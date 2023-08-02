@@ -2,219 +2,248 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45AA9C001DF
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Aug 2023 19:15:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79DB5C04E69
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Aug 2023 19:26:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229557AbjHBTPl (ORCPT
+        id S231390AbjHBT0C (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Aug 2023 15:15:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34664 "EHLO
+        Wed, 2 Aug 2023 15:26:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231833AbjHBTPj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2023 15:15:39 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8472626A6;
-        Wed,  2 Aug 2023 12:15:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Reply-To:Content-Type:
-        Content-ID:Content-Description:In-Reply-To:References;
-        bh=dmglu2WcMJRNiAya+Ibgj3ODFpzydvn3LhEN/Er/Pa8=; b=Ac4MNEXrIGqRdi5Ojv4/6ne5zF
-        tTfDfgM3FsAi6nlnFwNcpEi26QHWdsYPkSrMW/amu3qKg2mLbPvBO3ATSceJi+WvHUphOy+YNjwmU
-        1eq/0YuexqfdR991UoQ/LltL3wVrrEj8ab58HKUJKRNHeF44bztgdWIQLSFxkYE3Lne9Nx/NkuhbM
-        KZ2II1gkRil2CT+GILi62q7NgWZ7vG/Am1w7jn7oLm63N4Rrkv392n3vZOJHArYy7Ek7WW+3BrnaH
-        Wdw+eoBuasSnpS5CuaEMzUegwPRJHjst3jGpbsc0TvmduoaZO65BG1II6BFXui+nR450y096EUcRM
-        Z9rV+foA==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qRHJn-005j7p-2S;
-        Wed, 02 Aug 2023 19:15:35 +0000
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     fstests@vger.kernel.org, aalbersh@redhat.com,
-        chandan.babu@oracle.com, amir73il@gmail.com, josef@toxicpanda.com,
-        djwong@kernel.org
-Cc:     linux-fsdevel@vger.kernel.org, patches@lists.linux.dev,
-        Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH v2] fstests: add helper to canonicalize devices used to enable persistent disks
-Date:   Wed,  2 Aug 2023 12:15:35 -0700
-Message-Id: <20230802191535.1365096-1-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.38.1
+        with ESMTP id S229495AbjHBT0B (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2023 15:26:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9E661996
+        for <fstests@vger.kernel.org>; Wed,  2 Aug 2023 12:25:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1691004317;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=z+NCAApqbNw2Pro3K3FkTCUJU1Tn5lJ6dVDlokitvGg=;
+        b=ImczoTgfKcc4FokDUbiTPtU1lZFjt2s0+dl0M4TqAVbXnw+6B+kdT270fSHEVhCvY9aNyl
+        goYDYJ+CiUbAfuCjeO3jK2M5qaompzdOFSRvA+X3iYPjEmjTRlv8gPtrcDSLKh02q6XHpA
+        e3S4nDmoObG0ghhf/9hWrKmoJ5WA4z8=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-54-T1xH4ieGNtumGbZp2h5-CQ-1; Wed, 02 Aug 2023 15:25:15 -0400
+X-MC-Unique: T1xH4ieGNtumGbZp2h5-CQ-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bb8caf7312so1467635ad.0
+        for <fstests@vger.kernel.org>; Wed, 02 Aug 2023 12:25:15 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691004314; x=1691609114;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=z+NCAApqbNw2Pro3K3FkTCUJU1Tn5lJ6dVDlokitvGg=;
+        b=DicD7+Rl4rupctsv/44PlrlcsSPow2g3Ny6Ovn4u3gcrBH+2ARvBJMtHNn9s//8gnR
+         PpJhrNQ9566hd1eOFxp2d8kLAZGDSp6GHbWAH6MKWTehuagxZp/cbpU2wHrbsFCWbsMV
+         OID+o3WyHdenGB7Kz/cnOuRURth/qGCU+UAfpa33MpqHLs2/HGvWfnkfX7yMjTuqnfYw
+         0gxK5WO3xipE0BkTrsoWQqc5d2otpd75t0Ve92r1HI7U0QIcpZitUQcYFUPJQXJd4He7
+         e0L4s3652aoGtICV7Kf3U2fYCpZtQ7o3bCCNBV0NDe5VhnthDjrZ6LqNfbxdKn84Kuqg
+         +fZA==
+X-Gm-Message-State: ABy/qLYiyGlo3onhrhj9rmDY4EijlKVLvX7ac0GPmFMe7322Z5qJXCOb
+        qQugXIq80vte9O1+53hKISYGIY6+2MsQszY5rrw3TnzfXWzXoy5gfTjisVsRhOOZKeCEZNxgcPj
+        JpE6LV7gfW9gx5Xg0GA==
+X-Received: by 2002:a17:902:e809:b0:1b8:7613:594d with SMTP id u9-20020a170902e80900b001b87613594dmr21942597plg.24.1691004314512;
+        Wed, 02 Aug 2023 12:25:14 -0700 (PDT)
+X-Google-Smtp-Source: APBJJlHZiwFlmOJ2fvSoNElkqU2gYznUU3MA3Fp61RAewpOqQ2xV9KWv0TiIR6/ORMRQmdlwKTIt8Q==
+X-Received: by 2002:a17:902:e809:b0:1b8:7613:594d with SMTP id u9-20020a170902e80900b001b87613594dmr21942576plg.24.1691004314186;
+        Wed, 02 Aug 2023 12:25:14 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id b21-20020a170902d31500b001b552309aedsm12767209plc.192.2023.08.02.12.25.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Aug 2023 12:25:13 -0700 (PDT)
+Date:   Thu, 3 Aug 2023 03:25:10 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org
+Subject: Re: [PATCH v2] nfs: test files written size as expected
+Message-ID: <20230802192510.tecctatj3kqcw3e4@zlang-mailbox>
+References: <20230802054646.2197854-1-zlang@kernel.org>
+ <20230802163640.GY11352@frogsfrogsfrogs>
+ <20230802172418.2ulrealxsj2cvnxo@zlang-mailbox>
+ <20230802174326.GL11340@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230802174326.GL11340@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The filesystem configuration file does not allow you to use symlinks to
-real devices given the existing sanity checks verify that the target end
-device matches the source. Device mapper links work but not symlinks for
-real drives do not.
+On Wed, Aug 02, 2023 at 10:43:26AM -0700, Darrick J. Wong wrote:
+> On Thu, Aug 03, 2023 at 01:24:18AM +0800, Zorro Lang wrote:
+> > On Wed, Aug 02, 2023 at 09:36:40AM -0700, Darrick J. Wong wrote:
+> > > On Wed, Aug 02, 2023 at 01:46:46PM +0800, Zorro Lang wrote:
+> > > > Test nfs and its underlying fs, make sure file size as expected
+> > > > after writting a file, and the speculative allocation space can
+> > > > be shrunken.
+> > > > 
+> > > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > > > ---
+> > > > 
+> > > > Last year I sent a patch to fstests@, but it sometimes fails on the upstream
+> > > > kernel that year:
+> > > > 
+> > > >   https://lore.kernel.org/fstests/Y3vTbHqT64gsQ573@magnolia/
+> > > > 
+> > > > And we didn't get a proper reason for that, so that patch was blocked. Now
+> > > > I found this case test passed on current upstream linux [1] (after loop
+> > > > running it a whole night). So I think it's time to rebase and re-send this
+> > > > patch to get review.
+> > > > 
+> > > > Thanks,
+> > > > Zorro
+> > > > 
+> > > > [1]
+> > > > FSTYP         -- nfs
+> > > > PLATFORM      -- Linux/x86_64 xxxx 6.5.0-rc4 #1 SMP PREEMPT_DYNAMIC Tue Aug  1 15:32:55 EDT 2023
+> > > > MKFS_OPTIONS  -- xxxx.redhat.com:/mnt/xfstests/scratch/nfs-server
+> > > > MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0 xxxx.redhat.com:/mnt/xfstests/scratch/nfs-server /mnt/xfstests/scratch/nfs-client
+> > > > 
+> > > > nfs/002 4s ...  4s
+> > > > Ran: nfs/002
+> > > > Passed all 1 tests
+> > > > 
+> > > >  tests/nfs/002     | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/nfs/002.out |  2 ++
+> > > >  2 files changed, 48 insertions(+)
+> > > >  create mode 100755 tests/nfs/002
+> > > >  create mode 100644 tests/nfs/002.out
+> > > > 
+> > > > diff --git a/tests/nfs/002 b/tests/nfs/002
+> > > > new file mode 100755
+> > > > index 00000000..b4b6554c
+> > > > --- /dev/null
+> > > > +++ b/tests/nfs/002
+> > > > @@ -0,0 +1,46 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test 002
+> > > > +#
+> > > > +# Make sure nfs gets expected file size after writting a big sized file. It's
+> > > > +# not only testing nfs, test its underlying fs too. For example a known old bug
+> > > > +# on xfs (underlying fs) caused nfs get larger file size (e.g. 16M) after
+> > > > +# writting 10M data to a file. It's fixed by a series of patches around
+> > > > +# 579b62faa5fb16 ("xfs: add background scanning to clear eofblocks inodes")
+> > > 
+> > > Er... has this been banging around in the trunk for 11 years? ;)
+> > 
+> > Yeah, that's an old enough test case :-D I tried to tidy our internal test cases,
+> > felt this case can be in fstests.
+> > 
+> > > 
+> > > > +#
+> > > > +. ./common/preamble
+> > > > +_begin_fstest auto quick rw
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs nfs
+> > > > +# Need a series of patches related with this patch
+> > > > +_fixed_by_kernel_commit 579b62faa5fb16 \
+> > > > +	"xfs: add background scanning to clear eofblocks inodes"
+> > > > +_require_test
+> > > > +
+> > > > +localfile=$TEST_DIR/testfile.$seq
+> > > > +rm -rf $localfile
+> > > > +
+> > > > +$XFS_IO_PROG -f -t -c "pwrite 0 10m" -c "fsync" $localfile >>$seqres.full 2>&1
+> > > > +block_size=`stat -c '%B' $localfile`
+> > > > +iblocks_expected=$((10 * 1024 * 1024 / $block_size))
+> > > > +# Try several times for the speculative allocated file size can be shrunken
+> > > > +res=1
+> > > > +for ((i=0; i<10; i++));do
+> > > > +	iblocks_real=`stat -c '%b' $localfile`
+> > > > +	if [ "$iblocks_expected" = "$iblocks_real" ];then
+> > > 
+> > > What happens if real < expected?  Should there be some sort of bail out
+> > > for unexpected things like that?
+> > 
+> > Hmm... I never thought that. I saw the real >= expected, is there any
+> > chance to get real < expected?
+> 
+> <shrug> Suppose the NFS server is running on top of a filesystem that
+> supports compression and i_blocks as returned by stat reflects that?
+> 
+> --D
+> 
+> > > 
+> > > > +		res=0
+> > > > +		break
+> > > > +	fi
+> > > > +	sleep 10
+> > > > +done
+> > > 
+> > > Though I guess the runtime is capped at ~100s so maybe it doesn't
+> > > matter practically.
+> > 
+> > Mostly the test done in several seconds in my testing:
+> > 
+> > FSTYP         -- nfs
+> > PLATFORM      -- Linux/x86_64 hp-dl360g9-06 6.5.0-rc4 #1 SMP PREEMPT_DYNAMIC Tue Aug  1 15:32:55 EDT 2023
+> > MKFS_OPTIONS  -- hp-dl360g9-06.rhts.eng.pek2.redhat.com:/mnt/xfstests/scratch/nfs-server
+> > MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0 hp-dl360g9-06.rhts.eng.pek2.redhat.com:/mnt/xfstests/scratch/nfs-server /mnt/xfstests/scratch/nfs-client
+> > 
+> > nfs/002 5s ...  4s
+> > Ran: nfs/002
+> > Passed all 1 tests
+> 
+> Doesn't xfs remove the speculative preallocations every time a write fd
+> is closed?
+> 
+> Yes, it does do that:
+> https://lore.kernel.org/linux-xfs/155259894034.30230.7188877605950498518.stgit@magnolia/
+> 
+> IOWs, how is this test actually checking the behavior of background
+> blockgc clearing out speculative preallocations?
 
-Using a symlink is desirable if you want to enable persistent tests
-across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
-so to ensure that the same drives are used even after reboot. This
-is very useful if you are testing for example with a virtualized
-environment and are using PCIe passthrough with other qemu NVMe drives
-with one or many NVMe drives.
+OK, looks like this case is invalid. I'll keep it :)
 
-To enable support just add a helper to canonicalize devices prior to
-running the tests.
+Thanks,
+Zorro
 
-This allows one test runner, kdevops, which I just extended with
-support to use real NVMe drives it has support now to use nvme EUI
-symlinks and fallbacks to nvme model + serial symlinks as not all
-NVMe drives support EUIs. The drives it uses for the filesystem
-configuration optionally is with NVMe eui symlinks so to allow
-the same drives to be used over reboots.
-
-For instance this works today with real nvme drives:
-
-mkfs.xfs -f /dev/nvme0n1
-mount /dev/nvme0n1 /mnt
-TEST_DIR=/mnt TEST_DEV=/dev/nvme0n1 FSTYP=xfs ./check generic/110
-
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 flax-mtr01 6.5.0-rc3-djwx #rc3 SMP PREEMPT_DYNAMIC Wed Jul 26 14:26:48 PDT 2023
-
-generic/110        2s
-Ran: generic/110
-Passed all 1 tests
-
-But this does not:
-
-TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e FSTYP=xfs ./check generic/110
-mount: /mnt: /dev/disk/by-id/nvme-eui.0035385411904c1e already mounted on /mnt.
-common/rc: retrying test device mount with external set
-mount: /mnt: /dev/disk/by-id/nvme-eui.0035385411904c1e already mounted on /mnt.
-common/rc: could not mount /dev/disk/by-id/nvme-eui.0035385411904c1e on /mnt
-
-umount /mnt
-TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e FSTYP=xfs ./check generic/110
-TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e is mounted but not on TEST_DIR=/mnt - aborting
-Already mounted result:
-/dev/disk/by-id/nvme-eui.0035385411904c1e /mnt
-
-This fixes this. This allows the same real drives for a test to be
-used over and over after reboots.
-
-Use readlink -e because that support exists since 2004:
-
-https://github.com/coreutils/coreutils/commit/e0b8973bd4b146b5fb39641a4ee7984e922c3ff5
-
-realpath is much newer than readlink, it's first commit including
-support for -e dates back to 2011:
-
-https://github.com/coreutils/coreutils/commit/77ea441f79aa115f79b47d9c1fc9c0004c5c7111
-
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
----
-
-Changes on v2:
-
- - Enhanced the commit log to describe the existing status quo where
-   at least device mapper symlinks work but not for real drives. Also
-   provide an example output of the issue and use case as implied by
-   Darrick.
- - Added CANON_DEVS to disable this by default, document it
- - simplify _canonicalize_devices() with as many one liners as possible
- - use readlink -e because my history scavanging has found it has existed for
-   7 years longer thjan realpath -e support. Documen this on the commit
-   log as well.
-
- README        |  3 +++
- check         |  1 +
- common/config | 32 +++++++++++++++++++++++++++++++-
- 3 files changed, 35 insertions(+), 1 deletion(-)
-
-diff --git a/README b/README
-index 1ca506492bf0..97ef63d6d693 100644
---- a/README
-+++ b/README
-@@ -268,6 +268,9 @@ Misc:
-    this option is supported for all filesystems currently only -overlay is
-    expected to run without issues. For other filesystems additional patches
-    and fixes to the test suite might be needed.
-+ - set CANON_DEVS=yes to canonicalize device symlinks. This will let you
-+   for example use something like TEST_DEV/dev/disk/by-id/nvme-* so the
-+   device remains persistent between reboots. This is disabled by default.
- 
- ______________________
- USING THE FSQA SUITE
-diff --git a/check b/check
-index 0bf5b22e061a..577e09655844 100755
---- a/check
-+++ b/check
-@@ -711,6 +711,7 @@ function run_section()
- 	fi
- 
- 	get_next_config $section
-+	_canonicalize_devices
- 
- 	mkdir -p $RESULT_BASE
- 	if [ ! -d $RESULT_BASE ]; then
-diff --git a/common/config b/common/config
-index 6c8cb3a5ba68..7d74c285ac71 100644
---- a/common/config
-+++ b/common/config
-@@ -25,6 +25,9 @@
- # KEEP_DMESG -      whether to keep all dmesg for each test case.
- #                   yes: keep all dmesg
- #                   no: only keep dmesg with error/warning (default)
-+# CANON_DEVS -      whether or not to canonicalize device symlinks
-+#                   yes: canonicalize device symlinks
-+#                   no (default) do not canonicalize device if they are symlinks
- #
- # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
- #   below or a separate local configuration file can be used (using
-@@ -644,6 +647,32 @@ _canonicalize_mountpoint()
- 	echo "$parent/$base"
- }
- 
-+# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
-+# over reboots
-+_canonicalize_devices()
-+{
-+	if [ "$CANON_DEVS" != "yes" ]; then
-+		return
-+	fi
-+	[ -L "$TEST_DEV" ]	&& TEST_DEV=$(readlink -e "$TEST_DEV")
-+	[ -L $SCRATCH_DEV ]	&& SCRATCH_DEV=$(readlink -e "$SCRATCH_DEV")
-+	[ -L $TEST_LOGDEV ]	&& TEST_LOGDEV=$(readlink -e "$TEST_LOGDEV")
-+	[ -L $TEST_RTDEV ]	&& TEST_RTDEV=$(readlink -e "$TEST_RTDEV")
-+	[ -L $SCRATCH_RTDEV ]	&& SCRATCH_RTDEV=$(readlink -e "$SCRATCH_RTDEV")
-+	[ -L $LOGWRITES_DEV ]	&& LOGWRITES_DEV=$(readlink -e "$LOGWRITES_DEV")
-+	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-+		NEW_SCRATCH_POOL=""
-+		for i in $SCRATCH_DEV_POOL; do
-+			if [ -L $i ]; then
-+				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(readlink -e $i)"
-+			else
-+				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
-+			fi
-+		done
-+		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
-+	fi
-+}
-+
- # On check -overlay, for the non multi section config case, this
- # function is called on every test, before init_rc().
- # When SCRATCH/TEST_* vars are defined in config file, config file
-@@ -774,7 +803,6 @@ get_next_config() {
- 	fi
- 
- 	parse_config_section $1
--
- 	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
- 		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
- 		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-@@ -890,5 +918,7 @@ else
- 	fi
- fi
- 
-+_canonicalize_devices
-+
- # make sure this script returns success
- /bin/true
--- 
-2.39.2
+> 
+> > > (What happens if xfs blockgc only runs every 5 minutes?)
+> > 
+> > How can can make that happen? If the 100s isn't enough, is there an upper
+> > limit, or how to make an upper limit?
+> 
+> There's no way to tell over NFS...
+> 
+> --D
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > --D
+> > > 
+> > > > +if [ $res -ne 0 ];then
+> > > > +	echo "Write $iblocks_expected blocks, but get $iblocks_real blocks"
+> > > > +fi
+> > > > +
+> > > > +echo "Silence is golden"
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/nfs/002.out b/tests/nfs/002.out
+> > > > new file mode 100644
+> > > > index 00000000..61705c7c
+> > > > --- /dev/null
+> > > > +++ b/tests/nfs/002.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 002
+> > > > +Silence is golden
+> > > > -- 
+> > > > 2.40.1
+> > > > 
+> > > 
+> > 
+> 
 
