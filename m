@@ -2,146 +2,245 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25AEBC04A94
-	for <linux-fstests@archiver.kernel.org>; Wed,  2 Aug 2023 05:46:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C1FCC001DE
+	for <linux-fstests@archiver.kernel.org>; Wed,  2 Aug 2023 10:28:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229821AbjHBFqy (ORCPT
+        id S233638AbjHBK26 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 2 Aug 2023 01:46:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50050 "EHLO
+        Wed, 2 Aug 2023 06:28:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47842 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229508AbjHBFqx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2023 01:46:53 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 704F110EA;
-        Tue,  1 Aug 2023 22:46:52 -0700 (PDT)
+        with ESMTP id S234238AbjHBK2W (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2023 06:28:22 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15CCA5B9E;
+        Wed,  2 Aug 2023 03:25:08 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0331A6176A;
-        Wed,  2 Aug 2023 05:46:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0263DC433C7;
-        Wed,  2 Aug 2023 05:46:49 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 94659618F3;
+        Wed,  2 Aug 2023 10:23:46 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED124C433C9;
+        Wed,  2 Aug 2023 10:23:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690955211;
-        bh=VTi5vtYmcAxDfFm9ccl96vXNKm5WSfox4vUnYsxBQv4=;
-        h=From:To:Cc:Subject:Date:From;
-        b=k4cIJnis+/71SpqriYqgsNFV9iqcYiVjBD9XZLXcJ+bmUbzFfZwVGGSl7ifRvMxmv
-         RHGC1D9QiEBElBZMjnvTX2rZFEUUxW1/UxMmW/uq8EqbzyjkBYw2afsAaFTAa2xNs0
-         cKIZT1vKRfAndwD588zSTXEgQHs98nOSD/g5WqNYEjTVtsFcUfrd3BmCjrK6NF8zB6
-         T2uWQGl9CJ4VrDOY5+/5dFtZfdhp/lE0+ZBOSLQ+lp63Bag/8DmLuWMWJrcksmND2h
-         W6hleWjLjBVaaF8aZSYA1Vi3vBvqPWq5VR9qr25gEY4gb27f9FBBS3jJrKGE/hWBWE
-         IUgh9Hev5C1bA==
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-xfs@vger.kernel.org, linux-nfs@vger.kernel.org
-Subject: [PATCH v2] nfs: test files written size as expected
-Date:   Wed,  2 Aug 2023 13:46:46 +0800
-Message-Id: <20230802054646.2197854-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.40.1
+        s=k20201202; t=1690971826;
+        bh=rcGjV/KllcFJSF5eC33oaYw+vMBa6oe6ki6be/o5rW0=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=hKi2RrDPE3ROAsB73j2WuLUioaX0CGNWG+i8uSo3Rd3BCtgcQrPhX8LUgCfWqxVrB
+         Jn+/syZ5ZiirZ5lKe2A0eU8k82tRj8TvYkHsxdV1wZSWQzUIO9gAuNovkj4SFEvK4t
+         xLUuQYfzOnNT3D7fyObfvzw85akW6xNLMqtfs2snMz8/66/KpvvhjntFxX0GcXxRoC
+         YFEI33mI89M1+TjOv1nrd/7WrU9BXoVAM78+ECgP+dByGJ2VLVlEOckwuQ2pG+jyrY
+         noYs84H0Fru/bYSuzbyVeePF4EeNfvy2NvH+qxaZI30eg0/wX/Vc7xhBRtGmkw0P9l
+         1KGONwbFF1AVA==
+Received: by mail-oo1-f52.google.com with SMTP id 006d021491bc7-56c74961e0cso3665881eaf.3;
+        Wed, 02 Aug 2023 03:23:45 -0700 (PDT)
+X-Gm-Message-State: ABy/qLZmKod0LwNoBbfQcNVY13/0dgSEfIPqNgXstNJujuWJ1BnLWmq9
+        7jv4pcdIFLXXKWIrphEwpqI1h3xx/bSiqFrLtoc=
+X-Google-Smtp-Source: APBJJlEazdyiE7Qo+5LylQwWp5KWeBlA5L4fNkimke1nS+jpvRSwrYIqSyI+K+svoAhuyjW6vs/uLRmidtGjjJigO+4=
+X-Received: by 2002:a05:6870:1686:b0:1bb:a359:b909 with SMTP id
+ j6-20020a056870168600b001bba359b909mr17667225oae.55.1690971825012; Wed, 02
+ Aug 2023 03:23:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230801065529.50122-1-wqu@suse.com>
+In-Reply-To: <20230801065529.50122-1-wqu@suse.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Wed, 2 Aug 2023 11:23:08 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7MbA5Vfwgu=8Xuhh2o-SMnSCg9CJQszMTgLfHzmuBFWg@mail.gmail.com>
+Message-ID: <CAL3q7H7MbA5Vfwgu=8Xuhh2o-SMnSCg9CJQszMTgLfHzmuBFWg@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/276: allow a slight increase in the number of extents
+To:     Qu Wenruo <wqu@suse.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Test nfs and its underlying fs, make sure file size as expected
-after writting a file, and the speculative allocation space can
-be shrunken.
+On Tue, Aug 1, 2023 at 8:16=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> [BUG]
+> Sometimes test case btrfs/276 would fail with extra number of extents:
+>
+>     - output mismatch (see /opt/xfstests/results//btrfs/276.out.bad)
+>     --- tests/btrfs/276.out     2023-07-19 07:24:07.000000000 +0000
+>     +++ /opt/xfstests/results//btrfs/276.out.bad        2023-07-28 04:15:=
+06.223985372 +0000
+>     @@ -1,16 +1,16 @@
+>      QA output created by 276
+>      wrote 17179869184/17179869184 bytes at offset 0
+>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>     -Number of non-shared extents in the whole file: 131072
+>     +Number of non-shared extents in the whole file: 131082
+>      Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+>     -Number of shared extents in the whole file: 131072
+>     ...
+>     (Run 'diff -u /opt/xfstests/tests/btrfs/276.out /opt/xfstests/results=
+//btrfs/276.out.bad'  to see the entire diff)
+>
+> [CAUSE]
+> The test case uses golden output to record the number of total extents
+> of a 16G file.
+>
+> This is not reliable as we can have writeback happen halfway, resulting
+> smaller extents thus slightly more extents.
+>
+> With a VM with 4G memory, I have a chance around 1/10 hitting this
+> false alert.
+>
+> [FIX]
+> Instead of using golden output, we allow a slight (5%) float in the
+> number of extents, and move the 131072 (and 131072 - 16) from golden
+> output, so even if we have a slightly more extents, we can still pass
+> the test.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/276     | 41 ++++++++++++++++++++++++++++++++++++-----
+>  tests/btrfs/276.out |  4 ----
+>  2 files changed, 36 insertions(+), 9 deletions(-)
+>
+> diff --git a/tests/btrfs/276 b/tests/btrfs/276
+> index 944b0c8f..a63b28bb 100755
+> --- a/tests/btrfs/276
+> +++ b/tests/btrfs/276
+> @@ -65,10 +65,17 @@ count_not_shared_extents()
+>
+>  # Create a 16G file as that results in 131072 extents, all with a size o=
+f 128K
+>  # (due to compression), and a fs tree with a height of 3 (root node at l=
+evel 2).
+> +#
+> +# But due to writeback can happen halfway, we may have slightly more ext=
+ents
+> +# than 128K, so we allow 5% increase in the number of extents.
+> +#
+>  # We want to verify later that fiemap correctly reports the sharedness o=
+f each
+>  # extent, even when it needs to switch from one leaf to the next one and=
+ from a
+>  # node at level 1 to the next node at level 1.
+>  #
+> +nr_extents_lower=3D$((128 * 1024))
+> +nr_extents_upper=3D$((128 * 1024 + 128 * 1024 / 20))
+> +
+>  $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_i=
+o
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
+Does adding '-s' (fsync after every write) to the $XFS_IO_PROG fixes the is=
+sue?
+On my test vm, it doesn't increase runtime by that much (16 to 23 seconds).
 
-Last year I sent a patch to fstests@, but it sometimes fails on the upstream
-kernel that year:
+I'd rather do that so that we can be sure fiemap is working correctly
+and not returning more extents than there really are - this approach
+of allowing a bit more allows for that type of bug to be unnoticed,
+plus that little bit more might not be always enough (depending on
+available rm, writeback settings, etc).
 
-  https://lore.kernel.org/fstests/Y3vTbHqT64gsQ573@magnolia/
+Thanks.
 
-And we didn't get a proper reason for that, so that patch was blocked. Now
-I found this case test passed on current upstream linux [1] (after loop
-running it a whole night). So I think it's time to rebase and re-send this
-patch to get review.
-
-Thanks,
-Zorro
-
-[1]
-FSTYP         -- nfs
-PLATFORM      -- Linux/x86_64 xxxx 6.5.0-rc4 #1 SMP PREEMPT_DYNAMIC Tue Aug  1 15:32:55 EDT 2023
-MKFS_OPTIONS  -- xxxx.redhat.com:/mnt/xfstests/scratch/nfs-server
-MOUNT_OPTIONS -- -o vers=4.2 -o context=system_u:object_r:root_t:s0 xxxx.redhat.com:/mnt/xfstests/scratch/nfs-server /mnt/xfstests/scratch/nfs-client
-
-nfs/002 4s ...  4s
-Ran: nfs/002
-Passed all 1 tests
-
- tests/nfs/002     | 46 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/nfs/002.out |  2 ++
- 2 files changed, 48 insertions(+)
- create mode 100755 tests/nfs/002
- create mode 100644 tests/nfs/002.out
-
-diff --git a/tests/nfs/002 b/tests/nfs/002
-new file mode 100755
-index 00000000..b4b6554c
---- /dev/null
-+++ b/tests/nfs/002
-@@ -0,0 +1,46 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 002
-+#
-+# Make sure nfs gets expected file size after writting a big sized file. It's
-+# not only testing nfs, test its underlying fs too. For example a known old bug
-+# on xfs (underlying fs) caused nfs get larger file size (e.g. 16M) after
-+# writting 10M data to a file. It's fixed by a series of patches around
-+# 579b62faa5fb16 ("xfs: add background scanning to clear eofblocks inodes")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick rw
-+
-+# real QA test starts here
-+_supported_fs nfs
-+# Need a series of patches related with this patch
-+_fixed_by_kernel_commit 579b62faa5fb16 \
-+	"xfs: add background scanning to clear eofblocks inodes"
-+_require_test
-+
-+localfile=$TEST_DIR/testfile.$seq
-+rm -rf $localfile
-+
-+$XFS_IO_PROG -f -t -c "pwrite 0 10m" -c "fsync" $localfile >>$seqres.full 2>&1
-+block_size=`stat -c '%B' $localfile`
-+iblocks_expected=$((10 * 1024 * 1024 / $block_size))
-+# Try several times for the speculative allocated file size can be shrunken
-+res=1
-+for ((i=0; i<10; i++));do
-+	iblocks_real=`stat -c '%b' $localfile`
-+	if [ "$iblocks_expected" = "$iblocks_real" ];then
-+		res=0
-+		break
-+	fi
-+	sleep 10
-+done
-+if [ $res -ne 0 ];then
-+	echo "Write $iblocks_expected blocks, but get $iblocks_real blocks"
-+fi
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/nfs/002.out b/tests/nfs/002.out
-new file mode 100644
-index 00000000..61705c7c
---- /dev/null
-+++ b/tests/nfs/002.out
-@@ -0,0 +1,2 @@
-+QA output created by 002
-+Silence is golden
--- 
-2.40.1
-
+>
+>  # Sync to flush delalloc and commit the current transaction, so fiemap w=
+ill see
+> @@ -76,13 +83,22 @@ $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/=
+foo | _filter_xfs_io
+>  sync
+>
+>  # All extents should be reported as non shared (131072 extents).
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared=
+_extents)"
+> +found1=3D$(count_not_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found1}" >> $seq=
+res.full
+> +
+> +if [ $found1 -lt $nr_extents_lower -o $found1 -gt $nr_extents_upper ]; t=
+hen
+> +       echo "unexpected initial number of extents, has $found1 expect [$=
+nr_extents_lower, $nr_extents_upper]"
+> +fi
+>
+>  # Creating a snapshot.
+>  $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _fi=
+lter_scratch
+>
+>  # We have a snapshot, so now all extents should be reported as shared.
+> -echo "Number of shared extents in the whole file: $(count_shared_extents=
+)"
+> +found2=3D$(count_shared_extents)
+> +echo "Number of shared extents in the whole file: ${found2}" >> $seqres.=
+full
+> +if [ $found2 -ne $found1 ]; then
+> +       echo "unexpected shared extents, has $found2 expect $found1"
+> +fi
+>
+>  # Now COW two file ranges, of 1M each, in the snapshot's file.
+>  # So 16 extents should become non-shared after this.
+> @@ -97,8 +113,18 @@ sync
+>
+>  # Now we should have 16 non-shared extents and 131056 (131072 - 16) shar=
+ed
+>  # extents.
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared=
+_extents)"
+> -echo "Number of shared extents in the whole file: $(count_shared_extents=
+)"
+> +found3=3D$(count_not_shared_extents)
+> +found4=3D$(count_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found3}"
+> +echo "Number of shared extents in the whole file: ${found4}" >> $seqres.=
+full
+> +
+> +if [ $found3 !=3D 16 ]; then
+> +       echo "Unexpected number of non-shared extents, has $found3 expect=
+ 16"
+> +fi
+> +
+> +if [ $found4 !=3D $(( $found1 - $found3 )) ]; then
+> +       echo "Unexpected number of shared extents, has $found4 expect $((=
+ $found1 - $found3 ))"
+> +fi
+>
+>  # Check that the non-shared extents are indeed in the expected file rang=
+es (each
+>  # with 8 extents).
+> @@ -117,7 +143,12 @@ _scratch_remount commit=3D1
+>  sleep 1.1
+>
+>  # Now all extents should be reported as not shared (131072 extents).
+> -echo "Number of non-shared extents in the whole file: $(count_not_shared=
+_extents)"
+> +found5=3D$(count_not_shared_extents)
+> +echo "Number of non-shared extents in the whole file: ${found5}" >> $seq=
+res.full
+> +
+> +if [ $found5 !=3D $found1 ]; then
+> +       echo "Unexpected final number of non-shared extents, has $found5 =
+expect $found1"
+> +fi
+>
+>  # success, all done
+>  status=3D0
+> diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
+> index 3bf5a5e6..e318c2e9 100644
+> --- a/tests/btrfs/276.out
+> +++ b/tests/btrfs/276.out
+> @@ -1,16 +1,12 @@
+>  QA output created by 276
+>  wrote 17179869184/17179869184 bytes at offset 0
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -Number of non-shared extents in the whole file: 131072
+>  Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> -Number of shared extents in the whole file: 131072
+>  wrote 1048576/1048576 bytes at offset 8388608
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>  wrote 1048576/1048576 bytes at offset 12884901888
+>  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>  Number of non-shared extents in the whole file: 16
+> -Number of shared extents in the whole file: 131056
+>  Number of non-shared extents in range [8M, 9M): 8
+>  Number of non-shared extents in range [12G, 12G + 1M): 8
+>  Delete subvolume (commit): 'SCRATCH_MNT/snap'
+> -Number of non-shared extents in the whole file: 131072
+> --
+> 2.41.0
+>
