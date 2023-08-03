@@ -2,263 +2,377 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3813CC04A6A
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Aug 2023 04:07:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF78EC001DF
+	for <linux-fstests@archiver.kernel.org>; Thu,  3 Aug 2023 09:03:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231497AbjHCEHC (ORCPT
+        id S232505AbjHCJDi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Aug 2023 00:07:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35570 "EHLO
+        Thu, 3 Aug 2023 05:03:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229715AbjHCEG6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2023 00:06:58 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0279F2D7E
-        for <fstests@vger.kernel.org>; Wed,  2 Aug 2023 21:06:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1691035575;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=/JX7cAs7chLrarjH6MrLPnJz44xJdfnup4JJenCs9Y8=;
-        b=XbXuPYfy6mvG/gtE4xnwXldijE7eiotDab0Zk9TRkiIJV0cRXbhnvCHoaKEqHI2D3Q1cjx
-        Pz473ZHV4eFoQQLNsxxjCqcpZTL0gSXb1CXJ2ONCGT0ay5g7+p6bdDOKIKKVcinmX66fUe
-        ae/E6IRPNkDLQY5i6oXwR1pDrfxfDNI=
-Received: from mail-ot1-f72.google.com (mail-ot1-f72.google.com
- [209.85.210.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-587-NE6Mz5tSMhGeJfoB23hwqg-1; Thu, 03 Aug 2023 00:06:13 -0400
-X-MC-Unique: NE6Mz5tSMhGeJfoB23hwqg-1
-Received: by mail-ot1-f72.google.com with SMTP id 46e09a7af769-6bcbdeae7c1so893947a34.3
-        for <fstests@vger.kernel.org>; Wed, 02 Aug 2023 21:06:13 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691035572; x=1691640372;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/JX7cAs7chLrarjH6MrLPnJz44xJdfnup4JJenCs9Y8=;
-        b=dyHmF/K9365glvh1RMLxmszAfUbYXA6MbLfub4NbiZdyjSCDqsEL/v/y7x/aHOKHbf
-         boXfWrshlXnizkhLb0AG+46ISScjmYZPrtm325VDD5rAHzE4qDdStgsySNq/LzWwcwMf
-         KcCeLHPh1PGE2D7NP3AfTeILUQ9m+fuzAZeScyBDeVHlzO9TR+OCBpQm52D6lpYct9UM
-         /sqKVkeQqPs6ZvJSJanR7/zCuBEW+HUPhdDmjU2HZgSdMqttrd2BXsIW6u2qyne00Udu
-         MVLGIiMPOvaDPnjcEzWLUdZo5ZQB109aLCCbgShlXspbuKaayG4gj5K26OtgHicb7HgV
-         1YOA==
-X-Gm-Message-State: ABy/qLZDYhtmsA7yGloo19M6RqDhJs+Ud7gLHBC+b7IOOPT2JSQHsJWS
-        ax6W9f3pQApBN0cU9tn8vtNoz1dHy6WGeR+VHflVGzRn4VLFHfGuw3CZL/qqYiVNmcKkDvjRkQh
-        9LSW+lRNB9VHs9/rTMg==
-X-Received: by 2002:a05:6830:1016:b0:6b9:9129:dddf with SMTP id a22-20020a056830101600b006b99129dddfmr20079921otp.16.1691035572642;
-        Wed, 02 Aug 2023 21:06:12 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlGDciwVs7e8bxeFPbFtGT6SCsgLYajkMm4G923j7g9rMQqPkn0wzXiSF+kTBoSNoNxO0vl30g==
-X-Received: by 2002:a05:6830:1016:b0:6b9:9129:dddf with SMTP id a22-20020a056830101600b006b99129dddfmr20079905otp.16.1691035572268;
-        Wed, 02 Aug 2023 21:06:12 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id e12-20020a63744c000000b005641fadb844sm10049195pgn.49.2023.08.02.21.06.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Aug 2023 21:06:11 -0700 (PDT)
-Date:   Thu, 3 Aug 2023 12:06:07 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     fstests@vger.kernel.org, aalbersh@redhat.com,
-        chandan.babu@oracle.com, amir73il@gmail.com, josef@toxicpanda.com,
-        djwong@kernel.org, linux-fsdevel@vger.kernel.org,
-        patches@lists.linux.dev
-Subject: Re: [PATCH v2] fstests: add helper to canonicalize devices used to
- enable persistent disks
-Message-ID: <20230803040607.eytde4s5dnqavtqb@zlang-mailbox>
-References: <20230802191535.1365096-1-mcgrof@kernel.org>
+        with ESMTP id S233658AbjHCJDh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2023 05:03:37 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1665E7;
+        Thu,  3 Aug 2023 02:03:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2BBBE61CCB;
+        Thu,  3 Aug 2023 09:03:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8CDF3C433C8;
+        Thu,  3 Aug 2023 09:03:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691053413;
+        bh=VUNj4XyObd8fvYSE+Fq1GVqnwuTwQdzzUyxzUgJxvR4=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=hYR8H+dzJ+PeWM/44jc1smoUUoo/iYqFdl510Xug/29WLxzpE+us/ZgXPB8ovVKAz
+         C3p9KIaBqGZr0tXNnzDV12pgBzN/6x18qmkgPqcZfW45Qi9zp0nDPpoxTrYTh+kDSR
+         0mzq7ORubFklyBtcXfl27VvnNFkRNXrGlOFrX5dRykHgrr4qNrnM7U5/rCFyF81t4c
+         2/lb9GgFjbv0D/dMpy61yt4iGNJeL2i0TSUH8WUqSZprEb6YR7tHbiC6pKjm87dPMU
+         nqsOWlLmOHA+pvUFLkbyC/xpegZOgGiUCVMBobGDqNoiPbi6d/Pv79ZliYAj1gYoOK
+         C04oVW9ZSXrjg==
+Received: by mail-oa1-f53.google.com with SMTP id 586e51a60fabf-1bbaa549bcbso494657fac.3;
+        Thu, 03 Aug 2023 02:03:33 -0700 (PDT)
+X-Gm-Message-State: ABy/qLbh6XfnfjmsQCIfRfvAY3ySVqLQf/NGekdG+acB12PKLk35p1ap
+        ph+iWSXnMh5Zpf/SZbmb3b1P1zDhpqGRe5zB210=
+X-Google-Smtp-Source: APBJJlGIcKK4lYcUdo5kj3gU77Rnl06qfjJaF3YLDiiympBdScO0kYggbLY5y5UAxs2bPeNUXz8yKW3Bf7rJMO7zgNc=
+X-Received: by 2002:a05:6870:5611:b0:1bd:a5ea:ed7d with SMTP id
+ m17-20020a056870561100b001bda5eaed7dmr16901251oao.7.1691053412604; Thu, 03
+ Aug 2023 02:03:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230802191535.1365096-1-mcgrof@kernel.org>
+References: <20230801065529.50122-1-wqu@suse.com> <CAL3q7H7MbA5Vfwgu=8Xuhh2o-SMnSCg9CJQszMTgLfHzmuBFWg@mail.gmail.com>
+ <26ccf055-8ca2-275d-627d-e8b6c2e12ffe@gmx.com> <16f417cd-a625-3abb-b11d-8673bed265ef@gmx.com>
+ <CAL3q7H7kNyMBRPOH2DjohGKog69H4sdd306cZpe17fLLsHPsSA@mail.gmail.com> <b8c5c67b-57f9-eacb-bf54-ee49a89f6e98@gmx.com>
+In-Reply-To: <b8c5c67b-57f9-eacb-bf54-ee49a89f6e98@gmx.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Thu, 3 Aug 2023 10:02:56 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4VBnfusYSFr=Ws=Df7k4oyvLwfj_0NZQ1xN7ToWCMAmw@mail.gmail.com>
+Message-ID: <CAL3q7H4VBnfusYSFr=Ws=Df7k4oyvLwfj_0NZQ1xN7ToWCMAmw@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/276: allow a slight increase in the number of extents
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 02, 2023 at 12:15:35PM -0700, Luis Chamberlain wrote:
-> The filesystem configuration file does not allow you to use symlinks to
-> real devices given the existing sanity checks verify that the target end
-> device matches the source. Device mapper links work but not symlinks for
-> real drives do not.
-> 
-> Using a symlink is desirable if you want to enable persistent tests
-> across reboots. For example you may want to use /dev/disk/by-id/nvme-eui.*
-> so to ensure that the same drives are used even after reboot. This
-> is very useful if you are testing for example with a virtualized
-> environment and are using PCIe passthrough with other qemu NVMe drives
-> with one or many NVMe drives.
-> 
-> To enable support just add a helper to canonicalize devices prior to
-> running the tests.
-> 
-> This allows one test runner, kdevops, which I just extended with
-> support to use real NVMe drives it has support now to use nvme EUI
-> symlinks and fallbacks to nvme model + serial symlinks as not all
-> NVMe drives support EUIs. The drives it uses for the filesystem
-> configuration optionally is with NVMe eui symlinks so to allow
-> the same drives to be used over reboots.
-> 
-> For instance this works today with real nvme drives:
-> 
-> mkfs.xfs -f /dev/nvme0n1
-> mount /dev/nvme0n1 /mnt
-> TEST_DIR=/mnt TEST_DEV=/dev/nvme0n1 FSTYP=xfs ./check generic/110
-> 
-> FSTYP         -- xfs (debug)
-> PLATFORM      -- Linux/x86_64 flax-mtr01 6.5.0-rc3-djwx #rc3 SMP PREEMPT_DYNAMIC Wed Jul 26 14:26:48 PDT 2023
-> 
-> generic/110        2s
-> Ran: generic/110
-> Passed all 1 tests
-> 
-> But this does not:
-> 
-> TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e FSTYP=xfs ./check generic/110
-> mount: /mnt: /dev/disk/by-id/nvme-eui.0035385411904c1e already mounted on /mnt.
-> common/rc: retrying test device mount with external set
-> mount: /mnt: /dev/disk/by-id/nvme-eui.0035385411904c1e already mounted on /mnt.
-> common/rc: could not mount /dev/disk/by-id/nvme-eui.0035385411904c1e on /mnt
-> 
-> umount /mnt
-> TEST_DIR=/mnt TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e FSTYP=xfs ./check generic/110
-> TEST_DEV=/dev/disk/by-id/nvme-eui.0035385411904c1e is mounted but not on TEST_DIR=/mnt - aborting
-> Already mounted result:
-> /dev/disk/by-id/nvme-eui.0035385411904c1e /mnt
-> 
-> This fixes this. This allows the same real drives for a test to be
-> used over and over after reboots.
-> 
-> Use readlink -e because that support exists since 2004:
-> 
-> https://github.com/coreutils/coreutils/commit/e0b8973bd4b146b5fb39641a4ee7984e922c3ff5
-> 
-> realpath is much newer than readlink, it's first commit including
-> support for -e dates back to 2011:
-> 
-> https://github.com/coreutils/coreutils/commit/77ea441f79aa115f79b47d9c1fc9c0004c5c7111
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
-> 
-> Changes on v2:
-> 
->  - Enhanced the commit log to describe the existing status quo where
->    at least device mapper symlinks work but not for real drives. Also
->    provide an example output of the issue and use case as implied by
->    Darrick.
->  - Added CANON_DEVS to disable this by default, document it
->  - simplify _canonicalize_devices() with as many one liners as possible
->  - use readlink -e because my history scavanging has found it has existed for
->    7 years longer thjan realpath -e support. Documen this on the commit
->    log as well.
-> 
->  README        |  3 +++
->  check         |  1 +
->  common/config | 32 +++++++++++++++++++++++++++++++-
->  3 files changed, 35 insertions(+), 1 deletion(-)
-> 
-> diff --git a/README b/README
-> index 1ca506492bf0..97ef63d6d693 100644
-> --- a/README
-> +++ b/README
-> @@ -268,6 +268,9 @@ Misc:
->     this option is supported for all filesystems currently only -overlay is
->     expected to run without issues. For other filesystems additional patches
->     and fixes to the test suite might be needed.
-> + - set CANON_DEVS=yes to canonicalize device symlinks. This will let you
-> +   for example use something like TEST_DEV/dev/disk/by-id/nvme-* so the
-> +   device remains persistent between reboots. This is disabled by default.
->  
->  ______________________
->  USING THE FSQA SUITE
-> diff --git a/check b/check
-> index 0bf5b22e061a..577e09655844 100755
-> --- a/check
-> +++ b/check
-> @@ -711,6 +711,7 @@ function run_section()
->  	fi
->  
->  	get_next_config $section
-> +	_canonicalize_devices
->  
->  	mkdir -p $RESULT_BASE
->  	if [ ! -d $RESULT_BASE ]; then
-> diff --git a/common/config b/common/config
-> index 6c8cb3a5ba68..7d74c285ac71 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -25,6 +25,9 @@
->  # KEEP_DMESG -      whether to keep all dmesg for each test case.
->  #                   yes: keep all dmesg
->  #                   no: only keep dmesg with error/warning (default)
-> +# CANON_DEVS -      whether or not to canonicalize device symlinks
-> +#                   yes: canonicalize device symlinks
-> +#                   no (default) do not canonicalize device if they are symlinks
->  #
->  # - These can be added to $HOST_CONFIG_DIR (witch default to ./config)
->  #   below or a separate local configuration file can be used (using
-> @@ -644,6 +647,32 @@ _canonicalize_mountpoint()
->  	echo "$parent/$base"
->  }
->  
-> +# Enables usage of /dev/disk/by-id/ symlinks to persist target devices
-> +# over reboots
-> +_canonicalize_devices()
-> +{
-> +	if [ "$CANON_DEVS" != "yes" ]; then
-> +		return
-> +	fi
-> +	[ -L "$TEST_DEV" ]	&& TEST_DEV=$(readlink -e "$TEST_DEV")
-> +	[ -L $SCRATCH_DEV ]	&& SCRATCH_DEV=$(readlink -e "$SCRATCH_DEV")
+On Thu, Aug 3, 2023 at 2:30=E2=80=AFAM Qu Wenruo <quwenruo.btrfs@gmx.com> w=
+rote:
+>
+>
+>
+> On 2023/8/3 01:28, Filipe Manana wrote:
+> > On Wed, Aug 2, 2023 at 12:18=E2=80=AFPM Qu Wenruo <quwenruo.btrfs@gmx.c=
+om> wrote:
+> >>
+> >>
+> >>
+> >> On 2023/8/2 18:36, Qu Wenruo wrote:
+> >>>
+> >>>
+> >>> On 2023/8/2 18:23, Filipe Manana wrote:
+> >>>> On Tue, Aug 1, 2023 at 8:16=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrot=
+e:
+> >>>>>
+> >>>>> [BUG]
+> >>>>> Sometimes test case btrfs/276 would fail with extra number of exten=
+ts:
+> >>>>>
+> >>>>>       - output mismatch (see /opt/xfstests/results//btrfs/276.out.b=
+ad)
+> >>>>>       --- tests/btrfs/276.out     2023-07-19 07:24:07.000000000 +00=
+00
+> >>>>>       +++ /opt/xfstests/results//btrfs/276.out.bad        2023-07-2=
+8
+> >>>>> 04:15:06.223985372 +0000
+> >>>>>       @@ -1,16 +1,16 @@
+> >>>>>        QA output created by 276
+> >>>>>        wrote 17179869184/17179869184 bytes at offset 0
+> >>>>>        XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >>>>>       -Number of non-shared extents in the whole file: 131072
+> >>>>>       +Number of non-shared extents in the whole file: 131082
+> >>>>>        Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> >>>>>       -Number of shared extents in the whole file: 131072
+> >>>>>       ...
+> >>>>>       (Run 'diff -u /opt/xfstests/tests/btrfs/276.out
+> >>>>> /opt/xfstests/results//btrfs/276.out.bad'  to see the entire diff)
+> >>>>>
+> >>>>> [CAUSE]
+> >>>>> The test case uses golden output to record the number of total exte=
+nts
+> >>>>> of a 16G file.
+> >>>>>
+> >>>>> This is not reliable as we can have writeback happen halfway, resul=
+ting
+> >>>>> smaller extents thus slightly more extents.
+> >>>>>
+> >>>>> With a VM with 4G memory, I have a chance around 1/10 hitting this
+> >>>>> false alert.
+> >>>>>
+> >>>>> [FIX]
+> >>>>> Instead of using golden output, we allow a slight (5%) float in the
+> >>>>> number of extents, and move the 131072 (and 131072 - 16) from golde=
+n
+> >>>>> output, so even if we have a slightly more extents, we can still pa=
+ss
+> >>>>> the test.
+> >>>>>
+> >>>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> >>>>> ---
+> >>>>>    tests/btrfs/276     | 41 ++++++++++++++++++++++++++++++++++++---=
+--
+> >>>>>    tests/btrfs/276.out |  4 ----
+> >>>>>    2 files changed, 36 insertions(+), 9 deletions(-)
+> >>>>>
+> >>>>> diff --git a/tests/btrfs/276 b/tests/btrfs/276
+> >>>>> index 944b0c8f..a63b28bb 100755
+> >>>>> --- a/tests/btrfs/276
+> >>>>> +++ b/tests/btrfs/276
+> >>>>> @@ -65,10 +65,17 @@ count_not_shared_extents()
+> >>>>>
+> >>>>>    # Create a 16G file as that results in 131072 extents, all with =
+a
+> >>>>> size of 128K
+> >>>>>    # (due to compression), and a fs tree with a height of 3 (root n=
+ode
+> >>>>> at level 2).
+> >>>>> +#
+> >>>>> +# But due to writeback can happen halfway, we may have slightly mo=
+re
+> >>>>> extents
+> >>>>> +# than 128K, so we allow 5% increase in the number of extents.
+> >>>>> +#
+> >>>>>    # We want to verify later that fiemap correctly reports the
+> >>>>> sharedness of each
+> >>>>>    # extent, even when it needs to switch from one leaf to the next
+> >>>>> one and from a
+> >>>>>    # node at level 1 to the next node at level 1.
+> >>>>>    #
+> >>>>> +nr_extents_lower=3D$((128 * 1024))
+> >>>>> +nr_extents_upper=3D$((128 * 1024 + 128 * 1024 / 20))
+> >>>>> +
+> >>>>>    $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo |
+> >>>>> _filter_xfs_io
+> >>>>
+> >>>> Does adding '-s' (fsync after every write) to the $XFS_IO_PROG fixes
+> >>>> the issue?
+> >>>> On my test vm, it doesn't increase runtime by that much (16 to 23
+> >>>> seconds).
+> >>>
+> >>> This indeed is much better, without dirty pages pressure we can go th=
+e
+> >>> old golden output.
+> >>
+> >> Unfortunately I still have a very low chance (~1/20) to hit 1~3 more
+> >> extent than the golden output.
+> >>
+> >> There are still extra things like the commit intervals to let us to
+> >> writeback halfway.
+> >>
+> >> The best situation would be direct IO, but unfortunately direct IO
+> >> doesn't support compression, thus the resulted file would lead to merg=
+ed
+> >> fiemap results.
+> >
+> > The compression is not needed.
+> > I wrote the test to use compression because it makes creating a file wi=
+th
+> > thousands of extents very fast and using very little space.
+> >
+> > The goal is really to have many file extent items spanning multiple lea=
+ves and
+> > to have a root at level 2 (or higher), to verify the sharedness
+> > detection is correct
+> > for subtrees.
+> >
+> >>
+> >> The other solution is to write between two files using direct IO, to
+> >> make each extent inside the same file not continuous with each other.
+> >>
+> >> But that would lead to at least 512M * 2, and we also need to do the
+> >> same interleaved writes again for the 1M writes.
+> >>
+> >> Any ideas would be appreciated.
+> >
+> > See if this works:
+> >
+> > https://pastebin.com/raw/QnNtSrDP
+>
+> This works fine as after 20 runs I still didn't hit any output mismatch.
+>
+> Although you can further improve it by using direct IO and much smaller
+> blocksize (4K), which can further reduce the size and completely
+> eliminate the possibility of writeback halfway.
+> (This would require 4K sector size though)
 
-With or without "" will be different...
+The 64K was chosen precisely so that it works with any sector size.
+I don't know why you worry about the size - it's a ~250M file, quite small.
 
-> +	[ -L $TEST_LOGDEV ]	&& TEST_LOGDEV=$(readlink -e "$TEST_LOGDEV")
-> +	[ -L $TEST_RTDEV ]	&& TEST_RTDEV=$(readlink -e "$TEST_RTDEV")
-> +	[ -L $SCRATCH_RTDEV ]	&& SCRATCH_RTDEV=$(readlink -e "$SCRATCH_RTDEV")
-> +	[ -L $LOGWRITES_DEV ]	&& LOGWRITES_DEV=$(readlink -e "$LOGWRITES_DEV")
+>
+> In that case, you can even reuse the old 131072 number, as we only need
+> around 512M (file size would be 1G) for data.
+>
+>
+> Another thing is, if tree level 3 (root node level 2) is needed, we can
+> even further reduce the file size by requiring 4K nodesize, which can
+> further speed up the test, without the need for xattr.
 
-You've give "" to $TEST_DEV, others should be same.
+Yes, but I prefer to keep the default node size, so that it works on
+any environment and
+configuration, therefore increasing test coverage.
 
-> +	if [ ! -z "$SCRATCH_DEV_POOL" ]; then
-> +		NEW_SCRATCH_POOL=""
+>
+> >
+> > It accomplishes the same goals and it's still fast (about 23 seconds
+> > on my non-debug test vm, before it was about 16 seconds).
+>
+> The modified version is already fast enough even with a KASAN enabled
+> kernel, only 60s compared to the old 120+s.
+>
+> Mind to send the modification as a proper fix? That's a much improved
+> version compared to mine.
 
-If the NEW_SCRATCH_POOL isn't used in other places, it can be a local variable as
-a tmp variable.
+I will, thanks.
 
-Thanks,
-Zorro
-
-> +		for i in $SCRATCH_DEV_POOL; do
-> +			if [ -L $i ]; then
-> +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(readlink -e $i)"
-> +			else
-> +				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
-> +			fi
-> +		done
-> +		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
-> +	fi
-> +}
-> +
->  # On check -overlay, for the non multi section config case, this
->  # function is called on every test, before init_rc().
->  # When SCRATCH/TEST_* vars are defined in config file, config file
-> @@ -774,7 +803,6 @@ get_next_config() {
->  	fi
->  
->  	parse_config_section $1
-> -
->  	if [ ! -z "$OLD_FSTYP" ] && [ $OLD_FSTYP != $FSTYP ]; then
->  		[ -z "$MOUNT_OPTIONS" ] && _mount_opts
->  		[ -z "$TEST_FS_MOUNT_OPTS" ] && _test_mount_opts
-> @@ -890,5 +918,7 @@ else
->  	fi
->  fi
->  
-> +_canonicalize_devices
-> +
->  # make sure this script returns success
->  /bin/true
-> -- 
-> 2.39.2
-> 
-
+>
+> Thanks,
+> Qu
+>
+> >
+> > Thanks.
+> >
+> >>
+> >> Thanks,
+> >> Qu
+> >>>
+> >>> Thanks,
+> >>> Qu
+> >>>>
+> >>>> I'd rather do that so that we can be sure fiemap is working correctl=
+y
+> >>>> and not returning more extents than there really are - this approach
+> >>>> of allowing a bit more allows for that type of bug to be unnoticed,
+> >>>> plus that little bit more might not be always enough (depending on
+> >>>> available rm, writeback settings, etc).
+> >>>>
+> >>>> Thanks.
+> >>>>
+> >>>>>
+> >>>>>    # Sync to flush delalloc and commit the current transaction, so
+> >>>>> fiemap will see
+> >>>>> @@ -76,13 +83,22 @@ $XFS_IO_PROG -f -c "pwrite -b 8M 0 16G"
+> >>>>> $SCRATCH_MNT/foo | _filter_xfs_io
+> >>>>>    sync
+> >>>>>
+> >>>>>    # All extents should be reported as non shared (131072 extents).
+> >>>>> -echo "Number of non-shared extents in the whole file:
+> >>>>> $(count_not_shared_extents)"
+> >>>>> +found1=3D$(count_not_shared_extents)
+> >>>>> +echo "Number of non-shared extents in the whole file: ${found1}" >=
+>
+> >>>>> $seqres.full
+> >>>>> +
+> >>>>> +if [ $found1 -lt $nr_extents_lower -o $found1 -gt $nr_extents_uppe=
+r
+> >>>>> ]; then
+> >>>>> +       echo "unexpected initial number of extents, has $found1
+> >>>>> expect [$nr_extents_lower, $nr_extents_upper]"
+> >>>>> +fi
+> >>>>>
+> >>>>>    # Creating a snapshot.
+> >>>>>    $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/sn=
+ap
+> >>>>> | _filter_scratch
+> >>>>>
+> >>>>>    # We have a snapshot, so now all extents should be reported as s=
+hared.
+> >>>>> -echo "Number of shared extents in the whole file:
+> >>>>> $(count_shared_extents)"
+> >>>>> +found2=3D$(count_shared_extents)
+> >>>>> +echo "Number of shared extents in the whole file: ${found2}" >>
+> >>>>> $seqres.full
+> >>>>> +if [ $found2 -ne $found1 ]; then
+> >>>>> +       echo "unexpected shared extents, has $found2 expect $found1=
+"
+> >>>>> +fi
+> >>>>>
+> >>>>>    # Now COW two file ranges, of 1M each, in the snapshot's file.
+> >>>>>    # So 16 extents should become non-shared after this.
+> >>>>> @@ -97,8 +113,18 @@ sync
+> >>>>>
+> >>>>>    # Now we should have 16 non-shared extents and 131056 (131072 - =
+16)
+> >>>>> shared
+> >>>>>    # extents.
+> >>>>> -echo "Number of non-shared extents in the whole file:
+> >>>>> $(count_not_shared_extents)"
+> >>>>> -echo "Number of shared extents in the whole file:
+> >>>>> $(count_shared_extents)"
+> >>>>> +found3=3D$(count_not_shared_extents)
+> >>>>> +found4=3D$(count_shared_extents)
+> >>>>> +echo "Number of non-shared extents in the whole file: ${found3}"
+> >>>>> +echo "Number of shared extents in the whole file: ${found4}" >>
+> >>>>> $seqres.full
+> >>>>> +
+> >>>>> +if [ $found3 !=3D 16 ]; then
+> >>>>> +       echo "Unexpected number of non-shared extents, has $found3
+> >>>>> expect 16"
+> >>>>> +fi
+> >>>>> +
+> >>>>> +if [ $found4 !=3D $(( $found1 - $found3 )) ]; then
+> >>>>> +       echo "Unexpected number of shared extents, has $found4 expe=
+ct
+> >>>>> $(( $found1 - $found3 ))"
+> >>>>> +fi
+> >>>>>
+> >>>>>    # Check that the non-shared extents are indeed in the expected f=
+ile
+> >>>>> ranges (each
+> >>>>>    # with 8 extents).
+> >>>>> @@ -117,7 +143,12 @@ _scratch_remount commit=3D1
+> >>>>>    sleep 1.1
+> >>>>>
+> >>>>>    # Now all extents should be reported as not shared (131072 exten=
+ts).
+> >>>>> -echo "Number of non-shared extents in the whole file:
+> >>>>> $(count_not_shared_extents)"
+> >>>>> +found5=3D$(count_not_shared_extents)
+> >>>>> +echo "Number of non-shared extents in the whole file: ${found5}" >=
+>
+> >>>>> $seqres.full
+> >>>>> +
+> >>>>> +if [ $found5 !=3D $found1 ]; then
+> >>>>> +       echo "Unexpected final number of non-shared extents, has
+> >>>>> $found5 expect $found1"
+> >>>>> +fi
+> >>>>>
+> >>>>>    # success, all done
+> >>>>>    status=3D0
+> >>>>> diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
+> >>>>> index 3bf5a5e6..e318c2e9 100644
+> >>>>> --- a/tests/btrfs/276.out
+> >>>>> +++ b/tests/btrfs/276.out
+> >>>>> @@ -1,16 +1,12 @@
+> >>>>>    QA output created by 276
+> >>>>>    wrote 17179869184/17179869184 bytes at offset 0
+> >>>>>    XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >>>>> -Number of non-shared extents in the whole file: 131072
+> >>>>>    Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
+> >>>>> -Number of shared extents in the whole file: 131072
+> >>>>>    wrote 1048576/1048576 bytes at offset 8388608
+> >>>>>    XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >>>>>    wrote 1048576/1048576 bytes at offset 12884901888
+> >>>>>    XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >>>>>    Number of non-shared extents in the whole file: 16
+> >>>>> -Number of shared extents in the whole file: 131056
+> >>>>>    Number of non-shared extents in range [8M, 9M): 8
+> >>>>>    Number of non-shared extents in range [12G, 12G + 1M): 8
+> >>>>>    Delete subvolume (commit): 'SCRATCH_MNT/snap'
+> >>>>> -Number of non-shared extents in the whole file: 131072
+> >>>>> --
+> >>>>> 2.41.0
+> >>>>>
