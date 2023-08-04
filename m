@@ -2,364 +2,333 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01303C001DB
-	for <linux-fstests@archiver.kernel.org>; Thu,  3 Aug 2023 23:26:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F11BAC001DE
+	for <linux-fstests@archiver.kernel.org>; Fri,  4 Aug 2023 05:12:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231439AbjHCX0l (ORCPT
+        id S233352AbjHDFMV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 3 Aug 2023 19:26:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51964 "EHLO
+        Fri, 4 Aug 2023 01:12:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42224 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230471AbjHCX0k (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2023 19:26:40 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA7EF1BF6;
-        Thu,  3 Aug 2023 16:26:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
- s=s31663417; t=1691105189; x=1691709989; i=quwenruo.btrfs@gmx.com;
- bh=VCL9GE1SpjLZYKVktWpbJrXTIcExxsccI54Si4WMudU=;
- h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
- b=YmdcpprvcaUpFzpbUuQ+M72Nuc26IyOWi0/BnnvyzlOT96HEl5CHWfpMizb05OPiHfaId0A
- bQtxiEnd4XLpMTE/lTPRnUMhsFyd/sX//Y+u7LsGPaicUcQj+/ogYfxuIBvxBMjZXowq1Qy0u
- YiH+wzL9yxTjOSUoEgnxA2wEbz8D6q7redDzalP+G2Xu0b78mCGpt84Sxi09Ux7xC/aw/LkFR
- 9p9jLuz6QPexMGDKWayFnx6Ejq9Rr2wfa3M34QmdxQt8wlAA4o20nlcBCBMo72cl5Husk7PeR
- c2urwpLt9qbaG2zgKHFeUjs0xBmqvcTV+MrfQXlaKxRaYIb2/Yxw==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [0.0.0.0] ([149.28.201.231]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1N0G1n-1pfDIR457n-00xNXh; Fri, 04
- Aug 2023 01:26:29 +0200
-Message-ID: <ae643756-44b1-ef82-4349-a51dccb25e57@gmx.com>
-Date:   Fri, 4 Aug 2023 07:26:25 +0800
+        with ESMTP id S233688AbjHDFKU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Aug 2023 01:10:20 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF82649EB;
+        Thu,  3 Aug 2023 22:09:40 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 1C50061F34;
+        Fri,  4 Aug 2023 05:09:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6ADA4C433C7;
+        Fri,  4 Aug 2023 05:09:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691125779;
+        bh=ymFslNS9yu4Cvh7h4LocCsGGtKldJcOXZOXH1aSlzjc=;
+        h=Date:From:To:Subject:References:In-Reply-To:From;
+        b=MnZLrKQ9iI7eB34YjH+GWg3PmlQu27Sfd24YuMeIRqvbyo1YCv1+CW6r9FlhqB7XP
+         inQKt2Xxs3jOYRHzytQwpcnZUO7YEqPQmhOAVSViXmEptGIjrhxnTopknVOnInKe8b
+         bX6u/jtBZogepXb/QrTb8oxwkBKbLw+GV/JLgI+JS8ADqIWtN3ZrY/KkY8pnuQnegq
+         rRV4iMnfMeaGcnZ0NqQKx0BNYvY9HZH7nqU+JyolMpk+fTvfrzL6WHD4oYG78uf0n3
+         kYg2kBzolcKkSbSLN+B4Kwe5mLI1EIb1AIByUyMsQHJcDGI0umJGNRnx/uT9w/lhTc
+         Ai6OUnC2NEWmg==
+Date:   Thu, 3 Aug 2023 22:09:38 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     corbet@lwn.net, linux-xfs@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, david@fromorbit.com, cem@kernel.org,
+        sandeen@sandeen.net, chandan.babu@oracle.com, amir73il@gmail.com,
+        leah.rumancik@gmail.com, zlang@kernel.org, fstests@vger.kernel.org,
+        willy@infradead.org, shirley.ma@oracle.com, konrad.wilk@oracle.com
+Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
+Message-ID: <20230804050938.GH11352@frogsfrogsfrogs>
+References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
+ <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3] btrfs/276: make test accurate regarding number of
- expected extents
-To:     fdmanana@kernel.org, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
-        Qu Wenruo <wqu@suse.com>
-References: <c54bf70be6bbeefe440ea5b1341495b16803455c.1691058187.git.fdmanana@suse.com>
- <d74e3007a58128e6352f7aced6c403e2a2291181.1691062439.git.fdmanana@suse.com>
-Content-Language: en-US
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <d74e3007a58128e6352f7aced6c403e2a2291181.1691062439.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:9LbvEG9R4qTljU+574Bb14vdsSitp+uci7u8rijBzaYYQ70APPQ
- YpSkSCDhZQPwu6iaQ5hzMM7QVWXmD57mVpYGAmiuRwfvdJUv6r9vsAPvlWPyMstrMaPOep7
- AFSWGojnlYqsXWkTSlC6XhdSi4ZZ1Okf8kk6z5p07yKwT1BW9vwgNMY0CtwqQXveYYtKyXR
- 0wx0Gc8P7JDCIWC1Wv1Rg==
-UI-OutboundReport: notjunk:1;M01:P0:xqs3hX0MOnw=;+GehiqgYAFl4CRBwvZPyZ9XrI9Q
- AI7Wgf+kGSlF8qcKf7vwF664sL96MLGF+5aODCk0CVAMuQ4hOtwFZn5FVNOG/9SthRAiZlpdK
- G4uLFi9v100AINUIEnNeeIgPww/dkm5/Ud6RG7qmLKmoilf7h8Tgb+3giR5K68gu841pTkKq2
- c2yhfm1ZvE0CYwZaqNSmtxMFB0KHZras809N3ULNzXSLgGbZYynulV7Hd0gGLYISNVHG3WoaV
- mb97YXMLjHbqcSLo5iIvHyT6lFQqULt27uK3kzKCuKXTLmicP2t1wIEikRIaIOZ3d5SfUMjua
- WuTwAKhvmG9cgiTehM3QsArKS8+hjjbI8mf3gAIEFDKcjFTrDoj7NpdqKDtZ2jSQjU+jIcqI8
- A38Wzfl8mjL6BB9/bsxo/OMzF0xZGHYyxBzn9QOcnSfT+jLKrdEDnD7+KwY9601Mv8cFxk1pY
- eAuis3F+kgZF1TySJtj/AXdxCsFrGONj5pQ9G4UyHvZtCB/eeafbcWGtRuPuI3ik1MQ6OeN3K
- tb+ASynRypz7ENoydvFb74Zx+SRXp3JU6YHt/8VZHejNs7zTzr+MLM0UCWE1V5Tst7MO4lVra
- N2mYfsthK1OS3esPiqwMc/Oo56Byph1CpaLTex4DkJRXWwogn2aNuAjvHt7bxa8F3odO0SxV1
- HI5AOe65rvPhHKAjamK2ez1M/UJ/DHbT8wF2djcctrwx9kz2VobKPqXGgedUHI/hzQ9nOsFc+
- pQlwIsq5bKPjZrdd1eNI7GehM1TV15Miedt8FC3YuP7qeiJVT1CM1BAlBtRFAONgAXdMW+dwE
- r4jQSeQa7oiOJZEVG7h+h4H+NJMwAsQDiVg6TCaDuY9DNeQxHX641WkLsk3d3xZX+6ig6Fh3m
- or0tY9Gt0ibpaCLOuUyFuFXmgiD87lNSlM8V/NqXpqpMof6E0SzE8GSFRiStzF0F57muGCA9r
- Ps1NfCNehABqtvHwimOXypItmNA=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Adding a few notes from a discussion I had with Chandan this morning:
 
-
-On 2023/8/3 19:37, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
->
-> btrfs/276 creates a 16G file with compression enabled in order to quickl=
-y
-> and efficiently create a file with many extents and have a fs tree with =
-a
-> height of 3 (root node at level 2), so that it can test that fiemap is
-> correctly reporting extent sharedness when we have shared subtrees of th=
-e
-> fs tree due to a snapshot.
->
-> Compression results in extents with a maximum size of 128K and the test
-> is expecting only extents of 128K, which normally happens if the machine
-> has a large amount of RAM and writeback is not triggered before the xfs_=
-io
-> command finishes. However if writeback is triggered in the meanwhile, du=
-e
-> to memory pressure for example, then we can get end up with some extents
-> that are smaller than 128K, therefore increasing the total number of
-> extents in the test file and make the test fail.
->
-> This seems to happen often on test machines with small amounts of RAM,
-> such as 4G, as reported by Qu in the following thread:
->
->    https://lore.kernel.org/linux-btrfs/20230801065529.50122-1-wqu@suse.c=
-om/
->
-> So to address this create a file with holes and direct IO to make sure w=
-e
-> always get a specific number of extents in the test file. To speedup the
-> test create 2000 64K extents, with holes in between them, so that it wor=
-ks
-> on a fs with any sector size, and then create a bunch of files with larg=
-e
-> xattrs to quickly bump the fs tree height to 3 for any node size (4K to
-> 64K). This also guarantees that the file extent items are spread over
-> multiples leaves, in order to exercise fiemap's correctness when reporti=
-ng
-> shared extents due to shared subtrees.
->
-> Reported-by: Qu Wenruo <wqu@suse.com>
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-Tested-by: Qu Wenruo <wqu@suse.com>
-
-Thanks,
-Qu
+On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Create a new document to list what I think are (within the scope of XFS)
+> our shared goals and community roles.  Since I will be stepping down
+> shortly, I feel it's important to write down somewhere all the hats that
+> I have been wearing for the past six years.
+> 
+> Also, document important extra details about how to contribute to XFS.
+> 
+> Cc: corbet@lwn.net
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->
-> V3: Add missing 'wait' after each loop. Use sync to wait for ordered
->      extents after creating the file as well to avoid any races, and use
->      sync after updating the file to make sure we wait for ordered
->      extents to complete and we end up using the extent tree path in
->      the fiemap code instead of the delayed refs path (as it was before
->      this change).
->
-> V2: Use sync writes when overwriting file ranges to make sure fiemap
->      will see the new file extent items.
->
->   tests/btrfs/276     | 86 +++++++++++++++++++++++++++++----------------
->   tests/btrfs/276.out | 20 +++++------
->   2 files changed, 64 insertions(+), 42 deletions(-)
->
-> diff --git a/tests/btrfs/276 b/tests/btrfs/276
-> index 944b0c8f..8a21963c 100755
-> --- a/tests/btrfs/276
-> +++ b/tests/btrfs/276
-> @@ -9,19 +9,19 @@
->   # and when the file's subvolume was snapshoted.
->   #
->   . ./common/preamble
-> -_begin_fstest auto snapshot compress fiemap
-> +_begin_fstest auto snapshot fiemap
->
->   . ./common/filter
-> +. ./common/attr
->
->   _supported_fs btrfs
->   _require_scratch
->   _require_xfs_io_command "fiemap" "ranged"
-> +_require_attrs
-> +_require_odirect
->
->   _scratch_mkfs >> $seqres.full 2>&1
-> -# We use compression because it's a very quick way to create a file wit=
-h a very
-> -# large number of extents (compression limits the maximum extent size t=
-o 128K)
-> -# and while using very little disk space.
-> -_scratch_mount -o compress
-> +_scratch_mount
->
->   fiemap_test_file()
->   {
-> @@ -29,8 +29,9 @@ fiemap_test_file()
->   	local len=3D$2
->
->   	# Skip the first two lines of xfs_io's fiemap output (file path and
-> -	# header describing the output columns).
-> -	$XFS_IO_PROG -c "fiemap -v $offset $len" $SCRATCH_MNT/foo | tail -n +3
-> +	# header describing the output columns) as well as holes.
-> +	$XFS_IO_PROG -c "fiemap -v $offset $len" $SCRATCH_MNT/foo | \
-> +		grep -v 'hole' | tail -n +3
->   }
->
->   # Count the number of shared extents for the whole test file or just f=
-or a given
-> @@ -63,19 +64,43 @@ count_not_shared_extents()
->   			  --source 'END { print cnt }'
->   }
->
-> -# Create a 16G file as that results in 131072 extents, all with a size =
-of 128K
-> -# (due to compression), and a fs tree with a height of 3 (root node at =
-level 2).
-> -# We want to verify later that fiemap correctly reports the sharedness =
-of each
-> -# extent, even when it needs to switch from one leaf to the next one an=
-d from a
-> -# node at level 1 to the next node at level 1.
-> -#
-> -$XFS_IO_PROG -f -c "pwrite -b 8M 0 16G" $SCRATCH_MNT/foo | _filter_xfs_=
-io
-> -
-> -# Sync to flush delalloc and commit the current transaction, so fiemap =
-will see
-> -# all extents in the fs tree and extent trees and not look at delalloc.
-> +# Create a file with 2000 extents, and a fs tree with a height of at le=
-ast 3
-> +# (root node at level 2). We want to verify later that fiemap correctly=
- reports
-> +# the sharedness of each extent, even when it needs to switch from one =
-leaf to
-> +# the next one and from a node at level 1 to the next node at level 1.
-> +# To speedup creating a fs tree of height >=3D 3, add several large xat=
-trs.
-> +ext_size=3D$(( 64 * 1024 ))
-> +file_size=3D$(( 2000 * 2 * $ext_size )) # about 250M
-> +nr_cpus=3D$("$here/src/feature" -o)
-> +workers=3D0
-> +for (( i =3D 0; i < $file_size; i +=3D 2 * $ext_size )); do
-> +	$XFS_IO_PROG -f -d -c "pwrite -b $ext_size $i $ext_size" \
-> +		$SCRATCH_MNT/foo > /dev/null &
-> +	workers=3D$(( workers + 1 ))
-> +	if [ "$workers" -ge "$nr_cpus" ]; then
-> +		workers=3D0
-> +		wait
-> +	fi
-> +done
-> +wait
+>  Documentation/filesystems/index.rst                |    1 
+>  .../filesystems/xfs-maintainer-entry-profile.rst   |  192 ++++++++++++++++++++
+>  .../maintainer/maintainer-entry-profile.rst        |    1 
+>  MAINTAINERS                                        |    1 
+>  4 files changed, 195 insertions(+)
+>  create mode 100644 Documentation/filesystems/xfs-maintainer-entry-profile.rst
+> 
+> 
+> diff --git a/Documentation/filesystems/index.rst b/Documentation/filesystems/index.rst
+> index eb252fc972aa..09cade7eaefc 100644
+> --- a/Documentation/filesystems/index.rst
+> +++ b/Documentation/filesystems/index.rst
+> @@ -122,6 +122,7 @@ Documentation for filesystem implementations.
+>     virtiofs
+>     vfat
+>     xfs-delayed-logging-design
+> +   xfs-maintainer-entry-profile
+>     xfs-self-describing-metadata
+>     xfs-online-fsck-design
+>     zonefs
+> diff --git a/Documentation/filesystems/xfs-maintainer-entry-profile.rst b/Documentation/filesystems/xfs-maintainer-entry-profile.rst
+> new file mode 100644
+> index 000000000000..55d9e1fb5cd4
+> --- /dev/null
+> +++ b/Documentation/filesystems/xfs-maintainer-entry-profile.rst
+> @@ -0,0 +1,192 @@
+> +XFS Maintainer Entry Profile
+> +============================
 > +
-> +workers=3D0
-> +xattr_value=3D$(printf '%0.sX' $(seq 1 3900))
-> +for (( i =3D 1; i <=3D 29000; i++ )); do
-> +	echo -n > $SCRATCH_MNT/filler_$i
-> +	$SETFATTR_PROG -n 'user.x1' -v $xattr_value $SCRATCH_MNT/filler_$i &
-> +	workers=3D$(( workers + 1 ))
-> +	if [ "$workers" -ge "$nr_cpus" ]; then
-> +		workers=3D0
-> +		wait
-> +	fi
-> +done
-> +wait
+> +Overview
+> +--------
+> +XFS is a well known high-performance filesystem in the Linux kernel.
+> +The aim of this project is to provide and maintain a robust and
+> +performant filesystem.
 > +
-> +# Make sure every ordered extent completed and therefore updated the fs=
- tree.
->   sync
->
-> -# All extents should be reported as non shared (131072 extents).
-> +# All extents should be reported as non shared (2000 extents).
->   echo "Number of non-shared extents in the whole file: $(count_not_shar=
-ed_extents)"
->
->   # Creating a snapshot.
-> @@ -84,26 +109,25 @@ $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $S=
-CRATCH_MNT/snap | _filter_scr
->   # We have a snapshot, so now all extents should be reported as shared.
->   echo "Number of shared extents in the whole file: $(count_shared_exten=
-ts)"
->
-> -# Now COW two file ranges, of 1M each, in the snapshot's file.
-> -# So 16 extents should become non-shared after this.
-> +# Now COW two file ranges, of 64K each, in the snapshot's file.
-> +# So 2 extents should become non-shared after this. Each file extent it=
-em is in
-> +# different leaf of the snapshot tree.
->   #
-> -$XFS_IO_PROG -c "pwrite -b 1M 8M 1M" \
-> -	     -c "pwrite -b 1M 12G 1M" \
-> +$XFS_IO_PROG -d -c "pwrite -b $ext_size 512K $ext_size" \
-> +	     -d -c "pwrite -b $ext_size 249M $ext_size" \
->   	     $SCRATCH_MNT/snap/foo | _filter_xfs_io
->
-> -# Sync to flush delalloc and commit the current transaction, so fiemap =
-will see
-> -# all extents in the fs tree and extent trees and not look at delalloc.
-> +# Wait for ordered extents to complete and commit current transaction t=
-o make
-> +# sure fiemap will see all extents in the subvolume and extent trees.
->   sync
->
-> -# Now we should have 16 non-shared extents and 131056 (131072 - 16) sha=
-red
-> -# extents.
-> +# Now we should have 2 non-shared extents and 1998 shared extents.
->   echo "Number of non-shared extents in the whole file: $(count_not_shar=
-ed_extents)"
->   echo "Number of shared extents in the whole file: $(count_shared_exten=
-ts)"
->
-> -# Check that the non-shared extents are indeed in the expected file ran=
-ges (each
-> -# with 8 extents).
-> -echo "Number of non-shared extents in range [8M, 9M): $(count_not_share=
-d_extents 8M 1M)"
-> -echo "Number of non-shared extents in range [12G, 12G + 1M): $(count_no=
-t_shared_extents 12G 1M)"
-> +# Check that the non-shared extents are indeed in the expected file ran=
-ges.
-> +echo "Number of non-shared extents in range [512K, 512K + 64K): $(count=
-_not_shared_extents 512K 64K)"
-> +echo "Number of non-shared extents in range [249M, 249M + 64K): $(count=
-_not_shared_extents 249M 64K)"
->
->   # Now delete the snapshot.
->   $BTRFS_UTIL_PROG subvolume delete -c $SCRATCH_MNT/snap | _filter_scrat=
-ch
-> @@ -116,7 +140,7 @@ $BTRFS_UTIL_PROG subvolume delete -c $SCRATCH_MNT/sn=
-ap | _filter_scratch
->   _scratch_remount commit=3D1
->   sleep 1.1
->
-> -# Now all extents should be reported as not shared (131072 extents).
-> +# Now all extents should be reported as not shared (2000 extents).
->   echo "Number of non-shared extents in the whole file: $(count_not_shar=
-ed_extents)"
->
->   # success, all done
-> diff --git a/tests/btrfs/276.out b/tests/btrfs/276.out
-> index 3bf5a5e6..197d8edc 100644
-> --- a/tests/btrfs/276.out
-> +++ b/tests/btrfs/276.out
-> @@ -1,16 +1,14 @@
->   QA output created by 276
-> -wrote 17179869184/17179869184 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -Number of non-shared extents in the whole file: 131072
-> +Number of non-shared extents in the whole file: 2000
->   Create a snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap'
-> -Number of shared extents in the whole file: 131072
-> -wrote 1048576/1048576 bytes at offset 8388608
-> +Number of shared extents in the whole file: 2000
-> +wrote 65536/65536 bytes at offset 524288
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -wrote 1048576/1048576 bytes at offset 12884901888
-> +wrote 65536/65536 bytes at offset 261095424
->   XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -Number of non-shared extents in the whole file: 16
-> -Number of shared extents in the whole file: 131056
-> -Number of non-shared extents in range [8M, 9M): 8
-> -Number of non-shared extents in range [12G, 12G + 1M): 8
-> +Number of non-shared extents in the whole file: 2
-> +Number of shared extents in the whole file: 1998
-> +Number of non-shared extents in range [512K, 512K + 64K): 1
-> +Number of non-shared extents in range [249M, 249M + 64K): 1
->   Delete subvolume (commit): 'SCRATCH_MNT/snap'
-> -Number of non-shared extents in the whole file: 131072
-> +Number of non-shared extents in the whole file: 2000
+> +Patches are generally merged to the for-next branch of the appropriate
+> +git repository.
+> +After a testing period, the for-next branch is merged to the master
+> +branch.
+> +
+> +Kernel code are merged to the xfs-linux tree[0].
+> +Userspace code are merged to the xfsprogs tree[1].
+> +Test cases are merged to the xfstests tree[2].
+> +Ondisk format documentation are merged to the xfs-documentation tree[3].
+> +
+> +All patchsets involving XFS *must* be cc'd in their entirety to the mailing
+> +list linux-xfs@vger.kernel.org.
+> +
+> +Roles
+> +-----
+> +There are seven key roles in the XFS project.
+
+Eight.
+
+> +A person can take on multiple roles, and a role can be filled by
+> +multiple people.
+> +Anyone taking on a role is advised to check in with themselves and
+> +others on a regular basis about burnout.
+> +
+> +- **Outside Contributor**: Anyone who sends a patch but is not involved
+> +  in the XFS project on a regular basis.
+> +  These folks are usually people who work on other filesystems or
+> +  elsewhere in the kernel community.
+> +
+> +- **Developer**: Someone who is familiar with the XFS codebase enough to
+> +  write new code, documentation, and tests.
+> +
+> +  Developers can often be found in the IRC channel mentioned by the ``C:``
+> +  entry in the kernel MAINTAINERS file.
+> +
+> +- **Senior Developer**: A developer who is very familiar with at least
+> +  some part of the XFS codebase and/or other subsystems in the kernel.
+> +  These people collectively decide the long term goals of the project
+> +  and nudge the community in that direction.
+> +  They should help prioritize development and review work for each release
+> +  cycle.
+> +
+> +  Senior developers tend to be more active participants in the IRC channel.
+> +
+> +- **Reviewer**: Someone (most likely also a developer) who reads code
+> +  submissions to decide:
+> +
+> +  0. Is the idea behind the contribution sound?
+> +  1. Does the idea fit the goals of the project?
+> +  2. Is the contribution designed correctly?
+> +  3. Is the contribution polished?
+> +  4. Can the contribution be tested effectively?
+> +
+> +  Reviewers should identify themselves with an ``R:`` entry in the kernel
+> +  and fstests MAINTAINERS files.
+> +
+> +- **Testing Lead**: This person is responsible for setting the test
+> +  coverage goals of the project, negotiating with developers to decide
+> +  on new tests for new features, and making sure that developers and
+> +  release managers execute on the testing.
+> +
+> +  The testing lead should identify themselves with an ``M:`` entry in
+> +  the XFS section of the fstests MAINTAINERS file.
+> +
+> +- **Bug Triager**: Someone who examines incoming bug reports in just
+> +  enough detail to identify the person to whom the report should be
+> +  forwarded.
+> +
+> +  The bug triagers should identify themselves with a ``B:`` entry in
+> +  the kernel MAINTAINERS file.
+> +
+> +- **Release Manager**: This person merges reviewed patchsets into an
+> +  integration branch, tests the result locally, pushes the branch to a
+> +  public git repository, and sends pull requests further upstream.
+> +  This person should not be an active developer to avoid conflicts of
+> +  interest.
+
+Chandan asked if it was wise to forbid the release manager from /ever/
+writing patches.  I decided that it wouldn't be the end of the world if
+the RM produced bug fixes from time to time, or simple cleanups of
+grotty parts of the codebase.  I also recalled that my real goal here
+was to break the very frustrating dynamic that I encountered wherein
+reviewers of the maintainer's feature patchsets refuse to sign off
+unless the maintainer agrees to expand the scope of the work to include
+yet more cleanups.
+
+I withdraw this last sentence and replace it with:
+
+"If a developer and a reviewer fail to reach a resolution on some point,
+the release manager must have the ability to intervene to try to drive a
+resolution."
+
+> +
+> +  The release manager should identify themselves with an ``M:`` entry in
+> +  the kernel MAINTAINERS file.
+> +
+> +- **Community Manager**: This person calls and moderates meetings of as many
+> +  XFS participants as they can get when mailing list discussions prove
+> +  insufficient for collective decisionmaking.
+> +  They may also serve as liaison between managers of the organizations
+> +  sponsoring work on any part of XFS.
+
+Note: I'll keep doing this part too, since I already have all those
+connections.
+
+--D
+
+> +
+> +- **LTS Maintainer**: Someone who backports and tests bug fixes from
+> +  uptream to the LTS kernels.
+> +  There tend to be six separate LTS trees at any given time.
+> +
+> +  The maintainer for a given LTS release should identify themselves with an
+> +  ``M:`` entry in the MAINTAINERS file for that LTS tree.
+> +  Unmaintained LTS kernels should be marked with status ``S: Orphan`` in that
+> +  same file.
+> +
+> +Submission Checklist Addendum
+> +-----------------------------
+> +Please follow these additional rules when submitting to XFS:
+> +
+> +- Patches affecting only the filesystem itself should be based against
+> +  the latest -rc or the for-next branch.
+> +  These patches will be merged back to the for-next branch.
+> +
+> +- Authors of patches touching other subsystems need to coordinate with
+> +  the maintainers of XFS and the relevant subsystems to decide how to
+> +  proceed with a merge.
+> +
+> +- Any patchset changing XFS should be cc'd in its entirety to linux-xfs.
+> +  Do not send partial patchsets; that makes analysis of the broader
+> +  context of the changes unnecessarily difficult.
+> +
+> +- Anyone making kernel changes that have corresponding changes to the
+> +  userspace utilities should send the userspace changes as separate
+> +  patchsets immediately after the kernel patchsets.
+> +
+> +- Authors of bug fix patches are expected to use fstests[2] to perform
+> +  an A/B test of the patch to determine that there are no regressions.
+> +  When possible, a new regression test case should be written for
+> +  fstests.
+> +
+> +- Authors of new feature patchsets must ensure that fstests will have
+> +  appropriate functional and input corner-case test cases for the new
+> +  feature.
+> +
+> +- When implementing a new feature, it is strongly suggested that the
+> +  developers write a design document to answer the following questions:
+> +
+> +  * **What** problem is this trying to solve?
+> +
+> +  * **Who** will benefit from this solution, and **where** will they
+> +    access it?
+> +
+> +  * **How** will this new feature work?  This should touch on major data
+> +    structures and algorithms supporting the solution at a higher level
+> +    than code comments.
+> +
+> +  * **What** userspace interfaces are necessary to build off of the new
+> +    features?
+> +
+> +  * **How** will this work be tested to ensure that it solves the
+> +    problems laid out in the design document without causing new
+> +    problems?
+> +
+> +  The design document should be committed in the kernel documentation
+> +  directory.
+> +  It may be omitted if the feature is already well known to the
+> +  community.
+> +
+> +- Patchsets for the new tests should be submitted as separate patchsets
+> +  immediately after the kernel and userspace code patchsets.
+> +
+> +- Changes to the on-disk format of XFS must be described in the ondisk
+> +  format document[3] and submitted as a patchset after the fstests
+> +  patchsets.
+> +
+> +- Patchsets implementing bug fixes and further code cleanups should put
+> +  the bug fixes at the beginning of the series to ease backporting.
+> +
+> +Key Release Cycle Dates
+> +-----------------------
+> +Bug fixes may be sent at any time, though the release manager may decide to
+> +defer a patch when the next merge window is close.
+> +
+> +Code submissions targeting the next merge window should be sent between
+> +-rc1 and -rc6.
+> +This gives the community time to review the changes, to suggest other changes,
+> +and for the author to retest those changes.
+> +
+> +Code submissions also requiring changes to fs/iomap and targeting the
+> +next merge window should be sent between -rc1 and -rc4.
+> +This allows the broader kernel community adequate time to test the
+> +infrastructure changes.
+> +
+> +Review Cadence
+> +--------------
+> +In general, please wait at least one week before pinging for feedback.
+> +To find reviewers, either consult the MAINTAINERS file, or ask
+> +developers that have Reviewed-by tags for XFS changes to take a look and
+> +offer their opinion.
+> +
+> +References
+> +----------
+> +| [0] https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/
+> +| [1] https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/
+> +| [2] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/
+> +| [3] https://git.kernel.org/pub/scm/fs/xfs/xfs-documentation.git/
+> diff --git a/Documentation/maintainer/maintainer-entry-profile.rst b/Documentation/maintainer/maintainer-entry-profile.rst
+> index cfd37f31077f..6b64072d4bf2 100644
+> --- a/Documentation/maintainer/maintainer-entry-profile.rst
+> +++ b/Documentation/maintainer/maintainer-entry-profile.rst
+> @@ -105,3 +105,4 @@ to do something different in the near future.
+>     ../driver-api/media/maintainer-entry-profile
+>     ../driver-api/vfio-pci-device-specific-driver-acceptance
+>     ../nvme/feature-and-quirk-policy
+> +   ../filesystems/xfs-maintainer-entry-profile
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index d516295978a4..d232e9e36b87 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -23330,6 +23330,7 @@ S:	Supported
+>  W:	http://xfs.org/
+>  C:	irc://irc.oftc.net/xfs
+>  T:	git git://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git
+> +P:	Documentation/filesystems/xfs-maintainer-entry-profile.rst
+>  F:	Documentation/ABI/testing/sysfs-fs-xfs
+>  F:	Documentation/admin-guide/xfs.rst
+>  F:	Documentation/filesystems/xfs-delayed-logging-design.rst
+> 
