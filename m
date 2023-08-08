@@ -2,105 +2,145 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3EA8EB64DD
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Aug 2023 02:40:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 785FCC04A94
+	for <linux-fstests@archiver.kernel.org>; Tue,  8 Aug 2023 18:16:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229456AbjHHCkN (ORCPT
+        id S235476AbjHHSQJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 7 Aug 2023 22:40:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56374 "EHLO
+        Tue, 8 Aug 2023 14:16:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230073AbjHHCkJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2023 22:40:09 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E57F1715
-        for <fstests@vger.kernel.org>; Mon,  7 Aug 2023 19:39:47 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        with ESMTP id S235425AbjHHSPs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Aug 2023 14:15:48 -0400
+Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D78C11F411;
+        Tue,  8 Aug 2023 10:22:19 -0700 (PDT)
+Received: from authenticated-user (box.fidei.email [71.19.144.250])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4E25E62398
-        for <fstests@vger.kernel.org>; Tue,  8 Aug 2023 02:39:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4E20C433C7;
-        Tue,  8 Aug 2023 02:39:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691462385;
-        bh=g9o640JAR/smtwvF4fLL1HtY0/UmrUAe01tMBTtKhKQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OVJjV2k6PA/5XBJKHjcv9bVyypQMiKyl+ddwO5/xi+DsIPV/O/XJngxEurz4Ch8GN
-         xlyeJwdz3mhn25Zc5g0IVM3n1BVUDD4JJ9UMeOa70ugWGeXCnD7ndakNKGiyK5xAM1
-         XDTZJ91HGvz5dypbUR7VzpY7J0j8OU+ds/nIRuGW+DdctH0+zwSSWxKNPTWoFEKyeW
-         U9McjXQhpbILLmR7NGTvFyI0zZUSkSnH9iWwhcpzteizGBlYzz8g6GMYTuBXlaqLof
-         8sGMsjxWHouC0tde6BeKIYxyKOLkdMLCdatwDHbgh/rG3nA1D4kL+ww9U4QaoR1rmY
-         BqyaCmiAWd/JQ==
-Date:   Mon, 7 Aug 2023 19:39:44 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org,
-        linkinjeon@kernel.org, sj1557.seo@samsung.com,
-        Theodore Ts'o <tytso@mit.edu>
-Subject: Re: [PATCH] common/rc: drop '-f' parameter from fsck.exfat
-Message-ID: <20230808023944.GP11340@frogsfrogsfrogs>
-References: <20230807112850.9198-1-ddiss@suse.de>
- <20230807174835.moxyuvx4mp47pvky@zlang-mailbox>
+        by box.fidei.email (Postfix) with ESMTPSA id 705CC83548;
+        Tue,  8 Aug 2023 13:22:19 -0400 (EDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
+        t=1691515339; bh=3QofvkrzEbKIE7kiT4biu6yi+YODuBy1obePJtOF1UE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=ox+m8WtBmbG7cZnsJbBcOj/l0/QHDpBcImOeWhZSNbacQkiGW8tQgicKq0STZoI3l
+         qjCu16zKNyQZ5JpTTwme80vD81hqFWgaCaRD+Pa/2t5fpcEXBlSt4I9Fb62gD3EBx1
+         fhNyPQVEzCKIrxWzg1GI3YHyuT9AR+3aPOybW2iJhkAe8EzD/SeokMgb4ZrN6Ed/Zt
+         hFMTo/+lVMedyMELC7KBo2AslcmI3MU8Ymj+898PEEUaAfldb5+XMJWWjADq0C9fyb
+         DKKc4Nu4AoyUaSIlOsWsnl58SKYNVCZYpPQuvhDFGqkZ94uPoOSxuMxzPKGxAf7CN+
+         GnyQJrRkGY0MA==
+From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+        kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
+        fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
+        fsverity@lists.linux.dev, zlang@kernel.org
+Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+Subject: [RFC PATCH v3 8/9] btrfs: add simple test of reflink of encrypted data
+Date:   Tue,  8 Aug 2023 13:21:27 -0400
+Message-ID: <df2e27704eafd0ffe5d7826933294580c8fcdea5.1691530000.git.sweettea-kernel@dorminy.me>
+In-Reply-To: <cover.1691530000.git.sweettea-kernel@dorminy.me>
+References: <cover.1691530000.git.sweettea-kernel@dorminy.me>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230807174835.moxyuvx4mp47pvky@zlang-mailbox>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 08, 2023 at 01:48:35AM +0800, Zorro Lang wrote:
-> On Mon, Aug 07, 2023 at 01:28:50PM +0200, David Disseldorp wrote:
-> > fsck.exfat doesn't support the '-f' flag, so add a special case to
-> > _repair_test_fs().
-> 
-> I'm wondering why _repair_scratch_fs() doesn't have the '-f', but the
-> _repair_test_fs() has it. Looks like the '-f' option was for extN fs
-> originally, it's not a fsck common option, but in fsck.ext4.
-> 
-> So I think the '-f' might not be a necessary option. As _repair_scratch_fs
-> works without it, can we just remove the '-f' from _repair_test_fs()?
-> 
-> As _repair_test_fs was added by Ted, and _repair_scratch_fs was added
-> by Darrick, so CC them to get more review -- do we real need the '-f'
-> or not by default :)
+Make sure that we succeed at reflinking encrypted data.
 
-I suspect that was just an ext4ism, since fsck itself doesn't document
-any such option.
+Test deliberately numbered with a high number so it won't conflict with
+tests between now and merge.
+---
+ tests/btrfs/613     | 59 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/613.out | 13 ++++++++++
+ 2 files changed, 72 insertions(+)
+ create mode 100755 tests/btrfs/613
+ create mode 100644 tests/btrfs/613.out
 
---D
+diff --git a/tests/btrfs/613 b/tests/btrfs/613
+new file mode 100755
+index 00000000..0288016e
+--- /dev/null
++++ b/tests/btrfs/613
+@@ -0,0 +1,59 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 613
++#
++# Check if reflinking one encrypted file on btrfs succeeds.
++#
++. ./common/preamble
++_begin_fstest auto encrypt
++
++# Import common functions.
++. ./common/encrypt
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++
++_require_test
++_require_scratch
++_require_cp_reflink
++_require_scratch_encryption -v 2
++_require_command "$KEYCTL_PROG" keyctl
++
++_scratch_mkfs_encrypted &>> $seqres.full
++_scratch_mount
++
++dir=$SCRATCH_MNT/dir
++mkdir $dir
++_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++echo "Creating and reflinking a file"
++$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/test > /dev/null
++cp --reflink=always $dir/test $dir/test2
++
++echo "Can't reflink encrypted and unencrypted"
++cp --reflink=always $dir/test $SCRATCH_MNT/fail |& _filter_scratch
++
++echo "Diffing the file and its copy"
++diff $dir/test $dir/test2
++
++echo "Verifying the files are reflinked"
++_verify_reflink $dir/test $dir/test2
++
++echo "Diffing the files after remount"
++_scratch_cycle_mount
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++diff $dir/test $dir/test2
++
++echo "Diffing the files after key remove"
++_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
++diff $dir/test $dir/test2 |& _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/613.out b/tests/btrfs/613.out
+new file mode 100644
+index 00000000..4895d6dd
+--- /dev/null
++++ b/tests/btrfs/613.out
+@@ -0,0 +1,13 @@
++QA output created by 613
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++Creating and reflinking a file
++Can't reflink encrypted and unencrypted
++cp: failed to clone 'SCRATCH_MNT/fail' from 'SCRATCH_MNT/dir/test': Invalid argument
++Diffing the file and its copy
++Verifying the files are reflinked
++Diffing the files after remount
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++Diffing the files after key remove
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++diff: SCRATCH_MNT/dir/test: No such file or directory
++diff: SCRATCH_MNT/dir/test2: No such file or directory
+-- 
+2.41.0
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > Signed-off-by: David Disseldorp <ddiss@suse.de>
-> > ---
-> >  common/rc | 8 ++++++++
-> >  1 file changed, 8 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index 5c4429ed..ac7e50f1 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -1229,6 +1229,14 @@ _repair_test_fs()
-> >  			res=$?
-> >  		fi
-> >  		;;
-> > +	exfat)
-> > +		# exfat doesn't support -f
-> > +		fsck -t $FSTYP -y $TEST_DEV >$tmp.repair 2>&1
-> > +		res=$?
-> > +		if ((res < 4)); then
-> > +			res=0
-> > +		fi
-> > +		;;
-> >  	*)
-> >  		# Let's hope fsck -y suffices...
-> >  		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
-> > -- 
-> > 2.35.3
-> > 
-> 
