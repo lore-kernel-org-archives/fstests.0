@@ -2,123 +2,91 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A924AC04A6A
-	for <linux-fstests@archiver.kernel.org>; Tue,  8 Aug 2023 20:14:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A72A3C001B0
+	for <linux-fstests@archiver.kernel.org>; Wed,  9 Aug 2023 13:09:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231444AbjHHUOj (ORCPT
+        id S229450AbjHINJM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 8 Aug 2023 16:14:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45562 "EHLO
+        Wed, 9 Aug 2023 09:09:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231172AbjHHUO2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Aug 2023 16:14:28 -0400
-Received: from box.fidei.email (box.fidei.email [IPv6:2605:2700:0:2:a800:ff:feba:dc44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CB78BD7C4;
-        Tue,  8 Aug 2023 11:46:29 -0700 (PDT)
-Received: from authenticated-user (box.fidei.email [71.19.144.250])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        with ESMTP id S230265AbjHINJL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Aug 2023 09:09:11 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B74B1FF9;
+        Wed,  9 Aug 2023 06:09:11 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by box.fidei.email (Postfix) with ESMTPSA id 5BD3580C15;
-        Tue,  8 Aug 2023 14:46:28 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=dorminy.me; s=mail;
-        t=1691520389; bh=zboWyX3LOqJT54iC6p239R9WSjBQ9u2mjNYR6izqaxw=;
-        h=Date:Subject:To:References:From:In-Reply-To:From;
-        b=YTboS0nEd5b0R7WsONge72lwyMWoG8E8DpBn0OTG5htDaLIGa5AAjcXkNKqmpGG3v
-         YPvTCUxG76My5eWBV1d703zsOBLQzsnoogNlDEquv8PieKLeVRafS5/BlSnAFe6aW6
-         RndnupZ2+KnMm1rMO+jVQBjA3y+4ILRv6bVAdJhO4E/++L5YH3pWMIM5375LveK+A4
-         QQOU2NvxIehNSDsQZ1Qm8QbHsZOJeOwd2K7qb8Xd0s122taP0HiC9e0hvyliVLag+l
-         V9xYRwmz9l34rKHfpOMcbnvNZTvKypUefmoMcqGUqmvAyPVdoXzncKskNmvouaeOG8
-         wI/RwM93PXvgQ==
-Message-ID: <1b838929-f349-559c-5f69-560c635c1d24@dorminy.me>
-Date:   Tue, 8 Aug 2023 14:46:27 -0400
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 01D4D639CD;
+        Wed,  9 Aug 2023 13:09:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73691C433C8;
+        Wed,  9 Aug 2023 13:09:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691586550;
+        bh=RP3a1yCokfgzUe01alZGGBBHrvBOhkP0Oj8s3lt3FLM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=A3qf0Solz/HQtLEfafinM+HaCYc8Ft1YmkZBmDztHwy6j6yR8EQCuObDGd++0B5bQ
+         Wv2bnzQIp/uoasevq+oEInQzVuhjReDedDNDONveL7reIqCveZr/6fRzhsNubOxGJX
+         FHhm8jzIj9iCI4nxnCX2txwi3LHpQc/8in3sNGbsiWeLCaRDATmUpYEF8Vv7Xamihw
+         LDhj03safM2CiKKDW0zWV+xL9N5/YECvXBeDOX9drm0KP8ZGfd9bgZ2qCcWAMawtkD
+         17IWyurnx8xaB0bn6dj7SE57vzQylpmSjU4TdMMc3aw4qSW9lRNdpHArymx/wtcNVQ
+         98M0uLkuBljcg==
+Date:   Wed, 9 Aug 2023 15:09:04 +0200
+From:   Carlos Maiolino <cem@kernel.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Chandan Babu R <chandan.babu@oracle.com>,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        david@fromorbit.com, sandeen@sandeen.net, amir73il@gmail.com,
+        leah.rumancik@gmail.com, zlang@kernel.org, fstests@vger.kernel.org,
+        willy@infradead.org, shirley.ma@oracle.com, konrad.wilk@oracle.com
+Subject: Re: [PATCH 3/3] MAINTAINERS: add Chandan Babu as XFS release manager
+Message-ID: <20230809130904.veisiszzzssp6ohr@andromeda>
+References: <169116629797.3243794.7024231508559123519.stgit@frogsfrogsfrogs>
+ <RxME8o56Hr2QxC47qqkEkiU90SY26D2ubgubhreqqss6dZP5GfdYjpy_mDZyHLGDeOrPceqWuPwPJ4jX3SM_Gg==@protonmail.internalid>
+ <169116631533.3243794.12031505140377581673.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Subject: Re: [RFC PATCH v3 9/9] btrfs: test snapshotting encrypted subvol
-Content-Language: en-US
-To:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-        kernel-team@meta.com, ebiggers@google.com, anand.jain@oracle.com,
-        fdmanana@suse.com, linux-fscrypt@vger.kernel.org,
-        fsverity@lists.linux.dev, zlang@kernel.org
-References: <cover.1691530000.git.sweettea-kernel@dorminy.me>
- <400435f749f54e07a23e8e3c67bb717646747cc4.1691530000.git.sweettea-kernel@dorminy.me>
-From:   Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-In-Reply-To: <400435f749f54e07a23e8e3c67bb717646747cc4.1691530000.git.sweettea-kernel@dorminy.me>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <169116631533.3243794.12031505140377581673.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-
-On 8/8/23 13:21, Sweet Tea Dorminy wrote:
-> Make sure that snapshots of encrypted data are readable and writeable.
+On Fri, Aug 04, 2023 at 09:25:15AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Test deliberately high-numbered to not conflict.
+> I nominate Chandan Babu to take over release management for the upstream
+> kernel's XFS code.  He has had sufficient experience merging backports
+> to the 5.4 LTS tree, testing them, and sending them on to the LTS leads.
 > 
-> Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+> NOTE: I am /not/ nominating Chandan to take on any of the other roles I
+> have just dropped.  Bug triager, testing lead, and community manager are
+> open positions that need to be filled.  There's also maintainer for
+> supported LTS releases (4.14, 4.19, 5.10...).
+> 
+> Cc: Chandan Babu R <chandan.babu@oracle.com>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Acked-by: Chandan Babu R <chandan.babu@oracle.com>
+
+Reviewed-by: Carlos Maiolino <cem@kernel.org>
+
 > ---
->   tests/btrfs/614     |  76 ++++++++++++++++++++++++++++++
->   tests/btrfs/614.out | 111 ++++++++++++++++++++++++++++++++++++++++++++
->   2 files changed, 187 insertions(+)
->   create mode 100755 tests/btrfs/614
->   create mode 100644 tests/btrfs/614.out
+>  MAINTAINERS |    1 +
+>  1 file changed, 1 insertion(+)
 > 
-> diff --git a/tests/btrfs/614 b/tests/btrfs/614
-> new file mode 100755
-> index 00000000..87dd27f9
-> --- /dev/null
-> +++ b/tests/btrfs/614
-> @@ -0,0 +1,76 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 614
-> +#
-> +# Try taking a snapshot of an encrypted subvolume. Make sure the snapshot is
-> +# still readable. Rewrite part of the subvol with the same data; make sure it's
-> +# still readable.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto encrypt
-> +
-> +# Import common functions.
-> +. ./common/encrypt
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +
-> +_require_test
-> +_require_scratch
-> +_require_scratch_encryption -v 2
-> +_require_command "$KEYCTL_PROG" keyctl
-> +
-> +_scratch_mkfs_encrypted &>> $seqres.full
-> +_scratch_mount
-> +
-> +udir=$SCRATCH_MNT/reference
-> +dir=$SCRATCH_MNT/subvol
-> +dir2=$SCRATCH_MNT/subvol2
-> +$BTRFS_UTIL_PROG subvolume create $dir >> $seqres.full
-> +mkdir $udir
-> +
-> +_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-> +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-> +
-> +# get files with lots of extents by using backwards writes.
-> +for j in `seq 0 50`; do
-> +	for i in `seq 20 -1 1`; do
-> +		$XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> +		$dir/foo-$j >> $seqres.full | _filter_xfs_io
-> +		$XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> +		$udir/foo-$j >> $seqres.full | _filter_xfs_io
-> +	done
-> +done
-> +
-> +$BTRFS_UTIL_PROG subvolume snapshot $dir $dir2 | _filter_scratch
-> +
-> +_scratch_remount
-> +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-> +sleep 30
-Just noticed this sleep, will remove it in the next version.
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index d6b82aac42a4..f059e7c30f90 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -23324,6 +23324,7 @@ F:	include/xen/arm/swiotlb-xen.h
+>  F:	include/xen/swiotlb-xen.h
+> 
+>  XFS FILESYSTEM
+> +M:	Chandan Babu R <chandan.babu@oracle.com>
+>  R:	Darrick J. Wong <djwong@kernel.org>
+>  L:	linux-xfs@vger.kernel.org
+>  S:	Supported
+> 
