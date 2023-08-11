@@ -2,147 +2,74 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28264C001B0
-	for <linux-fstests@archiver.kernel.org>; Fri, 11 Aug 2023 14:48:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24F50C001DE
+	for <linux-fstests@archiver.kernel.org>; Fri, 11 Aug 2023 19:31:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231285AbjHKOsA (ORCPT
+        id S236843AbjHKTbX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 11 Aug 2023 10:48:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40340 "EHLO
+        Fri, 11 Aug 2023 15:31:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229929AbjHKOsA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Aug 2023 10:48:00 -0400
-Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98A4B2702
-        for <fstests@vger.kernel.org>; Fri, 11 Aug 2023 07:47:59 -0700 (PDT)
-Received: by mail-qk1-x736.google.com with SMTP id af79cd13be357-76d072daea2so156206885a.1
-        for <fstests@vger.kernel.org>; Fri, 11 Aug 2023 07:47:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20221208.gappssmtp.com; s=20221208; t=1691765279; x=1692370079;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=cZ9BvxHm6bXPkxel2nnteSQQICojHj+VlgU1XNz3+Q8=;
-        b=FGEoggp5UeSvGn7xd4cOLSg9aFg4mJYHxA1oTyXz7tJszfemjN/6djULBtzqsoDtTu
-         2EaOU6MflTycWkXinUWrhIs2VrpMAcUAenK+guhbtYkCp0jZsVCrqiudq8dILTzyOoAN
-         xC1yELgrmAWFz052ei5+entKNK2PmbLWrfCkrlhCNwyx+Xw4G8X9NFwrV+VZXQFiNxRX
-         SWUcctapBCevGZzBmLRfs8aht7iUjUp3jf3NQtNR1z8ZUDjasgZyZsSOS5ldTXY/xHO7
-         7HwboOCyaOuQL/gbFm1xpOaiAtA4is3yIvYSn+CoC1PL/TOxUJoxTe/PhehzWi45yzrc
-         rdMA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691765279; x=1692370079;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cZ9BvxHm6bXPkxel2nnteSQQICojHj+VlgU1XNz3+Q8=;
-        b=XGSRO0LWhTvKoy0rSazS57q9gpGb0HRmfLoJIEhN1mYpUbiKIbUwoU//CTS6fuI6E+
-         q7oIxRqRTPBKKs1SQtGA2F1aaRm+nSQ9K+nJnnvQMBjLE87GU4FpSWTuh+s38VS3Bwcg
-         DayrGnq6TkLfqlvMlL5EgXSI8DFGtBlA0ybTcF16HN7djfaJMhHLis5AIId38XVniLtf
-         sBIKeLqGoqC6f2YRZjncWxUYA4VXOGsNK0Z4prPDBHSoIiIOEDCPrJe6Cz1p8A8l/swo
-         ARS/wLzYKz3GEz/N5HUZQ15qRSWpMpEW/aof9oo0h/zIPeqvYqLpDdkaoyGwaf7cy0j0
-         CcHQ==
-X-Gm-Message-State: AOJu0Ywj32k6WgqVH8Knh7VkMlcqpD7JfGf3eiS5CkByzmokApK960x8
-        HRnLcyHOKDDK2p1LtmYRjZyv6pSbdh8IIasTq3KFMg==
-X-Google-Smtp-Source: AGHT+IFvgKzT3E0OCN2Zct3tBcZ2wLkr4F9wLTxafrxvjUCdBtIXiKenJAhIOtbnkDxjY1ooFp9j+Q==
-X-Received: by 2002:a05:620a:2991:b0:765:a651:a11d with SMTP id r17-20020a05620a299100b00765a651a11dmr2781228qkp.36.1691765278706;
-        Fri, 11 Aug 2023 07:47:58 -0700 (PDT)
-Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id t26-20020a05620a005a00b0076d1e149701sm1226717qkt.115.2023.08.11.07.47.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Aug 2023 07:47:58 -0700 (PDT)
-Date:   Fri, 11 Aug 2023 10:47:57 -0400
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     Lee Trager <lee@trager.us>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH] btrfs: Vertify dir permissions when creating a stub
- subvolume
-Message-ID: <20230811144757.GC2724906@perftesting>
-References: <20230811011519.1811259-1-lee@trager.us>
+        with ESMTP id S236820AbjHKTbW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Aug 2023 15:31:22 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA0AE30E6;
+        Fri, 11 Aug 2023 12:31:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=p5qvQ+yzO9nazRIKAyXORjIabtCXmQCWDwI1BMoHGgE=; b=y9yj2T9iBuU7QR0NCC+wFIp5bT
+        lbifkJx0QbnK/6cjOU6ilyHuw7vKWTpSLQ1GQYC0ArvwQ1TDxFzwqzbL1Lp1AEMz9UV74CM/MGIcK
+        HCl6aleTnY+zFdw2I0h1v5nE3ZA4u6T2PO6cnfkT9vFe+vJbbz+dt3MBkC6WBnlBpnEK8jT9Dlaio
+        6pTnn+9pI3lWEe07Bk5/+qojr9CPvrvi34qDa0fIMmrXsmqGYqFiNs32rcoKsES+prEe7x0UDYu5h
+        r/Np5S5Co8OllWLqM3sSoNi1/EvzwOWwvHzfXHR9+80cxQrlCNZkTOOB7QJ5C8hfJdf1tWnkjndPk
+        uIsLAatw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1qUXqw-00BSyf-2F;
+        Fri, 11 Aug 2023 19:31:18 +0000
+Date:   Fri, 11 Aug 2023 12:31:18 -0700
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     "Darrick J. Wong" <djwong@kernel.org>,
+        Amir Goldstein <amir73il@gmail.com>
+Cc:     corbet@lwn.net, linux-xfs@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, david@fromorbit.com, cem@kernel.org,
+        sandeen@sandeen.net, chandan.babu@oracle.com, amir73il@gmail.com,
+        leah.rumancik@gmail.com, zlang@kernel.org, fstests@vger.kernel.org,
+        willy@infradead.org, shirley.ma@oracle.com, konrad.wilk@oracle.com
+Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
+Message-ID: <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
+References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
+ <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230811011519.1811259-1-lee@trager.us>
+In-Reply-To: <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Aug 10, 2023 at 06:15:19PM -0700, Lee Trager wrote:
-> btrfs supports creating nesting subvolumes however snapshots are not
-> recurive. When a snapshot is taken of a volume which contains a subvolume
-> the subvolume is replaced with a stub subvolume which has the same name and
-> uses inode number 2. This test validates that the stub volume copies
-> permissions of the original volume.
-> Signed-off-by: Lee Trager <lee@trager.us>
-> ---
->  tests/btrfs/300     | 42 ++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/300.out | 18 ++++++++++++++++++
->  2 files changed, 60 insertions(+)
->  create mode 100755 tests/btrfs/300
->  create mode 100644 tests/btrfs/300.out
-> 
-> diff --git a/tests/btrfs/300 b/tests/btrfs/300
-> new file mode 100755
-> index 00000000..3a34f8c0
-> --- /dev/null
-> +++ b/tests/btrfs/300
-> @@ -0,0 +1,42 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 300
-> +#
-> +# Validate that snapshots taken while in a remapped namespace preserve
-> +# the permissions of the user.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick subvol snapshot
+On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
+> +Roles
+> +-----
+> +There are seven key roles in the XFS project.
+> +- **Testing Lead**: This person is responsible for setting the test
+> +  coverage goals of the project, negotiating with developers to decide
+> +  on new tests for new features, and making sure that developers and
+> +  release managers execute on the testing.
 > +
-> +_supported_fs btrfs
-> +
-> +_require_test
-> +_require_user
-> +_require_group
-> +_require_unix_perm_checking
-> +_register_cleanup "cleanup"
-> +
-> +test_dir="${TEST_DIR}/$(basename $0)"
-> +cleanup() {
-> +    [ -d "$test_dir" ] && rm -rf $test_dir
-> +}
-> +
-> +mkdir $test_dir
-> +chown fsgqa:fsgqa $test_dir
-> +
-> +_user_do "
-> +cd ${test_dir};
-> +unshare --user --keep-caps --map-auto --map-root-user;
+> +  The testing lead should identify themselves with an ``M:`` entry in
+> +  the XFS section of the fstests MAINTAINERS file.
 
-I'm not sure how well supported these operations are, generally we want to make
-sure that the commands exist and the options work.  Can you extract out the
-require_unshare() helper from tests/overlay/020 into a actual helper in
-common/rc, and then add
+I think breaking responsibility down is very sensible, and should hopefully
+allow you to not burn out. Given I realize how difficult it is to do all
+the tasks, and since I'm already doing quite a bit of testing of XFS
+on linux-next I can volunteer to help with this task of testing lead
+if folks also think it may be useful to the community.
 
-_require_unshare --user --keep-caps --map-auto --map-root-user
+The only thing is I'd like to also ask if Amir would join me on the
+role to avoid conflicts of interest when and if it comes down to testing
+features I'm involved in somehow.
 
-to your test, that way we don't get false failures if the environment doesn't
-support these capabilities.
-
-> +$BTRFS_UTIL_PROG subvolume create subvol;
-> +touch subvol/{1,2,3};
-> +$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
-> +touch subvol/subsubvol/{4,5,6};
-> +$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
-> +"
-
-I assme you have to do this all in one fell swoop because of the unshare part?
-Normally I'd prefer if we did one line per command, ie
-
-_user_do "cd"
-_user_do "unshare"
-_user_do "subvol create"
-
-but if that doesn't work it would be good to have a comment explaining that it
-has to be done in one fell swoop.  If it does work then I'd prefer the above
-pattern.  Thanks,
-
-Josef
+  Luis
