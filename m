@@ -2,195 +2,102 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC1BDEB64DD
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 11:02:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A97DEB64DD
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 14:10:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229494AbjHMLCd (ORCPT
+        id S229596AbjHMOJ5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Aug 2023 07:02:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58658 "EHLO
+        Sun, 13 Aug 2023 10:09:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229469AbjHMLCc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 07:02:32 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E463170D;
-        Sun, 13 Aug 2023 04:02:33 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 262FE61950;
-        Sun, 13 Aug 2023 11:02:33 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A40EC433C8;
-        Sun, 13 Aug 2023 11:02:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691924552;
-        bh=UvA73neR78vkE+SW834hmvUxPCYMsj9hk0MudjnYNGk=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=i3P3tsz346vLXDnuAbVcmuqK8tbi8cOI0OmMKGOW9fs7dNK3fIJiMqBCzUUyJ10sq
-         diF9b11h97FEG/PwybgZ/KgqDvM/K3/dxZUy4cor3nE2YvW21PJneKy7crJ5YHH1b0
-         ueu21uGtE4PhDRPRiCLVCTDe/0P7OTzLZFhgVVRMYqTSn5MuK+pzuKu7IkZqhTdo2r
-         wPh2wxuL9eA8mgiRMkUOiybeHnmfFlZkQvhy4f6uLV8xhD2CEYprN42GyN1OYyhCis
-         DriuPKvjrEiXmcCCtM9IAfZ4H+pixgD+iNrpxWvQDMcDJNYTOw1BtofMMvkKk53nqB
-         g2cfOPVJgxWhw==
-Received: by mail-oi1-f174.google.com with SMTP id 5614622812f47-3a44cccbd96so2739419b6e.3;
-        Sun, 13 Aug 2023 04:02:32 -0700 (PDT)
-X-Gm-Message-State: AOJu0Yy34TRMDHib0WN0vGbr0bWTIFrZGP/j+Woh6hsH2e0XyThxbupa
-        dRyeqdUH7ttzsARk+pBbWkVnMTsuD4vePYIeg+E=
-X-Google-Smtp-Source: AGHT+IEXUaph6nuD84BycE4t4QnJ2E10VABJCIUB3bbALvgssFzPcXinTZY5F642nXfpULLpLszuRBhSmyPQysmPPuE=
-X-Received: by 2002:a05:6808:4388:b0:3a1:c108:41b1 with SMTP id
- dz8-20020a056808438800b003a1c10841b1mr7764540oib.25.1691924551685; Sun, 13
- Aug 2023 04:02:31 -0700 (PDT)
+        with ESMTP id S229506AbjHMOJ5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 10:09:57 -0400
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CBB3127
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:09:58 -0700 (PDT)
+Received: by mail-wr1-x433.google.com with SMTP id ffacd0b85a97d-317dcdae365so3035034f8f.1
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:09:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1691935797; x=1692540597;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+b3MkMD/guKPDrTx+rrCwvFw4TyLSteIvYy2dC7qbGk=;
+        b=AEx4XxTCgblCOaP+Yglc363OXo8FSy+Xzs+OX62gu6xPeq+vNH5tsttTM65L41fxkO
+         TX8SuFjcnYutzXd+Q220JxDEPZUPv9jJ2Kfdy5aLggySSEsRzWfu5Er6XuPOphegNWN5
+         FmqGG6Yk2t3USzCZBxHYYmJ51w9g7WQ12BZw9rdlSu31pM0mq5sBoJAMDHCaZtaV0T44
+         yjOe7vYq6DYzLfW7585UkqvbxXeX/C2p14zby3RkUyG9oCMSlx4D828rFjwcgnny9XyO
+         BZQLCoxYZTMSo8hI21sKuuM4JZotWCNQxAp0LtdwAsrFpBGRTx9gWRXXYBlqiq/YRnmZ
+         edjw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1691935797; x=1692540597;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+b3MkMD/guKPDrTx+rrCwvFw4TyLSteIvYy2dC7qbGk=;
+        b=hjUyINU+hnfemqJg/rD6b+SjiHgbaKl6QXlA8+ZhI47Oi20y5o4lip+IZzg5/BQ6lb
+         S5q/svz/1swDv7/I+p6vtw/DwEXUqtQX1A0b0TXqiOKQPR3WCGiHU/o/+307Ct2TRaSh
+         qwwwFsyexZxag2zi/ehZlWjIqNQDqUNru/Bih/cIwqHF1ArAdoz3r35KTgErtQviNAfl
+         jXnuIIfNhIenZ84FNllkwbDi0ofPs1cOnLMp/tqajd5p4psQJjySuzdboXZ+x1ZSH47l
+         PNKh/xiLBaEpCUJFANNqz2InYoAL1LEsKpYEtQPcFFqHhr3aQPyJi940CmvQZgvmWkWu
+         L1kA==
+X-Gm-Message-State: AOJu0YyeRAEKijtLB21II2kgJpk9ulDYpgRWynbCrTmnZ8LyhgH3O6Ty
+        u3GHypIUU4m6VJcmm8kO3tKgLtUjYcI=
+X-Google-Smtp-Source: AGHT+IGYqRhPL0ZKBs+6doUllZ9UT+et+ZSdxOqSC0tSf4OgCintDCGBIeXjVzkTU8Edt0B1fyGRQA==
+X-Received: by 2002:adf:e649:0:b0:317:61d8:3c7e with SMTP id b9-20020adfe649000000b0031761d83c7emr5779692wrn.26.1691935796726;
+        Sun, 13 Aug 2023 07:09:56 -0700 (PDT)
+Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
+        by smtp.gmail.com with ESMTPSA id z7-20020adfd0c7000000b00317afc7949csm10864751wrh.50.2023.08.13.07.09.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 13 Aug 2023 07:09:56 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: [PATCH] check: fix parsing expunge file with comments
+Date:   Sun, 13 Aug 2023 17:09:50 +0300
+Message-Id: <20230813140950.678899-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <1e2924e9a604f781ad446ba8e2d789583e377837.1684408079.git.fdmanana@suse.com>
- <ff12321e5ddfdb763b9258f746e67fe3f6ea1321.1684489375.git.fdmanana@suse.com> <20230812204850.B86D.409509F4@e16-tech.com>
-In-Reply-To: <20230812204850.B86D.409509F4@e16-tech.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Sun, 13 Aug 2023 12:01:55 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5aZ8CAfvw241qKMty59ZBur4Ld2FCY3bwqAwZDXA7kmA@mail.gmail.com>
-Message-ID: <CAL3q7H5aZ8CAfvw241qKMty59ZBur4Ld2FCY3bwqAwZDXA7kmA@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs/213: avoid occasional failure due to already
- finished balance
-To:     Wang Yugui <wangyugui@e16-tech.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Aug 12, 2023 at 1:54=E2=80=AFPM Wang Yugui <wangyugui@e16-tech.com>=
- wrote:
->
-> Hi,
->
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > btrfs/213 writes data, in 1M extents, for 4 seconds into a file, then
-> > triggers a balance and then after 2 seconds it tries to cancel the
-> > balance operation. More often than not, this works because the balance
-> > is still running after 2 seconds. However it also fails sporadically
-> > because balance has finished in less than 2 seconds, which is plausible
-> > since data and metadata are cached or other factors such as virtualized
-> > environment. When that's the case, it fails like this:
-> >
-> >   $ ./check btrfs/213
-> >   FSTYP         -- btrfs
-> >   PLATFORM      -- Linux/x86_64 debian0 6.4.0-rc1-btrfs-next-131+ #1 SM=
-P PREEMPT_DYNAMIC Thu May 11 11:26:19 WEST 2023
-> >   MKFS_OPTIONS  -- /dev/sdc
-> >   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> >
-> >   btrfs/213 51s ... - output mismatch (see /home/fdmanana/git/hub/xfste=
-sts/results//btrfs/213.out.bad)
-> >       --- tests/btrfs/213.out 2020-06-10 19:29:03.822519250 +0100
-> >       +++ /home/fdmanana/git/hub/xfstests/results//btrfs/213.out.bad  2=
-023-05-17 15:39:32.653727223 +0100
-> >       @@ -1,2 +1,3 @@
-> >        QA output created by 213
-> >       +ERROR: balance cancel on '/home/fdmanana/btrfs-tests/scratch_1' =
-failed: Not in progress
-> >        Silence is golden
-> >       ...
-> >       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/213.out=
- /home/fdmanana/git/hub/xfstests/results//btrfs/213.out.bad'  to see the en=
-tire diff)
-> >   Ran: btrfs/213
-> >   Failures: btrfs/213
-> >   Failed 1 of 1 tests
-> >
-> > To make it much less likely that balance has already finished before we
-> > try to cancel it, unmount and mount again the filesystem before startin=
-g
-> > balance, to clear cached metadata and data, and also double the time we
-> > spend writing 1M data extents. Also make the test not run with an
-> > informative message if we detect that balance finished before we could
-> > cancel it.
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >
-> > v2: Make the test _notrun if we detect that balance finished before we
-> >     could cancel it.
-> >
-> >  tests/btrfs/213 | 16 +++++++++++++---
-> >  1 file changed, 13 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/tests/btrfs/213 b/tests/btrfs/213
-> > index e16e41c0..5666d9b9 100755
-> > --- a/tests/btrfs/213
-> > +++ b/tests/btrfs/213
-> > @@ -31,7 +31,7 @@ _fixed_by_kernel_commit 1dae7e0e58b4 \
-> >  _scratch_mkfs >> $seqres.full
-> >  _scratch_mount
-> >
-> > -runtime=3D4
-> > +runtime=3D8
-> >
-> >  # Create enough IO so that we need around $runtime seconds to relocate=
- it.
-> >  #
-> > @@ -42,11 +42,21 @@ sleep $runtime
-> >  kill $write_pid
-> >  wait $write_pid
-> >
-> > +# Unmount and mount again the fs to clear any cached data and metadata=
-, so that
-> > +# it's less likely balance has already finished when we try to cancel =
-it below.
-> > +_scratch_cycle_mount
-> > +
-> >  # Now balance should take at least $runtime seconds, we can cancel it =
-at
-> >  # $runtime/2 to ensure a success cancel.
-> >  _run_btrfs_balance_start -d --bg "$SCRATCH_MNT"
-> > -sleep $(($runtime / 2))
-> > -$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT"
-> > +sleep $(($runtime / 4))
-> > +# It's possible that balance has already completed. It's unlikely but =
-often
-> > +# it may happen due to virtualization, caching and other factors, so i=
-gnore
-> > +# any error about no balance currently running.
-> > +$BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT" 2>&1 | grep -iq 'not in=
- progress'
-> > +if [ $? -eq 0 ]; then
-> > +     _not_run "balance finished before we could cancel it"
-> > +fi
->
-> fstests(btrfs/213) failed once here.
->
-> btrfs/213 22s ... - output mismatch (see /usr/hpc-bio/xfstests/results//b=
-trfs/213.out.bad)
->     --- tests/btrfs/213.out     2023-03-28 06:09:10.372680814 +0800
->     +++ /usr/hpc-bio/xfstests/results//btrfs/213.out.bad        2023-08-1=
-2 20:31:47.848303940 +0800
->     @@ -1,2 +1,5 @@
->      QA output created by 213
->     +/usr/hpc-bio/xfstests/tests/btrfs/213: line 59: _not_run: command no=
-t found
->     +ERROR: error during balancing '/mnt/scratch': No space left on devic=
-e
->     +There may be more info in syslog - try dmesg | tail
->      Silence is golden
->
-> we need to fix the error of '_not_run: command not found'  firstly.
->
-> I will update the info if fstests(btrfs/213) fails again.
+commit 60054d51 ("check: fix excluded tests are only expunged in the
+first iteration") change to use exclude_tests array instead of file.
 
-It's a misspelled function name, it should be _notrun instead of
-_not_run. I just sent a fix for that.
+The check if a test is in expunge file was using grep -q $TEST_ID FILE
+so it was checking if the test was a non-exact match to one of the
+lines, for a common example: "generic/001 # exclude this test" would be
+a match to test generic/001.
 
-The test is not very reliable as balance can finish quickly, so
-occasionally it may be skipped in some environments.
+The commit regressed this example, because the new code checks for exact
+match of [ "generic/001" == "generic/001 " ]. Change the code to use
+prefix match to deal with this case and any other suffix correctly.
 
-Thanks.
+While the original code would also match line "exclude test generic/001"
+I don't think that non-prefix match is a real use case.
 
->
-> Best Regards
-> Wang Yugui (wangyugui@e16-tech.com)
-> 2023/08/12
->
->
->
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ check | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/check b/check
+index 549725eb..e8152f59 100755
+--- a/check
++++ b/check
+@@ -592,7 +592,8 @@ _expunge_test()
+ 	local TEST_ID="$1"
+ 
+ 	for f in "${exclude_tests[@]}"; do
+-		if [ "${TEST_ID}" == "$f" ]; then
++		# $f may contain traling spaces and comments
++		if [[ "$f" == ${TEST_ID}* ]]; then
+ 			echo "       [expunged]"
+ 			return 0
+ 		fi
+-- 
+2.34.1
+
