@@ -2,102 +2,177 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A97DEB64DD
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 14:10:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FFD1C001DE
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 14:53:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229596AbjHMOJ5 (ORCPT
+        id S229441AbjHMOxc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Aug 2023 10:09:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36848 "EHLO
+        Sun, 13 Aug 2023 10:53:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229506AbjHMOJ5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 10:09:57 -0400
-Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CBB3127
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:09:58 -0700 (PDT)
-Received: by mail-wr1-x433.google.com with SMTP id ffacd0b85a97d-317dcdae365so3035034f8f.1
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:09:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1691935797; x=1692540597;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=+b3MkMD/guKPDrTx+rrCwvFw4TyLSteIvYy2dC7qbGk=;
-        b=AEx4XxTCgblCOaP+Yglc363OXo8FSy+Xzs+OX62gu6xPeq+vNH5tsttTM65L41fxkO
-         TX8SuFjcnYutzXd+Q220JxDEPZUPv9jJ2Kfdy5aLggySSEsRzWfu5Er6XuPOphegNWN5
-         FmqGG6Yk2t3USzCZBxHYYmJ51w9g7WQ12BZw9rdlSu31pM0mq5sBoJAMDHCaZtaV0T44
-         yjOe7vYq6DYzLfW7585UkqvbxXeX/C2p14zby3RkUyG9oCMSlx4D828rFjwcgnny9XyO
-         BZQLCoxYZTMSo8hI21sKuuM4JZotWCNQxAp0LtdwAsrFpBGRTx9gWRXXYBlqiq/YRnmZ
-         edjw==
+        with ESMTP id S229506AbjHMOxc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 10:53:32 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 153D7172B
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:52:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1691938343;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=1ElkgXaUdfkDE64dXDF4ysq8G0wqTbLX7vnZmq3ciHU=;
+        b=CYUFfyhwPm6G5/uxNnRlrSfkAuOhVzvu90SDeberKWvF7+nLSYVnIwG3a/MMRRdLkrx94L
+        KwqzFlxC0X7rll+Ccn8/GHWmvnbpKHwo5mjmeR8tIpOvZf4tQja3/ZzSHCati4YDotQxYj
+        vk7B8EQ9kg2pVkxtele1Ls7is3UCTXU=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-468-UEsm0TVvNBaISAVhGzlT2w-1; Sun, 13 Aug 2023 10:52:21 -0400
+X-MC-Unique: UEsm0TVvNBaISAVhGzlT2w-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bc46ebab95so56813105ad.2
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:52:21 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691935797; x=1692540597;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+b3MkMD/guKPDrTx+rrCwvFw4TyLSteIvYy2dC7qbGk=;
-        b=hjUyINU+hnfemqJg/rD6b+SjiHgbaKl6QXlA8+ZhI47Oi20y5o4lip+IZzg5/BQ6lb
-         S5q/svz/1swDv7/I+p6vtw/DwEXUqtQX1A0b0TXqiOKQPR3WCGiHU/o/+307Ct2TRaSh
-         qwwwFsyexZxag2zi/ehZlWjIqNQDqUNru/Bih/cIwqHF1ArAdoz3r35KTgErtQviNAfl
-         jXnuIIfNhIenZ84FNllkwbDi0ofPs1cOnLMp/tqajd5p4psQJjySuzdboXZ+x1ZSH47l
-         PNKh/xiLBaEpCUJFANNqz2InYoAL1LEsKpYEtQPcFFqHhr3aQPyJi940CmvQZgvmWkWu
-         L1kA==
-X-Gm-Message-State: AOJu0YyeRAEKijtLB21II2kgJpk9ulDYpgRWynbCrTmnZ8LyhgH3O6Ty
-        u3GHypIUU4m6VJcmm8kO3tKgLtUjYcI=
-X-Google-Smtp-Source: AGHT+IGYqRhPL0ZKBs+6doUllZ9UT+et+ZSdxOqSC0tSf4OgCintDCGBIeXjVzkTU8Edt0B1fyGRQA==
-X-Received: by 2002:adf:e649:0:b0:317:61d8:3c7e with SMTP id b9-20020adfe649000000b0031761d83c7emr5779692wrn.26.1691935796726;
-        Sun, 13 Aug 2023 07:09:56 -0700 (PDT)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id z7-20020adfd0c7000000b00317afc7949csm10864751wrh.50.2023.08.13.07.09.55
+        d=1e100.net; s=20221208; t=1691938340; x=1692543140;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1ElkgXaUdfkDE64dXDF4ysq8G0wqTbLX7vnZmq3ciHU=;
+        b=R5v/j6+dKJwea4KaUJt93t3XIgBpHcHaPksbwNUqxjmj8T94CGZvDpxVXe5CkNWYqM
+         TfHHQrI8oSmA2YCJwWqiQetQAP3LiZIT9tjgNkpkFG2hKAaXW+360eOH170y/dgK+kaM
+         M1zDc1IGPqqxnd2DV4TWgngPCJE+BhjIZUHNkJpgMtm8cTplrzs+z4qjBuppb7/tIRAU
+         Ps+wl5Petjjnkne0UKA/mYwX11atQJ4F2oJWzf/pcKtQoXEqGC0VymJ/rJsfti5EvCHQ
+         sYuURVkItvVmTa0OzTk0Qjq3xZghOODeswRYYiCdOb6HH6l1ItZ907CCSua/wUfEIgS8
+         DOhA==
+X-Gm-Message-State: AOJu0Yw0StRapYMoVB6a4CwLPUuqyREvz4EYfW9V+oL/YZqSrPgbrz5c
+        5zkG7RWNs9YgM7i6psDfs3bEraN++9U2aLWsNiqM8KUxwwSZBuRcgRNFletZjRXN1M6C8idz+2I
+        eeesqUeZf5SK4fmQp1XsCY+Z5GTwn
+X-Received: by 2002:a17:902:f54d:b0:1b9:de67:286f with SMTP id h13-20020a170902f54d00b001b9de67286fmr10486815plf.49.1691938340067;
+        Sun, 13 Aug 2023 07:52:20 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGx850AJ1Sb2bQVim83dWNx0zn6kwuo1ETroWBlaqLCusrQQq0DXxUk3/rLySljx6oQ8vBhjQ==
+X-Received: by 2002:a17:902:f54d:b0:1b9:de67:286f with SMTP id h13-20020a170902f54d00b001b9de67286fmr10486800plf.49.1691938339734;
+        Sun, 13 Aug 2023 07:52:19 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id a20-20020a170903101400b00198d7b52eefsm2961752plb.257.2023.08.13.07.52.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Aug 2023 07:09:56 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Sun, 13 Aug 2023 07:52:19 -0700 (PDT)
+Date:   Sun, 13 Aug 2023 22:52:15 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     "Darrick J . Wong" <djwong@kernel.org>,
         Chandan Babu R <chandan.babu@oracle.com>,
-        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: [PATCH] check: fix parsing expunge file with comments
-Date:   Sun, 13 Aug 2023 17:09:50 +0300
-Message-Id: <20230813140950.678899-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/{175,297,298}: fix use of uninitialized var
+Message-ID: <20230813145215.dxaqcmhlskvhxmuq@zlang-mailbox>
+References: <20230812151500.553233-1-amir73il@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230812151500.553233-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-commit 60054d51 ("check: fix excluded tests are only expunged in the
-first iteration") change to use exclude_tests array instead of file.
+On Sat, Aug 12, 2023 at 06:15:00PM +0300, Amir Goldstein wrote:
+> Not sure how those tests pass in regression tests.
+> Probably truncate silently fails and is not critical to the test.
+> 
+> in kdevops I get errors like:
+> /data/fstests-install/xfstests/tests/generic/298: line 45: /dev/loop12):
+>            syntax error: operand expected (error token is "/dev/loop12)")
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-The check if a test is in expunge file was using grep -q $TEST_ID FILE
-so it was checking if the test was a non-exact match to one of the
-lines, for a common example: "generic/001 # exclude this test" would be
-a match to test generic/001.
+Hmm, weird, I never hit this failure, all test passed [1]. But I think the
+reason is [2], $(()) looks like treat empty variable as 0.
 
-The commit regressed this example, because the new code checks for exact
-match of [ "generic/001" == "generic/001 " ]. Change the code to use
-prefix match to deal with this case and any other suffix correctly.
+Anyway, this patch makes sense, so
 
-While the original code would also match line "exclude test generic/001"
-I don't think that non-prefix match is a real use case.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- check | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+[1]
+# ./check -s simpledev generic/175 generic/297 generic/298
+SECTION       -- simpledev
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.5.0-0.rc3.23.fc39.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Jul 24 13:32:24 UTC 2023
+MKFS_OPTIONS  -- -f /dev/sda3
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
 
-diff --git a/check b/check
-index 549725eb..e8152f59 100755
---- a/check
-+++ b/check
-@@ -592,7 +592,8 @@ _expunge_test()
- 	local TEST_ID="$1"
- 
- 	for f in "${exclude_tests[@]}"; do
--		if [ "${TEST_ID}" == "$f" ]; then
-+		# $f may contain traling spaces and comments
-+		if [[ "$f" == ${TEST_ID}* ]]; then
- 			echo "       [expunged]"
- 			return 0
- 		fi
--- 
-2.34.1
+generic/175 91s ...  40s
+generic/297        44s
+generic/298 125s ...  44s
+Ran: generic/175 generic/297 generic/298
+Passed all 3 tests
+
+SECTION       -- simpledev
+=========================
+Ran: generic/175 generic/297 generic/298
+Passed all 3 tests
+
+
+[2]
+# blksz=4096
+# echo $blksz
+4096
+# echo $i
+
+# echo $(( (2 ** i) * blksz))
+4096
+# echo $i
+
+# echo $((i))
+0
+
+
+
+
+
+
+>  tests/generic/175 | 2 +-
+>  tests/generic/297 | 2 +-
+>  tests/generic/298 | 2 +-
+>  3 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/generic/175 b/tests/generic/175
+> index 07af2199..14825a39 100755
+> --- a/tests/generic/175
+> +++ b/tests/generic/175
+> @@ -33,7 +33,7 @@ _pwrite_byte 0x61 0 $blksz "$testdir/file1" >> "$seqres.full"
+>  
+>  fnr=19
+>  echo "Create extents"
+> -truncate -s $(( (2 ** i) * blksz)) "$testdir/file1"
+> +truncate -s $(( (2 ** (fnr + 1)) * blksz)) "$testdir/file1"
+>  for i in $(seq 0 $fnr); do
+>  	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> "$seqres.full"
+>  	n=$(( (2 ** i) * blksz))
+> diff --git a/tests/generic/297 b/tests/generic/297
+> index 6bdc3e1c..1fc48671 100755
+> --- a/tests/generic/297
+> +++ b/tests/generic/297
+> @@ -42,7 +42,7 @@ _pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
+>  fnr=26		# 2^26 reflink extents should be enough to find a slow op?
+>  timeout=8	# guarantee a good long run...
+>  echo "Find a reflink size that takes a long time"
+> -truncate -s $(( (2 ** i) * blksz)) $testdir/file1
+> +truncate -s $(( (2 ** (fnr + 1)) * blksz)) $testdir/file1
+>  for i in $(seq 0 $fnr); do
+>  	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
+>  	n=$(( (2 ** i) * blksz))
+> diff --git a/tests/generic/298 b/tests/generic/298
+> index 95d4c02b..2e917a87 100755
+> --- a/tests/generic/298
+> +++ b/tests/generic/298
+> @@ -42,7 +42,7 @@ _pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
+>  fnr=26		# 2^26 reflink extents should be enough to find a slow op?
+>  timeout=8	# guarantee a good long run...
+>  echo "Find a reflink size that takes a long time"
+> -truncate -s $(( (2 ** i) * blksz)) $testdir/file1
+> +truncate -s $(( (2 ** (fnr + 1)) * blksz)) $testdir/file1
+>  for i in $(seq 0 $fnr); do
+>  	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
+>  	n=$(( (2 ** i) * blksz))
+> -- 
+> 2.34.1
+> 
 
