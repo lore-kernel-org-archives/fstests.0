@@ -2,67 +2,45 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FFD1C001DE
-	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 14:53:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34EDEC001B0
+	for <linux-fstests@archiver.kernel.org>; Sun, 13 Aug 2023 15:35:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229441AbjHMOxc (ORCPT
+        id S231300AbjHMPfY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Aug 2023 10:53:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50458 "EHLO
+        Sun, 13 Aug 2023 11:35:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59394 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229506AbjHMOxc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 10:53:32 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 153D7172B
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:52:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1691938343;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=1ElkgXaUdfkDE64dXDF4ysq8G0wqTbLX7vnZmq3ciHU=;
-        b=CYUFfyhwPm6G5/uxNnRlrSfkAuOhVzvu90SDeberKWvF7+nLSYVnIwG3a/MMRRdLkrx94L
-        KwqzFlxC0X7rll+Ccn8/GHWmvnbpKHwo5mjmeR8tIpOvZf4tQja3/ZzSHCati4YDotQxYj
-        vk7B8EQ9kg2pVkxtele1Ls7is3UCTXU=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-468-UEsm0TVvNBaISAVhGzlT2w-1; Sun, 13 Aug 2023 10:52:21 -0400
-X-MC-Unique: UEsm0TVvNBaISAVhGzlT2w-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bc46ebab95so56813105ad.2
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 07:52:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1691938340; x=1692543140;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1ElkgXaUdfkDE64dXDF4ysq8G0wqTbLX7vnZmq3ciHU=;
-        b=R5v/j6+dKJwea4KaUJt93t3XIgBpHcHaPksbwNUqxjmj8T94CGZvDpxVXe5CkNWYqM
-         TfHHQrI8oSmA2YCJwWqiQetQAP3LiZIT9tjgNkpkFG2hKAaXW+360eOH170y/dgK+kaM
-         M1zDc1IGPqqxnd2DV4TWgngPCJE+BhjIZUHNkJpgMtm8cTplrzs+z4qjBuppb7/tIRAU
-         Ps+wl5Petjjnkne0UKA/mYwX11atQJ4F2oJWzf/pcKtQoXEqGC0VymJ/rJsfti5EvCHQ
-         sYuURVkItvVmTa0OzTk0Qjq3xZghOODeswRYYiCdOb6HH6l1ItZ907CCSua/wUfEIgS8
-         DOhA==
-X-Gm-Message-State: AOJu0Yw0StRapYMoVB6a4CwLPUuqyREvz4EYfW9V+oL/YZqSrPgbrz5c
-        5zkG7RWNs9YgM7i6psDfs3bEraN++9U2aLWsNiqM8KUxwwSZBuRcgRNFletZjRXN1M6C8idz+2I
-        eeesqUeZf5SK4fmQp1XsCY+Z5GTwn
-X-Received: by 2002:a17:902:f54d:b0:1b9:de67:286f with SMTP id h13-20020a170902f54d00b001b9de67286fmr10486815plf.49.1691938340067;
-        Sun, 13 Aug 2023 07:52:20 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGx850AJ1Sb2bQVim83dWNx0zn6kwuo1ETroWBlaqLCusrQQq0DXxUk3/rLySljx6oQ8vBhjQ==
-X-Received: by 2002:a17:902:f54d:b0:1b9:de67:286f with SMTP id h13-20020a170902f54d00b001b9de67286fmr10486800plf.49.1691938339734;
-        Sun, 13 Aug 2023 07:52:19 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a20-20020a170903101400b00198d7b52eefsm2961752plb.257.2023.08.13.07.52.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Aug 2023 07:52:19 -0700 (PDT)
-Date:   Sun, 13 Aug 2023 22:52:15 +0800
-From:   Zorro Lang <zlang@redhat.com>
+        with ESMTP id S229736AbjHMPfY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 11:35:24 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5835DE5C
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 08:35:25 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E35B862E2D
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 15:35:24 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 464C0C433C9;
+        Sun, 13 Aug 2023 15:35:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1691940924;
+        bh=tlzax0jMYshZe7Or0sk8siayDiHahT4IA3Oz4cYvhgo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=JraMj9iMPkdWRYc6/quJ9UQgMa6Od3I6G35Ap2dPsS7Vi8bchNwrYcFxkyur26EGB
+         MgvawsM614z2L60ISF9zI5ylZ0DNWZz2WY80jA8zSBFL6ZUbadgLk7EV3cnjDxyREm
+         vNZBGJnLNXI+911S9T5TibTThkWuAiFnvfxMTQl/cB6CNR/j7WI+8WCO9nv39otBDZ
+         9mz8LMgIS9u8Dp72V903NPDeROJvfIMOJzVQ3L2ThKUrzsXYubRrQC3yxQ0uLGHyAn
+         f3NP/bH6ld5nqRTNGMRsQ0qRU2HhADNp4QJO3yY+G4gpMC9qZzhayFRUf1svSGMU9M
+         7TSmP3vi+8W9w==
+Date:   Sun, 13 Aug 2023 08:35:23 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     "Darrick J . Wong" <djwong@kernel.org>,
+Cc:     Zorro Lang <zlang@redhat.com>,
         Chandan Babu R <chandan.babu@oracle.com>,
         Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
 Subject: Re: [PATCH] generic/{175,297,298}: fix use of uninitialized var
-Message-ID: <20230813145215.dxaqcmhlskvhxmuq@zlang-mailbox>
+Message-ID: <20230813153523.GQ11377@frogsfrogsfrogs>
 References: <20230812151500.553233-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -82,52 +60,6 @@ On Sat, Aug 12, 2023 at 06:15:00PM +0300, Amir Goldstein wrote:
 > 
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
-
-Hmm, weird, I never hit this failure, all test passed [1]. But I think the
-reason is [2], $(()) looks like treat empty variable as 0.
-
-Anyway, this patch makes sense, so
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-[1]
-# ./check -s simpledev generic/175 generic/297 generic/298
-SECTION       -- simpledev
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.5.0-0.rc3.23.fc39.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Jul 24 13:32:24 UTC 2023
-MKFS_OPTIONS  -- -f /dev/sda3
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
-
-generic/175 91s ...  40s
-generic/297        44s
-generic/298 125s ...  44s
-Ran: generic/175 generic/297 generic/298
-Passed all 3 tests
-
-SECTION       -- simpledev
-=========================
-Ran: generic/175 generic/297 generic/298
-Passed all 3 tests
-
-
-[2]
-# blksz=4096
-# echo $blksz
-4096
-# echo $i
-
-# echo $(( (2 ** i) * blksz))
-4096
-# echo $i
-
-# echo $((i))
-0
-
-
-
-
-
-
 >  tests/generic/175 | 2 +-
 >  tests/generic/297 | 2 +-
 >  tests/generic/298 | 2 +-
@@ -144,6 +76,12 @@ Passed all 3 tests
 > -truncate -s $(( (2 ** i) * blksz)) "$testdir/file1"
 > +truncate -s $(( (2 ** (fnr + 1)) * blksz)) "$testdir/file1"
 >  for i in $(seq 0 $fnr); do
+
+Hmm.  Frankly I don't remember why I put those truncate calls in there.
+Does the test still work if you remove them entirely?  AFAICT the test
+writes a single block's worth of data to the file, then truncates the
+file size to one block.  Which I think is pointless.
+
 >  	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> "$seqres.full"
 >  	n=$(( (2 ** i) * blksz))
 > diff --git a/tests/generic/297 b/tests/generic/297
@@ -159,6 +97,21 @@ Passed all 3 tests
 >  for i in $(seq 0 $fnr); do
 >  	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
 >  	n=$(( (2 ** i) * blksz))
+
+The loop control logic could be converted to:
+
+echo "Find a reflink size that takes a long time"
+deadline="$(( $(date +%s) + timeout ))"
+for ((i = 0, now = $(date +%s); i < fnr && now < deadline; i++, now = $(date +%s))); do
+	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
+	n=$(( (2 ** i) * blksz))
+	$XFS_IO_PROG -f -c "reflink $testdir/file1 0 $n $n" $testdir/file1 >> $seqres.full 2>&1
+done
+
+(also in 298)
+
+--D
+
 > diff --git a/tests/generic/298 b/tests/generic/298
 > index 95d4c02b..2e917a87 100755
 > --- a/tests/generic/298
@@ -175,4 +128,3 @@ Passed all 3 tests
 > -- 
 > 2.34.1
 > 
-
