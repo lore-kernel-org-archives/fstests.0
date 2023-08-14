@@ -2,139 +2,174 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECFB6C001DB
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 03:59:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1726CC001DB
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 05:15:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233028AbjHND6a (ORCPT
+        id S233237AbjHNFO1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 13 Aug 2023 23:58:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42734 "EHLO
+        Mon, 14 Aug 2023 01:14:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51334 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233076AbjHND63 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2023 23:58:29 -0400
-X-Greylist: delayed 64 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 13 Aug 2023 20:58:28 PDT
-Received: from esa11.hc1455-7.c3s2.iphmx.com (esa11.hc1455-7.c3s2.iphmx.com [207.54.90.137])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93DD4E53
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 20:58:28 -0700 (PDT)
-X-IronPort-AV: E=McAfee;i="6600,9927,10801"; a="107417466"
-X-IronPort-AV: E=Sophos;i="6.01,171,1684767600"; 
-   d="scan'208";a="107417466"
-Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
-  by esa11.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Aug 2023 12:57:22 +0900
-Received: from oym-m4.gw.nic.fujitsu.com (oym-nat-oym-m4.gw.nic.fujitsu.com [192.168.87.61])
-        by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id BB0F8DE63C
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 12:57:19 +0900 (JST)
-Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
-        by oym-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id 9D478D6034
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 12:57:18 +0900 (JST)
-Received: from irides.g08.fujitsu.local (unknown [10.167.234.230])
-        by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 0718B6B803;
-        Mon, 14 Aug 2023 12:57:17 +0900 (JST)
-From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+        with ESMTP id S231644AbjHNFNz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Aug 2023 01:13:55 -0400
+Received: from trager.us (trager.us [52.5.81.116])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78CC4E71
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2023 22:13:54 -0700 (PDT)
+Received: from [163.114.132.6] (helo=localhost)
+        by trager.us with esmtpsa (TLSv1.3:TLS_AES_256_GCM_SHA384:256)
+        (Exim 4.92.3)
+        (envelope-from <lee@trager.us>)
+        id 1qVPtp-0004Uo-FZ; Mon, 14 Aug 2023 05:13:53 +0000
+From:   Lee Trager <lee@trager.us>
 To:     fstests@vger.kernel.org
-Cc:     djwong@kernel.org, zlang@redhat.com, ruansy.fnst@fujitsu.com
-Subject: [PATCH v2] fsx: tidy options usage and format
-Date:   Mon, 14 Aug 2023 11:55:03 +0800
-Message-ID: <20230814035503.1724774-1-ruansy.fnst@fujitsu.com>
-X-Mailer: git-send-email 2.41.0
-In-Reply-To: <20230804054003.936263-1-ruansy.fnst@fujitsu.com>
-References: <20230804054003.936263-1-ruansy.fnst@fujitsu.com>
+Cc:     Lee Trager <lee@trager.us>
+Subject: [PATCH v2] fstests: Vertify dir permissions when creating a stub subvolume
+Date:   Sun, 13 Aug 2023 22:13:42 -0700
+Message-Id: <20230814051342.3245942-1-lee@trager.us>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-27812.004
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-27812.004
-X-TMASE-Result: 10--13.162300-10.000000
-X-TMASE-MatchedRID: YVoDTlX4T0xZQ4rley4x/qzGfgakLdjawTlc9CcHMZerwqxtE531VBFu
-        p4CINH3JpsX84hgxtprDlswFp/2PscIRMxauaS3UuLt50vtxBA5w1ShlQ7jqItfKF/jK2yLiEoN
-        4n3g9RrbPu/rMYsy8zd6rPPq1PqrN68BVSn5BPNcRW4LR41Fi8gV54COoxb6Xx4aARMrh3G0WWg
-        76IlE/zHGGuF3kLXprEj1NnWJcw6zc+HB+YVvemPCW/PNRRp/ZwBi8lRTMyBoJeMOJX8c9nA8pG
-        XPEaliG5jmTk07qyg2UgZaMkXm5K9z07adr0VnOEzEoOqAAVLM2nLo2hN48IXEa7quPFSpQZ0nl
-        A6gXdt7i8zVgXoAltqKtaNMn6jcZC24oEZ6SpSkj80Za3RRg8NXNRNnJJqzBddrhylP28GS7NnI
-        Bqz9iQbaxmKgMDPGNSQTg4dNf2V4=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-1. Add missing options and wrap the cli example line.
-2. Cleanup and also add missing "-K" operation for options description
-part.
-
-Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+btrfs supports creating nesting subvolumes however snapshots are not
+recurive. When a snapshot is taken of a volume which contains a subvolume
+the subvolume is replaced with a stub subvolume which has the same name and
+uses inode number 2. This test validates that the stub volume copies
+permissions of the original volume.
+Signed-off-by: Lee Trager <lee@trager.us>
 ---
- ltp/fsx.c | 29 ++++++++++++++++++-----------
- 1 file changed, 18 insertions(+), 11 deletions(-)
+v2:
+- Migrated _require_unshare from overlay/020 into common_rc. Updated the error
+  message as most Linux systems should have unshare from util-linux.
+- Added note about why the test must be done in one subshell process.
+- chown command now uses $qa_user:$qa_group instead of hard coded values.
+common/rc           |  6 ++++++
+ tests/btrfs/300     | 46 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/300.out | 18 ++++++++++++++++++
+ tests/overlay/020   |  7 +------
+ 4 files changed, 71 insertions(+), 6 deletions(-)
+ create mode 100755 tests/btrfs/300
+ create mode 100644 tests/btrfs/300.out
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index ffa64cfa0..ccb382e77 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -2393,11 +2393,17 @@ void
- usage(void)
- {
- 	fprintf(stdout, "usage: %s",
--		"fsx [-dknqxBEFJLOWZ][-A|-U] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
-+		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
-+	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
-+	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
-+	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-+	   [-A|-U] [-D startingop] [-N numops] [-P dirpath] [-S seed]\n\
-+	   [--replay-ops=opsfile] [--record-ops[=opsfile]] [--duration=seconds]\n\
-+	   ... fname\n\
- 	-b opnum: beginning operation number (default 1)\n\
- 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
- 	-d: debug output for all operations\n\
--	-f flush and invalidate cache after I/O\n\
-+	-f: flush and invalidate cache after I/O\n\
- 	-g X: write character X instead of random generated data\n\
- 	-i logdev: do integrity testing, logdev is the dm log writes device\n\
- 	-j logid: prefix debug log messsages with this id\n\
-@@ -2412,15 +2418,15 @@ usage(void)
- 	-s style: 1 gives smaller truncates (default 0)\n\
- 	-t truncbdy: 4096 would make truncates page aligned (default 1)\n\
- 	-w writebdy: 4096 would make writes page aligned (default 1)\n\
--	-x: preallocate file space before starting, XFS only (default 0)\n\
--	-y synchronize changes to a file\n"
-+	-x: preallocate file space before starting, XFS only\n\
-+	-y: synchronize changes to a file\n"
+diff --git a/common/rc b/common/rc
+index 5c4429ed..ca7c5c14 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5224,6 +5224,12 @@ _soak_loop_running() {
+ 	return 0
+ }
  
- #ifdef AIO
- "	-A: Use the AIO system calls, -A excludes -U\n"
- #endif
- #ifdef URING
- "	-U: Use the IO_URING system calls, -U excludes -A\n"
-- #endif
-+#endif
- "	-D startingop: debug output starting at specified operation\n"
- #ifdef HAVE_LINUX_FALLOC_H
- "	-F: Do not use fallocate (preallocation) calls\n"
-@@ -2449,16 +2455,17 @@ usage(void)
- #ifdef FIEXCHANGE_RANGE
- "	-0: Do not use exchange range calls\n"
- #endif
--"	-L: fsxLite - no file creations & no file size changes\n\
-+"	-K: Do not use keep size\n\
-+	-L: fsxLite - no file creations & no file size changes\n\
- 	-N numops: total # operations to do (default infinity)\n\
- 	-O: use oplen (see -o flag) for every op (default random)\n\
--	-P: save .fsxlog .fsxops and .fsxgood files in dirpath (default ./)\n\
-+	-P dirpath: save .fsxlog .fsxops and .fsxgood files in dirpath (default ./)\n\
-+	-R: read() system calls only (mapped reads disabled)\n\
- 	-S seed: for random # generator (default 1) 0 gets timestamp\n\
- 	-W: mapped write operations DISabled\n\
--	-X: Read file and compare to good buffer after every operation.\n\
--        -R: read() system calls only (mapped reads disabled)\n\
--        -Z: O_DIRECT (use -R, -W, -r and -w too)\n\
--	--replay-ops opsfile: replay ops from recorded .fsxops file\n\
-+	-X: Read file and compare to good buffer after every operation\n\
-+	-Z: O_DIRECT (use -R, -W, -r and -w too)\n\
-+	--replay-ops=opsfile: replay ops from recorded .fsxops file\n\
- 	--record-ops[=opsfile]: dump ops file also on success. optionally specify ops file name\n\
- 	--duration=seconds: ignore any -N setting and run for this many seconds\n\
- 	fname: this filename is REQUIRED (no default)\n");
++
++_require_unshare() {
++	unshare -f -r -m -p -U  true &>/dev/null || \
++		_notrun "unshare $@: not found, should be in util-linux"
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/btrfs/300 b/tests/btrfs/300
+new file mode 100755
+index 00000000..c86ed268
+--- /dev/null
++++ b/tests/btrfs/300
+@@ -0,0 +1,46 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 300
++#
++# Validate that snapshots taken while in a remapped namespace preserve
++# the permissions of the user.
++#
++. ./common/preamble
++_begin_fstest auto quick subvol snapshot
++
++_supported_fs btrfs
++
++_require_test
++_require_user
++_require_group
++_require_unix_perm_checking
++_require_unshare
++_register_cleanup "cleanup"
++
++test_dir="${TEST_DIR}/$(basename $0)"
++cleanup() {
++    [ -d "$test_dir" ] && rm -rf $test_dir
++}
++
++mkdir $test_dir
++chown $qa_user:$qa_group $test_dir
++
++# _user_do executes each command as $qa_user in its own subshell. unshare
++# sets the namespace for the running shell. The test must run in one user
++# subshell to preserve the namespace over multiple commands.
++_user_do "
++cd ${test_dir};
++unshare --user --keep-caps --map-auto --map-root-user;
++$BTRFS_UTIL_PROG subvolume create subvol;
++touch subvol/{1,2,3};
++$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
++touch subvol/subsubvol/{4,5,6};
++$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
++"
++
++find $test_dir -printf "%M %u %g %P\n"
++
++status=0
++exit
+diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
+new file mode 100644
+index 00000000..33b5fb44
+--- /dev/null
++++ b/tests/btrfs/300.out
+@@ -0,0 +1,18 @@
++QA output created by 300
++Create subvolume './subvol'
++Create subvolume 'subvol/subsubvol'
++Create a snapshot of 'subvol' in './snapshot'
++drwxr-xr-x fsgqa fsgqa 
++drwxr-xr-x fsgqa fsgqa subvol
++-rw-r--r-- fsgqa fsgqa subvol/1
++-rw-r--r-- fsgqa fsgqa subvol/2
++-rw-r--r-- fsgqa fsgqa subvol/3
++drwxr-xr-x fsgqa fsgqa subvol/subsubvol
++-rw-r--r-- fsgqa fsgqa subvol/subsubvol/4
++-rw-r--r-- fsgqa fsgqa subvol/subsubvol/5
++-rw-r--r-- fsgqa fsgqa subvol/subsubvol/6
++drwxr-xr-x fsgqa fsgqa snapshot
++-rw-r--r-- fsgqa fsgqa snapshot/1
++-rw-r--r-- fsgqa fsgqa snapshot/2
++-rw-r--r-- fsgqa fsgqa snapshot/3
++drwxr-xr-x fsgqa fsgqa snapshot/subsubvol
+diff --git a/tests/overlay/020 b/tests/overlay/020
+index 98a33aec..9f82da34 100755
+--- a/tests/overlay/020
++++ b/tests/overlay/020
+@@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
+ 
+ # real QA test starts here
+ 
+-require_unshare() {
+-	unshare -f -r "$@" true &>/dev/null || \
+-		_notrun "unshare $@: not supported"
+-}
+-
+ # Modify as appropriate.
+ _supported_fs overlay
+ _fixed_by_kernel_commit 3fe6e52f0626 \
+ 	"ovl: override creds with the ones from the superblock mounter"
+ 
+ _require_scratch
+-require_unshare -m -p -U
++_require_unshare
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
 -- 
-2.41.0
+2.34.1
 
