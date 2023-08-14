@@ -2,143 +2,183 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D695C001B0
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 15:12:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 451FDC001DB
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 15:38:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231932AbjHNPMJ (ORCPT
+        id S229574AbjHNPiI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Aug 2023 11:12:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58942 "EHLO
+        Mon, 14 Aug 2023 11:38:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232647AbjHNPLu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Aug 2023 11:11:50 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3955910C6
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:10:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692025847;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=12HC6JD2O0bLtp7WyRFPXIoci6YJsDgOuX51lZJptGg=;
-        b=GuJm+jJ/g13dkx9G6TSFi5eBQ6bhpKYAFY9LsHsxgChMOHZQdkvkvv2bV5lJooWqGUQiOl
-        NnrESInehl4hRUG/SvcSdsI/zdqQ2MLqrOhEDiexkIO4AeM7LeNKRciC/eXeSf0lQBTos5
-        IgCGXHHicWe6xXLJ5AErklB9Fb45pHk=
-Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com
- [209.85.167.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-594-_HAliwNZNReGrHig8jMsgQ-1; Mon, 14 Aug 2023 11:10:45 -0400
-X-MC-Unique: _HAliwNZNReGrHig8jMsgQ-1
-Received: by mail-oi1-f198.google.com with SMTP id 5614622812f47-3a5a7e981ddso4708858b6e.2
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692025845; x=1692630645;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=12HC6JD2O0bLtp7WyRFPXIoci6YJsDgOuX51lZJptGg=;
-        b=EYsVtR58A8UPPYYkIBruwAvB4spddlgGB/ZT8xAKWkh26Hfpla+EsOosi2Ad7XrMmM
-         ArFCXTFFvcAxAng6X3sqrTrJ0c22U1VeEnCRCHCuzDWs7qsj+xqM9mrEZRoJL7OP8wS9
-         +oFhLLPetHH9yFUV/aGtvN6xlTUj0cyJqKrYEMzKdZhSaZ2vwaoAfra2vbBMyKt2C5Ix
-         u7vsic8qGGZa45+6++8dwz4u1cAaH/oOjP+QsP+wqPC0ch9kr2xdhIkQhbBQVnNds/81
-         JfZddfsHERe/pYRX3yJVySri9/VsTOCLmFTDo6tXUXkR/fYCw7pPZoBFS/XqDYizZLj+
-         x98w==
-X-Gm-Message-State: AOJu0YxI+Fw+PNfaePesdFGYEHHOU2ktO8bNULiity9Xe+jR2IHdhSkY
-        REoZzMgNHgFVFCcwzSh3cljDtXgAW0Rh5Hg1R2c95nWKW26uHPzwRH2cp2m7C/eW3m+3dFNdqOV
-        1hBb/XkAxeaKskELt8Q==
-X-Received: by 2002:a05:6808:1302:b0:3a7:4478:7139 with SMTP id y2-20020a056808130200b003a744787139mr14038503oiv.1.1692025845286;
-        Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE8QEE4IjurHEwQU6rrBLlxlxgWhg5PWd4F+u20NyunPPOuFzXd/X80EdVLIk+kfSN2UDWlMw==
-X-Received: by 2002:a05:6808:1302:b0:3a7:4478:7139 with SMTP id y2-20020a056808130200b003a744787139mr14038485oiv.1.1692025845035;
-        Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id t12-20020a63954c000000b0055fedbf1938sm8762083pgn.31.2023.08.14.08.10.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Aug 2023 08:10:44 -0700 (PDT)
-Date:   Mon, 14 Aug 2023 23:10:41 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH] check: fix parsing expunge file with comments
-Message-ID: <20230814151041.qakfinobofzlbyth@zlang-mailbox>
-References: <20230813140950.678899-1-amir73il@gmail.com>
- <20230814145015.6w6l2y7dxt4opvov@zlang-mailbox>
- <CAOQ4uxha+18YG+LrX76-2BUxuyTYcZ=9+cJOoCGpnLSC21Sxrg@mail.gmail.com>
+        with ESMTP id S230343AbjHNPh4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Aug 2023 11:37:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444CA10D0
+        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:37:55 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D3FFB63D7F
+        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 15:37:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 349CDC433C8;
+        Mon, 14 Aug 2023 15:37:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692027474;
+        bh=skbddAFFYuBQwzT2ccLGP27dSlr1S8DpzFbPztRCp8M=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=JGXBAOgao6Czy/dK4JHpLgSoZrIF4l/mzVwkrsH28/Qygq1q/96rJr+Ns3wp9kZ0W
+         SK1WtH1HD5J2h+z5ANrjmiah+oVwhZ5Il96qhZQqm0CT0sPZuIY5MHhj9vW/4tIMWa
+         5Z1ow4lGVWDAbqgO+ilOuUPk8IIZvh9n0ueDrbk050Jtng5bGm1/+J40kuerTklsco
+         9rcvAj/PtpNsU2bahlLuhJLTJ0QJvEZdhfp+eTcUGCbp/T0hgIPRnCk6qqXmb5KKKC
+         5t4UZvclaXhYy4dISO9HEIWYAkyW343ObkPoG5GTUKQ5LqyO48c6cDPYdpA1lMXONJ
+         q5z18HRomrLVQ==
+Date:   Mon, 14 Aug 2023 08:37:53 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org, axboe@kernel.dk, tytso@mit.edu, shr@fb.com
+Subject: Re: [PATCH] generic/471: Remove this broken case
+Message-ID: <20230814153753.GR11377@frogsfrogsfrogs>
+References: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxha+18YG+LrX76-2BUxuyTYcZ=9+cJOoCGpnLSC21Sxrg@mail.gmail.com>
+In-Reply-To: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 14, 2023 at 05:54:45PM +0300, Amir Goldstein wrote:
-> On Mon, Aug 14, 2023 at 5:50 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Sun, Aug 13, 2023 at 05:09:50PM +0300, Amir Goldstein wrote:
-> > > commit 60054d51 ("check: fix excluded tests are only expunged in the
-> > > first iteration") change to use exclude_tests array instead of file.
-> > >
-> > > The check if a test is in expunge file was using grep -q $TEST_ID FILE
-> > > so it was checking if the test was a non-exact match to one of the
-> > > lines, for a common example: "generic/001 # exclude this test" would be
-> > > a match to test generic/001.
-> > >
-> > > The commit regressed this example, because the new code checks for exact
-> > > match of [ "generic/001" == "generic/001 " ]. Change the code to use
-> > > prefix match to deal with this case and any other suffix correctly.
-> > >
-> > > While the original code would also match line "exclude test generic/001"
-> > > I don't think that non-prefix match is a real use case.
-> > >
-> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > ---
-> > >  check | 3 ++-
-> > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/check b/check
-> > > index 549725eb..e8152f59 100755
-> > > --- a/check
-> > > +++ b/check
-> > > @@ -592,7 +592,8 @@ _expunge_test()
-> > >       local TEST_ID="$1"
-> > >
-> > >       for f in "${exclude_tests[@]}"; do
-> > > -             if [ "${TEST_ID}" == "$f" ]; then
-> > > +             # $f may contain traling spaces and comments
-> > > +             if [[ "$f" == ${TEST_ID}* ]]; then
-> >
-> > We'll have seqnum with 4 numbers in one day, likes generic/1000. At that time,
-> > generic/100[0-9] will match generic/100*. That's not what we want.
-> >
+On Mon, Aug 14, 2023 at 10:41:41PM +0800, Yang Xu wrote:
+> I remember this case fails on last year becuase of
+> kernel commit cae2de69 ("iomap: Add async buffered write support")
+> kernel commit 1aa91d9 ("xfs: Add async buffered write support").
+> as below:
+>      pwrite: Resource temporarily unavailable
+>      wrote 8388608/8388608 bytes at offset 0
+>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>     -RWF_NOWAIT time is within limits.
+>     +pwrite: Resource temporarily unavailable
+>     +(standard_in) 1: syntax error
+>     +RWF_NOWAIT took  seconds
 > 
-> Good point.
+> So For async buffered write requests, the request will return -EAGAIN
+> if the ilock cannot be obtained immediately.
 > 
-> > I think we'd better to do exact match, or better to match the end of a word,
-> > for example
-> >
-> >   local id_regex="^${TEST_ID}\b"
-> >   if [[ "$f" =~ ${id_regex} ]];then
-> >   ...
-> >
-> > I think this will match "generic/100" and "generic/100 # xxxxx". But won't match
-> > "generic/1001".
-> >
+> Here also a discussion[1] that seems generic/471 has been broken.
 > 
-> Nice. Looks good to me.
+> Now, I met this problem in my linux distribution, then I found the above
+> discussion. IMO, remove this case is ok and then we can avoid to meet this
+> false report again.
+> 
+> [1]https://lore.kernel.org/linux-xfs/b2865bd6-2346-8f4d-168b-17f06bbedbed@kernel.dk/
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 
-I didn't test it, please check if that can help you and won't break old things,
-if you'd like to write that in V2 :)
+Fine with me, since nobody thinks this test does anything useful, nor
+has anyone made it do something useful.
 
-Thanks,
-Zorro
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
+--D
+
+> ---
+>  tests/generic/471     | 67 -------------------------------------------
+>  tests/generic/471.out | 13 ---------
+>  2 files changed, 80 deletions(-)
+>  delete mode 100755 tests/generic/471
+>  delete mode 100644 tests/generic/471.out
 > 
-> Thanks,
-> Amir.
+> diff --git a/tests/generic/471 b/tests/generic/471
+> deleted file mode 100755
+> index fbd0b12a..00000000
+> --- a/tests/generic/471
+> +++ /dev/null
+> @@ -1,67 +0,0 @@
+> -#! /bin/bash
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
+> -#
+> -# FS QA Test No. 471
+> -#
+> -# write a file with RWF_NOWAIT and it would fail because there are no
+> -# blocks allocated. Create a file with direct I/O and re-write it
+> -# using RWF_NOWAIT. I/O should finish within 50 microsecods since
+> -# block allocations are already performed.
+> -#
+> -. ./common/preamble
+> -_begin_fstest auto quick rw
+> -
+> -# Import common functions.
+> -. ./common/populate
+> -. ./common/filter
+> -. ./common/attr
+> -
+> -# real QA test starts here
+> -_require_odirect
+> -_require_test
+> -_require_xfs_io_command pwrite -N
+> -
+> -# Remove reminiscence of previously run tests
+> -testdir=$TEST_DIR/$seq
+> -if [ -e $testdir ]; then
+> -	rm -Rf $testdir
+> -fi
+> -
+> -mkdir $testdir
+> -
+> -# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail with -EAGAIN
+> -# when writing to a file range except if it's a NOCOW file and an extent for the
+> -# range already exists or if it's a COW file and preallocated/unwritten extent
+> -# exists in the target range. So to make sure that the last write succeeds on
+> -# all filesystems, use a NOCOW file on btrfs.
+> -if [ $FSTYP == "btrfs" ]; then
+> -	_require_chattr C
+> -	# Zoned btrfs does not support NOCOW
+> -	_require_non_zoned_device $TEST_DEV
+> -	touch $testdir/f1
+> -	$CHATTR_PROG +C $testdir/f1
+> -fi
+> -
+> -# Create a file with pwrite nowait (will fail with EAGAIN)
+> -$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+> -
+> -# Write the file without nowait
+> -$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1 | _filter_xfs_io
+> -
+> -time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
+> -
+> -# RWF_NOWAIT should finish within a short period of time so we are choosing
+> -# a conservative value of 50 ms. Anything longer means it is waiting
+> -# for something in the kernel which would be a fail.
+> -if (( $(echo "$time_taken < 0.05" | bc -l) )); then
+> -	echo "RWF_NOWAIT time is within limits."
+> -else
+> -	echo "RWF_NOWAIT took $time_taken seconds"
+> -fi
+> -
+> -$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
+> -
+> -# success, all done
+> -status=0
+> -exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> deleted file mode 100644
+> index ab23272e..00000000
+> --- a/tests/generic/471.out
+> +++ /dev/null
+> @@ -1,13 +0,0 @@
+> -QA output created by 471
+> -pwrite: Resource temporarily unavailable
+> -wrote 8388608/8388608 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -RWF_NOWAIT time is within limits.
+> -00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> -*
+> -00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
+> -*
+> -00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+> -*
+> -read 8388608/8388608 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -- 
+> 2.27.0
 > 
-
