@@ -2,103 +2,143 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E749DC001B0
-	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 15:02:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D695C001B0
+	for <linux-fstests@archiver.kernel.org>; Mon, 14 Aug 2023 15:12:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231167AbjHNPB7 (ORCPT
+        id S231932AbjHNPMJ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 14 Aug 2023 11:01:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57548 "EHLO
+        Mon, 14 Aug 2023 11:12:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229833AbjHNPBb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 Aug 2023 11:01:31 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFDA71B5
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:00:44 -0700 (PDT)
+        with ESMTP id S232647AbjHNPLu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Aug 2023 11:11:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3955910C6
+        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:10:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692025244;
+        s=mimecast20190719; t=1692025847;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=gUIcTGKgmv6U3oBn1AoJg5Y0JtooqOi2HzPrts+u9fU=;
-        b=HPvYjgJJ98FiJQcDyxIm2pjIIVNeQi/1hvLiua4JS7ToJ/xR4xlScjHnAAvYkhULbtHbXs
-        JkkcS3Yic1aw/NGRgZowpzC6ydBrXhKg7DUVaBTJcbCbNzqfrM74EPD+6YsV5g2JbUfXnS
-        ypMP7/OZKWHQToS5YnR+80OfF7bDO6Y=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=12HC6JD2O0bLtp7WyRFPXIoci6YJsDgOuX51lZJptGg=;
+        b=GuJm+jJ/g13dkx9G6TSFi5eBQ6bhpKYAFY9LsHsxgChMOHZQdkvkvv2bV5lJooWqGUQiOl
+        NnrESInehl4hRUG/SvcSdsI/zdqQ2MLqrOhEDiexkIO4AeM7LeNKRciC/eXeSf0lQBTos5
+        IgCGXHHicWe6xXLJ5AErklB9Fb45pHk=
+Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com
+ [209.85.167.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-73-TEW31s0-PzmT7IATkq9Idg-1; Mon, 14 Aug 2023 11:00:42 -0400
-X-MC-Unique: TEW31s0-PzmT7IATkq9Idg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bdca574b7fso34753375ad.1
-        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:00:42 -0700 (PDT)
+ us-mta-594-_HAliwNZNReGrHig8jMsgQ-1; Mon, 14 Aug 2023 11:10:45 -0400
+X-MC-Unique: _HAliwNZNReGrHig8jMsgQ-1
+Received: by mail-oi1-f198.google.com with SMTP id 5614622812f47-3a5a7e981ddso4708858b6e.2
+        for <fstests@vger.kernel.org>; Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692025241; x=1692630041;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gUIcTGKgmv6U3oBn1AoJg5Y0JtooqOi2HzPrts+u9fU=;
-        b=ZLDSaFi6XwTKpN+3xsbRb/Q3+DUrAo45/wKOW+sOmNCeMqnFAWkN3KgU+7FVvl9eDB
-         yMIyNBsZP+z5W+y7uwdSKqe72WrKUwNDZy5uzkljSmmEFTflCZcWhpEq1Pdqvq/h25qW
-         Jbgvi7XAs5C7tQYOyljyxZfOVoesiO1R0q74UBQsR1ndZ1hdqaaJ0cMa2Xyuw42LuDpy
-         l/h3mObui+mwgupdSRU4cNQ37mG3uni6x6MnHaOyK8HmdL3I4vjRAjJTk3y6LHv9VtU4
-         ClUcxRW51+TU8cSiOrOcHd9SIunGgEoh/xq0bhwurjpTJtkItDdcXcKNDCYpo4mh0Iwg
-         PqHg==
-X-Gm-Message-State: AOJu0YzTJ9MALw4obsEA9jK3erglNMyau17ohnt/amBMq4OE289mlwYO
-        HocJfKMSYSoSftFpENJEMIsnJPkKWsMV/hE+/5lyqKEj/F0hbhcC6izL8jeRVpyrkhqhb8B21rk
-        M4RlRjn995gQEFc6hmW/Ju1b+vWTk5kg=
-X-Received: by 2002:a17:903:234c:b0:1b7:e355:d1ea with SMTP id c12-20020a170903234c00b001b7e355d1eamr13740348plh.24.1692025240825;
-        Mon, 14 Aug 2023 08:00:40 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHn3wT/M1zRb6sEDUTnnaEwMglEZfX1p5XFlrpjFAtuPOKVhoc2RPEdx8jw0IP9m0vgV6HBOg==
-X-Received: by 2002:a17:903:234c:b0:1b7:e355:d1ea with SMTP id c12-20020a170903234c00b001b7e355d1eamr13740162plh.24.1692025240029;
-        Mon, 14 Aug 2023 08:00:40 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692025845; x=1692630645;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=12HC6JD2O0bLtp7WyRFPXIoci6YJsDgOuX51lZJptGg=;
+        b=EYsVtR58A8UPPYYkIBruwAvB4spddlgGB/ZT8xAKWkh26Hfpla+EsOosi2Ad7XrMmM
+         ArFCXTFFvcAxAng6X3sqrTrJ0c22U1VeEnCRCHCuzDWs7qsj+xqM9mrEZRoJL7OP8wS9
+         +oFhLLPetHH9yFUV/aGtvN6xlTUj0cyJqKrYEMzKdZhSaZ2vwaoAfra2vbBMyKt2C5Ix
+         u7vsic8qGGZa45+6++8dwz4u1cAaH/oOjP+QsP+wqPC0ch9kr2xdhIkQhbBQVnNds/81
+         JfZddfsHERe/pYRX3yJVySri9/VsTOCLmFTDo6tXUXkR/fYCw7pPZoBFS/XqDYizZLj+
+         x98w==
+X-Gm-Message-State: AOJu0YxI+Fw+PNfaePesdFGYEHHOU2ktO8bNULiity9Xe+jR2IHdhSkY
+        REoZzMgNHgFVFCcwzSh3cljDtXgAW0Rh5Hg1R2c95nWKW26uHPzwRH2cp2m7C/eW3m+3dFNdqOV
+        1hBb/XkAxeaKskELt8Q==
+X-Received: by 2002:a05:6808:1302:b0:3a7:4478:7139 with SMTP id y2-20020a056808130200b003a744787139mr14038503oiv.1.1692025845286;
+        Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE8QEE4IjurHEwQU6rrBLlxlxgWhg5PWd4F+u20NyunPPOuFzXd/X80EdVLIk+kfSN2UDWlMw==
+X-Received: by 2002:a05:6808:1302:b0:3a7:4478:7139 with SMTP id y2-20020a056808130200b003a744787139mr14038485oiv.1.1692025845035;
+        Mon, 14 Aug 2023 08:10:45 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id u10-20020a170902e80a00b001bdf046ed71sm998882plg.120.2023.08.14.08.00.38
+        by smtp.gmail.com with ESMTPSA id t12-20020a63954c000000b0055fedbf1938sm8762083pgn.31.2023.08.14.08.10.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Aug 2023 08:00:39 -0700 (PDT)
-Date:   Mon, 14 Aug 2023 23:00:36 +0800
+        Mon, 14 Aug 2023 08:10:44 -0700 (PDT)
+Date:   Mon, 14 Aug 2023 23:10:41 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs/213: fix failure due to misspelled function name
-Message-ID: <20230814150036.e6zyasqydeq5krsa@zlang-mailbox>
-References: <71413edbeb1ee5b945f0b82faccaf4a75e8ba56b.1691924176.git.fdmanana@suse.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] check: fix parsing expunge file with comments
+Message-ID: <20230814151041.qakfinobofzlbyth@zlang-mailbox>
+References: <20230813140950.678899-1-amir73il@gmail.com>
+ <20230814145015.6w6l2y7dxt4opvov@zlang-mailbox>
+ <CAOQ4uxha+18YG+LrX76-2BUxuyTYcZ=9+cJOoCGpnLSC21Sxrg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <71413edbeb1ee5b945f0b82faccaf4a75e8ba56b.1691924176.git.fdmanana@suse.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxha+18YG+LrX76-2BUxuyTYcZ=9+cJOoCGpnLSC21Sxrg@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 13, 2023 at 12:01:22PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, Aug 14, 2023 at 05:54:45PM +0300, Amir Goldstein wrote:
+> On Mon, Aug 14, 2023 at 5:50 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Sun, Aug 13, 2023 at 05:09:50PM +0300, Amir Goldstein wrote:
+> > > commit 60054d51 ("check: fix excluded tests are only expunged in the
+> > > first iteration") change to use exclude_tests array instead of file.
+> > >
+> > > The check if a test is in expunge file was using grep -q $TEST_ID FILE
+> > > so it was checking if the test was a non-exact match to one of the
+> > > lines, for a common example: "generic/001 # exclude this test" would be
+> > > a match to test generic/001.
+> > >
+> > > The commit regressed this example, because the new code checks for exact
+> > > match of [ "generic/001" == "generic/001 " ]. Change the code to use
+> > > prefix match to deal with this case and any other suffix correctly.
+> > >
+> > > While the original code would also match line "exclude test generic/001"
+> > > I don't think that non-prefix match is a real use case.
+> > >
+> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > ---
+> > >  check | 3 ++-
+> > >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > >
+> > > diff --git a/check b/check
+> > > index 549725eb..e8152f59 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -592,7 +592,8 @@ _expunge_test()
+> > >       local TEST_ID="$1"
+> > >
+> > >       for f in "${exclude_tests[@]}"; do
+> > > -             if [ "${TEST_ID}" == "$f" ]; then
+> > > +             # $f may contain traling spaces and comments
+> > > +             if [[ "$f" == ${TEST_ID}* ]]; then
+> >
+> > We'll have seqnum with 4 numbers in one day, likes generic/1000. At that time,
+> > generic/100[0-9] will match generic/100*. That's not what we want.
+> >
 > 
-> The test is calling _not_run but it should be _notrun, so fix that.
+> Good point.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
+> > I think we'd better to do exact match, or better to match the end of a word,
+> > for example
+> >
+> >   local id_regex="^${TEST_ID}\b"
+> >   if [[ "$f" =~ ${id_regex} ]];then
+> >   ...
+> >
+> > I think this will match "generic/100" and "generic/100 # xxxxx". But won't match
+> > "generic/1001".
+> >
+> 
+> Nice. Looks good to me.
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+I didn't test it, please check if that can help you and won't break old things,
+if you'd like to write that in V2 :)
 
->  tests/btrfs/213 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks,
+Zorro
+
 > 
-> diff --git a/tests/btrfs/213 b/tests/btrfs/213
-> index 5666d9b9..6def4f6e 100755
-> --- a/tests/btrfs/213
-> +++ b/tests/btrfs/213
-> @@ -55,7 +55,7 @@ sleep $(($runtime / 4))
->  # any error about no balance currently running.
->  $BTRFS_UTIL_PROG balance cancel "$SCRATCH_MNT" 2>&1 | grep -iq 'not in progress'
->  if [ $? -eq 0 ]; then
-> -	_not_run "balance finished before we could cancel it"
-> +	_notrun "balance finished before we could cancel it"
->  fi
->  
->  # Now check if we can finish relocating metadata, which should finish very
-> -- 
-> 2.34.1
+> Thanks,
+> Amir.
 > 
 
