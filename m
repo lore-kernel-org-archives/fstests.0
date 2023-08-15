@@ -2,124 +2,219 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D717C001B0
-	for <linux-fstests@archiver.kernel.org>; Tue, 15 Aug 2023 08:29:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5283DC001B0
+	for <linux-fstests@archiver.kernel.org>; Tue, 15 Aug 2023 10:46:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235627AbjHOI3K (ORCPT
+        id S236551AbjHOKq0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Aug 2023 04:29:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49428 "EHLO
+        Tue, 15 Aug 2023 06:46:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230322AbjHOI2n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2023 04:28:43 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F390127
-        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 01:28:41 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id 2adb3069b0e04-4fe15bfb1adso8282660e87.0
-        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 01:28:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1692088119; x=1692692919;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=BjjZ7acpFCbSorTKGRbLQpEVADt5GGavruXC9uYjeWA=;
-        b=mVa9MnzMtj1dkxfGkUtesz9v9KCrxJFDpiSqnxyBlVSGHLF+/UhE0+SRvYt8I2NPkO
-         Jr+segR0U0Tl5K2HNLenWTdeqrpM1t1iIt70Dou38DMYXiqhwGeUnov4lMUI6EdCXOd+
-         72TfFAIKxmQvg1VC8DxrTtNLkKO6N7Rwk3An/3Q7dznHTM6SCY4ZL4HgUXwg5DwHSjIb
-         wU4tPC4/NadORtxeflkUvlefmm1mZiy60ul5+Kc/p4xpQyzVyOB8ISEDrfLLL/KqFdkl
-         jeDUVlmRofyPpv2CTWz1WdUlShYkMv1hv7q4AMDYQzd58xyFEZGWdHB3nzRFTHimTymF
-         OhMQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692088119; x=1692692919;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=BjjZ7acpFCbSorTKGRbLQpEVADt5GGavruXC9uYjeWA=;
-        b=I1tNvfsgDP4TT05vZiaTP1gN5fTq4F40hWbyPyK6JD2EweKSAwKZeA8BR/hlt3nodu
-         bYj5yDoJ/iG0n8+SthyOmo8xu4aP+R9Haee5RUsNRIpbHKWZ0ftMxAShHA6+p+u78jg6
-         NUR+4Vpn9oA5GG0wAISs1SN3ouQGOOce8COwU6oGFvbAoKICU1120JQ8kV8rbztP/MBx
-         DMravAUK20GxpP1+gEHLV27XwPnHWUiRR2aq/sKC79BkBoNa+AS1ii36xUWcJXHuOovZ
-         vzxtfw2Uo+Xwj9uWi57+Mol7BUkE29Iif2HLP5LYySoHzUrv3EFTHQEtf86P+7phFbQo
-         qEvQ==
-X-Gm-Message-State: AOJu0Yyxk1uqpdu6ICWnadr+4+96zK8PsnKV9lYuwWEpORNWIyCSRSIl
-        fyW4jkloZG7XRlceEGmupJHIOeDSLHQ=
-X-Google-Smtp-Source: AGHT+IH6jRpy4MDBxD3iAVWCHqrNUmV/CjhwH+PWkrPYAn/0Oy6QhVfmD0x5xi8aXbtiDxPED6TQdQ==
-X-Received: by 2002:a05:6512:34c8:b0:4f9:6528:fb15 with SMTP id w8-20020a05651234c800b004f96528fb15mr6582397lfr.12.1692088119190;
-        Tue, 15 Aug 2023 01:28:39 -0700 (PDT)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id a13-20020a17090682cd00b00992f81122e1sm6738124ejy.21.2023.08.15.01.28.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Aug 2023 01:28:38 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     "Darrick J . Wong" <djwong@kernel.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Chandan Babu R <chandan.babu@oracle.com>,
-        fstests@vger.kernel.org
-Subject: [PATCH v2] generic/{175,297,298}: fix use of uninitialized var
-Date:   Tue, 15 Aug 2023 11:28:35 +0300
-Message-Id: <20230815082835.790906-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S236550AbjHOKqB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2023 06:46:01 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7692F1BEC
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 03:45:21 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 94A3A623D3
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 10:45:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD390C433CA
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 10:45:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692096317;
+        bh=faXjXO/JZQKFHWyOG0hg6+wiZ5cciQDytupYvubsB5Y=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=XN0Om+S6AsJHdsbaZ1swJMrEQw4bFTfNJiaZ+aNN17l0ts8vmpWPw9c6674J0MikB
+         JTC7wBnahdtweA352RAP1MWbL403v/1ovmM3XGjNWj4l0knMDrbFDQBTjR+aYAmZI0
+         pKe9RZB3XXpj6eJaiWx6aeKvYwnoHVQbQG5zUdZufnKIXGnjMLrCnbRGqZ9B0gAaQ9
+         oO4sgsBQhnTeSdSCzO8+64C7YsVucqn5ubHj1dUApHYO21fc+4pw2zqsEmH6lcnl/g
+         GNhQF6uU3PPA1EbwBEf3Hie6ySqU/8j9t9fGXtvhhoFtQIUVpmqa4d4LiCMT4J3lde
+         ffXfwBtDBTGUQ==
+Received: by mail-oo1-f52.google.com with SMTP id 006d021491bc7-56c711a88e8so3911694eaf.2
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 03:45:17 -0700 (PDT)
+X-Gm-Message-State: AOJu0YwlI6ZymreZNh2D0M0GnboIQBD72uUa3H8ge5jWg6cOklIanWUf
+        6aAVCuwtUjV9gQlIXKDKFg567Z6OvyJ+tnLG8b8=
+X-Google-Smtp-Source: AGHT+IF46C8fE/gl+1od/K99IxC7BoDKATHjTtUlBnWLtVOQiTyTcy3NHUYoP33QlosFSp7Wm6UwILt+3tX9Cd5RCF4=
+X-Received: by 2002:a05:6870:a798:b0:19f:aee0:e169 with SMTP id
+ x24-20020a056870a79800b0019faee0e169mr13091936oao.30.1692096316914; Tue, 15
+ Aug 2023 03:45:16 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
+In-Reply-To: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Tue, 15 Aug 2023 11:44:40 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7C0mE9tBaipdYPYOCgBVYMTVKQ8=f90khTckt1CbBF4A@mail.gmail.com>
+Message-ID: <CAL3q7H7C0mE9tBaipdYPYOCgBVYMTVKQ8=f90khTckt1CbBF4A@mail.gmail.com>
+Subject: Re: [PATCH] generic/471: Remove this broken case
+To:     Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc:     fstests@vger.kernel.org, djwong@kernel.org, axboe@kernel.dk,
+        tytso@mit.edu, shr@fb.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The truncate command in those tests use an uninitialized variable i.
-in kdevops, i must contain some leftover, so we get errors like:
-/data/fstests-install/xfstests/tests/generic/298: line 45: /dev/loop12):
-           syntax error: operand expected (error token is "/dev/loop12)")
+On Mon, Aug 14, 2023 at 4:04=E2=80=AFPM Yang Xu <xuyang2018.jy@fujitsu.com>=
+ wrote:
+>
+> I remember this case fails on last year becuase of
+> kernel commit cae2de69 ("iomap: Add async buffered write support")
+> kernel commit 1aa91d9 ("xfs: Add async buffered write support").
+> as below:
+>      pwrite: Resource temporarily unavailable
+>      wrote 8388608/8388608 bytes at offset 0
+>      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>     -RWF_NOWAIT time is within limits.
+>     +pwrite: Resource temporarily unavailable
+>     +(standard_in) 1: syntax error
+>     +RWF_NOWAIT took  seconds
+>
+> So For async buffered write requests, the request will return -EAGAIN
 
-Apparently, noone including the author of the tests knows why this
-truncate command is in the test, so remove the wrong truncate command.
+I'm curious about this.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+All the xfs_io pwrite calls are being done with Direct IO (-d)
+argument, so how does that explain the failure?
 
-Changes since v1:
-- Remove the unneeded truncate command instead of fixing it
+> if the ilock cannot be obtained immediately.
 
- tests/generic/175 | 1 -
- tests/generic/297 | 1 -
- tests/generic/298 | 1 -
- 3 files changed, 3 deletions(-)
+What is the ilock? That seems to be xfs specific.
 
-diff --git a/tests/generic/175 b/tests/generic/175
-index 07af2199..f827beb6 100755
---- a/tests/generic/175
-+++ b/tests/generic/175
-@@ -33,7 +33,6 @@ _pwrite_byte 0x61 0 $blksz "$testdir/file1" >> "$seqres.full"
- 
- fnr=19
- echo "Create extents"
--truncate -s $(( (2 ** i) * blksz)) "$testdir/file1"
- for i in $(seq 0 $fnr); do
- 	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> "$seqres.full"
- 	n=$(( (2 ** i) * blksz))
-diff --git a/tests/generic/297 b/tests/generic/297
-index 6bdc3e1c..54c2ac21 100755
---- a/tests/generic/297
-+++ b/tests/generic/297
-@@ -42,7 +42,6 @@ _pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
- fnr=26		# 2^26 reflink extents should be enough to find a slow op?
- timeout=8	# guarantee a good long run...
- echo "Find a reflink size that takes a long time"
--truncate -s $(( (2 ** i) * blksz)) $testdir/file1
- for i in $(seq 0 $fnr); do
- 	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
- 	n=$(( (2 ** i) * blksz))
-diff --git a/tests/generic/298 b/tests/generic/298
-index 95d4c02b..115a9bf7 100755
---- a/tests/generic/298
-+++ b/tests/generic/298
-@@ -42,7 +42,6 @@ _pwrite_byte 0x61 0 $blksz $testdir/file1 >> $seqres.full
- fnr=26		# 2^26 reflink extents should be enough to find a slow op?
- timeout=8	# guarantee a good long run...
- echo "Find a reflink size that takes a long time"
--truncate -s $(( (2 ** i) * blksz)) $testdir/file1
- for i in $(seq 0 $fnr); do
- 	echo " ++ Reflink size $i, $((2 ** i)) blocks" >> $seqres.full
- 	n=$(( (2 ** i) * blksz))
--- 
-2.34.1
+The test passes on btrfs and btrfs supports async buffered writes -
+but I'm still puzzled, because the test only does direct IO writes.
+Does xfs falls back from direct IO to buffered IO?
 
+>
+> Here also a discussion[1] that seems generic/471 has been broken.
+
+Well that discussion doesn't help me understand things. It mentions
+some other discussion, presumably with more details. Where's that
+other discussion?
+
+Thanks.
+
+>
+> Now, I met this problem in my linux distribution, then I found the above
+> discussion. IMO, remove this case is ok and then we can avoid to meet thi=
+s
+> false report again.
+>
+> [1]https://lore.kernel.org/linux-xfs/b2865bd6-2346-8f4d-168b-17f06bbedbed=
+@kernel.dk/
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> ---
+>  tests/generic/471     | 67 -------------------------------------------
+>  tests/generic/471.out | 13 ---------
+>  2 files changed, 80 deletions(-)
+>  delete mode 100755 tests/generic/471
+>  delete mode 100644 tests/generic/471.out
+>
+> diff --git a/tests/generic/471 b/tests/generic/471
+> deleted file mode 100755
+> index fbd0b12a..00000000
+> --- a/tests/generic/471
+> +++ /dev/null
+> @@ -1,67 +0,0 @@
+> -#! /bin/bash
+> -# SPDX-License-Identifier: GPL-2.0
+> -# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
+> -#
+> -# FS QA Test No. 471
+> -#
+> -# write a file with RWF_NOWAIT and it would fail because there are no
+> -# blocks allocated. Create a file with direct I/O and re-write it
+> -# using RWF_NOWAIT. I/O should finish within 50 microsecods since
+> -# block allocations are already performed.
+> -#
+> -. ./common/preamble
+> -_begin_fstest auto quick rw
+> -
+> -# Import common functions.
+> -. ./common/populate
+> -. ./common/filter
+> -. ./common/attr
+> -
+> -# real QA test starts here
+> -_require_odirect
+> -_require_test
+> -_require_xfs_io_command pwrite -N
+> -
+> -# Remove reminiscence of previously run tests
+> -testdir=3D$TEST_DIR/$seq
+> -if [ -e $testdir ]; then
+> -       rm -Rf $testdir
+> -fi
+> -
+> -mkdir $testdir
+> -
+> -# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail with=
+ -EAGAIN
+> -# when writing to a file range except if it's a NOCOW file and an extent=
+ for the
+> -# range already exists or if it's a COW file and preallocated/unwritten =
+extent
+> -# exists in the target range. So to make sure that the last write succee=
+ds on
+> -# all filesystems, use a NOCOW file on btrfs.
+> -if [ $FSTYP =3D=3D "btrfs" ]; then
+> -       _require_chattr C
+> -       # Zoned btrfs does not support NOCOW
+> -       _require_non_zoned_device $TEST_DEV
+> -       touch $testdir/f1
+> -       $CHATTR_PROG +C $testdir/f1
+> -fi
+> -
+> -# Create a file with pwrite nowait (will fail with EAGAIN)
+> -$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+> -
+> -# Write the file without nowait
+> -$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1=
+ | _filter_xfs_io
+> -
+> -time_taken=3D`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $t=
+estdir/f1 | awk '/^1/ {print $5}'`
+> -
+> -# RWF_NOWAIT should finish within a short period of time so we are choos=
+ing
+> -# a conservative value of 50 ms. Anything longer means it is waiting
+> -# for something in the kernel which would be a fail.
+> -if (( $(echo "$time_taken < 0.05" | bc -l) )); then
+> -       echo "RWF_NOWAIT time is within limits."
+> -else
+> -       echo "RWF_NOWAIT took $time_taken seconds"
+> -fi
+> -
+> -$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
+> -
+> -# success, all done
+> -status=3D0
+> -exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> deleted file mode 100644
+> index ab23272e..00000000
+> --- a/tests/generic/471.out
+> +++ /dev/null
+> @@ -1,13 +0,0 @@
+> -QA output created by 471
+> -pwrite: Resource temporarily unavailable
+> -wrote 8388608/8388608 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -RWF_NOWAIT time is within limits.
+> -00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> -*
+> -00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ............=
+....
+> -*
+> -00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ............=
+....
+> -*
+> -read 8388608/8388608 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> --
+> 2.27.0
+>
