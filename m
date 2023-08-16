@@ -2,174 +2,269 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D20DC001E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 06:05:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A99BC001B0
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 10:19:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241843AbjHPGE4 (ORCPT
+        id S243823AbjHPKSj (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Aug 2023 02:04:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41150 "EHLO
+        Wed, 16 Aug 2023 06:18:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34748 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242061AbjHPGEz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 02:04:55 -0400
+        with ESMTP id S243849AbjHPKSO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 06:18:14 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 628091BCC
-        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 23:04:14 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33784138
+        for <fstests@vger.kernel.org>; Wed, 16 Aug 2023 03:17:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692165854;
+        s=mimecast20190719; t=1692181050;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=K2SN3FtMPWOYoJEWsWtLTr+p00cJScPn6dytSX+zKSw=;
-        b=P2iH2zl0J2PmOHXjVr7RhJWBR+J5pHWTeuDKG5bsRcasqDopXV1RODdyzPDsNs6XZ9sjyf
-        rVnJbVJ8//hLUJyfseY4mBg2q8sRK8njkufR30b9Xg/rGh3Stc5Gar3V+QnFNqtmSEV16f
-        k+UasajsmdTiGqJPiN0Y5gOTxkcHdhw=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=i/4TlQaUgpN5C2FjPup3rLJkJfUEhe/1WNXH5y5dSaU=;
+        b=a4phiJtju0WmIz3A95bdi1QMFrj/DdBRyaLMPznvIYiSZG/253RjpK3+iZOc8igSpZS2XJ
+        yFAtYilOIj5Wn3tLY3Eyq8BN9/nYK3H2mvALTR9DhWJODEi0lJppnnUjgx2Zg5tokt9wig
+        RtoD9UGtLbAeAQ/kRtnZzllJ88mtgdE=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-217-Q9MYKXNeNkuOa_lqzj-pRg-1; Wed, 16 Aug 2023 02:04:12 -0400
-X-MC-Unique: Q9MYKXNeNkuOa_lqzj-pRg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bbebf511abso73964695ad.1
-        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 23:04:12 -0700 (PDT)
+ us-mta-673-NlbUeNr0PKOmwpH8Poj4xA-1; Wed, 16 Aug 2023 06:17:28 -0400
+X-MC-Unique: NlbUeNr0PKOmwpH8Poj4xA-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1bbb34b0abaso124642735ad.1
+        for <fstests@vger.kernel.org>; Wed, 16 Aug 2023 03:17:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692165852; x=1692770652;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=K2SN3FtMPWOYoJEWsWtLTr+p00cJScPn6dytSX+zKSw=;
-        b=kVerH/KmA0hZqHDgviaMXFIP4KVkMmJseh5fU1hH7Ia51zNBxCKD0GLWwI9Ry8+Pr4
-         XvFgHNXkqTufjrTONVxVha61CAyQS5V6qYD/8ZwDZq5lSihPchle8Rw5pAaen2o92++G
-         HfOIi4MeoZkCS6a5o7UfKXhzeHe3NhSPJKhLRSFvtDOGgvfiM+FUKlzp4iFuaYj5g/wq
-         JXBgqIF2N43EjcEXEex2ZvNDX5nH5e0J0DtSQv9Ym95LxK7EqOEREXOPmgtIjc1bsOzS
-         pkOuRsYNWeAGWQoBPRX2jVm3TkAI1LJOloNDqM0sjC5CLpchqUfab1dK1J636iziJ6Tj
-         S+LA==
-X-Gm-Message-State: AOJu0Yy26omdAVfGmM5/02X0uK/hoKJppQ5hk5R12ZIJ2J8wFFt0vCQo
-        EdRhf1LK5WBZUU8Ut/NbvF22kuOkWaSPuNTT5pYf2EB6fjGkzuEVEnyMLlkS1izn2JvxZh1egkP
-        sPNtMXK+LJfe06R8wYw==
-X-Received: by 2002:a17:903:2796:b0:1bd:f1a7:8293 with SMTP id jw22-20020a170903279600b001bdf1a78293mr807065plb.69.1692165851857;
-        Tue, 15 Aug 2023 23:04:11 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFS3SdxCOU/alsfStDzwCuPlhoClV2uZlYDjYjqcKgGb+s5pwSHzVGQpdAqkgVd/4Z3H89y+A==
-X-Received: by 2002:a17:903:2796:b0:1bd:f1a7:8293 with SMTP id jw22-20020a170903279600b001bdf1a78293mr807042plb.69.1692165851494;
-        Tue, 15 Aug 2023 23:04:11 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1692181047; x=1692785847;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=i/4TlQaUgpN5C2FjPup3rLJkJfUEhe/1WNXH5y5dSaU=;
+        b=EprHotN7FnnUETv8sxMKiZydTuIPlp6l2WXh4t1RQoj7PN3yDDnSUYlbKFC4rSoVGW
+         g8Oewg6s9Cn7pybY63KVdmz+sc7ODb23tsvXDz+2dCU3lXRoQiG4LcxvfD/eQNdolZ3E
+         rIw4wU6A4e9+l7kDfDM9x/yEAeDnXQn6Z32UWL94e+qD8F1J1KV370rqujCphtiynp9T
+         cOaD3hJI2diZTflChKwjz3OPUv9U6CWTeqrMkJvj1a/6ROZH1yv/KCjRjZLvBzMJrU1U
+         /B8C8DgZzrsIY5CKMW6joyuLhdOqIBdEzTZ7xByLNYypvhMs0c2V4Y525OxSWqVeXho/
+         9Ndw==
+X-Gm-Message-State: AOJu0YwY+jq06//tNbMIZla63adXf6gEFCk4y8U+AiZcj2cGdr8TMayK
+        S5IzQES0KiYBhu6U4SEXuEUEKhUSnA3NnR2LwQXx3zJbGi6FtcK2LXkv+oeVBdbXJmHUjxd7UG8
+        /M8hxoV7pKlLBEnnsvmdVMR7lSyK6NBQ=
+X-Received: by 2002:a17:902:d4ce:b0:1bb:b34b:73a with SMTP id o14-20020a170902d4ce00b001bbb34b073amr1660974plg.25.1692181047549;
+        Wed, 16 Aug 2023 03:17:27 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGSGZKYpVVdVMri+bQScXYJQzozpxhf1OPb09r/vJLOPdxs8moc7FcKfs8uXQnBbxr2JHWlFg==
+X-Received: by 2002:a17:902:d4ce:b0:1bb:b34b:73a with SMTP id o14-20020a170902d4ce00b001bbb34b073amr1660956plg.25.1692181047153;
+        Wed, 16 Aug 2023 03:17:27 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d11-20020a170903230b00b001b8af7f632asm12136464plh.176.2023.08.15.23.04.07
+        by smtp.gmail.com with ESMTPSA id c13-20020a170902c1cd00b001bde440e693sm5556629plc.44.2023.08.16.03.17.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Aug 2023 23:04:10 -0700 (PDT)
-Date:   Wed, 16 Aug 2023 14:04:05 +0800
+        Wed, 16 Aug 2023 03:17:26 -0700 (PDT)
+Date:   Wed, 16 Aug 2023 18:17:23 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Amir Goldstein <amir73il@gmail.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
-        chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
-        fstests@vger.kernel.org, willy@infradead.org,
-        shirley.ma@oracle.com, konrad.wilk@oracle.com
-Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
-Message-ID: <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
-References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
- <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
- <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
- <20230812000456.GA2375177@frogsfrogsfrogs>
- <CAOQ4uxibnPqE5qG9R53JyaMY1bd6j9OH0pq2eQxYpxDwf3xnGw@mail.gmail.com>
- <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
- <20230816001108.GA1348949@frogsfrogsfrogs>
+To:     Lee Trager <lee@trager.us>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v4] fstests: Vertify dir permissions when creating a stub
+ subvolume
+Message-ID: <20230816101723.x2twz764yk3bfr2o@zlang-mailbox>
+References: <20230816005157.3703141-1-lee@trager.us>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230816001108.GA1348949@frogsfrogsfrogs>
+In-Reply-To: <20230816005157.3703141-1-lee@trager.us>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 15, 2023 at 05:11:08PM -0700, Darrick J. Wong wrote:
-> On Tue, Aug 15, 2023 at 04:54:55PM -0700, Luis Chamberlain wrote:
-> > On Sat, Aug 12, 2023 at 12:05:33PM +0300, Amir Goldstein wrote:
-> > > On Sat, Aug 12, 2023 at 3:04 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > > >
-> > > > On Fri, Aug 11, 2023 at 12:31:18PM -0700, Luis Chamberlain wrote:
-> > > > > On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
-> > > > > > +Roles
-> > > > > > +-----
-> > > > > > +There are seven key roles in the XFS project.
-> > > > > > +- **Testing Lead**: This person is responsible for setting the test
-> > > > > > +  coverage goals of the project, negotiating with developers to decide
-> > > > > > +  on new tests for new features, and making sure that developers and
-> > > > > > +  release managers execute on the testing.
-> > > > > > +
-> > > > > > +  The testing lead should identify themselves with an ``M:`` entry in
-> > > > > > +  the XFS section of the fstests MAINTAINERS file.
-> 
->                                     ^^^^^^^^^^^^^^^^^^^
-> > > > >
-> > > > > I think breaking responsibility down is very sensible, and should hopefully
-> > > > > allow you to not burn out. Given I realize how difficult it is to do all
-> > > > > the tasks, and since I'm already doing quite a bit of testing of XFS
-> > > > > on linux-next I can volunteer to help with this task of testing lead
-> > > > > if folks also think it may be useful to the community.
-> > > > >
-> > > > > The only thing is I'd like to also ask if Amir would join me on the
-> > > > > role to avoid conflicts of interest when and if it comes down to testing
-> > > > > features I'm involved in somehow.
-> > > >
-> > > > Good question.  Amir?
-> > > >
-> > > 
-> > > I am more than happy to help, but I don't believe that I currently perform
-> > > or that I will have time to perform the official duties of **Testing
-> > > Lead** role.
-> > > 
-> > > I fully support the nomination of Luis and I think the **Release Manager**
-> > > should be able to resolve any conflict of interests of the **Testing Lead**
-> > > as feature developer should any such conflicts arise :)
-> > 
-> > Fair enough.
-> > 
-> > Darrick, I suppose just one thing then, using M for Testing Lead seems
-> > likely to implicate the 'Testing Lead' getting Cc'd on every single new
+On Tue, Aug 15, 2023 at 05:51:57PM -0700, Lee Trager wrote:
+> btrfs supports creating nesting subvolumes however snapshots are not
+> recurive. When a snapshot is taken of a volume which contains a subvolume
+> the subvolume is replaced with a stub subvolume which has the same name and
+> uses inode number 2. This test validates that the stub volume copies
+> permissions of the original volume.
+> Signed-off-by: Lee Trager <lee@trager.us>
+> ---
+> v4:
+> - Removed extra blank line in common/rc
+> - Allowed caller to pass extra options to _require_unshare to check for
+>   support. -f -r -m -p -U have been supported by util-linux and busybox
+>   for awhile and are typical options.
+> - Moved _registry_cleanup to right after _begin_fstest.
+> - Added "cd /;rm -rf $tmp.*" from standard cleanup to 300 cleanup.
+> - Added rm -rf $test_dir before running test to ensure its in a clean state.
 
-Do you hope to get CC address/list ...
+Thanks for this change.
 
-> > patch. As much as I could help review, I don't think I can commit to
-> > that, and I think that's the point of the current split. To let us split
-> > roles to help scale stuff.
-> 
-> Note that we're talking about "M:" entries in the *fstests* MAINTAINERS
-> file, not the kernel...
-
-... from fstests project, for a patch on a linux-$FSTYP project?
-
-That's weird to me. 
-
-> 
-> > So how about a separate new prefix, TL: ? Adding Linus in case he has
-> > a stronger preference to only keep us at one character fist index on
-> > MAINTAINERS.
-> 
-> ...so I'm cc'ing Zorro since he's the owner of the relevant git repo.
-> Hey Zorro, do you have any opinions about how to record who's
-> responsible for each filesystem adding tests for new code and whatnot?
-
-I think a specific fs test lead is a contributer for that fs project more,
-not for fstests. The test lead need to report test results to that fs
-project, not necessary to report to fstests.
-
-And a test lead might do more testing besides fstests. So I can't imagine
-that I need to check another project to learn about who's in charge of the
-current project I'm changing.
-
-(If I understood anything wrong, please correct me:)
+Is there a known upstream 'fix' for this test? Due to it failed [1] when I tried
+to run it. If there's a known fix, please use _fixed_by_kernel_commit or
+_fixed_by_git_commit to point out.
 
 Thanks,
 Zorro
 
+[1]
+# uname -r
+6.5.0-0.rc6.43.fc40.x86_64
+# rpm -q btrfs-progs
+btrfs-progs-6.3.2-3.fc39.x86_64
+# ./check -s simpledev btrfs/300
+SECTION       -- simpledev
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 hp-xxxxxx-01 6.5.0-0.rc6.43.fc40.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Jul 24 13:32:24 UTC 2023
+MKFS_OPTIONS  -- /dev/sda3
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
+
+btrfs/300       - output mismatch (see /root/git/xfstests/results//simpledev/btrfs/300.out.bad)
+    --- tests/btrfs/300.out     2023-08-16 17:53:23.408870265 +0800
+    +++ /root/git/xfstests/results//simpledev/btrfs/300.out.bad 2023-08-16 17:54:02.925281855 +0800
+    @@ -15,4 +15,4 @@
+     -rw-r--r-- fsgqa fsgqa ./snapshot/1
+     -rw-r--r-- fsgqa fsgqa ./snapshot/2
+     -rw-r--r-- fsgqa fsgqa ./snapshot/3
+    -drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
+    +drwxr-xr-x root root ./snapshot/subsubvol
+    ...
+    (Run 'diff -u /root/git/xfstests/tests/btrfs/300.out /root/git/xfstests/results//simpledev/btrfs/300.out.bad'  to see the entire diff)
+Ran: btrfs/300
+Failures: btrfs/300
+Failed 1 of 1 tests
+
+SECTION       -- simpledev
+=========================
+Ran: btrfs/300
+Failures: btrfs/300
+Failed 1 of 1 tests
+
+> v3:
+> - Fixed whitepsace in 300.out due to find command not using './' before %P
+> v2:
+> - Migrated _require_unshare from overlay/020 into common_rc. Updated the error
+>   message as most Linux systems should have unshare from util-linux.
+> - Added note about why the test must be done in one subshell process.
+> - chown command now uses $qa_user:$qa_group instead of hard coded values.
+> common/rc           |  5 +++++
+>  tests/btrfs/300     | 49 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/300.out | 18 +++++++++++++++++
+>  tests/overlay/020   |  7 +------
+>  4 files changed, 73 insertions(+), 6 deletions(-)
+>  create mode 100755 tests/btrfs/300
+>  create mode 100644 tests/btrfs/300.out
 > 
-> --D
-> 
-> > 
-> >   Luis
+> diff --git a/common/rc b/common/rc
+> index 5c4429ed..18ea0f02 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5224,6 +5224,11 @@ _soak_loop_running() {
+>  	return 0
+>  }
+>  
+> +_require_unshare() {
+> +	unshare -f -r -m -p -U $@ true &>/dev/null || \
+> +		_notrun "unshare: command not found, should be in util-linux"
+> +}
+> +
+>  init_rc
+>  
+>  ################################################################################
+> diff --git a/tests/btrfs/300 b/tests/btrfs/300
+> new file mode 100755
+> index 00000000..1e4dc7b1
+> --- /dev/null
+> +++ b/tests/btrfs/300
+> @@ -0,0 +1,49 @@
+> +#!/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 300
+> +#
+> +# Validate that snapshots taken while in a remapped namespace preserve
+> +# the permissions of the user.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick subvol snapshot
+> +_register_cleanup "cleanup"
+> +
+> +_supported_fs btrfs
+> +
+> +_require_test
+> +_require_user
+> +_require_group
+> +_require_unix_perm_checking
+> +_require_unshare
+> +
+> +test_dir="${TEST_DIR}/${seq}"
+> +cleanup() {
+> +	rm -rf $test_dir
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +rm -rf $test_dir
+> +mkdir $test_dir
+> +chown $qa_user:$qa_group $test_dir
+> +
+> +# _user_do executes each command as $qa_user in its own subshell. unshare
+> +# sets the namespace for the running shell. The test must run in one user
+> +# subshell to preserve the namespace over multiple commands.
+> +_user_do "
+> +cd ${test_dir};
+> +unshare --user --keep-caps --map-auto --map-root-user;
+> +$BTRFS_UTIL_PROG subvolume create subvol;
+> +touch subvol/{1,2,3};
+> +$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
+> +touch subvol/subsubvol/{4,5,6};
+> +$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
+> +"
+> +
+> +find $test_dir/. -printf "%M %u %g ./%P\n"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
+> new file mode 100644
+> index 00000000..6e94447e
+> --- /dev/null
+> +++ b/tests/btrfs/300.out
+> @@ -0,0 +1,18 @@
+> +QA output created by 300
+> +Create subvolume './subvol'
+> +Create subvolume 'subvol/subsubvol'
+> +Create a snapshot of 'subvol' in './snapshot'
+> +drwxr-xr-x fsgqa fsgqa ./
+> +drwxr-xr-x fsgqa fsgqa ./subvol
+> +-rw-r--r-- fsgqa fsgqa ./subvol/1
+> +-rw-r--r-- fsgqa fsgqa ./subvol/2
+> +-rw-r--r-- fsgqa fsgqa ./subvol/3
+> +drwxr-xr-x fsgqa fsgqa ./subvol/subsubvol
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/4
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/5
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/6
+> +drwxr-xr-x fsgqa fsgqa ./snapshot
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/1
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/2
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/3
+> +drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
+> diff --git a/tests/overlay/020 b/tests/overlay/020
+> index 98a33aec..9f82da34 100755
+> --- a/tests/overlay/020
+> +++ b/tests/overlay/020
+> @@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
+>  
+>  # real QA test starts here
+>  
+> -require_unshare() {
+> -	unshare -f -r "$@" true &>/dev/null || \
+> -		_notrun "unshare $@: not supported"
+> -}
+> -
+>  # Modify as appropriate.
+>  _supported_fs overlay
+>  _fixed_by_kernel_commit 3fe6e52f0626 \
+>  	"ovl: override creds with the ones from the superblock mounter"
+>  
+>  _require_scratch
+> -require_unshare -m -p -U
+> +_require_unshare
+>  
+>  # Remove all files from previous tests
+>  _scratch_mkfs
+> -- 
+> 2.34.1
 > 
 
