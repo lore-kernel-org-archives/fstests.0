@@ -2,45 +2,73 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F096C41513
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 01:23:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D20DC001E0
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 06:05:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240953AbjHPBWk (ORCPT
+        id S241843AbjHPGE4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Aug 2023 21:22:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51754 "EHLO
+        Wed, 16 Aug 2023 02:04:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241024AbjHPBWR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2023 21:22:17 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95B35211E;
-        Tue, 15 Aug 2023 18:22:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=PmuPdi8/K6pjWpAa0PRvM2ZuotU5rWlA6d+bG8XAGeg=; b=1sWMc1iXD2EhA5fS0bF8rBq1yF
-        O/ajvYoZuCHtExhS/gdhff5A3aXa9pg1/ODv/ZhJ1vy8vGt/WL0Y3vnBWmtYI7sxg0eD1BSMKyhGU
-        ZXS4TbCDamVjR6JMc443Y4clCVUleI0oIrZFI8eTZVgUR0cX/GVd54dZfRUNeYRznTW4yCRjEc+xl
-        lIxO7b2K58sC0vlcQPEa7eQL2Rv+mDX3SksLz3r2kFiN5o0kxMk1szTrvLKxPWAH6d+kshmQB73MG
-        Rczab6Ai4tzea/hdW2Vwy8d3b1MM0ghJBE4cIzR0mdHKGAh50NE20Rm6wxxAE0eyL5/pKzWSjM/qi
-        rSsl/Okg==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qW5Ei-002wA5-31;
-        Wed, 16 Aug 2023 01:22:12 +0000
-Date:   Tue, 15 Aug 2023 18:22:12 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
+        with ESMTP id S242061AbjHPGEz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 02:04:55 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 628091BCC
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 23:04:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1692165854;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=K2SN3FtMPWOYoJEWsWtLTr+p00cJScPn6dytSX+zKSw=;
+        b=P2iH2zl0J2PmOHXjVr7RhJWBR+J5pHWTeuDKG5bsRcasqDopXV1RODdyzPDsNs6XZ9sjyf
+        rVnJbVJ8//hLUJyfseY4mBg2q8sRK8njkufR30b9Xg/rGh3Stc5Gar3V+QnFNqtmSEV16f
+        k+UasajsmdTiGqJPiN0Y5gOTxkcHdhw=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-217-Q9MYKXNeNkuOa_lqzj-pRg-1; Wed, 16 Aug 2023 02:04:12 -0400
+X-MC-Unique: Q9MYKXNeNkuOa_lqzj-pRg-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1bbebf511abso73964695ad.1
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 23:04:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692165852; x=1692770652;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=K2SN3FtMPWOYoJEWsWtLTr+p00cJScPn6dytSX+zKSw=;
+        b=kVerH/KmA0hZqHDgviaMXFIP4KVkMmJseh5fU1hH7Ia51zNBxCKD0GLWwI9Ry8+Pr4
+         XvFgHNXkqTufjrTONVxVha61CAyQS5V6qYD/8ZwDZq5lSihPchle8Rw5pAaen2o92++G
+         HfOIi4MeoZkCS6a5o7UfKXhzeHe3NhSPJKhLRSFvtDOGgvfiM+FUKlzp4iFuaYj5g/wq
+         JXBgqIF2N43EjcEXEex2ZvNDX5nH5e0J0DtSQv9Ym95LxK7EqOEREXOPmgtIjc1bsOzS
+         pkOuRsYNWeAGWQoBPRX2jVm3TkAI1LJOloNDqM0sjC5CLpchqUfab1dK1J636iziJ6Tj
+         S+LA==
+X-Gm-Message-State: AOJu0Yy26omdAVfGmM5/02X0uK/hoKJppQ5hk5R12ZIJ2J8wFFt0vCQo
+        EdRhf1LK5WBZUU8Ut/NbvF22kuOkWaSPuNTT5pYf2EB6fjGkzuEVEnyMLlkS1izn2JvxZh1egkP
+        sPNtMXK+LJfe06R8wYw==
+X-Received: by 2002:a17:903:2796:b0:1bd:f1a7:8293 with SMTP id jw22-20020a170903279600b001bdf1a78293mr807065plb.69.1692165851857;
+        Tue, 15 Aug 2023 23:04:11 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFS3SdxCOU/alsfStDzwCuPlhoClV2uZlYDjYjqcKgGb+s5pwSHzVGQpdAqkgVd/4Z3H89y+A==
+X-Received: by 2002:a17:903:2796:b0:1bd:f1a7:8293 with SMTP id jw22-20020a170903279600b001bdf1a78293mr807042plb.69.1692165851494;
+        Tue, 15 Aug 2023 23:04:11 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d11-20020a170903230b00b001b8af7f632asm12136464plh.176.2023.08.15.23.04.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 15 Aug 2023 23:04:10 -0700 (PDT)
+Date:   Wed, 16 Aug 2023 14:04:05 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Amir Goldstein <amir73il@gmail.com>,
         Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
         linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
         david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
         chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
         fstests@vger.kernel.org, willy@infradead.org,
-        shirley.ma@oracle.com, konrad.wilk@oracle.com,
-        Zorro Lang <zlang@redhat.com>
+        shirley.ma@oracle.com, konrad.wilk@oracle.com
 Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
-Message-ID: <ZNwkxD7S/6zYZ1OF@bombadil.infradead.org>
+Message-ID: <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
 References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
  <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
  <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
@@ -49,18 +77,99 @@ References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
  <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
  <20230816001108.GA1348949@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 In-Reply-To: <20230816001108.GA1348949@frogsfrogsfrogs>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
 On Tue, Aug 15, 2023 at 05:11:08PM -0700, Darrick J. Wong wrote:
+> On Tue, Aug 15, 2023 at 04:54:55PM -0700, Luis Chamberlain wrote:
+> > On Sat, Aug 12, 2023 at 12:05:33PM +0300, Amir Goldstein wrote:
+> > > On Sat, Aug 12, 2023 at 3:04 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > > >
+> > > > On Fri, Aug 11, 2023 at 12:31:18PM -0700, Luis Chamberlain wrote:
+> > > > > On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
+> > > > > > +Roles
+> > > > > > +-----
+> > > > > > +There are seven key roles in the XFS project.
+> > > > > > +- **Testing Lead**: This person is responsible for setting the test
+> > > > > > +  coverage goals of the project, negotiating with developers to decide
+> > > > > > +  on new tests for new features, and making sure that developers and
+> > > > > > +  release managers execute on the testing.
+> > > > > > +
+> > > > > > +  The testing lead should identify themselves with an ``M:`` entry in
+> > > > > > +  the XFS section of the fstests MAINTAINERS file.
+> 
+>                                     ^^^^^^^^^^^^^^^^^^^
+> > > > >
+> > > > > I think breaking responsibility down is very sensible, and should hopefully
+> > > > > allow you to not burn out. Given I realize how difficult it is to do all
+> > > > > the tasks, and since I'm already doing quite a bit of testing of XFS
+> > > > > on linux-next I can volunteer to help with this task of testing lead
+> > > > > if folks also think it may be useful to the community.
+> > > > >
+> > > > > The only thing is I'd like to also ask if Amir would join me on the
+> > > > > role to avoid conflicts of interest when and if it comes down to testing
+> > > > > features I'm involved in somehow.
+> > > >
+> > > > Good question.  Amir?
+> > > >
+> > > 
+> > > I am more than happy to help, but I don't believe that I currently perform
+> > > or that I will have time to perform the official duties of **Testing
+> > > Lead** role.
+> > > 
+> > > I fully support the nomination of Luis and I think the **Release Manager**
+> > > should be able to resolve any conflict of interests of the **Testing Lead**
+> > > as feature developer should any such conflicts arise :)
+> > 
+> > Fair enough.
+> > 
+> > Darrick, I suppose just one thing then, using M for Testing Lead seems
+> > likely to implicate the 'Testing Lead' getting Cc'd on every single new
+
+Do you hope to get CC address/list ...
+
+> > patch. As much as I could help review, I don't think I can commit to
+> > that, and I think that's the point of the current split. To let us split
+> > roles to help scale stuff.
+> 
 > Note that we're talking about "M:" entries in the *fstests* MAINTAINERS
 > file, not the kernel...
 
-Ah, that makes much more sense :)
+... from fstests project, for a patch on a linux-$FSTYP project?
 
-  Luis
+That's weird to me. 
+
+> 
+> > So how about a separate new prefix, TL: ? Adding Linus in case he has
+> > a stronger preference to only keep us at one character fist index on
+> > MAINTAINERS.
+> 
+> ...so I'm cc'ing Zorro since he's the owner of the relevant git repo.
+> Hey Zorro, do you have any opinions about how to record who's
+> responsible for each filesystem adding tests for new code and whatnot?
+
+I think a specific fs test lead is a contributer for that fs project more,
+not for fstests. The test lead need to report test results to that fs
+project, not necessary to report to fstests.
+
+And a test lead might do more testing besides fstests. So I can't imagine
+that I need to check another project to learn about who's in charge of the
+current project I'm changing.
+
+(If I understood anything wrong, please correct me:)
+
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > 
+> >   Luis
+> 
+
