@@ -2,91 +2,237 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30F0EC001B0
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 10:31:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B5EDC04E69
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 11:47:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243702AbjHPKbD (ORCPT
+        id S244733AbjHPLqu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Aug 2023 06:31:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34408 "EHLO
+        Wed, 16 Aug 2023 07:46:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243922AbjHPKax (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 06:30:53 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05BC51BD4
-        for <fstests@vger.kernel.org>; Wed, 16 Aug 2023 03:30:52 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        with ESMTP id S244798AbjHPLqt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 07:46:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F9C11FC3;
+        Wed, 16 Aug 2023 04:46:48 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id BCF131F74D;
-        Wed, 16 Aug 2023 10:30:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1692181850; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=HYKb7WCcF2xloubaY3x7ogE/Wc/qlIIHpOkj3MYUscU=;
-        b=uEO8vWeBqzMeYqGQeBtzHiCb4pWLXrQd016Bu+DlvTbtQP+CO5eMj5Z+EkB3MsXh4a9y72
-        N4bqW035UvlFj2JQrAKHcXMStGGnSKT8hoqInL5ybofzDErFf3VumoIeYxpeQOtXJ0lTJL
-        7KqrQJakghf7qahH7e6aC1kE2yi+50k=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1692181850;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=HYKb7WCcF2xloubaY3x7ogE/Wc/qlIIHpOkj3MYUscU=;
-        b=qB7jUtIHfx3c4bmCZzm4c67cyxg8nAxlbrtKute6vRWG27uuYDcJI0YHppvVol6i9R6rlL
-        vzyUtqngLp/oO4BA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 968881353E;
-        Wed, 16 Aug 2023 10:30:50 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id tQUYI1ql3GRFbwAAMHmgww
-        (envelope-from <ddiss@suse.de>); Wed, 16 Aug 2023 10:30:50 +0000
-From:   David Disseldorp <ddiss@suse.de>
-To:     fstests@vger.kernel.org
-Cc:     David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v2] common/rc: drop 'fsck -f' parameter from _repair_test_fs
-Date:   Wed, 16 Aug 2023 12:33:30 +0200
-Message-Id: <20230816103330.961-1-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 944CF61644;
+        Wed, 16 Aug 2023 11:46:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3BCDC433C8;
+        Wed, 16 Aug 2023 11:46:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692186407;
+        bh=0k8u7oV6Uy3kseiVTDeFjUUPTj/LV2UxLgMy/m8tGIg=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Y3IngzYciTlrUQ48Ng7e/QkQ2I3vP5efdqAvIHvQyrQp5LN0oii8ep5jxAVsoW6ym
+         hpxs4qRa8FOoQOvUc0btXX8sUaF2Wwi74x83Xc8NEPA/yo9bSeRGX/9KsMibXd+8g0
+         8gi8iOjZ/hbIc9WDbxi+u2HsnIEjtsv0T7kP8l0Kkiownkybrco5SGOvdjj9w+v+VX
+         eyn2Y+LcLyAvGQp+1Rl44NLy43oeabHE+NotivJLnyKY7GjvTBwgLZ/4ik422bmK1p
+         v3iMURZHwycEJ/y1lVznIZh6wkO3eEplDKGU1W4+PE0qvr5hvb3rfHySol0oWpDcSw
+         3vFy73VCUznjQ==
+Received: by mail-oo1-f46.google.com with SMTP id 006d021491bc7-56c85b723cfso4112751eaf.3;
+        Wed, 16 Aug 2023 04:46:46 -0700 (PDT)
+X-Gm-Message-State: AOJu0YxVVd5sUMOJnCpH/94je/WYL9oHPLVJ3NGXj6bmbsA27cA240Ye
+        XV1Tqs8drq02qCsc/44Mw0HS5Su4PpoFz+fNHQA=
+X-Google-Smtp-Source: AGHT+IGfnIRvFopkHSwIfJLJovdHvlegNqkxGif0c9zYGwc7kOytaH2Nb8B/yJzXS0KU55BdPvnshStj+rvld+F6yxE=
+X-Received: by 2002:a05:6870:169a:b0:1b0:25b4:4b77 with SMTP id
+ j26-20020a056870169a00b001b025b44b77mr2017443oae.14.1692186406077; Wed, 16
+ Aug 2023 04:46:46 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230814203759.3555213-1-lee@trager.us>
+In-Reply-To: <20230814203759.3555213-1-lee@trager.us>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Wed, 16 Aug 2023 12:46:10 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H67_k0tRQm_ujbep15R5jCR3GEFk57Fnkqnmc_8538utw@mail.gmail.com>
+Message-ID: <CAL3q7H67_k0tRQm_ujbep15R5jCR3GEFk57Fnkqnmc_8538utw@mail.gmail.com>
+Subject: Re: [PATCH v3] fstests: Vertify dir permissions when creating a stub subvolume
+To:     Lee Trager <lee@trager.us>
+Cc:     fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The '-f' parameter is fsck.ext# specific, where it's documented to:
-  Force checking even if filesystem is marked clean
+On Mon, Aug 14, 2023 at 10:04=E2=80=AFPM Lee Trager <lee@trager.us> wrote:
+>
+> btrfs supports creating nesting subvolumes however snapshots are not
+> recurive. When a snapshot is taken of a volume which contains a subvolume
+> the subvolume is replaced with a stub subvolume which has the same name a=
+nd
+> uses inode number 2. This test validates that the stub volume copies
+> permissions of the original volume.
+> Signed-off-by: Lee Trager <lee@trager.us>
+> ---
+> v3
+> - Fixed whitepsace in 300.out due to find command not using './' before %=
+P
+> v2:
+> - Migrated _require_unshare from overlay/020 into common_rc. Updated the =
+error
+>   message as most Linux systems should have unshare from util-linux.
+> - Added note about why the test must be done in one subshell process.
+> - chown command now uses $qa_user:$qa_group instead of hard coded values.
+> common/rc           |  6 ++++++
+>  tests/btrfs/300     | 46 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/300.out | 18 ++++++++++++++++++
+>  tests/overlay/020   |  7 +------
+>  4 files changed, 71 insertions(+), 6 deletions(-)
+>  create mode 100755 tests/btrfs/300
+>  create mode 100644 tests/btrfs/300.out
+>
+> diff --git a/common/rc b/common/rc
+> index 5c4429ed..ca7c5c14 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5224,6 +5224,12 @@ _soak_loop_running() {
+>         return 0
+>  }
+>
+> +
+> +_require_unshare() {
+> +       unshare -f -r -m -p -U  true &>/dev/null || \
+> +               _notrun "unshare $@: not found, should be in util-linux"
+> +}
+> +
+>  init_rc
+>
+>  ########################################################################=
+########
+> diff --git a/tests/btrfs/300 b/tests/btrfs/300
+> new file mode 100755
+> index 00000000..fb9cd49f
+> --- /dev/null
+> +++ b/tests/btrfs/300
+> @@ -0,0 +1,46 @@
+> +#!/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
 
-_repair_test_fs() is only called on _check_test_fs() failure, so
-dropping the parameter should be possible without changing ext#
-behaviour.
-Doing so fixes _repair_test_fs() on exfat, where fsck.exfat doesn't
-support '-f'.
+2023
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
----
-v2: drop -f from default case instead of splitting out exfat case
+> +#
+> +# FS QA Test 300
+> +#
+> +# Validate that snapshots taken while in a remapped namespace preserve
+> +# the permissions of the user.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick subvol snapshot
+> +
+> +_supported_fs btrfs
+> +
+> +_require_test
+> +_require_user
+> +_require_group
+> +_require_unix_perm_checking
+> +_require_unshare
+> +_register_cleanup "cleanup"
 
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+So this is a test for the bug fix recently submitted:
 
-diff --git a/common/rc b/common/rc
-index 5c4429ed..66d270ac 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1231,7 +1231,7 @@ _repair_test_fs()
- 		;;
- 	*)
- 		# Let's hope fsck -y suffices...
--		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
-+		fsck -t $FSTYP -y $TEST_DEV >$tmp.repair 2>&1
- 		res=$?
- 		if test "$res" -lt 4 ; then
- 			res=0
--- 
-2.35.3
+https://lore.kernel.org/linux-btrfs/20230811004657.1661696-1-lee@trager.us/
 
+Which is in misc-next now:
+https://github.com/kdave/btrfs-devel/commit/ea6aa58a92299294b83a75defa46743=
+7a00011fe
+
+Please add a:
+
+_fixed_by_kernel_commit xxxxxxxxxxxx \
+       "btrfs: copy dir permission and time when creating a stub subvolume"
+
+The xxxxxxxxx should be replaced with the git commit id once it lands
+in Linus' tree, in the meanwhile you can leave the xxxxxxxxxx.
+
+Also please CC the linux-btrfs mailing list when you send btrfs tests
+or changes, so that it isn't missed by developers and nowadays it's
+even documented to do so in the MAINTAINERS file.
+
+There's also a typo in the subject:  Vertify -> Verify
+
+Thanks.
+
+
+> +
+> +test_dir=3D"${TEST_DIR}/$(basename $0)"
+> +cleanup() {
+> +    [ -d "$test_dir" ] && rm -rf $test_dir
+> +}
+> +
+> +mkdir $test_dir
+> +chown $qa_user:$qa_group $test_dir
+> +
+> +# _user_do executes each command as $qa_user in its own subshell. unshar=
+e
+> +# sets the namespace for the running shell. The test must run in one use=
+r
+> +# subshell to preserve the namespace over multiple commands.
+> +_user_do "
+> +cd ${test_dir};
+> +unshare --user --keep-caps --map-auto --map-root-user;
+> +$BTRFS_UTIL_PROG subvolume create subvol;
+> +touch subvol/{1,2,3};
+> +$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
+> +touch subvol/subsubvol/{4,5,6};
+> +$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
+> +"
+> +
+> +find $test_dir/. -printf "%M %u %g ./%P\n"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
+> new file mode 100644
+> index 00000000..6e94447e
+> --- /dev/null
+> +++ b/tests/btrfs/300.out
+> @@ -0,0 +1,18 @@
+> +QA output created by 300
+> +Create subvolume './subvol'
+> +Create subvolume 'subvol/subsubvol'
+> +Create a snapshot of 'subvol' in './snapshot'
+> +drwxr-xr-x fsgqa fsgqa ./
+> +drwxr-xr-x fsgqa fsgqa ./subvol
+> +-rw-r--r-- fsgqa fsgqa ./subvol/1
+> +-rw-r--r-- fsgqa fsgqa ./subvol/2
+> +-rw-r--r-- fsgqa fsgqa ./subvol/3
+> +drwxr-xr-x fsgqa fsgqa ./subvol/subsubvol
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/4
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/5
+> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/6
+> +drwxr-xr-x fsgqa fsgqa ./snapshot
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/1
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/2
+> +-rw-r--r-- fsgqa fsgqa ./snapshot/3
+> +drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
+> diff --git a/tests/overlay/020 b/tests/overlay/020
+> index 98a33aec..9f82da34 100755
+> --- a/tests/overlay/020
+> +++ b/tests/overlay/020
+> @@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
+>
+>  # real QA test starts here
+>
+> -require_unshare() {
+> -       unshare -f -r "$@" true &>/dev/null || \
+> -               _notrun "unshare $@: not supported"
+> -}
+> -
+>  # Modify as appropriate.
+>  _supported_fs overlay
+>  _fixed_by_kernel_commit 3fe6e52f0626 \
+>         "ovl: override creds with the ones from the superblock mounter"
+>
+>  _require_scratch
+> -require_unshare -m -p -U
+> +_require_unshare
+>
+>  # Remove all files from previous tests
+>  _scratch_mkfs
+> --
+> 2.34.1
+>
