@@ -2,125 +2,186 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63906C04A6A
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 00:11:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3DEFC001DE
+	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 00:53:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240738AbjHPALN (ORCPT
+        id S240888AbjHPAwp (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 15 Aug 2023 20:11:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46134 "EHLO
+        Tue, 15 Aug 2023 20:52:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240785AbjHPALL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2023 20:11:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 194ED1FFF;
-        Tue, 15 Aug 2023 17:11:10 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id AB81461DF8;
-        Wed, 16 Aug 2023 00:11:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0DAD9C433C7;
-        Wed, 16 Aug 2023 00:11:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692144669;
-        bh=EzRSGDgzZ8gErsTCdapRiM/o1Hhbl51iCT+MuOD6284=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Tl9PXV1XtLet2XdnCXQm7qGWTd4KMWdyPu6GqQU9ARmLIav931qLeZmKeJJMZ4583
-         hrG0fle5qMee2KqyZF+GM3/XuCVJfTlHr5VsGJT+JLN4nJ77sljJ31IqNXieYUDz/6
-         +RTJ6WlynMZZrIcZTMbi71+iJ5F93voO9dBgKsREHSyEOu/M/RJx8F0lNI12lMC5VK
-         9IMyf1RCsL7JCcUGcvDGFjwDUR016vIriX5o2Md3hLt4aPWyd8j9+cNmD0ixQJk6dU
-         FqKbYmEq7SpJPLl/79QE5RTbmi/VEN4lCHgFm5hT+TDIRpQZWCEiX3w9SPqvW6Jdwl
-         SKZYcxz6FVWcg==
-Date:   Tue, 15 Aug 2023 17:11:08 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     Amir Goldstein <amir73il@gmail.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
-        chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
-        fstests@vger.kernel.org, willy@infradead.org,
-        shirley.ma@oracle.com, konrad.wilk@oracle.com,
-        Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
-Message-ID: <20230816001108.GA1348949@frogsfrogsfrogs>
-References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
- <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
- <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
- <20230812000456.GA2375177@frogsfrogsfrogs>
- <CAOQ4uxibnPqE5qG9R53JyaMY1bd6j9OH0pq2eQxYpxDwf3xnGw@mail.gmail.com>
- <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
+        with ESMTP id S238380AbjHPAwS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2023 20:52:18 -0400
+Received: from trager.us (trager.us [52.5.81.116])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC4432117
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2023 17:52:16 -0700 (PDT)
+Received: from [163.114.132.6] (helo=localhost)
+        by trager.us with esmtpsa (TLSv1.3:TLS_AES_256_GCM_SHA384:256)
+        (Exim 4.92.3)
+        (envelope-from <lee@trager.us>)
+        id 1qW4lj-0008Ph-NM; Wed, 16 Aug 2023 00:52:15 +0000
+From:   Lee Trager <lee@trager.us>
+To:     fstests@vger.kernel.org
+Cc:     Lee Trager <lee@trager.us>
+Subject: [PATCH v4] fstests: Vertify dir permissions when creating a stub subvolume
+Date:   Tue, 15 Aug 2023 17:51:57 -0700
+Message-Id: <20230816005157.3703141-1-lee@trager.us>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 15, 2023 at 04:54:55PM -0700, Luis Chamberlain wrote:
-> On Sat, Aug 12, 2023 at 12:05:33PM +0300, Amir Goldstein wrote:
-> > On Sat, Aug 12, 2023 at 3:04 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > >
-> > > On Fri, Aug 11, 2023 at 12:31:18PM -0700, Luis Chamberlain wrote:
-> > > > On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
-> > > > > +Roles
-> > > > > +-----
-> > > > > +There are seven key roles in the XFS project.
-> > > > > +- **Testing Lead**: This person is responsible for setting the test
-> > > > > +  coverage goals of the project, negotiating with developers to decide
-> > > > > +  on new tests for new features, and making sure that developers and
-> > > > > +  release managers execute on the testing.
-> > > > > +
-> > > > > +  The testing lead should identify themselves with an ``M:`` entry in
-> > > > > +  the XFS section of the fstests MAINTAINERS file.
+btrfs supports creating nesting subvolumes however snapshots are not
+recurive. When a snapshot is taken of a volume which contains a subvolume
+the subvolume is replaced with a stub subvolume which has the same name and
+uses inode number 2. This test validates that the stub volume copies
+permissions of the original volume.
+Signed-off-by: Lee Trager <lee@trager.us>
+---
+v4:
+- Removed extra blank line in common/rc
+- Allowed caller to pass extra options to _require_unshare to check for
+  support. -f -r -m -p -U have been supported by util-linux and busybox
+  for awhile and are typical options.
+- Moved _registry_cleanup to right after _begin_fstest.
+- Added "cd /;rm -rf $tmp.*" from standard cleanup to 300 cleanup.
+- Added rm -rf $test_dir before running test to ensure its in a clean state.
+v3:
+- Fixed whitepsace in 300.out due to find command not using './' before %P
+v2:
+- Migrated _require_unshare from overlay/020 into common_rc. Updated the error
+  message as most Linux systems should have unshare from util-linux.
+- Added note about why the test must be done in one subshell process.
+- chown command now uses $qa_user:$qa_group instead of hard coded values.
+common/rc           |  5 +++++
+ tests/btrfs/300     | 49 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/300.out | 18 +++++++++++++++++
+ tests/overlay/020   |  7 +------
+ 4 files changed, 73 insertions(+), 6 deletions(-)
+ create mode 100755 tests/btrfs/300
+ create mode 100644 tests/btrfs/300.out
 
-                                    ^^^^^^^^^^^^^^^^^^^
-> > > >
-> > > > I think breaking responsibility down is very sensible, and should hopefully
-> > > > allow you to not burn out. Given I realize how difficult it is to do all
-> > > > the tasks, and since I'm already doing quite a bit of testing of XFS
-> > > > on linux-next I can volunteer to help with this task of testing lead
-> > > > if folks also think it may be useful to the community.
-> > > >
-> > > > The only thing is I'd like to also ask if Amir would join me on the
-> > > > role to avoid conflicts of interest when and if it comes down to testing
-> > > > features I'm involved in somehow.
-> > >
-> > > Good question.  Amir?
-> > >
-> > 
-> > I am more than happy to help, but I don't believe that I currently perform
-> > or that I will have time to perform the official duties of **Testing
-> > Lead** role.
-> > 
-> > I fully support the nomination of Luis and I think the **Release Manager**
-> > should be able to resolve any conflict of interests of the **Testing Lead**
-> > as feature developer should any such conflicts arise :)
-> 
-> Fair enough.
-> 
-> Darrick, I suppose just one thing then, using M for Testing Lead seems
-> likely to implicate the 'Testing Lead' getting Cc'd on every single new
-> patch. As much as I could help review, I don't think I can commit to
-> that, and I think that's the point of the current split. To let us split
-> roles to help scale stuff.
+diff --git a/common/rc b/common/rc
+index 5c4429ed..18ea0f02 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5224,6 +5224,11 @@ _soak_loop_running() {
+ 	return 0
+ }
+ 
++_require_unshare() {
++	unshare -f -r -m -p -U $@ true &>/dev/null || \
++		_notrun "unshare: command not found, should be in util-linux"
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/btrfs/300 b/tests/btrfs/300
+new file mode 100755
+index 00000000..1e4dc7b1
+--- /dev/null
++++ b/tests/btrfs/300
+@@ -0,0 +1,49 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2022 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 300
++#
++# Validate that snapshots taken while in a remapped namespace preserve
++# the permissions of the user.
++#
++. ./common/preamble
++_begin_fstest auto quick subvol snapshot
++_register_cleanup "cleanup"
++
++_supported_fs btrfs
++
++_require_test
++_require_user
++_require_group
++_require_unix_perm_checking
++_require_unshare
++
++test_dir="${TEST_DIR}/${seq}"
++cleanup() {
++	rm -rf $test_dir
++	cd /
++	rm -rf $tmp.*
++}
++
++rm -rf $test_dir
++mkdir $test_dir
++chown $qa_user:$qa_group $test_dir
++
++# _user_do executes each command as $qa_user in its own subshell. unshare
++# sets the namespace for the running shell. The test must run in one user
++# subshell to preserve the namespace over multiple commands.
++_user_do "
++cd ${test_dir};
++unshare --user --keep-caps --map-auto --map-root-user;
++$BTRFS_UTIL_PROG subvolume create subvol;
++touch subvol/{1,2,3};
++$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
++touch subvol/subsubvol/{4,5,6};
++$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
++"
++
++find $test_dir/. -printf "%M %u %g ./%P\n"
++
++status=0
++exit
+diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
+new file mode 100644
+index 00000000..6e94447e
+--- /dev/null
++++ b/tests/btrfs/300.out
+@@ -0,0 +1,18 @@
++QA output created by 300
++Create subvolume './subvol'
++Create subvolume 'subvol/subsubvol'
++Create a snapshot of 'subvol' in './snapshot'
++drwxr-xr-x fsgqa fsgqa ./
++drwxr-xr-x fsgqa fsgqa ./subvol
++-rw-r--r-- fsgqa fsgqa ./subvol/1
++-rw-r--r-- fsgqa fsgqa ./subvol/2
++-rw-r--r-- fsgqa fsgqa ./subvol/3
++drwxr-xr-x fsgqa fsgqa ./subvol/subsubvol
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/4
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/5
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/6
++drwxr-xr-x fsgqa fsgqa ./snapshot
++-rw-r--r-- fsgqa fsgqa ./snapshot/1
++-rw-r--r-- fsgqa fsgqa ./snapshot/2
++-rw-r--r-- fsgqa fsgqa ./snapshot/3
++drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
+diff --git a/tests/overlay/020 b/tests/overlay/020
+index 98a33aec..9f82da34 100755
+--- a/tests/overlay/020
++++ b/tests/overlay/020
+@@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
+ 
+ # real QA test starts here
+ 
+-require_unshare() {
+-	unshare -f -r "$@" true &>/dev/null || \
+-		_notrun "unshare $@: not supported"
+-}
+-
+ # Modify as appropriate.
+ _supported_fs overlay
+ _fixed_by_kernel_commit 3fe6e52f0626 \
+ 	"ovl: override creds with the ones from the superblock mounter"
+ 
+ _require_scratch
+-require_unshare -m -p -U
++_require_unshare
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
+-- 
+2.34.1
 
-Note that we're talking about "M:" entries in the *fstests* MAINTAINERS
-file, not the kernel...
-
-> So how about a separate new prefix, TL: ? Adding Linus in case he has
-> a stronger preference to only keep us at one character fist index on
-> MAINTAINERS.
-
-...so I'm cc'ing Zorro since he's the owner of the relevant git repo.
-Hey Zorro, do you have any opinions about how to record who's
-responsible for each filesystem adding tests for new code and whatnot?
-
---D
-
-> 
->   Luis
