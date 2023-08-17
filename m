@@ -2,92 +2,97 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C9CAC41513
-	for <linux-fstests@archiver.kernel.org>; Thu, 17 Aug 2023 01:16:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E56E7C2FC04
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Aug 2023 05:14:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347466AbjHQBPr (ORCPT
+        id S1347900AbjHQFNv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Aug 2023 21:15:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55126 "EHLO
+        Thu, 17 Aug 2023 01:13:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236955AbjHQBPc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 21:15:32 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B15AB1987;
-        Wed, 16 Aug 2023 18:15:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=qCicAS+g3vQtPfa9bypEn46nqXRIlzk6w9WcGt9/wvg=; b=fPC/3LdncyGeel3H+DM+pjHc/7
-        0AInY2MdqNrb6zS2SmcFhro9/ZZGeSnl4A2wXREa/ZX1FOEWI0eWdMHxJF0li8QlnW/L3BO/PRLDt
-        yOqd3pZQNNzNPJXU592I0nbhWnfFUcHCzVtAx1kOkBQvK1d2WDTIo9ZE7OSDb0e6nat5KMbiJEOQm
-        LOzPA664UYBQAaLlWUlBWhHX6YGt6ioBOkLCHo60e7nKZGPFWOw2PC6qI8zF4OyHWHXIC0mUPXX6v
-        7YrKOyf0lrAkmHNdLdM/3fdcZ0kLL4r6K2uVfEfOF3yTLKmWxFV/vrG9iXH/8CQDLFOJIYTjY8L/f
-        THpPf8HA==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qWRbf-005Htp-07;
-        Thu, 17 Aug 2023 01:15:23 +0000
-Date:   Wed, 16 Aug 2023 18:15:22 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, Amir Goldstein <amir73il@gmail.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
-        chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
-        fstests@vger.kernel.org, willy@infradead.org,
-        shirley.ma@oracle.com, konrad.wilk@oracle.com
-Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
-Message-ID: <ZN10qmDb8rFQKVkI@bombadil.infradead.org>
-References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
- <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
- <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
- <20230812000456.GA2375177@frogsfrogsfrogs>
- <CAOQ4uxibnPqE5qG9R53JyaMY1bd6j9OH0pq2eQxYpxDwf3xnGw@mail.gmail.com>
- <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
- <20230816001108.GA1348949@frogsfrogsfrogs>
- <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
- <20230817003345.GV11377@frogsfrogsfrogs>
+        with ESMTP id S1347999AbjHQFNV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 Aug 2023 01:13:21 -0400
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A0AB2705;
+        Wed, 16 Aug 2023 22:13:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1692249200; x=1723785200;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ZjmAYFKU2zWauoj7RfkAmXDrFLV8bHJn6Qjr0Z1ghNA=;
+  b=XTlX2fttiQ7HQ19f4F6AQ2gdfvPPMd6QCPt8H/xUbC2VXXaGW4YtdhUO
+   pgP3mOkvq0pP5JKk5ooINAHz8L4oGGFHe97AEFcKpYhxU90IXg/0m7Pbp
+   e7gSJ0h6amRkAuxE2ysOhdwaLX7pHVoHxHgWXrIMARCKgiiIpIWIl4Fbt
+   sh3XsFo+pXEZJoVT+Bz/fwZnSqCbFBfjhH2TPncxyuzFeJWt0nx7tPngC
+   zV+VlI83I1ajQU51mc/9M6RR+5BPYb8JSMLlZFANmJx6irlCupSfdxSM9
+   xw75Qz+cactTzE8B0ImuIrNE6LFBOOxq47Gea9bG9z2qCdasAo8IEohYG
+   w==;
+X-IronPort-AV: E=Sophos;i="6.01,179,1684771200"; 
+   d="scan'208";a="239607390"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 17 Aug 2023 13:13:19 +0800
+IronPort-SDR: zmTc2l+YOcd/ls1r2ZXnADltVqLWieovgeoHhPnfHWIz9B/WiQnoLdCQhqLI0vpENXJd9Mk1Pt
+ n/+rniUzkwWJKO134IeL7SFMmYUSo0pAAoSNQmF6pQlR9Q5mBlVlnQDNn+khDQImSXiZ9NsQr2
+ LbKjEHHlEd7i7rf+jPyNmdj6uDHlMbBj/+tNndZXwiaW7QhnfBWX3gLjUZ9ZJ1BDKmdlgQsf4T
+ w0c4rPExhi73tq7zKYYgUwYolmcNUmNpHwAXV+gntN3eWYVTIo/re6ozJW8vm6AsuBl6dSqS1J
+ VwA=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 16 Aug 2023 21:20:55 -0700
+IronPort-SDR: JeERcgGQn+svmc1Zj1hNqVZjC9Af/gvkJznbyMFcD20QyW0UUhp/Q+n1huxA3Km5TO6Y8m9iEC
+ yxa3cTyi8y16YFapHIncqR1OcSfoq62CztVQX8dsj8Pczo9ZFf98NyT5OYaZiTwIXwy2a180ae
+ hii0yU/bZ9b1KZ0zTmqUBHWmHJpK/Bb/CCyXzSYcPDiXArgymBk5BtEZjRNjiCES8JyWqK2DzZ
+ FFzodHew8RijOmvVYPweWX/UcT5C1rVfJ/QhD61KIuYaeXmQBYeICCBQtWqDcS63vx02pPKZNQ
+ 82U=
+WDCIronportException: Internal
+Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.88])
+  by uls-op-cesaip01.wdc.com with ESMTP; 16 Aug 2023 22:13:20 -0700
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] btrfs/179: optimize remove file selection
+Date:   Thu, 17 Aug 2023 14:13:17 +0900
+Message-ID: <20230817051317.3825299-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230817003345.GV11377@frogsfrogsfrogs>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 16, 2023 at 05:33:45PM -0700, Darrick J. Wong wrote:
-> However, I defined the testing lead (quoting from above):
-> 
-> "**Testing Lead**: This person is responsible for setting the test
-> coverage goals of the project, negotiating with developers to decide
-> on new tests for new features, and making sure that developers and
-> release managers execute on the testing."
+Currently, we use "ls ... | sort -R | head -n1" to choose a removing
+victim. It sorts the files with "ls", sort it randomly and pick the first
+line, which wastes the "ls" sort.
 
-This I thought I could do.
+Also, using "sort -R | head -n1" is inefficient. For example, in a
+directory with 1000000 files, it takes more than 15 seconds to pick a file.
 
-> In my mind, that means the testing lead should be reviewing changes
-> proposed for tests/xfs/* in fstests by XFS developers to make sure that
-> new features are adequately covered; and checking that drive-by
-> contributions from others fit well with what's already there.
+  $ time bash -c "ls -U | sort -R | head -n 1 >/dev/null"
+  bash -c "ls -U | sort -R | head -n 1 >/dev/null"  15.38s user 0.14s system 99% cpu 15.536 total
 
-This should be included in the description if that's part of the role.
-This alone is a task and I'm afraid *that* does require much more time
-commitment and experience I don't think I have with XFS yet. And so it
-would seem to me a more experience developer on both fstests and XFS
-would be required for this.
+  $ time bash -c "ls -U | shuf -n 1 >/dev/null"
+  bash -c "ls -U | shuf -n 1 >/dev/null"  0.30s user 0.12s system 138% cpu 0.306 total
 
-> > And a test lead might do more testing besides fstests. So I can't imagine
-> > that I need to check another project to learn about who's in charge of the
-> > current project I'm changing.
-> 
-> ...so the testing lead would be the person who you'd talk to directly
-> about changes that you want to make.
+So, just use "ls -U" and "shuf -n 1" to choose a victim.
 
-I could certainly help try to set a high bar, but to actually ensure
-correctness of XFS test patches, I do think that should require a more
-seasoned XFS developer and with fstests.
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ tests/btrfs/179 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-  Luis
+diff --git a/tests/btrfs/179 b/tests/btrfs/179
+index 2f17c9f9fb4a..0fbd875cf01b 100755
+--- a/tests/btrfs/179
++++ b/tests/btrfs/179
+@@ -45,7 +45,7 @@ fill_workload()
+ 
+ 		# Randomly remove some files for every 5 loop
+ 		if [ $(( $i % 5 )) -eq 0 ]; then
+-			victim=$(ls "$SCRATCH_MNT/src" | sort -R | head -n1)
++			victim=$(ls -U "$SCRATCH_MNT/src" | shuf -n 1)
+ 			rm "$SCRATCH_MNT/src/$victim"
+ 		fi
+ 		i=$((i + 1))
+-- 
+2.41.0
+
