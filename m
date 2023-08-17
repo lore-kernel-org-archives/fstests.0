@@ -2,98 +2,191 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FE8CC41513
-	for <linux-fstests@archiver.kernel.org>; Wed, 16 Aug 2023 19:41:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 534CDC41513
+	for <linux-fstests@archiver.kernel.org>; Thu, 17 Aug 2023 00:36:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345827AbjHPTkq (ORCPT
+        id S1347263AbjHQAgR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 16 Aug 2023 15:40:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43664 "EHLO
+        Wed, 16 Aug 2023 20:36:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55392 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345840AbjHPTkS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 15:40:18 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B4F61FE1
-        for <fstests@vger.kernel.org>; Wed, 16 Aug 2023 12:40:13 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        with ESMTP id S1347467AbjHQAf4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2023 20:35:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D6F93581;
+        Wed, 16 Aug 2023 17:35:18 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id E21131F86C;
-        Wed, 16 Aug 2023 19:40:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1692214811; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=0yxRmOnoegHg1YACTNg8XJKxxiizD6lgO1BrvCGzzos=;
-        b=k7OgY6p5TE5MxUHAclpqpoi0FMdRXSzIDhNnF1N3Qs0imxtQfBt806J506cxwvXq2tsrig
-        drxApZsYeQEffyqUk7WipSbCF3oH9sywUMZom74GQHk38ZFVuafgvYhBmouHDmuz2J7USs
-        m6//bBukn+/RCjCF9t7LoJaoAsbd1xo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1692214811;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=0yxRmOnoegHg1YACTNg8XJKxxiizD6lgO1BrvCGzzos=;
-        b=2kHs/QE8vmAQtpvItyhWGG0OOcExSx/wfG5p3O5puiN9zD2s4TvZ9yTTR8eSo9HDlOT+/j
-        /T8+5TIlicb1ebCQ==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id BC6481353E;
-        Wed, 16 Aug 2023 19:40:11 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id hBx5LBsm3WQjDwAAMHmgww
-        (envelope-from <ddiss@suse.de>); Wed, 16 Aug 2023 19:40:11 +0000
-Date:   Wed, 16 Aug 2023 21:42:54 +0200
-From:   David Disseldorp <ddiss@suse.de>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3F6A563F79;
+        Thu, 17 Aug 2023 00:33:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7DE06C433C8;
+        Thu, 17 Aug 2023 00:33:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692232426;
+        bh=btZI9n4a0YsXk7u3kMhkwvs0HUIAiqOAZNg313OcXDY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=aawE7pqryZ9BBhpupatyesPLzbWYmAQU9FPzgC3GDUsztKYzOX3UwAGT/chDd1Qua
+         BCJgCVvlr5skrHQCCVthR84Azq5JHjn3ufwcdfa3RvRgdwN66axzggCAnlHARnZT7m
+         6bfLMHZNvwqezCx0s1Uvj9w+/smajgKHOUxUFiEmJOr7qGWCcOT8XbKDJSRKPglffr
+         2JLwxKHmOmKdA6YfiIOevszv/j0DE9DkHPW8LhtkRNbETnqgpfps215kxSxIAuRxK7
+         bP8CtIV1A94ZnNhrHXb6jarXmmPPjPo97cuQzy1mc9iH3ZJGHH0Ds7A+Fl+8HXONn/
+         ia99eOI2grK/w==
+Date:   Wed, 16 Aug 2023 17:33:45 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     fstests@vger.kernel.org, Anand Jain <anand.jain@oracle.com>
-Subject: Re: [PATCH v2] common/rc: drop 'fsck -f' parameter from
- _repair_test_fs
-Message-ID: <20230816214254.4fc968c2@echidna.fritz.box>
-In-Reply-To: <20230816145543.ic73cnwhzayuivag@zlang-mailbox>
-References: <20230816103330.961-1-ddiss@suse.de>
-        <20230816145543.ic73cnwhzayuivag@zlang-mailbox>
+Cc:     Luis Chamberlain <mcgrof@kernel.org>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
+        chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
+        fstests@vger.kernel.org, willy@infradead.org,
+        shirley.ma@oracle.com, konrad.wilk@oracle.com
+Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
+Message-ID: <20230817003345.GV11377@frogsfrogsfrogs>
+References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
+ <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
+ <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
+ <20230812000456.GA2375177@frogsfrogsfrogs>
+ <CAOQ4uxibnPqE5qG9R53JyaMY1bd6j9OH0pq2eQxYpxDwf3xnGw@mail.gmail.com>
+ <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
+ <20230816001108.GA1348949@frogsfrogsfrogs>
+ <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, 16 Aug 2023 22:55:43 +0800, Zorro Lang wrote:
-
-> On Wed, Aug 16, 2023 at 12:33:30PM +0200, David Disseldorp wrote:
-> > The '-f' parameter is fsck.ext# specific, where it's documented to:
-> >   Force checking even if filesystem is marked clean
+On Wed, Aug 16, 2023 at 02:04:05PM +0800, Zorro Lang wrote:
+> On Tue, Aug 15, 2023 at 05:11:08PM -0700, Darrick J. Wong wrote:
+> > On Tue, Aug 15, 2023 at 04:54:55PM -0700, Luis Chamberlain wrote:
+> > > On Sat, Aug 12, 2023 at 12:05:33PM +0300, Amir Goldstein wrote:
+> > > > On Sat, Aug 12, 2023 at 3:04 AM Darrick J. Wong <djwong@kernel.org> wrote:
+> > > > >
+> > > > > On Fri, Aug 11, 2023 at 12:31:18PM -0700, Luis Chamberlain wrote:
+> > > > > > On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
+> > > > > > > +Roles
+> > > > > > > +-----
+> > > > > > > +There are seven key roles in the XFS project.
+> > > > > > > +- **Testing Lead**: This person is responsible for setting the test
+> > > > > > > +  coverage goals of the project, negotiating with developers to decide
+> > > > > > > +  on new tests for new features, and making sure that developers and
+> > > > > > > +  release managers execute on the testing.
+> > > > > > > +
+> > > > > > > +  The testing lead should identify themselves with an ``M:`` entry in
+> > > > > > > +  the XFS section of the fstests MAINTAINERS file.
 > > 
-> > _repair_test_fs() is only called on _check_test_fs() failure, so
-> > dropping the parameter should be possible without changing ext#
-> > behaviour.
-> > Doing so fixes _repair_test_fs() on exfat, where fsck.exfat doesn't
-> > support '-f'.
+> >                                     ^^^^^^^^^^^^^^^^^^^
+> > > > > >
+> > > > > > I think breaking responsibility down is very sensible, and should hopefully
+> > > > > > allow you to not burn out. Given I realize how difficult it is to do all
+> > > > > > the tasks, and since I'm already doing quite a bit of testing of XFS
+> > > > > > on linux-next I can volunteer to help with this task of testing lead
+> > > > > > if folks also think it may be useful to the community.
+> > > > > >
+> > > > > > The only thing is I'd like to also ask if Amir would join me on the
+> > > > > > role to avoid conflicts of interest when and if it comes down to testing
+> > > > > > features I'm involved in somehow.
+> > > > >
+> > > > > Good question.  Amir?
+> > > > >
+> > > > 
+> > > > I am more than happy to help, but I don't believe that I currently perform
+> > > > or that I will have time to perform the official duties of **Testing
+> > > > Lead** role.
+> > > > 
+> > > > I fully support the nomination of Luis and I think the **Release Manager**
+> > > > should be able to resolve any conflict of interests of the **Testing Lead**
+> > > > as feature developer should any such conflicts arise :)
+> > > 
+> > > Fair enough.
+> > > 
+> > > Darrick, I suppose just one thing then, using M for Testing Lead seems
+> > > likely to implicate the 'Testing Lead' getting Cc'd on every single new
+> 
+> Do you hope to get CC address/list ...
+> 
+> > > patch. As much as I could help review, I don't think I can commit to
+> > > that, and I think that's the point of the current split. To let us split
+> > > roles to help scale stuff.
 > > 
-> > Signed-off-by: David Disseldorp <ddiss@suse.de>
-> > ---
-> > v2: drop -f from default case instead of splitting out exfat case  
+> > Note that we're talking about "M:" entries in the *fstests* MAINTAINERS
+> > file, not the kernel...
 > 
-> This version is good to me.
+> ... from fstests project, for a patch on a linux-$FSTYP project?
 > 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> That's weird to me. 
 
-Thanks.
+Not for the kernel, no.  Just the contributions to fstests.
 
-> I remembered you hope to add a btrfs branch to _repair_scratch_fs and
-> _repair_test_fs [1]. Is that still in your plan? Anand, could you provide
-> more suggestions about that?
+For example, if I were sending a patch deluge, the online fsck testing
+patches would be cc'd to you; to whomever's listed as M: under XFS in
+fstests MAINTAINERS; and fstests@ and linux-xfs@.
 
-Yes, that's still my plan, but I was hoping to get some more input on
-whether "btrfs check --repair ..." is sufficient before proposing the
-change.
+The kernel patches would be cc'd to linux-xfs, and to whomever steps up
+to review the code (who are we kidding, dchinner).
 
-Cheers, David
+xfsprogs patches for online fsck would be cc'd to linux-xfs and Carlos.
+
+> 
+> > 
+> > > So how about a separate new prefix, TL: ? Adding Linus in case he has
+> > > a stronger preference to only keep us at one character fist index on
+> > > MAINTAINERS.
+> > 
+> > ...so I'm cc'ing Zorro since he's the owner of the relevant git repo.
+> > Hey Zorro, do you have any opinions about how to record who's
+> > responsible for each filesystem adding tests for new code and whatnot?
+> 
+> I think a specific fs test lead is a contributer for that fs project more,
+> not for fstests. The test lead need to report test results to that fs
+> project, not necessary to report to fstests.
+
+I disagree -- yes, /developers/ (and the release manager) should be
+running tests and reporting those results to that fs project.
+
+However, I defined the testing lead (quoting from above):
+
+"**Testing Lead**: This person is responsible for setting the test
+coverage goals of the project, negotiating with developers to decide
+on new tests for new features, and making sure that developers and
+release managers execute on the testing."
+
+In my mind, that means the testing lead should be reviewing changes
+proposed for tests/xfs/* in fstests by XFS developers to make sure that
+new features are adequately covered; and checking that drive-by
+contributions from others fit well with what's already there.
+
+(That's what I thought you wanted out from the people mentioned in the
+fstests MAINTAINERS file...)
+
+> And a test lead might do more testing besides fstests. So I can't imagine
+> that I need to check another project to learn about who's in charge of the
+> current project I'm changing.
+
+...so the testing lead would be the person who you'd talk to directly
+about changes that you want to make.
+
+(Wait, who is "I" here?  You, Zorro?  Or were you paraphrasing a
+developer?)
+
+--D
+
+> (If I understood anything wrong, please correct me:)
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > 
+> > >   Luis
+> > 
+> 
