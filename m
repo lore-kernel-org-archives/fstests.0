@@ -2,240 +2,120 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 155A7C678DC
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Aug 2023 12:13:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 256ABC7113E
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Aug 2023 12:35:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376779AbjHRMNA (ORCPT
+        id S1346511AbjHRMfV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Aug 2023 08:13:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40076 "EHLO
+        Fri, 18 Aug 2023 08:35:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376799AbjHRMMv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Aug 2023 08:12:51 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51F4E121
-        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 05:12:09 -0700 (PDT)
+        with ESMTP id S1359798AbjHRMfQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Aug 2023 08:35:16 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A396114
+        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 05:34:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692360728;
+        s=mimecast20190719; t=1692362071;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=H03qrLDPJ+C4WBVW8rxEz6cByLaUURA0As/7v5LT82o=;
-        b=FpIGj+ywon2W08Ag22gI5iPyzgB8Qcri9zdCjHsy9gvqZ8RGYT6VnextzP3H5UmDuW0J6x
-        pvyr0q8gsmdB0l+2Hza7JNdTDrJjV2UDvhjWlSyXqmR9gJFFUxWtNR+hLhX+737GvDj1w5
-        PQ4dH2JMctQYLgmthmLJex9aGWgCCA0=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=a4qu5KTlCd8QeM/N6zDYyk8NdIr2soUt+badkEvaFgY=;
+        b=UAB57yRReuKswStF54I6x8otnGn+P9tccOU9ZI66hnRnubBl1PIRfCH2gKFe8SEajq8RMW
+        Eo/vMum95pRy+2qhCoqrNhoASCQ2aXIwm6zGlPHp0BXoBLcBDdX/eIXSYXq0TomFz0lMg9
+        CmNzJZ95ersSt1drHaZmYzs3/mJIrOI=
+Received: from mail-oi1-f199.google.com (mail-oi1-f199.google.com
+ [209.85.167.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-45-zZmAcimtPYSwXmzpCFESmw-1; Fri, 18 Aug 2023 08:12:07 -0400
-X-MC-Unique: zZmAcimtPYSwXmzpCFESmw-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1bde8160f8bso13328815ad.0
-        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 05:12:06 -0700 (PDT)
+ us-mta-256-1K-F0mH6NgKeVAlKYSRfzQ-1; Fri, 18 Aug 2023 08:34:28 -0400
+X-MC-Unique: 1K-F0mH6NgKeVAlKYSRfzQ-1
+Received: by mail-oi1-f199.google.com with SMTP id 5614622812f47-3a78c2cdd77so982585b6e.1
+        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 05:34:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692360726; x=1692965526;
+        d=1e100.net; s=20221208; t=1692362068; x=1692966868;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=H03qrLDPJ+C4WBVW8rxEz6cByLaUURA0As/7v5LT82o=;
-        b=dg+tdAyY15SOHOtpyJB/8by8tH1nKBTBs+vKngtQxeZrONymZHYfK+OwS4J4+Aq0Nu
-         ZHvjYZ4+OSjJsb56/P2lMedCpF2/j70KjhUP1VndPwHYsqcTLKDPr3htOjQuPOLIFUB1
-         VrBZ93SJvSEWeUeIl0w8DJxl9F2QvcNj1B9I3HWz/gS1VWfNaWs3f6epv6AoCvjFhNMo
-         yRw0i4xQBafnAygTWTdiNW4QnDclJQRoaTdr7DM8tXFdzF3D0a1h//rb9tIHKbDXyGUL
-         z5H39AblVFrlgfx6xxDZzxmYPgDXlF9w0si6UCXI2YjtaT3xwraOMm+iG5gmP7+3VTyw
-         H17A==
-X-Gm-Message-State: AOJu0YzOkIqlnR2VBzVub8mVUx5lTvGrTjHMqUJQwZl4SyyONs+Cdj9y
-        tos04I8m+8T5/yX6CI8GeYZN0dk5MpQYGwKaipTPmzACmAf6YqssFIbzuqxVP48RjcBtvZ8cX3C
-        9Fmlu+jVLGbfd2Z1UeA==
-X-Received: by 2002:a17:902:ee4d:b0:1bb:b34b:73a with SMTP id 13-20020a170902ee4d00b001bbb34b073amr2612596plo.25.1692360726065;
-        Fri, 18 Aug 2023 05:12:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHxVA8hbHhyEUja5oL3p3+F8ruwUaIWxw+Me+eSMvE2mkiJjVYm7pulWiC3Q6j0nKmefu9mCw==
-X-Received: by 2002:a17:902:ee4d:b0:1bb:b34b:73a with SMTP id 13-20020a170902ee4d00b001bbb34b073amr2612575plo.25.1692360725697;
-        Fri, 18 Aug 2023 05:12:05 -0700 (PDT)
+        bh=a4qu5KTlCd8QeM/N6zDYyk8NdIr2soUt+badkEvaFgY=;
+        b=ZBLvL9DVI2eBHO+SRM6l/vGXautn/5usifWH3IKJw31gIBfW+v/lPXK8ciELXj42tu
+         koqMhtd9F6NW3AZDqa8oduLRFAUOwduDbQlK0EPgD58pj8tUDwfaptPoMa+d9s4aUGCd
+         yDZAzlVTJ/pqUwq3CDoCeHJeFcyAPjF29ubZCLqBeeUeIqskSeFN5d+Z2B5iDyhJNO/w
+         gnuQIy5sl0gkXK02yAw+jR1zeoz1S9A9ca5F7eM5EAxP6nvyWyLZ9OLjpuLT868a4VFW
+         4YGXaCv8l+EntnCXu167MzfQXyvhHzYYUqWW3sXLmIOTvvD3ll6T3A9QKTGSt9S65N9v
+         +jHQ==
+X-Gm-Message-State: AOJu0YwMZ5rm7bzPKoQ80HVRbqV7j8x5zE+GbACkpSLwP1Q9OZV1N6s1
+        PAVoDJ7jlRidQ6d4IdisflFua6ssQuCmuBTXZjxM2ig7aZ+uO2gjH6wrPLx/N1AimvWla3AWJFc
+        h3jX7XcA/iPXejSbwIg==
+X-Received: by 2002:a05:6808:10c3:b0:3a7:4478:7139 with SMTP id s3-20020a05680810c300b003a744787139mr3312588ois.1.1692362068062;
+        Fri, 18 Aug 2023 05:34:28 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGeUJTpOhppxRJNpSQ1/EK6BqmcVwoNul+nCknL0eVkzyfIhQnU+enbvpUKDXbci+EE5ewm5g==
+X-Received: by 2002:a05:6808:10c3:b0:3a7:4478:7139 with SMTP id s3-20020a05680810c300b003a744787139mr3312574ois.1.1692362067819;
+        Fri, 18 Aug 2023 05:34:27 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id v4-20020a170902b7c400b001b243a20f26sm1591413plz.273.2023.08.18.05.12.04
+        by smtp.gmail.com with ESMTPSA id k66-20020a633d45000000b0055fd10306a2sm1422604pga.75.2023.08.18.05.34.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Aug 2023 05:12:05 -0700 (PDT)
-Date:   Fri, 18 Aug 2023 20:12:01 +0800
+        Fri, 18 Aug 2023 05:34:27 -0700 (PDT)
+Date:   Fri, 18 Aug 2023 20:34:23 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Lee Trager <lee@trager.us>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v5] fstests: Verify dir permissions when creating a stub
- subvolume
-Message-ID: <20230818121201.34lvepp5ndhv6fkk@zlang-mailbox>
-References: <20230818081156.3306384-1-lee@trager.us>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Yuezhang Mo <Yuezhang.Mo@foxmail.com>,
+        Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] check: fix parsing expunge file with comments
+Message-ID: <20230818123423.okbppe7iqqy26mg6@zlang-mailbox>
+References: <20230814173132.767345-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230818081156.3306384-1-lee@trager.us>
+In-Reply-To: <20230814173132.767345-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Aug 18, 2023 at 01:11:56AM -0700, Lee Trager wrote:
-> btrfs supports creating nesting subvolumes however snapshots are not
-> recurive. When a snapshot is taken of a volume which contains a subvolume
-> the subvolume is replaced with a stub subvolume which has the same name and
-> uses inode number 2. This test validates that the stub volume copies
-> permissions of the original volume.
-> Signed-off-by: Lee Trager <lee@trager.us>
+On Mon, Aug 14, 2023 at 08:31:32PM +0300, Amir Goldstein wrote:
+> commit 60054d51 ("check: fix excluded tests are only expunged in the
+> first iteration") change to use exclude_tests array instead of file.
+> 
+> The check if a test is in expunge file was using grep -q $TEST_ID FILE
+> so it was checking if the test was a non-exact match to one of the
+> lines, for a common example: "generic/001 # exclude this test" would be
+> a match to test generic/001.
+> 
+> The commit regressed this example, because the new code checks for exact
+> match of [ "generic/001" == "generic/001 " ]. Change the code to match a
+> regular expression to deal with this case and any other suffix correctly.
+> 
+> NOTE that the original code would have matched test generic/100 with lines
+> like "generic/1000" when we get to 4 digit seqnum, so the regular
+> expression does an exact match to the first word of the line.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
-> v5:
-> - Fixed typo in subject
-> - Added _fixed_by_kernel_commit as this test requires a kernel fix to pass
-> - Fixed copyright year
 
-This version is good to me now,
-
+This version is good to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
-> v4:
-> - Removed extra blank line in common/rc
-> - Allowed caller to pass extra options to _require_unshare to check for
->   support. -f -r -m -p -U have been supported by util-linux and busybox
->   for awhile and are typical options.
-> - Moved _registry_cleanup to right after _begin_fstest.
-> - Added "cd /;rm -rf $tmp.*" from standard cleanup to 300 cleanup.
-> - Added rm -rf $test_dir before running test to ensure its in a clean state.
-> v3:
-> - Fixed whitepsace in 300.out due to find command not using './' before %P
-> v2:
-> - Migrated _require_unshare from overlay/020 into common_rc. Updated the error
->   message as most Linux systems should have unshare from util-linux.
-> - Added note about why the test must be done in one subshell process.
-> - chown command now uses $qa_user:$qa_group instead of hard coded values.
->  common/rc           |  5 +++++
->  tests/btrfs/300     | 52 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/300.out | 18 ++++++++++++++++
->  tests/overlay/020   |  7 +-----
->  4 files changed, 76 insertions(+), 6 deletions(-)
->  create mode 100755 tests/btrfs/300
->  create mode 100644 tests/btrfs/300.out
 > 
-> diff --git a/common/rc b/common/rc
-> index 5c4429ed..18ea0f02 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5224,6 +5224,11 @@ _soak_loop_running() {
->  	return 0
->  }
+> Changes since v1:
+> - Use regex for whole word match
+> 
+>  check | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/check b/check
+> index 549725eb..71b9fbd0 100755
+> --- a/check
+> +++ b/check
+> @@ -592,7 +592,9 @@ _expunge_test()
+>  	local TEST_ID="$1"
 >  
-> +_require_unshare() {
-> +	unshare -f -r -m -p -U $@ true &>/dev/null || \
-> +		_notrun "unshare: command not found, should be in util-linux"
-> +}
-> +
->  init_rc
->  
->  ################################################################################
-> diff --git a/tests/btrfs/300 b/tests/btrfs/300
-> new file mode 100755
-> index 00000000..d3722503
-> --- /dev/null
-> +++ b/tests/btrfs/300
-> @@ -0,0 +1,52 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 300
-> +#
-> +# Validate that snapshots taken while in a remapped namespace preserve
-> +# the permissions of the user.
-> +#
-> +. ./common/preamble
-> +
-> +_begin_fstest auto quick subvol snapshot
-> +_register_cleanup "cleanup"
-> +
-> +_supported_fs btrfs
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: copy dir permission and time when creating a stub subvolume"
-> +
-> +_require_test
-> +_require_user
-> +_require_group
-> +_require_unix_perm_checking
-> +_require_unshare
-> +
-> +test_dir="${TEST_DIR}/${seq}"
-> +cleanup() {
-> +	rm -rf $test_dir
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +rm -rf $test_dir
-> +mkdir $test_dir
-> +chown $qa_user:$qa_group $test_dir
-> +
-> +# _user_do executes each command as $qa_user in its own subshell. unshare
-> +# sets the namespace for the running shell. The test must run in one user
-> +# subshell to preserve the namespace over multiple commands.
-> +_user_do "
-> +cd ${test_dir};
-> +unshare --user --keep-caps --map-auto --map-root-user;
-> +$BTRFS_UTIL_PROG subvolume create subvol;
-> +touch subvol/{1,2,3};
-> +$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
-> +touch subvol/subsubvol/{4,5,6};
-> +$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
-> +"
-> +
-> +find $test_dir/. -printf "%M %u %g ./%P\n"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
-> new file mode 100644
-> index 00000000..6e94447e
-> --- /dev/null
-> +++ b/tests/btrfs/300.out
-> @@ -0,0 +1,18 @@
-> +QA output created by 300
-> +Create subvolume './subvol'
-> +Create subvolume 'subvol/subsubvol'
-> +Create a snapshot of 'subvol' in './snapshot'
-> +drwxr-xr-x fsgqa fsgqa ./
-> +drwxr-xr-x fsgqa fsgqa ./subvol
-> +-rw-r--r-- fsgqa fsgqa ./subvol/1
-> +-rw-r--r-- fsgqa fsgqa ./subvol/2
-> +-rw-r--r-- fsgqa fsgqa ./subvol/3
-> +drwxr-xr-x fsgqa fsgqa ./subvol/subsubvol
-> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/4
-> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/5
-> +-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/6
-> +drwxr-xr-x fsgqa fsgqa ./snapshot
-> +-rw-r--r-- fsgqa fsgqa ./snapshot/1
-> +-rw-r--r-- fsgqa fsgqa ./snapshot/2
-> +-rw-r--r-- fsgqa fsgqa ./snapshot/3
-> +drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
-> diff --git a/tests/overlay/020 b/tests/overlay/020
-> index 98a33aec..9f82da34 100755
-> --- a/tests/overlay/020
-> +++ b/tests/overlay/020
-> @@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
->  
->  # real QA test starts here
->  
-> -require_unshare() {
-> -	unshare -f -r "$@" true &>/dev/null || \
-> -		_notrun "unshare $@: not supported"
-> -}
-> -
->  # Modify as appropriate.
->  _supported_fs overlay
->  _fixed_by_kernel_commit 3fe6e52f0626 \
->  	"ovl: override creds with the ones from the superblock mounter"
->  
->  _require_scratch
-> -require_unshare -m -p -U
-> +_require_unshare
->  
->  # Remove all files from previous tests
->  _scratch_mkfs
+>  	for f in "${exclude_tests[@]}"; do
+> -		if [ "${TEST_ID}" == "$f" ]; then
+> +		# $f may contain traling spaces and comments
+> +		local id_regex="^${TEST_ID}\b"
+> +		if [[ "$f" =~ ${id_regex} ]]; then
+>  			echo "       [expunged]"
+>  			return 0
+>  		fi
 > -- 
 > 2.34.1
 > 
