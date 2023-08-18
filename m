@@ -2,87 +2,193 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC927C71133
-	for <linux-fstests@archiver.kernel.org>; Fri, 18 Aug 2023 02:04:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B273C001DE
+	for <linux-fstests@archiver.kernel.org>; Fri, 18 Aug 2023 08:13:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352400AbjHRCDi (ORCPT
+        id S1353022AbjHRIM3 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 17 Aug 2023 22:03:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59544 "EHLO
+        Fri, 18 Aug 2023 04:12:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357165AbjHRCD3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 17 Aug 2023 22:03:29 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EC8D30DF;
-        Thu, 17 Aug 2023 19:03:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1692324208; x=1723860208;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=nFbSp5P6d84AR5BRsgqD/c4FrXTmfzo61rKLHZH8Ju4=;
-  b=HFhiuf2fdIpc2CFYYLEKOFrlOIaoWxfUWWyI+yUB0YwEZvvTFfuSgMpv
-   sVUrapn7GGhZhQsMvb3y1BRfIF1kX37DHhet2ZpP3KyV8AFY6On0+we50
-   afu77WKZSTRZ9PuFKtCuDoGwhe0+2MJwcjyaE2DWadUGOVDh4FILxULP7
-   FyDmYf3RYwK4NRa6QTbmupDHczAVIb8yraPlwbkhxklQTIgikiPrS1q2z
-   B48Jun65THfedjur/i9GSJNfZ2csnmwImPI2+G0KyRsSYZVD1yb8RmGS5
-   UWEhp1NwUD0M0G3IVwe5D3t/6DuRmleSvX1C8AoA4QUxHshQuL4DbWShq
-   w==;
-X-IronPort-AV: E=Sophos;i="6.01,181,1684771200"; 
-   d="scan'208";a="346627805"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Aug 2023 10:03:28 +0800
-IronPort-SDR: 3Kl0D5eiVp44aq1QfnOdeIuoYwosZLaSXZYjtIVHzhDRX0hOdMxQ+TJjse/Pzk/cuwXQX/pmK9
- gjVXS18kAkOMSyqGjxTSRU/VhPLE0UKNSkZb/+/KDgKI+kYWdcKoHPlrWLTjV/KCILgP1En52I
- hT7l06KI0Fai+IrztLKQ76ko0JCpK1QTXAgAVmTBOPnMDyB823hFCi5yUNRlXy6c8szA4ix4Mj
- mTKQ3b497gq9SSWWOe5OOeQI3Xbh7HiodE45yhJoF/0oxC8CF1s64fI3KMaj+0/5qoBEcJm5kP
- FX4=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 17 Aug 2023 18:11:03 -0700
-IronPort-SDR: rSqAqxsPOJKOm9JTuf2GeEilUmAD2skqy72q+NiKsKTcW/Y+6pHWl1bXZJXyL+CJIgN3NEQwzi
- TA0/shS3m6TUyrXCAxn5awRDlmmQW0dGD0WecmtnIRnHNrQIIB2xR6jzYyXmamMXgCFD3BKNl1
- RetND0I7yiPnrfL4XLBrUuUdHBy1u4+R43shfrboircguFwAoPhcVU5wJ1k3sAjG21K+kJSjtN
- ntP7HOHzGtZu8F8yozp8I9AxtcId7S/CBNrvOK/3ldt1+Y7miY1Sxzwe9yS2+Vy5wR/yC5n+4/
- 7Kc=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.92])
-  by uls-op-cesaip01.wdc.com with ESMTP; 17 Aug 2023 19:03:28 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
+        with ESMTP id S1358463AbjHRIMO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Aug 2023 04:12:14 -0400
+Received: from trager.us (trager.us [52.5.81.116])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 418002D5D;
+        Fri, 18 Aug 2023 01:12:12 -0700 (PDT)
+Received: from [163.114.132.1] (helo=localhost)
+        by trager.us with esmtpsa (TLSv1.3:TLS_AES_256_GCM_SHA384:256)
+        (Exim 4.92.3)
+        (envelope-from <lee@trager.us>)
+        id 1qWuaZ-0004el-3E; Fri, 18 Aug 2023 08:12:11 +0000
+From:   Lee Trager <lee@trager.us>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] btrfs/220: do not run async discard test on zoned device
-Date:   Fri, 18 Aug 2023 11:03:25 +0900
-Message-ID: <20230818020325.1214715-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.41.0
+Cc:     linux-btrfs@vger.kernel.org, Lee Trager <lee@trager.us>
+Subject: [PATCH v5] fstests: Verify dir permissions when creating a stub subvolume
+Date:   Fri, 18 Aug 2023 01:11:56 -0700
+Message-Id: <20230818081156.3306384-1-lee@trager.us>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The mount option "discard=async" is not meant to be used on the zoned mode.
-Skip it from the test.
-
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+btrfs supports creating nesting subvolumes however snapshots are not
+recurive. When a snapshot is taken of a volume which contains a subvolume
+the subvolume is replaced with a stub subvolume which has the same name and
+uses inode number 2. This test validates that the stub volume copies
+permissions of the original volume.
+Signed-off-by: Lee Trager <lee@trager.us>
 ---
- tests/btrfs/220 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+v5:
+- Fixed typo in subject
+- Added _fixed_by_kernel_commit as this test requires a kernel fix to pass
+- Fixed copyright year
+v4:
+- Removed extra blank line in common/rc
+- Allowed caller to pass extra options to _require_unshare to check for
+  support. -f -r -m -p -U have been supported by util-linux and busybox
+  for awhile and are typical options.
+- Moved _registry_cleanup to right after _begin_fstest.
+- Added "cd /;rm -rf $tmp.*" from standard cleanup to 300 cleanup.
+- Added rm -rf $test_dir before running test to ensure its in a clean state.
+v3:
+- Fixed whitepsace in 300.out due to find command not using './' before %P
+v2:
+- Migrated _require_unshare from overlay/020 into common_rc. Updated the error
+  message as most Linux systems should have unshare from util-linux.
+- Added note about why the test must be done in one subshell process.
+- chown command now uses $qa_user:$qa_group instead of hard coded values.
+ common/rc           |  5 +++++
+ tests/btrfs/300     | 52 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/300.out | 18 ++++++++++++++++
+ tests/overlay/020   |  7 +-----
+ 4 files changed, 76 insertions(+), 6 deletions(-)
+ create mode 100755 tests/btrfs/300
+ create mode 100644 tests/btrfs/300.out
 
-diff --git a/tests/btrfs/220 b/tests/btrfs/220
-index 30ca06f6038d..b092f40bc1e0 100755
---- a/tests/btrfs/220
-+++ b/tests/btrfs/220
-@@ -279,7 +279,9 @@ test_revertible_options()
- 	test_should_fail "discard=invalid"
- 	if [ "$enable_discard_sync" = true ]; then
- 		test_roundtrip_mount "discard" "discard" "discard=sync" "discard"
--		test_roundtrip_mount "discard=async" "discard=async" "discard=sync" "discard"
-+		if ! _scratch_btrfs_is_zoned; then
-+			test_roundtrip_mount "discard=async" "discard=async" "discard=sync" "discard"
-+		fi
- 		test_roundtrip_mount "discard=sync" "discard" "nodiscard" "$DEFAULT_NODISCARD_OPTS"
- 	else
- 		test_roundtrip_mount "discard" "discard" "discard" "discard"
+diff --git a/common/rc b/common/rc
+index 5c4429ed..18ea0f02 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5224,6 +5224,11 @@ _soak_loop_running() {
+ 	return 0
+ }
+ 
++_require_unshare() {
++	unshare -f -r -m -p -U $@ true &>/dev/null || \
++		_notrun "unshare: command not found, should be in util-linux"
++}
++
+ init_rc
+ 
+ ################################################################################
+diff --git a/tests/btrfs/300 b/tests/btrfs/300
+new file mode 100755
+index 00000000..d3722503
+--- /dev/null
++++ b/tests/btrfs/300
+@@ -0,0 +1,52 @@
++#!/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 300
++#
++# Validate that snapshots taken while in a remapped namespace preserve
++# the permissions of the user.
++#
++. ./common/preamble
++
++_begin_fstest auto quick subvol snapshot
++_register_cleanup "cleanup"
++
++_supported_fs btrfs
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: copy dir permission and time when creating a stub subvolume"
++
++_require_test
++_require_user
++_require_group
++_require_unix_perm_checking
++_require_unshare
++
++test_dir="${TEST_DIR}/${seq}"
++cleanup() {
++	rm -rf $test_dir
++	cd /
++	rm -rf $tmp.*
++}
++
++rm -rf $test_dir
++mkdir $test_dir
++chown $qa_user:$qa_group $test_dir
++
++# _user_do executes each command as $qa_user in its own subshell. unshare
++# sets the namespace for the running shell. The test must run in one user
++# subshell to preserve the namespace over multiple commands.
++_user_do "
++cd ${test_dir};
++unshare --user --keep-caps --map-auto --map-root-user;
++$BTRFS_UTIL_PROG subvolume create subvol;
++touch subvol/{1,2,3};
++$BTRFS_UTIL_PROG subvolume create subvol/subsubvol;
++touch subvol/subsubvol/{4,5,6};
++$BTRFS_UTIL_PROG subvolume snapshot subvol snapshot;
++"
++
++find $test_dir/. -printf "%M %u %g ./%P\n"
++
++status=0
++exit
+diff --git a/tests/btrfs/300.out b/tests/btrfs/300.out
+new file mode 100644
+index 00000000..6e94447e
+--- /dev/null
++++ b/tests/btrfs/300.out
+@@ -0,0 +1,18 @@
++QA output created by 300
++Create subvolume './subvol'
++Create subvolume 'subvol/subsubvol'
++Create a snapshot of 'subvol' in './snapshot'
++drwxr-xr-x fsgqa fsgqa ./
++drwxr-xr-x fsgqa fsgqa ./subvol
++-rw-r--r-- fsgqa fsgqa ./subvol/1
++-rw-r--r-- fsgqa fsgqa ./subvol/2
++-rw-r--r-- fsgqa fsgqa ./subvol/3
++drwxr-xr-x fsgqa fsgqa ./subvol/subsubvol
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/4
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/5
++-rw-r--r-- fsgqa fsgqa ./subvol/subsubvol/6
++drwxr-xr-x fsgqa fsgqa ./snapshot
++-rw-r--r-- fsgqa fsgqa ./snapshot/1
++-rw-r--r-- fsgqa fsgqa ./snapshot/2
++-rw-r--r-- fsgqa fsgqa ./snapshot/3
++drwxr-xr-x fsgqa fsgqa ./snapshot/subsubvol
+diff --git a/tests/overlay/020 b/tests/overlay/020
+index 98a33aec..9f82da34 100755
+--- a/tests/overlay/020
++++ b/tests/overlay/020
+@@ -16,18 +16,13 @@ _begin_fstest auto quick copyup perms
+ 
+ # real QA test starts here
+ 
+-require_unshare() {
+-	unshare -f -r "$@" true &>/dev/null || \
+-		_notrun "unshare $@: not supported"
+-}
+-
+ # Modify as appropriate.
+ _supported_fs overlay
+ _fixed_by_kernel_commit 3fe6e52f0626 \
+ 	"ovl: override creds with the ones from the superblock mounter"
+ 
+ _require_scratch
+-require_unshare -m -p -U
++_require_unshare
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
 -- 
-2.41.0
+2.34.1
 
