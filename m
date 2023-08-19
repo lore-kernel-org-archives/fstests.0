@@ -2,227 +2,288 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF109EE49A8
-	for <linux-fstests@archiver.kernel.org>; Sat, 19 Aug 2023 03:54:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EFF5AEE49A3
+	for <linux-fstests@archiver.kernel.org>; Sat, 19 Aug 2023 16:26:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232796AbjHSDx3 (ORCPT
+        id S233930AbjHSQ0U (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 18 Aug 2023 23:53:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48854 "EHLO
+        Sat, 19 Aug 2023 12:26:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230308AbjHSDxQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 Aug 2023 23:53:16 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ECDE421F
-        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 20:52:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692417147;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=cy3Z7SW+rCdzzNQYguFXCQzqr1tVMIrLJOSnaM0sZUk=;
-        b=U9S5LFhTTh28fGnowvX1+KztPgmcMoGddf5J9p4OcX/SpyJ+dVtHvkVto8QWCPGy04pSmv
-        Jtj0TWlTSLWlvdiI18UXllO7hniFEOR9lMOb2HdniHq0ee0m2znOKUQwmrt92i7bISrpFb
-        7U2BOjl3aM29Kyfx9yrUCttgf18IyIc=
-Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
- [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-527-wCiqdoiNMtW_EbzbJKfoCQ-1; Fri, 18 Aug 2023 23:52:25 -0400
-X-MC-Unique: wCiqdoiNMtW_EbzbJKfoCQ-1
-Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3a3a70425b4so2132874b6e.3
-        for <fstests@vger.kernel.org>; Fri, 18 Aug 2023 20:52:25 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1692417145; x=1693021945;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=cy3Z7SW+rCdzzNQYguFXCQzqr1tVMIrLJOSnaM0sZUk=;
-        b=cdgJt4QBCJ6WFaoIhJrjZgzNhMR7hHIvaYFYD1NYz3WyWKPWmhJAC5jW0ktmmTetu3
-         oOLNPhsmbGtcRdSM3ovqBu6FyPjYMS+1eb3bNRrrLi1HYQXtKXyy7wd4QzraNlaP5/+U
-         2xrwhiJAvzShXHTlqW6Wp9GRSIoA1pAxPuWou9QphU/S2yt6SxOu9Di2UfzfSi+JYhyT
-         8uPSI/UsCfDMgIHUSDk/+Mllfu6jryWSa5u2hcObn6cNg+1D3uB0KCKFK6frDMuxbXxu
-         KMlFFECyBVbF3SPV+d09iU+sEAor9Af8cwMVVBZ7gKcnVfiHwsAhGz86f3gjpdgLBUna
-         kUyw==
-X-Gm-Message-State: AOJu0YySDREZsS/s+juEPmlcWMCa5H9XRYo9VEv7+oi33elM8sN8ph3A
-        hPcvtnNfCA+lCtKlyva/1KaSu9v/QqowRQPQ/oGC7AO1y2WGyglMCpA7EhP+0TXtaNt2o92uz4/
-        bwOjPLZyf9C4UMUf2Ew==
-X-Received: by 2002:a05:6808:5c5:b0:3a7:46c3:c5c3 with SMTP id d5-20020a05680805c500b003a746c3c5c3mr1148595oij.50.1692417144808;
-        Fri, 18 Aug 2023 20:52:24 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IESaLnr41gmdVixaAgFE9CzdYmktFVjsKz5nqdOZeXa3aYpnijK0jBcmBHQ38eTIILLOjtCoA==
-X-Received: by 2002:a05:6808:5c5:b0:3a7:46c3:c5c3 with SMTP id d5-20020a05680805c500b003a746c3c5c3mr1148580oij.50.1692417144511;
-        Fri, 18 Aug 2023 20:52:24 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x13-20020aa784cd000000b00666e883757fsm2246962pfn.123.2023.08.18.20.52.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 18 Aug 2023 20:52:24 -0700 (PDT)
-Date:   Sat, 19 Aug 2023 11:52:18 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Amir Goldstein <amir73il@gmail.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>, corbet@lwn.net,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        david@fromorbit.com, cem@kernel.org, sandeen@sandeen.net,
-        chandan.babu@oracle.com, leah.rumancik@gmail.com, zlang@kernel.org,
-        fstests@vger.kernel.org, willy@infradead.org,
-        shirley.ma@oracle.com, konrad.wilk@oracle.com
-Subject: Re: [PATCH 1/3] docs: add maintainer entry profile for XFS
-Message-ID: <20230819035218.yajnnxjy4zwhhogr@zlang-mailbox>
-References: <169091989589.112530.11294854598557805230.stgit@frogsfrogsfrogs>
- <169091990172.112530.13872332887678504055.stgit@frogsfrogsfrogs>
- <ZNaMhgqbLJGdateQ@bombadil.infradead.org>
- <20230812000456.GA2375177@frogsfrogsfrogs>
- <CAOQ4uxibnPqE5qG9R53JyaMY1bd6j9OH0pq2eQxYpxDwf3xnGw@mail.gmail.com>
- <ZNwQT80yoHYrjvn+@bombadil.infradead.org>
- <20230816001108.GA1348949@frogsfrogsfrogs>
- <20230816060405.u26tvypmh4tcovef@zlang-mailbox>
- <20230817003345.GV11377@frogsfrogsfrogs>
+        with ESMTP id S233964AbjHSQ0U (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 Aug 2023 12:26:20 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60F6512756
+        for <fstests@vger.kernel.org>; Sat, 19 Aug 2023 09:26:13 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DB48761E36
+        for <fstests@vger.kernel.org>; Sat, 19 Aug 2023 16:26:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B21CC433CA
+        for <fstests@vger.kernel.org>; Sat, 19 Aug 2023 16:26:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1692462372;
+        bh=rX89G/Uo4uyZiiXUm9zovEY4wvxgZKBB9CZ0MhPDgZk=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=iLWwCkeFgjiZppwysotTQnc8eV+l2g2eKxRMP4xS0O5sX2jeO9J+D6p0jAWLZwXBp
+         Rjwp8myLXHID/XnCZK9d7s1pM4JUyn+L/cyY6i/oM5LETefTxJbxyEjLVttT47zo8U
+         JhCWtvDnLYA+7aIWao/gK4bQJf2i2G8LxvqLCXgLrh5+7apOu/25W7DDtfAzJ4n1Jh
+         JoYXKj3Dzt7ImajLgZKR1Nyqx3l1a0f4dyajx5DjOOs1FKG71ugrMLd3iXIbM3HKlr
+         EezkH3IdeZufLzcjhbf3RuyHKGI2gLbk+AgNJmIpAkV/8bPiZEsnZo/4oGbLW7X0jo
+         rcTf+I05T1xSQ==
+Received: by mail-oo1-f52.google.com with SMTP id 006d021491bc7-570b6e1a413so245558eaf.3
+        for <fstests@vger.kernel.org>; Sat, 19 Aug 2023 09:26:12 -0700 (PDT)
+X-Gm-Message-State: AOJu0YzrkFhB+Om/nfgNAAUnmWI+K+M+aOoaQLviBzspoWOLW2U+Zfhi
+        ja+OcWDpWIcTfUUQc6SH5sSVs1Xl1fFCogPqhO0=
+X-Google-Smtp-Source: AGHT+IGvJwEZNyNofUwwXM9IuvkUKE/TpkMFUaXe2fXjERAE+4PSdq2AiURHFS1Hin2sbqdORfo+sj0YHEeqWHsJ1go=
+X-Received: by 2002:a4a:3956:0:b0:56e:4921:deb0 with SMTP id
+ x22-20020a4a3956000000b0056e4921deb0mr2863333oog.8.1692462371362; Sat, 19 Aug
+ 2023 09:26:11 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230817003345.GV11377@frogsfrogsfrogs>
+References: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <CAL3q7H7C0mE9tBaipdYPYOCgBVYMTVKQ8=f90khTckt1CbBF4A@mail.gmail.com>
+ <9eadebb8-1bc7-1c19-ad3d-04b31271f8dc@fujitsu.com> <20230818124325.vxod6jkdzirdeaak@zlang-mailbox>
+In-Reply-To: <20230818124325.vxod6jkdzirdeaak@zlang-mailbox>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Sat, 19 Aug 2023 17:25:35 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H5n054jOAW=WgSLJAXCkmbSpHJ1yNGGJ9s7-WpdAkwgPw@mail.gmail.com>
+Message-ID: <CAL3q7H5n054jOAW=WgSLJAXCkmbSpHJ1yNGGJ9s7-WpdAkwgPw@mail.gmail.com>
+Subject: Re: [PATCH] generic/471: Remove this broken case
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "djwong@kernel.org" <djwong@kernel.org>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "tytso@mit.edu" <tytso@mit.edu>, "shr@fb.com" <shr@fb.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 16, 2023 at 05:33:45PM -0700, Darrick J. Wong wrote:
-> On Wed, Aug 16, 2023 at 02:04:05PM +0800, Zorro Lang wrote:
-> > On Tue, Aug 15, 2023 at 05:11:08PM -0700, Darrick J. Wong wrote:
-> > > On Tue, Aug 15, 2023 at 04:54:55PM -0700, Luis Chamberlain wrote:
-> > > > On Sat, Aug 12, 2023 at 12:05:33PM +0300, Amir Goldstein wrote:
-> > > > > On Sat, Aug 12, 2023 at 3:04 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> > > > > >
-> > > > > > On Fri, Aug 11, 2023 at 12:31:18PM -0700, Luis Chamberlain wrote:
-> > > > > > > On Tue, Aug 01, 2023 at 12:58:21PM -0700, Darrick J. Wong wrote:
-> > > > > > > > +Roles
-> > > > > > > > +-----
-> > > > > > > > +There are seven key roles in the XFS project.
-> > > > > > > > +- **Testing Lead**: This person is responsible for setting the test
-> > > > > > > > +  coverage goals of the project, negotiating with developers to decide
-> > > > > > > > +  on new tests for new features, and making sure that developers and
-> > > > > > > > +  release managers execute on the testing.
-> > > > > > > > +
-> > > > > > > > +  The testing lead should identify themselves with an ``M:`` entry in
-> > > > > > > > +  the XFS section of the fstests MAINTAINERS file.
-> > > 
-> > >                                     ^^^^^^^^^^^^^^^^^^^
-> > > > > > >
-> > > > > > > I think breaking responsibility down is very sensible, and should hopefully
-> > > > > > > allow you to not burn out. Given I realize how difficult it is to do all
-> > > > > > > the tasks, and since I'm already doing quite a bit of testing of XFS
-> > > > > > > on linux-next I can volunteer to help with this task of testing lead
-> > > > > > > if folks also think it may be useful to the community.
-> > > > > > >
-> > > > > > > The only thing is I'd like to also ask if Amir would join me on the
-> > > > > > > role to avoid conflicts of interest when and if it comes down to testing
-> > > > > > > features I'm involved in somehow.
-> > > > > >
-> > > > > > Good question.  Amir?
-> > > > > >
-> > > > > 
-> > > > > I am more than happy to help, but I don't believe that I currently perform
-> > > > > or that I will have time to perform the official duties of **Testing
-> > > > > Lead** role.
-> > > > > 
-> > > > > I fully support the nomination of Luis and I think the **Release Manager**
-> > > > > should be able to resolve any conflict of interests of the **Testing Lead**
-> > > > > as feature developer should any such conflicts arise :)
-> > > > 
-> > > > Fair enough.
-> > > > 
-> > > > Darrick, I suppose just one thing then, using M for Testing Lead seems
-> > > > likely to implicate the 'Testing Lead' getting Cc'd on every single new
-> > 
-> > Do you hope to get CC address/list ...
-> > 
-> > > > patch. As much as I could help review, I don't think I can commit to
-> > > > that, and I think that's the point of the current split. To let us split
-> > > > roles to help scale stuff.
-> > > 
-> > > Note that we're talking about "M:" entries in the *fstests* MAINTAINERS
-> > > file, not the kernel...
-> > 
-> > ... from fstests project, for a patch on a linux-$FSTYP project?
-> > 
-> > That's weird to me. 
-> 
-> Not for the kernel, no.  Just the contributions to fstests.
-> 
-> For example, if I were sending a patch deluge, the online fsck testing
-> patches would be cc'd to you; to whomever's listed as M: under XFS in
-> fstests MAINTAINERS; and fstests@ and linux-xfs@.
-> 
-> The kernel patches would be cc'd to linux-xfs, and to whomever steps up
-> to review the code (who are we kidding, dchinner).
-> 
-> xfsprogs patches for online fsck would be cc'd to linux-xfs and Carlos.
-> 
-> > 
-> > > 
-> > > > So how about a separate new prefix, TL: ? Adding Linus in case he has
-> > > > a stronger preference to only keep us at one character fist index on
-> > > > MAINTAINERS.
-> > > 
-> > > ...so I'm cc'ing Zorro since he's the owner of the relevant git repo.
-> > > Hey Zorro, do you have any opinions about how to record who's
-> > > responsible for each filesystem adding tests for new code and whatnot?
-> > 
-> > I think a specific fs test lead is a contributer for that fs project more,
-> > not for fstests. The test lead need to report test results to that fs
-> > project, not necessary to report to fstests.
-> 
-> I disagree -- yes, /developers/ (and the release manager) should be
-> running tests and reporting those results to that fs project.
-> 
-> However, I defined the testing lead (quoting from above):
-> 
-> "**Testing Lead**: This person is responsible for setting the test
-> coverage goals of the project, negotiating with developers to decide
-> on new tests for new features, and making sure that developers and
-> release managers execute on the testing."
-> 
-> In my mind, that means the testing lead should be reviewing changes
-> proposed for tests/xfs/* in fstests by XFS developers to make sure that
-> new features are adequately covered; and checking that drive-by
-> contributions from others fit well with what's already there.
-> 
-> (That's what I thought you wanted out from the people mentioned in the
-> fstests MAINTAINERS file...)
+On Fri, Aug 18, 2023 at 1:43=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Wed, Aug 16, 2023 at 02:58:10PM +0000, Yang Xu (Fujitsu) wrote:
+> > on  2023/08/15 18:44, Filipe Manana wrote:
+> > > On Mon, Aug 14, 2023 at 4:04=E2=80=AFPM Yang Xu <xuyang2018.jy@fujits=
+u.com> wrote:
+> > >>
+> > >> I remember this case fails on last year becuase of
+> > >> kernel commit cae2de69 ("iomap: Add async buffered write support")
+> > >> kernel commit 1aa91d9 ("xfs: Add async buffered write support").
+> > >> as below:
+> > >>       pwrite: Resource temporarily unavailable
+> > >>       wrote 8388608/8388608 bytes at offset 0
+> > >>       XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > >>      -RWF_NOWAIT time is within limits.
+> > >>      +pwrite: Resource temporarily unavailable
+> > >>      +(standard_in) 1: syntax error
+> > >>      +RWF_NOWAIT took  seconds
+> > >>
+> > >> So For async buffered write requests, the request will return -EAGAI=
+N
+> > >
+> > > I'm curious about this.
+> > >
+> > > All the xfs_io pwrite calls are being done with Direct IO (-d)
+> > > argument, so how does that explain the failure?
+> >
+> > I am not understand async buffer write, but with the following
+> > discussion link[1] maybe explain this failure and explain why btrfs pas=
+sed.
+> > >
+> > >> if the ilock cannot be obtained immediately.
+> > >
+> > > What is the ilock? That seems to be xfs specific.
+> >
+> > yes, I guess it is xfs_ilock and they are xfs specific.
+> > >
+> > > The test passes on btrfs and btrfs supports async buffered writes -
+> > > but I'm still puzzled, because the test only does direct IO writes.
+> > > Does xfs falls back from direct IO to buffered IO?
+> > >
+> > >>
+> > >> Here also a discussion[1] that seems generic/471 has been broken.
+> > >
+> > > Well that discussion doesn't help me understand things. It mentions
+> > > some other discussion, presumably with more details. Where's that
+> > > other discussion?
+> >
+> > I think the url that Jens mention should be this[1] when he reviewed
+> > Stefan V7 patch for "io-uring/xfs: support async buffered writes".
+> >
+> > [1]https://lkml.kernel.org/linux-fsdevel/ca60a7dc-b16d-d8ce-f56c-547b44=
+9da8c9@kernel.dk/
+>
+> Hi Filipe,
+>
+> Does above explanation make sense to you?
 
-OK, you or (the one you nominate to be the XFS testing lead) might want to send
-a patch to fstests@, to add a "M: xxx" under "XFS" (xfstests/MAINTAINERS.),
-and add this new definition of "Testing lead" part to "M:" flag in
-xfstests/MAINTAINERS. We can talk about more details under that patch.
+Not completely.
 
-Thanks,
-Zorro
+It justifies that the test's assumptions are not necessarily correct,
+that I understood and it's reasonable.
 
-> 
-> > And a test lead might do more testing besides fstests. So I can't imagine
-> > that I need to check another project to learn about who's in charge of the
-> > current project I'm changing.
-> 
-> ...so the testing lead would be the person who you'd talk to directly
-> about changes that you want to make.
-> 
-> (Wait, who is "I" here?  You, Zorro?  Or were you paraphrasing a
-> developer?)
-> 
-> --D
-> 
-> > (If I understood anything wrong, please correct me:)
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > 
-> > > >   Luis
-> > > 
-> > 
-> 
+However I don't see, neither in that thread nor in this patch's
+changelog, why the test started to fail (on xfs, it still passes on
+btrfs and ext4) after adding support for async buffered IO writes to
+xfs and iomap - as all the writes done by the test are using direct
+IO.
 
+At least the changelog should point to that thread, and not the one it
+currently refers to because it doesn't provide any useful information.
+For completeness it should also justify why the async buffered write
+support broke the test, as it points out the test fails after those 2
+commits for buffered write support, yet there are no buffered writes
+performed by the test.
+
+Anyway, don't make me hold back a patch just because I'm too curious.
+
+Thanks.
+
+>
+> This patch got several RVBs, but as this patch removes a generic patch, s=
+o
+> I'd like to see there's not objection from any fs list. If btrfs still ha=
+ve
+> more review points, I'll hold this patch, won't merge it in next release.
+>
+> Thanks,
+> Zorro
+>
+> >
+> >
+> > Best Regards
+> > Yang Xu
+> > >
+> > > Thanks.
+> > >
+> > >>
+> > >> Now, I met this problem in my linux distribution, then I found the a=
+bove
+> > >> discussion. IMO, remove this case is ok and then we can avoid to mee=
+t this
+> > >> false report again.
+> > >>
+> > >> [1]https://lore.kernel.org/linux-xfs/b2865bd6-2346-8f4d-168b-17f06bb=
+edbed@kernel.dk/
+> > >> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+> > >> ---
+> > >>   tests/generic/471     | 67 ---------------------------------------=
+----
+> > >>   tests/generic/471.out | 13 ---------
+> > >>   2 files changed, 80 deletions(-)
+> > >>   delete mode 100755 tests/generic/471
+> > >>   delete mode 100644 tests/generic/471.out
+> > >>
+> > >> diff --git a/tests/generic/471 b/tests/generic/471
+> > >> deleted file mode 100755
+> > >> index fbd0b12a..00000000
+> > >> --- a/tests/generic/471
+> > >> +++ /dev/null
+> > >> @@ -1,67 +0,0 @@
+> > >> -#! /bin/bash
+> > >> -# SPDX-License-Identifier: GPL-2.0
+> > >> -# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
+> > >> -#
+> > >> -# FS QA Test No. 471
+> > >> -#
+> > >> -# write a file with RWF_NOWAIT and it would fail because there are =
+no
+> > >> -# blocks allocated. Create a file with direct I/O and re-write it
+> > >> -# using RWF_NOWAIT. I/O should finish within 50 microsecods since
+> > >> -# block allocations are already performed.
+> > >> -#
+> > >> -. ./common/preamble
+> > >> -_begin_fstest auto quick rw
+> > >> -
+> > >> -# Import common functions.
+> > >> -. ./common/populate
+> > >> -. ./common/filter
+> > >> -. ./common/attr
+> > >> -
+> > >> -# real QA test starts here
+> > >> -_require_odirect
+> > >> -_require_test
+> > >> -_require_xfs_io_command pwrite -N
+> > >> -
+> > >> -# Remove reminiscence of previously run tests
+> > >> -testdir=3D$TEST_DIR/$seq
+> > >> -if [ -e $testdir ]; then
+> > >> -       rm -Rf $testdir
+> > >> -fi
+> > >> -
+> > >> -mkdir $testdir
+> > >> -
+> > >> -# Btrfs is a COW filesystem, so a RWF_NOWAIT write will always fail=
+ with -EAGAIN
+> > >> -# when writing to a file range except if it's a NOCOW file and an e=
+xtent for the
+> > >> -# range already exists or if it's a COW file and preallocated/unwri=
+tten extent
+> > >> -# exists in the target range. So to make sure that the last write s=
+ucceeds on
+> > >> -# all filesystems, use a NOCOW file on btrfs.
+> > >> -if [ $FSTYP =3D=3D "btrfs" ]; then
+> > >> -       _require_chattr C
+> > >> -       # Zoned btrfs does not support NOCOW
+> > >> -       _require_non_zoned_device $TEST_DEV
+> > >> -       touch $testdir/f1
+> > >> -       $CHATTR_PROG +C $testdir/f1
+> > >> -fi
+> > >> -
+> > >> -# Create a file with pwrite nowait (will fail with EAGAIN)
+> > >> -$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+> > >> -
+> > >> -# Write the file without nowait
+> > >> -$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testd=
+ir/f1 | _filter_xfs_io
+> > >> -
+> > >> -time_taken=3D`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1=
+M" $testdir/f1 | awk '/^1/ {print $5}'`
+> > >> -
+> > >> -# RWF_NOWAIT should finish within a short period of time so we are =
+choosing
+> > >> -# a conservative value of 50 ms. Anything longer means it is waitin=
+g
+> > >> -# for something in the kernel which would be a fail.
+> > >> -if (( $(echo "$time_taken < 0.05" | bc -l) )); then
+> > >> -       echo "RWF_NOWAIT time is within limits."
+> > >> -else
+> > >> -       echo "RWF_NOWAIT took $time_taken seconds"
+> > >> -fi
+> > >> -
+> > >> -$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
+> > >> -
+> > >> -# success, all done
+> > >> -status=3D0
+> > >> -exit
+> > >> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> > >> deleted file mode 100644
+> > >> index ab23272e..00000000
+> > >> --- a/tests/generic/471.out
+> > >> +++ /dev/null
+> > >> @@ -1,13 +0,0 @@
+> > >> -QA output created by 471
+> > >> -pwrite: Resource temporarily unavailable
+> > >> -wrote 8388608/8388608 bytes at offset 0
+> > >> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > >> -RWF_NOWAIT time is within limits.
+> > >> -00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  .......=
+.........
+> > >> -*
+> > >> -00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  .......=
+.........
+> > >> -*
+> > >> -00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  .......=
+.........
+> > >> -*
+> > >> -read 8388608/8388608 bytes at offset 0
+> > >> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > >> --
+> > >> 2.27.0
+> > >>
+>
