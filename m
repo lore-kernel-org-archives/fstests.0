@@ -2,210 +2,145 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E21F5EE49A0
-	for <linux-fstests@archiver.kernel.org>; Mon, 21 Aug 2023 05:17:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10013EE4996
+	for <linux-fstests@archiver.kernel.org>; Mon, 21 Aug 2023 05:39:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233120AbjHUFRx (ORCPT
+        id S233158AbjHUFjg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 21 Aug 2023 01:17:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36610 "EHLO
+        Mon, 21 Aug 2023 01:39:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231236AbjHUFRx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Aug 2023 01:17:53 -0400
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDC27A3;
-        Sun, 20 Aug 2023 22:17:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1692595071; x=1724131071;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=Apr9deBkyRRHsesCVdbx96DFbyfAUwjMFcsv2HJFltE=;
-  b=G/HF5ADtpLW0uSoxYrpOOwovGDlg//0fp7p3a13qCnu0G6X4/HX2sA4l
-   JrjwRbQfHlLteTdvkKvSgDGwRqCXSkMry/0vFks4IEwnC3nWXAcYdiJeI
-   PxrDd8pspzRJzUOwlUdwqJdTli6pkh2ZUifpSYZbakuTZScSlecjXu6xr
-   V6SQGobSB2HAUtOd1YntrtfyL3LlydCTH9MFVRChb98bEnF6fXzxOsE9q
-   ZuFUG/6GIZSy9B0d+QrerXt6V0RKLC17E8dOFGofPoEsP1uDYhuLiAgoi
-   Agd9HkVEzBicgtzwM33EHoPyfcVth5YMw4aAPlLK6FXqd/uMeeDkHd1VV
-   g==;
-X-IronPort-AV: E=Sophos;i="6.01,189,1684771200"; 
-   d="scan'208";a="239916621"
-Received: from mail-mw2nam12lp2044.outbound.protection.outlook.com (HELO NAM12-MW2-obe.outbound.protection.outlook.com) ([104.47.66.44])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Aug 2023 13:17:50 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=fSXMP0EoM3Um85ayNXaBj02a/bDNnLTIcsS17C3+h7S01JeoxTqkSUY/tM6jLRjAxgahbNmNj1fFIq3wpSVkwCntiRLW9z/gIE1cZWmSjAM8YVwKp81HMgwA32ME7eS5ST4JE2A9/ypvE/MOb9qQ7N9q5R34n01OZreoxClIFc98egRMEhbHb4qR/NGlfE59TVTn38d8AjpIQrDHf/YKZG2J7u7uyNfw02fkSj/W2eTaPe5wkh//kx7+ozpHUKIfRwz09fVpTgXMGDfhSMpY5Y76DjyyIzNP9vCCkuQtw+UPGXff6glVeh9pRcA5BWKy5JZ+pR6Cy0/ugT/1Db06sw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=1B1sNaLsdgrN+D64vAkD+BKA+7MpeX23I58KlPG7nhE=;
- b=kPA5GMW+bIhbpHiBipfnaylzbvDN42umri4I3WzYoCzBRWj5Irj1JbDZufVuTZf+1gXQYlukQUjg9MedbZLadob0k8sdRj7re9YNdU9DPZtWyOqMupkYnqDYk8+XZYVheWOXRbhPk42ccMRnuo3IX8gxYFlhGh+emOj4swjbw21FGRMPeGRbfljAMunp8QtgYMnE7W5QwOCa8y59lBgZ1tan+NSDKGtEVIA2KfqNoIr0VOz53+eW95NEQp8S2UKvMl22pz7Up5oTc9rnB6VJgbvYRRdE27hr+nV5mcIe437M7HhR8tNqBLYFAeCEVjmCrokmFfWiVlh3CuiaEpAcRw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        with ESMTP id S231591AbjHUFjg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Aug 2023 01:39:36 -0400
+Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86691A6
+        for <fstests@vger.kernel.org>; Sun, 20 Aug 2023 22:39:34 -0700 (PDT)
+Received: by mail-pf1-x433.google.com with SMTP id d2e1a72fcca58-68a40d8557eso496782b3a.1
+        for <fstests@vger.kernel.org>; Sun, 20 Aug 2023 22:39:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=1B1sNaLsdgrN+D64vAkD+BKA+7MpeX23I58KlPG7nhE=;
- b=VmV/hrXWVliOWAaNlUSjpT2LVdxJEcWq1+VIpiaQM+a8G+hVJkV2YdFkQgJbvuIRUojsJkFcvxfCM7ZfPcRBZ/S9j4ZWo1ylHqGMOu43k6rVng57zOsx0fOJdCp85Fpdbkj7meNDN+FlLQuYakSUT9phO9Nr81KgfypxUvHJx7A=
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com (2603:10b6:a03:300::11)
- by BY5PR04MB6311.namprd04.prod.outlook.com (2603:10b6:a03:1f2::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6723.14; Mon, 21 Aug
- 2023 05:17:47 +0000
-Received: from SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::275a:b2f9:29b8:e60d]) by SJ0PR04MB7776.namprd04.prod.outlook.com
- ([fe80::275a:b2f9:29b8:e60d%7]) with mapi id 15.20.6723.013; Mon, 21 Aug 2023
- 05:17:46 +0000
-From:   Naohiro Aota <Naohiro.Aota@wdc.com>
-To:     Zorro Lang <zlang@redhat.com>
-CC:     "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH] btrfs/179: optimize remove file selection
-Thread-Topic: [PATCH] btrfs/179: optimize remove file selection
-Thread-Index: AQHZ0MmKZEwH0x5eGEmqqcAZORP8Ba/wdLuAgAPHVIA=
-Date:   Mon, 21 Aug 2023 05:17:46 +0000
-Message-ID: <wfrqqg3l3epcktr23ezw37s2s5dfk7gadlk7shqojpsxrfu3ez@czzwwcavixre>
-References: <20230817051317.3825299-1-naohiro.aota@wdc.com>
- <20230818193533.kuonbvwzvuw7eflw@zlang-mailbox>
-In-Reply-To: <20230818193533.kuonbvwzvuw7eflw@zlang-mailbox>
-Accept-Language: ja-JP, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SJ0PR04MB7776:EE_|BY5PR04MB6311:EE_
-x-ms-office365-filtering-correlation-id: 8c174d7a-0426-4905-ac34-08dba205f4b0
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: vWY71LJ2xQ3Q4HhkcU+vnaobLbqYivVuFSUxwB5CgJzdBLqwQ9OUEy1d8MoJef3jPbxTKBDI6o5mwXUie7XJEpVPiM4KB3d3U511LM1SlOf6G9Ky+F7srASXVSxfQZNKafoPmqIzd2p1gbQ0GGxelaIKN7SS/QxQu9+zweUGjicKsmHBQvftexVPjSydU6AFAa+qV/TwvBOY1VW6XPhPbAxiRq3B9J3Jp93rLngjs38oDRhR5iUDq0Cx1+Np23Bx714+veuHvOsgDJANbd/uJ5VZ2jVnY3olbXiNsfm/iX8dRKXD4seFTAiJRTq6hTa4C/CARNnazML5E4jlXbEZChheKLxvDTvpMmd7jkcddRffYtX7X21C1gK19b2sdmuUDy3QCB3BCOSxQYmC4rKPETRf2sfyPFG+PZFaffXR2QbiF81gwMlZfHNM6Tf8CDYv18Mid8FTgimY7Hjw6FHVAF8KKGBlBA9UeN7zptz626dEDpgqkUIB1GuHqQT0Z9K9syE+O95UMlktlIWhh5CQHOyV17QLj+ht0FAC+x2ayBdkS3lq7lhdNLzXx7XP18Rjt/BVDsHRXIYgvcjk2o0EJyN70TsYqZ2Cyv2l3UWfZVMkO2vfbDvXQ00tw0Q0TceoCDesvdyM1nmIeyNyMnkTcQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR04MB7776.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(7916004)(39860400002)(366004)(346002)(136003)(396003)(376002)(451199024)(186009)(1800799009)(2906002)(83380400001)(38100700002)(38070700005)(6506007)(6486002)(5660300002)(26005)(86362001)(8676002)(8936002)(4326008)(316002)(6512007)(9686003)(66476007)(64756008)(6916009)(54906003)(66446008)(66946007)(66556008)(76116006)(91956017)(82960400001)(478600001)(122000001)(71200400001)(41300700001)(33716001)(27256005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?tb73rVRRhyjR7Xoe8xr04widbvmdwIfRm1X3nulI8H6BA2XVqE4/jZlDvCqN?=
- =?us-ascii?Q?MXgKt609F4vOmjEukywCid3r8B92BV7c0KEliosW0CgU1yig1zWrCQzcP42X?=
- =?us-ascii?Q?8NHf2kRgFd3Xh/gJois5cQhb9vZ4Tu0M+byq56C5psKgYAhN/MMx5lfM0cCI?=
- =?us-ascii?Q?IN0Pe1I6Wr2CoXdGcKM+xY21qvXn3ApSHsXx4h/kjQ2XNyvjyO/zigBBUSOw?=
- =?us-ascii?Q?dDyXlbSMVWfRylG9ypyrWbbrRENHrjrmjedT2aEhtYkRxpSepz3/uHwMsq/l?=
- =?us-ascii?Q?8zCUc8ud047QmzT1rM4uzfKXE13ItI69zy/Q2nSuyyMQsSRBGsZUz9vtgwl6?=
- =?us-ascii?Q?/kOq+aAneEXSJh/Otu4/m77mDRGVlKLRZnxUd6dnn5bd/hT46Ibrc2v+5I+h?=
- =?us-ascii?Q?/6SZyz0tL062IOXayyPBVHbbD+r7l8qkQsqN4NpNEc1SlSIIpM/SBqohD3nO?=
- =?us-ascii?Q?bfBF4FuwmbeJqvYf3QTy55gKWKfBVFNKjEKZxlDpgOZ6teJDcNfKC7Rf1BzD?=
- =?us-ascii?Q?R0jywnuqp7D/Yjt/ZOCXunipKcJ721i293po3VJkHUa9/L2PC0dCdgbnJp9n?=
- =?us-ascii?Q?IbaKJz7rxAWHkHVCK22ylOUM9okmHIh+F8bDnXtTR7WcvChWCT4LXq+ZFbRM?=
- =?us-ascii?Q?QaNkG5vdmNfVTgoqY6D9IATbtQghSBSVnBjQqUBbMH3Ih4EM9STnDKpZFSaw?=
- =?us-ascii?Q?9ohWbrw8jcNVku/gfrifT71GqzK9oJwxqJPU3a+/27kHpxxc03RaNoVPFx0m?=
- =?us-ascii?Q?QVWayi7pNk8P33CURSRLpv4r4b9BSpA9KV0eMJdvwZHxH73eygOF1mJ6YsTg?=
- =?us-ascii?Q?Eeqwdg83t6VKZdoah7DquqPaUwZJXYZ5vWuN/W7bFRr3vbDtRB7EGhbTM8K5?=
- =?us-ascii?Q?+x0IMUe0eTGLcrua7rrXp/JxXrzzv+XVDhPvzN2BEdlW68gLHh1izivyeJIv?=
- =?us-ascii?Q?Il5Ce4/ZWgiqMPywByeFJbXCTnVdvsjKR+HtVnwSkmrzCfR8cgHMZ97lYBdR?=
- =?us-ascii?Q?YS+pU01Gs+QLzq09XmV4D4iWdnfncoB7cHgbMfunrG2XTUTQ/JGNNvdAO6wh?=
- =?us-ascii?Q?hBOzS75E5pky12O7hL3cFdghmzfnafzsmjak9AjZxG5deFo6qsvsBN8SNDdL?=
- =?us-ascii?Q?NlATx6dZNzWguFTi7RlVTah35fhkAs3nthTBHiCGWdIN+2eAeUfVYTLWqQe6?=
- =?us-ascii?Q?af5xSQeLXqh+NfWhhtwWxv01bkeXsIqc9Ftey3ha5ucEJeyKUZbYflY9xMU3?=
- =?us-ascii?Q?3SIs/A6h9FpEKz4iccOOMU63mappcxSMWnk9p/lnVOBsi//YLOmsICjUvUZ9?=
- =?us-ascii?Q?lyNRkXOqJn0FCfVZnoMug5HI9P/HOv47FwF73S+Kt0xnFcL6fa4GvrAiaDhL?=
- =?us-ascii?Q?nvLBDpj+1xKvU1VrRVrXBBbJOoLxDOZWxslYSn4TgohO/Ckju6sqh2nR54Z7?=
- =?us-ascii?Q?LBmx/rrlMJ2C4gQtvHFNGQ6/CpBEISqSjXIBNNY1BtT2bhOjx2WHtxsMiEfb?=
- =?us-ascii?Q?4nRChf/P8lvPO8dGIX5tHB0CLTbZZ9jhrm8FqrLI3h5XrUgFJfWGAZuQIg4Z?=
- =?us-ascii?Q?oSIzkabaO2FS+Nvtc1lC9InTY1Ww17ZSJzcrr6b8Uygy4U/eBNUjx167Z5RN?=
- =?us-ascii?Q?dg=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <871A034303D65C4EB61043FED3CA0F5B@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+        d=fromorbit-com.20221208.gappssmtp.com; s=20221208; t=1692596374; x=1693201174;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=PrNDlExWsXp7IbDtcKP6hyuoUlO8+tTokwRt3LzZyEM=;
+        b=BpUJ32BCb8pWxvzvUkkZ/LAzxrvYKBfSGd+Lpw4zVOQnLQzKkN6HdVC/AFQwLX6MRJ
+         H34KRHEsWU/SBRg+A4SPPFBjmAQtJ+1FtxnyaF3x2JUf0dZAEuNM5FOMupEHIkRpTjBf
+         W16NqjBw7iuvdX2hNtXeveIdwGgNfYDZzXJrQqUc2MM8vJZZs8+d1aIiA8eUvlWrpA5Q
+         slNKLfVptcENVg3HmVknKO2pRE5Wpomy55FMk4im9bNK/qKLZdou6LEmZO5F2MrhY1Es
+         yYQwDtVxyFM4B6YGscsZb7niBp8z/OKSqTSxs8CxHq8bMaifALvWMA8zPsVv1+9oF8SD
+         i1aQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692596374; x=1693201174;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=PrNDlExWsXp7IbDtcKP6hyuoUlO8+tTokwRt3LzZyEM=;
+        b=Hkuo+lF8Q2LfOzhtDzknzRu3Eu1SHCwwczyUKDsCDn+3xm25jwsZndnn1crzoUj+p+
+         Mysf+nHsC2RcTQ0GJLBqGj7ufPIoHKoNsLkI8ftT7gaZRS1YHl182v8h52J1AzJSq7tC
+         XmsAKnGQPaY0uvouArOEtScye613g896E6kBEQxKCTIK6flQmcjbl6pHAKGO3XWN4t9r
+         YuuJ3s8rR744EQaiRM0yhRXtmaDaWpfvGctWdmVKbT80/8FcI6WZgCup77/4q03A75ta
+         UsnvTMExVv8Q4XmiIp3R9tFCuEnLJe8lYVnU6TGXkFYZ5DU5sMfSOU3QLRiFzubIkgl1
+         4HZQ==
+X-Gm-Message-State: AOJu0Yxdxx+2z9j8fZ6qxpzIKMX4UgIHVvDj0FG1F82mIG//5TjIjJVO
+        vKPmJJnL09hVjuTyMI7OiODVCg==
+X-Google-Smtp-Source: AGHT+IE2ri8l4vyDD0Tyz2JDje2zNABuG19WzrsCwt7PyZkoheT0bSefz23HXMDljNz2UncqWYDfKw==
+X-Received: by 2002:a05:6a20:8411:b0:13e:b6b0:72a2 with SMTP id c17-20020a056a20841100b0013eb6b072a2mr9776809pzd.6.1692596373967;
+        Sun, 20 Aug 2023 22:39:33 -0700 (PDT)
+Received: from dread.disaster.area (pa49-195-66-88.pa.nsw.optusnet.com.au. [49.195.66.88])
+        by smtp.gmail.com with ESMTPSA id g7-20020a62e307000000b0068a0b8e4d5bsm3250088pfh.21.2023.08.20.22.39.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 20 Aug 2023 22:39:33 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+        (envelope-from <david@fromorbit.com>)
+        id 1qXxdS-004SHU-22;
+        Mon, 21 Aug 2023 15:39:30 +1000
+Date:   Mon, 21 Aug 2023 15:39:30 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Filipe Manana <fdmanana@kernel.org>
+Cc:     Zorro Lang <zlang@redhat.com>,
+        "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>,
+        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+        "djwong@kernel.org" <djwong@kernel.org>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "tytso@mit.edu" <tytso@mit.edu>, "shr@fb.com" <shr@fb.com>
+Subject: Re: [PATCH] generic/471: Remove this broken case
+Message-ID: <ZOL4kmQ/2ZLEzvmI@dread.disaster.area>
+References: <1692024101-3967-1-git-send-email-xuyang2018.jy@fujitsu.com>
+ <CAL3q7H7C0mE9tBaipdYPYOCgBVYMTVKQ8=f90khTckt1CbBF4A@mail.gmail.com>
+ <9eadebb8-1bc7-1c19-ad3d-04b31271f8dc@fujitsu.com>
+ <20230818124325.vxod6jkdzirdeaak@zlang-mailbox>
+ <CAL3q7H5n054jOAW=WgSLJAXCkmbSpHJ1yNGGJ9s7-WpdAkwgPw@mail.gmail.com>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: UVAYYJQp8r4x3/bpRsrFGxKUVi6RBfsY3/07bycRsER9wJyPZaCVNkzE6CgOcogZmNDKnbqZVJ7w/6uFjFFss+M4E8/bX0i3Ra+3ZNNxOC25zH3av0CadQGLX5f9VL4GuUL9BWsr4pB4cT/sAxBTLA+KXN0P1Hn21XPbIh8Uq9qkPNmJ7BfYoVT/GU5Um+y3hd/FrCXOO8O+cV78FtkohBToY9ecuZ0kkWWscHqEMchWw9TwueI1WWfvsuXH1ER0MOt4q6gb6xcjcCeiLwPHype6WlmoGcMaLIF2F+7DYdFJIWKgkzlUxI0V8eh1jBTBDSMGdrsvdLr2vbbSJ3bWMG+BMLEPBz9dKTpA/aVY1bggsLhDXq1NnzZTdgZ4E4bcmzbB/Dkm21eFcdRVSCTleQQpQ0KKsAaMaewxQQkdC7KvbIOl/miR0FinIRtL65BqHiNMy43O8Q1usnko7T7qOFN+kkETrBKECLCe1Xvuc36xI2hNrBlVVBNQuxcTpa5OUO/4o7mkSTpCUjL4CA08qUuSWcSJ6IiwVP1OGLLV3CVtFhHnK3MxMCQolEvt7H+RsmWDIH9+OcF7eQkUKneYBq+21o76a9TFlk885orgu5nQ4l30Vat/mDPF6Efl57t99xJLjmvxbFgXxpTGyd6pMrRPNv7pXROCze+ad57ByjNPHKPoLIDqK4tPVXPK0u/UXtDzIX3qonlwhgn7XKzNF5NrYpLMMmj6d2MkwfaCjnvZaf797r0Kvk26/PxjEypBayPEcY6ClpXX9SVV0/aB61RA+oDs/ObqSCyoUnPKwaEA7fCEnhbD+9coqtVtrKF9
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SJ0PR04MB7776.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8c174d7a-0426-4905-ac34-08dba205f4b0
-X-MS-Exchange-CrossTenant-originalarrivaltime: 21 Aug 2023 05:17:46.6703
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 80f0CJlENg+ifPLYDhX8wCTpbks9sH5RhIPgtjEeVdsMlU7S87PZlmt0M09a4uKznKpCeggGLSGQUD/QXQoPjw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR04MB6311
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL3q7H5n054jOAW=WgSLJAXCkmbSpHJ1yNGGJ9s7-WpdAkwgPw@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sat, Aug 19, 2023 at 03:35:33AM +0800, Zorro Lang wrote:
-> On Thu, Aug 17, 2023 at 02:13:17PM +0900, Naohiro Aota wrote:
-> > Currently, we use "ls ... | sort -R | head -n1" to choose a removing
-> > victim. It sorts the files with "ls", sort it randomly and pick the fir=
-st
-> > line, which wastes the "ls" sort.
-> >=20
-> > Also, using "sort -R | head -n1" is inefficient. For example, in a
-> > directory with 1000000 files, it takes more than 15 seconds to pick a f=
-ile.
-> >=20
-> >   $ time bash -c "ls -U | sort -R | head -n 1 >/dev/null"
-> >   bash -c "ls -U | sort -R | head -n 1 >/dev/null"  15.38s user 0.14s s=
-ystem 99% cpu 15.536 total
-> >=20
-> >   $ time bash -c "ls -U | shuf -n 1 >/dev/null"
-> >   bash -c "ls -U | shuf -n 1 >/dev/null"  0.30s user 0.12s system 138% =
-cpu 0.306 total
-> >=20
-> > So, just use "ls -U" and "shuf -n 1" to choose a victim.
-> >=20
-> > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
-> > ---
-> >  tests/btrfs/179 | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >=20
-> > diff --git a/tests/btrfs/179 b/tests/btrfs/179
-> > index 2f17c9f9fb4a..0fbd875cf01b 100755
-> > --- a/tests/btrfs/179
-> > +++ b/tests/btrfs/179
-> > @@ -45,7 +45,7 @@ fill_workload()
-> > =20
-> >  		# Randomly remove some files for every 5 loop
-> >  		if [ $(( $i % 5 )) -eq 0 ]; then
-> > -			victim=3D$(ls "$SCRATCH_MNT/src" | sort -R | head -n1)
-> > +			victim=3D$(ls -U "$SCRATCH_MNT/src" | shuf -n 1)
->=20
-> Thanks for this improvement. This case has two lines have this similar lo=
-gic,
-> Why not change them both?
+On Sat, Aug 19, 2023 at 05:25:35PM +0100, Filipe Manana wrote:
+> On Fri, Aug 18, 2023 at 1:43 PM Zorro Lang <zlang@redhat.com> wrote:
+> > On Wed, Aug 16, 2023 at 02:58:10PM +0000, Yang Xu (Fujitsu) wrote:
+> > > I think the url that Jens mention should be this[1] when he reviewed
+> > > Stefan V7 patch for "io-uring/xfs: support async buffered writes".
+> > >
+> > > [1]https://lkml.kernel.org/linux-fsdevel/ca60a7dc-b16d-d8ce-f56c-547b449da8c9@kernel.dk/
+> >
+> > Hi Filipe,
+> >
+> > Does above explanation make sense to you?
+> 
+> Not completely.
+> 
+> It justifies that the test's assumptions are not necessarily correct,
+> that I understood and it's reasonable.
+> 
+> However I don't see, neither in that thread nor in this patch's
+> changelog, why the test started to fail (on xfs, it still passes on
+> btrfs and ext4) after adding support for async buffered IO writes to
+> xfs and iomap - as all the writes done by the test are using direct
+> IO.
 
-Indeed. I forgot to pick it.
+We changed how timestamps are updated so that they are aware of
+IOCB_NOWAIT. If the IOCB_NOWIAT DIO write now needs to update the
+inode timestamps, it will return -EAGAIN instead of doing
+potentially blocking operations that require IO to complete (i.e.
+taking a transaction reservation).
 
-> And btrfs/192 has a similar line too:
->=20
-> $ grep -rsn -- "sort -R" tests
-> tests/btrfs/179:48:                     victim=3D$(ls "$SCRATCH_MNT/src" =
-| sort -R | head -n1)
-> tests/btrfs/179:72:             victim=3D$(ls "$SCRATCH_MNT/snapshots" | =
-sort -R | head -n1)
-> tests/btrfs/192:75:     echo "$basedir/$(ls $basedir | sort -R | tail -1)=
-"
-> tests/btrfs/004:204:    for file in `find $dir -name f\* -size +0 | sort =
--R`; do
+Hence the first time we go to do a DIO read an inode, it's going to
+do an atime update, which now occurrs from an IOCB_NOWAIT context
+and we return -EAGAIN....
 
-Yeah, we can use "shuf" there too. I found even the simple "sort -R"
-(without head or tail) is really slower than "shuf". I'll address them too.
+Yes, we added non-blocking timestamp updates as part of the async
+buffered write support, but this was a general XFS IO path change of
+behaviour to address a potential blocking point in *all* IOCB_NOWAIT
+reads and writes, buffered or direct.
 
->=20
-> Do we need to change that too? And a common helper might help, if more ca=
-ses
-> would like to have this helper?
+> At least the changelog should point to that thread, and not the one it
+> currently refers to because it doesn't provide any useful information.
+> For completeness it should also justify why the async buffered write
+> support broke the test, as it points out the test fails after those 2
+> commits for buffered write support, yet there are no buffered writes
+> performed by the test.
 
-Yeah, maybe, we can define _random_file() as named in btrfs/192.
+async buffered writes didn't break the test. The addition of
+nonblocking timestamp updates in XFS is what causes the test to now
+fail.
 
-> Thanks,
-> Zorro
->=20
-> >  			rm "$SCRATCH_MNT/src/$victim"
-> >  		fi
-> >  		i=3D$((i + 1))
-> > --=20
-> > 2.41.0
-> >=20
-> =
+Indeed, we may change this XFS behaviour again some day - if we can
+guarantee that we can get a transaciton reservation without blocking
+then we -could- allow the timestamp update to run in IOCB_NOWAIT
+context. Doing this would then mean the test might randomly fail,
+depending on whether the timestamp update can be done without
+blocking or not....
+
+Put simply, the test is not validating that RWF_NOWAIT is behaving
+correctly - it just was a simple operation that kinda exercised
+RWF_NOWAIT semantics when we had no other way to test this code. It
+has outlived it's original purpose, so it should be removed...
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
