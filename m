@@ -2,80 +2,96 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C85FEE4993
-	for <linux-fstests@archiver.kernel.org>; Tue, 22 Aug 2023 07:30:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1828EE49A8
+	for <linux-fstests@archiver.kernel.org>; Tue, 22 Aug 2023 07:30:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233272AbjHVHaO (ORCPT
+        id S232932AbjHVHaQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 22 Aug 2023 03:30:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52238 "EHLO
+        Tue, 22 Aug 2023 03:30:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233330AbjHVHaL (ORCPT
+        with ESMTP id S233366AbjHVHaL (ORCPT
         <rfc822;fstests@vger.kernel.org>); Tue, 22 Aug 2023 03:30:11 -0400
 Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF9E7186
-        for <fstests@vger.kernel.org>; Tue, 22 Aug 2023 00:30:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0249919E
+        for <fstests@vger.kernel.org>; Tue, 22 Aug 2023 00:30:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1692689408; x=1724225408;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=uL328NY7PVBEuDr5qiw/CJXQmy59bQVW39cyVH+jfFc=;
-  b=kt1BFU2dFTp7abwpN+S8742YHV9RUYLtkQCtowSMkAgv97Z3Wz+S+ai2
-   /Llwhosf2m1Aw6qKz/GPG8kyYXZV8BNvZpimTS8qwBkcWoMCBc4iKcTml
-   iz8J8nJMKZLPOq9mdXC4zUlRFrm6+8A2y/XPl9e3DuE9kohVP/OgLKn0S
-   KlFMg7V3HZA5X7gzpEP2uA8yYWlPDs1ZNElm+Q31AxELWVmC2e5D87beP
-   ducWFHVUbqymg1WmLQIrKLnCPJX9gitBq7p8awql7mowpyCzm6fS0vvrp
-   RujgjjQVSI3ZZ612Uq3XchdicaWYjpnAvzkC/GMduoYF9S0GwNhO5xdJ3
-   w==;
+  t=1692689410; x=1724225410;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=c+LHgde+NARKxsljIznK+Pf/Lfxji6/IdOHuAcQ55oU=;
+  b=XRrSZ34TR6RpB55SEA7oWWtD86T0gpkJCmeUdj5tp7DwBiyyWnSIbZ30
+   tE3zlvQZa+VVEuGOPlw2xzVqErLkR86diVZIBB+xZRYld5ltCcGcKZQ88
+   xXpTx6K7M/e4D1XnwX7G7mgtpHPIaTSweO7D67JgkBo58GRANSiHTfwg7
+   fgiO0Rmu0I1Db3zdiPLZq15D8UhpkyDm5YIDF/+gdBob/s6hel3UUqQhE
+   HCZu2PD3jmLFLXMlscDphAJHkmQdTpORLA6oi8viN6wDwhFlXuOJNeVSW
+   OitNZ3ARiWj04ZmgDfHrI32qx9RYAWmdoySFD1Jrkjb33W9cdXwADufu7
+   A==;
 X-IronPort-AV: E=Sophos;i="6.01,192,1684771200"; 
-   d="scan'208";a="240045034"
+   d="scan'208";a="240045035"
 Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 22 Aug 2023 15:30:08 +0800
-IronPort-SDR: D4uccoPn4QpKCrqIHn3/pVLj20uaqwz7BQl2mUncEtQP2uK/Hi1m+baWhM0tAlnoRYzbXXDNGK
- vzm91zG6YvTd8xARBdCmmp0Qetoolhb6OmjgAvBklT3Xh7/D3C5S9yPdi4yF/ichK8P5pRhKk1
- CfqnQBSWnOHp+ksujg3bf06mTWpuBXRQe6hbKGpxj9KmEdOwDiziQr32TYjqSo4sDBnSDGBRQC
- KiXgn0SG5fhRGp8TnUk71Gbd5XS+gdUdEyp6SZjF3VwPdW7Shd2ZeX6lIXE6QjyhazMX1uXqVk
- +os=
+  by ob1.hgst.iphmx.com with ESMTP; 22 Aug 2023 15:30:09 +0800
+IronPort-SDR: b1vm5jONA1Xj9b1ZnWHtuxKdBze2fdNF1gwYltGLsqghxyTRcBO776HaagJTBioU8YEtBVjMsA
+ QPsXH5BTcb394TsXcF15zyGfttCFP1A/zpOT3HWkSUJ16l09RXyXDDqr2GDrMmm9lcqcLQ0uaB
+ /oECM8FOHTNI9+e1fMNIL74RVbUkd9cN58bEJAN4jkqC13DQrsXX65zvt927d3+AcOePbTjdX/
+ +goLrpGFuC6sV87SkU+C2nsKWSUhGW7XrieU5NMHn8Wf+DM0seLH83eaOhU72q6GeNyDwz4p3z
+ r3U=
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 Aug 2023 23:43:18 -0700
-IronPort-SDR: OL0Qc45GI/lv3CLqFuPODhFfPxHbSq7KQMauFp94Ab3g0Xszw5NkTrU0vTFllne6026WHzOhHB
- QxwwkzmHDDLEjwjVkgGiKBZL5NLLAmQz9Z7u+1/CAiNl0pph0LSkHLZkkiEZE3eYssdiaOP2UG
- atsOgefNEsHdwPnkVB1sk9hV0TnjXBIngHo50rMbFo/UA2fnaFFdfwLTT8z5AvHJhI5SPwKk9o
- 48h16iNb0h5WQwTFgp7ClQ4iGnJraqAOky3IZlegIITVFZb5zggtZWXJ38ovYzAfCJsZvzfc8a
- 6t4=
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 Aug 2023 23:43:19 -0700
+IronPort-SDR: yTaJ9tTu6xHdqb5KLRHsEMmfH9ZS1B4p4WXzaeRjSGPdoveYQ+XtziwbRL7wC+oMlTEWUhRYSI
+ iEdP6Ep58XCYX9tY47Pp5j1fQFdZs0iEud7VzY46AWaL+1jWOYXT5lQ9vFEfjxPxyEpPdW5/T+
+ 9klbc2ygRXMssJLUF63PIACze2A8cF61OEEROX90aH1/2rIUPg3SwviYsGcJmUMRsCZsOsWc3O
+ /Cbbnd0A8CHAiQWK7TvIK+Z8EbkjnVbjKxHki/cUdYUOvVQ3LhwwijqD4yh9I+YjvwuhbXhin9
+ vSw=
 WDCIronportException: Internal
 Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.102])
-  by uls-op-cesaip02.wdc.com with ESMTP; 22 Aug 2023 00:30:08 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 22 Aug 2023 00:30:09 -0700
 From:   Naohiro Aota <naohiro.aota@wdc.com>
 To:     fstests@vger.kernel.org
 Cc:     Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH 0/3] generic/551: improve error reporting and handling
-Date:   Tue, 22 Aug 2023 16:28:49 +0900
-Message-ID: <cover.1692688971.git.naohiro.aota@wdc.com>
+Subject: [PATCH 1/3] aio-dio-write-verify: check for the IO errors
+Date:   Tue, 22 Aug 2023 16:28:50 +0900
+Message-ID: <2c9519c024e39b6eb4a3bb93f448752cedd83894.1692688971.git.naohiro.aota@wdc.com>
 X-Mailer: git-send-email 2.41.0
+In-Reply-To: <cover.1692688971.git.naohiro.aota@wdc.com>
+References: <cover.1692688971.git.naohiro.aota@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-When generic/551 failed, it is difficult to investigate the root cause
-because (1) it continues working after an error, corrupting the disk state,
-(2) there is no detail info printed, and (3) aio-dio-write-verify failed to
-check the event errors.
+The async write IOs can return some errors, which may lead to a short read or
+corruption in io_verify() stage. Catch an error early to identify the root
+cause easily.
 
-So, this series addresses these issues.
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ src/aio-dio-regress/aio-dio-write-verify.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-Naohiro Aota (3):
-  aio-dio-write-verify: check for the IO errors
-  aio-dio-write-verify: print more info on the error case
-  generic/551: bail out test if aio-dio-write-verify failed
-
- src/aio-dio-regress/aio-dio-write-verify.c | 17 ++++++++++++++---
- tests/generic/551                          |  6 ++++--
- 2 files changed, 18 insertions(+), 5 deletions(-)
-
+diff --git a/src/aio-dio-regress/aio-dio-write-verify.c b/src/aio-dio-regress/aio-dio-write-verify.c
+index 302b8fe4a096..90e41b391289 100644
+--- a/src/aio-dio-regress/aio-dio-write-verify.c
++++ b/src/aio-dio-regress/aio-dio-write-verify.c
+@@ -238,6 +238,16 @@ static int io_write(int fd, int num_events)
+ 		return 1;
+ 	}
+ 
++	for (i = 0; i < num_events; i++) {
++		int err = (int)evs[i].res;
++
++		if (err < 0) {
++			fprintf(stderr, "error %s with event %d\n",
++				strerror(err), i);
++			return 1;
++		}
++	}
++
+ 	/* Try to destroy at here, not necessary, so don't check result */
+ 	io_destroy(ctx);
+ 
 -- 
 2.41.0
 
