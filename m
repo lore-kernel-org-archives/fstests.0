@@ -2,178 +2,93 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 539D9C6787B
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Aug 2023 17:35:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BA97C71133
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Aug 2023 17:57:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235912AbjHYRet (ORCPT
+        id S231431AbjHYR5L (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Aug 2023 13:34:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41644 "EHLO
+        Fri, 25 Aug 2023 13:57:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233770AbjHYRe0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2023 13:34:26 -0400
+        with ESMTP id S232125AbjHYR5I (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2023 13:57:08 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D76202133;
-        Fri, 25 Aug 2023 10:34:24 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A3D3128;
+        Fri, 25 Aug 2023 10:57:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6D3B860FC9;
-        Fri, 25 Aug 2023 17:34:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41FB9C433C7;
-        Fri, 25 Aug 2023 17:34:23 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B507063110;
+        Fri, 25 Aug 2023 17:57:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0DCFC433CB;
+        Fri, 25 Aug 2023 17:57:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692984863;
-        bh=ucDQQXcZlLD8ggPa8LW4Pnr4Ae+ScU5+zUbRQhfpXWw=;
-        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-        b=h36zyzuNgHS9Mjrm7Myve3+AySb7CS7n28hqJyluQb6mY0HztP+soRUjWF3qZQ29+
-         1XyvBaqg2sZpcM0o0N2CX9RD5K5xLAW1QBDtGm6jZsfH1qLIhGgTj7W666mo6iMRKL
-         RGGoD+TgOmWSRmOoiVtN9qrUHPLPN3rlz0FtBFE9sevHKGQFKGLpzDnbt9dR7JhdHc
-         Gf0OTxq6P+q8uSW3h8LpRfAg89zxsjVvdBNvLB9F+Cv2zi5k+q4CAE+nSFGHWcd/Oi
-         /cdtk0gU7rnS7dyr4HaUfySjX2sro2jjmuaIke5Zu3DTst7u0VbXqHhiAIP/cJWgxG
-         I8qTZ+8m6Ux5w==
-Message-ID: <71710906c040cfac50ee48ce9055ddbccf431920.camel@kernel.org>
-Subject: Re: [PATCH fstests v2 3/3] generic/578: only run on filesystems
- that support FIEMAP
+        s=k20201202; t=1692986226;
+        bh=Z+sH4YtcXtJl1iB0CzUJffwIgkuuQjmeTsMDGAxYurQ=;
+        h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
+        b=IagMv31i1KZM4mBwoC250VwUdGvVQeJNRKmNL9sPV0M0um3eIWRU/RHLKULu1q8+v
+         lvVzj5MTCE4scWanO0fNQo6EfuSfYUnoFJUFuXLiHHgIbUh3r/ScZmZkAeZ2oKwTYK
+         udx8CqvHJORTDzngmqQhqsKzxgra12lFlYM3IuxKoNamvXjDmDyqHewRRfS06HDttD
+         MB0UMttDXmsd25ca0eiPhBNWDBr4GdhIwidMCd9l+zAzzprDPdCTQgu9Zjn/EbETOy
+         7oU1TIegPZRdkPu3iRmHftYPeV59NpJcz7F1PQuv2MUfrU8NqIKmtFu8GSuFAuSlZM
+         IePt+9M93vg7w==
 From:   Jeff Layton <jlayton@kernel.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Date:   Fri, 25 Aug 2023 13:34:21 -0400
-In-Reply-To: <20230825151816.GB17895@frogsfrogsfrogs>
-References: <20230824-fixes-v2-0-d60c2faf1057@kernel.org>
-         <20230824-fixes-v2-3-d60c2faf1057@kernel.org>
-         <20230824170931.GC11251@frogsfrogsfrogs>
-         <bc2586e3da8719b98126b22c15645a7951b9c1d9.camel@kernel.org>
-         <20230825141651.vd6lh3n4ztru5svl@zlang-mailbox>
-         <bf82ceee8ed50e5767c4570e4ff3d02ec56fc3b0.camel@kernel.org>
-         <20230825151816.GB17895@frogsfrogsfrogs>
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.48.4 (3.48.4-1.fc38) 
+Date:   Fri, 25 Aug 2023 13:56:55 -0400
+Subject: [PATCH fstests v3 2/2] generic/578: add a check to ensure that
+ fiemap is supported
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20230825-fixes-v3-2-6484c098f8e8@kernel.org>
+References: <20230825-fixes-v3-0-6484c098f8e8@kernel.org>
+In-Reply-To: <20230825-fixes-v3-0-6484c098f8e8@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        Darrick Wong <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>, Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=587; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=Z+sH4YtcXtJl1iB0CzUJffwIgkuuQjmeTsMDGAxYurQ=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk6Otv7Jc0esHnmgbNsPkYzQrwmUOPYqcqdnKoX
+ PrPqj6ulVWJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZOjrbwAKCRAADmhBGVaC
+ FbT4D/oC/1l4b0pW1ns+mBe8zfPUaxuEa8ERdKDm+K/SMnPdjM2cmiWzuBczNA00YNDB2rMC2mi
+ psfuj5p5N0DmN4Y9XjEDs8pN92tzlvD8q1KgQS+0Lc8C2blx6jRAiTqvyT6rJTfqLn4BXaAQvg7
+ hFy32HH3ifF8e7wVmFcPutEm3qMIe9sr7zCIHQOc1mWnsSEbCWkBESQ0RfV4yekRuApdsIz5mt8
+ DAWT3RSB9YF3D+erLfNaGA7GVQN6NcBsfpi+cp5XcQjVRYHfck/oSEhBtI9OqRAVFIAcT53n7aM
+ XlamnFP85H0undLWkMRHedcyIaGrCX0UC66AM6/+9iJlzfXL4/YQ5PZ2ybFnNA6tJgL5BPcStRa
+ ij9Ymem8bjGYIX3vztCte/1MZ/jN7rkwrBmw5d6NunDo6rRPjJw/LZ24ZHMd4ucW3luZ5tLr081
+ wkPnc9o3arpI9LsOzAl2je3vyXBQrhIfKhuz3PqCqJbvsD0Sndf413HjgKh2X61XaJ/AOjZ88Ae
+ zodDSGenOicCevZydORxxCc/XRq7HKwekF+LO7j9qtWSHXE3B7MG3HKP4j8OryM5uvtlnN2P6AU
+ QCGb3aYDq9J5WQ6anFV7SQUS/Sb/nee+RcMt7v2VpQVvQZedAqFeU7kuUBn8nE5CntIhx9LVrcu
+ QL26vjq51gri2oA==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, 2023-08-25 at 08:18 -0700, Darrick J. Wong wrote:
-> On Fri, Aug 25, 2023 at 10:57:20AM -0400, Jeff Layton wrote:
-> > On Fri, 2023-08-25 at 22:16 +0800, Zorro Lang wrote:
-> > > On Thu, Aug 24, 2023 at 01:28:26PM -0400, Jeff Layton wrote:
-> > > > On Thu, 2023-08-24 at 10:09 -0700, Darrick J. Wong wrote:
-> > > > > On Thu, Aug 24, 2023 at 12:44:19PM -0400, Jeff Layton wrote:
-> > > > > > Some filesystems (e.g. NFS) don't support FIEMAP. Limit generic=
-/578 to
-> > > > > > filesystems that do.
-> > > > > >=20
-> > > > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > > > > ---
-> > > > > >  common/rc         | 13 +++++++++++++
-> > > > > >  tests/generic/578 |  1 +
-> > > > > >  2 files changed, 14 insertions(+)
-> > > > > >=20
-> > > > > > diff --git a/common/rc b/common/rc
-> > > > > > index 33e74d20c28b..98d27890f6f7 100644
-> > > > > > --- a/common/rc
-> > > > > > +++ b/common/rc
-> > > > > > @@ -3885,6 +3885,19 @@ _require_metadata_journaling()
-> > > > > >  	fi
-> > > > > >  }
-> > > > > > =20
-> > > > > > +_require_fiemap()
-> > > > > > +{
-> > > > > > +	local testfile=3D$TEST_DIR/fiemaptest.$$
-> > > > > > +
-> > > > > > +	touch $testfile
-> > > > > > +	$XFS_IO_PROG -r -c "fiemap" $testfile 1>$testfile.out 2>&1
-> > > > > > +	if grep -q 'Operation not supported' $testfile.out; then
-> > > > > > +	  _notrun "FIEMAP is not supported by this filesystem"
-> > > > > > +	fi
-> > > > > > +
-> > > > > > +	rm -f $testfile $testfile.out
-> > > > > > +}
-> > > > >=20
-> > > > > _require_xfs_io_command "fiemap" ?
-> > > > >=20
-> > > > >=20
-> > > >=20
-> > > > Ok, I figured we'd probably do this test after testing for that
-> > > > separately, but you're correct that we do require it here.
-> > > >=20
-> > > > If we add that, should we also do this, at least in all of the gene=
-ral
-> > > > tests?
-> > > >=20
-> > > >     s/_require_xfs_io_command "fiemap"/_require_fiemap/
-> > > >=20
-> > > > I think we end up excluding some of those tests on NFS for other
-> > > > reasons, but other filesystems that don't support fiemap might stil=
-l try
-> > > > to run these tests.
-> > >=20
-> > > We have lots of cases contains _require_xfs_io_command "fiemap", so I=
- think
-> > > we can keep this "tradition", don't bring a new _require_fiemap for n=
-ow,
-> > > so ...
-> > >=20
-> > > > =20
-> > > > > > +
-> > > > > >  _count_extents()
-> > > > > >  {
-> > > > > >  	$XFS_IO_PROG -r -c "fiemap" $1 | tail -n +2 | grep -v hole | =
-wc -l
-> > > > > > diff --git a/tests/generic/578 b/tests/generic/578
-> > > > > > index b024f6ff90b4..903055b2ca58 100755
-> > > > > > --- a/tests/generic/578
-> > > > > > +++ b/tests/generic/578
-> > > > > > @@ -26,6 +26,7 @@ _require_test_program "mmap-write-concurrent"
-> > > > > >  _require_command "$FILEFRAG_PROG" filefrag
-> > > > > >  _require_test_reflink
-> > > > > >  _require_cp_reflink
-> > > > > > +_require_fiemap
-> > >=20
-> > > _require_xfs_io_command "fiemap"
-> > >=20
-> >=20
-> > That's not sufficient -- there is already a call to that in this test.
-> >=20
-> > _require_xfs_io_command just validates that the xfs_io binary has
-> > plumbing for that command (which just issues an ioctl to the file).
-> > Even if the binary has support, the underlying filesystem has to suppor=
-t
-> > the ioctl.
-> >=20
-> > Many don't, so we need to test for that specifically.
->=20
-> It /does/ test the kernel support for fiemap...
->=20
-> _require_xfs_io_command()
-> {
-> ...
-> 	"fiemap")
-> 		# If 'ranged' is passed as argument then we check to see if fiemap supp=
-orts
-> 		# ranged query params
-> 		if echo "$param" | grep -q "ranged"; then
-> 			param=3D$(echo "$param" | sed "s/ranged//")
-> 			$XFS_IO_PROG -c "help fiemap" | grep -q "\[offset \[len\]\]"
-> 			[ $? -eq 0 ] || _notrun "xfs_io $command ranged support is missing"
-> 		fi
-> 		testio=3D`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
-> 			-c "fiemap -v $param" $testfile 2>&1`
-> 		param_checked=3D"$param"
-> 		;;
->=20
+This test requires FIEMAP support.
 
-I stand corrected! We just need to add this to generic/578, like Zorro
-suggested:
+Suggested-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/578 | 1 +
+ 1 file changed, 1 insertion(+)
 
-    _require_xfs_io_command "fiemap"
+diff --git a/tests/generic/578 b/tests/generic/578
+index b024f6ff90b4..e8bb97f7b96c 100755
+--- a/tests/generic/578
++++ b/tests/generic/578
+@@ -24,6 +24,7 @@ _cleanup()
+ _supported_fs generic
+ _require_test_program "mmap-write-concurrent"
+ _require_command "$FILEFRAG_PROG" filefrag
++_require_xfs_io_command "fiemap"
+ _require_test_reflink
+ _require_cp_reflink
+ 
 
-I'll respin the patch to just do that instead.
+-- 
+2.41.0
 
-Thanks!
---=20
-Jeff Layton <jlayton@kernel.org>
