@@ -2,101 +2,111 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 878B1EE49A3
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Aug 2023 17:57:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 722A6C3DA66
+	for <linux-fstests@archiver.kernel.org>; Fri, 25 Aug 2023 20:11:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232120AbjHYR5M (ORCPT
+        id S229656AbjHYUKy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Aug 2023 13:57:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36200 "EHLO
+        Fri, 25 Aug 2023 16:10:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231907AbjHYR5H (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2023 13:57:07 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E56E128;
-        Fri, 25 Aug 2023 10:57:05 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        with ESMTP id S229607AbjHYUKW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2023 16:10:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2090D269F
+        for <fstests@vger.kernel.org>; Fri, 25 Aug 2023 13:09:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1692994150;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=29FzZD0FZPj922p5seNtVWuoujUYX0UNHYbMZZByKLU=;
+        b=TqeV8IeY+VpV5ms6QA+018kUmZ1wKkL5L3/H5LVCGxGDvY4luiqkNAglGngmMNNq4S1ZXV
+        RUobVCxWhyJs35+mMg2u4dOf6J/3rMBctueaHQ4mg2ACuOl7x9SyiZWfJCiOFMcLm7aoKm
+        nJ64qZT5nS7/F6a91SS84yQ5gqOFqOk=
+Received: from mimecast-mx02.redhat.com (66.187.233.73 [66.187.233.73]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-267-P8g-Fe7eNwyayAdo51kJWw-1; Fri, 25 Aug 2023 16:09:09 -0400
+X-MC-Unique: P8g-Fe7eNwyayAdo51kJWw-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3D17162BDA;
-        Fri, 25 Aug 2023 17:57:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1F270C433C7;
-        Fri, 25 Aug 2023 17:57:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692986224;
-        bh=Jv04+GJAsrSjCJYfOOwcKgif8bPHmexO1CMn8kUeFww=;
-        h=From:Subject:Date:To:Cc:From;
-        b=XGh2zalZL4hCOfGjf9vGqzQVCBba+bCENreWkgnT6n+12Jc9zcD/ERiRFdPHlIEYZ
-         FtIDUM8+NGyjK8nLbSq30l6W1aPZqPV5M+CMcwYthvyqAWzwAFoi5U/TWfpw/msBc9
-         WQOXAIdu8jxjEbWPrnwp6tMcQi+9i6HGMV8gsFRYqlstfmYFjtxq4zHHsxt4gxA8WG
-         t9N6c2CRor5bwEKluxGzeHLgxUiimoIj+MfgCRIhwxE//3a91f8nOYDNiWdM9vCrBP
-         zWa/IG4hmcpjzKLIFnaq3gcEDbEt6hpp6mHBYqDhQ8D9+bcTtkx2mbpD/yNx8eZWY1
-         fYKsdDnYP1d2w==
-From:   Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH fstests v3 0/2] fstests: add appropriate checks for fs
- features for some tests
-Date:   Fri, 25 Aug 2023 13:56:53 -0400
-Message-Id: <20230825-fixes-v3-0-6484c098f8e8@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAGXr6GQC/12MQQrCMBAAv1L2bCTdVGs9+Q/poaSbNihp2Q1BK
- fm7IUePwwxzgBB7Erg3BzAlL34LBcypAbtOYSHl58KAGo2+Yaec/5Cooe2sNW4g1yOUdmeqoqR
- PcBJJosBYxOolbvyt/4RV/60SKq3mq7boJtfqS/94EQd6nzdeYMw5/wDnsrGppAAAAA==
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 53EFF3C01DEE
+        for <fstests@vger.kernel.org>; Fri, 25 Aug 2023 20:09:09 +0000 (UTC)
+Received: from fedora.redhat.com (unknown [10.22.16.107])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2BA28140E950;
+        Fri, 25 Aug 2023 20:09:09 +0000 (UTC)
+From:   Bill O'Donnell <bodonnel@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        Darrick Wong <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>, Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=992; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=Jv04+GJAsrSjCJYfOOwcKgif8bPHmexO1CMn8kUeFww=;
- b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk6OtvJKM5H1b++ViJQEjB085NVLELC8x3MA2yz
- 5fLu9DeBdiJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZOjrbwAKCRAADmhBGVaC
- FcFuD/sG5d3JJjpIW88UAqIBrAdtxtJXhvQ6VJKpUmGzaCZ1MF8l1s9yXj846QbRmvY0sKhcMiq
- Gzc1awJodbA4pWrOFz+Biw95f9K3gUi8mL3eeSIhaJKO7FeVMY8MQjw+Zk1kKTKbLPSpNVkJwPf
- XbsI+mBUoC0MZem7xhQofW9BkP+GEalknZ+ngZ42KyclJ91Oc47XgfWRLcBVsrGyEH2a+Mg9VL3
- v/+wfiWGhFGTpmwIFj5Un/mUDIARMFfF/ATSbCRksNPhcpHXwTc8GfJQreN/K1Df9C+xexwU910
- 54+ui9ndaSQ8YI455+TzYZwUHJ4W7xcrhoafNGWR6dprHCdphJqptCxHL2TSynKKhjANEAccGH8
- iRz6L/rcpbbYz7TWbQpjHYvq59lQcSO5UZVJXsg8bu67xCfrNG0OlJOQsBrWTSyvyykhsCdmfJC
- Ib7U5sCKWw0dyzoceCutiL+emNuuzokDzNCl93rkj5qHt1ZVT6T1/eoEBgOuC6Xim6c3YDcq65D
- Z//tHcCBg4sVRUXwxVRbrddMxK4bez1ZWg9J3ynlatnEC/dlIR4nXZAmQkULz+Qusyd2f8wSE0o
- KeHm5koox/VZKCPXe9k3lDU/tKNWwPrJQNpPx9CxIBSIJ8mkMf26uLayZBonuO8CoGdzU5BheHp
- Xy7SiIBPcdd8ngQ==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Cc:     Bill O'Donnell <bodonnel@redhat.com>
+Subject: [PATCH v2] fstests: generic/352 should accomodate other pwrite behaviors
+Date:   Fri, 25 Aug 2023 15:09:06 -0500
+Message-ID: <20230825200906.95973-1-bodonnel@redhat.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-A number of fstests fail on NFS, primarily because it lacks certain
-features that are widely supported on local Linux filesystems. Fix
-up the test for POSIX ACLs and add a new requirement for fiemap support
-in generic/578.
+xfs_io pwrite issues a series of block size writes, but there is no guarantee
+that the resulting extent(s) will be singular or contiguous. This behavior is
+acceptable, but the test is flawed in that it expects a single extent for a
+pwrite.
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
+Modify test to accept any layout for the reflinked logical range.
+
+Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
 ---
-Changes in v2:
-- add new checks for fiemap and setcap
-- Link to v2: https://lore.kernel.org/r/20230824-fixes-v2-0-d60c2faf1057@kernel.org
+ tests/generic/352     | 9 +++++----
+ tests/generic/352.out | 6 ++----
+ 2 files changed, 7 insertions(+), 8 deletions(-)
 
-Changes in v3:
-- use _require_xfs_io_command "fiemap" in generic/578
-- drop the _require_setcap patch (Zorro has similar that adds a _require_capabilities)
-
----
-Jeff Layton (2):
-      common/attr: fix the _require_acl test
-      generic/578: add a check to ensure that fiemap is supported
-
- common/attr       | 9 ++++-----
- tests/generic/578 | 1 +
- 2 files changed, 5 insertions(+), 5 deletions(-)
----
-base-commit: 8de535c53887bb49adae74a1b2e83e77d7e8457d
-change-id: 20230824-fixes-914cc3f9ef72
-
-Best regards,
+diff --git a/tests/generic/352 b/tests/generic/352
+index 52ec4850..77570bce 100755
+--- a/tests/generic/352
++++ b/tests/generic/352
+@@ -28,14 +28,15 @@ _require_xfs_io_command "fiemap"
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ 
+-blocksize=$((128 * 1024))
++blocksize=$(_get_file_block_size $SCRATCH_MNT)
+ _require_congruent_file_oplen $SCRATCH_MNT $blocksize
+ file="$SCRATCH_MNT/tmp"
+ 
+ # Golden output is for $LOAD_FACTOR == 1 case
+ orig_nr=8192
+-orig_last_extent=$(($orig_nr * $blocksize / 512))
+-orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
++orig_blocksize=4096
++orig_last_extent=$(($orig_nr * $orig_blocksize / 512))
++orig_end=$(($orig_last_extent + $orig_blocksize / 512 - 1))
+ 
+ # Real output
+ nr=$(($orig_nr * $LOAD_FACTOR))
+@@ -43,7 +44,7 @@ last_extent=$(($nr * $blocksize / 512))
+ end=$(($last_extent + $blocksize / 512 - 1))
+ 
+ # write the initial block for later reflink
+-_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
++_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io > /dev/null
+ 
+ # use reflink to create the rest of the file, whose all extents are all
+ # pointing to the first extent
+diff --git a/tests/generic/352.out b/tests/generic/352.out
+index 4ff66c21..454ff52f 100644
+--- a/tests/generic/352.out
++++ b/tests/generic/352.out
+@@ -1,5 +1,3 @@
+ QA output created by 352
+-wrote 131072/131072 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0: [0..2097151]: shared
+-1: [2097152..2097407]: shared|last
++0: [0..65535]: shared
++1: [65536..65543]: shared|last
 -- 
-Jeff Layton <jlayton@kernel.org>
+2.41.0
 
