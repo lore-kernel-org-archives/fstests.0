@@ -2,42 +2,42 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20097C83F11
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 14:11:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 672D9C83F11
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 14:15:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229883AbjH0OLN (ORCPT
+        id S230219AbjH0OPL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Aug 2023 10:11:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35994 "EHLO
+        Sun, 27 Aug 2023 10:15:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230219AbjH0OKt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 10:10:49 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73298B9
-        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 07:10:46 -0700 (PDT)
+        with ESMTP id S229765AbjH0OOa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 10:14:30 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F318011B
+        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 07:14:27 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 11ED662185
-        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 14:10:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B57C9C433C8;
-        Sun, 27 Aug 2023 14:10:44 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 89A6F620BB
+        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 14:14:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30D04C433C7;
+        Sun, 27 Aug 2023 14:14:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693145445;
-        bh=rK52oo5nigGPr9RrfWJUlwPQ9ACy9Zpanq/6u1nFS1Y=;
+        s=k20201202; t=1693145666;
+        bh=nqbAW1VzZ/zZg3Sny4Q3i/0TzMJz/8IWgiBvmuUBQVc=;
         h=Date:From:To:Subject:From;
-        b=YDGlcLHBepoYEpIqwP3ZGykil1M5F2pDiN2Jj94rmNSC+BwRgxN7yQk/CG3DjQJLZ
-         b5o1BDtcfiP4NiQz/3lruQhkUJbwK0CRDmvRAK2Ruq7td7ZsUCFPVZH250Xq4YkjhW
-         bCAZ+FDvQ5VXrY9AWyKwz/1HQvL2oC8eAdJpyl759DVz7UGNyBwziEA/Y9wiV5gOUd
-         Tdlia/JdhoHqr9ywoGNdp6bWa+SxbsWvfJY5+yvt6sZ161ZDSjxGO5yqtKnI1O7X+I
-         7dcmwiFVXmS9zyZ0wl/UDF//Uxp9NyPYa3SXtbXs/kFlOkthcma+I1eCdDDt5V/T4G
-         lDfXI8I4TqL9A==
-Date:   Sun, 27 Aug 2023 22:10:38 +0800
+        b=ogXRAdawaJrf/p3g/dJDp4wFemAXLD5FMRTq2FXf7calKfx3f69ecHc7K4VW0gVQ/
+         xZ7mpIOGEHNpqlwC/dTQBnzM8slu1CbeYqpWmdy8MARWVTUhrpTPfLob3qSxofTKUi
+         RCA7XLFH9r6/IoL8+2iZrtEUMNele+BmTNH+E1dZjm0CMUZG6O8fSxtuQQbbRUrAG9
+         41sI8AdT4baSAEaQZ2wm4V1G2d76CnKvTjpOqHTWi3AVH3Dq6+nHl5dfnex9MdxzN4
+         W2e6dawM5w7O6qoVKM3gT5pmgnvghp/iK/VITdTwFlrG4BQec3B8oD8v7PEDt9Wabq
+         S0BFnCi118xgQ==
+Date:   Sun, 27 Aug 2023 22:14:21 +0800
 From:   Zorro Lang <zlang@kernel.org>
 To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.08.06 onto master branch
-Message-ID: <20230827141038.2icpo6q5jk32sjnh@zlang-mailbox>
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.08.27
+Message-ID: <20230827141421.kvxewenzjccfouxw@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -47,74 +47,84 @@ X-Mailing-List: fstests@vger.kernel.org
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.08.06 version.
+has just been updated and tagged as v2023.08.27 release.
+
+Release Notes:
+1) There's a new test case (btrfs/300) in this release, meanwhile an invalid
+   test case (generic/471) is removed.
+2) A new helper _random_file() helps to improve the performance to get a random
+   file name in a directory.
+
+More bug fixes or improvement refer to below. Thanks for all these contributions!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-0ca1d4fbb2e9 xfs: skip fragmentation tests when alwayscow mode is enabled, part 2
+fd94fc408b3e generic/471: Remove this broken case
 
-New commits:
+New commits ([N]ew, [U]pdate, [D]elete):
 
-Christoph Hellwig (2):
-      [625b651b3060] generic: add a test for device removal with dirty data
-      [b716634e75d2] generic: add a test for device removal without dirty data
+Amir Goldstein (2):
+[U]      [6d63f23987a6] check: fix parsing expunge file with comments
+[U]      [9caf3ee07d0d] generic/{175,297,298}: fix use of uninitialized var
 
-Darrick J. Wong (4):
-      [03d27d802569] xfs/122: adjust test for flexarray conversions in 6.5
-      [d39fb9a81d76] check: generate gcov code coverage reports at the end of each section
-      [d542fbc4ccef] generic/642: fix SOAK_DURATION usage in generic/642
-      [0ca1d4fbb2e9] xfs: skip fragmentation tests when alwayscow mode is enabled, part 2
+David Disseldorp (1):
+[U]      [515adab889b9] common/rc: drop 'fsck -f' parameter from _repair_test_fs
 
 Filipe Manana (1):
-      [24cfe625794e] btrfs/276: make test accurate regarding number of expected extents
+[U]      [4a78fc26ab16] btrfs/213: fix failure due to misspelled function name
 
-Luis Chamberlain (1):
-      [a0c36009103b] fstests: add helper to canonicalize devices used to enable persistent disks
+Lee Trager (1):
+[N]      [eccdeae8fc41] fstests: Verify dir permissions when creating a stub subvolume
 
-Qu Wenruo (2):
-      [e573069170b6] btrfs/294: reject zoned devices for now
-      [d74975e2c284] btrfs: add a test case to make sure scrub can repair parity corruption
+Naohiro Aota (4):
+[U]      [697988c94e87] btrfs/220: do not run async discard test on zoned device
+[U]      [778364fffb35] common/rc: introduce _random_file() helper
+[U]      [4dd2822ae01a] fstests/btrfs: use _random_file() helper
+[U]      [a0c6958c0e36] btrfs/004: use shuf to shuffle the file lines
 
-Theodore Ts'o (1):
-      [32201166fb09] fstests: install soak_duration.awk
+Qu Wenruo (1):
+[U]      [79d409ce9e39] fstests: fsstress: wait interrupted aio to finish
 
-Zorro Lang (1):
-      [3f86deef7cbd] fstests: add smoketest group
+Shiyang Ruan (1):
+[U]      [d9b0c584e25b] fsx: tidy options usage and format
+
+Stas Sergeev (2):
+[U]      [857c18868a0e] t_ofd_locks: fix stalled semaphore handling
+[U]      [ae154c192b95] t_ofd_locks: fix sem initialization sequence
+
+Yang Xu (1):
+[D]      [fd94fc408b3e] generic/471: Remove this broken case
 
 
 Code Diffstat:
 
- README                |  6 ++++
- check                 | 19 +++++++++++
- common/config         | 32 ++++++++++++++++++-
- common/gcov           | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
- doc/group-names.txt   |  1 +
- src/Makefile          |  3 +-
- tests/btrfs/276       | 86 ++++++++++++++++++++++++++++++++------------------
- tests/btrfs/276.out   | 20 ++++++------
- tests/btrfs/294       |  8 +++--
- tests/btrfs/297       | 85 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/297.out   |  2 ++
- tests/generic/475     |  2 +-
- tests/generic/476     |  2 +-
- tests/generic/521     |  2 +-
- tests/generic/522     |  2 +-
- tests/generic/642     |  4 +--
- tests/generic/730     | 57 +++++++++++++++++++++++++++++++++
- tests/generic/730.out |  2 ++
- tests/generic/731     | 58 ++++++++++++++++++++++++++++++++++
- tests/generic/731.out |  2 ++
- tests/xfs/122         |  8 +++++
- tests/xfs/180         |  1 +
- tests/xfs/208         |  1 +
- 23 files changed, 438 insertions(+), 52 deletions(-)
+ check                 |   4 +-
+ common/rc             |  14 +++++-
+ ltp/fsstress.c        |  20 ++++++++-
+ ltp/fsx.c             |  29 +++++++-----
+ src/t_ofd_locks.c     | 121 +++++++++++++++++++++-----------------------------
+ tests/btrfs/004       |   2 +-
+ tests/btrfs/179       |   9 ++--
+ tests/btrfs/192       |  14 ++----
+ tests/btrfs/213       |   2 +-
+ tests/btrfs/220       |   4 +-
+ tests/btrfs/300       |  52 ++++++++++++++++++++++
+ tests/btrfs/300.out   |  18 ++++++++
+ tests/generic/175     |   1 -
+ tests/generic/297     |   1 -
+ tests/generic/298     |   1 -
+ tests/generic/471     |  67 ----------------------------
+ tests/generic/471.out |  13 ------
+ tests/generic/478     |  37 +++++++++++++--
+ tests/overlay/020     |   7 +--
+ 19 files changed, 219 insertions(+), 197 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
