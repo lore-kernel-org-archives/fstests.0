@@ -2,111 +2,121 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 722A6C3DA66
-	for <linux-fstests@archiver.kernel.org>; Fri, 25 Aug 2023 20:11:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39BE0C83F13
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 09:06:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229656AbjHYUKy (ORCPT
+        id S230206AbjH0JFy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 25 Aug 2023 16:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56036 "EHLO
+        Sun, 27 Aug 2023 05:05:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229607AbjHYUKW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2023 16:10:22 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2090D269F
-        for <fstests@vger.kernel.org>; Fri, 25 Aug 2023 13:09:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1692994150;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=29FzZD0FZPj922p5seNtVWuoujUYX0UNHYbMZZByKLU=;
-        b=TqeV8IeY+VpV5ms6QA+018kUmZ1wKkL5L3/H5LVCGxGDvY4luiqkNAglGngmMNNq4S1ZXV
-        RUobVCxWhyJs35+mMg2u4dOf6J/3rMBctueaHQ4mg2ACuOl7x9SyiZWfJCiOFMcLm7aoKm
-        nJ64qZT5nS7/F6a91SS84yQ5gqOFqOk=
-Received: from mimecast-mx02.redhat.com (66.187.233.73 [66.187.233.73]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-267-P8g-Fe7eNwyayAdo51kJWw-1; Fri, 25 Aug 2023 16:09:09 -0400
-X-MC-Unique: P8g-Fe7eNwyayAdo51kJWw-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 53EFF3C01DEE
-        for <fstests@vger.kernel.org>; Fri, 25 Aug 2023 20:09:09 +0000 (UTC)
-Received: from fedora.redhat.com (unknown [10.22.16.107])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2BA28140E950;
-        Fri, 25 Aug 2023 20:09:09 +0000 (UTC)
-From:   Bill O'Donnell <bodonnel@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Bill O'Donnell <bodonnel@redhat.com>
-Subject: [PATCH v2] fstests: generic/352 should accomodate other pwrite behaviors
-Date:   Fri, 25 Aug 2023 15:09:06 -0500
-Message-ID: <20230825200906.95973-1-bodonnel@redhat.com>
+        with ESMTP id S230172AbjH0JFg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 05:05:36 -0400
+Received: from mail-ua1-x92a.google.com (mail-ua1-x92a.google.com [IPv6:2607:f8b0:4864:20::92a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BA10AC;
+        Sun, 27 Aug 2023 02:05:32 -0700 (PDT)
+Received: by mail-ua1-x92a.google.com with SMTP id a1e0cc1a2514c-79a46f02d45so625854241.0;
+        Sun, 27 Aug 2023 02:05:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1693127131; x=1693731931;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=F1p/OfYP/CILEOwow8hS+QJZ2ORum3pGJZjhjujQrcE=;
+        b=cS3hHxlURkh8ge5BxO7rsXVtz1rq+/bDKXwhLnYOLC8nhCsHDzlVNwSecndZxjSXqm
+         6YdmmJfA9w4GTYifDZ+TQlHLPTdMMbPhUok53QNiYcVGuMDiUCj4R9BziTHIkoajnhkJ
+         qQydYxNH8+iVJX0NAppkh/tKIjXIreH8QWAfiXwfklX6KBYOqHZ1wsEDHssItVwRStHu
+         B1InE9a4cWuuoF8Ssp4YgYPg8xzGrrCz4knivBWfgpu6w5ol3oNPC9FL0x/1D7EdJIiK
+         DfR3cTKxouHoYu97jymW6xnW3xHbInkTHdoEyaHRTSvZ0s4955MuQKvv2u6tl8lb/kK+
+         sRfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693127131; x=1693731931;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=F1p/OfYP/CILEOwow8hS+QJZ2ORum3pGJZjhjujQrcE=;
+        b=GLjd6u7FGtsy+Q2SLFUEjwsPaqbD+SXCHtUO4jxdteKeBgrjQeTFLaXTgUxb7p0q2P
+         vW9n6O4n/8H+ekvRAvo2LM0EQtzZ5thwHDw1biBMm7gfsetKfZvWOvUBdcwcF+dqRRTN
+         FZiv7HU1CtrcvNR0Ec58EPy19z0GkvBCmNrT9wzbrVHn3QcCc8qvhRysKpItxtXoKU/x
+         RVm8jOrO7uVPFMbkzDKVtSEK7pdLupSeqKm6xx0yB7XcTIPysjKXsy3BD9VAlgrto4rt
+         FQHR4zcZ0gGsF61X7RMElVN4yAyeRSJg1qu77XZiuf3kbQQnAzsCJ90prp7tGTyiQyb6
+         Whlg==
+X-Gm-Message-State: AOJu0YxFG/7CXwTWrpwd0HZAw8b2ORGMe7Bm/dv8leYO2GRaR9n4aRzE
+        cu0F1xDr+30Dm9lxAkqz+kBhpRZAW/B9HTD9pF8=
+X-Google-Smtp-Source: AGHT+IEd45DR1hQ0sTK/hCfS1Dnp7wuQpOSUYrtHwkWi4zlnfs7uVXvsi4rI98lbJG8+BeiGOaU85PoeeR+K0YKU/pU=
+X-Received: by 2002:a67:f70b:0:b0:44e:98d8:c62e with SMTP id
+ m11-20020a67f70b000000b0044e98d8c62emr7493396vso.33.1693127131508; Sun, 27
+ Aug 2023 02:05:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.7
+References: <20230625135033.3205742-1-amir73il@gmail.com>
+In-Reply-To: <20230625135033.3205742-1-amir73il@gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 27 Aug 2023 12:05:20 +0300
+Message-ID: <CAOQ4uxiuHfECh6ARBma86DbDCDzNPa1wCCxXLB9CRWQShj8q4g@mail.gmail.com>
+Subject: Re: [PATCH 0/3] fstests-bld overlayfs updates
+To:     "Theodore Ts'o" <tytso@mit.edu>
+Cc:     Eric Biggers <ebiggers@google.com>,
+        Alexander Larsson <alexl@redhat.com>,
+        Leah Rumancik <leah.rumancik@gmail.com>,
+        fstests@vger.kernel.org, linux-unionfs@vger.kernel.org,
+        Ext4 <linux-ext4@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfs_io pwrite issues a series of block size writes, but there is no guarantee
-that the resulting extent(s) will be singular or contiguous. This behavior is
-acceptable, but the test is flawed in that it expects a single extent for a
-pwrite.
+On Sun, Jun 25, 2023 at 4:50=E2=80=AFPM Amir Goldstein <amir73il@gmail.com>=
+ wrote:
+>
+> Hi Ted,
+>
+> The first patch enables testing the new overlayfs verity feature,
+> which is NOT the same as saying that overlayfs supports fsverity.
+>
+> The other two are cleanups and fixes to overlayfs configs.
+>
 
-Modify test to accept any layout for the reflinked logical range.
+Hi Ted,
 
-Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
----
- tests/generic/352     | 9 +++++----
- tests/generic/352.out | 6 ++----
- 2 files changed, 7 insertions(+), 8 deletions(-)
+Ping.
 
-diff --git a/tests/generic/352 b/tests/generic/352
-index 52ec4850..77570bce 100755
---- a/tests/generic/352
-+++ b/tests/generic/352
-@@ -28,14 +28,15 @@ _require_xfs_io_command "fiemap"
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- 
--blocksize=$((128 * 1024))
-+blocksize=$(_get_file_block_size $SCRATCH_MNT)
- _require_congruent_file_oplen $SCRATCH_MNT $blocksize
- file="$SCRATCH_MNT/tmp"
- 
- # Golden output is for $LOAD_FACTOR == 1 case
- orig_nr=8192
--orig_last_extent=$(($orig_nr * $blocksize / 512))
--orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
-+orig_blocksize=4096
-+orig_last_extent=$(($orig_nr * $orig_blocksize / 512))
-+orig_end=$(($orig_last_extent + $orig_blocksize / 512 - 1))
- 
- # Real output
- nr=$(($orig_nr * $LOAD_FACTOR))
-@@ -43,7 +44,7 @@ last_extent=$(($nr * $blocksize / 512))
- end=$(($last_extent + $blocksize / 512 - 1))
- 
- # write the initial block for later reflink
--_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io > /dev/null
- 
- # use reflink to create the rest of the file, whose all extents are all
- # pointing to the first extent
-diff --git a/tests/generic/352.out b/tests/generic/352.out
-index 4ff66c21..454ff52f 100644
---- a/tests/generic/352.out
-+++ b/tests/generic/352.out
-@@ -1,5 +1,3 @@
- QA output created by 352
--wrote 131072/131072 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--0: [0..2097151]: shared
--1: [2097152..2097407]: shared|last
-+0: [0..65535]: shared
-+1: [65536..65543]: shared|last
--- 
-2.41.0
+Did these two small patches get lost?
 
+FYI, Alexander's overlayfs verity patches are queued for 6.6
+and his overlay/verity fstests have already been merged to
+fstests release v2023.07.23.
+
+It would be great if fstests-bld support to test this feature would
+be merged as well.
+
+Thanks,
+Amir.
+
+>
+> Amir Goldstein (3):
+>   test-appliance: enable verity for testing overlay over ext4
+>   test-appliance: remove redudant overlay configs
+>   test-appliance: skip overlayfs tests from base fs exclude list
+>
+>  .../files/root/fs/overlay/cfg/large-ext4           | 14 --------------
+>  test-appliance/files/root/fs/overlay/cfg/large-xfs | 14 --------------
+>  .../files/root/fs/overlay/cfg/small-ext4           | 14 --------------
+>  .../files/root/fs/overlay/cfg/small-ext4.exclude   |  1 -
+>  test-appliance/files/root/fs/overlay/cfg/small-xfs | 14 --------------
+>  .../files/root/fs/overlay/cfg/small-xfs.exclude    |  1 -
+>  test-appliance/files/root/fs/overlay/config        |  2 +-
+>  test-appliance/files/root/runtests.sh              |  1 +
+>  8 files changed, 2 insertions(+), 59 deletions(-)
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-ext4
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-xfs
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4.e=
+xclude
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs
+>  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs.ex=
+clude
+>
+> --
+> 2.34.1
+>
