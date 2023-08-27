@@ -2,108 +2,169 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A632C83F11
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 12:46:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 815BEC83F11
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 13:08:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229500AbjH0Mpg (ORCPT
+        id S229834AbjH0NHt (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Aug 2023 08:45:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53560 "EHLO
+        Sun, 27 Aug 2023 09:07:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44776 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229503AbjH0MpU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 08:45:20 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 037B813D;
-        Sun, 27 Aug 2023 05:45:18 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 922CE611EE;
-        Sun, 27 Aug 2023 12:45:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99CDCC433C7;
-        Sun, 27 Aug 2023 12:45:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693140316;
-        bh=I4BzmJKtGwUNX8XAtTYMNV+M9Exu3kFE6GER6lqQcJo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rTmcg1ZQm1ZEQ4zULBQr3TwW98lcytB8ltae4wDbn8N/wC2ioKMoz32xUa5i+z0aU
-         U+WTKP0uMSj+4nbjMelPg3iPZb7RwTcWrefMaTqbvZgJSHF1kkI4FokTwssLeTFqq6
-         aC50uHdvA6NRP/cN6vuB1lOXcTvnlvmtJsbq0/qXNT1P33P84Nf6HKdfydXjWt7e/x
-         okTrwFV8ScAdBksyENmHrGr/bUqAgUS5Xvb0KPDG+5hupcoBxvObfMbzMqUOmJ40n2
-         Xs1l2rKvh3sNSkE4M2bjfO7hf6n2nHXWJlB7nycyQrAe03zV9ULaQhdCCic+/mHC6M
-         JfHFwYEn4oDUw==
-Date:   Sun, 27 Aug 2023 20:45:12 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-        linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH fstests v2 2/3] generic/513: limit to filesystems that
- support capabilities
-Message-ID: <20230827124512.23qnfe3keedrf4a2@zlang-mailbox>
-References: <20230824-fixes-v2-0-d60c2faf1057@kernel.org>
- <20230824-fixes-v2-2-d60c2faf1057@kernel.org>
- <20230825141123.wexv7kuxk75gr5os@zlang-mailbox>
- <a93ba004a46177c213159878a51c7378536f33ad.camel@kernel.org>
+        with ESMTP id S229602AbjH0NHj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 09:07:39 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B120913E
+        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 06:06:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693141610;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=STC5a0adxidzCn6eTupSaZiKkCcldLdNmhDF9jB7Qeo=;
+        b=ZSTH2JRgmeaYz/vouLNJpxSTrkPO/038dWtVGwNewA+QbjWs+LkF8S/XYZWAETio6nQftd
+        TpFPY3/355FDd1xmJ8tKUiqA4cT8Az3ANKV+WAUS2oJFSrHi3kIn03kl//fvlGqa/iGTs1
+        OLOfGrUcKt61EB94iG2Veq19G5D+T7I=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-537-UietwRjdNHKcWSm0sBKLTw-1; Sun, 27 Aug 2023 09:06:49 -0400
+X-MC-Unique: UietwRjdNHKcWSm0sBKLTw-1
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1bde8160fbdso21580895ad.1
+        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 06:06:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693141608; x=1693746408;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=STC5a0adxidzCn6eTupSaZiKkCcldLdNmhDF9jB7Qeo=;
+        b=DUnLHMSej8O4axzSl0wDN8zw6a4amMkG9zP1RqZymBXLdebwvGLlWP7dhNmgbGOdMP
+         zW69pISVA5yvTiFgI7XEzR50Gtc+P/UfcrHOqxXYVJbaKnQfJQUF9pMAHzEd6uWS7okp
+         bhdd/grXiLDmYfl4iA4nKedLVvZlMs7LgAZynTaMEAPJt5SeXu7Q0uhv2p/N2I45QY5N
+         0GjPPFD8SVShnJdQWCkz3QqbQvKRNlGreaPthTMVNVcM47jOBwZnt0rBpHMed/7ILlHB
+         AeNUB3VWSrpxXXQ65hu8Q7jXdNNOtmSZks5QpQhl20mNuu0xCno7+XnuEVAYGl/vtCxm
+         qA7Q==
+X-Gm-Message-State: AOJu0YzcxTGJixzot6u+x+sPEPUjrUsaARg0TTmQRFVjQyJKlmrcH1hS
+        xQsFN+m61cpLUSThp/T8w2gSIOQSIESyHYpSlh2AOLWrHMhsW3XG0RyaaaaWwptIHGRtD+dv/7V
+        rkzDIOUmFRE2EFIZHQMCX1bMXUtf/
+X-Received: by 2002:a17:903:2304:b0:1c0:d17a:bff2 with SMTP id d4-20020a170903230400b001c0d17abff2mr6190410plh.20.1693141608092;
+        Sun, 27 Aug 2023 06:06:48 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEvt0ZHIXBl9R6bsLyW34zYMDWYUHCeRZvZ0dWnQqjVg5niFN9VRwHGgNf3gcMbFfFnkJpBxg==
+X-Received: by 2002:a17:903:2304:b0:1c0:d17a:bff2 with SMTP id d4-20020a170903230400b001c0d17abff2mr6190391plh.20.1693141607743;
+        Sun, 27 Aug 2023 06:06:47 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id jf6-20020a170903268600b001b869410ed2sm5228331plb.72.2023.08.27.06.06.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 27 Aug 2023 06:06:47 -0700 (PDT)
+Date:   Sun, 27 Aug 2023 21:06:44 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Subject: Re: [RFC PATCH] fstests: test fix for an agbno overflow in
+ __xfs_getfsmap_datadev
+Message-ID: <20230827130644.nhdi6ihobn5qne3a@zlang-mailbox>
+References: <20230823010046.GD11286@frogsfrogsfrogs>
+ <20230823010239.GE11263@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a93ba004a46177c213159878a51c7378536f33ad.camel@kernel.org>
+In-Reply-To: <20230823010239.GE11263@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Aug 25, 2023 at 11:02:40AM -0400, Jeff Layton wrote:
-> On Fri, 2023-08-25 at 22:11 +0800, Zorro Lang wrote:
-> > On Thu, Aug 24, 2023 at 12:44:18PM -0400, Jeff Layton wrote:
-> > > This test requires being able to set file capabilities which some
-> > > filesystems (namely NFS) do not support. Add a _require_setcap test
-> > > and only run it on filesystems that pass it.
-> > > 
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > ---
-> > >  common/rc         | 13 +++++++++++++
-> > >  tests/generic/513 |  1 +
-> > >  2 files changed, 14 insertions(+)
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index 5c4429ed0425..33e74d20c28b 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -5048,6 +5048,19 @@ _require_mknod()
-> > >  	rm -f $TEST_DIR/$seq.null
-> > >  }
-> > >  
-> > > +_require_setcap()
-> > > +{
-> > > +	local testfile=$TEST_DIR/setcaptest.$$
-> > > +
-> > > +	touch $testfile
-> > > +	$SETCAP_PROG "cap_sys_module=p" $testfile > $testfile.out 2>&1
-> > 
-> > Actually we talked about the capabilities checking helper last year, as below:
-> > 
-> > https://lore.kernel.org/fstests/20220323023845.saj5en74km7aibdx@zlang-mailbox/
-> > 
-> > As you bring this discussion back, how about the _require_capabilities() in
-> > above link?
-> > 
+On Tue, Aug 22, 2023 at 06:02:39PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> I was testing a similar patch, but your version looks better. Should I
-> drop mine and you re-post yours?
-
-Actually we decided to use `_require_attrs security`, rather than a new
-_require_capabilities() helper. We need a chance/requirement to add
-that helper (when a test case really need it).
-
-So I hope know is `_require_attrs security` enough for you? Or you really
-need a specific _require_capabilities helper?
-
-Thanks,
-Zorro
-
+> Dave Chinner reported that xfs/273 fails if the AG size happens to be an
+> exact power of two.  I traced this to an agbno integer overflow when the
+> current GETFSMAP call is a continuation of a previous GETFSMAP call, and
+> the last record returned was non-shareable space at the end of an AG.
 > 
-> Thanks,
-> --
-> Jeff Layton <jlayton@kernel.org>
+> This is the regression test for that bug.
 > 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/935     |   55 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/935.out |    2 ++
+>  2 files changed, 57 insertions(+)
+>  create mode 100755 tests/xfs/935
+>  create mode 100644 tests/xfs/935.out
+> 
+> diff --git a/tests/xfs/935 b/tests/xfs/935
+> new file mode 100755
+> index 0000000000..a06f2fc8dc
+> --- /dev/null
+> +++ b/tests/xfs/935
+> @@ -0,0 +1,55 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 935
+> +#
+> +# Regression test for an agbno overflow bug in XFS GETFSMAP involving an
+> +# fsmap_advance call.  Userspace can indicate that a GETFSMAP call is actually
+> +# a continuation of a previous call by setting the "low" key to the last record
+> +# returned by the previous call.
+> +#
+> +# If the last record returned by GETFSMAP is a non-shareable extent at the end
+> +# of an AG and the AG size is exactly a power of two, the startblock in the low
+> +# key of the rmapbt query can be set to a value larger than EOAG.  When this
+> +# happens, GETFSMAP will return EINVAL instead of returning records for the
+> +# next AG.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick fsmap
+> +
+> +. ./common/filter
+> +
+> +_fixed_by_git_commit kernel XXXXXXXXXXXXX \
+> +	"xfs: fix an agbno overflow in __xfs_getfsmap_datadev"
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_xfs_io_command fsmap
+> +_require_xfs_scratch_rmapbt
+> +
+> +_scratch_mkfs | _filter_mkfs 2> $tmp.mkfs >> $seqres.full
+> +source $tmp.mkfs
+> +
+> +# Find the next power of two agsize smaller than whatever the default is.
+> +for ((p = 31; p > 0; p--)); do
+> +	desired_agsize=$((2 ** p))
+> +	test "$desired_agsize" -lt "$agsize" && break
+> +done
+> +
+> +echo "desired asize=$desired_agsize" >> $seqres.full
+> +_scratch_mkfs -d "agsize=${desired_agsize}b" | _filter_mkfs 2> $tmp.mkfs >> $seqres.full
+> +source $tmp.mkfs
+> +
+> +test "$desired_agsize" -eq "$agsize" || _notrun "wanted agsize=$desired_agsize, got $agsize"
+> +
+> +_scratch_mount
+> +$XFS_IO_PROG -c 'fsmap -n 1024 -v' $SCRATCH_MNT >> $tmp.big
+> +$XFS_IO_PROG -c 'fsmap -n 1 -v' $SCRATCH_MNT >> $tmp.small
+
+This line reports:
+
+  xfs_io: xfsctl(XFS_IOC_GETFSMAP) iflags=0x0 ["/mnt/xfstests/scratch"]: Invalid argument
+
+when the test case fails. Is that normal?
+
+> +
+> +diff -Naurpw $tmp.big $tmp.small
+> +
+> +# success, all done
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/xfs/935.out b/tests/xfs/935.out
+> new file mode 100644
+> index 0000000000..1b5422d1e3
+> --- /dev/null
+> +++ b/tests/xfs/935.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 935
+> +Silence is golden
+> 
+
