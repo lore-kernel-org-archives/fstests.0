@@ -2,121 +2,108 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39BE0C83F13
-	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 09:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A632C83F11
+	for <linux-fstests@archiver.kernel.org>; Sun, 27 Aug 2023 12:46:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230206AbjH0JFy (ORCPT
+        id S229500AbjH0Mpg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Aug 2023 05:05:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38258 "EHLO
+        Sun, 27 Aug 2023 08:45:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53560 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230172AbjH0JFg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 05:05:36 -0400
-Received: from mail-ua1-x92a.google.com (mail-ua1-x92a.google.com [IPv6:2607:f8b0:4864:20::92a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BA10AC;
-        Sun, 27 Aug 2023 02:05:32 -0700 (PDT)
-Received: by mail-ua1-x92a.google.com with SMTP id a1e0cc1a2514c-79a46f02d45so625854241.0;
-        Sun, 27 Aug 2023 02:05:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1693127131; x=1693731931;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=F1p/OfYP/CILEOwow8hS+QJZ2ORum3pGJZjhjujQrcE=;
-        b=cS3hHxlURkh8ge5BxO7rsXVtz1rq+/bDKXwhLnYOLC8nhCsHDzlVNwSecndZxjSXqm
-         6YdmmJfA9w4GTYifDZ+TQlHLPTdMMbPhUok53QNiYcVGuMDiUCj4R9BziTHIkoajnhkJ
-         qQydYxNH8+iVJX0NAppkh/tKIjXIreH8QWAfiXwfklX6KBYOqHZ1wsEDHssItVwRStHu
-         B1InE9a4cWuuoF8Ssp4YgYPg8xzGrrCz4knivBWfgpu6w5ol3oNPC9FL0x/1D7EdJIiK
-         DfR3cTKxouHoYu97jymW6xnW3xHbInkTHdoEyaHRTSvZ0s4955MuQKvv2u6tl8lb/kK+
-         sRfg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693127131; x=1693731931;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=F1p/OfYP/CILEOwow8hS+QJZ2ORum3pGJZjhjujQrcE=;
-        b=GLjd6u7FGtsy+Q2SLFUEjwsPaqbD+SXCHtUO4jxdteKeBgrjQeTFLaXTgUxb7p0q2P
-         vW9n6O4n/8H+ekvRAvo2LM0EQtzZ5thwHDw1biBMm7gfsetKfZvWOvUBdcwcF+dqRRTN
-         FZiv7HU1CtrcvNR0Ec58EPy19z0GkvBCmNrT9wzbrVHn3QcCc8qvhRysKpItxtXoKU/x
-         RVm8jOrO7uVPFMbkzDKVtSEK7pdLupSeqKm6xx0yB7XcTIPysjKXsy3BD9VAlgrto4rt
-         FQHR4zcZ0gGsF61X7RMElVN4yAyeRSJg1qu77XZiuf3kbQQnAzsCJ90prp7tGTyiQyb6
-         Whlg==
-X-Gm-Message-State: AOJu0YxFG/7CXwTWrpwd0HZAw8b2ORGMe7Bm/dv8leYO2GRaR9n4aRzE
-        cu0F1xDr+30Dm9lxAkqz+kBhpRZAW/B9HTD9pF8=
-X-Google-Smtp-Source: AGHT+IEd45DR1hQ0sTK/hCfS1Dnp7wuQpOSUYrtHwkWi4zlnfs7uVXvsi4rI98lbJG8+BeiGOaU85PoeeR+K0YKU/pU=
-X-Received: by 2002:a67:f70b:0:b0:44e:98d8:c62e with SMTP id
- m11-20020a67f70b000000b0044e98d8c62emr7493396vso.33.1693127131508; Sun, 27
- Aug 2023 02:05:31 -0700 (PDT)
+        with ESMTP id S229503AbjH0MpU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 08:45:20 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 037B813D;
+        Sun, 27 Aug 2023 05:45:18 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 922CE611EE;
+        Sun, 27 Aug 2023 12:45:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99CDCC433C7;
+        Sun, 27 Aug 2023 12:45:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693140316;
+        bh=I4BzmJKtGwUNX8XAtTYMNV+M9Exu3kFE6GER6lqQcJo=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=rTmcg1ZQm1ZEQ4zULBQr3TwW98lcytB8ltae4wDbn8N/wC2ioKMoz32xUa5i+z0aU
+         U+WTKP0uMSj+4nbjMelPg3iPZb7RwTcWrefMaTqbvZgJSHF1kkI4FokTwssLeTFqq6
+         aC50uHdvA6NRP/cN6vuB1lOXcTvnlvmtJsbq0/qXNT1P33P84Nf6HKdfydXjWt7e/x
+         okTrwFV8ScAdBksyENmHrGr/bUqAgUS5Xvb0KPDG+5hupcoBxvObfMbzMqUOmJ40n2
+         Xs1l2rKvh3sNSkE4M2bjfO7hf6n2nHXWJlB7nycyQrAe03zV9ULaQhdCCic+/mHC6M
+         JfHFwYEn4oDUw==
+Date:   Sun, 27 Aug 2023 20:45:12 +0800
+From:   Zorro Lang <zlang@kernel.org>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
+        linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH fstests v2 2/3] generic/513: limit to filesystems that
+ support capabilities
+Message-ID: <20230827124512.23qnfe3keedrf4a2@zlang-mailbox>
+References: <20230824-fixes-v2-0-d60c2faf1057@kernel.org>
+ <20230824-fixes-v2-2-d60c2faf1057@kernel.org>
+ <20230825141123.wexv7kuxk75gr5os@zlang-mailbox>
+ <a93ba004a46177c213159878a51c7378536f33ad.camel@kernel.org>
 MIME-Version: 1.0
-References: <20230625135033.3205742-1-amir73il@gmail.com>
-In-Reply-To: <20230625135033.3205742-1-amir73il@gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Sun, 27 Aug 2023 12:05:20 +0300
-Message-ID: <CAOQ4uxiuHfECh6ARBma86DbDCDzNPa1wCCxXLB9CRWQShj8q4g@mail.gmail.com>
-Subject: Re: [PATCH 0/3] fstests-bld overlayfs updates
-To:     "Theodore Ts'o" <tytso@mit.edu>
-Cc:     Eric Biggers <ebiggers@google.com>,
-        Alexander Larsson <alexl@redhat.com>,
-        Leah Rumancik <leah.rumancik@gmail.com>,
-        fstests@vger.kernel.org, linux-unionfs@vger.kernel.org,
-        Ext4 <linux-ext4@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <a93ba004a46177c213159878a51c7378536f33ad.camel@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Jun 25, 2023 at 4:50=E2=80=AFPM Amir Goldstein <amir73il@gmail.com>=
- wrote:
->
-> Hi Ted,
->
-> The first patch enables testing the new overlayfs verity feature,
-> which is NOT the same as saying that overlayfs supports fsverity.
->
-> The other two are cleanups and fixes to overlayfs configs.
->
+On Fri, Aug 25, 2023 at 11:02:40AM -0400, Jeff Layton wrote:
+> On Fri, 2023-08-25 at 22:11 +0800, Zorro Lang wrote:
+> > On Thu, Aug 24, 2023 at 12:44:18PM -0400, Jeff Layton wrote:
+> > > This test requires being able to set file capabilities which some
+> > > filesystems (namely NFS) do not support. Add a _require_setcap test
+> > > and only run it on filesystems that pass it.
+> > > 
+> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > > ---
+> > >  common/rc         | 13 +++++++++++++
+> > >  tests/generic/513 |  1 +
+> > >  2 files changed, 14 insertions(+)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 5c4429ed0425..33e74d20c28b 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -5048,6 +5048,19 @@ _require_mknod()
+> > >  	rm -f $TEST_DIR/$seq.null
+> > >  }
+> > >  
+> > > +_require_setcap()
+> > > +{
+> > > +	local testfile=$TEST_DIR/setcaptest.$$
+> > > +
+> > > +	touch $testfile
+> > > +	$SETCAP_PROG "cap_sys_module=p" $testfile > $testfile.out 2>&1
+> > 
+> > Actually we talked about the capabilities checking helper last year, as below:
+> > 
+> > https://lore.kernel.org/fstests/20220323023845.saj5en74km7aibdx@zlang-mailbox/
+> > 
+> > As you bring this discussion back, how about the _require_capabilities() in
+> > above link?
+> > 
+> 
+> I was testing a similar patch, but your version looks better. Should I
+> drop mine and you re-post yours?
 
-Hi Ted,
+Actually we decided to use `_require_attrs security`, rather than a new
+_require_capabilities() helper. We need a chance/requirement to add
+that helper (when a test case really need it).
 
-Ping.
-
-Did these two small patches get lost?
-
-FYI, Alexander's overlayfs verity patches are queued for 6.6
-and his overlay/verity fstests have already been merged to
-fstests release v2023.07.23.
-
-It would be great if fstests-bld support to test this feature would
-be merged as well.
+So I hope know is `_require_attrs security` enough for you? Or you really
+need a specific _require_capabilities helper?
 
 Thanks,
-Amir.
+Zorro
 
->
-> Amir Goldstein (3):
->   test-appliance: enable verity for testing overlay over ext4
->   test-appliance: remove redudant overlay configs
->   test-appliance: skip overlayfs tests from base fs exclude list
->
->  .../files/root/fs/overlay/cfg/large-ext4           | 14 --------------
->  test-appliance/files/root/fs/overlay/cfg/large-xfs | 14 --------------
->  .../files/root/fs/overlay/cfg/small-ext4           | 14 --------------
->  .../files/root/fs/overlay/cfg/small-ext4.exclude   |  1 -
->  test-appliance/files/root/fs/overlay/cfg/small-xfs | 14 --------------
->  .../files/root/fs/overlay/cfg/small-xfs.exclude    |  1 -
->  test-appliance/files/root/fs/overlay/config        |  2 +-
->  test-appliance/files/root/runtests.sh              |  1 +
->  8 files changed, 2 insertions(+), 59 deletions(-)
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-ext4
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/large-xfs
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-ext4.e=
-xclude
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs
->  delete mode 100644 test-appliance/files/root/fs/overlay/cfg/small-xfs.ex=
-clude
->
+> 
+> Thanks,
 > --
-> 2.34.1
->
+> Jeff Layton <jlayton@kernel.org>
+> 
