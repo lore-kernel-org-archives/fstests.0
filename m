@@ -2,152 +2,112 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE41CC83F15
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Aug 2023 14:37:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5990C83F11
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Aug 2023 17:24:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229986AbjH1Ogj (ORCPT
+        id S229522AbjH1RYK (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 28 Aug 2023 10:36:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47412 "EHLO
+        Mon, 28 Aug 2023 13:24:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231853AbjH1Og3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2023 10:36:29 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C93A10B
-        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 07:35:43 -0700 (PDT)
+        with ESMTP id S230336AbjH1RYC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2023 13:24:02 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58F1411C
+        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 10:23:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693233342;
+        s=mimecast20190719; t=1693243396;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=fseQpsy0VfGLC0oUmmsTYhYRD4hK2JRI8+6aM8OkWNM=;
-        b=MADAJb10rF8qjL2EC5CTkn8rnyuzKg/efBEODVJdwiOg1BK0lsirPbO9b4aV8wVzWW/uvZ
-        pKnNPoKoFbwTem6P3r1vnZfo4yPITB6x8wIGEvvqr2J3stvAfTIgSCUwrnCIL7VfSFT3+o
-        nD+BIsU2qI+EZcv5uLDvRMuum4fbGYQ=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-616-F7LmiYZ5MRup7wDGVs4XzA-1; Mon, 28 Aug 2023 10:35:41 -0400
-X-MC-Unique: F7LmiYZ5MRup7wDGVs4XzA-1
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-26fb3f2edc9so2680535a91.3
-        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 07:35:40 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693233340; x=1693838140;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fseQpsy0VfGLC0oUmmsTYhYRD4hK2JRI8+6aM8OkWNM=;
-        b=DAkd1WkgupMACwVG4QW1wkyvnZ6VGvHralTG09Zowf0PTIHJBPCnBOYeJPdOHkfKjT
-         WKCjXpMvxqc734CO9dhDoB04ZFiEcisw0IzuppicdQRhe14D/1JWim1ByDs/SVV4EPOG
-         UB2cHGIzU2il3C6b+Nf5Q/MUQ0CWCYqwuwqwaYqR9ovE3W9WnXAOfWC/9p1x5qPi3+1/
-         5cgnKOGutYsFfSZj+RkT3NGX2TwkgsYoJYacrMWeNbzdKX7Ncx7B9Tt0dKRaN1OzSIEB
-         x/IfogJgwBt+29QxMnnY7YO3N6vlIQ2NSoMw6Uv5Hhqjgy/UM82s45+SVxdvXivSeSMm
-         QOWg==
-X-Gm-Message-State: AOJu0Yx4XTX6qQV7QSi7u8ZWN/75d2Oqeo3jOj541NnuoGOUgnXmy/Wp
-        M/1YzjHdRy/O2qoXSfq/LDOYfABKbhWV2NJKCC77GEyi/GlZgimmP8sxzmSIm6jDvibPv0WmDKR
-        OIq/wet3FmJtR8R9aMA==
-X-Received: by 2002:a17:90b:4a02:b0:26b:5205:525e with SMTP id kk2-20020a17090b4a0200b0026b5205525emr17869139pjb.42.1693233340064;
-        Mon, 28 Aug 2023 07:35:40 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEVbS19uRYDlaiiPTcaLBl0QGZmCnV0XyUvmfp20Gbl9HdoVcc6Bml998WVwCap7gkYsRIoKA==
-X-Received: by 2002:a17:90b:4a02:b0:26b:5205:525e with SMTP id kk2-20020a17090b4a0200b0026b5205525emr17869121pjb.42.1693233339747;
-        Mon, 28 Aug 2023 07:35:39 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 20-20020a17090a199400b00268238583acsm9670672pji.32.2023.08.28.07.35.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Aug 2023 07:35:39 -0700 (PDT)
-Date:   Mon, 28 Aug 2023 22:35:35 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Jeff Layton <jlayton@kernel.org>
-Cc:     Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-        linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH fstests v2 2/3] generic/513: limit to filesystems that
- support capabilities
-Message-ID: <20230828143535.6x3duax7g43vhg5k@zlang-mailbox>
-References: <20230824-fixes-v2-0-d60c2faf1057@kernel.org>
- <20230824-fixes-v2-2-d60c2faf1057@kernel.org>
- <20230825141123.wexv7kuxk75gr5os@zlang-mailbox>
- <a93ba004a46177c213159878a51c7378536f33ad.camel@kernel.org>
- <20230827124512.23qnfe3keedrf4a2@zlang-mailbox>
- <45e9152ccb8afdced1c1f6887368fec59804c6d9.camel@kernel.org>
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=nhmwtrAleKvCDQ36c0A+UfbAnkvaBtkDyqi/zs1xBQ4=;
+        b=XiUDHJYCEnOck1NNWM7pbwZnmGUZ4mUfdgGSpXMx1OWRGYhoL8BR2c1sPOTM78jOwksjly
+        R0vXRJKHqQnvJHt+IniN2Xhz73LQJB5frodTOcOnYZR/Yg9QlyQcJlHuWhQySOhKpR/5oR
+        gX2jqvAtZCGu58H1NPO/FfulRalopEc=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-355-pIIfOASBPvaKO3DXYvaFwA-1; Mon, 28 Aug 2023 13:23:15 -0400
+X-MC-Unique: pIIfOASBPvaKO3DXYvaFwA-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id F1EEB101A528
+        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 17:23:14 +0000 (UTC)
+Received: from fedora.redhat.com (unknown [10.22.34.74])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CA03D1121318;
+        Mon, 28 Aug 2023 17:23:14 +0000 (UTC)
+From:   Bill O'Donnell <bodonnel@redhat.com>
+To:     fstests@vger.kernel.org
+Cc:     Bill O'Donnell <bodonnel@redhat.com>
+Subject: [PATCH v3] fstests: generic/352 should accomodate other pwrite behaviors
+Date:   Mon, 28 Aug 2023 12:23:07 -0500
+Message-ID: <20230828172307.7497-1-bodonnel@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <45e9152ccb8afdced1c1f6887368fec59804c6d9.camel@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.3
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 27, 2023 at 09:43:41AM -0400, Jeff Layton wrote:
-> On Sun, 2023-08-27 at 20:45 +0800, Zorro Lang wrote:
-> > On Fri, Aug 25, 2023 at 11:02:40AM -0400, Jeff Layton wrote:
-> > > On Fri, 2023-08-25 at 22:11 +0800, Zorro Lang wrote:
-> > > > On Thu, Aug 24, 2023 at 12:44:18PM -0400, Jeff Layton wrote:
-> > > > > This test requires being able to set file capabilities which some
-> > > > > filesystems (namely NFS) do not support. Add a _require_setcap test
-> > > > > and only run it on filesystems that pass it.
-> > > > > 
-> > > > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > > > ---
-> > > > >  common/rc         | 13 +++++++++++++
-> > > > >  tests/generic/513 |  1 +
-> > > > >  2 files changed, 14 insertions(+)
-> > > > > 
-> > > > > diff --git a/common/rc b/common/rc
-> > > > > index 5c4429ed0425..33e74d20c28b 100644
-> > > > > --- a/common/rc
-> > > > > +++ b/common/rc
-> > > > > @@ -5048,6 +5048,19 @@ _require_mknod()
-> > > > >  	rm -f $TEST_DIR/$seq.null
-> > > > >  }
-> > > > >  
-> > > > > +_require_setcap()
-> > > > > +{
-> > > > > +	local testfile=$TEST_DIR/setcaptest.$$
-> > > > > +
-> > > > > +	touch $testfile
-> > > > > +	$SETCAP_PROG "cap_sys_module=p" $testfile > $testfile.out 2>&1
-> > > > 
-> > > > Actually we talked about the capabilities checking helper last year, as below:
-> > > > 
-> > > > https://lore.kernel.org/fstests/20220323023845.saj5en74km7aibdx@zlang-mailbox/
-> > > > 
-> > > > As you bring this discussion back, how about the _require_capabilities() in
-> > > > above link?
-> > > > 
-> > > 
-> > > I was testing a similar patch, but your version looks better. Should I
-> > > drop mine and you re-post yours?
-> > 
-> > Actually we decided to use `_require_attrs security`, rather than a new
-> > _require_capabilities() helper. We need a chance/requirement to add
-> > that helper (when a test case really need it).
-> > 
-> > So I hope know is `_require_attrs security` enough for you? Or you really
-> > need a specific _require_capabilities helper?
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > 
-> 
-> 
-> Yeah, it looks like that should work:
-> 
->     generic/513       [not run] attr namespace security not supported by this filesystem type: nfs
-> 
-> I'll plan to respin this patch to add that instead.
+xfs_io pwrite issues a series of block size writes, but there is no
+guarantee that the resulting extent(s) will be singular or contiguous.
+This behavior is acceptable, but the test is flawed in that it expects
+a single extent for a pwrite.
 
-Thanks:) I saw you've sent a V3:
-[PATCH fstests v3 0/2] fstests: add appropriate checks for fs features for some tests
+Modify test to limit pwrite and reflink to a single block.
 
-so will you sent a V4 contains 3 patches?
+Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+---
+ tests/generic/352     | 10 ++++++----
+ tests/generic/352.out |  6 ++----
+ 2 files changed, 8 insertions(+), 8 deletions(-)
 
-Thanks,
-Zorro
-
-> 
-> Thanks!
-> -- 
-> Jeff Layton <jlayton@kernel.org>
-> 
+diff --git a/tests/generic/352 b/tests/generic/352
+index 52ec4850..acc17dac 100755
+--- a/tests/generic/352
++++ b/tests/generic/352
+@@ -28,14 +28,16 @@ _require_xfs_io_command "fiemap"
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ 
+-blocksize=$((128 * 1024))
++blocksize=$(_get_file_block_size $SCRATCH_MNT)
+ _require_congruent_file_oplen $SCRATCH_MNT $blocksize
+ file="$SCRATCH_MNT/tmp"
+ 
+ # Golden output is for $LOAD_FACTOR == 1 case
++# and assumes a normal blocksize of 4K
+ orig_nr=8192
+-orig_last_extent=$(($orig_nr * $blocksize / 512))
+-orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
++orig_blocksize=4096
++orig_last_extent=$(($orig_nr * $orig_blocksize / 512))
++orig_end=$(($orig_last_extent + $orig_blocksize / 512 - 1))
+ 
+ # Real output
+ nr=$(($orig_nr * $LOAD_FACTOR))
+@@ -43,7 +45,7 @@ last_extent=$(($nr * $blocksize / 512))
+ end=$(($last_extent + $blocksize / 512 - 1))
+ 
+ # write the initial block for later reflink
+-_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
++_pwrite_byte 0xcdcdcdcd 0 $blocksize $file > /dev/null
+ 
+ # use reflink to create the rest of the file, whose all extents are all
+ # pointing to the first extent
+diff --git a/tests/generic/352.out b/tests/generic/352.out
+index 4ff66c21..454ff52f 100644
+--- a/tests/generic/352.out
++++ b/tests/generic/352.out
+@@ -1,5 +1,3 @@
+ QA output created by 352
+-wrote 131072/131072 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-0: [0..2097151]: shared
+-1: [2097152..2097407]: shared|last
++0: [0..65535]: shared
++1: [65536..65543]: shared|last
+-- 
+2.41.0
 
