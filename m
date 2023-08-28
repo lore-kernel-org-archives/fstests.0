@@ -2,113 +2,128 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0239EC83F14
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Aug 2023 02:01:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76D9AC83F16
+	for <linux-fstests@archiver.kernel.org>; Mon, 28 Aug 2023 14:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229379AbjH1CBW (ORCPT
+        id S229512AbjH1OQi (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 27 Aug 2023 22:01:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41026 "EHLO
+        Mon, 28 Aug 2023 10:16:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbjH1CBK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Aug 2023 22:01:10 -0400
-Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2DEE3125
-        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 19:01:04 -0700 (PDT)
-Received: by mail-pg1-x533.google.com with SMTP id 41be03b00d2f7-56b0c5a140dso1729446a12.0
-        for <fstests@vger.kernel.org>; Sun, 27 Aug 2023 19:01:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20221208.gappssmtp.com; s=20221208; t=1693188063; x=1693792863;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=0OOpuUC9WrHx63XO3krpOCYmcaUxFgd3zsU66GiE1hw=;
-        b=b5odctLENGHiUXUUOYeCbtNMq5u5z9PG7r9KsSdSJT7eeN5m7IU4YGCKsk1zHZyLXg
-         Y0asyU+ab7/lI94c8aeOj7s8ivO6LLnQSubfLICsXQlL/ROeNnjTiwFU0R5cBdKkXlfV
-         c6F0spa4eLgt5JMAS2AdLqMwlW6D6IFRV3aym5QEw3SNWZ/QMyZ2Kp9f6QhYZsVhTUKB
-         MWWoWKWZ3D5pq/PACsrZQFNhWtkMzm8Sddp7xjksFp+i2HITffC0KMQIECKPTYNvn4Ec
-         fohDUpzKt0phRnnm12roN3tR+3L8lV7fe02UkYUr5kH7saI0hiNXkyErfqkT4hfukdoi
-         A4zg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693188063; x=1693792863;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0OOpuUC9WrHx63XO3krpOCYmcaUxFgd3zsU66GiE1hw=;
-        b=Q1YFtG5aQKPLCZ+vnyhumTttXtMjyGJdsgQAyH57jWZgq8dmrX5bt+Zs4bNpq2peu8
-         OZnagBOW02u/k5hUn40SmEeLBv+04alThYpmbDsrxeJtS1l1VyGIXP8xCgxUEj8Cj5Lg
-         0s+t37c6ileDhGzIQ+A/NcpaVSq/Jzafyx+jwuSTEayV3O+ZKrCoZD8DOzIhh7D3ynwl
-         6G1CwDZcQLQAr8xgx2+w1N0lF8j55iB+lB64abz7Ij1S5eqIp3ZdI92QIiGFTvDzA86X
-         vW01Y3OqZz8XCoea/LxJ18JIPQMkQwOMz8LbpSIYcBvcQb4a25WbMr96o1CYSHRqtJ/3
-         ZqcQ==
-X-Gm-Message-State: AOJu0YwK8xKhlLURcDmzTeFfIGSkT6xv9QcRRCepe2FBYCDo39tdofmq
-        3ImrRsXIZJnSUIyD7ZbVKZ1uAw==
-X-Google-Smtp-Source: AGHT+IEQEHw7cE3n9TM3j1prdwB4ECxh3iyjWx1gyrgkJRwQQLFZVC0IFBpmMuhOfxkpj1752eqbwQ==
-X-Received: by 2002:a17:902:8f97:b0:1b8:400a:48f2 with SMTP id z23-20020a1709028f9700b001b8400a48f2mr25586214plo.62.1693188063462;
-        Sun, 27 Aug 2023 19:01:03 -0700 (PDT)
-Received: from dread.disaster.area (pa49-195-66-88.pa.nsw.optusnet.com.au. [49.195.66.88])
-        by smtp.gmail.com with ESMTPSA id jk17-20020a170903331100b001b890b3bbb1sm5964667plb.211.2023.08.27.19.01.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Aug 2023 19:01:02 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-        (envelope-from <david@fromorbit.com>)
-        id 1qaRYp-007Rne-0S;
-        Mon, 28 Aug 2023 12:00:59 +1000
-Date:   Mon, 28 Aug 2023 12:00:59 +1000
-From:   Dave Chinner <david@fromorbit.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, xfs <linux-xfs@vger.kernel.org>,
-        fstests <fstests@vger.kernel.org>
-Subject: Re: [RFC PATCH] fstests: test fix for an agbno overflow in
- __xfs_getfsmap_datadev
-Message-ID: <ZOv/25JEPQblNx1n@dread.disaster.area>
-References: <20230823010046.GD11286@frogsfrogsfrogs>
- <20230823010239.GE11263@frogsfrogsfrogs>
- <20230827130644.nhdi6ihobn5qne3a@zlang-mailbox>
- <20230827155646.GA28202@frogsfrogsfrogs>
+        with ESMTP id S231743AbjH1OQP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2023 10:16:15 -0400
+Received: from sandeen.net (sandeen.net [63.231.237.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C506110B
+        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 07:16:12 -0700 (PDT)
+Received: from [10.0.0.71] (liberator.sandeen.net [10.0.0.71])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id C457251B58C;
+        Mon, 28 Aug 2023 09:16:11 -0500 (CDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 sandeen.net C457251B58C
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net;
+        s=default; t=1693232171;
+        bh=hjew/CS/pGpPtSLkCzFOaUKOq6jX7ctlTrbUlmu1ifc=;
+        h=Date:Subject:To:References:Cc:From:In-Reply-To:From;
+        b=aJjNRgrotAklF3MiZlIYAmK317d9srHuN0mILEY2JjC72Xl5pLqW+3YUwH87VEj1C
+         ckO4tQBvmLGIKDroSseTY6tBnhMdEG65cs3Ocw3+ZXigAy4mwYUtdDwjQC5+n7OMl4
+         3Wt8NsOA2tQRHYtvdoNLeGwizI8g0TFjbxqLBx7mTzrSlYttuBNJ/oZKOinBQcHgUh
+         4ro8e+F2oIaSw6REGZi4rYEmvyMTijGXHd6Ij9a/eFU6fSBW62gI+xS9ws5MnIJpcD
+         u2BBwVCe5WtZhXBXxrexVsozh489gjq5WyI3bmBLD1xWmisnyqlSsdlHdcSPbJMUgJ
+         85OVZYnoCtazQ==
+Message-ID: <4d035b07-784c-320c-ca7a-753ae0a81b6b@sandeen.net>
+Date:   Mon, 28 Aug 2023 09:16:10 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230827155646.GA28202@frogsfrogsfrogs>
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.14.0
+Subject: Re: [PATCH v2] fstests: generic/352 should accomodate other pwrite
+ behaviors
+Content-Language: en-US
+To:     Bill O'Donnell <bodonnel@redhat.com>, fstests@vger.kernel.org
+References: <20230825200906.95973-1-bodonnel@redhat.com>
+Cc:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+From:   Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <20230825200906.95973-1-bodonnel@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Aug 27, 2023 at 08:56:46AM -0700, Darrick J. Wong wrote:
-> On Sun, Aug 27, 2023 at 09:06:44PM +0800, Zorro Lang wrote:
-> > On Tue, Aug 22, 2023 at 06:02:39PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Dave Chinner reported that xfs/273 fails if the AG size happens to be an
-> > > exact power of two.  I traced this to an agbno integer overflow when the
-> > > current GETFSMAP call is a continuation of a previous GETFSMAP call, and
-> > > the last record returned was non-shareable space at the end of an AG.
-> > > 
-> > > This is the regression test for that bug.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-.....
-> > > +echo "desired asize=$desired_agsize" >> $seqres.full
-> > > +_scratch_mkfs -d "agsize=${desired_agsize}b" | _filter_mkfs 2> $tmp.mkfs >> $seqres.full
-> > > +source $tmp.mkfs
-> > > +
-> > > +test "$desired_agsize" -eq "$agsize" || _notrun "wanted agsize=$desired_agsize, got $agsize"
-> > > +
-> > > +_scratch_mount
-> > > +$XFS_IO_PROG -c 'fsmap -n 1024 -v' $SCRATCH_MNT >> $tmp.big
-> > > +$XFS_IO_PROG -c 'fsmap -n 1 -v' $SCRATCH_MNT >> $tmp.small
-> > 
-> > This line reports:
-> > 
-> >   xfs_io: xfsctl(XFS_IOC_GETFSMAP) iflags=0x0 ["/mnt/xfstests/scratch"]: Invalid argument
-> > 
-> > when the test case fails. Is that normal?
+On 8/25/23 3:09 PM, Bill O'Donnell wrote:
+> xfs_io pwrite issues a series of block size writes, but there is no guarantee
+> that the resulting extent(s) will be singular or contiguous. This behavior is
+> acceptable, but the test is flawed in that it expects a single extent for a
+> pwrite.
 > 
-> Yes.  The attached bugfix should make that go away.
+> Modify test to accept any layout for the reflinked logical range.
 
-The kernel bug fix fixes the same problem with xfs/273; I haven't
-tested this specific new regression test.
+I think this is no longer what the change does, right? You've now
+changed it so that it only pwrites (and reflinks) a single block rather
+than multiple, to avoid dealing with fragmentation issues.
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+> ---
+>  tests/generic/352     | 9 +++++----
+>  tests/generic/352.out | 6 ++----
+>  2 files changed, 7 insertions(+), 8 deletions(-)
+> 
+> diff --git a/tests/generic/352 b/tests/generic/352
+> index 52ec4850..77570bce 100755
+> --- a/tests/generic/352
+> +++ b/tests/generic/352
+> @@ -28,14 +28,15 @@ _require_xfs_io_command "fiemap"
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  
+> -blocksize=$((128 * 1024))
+> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
+>  _require_congruent_file_oplen $SCRATCH_MNT $blocksize
+>  file="$SCRATCH_MNT/tmp"
+>  
+>  # Golden output is for $LOAD_FACTOR == 1 case
+
+$LOAD_FACTOR == 1 and 4k block size case, now - this is a little tricky
+so worth documenting IMHO.
+
+>  orig_nr=8192
+> -orig_last_extent=$(($orig_nr * $blocksize / 512))
+> -orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
+> +orig_blocksize=4096
+> +orig_last_extent=$(($orig_nr * $orig_blocksize / 512))
+> +orig_end=$(($orig_last_extent + $orig_blocksize / 512 - 1))
+>  
+>  # Real output
+>  nr=$(($orig_nr * $LOAD_FACTOR))
+> @@ -43,7 +44,7 @@ last_extent=$(($nr * $blocksize / 512))
+>  end=$(($last_extent + $blocksize / 512 - 1))
+>  
+>  # write the initial block for later reflink
+> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
+> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io > /dev/null
+
+I think it's fine to exclude the non-matching lines of xfs_io output,
+but there's no reason to run it through the filter if you send it all to
+/dev/null anyway, so could just drop the filter here.
+
+Other than those nitpicks, I think this looks fine now.
+
+-Eric
+
+>  
+>  # use reflink to create the rest of the file, whose all extents are all
+>  # pointing to the first extent
+> diff --git a/tests/generic/352.out b/tests/generic/352.out
+> index 4ff66c21..454ff52f 100644
+> --- a/tests/generic/352.out
+> +++ b/tests/generic/352.out
+> @@ -1,5 +1,3 @@
+>  QA output created by 352
+> -wrote 131072/131072 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -0: [0..2097151]: shared
+> -1: [2097152..2097407]: shared|last
+> +0: [0..65535]: shared
+> +1: [65536..65543]: shared|last
+
