@@ -2,116 +2,111 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16424C83F12
-	for <linux-fstests@archiver.kernel.org>; Mon, 28 Aug 2023 19:16:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CB6DC83F12
+	for <linux-fstests@archiver.kernel.org>; Tue, 29 Aug 2023 03:49:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233319AbjH1TQB (ORCPT
+        id S230099AbjH2Dsy (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 28 Aug 2023 15:16:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53376 "EHLO
+        Mon, 28 Aug 2023 23:48:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233380AbjH1TPx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2023 15:15:53 -0400
-Received: from sandeen.net (sandeen.net [63.231.237.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C65D9107
-        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 12:15:50 -0700 (PDT)
-Received: from [10.0.0.71] (liberator.sandeen.net [10.0.0.71])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by sandeen.net (Postfix) with ESMTPSA id F35BD444F;
-        Mon, 28 Aug 2023 14:15:49 -0500 (CDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 sandeen.net F35BD444F
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net;
-        s=default; t=1693250150;
-        bh=ETEKufNS6iaiM19/JquTRvtzZ+BJ5eCGx+AgN5+tae4=;
-        h=Date:Subject:To:References:Cc:From:In-Reply-To:From;
-        b=CX0YjypnUayhHwVFJBsXDv/W0swEBlsqIFaUA/Pii1kSFFThEM3eKCwRuZZmCrfZ2
-         GMlrQcee6IpmcLG4536sXPLGb5xsN19ri3C+vGJlRK0akd3c6PaJJAKcMb4ZGigbWE
-         7EMEnyI5QZeCsQGDHY6twG72tK1TwIIbBdxbH6DeNz98SKd9X1S2qwKwuIJg0XmAPz
-         b77OQDZfQGuTHYuqVK1RW8Md39HqHQ2iQnt2E1//5VTzexZ0KovweeUcGCEcTUtirE
-         tYi5G1GnzyxpGbWZWUL2BZX6JWH5I6LZTJftcMewnsaqiyBO/XEaKT1wDIqeXOAWRx
-         1mtq45/Y3n6pA==
-Message-ID: <3d0fa237-496c-662b-ec05-1135845d3ad8@sandeen.net>
-Date:   Mon, 28 Aug 2023 14:15:49 -0500
+        with ESMTP id S231264AbjH2DsW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2023 23:48:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1EEB132
+        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 20:47:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693280853;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=PXcX9C+8dwtnHfSDi+diV9zwhmNht4+RCt1TTmBpwhA=;
+        b=NqMhLvIURwDBdDbWPXJ/wjbvugdQKrusWdpQnpgcVnfX+cVABhzbup3YzmtnDlq2ZA67/w
+        gbkBSXd4+nvbOqL6YsN6y3jP5H5w2YUMAS50nOwut3FdwaNqmkEhDKykpR4jgJwKbef3M1
+        Ev7PRaokfX0FRqLUWaKPK5EJ4ncGNm0=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-548-Z2r7o7M1P9enQCh-z-OpgA-1; Mon, 28 Aug 2023 23:47:32 -0400
+X-MC-Unique: Z2r7o7M1P9enQCh-z-OpgA-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1c08a15fcf4so40134055ad.3
+        for <fstests@vger.kernel.org>; Mon, 28 Aug 2023 20:47:32 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693280851; x=1693885651;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PXcX9C+8dwtnHfSDi+diV9zwhmNht4+RCt1TTmBpwhA=;
+        b=g0brjMl5rdSsT4BFCnr43enO1qVxJC/jglwiYBeDQIlmQ+0dSaZhth43ATpPm6505b
+         couaLX9AczFdPznM6xbSwQ+Oh900OtMFzICtgHUO2mTbU6PIx8AfGTQHH+g8E9JRGVXO
+         34ANv5KUbLi01lxcRJAWx3LH7+/roylYIARzaYFuWRdqTH3awV76sYL8UIFh44Gbn3CU
+         BxD4/wysmdua3PNH28BfPK8ze3NsucZA2jfow1mg9YYnD+Z02Y0j2MLiPZDDfDSs3QJC
+         ns7NY842PTzUZUYporC1y/WqOOuDY3o6H8d1cGxOTSRgtEJi0GDF5HqBh0guH7n0F5Fu
+         HPOQ==
+X-Gm-Message-State: AOJu0YzqKGfQ5I0FOi7i941ftBxGs2ja6z0rP6wpONJrfx5PXdJDluim
+        bnvMAhfltGckAJwyyGxGqjHuq4jtUQsaq9SVuMXAQAh4bwoYU4nx7k0yuIV2kfF0/q3S5o8Kfya
+        Hw1mmEzA0ELhIYmSrj7zEz23/Uz4P
+X-Received: by 2002:a17:902:c951:b0:1bd:f314:7896 with SMTP id i17-20020a170902c95100b001bdf3147896mr27572221pla.25.1693280851025;
+        Mon, 28 Aug 2023 20:47:31 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGBLlsZ2uhtyHBz2jxsqAZJjGa0Qpq99UOQBHFRF+FDpNmnZzAOJeoKX0DsioPprS0ED2ZJ0g==
+X-Received: by 2002:a17:902:c951:b0:1bd:f314:7896 with SMTP id i17-20020a170902c95100b001bdf3147896mr27572210pla.25.1693280850720;
+        Mon, 28 Aug 2023 20:47:30 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id l2-20020a170902ec0200b001b54d064a4bsm8221031pld.259.2023.08.28.20.47.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Aug 2023 20:47:30 -0700 (PDT)
+Date:   Tue, 29 Aug 2023 11:47:27 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] aio-dio-write-verify: check for the IO errors
+Message-ID: <20230829034727.p747xzy7hfwicypl@zlang-mailbox>
+References: <cover.1692688971.git.naohiro.aota@wdc.com>
+ <2c9519c024e39b6eb4a3bb93f448752cedd83894.1692688971.git.naohiro.aota@wdc.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
- Gecko/20100101 Thunderbird/102.14.0
-Subject: Re: [PATCH v3] fstests: generic/352 should accomodate other pwrite
- behaviors
-Content-Language: en-US
-To:     Bill O'Donnell <bodonnel@redhat.com>, fstests@vger.kernel.org
-References: <20230828172307.7497-1-bodonnel@redhat.com>
-Cc:     Qu Wenruo <quwenruo.btrfs@gmx.com>
-From:   Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <20230828172307.7497-1-bodonnel@redhat.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2c9519c024e39b6eb4a3bb93f448752cedd83894.1692688971.git.naohiro.aota@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On 8/28/23 12:23 PM, Bill O'Donnell wrote:
-> xfs_io pwrite issues a series of block size writes, but there is no
-> guarantee that the resulting extent(s) will be singular or contiguous.
-> This behavior is acceptable, but the test is flawed in that it expects
-> a single extent for a pwrite.
+On Tue, Aug 22, 2023 at 04:28:50PM +0900, Naohiro Aota wrote:
+> The async write IOs can return some errors, which may lead to a short read or
+> corruption in io_verify() stage. Catch an error early to identify the root
+> cause easily.
 > 
-> Modify test to limit pwrite and reflink to a single block.
-> 
-> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
-
-This looks good to me, thanks.
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 > ---
->  tests/generic/352     | 10 ++++++----
->  tests/generic/352.out |  6 ++----
->  2 files changed, 8 insertions(+), 8 deletions(-)
+
+Looks good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  src/aio-dio-regress/aio-dio-write-verify.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 > 
-> diff --git a/tests/generic/352 b/tests/generic/352
-> index 52ec4850..acc17dac 100755
-> --- a/tests/generic/352
-> +++ b/tests/generic/352
-> @@ -28,14 +28,16 @@ _require_xfs_io_command "fiemap"
->  _scratch_mkfs > /dev/null 2>&1
->  _scratch_mount
+> diff --git a/src/aio-dio-regress/aio-dio-write-verify.c b/src/aio-dio-regress/aio-dio-write-verify.c
+> index 302b8fe4a096..90e41b391289 100644
+> --- a/src/aio-dio-regress/aio-dio-write-verify.c
+> +++ b/src/aio-dio-regress/aio-dio-write-verify.c
+> @@ -238,6 +238,16 @@ static int io_write(int fd, int num_events)
+>  		return 1;
+>  	}
 >  
-> -blocksize=$((128 * 1024))
-> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
->  _require_congruent_file_oplen $SCRATCH_MNT $blocksize
->  file="$SCRATCH_MNT/tmp"
+> +	for (i = 0; i < num_events; i++) {
+> +		int err = (int)evs[i].res;
+> +
+> +		if (err < 0) {
+> +			fprintf(stderr, "error %s with event %d\n",
+> +				strerror(err), i);
+> +			return 1;
+> +		}
+> +	}
+> +
+>  	/* Try to destroy at here, not necessary, so don't check result */
+>  	io_destroy(ctx);
 >  
->  # Golden output is for $LOAD_FACTOR == 1 case
-> +# and assumes a normal blocksize of 4K
->  orig_nr=8192
-> -orig_last_extent=$(($orig_nr * $blocksize / 512))
-> -orig_end=$(($orig_last_extent + $blocksize / 512 - 1))
-> +orig_blocksize=4096
-> +orig_last_extent=$(($orig_nr * $orig_blocksize / 512))
-> +orig_end=$(($orig_last_extent + $orig_blocksize / 512 - 1))
->  
->  # Real output
->  nr=$(($orig_nr * $LOAD_FACTOR))
-> @@ -43,7 +45,7 @@ last_extent=$(($nr * $blocksize / 512))
->  end=$(($last_extent + $blocksize / 512 - 1))
->  
->  # write the initial block for later reflink
-> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file | _filter_xfs_io
-> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file > /dev/null
->  
->  # use reflink to create the rest of the file, whose all extents are all
->  # pointing to the first extent
-> diff --git a/tests/generic/352.out b/tests/generic/352.out
-> index 4ff66c21..454ff52f 100644
-> --- a/tests/generic/352.out
-> +++ b/tests/generic/352.out
-> @@ -1,5 +1,3 @@
->  QA output created by 352
-> -wrote 131072/131072 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -0: [0..2097151]: shared
-> -1: [2097152..2097407]: shared|last
-> +0: [0..65535]: shared
-> +1: [65536..65543]: shared|last
+> -- 
+> 2.41.0
+> 
 
