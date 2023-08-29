@@ -2,168 +2,426 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A05C8C6FA8F
-	for <linux-fstests@archiver.kernel.org>; Tue, 29 Aug 2023 12:50:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE40C83F19
+	for <linux-fstests@archiver.kernel.org>; Tue, 29 Aug 2023 13:19:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235555AbjH2Mt6 (ORCPT
+        id S231501AbjH2NSc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 29 Aug 2023 08:49:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53526 "EHLO
+        Tue, 29 Aug 2023 09:18:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235788AbjH2Mtv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Aug 2023 08:49:51 -0400
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88D44CED;
-        Tue, 29 Aug 2023 05:49:41 -0700 (PDT)
-Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 37TCCUQN021779;
-        Tue, 29 Aug 2023 12:49:41 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : content-transfer-encoding : content-type :
- mime-version; s=corp-2023-03-30;
- bh=YSuNUisqbBFb858C1NEV5sTGpsHh/D1VOq4x5D7nvCw=;
- b=mGhKNt3DQ45VE8ySli4R4gD9tuHiIubxgDt1kMN+ixlPjHwX7ZGY9R+ND0NY9EfGyvnr
- dZUEqYTXI4ZH1bpQVaIOHnWyNb+a3dvQ3HlV2taxsGv8vN1x+hS3ceRLbATJ6FdyZJgm
- xIGe22zOlCFecHjDM0MBqteOocKotNQ8NLUE5xjBcMdCZji9XxT8S+atGgnX7XlkFa50
- XInPkor35kj2q3F+ZL9BTEbocsicLWu3/bXyIMpUVFWL2qi7EgSepQ2DZ29xfhEddVrP
- Xa2ZLMITFAKfZNCsB2GO/WqUj2z0/byQYJi/HxZNR1zsIqPRZPN+ODqHm5vCgrdAT9Lj oQ== 
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3sq9j4cx6e-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 29 Aug 2023 12:49:41 +0000
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 37TB3v0h036840;
-        Tue, 29 Aug 2023 12:49:39 GMT
-Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2173.outbound.protection.outlook.com [104.47.56.173])
-        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3sr6mn1s2x-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 29 Aug 2023 12:49:39 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=It0q9qqOWH4FgiRjqOrwATnad4E4O71g1QTmqAVXCh4TfgcsopJEFrP81Flgqgv4LCeZ4AYYVPlQiBZ6vm5ZjsFhu1Mlv/eWTt5T0067XOkmSeAIY2WoPnbjCFa1taoqqr/NqqT2uzSJmAVe+DPZIuGduSqCbf8/TkTA7Y6LQKZ3I3ByeCJjD4ToBAKQJM3GrW6zCa5iPuN3p6XE4wFeqZwVn8TaZG/JuBnGXC4vlcQDcWkl8wZ3qP2fyKKROAk/HPlILbR04z05+KcPWf3BLWWcuSJZYQTAzocX4/X+L3Sg+8FnMB58mggEOxXZhi59C1IssdT0iA36HNG069uMRQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=YSuNUisqbBFb858C1NEV5sTGpsHh/D1VOq4x5D7nvCw=;
- b=Utld7Es5YmOs4GgRzYRFp41Y3/x3TDAD7rlgdnrCLYPgQjHyiG9Xn1jkkHCMo7r7JH90eHQPv+SAVa+niutWuoWX7pt9SqXC7XRfIe8ij61bSMxpWSypwB6Sir4f/OXkNtJhsaTnTiqjf6m688DV0H470e9iB1DkMqBsTKGqV/vgY9AkCRwzMKH0A5zV3rAX9iGg8vg3+mZsg+HbHEeJ88hewwbvZbGloValJNAVRRGjwLGoPlapdjqbzf7/OUHxICKtJBEDPK02Ci7WxyBkU7S2t/es7X1F4CcrawMYF7NO/DPxn9tTO4AnAq4Y6j3ZQGDq0DIwSOtXno1FUZL0yQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YSuNUisqbBFb858C1NEV5sTGpsHh/D1VOq4x5D7nvCw=;
- b=vEKY4W8iiPOG9KukwENVKQU3nkwfKzUgs6JqYr2NC3yZObrRWMntQeR0JKqaW0+zRd2Pz0YEDYcf0sLT9t3EwpCkf9N5drSeRSLdg0MKNRDPk9EN1t2soz8dtcDQB90WepBNKv/wV6vTXhQZJtUzs4ILaFGHl55UKeT7WIdoLF0=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by PH7PR10MB6154.namprd10.prod.outlook.com (2603:10b6:510:1f5::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6699.34; Tue, 29 Aug
- 2023 12:49:37 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::2bbc:60da:ba6c:f685]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::2bbc:60da:ba6c:f685%2]) with mapi id 15.20.6699.034; Tue, 29 Aug 2023
- 12:49:37 +0000
-From:   Anand Jain <anand.jain@oracle.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org
-Subject: [PATCH] fstests: btrfs/261 fix failure if /var/lib/btrfs isn't writable
-Date:   Tue, 29 Aug 2023 20:34:06 +0800
-Message-Id: <3e6b018ef39babe84d3a307e547b480b4834c4e1.1693312220.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.38.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SI2PR02CA0008.apcprd02.prod.outlook.com
- (2603:1096:4:194::12) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+        with ESMTP id S235934AbjH2NSb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Aug 2023 09:18:31 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76DA3F7
+        for <fstests@vger.kernel.org>; Tue, 29 Aug 2023 06:17:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693315062;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=K/kvl9u3Q/dPeMvE2AMCbtsJRkbDSW6Aku9zvQLvGJ8=;
+        b=J1mFxkRNzahGsyUkH6V7lxK7mqDlxz+untGYNmhe/+xLvnoOUu3HCodXqU71Nr2eVIpT+p
+        aPPuvJp9wkxJxhktmYWK5BlZDjpeaTJxpy2DGQLANchZlzYhKVxFPgQCNx//67kwxCA/Sq
+        OwR7v6QQmoW8X/J+0g/ZwqfDWUIsVDw=
+Received: from mail-lf1-f69.google.com (mail-lf1-f69.google.com
+ [209.85.167.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-145-wjki32poMzKMm379gvR9yg-1; Tue, 29 Aug 2023 09:17:40 -0400
+X-MC-Unique: wjki32poMzKMm379gvR9yg-1
+Received: by mail-lf1-f69.google.com with SMTP id 2adb3069b0e04-50092034189so4477369e87.3
+        for <fstests@vger.kernel.org>; Tue, 29 Aug 2023 06:17:40 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693315059; x=1693919859;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=K/kvl9u3Q/dPeMvE2AMCbtsJRkbDSW6Aku9zvQLvGJ8=;
+        b=PUdptEtzuR2+bSzUBaIu3pJjrmYHC2/asgS/lCrpxzHsaMTc0FssK3puFNrkIpvolP
+         YpMLkehA/VBhu1MP0x0ORQTqf6x5AvtXa27PhfMmXBRguB1kDxDOpgPn4AeWB9Q/2Frg
+         QJQvuyeKU4TJ9rReABXYrdNxk9HLtGgEjBT84usHUB6n+I5KP5R24rTk8pvJ3Co262qp
+         /JncEWiCOTeCykS7pCoCNspOCsHjaPmAj0c4P2OGLhW36BZlcYh59lAqwOPuoc5WK7q/
+         dg6rd76r+l3D/I80WtiFhoJt09luQqrAKb3g5yfVxCpn0ZoYMFGGjqfK5BhLyXBBiNlH
+         6JYg==
+X-Gm-Message-State: AOJu0Yzwf35pdxGt7SJ+q57/EThe22a1x6cOkW4F3GCTF3AdddWIk46e
+        dhJj+f+NP7FeFREx+Pi0pSLRvLmafiHdo7JzA2JQeyP95dng4aF3KeIxTYlBgqptdrDTGYOldeA
+        SxKKmic20pHqA221MirwPuNT4ZD7oOSYvuA==
+X-Received: by 2002:a05:6512:20c7:b0:500:a08e:2fcf with SMTP id u7-20020a05651220c700b00500a08e2fcfmr10277084lfr.47.1693315059261;
+        Tue, 29 Aug 2023 06:17:39 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFHeegyfxaonQumPzYUiTed8ngQep5lCbcKcd67qC9HLybaJW8N7y+lXmQn2shHt2qmm3Mh/UAtivBipGNu71M=
+X-Received: by 2002:a05:6512:20c7:b0:500:a08e:2fcf with SMTP id
+ u7-20020a05651220c700b00500a08e2fcfmr10277053lfr.47.1693315058825; Tue, 29
+ Aug 2023 06:17:38 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH7PR10MB6154:EE_
-X-MS-Office365-Filtering-Correlation-Id: df262ba2-4644-4468-2d83-08dba88e6754
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: B12CXOMN7fAAy2J31PVWXU8yDiGi4henGzGxLQ4O2HGrXmYgoRKBTA8HY03ItYTWEYIN374c+jw1ZUebaJPonnTDPpQd3cCrvB8WoEshP2jNuk3Cl0iVwHgyYQNw3opkk0ayPhoI/fX1mBT6JhpkfpEe2zpDkS/9xIsPtrNe9u3rzc86f4YYFNhNLV3JXeecsum8l167GodkwbneaDbNUSpZ//Hhkxu4R1JTs/k8Ogpad/lb6uHuZQRr1OWREtN+OSzh5nZ8313OWIepzrjxI19SAyQ/GJT2P5vGJoOqz3piPLjsPvZMjz8Tq2AAIHFqAbqgyvTMkykg4TQHW050uy5G5fRcwVh9HtPc5BF5iFyM6hq9qLwHY88JfXVQpmYDQna8yRaytuALi4GOz3mILCxKhn5uOomk0In/A1neAZ7ID0VhG6n+zarFx/160oJb8z3vmtUCREHXlt+PLm1zv2onx9M48me9HZCTOvj0dxTBMRvRe88iAtmi6QLl3VN/C9jvEn/aNp8GOCDgZqBebmnej5iL01yJvrPA3NT3s6LwaaCRjPTOsjFp3wl2pXfq
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(376002)(366004)(136003)(396003)(39860400002)(186009)(1800799009)(451199024)(41300700001)(38100700002)(6666004)(86362001)(83380400001)(478600001)(26005)(2616005)(6512007)(6486002)(6506007)(66476007)(66946007)(6916009)(2906002)(36756003)(316002)(66556008)(5660300002)(450100002)(4326008)(8676002)(8936002)(44832011);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?Kwlh5KgDGA7fTAsVudV+CY4gmROCJ54JoLczgaWsIckfmrqv6RJZHHUNlNcb?=
- =?us-ascii?Q?DlFCwFXr95frd6ilcUbnjNmTsMwwXlgsMAO9ie3v0jPhWKACsRZXArtAbGKv?=
- =?us-ascii?Q?qtzNHEwxSZPFcucaU/FvgWDqr2LQIUO4TlrfeE57Ryaha2ItH5ZV6noZvjka?=
- =?us-ascii?Q?sSracfqm6tSqvkqssJI47mdVYt9k3Odb7NlACu7mKwWmRzvwvTQlxQpJECj2?=
- =?us-ascii?Q?hitS57agtGOa5CKEgM00Kcq8Lwsb2R+5FSNdx2TOsBCftBWfS/0uzSFqoYv/?=
- =?us-ascii?Q?NIcAKeyjfhjs+13Ahih/k6jGeDotavfZQKt7VITsruUrhT04fuKEO96cdn34?=
- =?us-ascii?Q?dmPEiKc9fji6IR8s/jA5pSjkm2TTMS87/w0mRbFfwVOpW0xE7db6wXmwiiuZ?=
- =?us-ascii?Q?9jiNWPrxnR06q1s6AmZDhstQFIRQpKKPFW25cMZ5Yg88+3FHdRIn7+fX+oP2?=
- =?us-ascii?Q?SFSrP2qcBMABI9w4QEqHJWPdZ7jXJjLRzoyE6AH3S+hqjGIOlhR8kVH9jsjX?=
- =?us-ascii?Q?1yT9wVCm3f4wOo7ddUoUtn86ufr1p7ylTWQqhzSyoKR+HrYn+AVq2ZfKHClQ?=
- =?us-ascii?Q?5G3PvRCaJWo9x9wZ63YUxcyDyzQOlyWLCCeK7wE4zhMHv6+QmxYoEkUybIWC?=
- =?us-ascii?Q?HQPRI9o95KrubAg2jTtH0ye+7Aue/CePgDvZ0IgpRCsHy/2aUhv1BM0riECJ?=
- =?us-ascii?Q?MlLlairPO5S0A7yz7d9i0pENsiv3ZcxOck54M1N3vRP4bzYs20UvlSQFmLkq?=
- =?us-ascii?Q?LMVgRecp95Rdo7TBWBZ2iwA0rcdz29fuoq9K4nheRwT6/XuTxiwILoUDLPxP?=
- =?us-ascii?Q?Av2C0yY+taNoRdNkMRQZkktDw76VDxobRXih0XlQAUZMZ1Vt35SNFL33ip+d?=
- =?us-ascii?Q?z6CZTsrxtBidvQD1wrvcf6LLvQHyNJWnLlR/DGBQhG9LnbjlB1J19Me6HtYI?=
- =?us-ascii?Q?4CrKcr3kwIhm6kmBFm/XZerKzbnY1lTbhKJF/69bgPCA2C5PE2JcTgJFkCGD?=
- =?us-ascii?Q?lSPFs3X3udyorBZUg1v7WieCnsspnGrQeRNrFd3JicyI4RurWyIDrpKK7+bU?=
- =?us-ascii?Q?tNYA7pVM57EeZDTf/zEMgqUbFGRproFkbqVS9+MUZwp3JWJXc/1tVJHkL8Nm?=
- =?us-ascii?Q?4HK9X6sNvQbO2TH0z0eJ859rBkApBWeTfp1qUncks7Cpdgog0l4nHzOlO8DM?=
- =?us-ascii?Q?pOFsqxK7HhuLvl5y2VbkwfJy5kO2R9LscvNzLdYg2qRmGkroxrtJFmal+2JO?=
- =?us-ascii?Q?72eYtzN7mU2PWl+Iinw9Dkz1foNmdziBJReb/Xv/JwN9EiLqA9PvuYFcedxL?=
- =?us-ascii?Q?C10oWs+IB9dkIc8G+mNKttpoYsHD+ojnTu11pElKwRV3hGQX4eWfYByR2StF?=
- =?us-ascii?Q?/l02xne2+ujeaGMLVxk6M7uZXtu76AlbaPdVlTq49mTzCLLxyRb+3bVXwAZb?=
- =?us-ascii?Q?u24TTmRPjqrZ3EkjLTsdS3RWEqJWU68wOBVIOcdyhJX6l/gJgrxHW3FNUbZi?=
- =?us-ascii?Q?ES0o+LG1an+Eaf9OG58yQ3YaiCAjFe7hGsT9GHLIehqhq9YdokbKNkSeLYr5?=
- =?us-ascii?Q?ev3gqTeqkEfuIHnvbd6qufdGqlsK5b7xNVMf53UX?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 5lvclKifPLBjjJ1Xu7eUEf8diwxrKOSTgNuV3s8tYwoqw6nv/rmSPplsBRCEJf9RhJznAVSghC9m10h/84Bk/Tk5tbE7Zi1R4/1jRzOqL8FTVk8tuaR7v+iPqIKKOKmJxduYxGSP6G0i1nMPVMH/h8l2vWzYSmwC+ODClTg5sK4pLQ7OZZsPoHW3w/tF6lRFToSu2mOVRwdkEpdnWHARQwp9pA5Q5reexFPiI9QK1TEr+9KAT+7C6vzsPvQwMLUYLZwiQf6RxHYKz0F0EhiMnTO5QhPQTEW9LVN1kB/7V6CQnsnHhaM7Hy0fq55BFQHpp3QKOSQk1L2fxKW7382QTGmAaXOMJ75R2H1JxwPCAiAx7Vb/ijz+hvtJbvJTDSJvkBL4uIHtgSZyuATX1bJ85nQWY3RQ3kQ4kioBvi5IVUqwxU3EqKr8z35pmpZyTGoxpEYpp1Sd8PvVIhBaDXLifQWA0sVSrJtF7UclRbjIyYYgO7IgpBqk6SpGySkfgc6JkTrg4CpgNoCCNya+LTUnQqXwnvY6QL8gvBzDtcOASNYfYv/daNYTzkOSKSZ3Vs537L9KHUk1EPmcRpD5mo2m+GzB3/jf5aT1X6U19kxHogwM7ZKR7DcdalUYkkaO6UyVMUIlBNeL5QPFKbc1tJWfuGUHC6N3dlyUq4Lh5Bh6DhhVjt4Rr2qW8anl0+zb8NEw7nTh8YLQLZNENDX9bwwPvDnHasI96qNYs0MwjJF5I0nm6zkYKBOEwWUcmT20ti3UoG7Psc7m4mWouewUQqkebQ==
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: df262ba2-4644-4468-2d83-08dba88e6754
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Aug 2023 12:49:37.6439
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: zM64tThWMiYBVqnQnJT2Z7C64GC5MGw4p5Vrzn6y/d60z0+mwTEC83/a9BqnsOH+sQ0+f2/AuBA9UD/59mWZQw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR10MB6154
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.957,Hydra:6.0.601,FMLib:17.11.176.26
- definitions=2023-08-29_10,2023-08-29_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 phishscore=0
- suspectscore=0 spamscore=0 bulkscore=0 malwarescore=0 mlxscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2308100000 definitions=main-2308290112
-X-Proofpoint-GUID: h1FKG-D79oFGzelFhDP0mkbDLEqM3VgT
-X-Proofpoint-ORIG-GUID: h1FKG-D79oFGzelFhDP0mkbDLEqM3VgT
+References: <20230823210814.1838129-1-aahringo@redhat.com> <20230829044309.wdazieha4yvbnkq4@zlang-mailbox>
+In-Reply-To: <20230829044309.wdazieha4yvbnkq4@zlang-mailbox>
+From:   Alexander Aring <aahringo@redhat.com>
+Date:   Tue, 29 Aug 2023 09:17:27 -0400
+Message-ID: <CAK-6q+hzj615f8_je+EYOwAh=ezL361fpuNhj3yoow+cpRKC9w@mail.gmail.com>
+Subject: Re: [PATCH] generic: add fcntl corner cases tests
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, cluster-devel@redhat.com,
+        jlayton@kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-We don't need scrub status; it is okay to ignore the warnings due to
-the readonly /var/lib/btrfs if any. Redirect stderr to seqres.full.
-We check the scrub return status.
+Hi,
 
-    +WARNING: failed to open the progress status socket at /var/lib/btrfs/scrub.progress.42fad803-d505-48f4-a04d-612dbf8bd724: Read-only file system. Progress cannot be queried
-    +WARNING: failed to write the progress status file: Read-only file system. Status recording disabled
+On Tue, Aug 29, 2023 at 12:43=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrot=
+e:
+>
+> On Wed, Aug 23, 2023 at 05:08:14PM -0400, Alexander Aring wrote:
+> > This patch adds generic 730 testcase. It will test on various fcntl()
+>
+> The generic/730 has been taken. The case number might be changed when I m=
+erge
+> a patch, so you don't need to specify a fixed number in commit log or com=
+ments.
+>
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/261 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ok. Thanks.
 
-diff --git a/tests/btrfs/261 b/tests/btrfs/261
-index b33c053fbca0..50173de351f3 100755
---- a/tests/btrfs/261
-+++ b/tests/btrfs/261
-@@ -68,7 +68,9 @@ workload()
- 	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
- 
- 	# Make sure above scrub fixed the fs
--	$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full
-+	# Redirect the stderr to seqres.full as well to avoid warnings if
-+	# /var/lib filesystem is readonly, as scrub fails to write status.
-+	$BTRFS_UTIL_PROG scrub start -Br $SCRATCH_MNT >> $seqres.full 2>&1
- 	if [ $? -ne 0 ]; then
- 		echo "scrub failed to fix the fs for profile $mkfs_opts"
- 	fi
--- 
-2.39.3
+> > corner cases that was making problems on a GFS2 filesystem. GFS2 has
+> > it's own lock() implementation that has it's own posix lock
+> > implementation behind it. There are testcases to find issues with struc=
+t
+> > file_lock matches. Currently the Linux kernel does not have a unique
+> > identifier per lock request to e.g. find the original lock request when
+> > a complete handler of an async lock request comes back. The current way
+> > is to use struct file_lock fields to fine the original lock request.
+> > However there was issues being found that in some cases it wasn't an
+> > unique match because multiple pending struct file_lock could have the
+> > same state. To find issues the testcases fcntl_lock_equal_file_lock and
+> > fcntl_lock_same_owner are introduced and their OFD variants.
+> >
+> > Other test like fcntl_lock_kill_child tests cleanup routines when a
+> > process blocking in F_SETLKW to wait the lock request getting granted
+> > and the process gets killed.
+> >
+> > A similar test is fcntl_lock_signal_interrupt which checks for
+> > side-effects e.g. unlock all previous acquired locks when a blocking
+> > F_SETLKW gets interrupted by a signal.
+> >
+> > Signed-off-by: Alexander Aring <aahringo@redhat.com>
+> > ---
+>
+> Is there a known issue cause a deadlock or something else? I tried to run=
+ this
+> case on XFS, but it's always blocked on fcntl_lock_same_owner test[1], ev=
+en 1
+> day passed, it's still there.
+>
+
+Mhh, I can reproduce it and it should not happen. I messed something
+up with the same owner test cases to unlock other locks on cleanup.
+
+> [1]
+> [root@xxxxxx ~]# ps aux|grep fcntl
+> root       72361  0.0  0.0   3056  1536 pts/1    S+   12:10   0:00 /root/=
+git/xfstests/src/fcntl_lock_same_owner /mnt/test/testfile
+> root       72362  0.0  0.0  19580  1280 pts/1    Sl+  12:10   0:00 /root/=
+git/xfstests/src/fcntl_lock_same_owner /mnt/test/testfile
+> root       72405  0.0  0.0   6760  2048 pts/2    S+   12:12   0:00 grep -=
+-color=3Dauto fcntl
+> [root@xxxxxx ~]# cat /proc/72361/stack
+> [<0>] do_wait+0x160/0x2f0
+> [<0>] kernel_wait4+0xb8/0x160
+> [<0>] __do_sys_wait4+0xa2/0xb0
+> [<0>] do_syscall_64+0x60/0x90
+> [<0>] entry_SYSCALL_64_after_hwframe+0x73/0xdd
+> [root@xxxxxx ~]# cat /proc/72362/stack
+> [<0>] futex_wait_queue+0x63/0x90
+> [<0>] futex_wait+0x189/0x270
+> [<0>] do_futex+0xc6/0x190
+> [<0>] __x64_sys_futex+0x129/0x1e0
+> [<0>] do_syscall_64+0x60/0x90
+> [<0>] entry_SYSCALL_64_after_hwframe+0x73/0xdd
+>
+>
+> >  src/Makefile                         |   5 +-
+> >  src/fcntl_lock_equal_file_lock.c     | 140 +++++++++++++++++++++++
+> >  src/fcntl_lock_equal_file_lock_ofd.c | 144 ++++++++++++++++++++++++
+> >  src/fcntl_lock_kill_child.c          | 148 +++++++++++++++++++++++++
+> >  src/fcntl_lock_same_owner.c          | 146 ++++++++++++++++++++++++
+> >  src/fcntl_lock_same_owner_ofd.c      | 144 ++++++++++++++++++++++++
+> >  src/fcntl_lock_signal_interrupt.c    | 159 +++++++++++++++++++++++++++
+> >  tests/generic/730                    |  70 ++++++++++++
+> >  tests/generic/730.out                |   2 +
+>
+> The g/730 has been taken.
+>
+> >  9 files changed, 957 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/fcntl_lock_equal_file_lock.c
+> >  create mode 100644 src/fcntl_lock_equal_file_lock_ofd.c
+> >  create mode 100644 src/fcntl_lock_kill_child.c
+> >  create mode 100644 src/fcntl_lock_same_owner.c
+> >  create mode 100644 src/fcntl_lock_same_owner_ofd.c
+> >  create mode 100644 src/fcntl_lock_signal_interrupt.c
+> >  create mode 100755 tests/generic/730
+> >  create mode 100644 tests/generic/730.out
+> >
+>
+> [snip]
+>
+> > diff --git a/src/fcntl_lock_same_owner.c b/src/fcntl_lock_same_owner.c
+> > new file mode 100644
+> > index 00000000..071a3b49
+> > --- /dev/null
+> > +++ b/src/fcntl_lock_same_owner.c
+> > @@ -0,0 +1,146 @@
+> > +// SPDX-License-Identifier: GPL-2.0+
+> > +/*
+> > + * This program tests fcntl() operations that have two
+> > + * fcntl() calls in waiting state in two different threads.
+> > + * Those fcntl() ends in a struct file_lock have the same fl_owner
+> > + * field. One fcntl() call gets granted, there will be a verifier
+> > + * going on if the right lock was granted.
+> > + */
+> > +
+> > +#include <sys/wait.h>
+> > +#include <pthread.h>
+> > +#include <unistd.h>
+> > +#include <errno.h>
+> > +#include <fcntl.h>
+> > +#include <stdio.h>
+> > +
+> > +static const char *filename;
+> > +static int fd;
+> > +
+> > +static void *do_same_owner_thread0(void *arg)
+> > +{
+> > +     struct flock fl =3D {
+> > +             .l_type =3D F_WRLCK,
+> > +             .l_whence =3D SEEK_SET,
+> > +             .l_start =3D 0L,
+> > +             .l_len =3D 1L,
+> > +     };
+> > +     int rv;
+> > +
+> > +     rv =3D fcntl(fd, F_SETLKW, &fl);
+> > +     if (rv =3D=3D -1)
+> > +             _exit(1);
+> > +
+> > +     return NULL;
+> > +}
+> > +
+> > +static void *do_same_owner_thread1(void *arg)
+> > +{
+> > +     struct flock fl =3D {
+> > +             .l_type =3D F_WRLCK,
+> > +             .l_whence =3D SEEK_SET,
+> > +             .l_start =3D 1L,
+> > +             .l_len =3D 1L,
+> > +     };
+> > +     int rv;
+> > +
+> > +     rv =3D fcntl(fd, F_SETLKW, &fl);
+> > +     if (rv =3D=3D -1)
+> > +             _exit(1);
+> > +
+> > +     return NULL;
+> > +}
+> > +
+> > +static void do_setup()
+> > +{
+> > +     fd =3D open(filename, O_RDWR | O_CREAT, 0700);
+> > +     if (fd =3D=3D -1)
+> > +             _exit(1);
+> > +}
+> > +
+> > +static void do_teardown()
+> > +{
+> > +     close(fd);
+> > +}
+> > +
+> > +static void do_same_owner()
+> > +{
+> > +     struct flock fl =3D {
+> > +             .l_type =3D F_WRLCK,
+> > +             .l_whence =3D SEEK_SET,
+> > +             .l_start =3D 0L,
+> > +             .l_len =3D 2L,
+> > +     };
+> > +     pthread_t t[2];
+> > +     int pid, rv;
+> > +
+> > +     rv =3D fcntl(fd, F_SETLK, &fl);
+> > +     if (rv =3D=3D -1)
+> > +             _exit(1);
+> > +
+> > +     pid =3D fork();
+> > +     if (pid =3D=3D 0) {
+> > +             rv =3D pthread_create(&t[0], NULL, do_same_owner_thread0,=
+ NULL);
+> > +             if (rv !=3D 0)
+> > +                     _exit(1);
+> > +
+> > +             rv =3D pthread_create(&t[1], NULL, do_same_owner_thread1,=
+ NULL);
+> > +             if (rv !=3D 0)
+> > +                     _exit(1);
+> > +
+> > +             pthread_join(t[0], NULL);
+> > +             pthread_join(t[1], NULL);
+> > +
+> > +             _exit(0);
+> > +     }
+> > +
+> > +     /* wait threads should block */
+> > +     sleep(3);
+> > +
+> > +     fl.l_type =3D F_UNLCK;
+> > +     fl.l_start =3D 1;
+> > +     fl.l_len =3D 1;
+> > +     rv =3D fcntl(fd, F_SETLK, &fl);
+> > +     if (rv =3D=3D -1)
+> > +             _exit(1);
+> > +
+> > +     sleep(3);
+> > +
+> > +     /* check if the lock() implementation got the
+> > +      * right lock because two waiter with the
+> > +      * same fl_owner were waiting.
+> > +      */
+> > +     fl.l_type =3D F_WRLCK;
+> > +     rv =3D fcntl(fd, F_SETLK, &fl);
+> > +     if (!(rv =3D=3D -1 && errno =3D=3D EAGAIN))
+> > +             _exit(1);
+> > +
+> > +     fl.l_type =3D F_UNLCK;
+> > +     fl.l_start =3D 1;
+
+need to be 0.
+
+> > +     fl.l_len =3D 1;
+> > +     rv =3D fcntl(fd, F_SETLK, &fl);
+> > +     if (rv =3D=3D -1)
+> > +             _exit(1);
+> > +
+> > +     wait(NULL);
+> > +}
+> > +
+> > +static void usage(const char *argv0)
+> > +{
+> > +     fprintf(stderr, "Usage: %s {filename}\n", argv0);
+> > +     _exit(1);
+> > +}
+> > +
+> > +int main(int argc, const char *argv[])
+> > +{
+> > +     if (argc !=3D 2)
+> > +             usage(argv[0]);
+> > +
+> > +     filename =3D argv[1];
+> > +
+> > +     do_setup();
+> > +     do_same_owner();
+> > +     do_teardown();
+> > +
+> > +     return 0;
+> > +}
+>
+> [snip]
+>
+> > diff --git a/tests/generic/730 b/tests/generic/730
+> > new file mode 100755
+> > index 00000000..4a1e7f20
+> > --- /dev/null
+> > +++ b/tests/generic/730
+> > @@ -0,0 +1,70 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2023 Alexander Aring.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 730
+> > +#
+> > +# This tests performs some fcntl() corner cases when
+> > +# two waiter have the same or some (fl_owner) fields. In Linux
+> > +# there exists no unique lock request identifier, some lock()
+> > +# filesystem implementation does that over struct file_lock fields.
+> > +# Other tests check for bad side-effects if a blocking F_SETLKW lock
+> > +# request got interrupted or the process got killed.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_test_program fcntl_lock_equal_file_lock
+> > +_require_test_program fcntl_lock_equal_file_lock_ofd
+> > +_require_test_program fcntl_lock_kill_child
+> > +_require_test_program fcntl_lock_same_owner
+> > +_require_test_program fcntl_lock_same_owner_ofd
+> > +_require_test_program fcntl_lock_signal_interrupt
+>
+> Does these test programs try to do different test? You might want to
+> split them to seperated generic cases, or combine these .c into
+> one program?
+>
+
+The tests are different in case of what struct file_lock * of
+vfs_file_lock() looks like. The kernel does a lot of lookups by
+file_lock fields, I am trying to catch issues with locks around which
+have identical fields.
+
+I think "same_owner" can be removed, "equal file lock" is what we need
+to test on only. It does generate a file_lock which mostly looks
+identically. If there are issues with identical fl_owner values,
+"equal_file_lock" should catch them as well.
+
+The OFD variants are there, because of showing that if there is a
+problem OFD locks are also affected by doing "stupid" things on the
+application. In my opinion they can be removed as well because it just
+do the same thing as the non OFD variants with threads... There is
+just a different pattern of how to create them and run in a similar
+issue.
+
+The kill_child/signal interrupt are tests which check on the right
+cleanup routines, if such a case happens.
+
+I will try to short (also fixing) them and combine them in one .c program.
+
+> > +
+> > +echo "Silence is golden"
+> > +
+> > +$here/src/fcntl_lock_equal_file_lock $TEST_DIR/testfile
+> > +if [ $? -ne 0 ]
+> > +then
+> > +     exit
+>
+> So it's still the question, does these programs test independently or the=
+y
+> have progressive relationship? When a test fails, should we test others o=
+r
+> ignore others directly?
+>
+
+Probably not running other because if one test fails it could be that
+the POSIX lockstates are in some kind of invalid state, I experience
+this with GFS2 and following tests will fail or at least not starting
+from a clean lockstate environment.
+
+> And is there more debug info output if a test fails? To figure out which =
+test
+> fails and fail on where? From above .c programs, I didn't see some design=
+ed
+> printf, and if we exit directly at here, how to know which test fails?
+>
+
+ok. I can add more debug information. I am not sure what to put them
+into a $TESTFILE.out file but I will try to look it up on other test
+cases.
+
+Thanks.
+
+- Alex
 
