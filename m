@@ -2,139 +2,113 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40F97C6FA8F
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A69EC83F1A
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243828AbjH3Sww (ORCPT
+        id S244315AbjH3Swx (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:52:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55834 "EHLO
+        Wed, 30 Aug 2023 14:52:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244284AbjH3Mvz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 08:51:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 244A2185
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 05:51:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693399866;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=RwzYSnseP7w/+Hm+XBtz3YnbPcm43eVvHsQCXXwo/bI=;
-        b=RYQr2AHtLMng4je5GRzyBkEp38sNdDMlHlrobxe603OC0kjLsDj4firvJ04bokSxKkCy5F
-        9WOTkigJbJcDaoeJghdobQKJfHNrmzAWNx2uhBDWnGgxExgAPK9oXCu+z/7pwKrJXR5Avk
-        n1DNPB5zGVtOQyuTK0XcgNNOHWVihQc=
-Received: from mimecast-mx02.redhat.com (66.187.233.73 [66.187.233.73]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-64-BIYw6aY-NYGNIh3XL7MhqQ-1; Wed, 30 Aug 2023 08:51:03 -0400
-X-MC-Unique: BIYw6aY-NYGNIh3XL7MhqQ-1
-Received: from smtp.corp.redhat.com (int-mx10.intmail.prod.int.rdu2.redhat.com [10.11.54.10])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S243430AbjH3K7R (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 06:59:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42B381BF;
+        Wed, 30 Aug 2023 03:59:15 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 809001C06ED6
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 12:51:03 +0000 (UTC)
-Received: from fedora.redhat.com (unknown [10.22.34.74])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 564CE40610F;
-        Wed, 30 Aug 2023 12:51:03 +0000 (UTC)
-From:   Bill O'Donnell <bodonnel@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     Bill O'Donnell <bodonnel@redhat.com>
-Subject: [PATCH] fstests: generic/353 should accomodate other pwrite behaviors
-Date:   Wed, 30 Aug 2023 07:50:56 -0500
-Message-ID: <20230830125056.71299-1-bodonnel@redhat.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D52E6627B9;
+        Wed, 30 Aug 2023 10:59:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BA506C433C7;
+        Wed, 30 Aug 2023 10:59:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693393154;
+        bh=wYJq4N2YWcxC3zxarH9JteFYm6SgG77yA/UCDOnm3qM=;
+        h=From:Subject:Date:To:Cc:From;
+        b=SP8hXdfwFGAWsl+o+1KC2rwsEwUN9EaDmWRKs+zuH3zbKUeVcaa1KmiU5Et8SVBb4
+         5tHBKWa80W28l5VJy3XN35qFpt2qa2IEDjZiGstjPHMvVsCTV3aQ8rJklDQMpKM46h
+         m4KsmvV4XOK1O9xNj+4P//mF08NUitvradFDE4c2OMA7Mn31u/piDjai31U5JSA+2u
+         w1cL6wfqH5bn7hgPpQJKl8cRvEng+YS+Z7LkZ8BP4MEyXSSqij38pY0d7uZUDd+hY7
+         RimARwtNh0WCzAS9w9AbPuZFU41tnCGndhHoTfSqKJ24PMixbl1soflrWS79On0oQx
+         XC/jZa4Y7W6lQ==
+From:   Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH fstests v4 0/3] fstests: add appropriate checks for fs
+ features for some tests
+Date:   Wed, 30 Aug 2023 06:58:49 -0400
+Message-Id: <20230830-fixes-v4-0-88d7b8572aa3@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.10
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAOkg72QC/12MQQrCMBBFr1JmbSSdpG3qynuIi5JO2qC0kglBK
+ b27ISCoy8/7723AFDwxnKoNAiXPfl3y0IcK7DwsEwk/5g0oUUmDWjj/JBZ9ra1VrifXIeTvI1A
+ B+XoBx5E4MlwzmD3HNbxKP2HBf6mEQoqxlRbd4GrZdOcbhYXuxzVMJZHUt9Z8NJW1VhttZW+cI
+ fOj7fv+BkvCq2rbAAAA
+To:     fstests@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        Darrick Wong <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>, Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1417; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=wYJq4N2YWcxC3zxarH9JteFYm6SgG77yA/UCDOnm3qM=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk7yD8bOeZoKJMFfEptvIwbvbAY687tDs7TVOH3
+ vtJE50rk/mJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZO8g/AAKCRAADmhBGVaC
+ FaN3D/95nz68PF+QEWyKvDmk1rUNczW0Eqb7mnzIVJbUoCk8wwpxZx8v9RZKF4AQ61Wx++n/0Bh
+ JrS8twY63A5EWXM+85i37EISI++toVfdrIVSkf2Wv+8m/GxSUwtKe+GX+ZaSk1EiHw0GuRDlIzd
+ Kn0F61ciHW9S94ptuhZABaHkfOrknrVKRn+h9hTL1YlOypbvQ68jBYqBASkVWmjguQMWqmcnzv/
+ i6RE0YX7jKUCe7N7OglemzDO2Iz2QNUtnqZWHqyP0jYQH0HGZz+mxamr4JLsi96mCkiCo2GkjCs
+ wstp7NIozzH6xDR/tsXvO63XXsNagv4VkC2rR5Dy1ylyYAPvLlksos+xBDrF3zcfOA21REyWj4H
+ VBftbqHLi6vHqpWApSKiS+9J/jSDwZkAp253bI8VwYLcTh+WZOzr2nSNvFpisjxD29uLd5xPnOl
+ 62SqSjhkV3k2TRZNiwJ0ajCZlWojwJC1FdR4XsoYAOzqIB0cT8cOxI77dMmNl3eeU2wjPoML4DX
+ prL0y0giIYyZozB72jR+2EhVj13s9RUgM4Ty7COAXlQzOQHJses0Yx077OhcPEwN1HRUX8vUd+J
+ 3cFIgIY2Qq6Sb/38hFDpT8Rrxrtrfq45mFKoeVOxC4vqC7Z8mR1i14A/5L2Ljh/FHfBFQTEsBWA
+ tCBepxGl+DPC6Ig==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfs_io pwrite issues a series of block size writes, but there is no
-guarantee that the resulting extent(s) will be singular or contiguous.
-This behavior is acceptable, but the test is flawed in that it expects
-a single extent for a pwrite.
+A number of fstests fail on NFS, primarily because it lacks certain
+features that are widely supported on local Linux filesystems. Fix
+up the test for POSIX ACLs and add a new requirement for fiemap support
+in generic/578.
 
-Modify test to use actual blocksize for pwrite and reflink. Also
-modify it to accommodate pwrite and reflink that produce different
-mapping results.
-
-Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- tests/generic/353     | 27 ++++++++++++++-------------
- tests/generic/353.out | 14 --------------
- 2 files changed, 14 insertions(+), 27 deletions(-)
+Changes in v4:
+- use "_require_attrs security" instead of special setcap test
+- use '_require_xfs_io_command "fiemap"' instead of special fiemap test
+- Link to v3: https://lore.kernel.org/r/20230825-fixes-v3-0-6484c098f8e8@kernel.org
 
-diff --git a/tests/generic/353 b/tests/generic/353
-index 9a1471bd..03b038a6 100755
---- a/tests/generic/353
-+++ b/tests/generic/353
-@@ -29,31 +29,32 @@ _require_xfs_io_command "fiemap"
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- 
--blocksize=64k
-+blocksize=$(_get_file_block_size $SCRATCH_MNT)
-+
- file1="$SCRATCH_MNT/file1"
- file2="$SCRATCH_MNT/file2"
-+extmap1="$SCRATCH_MNT/extmap1"
-+extmap2="$SCRATCH_MNT/extmap2"
- 
- # write the initial file
--_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
- 
- # reflink initial file
--_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-+_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
- 
- # check their fiemap to make sure it's correct
--echo "before sync:"
--echo "$file1" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
--echo "$file2" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-+
-+cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
- 
- # sync and recheck, to make sure the fiemap doesn't change just
- # due to sync
- sync
--echo "after sync:"
--echo "$file1" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
--echo "$file2" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-+
-+cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
- 
- # success, all done
- status=0
-diff --git a/tests/generic/353.out b/tests/generic/353.out
-index 4f6e0b92..86cece4f 100644
---- a/tests/generic/353.out
-+++ b/tests/generic/353.out
-@@ -1,15 +1 @@
- QA output created by 353
--wrote 65536/65536 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--linked 65536/65536 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--before sync:
--SCRATCH_MNT/file1
--0: [0..127]: shared|last
--SCRATCH_MNT/file2
--0: [0..127]: shared|last
--after sync:
--SCRATCH_MNT/file1
--0: [0..127]: shared|last
--SCRATCH_MNT/file2
--0: [0..127]: shared|last
+Changes in v2:
+- add new checks for fiemap and setcap
+- Link to v2: https://lore.kernel.org/r/20230824-fixes-v2-0-d60c2faf1057@kernel.org
+
+Changes in v3:
+- use _require_xfs_io_command "fiemap" in generic/578
+- drop the _require_setcap patch (Zorro has similar that adds a _require_capabilities)
+
+---
+Jeff Layton (3):
+      common/attr: fix the _require_acl test
+      generic/578: add a check to ensure that fiemap is supported
+      generic/*: add a check for security attrs
+
+ common/attr       | 9 ++++-----
+ tests/generic/270 | 2 ++
+ tests/generic/513 | 2 ++
+ tests/generic/578 | 1 +
+ tests/generic/675 | 2 ++
+ tests/generic/688 | 2 ++
+ tests/generic/727 | 2 ++
+ 7 files changed, 15 insertions(+), 5 deletions(-)
+---
+base-commit: 0ca1d4fbb2e9a492968f2951df101f24477f7991
+change-id: 20230824-fixes-914cc3f9ef72
+
+Best regards,
 -- 
-2.41.0
+Jeff Layton <jlayton@kernel.org>
 
