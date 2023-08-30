@@ -2,93 +2,150 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AAE7C83F01
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 986ACC83F1E
 	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243454AbjH3SxJ (ORCPT
+        id S245274AbjH3SxL (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:53:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36370 "EHLO
+        Wed, 30 Aug 2023 14:53:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34008 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243432AbjH3K7T (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 06:59:19 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDB6A1BF;
-        Wed, 30 Aug 2023 03:59:16 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5259662775;
-        Wed, 30 Aug 2023 10:59:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 40988C433CB;
-        Wed, 30 Aug 2023 10:59:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693393155;
-        bh=Z+sH4YtcXtJl1iB0CzUJffwIgkuuQjmeTsMDGAxYurQ=;
-        h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-        b=N1g2gcUuq9SCKE67r/wEzSpkeUshul5yRa/daTiw8trO5ZIhQpA6+qW2rT/ScL0mw
-         JMvDhqLyKHm/3wdxVm3+WI/GZkA52tdFyZLDRINx/FH6wFL1oppRROO0F1IJabBrc9
-         seMJS5+eDvVldFU2yyvbgpN0H7uVzXXOXL49c/dgyMfmk9GWZKx0LnEWp++3JF26Hj
-         Noh0ylaAM9GF5q19d0Mbxd93EvjCo7YCtCdbbro+AbVsTccSc5PSCTT9HFXBejt2Zl
-         zgxZ2mAnmVKAoHM1sOImW1y93tKhFkii7KnevhVhWrjd3WRZwnZzdUNJa5lAnFM+nx
-         w4aMmmERVZcXg==
-From:   Jeff Layton <jlayton@kernel.org>
-Date:   Wed, 30 Aug 2023 06:58:51 -0400
-Subject: [PATCH fstests v4 2/3] generic/578: add a check to ensure that
+        with ESMTP id S244306AbjH3M4l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 08:56:41 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3848C193
+        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 05:55:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693400151;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=8gj/kkqvSdBg9gM5suDHTT489MFnXm9/ZuicaQfNNO8=;
+        b=gV0IejqFPwpStIz3h9tTxYRymSUU+WqvHHTzdP5ionH7rPnGH8Es8lGUCsgoMcp1DS3e37
+        OnYbYcJyKuZ7Z0AwljHw1eLU8s8FntzvKzTPvSeb+Beao6OoSiNKjnDboHgKMo9GKvjJAi
+        luveaYWGTwTmKVBNke4rFGU1WJzm89w=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-252-W4Sc3juPOeKd-amkbdmHGQ-1; Wed, 30 Aug 2023 08:55:49 -0400
+X-MC-Unique: W4Sc3juPOeKd-amkbdmHGQ-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-68bec515fa9so6766177b3a.2
+        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 05:55:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693400148; x=1694004948;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8gj/kkqvSdBg9gM5suDHTT489MFnXm9/ZuicaQfNNO8=;
+        b=aM54guazUr8Iq3ogcpWD4dCM3f3cWltWZAKpQ6ywRC5al4yJ7B+6bupx5znD1XARAu
+         tkEA+f0IKeLpkIaqBv+FTA0cYQy3BveKZl8mI7/OOjBsYYPetG9+5X7U5lGmN9QRtSYl
+         yhS6gHYNN/mWiMVydBx9Q/STwt5gLFCQXdMJZ9xhMq46lMikvXyouD+DcleGmVRg2kHb
+         TmfGNrpP8u0ssTFAdcYxkUAcKl1Mc9shZR8EgNMiWKpgukLt9ZGBrI+qOKrelVSAXgvP
+         rDEYTp7V9To3RU/qltCzxJhk9Y1ueDpWSCThSmSWpxMzEOyYYaFREK0S1jf+jCZc5UcA
+         fnYg==
+X-Gm-Message-State: AOJu0Yy2wAdaXPcFtK0BUZiqkzqMv/tGa+IejG++OCa5XQ2kO5Skl5+O
+        61bIJOZM13cN0DyGf75ELJuvYNvu9CVZBsWNCN2Q52gscT3sT24iqLugzQNnehLL8o7Oo5PYOPn
+        iHo78x1o3HojL8e0Pa9yhTi/0Q56Yi5g=
+X-Received: by 2002:a05:6a00:1393:b0:68c:57c7:1eb0 with SMTP id t19-20020a056a00139300b0068c57c71eb0mr2442349pfg.11.1693400148619;
+        Wed, 30 Aug 2023 05:55:48 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH4YJ5wmCeyn5temyXgtN3k4eROEzFKu80i/MWNBecBpVdA9/skK+WmoR79XsCIkWrmc56ang==
+X-Received: by 2002:a05:6a00:1393:b0:68c:57c7:1eb0 with SMTP id t19-20020a056a00139300b0068c57c71eb0mr2442339pfg.11.1693400148367;
+        Wed, 30 Aug 2023 05:55:48 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id ey20-20020a056a0038d400b006877ec47f82sm10094700pfb.66.2023.08.30.05.55.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Aug 2023 05:55:47 -0700 (PDT)
+Date:   Wed, 30 Aug 2023 20:55:44 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Yongcheng Yang <yoyang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org
+Subject: Re: [PATCH fstests v3 2/2] generic/578: add a check to ensure that
  fiemap is supported
+Message-ID: <20230830125544.chmzf5trejj4tppz@zlang-mailbox>
+References: <20230825-fixes-v3-0-6484c098f8e8@kernel.org>
+ <20230825-fixes-v3-2-6484c098f8e8@kernel.org>
+ <ZO6vh5+ZLdLSFbB7@yoyang-vm.hosts.qa.psi.pek2.redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230830-fixes-v4-2-88d7b8572aa3@kernel.org>
-References: <20230830-fixes-v4-0-88d7b8572aa3@kernel.org>
-In-Reply-To: <20230830-fixes-v4-0-88d7b8572aa3@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        Darrick Wong <djwong@kernel.org>,
-        Zorro Lang <zlang@redhat.com>, Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=587; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=Z+sH4YtcXtJl1iB0CzUJffwIgkuuQjmeTsMDGAxYurQ=;
- b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk7yEBOTrNXtJs+RBCImWCTfg5thvoJT3fQ4Xa6
- cH91dK//AqJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZO8hAQAKCRAADmhBGVaC
- Feu7D/4gVKPg4qN6wCxRi11dCm67IvUwWAWdLRLyblHVY5ulOfV44p/qOU34JY0guZ0VS4yMlUY
- 4erLoIhzPKJzM+NKenYNl4p1UCJ3ZpGqMWUE/cqADHal79Q6mBbYgihD2GZxhxpxseOJwV+r7pW
- ywXBiDpq6J4poRKrPnp4Q/3hSKT+Wfos40VxuQDlojcmvsQ/yX+Wfbyp3n0LdZ4QrxFiI7W90W9
- IljRvn9UFBsBgm0/YgbOlXAUemME9oh9Odw1hUt01BhFN2zfYt8SRFlTkQp7j6histjCaPHw/aS
- 2WYnackx7Iwt+0iYudVauv0p56SL6Z1AXan1bc54Dk0pCN5/AsveFZat2KJHeAZ2qU7fTfXBetc
- DeBHm3tyaq05o/pAw62Vme1z/NABGA3xQrSO+vZnXvGX9ZNpqJ8Y+1AGa99BFSTrdtcyP6i5DAw
- 7Ha+veKHAG53cQL4InaNdxUl3bmGkr85zahTcvFSQU8zlTK3y03k7Gq0S0TA/3kd4dAGHEYrKni
- 6CjE28crji9zwoP7coxzk9Oe+BNgXMbscbnn5giIlRatOhJMDLinKGIo52M9VUfRQNa3XaEvEL6
- SwnFQsF8OTO4ezOcLjyjG7hGwAy/1bpkIElcZ35wYWcr7JzQmEbE+JUX4DJrmBod6oR6E63Ng82
- DbeHHVokgV402EQ==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZO6vh5+ZLdLSFbB7@yoyang-vm.hosts.qa.psi.pek2.redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test requires FIEMAP support.
+On Wed, Aug 30, 2023 at 10:55:03AM +0800, Yongcheng Yang wrote:
+> Hi Zorro,
+> 
+> Can we assume all the FIEMAP tests need this check first?
+> If so, there are some others need the same patch.
+> 
+> I.e.
+> [yoyang@yoyang-vm xfstests-dev]$ grep url .git/config
+>         url = git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> [yoyang@yoyang-vm xfstests-dev]$ git pl
+> Already up to date.
+> [yoyang@yoyang-vm xfstests-dev]$ git grep _begin_fstest tests/ | grep fiemap | wc -l
+> 101
+> [yoyang@yoyang-vm xfstests-dev]$ git grep _require_xfs_io_command tests/ | grep fiemap | wc -l
+> 86
+> [yoyang@yoyang-vm xfstests-dev]$
 
-Suggested-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- tests/generic/578 | 1 +
- 1 file changed, 1 insertion(+)
+Hi Yongcheng,
 
-diff --git a/tests/generic/578 b/tests/generic/578
-index b024f6ff90b4..e8bb97f7b96c 100755
---- a/tests/generic/578
-+++ b/tests/generic/578
-@@ -24,6 +24,7 @@ _cleanup()
- _supported_fs generic
- _require_test_program "mmap-write-concurrent"
- _require_command "$FILEFRAG_PROG" filefrag
-+_require_xfs_io_command "fiemap"
- _require_test_reflink
- _require_cp_reflink
- 
+Thanks for taking attention on it. 101 - 86 = 15, let's check these 15 cases
+one by one:
 
--- 
-2.41.0
+[zorro@zlang-laptop xfstests-dev]$ for i in `egrep -rsnl _begin_fstest.*fiemap tests`;do grep -q $i < <(egrep -rsnl _require_xfs_io_command.*fiemap tests) || echo $i;done
+tests/btrfs/079
+tests/btrfs/140
+tests/btrfs/004
+tests/ext4/001
+tests/ext4/308
+tests/generic/655
+tests/generic/654
+tests/generic/578
+tests/generic/541
+tests/generic/542
+tests/generic/516
+tests/generic/519
+tests/generic/540
+tests/generic/543
+tests/overlay/066
+
+btrfs/079: It doesn't use fiemap direclty, it use filefrag command to trigger
+           fiemap (if support). If FIEMAP is not supported then filefrag will
+	   fall back to using FIBMAP. So it's not necessary to _notrun this case
+	   if FIEMAP isn't supported I think.
+btrfs/140: Similar as above
+btrfs/004: Similar as above
+ext4/001:  It use fiemap through _test_generic_punch helper, so I think it should
+	   has "_require_xfs_io_command fiemap"
+ext4/308:  I think it missed the `_require_xfs_io_command fiemap`
+g/655:     It doesn't use fiemap, but use filefrag. And filefrag will fall back to
+           FIBMAP, if FIEMAP isn't supported.
+g/654:     Similar as above
+g/578:     Similar as above
+g/541:	   Similar as above
+g/542:	   Similar as above
+g/516:	   Similar as above
+g/519:	   Similar as above
+g/540:	   Similar as above
+g/543:	   Similar as above
+overlay/066: Similar as above
+
+(If anything I said above is wrong, feel free to tell me:)
+
+So I think ext4/001 and ext4/308 can have the `_require_xfs_io_command fiemap`.
+But as they're ext4 specific test cases (not generic), so they won't affect
+other fs (which doesn't support fiemap) testing. If you'd like, you can add
+`_require_xfs_io_command fiemap` to these two cases.
+
+Thanks,
+Zorro
+
+> 
+> Best Regards,
+> Yongcheng
+> 
 
