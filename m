@@ -2,150 +2,99 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 986ACC83F1E
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 734AAC83F1C
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245274AbjH3SxL (ORCPT
+        id S244306AbjH3SxO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:53:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34008 "EHLO
+        Wed, 30 Aug 2023 14:53:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244306AbjH3M4l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 08:56:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3848C193
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 05:55:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693400151;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=8gj/kkqvSdBg9gM5suDHTT489MFnXm9/ZuicaQfNNO8=;
-        b=gV0IejqFPwpStIz3h9tTxYRymSUU+WqvHHTzdP5ionH7rPnGH8Es8lGUCsgoMcp1DS3e37
-        OnYbYcJyKuZ7Z0AwljHw1eLU8s8FntzvKzTPvSeb+Beao6OoSiNKjnDboHgKMo9GKvjJAi
-        luveaYWGTwTmKVBNke4rFGU1WJzm89w=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-252-W4Sc3juPOeKd-amkbdmHGQ-1; Wed, 30 Aug 2023 08:55:49 -0400
-X-MC-Unique: W4Sc3juPOeKd-amkbdmHGQ-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-68bec515fa9so6766177b3a.2
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 05:55:49 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693400148; x=1694004948;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=8gj/kkqvSdBg9gM5suDHTT489MFnXm9/ZuicaQfNNO8=;
-        b=aM54guazUr8Iq3ogcpWD4dCM3f3cWltWZAKpQ6ywRC5al4yJ7B+6bupx5znD1XARAu
-         tkEA+f0IKeLpkIaqBv+FTA0cYQy3BveKZl8mI7/OOjBsYYPetG9+5X7U5lGmN9QRtSYl
-         yhS6gHYNN/mWiMVydBx9Q/STwt5gLFCQXdMJZ9xhMq46lMikvXyouD+DcleGmVRg2kHb
-         TmfGNrpP8u0ssTFAdcYxkUAcKl1Mc9shZR8EgNMiWKpgukLt9ZGBrI+qOKrelVSAXgvP
-         rDEYTp7V9To3RU/qltCzxJhk9Y1ueDpWSCThSmSWpxMzEOyYYaFREK0S1jf+jCZc5UcA
-         fnYg==
-X-Gm-Message-State: AOJu0Yy2wAdaXPcFtK0BUZiqkzqMv/tGa+IejG++OCa5XQ2kO5Skl5+O
-        61bIJOZM13cN0DyGf75ELJuvYNvu9CVZBsWNCN2Q52gscT3sT24iqLugzQNnehLL8o7Oo5PYOPn
-        iHo78x1o3HojL8e0Pa9yhTi/0Q56Yi5g=
-X-Received: by 2002:a05:6a00:1393:b0:68c:57c7:1eb0 with SMTP id t19-20020a056a00139300b0068c57c71eb0mr2442349pfg.11.1693400148619;
-        Wed, 30 Aug 2023 05:55:48 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IH4YJ5wmCeyn5temyXgtN3k4eROEzFKu80i/MWNBecBpVdA9/skK+WmoR79XsCIkWrmc56ang==
-X-Received: by 2002:a05:6a00:1393:b0:68c:57c7:1eb0 with SMTP id t19-20020a056a00139300b0068c57c71eb0mr2442339pfg.11.1693400148367;
-        Wed, 30 Aug 2023 05:55:48 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id ey20-20020a056a0038d400b006877ec47f82sm10094700pfb.66.2023.08.30.05.55.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Aug 2023 05:55:47 -0700 (PDT)
-Date:   Wed, 30 Aug 2023 20:55:44 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Yongcheng Yang <yoyang@redhat.com>
+        with ESMTP id S245277AbjH3PCK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 11:02:10 -0400
+X-Greylist: delayed 168 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Aug 2023 08:02:07 PDT
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9ED22AC;
+        Wed, 30 Aug 2023 08:02:07 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 3CBB8B81F69;
+        Wed, 30 Aug 2023 15:02:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02BE6C433C8;
+        Wed, 30 Aug 2023 15:02:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693407725;
+        bh=DkyAnBJYU1X3RuDPRKTTh3ZWlq88A51VNKODLt3Plkg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=KWBuigGVj2TwLMnivQ6jgXE38R3DKovxO254CXz/izuQkAHfy6hcUyjeXmT9KbKmw
+         kXc2eFVF+ds9oDe9SRT0mYkDdpbpdlljwzeXts60+UfuzUHQ/fwiknWzM9nvdzX0yn
+         RI36m1bz4bSAT+myzKXvC2pO+EIgZnsI2BSRW9NDQqa79TBcYronlWhj/dkCuF+/GL
+         VLm1bBfmy5LP97mty/WQyRfKtXCt6lnW8yKZsI+3ff0thhDkWlRBjbyzD+AW2T3S+y
+         TFPhS78Eiqw6QXphR2xun6a/7N+vcp18ufNksDVX+hvuKc7eT8icRgJ9ARf/324l+K
+         DNlAXiGf1jE7g==
+Date:   Wed, 30 Aug 2023 08:02:04 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Jeff Layton <jlayton@kernel.org>
 Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH fstests v3 2/2] generic/578: add a check to ensure that
- fiemap is supported
-Message-ID: <20230830125544.chmzf5trejj4tppz@zlang-mailbox>
-References: <20230825-fixes-v3-0-6484c098f8e8@kernel.org>
- <20230825-fixes-v3-2-6484c098f8e8@kernel.org>
- <ZO6vh5+ZLdLSFbB7@yoyang-vm.hosts.qa.psi.pek2.redhat.com>
+        linux-fsdevel@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH fstests v4 1/3] common/attr: fix the _require_acl test
+Message-ID: <20230830150204.GE28202@frogsfrogsfrogs>
+References: <20230830-fixes-v4-0-88d7b8572aa3@kernel.org>
+ <20230830-fixes-v4-1-88d7b8572aa3@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZO6vh5+ZLdLSFbB7@yoyang-vm.hosts.qa.psi.pek2.redhat.com>
+In-Reply-To: <20230830-fixes-v4-1-88d7b8572aa3@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Aug 30, 2023 at 10:55:03AM +0800, Yongcheng Yang wrote:
-> Hi Zorro,
+On Wed, Aug 30, 2023 at 06:58:50AM -0400, Jeff Layton wrote:
+> _require_acl tests whether you're able to fetch the ACL from a file
+> using chacl, and then tests for an -EOPNOTSUPP error return.
+> Unfortunately, filesystems that don't support them (like NFSv4) just
+> return -ENODATA when someone calls getxattr for the POSIX ACL, so the
+> test doesn't work.
 > 
-> Can we assume all the FIEMAP tests need this check first?
-> If so, there are some others need the same patch.
+> Fix the test to have chacl set an ACL on the file instead, which should
+> reliably fail on filesystems that don't support them.
 > 
-> I.e.
-> [yoyang@yoyang-vm xfstests-dev]$ grep url .git/config
->         url = git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> [yoyang@yoyang-vm xfstests-dev]$ git pl
-> Already up to date.
-> [yoyang@yoyang-vm xfstests-dev]$ git grep _begin_fstest tests/ | grep fiemap | wc -l
-> 101
-> [yoyang@yoyang-vm xfstests-dev]$ git grep _require_xfs_io_command tests/ | grep fiemap | wc -l
-> 86
-> [yoyang@yoyang-vm xfstests-dev]$
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 
-Hi Yongcheng,
+Seems logical,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Thanks for taking attention on it. 101 - 86 = 15, let's check these 15 cases
-one by one:
+--D
 
-[zorro@zlang-laptop xfstests-dev]$ for i in `egrep -rsnl _begin_fstest.*fiemap tests`;do grep -q $i < <(egrep -rsnl _require_xfs_io_command.*fiemap tests) || echo $i;done
-tests/btrfs/079
-tests/btrfs/140
-tests/btrfs/004
-tests/ext4/001
-tests/ext4/308
-tests/generic/655
-tests/generic/654
-tests/generic/578
-tests/generic/541
-tests/generic/542
-tests/generic/516
-tests/generic/519
-tests/generic/540
-tests/generic/543
-tests/overlay/066
-
-btrfs/079: It doesn't use fiemap direclty, it use filefrag command to trigger
-           fiemap (if support). If FIEMAP is not supported then filefrag will
-	   fall back to using FIBMAP. So it's not necessary to _notrun this case
-	   if FIEMAP isn't supported I think.
-btrfs/140: Similar as above
-btrfs/004: Similar as above
-ext4/001:  It use fiemap through _test_generic_punch helper, so I think it should
-	   has "_require_xfs_io_command fiemap"
-ext4/308:  I think it missed the `_require_xfs_io_command fiemap`
-g/655:     It doesn't use fiemap, but use filefrag. And filefrag will fall back to
-           FIBMAP, if FIEMAP isn't supported.
-g/654:     Similar as above
-g/578:     Similar as above
-g/541:	   Similar as above
-g/542:	   Similar as above
-g/516:	   Similar as above
-g/519:	   Similar as above
-g/540:	   Similar as above
-g/543:	   Similar as above
-overlay/066: Similar as above
-
-(If anything I said above is wrong, feel free to tell me:)
-
-So I think ext4/001 and ext4/308 can have the `_require_xfs_io_command fiemap`.
-But as they're ext4 specific test cases (not generic), so they won't affect
-other fs (which doesn't support fiemap) testing. If you'd like, you can add
-`_require_xfs_io_command fiemap` to these two cases.
-
-Thanks,
-Zorro
-
+> ---
+>  common/attr | 9 ++++-----
+>  1 file changed, 4 insertions(+), 5 deletions(-)
 > 
-> Best Regards,
-> Yongcheng
+> diff --git a/common/attr b/common/attr
+> index cce4d1b201b2..3ebba682c894 100644
+> --- a/common/attr
+> +++ b/common/attr
+> @@ -163,13 +163,12 @@ _require_acls()
+>      [ -n "$CHACL_PROG" ] || _notrun "chacl command not found"
+>  
+>      #
+> -    # Test if chacl is able to list ACLs on the target filesystems.  On really
+> -    # old kernels the system calls might not be implemented at all, but the
+> -    # more common case is that the tested filesystem simply doesn't support
+> -    # ACLs.
+> +    # Test if chacl is able to set an ACL on a file.  On really old kernels
+> +    # the system calls might not be implemented at all, but the more common
+> +    # case is that the tested filesystem simply doesn't support ACLs.
+>      #
+>      touch $TEST_DIR/syscalltest
+> -    chacl -l $TEST_DIR/syscalltest > $TEST_DIR/syscalltest.out 2>&1
+> +    chacl 'u::rw-,g::---,o::---' $TEST_DIR/syscalltest > $TEST_DIR/syscalltest.out 2>&1
+>      cat $TEST_DIR/syscalltest.out >> $seqres.full
+>  
+>      if grep -q 'Function not implemented' $TEST_DIR/syscalltest.out; then
 > 
-
+> -- 
+> 2.41.0
+> 
