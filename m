@@ -2,63 +2,175 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E672EC83F01
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5254FC83F19
+	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 18:54:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244450AbjH3SxC (ORCPT
+        id S243431AbjH3SxH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:53:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53364 "EHLO
+        Wed, 30 Aug 2023 14:53:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53130 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244515AbjH3NSK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 09:18:10 -0400
-Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A9BA137
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 06:18:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-        s=20170329; h=Content-Transfer-Encoding:Content-Type:Subject:From:To:
-        MIME-Version:Date:Message-ID:Sender:Reply-To:Cc:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=nIo1A1xYFMsZfVxmBZB4DNRX4hpKcowLMVuUYzC1IqM=; b=Hq+rbcyXZabjzM6h7OnDyWZM42
-        ffx2xc7eAQM2/RTqKXPE2JHH7qz9BapC6mLOQeR5gEeX1cGpNZWevHxh1D7tNwxKeb+tMmB90HWzR
-        6hX8GiOmAln3VMNoVasFZwQCHcRcYceDBNFSBcdz/0oWKPgu45vFF8H3KEZ7Y/bkCxri80QNVyLwl
-        WlqU5eiGcjl3HJZb8w8KQj7+zlIWetWGb0WnW3bGdPA6etUzW/z8nCyhpR4+jqqX4ixxbKNJBRWoS
-        +BPKxjJ/op93gHcB3m9ni9dssZhJl/EFW2UkZNVSEX0g7Mg27JO2sCf8ZRxRwtNUeSrv3JTep6jxc
-        iUxgLpCw==;
-Received: from [187.116.122.196] (helo=[192.168.1.60])
-        by fanzine2.igalia.com with esmtpsa 
-        (Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128) (Exim)
-        id 1qbL58-00HOLm-Sy
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 15:18:03 +0200
-Message-ID: <5ac92006-6f06-196b-1acc-7380d8ca4a86@igalia.com>
-Date:   Wed, 30 Aug 2023 10:18:00 -0300
+        with ESMTP id S245274AbjH3PBc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 11:01:32 -0400
+X-Greylist: delayed 128 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Aug 2023 08:01:28 PDT
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECD151A2;
+        Wed, 30 Aug 2023 08:01:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 5B94EB81F6E;
+        Wed, 30 Aug 2023 15:01:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F4001C433CA;
+        Wed, 30 Aug 2023 15:01:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693407686;
+        bh=87aEVuBrF/H10/kaMMmVFs6bcYX3GUgxGXnoLaWtaKw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Ov+sft8ymsD/kXM5W4cvYAVXjIWibo4LxH9+Xz5393G1ENgxKrfrzYtUIP4EH5njv
+         VXEZu1Kn2asQGuTa4etAB3g8LZVkm6AOdjSCYY4dZWjcY/bOXu69CTZcTZ5zjXuvq1
+         5qGr/Q/sY5rrHrQd4wdiIPxsF39SxqKjTzSnfEQPJpW/IwDaSnwATDOFcPw6gcOAOr
+         BejZ9xuy/pBGvsXw4jiJlGFLPxgUDBLKbFaIGnsiSa605tIGUnMnFVoFMbfrYp4atz
+         7gsPWkzIO6OPRlgcqqs5IQ3tcZRYHylgnygMM8peKWvLtJAW7VnlydSG7++8zrDgaf
+         wbYwOuIc9SfmA==
+Date:   Wed, 30 Aug 2023 08:01:25 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH fstests v4 3/3] generic/*: add a check for security attrs
+Message-ID: <20230830150125.GD28202@frogsfrogsfrogs>
+References: <20230830-fixes-v4-0-88d7b8572aa3@kernel.org>
+ <20230830-fixes-v4-3-88d7b8572aa3@kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Content-Language: en-US
-To:     fstests@vger.kernel.org
-From:   "Guilherme G. Piccoli" <gpiccoli@igalia.com>
-Subject: Question about multiple scratch mount points
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230830-fixes-v4-3-88d7b8572aa3@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi folks, I am new at fstests development so I have a question
-that...might be silly, apologies in advance!
+On Wed, Aug 30, 2023 at 06:58:52AM -0400, Jeff Layton wrote:
+> There are several generic tests that require "setcap", but don't check
+> whether the underlying fs supports security attrs. Add the appropriate
+> checks.
+> 
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 
-How should I require to have 2 scratch mnt points for some test? I'm not
-sure if necessary: what I'd like to accomplish is to mount the same
-filesystem (present in the scratch device) twice, in different mount
-points. One idea would be to just mkdir 2 folders under $SCRATCH_MNT/,
-but I'm not sure if it's guaranteed to be writable before any mounts happen.
+Looks good to me,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Suggestions are appreciated! Also, sent here since I don't really know
-other forms of seeking help, tried IRC before without success.
-Thanks in advance,
+--D
 
-
-Guilherme
+> ---
+>  tests/generic/270 | 2 ++
+>  tests/generic/513 | 2 ++
+>  tests/generic/675 | 2 ++
+>  tests/generic/688 | 2 ++
+>  tests/generic/727 | 2 ++
+>  5 files changed, 10 insertions(+)
+> 
+> diff --git a/tests/generic/270 b/tests/generic/270
+> index 8a6a2822b76b..e7329c2f3280 100755
+> --- a/tests/generic/270
+> +++ b/tests/generic/270
+> @@ -13,6 +13,7 @@ _begin_fstest auto quota rw prealloc ioctl enospc stress
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/quota
+> +. ./common/attr
+>  
+>  # Disable all sync operations to get higher load
+>  FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
+> @@ -58,6 +59,7 @@ _require_user
+>  _require_scratch
+>  _require_command "$KILLALL_PROG" killall
+>  _require_command "$SETCAP_PROG" setcap
+> +_require_attrs security
+>  
+>  _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+>  _scratch_mount "-o usrquota,grpquota"
+> diff --git a/tests/generic/513 b/tests/generic/513
+> index dc082787ae4e..7ff845cea35b 100755
+> --- a/tests/generic/513
+> +++ b/tests/generic/513
+> @@ -12,12 +12,14 @@ _begin_fstest auto quick clone
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/attr
+>  
+>  # real QA test starts here
+>  _supported_fs generic
+>  _require_scratch_reflink
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+> +_require_attrs security
+>  
+>  _scratch_mkfs >>$seqres.full 2>&1
+>  _scratch_mount
+> diff --git a/tests/generic/675 b/tests/generic/675
+> index 189251f20c0d..cc4309e45a04 100755
+> --- a/tests/generic/675
+> +++ b/tests/generic/675
+> @@ -12,6 +12,7 @@ _begin_fstest auto clone quick
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/attr
+>  
+>  # real QA test starts here
+>  
+> @@ -21,6 +22,7 @@ _require_user
+>  _require_command "$GETCAP_PROG" getcap
+>  _require_command "$SETCAP_PROG" setcap
+>  _require_scratch_reflink
+> +_require_attrs security
+>  
+>  _scratch_mkfs >> $seqres.full
+>  _scratch_mount
+> diff --git a/tests/generic/688 b/tests/generic/688
+> index 426286b6c6ce..e2bf12b4457d 100755
+> --- a/tests/generic/688
+> +++ b/tests/generic/688
+> @@ -18,6 +18,7 @@ _cleanup()
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/attr
+>  
+>  # real QA test starts here
+>  
+> @@ -29,6 +30,7 @@ _require_command "$SETCAP_PROG" setcap
+>  _require_xfs_io_command falloc
+>  _require_test
+>  _require_congruent_file_oplen $TEST_DIR 65536
+> +_require_attrs security
+>  
+>  junk_dir=$TEST_DIR/$seq
+>  junk_file=$junk_dir/a
+> diff --git a/tests/generic/727 b/tests/generic/727
+> index 58a89e3eda70..2cda49eadab3 100755
+> --- a/tests/generic/727
+> +++ b/tests/generic/727
+> @@ -19,6 +19,7 @@ _begin_fstest auto fiexchange swapext quick
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/attr
+>  
+>  # real QA test starts here
+>  
+> @@ -30,6 +31,7 @@ _require_command "$SETCAP_PROG" setcap
+>  _require_xfs_io_command swapext '-v vfs -a'
+>  _require_xfs_io_command startupdate
+>  _require_scratch
+> +_require_attrs security
+>  
+>  _scratch_mkfs >> $seqres.full
+>  _scratch_mount
+> 
+> -- 
+> 2.41.0
+> 
