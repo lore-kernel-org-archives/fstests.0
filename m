@@ -2,125 +2,120 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A57EEC83F14
-	for <linux-fstests@archiver.kernel.org>; Wed, 30 Aug 2023 23:10:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CFEEC83F10
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Aug 2023 14:19:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242296AbjH3XKH (ORCPT
+        id S232317AbjHaOTM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 30 Aug 2023 19:10:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40664 "EHLO
+        Thu, 31 Aug 2023 10:19:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234459AbjH3XKH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2023 19:10:07 -0400
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDDE08F
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 16:10:04 -0700 (PDT)
-Received: by mail-pl1-x630.google.com with SMTP id d9443c01a7336-1c0ecb9a075so1331745ad.2
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2023 16:10:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1693437004; x=1694041804; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=pY8RbnhSGlMiv7I3aFkTawjz67jUc9YTIpapEZLnNrI=;
-        b=Fe28DdH+s6pW3uayHXyXJjFc4ZpZVRGFhQ1hSKCHJqXwfoa3zOxn2gvlsNO4IuTIR2
-         B8xEIGZ2anbDyEMQUgqzHYBlJMozcBu6fKLCogsR5wJAQ9SIA0X5/vM+q+jUlYPEZSrp
-         8uzDGqh8C42qJvUJtITFEihfdWS9qs/fCXBEzD/VvcrSL5k47FKyBMN2wO5wDPYgMMnj
-         hvjy88/sJLqtAEKZpLgH8P8hG4V1b92rXHWI8jn5MNZGkchgFAJyr/ARJ19oDQkFm5Lr
-         71zBR6E4N3y6zTJ8ycqguk4xMjqMXjTLY3p98r2htV2luuA9Krxw/6luZDCiOWmvAaS8
-         8B9Q==
+        with ESMTP id S1346420AbjHaOTL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 10:19:11 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5103DCF
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 07:18:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693491503;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=qafh6v0n34Khu8fe79YTlgwWBLCbN/DtxxKzvIEWTSE=;
+        b=eNTCRBplbrFWnJWBcl28ihIGf7xcH+qyBXXeX6uS4Vdkl9V2frz+/7ZNga+xwRrIyX6SDr
+        BnB3CiZQKBblPbYhK42CSaNjSw9DraTXu0C6p0rN+zERtIly6IuCnwPgtKecNkuBnhmK83
+        oYZmfdXMYrW0DwwaJdHkIt4IdjeoY2M=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-202-3_W3QPaOMwGCI2IdXtyVZQ-1; Thu, 31 Aug 2023 10:18:18 -0400
+X-MC-Unique: 3_W3QPaOMwGCI2IdXtyVZQ-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-26f591c1a2cso880706a91.3
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 07:18:15 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693437004; x=1694041804;
+        d=1e100.net; s=20221208; t=1693491494; x=1694096294;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pY8RbnhSGlMiv7I3aFkTawjz67jUc9YTIpapEZLnNrI=;
-        b=LTuNrgVbDBzGrINmWsDgzQjLHRY08/sAkJOuNJ5XKfZFTGeZ/2WFGnebfJfI3ZOVoI
-         1u1/u9uPTT5+tRvI3bHo4ffAvDpwPHqfYTlBjkCMZiJs5IxgB8goYTYnyk3n0+N4sXAG
-         mMCINCT/Mf+xHluvz9fBRN39ihO0jUFvHxFMdnTpIWgyHMClOK58WEY7l4/QYswau0Ga
-         NREah0OEfnPZ1/pU29DgGbmo4NPmTg3MozWrUp7Ks8XzfvYBAk4kz1TGD4nA98wOScmj
-         PBx/hp94tY+KfRDjg6i5/GrD8dcr5/oWLd5x1FJsJFOd3MxT4SEG/jHfJik+/pwx9QE2
-         OOcQ==
-X-Gm-Message-State: AOJu0YxggLPTgiBjhpUwx6dZOFL7zCgDYeEyjGBuZu7IrpHLokTQAZt4
-        3jD//b+iarezvzLj08vzgbqJNw==
-X-Google-Smtp-Source: AGHT+IH/kekC0GSQlZUGKo09NMAEckPgzzEnROIAm1WRV42FYGa4fZu0zCr9r+/SsFMApspPwx5Nvg==
-X-Received: by 2002:a17:902:cec4:b0:1bf:feb:100f with SMTP id d4-20020a170902cec400b001bf0feb100fmr4251162plg.9.1693437004415;
-        Wed, 30 Aug 2023 16:10:04 -0700 (PDT)
-Received: from dread.disaster.area (pa49-195-66-88.pa.nsw.optusnet.com.au. [49.195.66.88])
-        by smtp.gmail.com with ESMTPSA id jd4-20020a170903260400b001c0774d9327sm35530plb.91.2023.08.30.16.10.03
+        bh=qafh6v0n34Khu8fe79YTlgwWBLCbN/DtxxKzvIEWTSE=;
+        b=JyaFLY649mW2DVRNWLl5ngjd5g1YjxrLEqMYFfbcdHfQFd+Nc6iX1Qi/SYuK/9F6Sv
+         MCYFqnZjl5N6kgVnZcLtYqbDu+A6mYi1XwIxEtk1Dgf1J7SWDnIATCu7BWZh4cVtTtRI
+         dKOwIqiwi6zGrQDhqQZ3TyowympRtS9LlGZMDfZzkgH/6KSKya/HyI+iNeX3Qsw5ST4H
+         zfS8WVeATlAcrHDB5cYiW9nDvmtKjqCZBiEoPZPu140z3v6o3UlRgLyYvygdsrMEnqT4
+         5KIIdp5bSCPNyOINXmnQSVlM0mDZy6hDwB0U9LSGkoIzzDpB3KKumrOc8gHz7PoLHXrj
+         8ehQ==
+X-Gm-Message-State: AOJu0Yx+82vSm8wBcZg03WU7NKdmvnyxtXsUk0PkH9OhStb5Dgx2A44N
+        lzbIO58x05KFB8SRCFhb3nTVp5aovlXn/6h7U85vD9DEVP9hoF44YDBo8N0ywJYaDMv2l8nuJgS
+        8AQT5y4Rifp9Uj6YfnrabnR73cq+r8aI=
+X-Received: by 2002:a17:90a:6be1:b0:26b:726:118 with SMTP id w88-20020a17090a6be100b0026b07260118mr4934760pjj.19.1693491494727;
+        Thu, 31 Aug 2023 07:18:14 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHXXCE89W2KbVQBsW60A0+BWgataClwxQQ0ltZVmVIsQuXIG3cMLEtwOMrmNlZrsFtnBo/uug==
+X-Received: by 2002:a17:90a:6be1:b0:26b:726:118 with SMTP id w88-20020a17090a6be100b0026b07260118mr4934745pjj.19.1693491494360;
+        Thu, 31 Aug 2023 07:18:14 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id v7-20020a17090a898700b0026f90d7947csm1404126pjn.34.2023.08.31.07.18.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Aug 2023 16:10:03 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-        (envelope-from <david@fromorbit.com>)
-        id 1qbUK0-008iPR-2Z;
-        Thu, 31 Aug 2023 09:10:00 +1000
-Date:   Thu, 31 Aug 2023 09:10:00 +1000
-From:   Dave Chinner <david@fromorbit.com>
+        Thu, 31 Aug 2023 07:18:13 -0700 (PDT)
+Date:   Thu, 31 Aug 2023 22:18:10 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH 2/2] generic: only enable io_uring in fsstress explicitly
-Message-ID: <ZO/MSIMQulh8A+Mr@dread.disaster.area>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic/61[67]: support SOAK_DURATION
+Message-ID: <20230831141810.htr6wj6svvcco3yg@zlang-mailbox>
 References: <169335094811.3534600.13011878728080983620.stgit@frogsfrogsfrogs>
- <169335095953.3534600.16325849760213190849.stgit@frogsfrogsfrogs>
+ <169335095385.3534600.13449847282467855019.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <169335095953.3534600.16325849760213190849.stgit@frogsfrogsfrogs>
+In-Reply-To: <169335095385.3534600.13449847282467855019.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 29, 2023 at 04:15:59PM -0700, Darrick J. Wong wrote:
+On Tue, Aug 29, 2023 at 04:15:53PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Don't enable io_uring in fsstress unless someone asks for it explicitly,
-> just like fsx.  I think both tools should require explicit opt-in to
-> facilitate A/B testing between the old IO paths and this new one.
+> Now that I've finally gotten liburing installed on my test machine, I
+> can actually test io_uring.  Adapt these two tests to support
+> SOAK_DURATION so I can add it to that too.
 > 
-> While I was playing with fstests+io_uring, I noticed quite a few
-> regressions in fstests, which fell into two classes:
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+
+This makes sense to me, but how these two cases into "soak" group. I'd like to
+add all cases which supports "SOAK_DURATION" into "soak" group at least. Then
+we can do soak tests better.
+
+Thanks,
+Zorro
+
+>  tests/generic/616 |    1 +
+>  tests/generic/617 |    1 +
+>  2 files changed, 2 insertions(+)
 > 
-> The first class is umount failing with EBUSY.  Apparently this is due to
-> the kernel uring code hanging on to file references even after the
-> userspace program exits.  Tests that run fsstress and immediately
-> unmount now fail sporadically due to the EBUSY.  Unfortunately, the
-> metadata update stress tests, the recovery loop tests, the xfs online
-> fsck functional tests, and the xfs fuzz tests make heavy use of
-> "fsstress; umount" and they fail all over the place now.
 > 
-> Something's broken, Jens and Christian said it should get fixed, but in
-> the meantime this is getting in the way of me testing my own code.
+> diff --git a/tests/generic/616 b/tests/generic/616
+> index 538b480ba7..729898fded 100755
+> --- a/tests/generic/616
+> +++ b/tests/generic/616
+> @@ -33,6 +33,7 @@ fsx_args+=(-N $nr_ops)
+>  fsx_args+=(-p $((nr_ops / 100)))
+>  fsx_args+=(-o $op_sz)
+>  fsx_args+=(-l $file_sz)
+> +test -n "$SOAK_DURATION" && fsx_args+=(--duration="$SOAK_DURATION")
+>  
+>  run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
+>  
+> diff --git a/tests/generic/617 b/tests/generic/617
+> index 3bb3112e99..f0fd1feb2e 100755
+> --- a/tests/generic/617
+> +++ b/tests/generic/617
+> @@ -39,6 +39,7 @@ fsx_args+=(-r $min_dio_sz)
+>  fsx_args+=(-t $min_dio_sz)
+>  fsx_args+=(-w $min_dio_sz)
+>  fsx_args+=(-Z)
+> +test -n "$SOAK_DURATION" && fsx_args+=(--duration="$SOAK_DURATION")
+>  
+>  run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
+>  
+> 
 
-I'm not seeing regular problems with io_uring on my test machines.
-Occasionally there will be a filesystem unmount issue, but that's
-not causing anything but a single test here or there to fail. It's
-not a big deal.
-
-> The second problem I noticed is that fsstress now lodges complaints
-> about sporadic heap corruption.  I /think/ this is due to some kind of
-> memory mishandling bug when uring is active but IO requests fail, but I
-> haven't had the time to go figure out what's up with that.
-
-Yes, I've seen that happen in ~6.4 kernels, but current TOT doesn't
-seem to do that anymore on my test machines.
-
-Regardless, I don't think turning off io_uring support by default is
-the right thing to do. That's just shooting the messenger. We really
-do need this code to be exercised as much as possible because it is
-so full of bugs. Sure, add a flag to turn it off if you need it off
-(and add it to FSSTRESS_AVOID for your test environments), but
-otherwise we really should be exercising io_uring. Ignorance doesn't
-prevent bugs or CVEs....
-
-Realistically, what we actually need is to require io_uring
-developers to focus on testing io_uring functionality with
-filesystems and fsstress and *to fix the regressions* rather than
-endlessly adding more features and complexity that create more bugs. 
-Turning the code off certainly won't help us acheive that....
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
