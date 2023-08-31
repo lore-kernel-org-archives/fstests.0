@@ -2,147 +2,93 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B476FC83F2E
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Aug 2023 16:46:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3910C83F2F
+	for <linux-fstests@archiver.kernel.org>; Thu, 31 Aug 2023 18:40:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232909AbjHaQrA (ORCPT
+        id S1347073AbjHaSkg (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Aug 2023 12:47:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55766 "EHLO
+        Thu, 31 Aug 2023 14:40:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230189AbjHaQrA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 12:47:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D311A124
-        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 09:46:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693500368;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=iphPG/G9Gy4xm7DqdV4zrqWUp4ZNMxept5Xy+NlZyi0=;
-        b=J4Vxqsr6chtl7BQfa0PGJApFvTl8uSMyWCS2nW/CUlakUfX7zTh1Kq9JC3c5Bs79XzI1ru
-        aZQBR5iFGQtxZeM3OXM3CDscOlLrRtpxKKuzOcXD86mDj1aEKs2LQ/kxpxjjAvZWuuaBwx
-        9UAwT9lGAzLQALX/XpUGKne7Ko7qJNU=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-156-2UyPCQ4mPCOQN5fS50BL6Q-1; Thu, 31 Aug 2023 12:46:04 -0400
-X-MC-Unique: 2UyPCQ4mPCOQN5fS50BL6Q-1
-Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        with ESMTP id S234565AbjHaSkf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 14:40:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27188E5F;
+        Thu, 31 Aug 2023 11:40:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 380FC101AA4E;
-        Thu, 31 Aug 2023 16:46:04 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.34.74])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 0137A492C14;
-        Thu, 31 Aug 2023 16:46:03 +0000 (UTC)
-Date:   Thu, 31 Aug 2023 11:46:02 -0500
-From:   Bill O'Donnell <bodonnel@redhat.com>
-To:     Bill O'Donnell <bodonnel@redhat.com>
-Cc:     fstests@vger.kernel.org, quwenruo.btrfs@gmx.com
-Subject: Re: [PATCH] fstests: generic/353 should accomodate other pwrite
- behaviors
-Message-ID: <ZPDDyqyqSmI6dVDQ@redhat.com>
-References: <20230830125056.71299-1-bodonnel@redhat.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 929A263948;
+        Thu, 31 Aug 2023 18:40:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F019C433C8;
+        Thu, 31 Aug 2023 18:40:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693507232;
+        bh=whvgVdcrRN9Y5YfFx0/jgRmuIMm0IZrT1yrX/bPhRT8=;
+        h=From:Subject:Date:To:Cc:From;
+        b=qyC98hSOvQL45pjddrHdWTXdSbanJkhPdge0aIGuDfrbKIOnlvATvJTQrNTUCFwVz
+         2pmVn2G1tammhmqigSYvhdETnHBs3hMkjcwVhC8Cu0DvZCv29KL377FsS0EyVr022V
+         3O+AyeAu44ioOy1dxn9dcmTSfhP8kgJYyyr8d5DUOMdG3l0hbLp36drNMMYRnIS4my
+         uKpofsYqv+ILC6C28fLxHLBQRBPbuvQIYEQgjrQrxyEkl6pvVBQxLccXJVY5/4hJmy
+         XqH200GiPJbjXEtv0rF34yQ4waIxBf8GNpkAQTh1FafyF4ASZ8cfKkCfIOD1zWCo6W
+         /u3AWoLszYmVQ==
+From:   Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH fstests 0/3] generic: skip a few tests on NFS
+Date:   Thu, 31 Aug 2023 14:40:27 -0400
+Message-Id: <20230831-nfs-skip-v1-0-d54c1c6a9af2@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230830125056.71299-1-bodonnel@redhat.com>
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAJve8GQC/x3MTQqAIBBA4avIrBNK036uEi2kxhoCC0cikO6et
+ Pzg8TIwRkKGUWSIeBPTGQqaSsCyu7ChpLUYVK103etGBs+SD7pkZ5VxpvUD2g5KfkX09PyrCTw
+ n5MQwv+8HEuQD32MAAAA=
+To:     fstests@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org, Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=781; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=whvgVdcrRN9Y5YfFx0/jgRmuIMm0IZrT1yrX/bPhRT8=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk8N6fENhHbeZaqcWcGGvvwGNdyD0Dw15BDcV3l
+ SJDpAVyi4GJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZPDenwAKCRAADmhBGVaC
+ FenPD/wL93BGAT6KuV1LX1LAczmE+Sf0+7ot3GARVVlRFbdrbczK5VRofrpwhyMNYZhnV7EIlK9
+ wwDGSaj9tWWJYrjRqJvZpXbfOGQRwtGAD3fcoTYnJvunr0KVMCFUc/uFD2z15cbiyoUMhUGXvR+
+ ulZcJR6izPAjcOTsO1qDxlnTZIKwKLyWiPYD6JZXGy4jIzqofytgDu8T1TuV4gkrYEsDWj7F7ha
+ 8F8RbNM/t9NDbx3X+u9fFxy/pa/wbef9luIUJMxVrC5ceev8qaBbfuWPOP3u/Pp5A24avgZClr0
+ PFhqoBUVl2KSY2GoaPGWIAEUxEtmT6POW8QwST6qcdbnIw+O1j5syd2SVhlAPcKx2tFt1TMxcNn
+ iNvvtcYOz4+Yy1+xsv0CabsgF3ZeoT+Hd/E29OILVMb1hW/CtZPYWA2MVceJr4Pp+U5oC+8g7mV
+ qhtrd+53Wm6yvKwZktLgqmUp7GZk+jxzQmW9OhTkV9CScdj9Jb4t4ttWIcOoeBxJ2851Fp8eJaZ
+ BvRSQH3Ff5gQ2tkSEqzv7gO+6jqRhRhEh88dNT7Ab+9OH/zLmjBJJL8hi2jJeMcIJJZ1jPIhIGV
+ OVrCgpe4l2OQeXHn7NiOBa5OKDgHsyaKr+8mHlElj9LloIGOx+Lkq76vkph/O5fCE0S0paH9EeL
+ eZNnZpcjVc+sV2Q==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-cc Qu Wenruo
+There are some tests in xfstests generic section that fail or are
+unreliable for reasons that are known but are difficult to detect via
+feature tests.
 
-On Wed, Aug 30, 2023 at 07:50:56AM -0500, Bill O'Donnell wrote:
-> xfs_io pwrite issues a series of block size writes, but there is no
-> guarantee that the resulting extent(s) will be singular or contiguous.
-> This behavior is acceptable, but the test is flawed in that it expects
-> a single extent for a pwrite.
-> 
-> Modify test to use actual blocksize for pwrite and reflink. Also
-> modify it to accommodate pwrite and reflink that produce different
-> mapping results.
-> 
-> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
-> ---
->  tests/generic/353     | 27 ++++++++++++++-------------
->  tests/generic/353.out | 14 --------------
->  2 files changed, 14 insertions(+), 27 deletions(-)
-> 
-> diff --git a/tests/generic/353 b/tests/generic/353
-> index 9a1471bd..03b038a6 100755
-> --- a/tests/generic/353
-> +++ b/tests/generic/353
-> @@ -29,31 +29,32 @@ _require_xfs_io_command "fiemap"
->  _scratch_mkfs > /dev/null 2>&1
->  _scratch_mount
->  
-> -blocksize=64k
-> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
-> +
->  file1="$SCRATCH_MNT/file1"
->  file2="$SCRATCH_MNT/file2"
-> +extmap1="$SCRATCH_MNT/extmap1"
-> +extmap2="$SCRATCH_MNT/extmap2"
->  
->  # write the initial file
-> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
->  
->  # reflink initial file
-> -_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-> +_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
->  
->  # check their fiemap to make sure it's correct
-> -echo "before sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-> +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
->  
->  # sync and recheck, to make sure the fiemap doesn't change just
->  # due to sync
->  sync
-> -echo "after sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-> +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/353.out b/tests/generic/353.out
-> index 4f6e0b92..86cece4f 100644
-> --- a/tests/generic/353.out
-> +++ b/tests/generic/353.out
-> @@ -1,15 +1 @@
->  QA output created by 353
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -linked 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -before sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> -after sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> -- 
-> 2.41.0
-> 
+Check the FSTYP on these tests and _notrun if it's "nfs". Also add some
+documenting comments as to why we skip them on NFS.
+
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+Jeff Layton (3):
+      generic/294: don't run this test on NFS
+      generic/357: don't run this test on NFS
+      generic/187: don't run this test on NFS
+
+ tests/generic/187 | 3 +++
+ tests/generic/294 | 4 ++++
+ tests/generic/357 | 5 +++++
+ 3 files changed, 12 insertions(+)
+---
+base-commit: 0ca1d4fbb2e9a492968f2951df101f24477f7991
+change-id: 20230831-nfs-skip-7625a54f9e67
+
+Best regards,
+-- 
+Jeff Layton <jlayton@kernel.org>
 
