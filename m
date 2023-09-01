@@ -2,119 +2,116 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80E16CA0FE3
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 02:16:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3667ACA0FE8
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 05:15:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348040AbjIACQS (ORCPT
+        id S1348243AbjIAFPc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Aug 2023 22:16:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56038 "EHLO
+        Fri, 1 Sep 2023 01:15:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34250 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237340AbjIACQR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 22:16:17 -0400
+        with ESMTP id S1345883AbjIAFPc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 01:15:32 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ADDDE6E
-        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 19:15:31 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F63210CA
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 22:14:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693534529;
+        s=mimecast20190719; t=1693545285;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=2m6NIfRWGU81FmC4veM1riQ8LgQZRLXR/87iheQ744s=;
-        b=DRy8yu0m2vhySb5swePNMm4Ra7Cc5jaqNHz/aTnK+AIwygEh1ZvmajgiBFTlPiH/qA3Szh
-        aimmXADPG+/MTcHSNPE089IR1cItqazZYHykassusfFSIzVrWDggQt+m99AbMZJeRy2WJi
-        kawgsGt5EHX6YC6wb3OHTO5nKOXY2k8=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=GHEkg5etuCJBxRlFV9m9y4/3lnWWZvbQz9Kgowny85Q=;
+        b=XGrVlqzG0XS7rXU4nlMLdOtyA7+1asrgslUh+oSFAaTtWWffhGLyeb2LJvHFkOM8qp2RjW
+        b+9Si2W/5JePtwjpm0d27DY1Q1yWYSfYrG5T7UziNs6yEWcqr/YGnws7Bb8mPlUrA6yZcD
+        I8Umu0mPsArzpYbucd5GeRyWHoGK9uc=
+Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
+ [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-220-RzxTHzs0OUmiKKifo88D5Q-1; Thu, 31 Aug 2023 22:15:28 -0400
-X-MC-Unique: RzxTHzs0OUmiKKifo88D5Q-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1c0aaf4caaaso16520765ad.2
-        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 19:15:27 -0700 (PDT)
+ us-mta-146--iBl3njmN8ONfMBhs1BhWw-1; Fri, 01 Sep 2023 01:14:43 -0400
+X-MC-Unique: -iBl3njmN8ONfMBhs1BhWw-1
+Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-34ca50554d5so9648105ab.2
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 22:14:43 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693534527; x=1694139327;
+        d=1e100.net; s=20221208; t=1693545283; x=1694150083;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2m6NIfRWGU81FmC4veM1riQ8LgQZRLXR/87iheQ744s=;
-        b=ehcpSrpBfgSIp0+cyc3MLHm/IzXaYEYm5MCVStgyJ74Pc8DC39dmsjlm5lOs0/qElR
-         C9KxPkJq1HopNmZ0RDankRKGI+EQy740osq6O1L81ttHVpVF3yz7vgmdcw5iP1mViAcR
-         ADf6SH5d+YW1U1TSuiUE1sZ1YBSnTB10FKZasWEgLXcIjPVIhhiRU4zi0OZRE+UfALMm
-         NM/+/6lMwkky6INn35tVDVUHQDMWcLjtE1CWX635DvLqCvq6BOoLLSvtrQpIHrfGIG7H
-         6To+L0KiXAkOAhoRe7dQN+4Qu6r1NbSgo2lbgAi+O+lH9OQuWZ2h0gsjEr1XZEwpw1oa
-         clwA==
-X-Gm-Message-State: AOJu0Yw67uyfvJfC5Q70Jn2/Zmb/1HExmRwsvqjsdZ5M9ADDD5LTbtK3
-        SMJ0ZNq4K2LR04Ajs/GOwCbVROMUSosLQoFQD8MsiGGEPV+l8fyGXOAcgwTZa6iU7IS80C1q4BP
-        K3+vmLjCjqdXEdmqFJA==
-X-Received: by 2002:a17:902:cec5:b0:1b7:e49f:1d with SMTP id d5-20020a170902cec500b001b7e49f001dmr1657590plg.62.1693534526967;
-        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFx/IJbocd1YEkOLvgyP4KFjhmhiNB/+KDSKaRO+S0AvMTeO30g5cw8wAk37UysjUP0jy9LBQ==
-X-Received: by 2002:a17:902:cec5:b0:1b7:e49f:1d with SMTP id d5-20020a170902cec500b001b7e49f001dmr1657577plg.62.1693534526508;
-        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
+        bh=GHEkg5etuCJBxRlFV9m9y4/3lnWWZvbQz9Kgowny85Q=;
+        b=JWtHexQJRrwf1NzpcxrNUbhh9grZQ3vl70w/HT6/helRWaEQElhrS+KmMQTvI2wWgU
+         DMj5wG1jscyMadXDqYaklBL12BmclFv8tOdNcnz2Bu3CSOQW8GkOkzZpR6OGygLruUiQ
+         VIU3dbwTJROPIknawcFa0irRFzmdMfaAbEDz9h+2BjSptNfqluJvUDFhxAB+KGxOhrjb
+         lrW6yhWY3qWlhdCjmN48mWl6JFdjBhW1pBnt9dhB2rMI69qwkMvzT3R1QLx8TPz/pLix
+         AtfFqx/Ak4wjCXDs/49Ur91Nw3E+PWBasUx0bpdK+N41nguUys/bRyQi9Xurbq+1WYWT
+         qylQ==
+X-Gm-Message-State: AOJu0YyYi7grDaBJgaEojc8AMMVJzuODiXNQCQZxBTk/g7ZUGuCs0YMS
+        fWOxNtZbaqqfdh7It86VGLhtweBulo4vzP7YQy0rvuAN58cNOCgJzznPmQYWCg2divBBZ49O5d6
+        tO867Cv4zrwfZf9mZsIAKbhJbnBpRdqQ=
+X-Received: by 2002:a92:c144:0:b0:34c:cc37:3064 with SMTP id b4-20020a92c144000000b0034ccc373064mr1729120ilh.15.1693545282869;
+        Thu, 31 Aug 2023 22:14:42 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFm1O89Ri4TQyQNfpT5+w0sJ3E/uQVXKi3e8LsI5uu3LznX2mZvNh4qtJVaoJY/gHuZDDHJuA==
+X-Received: by 2002:a92:c144:0:b0:34c:cc37:3064 with SMTP id b4-20020a92c144000000b0034ccc373064mr1729115ilh.15.1693545282633;
+        Thu, 31 Aug 2023 22:14:42 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o9-20020a170902bcc900b001b87bedcc6fsm1833684pls.93.2023.08.31.19.15.25
+        by smtp.gmail.com with ESMTPSA id q1-20020a639801000000b0056946623d7esm2028377pgd.55.2023.08.31.22.14.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
-Date:   Fri, 1 Sep 2023 10:15:22 +0800
+        Thu, 31 Aug 2023 22:14:42 -0700 (PDT)
+Date:   Fri, 1 Sep 2023 13:14:39 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/650: race mount and unmount with cpu hotplug
- too
-Message-ID: <20230901021522.oczewijtf5dbb7dr@zlang-mailbox>
-References: <169335047228.3523635.3342369338633870707.stgit@frogsfrogsfrogs>
- <169335048358.3523635.7191015334485086811.stgit@frogsfrogsfrogs>
+To:     Jeff Layton <jlayton@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+Subject: Re: [PATCH fstests 1/3] generic/294: don't run this test on NFS
+Message-ID: <20230901051439.j5jduasrkmh67g6g@zlang-mailbox>
+References: <20230831-nfs-skip-v1-0-d54c1c6a9af2@kernel.org>
+ <20230831-nfs-skip-v1-1-d54c1c6a9af2@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <169335048358.3523635.7191015334485086811.stgit@frogsfrogsfrogs>
+In-Reply-To: <20230831-nfs-skip-v1-1-d54c1c6a9af2@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 29, 2023 at 04:08:03PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Thu, Aug 31, 2023 at 02:40:28PM -0400, Jeff Layton wrote:
+> When creating a new dentry (of any type), NFS will optimize away any
+> on-the-wire lookups prior to the create since that means an extra
+> round trip to the server. Because of that, it consistently fails this
+> test.
 > 
-> Ritesh Harjani reported that mount and unmount can race with the xfs cpu
-> hotplug notifier hooks and crash the kernel.  Extend this test to
-> include that.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > ---
-
-Good to me, and it helps to avoid this test takes too long time to run.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/generic/650 |   13 ++++++++++---
->  1 file changed, 10 insertions(+), 3 deletions(-)
+>  tests/generic/294 | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> 
-> diff --git a/tests/generic/650 b/tests/generic/650
-> index 05c939b84f..773f93c7cb 100755
-> --- a/tests/generic/650
-> +++ b/tests/generic/650
-> @@ -67,11 +67,18 @@ fsstress_args=(-w -d $stress_dir)
->  nr_cpus=$((LOAD_FACTOR * nr_hotplug_cpus))
->  test "$nr_cpus" -gt 1024 && nr_cpus="$nr_hotplug_cpus"
->  fsstress_args+=(-p $nr_cpus)
-> -test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
-> +if [ -n "$SOAK_DURATION" ]; then
-> +	test "$SOAK_DURATION" -lt 10 && SOAK_DURATION=10
-> +	fsstress_args+=(--duration="$((SOAK_DURATION / 10))")
-> +fi
+> diff --git a/tests/generic/294 b/tests/generic/294
+> index 406b1b3954b9..777b62aec9ad 100755
+> --- a/tests/generic/294
+> +++ b/tests/generic/294
+> @@ -15,6 +15,10 @@ _begin_fstest auto quick
 >  
-> -nr_ops=$((25000 * TIME_FACTOR))
-> +nr_ops=$((2500 * TIME_FACTOR))
->  fsstress_args+=(-n $nr_ops)
-> -$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
-> +for ((i = 0; i < 10; i++)); do
-> +	$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
-> +	_test_cycle_mount
-> +done
+>  # real QA test starts here
+>  
+> +# NFS will optimize away the on-the-wire lookup before attempting to
+> +# create a new file (since that means an extra round trip).
+> +test $FSTYP = "nfs"  && _notrun "NFS optmizes away lookups on exclusive creates"
 > +
->  rm -f $sentinel_file
->  
->  # success, all done
+>  # Modify as appropriate.
+>  _supported_fs generic
+
+I don't know if nfs-list wants to skip these test cases on nfs. Anyway, if
+there's not an objection from nfs team, the _supported_fs helper can use
+a black list, likes:
+
+  _supported_fs ^nfs
+
+If a test case doesn't support nfs totally, you can use this and give it a
+proper comment.
+
+Thanks,
+Zorro
+
+>  _require_scratch
+> 
+> -- 
+> 2.41.0
 > 
 
