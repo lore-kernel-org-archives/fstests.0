@@ -2,142 +2,146 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE2EFCA0FE4
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 16:19:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69262CA0FE4
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 16:33:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242341AbjIAQTR (ORCPT
+        id S231697AbjIAQdC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Sep 2023 12:19:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50246 "EHLO
+        Fri, 1 Sep 2023 12:33:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232030AbjIAQTQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 12:19:16 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39EE0E7E
-        for <fstests@vger.kernel.org>; Fri,  1 Sep 2023 09:18:28 -0700 (PDT)
+        with ESMTP id S235226AbjIAQdB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 12:33:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFE6B10EB
+        for <fstests@vger.kernel.org>; Fri,  1 Sep 2023 09:32:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693585107;
+        s=mimecast20190719; t=1693585934;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=9pOasN+78E6fTCnBqYDyfEIyJnJjBerFvCM7yr3lQ/8=;
-        b=emx6Z3xRTzpceCx8OH8LsFXdBsJpVQDDaGmSXZjWEkYzXwR/KkaBR5z5eUwgqNoCkKEAR6
-        1kirkI+Zo/wmFhHR7p3t7XttfbeshY2RlpEoSBb3qTTXGMKikOw+MwzndHMk6mAeztvEmV
-        idVOZ3dHkTDbUJiMAvJQwZ0ljw8Ct+g=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-270-en5XFTQ3MxuXV9PllIxsTQ-1; Fri, 01 Sep 2023 12:18:26 -0400
-X-MC-Unique: en5XFTQ3MxuXV9PllIxsTQ-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 0DFE8939186
-        for <fstests@vger.kernel.org>; Fri,  1 Sep 2023 16:18:26 +0000 (UTC)
-Received: from fedora.redhat.com (unknown [10.22.34.74])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id D13B983B7A;
-        Fri,  1 Sep 2023 16:18:25 +0000 (UTC)
-From:   Bill O'Donnell <bodonnel@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     zlang@redhat.com, Bill O'Donnell <bodonnel@redhat.com>
-Subject: [PATCH v2] fstests: generic/353 should accomodate other pwrite behaviors
-Date:   Fri,  1 Sep 2023 11:18:16 -0500
-Message-ID: <20230901161816.148854-1-bodonnel@redhat.com>
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=seGBgEQUi0lvTCuBGw9D7INs1kk4a1W/2PWVZkl0aVA=;
+        b=i88oceztc3BjUuVea8UvtOcYpvnrwx1aLANUf3FGARb9QOEu3oyhKYwnbh1JCWo4vdT0ha
+        EYPX4LP/ARZyd5BaO38iUYRGPtXv6qSGbfDMqSxu2iCXItXO6hJTWcBtiiGwpEsOMqN8wC
+        G9cuCmhpFfiJsONi1q3vy5QdcPBwmLM=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-693-QqV5BOHEM5mqSjrfRiqTpA-1; Fri, 01 Sep 2023 12:32:13 -0400
+X-MC-Unique: QqV5BOHEM5mqSjrfRiqTpA-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-68bf47ff13cso2641278b3a.1
+        for <fstests@vger.kernel.org>; Fri, 01 Sep 2023 09:32:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693585932; x=1694190732;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=seGBgEQUi0lvTCuBGw9D7INs1kk4a1W/2PWVZkl0aVA=;
+        b=RdBNAf5HeQTHjIKgev5SjfzfvpOPHXP5CN0gjN9724fa9YkJX53iB4OpbK8FPDYuV7
+         OyoeTAJwNSx+D+Ra8ultbhgFY4QQrOC1ySGlWRnjMrVB7EvDMnrY47J7rW4ERVUkurhZ
+         /gj4m7maymCdhZ+xHNOwOTzZmcEVJtbA68MbM6TIq+u1o9bTgCzDt7ZvjCVMUTvRlwIh
+         29qusmOeqQsRdQI6xalG466LnxFs9DN4cO5Ya8ncptWd3U7urfMDiKlw2Gr5132uz1Ck
+         M6xF45+BvoZyuiOutEko8SXLMuR5yPZb6o2JJlo3meO6W1EHRZZb36iGZNA+E1U0hqvK
+         WR0w==
+X-Gm-Message-State: AOJu0YzWLVG8YVU+1PYp8OUUoXt9m7n/JVTlQggajxJa5k9mXyICMo3y
+        kIlAAWIj4HXG5l98vEBtemn11wsLVrzHIrIWYJ2VTYelZtW4Bx8cGcux+wSaoT4OGmQW0Z796+m
+        61VfgUlQvBNpCKg5Gmg==
+X-Received: by 2002:a05:6a20:54a8:b0:148:4c5:9714 with SMTP id i40-20020a056a2054a800b0014804c59714mr3984185pzk.13.1693585932679;
+        Fri, 01 Sep 2023 09:32:12 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGMVaHqhGQOfFSNG3IuJWBGwg9ttsB0dWI2Js4E7jlvzxokNYYk2xKxzs90aqv+CBv1gBUdvA==
+X-Received: by 2002:a05:6a20:54a8:b0:148:4c5:9714 with SMTP id i40-20020a056a2054a800b0014804c59714mr3984156pzk.13.1693585932415;
+        Fri, 01 Sep 2023 09:32:12 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id x3-20020aa784c3000000b00687fcb2ba7csm3139717pfn.103.2023.09.01.09.32.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Sep 2023 09:32:11 -0700 (PDT)
+Date:   Sat, 2 Sep 2023 00:32:07 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/3] common: split _get_hugepagesize into detection and
+ actual query
+Message-ID: <20230901163207.xzii6pqogzfa3jxw@zlang-mailbox>
+References: <169335021210.3517899.17576674846994173943.stgit@frogsfrogsfrogs>
+ <169335021789.3517899.15257872086965624714.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <169335021789.3517899.15257872086965624714.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-xfs_io pwrite issues a series of block size writes, but there is no
-guarantee that the resulting extent(s) will be singular or contiguous.
-This behavior is acceptable, but the test is flawed in that it expects
-a single extent for a pwrite.
+On Tue, Aug 29, 2023 at 04:03:37PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This helper has two parts -- querying the value, and _notrun'ing the
+> test if huge pages aren't turned on.  Break these into the usual
+> _require_hugepages and _get_hugepagesize predicates so that we can adapt
+> xfs/559 to large folios being used for writes.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Modify test to use actual blocksize for pwrite and reflink. Also
-modify it to accommodate pwrite and reflink that produce different
-mapping results.
+Good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
----
- tests/generic/353     | 29 ++++++++++++++++-------------
- tests/generic/353.out | 15 +--------------
- 2 files changed, 17 insertions(+), 27 deletions(-)
-
-diff --git a/tests/generic/353 b/tests/generic/353
-index 9a1471bd..c5639725 100755
---- a/tests/generic/353
-+++ b/tests/generic/353
-@@ -29,31 +29,34 @@ _require_xfs_io_command "fiemap"
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- 
--blocksize=64k
-+blocksize=$(_get_file_block_size $SCRATCH_MNT)
-+
- file1="$SCRATCH_MNT/file1"
- file2="$SCRATCH_MNT/file2"
-+extmap1="$SCRATCH_MNT/extmap1"
-+extmap2="$SCRATCH_MNT/extmap2"
- 
- # write the initial file
--_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-+_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
- 
- # reflink initial file
--_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-+_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
- 
- # check their fiemap to make sure it's correct
--echo "before sync:"
--echo "$file1" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
--echo "$file2" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-+
-+cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
- 
- # sync and recheck, to make sure the fiemap doesn't change just
- # due to sync
- sync
--echo "after sync:"
--echo "$file1" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
--echo "$file2" | _filter_scratch
--$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-+$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-+$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-+
-+cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
-+
-+echo "Silence is golden"
- 
- # success, all done
- status=0
-diff --git a/tests/generic/353.out b/tests/generic/353.out
-index 4f6e0b92..16ba4f1f 100644
---- a/tests/generic/353.out
-+++ b/tests/generic/353.out
-@@ -1,15 +1,2 @@
- QA output created by 353
--wrote 65536/65536 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--linked 65536/65536 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--before sync:
--SCRATCH_MNT/file1
--0: [0..127]: shared|last
--SCRATCH_MNT/file2
--0: [0..127]: shared|last
--after sync:
--SCRATCH_MNT/file1
--0: [0..127]: shared|last
--SCRATCH_MNT/file2
--0: [0..127]: shared|last
-+Silence is golden
--- 
-2.41.0
+>  common/rc         |   13 ++++++++-----
+>  tests/generic/413 |    1 +
+>  tests/generic/605 |    1 +
+>  3 files changed, 10 insertions(+), 5 deletions(-)
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index 68d2ad041e..b5bf3c3bcb 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -108,14 +108,17 @@ _get_filesize()
+>      stat -c %s "$1"
+>  }
+>  
+> +# Does this kernel support huge pages?
+> +_require_hugepages()
+> +{
+> +	awk '/Hugepagesize/ {print $2}' /proc/meminfo | grep -E -q ^[0-9]+$ || \
+> +		_notrun "Kernel does not report huge page size"
+> +}
+> +
+>  # Get hugepagesize in bytes
+>  _get_hugepagesize()
+>  {
+> -	local hugepgsz=$(awk '/Hugepagesize/ {print $2}' /proc/meminfo)
+> -	# Call _notrun if $hugepgsz is not a number
+> -	echo "$hugepgsz" | grep -E -q ^[0-9]+$ || \
+> -		_notrun "Cannot get the value of Hugepagesize"
+> -	echo $((hugepgsz * 1024))
+> +	awk '/Hugepagesize/ {print $2 * 1024}' /proc/meminfo
+>  }
+>  
+>  _mount()
+> diff --git a/tests/generic/413 b/tests/generic/413
+> index 155f397d1d..bd1b04a624 100755
+> --- a/tests/generic/413
+> +++ b/tests/generic/413
+> @@ -13,6 +13,7 @@ _begin_fstest auto quick dax prealloc
+>  . ./common/filter
+>  
+>  _supported_fs generic
+> +_require_hugepages
+>  _require_test
+>  _require_scratch_dax_mountopt "dax"
+>  _require_test_program "feature"
+> diff --git a/tests/generic/605 b/tests/generic/605
+> index 77671f39d3..7e814d5ba1 100755
+> --- a/tests/generic/605
+> +++ b/tests/generic/605
+> @@ -13,6 +13,7 @@ _begin_fstest auto attr quick dax prealloc
+>  . ./common/filter
+>  
+>  _supported_fs generic
+> +_require_hugepages
+>  _require_scratch_dax_mountopt "dax=always"
+>  _require_test_program "feature"
+>  _require_test_program "t_mmap_dio"
+> 
 
