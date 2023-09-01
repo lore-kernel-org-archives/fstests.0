@@ -2,553 +2,99 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02395CA0FE4
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 17:01:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A2A3CA0FED
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 17:40:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344464AbjIARBt (ORCPT
+        id S232606AbjIARk2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Sep 2023 13:01:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54818 "EHLO
+        Fri, 1 Sep 2023 13:40:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243003AbjIARBr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 13:01:47 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FA8E10F2
-        for <fstests@vger.kernel.org>; Fri,  1 Sep 2023 10:00:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1693587657;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=KuDZ4McpRGGunYvEeB9n4Dkliibn9Tz8Iqy4GnT7Nf4=;
-        b=GuQ9QcGL7NnciL/kyOhkBJQ/Y84rZox2VmYPkLDBr6U7A2OyXGxgx1w1uuBs/l71M9C4hS
-        GSM59W5b8bKu/uLIk3AQnN1xkI1KJCy5dyAAmlVcueoUSdwPJsZ2t7P3wgAPgD6lrz17BR
-        EqnpCEJby4b2SC1B8zKa/srBv5hMSRo=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-310-vedQJayvM8apWEnsOJMBAw-1; Fri, 01 Sep 2023 13:00:55 -0400
-X-MC-Unique: vedQJayvM8apWEnsOJMBAw-1
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-26f3fce5b45so2825018a91.3
-        for <fstests@vger.kernel.org>; Fri, 01 Sep 2023 10:00:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693587655; x=1694192455;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KuDZ4McpRGGunYvEeB9n4Dkliibn9Tz8Iqy4GnT7Nf4=;
-        b=DR3+2aU3Bd5iazVQeYCqffmjuwrs7Rrsy0m5QW4DTUjQCcmN7XGon4D95GlpDtdmtd
-         REFET5PtNUwR8hnf2RpbO05/oOvNv0ztuUrlEXP7So1K5eoUv4sXwHe7cT9gEvjfD7NN
-         oFlAieolCE5Fzhq2IgCCgsyXZ7Q6LwXW1gijhwjf55JKX3vYh+md/932+RqbyYiL0LiU
-         puwJcDUPjfts7YN5BlVGPYVgagr8aSoKWv+o0bbvE1qsJKP/x+6ll8Vgr8w0brXkUynZ
-         ZFw2JIR5uZt5qQvmm6I5UCiz+12z7N2HLj8wp+SHFwTSnHrJh/yL0dZ3g6TzHRSZRUPj
-         Xt/Q==
-X-Gm-Message-State: AOJu0YyZZF6tiIrW/bPsxV19I2xaseaA9bOgspi+hR4wUgd8g8xqbKm4
-        6iAcgY9swVk67Kz+1R7zPxKvclgoaqwgx24vYTWuyuO+9zKh0TApT30PyXb1c68qo6YwtBe9JPq
-        e6lJWgFPsau56TA6bJQ==
-X-Received: by 2002:a17:90b:909:b0:26b:c3f:1503 with SMTP id bo9-20020a17090b090900b0026b0c3f1503mr3165300pjb.17.1693587654749;
-        Fri, 01 Sep 2023 10:00:54 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHJPyjBwm+y741kfbFbdRQxdIGw9Em/pz0RyI9RiLJV5FHKnVS0qpTj1aJYHTA51qRJoxtJMg==
-X-Received: by 2002:a17:90b:909:b0:26b:c3f:1503 with SMTP id bo9-20020a17090b090900b0026b0c3f1503mr3165230pjb.17.1693587653797;
-        Fri, 01 Sep 2023 10:00:53 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id e18-20020a17090301d200b001bb892a7a67sm3224160plh.1.2023.09.01.10.00.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Sep 2023 10:00:53 -0700 (PDT)
-Date:   Sat, 2 Sep 2023 01:00:49 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/3] common: rename get_page_size to _get_page_size
-Message-ID: <20230901170049.zwtectk3oooqwcr6@zlang-mailbox>
-References: <169335021210.3517899.17576674846994173943.stgit@frogsfrogsfrogs>
- <169335022356.3517899.16298598568849437206.stgit@frogsfrogsfrogs>
+        with ESMTP id S235729AbjIARk1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 13:40:27 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8520E5A;
+        Fri,  1 Sep 2023 10:40:24 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5DD2B621FA;
+        Fri,  1 Sep 2023 17:40:24 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5926BC433C7;
+        Fri,  1 Sep 2023 17:40:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693590023;
+        bh=NT32IHHCo6NiGkkgXV2GnG57YP8dnHCRP7HvOyk4WX8=;
+        h=From:Subject:Date:To:Cc:From;
+        b=tN0GaLB58OK4/nAR+CUwdihi9e3Ds2TjJsGqyRyx+arkKYsMJwXa++Mu6XGhWhWGb
+         bJPom8yNe6aEHBDNBfMa8yN+SjQ2FYwPSrdZTSY65POaTlHGN1I1H8cv8dev5aPDhO
+         wMzu0lIONkieIFWr/Tn3blh6nlGnbcUR2KpbuSbYJydW5YEh7sfHKz9/jC/FM1pOTo
+         OI8JI90xNRLfqyxSy/vI6+nHobrXtvuU1V+5sST+hILX/zW8bcqVzrD2S2+T6DRX4R
+         Bn/pDJ9+HhTDCAWSeULLIUZZXquM9acZzF8R1DuBKurFr353BMf6L+Vkzm3u92UY95
+         pV1x1CujPv3Cg==
+From:   Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH fstests v2 0/3] generic: skip a few tests on NFS
+Date:   Fri, 01 Sep 2023 13:39:54 -0400
+Message-Id: <20230901-nfs-skip-v2-0-9eccd59bc524@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <169335022356.3517899.16298598568849437206.stgit@frogsfrogsfrogs>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAOsh8mQC/2WNywrDIBBFfyXMupZoXk1W/Y+ShSRjMqRocERag
+ v9ecdvl4VzOvYDREzJM1QUeIzE5m0HdKlh2bTcUtGYGVaumfjRSWMOCDzrF0KtOd60ZsR8gz0+
+ Phj4l9QLDATkwzFnsxMH5b7mIsuj/WpSiFmvXLnLp9aiNeh7oLb7vzm8wp5R+KISElaoAAAA=
+To:     fstests@vger.kernel.org
+Cc:     linux-nfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
+        Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=948; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=NT32IHHCo6NiGkkgXV2GnG57YP8dnHCRP7HvOyk4WX8=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk8iIGxHxOtEo6e0yqXm7irha6Q6p5Fe9EX53q/
+ OowwhN7F4aJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZPIiBgAKCRAADmhBGVaC
+ FfOaD/wLN6iJvDMzQdk2gNIH97MQeyf1AzcxMf1h1LOkJJXgyD58xBqbjUnhRoFhiGGVPHm46iJ
+ I8wtlZMkNqdxPqeCnBgk0uRWUuy4blmiLWDevpDZa0RHquCykTg3JInuY2PDRkGJkcG2S5lA9xq
+ LlPTDuWcygeHE0fDC3McAn+boDP7DZLLYXqW/v4ULgz745WNFZv1Ye6KSKwnaRne9i/paq2xKn0
+ G/4fwWwNaSLlxVrp1C5K6vG2bzbd57j5AoJLg1FV44Pdql8Ws8cNipssg715m8TMsQ8OdDbnnY5
+ Lj5JgIpPcBhhWjKa8R0NP8kIPuLlDvf04Z8Hr4wTqK00T2E6tqukIVX9V5wTzspjw0mpKogE2Mr
+ JvH3seRXL1onqtoM/sBUVKPc5g3tRZUG9wgd2bukDuuKZdDSLnrzhO5CjEsK5VKLhOx/GBG//yV
+ t2+l2aUzUF0Fh2SNZTem52qAyXyIvR6CphApRLJ7Hw+lhxnNmTpZ+gW+bo3TTR77yCI0f6YFISr
+ uuqCqJINjJeswbGhk0yufefPO1eJNnkrDKvfZimj0XKQJHBz0d2b1SkqSm9X3rUr4/TUQNtl5UM
+ q5TBnCgR7rpEdzBaxXoZ3KjiytcpX9QsbDz6g3nJTgdAk0/e2HZ5IyyyUKLApxjvmAg4g/scPca
+ Zpv0WMat6V1fTIQ==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Aug 29, 2023 at 04:03:43PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This function does not follow the naming convention that common helpers
-> must start with an underscore.  Fix this.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+There are some tests in xfstests generic section that fail or are
+unreliable for reasons that are known but are difficult to detect via
+feature tests.
 
-Makes sense to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Check the FSTYP on these tests and _notrun if it's "nfs". Also add some
+documenting comments as to why we skip them on NFS.
 
->  common/btrfs      |    2 +-
->  common/filter     |    2 +-
->  common/rc         |    6 +++---
->  common/verity     |    2 +-
->  tests/btrfs/049   |    2 +-
->  tests/btrfs/106   |    2 +-
->  tests/btrfs/173   |    4 ++--
->  tests/btrfs/174   |    2 +-
->  tests/btrfs/175   |    4 ++--
->  tests/btrfs/176   |    4 ++--
->  tests/btrfs/192   |    2 +-
->  tests/btrfs/215   |    2 +-
->  tests/btrfs/251   |    2 +-
->  tests/btrfs/271   |    2 +-
->  tests/btrfs/274   |    2 +-
->  tests/btrfs/293   |    2 +-
->  tests/ext4/003    |    2 +-
->  tests/ext4/022    |    2 +-
->  tests/ext4/306    |    2 +-
->  tests/generic/416 |    2 +-
->  tests/generic/472 |    2 +-
->  tests/generic/495 |    2 +-
->  tests/generic/496 |    2 +-
->  tests/generic/497 |    2 +-
->  tests/generic/574 |    2 +-
->  tests/generic/636 |    2 +-
->  tests/generic/641 |    2 +-
->  tests/xfs/513     |    2 +-
->  tests/xfs/552     |    2 +-
->  tests/xfs/559     |    2 +-
->  30 files changed, 35 insertions(+), 35 deletions(-)
-> 
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index 0fec093d17..c9903a413c 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -489,7 +489,7 @@ _require_btrfs_support_sectorsize()
->  	local sectorsize=$1
->  
->  	# PAGE_SIZE as sectorsize is always supported
-> -	if [ $sectorsize -eq $(get_page_size) ]; then
-> +	if [ $sectorsize -eq $(_get_page_size) ]; then
->  		return
->  	fi
->  
-> diff --git a/common/filter b/common/filter
-> index f10ba78a04..509ee95039 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -228,7 +228,7 @@ _filter_xfs_io_blocks_modified()
->  
->  _filter_xfs_io_pages_modified()
->  {
-> -	PAGE_SIZE=$(get_page_size)
-> +	PAGE_SIZE=$(_get_page_size)
->  
->  	_filter_xfs_io_units_modified "Page" $PAGE_SIZE
->  }
-> diff --git a/common/rc b/common/rc
-> index b5bf3c3bcb..1618ded544 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1100,7 +1100,7 @@ _scratch_mkfs_blocksized()
->  	if ! [[ $blocksize =~ $re ]] ; then
->  		_notrun "error: _scratch_mkfs_sized: block size \"$blocksize\" not an integer."
->  	fi
-> -	if [ $blocksize -lt $(get_page_size) ]; then
-> +	if [ $blocksize -lt $(_get_page_size) ]; then
->  		_exclude_scratch_mount_option dax
->  	fi
->  
-> @@ -2808,7 +2808,7 @@ _require_scratch_swapfile()
->  	_scratch_mount
->  
->  	# Minimum size for mkswap is 10 pages
-> -	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> +	_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
->  
->  	# ext* has supported all variants of swap files since their
->  	# introduction, so swapon should not fail.
-> @@ -4667,7 +4667,7 @@ _require_file_block_size_equals_fs_block_size()
->  		_notrun "File allocation unit is larger than a filesystem block"
->  }
->  
-> -get_page_size()
-> +_get_page_size()
->  {
->  	echo $(getconf PAGE_SIZE)
->  }
-> diff --git a/common/verity b/common/verity
-> index e09377177d..03d175ce1b 100644
-> --- a/common/verity
-> +++ b/common/verity
-> @@ -61,7 +61,7 @@ _require_scratch_verity()
->  	# Therefore, we default to merkle_tree_block_size == min(fs_block_size,
->  	# page_size).  That maximizes the chance of verity actually working.
->  	local fs_block_size=$(_get_block_size $scratch_mnt)
-> -	local page_size=$(get_page_size)
-> +	local page_size=$(_get_page_size)
->  	if (( fs_block_size <= page_size )); then
->  		FSV_BLOCK_SIZE=$fs_block_size
->  	else
-> diff --git a/tests/btrfs/049 b/tests/btrfs/049
-> index 6993050b72..9569c14173 100755
-> --- a/tests/btrfs/049
-> +++ b/tests/btrfs/049
-> @@ -23,7 +23,7 @@ _spare_dev_get
->  swapfile="$SCRATCH_MNT/swap"
->  _scratch_pool_mkfs >/dev/null
->  _scratch_mount
-> -_format_swapfile "$swapfile" $(($(get_page_size) * 10)) >/dev/null
-> +_format_swapfile "$swapfile" $(($(_get_page_size) * 10)) >/dev/null
->  
->  check_exclusive_ops()
->  {
-> diff --git a/tests/btrfs/106 b/tests/btrfs/106
-> index 7496697f7a..7444e4d5a7 100755
-> --- a/tests/btrfs/106
-> +++ b/tests/btrfs/106
-> @@ -26,7 +26,7 @@ test_clone_and_read_compressed_extent()
->  	_scratch_mkfs >>$seqres.full 2>&1
->  	_scratch_mount $mount_opts
->  
-> -	PAGE_SIZE=$(get_page_size)
-> +	PAGE_SIZE=$(_get_page_size)
->  
->  	# Create our test file with 16 pages worth of data in a single extent
->  	# that is going to be compressed no matter which compression algorithm
-> diff --git a/tests/btrfs/173 b/tests/btrfs/173
-> index 9f53143ecc..4972a5a705 100755
-> --- a/tests/btrfs/173
-> +++ b/tests/btrfs/173
-> @@ -24,14 +24,14 @@ echo "COW file"
->  rm -f "$SCRATCH_MNT/swap"
->  touch "$SCRATCH_MNT/swap"
->  chmod 0600 "$SCRATCH_MNT/swap"
-> -_pwrite_byte 0x61 0 $(($(get_page_size) * 10)) "$SCRATCH_MNT/swap" >> $seqres.full
-> +_pwrite_byte 0x61 0 $(($(_get_page_size) * 10)) "$SCRATCH_MNT/swap" >> $seqres.full
->  $MKSWAP_PROG "$SCRATCH_MNT/swap" >> $seqres.full
->  swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->  swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
->  
->  echo "Compressed file"
->  rm -f "$SCRATCH_MNT/swap"
-> -_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> +_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
->  $CHATTR_PROG +c "$SCRATCH_MNT/swap" 2>&1 | grep -o "Invalid argument while setting flags"
->  
->  status=0
-> diff --git a/tests/btrfs/174 b/tests/btrfs/174
-> index 3bb5e7f918..0acd65f0e3 100755
-> --- a/tests/btrfs/174
-> +++ b/tests/btrfs/174
-> @@ -20,7 +20,7 @@ _scratch_mount
->  
->  $BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/swapvol" >> $seqres.full
->  swapfile="$SCRATCH_MNT/swapvol/swap"
-> -_format_swapfile "$swapfile" $(($(get_page_size) * 10)) > /dev/null
-> +_format_swapfile "$swapfile" $(($(_get_page_size) * 10)) > /dev/null
->  swapon "$swapfile"
->  
->  # Turning off nocow doesn't do anything because the file is not empty, not
-> diff --git a/tests/btrfs/175 b/tests/btrfs/175
-> index db877d4196..de52c71ee2 100755
-> --- a/tests/btrfs/175
-> +++ b/tests/btrfs/175
-> @@ -17,7 +17,7 @@ _require_scratch_swapfile
->  _check_minimal_fs_size $((1024 * 1024 * 1024))
->  
->  cycle_swapfile() {
-> -	local sz=${1:-$(($(get_page_size) * 10))}
-> +	local sz=${1:-$(($(_get_page_size) * 10))}
->  	_format_swapfile "$SCRATCH_MNT/swap" "$sz" > /dev/null
->  	swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->  	swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
-> @@ -47,7 +47,7 @@ _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
->  # Create the swap file, then add the device. That way we know it's all on one
->  # device.
-> -_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> +_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
->  scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | $AWK_PROG '{ print $2 }')"
->  $BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->  swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
-> diff --git a/tests/btrfs/176 b/tests/btrfs/176
-> index 7080d8608b..0ddff8d8e6 100755
-> --- a/tests/btrfs/176
-> +++ b/tests/btrfs/176
-> @@ -29,7 +29,7 @@ scratch_dev3="$(echo "${SCRATCH_DEV_POOL}" | $AWK_PROG '{ print $3 }')"
->  echo "Remove device"
->  _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
-> -_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> +_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
->  $BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->  swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->  # We know the swap file is on device 1 because we added device 2 after it was
-> @@ -47,7 +47,7 @@ _check_scratch_fs "$scratch_dev2"
->  echo "Replace device"
->  _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
-> -_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10)) > /dev/null
-> +_format_swapfile "$SCRATCH_MNT/swap" $(($(_get_page_size) * 10)) > /dev/null
->  $BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT" >> $seqres.full
->  swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
->  # Again, we know the swap file is on device 1.
-> diff --git a/tests/btrfs/192 b/tests/btrfs/192
-> index 7324c9e398..ea261b34fb 100755
-> --- a/tests/btrfs/192
-> +++ b/tests/btrfs/192
-> @@ -41,7 +41,7 @@ _require_scratch
->  _require_attrs
->  
->  # We require a 4K nodesize to ensure the test isn't too slow
-> -if [ $(get_page_size) -ne 4096 ]; then
-> +if [ $(_get_page_size) -ne 4096 ]; then
->  	_notrun "This test doesn't support non-4K page size yet"
->  fi
->  
-> diff --git a/tests/btrfs/215 b/tests/btrfs/215
-> index 3daa696aa6..006468984b 100755
-> --- a/tests/btrfs/215
-> +++ b/tests/btrfs/215
-> @@ -33,7 +33,7 @@ _scratch_mkfs > /dev/null
->  # blobk group
->  _scratch_mount $(_btrfs_no_v1_cache_opt)
->  
-> -pagesize=$(get_page_size)
-> +pagesize=$(_get_page_size)
->  blocksize=$(_get_block_size $SCRATCH_MNT)
->  
->  # For subpage case, since we still do read in full page size, if have 8 corrupted
-> diff --git a/tests/btrfs/251 b/tests/btrfs/251
-> index 4b6edd6cbe..af01095828 100755
-> --- a/tests/btrfs/251
-> +++ b/tests/btrfs/251
-> @@ -19,7 +19,7 @@ _begin_fstest auto quick compress dangerous
->  _supported_fs btrfs
->  _require_scratch
->  
-> -pagesize=$(get_page_size)
-> +pagesize=$(_get_page_size)
->  
->  # Read the content from urandom to a known safe location
->  $XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 $pagesize" "$tmp.good" > /dev/null
-> diff --git a/tests/btrfs/271 b/tests/btrfs/271
-> index c7c95b3e38..273799f179 100755
-> --- a/tests/btrfs/271
-> +++ b/tests/btrfs/271
-> @@ -25,7 +25,7 @@ _scratch_mount
->  
->  dev2=`echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}'`
->  
-> -pagesize=$(get_page_size)
-> +pagesize=$(_get_page_size)
->  blocksize=$(_get_block_size $SCRATCH_MNT)
->  sectors_per_page=$(($pagesize / $blocksize))
->  
-> diff --git a/tests/btrfs/274 b/tests/btrfs/274
-> index c0594e25de..ec7d66269a 100755
-> --- a/tests/btrfs/274
-> +++ b/tests/btrfs/274
-> @@ -30,7 +30,7 @@ swap_file="$SCRATCH_MNT/subvol/swap"
->  $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol | _filter_scratch
->  
->  echo "Creating and activating swap file..."
-> -_format_swapfile $swap_file $(($(get_page_size) * 32)) >> $seqres.full
-> +_format_swapfile $swap_file $(($(_get_page_size) * 32)) >> $seqres.full
->  _swapon_file $swap_file
->  
->  echo "Attempting to delete subvolume with swap file enabled..."
-> diff --git a/tests/btrfs/293 b/tests/btrfs/293
-> index f51d40ddec..5cbbee8fd1 100755
-> --- a/tests/btrfs/293
-> +++ b/tests/btrfs/293
-> @@ -29,7 +29,7 @@ _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
->  
->  swap_file="$SCRATCH_MNT/swapfile"
-> -_format_swapfile $swap_file $(($(get_page_size) * 64)) >> $seqres.full
-> +_format_swapfile $swap_file $(($(_get_page_size) * 64)) >> $seqres.full
->  
->  echo "Creating first snapshot..."
->  $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 | _filter_scratch
-> diff --git a/tests/ext4/003 b/tests/ext4/003
-> index 8ac467b89b..a70ad97a91 100755
-> --- a/tests/ext4/003
-> +++ b/tests/ext4/003
-> @@ -26,7 +26,7 @@ _supported_fs ext4
->  _require_scratch
->  _require_scratch_ext4_feature "bigalloc"
->  
-> -BLOCK_SIZE=$(get_page_size)
-> +BLOCK_SIZE=$(_get_page_size)
->  features=bigalloc
->  if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
->      features+=",encrypt"
-> diff --git a/tests/ext4/022 b/tests/ext4/022
-> index 321050b35c..96929cb8aa 100755
-> --- a/tests/ext4/022
-> +++ b/tests/ext4/022
-> @@ -27,7 +27,7 @@ _require_attrs
->  
->  # Block size
->  BLOCK_SIZE=4096
-> -if [[ $(get_page_size) -ne $BLOCK_SIZE ]]; then
-> +if [[ $(_get_page_size) -ne $BLOCK_SIZE ]]; then
->         _exclude_scratch_mount_option dax
->  fi
->  # Use large inodes to have enough space for experimentation
-> diff --git a/tests/ext4/306 b/tests/ext4/306
-> index db2562848e..715732a76e 100755
-> --- a/tests/ext4/306
-> +++ b/tests/ext4/306
-> @@ -37,7 +37,7 @@ if echo "${MOUNT_OPTIONS}" | grep -q 'test_dummy_encryption' ; then
->      features+=",encrypt"
->  fi
->  
-> -blksz=$(get_page_size)
-> +blksz=$(_get_page_size)
->  
->  $MKFS_EXT4_PROG -F -b $blksz -O "$features" $SCRATCH_DEV 512m >> $seqres.full 2>&1
->  _scratch_mount
-> diff --git a/tests/generic/416 b/tests/generic/416
-> index deb05f07dd..0f6e3bc9a1 100755
-> --- a/tests/generic/416
-> +++ b/tests/generic/416
-> @@ -22,7 +22,7 @@ _supported_fs generic
->  _require_scratch
->  
->  fs_size=$((128 * 1024 * 1024))
-> -page_size=$(get_page_size)
-> +page_size=$(_get_page_size)
->  
->  # We will never reach this number though
->  nr_files=$(($fs_size / $page_size))
-> diff --git a/tests/generic/472 b/tests/generic/472
-> index a64735caa4..7d11ba3700 100755
-> --- a/tests/generic/472
-> +++ b/tests/generic/472
-> @@ -57,7 +57,7 @@ swapfile_cycle $swapfile $((len + 3))
->  # Create a ridiculously small swap file.  Each swap file must have at least
->  # two pages after the header page.
->  echo "tiny swap" | tee -a $seqres.full
-> -swapfile_cycle $swapfile $(($(get_page_size) * 3))
-> +swapfile_cycle $swapfile $(($(_get_page_size) * 3))
->  
->  status=0
->  exit
-> diff --git a/tests/generic/495 b/tests/generic/495
-> index 5e03dfee62..84547f1823 100755
-> --- a/tests/generic/495
-> +++ b/tests/generic/495
-> @@ -30,7 +30,7 @@ test $blksize -eq $(getconf PAGE_SIZE) || \
->  touch "$SCRATCH_MNT/swap"
->  $CHATTR_PROG +C "$SCRATCH_MNT/swap" >> $seqres.full 2>&1
->  chmod 0600 "$SCRATCH_MNT/swap"
-> -$XFS_IO_PROG -c "truncate $(($(get_page_size) * 10))" "$SCRATCH_MNT/swap"
-> +$XFS_IO_PROG -c "truncate $(($(_get_page_size) * 10))" "$SCRATCH_MNT/swap"
->  "$here/src/mkswap" "$SCRATCH_MNT/swap"
->  "$here/src/swapon" "$SCRATCH_MNT/swap"
->  swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
-> diff --git a/tests/generic/496 b/tests/generic/496
-> index 4aeaffd319..12f1bc4f94 100755
-> --- a/tests/generic/496
-> +++ b/tests/generic/496
-> @@ -33,7 +33,7 @@ _scratch_mount >>$seqres.full 2>&1
->  
->  swapfile=$SCRATCH_MNT/swap
->  len=$((2 * 1048576))
-> -page_size=$(get_page_size)
-> +page_size=$(_get_page_size)
->  
->  swapfile_cycle() {
->  	local swapfile="$1"
-> diff --git a/tests/generic/497 b/tests/generic/497
-> index 6188e3854b..05e368ab6f 100755
-> --- a/tests/generic/497
-> +++ b/tests/generic/497
-> @@ -33,7 +33,7 @@ _scratch_mount >>$seqres.full 2>&1
->  
->  swapfile=$SCRATCH_MNT/swap
->  len=$((2 * 1048576))
-> -page_size=$(get_page_size)
-> +page_size=$(_get_page_size)
->  
->  swapfile_cycle() {
->  	local swapfile="$1"
-> diff --git a/tests/generic/574 b/tests/generic/574
-> index 5d12151079..067b3033a8 100755
-> --- a/tests/generic/574
-> +++ b/tests/generic/574
-> @@ -55,7 +55,7 @@ setup_zeroed_file()
->  round_up_to_page_boundary()
->  {
->  	local n=$1
-> -	local page_size=$(get_page_size)
-> +	local page_size=$(_get_page_size)
->  
->  	echo $(( (n + page_size - 1) & ~(page_size - 1) ))
->  }
-> diff --git a/tests/generic/636 b/tests/generic/636
-> index 10e658b68a..afb9df986b 100755
-> --- a/tests/generic/636
-> +++ b/tests/generic/636
-> @@ -24,7 +24,7 @@ _scratch_mount
->  touch "$SCRATCH_MNT/swap"
->  $CHATTR_PROG +C "$SCRATCH_MNT/swap" >> $seqres.full 2>&1
->  chmod 0600 "$SCRATCH_MNT/swap"
-> -_pwrite_byte 0x61 0 $(get_page_size) "$SCRATCH_MNT/swap" >> $seqres.full
-> +_pwrite_byte 0x61 0 $(_get_page_size) "$SCRATCH_MNT/swap" >> $seqres.full
->  "$here/src/mkswap" "$SCRATCH_MNT/swap"
->  "$here/src/swapon" "$SCRATCH_MNT/swap"
->  swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
-> diff --git a/tests/generic/641 b/tests/generic/641
-> index 1fd3db2adb..124f2e1dae 100755
-> --- a/tests/generic/641
-> +++ b/tests/generic/641
-> @@ -40,7 +40,7 @@ make_unaligned_swapfile()
->  
->  _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount
-> -psize=`get_page_size`
-> +psize=`_get_page_size`
->  bsize=`_get_file_block_size $SCRATCH_MNT`
->  # Due to we need page-unaligned blocks, so blocksize < pagesize is necessary.
->  # If not, try to make a smaller enough block size
-> diff --git a/tests/xfs/513 b/tests/xfs/513
-> index eb5ad8ee98..ce2bb34916 100755
-> --- a/tests/xfs/513
-> +++ b/tests/xfs/513
-> @@ -178,7 +178,7 @@ echo "** start xfs mount testing ..."
->  # Test allocsize=size
->  # Valid values for this option are page size (typically 4KiB) through to 1GiB
->  do_mkfs
-> -pagesz=$(get_page_size)
-> +pagesz=$(_get_page_size)
->  if [ $pagesz -ge 1024 ];then
->  	pagesz="$((pagesz / 1024))k"
->  fi
-> diff --git a/tests/xfs/552 b/tests/xfs/552
-> index 172ed2065d..cb97b2ff6c 100755
-> --- a/tests/xfs/552
-> +++ b/tests/xfs/552
-> @@ -30,7 +30,7 @@ mkdir $testdir
->  
->  echo "Create the original files"
->  nr=16
-> -blksz=$(get_page_size)
-> +blksz=$(_get_page_size)
->  _pwrite_byte 0x61 0 $((blksz * nr)) $testdir/testfile >> $seqres.full
->  _pwrite_byte 0x62 0 $((blksz * nr)) $testdir/poisonfile >> $seqres.full
->  seq 0 2 $((nr - 1)) | while read i; do
-> diff --git a/tests/xfs/559 b/tests/xfs/559
-> index 92822d26c7..cffe5045a5 100755
-> --- a/tests/xfs/559
-> +++ b/tests/xfs/559
-> @@ -42,7 +42,7 @@ $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
->  _require_pagecache_access $SCRATCH_MNT
->  
->  blocks=10
-> -blksz=$(get_page_size)
-> +blksz=$(_get_page_size)
->  filesz=$((blocks * blksz))
->  dirty_offset=$(( filesz - 1 ))
->  write_len=$(( ( (blocks - 1) * blksz) + 1 ))
-> 
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+Changes in v2:
+- switch to using _supported_fs()
+- Link to v1: https://lore.kernel.org/r/20230831-nfs-skip-v1-0-d54c1c6a9af2@kernel.org
+
+---
+Jeff Layton (3):
+      generic/294: don't run this test on NFS
+      generic/357: don't run this test on NFS
+      generic/187: don't run this test on NFS
+
+ tests/generic/187 | 6 +++++-
+ tests/generic/294 | 6 ++++--
+ tests/generic/357 | 5 +++++
+ 3 files changed, 14 insertions(+), 3 deletions(-)
+---
+base-commit: 0ca1d4fbb2e9a492968f2951df101f24477f7991
+change-id: 20230831-nfs-skip-7625a54f9e67
+
+Best regards,
+-- 
+Jeff Layton <jlayton@kernel.org>
 
