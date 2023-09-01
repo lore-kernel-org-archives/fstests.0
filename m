@@ -2,95 +2,119 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10729C83F3D
-	for <linux-fstests@archiver.kernel.org>; Thu, 31 Aug 2023 18:40:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80E16CA0FE3
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 02:16:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347080AbjHaSki (ORCPT
+        id S1348040AbjIACQS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 31 Aug 2023 14:40:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43546 "EHLO
+        Thu, 31 Aug 2023 22:16:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347075AbjHaSki (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 14:40:38 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D014AE5D;
-        Thu, 31 Aug 2023 11:40:35 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 55128B82344;
-        Thu, 31 Aug 2023 18:40:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2E04C433C8;
-        Thu, 31 Aug 2023 18:40:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693507233;
-        bh=sTbUtU7pe3hLO5cKrjbZHVIkvXTCJz4IN7jaRAjZQnw=;
-        h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-        b=uKMUinIRj3ctyEjlRmcp83bET50F1X8frlz5+u/ftvjAmuZ1yi5HUmgvXbYO3GQNp
-         7wB+/sm4yPXkPifmIbqltGUKUQ7NUx46UI7ydbyejBNckrKxcDbbDUiVyZPxEBnqaQ
-         XAbsi/fGn/zzCLbnGfFdjQZkYSHLl0FevUumv25k0xCTMbsJSq67oqCKGGcmZCPs+i
-         ushgGaMRbolmmEA9el1VyLPiNXrL79jjYfwBVADM1hRiDsc8/RFNA7mrcE0IM0vL3T
-         RMtEmfJc3IXAY9g14IuLnumX7ZkUbEG+uld9iaKDF26X+w1EvwQJNPeO5/YgieWO5m
-         dJmkQdMV2xitQ==
-From:   Jeff Layton <jlayton@kernel.org>
-Date:   Thu, 31 Aug 2023 14:40:29 -0400
-Subject: [PATCH fstests 2/3] generic/357: don't run this test on NFS
+        with ESMTP id S237340AbjIACQR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2023 22:16:17 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ADDDE6E
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 19:15:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693534529;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=2m6NIfRWGU81FmC4veM1riQ8LgQZRLXR/87iheQ744s=;
+        b=DRy8yu0m2vhySb5swePNMm4Ra7Cc5jaqNHz/aTnK+AIwygEh1ZvmajgiBFTlPiH/qA3Szh
+        aimmXADPG+/MTcHSNPE089IR1cItqazZYHykassusfFSIzVrWDggQt+m99AbMZJeRy2WJi
+        kawgsGt5EHX6YC6wb3OHTO5nKOXY2k8=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-220-RzxTHzs0OUmiKKifo88D5Q-1; Thu, 31 Aug 2023 22:15:28 -0400
+X-MC-Unique: RzxTHzs0OUmiKKifo88D5Q-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1c0aaf4caaaso16520765ad.2
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2023 19:15:27 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693534527; x=1694139327;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2m6NIfRWGU81FmC4veM1riQ8LgQZRLXR/87iheQ744s=;
+        b=ehcpSrpBfgSIp0+cyc3MLHm/IzXaYEYm5MCVStgyJ74Pc8DC39dmsjlm5lOs0/qElR
+         C9KxPkJq1HopNmZ0RDankRKGI+EQy740osq6O1L81ttHVpVF3yz7vgmdcw5iP1mViAcR
+         ADf6SH5d+YW1U1TSuiUE1sZ1YBSnTB10FKZasWEgLXcIjPVIhhiRU4zi0OZRE+UfALMm
+         NM/+/6lMwkky6INn35tVDVUHQDMWcLjtE1CWX635DvLqCvq6BOoLLSvtrQpIHrfGIG7H
+         6To+L0KiXAkOAhoRe7dQN+4Qu6r1NbSgo2lbgAi+O+lH9OQuWZ2h0gsjEr1XZEwpw1oa
+         clwA==
+X-Gm-Message-State: AOJu0Yw67uyfvJfC5Q70Jn2/Zmb/1HExmRwsvqjsdZ5M9ADDD5LTbtK3
+        SMJ0ZNq4K2LR04Ajs/GOwCbVROMUSosLQoFQD8MsiGGEPV+l8fyGXOAcgwTZa6iU7IS80C1q4BP
+        K3+vmLjCjqdXEdmqFJA==
+X-Received: by 2002:a17:902:cec5:b0:1b7:e49f:1d with SMTP id d5-20020a170902cec500b001b7e49f001dmr1657590plg.62.1693534526967;
+        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFx/IJbocd1YEkOLvgyP4KFjhmhiNB/+KDSKaRO+S0AvMTeO30g5cw8wAk37UysjUP0jy9LBQ==
+X-Received: by 2002:a17:902:cec5:b0:1b7:e49f:1d with SMTP id d5-20020a170902cec500b001b7e49f001dmr1657577plg.62.1693534526508;
+        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id o9-20020a170902bcc900b001b87bedcc6fsm1833684pls.93.2023.08.31.19.15.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 31 Aug 2023 19:15:26 -0700 (PDT)
+Date:   Fri, 1 Sep 2023 10:15:22 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] generic/650: race mount and unmount with cpu hotplug
+ too
+Message-ID: <20230901021522.oczewijtf5dbb7dr@zlang-mailbox>
+References: <169335047228.3523635.3342369338633870707.stgit@frogsfrogsfrogs>
+ <169335048358.3523635.7191015334485086811.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230831-nfs-skip-v1-2-d54c1c6a9af2@kernel.org>
-References: <20230831-nfs-skip-v1-0-d54c1c6a9af2@kernel.org>
-In-Reply-To: <20230831-nfs-skip-v1-0-d54c1c6a9af2@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org, Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=794; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=sTbUtU7pe3hLO5cKrjbZHVIkvXTCJz4IN7jaRAjZQnw=;
- b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk8N6f9Bxt+Uut7uAZS43L1HCjDS3B89EjtW8TP
- 4kRqVGEbmWJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZPDenwAKCRAADmhBGVaC
- FfnrD/oCwPdyHj3pRHpzwlNhXRvdBqgaUT6tmLF12riO7l3RyW1S5UZ6echRnoZzBwepgoRDcNA
- CZVIiH36pGJMrZ3XAgPDAm/Nu/eT8Xda8qYivOPV40ciwpGL5TqV/fWGpJtnOw3Mvpt5/aTb9YF
- sKatYB5ry4VTB9Jsds0B7HdQr7b4mx7LVJCtYp2hLwDPmrEbE32qqhxDUnZYq0WXhPGLtKi4JVG
- Cy2RX8Fb1lkHRzX3uowv+fTfA99rZULpSPZAyPg3bWbrlGJbo29A+OpZtoTdQaoIDFes2JzTk/B
- yOoH9tMP7Ir6uFnxVGDEBxr62n46sjdpyKHahQVP4FhrhJEi2O0CDakJjTZEzTvT5pKhF6XKIHF
- Owsm6Qbhb7ZXVRcPboIM5ioIu1+2/OH/lWLeztFDgeiMOKgwZUq7iCrKqVgCtsM5QzHKyPX6OvM
- tGiwPnDO/5ECqNCj4jZXmYQKSu7FepVUdS7+R/JKIRP4GDIVIHejG55citAMOmtVqUgPKbEgvCR
- /1Qw5309U0vCRKXJ2nNKLKkhKoy2GQsLKFzC+aeJnDwuWMnHkLT4604POwMeGcybQkFqO3j3tPh
- X/6hAwTNK8XHnYhCZNSWzOKt2hYNdhBSX57iZ6jTlbyMX1CncIC+gOCvlbL/ruPqIGVSjQ+4kbh
- UVJzu0A7nxHgX4Q==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <169335048358.3523635.7191015334485086811.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-NFS doesn't keep track of whether a file is reflinked or not, so it
-doesn't prevent this behavior. It shouldn't be a problem for NFS anyway,
-so just skip this test there.
+On Tue, Aug 29, 2023 at 04:08:03PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Ritesh Harjani reported that mount and unmount can race with the xfs cpu
+> hotplug notifier hooks and crash the kernel.  Extend this test to
+> include that.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- tests/generic/357 | 5 +++++
- 1 file changed, 5 insertions(+)
+Good to me, and it helps to avoid this test takes too long time to run.
 
-diff --git a/tests/generic/357 b/tests/generic/357
-index ce748f854327..909f0c8c6762 100755
---- a/tests/generic/357
-+++ b/tests/generic/357
-@@ -24,6 +24,11 @@ _cleanup()
- . ./common/reflink
- 
- # real QA test starts here
-+
-+# For NFS, a reflink is just a CLONE operation, and after that
-+# point it's dealt with by the server.
-+test $FSTYP = "nfs"  && _notrun "NFS allows reflinked swapfiles"
-+
- _require_scratch_swapfile
- _require_scratch_reflink
- _require_cp_reflink
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
--- 
-2.41.0
+>  tests/generic/650 |   13 ++++++++++---
+>  1 file changed, 10 insertions(+), 3 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/650 b/tests/generic/650
+> index 05c939b84f..773f93c7cb 100755
+> --- a/tests/generic/650
+> +++ b/tests/generic/650
+> @@ -67,11 +67,18 @@ fsstress_args=(-w -d $stress_dir)
+>  nr_cpus=$((LOAD_FACTOR * nr_hotplug_cpus))
+>  test "$nr_cpus" -gt 1024 && nr_cpus="$nr_hotplug_cpus"
+>  fsstress_args+=(-p $nr_cpus)
+> -test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
+> +if [ -n "$SOAK_DURATION" ]; then
+> +	test "$SOAK_DURATION" -lt 10 && SOAK_DURATION=10
+> +	fsstress_args+=(--duration="$((SOAK_DURATION / 10))")
+> +fi
+>  
+> -nr_ops=$((25000 * TIME_FACTOR))
+> +nr_ops=$((2500 * TIME_FACTOR))
+>  fsstress_args+=(-n $nr_ops)
+> -$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
+> +for ((i = 0; i < 10; i++)); do
+> +	$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
+> +	_test_cycle_mount
+> +done
+> +
+>  rm -f $sentinel_file
+>  
+>  # success, all done
+> 
 
