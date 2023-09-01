@@ -2,107 +2,138 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B916BCA0FEE
-	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 17:40:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51E7CCA0FF3
+	for <linux-fstests@archiver.kernel.org>; Fri,  1 Sep 2023 19:09:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350444AbjIARkd (ORCPT
+        id S244076AbjIATJH (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 1 Sep 2023 13:40:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51366 "EHLO
+        Fri, 1 Sep 2023 15:09:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345679AbjIARkc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 13:40:32 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23C45E5F;
-        Fri,  1 Sep 2023 10:40:29 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 52EEFCE23ED;
-        Fri,  1 Sep 2023 17:40:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C781C433CD;
-        Fri,  1 Sep 2023 17:40:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693590025;
-        bh=l2j+uv/+MikdtqQ3F2+J+3rQEZpSbqnYX/8LIP4jhGo=;
-        h=From:Date:Subject:References:In-Reply-To:To:Cc:From;
-        b=RDWxyLaW1kEsjwhDUjIogoBxbJIjuzXLI//gQ7sz7x/45mEaG+12y/u8XwG37fXGV
-         eJyDhqRhfL03MzUw8h5ZGanmPh6L1Pyx2bHq4tx+BNcp43CNMYRUxFt0m1Syct4nub
-         F8wq8QRDsqI//e8KmJdYgLczIkLmnz/a6DI1vloWLnfb30IwGb8PxNxatCRuspRLsB
-         BPU/GgLW+2MvKCu4fZiGSqdc8Zq04nK6K/+u5IV7wVBjz5PM0YdovfixMzuswn9Xlh
-         W4K0KR9cbkxFCfTqw4Q3d209bPCZuvh8A4GqMPHDAGitx3OGCvhmL1+4O17YNZXz7I
-         UHbbYhSluJuuQ==
-From:   Jeff Layton <jlayton@kernel.org>
-Date:   Fri, 01 Sep 2023 13:39:57 -0400
-Subject: [PATCH fstests v2 3/3] generic/187: don't run this test on NFS
+        with ESMTP id S229824AbjIATJH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2023 15:09:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CD6EE72
+        for <fstests@vger.kernel.org>; Fri,  1 Sep 2023 12:08:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1693595298;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=9QBxlQOEKlrGB+KsqdXab5YaWrxm9eLQ6OFAGzxD/Oo=;
+        b=jRd2uoq99JEr9q15+7Y3uvmw/5BiDdzSOXsr65aGiwBUXn8UoqmLGVrffgcL6JT0Wf4s7p
+        R+cOvipXOcZNuFdwAqbMpzFjY0vfRcuY7i/hQG0I/xhrDre5KY3YGaowd7jjpBiFKBoTWB
+        6qdt4PE12SutBO1clWjAR+smxPc+lyE=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-601-VftuMoZaMNyySpmCp1U8Tw-1; Fri, 01 Sep 2023 15:08:07 -0400
+X-MC-Unique: VftuMoZaMNyySpmCp1U8Tw-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-56c379a8250so2672443a12.0
+        for <fstests@vger.kernel.org>; Fri, 01 Sep 2023 12:08:07 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693595286; x=1694200086;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9QBxlQOEKlrGB+KsqdXab5YaWrxm9eLQ6OFAGzxD/Oo=;
+        b=Ydw1mtIVbVIGP4d2SpmhuWG8kbv5nOLL3iraixEyquKjqqD9InrgJTzkTJXBpa6F7J
+         kwl76EzM96/RZgycAH2cl1bcXAEzVvsaCj+9UEt6ukCb8YD4uZO2a+GIgG0GXiRlMciS
+         ck6cbtdxiDetG1qQF2R1O5coyW9wt7DidzSVRSgVxVhsxUQjKTueBMu1Vq/p3pe7dq7a
+         NyHwJDiTXNKfyZ4QMYT8g5saXxgXUVaNoNvkjhCBYiSqGx5i2lamseDAnQ/+f6CS1/Ei
+         BkcMUk736CV7WLhj22KbNEnpGp3MYaqnC1kDOxAS58apj+qUczJm12zk14NlDsPwFHU8
+         D8aQ==
+X-Gm-Message-State: AOJu0YyX8+UDbuJE33ycQhVxfplRNch5kAhElo8Ed8caRsymi+U+74no
+        w+0tRqYCtt9XXTCHiPgMtG/Dm2alMU/rr7kpCOi/0wu9DtG0GoCh8hnQkk1+IfbPtb+wBwrM16W
+        2XtB7R7IrSSAICgzqxooaKvTadecbybU=
+X-Received: by 2002:a17:903:41c4:b0:1c0:c86a:5425 with SMTP id u4-20020a17090341c400b001c0c86a5425mr4952418ple.19.1693595286074;
+        Fri, 01 Sep 2023 12:08:06 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHh6zqtDyMg94DjGM19x/JaA8nVEVRIQLedb+5Qq1URb1o4E6tTqMt68eYcP9xFKDxnLzv7pA==
+X-Received: by 2002:a17:903:41c4:b0:1c0:c86a:5425 with SMTP id u4-20020a17090341c400b001c0c86a5425mr4952393ple.19.1693595285777;
+        Fri, 01 Sep 2023 12:08:05 -0700 (PDT)
+Received: from zlang-mailbox ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d10-20020a170902654a00b001b80760fd04sm3358614pln.112.2023.09.01.12.08.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Sep 2023 12:08:05 -0700 (PDT)
+Date:   Sat, 2 Sep 2023 03:08:02 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 3/3] xfs/559: adapt to kernels that use large folios for
+ writes
+Message-ID: <20230901190802.zrttyndmri3rgekm@zlang-mailbox>
+References: <169335021210.3517899.17576674846994173943.stgit@frogsfrogsfrogs>
+ <169335022920.3517899.399149462227894457.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230901-nfs-skip-v2-3-9eccd59bc524@kernel.org>
-References: <20230901-nfs-skip-v2-0-9eccd59bc524@kernel.org>
-In-Reply-To: <20230901-nfs-skip-v2-0-9eccd59bc524@kernel.org>
-To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1122; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=l2j+uv/+MikdtqQ3F2+J+3rQEZpSbqnYX/8LIP4jhGo=;
- b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBk8iIHT+4iGaE6sqm2dib7aeJMbohKQNec8L/X4
- m0paJUudUuJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZPIiBwAKCRAADmhBGVaC
- Fe43D/4qiB85y6dEnXVcO61XtWfDa5BVcXkH2EnobK/E/Q9/S99y/uWqz5MqlOLV+dqwab7bL8+
- NqASWCCkL94aTclfS4i2HgzbIwoVCgPnc2U6A7Ru/poL9uaisaKE2kIRu8PkWXjmM67E/1b0aNl
- AtnX3RbeCh6UDa0vK14cF9xDcb5UYphJCfQqC+LArT4vKnrjZkHg8bYuQKSvZFkcnhFKY6n47fD
- xqMTRz+d9kMLsgybC/wNR2qkfJPuxjLWUCtkyFySrZxpqouE2KFWzwRHxeErAkALTR03vJ36/H4
- HK5cA1+xWA+Z+t9E6qp1r2ArekvheswqlWlYpgnNjuxSBpl0scKtQxzb0hpC6MjGZclQGzFxy3P
- X1NUPv2JjgaFG6ZA9eCj2Fv5lShhjTQYHZ9eOZbzq+9cALMCGnq04XuI+NVKGbD8qWmAMBEiNBQ
- oDPr3OUJaqLNTenqY/7rBLoyWYy77bv//uh/IilxYvvo/Vm3kSsRp4Jm/06aV0KOqliwJHtKu38
- fQZ3D3c6gGaMcBYQH5MJ7weWQU96IROoAkYAB/kVRTQcH12rHPmN4KfAIvKgEw132VxTvACXOps
- O59oDorvMOrCKxgqCAAx1QdOH6QFDCqgrtZajrhTAp1fbZhZ/eGPZnsINXSG+9EpoHWJIWdAGdP
- XDwAOGQHnAnIlgg==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <169335022920.3517899.399149462227894457.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-This test is unreliable on NFS. It fails consistently when run vs. a
-server exporting btrfs, but passes when the server exports xfs. Since we
-don't have any sort of attribute that we can require to test this, just
-skip this one on NFS.
+On Tue, Aug 29, 2023 at 04:03:49PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> The write invalidation code in iomap can only be triggered for writes
+> that span multiple folios.  If the kernel reports a huge page size,
+> scale up the write size.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/xfs/559 |   29 ++++++++++++++++++++++++++++-
+>  1 file changed, 28 insertions(+), 1 deletion(-)
+> 
+> 
+> diff --git a/tests/xfs/559 b/tests/xfs/559
+> index cffe5045a5..64fc16ebfd 100755
+> --- a/tests/xfs/559
+> +++ b/tests/xfs/559
+> @@ -42,11 +42,38 @@ $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
+>  _require_pagecache_access $SCRATCH_MNT
+>  
+>  blocks=10
+> -blksz=$(_get_page_size)
+> +
+> +# If this kernel advertises huge page support, it's possible that it could be
+> +# using large folios for the page cache writes.  It is necessary to write
+> +# multiple folios (large or regular) to triggering the write invalidation,
+> +# so we'll scale the test write size accordingly.
+> +blksz=$(_get_hugepagesize)
 
-Also, subsume the check for btrfs into the _supported_fs check, and add
-a comment for it.
+Isn't _require_hugepages needed if _get_hugepagesize is used?
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- tests/generic/187 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+Thanks,
+Zorro
 
-diff --git a/tests/generic/187 b/tests/generic/187
-index 0653b92f12f4..1b3509424462 100755
---- a/tests/generic/187
-+++ b/tests/generic/187
-@@ -29,13 +29,17 @@ _cleanup()
- . ./common/reflink
- 
- # real QA test starts here
-+
-+# btrfs can't fragment free space. This test is unreliable on NFS, as it
-+# depends on the exported filesystem.
-+_supported_fs ^btrfs ^nfs generic
- _require_scratch_reflink
- _require_cp_reflink
- _require_xfs_io_command "falloc"
- _require_xfs_io_command "fpunch"
--test $FSTYP = "btrfs" && _notrun "Can't fragment free space on btrfs."
- _require_odirect
- 
-+
- _fragment_freesp()
- {
- 	file=$1
-
--- 
-2.41.0
+> +base_pagesize=$(_get_page_size)
+> +test -z "$blksz" && blksz=${base_pagesize}
+>  filesz=$((blocks * blksz))
+>  dirty_offset=$(( filesz - 1 ))
+>  write_len=$(( ( (blocks - 1) * blksz) + 1 ))
+>  
+> +# The write invalidation that we're testing below can only occur as part of
+> +# a single large write.  The kernel limits writes to one base page less than
+> +# 2GiB to prevent lengthy IOs and integer overflows.  If the block size is so
+> +# huge (e.g. 512M huge pages on arm64) that we'd exceed that, reduce the number
+> +# of blocks to get us under the limit.
+> +max_writesize=$((2147483647 - base_pagesize))
+> +if ((write_len > max_writesize)); then
+> +	blocks=$(( ( (max_writesize - 1) / blksz) + 1))
+> +	# We need at least three blocks in the file to test invalidation
+> +	# between writes to multiple folios.  If we drop below that,
+> +	# reconfigure ourselves with base pages and hope for the best.
+> +	if ((blocks < 3)); then
+> +		blksz=$base_pagesize
+> +		blocks=10
+> +	fi
+> +	filesz=$((blocks * blksz))
+> +	dirty_offset=$(( filesz - 1 ))
+> +	write_len=$(( ( (blocks - 1) * blksz) + 1 ))
+> +fi
+> +
+>  # Create a large file with a large unwritten range.
+>  $XFS_IO_PROG -f -c "falloc 0 $filesz" $SCRATCH_MNT/file >> $seqres.full
+>  
+> 
 
