@@ -2,207 +2,249 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE5F6CA0FFC
-	for <linux-fstests@archiver.kernel.org>; Sat,  2 Sep 2023 06:00:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2017C71153
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Sep 2023 07:54:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229566AbjIBGAO (ORCPT
+        id S232051AbjICHyV (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 2 Sep 2023 02:00:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47490 "EHLO
+        Sun, 3 Sep 2023 03:54:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44742 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229469AbjIBGAN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Sep 2023 02:00:13 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78A8710F4;
-        Fri,  1 Sep 2023 23:00:08 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id EC08260109;
-        Sat,  2 Sep 2023 06:00:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CE2EC433C7;
-        Sat,  2 Sep 2023 06:00:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693634407;
-        bh=saczbWx+1hfN44P1/Z94O/nSgTtrRD1z4ja7TeKKr58=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=FhTwn+EBmAmWrZ1x2aEi3vqWp/ivJl+U2D6x/4SMZnDsYiKlWv5+OeVQA3BsKOkK1
-         vozrLukmaZTnubi1BtKJsEbRIpafLj9gDZPlPcxhoeAxYhZ3xBjAk9/5EzRUloaY4P
-         bWSt3Btq3LaxbhhbzCwkF30zmLXWHa32LGQZmtG/T97bbDvhnDZrmh1zBa3feSfXcv
-         y1+HHgXsEyy/Tkkn3+sl0VLw4srQsqmQjLGICj8oiILXOfwPU9Xm3SvgWRY3KCyNsY
-         koCbNJavt+KBSz6sQMhr168wvPuC5oV4vRGiCh8IdDvTp005IBfijkQ5N65eT93WhP
-         gVbdUhlhVLKqw==
-Date:   Sat, 2 Sep 2023 14:00:01 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/650: race mount and unmount with cpu hotplug
- too
-Message-ID: <20230902060001.p67agyowhbtauenf@zlang-mailbox>
-References: <169335047228.3523635.3342369338633870707.stgit@frogsfrogsfrogs>
- <169335048358.3523635.7191015334485086811.stgit@frogsfrogsfrogs>
- <20230902053358.m7ys4wcfzgqisk6o@zlang-mailbox>
- <20230902054046.GB28170@frogsfrogsfrogs>
+        with ESMTP id S229464AbjICHyV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2023 03:54:21 -0400
+Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 656C212E;
+        Sun,  3 Sep 2023 00:54:17 -0700 (PDT)
+Received: by mail-wm1-x335.google.com with SMTP id 5b1f17b1804b1-401c90ed2ecso5114015e9.0;
+        Sun, 03 Sep 2023 00:54:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1693727656; x=1694332456; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=myK1oq3x664TINacbafir9+NyUQlPgaIT0SL5O6FbM8=;
+        b=k6lgluYkymHbb1qJ+1dWlMLfwPWN/6arQrx+vOlxc1kmZg+aygb0xgjFB+302dcYW4
+         Vkj1x1f+sfb6NO39EW03NVSscHjnG+06f6/vM14ZnIGfrNJ4OTx3I+2see+cXQQJNRWj
+         pBP/8xXhof5QLe3V8LA0V96GHH4y/zDP8xmvtFWWZQbP7pIKu9PtF1sfvISRp2KLlAYf
+         SEELulgE2hzs+ujT6vROOEDHRLXU4EMaWk1rd/J+ASjtnYbqJOEazMqPzU8NAafRGHoa
+         lesk/hDLfjfBgoVClIE+AfbeZYEMzkuUYqcfhoY6FWojKyXRnfHYxLBu1KlmB701eDgR
+         Bxwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1693727656; x=1694332456;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=myK1oq3x664TINacbafir9+NyUQlPgaIT0SL5O6FbM8=;
+        b=IzeIcfi+uVbEXaH+bCewmIvJOgm8KB0NpD4HMG9H8U+drVRKXbhwxNWJoAIOjFM3AB
+         sTpmLv5r+yitKJopE5tVQ+lczSNTHIalIWGZ6IeTSIMJI1QID0PID7HYbv/62Uii1ioe
+         BAYH85Zp7iQy74OP1LT5Gcd27i5+akmAd76Mw3XtlcmczuwogQXvyrtdguHGGMd6LX1Z
+         pmESObd7SqQhDyXxj21xuPvwXWuyWKg3Uy+gWquHvyZJrFNFhYVqBhExTKr3y/pwDTCG
+         70o0/0i042RpCQP7I83X4EzNgZeWcjnl21GUeRwEdA+HjVMGAQ13HIWeiVPSSs9XpdZ8
+         PbXA==
+X-Gm-Message-State: AOJu0YxsLnIDvUrxSbbkCjn6dsJxfvEsdQDjI/na4v6e1dF6e32eTz2e
+        DN698w9zB9BlW547MeVYr3Ujd1tizks=
+X-Google-Smtp-Source: AGHT+IEppZZBUdzPKcjVr24WYr7S85jEbxy5QxrCXDGa2M7PnQRKRb7T4FF1blHQwEkFjj7WKTZdDw==
+X-Received: by 2002:a05:600c:11c7:b0:3fe:d7c8:e0d with SMTP id b7-20020a05600c11c700b003fed7c80e0dmr4734769wmi.34.1693727655535;
+        Sun, 03 Sep 2023 00:54:15 -0700 (PDT)
+Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
+        by smtp.gmail.com with ESMTPSA id 17-20020a05600c021100b003fefca26c72sm10328040wmi.23.2023.09.03.00.54.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 03 Sep 2023 00:54:15 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Alexander Larsson <alexl@redhat.com>,
+        Christian Brauner <brauner@kernel.org>,
+        linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCH] overlay: add test for persistent unique fsid
+Date:   Sun,  3 Sep 2023 10:54:11 +0300
+Message-Id: <20230903075411.2596590-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230902054046.GB28170@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 01, 2023 at 10:40:46PM -0700, Darrick J. Wong wrote:
-> On Sat, Sep 02, 2023 at 01:33:58PM +0800, Zorro Lang wrote:
-> > On Tue, Aug 29, 2023 at 04:08:03PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Ritesh Harjani reported that mount and unmount can race with the xfs cpu
-> > > hotplug notifier hooks and crash the kernel.  Extend this test to
-> > > include that.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > 
-> > Oh, it covers a new crash bug, right? I just hit it [1]. Is there a known fix
-> > which can be specified by _fixed_by....?
-> 
-> https://lore.kernel.org/linux-xfs/ZO6J4W9msOixUk05@dread.disaster.area/T/#t
-> 
-> Not merged yet, will ask Chandan to pull all my pending fixes next
-> week.
+Test overlayfs fsid behavior with new mount options uuid=null/on
+that were introduced in kernel v6.6:
 
-Thanks, I'll add this link into commit log. We can add the _fixed_by... later.
-Or if you like, I can let this patchset wait one week.
+- Test inherited upper fs fsid with mount option uuid=off/null
+- Test uuid=null behavior for existing overlayfs by default
+- Test persistent unique fsid with mount option uuid=on
+- Test uuid=on behavior for new overlayfs by default
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+
+Zorro,
+
+This is the functional test for an overlayfs feature merged to v6.6.
+The test does _notrun on older kernels:
+
+overlay/081 14s ...  [07:40:13][   57.780790] overlay: Bad value for 'uuid'
+ [07:40:14] [not run]
+	overlay/081 -- Overlayfs does not support unique fsid feature
+
+The test for another big overlayfs feature that was merged to v6.6,
+overlay/080 (validate lower using fs-verity) is already merged to fstests.
+
+Note that overlay/080 requires running overlayfs over a base filesystem
+with fs-verity support enabled, for example, on ext4 formatted with
+mkfs.ext4 -O verity [1].
 
 Thanks,
-Zorro
+Amir.
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > [1]
-> > [12328.869261] run fstests generic/650 at 2023-09-01 21:29:58
-> > [12330.643585] smpboot: CPU 38 is now offline
-> > [-- MARK -- Sat Sep  2 01:30:00 2023]
-> > [12332.435309] smpboot: CPU 164 is now offline
-> > [12333.137984] smpboot: CPU 94 is now offline
-> > [12333.818337] smpboot: CPU 63 is now offline
-> > [12334.959559] smpboot: CPU 127 is now offline
-> > [12335.631255] smpboot: CPU 160 is now offline
-> > ....
-> > ....
-> > [12555.494184] smpboot: Booting Node 1 Processor 193 APIC 0xb3
-> > [12556.213072] smpboot: CPU 170 is now offline
-> > [12557.409451] smpboot: CPU 109 is now offline
-> > [12558.013384] XFS (pmem1): Unmounting Filesystem 23992a48-9538-4c53-8312-becd4fcf4f0a
-> > [12558.029879] smpboot: CPU 191 is now offline
-> > [12558.074326] general protection fault, probably for non-canonical address 0xdffffc0000000002: 0000 [#1] PREEMPT SMP KASAN NOPTI
-> > [12558.085798] KASAN: null-ptr-deref in range [0x0000000000000010-0x0000000000000017]
-> > [12558.093415] CPU: 180 PID: 3988051 Comm: 650 Kdump: loaded Not tainted 6.5.0+ #1
-> > [12558.100768] Hardware name: HPE ProLiant DL380 Gen11/ProLiant DL380 Gen11, BIOS 1.32 03/23/2023
-> > [12558.109430] RIP: 0010:xlog_cil_pcp_dead+0x2b/0x540 [xfs]
-> > [12558.115080] Code: 1f 44 00 00 48 b8 00 00 00 00 00 fc ff df 41 57 41 56 41 55 41 54 55 53 48 89 fb 48 83 c7 10 48 89 fa 48 c1 ea 03 48 83 ec 10 <80> 3c 02 00 0f 85 1e 04 00 00 48 b8 00 00
-> >  00 00 00 fc ff df 48 8b
-> > [12558.133964] RSP: 0018:ffa000003a0c7988 EFLAGS: 00010286
-> > [12558.139224] RAX: dffffc0000000000 RBX: 0000000000000000 RCX: ffffffffb3aa11c6
-> > [12558.146402] RDX: 0000000000000002 RSI: 00000000000000bf RDI: 0000000000000010
-> > [12558.153580] RBP: ff1100062ed14000 R08: 0000000000000000 R09: fffa3bfffef4319f
-> > [12558.160759] R10: ffd1fffff7a18cff R11: 0000000000000000 R12: ff1100068dc5a180
-> > [12558.167937] R13: 00000000000000bf R14: dffffc0000000000 R15: ff11003ff6c2f7e0
-> > [12558.175115] FS:  00007f2fd250b740(0000) GS:ff11003ff4000000(0000) knlGS:0000000000000000
-> > [12558.183254] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [12558.189035] CR2: 00000000023e1048 CR3: 00000006c7a58002 CR4: 0000000000771ee0
-> > [12558.196211] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> > [12558.203388] DR3: 0000000000000000 DR6: 00000000fffe07f0 DR7: 0000000000000400
-> > [12558.210565] PKRU: 55555554
-> > [12558.213286] Call Trace:
-> > [12558.215749]  <TASK>
-> > [12558.217860]  ? die_addr+0x3d/0xa0
-> > [12558.221202]  ? exc_general_protection+0x150/0x230
-> > [12558.225943]  ? asm_exc_general_protection+0x22/0x30
-> > [12558.230859]  ? __cancel_work_timer+0x216/0x460
-> > [12558.235332]  ? xlog_cil_pcp_dead+0x2b/0x540 [xfs]
-> > [12558.240221]  ? xfs_inodegc_cpu_dead+0x76/0x380 [xfs]
-> > [12558.245380]  xfs_cpu_dead+0xab/0x120 [xfs]
-> > [12558.249661]  ? __pfx_xfs_cpu_dead+0x10/0x10 [xfs]
-> > [12558.254548]  cpuhp_invoke_callback+0x2f6/0x830
-> > [12558.259022]  ? __pfx_iova_cpuhp_dead+0x10/0x10
-> > [12558.263499]  ? __pfx___lock_release+0x10/0x10
-> > [12558.267886]  __cpuhp_invoke_callback_range+0xcc/0x1c0
-> > [12558.272970]  ? __pfx___cpuhp_invoke_callback_range+0x10/0x10
-> > [12558.278661]  ? trace_cpuhp_exit+0x15e/0x1a0
-> > [12558.282868]  ? cpuhp_kick_ap_work+0x1e6/0x370
-> > [12558.287252]  _cpu_down+0x352/0x890
-> > [12558.290678]  cpu_device_down+0x68/0xa0
-> > [12558.294450]  device_offline+0x243/0x310
-> > [12558.298311]  ? __pfx_device_offline+0x10/0x10
-> > [12558.302694]  ? __pfx___mutex_lock+0x10/0x10
-> > [12558.306904]  ? __pfx_lock_acquire+0x10/0x10
-> > [12558.311114]  ? __pfx_sysfs_kf_write+0x10/0x10
-> > [12558.315500]  online_store+0x87/0xf0
-> > [12558.319009]  ? __pfx_online_store+0x10/0x10
-> > [12558.323217]  ? __pfx_sysfs_kf_write+0x10/0x10
-> > [12558.327600]  ? sysfs_file_ops+0xe0/0x170
-> > [12558.331545]  ? sysfs_kf_write+0x3d/0x170
-> > [12558.335493]  kernfs_fop_write_iter+0x355/0x530
-> > [12558.339966]  vfs_write+0x7bd/0xc40
-> > [12558.343390]  ? __pfx_vfs_write+0x10/0x10
-> > [12558.347339]  ? local_clock_noinstr+0x9/0xc0
-> > [12558.351550]  ? __fget_light+0x51/0x220
-> > [12558.355326]  ksys_write+0xf1/0x1d0
-> > [12558.358747]  ? __pfx_ksys_write+0x10/0x10
-> > [12558.362779]  ? ktime_get_coarse_real_ts64+0x130/0x170
-> > [12558.367866]  do_syscall_64+0x59/0x90
-> > [12558.371464]  ? exc_page_fault+0xaa/0xe0
-> > [12558.375323]  ? asm_exc_page_fault+0x22/0x30
-> > [12558.379533]  ? lockdep_hardirqs_on+0x79/0x100
-> > [12558.383917]  entry_SYSCALL_64_after_hwframe+0x6e/0xd8
-> > [12558.392600] Code: 0b 00 f7 d8 64 89 02 48 c7 c0 ff ff ff ff eb b7 0f 1f 00 f3 0f 1e fa 64 8b 04 25 18 00 00 00 85 c0 75 10 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 51 c3 48 83 ec 28 48
-> >  89 54 24 18 48 89 74 24
-> > [12558.411482] RSP: 002b:00007fffc4c0d178 EFLAGS: 00000246 ORIG_RAX: 0000000000000001
-> > [12558.419098] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f2fd233eba7
-> > [12558.426274] RDX: 0000000000000002 RSI: 0000560a773d8000 RDI: 0000000000000001
-> > [12558.433451] RBP: 0000560a773d8000 R08: 0000000000000000 R09: 00007f2fd23b14e0
-> > [12558.440630] R10: 00007f2fd23b13e0 R11: 0000000000000246 R12: 0000000000000002
-> > [12558.447808] R13: 00007f2fd23fb780 R14: 0000000000000002 R15: 00007f2fd23f69e0
-> > ...
-> > 
-> > 
-> > >  tests/generic/650 |   13 ++++++++++---
-> > >  1 file changed, 10 insertions(+), 3 deletions(-)
-> > > 
-> > > 
-> > > diff --git a/tests/generic/650 b/tests/generic/650
-> > > index 05c939b84f..773f93c7cb 100755
-> > > --- a/tests/generic/650
-> > > +++ b/tests/generic/650
-> > > @@ -67,11 +67,18 @@ fsstress_args=(-w -d $stress_dir)
-> > >  nr_cpus=$((LOAD_FACTOR * nr_hotplug_cpus))
-> > >  test "$nr_cpus" -gt 1024 && nr_cpus="$nr_hotplug_cpus"
-> > >  fsstress_args+=(-p $nr_cpus)
-> > > -test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
-> > > +if [ -n "$SOAK_DURATION" ]; then
-> > > +	test "$SOAK_DURATION" -lt 10 && SOAK_DURATION=10
-> > > +	fsstress_args+=(--duration="$((SOAK_DURATION / 10))")
-> > > +fi
-> > >  
-> > > -nr_ops=$((25000 * TIME_FACTOR))
-> > > +nr_ops=$((2500 * TIME_FACTOR))
-> > >  fsstress_args+=(-n $nr_ops)
-> > > -$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
-> > > +for ((i = 0; i < 10; i++)); do
-> > > +	$FSSTRESS_PROG $FSSTRESS_AVOID -w "${fsstress_args[@]}" >> $seqres.full
-> > > +	_test_cycle_mount
-> > > +done
-> > > +
-> > >  rm -f $sentinel_file
-> > >  
-> > >  # success, all done
-> > > 
-> > 
-> 
+[1] https://lore.kernel.org/fstests/20230625135033.3205742-2-amir73il@gmail.com/
+
+ tests/overlay/081     | 128 ++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/081.out |   2 +
+ 2 files changed, 130 insertions(+)
+ create mode 100755 tests/overlay/081
+ create mode 100644 tests/overlay/081.out
+
+diff --git a/tests/overlay/081 b/tests/overlay/081
+new file mode 100755
+index 00000000..05156a3c
+--- /dev/null
++++ b/tests/overlay/081
+@@ -0,0 +1,128 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
++#
++# FSQA Test No. 081
++#
++# Test persistent (and optionally unique) overlayfs fsid
++# with mount options uuid=null/on introduced in kernel v6.6
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# Import common functions.
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs overlay
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# Create overlay layer with pre-packaged merge dir
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++mkdir -p $upperdir/test_dir
++mkdir -p $lowerdir/test_dir
++test_dir=$SCRATCH_MNT/test_dir/
++
++# Record base fs fsid
++upper_fsid=$(stat -f -c '%i' $upperdir)
++lower_fsid=$(stat -f -c '%i' $lowerdir)
++
++# Sanity tests
++[[ -n "$upper_fsid" ]] || \
++	echo "invalid upper fs fsid"
++[[ "$lower_fsid" == "$upper_fsid" ]] || \
++	echo "lower fs and upper fs fsid differ"
++
++# Test legacy behavior - ovl fsid inherited from upper fs
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=null 2>/dev/null || \
++	_notrun "Overlayfs does not support unique fsid feature"
++
++# Lookup of test_dir marks upper root as "impure", so following (uuid=auto) mounts
++# will NOT behave as first time mount of a new overlayfs
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$upper_fsid" ]] || \
++	echo "Overlayfs (uuid=null) and upper fs fsid differ"
++
++# Keep base fs mounted in case it has a volatile fsid (e.g. tmpfs)
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test legacy behavior is preserved by default for existing "impure" overlayfs
++_scratch_mount
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$upper_fsid" ]] || \
++	echo "Overlayfs (uuid=auto) and upper fs fsid differ"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test unique fsid on explicit opt-in for existing "impure" overlayfs
++_scratch_mount -o uuid=on
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++ovl_unique_fsid=$ovl_fsid
++[[ "$ovl_fsid" != "$upper_fsid" ]] || \
++	echo "Overlayfs (uuid=on) and upper fs fsid are the same"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test unique fsid is persistent by default after it was created
++_scratch_mount
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
++	echo "Overlayfs (uuid=auto) unique fsid is not persistent"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test ignore existing persistent fsid on explicit opt-out
++_scratch_mount -o uuid=off
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$upper_fsid" ]] || \
++	echo "Overlayfs (uuid=off) and upper fs fsid differ"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test fallback to uuid=null with non-upper ovelray
++_overlay_scratch_mount_dirs "$upperdir:$lowerdir" "-" "-" -o ro,uuid=on
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$lower_fsid" ]] || \
++	echo "Overlayfs (uuid=null) and lower fs fsid differ"
++
++# Re-create fresh overlay layers, so following (uuid=auto) mounts
++# will behave as first time mount of a new overlayfs
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++mkdir -p $upperdir/test_dir
++mkdir -p $lowerdir/test_dir
++
++# Record new base fs fsid
++upper_fsid=$(stat -f -c '%i' $upperdir)
++
++# Test unique fsid by default for first time mount of new overlayfs
++_scratch_mount
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++ovl_unique_fsid=$ovl_fsid
++[[ "$ovl_fsid" != "$upper_fsid" ]] || \
++	echo "Overlayfs (uuid=auto) and upper fs fsid are the same"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Test unique fsid is persistent by default after it was created
++_scratch_mount -o uuid=on
++
++ovl_fsid=$(stat -f -c '%i' $test_dir)
++[[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
++	echo "Overlayfs (uuid=on) unique fsid is not persistent"
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/081.out b/tests/overlay/081.out
+new file mode 100644
+index 00000000..663a8864
+--- /dev/null
++++ b/tests/overlay/081.out
+@@ -0,0 +1,2 @@
++QA output created by 081
++Silence is golden
+-- 
+2.34.1
+
