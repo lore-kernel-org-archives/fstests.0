@@ -2,163 +2,146 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 404A5C71153
-	for <linux-fstests@archiver.kernel.org>; Sun,  3 Sep 2023 15:32:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21EF0C83F2C
+	for <linux-fstests@archiver.kernel.org>; Sun,  3 Sep 2023 20:40:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235157AbjICPcf (ORCPT
+        id S241745AbjICUk1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 3 Sep 2023 11:32:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49962 "EHLO
+        Sun, 3 Sep 2023 16:40:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229970AbjICPce (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2023 11:32:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B95739C
-        for <fstests@vger.kernel.org>; Sun,  3 Sep 2023 08:32:31 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4BF9560ED5
-        for <fstests@vger.kernel.org>; Sun,  3 Sep 2023 15:32:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3457C433C7;
-        Sun,  3 Sep 2023 15:32:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693755150;
-        bh=R6hARU6vkHdw9PF3uj2/seG1NQQjrfUXvLuFeFULyh4=;
-        h=Date:From:To:Subject:From;
-        b=IgktmGQksY2GkWJXKFGy2kIuOVHCAX3WnYXLge9xWPc5Tk5h/YdiSYmAPUin+sx2K
-         uoVfOVPmpZaP7Sn+H9SdMbRBASJJL/pj61REGSMk0P7ETNqEc5b6MV2Q2P+QMED8Q3
-         xxG6aUUeb3Hs+6HGD2gbrkTssrsaiiKj4yca2ieiJ4ov9hjHIyd8FQeb8/t3je9mq+
-         RGcsUz0A/xtq16qhW/xSECsf8F2C4yfQ6QYdaaTHwq/nuXDQ2Y1aFK0Upm34WaydmC
-         QRmGVuB9WFg09AsF9tquPU4tFBMsgbaC6Co5Gi3D50yx9ZGYsLuSpywi2rKA88mFkn
-         YhJ+52z2SNslQ==
-Date:   Sun, 3 Sep 2023 23:32:26 +0800
-From:   Zorro Lang <zlang@kernel.org>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.09.03
-Message-ID: <20230903153226.h2fl2ss4ic5a4qeu@zlang-mailbox>
+        with ESMTP id S232907AbjICUk1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2023 16:40:27 -0400
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A546B7
+        for <fstests@vger.kernel.org>; Sun,  3 Sep 2023 13:40:23 -0700 (PDT)
+Received: from letrec.thunk.org (pool-173-48-116-73.bstnma.fios.verizon.net [173.48.116.73])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 383Ke1oC004437
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sun, 3 Sep 2023 16:40:02 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+        t=1693773603; bh=Ppr8KeJeHsorQrVaGp9vsaGRferjzXALJp6n2MSlTSY=;
+        h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+        b=NuQxVZ9mclBiwaN7p4ANjPYWQNpqTpGtI8FNJ5u85Jv/3mpwTxcAb29K7n+Kna8C/
+         4vI4MvqtUa4MgoeAF/xkGyWINR5UD3Ncjpfw0mEAkiW9LkFX4ctP3xS5cKfMvAGgJS
+         90iGpbU7cHuoe7141EeQnEy74+fZXryjMe78sGlOw67jTfqKOMJ058BxwaGwk2ICWH
+         J1lYxuwjpuEreXNGUSPY2daWoB/qGVkGejcIuhrGggVC65+o1dCkrLaKFcoHAKRDYB
+         GKCGc3vNkwfFbY05T/dTtO7tMEYZdLLrfvULFg4b9pavzqH0HTCLRS9A0/mZKdCl93
+         SGw/ApcX/Ch9A==
+Received: by letrec.thunk.org (Postfix, from userid 15806)
+        id 9BEC28C026E; Sun,  3 Sep 2023 16:40:01 -0400 (EDT)
+Date:   Sun, 3 Sep 2023 16:40:01 -0400
+From:   "Theodore Ts'o" <tytso@mit.edu>
+To:     Zorro Lang <zlang@kernel.org>
+Cc:     linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
+        regressions@lists.linux.dev
+Subject: Re: [fstests generic/388, 455, 475, 482 ...] Ext4 journal recovery
+ test fails
+Message-ID: <ZPTvIb6hwIjY7T2M@mit.edu>
+References: <20230903120001.qjv5uva2zaqthgk2@zlang-mailbox>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20230903120001.qjv5uva2zaqthgk2@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+On Sun, Sep 03, 2023 at 08:00:01PM +0800, Zorro Lang wrote:
+> Hi ext4 folks,
+> 
+> Recently I found lots of fstests cases which belong to "recoveryloop" (e.g.
+> g/388 [1], g/455 [2], g/475 [3] and g/482 [4]) or does fs shutdown/resize test
+> (e.g. ext4/059 [5], g/530 [6]) failed ext4 with 1k blocksize, the kernel is
+> linux v6.6-rc0+ (HEAD=b84acc11b1c9).
+> 
+> I tested with MKFS_OPTIONS="-b 1024", no specific MOUNT_OPTIONS. I hit these
+> failure several times, and I didn't hit them on my last regression test on
+> v6.5-rc7+. So I think this might be a regression problem. And I didn't hit
+> this failures on xfs. If this's a known issue will be fixed soon, feel free
+> to tell me.
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2023.09.03 release.
-
-Release Notes:
-1) There's a new test case in this release -- xfs/600. It's for a known bug,
-   so it fails currently.
-2) The g/650, g/616 and g/617 support SOAK_DURATION now, and are added to "soak"
-   group. Welcome more soak tests support SOAK_DURATION, and be in soak group.
-3) The g/650 runs less time by default (won't break most of my test machines:).
-   And It's changed to cover a new bug, which will cause a *kernel crash*. So be
-   careful to run it.
-4) Several generic test cases are skipped on NFS by default.
-
-More details and other improvements/fixes refer to below, thanks for all these
-contributions.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-2848174358e5 xfs/559: adapt to kernels that use large folios for writes
-
-New commits:
-
-Bill O'Donnell (1):
-      [0fc226e7eac1] fstests: generic/352 should accomodate other pwrite behaviors
-
-Darrick J. Wong (8):
-      [9445d70f0fd6] fstests: test fix for an agbno overflow in __xfs_getfsmap_datadev
-      [d8008ba6d6f6] generic/650: add SOAK_DURATION controls
-      [6769d7e094f2] generic/650: race mount and unmount with cpu hotplug too
-      [7a2663730e69] generic/61[67]: support SOAK_DURATION
-      [c5cef5ba74ed] btrfs/282: skip test if /var/lib/btrfs isnt writable
-      [bfe2fd60049e] common: split _get_hugepagesize into detection and actual query
-      [225170dbbc68] common: rename get_page_size to _get_page_size
-      [2848174358e5] xfs/559: adapt to kernels that use large folios for writes
-
-Jeff Layton (6):
-      [6bf1570d33cc] common/attr: fix the _require_acl test
-      [24f63dbc15de] generic/578: add a check to ensure that fiemap is supported
-      [2fcf852d5e6c] generic/*: add a check for security attrs
-      [b6f51cac4dbe] generic/294: don't run this test on NFS
-      [cf1ef0daf488] generic/357: don't run this test on NFS
-      [59037f2aa014] generic/187: don't run this test on NFS
-
-Naohiro Aota (4):
-      [2817df3ae9d7] aio-dio-write-verify: check for the IO errors
-      [c5e4bff3a8a4] aio-dio-write-verify: print more info on the error case
-      [d3bbcf20d8a2] generic/551: bail out test if aio-dio-write-verify failed
-      [c1b325152870] btrfs/237: kick reclaim process with a small filesystem
+TL;DR: there definitely seenms to be something going on with g/455 and
+g/482 with the ext4/1k blocksize case in Linus's latest upstream tree,
+although it wasn't there in the ext4 branch which I sent to Linus to
+pull.
 
 
-Code Diffstat:
+Unfortunately, generic/475 is a known failure, especially in the 1k
+block size case.  The rate seems to change a bit over time.  For
+example from 6.2:
 
- common/attr                                |  9 +++--
- common/btrfs                               |  2 +-
- common/filter                              |  2 +-
- common/rc                                  | 19 ++++++-----
- common/verity                              |  2 +-
- src/aio-dio-regress/aio-dio-write-verify.c | 17 +++++++--
- tests/btrfs/049                            |  2 +-
- tests/btrfs/106                            |  2 +-
- tests/btrfs/173                            |  4 +--
- tests/btrfs/174                            |  2 +-
- tests/btrfs/175                            |  4 +--
- tests/btrfs/176                            |  4 +--
- tests/btrfs/192                            |  2 +-
- tests/btrfs/215                            |  2 +-
- tests/btrfs/237                            | 21 ++++++++++--
- tests/btrfs/251                            |  2 +-
- tests/btrfs/271                            |  2 +-
- tests/btrfs/274                            |  2 +-
- tests/btrfs/282                            |  7 ++++
- tests/btrfs/293                            |  2 +-
- tests/ext4/003                             |  2 +-
- tests/ext4/022                             |  2 +-
- tests/ext4/306                             |  2 +-
- tests/generic/187                          |  5 ++-
- tests/generic/270                          |  2 ++
- tests/generic/294                          |  6 ++--
- tests/generic/352                          | 10 +++---
- tests/generic/352.out                      |  6 ++--
- tests/generic/357                          |  5 +++
- tests/generic/413                          |  1 +
- tests/generic/416                          |  2 +-
- tests/generic/472                          |  2 +-
- tests/generic/495                          |  2 +-
- tests/generic/496                          |  2 +-
- tests/generic/497                          |  2 +-
- tests/generic/513                          |  2 ++
- tests/generic/551                          |  6 ++--
- tests/generic/574                          |  2 +-
- tests/generic/578                          |  1 +
- tests/generic/605                          |  1 +
- tests/generic/616                          |  3 +-
- tests/generic/617                          |  3 +-
- tests/generic/636                          |  2 +-
- tests/generic/641                          |  2 +-
- tests/generic/650                          | 18 ++++++++--
- tests/generic/675                          |  2 ++
- tests/generic/688                          |  2 ++
- tests/generic/727                          |  2 ++
- tests/xfs/513                              |  2 +-
- tests/xfs/552                              |  2 +-
- tests/xfs/559                              | 29 +++++++++++++++-
- tests/xfs/600                              | 55 ++++++++++++++++++++++++++++++
- tests/xfs/600.out                          |  2 ++
- 53 files changed, 228 insertions(+), 68 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
+ext4/1k: 522 tests, 2 failures, 45 skipped, 6153 seconds
+  Flaky: generic/051: 40% (2/5)   generic/475: 60% (3/5)
+
+and from 6.1.0-rc4:
+
+ext4/1k: 522 tests, 2 failures, 45 skipped, 5660 seconds
+  Flaky: generic/051: 60% (3/5)   generic/475: 40% (2/5)
+
+In 6.5-rc3, it looks like the rate has gotten worse:
+
+ext4/1k: 30 tests, 29 failures, 2402 seconds
+  Flaky: generic/475: 97% (29/30)
+
+Alas, finding a root cause for generic/475 has been challenging.  I
+suspect that it happens when we crash while doing a large truncate on
+a highly fragmented file system, such as that the truncate has to span
+multiple truncates, with the inode on the orphan list so the kernel
+can complete the truncate if we trash mid-truncate when we clean up
+the orphan list.  However, that's just a theory, and I don't yet have
+hard evidence.
+
+
+The generic/388 test is very different.  It uses the shutdown ioctl,
+and that's something that ext4 has never completely handled correctly.
+Doing it right would require adding some locks in hot paths, so it's
+one which I've suppressed for all of my ext4 tests[1].
+
+[1] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/ext4/exclude
+
+
+The generic/455 and generic/482 tests work by using dm-log-writes, and
+that was *not* failing on the branch (v6.5.0-rc3-60-g768d612f7982) for
+which I sent a pull request to Linus:
+
+ext4/1k: 10 tests, 63 seconds
+  generic/455  Pass     4s
+  generic/482  Pass     8s
+  generic/455  Pass     5s
+  generic/482  Pass     8s
+  generic/455  Pass     5s
+  generic/482  Pass     7s
+  generic/455  Pass     5s
+  generic/482  Pass     8s
+  generic/455  Pass     5s
+  generic/482  Pass     8s
+Totals: 10 tests, 0 skipped, 0 failures, 0 errors, 63s
+
+... but I can confirm that it's failing on Linus's upstream (I tested
+commit 708283abf896):
+
+ext4/1k: 2 tests, 2 failures, 31 seconds
+  generic/455  Failed   4s
+  generic/455  Failed   2s
+  generic/455  Pass     5s
+  generic/455  Failed   3s
+  generic/455  Failed   2s
+  generic/482  Failed   2s
+  generic/482  Failed   3s
+  generic/482  Failed   1s
+  generic/482  Failed   3s
+  generic/482  Failed   4s
+Totals: 10 tests, 0 skipped, 9 failures, 0 errors, 29s
+
+						- Ted
+
+
+P.S.  After doing some digging, it appears generic/455 does have some
+failures on 6.4 (20%) and 6.5-rc3 (5%) on the ext4/1k blocksize test
+config.  But *something* is definitely causing a much greater failure
+rate in Linus's upstream.  The good news is that should make it
+relatively easy to bisect.  I'll look into it.  Thanks for flagging
+this.
