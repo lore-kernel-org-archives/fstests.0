@@ -2,192 +2,149 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAFCFCA100F
-	for <linux-fstests@archiver.kernel.org>; Tue,  5 Sep 2023 20:08:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 440BBC83F3E
+	for <linux-fstests@archiver.kernel.org>; Tue,  5 Sep 2023 22:11:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242772AbjIEUIr (ORCPT
+        id S244556AbjIEWLS (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 5 Sep 2023 16:08:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41212 "EHLO
+        Tue, 5 Sep 2023 18:11:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242698AbjIEUIp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2023 16:08:45 -0400
-Received: from fanzine2.igalia.com (fanzine2.igalia.com [213.97.179.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FADF199;
-        Tue,  5 Sep 2023 13:08:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-        s=20170329; h=Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:
-        Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:Content-Description:
-        Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
-        In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-        List-Post:List-Owner:List-Archive;
-        bh=dpctAN8yIpJSMB/GLp3M6ArNQv+a+uUGcuwQybJnBX4=; b=O5L1FHHC9Gq0OPKv1F70Iw3QWs
-        rfoBl8E/wPC+Cdok5bCvetUypQMPws/1l6yvHzuG4pO4A1P5coGb2NZpoPmWOPVV6Z2KfbAc1m4IE
-        o4K3x4qG6MMSHtzTc3Lyj4AC0KTroyWPo22R+5n8scIB4nrHs40au8XV0l3wihBEn8BPHtvQsto7x
-        nA0fUqvfictxXVOPpA8xdLtpbgt6DzOtY1mrV0j4JsbUrUms/bRnCIRweNB9svQYswMmZq0UOEnf/
-        rY0mLVq+AHQ/6UlQoqFYFxK7RlLf68wTuS2tBHjNmolAILOve9+iD2Gku1YMxrujcfTCrmbRd7r84
-        r6gBez2Q==;
-Received: from [179.232.147.2] (helo=localhost)
-        by fanzine2.igalia.com with esmtpsa 
-        (Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
-        id 1qdcLk-002klH-4q; Tue, 05 Sep 2023 22:08:36 +0200
-From:   "Guilherme G. Piccoli" <gpiccoli@igalia.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
-        dsterba@suse.com, kernel@gpiccoli.net, kernel-dev@igalia.com,
-        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
-        Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2] btrfs: Add test for the single-dev feature
-Date:   Tue,  5 Sep 2023 17:06:56 -0300
-Message-ID: <20230905200826.3605083-1-gpiccoli@igalia.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S229848AbjIEWLS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2023 18:11:18 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36B65F4;
+        Tue,  5 Sep 2023 15:11:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=GeP4MIuZrBFvrMvcXRvi2QnFxUlFhMKNwjLk6UGDJZ8=; b=kWZNxsuzHVS8No9JHSY0DoVH0c
+        kfFSUvNxy9UWj5dWPo0ifDJg42hkAP0pxpJdfgm4WwjQokZWYb3r4DT8KLLqHTJg8BlnejG0DZ5vH
+        fSvbHjx+PKkPX+rLYQhILwxPMPUT8HFi2Ue4ul3D8hTFcHdoOsUuIxdURXhEs4VsSVlo3RorKHH70
+        jHVRT2bv48jv5BagNKEzq+rbl+nib9isuh8b9Ywcgj+O5Wcd5ZgLiECFD+UGJkt7M7fi8WOmQOlZA
+        YZxjnC6smy8l//2I+rnMDAmr7zzJ6j6HI2pZ2X7EU+/642QbZI+aqZUmpJccj28Bb2gj/hOJ7zIcX
+        PtVMND6Q==;
+Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1qdeGE-00DwXa-LY; Tue, 05 Sep 2023 22:11:02 +0000
+Date:   Tue, 5 Sep 2023 23:11:02 +0100
+From:   Matthew Wilcox <willy@infradead.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Zorro Lang <zlang@kernel.org>, linux-ext4@vger.kernel.org,
+        fstests@vger.kernel.org, regressions@lists.linux.dev,
+        Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [fstests generic/388, 455, 475, 482 ...] Ext4 journal recovery
+ test fails
+Message-ID: <ZPendrb8gSbAC6fM@casper.infradead.org>
+References: <20230903120001.qjv5uva2zaqthgk2@zlang-mailbox>
+ <ZPTvIb6hwIjY7T2M@mit.edu>
+ <20230904060819.GB701295@mit.edu>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230904060819.GB701295@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The SINGLE_DEV btrfs feature allows to mount the same filesystem
-multiple times, at the same time. This is the fstests counter-part,
-which checks both mkfs/btrfstune (by mounting the FS twice), and
-also unsupported scenarios, like device replace / remove.
+On Mon, Sep 04, 2023 at 02:08:19AM -0400, Theodore Ts'o wrote:
+> #regzbot introduced: 8147c4c4546f9f05ef03bb839b741473b28bb560 ^
+> 
+> OK, I've isolated the regression of generic/455 failing with ext4/1k
+> to this commit, which came in via the mm tree.  Nothing seems
+> *obviously* wrong, but I'm not sure if there are any differences in
+> the semantics of the new folio functions such as kmap_local_folio,
+> offset_in_folio, set_folio_bh() which might be making a difference.
 
-Suggested-by: Anand Jain <anand.jain@oracle.com>
-Suggested-by: Josef Bacik <josef@toxicpanda.com>
-Signed-off-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
----
+Thanks for the cc,  Let's see what we can do ...
 
-V2:
-- Rebased against v2023.09.03 / changed test number to 301;
+virt_to_folio() - For an order-0 page, there is no difference.
+offset_in_folio() - Ditto
+bh->b_page vs bh->b_folio - Ditto
+virt_to_folio() - Ditto
+folio_set_bh() - Ditto
 
-- Implemented the great suggestions from Anand, which definitely
-made the test more clear and concise;
+kmap_local_folio() vs kmap_atomic - Here, we have a difference.
+memcpy_from_folio() - Same difference as above.
 
--Cc'ing linux-btrfs as well.
+I suppose it must be this, and yet I cannot understand how it would
+make a difference.  Perhaps you can help me?
 
-Thanks in advance for reviews / comments!
-Cheers,
+static inline void *kmap_atomic_prot(struct page *page, pgprot_t prot)
+{
+        if (IS_ENABLED(CONFIG_PREEMPT_RT))
+                migrate_disable();
+        else
+                preempt_disable();
 
-Guilherme
+        pagefault_disable();
+        return __kmap_local_page_prot(page, prot);
+}
 
+vs
 
- tests/btrfs/301     | 94 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/301.out |  5 +++
- 2 files changed, 99 insertions(+)
- create mode 100755 tests/btrfs/301
- create mode 100644 tests/btrfs/301.out
+static inline void *kmap_local_folio(struct folio *folio, size_t offset)
+{
+        struct page *page = folio_page(folio, offset / PAGE_SIZE);
+        return __kmap_local_page_prot(page, kmap_prot) + offset % PAGE_SIZE;
+}
 
-diff --git a/tests/btrfs/301 b/tests/btrfs/301
-new file mode 100755
-index 000000000000..5f8abdbe157a
---- /dev/null
-+++ b/tests/btrfs/301
-@@ -0,0 +1,94 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Guilherme G. Piccoli (Igalia S.L.).  All Rights Reserved.
-+#
-+# FS QA Test 301
-+#
-+# Test for the btrfs single-dev feature - both mkfs and btrfstune are
-+# validated, as well as explicitly unsupported commands, like device
-+# removal / replacement.
-+#
-+. ./common/preamble
-+_begin_fstest auto mkfs quick
-+. ./common/filter
-+_supported_fs btrfs
-+
-+_require_btrfs_mkfs_feature single-dev
-+_require_btrfs_fs_feature single_dev
-+
-+_require_scratch_dev_pool 2
-+_scratch_dev_pool_get 1
-+_spare_dev_get
-+
-+_require_command "$BTRFS_TUNE_PROG" btrfstune
-+_require_command "$WIPEFS_PROG" wipefs
-+
-+# Helper to mount a btrfs fs
-+# Arg 1: device
-+# Arg 2: mount point
-+mount_btrfs()
-+{
-+	$MOUNT_PROG -t btrfs $1 $2
-+	[ $? -ne 0 ] && _fail "mounting $1 on $2 failed"
-+}
-+
-+SPARE_MNT="${TEST_DIR}/${seq}/spare_mnt"
-+mkdir -p $SPARE_MNT
-+
-+
-+# Part 1
-+# First test involves a mkfs with single-dev feature enabled.
-+# If it succeeds and mounting that FS *twice* also succeeds,
-+# we're good and continue.
-+$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
-+$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
-+
-+_scratch_mkfs "-b 300M -O single-dev" >> $seqres.full 2>&1
-+dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
-+
-+mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
-+mount_btrfs $SPARE_DEV $SPARE_MNT
-+
-+$UMOUNT_PROG $SPARE_MNT
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Part 2
-+# Second test is similar to the first with the difference we
-+# run mkfs with no single-dev mention, and make use of btrfstune
-+# to set such feature.
-+$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
-+$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
-+
-+_scratch_mkfs "-b 300M" >> $seqres.full 2>&1
-+$BTRFS_TUNE_PROG --convert-to-single-device $SCRATCH_DEV
-+dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
-+
-+mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
-+mount_btrfs $SPARE_DEV $SPARE_MNT
-+
-+$UMOUNT_PROG $SPARE_MNT
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Part 3
-+# Final part attempts to run some single-dev unsupported commands,
-+# like device replace/remove - it they fail, test succeeds!
-+mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
-+
-+$BTRFS_UTIL_PROG device replace start $SCRATCH_DEV $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
-+	| _filter_scratch
-+
-+$BTRFS_UTIL_PROG device remove $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
-+	| _filter_scratch
-+
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+_spare_dev_put
-+_scratch_dev_pool_put 1
-+
-+# success, all done
-+status=0
-+echo "Finished"
-+
-+exit
-diff --git a/tests/btrfs/301.out b/tests/btrfs/301.out
-new file mode 100644
-index 000000000000..c65604fecc5f
---- /dev/null
-+++ b/tests/btrfs/301.out
-@@ -0,0 +1,5 @@
-+QA output created by 301
-+ERROR: ioctl(DEV_REPLACE_STATUS) failed on "SCRATCH_MNT": Invalid argument
-+
-+ERROR: error removing device 'SCRATCH_DEV': Invalid argument
-+Finished
--- 
-2.42.0
+I don't believe that returning the address with the offset included
+is the problem here.  It must be disabling preemption / migration.
+There's no chace this funcation accesses userspace (... is there?) so
+it can't be the pagefault_disable().
 
+We can try splitting this up into tiny commits and figuring out which
+of them is the problem.  I'll be back at work tomorrow and can look
+more deeply then.
+
+> Using kvm-xfstests[1] I bisected this via the command:
+> 
+> % install-kconfig ; kbuild ; kvm-xfstests -c ext4/1k -C 10 generic/455
+> 
+> [1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
+> 
+> 
+> And the bisection pointed me at this commit:
+> 
+>     commit 8147c4c4546f9f05ef03bb839b741473b28bb560 (refs/bisect/bad)
+>     Author: Matthew Wilcox (Oracle) <willy@infradead.org>
+>     AuthorDate: Thu Jul 13 04:55:11 2023 +0100
+>     Commit: Andrew Morton <akpm@linux-foundation.org>
+>     CommitDate: Fri Aug 18 10:12:30 2023 -0700
+> 
+>         jbd2: use a folio in jbd2_journal_write_metadata_buffer()
+>     
+> During the bisection, I treated a commit with 3+ failures as "bad",
+> and 0-2 commits as "good".  Running generic/455 50 times to get a
+> sense of the failure, with the first bad commit (8147c4c4546f), I got:
+> 
+>     ext4/1k: 50 tests, 21 failures, 223 seconds
+>       Flaky: generic/455: 42% (21/50)
+>     Totals: 50 tests, 0 skipped, 21 failures, 0 errors, 223s
+> 
+> While with the immediately preceding commit (07811230c3cd), I got:
+> 
+>     ext4/1k: 50 tests, 4 failures, 235 seconds
+>       Flaky: generic/455:  8% (4/50)
+>     Totals: 50 tests, 0 skipped, 4 failures, 0 errors, 235s
+> 
+> 
+> 
+> Comparing these two commits (8147c4c4546f vs 07811230c3cd) using the
+> ext4 with a 4k block size, I get:
+> 
+>     ext4/4k: 50 tests, 2 failures, 365 seconds
+>       Flaky: generic/455:  4% (2/50)
+>     Totals: 50 tests, 0 skipped, 2 failures, 0 errors, 365s
+> 
+> vs
+> 
+>     ext4/4k: 50 tests, 2 failures, 349 seconds
+>       Flaky: generic/455:  4% (2/50)
+>     Totals: 50 tests, 0 skipped, 2 failures, 0 errors, 349s
+> 
+> So issue seems to be specifically with a sub-page size block size,
+> since ext4/4k doesn't show any issues, while ext4/1k does.
+
+I doubt I tried it with a 1kB block size, so I'll focus on that too.
