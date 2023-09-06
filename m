@@ -2,172 +2,230 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9800AEB8FB9
-	for <linux-fstests@archiver.kernel.org>; Wed,  6 Sep 2023 12:38:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FF65EB8FD2
+	for <linux-fstests@archiver.kernel.org>; Wed,  6 Sep 2023 14:17:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240476AbjIFMip (ORCPT
+        id S238454AbjIFORk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 6 Sep 2023 08:38:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32876 "EHLO
+        Wed, 6 Sep 2023 10:17:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44780 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229932AbjIFMip (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Sep 2023 08:38:45 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 121DD19B1;
-        Wed,  6 Sep 2023 05:38:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=xzKnxGMihiQTZzTgBY6Hc/r1gngtuD8yL7c68hqDTsU=; b=mXQN4kdJtgWAXG/bePp1hy05vF
-        /XQpKHCMy3jJjEHmdHnPjShhRvie+x4kNSFTqNUlJGDjRDY9ThIxoWRKG4QN3AZtEWCLV9V3wMRku
-        AMmmtQb79Q0LRYMNrlmGydhszbcedvbhlY04zeDxKakQZ4I1uiGMZ9to0P73MxLB2BxtHrsQfd2b/
-        dVnXU6zHohpwrX3w4CftasOOBMQdAsLXEAIGR3SDshVeYLCnl6/FrsVzYnXhyS4rvauDaQlF4o82L
-        oBsvjcFRQthXXFHiXMWQEErW4/RFk6wxO4z5MnFzZTqzCnXclUGmN++2rn5UApGbf9aaY89xl8Hn2
-        vOGu1JbQ==;
-Received: from willy by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1qdrnb-002LZ8-Gm; Wed, 06 Sep 2023 12:38:23 +0000
-Date:   Wed, 6 Sep 2023 13:38:23 +0100
-From:   Matthew Wilcox <willy@infradead.org>
-To:     Ritesh Harjani <ritesh.list@gmail.com>
-Cc:     Theodore Ts'o <tytso@mit.edu>, Zorro Lang <zlang@kernel.org>,
-        linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
-        regressions@lists.linux.dev,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Jan Kara <jack@suse.cz>
-Subject: Re: [fstests generic/388, 455, 475, 482 ...] Ext4 journal recovery
- test fails
-Message-ID: <ZPhyv7cHxO9vbciL@casper.infradead.org>
-References: <ZPendrb8gSbAC6fM@casper.infradead.org>
- <87wmx336ns.fsf@doe.com>
+        with ESMTP id S230435AbjIFORj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Sep 2023 10:17:39 -0400
+Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3365EE4C
+        for <fstests@vger.kernel.org>; Wed,  6 Sep 2023 07:17:36 -0700 (PDT)
+Received: by mail-qv1-xf32.google.com with SMTP id 6a1803df08f44-64f5aeb81d1so21391126d6.0
+        for <fstests@vger.kernel.org>; Wed, 06 Sep 2023 07:17:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1694009855; x=1694614655; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=vVv4Pn2KolI5jr1rFB9IEFFdFAgIZ03cLPhStfuRazs=;
+        b=rOx57WnBwy2nsXuqQ7rl9R/wVB3Odw22UpC0kMxfm2SQrh5tV2ak1BIIF8c+QLIM2z
+         /nJfswpn/XmRpomTSqMdm1AiA7+KeZKF9Ul19EaPeuhltmBcwy34k0y08AMfYbpFY5R6
+         hdQjh5yTIC3gB/lRUH59Ltsl41FIO5s9TPdM/8HPhc0fJ1XOiZM5a2skEG38B1OAR/Pm
+         O3exugEDhMCBvpUEBk97Pdq5cm8Q3NjqCW9/ngLv6Yb6Gwbx6kmXMRiLTkNlIdTYiixU
+         x1jDxokgIPmFzBdkhmosZHr4//P4AhmxoWTJeLIqT0iCa5W7GiTCbgtJ3MYHHo7rMb3B
+         Osmg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1694009855; x=1694614655;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vVv4Pn2KolI5jr1rFB9IEFFdFAgIZ03cLPhStfuRazs=;
+        b=NIui74HtTjG95Y9WNXJDw2XfHyHlR2bfn1F8REslmy24Bw1TXZozMm4j8VSdAC/MXz
+         YISLXo9t3ru3EuUAQ4rBjqsUPVfjNFA1ME1KcO36YQzcxAYHzOKxjAN63ztMlP2pgHvH
+         mtnlKU9f47E6ds0vQ6G/B80J6KgY2kWBJqhK4IdsH71w+Nw+lRo6yNIbW+CQcS5uRWlY
+         x3lG0JsYbbt/LMYxrbHUpD1egTYyV7qFqucWLJhwB5QDN+4klI0g88KpTQHtOhPPj6ai
+         x0MJzmrwi3LyT0iNO3JQ4L7MpY4HNpMKvimyQO3i3UdotTlO9+3Pi5iLpVyCn+q0cX7X
+         iIJg==
+X-Gm-Message-State: AOJu0Ywak9l695HoWvAAG6IDRVCdnKuL2GkHoK9liy2tuKjYXKrEr+AC
+        9PC/Doi/eYRn9m2rQrMe9ynM+KqaGSJMkmnBYOI=
+X-Google-Smtp-Source: AGHT+IG42cHK8hHaXUlcZMvJPAWMXxeX+9Uxc4SLSR9ZmkPg7FPkUECbL0D37Fcnq1KWg105S0ddLA==
+X-Received: by 2002:a0c:8cc4:0:b0:651:68f4:92e9 with SMTP id q4-20020a0c8cc4000000b0065168f492e9mr14996210qvb.11.1694009855269;
+        Wed, 06 Sep 2023 07:17:35 -0700 (PDT)
+Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id j9-20020a0cf309000000b0064f364f3584sm5474363qvl.97.2023.09.06.07.17.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Sep 2023 07:17:34 -0700 (PDT)
+Date:   Wed, 6 Sep 2023 10:17:33 -0400
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        dsterba@suse.com, kernel@gpiccoli.net, kernel-dev@igalia.com,
+        Anand Jain <anand.jain@oracle.com>
+Subject: Re: [PATCH v2] btrfs: Add test for the single-dev feature
+Message-ID: <20230906141733.GC1877831@perftesting>
+References: <20230905200826.3605083-1-gpiccoli@igalia.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87wmx336ns.fsf@doe.com>
+In-Reply-To: <20230905200826.3605083-1-gpiccoli@igalia.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 06, 2023 at 04:33:35PM +0530, Ritesh Harjani wrote:
-> Matthew Wilcox <willy@infradead.org> writes:
+On Tue, Sep 05, 2023 at 05:06:56PM -0300, Guilherme G. Piccoli wrote:
+> The SINGLE_DEV btrfs feature allows to mount the same filesystem
+> multiple times, at the same time. This is the fstests counter-part,
+> which checks both mkfs/btrfstune (by mounting the FS twice), and
+> also unsupported scenarios, like device replace / remove.
 > 
-> > On Mon, Sep 04, 2023 at 02:08:19AM -0400, Theodore Ts'o wrote:
-> >> #regzbot introduced: 8147c4c4546f9f05ef03bb839b741473b28bb560 ^
-> >> 
-> >> OK, I've isolated the regression of generic/455 failing with ext4/1k
-> >> to this commit, which came in via the mm tree.  Nothing seems
-> >> *obviously* wrong, but I'm not sure if there are any differences in
-> >> the semantics of the new folio functions such as kmap_local_folio,
-> >> offset_in_folio, set_folio_bh() which might be making a difference.
-> >
-> > Thanks for the cc,  Let's see what we can do ...
-> >
-> > virt_to_folio() - For an order-0 page, there is no difference.
-> > offset_in_folio() - Ditto
-> > bh->b_page vs bh->b_folio - Ditto
-> > virt_to_folio() - Ditto
-> > folio_set_bh() - Ditto
-> >
-> > kmap_local_folio() vs kmap_atomic - Here, we have a difference.
-> > memcpy_from_folio() - Same difference as above.
-> >
-> > I suppose it must be this, and yet I cannot understand how it would
-> > make a difference.  Perhaps you can help me?
-> >
-> > static inline void *kmap_atomic_prot(struct page *page, pgprot_t prot)
-> > {
-> >         if (IS_ENABLED(CONFIG_PREEMPT_RT))
-> >                 migrate_disable();
-> >         else
-> >                 preempt_disable();
-> >
-> >         pagefault_disable();
-> >         return __kmap_local_page_prot(page, prot);
-> > }
-> >
-> > vs
-> >
-> > static inline void *kmap_local_folio(struct folio *folio, size_t offset)
-> > {
-> >         struct page *page = folio_page(folio, offset / PAGE_SIZE);
-> >         return __kmap_local_page_prot(page, kmap_prot) + offset % PAGE_SIZE;
-> > }
-> >
-> > I don't believe that returning the address with the offset included
-> > is the problem here.  It must be disabling preemption / migration.
-> > There's no chace this funcation accesses userspace (... is there?) so
-> > it can't be the pagefault_disable().
-> >
-> > We can try splitting this up into tiny commits and figuring out which
-> > of them is the problem.  I'll be back at work tomorrow and can look
-> > more deeply then.
-> >
-> >> Using kvm-xfstests[1] I bisected this via the command:
-> >> 
-> >> % install-kconfig ; kbuild ; kvm-xfstests -c ext4/1k -C 10 generic/455
-> >> 
-> >> [1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
-> >> 
-> >> 
-> >> And the bisection pointed me at this commit:
-> >> 
-> >>     commit 8147c4c4546f9f05ef03bb839b741473b28bb560 (refs/bisect/bad)
-> >>     Author: Matthew Wilcox (Oracle) <willy@infradead.org>
-> >>     AuthorDate: Thu Jul 13 04:55:11 2023 +0100
-> >>     Commit: Andrew Morton <akpm@linux-foundation.org>
-> >>     CommitDate: Fri Aug 18 10:12:30 2023 -0700
-> >> 
-> >>         jbd2: use a folio in jbd2_journal_write_metadata_buffer()
-> >>     
+> Suggested-by: Anand Jain <anand.jain@oracle.com>
+> Suggested-by: Josef Bacik <josef@toxicpanda.com>
+> Signed-off-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
+> ---
 > 
-> This is inline with my observation too. 
+> V2:
+> - Rebased against v2023.09.03 / changed test number to 301;
 > 
-> However, is this log expected with below diff when running with ext4/1k?
-> I am finding a folio with order > 0 here.
+> - Implemented the great suggestions from Anand, which definitely
+> made the test more clear and concise;
 > 
-> <diff>
-> diff --git a/fs/jbd2/journal.c b/fs/jbd2/journal.c
-> index 768fa05bcbed..152c08e83fa2 100644
-> --- a/fs/jbd2/journal.c
-> +++ b/fs/jbd2/journal.c
-> @@ -369,6 +369,12 @@ int jbd2_journal_write_metadata_buffer(transaction_t *transaction,
->                 new_offset = offset_in_folio(new_folio, jh2bh(jh_in)->b_data);
->         }
+> -Cc'ing linux-btrfs as well.
 > 
-> +       if (folio_size(new_folio) > PAGE_SIZE) {
-> +               pr_crit("%s: folio_size=%lu, folio_order=%d, new_offset=%u bh_size=%lu folio_test_large=%d\n",
-> +                       __func__, folio_size(new_folio), folio_order(new_folio), new_offset,
-> +                       bh_in->b_size, folio_test_large(new_folio));
-> +       }
+> Thanks in advance for reviews / comments!
+> Cheers,
+> 
+> Guilherme
+> 
+> 
+>  tests/btrfs/301     | 94 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/301.out |  5 +++
+>  2 files changed, 99 insertions(+)
+>  create mode 100755 tests/btrfs/301
+>  create mode 100644 tests/btrfs/301.out
+> 
+> diff --git a/tests/btrfs/301 b/tests/btrfs/301
+> new file mode 100755
+> index 000000000000..5f8abdbe157a
+> --- /dev/null
+> +++ b/tests/btrfs/301
+> @@ -0,0 +1,94 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Guilherme G. Piccoli (Igalia S.L.).  All Rights Reserved.
+> +#
+> +# FS QA Test 301
+> +#
+> +# Test for the btrfs single-dev feature - both mkfs and btrfstune are
+> +# validated, as well as explicitly unsupported commands, like device
+> +# removal / replacement.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto mkfs quick
+> +. ./common/filter
+
+Normally we group all the require'd stuff together
+> +_supported_fs btrfs
 > +
->         mapped_data = kmap_local_folio(new_folio, new_offset);
->         /*
->          * Fire data frozen trigger if data already wasn't frozen.  Do this
-> 
-> <dmesg log>
-> [   40.419772] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=0 bh_size=1024 folio_test_large=1
-> [   40.444737] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=2048 bh_size=1024 folio_test_large=1
-> [   40.472385] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=3072 bh_size=1024 folio_test_large=1
-> [   40.560581] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=8192 bh_size=1024 folio_test_large=1
-> [   40.588512] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=10240 bh_size=1024 folio_test_large=1
-> [   40.612103] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=7168 bh_size=1024 folio_test_large=1
-> [   40.636800] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=9216 bh_size=1024 folio_test_large=1
-> [   40.661166] jbd2_journal_write_metadata_buffer: folio_size=16384, folio_order=2, new_offset=10240 bh_size=1024 folio_test_large=1
-> 
-> 
-> Is this code path a possibility, which can cause above logs?
-> 
->    ptr = jbd2_alloc() -> kmem_cache_alloc()
->    <..>
->    new_folio = virt_to_folio(ptr)
->    new_offset = offset_in_folio(new_folio, ptr)
-> 
-> And then I am still not sure what the problem really is? 
-> Is it because at the time of checkpointing, the path is still not fully
-> converted to folio?
+> +_require_btrfs_mkfs_feature single-dev
+> +_require_btrfs_fs_feature single_dev
+> +
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 1
+> +_spare_dev_get
+> +
+> +_require_command "$BTRFS_TUNE_PROG" btrfstune
+> +_require_command "$WIPEFS_PROG" wipefs
+> +
+> +# Helper to mount a btrfs fs
+> +# Arg 1: device
+> +# Arg 2: mount point
+> +mount_btrfs()
+> +{
+> +	$MOUNT_PROG -t btrfs $1 $2
+> +	[ $? -ne 0 ] && _fail "mounting $1 on $2 failed"
+> +}
+> +
+> +SPARE_MNT="${TEST_DIR}/${seq}/spare_mnt"
+> +mkdir -p $SPARE_MNT
+> +
+> +
+> +# Part 1
+> +# First test involves a mkfs with single-dev feature enabled.
+> +# If it succeeds and mounting that FS *twice* also succeeds,
+> +# we're good and continue.
+> +$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
+> +$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
+> +
+> +_scratch_mkfs "-b 300M -O single-dev" >> $seqres.full 2>&1
+> +dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
+> +
+> +mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
 
-Oh yikes!  I didn't know that the allocation might come from kmalloc!
-Yes, slab might use high-order allocations.  I'll have to look through
-this and figure out what the problem might be.
+You can just use _scratch_mount here, since you want to handle failures just
 
-Thanks for debugging this.
+_scratch_mount || _fail "failed to mount scratch mount"
+
+> +mount_btrfs $SPARE_DEV $SPARE_MNT
+
+Instead use _mount here
+
+_mount $SPARE_DEV $SPARE_MNT || _fail "failed to mount spare dev"
+
+> +
+> +$UMOUNT_PROG $SPARE_MNT
+> +$UMOUNT_PROG $SCRATCH_MNT
+
+_scratch_unmount
+
+> +
+> +
+> +# Part 2
+> +# Second test is similar to the first with the difference we
+> +# run mkfs with no single-dev mention, and make use of btrfstune
+> +# to set such feature.
+> +$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
+> +$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
+> +
+> +_scratch_mkfs "-b 300M" >> $seqres.full 2>&1
+> +$BTRFS_TUNE_PROG --convert-to-single-device $SCRATCH_DEV
+> +dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
+> +
+> +mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
+
+_scratch_mount
+
+> +mount_btrfs $SPARE_DEV $SPARE_MNT
+
+_mount
+
+> +
+> +$UMOUNT_PROG $SPARE_MNT
+> +$UMOUNT_PROG $SCRATCH_MNT
+
+_scratch_unmount
+
+> +
+> +
+> +# Part 3
+> +# Final part attempts to run some single-dev unsupported commands,
+> +# like device replace/remove - it they fail, test succeeds!
+> +mount_btrfs $SCRATCH_DEV $SCRATCH_MNT
+
+_scratch_mount
+
+> +
+> +$BTRFS_UTIL_PROG device replace start $SCRATCH_DEV $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
+> +	| _filter_scratch
+> +
+> +$BTRFS_UTIL_PROG device remove $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
+> +	| _filter_scratch
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+
+_scratch_unmount
+
+> +
+> +_spare_dev_put
+> +_scratch_dev_pool_put 1
+> +
+> +# success, all done
+> +status=0
+> +echo "Finished"
+
+Don't need this bit.  Thanks,
+
+Josef
