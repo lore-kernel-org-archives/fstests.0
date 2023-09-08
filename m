@@ -2,149 +2,107 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1103EE14D7
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 04:02:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA137EE57C0
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 05:00:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231344AbjIHEC6 (ORCPT
+        id S238521AbjIHFAk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Sep 2023 00:02:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45366 "EHLO
+        Fri, 8 Sep 2023 01:00:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229679AbjIHEC5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 00:02:57 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C105A1BF0
-        for <fstests@vger.kernel.org>; Thu,  7 Sep 2023 21:02:10 -0700 (PDT)
+        with ESMTP id S229485AbjIHFAj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 01:00:39 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD92A1997
+        for <fstests@vger.kernel.org>; Thu,  7 Sep 2023 21:59:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694145729;
+        s=mimecast20190719; t=1694149190;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=xYvC4IUdgJ+gELBNmwoGvFIDDsROFybKkIWYtzQ1LQo=;
-        b=iklB/VhAaJS2wCnnZ4vTu/1klXhUxx0FkTOG+fWrf6jgiiZY7C9xfIKeCgM0PozUSaa0pm
-        07hDFJxkl5V2z4sxk+RYAPxlQ1hIoZOUPptVg0SkcjLO2E2GXxXuaUKERq9jBFPY/TcKvh
-        pzrrHL3IDiJUZL+Akcn6PL9NljQvmRc=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=omE/fqAi5L9tAoo0PSxtYu5iU2quEaNU33HuqqCYBpY=;
+        b=gbG/m05LyR7zmWkp9kgWeM0N9egT1Lg5Q44q4RPgeVazxSlUdI1d4nMKaqr0/Sntx1mzmd
+        3UHCVK5bR7EmQmEU3owrTHOLVpMYpMppB7BU7ATNq6XD0CiOqLLXTEvpcApNBl6vRHf4EB
+        Kbnu32HC1Hu73hVY3cCJ85pMwD6o2AQ=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-97-lEywoqOMMJ6nIXomgtxfFg-1; Fri, 08 Sep 2023 00:02:07 -0400
-X-MC-Unique: lEywoqOMMJ6nIXomgtxfFg-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-68bec4f6a64so2095017b3a.2
-        for <fstests@vger.kernel.org>; Thu, 07 Sep 2023 21:02:07 -0700 (PDT)
+ us-mta-602-lmoIw-z6PJy4imF0eTcq_w-1; Fri, 08 Sep 2023 00:59:48 -0400
+X-MC-Unique: lmoIw-z6PJy4imF0eTcq_w-1
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-267f00f6876so2161224a91.3
+        for <fstests@vger.kernel.org>; Thu, 07 Sep 2023 21:59:48 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694145726; x=1694750526;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=xYvC4IUdgJ+gELBNmwoGvFIDDsROFybKkIWYtzQ1LQo=;
-        b=jl+Xvd6OhnUnIY+9M3LbG4UIvmYEfrVmF+FevvHsxQalu/rPBwUlnbTBUjGwUltWqW
-         19hgPQxrUkGmf/Of86lviz/jbvObTeprsO9SRRC8zd27tZjy/Ta5Ykaky4CDK68GfEiF
-         XICLfPo09tCkuXJiQlOLmSUZOniHG0FwMiCULOWvugABRMzKw8CQpy2tb2Tq7MS2N+Oh
-         zXvSleD5jvNn9qlaaARnDxCw8B9M5P1lRt7kwc82bVFuXAKQmFw/Wx2HbgIeiPYvHOXy
-         wiQxK6gITvzH47anw9jUJ0ALzB9tYVn6hiUZnVOQU9l0XfjskiWGHfMfyz2e9KPJKPby
-         trlQ==
-X-Gm-Message-State: AOJu0Yywn5ZwZlIXweNY1j0wLZZcWYjb4GxmkEoiK1mxbwTeOK2jmdDI
-        rjqaRtwiUKRJoxrHheJE51YRG0eOFu8KGc2b85m9kITRfrN8X5rLfIaWaWcoRVltaeZTo/VuISz
-        V/2zISlg44yiUfSIh1XhnK2UBVL627iHOpaq5TGpbhbQHTpZ1VSXygZfVGc7VzfPnbaunrEyuRW
-        Gu
-X-Received: by 2002:a05:6a00:b95:b0:68e:3a59:b9d5 with SMTP id g21-20020a056a000b9500b0068e3a59b9d5mr1504332pfj.16.1694145726184;
-        Thu, 07 Sep 2023 21:02:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHx5d/NGNsY9EEB4lAEv9eATsVL7kxZu+zcm1936KmtFMtgsdt0DmC12ISdpn5WzRWB5vdB1g==
-X-Received: by 2002:a05:6a00:b95:b0:68e:3a59:b9d5 with SMTP id g21-20020a056a000b9500b0068e3a59b9d5mr1504305pfj.16.1694145725656;
-        Thu, 07 Sep 2023 21:02:05 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1694149187; x=1694753987;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=omE/fqAi5L9tAoo0PSxtYu5iU2quEaNU33HuqqCYBpY=;
+        b=ExUEfXanX7BDRLN47NoUe81Dtcxj09l5pRStkeL0m9/L0QMEQWwrqpP3ix7fPVNfef
+         zeFd6d7/fDSkI02YZFxmBvK1l7UKO1z08s6WhrOoQcptu5jtoDplmC7ThUE29xN5bRMs
+         8dDFYphsWbcpJPuzhr55x7sm+mymY+wIhDzrecZBbiUjGC6jSWD50Sb3ildHNAiObTk+
+         wYYzvEDlt0tCWeNyp0TuWT8ltFvCeirGb5VzxPEM5Lr4WfxEJIoOP3h2alZKztEjDBYu
+         BgZk3cUyOqrpBanD/cL27KZXYXeg735tULDlrvajDMLFp1rsFtmY95vQqcer8Pv0tPY2
+         A1mg==
+X-Gm-Message-State: AOJu0Yy/Mr6pi8dg4T7FIbuEj7rgMfwUmA47eKwHQBCE9rCPmFXs86A+
+        N/x//fq/85EhwE5eo4Hl+pTB3XjLDV0oWF/axwIT2aQsarJ9f3S9o2PhSxBbLJ2I3sFpW3BPltI
+        HtCWHSpF6/LD/8ss1Ii8WuPihlQ1H
+X-Received: by 2002:a17:90a:6549:b0:26b:17ef:7365 with SMTP id f9-20020a17090a654900b0026b17ef7365mr1327059pjs.48.1694149187173;
+        Thu, 07 Sep 2023 21:59:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG6NhQ62L0JiyHhxRneEm8r4PcuXeCDgEla5SbBaDU4m+lVBgWPmCsM/ZVIhm+osJC1RTOgew==
+X-Received: by 2002:a17:90a:6549:b0:26b:17ef:7365 with SMTP id f9-20020a17090a654900b0026b17ef7365mr1327052pjs.48.1694149186860;
+        Thu, 07 Sep 2023 21:59:46 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c3-20020aa78803000000b00686bef8e55csm430672pfo.39.2023.09.07.21.02.04
-        for <fstests@vger.kernel.org>
+        by smtp.gmail.com with ESMTPSA id i13-20020a17090332cd00b001b03cda6389sm597639plr.10.2023.09.07.21.59.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Sep 2023 21:02:05 -0700 (PDT)
-Date:   Fri, 8 Sep 2023 12:02:02 +0800
+        Thu, 07 Sep 2023 21:59:46 -0700 (PDT)
+Date:   Fri, 8 Sep 2023 12:59:43 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: Re: [PATCH] tools/mvtest: ensure testcase is executable (755)
-Message-ID: <20230908040202.mmtvskdcdd54coxe@zlang-mailbox>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] tools/mvtests: ensure testcase is executable (755)
+Message-ID: <20230908045943.k6jiwfbpdn6np2ay@zlang-mailbox>
 References: <20230906071349.3643040-1-ruansy.fnst@fujitsu.com>
- <20230907135434.kj44w7mg6qvpzs4m@zlang-mailbox>
- <7365bd90-6aaf-46d7-b09e-61ea1ad9ddb5@fujitsu.com>
+ <20230907113501.4119112-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <7365bd90-6aaf-46d7-b09e-61ea1ad9ddb5@fujitsu.com>
+In-Reply-To: <20230907113501.4119112-1-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 08, 2023 at 10:13:01AM +0800, Shiyang Ruan wrote:
+On Thu, Sep 07, 2023 at 07:35:01PM +0800, Shiyang Ruan wrote:
+> Some test cases lack executable permission ('x'). Before running each
+> test case, `./check` checks and grants them 'x' permission. However,
+> this always leads to a dirty git repo. And the absence of 'x' permission
+> in test cases is often overlooked during reviews.
 > 
+> Since maintainers use mvtest to assign new case, add this change for
+> convenience of maintainers.
 > 
-> 在 2023/9/7 21:54, Zorro Lang 写道:
-> > On Wed, Sep 06, 2023 at 03:13:49PM +0800, Shiyang Ruan wrote:
-> > > Some test cases lack executable permission ('x'). Before running each
-> > > test case, `./check` checks and grants them 'x' permission. However,
-> > > this always leads to a dirty git repo. And the absence of 'x' permission
-> > > in test cases is often overlooked during reviews.
-> > > 
-> > > Since maintainers use mvtest to assign new case, add this change for
-> > > convenience of maintainers.
-> > > 
-> > > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-> > > ---
-> > >   tools/mvtest | 2 ++
-> > >   1 file changed, 2 insertions(+)
-> > > 
-> > > diff --git a/tools/mvtest b/tools/mvtest
-> > > index 99b154142..e839f0256 100755
-> > > --- a/tools/mvtest
-> > > +++ b/tools/mvtest
-> > > @@ -28,6 +28,8 @@ append() {
-> > >   test "${src}" != "${dest}" || die "Test \"${src}\" is the same as dest."
-> > >   test -e "tests/${src}" || die "Test \"${src}\" does not exist."
-> > >   test ! -e "tests/${dest}" || die "Test \"${src}\" already exists."
-> > > +# make sure testcase is executable
-> > > +test `stat -c '%a' tests/${src}` == 755 || chmod 755 "tests/${src}"
-> > 
-> > (Weird, I thought I've replied this patch, but I can't find my reply anywhere.)
-> > 
-> > I said we can check and set the permission on the ${dest} file, after the
-> > move operation is done. Due to we actually want to get a 755 ${dest} file
-> > by running the mvtest.
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> ---
+>  tools/mvtest | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> It seems that maillist server was down at that time.  But I received your
-> reply:
+> diff --git a/tools/mvtest b/tools/mvtest
+> index 99b154142..1ad775a3e 100755
+> --- a/tools/mvtest
+> +++ b/tools/mvtest
+> @@ -34,6 +34,8 @@ did="$(basename "${dest}")"
+>  
+>  git mv "tests/${src}" "tests/${dest}"
+>  git mv "tests/${src}.out" "tests/${dest}.out"
+> +# make sure testcase is executable
+> +test $(stat -c '%a' tests/${dest}) == 755 || chmod 755 "tests/${dest}"
 
-Recently I missed some emails/patches, I don't know if it was a problem of
-fstests@ or redhat mail service. If I didn't reply a patch for long time,
-please feel free to ping me or the ping fstests list.
+I think `chmod 755 "tests/${dest}"` is enough at here. With this change:
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-Thanks,
-Zorro
-
-> 
-> > I think we can check and set the file permission on the target file
-> > after the move operation done, not the source file.
-> >
-> > And we recommend using $() to replace ``, if both of them work.
-> 
-> Then I have sent v2[1] which is using $() instead of `` and doing the
-> check-then-set tests/${dest} after `git mv`, as you suggested.
-> 
-> [1] https://lore.kernel.org/fstests/20230907113501.4119112-1-ruansy.fnst@fujitsu.com/
-> 
-> 
-> --
-> Thanks,
-> Ruan.
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >   sid="$(basename "${src}")"
-> > >   did="$(basename "${dest}")"
-> > > -- 
-> > > 2.42.0
-> > > 
-> > 
+>  sed -e "s/^# FS[[:space:]]*QA.*Test.*[0-9]\+$/# FS QA Test No. ${did}/g" -i "tests/${dest}"
+>  sed -e "s/^QA output created by ${sid}$/QA output created by ${did}/g" -i "tests/${dest}.out"
+>  sed -e "s/test-${sid}/test-${did}/g" -i "tests/${dest}.out"
+> -- 
+> 2.42.0
 > 
 
