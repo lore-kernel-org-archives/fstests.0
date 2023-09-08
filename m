@@ -2,157 +2,86 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9960EEE57C3
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 05:28:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37706EE57C9
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 05:46:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231676AbjIHF23 (ORCPT
+        id S236961AbjIHFqh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Sep 2023 01:28:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59820 "EHLO
+        Fri, 8 Sep 2023 01:46:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230003AbjIHF21 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 01:28:27 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCEED1BDA
-        for <fstests@vger.kernel.org>; Thu,  7 Sep 2023 22:27:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694150854;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=kKCsrqis+BsCzL1au9M77zkgSqfPeD5/UYOFu7ubnBU=;
-        b=EaGlqUkYFt/8IQIOj4xbiRPc+dspVgt4NxIK4XRejHUqVE5GalUDD++i9E1ptgPmWzo+mf
-        /ey6m2Crc9k8Cn6mJW0k2w0nhiw/sug5kVsdW7JdWbc86i3RxjIGSmwPJK5q7VUi38fz6m
-        s54Dyf9BrBwo8kCThDfvQ4+pkIeMMak=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-352-u6W4m8nNOeyv4rhKAvA9IQ-1; Fri, 08 Sep 2023 01:27:32 -0400
-X-MC-Unique: u6W4m8nNOeyv4rhKAvA9IQ-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1c0aaf4caaaso22541995ad.2
-        for <fstests@vger.kernel.org>; Thu, 07 Sep 2023 22:27:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694150852; x=1694755652;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=kKCsrqis+BsCzL1au9M77zkgSqfPeD5/UYOFu7ubnBU=;
-        b=jVhdHXDuy2kSe5wzGLEPKTensJS+cKAT2AsXp7+7pdlcW8eaewa25aTgeYI/eunvD4
-         hUqtzbCxkNuwRojcWgl7Uy+08WQssnqR1rZi3FPBJ76RJ5CBqLRTXuGNdq6VGUZ799pg
-         Abe8WHFL3A8F3kpTc/YjXOY8QZ4AibzYzoTgzZ0UauF+njFNc+6qtl+uoK5pt80iDVLw
-         R7P3YAUKcS3X46ovqFNr1A1EeC3toyq9HesA/78PnxaXTipPqB9ZJBmn5Lz4m6NJXdAC
-         NzFqpawu6+DjpxB8SQsx8sny3qALagq0NcmiQZunpg82yN3j43DP+/FyRNX4yktGGfQU
-         8QDA==
-X-Gm-Message-State: AOJu0Yyhhy+Xw0JKBSFTA9DHmSn2ng4njiem+3ZOa03d+hk/QhieGEol
-        5+8eRYH6hC1JId7Zpgr+V9n0G/WUdAdG1XM1OPmG16s1+Ct3qpolL9kujCdmLTfrj200nEP0OvP
-        TKzlksrzOVipOe4ct7Q==
-X-Received: by 2002:a17:902:c945:b0:1bb:32de:95c5 with SMTP id i5-20020a170902c94500b001bb32de95c5mr1976915pla.65.1694150851695;
-        Thu, 07 Sep 2023 22:27:31 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGJ40qCvKRfoIkm0b84FGgfTzvKoPpRC2DfetekChbsCofR092otCbVr1txAVQ/nG9XCDpMRg==
-X-Received: by 2002:a17:902:c945:b0:1bb:32de:95c5 with SMTP id i5-20020a170902c94500b001bb32de95c5mr1976899pla.65.1694150851352;
-        Thu, 07 Sep 2023 22:27:31 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id jf20-20020a170903269400b001b80760fd04sm646012plb.112.2023.09.07.22.27.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Sep 2023 22:27:30 -0700 (PDT)
-Date:   Fri, 8 Sep 2023 13:27:27 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     fstests@vger.kernel.org, aalbersh@redhat.com,
-        chandan.babu@oracle.com, amir73il@gmail.com, djwong@kernel.org,
-        linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [PATCH] check: add support for --start-after
-Message-ID: <20230908052727.ccyxadtibouis74h@zlang-mailbox>
-References: <20230907221030.3037715-1-mcgrof@kernel.org>
+        with ESMTP id S230208AbjIHFqh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 01:46:37 -0400
+Received: from esa5.hc1455-7.c3s2.iphmx.com (esa5.hc1455-7.c3s2.iphmx.com [68.232.139.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3CFA19B5
+        for <fstests@vger.kernel.org>; Thu,  7 Sep 2023 22:46:32 -0700 (PDT)
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="130777415"
+X-IronPort-AV: E=Sophos;i="6.02,236,1688396400"; 
+   d="scan'208";a="130777415"
+Received: from unknown (HELO oym-r3.gw.nic.fujitsu.com) ([210.162.30.91])
+  by esa5.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Sep 2023 14:46:31 +0900
+Received: from oym-m2.gw.nic.fujitsu.com (oym-nat-oym-m2.gw.nic.fujitsu.com [192.168.87.59])
+        by oym-r3.gw.nic.fujitsu.com (Postfix) with ESMTP id ABD41CA1EB
+        for <fstests@vger.kernel.org>; Fri,  8 Sep 2023 14:46:28 +0900 (JST)
+Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
+        by oym-m2.gw.nic.fujitsu.com (Postfix) with ESMTP id DFFF9BCB72
+        for <fstests@vger.kernel.org>; Fri,  8 Sep 2023 14:46:27 +0900 (JST)
+Received: from irides.g08.fujitsu.local (unknown [10.167.234.230])
+        by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 42F3F4033E;
+        Fri,  8 Sep 2023 14:46:27 +0900 (JST)
+From:   Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To:     fstests@vger.kernel.org
+Cc:     ruansy.fnst@fujitsu.com, Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v3] tools/mvtest: ensure testcase is executable (755)
+Date:   Fri,  8 Sep 2023 13:43:35 +0800
+Message-ID: <20230908054335.13625-1-ruansy.fnst@fujitsu.com>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <20230906071349.3643040-1-ruansy.fnst@fujitsu.com>
+References: <20230906071349.3643040-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230907221030.3037715-1-mcgrof@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-27862.005
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-27862.005
+X-TMASE-Result: 10--2.951100-10.000000
+X-TMASE-MatchedRID: eOGkqzLLC6otNVV5XI3AlHwsIAe4wcJG37jcLTY9yETfc2Xd6VJ+ytue
+        iHTXMaT6p7UNomiOZJwuiOJZr6TrGPXNEkgZOg/OOIQ9GP2P2u/BOVz0Jwcxl6vCrG0TnfVU2d8
+        mtRIRsUOtqhvfTy0XN4cR4xN9HQJ7HxPMjOKY7A/+HHE8LDNSg8RB0bsfrpPIcSqbxBgG0w5Lig
+        y/6yq4elVgyVSx0dJ1PlQQXz+QxkcdSoZ2qiTUs5Du24PeoPVp8l157DL+/A4MzfQezK2b9/efs
+        YyA80u3mDaH1d59Q8pbjBuldNvkMkoq97WSHdFjfupJaud1uZCfRs6uIbkFVw==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 07, 2023 at 03:10:30PM -0700, Luis Chamberlain wrote:
-> Often times one is running a new test baseline we want to continue to
-> start testing where we left off if the last test was a crash. To do
-> this the first thing that occurred to me was to use the check.time
-> file as an expunge file but that doesn't work so well if you crashed
-> as the file turns out empty.
-> 
-> So instead add super simple argument --start-after which let's you
-> skip all tests until the test infrastructure has "seen" the test
-> you want to skip. This does obviously work best if you are not using
-> a random order, but that is rather implied.
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
->  check | 17 +++++++++++++++++
->  1 file changed, 17 insertions(+)
-> 
-> diff --git a/check b/check
-> index 71b9fbd07522..1ecf07c1cb37 100755
-> --- a/check
-> +++ b/check
-> @@ -18,6 +18,8 @@ showme=false
->  have_test_arg=false
->  randomize=false
->  exact_order=false
-> +start_after=false
-> +start_after_test=""
->  export here=`pwd`
->  xfile=""
->  subdir_xfile=""
-> @@ -80,6 +82,7 @@ check options
->      -b			brief test summary
->      -R fmt[,fmt]	generate report in formats specified. Supported formats: xunit, xunit-quiet
->      --large-fs		optimise scratch device for large filesystems
-> +    --start-after	only start testing after the test specified
+Some test cases lack executable permission ('x'). Before running each
+test case, `./check` checks and grants them 'x' permission. However,
+this always leads to a dirty git repo. And the absence of 'x' permission
+in test cases is often overlooked during reviews.
 
-This option conflicts with "-r" option.
+Since maintainers use mvtest to assign new case, add this change for
+convenience of maintainers.
 
->      -s section		run only specified section from config file
->      -S section		exclude the specified section from the config file
->      -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
-> @@ -313,6 +316,11 @@ while [ $# -gt 0 ]; do
->  				<(sed "s/#.*$//" $xfile)
->  		fi
->  		;;
-> +	--start-after)
-> +		start_after=true
-> +		start_after_test="$2"
+Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+---
+ tools/mvtest | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Do we really need two variables at here?
-
-> +		shift
-> +		;;
->  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
->  	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
->  	-l)	diff="diff" ;;
-> @@ -591,6 +599,15 @@ _expunge_test()
->  {
->  	local TEST_ID="$1"
->  
-> +	if $start_after; then
-> +		if [[ "$start_after_test" == ${TEST_ID}* ]]; then
-> +			start_after=false
-> +		fi
-> +		echo "       [skipped]"
-> +		return 0
-> +
-> +	fi
-
-I can't understand how you use the --start-after. I though you'd like to remove
-all cases before the "start-after" from the running list. But when I saw here,
-I'm a little confused.
-
-Thanks,
-Zorro
-
-> +
->  	for f in "${exclude_tests[@]}"; do
->  		# $f may contain traling spaces and comments
->  		local id_regex="^${TEST_ID}\b"
-> -- 
-> 2.39.2
-> 
+diff --git a/tools/mvtest b/tools/mvtest
+index 99b154142..bd4006eb2 100755
+--- a/tools/mvtest
++++ b/tools/mvtest
+@@ -34,6 +34,8 @@ did="$(basename "${dest}")"
+ 
+ git mv "tests/${src}" "tests/${dest}"
+ git mv "tests/${src}.out" "tests/${dest}.out"
++# make sure testcase is executable
++chmod 755 "tests/${dest}"
+ sed -e "s/^# FS[[:space:]]*QA.*Test.*[0-9]\+$/# FS QA Test No. ${did}/g" -i "tests/${dest}"
+ sed -e "s/^QA output created by ${sid}$/QA output created by ${did}/g" -i "tests/${dest}.out"
+ sed -e "s/test-${sid}/test-${did}/g" -i "tests/${dest}.out"
+-- 
+2.42.0
 
