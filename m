@@ -2,134 +2,83 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 830D4EE8009
-	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 14:14:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F033EEB570
+	for <linux-fstests@archiver.kernel.org>; Fri,  8 Sep 2023 23:36:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243557AbjIHOPA (ORCPT
+        id S1344172AbjIHXgk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 8 Sep 2023 10:15:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46448 "EHLO
+        Fri, 8 Sep 2023 19:36:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241340AbjIHOO7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 10:14:59 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F13241BF1
-        for <fstests@vger.kernel.org>; Fri,  8 Sep 2023 07:14:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694182448;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=/gHYeaHYW7J0BYQ2w5FPEK9IEdhsXOZobbaMgeO5V28=;
-        b=cBuNN1Li5T3dcUc1TmH/ZOfZlgTfw+sgZsb9HekioEJKz0oSzPkvLXCTzmDj62jyMcKn6Z
-        dpy/rKRfPe5Vxmooi0YJKmaktiewJ/V0dPo/ooHyfaamYEeo+TXQ7w78+4pZN/6DWWKzt7
-        ygQghshHyQu5VTqndmqxXKQI/2/MK1Q=
-Received: from mail-ot1-f70.google.com (mail-ot1-f70.google.com
- [209.85.210.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-472-x8Yx9u7SNaKKqdTbims4AA-1; Fri, 08 Sep 2023 10:14:04 -0400
-X-MC-Unique: x8Yx9u7SNaKKqdTbims4AA-1
-Received: by mail-ot1-f70.google.com with SMTP id 46e09a7af769-6bd899e2d3aso2293168a34.3
-        for <fstests@vger.kernel.org>; Fri, 08 Sep 2023 07:14:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694182444; x=1694787244;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/gHYeaHYW7J0BYQ2w5FPEK9IEdhsXOZobbaMgeO5V28=;
-        b=DoGs37OLOw7w6IOaaAlOC2e67QY5/SsG0izOnLBjNrV1Cr2/irs0T6q27JAEO7t6lD
-         6GKOCxJRZ8JKN37DGnxv9MIR/AKbakzdlEiSLNTE6JGs+spVVeEOeOFh2m+uROJKSMz/
-         n9Jx69hTkX3Fs5ME6YAtTyYxL/no1B3BH3NLh+21qLOol7qb3f+/MKF07O7HLVscVtsQ
-         /9y4JoKAHG4T5KfZWovHE63+holP6z8y10w7SUhuksHt3p47jtG7hd288g3Ar3xJVSje
-         gEX/aA4+7a1SZXJSQT8JEzwx7fcirUr/Ev4Edeo31nwhIp1k4nSkZK/XvL983IkTyuOV
-         OVMA==
-X-Gm-Message-State: AOJu0Yzl4m6pPfcrR3SSF167k2d4/6S8ClcrAvo7QxEYK3CU9xtu7gJp
-        Ixd9KmNTGNzkVH5Xz0LhCrpIT/DbGUHa1ZRA4EcoOMOHoJTqkrI69R57dPfX+VhWWc9bg+MCIYd
-        oUB7/gUCmSENif7sxZg==
-X-Received: by 2002:a05:6870:b01f:b0:1b7:4521:14b6 with SMTP id y31-20020a056870b01f00b001b7452114b6mr3176050oae.5.1694182443866;
-        Fri, 08 Sep 2023 07:14:03 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGJihF/78YrUKgSIobBXtmksWFNQLKLPurOkSKqU+mhAvyR2a5y4tSUivfWywunndUdkT2PIA==
-X-Received: by 2002:a05:6870:b01f:b0:1b7:4521:14b6 with SMTP id y31-20020a056870b01f00b001b7452114b6mr3176009oae.5.1694182443003;
-        Fri, 08 Sep 2023 07:14:03 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id i69-20020a639d48000000b00563590be25esm1238406pgd.29.2023.09.08.07.14.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Sep 2023 07:14:02 -0700 (PDT)
-Date:   Fri, 8 Sep 2023 22:13:59 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     cem@kernel.org
-Cc:     fstests@vger.kernel.org, zlang@kernel.org,
-        linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] common: fix rt_ops setup in _scratch_mkfs_sized
-Message-ID: <20230908141359.4di6fyo52rengnks@zlang-mailbox>
-References: <20230908121234.553218-1-cem@kernel.org>
+        with ESMTP id S242428AbjIHXgk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2023 19:36:40 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 793FD18E
+        for <fstests@vger.kernel.org>; Fri,  8 Sep 2023 16:36:36 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B9D9C433C9;
+        Fri,  8 Sep 2023 23:36:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1694216196;
+        bh=w5qtAlTP9HyN5dzhHOsVLfrD/bfHDK4p9oJx2a6Gy5U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=qkCcA8fq8nNuntk/Ji79/949Icyv25DZuBWYS2tRG7TW7O3KqoZmCY3vDDYVNi/NL
+         ADLOIQEfrNrzghZ0YbuUuK81ugnME4V4KLambPtuFyCndklcXdcH6Xkjk0QaJ6Bpj3
+         gj5KYX/Q8msmxwvMxAXFBg0WkrAPDf3BBTWoaX1YV8OOj2h1YWA0Vf3cqASntDMquy
+         8HYYqdYFUEvu1rajYu1hd5Ewq35XjEBj228c/Nbb0umJcdc3cHXke9M4M9xaNE79/h
+         CUMY86s9vXnsDAD0xh997Xa4nzku0oHov3iNX8z/UZV1RbuVGF3CiAQH57LyV4reMS
+         lDZZ+W1r4+AOA==
+Date:   Fri, 8 Sep 2023 16:36:35 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Shiyang Ruan <ruansy.fnst@fujitsu.com>
+Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v3] tools/mvtest: ensure testcase is executable (755)
+Message-ID: <20230908233635.GC28170@frogsfrogsfrogs>
+References: <20230906071349.3643040-1-ruansy.fnst@fujitsu.com>
+ <20230908054335.13625-1-ruansy.fnst@fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230908121234.553218-1-cem@kernel.org>
+In-Reply-To: <20230908054335.13625-1-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 08, 2023 at 02:12:34PM +0200, cem@kernel.org wrote:
-> From: Carlos Maiolino <cem@kernel.org>
+On Fri, Sep 08, 2023 at 01:43:35PM +0800, Shiyang Ruan wrote:
+> Some test cases lack executable permission ('x'). Before running each
+> test case, `./check` checks and grants them 'x' permission. However,
+> this always leads to a dirty git repo. And the absence of 'x' permission
+> in test cases is often overlooked during reviews.
 > 
-> Tests using _scratch_mkfs_sized() will fail if SCRATCH_RTDEV is set,
-> but, USE_EXTERNAL is not, this happens because the function pass
-> "-r size=$fssize" to the _scratch_mkfs_xfs argument line, which in turn
-> will not set rtdev because USE_EXTERNAL is not set.
+> Since maintainers use mvtest to assign new case, add this change for
+> convenience of maintainers.
 > 
-> Tests like xfs/015 will fail as:
-> 
-> xfs/015 6s ... [failed, exit status 1]- output mismatch
-> .
-> .
->     +size specified for non-existent rt subvolume
->     +Usage: mkfs.xfs
-> .
-> .
-> 
-> with this patch the test runs properly using the rtdev if USE_EXTERNAL
-> is set.
-> 
-> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
 > ---
+>  tools/mvtest | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> Particularly I think SCRATCH_RTDEV should not depend on USE_EXTERNAL, as the
-> latter is also linked to external logdevs, but I noticed tests specific for RT
-> devices also set USE_EXTERNAL, so  I opted to change it according to the current
-> usage
-
-According to the fstests/README:
-
-  Extra SCRATCH device specifications:
-   - Set SCRATCH_LOGDEV to "device for scratch-fs external log"
-   - Set SCRATCH_RTDEV to "device for scratch-fs realtime data"
-   - If SCRATCH_LOGDEV and/or SCRATCH_RTDEV, the USE_EXTERNAL environment
-
-So the USE_EXTERNAL should work with SCRATCH_RTDEV too. So this patch looks
-good to me,
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> 
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 1618ded5..20608fbe 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -965,7 +965,7 @@ _scratch_mkfs_sized()
->  		[ "$fssize" -gt "$devsize" ] && _notrun "Scratch device too small"
->  	fi
+> diff --git a/tools/mvtest b/tools/mvtest
+> index 99b154142..bd4006eb2 100755
+> --- a/tools/mvtest
+> +++ b/tools/mvtest
+> @@ -34,6 +34,8 @@ did="$(basename "${dest}")"
 >  
-> -	if [ "$FSTYP" = "xfs" ] && [ -b "$SCRATCH_RTDEV" ]; then
-> +	if [ "$FSTYP" = "xfs" ] && [ "$USE_EXTERNAL" = yes -a -b "$SCRATCH_RTDEV" ]; then
->  		local rtdevsize=`blockdev --getsize64 $SCRATCH_RTDEV`
->  		[ "$fssize" -gt "$rtdevsize" ] && _notrun "Scratch rt device too small"
->  		rt_ops="-r size=$fssize"
-> -- 
-> 2.39.2
-> 
+>  git mv "tests/${src}" "tests/${dest}"
+>  git mv "tests/${src}.out" "tests/${dest}.out"
+> +# make sure testcase is executable
+> +chmod 755 "tests/${dest}"
 
+No objections to forcing 0755, though "a+x" here would have gotten the
+job done as well.
+
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
+>  sed -e "s/^# FS[[:space:]]*QA.*Test.*[0-9]\+$/# FS QA Test No. ${did}/g" -i "tests/${dest}"
+>  sed -e "s/^QA output created by ${sid}$/QA output created by ${did}/g" -i "tests/${dest}.out"
+>  sed -e "s/test-${sid}/test-${did}/g" -i "tests/${dest}.out"
+> -- 
+> 2.42.0
+> 
