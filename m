@@ -2,152 +2,128 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F5CFCA0ECE
-	for <linux-fstests@archiver.kernel.org>; Mon, 11 Sep 2023 22:50:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F45DCA0ED2
+	for <linux-fstests@archiver.kernel.org>; Mon, 11 Sep 2023 22:50:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240358AbjIKWqO (ORCPT
+        id S235234AbjIKWq1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 11 Sep 2023 18:46:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47224 "EHLO
+        Mon, 11 Sep 2023 18:46:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52112 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244333AbjIKUHi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Sep 2023 16:07:38 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4E04E185
-        for <fstests@vger.kernel.org>; Mon, 11 Sep 2023 13:06:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694462806;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=68rrNCxWRK2VmJRI4wA2otsKeJcntoz7oSW2095jKCk=;
-        b=TdMocJFadBuohTZgdmYktFadSBqrI7mIgSseqlLbICMdzzXlExTSGOnY/Zf0h+nwrPWStW
-        djDGoyQCKRY/2tCuYg11BQrohOXSIt/CBZxZGoVYOsP9eyDmAC8WLyL35+qLjykLe2uRAy
-        LWPW4ppRL/dEz48+q0e/mc1nmdXw09U=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-642-tXyJ6BVdN8C8Wv8Dbls4Uw-1; Mon, 11 Sep 2023 16:06:44 -0400
-X-MC-Unique: tXyJ6BVdN8C8Wv8Dbls4Uw-1
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-31ad77537ebso3159906f8f.0
-        for <fstests@vger.kernel.org>; Mon, 11 Sep 2023 13:06:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694462803; x=1695067603;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=68rrNCxWRK2VmJRI4wA2otsKeJcntoz7oSW2095jKCk=;
-        b=lrtJWWkmxKVQtUDCqFTOSjj4wEIC+52uSEy7ou68WSYeo4d+NFD3I5cVoCZs92HGS7
-         7R64HVJh56lh6G8g9KJYty+whhbx+wMmIhtOGgS3ANCOAjSjLlXYuMyeAbIfxnPkElHb
-         Zv7VwyNBjkl11LIoB7VkKqks6UtK1p48NAYBA40PLHcGnwuust5ApKkn8gS1GJWFqItp
-         kPkOBufsI1ESCYZ06VdKaxlPhIOW0Ybf4HXVBqQIH47ifgwQHlQMjchy1RvPEabaJWF9
-         n+MrH00gwnQXFXWPVe9oDIVjBaFSBuaNECOvhZaLXkChqCQ84KMxBKGnmTCUjEfC6VBQ
-         Eh6Q==
-X-Gm-Message-State: AOJu0YxVN6TSq6O/L+g9lAvWPGiXCSSCspYsWkP2qBp+Leb3xueGM3Bt
-        +nXcHse9tHDu03yJxERyqEXf/Q1zz3habzyIX2vVDoDqDS8r2oQo4tsWB897IBUnCSOxWT8SY59
-        uHkyjW6BJ9rlgGt8/vRbnRaOO3IVKse+aBwBd8bIWvHb4W8lhnz7RfUR5TAu0GJSHbcYHHfhCqa
-        qq
-X-Received: by 2002:a5d:610d:0:b0:31d:ce83:8a34 with SMTP id v13-20020a5d610d000000b0031dce838a34mr9181159wrt.39.1694462803280;
-        Mon, 11 Sep 2023 13:06:43 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFcHWLNpdI4Riw+2UXE5aSNzL0YtOftIJjZgN+9dxn/hTs0HzlABjPKIq6cHU4MmvegMUNohA==
-X-Received: by 2002:a5d:610d:0:b0:31d:ce83:8a34 with SMTP id v13-20020a5d610d000000b0031dce838a34mr9181143wrt.39.1694462802889;
-        Mon, 11 Sep 2023 13:06:42 -0700 (PDT)
-Received: from thinky.redhat.com ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id a3-20020adfeec3000000b003196e992567sm10915023wrp.115.2023.09.11.13.06.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Sep 2023 13:06:42 -0700 (PDT)
-From:   Andrey Albershteyn <aalbersh@redhat.com>
-To:     fstests@vger.kernel.org, fsverity@lists.linux.dev
-Cc:     Andrey Albershteyn <aalbersh@redhat.com>
-Subject: [PATCH] common/rc: make _get_max_file_size find file size on mount point
-Date:   Mon, 11 Sep 2023 22:06:17 +0200
-Message-Id: <20230911200617.777985-1-aalbersh@redhat.com>
-X-Mailer: git-send-email 2.40.1
+        with ESMTP id S243953AbjIKSbc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Sep 2023 14:31:32 -0400
+Received: from wout4-smtp.messagingengine.com (wout4-smtp.messagingengine.com [64.147.123.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49C61198;
+        Mon, 11 Sep 2023 11:31:27 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id E2EA83200912;
+        Mon, 11 Sep 2023 14:31:23 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute3.internal (MEProxy); Mon, 11 Sep 2023 14:31:24 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+        :content-type:content-type:date:date:from:from:in-reply-to
+        :in-reply-to:message-id:mime-version:references:reply-to:sender
+        :subject:subject:to:to; s=fm2; t=1694457083; x=1694543483; bh=Ec
+        MFYvhUrMnasEqJwEyJPej38pS4lZZ3N7GELDh7r38=; b=nMcci+o/59MCemrXW5
+        8dcZVnfHs5GPM/Dq4tcYijrGi7fvsxjxnWFulAC+EaeWcnl3ZwVgO7HOZ8kx268J
+        v3J5+OGvDxhy13nngEYTNboVIzpeafHZ+HFPftahw0sACD266c3kbfX4Vc2cXwtR
+        guQMSJV37NO13UnGXSzRuLPMURW4gK49vti+MfkO9Rw2Fm5cp2ev8btsP22PKoGw
+        43U7F1WShYKCs4fNKvClrt+NYXWBRiBLZKbbwVGTTUdr1tLhbPHnP+KJTDd0PJA0
+        h/WrFRkJQTs+2bIqEzNrp7S+Ph8Vx7MPWYS9p5+mBn6ZbIkzKk7Ln8wbEQMEXsxF
+        jjtA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:content-type:date:date
+        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+        :x-sasl-enc; s=fm1; t=1694457083; x=1694543483; bh=EcMFYvhUrMnas
+        EqJwEyJPej38pS4lZZ3N7GELDh7r38=; b=vsmmCu4Nv39Ay3NHLb3N2iQhwjdzZ
+        BHtUv5ei4e6U18ndUC855+9I8tupLZfAvGOrKojYzPcKvyGm9rbUYicMFehpzWi6
+        VTWygoxtHLzqZFVbBngs5RmEKrdpeqAD/4wJn9t52HZk9DZFotfluoEsFGiBsQMF
+        7Vi7rZS4i2Ot48+hvYOwK6fBAUSsAr/KsMzwvwYKzJATlEcKEyx8fWZODYQX7pDW
+        WV0hMtqoZKrnPzL6zpxcYHvN7NbX97pcPiDQdqSBq50iF+L/VAP3MV/UnDl4PlhH
+        X1dQF2fxUGBkGuLXAOee0jgFpplCm4rWaxLFo1pnmic4vsJjTGgm+yXmA==
+X-ME-Sender: <xms:-lz_ZJV4NRGW4-f1uSPJpD7Oxc8MxeJspcisSUu-1QcSt5YLYqca2g>
+    <xme:-lz_ZJlRbAVOz4Ei9KNaGwr7vZRP4h9Ldi-Eng8xmjdYceIDn1ZieZuJTuJ9p2pjW
+    yOEquAQ-P6-djvLve4>
+X-ME-Received: <xmr:-lz_ZFaM2n4rds7OPzAmWpOwf_9VWzGQKFXX2HcHmvutSQGy0kgkXcOWwATYCY-NqEvExsAQTZFn-69Pp1EojYdvgo0>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedviedrudeigedguddvfecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpeffhffvvefukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpeeuohhr
+    ihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnh
+    epkedvkeffjeellefhveehvdejudfhjedthfdvveeiieeiudfguefgtdejgfefleejnecu
+    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepsghorhhish
+    essghurhdrihho
+X-ME-Proxy: <xmx:-lz_ZMVwTpWjiCQ1Vxt_CmqHxv309uYBiPfgXqCLX1PsG4iWeuhLmA>
+    <xmx:-lz_ZDnGlhPaDrEhBiaWcUznyk3y9N6iqr2sFtOmoS_5TqXw4OvaPw>
+    <xmx:-lz_ZJc4vHhoT5JBEyY8ouXTZBxcHtl7K5IPajJLiXIe2e0sL2ifww>
+    <xmx:-1z_ZLvv9rmbrXM3dNZ0bG1VPErrBmXwyt3b8OS0BjizFISdtHhyzA>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 11 Sep 2023 14:31:22 -0400 (EDT)
+Date:   Mon, 11 Sep 2023 11:32:19 -0700
+From:   Boris Burkov <boris@bur.io>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: btrfs/185 update for single device pseudo
+ device-scan
+Message-ID: <20230911183219.GA1770132@zen>
+References: <7558eed09a89d25fbd8083d45078cfe2e9601f45.1694017375.git.anand.jain@oracle.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7558eed09a89d25fbd8083d45078cfe2e9601f45.1694017375.git.anand.jain@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Currently, _get_max_file_size finds max file size on $TEST_DIR.
-The tests/generic/692 uses this function to detect file size and
-then tries to create a file on $SCRATCH_MNT.
+On Thu, Sep 07, 2023 at 12:24:43AM +0800, Anand Jain wrote:
+> As we are obliterating the need for the device scan for the single device,
+> which will return success if the basic superblock verification passes,
+> even for the duplicate device of the mounted filesystem, drop the check
+> for the return code in this testcase and continue to verify if the device
+> path of the mounted filesystem remains unaltered after the scan.
+> 
+> Also, if the test fails, it leaves the local non-standard mount point
+> remained mounted, leading to further test cases failing. Call unmount
+> in _cleanup().
 
-This works fine when test and scratch filesystems have the same
-block size. However, it will fail if they differ, for example, TEST
-is 4k and SCRATCH is 1k (file will be too big).
+This was also affecting my setup, thanks for the fix!
 
-Found this by running generic/692 on ext4 with -b 1024.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>  tests/btrfs/185 | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/btrfs/185 b/tests/btrfs/185
+> index ba0200617e69..c7b8d2d46951 100755
+> --- a/tests/btrfs/185
+> +++ b/tests/btrfs/185
+> @@ -15,6 +15,7 @@ mnt=$TEST_DIR/$seq.mnt
+>  # Override the default cleanup function.
+>  _cleanup()
+>  {
+> +	$UMOUNT_PROG $mnt > /dev/null 2>&1
 
-Make _get_max_file_size accept mount point on which to detect max
-file size.
+Do you mean to umount before calling rm -rf on it? That seems.. risky.
 
-Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
----
- common/rc         | 8 +++++++-
- tests/generic/299 | 2 +-
- tests/generic/485 | 2 +-
- tests/generic/692 | 2 +-
- 4 files changed, 10 insertions(+), 4 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index 68d2ad04..d17ec73a 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4809,7 +4809,13 @@ _require_scratch_feature()
- # be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
- _get_max_file_size()
- {
--	local testfile=$TEST_DIR/maxfilesize.$seq
-+	if [ -z $1 ] || [ ! -d $1 ]; then
-+		echo "Missing mount point argument for _get_max_file_size"
-+		exit 1
-+	fi
-+
-+	local mnt=$1
-+	local testfile=$mnt/maxfilesize.$seq
- 	local l=0
- 	local r=9223372036854775807 # LLONG_MAX
- 
-diff --git a/tests/generic/299 b/tests/generic/299
-index d8ecff53..0cd12202 100755
---- a/tests/generic/299
-+++ b/tests/generic/299
-@@ -30,7 +30,7 @@ NUM_JOBS=$((4*LOAD_FACTOR))
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- FILE_SIZE=$((BLK_DEV_SIZE * 512))
- 
--max_file_size=$(_get_max_file_size)
-+max_file_size=$(_get_max_file_size $TEST_DIR)
- if [ $max_file_size -lt $FILE_SIZE ]; then
- 	FILE_SIZE=$max_file_size
- fi
-diff --git a/tests/generic/485 b/tests/generic/485
-index 3f7749ff..8bab450b 100755
---- a/tests/generic/485
-+++ b/tests/generic/485
-@@ -30,7 +30,7 @@ _require_xfs_io_command "finsert"
- _require_xfs_io_command "truncate"
- 
- block_size=$(_get_file_block_size $TEST_DIR)
--max_file_size=$(_get_max_file_size)
-+max_file_size=$(_get_max_file_size $TEST_DIR)
- max_blocks=$((max_file_size / block_size))
- testfile=$TEST_DIR/testfile.$seq
- 
-diff --git a/tests/generic/692 b/tests/generic/692
-index 95f6ec04..3fb8ac01 100755
---- a/tests/generic/692
-+++ b/tests/generic/692
-@@ -40,7 +40,7 @@ _scratch_mount
- 
- fsv_file=$SCRATCH_MNT/file.fsv
- 
--max_sz=$(_get_max_file_size)
-+max_sz=$(_get_max_file_size $SCRATCH_MNT)
- _fsv_scratch_begin_subtest "way too big: fail on first merkle block"
- truncate -s $max_sz $fsv_file
- _fsv_enable $fsv_file |& _filter_scratch
--- 
-2.40.1
-
+>  	rm -rf $mnt > /dev/null 2>&1
+>  	cd /
+>  	rm -f $tmp.*
+> @@ -51,9 +52,9 @@ for sb_bytenr in 65536 67108864; do
+>  	echo ..:$? >> $seqres.full
+>  done
+>  
+> -# Original device is mounted, scan of its clone should fail
+> +# Original device is mounted, scan of its clone must not alter the
+> +# filesystem device path
+>  $BTRFS_UTIL_PROG device scan $device_2 >> $seqres.full 2>&1
+> -[[ $? != 1 ]] && _fail "cloned device scan should fail"
+>  
+>  [[ $(findmnt $mnt | grep -v TARGET | $AWK_PROG '{print $2}') != $device_1 ]] && \
+>  						_fail "mounted device changed"
+> -- 
+> 2.39.3
+> 
