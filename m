@@ -2,139 +2,180 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E94FBEE01E0
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Sep 2023 17:07:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20589EE0212
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Sep 2023 23:19:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229625AbjIMRHU (ORCPT
+        id S233015AbjIMXTw (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Sep 2023 13:07:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60626 "EHLO
+        Wed, 13 Sep 2023 19:19:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229472AbjIMRHT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Sep 2023 13:07:19 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 77636198B
-        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 10:06:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694624789;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=9qmOEQJ/EqSZpL9rLSn0CaAejK2ncItiFgUoKh0UJKk=;
-        b=VL4L48bqLnDxgq0ouO9M1bkBItYQmsz5oLzw9lPVe5S0jm0LpFILlUQ3iwrUKQl7m1Eb9C
-        y3kTz5/vQZI5JCxJr99p/pIiznKUExM7E6hO9i/aa42N9E6qo7vCE5Pc3aUcGLLW5JsJeN
-        Tt/sQ32OclxgfDpbHE0+q78BfkkEh68=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-620-fIP7I2IXNnSltznkO_7LNw-1; Wed, 13 Sep 2023 13:06:28 -0400
-X-MC-Unique: fIP7I2IXNnSltznkO_7LNw-1
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-57774ddb68dso3808250a12.1
-        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 10:06:28 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694624787; x=1695229587;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=9qmOEQJ/EqSZpL9rLSn0CaAejK2ncItiFgUoKh0UJKk=;
-        b=TS2ycLxSx/HF5icOEgw7+5t9DWdanK9V10Rin9tl8z6I3dl4aAtYeMZ5dTFNVKriRs
-         1EjF2OzgV/SaNrxsxFqOQJQUtKUt1WPs+Q6bBQbdsmMdElTDnJOJm56ia2hV5+J4+/6H
-         6Jaor4EcVP84xmqx9fPd4PJnYZTZadfRZyp8K7XEz6HOO/2xdxfgg3fwvffTCvz5gqIR
-         ha/V2FLDQwWR3qMt8tVBrJ66v9wql2kbOUOZrbBPcrl/fxhu6vQsF4L0eyplIkyrGJOe
-         KI39/edZEff49jKPQ3FOdu6lomeMnf9/KFiQBG64oiM9GiXVz1LMp17L/S9KRQiFaoGu
-         q6zA==
-X-Gm-Message-State: AOJu0YwtFD9mnE4qTnDJXZwFGCcxKqiJ1+TK/hJX10EnIqmZe9hU0bX7
-        x0kFe8MOq4axaWSeh6qf8CH19Hg054/2soGwhBlPnQ32AS/svZ9RAnfp2EUQk7hbbshcISNgduo
-        reiO4qG7hcHxZcKyHr/ziiZVxSjgdikw=
-X-Received: by 2002:a05:6a20:2446:b0:134:8d7f:f4d9 with SMTP id t6-20020a056a20244600b001348d7ff4d9mr3596029pzc.52.1694624786831;
-        Wed, 13 Sep 2023 10:06:26 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEFjeJZP9KtyDBJGchBcOEX092Vvd/OM3Ram7Wz42jDbjJ4yBL+FQtW8boF3aSDV/yrXTBoZw==
-X-Received: by 2002:a05:6a20:2446:b0:134:8d7f:f4d9 with SMTP id t6-20020a056a20244600b001348d7ff4d9mr3596004pzc.52.1694624786478;
-        Wed, 13 Sep 2023 10:06:26 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id z24-20020a63ac58000000b005658d3a46d7sm9115850pgn.84.2023.09.13.10.06.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Sep 2023 10:06:26 -0700 (PDT)
-Date:   Thu, 14 Sep 2023 01:06:21 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: use btrfs check repair for repairing btrfs
- filesystems
-Message-ID: <20230913170621.f6paqto5vvibrkl6@zlang-mailbox>
-References: <2c89e68e7a34f1d0545f19e9e178e258f777c027.1692286458.git.anand.jain@oracle.com>
- <28de98f456031353d34be71fe7b71937d3ef3e4b.1692600778.git.anand.jain@oracle.com>
+        with ESMTP id S232883AbjIMXTv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Sep 2023 19:19:51 -0400
+X-Greylist: delayed 2030 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 13 Sep 2023 16:19:47 PDT
+Received: from fanzine2.igalia.com (fanzine.igalia.com [178.60.130.6])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA3A61BCB
+        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 16:19:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
+        s=20170329; h=Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:
+        Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:Content-Description:
+        Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
+        In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+        List-Post:List-Owner:List-Archive;
+        bh=jtKLXGrccLkNU+gD6b9UoIK+avDFO4fVNfiuOVKYzGA=; b=VILW1lhPyn/4fRsSNeCh3Wh/zz
+        7p9K7yFkh8PCaTijoHuPF7vnJxHh4A6dRAU9oXAvccW2+D6EECdNMq2JyWPNuanKuZ3NRb7RMcd2I
+        Pcg5m1z2h7YZEeJM5BmOfQgKbniXT5NyIDCL4XXl7cT1+VYWZ1fqCRB2HiyC/bCu4LNq6WnjpUFtB
+        AXfau/0TUcfLbQFC2XQ8UcuIim2cqYivq+3tcyxf72VNqMc8hZ+OX7pQ74V2mbp0/WJ9r6Jy/UaaJ
+        Bzhmp/HiTdDTzSW5L8WwrZOvIV6k0nxEoVaJ81FY7O0Fa/ntN2yoOBMvam1XSH6l9KPL5+6oRgOMT
+        EixQAnEg==;
+Received: from [187.116.122.196] (helo=localhost)
+        by fanzine2.igalia.com with esmtpsa 
+        (Cipher TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
+        id 1qgYcM-003ZCY-DA; Thu, 14 Sep 2023 00:45:55 +0200
+From:   "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
+        dsterba@suse.com, dsterba@suse.cz, kernel@gpiccoli.net,
+        kernel-dev@igalia.com, anand.jain@oracle.com,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>
+Subject: [PATCH v3] btrfs: Add test for the temp-fsid feature
+Date:   Wed, 13 Sep 2023 19:44:59 -0300
+Message-ID: <20230913224545.3940971-1-gpiccoli@igalia.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <28de98f456031353d34be71fe7b71937d3ef3e4b.1692600778.git.anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Aug 21, 2023 at 05:05:09PM +0800, Anand Jain wrote:
-> There are two repair functions: _repair_scratch_fs() and
-> _repair_test_fs(). As the names suggest, these functions are designed to
-> repair the filesystems SCRATCH_DEV and TEST_DEV, respectively. However,
-> these functions never called proper comamnd for the filesystem type btrfs.
-> This patch fixes it. Thx.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
+The TEMP_FSID btrfs feature allows to mount the same filesystem
+multiple times, at the same time. This is the fstests counter-part,
+which checks both mkfs/btrfstune (by mounting the FS twice), and
+also unsupported scenarios, like device replace / remove.
 
-This patch looks good to me. It's been several weeks past, there's not more
-review points or better idea from others either. So I'd like to merge it, to
-support btrfs specific repair.
+Suggested-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
+---
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+V3:
 
-> v2:
-> 
-> When I reran the tests, they hung because 'btrfs check --repair' was
-> waiting for confirmation to fix the tree, despite using the '--force'
-> option. This is a bug. However, we still need to support the older
-> btrfs-progs. So, pass in a 'yes' response.
-> 
-> Uses BTRFS_UTIL_PROG instead of btrfs.
-> 
->  common/rc | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 5002369b9b34..45cb56816c05 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1187,6 +1187,15 @@ _repair_scratch_fs()
->  	fi
->  	return $res
->          ;;
-> +    btrfs)
-> +	echo "yes|$BTRFS_UTIL_PROG check --repair --force $SCRATCH_DEV"
-> +	yes | $BTRFS_UTIL_PROG check --repair --force $SCRATCH_DEV 2>&1
-> +	local res=$?
-> +	if [ $res -ne 0 ]; then
-> +		_dump_err2 "btrfs repair failed, err=$res"
-> +	fi
-> +	return $res
-> +	;;
->      bcachefs)
->  	# With bcachefs, if fsck detects any errors we consider it a bug and we
->  	# want the test to fail:
-> @@ -1239,6 +1248,13 @@ _repair_test_fs()
->  			res=$?
->  		fi
->  		;;
-> +	btrfs)
-> +	echo 'yes|$BTRFS_UTIL_PROG check --repair --force "$TEST_DEV"' > \
-> +								/tmp.repair 2>&1
-> +	yes | $BTRFS_UTIL_PROG check --repair --force "$TEST_DEV" >> \
-> +								/tmp.repair 2>&1
-> +		res=$?
-> +		;;
->  	*)
->  		# Let's hope fsck -y suffices...
->  		fsck -t $FSTYP -y $TEST_DEV >$tmp.repair 2>&1
-> -- 
-> 2.38.1
-> 
+- Renamed the feature to temp-fsid.
+
+- Group all requirements;
+- Remove the "Finished" echo;
+- Make use of helpers like _scratch_mount and _mount.
+(Thanks Josef!)
+
+- Use lower case for local vars (thanks Anand!).
+
+V2: https://lore.kernel.org/linux-btrfs/20230905200826.3605083-1-gpiccoli@igalia.com/
+
+
+ tests/btrfs/301     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/301.out |  4 +++
+ 2 files changed, 87 insertions(+)
+ create mode 100755 tests/btrfs/301
+ create mode 100644 tests/btrfs/301.out
+
+diff --git a/tests/btrfs/301 b/tests/btrfs/301
+new file mode 100755
+index 000000000000..2e3d55a3cd81
+--- /dev/null
++++ b/tests/btrfs/301
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 Guilherme G. Piccoli (Igalia S.L.).  All Rights Reserved.
++#
++# FS QA Test 301
++#
++# Test for the btrfs temp-fsid feature - both mkfs and btrfstune are
++# validated, as well as explicitly unsupported commands, like device
++# removal / replacement.
++#
++. ./common/preamble
++. ./common/filter
++_begin_fstest auto mkfs quick
++_supported_fs btrfs
++
++_require_btrfs_mkfs_feature temp-fsid
++_require_btrfs_fs_feature temp_fsid
++_require_scratch_dev_pool 2
++
++_scratch_dev_pool_get 1
++_spare_dev_get
++
++_require_command "$BTRFS_TUNE_PROG" btrfstune
++_require_command "$WIPEFS_PROG" wipefs
++
++spare_mnt="${TEST_DIR}/${seq}/spare_mnt"
++mkdir -p $spare_mnt
++
++
++# Part 1
++# First test involves a mkfs with temp-fsid feature enabled.
++# If it succeeds and mounting that FS *twice* also succeeds,
++# we're good and continue.
++$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
++$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
++
++_scratch_mkfs "-b 300M -O temp-fsid" >> $seqres.full 2>&1
++dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
++
++_scratch_mount || _fail "failed to mount scratch dev (1)"
++_mount $SPARE_DEV $spare_mnt || _fail "failed to mount spare dev (1)"
++
++$UMOUNT_PROG $spare_mnt
++_scratch_unmount
++
++
++# Part 2
++# Second test is similar to the first with the difference we
++# run mkfs with no temp-fsid mention, and make use of btrfstune
++# to set such feature.
++$WIPEFS_PROG -a $SCRATCH_DEV >> $seqres.full 2>&1
++$WIPEFS_PROG -a $SPARE_DEV >> $seqres.full 2>&1
++
++_scratch_mkfs "-b 300M" >> $seqres.full 2>&1
++$BTRFS_TUNE_PROG --convert-to-temp-fsid $SCRATCH_DEV
++dd if=$SCRATCH_DEV of=$SPARE_DEV bs=300M count=1 conv=fsync >> $seqres.full 2>&1
++
++_scratch_mount || _fail "failed to mount scratch dev (2)"
++_mount $SPARE_DEV $spare_mnt || _fail "failed to mount spare dev (2)"
++
++$UMOUNT_PROG $spare_mnt
++_scratch_unmount
++
++
++# Part 3
++# Final part attempts to run some temp-fsid unsupported commands,
++# like device replace/remove - it they fail, test succeeds!
++_scratch_mount || _fail "failed to mount scratch dev (3)"
++
++$BTRFS_UTIL_PROG device replace start $SCRATCH_DEV $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG device remove $SCRATCH_DEV $SCRATCH_MNT 2>&1 \
++	| _filter_scratch
++
++_scratch_unmount
++
++_spare_dev_put
++_scratch_dev_pool_put 1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/301.out b/tests/btrfs/301.out
+new file mode 100644
+index 000000000000..f7f43d8c09c0
+--- /dev/null
++++ b/tests/btrfs/301.out
+@@ -0,0 +1,4 @@
++QA output created by 301
++ERROR: ioctl(DEV_REPLACE_STATUS) failed on "SCRATCH_MNT": Invalid argument
++
++ERROR: error removing device 'SCRATCH_DEV': Invalid argument
+-- 
+2.42.0
 
