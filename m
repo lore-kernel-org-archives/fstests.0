@@ -2,204 +2,262 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEA1FEDEC4D
-	for <linux-fstests@archiver.kernel.org>; Wed, 13 Sep 2023 13:58:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD727CA553C
+	for <linux-fstests@archiver.kernel.org>; Wed, 13 Sep 2023 16:24:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234159AbjIMN6U (ORCPT
+        id S229514AbjIMQYh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 13 Sep 2023 09:58:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52698 "EHLO
+        Wed, 13 Sep 2023 12:24:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35006 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230063AbjIMN6T (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Sep 2023 09:58:19 -0400
+        with ESMTP id S229437AbjIMQYg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Sep 2023 12:24:36 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 33BDD19B6
-        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 06:57:27 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AAB6490
+        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 09:23:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694613446;
+        s=mimecast20190719; t=1694622229;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=uSu+wfKI0COvYUFOUN1quOmzaqRDB5SntbfHwbLUiWw=;
-        b=P0WDvIyrExD89FKFxkCQsnyBpg1gGKD5B+USfa4c6IvOAay5JlkYEIariUUU4q18xnNEt4
-        a1YU6RfSTB8UCG0ItBMl5Oi5aJciS6oEWyHiAwdv6hh5bCJhdapzPaicLYqdcI0KJ0Mcx3
-        yO1QMzHB0f6821+YN+cprtp581qnFhE=
-Received: from mail-oi1-f200.google.com (mail-oi1-f200.google.com
- [209.85.167.200]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=HSeP8Pl8IyQkwnTNUoAh9rzd59W702HaO/sB6jKbxPA=;
+        b=cQRfGPrNU9BOpW8hMz7XbBZugmnl+L7ozstecIOEpb1UeMVr98+827uem9tRfHLINlCW9j
+        SNJayCsP6x2TPXH5RjNOOp5AsTm2S051/FEy74Irq0fcWc4fD5dSRZjvaH5ATCc2Al0aBb
+        Ytepnfu17uUpP+jYzkBMe2FaIjc9lhc=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-98-vlB_S9ZbN4qWcTjbwWzrTQ-1; Wed, 13 Sep 2023 09:57:24 -0400
-X-MC-Unique: vlB_S9ZbN4qWcTjbwWzrTQ-1
-Received: by mail-oi1-f200.google.com with SMTP id 5614622812f47-3a741f4790fso8090008b6e.0
-        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 06:57:24 -0700 (PDT)
+ us-mta-166-WtNi7rfYN_CspMlYeRXNJA-1; Wed, 13 Sep 2023 12:23:45 -0400
+X-MC-Unique: WtNi7rfYN_CspMlYeRXNJA-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1c093862623so97155765ad.1
+        for <fstests@vger.kernel.org>; Wed, 13 Sep 2023 09:23:44 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694613444; x=1695218244;
+        d=1e100.net; s=20230601; t=1694622223; x=1695227023;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=uSu+wfKI0COvYUFOUN1quOmzaqRDB5SntbfHwbLUiWw=;
-        b=no3tbWA+hsMCJfcWWXV0uEbdACm9eLQbIzrcMrrwfzLmU4rV3/cQei9KKRnXKmeVGd
-         tIM2qxiCU3SwvJ/QHFXG6OWjUWASyL6sNIpCkbOpeRrLzQkOVSK2ByeifAGaDcdklMpq
-         RKh1VtGy+RLo/EFHiMxn/dj7fZL0f0DqCkstjFhPjxj6Bj3KLtiJDtemddZGldcN31fv
-         9AEajEH193xnVZUIkVMhmujp6tMn/t4lSot51/LbkUI45xETx1VGOw0RBvWdsJBNuf86
-         NdJjRNIeXgCrjZHSHkHeeUNcB0I3rG/VYTqvVXHdJup4McF6E7q39hKDJYhx+YEnCLJQ
-         xZKA==
-X-Gm-Message-State: AOJu0Yy7lxfdECQazwAzwcFGh3H4/U1HpqOBrfoCx1RQHLpYo9S5NSUM
-        X7PnGQyxyrC0WQyIe77MiZTQsV1NaqjKLMAhvNg6iVEFQM6gSGgkmcXUhG7fOK2H/dz5DG7p9jZ
-        +7WNkKp//EP133GbFwD52EOIM2/4i
-X-Received: by 2002:a05:6808:2187:b0:3a7:238a:143e with SMTP id be7-20020a056808218700b003a7238a143emr3559886oib.2.1694613443912;
-        Wed, 13 Sep 2023 06:57:23 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFl9TR07hpfDdoxDYwgnaZ4bY8I6EOLvfZtBROeXDswTJ1ZOxx4u+NagkZ5tyR3ZpX3Fx7F0g==
-X-Received: by 2002:a05:6808:2187:b0:3a7:238a:143e with SMTP id be7-20020a056808218700b003a7238a143emr3559871oib.2.1694613443687;
-        Wed, 13 Sep 2023 06:57:23 -0700 (PDT)
+        bh=HSeP8Pl8IyQkwnTNUoAh9rzd59W702HaO/sB6jKbxPA=;
+        b=H8+Hvzb7uKf3GxwxTwlE93MlNiMLcYmzsegoU/CLBwhKBNsUEb4lTCM81y2RyaRJ+1
+         zCKmTaNi/PmrWLL7tAEP0LnqrbCYR/nYhOMnztCKsmtR+SKqiQPO1ay9H+aZwRn1NyQe
+         itYdKiB2SPyaTwqkgwsa5O75h7wBwlQMIB5jr2bVc89CFNaEHIi6NBKTPmpOK3zuCG4L
+         Xm6hRCA8CidupWAG/cGqEk2lP2snHFZezcLJvUC0QbUr+HrsATnfrz7WTdjj9thNUIzH
+         riNSmk2Ez6uD2DWPdenPFJYJbfxvHoF80kBP/0jjLXrcRBGeNgs5iBuQR2zYpW8lTSVZ
+         P9sw==
+X-Gm-Message-State: AOJu0YynzyhrPXszktwPJpwCeJJBI8SmvD6VF4TS91RJkN9v1caYXIFn
+        XUB/FcdxBXIWS6momlRwuOP1+iXAHfS04fXM4/CQ99AFI5qNZiEiEV77FAaIjvcWYkZakuyBxkT
+        xHFMibdwBnOiNMLU+mLGNKXjbLhuge8s=
+X-Received: by 2002:a17:902:ecc8:b0:1c0:ec66:f2b2 with SMTP id a8-20020a170902ecc800b001c0ec66f2b2mr4331497plh.27.1694622223559;
+        Wed, 13 Sep 2023 09:23:43 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE/j8du43N6j9iBkVHWC/yBlH/n4KddpLGfEqjRojgRNp3V9DlIaDuj9ACfCAT74eYzJ+YdDw==
+X-Received: by 2002:a17:902:ecc8:b0:1c0:ec66:f2b2 with SMTP id a8-20020a170902ecc800b001c0ec66f2b2mr4331473plh.27.1694622223262;
+        Wed, 13 Sep 2023 09:23:43 -0700 (PDT)
 Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id b75-20020a63344e000000b005776446f7cbsm5839609pga.66.2023.09.13.06.57.21
+        by smtp.gmail.com with ESMTPSA id c5-20020a170902d90500b001b8622c1ad2sm10636807plz.130.2023.09.13.09.23.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Sep 2023 06:57:23 -0700 (PDT)
-Date:   Wed, 13 Sep 2023 21:57:19 +0800
+        Wed, 13 Sep 2023 09:23:42 -0700 (PDT)
+Date:   Thu, 14 Sep 2023 00:23:39 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Andrey Albershteyn <aalbersh@redhat.com>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-        fsverity@lists.linux.dev
-Subject: Re: [PATCH] common/rc: make _get_max_file_size find file size on
- mount point
-Message-ID: <20230913135719.yrv7kzulfnom7ahw@zlang-mailbox>
-References: <20230911200617.777985-1-aalbersh@redhat.com>
- <20230912124213.q5irip4lbhoasg5i@zlang-mailbox>
- <20230912145625.GD28170@frogsfrogsfrogs>
- <ihs7k3gvnoa5bii5ugng6k3xlr3gerdtrkmkqkxq7yekmnydhf@7v53tjceewuh>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] overlay: add test for persistent unique fsid
+Message-ID: <20230913162339.hfare3jt2emhk5t6@zlang-mailbox>
+References: <20230903075411.2596590-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ihs7k3gvnoa5bii5ugng6k3xlr3gerdtrkmkqkxq7yekmnydhf@7v53tjceewuh>
+In-Reply-To: <20230903075411.2596590-1-amir73il@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 13, 2023 at 10:44:50AM +0200, Andrey Albershteyn wrote:
-> On 2023-09-12 07:56:25, Darrick J. Wong wrote:
-> > On Tue, Sep 12, 2023 at 08:42:13PM +0800, Zorro Lang wrote:
-> > > On Mon, Sep 11, 2023 at 10:06:17PM +0200, Andrey Albershteyn wrote:
-> > > > Currently, _get_max_file_size finds max file size on $TEST_DIR.
-> > > > The tests/generic/692 uses this function to detect file size and
-> > > > then tries to create a file on $SCRATCH_MNT.
-> > > > 
-> > > > This works fine when test and scratch filesystems have the same
-> > > > block size. However, it will fail if they differ, for example, TEST
-> > > > is 4k and SCRATCH is 1k (file will be too big).
-> > > 
-> > > I thought we generally use same mkfs options on TEST_DEV and SCRATCH_DEV.
-> > > If you'd like to test 1k blocksize ext4, shouldn't you make 1k blocksize
-> > > ext4 on TEST_DEV before testing.
-> > 
-> > Agreed, TEST_DEV (AFAIK) is supposed to have the same options as
-> > SCRATCH_MNT.
+On Sun, Sep 03, 2023 at 10:54:11AM +0300, Amir Goldstein wrote:
+> Test overlayfs fsid behavior with new mount options uuid=null/on
+> that were introduced in kernel v6.6:
 > 
-> Make sense but I didn't know that this is required, would it make
-> sense to add a check for at least block size? I was running -s
-> ext4_1k -s ext4_4k without recreating the TEST_DEV and that wasn't
-> obvious where the problem is as test is using SCRATCH.
+> - Test inherited upper fs fsid with mount option uuid=off/null
+> - Test uuid=null behavior for existing overlayfs by default
+> - Test persistent unique fsid with mount option uuid=on
+> - Test uuid=on behavior for new overlayfs by default
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-I remembered there's a global parameter named "RECREATE_TEST_DEV", if it's
-"true", the TEST_DEV will be recreated after a section testing done. You can
-check if it works :)
+It looks good to me, as there's not objection, I'd like to merge this test
+case in next release.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 > 
-> > 
-> > That said, I support adding the flexibility to supply a mount point,
-> > since that would be generally useful given the number of tests that add
-> > things to MKFS_OPTIONS...
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > Found this by running generic/692 on ext4 with -b 1024.
-> > > > 
-> > > > Make _get_max_file_size accept mount point on which to detect max
-> > > > file size.
-> > > > 
-> > > > Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
-> > > > ---
-> > > >  common/rc         | 8 +++++++-
-> > > >  tests/generic/299 | 2 +-
-> > > >  tests/generic/485 | 2 +-
-> > > >  tests/generic/692 | 2 +-
-> > > >  4 files changed, 10 insertions(+), 4 deletions(-)
-> > > > 
-> > > > diff --git a/common/rc b/common/rc
-> > > > index 68d2ad04..d17ec73a 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -4809,7 +4809,13 @@ _require_scratch_feature()
-> > > >  # be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
-> > > >  _get_max_file_size()
-> > > >  {
-> > > > -	local testfile=$TEST_DIR/maxfilesize.$seq
-> > > > +	if [ -z $1 ] || [ ! -d $1 ]; then
-> > > > +		echo "Missing mount point argument for _get_max_file_size"
-> > > > +		exit 1
-> > > > +	fi
-> > > > +
-> > > > +	local mnt=$1
-> > > > +	local testfile=$mnt/maxfilesize.$seq
-> > > >  	local l=0
-> > > >  	local r=9223372036854775807 # LLONG_MAX
-> > > >  
-> > > > diff --git a/tests/generic/299 b/tests/generic/299
-> > > > index d8ecff53..0cd12202 100755
-> > > > --- a/tests/generic/299
-> > > > +++ b/tests/generic/299
-> > > > @@ -30,7 +30,7 @@ NUM_JOBS=$((4*LOAD_FACTOR))
-> > > >  BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-> > > >  FILE_SIZE=$((BLK_DEV_SIZE * 512))
-> > > >  
-> > > > -max_file_size=$(_get_max_file_size)
-> > > > +max_file_size=$(_get_max_file_size $TEST_DIR)
-> > > >  if [ $max_file_size -lt $FILE_SIZE ]; then
-> > > >  	FILE_SIZE=$max_file_size
-> > > >  fi
-> > > > diff --git a/tests/generic/485 b/tests/generic/485
-> > > > index 3f7749ff..8bab450b 100755
-> > > > --- a/tests/generic/485
-> > > > +++ b/tests/generic/485
-> > > > @@ -30,7 +30,7 @@ _require_xfs_io_command "finsert"
-> > > >  _require_xfs_io_command "truncate"
-> > > >  
-> > > >  block_size=$(_get_file_block_size $TEST_DIR)
-> > > > -max_file_size=$(_get_max_file_size)
-> > > > +max_file_size=$(_get_max_file_size $TEST_DIR)
-> > > >  max_blocks=$((max_file_size / block_size))
-> > > >  testfile=$TEST_DIR/testfile.$seq
-> > > >  
-> > > > diff --git a/tests/generic/692 b/tests/generic/692
-> > > > index 95f6ec04..3fb8ac01 100755
-> > > > --- a/tests/generic/692
-> > > > +++ b/tests/generic/692
-> > > > @@ -40,7 +40,7 @@ _scratch_mount
-> > > >  
-> > > >  fsv_file=$SCRATCH_MNT/file.fsv
-> > > >  
-> > > > -max_sz=$(_get_max_file_size)
-> > > > +max_sz=$(_get_max_file_size $SCRATCH_MNT)
-> > 
-> > ...LGTM, so
-> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> > 
+> Zorro,
 > 
-> Thanks!
+> This is the functional test for an overlayfs feature merged to v6.6.
+> The test does _notrun on older kernels:
 > 
-> > --D
-> > 
-> > > >  _fsv_scratch_begin_subtest "way too big: fail on first merkle block"
-> > > >  truncate -s $max_sz $fsv_file
-> > > >  _fsv_enable $fsv_file |& _filter_scratch
-> > > > -- 
-> > > > 2.40.1
-> > > > 
-> > > 
-> > 
+> overlay/081 14s ...  [07:40:13][   57.780790] overlay: Bad value for 'uuid'
+>  [07:40:14] [not run]
+> 	overlay/081 -- Overlayfs does not support unique fsid feature
 > 
+> The test for another big overlayfs feature that was merged to v6.6,
+> overlay/080 (validate lower using fs-verity) is already merged to fstests.
+> 
+> Note that overlay/080 requires running overlayfs over a base filesystem
+> with fs-verity support enabled, for example, on ext4 formatted with
+> mkfs.ext4 -O verity [1].
+> 
+> Thanks,
+> Amir.
+> 
+> [1] https://lore.kernel.org/fstests/20230625135033.3205742-2-amir73il@gmail.com/
+> 
+>  tests/overlay/081     | 128 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/081.out |   2 +
+>  2 files changed, 130 insertions(+)
+>  create mode 100755 tests/overlay/081
+>  create mode 100644 tests/overlay/081.out
+> 
+> diff --git a/tests/overlay/081 b/tests/overlay/081
+> new file mode 100755
+> index 00000000..05156a3c
+> --- /dev/null
+> +++ b/tests/overlay/081
+> @@ -0,0 +1,128 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
+> +#
+> +# FSQA Test No. 081
+> +#
+> +# Test persistent (and optionally unique) overlayfs fsid
+> +# with mount options uuid=null/on introduced in kernel v6.6
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +# Create overlay layer with pre-packaged merge dir
+> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +mkdir -p $upperdir/test_dir
+> +mkdir -p $lowerdir/test_dir
+> +test_dir=$SCRATCH_MNT/test_dir/
+> +
+> +# Record base fs fsid
+> +upper_fsid=$(stat -f -c '%i' $upperdir)
+> +lower_fsid=$(stat -f -c '%i' $lowerdir)
+> +
+> +# Sanity tests
+> +[[ -n "$upper_fsid" ]] || \
+> +	echo "invalid upper fs fsid"
+> +[[ "$lower_fsid" == "$upper_fsid" ]] || \
+> +	echo "lower fs and upper fs fsid differ"
+> +
+> +# Test legacy behavior - ovl fsid inherited from upper fs
+> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o uuid=null 2>/dev/null || \
+> +	_notrun "Overlayfs does not support unique fsid feature"
+> +
+> +# Lookup of test_dir marks upper root as "impure", so following (uuid=auto) mounts
+> +# will NOT behave as first time mount of a new overlayfs
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$upper_fsid" ]] || \
+> +	echo "Overlayfs (uuid=null) and upper fs fsid differ"
+> +
+> +# Keep base fs mounted in case it has a volatile fsid (e.g. tmpfs)
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test legacy behavior is preserved by default for existing "impure" overlayfs
+> +_scratch_mount
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$upper_fsid" ]] || \
+> +	echo "Overlayfs (uuid=auto) and upper fs fsid differ"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test unique fsid on explicit opt-in for existing "impure" overlayfs
+> +_scratch_mount -o uuid=on
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +ovl_unique_fsid=$ovl_fsid
+> +[[ "$ovl_fsid" != "$upper_fsid" ]] || \
+> +	echo "Overlayfs (uuid=on) and upper fs fsid are the same"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test unique fsid is persistent by default after it was created
+> +_scratch_mount
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
+> +	echo "Overlayfs (uuid=auto) unique fsid is not persistent"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test ignore existing persistent fsid on explicit opt-out
+> +_scratch_mount -o uuid=off
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$upper_fsid" ]] || \
+> +	echo "Overlayfs (uuid=off) and upper fs fsid differ"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test fallback to uuid=null with non-upper ovelray
+> +_overlay_scratch_mount_dirs "$upperdir:$lowerdir" "-" "-" -o ro,uuid=on
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$lower_fsid" ]] || \
+> +	echo "Overlayfs (uuid=null) and lower fs fsid differ"
+> +
+> +# Re-create fresh overlay layers, so following (uuid=auto) mounts
+> +# will behave as first time mount of a new overlayfs
+> +_scratch_unmount
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +mkdir -p $upperdir/test_dir
+> +mkdir -p $lowerdir/test_dir
+> +
+> +# Record new base fs fsid
+> +upper_fsid=$(stat -f -c '%i' $upperdir)
+> +
+> +# Test unique fsid by default for first time mount of new overlayfs
+> +_scratch_mount
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +ovl_unique_fsid=$ovl_fsid
+> +[[ "$ovl_fsid" != "$upper_fsid" ]] || \
+> +	echo "Overlayfs (uuid=auto) and upper fs fsid are the same"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Test unique fsid is persistent by default after it was created
+> +_scratch_mount -o uuid=on
+> +
+> +ovl_fsid=$(stat -f -c '%i' $test_dir)
+> +[[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
+> +	echo "Overlayfs (uuid=on) unique fsid is not persistent"
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/overlay/081.out b/tests/overlay/081.out
+> new file mode 100644
+> index 00000000..663a8864
+> --- /dev/null
+> +++ b/tests/overlay/081.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 081
+> +Silence is golden
 > -- 
-> - Andrey
+> 2.34.1
 > 
 
