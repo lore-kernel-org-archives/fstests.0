@@ -2,317 +2,207 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE542EEAA40
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Sep 2023 14:15:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB8FCEEAA4F
+	for <linux-fstests@archiver.kernel.org>; Thu, 14 Sep 2023 15:08:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239760AbjINOPH (ORCPT
+        id S240791AbjINPIe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Sep 2023 10:15:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48530 "EHLO
+        Thu, 14 Sep 2023 11:08:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239493AbjINOPG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2023 10:15:06 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 69606C6
-        for <fstests@vger.kernel.org>; Thu, 14 Sep 2023 07:14:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694700859;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=5APf6SF/g1QZ1s9vDqwPNfEmYcBSoWU4u5okowunXEg=;
-        b=FbSPLZUOQLzVBiJXBfdPmEQTQSu4d867ZL/AK1eqwYQAG4LMiUv+/ZKdkbYMuj4zm7nd1n
-        264IUT39wvgZ+t7zrXgwb94rCD2QSZ4oYkrVK7L0+ODpEFetgJlZVuIMQmAWZjbpX4mlBM
-        QZW8Zhxx6RafEO9ralgaQOuh/pKBQcU=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-333-7fZ085PHM2KW_BLW9VRw9w-1; Thu, 14 Sep 2023 10:14:16 -0400
-X-MC-Unique: 7fZ085PHM2KW_BLW9VRw9w-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1c07778146aso9221335ad.0
-        for <fstests@vger.kernel.org>; Thu, 14 Sep 2023 07:14:16 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694700855; x=1695305655;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5APf6SF/g1QZ1s9vDqwPNfEmYcBSoWU4u5okowunXEg=;
-        b=M0ZKuIt7dyIjRMSvK9F7dblHezzwehMb6zee9nLhE74ScTgHqHe/jtfOZ9xzQX/N1r
-         zwos66PkvFiQmz5ryvXeM72Voi4EYpdXg3h0Fu7IBIB64uSwQCKax+tP64IMw14JMNVz
-         BY+rn/44m/7AEGpBASDZyUIbvoJ1enFH8ktOh25d+fzaaKbwd3HUeVtUjl45OjDFO32c
-         NvuU+1mDVOPxOIxm8YChcGmFHPc8eJxNNUZrDqoWqVGVi9GorB4MnRtSdzgIi9GpbYxL
-         HJIBM1BhPaCxMrIfo5iSkE6DP6YsN6nsAGmU2tChTCWcOraXewKVRUegiCxujEm4Mh2q
-         7xnQ==
-X-Gm-Message-State: AOJu0YzyC+So87PeKJoDCuX5F3Qhq+fDoyiYT/ohNb60SS8YwGJcGybC
-        Z9/w1O9fcWYQVZQ70fXFSq58xMlJcExh49b+okqMysh4TjsL/3PO4MWnzCMrswr9LDZj3lia20R
-        e3ywEqakPvIDfIEKR+226cb8HjzwWDyA=
-X-Received: by 2002:a17:902:e84f:b0:1c3:2df4:8791 with SMTP id t15-20020a170902e84f00b001c32df48791mr7554533plg.27.1694700855267;
-        Thu, 14 Sep 2023 07:14:15 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGL/YOXv9+En12nwSNEDcwBQAL5ZL0LmKA3blIJsfSJmwb2v1ziVfxW85lQzq1gSohJ6uqolw==
-X-Received: by 2002:a17:902:e84f:b0:1c3:2df4:8791 with SMTP id t15-20020a170902e84f00b001c32df48791mr7554507plg.27.1694700854936;
-        Thu, 14 Sep 2023 07:14:14 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o14-20020a170902d4ce00b001bde440e693sm1640324plg.44.2023.09.14.07.14.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Sep 2023 07:14:14 -0700 (PDT)
-Date:   Thu, 14 Sep 2023 22:14:11 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs add more tests into the scrub group
-Message-ID: <20230914141411.zat5up5kt5rd6ilu@zlang-mailbox>
-References: <2fc42b09cdc710cc2ac83e3a1726b5f7b1d0af62.1693312237.git.anand.jain@oracle.com>
+        with ESMTP id S240871AbjINPIZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2023 11:08:25 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 757F11FD7;
+        Thu, 14 Sep 2023 08:08:21 -0700 (PDT)
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 38EEpCAe023418;
+        Thu, 14 Sep 2023 15:08:19 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-transfer-encoding : content-type :
+ mime-version; s=corp-2023-03-30;
+ bh=8Ih8B66qPTyNfjsFWi4s2XaMM/r00pNiBT9kOYU99JU=;
+ b=H0TmaDLw+KOxK2qbeXei2T8NrKQ0iQYyKEuC22A+bUpIIwA3fM6APX5q79AwujQ6bEVB
+ ucjDTmg0yJEbHo68D3AYkg0fr7T3Q+Zi3eMiQRaZgZP6hOw8jeEJWSXtO4pc9Dv3xl3V
+ zmybGdqmgtIzCHz0XJV0Q3IBWEwtJ8UUaItkvZVZ70uA4twlMb8ygNl05vbfs7gn0KoB
+ W6mz88SekkyHW1reYn6MNCVrdHGc1fGQzTP/sXfBciVt4LZ8oXbQt3XH7I+9x6znTfsA
+ ghB9ZWN/ez+ckCsc8rt4Zs5Vbbzws2I9Tjjcu7S21TeDizevu5fFp9rAnbkVs6oAD6dy iQ== 
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3t2y7pnm5u-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 14 Sep 2023 15:08:18 +0000
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 38EEo3ms030205;
+        Thu, 14 Sep 2023 15:08:17 GMT
+Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2040.outbound.protection.outlook.com [104.47.66.40])
+        by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3t0wkj451s-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 14 Sep 2023 15:08:17 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=gvLlvt+b9UTyN/5Oo1bqX5IcpdNHQclV/1ODGkTLjbYg+R3CK0vN1pS5KKNnHk0akKcZ+FHC5tINAq7Kpct+gXOzYyVoXfl1mQ6kqF1AtshnpvNttQzAMjb8SBwpWYrVqumdRPd4Ri26bTs1GLY1tX/XHlMeSO3H/+9w6ergc9JIyXtAVPCCmz60wT6fzyfuc3xKi0qUyGaEYVhLf4gF7KZrzjCoaCUKBfyK6x3RghcJkZ+chHqM68oCVv8sXwq3p3EdK40tObx7QwB8aruOSqZkdh0mrGCdhTnwo+SpENgyJfsrADv+y+MgK9eNZPn79uXqzUHmyKDf16PWwDBrdg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=8Ih8B66qPTyNfjsFWi4s2XaMM/r00pNiBT9kOYU99JU=;
+ b=hm9lbJBXRyLPyMnAD1MdN3r30TriMDobvCneHxGByEDgGYRxeFjJIPPsLzAu5AeFViR5mh26s8fj7s0EdCs34Srb6YgOP9KbY4xJb40tRvAMKu/O254/ArjNmlWatNq9KQlFcwLXT/OHGfgrsPcDlOPm7LCSYWbTShf+jyw+m36gQnOHYe8PHCK540/KPUovrXW0MhhlUV/G0E7SxNbFLD8Yc04i1LCSynWggx6lGOmPakiMK76X1zeAB6ra6WEcxA3PHEFX3JnGr25Cxd2yJzfSUdaz9r5jS/MX0fh/BJrRfBeXyTEgo+RhAtbZlRh6PK1gER2K9/MeE2wkGZFeyw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8Ih8B66qPTyNfjsFWi4s2XaMM/r00pNiBT9kOYU99JU=;
+ b=gxhL8n5UWqupkOYPP1vgIpOKL4EvzTsHjxLaICcIRU4lrinmB92QCWoh6yK86nHe9ExZvQpVmnqx/pSrwTJVIxsTeMXnyw3M6z4U/LGJX9l1g1qZTpf6ocdayH0sXnMSZxDzzJfoxAj5q+5lRLAoTqqvxTT6KlgQC3wtu46u9/4=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by CH3PR10MB7137.namprd10.prod.outlook.com (2603:10b6:610:12b::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6768.30; Thu, 14 Sep
+ 2023 15:07:51 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685%2]) with mapi id 15.20.6768.029; Thu, 14 Sep 2023
+ 15:07:51 +0000
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, zlang@redhat.com
+Subject: [PATCH v1] fstests: add configuration option for executing post mkfs commands
+Date:   Thu, 14 Sep 2023 23:07:43 +0800
+Message-ID: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.38.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SI2PR02CA0050.apcprd02.prod.outlook.com
+ (2603:1096:4:196::11) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2fc42b09cdc710cc2ac83e3a1726b5f7b1d0af62.1693312237.git.anand.jain@oracle.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CH3PR10MB7137:EE_
+X-MS-Office365-Filtering-Correlation-Id: a219aac9-c864-434c-294c-08dbb5345d02
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: zxv5QHMcDH+SpqYekgRaMQSTovcKc/q1KO0r46DTlmdQe4zsTKM4NdLfD7ZjNsbMfkRj2M5mabtQa1kQqsvhwTpWxSGFUxbkfpyDlhQMU/Z0af4x0EsdOg5+/6k4kPOUz+PxCAS3oOgs28ssyHlpmOL4dyz+vexSwxpS6WdwwhrTsh1SIHC1UrVU6/46Zq6IRhFXd2FgT7r64+d8/6MBeWRXRmZ7qULUPl1wkm3JiZ/9jKCe20ZSQ2s0Ysdln3frQ5m30PuhbkBwhT5Gld8jiaZ2dP7RiEEOBx0wX5VvnjTmjLZugv6xqz5Lwe7PJyhQuTUmFHqw9wZysPvGb5kcsbiLnP+wX01Y11J+K+3QFD2/eNOjc96UQRoixdd1QVaMQj8kK2o//8kX4xfEHRJJL8iKZxlziyh/68Xgy7Cs2UvJPIWVNruGNTzsHqbKAI9DaF7IQPIO0mZLANTOprJ72ctO+9TH5n6Qmbfyh+4VnmnnML14wmxqqWGRU6DmHImG+N5rwH6w9UgDo9lHyAkQSrJwMO2BAPjqu09TDUdDPEg6rUzT0GSQwT7/8RCKYZPH
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376002)(346002)(366004)(396003)(136003)(39860400002)(451199024)(186009)(1800799009)(6666004)(6486002)(66946007)(478600001)(6506007)(86362001)(36756003)(6512007)(26005)(83380400001)(8676002)(316002)(2616005)(38100700002)(6916009)(8936002)(41300700001)(4326008)(5660300002)(2906002)(66476007)(66556008)(44832011);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?MIPh0FQNtSY3iVfh2zI5IBE2OmHUJPy061PPjXM93L63WuuOuL2N5GX1K0RQ?=
+ =?us-ascii?Q?Kxha0LM98XWeQe60pDh96FCXAo8R2J9SoOgzmLzCl2QM9Kvv2DyDt+/1+bgH?=
+ =?us-ascii?Q?V3+nKUgcwx+EfeW7Q1JDjS4Cr3icA/QMkaIcYHTPLDOTDcd5IfEXQan5hWQ2?=
+ =?us-ascii?Q?43fmIpKQyZKcBMh22PTzmtqNG+VGZE8Ajkx1YCdLu4F9M+6LCljzX4q1HkDM?=
+ =?us-ascii?Q?UcvLju9YGaDiM6ekjoPoIXdov3vJwIpHwAWUCI/5rL/Co49M2LdnFR/OUCNr?=
+ =?us-ascii?Q?9JPs6n5Ca1POY4QDAgb3/JKkC4F2Rlf2+fnQDO7hbLU7KXjdyIg/CcEYBkCA?=
+ =?us-ascii?Q?aDY12BY9Wc1p/BdNnnKJiyRg/xvsZVb9N1wJDM6TcRqXWfvLPF/P8J5MW5wV?=
+ =?us-ascii?Q?liotnJpUeWhQVCFnz8/Ru1oC+QdOgLvQ5R4GxNb/ZXIVu6uAkQDixbkODXIh?=
+ =?us-ascii?Q?D9p0G8CfZFqb307bGmHL5mOw4J8d1svRYuGcpcm8roZTTh/bti/Q/uPi0Vna?=
+ =?us-ascii?Q?fg7896st7HSFrjRgdR6o/bdGCgepe49XvyF6pTrySjYXTgM5xYXx/DGbXbs/?=
+ =?us-ascii?Q?ivz50utfOo9XrZDq0ijmxhSjOuBHvtp/aMSR2FayKBXhudojQ+WreK1RKZzu?=
+ =?us-ascii?Q?o/skBHjAG+uQD2BrXbEqUnnvaKqiUj8/q4UiFm+Mi7OKoAbFQFrpH0qvu4Ts?=
+ =?us-ascii?Q?3pccvOG3+9cEWSaM7HeQelThd5zQj2OPmpBZhQgRrNTksSQIpalncx0HM+Oc?=
+ =?us-ascii?Q?DzqX5w6FSRTLdcF7N9ZX7qDTEjpe1Z0qonPLsGxUAs6A+mRPsEF+tzgKL+GH?=
+ =?us-ascii?Q?zr/ch+Z0krIwSdntqW2d2VyY3ImEi1VsgayFYbYVF2vu8aZruQqXUKg4x4yT?=
+ =?us-ascii?Q?YkBpj3+76DGpoR906t6+SWg9zsxCSUKoQMu4eDDOW1b6HQmoKBQ/LejrEVIZ?=
+ =?us-ascii?Q?SVgw0LysQdAPcmpXDQLrUfgv4mvIcm4skQ/yEniu5ey8lGYj7OtSkkpAOzDr?=
+ =?us-ascii?Q?ccZTsHQ+hqDYHRWLlEqW4HUbp4KeuTwqhZh4Hwgy38zLKv6DeF1hwTTMFiJo?=
+ =?us-ascii?Q?b6Rbx1nhF2RmOM83BWjq+AysGyMakV8kF0aZb2qD7Q5/P90obO6Wue8Hqtok?=
+ =?us-ascii?Q?zIS8aUZlNDStUyqntIXAPFGwQMtt4zroxJEHpq8yuWWdm4z/Lrn3BktQLU3O?=
+ =?us-ascii?Q?43rU05y0b194+CbSlOh6MX+t8U+6GMZGIOwpPyPMKg9qxQEWa2hdkMuT1yRR?=
+ =?us-ascii?Q?h9xjW5sEe3oJNFPrwikvlx05q/dEjYnVOT/U8sEJ8Ec7iXLaYs4yYRq2q3Xk?=
+ =?us-ascii?Q?drKxA5MuRcMtDNk2kAA/eJCJoLVkxz26W2Nfn7q2kh/QuPn2vu8gYQVcBEIp?=
+ =?us-ascii?Q?MXIhCqThI6xRFKszDjPPN6cv5xP8WfvAQ0fq+oEZ0Axc0XsAupaMTnRRik6G?=
+ =?us-ascii?Q?9CqyrVSgIuBNirotnDRqYly/G4Dpm28GMGNSuOWZUBoV0+1MIS/dWixvAqtJ?=
+ =?us-ascii?Q?ZSXRWsvk2KehKmKIfoNNd5X1ayryC16/nwgYfwA26B7Mn/PtGFKNQySM54nu?=
+ =?us-ascii?Q?+hG9b575hI4bbWYZaKIXfX+Q+NCZe96OXKWccr8FV1drWcyqYhKbcSLI6ED/?=
+ =?us-ascii?Q?9A=3D=3D?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: X0iuyCStoKkp1C+HnVmN1vozF6qP97RInALCAE8D7s2MHgtzKrkgwAsYe3fX/TFpULwQypJ6d1DuiI7huIhhvWI9lkBvujXzccGC7b4tElnAxcRSa/qt9lOrlT0ZpjF147QME0EvWwANFjEGYDxya+UOEkpBeL+9+qAtVEAFsWh+aomBxiSgsLJTx7uI5OQqSl87VWWeOJ+jAOIpW/Re6cxq3Ui8kJcalkn3Gh+Qoyj3stD5R4F31ZKd7bNW4qoKQ7rji/PzX1uru6BXEDW/VBezfZvcA4jVemYe18i/e79jVtRPyvYhEpof1G64ik/iZ6/7SpZIfBgLN7An18hMx3Bsh1ps61S5njKU7HrqfP86VsmdXkIQRoL1WkZh13ejKbx2x+J0VGHSauwhAB0Y2eYzN5egu7b+SEDutzea/6dJOkTkLwhqjqO7gOndLlf03M9Z6WW9+nk4AQFYykC8tNPRc3+iRLqx7Rmo57pfIX5kTkbtQbC5ZHMtX5I3AKpvnGBdLelwxYv7dmabgZf2ILPqs/EzrVf6JomNerdpuj6EWkG10EcKtRsUKj9r3iJajh+UbENUiik42uvKl9X7GTqkHUueGXXzVIsLqUVr73u1Md2vQJ6m7JcJgVPV8lrsSQwsEB+ZAoKghoa/Rs7qdAZwiPXYuc9e7J4r/sFE0qCrZ3YkPvA7+lg9eCG/5wc0GWpDGFfW0IXqT9W6BdVVJINgJePH4LOUQWlUILuW1qLu1a/6BN8BddFRMdVniHbpKIQUIgvjxvkUshGo9ncjUuQpcFZSLlRftXb+mWX1UH8=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: a219aac9-c864-434c-294c-08dbb5345d02
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Sep 2023 15:07:50.9704
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: nJSOmkYuAEp43fFNliZ0WG3rv+s5RTS89Ea5ADXVi5WYX3GuVD9/Lmx+Lgs16eOLmr/4gnNe/MiDR3u6UOIVjQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR10MB7137
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.601,FMLib:17.11.176.26
+ definitions=2023-09-14_09,2023-09-14_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 adultscore=0 phishscore=0
+ spamscore=0 mlxlogscore=999 bulkscore=0 suspectscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2308100000
+ definitions=main-2309140131
+X-Proofpoint-GUID: GjBRPCJntKo9SC496655Jkw6nAiD91NL
+X-Proofpoint-ORIG-GUID: GjBRPCJntKo9SC496655Jkw6nAiD91NL
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
+Message-ID: <20230914150743.Wfk9rxTQni99ffkS8wmBnHgFjzwKi6BnC4zJCaeNDnQ@z>
 
-On Tue, Aug 29, 2023 at 08:32:40PM +0800, Anand Jain wrote:
-> I wanted to verify tests using the command "btrfs scrub start" and
-> found that there are many more test cases using "btrfs scrub start"
-> than what is listed in the group.list file. So, get them to the scrub
-> group.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
+This patch introduces a new configuration file parameter, POST_MKFS_CMD,
+which, when set, will run immediately it after the mkfs command for the
+FSTYP btrfs.
 
+	For example:
+	POST_MKFS_CMD="btrfstune -m"
 
+Currently, only btrfstune's '-m' option is tested. However, there may be
+more btrfstune options, so having this parameter as a config makes sense.
+Additionally, there can be other commands besides btrfstune.
 
->  tests/btrfs/011 | 2 +-
->  tests/btrfs/027 | 2 +-
->  tests/btrfs/060 | 2 +-
->  tests/btrfs/062 | 2 +-
->  tests/btrfs/063 | 2 +-
->  tests/btrfs/064 | 2 +-
->  tests/btrfs/065 | 2 +-
->  tests/btrfs/067 | 2 +-
->  tests/btrfs/068 | 2 +-
->  tests/btrfs/069 | 2 +-
->  tests/btrfs/070 | 2 +-
->  tests/btrfs/071 | 2 +-
->  tests/btrfs/074 | 2 +-
->  tests/btrfs/148 | 2 +-
->  tests/btrfs/195 | 2 +-
->  tests/btrfs/261 | 2 +-
->  16 files changed, 16 insertions(+), 16 deletions(-)
-> 
-> diff --git a/tests/btrfs/011 b/tests/btrfs/011
-> index 852742ee8396..ff52ada94a17 100755
-> --- a/tests/btrfs/011
-> +++ b/tests/btrfs/011
-> @@ -20,7 +20,7 @@
->  # performed, a btrfsck run, and finally the filesystem is remounted.
->  #
->  . ./common/preamble
-> -_begin_fstest auto replace volume
-> +_begin_fstest auto replace volume scrub
->  
->  noise_pid=0
->  
-> diff --git a/tests/btrfs/027 b/tests/btrfs/027
-> index 46c14b9c1c1f..dbf12c26d0cd 100755
-> --- a/tests/btrfs/027
-> +++ b/tests/btrfs/027
-> @@ -7,7 +7,7 @@
->  # Test replace of a missing device on various data and metadata profiles.
->  #
->  . ./common/preamble
-> -_begin_fstest auto replace volume
-> +_begin_fstest auto replace volume scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/060 b/tests/btrfs/060
-> index 26db8a9bee20..7dd4d2af74cd 100755
-> --- a/tests/btrfs/060
-> +++ b/tests/btrfs/060
-> @@ -8,7 +8,7 @@
->  # with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto balance subvol
-> +_begin_fstest auto balance subvol scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/062 b/tests/btrfs/062
-> index 47b0b9373f33..10f95111f8ff 100755
-> --- a/tests/btrfs/062
-> +++ b/tests/btrfs/062
-> @@ -8,7 +8,7 @@
->  # running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto balance defrag compress
-> +_begin_fstest auto balance defrag compress scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/063 b/tests/btrfs/063
-> index c96390b9315c..cef80771d457 100755
-> --- a/tests/btrfs/063
-> +++ b/tests/btrfs/063
-> @@ -8,7 +8,7 @@
->  # simultaneously, with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto balance remount compress
-> +_begin_fstest auto balance remount compress scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/064 b/tests/btrfs/064
-> index 741161889150..f29e68ba96af 100755
-> --- a/tests/btrfs/064
-> +++ b/tests/btrfs/064
-> @@ -10,7 +10,7 @@
->  # run simultaneously. One of them is expected to fail when the other is running.
->  
->  . ./common/preamble
-> -_begin_fstest auto balance replace volume
-> +_begin_fstest auto balance replace volume scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/065 b/tests/btrfs/065
-> index 4ebf93267a59..b6c9dbadfd32 100755
-> --- a/tests/btrfs/065
-> +++ b/tests/btrfs/065
-> @@ -8,7 +8,7 @@
->  # operation simultaneously, with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto subvol replace volume
-> +_begin_fstest auto subvol replace volume scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/067 b/tests/btrfs/067
-> index 44803f9faf7f..970a23c470fb 100755
-> --- a/tests/btrfs/067
-> +++ b/tests/btrfs/067
-> @@ -8,7 +8,7 @@
->  # operation simultaneously, with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto subvol defrag compress
-> +_begin_fstest auto subvol defrag compress scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/068 b/tests/btrfs/068
-> index e03a4891ec89..e0bcc2ac4930 100755
-> --- a/tests/btrfs/068
-> +++ b/tests/btrfs/068
-> @@ -9,7 +9,7 @@
->  # in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto subvol remount compress
-> +_begin_fstest auto subvol remount compress scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/069 b/tests/btrfs/069
-> index 6e798a2e5061..824ca3c3110b 100755
-> --- a/tests/btrfs/069
-> +++ b/tests/btrfs/069
-> @@ -8,7 +8,7 @@
->  # running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto replace scrub volume
-> +_begin_fstest auto replace scrub volume scrub
+The mkfs helper functions in common/rc passes the SCRATCH_DEV as an argument
+to the set POST_MKFS_CMD, which may not be compatible with other configurable
+commands in the future. However, as of now, since those usecases are still
+unknown, we can modify it later.
 
-I'll remove this duplicated change when I merge it. So ...
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+RFC -> v1:
+ No code changes, only commit log updated.
+ This feature has been a great help in spotting new bugs, and it's set to
+ be really handy for testing the upcoming feature. So, I'd like to bump it
+ up to v1. I'm open to feedback if any. Thanks
+ 
+ common/rc | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/070 b/tests/btrfs/070
-> index dcf978b36b0c..f2e61ad392cd 100755
-> --- a/tests/btrfs/070
-> +++ b/tests/btrfs/070
-> @@ -8,7 +8,7 @@
->  # running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto replace defrag compress volume
-> +_begin_fstest auto replace defrag compress volume scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/071 b/tests/btrfs/071
-> index cd1de2642a96..40230b112cbc 100755
-> --- a/tests/btrfs/071
-> +++ b/tests/btrfs/071
-> @@ -8,7 +8,7 @@
->  # algorithms simultaneously with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto replace remount compress volume
-> +_begin_fstest auto replace remount compress volume scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/074 b/tests/btrfs/074
-> index dc26d8c02497..92e25c7cc24a 100755
-> --- a/tests/btrfs/074
-> +++ b/tests/btrfs/074
-> @@ -8,7 +8,7 @@
->  # simultaneously with fsstress running in background.
->  #
->  . ./common/preamble
-> -_begin_fstest auto defrag remount compress
-> +_begin_fstest auto defrag remount compress scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/148 b/tests/btrfs/148
-> index 510e46dc0826..65a262922569 100755
-> --- a/tests/btrfs/148
-> +++ b/tests/btrfs/148
-> @@ -7,7 +7,7 @@
->  # Test that direct IO writes work on RAID5 and RAID6 filesystems.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick rw
-> +_begin_fstest auto quick rw scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/195 b/tests/btrfs/195
-> index 747345973244..96cc41343925 100755
-> --- a/tests/btrfs/195
-> +++ b/tests/btrfs/195
-> @@ -8,7 +8,7 @@
->  # source profiles just rely on being able to read the data and metadata.
->  #
->  . ./common/preamble
-> -_begin_fstest auto volume balance
-> +_begin_fstest auto volume balance scrub
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/261 b/tests/btrfs/261
-> index 21567052d58e..b33c053fbca0 100755
-> --- a/tests/btrfs/261
-> +++ b/tests/btrfs/261
-> @@ -8,7 +8,7 @@
->  # without affecting the consistency of the fs.
->  #
->  . ./common/preamble
-> -_begin_fstest auto volume raid
-> +_begin_fstest auto volume raid scrub
->  
->  _supported_fs btrfs
->  _require_scratch_dev_pool 4
-> -- 
-> 2.39.3
-> 
+diff --git a/common/rc b/common/rc
+index 5c4429ed0425..3e3c84259f38 100644
+--- a/common/rc
++++ b/common/rc
+@@ -667,6 +667,9 @@ _mkfs_dev()
+ 	exit 1
+     fi
+     rm -f $tmp.mkfserr $tmp.mkfsstd
++    if [[ -v POST_MKFS_CMD ]]; then
++	$POST_MKFS_CMD $(echo $* | $AWK_PROG '{print $1}')
++    fi
+ }
+ 
+ # remove all files in $SCRATCH_MNT, useful when testing on NFS/AFS/CIFS
+@@ -757,6 +760,9 @@ _scratch_mkfs()
+ 	esac
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $*
++	if [[ -v POST_MKFS_CMD ]]; then
++		$POST_MKFS_CMD $SCRATCH_DEV
++	fi
+ 	return $?
+ }
+ 
+@@ -878,7 +884,11 @@ _scratch_pool_mkfs()
+ {
+     case $FSTYP in
+     btrfs)
+-        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL > /dev/null
++        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL
++	if [[ -v POST_MKFS_CMD ]]; then
++		$POST_MKFS_CMD $(echo $SCRATCH_DEV_POOL |\
++						$AWK_PROG '{print $1}')
++	fi
+         ;;
+     *)
+         echo "_scratch_pool_mkfs is not implemented for $FSTYP" 1>&2
+-- 
+2.39.3
 
