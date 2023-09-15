@@ -2,312 +2,113 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF49AEEAA51
-	for <linux-fstests@archiver.kernel.org>; Thu, 14 Sep 2023 15:40:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F9FCEDE989
+	for <linux-fstests@archiver.kernel.org>; Fri, 15 Sep 2023 01:59:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240964AbjINPko (ORCPT
+        id S231434AbjIOCAA (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 14 Sep 2023 11:40:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39252 "EHLO
+        Thu, 14 Sep 2023 22:00:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241158AbjINPkn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2023 11:40:43 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 677ED1FD2;
-        Thu, 14 Sep 2023 08:40:39 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 22B11C433C7;
-        Thu, 14 Sep 2023 15:40:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1694706039;
-        bh=o8MeO5/daz6PUCXbw6nrS8m48LdnT9d1f74accI3vkI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=PfDCS88PxTqJLWE2DtiYqCIARU+WX85Iw06t3hgmoX9wRfd79H72nr/4PLpi3BRc8
-         DSQTuUsOq3r/OneEsV+tLN2ZagrN/aRzOXmY4s7EnZ4oQDUOA0s5lVp1LwJ81tt1uD
-         LxEGkvluSjUkptFEOWj+Nq0oQSADLkO2lWyiDGLMl2tZ1IiHFytWSrc3RzdFdTUR8j
-         iVxrZYkM6G8VixhNopAsE9GMesPWOiSUCJ2TBlOAakyArjNhbfZ2QYhSCkshzV82Zn
-         QosRUPND007v6OARQC1Y9F5k8fqGz7vIfca6EpQpZRfluMI18jHZpF+R1XPykDhHsG
-         cm0Ff26gmEiWQ==
-From:   fdmanana@kernel.org
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test new directory entries are returned after rewinding directory
-Date:   Thu, 14 Sep 2023 16:40:22 +0100
-Message-Id: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.40.1
+        with ESMTP id S231234AbjIOB77 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2023 21:59:59 -0400
+Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EF6C270F
+        for <fstests@vger.kernel.org>; Thu, 14 Sep 2023 18:59:55 -0700 (PDT)
+Received: by mail-pg1-x531.google.com with SMTP id 41be03b00d2f7-577f6b414a4so1269768a12.0
+        for <fstests@vger.kernel.org>; Thu, 14 Sep 2023 18:59:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1694743195; x=1695347995; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=BpFYzeBSV7BLSK6vX/5OOoybrcwN2yDHrgVnFoNl4L4=;
+        b=1ZbFZkeehkIzv1dRMmtnEN4IEnAO3eQdCUNLgozpsp0T399o/La3VgOlKqMmUhHyVN
+         93NrEBoxzBvq4JYhu2UCwPmcdNtfSAVREFizni7KDutcrS8EEycNRcMRMrQmnLlY9VA/
+         SRLidGna/oVbhLtIJeXIlr2qKmlrgvbg+Qa5lZx9/29cE7Se7UgJjyeLnFzdej1kFyEZ
+         cBws9SJxOZqw8GUNW36skcmBqO7Dwqkx9uW7YMfp7uhcGh0V9knOvm30aPrvb4AINOmN
+         uvh+mq+jm9ldSCeoy5d+MvfSA/RDt6alS0LGFLGBXumU/ikQCx+vYPjOU8QWge2KCezT
+         6LuQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1694743195; x=1695347995;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BpFYzeBSV7BLSK6vX/5OOoybrcwN2yDHrgVnFoNl4L4=;
+        b=fV4aXlbVkjuqmj+yvQfoIs1KAYxr76JnS6gXOkvbnbvdq8wI53CNjIbuYxf749xp9f
+         kJRt8FLWsja2V9M53+hS7x7Vpw+LDu6R/Q6WZCP6ItkRO7A1iDGuH2Jxzg1GXeFOvQDf
+         EiPm67N0wYXfIor2UTNspn+LlIg9yrfPVHInV+0eOCpgyp+eXkEv65ppC/OCwpxThw0Z
+         Nv3ibD4G1os68fT4BPsKNL0uGOUzl+gcGSj/QwfWdx5cQ6dd+8Z3BUWUQkdWTFTKWK67
+         e9xy1TiHEbg4kuSVZGzXcUbyZr2NQJPcWzzr+JwsFsM60qQbZDjPNYXIP1uHCo+T+F4m
+         vlgA==
+X-Gm-Message-State: AOJu0YwRidHa14ExwIShO6YolKZ2wGIJqENgnqj4J+/qoPk3uo72Dkpt
+        AXZKI6uXmAgLXqla5/TNraIzuQ==
+X-Google-Smtp-Source: AGHT+IHArELVpzffLRMKIv4CrOmO2y06bOn64llScRTKf51KEYm01Ez6F3rH0F/Uijf7LKxlbpx2nQ==
+X-Received: by 2002:a05:6a20:160c:b0:153:dff0:c998 with SMTP id l12-20020a056a20160c00b00153dff0c998mr651325pzj.6.1694743194670;
+        Thu, 14 Sep 2023 18:59:54 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-20-59.pa.nsw.optusnet.com.au. [49.180.20.59])
+        by smtp.gmail.com with ESMTPSA id s24-20020aa78298000000b0068be348e35fsm1923910pfm.166.2023.09.14.18.59.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Sep 2023 18:59:53 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+        (envelope-from <david@fromorbit.com>)
+        id 1qgy7a-000rIc-35;
+        Fri, 15 Sep 2023 11:59:50 +1000
+Date:   Fri, 15 Sep 2023 11:59:50 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        zlang@redhat.com
+Subject: Re: [PATCH v1] fstests: add configuration option for executing post
+ mkfs commands
+Message-ID: <ZQO6lmjasMPY8wOQ@dread.disaster.area>
+References: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+On Thu, Sep 14, 2023 at 11:07:43PM +0800, Anand Jain wrote:
+> This patch introduces a new configuration file parameter, POST_MKFS_CMD,
+> which, when set, will run immediately it after the mkfs command for the
+> FSTYP btrfs.
+> 
+> 	For example:
+> 	POST_MKFS_CMD="btrfstune -m"
+> 
+> Currently, only btrfstune's '-m' option is tested. However, there may be
+> more btrfstune options, so having this parameter as a config makes sense.
+> Additionally, there can be other commands besides btrfstune.
+> 
+> The mkfs helper functions in common/rc passes the SCRATCH_DEV as an argument
+> to the set POST_MKFS_CMD, which may not be compatible with other configurable
+> commands in the future. However, as of now, since those usecases are still
+> unknown, we can modify it later.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
-Test that if names are added to a directory after an opendir(3) call and
-before a rewinddir(3) call, future readdir(3) calls will return the names.
-This is mandated by POSIX:
+In general, we've put filesystem specific post-mkfs commands inside
+the filesystem specific mkfs function.
 
-  https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.html
+See _scratch_mkfs_xfs() for example. If we want to test TB scale
+scratch filesystems without requiring ENOSPC tests to fill TBs of
+disk space, we set LARGE_SCRATCH_DEV. This causes the mkfs function
+to do the post-mkfs creation of a hidden file that consumes all but
+50GB of space via fallocate (by calling _setup_large_xfs_fs()).
+Hence filesystem filling tests don't spend forever filling the
+filesystem, and no code outside of XFS specific functions need to
+care that this hidden file exists....
 
-This exercises a regression in btrfs which is fixed by a kernel patch that
-has the following subject:
+Given that the use case here is to issue filesystem specific
+commands rather than generic setup commands needed for all
+filesystems, I think it would be better to encapsulate it inside the
+btrfs specific mkfs implementation....
 
-  ""btrfs: refresh dir last index during a rewinddir(3) call""
+Cheers,
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- .gitignore            |   1 +
- src/Makefile          |   2 +-
- src/rewinddir-test.c  | 159 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/471     |  39 +++++++++++
- tests/generic/471.out |   2 +
- 5 files changed, 202 insertions(+), 1 deletion(-)
- create mode 100644 src/rewinddir-test.c
- create mode 100755 tests/generic/471
- create mode 100644 tests/generic/471.out
-
-diff --git a/.gitignore b/.gitignore
-index 644290f0..4c32ac42 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -124,6 +124,7 @@ tags
- /src/rename
- /src/renameat2
- /src/resvtest
-+/src/rewinddir-test
- /src/runas
- /src/seek_copy_test
- /src/seek_sanity_test
-diff --git a/src/Makefile b/src/Makefile
-index aff871d0..2815f919 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
- 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
- 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
--	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault
-+	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/rewinddir-test.c b/src/rewinddir-test.c
-new file mode 100644
-index 00000000..9f7505a2
---- /dev/null
-+++ b/src/rewinddir-test.c
-@@ -0,0 +1,159 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (c) 2023 SUSE Linux Products GmbH.  All Rights Reserved.
-+ */
-+#include <dirent.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <errno.h>
-+#include <unistd.h>
-+#include <sys/stat.h>
-+
-+/*
-+ * Number of files we add to the test directory after calling opendir(3) and
-+ * before calling rewinddir(3).
-+ */
-+#define NUM_FILES 10000
-+
-+int main(int argc, char *argv[])
-+{
-+	int file_counters[NUM_FILES] = { 0 };
-+	int dot_count = 0;
-+	int dot_dot_count = 0;
-+	struct dirent *entry;
-+	DIR *dir = NULL;
-+	char *dir_path = NULL;
-+	char *file_path = NULL;
-+	int ret = 0;
-+	int i;
-+
-+	if (argc != 2) {
-+		fprintf(stderr, "Usage:  %s <directory>\n", argv[0]);
-+		ret = 1;
-+		goto out;
-+	}
-+
-+	dir_path = malloc(strlen(argv[1]) + strlen("/testdir") + 1);
-+	if (!dir_path) {
-+		fprintf(stderr, "malloc failure\n");
-+		ret = ENOMEM;
-+		goto out;
-+	}
-+	i = strlen(argv[1]);
-+	memcpy(dir_path, argv[1], i);
-+	memcpy(dir_path + i, "/testdir", strlen("/testdir"));
-+	dir_path[i + strlen("/testdir")] = '\0';
-+
-+	/* More than enough to contain any full file path. */
-+	file_path = malloc(strlen(dir_path) + 12);
-+	if (!file_path) {
-+		fprintf(stderr, "malloc failure\n");
-+		ret = ENOMEM;
-+		goto out;
-+	}
-+
-+	ret = mkdir(dir_path, 0700);
-+	if (ret == -1) {
-+		fprintf(stderr, "Failed to create test directory: %d\n", errno);
-+		ret = errno;
-+		goto out;
-+	}
-+
-+	/* Open the directory first. */
-+	dir = opendir(dir_path);
-+	if (dir == NULL) {
-+		fprintf(stderr, "Failed to open directory: %d\n", errno);
-+		ret = errno;
-+		goto out;
-+	}
-+
-+	/*
-+	 * Now create all files inside the directory.
-+	 * File names go from 1 to NUM_FILES, 0 is unused as it's the return
-+	 * value for atoi(3) when an error happens.
-+	 */
-+	for (i = 1; i <= NUM_FILES; i++) {
-+		FILE *f;
-+
-+		sprintf(file_path, "%s/%d", dir_path, i);
-+		f = fopen(file_path, "w");
-+		if (f == NULL) {
-+			fprintf(stderr, "Failed to create file number %d: %d\n",
-+				i, errno);
-+			ret = errno;
-+			goto out;
-+		}
-+		fclose(f);
-+	}
-+
-+	/*
-+	 * Rewind the directory and read it.
-+	 * POSIX requires that after a rewind, any new names added to the
-+	 * directory after the openddir(3) call and before the rewinddir(3)
-+	 * call, must be returned by readdir(3) calls
-+	 */
-+	rewinddir(dir);
-+
-+	/*
-+	 * readdir(3) returns NULL when it reaches the end of the directory or
-+	 * when an error happens, so reset errno to 0 to distinguish between
-+	 * both cases later.
-+	 */
-+	errno = 0;
-+	while ((entry = readdir(dir)) != NULL) {
-+		if (strcmp(entry->d_name, ".") == 0) {
-+			dot_count++;
-+			continue;
-+		}
-+		if (strcmp(entry->d_name, "..") == 0) {
-+			dot_dot_count++;
-+			continue;
-+		}
-+		i = atoi(entry->d_name);
-+		if (i == 0) {
-+			fprintf(stderr,
-+				"Failed to parse name '%s' to integer: %d\n",
-+				entry->d_name, errno);
-+			ret = errno;
-+			goto out;
-+		}
-+		/* File names go from 1 to NUM_FILES, so subtract 1. */
-+		file_counters[i - 1]++;
-+	}
-+
-+	if (errno) {
-+		fprintf(stderr, "Failed to read directory: %d\n", errno);
-+		ret = errno;
-+		goto out;
-+	}
-+
-+	/*
-+	 * Now check that the readdir() calls return every single file name
-+	 * and without repeating any of them. If any name is missing or
-+	 * repeated, don't exit immediatelly, so that we print a message for
-+	 * all missing or repeated names.
-+	 */
-+	for (i = 0; i < NUM_FILES; i++) {
-+		if (file_counters[i] != 1) {
-+			fprintf(stderr, "File name %d appeared %d times\n",
-+				i + 1,  file_counters[i]);
-+			ret = EINVAL;
-+		}
-+	}
-+	if (dot_count != 1) {
-+		fprintf(stderr, "File name . appeared %d times\n", dot_count);
-+		ret = EINVAL;
-+	}
-+	if (dot_dot_count != 1) {
-+		fprintf(stderr, "File name .. appeared %d times\n", dot_dot_count);
-+		ret = EINVAL;
-+	}
-+out:
-+	free(dir_path);
-+	free(file_path);
-+	if (dir != NULL)
-+		closedir(dir);
-+
-+	return ret;
-+}
-diff --git a/tests/generic/471 b/tests/generic/471
-new file mode 100755
-index 00000000..15dc89f3
---- /dev/null
-+++ b/tests/generic/471
-@@ -0,0 +1,39 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 471
-+#
-+# Test that if names are added to a directory after an opendir(3) call and
-+# before a rewinddir(3) call, future readdir(3) calls will return the names.
-+# This is mandated by POSIX:
-+#
-+# https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.html
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $tmp.*
-+	[ -n "$target_dir" ] && rm -fr $target_dir
-+}
-+
-+_supported_fs generic
-+_require_test
-+_require_test_program rewinddir-test
-+
-+[ $FSTYP == "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: refresh dir last index during a rewinddir(3) call"
-+
-+target_dir="$TEST_DIR/test-$seq"
-+rm -fr $target_dir
-+mkdir $target_dir
-+
-+$here/src/rewinddir-test $target_dir
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/471.out b/tests/generic/471.out
-new file mode 100644
-index 00000000..260f629e
---- /dev/null
-+++ b/tests/generic/471.out
-@@ -0,0 +1,2 @@
-+QA output created by 471
-+Silence is golden
+Dave.
 -- 
-2.40.1
-
+Dave Chinner
+david@fromorbit.com
