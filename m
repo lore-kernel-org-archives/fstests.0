@@ -2,209 +2,135 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 683BFCD13CF
-	for <linux-fstests@archiver.kernel.org>; Sun, 17 Sep 2023 16:46:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B21DCD13D1
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Sep 2023 01:19:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231812AbjIQQpz (ORCPT
+        id S234486AbjIRBTC (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Sep 2023 12:45:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33570 "EHLO
+        Sun, 17 Sep 2023 21:19:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236318AbjIQQpm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Sep 2023 12:45:42 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0359130
-        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 09:44:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694969089;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ZvBKyF9TBNiopeAp8yVSBeI6ft5Z6xlwFaJDOlLeWFs=;
-        b=jINTbXF5pRjnt/OxWHk/fLIMYBIJdjiz91Tns4GiyPCUMjjfEIs0AA48/32nslAEx7Eiar
-        9zmXIwIdjmZWOabs0r45n6Qyxm0mm4zpebJnUAcLCQV4k7QYBpuY3RLlscS/UWQjhHD1br
-        jGq5VnWz94tzX1IVw0JOz3avekaDC/4=
-Received: from mail-oo1-f70.google.com (mail-oo1-f70.google.com
- [209.85.161.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-591-jdZw4PB0NOKzgoRNo201Fg-1; Sun, 17 Sep 2023 12:44:46 -0400
-X-MC-Unique: jdZw4PB0NOKzgoRNo201Fg-1
-Received: by mail-oo1-f70.google.com with SMTP id 006d021491bc7-5732447d6e0so5160763eaf.3
-        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 09:44:46 -0700 (PDT)
+        with ESMTP id S236261AbjIRBSo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Sep 2023 21:18:44 -0400
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B532A124
+        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
+Received: by mail-pl1-x62a.google.com with SMTP id d9443c01a7336-1c39a4f14bcso37459255ad.3
+        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1694999918; x=1695604718; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=xXRC1PQ3GY1eexkScHMq0QjKrpYm4dzHrRMoy1/YPyM=;
+        b=aqxJT2JZHDvnNaM+OHyNNC/EqJ6Vn1PlYq73qWiiznas705VDbs1u0qBaZp3RLcvg/
+         1Q3F5l19/wYcHUW1OAQX4FfCUFjsRJXUc/1pq5v/PJz53eB/J7ycEgV4QvDQ9dSBtJVB
+         7zFB5KUYBIbkcD9UXvXybT5uqyr+XOSRnGbWOJPGYVCt4mNPxWfEMpJJILm9mJArs9iT
+         TsLBYFqJNSCvYqLuRDrxhF7TSdwEb467+BkQZLefdN6deq0XhOF6cmPAkWwj1hSFyQJ/
+         TQPlov6t5OMfCJVFqFdJHcxcLz0CarkgvPKUrdgfZ9RDb/b+phWWrfPxv0YYvjDjau0h
+         8F7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694969085; x=1695573885;
+        d=1e100.net; s=20230601; t=1694999918; x=1695604718;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ZvBKyF9TBNiopeAp8yVSBeI6ft5Z6xlwFaJDOlLeWFs=;
-        b=SZURgdnFlMpSbks8nLVvX2hZ1YcpXc6eXfPS/DJolBQFrEDOUBT7T8DEUGdu+pFzkS
-         0ReXppZmmd9EI4inza/w2ZUh4F6Ezd2nU11DFrN7niURoN2jZYZxWOWqO3YkmrsuK6n4
-         kf5isuXlko+ZBhmchOaoXbAg5m7aJvu33fzKOje430XCbGzl+ZNio7uXZEvph9Kzfl1e
-         ALFZnkFL7AXxUHYTCZzw+iob+7quuFOHEiMPlxl6uKaby2HmSXYFz5epXaiP9VHquQkI
-         +yO4HXzorGUQDu1APXU7rmk+WN8t0wQW4i2cHy11xDZl0WC288GmgP5YxQcfLsEU0JI4
-         wGSw==
-X-Gm-Message-State: AOJu0YytHiVwxYbr6n9py7BfumAANibPyQxMP/P4rnCeXyRMhEN3sWSg
-        hYsH016y217DL1o8Jwlwm9IbA2mbmkvimLIKcQMcpIrIiOp3zLM06wydtCA7uG+SNvqK1UdZInu
-        IxTIex0dFD6Y65DRHosdkJ8FOEB1S
-X-Received: by 2002:a05:6871:706:b0:1c4:ee87:d3ea with SMTP id f6-20020a056871070600b001c4ee87d3eamr8584485oap.36.1694969085049;
-        Sun, 17 Sep 2023 09:44:45 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHetH4CGNKS8odgKlvbYcLiHq/7Skuu5to7H/TWvqTou1vTrRaR5dbm9U5VLY5o9fiCr4UfSg==
-X-Received: by 2002:a05:6871:706:b0:1c4:ee87:d3ea with SMTP id f6-20020a056871070600b001c4ee87d3eamr8584468oap.36.1694969084668;
-        Sun, 17 Sep 2023 09:44:44 -0700 (PDT)
-Received: from zlang-mailbox ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id fw11-20020a17090b128b00b0025bd4db25f0sm5835471pjb.53.2023.09.17.09.44.43
+        bh=xXRC1PQ3GY1eexkScHMq0QjKrpYm4dzHrRMoy1/YPyM=;
+        b=vmbc8Pm8xkf0+sMa5Fa1Jck/y9RMSgCPI7OQL2Q5VTk/UgsRNHjn9SMGoczTDn9l/j
+         mhRsXiLE0G/z1mU4LJ2BwLOyUCEJM82U3XP3VTzStyJYnBnkjzlq57Q2mTWy72dBV9j2
+         g4qWozchEg5XXAv4hNL1N7cxJXHjLY7gTUGJkTRNcqFtgvEkHkk/eUftNn67ebiAO34N
+         V+AN30W+WDm9RR2+eVkCifI8uEK2PN9UzQ0nZRe0483U2RSTf1JF1034zMsdc+esMbzN
+         mKH4pjvsV/4HpI1+jOPWB8DGSUu3g8hslHnJsk3/SEVVb1lDYhrPrSOosjT32NLYEDlS
+         O9UA==
+X-Gm-Message-State: AOJu0Yzffwqg1d/hLyLBmA47SZl7MWsTCC0uGaopK5xi3Ff5bEtADyJu
+        YOkdk57kQHECv1QlvrjflYHdyQ==
+X-Google-Smtp-Source: AGHT+IErcYyrcnbLQ/cqmK++Xn5ptpR5jKfTcNxZptMvKdAl/aYPErqRxsPGx0eI1m7EztBhEPs5/w==
+X-Received: by 2002:a17:902:f7c2:b0:1c5:64aa:b961 with SMTP id h2-20020a170902f7c200b001c564aab961mr1972359plw.50.1694999918170;
+        Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-20-59.pa.nsw.optusnet.com.au. [49.180.20.59])
+        by smtp.gmail.com with ESMTPSA id e6-20020a170902d38600b001bdb167f6ebsm7214871pld.94.2023.09.17.18.18.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Sep 2023 09:44:44 -0700 (PDT)
-Date:   Mon, 18 Sep 2023 00:44:40 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCHSET v2 0/2] fstests: fix ro mounting with unknown rocompat
- features
-Message-ID: <20230917164440.y27qdcugzodz6mw6@zlang-mailbox>
-References: <169335058807.3526409.15604604578540143202.stgit@frogsfrogsfrogs>
+        Sun, 17 Sep 2023 18:18:37 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+        (envelope-from <david@fromorbit.com>)
+        id 1qi2uI-00291T-37;
+        Mon, 18 Sep 2023 11:18:34 +1000
+Date:   Mon, 18 Sep 2023 11:18:34 +1000
+From:   Dave Chinner <david@fromorbit.com>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        zlang@redhat.com
+Subject: Re: [PATCH v1] fstests: add configuration option for executing post
+ mkfs commands
+Message-ID: <ZQelaoVEWPPQ1SD/@dread.disaster.area>
+References: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
+ <ZQO6lmjasMPY8wOQ@dread.disaster.area>
+ <87f9bf67-f407-e0b5-c29a-825eb4712392@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <169335058807.3526409.15604604578540143202.stgit@frogsfrogsfrogs>
+In-Reply-To: <87f9bf67-f407-e0b5-c29a-825eb4712392@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi Darrick,
+On Sun, Sep 17, 2023 at 07:58:11PM +0800, Anand Jain wrote:
+> 
+> > In general, we've put filesystem specific post-mkfs commands inside
+> > the filesystem specific mkfs function.
+> > 
+> >
+> > See _scratch_mkfs_xfs() for example. If we want to test TB scale
+> > scratch filesystems without requiring ENOSPC tests to fill TBs of
+> > disk space, we set LARGE_SCRATCH_DEV. This causes the mkfs function
+> > to do the post-mkfs creation of a hidden file that consumes all but
+> > 50GB of space via fallocate (by calling _setup_large_xfs_fs()).
+> > Hence filesystem filling tests don't spend forever filling the
+> > filesystem, and no code outside of XFS specific functions need to
+> > care that this hidden file exists....
+> > 
+> > Given that the use case here is to issue filesystem specific
+> > commands rather than generic setup commands needed for all
+> > filesystems, I think it would be better to encapsulate it inside the
+> > btrfs specific mkfs implementation....
+> > 
+> 
+> 
+> IMO, making it configurable and generic would also benefit other
+> filesystems. For instance, the XFS filesystem could set it to
+> 'POST_MKFS_CMD="xfs_admin -p"' or something similar ?
 
-Hi Darrick,
+That's basically no different to setting up the same filesystem
+config as using mkfs to do it. And a lot of the things that
+xfs_admin can change are always set on v5 format filesytsem and
+can't actually be modified. e.g. "-p" is such an option that is only
+ever added to old v4 filesystems, and even then it's been the mkfs
+default since 2013.
 
-Do these two changes cover new xfs bug fix? I hit xfs/270 fails on
-latest upstream mainline kernel testing, e.g. [1][2]. But the xfs/270
-always test passed on my side before.
+As it is, it can't easily be used for things like LARGE_SCRATCH_DEV,
+because that requires multiple operations to create and internal
+fstests knowledge that large devices are being used.
 
-Thanks,
-Zorro
+> The design choice here is to create an open and configurable command
+> variable. This is because we have several commands and options that
+> we need to test, and it wouldn't be practical to hardcode them.
 
-[1]
---- /dev/fd/63	2023-09-16 20:33:38.373115157 -0400
-+++ xfs/270.out.bad	2023-09-16 20:33:37.959115275 -0400
-@@ -1,6 +1,9 @@
- QA output created by 270
- rw mount test
- ro mount test
-+cat: /mnt/xfstests/scratch/testfile: Input/output error
- rw remount test
- rw mount test
- ro mount test
-+ro mount test failed
-+(see /var/lib/xfstests/results//xfs/270.full for details)
+I'm not suggesting that you hard code them. I'm just saying that for
+filesystem specific post-mkfs changes prior to mounting the
+filesytsem fo rthe first time, the code should be located in the
+filesytsem specific mkfs functions. You *must* be doing filesystem
+specific things here because the filesystem hasn't been mounted, and
+that greatly limits the generic things one can do with such a
+command....
 
-[2]
-[57829.436755] run fstests xfs/270 at 2023-09-16 20:33:31
-[57832.373519] XFS (vda3): Mounting V5 Filesystem b31f9652-417d-4dd2-a5ed-54ee957fbfcb
-[57832.398699] XFS (vda3): Ending clean mount
-[57832.551895] XFS (vda3): Unmounting Filesystem b31f9652-417d-4dd2-a5ed-54ee957fbfcb
-[57832.909487] XFS (vda3): Mounting V5 Filesystem 08403da7-afbe-4bfa-a45c-487e28280acc
-[57832.934603] XFS (vda3): Ending clean mount
-[57832.963287] XFS (vda3): User initiated shutdown received.
-[57832.967959] XFS (vda3): Metadata I/O Error (0x4) detected at xfs_fs_goingdown+0x4b/0x180 [xfs] (fs/xfs/xfs_fsops.c:492).  Shutting down filesystem.
-[57832.974742] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
-[57833.002720] XFS (vda3): Unmounting Filesystem 08403da7-afbe-4bfa-a45c-487e28280acc
-[57833.376473] XFS (vda3): Mounting V5 Filesystem 801b25ca-acc4-4232-9955-dc3448680467
-[57833.403380] XFS (vda3): Ending clean mount
-[57833.443719] XFS (vda3): Unmounting Filesystem 801b25ca-acc4-4232-9955-dc3448680467
-[57833.516114] [TTM] Buffer eviction failed
-[57833.519490] qxl 0000:00:02.0: object_init failed for (3149824, 0x00000001)
-[57833.523184] [drm:qxl_alloc_bo_reserved [qxl]] *ERROR* failed to allocate VRAM BO
-[57833.955746] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
-[57833.960383] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
-[57833.964353] XFS (vda3): Filesystem can only be safely mounted read only.
-[57833.967997] XFS (vda3): SB validate failed with error -22.
-[57834.039637] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
-[57834.046289] XFS (vda3): Mounting V5 Filesystem 801b25ca-acc4-4232-9955-dc3448680467
-[57834.075451] XFS (vda3): Ending clean mount
-[57834.082359] XFS (vda3): Corruption detected in superblock read-only compatible features (0x80000000)!
-[57834.086487] XFS (vda3): Metadata corruption detected at xfs_sb_write_verify+0x11d/0x380 [xfs], xfs_sb block 0x0 
-[57834.090716] XFS (vda3): Unmount and run xfs_repair
-[57834.093708] XFS (vda3): First 128 bytes of corrupted metadata buffer:
-[57834.096953] 00000000: 58 46 53 42 00 00 10 00 00 00 00 00 00 3c 00 00  XFSB.........<..
-[57834.100635] 00000010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-[57834.104330] 00000020: 80 1b 25 ca ac c4 42 32 99 55 dc 34 48 68 04 67  ..%...B2.U.4Hh.g
-[57834.108273] 00000030: 00 00 00 00 00 20 00 06 00 00 00 00 00 00 00 80  ..... ..........
-[57834.112176] 00000040: 00 00 00 00 00 00 00 81 00 00 00 00 00 00 00 82  ................
-[57834.116043] 00000050: 00 00 00 01 00 0f 00 00 00 00 00 04 00 00 00 00  ................
-[57834.119693] 00000060: 00 00 40 00 b4 a5 02 00 02 00 00 08 00 00 00 00  ..@.............
-[57834.123459] 00000070: 00 00 00 00 00 00 00 00 0c 09 09 03 14 00 00 19  ................
-[57834.127159] XFS (vda3): Corruption of in-memory data (0x8) detected at _xfs_buf_ioapply+0x50b/0x5f0 [xfs] (fs/xfs/xfs_buf.c:1558).  Shutting down filesystem.
-[57834.134557] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
-[57834.253491] XFS (vda3): ro->rw transition prohibited on unknown (0x80000000) ro-compat filesystem
-[57834.281980] XFS (vda3): Unmounting Filesystem 801b25ca-acc4-4232-9955-dc3448680467
-[57834.655120] XFS (vda3): Mounting V5 Filesystem 29902d21-a146-4095-8747-562850110ff6
-[57834.682299] XFS (vda3): Ending clean mount
-[57834.723067] XFS (vda3): User initiated shutdown received.
-[57834.730954] XFS (vda3): Metadata I/O Error (0x4) detected at xfs_fs_goingdown+0x4b/0x180 [xfs] (fs/xfs/xfs_fsops.c:492).  Shutting down filesystem.
-[57834.738710] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
-[57834.768607] XFS (vda3): Unmounting Filesystem 29902d21-a146-4095-8747-562850110ff6
-[57835.270472] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
-[57835.275655] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
-[57835.279434] XFS (vda3): Filesystem can only be safely mounted read only.
-[57835.283124] XFS (vda3): SB validate failed with error -22.
-[57835.357336] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
-[57835.369968] XFS (vda3): Mounting V5 Filesystem 29902d21-a146-4095-8747-562850110ff6
-[57835.398595] XFS (vda3): Starting recovery (logdev: internal)
-[57835.410361] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
-[57835.414593] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
-[57835.418495] XFS (vda3): Filesystem can only be safely mounted read only.
-[57835.422152] XFS (vda3): metadata I/O error in "xlog_do_recover+0x3e8/0x540 [xfs]" at daddr 0x0 len 1 error 22
-[57835.426851] XFS: Assertion failed: 0, file: fs/xfs/xfs_log_recover.c, line: 3321
-[57835.430765] ------------[ cut here ]------------
-[57835.434014] WARNING: CPU: 2 PID: 3426232 at fs/xfs/xfs_message.c:104 assfail+0x54/0x70 [xfs]
-[57835.438380] Modules linked in: ext2 overlay dm_zero dm_log_writes dm_thin_pool dm_persistent_data dm_bio_prison sd_mod t10_pi sg dm_snapshot dm_bufio ext4 mbcache jbd2 loop dm_flakey dm_mod tls rfkill intel_rapl_msr sunrpc intel_rapl_common intel_uncore_frequency_common isst_if_common nfit snd_hda_codec_generic ledtrig_audio kvm_intel snd_hda_intel snd_intel_dspcfg snd_intel_sdw_acpi snd_hda_codec kvm snd_hda_core snd_hwdep irqbypass snd_seq snd_seq_device snd_pcm qxl snd_timer drm_ttm_helper ttm pcspkr virtio_balloon snd drm_kms_helper soundcore i2c_piix4 joydev drm fuse xfs libcrc32c ata_generic crct10dif_pclmul crc32_pclmul crc32c_intel ghash_clmulni_intel ata_piix virtio_console virtio_net net_failover failover virtio_blk libata serio_raw [last unloaded: scsi_debug]
-[57835.467794] CPU: 2 PID: 3426232 Comm: mount Kdump: loaded Tainted: G        W          6.6.0-rc1+ #1
-[57835.472233] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2011
-[57835.475946] RIP: 0010:assfail+0x54/0x70 [xfs]
-[57835.479708] Code: c0 48 ba 00 00 00 00 00 fc ff df 48 89 c1 83 e0 07 48 c1 e9 03 0f b6 14 11 38 c2 7f 04 84 d2 75 10 80 3d 6e 3f 1c 00 00 75 15 <0f> 0b c3 cc cc cc cc 48 c7 c7 10 47 99 c0 e8 79 fd 34 df eb e2 0f
-[57835.489526] RSP: 0018:ffffc9000293f918 EFLAGS: 00010246
-[57835.493381] RAX: 0000000000000000 RBX: ffff88817b73a000 RCX: 1ffffffff81328e2
-[57835.497512] RDX: 0000000000000004 RSI: ffffc9000293f680 RDI: ffffffffc0afd780
-[57835.501588] RBP: ffff8881964ea000 R08: 00000000ffffffea R09: fffff52000527ec1
-[57835.505701] R10: ffffc9000293f60f R11: fffffffffff6c2b0 R12: 00000000ffffffea
-[57835.509789] R13: ffff88817b73a0e0 R14: ffff8881b927ba80 R15: 
+That is, you can still use environment variables to specify the
+-optional- post mkfs changes you want to test, but doing it from the
+internal _scratch_mkfs_$FSTYP() function allows the implementation
+to be specifically customised to whatever sort of complex operations
+you need to perform for that filesystem type without needing to care
+how that may impact other filesystems....
 
+Cheers,
 
-On Tue, Aug 29, 2023 at 04:09:48PM -0700, Darrick J. Wong wrote:
-> Hi all,
-> 
-> Dave pointed out some failures in xfs/270 when he upgraded Debian
-> unstable and util-linux started using the new mount apis.  Upon further
-> inquiry I noticed that XFS is quite a hot mess when it encounters a
-> filesystem with unrecognized rocompat bits set in the superblock.
-> 
-> Whereas we used to allow readonly mounts under these conditions, a
-> change to the sb write verifier several years ago resulted in the
-> filesystem going down immediately because the post-mount log cleaning
-> writes the superblock, which trips the sb write verifier on the
-> unrecognized rocompat bit.  I made the observation that the ROCOMPAT
-> features RMAPBT and REFLINK both protect new log intent item types,
-> which means that we actually cannot support recovering the log if we
-> don't recognize all the rocompat bits.
-> 
-> Therefore -- fix inode inactivation to work when we're recovering the
-> log, disallow recovery when there's unrecognized rocompat bits, and
-> don't clean the log if doing so would trip the rocompat checks.
-> 
-> v2: change direction of series to allow log recovery on ro mounts
-> 
-> If you're going to start using this code, I strongly recommend pulling
-> from my git trees, which are linked below.
-> 
-> This has been running on the djcloud for months with no problems.  Enjoy!
-> Comments and questions are, as always, welcome.
-> 
-> --D
-> 
-> fstests git tree:
-> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-ro-mounts
-> ---
->  tests/xfs/270     |   80 ++++++++++++++++++++++++++++++++++++++---------------
->  tests/xfs/270.out |    2 +
->  2 files changed, 59 insertions(+), 23 deletions(-)
-> 
-
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
