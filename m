@@ -2,185 +2,200 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23142CD37B0
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Sep 2023 07:08:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 407A0CD13DE
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Sep 2023 15:29:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239978AbjIRHID (ORCPT
+        id S229502AbjIRP37 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 18 Sep 2023 03:08:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52432 "EHLO
+        Mon, 18 Sep 2023 11:29:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240043AbjIRHHp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Sep 2023 03:07:45 -0400
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1045ED2;
-        Mon, 18 Sep 2023 00:07:38 -0700 (PDT)
-Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 38HMNilJ030651;
-        Mon, 18 Sep 2023 07:07:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-03-30;
- bh=h7HZvnNsSNH+lGteXi1rueXi1Pd1ste0io8efxWn3HM=;
- b=WAF/68FclDY/e+xD0R0opFuedBytGH5V5qowGop9jvc8nA12i0dLRGzlc58DEr45dCuN
- ELA33mLVq1Fbb3xpczDXeZ8g/FdnJtO83Tijvmk4mgVfoAVsdd4SFzK3xfzui033RpYc
- knx+EuRLHCCHotEjQrRwovT28nBCb3NgAfqeGaxthSxBp6+y5UkacRXCuV/2n/W+SMYx
- FUP6YE5H1GzMb3myP8OH2dMMR0JkMhK3GIUO/UcoQvgg83+KqS44DCfzUKzdcJmj37Fs
- gl4mQdBlDix5c7S8LfD70ibc9KjrMsvoVeMh2EKfF+Wv6onPV+RTKlXIWORZLg4PH6rx yw== 
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3t53yu1wwe-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 18 Sep 2023 07:07:32 +0000
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 38I5Vv6i015919;
-        Mon, 18 Sep 2023 07:07:32 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2170.outbound.protection.outlook.com [104.47.59.170])
-        by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3t52t3ps4m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 18 Sep 2023 07:07:32 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=O7Xh3NP8UBnmB91YJjGI6CqOTRo9i61dcjBhQ2JGtLTTIS1S44MmHoLfwsiHjux+GoEIAfvf++Jqsgg5df5ov/qMoxf1NmFnk795olep2Gnq4fRh3gXeqSUho1PGoQOrj43p7V7PeeydnjIgj6gWeGOFESYO9yjFrg2/kTH+42To6HwHbLJMThUF1uK9hppgEDcZpa6BdmmPxdqyGSoRRyHWf3itK2QFM7NDjsmDsIJsPXHF4EvIZCZVEBH3w+0ltfjGKtd//nirgm8zd/yDIj5suHy7/fgAuVEfGRvoEtdIH7pmne/3ER/N+LYZgly/XQq7RNjb8KFhSnKPT/mRoQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=h7HZvnNsSNH+lGteXi1rueXi1Pd1ste0io8efxWn3HM=;
- b=m9Vadi6UVHiIMJ/3IdtGzCjQJZzvJJ+jfHhIo0kutPVUmo91dOpWXDZVK8lYhih1iBPMrmWRjPC8S9I2KvnGKtU10CbuQ5Ss6HM0HecC5Ys4oYb+RR2uiAuE4gCaTWWiRZaC02VwTHw+9+9aslBxsV5cDJaRsPHUy7Ogg0dHZOiLGc3GbXV9OQLd9uBBtr5odpFwD/43/z2pgwHqpDCmyMzbSLa16RUNDe3ClFPZrrHHo9vM26kaMshqYDEwTyxQ06tae5LyIUCWtocDyfQAztB2GfX7JP0MapTeO5/BEnWrYqxgJDw4wNiaWStJhWar4RTFqKZZdT2a1DXibTFZRw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=h7HZvnNsSNH+lGteXi1rueXi1Pd1ste0io8efxWn3HM=;
- b=pZnrK/W5lJPMwcLcp83Amj9yyAIo4quA4+fUGYo/eIdxdrJhY+egRHrHBaZgcj7r46p6LIzyM4sAKmIpGXz9ZNm0/zv6Mmyl5bzUXaeshVjFqV64MR/tE/Etzy9gApLRKJAQvcOjnv4oy1wy6Wsmf4RFuMkOY1S82U1QaGDkNcQ=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by CO6PR10MB5601.namprd10.prod.outlook.com (2603:10b6:303:148::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6792.27; Mon, 18 Sep
- 2023 07:07:30 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::2bbc:60da:ba6c:f685]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::2bbc:60da:ba6c:f685%2]) with mapi id 15.20.6792.024; Mon, 18 Sep 2023
- 07:07:30 +0000
-Message-ID: <23d3d640-96af-0a57-5b55-a04437cfe2d0@oracle.com>
-Date:   Mon, 18 Sep 2023 15:07:21 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: [GIT PULL] fstests: btrfs changes for for-next v2023.09.03
-Content-Language: en-US
+        with ESMTP id S229852AbjIRP3v (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Sep 2023 11:29:51 -0400
+Received: from smtp.kernel.org (unknown [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F0F41BF7;
+        Mon, 18 Sep 2023 08:29:47 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17C0DC3277C;
+        Mon, 18 Sep 2023 15:17:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695050279;
+        bh=uwl7iTqPMGYHV2a5Z30kOY4Hfdhlsvbv8rfMj4ldIQw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=jnten6xc7x6rvDeNqlR12k+tasLbWzk5q2LSR7sFB0SjsquK/9fjvABlqdcMaOgBH
+         WEhWaFuypzCeSTMGpP9ddvIdslx5Wx2uZ2Ji/hwZez63mk+pU9MT5BFmI3mH2UMIzJ
+         lQcmMSUEKcBiihifucoChU+MsQNYg/0rus1qsKVIGK7uyvqo2hHqMJXdKm2EbcOtQJ
+         g9fR8AlrEjipC2864FQFs+5s23Ubbb+xmrqmO7KIPfncQ2LIBQZgzw8l86dUJKjuKl
+         Hid6c5tdQGoJ3yp1hkHlIY7+4SyntGemOzov1zZPZp2bufMUcxCUwGRXXmfC2yff5w
+         g/+mAhpyt4qDA==
+Date:   Mon, 18 Sep 2023 08:17:56 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     zlang@kernel.org, fstests@vger.kernel.org,
-        Linux BTRFS Development <linux-btrfs@vger.kernel.org>
-References: <2a2f6e34-980b-2c11-bb07-95e0222f3140@oracle.com>
- <20230918050838.k4uwskcplrxaljc4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From:   Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <20230918050838.k4uwskcplrxaljc4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI2PR04CA0018.apcprd04.prod.outlook.com
- (2603:1096:4:197::9) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCHSET v2 0/2] fstests: fix ro mounting with unknown rocompat
+ features
+Message-ID: <20230918151756.GA348004@frogsfrogsfrogs>
+References: <169335058807.3526409.15604604578540143202.stgit@frogsfrogsfrogs>
+ <20230917164440.y27qdcugzodz6mw6@zlang-mailbox>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CO6PR10MB5601:EE_
-X-MS-Office365-Filtering-Correlation-Id: 41763557-7eab-422c-118e-08dbb815ec1a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 13ShkTsgwsqP5VgItFodzHw13Flma05/Co5znFOe5c/5PPnK+AJHFgRxP9DKFP66IBA9mZb+8K97+2hkbVgwKw5Pul5e/DdtzTf5yEOOzrj3Wcy4wrtS3wuJ6H/0h19B4dTiYnfcOmXTt1nf76oRKdAuq2H59QCz34SDul27g2L8MCC7jCESHAewUiY+u5ZycWCchukJ7XI6BF30FPEbogathUTov7QrGnHZ7KWyix3JRzEtpgJwGuN0yLHzqqfnSWXXn0K3xPWYpJcrkDn306HQbL2i4D25pSoN6kud5UDOn+9izDRN3xiVKi2qkJT0WSWTzV/+bfPCNmJ5uE+Asf+Ekh1x+FxL5XBQQuXiVSK5m+dojdCB24JDUCZuynziNkoJI0We3MF4Scw5Gdnt/oqWTMkVjKzxr5QjTn9QN2oUkhsn4cMTo6kJl0/23+aN3TrNhdqvwhYFPBUF3c9pVA1HddxVdYWf28JI8V0JWNGPM1ECCl8aDu4w5jycfP/n+iUnPOxs7NMgVEz31/cAINXihdiLeN7dVu6tIzKEslhyldt5nDzflJC7cZ4/ZmeXrZxvB2SckFmFrxHhV1QBpV4oRycL2UfjPcpJq3cRRuvdhrlat5h4inIxV02HF3+gVI1qbXi7PbES7LKwobzpuCHxyJ8xpAie2MrrUj145sWXfx61ToEKQcav9tsINv1GhgxIA5ZhF9ybYGIZSgpL2g==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(396003)(366004)(376002)(39860400002)(136003)(1800799009)(451199024)(186009)(86362001)(36756003)(31696002)(31686004)(6486002)(6512007)(6666004)(6506007)(478600001)(5660300002)(316002)(44832011)(8676002)(4326008)(8936002)(6916009)(2616005)(26005)(41300700001)(66946007)(66476007)(66556008)(38100700002)(2906002)(83380400001)(45980500001)(43740500002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?cS9XaEo0SW1EYXE5OXFhK2xXdVZoTmt6eEZPVWhhVU5PeVByZ2FJeVdnN2Z4?=
- =?utf-8?B?Sk9BbHcwdHhocUV1RnVpVXZZZEszNzc3UVE4YnpuUmwyUnJibWhzb1ZiYlAx?=
- =?utf-8?B?alVSWVRVL1JVWGtQaDNFcGIrNHVkdFhFVU9LQjNaUUVucWt5UGFqSElQNmZD?=
- =?utf-8?B?VUlQaVJJSXpLSk9YVTNINTJad1UrTmI4dEEwQ0RHd1B5MFVRTDJiUm1pTmRX?=
- =?utf-8?B?VU43eVF4STkzdFlHejFJcGlsM0tRNG56YmVOS1o5SjVtYmFON0gzU0JPK2FB?=
- =?utf-8?B?d213K0Q1ZWlKbU11UW1hNU1yS1hjVXJ4aUJRbUkvb2xxSStrc1UzcVlma1RP?=
- =?utf-8?B?VWc2QTJ6eHZYaTc2N2FxZzl2NGZTRDZGQklqZ0JEbC8yaldxSGtiVWVHdCtm?=
- =?utf-8?B?TXBYanIxVWpmdU9uREg0VGdDL3J4MUdpZmtZQmpBd3h5VmRCeEN3YklBRnVN?=
- =?utf-8?B?MWw0QjhJdFg1cy8zVlJJMkZ6WTIyUjBCdjlzMGVmbFZxd281a3J3eXRvN2pC?=
- =?utf-8?B?eFJlaURyWms5SVphTHp5c1hTK0h1YVd3Z3ZaQXlqTzlVeGdCVlVWaUVqbVBW?=
- =?utf-8?B?N3FqNzJpR240U25KLzNsclZVWnZpanZFTlJ4aVQxT1I0QmhUdWpScXFaM3JW?=
- =?utf-8?B?N1EwdlZUemhoTlE4cW1ZcmRvaHVqOUZSNlJtdHhibFAvR3htQmx1UGJmN3V3?=
- =?utf-8?B?Z0FUZ1l6eCsybmZLbitVanJxK1l3aUZzeWlCcDhRSTlnYUpYMWpsckI2MjNQ?=
- =?utf-8?B?cFVyOFZ2R2JyU1F5Zm42WkV3ekMvTnl2TnlXMkVHVEZ2aEMwNVBIaGpIZzFt?=
- =?utf-8?B?dlBEd0dpd0pPRU1FUlovRUFmOVFESW9nU055U2JtNU50N2ZoeVJtVGR5ejJY?=
- =?utf-8?B?Mjl6Z1lEUmFkcnVmcHUwTUFmNDJUdkhOY3FWVm5xL2J4b1NSU1NVOW9VSUk0?=
- =?utf-8?B?RjFMTzNCV280S20wa2c1QjV4cjg2WkxDcWtCdUc5MTMwL1F0bStjdlFreTNQ?=
- =?utf-8?B?cUpnblc2WFB1WGFNMUkrZFRTcng3QmdpN2ZvZUg3N1BoSHViY1dFZWFhRGZV?=
- =?utf-8?B?TXRsTmd6WHVIVG5aYStpZjhoM1lUcndwUjBSaFNmVTlVbmFZNm84d3JFVDJE?=
- =?utf-8?B?V0IvM0RMdU1jVzhxTEFJY2FjR0txK0ZabnJ5UXl2bTVqQmI5d3R1MDZCbEJD?=
- =?utf-8?B?NVBIZVVnYnROVDhMWElrNzBHaUhNbmRmUktOY0c2SWlqUWZreHJOekFGWDZH?=
- =?utf-8?B?NVczUVo0dC9KeGJHbFBHYll0aWtZdFJHcXBkVVFFdEh0UDVYS2dkOW54cmtN?=
- =?utf-8?B?QjZCSTh5TElSREVEZlBwb2dUZ3FNTVdpdmh0WmRvRERCUjJQWnhGdXZYQVpT?=
- =?utf-8?B?Ym0xNk1iYW9UR3pPZ2dWUDd1ZUxTSW1PYmtzN3BMNHhtQkM2Tk8weG1UbEph?=
- =?utf-8?B?QkFxVDFoMk1PenB3eEUrVmFDNWJ0Ykc0TjZoeWpJSjZkRDZqa3lQT3FYUW56?=
- =?utf-8?B?YkxiMVg4Z0tNdy9SWjY4YzlGRUFYQW9qTm92eG1WM1IvN2p5bmdhY1BCVG1l?=
- =?utf-8?B?SUJWK21aWGJIQlZ2TUJpMXZ4S2VRbSs1VmZXZnhqT29OUTFaOFZYdGJkNkRP?=
- =?utf-8?B?TllqNUxkR1BWdWNBdUwvakU0WERmOFo3Z3lmc3BHZFB2RzNxd1lZSVdwQnJH?=
- =?utf-8?B?Y2NJdHZqSDZKU3VIajl0QkZXbFN3T1ByQmM2M0FESVhEMTR2SEl4ZW10UHhw?=
- =?utf-8?B?dWE3WHVPNjFZNTg0TTgzams1M2tQZEQ4RHVQWldIUWg3clpIRU1BdnAzK0sw?=
- =?utf-8?B?SXk5Z2NORGJ1V1o3d3prTFlVV3QyTWgvemtyVEF1RUF5eDhNYW1OazIvcTlq?=
- =?utf-8?B?bktWcDM4eERMMnNnTmVycTRYeksxb1pKS0I2MlVlbTB0RHNtR0plRnBURk1r?=
- =?utf-8?B?cHp1ZDhPSVVpeWpCMVhWUFdIYzVEMG5wUHJZcXFpdEVJazhjaWpEVzVlSzBz?=
- =?utf-8?B?dW1BNi8zckw4aWVvZ2FiV1ZmeXgvbmFqc1VTQ013emZXb2JKOE1PeDdUL1lS?=
- =?utf-8?B?cmV6UFJYUE5WYU5NaHlkQkYzWXppcnRNNG02bm16elkrdlliQVRXMWp1REFm?=
- =?utf-8?Q?31pN+K1YURZwrhO5awd7N2Otk?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: YJtmD3f4A0xD89gfbTBdmoN9YUMqhpZIBgp25Clok1Op0whk02DRUfgMp+H6ekc6VLFH3AYjPIeq7lX6bhCaAUPI/UHuNY2fqGwkVbCS7GEcZVE08DiA/wzKn/VtzsTQVEzX5v5ptXlG1cu26PYNbIlGqnKfkhMt4cDByBUlcPTfLZ8Zjga92QM+hUkryJS5Rbfwx9uh6sc2hhGpPczkCWgIZwDhpt1LrMRTjn2PiJfwcLA4PUCKYt8AZbKIV9qV4dhuGLrgKxvAKAhauMcZlAoYvqKRjn+nNIaZKPHV65T0UMTKsxfE02VVwX635NbGgkuLghX8SoEeHPg0Fr4gIHZO6HNKPP1PALZ0L34T8/4+dz+XrQglSv+NraHYiyOi8nZ69cAbn6qkDkHtvOo1mn4qtOr8readPYKhqcZSsp1pxjgN2adImf6+iv9mnnkXAVkHnvoZlod1UKLNZStjMIvmsG/g1VlKZVrB96W3Zf8dT5r30CFFnn1LkVZ/eO8pjdMbmBicVy59CzxLtKTd78mLJCzEneW0fecMCryJpS3FsaCGXc5oVMvH2DQA87/qiQk6fCPDmBhZ2WDTpkgcKPtYlA8w57pU5WtN7lumj50Sbct8CtoVVrgXrcQsl7jOh/FVWq1hbZVm8obPqw9SJ4RKaGal4Et4kjzOFKL5C+rxEacHs56D/E1HZwZqGlQAvGSx0bdhgn/6jmSmSOwGZ9fEd2agGBFRNMBq1g0JJHis7rZLu4APfLkVnLt8asMzUsbVFLMG/6fm2rYhT8diY9GjNC9dZp5euoW99Sb7FgctXAebURds9bxPly93KD7L
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 41763557-7eab-422c-118e-08dbb815ec1a
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Sep 2023 07:07:30.4086
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: nSYsBnOP9WDIxP3xzhnRHgdi0myIiJkjqgSuRQ7D4PO75Pzkwm73eUcLcntFwBq0CL+wjKNOIxl5BDBpFDP6zw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR10MB5601
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.601,FMLib:17.11.176.26
- definitions=2023-09-15_20,2023-09-15_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 mlxlogscore=999
- adultscore=0 mlxscore=0 spamscore=0 malwarescore=0 suspectscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2308100000 definitions=main-2309180063
-X-Proofpoint-GUID: pGzfhowQbqYnFGaTOvkO-fQlftdg5rW9
-X-Proofpoint-ORIG-GUID: pGzfhowQbqYnFGaTOvkO-fQlftdg5rW9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230917164440.y27qdcugzodz6mw6@zlang-mailbox>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-
-> [1]
-> 5bc43d67 (HEAD -> rh-for-next, redhat/rh-for-next) btrfs: add missing commit ids for a few tests using _fixed_by_kernel_commit
-> 38b7cb72 btrfs/076: use _fixed_by_kernel_commit to tell the fixing kernel commit
-> 6540ed24 btrfs/076: support smaller extent size limit
-> 49abf950 fstests: btrfs add more tests into the scrub group
-> 7ae7bcb1 common/rc: make _get_max_file_size find file size on mount point
-> 0e2055b4 tools/mvtest: ensure testcase is executable (755)
-> 39551b4d fstests: btrfs/185 update for single device pseudo device-scan
-> 253f54c0 overlay: add test for persistent unique fsid
-> 04bbac00 xfs/270: actually test log recovery with unknown rocompat features
-> 75adb8f7 xfs/270: actually test file readability
-> 8abf8a20 fstests: btrfs/261 fix failure if /var/lib/btrfs isn't writable
-> 2da0d269 fstests: use btrfs check repair for repairing btrfs filesystems
+On Mon, Sep 18, 2023 at 12:44:40AM +0800, Zorro Lang wrote:
+> Hi Darrick,
 > 
+> Hi Darrick,
+> 
+> Do these two changes cover new xfs bug fix? I hit xfs/270 fails on
+> latest upstream mainline kernel testing, e.g. [1][2]. But the xfs/270
+> always test passed on my side before.
 
-The btrfs patches in the list looks complete to me for now. Thanks.
+Yes, the changes in xfs/270 reflect the corrections to the ro mounting
+behavior in this fix series:
+https://lore.kernel.org/linux-xfs/169454023347.3411463.3256623887249978768.stg-ugh@frogsfrogsfrogs/T/#u
 
+The ro mount behavior regressed some 7-8 years ago; this test was
+written to test the broken fix; and we didn't notice any of this until
+6.1 added the incore unlinked list.  xfs/270 didn't check the usability
+of the mounted ro filesystem, so nobody noticed that the mount failed
+when it should have succeeded.
+
+(That's the first + line)
+
+The second diff here checks what happens when you try to ro mount with a
+dirty log.
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> [1]
+> --- /dev/fd/63	2023-09-16 20:33:38.373115157 -0400
+> +++ xfs/270.out.bad	2023-09-16 20:33:37.959115275 -0400
+> @@ -1,6 +1,9 @@
+>  QA output created by 270
+>  rw mount test
+>  ro mount test
+> +cat: /mnt/xfstests/scratch/testfile: Input/output error
+>  rw remount test
+>  rw mount test
+>  ro mount test
+> +ro mount test failed
+> +(see /var/lib/xfstests/results//xfs/270.full for details)
+> 
 > [2]
-> [PATCH] generic: test new directory entries are returned after rewinding directory
-> [PATCH 0/5] btrfs: simple quotas fstests
-> [RFC PATCH v3 0/9] fstests: add btrfs encryption testing
-
-
-  Yeah, I'm planning to have them for the local tests. So I'll take care 
-of them.
-
-  Also, I've included "[PATCH v3] btrfs: Add a test for the temp-fsid 
-feature."
-
-Thanks. Anand
-
+> [57829.436755] run fstests xfs/270 at 2023-09-16 20:33:31
+> [57832.373519] XFS (vda3): Mounting V5 Filesystem b31f9652-417d-4dd2-a5ed-54ee957fbfcb
+> [57832.398699] XFS (vda3): Ending clean mount
+> [57832.551895] XFS (vda3): Unmounting Filesystem b31f9652-417d-4dd2-a5ed-54ee957fbfcb
+> [57832.909487] XFS (vda3): Mounting V5 Filesystem 08403da7-afbe-4bfa-a45c-487e28280acc
+> [57832.934603] XFS (vda3): Ending clean mount
+> [57832.963287] XFS (vda3): User initiated shutdown received.
+> [57832.967959] XFS (vda3): Metadata I/O Error (0x4) detected at xfs_fs_goingdown+0x4b/0x180 [xfs] (fs/xfs/xfs_fsops.c:492).  Shutting down filesystem.
+> [57832.974742] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
+> [57833.002720] XFS (vda3): Unmounting Filesystem 08403da7-afbe-4bfa-a45c-487e28280acc
+> [57833.376473] XFS (vda3): Mounting V5 Filesystem 801b25ca-acc4-4232-9955-dc3448680467
+> [57833.403380] XFS (vda3): Ending clean mount
+> [57833.443719] XFS (vda3): Unmounting Filesystem 801b25ca-acc4-4232-9955-dc3448680467
+> [57833.516114] [TTM] Buffer eviction failed
+> [57833.519490] qxl 0000:00:02.0: object_init failed for (3149824, 0x00000001)
+> [57833.523184] [drm:qxl_alloc_bo_reserved [qxl]] *ERROR* failed to allocate VRAM BO
+> [57833.955746] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
+> [57833.960383] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
+> [57833.964353] XFS (vda3): Filesystem can only be safely mounted read only.
+> [57833.967997] XFS (vda3): SB validate failed with error -22.
+> [57834.039637] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
+> [57834.046289] XFS (vda3): Mounting V5 Filesystem 801b25ca-acc4-4232-9955-dc3448680467
+> [57834.075451] XFS (vda3): Ending clean mount
+> [57834.082359] XFS (vda3): Corruption detected in superblock read-only compatible features (0x80000000)!
+> [57834.086487] XFS (vda3): Metadata corruption detected at xfs_sb_write_verify+0x11d/0x380 [xfs], xfs_sb block 0x0 
+> [57834.090716] XFS (vda3): Unmount and run xfs_repair
+> [57834.093708] XFS (vda3): First 128 bytes of corrupted metadata buffer:
+> [57834.096953] 00000000: 58 46 53 42 00 00 10 00 00 00 00 00 00 3c 00 00  XFSB.........<..
+> [57834.100635] 00000010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+> [57834.104330] 00000020: 80 1b 25 ca ac c4 42 32 99 55 dc 34 48 68 04 67  ..%...B2.U.4Hh.g
+> [57834.108273] 00000030: 00 00 00 00 00 20 00 06 00 00 00 00 00 00 00 80  ..... ..........
+> [57834.112176] 00000040: 00 00 00 00 00 00 00 81 00 00 00 00 00 00 00 82  ................
+> [57834.116043] 00000050: 00 00 00 01 00 0f 00 00 00 00 00 04 00 00 00 00  ................
+> [57834.119693] 00000060: 00 00 40 00 b4 a5 02 00 02 00 00 08 00 00 00 00  ..@.............
+> [57834.123459] 00000070: 00 00 00 00 00 00 00 00 0c 09 09 03 14 00 00 19  ................
+> [57834.127159] XFS (vda3): Corruption of in-memory data (0x8) detected at _xfs_buf_ioapply+0x50b/0x5f0 [xfs] (fs/xfs/xfs_buf.c:1558).  Shutting down filesystem.
+> [57834.134557] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
+> [57834.253491] XFS (vda3): ro->rw transition prohibited on unknown (0x80000000) ro-compat filesystem
+> [57834.281980] XFS (vda3): Unmounting Filesystem 801b25ca-acc4-4232-9955-dc3448680467
+> [57834.655120] XFS (vda3): Mounting V5 Filesystem 29902d21-a146-4095-8747-562850110ff6
+> [57834.682299] XFS (vda3): Ending clean mount
+> [57834.723067] XFS (vda3): User initiated shutdown received.
+> [57834.730954] XFS (vda3): Metadata I/O Error (0x4) detected at xfs_fs_goingdown+0x4b/0x180 [xfs] (fs/xfs/xfs_fsops.c:492).  Shutting down filesystem.
+> [57834.738710] XFS (vda3): Please unmount the filesystem and rectify the problem(s)
+> [57834.768607] XFS (vda3): Unmounting Filesystem 29902d21-a146-4095-8747-562850110ff6
+> [57835.270472] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
+> [57835.275655] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
+> [57835.279434] XFS (vda3): Filesystem can only be safely mounted read only.
+> [57835.283124] XFS (vda3): SB validate failed with error -22.
+> [57835.357336] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
+> [57835.369968] XFS (vda3): Mounting V5 Filesystem 29902d21-a146-4095-8747-562850110ff6
+> [57835.398595] XFS (vda3): Starting recovery (logdev: internal)
+> [57835.410361] XFS (vda3): Superblock has unknown read-only compatible features (0x80000000) enabled.
+> [57835.414593] XFS (vda3): Attempted to mount read-only compatible filesystem read-write.
+> [57835.418495] XFS (vda3): Filesystem can only be safely mounted read only.
+> [57835.422152] XFS (vda3): metadata I/O error in "xlog_do_recover+0x3e8/0x540 [xfs]" at daddr 0x0 len 1 error 22
+> [57835.426851] XFS: Assertion failed: 0, file: fs/xfs/xfs_log_recover.c, line: 3321
+> [57835.430765] ------------[ cut here ]------------
+> [57835.434014] WARNING: CPU: 2 PID: 3426232 at fs/xfs/xfs_message.c:104 assfail+0x54/0x70 [xfs]
+> [57835.438380] Modules linked in: ext2 overlay dm_zero dm_log_writes dm_thin_pool dm_persistent_data dm_bio_prison sd_mod t10_pi sg dm_snapshot dm_bufio ext4 mbcache jbd2 loop dm_flakey dm_mod tls rfkill intel_rapl_msr sunrpc intel_rapl_common intel_uncore_frequency_common isst_if_common nfit snd_hda_codec_generic ledtrig_audio kvm_intel snd_hda_intel snd_intel_dspcfg snd_intel_sdw_acpi snd_hda_codec kvm snd_hda_core snd_hwdep irqbypass snd_seq snd_seq_device snd_pcm qxl snd_timer drm_ttm_helper ttm pcspkr virtio_balloon snd drm_kms_helper soundcore i2c_piix4 joydev drm fuse xfs libcrc32c ata_generic crct10dif_pclmul crc32_pclmul crc32c_intel ghash_clmulni_intel ata_piix virtio_console virtio_net net_failover failover virtio_blk libata serio_raw [last unloaded: scsi_debug]
+> [57835.467794] CPU: 2 PID: 3426232 Comm: mount Kdump: loaded Tainted: G        W          6.6.0-rc1+ #1
+> [57835.472233] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2011
+> [57835.475946] RIP: 0010:assfail+0x54/0x70 [xfs]
+> [57835.479708] Code: c0 48 ba 00 00 00 00 00 fc ff df 48 89 c1 83 e0 07 48 c1 e9 03 0f b6 14 11 38 c2 7f 04 84 d2 75 10 80 3d 6e 3f 1c 00 00 75 15 <0f> 0b c3 cc cc cc cc 48 c7 c7 10 47 99 c0 e8 79 fd 34 df eb e2 0f
+> [57835.489526] RSP: 0018:ffffc9000293f918 EFLAGS: 00010246
+> [57835.493381] RAX: 0000000000000000 RBX: ffff88817b73a000 RCX: 1ffffffff81328e2
+> [57835.497512] RDX: 0000000000000004 RSI: ffffc9000293f680 RDI: ffffffffc0afd780
+> [57835.501588] RBP: ffff8881964ea000 R08: 00000000ffffffea R09: fffff52000527ec1
+> [57835.505701] R10: ffffc9000293f60f R11: fffffffffff6c2b0 R12: 00000000ffffffea
+> [57835.509789] R13: ffff88817b73a0e0 R14: ffff8881b927ba80 R15: 
+> 
+> 
+> On Tue, Aug 29, 2023 at 04:09:48PM -0700, Darrick J. Wong wrote:
+> > Hi all,
+> > 
+> > Dave pointed out some failures in xfs/270 when he upgraded Debian
+> > unstable and util-linux started using the new mount apis.  Upon further
+> > inquiry I noticed that XFS is quite a hot mess when it encounters a
+> > filesystem with unrecognized rocompat bits set in the superblock.
+> > 
+> > Whereas we used to allow readonly mounts under these conditions, a
+> > change to the sb write verifier several years ago resulted in the
+> > filesystem going down immediately because the post-mount log cleaning
+> > writes the superblock, which trips the sb write verifier on the
+> > unrecognized rocompat bit.  I made the observation that the ROCOMPAT
+> > features RMAPBT and REFLINK both protect new log intent item types,
+> > which means that we actually cannot support recovering the log if we
+> > don't recognize all the rocompat bits.
+> > 
+> > Therefore -- fix inode inactivation to work when we're recovering the
+> > log, disallow recovery when there's unrecognized rocompat bits, and
+> > don't clean the log if doing so would trip the rocompat checks.
+> > 
+> > v2: change direction of series to allow log recovery on ro mounts
+> > 
+> > If you're going to start using this code, I strongly recommend pulling
+> > from my git trees, which are linked below.
+> > 
+> > This has been running on the djcloud for months with no problems.  Enjoy!
+> > Comments and questions are, as always, welcome.
+> > 
+> > --D
+> > 
+> > fstests git tree:
+> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-ro-mounts
+> > ---
+> >  tests/xfs/270     |   80 ++++++++++++++++++++++++++++++++++++++---------------
+> >  tests/xfs/270.out |    2 +
+> >  2 files changed, 59 insertions(+), 23 deletions(-)
+> > 
+> 
