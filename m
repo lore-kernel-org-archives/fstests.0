@@ -2,135 +2,156 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B21DCD13D1
-	for <linux-fstests@archiver.kernel.org>; Mon, 18 Sep 2023 01:19:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92C21C46CA1
+	for <linux-fstests@archiver.kernel.org>; Mon, 18 Sep 2023 05:10:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234486AbjIRBTC (ORCPT
+        id S232753AbjIRFJ6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 17 Sep 2023 21:19:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37920 "EHLO
+        Mon, 18 Sep 2023 01:09:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236261AbjIRBSo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Sep 2023 21:18:44 -0400
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B532A124
-        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
-Received: by mail-pl1-x62a.google.com with SMTP id d9443c01a7336-1c39a4f14bcso37459255ad.3
-        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1694999918; x=1695604718; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=xXRC1PQ3GY1eexkScHMq0QjKrpYm4dzHrRMoy1/YPyM=;
-        b=aqxJT2JZHDvnNaM+OHyNNC/EqJ6Vn1PlYq73qWiiznas705VDbs1u0qBaZp3RLcvg/
-         1Q3F5l19/wYcHUW1OAQX4FfCUFjsRJXUc/1pq5v/PJz53eB/J7ycEgV4QvDQ9dSBtJVB
-         7zFB5KUYBIbkcD9UXvXybT5uqyr+XOSRnGbWOJPGYVCt4mNPxWfEMpJJILm9mJArs9iT
-         TsLBYFqJNSCvYqLuRDrxhF7TSdwEb467+BkQZLefdN6deq0XhOF6cmPAkWwj1hSFyQJ/
-         TQPlov6t5OMfCJVFqFdJHcxcLz0CarkgvPKUrdgfZ9RDb/b+phWWrfPxv0YYvjDjau0h
-         8F7A==
+        with ESMTP id S234472AbjIRFJj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Sep 2023 01:09:39 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C695120
+        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 22:08:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695013724;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wE0CywnquWaBq0zaTmTYPgZ24xPdhCEo6wZjfP895Uw=;
+        b=aDeSC2tm2REIiSPWzfozjRYFQnFydle0tHN5TYKQp3ZYpyKLOaoc6l8FGKTS6a+xKPizsW
+        aoGctFm4QE83LiDYOhaHzmxCaDl02kNMl7QIGQ4dGJJpOWKO+Y1paiWeKNpYv9YyWnRfv9
+        3z3E5zfMyFyQUv03qbZymgSwkYcJCg0=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-86-t2uh9OzHMTmF_b6bAuEr8w-1; Mon, 18 Sep 2023 01:08:43 -0400
+X-MC-Unique: t2uh9OzHMTmF_b6bAuEr8w-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1c4103c26ccso40615855ad.3
+        for <fstests@vger.kernel.org>; Sun, 17 Sep 2023 22:08:43 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694999918; x=1695604718;
+        d=1e100.net; s=20230601; t=1695013722; x=1695618522;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=xXRC1PQ3GY1eexkScHMq0QjKrpYm4dzHrRMoy1/YPyM=;
-        b=vmbc8Pm8xkf0+sMa5Fa1Jck/y9RMSgCPI7OQL2Q5VTk/UgsRNHjn9SMGoczTDn9l/j
-         mhRsXiLE0G/z1mU4LJ2BwLOyUCEJM82U3XP3VTzStyJYnBnkjzlq57Q2mTWy72dBV9j2
-         g4qWozchEg5XXAv4hNL1N7cxJXHjLY7gTUGJkTRNcqFtgvEkHkk/eUftNn67ebiAO34N
-         V+AN30W+WDm9RR2+eVkCifI8uEK2PN9UzQ0nZRe0483U2RSTf1JF1034zMsdc+esMbzN
-         mKH4pjvsV/4HpI1+jOPWB8DGSUu3g8hslHnJsk3/SEVVb1lDYhrPrSOosjT32NLYEDlS
-         O9UA==
-X-Gm-Message-State: AOJu0Yzffwqg1d/hLyLBmA47SZl7MWsTCC0uGaopK5xi3Ff5bEtADyJu
-        YOkdk57kQHECv1QlvrjflYHdyQ==
-X-Google-Smtp-Source: AGHT+IErcYyrcnbLQ/cqmK++Xn5ptpR5jKfTcNxZptMvKdAl/aYPErqRxsPGx0eI1m7EztBhEPs5/w==
-X-Received: by 2002:a17:902:f7c2:b0:1c5:64aa:b961 with SMTP id h2-20020a170902f7c200b001c564aab961mr1972359plw.50.1694999918170;
-        Sun, 17 Sep 2023 18:18:38 -0700 (PDT)
-Received: from dread.disaster.area (pa49-180-20-59.pa.nsw.optusnet.com.au. [49.180.20.59])
-        by smtp.gmail.com with ESMTPSA id e6-20020a170902d38600b001bdb167f6ebsm7214871pld.94.2023.09.17.18.18.37
+        bh=wE0CywnquWaBq0zaTmTYPgZ24xPdhCEo6wZjfP895Uw=;
+        b=GIr5j/o7iIN7fPkLGpERfjDr1lgoPRqRPhUfG+vm7Epv7/Yud1GgrhSImhGlVrziC0
+         4PUJdm8N4/Wj1Qio3L4cR6uoIyRownC58iwC1APhKiJdZtjqyw9kFztSwB8Z8Nw+h1Ul
+         qUvvcqXpalRLdRXkzAnyCxbG4BBVbTu2nQ62t8GGxdgusalbdHoEZL3lO+EpS1KhBbqc
+         JC5Bo3/LWkdofNVWWJZpMlJA0Hy4D2xFbdJ54IvHoX0X/pNqqukr8Y5sPd6B8U6IUY/9
+         TaVlyutuNEfJujvZwn1ITH8DWhpI6YxJwjEaKaOxc4Kk0c1/jJ7KiqJ2JQwP7LUQ9YhL
+         BHDw==
+X-Gm-Message-State: AOJu0YwUYXrkgD7nK3VN4Vhgc46LN3qVQuSLkLu3MXd2Tz5jGiT760BU
+        2b+ejRB6JRQ6nxpAfoguhoKE0Og3OAVKJbMM61lh+osKOuHV0v5HsVwqx88A7YEVzXRyBL5Q2L6
+        PFxdpSNnklJm//ATy0w==
+X-Received: by 2002:a17:902:e84a:b0:1c2:584:51c8 with SMTP id t10-20020a170902e84a00b001c2058451c8mr10492191plg.12.1695013722240;
+        Sun, 17 Sep 2023 22:08:42 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEJQPxmn6qr/2wcLlsf006I+v7+RmF1IOWYxpBApYLYGqyXj3QTwT+0gO1cu4RI5J7TT2lC2A==
+X-Received: by 2002:a17:902:e84a:b0:1c2:584:51c8 with SMTP id t10-20020a170902e84a00b001c2058451c8mr10492179plg.12.1695013721955;
+        Sun, 17 Sep 2023 22:08:41 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id li11-20020a170903294b00b001bde6fa0a39sm7475949plb.167.2023.09.17.22.08.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Sep 2023 18:18:37 -0700 (PDT)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-        (envelope-from <david@fromorbit.com>)
-        id 1qi2uI-00291T-37;
-        Mon, 18 Sep 2023 11:18:34 +1000
-Date:   Mon, 18 Sep 2023 11:18:34 +1000
-From:   Dave Chinner <david@fromorbit.com>
+        Sun, 17 Sep 2023 22:08:41 -0700 (PDT)
+Date:   Mon, 18 Sep 2023 13:08:38 +0800
+From:   Zorro Lang <zlang@redhat.com>
 To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        zlang@redhat.com
-Subject: Re: [PATCH v1] fstests: add configuration option for executing post
- mkfs commands
-Message-ID: <ZQelaoVEWPPQ1SD/@dread.disaster.area>
-References: <9c6d36835c04f18a59005a8994ba128970bac20a.1690446808.git.anand.jain@oracle.com>
- <ZQO6lmjasMPY8wOQ@dread.disaster.area>
- <87f9bf67-f407-e0b5-c29a-825eb4712392@oracle.com>
+Cc:     zlang@kernel.org, fstests@vger.kernel.org,
+        Linux BTRFS Development <linux-btrfs@vger.kernel.org>
+Subject: Re: [GIT PULL] fstests: btrfs changes for for-next v2023.09.03
+Message-ID: <20230918050838.k4uwskcplrxaljc4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <2a2f6e34-980b-2c11-bb07-95e0222f3140@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87f9bf67-f407-e0b5-c29a-825eb4712392@oracle.com>
+In-Reply-To: <2a2f6e34-980b-2c11-bb07-95e0222f3140@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Sep 17, 2023 at 07:58:11PM +0800, Anand Jain wrote:
+On Sun, Sep 17, 2023 at 10:16:08PM +0800, Anand Jain wrote:
 > 
-> > In general, we've put filesystem specific post-mkfs commands inside
-> > the filesystem specific mkfs function.
-> > 
-> >
-> > See _scratch_mkfs_xfs() for example. If we want to test TB scale
-> > scratch filesystems without requiring ENOSPC tests to fill TBs of
-> > disk space, we set LARGE_SCRATCH_DEV. This causes the mkfs function
-> > to do the post-mkfs creation of a hidden file that consumes all but
-> > 50GB of space via fallocate (by calling _setup_large_xfs_fs()).
-> > Hence filesystem filling tests don't spend forever filling the
-> > filesystem, and no code outside of XFS specific functions need to
-> > care that this hidden file exists....
-> > 
-> > Given that the use case here is to issue filesystem specific
-> > commands rather than generic setup commands needed for all
-> > filesystems, I think it would be better to encapsulate it inside the
-> > btrfs specific mkfs implementation....
-> > 
+> These four patches are ready to be included in your for-next branch. I've
+> consolidated them here for your git pull.
+> 
+> Thanks, Anand
 > 
 > 
-> IMO, making it configurable and generic would also benefit other
-> filesystems. For instance, the XFS filesystem could set it to
-> 'POST_MKFS_CMD="xfs_admin -p"' or something similar ?
+> ------------------------------------------------------------
+> The following changes since commit 2848174358e542de0ad18c42cd79f7208ae93711:
+> 
+>   xfs/559: adapt to kernels that use large folios for writes (2023-09-02
+> 13:54:38 +0800)
+> 
+> are available in the Git repository at:
+> 
+>   https://github.com/asj/fstests.git for-next
+> 
+> for you to fetch changes up to 964d3327d3954ed589bf4a2f8c86302bbb37acf9:
+> 
+>   fstests: btrfs/185 update for single device pseudo device-scan (2023-09-17
+> 21:20:53 +0800)
+> 
+> ----------------------------------------------------------------
+> Anand Jain (4):
+>       fstests: btrfs/261 fix failure if /var/lib/btrfs isn't writable
+>       fstests: btrfs add more tests into the scrub group
+>       fstests: use btrfs check repair for repairing btrfs filesystems
+>       fstests: btrfs/185 update for single device pseudo device-scan
 
-That's basically no different to setting up the same filesystem
-config as using mkfs to do it. And a lot of the things that
-xfs_admin can change are always set on v5 format filesytsem and
-can't actually be modified. e.g. "-p" is such an option that is only
-ever added to old v4 filesystems, and even then it's been the mkfs
-default since 2013.
+Hi Anand,
 
-As it is, it can't easily be used for things like LARGE_SCRATCH_DEV,
-because that requires multiple operations to create and internal
-fstests knowledge that large devices are being used.
+Thanks Anand, actually I've merged these patches in my local branch [1]. I
+planned to push them last Sunday, but something blocked that. These un-pushed
+commits list as [1], feel free to tell me if I missed some btrfs patches. I'll
+push them soon.
 
-> The design choice here is to create an open and configurable command
-> variable. This is because we have several commands and options that
-> we need to test, and it wouldn't be practical to hardcode them.
+There're several btrfs related patches are pending as [2], if you'd like, feel
+free to review them, especially the btrfs new feature testing, hope to get review
+from btrfs side at first :)
 
-I'm not suggesting that you hard code them. I'm just saying that for
-filesystem specific post-mkfs changes prior to mounting the
-filesytsem fo rthe first time, the code should be located in the
-filesytsem specific mkfs functions. You *must* be doing filesystem
-specific things here because the filesystem hasn't been mounted, and
-that greatly limits the generic things one can do with such a
-command....
+Thanks,
+Zorro
 
-That is, you can still use environment variables to specify the
--optional- post mkfs changes you want to test, but doing it from the
-internal _scratch_mkfs_$FSTYP() function allows the implementation
-to be specifically customised to whatever sort of complex operations
-you need to perform for that filesystem type without needing to care
-how that may impact other filesystems....
+[1]
+5bc43d67 (HEAD -> rh-for-next, redhat/rh-for-next) btrfs: add missing commit ids for a few tests using _fixed_by_kernel_commit
+38b7cb72 btrfs/076: use _fixed_by_kernel_commit to tell the fixing kernel commit
+6540ed24 btrfs/076: support smaller extent size limit
+49abf950 fstests: btrfs add more tests into the scrub group
+7ae7bcb1 common/rc: make _get_max_file_size find file size on mount point
+0e2055b4 tools/mvtest: ensure testcase is executable (755)
+39551b4d fstests: btrfs/185 update for single device pseudo device-scan
+253f54c0 overlay: add test for persistent unique fsid
+04bbac00 xfs/270: actually test log recovery with unknown rocompat features
+75adb8f7 xfs/270: actually test file readability
+8abf8a20 fstests: btrfs/261 fix failure if /var/lib/btrfs isn't writable
+2da0d269 fstests: use btrfs check repair for repairing btrfs filesystems
 
-Cheers,
+[2]
+[PATCH] generic: test new directory entries are returned after rewinding directory
+[PATCH 0/5] btrfs: simple quotas fstests
+[RFC PATCH v3 0/9] fstests: add btrfs encryption testing
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+>  common/rc       | 16 ++++++++++++++++
+>  tests/btrfs/011 |  2 +-
+>  tests/btrfs/027 |  2 +-
+>  tests/btrfs/060 |  2 +-
+>  tests/btrfs/062 |  2 +-
+>  tests/btrfs/063 |  2 +-
+>  tests/btrfs/064 |  2 +-
+>  tests/btrfs/065 |  2 +-
+>  tests/btrfs/067 |  2 +-
+>  tests/btrfs/068 |  2 +-
+>  tests/btrfs/070 |  2 +-
+>  tests/btrfs/071 |  2 +-
+>  tests/btrfs/074 |  2 +-
+>  tests/btrfs/148 |  2 +-
+>  tests/btrfs/185 |  5 +++--
+>  tests/btrfs/195 |  2 +-
+>  tests/btrfs/261 |  6 ++++--
+>  17 files changed, 37 insertions(+), 18 deletions(-)
+> 
+
