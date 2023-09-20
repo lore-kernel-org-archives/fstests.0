@@ -2,199 +2,193 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51DC3C00523
-	for <linux-fstests@archiver.kernel.org>; Wed, 20 Sep 2023 15:15:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64646C00E86
+	for <linux-fstests@archiver.kernel.org>; Wed, 20 Sep 2023 15:34:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234864AbjITPPD (ORCPT
+        id S234611AbjITPeo (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 20 Sep 2023 11:15:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49216 "EHLO
+        Wed, 20 Sep 2023 11:34:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32866 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234765AbjITPPD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Sep 2023 11:15:03 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 822DBAD
-        for <fstests@vger.kernel.org>; Wed, 20 Sep 2023 08:14:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695222855;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=EuQ8ZHKY3/RhYQyr6LX8a2yu9PvZXsrNsWsQmzmK7as=;
-        b=civIV33jb1+SL5tsz675fN2Bdppvq+Xik+YZFTMpHMQvLMC8x7Vj9izREm5D+h6CIP9oRa
-        TCqCyFr3c7g/F1GAokvvZkWievrQY05/5WzXsgQztnx094OfJscjPL0sbEI1gKmcf/1NiC
-        LrUpRJ3T00BtYXvOkIYDaiIvErbbxHQ=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-498-mHAPjAJUPeafI-yHvcmX0Q-1; Wed, 20 Sep 2023 11:14:14 -0400
-X-MC-Unique: mHAPjAJUPeafI-yHvcmX0Q-1
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-274d8199627so3135149a91.1
-        for <fstests@vger.kernel.org>; Wed, 20 Sep 2023 08:14:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695222848; x=1695827648;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        with ESMTP id S235454AbjITPel (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Sep 2023 11:34:41 -0400
+Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB7D9A3;
+        Wed, 20 Sep 2023 08:34:34 -0700 (PDT)
+Received: by mail-vk1-xa29.google.com with SMTP id 71dfb90a1353d-49351972cbeso2647499e0c.2;
+        Wed, 20 Sep 2023 08:34:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695224072; x=1695828872; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=EuQ8ZHKY3/RhYQyr6LX8a2yu9PvZXsrNsWsQmzmK7as=;
-        b=Kiwr11SGFMqdsqcCXXOSYEPs3bMQj5i1MSj6PQahKNasfWnFTYeUwQGFG3qpOX64DH
-         guJfLPvh6mvHiEYlQPoMLq49Mayv3PQQ3qGlZxNZrQQ2+rSgYr7rtR5EX1lq9cONS6G/
-         rEOczUmhUWAtKwa0/vMtz2j4sbj3FqTRzK8WdIohyIWoyekdWYv8hgTq6Y7ekdHyxTI2
-         Td2vCtUSSLPTBrXzUFhVgfrFkNgeHeos3C6Ej1bCFZHJ9tf/eC8BkaGrl5uSL+CtXuuL
-         yzyuABTy+WEByWcq2InUzBPeXCAi5PtwOqQUSkdxlFWGQtWHbthy4Ly3BJHEQFof/bKd
-         gX/A==
-X-Gm-Message-State: AOJu0YwlkGEB3ReV2qG1Rc+Kcz4HZMw+H719kQlKjNz0+gvsHK5CCLU4
-        u9ZeAuVpc//0HeUaAXlO3mA3K6+3DzzcMPoHdfJYz/FdU++rM8TkyOGiR3YmHUnzvTOTaS3//xU
-        VFAzBaRuFMeErqV6PwQ==
-X-Received: by 2002:a17:90a:e601:b0:273:f51f:1626 with SMTP id j1-20020a17090ae60100b00273f51f1626mr2530469pjy.35.1695222847734;
-        Wed, 20 Sep 2023 08:14:07 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGYBlLus7cH8A0TOF+ELrpxahnz+IdnInpsto9G/Hx4fidfPc4lNxi3CpAkyWgi6xL8TYyeAg==
-X-Received: by 2002:a17:90a:e601:b0:273:f51f:1626 with SMTP id j1-20020a17090ae60100b00273f51f1626mr2530448pjy.35.1695222847412;
-        Wed, 20 Sep 2023 08:14:07 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id fu10-20020a17090ad18a00b00263b9e75aecsm1459100pjb.41.2023.09.20.08.14.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Sep 2023 08:14:07 -0700 (PDT)
-Date:   Wed, 20 Sep 2023 23:14:03 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
+        bh=Y6xgfycrDfXDSoYS8UUa4kOAVuKTt2sQwgXfyUldWLI=;
+        b=TdtxAhqB03CGVAp/2+1IWBk+EptHKP6G5L+BeHcs9d6rh+gsDKmT1E/1MivqnaB920
+         C28bMWkzellz9X3aisaVwPmrE8HW1gZRRrA2EbxXOeuCfoF1TuKTkxwS6m2Yrs0VrhNq
+         bIJJ2J9ZH7gxz8QkNjhwyso+aeKp7d22mEkkz2LyKuGJJMYlB+mI9a4S+SS84nuQJwhx
+         ddmFodBy6Fx0jRrnyXjJ6xz8ly6/w+C5Zl9+SlJtMrB9enAKBHLpzFBvY9EgatAZdCgC
+         09jR2XpVxkO+lqj+SsLlUuBKgXsO+pNejskkKbxVtjFHmCHr8lbPf32ayMSpoz6lCN/5
+         UuFQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695224072; x=1695828872;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Y6xgfycrDfXDSoYS8UUa4kOAVuKTt2sQwgXfyUldWLI=;
+        b=iu6wmTo7RYk1ktgDpwtavznJzHVwVkeySFdEGVuB4CW3p6LpQVS4MOn6I48BtVCg4V
+         fnzgyY/7pmJWUlfGeSzMBSBlXkrSAeDB8Rrfe7m1az5SR411FHjHFzHNCYPm1LJns1KN
+         3+L7V7SahIhwLXBCyX6u2natJF65eQ9cBPmv5tjRJ54deu3puR0G3qkERtCNQIn6Ii5p
+         ryYCL3m4v0Y5mmltgmLV05Ad4EAobSX9h+WNi9Ixk22XsZKi1GPzLCuCsyhgmzQjhiv1
+         gHfIXjNbrTaVprZu5Jn7xlDPBS33kiuBLBG0JhXE4ldM3+7rn1Lqv+0MWDlW7M1ExIfM
+         9ftA==
+X-Gm-Message-State: AOJu0YwXoOrc3NG30Catb1R8Fnl9cyIiJwbU/BOpTiOZ5zgzc4sCasat
+        jhlCHmN8J7ozsyJKknkQ0KC+uyo9VvcumvtOcbkDbLkZTjI=
+X-Google-Smtp-Source: AGHT+IEkezAjkivmbsBp9Oz7J79B98alW89gbSwyGFc+qMvL5fwuhIpI/einIFD748Biswm8OS7GMi8qjvysxN96OaM=
+X-Received: by 2002:a1f:ca46:0:b0:495:bf04:8a05 with SMTP id
+ a67-20020a1fca46000000b00495bf048a05mr2562919vkg.9.1695224072124; Wed, 20 Sep
+ 2023 08:34:32 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230920130355.62763-1-amir73il@gmail.com> <20230920151403.gsh5gphvlilhp6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20230920151403.gsh5gphvlilhp6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Wed, 20 Sep 2023 18:34:21 +0300
+Message-ID: <CAOQ4uxhxsg2AwttYPfhSLQQNbFxo2pmyNUMTC8QpxNw6L_afpw@mail.gmail.com>
+Subject: Re: [PATCH] overlay: add test for rename of lower symlink with
+ NOATIME attr
+To:     Zorro Lang <zlang@redhat.com>
 Cc:     Miklos Szeredi <miklos@szeredi.hu>,
         Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
         fstests@vger.kernel.org
-Subject: Re: [PATCH] overlay: add test for rename of lower symlink with
- NOATIME attr
-Message-ID: <20230920151403.gsh5gphvlilhp6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230920130355.62763-1-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230920130355.62763-1-amir73il@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 20, 2023 at 04:03:55PM +0300, Amir Goldstein wrote:
-> A test for a regression from v5.15 reported by Ruiwen Zhao:
-> https://lore.kernel.org/linux-unionfs/CAKd=y5Hpg7J2gxrFT02F94o=FM9QvGp=kcH1Grctx8HzFYvpiA@mail.gmail.com/
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
-> 
-> Zorro,
-> 
-> This is a test for a regression in kernel v5.15.
-> The fix was merged for 6.6-rc2 and has been picked for
-> the upcoming LTS releases 5.15, 6.1, 6.5.
-> 
-> The reproducer only manifests the bug in fs that inherit noatime flag,
-> namely ext4, btrfs, ... but not xfs.
-> 
-> The test does _notrun on xfs for that reason.
-> 
-> Thanks,
-> Amir.
-> 
->  tests/overlay/082     | 68 +++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/082.out |  2 ++
->  2 files changed, 70 insertions(+)
->  create mode 100755 tests/overlay/082
->  create mode 100644 tests/overlay/082.out
-> 
-> diff --git a/tests/overlay/082 b/tests/overlay/082
-> new file mode 100755
-> index 00000000..abea3c2b
-> --- /dev/null
-> +++ b/tests/overlay/082
-> @@ -0,0 +1,68 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
-> +#
-> +# FS QA Test 082
-> +#
-> +# kernel commit 72db82115d2b ("ovl: copy up sync/noatime fileattr flags")
-> +# from v5.15 introduced a regression.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_fixed_by_kernel_commit ab048302026d \
-> +	"ovl: fix failed copyup of fileattr on a symlink"
-> +
-> +_require_scratch
-> +_require_chattr A
-> +
-> +# remove all files from previous runs
-> +_scratch_mkfs
-> +
-> +# prepare lower test dir with NOATIME flag
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> +mkdir -p $lowerdir/testdir
-> +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
-> +	_notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag"
-> +
-> +# The NOATIME is inheritted to children symlink in ext4/fs2fs
-> +# (and on tmpfs on recent kernels).
-> +# The overlayfs test will not fail unless base fs is
-> +# one of those filesystems.
-> +#
-> +# The problem with this inheritence is that the NOATIME flag is inheritted
-> +# to a symlink and the flag does take effect, but there is no way to query
-> +# the flag (lsattr) or change it (chattr) on a symlink, so overlayfs will
-> +# fail when trying to copy up NOATIME flag from lower to upper symlink.
-> +#
-> +touch $lowerdir/testdir/foo
-> +ln -sf foo $lowerdir/testdir/lnk
-> +
-> +$LSATTR_PROG -l $lowerdir/testdir/foo >> $seqres.full 2>&1
-> +$LSATTR_PROG -l $lowerdir/testdir/foo | grep -q No_Atime || \
-> +	_notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag"
-> +
-> +before=$(stat -c %x $lowerdir/testdir/lnk)
-> +echo "symlink atime before readlink: $before" >> $seqres.full 2>&1
-> +cat $lowerdir/testdir/lnk
-> +after=$(stat -c %x $lowerdir/testdir/lnk)
-> +echo "symlink atime after readlink: $after" >> $seqres.full 2>&1
-> +
-> +[ "$before" == "$after" ] || \
-> +	_notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag on symlink"
-> +
-> +# mounting overlay
-> +_scratch_mount
-> +
-> +# moving symlink will try to copy up lower symlink flags
-> +mv $SCRATCH_MNT/testdir/lnk $SCRATCH_MNT/
+On Wed, Sep 20, 2023 at 6:14=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Wed, Sep 20, 2023 at 04:03:55PM +0300, Amir Goldstein wrote:
+> > A test for a regression from v5.15 reported by Ruiwen Zhao:
+> > https://lore.kernel.org/linux-unionfs/CAKd=3Dy5Hpg7J2gxrFT02F94o=3DFM9Q=
+vGp=3DkcH1Grctx8HzFYvpiA@mail.gmail.com/
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >
+> > Zorro,
+> >
+> > This is a test for a regression in kernel v5.15.
+> > The fix was merged for 6.6-rc2 and has been picked for
+> > the upcoming LTS releases 5.15, 6.1, 6.5.
+> >
+> > The reproducer only manifests the bug in fs that inherit noatime flag,
+> > namely ext4, btrfs, ... but not xfs.
+> >
+> > The test does _notrun on xfs for that reason.
+> >
+> > Thanks,
+> > Amir.
+> >
+> >  tests/overlay/082     | 68 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/082.out |  2 ++
+> >  2 files changed, 70 insertions(+)
+> >  create mode 100755 tests/overlay/082
+> >  create mode 100644 tests/overlay/082.out
+> >
+> > diff --git a/tests/overlay/082 b/tests/overlay/082
+> > new file mode 100755
+> > index 00000000..abea3c2b
+> > --- /dev/null
+> > +++ b/tests/overlay/082
+> > @@ -0,0 +1,68 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
+> > +#
+> > +# FS QA Test 082
+> > +#
+> > +# kernel commit 72db82115d2b ("ovl: copy up sync/noatime fileattr flag=
+s")
+> > +# from v5.15 introduced a regression.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs overlay
+> > +_fixed_by_kernel_commit ab048302026d \
+> > +     "ovl: fix failed copyup of fileattr on a symlink"
+> > +
+> > +_require_scratch
+> > +_require_chattr A
+> > +
+> > +# remove all files from previous runs
+> > +_scratch_mkfs
+> > +
+> > +# prepare lower test dir with NOATIME flag
+> > +lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> > +mkdir -p $lowerdir/testdir
+> > +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
+> > +     _notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag"
+> > +
+> > +# The NOATIME is inheritted to children symlink in ext4/fs2fs
+> > +# (and on tmpfs on recent kernels).
+> > +# The overlayfs test will not fail unless base fs is
+> > +# one of those filesystems.
+> > +#
+> > +# The problem with this inheritence is that the NOATIME flag is inheri=
+tted
+> > +# to a symlink and the flag does take effect, but there is no way to q=
+uery
+> > +# the flag (lsattr) or change it (chattr) on a symlink, so overlayfs w=
+ill
+> > +# fail when trying to copy up NOATIME flag from lower to upper symlink=
+.
+> > +#
+> > +touch $lowerdir/testdir/foo
+> > +ln -sf foo $lowerdir/testdir/lnk
+> > +
+> > +$LSATTR_PROG -l $lowerdir/testdir/foo >> $seqres.full 2>&1
+> > +$LSATTR_PROG -l $lowerdir/testdir/foo | grep -q No_Atime || \
+> > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag"
+> > +
+> > +before=3D$(stat -c %x $lowerdir/testdir/lnk)
+> > +echo "symlink atime before readlink: $before" >> $seqres.full 2>&1
+> > +cat $lowerdir/testdir/lnk
+> > +after=3D$(stat -c %x $lowerdir/testdir/lnk)
+> > +echo "symlink atime after readlink: $after" >> $seqres.full 2>&1
+> > +
+> > +[ "$before" =3D=3D "$after" ] || \
+> > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag o=
+n symlink"
+> > +
+> > +# mounting overlay
+> > +_scratch_mount
+> > +
+> > +# moving symlink will try to copy up lower symlink flags
+> > +mv $SCRATCH_MNT/testdir/lnk $SCRATCH_MNT/
+>
+> Lots of above codes are checking if the underlying fs supports No_Atime (=
+and inherit),
+> and _notrun if not support. How about do these checking steps in a requir=
+e_*
+> function locally or in common/, likes _require_noatime_inheritance(). And=
+ we also
+> can let _require_chattr accept one more argument to specify a test direct=
+ory.
+>
 
-Lots of above codes are checking if the underlying fs supports No_Atime (and inherit),
-and _notrun if not support. How about do these checking steps in a require_*
-function locally or in common/, likes _require_noatime_inheritance(). And we also
-can let _require_chattr accept one more argument to specify a test directory.
+ok.
 
-The "mv ..." command looks like the final testing step. If there's not that bug,
-nothing happen, but I'm wondering what should happen if there's a bug?
+> The "mv ..." command looks like the final testing step. If there's not th=
+at bug,
+> nothing happen, but I'm wondering what should happen if there's a bug?
+
+mv fails with error ENXIO, see linked bug report in commit message.
 
 Thanks,
-Zorro
-
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/overlay/082.out b/tests/overlay/082.out
-> new file mode 100644
-> index 00000000..2977f141
-> --- /dev/null
-> +++ b/tests/overlay/082.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 082
-> +Silence is golden
-> -- 
-> 2.34.1
-> 
-
+Amir.
