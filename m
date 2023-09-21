@@ -2,275 +2,259 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB393E7D0A4
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:03:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC695E7D0A7
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:04:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230398AbjIUTDr (ORCPT
+        id S230010AbjIUTEQ (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 15:03:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42492 "EHLO
+        Thu, 21 Sep 2023 15:04:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229464AbjIUTDZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:03:25 -0400
+        with ESMTP id S229897AbjIUTEC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:04:02 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47F867B96E
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:37:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BEE5897DB
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:40:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695317822;
+        s=mimecast20190719; t=1695318001;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=oK2PX137XfTZOWRLKOkFV4Sa+eaXzi/ddegWpwPmmro=;
-        b=LdmDX3Nxl3egsXbRDO2a1J1SyewJFg4zHxSye+ZR0K9AOA23j3jKqAWbPbf0rCwc5NPhxN
-        4uYob3JMqY32x7EMAX/Qa0QCTzWfCIy7kCa1WuUlmArW42GJ6gX62zEZSHH0/dSpPs5H5n
-        8FAR743pto9JaAuyDsSmeFwifOkNMJQ=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=CkPn1rRuDeTSkQf8G31WO9C/xqlwOshTJosTm+hvLws=;
+        b=iMoLMdx+I34EBHUOeJMjVSxtBWSYLscfp2GsrTy/c53Esg2XwUhg+XTyo6hE4V9NlyXsal
+        oO/gH5D0GzvCcR/bw0zHMiED+qNXlYU0UDgy7LGXSD+7a5Tv8auC7iak5ZoQePO3QS9X93
+        MvkrEWlZH5fw8DJRBsdvXafbu7vluDs=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-680-Yn0JZIW6MVuNBkA-_9DfBQ-1; Thu, 21 Sep 2023 10:20:47 -0400
-X-MC-Unique: Yn0JZIW6MVuNBkA-_9DfBQ-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1c563506047so8794195ad.1
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 07:20:45 -0700 (PDT)
+ us-mta-673-yW1z3SPrOX6afHB6p2v3cg-1; Thu, 21 Sep 2023 10:24:31 -0400
+X-MC-Unique: yW1z3SPrOX6afHB6p2v3cg-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-690f7d73c68so909729b3a.1
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 07:24:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695306045; x=1695910845;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oK2PX137XfTZOWRLKOkFV4Sa+eaXzi/ddegWpwPmmro=;
-        b=Tb7IPhdml1dlDo0Ah2c2+2Sxw+xjio5/7cWtlBvrHsblWcq/erZtBy94uFf3rIoJaN
-         afOg+FVPwVMwPNKhuvf4HPS7SVarvakAFnv2sGs7SQpb7u83AadACoW0nP2qDcrrsjSU
-         nEW1L+//hZbWN1XlZX83GzDt4Hz65SwcBz+UHtwlO5uYhV6N+Crf1iWN+OMnMjaC7/J2
-         rSHOEuLEmzjhv3MyjARMvTFQAcC5pUofKw9kSJV3StjvhpACpPstirq6nwB3eGk/T9Ar
-         d4uw4W9+1pUOdL5KUdD7IDMrPCCZjDdkgOFETVYmFirCHvpuzoZABLk9bgdIBy9E2MGm
-         yqIA==
-X-Gm-Message-State: AOJu0Yz2HbHx74NeLNLhMy54rZxToABC/X+PogRBWMG+E9GDCDcC1Zzh
-        O1g56O80RNjcm7bjNAqiWeG8+LIVIUDkN/T3i5ppoWBVDSJainZ9pTHTs1M37oliP7ne4W5/dts
-        hrcC0w4ovN2JL26PsxQ==
-X-Received: by 2002:a17:902:e851:b0:1b8:8af0:416f with SMTP id t17-20020a170902e85100b001b88af0416fmr5592888plg.1.1695306044996;
-        Thu, 21 Sep 2023 07:20:44 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEQyylMW0W28BrF97Ryzwd7N7x6wv78ELjt1csgIkBrtP15gOHsBecy+9nrfVNi5btFXUa0wA==
-X-Received: by 2002:a17:902:e851:b0:1b8:8af0:416f with SMTP id t17-20020a170902e85100b001b88af0416fmr5592862plg.1.1695306044621;
-        Thu, 21 Sep 2023 07:20:44 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695306271; x=1695911071;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=CkPn1rRuDeTSkQf8G31WO9C/xqlwOshTJosTm+hvLws=;
+        b=RO1boW2zfYSzTVXhZjdwjo2PDr3D144CpcJ+/eYzhjle1sR8uJ7uikF3aNFCeBUtMa
+         JODHEZ2R0PNE3qEgw+ZzmFHXJIdS2jCgqhfk1fbRVuZ84QIXKPrFDOHCE8+4sk93OPnF
+         9P1sZsYzgGzlEMOpOPTMhMDS8PKvHK0lUsD0ZM2hO34q7K7qn/9LveyADzzLpYfjJaYy
+         MFksig20p/rhAR3/GVAE2suOChjX+9jhJMzuuB0ScZfVR6WKpDpP3Ki9SkxJphmUpXlt
+         eeu/S7RmibzJ65N7KfctU49cR3pCBUiHoO3yShmPo0GTimKLoPU0ZWUbrcC8SPolOXtL
+         lJdw==
+X-Gm-Message-State: AOJu0YxOgHHpBG7WN7BIdwJFoDiajq9KeoKFsiV9L34ywFa6NEproz+3
+        nJ6RwOM9hThp0/3bK/KdkIX92jwEPQwPSEkypv9IYyVTBmrXlznoH20FZbiQ0O9/ZxtkWHXATo7
+        6Ts+t/28b8OLVNJ4Bsg==
+X-Received: by 2002:a05:6a00:188e:b0:68b:f529:a329 with SMTP id x14-20020a056a00188e00b0068bf529a329mr6943433pfh.5.1695306270744;
+        Thu, 21 Sep 2023 07:24:30 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFjXorDkEKq9+yTotM1RDnO2lIjUdzwDM4DqHwQyVI5QbcUJU1NUNUlr90ILKxU4f/UjeEcWQ==
+X-Received: by 2002:a05:6a00:188e:b0:68b:f529:a329 with SMTP id x14-20020a056a00188e00b0068bf529a329mr6943405pfh.5.1695306270313;
+        Thu, 21 Sep 2023 07:24:30 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 17-20020a170902ee5100b001bb7a736b4csm1550033plo.77.2023.09.21.07.20.42
+        by smtp.gmail.com with ESMTPSA id q24-20020a62e118000000b0069029a3196dsm1409187pfh.184.2023.09.21.07.24.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 07:20:44 -0700 (PDT)
-Date:   Thu, 21 Sep 2023 22:20:40 +0800
+        Thu, 21 Sep 2023 07:24:29 -0700 (PDT)
+Date:   Thu, 21 Sep 2023 22:24:26 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Yongcheng Yang <yoyang@redhat.com>
-Cc:     fstests@vger.kernel.org, linux-nfs@vger.kernel.org,
-        Amir Goldstein <amir73il@gmail.com>,
-        linux-unionfs@vger.kernel.org
-Subject: Re: [PATCH] generic/471: add a test to check move in mountpoints of
- the same export
-Message-ID: <20230921142040.hw6szynpmemusdi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230921134347.839957-1-yoyang@redhat.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] overlay: add test for rename of lower symlink with
+ NOATIME attr
+Message-ID: <20230921142426.p5g7yqf2gunemnd6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230920130355.62763-1-amir73il@gmail.com>
+ <20230920151403.gsh5gphvlilhp6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxhxsg2AwttYPfhSLQQNbFxo2pmyNUMTC8QpxNw6L_afpw@mail.gmail.com>
+ <20230921062645.lhryfrod7ggdxfuh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxjNy6tD87dsGKAOwu6VpkoH3+kgzOEw=KQOzDF1WhhN=A@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20230921134347.839957-1-yoyang@redhat.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxjNy6tD87dsGKAOwu6VpkoH3+kgzOEw=KQOzDF1WhhN=A@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 21, 2023 at 09:43:47PM +0800, Yongcheng Yang wrote:
-> Add a new test to ckeck file move (rename) operation among
-> different mount points which are mounting to a same export.
+On Thu, Sep 21, 2023 at 11:00:37AM +0300, Amir Goldstein wrote:
+> On Thu, Sep 21, 2023 at 9:26 AM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Wed, Sep 20, 2023 at 06:34:21PM +0300, Amir Goldstein wrote:
+> > > On Wed, Sep 20, 2023 at 6:14 PM Zorro Lang <zlang@redhat.com> wrote:
+> > > >
+> > > > On Wed, Sep 20, 2023 at 04:03:55PM +0300, Amir Goldstein wrote:
+> > > > > A test for a regression from v5.15 reported by Ruiwen Zhao:
+> > > > > https://lore.kernel.org/linux-unionfs/CAKd=y5Hpg7J2gxrFT02F94o=FM9QvGp=kcH1Grctx8HzFYvpiA@mail.gmail.com/
+> >
+> > Could you give one more sentence to tell what kind of regression
+> > does this case test for? Not only a link address.
+> >
+> > > > >
+> > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > ---
+> > > > >
+> > > > > Zorro,
+> > > > >
+> > > > > This is a test for a regression in kernel v5.15.
+> > > > > The fix was merged for 6.6-rc2 and has been picked for
+> > > > > the upcoming LTS releases 5.15, 6.1, 6.5.
+> > > > >
+> > > > > The reproducer only manifests the bug in fs that inherit noatime flag,
+> > > > > namely ext4, btrfs, ... but not xfs.
 > 
-> This should be a simple test but it recently unveils an ancient
-> nfsd bug. Thus let's make it to be a regresstion check.
+> FYI, I made a mistake in the statement above.
+> xfs does support inherit of noatime flag, but
+> it does not inherit noatime for *symlinks*.
 > 
-> Signed-off-by: Yongcheng Yang <yoyang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> There is an ancient nfsd problem just pop up and is now resolved by
-> the upstream commit [1]. Looks like it's a basic and simple test which
-> is probably appropriate for the fstest IMO.
-> 
-> This test in nfs will be failed without patch [1]:
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> [root@kvm-07-guest24 xfstests]# ./check -nfs generic/471
-> FSTYP     	-- nfs
-> PLATFORM  	-- Linux/x86_64 kvm-07-guest24 5.14.0-abc.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Sep 13 04:59:08 EDT 2023
-> MKFS_OPTIONS  -- localhost:/export_test2
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test2 /mnt_scratch
-> 
-> generic/471 1s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
-> 	--- tests/generic/471.out    2023-09-21 05:55:28.514673177 -0400
-> 	+++ /root/xfstests/results//generic/471.out.bad    2023-09-21 08:06:16.935695355 -0400
-> 	@@ -1,2 +1,3 @@
->  	QA output created by 471
->  	Silence is golden
-> 	+mv: '/mnt_test/mountpoint1-471/A/f' and '/mnt_test/mountpoint1-471/B/f' are the same file
-> 	...
-> 	(Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
-> 
-> HINT: You _MAY_ be missing kernel fix:
->   	fdd2630a739819 nfsd: fix change_info in NFSv4 RENAME replies
-> 
-> Ran: generic/471
-> Failures: generic/471
-> Failed 1 of 1 tests
-> 
-> [root@kvm-07-guest24 xfstests]#
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> 
-> And it can pass after that patch [1] merged:
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> [root@fsqe-r6515-02 xfstests]# ./check -nfs generic/471
-> FSTYP     	-- nfs
-> PLATFORM  	-- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-> MKFS_OPTIONS  -- localhost:/export_test1
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test1 /mnt_scratch
-> 
-> generic/471    	0s
-> Ran: generic/471
-> Passed all 1 tests
-> 
-> [root@fsqe-r6515-02 xfstests]#
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> 
-> 
-> Also I have just checked the xfs and overlayfs but the latter get failed:
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> [root@fsqe-r6515-02 xfstests]# ./check generic/471
-> FSTYP         -- xfs (non-debug)
-> PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-> MKFS_OPTIONS  -- -f /dev/loop1
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt_scratch
-> 
-> generic/471 0s ...  1s
-> Ran: generic/471
-> Passed all 1 tests
-> 
-> [root@fsqe-r6515-02 xfstests]#
-> [root@fsqe-r6515-02 xfstests]# ./check -overlay generic/471
-> FSTYP         -- overlay
-> PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-> MKFS_OPTIONS  -- /mnt_scratch
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /mnt_scratch /mnt_scratch/ovl-mnt
-> 
-> generic/471 0s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
->     --- tests/generic/471.out	2023-09-21 09:02:14.580495256 -0400
->     +++ /root/xfstests/results//generic/471.out.bad	2023-09-21 09:02:51.145345830 -0400
->     @@ -1,2 +1,3 @@
->      QA output created by 471
->      Silence is golden
->     +mv: '/mnt_test/ovl-mnt/mountpoint1-471/A/f' and '/mnt_test/ovl-mnt/mountpoint1-471/B/f' are the same file
+> I added the _require_chattr_inherit helper that you suggested
+> in v2, but it only checks for inherit of noatime flag (the 2nd _notrun).
+> I did not add a helper for _require_chattr_inherit_symlink
+> because it was too specific and so I left the 3rd _notrun
+> open coded in the test in v2.
 
-Does the underlying fs affect this testing result?
-
-CC Amir to get his review on this overlay specific failure.
-
->     ...
->     (Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
-> Ran: generic/471
-> Failures: generic/471
-> Failed 1 of 1 tests
-> 
-> [root@fsqe-r6515-02 xfstests]#
-> ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> 
-> For now I'm not sure if the overlayfs don't support this operation or
-> we just need to fix that.
-> 
-> Thanks,
-> Yongcheng
-> 
-> [1] https://lore.kernel.org/linux-nfs/ZPyMyv1nNFV2whKP@tissot.1015granger.net/T/#t
-> 
-> 
->  tests/generic/471     | 60 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/471.out |  2 ++
->  2 files changed, 62 insertions(+)
->  create mode 100755 tests/generic/471
->  create mode 100644 tests/generic/471.out
-> 
-> diff --git a/tests/generic/471 b/tests/generic/471
-> new file mode 100755
-> index 00000000..ada48129
-> --- /dev/null
-> +++ b/tests/generic/471
-> @@ -0,0 +1,60 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 471
-> +#
-> +# Mount the same export to different mount points and move (rename)
-> +# files among those mount points.
-> +# This simple test recently unveils an ancient nfsd bug that is fixed
-> +# by fdd2630a739819 ("nfsd: fix change_info in NFSv4 RENAME replies").
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-
-This test might be good to be in "rename" group too.
-
-Others looks good to me.
+OK, if xfs thinks it's an expected behavior which won't be changed :)
 
 Thanks,
 Zorro
 
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	$UMOUNT_PROG $testdir1 2>/dev/null
-> +	$UMOUNT_PROG $testdir2 2>/dev/null
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs generic
-> +[ "$FSTYP" = "nfs" ] && \
-> +	_fixed_by_kernel_commit fdd2630a739819 \
-> +		"nfsd: fix change_info in NFSv4 RENAME replies"
-> +
-> +_require_test
-> +_require_scratch
-> +
-> +echo "Silence is golden"
-> +
-> +_scratch_mkfs >> $seqres.full
-> +testdir1=$TEST_DIR/mountpoint1-$seq
-> +testdir2=$TEST_DIR/mountpoint2-$seq
-> +rm -rf $testdir1 $testdir2
-> +mkdir -p $testdir1 $testdir2
-> +
-> +# Don't share the data and attribute caches among mount points for NFS.
-> +# This caching behavior is necessary to reproduce this issue as we're
-> +# checking the alignment of each mount point's own unique cache.
-> +[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="-o nosharecache"
-> +
-> +SCRATCH_MNT=$testdir1 _scratch_mount
-> +SCRATCH_MNT=$testdir2 _scratch_mount
-> +rm -rf $testdir1/{A,B}
-> +mkdir $testdir1/{A,B}
-> +touch $testdir1/A/f
-> +mv $testdir1/A/f $testdir1/B/
-> +cat $testdir2/B/f
-> +mv $testdir2/B/f $testdir2/A/
-> +cat $testdir1/A/f
-> +mv $testdir1/A/f $testdir1/B/
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/471.out b/tests/generic/471.out
-> new file mode 100644
-> index 00000000..260f629e
-> --- /dev/null
-> +++ b/tests/generic/471.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 471
-> +Silence is golden
-> -- 
-> 2.31.1
+> 
+> > > > >
+> > > > > The test does _notrun on xfs for that reason.
+> > > > >
+> > > > > Thanks,
+> > > > > Amir.
+> > > > >
+> > > > >  tests/overlay/082     | 68 +++++++++++++++++++++++++++++++++++++++++++
+> > > > >  tests/overlay/082.out |  2 ++
+> > > > >  2 files changed, 70 insertions(+)
+> > > > >  create mode 100755 tests/overlay/082
+> > > > >  create mode 100644 tests/overlay/082.out
+> > > > >
+> > > > > diff --git a/tests/overlay/082 b/tests/overlay/082
+> > > > > new file mode 100755
+> > > > > index 00000000..abea3c2b
+> > > > > --- /dev/null
+> > > > > +++ b/tests/overlay/082
+> > > > > @@ -0,0 +1,68 @@
+> > > > > +#! /bin/bash
+> > > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > > +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
+> > > > > +#
+> > > > > +# FS QA Test 082
+> > > > > +#
+> > > > > +# kernel commit 72db82115d2b ("ovl: copy up sync/noatime fileattr flags")
+> > > > > +# from v5.15 introduced a regression.
+> >
+> > Hi Amir,
+> >
+> > Thanks for this new regression test. More detailed (picky:) review points
+> > as below ...
+> >
+> > So this commit is the one which introduced a regression. But we generally
+> > say what kind of regression does this case test for, in this comment.
+> >
+> > > > > +#
+> > > > > +. ./common/preamble
+> > > > > +_begin_fstest auto quick
+> >
+> > According the source code of this case, please think about more detailed group
+> > names, likes: "symlink", "copyup" and "atime".
+> >
+> > > > > +
+> > > > > +# Import common functions.
+> > > > > +. ./common/filter
+> >
+> > I think this case doesn't use any filter helpers, right?
+> >
+> > > > > +
+> > > > > +# real QA test starts here
+> > > > > +_supported_fs overlay
+> > > > > +_fixed_by_kernel_commit ab048302026d \
+> > > > > +     "ovl: fix failed copyup of fileattr on a symlink"
+> > > > > +
+> > > > > +_require_scratch
+> > > > > +_require_chattr A
+> > > > > +
+> > > > > +# remove all files from previous runs
+> > > > > +_scratch_mkfs
+> > > > > +
+> > > > > +# prepare lower test dir with NOATIME flag
+> > > > > +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> > > > > +mkdir -p $lowerdir/testdir
+> > > > > +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
+> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag"
+> > > > > +
+> > > > > +# The NOATIME is inheritted to children symlink in ext4/fs2fs
+> > > > > +# (and on tmpfs on recent kernels).
+> > > > > +# The overlayfs test will not fail unless base fs is
+> > > > > +# one of those filesystems.
+> > > > > +#
+> > > > > +# The problem with this inheritence is that the NOATIME flag is inheritted
+> > > > > +# to a symlink and the flag does take effect, but there is no way to query
+> > > > > +# the flag (lsattr) or change it (chattr) on a symlink, so overlayfs will
+> > > > > +# fail when trying to copy up NOATIME flag from lower to upper symlink.
+> > > > > +#
+> > > > > +touch $lowerdir/testdir/foo
+> > > > > +ln -sf foo $lowerdir/testdir/lnk
+> > > > > +
+> > > > > +$LSATTR_PROG -l $lowerdir/testdir/foo >> $seqres.full 2>&1
+> > > > > +$LSATTR_PROG -l $lowerdir/testdir/foo | grep -q No_Atime || \
+> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag"
+> > > > > +
+> > > > > +before=$(stat -c %x $lowerdir/testdir/lnk)
+> > > > > +echo "symlink atime before readlink: $before" >> $seqres.full 2>&1
+> >
+> > I remember some filesystems' timestamp for atime (e.g. exfat) might have more
+> > seconds granularity. So it would be better to `sleep 2s` at here.
+> >
+> > Correct me if someone fs need more or less :)
+> >
+> 
+> That would be a futile waste of 2 seconds IMO, because
+> Those niche fs probably do not support chattr and because
+> This is an overlayfs regression test and overlayfs is highly
+> unlikely to be running in production on those niche fs and it
+> probably does not support many of them.
+> 
+> 
+> > > > > +cat $lowerdir/testdir/lnk
+> > > > > +after=$(stat -c %x $lowerdir/testdir/lnk)
+> > > > > +echo "symlink atime after readlink: $after" >> $seqres.full 2>&1
+> > > > > +
+> > > > > +[ "$before" == "$after" ] || \
+> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag on symlink"
+> > > > > +
+> > > > > +# mounting overlay
+> > > > > +_scratch_mount
+> > > > > +
+> > > > > +# moving symlink will try to copy up lower symlink flags
+> > > > > +mv $SCRATCH_MNT/testdir/lnk $SCRATCH_MNT/
+> > > >
+> > > > Lots of above codes are checking if the underlying fs supports No_Atime (and inherit),
+> > > > and _notrun if not support. How about do these checking steps in a require_*
+> > > > function locally or in common/, likes _require_noatime_inheritance(). And we also
+> > > > can let _require_chattr accept one more argument to specify a test directory.
+> > > >
+> > >
+> > > ok.
+> > >
+> > > > The "mv ..." command looks like the final testing step. If there's not that bug,
+> > > > nothing happen, but I'm wondering what should happen if there's a bug?
+> > >
+> > > mv fails with error ENXIO, see linked bug report in commit message.
+> >
+> > Thanks, I think we can add "fails with error ENXIO at here, if the bug is reproduced" in
+> > the comment of that "mv ..." command.
+> >
+> 
+> Sure. no problem.
+> I will post v2 soon with _require_chattr_inherit and
+> above comments fixed.
+> 
+> Thanks for the review!
+> Amir.
 > 
 
