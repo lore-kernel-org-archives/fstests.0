@@ -2,150 +2,129 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70384E7D0B3
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 22:31:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7655BE7D0A1
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 23:05:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231726AbjIUWbI (ORCPT
+        id S229731AbjIUXF6 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 18:31:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36954 "EHLO
+        Thu, 21 Sep 2023 19:05:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229599AbjIUWbG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 18:31:06 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDE8C94
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 15:30:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695335417;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=K4M+FWtQQH/uedAXoSmp/LedYRJ52Upj9sseWebeJho=;
-        b=Xdtx7FGOOypb3AaphmBKBr7rT9oHY3hFaI/ADdEroJittUNky92A+AeuBK25xrXOdi6qvV
-        8ydfL2xz1aMJDKyCegZ1bhhq/XgbWZY8nbqLrW1qWeNTkm4AvS4HhKKhDsVACfXMMxk6ct
-        UOmvNgbV/3xCIMNI0KqH3Uc87bjrEeg=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-327-IlJb1DOtO2maIFx0Q5L6gg-1; Thu, 21 Sep 2023 18:30:15 -0400
-X-MC-Unique: IlJb1DOtO2maIFx0Q5L6gg-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 712DD1C060DB
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 22:30:15 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.18.43])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 3E8A02156A27;
-        Thu, 21 Sep 2023 22:30:15 +0000 (UTC)
-Date:   Thu, 21 Sep 2023 17:30:13 -0500
-From:   Bill O'Donnell <bodonnel@redhat.com>
-To:     Bill O'Donnell <bodonnel@redhat.com>
-Cc:     fstests@vger.kernel.org, zlang@redhat.com
-Subject: Re: [PATCH v2] fstests: generic/353 should accomodate other pwrite
- behaviors
-Message-ID: <ZQzD9ffGrYdxUkyF@redhat.com>
-References: <20230901161816.148854-1-bodonnel@redhat.com>
+        with ESMTP id S230133AbjIUXFt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 19:05:49 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D145133;
+        Thu, 21 Sep 2023 16:05:42 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF8EDC433CA;
+        Thu, 21 Sep 2023 23:05:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695337541;
+        bh=w52bxHynGdgXuyLTw6Zv7bVi39Ag06bx7oZrC7NUDnw=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=k59lDyobMXM/awCcfkZSboMaJsoSV0tY++ZEc69u83OUYXqPmK06NuC3IUKsQaiB5
+         iP+FM/368+vqcJ7KYBoYiLXq7sRMPF4pmRfwEvHYsvszvXyWAUDbilxKb9Viwpk+iA
+         e1Wzb5Q+UtE+95cMHNp1EXBqJgjeY2Yn4UyGek5x4e2ApNW8NiVZ65qAjBnL7/iCLq
+         QHuX96Nnl2RoUSy5yB5OXUaNcq78E4lSaOz4ImMDwHiEWDpSsC0sHZXe7yBBvb3pSw
+         imsgW9yTefOQ/S8mudo723yLnhOLfx2JX2CTyRkmcGrulFdt/7/Yy045xIVNRBXSYW
+         16Gdgx46daRHw==
+Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-1dc9c2b2b79so442155fac.0;
+        Thu, 21 Sep 2023 16:05:41 -0700 (PDT)
+X-Gm-Message-State: AOJu0YxiJ9MbR1ml2K7+2N733vgUTq5xMy0EP1E92IJX0VtSqDDjiHgX
+        K3MaFpV2HEuRej09y2NlEVk1gtBSiWwj4qHv6l4=
+X-Google-Smtp-Source: AGHT+IGLLeJh1qCr+W9Uwmc4P+YuncreqqkipAd9StB+Ho4gVgkRDd8w1mY2aqTynypEsbZPVCYVMW7GA4vjTLMs3ZU=
+X-Received: by 2002:a05:6870:b506:b0:1d5:a6ac:ac8d with SMTP id
+ v6-20020a056870b50600b001d5a6acac8dmr7310862oap.47.1695337540982; Thu, 21 Sep
+ 2023 16:05:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230901161816.148854-1-bodonnel@redhat.com>
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.6
+References: <20230921094158.1391328-1-naohiro.aota@wdc.com>
+In-Reply-To: <20230921094158.1391328-1-naohiro.aota@wdc.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Fri, 22 Sep 2023 00:05:04 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7oPfpBY72SXkkBMn1BQNxMeGdVt8=bof=vjmRoXYG0sQ@mail.gmail.com>
+Message-ID: <CAL3q7H7oPfpBY72SXkkBMn1BQNxMeGdVt8=bof=vjmRoXYG0sQ@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/239: call fsync to create tree-log dedicated block
+ group for zoned mode
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Gentle ping.
+On Thu, Sep 21, 2023 at 8:39=E2=80=AFPM Naohiro Aota <naohiro.aota@wdc.com>=
+ wrote:
+>
+> Running btrfs/239 on a zoned device often fails with the following error.
+>
+>   btrfs/239 5s ... - output mismatch (see /host/btrfs/239.out.bad)
+>       --- tests/btrfs/239.out     2023-09-21 16:56:37.735204924 +0900
+>       +++ /host/btrfs/239.out.bad  2023-09-21 18:22:45.401433408 +0900
+>       @@ -1,4 +1,6 @@
+>        QA output created by 239
+>       +/testdir/dira still exists
+>       +/dira does not exists
+>        File SCRATCH_MNT/testdir/file1 data:
+>        0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+>        *
+>       ...
+>
+> This happens because "testdir" and "dira" are not logged on the first fsy=
+nc
+> (fsync $SCRATCH_MNT/testdir), but are written as a full commit. That
+> prevents updating the log on "mv" time, leaving them pre-mv state.
+>
+> The full commit is induced by the creation of a new block group. On the
+> zoned mode, we use a dedicated block group for tree-log. That block group
+> is created on-demand or assigned to a metadata block group if there is
+> none. On the first mount of a file system, we need to create one because
+> there is only one metadata block group available for the regular
+> metadata. That creation of a new block group forces tree-log to be a full
+> commit on that transaction, which prevents logging "testdir" and "dira".
+>
+> Fix the issue by calling fsync before the first "sync", which creates the
+> dedicated block group and let the files be properly logged.
+>
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 
-On Fri, Sep 01, 2023 at 11:18:16AM -0500, Bill O'Donnell wrote:
-> xfs_io pwrite issues a series of block size writes, but there is no
-> guarantee that the resulting extent(s) will be singular or contiguous.
-> This behavior is acceptable, but the test is flawed in that it expects
-> a single extent for a pwrite.
-> 
-> Modify test to use actual blocksize for pwrite and reflink. Also
-> modify it to accommodate pwrite and reflink that produce different
-> mapping results.
-> 
-> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Looks reasonable, thanks.
+
 > ---
->  tests/generic/353     | 29 ++++++++++++++++-------------
->  tests/generic/353.out | 15 +--------------
->  2 files changed, 17 insertions(+), 27 deletions(-)
-> 
-> diff --git a/tests/generic/353 b/tests/generic/353
-> index 9a1471bd..c5639725 100755
-> --- a/tests/generic/353
-> +++ b/tests/generic/353
-> @@ -29,31 +29,34 @@ _require_xfs_io_command "fiemap"
->  _scratch_mkfs > /dev/null 2>&1
->  _scratch_mount
->  
-> -blocksize=64k
-> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
+>  tests/btrfs/239 | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
+>
+> diff --git a/tests/btrfs/239 b/tests/btrfs/239
+> index 3fbeaedd2c39..5a2dbe58d5fb 100755
+> --- a/tests/btrfs/239
+> +++ b/tests/btrfs/239
+> @@ -83,6 +83,18 @@ done
+>  #
+>  mkdir $SCRATCH_MNT/testdir/dira
+>
+> +# This fsync is for the zoned mode. On the zoned mode, we use a dedicate=
+d block
+> +# group for tree-log. That block group is created on-demand or assigned =
+to a
+> +# metadata block group if there is none. On the first mount of a file sy=
+stem, we
+> +# need to create one because there is only one metadata block group avai=
+lable
+> +# for the regular metadata. That creation of a new block group forces tr=
+ee-log
+> +# to be a full commit on that transaction, which prevents logging "testd=
+ir" and
+> +# "dira" and screws up the result.
+> +#
+> +# Calling fsync here will create the dedicated block group, and let them=
+ be
+> +# logged.
+> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
 > +
->  file1="$SCRATCH_MNT/file1"
->  file2="$SCRATCH_MNT/file2"
-> +extmap1="$SCRATCH_MNT/extmap1"
-> +extmap2="$SCRATCH_MNT/extmap2"
->  
->  # write the initial file
-> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
->  
->  # reflink initial file
-> -_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-> +_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
->  
->  # check their fiemap to make sure it's correct
-> -echo "before sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-> +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
->  
->  # sync and recheck, to make sure the fiemap doesn't change just
->  # due to sync
+>  # Make sure everything done so far is durably persisted.
 >  sync
-> -echo "after sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-> +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
-> +
-> +echo "Silence is golden"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/353.out b/tests/generic/353.out
-> index 4f6e0b92..16ba4f1f 100644
-> --- a/tests/generic/353.out
-> +++ b/tests/generic/353.out
-> @@ -1,15 +1,2 @@
->  QA output created by 353
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -linked 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -before sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> -after sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> +Silence is golden
-> -- 
-> 2.41.0
-> 
-
+>
+> --
+> 2.42.0
+>
