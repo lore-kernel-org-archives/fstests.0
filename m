@@ -2,89 +2,150 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F919E7D0AF
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 22:27:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70384E7D0B3
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 22:31:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233095AbjIUW1V (ORCPT
+        id S231726AbjIUWbI (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 18:27:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36052 "EHLO
+        Thu, 21 Sep 2023 18:31:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232007AbjIUW1F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 18:27:05 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D66BFA75E9;
-        Thu, 21 Sep 2023 11:01:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1695319274; x=1726855274;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=eQQiV0hLP2bIUI2HNvk9Nzw46PQ60At884Epzu9W55k=;
-  b=EuQMwKPKvtq0Rvjx3K0cVwlG7aqTXF8uUG9zIl6qyldK8WO1UviR+9T/
-   Gg6u7dXJpK4hyfhniwIpuumNWXRY7SF9YO1YzM3T2s9FTsib470F802Ia
-   VoZ8ustHM+3D3IWUieKzx4q53CzBLF7NGig+/sXWR+Z8ptmI+BAliP8aG
-   zR4XhG+FfiS9kSTmIsGPHO7amgB9O+RkcXTkaOloMLkHmbBUHJ1bd/DC3
-   7zvyxXNQwWGr2v3cvKSDnHP0X7Dr5MAe128CcWbwRcsUmoE8Ne6q9k8rN
-   dohnFNo/nRUapOqoCZyT2YqlZ+sPV2xvQeZjGzybPEh2zSgl0aMOWovDk
-   w==;
-X-CSE-ConnectionGUID: aNR3e2T4RyiA4eNyNitEcg==
-X-CSE-MsgGUID: b1o2Ub00R1W+DbkKqtfAWg==
-X-IronPort-AV: E=Sophos;i="6.03,164,1694707200"; 
-   d="scan'208";a="349818414"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Sep 2023 15:44:22 +0800
-IronPort-SDR: rmX3pv5JVJeLO7OsSBKNSs8X0hzBohYiURcsv1i2zhopnvbQOP2WchVhoOG1YQhEwW4G5m8nXf
- 2RX5c5aTApGJHREiKMjSYhc8Qw/Z22o6HcMAaE00DpOkGPIAcjFR6lKyQUELcFfF8knz9qqbOo
- C+vttE+ICkP//kuq1xw+77636dNfw4Phwt702jrQvVhCo6CzXRF64+1gepCt/AGYWmSweekKGl
- YS0MiCNut2bM4b4m4ZDXKf2EHj55MZ5YqttJtGohSqXXRSjwdOFjpzRAyPvbs86OYV8Wg2eJlN
- wHc=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Sep 2023 23:56:56 -0700
-IronPort-SDR: 7pyUaF3dziQcm4uxXflZtkNnfhw/oVlpBYCRq56ScH1Nf8uPocsQ5xgauM7+7X2PA/QRtGQLMP
- FyZwhVhH2AEWFPTeBtfx6YlbIQH/tW0/wYSIpvMr1/lgFZ0cOrwupx1Ft06ziluiHFJBdAzWD/
- HaYQjRDL0lp3T8qQe5HE+TsbSc0+p0IwBro33+OBdfz7eH/bWaaiNIGTnEkSefQpn7y+t6YFBL
- VKHSD7Rb/sTFt/h6VusIKU0y1zCZSwTbtJflT7Mi5ZsFdDGuc3FhFauQAQc4eErIoAJN0APVN7
- NE4=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.94])
-  by uls-op-cesaip01.wdc.com with ESMTP; 21 Sep 2023 00:44:22 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH v3 0/2] btrfs/076: fix failure on device with small zone_append_max_bytes
-Date:   Thu, 21 Sep 2023 16:44:06 +0900
-Message-ID: <cover.1695282094.git.naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S229599AbjIUWbG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 18:31:06 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDE8C94
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 15:30:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695335417;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=K4M+FWtQQH/uedAXoSmp/LedYRJ52Upj9sseWebeJho=;
+        b=Xdtx7FGOOypb3AaphmBKBr7rT9oHY3hFaI/ADdEroJittUNky92A+AeuBK25xrXOdi6qvV
+        8ydfL2xz1aMJDKyCegZ1bhhq/XgbWZY8nbqLrW1qWeNTkm4AvS4HhKKhDsVACfXMMxk6ct
+        UOmvNgbV/3xCIMNI0KqH3Uc87bjrEeg=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-327-IlJb1DOtO2maIFx0Q5L6gg-1; Thu, 21 Sep 2023 18:30:15 -0400
+X-MC-Unique: IlJb1DOtO2maIFx0Q5L6gg-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 712DD1C060DB
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 22:30:15 +0000 (UTC)
+Received: from redhat.com (unknown [10.22.18.43])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 3E8A02156A27;
+        Thu, 21 Sep 2023 22:30:15 +0000 (UTC)
+Date:   Thu, 21 Sep 2023 17:30:13 -0500
+From:   Bill O'Donnell <bodonnel@redhat.com>
+To:     Bill O'Donnell <bodonnel@redhat.com>
+Cc:     fstests@vger.kernel.org, zlang@redhat.com
+Subject: Re: [PATCH v2] fstests: generic/353 should accomodate other pwrite
+ behaviors
+Message-ID: <ZQzD9ffGrYdxUkyF@redhat.com>
+References: <20230901161816.148854-1-bodonnel@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230901161816.148854-1-bodonnel@redhat.com>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.6
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Running btrfs/072 on a zoned null_blk device fails with a mismatch of the
-number of extents. That mismatch happens because the max size of extent is
-limited by not only BTRFS_MAX_UNCOMPRESSED, but also zone_append_max_bytes
-on the zoned mode.
+Gentle ping.
 
-Fix the issue by calculating the expected number of extents instead of
-hard-coding it in the output file.
-
-Also, use _fixed_by_kernel_commit to rewrite the fixing commit indication
-in the comment.
-
-- v3: Use 1024s instead of "<< 10"s to represents KB or MB
-- v2: Only fixed the subject lines
-
-Naohiro Aota (2):
-  btrfs/076: support smaller extent size limit
-  btrfs/076: use _fixed_by_kernel_commit to tell the fixing kernel
-    commit
-
- tests/btrfs/076     | 29 ++++++++++++++++++++++++-----
- tests/btrfs/076.out |  3 +--
- 2 files changed, 25 insertions(+), 7 deletions(-)
-
--- 
-2.42.0
+On Fri, Sep 01, 2023 at 11:18:16AM -0500, Bill O'Donnell wrote:
+> xfs_io pwrite issues a series of block size writes, but there is no
+> guarantee that the resulting extent(s) will be singular or contiguous.
+> This behavior is acceptable, but the test is flawed in that it expects
+> a single extent for a pwrite.
+> 
+> Modify test to use actual blocksize for pwrite and reflink. Also
+> modify it to accommodate pwrite and reflink that produce different
+> mapping results.
+> 
+> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+> ---
+>  tests/generic/353     | 29 ++++++++++++++++-------------
+>  tests/generic/353.out | 15 +--------------
+>  2 files changed, 17 insertions(+), 27 deletions(-)
+> 
+> diff --git a/tests/generic/353 b/tests/generic/353
+> index 9a1471bd..c5639725 100755
+> --- a/tests/generic/353
+> +++ b/tests/generic/353
+> @@ -29,31 +29,34 @@ _require_xfs_io_command "fiemap"
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  
+> -blocksize=64k
+> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
+> +
+>  file1="$SCRATCH_MNT/file1"
+>  file2="$SCRATCH_MNT/file2"
+> +extmap1="$SCRATCH_MNT/extmap1"
+> +extmap2="$SCRATCH_MNT/extmap2"
+>  
+>  # write the initial file
+> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
+> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
+>  
+>  # reflink initial file
+> -_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
+> +_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
+>  
+>  # check their fiemap to make sure it's correct
+> -echo "before sync:"
+> -echo "$file1" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
+> -echo "$file2" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
+> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
+> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
+> +
+> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
+>  
+>  # sync and recheck, to make sure the fiemap doesn't change just
+>  # due to sync
+>  sync
+> -echo "after sync:"
+> -echo "$file1" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
+> -echo "$file2" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
+> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
+> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
+> +
+> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
+> +
+> +echo "Silence is golden"
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/generic/353.out b/tests/generic/353.out
+> index 4f6e0b92..16ba4f1f 100644
+> --- a/tests/generic/353.out
+> +++ b/tests/generic/353.out
+> @@ -1,15 +1,2 @@
+>  QA output created by 353
+> -wrote 65536/65536 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -linked 65536/65536 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -before sync:
+> -SCRATCH_MNT/file1
+> -0: [0..127]: shared|last
+> -SCRATCH_MNT/file2
+> -0: [0..127]: shared|last
+> -after sync:
+> -SCRATCH_MNT/file1
+> -0: [0..127]: shared|last
+> -SCRATCH_MNT/file2
+> -0: [0..127]: shared|last
+> +Silence is golden
+> -- 
+> 2.41.0
+> 
 
