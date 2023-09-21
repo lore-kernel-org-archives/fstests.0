@@ -2,238 +2,353 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A26DE7D0AA
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 21:17:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20020E7D0AB
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 21:34:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232701AbjIUVRO (ORCPT
+        id S231590AbjIUVe2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 17:17:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45546 "EHLO
+        Thu, 21 Sep 2023 17:34:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232650AbjIUVQH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 17:16:07 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D80141BFF
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:03:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695315662;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=y0ax/dHqXYgyiJqtUUajFliIPWSkSwMmazUAOco5xqs=;
-        b=TEI6aqUbVo9sQq1gTJIfRc+NIY4cP8g40/AHd7FwigoBE4RLhn4Ob0A+JoxIRT5cXvBqfE
-        mwDznkVQdE1cJ7fvVgwq59vyWJDoIaAE4//oj9j/V1R2fqOqJwOEQ8Ko3lYn6FBn8ZltVY
-        uoh1X+6q/xigS8bnyPzCSwkllYQabHc=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-68-3x0h7vyePY6Brrq1DpIKSA-1; Thu, 21 Sep 2023 09:44:09 -0400
-X-MC-Unique: 3x0h7vyePY6Brrq1DpIKSA-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 36D958030CB;
-        Thu, 21 Sep 2023 13:44:09 +0000 (UTC)
-Received: from localhost (yoyang-vm.hosts.qa.psi.pek2.redhat.com [10.73.149.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 90286C15BB8;
-        Thu, 21 Sep 2023 13:44:08 +0000 (UTC)
-From:   Yongcheng Yang <yoyang@redhat.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-nfs@vger.kernel.org, zlang@redhat.com,
-        Yongcheng Yang <yoyang@redhat.com>
-Subject: [PATCH] generic/471: add a test to check move in mountpoints of the same export
-Date:   Thu, 21 Sep 2023 21:43:47 +0800
-Message-Id: <20230921134347.839957-1-yoyang@redhat.com>
+        with ESMTP id S231718AbjIUVeF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 17:34:05 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5577446A2;
+        Thu, 21 Sep 2023 10:22:28 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38B33C193E8;
+        Thu, 21 Sep 2023 09:05:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695287158;
+        bh=7iGRP0Te8BQrkv3ugWrdAtmFNQSsZNKGzyjjRhXwezU=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=mL0hKpzBfI3KsVpVsxGoA/OJYJvVVRCQkAZUr8isRmK7JoSP7xNOjPLfUxsE4lUfP
+         Xr235pvFbAJPmQT6/0ychSUN1tBSBgGspg181EJU5OFOm7AGK5cEg0ZEejtJBisJNa
+         6zdFvuJBIQzCTm5RcVafAK3wh64oYG2RRmSPYTy9MHMXlh22wh+Pb11C7mIZrch1ba
+         J4GCFBMnNriaGy5gqygb62fsTjkq7aEVUIuQa6yp9L+YEn+tNLoRsehFWT4ICinazV
+         icsp/P4Ad0VKOytTiSnZ4qlTz3aTbIixcXs2IGCNQH2kuwv6jKVFA5jId21CLBHwgA
+         2tHQfBiHpCHxw==
+Received: by mail-oo1-f42.google.com with SMTP id 006d021491bc7-57b5ef5b947so74632eaf.0;
+        Thu, 21 Sep 2023 02:05:58 -0700 (PDT)
+X-Gm-Message-State: AOJu0YyD1SoJSAI9M658PsvNTNRFTH6I9tTh1releY7B+rFOHKuDGZIS
+        m5tguN6TvJkJzt1XYedu8j2LIGF38570/3UsYzQ=
+X-Google-Smtp-Source: AGHT+IF2Z9XncYAzeLzIhqKMkgRCz+bYmKv6XecT1HHYJteTmKGnDYKP3vgaHgb59xNrftIE4LL8xpM2ZNI1Ca2ROTc=
+X-Received: by 2002:a05:6870:c207:b0:1bf:4a66:d54f with SMTP id
+ z7-20020a056870c20700b001bf4a66d54fmr4846399oae.56.1695287157411; Thu, 21 Sep
+ 2023 02:05:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.1 on 10.11.54.8
+References: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
+In-Reply-To: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Thu, 21 Sep 2023 10:05:21 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4xMFiSCj=A4b-CEMo_-ce_O_ZRHN4FjcjKHS65cZHtVA@mail.gmail.com>
+Message-ID: <CAL3q7H4xMFiSCj=A4b-CEMo_-ce_O_ZRHN4FjcjKHS65cZHtVA@mail.gmail.com>
+Subject: Re: [PATCH] generic: test new directory entries are returned after
+ rewinding directory
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Add a new test to ckeck file move (rename) operation among
-different mount points which are mounting to a same export.
+On Thu, Sep 14, 2023 at 4:44=E2=80=AFPM <fdmanana@kernel.org> wrote:
+>
+> From: Filipe Manana <fdmanana@suse.com>
+>
+> Test that if names are added to a directory after an opendir(3) call and
+> before a rewinddir(3) call, future readdir(3) calls will return the names=
+.
+> This is mandated by POSIX:
+>
+>   https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.htm=
+l
+>
+> This exercises a regression in btrfs which is fixed by a kernel patch tha=
+t
+> has the following subject:
+>
+>   ""btrfs: refresh dir last index during a rewinddir(3) call""
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  .gitignore            |   1 +
+>  src/Makefile          |   2 +-
+>  src/rewinddir-test.c  | 159 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/471     |  39 +++++++++++
+>  tests/generic/471.out |   2 +
+>  5 files changed, 202 insertions(+), 1 deletion(-)
+>  create mode 100644 src/rewinddir-test.c
+>  create mode 100755 tests/generic/471
+>  create mode 100644 tests/generic/471.out
+>
+> diff --git a/.gitignore b/.gitignore
+> index 644290f0..4c32ac42 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -124,6 +124,7 @@ tags
+>  /src/rename
+>  /src/renameat2
+>  /src/resvtest
+> +/src/rewinddir-test
+>  /src/runas
+>  /src/seek_copy_test
+>  /src/seek_sanity_test
+> diff --git a/src/Makefile b/src/Makefile
+> index aff871d0..2815f919 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -19,7 +19,7 @@ TARGETS =3D dirstress fill fill2 getpagesize holes lsta=
+t64 \
+>         t_ofd_locks t_mmap_collision mmap-write-concurrent \
+>         t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+>         t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale=
+ \
+> -       t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault
+> +       t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewindd=
+ir-test
+>
+>  LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_r=
+eader \
+>         preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/rewinddir-test.c b/src/rewinddir-test.c
+> new file mode 100644
+> index 00000000..9f7505a2
+> --- /dev/null
+> +++ b/src/rewinddir-test.c
+> @@ -0,0 +1,159 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2023 SUSE Linux Products GmbH.  All Rights Reserved.
+> + */
+> +#include <dirent.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <unistd.h>
+> +#include <sys/stat.h>
+> +
+> +/*
+> + * Number of files we add to the test directory after calling opendir(3)=
+ and
+> + * before calling rewinddir(3).
+> + */
+> +#define NUM_FILES 10000
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +       int file_counters[NUM_FILES] =3D { 0 };
+> +       int dot_count =3D 0;
+> +       int dot_dot_count =3D 0;
+> +       struct dirent *entry;
+> +       DIR *dir =3D NULL;
+> +       char *dir_path =3D NULL;
+> +       char *file_path =3D NULL;
+> +       int ret =3D 0;
+> +       int i;
+> +
+> +       if (argc !=3D 2) {
+> +               fprintf(stderr, "Usage:  %s <directory>\n", argv[0]);
+> +               ret =3D 1;
+> +               goto out;
+> +       }
+> +
+> +       dir_path =3D malloc(strlen(argv[1]) + strlen("/testdir") + 1);
+> +       if (!dir_path) {
+> +               fprintf(stderr, "malloc failure\n");
+> +               ret =3D ENOMEM;
+> +               goto out;
+> +       }
+> +       i =3D strlen(argv[1]);
+> +       memcpy(dir_path, argv[1], i);
+> +       memcpy(dir_path + i, "/testdir", strlen("/testdir"));
+> +       dir_path[i + strlen("/testdir")] =3D '\0';
+> +
+> +       /* More than enough to contain any full file path. */
+> +       file_path =3D malloc(strlen(dir_path) + 12);
+> +       if (!file_path) {
+> +               fprintf(stderr, "malloc failure\n");
+> +               ret =3D ENOMEM;
+> +               goto out;
+> +       }
+> +
+> +       ret =3D mkdir(dir_path, 0700);
+> +       if (ret =3D=3D -1) {
+> +               fprintf(stderr, "Failed to create test directory: %d\n", =
+errno);
+> +               ret =3D errno;
+> +               goto out;
+> +       }
+> +
+> +       /* Open the directory first. */
+> +       dir =3D opendir(dir_path);
+> +       if (dir =3D=3D NULL) {
+> +               fprintf(stderr, "Failed to open directory: %d\n", errno);
+> +               ret =3D errno;
+> +               goto out;
+> +       }
+> +
+> +       /*
+> +        * Now create all files inside the directory.
+> +        * File names go from 1 to NUM_FILES, 0 is unused as it's the ret=
+urn
+> +        * value for atoi(3) when an error happens.
+> +        */
+> +       for (i =3D 1; i <=3D NUM_FILES; i++) {
+> +               FILE *f;
+> +
+> +               sprintf(file_path, "%s/%d", dir_path, i);
+> +               f =3D fopen(file_path, "w");
+> +               if (f =3D=3D NULL) {
+> +                       fprintf(stderr, "Failed to create file number %d:=
+ %d\n",
+> +                               i, errno);
+> +                       ret =3D errno;
+> +                       goto out;
+> +               }
+> +               fclose(f);
+> +       }
+> +
+> +       /*
+> +        * Rewind the directory and read it.
+> +        * POSIX requires that after a rewind, any new names added to the
+> +        * directory after the openddir(3) call and before the rewinddir(=
+3)
+> +        * call, must be returned by readdir(3) calls
+> +        */
+> +       rewinddir(dir);
+> +
+> +       /*
+> +        * readdir(3) returns NULL when it reaches the end of the directo=
+ry or
+> +        * when an error happens, so reset errno to 0 to distinguish betw=
+een
+> +        * both cases later.
+> +        */
+> +       errno =3D 0;
+> +       while ((entry =3D readdir(dir)) !=3D NULL) {
+> +               if (strcmp(entry->d_name, ".") =3D=3D 0) {
+> +                       dot_count++;
+> +                       continue;
+> +               }
+> +               if (strcmp(entry->d_name, "..") =3D=3D 0) {
+> +                       dot_dot_count++;
+> +                       continue;
+> +               }
+> +               i =3D atoi(entry->d_name);
+> +               if (i =3D=3D 0) {
+> +                       fprintf(stderr,
+> +                               "Failed to parse name '%s' to integer: %d=
+\n",
+> +                               entry->d_name, errno);
+> +                       ret =3D errno;
+> +                       goto out;
+> +               }
+> +               /* File names go from 1 to NUM_FILES, so subtract 1. */
+> +               file_counters[i - 1]++;
+> +       }
+> +
+> +       if (errno) {
+> +               fprintf(stderr, "Failed to read directory: %d\n", errno);
+> +               ret =3D errno;
+> +               goto out;
+> +       }
+> +
+> +       /*
+> +        * Now check that the readdir() calls return every single file na=
+me
+> +        * and without repeating any of them. If any name is missing or
+> +        * repeated, don't exit immediatelly, so that we print a message =
+for
+> +        * all missing or repeated names.
+> +        */
+> +       for (i =3D 0; i < NUM_FILES; i++) {
+> +               if (file_counters[i] !=3D 1) {
+> +                       fprintf(stderr, "File name %d appeared %d times\n=
+",
+> +                               i + 1,  file_counters[i]);
+> +                       ret =3D EINVAL;
+> +               }
+> +       }
+> +       if (dot_count !=3D 1) {
+> +               fprintf(stderr, "File name . appeared %d times\n", dot_co=
+unt);
+> +               ret =3D EINVAL;
+> +       }
+> +       if (dot_dot_count !=3D 1) {
+> +               fprintf(stderr, "File name .. appeared %d times\n", dot_d=
+ot_count);
+> +               ret =3D EINVAL;
+> +       }
+> +out:
+> +       free(dir_path);
+> +       free(file_path);
+> +       if (dir !=3D NULL)
+> +               closedir(dir);
+> +
+> +       return ret;
+> +}
+> diff --git a/tests/generic/471 b/tests/generic/471
+> new file mode 100755
+> index 00000000..15dc89f3
+> --- /dev/null
+> +++ b/tests/generic/471
+> @@ -0,0 +1,39 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 471
+> +#
+> +# Test that if names are added to a directory after an opendir(3) call a=
+nd
+> +# before a rewinddir(3) call, future readdir(3) calls will return the na=
+mes.
+> +# This is mandated by POSIX:
+> +#
+> +# https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.ht=
+ml
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -fr $tmp.*
+> +       [ -n "$target_dir" ] && rm -fr $target_dir
+> +}
+> +
+> +_supported_fs generic
+> +_require_test
+> +_require_test_program rewinddir-test
+> +
+> +[ $FSTYP =3D=3D "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: refresh dir last index during a rewinddir(3) call"
 
-This should be a simple test but it recently unveils an ancient
-nfsd bug. Thus let's make it to be a regresstion check.
+This landed yesterday in Linus' tree, the commit id is e60aa5da14d0.
+If needed I'll send a v2 with just that change.
 
-Signed-off-by: Yongcheng Yang <yoyang@redhat.com>
----
-
-Hi,
-
-There is an ancient nfsd problem just pop up and is now resolved by
-the upstream commit [1]. Looks like it's a basic and simple test which
-is probably appropriate for the fstest IMO.
-
-This test in nfs will be failed without patch [1]:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[root@kvm-07-guest24 xfstests]# ./check -nfs generic/471
-FSTYP     	-- nfs
-PLATFORM  	-- Linux/x86_64 kvm-07-guest24 5.14.0-abc.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Sep 13 04:59:08 EDT 2023
-MKFS_OPTIONS  -- localhost:/export_test2
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test2 /mnt_scratch
-
-generic/471 1s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
-	--- tests/generic/471.out    2023-09-21 05:55:28.514673177 -0400
-	+++ /root/xfstests/results//generic/471.out.bad    2023-09-21 08:06:16.935695355 -0400
-	@@ -1,2 +1,3 @@
- 	QA output created by 471
- 	Silence is golden
-	+mv: '/mnt_test/mountpoint1-471/A/f' and '/mnt_test/mountpoint1-471/B/f' are the same file
-	...
-	(Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
-
-HINT: You _MAY_ be missing kernel fix:
-  	fdd2630a739819 nfsd: fix change_info in NFSv4 RENAME replies
-
-Ran: generic/471
-Failures: generic/471
-Failed 1 of 1 tests
-
-[root@kvm-07-guest24 xfstests]#
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-And it can pass after that patch [1] merged:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[root@fsqe-r6515-02 xfstests]# ./check -nfs generic/471
-FSTYP     	-- nfs
-PLATFORM  	-- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-MKFS_OPTIONS  -- localhost:/export_test1
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test1 /mnt_scratch
-
-generic/471    	0s
-Ran: generic/471
-Passed all 1 tests
-
-[root@fsqe-r6515-02 xfstests]#
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-Also I have just checked the xfs and overlayfs but the latter get failed:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[root@fsqe-r6515-02 xfstests]# ./check generic/471
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-MKFS_OPTIONS  -- -f /dev/loop1
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt_scratch
-
-generic/471 0s ...  1s
-Ran: generic/471
-Passed all 1 tests
-
-[root@fsqe-r6515-02 xfstests]#
-[root@fsqe-r6515-02 xfstests]# ./check -overlay generic/471
-FSTYP         -- overlay
-PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
-MKFS_OPTIONS  -- /mnt_scratch
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /mnt_scratch /mnt_scratch/ovl-mnt
-
-generic/471 0s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
-    --- tests/generic/471.out	2023-09-21 09:02:14.580495256 -0400
-    +++ /root/xfstests/results//generic/471.out.bad	2023-09-21 09:02:51.145345830 -0400
-    @@ -1,2 +1,3 @@
-     QA output created by 471
-     Silence is golden
-    +mv: '/mnt_test/ovl-mnt/mountpoint1-471/A/f' and '/mnt_test/ovl-mnt/mountpoint1-471/B/f' are the same file
-    ...
-    (Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
-Ran: generic/471
-Failures: generic/471
-Failed 1 of 1 tests
-
-[root@fsqe-r6515-02 xfstests]#
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For now I'm not sure if the overlayfs don't support this operation or
-we just need to fix that.
-
-Thanks,
-Yongcheng
-
-[1] https://lore.kernel.org/linux-nfs/ZPyMyv1nNFV2whKP@tissot.1015granger.net/T/#t
-
-
- tests/generic/471     | 60 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/471.out |  2 ++
- 2 files changed, 62 insertions(+)
- create mode 100755 tests/generic/471
- create mode 100644 tests/generic/471.out
-
-diff --git a/tests/generic/471 b/tests/generic/471
-new file mode 100755
-index 00000000..ada48129
---- /dev/null
-+++ b/tests/generic/471
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 471
-+#
-+# Mount the same export to different mount points and move (rename)
-+# files among those mount points.
-+# This simple test recently unveils an ancient nfsd bug that is fixed
-+# by fdd2630a739819 ("nfsd: fix change_info in NFSv4 RENAME replies").
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	$UMOUNT_PROG $testdir1 2>/dev/null
-+	$UMOUNT_PROG $testdir2 2>/dev/null
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+[ "$FSTYP" = "nfs" ] && \
-+	_fixed_by_kernel_commit fdd2630a739819 \
-+		"nfsd: fix change_info in NFSv4 RENAME replies"
-+
-+_require_test
-+_require_scratch
-+
-+echo "Silence is golden"
-+
-+_scratch_mkfs >> $seqres.full
-+testdir1=$TEST_DIR/mountpoint1-$seq
-+testdir2=$TEST_DIR/mountpoint2-$seq
-+rm -rf $testdir1 $testdir2
-+mkdir -p $testdir1 $testdir2
-+
-+# Don't share the data and attribute caches among mount points for NFS.
-+# This caching behavior is necessary to reproduce this issue as we're
-+# checking the alignment of each mount point's own unique cache.
-+[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="-o nosharecache"
-+
-+SCRATCH_MNT=$testdir1 _scratch_mount
-+SCRATCH_MNT=$testdir2 _scratch_mount
-+rm -rf $testdir1/{A,B}
-+mkdir $testdir1/{A,B}
-+touch $testdir1/A/f
-+mv $testdir1/A/f $testdir1/B/
-+cat $testdir2/B/f
-+mv $testdir2/B/f $testdir2/A/
-+cat $testdir1/A/f
-+mv $testdir1/A/f $testdir1/B/
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/471.out b/tests/generic/471.out
-new file mode 100644
-index 00000000..260f629e
---- /dev/null
-+++ b/tests/generic/471.out
-@@ -0,0 +1,2 @@
-+QA output created by 471
-+Silence is golden
--- 
-2.31.1
-
+> +
+> +target_dir=3D"$TEST_DIR/test-$seq"
+> +rm -fr $target_dir
+> +mkdir $target_dir
+> +
+> +$here/src/rewinddir-test $target_dir
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=3D0
+> +exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> new file mode 100644
+> index 00000000..260f629e
+> --- /dev/null
+> +++ b/tests/generic/471.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 471
+> +Silence is golden
+> --
+> 2.40.1
+>
