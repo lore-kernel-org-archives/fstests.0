@@ -2,152 +2,224 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61599E7D0A6
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:30:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76C97E7D0A6
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 20:20:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229498AbjIUTag (ORCPT
+        id S230189AbjIUUTh (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 15:30:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
+        Thu, 21 Sep 2023 16:19:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229716AbjIUTaA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:30:00 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66DBE44A3
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:09:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695316185;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=tKNfKAr0ozqZGJU0pTiqUwEte0aBUe4YFp+VlpUsJO0=;
-        b=hoE+4S7cJwNqtRK/6mPjZEp8H2n2jzptgbK8Y0naKc/JwNIrJYB6mCSR1EtUX3i9sOiCso
-        GDkcSVUJtOEkqvN1tXWh8t8l1jP6NMgOUfjZgdenIQta+O1/U6onfTtZqkaPaDxxPmSVS2
-        VkFFMQ6vxcFKNH0qTRMqn7Yx2pMmw74=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-306-I9pNtmd-Ow2OX9UDZZ31cA-1; Thu, 21 Sep 2023 13:09:44 -0400
-X-MC-Unique: I9pNtmd-Ow2OX9UDZZ31cA-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-55c7bb27977so993797a12.0
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:09:43 -0700 (PDT)
+        with ESMTP id S231604AbjIUUTP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 16:19:15 -0400
+Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3BE39B4C;
+        Thu, 21 Sep 2023 10:12:57 -0700 (PDT)
+Received: by mail-vs1-xe34.google.com with SMTP id ada2fe7eead31-452b4fd977eso477717137.1;
+        Thu, 21 Sep 2023 10:12:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695316376; x=1695921176; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+WIdFt6vJDrcHdG6YWsakScBEBflHQiav+VrJj2Kr/U=;
+        b=Ddh8MU/bdBmAQp1f2l/kEk1xCBkoM3McuPaGkjHWxcautYIgvh8zSCYTZ70evx/vmX
+         kF2GCVeUIk3uubwldVh5ckbT6fhBKt5UbmV4FewhZEqZUoOv2Y65drwg9GnUJyJB9LDl
+         /vdkfE1rtZfLyp61fdaLlC/9UFMvNBReL5yLDbBKYWQCmVYwo9SlQJNxh/FZuosaPu8/
+         8+JkxbEl22YT9V6z+Rnnu5vwHqgVGUR2/QYsAtZKFzi2Z6lAEzssbf+8Dio9HWczlBDi
+         y3j4ug3OGcsHTtRnktzcOBkL7tc+p/Eids0lRJ8wQtHvAhKIceFWJwe5e9P6EJz6FQMG
+         L+EQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695316183; x=1695920983;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=tKNfKAr0ozqZGJU0pTiqUwEte0aBUe4YFp+VlpUsJO0=;
-        b=qAeBGuFEGRKq3a6RQ30YninHEcLE8b85Zo35aWKx/5bO2ZFAOlPzusJu3yXa7moRbe
-         o09Xsn9CTL8mrRj0rzdSJ23Lwcp8DfoZuVLzLoDaPxlNkjjcI3KzOg0d9cmW5HSXi4Sv
-         f+OHRQ4GxWOJZflg0NIPK893h4RQnERa8t/eRlET23ERs/F8pJqgiV4oxiaeJSEtS8le
-         6M/P691ITlHm9Dx303pbPlO/lEs2xhrBDsdNFmxBO9moeuhVqTzRNt0BEhmqBef+Rumx
-         uNk0TJIpwiksW9PRICt9efUBkLci0au3PDT5o8clBgTTxEoDHmxSO6ABgbDzDyYIrdrR
-         PbcQ==
-X-Gm-Message-State: AOJu0Ywx251j7Go02ityzKzFzvN9k0KNZ/L+8S9NnlB8YkZadqzI2uMy
-        Es0BppC4axYLBtvntSVEB0GClAwWW53ujLIKIjaC7B04TZcq4P5DzO8uMKM368cN9ZooFat8Y/8
-        /kw2e2xCGIoC1aLStcFtrwjgWM90u6wM=
-X-Received: by 2002:a05:6a20:7288:b0:135:7975:f55 with SMTP id o8-20020a056a20728800b0013579750f55mr6850188pzk.47.1695316182849;
-        Thu, 21 Sep 2023 10:09:42 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFXjXLWs9og+M2o/PuwMBg3kbrihV1cC6ZfxlgM5RSSjiSZfNB5O+lCT7qMFEg9lAwA29B+3A==
-X-Received: by 2002:a05:6a20:7288:b0:135:7975:f55 with SMTP id o8-20020a056a20728800b0013579750f55mr6850165pzk.47.1695316182484;
-        Thu, 21 Sep 2023 10:09:42 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id mu4-20020a17090b388400b0025bfda134ccsm1686141pjb.16.2023.09.21.10.09.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 10:09:42 -0700 (PDT)
-Date:   Fri, 22 Sep 2023 01:09:38 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Naohiro Aota <Naohiro.Aota@wdc.com>
-Cc:     Filipe Manana <fdmanana@kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH v2 1/2] btrfs/076: support smaller extent size limit
-Message-ID: <20230921170938.jerqehx5427tgj45@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1694762532.git.naohiro.aota@wdc.com>
- <f03093d83baa5bcd4229a0dc9a473add534ee016.1694762532.git.naohiro.aota@wdc.com>
- <CAL3q7H5m-kGMT7=wAmfDm-ZJ3bpdmN0=GhRkinMciRq8GfF-QQ@mail.gmail.com>
- <lrlnkxdh47dd55y3uwdimbczoystuoikolaymnapsuheylvbs3@vztqzs75tlfx>
+        d=1e100.net; s=20230601; t=1695316376; x=1695921176;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+WIdFt6vJDrcHdG6YWsakScBEBflHQiav+VrJj2Kr/U=;
+        b=vvb6UO0ftBXWOcq8rBu9UfsEnsU+RlgbSqMgDsY9MugZsMFqx84Ih7NktM4xsUxK1A
+         jeWnzpnhaXPYMGaeoqQkGZrNnQHYTliHfiVa5XSXxwreHGiw6h5bZxPihUgg7914qOoa
+         DRm4uZ4Dd/SXkEZc6+543B9ULWWEZCjQXSt9Hu4Dvfo8s91mRTBJDMaXELkvjwWOZNH3
+         MR0zAcEOdT9Wff4JBSqo3+n119rtYKBI1P8cvzYMFgPMRCB2sjrbLjRvVH0blVdGvYlA
+         AsXjbzUXvvcGOjLXnaenaeqSDXPsNK2eRHum92ZY2P/J/pAPgrbIoZWojnSBvt+TGQIb
+         bVpg==
+X-Gm-Message-State: AOJu0YyGJoWs3xmOU1yUWErEDVH7LJE17LAcy6SILwZYLBsoTDWd559I
+        k9TUmiv/3nVxlM/hg9PuA9J9vzw0F9mCw5Wnhbc=
+X-Google-Smtp-Source: AGHT+IFsy931Jm6ji1RHCOwW/6LEeHndp4zhhg1dG3BN59Y6z6f0r1EsU2629DVm6cMgn3ciWSdJP2NeetcvVLjO9Co=
+X-Received: by 2002:a05:6102:3168:b0:452:8423:e957 with SMTP id
+ l8-20020a056102316800b004528423e957mr5238598vsm.28.1695316376147; Thu, 21 Sep
+ 2023 10:12:56 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <lrlnkxdh47dd55y3uwdimbczoystuoikolaymnapsuheylvbs3@vztqzs75tlfx>
+References: <20230921143102.127526-1-amir73il@gmail.com> <20230921143102.127526-2-amir73il@gmail.com>
+ <20230921152648.25wd4gqralgiuksv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxj5YR4Kv2-EZXnQGDo1zbExKZ+mw=rYNVBpCo30KkFAfQ@mail.gmail.com>
+ <20230921162319.gsh5is3vkptp5hz2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxjgMjSY0fye1o-i-d44usfswuFebWBaQ6pE_od+HYGfrQ@mail.gmail.com> <20230921170626.hdqw5snvxtg4oxgl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20230921170626.hdqw5snvxtg4oxgl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Thu, 21 Sep 2023 20:12:45 +0300
+Message-ID: <CAOQ4uxj0jhs1jxoP73FCAvmGxWhOVv26pnfgwfUC9YydCjGgSQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] common: add helper _require_chattr_inherit
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 21, 2023 at 07:41:19AM +0000, Naohiro Aota wrote:
-> On Fri, Sep 15, 2023 at 10:16:32AM +0100, Filipe Manana wrote:
-> > On Fri, Sep 15, 2023 at 8:28 AM Naohiro Aota <naohiro.aota@wdc.com> wrote:
+On Thu, Sep 21, 2023 at 8:06=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Thu, Sep 21, 2023 at 07:46:12PM +0300, Amir Goldstein wrote:
+> > On Thu, Sep 21, 2023 at 7:23=E2=80=AFPM Zorro Lang <zlang@redhat.com> w=
+rote:
 > > >
-> > > Running btrfs/076 on a zoned null_blk device will fail with the following error.
+> > > On Thu, Sep 21, 2023 at 06:40:49PM +0300, Amir Goldstein wrote:
+> > > > On Thu, Sep 21, 2023 at 6:26=E2=80=AFPM Zorro Lang <zlang@redhat.co=
+m> wrote:
+> > > > >
+> > > > > On Thu, Sep 21, 2023 at 05:31:01PM +0300, Amir Goldstein wrote:
+> > > > > > Similar to _require_chattr, but also checks if an attribute is
+> > > > > > inheritted from parent dir to children.
+> > > > > >
+> > > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > > ---
+> > > > > >  common/rc | 52 +++++++++++++++++++++++++++++++++++++++++++----=
+-----
+> > > > > >  1 file changed, 43 insertions(+), 9 deletions(-)
+> > > > > >
+> > > > > > diff --git a/common/rc b/common/rc
+> > > > > > index 1618ded5..00cfd434 100644
+> > > > > > --- a/common/rc
+> > > > > > +++ b/common/rc
+> > > > > > @@ -4235,23 +4235,57 @@ _require_test_lsattr()
+> > > > > >               _notrun "lsattr not supported by test filesystem =
+type: $FSTYP"
+> > > > > >  }
+> > > > > >
+> > > > > > +_check_chattr_inherit()
+> > > > > > +{
+> > > > > > +     local attribute=3D$1
+> > > > > > +     local path=3D$2
+> > > > > > +     local inherit=3D$3
+> > > > >
+> > > > > As I understand, this function calls _check_chattr_inherit, so it=
+ will
+> > > > > return zero or non-zero to clarify if $path support $attribute in=
+heritance.
+> > > > > ...
+> > > > >
+> > > > > > +
+> > > > > > +     touch $path
+> > > > > > +     $CHATTR_PROG "+$attribute" $path > $tmp.chattr 2>&1
+> > > > > > +     local ret=3D$?
+> > > > > > +     if [ -n "$inherit" ]; then
+> > > > > > +             touch "$path/$inherit"
+> > > > > > +     fi
+> > > > >
+> > > > > ... but looks like it doesn't, it only create a $inherit file, th=
+en let the
+> > > > > caller check if the $attribute is inherited.
+> > > > >
+> > > > > I think that's a little confused.
+> > > >
+> > > > I agree.
+> > > >
+> > > > > I think we can name the function as _check_chattr()
+> > > >
+> > > > I agree.
+> > > >
+> > > > > and the 3rd argument $inherit as a bool variable, to
+> > > > > decide if we check inheritance or not.
+> > > > >
+> > > >
+> > > > Not my prefered choice.
+> > > >
+> > > > > Or you'd like to have two functions _check_chattr and _check_chat=
+tr_inherit,
+> > > > > _check_chattr_inherit calls _check_chattr then keep checking inhe=
+ritance.
+> > > > >
+> > > > > What do you think?
+> > > >
+> > > > I think this is over engineering for a helper that may not
+> > > > be ever used by any other test.
+> > > >
+> > > > Suggest to just change the name to _check_chattr()
+> > > > to match the meaning to the return value.
+> > > >
+> > > > The 3rd inherit argument just means that we request
+> > > > to create a file after chattr + and before chattr -,
+> > > > so that the caller could check it itself later.
 > > >
-> > >   - output mismatch (see /host/results/btrfs/076.out.bad)
-> > >       --- tests/btrfs/076.out     2021-02-05 01:44:20.000000000 +0000
-> > >       +++ /host/results/btrfs/076.out.bad 2023-09-15 01:49:36.000000000 +0000
-> > >       @@ -1,3 +1,3 @@
-> > >        QA output created by 076
-> > >       -80
-> > >       -80
-> > >       +83
-> > >       +83
-> > >       ...
+> > > I still think it doesn't make sense ... but I don't want to give you
+> > > that pressure, so ...
 > > >
-> > > This is because the default value of zone_append_max_bytes is 127.5 KB
-> > > which is smaller than BTRFS_MAX_UNCOMPRESSED (128K). So, the extent size is
-> > > limited to 126976 (= ROUND_DOWN(127.5K, 4096)), which makes the number of
-> > > extents larger, and fails the test.
+> > > >
+> > > > If you accept this minor change is enough
+> > > > can you apply it yourself on commit?
 > > >
-> > > Instead of hard-coding the number of extents, we can calculate it using the
-> > > max extent size of an extent. It is limited by either
-> > > BTRFS_MAX_UNCOMPRESSED or zone_append_max_bytes.
+> > > ... If you think it's too complicated, we can drop the inheritance ch=
+ecking
+> > > common helper. Just change the _require_chattr(), make it to accept o=
+ne more
+> > > *directory* argument (use $TEST_DIR by default). Then we can do:
 > > >
-> > > Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
-> > 
-> > Looks good,
-> > 
-> > Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> > 
-> > Just two minor comments below.
-> > 
-> > > ---
-> > >  tests/btrfs/076     | 23 +++++++++++++++++++++--
-> > >  tests/btrfs/076.out |  3 +--
-> > >  2 files changed, 22 insertions(+), 4 deletions(-)
-> > >
-> > > diff --git a/tests/btrfs/076 b/tests/btrfs/076
-> > > index 89e9672d09e2..a5cc3eb96b2f 100755
-> > > --- a/tests/btrfs/076
-> > > +++ b/tests/btrfs/076
-> > > @@ -28,13 +28,28 @@ _supported_fs btrfs
-> > >  _require_test
-> > >  _require_scratch
-> > >
-> > > +# An extent size can be up to BTRFS_MAX_UNCOMPRESSED
-> > > +max_extent_size=$(( 128 << 10 ))
-> > 
-> > For consistency with every other test and common files, using 128 *
-> > 1024 would be perhaps better. I certainly find it easier to read, but
-> > that's a personal preference only.
-> > 
-> > > +if _scratch_btrfs_is_zoned; then
-> > > +       zone_append_max=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/zone_append_max_bytes")
-> > > +       if [[ $zone_append_max -gt 0 && $zone_append_max -lt $max_extent_size ]]; then
-> > > +               # Round down to PAGE_SIZE
-> > > +               max_extent_size=$(( $zone_append_max / 4096 * 4096 ))
-> > > +       fi
-> > > +fi
-> > > +file_size=$(( 10 << 20 ))
-> > 
-> > And this one it's even less immediate to understand, having 1 * 1024 *
-> > 1024 would make it much more easier to read.
-> 
-> Agreed. I'll use 1024 and repost. Thanks.
+> > > _require_chattr A $BASE_SCRATCH_MNT
+> >
+> > This is not needed.
+> > Overlayfs (on $SCRATCH_MNT) will not pass the require_chattr
+> > check if the base fs does not support chattr.
+>
+> Oh, I saw you wrote as this:
+>
+>   +# prepare lower test dir with NOATIME flag
+>   +lowerdir=3D$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+>   +mkdir -p $lowerdir/testdir
+>   +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
+>   +       _notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag=
+"
+>
+> so I thought you might want a `_require_chattr A $BASE_SCRATCH_MNT`.
+>
 
-I've changed that part when I merged this patch (haven't pushed), so you
-don't need to send this patch again, save that time :)
+You are right. it should have been an error, not _notrun
+as it is in V2.
 
-Thanks,
-Zorro
+> >
+> > > _require_chattr A $SCRATCH_MNT
+> >
+> > This is practically equivalent to _require_chattr A
+> > on the test partition, there is no reason to test the
+> > scratch partition specifically.
+> >
+> > So there is no need for the proposed change in _require_chattr.
+> >
+> > >
+> > > And then do all inheritance checking in the overlay case itself (like=
+s you did in
+> > > V1), don't make them to be a common helper. Due to only this case nee=
+d the
+> > > _require_chattr_inheritance, so we can think about that common helper=
+ when more
+> > > cases need that :)
+> > >
+> > > I think this change is simple enough (base on your V1 patch). Is that=
+ good to
+> > > you :)
+> >
+> > V1 is good enough for me as is. :)
+> > You can take the commit message and test
+> > header comment fixes from V2.
+>
+> I'll merge v2 patch 2/2, with ...
+> 1) Change _require_chattr_inherit to _require_chattr.
+> 2) Add `sleep 2s` under the "before=3D$(stat -c %x $lowerdir/testdir/lnk)=
+" line.
+>
 
+OK.
+
+Thanks!
+Amir.
