@@ -2,259 +2,123 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC695E7D0A7
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:04:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91803E7D0A2
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:27:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230010AbjIUTEQ (ORCPT
+        id S229685AbjIUT1u (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 15:04:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42716 "EHLO
+        Thu, 21 Sep 2023 15:27:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43496 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229897AbjIUTEC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:04:02 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BEE5897DB
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:40:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695318001;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=CkPn1rRuDeTSkQf8G31WO9C/xqlwOshTJosTm+hvLws=;
-        b=iMoLMdx+I34EBHUOeJMjVSxtBWSYLscfp2GsrTy/c53Esg2XwUhg+XTyo6hE4V9NlyXsal
-        oO/gH5D0GzvCcR/bw0zHMiED+qNXlYU0UDgy7LGXSD+7a5Tv8auC7iak5ZoQePO3QS9X93
-        MvkrEWlZH5fw8DJRBsdvXafbu7vluDs=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-673-yW1z3SPrOX6afHB6p2v3cg-1; Thu, 21 Sep 2023 10:24:31 -0400
-X-MC-Unique: yW1z3SPrOX6afHB6p2v3cg-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-690f7d73c68so909729b3a.1
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 07:24:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695306271; x=1695911071;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=CkPn1rRuDeTSkQf8G31WO9C/xqlwOshTJosTm+hvLws=;
-        b=RO1boW2zfYSzTVXhZjdwjo2PDr3D144CpcJ+/eYzhjle1sR8uJ7uikF3aNFCeBUtMa
-         JODHEZ2R0PNE3qEgw+ZzmFHXJIdS2jCgqhfk1fbRVuZ84QIXKPrFDOHCE8+4sk93OPnF
-         9P1sZsYzgGzlEMOpOPTMhMDS8PKvHK0lUsD0ZM2hO34q7K7qn/9LveyADzzLpYfjJaYy
-         MFksig20p/rhAR3/GVAE2suOChjX+9jhJMzuuB0ScZfVR6WKpDpP3Ki9SkxJphmUpXlt
-         eeu/S7RmibzJ65N7KfctU49cR3pCBUiHoO3yShmPo0GTimKLoPU0ZWUbrcC8SPolOXtL
-         lJdw==
-X-Gm-Message-State: AOJu0YxOgHHpBG7WN7BIdwJFoDiajq9KeoKFsiV9L34ywFa6NEproz+3
-        nJ6RwOM9hThp0/3bK/KdkIX92jwEPQwPSEkypv9IYyVTBmrXlznoH20FZbiQ0O9/ZxtkWHXATo7
-        6Ts+t/28b8OLVNJ4Bsg==
-X-Received: by 2002:a05:6a00:188e:b0:68b:f529:a329 with SMTP id x14-20020a056a00188e00b0068bf529a329mr6943433pfh.5.1695306270744;
-        Thu, 21 Sep 2023 07:24:30 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFjXorDkEKq9+yTotM1RDnO2lIjUdzwDM4DqHwQyVI5QbcUJU1NUNUlr90ILKxU4f/UjeEcWQ==
-X-Received: by 2002:a05:6a00:188e:b0:68b:f529:a329 with SMTP id x14-20020a056a00188e00b0068bf529a329mr6943405pfh.5.1695306270313;
-        Thu, 21 Sep 2023 07:24:30 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q24-20020a62e118000000b0069029a3196dsm1409187pfh.184.2023.09.21.07.24.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 07:24:29 -0700 (PDT)
-Date:   Thu, 21 Sep 2023 22:24:26 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] overlay: add test for rename of lower symlink with
- NOATIME attr
-Message-ID: <20230921142426.p5g7yqf2gunemnd6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230920130355.62763-1-amir73il@gmail.com>
- <20230920151403.gsh5gphvlilhp6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxhxsg2AwttYPfhSLQQNbFxo2pmyNUMTC8QpxNw6L_afpw@mail.gmail.com>
- <20230921062645.lhryfrod7ggdxfuh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxjNy6tD87dsGKAOwu6VpkoH3+kgzOEw=KQOzDF1WhhN=A@mail.gmail.com>
+        with ESMTP id S229781AbjIUT1a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:27:30 -0400
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A38AA75F9;
+        Thu, 21 Sep 2023 11:01:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1695319280; x=1726855280;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Xbsa5OcnCXXXs0TqjLs951q126IEREQqxyCG6U4LtuA=;
+  b=UESu6cIe0Put/kP0/geCUo4Fggu/d5ygOzcBV/GAdRMs8ZGZxmKQ3leW
+   NB2iEjvqNkvVY1Uh3t+TT3wUnL/2T+44vvBEEcRLPderSP5O4xA26msqf
+   dUXwfzbSFDIxo3Np0iAfLssIUZMScU2KmvZZccO4FrZaXOBlwEP9ASDze
+   BsAIM4O8zMKmCRqyaXtocOzOSW9ftvk+CNheZ9gtT1s0SboiidPFXUh1u
+   hj1pnIoOKbENpa2o4fFbgXUZIvkDHi1IFCEe91K6GtVdkTrGIcOfLjJIy
+   eCQA5IzIvagIV6bT3P2EiHipuzWbWrkKcNP2y0NOdvub7ePPwA0mk4OmM
+   Q==;
+X-CSE-ConnectionGUID: YnpFUizWSB6CDHxAWUx8Zw==
+X-CSE-MsgGUID: ECMHY59KQGyc7NXkvIJfXw==
+X-IronPort-AV: E=Sophos;i="6.03,165,1694707200"; 
+   d="scan'208";a="349826984"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 21 Sep 2023 17:42:05 +0800
+IronPort-SDR: eGE4G3/ZtroGBAQ+l/Esw4npXUV+tBih74Odx8gDpEJK1hftiHjpgr9mgFtTsuS/lA49HWPmJc
+ kmIiW7lMAQk7bhYzZjgdas0fFFtESkk8bC5sYBz2/3/gqmWtd9qXftT0f6QqQZ0cR2nSf3GKuJ
+ sv1NtyUISa7K6+/5QrdGfGgIV3GIjxSB1xiM2VGm5OEa0yPDuppGkwv7ssP1uYmcar1DpRjUPg
+ dbGvKYtaT57YlfcfkT8maJvHYd6Iy8llSM0sBL9LXs6PxYa7fOaxoZ5/HLGCR/0JUl/FYMM5gU
+ NlQ=
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 Sep 2023 01:48:58 -0700
+IronPort-SDR: OyE5cX3Kz8opQiaSpy4r/0cdHLG3+l5ROEH9e5GYmfk1zEoJ/SUKZUwNMvx9v95+bQTEMT48Za
+ xQXJgtNz1qRo08l6cETqC0GV7hMyngmN8Q+3O1R07Mcmk/ZYKy+/Po4hyKI0+ViLMSMlfkPnS4
+ szN0xNRLcJmp53VJ3KqXPpjOhR/ohWcEQCFuqJxEp6uQL4YNurQjDR6OKX+CqgN5UoEJ1Zgod+
+ YKdWF2FmuJ5XmpBbXeNHZC/b98+2ZgC9O1ZjyMobqxDxophsXyZ6nP3DkK0l6R86+F2SBzkvB7
+ 8UA=
+WDCIronportException: Internal
+Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.94])
+  by uls-op-cesaip01.wdc.com with ESMTP; 21 Sep 2023 02:42:04 -0700
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] btrfs/239: call fsync to create tree-log dedicated block group for zoned mode
+Date:   Thu, 21 Sep 2023 18:41:58 +0900
+Message-ID: <20230921094158.1391328-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAOQ4uxjNy6tD87dsGKAOwu6VpkoH3+kgzOEw=KQOzDF1WhhN=A@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 21, 2023 at 11:00:37AM +0300, Amir Goldstein wrote:
-> On Thu, Sep 21, 2023 at 9:26 AM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Wed, Sep 20, 2023 at 06:34:21PM +0300, Amir Goldstein wrote:
-> > > On Wed, Sep 20, 2023 at 6:14 PM Zorro Lang <zlang@redhat.com> wrote:
-> > > >
-> > > > On Wed, Sep 20, 2023 at 04:03:55PM +0300, Amir Goldstein wrote:
-> > > > > A test for a regression from v5.15 reported by Ruiwen Zhao:
-> > > > > https://lore.kernel.org/linux-unionfs/CAKd=y5Hpg7J2gxrFT02F94o=FM9QvGp=kcH1Grctx8HzFYvpiA@mail.gmail.com/
-> >
-> > Could you give one more sentence to tell what kind of regression
-> > does this case test for? Not only a link address.
-> >
-> > > > >
-> > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > > > ---
-> > > > >
-> > > > > Zorro,
-> > > > >
-> > > > > This is a test for a regression in kernel v5.15.
-> > > > > The fix was merged for 6.6-rc2 and has been picked for
-> > > > > the upcoming LTS releases 5.15, 6.1, 6.5.
-> > > > >
-> > > > > The reproducer only manifests the bug in fs that inherit noatime flag,
-> > > > > namely ext4, btrfs, ... but not xfs.
-> 
-> FYI, I made a mistake in the statement above.
-> xfs does support inherit of noatime flag, but
-> it does not inherit noatime for *symlinks*.
-> 
-> I added the _require_chattr_inherit helper that you suggested
-> in v2, but it only checks for inherit of noatime flag (the 2nd _notrun).
-> I did not add a helper for _require_chattr_inherit_symlink
-> because it was too specific and so I left the 3rd _notrun
-> open coded in the test in v2.
+Running btrfs/239 on a zoned device often fails with the following error.
 
-OK, if xfs thinks it's an expected behavior which won't be changed :)
+  btrfs/239 5s ... - output mismatch (see /host/btrfs/239.out.bad)
+      --- tests/btrfs/239.out     2023-09-21 16:56:37.735204924 +0900
+      +++ /host/btrfs/239.out.bad  2023-09-21 18:22:45.401433408 +0900
+      @@ -1,4 +1,6 @@
+       QA output created by 239
+      +/testdir/dira still exists
+      +/dira does not exists
+       File SCRATCH_MNT/testdir/file1 data:
+       0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
+       *
+      ...
 
-Thanks,
-Zorro
+This happens because "testdir" and "dira" are not logged on the first fsync
+(fsync $SCRATCH_MNT/testdir), but are written as a full commit. That
+prevents updating the log on "mv" time, leaving them pre-mv state.
 
-> 
-> > > > >
-> > > > > The test does _notrun on xfs for that reason.
-> > > > >
-> > > > > Thanks,
-> > > > > Amir.
-> > > > >
-> > > > >  tests/overlay/082     | 68 +++++++++++++++++++++++++++++++++++++++++++
-> > > > >  tests/overlay/082.out |  2 ++
-> > > > >  2 files changed, 70 insertions(+)
-> > > > >  create mode 100755 tests/overlay/082
-> > > > >  create mode 100644 tests/overlay/082.out
-> > > > >
-> > > > > diff --git a/tests/overlay/082 b/tests/overlay/082
-> > > > > new file mode 100755
-> > > > > index 00000000..abea3c2b
-> > > > > --- /dev/null
-> > > > > +++ b/tests/overlay/082
-> > > > > @@ -0,0 +1,68 @@
-> > > > > +#! /bin/bash
-> > > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > > +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
-> > > > > +#
-> > > > > +# FS QA Test 082
-> > > > > +#
-> > > > > +# kernel commit 72db82115d2b ("ovl: copy up sync/noatime fileattr flags")
-> > > > > +# from v5.15 introduced a regression.
-> >
-> > Hi Amir,
-> >
-> > Thanks for this new regression test. More detailed (picky:) review points
-> > as below ...
-> >
-> > So this commit is the one which introduced a regression. But we generally
-> > say what kind of regression does this case test for, in this comment.
-> >
-> > > > > +#
-> > > > > +. ./common/preamble
-> > > > > +_begin_fstest auto quick
-> >
-> > According the source code of this case, please think about more detailed group
-> > names, likes: "symlink", "copyup" and "atime".
-> >
-> > > > > +
-> > > > > +# Import common functions.
-> > > > > +. ./common/filter
-> >
-> > I think this case doesn't use any filter helpers, right?
-> >
-> > > > > +
-> > > > > +# real QA test starts here
-> > > > > +_supported_fs overlay
-> > > > > +_fixed_by_kernel_commit ab048302026d \
-> > > > > +     "ovl: fix failed copyup of fileattr on a symlink"
-> > > > > +
-> > > > > +_require_scratch
-> > > > > +_require_chattr A
-> > > > > +
-> > > > > +# remove all files from previous runs
-> > > > > +_scratch_mkfs
-> > > > > +
-> > > > > +# prepare lower test dir with NOATIME flag
-> > > > > +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> > > > > +mkdir -p $lowerdir/testdir
-> > > > > +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
-> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag"
-> > > > > +
-> > > > > +# The NOATIME is inheritted to children symlink in ext4/fs2fs
-> > > > > +# (and on tmpfs on recent kernels).
-> > > > > +# The overlayfs test will not fail unless base fs is
-> > > > > +# one of those filesystems.
-> > > > > +#
-> > > > > +# The problem with this inheritence is that the NOATIME flag is inheritted
-> > > > > +# to a symlink and the flag does take effect, but there is no way to query
-> > > > > +# the flag (lsattr) or change it (chattr) on a symlink, so overlayfs will
-> > > > > +# fail when trying to copy up NOATIME flag from lower to upper symlink.
-> > > > > +#
-> > > > > +touch $lowerdir/testdir/foo
-> > > > > +ln -sf foo $lowerdir/testdir/lnk
-> > > > > +
-> > > > > +$LSATTR_PROG -l $lowerdir/testdir/foo >> $seqres.full 2>&1
-> > > > > +$LSATTR_PROG -l $lowerdir/testdir/foo | grep -q No_Atime || \
-> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag"
-> > > > > +
-> > > > > +before=$(stat -c %x $lowerdir/testdir/lnk)
-> > > > > +echo "symlink atime before readlink: $before" >> $seqres.full 2>&1
-> >
-> > I remember some filesystems' timestamp for atime (e.g. exfat) might have more
-> > seconds granularity. So it would be better to `sleep 2s` at here.
-> >
-> > Correct me if someone fs need more or less :)
-> >
-> 
-> That would be a futile waste of 2 seconds IMO, because
-> Those niche fs probably do not support chattr and because
-> This is an overlayfs regression test and overlayfs is highly
-> unlikely to be running in production on those niche fs and it
-> probably does not support many of them.
-> 
-> 
-> > > > > +cat $lowerdir/testdir/lnk
-> > > > > +after=$(stat -c %x $lowerdir/testdir/lnk)
-> > > > > +echo "symlink atime after readlink: $after" >> $seqres.full 2>&1
-> > > > > +
-> > > > > +[ "$before" == "$after" ] || \
-> > > > > +     _notrun "base fs $OVL_BASE_FSTYP does not inherit No_Atime flag on symlink"
-> > > > > +
-> > > > > +# mounting overlay
-> > > > > +_scratch_mount
-> > > > > +
-> > > > > +# moving symlink will try to copy up lower symlink flags
-> > > > > +mv $SCRATCH_MNT/testdir/lnk $SCRATCH_MNT/
-> > > >
-> > > > Lots of above codes are checking if the underlying fs supports No_Atime (and inherit),
-> > > > and _notrun if not support. How about do these checking steps in a require_*
-> > > > function locally or in common/, likes _require_noatime_inheritance(). And we also
-> > > > can let _require_chattr accept one more argument to specify a test directory.
-> > > >
-> > >
-> > > ok.
-> > >
-> > > > The "mv ..." command looks like the final testing step. If there's not that bug,
-> > > > nothing happen, but I'm wondering what should happen if there's a bug?
-> > >
-> > > mv fails with error ENXIO, see linked bug report in commit message.
-> >
-> > Thanks, I think we can add "fails with error ENXIO at here, if the bug is reproduced" in
-> > the comment of that "mv ..." command.
-> >
-> 
-> Sure. no problem.
-> I will post v2 soon with _require_chattr_inherit and
-> above comments fixed.
-> 
-> Thanks for the review!
-> Amir.
-> 
+The full commit is induced by the creation of a new block group. On the
+zoned mode, we use a dedicated block group for tree-log. That block group
+is created on-demand or assigned to a metadata block group if there is
+none. On the first mount of a file system, we need to create one because
+there is only one metadata block group available for the regular
+metadata. That creation of a new block group forces tree-log to be a full
+commit on that transaction, which prevents logging "testdir" and "dira".
+
+Fix the issue by calling fsync before the first "sync", which creates the
+dedicated block group and let the files be properly logged.
+
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ tests/btrfs/239 | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/tests/btrfs/239 b/tests/btrfs/239
+index 3fbeaedd2c39..5a2dbe58d5fb 100755
+--- a/tests/btrfs/239
++++ b/tests/btrfs/239
+@@ -83,6 +83,18 @@ done
+ #
+ mkdir $SCRATCH_MNT/testdir/dira
+ 
++# This fsync is for the zoned mode. On the zoned mode, we use a dedicated block
++# group for tree-log. That block group is created on-demand or assigned to a
++# metadata block group if there is none. On the first mount of a file system, we
++# need to create one because there is only one metadata block group available
++# for the regular metadata. That creation of a new block group forces tree-log
++# to be a full commit on that transaction, which prevents logging "testdir" and
++# "dira" and screws up the result.
++#
++# Calling fsync here will create the dedicated block group, and let them be
++# logged.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
++
+ # Make sure everything done so far is durably persisted.
+ sync
+ 
+-- 
+2.42.0
 
