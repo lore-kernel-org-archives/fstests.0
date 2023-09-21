@@ -2,179 +2,318 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A0CBE7D0A2
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 20:31:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61A44E7D0AE
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 20:56:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230469AbjIUUbj (ORCPT
+        id S230264AbjIUU4f (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 16:31:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57490 "EHLO
+        Thu, 21 Sep 2023 16:56:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231679AbjIUUbU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 16:31:20 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92C5689D80
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:40:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695318012;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=iGefNxv1yd0BzICQaWLUZmaFcz/PuZWoohN98lo6Wd4=;
-        b=CStJSzWlyYvlM17S3WexglTDbevSgO/tRmltOLeRezgeg9f0Vo6nB3rASBv5KPj/Px1r0h
-        Ec80TCA/N16CRY+UT2UpxOzvFzTV+T/4Omgk3ak5eyCtdVzjEYuOyUlwYBPQC5Y4lS9np2
-        U99dkrMpOv48ZQz7rl4Xlz6hPiYEni8=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-298-hR-GHXKVM4S9-6S_3IfX5g-1; Thu, 21 Sep 2023 11:26:53 -0400
-X-MC-Unique: hR-GHXKVM4S9-6S_3IfX5g-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-573fdb618eeso901567a12.0
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 08:26:53 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695310012; x=1695914812;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iGefNxv1yd0BzICQaWLUZmaFcz/PuZWoohN98lo6Wd4=;
-        b=SwALvMMz+Bc8GJc3rxOzZdUXVMnrirWQ8odkHXqwf61BU9XU2aqmgBKqHzMNmSTNLA
-         8jzfSKWgMhhN59bR97HjKTwVvd785x11ht74IDUXV2/YTe3NQ3CNIGqaROqwt7iJD94b
-         AsB6XZ098ux93GdcA3ihyPWFrnDaG4XMijt7Ygh1Qn14/fSK3OsWs3/eHXNgDdT6WqWV
-         Opi9zpsSJW5lj3V5wBtQXGpW2RzWWNYTDyMRc/TCe0NZ9ZeAzlxMeF4eZW6l7NEgTjcO
-         q5QLioc1qXo7n1IM3gCc7AIZiD763D2yIiw1jrwTmHC+6t6y1OyWlbf2AhD3OTjJ4ZJh
-         SOqg==
-X-Gm-Message-State: AOJu0Ywef1kP7NxkWsyKLRNE/3ixiiLYbzqPCi3qTCwHqK8KYXIt/G1K
-        7jBsbJj/QFXZWZpR9BrgDgxhsRJRER04JxsG00ZhuXJqzDqyEA0deQecAPbfO3nE8UstzdtvE+S
-        Jxn2/z+TMZyPoULuBww==
-X-Received: by 2002:a17:90a:4f0b:b0:267:ffcf:e9e3 with SMTP id p11-20020a17090a4f0b00b00267ffcfe9e3mr5877480pjh.46.1695310012394;
-        Thu, 21 Sep 2023 08:26:52 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEX0kiCzjc0LbZSHpkY7QKTmYoqEe2yD0jDAiFR+PxuUVq0MlWDxrFuGdyfhW6d9hOc/EoUQw==
-X-Received: by 2002:a17:90a:4f0b:b0:267:ffcf:e9e3 with SMTP id p11-20020a17090a4f0b00b00267ffcfe9e3mr5877463pjh.46.1695310012074;
-        Thu, 21 Sep 2023 08:26:52 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id s12-20020a17090ad48c00b0026b45fb4443sm3271168pju.4.2023.09.21.08.26.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 08:26:51 -0700 (PDT)
-Date:   Thu, 21 Sep 2023 23:26:48 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     Amir Goldstein <amir73il@gmail.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>,
-        Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] common: add helper _require_chattr_inherit
-Message-ID: <20230921152648.25wd4gqralgiuksv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230921143102.127526-1-amir73il@gmail.com>
- <20230921143102.127526-2-amir73il@gmail.com>
+        with ESMTP id S232386AbjIUUfD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 16:35:03 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2168986804;
+        Thu, 21 Sep 2023 10:38:00 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FE54C4E762;
+        Thu, 21 Sep 2023 15:16:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695309402;
+        bh=pMG68veemBfAguTkOcpkKRmCG8VduN+UWYhtF1GDjaw=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=M2CmkZNRv6LbhvH7HpSVfjKcTnDcuv6IevX7c38UoeMaKyL2qxbDke8sNcv0AYzO+
+         i85ExxdGYhJWvQ/epA8ao4dLBFdfKeRP0bSuVhsLjRi7KsHm1ONxLWxTD+zA8q7anO
+         rbOb7DFMg6x4KlB3h85VF6A6YRgcd7y+3F4EPt474Il1CxGMgttWaCe3zmv01b09QS
+         E5cuoihvFWNyP6oMJFiAb9rd1G+8JcBZSj/SboVw5xoEz2D/XDpi3xYO9X5y1IsasP
+         NtmKH93yi4DiOrqm5y2vbmCmZPh7UU7a3gw8ac4fpfhWBPXE3gytInECWTgWw5hRX7
+         +H3wYHoAhrTyA==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] generic: test new directory entries are returned after rewinding directory
+Date:   Thu, 21 Sep 2023 16:16:34 +0100
+Message-Id: <603deada0f5b9ddff2446dae87a96cb05d566c2c.1695309198.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.40.1
+In-Reply-To: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
+References: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230921143102.127526-2-amir73il@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 21, 2023 at 05:31:01PM +0300, Amir Goldstein wrote:
-> Similar to _require_chattr, but also checks if an attribute is
-> inheritted from parent dir to children.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  common/rc | 52 +++++++++++++++++++++++++++++++++++++++++++---------
->  1 file changed, 43 insertions(+), 9 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 1618ded5..00cfd434 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -4235,23 +4235,57 @@ _require_test_lsattr()
->  		_notrun "lsattr not supported by test filesystem type: $FSTYP"
->  }
->  
-> +_check_chattr_inherit()
-> +{
-> +	local attribute=$1
-> +	local path=$2
-> +	local inherit=$3
+From: Filipe Manana <fdmanana@suse.com>
 
-As I understand, this function calls _check_chattr_inherit, so it will
-return zero or non-zero to clarify if $path support $attribute inheritance.
-...
+Test that if names are added to a directory after an opendir(3) call and
+before a rewinddir(3) call, future readdir(3) calls will return the names.
+This is mandated by POSIX:
 
-> +
-> +	touch $path
-> +	$CHATTR_PROG "+$attribute" $path > $tmp.chattr 2>&1
-> +	local ret=$?
-> +	if [ -n "$inherit" ]; then
-> +		touch "$path/$inherit"
-> +	fi
+  https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.html
 
-... but looks like it doesn't, it only create a $inherit file, then let the
-caller check if the $attribute is inherited.
+This exercises a regression in btrfs which is fixed by a kernel patch that
+has the following subject:
 
-I think that's a little confused. I think we can name the function as
-_check_chattr() and the 3rd argument $inherit as a bool variable, to
-decide if we check inheritance or not.
+  ""btrfs: refresh dir last index during a rewinddir(3) call""
 
-Or you'd like to have two functions _check_chattr and _check_chattr_inherit,
-_check_chattr_inherit calls _check_chattr then keep checking inheritance.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-What do you think?
+V2: Add test to dir group.
+    Add commit id now that the fix is in Linus' tree (as of yesterday).
 
-Thanks,
-Zorro
+ .gitignore            |   1 +
+ src/Makefile          |   2 +-
+ src/rewinddir-test.c  | 159 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/471     |  39 +++++++++++
+ tests/generic/471.out |   2 +
+ 5 files changed, 202 insertions(+), 1 deletion(-)
+ create mode 100644 src/rewinddir-test.c
+ create mode 100755 tests/generic/471
+ create mode 100644 tests/generic/471.out
 
-> +	$CHATTR_PROG "-$attribute" $path > $tmp.chattr 2>&1
-> +	if [ "$ret" -ne 0 ]; then
-> +		_notrun "file system doesn't support chattr +$attribute"
-> +	fi
-> +	cat $tmp.chattr >> $seqres.full
-> +	rm -f $tmp.chattr
-> +	return $ret
-> +}
-> +
->  _require_chattr()
->  {
->  	if [ -z "$1" ]; then
->  		echo "Usage: _require_chattr <attr>"
->  		exit 1
->  	fi
-> -	local attribute=$1
-> +	_check_chattr_inherit $1 $TEST_DIR/syscalltest
-> +}
->  
-> -	touch $TEST_DIR/syscalltest
-> -	chattr "+$attribute" $TEST_DIR/syscalltest > $TEST_DIR/syscalltest.out 2>&1
-> -	local ret=$?
-> -	chattr "-$attribute" $TEST_DIR/syscalltest > $TEST_DIR/syscalltest.out 2>&1
-> -	if [ "$ret" -ne 0 ]; then
-> -		_notrun "file system doesn't support chattr +$attribute"
-> +_require_chattr_inherit()
-> +{
-> +	if [ -z "$1" ]; then
-> +		echo "Usage: _require_chattr_inherit <attr>"
-> +		exit 1
->  	fi
-> -	cat $TEST_DIR/syscalltest.out >> $seqres.full
-> -	rm -f $TEST_DIR/syscalltest.out
-> +	local attribute=$1
-> +	local testdir="$TEST_DIR/chattrtest"
-> +	mkdir -p $testdir
-> +	_check_chattr_inherit $attribute $testdir testfile || \
-> +		return
-> +
-> +	local testfile="$TEST_DIR/chattrtest/testfile"
-> +	local lsattrout=($($LSATTR_PROG $testfile 2>> $seqres.full))
-> +	echo ${lsattrout[*]} >> $seqres.full
-> +	echo ${lsattrout[0]} | grep -q $attribute || \
-> +		_notrun "file system doesn't inherit chattr +$attribute"
-> +
-> +	$CHATTR_PROG "-$attribute" $testfile >> $seqres.full 2>&1
-> +	rm -f $testfile
-> +	rmdir $testdir
->  }
->  
->  _get_total_inode()
-> -- 
-> 2.34.1
-> 
+diff --git a/.gitignore b/.gitignore
+index 644290f0..4c32ac42 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -124,6 +124,7 @@ tags
+ /src/rename
+ /src/renameat2
+ /src/resvtest
++/src/rewinddir-test
+ /src/runas
+ /src/seek_copy_test
+ /src/seek_sanity_test
+diff --git a/src/Makefile b/src/Makefile
+index aff871d0..2815f919 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -19,7 +19,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+ 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+ 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+-	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault
++	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/rewinddir-test.c b/src/rewinddir-test.c
+new file mode 100644
+index 00000000..9f7505a2
+--- /dev/null
++++ b/src/rewinddir-test.c
+@@ -0,0 +1,159 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2023 SUSE Linux Products GmbH.  All Rights Reserved.
++ */
++#include <dirent.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++#include <unistd.h>
++#include <sys/stat.h>
++
++/*
++ * Number of files we add to the test directory after calling opendir(3) and
++ * before calling rewinddir(3).
++ */
++#define NUM_FILES 10000
++
++int main(int argc, char *argv[])
++{
++	int file_counters[NUM_FILES] = { 0 };
++	int dot_count = 0;
++	int dot_dot_count = 0;
++	struct dirent *entry;
++	DIR *dir = NULL;
++	char *dir_path = NULL;
++	char *file_path = NULL;
++	int ret = 0;
++	int i;
++
++	if (argc != 2) {
++		fprintf(stderr, "Usage:  %s <directory>\n", argv[0]);
++		ret = 1;
++		goto out;
++	}
++
++	dir_path = malloc(strlen(argv[1]) + strlen("/testdir") + 1);
++	if (!dir_path) {
++		fprintf(stderr, "malloc failure\n");
++		ret = ENOMEM;
++		goto out;
++	}
++	i = strlen(argv[1]);
++	memcpy(dir_path, argv[1], i);
++	memcpy(dir_path + i, "/testdir", strlen("/testdir"));
++	dir_path[i + strlen("/testdir")] = '\0';
++
++	/* More than enough to contain any full file path. */
++	file_path = malloc(strlen(dir_path) + 12);
++	if (!file_path) {
++		fprintf(stderr, "malloc failure\n");
++		ret = ENOMEM;
++		goto out;
++	}
++
++	ret = mkdir(dir_path, 0700);
++	if (ret == -1) {
++		fprintf(stderr, "Failed to create test directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/* Open the directory first. */
++	dir = opendir(dir_path);
++	if (dir == NULL) {
++		fprintf(stderr, "Failed to open directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/*
++	 * Now create all files inside the directory.
++	 * File names go from 1 to NUM_FILES, 0 is unused as it's the return
++	 * value for atoi(3) when an error happens.
++	 */
++	for (i = 1; i <= NUM_FILES; i++) {
++		FILE *f;
++
++		sprintf(file_path, "%s/%d", dir_path, i);
++		f = fopen(file_path, "w");
++		if (f == NULL) {
++			fprintf(stderr, "Failed to create file number %d: %d\n",
++				i, errno);
++			ret = errno;
++			goto out;
++		}
++		fclose(f);
++	}
++
++	/*
++	 * Rewind the directory and read it.
++	 * POSIX requires that after a rewind, any new names added to the
++	 * directory after the openddir(3) call and before the rewinddir(3)
++	 * call, must be returned by readdir(3) calls
++	 */
++	rewinddir(dir);
++
++	/*
++	 * readdir(3) returns NULL when it reaches the end of the directory or
++	 * when an error happens, so reset errno to 0 to distinguish between
++	 * both cases later.
++	 */
++	errno = 0;
++	while ((entry = readdir(dir)) != NULL) {
++		if (strcmp(entry->d_name, ".") == 0) {
++			dot_count++;
++			continue;
++		}
++		if (strcmp(entry->d_name, "..") == 0) {
++			dot_dot_count++;
++			continue;
++		}
++		i = atoi(entry->d_name);
++		if (i == 0) {
++			fprintf(stderr,
++				"Failed to parse name '%s' to integer: %d\n",
++				entry->d_name, errno);
++			ret = errno;
++			goto out;
++		}
++		/* File names go from 1 to NUM_FILES, so subtract 1. */
++		file_counters[i - 1]++;
++	}
++
++	if (errno) {
++		fprintf(stderr, "Failed to read directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/*
++	 * Now check that the readdir() calls return every single file name
++	 * and without repeating any of them. If any name is missing or
++	 * repeated, don't exit immediatelly, so that we print a message for
++	 * all missing or repeated names.
++	 */
++	for (i = 0; i < NUM_FILES; i++) {
++		if (file_counters[i] != 1) {
++			fprintf(stderr, "File name %d appeared %d times\n",
++				i + 1,  file_counters[i]);
++			ret = EINVAL;
++		}
++	}
++	if (dot_count != 1) {
++		fprintf(stderr, "File name . appeared %d times\n", dot_count);
++		ret = EINVAL;
++	}
++	if (dot_dot_count != 1) {
++		fprintf(stderr, "File name .. appeared %d times\n", dot_dot_count);
++		ret = EINVAL;
++	}
++out:
++	free(dir_path);
++	free(file_path);
++	if (dir != NULL)
++		closedir(dir);
++
++	return ret;
++}
+diff --git a/tests/generic/471 b/tests/generic/471
+new file mode 100755
+index 00000000..6d40d0e2
+--- /dev/null
++++ b/tests/generic/471
+@@ -0,0 +1,39 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 471
++#
++# Test that if names are added to a directory after an opendir(3) call and
++# before a rewinddir(3) call, future readdir(3) calls will return the names.
++# This is mandated by POSIX:
++#
++# https://pubs.opengroup.org/onlinepubs/007904875/functions/rewinddir.html
++#
++. ./common/preamble
++_begin_fstest auto quick dir
++
++_cleanup()
++{
++	cd /
++	rm -fr $tmp.*
++	rm -fr $target_dir
++}
++
++_supported_fs generic
++_require_test
++_require_test_program rewinddir-test
++
++[ $FSTYP == "btrfs" ] && _fixed_by_kernel_commit e60aa5da14d0 \
++	"btrfs: refresh dir last index during a rewinddir(3) call"
++
++target_dir="$TEST_DIR/test-$seq"
++rm -fr $target_dir
++mkdir $target_dir
++
++$here/src/rewinddir-test $target_dir
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/471.out b/tests/generic/471.out
+new file mode 100644
+index 00000000..260f629e
+--- /dev/null
++++ b/tests/generic/471.out
+@@ -0,0 +1,2 @@
++QA output created by 471
++Silence is golden
+-- 
+2.40.1
 
