@@ -2,103 +2,238 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E35EE7D0AF
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 21:15:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A26DE7D0AA
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 21:17:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232351AbjIUVPt (ORCPT
+        id S232701AbjIUVRO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 17:15:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52660 "EHLO
+        Thu, 21 Sep 2023 17:17:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233074AbjIUVPP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 17:15:15 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD039A75EF;
-        Thu, 21 Sep 2023 11:01:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1695319276; x=1726855276;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=J5/Mm01U/8HkGqBt2NFeAHTMA49ugVf9griRdMZM9bc=;
-  b=OjT/9BopjpGX/QNuLb4abuT0d4KM+xdm3f9ieaUJIXwk5KptG7rXgUQG
-   KwlBNj0GlFa6JcuiiEvsmHFwbGR0J0FzOYt5UcykpuEOHdevfYLUal3Ia
-   mDXm8EhjOZwkN2yVVIqt1E3kdeG4GLFAiBCuJIVpXaTXBU3PKy3NNbXeL
-   nkOhm888l2TyelQ/t64vuO8dQCiqn118auUf2+7gOYIHI2sVioq8EPETH
-   BaoSRjP78diBsuCqfeXEejBkOnS5TnDCqf8t1IA45XfgPmuja0xwRxgOX
-   KBJTP0vhgvxbahFgF9tsZotInxw3LFidC+FBzoKVExV8knC9Zf1lRI1fX
-   g==;
-X-CSE-ConnectionGUID: KC3GDAmJQb+sCHBT0IJTIw==
-X-CSE-MsgGUID: W6TQwcbCS2eFrOn2iQW9kA==
-X-IronPort-AV: E=Sophos;i="6.03,164,1694707200"; 
-   d="scan'208";a="349818423"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Sep 2023 15:44:24 +0800
-IronPort-SDR: 9njPc3Ld3pehKnMA4GMgoGnwp3W5DkuYVIBxLNWbvFlyEqb3czJyp8wO5axNlL1HnV+RNSX0Lb
- 478Of/WrC79BO7CSOwluqDe+jekcXxdnNkK/ulLRsKsJ+N9tbyD5v62jxkQLJVd5iekEtWu6JO
- 8X0WHUbXznlDB712d/N0JxdLVb+d3IrGPQVp0TJf4hJAmWquBcObeM36QcLhBSJUClmicYzgD/
- Skiu/ElIhp5dx2Q7wC8jXBSbVDrI016k0QszEgHciskFDrrB182mGdRellVNxprwfDVK9weTTf
- baA=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Sep 2023 23:51:18 -0700
-IronPort-SDR: rF0sQVydsUig2QapScE+ESHXYYV/2xwQ0BDCzBhdhS8rzjf1gV4VqizBjMOauCwYwDtQqTrVbQ
- nMoh5LNSbWwwt0BqgTRYuwAWwU7slTTG8g7ZJBtsNin/T/8jC0+JHgzyyOH8tpV1F7cTA3CSis
- PUAZqIHETGziMISImKxj/viu8V4+cjl7spkF/w1eS1bYvPhp2oHild3j/ac3Iv0WgO97BgawI7
- 40HhuE5ewLfvsS/M+a2xTwHCJsTwKlnHRTpHYVsNXYkqAXs8SyW5kst7Iup3tnFggNLad/aR8W
- qvE=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.94])
-  by uls-op-cesaip01.wdc.com with ESMTP; 21 Sep 2023 00:44:24 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
+        with ESMTP id S232650AbjIUVQH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 17:16:07 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D80141BFF
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:03:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695315662;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=y0ax/dHqXYgyiJqtUUajFliIPWSkSwMmazUAOco5xqs=;
+        b=TEI6aqUbVo9sQq1gTJIfRc+NIY4cP8g40/AHd7FwigoBE4RLhn4Ob0A+JoxIRT5cXvBqfE
+        mwDznkVQdE1cJ7fvVgwq59vyWJDoIaAE4//oj9j/V1R2fqOqJwOEQ8Ko3lYn6FBn8ZltVY
+        uoh1X+6q/xigS8bnyPzCSwkllYQabHc=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-68-3x0h7vyePY6Brrq1DpIKSA-1; Thu, 21 Sep 2023 09:44:09 -0400
+X-MC-Unique: 3x0h7vyePY6Brrq1DpIKSA-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 36D958030CB;
+        Thu, 21 Sep 2023 13:44:09 +0000 (UTC)
+Received: from localhost (yoyang-vm.hosts.qa.psi.pek2.redhat.com [10.73.149.36])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 90286C15BB8;
+        Thu, 21 Sep 2023 13:44:08 +0000 (UTC)
+From:   Yongcheng Yang <yoyang@redhat.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>,
-        Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v3 2/2] btrfs/076: use _fixed_by_kernel_commit to tell the fixing kernel commit
-Date:   Thu, 21 Sep 2023 16:44:08 +0900
-Message-ID: <74525f6b1fd645ac276b701e5032f3f913ed8ce0.1695282094.git.naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.42.0
-In-Reply-To: <cover.1695282094.git.naohiro.aota@wdc.com>
-References: <cover.1695282094.git.naohiro.aota@wdc.com>
+Cc:     linux-nfs@vger.kernel.org, zlang@redhat.com,
+        Yongcheng Yang <yoyang@redhat.com>
+Subject: [PATCH] generic/471: add a test to check move in mountpoints of the same export
+Date:   Thu, 21 Sep 2023 21:43:47 +0800
+Message-Id: <20230921134347.839957-1-yoyang@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.8
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-The fix commit is written in the comment without a commit hash. Use
-_fixed_by_kernel_commit command to describe it.
+Add a new test to ckeck file move (rename) operation among
+different mount points which are mounting to a same export.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+This should be a simple test but it recently unveils an ancient
+nfsd bug. Thus let's make it to be a regresstion check.
+
+Signed-off-by: Yongcheng Yang <yoyang@redhat.com>
 ---
- tests/btrfs/076 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/btrfs/076 b/tests/btrfs/076
-index 43dbff538278..894a1ac7fa5d 100755
---- a/tests/btrfs/076
-+++ b/tests/btrfs/076
-@@ -5,10 +5,8 @@
- # FS QA Test No. btrfs/076
- #
- # Regression test for btrfs incorrect inode ratio detection.
--# This was fixed in the following linux kernel patch:
--#
--#     Btrfs: fix incorrect compression ratio detection
- #
+Hi,
+
+There is an ancient nfsd problem just pop up and is now resolved by
+the upstream commit [1]. Looks like it's a basic and simple test which
+is probably appropriate for the fstest IMO.
+
+This test in nfs will be failed without patch [1]:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[root@kvm-07-guest24 xfstests]# ./check -nfs generic/471
+FSTYP     	-- nfs
+PLATFORM  	-- Linux/x86_64 kvm-07-guest24 5.14.0-abc.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Sep 13 04:59:08 EDT 2023
+MKFS_OPTIONS  -- localhost:/export_test2
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test2 /mnt_scratch
+
+generic/471 1s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
+	--- tests/generic/471.out    2023-09-21 05:55:28.514673177 -0400
+	+++ /root/xfstests/results//generic/471.out.bad    2023-09-21 08:06:16.935695355 -0400
+	@@ -1,2 +1,3 @@
+ 	QA output created by 471
+ 	Silence is golden
+	+mv: '/mnt_test/mountpoint1-471/A/f' and '/mnt_test/mountpoint1-471/B/f' are the same file
+	...
+	(Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
+
+HINT: You _MAY_ be missing kernel fix:
+  	fdd2630a739819 nfsd: fix change_info in NFSv4 RENAME replies
+
+Ran: generic/471
+Failures: generic/471
+Failed 1 of 1 tests
+
+[root@kvm-07-guest24 xfstests]#
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+And it can pass after that patch [1] merged:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[root@fsqe-r6515-02 xfstests]# ./check -nfs generic/471
+FSTYP     	-- nfs
+PLATFORM  	-- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
+MKFS_OPTIONS  -- localhost:/export_test1
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 localhost:/export_test1 /mnt_scratch
+
+generic/471    	0s
+Ran: generic/471
+Passed all 1 tests
+
+[root@fsqe-r6515-02 xfstests]#
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Also I have just checked the xfs and overlayfs but the latter get failed:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[root@fsqe-r6515-02 xfstests]# ./check generic/471
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
+MKFS_OPTIONS  -- -f /dev/loop1
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt_scratch
+
+generic/471 0s ...  1s
+Ran: generic/471
+Passed all 1 tests
+
+[root@fsqe-r6515-02 xfstests]#
+[root@fsqe-r6515-02 xfstests]# ./check -overlay generic/471
+FSTYP         -- overlay
+PLATFORM      -- Linux/x86_64 fsqe-r6515-02 5.14.0-abcd.el9.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Sep 19 08:10:36 EDT 2023
+MKFS_OPTIONS  -- /mnt_scratch
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /mnt_scratch /mnt_scratch/ovl-mnt
+
+generic/471 0s ... - output mismatch (see /root/xfstests/results//generic/471.out.bad)
+    --- tests/generic/471.out	2023-09-21 09:02:14.580495256 -0400
+    +++ /root/xfstests/results//generic/471.out.bad	2023-09-21 09:02:51.145345830 -0400
+    @@ -1,2 +1,3 @@
+     QA output created by 471
+     Silence is golden
+    +mv: '/mnt_test/ovl-mnt/mountpoint1-471/A/f' and '/mnt_test/ovl-mnt/mountpoint1-471/B/f' are the same file
+    ...
+    (Run 'diff -u /root/xfstests/tests/generic/471.out /root/xfstests/results//generic/471.out.bad'  to see the entire diff)
+Ran: generic/471
+Failures: generic/471
+Failed 1 of 1 tests
+
+[root@fsqe-r6515-02 xfstests]#
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For now I'm not sure if the overlayfs don't support this operation or
+we just need to fix that.
+
+Thanks,
+Yongcheng
+
+[1] https://lore.kernel.org/linux-nfs/ZPyMyv1nNFV2whKP@tissot.1015granger.net/T/#t
+
+
+ tests/generic/471     | 60 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/471.out |  2 ++
+ 2 files changed, 62 insertions(+)
+ create mode 100755 tests/generic/471
+ create mode 100644 tests/generic/471.out
+
+diff --git a/tests/generic/471 b/tests/generic/471
+new file mode 100755
+index 00000000..ada48129
+--- /dev/null
++++ b/tests/generic/471
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 471
++#
++# Mount the same export to different mount points and move (rename)
++# files among those mount points.
++# This simple test recently unveils an ancient nfsd bug that is fixed
++# by fdd2630a739819 ("nfsd: fix change_info in NFSv4 RENAME replies").
++#
++. ./common/preamble
++_begin_fstest auto quick
 +
- . ./common/preamble
- _begin_fstest auto quick compress
- 
-@@ -27,6 +25,8 @@ _cleanup()
- _supported_fs btrfs
- _require_test
- _require_scratch
-+_fixed_by_kernel_commit 4bcbb3325513 \
-+	"Btrfs: fix incorrect compression ratio detection"
- 
- # An extent size can be up to BTRFS_MAX_UNCOMPRESSED
- max_extent_size=$(( 128 * 1024 ))
++# Override the default cleanup function.
++_cleanup()
++{
++	$UMOUNT_PROG $testdir1 2>/dev/null
++	$UMOUNT_PROG $testdir2 2>/dev/null
++	cd /
++	rm -r -f $tmp.*
++}
++
++# real QA test starts here
++
++_supported_fs generic
++[ "$FSTYP" = "nfs" ] && \
++	_fixed_by_kernel_commit fdd2630a739819 \
++		"nfsd: fix change_info in NFSv4 RENAME replies"
++
++_require_test
++_require_scratch
++
++echo "Silence is golden"
++
++_scratch_mkfs >> $seqres.full
++testdir1=$TEST_DIR/mountpoint1-$seq
++testdir2=$TEST_DIR/mountpoint2-$seq
++rm -rf $testdir1 $testdir2
++mkdir -p $testdir1 $testdir2
++
++# Don't share the data and attribute caches among mount points for NFS.
++# This caching behavior is necessary to reproduce this issue as we're
++# checking the alignment of each mount point's own unique cache.
++[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="-o nosharecache"
++
++SCRATCH_MNT=$testdir1 _scratch_mount
++SCRATCH_MNT=$testdir2 _scratch_mount
++rm -rf $testdir1/{A,B}
++mkdir $testdir1/{A,B}
++touch $testdir1/A/f
++mv $testdir1/A/f $testdir1/B/
++cat $testdir2/B/f
++mv $testdir2/B/f $testdir2/A/
++cat $testdir1/A/f
++mv $testdir1/A/f $testdir1/B/
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/471.out b/tests/generic/471.out
+new file mode 100644
+index 00000000..260f629e
+--- /dev/null
++++ b/tests/generic/471.out
+@@ -0,0 +1,2 @@
++QA output created by 471
++Silence is golden
 -- 
-2.42.0
+2.31.1
 
