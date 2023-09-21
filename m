@@ -2,123 +2,222 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91803E7D0A2
-	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:27:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42422E7D0A2
+	for <linux-fstests@archiver.kernel.org>; Thu, 21 Sep 2023 19:29:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229685AbjIUT1u (ORCPT
+        id S230441AbjIUT3N (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 21 Sep 2023 15:27:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43496 "EHLO
+        Thu, 21 Sep 2023 15:29:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229781AbjIUT1a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:27:30 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A38AA75F9;
-        Thu, 21 Sep 2023 11:01:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1695319280; x=1726855280;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=Xbsa5OcnCXXXs0TqjLs951q126IEREQqxyCG6U4LtuA=;
-  b=UESu6cIe0Put/kP0/geCUo4Fggu/d5ygOzcBV/GAdRMs8ZGZxmKQ3leW
-   NB2iEjvqNkvVY1Uh3t+TT3wUnL/2T+44vvBEEcRLPderSP5O4xA26msqf
-   dUXwfzbSFDIxo3Np0iAfLssIUZMScU2KmvZZccO4FrZaXOBlwEP9ASDze
-   BsAIM4O8zMKmCRqyaXtocOzOSW9ftvk+CNheZ9gtT1s0SboiidPFXUh1u
-   hj1pnIoOKbENpa2o4fFbgXUZIvkDHi1IFCEe91K6GtVdkTrGIcOfLjJIy
-   eCQA5IzIvagIV6bT3P2EiHipuzWbWrkKcNP2y0NOdvub7ePPwA0mk4OmM
-   Q==;
-X-CSE-ConnectionGUID: YnpFUizWSB6CDHxAWUx8Zw==
-X-CSE-MsgGUID: ECMHY59KQGyc7NXkvIJfXw==
-X-IronPort-AV: E=Sophos;i="6.03,165,1694707200"; 
-   d="scan'208";a="349826984"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 21 Sep 2023 17:42:05 +0800
-IronPort-SDR: eGE4G3/ZtroGBAQ+l/Esw4npXUV+tBih74Odx8gDpEJK1hftiHjpgr9mgFtTsuS/lA49HWPmJc
- kmIiW7lMAQk7bhYzZjgdas0fFFtESkk8bC5sYBz2/3/gqmWtd9qXftT0f6QqQZ0cR2nSf3GKuJ
- sv1NtyUISa7K6+/5QrdGfGgIV3GIjxSB1xiM2VGm5OEa0yPDuppGkwv7ssP1uYmcar1DpRjUPg
- dbGvKYtaT57YlfcfkT8maJvHYd6Iy8llSM0sBL9LXs6PxYa7fOaxoZ5/HLGCR/0JUl/FYMM5gU
- NlQ=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 Sep 2023 01:48:58 -0700
-IronPort-SDR: OyE5cX3Kz8opQiaSpy4r/0cdHLG3+l5ROEH9e5GYmfk1zEoJ/SUKZUwNMvx9v95+bQTEMT48Za
- xQXJgtNz1qRo08l6cETqC0GV7hMyngmN8Q+3O1R07Mcmk/ZYKy+/Po4hyKI0+ViLMSMlfkPnS4
- szN0xNRLcJmp53VJ3KqXPpjOhR/ohWcEQCFuqJxEp6uQL4YNurQjDR6OKX+CqgN5UoEJ1Zgod+
- YKdWF2FmuJ5XmpBbXeNHZC/b98+2ZgC9O1ZjyMobqxDxophsXyZ6nP3DkK0l6R86+F2SBzkvB7
- 8UA=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.94])
-  by uls-op-cesaip01.wdc.com with ESMTP; 21 Sep 2023 02:42:04 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] btrfs/239: call fsync to create tree-log dedicated block group for zoned mode
-Date:   Thu, 21 Sep 2023 18:41:58 +0900
-Message-ID: <20230921094158.1391328-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S229500AbjIUT2u (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2023 15:28:50 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33E21F837
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:06:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695315993;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=6hUA0LTyQq81FtAH8DG+wAjHXiFC/ZdyJJ4zc+Pob+4=;
+        b=jUuuy9hoOCSpEUZGZQSgkTgTkF9b7zaeRsa3Z5Pt50Mqd9n+w/qCYwPHIhYOm+5Cfmn/Gs
+        wHyHn9359Wy1v/sIrsg4QZ56vqnBcIwhUuwdXS/puwpaDaP7HRmJKnQ+0iCq3/hzgth5Lw
+        gutyr0Y1Jo/1M+2TsZuj19+lxytQ8P0=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-435-xWpI19YEP6uxmHymFgWqsQ-1; Thu, 21 Sep 2023 13:06:31 -0400
+X-MC-Unique: xWpI19YEP6uxmHymFgWqsQ-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1c467c33c06so18595405ad.0
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2023 10:06:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695315990; x=1695920790;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6hUA0LTyQq81FtAH8DG+wAjHXiFC/ZdyJJ4zc+Pob+4=;
+        b=HiAtxSxRu0sC0i0A1dyTiPJz04QhecJNzb7tBUGS76lsoHIVcrDZ7DgrYOnz/4l7Q1
+         eGIKmRGJraWaAlk9iJPbRgcpyI3yA0bEikgnVcRtHbQl3UY3U2vg55xDg6kGEfpdBpmI
+         0C7H4E4wBsV7iFjW1/sTLbayODkbJzICEyEw0SxwAFtc1ExChCj7LRKZ/aEmxSIlJ4AJ
+         HGdsnltjBQ9vxvns6b1qHHO/iJo/LGXEBx/kZ2X6tAF2vFApIGncBqekHFw+PvVsw7ex
+         dxFZAZ8RwilWoYhVOG+xsFxCxcKgVXFs746XC/GaMriIuuVt6IiaexUecATC29XUt17y
+         oqiw==
+X-Gm-Message-State: AOJu0YwauXgyhfqg60ABfJ+qwcUmOX1ydoUOPZPjG9w+pv0/4wii0JPF
+        b9tAgJgVu/q//sdBCelLJZm8uCDPRO7pmgUmeWA5MM0qocV2F8B39UerczuT+vycxquZfOO+B7G
+        wBSnx6mTUjdJordTp6A==
+X-Received: by 2002:a17:902:f689:b0:1b4:5699:aac1 with SMTP id l9-20020a170902f68900b001b45699aac1mr307421plg.12.1695315990609;
+        Thu, 21 Sep 2023 10:06:30 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEq20VS4UuwpQj2qY7mPiLR41qpIJcoM4f8zFr5QTY+NW4xy/tfn5q43C95H81ITPPVtfelVQ==
+X-Received: by 2002:a17:902:f689:b0:1b4:5699:aac1 with SMTP id l9-20020a170902f68900b001b45699aac1mr307377plg.12.1695315990068;
+        Thu, 21 Sep 2023 10:06:30 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id j13-20020a170902da8d00b001c1ef9d2215sm1741980plx.270.2023.09.21.10.06.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 21 Sep 2023 10:06:29 -0700 (PDT)
+Date:   Fri, 22 Sep 2023 01:06:26 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Amir Goldstein <amir73il@gmail.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Ruiwen Zhao <ruiwen@google.com>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] common: add helper _require_chattr_inherit
+Message-ID: <20230921170626.hdqw5snvxtg4oxgl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230921143102.127526-1-amir73il@gmail.com>
+ <20230921143102.127526-2-amir73il@gmail.com>
+ <20230921152648.25wd4gqralgiuksv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxj5YR4Kv2-EZXnQGDo1zbExKZ+mw=rYNVBpCo30KkFAfQ@mail.gmail.com>
+ <20230921162319.gsh5is3vkptp5hz2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxjgMjSY0fye1o-i-d44usfswuFebWBaQ6pE_od+HYGfrQ@mail.gmail.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxjgMjSY0fye1o-i-d44usfswuFebWBaQ6pE_od+HYGfrQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Running btrfs/239 on a zoned device often fails with the following error.
+On Thu, Sep 21, 2023 at 07:46:12PM +0300, Amir Goldstein wrote:
+> On Thu, Sep 21, 2023 at 7:23 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Thu, Sep 21, 2023 at 06:40:49PM +0300, Amir Goldstein wrote:
+> > > On Thu, Sep 21, 2023 at 6:26 PM Zorro Lang <zlang@redhat.com> wrote:
+> > > >
+> > > > On Thu, Sep 21, 2023 at 05:31:01PM +0300, Amir Goldstein wrote:
+> > > > > Similar to _require_chattr, but also checks if an attribute is
+> > > > > inheritted from parent dir to children.
+> > > > >
+> > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > ---
+> > > > >  common/rc | 52 +++++++++++++++++++++++++++++++++++++++++++---------
+> > > > >  1 file changed, 43 insertions(+), 9 deletions(-)
+> > > > >
+> > > > > diff --git a/common/rc b/common/rc
+> > > > > index 1618ded5..00cfd434 100644
+> > > > > --- a/common/rc
+> > > > > +++ b/common/rc
+> > > > > @@ -4235,23 +4235,57 @@ _require_test_lsattr()
+> > > > >               _notrun "lsattr not supported by test filesystem type: $FSTYP"
+> > > > >  }
+> > > > >
+> > > > > +_check_chattr_inherit()
+> > > > > +{
+> > > > > +     local attribute=$1
+> > > > > +     local path=$2
+> > > > > +     local inherit=$3
+> > > >
+> > > > As I understand, this function calls _check_chattr_inherit, so it will
+> > > > return zero or non-zero to clarify if $path support $attribute inheritance.
+> > > > ...
+> > > >
+> > > > > +
+> > > > > +     touch $path
+> > > > > +     $CHATTR_PROG "+$attribute" $path > $tmp.chattr 2>&1
+> > > > > +     local ret=$?
+> > > > > +     if [ -n "$inherit" ]; then
+> > > > > +             touch "$path/$inherit"
+> > > > > +     fi
+> > > >
+> > > > ... but looks like it doesn't, it only create a $inherit file, then let the
+> > > > caller check if the $attribute is inherited.
+> > > >
+> > > > I think that's a little confused.
+> > >
+> > > I agree.
+> > >
+> > > > I think we can name the function as _check_chattr()
+> > >
+> > > I agree.
+> > >
+> > > > and the 3rd argument $inherit as a bool variable, to
+> > > > decide if we check inheritance or not.
+> > > >
+> > >
+> > > Not my prefered choice.
+> > >
+> > > > Or you'd like to have two functions _check_chattr and _check_chattr_inherit,
+> > > > _check_chattr_inherit calls _check_chattr then keep checking inheritance.
+> > > >
+> > > > What do you think?
+> > >
+> > > I think this is over engineering for a helper that may not
+> > > be ever used by any other test.
+> > >
+> > > Suggest to just change the name to _check_chattr()
+> > > to match the meaning to the return value.
+> > >
+> > > The 3rd inherit argument just means that we request
+> > > to create a file after chattr + and before chattr -,
+> > > so that the caller could check it itself later.
+> >
+> > I still think it doesn't make sense ... but I don't want to give you
+> > that pressure, so ...
+> >
+> > >
+> > > If you accept this minor change is enough
+> > > can you apply it yourself on commit?
+> >
+> > ... If you think it's too complicated, we can drop the inheritance checking
+> > common helper. Just change the _require_chattr(), make it to accept one more
+> > *directory* argument (use $TEST_DIR by default). Then we can do:
+> >
+> > _require_chattr A $BASE_SCRATCH_MNT
+> 
+> This is not needed.
+> Overlayfs (on $SCRATCH_MNT) will not pass the require_chattr
+> check if the base fs does not support chattr.
 
-  btrfs/239 5s ... - output mismatch (see /host/btrfs/239.out.bad)
-      --- tests/btrfs/239.out     2023-09-21 16:56:37.735204924 +0900
-      +++ /host/btrfs/239.out.bad  2023-09-21 18:22:45.401433408 +0900
-      @@ -1,4 +1,6 @@
-       QA output created by 239
-      +/testdir/dira still exists
-      +/dira does not exists
-       File SCRATCH_MNT/testdir/file1 data:
-       0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-       *
-      ...
+Oh, I saw you wrote as this:
 
-This happens because "testdir" and "dira" are not logged on the first fsync
-(fsync $SCRATCH_MNT/testdir), but are written as a full commit. That
-prevents updating the log on "mv" time, leaving them pre-mv state.
+  +# prepare lower test dir with NOATIME flag
+  +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+  +mkdir -p $lowerdir/testdir
+  +$CHATTR_PROG +A $lowerdir/testdir >> $seqres.full 2>&1 ||
+  +       _notrun "base fs $OVL_BASE_FSTYP does not support No_Atime flag"
 
-The full commit is induced by the creation of a new block group. On the
-zoned mode, we use a dedicated block group for tree-log. That block group
-is created on-demand or assigned to a metadata block group if there is
-none. On the first mount of a file system, we need to create one because
-there is only one metadata block group available for the regular
-metadata. That creation of a new block group forces tree-log to be a full
-commit on that transaction, which prevents logging "testdir" and "dira".
+so I thought you might want a `_require_chattr A $BASE_SCRATCH_MNT`.
 
-Fix the issue by calling fsync before the first "sync", which creates the
-dedicated block group and let the files be properly logged.
+> 
+> > _require_chattr A $SCRATCH_MNT
+> 
+> This is practically equivalent to _require_chattr A
+> on the test partition, there is no reason to test the
+> scratch partition specifically.
+> 
+> So there is no need for the proposed change in _require_chattr.
+> 
+> >
+> > And then do all inheritance checking in the overlay case itself (likes you did in
+> > V1), don't make them to be a common helper. Due to only this case need the
+> > _require_chattr_inheritance, so we can think about that common helper when more
+> > cases need that :)
+> >
+> > I think this change is simple enough (base on your V1 patch). Is that good to
+> > you :)
+> 
+> V1 is good enough for me as is. :)
+> You can take the commit message and test
+> header comment fixes from V2.
 
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
----
- tests/btrfs/239 | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+I'll merge v2 patch 2/2, with ...
+1) Change _require_chattr_inherit to _require_chattr.
+2) Add `sleep 2s` under the "before=$(stat -c %x $lowerdir/testdir/lnk)" line.
 
-diff --git a/tests/btrfs/239 b/tests/btrfs/239
-index 3fbeaedd2c39..5a2dbe58d5fb 100755
---- a/tests/btrfs/239
-+++ b/tests/btrfs/239
-@@ -83,6 +83,18 @@ done
- #
- mkdir $SCRATCH_MNT/testdir/dira
- 
-+# This fsync is for the zoned mode. On the zoned mode, we use a dedicated block
-+# group for tree-log. That block group is created on-demand or assigned to a
-+# metadata block group if there is none. On the first mount of a file system, we
-+# need to create one because there is only one metadata block group available
-+# for the regular metadata. That creation of a new block group forces tree-log
-+# to be a full commit on that transaction, which prevents logging "testdir" and
-+# "dira" and screws up the result.
-+#
-+# Calling fsync here will create the dedicated block group, and let them be
-+# logged.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT
-+
- # Make sure everything done so far is durably persisted.
- sync
- 
--- 
-2.42.0
+Thanks,
+Zorro
+
+> 
+> Note that the common _require_chattr_inheritance in V2
+> almost did not remove any lines from the test at all -
+> it moved one _notrun line into _require_chattr_inheritance
+> and turned another _notrun into echo "fail".
+> 
+> So I agree that if no other test is going to use the new helpers
+> their value is limited.
+> 
+> Thanks,
+> Amir.
+> 
 
