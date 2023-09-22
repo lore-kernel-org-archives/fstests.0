@@ -2,87 +2,74 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 471CACD4F2B
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 08:35:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D5B1CD4F5F
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 11:45:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231814AbjIVIfc (ORCPT
+        id S233799AbjIVLpO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Sep 2023 04:35:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43430 "EHLO
+        Fri, 22 Sep 2023 07:45:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229476AbjIVIfc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 04:35:32 -0400
+        with ESMTP id S233384AbjIVLpN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 07:45:13 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47A8583;
-        Fri, 22 Sep 2023 01:35:26 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E48C5C433C8;
-        Fri, 22 Sep 2023 08:35:25 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8CF3100;
+        Fri, 22 Sep 2023 04:45:07 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A3FEC433C8;
+        Fri, 22 Sep 2023 11:45:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695371725;
-        bh=yA1EP1f7a790yrhL8e6OjpEsAGP/5wtDGP/+UI6xmVs=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=D6bQeNWeMydtm4ey/v7yY1g2SJN1oG1Os57nreySWZV8yv+61FAy7hGdcrCkgA+P4
-         uVBVV2kOI1gJ+hXUTSmPxdOuD1k3Kc8tYVOwyVIy14gJ8sZNmzV8zpVEH+qdv/ch7N
-         Yv504Hk3o4KOXE+lLKj4dl5P838P4pn2Vi6VaPEUONlGxSbeW5QFER/Odq7JAhuOc1
-         v7TZ+ATj5Xv/yVsPv4eI4+YqqovQKpnNm8zZ00UnU6Rh920eQTvCXGcdPwXy4hQkMP
-         yTysEuV+NZtao5oJw9Z1te6TtJ7AjNfqTaWW1KgzTpk0BS5MHkL6M1TdoI4yltsdXw
-         moE7rq+W1frrw==
-Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-1dc6198196aso1043669fac.0;
-        Fri, 22 Sep 2023 01:35:25 -0700 (PDT)
-X-Gm-Message-State: AOJu0YwoEd01n5Z0blMZ63AOqBq1/D+SowyzTb6n2a9b6+jmdyDA3Y11
-        H+z2S1qHwhdDw4ceWoOMXZ9GUP7U+nK8JyMzHdg=
-X-Google-Smtp-Source: AGHT+IGJdlkVceh36Y6rKSzedFfiPm1XaCfxQie2IkIoOQ9IcU0nVAMjuqmzZt5P4sowVEmajbNVw4kw03SbmVHDSaQ=
-X-Received: by 2002:a05:6870:b49f:b0:1bb:6792:4787 with SMTP id
- y31-20020a056870b49f00b001bb67924787mr8715175oap.40.1695371725233; Fri, 22
- Sep 2023 01:35:25 -0700 (PDT)
+        s=k20201202; t=1695383107;
+        bh=uR/h12H4tUSld//WUy5EjZ19GU8VnbLlJ4DEyzMR6RU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=fL1KyVIzpiZbcx+oZJMeJFD3kkyS7frU8EYI31+LYH5hBUcFvhcz4h16iih9XKHjK
+         AD//V6K3Zi9imUxqKLcWqVm7hPJVmPWf2cNPekhu/iv7aqow+PMS6Dxu5bh9D+Iv+7
+         yPFZtnXXczK5+0YMUcfqiZEv/i/CMEhEtlboYKnukGV88hxP0claDg+lrol+k+0phk
+         qObxhWp1vs0hci38elr16R7c9DEikrDu952OyG1JzNq44Rs0oWK7F7tTdHgdGL2qgr
+         6kqHW2JqhaIX9jdF+wNqjGSUPfhXDIbv1dNCBXoudiYRSLwV4lnAFoUK4U8Ie1E2J1
+         0pVqBgoxe9CFg==
+From:   fdmanana@kernel.org
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: use full subcommand name at _btrfs_get_subvolid()
+Date:   Fri, 22 Sep 2023 12:45:01 +0100
+Message-Id: <c0ebb36f51f97acb3612ec5376a68441b5e62ac6.1695383055.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-References: <20230922000249.2345701-1-naohiro.aota@wdc.com>
-In-Reply-To: <20230922000249.2345701-1-naohiro.aota@wdc.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Fri, 22 Sep 2023 09:34:49 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5nbsLTPA9J31aRFz2nF36=EwE9TdNqh8jKd1XB_4CUyQ@mail.gmail.com>
-Message-ID: <CAL3q7H5nbsLTPA9J31aRFz2nF36=EwE9TdNqh8jKd1XB_4CUyQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/259: fix output's wrong word
-To:     Naohiro Aota <naohiro.aota@wdc.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 1:40=E2=80=AFAM Naohiro Aota <naohiro.aota@wdc.com>=
- wrote:
->
-> It prints "File extent layout before defrag" for the both outputs, but th=
-e
-> latter one should be "after defrag".
->
-> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Avoid using the shortcut "sub" for the "subvolume" command, as this is the
+standard practice because such shortcuts are not guaranteed to exist in
+every btrfs-progs release (they may come and go). Also make the variables
+local.
 
-Looks good, thanks.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ common/btrfs | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-> ---
->  tests/btrfs/259 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/btrfs/259 b/tests/btrfs/259
-> index cbbea9f527f5..358a455068a1 100755
-> --- a/tests/btrfs/259
-> +++ b/tests/btrfs/259
-> @@ -40,7 +40,7 @@ sync
->
->  new_csum=3D$(_md5_checksum $SCRATCH_MNT/foobar)
->
-> -echo "=3D=3D=3D File extent layout before defrag =3D=3D=3D" >> $seqres.f=
-ull
-> +echo "=3D=3D=3D File extent layout after defrag =3D=3D=3D" >> $seqres.fu=
-ll
->  $XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foobar" >> $seqres.full
->  $XFS_IO_PROG -c "fiemap -v" "$SCRATCH_MNT/foobar" > $tmp.after
->
-> --
-> 2.42.0
->
+diff --git a/common/btrfs b/common/btrfs
+index c9903a41..62cee209 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -6,10 +6,10 @@
+ 
+ _btrfs_get_subvolid()
+ {
+-	mnt=$1
+-	name=$2
++	local mnt=$1
++	local name=$2
+ 
+-	$BTRFS_UTIL_PROG sub list $mnt | grep -E "\s$name$" | $AWK_PROG '{ print $2 }'
++	$BTRFS_UTIL_PROG subvolume list $mnt | grep -E "\s$name$" | $AWK_PROG '{ print $2 }'
+ }
+ 
+ # _require_btrfs_command <command> [<subcommand>|<option>]
+-- 
+2.40.1
+
