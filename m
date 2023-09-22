@@ -2,193 +2,210 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE734CD4847
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 17:07:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F5D6CD4846
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 17:12:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229572AbjIVRHT (ORCPT
+        id S230242AbjIVRMl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Sep 2023 13:07:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49406 "EHLO
+        Fri, 22 Sep 2023 13:12:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230484AbjIVRHS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 13:07:18 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8FAA194
-        for <fstests@vger.kernel.org>; Fri, 22 Sep 2023 10:06:26 -0700 (PDT)
+        with ESMTP id S230195AbjIVRMk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 13:12:40 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0C01198
+        for <fstests@vger.kernel.org>; Fri, 22 Sep 2023 10:11:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695402386;
+        s=mimecast20190719; t=1695402706;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=NBvwpRZncWMEu2fOsmmJ3UeKyf9fjcHN+aQjvpZDdsc=;
-        b=cJJ6AxnEZGXNMM/eELHu2BRhV6eNMitEexDeSPZJcfl0zqSHiS1zR5VI7EsH89OD0415Jk
-        h81BAfZuZ1No+A9PSO9CqA3SeZEP8VksZLTQ5/6rVA9N5WtG0GVh3Uhm6nUv0I2vU3UBII
-        PSZKY4HIyuKQrvj2Cp7Lh6XdcYU+gtk=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=7JJ8GDc0WMBiyqPY+SDqt8ZvOoqVbEWn0hW2YQR7aGU=;
+        b=gDvr55fH9K84QucV3CWLYN3frB3za0Pbl78qAbTOgEoRBQoPkApRomXLjveO9yEUPjT9WT
+        vfjcSiXigpsrIWbppGat7KffeJnslQyj+jKVSwem7IasUSwVA+n6vl7DaVi3Lt9t8mlhBh
+        f1KaTwfGzJe0YBerFlHrQAzgNFuyG9A=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-499-hBhhuNo3P3CajwtxVE7vFQ-1; Fri, 22 Sep 2023 13:06:24 -0400
-X-MC-Unique: hBhhuNo3P3CajwtxVE7vFQ-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-274d62ab09bso2109273a91.2
-        for <fstests@vger.kernel.org>; Fri, 22 Sep 2023 10:06:24 -0700 (PDT)
+ us-mta-644-M-Vjc4xxMVWFMOZqIEyJPQ-1; Fri, 22 Sep 2023 13:11:44 -0400
+X-MC-Unique: M-Vjc4xxMVWFMOZqIEyJPQ-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1c577fea3dcso20013465ad.2
+        for <fstests@vger.kernel.org>; Fri, 22 Sep 2023 10:11:44 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695402383; x=1696007183;
+        d=1e100.net; s=20230601; t=1695402703; x=1696007503;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=NBvwpRZncWMEu2fOsmmJ3UeKyf9fjcHN+aQjvpZDdsc=;
-        b=LtPN66/JhHryc6iRPGT2uPR2ypGz7Ah/gpGL+RKtMXmCfvAlVCCEtZMUhqijJuoVRT
-         Tb8paCepLFdTFgTh4WdJGX8BN/bJpcGYlLtT1YVqx6x5HzkPlraAJTZn6jAylta8foMo
-         2V/yOvBtEIceZpUYpQQqtq5UxGpVtImAWp+zFF0ax2gBR/hJB1wJBLp8c4ZfkCWjxwlM
-         SlOVOOZAUZvvXF0Bmwh5BX54MxQAWaVNunsB3fi91g/WWYZDgM0R8LcFssr9DAKQrtzl
-         6gtdT96IuWqBXSDhiKWjKN1QJnIFeEiBx+Gsr03cF+Gpe2Ve1zK3pGsoVgXMwHqh2RP8
-         xh4Q==
-X-Gm-Message-State: AOJu0Yyf21B0sqorZf4MgSwGXkQzYztFhveUgtsM0IRe6YGBY7sGoXwd
-        WEcnVUNVfPMMzjZOODNDJMq3LlEYyChJVY0FFO08ACu2u/c5mp9DbRrVTqj5zJX7tccMbXl5Nxw
-        s1pH5aVB7lNJkLqQlA57iWh+J2xiQ
-X-Received: by 2002:a17:90b:4b41:b0:26b:48e8:cd76 with SMTP id mi1-20020a17090b4b4100b0026b48e8cd76mr276676pjb.37.1695402382826;
-        Fri, 22 Sep 2023 10:06:22 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGjPTMBXJLLU2YC4z3ZHlyKb74NGD84F7EZ5rXS0NITAduQnqyKe6yo93KiLBxEI9gktP8S0A==
-X-Received: by 2002:a17:90b:4b41:b0:26b:48e8:cd76 with SMTP id mi1-20020a17090b4b4100b0026b48e8cd76mr276658pjb.37.1695402382473;
-        Fri, 22 Sep 2023 10:06:22 -0700 (PDT)
+        bh=7JJ8GDc0WMBiyqPY+SDqt8ZvOoqVbEWn0hW2YQR7aGU=;
+        b=rXR7GMCJ+KtcdTyBv3wL0n96+2x7XauYbd7bb6vUOYYwinNZHlKsybYFBrG0lwxduU
+         KOQXam7icebhEBrQRxf9dsH6NZB6BP7IFyvXcoqOY9xvgmN7G6HbGZf/P1LlBxaEDKEV
+         QZHISK8vZI+ApkVwfoBn396qUQ3nlPq3+RECHIYXLaBbowEyt7DVsPqpWQDkVqi0OnQ3
+         ll0g3zE1XzEomqRunph3ijkuZNgWgg/lZoLK5uEDVe8Ssl21ZUNrrMDJDzJLE5+GGTxj
+         kgTIK/wut5pWwbO7uP+jyE6k8lwhaZfJ8ggFwmbqxC1cnUeq3MDsfuQ4VcYfNcCVHlzH
+         CrUA==
+X-Gm-Message-State: AOJu0YzlFEvikwExhhjqYvYzKlh8HzUdTU1TTcfWL+rsNkx6IsVwABxK
+        mkzHoVVzEK2xA+76cmZ9sIKMuj/3EcjcCkETRgVLIcks1BzeWFZUZSkJx3QgQ+7QzBHL9nwfL7z
+        wrwI0ecwdul5MoEQ9JA==
+X-Received: by 2002:a17:902:ab17:b0:1b8:28f6:20e6 with SMTP id ik23-20020a170902ab1700b001b828f620e6mr90279plb.34.1695402703570;
+        Fri, 22 Sep 2023 10:11:43 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEvF8HqczD1mx2AQsIe4++Z59S6NRE1VnElUP63PN5GKXNT6dPAjHCJI8aVVC85o9lku7f8CA==
+X-Received: by 2002:a17:902:ab17:b0:1b8:28f6:20e6 with SMTP id ik23-20020a170902ab1700b001b828f620e6mr90265plb.34.1695402703228;
+        Fri, 22 Sep 2023 10:11:43 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 20-20020a17090a199400b00268b439a0cbsm3811837pji.23.2023.09.22.10.06.20
+        by smtp.gmail.com with ESMTPSA id k9-20020a170902c40900b001c56157f062sm3724112plk.227.2023.09.22.10.11.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Sep 2023 10:06:22 -0700 (PDT)
-Date:   Sat, 23 Sep 2023 01:06:18 +0800
+        Fri, 22 Sep 2023 10:11:42 -0700 (PDT)
+Date:   Sat, 23 Sep 2023 01:11:39 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-        Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
-        Gao Xiang <hsiangkao@linux.alibaba.com>
-Subject: Re: [PATCH] generic: Add integrity tests with synchronous directio
-Message-ID: <20230922170618.7qnyqu7gpntlcpki@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <87y1gy5s9c.fsf@doe.com>
- <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
+To:     Anand Jain <anand.jain@oracle.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] btrfs: add missing _fixed_by_kernel_commit for a few
+ tests
+Message-ID: <20230922171139.gnri5fnoxmqcxtt6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <34b81b45d31ac4f951a1eb218870f27e74920a75.1695272311.git.anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
+In-Reply-To: <34b81b45d31ac4f951a1eb218870f27e74920a75.1695272311.git.anand.jain@oracle.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 05:40:36PM +0530, Ritesh Harjani (IBM) wrote:
-> This test covers data & metadata integrity check with directio with
-> o_sync flag and checks the file contents & size after sudden fileystem
-> shutdown once the directio write is completed. ext4 directio after iomap
-> conversion was broken in the sense that if the FS crashes after
-> synchronous directio write, it's file size is not properly updated.
-> This test adds a testcase to cover such scenario.
-
-Thanks for this patch, some review points as below.
-
-Is there a bug ? If there is, please use _fixed_by_kernel_commit to point
-out that.
-
+On Thu, Sep 21, 2023 at 01:22:16PM +0800, Anand Jain wrote:
+> A few tests were still using the older style of mentioning the fix in the
+> comment section. This patch migrates them to using
+> _fixed_by_kernel_commit.
 > 
-> Man page of open says that -
-> O_SYNC provides synchronized I/O file integrity completion, meaning write
-> operations will flush data and all associated metadata to the underlying
-> hardware
-> 
-> Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  tests/generic/471     | 45 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/471.out |  8 ++++++++
->  2 files changed, 53 insertions(+)
->  create mode 100755 tests/generic/471
->  create mode 100644 tests/generic/471.out
+
+No objection from me.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/btrfs/199 | 6 +++---
+>  tests/btrfs/216 | 4 ++--
+>  tests/btrfs/218 | 6 ++----
+>  tests/btrfs/225 | 4 ++--
+>  tests/btrfs/238 | 5 ++---
+>  5 files changed, 11 insertions(+), 14 deletions(-)
 > 
-> diff --git a/tests/generic/471 b/tests/generic/471
-> new file mode 100755
-> index 00000000..6c31cff8
-> --- /dev/null
-> +++ b/tests/generic/471
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
-> +#
-> +# FS QA Test 471
-> +#
-> +# Integrity test with DIRECT_IO & O_SYNC with sudden shutdown
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick shutdown
+> diff --git a/tests/btrfs/199 b/tests/btrfs/199
+> index 709ad1f988c3..a4920b99ef97 100755
+> --- a/tests/btrfs/199
+> +++ b/tests/btrfs/199
+> @@ -12,9 +12,6 @@
+>  # There is a long existing bug that btrfs doesn't discard all space for
+>  # above mentioned case.
+>  #
+> -# The fix is: "btrfs: extent-tree: Ensure we trim ranges across block group
+> -# boundary"
+> -#
+>  . ./common/preamble
+>  _begin_fstest auto quick trim fiemap
+>  
+> @@ -34,6 +31,9 @@ _cleanup()
+>  
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> +_fixed_by_kernel_commit 6b7faadd985c \
+> +	"btrfs: Ensure we trim ranges across block group boundary"
 > +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +}
-
-This _cleanup looks same ith the default one, so you don't need to do
-this "override", just remove this _cleanup and use the default one.
-
-> +
-> +# Import common functions.
-> +. ./common/filter
-
-If you don't need any filter helpers, feel free to remove this line.
-
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-     ^^^
-If you'll send a v2, feel free to remove this comment line :)
-
-> +_supported_fs generic
-> +_require_scratch
-> +_require_scratch_shutdown
-
-_require_odirect ??
-
-Or if you will add aio test in v2, please use _require_aiodio.
-Also add "aio" test group (in the _begin_fstest line).
-
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +echo "Create a 1M file using O_DIRECT & O_SYNC"
-> +xfs_io -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile > /dev/null 2>&1
-
-$XFS_IO_PROG
-
-Thanks,
-Zorro
-
-> +
-> +echo "Shutdown the fs suddenly"
-> +_scratch_shutdown
-> +
-> +echo "Cycle mount"
-> +_scratch_cycle_mount
-> +
-> +echo "File contents after cycle mount"
-> +_hexdump $SCRATCH_MNT/testfile
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/471.out b/tests/generic/471.out
-> new file mode 100644
-> index 00000000..ae279b79
-> --- /dev/null
-> +++ b/tests/generic/471.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 471
-> +Create a 1M file using O_DIRECT & O_SYNC
-> +Shutdown the fs suddenly
-> +Cycle mount
-> +File contents after cycle mount
-> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-> +*
-> +100000
+>  _require_loop
+>  _require_xfs_io_command "fiemap"
+>  
+> diff --git a/tests/btrfs/216 b/tests/btrfs/216
+> index 2ed4866887f7..979dcb73f097 100755
+> --- a/tests/btrfs/216
+> +++ b/tests/btrfs/216
+> @@ -6,8 +6,6 @@
+>  #
+>  # Test if the show_devname() returns sprout device instead of seed device.
+>  #
+> -# Fixed in kernel patch:
+> -#   btrfs: btrfs_show_devname don't traverse into the seed fsid
+>  
+>  . ./common/preamble
+>  _begin_fstest auto quick seed
+> @@ -17,6 +15,8 @@ _begin_fstest auto quick seed
+>  
+>  # real QA test starts here
+>  _supported_fs btrfs
+> +_fixed_by_kernel_commit 4faf55b03823 \
+> +	"btrfs: don't traverse into the seed devices in show_devname"
+>  _require_scratch_dev_pool 2
+>  
+>  _scratch_dev_pool_get 2
+> diff --git a/tests/btrfs/218 b/tests/btrfs/218
+> index 672ad0ff61f0..b0434834ff65 100755
+> --- a/tests/btrfs/218
+> +++ b/tests/btrfs/218
+> @@ -4,10 +4,6 @@
+>  #
+>  # FS QA Test 218
+>  #
+> -# Regression test for the problem fixed by the patch
+> -#
+> -#  btrfs: init device stats for seed devices
+> -#
+>  # Make a seed device, add a sprout to it, and then make sure we can still read
+>  # the device stats for both devices after we remount with the new sprout device.
+>  #
+> @@ -22,6 +18,8 @@ _begin_fstest auto quick volume
+>  
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> +_fixed_by_kernel_commit 124604eb50f8 \
+> +	"btrfs: init device stats for seed devices"
+>  _require_test
+>  _require_scratch_dev_pool 2
+>  
+> diff --git a/tests/btrfs/225 b/tests/btrfs/225
+> index cfb64a342644..677c162cb63a 100755
+> --- a/tests/btrfs/225
+> +++ b/tests/btrfs/225
+> @@ -5,8 +5,6 @@
+>  # FS QA Test 225
+>  #
+>  # Test for seed device-delete on a sprouted FS.
+> -# Requires kernel patch
+> -#    b5ddcffa3777  btrfs: fix put of uninitialized kobject after seed device delete
+>  #
+>  # Steps:
+>  #  Create a seed FS. Add a RW device to make it sprout FS and then delete
+> @@ -30,6 +28,8 @@ _cleanup()
+>  
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> +_fixed_by_kernel_commit b5ddcffa3777 \
+> +	"btrfs: fix put of uninitialized kobject after seed device delete"
+>  _require_test
+>  _require_scratch_dev_pool 2
+>  _require_btrfs_forget_or_module_loadable
+> diff --git a/tests/btrfs/238 b/tests/btrfs/238
+> index 57245917e16a..3a711ea7a1a8 100755
+> --- a/tests/btrfs/238
+> +++ b/tests/btrfs/238
+> @@ -6,9 +6,6 @@
+>  #
+>  # Check seed device integrity after fstrim on the sprout device.
+>  #
+> -#  Kernel bug is fixed by the commit:
+> -#    btrfs: fix unmountable seed device after fstrim
+> -
+>  . ./common/preamble
+>  _begin_fstest auto quick seed trim
+>  
+> @@ -19,6 +16,8 @@ _begin_fstest auto quick seed trim
+>  
+>  # Modify as appropriate.
+>  _supported_fs btrfs
+> +_fixed_by_kernel_commit 5e753a817b2d \
+> +	"btrfs: fix unmountable seed device after fstrim"
+>  _require_command "$BTRFS_TUNE_PROG" btrfstune
+>  _require_fstrim
+>  _require_scratch_dev_pool 2
 > -- 
-> 2.41.0
+> 2.31.1
 > 
 
