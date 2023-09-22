@@ -2,251 +2,158 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96A1ACD4F5B
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 11:45:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EAE0C04AAB
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 12:10:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233384AbjIVLp3 (ORCPT
+        id S233921AbjIVMKv (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Sep 2023 07:45:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51786 "EHLO
+        Fri, 22 Sep 2023 08:10:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231284AbjIVLp2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 07:45:28 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5831FFB;
-        Fri, 22 Sep 2023 04:45:22 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 26891C433C8;
-        Fri, 22 Sep 2023 11:45:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695383122;
-        bh=DMobzPB7Mh+U/9SkuKK6FKc9DEMpktLiCagzj++F7Ew=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ITSLUwS6ESUfMQwhWhRIA+Gri0NrR0RXrsoC9SXoGEVUeAM5CO4iThHxNByOHcyyp
-         8vIwNPSvCkBi5n0WUtu8JDgnOXBBEJeJO3rR8ZXLJP2nvw7QLjdEc7wTR1verm2icE
-         kY8TjBENEUE1h6S26dngFfXzOQKgGod8Tw3pTsXWNLl2Sdx3Y9w9qh9nAEAv4wzt4R
-         DEtlA3Iy7eOmKVbtPf9PVIzFejwNrrhbWnE4fZR72jZu4XduXyLiGqM04J2dg8359+
-         YAkqlMhcjvNYU1Y8g+rWoMNExYG7XqCOjIugupwhT9pItpISg5/kiiO4rqmW4zd32e
-         /EIMDTO3TOSLw==
-From:   fdmanana@kernel.org
+        with ESMTP id S231301AbjIVMKv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 08:10:51 -0400
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1A9792;
+        Fri, 22 Sep 2023 05:10:44 -0700 (PDT)
+Received: by mail-pf1-x42d.google.com with SMTP id d2e1a72fcca58-68bed2c786eso1848005b3a.0;
+        Fri, 22 Sep 2023 05:10:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695384644; x=1695989444; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mPDulTQG32dEgsHx5Z26bnYKsvCd2L6FGqcW6KHfius=;
+        b=IxDKV8AI2U15GgXSEo/bksHf69jRKL906eJOpx1+C7v9vBp79DJVDul2ZFjlCrIuyq
+         +4QgWOxJeG8/R0NnbFUbnOHz4MBvkjUcIoPvVlz5A2ptLwJaWUqxaeh7nJChjpuSn3bd
+         c2kNplqyvD9PenQeuLkAvd3aMaq0AiDwbToPCCwAt/Rh5rZkTqCIT6XOWhj4qMJMoD52
+         IfasnEOORKJjvW7PdLYIT/gv7chB4VVoyQpV/7g9OYE/0N3OOV7KKFqWZ/vxmflEC7wB
+         pVpy9ko/kUDvqlKl06My/msd2rk9H0eK7dGJobtPJBxe2ViFVF8zHFaVZOqpEEa90m6g
+         Qd6A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695384644; x=1695989444;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=mPDulTQG32dEgsHx5Z26bnYKsvCd2L6FGqcW6KHfius=;
+        b=h9Rg6qaL4vZiNLfZ+C0qxr+TvtlQ48GIPQg4OrOAFuKZ6JpUx8EbcUYNWhFiQiHKv2
+         o6/V+LeUsqh6S0MP5afcDSMtjHWUK4qnRCXTTTOIo9e76ybEC27CLzq7HLAA/2FOhMYV
+         GJtX2+P4iESBNG/ihyDIXU/n9GsJ5oF7ZxNYd8fzz6dXATvzQfIKlbWNcffRWd7+et/q
+         +moOonfWt2UZ6eIORu7nuN1xMUWlh7k3+VqZjs2AuOrUE8Yl3xuIvUmhu3osvb5RIVwM
+         yBYT+YgOgxcslVYWQxY8enWmNo4qa1ErIUWszzpbtXkjVCpz0/ph5wSWTCD/DfFW96EX
+         4fCg==
+X-Gm-Message-State: AOJu0YwHvJSSK2FYulX4jmdPUonai2TJjVtA3HzqZxpGpzuc+8OgHXZU
+        Hmi0WDAx+rqRxL5aX087rzT4VckGGd8=
+X-Google-Smtp-Source: AGHT+IEjKnrh5M2TnMG3CWNSLkGC2K6tUNRhr56GE0XpOPse5DHFw5PcAs77AS8qLtIweQTd1dqV8Q==
+X-Received: by 2002:a05:6a21:47ca:b0:157:b9e1:c82f with SMTP id as10-20020a056a2147ca00b00157b9e1c82fmr7412339pzc.35.1695384643788;
+        Fri, 22 Sep 2023 05:10:43 -0700 (PDT)
+Received: from dw-tp.ihost.com ([49.207.223.191])
+        by smtp.gmail.com with ESMTPSA id d14-20020a17090ad98e00b00274803c4c90sm3127380pjv.40.2023.09.22.05.10.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 22 Sep 2023 05:10:43 -0700 (PDT)
+From:   "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs/287: filter snapshot IDs to avoid failures when using some features
-Date:   Fri, 22 Sep 2023 12:45:17 +0100
-Message-Id: <99982dd613b5bb2d693b0491af873e1e7291dd4b.1695383059.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.40.1
+Cc:     linux-ext4@vger.kernel.org, Jan Kara <jack@suse.cz>,
+        Theodore Ts'o <tytso@mit.edu>,
+        "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
+        Gao Xiang <hsiangkao@linux.alibaba.com>
+Subject: [PATCH] generic: Add integrity tests with synchronous directio
+Date:   Fri, 22 Sep 2023 17:40:36 +0530
+Message-ID: <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
+X-Mailer: git-send-email 2.41.0
+In-Reply-To: <87y1gy5s9c.fsf@doe.com>
+References: <87y1gy5s9c.fsf@doe.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Filipe Manana <fdmanana@suse.com>
+This test covers data & metadata integrity check with directio with
+o_sync flag and checks the file contents & size after sudden fileystem
+shutdown once the directio write is completed. ext4 directio after iomap
+conversion was broken in the sense that if the FS crashes after
+synchronous directio write, it's file size is not properly updated.
+This test adds a testcase to cover such scenario.
 
-When running btrfs/287 with features that create extra trees or don't
-the need to create some trees, such as when using the free space tree
-(default for several btrfs-progs releases now) versus when not using
-it (by passing -R ^free-space-tree in MKFS_OPTIONS), the test can fail
-because the IDs for the two snapshots it creates changes, and the golden
-output is requiring the numeric IDs of the snapshots.
+Man page of open says that -
+O_SYNC provides synchronized I/O file integrity completion, meaning write
+operations will flush data and all associated metadata to the underlying
+hardware
 
-For example, when disabling the free space tree, the test fails like this:
-
-  $ MKFS_OPTIONS="-R ^free-space-tree" ./check btrfs/287
-  FSTYP         -- btrfs
-  PLATFORM      -- Linux/x86_64 debian0 6.6.0-rc2-btrfs-next-138+ #1 SMP PREEMPT_DYNAMIC Thu Sep 21 17:58:48 WEST 2023
-  MKFS_OPTIONS  -- -R ^free-space-tree /dev/sdc
-  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-
-  btrfs/287 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad)
-      --- tests/btrfs/287.out	2023-09-22 12:39:43.060761389 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad	2023-09-22 12:40:54.238849251 +0100
-      @@ -44,52 +44,52 @@
-       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
-       Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
-       resolve first extent:
-      -inode 257 offset 16777216 root 257
-      -inode 257 offset 8388608 root 257
-      -inode 257 offset 16777216 root 256
-      -inode 257 offset 8388608 root 256
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/287.out /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad'  to see the entire diff)
-
-  HINT: You _MAY_ be missing kernel fix:
-        0cad8f14d70c btrfs: fix backref walking not returning all inode refs
-
-  Ran: btrfs/287
-  Failures: btrfs/287
-  Failed 1 of 1 tests
-
-So add a filter to logical reserve calls to replace snapshot root IDs with
-a logical name (snap1 and snap2).
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 ---
- tests/btrfs/287     | 24 ++++++++++++++-----
- tests/btrfs/287.out | 56 ++++++++++++++++++++++-----------------------
- 2 files changed, 46 insertions(+), 34 deletions(-)
+ tests/generic/471     | 45 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/471.out |  8 ++++++++
+ 2 files changed, 53 insertions(+)
+ create mode 100755 tests/generic/471
+ create mode 100644 tests/generic/471.out
 
-diff --git a/tests/btrfs/287 b/tests/btrfs/287
-index cac96a23..04871d46 100755
---- a/tests/btrfs/287
-+++ b/tests/btrfs/287
-@@ -27,6 +27,15 @@ query_logical_ino()
- 	$BTRFS_UTIL_PROG inspect-internal logical-resolve -P $* $SCRATCH_MNT
- }
- 
-+# The IDs of the snapshots (roots) we create may vary if we are using the free
-+# space tree or not for example (mkfs options -R free-space-tree and
-+# -R ^free-space-tree). So replace their IDs with names so that we don't get
-+# golden output mismatches if we are using features that create other roots.
-+filter_snapshot_ids()
+diff --git a/tests/generic/471 b/tests/generic/471
+new file mode 100755
+index 00000000..6c31cff8
+--- /dev/null
++++ b/tests/generic/471
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
++#
++# FS QA Test 471
++#
++# Integrity test with DIRECT_IO & O_SYNC with sudden shutdown
++#
++. ./common/preamble
++_begin_fstest auto quick shutdown
++
++# Override the default cleanup function.
++_cleanup()
 +{
-+	sed -e "s/root $snap1_id\b/snap1/" -e "s/root $snap2_id\b/snap2/"
++	cd /
++	rm -r -f $tmp.*
 +}
 +
- _scratch_mkfs >> $seqres.full || _fail "mkfs failed"
- _scratch_mount
- 
-@@ -107,16 +116,19 @@ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 \
- $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
- 	| _filter_scratch
- 
-+snap1_id=$(_btrfs_get_subvolid $SCRATCH_MNT snap1)
-+snap2_id=$(_btrfs_get_subvolid $SCRATCH_MNT snap2)
++# Import common functions.
++. ./common/filter
 +
- # Query for the first extent (at offset 0). Should give two entries for each
- # root - default subvolume and the 2 snapshots, for file offsets 8M and 16M.
- echo "resolve first extent:"
--query_logical_ino $first_extent_bytenr
-+query_logical_ino $first_extent_bytenr | filter_snapshot_ids
- 
- # Query for the first extent (at offset 0) with the ignore offset option.
- # Should give 3 entries for each root - default subvolume and the 2 snapshots,
- # for file offsets 2M, 8M and 16M.
- echo "resolve first extent with ignore offset option:"
--query_logical_ino -o $first_extent_bytenr
-+query_logical_ino -o $first_extent_bytenr | filter_snapshot_ids
- 
- # Now lets punch a 1M hole at file offset 4M. This changes the second file
- # extent item to point to the second extent with an offset of 1M and a length
-@@ -126,14 +138,14 @@ query_logical_ino -o $first_extent_bytenr
- # return file offsets 12M and 20M.
- $XFS_IO_PROG -c "fpunch 4M 1M" $SCRATCH_MNT/foo
- echo "resolve second extent after punching hole at file range [4M, 5M):"
--query_logical_ino $second_extent_bytenr
-+query_logical_ino $second_extent_bytenr | filter_snapshot_ids
- 
- # Repeat the query but with the ignore offset option. We should get 3 entries
- # for each root. For the snapshot roots, we should get entries for file offsets
- # 4M, 12M and 20M, while for the default subvolume (root 5) we should get for
- # file offsets 5M, 12M and 20M.
- echo "resolve second extent with ignore offset option:"
--query_logical_ino -o $second_extent_bytenr
-+query_logical_ino -o $second_extent_bytenr | filter_snapshot_ids
- 
- # Now delete the first snapshot and repeat the last 2 queries.
- $BTRFS_UTIL_PROG subvolume delete -C $SCRATCH_MNT/snap1 | _filter_scratch
-@@ -142,13 +154,13 @@ $BTRFS_UTIL_PROG subvolume delete -C $SCRATCH_MNT/snap1 | _filter_scratch
- # and 20M for the default subvolume (root 5) and file offsets 4M, 12M and 20M
- # for the second snapshot root.
- echo "resolve second extent:"
--query_logical_ino $second_extent_bytenr
-+query_logical_ino $second_extent_bytenr | filter_snapshot_ids
- 
- # Query the second extent with the ignore offset option, should return file
- # offsets 5M, 12M and 20M for the default subvolume (root 5) and file offsets
- # 4M, 12M and 20M for the second snapshot root.
- echo "resolve second extent with ignore offset option:"
--query_logical_ino -o $second_extent_bytenr
-+query_logical_ino -o $second_extent_bytenr | filter_snapshot_ids
- 
- status=0
- exit
-diff --git a/tests/btrfs/287.out b/tests/btrfs/287.out
-index 683f9875..0d694733 100644
---- a/tests/btrfs/287.out
-+++ b/tests/btrfs/287.out
-@@ -44,52 +44,52 @@ inode 257 offset 2097152 root 5
- Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
- Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
- resolve first extent:
--inode 257 offset 16777216 root 257
--inode 257 offset 8388608 root 257
--inode 257 offset 16777216 root 256
--inode 257 offset 8388608 root 256
-+inode 257 offset 16777216 snap2
-+inode 257 offset 8388608 snap2
-+inode 257 offset 16777216 snap1
-+inode 257 offset 8388608 snap1
- inode 257 offset 16777216 root 5
- inode 257 offset 8388608 root 5
- resolve first extent with ignore offset option:
--inode 257 offset 16777216 root 257
--inode 257 offset 8388608 root 257
--inode 257 offset 2097152 root 257
--inode 257 offset 16777216 root 256
--inode 257 offset 8388608 root 256
--inode 257 offset 2097152 root 256
-+inode 257 offset 16777216 snap2
-+inode 257 offset 8388608 snap2
-+inode 257 offset 2097152 snap2
-+inode 257 offset 16777216 snap1
-+inode 257 offset 8388608 snap1
-+inode 257 offset 2097152 snap1
- inode 257 offset 16777216 root 5
- inode 257 offset 8388608 root 5
- inode 257 offset 2097152 root 5
- resolve second extent after punching hole at file range [4M, 5M):
--inode 257 offset 20971520 root 257
--inode 257 offset 12582912 root 257
--inode 257 offset 4194304 root 257
--inode 257 offset 20971520 root 256
--inode 257 offset 12582912 root 256
--inode 257 offset 4194304 root 256
-+inode 257 offset 20971520 snap2
-+inode 257 offset 12582912 snap2
-+inode 257 offset 4194304 snap2
-+inode 257 offset 20971520 snap1
-+inode 257 offset 12582912 snap1
-+inode 257 offset 4194304 snap1
- inode 257 offset 20971520 root 5
- inode 257 offset 12582912 root 5
- resolve second extent with ignore offset option:
--inode 257 offset 20971520 root 257
--inode 257 offset 12582912 root 257
--inode 257 offset 4194304 root 257
--inode 257 offset 20971520 root 256
--inode 257 offset 12582912 root 256
--inode 257 offset 4194304 root 256
-+inode 257 offset 20971520 snap2
-+inode 257 offset 12582912 snap2
-+inode 257 offset 4194304 snap2
-+inode 257 offset 20971520 snap1
-+inode 257 offset 12582912 snap1
-+inode 257 offset 4194304 snap1
- inode 257 offset 20971520 root 5
- inode 257 offset 12582912 root 5
- inode 257 offset 5242880 root 5
- Delete subvolume (commit): 'SCRATCH_MNT/snap1'
- resolve second extent:
--inode 257 offset 20971520 root 257
--inode 257 offset 12582912 root 257
--inode 257 offset 4194304 root 257
-+inode 257 offset 20971520 snap2
-+inode 257 offset 12582912 snap2
-+inode 257 offset 4194304 snap2
- inode 257 offset 20971520 root 5
- inode 257 offset 12582912 root 5
- resolve second extent with ignore offset option:
--inode 257 offset 20971520 root 257
--inode 257 offset 12582912 root 257
--inode 257 offset 4194304 root 257
-+inode 257 offset 20971520 snap2
-+inode 257 offset 12582912 snap2
-+inode 257 offset 4194304 snap2
- inode 257 offset 20971520 root 5
- inode 257 offset 12582912 root 5
- inode 257 offset 5242880 root 5
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_require_scratch
++_require_scratch_shutdown
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++echo "Create a 1M file using O_DIRECT & O_SYNC"
++xfs_io -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile > /dev/null 2>&1
++
++echo "Shutdown the fs suddenly"
++_scratch_shutdown
++
++echo "Cycle mount"
++_scratch_cycle_mount
++
++echo "File contents after cycle mount"
++_hexdump $SCRATCH_MNT/testfile
++
++status=0
++exit
+diff --git a/tests/generic/471.out b/tests/generic/471.out
+new file mode 100644
+index 00000000..ae279b79
+--- /dev/null
++++ b/tests/generic/471.out
+@@ -0,0 +1,8 @@
++QA output created by 471
++Create a 1M file using O_DIRECT & O_SYNC
++Shutdown the fs suddenly
++Cycle mount
++File contents after cycle mount
++000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
++*
++100000
 -- 
-2.40.1
+2.41.0
 
