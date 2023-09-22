@@ -2,107 +2,143 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 818F5E6FE41
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 15:18:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA97BE6FE52
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 15:21:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232803AbjIVPSu (ORCPT
+        id S232370AbjIVPVY (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Sep 2023 11:18:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60100 "EHLO
+        Fri, 22 Sep 2023 11:21:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232689AbjIVPSt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 11:18:49 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E90DC1A3;
-        Fri, 22 Sep 2023 08:18:38 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id A8AC11FF1F;
-        Fri, 22 Sep 2023 15:18:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1695395917; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=qn8lIN/sqGnW3hNAcQMzFMZ3Cywk6q++rP9dDkSEQFM=;
-        b=JFVRFqLMY+kZqmao2NME8QY/yDRRxdO1kK2sWDNpaaxKCf8cFyqKMfOfDyp5Sov9HhXthO
-        YOA+exhdjxOr3NtK369rXCHBmieReqDVKGn6ece82vVhkIO3nFDjU0Zbjfi+cJnhvbqfAu
-        P1oSD6O9+yIraDrNXrkJUdkp6JgCWu8=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1695395917;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=qn8lIN/sqGnW3hNAcQMzFMZ3Cywk6q++rP9dDkSEQFM=;
-        b=5jIwua/DP+cvFKlSctL7btSHtutdZV7xB7CI2OBPZ3QHbh2nkdlgDrkQyx619HqbNE2sG5
-        i11Tet58BzJonUDg==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7C67613597;
-        Fri, 22 Sep 2023 15:18:37 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id cZeCHE2wDWW/GAAAMHmgww
-        (envelope-from <ddiss@suse.de>); Fri, 22 Sep 2023 15:18:37 +0000
-Date:   Fri, 22 Sep 2023 17:18:35 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: use full subcommand name at
- _btrfs_get_subvolid()
-Message-ID: <20230922171835.4fb6fc0c@echidna.fritz.box>
-In-Reply-To: <c0ebb36f51f97acb3612ec5376a68441b5e62ac6.1695383055.git.fdmanana@suse.com>
-References: <c0ebb36f51f97acb3612ec5376a68441b5e62ac6.1695383055.git.fdmanana@suse.com>
+        with ESMTP id S232239AbjIVPVY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 11:21:24 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB3B2A1;
+        Fri, 22 Sep 2023 08:21:17 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 74D2DC433C7;
+        Fri, 22 Sep 2023 15:21:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695396077;
+        bh=ij9sQedXywv7LVfCQIvTYStG7bDNfL6PZxTLsZZzB1M=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=r9yDc3BjhRr/yu1b3PR4hPIdvru9iP2b+AJPBg0DxSEaKg4IMXinp529XotMQEgpk
+         cBcnqjD+v+Z0CY+NLGppouJ/jJ8UjZl7Dqc+dFrspzdyp8QTxyuFT8RM15m+PvKGjx
+         dIXt5Fn+CnB2Zr2IDjwAofuhzIjeFsokUMflvuLVM9VkwBbzjmCCuqV2aZIF4O9T0S
+         7igJCbPdOy/x4vmm/z79Taenl570xDtWtiAflgysq9toXoWPN8cT7fl0lEFoPwb6GA
+         O3gVS+18WZDyPKLhSudxzGY5xLNxNm9+nZgVFNE5xg6tSEVBVrZJ0fZBa0XIwrMAn4
+         CLOpjBhEF+fHg==
+Date:   Fri, 22 Sep 2023 08:21:16 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        Jan Kara <jack@suse.cz>, Theodore Ts'o <tytso@mit.edu>,
+        Gao Xiang <hsiangkao@linux.alibaba.com>
+Subject: Re: [PATCH] generic: Add integrity tests with synchronous directio
+Message-ID: <20230922152116.GA11380@frogsfrogsfrogs>
+References: <87y1gy5s9c.fsf@doe.com>
+ <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, 22 Sep 2023 12:45:01 +0100, fdmanana@kernel.org wrote:
-
-> From: Filipe Manana <fdmanana@suse.com>
+On Fri, Sep 22, 2023 at 05:40:36PM +0530, Ritesh Harjani (IBM) wrote:
+> This test covers data & metadata integrity check with directio with
+> o_sync flag and checks the file contents & size after sudden fileystem
+> shutdown once the directio write is completed. ext4 directio after iomap
+> conversion was broken in the sense that if the FS crashes after
+> synchronous directio write, it's file size is not properly updated.
+> This test adds a testcase to cover such scenario.
 > 
-> Avoid using the shortcut "sub" for the "subvolume" command, as this is the
-> standard practice because such shortcuts are not guaranteed to exist in
-> every btrfs-progs release (they may come and go). Also make the variables
-> local.
-
-Hmm, having them come and go would likely break quite a few user
-scripts...
-
+> Man page of open says that -
+> O_SYNC provides synchronized I/O file integrity completion, meaning write
+> operations will flush data and all associated metadata to the underlying
+> hardware
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 > ---
->  common/btrfs | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  tests/generic/471     | 45 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/471.out |  8 ++++++++
+>  2 files changed, 53 insertions(+)
+>  create mode 100755 tests/generic/471
+>  create mode 100644 tests/generic/471.out
 > 
-> diff --git a/common/btrfs b/common/btrfs
-> index c9903a41..62cee209 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -6,10 +6,10 @@
->  
->  _btrfs_get_subvolid()
->  {
-> -	mnt=$1
-> -	name=$2
-> +	local mnt=$1
-> +	local name=$2
->  
-> -	$BTRFS_UTIL_PROG sub list $mnt | grep -E "\s$name$" | $AWK_PROG '{ print $2 }'
-> +	$BTRFS_UTIL_PROG subvolume list $mnt | grep -E "\s$name$" | $AWK_PROG '{ print $2 }'
+> diff --git a/tests/generic/471 b/tests/generic/471
+> new file mode 100755
+> index 00000000..6c31cff8
+> --- /dev/null
+> +++ b/tests/generic/471
+> @@ -0,0 +1,45 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 471
+> +#
+> +# Integrity test with DIRECT_IO & O_SYNC with sudden shutdown
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick shutdown
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_scratch
+> +_require_scratch_shutdown
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo "Create a 1M file using O_DIRECT & O_SYNC"
+> +xfs_io -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile > /dev/null 2>&1
 
-My grep+awk OCD would say that this should be:
-$BTRFS_UTIL_PROG subvolume list $mnt | $AWK_PROG -v name="$name" '$9 == name { print $2 }'
+$XFS_IO_PROG ?
 
-Looks fine as is though.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Otherwise looks good to me...
 
+--D
+
+> +
+> +echo "Shutdown the fs suddenly"
+> +_scratch_shutdown
+> +
+> +echo "Cycle mount"
+> +_scratch_cycle_mount
+> +
+> +echo "File contents after cycle mount"
+> +_hexdump $SCRATCH_MNT/testfile
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> new file mode 100644
+> index 00000000..ae279b79
+> --- /dev/null
+> +++ b/tests/generic/471.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 471
+> +Create a 1M file using O_DIRECT & O_SYNC
+> +Shutdown the fs suddenly
+> +Cycle mount
+> +File contents after cycle mount
+> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
+> +*
+> +100000
+> -- 
+> 2.41.0
+> 
