@@ -2,71 +2,149 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4D29E7109A
-	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 12:21:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8B17E6FE2C
+	for <linux-fstests@archiver.kernel.org>; Fri, 22 Sep 2023 13:30:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231301AbjIVMVg (ORCPT
+        id S234188AbjIVNa1 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 22 Sep 2023 08:21:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48972 "EHLO
+        Fri, 22 Sep 2023 09:30:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54782 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231172AbjIVMVf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 08:21:35 -0400
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90AC192;
-        Fri, 22 Sep 2023 05:21:29 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out1.suse.de (Postfix) with ESMTPS id 259D621B15;
-        Fri, 22 Sep 2023 12:21:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1695385288; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3LGMPBoIWAWB5ngDZRlQWYO+9y+tDw1exhS/hsC/g7o=;
-        b=rT4PW29i1NWHGl7XAwre92Xz7U03WDGsQ5UhzwN+GClwwcnm7CQJ7B9uCPlVwlA4EcWlTE
-        r2GGiOzTO/bC1aQ5DWLtAzh2zZgMgDQFq+BoCm3tkU6UOrZw2E/l+pPYGQIKVd9rBhnq2U
-        p0ummrcHh5Gvlc4p6QhnDNBrYbsEx+M=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1695385288;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3LGMPBoIWAWB5ngDZRlQWYO+9y+tDw1exhS/hsC/g7o=;
-        b=82q1izXSigQ1juU5gRdgU9jCzGYwKG7gE/xdcTHSK6gxsk9lHtf6khfG18AFR+aY+Etb+R
-        3SP5LsuYmCWD3+Bw==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id E7F9013478;
-        Fri, 22 Sep 2023 12:21:27 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id bWU0N8eGDWWKOgAAMHmgww
-        (envelope-from <ddiss@suse.de>); Fri, 22 Sep 2023 12:21:27 +0000
-Date:   Fri, 22 Sep 2023 14:21:26 +0200
-From:   David Disseldorp <ddiss@suse.de>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] generic: test new directory entries are returned
- after rewinding directory
-Message-ID: <20230922142126.6e8500cc@echidna.fritz.box>
-In-Reply-To: <603deada0f5b9ddff2446dae87a96cb05d566c2c.1695309198.git.fdmanana@suse.com>
-References: <1888d81c5fad8204dd4948d36291d24f00354b22.1694705838.git.fdmanana@suse.com>
-        <603deada0f5b9ddff2446dae87a96cb05d566c2c.1695309198.git.fdmanana@suse.com>
+        with ESMTP id S234065AbjIVNaL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Sep 2023 09:30:11 -0400
+Received: from out30-110.freemail.mail.aliyun.com (out30-110.freemail.mail.aliyun.com [115.124.30.110])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E0231A8;
+        Fri, 22 Sep 2023 06:30:03 -0700 (PDT)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R561e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046049;MF=hsiangkao@linux.alibaba.com;NM=1;PH=DS;RN=5;SR=0;TI=SMTPD_---0Vsdceue_1695389400;
+Received: from 192.168.3.4(mailfrom:hsiangkao@linux.alibaba.com fp:SMTPD_---0Vsdceue_1695389400)
+          by smtp.aliyun-inc.com;
+          Fri, 22 Sep 2023 21:30:01 +0800
+Message-ID: <7ce321e3-3250-5627-18f8-230249fbf78f@linux.alibaba.com>
+Date:   Fri, 22 Sep 2023 21:29:59 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0)
+ Gecko/20100101 Thunderbird/102.15.0
+Subject: Re: [PATCH] generic: Add integrity tests with synchronous directio
+To:     "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
+        fstests@vger.kernel.org
+Cc:     linux-ext4@vger.kernel.org, Jan Kara <jack@suse.cz>,
+        Theodore Ts'o <tytso@mit.edu>
+References: <87y1gy5s9c.fsf@doe.com>
+ <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
+From:   Gao Xiang <hsiangkao@linux.alibaba.com>
+In-Reply-To: <434beffaf18d39f898518ea9eb1cea4548e77c3a.1695383715.git.ritesh.list@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+Hi Ritesh,
 
+On 2023/9/22 20:10, Ritesh Harjani (IBM) wrote:
+> This test covers data & metadata integrity check with directio with
+> o_sync flag and checks the file contents & size after sudden fileystem
+> shutdown once the directio write is completed. ext4 directio after iomap
+> conversion was broken in the sense that if the FS crashes after
+> synchronous directio write, it's file size is not properly updated.
+> This test adds a testcase to cover such scenario.
+> 
+> Man page of open says that -
+> O_SYNC provides synchronized I/O file integrity completion, meaning write
+> operations will flush data and all associated metadata to the underlying
+> hardware
+> 
+> Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> ---
+>   tests/generic/471     | 45 +++++++++++++++++++++++++++++++++++++++++++
+>   tests/generic/471.out |  8 ++++++++
+>   2 files changed, 53 insertions(+)
+>   create mode 100755 tests/generic/471
+>   create mode 100644 tests/generic/471.out
+> 
+> diff --git a/tests/generic/471 b/tests/generic/471
+> new file mode 100755
+> index 00000000..6c31cff8
+> --- /dev/null
+> +++ b/tests/generic/471
+> @@ -0,0 +1,45 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 471
+> +#
+> +# Integrity test with DIRECT_IO & O_SYNC with sudden shutdown
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick shutdown
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_scratch
+> +_require_scratch_shutdown
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo "Create a 1M file using O_DIRECT & O_SYNC"
+> +xfs_io -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile > /dev/null 2>&1
+
+Thanks for the time on this.
+
+I'm fine with this as it's the exact regression test to
+my report.
+
+Although the original issue from our guest real workload
+is actually aio + O_SYNC, but that doesn't matter for
+ext4 since it will serialize the whole process of DIO
+write beyond i_size with inode lock.
+
+Yet if my understanding is correct, some other fses (e.g.
+XFS) seem to be more relaxed than this, see
+xfs_file_dio_write_aligned() and xfs_file_write_checks(),
+so I'm not sure if we need to cover AIO cases as well,
+anyway.
+
+Thanks,
+Gao Xiang
+
+> +
+> +echo "Shutdown the fs suddenly"
+> +_scratch_shutdown
+> +
+> +echo "Cycle mount"
+> +_scratch_cycle_mount
+> +
+> +echo "File contents after cycle mount"
+> +_hexdump $SCRATCH_MNT/testfile
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> new file mode 100644
+> index 00000000..ae279b79
+> --- /dev/null
+> +++ b/tests/generic/471.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 471
+> +Create a 1M file using O_DIRECT & O_SYNC
+> +Shutdown the fs suddenly
+> +Cycle mount
+> +File contents after cycle mount
+> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
+> +*
+> +100000
