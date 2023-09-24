@@ -2,183 +2,224 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14D07CE7A8A
-	for <linux-fstests@archiver.kernel.org>; Sun, 24 Sep 2023 15:16:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 653F4CE7A88
+	for <linux-fstests@archiver.kernel.org>; Sun, 24 Sep 2023 15:45:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229569AbjIXPQt (ORCPT
+        id S229559AbjIXPp7 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 24 Sep 2023 11:16:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40028 "EHLO
+        Sun, 24 Sep 2023 11:45:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbjIXPQs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Sep 2023 11:16:48 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7A2FFD
-        for <fstests@vger.kernel.org>; Sun, 24 Sep 2023 08:16:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695568601;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type;
-        bh=9GwWvlXYkgcC89ljX5OuVItnEqMAYozS6l7LsuY5VUA=;
-        b=VQcQMk7dH6l2lPN6FuUGyRl4xoqmEaCyec2gCj3Bj4C/4Hv+wCQEVW02VSgHZUHRFygygs
-        YPG1pJLopjjZFLZ6cCzyxLLhnxhnec+AqJKlUE+EgEF6ewKGmDBiGfxRVasqAe+ypQKS7e
-        w3CgCBq3d8Y5p7a6Kq7K3vwSXaAMNkY=
-Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
- [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-504-eBuPb7IcMWaVLdmpa2cvqA-1; Sun, 24 Sep 2023 11:16:38 -0400
-X-MC-Unique: eBuPb7IcMWaVLdmpa2cvqA-1
-Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3aa1254fb00so10843679b6e.1
-        for <fstests@vger.kernel.org>; Sun, 24 Sep 2023 08:16:38 -0700 (PDT)
+        with ESMTP id S229437AbjIXPp6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Sep 2023 11:45:58 -0400
+Received: from mail-vk1-xa30.google.com (mail-vk1-xa30.google.com [IPv6:2607:f8b0:4864:20::a30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ED6EC6;
+        Sun, 24 Sep 2023 08:45:51 -0700 (PDT)
+Received: by mail-vk1-xa30.google.com with SMTP id 71dfb90a1353d-4963a2e3aa6so4297903e0c.0;
+        Sun, 24 Sep 2023 08:45:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695570350; x=1696175150; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=fxAiqV0SbR0M9A07Lt2yaycJ8W97vQp/Mh06hMDHTLs=;
+        b=OddJYccUQVjQDnMGnlvt7ukZyO9vK07HESjbEWWZmFK4ySvNmb9ACM71eIT7evAoKB
+         Dg23ul5qd1GTZasEod9bq+88MvhA9ZGsDA+oRXkFc22iqVDFnWAA8Ubn3UoB11Btu0VX
+         a6tlzEbJX8bbQe73DH/upJwjGmsGQ0USC7fdsmldwFB1okb7mBafuPGtQhgOi6dZUs4X
+         G2pWhG9XRxFMpTS9hshwYU5MqQNMq1x0WNBjPYo6rNKZCM6PZipbJMA/RdmFt2MTsz7q
+         FZd0QZZvMpDl85wUttTIF2d2oBzaIve5i1EXcInrqfnBUx1h8w5+mDndyGP2+SblKsZO
+         mzew==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695568597; x=1696173397;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=9GwWvlXYkgcC89ljX5OuVItnEqMAYozS6l7LsuY5VUA=;
-        b=PM0ItvybUl4UYHlP0SQddKCKtCA2XHroPVM0u7hRcXcE7TZ3scWMZ6LMpv1Als3Yx5
-         gT5iLk4oRYGhWG1kwtOheQFyNfbnI0SESDb4GDL9Mnx5sJ8WPezNC1C2ZggCdhlwsBfW
-         V2YqUrYrLoOdVX6jsLcfJofdJCIwWlfVGSqyjRFP4K1xSTQE8YuXbcWSwZUwF9k5eI/H
-         WZcMbu7VCYbaTJtoiRg+pLdfgTqanYl6qJD5sEmneCiwmulQmZvzH5dFY85pOpB1X0r6
-         sBqgxCN60Qb84mRXDosaJMqXX4YZc+16Vg20YdPD3blZOqPtWILghEL+iBaPftSs27dj
-         rWWg==
-X-Gm-Message-State: AOJu0YyWZg5Hp4hKJy97jiWMISRU47YUaklVj6oJ16Nep36iPYXK8Ye8
-        9IL0UTYFT0O4DcKt1+ryPaX0mTEAFTsM1gcRhdf8c7zGkKvvjLL8aRT9ENQcdlCgXdLFFK5TsDZ
-        6FNmlKvwxl3iD7l1OOrkVAGaNWxww2TInA7oaiFJnmF+ldNgA/R/hzeFSyO9qMR3OKZriy8cu2d
-        KW
-X-Received: by 2002:a54:449a:0:b0:3ad:ffa4:e003 with SMTP id v26-20020a54449a000000b003adffa4e003mr5284835oiv.33.1695568597233;
-        Sun, 24 Sep 2023 08:16:37 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHLZxgt/KjAp6Ynx8pGgX++2f5OifJUicoJwPgBKjnfysxHS/6iXbGczIH7Rjz8scb4l/oKrw==
-X-Received: by 2002:a54:449a:0:b0:3ad:ffa4:e003 with SMTP id v26-20020a54449a000000b003adffa4e003mr5284820oiv.33.1695568596908;
-        Sun, 24 Sep 2023 08:16:36 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id p14-20020a62ab0e000000b0068e49cb1692sm6380364pff.1.2023.09.24.08.16.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 24 Sep 2023 08:16:36 -0700 (PDT)
-Date:   Sun, 24 Sep 2023 23:16:33 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.09.24
-Message-ID: <20230924151633.s2hvilhahqaykods@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+        d=1e100.net; s=20230601; t=1695570350; x=1696175150;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=fxAiqV0SbR0M9A07Lt2yaycJ8W97vQp/Mh06hMDHTLs=;
+        b=GVt1WBffT0E4LxPvKobtwyM1LvjXwvKcVjTQhKmqG2o+/W6Ku9w/ndrX3RToQQdH+r
+         xdOx1bcV6gZoeqBbbCIsIQ+ozo5Yuko0ET3bWAV1kxtNLqdW9FoRV/rS1il+dsL97Xb+
+         lt1zZR9X+mjasmsz6yrv7jy9cj/yVg4rMxM/d69j/VnTLF7mr3/vF2ls8MQ789VhuV9O
+         AF1Ysb3YpcZ9XjyfPvK4j0N9De7EKpvPvzV0XWWbK7sPNI5LnoqeKaZ29Af7t7fP8zS6
+         10R6l5xg/qNcxUyfsNYdTqOFv7QxbOGfHMwgHY4yy+tpR16V5F1w/iOz0JuFyJqacVng
+         OOUw==
+X-Gm-Message-State: AOJu0YyAVcBUiCkXiduUbBuWOXKzshUxYEFMittp5HUjgR7pHNYzVHEk
+        vQ09rOMM/Cd7twJERffjeJU4Ww/qydfrIUVhrciiMRmboYY=
+X-Google-Smtp-Source: AGHT+IEiH3fl59g8Ui3OUaphdb0rqJmQnbWe+Q0ZM31wZvzcRsCSdzMErzFME0BWADpvc2MlBNdMbxZDaF5ZqZjVYwQ=
+X-Received: by 2002:ac5:c913:0:b0:495:c8bb:f0f8 with SMTP id
+ t19-20020ac5c913000000b00495c8bbf0f8mr3581640vkl.3.1695570349689; Sun, 24 Sep
+ 2023 08:45:49 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20230924142754.ejwsjen5pvyc32l4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20230924142754.ejwsjen5pvyc32l4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 24 Sep 2023 18:45:38 +0300
+Message-ID: <CAOQ4uxgpC-qgE0BvtBYW0JfqyJ-Yf8jj84wLwm+6XzRrjNsXHg@mail.gmail.com>
+Subject: Re: [xfstests generic/617] fsx io_uring dio starts to fail on
+ overlayfs since v6.6-rc1
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     linux-unionfs@vger.kernel.org, io-uring@vger.kernel.org,
+        fstests@vger.kernel.org, Christian Brauner <brauner@kernel.org>,
+        Jens Axboe <axboe@kernel.dk>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
+On Sun, Sep 24, 2023 at 6:15=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> Hi,
+>
+> The generic/617 of fstests is a test case does IO_URING soak direct-IO
+> fsx test, but recently (about from v6.6-rc1 to now) it always fails on
+> overlayfs as [1], no matter the underlying fs is ext4 or xfs. But it
+> never failed on overlay before, likes [2].
+>
+> So I thought it might be a regression of overlay or io-uring on current v=
+6.6.
+> Please help to review, it's easy to reproduce. My system is Fedora-rawhid=
+e/RHEL-9,
+> with upstream mainline linux HEAD=3Ddc912ba91b7e2fa74650a0fc22cccf0e0d50f=
+371.
+> The generic/617.full output as [3].
+>
 
-The for-next branch of the xfstests repository at:
+Hi Zorro,
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Thank you for the report.
+I am on public holiday, so it may take me a few days to get to look at this=
+.
+In the meanwhile could you try to bisect if the regression is introduced
+by this vfs PR merge (of my patches):
 
-has just been updated and tagged as v2023.09.24 release.
+ *   de16588a7737 - Merge tag 'v6.6-vfs.misc' of
+git://git.kernel.org/pub/scm/linux/kernel/git/vfs/vfs
+|\
+| * e6fa4c728fb6 - cachefiles: use kiocb_{start,end}_write() helpers
+| * 8f7371268a4b - ovl: use kiocb_{start,end}_write() helpers
+| * 8c3cfa80fd1e - aio: use kiocb_{start,end}_write() helpers
+| * e484fd73f4bd - io_uring: use kiocb_{start,end}_write() helpers
 
-Release Notes:
-1) There's 3 new cases in this release -- overlay/081, overlay/082 and
-   generic/471. They're all regression test cases for known overlay or
-   btrfs issue. They'll fail on old downstream kernel, but won't crash.
-2) Besides new test cases, xfs/270 has new bug coverage, so it'll fail
-   on unfixed kernel, note that it's not a regression, don't panic.
-3) Btrfs fixes some test failures, and update some known kernel commit id
-   in cases.
+The io_uring PR merge:
 
-More details refer to below, thanks for these contribution!
+*   c1b7fcf3f6d9 - Merge tag 'for-6.6/io_uring-2023-08-28' of
+git://git.kernel.dk/linux
+
+Or the overlayfs PR merge:
+
+*   63580f669d7f - Merge tag 'ovl-update-6.6' of
+git://git.kernel.org/pub/scm/linux/kernel/git/overlayfs/vfs
 
 Thanks,
-Zorro
+Amir.
 
-The new head of the for-next branch is commit:
-
-2fddeb5c79ff btrfs/287: filter snapshot IDs to avoid failures when using some features
-
-New commits:
-
-Amir Goldstein (2):
-[N]      [6f5c1dcbb723] overlay: add test for persistent unique fsid
-[N]      [823613d66648] overlay: add test for rename of lower symlink with NOATIME attr
-
-Anand Jain (5):
-[U]      [2da0d2692c94] fstests: use btrfs check repair for repairing btrfs filesystems
-[U]      [8abf8a203a9e] fstests: btrfs/261 fix failure if /var/lib/btrfs isn't writable
-[U]      [1348ed0e256a] fstests: btrfs/185 update for single device pseudo device-scan
-[U]      [79650397e1d1] fstests: btrfs add more tests into the scrub group
-[U]      [e3121832fc2b] btrfs: add missing _fixed_by_kernel_commit for a few tests
-
-Andrey Albershteyn (1):
-[U]      [566fc79138ef] common/rc: make _get_max_file_size find file size on mount point
-
-Darrick J. Wong (2):
-[U]      [d79d44afac69] xfs/270: actually test file readability
-[U]      [5267463070c5] xfs/270: actually test log recovery with unknown rocompat features
-
-Filipe Manana (4):
-[U]      [b1ad2f63105e] btrfs: add missing commit ids for a few tests using _fixed_by_kernel_commit
-[N]      [68b958f5dc4a] generic: test new directory entries are returned after rewinding directory
-[U]      [70ff4b82ea80] btrfs: use full subcommand name at _btrfs_get_subvolid()
-[U]      [2fddeb5c79ff] btrfs/287: filter snapshot IDs to avoid failures when using some features
-
-Naohiro Aota (4):
-[U]      [f4c7dbbb4f16] btrfs/076: support smaller extent size limit
-[U]      [27f1089cf2e3] btrfs/076: use _fixed_by_kernel_commit to tell the fixing kernel commit
-[U]      [150670eb9216] btrfs/239: call fsync to create tree-log dedicated block group for zoned mode
-[U]      [d6ac854df754] btrfs/259: fix output's wrong word
-
-Shiyang Ruan (1):
-[U]      [f738aca836ad] tools/mvtest: ensure testcase is executable (755)
-
-
-Code Diffstat:
-
- .gitignore            |   1 +
- common/btrfs          |   6 +-
- common/rc             |  24 +++++++-
- src/Makefile          |   2 +-
- src/rewinddir-test.c  | 159 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/011       |   2 +-
- tests/btrfs/027       |   2 +-
- tests/btrfs/060       |   2 +-
- tests/btrfs/062       |   2 +-
- tests/btrfs/063       |   2 +-
- tests/btrfs/064       |   2 +-
- tests/btrfs/065       |   2 +-
- tests/btrfs/067       |   2 +-
- tests/btrfs/068       |   2 +-
- tests/btrfs/070       |   2 +-
- tests/btrfs/071       |   2 +-
- tests/btrfs/074       |   2 +-
- tests/btrfs/076       |  29 +++++++--
- tests/btrfs/076.out   |   3 +-
- tests/btrfs/148       |   2 +-
- tests/btrfs/185       |   5 +-
- tests/btrfs/195       |   2 +-
- tests/btrfs/199       |   6 +-
- tests/btrfs/216       |   4 +-
- tests/btrfs/218       |   6 +-
- tests/btrfs/225       |   4 +-
- tests/btrfs/238       |   5 +-
- tests/btrfs/239       |  12 ++++
- tests/btrfs/259       |   2 +-
- tests/btrfs/261       |   6 +-
- tests/btrfs/287       |  24 ++++++--
- tests/btrfs/287.out   |  56 +++++++++---------
- tests/btrfs/288       |   2 +-
- tests/btrfs/289       |   2 +-
- tests/btrfs/300       |   2 +-
- tests/generic/299     |   2 +-
- tests/generic/471     |  39 +++++++++++++
- tests/generic/471.out |   2 +
- tests/generic/485     |   2 +-
- tests/generic/692     |   2 +-
- tests/overlay/081     | 128 ++++++++++++++++++++++++++++++++++++++++
- tests/overlay/081.out |   2 +
- tests/overlay/082     |  67 +++++++++++++++++++++
- tests/overlay/082.out |   2 +
- tests/xfs/270         |  82 ++++++++++++++++++--------
- tests/xfs/270.out     |   2 +
- tools/mvtest          |   2 +
- 47 files changed, 612 insertions(+), 108 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
+>
+> [1]
+> FSTYP         -- overlay
+> PLATFORM      -- Linux/x86_64 dell-xxxx-xxx 6.6.0-rc2+ #1 SMP PREEMPT_DYN=
+AMIC Fri Sep 22 15:41:10 EDT 2023
+> MKFS_OPTIONS  -- -m crc=3D1,finobt=3D1,rmapbt=3D0,reflink=3D1,inobtcount=
+=3D1,bigtime=3D1 /mnt/xfstests/scratch
+> MOUNT_OPTIONS -- -o context=3Dsystem_u:object_r:root_t:s0 /mnt/xfstests/s=
+cratch /mnt/xfstests/scratch/ovl-mnt
+>
+> generic/617       - output mismatch (see /var/lib/xfstests/results//gener=
+ic/617.out.bad)
+>     --- tests/generic/617.out   2023-09-22 16:08:35.444572181 -0400
+>     +++ /var/lib/xfstests/results//generic/617.out.bad  2023-09-22 19:33:=
+29.240901008 -0400
+>     @@ -1,2 +1,54 @@
+>      QA output created by 617
+>     +uring write bad io length: 0 instead of 8192
+>     +short write: 0x0 bytes instead of 0x2000
+>     +LOG DUMP (46 total operations):
+>     +1(  1 mod 256): FALLOC   0x28c0d thru 0x2953a      (0x92d bytes) EXT=
+ENDING
+>     +2(  2 mod 256): TRUNCATE UP        from 0x2953a to 0x81000
+>     +3(  3 mod 256): ZERO     0x6f07 thru 0x14790       (0xd88a bytes)
+>     ...
+>     (Run 'diff -u /var/lib/xfstests/tests/generic/617.out /var/lib/xfstes=
+ts/results//generic/617.out.bad'  to see the entire diff)
+> Ran: generic/617
+> Failures: generic/617
+> Failed 1 of 1 tests
+>
+> [2]
+> FSTYP         -- overlay
+> PLATFORM      -- Linux/x86_64 hp-xxxxxx-xx 6.5.0-rc6+ #1 SMP PREEMPT_DYNA=
+MIC Mon Aug 14 12:45:06 UTC 2023
+> MKFS_OPTIONS  -- /mnt/scratch
+> MOUNT_OPTIONS -- -o context=3Dsystem_u:object_r:root_t:s0 /mnt/scratch /m=
+nt/scratch/ovl-mnt
+>
+> generic/617        5s
+> Ran: generic/617
+> Passed all 1 tests
+>
+> [3]
+> /var/lib/xfstests/ltp/fsx -S 0 -U -q -N 20000 -p 200 -o 128000 -l 600000 =
+-r 4096 -t 4096 -w 4096 -Z /mnt/xfstests/test/ovl-mnt/junk
+> uring write bad io length: 0 instead of 8192
+> short write: 0x0 bytes instead of 0x2000
+> LOG DUMP (46 total operations):
+> 1(  1 mod 256): FALLOC   0x28c0d thru 0x2953a   (0x92d bytes) EXTENDING
+> 2(  2 mod 256): TRUNCATE UP     from 0x2953a to 0x81000
+> 3(  3 mod 256): ZERO     0x6f07 thru 0x14790    (0xd88a bytes)
+> 4(  4 mod 256): ZERO     0x4a097 thru 0x5dfc8   (0x13f32 bytes)
+> 5(  5 mod 256): TRUNCATE DOWN   from 0x81000 to 0x10000
+> 6(  6 mod 256): MAPWRITE 0x74000 thru 0x78de7   (0x4de8 bytes)
+> 7(  7 mod 256): SKIPPED (no operation)
+> 8(  8 mod 256): MAPWRITE 0x52000 thru 0x57bf5   (0x5bf6 bytes)
+> 9(  9 mod 256): DEDUPE 0x19000 thru 0x20fff     (0x8000 bytes) to 0x57000=
+ thru 0x5efff
+> 10( 10 mod 256): COPY 0x64000 thru 0x6bfff      (0x8000 bytes) to 0x1c000=
+ thru 0x23fff
+> 11( 11 mod 256): INSERT 0x38000 thru 0x46fff    (0xf000 bytes)
+> 12( 12 mod 256): WRITE    0x16000 thru 0x1cfff  (0x7000 bytes)
+> 13( 13 mod 256): MAPWRITE 0x3f000 thru 0x444d5  (0x54d6 bytes)
+> 14( 14 mod 256): INSERT 0x83000 thru 0x8cfff    (0xa000 bytes)
+> 15( 15 mod 256): COPY 0x54000 thru 0x5dfff      (0xa000 bytes) to 0x6d000=
+ thru 0x76fff
+> 16( 16 mod 256): PUNCH    0x34f3d thru 0x48c45  (0x13d09 bytes)
+> 17( 17 mod 256): FALLOC   0x47bd5 thru 0x5a950  (0x12d7b bytes) INTERIOR
+> 18( 18 mod 256): READ     0x20000 thru 0x3cfff  (0x1d000 bytes)
+> 19( 19 mod 256): READ     0xe000 thru 0x1cfff   (0xf000 bytes)
+> 20( 20 mod 256): MAPREAD  0x70000 thru 0x8d512  (0x1d513 bytes)
+> 21( 21 mod 256): PUNCH    0x12773 thru 0x1f5b1  (0xce3f bytes)
+> 22( 22 mod 256): DEDUPE 0x81000 thru 0x8ffff    (0xf000 bytes) to 0x3b000=
+ thru 0x49fff
+> 23( 23 mod 256): CLONE 0x78000 thru 0x7efff     (0x7000 bytes) to 0x1e000=
+ thru 0x24fff
+> 24( 24 mod 256): MAPREAD  0x1000 thru 0x1b6c1   (0x1a6c2 bytes)
+> 25( 25 mod 256): SKIPPED (no operation)
+> 26( 26 mod 256): FALLOC   0x43b4c thru 0x5ecb7  (0x1b16b bytes) INTERIOR
+> 27( 27 mod 256): SKIPPED (no operation)
+> 28( 28 mod 256): WRITE    0x3000 thru 0x8fff    (0x6000 bytes)
+> 29( 29 mod 256): COPY 0x19000 thru 0x20fff      (0x8000 bytes) to 0x79000=
+ thru 0x80fff
+> 30( 30 mod 256): WRITE    0x19000 thru 0x28fff  (0x10000 bytes)
+> 31( 31 mod 256): DEDUPE 0x3a000 thru 0x3dfff    (0x4000 bytes) to 0x49000=
+ thru 0x4cfff
+> 32( 32 mod 256): ZERO     0x8f290 thru 0x927bf  (0x3530 bytes)
+> 33( 33 mod 256): PUNCH    0x45aec thru 0x58137  (0x1264c bytes)
+> 34( 34 mod 256): SKIPPED (no operation)
+> 35( 35 mod 256): FALLOC   0x5b567 thru 0x613ab  (0x5e44 bytes) INTERIOR
+> 36( 36 mod 256): ZERO     0x1abc7 thru 0x1bbd6  (0x1010 bytes)
+> 37( 37 mod 256): MAPWRITE 0x44000 thru 0x45411  (0x1412 bytes)
+> 38( 38 mod 256): FALLOC   0x3b222 thru 0x4de57  (0x12c35 bytes) INTERIOR
+> 39( 39 mod 256): COLLAPSE 0x1e000 thru 0x20fff  (0x3000 bytes)
+> 40( 40 mod 256): INSERT 0x62000 thru 0x64fff    (0x3000 bytes)
+> 41( 41 mod 256): DEDUPE 0xf000 thru 0x16fff     (0x8000 bytes) to 0x78000=
+ thru 0x7ffff
+> 42( 42 mod 256): WRITE    0x4000 thru 0x12fff   (0xf000 bytes)
+> 43( 43 mod 256): COPY 0x62000 thru 0x79fff      (0x18000 bytes) to 0x2000=
+ thru 0x19fff
+> 44( 44 mod 256): SKIPPED (no operation)
+> 45( 45 mod 256): MAPWRITE 0x22000 thru 0x297c9  (0x77ca bytes)
+> 46( 46 mod 256): WRITE    0x41000 thru 0x42fff  (0x2000 bytes)
+> Log of operations saved to "/mnt/xfstests/test/ovl-mnt/junk.fsxops"; repl=
+ay with --replay-ops
+> Correct content saved for comparison
+> (maybe hexdump "/mnt/xfstests/test/ovl-mnt/junk" vs "/mnt/xfstests/test/o=
+vl-mnt/junk.fsxgood")
+>
