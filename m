@@ -2,95 +2,93 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 856CECE7A94
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Sep 2023 14:07:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A5A9CE7A94
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Sep 2023 14:55:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232067AbjIYOHs (ORCPT
+        id S232413AbjIYOz4 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Sep 2023 10:07:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50402 "EHLO
+        Mon, 25 Sep 2023 10:55:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232137AbjIYOHr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Sep 2023 10:07:47 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2001:67c:2178:6::1d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68BB8107;
-        Mon, 25 Sep 2023 07:07:41 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 208531F74A;
-        Mon, 25 Sep 2023 14:07:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1695650860;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=AMw7FBB5qe0mlRxK2wqXnJTRx2GbUv3nRb0DDPszrUs=;
-        b=cMhfXC/zh+hKnDx32Sy1DZ4ilJbAbJN6CVlKqzJn0fC0TVEfeDVXKnSnTs8sfmJn8nPxie
-        1q40KO+6vP7zuk+yjI9rhpOUvBi7waLokEfOtDhQq+TAPmntQAsLfds+ZxOxKxj5NRiHvL
-        J7p1fevLtAy4yaCyAxEqUPgJZRu/ujk=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1695650860;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=AMw7FBB5qe0mlRxK2wqXnJTRx2GbUv3nRb0DDPszrUs=;
-        b=0EzjpAvhUdMJ6O/5rhFrzBNPPPSSLPJYq0xAuYHVTu1wGrdHyIsxZ54Piasnfvczmcfw5T
-        6tqkR7Tbi3A8sOBA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id DBB081358F;
-        Mon, 25 Sep 2023 14:07:39 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id sGrrNCuUEWU5JwAAMHmgww
-        (envelope-from <dsterba@suse.cz>); Mon, 25 Sep 2023 14:07:39 +0000
-Date:   Mon, 25 Sep 2023 16:01:02 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     David Disseldorp <ddiss@suse.de>
-Cc:     fdmanana@kernel.org, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: use full subcommand name at _btrfs_get_subvolid()
-Message-ID: <20230925140102.GN13697@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <c0ebb36f51f97acb3612ec5376a68441b5e62ac6.1695383055.git.fdmanana@suse.com>
- <20230922171835.4fb6fc0c@echidna.fritz.box>
+        with ESMTP id S232002AbjIYOz4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Sep 2023 10:55:56 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92F8710A
+        for <fstests@vger.kernel.org>; Mon, 25 Sep 2023 07:55:49 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37932C433C8;
+        Mon, 25 Sep 2023 14:55:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695653749;
+        bh=iJIofJstftPKYBdeSkKT90LwhbTDmzNkCCWebwAUp5g=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=BX3yYlVObPUnnIQhMa9j4lNJncLVVMcqqIDO4lUTE3nOIZGGT4wwQV1WO5tg68DD8
+         j9HYpXPlDSlKyatNoChKb9ifFbGA3WbIRjNu5Gm3O/T1olzvumGBspkqDSdj9pl6A/
+         r+5RmxaNRHxOE5FdTobcvOpPTu1mMBcKDs+ODiHJHlbW4PL8QfZHO/OO7P8ng7dyyt
+         WHKnYSxDIIrsCf4/HiSYkGXlmCs5BaEoZLQx0O/SuZc3Xy2x94qd7y3p9vK6n2uyCR
+         Egki1wn6sX9gLvMpBmE0nOKOqdsYQErVjK3Dyk4IqzU6i6dY1rMSPEq2SIsY4bvMyx
+         D/iOE69gzSCHQ==
+Date:   Mon, 25 Sep 2023 07:55:48 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Chandan Babu R <chandanbabu@kernel.org>
+Cc:     fstests@vger.kernel.org, zlang@redhat.com
+Subject: Re: [PATCH] _scratch_mkfs_geom: Fix regex used for matching block
+ size option
+Message-ID: <20230925145548.GA11423@frogsfrogsfrogs>
+References: <20230925134805.1559201-1-chandanbabu@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230922171835.4fb6fc0c@echidna.fritz.box>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+In-Reply-To: <20230925134805.1559201-1-chandanbabu@kernel.org>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 05:18:35PM +0200, David Disseldorp wrote:
-> On Fri, 22 Sep 2023 12:45:01 +0100, fdmanana@kernel.org wrote:
+On Mon, Sep 25, 2023 at 07:18:05PM +0530, Chandan Babu R wrote:
+> The regular expression used by _scratch_mkfs_geom() to match mkfs.xfs' block
+> size argument interprets the character 'b' as optional. It should actually
+> interpret whitespace as optional.
 > 
-> > From: Filipe Manana <fdmanana@suse.com>
-> > 
-> > Avoid using the shortcut "sub" for the "subvolume" command, as this is the
-> > standard practice because such shortcuts are not guaranteed to exist in
-> > every btrfs-progs release (they may come and go). Also make the variables
-> > local.
+> This causes generic/223 to fail when testing an XFS filesystem which uses an
+> external log device along with the -lsize option. In this case, the original
+> value of -lsize is replaced with the value of $blocksize.
 > 
-> Hmm, having them come and go would likely break quite a few user
-> scripts...
+> _scratch_mkfs_sized() also uses the same incorrect regex.
+> 
+> Signed-off-by: Chandan Babu R <chandanbabu@kernel.org>
 
-The help text of 'btrfs' says at the end:
+Heh. :(
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-"For an overview of a given command use 'btrfs command --help'
- or 'btrfs [command...] --help --full' to print all available options.
- Any command name can be shortened as far as it stays unambiguous,
- however it is recommended to use full command names in scripts.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--D
 
- All command groups have their manual page named 'btrfs-<group>'."
-
-
-The commands will not disappear but new commands may be added and the
-prefix would become ambiguous. The short versions are accepted for
-manual command typing convenience, scripts should use the full length.
+> ---
+>  common/rc | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 5c4429ed..991a5731 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -971,7 +971,7 @@ _scratch_mkfs_sized()
+>  	case $FSTYP in
+>  	xfs)
+>  		# don't override MKFS_OPTIONS that set a block size.
+> -		echo $MKFS_OPTIONS |grep -E -q "b?size="
+> +		echo $MKFS_OPTIONS |grep -E -q "b\s*size="
+>  		if [ $? -eq 0 ]; then
+>  			_scratch_mkfs_xfs -d size=$fssize $rt_ops
+>  		else
+> @@ -1063,8 +1063,8 @@ _scratch_mkfs_geom()
+>  
+>      case $FSTYP in
+>      xfs)
+> -	if echo "$MKFS_OPTIONS" | grep -E -q "b?size="; then
+> -		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b?size=)[0-9]+k?/\1$blocksize/")
+> +	if echo "$MKFS_OPTIONS" | grep -E -q "b\s*size="; then
+> +		MKFS_OPTIONS=$(echo "$MKFS_OPTIONS" | sed -r "s/(b\s*size=)[0-9]+k?/\1$blocksize/")
+>  	else
+>  		MKFS_OPTIONS+=" -b size=$blocksize"
+>  	fi
+> -- 
+> 2.39.1
+> 
