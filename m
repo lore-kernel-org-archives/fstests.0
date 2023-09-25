@@ -2,97 +2,120 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CC9ACE7A81
-	for <linux-fstests@archiver.kernel.org>; Mon, 25 Sep 2023 05:55:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C8A8CE7A8C
+	for <linux-fstests@archiver.kernel.org>; Mon, 25 Sep 2023 06:36:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229568AbjIYFzy (ORCPT
+        id S229925AbjIYGga (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 25 Sep 2023 01:55:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50498 "EHLO
+        Mon, 25 Sep 2023 02:36:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56864 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229604AbjIYFzx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Sep 2023 01:55:53 -0400
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 294A983;
-        Sun, 24 Sep 2023 22:55:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1695621345; x=1727157345;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=5dHZwuLOoad7Dv/ZTwEbxO/erIfjG+1LZsKASkt7Ap4=;
-  b=dVqviYJXATN78qSr5iy8BAQBOHwj0MXTx7swu3oJGpLblYdooqT0H1Z8
-   EYZw/lbfwNkVVoPkvoLp+4M0SDReZHfrsJdD2XjdOAXPln+c7gozVOAlP
-   4h9dWrUyFvOMP241VVL7gTomewfRbGovVyoIjeBfocPrXEc9UYw+r7HxX
-   TX3i8yzuVqixmThhrKzNsXWJ5JsRoYumUQnYkg11eqpwvxLQo3L4NWnKu
-   3UfDt8io9VZQznSddnFsklG/b5iBv0NY8Gfn3cz1Q4297G+QnBf59nntE
-   4ur1BwlbkoXEKhF/aRsEgmloyvDvhpAxY4j+kmT/z/GFKdhYVhgy40VGC
-   A==;
-X-CSE-ConnectionGUID: CE7OxVVlTwGDL83nMo0a1w==
-X-CSE-MsgGUID: BW09gjArQQKPhSnzJpCrKQ==
-X-IronPort-AV: E=Sophos;i="6.03,174,1694707200"; 
-   d="scan'208";a="243047963"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 25 Sep 2023 13:55:45 +0800
-IronPort-SDR: uGShNZF43c3j5+w2X9/nujs3hkBVrYrxK18fVCpYpAZH1kyMIQLsFuDFDUhFdNl/Bi00EtGFY9
- IbS4X6dZL7w4uGaT0bxhBIi7l0/P3gKw76JCAasvZs+obdUue9waO/eZ6BhE54vINmi8dusbju
- wrZuddCYDSkd0aQwLo1FnzKR8pNV1A0Ay/3K5Y8o5TFuLq0cazlAsiOltu32fKnQfATJf24eRz
- oPfflZVAu/gQ3u8EJjGhNrswoJFwFpIw24P3yvujwzjthY1Hx59DGNx1UXIcDXjSn6m99h3PTH
- ePI=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 24 Sep 2023 22:08:15 -0700
-IronPort-SDR: UJhujDd9w5X7dpN+JmBfI56u/X+DZXQLFWYfAtk+LWWZylHRZqpBr2tK7B0AXpUGw4O2iUegdT
- Fm4WHNeR+PRtEqMET5QwXY4MA80HqYX91Bo68z3NcpsAfozPIDORoKmvSxyaJopnj58Ksbc4Yj
- /3Layi+ilyySdJYULoJ9zqYxszrs15YV+V4QDQCNpJlQhsA0zQfRnv7k/G8Rbdw6ioaSoYPk1U
- Rba9Y6D6LAvyZq272KB2KDt4aAztdhHkACl2fuigooQmyOGXdt8KOhiwLsyx1Xq0qslmu8H9V6
- iUQ=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.101])
-  by uls-op-cesaip01.wdc.com with ESMTP; 24 Sep 2023 22:55:44 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] btrfs/283: skip if we cannot write into one extent
-Date:   Mon, 25 Sep 2023 14:55:41 +0900
-Message-ID: <20230925055541.2848073-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S232080AbjIYGg3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Sep 2023 02:36:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37BC3B3
+        for <fstests@vger.kernel.org>; Sun, 24 Sep 2023 23:35:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695623738;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=i1YYbpFs118kf99zhzmzRkzKTOXsWkm5QlprOWgyPU8=;
+        b=J9PLBx1+0VlM1E3JacmWDC0QzHQEjKp6x1Am83sSmr+doxIAstml0l01WzbYjfD4ALeHW6
+        /qY6WKBpiqMGlufF1heS1JAEClyrrL9xE9w7g+UE1JGNWTpI95a7jmygwwR6gNI2hCpoih
+        J7c9wdEbq48uAbaXRgF3vNl9xRq7yd8=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-358-km0dpOaJOPKtsTY725yU9Q-1; Mon, 25 Sep 2023 02:35:35 -0400
+X-MC-Unique: km0dpOaJOPKtsTY725yU9Q-1
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-5807fcefe79so1671958a12.1
+        for <fstests@vger.kernel.org>; Sun, 24 Sep 2023 23:35:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695623734; x=1696228534;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=i1YYbpFs118kf99zhzmzRkzKTOXsWkm5QlprOWgyPU8=;
+        b=iYmCGxLzdNMnJL+IwlTg1RKdmJdl+lqvNimSheW4BbBQ9XDGsZuSIxXhfqc+MFf2LS
+         Kc7Jsd5jiEsbgUcyY6hXiI2M1KFEsp+nWuMkloQifisOkrX2zxe0eMAUsVezdYzS1J/3
+         MrJXFN214o4dT80UP3gZUxcz+FIf/48eA3Ncxy+1V/YTfpAW8sod0Ir1+qAR5/onAwig
+         RYgfuYuIusfFgVuAF9usbca0iRJsTeHJyBZu/lI42Ydr4ERctGUDfFPZNUM0Mwt9sGEN
+         /XLPUktcMsdA43U88hZ7HQERMdGEFeOOBY8MEONnx96cNkyYvtiOdR+VpllkaY1NgAo1
+         hmEQ==
+X-Gm-Message-State: AOJu0YzNbTjH8wWkA1unuwR0u3hLZUIqnITNmU4iH2Mke10Ixr211ZjO
+        rVHBsVJW1rvNs4UCTcEeCrrhCBziDKElnGMjIxtZVcYufGJ18Tm5Ajw9Lvc9tCm4o6cklkxEQNY
+        7RfPU1sEYOe9rH2nR8w==
+X-Received: by 2002:a05:6300:8083:b0:15e:5952:4fc1 with SMTP id ap3-20020a056300808300b0015e59524fc1mr2604854pzc.29.1695623734703;
+        Sun, 24 Sep 2023 23:35:34 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHnFsLurviJROW+Rwn45qHnB0C1VbzviPVORlZZoy1m5tGPZ2IE2BZ32ATH3LmYNkTVfIK3Yg==
+X-Received: by 2002:a05:6300:8083:b0:15e:5952:4fc1 with SMTP id ap3-20020a056300808300b0015e59524fc1mr2604846pzc.29.1695623734295;
+        Sun, 24 Sep 2023 23:35:34 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id do17-20020a056a004a1100b00692b0d413c8sm4941640pfb.197.2023.09.24.23.35.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 24 Sep 2023 23:35:33 -0700 (PDT)
+Date:   Mon, 25 Sep 2023 14:35:30 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     linux-unionfs@vger.kernel.org, io-uring@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: Re: [xfstests generic/617] fsx io_uring dio starts to fail on
+ overlayfs since v6.6-rc1
+Message-ID: <20230925063530.m4wpinakby26b6q5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230924142754.ejwsjen5pvyc32l4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <02c1c68c-61a0-4d93-8619-971c0416b0e6@kernel.dk>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <02c1c68c-61a0-4d93-8619-971c0416b0e6@kernel.dk>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On the zoned mode, the extent size is limited also by
-queue/zone_append_max_bytes. This breaks the assumption that the file "foo"
-has a single extent and corrupts the test output.
+On Sun, Sep 24, 2023 at 11:52:12AM -0600, Jens Axboe wrote:
+> On 9/24/23 8:29 AM, Zorro Lang wrote:
+> > Hi,
+> > 
+> > The generic/617 of fstests is a test case does IO_URING soak direct-IO
+> > fsx test, but recently (about from v6.6-rc1 to now) it always fails on
+> > overlayfs as [1], no matter the underlying fs is ext4 or xfs. But it
+> > never failed on overlay before, likes [2].
+> > 
+> > So I thought it might be a regression of overlay or io-uring on current v6.6.
+> > Please help to review, it's easy to reproduce. My system is Fedora-rawhide/RHEL-9,
+> > with upstream mainline linux HEAD=dc912ba91b7e2fa74650a0fc22cccf0e0d50f371.
+> > The generic/617.full output as [3].
+> 
+> It works without overlayfs - would be great if you could include how to
+> reproduce this with overlayfs.
 
-It is difficult to support the case, so let's just skip the test in this
-case.
+Sorry I didn't provide the test steps:
 
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
----
- tests/btrfs/283 | 8 ++++++++
- 1 file changed, 8 insertions(+)
+1) git clone git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+2) cd xfstests-dev
+3) make -j8  # refer to README, about how to build xfstests
+4) vi local.config
+# The FSTYP can be other fs, e.g. ext4.
+# The TEST_DEV and SCRATCH_DEV can be any local devices you have (even loopdev)
+# TEST_DIR and SCRATCH_MNT can be changed too
+export FSTYP=xfs
+export TEST_DEV=/dev/sda5
+export TEST_DIR=/mnt/test
+export SCRATCH_DEV=/dev/sda3
+export SCRATCH_MNT=/mnt/scratch
 
-diff --git a/tests/btrfs/283 b/tests/btrfs/283
-index c1f6007d5398..118df08b8958 100755
---- a/tests/btrfs/283
-+++ b/tests/btrfs/283
-@@ -25,6 +25,14 @@ _require_fssum
- _wants_kernel_commit c7499a64dcf6 \
- 	     "btrfs: send: optimize clone detection to increase extent sharing"
- 
-+extent_size=$(( 128 * 1024 ))
-+if _scratch_btrfs_is_zoned; then
-+	zone_append_max=$(cat "/sys/block/$(_short_dev $SCRATCH_DEV)/queue/zone_append_max_bytes")
-+	if [[ $zone_append_max -gt 0 && $zone_append_max -lt $extent_size ]]; then
-+		_notrun "zone append max $zone_append_max is smaller than wanted extent size $extent_size"
-+	fi
-+fi
-+
- send_files_dir=$TEST_DIR/btrfs-test-$seq
- send_stream=$send_files_dir/snap.stream
- snap_fssum=$send_files_dir/snap.fssum
--- 
-2.42.0
+5) mkfs.xfs -f /dev/sda5 && mkfs.xfs -f /dev/sda3
+6) mkdir -p /mnt/test && mkdir -p /mnt/scratch
+7) ./check -overlay generic/617
+
+The step#6 will be failed.
+
+Thanks,
+Zorro
+
+> 
+> -- 
+> Jens Axboe
+> 
 
