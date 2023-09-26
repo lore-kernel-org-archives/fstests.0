@@ -2,56 +2,91 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54E8CE7D27A
-	for <linux-fstests@archiver.kernel.org>; Tue, 26 Sep 2023 10:36:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E323E7E635
+	for <linux-fstests@archiver.kernel.org>; Tue, 26 Sep 2023 14:11:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229445AbjIZKgH (ORCPT
+        id S229958AbjIZOMB (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 26 Sep 2023 06:36:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51558 "EHLO
+        Tue, 26 Sep 2023 10:12:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234398AbjIZKgG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2023 06:36:06 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00775126
-        for <fstests@vger.kernel.org>; Tue, 26 Sep 2023 03:35:59 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E7340C433C8;
-        Tue, 26 Sep 2023 10:35:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695724559;
-        bh=QXsmVLXsjGpk2LDtB6AmQr5lIzUl31WSXnjbiJhrEEA=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=mgzNlCRAhZrhkmH9YI4mDEbArYYCz6iDtesAqAhjFXSNrSIXfNiw8g608qRcYaAls
-         nudgB4WQWsoCdxR/YLz77ZfTgyBPnJgu+zk99OJuPUenAzA19UgvSVcKIw4uUCssrG
-         uK7N0L30owcxV4r/26ho5mVVHNDF1FWit2WhuO+cj8PYhg7DFA1uLOpFrGVzNb1/40
-         YqjNZIV/xU+k1pog86LHcS3ead+jEgDIYihCPVcpSKTbg5qV4+Gt4vIvBWyrfnrEkJ
-         r0dFisEk2Fb2kLDrTRxXHkStKoONj6V6cMnstZc1q6xvknAJ7R66R2Ioy0M457evBh
-         kF2e1u4RJjP3g==
-Date:   Tue, 26 Sep 2023 12:35:56 +0200
-From:   Christian Brauner <brauner@kernel.org>
-To:     Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH] common: check user and group existence via id
-Message-ID: <20230926-kursprogramm-halfen-9856aff95172@brauner>
-References: <20230925-fstests-check-user-v1-1-09b97257bcdb@kernel.org>
+        with ESMTP id S229519AbjIZOMA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2023 10:12:00 -0400
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AFCDCE;
+        Tue, 26 Sep 2023 07:11:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1695737514; x=1727273514;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=stxQJCGNdM+SFI1RDdyjFiqx/RgCTQgAOwlHZG8rbqI=;
+  b=i4dqSTfn3daCEb3MdwrTUuJdNpChydO/3zJefsDRIJ2w1+FvEhi/PKDI
+   p0IdW192tb5PYVLJUjqwn5fEBitJ3gHisD18j3hkRhskQy0Xngvrr+gig
+   timTvj5qV9uoXQRr3fUyJ7pOSjGNNKh9vY7jHXQ5Oc1ApcNhoTlM7GXgg
+   NYMEcKJVC0T/y0i5xnTFPoG+HE5NI6xXzlJyjFSvjbCN2rBLOBrGMM3iq
+   9apxjQOFGgYwT8Qucgpz+HuKISujWlHuL2aU9JnYp8whU9nokujdR8qtl
+   C83BlVctL+1h7+vOnucjNIh9hsQ9qa2UacNcjcblb1L/IKz8cdAuwHJij
+   Q==;
+X-CSE-ConnectionGUID: rGlVbxXjTcaDh9+csk9o2Q==
+X-CSE-MsgGUID: YQDGhqBsQ76L2UnVJNh2eA==
+X-IronPort-AV: E=Sophos;i="6.03,178,1694707200"; 
+   d="scan'208";a="245323231"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 26 Sep 2023 22:11:53 +0800
+IronPort-SDR: KK0v6TQDqza1U+sfo8OUf5uirQd/rQZ519nUwf+LqnFp+NKU9jJHWTwDigDIZNRTtmcTBpdrcR
+ lGRnwsXwaz070FbQLjT6oCZoNz4DdIv+jZERKyvLkmTomG1Qe1sQPWTA/Q3G2y0rn6fLbD8sux
+ Q0FElw1tFqQ5NhdBjjinarbjVSAwHYmt9yPqXRoSbR2eoYs3JeAicHOU0sTHTy95yXIixDClou
+ DQ7wGt0apvdQ3t//yQe9zNr11KSoDHThHh4CC3i5fG6QOBSehHeO4KNf+n34Sk1n4aVCQ8gK4o
+ uMw=
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 26 Sep 2023 06:18:40 -0700
+IronPort-SDR: oDhDVC/S+DvLk1EZxwqsMzXT0P/Q1WjMnQ0LmRpBy1Dw6s+NqHjXpe7HQ9I8MpvKbwULgZN6+M
+ RwoxQhD9RlMmRT+CvMIvzuXnimIiIph5q613/TlF4MJ28ij9UQJ1kpH/WQE31/N8ua1ITBQKkS
+ ALF+gFKh+R+fXye3+454Pht/AJaAuwjGwmYuckkUK/hQeN5wYrypsAsbrvekCit5jwVHgzxn9U
+ pgGMu1HAH3/p9LpDLaR6KtuJ6Qf6vNlIxIm+vzo8QFX4MzG/5m5ESdjdm5r8JY+4QyRyyUahVx
+ yqo=
+WDCIronportException: Internal
+Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.102])
+  by uls-op-cesaip02.wdc.com with ESMTP; 26 Sep 2023 07:11:53 -0700
+From:   Naohiro Aota <naohiro.aota@wdc.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org, Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] btrfs/295: skip on zoned device as we cannot corrupt it directly
+Date:   Tue, 26 Sep 2023 23:11:47 +0900
+Message-ID: <20230926141147.471503-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20230925-fstests-check-user-v1-1-09b97257bcdb@kernel.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 25, 2023 at 05:22:21PM +0200, Christian Brauner wrote:
-> Newer machines support the creation of users that don't appear in
-> /etc/passwd but are only available via nss or userdbd. Use the id binary
-> which is portable and reliable.
-> 
-> With this change I can run xfstests on systems where the users are
-> created via systemd-userdbd drop-ins. See the documentation in [1] and [2].
-> 
-> Link: [1]: https://man7.org/linux/man-pages/man8/nss-systemd.8.html
-> Link: [2]: https://man7.org/linux/man-pages/man5/nsswitch.conf.5.html
-> Signed-off-by: Christian Brauner <brauner@kernel.org>
-> ---
+We use _pwrite_byte to corrupt the root node, but such overwrite won't work
+on a sequential write required zone. So, skip the test on a zoned device.
 
-I need to resend a fixed version. I only send half the patch.
+Technically, we can run this test case by checking if the physical location
+lands in a conventional zone. But, the logic should be no difference than
+the regular mode and I don't think it's worth doing so.
+
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ tests/btrfs/295 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tests/btrfs/295 b/tests/btrfs/295
+index a9a8e5530a80..00a5c5680b86 100755
+--- a/tests/btrfs/295
++++ b/tests/btrfs/295
+@@ -12,6 +12,8 @@ _begin_fstest auto quick dangerous
+ . ./common/filter
+ _supported_fs btrfs
+ _require_scratch
++# Directly writing to the device, which may not work with a zoned device
++_require_non_zoned_device "$SCRATCH_DEV"
+ 
+ # Use single metadata profile so we only need to corrupt one copy of tree block
+ _scratch_mkfs -m single > $seqres.full
+-- 
+2.42.0
+
