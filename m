@@ -2,78 +2,90 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAE98E80AB3
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 14:31:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF831E80AB3
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 14:33:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232123AbjI0ObJ (ORCPT
+        id S232103AbjI0Odu (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Sep 2023 10:31:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44664 "EHLO
+        Wed, 27 Sep 2023 10:33:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43450 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232124AbjI0ObI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 10:31:08 -0400
+        with ESMTP id S232073AbjI0Odt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 10:33:49 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A34DFCE8
-        for <fstests@vger.kernel.org>; Wed, 27 Sep 2023 07:30:54 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FCC3C433C8;
-        Wed, 27 Sep 2023 14:30:54 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E6F3F3
+        for <fstests@vger.kernel.org>; Wed, 27 Sep 2023 07:33:48 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0AF29C433C8;
+        Wed, 27 Sep 2023 14:33:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695825054;
-        bh=by+QWaO+9ZvCcB2QzKuozRechZIRl+dHz1k+3siCXzg=;
+        s=k20201202; t=1695825228;
+        bh=/N9uOJ/sgcxjvntKB714ygv0FbOa/sv5Bnkel2mWVFE=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OiCxws46+Wz6Djzr9Ug3SRuwSG6b+SI0pWReZqas8CR/WHoJJY53PLYQwd1fJoGtE
-         xATpNptASozvcxgSXkSjsWWJV7/58721+Ov45f9CZKXXicPan+n+BW4v5hnu/hYful
-         uydghD6GKWDCE+ga3TPqxlrg4r1ILZxV7p3tNznppqD/lVp/XQjqPEIw2VUu0ksWcN
-         2lUAiY09ApxpYtfrHBRnKqRAtUCmBvTsgI+75f8uYf9bpGo4p8QPRlDXzqoYO0c4mc
-         9AQTUWG/q2LKAvdZYY2He7Fqg+IsWolmnW6oJOA2lDFgGVBegOcVnHTjv9LADiBsc3
-         xQspUk9sa3gnA==
-Date:   Wed, 27 Sep 2023 07:30:53 -0700
+        b=bn6MEyhoqemmsnTD2e+E8KwPo7oOPTTYw+be1fep34CL0j670LUNDV8Tisy/Ne3tt
+         s1ZCA/ururDp3rJmCdnqcNuuknfp+dqayIB1zDBSRypIJAAHRASGuL3ncSg/H54IZW
+         pMEKGffmCkM1T5AsxbwSst8HUR64UnasLTaXA45oQnvdgdSWLhoII18Gcqk3rHozQu
+         16XyUCQ8npFZnrDth19S6PCUPYOqe0GpOAEEcnUPSedXaaIPPsX7BzSgiubwItHU2o
+         dgEa2N1juM9TkNqS45Fi/7K8Uv6ZutGmuBb/usU3TbL/tTZBjFhu4r01SDUHBOi5w8
+         42XmHbXQ/VJTg==
+Date:   Wed, 27 Sep 2023 07:33:47 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Vyacheslav Yurkov <uvv.mail@gmail.com>
-Cc:     fstests@vger.kernel.org, Khem Raj <raj.khem@gmail.com>,
-        Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] fsx: Add a return type to aio_rw
-Message-ID: <20230927143053.GC11423@frogsfrogsfrogs>
-References: <20230927131617.100908-1-uvv.mail@gmail.com>
+To:     Naohiro Aota <naohiro.aota@wdc.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH] common/rc: check error case and fail the test
+Message-ID: <20230927143347.GD11423@frogsfrogsfrogs>
+References: <20230927061100.95365-1-naohiro.aota@wdc.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230927131617.100908-1-uvv.mail@gmail.com>
+In-Reply-To: <20230927061100.95365-1-naohiro.aota@wdc.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 27, 2023 at 03:16:17PM +0200, Vyacheslav Yurkov wrote:
-> From: Khem Raj <raj.khem@gmail.com>
+On Wed, Sep 27, 2023 at 03:11:00PM +0900, Naohiro Aota wrote:
+> If we place /var/lib/xfstests on a read-only filesystem, commands in
+> _link_out_file_named() fail to modify the files. However, they won't fail
+> the test. As a result, the test case fails mysteriously with only "no
+> qualified output" printed.
 > 
-> Compilers complain about the function prototype otherwise
+> Fix it by checking the error case.
 > 
-> Signed-off-by: Khem Raj <raj.khem@gmail.com>
-> Signed-off-by: Vyacheslav Yurkov <uvv.mail@gmail.com>
-> Cc: Darrick J. Wong <djwong@kernel.org>
-> Cc: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+> ---
+>  common/rc | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 76a7e7740318..4e9bd34f7772 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3431,8 +3431,8 @@ _link_out_file_named()
+>  		}
+>  		print $result
+>  		' <$seqfull.cfg)
+> -	rm -f $1
+> -	ln -fs $(basename $1).$suffix $1
+> +	rm -f $1 || _fail "_link_out_file_named: failed to remove existing output file"
+> +	ln -fs $(basename $1).$suffix $1 || _fail "_link_out_file_named: failed to setup output file"
 
-Whoooops, good catch!
+For the second _fail, you could improve the diagnostic output by
+specifying /which/ output file couldn't be linked, e.g.
+
+	ln -fs $(basename $1).$suffix $1 || \
+		_fail "$(basename $1).$suffix: could not setup output file"
+
+Since there's always the possibility of Weird Things happening, like
+project quota ENOSPC/EXDEV failures, ro mounts, and other strange things
+that might be a consequence of the file the test picked.
+
+With that changed,
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
-> ---
->  ltp/fsx.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index ccb382e7..a30e2a8d 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -2592,6 +2592,7 @@ out_error:
->  	return -1;
 >  }
->  #else
-> +int
->  aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
->  {
->  	fprintf(stderr, "io_rw: need AIO support!\n");
+>  
+>  _link_out_file()
 > -- 
-> 2.35.1
+> 2.42.0
 > 
