@@ -2,93 +2,101 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA426E80A92
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 06:11:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7037CE810C0
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 10:24:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229478AbjI0GLO (ORCPT
+        id S231392AbjI0KYM (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Sep 2023 02:11:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33826 "EHLO
+        Wed, 27 Sep 2023 06:24:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43904 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjI0GLN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 02:11:13 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E646B3
-        for <fstests@vger.kernel.org>; Tue, 26 Sep 2023 23:11:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1695795070; x=1727331070;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=k/zrTZjNSkcZVAgwGIPz4WwvkC4xyplEg5oLwEFD2hQ=;
-  b=TYXRSUlfHYDouEBcCYBahWH2SJAnCbYQzXj78rKF6iuVVP4XjbauaUa+
-   dg9tXMdct6RTSxKZjknaBjsefj8484212ZlNFW8UUvABIBcjA/bN7nqwH
-   /NEFhm4thYUlx1g3ShAtGKEa8gVGkpz/fVV+gbmGzBb6VHHabt/Iv1vMP
-   PDCREBcLPEVSMlha3E2GKVrWq9BuI/JUMCJtb93fUfuFeLFhtQxatKggl
-   SvQs94zeR1Hv23pBLWy541qKoTCsHDXmQawu4lrIwJu0rqSPV+wWopijf
-   mJDID6wJ5/cdskihLx3rS7kAGNybFrzxD9ECReUhd2p/LQw7g1128zjiJ
-   g==;
-X-CSE-ConnectionGUID: wHRzk2LVTWe6St3y8+KJUg==
-X-CSE-MsgGUID: yB1PRjAgSgKSTFfDKIZr1Q==
-X-IronPort-AV: E=Sophos;i="6.03,179,1694707200"; 
-   d="scan'208";a="350410421"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 27 Sep 2023 14:11:10 +0800
-IronPort-SDR: RehEoGjh83Gzbn/c5EtMp/D/aXohduSUwPgy/hFCQKwCbhMhu1/bHwR+S5/wK0HNULHoJL4KYQ
- 0+SkmpgsT/De3EkFIuZu02p6beHkvPWewK+okW6IElnDibCrUBmwy7Z5PREMd29olLhjR3rE40
- aKVjh5Q3Ccyx5zPZ7hgEzUDxNl3W6UgcPJzZOHuMPd5MOh16CjeP/fsXRdlNkT9pUIv6O6S0Qg
- ydlbys9yYQrIu4UiKUOUWNPPHhBItxAUqEGCwkVhwsn618svQoeDxVi+K7guZhHsjbr1WydIEY
- 9vw=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 26 Sep 2023 22:23:36 -0700
-IronPort-SDR: Ru4Bk1UOFEmdXVfU40H+e9jr+7sCadOVXEOGsLk2uFd6iJxI/L87OQar+gOsU+S7kEGi7I4mzV
- AOlwQrnwjv0iIu8CI49bkLL4fxO5ZZllmsdX0z2900pLYpKSO3NtVvD5qpS0ErX1xk2r756O66
- mqcX0O/BAz68wkZS08XHW7awar9WaE/PxGl1hL+LCM5a20n9q6fkhUYSFPPVdgOablEPENx02v
- jgzK3fKXLViucMBxKj8Cg/oxJmqbivXMgZPfaoQiWZ6ODI/4VQCIEXBivz51F1kjCgIE3xzbfE
- +zQ=
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.106])
-  by uls-op-cesaip01.wdc.com with ESMTP; 26 Sep 2023 23:11:10 -0700
-From:   Naohiro Aota <naohiro.aota@wdc.com>
-To:     fstests@vger.kernel.org
-Cc:     Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] common/rc: check error case and fail the test
-Date:   Wed, 27 Sep 2023 15:11:00 +0900
-Message-ID: <20230927061100.95365-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S231288AbjI0KXt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 06:23:49 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F20C9558F;
+        Wed, 27 Sep 2023 03:13:58 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DD3BC433C8;
+        Wed, 27 Sep 2023 10:13:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695809638;
+        bh=vL9Xulcdmo5JSJCoGs/OksSLrv/rwxVoIWne65a98n0=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=lSxajg/KEYUu3Z9v2D6wOwSkeEgTqRd5oovBSeBCw2LWyrC9EXbCrBQvTO+30qZji
+         UDJO/EvQ3j6NiQX0a57wOrv1jEWG/luvGzfVXxzV8sPdtmkvOhQ5Qa3B3H1cPathAo
+         GYvxxf9vxiKOegsMM2DnC7x8OyXlHL99FAHJ8T8Ga++VxUpVOmTRGzSNMRdXPRajXc
+         9ki++bmGNafh1uI6iC5218CbO6qD6VFzYFJC74rpjsc5Qar3riDgGRykiJOJAQWYj4
+         5PG0wyO2HZ/NKyFERkRLzWUv9PMvnQDATdnJzWShrkaqcb2Sqn+kB+O3E2coDJZkuY
+         ARabQBZ/WJ0dg==
+Received: by mail-oi1-f172.google.com with SMTP id 5614622812f47-3ae2ec1a222so4864005b6e.2;
+        Wed, 27 Sep 2023 03:13:58 -0700 (PDT)
+X-Gm-Message-State: AOJu0YzzQExugH/zjVOdn03psfjz0gd1gOmsoQU7Z5lHhgv2AUjjU/R1
+        OciFMtQfjwooBnejZROkz8B47imxs90JN7aDDjk=
+X-Google-Smtp-Source: AGHT+IFMvw6paHkuhvVWQYQmCKaGOoG8tVw4kbov5K4W/k8FSbwNH21FChkOsIiyTP+mkLg0mIq+ZcudePVKfrU36X0=
+X-Received: by 2002:a05:6870:2404:b0:1ba:2a58:b15e with SMTP id
+ n4-20020a056870240400b001ba2a58b15emr1914738oap.2.1695809637922; Wed, 27 Sep
+ 2023 03:13:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230927014258.GB11423@frogsfrogsfrogs>
+In-Reply-To: <20230927014258.GB11423@frogsfrogsfrogs>
+From:   Filipe Manana <fdmanana@kernel.org>
+Date:   Wed, 27 Sep 2023 11:13:21 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H5sKfn82mqo3jMrdEZRB5irsNT6z9WrysPjBZ6pK6LoOw@mail.gmail.com>
+Message-ID: <CAL3q7H5sKfn82mqo3jMrdEZRB5irsNT6z9WrysPjBZ6pK6LoOw@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/300: check existence of unshare arguments
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>,
+        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-If we place /var/lib/xfstests on a read-only filesystem, commands in
-_link_out_file_named() fail to modify the files. However, they won't fail
-the test. As a result, the test case fails mysteriously with only "no
-qualified output" printed.
+On Wed, Sep 27, 2023 at 3:18=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
+>
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> Make sure the installed unshare binary supports all the arguments that
+> it wants to use.  The unshare program on my system (Ubuntu 22.04)
+> doesn't support --map-auto, so this test fails unnecessarily.
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 
-Fix it by checking the error case.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
----
- common/rc | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Looks good, thanks.
 
-diff --git a/common/rc b/common/rc
-index 76a7e7740318..4e9bd34f7772 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3431,8 +3431,8 @@ _link_out_file_named()
- 		}
- 		print $result
- 		' <$seqfull.cfg)
--	rm -f $1
--	ln -fs $(basename $1).$suffix $1
-+	rm -f $1 || _fail "_link_out_file_named: failed to remove existing output file"
-+	ln -fs $(basename $1).$suffix $1 || _fail "_link_out_file_named: failed to setup output file"
- }
- 
- _link_out_file()
--- 
-2.42.0
-
+> ---
+>  common/rc       |    2 +-
+>  tests/btrfs/300 |    2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index 41862c2766..722e3bdcaa 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5333,7 +5333,7 @@ _soak_loop_running() {
+>
+>  _require_unshare() {
+>         unshare -f -r -m -p -U $@ true &>/dev/null || \
+> -               _notrun "unshare: command not found, should be in util-li=
+nux"
+> +               _notrun "unshare $*: command not found, should be in util=
+-linux"
+>  }
+>
+>  # Return a random file in a directory. A directory is *not* followed
+> diff --git a/tests/btrfs/300 b/tests/btrfs/300
+> index ff87ee7112..8a0eaecf87 100755
+> --- a/tests/btrfs/300
+> +++ b/tests/btrfs/300
+> @@ -20,7 +20,7 @@ _require_test
+>  _require_user
+>  _require_group
+>  _require_unix_perm_checking
+> -_require_unshare
+> +_require_unshare --keep-caps --map-auto --map-root-user
+>
+>  test_dir=3D"${TEST_DIR}/${seq}"
+>  cleanup() {
