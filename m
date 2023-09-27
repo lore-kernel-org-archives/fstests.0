@@ -2,101 +2,93 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7037CE810C0
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 10:24:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8429E7F14F
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 13:17:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231392AbjI0KYM (ORCPT
+        id S231806AbjI0NRE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Sep 2023 06:24:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43904 "EHLO
+        Wed, 27 Sep 2023 09:17:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231288AbjI0KXt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 06:23:49 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F20C9558F;
-        Wed, 27 Sep 2023 03:13:58 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DD3BC433C8;
-        Wed, 27 Sep 2023 10:13:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1695809638;
-        bh=vL9Xulcdmo5JSJCoGs/OksSLrv/rwxVoIWne65a98n0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=lSxajg/KEYUu3Z9v2D6wOwSkeEgTqRd5oovBSeBCw2LWyrC9EXbCrBQvTO+30qZji
-         UDJO/EvQ3j6NiQX0a57wOrv1jEWG/luvGzfVXxzV8sPdtmkvOhQ5Qa3B3H1cPathAo
-         GYvxxf9vxiKOegsMM2DnC7x8OyXlHL99FAHJ8T8Ga++VxUpVOmTRGzSNMRdXPRajXc
-         9ki++bmGNafh1uI6iC5218CbO6qD6VFzYFJC74rpjsc5Qar3riDgGRykiJOJAQWYj4
-         5PG0wyO2HZ/NKyFERkRLzWUv9PMvnQDATdnJzWShrkaqcb2Sqn+kB+O3E2coDJZkuY
-         ARabQBZ/WJ0dg==
-Received: by mail-oi1-f172.google.com with SMTP id 5614622812f47-3ae2ec1a222so4864005b6e.2;
-        Wed, 27 Sep 2023 03:13:58 -0700 (PDT)
-X-Gm-Message-State: AOJu0YzzQExugH/zjVOdn03psfjz0gd1gOmsoQU7Z5lHhgv2AUjjU/R1
-        OciFMtQfjwooBnejZROkz8B47imxs90JN7aDDjk=
-X-Google-Smtp-Source: AGHT+IFMvw6paHkuhvVWQYQmCKaGOoG8tVw4kbov5K4W/k8FSbwNH21FChkOsIiyTP+mkLg0mIq+ZcudePVKfrU36X0=
-X-Received: by 2002:a05:6870:2404:b0:1ba:2a58:b15e with SMTP id
- n4-20020a056870240400b001ba2a58b15emr1914738oap.2.1695809637922; Wed, 27 Sep
- 2023 03:13:57 -0700 (PDT)
+        with ESMTP id S231854AbjI0NRD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 09:17:03 -0400
+Received: from mail-io1-xd2f.google.com (mail-io1-xd2f.google.com [IPv6:2607:f8b0:4864:20::d2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F723126
+        for <fstests@vger.kernel.org>; Wed, 27 Sep 2023 06:17:02 -0700 (PDT)
+Received: by mail-io1-xd2f.google.com with SMTP id ca18e2360f4ac-79fbbb2bed0so184029739f.1
+        for <fstests@vger.kernel.org>; Wed, 27 Sep 2023 06:17:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695820621; x=1696425421; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=jTa9MnGK+3n5fqUH7OqJiQwKFw3j5esYfuDNozy5ZH0=;
+        b=JbCQBbkxgqHPBhC3iK3f419+IpemoC3Be8xyEoTwh2Z2ZIiNcTJZKg++XPObHADWZz
+         k+2TDAnUXcRHQflggbjtvHa4ErTPfti8Bv2mN0icogzbXhkXBL2FFA7bHO9WCkkjaW9D
+         QiRlNGRK441DhkSOQbg5mIEVkH+5Y8xvj8sVVDQM2nfoHdAn9AhgKqE2p1tcRlq0eVfS
+         zPszuf0QTsnfMHdsSmqcgq73ofoLS30FpzlAS57oNUmTLvZUOGFGk8kE2IuF2EQwlRY1
+         lW0wrFolwWMaHA6x8xcmn6ZwxvFzSTha5Zqd46bqQtVGpaY/4FdBHsMHYyvjnKbkNMKl
+         eH8w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695820621; x=1696425421;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=jTa9MnGK+3n5fqUH7OqJiQwKFw3j5esYfuDNozy5ZH0=;
+        b=EMLdvZGl2iUyNI/f1d9/9sFQO7g7o0gT4w9/RNkdWjbdOLJzK0MP7lhQi6nm8KNMrz
+         bXRoxJFoRL4+VAZGcvKRoUjdom9MXTjhxX+ciRiOOCbesxBSIybwuBIWLQsGgHuaTPpD
+         80bJalUMUSJmyaQC2CcyedlXXTya8yWEDGOsHaAqGSz+iUgb0xBn0idyU1B47/F+9hYv
+         226WEL7P8UKT8YqLYEF1/nM6c3yaJAlwF+neZ/ehbG7kTTkBUc/b3JnLM5rtG/axa4I6
+         IY0pE7eW9+a56yre8UMOG9PkG2v2YxtsA8Coi77KMWv0hARJuM3BPBrqlBESv+eP5AaN
+         FBUA==
+X-Gm-Message-State: AOJu0YxylrYKIfihDcHAssaV77y3exmLGcIwQCnclQYucCk9TEyWBMpF
+        zFVvewrHBxiSglTTUnJtqjLAYU5+QQQko3HKn+o=
+X-Google-Smtp-Source: AGHT+IHMssRobxSgwNb1V+4E2NyQsx8qQBLCXDZM4wAyZok7UwvjGBEaibjqHn+T1bKcz7VLVGDenw==
+X-Received: by 2002:a05:6e02:170d:b0:34c:b4b5:765 with SMTP id u13-20020a056e02170d00b0034cb4b50765mr6563027ill.5.1695820621172;
+        Wed, 27 Sep 2023 06:17:01 -0700 (PDT)
+Received: from slackware.home ([209.206.91.222])
+        by smtp.gmail.com with ESMTPSA id c6-20020a02a406000000b00430091fd494sm3787986jal.34.2023.09.27.06.17.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Sep 2023 06:17:00 -0700 (PDT)
+From:   Vyacheslav Yurkov <uvv.mail@gmail.com>
+To:     fstests@vger.kernel.org
+Cc:     Khem Raj <raj.khem@gmail.com>,
+        Vyacheslav Yurkov <uvv.mail@gmail.com>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] fsx: Add a return type to aio_rw
+Date:   Wed, 27 Sep 2023 15:16:17 +0200
+Message-Id: <20230927131617.100908-1-uvv.mail@gmail.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-References: <20230927014258.GB11423@frogsfrogsfrogs>
-In-Reply-To: <20230927014258.GB11423@frogsfrogsfrogs>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 27 Sep 2023 11:13:21 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5sKfn82mqo3jMrdEZRB5irsNT6z9WrysPjBZ6pK6LoOw@mail.gmail.com>
-Message-ID: <CAL3q7H5sKfn82mqo3jMrdEZRB5irsNT6z9WrysPjBZ6pK6LoOw@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/300: check existence of unshare arguments
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>,
-        fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Sep 27, 2023 at 3:18=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
- wrote:
->
-> From: Darrick J. Wong <djwong@kernel.org>
->
-> Make sure the installed unshare binary supports all the arguments that
-> it wants to use.  The unshare program on my system (Ubuntu 22.04)
-> doesn't support --map-auto, so this test fails unnecessarily.
->
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+From: Khem Raj <raj.khem@gmail.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Compilers complain about the function prototype otherwise
 
-Looks good, thanks.
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+Signed-off-by: Vyacheslav Yurkov <uvv.mail@gmail.com>
+Cc: Darrick J. Wong <djwong@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>
+---
+ ltp/fsx.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> ---
->  common/rc       |    2 +-
->  tests/btrfs/300 |    2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/common/rc b/common/rc
-> index 41862c2766..722e3bdcaa 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5333,7 +5333,7 @@ _soak_loop_running() {
->
->  _require_unshare() {
->         unshare -f -r -m -p -U $@ true &>/dev/null || \
-> -               _notrun "unshare: command not found, should be in util-li=
-nux"
-> +               _notrun "unshare $*: command not found, should be in util=
--linux"
->  }
->
->  # Return a random file in a directory. A directory is *not* followed
-> diff --git a/tests/btrfs/300 b/tests/btrfs/300
-> index ff87ee7112..8a0eaecf87 100755
-> --- a/tests/btrfs/300
-> +++ b/tests/btrfs/300
-> @@ -20,7 +20,7 @@ _require_test
->  _require_user
->  _require_group
->  _require_unix_perm_checking
-> -_require_unshare
-> +_require_unshare --keep-caps --map-auto --map-root-user
->
->  test_dir=3D"${TEST_DIR}/${seq}"
->  cleanup() {
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index ccb382e7..a30e2a8d 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -2592,6 +2592,7 @@ out_error:
+ 	return -1;
+ }
+ #else
++int
+ aio_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+ {
+ 	fprintf(stderr, "io_rw: need AIO support!\n");
+-- 
+2.35.1
+
