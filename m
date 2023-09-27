@@ -2,224 +2,135 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D50CE82CBB
-	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 17:56:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59B8DE80A8A
+	for <linux-fstests@archiver.kernel.org>; Wed, 27 Sep 2023 23:06:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229644AbjI0R4w (ORCPT
+        id S229469AbjI0XGX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 27 Sep 2023 13:56:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50584 "EHLO
+        Wed, 27 Sep 2023 19:06:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51536 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229643AbjI0R4u (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 13:56:50 -0400
-Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EA8DFB;
-        Wed, 27 Sep 2023 10:56:48 -0700 (PDT)
-Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
-        by mailout.west.internal (Postfix) with ESMTP id 87EC6320076F;
-        Wed, 27 Sep 2023 13:56:47 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute1.internal (MEProxy); Wed, 27 Sep 2023 13:56:48 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-        :content-type:content-type:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm3; t=1695837407; x=1695923807; bh=qy
-        VZsJd+mwXxo/tflL9+H6BYxxKBtPvMESzVThYup7Y=; b=pF/3Ol66PymNYoTe32
-        MqPE/vtKgy+LYJpLomAO8676hNP68k20tltUupbIn0Ws8al3j57+Q+2KB/CYuueH
-        HSBNO4lp69k1V40VvC1wXMkkKFptC0vn55rJYhFqhb55uRqw82CKcHMNoGBtTISu
-        985MRGC3mtRcupheMuMtw6JIoVj/HQv/u1aJEZ7/0ZCDc/w3qtLCReEaH2b3Bl3O
-        LqNq0jhbZya9LXgixGxh6MCzv1Po+iCqzQl2yQGKWy72XxbzXYZWHfILfz4x2tXf
-        u52CCn4A6VsQ9MUOAR0QxVBNvQltCHB9Eagf0s+ZsjW0TAtLh0tLCntDzxkVx8Xj
-        /9rw==
+        with ESMTP id S229464AbjI0XGW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2023 19:06:22 -0400
+Received: from out4-smtp.messagingengine.com (out4-smtp.messagingengine.com [66.111.4.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7AAEF4;
+        Wed, 27 Sep 2023 16:06:20 -0700 (PDT)
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id 0AA865C2924;
+        Wed, 27 Sep 2023 19:06:20 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute4.internal (MEProxy); Wed, 27 Sep 2023 19:06:20 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+        :content-transfer-encoding:content-type:date:date:from:from
+        :in-reply-to:message-id:mime-version:reply-to:sender:subject
+        :subject:to:to; s=fm3; t=1695855980; x=1695942380; bh=0ugX3xILH8
+        0OBULxpahgdONffdW0qbYIrFln5s8teO8=; b=cQQXs+2mu31dA1l3sxvPhe1jse
+        u6JIGDwVA8MJVldPyM0G5xrAsbPezWFCy4iqy2ZyicQksnhZZKgyZKr6thhkLl/F
+        1h0cUXE8komdERg6/DiqmhPW/KrtPLB5gBmbfu9HiQbzsnOB+XG2+Um542y3cKM6
+        WV2nlWG7mwudphrDLHzoYpse9vegpXbL1yZ3ws8y+GMC+acJcVDG0yCDiK2Jky2U
+        KmfeAuzqSudFNOVVY1gtigbtpmlnPIRGVFAe75Wk9Q7Jg4wX2B2XMnr3oQhXHYwU
+        fZjcUa6EaF6IReI1pMYbN/F1uKKNjHOOqjh8F0hA42oo/2JLEfYgu4cm1+3Q==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:content-type:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm2; t=1695837407; x=1695923807; bh=qyVZsJd+mwXxo
-        /tflL9+H6BYxxKBtPvMESzVThYup7Y=; b=ieQwzGeG2BqKqUYC0E66vfIjpbLOO
-        ukiFpG6YKKXCRUAkxtoZbHnm/CrbnKKJPiBwxKWO92ER5Q1LYMAhm8QTTs/h0R/2
-        4XeYumYk4O+TceqLbbCW4r7f/env/CKAYJe75ZvgvurfTEeLm8SE5JINaEkVaSQg
-        0aUutoeSG2YiVo1dTl+MD9Z7F9CaEdJ+lC3k4nhopMmMcHSsFAJeut7hSi/9P3Aa
-        bGeX/SYwUUMLNVFlpowetGMN1CQNYDEEB4xr/aez6mUIgQrWGTBlGujJTrEcNLuE
-        vfD1iWdvSFoPgJ5uNGyeRgqBmfi32InCB6T0WipGiq8YHmHIK/+jO/FQg==
-X-ME-Sender: <xms:3mwUZV13Wk1bjRRyhZRHv1SOP4q2qslcIIlLJbkRsLLS1Ksz1ZE-rA>
-    <xme:3mwUZcF8dC7vBRzq-A1Tb_R8Uda8ie6XnmTkh8JZr3MyGsD07GdhtC1kWG2_F9Rtv
-    -oJ98Mxua79cC45rWw>
-X-ME-Received: <xmr:3mwUZV7c-sYi-DQtf8sAWGKktCeyghxhi93XbUtlQKCIhlRV4h6_G-9tGOt5hXEyLatOmZrpWQ0J7ECuuAKVQddcomc>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvjedrtdeggdehiecutefuodetggdotefrodftvf
+        messagingengine.com; h=cc:content-transfer-encoding:content-type
+        :date:date:feedback-id:feedback-id:from:from:in-reply-to
+        :message-id:mime-version:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm2; t=1695855980; x=1695942380; bh=0ugX3xILH80OBULxpahgdONffdW0
+        qbYIrFln5s8teO8=; b=N+cGnqqM4jtEJvm8Eec/YJx19zSn5I65yIYcCjn2lAVd
+        TGhrMYbAXcc9I6dt+z3eF7i/eTb8rUBKjQzUGL8rZxLpWWBM3fX3z5D9j38FU3lR
+        AOMHXpBMQbzGalsRBWYeWkvS5JujDC0bNZHJVtkwPy5O6nrW1kHBIrCyOl3NMro+
+        3AHAHqCNtj1cEKjIS9uu6cbE+ovK2oQSUjzOlDCYSnwNojFUZULlq7JgpFyuIX84
+        wf4ZI8ATYFi70T/W4AHXqEgWUAU+IwUPQS41nfbagWJ8gQwbUSSWiuMmu45131wi
+        2nQPjSBRnttoeYXYvGKFXe5dkPfoVa/zOaiDxcV7Gg==
+X-ME-Sender: <xms:a7UUZZl553IFkOeGlo71eSkdEh75Pn9b8lBrBoBqbkLBSE-f_gcOFg>
+    <xme:a7UUZU1Y0PI7PvqKqnBB3dG99KXxYg53d-OmBVWA3l_r3Txxjf10fatGFxAcIXeQ8
+    hzELpzL2I-L3hkwN8Y>
+X-ME-Received: <xmr:a7UUZfoeZ7b5G2ZlIuqk2oNFezIbHRZhAvb6qaI6FJphioVFht0-ptc0lfc9xKYSE--BmFhBiC8xRzRf93pOQxZgNr8>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvjedrtdehgddukecutefuodetggdotefrodftvf
     curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpeffhffvvefukfhfgggtuggjsehttdertddttddvnecuhfhrohhmpeeuohhrihhs
-    uceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepke
-    dvkeffjeellefhveehvdejudfhjedthfdvveeiieeiudfguefgtdejgfefleejnecuvehl
-    uhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepsghorhhishessg
-    hurhdrihho
-X-ME-Proxy: <xmx:3mwUZS20Vwoq5BtfJ7wbjwG-wrQBWs6KsCzz5_LPauFR6NHLD5Rmzg>
-    <xmx:3mwUZYHp945ijxWvWTa-_PJmtO6GaoZmye2mppvVYVa0KDpyLmcspA>
-    <xmx:3mwUZT_uKj1OTgDp_AAmNprVq-TbPW0QWNXtu5o3Xo-ag9tyg7qq_g>
-    <xmx:32wUZdRFbAOoZzCP1RCB9FxDyg8TzHNs7XFqyXQWUH1fOpx6pZQwkw>
+    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertdertd
+    dtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheq
+    necuggftrfgrthhtvghrnhepieeltdffhffhvddtfeegvdeiteelieejjeeitdfhfeegke
+    ehveehkeejleekgeeknecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushht
+    vghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhssegsuhhrrd
+    hioh
+X-ME-Proxy: <xmx:a7UUZZk4GO_bSNSm8pNZH6lURHw0TpGfzflAF6glHIAk09IZTOPgKg>
+    <xmx:a7UUZX1Tead0Riu0na3AFcdNZL7z3wjA2j3WKukxs1MC8Gcz-xybnw>
+    <xmx:a7UUZYt2zS1X99SKstgiVa57e_jYdojL8CyK8Fkafhi6MDDXrFEqgg>
+    <xmx:bLUUZQ9eui2kA_ZwvZdrlOEN3TPsNdJASV6iAdmvCSDOjZReWjJUSQ>
 Feedback-ID: i083147f8:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 27 Sep 2023 13:56:46 -0400 (EDT)
-Date:   Wed, 27 Sep 2023 10:57:46 -0700
+ 27 Sep 2023 19:06:19 -0400 (EDT)
 From:   Boris Burkov <boris@bur.io>
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
         fstests@vger.kernel.org
-Subject: Re: [PATCH 1/5] btrfs/400: new test for simple quotas
-Message-ID: <20230927175746.GA293293@zen.localdomain>
-References: <cover.1688600422.git.boris@bur.io>
- <9df2554d5e427e47290a10cbfccf20305472c958.1688600422.git.boris@bur.io>
- <9d0abdf8-35cb-ace1-117d-dc45e7f13964@oracle.com>
+Subject: [PATCH v2 0/6] btrfs: simple quotas fstests
+Date:   Wed, 27 Sep 2023 16:07:12 -0700
+Message-ID: <cover.1695855635.git.boris@bur.io>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <9d0abdf8-35cb-ace1-117d-dc45e7f13964@oracle.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 22, 2023 at 11:40:46PM +0800, Anand Jain wrote:
-> 
-> 
-> 
-> 
-> 
-> On 06/07/2023 07:42, Boris Burkov wrote:
-> > Test some interesting basic and edge cases of simple quotas.
-> > 
-> > To some extent, this is redundant with the alternate testing strategy of
-> > using MKFS_OPTIONS to enable simple quotas, running the full suite and
-> > relying on kernel warnings and fsck to surface issues.
-> > 
-> > Signed-off-by: Boris Burkov <boris@bur.io>
-> > ---
-> >   tests/btrfs/400     | 439 ++++++++++++++++++++++++++++++++++++++++++++
-> >   tests/btrfs/400.out |   2 +
-> >   2 files changed, 441 insertions(+)
-> >   create mode 100755 tests/btrfs/400
-> >   create mode 100644 tests/btrfs/400.out
-> > 
-> > diff --git a/tests/btrfs/400 b/tests/btrfs/400
-> > new file mode 100755
-> > index 000000000..c3548d42e
-> > --- /dev/null
-> > +++ b/tests/btrfs/400
-> > @@ -0,0 +1,439 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 400
-> > +#
-> > +# Test common btrfs simple quotas scenarios involving sharing extents and
-> > +# removing them in various orders.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick qgroup copy_range snapshot
-> > +
-> > +# Import common functions.
-> > +# . ./common/filter
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs btrfs
-> > +_require_scratch
-> 
-> 
-> I don't see any prerequisite checking and call of notrun() on the
-> systems without the kernel or progs simple-quota support. Is it not
-> required?
-> 
-> 
-> > +
-> > +SUBV=$SCRATCH_MNT/subv
-> > +NESTED=$SCRATCH_MNT/subv/nested
-> > +SNAP=$SCRATCH_MNT/snap
-> > +K=1024
-> > +M=$(($K * $K))
-> > +NR_FILL=1024
-> > +FILL_SZ=$((8 * $K))
-> > +TOTAL_FILL=$(($NR_FILL * $FILL_SZ))
-> > +EB_SZ=$((16 * $K))
-> > +EXT_SZ=$((128 * M))
-> > +LIMIT_NR=8
-> > +LIMIT=$(($EXT_SZ * $LIMIT_NR))
-> 
-> Style consistency requires the use of lowercase for test local
-> variables.
-> 
+Add new tests (btrfs/400 for now, but intend to grab a real number
+before the last version)
 
-Is this documented? There are lots of counterexamples.
-Will fix, of course.
+Also made modifications for passing existing qgroups tests when possible
+and for passing all tests with simple quota enabled via mkfs and with
+squota-aware `btrfs check`. Since this required reading sysfs files of
+scratch fses, did a bit of refactoring to make those checks target a
+device rather than assuming TEST_DEV.
 
-> 
-> > +
-> > +prepare()
-> > +{
-> > +	echo "preparing" > /dev/kmsg
-> 
-> 
->  Please use $seqres.full or stdout for debugging purpose.
+btrfs/400 depends on the kernel patchset:
+https://lore.kernel.org/linux-btrfs/cover.1694563454.git.boris@bur.io/
+and the btrfs-progs patchset:
+https://lore.kernel.org/linux-btrfs/cover.1695836680.git.boris@bur.io/
+(and config appropriate binaries to use squota-aware versions)
+---
+Changelog:
+v2:
+- new sysfs helpers in common
+- better gating for the new squota test
+- fix various formatting issues
+- get rid of noisy dmesg logging
 
-These messages are only helpful in dmesg, as they help to sequence test
-actions with kernel logs while debugging test failures.
+Boris Burkov (6):
+  common: refactor sysfs_attr functions
+  btrfs: quota mode helpers
+  btrfs/400: new test for simple quotas
+  btrfs: quota rescan helpers
+  btrfs: use new rescan wrapper
+  btrfs: skip squota incompatible tests
 
-I personally find it to be a great pattern for writing debuggable tests
-that don't end up with annoying fragile test.out files, so I would
-encourage you to play with the pattern and see what you think.
-Especially in vm-like environments there's really no downside, that I
-can see, it's just super nice to have the test actions in dmesg.
+ common/btrfs        |  56 ++++++
+ common/rc           | 127 ++++++++-----
+ tests/btrfs/017     |   1 +
+ tests/btrfs/022     |   1 +
+ tests/btrfs/028     |   2 +-
+ tests/btrfs/057     |   1 +
+ tests/btrfs/091     |   3 +-
+ tests/btrfs/104     |   2 +-
+ tests/btrfs/123     |   2 +-
+ tests/btrfs/126     |   2 +-
+ tests/btrfs/139     |   2 +-
+ tests/btrfs/153     |   2 +-
+ tests/btrfs/171     |   6 +-
+ tests/btrfs/179     |   2 +-
+ tests/btrfs/180     |   2 +-
+ tests/btrfs/190     |   2 +-
+ tests/btrfs/193     |   2 +-
+ tests/btrfs/210     |   2 +-
+ tests/btrfs/224     |   6 +-
+ tests/btrfs/230     |   2 +-
+ tests/btrfs/232     |   2 +-
+ tests/btrfs/400     | 423 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/400.out |   2 +
+ 23 files changed, 587 insertions(+), 65 deletions(-)
+ create mode 100755 tests/btrfs/400
+ create mode 100644 tests/btrfs/400.out
 
-However, I appreciate that I'm the one doing the weird thing, so I'll
-remove the messages or throw them in seqres.full.
+-- 
+2.42.0
 
-> 
-> 
-> > +	_scratch_mkfs >> $seqres.full
-> > +	_scratch_mount
-> > +	enable_quota "s"
-> > +	$BTRFS_UTIL_PROG subvolume create $SUBV >> $seqres.full
-> > +	set_subvol_limit 256 $LIMIT
-> > +	check_subvol_usage 256 0
-> > +
-> > +	echo "filling" > /dev/kmsg
-> > +	# Create a bunch of little filler files to generate several levels in
-> > +	# the btree, to make snapshotting sharing scenarios complex enough.
-> > +	$FIO_PROG --name=filler --directory=$SUBV --rw=randwrite --nrfiles=$NR_FILL --filesize=$FILL_SZ >/dev/null 2>&1
-> > +	echo "filled" > /dev/kmsg
-> > +	check_subvol_usage 256 $TOTAL_FILL
-> > +
-> > +	# Create a single file whose extents we will explicitly share/unshare.
-> > +	do_write $SUBV/f $EXT_SZ
-> > +	check_subvol_usage 256 $(($TOTAL_FILL + $EXT_SZ))
-> > +	echo "prepared" > /dev/kmsg
-> > +}
-> > +
-> 
-> 
-> 
-> > +
-> > +echo "Silence is golden"
-> 
-> We can have the echo part, like (echo 'prepared' > /dev/kmsg), directed
-> to stdout; this will be useful for verification and debugging as well.
-> 
-> 
-> Thanks, Anand
-> 
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/400.out b/tests/btrfs/400.out
-> > new file mode 100644
-> > index 000000000..c940c6206
-> > --- /dev/null
-> > +++ b/tests/btrfs/400.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 400
-> > +Silence is golden
-> 
