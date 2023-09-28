@@ -2,189 +2,173 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83A00CE7AFE
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Sep 2023 04:26:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A00C6CE7AFA
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Sep 2023 04:51:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229493AbjI1E0m (ORCPT
+        id S229445AbjI1Evd (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Sep 2023 00:26:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45252 "EHLO
+        Thu, 28 Sep 2023 00:51:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjI1E0l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2023 00:26:41 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F640114;
-        Wed, 27 Sep 2023 21:26:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com; s=s31663417;
- t=1695875194; x=1696479994; i=quwenruo.btrfs@gmx.com;
- bh=9lySKOxaGxpPFC8m8YAGAL2mtQmyg6MUdtJrjRtNDiM=;
- h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
- b=cGxLyvdGsGochVgJ7rjjOq89lzwS7l8z+45UGJLcNgFo5LYb7959mv4/8IM9dtcdygdzf1yAtyq
- ijg3qXkVMWPbVe/q7tC/Ky7ClMdSuGfjqSZSWaYrFIDcIty7EOm1RNk45QDeis37z6RO49GEjzUp+
- xjHcs8lQh7aXm6TJgc3w5fAoSdA4nFfR+gQHMNLhXas0eCBd72sYRQ+z7mmYkN0pTVpMCUoaoFs34
- g4UAYgZmXQVOEcyA5cu42S8vIKCGoM+e0P/YaCWLQe8Ywv+tYDkDcM/KxrlODhHFyYSPz7nq0NHY8
- ITSsvSam8m9/USGQpi/ZekQPxGTaBsCIBvLQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [10.8.112.26] ([173.244.62.10]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MYvcG-1r7pwv1bKC-00UtC8; Thu, 28
- Sep 2023 06:26:33 +0200
-Message-ID: <dfc4cece-d809-4b5b-93f7-7251ba3a492a@gmx.com>
-Date:   Thu, 28 Sep 2023 13:56:29 +0930
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] fstests: add configuration option for executing post
- mkfs commands
-Content-Language: en-US
-To:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc:     linux-btrfs@vger.kernel.org, david@fromorbit.com
-References: <cover.1695543976.git.anand.jain@oracle.com>
- <eff4da60fe7a6ce56851d5fc706b5f2f2d772c56.1695543976.git.anand.jain@oracle.com>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <eff4da60fe7a6ce56851d5fc706b5f2f2d772c56.1695543976.git.anand.jain@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:og0r2XXJIV/BmNeKJj9HDM3vGSeHyfQFVRr865oJnu6xnt96QLd
- Hv8+FL0ZmwRhj+1VM7MUU4+5tHlUDvFNxYvuBAdIfOmuFzLUc5riAow7NmJZHRNBC9KpCva
- ffACmWTXowLtXzaiaSkfTYh4zqbdjSqU6RZwdUidkurUjQUMKMlzaKkrlr8SzWkqidvKwVf
- XVZuZeXyfPc54J6vSjC5g==
-UI-OutboundReport: notjunk:1;M01:P0:oJq4Vz7ReBw=;sKY/M4o8y0+b2Gy5Yhq0SLKSY/D
- tuWbYTv766lmBcuY27zJjl+9L9rbyomuSJcpvX5C39S0YhnZGDRoEiN6b0G5DjYsanEo5LeRn
- JcjS3nOGx0WchGcAcsuiWXz9EtxTpjQbxjw34FCnVjteZJetYPQiBsJzJeTpeU6AoxqkHielD
- /yVUtiKXW8gRLQNFhN5yAeHDUgdIG4POBeKO2+7o/V0YTBxMhoHK1eaxesfSLj/S69V9ZwDJ1
- u4we2Qhpiv+GM93o5k81Jei0tbiI7U+xKjW46C3F99PeCGHTOxvg+3acqTJ20iKhZivADO57+
- hiUb+CSM4f9aMUejEi03zd5gxjoAvFQFhY0F/YSy4DHeVOWVsjgvMV+khpdeqyaVrsuYnGIt7
- G/V5U2XIHcjkmH+RLeSAmUMvPZQbPUhSAHxm8kMMVnNoJfQ/+n+qR3wHgcHb3BGx6FCZf5wU2
- RDR7mRwywm6iMBZ4zf5D5IrEulfOLy4L6sdZxeyFTfWzB4nFBQiMkQXHVCBHKErQHHDLd7SJ+
- S3wbQFaBLXoY9DTI8WtTBfJ+ulJQugn+Y9AVzZkl8ft1srv8s8Pv531NqyMyg5SOVbBFvG6UY
- Po/lG6BfNzOQFQoL28E78okshDvO5Lecs/VIXN22kUruXscDEjVXfEDwXbCSPAa7ikeJOxUW9
- zRwaGtmnXq/EjdY6utaTE6bEdQkqjgElUgxNME4tkvT8yHaDYrcR+X4/mD9E7NjOr+pqm59eF
- r4ZwVAH1xp0c5+jJEQpviPawToUdQhGL+uVvIf9V7NwYvraai0Af+kTL6DaRMNg7V3Q9eqiQq
- z0nqSXM/Rvwgi/RMd5ix/S7PdrTjvuuC2GjAyfzq/mDJskolRTZ3i1pUihcuz3itllsrB/2Lh
- zxmrarZrPtR0owWkjiuZ5ajehBXJoYanh9WxLNRbIWY4RjoRzfJQAmF/kXVtAv3Y9v2uncSct
- ysWk5/1xoxZyQWPMWjGZhQBF3Ms=
+        with ESMTP id S230089AbjI1Evc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2023 00:51:32 -0400
+Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B07F2F9;
+        Wed, 27 Sep 2023 21:51:30 -0700 (PDT)
+Received: by mail-pl1-x635.google.com with SMTP id d9443c01a7336-1c453379020so93568875ad.1;
+        Wed, 27 Sep 2023 21:51:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1695876690; x=1696481490; darn=vger.kernel.org;
+        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=myreFmYUAC51stxeS7fbe7+oggnl1GIjqnoJwBTGn6k=;
+        b=SoS7YUdDmqKafgKREf20VSwG7aSWt/gkX25lA0kW8SEBEXI+RBKAgzHFiEIKBHgwFW
+         ArbMSH7OQuMq4hotqYBDb0zkAWCW6GdOCOapeW/jOoVFztrxM9gGd9Kep2mzsPJFwrzz
+         ufjT72zoHfnVWQhlAsWZ5TurQwWs630CC9O15Inict5uAUx7SLTqGG8szKxPOZryU4OV
+         x50/Gh0QVr0MwWsONxS483XXlGbXlpDQFNVbUVmBHZG9NkOooSwTrI2xqrllefdR9+aA
+         5ZB5H/RoaXyF18fM2nrG5uSGcV1lmzFpezA9154rKaUXd1wBnlnI793Z1GkXtM3YvP2n
+         5J1A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695876690; x=1696481490;
+        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=myreFmYUAC51stxeS7fbe7+oggnl1GIjqnoJwBTGn6k=;
+        b=e2I7Rh3+GlD9cg4aL6M7EsJqg0V2qirpB7uHeQh/YHPjV3o279PMq3kCnu8ezo9bie
+         sFtkx6guAfxXTkeF0sJVjp0tTPpTPf4ZZ9tYwSJ5SBwz+SVwIqIY4ZUHWBmwcisB7Hea
+         p5goBV9EkA5r+1nenmsvy3smS5VAA/YSn4qOTNPnRQbxZlGiipZVgySUEwjWs7fmGRCH
+         8e6ST4ehLTOvnw9YioSpahAXL8yuGIfTKDCNYTIfm6KbNY3YJC5cxAO+rvz/xt25Evba
+         GR285lwVkKYkcHv+iz5Q9xxdVyZh1JVyL/mv54cKZ0RQnx8ryDPuE1mySkwVrLi8XOuB
+         6Y5w==
+X-Gm-Message-State: AOJu0YzuUIm9cjY6wb/dkQ88saCMQzp34P5EMD0LAe1EHVWjIsZ0XyCy
+        wecREGcsohJt9SNucCI1zE4=
+X-Google-Smtp-Source: AGHT+IEcp3oIWE40t0Zf+/YtqRC63IpNNQtMaBTXICa17dscpSyUTozcSu3N+B3/P01vnn1jLpNSXQ==
+X-Received: by 2002:a17:903:2305:b0:1c6:e4b:bbeb with SMTP id d5-20020a170903230500b001c60e4bbbebmr78060plh.56.1695876690047;
+        Wed, 27 Sep 2023 21:51:30 -0700 (PDT)
+Received: from dw-tp ([129.41.58.7])
+        by smtp.gmail.com with ESMTPSA id a7-20020a170902ecc700b001b87bedcc6fsm13979174plh.93.2023.09.27.21.51.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Sep 2023 21:51:29 -0700 (PDT)
+Date:   Thu, 28 Sep 2023 10:21:24 +0530
+Message-Id: <87pm22rjcj.fsf@doe.com>
+From:   Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To:     Zorro Lang <zlang@redhat.com>
+Cc:     fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+        "Darrick J . Wong" <djwong@kernel.org>
+Subject: Re: [PATCHv2 2/2] generic: Add integrity tests with synchronous directio
+In-Reply-To: <20230928034204.htefxfkdobn3d5e4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+Zorro Lang <zlang@redhat.com> writes:
+
+> On Sat, Sep 23, 2023 at 05:30:24PM +0530, Ritesh Harjani (IBM) wrote:
+>> This test covers data & metadata integrity check with directio with
+>> o_sync flag and checks the file contents & size after sudden fileystem
+>> shutdown once the directio write is completed. ext4 directio after iomap
+>> conversion was broken in the sense that if the FS crashes after
+>> synchronous directio write, it's file size is not properly updated.
+>> This test adds a testcase to cover such scenario.
+>> 
+>> Man page of open says that -
+>> O_SYNC provides synchronized I/O file integrity completion, meaning write
+>> operations will flush data and all associated metadata to the underlying
+>> hardware
+>
+>
+>
+>> 
+>> Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
+>> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>> ---
+>>  tests/generic/471     | 50 +++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/471.out | 22 +++++++++++++++++++
+>>  2 files changed, 72 insertions(+)
+>>  create mode 100755 tests/generic/471
+>>  create mode 100644 tests/generic/471.out
+>> 
+>> diff --git a/tests/generic/471 b/tests/generic/471
+>
+> The generic/471 has been taken last week, you can choose another number.
+> Or simply use generic/999, then I'll change the 999 to a proper number.
+>
+>> new file mode 100755
+>> index 00000000..218e6676
+>> --- /dev/null
+>> +++ b/tests/generic/471
+>> @@ -0,0 +1,50 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 471
+>> +#
+>> +# Integrity test for O_SYNC with buff-io, dio, aio-dio with sudden shutdown
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick shutdown aio
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>
+> Is the bug fix be reviewed and acked now? If it is, please use _fixed_by_kernel_commit
+> at here. The commit id can be "xxxxxxxxxxxx" if it's not merged by acked.
+>
+
+Hi Zorro,
+
+Yes, the patch is still being worked on. I think we can wait till then
+to not spook the distro CI testing to start reporting multiple bug
+reports using this testcase :P 
 
 
-On 2023/9/28 13:53, Anand Jain wrote:
-> This patch introduces new configuration file parameters,
-> POST_SCRATCH_MKFS_CMD and POST_SCRATCH_POOL_MKFS_CMD.
+>> +_require_scratch
+>> +_require_scratch_shutdown
+>> +_require_odirect
 >
-> Usage example:
+> Due to you add aio test in v2, so this line should be: _require_aiodio
 >
->          POST_SCRATCH_MKFS_CMD=3D"btrfstune -m"
->          POST_SCRATCH_POOL_MKFS_CMD=3D"btrfstune -m"
 
-Can't we add extra options for mkfs.btrfs to support metadata uuid at
-mkfs time?
+Ok, I guess I can just remove this line "_require_odirect". Because in the
+next line I anyway include _require_aiodio.
 
-We already support quota and all other features, I think it would be
-much easier to implement metadata_uuid inside mkfs.
+>> +_require_aiodio aio-dio-write-verify
 
-If this feature is only for metadata_uuid, then I really prefer to do it
-inside mkfs.btrfs.
+here ^^
 
-Thanks,
-Qu
+>> +
+>> +_scratch_mkfs > $seqres.full 2>&1
+>> +_scratch_mount
+>> +
+>> +echo "T-1: Create a 1M file using buff-io & O_SYNC"
+>> +$XFS_IO_PROG -fs -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
+>> +echo "T-1: Shutdown the fs suddenly"
+>> +_scratch_shutdown
+>> +echo "T-1: Cycle mount"
+>> +_scratch_cycle_mount
+>> +echo "T-1: File contents after cycle mount"
+>> +_hexdump $SCRATCH_MNT/testfile.t1
+>> +
+>> +echo "T-2: Create a 1M file using O_DIRECT & O_SYNC"
+>> +$XFS_IO_PROG -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t2 > /dev/null 2>&1
+>> +echo "T-2: Shutdown the fs suddenly"
+>> +_scratch_shutdown
+>> +echo "T-2: Cycle mount"
+>> +_scratch_cycle_mount
+>> +echo "T-2: File contents after cycle mount"
+>> +_hexdump $SCRATCH_MNT/testfile.t2
+>> +
+>> +echo "T-3: Create a 1M file using AIO-DIO & O_SYNC"
+>> +$AIO_TEST -a size=1048576 -S -N $SCRATCH_MNT/testfile.t3 > /dev/null 2>&1
 >
-> With this configuration option, test cases using _scratch_mkfs(),
-> scratch_pool_mkfs(), or _scratch_mkfs_sized() will run the above
-> set value after the mkfs operation.
->
-> Other mkfs functions, such as _mkfs_dev(), are not connected to the
-> POST_SCRATCH_MKFS_CMD.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->   common/btrfs | 35 +++++++++++++++++++++++++++++++++++
->   1 file changed, 35 insertions(+)
->
-> diff --git a/common/btrfs b/common/btrfs
-> index 798c899f6233..b0972e882c7c 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -690,17 +690,48 @@ _require_btrfs_scratch_logical_resolve_v2()
->   	_scratch_unmount
->   }
->
-> +post_scratch_mkfs_cmd()
-> +{
-> +	if [[ -v POST_SCRATCH_MKFS_CMD ]]; then
-> +		echo "$POST_SCRATCH_MKFS_CMD $SCRATCH_DEV"
-> +		$POST_SCRATCH_MKFS_CMD $SCRATCH_DEV
-> +		return $?
-> +	fi
-> +
-> +	return 0
-> +}
-> +
-> +post_scratch_pool_mkfs_cmd()
-> +{
-> +	if [[ -v POST_SCRATCH_POOL_MKFS_CMD ]]; then
-> +		echo "$POST_SCRATCH_POOL_MKFS_CMD $SCRATCH_DEV_POOL"
-> +		$POST_SCRATCH_POOL_MKFS_CMD $SCRATCH_DEV_POOL
-> +		return $?
-> +	fi
-> +
-> +	return 0
-> +}
-> +
->   _scratch_mkfs_retry_btrfs()
->   {
->   	# _scratch_do_mkfs() may retry mkfs without $MKFS_OPTIONS
->   	_scratch_do_mkfs "$MKFS_BTRFS_PROG" "cat" $*
->
-> +	if [[ $? =3D=3D 0 ]]; then
-> +		post_scratch_mkfs_cmd
-> +	fi
-> +
->   	return $?
->   }
->
->   _scratch_mkfs_btrfs()
->   {
->   	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
-> +
-> +	if [[ $? =3D=3D 0 ]]; then
-> +		post_scratch_mkfs_cmd
-> +	fi
-> +
->   	return $?
->   }
->
-> @@ -708,5 +739,9 @@ _scratch_pool_mkfs_btrfs()
->   {
->   	$MKFS_BTRFS_PROG $MKFS_OPTIONS $* $SCRATCH_DEV_POOL
->
-> +	if [[ $? =3D=3D 0 ]]; then
-> +		post_scratch_pool_mkfs_cmd
-> +	fi
-> +
->   	return $?
->   }
+> So you just need aio-dio-write-verify.c to do aio write. Maybe we can have aio
+> read and write support in xfs_io in one day:)
+
+Yes, someday maybe :)
+But I am not sure what plan Darrick has about it. Was there any
+history behind no aio-dio support in xfs_io? Just curious since the
+discussion came up.
+
+
+Thanks for the review!
+-ritesh
