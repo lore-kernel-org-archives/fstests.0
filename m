@@ -2,115 +2,256 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2119EE743C0
-	for <linux-fstests@archiver.kernel.org>; Thu, 28 Sep 2023 20:30:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45E55E743CE
+	for <linux-fstests@archiver.kernel.org>; Thu, 28 Sep 2023 23:16:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232120AbjI1UaG (ORCPT
+        id S229794AbjI1XQF (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Sep 2023 16:30:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52154 "EHLO
+        Thu, 28 Sep 2023 19:16:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231921AbjI1UaF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2023 16:30:05 -0400
-Received: from mail-io1-xd31.google.com (mail-io1-xd31.google.com [IPv6:2607:f8b0:4864:20::d31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDA35180;
-        Thu, 28 Sep 2023 13:30:02 -0700 (PDT)
-Received: by mail-io1-xd31.google.com with SMTP id ca18e2360f4ac-79f95439795so328650239f.0;
-        Thu, 28 Sep 2023 13:30:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695933002; x=1696537802; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=nBOxrxDr1jHFBGxJjQHlUvnbQXDpgQCuw7Awu1Ra6tQ=;
-        b=S9/190iC6ARmOXl5nvaKGf/zTBmUdV/le/os8DvKD60S49pSv0egZi3tcXZKi4XsSv
-         2ATZ6tJ8WIIr41wd4r56MklHy8prR9jpZeQO0jewPB2P/rmuM5uGCHZl1uhdY4a1N8E+
-         8tyaSk+C9oBHFNIerHJH9Chx3oPnsk+2bv9eIN0LGjlsgF/K0nJSTeCExBODUsE5k9Q8
-         cYUDrQ8ea7cdcGCmVauIMqG5Ytcws7MdBbWEAQnKgFnfLGFsxUQHtyTmyEpf2ktGAASh
-         CWE646R33EokRsjj+H5SdP9ZuiIrg/inbNvY29olZoDaY1voAY0QMs03lyOltocpvVm9
-         72Zg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695933002; x=1696537802;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nBOxrxDr1jHFBGxJjQHlUvnbQXDpgQCuw7Awu1Ra6tQ=;
-        b=YEWNHrWteESPVfzCIwsQjxm4vBDkGxt/Mfqlot2J33E0y0wKNblQJngSSPIkE4bTvU
-         1RRh5V836WnMlM83OlfPM33Hj+9+dkj8sKTpGjM/op2XjCeOg80tnyNaCUUOawP4Gmvp
-         W3Ea4CdzHputAovxwQIi7G5hwHkugQRq3PlTVcPD5hFTy0fHMjVJjhA57Vs8CK9ZFaXz
-         PehFEZd1A04T++YiOxmQTzYoN4T5qi251x5Bp/NLQE0+WabwsI9cJl9//8MnqveKG5B5
-         IGkCQ2MIQ6GL513wKuUJfFG6Q5Itf9ytkU5u4dZUW9PvkOBdOUPPjCT8lSOr9j/pAknH
-         0Xfw==
-X-Gm-Message-State: AOJu0YwCrA/AaZBRvNyU3W3AE70/m9sORCI0b7kI+dUCLMBDNq+AXzz7
-        TZYTwL0wb7xJYR4Zgh/a/EOPtb6KDH62wlBhxME=
-X-Google-Smtp-Source: AGHT+IEfTycpY47X0wq7gNaM9Z5ej2sbqh6mEw6znOhuYm6dBLkds3erWz/536wH82BFhfz1YEKI1w==
-X-Received: by 2002:a05:6e02:184d:b0:348:b086:2c4b with SMTP id b13-20020a056e02184d00b00348b0862c4bmr2022760ilv.9.1695933001723;
-        Thu, 28 Sep 2023 13:30:01 -0700 (PDT)
-Received: from slackware.lan (c-107-2-182-140.hsd1.co.comcast.net. [107.2.182.140])
-        by smtp.gmail.com with ESMTPSA id fs11-20020a05663865cb00b004313f22611csm4683805jab.151.2023.09.28.13.30.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Sep 2023 13:30:01 -0700 (PDT)
-From:   Vyacheslav Yurkov <uvv.mail@gmail.com>
-To:     fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>,
-        Zorro Lang <zlang@kernel.org>
-Cc:     linux-unionfs@vger.kernel.org,
-        Vyacheslav Yurkov <uvv.mail@gmail.com>
-Subject: [PATCH] README: Update overlayfs URL
-Date:   Thu, 28 Sep 2023 22:28:34 +0200
-Message-Id: <20230928202834.47640-1-uvv.mail@gmail.com>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S229541AbjI1XQE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2023 19:16:04 -0400
+Received: from out4-smtp.messagingengine.com (out4-smtp.messagingengine.com [66.111.4.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6AB319F;
+        Thu, 28 Sep 2023 16:15:58 -0700 (PDT)
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id 30CF05C0130;
+        Thu, 28 Sep 2023 19:15:58 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute4.internal (MEProxy); Thu, 28 Sep 2023 19:15:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+        :content-transfer-encoding:content-type:date:date:from:from
+        :in-reply-to:in-reply-to:message-id:mime-version:references
+        :reply-to:sender:subject:subject:to:to; s=fm3; t=1695942958; x=
+        1696029358; bh=j+KD/sriX+e/wWHTpgo0NBnggBDG5I8dvFVim9K0Vrc=; b=C
+        CwtEzJBU0ClN02vR025tZLjVxXMkSFvztoIMIUttAicixX8vbX66NA+RjNJEynbL
+        /iRs7zpI2brcDZdm9A5GCNsIhRIw8okh/i7DWItw3jmRc0NlwQyHBuujIRpZIgth
+        Je9qZ1qeY1MdLx92eXBnYGa3xkPZsuXJQyDpU17jJQdXVWUKNB6TBruBVqr0XcTb
+        nUT5pGtLBpV3lDpSrn6Spn6oYpmAJL6J1VQyB7/DeA+noyh38WE0UDJjno4KGT5p
+        6UvMyQZ8TiRnFlSDEZgkSP/hFI/10AkEZiYOh5Uf5V0nQ9QrypGj2pMGoNW8T6eC
+        EkP03qbwft2xeICjiVsaw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:content-type
+        :date:date:feedback-id:feedback-id:from:from:in-reply-to
+        :in-reply-to:message-id:mime-version:references:reply-to:sender
+        :subject:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender
+        :x-me-sender:x-sasl-enc; s=fm2; t=1695942958; x=1696029358; bh=j
+        +KD/sriX+e/wWHTpgo0NBnggBDG5I8dvFVim9K0Vrc=; b=OSOKL0UUCx2EIE+tT
+        07ai3oeD9sFpwd+rz5Jurv2w1oiIVZ7itO7zAwOQrln0H06pgGrj0YXcvD8ClyYd
+        +XcVx1KJ58/N/Ijx8inzg/vdWUwkS1oTQhFKZbewoDiI/0eyLYG2uviFbFySyb2b
+        dI07dEvtR0KEYCA+5GCpz6KLbEFQi2yIGTebXEGrM3aOW0L+W6eLPZHJ46GNU1Y3
+        +qIJLVIN2f/acb+GNHHaLLo3z2Q04v3hmg9LkgA/WRh3JVrOJniTWy0kwsKjcDCo
+        iMsDTBEGYbMiAuwWF7H4Dx9xnLf8Po4bDkY9rlW2pjLiUtbnHeAAIaIEORSP6SFo
+        jMDxQ==
+X-ME-Sender: <xms:LQkWZbj-ylGitZRN1oVyVgpJsDX-77upJBYgiecgzggUbAiWGndPyA>
+    <xme:LQkWZYDg3d0I6f2jSeGwhIxWTQiQRUjYxDmnbjd0kpcezyiQFU50hWgDeK57z2S7C
+    a0dEIx39ItDK21Hhc4>
+X-ME-Received: <xmr:LQkWZbHui7x8_0lcaxFp2FWDQXCXLlery89J1FUoGMmoQpmG6ZQitJcl9XuvaemTFgRrGZosE9ZRTVlAmfmOsdThrDE>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrtddugddvudcutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffojghfggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepieeuffeuvdeiueejhfehiefgkeevudejjeejffevvd
+    ehtddufeeihfekgeeuheelnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:LQkWZYQTF85e3LKEvnasJyjeyG9suZkgWte7YVgRWsuJ-XAAoGpZ5Q>
+    <xmx:LQkWZYyrTy0fnMsi8uAQWWgI1RkwvR8QvRXOVgsVXNzisvqYj5NoiQ>
+    <xmx:LQkWZe5uAu2uWUbyaIMQSfPgPnoqpkd4ki0m6_-lhm_eEGds_E1Vow>
+    <xmx:LgkWZVqLg8_jfEIKfCJbk7Ti1bdZDTVMISGIBVauD6wukX1dmjPS5w>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 28 Sep 2023 19:15:57 -0400 (EDT)
+From:   Boris Burkov <boris@bur.io>
+To:     linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+        fstests@vger.kernel.org
+Subject: [PATCH v4 1/6] common: refactor sysfs_attr functions
+Date:   Thu, 28 Sep 2023 16:16:43 -0700
+Message-ID: <0714f6b21000181ab43d3085903859b8ae1e1a32.1695942727.git.boris@bur.io>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <cover.1695942727.git.boris@bur.io>
+References: <cover.1695942727.git.boris@bur.io>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Overlayfs-tools and overlayfs-progs projects have been merged together.
+Expand the has/get/require functions to allow passing a dev by
+parameter, and implement the test_dev specific one in terms of the new
+generic one.
 
-Signed-off-by: Vyacheslav Yurkov <uvv.mail@gmail.com>
+Signed-off-by: Boris Burkov <boris@bur.io>
 ---
- README | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ common/rc | 127 +++++++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 82 insertions(+), 45 deletions(-)
 
-diff --git a/README b/README
-index d9db9675..e558efc9 100644
---- a/README
-+++ b/README
-@@ -19,7 +19,7 @@ Ubuntu or Debian
-         xfslibs-dev
+diff --git a/common/rc b/common/rc
+index 1618ded54..c3cd53546 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4689,47 +4689,33 @@ run_fsx()
+ 	rm -f $tmp.fsx
+ }
  
-    For OverlayFS install:
--    - see https://github.com/hisilicon/overlayfs-progs
-+    - see https://github.com/kmxz/overlayfs-tools
+-# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
++_require_statx()
++{
++	$here/src/stat_test --check-statx ||
++	_notrun "This test requires the statx system call"
++}
++
++# Get the path to the sysfs directory for the fs on a device
+ #
+ # Only one argument is needed:
+-#  - attr: path name under /sys/fs/$FSTYP/DEV
++#  - dev: mounted block device for the fs
+ #
+ # Usage example:
+-#   _require_fs_sysfs error/fail_at_unmount
+-_has_fs_sysfs()
++#   _fs_sysfs_dname /dev/mapper/scratch-dev
++_fs_sysfs_dname()
+ {
+-	local attr=$1
+-	local dname
++	local dev=$1
++
++	if [ ! -b "$dev" ]; then
++		_fail "Usage: _fs_sysfs_dname <mounted_device>"
++	fi
  
- Fedora
- ------
-@@ -37,7 +37,7 @@ Fedora
-         xfsprogs-devel
+ 	case "$FSTYP" in
+ 	btrfs)
+-		dname=$(findmnt -n -o UUID $TEST_DEV) ;;
++		findmnt -n -o UUID ${dev} ;;
+ 	*)
+-		dname=$(_short_dev $TEST_DEV) ;;
++		_short_dev $dev ;;
+ 	esac
+-
+-	if [ -z "$attr" -o -z "$dname" ];then
+-		_fail "Usage: _require_fs_sysfs <sysfs_attr_path>"
+-	fi
+-
+-	test -e /sys/fs/${FSTYP}/${dname}/${attr}
+-}
+-
+-# Require the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
+-_require_fs_sysfs()
+-{
+-	_has_fs_sysfs "$@" && return
+-
+-	local attr=$1
+-	local dname=$(_short_dev $TEST_DEV)
+-
+-	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr}"
+-}
+-
+-_require_statx()
+-{
+-	$here/src/stat_test --check-statx ||
+-	_notrun "This test requires the statx system call"
+ }
  
-    For OverlayFS build and install:
--    - see https://github.com/hisilicon/overlayfs-progs
-+    - see https://github.com/kmxz/overlayfs-tools
+ # Write "content" into /sys/fs/$FSTYP/$DEV/$ATTR
+@@ -4753,13 +4739,7 @@ _set_fs_sysfs_attr()
+ 		_fail "Usage: _set_fs_sysfs_attr <mounted_device> <attr> <content>"
+ 	fi
  
- RHEL or CentOS
- --------------
-@@ -75,7 +75,7 @@ RHEL or CentOS
-      - see https://github.com/markfasheh/ocfs2-tools
+-	local dname
+-	case "$FSTYP" in
+-	btrfs)
+-		dname=$(findmnt -n -o UUID ${dev}) ;;
+-	*)
+-		dname=$(_short_dev $dev) ;;
+-	esac
++	local dname=$(_fs_sysfs_dname $dev)
  
-     For OverlayFS build and install:
--     - see https://github.com/hisilicon/overlayfs-progs
-+     - see https://github.com/kmxz/overlayfs-tools
+ 	echo "$content" > /sys/fs/${FSTYP}/${dname}/${attr}
+ }
+@@ -4781,17 +4761,74 @@ _get_fs_sysfs_attr()
+ 		_fail "Usage: _get_fs_sysfs_attr <mounted_device> <attr>"
+ 	fi
  
- SUSE Linux Enterprise or openSUSE
- ---------------------------------
-@@ -95,7 +95,7 @@ SUSE Linux Enterprise or openSUSE
-      $ sudo zypper install xfsdump xfsprogs-devel
+-	local dname
+-	case "$FSTYP" in
+-	btrfs)
+-		dname=$(findmnt -n -o UUID ${dev}) ;;
+-	*)
+-		dname=$(_short_dev $dev) ;;
+-	esac
++	local dname=$(_fs_sysfs_dname $dev)
  
-     For OverlayFS build and install:
--     - see https://github.com/hisilicon/overlayfs-progs
-+     - see https://github.com/kmxz/overlayfs-tools
+ 	cat /sys/fs/${FSTYP}/${dname}/${attr}
+ }
  
- Build and install test, libs and utils
- --------------------------------------
++# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ATTR
++#
++# All arguments are necessary, and in this order:
++#  - dev: device name, e.g. $SCRATCH_DEV
++#  - attr: path name under /sys/fs/$FSTYP/$dev
++#
++# Usage example:
++#   _has_fs_sysfs_attr /dev/mapper/scratch-dev error/fail_at_unmount
++_has_fs_sysfs_attr()
++{
++	local dev=$1
++	local attr=$2
++
++	if [ ! -b "$dev" -o -z "$attr" ];then
++		_fail "Usage: _get_fs_sysfs_attr <mounted_device> <attr>"
++	fi
++
++	local dname=$(_fs_sysfs_dname $dev)
++
++	test -e /sys/fs/${FSTYP}/${dname}/${attr}
++}
++
++# Require the existence of a sysfs entry at /sys/fs/$FSTYP/$DEV/$ATTR
++# All arguments are necessary, and in this order:
++#  - dev: device name, e.g. $SCRATCH_DEV
++#  - attr: path name under /sys/fs/$FSTYP/$dev
++#
++# Usage example:
++#   _require_fs_sysfs_attr /dev/mapper/scratch-dev error/fail_at_unmount
++_require_fs_sysfs_attr()
++{
++	_has_fs_sysfs_attr "$@" && return
++
++	local dev=$1
++	local attr=$2
++	local dname=$(_fs_sysfs_dname $dev)
++
++	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr}"
++}
++
++# Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
++#
++# Only one argument is needed:
++#  - attr: path name under /sys/fs/$FSTYP/DEV
++#
++# Usage example:
++#   _has_fs_sysfs error/fail_at_unmount
++_has_fs_sysfs()
++{
++	_has_fs_sysfs_attr $TEST_DEV "$@"
++}
++
++# Require the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
++_require_fs_sysfs()
++{
++	_has_fs_sysfs "$@" && return
++
++	local attr=$1
++	local dname=$(_short_dev $TEST_DEV)
++
++	_notrun "This test requires /sys/fs/${FSTYP}/${dname}/${attr}"
++}
++
+ # Generic test for specific filesystem feature.
+ # Currently only implemented to test overlayfs features.
+ _require_scratch_feature()
 -- 
-2.35.1
+2.42.0
 
