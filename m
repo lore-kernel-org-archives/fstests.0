@@ -2,147 +2,177 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 359F6E743DC
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 03:17:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C1C2E743E1
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 05:07:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229799AbjI2DRD (ORCPT
+        id S230181AbjI2FHq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 28 Sep 2023 23:17:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34374 "EHLO
+        Fri, 29 Sep 2023 01:07:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229541AbjI2DRC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2023 23:17:02 -0400
-Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1976199;
-        Thu, 28 Sep 2023 20:17:00 -0700 (PDT)
-Received: by mail-ua1-x92f.google.com with SMTP id a1e0cc1a2514c-7abe4fa15ceso158476241.1;
-        Thu, 28 Sep 2023 20:17:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695957420; x=1696562220; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=DkdkomWUtTXARHMgZ0EQBfQou7x4oicQEPVEloUMgRk=;
-        b=DxYrw1OOrPugFJdfR9OcSRv/QwT+dQcRKbwKUJrK8ych5dW0TfHnbMEB9/1g2VgIaf
-         yXozEzNDGcj3yufL6GLa0cStdys0MF71NncSQq2OWwIldYbd4IqFW2tPyWaofmQYwcvt
-         +1/7XHPYjr0fyPCj1Yptln0PZGKQkwSkoaSz3hRxBOml1WX4dRrzJT5U4bEbT+OoruA2
-         Fsrrrkan7S/RmT7HlXFJMkDxwFTY7wa111baAlFYIY3iZdZlS4pW11NFr/XlQsFRhCFb
-         +3dPJX5cSXw+99Q+KBO/VsllHXScp/Su2n7ux4BI4vXifu1BBhYyu2xcChDZD9sUvbkH
-         oagw==
+        with ESMTP id S229577AbjI2FHq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2023 01:07:46 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAB4F195
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:06:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1695964018;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=3Nj9uS8ksqi/HQwcfZwGx/l1IEoT6Cp8IOy3+pFjPgA=;
+        b=Xun6txvCMDg7Qfski1Xo9XjGaLuV9TR+nefP4TLl5gTZvrn/pBjveuF98j1QRSzAQLDkBa
+        s4Wl07O9Ah6SN3TNXMKWDpu/r5yGl77E7yF0ZEqy+SdwxtR3aoW3kYbXS9Yq0sAx/QL3zE
+        Z4bzkwsAksZPgy2u554LS0nho9oJgiY=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-230-HZf2qGjaPReR3-7pk5Ffzg-1; Fri, 29 Sep 2023 01:06:56 -0400
+X-MC-Unique: HZf2qGjaPReR3-7pk5Ffzg-1
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1c727ea6b98so2843295ad.0
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:06:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695957420; x=1696562220;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=DkdkomWUtTXARHMgZ0EQBfQou7x4oicQEPVEloUMgRk=;
-        b=N3MfjoqBDaq1H/uQQWgGHvNiKOQrPygAEd9Wu3ymFSseYMSl1wlFDecsJj1Gz5MSVN
-         x1AaMZ1YsxrMUj06+HylWgUA4GNQ9TYE+cu8v2EiYMzZ5Z2ejVNlaQ+PSdU0kJS1rqIl
-         +ju8B74wAiX3CTX0JlstYfL/iPmsFXfTK1gU6wEguPrZOTqogzHjsKaJJ3ufJypl2QCs
-         0WvYLbUz1ovBHr5KAHEM8NdpjdRUtQd7vLpKKsNsK/4MK1G65q8AxhmTt5ydvKxIKp5i
-         qRQbIhNqrYtz/8dJrcCTm/4XuSCqG102XSCU3LH94YRkc2yV1T002XxP2SAdlUwiavYk
-         MuYA==
-X-Gm-Message-State: AOJu0YzFb7aVkJRElPLfZQ6ibrw6L7R6jciETmxstr1vI5kTlrPBO5wV
-        nFnZdRlMovSIogFKe4/m1RZwXDHTTBNyLoTNp5M=
-X-Google-Smtp-Source: AGHT+IF6DQiLz/3VVd2aTeNkUJdZZfNJtiysKP56EzIgbZ2E97uoqIxWXMAn7o7Tpc4bhjP4H33mYjt4kDHWOPeGLBA=
-X-Received: by 2002:a05:6102:5486:b0:452:61fa:1e04 with SMTP id
- bk6-20020a056102548600b0045261fa1e04mr1689939vsb.9.1695957419809; Thu, 28 Sep
- 2023 20:16:59 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1695964015; x=1696568815;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3Nj9uS8ksqi/HQwcfZwGx/l1IEoT6Cp8IOy3+pFjPgA=;
+        b=xLS/eEWXYXE2T6JSK3hWCVs99NA4dbesUOdAcixzFSPpqWNERnoKplfbRH6cFtaKRM
+         Ds29KP2Gq1zrApKpsyy0q6xN+wt85VH/3J6D5yycJOp1QeG6EV4RN6rZu9/xJm8mvS8q
+         /xYBLZalr/0T8Kb5ev05Q7wM/n0ePjuSbmgSzYxx6Afl3Ni6pgOzaRuc4cgRmEycTRP2
+         ZdYuyAuVKWfXOR5ktm0d8na2aDglncwNxhJxPkDwok/9vBRHPU453KFzNhfL9ovkXayR
+         a2Wk5sqTRvHSF5GGOE8Pq7ECKX7zSZHx2k2yA71K/q7MaVGxat/r7W6YZJoDMXUZu+Ey
+         jEMQ==
+X-Gm-Message-State: AOJu0YyNPldjG32u7MEyC6l1gJGG/gJ8Gz1CZ9BQZoE9JmymwSOlegWR
+        Jh//R8BgHK7nXYPkn7gA81YhLeP3ASvC32W2OUdL5Rzg9ZkTO+Haq6LKl+rVrzzP0Wi52eK1slF
+        huBxEbR5tlKt+LEaIxA==
+X-Received: by 2002:a17:902:dad2:b0:1c7:2e8f:c3b5 with SMTP id q18-20020a170902dad200b001c72e8fc3b5mr5023948plx.20.1695964014888;
+        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGs9PYDgEG/mjeZJ7gw2Luzl4ABkAI4qPy+jtDCX7CoRO0cMkIZB+7+seExPzI5fu9RqW7hxg==
+X-Received: by 2002:a17:902:dad2:b0:1c7:2e8f:c3b5 with SMTP id q18-20020a170902dad200b001c72e8fc3b5mr5023932plx.20.1695964014520;
+        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id l16-20020a170903245000b001bdb0483e65sm15813633pls.265.2023.09.28.22.06.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
+Date:   Fri, 29 Sep 2023 13:06:51 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Bill O'Donnell <bodonnel@redhat.com>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v2] fstests: generic/353 should accomodate other pwrite
+ behaviors
+Message-ID: <20230929050651.7rlyclnxlmzrot3z@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230901161816.148854-1-bodonnel@redhat.com>
 MIME-Version: 1.0
-References: <20230928202834.47640-1-uvv.mail@gmail.com>
-In-Reply-To: <20230928202834.47640-1-uvv.mail@gmail.com>
-From:   Amir Goldstein <amir73il@gmail.com>
-Date:   Fri, 29 Sep 2023 06:16:48 +0300
-Message-ID: <CAOQ4uxhx59ZnMbhLTL85M1VQta6AZ2oqe9gMQJcN1qiAzOu6tQ@mail.gmail.com>
-Subject: Re: [PATCH] README: Update overlayfs URL
-To:     Vyacheslav Yurkov <uvv.mail@gmail.com>
-Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>,
-        linux-unionfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230901161816.148854-1-bodonnel@redhat.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Sep 28, 2023 at 11:30=E2=80=AFPM Vyacheslav Yurkov <uvv.mail@gmail.=
-com> wrote:
->
-> Overlayfs-tools and overlayfs-progs projects have been merged together.
->
-
-Nice :)
-
-Do you also have any plans to improve the tools?
-
-> Signed-off-by: Vyacheslav Yurkov <uvv.mail@gmail.com>
+On Fri, Sep 01, 2023 at 11:18:16AM -0500, Bill O'Donnell wrote:
+> xfs_io pwrite issues a series of block size writes, but there is no
+> guarantee that the resulting extent(s) will be singular or contiguous.
+> This behavior is acceptable, but the test is flawed in that it expects
+> a single extent for a pwrite.
+> 
+> Modify test to use actual blocksize for pwrite and reflink. Also
+> modify it to accommodate pwrite and reflink that produce different
+> mapping results.
+> 
+> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
 > ---
->  README | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/README b/README
-> index d9db9675..e558efc9 100644
-> --- a/README
-> +++ b/README
-> @@ -19,7 +19,7 @@ Ubuntu or Debian
->          xfslibs-dev
->
->     For OverlayFS install:
 
-While you are fixing the README:
+This patch makes sense to me, but this case looks like a regression test
+test for a known btrfs issue. But this test case doesn't point out which
+bug/fix does it test for. So I don't know if the 64k blocksize is a
+necessary condition to reproduce the bug.
 
-1. Above should read 'build and install' like the rest of the sections
-2. Please refrain from the use of letter case OverlayFS - it is
-    inconsistent with the rest of fstests
-3. This reads as if installing overlayfs-tools is a prerequisite for
-    testing overlayfs, which is not true. In fact, in most likelihood,
-    there are very few people that run fstests with fsck.overlay,
-    so it would be more accurate to say:
-
-     For fsck.overlay [optional], build and install:
-
-4. Because fsck.overlay is not mandatory and because it is
-    not distro specific, I think this instruction should be moved
-    to README.overlay.
-    Note that the instructions to install unionmount testsuite
-    are in README.overlay and while they are also not mandatory
-    fo testing overlayfs, they likely add much more test coverage then
-    fsck.overlay does, so no reason to promote installing fsck.overlay
-    more than installing unionmount
+If we can prove it still can reproduce that bug with this patch at least,
+then it's good to me to merge it.
 
 Thanks,
-Amir.
+Zorro
 
-> -    - see https://github.com/hisilicon/overlayfs-progs
-> +    - see https://github.com/kmxz/overlayfs-tools
->
->  Fedora
->  ------
-> @@ -37,7 +37,7 @@ Fedora
->          xfsprogs-devel
->
->     For OverlayFS build and install:
-> -    - see https://github.com/hisilicon/overlayfs-progs
-> +    - see https://github.com/kmxz/overlayfs-tools
->
->  RHEL or CentOS
->  --------------
-> @@ -75,7 +75,7 @@ RHEL or CentOS
->       - see https://github.com/markfasheh/ocfs2-tools
->
->      For OverlayFS build and install:
-> -     - see https://github.com/hisilicon/overlayfs-progs
-> +     - see https://github.com/kmxz/overlayfs-tools
->
->  SUSE Linux Enterprise or openSUSE
->  ---------------------------------
-> @@ -95,7 +95,7 @@ SUSE Linux Enterprise or openSUSE
->       $ sudo zypper install xfsdump xfsprogs-devel
->
->      For OverlayFS build and install:
-> -     - see https://github.com/hisilicon/overlayfs-progs
-> +     - see https://github.com/kmxz/overlayfs-tools
->
->  Build and install test, libs and utils
->  --------------------------------------
-> --
-> 2.35.1
->
+>  tests/generic/353     | 29 ++++++++++++++++-------------
+>  tests/generic/353.out | 15 +--------------
+>  2 files changed, 17 insertions(+), 27 deletions(-)
+> 
+> diff --git a/tests/generic/353 b/tests/generic/353
+> index 9a1471bd..c5639725 100755
+> --- a/tests/generic/353
+> +++ b/tests/generic/353
+> @@ -29,31 +29,34 @@ _require_xfs_io_command "fiemap"
+>  _scratch_mkfs > /dev/null 2>&1
+>  _scratch_mount
+>  
+> -blocksize=64k
+> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
+> +
+>  file1="$SCRATCH_MNT/file1"
+>  file2="$SCRATCH_MNT/file2"
+> +extmap1="$SCRATCH_MNT/extmap1"
+> +extmap2="$SCRATCH_MNT/extmap2"
+>  
+>  # write the initial file
+> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
+> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
+>  
+>  # reflink initial file
+> -_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
+> +_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
+>  
+>  # check their fiemap to make sure it's correct
+> -echo "before sync:"
+> -echo "$file1" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
+> -echo "$file2" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
+> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
+> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
+> +
+> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
+>  
+>  # sync and recheck, to make sure the fiemap doesn't change just
+>  # due to sync
+>  sync
+> -echo "after sync:"
+> -echo "$file1" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
+> -echo "$file2" | _filter_scratch
+> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
+> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
+> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
+> +
+> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
+> +
+> +echo "Silence is golden"
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/generic/353.out b/tests/generic/353.out
+> index 4f6e0b92..16ba4f1f 100644
+> --- a/tests/generic/353.out
+> +++ b/tests/generic/353.out
+> @@ -1,15 +1,2 @@
+>  QA output created by 353
+> -wrote 65536/65536 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -linked 65536/65536 bytes at offset 0
+> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> -before sync:
+> -SCRATCH_MNT/file1
+> -0: [0..127]: shared|last
+> -SCRATCH_MNT/file2
+> -0: [0..127]: shared|last
+> -after sync:
+> -SCRATCH_MNT/file1
+> -0: [0..127]: shared|last
+> -SCRATCH_MNT/file2
+> -0: [0..127]: shared|last
+> +Silence is golden
+> -- 
+> 2.41.0
+> 
+
