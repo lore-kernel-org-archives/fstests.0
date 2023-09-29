@@ -2,121 +2,118 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80762E743E1
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 05:18:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82B6EE743E1
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 05:23:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232519AbjI2FSX (ORCPT
+        id S231429AbjI2FXz (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Sep 2023 01:18:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57488 "EHLO
+        Fri, 29 Sep 2023 01:23:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232537AbjI2FSW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2023 01:18:22 -0400
+        with ESMTP id S229613AbjI2FXy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2023 01:23:54 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53175195
-        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:17:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35E641A2
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:23:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695964653;
+        s=mimecast20190719; t=1695964986;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=qNzIK+hDRSEvCljzH+3cTf/shuxMZGWWu5JeZVomWdg=;
-        b=fnVnBYlLWERRfz4L2XkXe5yDpxyD/MujWKcKJfViUsltRgeb8iqAONpIdk333QWvJioKDs
-        qbaRm7YECMJfZdimO1bXmNj8uay72ckH+fbeyuuGTgUcL2UuLvBNLd2kokIPbeCxugrR9H
-        hNUuKtBy4X61eVBlR4eGUXvOYftNnSg=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=rT7q5ABhiXi4cAWfRmu0uabBW3kY7SYwhq6pFjVOpGs=;
+        b=dJQLOIlFSeZdsJXGh7KW6lqz5gJfxLNBLNQZEZqVf4hF3p9GK7+1x9Y6ITkNrGmfh/TZkE
+        FaLoFF9uxEKOPtzkrzFtukU68o1ok3gJrrZ6oIDe57/62i1kAQxpkL8Dx0KEEYDV1H1XD/
+        CpeBPrX5T5pBMLrUpFugUhTIWdOOmIo=
+Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
+ [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-621-LcjdL-ybO-CXhS26LlLx2w-1; Fri, 29 Sep 2023 01:17:25 -0400
-X-MC-Unique: LcjdL-ybO-CXhS26LlLx2w-1
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-278f5b7a960so5645929a91.2
-        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:17:24 -0700 (PDT)
+ us-mta-73-cgUo8fLgMSC26OTVB3C-mg-1; Fri, 29 Sep 2023 01:23:04 -0400
+X-MC-Unique: cgUo8fLgMSC26OTVB3C-mg-1
+Received: by mail-ot1-f71.google.com with SMTP id 46e09a7af769-6c0f174540cso28163990a34.2
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:23:04 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695964644; x=1696569444;
+        d=1e100.net; s=20230601; t=1695964983; x=1696569783;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qNzIK+hDRSEvCljzH+3cTf/shuxMZGWWu5JeZVomWdg=;
-        b=iXFvabpZIqwg8zpD5DCE3Hct4ZuVqp3fNMIIKkqvs7bgDL5Z6CT621bOXUCVIq7yP5
-         KWIyKMDD1DiNc9oT+zzD5wWigiQ5mBwbshBRCWlcSu9lkhNaFFxfjDezELFcj4Um6FEf
-         B1P7ns2slyEBDjxIOlgk3K6sGHBr/AV0uAs+5UbXMrTI9E5GDc2RL8C12pKnR67KJfFv
-         2pMbs2vti2iolw1IPwcnSRjXYb3ndqm4Pt6RiYAZITP8XWArlBr4xtaIePKeqbO2ATAp
-         39uaC5IgA1jdq2hZn8D/oYWXsxNb6dWJmQDIAyy7QeyI3NvOxYzok+4ooSBhe2yT1jML
-         zwKA==
-X-Gm-Message-State: AOJu0YxhbAAIBr+op7wmSngEQIwMob+GPSinp66mxDIfj12wFWgmCBAS
-        Y5iwfRHA8eltdSbpQKAz3flJOFsAQct5rWwPbEZI6W/yjSj0qGrL3Nh+GYYbFYLt4fIt72/tvNU
-        2+i2wtIHApOs9ZNXAog==
-X-Received: by 2002:a17:90a:64f:b0:279:104e:1779 with SMTP id q15-20020a17090a064f00b00279104e1779mr3160690pje.16.1695964643980;
-        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGrtP3sbKcO75m2H368iUYaattz5g53Z+pHQ2t4QlCntswaEZ2FZpjjT6rGSMYPs6pyCRw3DA==
-X-Received: by 2002:a17:90a:64f:b0:279:104e:1779 with SMTP id q15-20020a17090a064f00b00279104e1779mr3160681pje.16.1695964643625;
-        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
+        bh=rT7q5ABhiXi4cAWfRmu0uabBW3kY7SYwhq6pFjVOpGs=;
+        b=AaIAVA4/oBEMLnggij8PSH9YORecGhfO6TYT6kPXloXWFKhuDYnUlbbxcclhaBhOCB
+         Pc81KI4lviLkBOF/Vu34hdM2Vlg23p8I03f5LwacROOtFau7giXq0cnx7vpOzrysDyCl
+         EPjeNxZqNnOl1A5SpfSnNuKsue0DJ16UF59Ckl/NEueDbHEGNIZ1RlarMdwSVs1/PSQI
+         pZC1sOPE0QjqQGgKWLB00ydZmv0pYs0yHPVN1ctfaIQ4A0A5Mb3GknPE3sv61VB7DrKT
+         CYbjCYTyg/PNyxVTSHn5FHJO5qSXw7kSoWsQNAq3XD8IfpcosgEuvXYUPI1lszyNyIKm
+         xOZw==
+X-Gm-Message-State: AOJu0Yy6cqLCuBoObO+xt9Es51dvWNUd/fl0Begj20ynrCHeWmwCUe/0
+        0q5HlAEzYIdXNyPyzH2H0k8LPnTQ/3kOO+x+cGXhZrrIDfI/0G+L6sov9GtjRVHrK9uTJ4MnPod
+        gj/B9vAEO00ND4I9AAQ==
+X-Received: by 2002:a05:6830:124b:b0:6bd:ba2c:fbbd with SMTP id s11-20020a056830124b00b006bdba2cfbbdmr3472491otp.20.1695964983529;
+        Thu, 28 Sep 2023 22:23:03 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFiwhdDJHiM0VK32TkOIKuqOf5Pa+JVy4+/rQWRgR5FJFhd0Ro7XD8L+LRUodOp+KHLh3FXqw==
+X-Received: by 2002:a05:6830:124b:b0:6bd:ba2c:fbbd with SMTP id s11-20020a056830124b00b006bdba2cfbbdmr3472486otp.20.1695964983268;
+        Thu, 28 Sep 2023 22:23:03 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id ge13-20020a17090b0e0d00b002680dfd368dsm482248pjb.51.2023.09.28.22.17.22
+        by smtp.gmail.com with ESMTPSA id p27-20020a63741b000000b0056c2de1f32esm11863594pgc.78.2023.09.28.22.23.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
-Date:   Fri, 29 Sep 2023 13:17:20 +0800
+        Thu, 28 Sep 2023 22:23:02 -0700 (PDT)
+Date:   Fri, 29 Sep 2023 13:22:59 +0800
 From:   Zorro Lang <zlang@redhat.com>
 To:     "Darrick J. Wong" <djwong@kernel.org>
 Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] xfs/018: make sure that larp mode actually works
-Message-ID: <20230929051720.naai64pxwrxbbjdr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <169567816120.2269819.5620379594030200785.stgit@frogsfrogsfrogs>
- <169567816694.2269819.8230834804621611518.stgit@frogsfrogsfrogs>
+Subject: Re: [PATCH 1/1] xfs/270: update commit id for _fixed_by tag.
+Message-ID: <20230929052259.7umlz236g3o4su6r@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <169567817047.2269889.16262169848413312221.stgit@frogsfrogsfrogs>
+ <169567817607.2269889.5897696336492740125.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <169567816694.2269819.8230834804621611518.stgit@frogsfrogsfrogs>
+In-Reply-To: <169567817607.2269889.5897696336492740125.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Mon, Sep 25, 2023 at 02:42:46PM -0700, Darrick J. Wong wrote:
+On Mon, Sep 25, 2023 at 02:42:56PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Skip this test if larp mode doesn't work.
+> Update the commit id in the _fixed_by tag now that we've merged the
+> kernel fix.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/xfs/018 |   13 +++++++++++++
->  1 file changed, 13 insertions(+)
+>  tests/xfs/270 |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
 > 
-> diff --git a/tests/xfs/018 b/tests/xfs/018
-> index 1ef51a2e61..73040edc92 100755
-> --- a/tests/xfs/018
-> +++ b/tests/xfs/018
-> @@ -71,6 +71,17 @@ create_test_file()
->  	done
->  }
+> diff --git a/tests/xfs/270 b/tests/xfs/270
+> index 7d4e1f6a87..4e4f767dc1 100755
+> --- a/tests/xfs/270
+> +++ b/tests/xfs/270
+> @@ -17,7 +17,7 @@ _begin_fstest auto quick mount
 >  
-> +require_larp()
-> +{
-> +	touch $SCRATCH_MNT/a
-> +
-> +	# Set attribute, being careful not to include the trailing newline
-> +	# in the attr value.
-> +	echo -n "attr_value" | ${ATTR_PROG} -s "attr_name" $SCRATCH_MNT/a 2>&1 | \
-> +		grep 'Operation not supported' && \
-> +		_notrun 'LARP not supported on this filesystem'
-
-"rm -f $SCRATCH_MNT/a" ? although that's not necessary :)
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> +}
-> +
 >  # real QA test starts here
 >  _supported_fs xfs
->  
-> @@ -112,6 +123,8 @@ _scratch_mount
->  testdir=$SCRATCH_MNT/testdir
->  mkdir $testdir
->  
-> +require_larp
-> +
->  # empty, inline
->  create_test_file empty_file1 0
->  test_attr_replay empty_file1 "attr_name" $attr64 "s" "larp"
+> -_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +_fixed_by_kernel_commit 74ad4693b647 \
+>  	"xfs: fix log recovery when unknown rocompat bits are set"
+
+This patch is good to me, but we have more xfs cases have fixed commit which
+have been merged:
+
+$ grep -rsni xxxxxxxx tests/xfs|grep _fixed
+tests/xfs/600:23:_fixed_by_git_commit kernel XXXXXXXXXXXXX \
+tests/xfs/557:21:_fixed_by_kernel_commit XXXXXXXXXXXX \
+tests/xfs/270:20:_fixed_by_kernel_commit xxxxxxxxxxxx \
+
+xfs/600: cfa2df68b7ce xfs: fix an agbno overflow in __xfs_getfsmap_datadev
+xfs/557: 817644fa4525 xfs: get root inode correctly at bulkstat
+
+Do you want to fix them in one patch, or you hope to merge this
+patch at first?
+
+Thanks,
+Zorro
+
+
+>  # skip fs check because superblock contains unknown ro-compat features
+>  _require_scratch_nocheck
 > 
 
