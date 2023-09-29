@@ -2,177 +2,121 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C1C2E743E1
-	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 05:07:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80762E743E1
+	for <linux-fstests@archiver.kernel.org>; Fri, 29 Sep 2023 05:18:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230181AbjI2FHq (ORCPT
+        id S232519AbjI2FSX (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 29 Sep 2023 01:07:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56038 "EHLO
+        Fri, 29 Sep 2023 01:18:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229577AbjI2FHq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2023 01:07:46 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAB4F195
-        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:06:59 -0700 (PDT)
+        with ESMTP id S232537AbjI2FSW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2023 01:18:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53175195
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:17:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1695964018;
+        s=mimecast20190719; t=1695964653;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=3Nj9uS8ksqi/HQwcfZwGx/l1IEoT6Cp8IOy3+pFjPgA=;
-        b=Xun6txvCMDg7Qfski1Xo9XjGaLuV9TR+nefP4TLl5gTZvrn/pBjveuF98j1QRSzAQLDkBa
-        s4Wl07O9Ah6SN3TNXMKWDpu/r5yGl77E7yF0ZEqy+SdwxtR3aoW3kYbXS9Yq0sAx/QL3zE
-        Z4bzkwsAksZPgy2u554LS0nho9oJgiY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=qNzIK+hDRSEvCljzH+3cTf/shuxMZGWWu5JeZVomWdg=;
+        b=fnVnBYlLWERRfz4L2XkXe5yDpxyD/MujWKcKJfViUsltRgeb8iqAONpIdk333QWvJioKDs
+        qbaRm7YECMJfZdimO1bXmNj8uay72ckH+fbeyuuGTgUcL2UuLvBNLd2kokIPbeCxugrR9H
+        hNUuKtBy4X61eVBlR4eGUXvOYftNnSg=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-230-HZf2qGjaPReR3-7pk5Ffzg-1; Fri, 29 Sep 2023 01:06:56 -0400
-X-MC-Unique: HZf2qGjaPReR3-7pk5Ffzg-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1c727ea6b98so2843295ad.0
-        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:06:55 -0700 (PDT)
+ us-mta-621-LcjdL-ybO-CXhS26LlLx2w-1; Fri, 29 Sep 2023 01:17:25 -0400
+X-MC-Unique: LcjdL-ybO-CXhS26LlLx2w-1
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-278f5b7a960so5645929a91.2
+        for <fstests@vger.kernel.org>; Thu, 28 Sep 2023 22:17:24 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695964015; x=1696568815;
+        d=1e100.net; s=20230601; t=1695964644; x=1696569444;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3Nj9uS8ksqi/HQwcfZwGx/l1IEoT6Cp8IOy3+pFjPgA=;
-        b=xLS/eEWXYXE2T6JSK3hWCVs99NA4dbesUOdAcixzFSPpqWNERnoKplfbRH6cFtaKRM
-         Ds29KP2Gq1zrApKpsyy0q6xN+wt85VH/3J6D5yycJOp1QeG6EV4RN6rZu9/xJm8mvS8q
-         /xYBLZalr/0T8Kb5ev05Q7wM/n0ePjuSbmgSzYxx6Afl3Ni6pgOzaRuc4cgRmEycTRP2
-         ZdYuyAuVKWfXOR5ktm0d8na2aDglncwNxhJxPkDwok/9vBRHPU453KFzNhfL9ovkXayR
-         a2Wk5sqTRvHSF5GGOE8Pq7ECKX7zSZHx2k2yA71K/q7MaVGxat/r7W6YZJoDMXUZu+Ey
-         jEMQ==
-X-Gm-Message-State: AOJu0YyNPldjG32u7MEyC6l1gJGG/gJ8Gz1CZ9BQZoE9JmymwSOlegWR
-        Jh//R8BgHK7nXYPkn7gA81YhLeP3ASvC32W2OUdL5Rzg9ZkTO+Haq6LKl+rVrzzP0Wi52eK1slF
-        huBxEbR5tlKt+LEaIxA==
-X-Received: by 2002:a17:902:dad2:b0:1c7:2e8f:c3b5 with SMTP id q18-20020a170902dad200b001c72e8fc3b5mr5023948plx.20.1695964014888;
-        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGs9PYDgEG/mjeZJ7gw2Luzl4ABkAI4qPy+jtDCX7CoRO0cMkIZB+7+seExPzI5fu9RqW7hxg==
-X-Received: by 2002:a17:902:dad2:b0:1c7:2e8f:c3b5 with SMTP id q18-20020a170902dad200b001c72e8fc3b5mr5023932plx.20.1695964014520;
-        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
+        bh=qNzIK+hDRSEvCljzH+3cTf/shuxMZGWWu5JeZVomWdg=;
+        b=iXFvabpZIqwg8zpD5DCE3Hct4ZuVqp3fNMIIKkqvs7bgDL5Z6CT621bOXUCVIq7yP5
+         KWIyKMDD1DiNc9oT+zzD5wWigiQ5mBwbshBRCWlcSu9lkhNaFFxfjDezELFcj4Um6FEf
+         B1P7ns2slyEBDjxIOlgk3K6sGHBr/AV0uAs+5UbXMrTI9E5GDc2RL8C12pKnR67KJfFv
+         2pMbs2vti2iolw1IPwcnSRjXYb3ndqm4Pt6RiYAZITP8XWArlBr4xtaIePKeqbO2ATAp
+         39uaC5IgA1jdq2hZn8D/oYWXsxNb6dWJmQDIAyy7QeyI3NvOxYzok+4ooSBhe2yT1jML
+         zwKA==
+X-Gm-Message-State: AOJu0YxhbAAIBr+op7wmSngEQIwMob+GPSinp66mxDIfj12wFWgmCBAS
+        Y5iwfRHA8eltdSbpQKAz3flJOFsAQct5rWwPbEZI6W/yjSj0qGrL3Nh+GYYbFYLt4fIt72/tvNU
+        2+i2wtIHApOs9ZNXAog==
+X-Received: by 2002:a17:90a:64f:b0:279:104e:1779 with SMTP id q15-20020a17090a064f00b00279104e1779mr3160690pje.16.1695964643980;
+        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGrtP3sbKcO75m2H368iUYaattz5g53Z+pHQ2t4QlCntswaEZ2FZpjjT6rGSMYPs6pyCRw3DA==
+X-Received: by 2002:a17:90a:64f:b0:279:104e:1779 with SMTP id q15-20020a17090a064f00b00279104e1779mr3160681pje.16.1695964643625;
+        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l16-20020a170903245000b001bdb0483e65sm15813633pls.265.2023.09.28.22.06.53
+        by smtp.gmail.com with ESMTPSA id ge13-20020a17090b0e0d00b002680dfd368dsm482248pjb.51.2023.09.28.22.17.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Sep 2023 22:06:54 -0700 (PDT)
-Date:   Fri, 29 Sep 2023 13:06:51 +0800
+        Thu, 28 Sep 2023 22:17:23 -0700 (PDT)
+Date:   Fri, 29 Sep 2023 13:17:20 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Bill O'Donnell <bodonnel@redhat.com>
-Cc:     fstests@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: generic/353 should accomodate other pwrite
- behaviors
-Message-ID: <20230929050651.7rlyclnxlmzrot3z@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230901161816.148854-1-bodonnel@redhat.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] xfs/018: make sure that larp mode actually works
+Message-ID: <20230929051720.naai64pxwrxbbjdr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <169567816120.2269819.5620379594030200785.stgit@frogsfrogsfrogs>
+ <169567816694.2269819.8230834804621611518.stgit@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230901161816.148854-1-bodonnel@redhat.com>
+In-Reply-To: <169567816694.2269819.8230834804621611518.stgit@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 01, 2023 at 11:18:16AM -0500, Bill O'Donnell wrote:
-> xfs_io pwrite issues a series of block size writes, but there is no
-> guarantee that the resulting extent(s) will be singular or contiguous.
-> This behavior is acceptable, but the test is flawed in that it expects
-> a single extent for a pwrite.
+On Mon, Sep 25, 2023 at 02:42:46PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Modify test to use actual blocksize for pwrite and reflink. Also
-> modify it to accommodate pwrite and reflink that produce different
-> mapping results.
+> Skip this test if larp mode doesn't work.
 > 
-> Signed-off-by: Bill O'Donnell <bodonnel@redhat.com>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
-
-This patch makes sense to me, but this case looks like a regression test
-test for a known btrfs issue. But this test case doesn't point out which
-bug/fix does it test for. So I don't know if the 64k blocksize is a
-necessary condition to reproduce the bug.
-
-If we can prove it still can reproduce that bug with this patch at least,
-then it's good to me to merge it.
-
-Thanks,
-Zorro
-
->  tests/generic/353     | 29 ++++++++++++++++-------------
->  tests/generic/353.out | 15 +--------------
->  2 files changed, 17 insertions(+), 27 deletions(-)
+>  tests/xfs/018 |   13 +++++++++++++
+>  1 file changed, 13 insertions(+)
 > 
-> diff --git a/tests/generic/353 b/tests/generic/353
-> index 9a1471bd..c5639725 100755
-> --- a/tests/generic/353
-> +++ b/tests/generic/353
-> @@ -29,31 +29,34 @@ _require_xfs_io_command "fiemap"
->  _scratch_mkfs > /dev/null 2>&1
->  _scratch_mount
+> 
+> diff --git a/tests/xfs/018 b/tests/xfs/018
+> index 1ef51a2e61..73040edc92 100755
+> --- a/tests/xfs/018
+> +++ b/tests/xfs/018
+> @@ -71,6 +71,17 @@ create_test_file()
+>  	done
+>  }
 >  
-> -blocksize=64k
-> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
+> +require_larp()
+> +{
+> +	touch $SCRATCH_MNT/a
 > +
->  file1="$SCRATCH_MNT/file1"
->  file2="$SCRATCH_MNT/file2"
-> +extmap1="$SCRATCH_MNT/extmap1"
-> +extmap2="$SCRATCH_MNT/extmap2"
->  
->  # write the initial file
-> -_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 | _filter_xfs_io
-> +_pwrite_byte 0xcdcdcdcd 0 $blocksize $file1 > /dev/null
->  
->  # reflink initial file
-> -_reflink_range $file1 0 $file2 0 $blocksize | _filter_xfs_io
-> +_reflink_range $file1 0 $file2 0 $blocksize > /dev/null
->  
->  # check their fiemap to make sure it's correct
-> -echo "before sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
+> +	# Set attribute, being careful not to include the trailing newline
+> +	# in the attr value.
+> +	echo -n "attr_value" | ${ATTR_PROG} -s "attr_name" $SCRATCH_MNT/a 2>&1 | \
+> +		grep 'Operation not supported' && \
+> +		_notrun 'LARP not supported on this filesystem'
+
+"rm -f $SCRATCH_MNT/a" ? although that's not necessary :)
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> +}
 > +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps before sync"
+>  # real QA test starts here
+>  _supported_fs xfs
 >  
->  # sync and recheck, to make sure the fiemap doesn't change just
->  # due to sync
->  sync
-> -echo "after sync:"
-> -echo "$file1" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags
-> -echo "$file2" | _filter_scratch
-> -$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags
-> +$XFS_IO_PROG -c "fiemap -v" $file1 | _filter_fiemap_flags > $extmap1
-> +$XFS_IO_PROG -c "fiemap -v" $file2 | _filter_fiemap_flags > $extmap2
-> +
-> +cmp -s $extmap1 $extmap2 || echo "mismatched extent maps after sync"
-> +
-> +echo "Silence is golden"
+> @@ -112,6 +123,8 @@ _scratch_mount
+>  testdir=$SCRATCH_MNT/testdir
+>  mkdir $testdir
 >  
->  # success, all done
->  status=0
-> diff --git a/tests/generic/353.out b/tests/generic/353.out
-> index 4f6e0b92..16ba4f1f 100644
-> --- a/tests/generic/353.out
-> +++ b/tests/generic/353.out
-> @@ -1,15 +1,2 @@
->  QA output created by 353
-> -wrote 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -linked 65536/65536 bytes at offset 0
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -before sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> -after sync:
-> -SCRATCH_MNT/file1
-> -0: [0..127]: shared|last
-> -SCRATCH_MNT/file2
-> -0: [0..127]: shared|last
-> +Silence is golden
-> -- 
-> 2.41.0
+> +require_larp
+> +
+>  # empty, inline
+>  create_test_file empty_file1 0
+>  test_attr_replay empty_file1 "attr_name" $attr64 "s" "larp"
 > 
 
