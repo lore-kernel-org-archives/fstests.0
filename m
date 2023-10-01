@@ -2,133 +2,108 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34344E748E9
-	for <linux-fstests@archiver.kernel.org>; Sun,  1 Oct 2023 11:51:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E84B3E748F5
+	for <linux-fstests@archiver.kernel.org>; Sun,  1 Oct 2023 12:42:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234899AbjJALv5 (ORCPT
+        id S234948AbjJAMmc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 1 Oct 2023 07:51:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49120 "EHLO
+        Sun, 1 Oct 2023 08:42:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234895AbjJALv4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Oct 2023 07:51:56 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ECF1D3
-        for <fstests@vger.kernel.org>; Sun,  1 Oct 2023 04:51:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1696161067;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=8sgnRjwVlSJC3Jbh1PUE3xy0ZYHOD7sQ7ElHVYQp3HE=;
-        b=XKIo/VL7ylBNM7WUsNsynzcXxB9fL895xgXdmk3duxs5Ett0zOl4cLd5b0O0hGfs9jqxsY
-        ojxxSwkk7ccdzkMTX+LFMEoI/IELIK2hOoBvnWm7R3lS8D3YKzT1zaOQQqwKyFERzMnqMP
-        ezD5PXyW5Jhkigk4pM102WYHg095EME=
-Received: from mail-oi1-f199.google.com (mail-oi1-f199.google.com
- [209.85.167.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-356-6o0fO06NOmye2dKPvh_S_A-1; Sun, 01 Oct 2023 07:51:05 -0400
-X-MC-Unique: 6o0fO06NOmye2dKPvh_S_A-1
-Received: by mail-oi1-f199.google.com with SMTP id 5614622812f47-3ae214a02a6so33649301b6e.3
-        for <fstests@vger.kernel.org>; Sun, 01 Oct 2023 04:51:05 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696161065; x=1696765865;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        with ESMTP id S229556AbjJAMmc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Oct 2023 08:42:32 -0400
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85FF799;
+        Sun,  1 Oct 2023 05:42:29 -0700 (PDT)
+Received: by mail-vs1-xe30.google.com with SMTP id ada2fe7eead31-4527d65354bso6947166137.0;
+        Sun, 01 Oct 2023 05:42:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1696164148; x=1696768948; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8sgnRjwVlSJC3Jbh1PUE3xy0ZYHOD7sQ7ElHVYQp3HE=;
-        b=LjY1VwqiXi2/jT+s6du22o0xeuilI7EHgC0r4+r2J/6/Or8FmzOIg0pCKbPI5AkDSM
-         KsFlsYpvUZz9NHTK8y1xjv+NnuLZ8QNG8px6d9XTlfSFujJL5x0HWX0rySw6KTAqoK9L
-         lFrmFPHj6wtWqsZLvWKwNKI9M0EFfyTPGhc0opNcqO6l7+tAC2qI2uwkCACOyXDTHSWj
-         7YVQ11YvRjLVtCPF9bYsrVsgYsSDvRTqSdLTcrcrrepIJVoQn6qEJRaQLMjylESr+XRq
-         hCEtokKoOZ/NIByMKlON99B9t7aJGU4HKUbpPNIlPhpYOnA8pDE/vHi+mIBypRRYTW4J
-         C1+Q==
-X-Gm-Message-State: AOJu0YxWt6Fp3UDYPX+NiVDP9vI/2DXzt+atw07Mu3Ui9xoPXH3xXGi5
-        QFnkqxCCFrK2udOwqd60hq8nvnnQqRUkZ+RcUS6I1IPjY8cQYZbg/ZxF/4YjWInTnjQhbh+xlpA
-        /2KF9mKh6UPZ/bGCEtA==
-X-Received: by 2002:a05:6808:9a3:b0:3af:6634:49b9 with SMTP id e3-20020a05680809a300b003af663449b9mr9745107oig.30.1696161065041;
-        Sun, 01 Oct 2023 04:51:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHDe5qBR666JBaneKAyWAZe6WAmzdhd1egCicRTZPq8AF4S8MvbttIt74I9tBmH0HFw2XLX8Q==
-X-Received: by 2002:a05:6808:9a3:b0:3af:6634:49b9 with SMTP id e3-20020a05680809a300b003af663449b9mr9745092oig.30.1696161064695;
-        Sun, 01 Oct 2023 04:51:04 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id h12-20020a170902f54c00b001bd28b9c3ddsm20085160plf.299.2023.10.01.04.51.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Oct 2023 04:51:04 -0700 (PDT)
-Date:   Sun, 1 Oct 2023 19:51:00 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2.1 1/1] xfs/{270,557,600}: update commit id for
- _fixed_by tag.
-Message-ID: <20231001115100.q3v33yht334fcigy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <169567817047.2269889.16262169848413312221.stgit@frogsfrogsfrogs>
- <169567817607.2269889.5897696336492740125.stgit@frogsfrogsfrogs>
- <20230929172801.GB21283@frogsfrogsfrogs>
+        bh=5jNZUk6it4QYZxL9++dfSem+3+3rWlI5HjzgyYo8pK0=;
+        b=QW7qSeUBb3j7Gdn/8apKxD4EK6rf7xZUMDVgrhuGHZDaIdGai4xzW5WjoB/iQmLllp
+         56bFKYJ8OL4dQt/sZF0hAZeOaiIHEVO+WuTmg36+pAxT/Wsn354tpuQzWpsc2MhgegLX
+         UwdgKKuVdL/8nw4i6p1aSbxBsyjVzpiI6w8MslUpV/s/SdonvQlGXbg7hEsyV8tEeSdt
+         GkDorn34kROl0EEA5c3MnUC8tzRxoKOAtOyYjq/qS5SgUgs4x6FETUGstX3rFeDKMRmm
+         LCrSpLFAamGKcGePa1Fvp9E2aqDUvpftt4brniuz2PYx1BPHll/bQL9bGZ6lHy7OPZze
+         nJJA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696164148; x=1696768948;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=5jNZUk6it4QYZxL9++dfSem+3+3rWlI5HjzgyYo8pK0=;
+        b=CggxPKW9CFeEWZDndwfN06VQTdC7Bq27HlfwKqaEKsZx6U72nA4kWzyv+10R/xanbI
+         3kBY5OvG6UBPpTDX/dKWdNmYWxKhq2LpPM0R9wGHYLOLIklc2/jQpSK3F/rXfhmYq8cV
+         ADku5gxiCEbSHjeLOFw9hkyrxzEliDi4sxNVYX8o9lARzOysfkWZMN6StQrpuyTlM8Cj
+         kk/ag8ep/rGQQWC9Ny4R1EB4gGPZqhLD22C7HMe4eEjmyckjlAIJdHWFsTV73oflrvmI
+         0a9mA7SWmXV+vruwv2wxCGkaSPD5k3F/HhBgFVoL4+mWnPSFwMRD3ovGtb0e+rOE73Xy
+         0ETg==
+X-Gm-Message-State: AOJu0YxIJPN4M1nRLtGlBKq/amMFKaO3WWrYFNpDvnFgFnw6TbreXnpw
+        YFacthAzZrQ8ZZvT5Eo3jWotQY2zMhqLl1C9CRXPXlb6qEc=
+X-Google-Smtp-Source: AGHT+IEJA2ncZm8jhxpgZ3oi1ko5qh9+rZ7SmY6VDQGTco+kpr6HcFITtAOrl4e5HDt9BClp+IyntgOPOXAjMUv0tzg=
+X-Received: by 2002:a05:6102:52a:b0:450:fcad:ff18 with SMTP id
+ m10-20020a056102052a00b00450fcadff18mr7863898vsa.34.1696164148558; Sun, 01
+ Oct 2023 05:42:28 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230929172801.GB21283@frogsfrogsfrogs>
+References: <20230928202834.47640-1-uvv.mail@gmail.com> <CAOQ4uxhx59ZnMbhLTL85M1VQta6AZ2oqe9gMQJcN1qiAzOu6tQ@mail.gmail.com>
+ <9e57cce1-2eca-411d-98a4-3321823d8f3d@gmail.com>
+In-Reply-To: <9e57cce1-2eca-411d-98a4-3321823d8f3d@gmail.com>
+From:   Amir Goldstein <amir73il@gmail.com>
+Date:   Sun, 1 Oct 2023 15:42:17 +0300
+Message-ID: <CAOQ4uxjawFZv_6NGKvmiVBfAL2eqExwXhunf=C-_yL3eAcD_gA@mail.gmail.com>
+Subject: Re: [PATCH] README: Update overlayfs URL
+To:     Vyacheslav Yurkov <uvv.mail@gmail.com>
+Cc:     fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>,
+        linux-unionfs@vger.kernel.org,
+        Gao Xiang <hsiangkao@linux.alibaba.com>,
+        Jingbo Xu <jefflexu@linux.alibaba.com>,
+        "zhangyi (F)" <yi.zhang@huawei.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Sep 29, 2023 at 10:28:01AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Update the commit id in the _fixed_by tag now that we've merged the
-> kernel fixes.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+On Sun, Oct 1, 2023 at 3:41=E2=80=AFAM Vyacheslav Yurkov <uvv.mail@gmail.co=
+m> wrote:
+>
+> On 29.09.2023 05:16, Amir Goldstein wrote:
+> > On Thu, Sep 28, 2023 at 11:30=E2=80=AFPM Vyacheslav Yurkov <uvv.mail@gm=
+ail.com> wrote:
+> >> Overlayfs-tools and overlayfs-progs projects have been merged together=
+.
+> >>
+> > Nice :)
+> >
+> > Do you also have any plans to improve the tools?
+>
+> Thanks for the review!
+> I'll move the instructions completely to README.overlay in V2 then. Is
+> there a particular reason that the file starts from an empty line?
 
-Thanks, this version is good to me.
+No reason.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> (perhaps I could remove that as well in the same patch)
+>
 
->  tests/xfs/270 |    2 +-
->  tests/xfs/557 |    2 +-
->  tests/xfs/600 |    2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/xfs/270 b/tests/xfs/270
-> index 7d4e1f6a87..4e4f767dc1 100755
-> --- a/tests/xfs/270
-> +++ b/tests/xfs/270
-> @@ -17,7 +17,7 @@ _begin_fstest auto quick mount
->  
->  # real QA test starts here
->  _supported_fs xfs
-> -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +_fixed_by_kernel_commit 74ad4693b647 \
->  	"xfs: fix log recovery when unknown rocompat bits are set"
->  # skip fs check because superblock contains unknown ro-compat features
->  _require_scratch_nocheck
-> diff --git a/tests/xfs/557 b/tests/xfs/557
-> index 522c4f0643..01205377b7 100644
-> --- a/tests/xfs/557
-> +++ b/tests/xfs/557
-> @@ -18,7 +18,7 @@ _require_xfs_io_command "falloc"
->  _require_xfs_io_command "bulkstat_single"
->  _require_scratch
->  
-> -_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +_fixed_by_kernel_commit 817644fa4525 \
->  	"xfs: get root inode correctly at bulkstat"
->  
->  # Create a filesystem which contains a fake root inode
-> diff --git a/tests/xfs/600 b/tests/xfs/600
-> index 56af634a7c..e6997c53d1 100755
-> --- a/tests/xfs/600
-> +++ b/tests/xfs/600
-> @@ -20,7 +20,7 @@ _begin_fstest auto quick fsmap
->  
->  . ./common/filter
->  
-> -_fixed_by_git_commit kernel XXXXXXXXXXXXX \
-> +_fixed_by_git_commit kernel cfa2df68b7ce \
->  	"xfs: fix an agbno overflow in __xfs_getfsmap_datadev"
->  
->  # Modify as appropriate.
-> 
+OK.
 
+> Right now the plan was only to maintain both projects and accept patches
+> from others. Perhaps I will also update the build system to something
+> up-to-date. As for further development, unfortunately I don't have a
+> project behind ATM to improve the tools further. If something pops up
+> (or you have something), I could try to find a capacity for that.
+
+Gao was asking about an offline merge tool, so I pointed him
+at overlayfs-tools:
+
+https://lore.kernel.org/linux-unionfs/bc9b3731-9eac-28be-e635-44a098e87d76@=
+linux.alibaba.com/
+
+Maybe he can explain what features in specific he was looking for.
+
+Thanks,
+Amir.
