@@ -2,568 +2,471 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27762E7AD6E
-	for <linux-fstests@archiver.kernel.org>; Tue,  3 Oct 2023 15:24:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86D98E748FA
+	for <linux-fstests@archiver.kernel.org>; Tue,  3 Oct 2023 17:39:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231596AbjJCPYn (ORCPT
+        id S231887AbjJCRjc (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 3 Oct 2023 11:24:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42244 "EHLO
+        Tue, 3 Oct 2023 13:39:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231591AbjJCPYn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Oct 2023 11:24:43 -0400
+        with ESMTP id S230202AbjJCRjb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Oct 2023 13:39:31 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E742A83;
-        Tue,  3 Oct 2023 08:24:38 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86522C433C8;
-        Tue,  3 Oct 2023 15:24:38 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15F9895
+        for <fstests@vger.kernel.org>; Tue,  3 Oct 2023 10:39:28 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48209C433C7;
+        Tue,  3 Oct 2023 17:39:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1696346678;
-        bh=zjDnH1sSI9fj32ubbUZtzfk6UBg44WRULmXeTqe6Hqs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=k+gzQ39HwPLa8M/XCtvB9KFol05I8JkLjx9/Oewj+ZPi0+MsMXGG/rUYWGvfB0UwA
-         NG9jKk8qbRyZsIYTK47Jcev5xjv/vScajsNfkzvWsV0JnM1AGakvd+TB+QFBzZq5ZT
-         T4QY2bvJxnd1ffdO4vMySlISrAsnhoRJdRIxwdpCwX25ux/fqdKQ2Uji9V+Pcwnkwh
-         F70ckAW8YfWO5RZZ37rLyPmaisOtcl634jDLaFXbJ2QGrRx14RoxRNpabTzvzmtikS
-         4BdGkpqmES7Bd0J6QO6qp2Q/18TT+B0jzD+3HDn2NtzaWsRPIrSJYiv/c4rn0qleLY
-         AvsOAuvCrpgLQ==
-Date:   Tue, 3 Oct 2023 08:24:37 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 1/2] fstests: redirect fsstress' stdout to $seqres.full
- instead of /dev/null
-Message-ID: <20231003152437.GC21283@frogsfrogsfrogs>
-References: <cover.1696333874.git.fdmanana@suse.com>
- <bbd99333b3c2dcd44c10958aeab43c22c91a738f.1696333874.git.fdmanana@suse.com>
+        s=k20201202; t=1696354767;
+        bh=zgtlYinofr+9fWtQh146DdzYp++zfCqvJh5v6tgYTnA=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=QM/DG5mozgvSIE3ehruqVZTZD8EcD3M678DpO5mV2sYQXR1WY3JEjyNjGePk2uPSc
+         YZSTixKvtVAuLwXBrSjpNHqxV4giD+lfVFO9RvwvtIsM6xqXgaGhXkgHEY/J8xfm/X
+         PafwNtLaMZ8eA5ww4EcC0EIpQBS4t9KM9oD175jHR4NniKTU0J/S505Hwru+2wmYgb
+         NSr3gsq8IMfDhIEy/c0zlZqW5U/kroPLzPhpqywGGzRe1Rafi3zjSBmKG+7re7Wd/a
+         gocotaSVhXGx3cVoOB5I/noGoAJiid6fwh/PnvRNVLhmNu5Uhjou1jxzdBxI8ZvPpS
+         arO7JtwWY8Hvw==
+Message-ID: <3645c31d33685a444265ab65fddad3ba596224cb.camel@kernel.org>
+Subject: Re: [PATCH][RESEND] generic/478: add F_UNLCK testing
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Stas Sergeev <stsp2@yandex.ru>, fstests@vger.kernel.org
+Cc:     Murphy Zhou <xzhou@redhat.com>, Zorro Lang <zlang@redhat.com>
+Date:   Tue, 03 Oct 2023 13:39:25 -0400
+In-Reply-To: <20230925110027.2141499-1-stsp2@yandex.ru>
+References: <20230925110027.2141499-1-stsp2@yandex.ru>
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.48.4 (3.48.4-1.fc38) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bbd99333b3c2dcd44c10958aeab43c22c91a738f.1696333874.git.fdmanana@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 03, 2023 at 12:57:44PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Several tests are redirecting the output of fsstress to /dev/null and this
-> makes it harder to debug a test failure because we have no way of knowing
-> what was the seed used by fsstress, as fsstress outputs the seed it uses
-> to stdout. Very often when such a test fails, I have to go modify to
-> redirect stdout to the $seqres.full file and then run it in a loop until
-> I find a seed that causes a failure.
-> 
-> So modify all tests that redirect fsstress' output to /dev/null to instead
-> redirect it to the $seqres.full file. Note that for some tests I've added
-> the style ">> $seqres.full" (with a space after >>) while for others I did
-> ">>$seqres.full" (no space) - the reason for this was to keep style
-> consistency within each test case.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+On Mon, 2023-09-25 at 16:00 +0500, Stas Sergeev wrote:
+> F_UNLCK can be used with F_OFD_GETLK to get the locks from
+> particular fd. This patch adds testing for that functionality.
+>=20
+> The following options are added to t_ofd_locks:
+> -u selects F_UNLCK for testing
+> -G sets the unix socket name for fd receive
+> -S sets the unix socket name for fd send
+> -U sets the message to be printed if the requested functionality
+>    unsupported.
+>=20
+> Test works as follows:
+> - locker process sets the lock and sends an fd via unix socket
+> - lock-tester process receives an fd and uses F_UNLCK to check the lock
+> - the test is provided with a "success" message that it should print
+>   only if the tested functionality is not supported. In that case
+>   printing a "success" message avoids the test failure on older kernels.
+>=20
+> To allow passing the "success" messages with spaces, eval has to be
+> used in a shell script when starting the test case.
+>=20
+> CC: fstests@vger.kernel.org
+> CC: Murphy Zhou <xzhou@redhat.com>
+> CC: Jeff Layton <jlayton@kernel.org>
+> CC: Zorro Lang <zlang@redhat.com>
+>=20
+> Signed-off-by: Stas Sergeev <stsp2@yandex.ru>
 > ---
->  tests/btrfs/028   | 2 +-
->  tests/btrfs/049   | 2 +-
->  tests/btrfs/060   | 2 +-
->  tests/btrfs/061   | 2 +-
->  tests/btrfs/062   | 2 +-
->  tests/btrfs/063   | 2 +-
->  tests/btrfs/064   | 2 +-
->  tests/btrfs/065   | 2 +-
->  tests/btrfs/066   | 2 +-
->  tests/btrfs/067   | 2 +-
->  tests/btrfs/068   | 2 +-
->  tests/btrfs/069   | 2 +-
->  tests/btrfs/070   | 2 +-
->  tests/btrfs/071   | 2 +-
->  tests/btrfs/072   | 2 +-
->  tests/btrfs/073   | 2 +-
->  tests/btrfs/074   | 2 +-
->  tests/btrfs/136   | 2 +-
->  tests/btrfs/192   | 2 +-
->  tests/btrfs/232   | 2 +-
->  tests/btrfs/261   | 2 +-
->  tests/btrfs/286   | 2 +-
->  tests/ext4/057    | 2 +-
->  tests/ext4/307    | 2 +-
->  tests/generic/068 | 2 +-
->  tests/generic/269 | 2 +-
->  tests/generic/409 | 2 +-
->  tests/generic/410 | 2 +-
->  tests/generic/411 | 2 +-
->  tests/generic/589 | 2 +-
->  tests/xfs/051     | 2 +-
->  tests/xfs/057     | 2 +-
->  tests/xfs/297     | 2 +-
->  tests/xfs/305     | 2 +-
->  tests/xfs/538     | 2 +-
+>  src/t_ofd_locks.c     | 183 +++++++++++++++++++++++++++++++++++++++---
+>  tests/generic/478     |  24 ++++--
+>  tests/generic/478.out |  15 ++++
+>  3 files changed, 204 insertions(+), 18 deletions(-)
+>=20
 
-For the generic & xfs parts,
-Acked-by: Darrick J. Wong <djwong@kernel.org>
+Sorry for the long review delay. It's been a busy cycle.
 
-(The rest are also probably ok but I'm much less familiar with the
-btrfs-specific tests.)
+> diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
+> index 58cb0959..a78fd575 100644
+> --- a/src/t_ofd_locks.c
+> +++ b/src/t_ofd_locks.c
+> @@ -14,6 +14,8 @@
+>  #include <sys/wait.h>
+>  #include <sys/ipc.h>
+>  #include <sys/sem.h>
+> +#include <sys/socket.h>
+> +#include <sys/un.h>
+> =20
+>  /*
+>   * In distributions that do not have these macros ready in glibc-headers=
+,
+> @@ -134,7 +136,7 @@ static void usage(char *arg0)
+>  	printf("\t-F : clone with CLONE_FILES in setlk to setup test condition\=
+n");
+>  	printf("\t-d : dup and close in setlk\n");
+>  	printf("\twithout both -F/d, use clone without CLONE_FILES\n");
+> -	printf("\t-r/-w : set/get rdlck/wrlck\n");
+> +	printf("\t-r/-w/-u : set/get rdlck/wrlck/unlck\n");
 
---D
+No explanation of -G/-S/-U ?
 
->  35 files changed, 35 insertions(+), 35 deletions(-)
-> 
-> diff --git a/tests/btrfs/028 b/tests/btrfs/028
-> index fe0678f8..4637469c 100755
-> --- a/tests/btrfs/028
-> +++ b/tests/btrfs/028
-> @@ -35,7 +35,7 @@ args=`_scale_fsstress_args -z \
->  	-f fsync=10 -n 100000 -p 2 \
->  	-d $SCRATCH_MNT/stress_dir`
->  echo "Run fsstress $args" >>$seqres.full
-> -$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +$FSSTRESS_PROG $args >>$seqres.full &
->  fsstress_pid=$!
->  
->  echo "Start balance" >>$seqres.full
-> diff --git a/tests/btrfs/049 b/tests/btrfs/049
-> index 9569c141..c48e4087 100755
-> --- a/tests/btrfs/049
-> +++ b/tests/btrfs/049
-> @@ -42,7 +42,7 @@ args=`_scale_fsstress_args -z \
->  	-f write=10 -f creat=10 \
->  	-n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
->  echo "Run fsstress $args" >>$seqres.full
-> -$FSSTRESS_PROG $args >/dev/null 2>&1
-> +$FSSTRESS_PROG $args >>$seqres.full
->  
->  # Start and pause balance to ensure it will be restored on remount
->  echo "Start balance" >>$seqres.full
-> diff --git a/tests/btrfs/060 b/tests/btrfs/060
-> index 7dd4d2af..a0184891 100755
-> --- a/tests/btrfs/060
-> +++ b/tests/btrfs/060
-> @@ -38,7 +38,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start balance worker: " >>$seqres.full
-> diff --git a/tests/btrfs/061 b/tests/btrfs/061
-> index 55f5625b..c1010413 100755
-> --- a/tests/btrfs/061
-> +++ b/tests/btrfs/061
-> @@ -36,7 +36,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start balance worker: " >>$seqres.full
-> diff --git a/tests/btrfs/062 b/tests/btrfs/062
-> index 10f95111..818a0156 100755
-> --- a/tests/btrfs/062
-> +++ b/tests/btrfs/062
-> @@ -37,7 +37,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start balance worker: " >>$seqres.full
-> diff --git a/tests/btrfs/063 b/tests/btrfs/063
-> index cef80771..2f771baf 100755
-> --- a/tests/btrfs/063
-> +++ b/tests/btrfs/063
-> @@ -36,7 +36,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start balance worker: " >>$seqres.full
-> diff --git a/tests/btrfs/064 b/tests/btrfs/064
-> index f29e68ba..e9b46ce6 100755
-> --- a/tests/btrfs/064
-> +++ b/tests/btrfs/064
-> @@ -46,7 +46,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	# Start both balance and replace in the background.
-> diff --git a/tests/btrfs/065 b/tests/btrfs/065
-> index b6c9dbad..c4b6aafe 100755
-> --- a/tests/btrfs/065
-> +++ b/tests/btrfs/065
-> @@ -46,7 +46,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	# make sure the stop sign is not there
-> diff --git a/tests/btrfs/066 b/tests/btrfs/066
-> index 8d12af61..a29034bb 100755
-> --- a/tests/btrfs/066
-> +++ b/tests/btrfs/066
-> @@ -38,7 +38,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	# make sure the stop sign is not there
-> diff --git a/tests/btrfs/067 b/tests/btrfs/067
-> index 970a23c4..709db155 100755
-> --- a/tests/btrfs/067
-> +++ b/tests/btrfs/067
-> @@ -39,7 +39,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	# make sure the stop sign is not there
-> diff --git a/tests/btrfs/068 b/tests/btrfs/068
-> index e0bcc2ac..15fd41db 100755
-> --- a/tests/btrfs/068
-> +++ b/tests/btrfs/068
-> @@ -39,7 +39,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	# make sure the stop sign is not there
-> diff --git a/tests/btrfs/069 b/tests/btrfs/069
-> index 6e798a2e..139dde48 100755
-> --- a/tests/btrfs/069
-> +++ b/tests/btrfs/069
-> @@ -44,7 +44,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start replace worker: " >>$seqres.full
-> diff --git a/tests/btrfs/070 b/tests/btrfs/070
-> index f2e61ad3..54aa275c 100755
-> --- a/tests/btrfs/070
-> +++ b/tests/btrfs/070
-> @@ -45,7 +45,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start replace worker: " >>$seqres.full
-> diff --git a/tests/btrfs/071 b/tests/btrfs/071
-> index 40230b11..6ebbd8cc 100755
-> --- a/tests/btrfs/071
-> +++ b/tests/btrfs/071
-> @@ -44,7 +44,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start replace worker: " >>$seqres.full
-> diff --git a/tests/btrfs/072 b/tests/btrfs/072
-> index bcb0ea25..4b6b6fb5 100755
-> --- a/tests/btrfs/072
-> +++ b/tests/btrfs/072
-> @@ -37,7 +37,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start scrub worker: " >>$seqres.full
-> diff --git a/tests/btrfs/073 b/tests/btrfs/073
-> index 26c5deb6..b1604f94 100755
-> --- a/tests/btrfs/073
-> +++ b/tests/btrfs/073
-> @@ -36,7 +36,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start scrub worker: " >>$seqres.full
-> diff --git a/tests/btrfs/074 b/tests/btrfs/074
-> index 92e25c7c..9b22c620 100755
-> --- a/tests/btrfs/074
-> +++ b/tests/btrfs/074
-> @@ -37,7 +37,7 @@ run_test()
->  
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  
->  	echo -n "Start defrag worker: " >>$seqres.full
-> diff --git a/tests/btrfs/136 b/tests/btrfs/136
-> index b9ab8270..70e836a5 100755
-> --- a/tests/btrfs/136
-> +++ b/tests/btrfs/136
-> @@ -39,7 +39,7 @@ populate_data(){
->  	mkdir -p $data_path
->  	args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $data_path`
->  	echo "Run fsstress $args" >>$seqres.full
-> -	$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >>$seqres.full &
->  	fsstress_pid=$!
->  	wait $fsstress_pid
+>  	printf("\t-o num : offset start to lock, default 0\n");
+>  	printf("\t-l num : lock length, default 10\n");
+>  	printf("\t-R/-W : open file RDONLY/RDWR\n\n");
+> @@ -164,6 +166,117 @@ static int child_fn(void* p)
+>  	return 0;
 >  }
-> diff --git a/tests/btrfs/192 b/tests/btrfs/192
-> index ea261b34..80588a3c 100755
-> --- a/tests/btrfs/192
-> +++ b/tests/btrfs/192
-> @@ -140,7 +140,7 @@ pid1=$!
->  delete_workload &
->  pid2=$!
->  
-> -"$FSSTRESS_PROG" $fsstress_args > /dev/null &
-> +"$FSSTRESS_PROG" $fsstress_args >> $seqres.full &
->  sleep $runtime
->  
->  "$KILLALL_PROG" -q "$FSSTRESS_PROG" &> /dev/null
-> diff --git a/tests/btrfs/232 b/tests/btrfs/232
-> index 02c7e49d..e8a22f5e 100755
-> --- a/tests/btrfs/232
-> +++ b/tests/btrfs/232
-> @@ -25,7 +25,7 @@ writer()
->  
->  	while true; do
->  		args=`_scale_fsstress_args -p 20 -n 1000 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> -		$FSSTRESS_PROG $args >/dev/null 2>&1
-> +		$FSSTRESS_PROG $args >> $seqres.full
->  	done
->  }
->  
-> diff --git a/tests/btrfs/261 b/tests/btrfs/261
-> index 50173de3..58fa8e75 100755
-> --- a/tests/btrfs/261
-> +++ b/tests/btrfs/261
-> @@ -36,7 +36,7 @@ prepare_fs()
->  	# Then use fsstress to generate some extra contents.
->  	# Disable setattr related operations, as it may set NODATACOW which will
->  	# not allow us to use btrfs checksum to verify the content.
-> -	$FSSTRESS_PROG -f setattr=0 -d $SCRATCH_MNT -w -n 3000 > /dev/null 2>&1
-> +	$FSSTRESS_PROG -f setattr=0 -d $SCRATCH_MNT -w -n 3000 >> $seqres.full
->  	sync
->  
->  	# Save the fssum of this fs
-> diff --git a/tests/btrfs/286 b/tests/btrfs/286
-> index f1ee129c..71f6d4bd 100755
-> --- a/tests/btrfs/286
-> +++ b/tests/btrfs/286
-> @@ -36,7 +36,7 @@ workload()
->  	# Use nodatasum mount option, so all data won't have checksum.
->  	_scratch_mount -o nodatasum
->  
-> -	$FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT > /dev/null 2>&1
-> +	$FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT >> $seqres.full
->  	sync
->  
->  	# Generate fssum for later verification, here we only care
-> diff --git a/tests/ext4/057 b/tests/ext4/057
-> index 4006a07c..6babedb2 100755
-> --- a/tests/ext4/057
-> +++ b/tests/ext4/057
-> @@ -42,7 +42,7 @@ _scratch_mount
->  
->  # Begin fsstress while modifying UUID
->  fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-> -$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1 &
-> +$FSSTRESS_PROG $fsstress_args >> $seqres.full &
->  fsstress_pid=$!
->  
->  for n in $(seq 1 20); do
-> diff --git a/tests/ext4/307 b/tests/ext4/307
-> index db83a083..8b1cfc9e 100755
-> --- a/tests/ext4/307
-> +++ b/tests/ext4/307
-> @@ -21,7 +21,7 @@ _workout()
->  	out=$SCRATCH_MNT/fsstress.$$
->  	args=`_scale_fsstress_args -p4 -n999 -f setattr=1 $FSSTRESS_AVOID -d $out`
->  	echo "fsstress $args" >> $seqres.full
-> -	$FSSTRESS_PROG $args > /dev/null 2>&1
-> +	$FSSTRESS_PROG $args >> $seqres.full
->  	find $out -type f > $out.list
->  	cat $out.list | xargs  md5sum > $out.md5sum
->  	usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
-> diff --git a/tests/generic/068 b/tests/generic/068
-> index eeddf6d1..af527fee 100755
-> --- a/tests/generic/068
-> +++ b/tests/generic/068
-> @@ -57,7 +57,7 @@ touch $tmp.running
->        # We do both read & write IO - not only is this more realistic,
->        # but it also potentially tests atime updates
->        FSSTRESS_ARGS=`_scale_fsstress_args -d $STRESS_DIR -p $procs -n $nops $FSSTRESS_AVOID`
-> -      $FSSTRESS_PROG $FSSTRESS_ARGS > /dev/null 2>&1
-> +      $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
->      done
->  
->      rm -r $STRESS_DIR/*
-> diff --git a/tests/generic/269 b/tests/generic/269
-> index 838e696d..b852f6bf 100755
-> --- a/tests/generic/269
-> +++ b/tests/generic/269
-> @@ -23,7 +23,7 @@ _workout()
->  	out=$SCRATCH_MNT/fsstress.$$
->  	args=`_scale_fsstress_args -p128 -n999999999 -f setattr=1 $FSSTRESS_AVOID -d $out`
->  	echo "fsstress $args" >> $seqres.full
-> -	$FSSTRESS_PROG $args > /dev/null 2>&1 &
-> +	$FSSTRESS_PROG $args >> $seqres.full &
->  	pid=$!
->  	echo "Run dd writers in parallel"
->  	for ((i=0; i < num_iterations; i++))
-> diff --git a/tests/generic/409 b/tests/generic/409
-> index 7a5004ed..432befac 100755
-> --- a/tests/generic/409
-> +++ b/tests/generic/409
-> @@ -58,7 +58,7 @@ fs_stress()
->  		       -f chown=1 \
->  		       -f getdents=1 \
->  		       -f fiemap=1 \
-> -		       -d $target >/dev/null
-> +		       -d $target >>$seqres.full
->  	sync
->  }
->  
-> diff --git a/tests/generic/410 b/tests/generic/410
-> index f35f2f4a..8cc36d9f 100755
-> --- a/tests/generic/410
-> +++ b/tests/generic/410
-> @@ -66,7 +66,7 @@ fs_stress()
->  		       -f chown=1 \
->  		       -f getdents=1 \
->  		       -f fiemap=1 \
-> -		       -d $target >/dev/null
-> +		       -d $target >>$seqres.full
->  	sync
->  }
->  
-> diff --git a/tests/generic/411 b/tests/generic/411
-> index 9852a49d..b2b8d550 100755
-> --- a/tests/generic/411
-> +++ b/tests/generic/411
-> @@ -49,7 +49,7 @@ fs_stress()
->  		       -f chown=1 \
->  		       -f getdents=1 \
->  		       -f fiemap=1 \
-> -		       -d $target >/dev/null
-> +		       -d $target >>$seqres.full
->  	sync
->  }
->  
-> diff --git a/tests/generic/589 b/tests/generic/589
-> index c03cf1fc..bfc7407a 100755
-> --- a/tests/generic/589
-> +++ b/tests/generic/589
-> @@ -48,7 +48,7 @@ fs_stress()
+> =20
+> +static int connect_unix(const char *sname)
+> +{
+> +	struct sockaddr_un addr =3D { .sun_family =3D AF_UNIX };
+> +
+> +	int unix_sock =3D socket(AF_UNIX, SOCK_DGRAM, 0);
+> +	if (unix_sock =3D=3D -1)
+> +		return -1;
+> +
+> +	strncpy(addr.sun_path, sname, sizeof(addr.sun_path) - 1);
+> +	if (connect(unix_sock, (struct sockaddr *)&addr, sizeof(addr)) =3D=3D -=
+1)
+> +	{
+> +		close(unix_sock);
+> +		perror("connect()");
+> +		return -1;
+> +	}
+> +
+> +	return unix_sock;
+> +}
+> +
+> +static int send_fd(const char *sname, int fd)
+> +{
+> +	int ret;
+> +	int unix_sock;
+> +	struct iovec iov =3D {.iov_base =3D ":)", // Must send at least one byt=
+e
+> +			    .iov_len =3D 2};
+> +
+> +	union {
+> +		char buf[CMSG_SPACE(sizeof(fd))];
+> +		struct cmsghdr align;
+> +	} u;
+> +
+> +	struct msghdr msg =3D {.msg_iov =3D &iov,
+> +			     .msg_iovlen =3D 1,
+> +			     .msg_control =3D u.buf,
+> +			     .msg_controllen =3D sizeof(u.buf)};
+> +
+> +	struct cmsghdr *cmsg =3D CMSG_FIRSTHDR(&msg);
+> +	*cmsg =3D (struct cmsghdr){.cmsg_level =3D SOL_SOCKET,
+> +				 .cmsg_type =3D SCM_RIGHTS,
+> +				 .cmsg_len =3D CMSG_LEN(sizeof(fd))};
+> +
+> +	memcpy(CMSG_DATA(cmsg), &fd, sizeof(fd));
+> +
+> +	unix_sock =3D connect_unix(sname);
+> +	if (unix_sock =3D=3D -1) {
+> +		perror("sendmsg()");
+> +		return -1;
+> +	}
+> +	ret =3D sendmsg(unix_sock, &msg, 0);
+> +	close(unix_sock);
+> +	if (ret =3D=3D -1)
+> +		perror("sendmsg()");
+> +	return ret;
+> +}
+> +
+> +static int bind_unix(const char *sname)
+> +{
+> +	struct sockaddr_storage storage =3D {};
+> +	struct sockaddr_un *addr;
+> +	int sock;
+> +
+> +	sock =3D socket(AF_UNIX, SOCK_DGRAM, 0);
+> +	if (sock =3D=3D -1)
+> +		return -1;
+> +	addr =3D (struct sockaddr_un *)&storage;
+> +	addr->sun_family =3D AF_UNIX;
+> +	strncpy(addr->sun_path, sname, sizeof(addr->sun_path) - 1);
+> +	unlink(sname);
+> +	if (bind(sock, (struct sockaddr *)addr, SUN_LEN(addr)) =3D=3D -1) {
+> +		perror("bind()");
+> +		close(sock);
+> +		return -1;
+> +	}
+> +	return sock;
+> +}
+> +
+> +static int recv_fd(int sock)
+> +{
+> +	struct msghdr msg;
+> +	struct cmsghdr *cmsghdr;
+> +	struct iovec iov;
+> +	ssize_t nbytes;
+> +	int *p;
+> +	char buf[CMSG_SPACE(sizeof(int))], c[16];
+> +	struct cmsghdr *cmsgp;
+> +
+> +	iov.iov_base =3D &c;
+> +	iov.iov_len =3D sizeof(c);
+> +	cmsghdr =3D (struct cmsghdr *)buf;
+> +	cmsghdr->cmsg_len =3D CMSG_LEN(sizeof(int));
+> +	cmsghdr->cmsg_level =3D SOL_SOCKET;
+> +	cmsghdr->cmsg_type =3D SCM_RIGHTS;
+> +	msg.msg_name =3D NULL;
+> +	msg.msg_namelen =3D 0;
+> +	msg.msg_iov =3D &iov;
+> +	msg.msg_iovlen =3D 1;
+> +	msg.msg_control =3D cmsghdr;
+> +	msg.msg_controllen =3D CMSG_LEN(sizeof(int));
+> +	msg.msg_flags =3D 0;
+> +
+> +	nbytes =3D recvmsg(sock, &msg, 0);
+> +	if (nbytes =3D=3D -1)
+> +		return -1;
+> +
+> +	cmsgp =3D CMSG_FIRSTHDR(&msg);
+> +	p =3D (int *)CMSG_DATA(cmsgp);
+> +	if (!p)
+> +		return -1;
+> +	return *p;
+> +}
+> +
+>  int main(int argc, char **argv)
 >  {
->  	local target=$1
->  
-> -	$FSSTRESS_PROG -n 50 -p 3 -d $target >/dev/null
-> +	$FSSTRESS_PROG -n 50 -p 3 -d $target >>$seqres.full
->  	sync
->  }
->  
-> diff --git a/tests/xfs/051 b/tests/xfs/051
-> index ea70cb50..1c670964 100755
-> --- a/tests/xfs/051
-> +++ b/tests/xfs/051
-> @@ -38,7 +38,7 @@ _scratch_mount
->  
->  # Start a workload and shutdown the fs. The subsequent mount will require log
->  # recovery.
-> -$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT > /dev/null 2>&1 &
-> +$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT >> $seqres.full &
->  sleep 5
->  _scratch_shutdown -f
->  $KILLALL_PROG -q $FSSTRESS_PROG
-> diff --git a/tests/xfs/057 b/tests/xfs/057
-> index 9fb3f406..6af14c80 100755
-> --- a/tests/xfs/057
-> +++ b/tests/xfs/057
-> @@ -56,7 +56,7 @@ _scratch_mkfs_sized $((1024 * 1024 * 500)) >> $seqres.full 2>&1 ||
->  _scratch_mount
->  
->  # populate the fs with some data and cycle the mount to reset the log head/tail
-> -$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 > /dev/null 2>&1
-> +$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 >> $seqres.full
->  _scratch_cycle_mount || _fail "cycle mount failed"
->  
->  # Pin the tail and start a file removal workload. File removal tends to
-> diff --git a/tests/xfs/297 b/tests/xfs/297
-> index 07f84c25..1d101876 100755
-> --- a/tests/xfs/297
-> +++ b/tests/xfs/297
-> @@ -39,7 +39,7 @@ _scratch_mount
->  STRESS_DIR="$SCRATCH_MNT/testdir"
->  mkdir -p $STRESS_DIR
->  
-> -$FSSTRESS_PROG -d $STRESS_DIR -n 100 -p 1000 $FSSTRESS_AVOID >/dev/null 2>&1 &
-> +$FSSTRESS_PROG -d $STRESS_DIR -n 100 -p 1000 $FSSTRESS_AVOID >>$seqres.full &
->  
->  # Freeze/unfreeze file system randomly
->  echo "Start freeze/unfreeze randomly" | tee -a $seqres.full
-> diff --git a/tests/xfs/305 b/tests/xfs/305
-> index 41c7b7f8..d8a6712e 100755
-> --- a/tests/xfs/305
-> +++ b/tests/xfs/305
-> @@ -36,7 +36,7 @@ _exercise()
->  	_qmount
->  	mkdir -p $QUOTA_DIR
->  
-> -	$FSSTRESS_PROG -d $QUOTA_DIR -n 1000000 -p 100 $FSSTRESS_AVOID >/dev/null 2>&1 &
-> +	$FSSTRESS_PROG -d $QUOTA_DIR -n 1000000 -p 100 $FSSTRESS_AVOID >>$seqres.full &
->  	sleep 10
->  	$XFS_QUOTA_PROG -x -c "disable -$type" $SCRATCH_DEV
->  	sleep 5
-> diff --git a/tests/xfs/538 b/tests/xfs/538
-> index 2b5e97e5..0b5772a1 100755
-> --- a/tests/xfs/538
-> +++ b/tests/xfs/538
-> @@ -63,7 +63,7 @@ $FSSTRESS_PROG -d $SCRATCH_MNT \
->  		-f readv=0 \
->  		-f stat=0 \
->  		-f aread=0 \
-> -		-f dread=0 > /dev/null 2>&1
-> +		-f dread=0 >> $seqres.full
->  
->  # success, all done
->  status=0
-> -- 
-> 2.40.1
-> 
+>  	int posix =3D 0;
+> @@ -184,10 +297,14 @@ int main(int argc, char **argv)
+>  	struct semid_ds sem_ds;
+>  	struct sembuf sop;
+>  	int opt, ret;
+> +	int rcv_sock =3D -1;
+> +	const char *snd_sock_name =3D NULL;
+> +	const char *unsup_msg =3D NULL;
+> +	int unlck_unsup =3D 0;
+> =20
+>  	//avoid libcap errno bug
+>  	errno =3D 0;
+> -	while((opt =3D getopt(argc, argv, "sgrwo:l:PRWtFdK:")) !=3D -1) {
+> +	while((opt =3D getopt(argc, argv, "sgrwuo:l:PRWtFdK:G:S:U:")) !=3D -1) =
+{
+>  		switch(opt) {
+>  		case 's':
+>  			lock_cmd =3D 1;
+> @@ -201,6 +318,9 @@ int main(int argc, char **argv)
+>  		case 'w':
+>  			lock_rw =3D 1;
+>  			break;
+> +		case 'u':
+> +			lock_rw =3D 2;
+> +			break;
+>  		case 'o':
+>  			lock_start =3D atoi(optarg);
+>  			break;
+> @@ -228,6 +348,15 @@ int main(int argc, char **argv)
+>  		case 'K':
+>  			semkey =3D strtol(optarg, NULL, 16);
+>  			break;
+> +		case 'G':
+> +			rcv_sock =3D bind_unix(optarg);
+> +			break;
+> +		case 'S':
+> +			snd_sock_name =3D optarg;
+> +			break;
+> +		case 'U':
+> +			unsup_msg =3D optarg;
+> +			break;
+>  		default:
+>  			usage(argv[0]);
+>  			return -1;
+> @@ -256,17 +385,27 @@ int main(int argc, char **argv)
+>  		getlk_macro =3D F_GETLK;
+>  	}
+> =20
+> -	if (lock_rw =3D=3D 1)
+> +	switch (lock_rw) {
+> +	case 1:
+>  		flk.l_type =3D F_WRLCK;
+> -	else
+> +		break;
+> +	case 0:
+>  		flk.l_type =3D F_RDLCK;
+> +		break;
+> +	case 2:
+> +		flk.l_type =3D F_UNLCK;
+> +		break;
+> +	}
+> =20
+
+nit: fix the ordering above? Not sure why you decided to do 1,0,2...
+
+> -	if (open_rw =3D=3D 0)
+> -		fd =3D open(argv[optind], O_RDONLY);
+> -	else
+> -		fd =3D open(argv[optind], O_RDWR);
+> -	if (fd =3D=3D -1)
+> -		err_exit("open", errno);
+> +	if (rcv_sock =3D=3D -1) {
+> +		if (open_rw =3D=3D 0) {
+> +			fd =3D open(argv[optind], O_RDONLY);
+> +		} else {
+> +			fd =3D open(argv[optind], O_RDWR);
+> +		}
+> +		if (fd =3D=3D -1)
+> +			err_exit("open", errno);
+> +	}
+> =20
+>  	/*
+>  	 * In a testun, we do a fcntl getlk call and exit
+> @@ -322,6 +461,9 @@ int main(int argc, char **argv)
+>  		if (fcntl(fd, setlk_macro, &flk) < 0)
+>  			err_exit("setlkw", errno);
+> =20
+> +		if (snd_sock_name)
+> +			send_fd(snd_sock_name, fd);
+> +
+>  		if (use_dup =3D=3D 1) {
+>  			/* dup fd and close the newfd */
+>  			int dfd =3D dup(fd);
+> @@ -400,13 +542,30 @@ int main(int argc, char **argv)
+>  		if (semtimedop(semid, &sop, 1, &ts) =3D=3D -1)
+>  			err_exit("wait sem0 0", errno);
+> =20
+> -		if (fcntl(fd, getlk_macro, &flk) < 0)
+> -			err_exit("getlk", errno);
+> +		if (rcv_sock !=3D -1) {
+> +			fd =3D recv_fd(rcv_sock);
+> +			close(rcv_sock);
+> +			if (fd =3D=3D -1)
+> +				err_exit("SCM_RIGHTS", errno);
+> +		}
+> +
+> +		if (fcntl(fd, getlk_macro, &flk) < 0) {
+> +			if (lock_rw =3D=3D 2 && errno =3D=3D EINVAL)
+> +				unlck_unsup++;
+> +			else
+> +				err_exit("getlk", errno);
+> +		}
+> =20
+>  		/* set sem1 =3D 0 (getlk done) */
+>  		semu.val =3D 0;
+>  		if (semctl(semid, 1, SETVAL, semu) =3D=3D -1)
+>  			err_exit("set sem1 0", errno);
+> +		if (unlck_unsup) {
+> +			if (unsup_msg)
+> +				puts(unsup_msg);
+> +			close(fd);
+> +			return 0;
+> +		}
+> =20
+>  		/* check result */
+>  		switch (flk.l_type) {
+> diff --git a/tests/generic/478 b/tests/generic/478
+> index 419acc94..1399aa6f 100755
+> --- a/tests/generic/478
+> +++ b/tests/generic/478
+> @@ -128,9 +128,9 @@ do_test()
+>  	soptions=3D"$1 -K $SEMKEY"
+>  	goptions=3D"$2 -K $SEMKEY"
+>  	# -s : do setlk
+> -	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+> +	eval $here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+>  	# -g : do getlk
+> -	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+> +	eval $here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+>  		tee -a $seqres.full
+>  	wait $!
+>  	rm_sem
+> @@ -140,8 +140,8 @@ do_test()
+>  	soptions=3D"$1 -F -K $SEMKEY"
+>  	goptions=3D"$2 -K $SEMKEY"
+>  	# with -F, new locks are always file to place
+> -	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+> -	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+> +	eval $here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+> +	eval $here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+>  		tee -a $seqres.full
+>  	wait $!
+>  	rm_sem
+> @@ -150,8 +150,8 @@ do_test()
+>  	# add -d to dup and close
+>  	soptions=3D"$1 -d -K $SEMKEY"
+>  	goptions=3D"$2 -K $SEMKEY"
+> -	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+> -	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+> +	eval $here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
+> +	eval $here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
+>  		tee -a $seqres.full
+>  	wait $!
+>  	rm_sem
+> @@ -197,6 +197,11 @@ do_test "-s -w -o 0 -l 10 -P" "-g -r -o 5 -l 20" "wr=
+lck" "unlck" "unlck"
+>  # setlk posix wrlck [0,9], getlk rdlck [20,29]
+>  do_test "-s -w -o 0 -l 10 -P" "-g -r -o 20 -l 10" "unlck" "unlck" "unlck=
+"
+> =20
+> +# setlk wrlck [0,9], getlk unlck [0,9]
+> +do_test "-s -w -o 0 -l 10 -W -S /tmp/fstests.sock" "-g -u -o 0 -l 10 -W =
+-G /tmp/fstests.sock -U get\ wrlck" "wrlck" "wrlck" "wrlck"
+> +# setlk wrlck [0,9], getlk unlck [20,29]
+> +do_test "-s -w -o 0 -l 10 -S /tmp/fstests.sock" "-g -u -o 20 -l 10 -G /t=
+mp/fstests.sock -U lock\ could\ be\ placed" "unlck" "unlck" "unlck"
+> +
+>  # setlk rdlck [0,9], getlk wrlck [0,9], open RDONLY
+>  do_test "-s -r -o 0 -l 10 -R" "-g -w -o 0 -l 10 -R" "rdlck" "unlck" "rdl=
+ck"
+>  # setlk rdlck [0,9], getlk wrlck [5,24], open RDONLY
+> @@ -204,6 +209,13 @@ do_test "-s -r -o 0 -l 10 -R" "-g -w -o 5 -l 20 -R -=
+P" "rdlck" "unlck" "rdlck"
+>  # setlk posix rdlck [0,9], getlk wrlck [5,24], open RDONLY
+>  do_test "-s -r -o 0 -l 10 -R -P" "-g -w -o 5 -l 20 -R" "rdlck" "unlck" "=
+unlck"
+> =20
+> +# setlk rdlck [0,9], getlk unlck [0,9], open RDONLY
+> +do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 0 -l 10 -R =
+-G /tmp/fstests.sock -U get\ rdlck" "rdlck" "rdlck" "rdlck"
+> +# setlk posix rdlck [0,9], getlk unlck [5,24], open RDONLY
+> +do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 5 -l 20 -R =
+-G /tmp/fstests.sock -U get\ rdlck" "rdlck" "rdlck" "rdlck"
+> +# setlk rdlck [0,9], getlk unlck [20,29], open RDONLY
+> +do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 20 -l 10 -R=
+ -G /tmp/fstests.sock -U lock\ could\ be\ placed" "unlck" "unlck" "unlck"
+> +
+>  # setlk rdlck [0,9], getlk wrlck [0,9]
+>  do_test "-s -r -o 0 -l 10" "-g -w -o 0 -l 10" "rdlck" "unlck" "rdlck"
+>  # setlk rdlck [0,9], getlk posix wrlck [5,24]
+> diff --git a/tests/generic/478.out b/tests/generic/478.out
+> index 0b4b344a..f3ca2473 100644
+> --- a/tests/generic/478.out
+> +++ b/tests/generic/478.out
+> @@ -29,6 +29,12 @@ lock could be placed
+>  lock could be placed
+>  lock could be placed
+>  lock could be placed
+> +get wrlck
+> +get wrlck
+> +get wrlck
+> +lock could be placed
+> +lock could be placed
+> +lock could be placed
+>  get rdlck
+>  lock could be placed
+>  get rdlck
+> @@ -39,6 +45,15 @@ get rdlck
+>  lock could be placed
+>  lock could be placed
+>  get rdlck
+> +get rdlck
+> +get rdlck
+> +get rdlck
+> +get rdlck
+> +get rdlck
+> +lock could be placed
+> +lock could be placed
+> +lock could be placed
+> +get rdlck
+>  lock could be placed
+>  get rdlck
+>  get rdlck
+
+The problem here is that old kernels are going to fail the new tests,
+and it's going to be hard to engineer the output of 478 to account for
+that.
+
+I think instead of extending generic/478, you should add these in a new
+testcase, and roll a _requires_ofd_getlk_unlck test or something that
+allows older kernels to skip this test. The modifications to
+t_ofd_locks.c look fine overall though.
+
+--=20
+Jeff Layton <jlayton@kernel.org>
