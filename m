@@ -2,571 +2,106 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5264EE7C4E7
-	for <linux-fstests@archiver.kernel.org>; Wed,  4 Oct 2023 17:59:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70431E92700
+	for <linux-fstests@archiver.kernel.org>; Thu,  5 Oct 2023 13:59:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233149AbjJDR7f (ORCPT
+        id S232089AbjJEN7h (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 4 Oct 2023 13:59:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34526 "EHLO
+        Thu, 5 Oct 2023 09:59:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232583AbjJDR7f (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Oct 2023 13:59:35 -0400
-Received: from forward100a.mail.yandex.net (forward100a.mail.yandex.net [178.154.239.83])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95E71A7
-        for <fstests@vger.kernel.org>; Wed,  4 Oct 2023 10:59:29 -0700 (PDT)
-Received: from mail-nwsmtp-smtp-production-main-67.vla.yp-c.yandex.net (mail-nwsmtp-smtp-production-main-67.vla.yp-c.yandex.net [IPv6:2a02:6b8:c15:2c95:0:640:f90:0])
-        by forward100a.mail.yandex.net (Yandex) with ESMTP id 7BBF346C7E;
-        Wed,  4 Oct 2023 20:59:27 +0300 (MSK)
-Received: by mail-nwsmtp-smtp-production-main-67.vla.yp-c.yandex.net (smtp/Yandex) with ESMTPSA id PxbWM6aDU0U0-L7omKYo2;
-        Wed, 04 Oct 2023 20:59:26 +0300
-X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail;
-        t=1696442366; bh=hlPRg7zRpSCF7O7SdEvCkZ+pcYiQNmlF0nw4UsE8cvw=;
-        h=Message-Id:Date:Cc:Subject:To:From;
-        b=jzTlPHuhjA8LwrnW6KjQQVG/ghpQTiYB7XYyqNpQaaadDlUZy3GOI6rxhOoRGjC9R
-         F/XkAerhLfLgX9s7Ii5NT7ZWqB9G7jJsiQSs68xCdQHpO6EakFAlWhQqMoSBt+yRoK
-         H0yXi/PNpDY5+8QbEyp4iqb1zIZe8D7afGs3rB1Y=
-Authentication-Results: mail-nwsmtp-smtp-production-main-67.vla.yp-c.yandex.net; dkim=pass header.i=@yandex.ru
-From:   Stas Sergeev <stsp2@yandex.ru>
+        with ESMTP id S232285AbjJEN5g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Oct 2023 09:57:36 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2001:67c:2178:6::1c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30B151991
+        for <fstests@vger.kernel.org>; Wed,  4 Oct 2023 20:43:07 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id 76DC12184B;
+        Thu,  5 Oct 2023 03:43:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1696477380; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=sQ5kNyJKpOGisvBNGoSlD0DNdlmyK9MFPpT3Nc06aDM=;
+        b=n6YiBNsS5TIaD3iOMFUWHf0pdIBuqkW4Q3Swi4g5IRFyIoVajL1n+FHOZWL9gmlt/5VlIs
+        kGtgU2h46zxk9RMb5g849MOB/zDwLh8e6FZOa4xIOlDzn2b4vcllf5EzSJ2yTELUbPm0mr
+        zLoXoYkyL9tNoX2A+yKw7maUSBdq694=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 4C46E13597;
+        Thu,  5 Oct 2023 03:42:59 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id nCESBcMwHmXGXwAAMHmgww
+        (envelope-from <glass.su@suse.com>); Thu, 05 Oct 2023 03:42:59 +0000
+From:   Su Yue <glass.su@suse.com>
 To:     fstests@vger.kernel.org
-Cc:     Stas Sergeev <stsp2@yandex.ru>, Murphy Zhou <xzhou@redhat.com>,
-        Jeff Layton <jlayton@kernel.org>, Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] generic/732: add F_OFD_GETLK/F_UNLCK testing
-Date:   Wed,  4 Oct 2023 22:59:18 +0500
-Message-Id: <20231004175918.240110-1-stsp2@yandex.ru>
-X-Mailer: git-send-email 2.40.1
+Cc:     l@damenly.org, Su Yue <glass.su@suse.com>
+Subject: [PATCH] generic/245: Filter mv error message
+Date:   Thu,  5 Oct 2023 11:42:55 +0800
+Message-ID: <20231005034255.2031-1-glass.su@suse.com>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-F_UNLCK can be used with F_OFD_GETLK to get the locks from
-particular fd. This patch adds a new test, generic/732,
-to check that functionality.
+Coreutils commit 3cb862ce5f10 ( mv: better diagnostic for 'mv dir x' failure)
+was released in v9.4, changed the error message from
+'mv: cannot move 'b/t' to 'a/t': Directory not empty' to
+'mv: cannot overwrite 'a/t': Directory not empty' in case of
+EDQUOT/EEXIST/EISDIR/EMLINK/ENOSPC/ENOTEMPTY/ETXTBSY.
 
-The following options are added to t_ofd_locks:
--u selects F_UNLCK for testing
--G sets the unix socket name for fd receive
--S sets the unix socket name for fd send
+The change breaks generic/245 due to the mismatched output:
 
-Test works as follows:
-- locker process sets the lock and sends an fd via unix socket
-- lock-tester process receives an fd and uses F_UNLCK to check the lock
+generic/245 1s ... - output mismatch (see /root/xfstests-dev/results//generic/245.out.bad)
+    --- tests/generic/245.out   2023-10-05 11:15:21.124295738 +0800
+    +++ /root/xfstests-dev/results//generic/245.out.bad 2023-10-05 11:15:23.456315468 +0800
+    @@ -1,2 +1,2 @@
+    QA output created by 245
+    -mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
+    +mv: cannot overwrite 'TEST_DIR/test-mv/aa': File exists
+    ...
+    (Run 'diff -u /root/xfstests-dev/tests/generic/245.out /root/xfstests-dev/results//generic/245.out.bad'  to see the entire diff)
 
-CC: fstests@vger.kernel.org
-CC: Murphy Zhou <xzhou@redhat.com>
-CC: Jeff Layton <jlayton@kernel.org>
-CC: Zorro Lang <zlang@redhat.com>
+Filter out the common part of mv error messages to fix the test.
 
-Signed-off-by: Stas Sergeev <stsp2@yandex.ru>
+Signed-off-by: Su Yue <glass.su@suse.com>
 ---
- common/ofdlk          |  61 +++++++++++++++
- common/rc             |   7 ++
- src/t_ofd_locks.c     | 169 +++++++++++++++++++++++++++++++++++++++---
- tests/generic/478     |  59 +--------------
- tests/generic/732     |  60 +++++++++++++++
- tests/generic/732.out |  16 ++++
- 6 files changed, 303 insertions(+), 69 deletions(-)
- create mode 100644 common/ofdlk
- create mode 100755 tests/generic/732
- create mode 100644 tests/generic/732.out
+ tests/generic/245     | 4 +++-
+ tests/generic/245.out | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/common/ofdlk b/common/ofdlk
-new file mode 100644
-index 00000000..4a4dbcb3
---- /dev/null
-+++ b/common/ofdlk
-@@ -0,0 +1,61 @@
-+#
-+# Common functions for OFD lock tests
-+#
-+
-+mk_ofdlk_sem()
-+{
-+	SEMID=$(ipcmk -S 2 | cut -d ":" -f 2 | tr -d '[:space:]')
-+	if [ -z "$SEMID" ]; then
-+		echo "ipcmk failed"
-+		exit 1
-+	fi
-+	SEMKEY=$(ipcs -s | grep $SEMID | cut -d " " -f 1)
-+	if [ -z "$SEMKEY" ]; then
-+		echo "ipcs failed"
-+		exit 1
-+	fi
-+}
-+
-+rm_ofdlk_sem()
-+{
-+	ipcrm -s $SEMID 2>/dev/null
-+}
-+
-+do_test()
-+{
-+	local soptions
-+	local goptions
-+	# print options and getlk output for debug
-+	echo $* >> $seqres.full 2>&1
-+	mk_ofdlk_sem
-+	soptions="$1 -K $SEMKEY"
-+	goptions="$2 -K $SEMKEY"
-+	# -s : do setlk
-+	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
-+	# -g : do getlk
-+	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
-+		tee -a $seqres.full
-+	wait $!
-+	rm_ofdlk_sem
-+
-+	mk_ofdlk_sem
-+	# add -F to clone with CLONE_FILES
-+	soptions="$1 -F -K $SEMKEY"
-+	goptions="$2 -K $SEMKEY"
-+	# with -F, new locks are always file to place
-+	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
-+	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
-+		tee -a $seqres.full
-+	wait $!
-+	rm_ofdlk_sem
-+
-+	mk_ofdlk_sem
-+	# add -d to dup and close
-+	soptions="$1 -d -K $SEMKEY"
-+	goptions="$2 -K $SEMKEY"
-+	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
-+	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
-+		tee -a $seqres.full
-+	wait $!
-+	rm_ofdlk_sem
-+}
-diff --git a/common/rc b/common/rc
-index 1618ded5..f5db434a 100644
---- a/common/rc
-+++ b/common/rc
-@@ -4226,6 +4226,13 @@ _require_ofd_locks()
- 	[ $? -eq 22 ] && _notrun "Require OFD locks support"
- }
- 
-+_require_ofd_getlk_unlck()
-+{
-+	_require_ofd_locks
-+	$here/src/t_ofd_locks -t -gu $TEST_DIR/ofd_testfile > /dev/null 2>&1
-+	[ $? -eq 22 ] && _notrun "Require OFD locks F_OFD_GETLK/F_UNLCK extension"
-+}
-+
- _require_test_lsattr()
+diff --git a/tests/generic/245 b/tests/generic/245
+index e2d5c926e906..31f9dd1873b6 100755
+--- a/tests/generic/245
++++ b/tests/generic/245
+@@ -29,9 +29,11 @@ _cleanup()
+ # According to the rename(2) manpage you can get either EEXIST or ENOTEMPTY as an
+ # error for trying to rename a non-empty directory, so just catch the error for
+ # ENOTMEMPTY and replace it with the EEXIST output so that either result passes
++# Also, mv v9.4+ modified error message when a nonempty destination directory fails
++# to be overwriteen
+ _filter_directory_not_empty()
  {
- 	local testio=$(lsattr -d $TEST_DIR 2>&1)
-diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
-index 58cb0959..8d63b80b 100644
---- a/src/t_ofd_locks.c
-+++ b/src/t_ofd_locks.c
-@@ -14,6 +14,8 @@
- #include <sys/wait.h>
- #include <sys/ipc.h>
- #include <sys/sem.h>
-+#include <sys/socket.h>
-+#include <sys/un.h>
- 
- /*
-  * In distributions that do not have these macros ready in glibc-headers,
-@@ -134,10 +136,13 @@ static void usage(char *arg0)
- 	printf("\t-F : clone with CLONE_FILES in setlk to setup test condition\n");
- 	printf("\t-d : dup and close in setlk\n");
- 	printf("\twithout both -F/d, use clone without CLONE_FILES\n");
--	printf("\t-r/-w : set/get rdlck/wrlck\n");
-+	printf("\t-r/-w/-u : set/get rdlck/wrlck/unlck\n");
- 	printf("\t-o num : offset start to lock, default 0\n");
- 	printf("\t-l num : lock length, default 10\n");
- 	printf("\t-R/-W : open file RDONLY/RDWR\n\n");
-+	printf("\t-G path : unix socket path for fd reception\n\n");
-+	printf("\t-S path : unix socket path for fd sending\n\n");
-+	printf("\t-t : test run, try to perform lock and report\n\n");
- 	printf("\tUsually we run a setlk routine in background and then\n");
- 	printf("\trun a getlk routine to check. They must be paired, or\n");
- 	printf("\ttest will hang.\n\n");
-@@ -164,6 +169,117 @@ static int child_fn(void* p)
- 	return 0;
+-	sed -e "s,Directory not empty,File exists,g"
++	sed -e "s,Directory not empty,File exists,g" -e "s/.* '\(.*\)':\(.*\)/mv: '\1':\2/"
  }
+  
  
-+static int connect_unix(const char *sname)
-+{
-+	struct sockaddr_un addr = { .sun_family = AF_UNIX };
-+
-+	int unix_sock = socket(AF_UNIX, SOCK_DGRAM, 0);
-+	if (unix_sock == -1)
-+		return -1;
-+
-+	strncpy(addr.sun_path, sname, sizeof(addr.sun_path) - 1);
-+	if (connect(unix_sock, (struct sockaddr *)&addr, sizeof(addr)) == -1)
-+	{
-+		close(unix_sock);
-+		perror("connect()");
-+		return -1;
-+	}
-+
-+	return unix_sock;
-+}
-+
-+static int send_fd(const char *sname, int fd)
-+{
-+	int ret;
-+	int unix_sock;
-+	struct iovec iov = {.iov_base = ":)", // Must send at least one byte
-+			    .iov_len = 2};
-+
-+	union {
-+		char buf[CMSG_SPACE(sizeof(fd))];
-+		struct cmsghdr align;
-+	} u;
-+
-+	struct msghdr msg = {.msg_iov = &iov,
-+			     .msg_iovlen = 1,
-+			     .msg_control = u.buf,
-+			     .msg_controllen = sizeof(u.buf)};
-+
-+	struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
-+	*cmsg = (struct cmsghdr){.cmsg_level = SOL_SOCKET,
-+				 .cmsg_type = SCM_RIGHTS,
-+				 .cmsg_len = CMSG_LEN(sizeof(fd))};
-+
-+	memcpy(CMSG_DATA(cmsg), &fd, sizeof(fd));
-+
-+	unix_sock = connect_unix(sname);
-+	if (unix_sock == -1) {
-+		perror("sendmsg()");
-+		return -1;
-+	}
-+	ret = sendmsg(unix_sock, &msg, 0);
-+	close(unix_sock);
-+	if (ret == -1)
-+		perror("sendmsg()");
-+	return ret;
-+}
-+
-+static int bind_unix(const char *sname)
-+{
-+	struct sockaddr_storage storage = {};
-+	struct sockaddr_un *addr;
-+	int sock;
-+
-+	sock = socket(AF_UNIX, SOCK_DGRAM, 0);
-+	if (sock == -1)
-+		return -1;
-+	addr = (struct sockaddr_un *)&storage;
-+	addr->sun_family = AF_UNIX;
-+	strncpy(addr->sun_path, sname, sizeof(addr->sun_path) - 1);
-+	unlink(sname);
-+	if (bind(sock, (struct sockaddr *)addr, SUN_LEN(addr)) == -1) {
-+		perror("bind()");
-+		close(sock);
-+		return -1;
-+	}
-+	return sock;
-+}
-+
-+static int recv_fd(int sock)
-+{
-+	struct msghdr msg;
-+	struct cmsghdr *cmsghdr;
-+	struct iovec iov;
-+	ssize_t nbytes;
-+	int *p;
-+	char buf[CMSG_SPACE(sizeof(int))], c[16];
-+	struct cmsghdr *cmsgp;
-+
-+	iov.iov_base = &c;
-+	iov.iov_len = sizeof(c);
-+	cmsghdr = (struct cmsghdr *)buf;
-+	cmsghdr->cmsg_len = CMSG_LEN(sizeof(int));
-+	cmsghdr->cmsg_level = SOL_SOCKET;
-+	cmsghdr->cmsg_type = SCM_RIGHTS;
-+	msg.msg_name = NULL;
-+	msg.msg_namelen = 0;
-+	msg.msg_iov = &iov;
-+	msg.msg_iovlen = 1;
-+	msg.msg_control = cmsghdr;
-+	msg.msg_controllen = CMSG_LEN(sizeof(int));
-+	msg.msg_flags = 0;
-+
-+	nbytes = recvmsg(sock, &msg, 0);
-+	if (nbytes == -1)
-+		return -1;
-+
-+	cmsgp = CMSG_FIRSTHDR(&msg);
-+	p = (int *)CMSG_DATA(cmsgp);
-+	if (!p)
-+		return -1;
-+	return *p;
-+}
-+
- int main(int argc, char **argv)
- {
- 	int posix = 0;
-@@ -184,10 +300,12 @@ int main(int argc, char **argv)
- 	struct semid_ds sem_ds;
- 	struct sembuf sop;
- 	int opt, ret;
-+	int rcv_sock = -1;
-+	const char *snd_sock_name = NULL;
- 
- 	//avoid libcap errno bug
- 	errno = 0;
--	while((opt = getopt(argc, argv, "sgrwo:l:PRWtFdK:")) != -1) {
-+	while((opt = getopt(argc, argv, "sgrwuo:l:PRWtFdK:G:S:")) != -1) {
- 		switch(opt) {
- 		case 's':
- 			lock_cmd = 1;
-@@ -201,6 +319,9 @@ int main(int argc, char **argv)
- 		case 'w':
- 			lock_rw = 1;
- 			break;
-+		case 'u':
-+			lock_rw = 2;
-+			break;
- 		case 'o':
- 			lock_start = atoi(optarg);
- 			break;
-@@ -228,6 +349,12 @@ int main(int argc, char **argv)
- 		case 'K':
- 			semkey = strtol(optarg, NULL, 16);
- 			break;
-+		case 'G':
-+			rcv_sock = bind_unix(optarg);
-+			break;
-+		case 'S':
-+			snd_sock_name = optarg;
-+			break;
- 		default:
- 			usage(argv[0]);
- 			return -1;
-@@ -256,17 +383,27 @@ int main(int argc, char **argv)
- 		getlk_macro = F_GETLK;
- 	}
- 
--	if (lock_rw == 1)
--		flk.l_type = F_WRLCK;
--	else
-+	switch (lock_rw) {
-+	case 0:
- 		flk.l_type = F_RDLCK;
-+		break;
-+	case 1:
-+		flk.l_type = F_WRLCK;
-+		break;
-+	case 2:
-+		flk.l_type = F_UNLCK;
-+		break;
-+	}
- 
--	if (open_rw == 0)
--		fd = open(argv[optind], O_RDONLY);
--	else
--		fd = open(argv[optind], O_RDWR);
--	if (fd == -1)
--		err_exit("open", errno);
-+	if (rcv_sock == -1) {
-+		if (open_rw == 0) {
-+			fd = open(argv[optind], O_RDONLY);
-+		} else {
-+			fd = open(argv[optind], O_RDWR);
-+		}
-+		if (fd == -1)
-+			err_exit("open", errno);
-+	}
- 
- 	/*
- 	 * In a testun, we do a fcntl getlk call and exit
-@@ -322,6 +459,9 @@ int main(int argc, char **argv)
- 		if (fcntl(fd, setlk_macro, &flk) < 0)
- 			err_exit("setlkw", errno);
- 
-+		if (snd_sock_name)
-+			send_fd(snd_sock_name, fd);
-+
- 		if (use_dup == 1) {
- 			/* dup fd and close the newfd */
- 			int dfd = dup(fd);
-@@ -400,6 +540,13 @@ int main(int argc, char **argv)
- 		if (semtimedop(semid, &sop, 1, &ts) == -1)
- 			err_exit("wait sem0 0", errno);
- 
-+		if (rcv_sock != -1) {
-+			fd = recv_fd(rcv_sock);
-+			close(rcv_sock);
-+			if (fd == -1)
-+				err_exit("SCM_RIGHTS", errno);
-+		}
-+
- 		if (fcntl(fd, getlk_macro, &flk) < 0)
- 			err_exit("getlk", errno);
- 
-diff --git a/tests/generic/478 b/tests/generic/478
-index 419acc94..580c260e 100755
---- a/tests/generic/478
-+++ b/tests/generic/478
-@@ -88,6 +88,7 @@ _begin_fstest auto quick
- 
- # Import common functions.
- . ./common/filter
-+. ./common/ofdlk
- 
- # Modify as appropriate.
- _supported_fs generic
-@@ -99,64 +100,6 @@ _require_ofd_locks
- $XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
- 	$TEST_DIR/testfile >> $seqres.full 2>&1
- 
--mk_sem()
--{
--	SEMID=$(ipcmk -S 2 | cut -d ":" -f 2 | tr -d '[:space:]')
--	if [ -z "$SEMID" ]; then
--		echo "ipcmk failed"
--		exit 1
--	fi
--	SEMKEY=$(ipcs -s | grep $SEMID | cut -d " " -f 1)
--	if [ -z "$SEMKEY" ]; then
--		echo "ipcs failed"
--		exit 1
--	fi
--}
--
--rm_sem()
--{
--	ipcrm -s $SEMID 2>/dev/null
--}
--
--do_test()
--{
--	local soptions
--	local goptions
--	# print options and getlk output for debug
--	echo $* >> $seqres.full 2>&1
--	mk_sem
--	soptions="$1 -K $SEMKEY"
--	goptions="$2 -K $SEMKEY"
--	# -s : do setlk
--	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
--	# -g : do getlk
--	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
--		tee -a $seqres.full
--	wait $!
--	rm_sem
--
--	mk_sem
--	# add -F to clone with CLONE_FILES
--	soptions="$1 -F -K $SEMKEY"
--	goptions="$2 -K $SEMKEY"
--	# with -F, new locks are always file to place
--	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
--	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
--		tee -a $seqres.full
--	wait $!
--	rm_sem
--
--	mk_sem
--	# add -d to dup and close
--	soptions="$1 -d -K $SEMKEY"
--	goptions="$2 -K $SEMKEY"
--	$here/src/t_ofd_locks $soptions $TEST_DIR/testfile &
--	$here/src/t_ofd_locks $goptions $TEST_DIR/testfile | \
--		tee -a $seqres.full
--	wait $!
--	rm_sem
--}
--
- # Always setlk at range [0,9], getlk at range [0,9] [5,24] or [20,29].
- # To open file RDONLY or RDWR should not break the locks.
- # POSIX locks should be released after closed fd, so it wont conflict
-diff --git a/tests/generic/732 b/tests/generic/732
-new file mode 100755
-index 00000000..f287fb67
---- /dev/null
-+++ b/tests/generic/732
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 stsp2@yandex.ru
-+#
-+# FS QA Test 732
-+#
-+# Test OFD lock's F_UNLCK extension.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/ofdlk
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_require_test
-+_require_ofd_getlk_unlck
-+
-+# real QA test starts here
-+# prepare a 4k testfile in TEST_DIR
-+$XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
-+	$TEST_DIR/testfile >> $seqres.full 2>&1
-+
-+# Always setlk at range [0,9], getlk at range [0,9] [5,24] or [20,29].
-+# To open file RDONLY or RDWR should not break the locks.
-+# POSIX locks should be released after closed fd, so it wont conflict
-+# with other locks in tests
-+
-+# -P : operate posix lock
-+# -w : operate on F_WRLCK
-+# -r : operate on F_RDLCK
-+# -R : open file RDONLY
-+# -W : open file RDWR
-+# -o : file offset where the lock starts
-+# -l : lock length
-+# -F : clone with CLONE_FILES in setlk
-+# -d : dup and close in setlk
-+
-+# setlk wrlck [0,9], getlk wrlck [0,9], expect
-+#    + wrlck when CLONE_FILES not set
-+#    + unlck when CLONE_FILES set
-+#    + wrlck when dup & close
-+
-+# setlk wrlck [0,9], getlk unlck [0,9]
-+do_test "-s -w -o 0 -l 10 -W -S /tmp/fstests.sock" "-g -u -o 0 -l 10 -W -G /tmp/fstests.sock" "wrlck" "wrlck" "wrlck"
-+# setlk wrlck [0,9], getlk unlck [20,29]
-+do_test "-s -w -o 0 -l 10 -S /tmp/fstests.sock" "-g -u -o 20 -l 10 -G /tmp/fstests.sock" "unlck" "unlck" "unlck"
-+
-+# setlk rdlck [0,9], getlk unlck [0,9], open RDONLY
-+do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 0 -l 10 -R -G /tmp/fstests.sock" "rdlck" "rdlck" "rdlck"
-+# setlk posix rdlck [0,9], getlk unlck [5,24], open RDONLY
-+do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 5 -l 20 -R -G /tmp/fstests.sock" "rdlck" "rdlck" "rdlck"
-+# setlk rdlck [0,9], getlk unlck [20,29], open RDONLY
-+do_test "-s -r -o 0 -l 10 -R -S /tmp/fstests.sock" "-g -u -o 20 -l 10 -R -G /tmp/fstests.sock" "unlck" "unlck" "unlck"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/732.out b/tests/generic/732.out
-new file mode 100644
-index 00000000..98996904
---- /dev/null
-+++ b/tests/generic/732.out
-@@ -0,0 +1,16 @@
-+QA output created by 732
-+get wrlck
-+get wrlck
-+get wrlck
-+lock could be placed
-+lock could be placed
-+lock could be placed
-+get rdlck
-+get rdlck
-+get rdlck
-+get rdlck
-+get rdlck
-+get rdlck
-+lock could be placed
-+lock could be placed
-+lock could be placed
+diff --git a/tests/generic/245.out b/tests/generic/245.out
+index f5b5f182619d..fb7f0f7908e7 100644
+--- a/tests/generic/245.out
++++ b/tests/generic/245.out
+@@ -1,2 +1,2 @@
+ QA output created by 245
+-mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
++mv: 'TEST_DIR/test-mv/aa': File exists
 -- 
-2.40.1
+2.42.0
 
