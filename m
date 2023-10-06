@@ -2,324 +2,242 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68D02E92FF0
-	for <linux-fstests@archiver.kernel.org>; Fri,  6 Oct 2023 06:46:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AC46E94133
+	for <linux-fstests@archiver.kernel.org>; Fri,  6 Oct 2023 22:12:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230184AbjJFGqv (ORCPT
+        id S233545AbjJFWMk (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Fri, 6 Oct 2023 02:46:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54676 "EHLO
+        Fri, 6 Oct 2023 18:12:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230150AbjJFGqu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Oct 2023 02:46:50 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2433CA;
-        Thu,  5 Oct 2023 23:46:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com; s=s31663417;
- t=1696574797; x=1697179597; i=quwenruo.btrfs@gmx.com;
- bh=RkLX+Zm7Ynv5tgK52EobqPUfHx+7O3wilpNPT6eXDw0=;
- h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:In-Reply-To;
- b=RXEGm0IR5wkzhEr3tlYwA/lRMhXWwSJoBugSAgt8Sg5xxVskI+eSp20k0acqMQo8qs7LdtLaJSF
- iOxxu/NLqYkwuJ/wSgHMI8FgQHVc12a5ygzQlC0pbaZ/IV8L0BHOJxKo7EvnAyYLVvxXnqiwOjSuT
- XCt1sEpYumk7GmPy8V8YyFyr7fgf4ZKVk0GEvipYpoOBfG8vY+YdfnBr8B8ItV+QlEe/5NDseDZdh
- ZEG1cEARoUuiggyqJLI1lXDfWt9HdnpBJRhgx3g2tM/8loEi3DTZI3g0lC3b6VIaTVVrKOJiaqS8m
- 7DsEtrCuD85pFd5nsHNHkssU0b1t/Z4vwEEQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.117] ([218.215.59.251]) by mail.gmx.net (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MmULr-1rWChZ1teT-00iWe0; Fri, 06
- Oct 2023 08:46:37 +0200
-Message-ID: <1f23346d-ad61-412f-b59d-1f76e2d1df6c@gmx.com>
-Date:   Fri, 6 Oct 2023 17:16:31 +1030
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
+        with ESMTP id S233630AbjJFWMj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Oct 2023 18:12:39 -0400
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D82ACC5
+        for <fstests@vger.kernel.org>; Fri,  6 Oct 2023 15:12:37 -0700 (PDT)
+Received: by mail-pf1-x434.google.com with SMTP id d2e1a72fcca58-69101022969so2337921b3a.3
+        for <fstests@vger.kernel.org>; Fri, 06 Oct 2023 15:12:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1696630357; x=1697235157; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Rew63+U8EYvK/OQFQ4wEQBz1HJbKEzzHxs+hVI2/vlI=;
+        b=XqSaPjsQWTG/slD/6GsmagBE1giQNMTjJ/R0PbtBmBkGe1UKUNzxKQve5NlVv6izkE
+         liz4hU+CozXFmZcf7foIHOqRYovOLPbkE7e6Fd8UU7ySe6JeKhQct9gqPOBRwQgQ27vk
+         PITJw8CVOPrAuis8ROP/7eWAh1F5jtMD7P+3iS4rW4x6wkIeFmCWL7Xtl1H72BjTg4Yd
+         UaY7eDDVrrnA/lUmEuU0cvzXTYa6oSKKl5ulJhqi0YU/OtWTm5nfoVqAQtTXfxajjYgG
+         hHYVqiCab3WdcglJ4vvnFVJKBNyX0RbcRymi9HE+wfxJmGQwhlvUxVMsC40zhUwVoWbL
+         mJjg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696630357; x=1697235157;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Rew63+U8EYvK/OQFQ4wEQBz1HJbKEzzHxs+hVI2/vlI=;
+        b=FLrMUQ6HN5+HeEaF8RKgT8b1AbZ8XV3EUqat392nFmZPpBTk5cTYsKyQmePspP2EqP
+         4MLWc44kkdAL+uwa8TaUgvPoY8cJcxEprJn0vrov4G316GaBopKok/dltv29CCm6/8tv
+         A7MGSMo5VcZQFvQTcn8QdPobp9bCdkTowcdrEUwiz4Ntru8zhqG0qIv+5o3S51z6Tf3G
+         QUJpP+X1rpt0TdF7mCaJPbp7iHxgI9N8Mu+ltZzDJ0siMml4J+vB2uvu4/DRSmIQXFpV
+         ZeVCEwCQ59iwQaDY4Vp9zP92Afa/wdxRPu7YCUK3kuOSUZAFfrKxTicnHvPsWWXe65qg
+         xDXw==
+X-Gm-Message-State: AOJu0Ywi8319LRbnI6QETV7wmiVppVLckZitAL5VPCNFc9xKn+ASn6mE
+        oUG56NHag0lPqZX0kSFIjk9v2Q==
+X-Google-Smtp-Source: AGHT+IG0bjlhSRaH0a67atx8yn8B2HTBfRFU1miCBB5/HMp9qtJUPMrOhhivpDJU+Opd25PufzxMcg==
+X-Received: by 2002:a05:6a20:12c6:b0:131:a21:9f96 with SMTP id v6-20020a056a2012c600b001310a219f96mr11346140pzg.6.1696630357194;
+        Fri, 06 Oct 2023 15:12:37 -0700 (PDT)
+Received: from dread.disaster.area (pa49-180-20-59.pa.nsw.optusnet.com.au. [49.180.20.59])
+        by smtp.gmail.com with ESMTPSA id t19-20020a1709028c9300b001b9d95945afsm4406729plo.155.2023.10.06.15.12.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Oct 2023 15:12:36 -0700 (PDT)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+        (envelope-from <david@fromorbit.com>)
+        id 1qot3h-00AOQq-10;
+        Sat, 07 Oct 2023 09:12:33 +1100
+Date:   Sat, 7 Oct 2023 09:12:33 +1100
+From:   Dave Chinner <david@fromorbit.com>
+To:     Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     "Darrick J. Wong" <djwong@kernel.org>,
+        Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
 Subject: Re: [PATCH 2/2] fstests: add configuration option for executing post
  mkfs commands
-Content-Language: en-US
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, david@fromorbit.com
+Message-ID: <ZSCGUUtCY5AsmWaO@dread.disaster.area>
 References: <cover.1695543976.git.anand.jain@oracle.com>
  <eff4da60fe7a6ce56851d5fc706b5f2f2d772c56.1695543976.git.anand.jain@oracle.com>
  <dfc4cece-d809-4b5b-93f7-7251ba3a492a@gmx.com>
  <5485cd32-2308-c9c5-4c97-9ff6c74c64dd@oracle.com>
  <0a8d40fc-501e-4d85-903a-83d9b3508bf5@gmx.com>
  <20231006060932.GD21283@frogsfrogsfrogs>
-From:   Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <20231006060932.GD21283@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:KsbQmVgchZxrsFhocsraNEKr7ULQNOAUPr++80tFGzGTMJPDNX3
- PiCDzCPfKLeU5Kmp3/9mSCyXSo0baM5eP6n55/1Fe+xu2FFTY20bsJou1UWlz0UrM34o/sU
- ZWC+lIv5sz52Jjx4W05aHybni1yz9l3u6sYOYBPwbSfTnv/AmtjvG7YpwJt0gUl91VlWB20
- C8DvzQaRoABw0HdE9Ujvw==
-UI-OutboundReport: notjunk:1;M01:P0:ruqD/Aq6EhY=;lej59FlK+CH5D6pw76HQjXOqN9A
- UxbIXFupCiriMkblgRAmojkd1jceIEY9VjVk4c4bzwjNS59PkYpCKppDguxSUZMzkplUHy8EB
- sHCh72dnEPHVMAmkbx+8u0CNRK3BcX63cPl3ca/usFVdidv8PWMXwOZJ2vhlXuNLWld70ac3F
- Ieza3abTgO6hS/tPoj1QI6EN6omHvXe95sEVu39BkxK4W1syUyH2+VSnweUQ2ivxfbuA/KxsZ
- hYG9Cs2A/D1jvHuRTbo/8GVhKxHLaIfRMytFSbimlF25f0E8IQbEV8fGs3WaBZt5xbJxdq97y
- 0AnW9x0u2PJYvw66GW4uY9ygtlN2gdQA5J/kYYXhcbIt/sRoeRgzhjqKHOeCGshnfWhJ8fBrB
- uLHjX9uSFhtcQwgU8+ItS3PfujUbKwe/nHQm6PEHsC8AjdsJbGzZO9Ruf8uARMPjOPPcWTcgh
- 2OGtPVB6rteY5qBwx21iY8xZFseo1p89rW5KrPqEbnboUD2mtxCtj2l7IUDBFe5ZPRnMAQ4of
- 9gosslaW7NtmYurXnSOdheSBRk6kIn0vbBmOUpYcEE+9gd0TX2tW+icQ7ErnB8ux1VSPzHGGp
- LNLxzhFZfYYs7HCP9T+9X3LwTTXsVXsT9+It97sjLE7S/hsHE2+rknqHQKsk3bxEtHbM+p2kg
- K75U7ccoruI2SpoCIpJTJ2/OEkzNstAVBJU1tArq+rJw08tLpp96vv8eZ3Rad/YoST9Ys6PJu
- lpZZK+FPEOpZfABHeiP+eWQZUJaYHxrsh4+v5YZn61tr3ZZFF4K2kExiQff0wkV1yVKhVfdky
- a+1ZCsj7FZyBlsj1jNENHTHJkpQwtkGo4aDSSRjUrqNR9vpIzJ3dIstYHsV3WqhV+fSXqBHOl
- AP3s1KR/J2wwc0/Lp24688E7X718+GHxrXDXeWZCZ/OTGpbOOb2GXk1A1G6icqm7CZZ2jvpHS
- 7qOkgUcApSCz9opi5J8AFOttXgE=
+ <1f23346d-ad61-412f-b59d-1f76e2d1df6c@gmx.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1f23346d-ad61-412f-b59d-1f76e2d1df6c@gmx.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
+On Fri, Oct 06, 2023 at 05:16:31PM +1030, Qu Wenruo wrote:
+> However for the whole btrfs/fstests combination, we have several
+> features which can not be easily integrated into fstests.
+> 
+> The biggest example is multi-device management.
+> 
+> For now, only some btrfs specific test cases are utilizing
+> SCRATCH_DEV_POOL to cover multi-device functionality (including all the
+> RAID and seed support).
+> This means way less coverage for seed and btrfs RAID, all generic group
+> would not utilize btrfs RAID/seed functionality at all.
 
+IOWs, you are saying that the btrfs device setup code in fstests is
+functionally deficient.
 
-On 2023/10/6 16:39, Darrick J. Wong wrote:
-> On Thu, Sep 28, 2023 at 05:10:25PM +0930, Qu Wenruo wrote:
->>
->>
->> On 2023/9/28 15:04, Anand Jain wrote:
->>>
->>>
->>> On 28/09/2023 12:26, Qu Wenruo wrote:
->>>>
->>>>
->>>> On 2023/9/28 13:53, Anand Jain wrote:
->>>>> This patch introduces new configuration file parameters,
->>>>> POST_SCRATCH_MKFS_CMD and POST_SCRATCH_POOL_MKFS_CMD.
->>>>>
->>>>> Usage example:
->>>>>
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 POST_SCRATCH_MKFS_=
-CMD=3D"btrfstune -m"
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 POST_SCRATCH_POOL_=
-MKFS_CMD=3D"btrfstune -m"
->>>>
->>>> Can't we add extra options for mkfs.btrfs to support metadata uuid at
->>>> mkfs time?
->>>>
->>>> We already support quota and all other features, I think it would be
->>>> much easier to implement metadata_uuid inside mkfs.
->>>>
->>>> If this feature is only for metadata_uuid, then I really prefer to do=
- it
->>>> inside mkfs.btrfs.
->>>
->>> Thanks for the comments.
->>>
->>> The use of btrfstune -m is just an example; any other command,
->>> function, or script can be assigned to the variable POST_SCRATCH_xx.
->>
->> The last time I tried something like this, I got strong objection from
->> some guy in the XFS community.
->>
->> Just good luck if you can have a better chance.
+> 
+> For a better coverage, or for more complex setup (maybe dm-dust for XFS
+> log device?), I am not that convinced if the current plain mkfs options
+> is good enough.
+
+We already know mkfs alone isn't sufficent - that's why we have
+filesystem specific mkfs fucntions for any filesystem that needs to
+do something more complex than run mkfs....
+
+i.e. we already have infrastructure that we use to solve this
+problem - there are example implementations that you can look at to
+follow.
+
+> 
+> Thus I'm more interested in exploring the possibility to "out-source"
+> those basic functionality (from mkfs to check) to outside scripts, as
+> we're not that far away to hit the limits of the existing framework. (At
+> least for btrfs)
+
+The whole idea that we set up devices for testing via magic,
+undocumented, private external scripts is antithetical to the
+purpose of fstests. The device model used in fstests is that you tell it
+what configuration you want, and it does all the work to set them up
+that way. This allows tests to override or skip incompatible
+configurations based on known config variables, etc.
+
+It also allows -everyone- to test complex configurations without
+needing to share private, external scripts or knowing any of the
+intricate details needed to set up that configuration. External
+scripts are like proprietary code - it only works if you have some
+magic secret sauce that nobody else knows about.
+
+If it's hard to set something up in fstests, then *fix that
+problem*. If you are adding code in environment variables and
+hacking in environment varaibles to run that code, then the -code
+itself- should be in fstests.
+
+Having the code in fstests means that anyone can add
+"BTRFS_SCRATCH_UUID='<uuid>' to their config file to change uuids
+for the devices being tested. They don't need to know waht magic
+command is needed to do this, when it needs to be set, what changes
+elsewhere in fstests they need to watch out for, which tests is
+might conflict with, etc.
+
+Hiding this in some custom script means it can't be easily
+documented, can't be easily or widely replicated, it can't be
+discovered by reading the fstests code, and it isn't obvious to
+-anyone- that it is part of the btrfs test matrix that needs to be
+exercised.
+
+IOWs, it's just really bad QA architecture to externalise random
+parts of the test environment configuration.  If the configuration
+needs to be tested, then the infrastructure should support that
+directly and it should be easily discoverable and used by people
+largely unfamiliar with btrfs volume management (i.e. typical distro
+QA environment).
+
+> > I suppose the problem there is that mkfs.btrfs won't itself create a
+> > filesystem with the metadata_uuid field that doesn't match the other
+> > uuid?
+> 
+> That's not a big deal, we (at least me) are very open to add this mkfs
+> feature.
+> 
+> But there are other limits, like the fsck part.
+> 
+> For now, btrfs follows the behavior of other fses, just check the
+> correctness of the metadata, and ignore the correctness of data.
 >
-> As another guy in the XFS community, I also don't understand why this
-> can't be accomplished with a _scratch_mkfs_btrfs helper that runs the
-> real mkfs tool and then tunes the resulting fs.
+> But remember btrfs has data checksum by default, thus it can easily
+> verify the data too, and we have the extra switch ("--check-data-csum"
+> option) to enable that for "btrfs check".
 
-For this particular case, sure, it can be done through mkfs flags.
-(As I already mentioned, I also believe this is the correct way to go,
-for this particular case)
+Which is yet another arguement for the code being in fstests and
+controlled by an environment variable.
 
->  Is it significant for
-> bug finding to be able to run an entire separate fstests config with
-> this config?  Versus writing a targeted exerciser for the -m case?
+This is *exactly* the case for the LARGE_SCRATCH_DEV stuff that ext4
+and XFS support in the mkfs routines. On the XFS side we have
+LARGE_SCRATCH_DEV checks in -both- the XFS mkfs and check/repair
+functions to handle this configuration correctly.
 
-IIRC it's mostly lack of test coverage, but I won't be surprised if we
-really found some bugs.
-Lack of coverage means bugs, just sooner or later.
+IOWs, what you want to do is add a config variable for
+BTFS_SCRATCH_CHECK_DATA, and trigger off that in all btrfs specific
+functions that need to add, modify or check data checksums.
 
->
-> Is there some reason why the exact command needs to be injected via
-> environment variables?  Or, why can't mkfs.btrfs do whatever "btrfstune
-> -m" does?
+> For now we're not going to enable the "--check-data-csum" option nor we
+> have the ability to teach fstests how to change the behavior.
 
-For this particular case, I think the mkfs.btrfs way is good enough to
-handle, just as my first reply said.
+We most certainly do have the ability to do this in fstests, and
+quite easily.
 
+Another example is the USE_EXTERNAL variable that tells XFS and ext4
+that external log devices (and rt devices for XFS) are to be used.
+This has hooks all over mkfs, mount, check, repair, xfs_db, quota
+and fs population functions so that they all specify devices
+appropriately.
 
-However for the whole btrfs/fstests combination, we have several
-features which can not be easily integrated into fstests.
+That is, this config variable directly modifies the command lines
+used for these operations - it is an even better example of FS
+specific device configuration driving by config variables than
+LARGE_SCRATCH_DEV.  This model will work just fine for stuff like
+the --check-data-csum btrfs specific check option being talked about
+here, and the only thing that needs to change is the btrfs specific
+check/repair functions...
 
-The biggest example is multi-device management.
+> Thus I'm taking the chance to explore any way to "out-source" those
+> mkfs/fsck functionality, even this means other fses may not even bother
+> as the current framework just works good enough for them.
 
-For now, only some btrfs specific test cases are utilizing
-SCRATCH_DEV_POOL to cover multi-device functionality (including all the
-RAID and seed support).
-This means way less coverage for seed and btrfs RAID, all generic group
-would not utilize btrfs RAID/seed functionality at all.
+And as I said above, that's the wrong model for fstests - it means
+that a typical QA environment is not going to be able to test
+complex things because the people running the tests do not know how
+to write these complex "out-sourced" scripts to configure the test
+environment.
 
-For a better coverage, or for more complex setup (maybe dm-dust for XFS
-log device?), I am not that convinced if the current plain mkfs options
-is good enough.
+Having all the code in fstests and triggering it via a config
+variable is the right way to do this sort of thing. It works for
+everyone and it's easy to replicate the test environment and
+configurations for reproduction of issues that are found.
 
-Thus I'm more interested in exploring the possibility to "out-source"
-those basic functionality (from mkfs to check) to outside scripts, as
-we're not that far away to hit the limits of the existing framework. (At
-least for btrfs)
+If the test envirnoment is dependent on private scripts for
+configuration and reproduction of issues, then how do other people
+reproduce the problems you might find? Yeah, you have to share all
+your scripts for everyone to run, and at that point the code
+actually needs to be in fstests itself because it's proven to be a
+useful test configuration that everyone should be running....
 
->
-> I suppose the problem there is that mkfs.btrfs won't itself create a
-> filesystem with the metadata_uuid field that doesn't match the other
-> uuid?
+> But IIRC, even f2fs is gaining multi-device support, I believe this is
+> not a btrfs specific thing, but a framework limitation.
 
-That's not a big deal, we (at least me) are very open to add this mkfs
-feature.
+The scratch dev pool was an easy extension to support multi-device
+btrfs filesystems done in the really early days when there was
+almost zero btrfs specific test coverage in fstests. I'm not
+surprised that it has warts and may not do everything that btrfs
+developers might need these days.
 
-But there are other limits, like the fsck part.
+However, we don't need custom hooks to externalise scripts - we
+already have a working model for config driven filesystem specific
+device configuration. I don't see that there is any major common
+infrastructure change needed, most of what I'm hearing is that the
+btrfs specific device configuration needs to catch up with how other
+filesystems have been testing complex device configurations....
 
-For now, btrfs follows the behavior of other fses, just check the
-correctness of the metadata, and ignore the correctness of data.
+Cheers,
 
-But remember btrfs has data checksum by default, thus it can easily
-verify the data too, and we have the extra switch ("--check-data-csum"
-option) to enable that for "btrfs check".
-
-For now we're not going to enable the "--check-data-csum" option nor we
-have the ability to teach fstests how to change the behavior.
-
-Thus I'm taking the chance to explore any way to "out-source" those
-mkfs/fsck functionality, even this means other fses may not even bother
-as the current framework just works good enough for them.
-
-But IIRC, even f2fs is gaining multi-device support, I believe this is
-not a btrfs specific thing, but a framework limitation.
-
-On the other hand, I can also see the possible problems of too many
-things out-sourced to external scripts, but I believe we at least need
-some honest and constructive discussion on the limits of the existing
-framework.
-
-Thanks,
-Qu
->
-> --D
->
->>>
->>> Now, regarding updating mkfs.btrfs with the btrfstune -m feature,
->>> why not? It simplifies testing. However, can we identify a use case
->>> other than testing?
->>
->> For consistency, I believe all (at the ones we can enable) features
->> should have a mkfs equivalent at least.
->>
->> (And can get around the the test limitations for sure)
->>
->> Thanks,
->> Qu
->>>
->>> Thanks, Anand
->>>
->>>>
->>>> Thanks,
->>>> Qu
->>>>>
->>>>> With this configuration option, test cases using _scratch_mkfs(),
->>>>> scratch_pool_mkfs(), or _scratch_mkfs_sized() will run the above
->>>>> set value after the mkfs operation.
->>>>>
->>>>> Other mkfs functions, such as _mkfs_dev(), are not connected to the
->>>>> POST_SCRATCH_MKFS_CMD.
->>>>>
->>>>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->>>>> ---
->>>>>  =C2=A0 common/btrfs | 35 +++++++++++++++++++++++++++++++++++
->>>>>  =C2=A0 1 file changed, 35 insertions(+)
->>>>>
->>>>> diff --git a/common/btrfs b/common/btrfs
->>>>> index 798c899f6233..b0972e882c7c 100644
->>>>> --- a/common/btrfs
->>>>> +++ b/common/btrfs
->>>>> @@ -690,17 +690,48 @@ _require_btrfs_scratch_logical_resolve_v2()
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _scratch_unmount
->>>>>  =C2=A0 }
->>>>>
->>>>> +post_scratch_mkfs_cmd()
->>>>> +{
->>>>> +=C2=A0=C2=A0=C2=A0 if [[ -v POST_SCRATCH_MKFS_CMD ]]; then
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 echo "$POST_SCRATCH_MKFS=
-_CMD $SCRATCH_DEV"
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $POST_SCRATCH_MKFS_CMD $=
-SCRATCH_DEV
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return $?
->>>>> +=C2=A0=C2=A0=C2=A0 fi
->>>>> +
->>>>> +=C2=A0=C2=A0=C2=A0 return 0
->>>>> +}
->>>>> +
->>>>> +post_scratch_pool_mkfs_cmd()
->>>>> +{
->>>>> +=C2=A0=C2=A0=C2=A0 if [[ -v POST_SCRATCH_POOL_MKFS_CMD ]]; then
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 echo "$POST_SCRATCH_POOL=
-_MKFS_CMD $SCRATCH_DEV_POOL"
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $POST_SCRATCH_POOL_MKFS_=
-CMD $SCRATCH_DEV_POOL
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return $?
->>>>> +=C2=A0=C2=A0=C2=A0 fi
->>>>> +
->>>>> +=C2=A0=C2=A0=C2=A0 return 0
->>>>> +}
->>>>> +
->>>>>  =C2=A0 _scratch_mkfs_retry_btrfs()
->>>>>  =C2=A0 {
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 # _scratch_do_mkfs() may retry mkfs =
-without $MKFS_OPTIONS
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _scratch_do_mkfs "$MKFS_BTRFS_PROG" =
-"cat" $*
->>>>>
->>>>> +=C2=A0=C2=A0=C2=A0 if [[ $? =3D=3D 0 ]]; then
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 post_scratch_mkfs_cmd
->>>>> +=C2=A0=C2=A0=C2=A0 fi
->>>>> +
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return $?
->>>>>  =C2=A0 }
->>>>>
->>>>>  =C2=A0 _scratch_mkfs_btrfs()
->>>>>  =C2=A0 {
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixe=
-d_opt -b $fssize $SCRATCH_DEV
->>>>> +
->>>>> +=C2=A0=C2=A0=C2=A0 if [[ $? =3D=3D 0 ]]; then
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 post_scratch_mkfs_cmd
->>>>> +=C2=A0=C2=A0=C2=A0 fi
->>>>> +
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return $?
->>>>>  =C2=A0 }
->>>>>
->>>>> @@ -708,5 +739,9 @@ _scratch_pool_mkfs_btrfs()
->>>>>  =C2=A0 {
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $S=
-CRATCH_DEV_POOL
->>>>>
->>>>> +=C2=A0=C2=A0=C2=A0 if [[ $? =3D=3D 0 ]]; then
->>>>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 post_scratch_pool_mkfs_c=
-md
->>>>> +=C2=A0=C2=A0=C2=A0 fi
->>>>> +
->>>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 return $?
->>>>>  =C2=A0 }
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
