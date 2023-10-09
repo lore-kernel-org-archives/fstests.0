@@ -2,212 +2,219 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55136E95A82
-	for <linux-fstests@archiver.kernel.org>; Sun,  8 Oct 2023 13:33:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04DDAE95A96
+	for <linux-fstests@archiver.kernel.org>; Mon,  9 Oct 2023 12:20:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230332AbjJHNd4 (ORCPT
+        id S1346640AbjJIMU0 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sun, 8 Oct 2023 09:33:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34358 "EHLO
+        Mon, 9 Oct 2023 08:20:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230303AbjJHNdz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2023 09:33:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D8BCB6
-        for <fstests@vger.kernel.org>; Sun,  8 Oct 2023 06:33:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1696771997;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:mime-version:mime-version:content-type:content-type;
-        bh=qfnQXFI0AVr8DqhHlpHNgkwrrOpVjfmomJjzCrRdnjM=;
-        b=OhhbBRjMPdTXGB567rufGHHL/rLJFa0IgCpkdU/MTCzpROgmnB37w3j1nE+OrucaRo8zJw
-        t1xKbnvIUKY3Zrp3bPw7o9OFcspBzaVs4DzZPEuZhy/tdVoqiz9URwO/mOgS+O5J43n7vu
-        V7aZEDcW2sjTmJZfYJp3Df7ncitzLX0=
-Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
- [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-590-Tvs1pwLpOeyISjn-66mZMQ-1; Sun, 08 Oct 2023 09:33:11 -0400
-X-MC-Unique: Tvs1pwLpOeyISjn-66mZMQ-1
-Received: by mail-ot1-f71.google.com with SMTP id 46e09a7af769-6c4717c4745so4582062a34.0
-        for <fstests@vger.kernel.org>; Sun, 08 Oct 2023 06:33:10 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696771990; x=1697376790;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=qfnQXFI0AVr8DqhHlpHNgkwrrOpVjfmomJjzCrRdnjM=;
-        b=wctzOXsYe/VmYstPhRwBf84pw20tJKb9yAfgTwdpdsS5a24w5rjJ+53ZFLK01HeMJj
-         Te1lisuD/ZEIs7IWIxek0CfJA7yUNY1PZJZdyFuZFI1ouN6O2G8P76MGtIUSsKLrlBSj
-         sJ6w9IAX/m6mZFwH5wgvNuJ6A/JG2xe6WUApHRuZvnLdgohM3G7fo83Ohnkag8rmypCK
-         Xochj2JArZl1au57q6LgZhGgMWigUuA7C0DeIxk/GT5aXoigW51vTmV8S3UKTNbIqRdb
-         7bidPgpSPoTF1yNV8/6Q4xiaMAlVfHZ84Iyxqkl+UmhnkzLEmQAnBR4wa+Tl0Jyt1TqJ
-         dEtQ==
-X-Gm-Message-State: AOJu0YxNh55HUkkcgZ+18oB/o5gxkwnKcrHLkXf7yKmbG8B9yNZPIO2b
-        avKIJ3NBe4QdqwHcBYS98ZM0v5fDo7L7VeUJnG1ZFwkzRNjl69epULGu4nQxOG2VOthXqJ1FxKZ
-        opHbvcNU42U2XrHsvXXBqYZUHloXjWB0RmsgZaD1l4hZ2te6mSfZaE5+JNXGUwAhN7iqCaOb57k
-        J4+MA=
-X-Received: by 2002:a9d:784c:0:b0:6c6:1c54:a1b7 with SMTP id c12-20020a9d784c000000b006c61c54a1b7mr14564671otm.24.1696771989924;
-        Sun, 08 Oct 2023 06:33:09 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHRUF1EtpQt0dBc5xCMHga+PE6Ki/wgw9nRS8XLOUgdsI7yVWO0uzLWyXBj4DKoNKoUHL09jg==
-X-Received: by 2002:a9d:784c:0:b0:6c6:1c54:a1b7 with SMTP id c12-20020a9d784c000000b006c61c54a1b7mr14564658otm.24.1696771989545;
-        Sun, 08 Oct 2023 06:33:09 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q30-20020a638c5e000000b0058a9621f583sm3508974pgn.44.2023.10.08.06.33.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Oct 2023 06:33:09 -0700 (PDT)
-Date:   Sun, 8 Oct 2023 21:33:05 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.10.08
-Message-ID: <20231008133305.kqpxoedjwd4pggb4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+        with ESMTP id S1346678AbjJIMUN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Oct 2023 08:20:13 -0400
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79B39D45;
+        Mon,  9 Oct 2023 05:19:29 -0700 (PDT)
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 399C8oDC011316;
+        Mon, 9 Oct 2023 12:19:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : cc : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2023-03-30;
+ bh=ohnhzGF1bWfhhe55Ktcti5h75oQgffkhVnZI7StSN8Y=;
+ b=1ZRx+5vDziGRJeToQbLE1Lnk+VJx3LDQybRnCWyWZ8fqocuOZLMFgFfP+OrdxtSgMQYL
+ u9mkOKvPzh1xX4VKq/iSLnBbjzJXzE5oj6olrhltBd6Rt41xgUsc9rZ2C+jHlqngJHxL
+ /fGJEUSiwTZ4X/7+P4pCW1+GwApP9P6/vPFizIJ4vUQqtdB/W8Kodh9yI2y8+Pf//Czx
+ Vwg61Fe7K0yXTptHRiauEAa0WW8P4iVbTkRlSCqwRcT2AUCoHusA9vSvZiB44HPjHPWx
+ feFRVelKfEGvrzO7i4ZOe2bTIE65cBtN+7KJ2ENEGSVQcUMaSgzQ1IiBOsEALD1tis62 jw== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3tmh90r0ka-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 09 Oct 2023 12:19:22 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 399BdFtq014439;
+        Mon, 9 Oct 2023 12:19:01 GMT
+Received: from nam12-bn8-obe.outbound.protection.outlook.com (mail-bn8nam12lp2169.outbound.protection.outlook.com [104.47.55.169])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3tjwsadk1h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 09 Oct 2023 12:19:01 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=V8hR9SYOEa7R8o+BLmO/eK0ucryg7CYO+01+5fOl5ANStCeCiOirk3iEDxgKRP51s5HO14dvFY2a+y1DA38eq9KWxTxl2RhLli9Zu80BPk2hJeCk5A/tW3EgUEoksFaDnQ/RHYyN1M3nWk0sdIS5ua6V+av3wPI6BGTEJu4a2zdeKCA+cbd19gBcBrtcwKz2Lq8UvBDCDMr8No8jc/4LQzmt/1KPhgm1OqR0StspNR69kOHPbsswrU+Yq/LnNtlNCwkEwIz2Q4uSrmLZj0mVXgpVV4LX+CZ9yiiOPN2sWT5OSGiQy/FbPIhbennoXcq+innpGVOZd5mRp1a8pS3xpg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ohnhzGF1bWfhhe55Ktcti5h75oQgffkhVnZI7StSN8Y=;
+ b=JzuHysIGvPGOTNm29lqoCgH9OP6gFP1rmcyz5lAs/SYBij/6ZE7gZJ1tiFsgvHQYmnL+c6KBKTNEwFjSwM2y5JOoHAmZt1d0ebANMRa7zh6vtAKLk0m4KgpDOwprap3hNcSVZDbgDOgRB1/35gMWYIAzGW/D33CsP78Ie0+udkMoc3Q8cInXEbj2IMvzw6KPUnSqf3wXrQYTTiVckqNkIWQ0i6PLj8/0oW+SKUlODGoeOF4G0dpXdsF6I4wc4cZmowk3/rvw2nAp4p9s0U/OB02B0DVzOv8OnN/d+6fhsZv4ZNfJIcogaKjZQmym+R6Co/iEhePJ1KdMe2Y06uNI0w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ohnhzGF1bWfhhe55Ktcti5h75oQgffkhVnZI7StSN8Y=;
+ b=zora07y0QgOtGEaCrNwSa6asAY1XahG/H/XDvanC/nGmgrrV6l8CJCQBYr0qhoJv2nqQyXGwxiJLtJOW/+7Tqik7bODFaWIFlTMIJ9BIF65tqGIFyk8C8qVbxlXjASsRq2OsuyHNRvvqq8ICtB1Qur2OnJxG2NBZGOLXx6nZwTE=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by CH3PR10MB7563.namprd10.prod.outlook.com (2603:10b6:610:180::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6863.36; Mon, 9 Oct
+ 2023 12:19:00 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685%2]) with mapi id 15.20.6838.033; Mon, 9 Oct 2023
+ 12:19:00 +0000
+Message-ID: <d4e7ba14-dc94-4611-8f7d-e3c5aafe80e1@oracle.com>
+Date:   Mon, 9 Oct 2023 17:48:49 +0530
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/2] fstests: add configuration option for executing post
+ mkfs commands
+Content-Language: en-US
+To:     Dave Chinner <david@fromorbit.com>,
+        Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+References: <cover.1695543976.git.anand.jain@oracle.com>
+ <eff4da60fe7a6ce56851d5fc706b5f2f2d772c56.1695543976.git.anand.jain@oracle.com>
+ <dfc4cece-d809-4b5b-93f7-7251ba3a492a@gmx.com>
+ <5485cd32-2308-c9c5-4c97-9ff6c74c64dd@oracle.com>
+ <0a8d40fc-501e-4d85-903a-83d9b3508bf5@gmx.com>
+ <ZR+YX6whnmZlnFv4@dread.disaster.area>
+From:   Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <ZR+YX6whnmZlnFv4@dread.disaster.area>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: MA0PR01CA0078.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:ad::20) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CH3PR10MB7563:EE_
+X-MS-Office365-Filtering-Correlation-Id: d27b556d-4753-452c-9584-08dbc8c1eb04
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: sgd3wB79MFn3QHTCDpW8a6S3ViEMfZjmCupI91qADkacRpt8YSL/2OzLshjvFEWmfWFvQqVR7n88B2GbljuyIBCBg63LxQny0lqgaA6Wu2rwGLWVP+/8Zf7brbzFSlrxa4Na511XPvTq7lZMVxsApOFQ8roh+7rKXzdMu3o/Rs0Ao3Zqwxv7XL4JOUsjNnnGVqXjZpMv4OJhtCz1dsesKpagU8YACO3BRBuXLztD6m1tlUJUV88lVO4sRVcoi1jbzH72MKP2hYb1waAthDB/IoWA4QJSB7Ci5IjaAPrQvD1sypMfyv9RiILvPa6NOfgROrRzJJqTBrSiRTG0fyrQ+8krxoVaHEBjzERujXpj/kTTITbLTqGWhnMTt1GUvnY8ZQCoGWfRZBqUZb+e4jFRsNNdsWcljU4c2QlX1QBheztqLfZwGxkSaXStlJR0g9qPv9P/H/pAADWONkKY30G2TWFUnEBRkTHVPxS1zbPs6uxC3Nk5q54FHEcI0ryTp7kGkzRRSXUs9rQLNyqxh04POj4ayGnhynXMyEiUItltRakZxH1HSlLDLUnpVzVNPEc70sGRQiyz7hTRAMB0yJQ0HsKLSCNzZTA/AzDQmJLhQecwtiEFTprAXabEuwuy1jD90v+/Vsh7DiU0zFoEkmWXhw==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(366004)(136003)(39860400002)(396003)(376002)(230922051799003)(64100799003)(451199024)(1800799009)(186009)(31686004)(66899024)(26005)(2616005)(38100700002)(36756003)(31696002)(86362001)(8936002)(4326008)(2906002)(8676002)(6506007)(478600001)(6512007)(6666004)(41300700001)(44832011)(5660300002)(6486002)(316002)(66476007)(66946007)(110136005)(66556008)(45980500001)(43740500002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?Tkk3aTJsYSs0VnhseVNIRzRxZnhxMHU4bXZyRzJObmxHdnJEZkxvdXNKK2Fy?=
+ =?utf-8?B?OTZVSkpxbzA4NktneUNpa0pZZXB3ZHEvUTAxUXV6WXRiRzFaelRxdWVwcnhD?=
+ =?utf-8?B?Q01tdUpnQzRjalorV0pZYVNNNDFvRFkzWDc4MXZBYzhDYlBtcVBvdE1CRXQ0?=
+ =?utf-8?B?aUdKK1F2b3pzTVpWaDgzbVBScEk4dGhKVHkvU3RTNzEzc3VSZllOVHp2M1hy?=
+ =?utf-8?B?RXZGZHFhS2pEM01hMk5tU0x4Y1BNTGNmTXZTL2owbHlDckFvRGUweGhySU5h?=
+ =?utf-8?B?WHJJTk1yeFc5UlowMmU1Unh1c3NseXNJcm9aajRndTdaZ01yUkhWVjRtbHVs?=
+ =?utf-8?B?ZVdoV1VKWlBIczhsdHZySlcxVDlERkxaV0NwY2hIaFdIZUYvSGdCek1yeUhD?=
+ =?utf-8?B?MWpWeTVmOHk4SWR0QlhMeTdvbmxRaXBlaXBKeEhsdk9ZQUdXa1ptNkZQdmZi?=
+ =?utf-8?B?dnQ3NW9IeGZLUXhxOWtMbVRybjNoM1RyMnNhbk56QWVFeGd0U1ZZajhoUE5L?=
+ =?utf-8?B?eGxUampOUEVaY3c5RnpYN0R4R3JGbUU2RFNWTXE5NDVGeTJJWmhiQVdLZU05?=
+ =?utf-8?B?Y05EQVRSZlQvS2hSbkZvQ3g4bG5UTFp2NFlXbURGOVNDamluSjV6eHBodzVT?=
+ =?utf-8?B?TGxFYmdMSitrUmhnelhlLzBxODVCcEE5Z05udVEzbjhMVkRDc2tjMXNLbVVr?=
+ =?utf-8?B?WkNuR1pyWXdLb3daWEg3eUg2ZGFGWGZJaDlFUE9DZUw5blFZd2l4Mm9jZkE0?=
+ =?utf-8?B?QkFiYWJ2NFNiRjdETlNIMHhHSUMwTUVCejhWVm42OTRWNXZ6V3J2WUdJWTBo?=
+ =?utf-8?B?NGFZelBNRXR1aXBVaXg4NXUvVGs3ai9iczlVVGpUK3F4NlAwYjVzY3BlT3R4?=
+ =?utf-8?B?UDRwNmQ1RjVONUtqUWdjN1ljTGFsY1R2SjMrNFZqOG1JT3E3VzM0S3h4WHFY?=
+ =?utf-8?B?YUd1TXRnQ0xFclY1d2R2Y1R3bjJWOFFpUHBmU0IxSXNqSTdJNDZORllmT2Mv?=
+ =?utf-8?B?UlVlRmdhdzlwZVEvTkRVN2M3VUtNR01RMFQ5d2gvOEVwMVFsZmNFdFI2Z0tC?=
+ =?utf-8?B?LzBvY09iOGk4T1ZZTVM2d3AxUjd5NVVaSkg0NjUxZUhzK3gwbVh2MjJ1SWlZ?=
+ =?utf-8?B?dFZ5dFpnN04vTzBnTXV3aVpoOE52V1dVMVRGbTVNc1hTbU16OE1TNDRqQzZz?=
+ =?utf-8?B?ZUhIN3k3YjM5K0NWQU1ONzRDRTQzY1Q4aENyRzJJaXNsblE1SytHbUc2SnZs?=
+ =?utf-8?B?eCtvTkp0bXVWZkZSQ1dpdE92TWNsWmRCaEptb1hKRzhkc3J3TG5EOU1UUXVY?=
+ =?utf-8?B?djFyV1ZLMGhPcGZlN3Jrb0lBaFl0eGluZ0RsZUlXRHhxYlh6ZGNFb1ZDZFM5?=
+ =?utf-8?B?WThwV2ZabEp5UTBHMUJ6S1IwNU02YitqZktBNVJSTVJXWGxISUFyYkFqQjgw?=
+ =?utf-8?B?ay9CcVZKQnB2VHFlQ0hwR01panhQZ3NWS21xMlF4eElJUVVOS1Z2bWRaMnVq?=
+ =?utf-8?B?bDl2RWk0eFdwcysyYjF0dnhMbUlGQ0ZYN1o2QXNab1FTVXA3SjZFdTMwSkw4?=
+ =?utf-8?B?eVNHQkRPOTRCT2pMVzB6dklDNDYwSmZJK1ZEcTZOVkpFNnVaVytxOHpTbXJU?=
+ =?utf-8?B?RmJZZSsxVjJXZEM2ZXNMMG5qeStEMS9iVnlRQng2SkltMlFOSFphMGFWWGFN?=
+ =?utf-8?B?anVyQ3BiaTE3VDVlVmxWakY0THZxb0MzUCthM3UxYURPaTgyUjdCT3cwNTZM?=
+ =?utf-8?B?TnJxZDZUZmdIZHNoeWlVRzZNL09NWGc4UXdqaW10aHJFQ2Fpb2ZzVzZXSnFu?=
+ =?utf-8?B?RTRSekIrRUVxemlZTUYwM280a0N1eHZKZE5ZOWcyKzhVdFo0bWJqb1ZCVW5G?=
+ =?utf-8?B?YWFITzhOTlRqYTZaTUNUTTNHU0JXTTVONFpoc25rVWpKY0NrMmxNMi9kemFq?=
+ =?utf-8?B?azY4RUdiZnlwbDdSZ0xHbG95Nm1LZ1F2VFNTTE1IWUhYNkJnUDI5UTNjTVN0?=
+ =?utf-8?B?aU1HcTZpdGhmNzBYL2VvNnEycUxIa04zcHB3VG0zdTQzQlBmOW9nNFFXTmQw?=
+ =?utf-8?B?MXMyRlNwUWhPNVFJUWFQZFhwaEFzb1ZESkxqNm5GSEVnUlJqaUpaRVMvUVk1?=
+ =?utf-8?Q?9xyxr4ujwtnscY8SKBcVkOOee?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: MH62ggrGvszlH7+87tds5A1mCVfFFnMrCjx3MdayNT4qh7N1rNfGDIu5UzHmB51FiEATeSwmt5kKKE/xpa1fgU0Lp5XDiFEcIrN5FOBIIjuN5apBcJr0padUrPeVVvoE7CK87/FdKge7ejS7qEGSpYZH3sxYQTfIlfhOZMBSsyL8iTRv3u2wZszRW69bXC5+FUEOjbl3yZ7jfMumDJ3ckWiuoS+LIA/naCTSRNfOqMrGrC8bJaBTrOt6a3SjzQ6GyWpjD0f9JuhPqsHb4AH64gb40hEEsgwDaKEEXhI7spRUVbVoyODO6oRddR1Hl4dydDpWovh0pGY4aeIjqZMSbSDeUWbjgixN++TBtohzBuPIx5tmZt+30c7a8WtshEDJ2G7K8TC4p9TKLdG3xCswPZrh2z/eVHB/PITenW/R4i3bKMQib7cWIwS9ilPHelNof3rAPYV/jUYcYmn7IrGZ/I9wawfOT8hhDXdqRL5hvUeiV7NuLiBhplpDoyAruclEd8akLCcuOAwX+eOwAw+uUP4c/Chxt1yY/3N72kXRld+6nFuT/eAPpcdyZThQAWsRgxjl3jkc2kFV1/SeNVdTHI0gX/w6htWu+xsjkz0gsOfNFH9Vu8j0wiK8jpjRBGSOcTTlaw6JEdG4cn6LbsIT6Zkckgw/BrS8TtAMTicmJRL05JsmjGmIAlCkmHqreS5HicTwfvUAvsZ/SumH0dbTpUEwPV9UFVTdBzHAgYX9feIFw4wnWEaYak4B1RRJEE/kkAu2AA2xOK5xcIy+OJFPPBafc027++w4Z0ZDfMhi3um2sUnNAgJuXtRn2E9d5slH
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d27b556d-4753-452c-9584-08dbc8c1eb04
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Oct 2023 12:19:00.3759
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: maPkDBiJHLYRD1+0rUACH7KJKRqqf02/VzG6xMkOg39SQpgqPcmjD8LHYp4xBdHpxDEP6PuyhQ3wqy+VoDcGcg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR10MB7563
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.267,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-10-09_11,2023-10-09_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 adultscore=0
+ suspectscore=0 mlxlogscore=999 phishscore=0 bulkscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2309180000
+ definitions=main-2310090101
+X-Proofpoint-GUID: tzQyGeLm02qV2SjIcP1OufE7nWuJtvzC
+X-Proofpoint-ORIG-GUID: tzQyGeLm02qV2SjIcP1OufE7nWuJtvzC
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Hi all,
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2023.10.08 release.
-
-Release Notes:
-1) There're 3 new test cases in this release. They're btrfs/298, btrfs/301
-   and generic/732. Two for btrfs functional testing, and one for a nfs
-   known issue (fixed by upstream). They won't cause panic/hang on old
-   downstream kernel.
-2) A big change for btrfs qgroup feature testing.
-3) Fix a regression on btrfs/076.
-4) Lots of fixes or improvements in this release.
-
-More details refer to below, thanks for all your contribution!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-59299b65ac8f README: Update overlayfs instructions
-
-New commits ([N]ew, [U]pdate):
-
-Anand Jain (1):
-[N]      [0b70188b651b] btrfs: test scan but not register the single device fs
-
-Boris Burkov (6):
-[U]      [c0cafb48a892] common: refactor sysfs_attr functions
-[U]      [587984a47e44] btrfs: quota mode helpers
-[N]      [b887c9f7bd38] btrfs/301: new test for simple quotas
-[U]      [177848f09a13] btrfs: quota rescan helpers
-[U]      [c4e3b3d482d7] btrfs: use new rescan wrapper
-[U]      [15792e35ae9b] btrfs: skip squota incompatible tests
-
-Chandan Babu R (1):
-[U]      [809fd13575df] _scratch_mkfs_geom: Fix regex used for matching block size option
-
-Darrick J. Wong (3):
-[U]      [4609e9481fe8] xfs/018: make sure that larp mode actually works
-[U]      [9b88ac7ee508] btrfs/300: check existence of unshare arguments
-[U]      [975277cea4c4] xfs/{270,557,600}: update commit id for _fixed_by tag.
-
-Filipe Manana (2):
-[U]      [f55e46d62968] fstests: redirect fsstress' stdout to $seqres.full instead of /dev/null
-[U]      [d213e332a32b] btrfs/192: use append operator to output log replay results to $seqres.full
-
-Khem Raj (1):
-[U]      [ab81b565f360] fsx: Add a return type to aio_rw
-
-Naohiro Aota (4):
-[U]      [0f4d4a18b397] btrfs/283: skip if we cannot write into one extent
-[U]      [80e277fd69a2] btrfs/076: fix file_size variable
-[U]      [7a093dfa66d6] btrfs/295: skip on zoned device as we cannot corrupt it directly
-[U]      [ffa82237277e] common/rc: check error case and fail the test
-
-Vyacheslav Yurkov (1):
-[U]      [59299b65ac8f] README: Update overlayfs instructions
-
-Yongcheng Yang (1):
-[N]      [fb817fa4be6b] generic: add a test to check move in mountpoints of the same export
+>>>>> @@ -690,17 +690,48 @@ _require_btrfs_scratch_logical_resolve_v2()
+>>>>>        _scratch_unmount
+>>>>>    }
+>>>>>
+>>>>> +post_scratch_mkfs_cmd()
+>>>>> +{
+>>>>> +    if [[ -v POST_SCRATCH_MKFS_CMD ]]; then
+>>>>> +        echo "$POST_SCRATCH_MKFS_CMD $SCRATCH_DEV"
+>>>>> +        $POST_SCRATCH_MKFS_CMD $SCRATCH_DEV
+>>>>> +        return $?
+>>>>> +    fi
+> 
+> Ideally this should be something like:
+> 
+> export SCRATCH_BTRFS_UUID='<uuid spec>'
+> 
+> btrfs_tune_dev() {
+> 	local dev="$1"
+> 
+> 	if [ -n "$SCRATCH_BTRFS_UUID" ]; then
+> 		btrfstune -m $SCRATCH_BTRFS_UUID $dev
+> 		return $?
+> 	fi
+> 	return 0;
+> }
+> 
+> _scratch_pool_mkfs_btrfs()
+> {
+> 	.....
+> 	btrfs_tune_dev $SCRATCH_DEV_POOL
+> 	.....
+> }	
+> 
+> _scratch_mkfs_btrfs()
+> {
+> 	.....
+> 	btrfs_tune_dev $SCRATCH_DEV
+> 	.....
+> }	
+> 
+> See how different it becomes when you stop thinking about filesystem
+> configuration as a generic post-mkfs command and instead think of it
+> as just another configuration option?
 
 
-Code Diffstat:
+There's a possibility that mkfs.btrfs might include an option similar
+to btrfstune -m, but its main purpose would likely be for running
+fstests as there isn't any other use-case for it. If this addition
+happens, I can withdraw this patch.
 
- README                |  12 --
- README.overlay        |   9 +-
- common/btrfs          |  64 ++++++++
- common/rc             | 139 ++++++++++------
- ltp/fsx.c             |   1 +
- tests/btrfs/017       |   1 +
- tests/btrfs/022       |   1 +
- tests/btrfs/028       |   4 +-
- tests/btrfs/049       |   2 +-
- tests/btrfs/057       |   1 +
- tests/btrfs/060       |   2 +-
- tests/btrfs/061       |   2 +-
- tests/btrfs/062       |   2 +-
- tests/btrfs/063       |   2 +-
- tests/btrfs/064       |   2 +-
- tests/btrfs/065       |   2 +-
- tests/btrfs/066       |   2 +-
- tests/btrfs/067       |   2 +-
- tests/btrfs/068       |   2 +-
- tests/btrfs/069       |   2 +-
- tests/btrfs/070       |   2 +-
- tests/btrfs/071       |   2 +-
- tests/btrfs/072       |   2 +-
- tests/btrfs/073       |   2 +-
- tests/btrfs/074       |   2 +-
- tests/btrfs/076       |   2 +-
- tests/btrfs/091       |   3 +-
- tests/btrfs/104       |   2 +-
- tests/btrfs/123       |   2 +-
- tests/btrfs/126       |   2 +-
- tests/btrfs/136       |   2 +-
- tests/btrfs/139       |   2 +-
- tests/btrfs/153       |   2 +-
- tests/btrfs/171       |   6 +-
- tests/btrfs/179       |   2 +-
- tests/btrfs/180       |   2 +-
- tests/btrfs/190       |   2 +-
- tests/btrfs/192       |   4 +-
- tests/btrfs/193       |   2 +-
- tests/btrfs/210       |   2 +-
- tests/btrfs/224       |   6 +-
- tests/btrfs/230       |   2 +-
- tests/btrfs/232       |   4 +-
- tests/btrfs/261       |   2 +-
- tests/btrfs/283       |   8 +
- tests/btrfs/286       |   2 +-
- tests/btrfs/295       |   2 +
- tests/btrfs/298       |  55 +++++++
- tests/btrfs/298.out   |   2 +
- tests/btrfs/300       |   2 +-
- tests/btrfs/301       | 444 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/301.out   |  18 ++
- tests/ext4/057        |   2 +-
- tests/ext4/307        |   2 +-
- tests/generic/068     |   2 +-
- tests/generic/269     |   2 +-
- tests/generic/409     |   2 +-
- tests/generic/410     |   2 +-
- tests/generic/411     |   2 +-
- tests/generic/589     |   2 +-
- tests/generic/732     |  58 +++++++
- tests/generic/732.out |   2 +
- tests/xfs/018         |  13 ++
- tests/xfs/051         |   2 +-
- tests/xfs/057         |   2 +-
- tests/xfs/270         |   2 +-
- tests/xfs/297         |   2 +-
- tests/xfs/305         |   2 +-
- tests/xfs/538         |   2 +-
- tests/xfs/557         |   2 +-
- tests/xfs/600         |   2 +-
- 71 files changed, 828 insertions(+), 125 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
+However, to clarify your approach mentioned above, if we want to set
+SCRATCH_BTRFS_UUID to the UUID of TEST_DEV, then the config file
+should contain something like this:
 
+    SCRATCH_BTRFS_UUID=$(blkid /dev/sda1 | awk '{print $2}' | cut -d"=" 
+-f2 | sed s/\"//g)
+
+
+This should go in the config file. Right?
+
+Thanks, Anand
