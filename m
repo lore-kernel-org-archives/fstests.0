@@ -2,61 +2,60 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E454CD8CB6
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29CF8CD8CB9
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234655AbjJJU0g (ORCPT
+        id S234677AbjJJU0i (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Oct 2023 16:26:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54282 "EHLO
+        Tue, 10 Oct 2023 16:26:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234279AbjJJU0a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:30 -0400
-Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1017FC
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
-Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-5a7ab31fb8bso22189697b3.1
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
+        with ESMTP id S234641AbjJJU0c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:32 -0400
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7B910C
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:28 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-d81d09d883dso6678538276.0
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969585; x=1697574385; darn=vger.kernel.org;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969587; x=1697574387; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WjlHOtrmj3j+aDuwQDOJPd6FNzCtXK4lP83KMVMNQ78=;
-        b=NuOA82EblV9VoFsJrz8LU/0QooeSrjOEKcAvBaH+20hPlXvuQXGOOuhO748m0ZbyaE
-         I/K6amYHbwigIgU/ypBQIEBPWM4V36xdl1hhAQ2b1ghgm8hqFHHrmMsPIUsTETQcnwB+
-         GohYUuW5A9rViUk3Bs3trcZP5sC4VNt6QAgITFo6OZ5VnCG4vXNej7/IzZz/o54vWBbO
-         4Mbd1DILvGkZvYE0CC/heXzLj6dEPRXSV6ee3RnpmlsI5WWbFG4KVCUMsnWZIRBQAXdR
-         NyJfskiDl3cc0LlHQJr2EtUyjacObWv7A6Konjotprp5/SxiBu2BQfGPVXRKBwKLOwNE
-         fohA==
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nCU5pMZ0m3eAagSN+le1r3UM58vPGnqfNmWJ/pF9FlI=;
+        b=N0wBgkc2d5Tkqg+iNcNW3Lqpbmjb4x2AeSjVurIRNV9RGQxg9X83htpUvm0Gdb3jxw
+         NmF43S/5e341s31BENtdXmmsU1RnIEIPThaCy5Sw/tjFv6qN5V6qpsPiTVjeu4CJm5kH
+         J8vbuO/C/UeX+QpkQ3lbnypnkRmsi4fa0g74pLjsybWjrS5wVZQWdxIDUlhBmCnVKH8l
+         7wkfwzqapKWk1C/ufrlUu9pAnpnyu2Zme+vaPmvqK74psn9oN5hZphEs58Fl0DyeigPh
+         n3dfJFvsW47hdeDyxY3tCrtB0JkjlStxo2KxOOoYh/CDGsThfxHCsUIRE0NiQLvtn8MN
+         n+tQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696969585; x=1697574385;
+        d=1e100.net; s=20230601; t=1696969587; x=1697574387;
         h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=WjlHOtrmj3j+aDuwQDOJPd6FNzCtXK4lP83KMVMNQ78=;
-        b=npOsWA9HgOrJwk88Oex8+njaCXsifOlC8HLzw9Q+8BGTg1t4ySSyBmayyB4+MLBFif
-         /LCiU3A93NvBKRrGsup2397aPLSRew8LBeovjR9DwtsYmfWIkJB0eOy9zxsu5TEtDlTS
-         iPBI7pK+1TAk3we5n42Q5XaCGG9ujVML66D2+Eb2fWuPMJhk7k0NRa80nQvVi49e9lIb
-         D/V2eGhvVyrJED63lPVJo3Ih1mN4+d0lhkGQnJFSn2E2U3LazgTviP7iWxdLAthP1eQr
-         r97GupC5jYNCRrk/Lv9LOqEeiIoBWaKem3Dc8RlTcohAlcEDLxixIdmo+g9h3dOSnCY9
-         JBTA==
-X-Gm-Message-State: AOJu0YxEbvfAV/dnNfajZkQE4qwxtt12+II5fZ3oNp0F/p+HGIRgqITl
-        chfN5P50yJLWl9FA0e88dlSuLVjBKd6zNkAhOUGGHA==
-X-Google-Smtp-Source: AGHT+IFYUeWvqGAdezAeV0PC8Dt/mEZnTIfBKHtUm1+6ewgo2L71xr6Nj3WRQlnyyO/HOQuYGigcZQ==
-X-Received: by 2002:a81:8782:0:b0:577:51cd:1b4a with SMTP id x124-20020a818782000000b0057751cd1b4amr21451628ywf.41.1696969585060;
-        Tue, 10 Oct 2023 13:26:25 -0700 (PDT)
+        bh=nCU5pMZ0m3eAagSN+le1r3UM58vPGnqfNmWJ/pF9FlI=;
+        b=fA3CJuuAte7gwtHogOvKeqkFs2vV2ZnLLkE4Dw6zsvf/4NYtj370KSTYVOXwZgc6Lq
+         DUGlhyFJ3QhNXRnAS69MkX0INLGI5KSlEMT6zhm+VfakPDpIJeu1vOipSnz5o56iBukX
+         wj0FC2bqMRM94FRXH/1OLBoMioKmbhzpK59WQVBLbd61n2DUWZ6tqqKLkYz5Hj6ITTp9
+         4AkCik3gVpLDASdujyyfivvtnD8KJrDMZAO6WVWoy6V0w3rudcahcePqmdCliyhpyyZQ
+         y6AscPLTuc8dDmmfnbyyoh4NDjCF4nURPU1bKgpLc51VjJr8sx1LLn5n6sGW/YHWrq8u
+         Lgfg==
+X-Gm-Message-State: AOJu0YyWyoCLCc9B+CAz4xtRzEroxiJoId8XUd0t5AXns9lPONruJD7u
+        vLMH9LM+TD4ra1DiC4ZtNjjfrgMPhppbsNEWteRg0Q==
+X-Google-Smtp-Source: AGHT+IEnYO8liLS81q3dOYpjTVcFTD241g3yDLfTZ44VO54mhYjCFyeio+o8MlAwl2q8YA/MIf3scg==
+X-Received: by 2002:a25:3308:0:b0:d9a:3801:aed8 with SMTP id z8-20020a253308000000b00d9a3801aed8mr4648166ybz.14.1696969586907;
+        Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
 Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id m12-20020a819e0c000000b00594fff48796sm4588587ywj.75.2023.10.10.13.26.24
+        by smtp.gmail.com with ESMTPSA id x142-20020a25ce94000000b00d89679f6d22sm786655ybe.64.2023.10.10.13.26.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Oct 2023 13:26:24 -0700 (PDT)
+        Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         linux-btrfs@vger.kernel.org
-Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [PATCH 07/12] btrfs: test snapshotting encrypted subvol
-Date:   Tue, 10 Oct 2023 16:26:00 -0400
-Message-ID: <9a17afb133849c2321bb98c07c48cff2aaf1d87a.1696969376.git.josef@toxicpanda.com>
+Subject: [PATCH 09/12] fstests: split generic/580 into two tests
+Date:   Tue, 10 Oct 2023 16:26:02 -0400
+Message-ID: <ecf95cca70aa11c64455893ea823ec8de0249cf5.1696969376.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.41.0
 In-Reply-To: <cover.1696969376.git.josef@toxicpanda.com>
 References: <cover.1696969376.git.josef@toxicpanda.com>
@@ -66,219 +65,348 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+generic/580 tests both v1 and v2 encryption policies, however btrfs only
+supports v2 policies.  Split this into two tests so that we can get the
+v2 coverage for btrfs.
 
-Make sure that snapshots of encrypted data are readable and writeable.
-
-Test deliberately high-numbered to not conflict.
-
-Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/btrfs/614     |  76 ++++++++++++++++++++++++++++++
- tests/btrfs/614.out | 111 ++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 187 insertions(+)
- create mode 100755 tests/btrfs/614
- create mode 100644 tests/btrfs/614.out
+ tests/generic/580     | 118 ++++++++++++++++++------------------------
+ tests/generic/580.out |  40 --------------
+ tests/generic/733     |  79 ++++++++++++++++++++++++++++
+ tests/generic/733.out |  44 ++++++++++++++++
+ 4 files changed, 173 insertions(+), 108 deletions(-)
+ create mode 100644 tests/generic/733
+ create mode 100644 tests/generic/733.out
 
-diff --git a/tests/btrfs/614 b/tests/btrfs/614
-new file mode 100755
-index 00000000..87dd27f9
+diff --git a/tests/generic/580 b/tests/generic/580
+index 73f32ff9..63ab9712 100755
+--- a/tests/generic/580
++++ b/tests/generic/580
+@@ -5,7 +5,7 @@
+ # FS QA Test generic/580
+ #
+ # Basic test of the fscrypt filesystem-level encryption keyring
+-# and v2 encryption policies.
++# policy.
+ #
+ 
+ . ./common/preamble
+@@ -18,80 +18,62 @@ echo
+ 
+ # real QA test starts here
+ _supported_fs generic
+-_require_scratch_encryption -v 2
++_require_scratch_encryption 
+ 
+ _scratch_mkfs_encrypted &>> $seqres.full
+ _scratch_mount
+ 
+-test_with_policy_version()
+-{
+-	local vers=$1
+-
+-	if (( vers == 1 )); then
+-		local keyspec=$TEST_KEY_DESCRIPTOR
+-		local add_enckey_args="-d $keyspec"
+-	else
+-		local keyspec=$TEST_KEY_IDENTIFIER
+-		local add_enckey_args=""
+-	fi
+-
+-	mkdir $dir
+-	echo "# Setting v$vers encryption policy"
+-	_set_encpolicy $dir $keyspec
+-	echo "# Getting v$vers encryption policy"
+-	_get_encpolicy $dir | _filter_scratch
+-	if (( vers == 1 )); then
+-		echo "# Getting v1 encryption policy using old ioctl"
+-		_get_encpolicy $dir -1 | _filter_scratch
+-	fi
+-	echo "# Trying to create file without key added yet"
+-	$XFS_IO_PROG -f $dir/file |& _filter_scratch
+-	echo "# Getting encryption key status"
+-	_enckey_status $SCRATCH_MNT $keyspec
+-	echo "# Adding encryption key"
+-	_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" $add_enckey_args
+-	echo "# Creating encrypted file"
+-	echo contents > $dir/file
+-	echo "# Getting encryption key status"
+-	_enckey_status $SCRATCH_MNT $keyspec
+-	echo "# Removing encryption key"
+-	_rm_enckey $SCRATCH_MNT $keyspec
+-	echo "# Getting encryption key status"
+-	_enckey_status $SCRATCH_MNT $keyspec
+-	echo "# Verifying that the encrypted directory was \"locked\""
+-	cat $dir/file |& _filter_scratch
+-	cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
+-
+-	# Test removing key with a file open.
+-	echo "# Re-adding encryption key"
+-	_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" $add_enckey_args
+-	echo "# Creating another encrypted file"
+-	echo foo > $dir/file2
+-	echo "# Removing key while an encrypted file is open"
+-	exec 3< $dir/file
+-	_rm_enckey $SCRATCH_MNT $keyspec
+-	echo "# Non-open file should have been evicted"
+-	cat $dir/file2 |& _filter_scratch
+-	echo "# Open file shouldn't have been evicted"
+-	cat $dir/file
+-	echo "# Key should be in \"incompletely removed\" state"
+-	_enckey_status $SCRATCH_MNT $keyspec
+-	echo "# Closing file and removing key for real now"
+-	exec 3<&-
+-	_rm_enckey $SCRATCH_MNT $keyspec
+-	cat $dir/file |& _filter_scratch
+-
+-	echo "# Cleaning up"
+-	rm -rf $dir
+-	_scratch_cycle_mount	# Clear all keys
+-	echo
+-}
+-
+ dir=$SCRATCH_MNT/dir
++keyspec=$TEST_KEY_DESCRIPTOR
+ 
+-test_with_policy_version 1
++mkdir $dir
++echo "# Setting v1 encryption policy"
++_set_encpolicy $dir $keyspec
++echo "# Getting v1 encryption policy"
++_get_encpolicy $dir | _filter_scratch
++echo "# Getting v1 encryption policy using old ioctl"
++_get_encpolicy $dir -1 | _filter_scratch
++echo "# Trying to create file without key added yet"
++$XFS_IO_PROG -f $dir/file |& _filter_scratch
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Adding encryption key"
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" -d $keyspec
++echo "# Creating encrypted file"
++echo contents > $dir/file
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Removing encryption key"
++_rm_enckey $SCRATCH_MNT $keyspec
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Verifying that the encrypted directory was \"locked\""
++cat $dir/file |& _filter_scratch
++cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
+ 
+-test_with_policy_version 2
++# Test removing key with a file open.
++echo "# Re-adding encryption key"
++_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" -d $keyspec
++echo "# Creating another encrypted file"
++echo foo > $dir/file2
++echo "# Removing key while an encrypted file is open"
++exec 3< $dir/file
++_rm_enckey $SCRATCH_MNT $keyspec
++echo "# Non-open file should have been evicted"
++cat $dir/file2 |& _filter_scratch
++echo "# Open file shouldn't have been evicted"
++cat $dir/file
++echo "# Key should be in \"incompletely removed\" state"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Closing file and removing key for real now"
++exec 3<&-
++_rm_enckey $SCRATCH_MNT $keyspec
++cat $dir/file |& _filter_scratch
++
++echo "# Cleaning up"
++rm -rf $dir
++_scratch_cycle_mount	# Clear all keys
++echo
+ 
+ echo "# Trying to remove absent key"
+ _rm_enckey $SCRATCH_MNT abcdabcdabcdabcd
+diff --git a/tests/generic/580.out b/tests/generic/580.out
+index 989d4514..f2f4d490 100644
+--- a/tests/generic/580.out
++++ b/tests/generic/580.out
+@@ -47,45 +47,5 @@ Removed encryption key with descriptor 0000111122223333
+ cat: SCRATCH_MNT/dir/file: No such file or directory
+ # Cleaning up
+ 
+-# Setting v2 encryption policy
+-# Getting v2 encryption policy
+-Encryption policy for SCRATCH_MNT/dir:
+-	Policy version: 2
+-	Master key identifier: 69b2f6edeee720cce0577937eb8a6751
+-	Contents encryption mode: 1 (AES-256-XTS)
+-	Filenames encryption mode: 4 (AES-256-CTS)
+-	Flags: 0x02
+-# Trying to create file without key added yet
+-SCRATCH_MNT/dir/file: Required key not available
+-# Getting encryption key status
+-Absent
+-# Adding encryption key
+-Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
+-# Creating encrypted file
+-# Getting encryption key status
+-Present (user_count=1, added_by_self)
+-# Removing encryption key
+-Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
+-# Getting encryption key status
+-Absent
+-# Verifying that the encrypted directory was "locked"
+-cat: SCRATCH_MNT/dir/file: No such file or directory
+-Required key not available
+-# Re-adding encryption key
+-Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
+-# Creating another encrypted file
+-# Removing key while an encrypted file is open
+-Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
+-# Non-open file should have been evicted
+-cat: SCRATCH_MNT/dir/file2: Required key not available
+-# Open file shouldn't have been evicted
+-contents
+-# Key should be in "incompletely removed" state
+-Incompletely removed
+-# Closing file and removing key for real now
+-Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
+-cat: SCRATCH_MNT/dir/file: No such file or directory
+-# Cleaning up
+-
+ # Trying to remove absent key
+ Error removing encryption key: Required key not available
+diff --git a/tests/generic/733 b/tests/generic/733
+new file mode 100644
+index 00000000..ae0434fb
 --- /dev/null
-+++ b/tests/btrfs/614
-@@ -0,0 +1,76 @@
++++ b/tests/generic/733
+@@ -0,0 +1,79 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
 +#
-+# FS QA Test 614
++# FS QA Test generic/733
 +#
-+# Try taking a snapshot of an encrypted subvolume. Make sure the snapshot is
-+# still readable. Rewrite part of the subvol with the same data; make sure it's
-+# still readable.
-+#
++# A v2 only version of generic/580
++
 +. ./common/preamble
-+_begin_fstest auto encrypt
++_begin_fstest auto quick encrypt
++echo
 +
 +# Import common functions.
-+. ./common/encrypt
 +. ./common/filter
++. ./common/encrypt
 +
 +# real QA test starts here
-+_supported_fs btrfs
-+
-+_require_test
-+_require_scratch
++_supported_fs generic
 +_require_scratch_encryption -v 2
-+_require_command "$KEYCTL_PROG" keyctl
 +
 +_scratch_mkfs_encrypted &>> $seqres.full
 +_scratch_mount
 +
-+udir=$SCRATCH_MNT/reference
-+dir=$SCRATCH_MNT/subvol
-+dir2=$SCRATCH_MNT/subvol2
-+$BTRFS_UTIL_PROG subvolume create $dir >> $seqres.full
-+mkdir $udir
++keyspec=$TEST_KEY_IDENTIFIER
++dir=$SCRATCH_MNT/dir
 +
-+_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++mkdir $dir
++echo "# Setting v2 encryption policy"
++_set_encpolicy $dir $keyspec
++echo "# Getting v2 encryption policy"
++_get_encpolicy $dir | _filter_scratch
++echo "# Trying to create file without key added yet"
++$XFS_IO_PROG -f $dir/file |& _filter_scratch
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Adding encryption key"
 +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++echo "# Creating encrypted file"
++echo contents > $dir/file
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Removing encryption key"
++_rm_enckey $SCRATCH_MNT $keyspec
++echo "# Getting encryption key status"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Verifying that the encrypted directory was \"locked\""
++cat $dir/file |& _filter_scratch
++cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
 +
-+# get files with lots of extents by using backwards writes.
-+for j in `seq 0 50`; do
-+	for i in `seq 20 -1 1`; do
-+		$XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-+		$dir/foo-$j >> $seqres.full | _filter_xfs_io
-+		$XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-+		$udir/foo-$j >> $seqres.full | _filter_xfs_io
-+	done
-+done
-+
-+$BTRFS_UTIL_PROG subvolume snapshot $dir $dir2 | _filter_scratch
-+
-+_scratch_remount
++# Test removing key with a file open.
++echo "# Re-adding encryption key"
 +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+sleep 30
-+echo "Diffing $dir and $dir2"
-+diff $dir $dir2
++echo "# Creating another encrypted file"
++echo foo > $dir/file2
++echo "# Removing key while an encrypted file is open"
++exec 3< $dir/file
++_rm_enckey $SCRATCH_MNT $keyspec
++echo "# Non-open file should have been evicted"
++cat $dir/file2 |& _filter_scratch
++echo "# Open file shouldn't have been evicted"
++cat $dir/file
++echo "# Key should be in \"incompletely removed\" state"
++_enckey_status $SCRATCH_MNT $keyspec
++echo "# Closing file and removing key for real now"
++exec 3<&-
++_rm_enckey $SCRATCH_MNT $keyspec
++cat $dir/file |& _filter_scratch
 +
-+echo "Rewriting $dir2 partly"
-+# rewrite half of each file in the snapshot
-+for j in `seq 0 50`; do
-+	for i in `seq 10 -1 1`; do
-+		$XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-+		$dir2/foo-$j >> $seqres.full | _filter_xfs_io
-+	done
-+done
++echo "# Cleaning up"
++rm -rf $dir
++_scratch_cycle_mount	# Clear all keys
++echo
 +
-+echo "Diffing $dir and $dir2"
-+diff $dir $dir2
-+
-+echo "Dropping key and diffing"
-+_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-+diff $dir $dir2 |& _filter_scratch | _filter_nokey_filenames
-+
-+$BTRFS_UTIL_PROG subvolume delete $dir > /dev/null 2>&1
++echo "# Trying to remove absent key"
++_rm_enckey $SCRATCH_MNT abcdabcdabcdabcd
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/614.out b/tests/btrfs/614.out
++
+diff --git a/tests/generic/733.out b/tests/generic/733.out
 new file mode 100644
-index 00000000..390807e8
+index 00000000..02dce51d
 --- /dev/null
-+++ b/tests/btrfs/614.out
-@@ -0,0 +1,111 @@
-+QA output created by 614
++++ b/tests/generic/733.out
+@@ -0,0 +1,44 @@
++QA output created by 733
++
++# Setting v2 encryption policy
++# Getting v2 encryption policy
++Encryption policy for SCRATCH_MNT/dir:
++	Policy version: 2
++	Master key identifier: 69b2f6edeee720cce0577937eb8a6751
++	Contents encryption mode: 1 (AES-256-XTS)
++	Filenames encryption mode: 4 (AES-256-CTS)
++	Flags: 0x02
++# Trying to create file without key added yet
++SCRATCH_MNT/dir/file: Required key not available
++# Getting encryption key status
++Absent
++# Adding encryption key
 +Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+Create a snapshot of 'SCRATCH_MNT/subvol' in 'SCRATCH_MNT/subvol2'
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+Diffing /mnt/scratch/subvol and /mnt/scratch/subvol2
-+Rewriting /mnt/scratch/subvol2 partly
-+Diffing /mnt/scratch/subvol and /mnt/scratch/subvol2
-+Dropping key and diffing
++# Creating encrypted file
++# Getting encryption key status
++Present (user_count=1, added_by_self)
++# Removing encryption key
 +Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
-+NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKEY_NAME NOKEY_NAME
++# Getting encryption key status
++Absent
++# Verifying that the encrypted directory was "locked"
++cat: SCRATCH_MNT/dir/file: No such file or directory
++Required key not available
++# Re-adding encryption key
++Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++# Creating another encrypted file
++# Removing key while an encrypted file is open
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
++# Non-open file should have been evicted
++cat: SCRATCH_MNT/dir/file2: Required key not available
++# Open file shouldn't have been evicted
++contents
++# Key should be in "incompletely removed" state
++Incompletely removed
++# Closing file and removing key for real now
++Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
++cat: SCRATCH_MNT/dir/file: No such file or directory
++# Cleaning up
++
++# Trying to remove absent key
++Error removing encryption key: Required key not available
 -- 
 2.41.0
 
