@@ -2,61 +2,61 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 102A0CD8CB9
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 824A5CD8CB8
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230499AbjJJU00 (ORCPT
+        id S234663AbjJJU0d (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Oct 2023 16:26:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36448 "EHLO
+        Tue, 10 Oct 2023 16:26:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232119AbjJJU0X (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:23 -0400
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55DCBDC
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:21 -0700 (PDT)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-59f6441215dso75590237b3.2
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:21 -0700 (PDT)
+        with ESMTP id S234457AbjJJU03 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:29 -0400
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 507D7E4
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:23 -0700 (PDT)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-5a7be88e9ccso14394487b3.2
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969580; x=1697574380; darn=vger.kernel.org;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969582; x=1697574382; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OFwcUtvU3gU5AGXiF/CPujJ+TekA/xyF9zqxriLoMwM=;
-        b=gRQAywef0j79nEmibOimvJGCzSWw6Z5UsPLv3u0VpLoOgzrC/IbFEKbTxIgChb6vpj
-         lpEUoZcgsE9U6h+a8oJCem/mFWo80th9o0icWOoNFUYB8jPIi9PxNrKNJ0/OypFvj1ir
-         319DWod/C8ATKL/diOCnIdtVjapJYZgXg2U+7ZbhsRB9oicVJW0alOM2nzrvG0ATS5Zn
-         ym2/jiSHrSrR7nt6TtoZb3PMmT8rHSe/UGb9Q7/ThV2CZzYTyuKba2b8pGZrzIEWUJnr
-         U9vtfjeTJxck/6pEA+VVr3alba6n+OFoEEUKNhZQHI7FolqPJvVJS+wX3tC4JxhhiVGo
-         sRzg==
+        bh=Dmh9xGr/as1MpprJlAG4JgvOSIGD6BUQHl774+RzFu4=;
+        b=bqjaX0mDqOCfQ1W1b3N+mkOPqhm8/pBhtr9xLJyNucFnGT2tG7iTjcf5kSupZXDamu
+         vw3hESjVK7NQH1jE1NnFNDRdhPG2iegWL0bJD/oWL5Wq/VCXjPQdPqLl5JGm5mPvv2og
+         fDV7wDVYzH/Ddd9XfsKp1OmbI861xO0ehO0X5V9Br39P759MDZoKZuREBTYuJ2MifcsZ
+         OwjnkC4XA/aCLnWc4NJdRCWk01WqugNsuU8T/R7s6tf0fMS1ry360bwP6IIF2IJu/N3o
+         UmzVv39xEl9Tu7RhaHnDC3iecFtW5kYrtxNoBnEUQjheuiOPI9F1aCnZzHJEB/b0gm1M
+         qZIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696969580; x=1697574380;
+        d=1e100.net; s=20230601; t=1696969582; x=1697574382;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=OFwcUtvU3gU5AGXiF/CPujJ+TekA/xyF9zqxriLoMwM=;
-        b=kkO8MzRy+FkXXK3e8kKsbd7BBqCkwVVnggyqPkzXWv99nipta21XqmlI+AKJhHN1Jv
-         VIwjPUx4Hz+oglHjXQde1PTSgp5oEhK7jjpMIZzxXwLK8yJnvCEZk5mleYLjQDSFafba
-         5m6GGAUsMFqfHrM+ypC+A+waDafZAZ/3rgAx6Shy5qfoOMXssRVjK4HNqs2RSJhbt0tZ
-         GnT36eeGWoaMV2IZJymRgdnl4B1l5l36c8DsIgaXEygbG5gqLmvjL9PbaIsLRU1GmRey
-         YaN8XoV2Q+ODa7Ab+iqvRnqvBX+XHdXWSJ+RaBpRzPiC79ihkJb+S7zIfDDJAZ3Pk1TY
-         zsrw==
-X-Gm-Message-State: AOJu0YzFlsOuQamSkLLEd2/KERLg8QrJXCAiw/PQYg5HrmcmZSHT8QS2
-        UJOims8vxGg6UHLelsjUOHFWaAWyvBJrUdEi/zxe2w==
-X-Google-Smtp-Source: AGHT+IFQoMBF9uhCT0asEEgYDb3P3Co+GNRB/75Q1mdnz6O01l+cwEoqFE71PBDrmralI/v8iQ9RpQ==
-X-Received: by 2002:a81:8104:0:b0:59b:bacb:a84f with SMTP id r4-20020a818104000000b0059bbacba84fmr20903470ywf.47.1696969580433;
-        Tue, 10 Oct 2023 13:26:20 -0700 (PDT)
+        bh=Dmh9xGr/as1MpprJlAG4JgvOSIGD6BUQHl774+RzFu4=;
+        b=YPV0FwBEXUsOvtQEJTPT925Kg5H6G+qj0aEumQgtOw+iIfYC9rcLxSBYwDfzjzXhgP
+         1CMGXqQgWK2CSA7hpi7cN7k75YugbypkK58sdR+/evrdWXmAXf3tu+yDwdwAyUHqDZp2
+         IVlwtJwPmd8hKY7CmulOzAsxh6Wlou8nU8iBha8kQBkpS7UJ85DLW+lgqxfCar0v6Bc5
+         sW9Y6WBMYHNU224KoYFSQ7z/oi9OdppmGxyGqMkVHuWxA/I7vZ3cYn5DgyauQ+Xa1Ik6
+         lflGzyQuL2vWi4Ndwj5da0j2FU3mKLgpsYeImjL8uQPaJY3hOPjx0HcgKIitfiHN6sO6
+         fAHw==
+X-Gm-Message-State: AOJu0Yy3nOoEwwhP5y56GRdYcNDdFEZ4KI3flCXDOTKKZ357WN3Ltg86
+        YREvYz2BZzB2hUAInneqb2gw2TJUQaXM9oH877Z3fA==
+X-Google-Smtp-Source: AGHT+IHHPc4cVCv0X5UjY6ZEhh73TopZ6jV5VXaR1PRAmJHmMIp+SqJlnKd+kKUVvokDPp15rDCEYQ==
+X-Received: by 2002:a0d:e841:0:b0:5a7:d986:a9bb with SMTP id r62-20020a0de841000000b005a7d986a9bbmr873545ywe.3.1696969582283;
+        Tue, 10 Oct 2023 13:26:22 -0700 (PDT)
 Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id x9-20020a814a09000000b00589b653b7adsm4691229ywa.136.2023.10.10.13.26.20
+        by smtp.gmail.com with ESMTPSA id d187-20020a0df4c4000000b0059af121d0b8sm4694342ywf.52.2023.10.10.13.26.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Oct 2023 13:26:20 -0700 (PDT)
+        Tue, 10 Oct 2023 13:26:22 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         linux-btrfs@vger.kernel.org
 Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [PATCH 02/12] common/encrypt: add btrfs to get_encryption_*nonce
-Date:   Tue, 10 Oct 2023 16:25:55 -0400
-Message-ID: <f751b02bf76ffb24a126016c089dbf04d2e80823.1696969376.git.josef@toxicpanda.com>
+Subject: [PATCH 04/12] common/encrypt: enable making a encrypted btrfs filesystem
+Date:   Tue, 10 Oct 2023 16:25:57 -0400
+Message-ID: <905514b9fa178c51afde27c4eff456079e010750.1696969376.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.41.0
 In-Reply-To: <cover.1696969376.git.josef@toxicpanda.com>
 References: <cover.1696969376.git.josef@toxicpanda.com>
@@ -68,72 +68,34 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
 
-Add the modes of getting the encryption nonces, either inode or extent,
-to the various get_encryption_nonce functions. For now, no encrypt test
-makes a file with more than one extent, so we can just grab the first
-extent's nonce for the data nonce; when we write a bigger file test,
-we'll need to change that.
-
 Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
 ---
- common/encrypt | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ common/encrypt | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/common/encrypt b/common/encrypt
-index 04b6e5ac..fc1c8cc7 100644
+index 2c1925da..1372af66 100644
 --- a/common/encrypt
 +++ b/common/encrypt
-@@ -531,6 +531,17 @@ _get_encryption_file_nonce()
- 				found = 0;
- 			}'
+@@ -153,6 +153,9 @@ _scratch_mkfs_encrypted()
+ 		# erase the UBI volume; reformated automatically on next mount
+ 		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
  		;;
 +	btrfs)
-+		# Retrieve the fscrypt context for an inode as a hex string.
-+		# btrfs prints these like:
-+		#        item 14 key ($inode FSCRYPT_CTXT_ITEM 0) itemoff 15491 itemsize 40
-+		#                value: 02010400000000008fabf3dd745d41856e812458cd765bf0140f41d62853f4c0351837daff4dcc8f
-+
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 1 "key ($inode FSCRYPT_CTXT_ITEM 0)" | \
-+			grep --only-matching 'value: [[:xdigit:]]\+' | \
-+			tr -d ' \n' | tail -c 32
++		_scratch_mkfs
 +		;;
- 	*)
- 		_fail "_get_encryption_file_nonce() isn't implemented on $FSTYP"
+ 	ceph)
+ 		_scratch_cleanup_files
  		;;
-@@ -550,6 +561,23 @@ _get_encryption_data_nonce()
+@@ -168,6 +171,9 @@ _scratch_mkfs_sized_encrypted()
  	ext4|f2fs)
- 		_get_encryption_file_nonce $device $inode
+ 		MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" _scratch_mkfs_sized $*
  		;;
 +	btrfs)
-+		# Retrieve the encryption IV of the first file extent in an inode as a hex
-+		# string. btrfs prints the file extents (for simple unshared
-+		# inodes) like:
-+		#         item 21 key ($inode EXTENT_DATA 0) itemoff 2534 itemsize 69
-+		#                generation 7 type 1 (regular)
-+                #		 extent data disk byte 5304320 nr 1048576
-+                #		 extent data offset 0 nr 1048576 ram 1048576
-+                #		 extent compression 0 (none)
-+                #		 extent encryption 161 ((1, 40: context 0201040200000000116a77667261d7422a4b1ed8c427e685edb7a0d370d0c9d40030333033333330))
-+
-+
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree $device | \
-+			grep -A 5 "key ($inode EXTENT_DATA 0)" | \
-+			grep --only-matching 'context [[:xdigit:]]\+' | \
-+			tr -d ' \n' | tail -c 32
++		_scratch_mkfs_sized $*
 +		;;
  	*)
- 		_fail "_get_encryption_data_nonce() isn't implemented on $FSTYP"
- 		;;
-@@ -572,6 +600,9 @@ _require_get_encryption_nonce_support()
- 		# Otherwise the xattr is incorrectly parsed as v1.  But just let
- 		# the test fail in that case, as it was an f2fs-tools bug...
- 		;;
-+	btrfs)
-+		_require_command "$BTRFS_UTIL_PROG" btrfs
-+		;;
- 	*)
- 		_notrun "_get_encryption_*nonce() isn't implemented on $FSTYP"
+ 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized_encrypted"
  		;;
 -- 
 2.41.0
