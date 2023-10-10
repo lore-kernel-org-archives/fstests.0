@@ -2,60 +2,60 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29CF8CD8CB9
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 281F5CD6119
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234677AbjJJU0i (ORCPT
+        id S1343602AbjJJU0k (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Oct 2023 16:26:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54236 "EHLO
+        Tue, 10 Oct 2023 16:26:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234641AbjJJU0c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:32 -0400
-Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7B910C
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:28 -0700 (PDT)
-Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-d81d09d883dso6678538276.0
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:27 -0700 (PDT)
+        with ESMTP id S234480AbjJJU0f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:35 -0400
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 570E2119
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:30 -0700 (PDT)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-59b5484fbe6so75190237b3.1
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969587; x=1697574387; darn=vger.kernel.org;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969589; x=1697574389; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=nCU5pMZ0m3eAagSN+le1r3UM58vPGnqfNmWJ/pF9FlI=;
-        b=N0wBgkc2d5Tkqg+iNcNW3Lqpbmjb4x2AeSjVurIRNV9RGQxg9X83htpUvm0Gdb3jxw
-         NmF43S/5e341s31BENtdXmmsU1RnIEIPThaCy5Sw/tjFv6qN5V6qpsPiTVjeu4CJm5kH
-         J8vbuO/C/UeX+QpkQ3lbnypnkRmsi4fa0g74pLjsybWjrS5wVZQWdxIDUlhBmCnVKH8l
-         7wkfwzqapKWk1C/ufrlUu9pAnpnyu2Zme+vaPmvqK74psn9oN5hZphEs58Fl0DyeigPh
-         n3dfJFvsW47hdeDyxY3tCrtB0JkjlStxo2KxOOoYh/CDGsThfxHCsUIRE0NiQLvtn8MN
-         n+tQ==
+        bh=CpXoLSC4B3+y4tFzKbAFP96R061BBPW8n0TzUGeBy20=;
+        b=1I2t8mzbvuNF3pruO1Xc89EgwsALHJBW3WE/RSrXcL3zphYYNS6hnIfCyIcvypmpeR
+         YViEHmWtdVNo43z+6eFe1g1qh5oy9O9q6PTetX/u4IQvSS6y644nQZxJd8RrYRi9QS8q
+         LrrIgTVzptfeKVbBcGIWYGW5ydrJS0/kSnSui1M3o70CUfxq/j+jD5O+2p7C2/DnEw5i
+         DFeSADdy3s4xs4JxckBzmL7EoiNZ6oIUGaqoz9PYrUJjzYOok67aP+Xfc1Cc1IgRjeYF
+         VObc6OsJm2FFl3D3F8r+m6GSQ84KzpUhGpKiuJZQsuC4NEZtE5jM+lDbV0rb6NABscZ8
+         92sQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696969587; x=1697574387;
+        d=1e100.net; s=20230601; t=1696969589; x=1697574389;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=nCU5pMZ0m3eAagSN+le1r3UM58vPGnqfNmWJ/pF9FlI=;
-        b=fA3CJuuAte7gwtHogOvKeqkFs2vV2ZnLLkE4Dw6zsvf/4NYtj370KSTYVOXwZgc6Lq
-         DUGlhyFJ3QhNXRnAS69MkX0INLGI5KSlEMT6zhm+VfakPDpIJeu1vOipSnz5o56iBukX
-         wj0FC2bqMRM94FRXH/1OLBoMioKmbhzpK59WQVBLbd61n2DUWZ6tqqKLkYz5Hj6ITTp9
-         4AkCik3gVpLDASdujyyfivvtnD8KJrDMZAO6WVWoy6V0w3rudcahcePqmdCliyhpyyZQ
-         y6AscPLTuc8dDmmfnbyyoh4NDjCF4nURPU1bKgpLc51VjJr8sx1LLn5n6sGW/YHWrq8u
-         Lgfg==
-X-Gm-Message-State: AOJu0YyWyoCLCc9B+CAz4xtRzEroxiJoId8XUd0t5AXns9lPONruJD7u
-        vLMH9LM+TD4ra1DiC4ZtNjjfrgMPhppbsNEWteRg0Q==
-X-Google-Smtp-Source: AGHT+IEnYO8liLS81q3dOYpjTVcFTD241g3yDLfTZ44VO54mhYjCFyeio+o8MlAwl2q8YA/MIf3scg==
-X-Received: by 2002:a25:3308:0:b0:d9a:3801:aed8 with SMTP id z8-20020a253308000000b00d9a3801aed8mr4648166ybz.14.1696969586907;
-        Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
+        bh=CpXoLSC4B3+y4tFzKbAFP96R061BBPW8n0TzUGeBy20=;
+        b=AcUsp4CiEHwdT4YXCfwr2VgIv1ioupxc5V9kErzt7wHAHY65h/Hwn8CrUe7VD6UePI
+         BoPDGY2BRaP296gCJDGPYRR8B/ORvUHLewc30CURuWonbb4UpOmQOSxmFnAzBMPStYwY
+         SlIkk5ItnSEyxErnZpH1VoxOgQ3pl0ctUrzpIXMNDI0svfczsP4rg5iiJteKrYW9YWLx
+         jv7wLatH4tc33gip0vxN4Y0LvLX4WsUeQIxmAX6Ud+kpjzb2kKGIDE5qKImiX4kD4KZ+
+         QMvQF6pbJC+QhdUjuNVD5NP5UiRVKyDjti2OjwbBq36YOzC8oO0qEzVuAa35T40Byp2a
+         MF1g==
+X-Gm-Message-State: AOJu0YxDdW641HSQ3ig1OxfWh1Pr6fpPE6Ob0QzWu20CiQlrxVLboCfz
+        Wr9Fvcc5hnJU3TVdeVdtx0mQmrQQmNHREaBCPWj7QA==
+X-Google-Smtp-Source: AGHT+IF7Y/FZ6maDxIIOaCWirMfXhRsvOOUqzWjpYsCWBIt+XCan7S/I9Xp6egN+Uj1LaMkChVCBjg==
+X-Received: by 2002:a81:6203:0:b0:59b:bd55:8452 with SMTP id w3-20020a816203000000b0059bbd558452mr22083068ywb.36.1696969589322;
+        Tue, 10 Oct 2023 13:26:29 -0700 (PDT)
 Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id x142-20020a25ce94000000b00d89679f6d22sm786655ybe.64.2023.10.10.13.26.26
+        by smtp.gmail.com with ESMTPSA id g68-20020a0df647000000b0059f766f9750sm4665680ywf.124.2023.10.10.13.26.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
+        Tue, 10 Oct 2023 13:26:28 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         linux-btrfs@vger.kernel.org
-Subject: [PATCH 09/12] fstests: split generic/580 into two tests
-Date:   Tue, 10 Oct 2023 16:26:02 -0400
-Message-ID: <ecf95cca70aa11c64455893ea823ec8de0249cf5.1696969376.git.josef@toxicpanda.com>
+Subject: [PATCH 11/12] fstests: split generic/613 into two tests
+Date:   Tue, 10 Oct 2023 16:26:04 -0400
+Message-ID: <227ac42377705dcd416558f8415965ecba3a17df.1696969376.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.41.0
 In-Reply-To: <cover.1696969376.git.josef@toxicpanda.com>
 References: <cover.1696969376.git.josef@toxicpanda.com>
@@ -65,229 +65,122 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-generic/580 tests both v1 and v2 encryption policies, however btrfs only
-supports v2 policies.  Split this into two tests so that we can get the
-v2 coverage for btrfs.
+generic/613 tests v1 and v2 policies, but btrfs can only support v2
+policies.  Split this into two different tests, 613 which will only test
+v1 policies, and then 735 which will test v2 policies.
+
+The 735 test will also add checks for the per-extent nonces to validate
+they're all sufficiently random.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/generic/580     | 118 ++++++++++++++++++------------------------
- tests/generic/580.out |  40 --------------
- tests/generic/733     |  79 ++++++++++++++++++++++++++++
- tests/generic/733.out |  44 ++++++++++++++++
- 4 files changed, 173 insertions(+), 108 deletions(-)
- create mode 100644 tests/generic/733
- create mode 100644 tests/generic/733.out
+ tests/generic/613     |  20 ++------
+ tests/generic/613.out |   5 +-
+ tests/generic/735     | 117 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/735.out |  14 +++++
+ 4 files changed, 138 insertions(+), 18 deletions(-)
+ create mode 100644 tests/generic/735
+ create mode 100644 tests/generic/735.out
 
-diff --git a/tests/generic/580 b/tests/generic/580
-index 73f32ff9..63ab9712 100755
---- a/tests/generic/580
-+++ b/tests/generic/580
-@@ -5,7 +5,7 @@
- # FS QA Test generic/580
- #
- # Basic test of the fscrypt filesystem-level encryption keyring
--# and v2 encryption policies.
-+# policy.
- #
- 
- . ./common/preamble
-@@ -18,80 +18,62 @@ echo
+diff --git a/tests/generic/613 b/tests/generic/613
+index 47c60e9c..96b81a96 100755
+--- a/tests/generic/613
++++ b/tests/generic/613
+@@ -22,22 +22,21 @@ _begin_fstest auto quick encrypt
  
  # real QA test starts here
  _supported_fs generic
 -_require_scratch_encryption -v 2
-+_require_scratch_encryption 
++_require_scratch_encryption
+ _require_get_encryption_nonce_support
+ _require_command "$XZ_PROG" xz
  
  _scratch_mkfs_encrypted &>> $seqres.full
  _scratch_mount
  
--test_with_policy_version()
--{
--	local vers=$1
+-echo -e "\n# Adding encryption keys"
+-_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
++echo -e "\n# Adding encryption key"
+ _add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" -d $TEST_KEY_DESCRIPTOR
+ 
+ # Create a bunch of encrypted files and directories -- enough for the uniqueness
+ # and randomness tests to be meaningful, but not so many that this test takes a
+-# long time.  Test using both v1 and v2 encryption policies, and for each of
+-# those test the case of an encryption policy that is assigned to an empty
+-# directory as well as the case of a file created in an encrypted directory.
++# long time.  Test using the v1 encryption policy, test the case of an
++# encryption policy that is assigned to an empty directory as well as the case
++# of a file created in an encrypted directory.
+ echo -e "\n# Creating encrypted files and directories"
+ inodes=()
+ for i in {1..50}; do
+@@ -45,20 +44,11 @@ for i in {1..50}; do
+ 	mkdir $dir
+ 	inodes+=("$(stat -c %i $dir)")
+ 	_set_encpolicy $dir $TEST_KEY_DESCRIPTOR
 -
--	if (( vers == 1 )); then
--		local keyspec=$TEST_KEY_DESCRIPTOR
--		local add_enckey_args="-d $keyspec"
--	else
--		local keyspec=$TEST_KEY_IDENTIFIER
--		local add_enckey_args=""
--	fi
--
+-	dir=$SCRATCH_MNT/v2_policy_dir_$i
 -	mkdir $dir
--	echo "# Setting v$vers encryption policy"
--	_set_encpolicy $dir $keyspec
--	echo "# Getting v$vers encryption policy"
--	_get_encpolicy $dir | _filter_scratch
--	if (( vers == 1 )); then
--		echo "# Getting v1 encryption policy using old ioctl"
--		_get_encpolicy $dir -1 | _filter_scratch
--	fi
--	echo "# Trying to create file without key added yet"
--	$XFS_IO_PROG -f $dir/file |& _filter_scratch
--	echo "# Getting encryption key status"
--	_enckey_status $SCRATCH_MNT $keyspec
--	echo "# Adding encryption key"
--	_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" $add_enckey_args
--	echo "# Creating encrypted file"
--	echo contents > $dir/file
--	echo "# Getting encryption key status"
--	_enckey_status $SCRATCH_MNT $keyspec
--	echo "# Removing encryption key"
--	_rm_enckey $SCRATCH_MNT $keyspec
--	echo "# Getting encryption key status"
--	_enckey_status $SCRATCH_MNT $keyspec
--	echo "# Verifying that the encrypted directory was \"locked\""
--	cat $dir/file |& _filter_scratch
--	cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
+-	inodes+=("$(stat -c %i $dir)")
+-	_set_encpolicy $dir $TEST_KEY_IDENTIFIER
+ done
+ for i in {1..50}; do
+ 	file=$SCRATCH_MNT/v1_policy_dir_1/$i
+ 	touch $file
+ 	inodes+=("$(stat -c %i $file)")
 -
--	# Test removing key with a file open.
--	echo "# Re-adding encryption key"
--	_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" $add_enckey_args
--	echo "# Creating another encrypted file"
--	echo foo > $dir/file2
--	echo "# Removing key while an encrypted file is open"
--	exec 3< $dir/file
--	_rm_enckey $SCRATCH_MNT $keyspec
--	echo "# Non-open file should have been evicted"
--	cat $dir/file2 |& _filter_scratch
--	echo "# Open file shouldn't have been evicted"
--	cat $dir/file
--	echo "# Key should be in \"incompletely removed\" state"
--	_enckey_status $SCRATCH_MNT $keyspec
--	echo "# Closing file and removing key for real now"
--	exec 3<&-
--	_rm_enckey $SCRATCH_MNT $keyspec
--	cat $dir/file |& _filter_scratch
--
--	echo "# Cleaning up"
--	rm -rf $dir
--	_scratch_cycle_mount	# Clear all keys
--	echo
--}
--
- dir=$SCRATCH_MNT/dir
-+keyspec=$TEST_KEY_DESCRIPTOR
+-	file=$SCRATCH_MNT/v2_policy_dir_1/$i
+-	touch $file
+-	inodes+=("$(stat -c %i $file)")
+ done
+ _scratch_unmount
  
--test_with_policy_version 1
-+mkdir $dir
-+echo "# Setting v1 encryption policy"
-+_set_encpolicy $dir $keyspec
-+echo "# Getting v1 encryption policy"
-+_get_encpolicy $dir | _filter_scratch
-+echo "# Getting v1 encryption policy using old ioctl"
-+_get_encpolicy $dir -1 | _filter_scratch
-+echo "# Trying to create file without key added yet"
-+$XFS_IO_PROG -f $dir/file |& _filter_scratch
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Adding encryption key"
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" -d $keyspec
-+echo "# Creating encrypted file"
-+echo contents > $dir/file
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Removing encryption key"
-+_rm_enckey $SCRATCH_MNT $keyspec
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Verifying that the encrypted directory was \"locked\""
-+cat $dir/file |& _filter_scratch
-+cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
+diff --git a/tests/generic/613.out b/tests/generic/613.out
+index 203a64f2..4a218d03 100644
+--- a/tests/generic/613.out
++++ b/tests/generic/613.out
+@@ -1,7 +1,6 @@
+ QA output created by 613
  
--test_with_policy_version 2
-+# Test removing key with a file open.
-+echo "# Re-adding encryption key"
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY" -d $keyspec
-+echo "# Creating another encrypted file"
-+echo foo > $dir/file2
-+echo "# Removing key while an encrypted file is open"
-+exec 3< $dir/file
-+_rm_enckey $SCRATCH_MNT $keyspec
-+echo "# Non-open file should have been evicted"
-+cat $dir/file2 |& _filter_scratch
-+echo "# Open file shouldn't have been evicted"
-+cat $dir/file
-+echo "# Key should be in \"incompletely removed\" state"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Closing file and removing key for real now"
-+exec 3<&-
-+_rm_enckey $SCRATCH_MNT $keyspec
-+cat $dir/file |& _filter_scratch
-+
-+echo "# Cleaning up"
-+rm -rf $dir
-+_scratch_cycle_mount	# Clear all keys
-+echo
- 
- echo "# Trying to remove absent key"
- _rm_enckey $SCRATCH_MNT abcdabcdabcdabcd
-diff --git a/tests/generic/580.out b/tests/generic/580.out
-index 989d4514..f2f4d490 100644
---- a/tests/generic/580.out
-+++ b/tests/generic/580.out
-@@ -47,45 +47,5 @@ Removed encryption key with descriptor 0000111122223333
- cat: SCRATCH_MNT/dir/file: No such file or directory
- # Cleaning up
- 
--# Setting v2 encryption policy
--# Getting v2 encryption policy
--Encryption policy for SCRATCH_MNT/dir:
--	Policy version: 2
--	Master key identifier: 69b2f6edeee720cce0577937eb8a6751
--	Contents encryption mode: 1 (AES-256-XTS)
--	Filenames encryption mode: 4 (AES-256-CTS)
--	Flags: 0x02
--# Trying to create file without key added yet
--SCRATCH_MNT/dir/file: Required key not available
--# Getting encryption key status
--Absent
--# Adding encryption key
+-# Adding encryption keys
 -Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
--# Creating encrypted file
--# Getting encryption key status
--Present (user_count=1, added_by_self)
--# Removing encryption key
--Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
--# Getting encryption key status
--Absent
--# Verifying that the encrypted directory was "locked"
--cat: SCRATCH_MNT/dir/file: No such file or directory
--Required key not available
--# Re-adding encryption key
--Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
--# Creating another encrypted file
--# Removing key while an encrypted file is open
--Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
--# Non-open file should have been evicted
--cat: SCRATCH_MNT/dir/file2: Required key not available
--# Open file shouldn't have been evicted
--contents
--# Key should be in "incompletely removed" state
--Incompletely removed
--# Closing file and removing key for real now
--Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
--cat: SCRATCH_MNT/dir/file: No such file or directory
--# Cleaning up
--
- # Trying to remove absent key
- Error removing encryption key: Required key not available
-diff --git a/tests/generic/733 b/tests/generic/733
++# Adding encryption key
+ Added encryption key with descriptor 0000111122223333
+ 
+ # Creating encrypted files and directories
+@@ -12,5 +11,5 @@ Added encryption key with descriptor 0000111122223333
+ Listing non-unique nonces:
+ 
+ # Verifying randomness of nonces
+-Uncompressed size is 3200 bytes
++Uncompressed size is 1600 bytes
+ Nonces are incompressible, as expected
+diff --git a/tests/generic/735 b/tests/generic/735
 new file mode 100644
-index 00000000..ae0434fb
+index 00000000..c901be1f
 --- /dev/null
-+++ b/tests/generic/733
-@@ -0,0 +1,79 @@
++++ b/tests/generic/735
+@@ -0,0 +1,117 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
++# Copyright 2023 Meta
 +#
-+# FS QA Test generic/733
++# FS QA Test No. 735
 +#
-+# A v2 only version of generic/580
-+
++# A variation of generic/613 that only tests v2, and checks data nonces for any
++# file system that supporst per-extent encryption.
++#
++# Test that encryption nonces are unique and random, where randomness is
++# approximated as "incompressible by the xz program".
++#
++# An encryption nonce is the 16-byte value that the filesystem generates for
++# each encrypted file.  These nonces must be unique in order to cause different
++# files to be encrypted differently, which is an important security property.
++# In practice, they need to be random to achieve that; and it's easy enough to
++# test for both uniqueness and randomness, so we test for both.
++#
 +. ./common/preamble
 +_begin_fstest auto quick encrypt
-+echo
 +
 +# Import common functions.
 +. ./common/filter
@@ -296,117 +189,115 @@ index 00000000..ae0434fb
 +# real QA test starts here
 +_supported_fs generic
 +_require_scratch_encryption -v 2
++_require_get_encryption_nonce_support
++_require_command "$XZ_PROG" xz
++
++_check_nonce()
++{
++	local nonce=$1
++
++	if (( ${#nonce} != 32 )) || [ -n "$(echo "$nonce" | tr -d 0-9a-fA-F)" ]
++	then
++		_fail "Expected nonce for inode $inode to be 16 bytes (32 hex characters), but got \"$nonce\""
++	fi
++}
 +
 +_scratch_mkfs_encrypted &>> $seqres.full
 +_scratch_mount
 +
-+keyspec=$TEST_KEY_IDENTIFIER
-+dir=$SCRATCH_MNT/dir
-+
-+mkdir $dir
-+echo "# Setting v2 encryption policy"
-+_set_encpolicy $dir $keyspec
-+echo "# Getting v2 encryption policy"
-+_get_encpolicy $dir | _filter_scratch
-+echo "# Trying to create file without key added yet"
-+$XFS_IO_PROG -f $dir/file |& _filter_scratch
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Adding encryption key"
++echo -e "\n# Adding encryption key"
 +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+echo "# Creating encrypted file"
-+echo contents > $dir/file
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Removing encryption key"
-+_rm_enckey $SCRATCH_MNT $keyspec
-+echo "# Getting encryption key status"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Verifying that the encrypted directory was \"locked\""
-+cat $dir/file |& _filter_scratch
-+cat "$(find $dir -type f)" |& _filter_scratch | cut -d ' ' -f3-
 +
-+# Test removing key with a file open.
-+echo "# Re-adding encryption key"
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+echo "# Creating another encrypted file"
-+echo foo > $dir/file2
-+echo "# Removing key while an encrypted file is open"
-+exec 3< $dir/file
-+_rm_enckey $SCRATCH_MNT $keyspec
-+echo "# Non-open file should have been evicted"
-+cat $dir/file2 |& _filter_scratch
-+echo "# Open file shouldn't have been evicted"
-+cat $dir/file
-+echo "# Key should be in \"incompletely removed\" state"
-+_enckey_status $SCRATCH_MNT $keyspec
-+echo "# Closing file and removing key for real now"
-+exec 3<&-
-+_rm_enckey $SCRATCH_MNT $keyspec
-+cat $dir/file |& _filter_scratch
++# Create a bunch of encrypted files and directories -- enough for the uniqueness
++# and randomness tests to be meaningful, but not so many that this test takes a
++# long time.  Test using the v2 encryption policy, test the case of an
++# encryption policy that is assigned to an empty directory as well as the case
++# of a file created in an encrypted directory.
++echo -e "\n# Creating encrypted files and directories"
++inodes=()
++for i in {1..50}; do
++	dir=$SCRATCH_MNT/v2_policy_dir_$i
++	mkdir $dir
++	inodes+=("$(stat -c %i $dir)")
++	_set_encpolicy $dir $TEST_KEY_IDENTIFIER
++done
++for i in {1..50}; do
++	file=$SCRATCH_MNT/v2_policy_dir_1/$i
++	$XFS_IO_PROG -f -c "pwrite 0 1m" $file > /dev/null
++	inodes+=("$(stat -c %i $file)")
++done
++_scratch_unmount
 +
-+echo "# Cleaning up"
-+rm -rf $dir
-+_scratch_cycle_mount	# Clear all keys
-+echo
++# Build files that contain all the nonces.  nonces_hex contains them in hex, one
++# per line.  nonces_bin contains them in binary, all concatenated.
++echo -e "\n# Getting encryption nonces from inodes"
++echo -n > $tmp.nonces_hex
++echo -n > $tmp.nonces_bin
++for inode in "${inodes[@]}"; do
++	inode_nonce=$(_get_encryption_file_nonce $SCRATCH_DEV $inode)
++	_check_nonce $inode_nonce
++	
++	echo $inode_nonce >> $tmp.nonces_hex
++	echo -ne "$(echo $inode_nonce | sed 's/[0-9a-fA-F]\{2\}/\\x\0/g')" \
++		>> $tmp.nonces_bin
 +
-+echo "# Trying to remove absent key"
-+_rm_enckey $SCRATCH_MNT abcdabcdabcdabcd
++	data_nonce=$(_get_encryption_data_nonce $SCRATCH_DEV $inode)
++
++	# If the inode is empty we won't have a data nonce
++	[ "$data_nonce" = "" ] && continue
++
++	# If the inode nonce and data nonce are the same continue
++	[ "$inode_nonce" = "$data_nonce" ] && continue
++
++	_check_nonce $data_nonce
++	
++	echo $data_nonce >> $tmp.nonces_hex
++	echo -ne "$(echo $data_nonce | sed 's/[0-9a-fA-F]\{2\}/\\x\0/g')" \
++		>> $tmp.nonces_bin
++done
++
++# Verify the uniqueness and randomness of the nonces.  In theory randomness
++# implies uniqueness here, but it's easy enough to explicitly test for both.
++
++echo -e "\n# Verifying uniqueness of nonces"
++echo "Listing non-unique nonces:"
++sort < $tmp.nonces_hex | uniq -d
++
++echo -e "\n# Verifying randomness of nonces"
++uncompressed_size=$(stat -c %s $tmp.nonces_bin)
++echo "Uncompressed size is $uncompressed_size bytes" >> $seqres.full
++compressed_size=$($XZ_PROG -c < $tmp.nonces_bin | wc -c)
++echo "Compressed size is $compressed_size bytes" >> $seqres.full
++# The xz format has 60 bytes of overhead.  Go a bit lower to avoid flakiness.
++if (( compressed_size >= uncompressed_size + 55 )); then
++	echo "Nonces are incompressible, as expected"
++else
++	_fail "Nonces are compressible (non-random); compressed $uncompressed_size => $compressed_size bytes!"
++fi
 +
 +# success, all done
 +status=0
 +exit
-+
-diff --git a/tests/generic/733.out b/tests/generic/733.out
+diff --git a/tests/generic/735.out b/tests/generic/735.out
 new file mode 100644
-index 00000000..02dce51d
+index 00000000..bf73118b
 --- /dev/null
-+++ b/tests/generic/733.out
-@@ -0,0 +1,44 @@
-+QA output created by 733
++++ b/tests/generic/735.out
+@@ -0,0 +1,14 @@
++QA output created by 735
 +
-+# Setting v2 encryption policy
-+# Getting v2 encryption policy
-+Encryption policy for SCRATCH_MNT/dir:
-+	Policy version: 2
-+	Master key identifier: 69b2f6edeee720cce0577937eb8a6751
-+	Contents encryption mode: 1 (AES-256-XTS)
-+	Filenames encryption mode: 4 (AES-256-CTS)
-+	Flags: 0x02
-+# Trying to create file without key added yet
-+SCRATCH_MNT/dir/file: Required key not available
-+# Getting encryption key status
-+Absent
 +# Adding encryption key
 +Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Creating encrypted file
-+# Getting encryption key status
-+Present (user_count=1, added_by_self)
-+# Removing encryption key
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Getting encryption key status
-+Absent
-+# Verifying that the encrypted directory was "locked"
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+Required key not available
-+# Re-adding encryption key
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+# Creating another encrypted file
-+# Removing key while an encrypted file is open
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751, but files still busy
-+# Non-open file should have been evicted
-+cat: SCRATCH_MNT/dir/file2: Required key not available
-+# Open file shouldn't have been evicted
-+contents
-+# Key should be in "incompletely removed" state
-+Incompletely removed
-+# Closing file and removing key for real now
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+cat: SCRATCH_MNT/dir/file: No such file or directory
-+# Cleaning up
 +
-+# Trying to remove absent key
-+Error removing encryption key: Required key not available
++# Creating encrypted files and directories
++
++# Getting encryption nonces from inodes
++
++# Verifying uniqueness of nonces
++Listing non-unique nonces:
++
++# Verifying randomness of nonces
++Nonces are incompressible, as expected
 -- 
 2.41.0
 
