@@ -2,61 +2,60 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78EB5CD8CBA
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC1ACD8CBE
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231787AbjJJU0f (ORCPT
+        id S234666AbjJJU0h (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Oct 2023 16:26:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36448 "EHLO
+        Tue, 10 Oct 2023 16:26:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234510AbjJJU0a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:30 -0400
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BEF9F0
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:25 -0700 (PDT)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-5a7d9d357faso3761117b3.0
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:25 -0700 (PDT)
+        with ESMTP id S234614AbjJJU0b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:31 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAAAF103
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-5a7a80a96dbso2252267b3.0
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969584; x=1697574384; darn=vger.kernel.org;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969586; x=1697574386; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=M2VMrA1lI9Q4ecQ5bc5FJJXlOR+SulDDfBaPoTgzRVE=;
-        b=qHBR6KTb5/EJuFj244Q9gGY7llosCXyLMr2HggcN28lQ3AiDdEmQBmvamMx0L9EWab
-         Q22kpdWE66SlTK4XB3BSpR4VJ+ZSK8o+M5eBt3CkUiUkBSCl++aKLcjXKn0V27HfOtEi
-         64iW+31QJBmLQU2rMTzlCG6SReVYQE6euKGQX8i2eY3Q761eOhNIb0cBq7cq8XnkSNny
-         wY+0XYkR4jBKc3v1PbzhvG3ALHj4SMKMlAIYEWEKxi/9Vt99dZEH5v1/lFrxDKIBFQnh
-         7INt3Di28T44YPz6KtnjlD9Z2UuRWa+vAp3s7Q3w81wRl4FrhVG32moGy6uUqsrzmdhQ
-         X/Ug==
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3hzSgDT0gSoCBX2kCWh7EzeVvXJNhVaEv2jbeDNylHU=;
+        b=PaIPiU64zkb7shF8XRz5d7OP0jz+m0uJYV++VIBdawswqF3loG3st5JpPf+xDoUJKM
+         66MzEdLcFWPwpn47x0icvbvOqIBDA1TamkiVxOvbAuZa0l21Zxf2rUelb7RrBgV50Ida
+         MK8+dEpvUwQqTX+ccyIbk7UTpE9AU8SEClXuVxw8Lxms3HEZ6S3gvy4kkApZ/CBrd+8E
+         6xWfUakK303goQePALyJDI+rKT54jpThCrZmEZe/8MLXkG96voVKd2KiyIDD/vvCOCH5
+         URE3EMTDt3VhuMw7qziw1U5pwMxf0V94lzmnEcYd8Z1fsIjNbZaCIORdc9MwQFQ95JM3
+         s5kw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1696969584; x=1697574384;
+        d=1e100.net; s=20230601; t=1696969586; x=1697574386;
         h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=M2VMrA1lI9Q4ecQ5bc5FJJXlOR+SulDDfBaPoTgzRVE=;
-        b=soL8R8ecC6+h9TK0TMhEYcCuNTeoMMXypsqW9rClJmxQ887f25gFcBKB6YtPz4+cz/
-         Ta2g/sgsJA2627T1hTV+Y40afMbIx0ae4dOfoXJhYRBKf75j+fufeLo0KcM/Otrv19Z6
-         sW0aGW4Ieis3A5Kj677tkMn+RdmH11Tbrpy/8+M82+p6H/KKFOrDQnE9HWMcdSZfMI4/
-         jEbcLfWckswJgOQn7AsmCToBugRseDTR4GunkIm2diGa4wiV4eO8e8AZPSY+76t1xbUx
-         t2WhlW+8/ehUBTtpzmxjrsbf3Eh+oclWFQ0e7QSUoq/MDeYUD5+fmBoDScbdoXx+H646
-         x2cQ==
-X-Gm-Message-State: AOJu0YwOatjPoD8EHyofy1r/wb88sAL283R9vQxMQ0coCdvs0bqmjGV7
-        roG9IAw/9iYx3Oi6Wor6kQdAkIZ1vXohjcvf2qRnRQ==
-X-Google-Smtp-Source: AGHT+IG+BJZqKItphUjRYVNLo/YE1loYz+1+fzWvZ+O4HVoM+QGspAsPD6MkeRRtOJichHcdzorz5g==
-X-Received: by 2002:a0d:ef43:0:b0:595:be7:a38 with SMTP id y64-20020a0def43000000b005950be70a38mr20627894ywe.49.1696969584182;
-        Tue, 10 Oct 2023 13:26:24 -0700 (PDT)
+        bh=3hzSgDT0gSoCBX2kCWh7EzeVvXJNhVaEv2jbeDNylHU=;
+        b=Hw4lJcCcvYf9EioZHKz+lA7ZapEX5wun1v+cEfFBY92pzQHhk3OIZL7Y3aDCH7szlz
+         DiFtPZelpzLGZgKqfX3VcY9K6VGyMMETSUWoExNItOGlwoQQUWwYd14vjJ1Rv2IZoDUB
+         2tIbxFievrHmt9c2YEhTPP3vC0yJZqBob+C/NbyPCfT1XPhCR4eYRMiNXviQF4bAniki
+         jTBQ5ILp8jTYBHanxLFI2OD2synQl9ZjJrGRhjbglSorluMZ3/+/6YEs1q3znDeGCDWq
+         MHArSpR4XhX0yJklTeJeOBf6ERUTtZm5HPfSm53XWpPLgiqB5dT20vBnbMxj56y8jJeT
+         3cZg==
+X-Gm-Message-State: AOJu0YzKKUhwSu78cOTZKAEZjf89e+qeTYlP09XcjwdjZWcMq9uSqcXk
+        mBxhvbVJ3/Zz7dqfiyJGEneNulgeoIwAcq7wxZwurQ==
+X-Google-Smtp-Source: AGHT+IEADGedsJ+tD+z1v+BkL/Fj36MMKWHXc5DgD5MLY74OYK5q9bScHx6p5oY7kR3DiomxEx51DA==
+X-Received: by 2002:a81:4e10:0:b0:56c:e480:2b2b with SMTP id c16-20020a814e10000000b0056ce4802b2bmr10786812ywb.12.1696969585964;
+        Tue, 10 Oct 2023 13:26:25 -0700 (PDT)
 Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id i84-20020a819157000000b005a7bfec6c34sm701856ywg.46.2023.10.10.13.26.23
+        by smtp.gmail.com with ESMTPSA id p20-20020a0de614000000b005a7bbd713ddsm824658ywe.108.2023.10.10.13.26.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Oct 2023 13:26:23 -0700 (PDT)
+        Tue, 10 Oct 2023 13:26:25 -0700 (PDT)
 From:   Josef Bacik <josef@toxicpanda.com>
 To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         linux-btrfs@vger.kernel.org
-Cc:     Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Subject: [PATCH 06/12] btrfs: add simple test of reflink of encrypted data
-Date:   Tue, 10 Oct 2023 16:25:59 -0400
-Message-ID: <723b5972c3d2d917acc23bf65eb3a5e5feba5ecc.1696969376.git.josef@toxicpanda.com>
+Subject: [PATCH 08/12] fstests: properly test for v1 encryption policies in encrypt tests
+Date:   Tue, 10 Oct 2023 16:26:01 -0400
+Message-ID: <c77a1a8ca09b2738f432d586177801a579a775e4.1696969376.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.41.0
 In-Reply-To: <cover.1696969376.git.josef@toxicpanda.com>
 References: <cover.1696969376.git.josef@toxicpanda.com>
@@ -66,103 +65,42 @@ Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-From: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+With btrfs adding fscrypt support we're limiting the usage to plain v2
+policies only.  This means we need to update the _require's for
+generic/593 that tests both v1 and v2 policies.  The other sort of tests
+will be split into two tests in later patches.
 
-Make sure that we succeed at reflinking encrypted data.
-
-Test deliberately numbered with a high number so it won't conflict with
-tests between now and merge.
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/btrfs/613     | 59 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/613.out | 13 ++++++++++
- 2 files changed, 72 insertions(+)
- create mode 100755 tests/btrfs/613
- create mode 100644 tests/btrfs/613.out
+ common/encrypt    | 2 ++
+ tests/generic/593 | 1 +
+ 2 files changed, 3 insertions(+)
 
-diff --git a/tests/btrfs/613 b/tests/btrfs/613
-new file mode 100755
-index 00000000..0288016e
---- /dev/null
-+++ b/tests/btrfs/613
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 613
-+#
-+# Check if reflinking one encrypted file on btrfs succeeds.
-+#
-+. ./common/preamble
-+_begin_fstest auto encrypt
-+
-+# Import common functions.
-+. ./common/encrypt
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+
-+_require_test
-+_require_scratch
-+_require_cp_reflink
-+_require_scratch_encryption -v 2
-+_require_command "$KEYCTL_PROG" keyctl
-+
-+_scratch_mkfs_encrypted &>> $seqres.full
-+_scratch_mount
-+
-+dir=$SCRATCH_MNT/dir
-+mkdir $dir
-+_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+echo "Creating and reflinking a file"
-+$XFS_IO_PROG -t -f -c "pwrite 0 33k" $dir/test > /dev/null
-+cp --reflink=always $dir/test $dir/test2
-+
-+echo "Can't reflink encrypted and unencrypted"
-+cp --reflink=always $dir/test $SCRATCH_MNT/fail |& _filter_scratch
-+
-+echo "Diffing the file and its copy"
-+diff $dir/test $dir/test2
-+
-+echo "Verifying the files are reflinked"
-+_verify_reflink $dir/test $dir/test2
-+
-+echo "Diffing the files after remount"
-+_scratch_cycle_mount
-+_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-+diff $dir/test $dir/test2
-+
-+echo "Diffing the files after key remove"
-+_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-+diff $dir/test $dir/test2 |& _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/613.out b/tests/btrfs/613.out
-new file mode 100644
-index 00000000..4895d6dd
---- /dev/null
-+++ b/tests/btrfs/613.out
-@@ -0,0 +1,13 @@
-+QA output created by 613
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+Creating and reflinking a file
-+Can't reflink encrypted and unencrypted
-+cp: failed to clone 'SCRATCH_MNT/fail' from 'SCRATCH_MNT/dir/test': Invalid argument
-+Diffing the file and its copy
-+Verifying the files are reflinked
-+Diffing the files after remount
-+Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+Diffing the files after key remove
-+Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-+diff: SCRATCH_MNT/dir/test: No such file or directory
-+diff: SCRATCH_MNT/dir/test2: No such file or directory
+diff --git a/common/encrypt b/common/encrypt
+index 1372af66..120ca612 100644
+--- a/common/encrypt
++++ b/common/encrypt
+@@ -59,6 +59,8 @@ _require_scratch_encryption()
+ 	# policy required by the test.
+ 	if [ $# -ne 0 ]; then
+ 		_require_encryption_policy_support $SCRATCH_MNT "$@"
++	else
++		_require_encryption_policy_support $SCRATCH_MNT -v 1
+ 	fi
+ 
+ 	_scratch_unmount
+diff --git a/tests/generic/593 b/tests/generic/593
+index 2dda5d76..7907236c 100755
+--- a/tests/generic/593
++++ b/tests/generic/593
+@@ -17,6 +17,7 @@ _begin_fstest auto quick encrypt
+ 
+ # real QA test starts here
+ _supported_fs generic
++_require_scratch_encryption -v 1
+ _require_scratch_encryption -v 2
+ _require_command "$KEYCTL_PROG" keyctl
+ 
 -- 
 2.41.0
 
