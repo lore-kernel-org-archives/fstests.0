@@ -2,52 +2,135 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AAA9CD68F5
-	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 07:05:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 003DBCD8CB4
+	for <linux-fstests@archiver.kernel.org>; Tue, 10 Oct 2023 20:26:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377808AbjJJHFf (ORCPT
+        id S231201AbjJJU0W (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 10 Oct 2023 03:05:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37614 "EHLO
+        Tue, 10 Oct 2023 16:26:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1442267AbjJJHFe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 03:05:34 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3D0299;
-        Tue, 10 Oct 2023 00:05:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=eHc5WzNz5xkDyMAX+lsBWgxGnx
-        8HqjxyV8pRrykRvcU/QJ/akmFHrBNfgHFBsCj4nATwXaNEpJrvGrJ78ax5HtXL/s5c5grly6F76pO
-        LOdaddEIpu2ZcZQoweXzKg0tcfP0lh8dWKzlaABLbEYD46+EvYDNp8tBYVGX8dCX4PR+SIKk+5n1N
-        c+rVENc7foX/VgpBn8mlv+QSGi4wkXC6jaNBUE3pMad0/G5SpG6IBve92RpjRBQYV1vav97XTrNbD
-        CtHJVkjDcEOLRH9UjBo1Jb9aR/ldW6Fm+7ct42L2fVqZFHLZ/5yvTWNk+pUpWJP/+SZJ/j2Ul7NK8
-        dvT92lKA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qq6o7-00CfbA-1m;
-        Tue, 10 Oct 2023 07:05:31 +0000
-Date:   Tue, 10 Oct 2023 00:05:31 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
-        willy@infradead.org
-Subject: Re: [PATCH 1/1] generic: test FALLOC_FL_UNSHARE when pagecache is
- not loaded
-Message-ID: <ZST3u3AJvOekLOb5@infradead.org>
-References: <169687553806.3949152.10461541168914314461.stgit@frogsfrogsfrogs>
- <169687554366.3949152.2864477369744294080.stgit@frogsfrogsfrogs>
+        with ESMTP id S231224AbjJJU0V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2023 16:26:21 -0400
+Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2938D3
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:19 -0700 (PDT)
+Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-5a7c7262d5eso10976207b3.1
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2023 13:26:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1696969578; x=1697574378; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/oUXcDQUazRYl/q6tfPda3dLC2HPm8UTdYafb9VJ75s=;
+        b=emDNmGaqmTZP9hh4CrXFKIUa8qCYZL3TQv83vNARJVvieePsN1AeLWl4BErqm6sjpe
+         O/zu1taBS7NFnKt3WWRu9IzG5q6X9C+T3Sgrsk7t80Sz4qIO/s4ci/nGRZ5oBapom1JS
+         tGF/J/cVy1DNkmaD1mYIuEBzjVUYqzhEjjvXUPi1TSFZsdDO489OCwAeJDiwt980cUT6
+         niHbr6ynb2mOcsmvNv4gINDTHkt0oI6T6rG+/HeRyYKAEVnGrNcsSxm7UF13SfZvRrv8
+         lynt9FwM9Wt1em+APEZfvHfu1xy9+qxYwrsEkC/xTU1ZJiMPAiOzSeXplb9D3FAUrJ/J
+         FUTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1696969578; x=1697574378;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=/oUXcDQUazRYl/q6tfPda3dLC2HPm8UTdYafb9VJ75s=;
+        b=cEmEF1weIPNaYapBynx57VXCSFLXrdTIDOMlYMuo6EXKT1WnTQxdLvU8Bu39DUA5c7
+         bnaJn2gHLQs/HwUsxXxKPWUUR936hmmkt7j/Zy85WH09JghaeYMfufFWAaB1IovOOvnf
+         3i7sMXzQg67m1Xsnb24p3yAVyhc9rQU1o7Vv5Wv+Bkx7nB5YimSumVqN7HgmiYRqmWJ0
+         sjHvFkBOqegHb+nX6Rc+jKl7jb5d5zH6EeknoIAxMtGY4eFasGtyt3L5ooGVi5Zb7HyH
+         hrpRiZGXmy1C0qf0+o/jBOWfsY1rWfKWD/IdFWI69WEqPGgkyc48qEAf8kC9gLUey3zp
+         6nqw==
+X-Gm-Message-State: AOJu0YxIRx2/mAU+pjpGRF+9rbknIxzka0uUlDnbf3k7PzOT9xXM+r59
+        QR5lVvxruZakN7DJ0U7OVu7et3GwQy4wgzTLbRE2kw==
+X-Google-Smtp-Source: AGHT+IFN5bpm8PrJMf9wAVzRyMzsCPIs+UJ68mlWJXM4PiQeeQ4H5vKmp7iv8uwSDpSH9Xx7/a2c6Q==
+X-Received: by 2002:a0d:d441:0:b0:5a7:dad7:61dd with SMTP id w62-20020a0dd441000000b005a7dad761ddmr545269ywd.20.1696969578594;
+        Tue, 10 Oct 2023 13:26:18 -0700 (PDT)
+Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id q65-20020a0de744000000b005a4c2316412sm4711934ywe.137.2023.10.10.13.26.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Oct 2023 13:26:18 -0700 (PDT)
+From:   Josef Bacik <josef@toxicpanda.com>
+To:     fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        linux-btrfs@vger.kernel.org
+Subject: [PATCH 00/12] fstests: fscrypt test updates
+Date:   Tue, 10 Oct 2023 16:25:53 -0400
+Message-ID: <cover.1696969376.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <169687554366.3949152.2864477369744294080.stgit@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good:
+Hello,
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Btrfs is adding fscrypt support, and thus requires a variety of changes to the
+current fscrypt tests and infrastructure, as well as adding a few extra tests.
+
+The bulk of the changes to the existing tests is simply breaking the v1 and v2
+policy tests into two different tests, as btrfs will only support v2 policies.
+The infrastructure related work is around pulling the nonce's out of the file
+system in order to support the different nonce/decryption related checks.
+
+And finally there are 3 new tests, two around reflinks and snapshots and then a
+generic fsstress test.
+
+I've tested these with ext4 and btrfs (with our patches) to make sure everything
+works properly.  Thanks,
+
+Josef
+
+Josef Bacik (5):
+  fstests: properly test for v1 encryption policies in encrypt tests
+  fstests: split generic/580 into two tests
+  fstests: split generic/581 into two tests
+  fstests: split generic/613 into two tests
+  fstest: add a fsstress+fscrypt test
+
+Sweet Tea Dorminy (7):
+  common/encrypt: separate data and inode nonces
+  common/encrypt: add btrfs to get_encryption_*nonce
+  common/encrypt: add btrfs to get_ciphertext_filename
+  common/encrypt: enable making a encrypted btrfs filesystem
+  common/verity: explicitly don't allow btrfs encryption
+  btrfs: add simple test of reflink of encrypted data
+  btrfs: test snapshotting encrypted subvol
+
+ common/encrypt        |  88 ++++++++++++++++++++++++---
+ common/verity         |   4 ++
+ tests/btrfs/613       |  59 ++++++++++++++++++
+ tests/btrfs/613.out   |  13 ++++
+ tests/btrfs/614       |  76 ++++++++++++++++++++++++
+ tests/btrfs/614.out   | 111 ++++++++++++++++++++++++++++++++++
+ tests/f2fs/002        |   2 +-
+ tests/generic/580     | 118 ++++++++++++++++--------------------
+ tests/generic/580.out |  40 -------------
+ tests/generic/581     |  89 +---------------------------
+ tests/generic/581.out |  50 ----------------
+ tests/generic/593     |   1 +
+ tests/generic/613     |  24 +++-----
+ tests/generic/613.out |   5 +-
+ tests/generic/733     |  79 ++++++++++++++++++++++++
+ tests/generic/733.out |  44 ++++++++++++++
+ tests/generic/734     | 135 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/734.out |  51 ++++++++++++++++
+ tests/generic/735     | 117 ++++++++++++++++++++++++++++++++++++
+ tests/generic/735.out |  14 +++++
+ tests/generic/736     |  38 ++++++++++++
+ tests/generic/736.out |   3 +
+ 22 files changed, 888 insertions(+), 273 deletions(-)
+ create mode 100755 tests/btrfs/613
+ create mode 100644 tests/btrfs/613.out
+ create mode 100755 tests/btrfs/614
+ create mode 100644 tests/btrfs/614.out
+ create mode 100644 tests/generic/733
+ create mode 100644 tests/generic/733.out
+ create mode 100644 tests/generic/734
+ create mode 100644 tests/generic/734.out
+ create mode 100644 tests/generic/735
+ create mode 100644 tests/generic/735.out
+ create mode 100644 tests/generic/736
+ create mode 100644 tests/generic/736.out
+
+-- 
+2.41.0
+
