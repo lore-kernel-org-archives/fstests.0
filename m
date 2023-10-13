@@ -2,52 +2,76 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03AB4CDB47E
-	for <linux-fstests@archiver.kernel.org>; Thu, 12 Oct 2023 15:10:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B6B5CDB483
+	for <linux-fstests@archiver.kernel.org>; Fri, 13 Oct 2023 06:17:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347276AbjJLPKW (ORCPT
+        id S229697AbjJMGRe (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 12 Oct 2023 11:10:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42250 "EHLO
+        Fri, 13 Oct 2023 02:17:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347278AbjJLPKV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Oct 2023 11:10:21 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E8F0BE;
-        Thu, 12 Oct 2023 08:10:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=AHEAS3BlGvBcTUKNOms6qt/iO/
-        G1728jJ+mT+DY1bMt6c5qSQmz0B5MioeIV0JKSq3E0OO5QHZs6VMwf/+g9p2U/tqVJFXFxfF0Sohc
-        RaAaqmLcWOQorK0h+eJL4StdWlRbLwuTapfv+737lriTh86WpmKELds47d8MpJrzaRFVVfbeKPvnH
-        OXrUSLZWYYRMkPHId/0x5vZVrfz7ZJWUzISbdqtttHshOx2d50chO7TJrs/eDTQPGw7wp5sWizqe6
-        3KoJcfSCjHbKGcGf5T/yMVCRql7See8cWBL3s0XgiA2iDeq5dGmVYvK9X10oU9H5gcpvJkgGViYzF
-        x3ewODNA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1qqxKL-001Fv8-2G;
-        Thu, 12 Oct 2023 15:10:17 +0000
-Date:   Thu, 12 Oct 2023 08:10:17 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     zlang@redhat.com, Christoph Hellwig <hch@infradead.org>,
-        linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH v2 1/3] xfs/178: don't fail when SCRATCH_DEV contains
- random xfs superblocks
-Message-ID: <ZSgMWS61dTM0z+k8@infradead.org>
-References: <169687550821.3948976.6892161616008393594.stgit@frogsfrogsfrogs>
- <169687551395.3948976.8425812597156927952.stgit@frogsfrogsfrogs>
- <20231012150922.GF21298@frogsfrogsfrogs>
+        with ESMTP id S229441AbjJMGRe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Oct 2023 02:17:34 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CF9595;
+        Thu, 12 Oct 2023 23:17:31 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 275CEC433C8;
+        Fri, 13 Oct 2023 06:17:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1697177851;
+        bh=Y2nRxDCSuhkznRPXdeWCkaxbTh12MTpQtizlDW24RAo=;
+        h=From:To:Cc:Subject:Date:From;
+        b=boeUJp6iNRWXcEotnbkgQpHPeDxJslI74oeF2CBy4Hy99Dvwh9RemPBaZVb7hXDJH
+         Aq5qb5Xzu4qYyXF0aRm2eMV/3ZtE3efnu/WudFjrxxL97lV405HB2uogQOXDvQRzhP
+         OUSdo5w4S7WoWWKPJ5e7alFnapw/U8+LNzZ15nDbPeQMdmGFZzxUBN1BZQ+Jbx80Jy
+         U+nqAvG3BzvIkG0yefpMGZREWZu3AfqT20VgPo3MnbTmWhZokjrLasZTxG2KsKRpKb
+         tbVaOlw6OfTMhJ1fgJm+bynOPfHJBL1Vp0T05s9BXStTjwUWhdFdhbES2g1j5ZFWl8
+         CBcqU30/NfugQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     fstests@vger.kernel.org
+Cc:     linux-fscrypt@vger.kernel.org
+Subject: [PATCH 0/4] xfstests: test custom crypto data unit size
+Date:   Thu, 12 Oct 2023 23:13:59 -0700
+Message-ID: <20231013061403.138425-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.42.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231012150922.GF21298@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Looks good:
+This series adds a test for the functionality introduced by the kernel
+patch
+"fscrypt: support crypto data unit size less than filesystem block size"
+(https://lore.kernel.org/linux-fscrypt/20230925055451.59499-6-ebiggers@kernel.org/).
+It is a ciphertext verification test, as opposed to general I/O test.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+This feature is not yet in mainline, but I've applied it for 6.7.
+
+The test depends on an xfsprogs patch that adds the '-s' option to the
+set_encpolicy command of xfs_io, allowing the new log2_data_unit_size
+field to be set via a shell script.
+
+As usual, the test skips itself when any prerequisite isn't met.
+
+Eric Biggers (4):
+  fscrypt-crypt-util: rename block to data unit
+  common/rc: fix _require_xfs_io_command with digits in argument
+  common/encrypt: support custom data unit size
+  generic: add test for custom crypto data unit size
+
+ common/encrypt           | 42 +++++++++++++-----
+ common/rc                |  2 +-
+ src/fscrypt-crypt-util.c | 93 ++++++++++++++++++++--------------------
+ tests/f2fs/002           |  6 +--
+ tests/generic/900        | 27 ++++++++++++
+ tests/generic/900.out    | 11 +++++
+ 6 files changed, 121 insertions(+), 60 deletions(-)
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+
+
+base-commit: 59299b65ac8f15935ab45e7920cbfda8a6beffd1
+-- 
+2.42.0
+
