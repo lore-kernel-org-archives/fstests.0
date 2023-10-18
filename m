@@ -2,159 +2,143 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A9A8C41513
-	for <linux-fstests@archiver.kernel.org>; Tue, 17 Oct 2023 10:12:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1C54CDB47E
+	for <linux-fstests@archiver.kernel.org>; Wed, 18 Oct 2023 14:09:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343689AbjJQKMH (ORCPT
+        id S231865AbjJROJE (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 17 Oct 2023 06:12:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43274 "EHLO
+        Wed, 18 Oct 2023 10:09:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343548AbjJQKL5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Oct 2023 06:11:57 -0400
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3064D114;
-        Tue, 17 Oct 2023 03:11:53 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id ffacd0b85a97d-32003aae100so4172429f8f.0;
-        Tue, 17 Oct 2023 03:11:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1697537511; x=1698142311; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=abEVXyRKc81NsrCd6gmVxyPfhCrSclCAws76jFlb9bU=;
-        b=jHZ4yC4DR2839F5u4mk6vNSwwuYEJJ+cE7/x/Kg9vqVgqdFA4i4hcyEAc91gmmAJBG
-         cwpx32+OUSHcDFrUMXJjRX5mkLCnigVKOdKXbyRTE9WTIR6QUsMa208Y4r7G86VAT/D6
-         5g4DlH/iS8yB0Y0ZzIVcc9AcXcTBlQ2HyiDyXlkBHXkrF1JAazT3X/dtN3QZwPXX4iyZ
-         UqhdPdQIYF5Y6hM694f2WvaO8NER9i67PjgvQG6DjQWHT92+hKRhwMER9QxdG08hPSJD
-         2evdLhzFC59YP7xhvUwwc+f+DfVdoOJ7slrUOb2+1LV5/ObB0NpoTyPRr03cmKS1clJz
-         SIAg==
+        with ESMTP id S231860AbjJROJD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Oct 2023 10:09:03 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C03AC10D
+        for <fstests@vger.kernel.org>; Wed, 18 Oct 2023 07:08:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1697638095;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=gxjr3FRAWUXmlL4dYt3wy5Ctb+m7y7/6eNZRQEsyw5s=;
+        b=CpW3CaExn6V7vlJs2V47as21d7Gl314NVwherTdgndBRZP658DH1jecqgtZ+TW+egdT8qG
+        dndO0EEwr6/5qP4sEkQ019WeeynElovuQcK3r22Yc0hml1cyaAMFjG6vsNTSrOBdVteV9j
+        E4ZzQd4eb1ydxxI9LjjQuR6k2KvPmyQ=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-446-d0o6ZysPM9SCSXlWsKia0A-1; Wed, 18 Oct 2023 10:08:12 -0400
+X-MC-Unique: d0o6ZysPM9SCSXlWsKia0A-1
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-27d3345f079so3874005a91.0
+        for <fstests@vger.kernel.org>; Wed, 18 Oct 2023 07:08:12 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697537511; x=1698142311;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=abEVXyRKc81NsrCd6gmVxyPfhCrSclCAws76jFlb9bU=;
-        b=G6w6WHEqk9WJ5nKou/nm4+dYkjEN5eA5MuLcRGICl8XuBphAVWXMUcWkx7YZt+0p3+
-         p7b+7WelLl2dtSXjM7CKudwiT4/zVYP7Vc1H1IkHaZYTuiZpemN45hYy1lh5OaxxMAWu
-         COCPhSHhuZNXR/0L1WFId9bV0v/El7EuxqTCtTZrR/4PSHXkwOx1NOnUngroDMm2Sw6g
-         0fWIhAD2jz7/bynVQzDt4gHWClw4fOMGdqGjvkg1vvUPKIMnT14O/R0t7TCuLyE0141H
-         14eLawG7IQtEZ8g8/49dxEIywFzYJSMW3Vngby7aFEyNO0DNGNKmS4qjBdKvc7D6gMt8
-         pyIw==
-X-Gm-Message-State: AOJu0YwCrJVhlc7to/HPPTzhjL9It/JIrg2Plfv85lAtXjtTFilA+pk4
-        bZL41XfGiQI5Z1fj8wLxeuY=
-X-Google-Smtp-Source: AGHT+IFhPm/ML70anniu2XzBO1zj2firLtJi69avDmb5GYfl876S553+vvp31f1n/wlSmuD4IYPEMQ==
-X-Received: by 2002:a5d:65c6:0:b0:32d:81f9:7712 with SMTP id e6-20020a5d65c6000000b0032d81f97712mr1367688wrw.20.1697537511030;
-        Tue, 17 Oct 2023 03:11:51 -0700 (PDT)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id a9-20020adffac9000000b003232380ffd5sm1314294wrs.106.2023.10.17.03.11.49
+        d=1e100.net; s=20230601; t=1697638091; x=1698242891;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gxjr3FRAWUXmlL4dYt3wy5Ctb+m7y7/6eNZRQEsyw5s=;
+        b=XFf9YRcIjsTVch3phoOrWGU6S3h3DMgSUsHMK0Ze+p+DNN93uqMLVOaIAiMJhfOlpa
+         I+sB+t1P9cxw7D4FVrUpRel4RkhFQ+9pFGfBdsHWeZdELI0WxJjhDFksfkWrnAOzGyS1
+         b6jdUH3lvnOPkTf6zMholT2xjRlhSCEtpT7cRaThZWNpLefDoYMjn+GQU2gyEhJNNZrP
+         sOYXKlRbDLWp5ZNFR88ISP2kxe+z/uYhXBq+OPsAHmfOGjC0Arfl2tcyYanHhpV/J33k
+         hrIWtWyl9vpgTYgnVt2iY15H9bMru9jwgz3tFCz0n40WLZJDBAqpCSUJmELMXLbDHSWr
+         T+NA==
+X-Gm-Message-State: AOJu0YwKIB4QQDyq3O9tsWmSZDrp2j/ZMD9ftziBqwYKZl/2SX1AohBM
+        6elZ0a6cr/yiOJfCc7F/LyKIOcm/iypHUyg2YjApNrAhhMUt9VmuDAogxVhPSBe9IMz0RYk59uH
+        J6uS1tH+h2shLD9JYx+Lpm+tuuWhqMw0=
+X-Received: by 2002:a17:90b:1082:b0:27c:ef06:38c3 with SMTP id gj2-20020a17090b108200b0027cef0638c3mr5159205pjb.21.1697638090717;
+        Wed, 18 Oct 2023 07:08:10 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFlqavad+q4lNO1MmJa5z5s6d7enM+7etCIaBd7y0nWFKrXX3zVzppW+/EpQq1dvRDNneRzDg==
+X-Received: by 2002:a17:90b:1082:b0:27c:ef06:38c3 with SMTP id gj2-20020a17090b108200b0027cef0638c3mr5159175pjb.21.1697638090319;
+        Wed, 18 Oct 2023 07:08:10 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id m2-20020a17090a34c200b0027732eb24bbsm1493658pjf.4.2023.10.18.07.08.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Oct 2023 03:11:50 -0700 (PDT)
-From:   Amir Goldstein <amir73il@gmail.com>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-        fstests@vger.kernel.org
-Subject: [PATCH] overlay: add test for lowerdir mount option parsing
-Date:   Tue, 17 Oct 2023 13:11:45 +0300
-Message-Id: <20231017101145.2348571-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        Wed, 18 Oct 2023 07:08:09 -0700 (PDT)
+Date:   Wed, 18 Oct 2023 22:08:06 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Su Yue <glass.su@suse.com>
+Cc:     fstests@vger.kernel.org, l@damenly.org
+Subject: Re: [PATCH] generic/245: Filter mv error message
+Message-ID: <20231018140806.zyb45abbwzdvxtlu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231005034255.2031-1-glass.su@suse.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231005034255.2031-1-glass.su@suse.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Check parsing and display of spaces and escaped colons and commans in
-lowerdir mount option.
+On Thu, Oct 05, 2023 at 11:42:55AM +0800, Su Yue wrote:
+> Coreutils commit 3cb862ce5f10 ( mv: better diagnostic for 'mv dir x' failure)
+> was released in v9.4, changed the error message from
+> 'mv: cannot move 'b/t' to 'a/t': Directory not empty' to
+> 'mv: cannot overwrite 'a/t': Directory not empty' in case of
+> EDQUOT/EEXIST/EISDIR/EMLINK/ENOSPC/ENOTEMPTY/ETXTBSY.
+> 
+> The change breaks generic/245 due to the mismatched output:
+> 
+> generic/245 1s ... - output mismatch (see /root/xfstests-dev/results//generic/245.out.bad)
+>     --- tests/generic/245.out   2023-10-05 11:15:21.124295738 +0800
+>     +++ /root/xfstests-dev/results//generic/245.out.bad 2023-10-05 11:15:23.456315468 +0800
+>     @@ -1,2 +1,2 @@
+>     QA output created by 245
+>     -mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
+>     +mv: cannot overwrite 'TEST_DIR/test-mv/aa': File exists
 
-This is a regression test for two bugs introduced in v6.5 with the
-conversion to new mount api.
+Thanks for fixing this issue, I hit it too.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+>     ...
+>     (Run 'diff -u /root/xfstests-dev/tests/generic/245.out /root/xfstests-dev/results//generic/245.out.bad'  to see the entire diff)
+> 
+> Filter out the common part of mv error messages to fix the test.
+> 
+> Signed-off-by: Su Yue <glass.su@suse.com>
+> ---
+>  tests/generic/245     | 4 +++-
+>  tests/generic/245.out | 2 +-
+>  2 files changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/generic/245 b/tests/generic/245
+> index e2d5c926e906..31f9dd1873b6 100755
+> --- a/tests/generic/245
+> +++ b/tests/generic/245
+> @@ -29,9 +29,11 @@ _cleanup()
+>  # According to the rename(2) manpage you can get either EEXIST or ENOTEMPTY as an
+>  # error for trying to rename a non-empty directory, so just catch the error for
+>  # ENOTMEMPTY and replace it with the EEXIST output so that either result passes
+> +# Also, mv v9.4+ modified error message when a nonempty destination directory fails
+> +# to be overwriteen
+>  _filter_directory_not_empty()
+>  {
+> -	sed -e "s,Directory not empty,File exists,g"
+> +	sed -e "s,Directory not empty,File exists,g" -e "s/.* '\(.*\)':\(.*\)/mv: '\1':\2/"
 
-Zorro,
+As the first line uses "," to be the separator, so better to follow it.
+And the ".* '\(.*\)':\(.*\)" is too "imprecise", better to give it more
+specific strings to match, to avoid it replace something we don't want
+to change. So how about:
 
-This is a test for two regressions in kernel v6.5.
-The two fixes were merged in 6.6-rc6 and have been picked for
-the upcoming LTS 6.5.y release.
+	sed -e "s,Directory not empty,File exists,g" \
+	    -e "s,cannot move .* to \(.*\):\(.*\),cannot overwrite \1:\2,g"
 
 Thanks,
-Amir.
+Zorro
 
- tests/overlay/083     | 54 +++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/083.out |  2 ++
- 2 files changed, 56 insertions(+)
- create mode 100755 tests/overlay/083
- create mode 100644 tests/overlay/083.out
 
-diff --git a/tests/overlay/083 b/tests/overlay/083
-new file mode 100755
-index 00000000..071b4b84
---- /dev/null
-+++ b/tests/overlay/083
-@@ -0,0 +1,54 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test 083
-+#
-+# Test regressions in parsing and display of special chars in mount options.
-+#
-+# The following kernel commits from v6.5 introduced regressions:
-+#  b36a5780cb44 ("ovl: modify layer parameter parsing")
-+#  1784fbc2ed9c ("ovl: port to new mount api")
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto quick mount
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_fixed_by_kernel_commit 32db51070850 \
-+	"ovl: fix regression in showing lowerdir mount option"
-+_fixed_by_kernel_commit c34706acf40b \
-+	"ovl: fix regression in parsing of mount options with escaped comma"
-+
-+# _overlay_check_* helpers do not handle special chars well
-+_require_scratch_nocheck
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create lowerdirs with special characters
-+lowerdir1="$OVL_BASE_SCRATCH_MNT/lower1 with  spaces"
-+lowerdir2="$OVL_BASE_SCRATCH_MNT/lower2:with::colons"
-+lowerdir3="$OVL_BASE_SCRATCH_MNT/lower3,with,,commas"
-+lowerdir2_esc="$OVL_BASE_SCRATCH_MNT/lower2\:with\:\:colons"
-+lowerdir3_esc="$OVL_BASE_SCRATCH_MNT/lower3\,with\,\,commas"
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+mkdir -p "$lowerdir1" "$lowerdir2" "$lowerdir3"
-+
-+# _overlay_mount_* helpers do not handle special chars well, so execute mount directly.
-+# if escaped colons and commas are not parsed correctly, mount will fail.
-+$MOUNT_PROG -t overlay ovl_esc_test $SCRATCH_MNT \
-+	-o"upperdir=$upperdir,workdir=$workdir,lowerdir=$lowerdir3_esc:$lowerdir2_esc:$lowerdir1"
-+
-+# if spaces are not escaped when showing mount options,
-+# mount command will not show the word 'spaces' after the spaces
-+$MOUNT_PROG -t overlay | grep ovl_esc_test  | tee -a $seqres.full | grep -v spaces
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/083.out b/tests/overlay/083.out
-new file mode 100644
-index 00000000..0beba309
---- /dev/null
-+++ b/tests/overlay/083.out
-@@ -0,0 +1,2 @@
-+QA output created by 083
-+Silence is golden
--- 
-2.34.1
+>  }
+>   
+>  
+> diff --git a/tests/generic/245.out b/tests/generic/245.out
+> index f5b5f182619d..fb7f0f7908e7 100644
+> --- a/tests/generic/245.out
+> +++ b/tests/generic/245.out
+> @@ -1,2 +1,2 @@
+>  QA output created by 245
+> -mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
+> +mv: 'TEST_DIR/test-mv/aa': File exists
+> -- 
+> 2.42.0
+> 
 
