@@ -2,37 +2,37 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF5F9CDB465
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Oct 2023 10:06:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21FC9CDB465
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Oct 2023 12:24:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345162AbjJSKG1 (ORCPT
+        id S1345442AbjJSMYO (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Thu, 19 Oct 2023 06:06:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42168 "EHLO
+        Thu, 19 Oct 2023 08:24:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345188AbjJSKG0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Oct 2023 06:06:26 -0400
+        with ESMTP id S233195AbjJSMYN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Oct 2023 08:24:13 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6E0F12A;
-        Thu, 19 Oct 2023 03:06:24 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A3CEC433C8;
-        Thu, 19 Oct 2023 10:06:23 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36C74A3;
+        Thu, 19 Oct 2023 05:24:12 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1654EC433C8;
+        Thu, 19 Oct 2023 12:24:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1697709984;
-        bh=2RHW6eQDtzw4Pa0BgCifdvVOWoLALmZaQF83z6YwPfI=;
+        s=k20201202; t=1697718251;
+        bh=jVv88ycSKk1t4XZAyebfgY8YDB4MbBZTE/cuELqnjgw=;
         h=From:To:Cc:Subject:Date:From;
-        b=EYR6qWBprpUKwMl/NbUgsFFrfZ30Z2z4aSkED33FK0T+DOPokoJcRGgXIqXa3VA9f
-         MPlCt6Gt9B4dFh2KR0ksZI+xYZSyCvU0niYPyerYf7bYuOIRp9VP9txdEVFDpAk0LX
-         +y9sBW1+ehwnJDl3nSBwmzXjbOz+zx8qAvIn77xbExVIRa3DgugKEqKh+tO5mnEg6h
-         bjXaIF/ZR5B8UVpQgZNcPyENyNoWAk1VvBAe912H3a4wQaZva+yZsHWy5KJ2W3rhCh
-         bB0lKIeDiauev1NHm+OO5ukSIjKu8O99AGE0FQ4Fy4TjT4y8zyPDxGLhgSirTZX9wP
-         YkJ5rQLvRW/yg==
+        b=Fo4LlXdGg4PQwU1zxww6tWngkVXt0J63I3E7k9mobvYOhBTdUyc+WSmKL5F8+++7m
+         q7NWxqB6IwHNyxspFft/3zD3FTcnlVd8Pg5h2fTEVwkWhZygQyOmUCQsK2P6pxVo8U
+         1VJ/jDQ/ErsFHOVASMA7HRbS7iA5nlxGNB5SXfSwO2F9A9geY/TS5N0DKwEXbj7p7F
+         4xhF08y7UAKKmDtCDxAR05Jj7S6TkFsGSlyz3nedzsRRJ9/39ZVFrDRjOjxl9OlGv3
+         AoGC/+sFas6p9A3dNcKcGZtSw74ayOZ83FEx7jcZj9UtA0If+GZj93oYBIRwJhFf3Z
+         BV6zzml3JEE5Q==
 From:   fdmanana@kernel.org
 To:     fstests@vger.kernel.org
 Cc:     linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs/298: fix failure when added device supports trim
-Date:   Thu, 19 Oct 2023 11:06:14 +0100
-Message-Id: <ee1d17b6f4956c0638cb7faa6f9c92b7bf3c25ac.1697709904.git.fdmanana@suse.com>
+Subject: [PATCH] btrfs: test snapshoting a subvolume that was just created
+Date:   Thu, 19 Oct 2023 13:23:49 +0100
+Message-Id: <3149ccc2900f5574a046e675a6db79b019af2bac.1697718086.git.fdmanana@suse.com>
 X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -42,52 +42,99 @@ X-Mailing-List: fstests@vger.kernel.org
 
 From: Filipe Manana <fdmanana@suse.com>
 
-A btrfs device add command issues a trim on the device if the device
-supports trim, and then it outputs a message to stdout informing that it
-performed a trim. If that happens it breaks the golden output and the
-test fails like this:
+Test that snapshoting a new subvolume (created in the current transaction)
+that has a btree with a height > 1, works and does not result in a fs
+corruption.
 
-   $ ./check btrfs/298
-   FSTYP         -- btrfs
-   PLATFORM      -- Linux/x86_64 debian0 6.6.0-rc3-btrfs-next-139+ #1 SMP PREEMPT_DYNAMIC Tue Oct  3 13:52:02 WEST 2023
-   MKFS_OPTIONS  -- /dev/sdc
-   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+This exercises a regression introduced in kernel 6.5 by the kernel commit:
 
-   btrfs/298       - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/298.out.bad)
-       --- tests/btrfs/298.out	2023-10-18 23:29:06.029292800 +0100
-       +++ /home/fdmanana/git/hub/xfstests/results//btrfs/298.out.bad	2023-10-19 10:54:29.693210881 +0100
-       @@ -1,2 +1,3 @@
-        QA output created by 298
-       +Performing full device TRIM /dev/sdd (100.00GiB) ...
-        Silence is golden
-       ...
-       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/298.out /home/fdmanana/git/hub/xfstests/results//btrfs/298.out.bad'  to see the entire diff)
-   Ran: btrfs/298
-   Failures: btrfs/298
-   Failed 1 of 1 tests
-
-Fix this by redirecting the device add's stdout to the $seqres.full file.
-Any device add errors are sent to stderr, so we'll notice if errors happen
-due to possible future regressions, as it will break the golden output.
+  1b53e51a4a8f ("btrfs: don't commit transaction for every subvol create")
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/298 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/btrfs/302     | 61 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/302.out |  4 +++
+ 2 files changed, 65 insertions(+)
+ create mode 100755 tests/btrfs/302
+ create mode 100644 tests/btrfs/302.out
 
-diff --git a/tests/btrfs/298 b/tests/btrfs/298
-index d5536cf3..0cea81d0 100755
---- a/tests/btrfs/298
-+++ b/tests/btrfs/298
-@@ -25,7 +25,7 @@ _scratch_mkfs "-b 300M" >> $seqres.full 2>&1 || \
- 	_fail "Fail to make SCRATCH_DEV with -b 300M"
- $BTRFS_TUNE_PROG -S 1 $SCRATCH_DEV
- _scratch_mount >> $seqres.full 2>&1
--$BTRFS_UTIL_PROG device add $SPARE_DEV $SCRATCH_MNT
-+$BTRFS_UTIL_PROG device add $SPARE_DEV $SCRATCH_MNT >> $seqres.full
- _scratch_unmount
- $BTRFS_UTIL_PROG device scan --forget
- 
+diff --git a/tests/btrfs/302 b/tests/btrfs/302
+new file mode 100755
+index 00000000..13b60f9d
+--- /dev/null
++++ b/tests/btrfs/302
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 302
++#
++# Test that snapshoting a new subvolume (created in the current transaction)
++# that has a btree with a height > 1, works and does not result in a filesystem
++# corruption.
++#
++# This exercises a regression introduced in kernel 6.5 by the kernel commit:
++#
++#    1b53e51a4a8f ("btrfs: don't commit transaction for every subvol create")
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot subvol
++
++. ./common/filter
++
++_supported_fs btrfs
++_require_scratch
++_require_fssum
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix unwritten extent buffer after snapshoting a new subvolume"
++
++# Use a filesystem with a 64K node size so that we have the same node size on
++# every machine regardless of its page size (on x86_64 default node size is 16K
++# due to the 4K page size, while on PPC it's 64K by default). This way we can
++# make sure we are able to create a btree for the subvolume with a height of 2.
++_scratch_mkfs -n 64K >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol | _filter_scratch
++
++# Create a few empty files on the subvolume, this bumps its btree height to 2
++# (root node at level 1 and 2 leaves).
++for ((i = 1; i <= 300; i++)); do
++	echo -n > $SCRATCH_MNT/subvol/file_$i
++done
++
++# Create a checksum of the subvolume's content.
++fssum_file="$SCRATCH_MNT/checksum.fssum"
++$FSSUM_PROG -A -f -w $fssum_file $SCRATCH_MNT/subvol
++
++# Now create a snapshot of the subvolume and make it accessible from within the
++# subvolume.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol \
++		 $SCRATCH_MNT/subvol/snap | _filter_scratch
++
++# Now unmount and mount again the fs. We want to verify we are able to read all
++# metadata for the snapshot from disk (no IO failures, etc).
++_scratch_cycle_mount
++
++# The snapshot's content should match the subvolume's content before we created
++# the snapshot.
++$FSSUM_PROG -r $fssum_file $SCRATCH_MNT/subvol/snap
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/302.out b/tests/btrfs/302.out
+new file mode 100644
+index 00000000..8770aefc
+--- /dev/null
++++ b/tests/btrfs/302.out
+@@ -0,0 +1,4 @@
++QA output created by 302
++Create subvolume 'SCRATCH_MNT/subvol'
++Create a readonly snapshot of 'SCRATCH_MNT/subvol' in 'SCRATCH_MNT/subvol/snap'
++OK
 -- 
 2.40.1
 
