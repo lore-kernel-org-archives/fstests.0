@@ -2,131 +2,120 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3437DCDB482
-	for <linux-fstests@archiver.kernel.org>; Thu, 19 Oct 2023 01:54:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02717CDB482
+	for <linux-fstests@archiver.kernel.org>; Thu, 19 Oct 2023 05:51:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229697AbjJSByK (ORCPT
+        id S229894AbjJSFvl (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 18 Oct 2023 21:54:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36496 "EHLO
+        Thu, 19 Oct 2023 01:51:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229632AbjJSByJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Oct 2023 21:54:09 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87AAAEA
-        for <fstests@vger.kernel.org>; Wed, 18 Oct 2023 18:54:06 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id 1EE061F890;
-        Thu, 19 Oct 2023 01:54:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1697680445; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-        bh=fYEhNPDJSJuMa0Irvw5Tz5Ff8Tji+nH6mi1Eq4Y3USA=;
-        b=XY4mciedsRPQqLOw2FOuGeDyFH0EfWbzPrcvkcYOLasjUIwdtNRPd6xo3u339JSsK9mTl1
-        /IQ4YGw2WSUXiLXXn4oVyVwV4edtMAXeZ8hn4DcD+s8F0oXPeAmXRNfAKG3ltXWbI7iYom
-        gJzmvvxGTbKJbIC6PdRUKqnsbTnOmcA=
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 540861391B;
-        Thu, 19 Oct 2023 01:54:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id r5QhADuMMGUBCAAAMHmgww
-        (envelope-from <glass.su@suse.com>); Thu, 19 Oct 2023 01:54:02 +0000
-From:   Su Yue <glass.su@suse.com>
-To:     fstests@vger.kernel.org
-Cc:     l@damenly.org, zlang@redhat.com, Su Yue <glass.su@suse.com>
-Subject: [PATCH v2] generic/245: Filter mv error message
-Date:   Thu, 19 Oct 2023 09:53:56 +0800
-Message-ID: <20231019015356.23648-1-glass.su@suse.com>
-X-Mailer: git-send-email 2.42.0
+        with ESMTP id S232673AbjJSFvf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Oct 2023 01:51:35 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C73AB6
+        for <fstests@vger.kernel.org>; Wed, 18 Oct 2023 22:50:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1697694645;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=rlLF5HCj0fr5QN1awIaaxu3jBU7j2Cl7M4uQMSHbd4w=;
+        b=CtRYLncMQkv+Wtuoss7Iqe+9dnCDAQWTmbLDcx6WIC927Nu3lC+AhzoqCnzxL/lj/xKBHQ
+        nZU26LJhVwIV085kTP7IQ/vNK7nUFJZxpUe2/FD5rMMuQR+etZBYThuMVKl0mpoS7liZAo
+        mUGqssyWVrxvQC+09zjizbJ9SJZZrPg=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-353-8NT5RfFKNWiTHfYpx8Gbyw-1; Thu, 19 Oct 2023 01:50:43 -0400
+X-MC-Unique: 8NT5RfFKNWiTHfYpx8Gbyw-1
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-27cfa6f943fso5402228a91.2
+        for <fstests@vger.kernel.org>; Wed, 18 Oct 2023 22:50:43 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1697694642; x=1698299442;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rlLF5HCj0fr5QN1awIaaxu3jBU7j2Cl7M4uQMSHbd4w=;
+        b=g/+rYDim94DaJ1njEgGBb+/OnJO6MqExvjHMzLHNqLiDdQ2oKi4b/KKAVFL/eS894C
+         DL+7vCiSWCYssxci19SjS6fLj5NwXzsu+JvXynL1PV+MLs5lcGmTE8MNDUNXYuNvwVtM
+         v8d6X+m+QBXz5B52QjNnourYnr4rWqFK31eR1lguAnK8mgs2ykXX7Rrm0A9ADD3Fp5uy
+         Ek8+6jURIkToV/509Dm8yzokhkfg72insuLteeOgR7Ee5LhLcLVpTiiyEYGV4VlcFL+R
+         8nrY6bNsmJcj2ObiyJAc5JY19FhrxPMYBiq7k1eQE+LptKhr5O9XTYgsPFfM10f6t44s
+         HEbg==
+X-Gm-Message-State: AOJu0Yy2Tzc8wyG16Z7wl4LJP+AVgJ1Sn4ckWPjtPCbl6Vv5skHWr6q5
+        feVxZddElauRP2Sd2Lobyz9E6tDJzRDcL4g0afPDpsZ4NmujqaHUIsTxciPMkjLUhxk6MZaPdHd
+        YhmI1/Xp3JfhX68E/Fr90gkLlx6s/G8E=
+X-Received: by 2002:a17:90a:195e:b0:27d:3968:8366 with SMTP id 30-20020a17090a195e00b0027d39688366mr1229761pjh.8.1697694642022;
+        Wed, 18 Oct 2023 22:50:42 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGJScbiTMBW8Z1c8mYRklAIaDRYlDLvOcOHxbrgwxtTHkOxzBTTvtK0E9tEjuUAyvGDxJpxrw==
+X-Received: by 2002:a17:90a:195e:b0:27d:3968:8366 with SMTP id 30-20020a17090a195e00b0027d39688366mr1229752pjh.8.1697694641683;
+        Wed, 18 Oct 2023 22:50:41 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id gc21-20020a17090b311500b0027d0de51454sm837665pjb.19.2023.10.18.22.50.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Oct 2023 22:50:41 -0700 (PDT)
+Date:   Thu, 19 Oct 2023 13:50:38 +0800
+From:   Zorro Lang <zlang@redhat.com>
+To:     Jan Kara <jack@suse.cz>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH v3] generic/707: Test moving directory while being grown
+Message-ID: <20231019055038.bb5njpat2tz3nwer@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230131125416.16120-1-jack@suse.cz>
+ <20230131142544.dwlk7kwdpznatlt3@zlang-mailbox>
+ <20231012140903.tuwphwhp7fh7podq@quack3>
+ <20231018141237.oorwr6f5vd54vybc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20231018185530.77phjvdwafrjkdoe@quack3>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Authentication-Results: smtp-out2.suse.de;
-        none
-X-Spamd-Result: default: False [-2.10 / 50.00];
-         ARC_NA(0.00)[];
-         RCVD_VIA_SMTP_AUTH(0.00)[];
-         FROM_HAS_DN(0.00)[];
-         RCPT_COUNT_THREE(0.00)[4];
-         TO_DN_SOME(0.00)[];
-         TO_MATCH_ENVRCPT_ALL(0.00)[];
-         MIME_GOOD(-0.10)[text/plain];
-         R_MISSING_CHARSET(2.50)[];
-         BROKEN_CONTENT_TYPE(1.50)[];
-         NEURAL_HAM_LONG(-3.00)[-1.000];
-         DKIM_SIGNED(0.00)[suse.com:s=susede1];
-         NEURAL_HAM_SHORT(-1.00)[-1.000];
-         MID_CONTAINS_FROM(1.00)[];
-         FROM_EQ_ENVFROM(0.00)[];
-         MIME_TRACE(0.00)[0:+];
-         RCVD_COUNT_TWO(0.00)[2];
-         RCVD_TLS_ALL(0.00)[];
-         BAYES_HAM(-3.00)[100.00%]
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231018185530.77phjvdwafrjkdoe@quack3>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-Coreutils commit 3cb862ce5f10 ( mv: better diagnostic for 'mv dir x' failure)
-was released in v9.4, changed the error message from
-'mv: cannot move 'b/t' to 'a/t': Directory not empty' to
-'mv: cannot overwrite 'a/t': Directory not empty' in case of
-EDQUOT/EEXIST/EISDIR/EMLINK/ENOSPC/ENOTEMPTY/ETXTBSY.
+On Wed, Oct 18, 2023 at 08:55:30PM +0200, Jan Kara wrote:
+> On Wed 18-10-23 22:12:37, Zorro Lang wrote:
+> > On Thu, Oct 12, 2023 at 04:09:03PM +0200, Jan Kara wrote:
+> > > On Tue 31-01-23 22:25:44, Zorro Lang wrote:
+> > > > On Tue, Jan 31, 2023 at 01:54:16PM +0100, Jan Kara wrote:
+> > > > > Test how the filesystem can handle moving a directory to a different
+> > > > > directory (so that parent pointer gets updated) while it is grown. Ext4
+> > > > > and UDF had a bug where if the directory got converted to a different
+> > > > > type due to growth while rename is running, the filesystem got
+> > > > > corrupted.
+> > > > > 
+> > > > > Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+> > > > > Signed-off-by: Jan Kara <jack@suse.cz>
+> > > > > ---
+> > > > 
+> > > > Thanks, this version looks good to me,
+> > > > 
+> > > > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > > 
+> > > Guys, I have just noticed this patch didn't get merged. Can you please pick
+> > > it up? Thanks!
+> > 
+> > Hi Jan, I think it has been in fstests v2023.02.05 release, as:
+> > 
+> > commit da69ce70dfcdbd88d6f940d7c1ab346d5a1e5f82
+> > Author: Jan Kara <jack@suse.cz>
+> > Date:   Tue Jan 31 13:54:16 2023 +0100
+> > 
+> >     generic/707: Test moving directory while being grown
+> > 
+> > Isn't it same with this patch? Please check, and feel free to tell me
+> > if anything wrong.
+> 
+> Bah, sorry. Not sure why I didn't find it when grepping :-|. I'm sorry for
+> the noise.
 
-The change breaks generic/245 due to the mismatched output:
+No problem, Feel free to ping me if any of your patches get missed :)
 
-generic/245 1s ... - output mismatch (see /root/xfstests-dev/results//generic/245.out.bad)
-    --- tests/generic/245.out   2023-10-05 11:15:21.124295738 +0800
-    +++ /root/xfstests-dev/results//generic/245.out.bad 2023-10-05 11:15:23.456315468 +0800
-    @@ -1,2 +1,2 @@
-    QA output created by 245
-    -mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
-    +mv: cannot overwrite 'TEST_DIR/test-mv/aa': File exists
-    ...
-    (Run 'diff -u /root/xfstests-dev/tests/generic/245.out /root/xfstests-dev/results//generic/245.out.bad'  to see the entire diff)
-
-Filter out and replace mv error messages to fix the test.
-
-Signed-off-by: Su Yue <glass.su@suse.com>
----
-v2:
-  change sed regrex expression as Zorro suggested.
----
- tests/generic/245     | 5 ++++-
- tests/generic/245.out | 2 +-
- 2 files changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/tests/generic/245 b/tests/generic/245
-index e2d5c926e906..8e0f22366db3 100755
---- a/tests/generic/245
-+++ b/tests/generic/245
-@@ -29,9 +29,12 @@ _cleanup()
- # According to the rename(2) manpage you can get either EEXIST or ENOTEMPTY as an
- # error for trying to rename a non-empty directory, so just catch the error for
- # ENOTMEMPTY and replace it with the EEXIST output so that either result passes
-+# Also, mv v9.4+ modified error message when a nonempty destination directory fails
-+# to be overwriteen
- _filter_directory_not_empty()
- {
--	sed -e "s,Directory not empty,File exists,g"
-+	sed -e "s,Directory not empty,File exists,g" \
-+		-e "s,cannot move .* to \(.*\):\(.*\),cannot overwrite \1:\2,g"
- }
-  
- 
-diff --git a/tests/generic/245.out b/tests/generic/245.out
-index f5b5f182619d..19b598e4a175 100644
---- a/tests/generic/245.out
-+++ b/tests/generic/245.out
-@@ -1,2 +1,2 @@
- QA output created by 245
--mv: cannot move 'TEST_DIR/test-mv/ab/aa/' to 'TEST_DIR/test-mv/aa': File exists
-+mv: cannot overwrite 'TEST_DIR/test-mv/aa': File exists
--- 
-2.41.0
+> 
+> 								Honza
+> -- 
+> Jan Kara <jack@suse.com>
+> SUSE Labs, CR
+> 
 
