@@ -2,238 +2,151 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCBC7C0032E
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Oct 2023 13:15:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F71EC001E0
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Oct 2023 13:24:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230514AbjJUNPq (ORCPT
+        id S229583AbjJUNY5 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 Oct 2023 09:15:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37390 "EHLO
+        Sat, 21 Oct 2023 09:24:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231162AbjJUNPp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Oct 2023 09:15:45 -0400
+        with ESMTP id S229478AbjJUNY4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Oct 2023 09:24:56 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C25ABD63
-        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:14:56 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28E9DE7
+        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:24:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697894096;
+        s=mimecast20190719; t=1697894648;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          in-reply-to:in-reply-to:references:references;
-        bh=88kKvR/QvmUFQ2EQ4+M3EZF9rOsP4Vwrjwk+guy9Id4=;
-        b=gsZqzX0RKryou87FwAokVdil10sTQnt8b+C4e1nd+tW3c2MGLztDuCEdZpoDj5SXsC6Sjs
-        z9lU2j8eYa5rpQVISqHth5fXnjokDVZggQwNsVP9WR3k6H7qNN6psOv8YnP4YnIuFTEmBz
-        sqf63dperHop2PksfjmyXPLsaR+X01Y=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=U0ygw2vvEBmj2jhW78qox0ZhQRRmHMkEb8zFhHYSiKg=;
+        b=DrjLGM1CTdg9Pjf6TX7XGne7c6LT5n9uTfzSVZdg2R79rqazblWc0dk6nvcicwsbhS9UfU
+        g0/wUlZP7QrVrg/z/l+opooc52K2qfYc7fvnWda6GB4/i19oIvbvD44g2RP1C0VKXuOfGV
+        QMDCmY53OWZwmi8v7LVSPck/hL29lfg=
+Received: from mail-oa1-f71.google.com (mail-oa1-f71.google.com
+ [209.85.160.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-570-itZ8VzxDMOi_C-ovAdLbHw-1; Sat, 21 Oct 2023 09:14:54 -0400
-X-MC-Unique: itZ8VzxDMOi_C-ovAdLbHw-1
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-588fb7ab571so928629a12.1
-        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:14:53 -0700 (PDT)
+ us-mta-596-jbdJHO3IPraT0VfVXXtSyg-1; Sat, 21 Oct 2023 09:24:06 -0400
+X-MC-Unique: jbdJHO3IPraT0VfVXXtSyg-1
+Received: by mail-oa1-f71.google.com with SMTP id 586e51a60fabf-1e990f0629cso2637390fac.2
+        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:24:06 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697894093; x=1698498893;
+        d=1e100.net; s=20230601; t=1697894645; x=1698499445;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=88kKvR/QvmUFQ2EQ4+M3EZF9rOsP4Vwrjwk+guy9Id4=;
-        b=JToL8/u2WglfpVbq9tm9IlnGowdZVq1s2Apiiw9r4wOoSFBkGIhPWFor8HcMwZgL27
-         fvPBPMhobNYlvAJhOFKFQnudqK/IbtFCD0xVhM++mtoAqIC7toI3sSiVHYsRiTHgnDXE
-         tpg4CECjTMjIQK11EA4ou1Aep2aQFRjGMyfXvydyDMPKumcAEOMmO3hD85eFTxyWXTnC
-         ApDY8T+t7BYO70/k4f08Ll5voN4G/vtpAPjN0Rkfz/uJLPJwGAxSp9NmfB7i63tiRIdr
-         VRRmanj3IaMxxZzVgwvmPsuet4bKFb1iUnAtG1Fps0DRP6mOO5zOpF54sfRpwMBkyt1N
-         GnuQ==
-X-Gm-Message-State: AOJu0YwJHbJsdrOnZ14KvLid5J6rrLHL3UEE2Onll9C5RRFcQvDuXMgC
-        4iyvH4FvkIilJdi+gyAxc3V42bNII9Su1HIak6kNjlyuEEWUaBo3DW9Lj7j+TEz3J9nSkhmdYde
-        TFNO7jDRjK0wyDLN1Kw==
-X-Received: by 2002:a05:6a20:3ca9:b0:12c:b10d:693d with SMTP id b41-20020a056a203ca900b0012cb10d693dmr4592598pzj.6.1697894092946;
-        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFNiom7w2ymCOyGFTwsF68OMsR5nwN/MyvpzZ2I7bgaoN2de33VjR42vrOzUlWtOFxTNkgvQw==
-X-Received: by 2002:a05:6a20:3ca9:b0:12c:b10d:693d with SMTP id b41-20020a056a203ca900b0012cb10d693dmr4592577pzj.6.1697894092493;
-        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
+        bh=U0ygw2vvEBmj2jhW78qox0ZhQRRmHMkEb8zFhHYSiKg=;
+        b=sdpHtkAv5OEeQqeWQR+bPmnk3DxkucXpztzzfNZhz6CTLah/H1ey4CRA9Oct9EASm5
+         LXE3d83qx2/W20eC6PCTkOM77l/107Vmay/bX22tgsj29mcjl2QrOxaeatooaa+tDzoG
+         s1U7KLxtLoF5wbhJQtMtg2LCX61re5x/h5cT8FOtLNIO2FybV19ZHcaVIk0gMPxK/Pyr
+         4iEuUvbEoH7YvJTDwtzMWYyWf8Qa4KOcoeVYYpi/468Dn/2zsGxKC+Nm0xxSh0IXpjqe
+         0G38Y8kFJPmHA0VL9S0bRq7nw/JXYf60U7IuHAnyXtC2yabgw9xS7sWyOGiDBkClvShB
+         mRTA==
+X-Gm-Message-State: AOJu0YyYwW0yzBgxgDOHzbqhx8lfIDppSFz2Pv1qMdZSqwint0QZTNeC
+        WbXtLccxAwEeyL9MlAOARTfm3hGA14MKamTbwntmJXL0rESfdLRnpxlFg5JiIoOWQIjl9n90qrP
+        Fv3SZvsXhITYQw39BCg==
+X-Received: by 2002:a05:6870:1210:b0:1ea:7bd1:c48d with SMTP id 16-20020a056870121000b001ea7bd1c48dmr5266313oan.49.1697894645723;
+        Sat, 21 Oct 2023 06:24:05 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG0ExB7lqubcClDzjRYkJ+7/1PvDeQ8lcoK+G5SLNe7kv5os2l2O4azFA6ATS0OOI0Iin0t6g==
+X-Received: by 2002:a05:6870:1210:b0:1ea:7bd1:c48d with SMTP id 16-20020a056870121000b001ea7bd1c48dmr5266293oan.49.1697894645399;
+        Sat, 21 Oct 2023 06:24:05 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o67-20020a634146000000b005742092c211sm3055320pga.64.2023.10.21.06.14.50
+        by smtp.gmail.com with ESMTPSA id p15-20020aa7860f000000b0068fe9c7b199sm3237488pfn.105.2023.10.21.06.24.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
-Date:   Sat, 21 Oct 2023 21:14:48 +0800
+        Sat, 21 Oct 2023 06:24:05 -0700 (PDT)
+Date:   Sat, 21 Oct 2023 21:24:01 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
-Subject: Re: [PATCH] generic/251: check min and max length and minlen for
- FSTRIM
-Message-ID: <20231021131448.jjayss67pq5ztjdy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231019143627.GD11391@frogsfrogsfrogs>
+To:     Sidong Yang <realwakka@gmail.com>
+Cc:     linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] btrfs/298: add test for showing qgroups include staled
+ sorted by path
+Message-ID: <20231021132401.yczjnm34fk7lwpco@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231009143123.9588-1-realwakka@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231019143627.GD11391@frogsfrogsfrogs>
+In-Reply-To: <20231009143123.9588-1-realwakka@gmail.com>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 19, 2023 at 07:36:27AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Oct 09, 2023 at 02:31:23PM +0000, Sidong Yang wrote:
+> Test for showing qgroups include a staled qgroup list sorted by path.
+> It crashed without checking qgroup has empty path. It fixed by the
+> following commit in btrfs-progs:
 > 
-> Every now and then, this test fails with the following output when
-> running against my development tree when configured with an 8k fs block
-> size:
+> cd7f1e48 ("btrfs-progs: qgroup: check null in comparing paths")
 > 
-> --- a/tests/generic/251.out	2023-07-11 12:18:21.624971186 -0700
-> +++ b/tests/generic/251.out.bad	2023-10-15 20:54:44.636000000 -0700
-> @@ -1,2 +1,4677 @@
->  QA output created by 251
->  Running the test: done.
-> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> ...
-> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> 
-> Dumping the exact fstrim command lines to seqres.full produces this at
-> the end:
-> 
-> /usr/sbin/fstrim -m 32544k -o 30247k -l 4k /opt
-> /usr/sbin/fstrim -m 32544k -o 30251k -l 4k /opt
-> ...
-> /usr/sbin/fstrim -m 32544k -o 30255k -l 4k /opt
-> 
-> The count of failure messages is the same as the count as the "-l 4k"
-> fstrim invocations.  Since this is an 8k-block filesystem, the -l
-> parameter is clearly incorrect.  The test computes random -m and -l
-> options.
-> 
-> Therefore, create helper functions to guess at the minimum and maximum
-> length and minlen parameters that can be used with the fstrim program.
-> In the inner loop of the test, make sure that our choices for -m and -l
-> fall within those constraints.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Sidong Yang <realwakka@gmail.com>
 > ---
+>  tests/btrfs/298     | 34 ++++++++++++++++++++++++++++++++++
+>  tests/btrfs/298.out |  2 ++
+>  2 files changed, 36 insertions(+)
+>  create mode 100755 tests/btrfs/298
+>  create mode 100644 tests/btrfs/298.out
+> 
+> diff --git a/tests/btrfs/298 b/tests/btrfs/298
+> new file mode 100755
+> index 00000000..5457423d
+> --- /dev/null
+> +++ b/tests/btrfs/298
+> @@ -0,0 +1,34 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Sidong Yang.  All Rights Reserved.
+> +#
+> +# FS QA Test 298
+> +#
+> +# Test that showing qgourps list includes a staled qgroup without crash.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick qgroup
+> +
+> + . ./common/filter
+> +
+> +_supported_fs btrfs
+> +_require_test
+> +_require_scratch
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +
+> +# Create stale qgroup with creating and deleting a subvolume.
+> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT >> $seqres.full
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
+> +$BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/a >> $seqres.full
+> +
+> +# Show qgroups list with sorting path without crash.
+> +$BTRFS_UTIL_PROG qgroup show --sort path $SCRATCH_MNT >> $seqres.full
+> +
+> +_scratch_unmount
 
-Hi Darrick, with this patch I 100% hit below failure (on default 4k xfs
-and ext4):
+Is the umount a necessary part of this test? If not, this step isn't needed.
+The SCRATCH_DEV will be unmounted later.
 
-# ./check generic/251
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-MKFS_OPTIONS  -- -f /dev/loop0
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
+Others looks good to me. I don't mind merging this case, if btrfs list
+feels good to take time to run it in fstests. If no objection from btrfs, then:
 
-generic/251 260s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-    --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-    +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-21 21:02:37.687088360 +0800
-    @@ -1,2 +1,5 @@
-     QA output created by 251
-     Running the test: done.
-    +5834a5835
-    +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-    +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-    ...
-    (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-Ran: generic/251
-Failures: generic/251
-Failed 1 of 1 tests
-
-And test passed without this patch.
-
-# ./check generic/251
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-MKFS_OPTIONS  -- -f /dev/loop0
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-
-generic/251 260s ...  249s
-Ran: generic/251
-Passed all 1 tests
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 Thanks,
 Zorro
 
->  tests/generic/251 |   59 ++++++++++++++++++++++++++++++++++++++++++++++-------
->  1 file changed, 51 insertions(+), 8 deletions(-)
-> 
-> diff --git a/tests/generic/251 b/tests/generic/251
-> index 8ee74980cc..40cfd7c381 100755
-> --- a/tests/generic/251
-> +++ b/tests/generic/251
-> @@ -53,14 +53,46 @@ _fail()
->  	kill $mypid 2> /dev/null
->  }
->  
-> -_guess_max_minlen()
-> +# Set FSTRIM_{MIN,MAX}_MINLEN to the lower and upper bounds of the -m(inlen)
-> +# parameter to fstrim on the scratch filesystem.
-> +set_minlen_constraints()
->  {
-> -	mmlen=100000
-> -	while [ $mmlen -gt 1 ]; do
-> +	local mmlen
 > +
-> +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
->  		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> -		mmlen=$(($mmlen/2))
->  	done
-> -	echo $mmlen
-> +	test $mmlen -gt 0 || \
-> +		_notrun "could not determine maximum FSTRIM minlen param"
-> +	FSTRIM_MAX_MINLEN=$mmlen
-> +
-> +	for ((mmlen = 1; mmlen < FSTRIM_MAX_MINLEN; mmlen *= 2)); do
-> +		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> +	done
-> +	test $mmlen -le $FSTRIM_MAX_MINLEN || \
-> +		_notrun "could not determine minimum FSTRIM minlen param"
-> +	FSTRIM_MIN_MINLEN=$mmlen
-> +}
-> +
-> +# Set FSTRIM_{MIN,MAX}_LEN to the lower and upper bounds of the -l(ength)
-> +# parameter to fstrim on the scratch filesystem.
-> +set_length_constraints()
-> +{
-> +	local mmlen
-> +
-> +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> +	done
-> +	test $mmlen -gt 0 || \
-> +		_notrun "could not determine maximum FSTRIM length param"
-> +	FSTRIM_MAX_LEN=$mmlen
-> +
-> +	for ((mmlen = 1; mmlen < FSTRIM_MAX_LEN; mmlen *= 2)); do
-> +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> +	done
-> +	test $mmlen -le $FSTRIM_MAX_LEN || \
-> +		_notrun "could not determine minimum FSTRIM length param"
-> +	FSTRIM_MIN_LEN=$mmlen
->  }
->  
->  ##
-> @@ -70,13 +102,24 @@ _guess_max_minlen()
->  ##
->  fstrim_loop()
->  {
-> +	set_minlen_constraints
-> +	set_length_constraints
-> +	echo "MINLEN max=$FSTRIM_MAX_MINLEN min=$FSTRIM_MIN_MINLEN" >> $seqres.full
-> +	echo "LENGTH max=$FSTRIM_MAX_LEN min=$FSTRIM_MIN_LEN" >> $seqres.full
-> +
->  	trap "_destroy_fstrim; exit \$status" 2 15
->  	fsize=$(_discard_max_offset_kb "$SCRATCH_MNT" "$SCRATCH_DEV")
-> -	mmlen=$(_guess_max_minlen)
->  
->  	while true ; do
-> -		step=$((RANDOM*$RANDOM+4))
-> -		minlen=$(((RANDOM*($RANDOM%2+1))%$mmlen))
-> +		while true; do
-> +			step=$((RANDOM*$RANDOM+4))
-> +			test "$step" -ge "$FSTRIM_MIN_LEN" && break
-> +		done
-> +		while true; do
-> +			minlen=$(( (RANDOM * (RANDOM % 2 + 1)) % FSTRIM_MAX_MINLEN ))
-> +			test "$minlen" -ge "$FSTRIM_MIN_MINLEN" && break
-> +		done
-> +
->  		start=$RANDOM
->  		if [ $((RANDOM%10)) -gt 7 ]; then
->  			$FSTRIM_PROG $SCRATCH_MNT &
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/298.out b/tests/btrfs/298.out
+> new file mode 100644
+> index 00000000..63434267
+> --- /dev/null
+> +++ b/tests/btrfs/298.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 298
+> +Silence is golden
+> -- 
+> 2.34.1
 > 
 
