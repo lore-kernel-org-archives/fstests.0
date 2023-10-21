@@ -2,628 +2,238 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAD2CC001E0
-	for <linux-fstests@archiver.kernel.org>; Sat, 21 Oct 2023 12:32:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCBC7C0032E
+	for <linux-fstests@archiver.kernel.org>; Sat, 21 Oct 2023 13:15:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229583AbjJUMci (ORCPT
+        id S230514AbjJUNPq (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Sat, 21 Oct 2023 08:32:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44324 "EHLO
+        Sat, 21 Oct 2023 09:15:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229621AbjJUMch (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Oct 2023 08:32:37 -0400
+        with ESMTP id S231162AbjJUNPp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Oct 2023 09:15:45 -0400
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3995D68
-        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 05:31:48 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C25ABD63
+        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:14:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1697891508;
+        s=mimecast20190719; t=1697894096;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=vNtHQltrYS8hiHaQfsCoz/LrBC92gVtjeyT1RyeoFlQ=;
-        b=iVevAzvc406+HQ68cY+YTJtdRqGOB0aJLiiDuy2iswHNRb2GljQQ9nxS2UX8ADpW0sM2Z1
-        8mrSn1qxaR24+JU0KSLZT0v68BuFjC4jogt5TcO+1nMcZQUtHZiGxyIdmIlghThOUnl5UG
-        dqNEd1JAT5v7si/ACviHDSkR825q1P0=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+        bh=88kKvR/QvmUFQ2EQ4+M3EZF9rOsP4Vwrjwk+guy9Id4=;
+        b=gsZqzX0RKryou87FwAokVdil10sTQnt8b+C4e1nd+tW3c2MGLztDuCEdZpoDj5SXsC6Sjs
+        z9lU2j8eYa5rpQVISqHth5fXnjokDVZggQwNsVP9WR3k6H7qNN6psOv8YnP4YnIuFTEmBz
+        sqf63dperHop2PksfjmyXPLsaR+X01Y=
+Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
+ [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-684-pTJ_tBtBMXuOQcphwGm3AQ-1; Sat, 21 Oct 2023 08:31:46 -0400
-X-MC-Unique: pTJ_tBtBMXuOQcphwGm3AQ-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-5b7f3f47547so1140330a12.3
-        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 05:31:46 -0700 (PDT)
+ us-mta-570-itZ8VzxDMOi_C-ovAdLbHw-1; Sat, 21 Oct 2023 09:14:54 -0400
+X-MC-Unique: itZ8VzxDMOi_C-ovAdLbHw-1
+Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-588fb7ab571so928629a12.1
+        for <fstests@vger.kernel.org>; Sat, 21 Oct 2023 06:14:53 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1697891505; x=1698496305;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vNtHQltrYS8hiHaQfsCoz/LrBC92gVtjeyT1RyeoFlQ=;
-        b=SuTEb1yb/BYfE792Bvq9XCkKmZEZCDcwyjkhxYzQjSj00x0nnZjYsonf6om8uiUjRU
-         HdDpiUggRwgb5KcYjVrMReB9Jk91X6Uifls45H/8jSq02OX3mY+u1VMI0FTD3U4ODAlf
-         G0O0SHwhzUP0az00DY25JMedUYbOEEEqvdiNq00PnDye4tZA2A5FgNRxuHxvP9GghPOC
-         UZXCMAsccSITKRdYtqe8gmkCBD6tPVRSVFGS2UEvevv5yh2mIMhn5/vlrC+WzUQI7fvJ
-         ShnJB03w7QbW+o4m9Pfe6nTEwsPyYyutAQhq+vKD9UX8XywKd61Jkea68++aVweV3tG2
-         uTiw==
-X-Gm-Message-State: AOJu0YzN2c43LM3kodzDlOSdS50vC9eaehy8oPZjQEKGcgMPD6AQUwYb
-        UzGfQnbSYeCaGNS3xtagG0EMvVm+eBisiDH6pSo10PIdqake35UpLGw4RtnNXBU/i+Vkp40vaJM
-        h7EzwTapiXvvhIzahgfV9a1PDMkCk
-X-Received: by 2002:a05:6a20:9155:b0:16b:a5fb:eee5 with SMTP id x21-20020a056a20915500b0016ba5fbeee5mr4251576pzc.28.1697891504591;
-        Sat, 21 Oct 2023 05:31:44 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFI6HitDiumreUXaowiCD86Dm+Am1htfHOZoXlUFztJxWkxP1DPbKlRS8393Ys8EnVBT/TUCQ==
-X-Received: by 2002:a05:6a20:9155:b0:16b:a5fb:eee5 with SMTP id x21-20020a056a20915500b0016ba5fbeee5mr4251551pzc.28.1697891504025;
-        Sat, 21 Oct 2023 05:31:44 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1697894093; x=1698498893;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=88kKvR/QvmUFQ2EQ4+M3EZF9rOsP4Vwrjwk+guy9Id4=;
+        b=JToL8/u2WglfpVbq9tm9IlnGowdZVq1s2Apiiw9r4wOoSFBkGIhPWFor8HcMwZgL27
+         fvPBPMhobNYlvAJhOFKFQnudqK/IbtFCD0xVhM++mtoAqIC7toI3sSiVHYsRiTHgnDXE
+         tpg4CECjTMjIQK11EA4ou1Aep2aQFRjGMyfXvydyDMPKumcAEOMmO3hD85eFTxyWXTnC
+         ApDY8T+t7BYO70/k4f08Ll5voN4G/vtpAPjN0Rkfz/uJLPJwGAxSp9NmfB7i63tiRIdr
+         VRRmanj3IaMxxZzVgwvmPsuet4bKFb1iUnAtG1Fps0DRP6mOO5zOpF54sfRpwMBkyt1N
+         GnuQ==
+X-Gm-Message-State: AOJu0YwJHbJsdrOnZ14KvLid5J6rrLHL3UEE2Onll9C5RRFcQvDuXMgC
+        4iyvH4FvkIilJdi+gyAxc3V42bNII9Su1HIak6kNjlyuEEWUaBo3DW9Lj7j+TEz3J9nSkhmdYde
+        TFNO7jDRjK0wyDLN1Kw==
+X-Received: by 2002:a05:6a20:3ca9:b0:12c:b10d:693d with SMTP id b41-20020a056a203ca900b0012cb10d693dmr4592598pzj.6.1697894092946;
+        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFNiom7w2ymCOyGFTwsF68OMsR5nwN/MyvpzZ2I7bgaoN2de33VjR42vrOzUlWtOFxTNkgvQw==
+X-Received: by 2002:a05:6a20:3ca9:b0:12c:b10d:693d with SMTP id b41-20020a056a203ca900b0012cb10d693dmr4592577pzj.6.1697894092493;
+        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id ix21-20020a170902f81500b001c407fac227sm3128651plb.41.2023.10.21.05.31.42
+        by smtp.gmail.com with ESMTPSA id o67-20020a634146000000b005742092c211sm3055320pga.64.2023.10.21.06.14.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 21 Oct 2023 05:31:43 -0700 (PDT)
-Date:   Sat, 21 Oct 2023 20:31:40 +0800
+        Sat, 21 Oct 2023 06:14:52 -0700 (PDT)
+Date:   Sat, 21 Oct 2023 21:14:48 +0800
 From:   Zorro Lang <zlang@redhat.com>
-To:     Filipe Manana <fdmanana@kernel.org>
-Cc:     "Darrick J. Wong" <djwong@kernel.org>,
-        Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-        fdmanana@suse.com, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: filter out fsstress error output
-Message-ID: <20231021123140.g72lggq2lpuhacp7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231018194658.3703329-1-zlang@kernel.org>
- <20231019143143.GC11391@frogsfrogsfrogs>
- <20231019181126.gu4g37sess2bmw6a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAL3q7H5qSATSW8T6oejqtjQgAAY6oLEygUKCy6zMV+xKgMOJ+A@mail.gmail.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Subject: Re: [PATCH] generic/251: check min and max length and minlen for
+ FSTRIM
+Message-ID: <20231021131448.jjayss67pq5ztjdy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231019143627.GD11391@frogsfrogsfrogs>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H5qSATSW8T6oejqtjQgAAY6oLEygUKCy6zMV+xKgMOJ+A@mail.gmail.com>
+In-Reply-To: <20231019143627.GD11391@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Fri, Oct 20, 2023 at 11:22:58AM +0100, Filipe Manana wrote:
-> On Thu, Oct 19, 2023 at 7:12 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Thu, Oct 19, 2023 at 07:31:43AM -0700, Darrick J. Wong wrote:
-> > > On Thu, Oct 19, 2023 at 03:46:58AM +0800, Zorro Lang wrote:
-> > > > The f55e46d6 ("fstests: redirect fsstress' stdout to $seqres.full
-> > > > instead of /dev/null") did lots of changes as below:
-> > > >
-> > > >   -$FSSTRESS_PROG $args >/dev/null 2>&1 &
-> > > >   +$FSSTRESS_PROG $args >>$seqres.full &
-> > > >
-> > > > Although it's good to replace /dev/null with $seqres.full, but the
-> > > > change also removed the "2>&1", that againsts the original behavior.
-> > > > Some test cases might want to ignore fsstress error output, but now
-> > > > the error output breaks the gardon image. For example:
-> > > >
-> > > >   FSTYP         -- xfs (non-debug)
-> > > >   PLATFORM      -- Linux/s390x xxx-xxx-xxx
-> > > >   MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=1,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
-> > > >   MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
-> > > >
-> > > >   generic/269       - output mismatch (see /var/lib/xfstests/results//generic/269.out.bad)
-> > > >       --- tests/generic/269.out     2023-10-17 22:32:46.162110249 -0400
-> > > >       +++ /var/lib/xfstests/results//generic/269.out.bad    2023-10-17 23:07:45.752145653 -0400
-> > > >       @@ -3,3 +3,60 @@
-> > > >        Run fsstress
-> > > >
-> > > >        Run dd writers in parallel
-> > > >       +p36: No such file or directory
-> > > >       +p41: No such file or directory
-> > > >       +p42: No such file or directory
-> > > >       +p43: No such file or directory
-> > > >       ...
-> > > >
-> > > > The generic/269 hopes to run fsstress with ENOSPC error, so it
-> > > > redirects stderr to /dev/null. But now it fails.
-> > > >
-> > > > The f55e46d6 ("fstests: redirect fsstress' stdout to $seqres.full
-> > > > instead of /dev/null") only wants to redirect stdout, so we'd better
-> > > > to keep stderr output to /dev/null, if a case hopes to do that.
-> > > >
-> > > > Fixes: f55e46d6 ("fstests: redirect fsstress' stdout to $seqres.full instead of /dev/null")
-> > > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > > ---
-> > > >
-> > > > Hi,
-> > > >
-> > > > This patch only trys to bring "2>&1" back, if case has it at beginning. To make
-> > > > sure we don't break the original behavior of these cases.
-> > > >
-> > > > If some of below cases really want to remove the "2>&1", better to do that in
-> > > > another patch, and show a proper reason.
-> > > >
-> > > > Thanks,
-> > > > Zorro
-> > > >
-> > > >  tests/btrfs/028   | 2 +-
-> > > >  tests/btrfs/049   | 2 +-
-> > > >  tests/btrfs/060   | 2 +-
-> > > >  tests/btrfs/061   | 2 +-
-> > > >  tests/btrfs/062   | 2 +-
-> > > >  tests/btrfs/063   | 2 +-
-> > > >  tests/btrfs/064   | 2 +-
-> > > >  tests/btrfs/065   | 2 +-
-> > > >  tests/btrfs/066   | 2 +-
-> > > >  tests/btrfs/067   | 2 +-
-> > > >  tests/btrfs/068   | 2 +-
-> > > >  tests/btrfs/069   | 2 +-
-> > > >  tests/btrfs/070   | 2 +-
-> > > >  tests/btrfs/071   | 2 +-
-> > > >  tests/btrfs/072   | 2 +-
-> > > >  tests/btrfs/073   | 2 +-
-> > > >  tests/btrfs/074   | 2 +-
-> > > >  tests/btrfs/136   | 2 +-
-> > > >  tests/btrfs/192   | 2 +-
-> > > >  tests/btrfs/232   | 2 +-
-> > > >  tests/btrfs/261   | 2 +-
-> > > >  tests/btrfs/286   | 2 +-
-> > > >  tests/ext4/057    | 2 +-
-> > > >  tests/ext4/307    | 2 +-
-> > > >  tests/generic/068 | 2 +-
-> > > >  tests/generic/269 | 2 +-
-> > > >  tests/xfs/051     | 2 +-
-> > >
-> > > These two changes (269, 051) duplicates
-> > > https://lore.kernel.org/fstests/169687550821.3948976.6892161616008393594.stgit@frogsfrogsfrogs/T/#m613d9379a026fcae5357650af09d5d0725d324f5
-> >
-> > Thanks for fixing it.
-> >
-> > >
-> > > AFAICT the other generic and xfs tests aren't setting up fsstress to hit
-> > > errors, so we should be dumping them to the golden output because that's
-> > > a sign that something has gone very wrong.
-> > >
-> > > I suppose prior to f55e46d629 ("fstests: redirect fsstress' stdout to
-> > > $seqres.full instead of /dev/null") we'd discard the error messages.
-> > >
-> > > OTOH I've now run the generic and xfs tests with stderr going to the
-> > > .out file and none of them complain, so I'd prefer to see those tests
-> > > stay the way they are now.
-> >
-> > OK, due to that commit affects btrfs specific cases more, besides btrfs part
-> > there're only below 5 cases removed the "2>&1":
-> >
-> > ext4/057
-> > ext4/307
-> > generic/068
-> > generic/269
-> > xfs/051
-> >
-> > As we've reviewed generic and xfs part, and will fix generic/269 and xfs/051,
-> > and those two ext4 cases look good without the "2>&1". So *if btrfs list feels
-> > good without the stderr filter*, I can drop this patch.
+On Thu, Oct 19, 2023 at 07:36:27AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> The stderr filter is not needed for the btrfs tests.
-> None of them expects errors from fsstress, so we want the tests to
-> fail in case fsstress faisl.
+> Every now and then, this test fails with the following output when
+> running against my development tree when configured with an 8k fs block
+> size:
+> 
+> --- a/tests/generic/251.out	2023-07-11 12:18:21.624971186 -0700
+> +++ b/tests/generic/251.out.bad	2023-10-15 20:54:44.636000000 -0700
+> @@ -1,2 +1,4677 @@
+>  QA output created by 251
+>  Running the test: done.
+> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
+> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
+> ...
+> +fstrim: /opt: FITRIM ioctl failed: Invalid argument
+> 
+> Dumping the exact fstrim command lines to seqres.full produces this at
+> the end:
+> 
+> /usr/sbin/fstrim -m 32544k -o 30247k -l 4k /opt
+> /usr/sbin/fstrim -m 32544k -o 30251k -l 4k /opt
+> ...
+> /usr/sbin/fstrim -m 32544k -o 30255k -l 4k /opt
+> 
+> The count of failure messages is the same as the count as the "-l 4k"
+> fstrim invocations.  Since this is an 8k-block filesystem, the -l
+> parameter is clearly incorrect.  The test computes random -m and -l
+> options.
+> 
+> Therefore, create helper functions to guess at the minimum and maximum
+> length and minlen parameters that can be used with the fstrim program.
+> In the inner loop of the test, make sure that our choices for -m and -l
+> fall within those constraints.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Thanks for this feedback, so I'll drop this patch and turn to merge:
-https://lore.kernel.org/fstests/169687550821.3948976.6892161616008393594.stgit@frogsfrogsfrogs/T/#m613d9379a026fcae5357650af09d5d0725d324f5
+Hi Darrick, with this patch I 100% hit below failure (on default 4k xfs
+and ext4):
+
+# ./check generic/251
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
+MKFS_OPTIONS  -- -f /dev/loop0
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
+
+generic/251 260s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
+    --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
+    +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-21 21:02:37.687088360 +0800
+    @@ -1,2 +1,5 @@
+     QA output created by 251
+     Running the test: done.
+    +5834a5835
+    +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
+    +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
+    ...
+    (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
+Ran: generic/251
+Failures: generic/251
+Failed 1 of 1 tests
+
+And test passed without this patch.
+
+# ./check generic/251
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
+MKFS_OPTIONS  -- -f /dev/loop0
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
+
+generic/251 260s ...  249s
+Ran: generic/251
+Passed all 1 tests
 
 Thanks,
 Zorro
 
+>  tests/generic/251 |   59 ++++++++++++++++++++++++++++++++++++++++++++++-------
+>  1 file changed, 51 insertions(+), 8 deletions(-)
 > 
-> Thanks.
-> 
-> >
-> > Thanks,
-> > Zorro
-> >
-> > >
-> > > --D
-> > >
-> > > >  tests/xfs/057     | 2 +-
-> > > >  tests/xfs/297     | 2 +-
-> > > >  tests/xfs/305     | 2 +-
-> > > >  tests/xfs/538     | 2 +-
-> > > >  31 files changed, 31 insertions(+), 31 deletions(-)
-> > > >
-> > > > diff --git a/tests/btrfs/028 b/tests/btrfs/028
-> > > > index d860974e..c4853e06 100755
-> > > > --- a/tests/btrfs/028
-> > > > +++ b/tests/btrfs/028
-> > > > @@ -35,7 +35,7 @@ args=`_scale_fsstress_args -z \
-> > > >     -f fsync=10 -n 100000 -p 2 \
-> > > >     -d $SCRATCH_MNT/stress_dir`
-> > > >  echo "Run fsstress $args" >>$seqres.full
-> > > > -$FSSTRESS_PROG $args >>$seqres.full &
-> > > > +$FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >  fsstress_pid=$!
-> > > >
-> > > >  echo "Start balance" >>$seqres.full
-> > > > diff --git a/tests/btrfs/049 b/tests/btrfs/049
-> > > > index c48e4087..e5f37ccd 100755
-> > > > --- a/tests/btrfs/049
-> > > > +++ b/tests/btrfs/049
-> > > > @@ -42,7 +42,7 @@ args=`_scale_fsstress_args -z \
-> > > >     -f write=10 -f creat=10 \
-> > > >     -n 1000 -p 2 -d $SCRATCH_MNT/stress_dir`
-> > > >  echo "Run fsstress $args" >>$seqres.full
-> > > > -$FSSTRESS_PROG $args >>$seqres.full
-> > > > +$FSSTRESS_PROG $args >>$seqres.full 2>&1
-> > > >
-> > > >  # Start and pause balance to ensure it will be restored on remount
-> > > >  echo "Start balance" >>$seqres.full
-> > > > diff --git a/tests/btrfs/060 b/tests/btrfs/060
-> > > > index a0184891..5c10fc51 100755
-> > > > --- a/tests/btrfs/060
-> > > > +++ b/tests/btrfs/060
-> > > > @@ -38,7 +38,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start balance worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/061 b/tests/btrfs/061
-> > > > index c1010413..407066e3 100755
-> > > > --- a/tests/btrfs/061
-> > > > +++ b/tests/btrfs/061
-> > > > @@ -36,7 +36,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start balance worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/062 b/tests/btrfs/062
-> > > > index 818a0156..dacf56db 100755
-> > > > --- a/tests/btrfs/062
-> > > > +++ b/tests/btrfs/062
-> > > > @@ -37,7 +37,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start balance worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/063 b/tests/btrfs/063
-> > > > index 2f771baf..88d0ed21 100755
-> > > > --- a/tests/btrfs/063
-> > > > +++ b/tests/btrfs/063
-> > > > @@ -36,7 +36,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start balance worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/064 b/tests/btrfs/064
-> > > > index e9b46ce6..cad78248 100755
-> > > > --- a/tests/btrfs/064
-> > > > +++ b/tests/btrfs/064
-> > > > @@ -46,7 +46,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     # Start both balance and replace in the background.
-> > > > diff --git a/tests/btrfs/065 b/tests/btrfs/065
-> > > > index c4b6aafe..d388f1e1 100755
-> > > > --- a/tests/btrfs/065
-> > > > +++ b/tests/btrfs/065
-> > > > @@ -46,7 +46,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     # make sure the stop sign is not there
-> > > > diff --git a/tests/btrfs/066 b/tests/btrfs/066
-> > > > index a29034bb..ecb35f38 100755
-> > > > --- a/tests/btrfs/066
-> > > > +++ b/tests/btrfs/066
-> > > > @@ -38,7 +38,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     # make sure the stop sign is not there
-> > > > diff --git a/tests/btrfs/067 b/tests/btrfs/067
-> > > > index 709db155..d9808177 100755
-> > > > --- a/tests/btrfs/067
-> > > > +++ b/tests/btrfs/067
-> > > > @@ -39,7 +39,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     # make sure the stop sign is not there
-> > > > diff --git a/tests/btrfs/068 b/tests/btrfs/068
-> > > > index 15fd41db..321bb4d2 100755
-> > > > --- a/tests/btrfs/068
-> > > > +++ b/tests/btrfs/068
-> > > > @@ -39,7 +39,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     # make sure the stop sign is not there
-> > > > diff --git a/tests/btrfs/069 b/tests/btrfs/069
-> > > > index 139dde48..4a65c7e5 100755
-> > > > --- a/tests/btrfs/069
-> > > > +++ b/tests/btrfs/069
-> > > > @@ -44,7 +44,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start replace worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/070 b/tests/btrfs/070
-> > > > index 54aa275c..b823d95b 100755
-> > > > --- a/tests/btrfs/070
-> > > > +++ b/tests/btrfs/070
-> > > > @@ -45,7 +45,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start replace worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/071 b/tests/btrfs/071
-> > > > index 6ebbd8cc..ff16d5ac 100755
-> > > > --- a/tests/btrfs/071
-> > > > +++ b/tests/btrfs/071
-> > > > @@ -44,7 +44,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start replace worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/072 b/tests/btrfs/072
-> > > > index 4b6b6fb5..3eda8dfb 100755
-> > > > --- a/tests/btrfs/072
-> > > > +++ b/tests/btrfs/072
-> > > > @@ -37,7 +37,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start scrub worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/073 b/tests/btrfs/073
-> > > > index b1604f94..d3264f3b 100755
-> > > > --- a/tests/btrfs/073
-> > > > +++ b/tests/btrfs/073
-> > > > @@ -36,7 +36,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start scrub worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/074 b/tests/btrfs/074
-> > > > index 9b22c620..3d08415c 100755
-> > > > --- a/tests/btrfs/074
-> > > > +++ b/tests/btrfs/074
-> > > > @@ -37,7 +37,7 @@ run_test()
-> > > >
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >
-> > > >     echo -n "Start defrag worker: " >>$seqres.full
-> > > > diff --git a/tests/btrfs/136 b/tests/btrfs/136
-> > > > index 70e836a5..fd637f33 100755
-> > > > --- a/tests/btrfs/136
-> > > > +++ b/tests/btrfs/136
-> > > > @@ -39,7 +39,7 @@ populate_data(){
-> > > >     mkdir -p $data_path
-> > > >     args=`_scale_fsstress_args -p 20 -n 100 $FSSTRESS_AVOID -d $data_path`
-> > > >     echo "Run fsstress $args" >>$seqres.full
-> > > > -   $FSSTRESS_PROG $args >>$seqres.full &
-> > > > +   $FSSTRESS_PROG $args >>$seqres.full 2>&1 &
-> > > >     fsstress_pid=$!
-> > > >     wait $fsstress_pid
-> > > >  }
-> > > > diff --git a/tests/btrfs/192 b/tests/btrfs/192
-> > > > index 00ea1478..0d926635 100755
-> > > > --- a/tests/btrfs/192
-> > > > +++ b/tests/btrfs/192
-> > > > @@ -140,7 +140,7 @@ pid1=$!
-> > > >  delete_workload &
-> > > >  pid2=$!
-> > > >
-> > > > -"$FSSTRESS_PROG" $fsstress_args >> $seqres.full &
-> > > > +"$FSSTRESS_PROG" $fsstress_args >> $seqres.full 2>&1 &
-> > > >  sleep $runtime
-> > > >
-> > > >  "$KILLALL_PROG" -q "$FSSTRESS_PROG" &> /dev/null
-> > > > diff --git a/tests/btrfs/232 b/tests/btrfs/232
-> > > > index 84c39c07..8ac0ce7c 100755
-> > > > --- a/tests/btrfs/232
-> > > > +++ b/tests/btrfs/232
-> > > > @@ -25,7 +25,7 @@ writer()
-> > > >
-> > > >     while true; do
-> > > >             args=`_scale_fsstress_args -p 20 -n 1000 $FSSTRESS_AVOID -d $SCRATCH_MNT/stressdir`
-> > > > -           $FSSTRESS_PROG $args >> $seqres.full
-> > > > +           $FSSTRESS_PROG $args >> $seqres.full 2>&1
-> > > >     done
-> > > >  }
-> > > >
-> > > > diff --git a/tests/btrfs/261 b/tests/btrfs/261
-> > > > index 58fa8e75..9968c694 100755
-> > > > --- a/tests/btrfs/261
-> > > > +++ b/tests/btrfs/261
-> > > > @@ -36,7 +36,7 @@ prepare_fs()
-> > > >     # Then use fsstress to generate some extra contents.
-> > > >     # Disable setattr related operations, as it may set NODATACOW which will
-> > > >     # not allow us to use btrfs checksum to verify the content.
-> > > > -   $FSSTRESS_PROG -f setattr=0 -d $SCRATCH_MNT -w -n 3000 >> $seqres.full
-> > > > +   $FSSTRESS_PROG -f setattr=0 -d $SCRATCH_MNT -w -n 3000 >> $seqres.full 2>&1
-> > > >     sync
-> > > >
-> > > >     # Save the fssum of this fs
-> > > > diff --git a/tests/btrfs/286 b/tests/btrfs/286
-> > > > index 71f6d4bd..ab4f9b24 100755
-> > > > --- a/tests/btrfs/286
-> > > > +++ b/tests/btrfs/286
-> > > > @@ -36,7 +36,7 @@ workload()
-> > > >     # Use nodatasum mount option, so all data won't have checksum.
-> > > >     _scratch_mount -o nodatasum
-> > > >
-> > > > -   $FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT >> $seqres.full
-> > > > +   $FSSTRESS_PROG -p 10 -n 200 -d $SCRATCH_MNT >> $seqres.full 2>&1
-> > > >     sync
-> > > >
-> > > >     # Generate fssum for later verification, here we only care
-> > > > diff --git a/tests/ext4/057 b/tests/ext4/057
-> > > > index 6babedb2..b6d19339 100755
-> > > > --- a/tests/ext4/057
-> > > > +++ b/tests/ext4/057
-> > > > @@ -42,7 +42,7 @@ _scratch_mount
-> > > >
-> > > >  # Begin fsstress while modifying UUID
-> > > >  fsstress_args=$(_scale_fsstress_args -d $SCRATCH_MNT -p 15 -n 999999)
-> > > > -$FSSTRESS_PROG $fsstress_args >> $seqres.full &
-> > > > +$FSSTRESS_PROG $fsstress_args >> $seqres.full 2>&1 &
-> > > >  fsstress_pid=$!
-> > > >
-> > > >  for n in $(seq 1 20); do
-> > > > diff --git a/tests/ext4/307 b/tests/ext4/307
-> > > > index 8b1cfc9e..75a8bff0 100755
-> > > > --- a/tests/ext4/307
-> > > > +++ b/tests/ext4/307
-> > > > @@ -21,7 +21,7 @@ _workout()
-> > > >     out=$SCRATCH_MNT/fsstress.$$
-> > > >     args=`_scale_fsstress_args -p4 -n999 -f setattr=1 $FSSTRESS_AVOID -d $out`
-> > > >     echo "fsstress $args" >> $seqres.full
-> > > > -   $FSSTRESS_PROG $args >> $seqres.full
-> > > > +   $FSSTRESS_PROG $args >> $seqres.full 2>&1
-> > > >     find $out -type f > $out.list
-> > > >     cat $out.list | xargs  md5sum > $out.md5sum
-> > > >     usage=`du -sch $out | tail -n1 | gawk '{ print $1 }'`
-> > > > diff --git a/tests/generic/068 b/tests/generic/068
-> > > > index af527fee..b2967d13 100755
-> > > > --- a/tests/generic/068
-> > > > +++ b/tests/generic/068
-> > > > @@ -57,7 +57,7 @@ touch $tmp.running
-> > > >        # We do both read & write IO - not only is this more realistic,
-> > > >        # but it also potentially tests atime updates
-> > > >        FSSTRESS_ARGS=`_scale_fsstress_args -d $STRESS_DIR -p $procs -n $nops $FSSTRESS_AVOID`
-> > > > -      $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full
-> > > > +      $FSSTRESS_PROG $FSSTRESS_ARGS >>$seqres.full 2>&1
-> > > >      done
-> > > >
-> > > >      rm -r $STRESS_DIR/*
-> > > > diff --git a/tests/generic/269 b/tests/generic/269
-> > > > index b852f6bf..eddca10d 100755
-> > > > --- a/tests/generic/269
-> > > > +++ b/tests/generic/269
-> > > > @@ -23,7 +23,7 @@ _workout()
-> > > >     out=$SCRATCH_MNT/fsstress.$$
-> > > >     args=`_scale_fsstress_args -p128 -n999999999 -f setattr=1 $FSSTRESS_AVOID -d $out`
-> > > >     echo "fsstress $args" >> $seqres.full
-> > > > -   $FSSTRESS_PROG $args >> $seqres.full &
-> > > > +   $FSSTRESS_PROG $args >> $seqres.full 2>&1 &
-> > > >     pid=$!
-> > > >     echo "Run dd writers in parallel"
-> > > >     for ((i=0; i < num_iterations; i++))
-> > > > diff --git a/tests/xfs/051 b/tests/xfs/051
-> > > > index 1c670964..eca67bb8 100755
-> > > > --- a/tests/xfs/051
-> > > > +++ b/tests/xfs/051
-> > > > @@ -38,7 +38,7 @@ _scratch_mount
-> > > >
-> > > >  # Start a workload and shutdown the fs. The subsequent mount will require log
-> > > >  # recovery.
-> > > > -$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT >> $seqres.full &
-> > > > +$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT >> $seqres.full 2>&1 &
-> > > >  sleep 5
-> > > >  _scratch_shutdown -f
-> > > >  $KILLALL_PROG -q $FSSTRESS_PROG
-> > > > diff --git a/tests/xfs/057 b/tests/xfs/057
-> > > > index 6af14c80..9b52da79 100755
-> > > > --- a/tests/xfs/057
-> > > > +++ b/tests/xfs/057
-> > > > @@ -56,7 +56,7 @@ _scratch_mkfs_sized $((1024 * 1024 * 500)) >> $seqres.full 2>&1 ||
-> > > >  _scratch_mount
-> > > >
-> > > >  # populate the fs with some data and cycle the mount to reset the log head/tail
-> > > > -$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 >> $seqres.full
-> > > > +$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 >> $seqres.full 2>&1
-> > > >  _scratch_cycle_mount || _fail "cycle mount failed"
-> > > >
-> > > >  # Pin the tail and start a file removal workload. File removal tends to
-> > > > diff --git a/tests/xfs/297 b/tests/xfs/297
-> > > > index 1d101876..cd7bccb2 100755
-> > > > --- a/tests/xfs/297
-> > > > +++ b/tests/xfs/297
-> > > > @@ -39,7 +39,7 @@ _scratch_mount
-> > > >  STRESS_DIR="$SCRATCH_MNT/testdir"
-> > > >  mkdir -p $STRESS_DIR
-> > > >
-> > > > -$FSSTRESS_PROG -d $STRESS_DIR -n 100 -p 1000 $FSSTRESS_AVOID >>$seqres.full &
-> > > > +$FSSTRESS_PROG -d $STRESS_DIR -n 100 -p 1000 $FSSTRESS_AVOID >>$seqres.full 2>&1 &
-> > > >
-> > > >  # Freeze/unfreeze file system randomly
-> > > >  echo "Start freeze/unfreeze randomly" | tee -a $seqres.full
-> > > > diff --git a/tests/xfs/305 b/tests/xfs/305
-> > > > index d8a6712e..a93576bc 100755
-> > > > --- a/tests/xfs/305
-> > > > +++ b/tests/xfs/305
-> > > > @@ -36,7 +36,7 @@ _exercise()
-> > > >     _qmount
-> > > >     mkdir -p $QUOTA_DIR
-> > > >
-> > > > -   $FSSTRESS_PROG -d $QUOTA_DIR -n 1000000 -p 100 $FSSTRESS_AVOID >>$seqres.full &
-> > > > +   $FSSTRESS_PROG -d $QUOTA_DIR -n 1000000 -p 100 $FSSTRESS_AVOID >>$seqres.full 2>&1 &
-> > > >     sleep 10
-> > > >     $XFS_QUOTA_PROG -x -c "disable -$type" $SCRATCH_DEV
-> > > >     sleep 5
-> > > > diff --git a/tests/xfs/538 b/tests/xfs/538
-> > > > index 0b5772a1..d36673a9 100755
-> > > > --- a/tests/xfs/538
-> > > > +++ b/tests/xfs/538
-> > > > @@ -63,7 +63,7 @@ $FSSTRESS_PROG -d $SCRATCH_MNT \
-> > > >             -f readv=0 \
-> > > >             -f stat=0 \
-> > > >             -f aread=0 \
-> > > > -           -f dread=0 >> $seqres.full
-> > > > +           -f dread=0 >> $seqres.full 2>&1
-> > > >
-> > > >  # success, all done
-> > > >  status=0
-> > > > --
-> > > > 2.41.0
-> > > >
-> > >
-> >
+> diff --git a/tests/generic/251 b/tests/generic/251
+> index 8ee74980cc..40cfd7c381 100755
+> --- a/tests/generic/251
+> +++ b/tests/generic/251
+> @@ -53,14 +53,46 @@ _fail()
+>  	kill $mypid 2> /dev/null
+>  }
+>  
+> -_guess_max_minlen()
+> +# Set FSTRIM_{MIN,MAX}_MINLEN to the lower and upper bounds of the -m(inlen)
+> +# parameter to fstrim on the scratch filesystem.
+> +set_minlen_constraints()
+>  {
+> -	mmlen=100000
+> -	while [ $mmlen -gt 1 ]; do
+> +	local mmlen
+> +
+> +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
+>  		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
+> -		mmlen=$(($mmlen/2))
+>  	done
+> -	echo $mmlen
+> +	test $mmlen -gt 0 || \
+> +		_notrun "could not determine maximum FSTRIM minlen param"
+> +	FSTRIM_MAX_MINLEN=$mmlen
+> +
+> +	for ((mmlen = 1; mmlen < FSTRIM_MAX_MINLEN; mmlen *= 2)); do
+> +		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
+> +	done
+> +	test $mmlen -le $FSTRIM_MAX_MINLEN || \
+> +		_notrun "could not determine minimum FSTRIM minlen param"
+> +	FSTRIM_MIN_MINLEN=$mmlen
+> +}
+> +
+> +# Set FSTRIM_{MIN,MAX}_LEN to the lower and upper bounds of the -l(ength)
+> +# parameter to fstrim on the scratch filesystem.
+> +set_length_constraints()
+> +{
+> +	local mmlen
+> +
+> +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
+> +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
+> +	done
+> +	test $mmlen -gt 0 || \
+> +		_notrun "could not determine maximum FSTRIM length param"
+> +	FSTRIM_MAX_LEN=$mmlen
+> +
+> +	for ((mmlen = 1; mmlen < FSTRIM_MAX_LEN; mmlen *= 2)); do
+> +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
+> +	done
+> +	test $mmlen -le $FSTRIM_MAX_LEN || \
+> +		_notrun "could not determine minimum FSTRIM length param"
+> +	FSTRIM_MIN_LEN=$mmlen
+>  }
+>  
+>  ##
+> @@ -70,13 +102,24 @@ _guess_max_minlen()
+>  ##
+>  fstrim_loop()
+>  {
+> +	set_minlen_constraints
+> +	set_length_constraints
+> +	echo "MINLEN max=$FSTRIM_MAX_MINLEN min=$FSTRIM_MIN_MINLEN" >> $seqres.full
+> +	echo "LENGTH max=$FSTRIM_MAX_LEN min=$FSTRIM_MIN_LEN" >> $seqres.full
+> +
+>  	trap "_destroy_fstrim; exit \$status" 2 15
+>  	fsize=$(_discard_max_offset_kb "$SCRATCH_MNT" "$SCRATCH_DEV")
+> -	mmlen=$(_guess_max_minlen)
+>  
+>  	while true ; do
+> -		step=$((RANDOM*$RANDOM+4))
+> -		minlen=$(((RANDOM*($RANDOM%2+1))%$mmlen))
+> +		while true; do
+> +			step=$((RANDOM*$RANDOM+4))
+> +			test "$step" -ge "$FSTRIM_MIN_LEN" && break
+> +		done
+> +		while true; do
+> +			minlen=$(( (RANDOM * (RANDOM % 2 + 1)) % FSTRIM_MAX_MINLEN ))
+> +			test "$minlen" -ge "$FSTRIM_MIN_MINLEN" && break
+> +		done
+> +
+>  		start=$RANDOM
+>  		if [ $((RANDOM%10)) -gt 7 ]; then
+>  			$FSTRIM_PROG $SCRATCH_MNT &
 > 
 
