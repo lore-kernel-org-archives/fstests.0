@@ -2,290 +2,191 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96042CDB474
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Oct 2023 04:46:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F325FC004C0
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Oct 2023 10:49:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229451AbjJWEqv (ORCPT
+        id S229734AbjJWKt2 (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Oct 2023 00:46:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54684 "EHLO
+        Mon, 23 Oct 2023 06:49:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229450AbjJWEqv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Oct 2023 00:46:51 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C583D52;
-        Sun, 22 Oct 2023 21:46:48 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E9DBC433C8;
-        Mon, 23 Oct 2023 04:46:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1698036408;
-        bh=3tpEaovGrmNIgrXljEbjRcuzZ6GNx4xTynhxj4BHZZ0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=gY4mPMZ3pajtqKMoZ+0PzCWUzcOaJWmmAhrkn7HHlng88kRhYm1NqKdu553dCQStr
-         OdBOpzQrK0qGUsJriIF1HxocSqve65RniM8aJldSnF/rb9mpx3lYgFV6oF/PY3r+Yz
-         VEy4OY1qtuq96j3aAYu2iP0f32nYlo/pDS6ObhYodiuexJlHsajoDM13dXyAfgee8e
-         SUxCQlSLdROJtFY+MmzJ4Phs0vjhN6L7YiiCGObGnAFAGsLutmP1f4+AC/rctWmKhZ
-         PzNoLJvVFAF380I9XFEXw7Sn2RlfGD/Brr9tfdbJAbKNHblcgJtnVtm3+Kcmymm/iS
-         ZCx4eegvwqfuA==
-Date:   Sun, 22 Oct 2023 21:46:47 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
+        with ESMTP id S229448AbjJWKt1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Oct 2023 06:49:27 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DC86D76;
+        Mon, 23 Oct 2023 03:49:23 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id ffacd0b85a97d-32df66c691dso713553f8f.3;
+        Mon, 23 Oct 2023 03:49:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1698058162; x=1698662962; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Al4aLml/xy+weWyHVCXdvWuTfYQMUhnSE97h2bvaWTU=;
+        b=Q5TsdT6TjQkMkf3d5VCxsIpASCrdTl7av28f2B6jJjJ02gPZGbkbHFeIMreEJmFpUj
+         AmmtmHyHvY4mG4tjetzbiLRaOvq1kgLaUVGYOxf5YLxfEViRBchS18b0w5y9/DQ5I/K5
+         E/3TCiV02LRnlXpCLr5/tPUkrtzhZD5LzhU/HdjDH+CiShHGT607QZ+EssWThRQ3vfD6
+         SsEJxYSfsC4nukVkY1GLAJfJhnklROEOlhZ0wuA6YyLgRdZlAxxO6b14nBbKrnj9qfJh
+         bhuEqMKyb4kZ+6WiTFHBpKRSbP+yLZPQJFYLZoKiJ4BI6ni1phpTq/iSKz3+ImSf9tEf
+         G0jg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698058162; x=1698662962;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Al4aLml/xy+weWyHVCXdvWuTfYQMUhnSE97h2bvaWTU=;
+        b=imu7W+8rP39NQZz+lGD75hFza3JLn7zKxeC7VURpbMlMkA2SSLjLaDTbDmiZzVlMCL
+         Dlwvedi+t6goB4DLOvk4hbAy98qemR+HO85bHn2Ie9jY3jkLEw8xoZmGrf5pk13/BCdx
+         iRHD85Scrk7AnrW4reTl7Y66GaNj3xw06fKmu0TiF5u4quMfr7NK48K8J3PJGJujaIAX
+         FqgIMaGTrP7g8Ce/89f+4ELovEtUSHG0K1EAkLEkD5w9PDMo1VxHC8K8JSsTpGeA17Z9
+         LtPL2DVrKOtR7ycyz2ydNJV/szABMEHf+RL8l/TkPYWuhWcRWOKrYP8tBUGH49IAoZT1
+         1pHw==
+X-Gm-Message-State: AOJu0YzSh397wzJ1vTAM/ACJdo6hiFk7twObRwXtYzArC1/2kVOuKU5t
+        SGAbsDbXAW2oZCNBBrTUMX32LYzFjmg=
+X-Google-Smtp-Source: AGHT+IHCoJlRjSW+BF/KGSahu9OrnjCznGgoGqQY9KfxPHW4rKtLvjcp1j2LT1VcRinAJCLsvBRtfA==
+X-Received: by 2002:a5d:53d1:0:b0:323:36f1:c256 with SMTP id a17-20020a5d53d1000000b0032336f1c256mr4765025wrw.11.1698058161622;
+        Mon, 23 Oct 2023 03:49:21 -0700 (PDT)
+Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
+        by smtp.gmail.com with ESMTPSA id f10-20020adff98a000000b0031aef72a021sm7510581wrr.86.2023.10.23.03.49.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Oct 2023 03:49:19 -0700 (PDT)
+From:   Amir Goldstein <amir73il@gmail.com>
 To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/251: check min and max length and minlen for
- FSTRIM
-Message-ID: <20231023044647.GE11391@frogsfrogsfrogs>
-References: <20231019143627.GD11391@frogsfrogsfrogs>
- <20231021131448.jjayss67pq5ztjdy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231021230024.GT3195650@frogsfrogsfrogs>
- <20231022061834.2km47c7vmhp5uen2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc:     Miklos Szeredi <miklos@szeredi.hu>,
+        Christian Brauner <brauner@kernel.org>,
+        Karel Zak <kzak@redhat.com>, linux-unionfs@vger.kernel.org,
+        fstests@vger.kernel.org
+Subject: [PATCH v2] overlay: add test for lowerdir mount option parsing
+Date:   Mon, 23 Oct 2023 13:49:16 +0300
+Message-Id: <20231023104916.2932366-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231022061834.2km47c7vmhp5uen2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Sun, Oct 22, 2023 at 02:18:34PM +0800, Zorro Lang wrote:
-> On Sat, Oct 21, 2023 at 04:00:24PM -0700, Darrick J. Wong wrote:
-> > On Sat, Oct 21, 2023 at 09:14:48PM +0800, Zorro Lang wrote:
-> > > On Thu, Oct 19, 2023 at 07:36:27AM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Every now and then, this test fails with the following output when
-> > > > running against my development tree when configured with an 8k fs block
-> > > > size:
-> > > > 
-> > > > --- a/tests/generic/251.out	2023-07-11 12:18:21.624971186 -0700
-> > > > +++ b/tests/generic/251.out.bad	2023-10-15 20:54:44.636000000 -0700
-> > > > @@ -1,2 +1,4677 @@
-> > > >  QA output created by 251
-> > > >  Running the test: done.
-> > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > ...
-> > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > 
-> > > > Dumping the exact fstrim command lines to seqres.full produces this at
-> > > > the end:
-> > > > 
-> > > > /usr/sbin/fstrim -m 32544k -o 30247k -l 4k /opt
-> > > > /usr/sbin/fstrim -m 32544k -o 30251k -l 4k /opt
-> > > > ...
-> > > > /usr/sbin/fstrim -m 32544k -o 30255k -l 4k /opt
-> > > > 
-> > > > The count of failure messages is the same as the count as the "-l 4k"
-> > > > fstrim invocations.  Since this is an 8k-block filesystem, the -l
-> > > > parameter is clearly incorrect.  The test computes random -m and -l
-> > > > options.
-> > > > 
-> > > > Therefore, create helper functions to guess at the minimum and maximum
-> > > > length and minlen parameters that can be used with the fstrim program.
-> > > > In the inner loop of the test, make sure that our choices for -m and -l
-> > > > fall within those constraints.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > ---
-> > > 
-> > > Hi Darrick, with this patch I 100% hit below failure (on default 4k xfs
-> > > and ext4):
-> > > 
-> > > # ./check generic/251
-> > > FSTYP         -- xfs (debug)
-> > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > 
-> > > generic/251 260s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-> > >     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-> > >     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-21 21:02:37.687088360 +0800
-> > >     @@ -1,2 +1,5 @@
-> > >      QA output created by 251
-> > >      Running the test: done.
-> > >     +5834a5835
-> > >     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > >     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > >     ...
-> > >     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> > 
-> > Huh.  I don't see that on ext4 on my machine.  Can you send me all your
-> 
-> The failure on ext4:
-> 
-> # ./check generic/251
-> FSTYP         -- ext4
-> PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> MKFS_OPTIONS  -- -F /dev/loop0
-> MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> 
-> generic/251 249s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
->     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
->     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-22 14:17:07.248059405 +0800
->     @@ -1,2 +1,5 @@
->      QA output created by 251
->      Running the test: done.
->     +5838a5839
->     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
->     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
->     ...
->     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> Ran: generic/251
-> Failures: generic/251
-> Failed 1 of 1 tests
-> 
-> > /root/git/xfstests/results//generic/251* files so that I can have a
-> > look?
-> 
-> Sure, thanks! There're .full and .out.bad files:
-> 
-> # cat results/generic/251.full 
-> MINLEN max=100000 min=2
-> LENGTH max=100000 min=4
-> # cat results/generic/251.out.bad 
-> QA output created by 251
-> Running the test: done.
-> 5833a5834
-> > aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> !!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> 
-> The SCRATCH_DEV is loop0, its info as below:
-> # xfs_info /dev/loop0
-> meta-data=/dev/loop0             isize=512    agcount=4, agsize=720896 blks
->          =                       sectsz=512   attr=2, projid32bit=1
->          =                       crc=1        finobt=1, sparse=1, rmapbt=0
->          =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
-> data     =                       bsize=4096   blocks=2883584, imaxpct=25
->          =                       sunit=0      swidth=0 blks
-> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> log      =internal log           bsize=4096   blocks=16384, version=2
->          =                       sectsz=512   sunit=0 blks, lazy-count=1
-> realtime =none                   extsz=4096   blocks=0, rtextents=0
+Check parsing and display of spaces and escaped colons and commans in
+lowerdir mount option.
 
-Huh.  What filesystem contains the file that /dev/loop0 points to?
+This is a regression test for two bugs introduced in v6.5 with the
+conversion to new mount api.
 
---D
+There is another regression of new mount api related to libmount parsing
+of escaped commas, but this needs a fix in libmount - this test only
+verifies the fixes in the kernel, so it uses LIBMOUNT_FORCE_MOUNT2=always
+to force mount(2) and kernel pasring of the comma separated options list.
 
-> More other information:
-> # rpm -qf /usr/sbin/fstrim
-> util-linux-2.39.2-1.fc40.x86_64
-> # uname -r
-> 6.6.0-rc6-mainline+
-> # rpm -q xfsprogs
-> xfsprogs-6.4.0-1.fc39.x86_64
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > Ran: generic/251
-> > > Failures: generic/251
-> > > Failed 1 of 1 tests
-> > > 
-> > > And test passed without this patch.
-> > > 
-> > > # ./check generic/251
-> > > FSTYP         -- xfs (debug)
-> > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > 
-> > > generic/251 260s ...  249s
-> > > Ran: generic/251
-> > > Passed all 1 tests
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > >  tests/generic/251 |   59 ++++++++++++++++++++++++++++++++++++++++++++++-------
-> > > >  1 file changed, 51 insertions(+), 8 deletions(-)
-> > > > 
-> > > > diff --git a/tests/generic/251 b/tests/generic/251
-> > > > index 8ee74980cc..40cfd7c381 100755
-> > > > --- a/tests/generic/251
-> > > > +++ b/tests/generic/251
-> > > > @@ -53,14 +53,46 @@ _fail()
-> > > >  	kill $mypid 2> /dev/null
-> > > >  }
-> > > >  
-> > > > -_guess_max_minlen()
-> > > > +# Set FSTRIM_{MIN,MAX}_MINLEN to the lower and upper bounds of the -m(inlen)
-> > > > +# parameter to fstrim on the scratch filesystem.
-> > > > +set_minlen_constraints()
-> > > >  {
-> > > > -	mmlen=100000
-> > > > -	while [ $mmlen -gt 1 ]; do
-> > > > +	local mmlen
-> > > > +
-> > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > >  		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > -		mmlen=$(($mmlen/2))
-> > > >  	done
-> > > > -	echo $mmlen
-> > > > +	test $mmlen -gt 0 || \
-> > > > +		_notrun "could not determine maximum FSTRIM minlen param"
-> > > > +	FSTRIM_MAX_MINLEN=$mmlen
-> > > > +
-> > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_MINLEN; mmlen *= 2)); do
-> > > > +		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > +	done
-> > > > +	test $mmlen -le $FSTRIM_MAX_MINLEN || \
-> > > > +		_notrun "could not determine minimum FSTRIM minlen param"
-> > > > +	FSTRIM_MIN_MINLEN=$mmlen
-> > > > +}
-> > > > +
-> > > > +# Set FSTRIM_{MIN,MAX}_LEN to the lower and upper bounds of the -l(ength)
-> > > > +# parameter to fstrim on the scratch filesystem.
-> > > > +set_length_constraints()
-> > > > +{
-> > > > +	local mmlen
-> > > > +
-> > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > +	done
-> > > > +	test $mmlen -gt 0 || \
-> > > > +		_notrun "could not determine maximum FSTRIM length param"
-> > > > +	FSTRIM_MAX_LEN=$mmlen
-> > > > +
-> > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_LEN; mmlen *= 2)); do
-> > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > +	done
-> > > > +	test $mmlen -le $FSTRIM_MAX_LEN || \
-> > > > +		_notrun "could not determine minimum FSTRIM length param"
-> > > > +	FSTRIM_MIN_LEN=$mmlen
-> > > >  }
-> > > >  
-> > > >  ##
-> > > > @@ -70,13 +102,24 @@ _guess_max_minlen()
-> > > >  ##
-> > > >  fstrim_loop()
-> > > >  {
-> > > > +	set_minlen_constraints
-> > > > +	set_length_constraints
-> > > > +	echo "MINLEN max=$FSTRIM_MAX_MINLEN min=$FSTRIM_MIN_MINLEN" >> $seqres.full
-> > > > +	echo "LENGTH max=$FSTRIM_MAX_LEN min=$FSTRIM_MIN_LEN" >> $seqres.full
-> > > > +
-> > > >  	trap "_destroy_fstrim; exit \$status" 2 15
-> > > >  	fsize=$(_discard_max_offset_kb "$SCRATCH_MNT" "$SCRATCH_DEV")
-> > > > -	mmlen=$(_guess_max_minlen)
-> > > >  
-> > > >  	while true ; do
-> > > > -		step=$((RANDOM*$RANDOM+4))
-> > > > -		minlen=$(((RANDOM*($RANDOM%2+1))%$mmlen))
-> > > > +		while true; do
-> > > > +			step=$((RANDOM*$RANDOM+4))
-> > > > +			test "$step" -ge "$FSTRIM_MIN_LEN" && break
-> > > > +		done
-> > > > +		while true; do
-> > > > +			minlen=$(( (RANDOM * (RANDOM % 2 + 1)) % FSTRIM_MAX_MINLEN ))
-> > > > +			test "$minlen" -ge "$FSTRIM_MIN_MINLEN" && break
-> > > > +		done
-> > > > +
-> > > >  		start=$RANDOM
-> > > >  		if [ $((RANDOM%10)) -gt 7 ]; then
-> > > >  			$FSTRIM_PROG $SCRATCH_MNT &
-> > > > 
-> > > 
-> > 
-> 
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+
+Zorro,
+
+I've fixed the libmount issue by splitting the combined test cases
+to two test cases that corresspond to the two kernel fix commits.
+
+The first test case (lowerdir_spaces) is agnostic to libmount version.
+
+The second test case (lowerdir_commas) explicitly opts-in to mount(2)
+syscall.
+
+ATM, using LIBMOUNT_FORCE_MOUNT2=always, as the second test cases does,
+would be our recommended workaround for the escaped commas regression
+in v6.5, until libmount gets a fix to detect overlayfs escaped commas.
+
+Thanks,
+Amir.
+
+ tests/overlay/083     | 71 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/083.out |  2 ++
+ 2 files changed, 73 insertions(+)
+ create mode 100755 tests/overlay/083
+ create mode 100644 tests/overlay/083.out
+
+diff --git a/tests/overlay/083 b/tests/overlay/083
+new file mode 100755
+index 00000000..0f434951
+--- /dev/null
++++ b/tests/overlay/083
+@@ -0,0 +1,71 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
++#
++# FS QA Test 083
++#
++# Test regressions in parsing and display of special chars in mount options.
++#
++# The following kernel commits from v6.5 introduced regressions:
++#  b36a5780cb44 ("ovl: modify layer parameter parsing")
++#  1784fbc2ed9c ("ovl: port to new mount api")
++#
++
++. ./common/preamble
++_begin_fstest auto quick mount
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs overlay
++_fixed_by_kernel_commit 32db51070850 \
++	"ovl: fix regression in showing lowerdir mount option"
++_fixed_by_kernel_commit c34706acf40b \
++	"ovl: fix regression in parsing of mount options with escaped comma"
++
++# _overlay_check_* helpers do not handle special chars well
++_require_scratch_nocheck
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create lowerdirs with special characters
++lowerdir_spaces="$OVL_BASE_SCRATCH_MNT/lower1 with  spaces"
++lowerdir_colons="$OVL_BASE_SCRATCH_MNT/lower2:with::colons"
++lowerdir_commas="$OVL_BASE_SCRATCH_MNT/lower3,with,,commas"
++lowerdir_colons_esc="$OVL_BASE_SCRATCH_MNT/lower2\:with\:\:colons"
++lowerdir_commas_esc="$OVL_BASE_SCRATCH_MNT/lower3\,with\,\,commas"
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++mkdir -p "$lowerdir_spaces" "$lowerdir_colons" "$lowerdir_commas"
++
++# _overlay_mount_* helpers do not handle special chars well, so execute mount directly.
++# if escaped colons are not parsed correctly, mount will fail.
++$MOUNT_PROG -t overlay ovl_esc_test $SCRATCH_MNT \
++	-o"upperdir=$upperdir,workdir=$workdir" \
++	-o"lowerdir=$lowerdir_colons_esc:$lowerdir_spaces" \
++	2>&1 | tee -a $seqres.full
++
++# if spaces are not escaped when showing mount options,
++# mount command will not show the word 'spaces' after the spaces
++$MOUNT_PROG -t overlay | grep ovl_esc_test  | tee -a $seqres.full | grep -v spaces && \
++	echo "ERROR: escaped spaces truncated from lowerdir mount option"
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Kernel commit c34706acf40b fixes parsing of mount options with escaped comma
++# when the mount options string is provided via data argument to mount(2) syscall.
++# With libmount >= 2.39, libmount itself will try to split the comma separated
++# options list provided to mount(8) commnad line and call fsconfig(2) for each
++# mount option seperately.  Since libmount does not obay to overlayfs escaped
++# commas format, it will call fsconfig(2) with the wrong path (i.e. ".../lower3")
++# and this test will fail, but the failure would indicate a libmount issue, not
++# a kernel issue.  Therefore, force libmount to use mount(2) syscall, so we only
++# test the kernel fix.
++LIBMOUNT_FORCE_MOUNT2=always $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_DEV $SCRATCH_MNT \
++	-o"upperdir=$upperdir,workdir=$workdir,lowerdir=$lowerdir_commas_esc" 2>> $seqres.full || \
++	echo "ERROR: incorrect parsing of escaped comma in lowerdir mount option"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/083.out b/tests/overlay/083.out
+new file mode 100644
+index 00000000..0beba309
+--- /dev/null
++++ b/tests/overlay/083.out
+@@ -0,0 +1,2 @@
++QA output created by 083
++Silence is golden
+-- 
+2.34.1
+
