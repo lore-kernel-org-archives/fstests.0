@@ -2,84 +2,157 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AC2FC004C0
-	for <linux-fstests@archiver.kernel.org>; Mon, 23 Oct 2023 15:10:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBC2AC001E0
+	for <linux-fstests@archiver.kernel.org>; Mon, 23 Oct 2023 15:45:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229718AbjJWPKm (ORCPT
+        id S230274AbjJWPpR (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Mon, 23 Oct 2023 11:10:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32970 "EHLO
+        Mon, 23 Oct 2023 11:45:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229686AbjJWPKl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Oct 2023 11:10:41 -0400
-Received: from mail-yw1-x1136.google.com (mail-yw1-x1136.google.com [IPv6:2607:f8b0:4864:20::1136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88277DD
-        for <fstests@vger.kernel.org>; Mon, 23 Oct 2023 08:10:34 -0700 (PDT)
-Received: by mail-yw1-x1136.google.com with SMTP id 00721157ae682-5a7ad24b3aaso35508527b3.2
-        for <fstests@vger.kernel.org>; Mon, 23 Oct 2023 08:10:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1698073834; x=1698678634; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=KT/yC7uPar1/8Ex9cQ/S9J2X1+tzCHBSayZxtj5rwtA=;
-        b=MIRx6ljctdb8qNL07hygsY0rbSN7FJ7w2pQLJ9OxdaKMi1eFnEN0oHyNlxZNa8aMoF
-         VL8j6ykHyTV9Qsbxk2WH9jOdcseTr8ygh71swZfXsHquQbhW63UqyI+Beo7vqLYVfGgc
-         OLDEltJUL6ks7xybmgbLZEEF5ntOW/ctWNsjz5lPUe6VeNKLQ42TqhfpdsGb0PBeDmt9
-         0AaYK7nBDw3CH6yj2nBcxj9Mmxwmgp47WDfwy/tQvGzm2TtoIPGgrX7IY8EsRgs7P7w3
-         7dq12MIKdC84HRIAelzHf+nQPYNOsfqu0JRclR/UgWHzdoY+yHWy15yEdU1NK3IQho3V
-         9TyQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698073834; x=1698678634;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KT/yC7uPar1/8Ex9cQ/S9J2X1+tzCHBSayZxtj5rwtA=;
-        b=uLCTn2lxoWWZRzjY2EQOityy/4dgaJy30qRVHqyV4VdcCjfjAvc0fBxjL0SqsK8ppp
-         gQPSRJbhYejIkIQzZUMEsp6tbrvigd8rAWutHHM2/Y0kWMN8sBGx3UY0L8sGzLmGuPvK
-         XueLK/uCO3ESbArfvW5Hh3uZrmjKpMOIWXAF0kidA0E659RA5BjvO42jVgSOAkYB8JjG
-         nmd3O7e0lsNgiRNC2EC0hcbdFDw3PePnlh7jEEUsZ+HvC0o0CbX9tTYhZOJO8Ib96ZNs
-         lvlq8Et97E4besXXLGoklqdyYamRHpvzwYs4vc5QpirS7FuCCawOeO/v/4gn5WEEh2tw
-         mJRw==
-X-Gm-Message-State: AOJu0YyIRUUk/c9G+UXcOzBkzSVm6bRu4HLdiHOTru5EbqomVt6p5X48
-        aqzTwZSzplfRRM2uAVm2r9LegJ0gmMdWwmQURrO1dg==
-X-Google-Smtp-Source: AGHT+IFikmGkJ7Nzuv7LRFMijQJRvhXqDUCUJXPVUuEPr4RZpR/9XtNJFAPFSsvg+ch/pYzgZToz+Q==
-X-Received: by 2002:a0d:e347:0:b0:5a8:1d75:65c3 with SMTP id m68-20020a0de347000000b005a81d7565c3mr10397114ywe.13.1698073833709;
-        Mon, 23 Oct 2023 08:10:33 -0700 (PDT)
-Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id d5-20020a0ddb05000000b005a80102fe3bsm3227059ywe.13.2023.10.23.08.10.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Oct 2023 08:10:33 -0700 (PDT)
-Date:   Mon, 23 Oct 2023 11:10:31 -0400
-From:   Josef Bacik <josef@toxicpanda.com>
-To:     fdmanana@kernel.org
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test snapshoting a subvolume that was just created
-Message-ID: <20231023151031.GA2798160@perftesting>
-References: <3149ccc2900f5574a046e675a6db79b019af2bac.1697718086.git.fdmanana@suse.com>
+        with ESMTP id S231979AbjJWPpQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Oct 2023 11:45:16 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 348CE9D
+        for <fstests@vger.kernel.org>; Mon, 23 Oct 2023 08:45:14 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6031C433C8;
+        Mon, 23 Oct 2023 15:45:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1698075913;
+        bh=so36s5G0RF5gA1XPz0t+VuvIDi1rWO4pdhC5Z5DFdYM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=tI+4sL34AC0qO1/8vjEbxRCUjrpcDjamRsSAtAlX++taIewI2ZjVxo0yCq7NRNeQh
+         W/NU8DFe63j2LDUoPFw9ixokXyMMZ8wdxnbzZaku0v8XwxEj7w4LbG6jtZxxELoAZ9
+         utFnfTzgADzbbUPy1/YLsUvzD4/TlqTUB60kUO2Y/JEwB00c5QsvSexPnrS2EWOAM6
+         UAgF16Ug0iYKuoEuhkoabKtCNGfAG/MllWX/W7X5G6CBL+y0wcxAi/lBIlEhm5sC8F
+         jZN7FIcvAZHNGhukQCLO+bO47xNFs9KsbmS6b+V/8mX2UhI0cnyjbd3rR8Fgs4kQcr
+         77D/iWDEveOEw==
+Date:   Mon, 23 Oct 2023 08:45:13 -0700
+From:   "Darrick J. Wong" <djwong@kernel.org>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] common: check if the scratch device can support 1024
+ block sizes
+Message-ID: <20231023154513.GF11391@frogsfrogsfrogs>
+References: <20231022215529.2202150-1-tytso@mit.edu>
+ <20231022215529.2202150-2-tytso@mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <3149ccc2900f5574a046e675a6db79b019af2bac.1697718086.git.fdmanana@suse.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20231022215529.2202150-2-tytso@mit.edu>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Thu, Oct 19, 2023 at 01:23:49PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Sun, Oct 22, 2023 at 05:55:28PM -0400, Theodore Ts'o wrote:
+> If the scratch device has as logical blocksize larger than 512 --- for
+> example, some SSD or HDD's may have a 4k logical blocksize, and so
+> will not support a file system with a 1k block size.
 > 
-> Test that snapshoting a new subvolume (created in the current transaction)
-> that has a btree with a height > 1, works and does not result in a fs
-> corruption.
+> Add a new function, _require_scratch_support_blocksize so we can skip
+> tests that use _scratch_mkfs_blocksized with a size less than the
+> scratch device's logical block size.
 > 
-> This exercises a regression introduced in kernel 6.5 by the kernel commit:
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  common/rc      | 12 ++++++++++++
+>  tests/ext4/055 |  1 +
+>  tests/xfs/205  |  1 +
+>  tests/xfs/432  |  1 +
+>  tests/xfs/516  |  1 +
+>  5 files changed, 16 insertions(+)
 > 
->   1b53e51a4a8f ("btrfs: don't commit transaction for every subvol create")
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> diff --git a/common/rc b/common/rc
+> index 7f5a9527c..8d7179567 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1124,6 +1124,9 @@ _scratch_mkfs_blocksized()
+>  	if [ $blocksize -lt $(_get_page_size) ]; then
+>  		_exclude_scratch_mount_option dax
+>  	fi
+> +	if [ $blocksize -lt $(blockdev --getss $SCRATCH_DEV) ]; then
+> +		_require_scratch_support_blocksize "$blocksize"
+> +	fi
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+This duplicates the logic in _require_scratch_support_blocksize, so I
+think you can drop it.
 
-Thanks,
+>  
+>  	case $FSTYP in
+>  	btrfs)
+> @@ -4452,6 +4455,15 @@ _get_device_size()
+>  	echo $(($(blockdev --getsz $1) >> 1))
+>  }
+>  
+> +_require_scratch_support_blocksize()
+> +{
+> +	local blocksize=$1
+> +
+> +	if [ $blocksize -lt $(blockdev --getss $SCRATCH_DEV) ]; then
+> +		_notrun "$SCRATCH_DEV does not support a block size of $blocksize."
 
-Josef
+"block" is a bit vague in this context -- you mean the LBA size, not the
+internal physical block size, right?
+
+May I suggest "...does not support an LBA size of $blocksize." ?
+
+--D
+
+> +	fi
+> +}
+> +
+>  # Make sure we actually have dmesg checking set up.
+>  _require_check_dmesg()
+>  {
+> diff --git a/tests/ext4/055 b/tests/ext4/055
+> index aa15cfe98..7025f6283 100755
+> --- a/tests/ext4/055
+> +++ b/tests/ext4/055
+> @@ -27,6 +27,7 @@ echo "Silence is golden"
+>  
+>  # The 1K blocksize is designed for debugfs.
+>  _exclude_scratch_mount_option dax
+> +_require_scratch_support_blocksize 1024
+>  _scratch_mkfs "-F -O quota -b 1024" > $seqres.full 2>&1
+>  
+>  # Start from 0, fill block 1 with 6，replace the original 2.
+> diff --git a/tests/xfs/205 b/tests/xfs/205
+> index 104f1f45a..84c099208 100755
+> --- a/tests/xfs/205
+> +++ b/tests/xfs/205
+> @@ -23,6 +23,7 @@ _require_scratch_nocheck
+>  unset SCRATCH_RTDEV
+>  
+>  fsblksz=1024
+> +_require_scratch_support_blocksize $fsblksz
+>  _scratch_mkfs_xfs -d size=$((32768*fsblksz)) -b size=$fsblksz >> $seqres.full 2>&1
+>  _scratch_mount
+>  
+> diff --git a/tests/xfs/432 b/tests/xfs/432
+> index 66315b039..2efa6230b 100755
+> --- a/tests/xfs/432
+> +++ b/tests/xfs/432
+> @@ -50,6 +50,7 @@ echo "Format and mount"
+>  # block.  8187 hashes/dablk / 248 dirents/dirblock = ~33 dirblocks per
+>  # dablock.  33 dirblocks * 64k mean that we can expand a directory by
+>  # 2112k before we have to allocate another da btree block.
+> +_require_scratch_support_blocksize 1024
+>  _scratch_mkfs -b size=1k -n size=64k > "$seqres.full" 2>&1
+>  _scratch_mount >> "$seqres.full" 2>&1
+>  
+> diff --git a/tests/xfs/516 b/tests/xfs/516
+> index 9e1b99317..65fc635dd 100755
+> --- a/tests/xfs/516
+> +++ b/tests/xfs/516
+> @@ -23,6 +23,7 @@ _cleanup()
+>  # real QA test starts here
+>  _supported_fs xfs
+>  _require_scratch_nocheck
+> +_require_scratch_support_blocksize 1024
+>  
+>  # Assume that if we can run scrub on the test dev we can run it on the scratch
+>  # fs too.
+> -- 
+> 2.31.0
+> 
