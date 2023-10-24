@@ -2,379 +2,157 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFE58C00A8F
-	for <linux-fstests@archiver.kernel.org>; Tue, 24 Oct 2023 15:29:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A462C25B48
+	for <linux-fstests@archiver.kernel.org>; Tue, 24 Oct 2023 23:37:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233646AbjJXP3R (ORCPT
+        id S1343883AbjJXXht (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Tue, 24 Oct 2023 11:29:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44754 "EHLO
+        Tue, 24 Oct 2023 19:37:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44208 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343936AbjJXP3C (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Oct 2023 11:29:02 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46156198A;
-        Tue, 24 Oct 2023 08:28:55 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9D70C433C7;
-        Tue, 24 Oct 2023 15:28:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1698161334;
-        bh=IGqAmiASIHDvYtDKrKA7neZgY+6CMJ6B2n90mwbAnLI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=FB9teF7Uw557DM7dIYC9KMcts1cB5Urwx/uvxjR2waUbBDXd7cHbGjEk0i7WUF0NI
-         0y8otl+CQ1fQDTXE7UPsqFQ1oRzyM3smkyT0RBB2ZukuhfY7udp0JFSBSXeVPT/LUW
-         L+HFIUN1LyJ5RrIOHvV3uJfh3Kz9+gBSJMv6TO8lO3dg4YYOgWayWqRDHtfwQG8vIw
-         g3eSX9TqUwh4V6dSdz2LxVtWME36knG88JVNpvdre1Jj5kbbM+kvWdwxYwqR4cYiEq
-         jysvR1qeq7cGNnqw/A85yKo347RaB0USJOWldigQPVYnsV6pIfuMqKfu11WAVHnDU6
-         Jsnn19NiFQupw==
-Date:   Tue, 24 Oct 2023 08:28:54 -0700
-From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Zorro Lang <zlang@redhat.com>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/251: check min and max length and minlen for
- FSTRIM
-Message-ID: <20231024152854.GI11391@frogsfrogsfrogs>
-References: <20231019143627.GD11391@frogsfrogsfrogs>
- <20231021131448.jjayss67pq5ztjdy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231021230024.GT3195650@frogsfrogsfrogs>
- <20231022061834.2km47c7vmhp5uen2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231023044647.GE11391@frogsfrogsfrogs>
- <20231023131652.37xfq73zwyozvbbn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231023174954.GH11391@frogsfrogsfrogs>
- <20231024055930.3tjuevh6nee6lfo3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+        with ESMTP id S1344622AbjJXXht (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Oct 2023 19:37:49 -0400
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEC6610DA
+        for <fstests@vger.kernel.org>; Tue, 24 Oct 2023 16:37:46 -0700 (PDT)
+Received: by mail-pg1-x52f.google.com with SMTP id 41be03b00d2f7-5aaebfac4b0so3003056a12.2
+        for <fstests@vger.kernel.org>; Tue, 24 Oct 2023 16:37:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1698190666; x=1698795466; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=p8PpTv+uWkp5IFGC5paE61uGTyCzF2rR6Z84Y7JujcQ=;
+        b=zdDNwxpmkb++/0cJvF/qFtyUn5AXjvwQ8LVubpqon1ervod7f1+OUTMMh6cc9ug6Rq
+         SoYwyNdysuEYL+zIJApnCOkt7JTwbckj+n6R6bCXIRlhpDMX5mMrH7E6I2X7RZm22O8y
+         G8pGgnleepKQvkXLA7IOCHLbTye1tMCFLmuAsk0YzcQPotSFuWw3Z31Hf7Q59BDdfdig
+         MDeWvG74Q6vYq9sp20If843TC5eLdBkvdvPl7BS7uapUoTHXkrdCcAP8ZeRa+EaIdDGs
+         lPLzKxv5L8PCCpsZyMSst91F7P7HnbDuQSkF9UkUNukUgCC+XUgygujskKg+wevokisy
+         Z9hQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698190666; x=1698795466;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=p8PpTv+uWkp5IFGC5paE61uGTyCzF2rR6Z84Y7JujcQ=;
+        b=uw9CUF391yLvqjrO33Q1tIeoxGcSfQdEh7ncxpLc6yyrgwXWza7C+Ag/cZsj2CJj6b
+         RGV4G+tXLhyvy86/Co2xv97W17HoBxsEeHU98pZB/DZyVLdmB9W0WaeMazgbRS6TJATQ
+         EunmsPAHonWMObk/NYuAds7JvX/qtnDCb3nVDtUZRv8AH60TZK7VgrRR9W2UmPAqpI6o
+         OcncnKlV3S+vrwhgv8RGTE+O7S5svCwJDury9lbtQLJtZENukLDpUur6NwCfWpjm3lTO
+         Lac98l3QJ+HuyDApJL7o3t4vDIEYEALTTXacw6S+J3ELAh18SEoMHNi79vK+01Ap5AtX
+         HQaQ==
+X-Gm-Message-State: AOJu0YxC3dALhhhTUmviNKBLm1N7tL2JcAT7AA7juNiZcbjSLfL/8e1N
+        93fZVZjTHuWiZMkl2RWOSwVPlsBt1DpZSCebXLM=
+X-Google-Smtp-Source: AGHT+IFt17sjbFdWXpbnFV5tHaor2KEpN3UQGiSD8G8sBuK8FKh94CeTIjWGyUD5H1WGtuiucRDKkA==
+X-Received: by 2002:a05:6a20:4408:b0:17b:3822:e5ea with SMTP id ce8-20020a056a20440800b0017b3822e5eamr5203326pzb.19.1698190665897;
+        Tue, 24 Oct 2023 16:37:45 -0700 (PDT)
+Received: from telecaster.hsd1.wa.comcast.net ([2620:10d:c090:400::4:4dbb])
+        by smtp.gmail.com with ESMTPSA id s6-20020a170902ea0600b001c0ce518e98sm7911067plg.224.2023.10.24.16.37.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Oct 2023 16:37:45 -0700 (PDT)
+From:   Omar Sandoval <osandov@osandov.com>
+To:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Cc:     kernel-team@fb.com
+Subject: [PATCH fstests] xfs: test refilling AGFL after lots of btree splits
+Date:   Tue, 24 Oct 2023 16:37:42 -0700
+Message-ID: <c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com>
+X-Mailer: git-send-email 2.41.0
+In-Reply-To: <013168d2de9d25c56fe45ad75e9257cf9664f2d6.1698190191.git.osandov@fb.com>
+References: <013168d2de9d25c56fe45ad75e9257cf9664f2d6.1698190191.git.osandov@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231024055930.3tjuevh6nee6lfo3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 24, 2023 at 01:59:30PM +0800, Zorro Lang wrote:
-> On Mon, Oct 23, 2023 at 10:49:54AM -0700, Darrick J. Wong wrote:
-> > On Mon, Oct 23, 2023 at 09:16:52PM +0800, Zorro Lang wrote:
-> > > On Sun, Oct 22, 2023 at 09:46:47PM -0700, Darrick J. Wong wrote:
-> > > > On Sun, Oct 22, 2023 at 02:18:34PM +0800, Zorro Lang wrote:
-> > > > > On Sat, Oct 21, 2023 at 04:00:24PM -0700, Darrick J. Wong wrote:
-> > > > > > On Sat, Oct 21, 2023 at 09:14:48PM +0800, Zorro Lang wrote:
-> > > > > > > On Thu, Oct 19, 2023 at 07:36:27AM -0700, Darrick J. Wong wrote:
-> > > > > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > > > > 
-> > > > > > > > Every now and then, this test fails with the following output when
-> > > > > > > > running against my development tree when configured with an 8k fs block
-> > > > > > > > size:
-> > > > > > > > 
-> > > > > > > > --- a/tests/generic/251.out	2023-07-11 12:18:21.624971186 -0700
-> > > > > > > > +++ b/tests/generic/251.out.bad	2023-10-15 20:54:44.636000000 -0700
-> > > > > > > > @@ -1,2 +1,4677 @@
-> > > > > > > >  QA output created by 251
-> > > > > > > >  Running the test: done.
-> > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > ...
-> > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > 
-> > > > > > > > Dumping the exact fstrim command lines to seqres.full produces this at
-> > > > > > > > the end:
-> > > > > > > > 
-> > > > > > > > /usr/sbin/fstrim -m 32544k -o 30247k -l 4k /opt
-> > > > > > > > /usr/sbin/fstrim -m 32544k -o 30251k -l 4k /opt
-> > > > > > > > ...
-> > > > > > > > /usr/sbin/fstrim -m 32544k -o 30255k -l 4k /opt
-> > > > > > > > 
-> > > > > > > > The count of failure messages is the same as the count as the "-l 4k"
-> > > > > > > > fstrim invocations.  Since this is an 8k-block filesystem, the -l
-> > > > > > > > parameter is clearly incorrect.  The test computes random -m and -l
-> > > > > > > > options.
-> > > > > > > > 
-> > > > > > > > Therefore, create helper functions to guess at the minimum and maximum
-> > > > > > > > length and minlen parameters that can be used with the fstrim program.
-> > > > > > > > In the inner loop of the test, make sure that our choices for -m and -l
-> > > > > > > > fall within those constraints.
-> > > > > > > > 
-> > > > > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > > > > ---
-> > > > > > > 
-> > > > > > > Hi Darrick, with this patch I 100% hit below failure (on default 4k xfs
-> > > > > > > and ext4):
-> > > > > > > 
-> > > > > > > # ./check generic/251
-> > > > > > > FSTYP         -- xfs (debug)
-> > > > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > > > 
-> > > > > > > generic/251 260s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-> > > > > > >     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-> > > > > > >     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-21 21:02:37.687088360 +0800
-> > > > > > >     @@ -1,2 +1,5 @@
-> > > > > > >      QA output created by 251
-> > > > > > >      Running the test: done.
-> > > > > > >     +5834a5835
-> > > > > > >     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > > > >     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > > > > > >     ...
-> > > > > > >     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> > > > > > 
-> > > > > > Huh.  I don't see that on ext4 on my machine.  Can you send me all your
-> > > > > 
-> > > > > The failure on ext4:
-> > > > > 
-> > > > > # ./check generic/251
-> > > > > FSTYP         -- ext4
-> > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > MKFS_OPTIONS  -- -F /dev/loop0
-> > > > > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > 
-> > > > > generic/251 249s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-> > > > >     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-> > > > >     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-22 14:17:07.248059405 +0800
-> > > > >     @@ -1,2 +1,5 @@
-> > > > >      QA output created by 251
-> > > > >      Running the test: done.
-> > > > >     +5838a5839
-> > > > >     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > >     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > > > >     ...
-> > > > >     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> > > > > Ran: generic/251
-> > > > > Failures: generic/251
-> > > > > Failed 1 of 1 tests
-> > > > > 
-> > > > > > /root/git/xfstests/results//generic/251* files so that I can have a
-> > > > > > look?
-> > > > > 
-> > > > > Sure, thanks! There're .full and .out.bad files:
-> > > > > 
-> > > > > # cat results/generic/251.full 
-> > > > > MINLEN max=100000 min=2
-> > > > > LENGTH max=100000 min=4
-> > > > > # cat results/generic/251.out.bad 
-> > > > > QA output created by 251
-> > > > > Running the test: done.
-> > > > > 5833a5834
-> > > > > > aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > > !!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > 
-> > Hang on, why is $seqres.full being included in the generic/251 integrity
-> > checks?
-> > 
-> > *OH* it's this piece that runs before we start the fstrim loop:
-> > 
-> > 	content=$here
-> > 	(
-> > 	cd $content
-> > 	find -P . -xdev -type f -print0 | xargs -0 md5sum | sort -o
-> > 	$tmp/content.sums
-> > 	)
-> 
-> Err... generic/251 is an old case, was written 12 years ago. It trys to do
-> 
->   content=$here
->   cp -axT $content/ $SCRATCH_MNT/$p/
-> 
-> to use the whole xfstests/* as testing data. I doubt that's recommended.
-> How about we run fsstress a while, to get a fixed original data directory,
-> then copy it to test. Likes we did in generic/560.
-> 
-> Any better ides? If you think it's good, and would like to wait. I can make
-> this change at first. Then you make a rebase and send this patch again.
+This is a regression test for patch "xfs: fix internal error from AGFL
+exhaustion"), which is not yet merged. Without the fix, it will fail
+with a "Structure needs cleaning" error.
 
-I /think/ generic/251 is the only test that copies $here repeatedly and
-checksums the file contents of the copies.  Perhaps it'd be simpler to
-copy $here to $SCRATCH_DEV, checksum the *copy*, and only then start the
-loop that creates and deletes more copies while FITRIMming?
+Signed-off-by: Omar Sandoval <osandov@osandov.com>
+---
+ tests/xfs/601     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/601.out |  2 ++
+ 2 files changed, 64 insertions(+)
+ create mode 100755 tests/xfs/601
+ create mode 100644 tests/xfs/601.out
 
-Anyway, I'll go try that and see what happens.
+diff --git a/tests/xfs/601 b/tests/xfs/601
+new file mode 100755
+index 00000000..bbc5b443
+--- /dev/null
++++ b/tests/xfs/601
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# FS QA Test 601
++#
++# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
++#
++. ./common/preamble
++_begin_fstest auto prealloc punch
++
++. ./common/filter
++
++_supported_fs xfs
++_require_scratch
++_require_test_program punch-alternating
++_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
++
++_scratch_mkfs -m rmapbt=0 | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
++. "$tmp.mkfs"
++_scratch_mount
++
++alloc_block_len=$((_fs_has_crcs ? 56 : 16))
++allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
++allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
++
++# Create a big file with a size such that the punches below create the exact
++# free extents we want.
++num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
++$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
++
++# Fill in any small free extents in AG 0. After this, there should be only one,
++# large free extent.
++_scratch_unmount
++mapfile -t gaps < <($XFS_DB_PROG -c 'agf 0' -c 'addr cntroot' -c 'p recs' "$SCRATCH_DEV" |
++	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
++	tac | tail -n +2)
++_scratch_mount
++for gap_i in "${!gaps[@]}"; do
++	gap=${gaps[$gap_i]}
++	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
++done
++
++# Create enough free space records to make the bnobt and cntbt both full,
++# 2-level trees, plus one more record to make them split all the way to the
++# root and become 3-level trees. After this, there is a 7-block free extent in
++# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
++# than the rightmost two are full. Without the fix, the free list is also
++# empty.
++$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
++"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
++
++# Do an arbitrary operation that refills the free list. Without the fix, this
++# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
++# the cntbt, then try to insert the remaining 1 block free extent in the
++# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
++# leaf and fails because the free list is empty.
++$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/xfs/601.out b/tests/xfs/601.out
+new file mode 100644
+index 00000000..0d70c3e5
+--- /dev/null
++++ b/tests/xfs/601.out
+@@ -0,0 +1,2 @@
++QA output created by 601
++Silence is golden
+-- 
+2.42.0
 
---D
-
-> Thanks,
-> Zorro
-> 
-> > 
-> > If you don't explicitly set RESULT_BASE before running fstests, you get
-> > the default setting of:
-> > 
-> > 	export RESULT_BASE="$here/results/"
-> > 
-> > Hence $seqres.full is really $here/results/generic/251.full.  Logging
-> > the MINLEN/LENGTH settings to $seqres.full changes the contents of the
-> > file, which changes the contents of the directory tree that we
-> > repeatedly copy into $SCRATCH_MNT while racing with FSTRIM.  That's the
-> > cause of the "Checksums has changed" message.
-> > 
-> > The checksums differ because the logging messages I added now result in
-> > the test changing the outcome of the test by observing it.  I never
-> > noticed because my test setup sets RESULT_BASE to a NFS server so that I
-> > always get /something/ to look at, even if the node crashes.
-> > 
-> > Not sure what you want to do about this, because this is a subtle bug
-> > for test authors to fall into.  I guess a mitigation could be to _notrun
-> > if $seqres.full is under $here but ... yeughck.
-> > 
-> > Thoughts?
-> > 
-> > --D
-> > 
-> > > > > 
-> > > > > The SCRATCH_DEV is loop0, its info as below:
-> > > > > # xfs_info /dev/loop0
-> > > > > meta-data=/dev/loop0             isize=512    agcount=4, agsize=720896 blks
-> > > > >          =                       sectsz=512   attr=2, projid32bit=1
-> > > > >          =                       crc=1        finobt=1, sparse=1, rmapbt=0
-> > > > >          =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
-> > > > > data     =                       bsize=4096   blocks=2883584, imaxpct=25
-> > > > >          =                       sunit=0      swidth=0 blks
-> > > > > naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> > > > > log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > >          =                       sectsz=512   sunit=0 blks, lazy-count=1
-> > > > > realtime =none                   extsz=4096   blocks=0, rtextents=0
-> > > > 
-> > > > Huh.  What filesystem contains the file that /dev/loop0 points to?
-> > > 
-> > > A xfs, but with multi-stripes:
-> > > 
-> > > # xfs_info /
-> > > meta-data=/dev/mapper/fedora_hp--dl380pg8--01-root isize=512    agcount=16, agsize=8192000 blks
-> > >          =                       sectsz=512   attr=2, projid32bit=1
-> > >          =                       crc=1        finobt=1, sparse=1, rmapbt=0
-> > >          =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
-> > > data     =                       bsize=4096   blocks=131072000, imaxpct=25
-> > >          =                       sunit=64     swidth=64 blks
-> > > naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> > > log      =internal log           bsize=4096   blocks=64000, version=2
-> > >          =                       sectsz=512   sunit=64 blks, lazy-count=1
-> > > realtime =none                   extsz=4096   blocks=0, rtextents=0
-> > > 
-> > > > 
-> > > > --D
-> > > > 
-> > > > > More other information:
-> > > > > # rpm -qf /usr/sbin/fstrim
-> > > > > util-linux-2.39.2-1.fc40.x86_64
-> > > > > # uname -r
-> > > > > 6.6.0-rc6-mainline+
-> > > > > # rpm -q xfsprogs
-> > > > > xfsprogs-6.4.0-1.fc39.x86_64
-> > > > > 
-> > > > > Thanks,
-> > > > > Zorro
-> > > > > 
-> > > > > > 
-> > > > > > --D
-> > > > > > 
-> > > > > > > Ran: generic/251
-> > > > > > > Failures: generic/251
-> > > > > > > Failed 1 of 1 tests
-> > > > > > > 
-> > > > > > > And test passed without this patch.
-> > > > > > > 
-> > > > > > > # ./check generic/251
-> > > > > > > FSTYP         -- xfs (debug)
-> > > > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > > > 
-> > > > > > > generic/251 260s ...  249s
-> > > > > > > Ran: generic/251
-> > > > > > > Passed all 1 tests
-> > > > > > > 
-> > > > > > > Thanks,
-> > > > > > > Zorro
-> > > > > > > 
-> > > > > > > >  tests/generic/251 |   59 ++++++++++++++++++++++++++++++++++++++++++++++-------
-> > > > > > > >  1 file changed, 51 insertions(+), 8 deletions(-)
-> > > > > > > > 
-> > > > > > > > diff --git a/tests/generic/251 b/tests/generic/251
-> > > > > > > > index 8ee74980cc..40cfd7c381 100755
-> > > > > > > > --- a/tests/generic/251
-> > > > > > > > +++ b/tests/generic/251
-> > > > > > > > @@ -53,14 +53,46 @@ _fail()
-> > > > > > > >  	kill $mypid 2> /dev/null
-> > > > > > > >  }
-> > > > > > > >  
-> > > > > > > > -_guess_max_minlen()
-> > > > > > > > +# Set FSTRIM_{MIN,MAX}_MINLEN to the lower and upper bounds of the -m(inlen)
-> > > > > > > > +# parameter to fstrim on the scratch filesystem.
-> > > > > > > > +set_minlen_constraints()
-> > > > > > > >  {
-> > > > > > > > -	mmlen=100000
-> > > > > > > > -	while [ $mmlen -gt 1 ]; do
-> > > > > > > > +	local mmlen
-> > > > > > > > +
-> > > > > > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > > > > > >  		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > -		mmlen=$(($mmlen/2))
-> > > > > > > >  	done
-> > > > > > > > -	echo $mmlen
-> > > > > > > > +	test $mmlen -gt 0 || \
-> > > > > > > > +		_notrun "could not determine maximum FSTRIM minlen param"
-> > > > > > > > +	FSTRIM_MAX_MINLEN=$mmlen
-> > > > > > > > +
-> > > > > > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_MINLEN; mmlen *= 2)); do
-> > > > > > > > +		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > +	done
-> > > > > > > > +	test $mmlen -le $FSTRIM_MAX_MINLEN || \
-> > > > > > > > +		_notrun "could not determine minimum FSTRIM minlen param"
-> > > > > > > > +	FSTRIM_MIN_MINLEN=$mmlen
-> > > > > > > > +}
-> > > > > > > > +
-> > > > > > > > +# Set FSTRIM_{MIN,MAX}_LEN to the lower and upper bounds of the -l(ength)
-> > > > > > > > +# parameter to fstrim on the scratch filesystem.
-> > > > > > > > +set_length_constraints()
-> > > > > > > > +{
-> > > > > > > > +	local mmlen
-> > > > > > > > +
-> > > > > > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > > > > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > +	done
-> > > > > > > > +	test $mmlen -gt 0 || \
-> > > > > > > > +		_notrun "could not determine maximum FSTRIM length param"
-> > > > > > > > +	FSTRIM_MAX_LEN=$mmlen
-> > > > > > > > +
-> > > > > > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_LEN; mmlen *= 2)); do
-> > > > > > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > +	done
-> > > > > > > > +	test $mmlen -le $FSTRIM_MAX_LEN || \
-> > > > > > > > +		_notrun "could not determine minimum FSTRIM length param"
-> > > > > > > > +	FSTRIM_MIN_LEN=$mmlen
-> > > > > > > >  }
-> > > > > > > >  
-> > > > > > > >  ##
-> > > > > > > > @@ -70,13 +102,24 @@ _guess_max_minlen()
-> > > > > > > >  ##
-> > > > > > > >  fstrim_loop()
-> > > > > > > >  {
-> > > > > > > > +	set_minlen_constraints
-> > > > > > > > +	set_length_constraints
-> > > > > > > > +	echo "MINLEN max=$FSTRIM_MAX_MINLEN min=$FSTRIM_MIN_MINLEN" >> $seqres.full
-> > > > > > > > +	echo "LENGTH max=$FSTRIM_MAX_LEN min=$FSTRIM_MIN_LEN" >> $seqres.full
-> > > > > > > > +
-> > > > > > > >  	trap "_destroy_fstrim; exit \$status" 2 15
-> > > > > > > >  	fsize=$(_discard_max_offset_kb "$SCRATCH_MNT" "$SCRATCH_DEV")
-> > > > > > > > -	mmlen=$(_guess_max_minlen)
-> > > > > > > >  
-> > > > > > > >  	while true ; do
-> > > > > > > > -		step=$((RANDOM*$RANDOM+4))
-> > > > > > > > -		minlen=$(((RANDOM*($RANDOM%2+1))%$mmlen))
-> > > > > > > > +		while true; do
-> > > > > > > > +			step=$((RANDOM*$RANDOM+4))
-> > > > > > > > +			test "$step" -ge "$FSTRIM_MIN_LEN" && break
-> > > > > > > > +		done
-> > > > > > > > +		while true; do
-> > > > > > > > +			minlen=$(( (RANDOM * (RANDOM % 2 + 1)) % FSTRIM_MAX_MINLEN ))
-> > > > > > > > +			test "$minlen" -ge "$FSTRIM_MIN_MINLEN" && break
-> > > > > > > > +		done
-> > > > > > > > +
-> > > > > > > >  		start=$RANDOM
-> > > > > > > >  		if [ $((RANDOM%10)) -gt 7 ]; then
-> > > > > > > >  			$FSTRIM_PROG $SCRATCH_MNT &
-> > > > > > > > 
-> > > > > > > 
-> > > > > > 
-> > > > > 
-> > > > 
-> > > 
-> > 
-> 
