@@ -2,418 +2,189 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FD08C07545
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Oct 2023 05:17:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC0D5C0032E
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Oct 2023 10:50:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229456AbjJYFRi (ORCPT
+        id S232926AbjJYKup (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Oct 2023 01:17:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44746 "EHLO
+        Wed, 25 Oct 2023 06:50:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229583AbjJYFRh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 01:17:37 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C1F0A4
-        for <fstests@vger.kernel.org>; Tue, 24 Oct 2023 22:16:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1698211007;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=fjTjDsyrum46VZzPrCLBfr86LrqujihFNafODzlO4bo=;
-        b=QGVZ9hFcPNnLqXxZauWjgOR0JpPdMYkqAkFAXxgFuq2JsaapDkjuzOjtC0Hza7sGxmB39H
-        7rBTR7y8OFgzoos1dzhaRt/3+w3g7aJqZmtK4SIjBXiR+byioObFn6tv+qxR8XHmO+P5y4
-        L0kbXu3ptN3MPhwRi/fv6al92YGIc/U=
-Received: from mail-oo1-f71.google.com (mail-oo1-f71.google.com
- [209.85.161.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-270-teBaeh4mOqaarjskVVFmzw-1; Wed, 25 Oct 2023 01:16:36 -0400
-X-MC-Unique: teBaeh4mOqaarjskVVFmzw-1
-Received: by mail-oo1-f71.google.com with SMTP id 006d021491bc7-581d766cc15so7475631eaf.3
-        for <fstests@vger.kernel.org>; Tue, 24 Oct 2023 22:16:36 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698210995; x=1698815795;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fjTjDsyrum46VZzPrCLBfr86LrqujihFNafODzlO4bo=;
-        b=dtbh/rKegaoraTdtTSu1EXYeUQYmNsQz4t5lmf3cKdmwhempsM3hr69BCtl0An59Ov
-         SU3/cZEkOeTgMV9Wc5mpkVGqpfaPIFJMXXt9fmQJJD1vKRol/eKSsJoyH9kE0ssilmeQ
-         cZRJm4dTdVlQNaxK3AA1FLqB1p82AbblOS5LE4j2RhxMPk6d0HwJag5Q0SaIY3g+lrtv
-         8QrfEbDOBgZUYD9UTNZiICFgyHwU/TFvAepTvWbTbPKEwHqu6hU0BCC8MIPPCGzO7Rol
-         QiINvE8nQrsoX1tY3g+mBfmT0dXRSweIFHn/fakHY3BsIOcRowEe8sDzSi2/X5Q3MrnO
-         cSsg==
-X-Gm-Message-State: AOJu0Yyx4PPzHPuYhOgfdF+sj6UCQCt8PNLBRM73PUI/2+B/LzBPyEFn
-        xqCzVYFzls9m9UsVWyILEcUopVZyHUFnJt8iR1k2s8IzXByxK+OkY9xq8dnD/HM9OiRaaW+JUQN
-        T0A6+oilPDBmyobChloorR1B4EKydNBw=
-X-Received: by 2002:a05:6358:9d99:b0:168:e843:9000 with SMTP id d25-20020a0563589d9900b00168e8439000mr6118206rwo.26.1698210995179;
-        Tue, 24 Oct 2023 22:16:35 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFV0d/4M8E4d/q9nHZZQXHHDKoTAK0V+dYmcQHSqdtC5fHkpd6a0k3NZazzm+CelAo3jDxylg==
-X-Received: by 2002:a05:6358:9d99:b0:168:e843:9000 with SMTP id d25-20020a0563589d9900b00168e8439000mr6118189rwo.26.1698210994602;
-        Tue, 24 Oct 2023 22:16:34 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id i18-20020aa796f2000000b0068fcb70ccafsm8289587pfq.129.2023.10.24.22.16.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Oct 2023 22:16:34 -0700 (PDT)
-Date:   Wed, 25 Oct 2023 13:16:31 +0800
-From:   Zorro Lang <zlang@redhat.com>
-To:     "Darrick J. Wong" <djwong@kernel.org>
-Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/251: check min and max length and minlen for
- FSTRIM
-Message-ID: <20231025051631.3lsxl7ytyltapoir@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231019143627.GD11391@frogsfrogsfrogs>
- <20231021131448.jjayss67pq5ztjdy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231021230024.GT3195650@frogsfrogsfrogs>
- <20231022061834.2km47c7vmhp5uen2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231023044647.GE11391@frogsfrogsfrogs>
- <20231023131652.37xfq73zwyozvbbn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231023174954.GH11391@frogsfrogsfrogs>
- <20231024055930.3tjuevh6nee6lfo3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231024152854.GI11391@frogsfrogsfrogs>
+        with ESMTP id S232076AbjJYKun (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 06:50:43 -0400
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EDF9BB;
+        Wed, 25 Oct 2023 03:50:37 -0700 (PDT)
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 39PAfJS2019987;
+        Wed, 25 Oct 2023 10:50:36 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-transfer-encoding : content-type :
+ mime-version; s=corp-2023-03-30;
+ bh=vUXWP03XJHTTJ1GIm3n/RjckZfSNqkFPGnEmezSxBWA=;
+ b=pObOmYt251wL2plQELGkUnkzIWAIBalZxf7G30UMqV78TbrsOAWdHGLQ+DbH+IZ6MzVh
+ KTrDQTxeu8Mf07/ykntiZaryHbDCmGttRnSmedZ5NBl8f7m9fkjt4dsQVhKs3PF99gPy
+ peNQYl9DvEL/G7AxGEn7oE7nyPYx2rUJSlRG1zJVdF9lpHXzwwaQxDgBkJOhNA+Ncrjb
+ 71gCaxYV/DJ9wHOCNi9PvcXg4v57LcAAb+uLxpPnngwbbCdsWpa+xd8nO/SYUP6WaMqm
+ p+ivXjjerT9tGlH9UPcyuw6649GlFcYmSKd3i4+8dna1nu2gpcRhcYAPAHwuSgEeXHP5 /Q== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3tv68tff0h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 25 Oct 2023 10:50:36 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 39P9A5xa001528;
+        Wed, 25 Oct 2023 10:50:36 GMT
+Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2101.outbound.protection.outlook.com [104.47.55.101])
+        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3tv53cymff-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 25 Oct 2023 10:50:36 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fqexDQD4RHE2lxsYzbgl3kRZgzTafd2NhB+CVySWodc3HqfQdvCo4KxJj9bCwObYm5XhjM8laPoFa5I2Y3o14X3vK5jqhXoCzcetLtwRV4/BqEKjAhTrWyzsYvzCheOfKfB5pCmBWebbckiyBJXUrK4g8ByQUUsf4xXLMz1BXxI96oljB6lEJCKlQxq/z8fXjWB/jOsJDWlneXp+ahckh/7x41XlRvj75+EO+iQSBHhtoSRvSaOH8e/f0TwROY2ODWFz5Xbqj/7Fue6Jt7uqvOTHghYRmeDHJ7VQO//GGPfvvV2kEcVQkS+O3RoIPkPJPE+QY9yAOKSAlLran354WA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=vUXWP03XJHTTJ1GIm3n/RjckZfSNqkFPGnEmezSxBWA=;
+ b=imOsr/Ll3+vhdll+Zz3QjsalND1YOjTMsog7dTasHYciU9fE7iWh1suXhQj6U3wSaYPcDuFCn881kmviiKPvQvJPE1aHwMhUAFFpq8Cz002s+AaRZ2OfydjQKdCyr0u0PvHAAIdjnH2hSGr6p/MB+R0Rirg/t5aGW2supzubnFzkCMCokm/cJSVwUzh811YxZa6qtuyymLPzmxaLt78zTBvi3G1cui+r8n8Iqw+PxGIRzMJ7uYMB8eLFLZbQcwgXX0h78fG/iO4SNuDBhXsZWTkNWDOOuTRr8IjUVSsEo6yiOyaTyRmeiOOkyjy2BXnWz4HNWv8ixL0BHHR7KuXe8g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=vUXWP03XJHTTJ1GIm3n/RjckZfSNqkFPGnEmezSxBWA=;
+ b=b0Qve8viDpHlYJuIzrRqrt76Jzz/LkJYYpMn3qOYxTuO7iwblcNEyCiT3hwOfvf8WuAva+kqZMz08bU7N6ZHpIcLxtUfJX7FAmvDzkw8AVgqLojx482qaU4S/U4UNmS2ubr5KgZGsf/tkHdXlLUkpaJ6CQ9+L7Fvjcmr+VjWye8=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by CO1PR10MB4545.namprd10.prod.outlook.com (2603:10b6:303:9a::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6907.33; Wed, 25 Oct
+ 2023 10:50:33 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2bbc:60da:ba6c:f685%2]) with mapi id 15.20.6886.034; Wed, 25 Oct 2023
+ 10:50:33 +0000
+From:   Anand Jain <anand.jain@oracle.com>
+To:     fstests@vger.kernel.org
+Cc:     linux-btrfs@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/219 cloned-device mount capability update
+Date:   Wed, 25 Oct 2023 18:49:13 +0800
+Message-ID: <39311089b30f9250ff7f7a0aabb70547616a4b3a.1698230869.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.42.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SGXP274CA0013.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::25)
+ To PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231024152854.GI11391@frogsfrogsfrogs>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CO1PR10MB4545:EE_
+X-MS-Office365-Filtering-Correlation-Id: 551e5f25-6557-4862-5711-08dbd548367e
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: OQC5JHDk2V6k16Vu+fy054k1UlfEK/SRYq+popaEQ0LORkHpM9c40BTt61zywZxObUyFR1v8/6Uw36XmjzUMGHTjI2Nmgy2Vn3T4MUE/YMc7WQx/r3xgTLbBZj7dtF1+blGvDEs3FxTk/hpL+4KZcmYM0QxV3a8LcgbsiwRvrxBAdhNFf9RNDBFvHmRTOxdgZs5hso75VnXrh7NiREHvplp+9oZv/T82kq593IWVD60N/SAstXtl6YvrZ9FUqJqh6XEdfPCGKtYhTuVofvBDcUTT6lCpWUTI/yh9OOodf/EFsnOscIGb/E5KgzuFo2plaMBuakpWuq5Pq7P5798ioUQvnQwYUaFJfVT3te7j3tvFvRzz4GR711pRdHfqj8SNcZD27YRnzQ3Ac9XmgqdBtmbnpfWCq8P6TXzJyD4znLCYDfsM09iZX1duEWjZhF8exLcNGfRgxk1EXYDcVILtQVIVzhSjxS2la7rbvwCrAZZrGvB6hTySIVhcjNFyNo1LYmhApK8Kr/aF7EWwQaSLp+hQVCOJqr6n8afljoadyA4=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(39860400002)(136003)(346002)(366004)(396003)(376002)(230922051799003)(1800799009)(451199024)(64100799003)(186009)(2616005)(26005)(66476007)(83380400001)(316002)(66946007)(6916009)(6506007)(6512007)(6666004)(66556008)(6486002)(966005)(8936002)(478600001)(38100700002)(44832011)(8676002)(4326008)(41300700001)(2906002)(36756003)(86362001)(5660300002)(450100002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?GG0+tpgjgQ8LGsgZCJoky8u9mWv5oo2ielzRniK7SqSzm40obB5Fk9mO6+HL?=
+ =?us-ascii?Q?RTRYLfmXDRFGYRFqJGps5X9XsXG/qy5YNlp5Lzp5/UZTyeDFbMoyiKCME3+P?=
+ =?us-ascii?Q?R6tSeiqBzeZ/RGHau01R6/phn5DFcrqJSLD2hnKwEXwTrekI9YFLm5cwyrI4?=
+ =?us-ascii?Q?4jkOQF3C5mbtJM65zWUiaaajshtH2VlRfUoOwPern17o4YZ5fqxhnywyjni6?=
+ =?us-ascii?Q?Ud46Op60GRUgIGmExoZ8mhlK5VfIc6MqCth1ogo13wsRLmVhdQOlTEuv03P6?=
+ =?us-ascii?Q?3F8RNIDk6qKiVq73+h/ZjfkdcytnUZFM1ayKNCILzTz15UOrjMCjdGk0kd8z?=
+ =?us-ascii?Q?U5dV/prS10cki8HzcIi014DFMTZiKZLlMS9oTe+KyKzATm0EYwnJ8VHbSXdt?=
+ =?us-ascii?Q?aUeqc5ohXmgXqhceQCUO+MyvkLJ8jPX+W+IgHQwvM65D+a0iX/KZ4mnLzryM?=
+ =?us-ascii?Q?aEhDDnp42AMlhWnrkhZo6O2gTTfcXea8DQaO/OhVUGrmBRk/AnA3J9CVNEAB?=
+ =?us-ascii?Q?5NpuI3s5Ku6ge5p+IKXe3fAwnIs0Gn7rEumVgt7BNK+8tDWnkYmKIUP3gVus?=
+ =?us-ascii?Q?hOGVuCHCTIFZlJjpuKr/D/Ks4LvXmVSX91Gw81KsP4FGT6Sxau2k+0G9EMoy?=
+ =?us-ascii?Q?W0wofOfhb277w0cFFXHjR0HWKUxjDqGGUglAClmzIoEm/aJ8ET7WcOxSLfBd?=
+ =?us-ascii?Q?aGkHLCYEy3pzfkOquB1DT6McVpVVeJGtdM4il7eKGgqovFFWxCAgZxsqRoXg?=
+ =?us-ascii?Q?CNNV3qkpr/IlVwn73MXQMeMNU279kyQFH19G6PW4LCKKcF5Y/q285mEx5NM6?=
+ =?us-ascii?Q?yjCCfkjBE5gsq/Fk4SzHjlRt1cOG5x8S46wR8wS/4qvuG5qUa6Q1nFSGj4UL?=
+ =?us-ascii?Q?h+F0VNKt8tXXMuKlpBTUc+AX0q6u9ZgcHL9V79IfHtiKI27J2UF7H+79bdmc?=
+ =?us-ascii?Q?J81AFNd7G0K0VCNzUfPDnlXqNAN8YgdEJzyLB7vcuGgulI4HXyjvE3cQdYMk?=
+ =?us-ascii?Q?NCVfcmVSr8a5BxPnHtegBwZGTMx0Gj6hOGDpAvpnwfsyto18tcldCzLir0R/?=
+ =?us-ascii?Q?HmZxCYjvvKBBjtbXe/+zuxoJWdZ/2DjuGI4p24aOUQQKvu71bsSDKWWhg8aO?=
+ =?us-ascii?Q?eTiDsvx3w8Wngy40TaBN/s06JWD5+8Ogp/M+kxNN9koZz8y7S9+4iRudeEps?=
+ =?us-ascii?Q?z+IB/Om6RMt7LmfO3e3rf2fuh+UKQNArT9oAzUekRJ4pPrF264DtlbFx4qFP?=
+ =?us-ascii?Q?U8cZP1PUlwTQcZgcGVFCPjwqK0cYzTMtMMgjVK/VgSVFPJlCX/vHqiuY6IaT?=
+ =?us-ascii?Q?9uH6PYuURXo6nurkSaCZbvmMI/Pb2mb49pgeyRBEZmtzKWumnJlQZ43ru8cO?=
+ =?us-ascii?Q?K6/O+MgwFl8W5YO5TZEUbJUbevtyfy/Bm3Band8oUTtI16GzFdq79NA3tJpH?=
+ =?us-ascii?Q?G5WFqG2qTeZpY/Lpsk3k0zpPNIbxY6TUKFnB+h6s1ORvAjUkbjqvDM4OQmHi?=
+ =?us-ascii?Q?6Nx1w+EnwiFZ5k1KgPqSm+M8SeJwvYSF1zEyOvy+F+3xbWWtDpptx2EEgsIG?=
+ =?us-ascii?Q?PHOI/55QzMF2a8eSwnmRbZWiX3KuLbFVMBp7Ki66?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: ab5xMF4qUzzJD5acTOQV4QkqL+bS71bHr0iHXoMXPv/7imMHiqW0rY57bYadYxdy2weUCcVVnt/0Q9gyJ03ikOgXoDDgGmAvvAa6FyWoUHHuU4vVQkwjttUYIcqj0wMWFnllH22WdIb0HUCx5j2GfPgh4DQISRiwFnIy+t6vzpwGyySa1uJ9kmoi56u/96tQVKyRnKI9SSa10p2CE8zZCfAPtdFaw4GEIdUet7oCrpLVK65ZcTke73MtpSEvNAQtUyrrpYIurMvEZIIZ3eucmZMcWB6yH+wOtAMV6GvA5PFLi/U06zVIqwfVB9/SCcPM79AT0Q3lJrhFDwuxGGxVon/dZ0GRBg0pvlQDqhXhL4kv0I3S0t+5VdmIVGufxgz6i4LB5NT54WvZAdDN/7qzHGL7Zgrx/jk9rO2Ks01PJWpydJYsmS/Go/dkRQF6BPsFv5Mt50WC/ikiOiu3BtwGToAUQ8QBe22wOuvML5bMn0xjd4samlbN+cmsKFk8OaynUHxdV4B2LT6Uq0xZgFBRjXz8/Sg7dL3BMuaIUPAIKZWElwab3RrxP+xwgXmsStG3XG2f1PceYsBgbtpHe/3t8jCDRb8vRgth4mqJN8fO43Y/zK4a+DA5WF8jMFYhfKfJAr+fptVpsFx2GBF7Ixe11AqZrVlSV87yCHRpLvzTHJjb2AXHqsfTmnlA0ck0QQm7tOfyKV05+nkjXv7IiHzn2VebUUuuxAhntWdpHVt8KH/T+SDhlN1SXQjIR6UNOJgIWyqz7FwaC0fj+3Kgvh3nzg==
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 551e5f25-6557-4862-5711-08dbd548367e
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Oct 2023 10:50:33.4577
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: aivKDA3wqpZYcmxyIzeYLWSA6mPrH7fr6dp3jq1Jb6LTBmhfYYFYnHqkphnHCj5imn1BVj6HzQfIZ4un/1cbPw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO1PR10MB4545
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.980,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-10-25_01,2023-10-25_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxlogscore=999
+ adultscore=0 bulkscore=0 suspectscore=0 mlxscore=0 phishscore=0
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2310170001 definitions=main-2310250093
+X-Proofpoint-ORIG-GUID: g0H98TVB5yveTNJ4nL7bRLGqiacHEe7h
+X-Proofpoint-GUID: g0H98TVB5yveTNJ4nL7bRLGqiacHEe7h
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Tue, Oct 24, 2023 at 08:28:54AM -0700, Darrick J. Wong wrote:
-> On Tue, Oct 24, 2023 at 01:59:30PM +0800, Zorro Lang wrote:
-> > On Mon, Oct 23, 2023 at 10:49:54AM -0700, Darrick J. Wong wrote:
-> > > On Mon, Oct 23, 2023 at 09:16:52PM +0800, Zorro Lang wrote:
-> > > > On Sun, Oct 22, 2023 at 09:46:47PM -0700, Darrick J. Wong wrote:
-> > > > > On Sun, Oct 22, 2023 at 02:18:34PM +0800, Zorro Lang wrote:
-> > > > > > On Sat, Oct 21, 2023 at 04:00:24PM -0700, Darrick J. Wong wrote:
-> > > > > > > On Sat, Oct 21, 2023 at 09:14:48PM +0800, Zorro Lang wrote:
-> > > > > > > > On Thu, Oct 19, 2023 at 07:36:27AM -0700, Darrick J. Wong wrote:
-> > > > > > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > > > > > 
-> > > > > > > > > Every now and then, this test fails with the following output when
-> > > > > > > > > running against my development tree when configured with an 8k fs block
-> > > > > > > > > size:
-> > > > > > > > > 
-> > > > > > > > > --- a/tests/generic/251.out	2023-07-11 12:18:21.624971186 -0700
-> > > > > > > > > +++ b/tests/generic/251.out.bad	2023-10-15 20:54:44.636000000 -0700
-> > > > > > > > > @@ -1,2 +1,4677 @@
-> > > > > > > > >  QA output created by 251
-> > > > > > > > >  Running the test: done.
-> > > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > > ...
-> > > > > > > > > +fstrim: /opt: FITRIM ioctl failed: Invalid argument
-> > > > > > > > > 
-> > > > > > > > > Dumping the exact fstrim command lines to seqres.full produces this at
-> > > > > > > > > the end:
-> > > > > > > > > 
-> > > > > > > > > /usr/sbin/fstrim -m 32544k -o 30247k -l 4k /opt
-> > > > > > > > > /usr/sbin/fstrim -m 32544k -o 30251k -l 4k /opt
-> > > > > > > > > ...
-> > > > > > > > > /usr/sbin/fstrim -m 32544k -o 30255k -l 4k /opt
-> > > > > > > > > 
-> > > > > > > > > The count of failure messages is the same as the count as the "-l 4k"
-> > > > > > > > > fstrim invocations.  Since this is an 8k-block filesystem, the -l
-> > > > > > > > > parameter is clearly incorrect.  The test computes random -m and -l
-> > > > > > > > > options.
-> > > > > > > > > 
-> > > > > > > > > Therefore, create helper functions to guess at the minimum and maximum
-> > > > > > > > > length and minlen parameters that can be used with the fstrim program.
-> > > > > > > > > In the inner loop of the test, make sure that our choices for -m and -l
-> > > > > > > > > fall within those constraints.
-> > > > > > > > > 
-> > > > > > > > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > > > > > > > ---
-> > > > > > > > 
-> > > > > > > > Hi Darrick, with this patch I 100% hit below failure (on default 4k xfs
-> > > > > > > > and ext4):
-> > > > > > > > 
-> > > > > > > > # ./check generic/251
-> > > > > > > > FSTYP         -- xfs (debug)
-> > > > > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > > > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > > > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > > > > 
-> > > > > > > > generic/251 260s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-> > > > > > > >     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-> > > > > > > >     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-21 21:02:37.687088360 +0800
-> > > > > > > >     @@ -1,2 +1,5 @@
-> > > > > > > >      QA output created by 251
-> > > > > > > >      Running the test: done.
-> > > > > > > >     +5834a5835
-> > > > > > > >     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > > > > >     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > > > > > > >     ...
-> > > > > > > >     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> > > > > > > 
-> > > > > > > Huh.  I don't see that on ext4 on my machine.  Can you send me all your
-> > > > > > 
-> > > > > > The failure on ext4:
-> > > > > > 
-> > > > > > # ./check generic/251
-> > > > > > FSTYP         -- ext4
-> > > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > > MKFS_OPTIONS  -- -F /dev/loop0
-> > > > > > MOUNT_OPTIONS -- -o acl,user_xattr -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > > 
-> > > > > > generic/251 249s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
-> > > > > >     --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
-> > > > > >     +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-22 14:17:07.248059405 +0800
-> > > > > >     @@ -1,2 +1,5 @@
-> > > > > >      QA output created by 251
-> > > > > >      Running the test: done.
-> > > > > >     +5838a5839
-> > > > > >     +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > > >     +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > > > > >     ...
-> > > > > >     (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
-> > > > > > Ran: generic/251
-> > > > > > Failures: generic/251
-> > > > > > Failed 1 of 1 tests
-> > > > > > 
-> > > > > > > /root/git/xfstests/results//generic/251* files so that I can have a
-> > > > > > > look?
-> > > > > > 
-> > > > > > Sure, thanks! There're .full and .out.bad files:
-> > > > > > 
-> > > > > > # cat results/generic/251.full 
-> > > > > > MINLEN max=100000 min=2
-> > > > > > LENGTH max=100000 min=4
-> > > > > > # cat results/generic/251.out.bad 
-> > > > > > QA output created by 251
-> > > > > > Running the test: done.
-> > > > > > 5833a5834
-> > > > > > > aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
-> > > > > > !!!Checksums has changed - Filesystem possibly corrupted!!!\n
-> > > 
-> > > Hang on, why is $seqres.full being included in the generic/251 integrity
-> > > checks?
-> > > 
-> > > *OH* it's this piece that runs before we start the fstrim loop:
-> > > 
-> > > 	content=$here
-> > > 	(
-> > > 	cd $content
-> > > 	find -P . -xdev -type f -print0 | xargs -0 md5sum | sort -o
-> > > 	$tmp/content.sums
-> > > 	)
-> > 
-> > Err... generic/251 is an old case, was written 12 years ago. It trys to do
-> > 
-> >   content=$here
-> >   cp -axT $content/ $SCRATCH_MNT/$p/
-> > 
-> > to use the whole xfstests/* as testing data. I doubt that's recommended.
-> > How about we run fsstress a while, to get a fixed original data directory,
-> > then copy it to test. Likes we did in generic/560.
-> > 
-> > Any better ides? If you think it's good, and would like to wait. I can make
-> > this change at first. Then you make a rebase and send this patch again.
-> 
-> I /think/ generic/251 is the only test that copies $here repeatedly and
-> checksums the file contents of the copies.  Perhaps it'd be simpler to
-> copy $here to $SCRATCH_DEV, checksum the *copy*, and only then start the
-> loop that creates and deletes more copies while FITRIMming?
+This test case originally checked for failed cloned device mounts, which
+is no longer relevant after the commit a5b8a5f9f835 ("btrfs: support
+cloned-device mount capability"). So removing the obsolete part.
 
-Sure, the $here is changing when the fstests is running. But we can copy $here
-to other place to be a fixed original data at the beginning.
+For older kernels without this commit, the test case still serves its core
+purpose.
 
-> 
-> Anyway, I'll go try that and see what happens.
+Additionally, add this test case back to the auto group which reverts the
+commit e2e7b549380a ("fstests: btrfs/219: remove it from auto group") since
+the previously missing kernel commit 5f58d783fd78 ("btrfs: free device in
+btrfs_close_devices for a single device filesystem") has already been
+integrated.
 
-Thanks!
+Reported-by: kernel test robot <oliver.sang@intel.com>
+Closes: https://lore.kernel.org/oe-lkp/202310251645.5fe5495a-oliver.sang@intel.com
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/btrfs/219 | 11 +----------
+ 1 file changed, 1 insertion(+), 10 deletions(-)
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > If you don't explicitly set RESULT_BASE before running fstests, you get
-> > > the default setting of:
-> > > 
-> > > 	export RESULT_BASE="$here/results/"
-> > > 
-> > > Hence $seqres.full is really $here/results/generic/251.full.  Logging
-> > > the MINLEN/LENGTH settings to $seqres.full changes the contents of the
-> > > file, which changes the contents of the directory tree that we
-> > > repeatedly copy into $SCRATCH_MNT while racing with FSTRIM.  That's the
-> > > cause of the "Checksums has changed" message.
-> > > 
-> > > The checksums differ because the logging messages I added now result in
-> > > the test changing the outcome of the test by observing it.  I never
-> > > noticed because my test setup sets RESULT_BASE to a NFS server so that I
-> > > always get /something/ to look at, even if the node crashes.
-> > > 
-> > > Not sure what you want to do about this, because this is a subtle bug
-> > > for test authors to fall into.  I guess a mitigation could be to _notrun
-> > > if $seqres.full is under $here but ... yeughck.
-> > > 
-> > > Thoughts?
-> > > 
-> > > --D
-> > > 
-> > > > > > 
-> > > > > > The SCRATCH_DEV is loop0, its info as below:
-> > > > > > # xfs_info /dev/loop0
-> > > > > > meta-data=/dev/loop0             isize=512    agcount=4, agsize=720896 blks
-> > > > > >          =                       sectsz=512   attr=2, projid32bit=1
-> > > > > >          =                       crc=1        finobt=1, sparse=1, rmapbt=0
-> > > > > >          =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
-> > > > > > data     =                       bsize=4096   blocks=2883584, imaxpct=25
-> > > > > >          =                       sunit=0      swidth=0 blks
-> > > > > > naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> > > > > > log      =internal log           bsize=4096   blocks=16384, version=2
-> > > > > >          =                       sectsz=512   sunit=0 blks, lazy-count=1
-> > > > > > realtime =none                   extsz=4096   blocks=0, rtextents=0
-> > > > > 
-> > > > > Huh.  What filesystem contains the file that /dev/loop0 points to?
-> > > > 
-> > > > A xfs, but with multi-stripes:
-> > > > 
-> > > > # xfs_info /
-> > > > meta-data=/dev/mapper/fedora_hp--dl380pg8--01-root isize=512    agcount=16, agsize=8192000 blks
-> > > >          =                       sectsz=512   attr=2, projid32bit=1
-> > > >          =                       crc=1        finobt=1, sparse=1, rmapbt=0
-> > > >          =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
-> > > > data     =                       bsize=4096   blocks=131072000, imaxpct=25
-> > > >          =                       sunit=64     swidth=64 blks
-> > > > naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> > > > log      =internal log           bsize=4096   blocks=64000, version=2
-> > > >          =                       sectsz=512   sunit=64 blks, lazy-count=1
-> > > > realtime =none                   extsz=4096   blocks=0, rtextents=0
-> > > > 
-> > > > > 
-> > > > > --D
-> > > > > 
-> > > > > > More other information:
-> > > > > > # rpm -qf /usr/sbin/fstrim
-> > > > > > util-linux-2.39.2-1.fc40.x86_64
-> > > > > > # uname -r
-> > > > > > 6.6.0-rc6-mainline+
-> > > > > > # rpm -q xfsprogs
-> > > > > > xfsprogs-6.4.0-1.fc39.x86_64
-> > > > > > 
-> > > > > > Thanks,
-> > > > > > Zorro
-> > > > > > 
-> > > > > > > 
-> > > > > > > --D
-> > > > > > > 
-> > > > > > > > Ran: generic/251
-> > > > > > > > Failures: generic/251
-> > > > > > > > Failed 1 of 1 tests
-> > > > > > > > 
-> > > > > > > > And test passed without this patch.
-> > > > > > > > 
-> > > > > > > > # ./check generic/251
-> > > > > > > > FSTYP         -- xfs (debug)
-> > > > > > > > PLATFORM      -- Linux/x86_64 hp-dl380pg8-01 6.6.0-rc6-mainline+ #7 SMP PREEMPT_DYNAMIC Thu Oct 19 22:34:28 CST 2023
-> > > > > > > > MKFS_OPTIONS  -- -f /dev/loop0
-> > > > > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop0 /mnt/scratch
-> > > > > > > > 
-> > > > > > > > generic/251 260s ...  249s
-> > > > > > > > Ran: generic/251
-> > > > > > > > Passed all 1 tests
-> > > > > > > > 
-> > > > > > > > Thanks,
-> > > > > > > > Zorro
-> > > > > > > > 
-> > > > > > > > >  tests/generic/251 |   59 ++++++++++++++++++++++++++++++++++++++++++++++-------
-> > > > > > > > >  1 file changed, 51 insertions(+), 8 deletions(-)
-> > > > > > > > > 
-> > > > > > > > > diff --git a/tests/generic/251 b/tests/generic/251
-> > > > > > > > > index 8ee74980cc..40cfd7c381 100755
-> > > > > > > > > --- a/tests/generic/251
-> > > > > > > > > +++ b/tests/generic/251
-> > > > > > > > > @@ -53,14 +53,46 @@ _fail()
-> > > > > > > > >  	kill $mypid 2> /dev/null
-> > > > > > > > >  }
-> > > > > > > > >  
-> > > > > > > > > -_guess_max_minlen()
-> > > > > > > > > +# Set FSTRIM_{MIN,MAX}_MINLEN to the lower and upper bounds of the -m(inlen)
-> > > > > > > > > +# parameter to fstrim on the scratch filesystem.
-> > > > > > > > > +set_minlen_constraints()
-> > > > > > > > >  {
-> > > > > > > > > -	mmlen=100000
-> > > > > > > > > -	while [ $mmlen -gt 1 ]; do
-> > > > > > > > > +	local mmlen
-> > > > > > > > > +
-> > > > > > > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > > > > > > >  		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > > -		mmlen=$(($mmlen/2))
-> > > > > > > > >  	done
-> > > > > > > > > -	echo $mmlen
-> > > > > > > > > +	test $mmlen -gt 0 || \
-> > > > > > > > > +		_notrun "could not determine maximum FSTRIM minlen param"
-> > > > > > > > > +	FSTRIM_MAX_MINLEN=$mmlen
-> > > > > > > > > +
-> > > > > > > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_MINLEN; mmlen *= 2)); do
-> > > > > > > > > +		$FSTRIM_PROG -l $(($mmlen*2))k -m ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > > +	done
-> > > > > > > > > +	test $mmlen -le $FSTRIM_MAX_MINLEN || \
-> > > > > > > > > +		_notrun "could not determine minimum FSTRIM minlen param"
-> > > > > > > > > +	FSTRIM_MIN_MINLEN=$mmlen
-> > > > > > > > > +}
-> > > > > > > > > +
-> > > > > > > > > +# Set FSTRIM_{MIN,MAX}_LEN to the lower and upper bounds of the -l(ength)
-> > > > > > > > > +# parameter to fstrim on the scratch filesystem.
-> > > > > > > > > +set_length_constraints()
-> > > > > > > > > +{
-> > > > > > > > > +	local mmlen
-> > > > > > > > > +
-> > > > > > > > > +	for ((mmlen = 100000; mmlen > 0; mmlen /= 2)); do
-> > > > > > > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > > +	done
-> > > > > > > > > +	test $mmlen -gt 0 || \
-> > > > > > > > > +		_notrun "could not determine maximum FSTRIM length param"
-> > > > > > > > > +	FSTRIM_MAX_LEN=$mmlen
-> > > > > > > > > +
-> > > > > > > > > +	for ((mmlen = 1; mmlen < FSTRIM_MAX_LEN; mmlen *= 2)); do
-> > > > > > > > > +		$FSTRIM_PROG -l ${mmlen}k $SCRATCH_MNT &> /dev/null && break
-> > > > > > > > > +	done
-> > > > > > > > > +	test $mmlen -le $FSTRIM_MAX_LEN || \
-> > > > > > > > > +		_notrun "could not determine minimum FSTRIM length param"
-> > > > > > > > > +	FSTRIM_MIN_LEN=$mmlen
-> > > > > > > > >  }
-> > > > > > > > >  
-> > > > > > > > >  ##
-> > > > > > > > > @@ -70,13 +102,24 @@ _guess_max_minlen()
-> > > > > > > > >  ##
-> > > > > > > > >  fstrim_loop()
-> > > > > > > > >  {
-> > > > > > > > > +	set_minlen_constraints
-> > > > > > > > > +	set_length_constraints
-> > > > > > > > > +	echo "MINLEN max=$FSTRIM_MAX_MINLEN min=$FSTRIM_MIN_MINLEN" >> $seqres.full
-> > > > > > > > > +	echo "LENGTH max=$FSTRIM_MAX_LEN min=$FSTRIM_MIN_LEN" >> $seqres.full
-> > > > > > > > > +
-> > > > > > > > >  	trap "_destroy_fstrim; exit \$status" 2 15
-> > > > > > > > >  	fsize=$(_discard_max_offset_kb "$SCRATCH_MNT" "$SCRATCH_DEV")
-> > > > > > > > > -	mmlen=$(_guess_max_minlen)
-> > > > > > > > >  
-> > > > > > > > >  	while true ; do
-> > > > > > > > > -		step=$((RANDOM*$RANDOM+4))
-> > > > > > > > > -		minlen=$(((RANDOM*($RANDOM%2+1))%$mmlen))
-> > > > > > > > > +		while true; do
-> > > > > > > > > +			step=$((RANDOM*$RANDOM+4))
-> > > > > > > > > +			test "$step" -ge "$FSTRIM_MIN_LEN" && break
-> > > > > > > > > +		done
-> > > > > > > > > +		while true; do
-> > > > > > > > > +			minlen=$(( (RANDOM * (RANDOM % 2 + 1)) % FSTRIM_MAX_MINLEN ))
-> > > > > > > > > +			test "$minlen" -ge "$FSTRIM_MIN_MINLEN" && break
-> > > > > > > > > +		done
-> > > > > > > > > +
-> > > > > > > > >  		start=$RANDOM
-> > > > > > > > >  		if [ $((RANDOM%10)) -gt 7 ]; then
-> > > > > > > > >  			$FSTRIM_PROG $SCRATCH_MNT &
-> > > > > > > > > 
-> > > > > > > > 
-> > > > > > > 
-> > > > > > 
-> > > > > 
-> > > > 
-> > > 
-> > 
-> 
+diff --git a/tests/btrfs/219 b/tests/btrfs/219
+index b747ce34fcc4..44296c119b0a 100755
+--- a/tests/btrfs/219
++++ b/tests/btrfs/219
+@@ -12,7 +12,7 @@
+ #
+ 
+ . ./common/preamble
+-_begin_fstest quick volume
++_begin_fstest auto quick volume
+ 
+ # Override the default cleanup function.
+ _cleanup()
+@@ -79,15 +79,6 @@ _mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
+ 	_fail "Failed to mount the second time"
+ $UMOUNT_PROG $loop_mnt
+ 
+-# Now we definitely can't mount them at the same time, because we're still tied
+-# to the limitation of one fs_devices per fsid.
+-_btrfs_forget_or_module_reload
+-
+-_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
+-	_fail "Failed to mount the third time"
+-_mount -o loop $fs_img2 $loop_mnt1 > /dev/null 2>&1 && \
+-	_fail "We were allowed to mount when we should have failed"
+-
+ _btrfs_rescan_devices
+ # success, all done
+ echo "Silence is golden"
+-- 
+2.31.1
 
