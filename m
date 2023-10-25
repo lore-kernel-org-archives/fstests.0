@@ -2,121 +2,194 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B05FC0032E
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Oct 2023 15:32:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CB28C0032E
+	for <linux-fstests@archiver.kernel.org>; Wed, 25 Oct 2023 20:15:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233846AbjJYPcY (ORCPT
+        id S229695AbjJYUPs (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Oct 2023 11:32:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55282 "EHLO
+        Wed, 25 Oct 2023 16:15:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40622 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235048AbjJYPcW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 11:32:22 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3F12184;
-        Wed, 25 Oct 2023 08:32:20 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E660C433C9;
-        Wed, 25 Oct 2023 15:32:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1698247940;
-        bh=AVTx5lQPYgHLSGJTavoq8CVU+uCf50DO877w8nwruKw=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=IDiW4LCq64gwOm+NPf+IdH3/9FQ7h8d1HEV/pMTrn3hEOHM/hizw/2uNax/tWaIkF
-         Eeo+7pX+QI4CPV4RTlkfr6+3CwkO2vXWsnN2diDyVx3y7rs8Oc+sgoMn6IJdt6dgcf
-         3vEmmfr0tw4KWMBYURBVvbxEFdO9938DuhJzkC0C5ws1gGKcT45LcqWAuAFnAZk16a
-         9wgKk9mVTEOewdthjFnljrRu3kqmp1iWTf1pC6tAkoPTKPboD0Iatp0Q8ZksrwyIbN
-         h9fPGJulCjCybjbBupfHm/1YeZg4ajkdDATl3lqPXBFB9k8H3cecW1qH/wgLA+rMdr
-         z9p26TrVjnP5A==
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-9ba081173a3so919042966b.1;
-        Wed, 25 Oct 2023 08:32:20 -0700 (PDT)
-X-Gm-Message-State: AOJu0YzyUJNjQS+WjmKenurqQ95r+v4xpOJPsvlhM7KPMrcAZqq/66y4
-        kYZda0ToOtor8IZdTcHrmgp2950pNqqBkWj4XJ0=
-X-Google-Smtp-Source: AGHT+IFBjoUUVvhkSZ016wtYSOPQNixEa20PoYMyEiijmi/iAUFVe89Ix6wUtRlXO1ywRbbWhMNwsORR5UjYc7NkhuI=
-X-Received: by 2002:a17:907:d86:b0:9be:b7da:72d6 with SMTP id
- go6-20020a1709070d8600b009beb7da72d6mr12752191ejc.63.1698247938904; Wed, 25
- Oct 2023 08:32:18 -0700 (PDT)
+        with ESMTP id S229441AbjJYUPs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 16:15:48 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C77BA4
+        for <fstests@vger.kernel.org>; Wed, 25 Oct 2023 13:15:46 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id 98e67ed59e1d1-27d4b280e4eso94379a91.1
+        for <fstests@vger.kernel.org>; Wed, 25 Oct 2023 13:15:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1698264945; x=1698869745; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=wNKFRrcGPKCw2urMVlYjSwpGmX50PHCHf7m+Ggr/ItU=;
+        b=0oMP+nZgov3lwm/QG0dK5qWF5AQDMedyZwC5T+nYcHE5prN+NvdZpEXbSQj5mvOW3K
+         Mpu3dy/z8T3Z3IeMRoGN/TYRnc+B3BFU+fz6ZWNmuDFbVAQNC60hUATC8bNPbAXqYeGu
+         iJVUle14MSf4KH4/ETMhcvkQADO2pGETe3DOFS+UuhJBqdOCcFfLD117Tf5MyiJsGF5A
+         repG4hVsq9Z3ecjno3JjaZt4XZS4DV9XT3Dnnfy5fB/lJR8aGyKhluKkfo4KqtHcXdrN
+         B4M/z+RryAfnTpoNcbU7/xt9pKojliq0JOs5losRX0tqeWEwwJvqt98z/cHcqP5/jEyl
+         rzuQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698264945; x=1698869745;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wNKFRrcGPKCw2urMVlYjSwpGmX50PHCHf7m+Ggr/ItU=;
+        b=La99nKFXM1GCbIEw+CWtU2/PM/aIRIMFiYVnpGYuCEdUeZWLQk4drzwFzIiXPGZZ0C
+         mZG5RIoRPa14yWd0G6eO7Wz/nI8SSKyNToDl+DJgdFbNfJV+wvnILF/+P5Q/oGn6jrVC
+         k3pHbCyCnz4b6LCogJ+eu57iOPjtdQtPY4UOmro0JVxNtVEYhxzMWeE8uZsKf9MOfs8n
+         b8oqQ/LawsWmjEI5DKjI5/+k8m9CKvBsqIpQ/Ng+ngMgvQIGMpFDIxvjzu5gKppoe4hd
+         8d1dKbBIRWX2q+y1YkAhsZSp3wejlVIOEPVCC17TMzfllQxYd+olgAiesAO5s8iovewO
+         CwUA==
+X-Gm-Message-State: AOJu0Yxy++IW2f3ecPiURQMzFRX5rXlLdo1tLs8G7Gng/v6mkWrQM/SV
+        aGi7cnti6iYyCLlXckGha3eeBQ==
+X-Google-Smtp-Source: AGHT+IFWre9y5UnZUXpG9XIHgHLhDKerCZ8Di3Xxue/0aJEEnDpUpBEtG8BpQ4sZafw2HaOA7+2EpQ==
+X-Received: by 2002:a17:90b:3e87:b0:27c:f282:adac with SMTP id rj7-20020a17090b3e8700b0027cf282adacmr852056pjb.0.1698264945390;
+        Wed, 25 Oct 2023 13:15:45 -0700 (PDT)
+Received: from telecaster ([2620:10d:c090:500::6:9893])
+        by smtp.gmail.com with ESMTPSA id bv8-20020a17090af18800b0027df62a9e68sm286190pjb.13.2023.10.25.13.15.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Oct 2023 13:15:44 -0700 (PDT)
+Date:   Wed, 25 Oct 2023 13:15:43 -0700
+From:   Omar Sandoval <osandov@osandov.com>
+To:     "Darrick J. Wong" <djwong@kernel.org>
+Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+        kernel-team@fb.com
+Subject: Re: [PATCH fstests] xfs: test refilling AGFL after lots of btree
+ splits
+Message-ID: <ZTl3b3dqgEHUZ+w/@telecaster>
+References: <013168d2de9d25c56fe45ad75e9257cf9664f2d6.1698190191.git.osandov@fb.com>
+ <c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com>
+ <20231025152702.GE3195650@frogsfrogsfrogs>
 MIME-Version: 1.0
-References: <39311089b30f9250ff7f7a0aabb70547616a4b3a.1698230869.git.anand.jain@oracle.com>
-In-Reply-To: <39311089b30f9250ff7f7a0aabb70547616a4b3a.1698230869.git.anand.jain@oracle.com>
-From:   Filipe Manana <fdmanana@kernel.org>
-Date:   Wed, 25 Oct 2023 16:31:42 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H6Yg6bv1pKjA6dVjgr45Z=-YkDzcr3RzaV284d8uLxAdg@mail.gmail.com>
-Message-ID: <CAL3q7H6Yg6bv1pKjA6dVjgr45Z=-YkDzcr3RzaV284d8uLxAdg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/219 cloned-device mount capability update
-To:     Anand Jain <anand.jain@oracle.com>
-Cc:     fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231025152702.GE3195650@frogsfrogsfrogs>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 25, 2023 at 11:51=E2=80=AFAM Anand Jain <anand.jain@oracle.com>=
- wrote:
->
-> This test case originally checked for failed cloned device mounts, which
-> is no longer relevant after the commit a5b8a5f9f835 ("btrfs: support
-> cloned-device mount capability"). So removing the obsolete part.
->
-> For older kernels without this commit, the test case still serves its cor=
-e
-> purpose.
->
-> Additionally, add this test case back to the auto group which reverts the
-> commit e2e7b549380a ("fstests: btrfs/219: remove it from auto group") sin=
-ce
-> the previously missing kernel commit 5f58d783fd78 ("btrfs: free device in
-> btrfs_close_devices for a single device filesystem") has already been
-> integrated.
->
-> Reported-by: kernel test robot <oliver.sang@intel.com>
-> Closes: https://lore.kernel.org/oe-lkp/202310251645.5fe5495a-oliver.sang@=
-intel.com
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/btrfs/219 | 11 +----------
->  1 file changed, 1 insertion(+), 10 deletions(-)
->
-> diff --git a/tests/btrfs/219 b/tests/btrfs/219
-> index b747ce34fcc4..44296c119b0a 100755
-> --- a/tests/btrfs/219
-> +++ b/tests/btrfs/219
-> @@ -12,7 +12,7 @@
->  #
->
->  . ./common/preamble
-> -_begin_fstest quick volume
-> +_begin_fstest auto quick volume
->
->  # Override the default cleanup function.
->  _cleanup()
-> @@ -79,15 +79,6 @@ _mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
->         _fail "Failed to mount the second time"
->  $UMOUNT_PROG $loop_mnt
->
-> -# Now we definitely can't mount them at the same time, because we're sti=
-ll tied
-> -# to the limitation of one fs_devices per fsid.
-> -_btrfs_forget_or_module_reload
-> -
-> -_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-> -       _fail "Failed to mount the third time"
-> -_mount -o loop $fs_img2 $loop_mnt1 > /dev/null 2>&1 && \
-> -       _fail "We were allowed to mount when we should have failed"
-> -
+On Wed, Oct 25, 2023 at 08:27:02AM -0700, Darrick J. Wong wrote:
+> On Tue, Oct 24, 2023 at 04:37:42PM -0700, Omar Sandoval wrote:
+> > This is a regression test for patch "xfs: fix internal error from AGFL
+> > exhaustion"), which is not yet merged. Without the fix, it will fail
+> > with a "Structure needs cleaning" error.
+> 
+> Will look at the actual code patch next...
+> 
+> > Signed-off-by: Omar Sandoval <osandov@osandov.com>
+> > ---
+> >  tests/xfs/601     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/601.out |  2 ++
+> >  2 files changed, 64 insertions(+)
+> >  create mode 100755 tests/xfs/601
+> >  create mode 100644 tests/xfs/601.out
+> > 
+> > diff --git a/tests/xfs/601 b/tests/xfs/601
+> > new file mode 100755
+> > index 00000000..bbc5b443
+> > --- /dev/null
+> > +++ b/tests/xfs/601
+> > @@ -0,0 +1,62 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) Meta Platforms, Inc. and affiliates.
+> > +#
+> > +# FS QA Test 601
+> > +#
+> > +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto prealloc punch
+> > +
+> > +. ./common/filter
+> > +
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_test_program punch-alternating
+> > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
+> > +
+> > +_scratch_mkfs -m rmapbt=0 | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
+> 
+> Need to probe if mkfs.xfs actually supports rmapbt options first, since
+> this bug applies to old fses from before rmap even existed, right?
 
-For kernels without the cloned-device feature, it's useful to still
-test this... We want to catch regressions on stable releases and
-downstream (distros).
-Rather than removing this code, I would rather run the code only if
-the kernel does not support the feature (file
-/sys/fs/btrfs/features/temp_fsid does not exist).
+Good point. Something like:
 
-Thanks.
+opts=
+if $MKFS_XFS_PROG |& grep rmapbt; then
+	opts="-m rmapbt=0"
+fi
+_scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
 
->  _btrfs_rescan_devices
->  # success, all done
->  echo "Silence is golden"
-> --
-> 2.31.1
->
+> (Or: What changes are needed to make the reproducer work with rmapbt
+> enabled?)
+
+We'd need to craft the filesystem in a way that a single operation
+splits and adds a new level to the bnobt, cntbt, and rmapbt all at the
+same time. It can probably be done, but I suspect it'd be much more
+complicated :(
+
+> > +. "$tmp.mkfs"
+> > +_scratch_mount
+> > +
+> > +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
+> > +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
+> > +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
+> > +
+> > +# Create a big file with a size such that the punches below create the exact
+> > +# free extents we want.
+> > +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
+> > +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
+> 
+> What happens if the allocations are all in some other AG?  The scratch
+> device could be 100TB.
+
+Yeah, this relies on all of the allocations going to AG 0, and the big
+fallocate getting one contiguous extent. That always happened for me on
+a few different sized filesystems, but I understand it's not guaranteed.
+Maybe I should create the filesystem with -d agcount=1?
+
+> > +# Fill in any small free extents in AG 0. After this, there should be only one,
+> > +# large free extent.
+> > +_scratch_unmount
+> > +mapfile -t gaps < <($XFS_DB_PROG -c 'agf 0' -c 'addr cntroot' -c 'p recs' "$SCRATCH_DEV" |
+> > +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
+> > +	tac | tail -n +2)
+> 
+> _scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c 'btdump' ?
+
+Will fix.
+
+> > +_scratch_mount
+> > +for gap_i in "${!gaps[@]}"; do
+> > +	gap=${gaps[$gap_i]}
+> > +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
+> > +done
+> > +
+> > +# Create enough free space records to make the bnobt and cntbt both full,
+> > +# 2-level trees, plus one more record to make them split all the way to the
+> > +# root and become 3-level trees. After this, there is a 7-block free extent in
+> > +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
+> > +# than the rightmost two are full. Without the fix, the free list is also
+> > +# empty.
+> > +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
+> > +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
+> > +
+> > +# Do an arbitrary operation that refills the free list. Without the fix, this
+> > +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
+> > +# the cntbt, then try to insert the remaining 1 block free extent in the
+> > +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
+> > +# leaf and fails because the free list is empty.
+> > +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
+> > +
+> > +echo "Silence is golden"
+> 
+> Without the fix applied, what happens now?  Does fpunch fail with EIO
+> to taint the golden output?
+
+It fails with EFSCORRUPTED/EUCLEAN and prints an error message as noted
+in my commit message, yeah.
+
+Thanks!
+
+Omar
