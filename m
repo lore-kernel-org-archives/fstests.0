@@ -2,187 +2,94 @@ Return-Path: <fstests-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6AE2C0032E
-	for <linux-fstests@archiver.kernel.org>; Wed, 25 Oct 2023 22:05:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 684AAC0032E
+	for <linux-fstests@archiver.kernel.org>; Thu, 26 Oct 2023 03:12:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229649AbjJYWFq (ORCPT
+        id S229596AbjJZDMG (ORCPT
         <rfc822;linux-fstests@archiver.kernel.org>);
-        Wed, 25 Oct 2023 18:05:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43068 "EHLO
+        Wed, 25 Oct 2023 23:12:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229677AbjJYWFp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 18:05:45 -0400
+        with ESMTP id S229954AbjJZDMF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2023 23:12:05 -0400
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27269137;
-        Wed, 25 Oct 2023 15:05:43 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BCEB5C433C8;
-        Wed, 25 Oct 2023 22:05:42 +0000 (UTC)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7203BA3;
+        Wed, 25 Oct 2023 20:12:03 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6890C433C8;
+        Thu, 26 Oct 2023 03:12:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1698271542;
-        bh=sXgCZDGvHjX5ThjhyGj/jyEl+TF9e+Epo8eZ2CaHRjg=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=YBLYuxak40DkVG6Nzny/S8oiHzZMKK6NzhdYr08HtKT62+cBPdhhbhu3+pjR2J1/q
-         SNxpu24YfOVeaz+oYDL0/W7HCQzjF7kNfdekTJjW77wnpTMQdusST8kADahaEbqs1Y
-         PzPU4OWcrIfWvih6K+eey6fW4pG1FD74mjiEZYSIikJUhpfHkl+tqmOLJpY2F/vQVB
-         vtr5bMDuD6+PK2KIcEXzFfb7Pk68gd9rmZdOL5Du1ibCJ7c/IPPXkzzfDOJ8pgLP04
-         Q0zwcvXrB/N+H7A23QJ43F1hmBwPLzshyO7LSjV5BqI8lqitLBIWMR6vsc17ZN/G8j
-         kHqHzEcyu5MYA==
-Date:   Wed, 25 Oct 2023 15:05:42 -0700
+        s=k20201202; t=1698289922;
+        bh=DMKEiucjBrbAkBtbJr3/1/zCnWag9V9rQQLaak8nDKs=;
+        h=Date:From:To:Cc:Subject:From;
+        b=duZG+ZZJ/P+hmb5+Na0JO1MTlASYuUPgckDthEvOhQu+72WFGbQqN+S4KVeD90s2n
+         ua9xY3X5Ettopeyl7rr7th1FZ0MSLuWj5tftTMfmwv8Iem4vCpIy0X3Dq5Y0k1EPzi
+         NM25Nb1EP0x+mcUruy5MmGtgxt3OKPQQOwTPJMfuepsGxTWnDH9KOeV5/aCh05u59J
+         UKqAew9v59Te8JcGj1SIL5Cauqi7O5G6m6elfQ7n0BMYN1IMZqb1Ak8Q/AvlHhM7dt
+         2svECyO1WysDHnwMqw61HIUFB7uDtt8FrwTA1A/Hgv7QDm6SI7ZY8F+INnx1CQF0SO
+         1XqqmXjxkIdMg==
+Date:   Wed, 25 Oct 2023 20:12:02 -0700
 From:   "Darrick J. Wong" <djwong@kernel.org>
-To:     Omar Sandoval <osandov@osandov.com>
-Cc:     fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-        kernel-team@fb.com
-Subject: Re: [PATCH fstests] xfs: test refilling AGFL after lots of btree
- splits
-Message-ID: <20231025220542.GL11391@frogsfrogsfrogs>
-References: <013168d2de9d25c56fe45ad75e9257cf9664f2d6.1698190191.git.osandov@fb.com>
- <c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com>
- <20231025152702.GE3195650@frogsfrogsfrogs>
- <ZTl3b3dqgEHUZ+w/@telecaster>
+To:     zlang@redhat.com
+Cc:     linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me
+Subject: [PATCH 1/2] generic/251: don't snapshot $here during a test
+Message-ID: <20231026031202.GM11391@frogsfrogsfrogs>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZTl3b3dqgEHUZ+w/@telecaster>
 Precedence: bulk
 List-ID: <fstests.vger.kernel.org>
 X-Mailing-List: fstests@vger.kernel.org
 
-On Wed, Oct 25, 2023 at 01:15:43PM -0700, Omar Sandoval wrote:
-> On Wed, Oct 25, 2023 at 08:27:02AM -0700, Darrick J. Wong wrote:
-> > On Tue, Oct 24, 2023 at 04:37:42PM -0700, Omar Sandoval wrote:
-> > > This is a regression test for patch "xfs: fix internal error from AGFL
-> > > exhaustion"), which is not yet merged. Without the fix, it will fail
-> > > with a "Structure needs cleaning" error.
-> > 
-> > Will look at the actual code patch next...
-> > 
-> > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
-> > > ---
-> > >  tests/xfs/601     | 62 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/601.out |  2 ++
-> > >  2 files changed, 64 insertions(+)
-> > >  create mode 100755 tests/xfs/601
-> > >  create mode 100644 tests/xfs/601.out
-> > > 
-> > > diff --git a/tests/xfs/601 b/tests/xfs/601
-> > > new file mode 100755
-> > > index 00000000..bbc5b443
-> > > --- /dev/null
-> > > +++ b/tests/xfs/601
-> > > @@ -0,0 +1,62 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> > > +#
-> > > +# FS QA Test 601
-> > > +#
-> > > +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto prealloc punch
-> > > +
-> > > +. ./common/filter
-> > > +
-> > > +_supported_fs xfs
-> > > +_require_scratch
-> > > +_require_test_program punch-alternating
-> > > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
-> > > +
-> > > +_scratch_mkfs -m rmapbt=0 | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
-> > 
-> > Need to probe if mkfs.xfs actually supports rmapbt options first, since
-> > this bug applies to old fses from before rmap even existed, right?
-> 
-> Good point. Something like:
-> 
-> opts=
-> if $MKFS_XFS_PROG |& grep rmapbt; then
-> 	opts="-m rmapbt=0"
-> fi
-> _scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
+From: Darrick J. Wong <djwong@kernel.org>
 
-Yep, that works.
+Zorro complained that the next patch caused him a regression:
 
-> > (Or: What changes are needed to make the reproducer work with rmapbt
-> > enabled?)
-> 
-> We'd need to craft the filesystem in a way that a single operation
-> splits and adds a new level to the bnobt, cntbt, and rmapbt all at the
-> same time. It can probably be done, but I suspect it'd be much more
-> complicated :(
-> 
-> > > +. "$tmp.mkfs"
-> > > +_scratch_mount
-> > > +
-> > > +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
-> > > +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
-> > > +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
-> > > +
-> > > +# Create a big file with a size such that the punches below create the exact
-> > > +# free extents we want.
-> > > +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
-> > > +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
-> > 
-> > What happens if the allocations are all in some other AG?  The scratch
-> > device could be 100TB.
-> 
-> Yeah, this relies on all of the allocations going to AG 0, and the big
-> fallocate getting one contiguous extent. That always happened for me on
-> a few different sized filesystems, but I understand it's not guaranteed.
-> Maybe I should create the filesystem with -d agcount=1?
+generic/251 249s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/251.out.bad)
+    --- tests/generic/251.out   2022-04-29 23:07:23.263498297 +0800
+    +++ /root/git/xfstests/results//generic/251.out.bad 2023-10-22 14:17:07.248059405 +0800
+    @@ -1,2 +1,5 @@
+     QA output created by 251
+     Running the test: done.
+    +5838a5839
+    +> aa60581221897d3d7dd60458e1cca2fa  ./results/generic/251.full
+    +!!!Checksums has changed - Filesystem possibly corrupted!!!\n
+    ...
+    (Run 'diff -u /root/git/xfstests/tests/generic/251.out /root/git/xfstests/results//generic/251.out.bad'  to see the entire diff)
+Ran: generic/251
+Failures: generic/251
+Failed 1 of 1 tests
 
-Hmm.  xfs_repair is likely to get cranky about single-AG filesystems...
+The next patch writes some debugging information into $seqres.full,
+which is a file underneat $RESULT_BASE.  If the test operator does not
+set RESULT_BASE, it will be set to a subdir of $here by default.  Since
+this test also snapshots the contents of $here before starting its loop,
+any logging to $seqres.full on such a system will cause the post-copy
+checksum to fail due to a mismatch.
 
-> > > +# Fill in any small free extents in AG 0. After this, there should be only one,
-> > > +# large free extent.
-> > > +_scratch_unmount
-> > > +mapfile -t gaps < <($XFS_DB_PROG -c 'agf 0' -c 'addr cntroot' -c 'p recs' "$SCRATCH_DEV" |
-> > > +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
-> > > +	tac | tail -n +2)
-> > 
-> > _scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c 'btdump' ?
-> 
-> Will fix.
+Fix all this by copying $here to $SCRATCH_DEV and checksumming the copy
+before the FITRIM stress test begins to avoid problems with $seqres.full.
 
-> > > +_scratch_mount
-> > > +for gap_i in "${!gaps[@]}"; do
-> > > +	gap=${gaps[$gap_i]}
-> > > +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
-> > > +done
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ tests/generic/251 |    8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-...but you could check that the AG 0 cntbt actually has one large free
-extent, as the comment says should be the case.
-
-> > > +
-> > > +# Create enough free space records to make the bnobt and cntbt both full,
-> > > +# 2-level trees, plus one more record to make them split all the way to the
-> > > +# root and become 3-level trees. After this, there is a 7-block free extent in
-> > > +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
-> > > +# than the rightmost two are full. Without the fix, the free list is also
-> > > +# empty.
-> > > +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
-> > > +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
-> > > +
-> > > +# Do an arbitrary operation that refills the free list. Without the fix, this
-> > > +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
-> > > +# the cntbt, then try to insert the remaining 1 block free extent in the
-> > > +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
-> > > +# leaf and fails because the free list is empty.
-> > > +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
-> > > +
-> > > +echo "Silence is golden"
-> > 
-> > Without the fix applied, what happens now?  Does fpunch fail with EIO
-> > to taint the golden output?
-> 
-> It fails with EFSCORRUPTED/EUCLEAN and prints an error message as noted
-> in my commit message, yeah.
-
-Cool!  Looking forward to the next revision. :)
-
---D
-
-> 
-> Thanks!
-> 
-> Omar
+diff --git a/tests/generic/251 b/tests/generic/251
+index 8ee74980cc..3b807df5fa 100755
+--- a/tests/generic/251
++++ b/tests/generic/251
+@@ -130,7 +130,13 @@ function run_process() {
+ }
+ 
+ nproc=20
+-content=$here
++
++# Copy $here to the scratch fs and make coipes of the replica.  The fstests
++# output (and hence $seqres.full) could be in $here, so we need to snapshot
++# $here before computing file checksums.
++content=$SCRATCH_MNT/orig
++mkdir -p $content
++cp -axT $here/ $content/
+ 
+ mkdir -p $tmp
+ 
