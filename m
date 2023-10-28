@@ -1,120 +1,85 @@
-Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C39B9ECA
-	for <fstests@vger.kernel.org>; Sat, 28 Oct 2023 06:56:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 995A9AB
-	for <fstests@vger.kernel.org>; Fri, 27 Oct 2023 23:56:50 -0700 (PDT)
-Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.56])
-	by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4SHVZK0G3MzpWXC;
-	Sat, 28 Oct 2023 14:51:53 +0800 (CST)
-Received: from huawei.com (10.175.127.227) by dggpeml500021.china.huawei.com
- (7.185.36.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.31; Sat, 28 Oct
- 2023 14:56:47 +0800
-From: Baokun Li <libaokun1@huawei.com>
-To: <fstests@vger.kernel.org>
-CC: <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
-	<ritesh.list@gmail.com>, <yangerkun@huawei.com>, <libaokun1@huawei.com>
-Subject: [PATCH] ext4: Regression test of ext4_lblk_t overflow
-Date: Sat, 28 Oct 2023 15:01:23 +0800
-Message-ID: <20231028070123.971548-1-libaokun1@huawei.com>
-X-Mailer: git-send-email 2.31.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39E3C1FCF
+	for <fstests@vger.kernel.org>; Sat, 28 Oct 2023 11:09:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PvZ8iDdT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98870C433C7;
+	Sat, 28 Oct 2023 11:09:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1698491399;
+	bh=fsZh7F34DWdcWjhD/YNCEhJ1lZ/E1/1pAk3CZbPpY3Q=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=PvZ8iDdTveDRVgVlTU8azVWRCzbgcEzP5S1tFB01DXdwCnphcJeu2dvQJHDLOKh2/
+	 AqKAgijSHTHe4XZ4Dfa9rgWXepZwmzg55+2DMAutBvNXLCHQDMmzTV0BUglDczl3+z
+	 2L/JIBqNl+6MXagZzSEWESapuPfWv9gYMB49swwtsyKR7YU+IRMfe3VdJyN+w+7rmM
+	 14Pcty6e1aQnQQAHnjf5aJx6b/3285RLhYZ2N4p0EIz9dN3h9j0cMNiJeMDtnIP5ds
+	 8Tllj8bUdyYwH0UXV0c54aWAW1T2QZ1X+fcHY6Bp351/ekm60LIlcfXR+AxngH6a/a
+	 r62phSKkb+Yfg==
+Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-9c41e95efcbso404009266b.3;
+        Sat, 28 Oct 2023 04:09:59 -0700 (PDT)
+X-Gm-Message-State: AOJu0YyPNzc5W0I0nbLjnWd5urzVgoRI1jdjkNCSzisaGt01a1B8YZ6f
+	cYxJKpbStsfu24aeJddxAZ9K7BIHNlzI9E71Ghs=
+X-Google-Smtp-Source: AGHT+IFXmNsQ6cyP4vV49wGU6OTN8gk0VvJAb6uxlUmvCGPsAo4rnUI1UQR6UCEXfXVP/27+agwtlj13dSk5FRdXbZg=
+X-Received: by 2002:a17:906:db09:b0:9ad:f7e5:67d9 with SMTP id
+ xj9-20020a170906db0900b009adf7e567d9mr4152778ejb.4.1698491398051; Sat, 28 Oct
+ 2023 04:09:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.175.127.227]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpeml500021.china.huawei.com (7.185.36.21)
-X-CFilter-Loop: Reflected
+References: <cover.1698418886.git.anand.jain@oracle.com> <678808b10d005e976f5e299816b63c8e6fa44c4a.1698418886.git.anand.jain@oracle.com>
+In-Reply-To: <678808b10d005e976f5e299816b63c8e6fa44c4a.1698418886.git.anand.jain@oracle.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Sat, 28 Oct 2023 12:09:21 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7O2U-Gc7t9EHv0aJSBA5MDouK02b=6RNtgyfg3_crhqA@mail.gmail.com>
+Message-ID: <CAL3q7H7O2U-Gc7t9EHv0aJSBA5MDouK02b=6RNtgyfg3_crhqA@mail.gmail.com>
+Subject: Re: [PATCH 1/2 v2] common/rc: _fs_sysfs_dname fetch fsid using btrfs tool
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Append writes to a file approaching 16T and observe if a kernel crash is
-caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-This is a regression test for commit bc056e7163ac ("ext4: fix BUG in
-ext4_mb_new_inode_pa() due to overflow")
+On Fri, Oct 27, 2023 at 4:14=E2=80=AFPM Anand Jain <anand.jain@oracle.com> =
+wrote:
+>
+> Currently _fs_sysfs_dname gets fsid from the findmnt command however
+> this command provides the metadata_uuid in the context device is
+> mounted with temp-fsid. So instead, use btrfs filesystem show command to
+> know the temp-fsid.
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> v2: new.
+>
+>  common/rc | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/common/rc b/common/rc
+> index 259a1ffb09b9..deeffe4228d4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4728,7 +4728,9 @@ _fs_sysfs_dname()
+>
+>         case "$FSTYP" in
+>         btrfs)
+> -               findmnt -n -o UUID ${dev} ;;
+> +               fsid=3D$($BTRFS_UTIL_PROG filesystem show ${dev} | grep u=
+uid: | \
+> +                                                       awk '{print $NF}'=
+)
 
-Signed-off-by: Baokun Li <libaokun1@huawei.com>
----
- tests/ext4/062     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/062.out |  2 ++
- 2 files changed, 55 insertions(+)
- create mode 100755 tests/ext4/062
- create mode 100644 tests/ext4/062.out
+Please make the variable local.
 
-diff --git a/tests/ext4/062 b/tests/ext4/062
-new file mode 100755
-index 00000000..0ae4ed80
---- /dev/null
-+++ b/tests/ext4/062
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
-+#
-+# FS QA Test No. 062
-+#
-+# Append writes to a file approaching 16T and observe if a kernel crash is
-+# caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-+# This is a regression test for commit
-+# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick insert
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_fixed_by_kernel_commit bc056e7163ac \
-+	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
-+
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "open"
-+_require_xfs_io_command "pwrite"
-+_require_scratch_size_nocheck $((100 * 1024))   # 100MB in KB
-+
-+# Initalize a 4k 100M ext4 fs
-+dev_size=$((100 * 1024 * 1024))
-+MKFS_OPTIONS="-b 4096 $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
-+	>>$seqres.full 2>&1 || _fail "mkfs failed"
-+
-+_scratch_mount
-+
-+# Reserve 1M space
-+$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full 2>&1
-+
-+# Create a file with logical block numbers close to overflow
-+$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c "finsert 1M 16777203M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
-+
-+# Filling up the free space ensures that the pre-allocated space is the reserved space.
-+$XFS_IO_PROG -f -c "falloc 0 80388096" "${SCRATCH_MNT}/fill" >> $seqres.full 2>&1
-+
-+# Remove reserved space to gain free space for allocation
-+rm -f ${SCRATCH_MNT}/tmp
-+
-+# Trying to allocate two blocks triggers BUG_ON.
-+$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 8192" >> $seqres.full 2>&1
-+
-+umount "${SCRATCH_MNT}"
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/062.out b/tests/ext4/062.out
-new file mode 100644
-index 00000000..a1578f48
---- /dev/null
-+++ b/tests/ext4/062.out
-@@ -0,0 +1,2 @@
-+QA output created by 062
-+Silence is golden
--- 
-2.31.1
+Thanks.
 
+> +               echo $fsid ;;
+>         *)
+>                 _short_dev $dev ;;
+>         esac
+> --
+> 2.39.3
+>
