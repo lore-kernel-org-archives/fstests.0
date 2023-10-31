@@ -1,395 +1,155 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EA531E52F
-	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 15:39:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C097112E57
+	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 21:25:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="n7LYVvt9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BAF6CC433C8;
-	Tue, 31 Oct 2023 15:39:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="teexWezt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23A28C433C7;
+	Tue, 31 Oct 2023 21:25:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1698766796;
-	bh=q6qDhLG1BHd16Qr5i45po+R3KGdPCDDX+MO+gWEawlE=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=n7LYVvt9cOCebrmC3hDl54tnPRGLe3r1fjPpPx1fT7Pc1kzNu+AHr8aqTufwNoaPX
-	 8SERRGzjCIGTJZ/QCHFVu3Cq5lKoZ7Yi+M5bX0dxfSvtNhdtqT8B2zi6r4iXm1t/JS
-	 laEIAPbdPsyBhCV7pcwA85DhSJFk2pGRMVUJmGgWJmZfWUvYFPkoYDtaPSsSK3Xzml
-	 B+/kF5cHaFqOsA4Muo4J3G/TAV1eDI+jSnAUZNxGYPR0NZ/6Bl+gETZi9rkMivcg77
-	 KQIFUAPgns2fs7l16NgmZwEsyD5WxiF+uAN2c4PU/mM0tinHEANuebZUkw4+XJDoli
-	 co0aClEebosag==
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-9be02fcf268so861202266b.3;
-        Tue, 31 Oct 2023 08:39:56 -0700 (PDT)
-X-Gm-Message-State: AOJu0Ywx6V6IZDE0gYM3tD9gOsnDxOwivLudrghHuE86D2i33epAIM2m
-	kXYo20OVe9mYPplqxQJHayCN0WSegqEarAVruHY=
-X-Google-Smtp-Source: AGHT+IGkIvv+M/TLtJuUOGMtBLrWo+1PZCja3VehbOA3OYTijeiLOLLXukPH16eYqjt0/VPOSwLCwj4EHsSiUjLQ8ds=
-X-Received: by 2002:a17:907:720e:b0:9bd:c592:e0ce with SMTP id
- dr14-20020a170907720e00b009bdc592e0cemr10390261ejc.51.1698766795109; Tue, 31
- Oct 2023 08:39:55 -0700 (PDT)
+	s=k20201202; t=1698787500;
+	bh=v4rP/GnoadJW0JP8/YFl63nAgZgBI+CPrilnlqN/wzs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=teexWeztF5K/qTLgJxBgBipYYjmHiWoq+1FDGSm6f+WD32pRfULlo3CRnf3lUDY94
+	 dG5Jm63U/xK5ZfEIzjIef5jy9Fda8EjTB/f0zdbBZAf91VSKu3ii/H74B184ANccWy
+	 7LbTtJblXM3lmJUMgsysp/E+igW6fE7GSVXKfh7GFnbn1qETRCORjDxbhbRqqHeGLA
+	 D0z7KwA/7uegIWc9osXw+VLqID6UaBhPrs2yORiCgWfSQe2NVbK5O3FyrQbrx52VKt
+	 AQBtth3cy/pFivf2yvaju6KuHuhjHkzQiHXpKWNrE2uRWtTONe3M05DA22nGowN3jB
+	 g03TRwrXfvNbw==
+Date: Tue, 31 Oct 2023 14:24:59 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com,
+	Dave Chinner <dchinner@redhat.com>
+Subject: Re: [PATCH fstests v2] xfs: test refilling AGFL after lots of btree
+ splits
+Message-ID: <20231031212459.GB1205143@frogsfrogsfrogs>
+References: <68cd85697855f686529829a2825b044913148caf.1698699188.git.osandov@fb.com>
+ <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1696969376.git.josef@toxicpanda.com> <9a17afb133849c2321bb98c07c48cff2aaf1d87a.1696969376.git.josef@toxicpanda.com>
-In-Reply-To: <9a17afb133849c2321bb98c07c48cff2aaf1d87a.1696969376.git.josef@toxicpanda.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 31 Oct 2023 15:39:18 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H5eg0Xs+-JYnHnh11ogUB=GSaCGT_C0a4QFVnj_--oFng@mail.gmail.com>
-Message-ID: <CAL3q7H5eg0Xs+-JYnHnh11ogUB=GSaCGT_C0a4QFVnj_--oFng@mail.gmail.com>
-Subject: Re: [PATCH 07/12] btrfs: test snapshotting encrypted subvol
-To: Josef Bacik <josef@toxicpanda.com>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org, Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
 
-On Tue, Oct 10, 2023 at 9:26=E2=80=AFPM Josef Bacik <josef@toxicpanda.com> =
-wrote:
->
-> From: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
->
-> Make sure that snapshots of encrypted data are readable and writeable.
->
-> Test deliberately high-numbered to not conflict.
->
-> Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
+On Mon, Oct 30, 2023 at 02:00:15PM -0700, Omar Sandoval wrote:
+> This is a regression test for patch "xfs: fix internal error from AGFL
+> exhaustion"), which is not yet merged. Without the fix, it will fail
+> with a "Structure needs cleaning" error.
+> 
+> Signed-off-by: Omar Sandoval <osandov@osandov.com>
+
+Looks good now,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+
+--D
+
 > ---
->  tests/btrfs/614     |  76 ++++++++++++++++++++++++++++++
->  tests/btrfs/614.out | 111 ++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 187 insertions(+)
->  create mode 100755 tests/btrfs/614
->  create mode 100644 tests/btrfs/614.out
->
-> diff --git a/tests/btrfs/614 b/tests/btrfs/614
+> Changes since v1 [1]:
+> 
+> - Fixed to check whether mkfs.xfs supports -m rmapbt.
+> - Changed bare $XFS_DB calls to _scratch_xfs_db.
+> - Expanded comment about what happens without the fix.
+> 
+> I didn't add a check for whether everything ended up in AG 0, because it
+> wasn't clear to me what to do in that case. We could skip the test, but
+> it also doesn't hurt to run it anyways.
+> 
+> 1: https://lore.kernel.org/linux-xfs/c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com/
+> 
+>  tests/xfs/601     | 68 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/601.out |  2 ++
+>  2 files changed, 70 insertions(+)
+>  create mode 100755 tests/xfs/601
+>  create mode 100644 tests/xfs/601.out
+> 
+> diff --git a/tests/xfs/601 b/tests/xfs/601
 > new file mode 100755
-> index 00000000..87dd27f9
+> index 00000000..68df6ac0
 > --- /dev/null
-> +++ b/tests/btrfs/614
-> @@ -0,0 +1,76 @@
+> +++ b/tests/xfs/601
+> @@ -0,0 +1,68 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> +# Copyright (c) Meta Platforms, Inc. and affiliates.
 > +#
-> +# FS QA Test 614
+> +# FS QA Test 601
 > +#
-> +# Try taking a snapshot of an encrypted subvolume. Make sure the snapsho=
-t is
-> +# still readable. Rewrite part of the subvol with the same data; make su=
-re it's
-> +# still readable.
+> +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto encrypt
-
-Should be in the 'snapshot' and 'subvol' groups too, as it creates a
-snapshot and a subvolume.
-Also maybe in the 'quick' group too, see the comments further below.
-
+> +_begin_fstest auto prealloc punch
 > +
-> +# Import common functions.
-> +. ./common/encrypt
 > +. ./common/filter
 > +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +
-> +_require_test
-
-The test device is not used, so this can go away.
-
+> +_supported_fs xfs
 > +_require_scratch
-> +_require_scratch_encryption -v 2
-> +_require_command "$KEYCTL_PROG" keyctl
+> +_require_test_program punch-alternating
+> +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
 > +
-> +_scratch_mkfs_encrypted &>> $seqres.full
+> +# Disable the rmapbt so we only need to worry about splitting the bnobt and
+> +# cntbt at the same time.
+> +opts=
+> +if $MKFS_XFS_PROG |& grep -q rmapbt; then
+> +	opts="-m rmapbt=0"
+> +fi
+> +_scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
+> +. "$tmp.mkfs"
 > +_scratch_mount
 > +
-> +udir=3D$SCRATCH_MNT/reference
-> +dir=3D$SCRATCH_MNT/subvol
-> +dir2=3D$SCRATCH_MNT/subvol2
-> +$BTRFS_UTIL_PROG subvolume create $dir >> $seqres.full
-> +mkdir $udir
+> +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
+> +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
+> +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
 > +
-> +_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-> +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
+> +# Create a big file with a size such that the punches below create the exact
+> +# free extents we want.
+> +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
+> +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
 > +
-> +# get files with lots of extents by using backwards writes.
-> +for j in `seq 0 50`; do
-> +       for i in `seq 20 -1 1`; do
-> +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> +               $dir/foo-$j >> $seqres.full | _filter_xfs_io
-> +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> +               $udir/foo-$j >> $seqres.full | _filter_xfs_io
-> +       done
+> +# Fill in any small free extents in AG 0. After this, there should be only one,
+> +# large free extent.
+> +_scratch_unmount
+> +mapfile -t gaps < <(_scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c btdump |
+> +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
+> +	tac | tail -n +2)
+> +_scratch_mount
+> +for gap_i in "${!gaps[@]}"; do
+> +	gap=${gaps[$gap_i]}
+> +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
 > +done
 > +
-> +$BTRFS_UTIL_PROG subvolume snapshot $dir $dir2 | _filter_scratch
+> +# Create enough free space records to make the bnobt and cntbt both full,
+> +# 2-level trees, plus one more record to make them split all the way to the
+> +# root and become 3-level trees. After this, there is a 7-block free extent in
+> +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
+> +# than the rightmost two are full. Without the fix, the free list is also
+> +# empty.
+> +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
+> +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
 > +
-> +_scratch_remount
-> +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-> +sleep 30
-
-What's the sleep for?
-Is the 30 seconds to wait for a transaction commit?
-If it is then I'd rather mount the fs with -o commit=3D3 (or some other
-low value) and then "sleep 3" to make the test run much faster.
-A comment explaining why the sleep is there, what is its purpose,
-should also be in place.
-
-> +echo "Diffing $dir and $dir2"
-> +diff $dir $dir2
+> +# Do an arbitrary operation that refills the free list. Without the fix, this
+> +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
+> +# the cntbt, then try to insert the remaining 1 block free extent in the
+> +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
+> +# leaf and fails because the free list is empty, returning EFSCORRUPTED.
+> +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
 > +
-> +echo "Rewriting $dir2 partly"
-> +# rewrite half of each file in the snapshot
-> +for j in `seq 0 50`; do
-> +       for i in `seq 10 -1 1`; do
-> +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> +               $dir2/foo-$j >> $seqres.full | _filter_xfs_io
-> +       done
-> +done
-> +
-> +echo "Diffing $dir and $dir2"
-> +diff $dir $dir2
-> +
-> +echo "Dropping key and diffing"
-> +_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-> +diff $dir $dir2 |& _filter_scratch | _filter_nokey_filenames
-> +
-> +$BTRFS_UTIL_PROG subvolume delete $dir > /dev/null 2>&1
-
-What's the purpose of this subvolume delete?
-It's ignoring stdout and stderr, so it doesn't care whether it
-succeeds or fails, and we
-don't do any tests/checks after it.
-
-Thanks.
-
-
-
-> +
-> +# success, all done
-> +status=3D0
+> +echo "Silence is golden"
+> +status=0
 > +exit
-> diff --git a/tests/btrfs/614.out b/tests/btrfs/614.out
+> diff --git a/tests/xfs/601.out b/tests/xfs/601.out
 > new file mode 100644
-> index 00000000..390807e8
+> index 00000000..0d70c3e5
 > --- /dev/null
-> +++ b/tests/btrfs/614.out
-> @@ -0,0 +1,111 @@
-> +QA output created by 614
-> +Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-> +Create a snapshot of 'SCRATCH_MNT/subvol' in 'SCRATCH_MNT/subvol2'
-> +Added encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-> +Diffing /mnt/scratch/subvol and /mnt/scratch/subvol2
-> +Rewriting /mnt/scratch/subvol2 partly
-> +Diffing /mnt/scratch/subvol and /mnt/scratch/subvol2
-> +Dropping key and diffing
-> +Removed encryption key with identifier 69b2f6edeee720cce0577937eb8a6751
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> +NOKEY_NAME: NOKEY_NAME/NOKEY_NAME/NOKEY_NAME: NOKEY_NAME NOKEY_NAME NOKE=
-Y_NAME NOKEY_NAME
-> --
+> +++ b/tests/xfs/601.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 601
+> +Silence is golden
+> -- 
 > 2.41.0
->
+> 
