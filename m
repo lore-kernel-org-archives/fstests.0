@@ -1,200 +1,120 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3418B199DB
-	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 11:41:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 091CC1A73C
+	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 11:44:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NL4GhBTk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99DC8C433C9;
-	Tue, 31 Oct 2023 11:41:53 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TviSicQC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8DD5FC433CB
+	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 11:44:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1698752513;
-	bh=JuxmoNQt9b9nMo/D5J5WC2Km3s5UvYzOCUpeegChWeg=;
+	s=k20201202; t=1698752672;
+	bh=9/s5EZb7+QYF720fufqbIF67LpM65Ha3yx6618mShio=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=NL4GhBTktue4Wk3fEqsrsv5IASCQoo8Ky+OY6yVfdl9bbXCNUN21pj7NXzPXIlLw5
-	 87n+s2Rs8eBsen40sj3DhKHD9uQthvCp0NTqLYLhBhb8NlcqIpZYLMfoP7TLKbUmDy
-	 XEIwmKGNbno4s+MooJLh8bRYc026LC4rl6Hst1O1rJtCdsv6har23VU5tLDvDPUKpO
-	 hVZyhnk6G8eJmAYHbBAKZ+SySJED0aypTxNJ3YfWbdllH17jyS9CNXn9B7KA2gbCbh
-	 eVCdLbOVkQadbeJlN5VDZVS6duqMf4PQPDZqA5lqExHEDjwd2HuF6L6OMepX8P+LCK
-	 ZpvQaE5sXsgMw==
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-9c2a0725825so884221166b.2;
-        Tue, 31 Oct 2023 04:41:53 -0700 (PDT)
-X-Gm-Message-State: AOJu0YwlIhM8THhnwtueoid8grs0Hi5I2NwEvIbO3wxeM8RWyxejxaqv
-	O/p1WsTrKdo4ox4VH5z8S/tBieOtBkN8N04MRws=
-X-Google-Smtp-Source: AGHT+IGHrxVkFB2Mr/mAl/KgHsgrrLprWevC2aQxcw6n+5Bw63J+LTPDzmjr7jmrTg8o+22F+xF1tRxQosB3hdRhqqk=
-X-Received: by 2002:a17:907:7283:b0:9c3:cefa:93c6 with SMTP id
- dt3-20020a170907728300b009c3cefa93c6mr10544818ejc.10.1698752512000; Tue, 31
- Oct 2023 04:41:52 -0700 (PDT)
+	b=TviSicQCiL9VOWRj1sZlw4aBCxcxO/3aAMyLjHZf59wRxSBdjxOBV0OqPOmmXSw0t
+	 aGyYB8idTiUdsgjIbnxR94rzwq/ta1jEd/wWDh0pcUYochyS8XmUGjp95+8Kbr7Qj/
+	 TREf44XFD8SngT2xUvPdKOp3dB6xLrefEHG4LDIPVEF8O9oCG7Hf6kZYhUVuZYf+vz
+	 Ax4pLodGBkAt4ffuhHa8xvacNm4EgYRtrgRZVIUk5z99+8jQEUvzLadmWmanSX9IIQ
+	 EUTupVKfnmBGtMrkRZfV0q5OFqh6KElvrFveAlHOpFx8i8ZacHgfFuZoYf3H+VEB6p
+	 s5Y5tYlPAy0EQ==
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-9936b3d0286so853826266b.0
+        for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 04:44:32 -0700 (PDT)
+X-Gm-Message-State: AOJu0Yx7YohL3rKPw0gsWGRbQLA/k+IYlFGvjiQOzl7vjq15f7nAF9z+
+	DQKK6hxGDm6owFvdxJgc3YUSJ+RVU6pTuz4OTzQ=
+X-Google-Smtp-Source: AGHT+IGU1OfLk39/NaBDoZbOFgx2l1ZBIB6mBhK2Pj0FmIu4tx1SpnnRwmkHoR0qUyvpxuYooUT1jA4yhsdNFBfskU4=
+X-Received: by 2002:a17:906:99c1:b0:9c7:4d98:9847 with SMTP id
+ s1-20020a17090699c100b009c74d989847mr11541931ejn.53.1698752671018; Tue, 31
+ Oct 2023 04:44:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1698712764.git.anand.jain@oracle.com> <77a360863a5d41d4e849fdb829145c6591d4e955.1698712764.git.anand.jain@oracle.com>
-In-Reply-To: <77a360863a5d41d4e849fdb829145c6591d4e955.1698712764.git.anand.jain@oracle.com>
+References: <20231031111027.3367136-1-kernel@pankajraghav.com>
+In-Reply-To: <20231031111027.3367136-1-kernel@pankajraghav.com>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 31 Oct 2023 11:41:15 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4uK=WO=RcmpJHAUzQTyAGkoHu8-m2Ax0DE3bZxuGVWuQ@mail.gmail.com>
-Message-ID: <CAL3q7H4uK=WO=RcmpJHAUzQTyAGkoHu8-m2Ax0DE3bZxuGVWuQ@mail.gmail.com>
-Subject: Re: [PATCH v4 3/5] btrfs/219: fix _cleanup() to successful release
- the loop-device
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Date: Tue, 31 Oct 2023 11:43:54 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H5vTNDQkr5z+PEZu=wzDtjOfzQdBmHpj49BerWeFYgDvg@mail.gmail.com>
+Message-ID: <CAL3q7H5vTNDQkr5z+PEZu=wzDtjOfzQdBmHpj49BerWeFYgDvg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: redirect stderr to stdout in generic/269 and xfs/051
+To: Pankaj Raghav <kernel@pankajraghav.com>
+Cc: fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>, gost.dev@samsung.com, 
+	mcgrof@kernel.org, djwong@kernel.org, fdmanana@suse.com, p.raghav@samsung.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Oct 31, 2023 at 12:54=E2=80=AFAM Anand Jain <anand.jain@oracle.com>=
- wrote:
+On Tue, Oct 31, 2023 at 11:11=E2=80=AFAM Pankaj Raghav <kernel@pankajraghav=
+.com> wrote:
 >
-> When we fail with the message 'We were allowed to mount when we should
-> have failed,' it will fail to clean up the loop devices, making it
-> difficult to run further test cases or the same test case again.
+> From: Pankaj Raghav <p.raghav@samsung.com>
 >
-> So we need a 2nd loop device local variable to release it. Let's
-> reorganize the local variables to clean them up in the _cleanup() functio=
-n.
+> A recent commit redirected the stdout from /dev/null to $seqres.full.
+> That commit missed redirection of stderr to stdout which was present
+> before.
 >
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> This leads to test failures as the stderr is going to the output:
+>
+> fsstress: check_cwd stat64() returned -1 with errno: 5 (Input/output erro=
+r)
+> fsstress: check_cwd stat64() returned -1 with errno: 5 (Input/output erro=
+r)
+> fsstress: check_cwd failure
+> fsstress: check_cwd failure
+>
+> Redirection of stderr to stdout is still needed because fsstress can
+> still return errors in generic/269 and xfs/051 as we inject enospc and
+> shutdown the fs respectively. These tests only care about the fs
+> consistency at the end.
+>
+> Add the removed 2>&1 back in these two tests.
+
+Wasn't this already fixed in the for-next branch?
+
+https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-next=
+&id=3Dbbeaf7d1cbf2db50549cdc95b4d2099748641b1c
+
+>
+> Fixes: f55e46d6 ("fstests: redirect fsstress' stdout to $seqres.full inst=
+ead of /dev/null")
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
 > ---
+> There could be more tests that might be affected by this regression but
+> I came across only these two when I ran the test for xfs.
 >
-> v4: rm -f, removed error/output redirection
->     rm, -r removed for file image
->     Check for the initialization of the local variable loop_dev[1-2]
->      before calling  _destroy_loop_device().
+>  tests/generic/269 | 2 +-
+>  tests/xfs/051     | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 >
-> v3: a split from the patch 5/6
-
-One patch has a v4, others remain as v3 and one from v3 is dropped. A
-bit hard to follow, as the common practice is usually to send a new
-version of the whole patchset.
-
-Nevertheless, unless I missed something, it looks good now:
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Thanks.
-
+> diff --git a/tests/generic/269 b/tests/generic/269
+> index b852f6bf..eddca10d 100755
+> --- a/tests/generic/269
+> +++ b/tests/generic/269
+> @@ -23,7 +23,7 @@ _workout()
+>         out=3D$SCRATCH_MNT/fsstress.$$
+>         args=3D`_scale_fsstress_args -p128 -n999999999 -f setattr=3D1 $FS=
+STRESS_AVOID -d $out`
+>         echo "fsstress $args" >> $seqres.full
+> -       $FSSTRESS_PROG $args >> $seqres.full &
+> +       $FSSTRESS_PROG $args >> $seqres.full 2>&1 &
+>         pid=3D$!
+>         echo "Run dd writers in parallel"
+>         for ((i=3D0; i < num_iterations; i++))
+> diff --git a/tests/xfs/051 b/tests/xfs/051
+> index 1c670964..eca67bb8 100755
+> --- a/tests/xfs/051
+> +++ b/tests/xfs/051
+> @@ -38,7 +38,7 @@ _scratch_mount
 >
->  tests/btrfs/219 | 63 ++++++++++++++++++++++++++++---------------------
->  1 file changed, 36 insertions(+), 27 deletions(-)
->
-> diff --git a/tests/btrfs/219 b/tests/btrfs/219
-> index b747ce34fcc4..35824df2baaa 100755
-> --- a/tests/btrfs/219
-> +++ b/tests/btrfs/219
-> @@ -19,14 +19,19 @@ _cleanup()
->  {
->         cd /
->         rm -f $tmp.*
-> -       if [ ! -z "$loop_mnt" ]; then
-> -               $UMOUNT_PROG $loop_mnt
-> -               rm -rf $loop_mnt
-> -       fi
-> -       [ ! -z "$loop_mnt1" ] && rm -rf $loop_mnt1
-> -       [ ! -z "$fs_img1" ] && rm -rf $fs_img1
-> -       [ ! -z "$fs_img2" ] && rm -rf $fs_img2
-> -       [ ! -z "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +
-> +       # The variables are set before the test case can fail.
-> +       $UMOUNT_PROG ${loop_mnt1} &> /dev/null
-> +       $UMOUNT_PROG ${loop_mnt2} &> /dev/null
-> +       rm -rf $loop_mnt1
-> +       rm -rf $loop_mnt2
-> +
-> +       [ ! -z $loop_dev1 ] && _destroy_loop_device $loop_dev1
-> +       [ ! -z $loop_dev1 ] && _destroy_loop_device $loop_dev2
-> +
-> +       rm -f $fs_img1
-> +       rm -f $fs_img2
-> +
->         _btrfs_rescan_devices
->  }
->
-> @@ -36,56 +41,60 @@ _cleanup()
->  # real QA test starts here
->
->  _supported_fs btrfs
-> +
-> +loop_mnt1=3D$TEST_DIR/$seq/mnt1
-> +loop_mnt2=3D$TEST_DIR/$seq/mnt2
-> +fs_img1=3D$TEST_DIR/$seq/img1
-> +fs_img2=3D$TEST_DIR/$seq/img2
-> +loop_dev1=3D""
-> +loop_dev2=3D""
-> +
->  _require_test
->  _require_loop
->  _require_btrfs_forget_or_module_loadable
->  _fixed_by_kernel_commit 5f58d783fd78 \
->         "btrfs: free device in btrfs_close_devices for a single device fi=
-lesystem"
->
-> -loop_mnt=3D$TEST_DIR/$seq.mnt
-> -loop_mnt1=3D$TEST_DIR/$seq.mnt1
-> -fs_img1=3D$TEST_DIR/$seq.img1
-> -fs_img2=3D$TEST_DIR/$seq.img2
-> -
-> -mkdir $loop_mnt
-> -mkdir $loop_mnt1
-> +mkdir -p $loop_mnt1
-> +mkdir -p $loop_mnt2
->
->  $XFS_IO_PROG -f -c "truncate 256m" $fs_img1 >>$seqres.full 2>&1
->
->  _mkfs_dev $fs_img1 >>$seqres.full 2>&1
->  cp $fs_img1 $fs_img2
->
-> +loop_dev1=3D`_create_loop_device $fs_img1`
-> +loop_dev2=3D`_create_loop_device $fs_img2`
-> +
->  # Normal single device case, should pass just fine
-> -_mount -o loop $fs_img1 $loop_mnt > /dev/null  2>&1 || \
-> +_mount $loop_dev1 $loop_mnt1 > /dev/null  2>&1 || \
->         _fail "Couldn't do initial mount"
-> -$UMOUNT_PROG $loop_mnt
-> +$UMOUNT_PROG $loop_mnt1
->
->  _btrfs_forget_or_module_reload
->
->  # Now mount the new version again to get the higher generation cached, u=
-mount
->  # and try to mount the old version.  Mount the new version again just fo=
-r good
->  # measure.
-> -loop_dev=3D`_create_loop_device $fs_img1`
-> -
-> -_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-> +_mount $loop_dev1 $loop_mnt1 > /dev/null 2>&1 || \
->         _fail "Failed to mount the second time"
-> -$UMOUNT_PROG $loop_mnt
-> +$UMOUNT_PROG $loop_mnt1
->
-> -_mount -o loop $fs_img2 $loop_mnt > /dev/null 2>&1 || \
-> +_mount $loop_dev2 $loop_mnt2 > /dev/null 2>&1 || \
->         _fail "We couldn't mount the old generation"
-> -$UMOUNT_PROG $loop_mnt
-> +$UMOUNT_PROG $loop_mnt2
->
-> -_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-> +_mount $loop_dev1 $loop_mnt1 > /dev/null 2>&1 || \
->         _fail "Failed to mount the second time"
-> -$UMOUNT_PROG $loop_mnt
-> +$UMOUNT_PROG $loop_mnt1
->
->  # Now we definitely can't mount them at the same time, because we're sti=
-ll tied
->  # to the limitation of one fs_devices per fsid.
->  _btrfs_forget_or_module_reload
->
-> -_mount $loop_dev $loop_mnt > /dev/null 2>&1 || \
-> +_mount $loop_dev1 $loop_mnt1 > /dev/null 2>&1 || \
->         _fail "Failed to mount the third time"
-> -_mount -o loop $fs_img2 $loop_mnt1 > /dev/null 2>&1 && \
-> +_mount $loop_dev2 $loop_mnt2 > /dev/null 2>&1 && \
->         _fail "We were allowed to mount when we should have failed"
->
->  _btrfs_rescan_devices
+>  # Start a workload and shutdown the fs. The subsequent mount will requir=
+e log
+>  # recovery.
+> -$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT >> $seqres.full &
+> +$FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT >> $seqres.full 2>&1 &
+>  sleep 5
+>  _scratch_shutdown -f
+>  $KILLALL_PROG -q $FSSTRESS_PROG
 > --
-> 2.31.1
+> 2.40.1
+>
 >
