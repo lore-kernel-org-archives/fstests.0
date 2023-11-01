@@ -1,30 +1,61 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C097112E57
-	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 21:25:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11EF31876
+	for <fstests@vger.kernel.org>; Wed,  1 Nov 2023 06:45:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="teexWezt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23A28C433C7;
-	Tue, 31 Oct 2023 21:25:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1698787500;
-	bh=v4rP/GnoadJW0JP8/YFl63nAgZgBI+CPrilnlqN/wzs=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=teexWeztF5K/qTLgJxBgBipYYjmHiWoq+1FDGSm6f+WD32pRfULlo3CRnf3lUDY94
-	 dG5Jm63U/xK5ZfEIzjIef5jy9Fda8EjTB/f0zdbBZAf91VSKu3ii/H74B184ANccWy
-	 7LbTtJblXM3lmJUMgsysp/E+igW6fE7GSVXKfh7GFnbn1qETRCORjDxbhbRqqHeGLA
-	 D0z7KwA/7uegIWc9osXw+VLqID6UaBhPrs2yORiCgWfSQe2NVbK5O3FyrQbrx52VKt
-	 AQBtth3cy/pFivf2yvaju6KuHuhjHkzQiHXpKWNrE2uRWtTONe3M05DA22nGowN3jB
-	 g03TRwrXfvNbw==
-Date: Tue, 31 Oct 2023 14:24:59 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Omar Sandoval <osandov@osandov.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com,
-	Dave Chinner <dchinner@redhat.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZGqfR+vw"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B70610C
+	for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 23:45:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1698821151;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DtWSBKy+pJ4d1oGPsGdg7yXWIMqrMYv2TkJ0w13nPm0=;
+	b=ZGqfR+vwQXI1o82YpvFpvAK1CZ3NCh+cE/tIFEkcivzXylxR3+hOn1i8c5qa0OJzLMI4e3
+	rMasMlzfQZyJ8Q1jbEqcB9g19jKD2MJHe5AxA2FVCad5eaG1VkeRU+OrN17tDvZvSlVj97
+	6S7SbBIuLLVhN8kSn6594vFg5KnM8To=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-371-0GX-SfLdN6K9ie3LIO4KEA-1; Wed, 01 Nov 2023 02:45:50 -0400
+X-MC-Unique: 0GX-SfLdN6K9ie3LIO4KEA-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-5788445ac04so4412336a12.2
+        for <fstests@vger.kernel.org>; Tue, 31 Oct 2023 23:45:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1698821149; x=1699425949;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DtWSBKy+pJ4d1oGPsGdg7yXWIMqrMYv2TkJ0w13nPm0=;
+        b=UBOTvWt2P48MFYdQ2mWKMnOqxrvm9xzIgSbnWDE2x7SUqWkErF6MSizTOi123Zir9c
+         dhrx0fOYWR7Yctv0fwxP5V/PEnR9iFnmfXrzuoemIjaIgrroDl2OtytegZUuQ8ln+SYP
+         iOnNmnlYhfyz1w94daUHvxi/WNooe1VVxbM7wyIvwxTvOqxMVk2/z6Aman1D1UWMLoNR
+         HgHl7NVw6ysUtNygOYiBmIhDQgzvawzyXwAsV9Kv2XsWxEUzesPC3NcfLpkSLdy9kqEY
+         2WOn0Tn/rl2O7ThkybMWrhpBFgD3OJFXBivrD3MDYx0cE2Tv16PpbNCW1cOv+xyUE4R7
+         6cAQ==
+X-Gm-Message-State: AOJu0YyPL8LajsVKv5OF5OO0HNDLiQL6txaDXCSixn4AOrK27va1ZQER
+	2Kp4ES+6bo/Nq3pT+AUs3zkWymIPT+HpwwnGX1jgsUDCI9eicH0d/IgOiL4MGn3YLRHKD7DVDwI
+	sEST9x2zNYjD8OZs6Ig==
+X-Received: by 2002:a05:6a21:3389:b0:17d:b971:ebc3 with SMTP id yy9-20020a056a21338900b0017db971ebc3mr15275247pzb.0.1698821148961;
+        Tue, 31 Oct 2023 23:45:48 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHmcnbCXQjoBdhKM4Tp/qdXpXon8wZcdPMd3M5puKV4E+SzowWI40QgbORsSdq1fDGle0IHVQ==
+X-Received: by 2002:a05:6a21:3389:b0:17d:b971:ebc3 with SMTP id yy9-20020a056a21338900b0017db971ebc3mr15275231pzb.0.1698821148551;
+        Tue, 31 Oct 2023 23:45:48 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id ev13-20020a17090aeacd00b002809d2d90e3sm241723pjb.8.2023.10.31.23.45.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 Oct 2023 23:45:48 -0700 (PDT)
+Date: Wed, 1 Nov 2023 14:45:43 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Omar Sandoval <osandov@osandov.com>,
+	"Darrick J . Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com
 Subject: Re: [PATCH fstests v2] xfs: test refilling AGFL after lots of btree
  splits
-Message-ID: <20231031212459.GB1205143@frogsfrogsfrogs>
+Message-ID: <20231101064543.uruh3ljicwnedw7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <68cd85697855f686529829a2825b044913148caf.1698699188.git.osandov@fb.com>
  <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
 Precedence: bulk
@@ -43,12 +74,6 @@ On Mon, Oct 30, 2023 at 02:00:15PM -0700, Omar Sandoval wrote:
 > with a "Structure needs cleaning" error.
 > 
 > Signed-off-by: Omar Sandoval <osandov@osandov.com>
-
-Looks good now,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
 > ---
 > Changes since v1 [1]:
 > 
@@ -64,6 +89,17 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > 
 >  tests/xfs/601     | 68 +++++++++++++++++++++++++++++++++++++++++++++++
 >  tests/xfs/601.out |  2 ++
+
+The xfs/601 has been taken by:
+  39f88c55 ("generic: test FALLOC_FL_UNSHARE when pagecache is not loaded")
+
+I'll change this case to another number.
+
+...
+Hi Darrick, I just noticed that commit has "generic", but that's a case in
+tests/xfs, and there's not "_supported_fs xfs" in xfs/601. Do you want to
+move it to be a generic case?
+
 >  2 files changed, 70 insertions(+)
 >  create mode 100755 tests/xfs/601
 >  create mode 100644 tests/xfs/601.out
@@ -89,6 +125,13 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > +
 > +_supported_fs xfs
 > +_require_scratch
+
+_require_xfs_io_command "fpunch" ?
+
+I can help to add that, others look good to me.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
 > +_require_test_program punch-alternating
 > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
 > +
@@ -153,3 +196,5 @@ Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > -- 
 > 2.41.0
 > 
+> 
+
