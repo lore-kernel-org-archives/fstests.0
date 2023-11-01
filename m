@@ -1,449 +1,86 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B32E2F93
-	for <fstests@vger.kernel.org>; Wed,  1 Nov 2023 17:20:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4628AA28
+	for <fstests@vger.kernel.org>; Wed,  1 Nov 2023 18:17:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hpf0RRQQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A7DA4C433C7;
-	Wed,  1 Nov 2023 17:20:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JPwy5vP6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3D34C433C8;
+	Wed,  1 Nov 2023 18:17:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1698859254;
-	bh=IDoqLbrDJfSw2TxMg5HATbMM9CL3he89gJS2pdfSQ94=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hpf0RRQQfq2pJrl1JA1yaGMuockE6t4TOcbAJunHs5LUAs8RYxdN5aZeVDJqLARiF
-	 hrh8lQ9feRm5sY1B9wDIdoqA/Lp+C5olbQ6woFnEmnxERT4YZhaUb/Lr+vJY6XdtCU
-	 yrU6x/L736Z+Tn3ngVnAk/LwQ3b+2lWojgMCPlPH/i+l9vaVj9eyxWdOZ0wsJS4xoY
-	 +BWNjjP+ZZsom1/ovR0yQomXA2IirE4LNxJTNUpX01rgcvuds2E8+HHzoYph/1Xapg
-	 P9Fy9OjO5iFYYo3FZC4z6NQZHEh2FtP2j0A3XzZW4ZL5Ps5EjXHgsPrrM2O9Irv6TZ
-	 VAFWSFuBdBdwQ==
-Date: Wed, 1 Nov 2023 10:20:54 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, guan@eryu.me,
-	david@fromorbit.com
-Subject: Re: [PATCH 1/1] xfs: test unlinked inode list repair on demand
-Message-ID: <20231101172054.GD1205143@frogsfrogsfrogs>
-References: <169687552892.3949084.287369396167434290.stgit@frogsfrogsfrogs>
- <169687553453.3949084.14532709239423528329.stgit@frogsfrogsfrogs>
+	s=k20201202; t=1698862637;
+	bh=4vPFVnWstkhzW5nHrdG6MlQDLAG5nuuT6qkINzznnos=;
+	h=From:Date:Subject:To:Cc:From;
+	b=JPwy5vP6asSxWrEoQuKsCRCVIEPkmnM7Nd7eKu1kz7RqmgGoeDZjVTZFKUP5qX5US
+	 rgTy1bsJ4lZ3U3Qg1OrFYdG/YR65gHFW5kKV01QsuWiFObNDUdhrE7rLjVJJ1v3pyc
+	 VH47Gyuku7TLxek8OptUsa9LcdJTHw/JQJsxEc3jgUZVOMo+NYfuKsYI5JcZh+3sOZ
+	 dkqrWcGe21t5trMwICwaI9Uzhoy93x7V6BivcvsJKtIik49TqUUi6m40RWLdyMAokG
+	 J2ojKxgkLeqn6MAaEBEu2G12tt7Ce4K+tRePCR/fhDLJMib8owKK332vHvTklieq72
+	 fdUStUFsekMmg==
+From: Jeff Layton <jlayton@kernel.org>
+Date: Wed, 01 Nov 2023 14:17:13 -0400
+Subject: [PATCH] generic/732: fix mount option munging
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <169687553453.3949084.14532709239423528329.stgit@frogsfrogsfrogs>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20231101-master-v1-1-08bbe2f83307@kernel.org>
+X-B4-Tracking: v=1; b=H4sIACmWQmUC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDI2NDQwND3dzE4pLUIl1jI4u0NGOD5FQzszQloOKCotS0zAqwQdGxtbUA4Wf
+ Uz1gAAAA=
+To: fstests@vger.kernel.org
+Cc: Yongcheng Yang <yoyang@redhat.com>, Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1109; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=4vPFVnWstkhzW5nHrdG6MlQDLAG5nuuT6qkINzznnos=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBlQpYsUvT2318FcLUEQ7OLAn6Eh+d2Iwfdv93q+
+ JKV4ZmAWz2JAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZUKWLAAKCRAADmhBGVaC
+ FXtCEACmCnKP1Zwki+43Azc3fEEbQ4e+PAW52hkfT1chjbNhelnehw5FRkqosoUGcm5RHn32/jV
+ 9qi1yMm5liwHc8Y9W6sSqBulnUpz8dE7wUCxGif24f8b6yQCLJnOkT3M3kJsXmByIH+XGWwuDib
+ WKiLEoKcApJDhD1dNyJWkWvmi0QGLjNgzG6vHaTKEKgOGkIDhIlG2hDB8TM8X6f4a1OTtFYU3k8
+ fofPzxOy2Ni0/tGd0nx5QL+MloGfreQS5t9Jglf0P6QXc7z1OitAhXffe/g9q+uln1dALchIEgS
+ JzDJ815N7TxIEAUNK/KHqoaemUaGmvMhvQABmvpRfb7cfuhdFOFl7qDb0mnx0Px9fpYfCQpHgIx
+ zONwD3RW2RjSq60tAwSAt2KrkH+EXed5/7j6nEYjKe+wXhPHTL/NObIcvhcKDDPWm6dc2QptXg7
+ 3jKFDn5MegELT2Jrf2MAesewhPEYon9MrZqtjYIUZW+xfSM8+h52sTRCzXIDQIvwcybNAfIZ5U7
+ YWLNJ0iYUoWasKguID/xwO6E3sJ8T275vfAbHWamiEJ9TGQhPrP/f1Wc9gBFjeKArjCWCyowcFB
+ PM2Za14fWo2gmNqQAOdn5wy4uE8oM/EZoMPCdGwP42f8hO8X3NzwsIsxh4YCcERn2mmGwTZd4Ps
+ Gl3TTuXwXYMsOWQ==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 
-On Mon, Oct 09, 2023 at 11:18:54AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Create a test to exercise recovery of unlinked inodes on a clean
-> filesystem.  This was definitely possible on old kernels that on an ro
-> mount would clean the log without processing the iunlink list.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+With NFS in particular, we are usually testing with some mount options.
+Ensure that we preserve those and just add "nosharecache" onto the end
+of the string.
 
-Ping?  The kernel fixes and the xfs_db commands have both been merged
-upstream, could we please merge this functional test of the new unlinked
-inode cleanup code in the kernel XFS driver?
+Cc: Yongcheng Yang <yoyang@redhat.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/732 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/tests/generic/732 b/tests/generic/732
+index 785aac58f361..ae49152e42dc 100755
+--- a/tests/generic/732
++++ b/tests/generic/732
+@@ -40,7 +40,7 @@ mkdir -p $testdir1 $testdir2
+ # Don't share the data and attribute caches among mount points for NFS.
+ # This caching behavior is necessary to reproduce this issue as we're
+ # checking the alignment of each mount point's own unique cache.
+-[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="-o nosharecache"
++[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="$MOUNT_OPTIONS -o nosharecache"
+ 
+ SCRATCH_MNT=$testdir1 _scratch_mount
+ SCRATCH_MNT=$testdir2 _scratch_mount
 
-> ---
->  common/rc          |    4 +
->  tests/xfs/1872     |  113 +++++++++++++++++++++++++++
->  tests/xfs/1872.out |    5 +
->  tests/xfs/1873     |  217 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1873.out |    6 +
->  5 files changed, 344 insertions(+), 1 deletion(-)
->  create mode 100755 tests/xfs/1872
->  create mode 100644 tests/xfs/1872.out
->  create mode 100755 tests/xfs/1873
->  create mode 100644 tests/xfs/1873.out
-> 
-> 
-> diff --git a/common/rc b/common/rc
-> index 259a1ffb09..20d3e61c4e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2668,9 +2668,11 @@ _require_xfs_io_command()
->  		param_checked="$pwrite_opts $param"
->  		;;
->  	"scrub"|"repair")
-> -		testio=`$XFS_IO_PROG -x -c "$command probe" $TEST_DIR 2>&1`
-> +		test -z "$param" && param="probe"
-> +		testio=`$XFS_IO_PROG -x -c "$command $param" $TEST_DIR 2>&1`
->  		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
-> +		param_checked="$param"
->  		;;
->  	"startupdate"|"commitupdate"|"cancelupdate")
->  		$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 128k -b 128k' $testfile > /dev/null
-> diff --git a/tests/xfs/1872 b/tests/xfs/1872
-> new file mode 100755
-> index 0000000000..3720a3d184
-> --- /dev/null
-> +++ b/tests/xfs/1872
-> @@ -0,0 +1,113 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 1872
-> +#
-> +# Test using runtime code to fix unlinked inodes on a clean filesystem that
-> +# never got cleaned up.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick unlink
-> +
-> +# Import common functions.
-> +source ./common/filter
-> +source ./common/fuzzy
-> +source ./common/quota
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_xfs_db_command iunlink
-> +_require_scratch_nocheck	# we'll run repair ourselves
-> +
-> +# From the AGI definition
-> +XFS_AGI_UNLINKED_BUCKETS=64
-> +
-> +# Try to make each iunlink bucket have this many inodes in it.
-> +IUNLINK_BUCKETLEN=5
-> +
-> +# XXX Forcibly disable quota since quotacheck will break this test
-> +orig_mount_options="$MOUNT_OPTIONS"
-> +_qmount_option 'noquota'
-> +
-> +format_scratch() {
-> +	_scratch_mkfs -d agcount=1 | _filter_mkfs 2> "${tmp}.mkfs" >> $seqres.full
-> +	source "${tmp}.mkfs"
-> +	test "${agcount}" -eq 1 || _notrun "test requires 1 AG for error injection"
-> +
-> +	local nr_iunlinks="$((IUNLINK_BUCKETLEN * XFS_AGI_UNLINKED_BUCKETS))"
-> +	readarray -t BADINODES < <(_scratch_xfs_db -x -c "iunlink -n $nr_iunlinks" | awk '{print $4}')
-> +}
-> +
-> +__repair_check_scratch() {
-> +	_scratch_xfs_repair -o force_geometry -n 2>&1 | \
-> +		tee -a $seqres.full | \
-> +		grep -E '(disconnected inode.*would move|next_unlinked in inode|unlinked bucket.*is.*in ag)'
-> +	return "${PIPESTATUS[0]}"
-> +}
-> +
-> +exercise_scratch() {
-> +	# Create a bunch of files...
-> +	declare -A inums
-> +	for ((i = 0; i < (XFS_AGI_UNLINKED_BUCKETS * 2); i++)); do
-> +		touch "${SCRATCH_MNT}/${i}" || break
-> +		inums["${i}"]="$(stat -c %i "${SCRATCH_MNT}/${i}")"
-> +	done
-> +
-> +	# ...then delete them to exercise the unlinked buckets
-> +	for ((i = 0; i < (XFS_AGI_UNLINKED_BUCKETS * 2); i++)); do
-> +		if ! rm -f "${SCRATCH_MNT}/${i}"; then
-> +			echo "rm failed on inum ${inums[$i]}"
-> +			break
-> +		fi
-> +	done
-> +}
-> +
-> +# Offline repair should not find anything
-> +final_check_scratch() {
-> +	__repair_check_scratch
-> +	res=$?
-> +	if [ $res -eq 2 ]; then
-> +		echo "scratch fs went offline?"
-> +		_scratch_mount
-> +		_scratch_unmount
-> +		__repair_check_scratch
-> +	fi
-> +	test "$res" -ne 0 && echo "repair returned $res?"
-> +}
-> +
-> +echo "+ Part 0: See if runtime can recover the unlinked list" | tee -a $seqres.full
-> +format_scratch
-> +_kernlog "part 0"
-> +_scratch_mount
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +echo "+ Part 1: See if bulkstat can recover the unlinked list" | tee -a $seqres.full
-> +format_scratch
-> +_kernlog "part 1"
-> +_scratch_mount
-> +$XFS_IO_PROG -c 'bulkstat' $SCRATCH_MNT > /dev/null
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +echo "+ Part 2: See if quotacheck can recover the unlinked list" | tee -a $seqres.full
-> +if [ -f /proc/fs/xfs/xqmstat ]; then
-> +	MOUNT_OPTIONS="$orig_mount_options"
-> +	_qmount_option 'quota'
-> +	format_scratch
-> +	_kernlog "part 2"
-> +	_scratch_mount
-> +	exercise_scratch
-> +	_scratch_unmount
-> +	final_check_scratch
-> +fi
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1872.out b/tests/xfs/1872.out
-> new file mode 100644
-> index 0000000000..248f0e2416
-> --- /dev/null
-> +++ b/tests/xfs/1872.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 1872
-> ++ Part 0: See if runtime can recover the unlinked list
-> ++ Part 1: See if bulkstat can recover the unlinked list
-> ++ Part 2: See if quotacheck can recover the unlinked list
-> +Silence is golden
-> diff --git a/tests/xfs/1873 b/tests/xfs/1873
-> new file mode 100755
-> index 0000000000..4712dee7ab
-> --- /dev/null
-> +++ b/tests/xfs/1873
-> @@ -0,0 +1,217 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 1873
-> +#
-> +# Functional test of using online repair to fix unlinked inodes on a clean
-> +# filesystem that never got cleaned up.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto online_repair
-> +
-> +# Import common functions.
-> +source ./common/filter
-> +source ./common/fuzzy
-> +source ./common/quota
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_xfs_db_command iunlink
-> +# The iunlink bucket repair code wasn't added to the AGI repair code
-> +# until after the directory repair code was merged
-> +_require_xfs_io_command repair -R directory
-> +_require_scratch_nocheck	# repair doesn't like single-AG fs
-> +
-> +# From the AGI definition
-> +XFS_AGI_UNLINKED_BUCKETS=64
-> +
-> +# Try to make each iunlink bucket have this many inodes in it.
-> +IUNLINK_BUCKETLEN=5
-> +
-> +# XXX Forcibly disable quota since quotacheck will break this test
-> +_qmount_option 'noquota'
-> +
-> +format_scratch() {
-> +	_scratch_mkfs -d agcount=1 | _filter_mkfs 2> "${tmp}.mkfs" >> $seqres.full
-> +	source "${tmp}.mkfs"
-> +	test "${agcount}" -eq 1 || _notrun "test requires 1 AG for error injection"
-> +
-> +	local nr_iunlinks="$((IUNLINK_BUCKETLEN * XFS_AGI_UNLINKED_BUCKETS))"
-> +	readarray -t BADINODES < <(_scratch_xfs_db -x -c "iunlink -n $nr_iunlinks" | awk '{print $4}')
-> +}
-> +
-> +__repair_check_scratch() {
-> +	_scratch_xfs_repair -o force_geometry -n 2>&1 | \
-> +		tee -a $seqres.full | \
-> +		grep -E '(disconnected inode.*would move|next_unlinked in inode|unlinked bucket.*is.*in ag)'
-> +	return "${PIPESTATUS[0]}"
-> +}
-> +
-> +corrupt_scratch() {
-> +	# How far into the iunlink bucket chain do we target inodes for corruption?
-> +	# 1 = target the inode pointed to by the AGI
-> +	# 3 = middle of bucket list
-> +	# 5 = last element in bucket
-> +	local corruption_bucket_depth="$1"
-> +	if ((corruption_bucket_depth < 1 || corruption_bucket_depth > IUNLINK_BUCKETLEN)); then
-> +		echo "${corruption_bucket_depth}: Value must be between 1 and ${IUNLINK_BUCKETLEN}."
-> +		return 1
-> +	fi
-> +
-> +	# Index of the inode numbers within BADINODES
-> +	local bad_ino1_idx=$(( (IUNLINK_BUCKETLEN - corruption_bucket_depth) * XFS_AGI_UNLINKED_BUCKETS))
-> +	local bad_ino2_idx=$((bad_ino1_idx + 1))
-> +
-> +	# Inode numbers to target
-> +	local bad_ino1="${BADINODES[bad_ino1_idx]}"
-> +	local bad_ino2="${BADINODES[bad_ino2_idx]}"
-> +	printf "bad: 0x%x 0x%x\n" "${bad_ino1}" "${bad_ino2}" | _tee_kernlog >> $seqres.full
-> +
-> +	# Bucket within AGI 0's iunlinked array.
-> +	local ino1_bucket="$((bad_ino1 % XFS_AGI_UNLINKED_BUCKETS))"
-> +	local ino2_bucket="$((bad_ino2 % XFS_AGI_UNLINKED_BUCKETS))"
-> +
-> +	# The first bad inode stays on the unlinked list but gets a nonzero
-> +	# nlink; the second bad inode is removed from the unlinked list but
-> +	# keeps its zero nlink
-> +	_scratch_xfs_db -x \
-> +		-c "inode ${bad_ino1}" -c "write -d core.nlinkv2 5555" \
-> +		-c "agi 0" -c "fuzz -d unlinked[${ino2_bucket}] ones" -c "print unlinked" >> $seqres.full
-> +
-> +	local iwatch=()
-> +	local idx
-> +
-> +	# Make a list of the adjacent iunlink bucket inodes for the first inode
-> +	# that we targeted.
-> +	if [ "${corruption_bucket_depth}" -gt 1 ]; then
-> +		# Previous ino in bucket
-> +		idx=$(( (IUNLINK_BUCKETLEN - corruption_bucket_depth + 1) * XFS_AGI_UNLINKED_BUCKETS))
-> +		iwatch+=("${BADINODES[idx]}")
-> +	fi
-> +	iwatch+=("${bad_ino1}")
-> +	if [ "$((corruption_bucket_depth + 1))" -lt "${IUNLINK_BUCKETLEN}" ]; then
-> +		# Next ino in bucket
-> +		idx=$(( (IUNLINK_BUCKETLEN - corruption_bucket_depth - 1) * XFS_AGI_UNLINKED_BUCKETS))
-> +		iwatch+=("${BADINODES[idx]}")
-> +	fi
-> +
-> +	# Make a list of the adjacent iunlink bucket inodes for the second
-> +	# inode that we targeted.
-> +	if [ "${corruption_bucket_depth}" -gt 1 ]; then
-> +		# Previous ino in bucket
-> +		idx=$(( (IUNLINK_BUCKETLEN - corruption_bucket_depth + 1) * XFS_AGI_UNLINKED_BUCKETS))
-> +		iwatch+=("${BADINODES[idx + 1]}")
-> +	fi
-> +	iwatch+=("${bad_ino2}")
-> +	if [ "$((corruption_bucket_depth + 1))" -lt "${IUNLINK_BUCKETLEN}" ]; then
-> +		# Next ino in bucket
-> +		idx=$(( (IUNLINK_BUCKETLEN - corruption_bucket_depth - 1) * XFS_AGI_UNLINKED_BUCKETS))
-> +		iwatch+=("${BADINODES[idx + 1]}")
-> +	fi
-> +
-> +	# Construct a grep string for tracepoints.
-> +	GREP_STR="(xrep_attempt|xrep_done|bucket ${ino1_bucket} |bucket ${ino2_bucket} |bucket ${fuzz_bucket} "
-> +	GREP_STR="(xrep_attempt|xrep_done|bucket ${ino1_bucket} |bucket ${ino2_bucket} "
-> +	for ino in "${iwatch[@]}"; do
-> +		f="$(printf "|ino 0x%x" "${ino}")"
-> +		GREP_STR="${GREP_STR}${f}"
-> +	done
-> +	GREP_STR="${GREP_STR})"
-> +	echo "grep -E \"${GREP_STR}\"" >> $seqres.full
-> +
-> +	# Dump everything we did to to the full file.
-> +	local db_dump=(-c 'agi 0' -c 'print unlinked')
-> +	db_dump+=(-c 'addr root' -c 'print')
-> +	test "${ino1_bucket}" -gt 0 && \
-> +		db_dump+=(-c "dump_iunlinked -a 0 -b $((ino1_bucket - 1))")
-> +	db_dump+=(-c "dump_iunlinked -a 0 -b ${ino1_bucket}")
-> +	db_dump+=(-c "dump_iunlinked -a 0 -b ${ino2_bucket}")
-> +	test "${ino2_bucket}" -lt 63 && \
-> +		db_dump+=(-c "dump_iunlinked -a 0 -b $((ino2_bucket + 1))")
-> +	db_dump+=(-c "inode $bad_ino1" -c 'print core.nlinkv2 v3.inumber next_unlinked')
-> +	db_dump+=(-c "inode $bad_ino2" -c 'print core.nlinkv2 v3.inumber next_unlinked')
-> +	_scratch_xfs_db "${db_dump[@]}" >> $seqres.full
-> +
-> +	# Test run of repair to make sure we find disconnected inodes
-> +	__repair_check_scratch | \
-> +		sed -e 's/disconnected inode \([0-9]*\)/disconnected inode XXXXXX/g' \
-> +		    -e 's/next_unlinked in inode \([0-9]*\)/next_unlinked in inode XXXXXX/g' \
-> +		    -e 's/unlinked bucket \([0-9]*\) is \([0-9]*\) in ag \([0-9]*\) .inode=\([0-9]*\)/unlinked bucket YY is XXXXXX in ag Z (inode=AAAAAA/g' | \
-> +		uniq -c >> $seqres.full
-> +	res=${PIPESTATUS[0]}
-> +	test "$res" -ne 0 || echo "repair returned $res after corruption?"
-> +}
-> +
-> +exercise_scratch() {
-> +	# Create a bunch of files...
-> +	declare -A inums
-> +	for ((i = 0; i < (XFS_AGI_UNLINKED_BUCKETS * 2); i++)); do
-> +		touch "${SCRATCH_MNT}/${i}" || break
-> +		inums["${i}"]="$(stat -c %i "${SCRATCH_MNT}/${i}")"
-> +	done
-> +
-> +	# ...then delete them to exercise the unlinked buckets
-> +	for ((i = 0; i < (XFS_AGI_UNLINKED_BUCKETS * 2); i++)); do
-> +		if ! rm -f "${SCRATCH_MNT}/${i}"; then
-> +			echo "rm failed on inum ${inums[$i]}"
-> +			break
-> +		fi
-> +	done
-> +}
-> +
-> +# Offline repair should not find anything
-> +final_check_scratch() {
-> +	__repair_check_scratch
-> +	res=$?
-> +	if [ $res -eq 2 ]; then
-> +		echo "scratch fs went offline?"
-> +		_scratch_mount
-> +		_scratch_unmount
-> +		__repair_check_scratch
-> +	fi
-> +	test "$res" -ne 0 && echo "repair returned $res?"
-> +}
-> +
-> +echo "+ Part 1: See if scrub can recover the unlinked list" | tee -a $seqres.full
-> +format_scratch
-> +_kernlog "no bad inodes"
-> +_scratch_mount
-> +_scratch_scrub >> $seqres.full
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +echo "+ Part 2: Corrupt the first inode in the bucket" | tee -a $seqres.full
-> +format_scratch
-> +corrupt_scratch 1
-> +_scratch_mount
-> +_scratch_scrub >> $seqres.full
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +echo "+ Part 3: Corrupt the middle inode in the bucket" | tee -a $seqres.full
-> +format_scratch
-> +corrupt_scratch 3
-> +_scratch_mount
-> +_scratch_scrub >> $seqres.full
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +echo "+ Part 4: Corrupt the last inode in the bucket" | tee -a $seqres.full
-> +format_scratch
-> +corrupt_scratch 5
-> +_scratch_mount
-> +_scratch_scrub >> $seqres.full
-> +exercise_scratch
-> +_scratch_unmount
-> +final_check_scratch
-> +
-> +# success, all done
-> +echo Silence is golden
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1873.out b/tests/xfs/1873.out
-> new file mode 100644
-> index 0000000000..0e36bd2304
-> --- /dev/null
-> +++ b/tests/xfs/1873.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 1873
-> ++ Part 1: See if scrub can recover the unlinked list
-> ++ Part 2: Corrupt the first inode in the bucket
-> ++ Part 3: Corrupt the middle inode in the bucket
-> ++ Part 4: Corrupt the last inode in the bucket
-> +Silence is golden
-> 
+---
+base-commit: 59299b65ac8f15935ab45e7920cbfda8a6beffd1
+change-id: 20231101-master-328ff30ce66f
+
+Best regards,
+-- 
+Jeff Layton <jlayton@kernel.org>
+
