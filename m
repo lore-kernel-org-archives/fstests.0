@@ -1,86 +1,71 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4628AA28
-	for <fstests@vger.kernel.org>; Wed,  1 Nov 2023 18:17:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C66AF111F
+	for <fstests@vger.kernel.org>; Thu,  2 Nov 2023 00:36:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JPwy5vP6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3D34C433C8;
-	Wed,  1 Nov 2023 18:17:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1698862637;
-	bh=4vPFVnWstkhzW5nHrdG6MlQDLAG5nuuT6qkINzznnos=;
-	h=From:Date:Subject:To:Cc:From;
-	b=JPwy5vP6asSxWrEoQuKsCRCVIEPkmnM7Nd7eKu1kz7RqmgGoeDZjVTZFKUP5qX5US
-	 rgTy1bsJ4lZ3U3Qg1OrFYdG/YR65gHFW5kKV01QsuWiFObNDUdhrE7rLjVJJ1v3pyc
-	 VH47Gyuku7TLxek8OptUsa9LcdJTHw/JQJsxEc3jgUZVOMo+NYfuKsYI5JcZh+3sOZ
-	 dkqrWcGe21t5trMwICwaI9Uzhoy93x7V6BivcvsJKtIik49TqUUi6m40RWLdyMAokG
-	 J2ojKxgkLeqn6MAaEBEu2G12tt7Ce4K+tRePCR/fhDLJMib8owKK332vHvTklieq72
-	 fdUStUFsekMmg==
-From: Jeff Layton <jlayton@kernel.org>
-Date: Wed, 01 Nov 2023 14:17:13 -0400
-Subject: [PATCH] generic/732: fix mount option munging
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="gl+A1oDh"
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16E39115;
+	Wed,  1 Nov 2023 17:36:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Type:MIME-Version:
+	Message-ID:Subject:Cc:To:From:Date:Reply-To:Content-Transfer-Encoding:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=gGm0sYWnnrJGarxSgyGZcxG+ZjgGMcHCRe0pP5641sY=; b=gl+A1oDhQSo2DWsqEXNFPd+oJF
+	YoHlaJivSM8nJLEcziJKP8tUAaLW6Hk93ZQUfmsdhg9Wk6JhKCaHgYuzOp/LkABNzy8odEB6dDOLC
+	sEQp4c+9Bub/zM7IkPYsAMU8EF8NiQjznuck1OuxdZW7asa3HtFgvcpF2tcTddOP2XWoPuw0611ep
+	Q0xe3bd3VcrxClzt/3ydGWnSJxjk90rmNzg7/VpzJffmaBwi3mPk4IQZyVrHM0yME28JVL0BUjwgI
+	JaiJgJzrQ/zZ53J8RQpJ8WWMoOWGgQg4Jt9auJsxdR6mchQX5rTp3rR00pQGCZlrEiVLGHeK2r7DQ
+	9TiTtHug==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+	id 1qyLgz-008PIJ-1g;
+	Thu, 02 Nov 2023 00:36:13 +0000
+Date: Wed, 1 Nov 2023 17:36:13 -0700
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Cc: Luis Chamberlain <mcgrof@kernel.org>,
+	Pankaj Raghav <p.raghav@samsung.com>,
+	Daniel Gomez <da.gomez@samsung.com>
+Subject: xfs/599 on LBS
+Message-ID: <ZULu/Rm/EiBY8ZzG@bombadil.infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231101-master-v1-1-08bbe2f83307@kernel.org>
-X-B4-Tracking: v=1; b=H4sIACmWQmUC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDI2NDQwND3dzE4pLUIl1jI4u0NGOD5FQzszQloOKCotS0zAqwQdGxtbUA4Wf
- Uz1gAAAA=
-To: fstests@vger.kernel.org
-Cc: Yongcheng Yang <yoyang@redhat.com>, Jeff Layton <jlayton@kernel.org>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1109; i=jlayton@kernel.org;
- h=from:subject:message-id; bh=4vPFVnWstkhzW5nHrdG6MlQDLAG5nuuT6qkINzznnos=;
- b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBlQpYsUvT2318FcLUEQ7OLAn6Eh+d2Iwfdv93q+
- JKV4ZmAWz2JAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZUKWLAAKCRAADmhBGVaC
- FXtCEACmCnKP1Zwki+43Azc3fEEbQ4e+PAW52hkfT1chjbNhelnehw5FRkqosoUGcm5RHn32/jV
- 9qi1yMm5liwHc8Y9W6sSqBulnUpz8dE7wUCxGif24f8b6yQCLJnOkT3M3kJsXmByIH+XGWwuDib
- WKiLEoKcApJDhD1dNyJWkWvmi0QGLjNgzG6vHaTKEKgOGkIDhIlG2hDB8TM8X6f4a1OTtFYU3k8
- fofPzxOy2Ni0/tGd0nx5QL+MloGfreQS5t9Jglf0P6QXc7z1OitAhXffe/g9q+uln1dALchIEgS
- JzDJ815N7TxIEAUNK/KHqoaemUaGmvMhvQABmvpRfb7cfuhdFOFl7qDb0mnx0Px9fpYfCQpHgIx
- zONwD3RW2RjSq60tAwSAt2KrkH+EXed5/7j6nEYjKe+wXhPHTL/NObIcvhcKDDPWm6dc2QptXg7
- 3jKFDn5MegELT2Jrf2MAesewhPEYon9MrZqtjYIUZW+xfSM8+h52sTRCzXIDQIvwcybNAfIZ5U7
- YWLNJ0iYUoWasKguID/xwO6E3sJ8T275vfAbHWamiEJ9TGQhPrP/f1Wc9gBFjeKArjCWCyowcFB
- PM2Za14fWo2gmNqQAOdn5wy4uE8oM/EZoMPCdGwP42f8hO8X3NzwsIsxh4YCcERn2mmGwTZd4Ps
- Gl3TTuXwXYMsOWQ==
-X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
- fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-With NFS in particular, we are usually testing with some mount options.
-Ensure that we preserve those and just add "nosharecache" onto the end
-of the string.
+xfs/599 takes a long time on LBS, but it passes. The amount of time it
+takes, however, begs the question if the test is could be trimmed to
+do less work because the larger the block size the larger the number of
+dirents and xattrs are used to create. The large dirents are not a
+problem. The amount of time it takes to create xattrs with hashcol however
+grows exponentially in time.
 
-Cc: Yongcheng Yang <yoyang@redhat.com>
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- tests/generic/732 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+n=16k   takes 5   seconds
+n=32k   takes 30  seconds
+n=64k     takes 6-7 minutes
+n=1048576 takes 30 hours
 
-diff --git a/tests/generic/732 b/tests/generic/732
-index 785aac58f361..ae49152e42dc 100755
---- a/tests/generic/732
-+++ b/tests/generic/732
-@@ -40,7 +40,7 @@ mkdir -p $testdir1 $testdir2
- # Don't share the data and attribute caches among mount points for NFS.
- # This caching behavior is necessary to reproduce this issue as we're
- # checking the alignment of each mount point's own unique cache.
--[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="-o nosharecache"
-+[ "$FSTYP" = "nfs" ] && MOUNT_OPTIONS="$MOUNT_OPTIONS -o nosharecache"
- 
- SCRATCH_MNT=$testdir1 _scratch_mount
- SCRATCH_MNT=$testdir2 _scratch_mount
+n=1048576 is what we use for block size 32k.
 
----
-base-commit: 59299b65ac8f15935ab45e7920cbfda8a6beffd1
-change-id: 20231101-master-328ff30ce66f
+Do we really need so many xattrs for larger block sizes for this test?
 
-Best regards,
--- 
-Jeff Layton <jlayton@kernel.org>
+S1="KNR4qb1wJE1ncgC83X2XQg7CKwuqEYQjwuX3MG1o6FyqwrCXagIYlgGqtbLlpUn9prWpkCo9ChrxJOINgc3MBSG0La6Qhm9imcduPeGtC3IvQOzuKPsQAN3O5lVS9zha1giONke1RfnTcidsDlIxNcupydmZrdJmwHU7HRxWWqLTenWh3Gi5YNWExX0Ft94NEtfY8Lov2qvYJbTA5knONimQq5wUaK1Eo449pDXTnCOTRRhPnSHMXzNqT"
 
+mkfs.xfs -f -b size=32k -s size=4k /dev/loop16
+mount /dev/loop16 /mnt
+touch /mnt/foo
+time xfs_db -r -c "hashcoll -a -n 1048576 -p /mnt/foo $S1" /dev/loop16 
+
+But also, for the life of me, I can't get the btree printed out, I see
+the nvlist but not btree, you can print *everything* out with just
+-c 'print':
+
+xfs_db -c 'path /hah' -c 'ablock 0' -c 'addr btree[0].before' -c 'print' /dev/loop16
+
+  Luis
