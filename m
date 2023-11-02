@@ -1,92 +1,99 @@
-Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 487011C296
-	for <fstests@vger.kernel.org>; Thu,  2 Nov 2023 14:37:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93C0E1DDD6
+	for <fstests@vger.kernel.org>; Thu,  2 Nov 2023 18:59:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Gw4JJOkT"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BDCB182
-	for <fstests@vger.kernel.org>; Thu,  2 Nov 2023 07:37:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1698935875;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=9jsCF0i5O6/gTr16YZpNXJMk9ajCl+87XqCHuQIk8JQ=;
-	b=Gw4JJOkTvey43NuMciJ+HzU1qRq9nesQdqfDEaJ1mnObOvHhootu5aB046r59RlKE9PDpt
-	FnKcan0CzYYs+lM7gvTRiZFOhRV54lc6QuEuKsw814AMqFUTLwbo3UWPEj+NqoKDb57Wi1
-	d4tAFpMGJslPLwi4za1ZAZBUhzfkWkQ=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-447-5mBTm-QBNLaYOITJ14OR8w-1; Thu, 02 Nov 2023 10:37:54 -0400
-X-MC-Unique: 5mBTm-QBNLaYOITJ14OR8w-1
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-9c7558b89ccso69880666b.3
-        for <fstests@vger.kernel.org>; Thu, 02 Nov 2023 07:37:54 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1698935873; x=1699540673;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=9jsCF0i5O6/gTr16YZpNXJMk9ajCl+87XqCHuQIk8JQ=;
-        b=LudL176PIs5Y1BySFQvkgT8yk7ruvlKJS6PBFW+t3pqC2Z9FQ2im0s67fhBv57kt6t
-         W2P5SKfAUcgObpnjxWr39/GZQM5ubqvLM6dQq6Ez5JWXcCxTNJYCJqsTQE99TIlmEOqf
-         VWcePwoXC0EAtRLgYvqlyjXc4L6EqAq4xvk/7KZUbxLMvFPLSisMWEv5zi2yY7QcIuJd
-         s9RzyruJU7PIHXSnZ2jYlZhDGA/1Z5GPS5K7o+P82emgXSx07gnOaGF+tIpeh/+bw/WG
-         OmUNS1+wNQnldz/+vl4dFgn6jvrtTXn4lTrpo8InLJCXqZD1G4cWfpHj8gkN0R989oXi
-         nfvQ==
-X-Gm-Message-State: AOJu0YxpKnB36MogATekOo7q7V5Fp6V6El8mBTyNer8vOpOUSjKvgk8a
-	5esd0x2GZFXImjjLiQ2ciGmrBcU8oGsk47zbepT8Qk1bdRM6ZLi+hVY7T7sKDgQ2OnM0q6hhcnF
-	XRFlBLsDechofHwhdKtyhIoDtgJb/smsboXLHgItqnw==
-X-Received: by 2002:a17:906:c115:b0:9d2:63ab:6d4f with SMTP id do21-20020a170906c11500b009d263ab6d4fmr4566401ejc.55.1698935873325;
-        Thu, 02 Nov 2023 07:37:53 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IERhFhafae76zUUdYJkyHMjhO18uMk2/F3HJt78Ghicsp55KLISPLQmp4pEBzxjiuTwfkA2ALEKRA7R02mMtlM=
-X-Received: by 2002:a17:906:c115:b0:9d2:63ab:6d4f with SMTP id
- do21-20020a170906c11500b009d263ab6d4fmr4566388ejc.55.1698935873065; Thu, 02
- Nov 2023 07:37:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OcrL98Mv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8B72C433C7;
+	Thu,  2 Nov 2023 18:59:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1698951549;
+	bh=ZiO2lHEBYb1GPsbDe5Y568IrZA2/oX2TO88OoHKckfE=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+	b=OcrL98MvyAlY+K74zmxsvtG6BHlPfCP6B6eXl7EThlO8Y2PLU5kPAGaIgxKbZvVgg
+	 IEe4ldph4veTKa1xp7Lkzw6CyZuvZzwgvLjnElnY0uzfPkkfL4dJq0QlIokDkHoxlB
+	 zZQwR++82O82iHoVn7JY6Pw1I4x27ig1UimZ036yLr4AqlklpVpZgGT/I3c7fkWDWT
+	 6p0aM8GvfofM+nZbfW5OMHDgh/ybvcFE++Ts220fBLyGVhe0kheXraj9EKHvxU40TM
+	 GnktxZi+DbaHbfwmQUeQdGWPlLr3e2z14iWxWjIlh/zpoUeHIOtub+iN4UH1TG6SKf
+	 sbJFzOGKpk3pg==
+Message-ID: <f3c14dc1db7b4aa5d348cd0ccdfb63117c6e2d86.camel@kernel.org>
+Subject: Re: [PATCH] generic/732: fix mount option munging
+From: Jeff Layton <jlayton@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, Yongcheng Yang <yoyang@redhat.com>
+Date: Thu, 02 Nov 2023 14:59:07 -0400
+In-Reply-To: <20231102080640.bntmfreb7t5rh4wp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231101-master-v1-1-08bbe2f83307@kernel.org>
+	 <20231102080640.bntmfreb7t5rh4wp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.48.4 (3.48.4-1.fc38) 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230925201827.1703857-1-aahringo@redhat.com>
-In-Reply-To: <20230925201827.1703857-1-aahringo@redhat.com>
-From: Alexander Aring <aahringo@redhat.com>
-Date: Thu, 2 Nov 2023 10:37:41 -0400
-Message-ID: <CAK-6q+hrsfCn+y3yjqnti9JUfSOhOWgiEtSioukL5H3dA6-_8A@mail.gmail.com>
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, gfs2@lists.linux.dev, jlayton@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Hi,
+On Thu, 2023-11-02 at 16:06 +0800, Zorro Lang wrote:
+> On Wed, Nov 01, 2023 at 02:17:13PM -0400, Jeff Layton wrote:
+> > With NFS in particular, we are usually testing with some mount options.
+> > Ensure that we preserve those and just add "nosharecache" onto the end
+> > of the string.
+> >=20
+> > Cc: Yongcheng Yang <yoyang@redhat.com>
+> > Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> > ---
+> >  tests/generic/732 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >=20
+> > diff --git a/tests/generic/732 b/tests/generic/732
+> > index 785aac58f361..ae49152e42dc 100755
+> > --- a/tests/generic/732
+> > +++ b/tests/generic/732
+> > @@ -40,7 +40,7 @@ mkdir -p $testdir1 $testdir2
+> >  # Don't share the data and attribute caches among mount points for NFS=
+.
+> >  # This caching behavior is necessary to reproduce this issue as we're
+> >  # checking the alignment of each mount point's own unique cache.
+> > -[ "$FSTYP" =3D "nfs" ] && MOUNT_OPTIONS=3D"-o nosharecache"
+> > +[ "$FSTYP" =3D "nfs" ] && MOUNT_OPTIONS=3D"$MOUNT_OPTIONS -o noshareca=
+che"
+>=20
+> Good to me, and looks like the later option replaces the former one, if
+> there're same options (e.g. -o sharecache -o nosharecache).
+>=20
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>=20
+>=20
 
-On Mon, Sep 25, 2023 at 4:18=E2=80=AFPM Alexander Aring <aahringo@redhat.co=
-m> wrote:
->
-> This patch adds fcntl corner cases that was being used to confirm issues
-> on a GFS2 filesystem. The GFS2 filesystem has it's own ->lock()
-> implementation and in those corner cases issues was being found and
-> fixed.
->
-> Signed-off-by: Alexander Aring <aahringo@redhat.com>
-> ---
-> changes since v2:
-> - move fcntl tests into one fcntl c file
-> - remove ofd and same owner tests, should be reflected by only one test
-> - simplify commit message (remove testname out of it)
-> - add error messages in fcntl.c to give more information if an error
->   occur
+Thanks, Zorro.
 
-ping, any comments? Would for me nice to have these fcntl() tests
-upstream and have a starting point to add more tests regarding dlm
-plock implementation.
+Now that I look more closely, I'm not sure this test will ever pass
+properly on NFS. It's basically doing this:
 
-Thanks.
+client1: A/f -> B/f
+client2: B/f -> A/f
+client1: A/f -> B/f
 
- - Alex
+...and the two clients aren't aware of the changes the other is making
+(because they were mounted using -o nosharecache). The 3rd rename ends
+up thinking that the B/f dentry is still positive, and the rename
+syscall fails with EEXIST.
 
+The really confusing bit is that this test passes against servers
+running older kernels, because the rename response had the wrong change
+info in it and that tricks the client into invalidating the directory
+caches when it shouldn't need to do that.
+
+We fixed that in fdd2630a7398 (nfsd: fix change_info in NFSv4 RENAME
+replies), and now this test pretty reliably fails when testing against
+modern nfsd.
+
+We have some longer term plans to add support for directory delegations
+eventually, which may make it easier to keep the caches more coherent,
+in this situation, but until then we might want to skip this test.
+
+--=20
+Jeff Layton <jlayton@kernel.org>
