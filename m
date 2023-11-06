@@ -1,59 +1,65 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51F26B671
-	for <fstests@vger.kernel.org>; Mon,  6 Nov 2023 06:26:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75C1C2F41
+	for <fstests@vger.kernel.org>; Mon,  6 Nov 2023 19:26:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="orzdhSeW"
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03B06DB
-	for <fstests@vger.kernel.org>; Sun,  5 Nov 2023 22:26:18 -0800 (PST)
-Received: by mail-pf1-x42d.google.com with SMTP id d2e1a72fcca58-6c3077984e8so3420597b3a.0
-        for <fstests@vger.kernel.org>; Sun, 05 Nov 2023 22:26:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1699251977; x=1699856777; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Vs8EyB85nlBUE5TSiBTkXaWpXa4Ucxuzf7Wsqr/jcc0=;
-        b=orzdhSeW35jEEcgWH8uiHHKpeQ8XIpHpD4vJgFcg2hBVCPDf2teCM235FFRuZgFD+M
-         gCkuvEew9lbaDWUl9r7NtJNhNwFLIrVaedLKwNzQQi/wKu+d8roUBDUAlkgO3ZH4Yi5m
-         J2aNgbD07FIfcBHB+oPVrgW2TNiTfxVN6qtDBFbs7RF450+iub5UAhrzXGawo7vzNn9A
-         DxJyFInRLkzPs8d7Bmx6FEk3oUuGLje3rH7Ub1B4BPV7PT0N5kQEDteFO/8d0+Hsmh6X
-         x+1dMwZBaMoURPe+uJEfR0WkyfRL3qezy+5/kaUhCjO9DYR3TbP4M5KkbBsjGAgY4z+c
-         g/XQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZzhJ1L1m"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0A2EFA
+	for <fstests@vger.kernel.org>; Mon,  6 Nov 2023 11:26:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1699298794;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=QrglblGKu5t8qGXDp6Bxs0SVaAyV7q53TskJ/b754JQ=;
+	b=ZzhJ1L1mYEx+hhw3t2qQ8B/N1EbRbCuFGIp0N84aSRQ6yauf7H7VJOcldqGJjSNwwaKrXH
+	4mO/vXI8/P3PNg6ntupLRBLulLaTZkH5paGAYSPXyhIuRg4U07IzVQKalRhUjgdFWpAivJ
+	hKJqvMr6p9gGrct5wEvfYiIXCnaBs5k=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-199-Kf0zqngbNbqzd039iXtT4w-1; Mon, 06 Nov 2023 14:26:32 -0500
+X-MC-Unique: Kf0zqngbNbqzd039iXtT4w-1
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-6b225c9ee0bso3459586b3a.2
+        for <fstests@vger.kernel.org>; Mon, 06 Nov 2023 11:26:32 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699251977; x=1699856777;
+        d=1e100.net; s=20230601; t=1699298791; x=1699903591;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Vs8EyB85nlBUE5TSiBTkXaWpXa4Ucxuzf7Wsqr/jcc0=;
-        b=mkIyGd7/60t/zJ59ydgsMziBArMy+31621MqapVtVXmcnKzOHzs6fFWCez77k+Q4wU
-         34qQL70UfI1Ac1MvscSsqZ0bDRlKl/Lb0L+8lW7tX5ZK+7gqzxHhZTpBWQ0xxnJII/XN
-         9dl2O4ASiOI3Lp7M3PJm1JhhMwbpru0W3Kv/8sO21wwQPNqQsSduMXg1gIDVC03Qr7C2
-         jO1TRlE7WeR94F2ZGViEL9j1Ya96KSfDdbJJdu/yfzxvLcnmOObgNBosGpqjbAB2yPWD
-         Dt+o8HEqgged2I24isgVjh61MAvGvxJaOHXqOT9rIRCuzoVcwlPXWGIiqAk86pkDu3/X
-         bn9Q==
-X-Gm-Message-State: AOJu0Ywcj2NQVNgI5y7wZ3y9/YUna0jZOXDVgDpKK8Wxb3C+7Pp6XZaQ
-	R/o8hOlrw1CEenzKuvVd08NPwg==
-X-Google-Smtp-Source: AGHT+IGeUIFQqGN3DiVhdgjAa2fPVCK7a9HtcSSSgdtkKgdvqa2gboNZOgopPu5KhXFAJeenCXuXGQ==
-X-Received: by 2002:a05:6a00:1741:b0:6c3:41fd:3a3e with SMTP id j1-20020a056a00174100b006c341fd3a3emr9208340pfc.27.1699251977419;
-        Sun, 05 Nov 2023 22:26:17 -0800 (PST)
-Received: from dread.disaster.area (pa49-180-20-59.pa.nsw.optusnet.com.au. [49.180.20.59])
-        by smtp.gmail.com with ESMTPSA id fa30-20020a056a002d1e00b006bdd1ce6915sm4889877pfb.193.2023.11.05.22.26.16
+        bh=QrglblGKu5t8qGXDp6Bxs0SVaAyV7q53TskJ/b754JQ=;
+        b=ONQeJGxa1sVoLfszvQLC02DppyLTI2qLOQiODQ+Kx8jRmqY/vjVf/GsXIFPTtVUyXq
+         7ScHoaTZKZePBPwlhmkVb3SDNlnVcLUpGtChdAdFHr1dHZ+yQTHOG6otOc5r7HO14AiN
+         VCfvK8CmRMzogdRVlqK1RnskMylVqR/5PIRMIGYJEq3IpzkriAZhn0xaKfvg0OJM5HzX
+         c0ikGKzBq8x4wUuqiBApR6eaFKq1qR4h4mOq3WHEhAdOVVI0LO2WUEtoIZOAp5UQvfEm
+         gC6XdNBaxW5tUtPsgNkAyHW/JSI3XkEVCRKz4yHn0sPIXEKYmosn+g17a3Bxeq3Sr2E8
+         3bnw==
+X-Gm-Message-State: AOJu0YyXu7XuAFS8E2iVnOH6omc6DCVXJgNGFexyBJ04ryYYKLex5bi7
+	2UoCb1adhg2BEHUFJTHsJe8XKqlmq0txpDvKx2NQBZmIKpIy513z8Eu6taoGtB9bkxHoTPcuXLS
+	a6S2TsO346l1+/vkg4Q==
+X-Received: by 2002:a05:6a00:1797:b0:6b4:6b34:8cef with SMTP id s23-20020a056a00179700b006b46b348cefmr27971061pfg.34.1699298791462;
+        Mon, 06 Nov 2023 11:26:31 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFkTpFxfcDo+DJ4iF8kHc463XZMDpUJNLKjSwczRFZ6FULYFHtF2R099VOnD2Y/88FKTWqHQQ==
+X-Received: by 2002:a05:6a00:1797:b0:6b4:6b34:8cef with SMTP id s23-20020a056a00179700b006b46b348cefmr27971045pfg.34.1699298791118;
+        Mon, 06 Nov 2023 11:26:31 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id b2-20020a056a0002c200b006c0685422e0sm5923116pft.214.2023.11.06.11.26.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Nov 2023 22:26:16 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-	(envelope-from <david@fromorbit.com>)
-	id 1qzt3u-008ruE-0r;
-	Mon, 06 Nov 2023 17:26:14 +1100
-Date: Mon, 6 Nov 2023 17:26:14 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: linux-xfs@vger.kernel.org, linux-s390@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [Bug report] More xfs courruption issue found on s390x
-Message-ID: <ZUiHBpJTUr3G4//q@dread.disaster.area>
-References: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+        Mon, 06 Nov 2023 11:26:30 -0800 (PST)
+Date: Tue, 7 Nov 2023 03:26:27 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	Carlos Maiolino <carlos@maiolino.me>
+Subject: Re: [Bug report][fstests generic/047] Internal error !(flags &
+ XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.
+ Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+Message-ID: <20231106192627.ilvijcbpmp3l3wcz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231029041122.bx2k7wwm7otebjd5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUiECgUWZ/8HKi3k@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,49 +68,133 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <ZUiECgUWZ/8HKi3k@dread.disaster.area>
 
-On Sun, Oct 29, 2023 at 12:33:33PM +0800, Zorro Lang wrote:
-> Hi xfs folks,
+On Mon, Nov 06, 2023 at 05:13:30PM +1100, Dave Chinner wrote:
+> On Sun, Oct 29, 2023 at 12:11:22PM +0800, Zorro Lang wrote:
+> > Hi xfs list,
+> > 
+> > Recently I always hit xfs corruption by running fstests generic/047 [1], and
+> > it show more failures in dmesg[2], e.g:
 > 
-> Besides https://lore.kernel.org/linux-xfs/20231029041122.bx2k7wwm7otebjd5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#u ,
+> OK, g/047 is an fsync test.
 > 
-> I always hit another failure on s390x too, by running generic/039 or generic/065 [1]:
+> > 
+> >   XFS (loop1): Internal error !(flags & XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.  Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+> 
+> Ok, a directory block index translated to a hole in the file
+> mapping. That's bad...
+> 
+> > [2]
+> > [  376.468885] run fstests generic/047 at 2023-10-27 09:08:07
+> >  [  376.675751] XFS (loop1): Mounting V5 Filesystem 716c9687-ee74-4c12-b6ad-a0b513194f2b
+> >  [  376.677088] XFS (loop1): Ending clean mount
+> >  [  376.678189] XFS (loop1): User initiated shutdown received.
+> >  [  376.678194] XFS (loop1): Metadata I/O Error (0x4) detected at xfs_fs_goingdown+0x5a/0xf8 [xfs] (fs/xfs/xfs_fsops.c:492).  Shutting down filesystem.
+> >  [  376.678409] XFS (loop1): Please unmount the filesystem and rectify the problem(s)
+> >  [  376.679423] XFS (loop1): Unmounting Filesystem 716c9687-ee74-4c12-b6ad-a0b513194f2b
+> >  [  376.714910] XFS (loop1): Mounting V5 Filesystem 40196bb2-39f4-4c32-83ef-567f42216699
+> >  [  376.716353] XFS (loop1): Ending clean mount
+> 
+> Files are created and fsync'd here.
+> 
+> >  [  380.375878] XFS (loop1): User initiated shutdown received.
+> >  [  380.375888] XFS (loop1): Log I/O Error (0x6) detected at xfs_fs_goingdown+0xb4/0xf8 [xfs] (fs/xfs/xfs_fsops.c:495).  Shutting down filesystem.
+> 
+> Then the fs is shut down.
+> 
+> >  [  380.376101] XFS (loop1): Please unmount the filesystem and rectify the problem(s)
+> >  [  380.380373] XFS (loop1): Unmounting Filesystem 40196bb2-39f4-4c32-83ef-567f42216699
+> >  [  380.383835] XFS (loop1): Mounting V5 Filesystem 40196bb2-39f4-4c32-83ef-567f42216699
+> >  [  380.397086] XFS (loop1): Starting recovery (logdev: internal)
+> >  [  380.465934] XFS (loop1): Ending recovery (logdev: internal)
+> 
+> Then it is recovered....
+> >  [  380.467409] XFS (loop1): Unmounting Filesystem 40196bb2-39f4-4c32-83ef-567f42216699
+> >  [  380.475431] XFS (loop1): Mounting V5 Filesystem 40196bb2-39f4-4c32-83ef-567f42216699
+> >  [  380.477235] XFS (loop1): Ending clean mount
+> >  [  380.477500] XFS (loop1): Internal error !(flags & XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.  Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+> 
+> .... and now the directory is bad.
+> 
+> >  [  380.477636] CPU: 0 PID: 337362 Comm: 047 Kdump: loaded Tainted: G        W          6.6.0-rc7+ #1
+> >  [  380.477639] Hardware name: IBM 3931 LA1 400 (KVM/Linux)
+> >  [  380.477641] Call Trace:
+> >  [  380.477642]  [<0000000032d71372>] dump_stack_lvl+0x62/0x80 
+> >  [  380.477648]  [<000003ff7ff96c00>] xfs_corruption_error+0x70/0xa0 [xfs] 
+> >  [  380.477762]  [<000003ff7ff551ce>] xfs_dabuf_map.constprop.0+0x2a6/0x368 [xfs] 
+> >  [  380.477871]  [<000003ff7ff5773e>] xfs_da_read_buf+0x6e/0x128 [xfs] 
+> >  [  380.477977]  [<000003ff7ff57838>] xfs_da3_node_read+0x40/0x78 [xfs] 
+> >  [  380.478085]  [<000003ff7ff58c7a>] xfs_da3_node_lookup_int+0x82/0x558 [xfs] 
+> >  [  380.478193]  [<000003ff7ff68d6e>] xfs_dir2_node_lookup+0x3e/0x140 [xfs] 
+> 
+> So it's supposed to be in node format, which means enough blocks to
+> have an external free list. I guess a thousand dirents is enough to
+> do that.
+> 
+> Yet fsync is run after every file is created and written, so the
+> dirents and directory blocks should all be there....
+> 
+> .....
+> 
+> > _check_xfs_filesystem: filesystem on /dev/loop1 is inconsistent (r)
+> > *** xfs_repair -n output ***
+> > Phase 1 - find and verify superblock...
+> > Phase 2 - using internal log
+> >         - zero log...
+> >         - scan filesystem freespace and inode maps...
+> >         - found root inode chunk
+> > Phase 3 - for each AG...
+> >         - scan (but don't clear) agi unlinked lists...
+> >         - process known inodes and perform inode discovery...
+> >         - agno = 0
+> > bad nblocks 9 for inode 128, would reset to 0
+> > no . entry for directory 128
+> > no .. entry for root directory 128
+> > problem with directory contents in inode 128
+> > would clear root inode 128
+> > bad nblocks 8 for inode 131, would reset to 0
+> > bad nblocks 8 for inode 132, would reset to 0
+> > bad nblocks 8 for inode 133, would reset to 0
+> > ...
+> > bad nblocks 8 for inode 62438, would reset to 0
+> > bad nblocks 8 for inode 62439, would reset to 0
+> > bad nblocks 8 for inode 62440, would reset to 0
+> > bad nblocks 8 for inode 62441, would reset to 0
+> 
+> Yet all the files - including the data files that were fsync'd - are
+> all bad.
+> 
+> Aparently the journal has been recovered, but lots of metadata
+> updates that should have been in the journal are missing after
+> recovery has completed? That doesn't make a whole lot of sense -
+> when did these tests start failing? Can you run a bisect?
 
-g/039 is a sync + fsync + flakey remount+recovery test.
-g/065 is a similar by more complex test.
+Hi Dave,
 
-So that's 3 fsync + shutdown/recovery tests on s390 that are now
-failing with ip->i_nblocks not matching the extent tree state after
-fsync-shutdown-recover.
+Thanks for your reply :) I tried to do a kernel bisect long time, but
+find nothing ... Then suddently, I found it's failed from a xfsprogs
+change [1].
 
+Although that's not the root cause of this bug (on s390x), it just
+enabled "nrext64" by default, which I never tested on s390x before.
+For now, we know this's an issue about this feature, and only on
+s390x for now.
+
+Thanks,
+Zorro
+
+[1]
+commit e5b18d7d1d962e942ce3b0a9ccdb5872074e24df
+Author: Darrick J. Wong <djwong@kernel.org>
+Date:   Mon Sep 25 14:59:25 2023 -0700
+
+    mkfs: enable large extent counts by default
 
 > 
->   XFS: Assertion failed: ip->i_nblocks == 0, file: fs/xfs/xfs_inode.c, line: 2359
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 > 
-> More details as dmesg output [2] and .full output [3].
-> 
-> And ... more other kind of failure likes [3]:
->   XFS: Assertion failed: error != -ENOENT, file: fs/xfs/xfs_trans.c, line: 1310
 
-ANd that one is from g/509 after a quotacheck is completed and then
-the fs is shutdown, resulting in dquots not being found after the
-journal has been recovered and unlinked list recovery is being run.
-i.e. unlinked list processing is tripping over missing file data
-extents after recovery.
-
-> All these falures are on s390x only... and more xfs corruption failure by running
-> fstests on s390x. I don't know if it's a s390x issue or a xfs issue on big endian
-> machine (s390x), so cc s390x list.
-
-IOWs, all four of these issues are the same problem - journal
-recovery is not resulting in a correct and consistent filesystem
-after the journal has been flushed at runtime, so please discuss and
-consolidate them all in the initial bug report thread....
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
