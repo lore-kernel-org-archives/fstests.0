@@ -1,34 +1,66 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F2663033C
-	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 15:24:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BF3D3457D
+	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 16:39:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Ru3al2Sj"
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 159E71BF7
-	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 07:24:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-Id:Date:Subject:To:From:Sender:Reply-To:Cc:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=syBZPWaLHClciUyk0/kDKS86tiL6cp5bJb2e97y8P2c=; b=Ru3al2Sjnxg8BbFeFAg7cKF8Wa
-	LxfaB0gDvg7nftayObUXybSNSPz3RIePHWibHtnPPhBp9ukMFgTuIUWCbOkEGyf3Cx8rty6H/LjxM
-	Wr7d6y4wFnlBoUaPduJ0GVUadGgLkok+bV8Qswq/w0GZxy8nefbb9dr8o5Rkb4wreBIyuc2eHNU1C
-	ITOeE0En/+xHm89uLdq4bVm8rC9jb0KvvtS/msu/C1VWdiUR/vElPHhIrxMhV5PP31zVCud1SIv0u
-	Sp7OhRAVhQ2WzhSd32F5Zj0HyM6ZbxUONjsbVywfJg9lzKwlkz5YZFO97ZHlab/4A8pl531Zc4wgo
-	Z2mwg8pg==;
-Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-	id 1r0kPv-004BTh-1L
-	for fstests@vger.kernel.org;
-	Wed, 08 Nov 2023 15:24:31 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: fstests@vger.kernel.org
-Subject: [PATCH] generic/726,727: add missing _require_scratch_reflink
-Date: Wed,  8 Nov 2023 16:24:28 +0100
-Message-Id: <20231108152428.432995-1-hch@lst.de>
-X-Mailer: git-send-email 2.39.2
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="MnMjQE4i"
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7D5B2130;
+	Wed,  8 Nov 2023 08:39:26 -0800 (PST)
+Received: from pps.filterd (m0353726.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3A8GBbpm020840;
+	Wed, 8 Nov 2023 16:39:26 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=x8+A1KDoK1OXjewh7ZpwrkcFuwzkD66yQiRWuYB9axc=;
+ b=MnMjQE4iErC32UlYns69fpL6pr0hS3xwujgwCElce2W2VK0nyGebyvVPj40M0z7B2Xxv
+ m2LKgs4Il1bDLiAmXSEY43epuhMmQnb47mQAHgFdkN/wR4MdtLnvpkVyKImUrpvbEMiS
+ nKd3nrx+YHl1AIrR5+ssQUF11Tfg8KMYNIsNVojLAsleowPSxR6fG792DxawwvKfzZkH
+ vqj1LEd6VjcRIq4VJcCFVhNf705Jzz58JCjngCF4LC3dhUTGkQ2xtj08rq7dTOCqxKGc
+ epzCpgLt7t6lH0xcZUZ+0+BiiSSaarTPPHJlPGtPTy8m72shxORz3jgLv48Ct6TCtGFM NA== 
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3u8dbu24ea-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 08 Nov 2023 16:39:24 +0000
+Received: from m0353726.ppops.net (m0353726.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3A8GaHSL017264;
+	Wed, 8 Nov 2023 16:39:20 GMT
+Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3u8dbu22rc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 08 Nov 2023 16:39:20 +0000
+Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma11.dal12v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3A8GZBWK004112;
+	Wed, 8 Nov 2023 16:38:55 GMT
+Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
+	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 3u7w20x2fc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 08 Nov 2023 16:38:55 +0000
+Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
+	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3A8GcrOl44696010
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 8 Nov 2023 16:38:53 GMT
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 38C7320043;
+	Wed,  8 Nov 2023 16:38:53 +0000 (GMT)
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id C0B1920040;
+	Wed,  8 Nov 2023 16:38:52 +0000 (GMT)
+Received: from li-97e414cc-2e07-11b2-a85c-b6096b19d8a2.ibm.com.com (unknown [9.179.0.128])
+	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Wed,  8 Nov 2023 16:38:52 +0000 (GMT)
+From: edward6@linux.ibm.com
+To: zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-xfs@vger.kernel.org, edward6@linux.ibm.com
+Subject: Re: [Bug report] More xfs courruption issue found on s390x
+Date: Wed,  8 Nov 2023 17:38:12 +0100
+Message-Id: <20231108163812.1440930-1-edward6@linux.ibm.com>
+X-Mailer: git-send-email 2.39.3
+In-Reply-To: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -36,57 +68,36 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: Mld01iZ2cpwbRHbxeWzRIWfOYlJrjuDZ
+X-Proofpoint-ORIG-GUID: LKe2XSIxjno0zC4KTPg1Ve8-iwjamrO1
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-11-08_05,2023-11-08_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
+ adultscore=0 spamscore=0 phishscore=0 mlxlogscore=773 clxscore=1011
+ suspectscore=0 priorityscore=1501 impostorscore=0 lowpriorityscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311060000 definitions=main-2311080137
 
-These two tests require reflink functionality, add the correct
-statement to ensure that.
+From: Eduard Shishkin <edward6@linux.ibm.com>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/generic/726 | 2 ++
- tests/generic/727 | 2 ++
- 2 files changed, 4 insertions(+)
+On Sun, Oct 29, 2023 at 12:33:33PM +0800, Zorro Lang wrote:
 
-diff --git a/tests/generic/726 b/tests/generic/726
-index f0d8df2e..77afe10c 100755
---- a/tests/generic/726
-+++ b/tests/generic/726
-@@ -19,6 +19,7 @@ _begin_fstest auto fiexchange swapext quick
- 
- # Import common functions.
- . ./common/filter
-+. ./common/reflink
- 
- # real QA test starts here
- 
-@@ -28,6 +29,7 @@ _require_user
- _require_xfs_io_command swapext '-v vfs -a'
- _require_xfs_io_command startupdate
- _require_scratch
-+_require_scratch_reflink
- 
- _scratch_mkfs >> $seqres.full
- _scratch_mount
-diff --git a/tests/generic/727 b/tests/generic/727
-index 2cda49ea..1f9eebc5 100755
---- a/tests/generic/727
-+++ b/tests/generic/727
-@@ -20,6 +20,7 @@ _begin_fstest auto fiexchange swapext quick
- # Import common functions.
- . ./common/filter
- . ./common/attr
-+. ./common/reflink
- 
- # real QA test starts here
- 
-@@ -31,6 +32,7 @@ _require_command "$SETCAP_PROG" setcap
- _require_xfs_io_command swapext '-v vfs -a'
- _require_xfs_io_command startupdate
- _require_scratch
-+_require_scratch_reflink
- _require_attrs security
- 
- _scratch_mkfs >> $seqres.full
--- 
-2.39.2
+[...]
 
+> All these falures are on s390x only... and more xfs corruption
+> failure by running fstests on s390x. I don't know if it's a s390x
+> issue or a xfs issue on big endian machine (s390x), so cc s390x
+> list.
+
+Dear all,
+
+It is a really great nuisance. We are looking into this from our
+(s390x) side in turn. Unfortunately, I don't see any ways except code
+review for now. If you have any ideas on how to optimize the process,
+please, let us know. Right now, I think, we can help with additional
+hardware resources.
+
+Thanks,
+Eduard.
