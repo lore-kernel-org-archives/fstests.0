@@ -1,103 +1,82 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BF3D3457D
-	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 16:39:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CFFE37165
+	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 20:25:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="MnMjQE4i"
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7D5B2130;
-	Wed,  8 Nov 2023 08:39:26 -0800 (PST)
-Received: from pps.filterd (m0353726.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3A8GBbpm020840;
-	Wed, 8 Nov 2023 16:39:26 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=x8+A1KDoK1OXjewh7ZpwrkcFuwzkD66yQiRWuYB9axc=;
- b=MnMjQE4iErC32UlYns69fpL6pr0hS3xwujgwCElce2W2VK0nyGebyvVPj40M0z7B2Xxv
- m2LKgs4Il1bDLiAmXSEY43epuhMmQnb47mQAHgFdkN/wR4MdtLnvpkVyKImUrpvbEMiS
- nKd3nrx+YHl1AIrR5+ssQUF11Tfg8KMYNIsNVojLAsleowPSxR6fG792DxawwvKfzZkH
- vqj1LEd6VjcRIq4VJcCFVhNf705Jzz58JCjngCF4LC3dhUTGkQ2xtj08rq7dTOCqxKGc
- epzCpgLt7t6lH0xcZUZ+0+BiiSSaarTPPHJlPGtPTy8m72shxORz3jgLv48Ct6TCtGFM NA== 
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3u8dbu24ea-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 08 Nov 2023 16:39:24 +0000
-Received: from m0353726.ppops.net (m0353726.ppops.net [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3A8GaHSL017264;
-	Wed, 8 Nov 2023 16:39:20 GMT
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3u8dbu22rc-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 08 Nov 2023 16:39:20 +0000
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3A8GZBWK004112;
-	Wed, 8 Nov 2023 16:38:55 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 3u7w20x2fc-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 08 Nov 2023 16:38:55 +0000
-Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3A8GcrOl44696010
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 8 Nov 2023 16:38:53 GMT
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 38C7320043;
-	Wed,  8 Nov 2023 16:38:53 +0000 (GMT)
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id C0B1920040;
-	Wed,  8 Nov 2023 16:38:52 +0000 (GMT)
-Received: from li-97e414cc-2e07-11b2-a85c-b6096b19d8a2.ibm.com.com (unknown [9.179.0.128])
-	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Wed,  8 Nov 2023 16:38:52 +0000 (GMT)
-From: edward6@linux.ibm.com
-To: zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-xfs@vger.kernel.org, edward6@linux.ibm.com
-Subject: Re: [Bug report] More xfs courruption issue found on s390x
-Date: Wed,  8 Nov 2023 17:38:12 +0100
-Message-Id: <20231108163812.1440930-1-edward6@linux.ibm.com>
-X-Mailer: git-send-email 2.39.3
-In-Reply-To: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="BbC9HjwQ"
+Received: from mail-qk1-x72d.google.com (mail-qk1-x72d.google.com [IPv6:2607:f8b0:4864:20::72d])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9B3C2580
+	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 12:25:52 -0800 (PST)
+Received: by mail-qk1-x72d.google.com with SMTP id af79cd13be357-7789cc5c8ccso13212885a.0
+        for <fstests@vger.kernel.org>; Wed, 08 Nov 2023 12:25:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1699475152; x=1700079952; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=jK1nJO3A2bdbcDtSiZJ/FINWoUSICdNOK+5Z8W44+94=;
+        b=BbC9HjwQaAVk9OOyefV64MqE3CXM2OKa/EYeIoB4Ddz7qDPssDQkBXkdpMe3DgdUMe
+         DUQ7QX0/01T2dMsCKd1sGD0DdLkI6oy4h8NF8/8JRCA/AIzjiwCMnTkg4+mQhIwii4lJ
+         9RRgHkJBkS/9CODuA+dprCwWZ8rd6ckh+uQPBNGWCTMTkrXb4MbiJtalpCpHYoFOIeBd
+         HqS3pi3CBe4Rue5ikiGnrcZr3RkOMAI6/RT8k5Ff4Hpc5YtOsvoIiZrOWybaTGk7cflJ
+         DX3vgcAL/XeynWmixdrBx3+eizZ95gS6S2w1gsBpfsV8PsGusjHV6wZp5HWXBUK2gYIQ
+         cKFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699475152; x=1700079952;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jK1nJO3A2bdbcDtSiZJ/FINWoUSICdNOK+5Z8W44+94=;
+        b=oD4Na/Ci0ef9Jl9sZ4xs0shxkfgyUPlJkNW5DW6To5tx/R1BUoq8OKmKFNKR6IoB8R
+         C640aYZQ/ZFRzJ4VbCA/0MAcefNThAg/azCErGvoH96UaV5XEMhupOz24sefgCCuiPph
+         pjgS/QObpVw2XpphFd9VIp/T1gn7qAya9qfKSZWy8FE1J5uM9z6J3U4opERpon51FykX
+         wjhRYgphgiMQSq+WDnQgWc0hPls6JZVqRZo+77S2EMPNsRsP7/ZyotQUR4/kQM/fbLCR
+         Y5X193zWyvrtWZ3OzdFd+ARasfOjPwEWN+I0x+QIEkbxOK9afpIk9vMjDOtXp8D49HtD
+         P5Ww==
+X-Gm-Message-State: AOJu0YxV8NJo0Qy8ZOKaX4opVW2i6AHXm4PFbfHpdFgCY7F3+dPtu9bY
+	1GR9cOGHMOzVbKG1GrdBHABB5w==
+X-Google-Smtp-Source: AGHT+IEIJIogXASMFwyMazJN0/00lMzSLQnx6+b8+pjRO0r+W1pyhri4FzCdaCazZdXs5hi6d9s/xQ==
+X-Received: by 2002:a05:620a:40c6:b0:775:92ac:a3d6 with SMTP id g6-20020a05620a40c600b0077592aca3d6mr4285567qko.14.1699475151873;
+        Wed, 08 Nov 2023 12:25:51 -0800 (PST)
+Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id vq25-20020a05620a559900b007756c0853a5sm1395858qkn.58.2023.11.08.12.25.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Nov 2023 12:25:51 -0800 (PST)
+Date: Wed, 8 Nov 2023 15:25:50 -0500
+From: Josef Bacik <josef@toxicpanda.com>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH 09/12] fstests: split generic/580 into two tests
+Message-ID: <20231108202550.GA548237@perftesting>
+References: <cover.1696969376.git.josef@toxicpanda.com>
+ <ecf95cca70aa11c64455893ea823ec8de0249cf5.1696969376.git.josef@toxicpanda.com>
+ <7cba2927-5636-4039-9e76-f01a5b86c108@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: Mld01iZ2cpwbRHbxeWzRIWfOYlJrjuDZ
-X-Proofpoint-ORIG-GUID: LKe2XSIxjno0zC4KTPg1Ve8-iwjamrO1
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-11-08_05,2023-11-08_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
- adultscore=0 spamscore=0 phishscore=0 mlxlogscore=773 clxscore=1011
- suspectscore=0 priorityscore=1501 impostorscore=0 lowpriorityscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2311060000 definitions=main-2311080137
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7cba2927-5636-4039-9e76-f01a5b86c108@oracle.com>
 
-From: Eduard Shishkin <edward6@linux.ibm.com>
+On Thu, Nov 02, 2023 at 07:42:50PM +0800, Anand Jain wrote:
+> On 10/11/23 04:26, Josef Bacik wrote:
+> > generic/580 tests both v1 and v2 encryption policies, however btrfs only
+> > supports v2 policies.  Split this into two tests so that we can get the
+> > v2 coverage for btrfs.
+> 
+> Instead of duplicating the test cases for v1 and v2 encryption policies,
+> can we check the supported version and run them accordingly within a
+> single test case?
+> 
+> The same applies 10 and 11/12 patches as well.
 
-On Sun, Oct 29, 2023 at 12:33:33PM +0800, Zorro Lang wrote:
+This will be awkward for file systems that support both, hence the split.  I
+don't love suddenly generating a bunch of new tests, but this seems like the
+better option since btrfs is the only file system that only supports v2, and
+everybody else supports everything.  Thanks,
 
-[...]
-
-> All these falures are on s390x only... and more xfs corruption
-> failure by running fstests on s390x. I don't know if it's a s390x
-> issue or a xfs issue on big endian machine (s390x), so cc s390x
-> list.
-
-Dear all,
-
-It is a really great nuisance. We are looking into this from our
-(s390x) side in turn. Unfortunately, I don't see any ways except code
-review for now. If you have any ideas on how to optimize the process,
-please, let us know. Right now, I think, we can help with additional
-hardware resources.
-
-Thanks,
-Eduard.
+Josef
