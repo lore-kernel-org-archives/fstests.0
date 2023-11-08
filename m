@@ -1,82 +1,88 @@
-Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CFFE37165
-	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 20:25:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F176374CA
+	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 21:29:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="BbC9HjwQ"
-Received: from mail-qk1-x72d.google.com (mail-qk1-x72d.google.com [IPv6:2607:f8b0:4864:20::72d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9B3C2580
-	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 12:25:52 -0800 (PST)
-Received: by mail-qk1-x72d.google.com with SMTP id af79cd13be357-7789cc5c8ccso13212885a.0
-        for <fstests@vger.kernel.org>; Wed, 08 Nov 2023 12:25:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1699475152; x=1700079952; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=jK1nJO3A2bdbcDtSiZJ/FINWoUSICdNOK+5Z8W44+94=;
-        b=BbC9HjwQaAVk9OOyefV64MqE3CXM2OKa/EYeIoB4Ddz7qDPssDQkBXkdpMe3DgdUMe
-         DUQ7QX0/01T2dMsCKd1sGD0DdLkI6oy4h8NF8/8JRCA/AIzjiwCMnTkg4+mQhIwii4lJ
-         9RRgHkJBkS/9CODuA+dprCwWZ8rd6ckh+uQPBNGWCTMTkrXb4MbiJtalpCpHYoFOIeBd
-         HqS3pi3CBe4Rue5ikiGnrcZr3RkOMAI6/RT8k5Ff4Hpc5YtOsvoIiZrOWybaTGk7cflJ
-         DX3vgcAL/XeynWmixdrBx3+eizZ95gS6S2w1gsBpfsV8PsGusjHV6wZp5HWXBUK2gYIQ
-         cKFw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699475152; x=1700079952;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=jK1nJO3A2bdbcDtSiZJ/FINWoUSICdNOK+5Z8W44+94=;
-        b=oD4Na/Ci0ef9Jl9sZ4xs0shxkfgyUPlJkNW5DW6To5tx/R1BUoq8OKmKFNKR6IoB8R
-         C640aYZQ/ZFRzJ4VbCA/0MAcefNThAg/azCErGvoH96UaV5XEMhupOz24sefgCCuiPph
-         pjgS/QObpVw2XpphFd9VIp/T1gn7qAya9qfKSZWy8FE1J5uM9z6J3U4opERpon51FykX
-         wjhRYgphgiMQSq+WDnQgWc0hPls6JZVqRZo+77S2EMPNsRsP7/ZyotQUR4/kQM/fbLCR
-         Y5X193zWyvrtWZ3OzdFd+ARasfOjPwEWN+I0x+QIEkbxOK9afpIk9vMjDOtXp8D49HtD
-         P5Ww==
-X-Gm-Message-State: AOJu0YxV8NJo0Qy8ZOKaX4opVW2i6AHXm4PFbfHpdFgCY7F3+dPtu9bY
-	1GR9cOGHMOzVbKG1GrdBHABB5w==
-X-Google-Smtp-Source: AGHT+IEIJIogXASMFwyMazJN0/00lMzSLQnx6+b8+pjRO0r+W1pyhri4FzCdaCazZdXs5hi6d9s/xQ==
-X-Received: by 2002:a05:620a:40c6:b0:775:92ac:a3d6 with SMTP id g6-20020a05620a40c600b0077592aca3d6mr4285567qko.14.1699475151873;
-        Wed, 08 Nov 2023 12:25:51 -0800 (PST)
-Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id vq25-20020a05620a559900b007756c0853a5sm1395858qkn.58.2023.11.08.12.25.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Nov 2023 12:25:51 -0800 (PST)
-Date: Wed, 8 Nov 2023 15:25:50 -0500
-From: Josef Bacik <josef@toxicpanda.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 09/12] fstests: split generic/580 into two tests
-Message-ID: <20231108202550.GA548237@perftesting>
-References: <cover.1696969376.git.josef@toxicpanda.com>
- <ecf95cca70aa11c64455893ea823ec8de0249cf5.1696969376.git.josef@toxicpanda.com>
- <7cba2927-5636-4039-9e76-f01a5b86c108@oracle.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sHRrHcx6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CAFF3C433C7;
+	Wed,  8 Nov 2023 21:29:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1699478948;
+	bh=Sq/aYzPT6j+i7p6ITsCC14O95GyOxmkIEUJwxuTT67g=;
+	h=Subject:From:To:Cc:Date:From;
+	b=sHRrHcx6cfL7slhOKEZ55FwWPttRbgHCMemzWn8p/HeaEF9HxYhQlRtI8rAv2VDeI
+	 m0DBUwo9GcTsa+HWEF3UoWOQUpS18hXurMKj63GXyogBXuYtsZnsRVCOJJtwCp2Zid
+	 FZf9NpCFa8n8FYZx1YgMbLmMjGCqxNpWSDLqaztJX0Y/fNZshx61B4lpXdaI/sJjf1
+	 JZRLHvneK5JWc8eZc2ZyEwvHPmOOYy36DAmHgX7a4FJdgTZd8tgYg8NtGEGZgiZVBl
+	 xZk9b/dG+rT1RzEiVyXMVWzCHRoyTM12ogUhimUX0gKf8OXoBntXX7dDzaz6z8B84y
+	 b3NdNtuPIz6TQ==
+Subject: [PATCHSET v3 0/2] fstests: reload entire iunlink lists
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: djwong@kernel.org, zlang@redhat.com
+Cc: guan@eryu.me, david@fromorbit.com, fstests@vger.kernel.org,
+ linux-xfs@vger.kernel.org
+Date: Wed, 08 Nov 2023 13:29:08 -0800
+Message-ID: <169947894813.203694.3337426306300447087.stgit@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <7cba2927-5636-4039-9e76-f01a5b86c108@oracle.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-On Thu, Nov 02, 2023 at 07:42:50PM +0800, Anand Jain wrote:
-> On 10/11/23 04:26, Josef Bacik wrote:
-> > generic/580 tests both v1 and v2 encryption policies, however btrfs only
-> > supports v2 policies.  Split this into two tests so that we can get the
-> > v2 coverage for btrfs.
-> 
-> Instead of duplicating the test cases for v1 and v2 encryption policies,
-> can we check the supported version and run them accordingly within a
-> single test case?
-> 
-> The same applies 10 and 11/12 patches as well.
+Hi all,
 
-This will be awkward for file systems that support both, hence the split.  I
-don't love suddenly generating a bunch of new tests, but this seems like the
-better option since btrfs is the only file system that only supports v2, and
-everybody else supports everything.  Thanks,
+This is the second part of correcting XFS to reload the incore unlinked
+inode list from the ondisk contents.  Whereas part one tackled failures
+from regular filesystem calls, this part takes on the problem of needing
+to reload the entire incore unlinked inode list on account of somebody
+loading an inode that's in the /middle/ of an unlinked list.  This
+happens during quotacheck, bulkstat, or even opening a file by handle.
 
-Josef
+In this case we don't know the length of the list that we're reloading,
+so we don't want to create a new unbounded memory load while holding
+resources locked.  Instead, we'll target UNTRUSTED iget calls to reload
+the entire bucket.
+
+Note that this changes the definition of the incore unlinked inode list
+slightly -- i_prev_unlinked == 0 now means "not on the incore list".
+
+v2: rebase to for-next, resend without changes
+v3: add necessary prerequisites
+
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
+
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=fix-iunlink-list
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fix-iunlink-list
+---
+ common/fuzzy       |    4 -
+ common/rc          |   36 ++++++++-
+ tests/xfs/1872     |  113 +++++++++++++++++++++++++++
+ tests/xfs/1872.out |    5 +
+ tests/xfs/1873     |  217 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1873.out |    6 +
+ tests/xfs/329      |    4 -
+ tests/xfs/434      |    2 
+ tests/xfs/435      |    2 
+ tests/xfs/436      |    2 
+ tests/xfs/444      |    2 
+ tests/xfs/516      |    2 
+ 12 files changed, 385 insertions(+), 10 deletions(-)
+ create mode 100755 tests/xfs/1872
+ create mode 100644 tests/xfs/1872.out
+ create mode 100755 tests/xfs/1873
+ create mode 100644 tests/xfs/1873.out
+
