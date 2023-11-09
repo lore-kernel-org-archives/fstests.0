@@ -1,35 +1,70 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 244EFD269
-	for <fstests@vger.kernel.org>; Thu,  9 Nov 2023 05:39:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B4B8D27D
+	for <fstests@vger.kernel.org>; Thu,  9 Nov 2023 06:14:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="jShRZ0k/"
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73F2B26B5;
-	Wed,  8 Nov 2023 21:39:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=VHb4k4Hp51eahTDHPTtr9nAIrHBHgHKaX5N7mwJ8nf0=; b=jShRZ0k/wedZUv7S+uy8gvMvlJ
-	LRw5dstI/Z1C+EQ7So4oM3banG558IyNe9cINm57ouJG7QsGzXwo95Fi9mNFaBKdbZ5vCrJJgQiYt
-	jnXQ9guqw+A/sI+jrubv5q/Kxvvup70eu2rYczOM/EMXqOp5Sl2jbi+MlTy5NXrfn1HPRTk6bH0gf
-	xTS1DmAacxXWMNcOd/OQ/L56XXITy134l6wsqWNBjpQC4fwZKsS0kikuT52BipBGXKFHNEwhWNTsD
-	CUpXOGu4xhKSiKg6IeQ+OcHJY4eVLGowqQhCAqBVYlB+3Dikz5DOHfz7SCL28vO9LevF/C8pCR2Jm
-	T7oQES/w==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-	id 1r0xlY-005KrU-2W;
-	Thu, 09 Nov 2023 05:39:44 +0000
-Date: Wed, 8 Nov 2023 21:39:44 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, guan@eryu.me, david@fromorbit.com,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs: test unlinked inode list repair on demand
-Message-ID: <ZUxwoLoy2D/CIUbE@infradead.org>
-References: <169947894813.203694.3337426306300447087.stgit@frogsfrogsfrogs>
- <169947895967.203694.8763078075817732328.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="dpMQC+kz"
+Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEDDD26A0
+	for <fstests@vger.kernel.org>; Wed,  8 Nov 2023 22:14:55 -0800 (PST)
+Received: by mail-pl1-x636.google.com with SMTP id d9443c01a7336-1cc0e78ec92so3669735ad.3
+        for <fstests@vger.kernel.org>; Wed, 08 Nov 2023 22:14:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1699510495; x=1700115295; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=EKR0dJg1x5C8vmSRq/4juWRLHn7Fh5ZJAZMUTfWN+Vk=;
+        b=dpMQC+kzNWW9slxGUf7JV0zbfyjPYyuqw285HA3OYsdWgMIQejX4KHG+VKPHxKlQaZ
+         ihxA//hwX5kPvOZmBnhiJAWagw/oeOoMuYPzKgfRSpPcxCiYzdlZNqIqlDdHoRRAZOHy
+         21IkWKPi/SOAul8t+oGbiJikDW91cDMoilRd6wPCTo/DV1yZgB+78shnU2+h4K95f9fz
+         PXpZDsKCD6tF5rSxMWRCP48MSjwD9Zpp38MSos8oZ+2FVnuEciuKi72A8m2gUdNoEWKV
+         jQNhIjvalgmbdhMvXdCPFsFbZ7EnKMAwbpkZ+SAxL4UiPWCDEkVdLTX4RtFVbq0x/8Mz
+         ONOw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1699510495; x=1700115295;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=EKR0dJg1x5C8vmSRq/4juWRLHn7Fh5ZJAZMUTfWN+Vk=;
+        b=Eg1mEuEPx8IiwHCpST6kQwsKu1hf67SD4tQww7GkTdVuVz1qTibf7nJc+adTu5Botk
+         S2ecWpM0b388etxNbNFUt6duQbkQnoM2cnwE6cQk2hjKckwQHeq5Np6PlduD1ncZq9S+
+         EjqgltTKAW2hl5W+0lFPc9W9r3sZQweQrDKw7wDEejs2G07B9JxnKcuTiddGmo7aJV10
+         1qz4zJJLt0XDrhcJyaUTay14TWGNx0fIWqwC9wOYeJCzqEkQv/D7nOTZ4+IywG+qGZyd
+         dArRAernY4h7XY+hpQvcS0GmuMTaOjmLBaEskGFBpjOwb5RZKX1nCx4SxlXHLNACeCGB
+         /EpQ==
+X-Gm-Message-State: AOJu0Yy0+huANVzDbbOq9cmCMGHrmIDTGa66DvrLkCm90Ar5bi8DOOvg
+	PtX+eVBsLHTt6o56/KkWXqF7uw==
+X-Google-Smtp-Source: AGHT+IF2YBPrA+TxtUhJZck5p3y+HBHnCqrT+9+9tiGmlO2fuNVpVmkXJ83THm7eb09L0mRw4dj17w==
+X-Received: by 2002:a17:902:eb8f:b0:1cc:6906:c016 with SMTP id q15-20020a170902eb8f00b001cc6906c016mr4366753plg.9.1699510494965;
+        Wed, 08 Nov 2023 22:14:54 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-125-5.pa.nsw.optusnet.com.au. [49.180.125.5])
+        by smtp.gmail.com with ESMTPSA id d18-20020a170903231200b001cc47c1c29csm2691069plh.84.2023.11.08.22.14.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Nov 2023 22:14:53 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+	(envelope-from <david@fromorbit.com>)
+	id 1r0yJX-00ACB6-03;
+	Thu, 09 Nov 2023 17:14:51 +1100
+Date: Thu, 9 Nov 2023 17:14:51 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Zirong Lang <zlang@redhat.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	Carlos Maiolino <carlos@maiolino.me>
+Subject: Re: [Bug report][fstests generic/047] Internal error !(flags &
+ XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.
+ Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+Message-ID: <ZUx429/S9H07xLrA@dread.disaster.area>
+References: <20231029041122.bx2k7wwm7otebjd5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUiECgUWZ/8HKi3k@dread.disaster.area>
+ <20231106192627.ilvijcbpmp3l3wcz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUlNroz8l5h1s1oF@dread.disaster.area>
+ <20231107080522.5lowalssbmi6lus3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUnxswEfoeZQhw5P@dread.disaster.area>
+ <20231107151314.angahkixgxsjwbot@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUstA+1+IvHJ87eP@dread.disaster.area>
+ <CAN=2_H+CdEK_rEUmYbmkCjSRqhX2cwi5yRHQcKAmKDPF16vqOw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,29 +73,93 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <169947895967.203694.8763078075817732328.stgit@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <CAN=2_H+CdEK_rEUmYbmkCjSRqhX2cwi5yRHQcKAmKDPF16vqOw@mail.gmail.com>
 
-> +# Modify as appropriate.
+On Thu, Nov 09, 2023 at 10:43:58AM +0800, Zirong Lang wrote:
+> By changing the generic/047 as below, I got 2 dump files and 2 log files.
+> Please check the attachment,
+> and feel free to tell me if you need more.
 
-Btw, why do we keep adding this pointless boilerplate everywhere?
+Well, we've narrowed down to some weird recovery issue - the journal
+is intact, recovery recovers the inode from the correct log item in
+the journal, but the inode written to disk by recovery is corrupt.
 
-> +_supported_fs generic
+What this points out is that we don't actually verify the inode we
+recover is valid before writeback is queued, nor do we detect the
+specific corruption being encountered in the verifier (i.e. non-zero
+nblocks count when extent count is zero).
 
-I think this should be xfs only.
+Can you add the patch below and see if/when the verifier fires on
+the reproducer? I'm particularly interested to know where it fires -
+in recovery before writeback, or when the root inode is re-read from
+disk. It doesn't fire on x64-64....
 
-> +source ./common/filter
-> +source ./common/fuzzy
-> +source ./common/quota
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
 
-When did we switch from using . to source other shell files
-to "source"?  Just curious.
+xfs: inode recovery does not validate the recovered inode
 
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
+From: Dave Chinner <dchinner@redhat.com>
 
-xfs again.
+Discovered when trying to track down a weird recovery corruption
+issue that wasn't detected at recovery time.
 
+The specific corruption was a zero extent count field when big
+extent counts are in use, and it turns out the dinode verifier
+doesn't detect that specific corruption case, either. So fix it too.
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ fs/xfs/libxfs/xfs_inode_buf.c   |  3 +++
+ fs/xfs/xfs_inode_item_recover.c | 14 +++++++++++++-
+ 2 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/fs/xfs/libxfs/xfs_inode_buf.c b/fs/xfs/libxfs/xfs_inode_buf.c
+index a35781577cad..0f970a0b3382 100644
+--- a/fs/xfs/libxfs/xfs_inode_buf.c
++++ b/fs/xfs/libxfs/xfs_inode_buf.c
+@@ -508,6 +508,9 @@ xfs_dinode_verify(
+ 	if (mode && nextents + naextents > nblocks)
+ 		return __this_address;
+ 
++	if (nextents + naextents == 0 && nblocks != 0)
++		return __this_address;
++
+ 	if (S_ISDIR(mode) && nextents > mp->m_dir_geo->max_extents)
+ 		return __this_address;
+ 
+diff --git a/fs/xfs/xfs_inode_item_recover.c b/fs/xfs/xfs_inode_item_recover.c
+index 6b09e2bf2d74..f4c31c2b60d5 100644
+--- a/fs/xfs/xfs_inode_item_recover.c
++++ b/fs/xfs/xfs_inode_item_recover.c
+@@ -286,6 +286,7 @@ xlog_recover_inode_commit_pass2(
+ 	struct xfs_log_dinode		*ldip;
+ 	uint				isize;
+ 	int				need_free = 0;
++	xfs_failaddr_t			fa;
+ 
+ 	if (item->ri_buf[0].i_len == sizeof(struct xfs_inode_log_format)) {
+ 		in_f = item->ri_buf[0].i_addr;
+@@ -529,8 +530,19 @@ xlog_recover_inode_commit_pass2(
+ 	    (dip->di_mode != 0))
+ 		error = xfs_recover_inode_owner_change(mp, dip, in_f,
+ 						       buffer_list);
+-	/* re-generate the checksum. */
++	/* re-generate the checksum and validate the recovered inode. */
+ 	xfs_dinode_calc_crc(log->l_mp, dip);
++	fa = xfs_dinode_verify(log->l_mp, in_f->ilf_ino, dip);
++	if (fa) {
++		XFS_CORRUPTION_ERROR(
++			"Bad dinode after recovery",
++				XFS_ERRLEVEL_LOW, mp, dip, sizeof(*dip));
++		xfs_alert(mp,
++			"Metadata corruption detected at %pS, inode 0x%llx",
++			fa, in_f->ilf_ino);
++		error = -EFSCORRUPTED;
++		goto out_release;
++	}
+ 
+ 	ASSERT(bp->b_mount == mp);
+ 	bp->b_flags |= _XBF_LOGRECOVERY;
