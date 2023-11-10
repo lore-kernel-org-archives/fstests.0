@@ -1,29 +1,46 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 066031C17
-	for <fstests@vger.kernel.org>; Fri, 10 Nov 2023 04:50:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2904F1FC4
+	for <fstests@vger.kernel.org>; Fri, 10 Nov 2023 07:34:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y6Zxhz2x"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FA25C433CD;
-	Fri, 10 Nov 2023 04:50:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1699591801;
-	bh=Y8i0xqnq5SDrFz1ZIpYOtQGpqk1UGb5J9Y6i9KcJZCw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Y6Zxhz2xPOskMr6/fiXBQc9Hz/HMxbb58sQNXpx0uBF5WtzAsP/Zertb+SYuM0fCB
-	 WGiDmRDuDjNwQ8uMHH02zZz7GSLW1iWT2ubq/Jc+vSj7WKjQeOd28cVFfbhYPlHH+q
-	 rz+E6fMmhYEru65JUmiVbjtVEyWisZ1vcNIuNgCuQ4snS89nmGCDSPgo6qDW3S59wt
-	 4iEj+e5abCHN5AsDQGYqKwAHf2In6Y7kORMsorIZD7dZYlz5QO8eWLwTQGmLPFEsXz
-	 ThiQzAe+HlD6K0GIPl//ctuaoiVjcykj8NNZP2wRTW3PNo5cjRvgifOlljCLD5mSPG
-	 HKZ4PVH+B+eMw==
-Date: Thu, 9 Nov 2023 20:50:00 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/146: require fallocate support
-Message-ID: <20231110045000.GG1203404@frogsfrogsfrogs>
-References: <20231109164947.736069-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="CiKifnrF"
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 863578682;
+	Thu,  9 Nov 2023 23:34:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=WcqbHTawts+uSnzuvifHEMIEpu10PW7yxePWCzc/iZo=; b=CiKifnrFplg/pmYpogdkbkCz9b
+	KyI5DM9/HsfiuRAZcaLtJZFZUiwbP32u0DY+PXi0rgQRu1opftUcxeZRLuNkUNcMX7cZ9Thc/mkPr
+	PCROHWLoP9mceVxpLyVxnWOAKRR+N5Dzz2Ef/bPnkYmEpdbrOd8hrVOb9HjVM7Mkibph1Caf/S7AM
+	jlNirrkuCo1ydJmpMTfT/sDratNFktebkPo4bMm+x1lA7Xu58XwibV+LGlctEBTuSg/Gg/hE4Z84C
+	nm9V576XoqlKNFY6F80r1ydwh+npiI5PtEpUqlcrEw73IIzJzV2kn0O5usurNHeJ72+4uQBVIAU/B
+	sNfUjETw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+	id 1r1M2A-0081y5-38;
+	Fri, 10 Nov 2023 07:34:31 +0000
+Date: Thu, 9 Nov 2023 23:34:30 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
+	Carlos Maiolino <carlos@maiolino.me>
+Subject: Re: [Bug report][fstests generic/047] Internal error !(flags &
+ XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.
+ Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+Message-ID: <ZU3dBpU67dG6rq3z@infradead.org>
+References: <20231107080522.5lowalssbmi6lus3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUnxswEfoeZQhw5P@dread.disaster.area>
+ <20231107151314.angahkixgxsjwbot@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUstA+1+IvHJ87eP@dread.disaster.area>
+ <CAN=2_H+CdEK_rEUmYbmkCjSRqhX2cwi5yRHQcKAmKDPF16vqOw@mail.gmail.com>
+ <ZUx429/S9H07xLrA@dread.disaster.area>
+ <20231109140929.jq7bpnuustsup3xf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZU1nltE2X6qLJ8EL@dread.disaster.area>
+ <20231110013651.fw3j6khkdtjfe2bj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZU2PhTKqwNEbjK13@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -32,39 +49,34 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231109164947.736069-1-hch@lst.de>
+In-Reply-To: <ZU2PhTKqwNEbjK13@dread.disaster.area>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Thu, Nov 09, 2023 at 05:49:47PM +0100, Christoph Hellwig wrote:
-> xfs/146 uses the xfs_io falloc subcommand and thus kernel fallocate
-> support.  Ensure the support is present.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> +	if (!xfs_has_v3inodes(mp)) {
+> +		if (ldip->di_flushiter < be16_to_cpu(dip->di_flushiter)) {
+> +			/*
+> +			 * Deal with the wrap case, DI_MAX_FLUSH is less
+> +			 * than smaller numbers
+> +			 */
+> +			if (be16_to_cpu(dip->di_flushiter) == DI_MAX_FLUSH &&
+> +			    ldip->di_flushiter < (DI_MAX_FLUSH >> 1)) {
+> +				/* do nothing */
+> +			} else {
+> +				trace_xfs_log_recover_inode_skip(log, in_f);
+> +				error = 0;
+> +				goto out_release;
+> +			}
 
-Ooooops we really ought to get a static checker for this kind of thing.
-That would be a much better use of engineer time than someone spinning
-up yet another syzkaller instance... <cough>
+Tis just moves the existing code, but the conditional style is really
+weird vs a simple:
 
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+			if (be16_to_cpu(dip->di_flushiter) != DI_MAX_FLUSH ||
+			    ldip->di_flushiter >= (DI_MAX_FLUSH >> 1)) {
+				trace_xfs_log_recover_inode_skip(log, in_f);
+				error = 0;
+				goto out_release;
+			}
 
---D
+Nitpicking aside, this looks good:
 
-> ---
->  tests/xfs/146 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/xfs/146 b/tests/xfs/146
-> index 123bdff5..c8268a52 100755
-> --- a/tests/xfs/146
-> +++ b/tests/xfs/146
-> @@ -24,6 +24,7 @@ _begin_fstest auto quick rw realtime
->  _supported_fs xfs
->  _require_scratch
->  _require_realtime
-> +_require_xfs_io_command "falloc"
->  _require_test_program "punch-alternating"
->  
->  # Format filesystem to get the block size
-> -- 
-> 2.39.2
-> 
-> 
+Reviewed-by: Christoph Hellwig <hch@lst.de>
