@@ -1,41 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B41E125BF
-	for <fstests@vger.kernel.org>; Fri, 10 Nov 2023 04:32:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2957E111B
+	for <fstests@vger.kernel.org>; Fri, 10 Nov 2023 04:46:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ui1tHXWu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE632C433CA;
-	Fri, 10 Nov 2023 04:32:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s1LgXS+F"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89307C433CB;
+	Fri, 10 Nov 2023 04:46:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1699590776;
-	bh=WrtGLywe6Mqbm8Gy9hPY2/HDTKKorUImy8/nr/kTkkI=;
+	s=k20201202; t=1699591607;
+	bh=fzEvcDCi184fWZaY5x5VLkkRZ1aAYGSc82ksbTAfnQg=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ui1tHXWuv4wtcj8renDLHOFHNXteKaSCkIdaY5Y643Y6IYYAHBhOXZT1+adbRALRE
-	 +Ncn26ZG1AJhnLOpM0BYOdCPn9K2YK1RM5odlxY9tPygWKfgxCvOiHEZJUrQl6dujE
-	 ZvzQrl99U5TDbvdxfL5rXTJrbm3ncHPqwQj7j+DHBFlYvrq74HLacowHHMP5a3QU8b
-	 wyblKqYSrWLILIYqV2+075BpYYCbS4HEHC5vTXQJkWrookgiATf0jdxfZWmeNc7qL0
-	 zgRBZ37Szqbf3wtPCTFyYXWEAx9aFkuO34EqpiUFa6ymU4TjsfwQr+SmCljfLJEW1O
-	 scwDmgDDAbAKw==
-Date: Thu, 9 Nov 2023 20:32:56 -0800
+	b=s1LgXS+FMKnAlk+lJtac8ywK/+e5SgxtAHthRYe6uoUngwImNs+DpZ1NtWpE86IFr
+	 eGDMYfN8JV+g71tAUK+DD6Thpn+ap7E1tD8FNQyXnv1xva0O0//OocGI5ME2hyh+YR
+	 oSmBcYKQOGOzzabZOQIFWbBrjbVkvpwICnec0lzCsZeaWt6J3VTY9Coe4QJjFw7CMk
+	 LAqQGRDChndMKdEKYhNMSY99dqmlUIeufjgaBRwtsgXjl7eJ4FU4kqqGLjAT5wDUCU
+	 8sYov1lh1HpY14SuAfTw+VoiQ4j1AwZiKFy8wB8Rmi7qBnJIVOcohVRf4NEtZBgnzD
+	 Iz0oBkB3bvBkw==
+Date: Thu, 9 Nov 2023 20:46:46 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org, Carlos Maiolino <carlos@maiolino.me>
-Subject: Re: [Bug report][fstests generic/047] Internal error !(flags &
- XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c.
- Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
-Message-ID: <20231110043256.GI1205143@frogsfrogsfrogs>
-References: <20231107080522.5lowalssbmi6lus3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZUnxswEfoeZQhw5P@dread.disaster.area>
- <20231107151314.angahkixgxsjwbot@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZUstA+1+IvHJ87eP@dread.disaster.area>
- <CAN=2_H+CdEK_rEUmYbmkCjSRqhX2cwi5yRHQcKAmKDPF16vqOw@mail.gmail.com>
- <ZUx429/S9H07xLrA@dread.disaster.area>
- <20231109140929.jq7bpnuustsup3xf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZU1nltE2X6qLJ8EL@dread.disaster.area>
- <20231110013651.fw3j6khkdtjfe2bj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZU2PhTKqwNEbjK13@dread.disaster.area>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, guan@eryu.me, david@fromorbit.com,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs: test unlinked inode list repair on demand
+Message-ID: <20231110044646.GE1203404@frogsfrogsfrogs>
+References: <169947894813.203694.3337426306300447087.stgit@frogsfrogsfrogs>
+ <169947895967.203694.8763078075817732328.stgit@frogsfrogsfrogs>
+ <ZUxwoLoy2D/CIUbE@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,126 +35,40 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZU2PhTKqwNEbjK13@dread.disaster.area>
+In-Reply-To: <ZUxwoLoy2D/CIUbE@infradead.org>
 
-On Fri, Nov 10, 2023 at 01:03:49PM +1100, Dave Chinner wrote:
-> On Fri, Nov 10, 2023 at 09:36:51AM +0800, Zorro Lang wrote:
-> > The g/047 still fails with this 2nd patch. So I did below steps [1],
-> > and get the trace output as [2], those dump_inodes() messages you
-> > added have been printed, please check.
+On Wed, Nov 08, 2023 at 09:39:44PM -0800, Christoph Hellwig wrote:
+> > +# Modify as appropriate.
 > 
-> And that points me at the bug.
-> 
-> dump_inodes: disk ino 0x83: init nblocks 0x8 nextents 0x0/0x0 anextents 0x0/0x0 v3_pad 0x0 nrext64_pad 0x0 di_flags2 0x18
-> dump_inodes: log ino 0x83: init nblocks 0x8 nextents 0x0/0x1 anextents 0x0/0x0 v3_pad 0x1 nrext64_pad 0x0 di_flags2 0x18 big
->                                                      ^^^^^^^
-> The initial log inode is correct.
-> 
-> dump_inodes: disk ino 0x83: pre nblocks 0x8 nextents 0x0/0x0 anextents 0x0/0x0 v3_pad 0x0 nrext64_pad 0x0 di_flags2 0x18
-> dump_inodes: log ino 0x83: pre nblocks 0x8 nextents 0x0/0x0 anextents 0x0/0x0 v3_pad 0x0 nrext64_pad 0x0 di_flags2 0x18 big
->                                                     ^^^^^^^
-> 
-> .... but on the second sample, it's been modified and the extent
-> count has been zeroed? Huh, that is unexpected - what did that?
-> 
-> Oh.
-> 
-> Can you test the patch below and see if it fixes the issue? Keep
-> the first verifier patch I sent, then apply the patch below. You can
-> drop the debug traceprintk patch - the patch below should fix it.
-> 
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
-> xfs: recovery should not clear di_flushiter unconditionally
-> 
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> Because on v3 inodes, di_flushiter doesn't exist. It overlaps with
-> zero padding in the inode, except when NREXT64=1 configurations are
-> in use and the zero padding is no longer padding but holds the 64
-> bit extent counter.
-> 
-> This manifests obviously on big endian platforms (e.g. s390) because
-> the log dinode is in host order and the overlap is the LSBs of the
-> extent count field. It is not noticed on little endian machines
-> because the overlap is at the MSB end of the extent count field and
-> we need to get more than 2^^48 extents in the inode before it
-> manifests. i.e. the heat death of the universe will occur before we
-> see the problem in little endian machines.
-> 
-> This is a zero-day issue for NREXT64=1 configuraitons on big endian
-> machines. Fix it by only clearing di_flushiter on v2 inodes during
-> recovery.
-> 
-> Fixes: 9b7d16e34bbe ("xfs: Introduce XFS_DIFLAG2_NREXT64 and associated helpers")
-> cc: stable@kernel.org # 5.19+
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  fs/xfs/xfs_inode_item_recover.c | 32 +++++++++++++++++---------------
->  1 file changed, 17 insertions(+), 15 deletions(-)
-> 
-> diff --git a/fs/xfs/xfs_inode_item_recover.c b/fs/xfs/xfs_inode_item_recover.c
-> index f4c31c2b60d5..dbdab4ce7c44 100644
-> --- a/fs/xfs/xfs_inode_item_recover.c
-> +++ b/fs/xfs/xfs_inode_item_recover.c
-> @@ -371,24 +371,26 @@ xlog_recover_inode_commit_pass2(
->  	 * superblock flag to determine whether we need to look at di_flushiter
->  	 * to skip replay when the on disk inode is newer than the log one
->  	 */
-> -	if (!xfs_has_v3inodes(mp) &&
-> -	    ldip->di_flushiter < be16_to_cpu(dip->di_flushiter)) {
-> -		/*
-> -		 * Deal with the wrap case, DI_MAX_FLUSH is less
-> -		 * than smaller numbers
-> -		 */
-> -		if (be16_to_cpu(dip->di_flushiter) == DI_MAX_FLUSH &&
-> -		    ldip->di_flushiter < (DI_MAX_FLUSH >> 1)) {
-> -			/* do nothing */
-> -		} else {
-> -			trace_xfs_log_recover_inode_skip(log, in_f);
-> -			error = 0;
-> -			goto out_release;
-> +	if (!xfs_has_v3inodes(mp)) {
-> +		if (ldip->di_flushiter < be16_to_cpu(dip->di_flushiter)) {
-> +			/*
-> +			 * Deal with the wrap case, DI_MAX_FLUSH is less
-> +			 * than smaller numbers
-> +			 */
-> +			if (be16_to_cpu(dip->di_flushiter) == DI_MAX_FLUSH &&
-> +			    ldip->di_flushiter < (DI_MAX_FLUSH >> 1)) {
-> +				/* do nothing */
-> +			} else {
-> +				trace_xfs_log_recover_inode_skip(log, in_f);
-> +				error = 0;
-> +				goto out_release;
-> +			}
->  		}
-> +
-> +		/* Take the opportunity to reset the flush iteration count */
-> +		ldip->di_flushiter = 0;
->  	}
->  
-> -	/* Take the opportunity to reset the flush iteration count */
-> -	ldip->di_flushiter = 0;
+> Btw, why do we keep adding this pointless boilerplate everywhere?
 
-That's an unfortunate logic bomb left over from the V5 introduction.  I
-guess it was benign until we finally reused that part of the xfs_dinode.
+Oops.  It comes from the ./new output, but I guess I am a bit lazy about
+removing it. :(
 
-If this fixes zorro's machine, then:
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > +_supported_fs generic
+> 
+> I think this should be xfs only.
 
-I wonder, if we made XFS_SUPPORT_V4=n turn xfs_has_v3inodes and
-xfs_has_crc into #define'd true symbols, could we then rename all the
-V4-only fields to see what stops compiling?
+Changed.
 
-(Probably not, gcc will still want to parse it all even if the source
-code itself is dead...)
+> > +source ./common/filter
+> > +source ./common/fuzzy
+> > +source ./common/quota
+> 
+> When did we switch from using . to source other shell files
+> to "source"?  Just curious.
+
+Habit of mine.  vim colors and bolds "source" nicely, which it doesn't
+do for dot.
+
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> 
+> xfs again.
+
+Changed again.
 
 --D
-
->  
->  	if (unlikely(S_ISREG(ldip->di_mode))) {
->  		if ((ldip->di_format != XFS_DINODE_FMT_EXTENTS) &&
