@@ -1,57 +1,43 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E04A46FA3
-	for <fstests@vger.kernel.org>; Sun, 12 Nov 2023 08:02:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBE321BDC4;
+	Sun, 12 Nov 2023 23:33:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FIFJKDtw"
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 570DA30C5;
-	Sun, 12 Nov 2023 00:02:49 -0800 (PST)
-Received: by mail-wm1-x334.google.com with SMTP id 5b1f17b1804b1-40859dee28cso28066225e9.0;
-        Sun, 12 Nov 2023 00:02:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1699776168; x=1700380968; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=w4D7nsH3EJdfsu9/ysqFllp1Fim7BA5laHaE5lvR2Wc=;
-        b=FIFJKDtw2FNMg2a7m8VAT8Pcgjbi8rVuZ3FPyLcAQAj2rgTThe4eV76KOyrNVR9qYG
-         3RFE4Dbwv9sXh37rCF3iomxEjCmlVRgADm+54rgXhNyMyoe5xx+8wt6uROKpCH1JDOzR
-         gmUBxHRHzT73r2cNthOrQfQn/tdow6ZyFB9YbFs/SFWVpdl+/4qPiM+aHYL0+UtM9Zni
-         bNAXbbYLb2ncEe3zVoleBvzIl6FKWYJA2GL/q3Ndgd8iyzJkUzbK8iF5rj70lkLdZA+j
-         gmjs9RIYDjXq4Z9FCpFoXsEptb7FtKRvLuvGxZkLsE6qdSpkSXzez1HHNqGhHQnmH6dC
-         WwXw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1699776168; x=1700380968;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=w4D7nsH3EJdfsu9/ysqFllp1Fim7BA5laHaE5lvR2Wc=;
-        b=GKUhJQb+cu7YyJBKMi6OQ/Ufsc9vnCgU/pnFr1LTvLYleD8PaqByOvOTM4ojrmtzRR
-         kfpRdxHJTS+Ml+tHXxbTZIoTNS0oapJvWF1q3+6AgGzfgSw8p8BQnup3WcfQIrq3Fgz7
-         j4dObTW8aV/dsF8tXoHmmbXWymi7WnXO/QWtIq48cZJ/fg/cmTETcpFk6/PR8LTqgsf8
-         GM9gqffcLWboxIYhvQJjNAgeqeAd7YE5fx73LOKbf/O1OdJ6iFV+6CaiD3SEHMg09JDe
-         jT5Ep4iPZMnwKldbZtKm8HF44iN3rglH72c0MJgtkeKwFit6mOvS6XvKhr9/KBtEJqC9
-         cG+g==
-X-Gm-Message-State: AOJu0YxVkywQcyzEX6JOsBZkJQ7EBFHKp0fcbhWSfvdw7GVHveBXhwpW
-	ohdiCBTjXXsCBBLc/3VKPznRYyEBkvQ=
-X-Google-Smtp-Source: AGHT+IG98lxP8PKJiG7/ZP92U5RxnEUeyCbwhfBJlj8uAw6KOLQOsuydxstn0XY5c+9A+UTHnbWJcw==
-X-Received: by 2002:a05:600c:a02:b0:407:5b54:bb0c with SMTP id z2-20020a05600c0a0200b004075b54bb0cmr3326889wmp.19.1699776167470;
-        Sun, 12 Nov 2023 00:02:47 -0800 (PST)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id l37-20020a05600c1d2500b004030e8ff964sm10226403wms.34.2023.11.12.00.02.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Nov 2023 00:02:46 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Alexander Larsson <alexl@redhat.com>,
-	Miklos Szeredi <miklos@szeredi.hu>,
-	linux-unionfs@vger.kernel.org,
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="OLEHzdl7"
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E93F81BF7;
+	Sun, 12 Nov 2023 15:33:45 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 909C61F45B;
+	Sun, 12 Nov 2023 23:33:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1699832024; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=2ICh6pwnGbyOeDtbMijzBbhE79LgWANYXpveNTIE9xU=;
+	b=OLEHzdl7V+xuiIU4reczBrpKCJSdMZV5NbKkfELGXdK/8JRkdWMZw8ayWk+3fnPwIuPPwQ
+	FGZKIK+rIqcbVkD5tZwGFbib6rfiuReUL2awxDXpQufVYWqYBgU2Asl7oK1RGdMP/yLmvc
+	w5WL+xDBtwG7VBjjdcYvD5R6Qdk46xA=
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+	(No client certificate requested)
+	by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 82A371391A;
+	Sun, 12 Nov 2023 23:33:43 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+	by imap2.suse-dmz.suse.de with ESMTPSA
+	id pO9qENdgUWUZJwAAMHmgww
+	(envelope-from <wqu@suse.com>); Sun, 12 Nov 2023 23:33:43 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Subject: [PATCH] overlay/026: Fix test expectation for newer kernels
-Date: Sun, 12 Nov 2023 10:02:42 +0200
-Message-Id: <20231112080242.1492842-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+Subject: [PATCH] fstests: btrfs: test snapshot creation with existing qgroup
+Date: Mon, 13 Nov 2023 10:03:25 +1030
+Message-ID: <20231112233325.103250-1-wqu@suse.com>
+X-Mailer: git-send-email 2.42.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,97 +46,138 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Alexander Larsson <alexl@redhat.com>
+[BUG]
+There is a sysbot regression report about transaction abort during
+snapshot creation, which is caused by the new timing of qgroup creation
+and too strict error check.
 
-We now support xattr of overlayfs.* xattrs, so check that either
-both set and get work, or neither.
+[FIX]
+The proper fix is already submitted, with the title "btrfs: do not abort
+transaction if there is already an existing qgroup".
 
-Signed-off-by: Alexander Larsson <alexl@redhat.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+[TEST]
+The new test case would reproduce the regression by:
+
+- Create a subvolume and a snapshot of it
+
+- Record the subvolumeid of the snapshot
+
+- Re-create the fs
+  Since btrfs won't reuse the subvolume id, we have to re-create the fs.
+
+- Enable quota and create a qgroup with the same subvolumeid
+
+- Create a subvolume and a snapshot of it
+  For unpatched and affected kernel (thankfully no release is affected),
+  the snapshot creation would fail due to aborted transaction.
+
+- Make sure the subvolume id doesn't change for the snapshot
+  There is one very hacky attempt to fix it by avoiding using the
+  subvolume id, which is completely wrong and would be caught by this
+  extra check.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
+ tests/btrfs/303     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/303.out |  2 ++
+ 2 files changed, 82 insertions(+)
+ create mode 100755 tests/btrfs/303
+ create mode 100644 tests/btrfs/303.out
 
-Zorro,
-
-This test is failing since overlayfs merge for v6.7-rc1, because it
-encodes an expectation that set/get of private overlay.* xattrs
-should fail.
-
-This expectation is no longer correct for new kernel, so Alex has
-fixed the test to expect consistent behavior of set/get of private
-overlay.* xattrs.
-
-We have some new tests for features merged for v6.7-rc1, but this fix
-has higher priority, so sending it early.
-
-Thanks,
-Amir.
-
-
- tests/overlay/026     | 35 +++++++++++++++++++++++++----------
- tests/overlay/026.out |  2 --
- 2 files changed, 25 insertions(+), 12 deletions(-)
-
-diff --git a/tests/overlay/026 b/tests/overlay/026
-index 77030d20..f71b3f13 100755
---- a/tests/overlay/026
-+++ b/tests/overlay/026
-@@ -57,21 +57,36 @@ $SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
- _getfattr --absolute-names -n "trusted.overlayfsrz" \
-   $SCRATCH_MNT/testf0 2>&1 | _filter_scratch
- 
--# {s,g}etfattr of "trusted.overlay.xxx" should fail.
-+# {s,g}etfattr of "trusted.overlay.xxx" fail on older kernels
- # The errno returned varies among kernel versions,
--#            v4.3/7   v4.8-rc1    v4.8       v4.10
--# setfattr  not perm  not perm   not perm   not supp
--# getfattr  no attr   no attr    not perm   not supp
-+#            v4.3/7   v4.8-rc1    v4.8       v4.10     v6.7
-+# setfattr  not perm  not perm   not perm   not supp  ok
-+# getfattr  no attr   no attr    not perm   not supp  ok
- #
--# Consider "Operation not {supported,permitted}" pass.
-+# Consider both "Operation not {supported,permitted}" and
-+# "No such attribute" as pass for getattr to support all kernel
-+# version. However, the setfattr result must match getattr.
- #
--$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
--  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
--  sed -e 's/permitted/supported/g'
- 
--_getfattr --absolute-names -n "trusted.overlay.fsz" \
-+getres=$(_getfattr --absolute-names -n "trusted.overlay.fsz" \
-+  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch)
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+new file mode 100755
+index 00000000..fe924496
+--- /dev/null
++++ b/tests/btrfs/303
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 303
++#
++# A regression test to make sure snapshot creation won't cause transaction
++# abort if there is already an existing qgroup.
++#
++. ./common/preamble
++_begin_fstest auto quick qgroup
 +
-+supported=n
-+if [[ "$getres" =~ "No such attribute" ]]; then
-+    supported=y
-+else
-+   [[ "$getres" =~ Operation\ not\ (supported|permitted) ]] || echo unexpected getattr result: $getres
++. ./common/filter
++
++_supported_fs btrfs
++_require_scratch
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: do not abort transaction if there is already an existing qgroup"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++# Create the first subvolume and get its id.
++# This subvolume id should not change no matter if there is an existing
++# qgroup for it.
++$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
++$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
++	"$SCRATCH_MNT/snapshot">> $seqres.full
++
++init_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
++
++if [ -z "$init_subvolid" ]; then
++	_fail "Unable to get the subvolid of the first snapshot"
 +fi
 +
-+setres=$($SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-   $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
--  sed -e 's/permitted/supported/g'
-+  sed -e 's/permitted/supported/g')
++echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
 +
-+if [ $supported == 'y' ]; then
-+    [[ "$setres" == "" ]] || echo unexpected setattr result: $setres
-+else
-+    [[ "$setres" =~ "Operation not supported" ]] || echo unexpected setattr result: $setres
++_scratch_unmount
++
++# Re-create the fs, as btrfs won't reuse the subvolume id.
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
++_scratch_mount
++
++$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
++$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >> $seqres.full
++
++# Create a qgroup for the first subvolume, this would make the later
++# subvolume creation to find an existing qgroup, and abort transaction.
++$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $seqres.full
++sync
++
++# Now create the first snapshot, which should have the same subvolid no matter
++# if the quota is enabled.
++$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
++$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
++	"$SCRATCH_MNT/snapshot">> $seqres.full
++
++# Either the snapshot create failed and transaction is aborted thus no
++# snapshot here, or we should be able to create the snapshot.
++new_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
++
++echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
++
++if [ -z "$new_subvolid" ]; then
++	_fail "Unable to get the subvolid of the first snapshot"
 +fi
- 
- # success, all done
- status=0
-diff --git a/tests/overlay/026.out b/tests/overlay/026.out
-index c4572d67..53030009 100644
---- a/tests/overlay/026.out
-+++ b/tests/overlay/026.out
-@@ -2,5 +2,3 @@ QA output created by 026
- # file: SCRATCH_MNT/testf0
- trusted.overlayfsrz="n"
- 
--setfattr: SCRATCH_MNT/testf1: Operation not supported
--SCRATCH_MNT/testf1: trusted.overlay.fsz: Operation not supported
++
++# Make sure the subvolumeid for the first snapshot didn't change.
++if [ "$new_subvolid" -ne "$init_subvolid" ]; then
++	_fail "Subvolumeid for the first snapshot changed, has ${new_subvolid} expect ${init_subvolid}"
++fi
++
++_scratch_unmount
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+new file mode 100644
+index 00000000..d48808e6
+--- /dev/null
++++ b/tests/btrfs/303.out
+@@ -0,0 +1,2 @@
++QA output created by 303
++Silence is golden
 -- 
-2.34.1
+2.42.0
 
