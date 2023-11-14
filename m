@@ -1,563 +1,275 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD225224CA
-	for <fstests@vger.kernel.org>; Mon, 13 Nov 2023 17:08:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92F517E;
+	Tue, 14 Nov 2023 02:56:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Cdlt6sVi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73CE3C433C7;
-	Mon, 13 Nov 2023 17:08:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1699895320;
-	bh=MWFG+8nKqD8bNzaxKA41t3odyv+Hc5vBMKIWpM86gic=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-	b=Cdlt6sVi8M+FJo+DhH4kUZVNC+njBySiXn7lqG2hxUQtuPLQii0PQoRNYVFDvEqRv
-	 aiGRVGTzJ/8m/N4GJ/xvoWxB8gU79lheGB8en+cOVwulP5rnGcD3bg2J6cEUF+JQ9O
-	 DfFGalkjoeZXNleTM2FbDnxWzbTLqrcG4weWpmdL3aYfduOdQo8CQzYFINEEstefgr
-	 2FnBKRQ+K9j4DlaeBaCpmdsmuwN4DmqGYry8/120U1FWrno4dzgM+NQEYtPnz4yI0e
-	 yXz4b80+mXWdIuX8npM/nf6KSd+2mQnoWSGnnxc7bl20OxXeybzLn/UqQL3NgKl0h7
-	 vehAaUqOorO5Q==
-Subject: [PATCH 1/1] generic: test reads racing with slow reflink operations
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: Christoph Hellwig <hch@lst.de>,
- Catherine Hoang <catherine.hoang@oracle.com>, linux-xfs@vger.kernel.org,
- fstests@vger.kernel.org, guan@eryu.me
-Date: Mon, 13 Nov 2023 09:08:39 -0800
-Message-ID: <169989531989.1034466.10430740786795917744.stgit@frogsfrogsfrogs>
-In-Reply-To: <169989531418.1034466.15629933501843921475.stgit@frogsfrogsfrogs>
-References: <169989531418.1034466.15629933501843921475.stgit@frogsfrogsfrogs>
-User-Agent: StGit/0.19
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="WcxtumEI"
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA8F11A2;
+	Mon, 13 Nov 2023 18:56:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
+	s=s31663417; t=1699930600; x=1700535400; i=quwenruo.btrfs@gmx.com;
+	bh=L9S/GNSoBl/VKkfPtgbzd5qKFUygxUbosUOexm32ASc=;
+	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
+	 In-Reply-To;
+	b=WcxtumEIxRlME13hw+8xjsR3SdMl8UHroN5zpYZ1I1hSuwebllvttWnYZSx5sAF2
+	 QCABKGtn2EPz8dG9WkBmGD928nOJuXkUoLpBDsIg1WwM4LFesmj1vTh9ejsqXJWG0
+	 DVkLOXWz+BrH5+uurUKCI+LsC0m0DmBzU4rstT/qsm1RhiZt+ymoD3Y1h+cNtRVbM
+	 +EtyLTOcgjBp9lFIe3j0Fjgi3enMVakvX9c78jxRGmqcuHcLkVndcExp1uyenJ/WQ
+	 StTPKHyjXLWBwHag0PDyu6cORycj1yVJXZJoLvXTlE4f1qvlqH6np89OpRUIxBN6N
+	 /UGrMCMyfRNZY5FC7g==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.117] ([122.151.37.21]) by mail.gmx.net (mrgmx005
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1Mel3n-1rdAkU2b01-00aoBe; Tue, 14
+ Nov 2023 03:56:40 +0100
+Message-ID: <4407b54a-30c6-4ee8-b2bc-bcfdb668e441@gmx.com>
+Date: Tue, 14 Nov 2023 13:26:35 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] fstests: btrfs: test snapshot creation with existing
+ qgroup
+Content-Language: en-US
+To: Filipe Manana <fdmanana@kernel.org>, Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20231112233325.103250-1-wqu@suse.com>
+ <CAL3q7H5so2=7MojMydXZfxQPCYmFrcNMvqA8fBxtKfEZ5hhsNA@mail.gmail.com>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
+ pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
+ BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
+ XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
+ jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
+ LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
+ mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
+ CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
+ tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
+ INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
+ DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
+ iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
+In-Reply-To: <CAL3q7H5so2=7MojMydXZfxQPCYmFrcNMvqA8fBxtKfEZ5hhsNA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:ka6N3+suPP3aoZRR8YtuNOEQT5chuWAi4TXAOSJz+vI+q2wAGj3
+ HaaN+3BLXNvD5wgNQg7Xf93e4UNcBgcvu+rEduWqvYSCdJUBCavsrmRABBu52VefNMzI+oo
+ 2Rv51OAL+QhO8hkSFDsmG+stFU5wyn4TYtR+ibeykKiMhlFSJQJC1m6NcTO2zkrL3JDZkA6
+ FdgIEwaJPyQt3cENdAoQw==
+UI-OutboundReport: notjunk:1;M01:P0:w938nZuAJYE=;+B8oWcjlZ01q7U70Lc/yOkvxSH2
+ I+0Tv4z/KQ5K3oSKBvriE2+OIs7atuVPM1Oakdrvv9MMLDU4/w3n3QyW82YTr4sbQA9Ygwi0G
+ VeaxW5aFmgRQIgMHIyHeS9yD70admoVwVRq0BsVh/Uc3pc4rBfvLfwTWs64e4akWKDrRAoqkG
+ veARwwDgPUIeNc5tobNQCbs1MINKk37PmkmbF94pSjgcdmK/G2mpJp4ypGuWqZ6ICWXfGxaEH
+ GR5qBETiFI6c1Ws0CYpxGW12UUig2x76l0DgW7q/OYxIrSKLF5eO3Uwb10SIupA+mXPJUGHdh
+ 6EMg5e89DIahtNLohQt1w9KIGyalCwuz0aLx2hCQs1DHdKs81TNdoA0Z5jUoj4t2vj+3C1zmF
+ /yfvSYTw2U3u2WTtVsp/39CnzMFW8pNDLh7Nu2d/u/ptVGNfnUt7ZHBbCuji7U3B6rmeqjYTf
+ UR5zOzAE1fBrKe6pNKDwnk3Fk1qO5DagGMrFzsKkQvX+MjBQjUikyJ/PyM9im9yNkcxTwPDAA
+ JwppHPdVtvr2mi87SunYUMMyyGZTeYOpTgvKZPli9zcfIGF//K2nTwjHUZPfv6vT0JDIDA33f
+ V2sS+egd6WG3VdmBEPr2BaEFugQGKlByaz8oHwujoGKikiJvRfJ9ZQAwu15dFZvBuXV5yCpxL
+ P63IT/d2pBHit/DtaX32v8gZcsLLEOX5g8ikLIGgBUBNCmCF8zw9eeXO8jXXzZQWUEOWHCbs+
+ CEpL9icY/9eNLBGDybL/IH0+lDGvpbGAsl5eNCqa9R4jFmfXXvqDKmr995/6ZYsVtpYcYtbsU
+ 9QeNNfP+ARdqMCnzen49LAJVEQsTHXGqS49e4NMJBjbWBQNa5IdpHJE4aqYlb8/pTml1+4xv2
+ Oq2GbjbI8BW/n0iq4Pc3V6ploi2rr5HputDcFjOhx1KMsfRWOaqlupEouDBtVA2ysg76oBCaa
+ 2dX0UmBtWjcvbwpimWALkfjacW0=
 
-From: Darrick J. Wong <djwong@kernel.org>
-
-XFS has a rather slow reflink operation.  While a reflink operation is
-running, other programs cannot read the contents of the source file,
-which is causing latency spikes.  Catherine Hoang wrote a patch to
-permit reads, since the source file contents do not change.  This is a
-functionality test for that patch.
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Catherine Hoang <catherine.hoang@oracle.com>
----
- configure.ac              |    1 
- include/builddefs.in      |    1 
- m4/package_libcdev.m4     |   13 ++
- src/Makefile              |    4 +
- src/t_reflink_read_race.c |  339 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/1953        |   75 ++++++++++
- tests/generic/1953.out    |    6 +
- 7 files changed, 439 insertions(+)
- create mode 100644 src/t_reflink_read_race.c
- create mode 100755 tests/generic/1953
- create mode 100644 tests/generic/1953.out
 
 
-diff --git a/configure.ac b/configure.ac
-index 4687d8a3c0..7333045330 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -71,6 +71,7 @@ AC_HAVE_BMV_OF_SHARED
- AC_HAVE_NFTW
- AC_HAVE_RLIMIT_NOFILE
- AC_HAVE_FIEXCHANGE
-+AC_HAVE_FICLONE
- 
- AC_CHECK_FUNCS([renameat2])
- AC_CHECK_FUNCS([reallocarray])
-diff --git a/include/builddefs.in b/include/builddefs.in
-index 969acf0da2..446350d5fc 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -73,6 +73,7 @@ HAVE_NFTW = @have_nftw@
- HAVE_BMV_OF_SHARED = @have_bmv_of_shared@
- HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
- HAVE_FIEXCHANGE = @have_fiexchange@
-+HAVE_FICLONE = @have_ficlone@
- 
- GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
- 
-diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-index 7f73104405..0f4b8063f3 100644
---- a/m4/package_libcdev.m4
-+++ b/m4/package_libcdev.m4
-@@ -174,3 +174,16 @@ AC_DEFUN([AC_HAVE_FIEXCHANGE],
-        AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-     AC_SUBST(have_fiexchange)
-   ])
-+
-+# Check if we have FICLONE
-+AC_DEFUN([AC_HAVE_FICLONE],
-+  [ AC_MSG_CHECKING([for FICLONE])
-+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-+#include <sys/ioctl.h>
-+#include <linux/fs.h>
-+    ]], [[
-+	 ioctl(-1, FICLONE, -1);
-+    ]])],[have_ficlone=yes
-+       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-+    AC_SUBST(have_ficlone)
-+  ])
-diff --git a/src/Makefile b/src/Makefile
-index 2815f919b2..49dd2f6c1e 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -94,6 +94,10 @@ ifeq ($(HAVE_SEEK_DATA), yes)
-  endif
- endif
- 
-+ifeq ($(HAVE_FICLONE),yes)
-+     TARGETS += t_reflink_read_race
-+endif
-+
- CFILES = $(TARGETS:=.c)
- LDIRT = $(TARGETS) fssum
- 
-diff --git a/src/t_reflink_read_race.c b/src/t_reflink_read_race.c
-new file mode 100644
-index 0000000000..00c19d7c05
---- /dev/null
-+++ b/src/t_reflink_read_race.c
-@@ -0,0 +1,339 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Race reads with reflink to see if reads continue while we're cloning.
-+ * Copyright 2023 Oracle.  All rights reserved.
-+ */
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <sys/ioctl.h>
-+#include <linux/fs.h>
-+#include <time.h>
-+#include <stdlib.h>
-+#include <unistd.h>
-+#include <signal.h>
-+#include <fcntl.h>
-+#include <pthread.h>
-+#include <stdio.h>
-+#include <errno.h>
-+#include <string.h>
-+
-+static pid_t mypid;
-+
-+static FILE *outcome_fp;
-+
-+/* Significant timestamps.  Initialized to zero */
-+static double program_start, clone_start, clone_end;
-+
-+/* Coordinates access to timestamps */
-+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-+
-+struct readinfo {
-+	int fd;
-+	unsigned int blocksize;
-+	char *descr;
-+};
-+
-+struct cloneinfo {
-+	int src_fd, dst_fd;
-+};
-+
-+#define MSEC_PER_SEC	1000
-+#define NSEC_PER_MSEC	1000000
-+
-+/*
-+ * Assume that it shouldn't take longer than 100ms for the FICLONE ioctl to
-+ * enter the kernel and take locks on an uncontended file.  This is also the
-+ * required CLOCK_MONOTONIC granularity.
-+ */
-+#define EARLIEST_READ_MS	(MSEC_PER_SEC / 10)
-+
-+/*
-+ * We want to be reasonably sure that the FICLONE takes long enough that any
-+ * read initiated after clone operation locked the source file could have
-+ * completed a disk IO before the clone finishes.  Therefore, we require that
-+ * the clone operation must take at least 4x the maximum setup time.
-+ */
-+#define MINIMUM_CLONE_MS	(EARLIEST_READ_MS * 5)
-+
-+static double timespec_to_msec(const struct timespec *ts)
-+{
-+	return (ts->tv_sec * (double)MSEC_PER_SEC) +
-+	       (ts->tv_nsec / (double)NSEC_PER_MSEC);
-+}
-+
-+static void sleep_ms(unsigned int len)
-+{
-+	struct timespec time = {
-+		.tv_nsec = len * NSEC_PER_MSEC,
-+	};
-+
-+	nanosleep(&time, NULL);
-+}
-+
-+static void outcome(const char *str)
-+{
-+	fprintf(outcome_fp, "%s\n", str);
-+	fflush(outcome_fp);
-+}
-+
-+static void *reader_fn(void *arg)
-+{
-+	struct timespec now;
-+	struct readinfo *ri = arg;
-+	char *buf = malloc(ri->blocksize);
-+	loff_t pos = 0;
-+	ssize_t copied;
-+	int ret;
-+
-+	if (!buf) {
-+		perror("alloc buffer");
-+		goto kill_error;
-+	}
-+
-+	/* Wait for the FICLONE to start */
-+	pthread_mutex_lock(&lock);
-+	while (clone_start < program_start) {
-+		pthread_mutex_unlock(&lock);
-+#ifdef DEBUG
-+		printf("%s read waiting for clone to start; cs=%.2f ps=%.2f\n",
-+				ri->descr, clone_start, program_start);
-+		fflush(stdout);
-+#endif
-+		sleep_ms(1);
-+		pthread_mutex_lock(&lock);
-+	}
-+	pthread_mutex_unlock(&lock);
-+	sleep_ms(EARLIEST_READ_MS);
-+
-+	/* Read from the file... */
-+	while ((copied = read(ri->fd, buf, ri->blocksize)) > 0) {
-+		double read_completion;
-+
-+		ret = clock_gettime(CLOCK_MONOTONIC, &now);
-+		if (ret) {
-+			perror("clock_gettime");
-+			goto kill_error;
-+		}
-+		read_completion = timespec_to_msec(&now);
-+
-+		/*
-+		 * If clone_end is still zero, the FICLONE is still running.
-+		 * If the read completion occurred a safe duration after the
-+		 * start of the ioctl, then report that as an early read
-+		 * completion.
-+		 */
-+		pthread_mutex_lock(&lock);
-+		if (clone_end < program_start &&
-+		    read_completion > clone_start + EARLIEST_READ_MS) {
-+			pthread_mutex_unlock(&lock);
-+
-+			/* clone still running... */
-+			printf("finished %s read early at %.2fms\n",
-+					ri->descr,
-+					read_completion - program_start);
-+			fflush(stdout);
-+			outcome("finished read early");
-+			goto kill_done;
-+		}
-+		pthread_mutex_unlock(&lock);
-+
-+		sleep_ms(1);
-+		pos += copied;
-+	}
-+	if (copied < 0) {
-+		perror("read");
-+		goto kill_error;
-+	}
-+
-+	return NULL;
-+kill_error:
-+	outcome("reader error");
-+kill_done:
-+	kill(mypid, SIGTERM);
-+	return NULL;
-+}
-+
-+static void *clone_fn(void *arg)
-+{
-+	struct timespec now;
-+	struct cloneinfo *ci = arg;
-+	int ret;
-+
-+	/* Record the approximate start time of this thread */
-+	ret = clock_gettime(CLOCK_MONOTONIC, &now);
-+	if (ret) {
-+		perror("clock_gettime clone start");
-+		goto kill_error;
-+	}
-+	pthread_mutex_lock(&lock);
-+	clone_start = timespec_to_msec(&now);
-+	pthread_mutex_unlock(&lock);
-+
-+	printf("started clone at %.2fms\n", clone_start - program_start);
-+	fflush(stdout);
-+
-+	/* Kernel call, only killable with a fatal signal */
-+	ret = ioctl(ci->dst_fd, FICLONE, ci->src_fd);
-+	if (ret) {
-+		perror("FICLONE");
-+		goto kill_error;
-+	}
-+
-+	/* If the ioctl completes, note the completion time */
-+	ret = clock_gettime(CLOCK_MONOTONIC, &now);
-+	if (ret) {
-+		perror("clock_gettime clone end");
-+		goto kill_error;
-+	}
-+
-+	pthread_mutex_lock(&lock);
-+	clone_end = timespec_to_msec(&now);
-+	pthread_mutex_unlock(&lock);
-+
-+	printf("finished clone at %.2fms\n",
-+			clone_end - program_start);
-+	fflush(stdout);
-+
-+	/* Complain if we didn't take long enough to clone. */
-+	if (clone_end < clone_start + MINIMUM_CLONE_MS) {
-+		printf("clone did not take enough time (%.2fms)\n",
-+				clone_end - clone_start);
-+		fflush(stdout);
-+		outcome("clone too fast");
-+		goto kill_done;
-+	}
-+
-+	outcome("clone finished before any reads");
-+	goto kill_done;
-+
-+kill_error:
-+	outcome("clone error");
-+kill_done:
-+	kill(mypid, SIGTERM);
-+	return NULL;
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	struct cloneinfo ci;
-+	struct readinfo bufio = { .descr = "buffered" };
-+	struct readinfo directio = { .descr = "directio" };
-+	struct timespec now;
-+	pthread_t clone_thread, bufio_thread, directio_thread;
-+	double clockres;
-+	int ret;
-+
-+	if (argc != 4) {
-+		printf("Usage: %s src_file dst_file outcome_file\n", argv[0]);
-+		return 1;
-+	}
-+
-+	mypid = getpid();
-+
-+	/* Check for sufficient clock precision. */
-+	ret = clock_getres(CLOCK_MONOTONIC, &now);
-+	if (ret) {
-+		perror("clock_getres MONOTONIC");
-+		return 2;
-+	}
-+	printf("CLOCK_MONOTONIC resolution: %llus %luns\n",
-+			(unsigned long long)now.tv_sec,
-+			(unsigned long)now.tv_nsec);
-+	fflush(stdout);
-+
-+	clockres = timespec_to_msec(&now);
-+	if (clockres > EARLIEST_READ_MS) {
-+		fprintf(stderr, "insufficient CLOCK_MONOTONIC resolution\n");
-+		return 2;
-+	}
-+
-+	/*
-+	 * Measure program start time since the MONOTONIC time base is not
-+	 * all that well defined.
-+	 */
-+	ret = clock_gettime(CLOCK_MONOTONIC, &now);
-+	if (ret) {
-+		perror("clock_gettime MONOTONIC");
-+		return 2;
-+	}
-+	if (now.tv_sec == 0 && now.tv_nsec == 0) {
-+		fprintf(stderr, "Uhoh, start time is zero?!\n");
-+		return 2;
-+	}
-+	program_start = timespec_to_msec(&now);
-+
-+	outcome_fp = fopen(argv[3], "w");
-+	if (!outcome_fp) {
-+		perror(argv[3]);
-+		return 2;
-+	}
-+
-+	/* Open separate fds for each thread */
-+	ci.src_fd = open(argv[1], O_RDONLY);
-+	if (ci.src_fd < 0) {
-+		perror(argv[1]);
-+		return 2;
-+	}
-+
-+	ci.dst_fd = open(argv[2], O_RDWR | O_CREAT, 0600);
-+	if (ci.dst_fd < 0) {
-+		perror(argv[2]);
-+		return 2;
-+	}
-+
-+	bufio.fd = open(argv[1], O_RDONLY);
-+	if (bufio.fd < 0) {
-+		perror(argv[1]);
-+		return 2;
-+	}
-+	bufio.blocksize = 37;
-+
-+	directio.fd = open(argv[1], O_RDONLY | O_DIRECT);
-+	if (directio.fd < 0) {
-+		perror(argv[1]);
-+		return 2;
-+	}
-+	directio.blocksize = 512;
-+
-+	/* Start threads */
-+	ret = pthread_create(&clone_thread, NULL, clone_fn, &ci);
-+	if (ret) {
-+		fprintf(stderr, "create clone thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	ret = pthread_create(&bufio_thread, NULL, reader_fn, &bufio);
-+	if (ret) {
-+		fprintf(stderr, "create bufio thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	ret = pthread_create(&directio_thread, NULL, reader_fn, &directio);
-+	if (ret) {
-+		fprintf(stderr, "create directio thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	/* Wait for threads */
-+	ret = pthread_join(clone_thread, NULL);
-+	if (ret) {
-+		fprintf(stderr, "join clone thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	ret = pthread_join(bufio_thread, NULL);
-+	if (ret) {
-+		fprintf(stderr, "join bufio thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	ret = pthread_join(directio_thread, NULL);
-+	if (ret) {
-+		fprintf(stderr, "join directio thread: %s\n", strerror(ret));
-+		return 2;
-+	}
-+
-+	printf("Program should have killed itself?\n");
-+	outcome("program failed to end early");
-+	return 0;
-+}
-diff --git a/tests/generic/1953 b/tests/generic/1953
-new file mode 100755
-index 0000000000..c14de7060d
---- /dev/null
-+++ b/tests/generic/1953
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 1953
-+#
-+# Race file reads with a very slow reflink operation to see if the reads
-+# actually complete while the reflink is ongoing.  This is a functionality
-+# test for XFS commit f3ba4762fa56 "xfs: allow read IO and FICLONE to run
-+# concurrently".
-+#
-+. ./common/preamble
-+_begin_fstest auto clone punch
-+
-+# Import common functions.
-+. ./common/filter
-+. ./common/attr
-+. ./common/reflink
-+
-+# real QA test starts here
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "fpunch"
-+_require_test_program "punch-alternating"
-+_require_test_program "t_reflink_read_race"
-+_require_command "$TIMEOUT_PROG" timeout
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+testdir="$SCRATCH_MNT/test-$seq"
-+mkdir "$testdir"
-+
-+calc_space() {
-+	blocks_needed=$(( 2 ** (fnr + 1) ))
-+	space_needed=$((blocks_needed * blksz * 5 / 4))
-+}
-+
-+# Figure out the number of blocks that we need to get the reflink runtime above
-+# 1 seconds
-+echo "Create a many-block file"
-+for ((fnr = 1; fnr < 40; fnr++)); do
-+	free_blocks=$(stat -f -c '%a' "$testdir")
-+	blksz=$(_get_file_block_size "$testdir")
-+	space_avail=$((free_blocks * blksz))
-+	calc_space
-+	test $space_needed -gt $space_avail && \
-+		_notrun "Insufficient space for stress test; would only create $blocks_needed extents."
-+
-+	off=$(( (2 ** fnr) * blksz))
-+	$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 $off $off" "$testdir/file1" >> "$seqres.full"
-+	"$here/src/punch-alternating" "$testdir/file1" >> "$seqres.full"
-+
-+	$TIMEOUT_PROG 1s cp --reflink=always "$testdir/file1" "$testdir/garbage" || break
-+done
-+echo "fnr=$fnr" >> $seqres.full
-+
-+echo "Reflink the big file"
-+$here/src/t_reflink_read_race "$testdir/file1" "$testdir/file2" \
-+	"$testdir/outcome" &>> $seqres.full
-+
-+if [ ! -e "$testdir/outcome" ]; then
-+	echo "Could not set up program"
-+elif grep -q "finished read early" "$testdir/outcome"; then
-+	echo "test completed successfully"
-+else
-+	cat "$testdir/outcome"
-+fi
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/1953.out b/tests/generic/1953.out
-new file mode 100644
-index 0000000000..8eaacb7ff0
---- /dev/null
-+++ b/tests/generic/1953.out
-@@ -0,0 +1,6 @@
-+QA output created by 1953
-+Format and mount
-+Create a many-block file
-+Reflink the big file
-+Terminated
-+test completed successfully
+On 2023/11/14 00:03, Filipe Manana wrote:
+> On Sun, Nov 12, 2023 at 11:33=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
+>>
+>> [BUG]
+>> There is a sysbot regression report about transaction abort during
+>> snapshot creation, which is caused by the new timing of qgroup creation
+>> and too strict error check.
+>>
+>> [FIX]
+>> The proper fix is already submitted, with the title "btrfs: do not abor=
+t
+>> transaction if there is already an existing qgroup".
+>>
+>> [TEST]
+>> The new test case would reproduce the regression by:
+>>
+>> - Create a subvolume and a snapshot of it
+>>
+>> - Record the subvolumeid of the snapshot
+>>
+>> - Re-create the fs
+>>    Since btrfs won't reuse the subvolume id, we have to re-create the f=
+s.
+>>
+>> - Enable quota and create a qgroup with the same subvolumeid
+>>
+>> - Create a subvolume and a snapshot of it
+>>    For unpatched and affected kernel (thankfully no release is affected=
+),
+>>    the snapshot creation would fail due to aborted transaction.
+>>
+>> - Make sure the subvolume id doesn't change for the snapshot
+>>    There is one very hacky attempt to fix it by avoiding using the
+>>    subvolume id, which is completely wrong and would be caught by this
+>>    extra check.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>>   tests/btrfs/303     | 80 ++++++++++++++++++++++++++++++++++++++++++++=
++
+>>   tests/btrfs/303.out |  2 ++
+>>   2 files changed, 82 insertions(+)
+>>   create mode 100755 tests/btrfs/303
+>>   create mode 100644 tests/btrfs/303.out
+>>
+>> diff --git a/tests/btrfs/303 b/tests/btrfs/303
+>> new file mode 100755
+>> index 00000000..fe924496
+>> --- /dev/null
+>> +++ b/tests/btrfs/303
+>> @@ -0,0 +1,80 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+>> +#
+>> +# FS QA Test 303
+>> +#
+>> +# A regression test to make sure snapshot creation won't cause transac=
+tion
+>> +# abort if there is already an existing qgroup.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick qgroup
+>
+> Also 'snapshot' and 'subvol' groups.
+>
+>> +
+>> +. ./common/filter
+>> +
+>> +_supported_fs btrfs
+>> +_require_scratch
+>> +
+>> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> +       "btrfs: do not abort transaction if there is already an existin=
+g qgroup"
+>> +
+>> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+>> +_scratch_mount
+>> +
+>> +# Create the first subvolume and get its id.
+>> +# This subvolume id should not change no matter if there is an existin=
+g
+>> +# qgroup for it.
+>> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.ful=
+l
+>> +$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+>> +       "$SCRATCH_MNT/snapshot">> $seqres.full
+>> +
+>> +init_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+>> +
+>> +if [ -z "$init_subvolid" ]; then
+>> +       _fail "Unable to get the subvolid of the first snapshot"
+>> +fi
+>> +
+>> +echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
+>> +
+>> +_scratch_unmount
+>> +
+>> +# Re-create the fs, as btrfs won't reuse the subvolume id.
+>> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
+>> +_scratch_mount
+>> +
+>> +$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
+>> +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >> $seqres.full
+>> +
+>> +# Create a qgroup for the first subvolume, this would make the later
+>> +# subvolume creation to find an existing qgroup, and abort transaction=
+.
+>> +$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $s=
+eqres.full
+>> +sync
+>
+> This sync is not needed. An unpatched kernel still fails, and a
+> patched kernel passes this test without the sync.
+>
+> Also, please always comment on why a sync is needed.
+> In this case it can be removed because it's redundant.
 
+Would address all comments, but here I'm a little curious about the
+"sync" comment principle.
+
+I totally understand for this particular case the "sync" is unnecessary,
+the qgroup item doesn't need to be committed, thus it's totally
+reasonable to remove this sync.
+
+But I'm wondering is there any other reasons why we should avoid
+unnecessary "sync"s?
+Like slowing down the test or just to improve our awareness and avoid
+sync-happy guys?
+
+Thanks,
+Qu
+>
+>> +
+>> +# Now create the first snapshot, which should have the same subvolid n=
+o matter
+>> +# if the quota is enabled.
+>> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.ful=
+l
+>> +$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+>> +       "$SCRATCH_MNT/snapshot">> $seqres.full
+>> +
+>> +# Either the snapshot create failed and transaction is aborted thus no
+>> +# snapshot here, or we should be able to create the snapshot.
+>> +new_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+>> +
+>> +echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
+>> +
+>> +if [ -z "$new_subvolid" ]; then
+>> +       _fail "Unable to get the subvolid of the first snapshot"
+>> +fi
+>> +
+>> +# Make sure the subvolumeid for the first snapshot didn't change.
+>> +if [ "$new_subvolid" -ne "$init_subvolid" ]; then
+>> +       _fail "Subvolumeid for the first snapshot changed, has ${new_su=
+bvolid} expect ${init_subvolid}"
+>> +fi
+>> +
+>> +_scratch_unmount
+>
+> This explicit unmount is not needed, the fstests framework
+> automatically does that.
+>
+> Otherwise it looks fine, thanks.
+>
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+>> new file mode 100644
+>> index 00000000..d48808e6
+>> --- /dev/null
+>> +++ b/tests/btrfs/303.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 303
+>> +Silence is golden
+>> --
+>> 2.42.0
+>>
+>>
+>
