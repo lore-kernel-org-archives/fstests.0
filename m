@@ -1,202 +1,112 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2575BE60;
-	Tue, 14 Nov 2023 08:34:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19D28224D4
+	for <fstests@vger.kernel.org>; Tue, 14 Nov 2023 11:17:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KFiZMNRI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 306B5C433C8;
-	Tue, 14 Nov 2023 08:34:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1699950881;
-	bh=/ZPh84xGNHaChkwC9/BKraA3PiWHlPqYWr4xuPZnq1Y=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=KFiZMNRIhr1deVzG/AqaASx+11Z3cKa88YF+cRWuV4KmrAYpCNTN3TZRyBfc7FYha
-	 +LqHqMNxv39MXJyXsSuhsf0t7AODDqPojkQ/Q8MJ6UJKn+QrySXPat9E682WlPClp6
-	 xQRB4/mBkPyT/UA0hz3J0eDGChp34GpAmpCdevsVTqon+lw0i9aWq18Gik6Xox3txZ
-	 Hpur4ChPQ5Rf7b8MCw72B1jwLRt7t693lG8lm9C5/+zOW3GexITH/cwaOHj7rCVEhY
-	 R1bYyvgwk/6Fk0Hl4TKffm/9lkLwf7xN/H5OmC8yeAN8k6bn9IXtjAUzP+a0NaWyQc
-	 HyK9H6gSauwAg==
-Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-9e62b14c9eeso563418166b.2;
-        Tue, 14 Nov 2023 00:34:41 -0800 (PST)
-X-Gm-Message-State: AOJu0Ywq7uQ+kfGBEAZnDo3n5dn56DPg+GwWiN7oLcesj5qbwc2Yjpdh
-	AdxuSlbI+sfjnwGKkQVHI5ugZWby47aoxP/WZk0=
-X-Google-Smtp-Source: AGHT+IE0E8YvCbmdETt2XZR2wIMsqWOrTZ2Yjps9vBTlR689saqDcSlKQgqvJffxBHzdh+5L0klTnPMp/amfhzVTwjQ=
-X-Received: by 2002:a17:906:234d:b0:9d3:f436:6809 with SMTP id
- m13-20020a170906234d00b009d3f4366809mr6562591eja.39.1699950879545; Tue, 14
- Nov 2023 00:34:39 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="kbKr8fZ3"
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76C8912C;
+	Tue, 14 Nov 2023 03:17:53 -0800 (PST)
+Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3AEAfniK015941;
+	Tue, 14 Nov 2023 11:17:39 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=gWDSktdQe9krShHKNgxxHGGVW8Fgw0IN5fOXr76GNOw=;
+ b=kbKr8fZ3DpgMBvlcN2CoDn+cvOfYORnRXoFGJTcjqRp6poxC0AAHNsKd+HRFUkUvfU7B
+ b5KAKFVN3jLT90s5ikPYkKX8QkDHqr11HGvk5Opo3LMuZa+xt7BqPvBmDjZItT7WPRo7
+ HZkN44LI8Z6TFTI9zKCgfLMitKux/kYfHPfRcr7HhBK3bZcbvTcCgHqtgFB4/UJOizWJ
+ njXm9BJAhKop4M0lpktxi3Zyf+hsRsGa9HpFYZhd/WMhrVq0UYS3XeADrbuMgAElDVfg
+ KiiJAYzeq6pUDy3UKKSToaP1k7cVHYaHnoLKFsgvt61/OMiUY/SqgMI3Nx4ztIfG/X3J aQ== 
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3uc70rspej-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 14 Nov 2023 11:17:39 +0000
+Received: from m0353729.ppops.net (m0353729.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3AEAfpkP016353;
+	Tue, 14 Nov 2023 11:17:39 GMT
+Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3uc70rspde-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 14 Nov 2023 11:17:39 +0000
+Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma22.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3AE8R8VE014707;
+	Tue, 14 Nov 2023 11:17:37 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3uamay7j75-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 14 Nov 2023 11:17:37 +0000
+Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3AEBHZBm43975418
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 14 Nov 2023 11:17:35 GMT
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 915C420043;
+	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 55FCA20040;
+	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
+Received: from li-97e414cc-2e07-11b2-a85c-b6096b19d8a2.boeblingen.de.ibm.com (unknown [9.152.212.242])
+	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
+From: edward6@linux.ibm.com
+To: david@fromorbit.com
+Cc: carlos@maiolino.me, djwong@kernel.org, fstests@vger.kernel.org,
+        linux-xfs@vger.kernel.org, zlang@redhat.com,
+        linux-s390@vger.kernel.org, Eduard Shishkin <edward6@linux.ibm.com>
+Subject: Re: [Bug report][fstests generic/047] Internal error !(flags & XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c. Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
+Date: Tue, 14 Nov 2023 12:17:21 +0100
+Message-Id: <20231114111721.262282-1-edward6@linux.ibm.com>
+X-Mailer: git-send-email 2.39.3
+In-Reply-To: <ZU2PhTKqwNEbjK13@dread.disaster.area>
+References: <ZU2PhTKqwNEbjK13@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231114025913.83171-1-wqu@suse.com>
-In-Reply-To: <20231114025913.83171-1-wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 14 Nov 2023 08:34:02 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7+S65_0dSsoSjHpJwCwNZOD96+7HfEAO25Va5h0GzHUQ@mail.gmail.com>
-Message-ID: <CAL3q7H7+S65_0dSsoSjHpJwCwNZOD96+7HfEAO25Va5h0GzHUQ@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs: test snapshot creation with existing qgroup
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 6bUWru1HMXC98peFWiS1aS9DdOeef1Iw
+X-Proofpoint-ORIG-GUID: Sr3_qyk0GbjHPZp9R1uxSATENGciedDy
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-11-14_10,2023-11-09_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=879
+ priorityscore=1501 bulkscore=0 spamscore=0 adultscore=0 clxscore=1011
+ suspectscore=0 phishscore=0 lowpriorityscore=0 impostorscore=0
+ malwarescore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311060000 definitions=main-2311140087
 
-On Tue, Nov 14, 2023 at 2:59=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> [BUG]
-> There is a sysbot regression report about transaction abort during
-> snapshot creation, which is caused by the new timing of qgroup creation
-> and too strict error check.
->
-> [FIX]
-> The proper fix is already submitted, with the title "btrfs: do not abort
-> transaction if there is already an existing qgroup".
->
-> [TEST]
-> The new test case would reproduce the regression by:
->
-> - Create a subvolume and a snapshot of it
->
-> - Record the subvolumeid of the snapshot
->
-> - Re-create the fs
->   Since btrfs won't reuse the subvolume id, we have to re-create the fs.
->
-> - Enable quota and create a qgroup with the same subvolumeid
->
-> - Create a subvolume and a snapshot of it
->   For unpatched and affected kernel (thankfully no release is affected),
->   the snapshot creation would fail due to aborted transaction.
->
-> - Make sure the subvolume id doesn't change for the snapshot
->   There is one very hacky attempt to fix it by avoiding using the
->   subvolume id, which is completely wrong and would be caught by this
->   extra check.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+From: Eduard Shishkin <edward6@linux.ibm.com>
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+[...]
 
-Now it looks good, thanks.
+> Can you test the patch below and see if it fixes the issue? Keep
+> the first verifier patch I sent, then apply the patch below. You can
+> drop the debug traceprintk patch - the patch below should fix it.
 
-> ---
-> Changelog:
-> v2:
-> - Add to 'snapshot' and 'subvol' groups
->
-> - Remove one unnecessary sync
->   The sync after qgroup creation is not needed, the qgroup id conflicts
->   doesn't need qgroup tree to be committed anyway.
->
-> - Remove one unnecessary unmount
->   The final scratch unmount is not needed as the framework would unmount
->   it automatically.
-> ---
->  tests/btrfs/303     | 77 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/303.out |  2 ++
->  2 files changed, 79 insertions(+)
->  create mode 100755 tests/btrfs/303
->  create mode 100644 tests/btrfs/303.out
->
-> diff --git a/tests/btrfs/303 b/tests/btrfs/303
-> new file mode 100755
-> index 00000000..b9d6c61d
-> --- /dev/null
-> +++ b/tests/btrfs/303
-> @@ -0,0 +1,77 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 303
-> +#
-> +# A regression test to make sure snapshot creation won't cause transacti=
-on
-> +# abort if there is already an existing qgroup.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick snapshot subvol qgroup
-> +
-> +. ./common/filter
-> +
-> +_supported_fs btrfs
-> +_require_scratch
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +       "btrfs: do not abort transaction if there is already an existing =
-qgroup"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
-> +
-> +# Create the first subvolume and get its id.
-> +# This subvolume id should not change no matter if there is an existing
-> +# qgroup for it.
-> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> +$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> +       "$SCRATCH_MNT/snapshot">> $seqres.full
-> +
-> +init_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> +
-> +if [ -z "$init_subvolid" ]; then
-> +       _fail "Unable to get the subvolid of the first snapshot"
-> +fi
-> +
-> +echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
-> +
-> +_scratch_unmount
-> +
-> +# Re-create the fs, as btrfs won't reuse the subvolume id.
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
-> +_scratch_mount
-> +
-> +$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
-> +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >> $seqres.full
-> +
-> +# Create a qgroup for the first subvolume, this would make the later
-> +# subvolume creation to find an existing qgroup, and abort transaction.
-> +$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $seq=
-res.full
-> +
-> +# Now create the first snapshot, which should have the same subvolid no =
-matter
-> +# if the quota is enabled.
-> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> +$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> +       "$SCRATCH_MNT/snapshot" >> $seqres.full
-> +
-> +# Either the snapshot create failed and transaction is aborted thus no
-> +# snapshot here, or we should be able to create the snapshot.
-> +new_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> +
-> +echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
-> +
-> +if [ -z "$new_subvolid" ]; then
-> +       _fail "Unable to get the subvolid of the first snapshot"
-> +fi
-> +
-> +# Make sure the subvolumeid for the first snapshot didn't change.
-> +if [ "$new_subvolid" -ne "$init_subvolid" ]; then
-> +       _fail "Subvolumeid for the first snapshot changed, has ${new_subv=
-olid} expect ${init_subvolid}"
-> +fi
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
-> new file mode 100644
-> index 00000000..d48808e6
-> --- /dev/null
-> +++ b/tests/btrfs/303.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 303
-> +Silence is golden
-> --
-> 2.42.0
->
->
+
+Thanks for fixing it!
+Tested-by: Eduard Shishkin <edward6@linux.ibm.com>
+
+[...]
+
+> This manifests obviously on big endian platforms (e.g. s390) because
+> the log dinode is in host order and the overlap is the LSBs of the
+> extent count field. It is not noticed on little endian machines
+> because the overlap is at the MSB end of the extent count field and
+> we need to get more than 2^^48 extents in the inode before it
+> manifests. i.e. the heat death of the universe will occur before we
+> see the problem in little endian machines.
+
+
+This sounds too bold. I can easily imagine mountable images similar to
+filesystem meta-data dumps, but not generated by scanning real
+partitions, instead created by a special tool e.g. for debugging
+purposes. My point is that on little-endian architectures the
+manifestation of such a "sleeping" bug is a much more realistic event
+than it may seem at first glance.
