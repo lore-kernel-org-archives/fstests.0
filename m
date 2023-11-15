@@ -1,67 +1,36 @@
 Received: from lindbergh.monkeyblade.net (lindbergh.monkeyblade.net [23.128.96.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19D28224D4
-	for <fstests@vger.kernel.org>; Tue, 14 Nov 2023 11:17:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="kbKr8fZ3"
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76C8912C;
-	Tue, 14 Nov 2023 03:17:53 -0800 (PST)
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3AEAfniK015941;
-	Tue, 14 Nov 2023 11:17:39 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=gWDSktdQe9krShHKNgxxHGGVW8Fgw0IN5fOXr76GNOw=;
- b=kbKr8fZ3DpgMBvlcN2CoDn+cvOfYORnRXoFGJTcjqRp6poxC0AAHNsKd+HRFUkUvfU7B
- b5KAKFVN3jLT90s5ikPYkKX8QkDHqr11HGvk5Opo3LMuZa+xt7BqPvBmDjZItT7WPRo7
- HZkN44LI8Z6TFTI9zKCgfLMitKux/kYfHPfRcr7HhBK3bZcbvTcCgHqtgFB4/UJOizWJ
- njXm9BJAhKop4M0lpktxi3Zyf+hsRsGa9HpFYZhd/WMhrVq0UYS3XeADrbuMgAElDVfg
- KiiJAYzeq6pUDy3UKKSToaP1k7cVHYaHnoLKFsgvt61/OMiUY/SqgMI3Nx4ztIfG/X3J aQ== 
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3uc70rspej-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 14 Nov 2023 11:17:39 +0000
-Received: from m0353729.ppops.net (m0353729.ppops.net [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3AEAfpkP016353;
-	Tue, 14 Nov 2023 11:17:39 GMT
-Received: from ppma22.wdc07v.mail.ibm.com (5c.69.3da9.ip4.static.sl-reverse.com [169.61.105.92])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3uc70rspde-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 14 Nov 2023 11:17:39 +0000
-Received: from pps.filterd (ppma22.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma22.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3AE8R8VE014707;
-	Tue, 14 Nov 2023 11:17:37 GMT
-Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
-	by ppma22.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3uamay7j75-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 14 Nov 2023 11:17:37 +0000
-Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
-	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3AEBHZBm43975418
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 14 Nov 2023 11:17:35 GMT
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 915C420043;
-	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 55FCA20040;
-	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
-Received: from li-97e414cc-2e07-11b2-a85c-b6096b19d8a2.boeblingen.de.ibm.com (unknown [9.152.212.242])
-	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Tue, 14 Nov 2023 11:17:35 +0000 (GMT)
-From: edward6@linux.ibm.com
-To: david@fromorbit.com
-Cc: carlos@maiolino.me, djwong@kernel.org, fstests@vger.kernel.org,
-        linux-xfs@vger.kernel.org, zlang@redhat.com,
-        linux-s390@vger.kernel.org, Eduard Shishkin <edward6@linux.ibm.com>
-Subject: Re: [Bug report][fstests generic/047] Internal error !(flags & XFS_DABUF_MAP_HOLE_OK) at line 2572 of file fs/xfs/libxfs/xfs_da_btree.c. Caller xfs_dabuf_map.constprop.0+0x26c/0x368 [xfs]
-Date: Tue, 14 Nov 2023 12:17:21 +0100
-Message-Id: <20231114111721.262282-1-edward6@linux.ibm.com>
-X-Mailer: git-send-email 2.39.3
-In-Reply-To: <ZU2PhTKqwNEbjK13@dread.disaster.area>
-References: <ZU2PhTKqwNEbjK13@dread.disaster.area>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6FB07E
+	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 05:57:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from esa8.hc1455-7.c3s2.iphmx.com (esa8.hc1455-7.c3s2.iphmx.com [139.138.61.253])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E0E9DB
+	for <fstests@vger.kernel.org>; Tue, 14 Nov 2023 21:57:10 -0800 (PST)
+X-IronPort-AV: E=McAfee;i="6600,9927,10894"; a="127718017"
+X-IronPort-AV: E=Sophos;i="6.03,304,1694703600"; 
+   d="scan'208";a="127718017"
+Received: from unknown (HELO yto-r3.gw.nic.fujitsu.com) ([218.44.52.219])
+  by esa8.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Nov 2023 14:57:08 +0900
+Received: from yto-m1.gw.nic.fujitsu.com (yto-nat-yto-m1.gw.nic.fujitsu.com [192.168.83.64])
+	by yto-r3.gw.nic.fujitsu.com (Postfix) with ESMTP id F27E4D4F5A
+	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 14:57:05 +0900 (JST)
+Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
+	by yto-m1.gw.nic.fujitsu.com (Postfix) with ESMTP id 373A9CFA5A
+	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 14:57:05 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id C00426B806
+	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 14:57:04 +0900 (JST)
+Received: from localhost.localdomain (unknown [10.167.220.121])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 66CDF1A006F;
+	Wed, 15 Nov 2023 13:57:04 +0800 (CST)
+From: Yang Xu <xuyang2018.jy@fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] xfs/263: increase data section size to 1024M
+Date: Wed, 15 Nov 2023 00:56:59 -0500
+Message-Id: <20231115055659.2027-1-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 2.39.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -70,43 +39,55 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: 6bUWru1HMXC98peFWiS1aS9DdOeef1Iw
-X-Proofpoint-ORIG-GUID: Sr3_qyk0GbjHPZp9R1uxSATENGciedDy
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.987,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2023-11-14_10,2023-11-09_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=879
- priorityscore=1501 bulkscore=0 spamscore=0 adultscore=0 clxscore=1011
- suspectscore=0 phishscore=0 lowpriorityscore=0 impostorscore=0
- malwarescore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2311060000 definitions=main-2311140087
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-27998.005
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-27998.005
+X-TMASE-Result: 10--4.655900-10.000000
+X-TMASE-MatchedRID: r2UsUYnETSIObebKdnmixgXtykVcrvpNi/c1Us2QTkCZLRO16GOkknFC
+	0fMeQA5w1SLrct07oQxHW7omdzHbHV9CEME3KQfX3IFFT9wqfr2OVGny5q72hownGKAoIKJLvwU
+	evDt+uW5/XjpbSJS7axK4lG1JTzijwktTXgr7N6ieAiCmPx4NwGmRqNBHmBveVDC1CbuJXmMqtq
+	5d3cxkNaUs4whL2uiUN7BzNJawAMu3EWUHozc8ucfRC+/F5VM7SYlNex9K/JXjIKzCAUo+m0lRE
+	BUgzA5Tao+nkfRSQWjJJbTdB6arFP8jyjqYHnMRFcUQf3Yp/ridO0/GUi4gFb0fOPzpgdcEKeJ/
+	HkAZ8Is=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-From: Eduard Shishkin <edward6@linux.ibm.com>
+On machine with using raid, this case will trigger
+the following error:
+==== NO CRC ====
++mkfs.xfs: small data volume, ignoring data volume stripe unit 512 and stripe width 512
+== Options: rw ==
+== Options: usrquota,rw ==
 
-[...]
+mkfs.xfs generates this error since xfsprogs commit 42371fb36
+("mkfs: ignore data blockdev stripe geometry for small filesystems").
+It disables automatic detection of stripe unit and width if the
+data device is less than 1GB.
 
-> Can you test the patch below and see if it fixes the issue? Keep
-> the first verifier patch I sent, then apply the patch below. You can
-> drop the debug traceprintk patch - the patch below should fix it.
+To slove false poistive, just increase data section size to 1G.
 
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/xfs/263 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Thanks for fixing it!
-Tested-by: Eduard Shishkin <edward6@linux.ibm.com>
+diff --git a/tests/xfs/263 b/tests/xfs/263
+index fadd6280..48581bac 100755
+--- a/tests/xfs/263
++++ b/tests/xfs/263
+@@ -73,11 +73,11 @@ function test_all_state()
+ 
+ echo "==== NO CRC ===="
+ # Control size to control inode numbers
+-_scratch_mkfs_xfs "-m crc=0 -n ftype=0 -d size=512m" >> $seqres.full
++_scratch_mkfs_xfs "-m crc=0 -n ftype=0 -d size=1024m" >> $seqres.full
+ test_all_state
+ 
+ echo "==== CRC ===="
+-_scratch_mkfs_xfs "-m crc=1 -d size=512m" >>$seqres.full
++_scratch_mkfs_xfs "-m crc=1 -d size=1024m" >>$seqres.full
+ test_all_state
+ 
+ status=0
+-- 
+2.39.1
 
-[...]
-
-> This manifests obviously on big endian platforms (e.g. s390) because
-> the log dinode is in host order and the overlap is the LSBs of the
-> extent count field. It is not noticed on little endian machines
-> because the overlap is at the MSB end of the extent count field and
-> we need to get more than 2^^48 extents in the inode before it
-> manifests. i.e. the heat death of the universe will occur before we
-> see the problem in little endian machines.
-
-
-This sounds too bold. I can easily imagine mountable images similar to
-filesystem meta-data dumps, but not generated by scanning real
-partitions, instead created by a special tool e.g. for debugging
-purposes. My point is that on little-endian architectures the
-manifestation of such a "sleeping" bug is a much more realistic event
-than it may seem at first glance.
