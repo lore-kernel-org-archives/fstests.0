@@ -1,69 +1,135 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1644BEAD4;
-	Thu, 16 Nov 2023 10:04:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VJaExwT0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E2F9C433C7;
-	Thu, 16 Nov 2023 10:04:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700129062;
-	bh=uIPRvuOccneeBtO3/9hRvyi7Ye1E1xX4yxPtxFdSS1c=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=VJaExwT0OjsGuDC4xKVoWQ4hoI0j76mrFOPXoZGSAugFDHJpNWJqwS7jgnQjNlUCv
-	 JLKMQMoeEZngiMkm7GwxMsfBHV9PScoEcIqG/yMdmPmaSc35mWkErWIcpnK5IGVmbS
-	 4Cs6oBRCxCByuCoaqfqKnYOSgozuPI7L9t6EV/Ut1FGac5vgg5b06PH5IoxVVYTK+H
-	 XDPpWEZdDgYHhYSYGkLRdYcrWOhbJpEkW1oOZq7bnb1VkvmChIJR1GBxuUtR4Z/b4L
-	 I9lw/uH5yR4v2opFaSf8sEXM76PVtj5Jvnys/dqSZctxwTgbkE1agV0tZOY4Zl0bTj
-	 vqnNdeEUthPag==
-Date: Thu, 16 Nov 2023 11:04:16 +0100
-From: Carlos Maiolino <cem@kernel.org>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: linux-xfs@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
-	fstests@vger.kernel.org
-Subject: Re: [xfsprogs PATCH] xfs_io/encrypt: support specifying crypto data
- unit size
-Message-ID: <h7e7q6g7ti4mbre55ap6x5o6suzdiiyykxtn5pgfsf2w6y7esx@tg2qxsplx2zb>
-References: <20231013062639.141468-1-ebiggers@kernel.org>
- <KMvmogj9a91wwFViEyqlFQPlIuusUrW4mllNMHHZWBgZzBLAzrSJ2c93ZZyLh7bh4tkBI-JTjQZ6LJrGHubXcQ==@protonmail.internalid>
- <20231116035846.GA1583@sol.localdomain>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="iTFhc144"
+Received: from mail-ot1-x332.google.com (mail-ot1-x332.google.com [IPv6:2607:f8b0:4864:20::332])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B7B1187;
+	Thu, 16 Nov 2023 04:07:24 -0800 (PST)
+Received: by mail-ot1-x332.google.com with SMTP id 46e09a7af769-6cd09f51fe0so413506a34.1;
+        Thu, 16 Nov 2023 04:07:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1700136443; x=1700741243; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2t4pA4Hy4IcnjOyjoQQ8X1tZCzpmRXP54dZ3bMlYETI=;
+        b=iTFhc144TUiq5fR5t6LfDm9jFDYql+S2UdudARg+dB/m9YbYHXLOQxj7GV9SEDJ5HB
+         ABheFmx05i2f7hKfYxyts4max7CYrj+xPjXyujRFln9UhG+dGcClt+B0G7ooRvRwcoo2
+         rrGulgcIOLq8MG6vKJcfQw2GEJXbkTc4YiIiMTmiWQY98blhOeBHmGZ7+LhoHtwvp+ak
+         QVfuchUVU6QExHJNiVNlj0hm3bX4GRb/qvbDzWNkdx4+AsAdan3uIsUBdyKNWHJ2XK51
+         lTevSnJH7F4ckoEpZ/dwss2yrohsRdoQiaVlnXaf1jd0vIWGJzIOHcNA8LbHYkY79jR+
+         FciQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1700136443; x=1700741243;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2t4pA4Hy4IcnjOyjoQQ8X1tZCzpmRXP54dZ3bMlYETI=;
+        b=rQARxN4Vex9HkikmKRVY/n1V5JeQ4GyNwDOCWJs/YGDI5x4ShUFowokyuefFqe0GLG
+         NckmWa21R3fyxW9njydMeqU6j6QDSpOkLe4u7+zP3Cnt86h4HnDopwAc9/2Ixrb2qNQc
+         +3lGo3gbQOCXpDON/Jiigc/jxM3LEslYDdMhGyEaq9fZaSlcHk1+ptEsJkJd8Jv4tRAz
+         BnEZjk3Fbw2oa7JohBPaZSLJX2j4HZrdDDtgMPqEZJpNk8m4HwxPPeQpIuuNsxY06k0L
+         Mebu9j0MarqW5i2ATHviPLLjf7EVb5fmwMdBJJacEL+TdVUQ2XJPbR0srhMscGRByn5a
+         wmcg==
+X-Gm-Message-State: AOJu0YxldNYDIhN2OXy5scNAPT25kn4NCPEDwU+UHXsRWsJ63TT7lB+d
+	5Zl2rF13ybTaY+Pe1mdFjsrdJ2+mAqZr6agavWjKApxXg6Q=
+X-Google-Smtp-Source: AGHT+IESaJIDsPOMgQHv8Jy+U9ph0GUxIB+r9V/fSnu6doNeWEq4/54ruPF4WHO6e2wIBeM3R8vJOX2dHE4frrVYA5E=
+X-Received: by 2002:a05:6830:448b:b0:6d3:1982:6f49 with SMTP id
+ r11-20020a056830448b00b006d319826f49mr10224503otv.6.1700136443598; Thu, 16
+ Nov 2023 04:07:23 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231116035846.GA1583@sol.localdomain>
+References: <20231112080242.1492842-1-amir73il@gmail.com> <20231116075250.ntopaswush4sn2qf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20231116075250.ntopaswush4sn2qf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 16 Nov 2023 14:07:12 +0200
+Message-ID: <CAOQ4uxi4VnZDVHkXp-GYff5iT=c+7znZTKR-w-OaM=fn45yNKQ@mail.gmail.com>
+Subject: Re: [PATCH] overlay/026: Fix test expectation for newer kernels
+To: Zorro Lang <zlang@redhat.com>
+Cc: Alexander Larsson <alexl@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Nov 15, 2023 at 07:58:46PM -0800, Eric Biggers wrote:
-> On Thu, Oct 12, 2023 at 11:26:39PM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
+On Thu, Nov 16, 2023 at 9:52=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Sun, Nov 12, 2023 at 10:02:42AM +0200, Amir Goldstein wrote:
+> > From: Alexander Larsson <alexl@redhat.com>
 > >
-> > Add an '-s' option to the 'set_encpolicy' command of xfs_io to allow
-> > exercising the log2_data_unit_size field that is being added to struct
-> > fscrypt_policy_v2 (kernel patch:
-> > https://lore.kernel.org/linux-fscrypt/20230925055451.59499-6-ebiggers@kernel.org).
+> > We now support xattr of overlayfs.* xattrs, so check that either
+> > both set and get work, or neither.
 > >
-> > The xfs_io support is needed for xfstests
-> > (https://lore.kernel.org/fstests/20231013061403.138425-1-ebiggers@kernel.org),
-> > which currently relies on xfs_io to access the encryption ioctls.
-> >
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > Signed-off-by: Alexander Larsson <alexl@redhat.com>
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > > ---
-> >  configure.ac          |  1 +
-> >  include/builddefs.in  |  4 +++
-> >  io/encrypt.c          | 72 ++++++++++++++++++++++++++++++++-----------
-> >  m4/package_libcdev.m4 | 21 +++++++++++++
-> >  man/man8/xfs_io.8     |  5 ++-
-> >  5 files changed, 84 insertions(+), 19 deletions(-)
-> 
-> Hi!  Any feedback on this patch?
+> >
+> > Zorro,
+> >
+> > This test is failing since overlayfs merge for v6.7-rc1, because it
+> > encodes an expectation that set/get of private overlay.* xattrs
+> > should fail.
+> >
+> > This expectation is no longer correct for new kernel, so Alex has
+> > fixed the test to expect consistent behavior of set/get of private
+> > overlay.* xattrs.
+> >
+> > We have some new tests for features merged for v6.7-rc1, but this fix
+> > has higher priority, so sending it early.
+> >
+> > Thanks,
+> > Amir.
+> >
+> >
+> >  tests/overlay/026     | 35 +++++++++++++++++++++++++----------
+> >  tests/overlay/026.out |  2 --
+> >  2 files changed, 25 insertions(+), 12 deletions(-)
+> >
+> > diff --git a/tests/overlay/026 b/tests/overlay/026
+> > index 77030d20..f71b3f13 100755
+> > --- a/tests/overlay/026
+> > +++ b/tests/overlay/026
+> > @@ -57,21 +57,36 @@ $SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
+> >  _getfattr --absolute-names -n "trusted.overlayfsrz" \
+> >    $SCRATCH_MNT/testf0 2>&1 | _filter_scratch
+> >
+> > -# {s,g}etfattr of "trusted.overlay.xxx" should fail.
+> > +# {s,g}etfattr of "trusted.overlay.xxx" fail on older kernels
+> >  # The errno returned varies among kernel versions,
+> > -#            v4.3/7   v4.8-rc1    v4.8       v4.10
+> > -# setfattr  not perm  not perm   not perm   not supp
+> > -# getfattr  no attr   no attr    not perm   not supp
+> > +#            v4.3/7   v4.8-rc1    v4.8       v4.10     v6.7
+> > +# setfattr  not perm  not perm   not perm   not supp  ok
+> > +# getfattr  no attr   no attr    not perm   not supp  ok
+> >  #
+> > -# Consider "Operation not {supported,permitted}" pass.
+> > +# Consider both "Operation not {supported,permitted}" and
+> > +# "No such attribute" as pass for getattr to support all kernel
+> > +# version. However, the setfattr result must match getattr.
+> >  #
+> > -$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
+> > -  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
+> > -  sed -e 's/permitted/supported/g'
+> >
+> > -_getfattr --absolute-names -n "trusted.overlay.fsz" \
+> > +getres=3D$(_getfattr --absolute-names -n "trusted.overlay.fsz" \
+> > +  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch)
+>
+> Can we have a helper in common/overlay to check if current FSTYP supports
+> get or set overlay.* xattr, to deal with this patch?
+>
 
-I've got a limited bandwidth these days, I'll try to review this sometime
-around next week.
+I see that Alex has already created _require_scratch_overlay_xattr_escapes(=
+)
+in the patch adding test overlay/084 that I posted.
 
-> 
-> - Eric
+Alex,
+
+Can you pls refactor that into _check_scratch_overlay_xattr_escapes()
+and use it in this patch?
+
+Thanks,
+Amir.
