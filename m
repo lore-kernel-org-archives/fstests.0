@@ -1,111 +1,95 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D5C193C6A3
-	for <fstests@vger.kernel.org>; Thu, 16 Nov 2023 17:35:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ltEwIhyw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 545FCC433C7;
-	Thu, 16 Nov 2023 17:35:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700156133;
-	bh=sae3T8fTm7bGIlBN4+hIM9ppP7jdM4GaqK2tKSXoviM=;
-	h=Date:Subject:From:To:Cc:From;
-	b=ltEwIhywT9IZjVvZNGceNz37VZRNMM4F7eoOEZ7dzdbizsMptqTkn12gTphGAHUJL
-	 +yajkrmm2YC8nHLixJ7rjjTffiy6CFeYUarH/7qAl5YxVRi0yvw2RoLwbhHqLKh7S6
-	 7seKRo8wPbOXPWsx/k9dqIifB4c3t8jKWvPJvAE6qVOx6IdRqQd6PkNs6VoACvdOVM
-	 DtJRwidR4biogIMmAwDWnsVuaTIbpRsMizleRgCGnXYEIN6bd7tM5x8S/kSuIzp/vW
-	 v757LGz0uKFUji5ZB5K2Ww0IgywugjKtg9kqhhO7vy4rqNUmGJC+DYHDdkn8yg8Aom
-	 2BsQTJvR5t2Jw==
-Date: Thu, 16 Nov 2023 09:35:32 -0800
-Subject: [GIT PULL 3/3] fstests: FIEXCHANGE is now an XFS ioctl
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: fstests@vger.kernel.org, guan@eryu.me, hch@lst.de, linux-xfs@vger.kernel.org
-Message-ID: <170015608757.3373797.8063458881541595889.stg-ugh@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="F85lZgKf"
+X-Greylist: delayed 439 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 16 Nov 2023 11:00:54 PST
+Received: from sandeen.net (sandeen.net [63.231.237.45])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTP id EB336181
+	for <fstests@vger.kernel.org>; Thu, 16 Nov 2023 11:00:54 -0800 (PST)
+Received: from [10.0.0.71] (liberator.sandeen.net [10.0.0.71])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by sandeen.net (Postfix) with ESMTPSA id F18EE7905;
+	Thu, 16 Nov 2023 12:53:34 -0600 (CST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 sandeen.net F18EE7905
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net;
+	s=default; t=1700160815;
+	bh=Bll5EVtak0xdJ9+cFvwgdRxqcAl1PuPU3XngECst/1c=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=F85lZgKf39DzosCB2EON1kRW3ybCPdjJDgwDBNe3wy+bYwwRrkbRHCvCslrg8Wgh7
+	 1jZ6d24UGn5GeYsguY7jNw2wAy5NLgZ4CA+0cw21qKfCBGlhQI6T7oXPboxRjJDmYe
+	 RXPsukXNhEN96k/inQyKfGc7gLFSyX/3+FH2861kjLFNZTFYEGggedpt1KjjSFIBMj
+	 W/4y1+7+xuYxruJJ+wAKgNVs5RS3pnSOZvqN+7iiYA/ms6PMkKhwg8h5FNcJkQ+sH1
+	 3gGuvW6bPEJCwxVfk70/9Wy3RUfkvq9cWfJo7tVbq2UN8yjSv/OOGYPqdUFu1BfQeD
+	 CL1hjwMvetZ9A==
+Message-ID: <678a8d0a-1998-4b66-98c4-56a2e4ca0e28@sandeen.net>
+Date: Thu, 16 Nov 2023 12:53:34 -0600
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] xfs/263: increase data section size to 1024M
+Content-Language: en-US
+To: "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>,
+ Zorro Lang <zlang@redhat.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+ "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+References: <20231115055659.2027-1-xuyang2018.jy@fujitsu.com>
+ <20231115160543.GD36175@frogsfrogsfrogs>
+ <20231116023341.4be2u2dtpghe5tan@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <OS7PR01MB1183929872AD5D43F1D7724D7FDB0A@OS7PR01MB11839.jpnprd01.prod.outlook.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <OS7PR01MB1183929872AD5D43F1D7724D7FDB0A@OS7PR01MB11839.jpnprd01.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Hi Zorro,
+On 11/16/23 1:05 AM, Yang Xu (Fujitsu) wrote:
+> Hi Zorro
+> 
+>> As we've filter out the inode number, so the "inode numbers control" doesn't make sense anymore. It's fine for me to remove the "-d size=xxx" part (if it's still test passed).
+> I have tested and pass. Will send a v2.
+> 
+> Best Regards
+> Yang Xu
+> 
+> -----Original Message-----
+> From: Zorro Lang <zlang@redhat.com> 
+> Sent: Thursday, November 16, 2023 10:34 AM
+> To: Xu, Yang/徐 杨 <xuyang2018.jy@fujitsu.com>
+> Cc: Darrick J. Wong <djwong@kernel.org>; fstests@vger.kernel.org
+> Subject: Re: [PATCH] xfs/263: increase data section size to 1024M
+> 
+> On Wed, Nov 15, 2023 at 08:05:43AM -0800, Darrick J. Wong wrote:
+>> On Wed, Nov 15, 2023 at 12:56:59AM -0500, Yang Xu wrote:
+>>> On machine with using raid, this case will trigger the following 
+>>> error:
+>>> ==== NO CRC ====
+>>> +mkfs.xfs: small data volume, ignoring data volume stripe unit 512 
+>>> +and stripe width 512
+>>> == Options: rw ==
+>>> == Options: usrquota,rw ==
+>>>
+>>> mkfs.xfs generates this error since xfsprogs commit 42371fb36
+>>> ("mkfs: ignore data blockdev stripe geometry for small filesystems").
+>>> It disables automatic detection of stripe unit and width if the data 
+>>> device is less than 1GB.
+>>>
+>>> To slove false poistive, just increase data section size to 1G.
+>>
+>> Is there a particular reason why this test needs -d size= at all?
+>>
+>> There's a single comment about "Control size to control inode numbers"
+>> but then filter_quota_state() seds the inode numbers to #XXX.  So 
+>> perhaps that part of the mkfs argument isn't necessary anymore?
+> 
+> As we've filter out the inode number, so the "inode numbers control" doesn't make sense anymore. It's fine for me to remove the "-d size=xxx" part (if it's still test passed).
 
-Please pull this branch with changes for fstests.
+Sorry for the late reply, but I agree that it's not needed now.
 
-As usual, I did a test-merge with the main upstream branch as of a few
-minutes ago, and didn't see any conflicts.  Please let me know if you
-encounter any problems.
+(I wonder if we should just filter the "small data volume, ignoring data volume
+stripe" message in a common filter, but we don't need to tie up this fix, I
+think it's fine to change the size for this test.)
 
---D
-
-The following changes since commit dfaf19dd09b31088d5adfcdd888479301450a8c9:
-
-generic: test reads racing with slow reflink operations (2023-11-16 09:11:57 -0800)
-
-are available in the Git repository at:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git tags/private-fiexchange_2023-11-16
-
-for you to fetch changes up to 7053833541bd48b3260f2e6e208fe4d7daab5955:
-
-misc: update xfs_io swapext usage (2023-11-16 09:11:57 -0800)
-
-----------------------------------------------------------------
-fstests: FIEXCHANGE is now an XFS ioctl [v27.1]
-
-Minor amendments to the fstests code now that we've taken FIEXCHANGE
-private to XFS.
-
-v27.1: add hch review tags; rebase and maybe fix merge problems?
-
-This has been running on the djcloud for months with no problems.  Enjoy!
-
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-
-----------------------------------------------------------------
-Darrick J. Wong (2):
-misc: privatize the FIEXCHANGE ioctl for now
-misc: update xfs_io swapext usage
-
-common/xfs            |  2 +-
-configure.ac          |  2 +-
-doc/group-names.txt   |  2 +-
-include/builddefs.in  |  2 +-
-ltp/Makefile          |  4 ++--
-ltp/fsstress.c        | 10 +++++-----
-ltp/fsx.c             | 20 ++++++++++----------
-m4/package_libcdev.m4 | 20 --------------------
-m4/package_xfslibs.m4 | 14 ++++++++++++++
-src/Makefile          |  4 ++++
-src/fiexchange.h      | 44 ++++++++++++++++++++++----------------------
-src/global.h          |  4 +---
-src/vfs/Makefile      |  4 ++++
-tests/generic/709     |  2 +-
-tests/generic/710     |  2 +-
-tests/generic/711     |  2 +-
-tests/generic/712     |  2 +-
-tests/generic/713     |  4 ++--
-tests/generic/714     |  4 ++--
-tests/generic/715     |  4 ++--
-tests/generic/716     |  2 +-
-tests/generic/717     |  2 +-
-tests/generic/718     |  2 +-
-tests/generic/719     |  2 +-
-tests/generic/720     |  2 +-
-tests/generic/722     |  4 ++--
-tests/generic/723     |  6 +++---
-tests/generic/724     |  6 +++---
-tests/generic/725     |  2 +-
-tests/generic/726     |  2 +-
-tests/generic/727     |  2 +-
-tests/xfs/122.out     |  1 +
-tests/xfs/789         |  2 +-
-tests/xfs/790         |  2 +-
-tests/xfs/791         |  6 +++---
-tests/xfs/792         |  2 +-
-36 files changed, 99 insertions(+), 98 deletions(-)
-
+Thanks,
+-Eric
