@@ -1,167 +1,78 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="al9WIzM5"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3788127
-	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 23:53:00 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="G32QNoy2"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5867D1A8
+	for <fstests@vger.kernel.org>; Thu, 16 Nov 2023 00:44:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700121180;
+	s=mimecast20190719; t=1700124259;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=IcJ3rcR8Miv9CI5k5e5Ubu9tQmUURbRqEdiSTe9Utnc=;
-	b=al9WIzM5ze4r7McuXECjEE/On0IYSkq1hZ6H4gzPu+M5HypYvPuWqBTWh+TX/Xb7HQp2qs
-	+pVucgefxr5pbm/8GY7E6ELjojbenXshSDs3JufStLD0x7i89MXQYqwNvxIvPaKdo4Vau9
-	S6fFFn4NdRwFS+SQ9MbEJHZos3S8g0E=
-Received: from mail-oi1-f198.google.com (mail-oi1-f198.google.com
- [209.85.167.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=hd0018aZ4vpoXpzDt5JFV+Ui4bsPaSR8Ci/P/DgIWOU=;
+	b=G32QNoy2omxprV+pZXnSHBL1/aUYLM9aJ8az1v5QIpGVA4JwIVe0IURkoWn3yYCmCb88of
+	EfQeZThgoAQMtEZx/El4Vk2Fu4Ny71X7bTLP5thLkhiXn7Rja+u07lxBJi9N4kaZNWbaJ8
+	uKRkmuFZ0DyiwFl6SldlTa8fDPp0k8w=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-650-Adz_zHteP0KjLb0vb2gK7g-1; Thu, 16 Nov 2023 02:52:56 -0500
-X-MC-Unique: Adz_zHteP0KjLb0vb2gK7g-1
-Received: by mail-oi1-f198.google.com with SMTP id 5614622812f47-3b3e1c828a4so636040b6e.0
-        for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 23:52:56 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700121175; x=1700725975;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IcJ3rcR8Miv9CI5k5e5Ubu9tQmUURbRqEdiSTe9Utnc=;
-        b=BfLSCyLmpXzyjeRxD/WuhbPRr6I6T9lhkmcrTbiuG8tSRWTMAuBZjSx+dU5O6tY9yk
-         bCTrH2wRpIwARYBd4P821hvNkKmHRdLcbI4eLbHOHe6itc3l/BQ4910yOotvLwXtawER
-         AylhhLJoPLBAf5HkXk294wLvi3TxILHAX0QvvNcL9j2MW6p9VanJHuHk9T8KlPbs796h
-         PbcYbmQUmkN0c0tkewW9gM2ezsf2J348CBRxgHJ0qpI2a8FkH/n2VGOtp5rN/TcvZqCQ
-         T28Z5YYDL7WSo6MPdGlA2sWMVcwH8VjIDduyhK6iy/CqA2flfv8fwLV/DUo42bSK+K1z
-         4H9w==
-X-Gm-Message-State: AOJu0YyGtotz1EFi0Zs3FLLU7BHIDV96l928zlOnrdOd27ujAvJSQRUA
-	Gxcr5V0JTbBuUlDvxzOoXdjY/dUYsiOgRwls3p+a4T6cu90PfT86j8rMf17Gncac9Q2TaKcZL8l
-	xyOr3V4hRb/IUM/oc8UidZG9Kig==
-X-Received: by 2002:a05:6808:2191:b0:3ae:16b6:6338 with SMTP id be17-20020a056808219100b003ae16b66338mr21431768oib.3.1700121175535;
-        Wed, 15 Nov 2023 23:52:55 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHtmLvRqYTeG43Zm7XrhtSCPgLYITfbuc5jwiskSxqRtqheikMTUy2kWou2JtNxNr7WfcLwaw==
-X-Received: by 2002:a05:6808:2191:b0:3ae:16b6:6338 with SMTP id be17-20020a056808219100b003ae16b66338mr21431755oib.3.1700121175285;
-        Wed, 15 Nov 2023 23:52:55 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 28-20020a630c5c000000b005c1ce3c960bsm2354075pgm.50.2023.11.15.23.52.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Nov 2023 23:52:54 -0800 (PST)
-Date: Thu, 16 Nov 2023 15:52:50 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Alexander Larsson <alexl@redhat.com>,
-	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] overlay/026: Fix test expectation for newer kernels
-Message-ID: <20231116075250.ntopaswush4sn2qf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231112080242.1492842-1-amir73il@gmail.com>
+ us-mta-623-Y_zPuH2MN-GbkKEoMjrwwA-1; Thu, 16 Nov 2023 03:44:18 -0500
+X-MC-Unique: Y_zPuH2MN-GbkKEoMjrwwA-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C2D40101A550
+	for <fstests@vger.kernel.org>; Thu, 16 Nov 2023 08:44:17 +0000 (UTC)
+Received: from xifeng.usersys.redhat.com (unknown [10.66.60.150])
+	by smtp.corp.redhat.com (Postfix) with ESMTP id 0AD4140C6EBB;
+	Thu, 16 Nov 2023 08:44:15 +0000 (UTC)
+From: XiaoLi Feng <xifeng@redhat.com>
+To: fstests@vger.kernel.org,
+	bfoster@redhat.com
+Cc: Xiaoli Feng <xifeng@redhat.com>
+Subject: [PATCH v1] generic/042: change the test file size from 25m to 26m.
+Date: Thu, 16 Nov 2023 16:44:14 +0800
+Message-Id: <20231116084414.21258-1-xifeng@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231112080242.1492842-1-amir73il@gmail.com>
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.2
 
-On Sun, Nov 12, 2023 at 10:02:42AM +0200, Amir Goldstein wrote:
-> From: Alexander Larsson <alexl@redhat.com>
-> 
-> We now support xattr of overlayfs.* xattrs, so check that either
-> both set and get work, or neither.
-> 
-> Signed-off-by: Alexander Larsson <alexl@redhat.com>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
-> 
-> Zorro,
-> 
-> This test is failing since overlayfs merge for v6.7-rc1, because it
-> encodes an expectation that set/get of private overlay.* xattrs
-> should fail.
-> 
-> This expectation is no longer correct for new kernel, so Alex has
-> fixed the test to expect consistent behavior of set/get of private
-> overlay.* xattrs.
-> 
-> We have some new tests for features merged for v6.7-rc1, but this fix
-> has higher priority, so sending it early.
-> 
-> Thanks,
-> Amir.
-> 
-> 
->  tests/overlay/026     | 35 +++++++++++++++++++++++++----------
->  tests/overlay/026.out |  2 --
->  2 files changed, 25 insertions(+), 12 deletions(-)
-> 
-> diff --git a/tests/overlay/026 b/tests/overlay/026
-> index 77030d20..f71b3f13 100755
-> --- a/tests/overlay/026
-> +++ b/tests/overlay/026
-> @@ -57,21 +57,36 @@ $SETFATTR_PROG -n "trusted.overlayfsrz" -v "n" \
->  _getfattr --absolute-names -n "trusted.overlayfsrz" \
->    $SCRATCH_MNT/testf0 2>&1 | _filter_scratch
->  
-> -# {s,g}etfattr of "trusted.overlay.xxx" should fail.
-> +# {s,g}etfattr of "trusted.overlay.xxx" fail on older kernels
->  # The errno returned varies among kernel versions,
-> -#            v4.3/7   v4.8-rc1    v4.8       v4.10
-> -# setfattr  not perm  not perm   not perm   not supp
-> -# getfattr  no attr   no attr    not perm   not supp
-> +#            v4.3/7   v4.8-rc1    v4.8       v4.10     v6.7
-> +# setfattr  not perm  not perm   not perm   not supp  ok
-> +# getfattr  no attr   no attr    not perm   not supp  ok
->  #
-> -# Consider "Operation not {supported,permitted}" pass.
-> +# Consider both "Operation not {supported,permitted}" and
-> +# "No such attribute" as pass for getattr to support all kernel
-> +# version. However, the setfattr result must match getattr.
->  #
-> -$SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
-> -  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
-> -  sed -e 's/permitted/supported/g'
->  
-> -_getfattr --absolute-names -n "trusted.overlay.fsz" \
-> +getres=$(_getfattr --absolute-names -n "trusted.overlay.fsz" \
-> +  $SCRATCH_MNT/testf1 2>&1 | _filter_scratch)
+From: Xiaoli Feng <xifeng@redhat.com>
 
-Can we have a helper in common/overlay to check if current FSTYP supports
-get or set overlay.* xattr, to deal with this patch?
+When mkfs with "-d su=2m,sw=1" that DAX 2 MiB hugepage faults
+request, it need the multiples of 2 file size. So Change to 26M.
 
-Thanks,
-Zorro
+Signed-off-by: Xiaoli Feng <xifeng@redhat.com>
+---
 
-> +
-> +supported=n
-> +if [[ "$getres" =~ "No such attribute" ]]; then
-> +    supported=y
-> +else
-> +   [[ "$getres" =~ Operation\ not\ (supported|permitted) ]] || echo unexpected getattr result: $getres
-> +fi
-> +
-> +setres=$($SETFATTR_PROG -n "trusted.overlay.fsz" -v "n" \
->    $SCRATCH_MNT/testf1 2>&1 | _filter_scratch | \
-> -  sed -e 's/permitted/supported/g'
-> +  sed -e 's/permitted/supported/g')
-> +
-> +if [ $supported == 'y' ]; then
-> +    [[ "$setres" == "" ]] || echo unexpected setattr result: $setres
-> +else
-> +    [[ "$setres" =~ "Operation not supported" ]] || echo unexpected setattr result: $setres
-> +fi
->  
->  # success, all done
->  status=0
-> diff --git a/tests/overlay/026.out b/tests/overlay/026.out
-> index c4572d67..53030009 100644
-> --- a/tests/overlay/026.out
-> +++ b/tests/overlay/026.out
-> @@ -2,5 +2,3 @@ QA output created by 026
->  # file: SCRATCH_MNT/testf0
->  trusted.overlayfsrz="n"
->  
-> -setfattr: SCRATCH_MNT/testf1: Operation not supported
-> -SCRATCH_MNT/testf1: trusted.overlay.fsz: Operation not supported
-> -- 
-> 2.34.1
-> 
+Hello Brian,
+
+I'd like to change the test file size to 26M. Are there any special requirement
+for 25M file size?
+
+Thanks.
+
+ tests/generic/042 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/generic/042 b/tests/generic/042
+index 5116183f..c583f0ae 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -27,7 +27,7 @@ _crashtest()
+ 	img=$SCRATCH_MNT/$seq.img
+ 	mnt=$SCRATCH_MNT/$seq.mnt
+ 	file=$mnt/file
+-	size=25M
++	size=26M
+ 
+ 	# f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
+ 	# f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change
+-- 
+2.39.1
 
