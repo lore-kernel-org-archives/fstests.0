@@ -1,56 +1,55 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ThzBf1qL"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WRshfmwS"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D01FA19D
-	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 18:33:48 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDB3BA4
+	for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 18:51:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700102028;
+	s=mimecast20190719; t=1700103096;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=njZ5atozwy9G0BrydKv0/iZq4RwpVGfhN97xeS0VssM=;
-	b=ThzBf1qLD8PMoiyIajO2MQ0tob9Mlrls+MEGw5CeiLeomuOBQJtwaSeZHklNCzssS9ip4A
-	SiyNFLZAKezyUqFqMftYioLau4TzWwgpiIAzDZD+tZtuap7YqOMgBiKJUXZPoxXhKqb358
-	Qpwe62bDUkIs36FmW9htA/KcVGQOJgU=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=BL4zxiN7u9NkwZgBjtZRADD+ybgJzZTVWcuKU9mDEZo=;
+	b=WRshfmwSeadbGikuw409jsHZnFvmX5j5MwFdLM9T4dClaZevyIK3UFW6IZkcn8PZn3FR4N
+	qlRDkyo53Qhh5AnSCZ9yrhy9tqgu0NluJll80XZ0vTtt0sxDK6O1rr/iKSlGsOdLuFk5ME
+	jsLFYhQ/wyXgmdbFwS65m7vuXbsqDTo=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-167-7UeAkre6OpeAEop4CETYNg-1; Wed, 15 Nov 2023 21:33:46 -0500
-X-MC-Unique: 7UeAkre6OpeAEop4CETYNg-1
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-6c337ce11ceso478488b3a.1
-        for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 18:33:46 -0800 (PST)
+ us-mta-147-ATehX3WiPyuAyRR8NK_qLg-1; Wed, 15 Nov 2023 21:51:33 -0500
+X-MC-Unique: ATehX3WiPyuAyRR8NK_qLg-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-27ff8065e61so311960a91.1
+        for <fstests@vger.kernel.org>; Wed, 15 Nov 2023 18:51:33 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700102025; x=1700706825;
+        d=1e100.net; s=20230601; t=1700103092; x=1700707892;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=njZ5atozwy9G0BrydKv0/iZq4RwpVGfhN97xeS0VssM=;
-        b=e5tCF20JvvFYoLgciCi66EcPuBXR5F67TLGIcy5Yh+nVc8RztSxjh6TWq4LhW1TEl4
-         nvaZiqZGXaUZra/8BjIiXwB0FTt1e/7wEZvGwE9LCvItY3uwq4/4soW8OVPEFfDVSrqr
-         M8Zdk7NiJPFmfI+tUZS1PZLNYeutP91EAg+Y+uJNjjgl+dTChjvvWqHAh2THa8Ohhp4+
-         +/+PKblyQzsUKeM/X+7HH4s5Q2fzuetZI852I5s14lCEI7UV5xi4dscnvgFzCfVUQolG
-         UqU1x+otgZetKs/ZZuIBGGzjuq0rhF0B2od+w2DZYugbYE5vwqybb11MZKe2qCzbGgco
-         c4Ug==
-X-Gm-Message-State: AOJu0YziuNmuoHrEuzU3ii/qSRjVAh+BOUwIYLSsnX8CVMQ5CQxuULmd
-	6KVEHexzz9+0YCRl1GyWtwO6sScBLqF6WxX6uYmNknZRon27PQXc2DqkfEB6STSQNQ6DhHBsq6f
-	dnlfiD9crisJ2ID/b7A==
-X-Received: by 2002:a05:6a21:3389:b0:16b:afc2:3b68 with SMTP id yy9-20020a056a21338900b0016bafc23b68mr18121011pzb.25.1700102025554;
-        Wed, 15 Nov 2023 18:33:45 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHPbo3bkxCwD0UIyozTUHawbpeKC1QMiVlpUA/KYQ+JbWBMb4Uy3GoAefXWDIpSoUKakX+AJA==
-X-Received: by 2002:a05:6a21:3389:b0:16b:afc2:3b68 with SMTP id yy9-20020a056a21338900b0016bafc23b68mr18120998pzb.25.1700102025223;
-        Wed, 15 Nov 2023 18:33:45 -0800 (PST)
+        bh=BL4zxiN7u9NkwZgBjtZRADD+ybgJzZTVWcuKU9mDEZo=;
+        b=SjIDHbSw4bHSEWPA4x/6vP8E6ONSwtW8VG8n0V87G5Gqv5TOm11lTUB0coXT5Z60mz
+         GlCnKqyn8+YL5O4VnZB+2I1DEN7u1c3iUMRgRf12ug0DS9+ZTBOfRTCnAN2iPFpiaOaF
+         l0nh+1xqUhj+0zj9E9/sytcFLe7O1B4vscwUZzCdVlvrdHpMjaolAzS4ry6ao76bg7fV
+         G8rBazgTGT9OPuUeb1lnZPtGU8QiVjThNsYcVBos6CCO7F8EbE4J6Cc6Mm+rcW+dlpPT
+         vbZ5kghSXdnOhtbWQML7x1vh9LptelYslVB3LR9qFMWQuOeLUd3JRQLJ5Dtp/JuEwsXY
+         AhRQ==
+X-Gm-Message-State: AOJu0Yw63clcn/sZKScWnjzh053bIucYadWnGKICBMehSexHV8ieb2KI
+	hiQWcBOqAKg2wKpaflHbnDyw6ovvZ2W5dH/iBWc2wqy6hoAGJj8XmU0STMDkRbS6f7/MJUSyul8
+	y+B5eDyEBvT5AuS2oyQ==
+X-Received: by 2002:a17:90b:3b47:b0:27c:f8f4:fedb with SMTP id ot7-20020a17090b3b4700b0027cf8f4fedbmr16957713pjb.21.1700103092412;
+        Wed, 15 Nov 2023 18:51:32 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGms3NCGbnZe4BJTxXjIBHSBKzJhwlVFfrZGxEm9fAyWwc5ptdzCfEOOxGKl933OFzN4PAkZA==
+X-Received: by 2002:a17:90b:3b47:b0:27c:f8f4:fedb with SMTP id ot7-20020a17090b3b4700b0027cf8f4fedbmr16957705pjb.21.1700103092123;
+        Wed, 15 Nov 2023 18:51:32 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id a16-20020a62bd10000000b006b725b2158bsm3417588pff.41.2023.11.15.18.33.43
+        by smtp.gmail.com with ESMTPSA id o17-20020a17090ab89100b00280469602bcsm517179pjr.2.2023.11.15.18.51.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Nov 2023 18:33:44 -0800 (PST)
-Date: Thu, 16 Nov 2023 10:33:41 +0800
+        Wed, 15 Nov 2023 18:51:31 -0800 (PST)
+Date: Thu, 16 Nov 2023 10:51:25 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/263: increase data section size to 1024M
-Message-ID: <20231116023341.4be2u2dtpghe5tan@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231115055659.2027-1-xuyang2018.jy@fujitsu.com>
- <20231115160543.GD36175@frogsfrogsfrogs>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, dsterba@suse.cz
+Subject: Re: [PATCH] common/btrfs: add _btrfs_get_fsid() helper
+Message-ID: <20231116025125.cdrwnopq33srdcb4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <887706aa6c981aff219b0b2faca614e8ee2323b3.1699417639.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -59,66 +58,82 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231115160543.GD36175@frogsfrogsfrogs>
+In-Reply-To: <887706aa6c981aff219b0b2faca614e8ee2323b3.1699417639.git.anand.jain@oracle.com>
 
-On Wed, Nov 15, 2023 at 08:05:43AM -0800, Darrick J. Wong wrote:
-> On Wed, Nov 15, 2023 at 12:56:59AM -0500, Yang Xu wrote:
-> > On machine with using raid, this case will trigger
-> > the following error:
-> > ==== NO CRC ====
-> > +mkfs.xfs: small data volume, ignoring data volume stripe unit 512 and stripe width 512
-> > == Options: rw ==
-> > == Options: usrquota,rw ==
-> > 
-> > mkfs.xfs generates this error since xfsprogs commit 42371fb36
-> > ("mkfs: ignore data blockdev stripe geometry for small filesystems").
-> > It disables automatic detection of stripe unit and width if the
-> > data device is less than 1GB.
-> > 
-> > To slove false poistive, just increase data section size to 1G.
+On Wed, Nov 08, 2023 at 12:28:57PM +0800, Anand Jain wrote:
+> We have two instances of reading the btrfs fsid by using the command
+> 'btrfs filesystem show <mnt>' turn this into an easy-to-use helper
+> function and also use it.
 > 
-> Is there a particular reason why this test needs -d size= at all?
-> 
-> There's a single comment about "Control size to control inode numbers"
-> but then filter_quota_state() seds the inode numbers to #XXX.  So
-> perhaps that part of the mkfs argument isn't necessary anymore?
+> Suggested-by: David Sterba <dsterba@suse.cz>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
 
-As we've filter out the inode number, so the "inode numbers control" doesn't
-make sense anymore. It's fine for me to remove the "-d size=xxx" part (if it's
-still test passed).
+It looks good to me, will merge it with:
+  [PATCH v4 0/5] btrfs/219 cloned-device mount capability update
 
-Thanks,
-Zorro
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+
+>  common/btrfs | 14 ++++++++++++--
+>  common/rc    |  5 +----
+>  2 files changed, 13 insertions(+), 6 deletions(-)
 > 
-> --D
+> diff --git a/common/btrfs b/common/btrfs
+> index fbc26181f7bc..f91f8dd869a1 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -457,13 +457,23 @@ _scratch_btrfs_is_zoned()
+>  	return 1
+>  }
+>  
+> -_require_btrfs_sysfs_fsid()
+> +_btrfs_get_fsid()
+>  {
+>  	local fsid
+> +	local mnt=$1
+>  
+> -	fsid=$($BTRFS_UTIL_PROG filesystem show $TEST_DIR |grep uuid: |\
+> +	fsid=$($BTRFS_UTIL_PROG filesystem show $mnt |grep uuid: |\
+>  	       $AWK_PROG '{print $NF}')
+>  
+> +	echo $fsid
+> +}
+> +
+> +_require_btrfs_sysfs_fsid()
+> +{
+> +	local fsid
+> +
+> +	fsid=$(_btrfs_get_fsid $TEST_DIR)
+> +
+>  	# Check if the kernel has sysfs fsid support.
+>  	# Following kernel patch adds it:
+>  	#   btrfs: sysfs add devinfo/fsid to retrieve fsid from the device
+> diff --git a/common/rc b/common/rc
+> index 7f14c19ca89e..b2e06b127321 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4721,7 +4721,6 @@ _require_statx()
+>  _fs_sysfs_dname()
+>  {
+>  	local dev=$1
+> -	local fsid
+>  
+>  	if [ ! -b "$dev" ]; then
+>  		_fail "Usage: _fs_sysfs_dname <mounted_device>"
+> @@ -4729,9 +4728,7 @@ _fs_sysfs_dname()
+>  
+>  	case "$FSTYP" in
+>  	btrfs)
+> -		fsid=$($BTRFS_UTIL_PROG filesystem show ${dev} | grep uuid: | \
+> -							$AWK_PROG '{print $NF}')
+> -		echo $fsid ;;
+> +		_btrfs_get_fsid $dev ;;
+>  	*)
+>  		_short_dev $dev ;;
+>  	esac
+> -- 
+> 2.39.3
 > 
-> > Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> > ---
-> >  tests/xfs/263 | 4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/tests/xfs/263 b/tests/xfs/263
-> > index fadd6280..48581bac 100755
-> > --- a/tests/xfs/263
-> > +++ b/tests/xfs/263
-> > @@ -73,11 +73,11 @@ function test_all_state()
-> >  
-> >  echo "==== NO CRC ===="
-> >  # Control size to control inode numbers
-> > -_scratch_mkfs_xfs "-m crc=0 -n ftype=0 -d size=512m" >> $seqres.full
-> > +_scratch_mkfs_xfs "-m crc=0 -n ftype=0 -d size=1024m" >> $seqres.full
-> >  test_all_state
-> >  
-> >  echo "==== CRC ===="
-> > -_scratch_mkfs_xfs "-m crc=1 -d size=512m" >>$seqres.full
-> > +_scratch_mkfs_xfs "-m crc=1 -d size=1024m" >>$seqres.full
-> >  test_all_state
-> >  
-> >  status=0
-> > -- 
-> > 2.39.1
-> > 
-> > 
 > 
 
