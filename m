@@ -1,35 +1,30 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8C174500A
-	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 22:07:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB2DF4500A
+	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 22:09:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FeWYFKoN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6656CC433C7;
-	Fri, 17 Nov 2023 22:07:33 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y0MFh2BE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 29831C433C8;
+	Fri, 17 Nov 2023 22:09:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700258853;
-	bh=V142oDvt3hPbZ3WiBahX/4bq2zQvzjIW7/+jyfXMVDo=;
+	s=k20201202; t=1700258986;
+	bh=o1YSel63NJjceSYSoyhJnMK4hoF64DxXtLdCfsaK4dk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=FeWYFKoNHgAbWm7PW5sCnA3pn74U/f7V+qcAIwiGLvTXDoIdoE0UiYg3PG8vidDoa
-	 rqmjXHAda1Mogwf9xRxV6mu0C5FhuX4DFZIbQJGRX58JG/Q+6niLVz8X1xb+AMN+VP
-	 nHzSmx0xWkM/yRjVBDKt6Yy9zAemFD3EZ8dRSvLX0lksVTabfQYjToSDkVJ6mkRNIl
-	 tIDI4lTGvwALPs6qyHqMQpf9URJRnF0wJFw/PXUn2P0ofYLpJ4lsii6lh/mIPMAquc
-	 n9nbNULXhSZnzSBf+/Nxvu9/xToUAbT8D4twwJ4P3U5Xg90wPqT7hnUOOSv6pnvzJ+
-	 u6yT7wqN9ywWw==
-Date: Fri, 17 Nov 2023 14:07:32 -0800
+	b=Y0MFh2BEwZzgW7OzaybsVWBzvnbDeUm8bYh6fDBjjdbuon7H4ZxxvbEkyJO03qLIc
+	 fro7Ew4pginzIsgxbu1HL+5icGbjTcPsmqb5DfJK9JDdNkxubI+Qcbjg3NJqa/tBtz
+	 zHwccshy/qbhYJbYBfdQ00cpWGlkM2dYNFoPiZQZlHZ3NOyiWbi2tRpCmcJng7VKvH
+	 Fibi70SfpJM1KQ6knRuuNiUBxZHws05V4wHrOK2QFUT4hiVvha+/pz+bD/z/W62Yn+
+	 ssFWzJPi0/zKHNZ6bWC6RefM8eQMiE1vAn3whIEj6KOd8OvLt00xvo5GJ53+dfWc6y
+	 OPd4XPfc0WSPA==
+Date: Fri, 17 Nov 2023 14:09:45 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Zorro Lang <zlang@redhat.com>
-Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH fstests v2] xfs: test refilling AGFL after lots of btree
- splits
-Message-ID: <20231117220732.GG36175@frogsfrogsfrogs>
-References: <68cd85697855f686529829a2825b044913148caf.1698699188.git.osandov@fb.com>
- <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
- <20231101064543.uruh3ljicwnedw7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231101155630.GA1203404@frogsfrogsfrogs>
- <20231117143232.jool55gt5zysmm55@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/726,727: add missing _require_scratch_reflink
+Message-ID: <20231117220945.GH36175@frogsfrogsfrogs>
+References: <20231108152428.432995-1-hch@lst.de>
+ <20231117145155.t7vvq3ksdrhyo5ff@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,160 +33,75 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231117143232.jool55gt5zysmm55@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20231117145155.t7vvq3ksdrhyo5ff@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Fri, Nov 17, 2023 at 10:32:32PM +0800, Zorro Lang wrote:
-> On Wed, Nov 01, 2023 at 08:56:30AM -0700, Darrick J. Wong wrote:
-> > On Wed, Nov 01, 2023 at 02:45:43PM +0800, Zorro Lang wrote:
-> > > On Mon, Oct 30, 2023 at 02:00:15PM -0700, Omar Sandoval wrote:
-> > > > This is a regression test for patch "xfs: fix internal error from AGFL
-> > > > exhaustion"), which is not yet merged. Without the fix, it will fail
-> > > > with a "Structure needs cleaning" error.
-> > > > 
-> > > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
-> > > > ---
-> > > > Changes since v1 [1]:
-> > > > 
-> > > > - Fixed to check whether mkfs.xfs supports -m rmapbt.
-> > > > - Changed bare $XFS_DB calls to _scratch_xfs_db.
-> > > > - Expanded comment about what happens without the fix.
-> > > > 
-> > > > I didn't add a check for whether everything ended up in AG 0, because it
-> > > > wasn't clear to me what to do in that case. We could skip the test, but
-> > > > it also doesn't hurt to run it anyways.
-> > > > 
-> > > > 1: https://lore.kernel.org/linux-xfs/c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com/
-> > > > 
-> > > >  tests/xfs/601     | 68 +++++++++++++++++++++++++++++++++++++++++++++++
-> > > >  tests/xfs/601.out |  2 ++
-> > > 
-> > > The xfs/601 has been taken by:
-> > >   39f88c55 ("generic: test FALLOC_FL_UNSHARE when pagecache is not loaded")
-> > > 
-> > > I'll change this case to another number.
-> > > 
-> > > ...
-> > > Hi Darrick, I just noticed that commit has "generic", but that's a case in
-> > > tests/xfs, and there's not "_supported_fs xfs" in xfs/601. Do you want to
-> > > move it to be a generic case?
+On Fri, Nov 17, 2023 at 10:51:55PM +0800, Zorro Lang wrote:
+> On Wed, Nov 08, 2023 at 04:24:28PM +0100, Christoph Hellwig wrote:
+> > These two tests require reflink functionality, add the correct
+> > statement to ensure that.
 > > 
-> > Yes, the existing xfs/601 regression test (kernel commit 35d30c9cf127)
-> > can become a generic test; and then this one can take its place.
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > ---
+> >  tests/generic/726 | 2 ++
+> >  tests/generic/727 | 2 ++
+> >  2 files changed, 4 insertions(+)
+> > 
+> > diff --git a/tests/generic/726 b/tests/generic/726
+> > index f0d8df2e..77afe10c 100755
+> > --- a/tests/generic/726
+> > +++ b/tests/generic/726
+> > @@ -19,6 +19,7 @@ _begin_fstest auto fiexchange swapext quick
+> >  
+> >  # Import common functions.
+> >  . ./common/filter
+> > +. ./common/reflink
+> >  
+> >  # real QA test starts here
+> >  
+> > @@ -28,6 +29,7 @@ _require_user
+> >  _require_xfs_io_command swapext '-v vfs -a'
+> >  _require_xfs_io_command startupdate
+> >  _require_scratch
+> > +_require_scratch_reflink
 > 
-> If you need to move current xfs/601 to generic/, better to have another patch.
-> I'll merge this patch in xfs/ at first. Then you can do that moving in your next
-> "random fix" patchset, or I can send a patch to do that.
+> Does the "startupdate" actually need reflink feature?
 
-<shrug> I'll ./mvtest and send the resulting patch next week unless you
-beat me to it.
+It does, but the -a switch to the _require_xfs_io_command swapext line
+above will fail _notrun the test.  Or at least it would had I not
+changed the CLI options when I gave up on getting FIEXCHANGE merged and
+reworked it as an xfs-only ioctl.
+
+IOWs, the "privatize the FIEXCHANGE" series should fix all these
+problems for Christoph.
 
 --D
 
-> Thanks,
-> Zorro
-> 
+> >  
+> >  _scratch_mkfs >> $seqres.full
+> >  _scratch_mount
+> > diff --git a/tests/generic/727 b/tests/generic/727
+> > index 2cda49ea..1f9eebc5 100755
+> > --- a/tests/generic/727
+> > +++ b/tests/generic/727
+> > @@ -20,6 +20,7 @@ _begin_fstest auto fiexchange swapext quick
+> >  # Import common functions.
+> >  . ./common/filter
+> >  . ./common/attr
+> > +. ./common/reflink
+> >  
+> >  # real QA test starts here
+> >  
+> > @@ -31,6 +32,7 @@ _require_command "$SETCAP_PROG" setcap
+> >  _require_xfs_io_command swapext '-v vfs -a'
+> >  _require_xfs_io_command startupdate
+> >  _require_scratch
+> > +_require_scratch_reflink
+> >  _require_attrs security
+> >  
+> >  _scratch_mkfs >> $seqres.full
+> > -- 
+> > 2.39.2
 > > 
-> > --D
-> > 
-> > > >  2 files changed, 70 insertions(+)
-> > > >  create mode 100755 tests/xfs/601
-> > > >  create mode 100644 tests/xfs/601.out
-> > > > 
-> > > > diff --git a/tests/xfs/601 b/tests/xfs/601
-> > > > new file mode 100755
-> > > > index 00000000..68df6ac0
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/601
-> > > > @@ -0,0 +1,68 @@
-> > > > +#! /bin/bash
-> > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> > > > +#
-> > > > +# FS QA Test 601
-> > > > +#
-> > > > +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
-> > > > +#
-> > > > +. ./common/preamble
-> > > > +_begin_fstest auto prealloc punch
-> > > > +
-> > > > +. ./common/filter
-> > > > +
-> > > > +_supported_fs xfs
-> > > > +_require_scratch
-> > > 
-> > > _require_xfs_io_command "fpunch" ?
-> > > 
-> > > I can help to add that, others look good to me.
-> > > 
-> > > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > > 
-> > > > +_require_test_program punch-alternating
-> > > > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
-> > > > +
-> > > > +# Disable the rmapbt so we only need to worry about splitting the bnobt and
-> > > > +# cntbt at the same time.
-> > > > +opts=
-> > > > +if $MKFS_XFS_PROG |& grep -q rmapbt; then
-> > > > +	opts="-m rmapbt=0"
-> > > > +fi
-> > > > +_scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
-> > > > +. "$tmp.mkfs"
-> > > > +_scratch_mount
-> > > > +
-> > > > +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
-> > > > +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
-> > > > +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
-> > > > +
-> > > > +# Create a big file with a size such that the punches below create the exact
-> > > > +# free extents we want.
-> > > > +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
-> > > > +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
-> > > > +
-> > > > +# Fill in any small free extents in AG 0. After this, there should be only one,
-> > > > +# large free extent.
-> > > > +_scratch_unmount
-> > > > +mapfile -t gaps < <(_scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c btdump |
-> > > > +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
-> > > > +	tac | tail -n +2)
-> > > > +_scratch_mount
-> > > > +for gap_i in "${!gaps[@]}"; do
-> > > > +	gap=${gaps[$gap_i]}
-> > > > +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
-> > > > +done
-> > > > +
-> > > > +# Create enough free space records to make the bnobt and cntbt both full,
-> > > > +# 2-level trees, plus one more record to make them split all the way to the
-> > > > +# root and become 3-level trees. After this, there is a 7-block free extent in
-> > > > +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
-> > > > +# than the rightmost two are full. Without the fix, the free list is also
-> > > > +# empty.
-> > > > +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
-> > > > +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
-> > > > +
-> > > > +# Do an arbitrary operation that refills the free list. Without the fix, this
-> > > > +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
-> > > > +# the cntbt, then try to insert the remaining 1 block free extent in the
-> > > > +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
-> > > > +# leaf and fails because the free list is empty, returning EFSCORRUPTED.
-> > > > +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
-> > > > +
-> > > > +echo "Silence is golden"
-> > > > +status=0
-> > > > +exit
-> > > > diff --git a/tests/xfs/601.out b/tests/xfs/601.out
-> > > > new file mode 100644
-> > > > index 00000000..0d70c3e5
-> > > > --- /dev/null
-> > > > +++ b/tests/xfs/601.out
-> > > > @@ -0,0 +1,2 @@
-> > > > +QA output created by 601
-> > > > +Silence is golden
-> > > > -- 
-> > > > 2.41.0
-> > > > 
-> > > > 
-> > > 
-> > > 
 > > 
 > 
 > 
