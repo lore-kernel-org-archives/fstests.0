@@ -1,131 +1,120 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FqYLtQ4D"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B366B130
-	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:42:33 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fxCl7tsx"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3CABD6E
+	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:52:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700232153;
+	s=mimecast20190719; t=1700232721;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=viEBw0op9J3Rz65ZIAnnSEgNGq9SfbItEJguo/umJ08=;
-	b=FqYLtQ4DhTGHgDOnVrda1NvDUJahWRqOngHmS7PuXYGituf8zxKfsc+me+bXFTv5wYkHr4
-	Z9c/IlIZ5Z46MZBniyirbw/7jLYNx5+ac/LKv5bVs2xaR91Y+Mkf6Q7GjvbFBk7ztJRDTS
-	n5KIZ4KZIKJiWmQqEuXlv1acgWwsJ44=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-138-Vs4Fr8nHPxucXZYU739o-Q-1; Fri,
- 17 Nov 2023 09:42:31 -0500
-X-MC-Unique: Vs4Fr8nHPxucXZYU739o-Q-1
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BD9A1381A8A0;
-	Fri, 17 Nov 2023 14:42:29 +0000 (UTC)
-Received: from bfoster.redhat.com (unknown [10.22.32.99])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 967352166B2A;
-	Fri, 17 Nov 2023 14:42:29 +0000 (UTC)
-From: Brian Foster <bfoster@redhat.com>
-To: fstests@vger.kernel.org
-Cc: linux-bcachefs@vger.kernel.org
-Subject: [PATCH] generic/459: improve shutdown/read-only check to accommodate bcachefs
-Date: Fri, 17 Nov 2023 09:43:17 -0500
-Message-ID: <20231117144317.10882-1-bfoster@redhat.com>
+	 in-reply-to:in-reply-to:references:references;
+	bh=b7j5sBfV13vA8wMQsCDmP3uVuHgN6BsD8DUHr4xS7M0=;
+	b=fxCl7tsx6N8Jz5YMyrK7YTCLWDbYobZTQ2KN+1n3/1UlQCsRHxFTDeMOm4I98qCfUsGPRZ
+	7cOO6E/sQu4GqGxCbl1u5yxKBL1Ddvx87qJimzwvhTfzCr6kFCRArGcyNra2BwgnVw7LVI
+	riyMcJC+9H07WvcOHs20WORakT9WJA8=
+Received: from mail-ot1-f72.google.com (mail-ot1-f72.google.com
+ [209.85.210.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-169-iUsc5ULpMaCk7PGF5bg05A-1; Fri, 17 Nov 2023 09:52:00 -0500
+X-MC-Unique: iUsc5ULpMaCk7PGF5bg05A-1
+Received: by mail-ot1-f72.google.com with SMTP id 46e09a7af769-6d656fd896dso1957840a34.3
+        for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:52:00 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1700232719; x=1700837519;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=b7j5sBfV13vA8wMQsCDmP3uVuHgN6BsD8DUHr4xS7M0=;
+        b=CRm6VYjbJujPcDsU+4c3RZaCwwGDkMkv0gJIFozHbykZO5/EkRx28T6aCLkntDJ4ez
+         HSbaGSlIJmvL9VwR08XDb5CaKtIBi9x2bIrxLAkFV8qJo5AQ2vCv2P6Fo9CVtswH1JUE
+         ITw6bdvCORXlNnkebYz9o2BWIys9/6SY/rIk5L5X+MtA4zrUY+aWS2i7MYxc/dliJl1x
+         zaPF66RGYvXwb//2z83i+jYjATKyNU70TjQTrYAqSsIuS0FokIt4RRijr7dcL4ceeBxh
+         O1cCAk41p9vROYoKpyZuIgj9vRKRbLZ6o7HZExXgxn9GJei/zKWw2EcQThDUdiVO4FVG
+         IRJg==
+X-Gm-Message-State: AOJu0YyFN0PLls/+KLqErR915khW/r/ZWgHErRZT+tAeCljImcXFzbpk
+	zMsSMi6+GmZmsK5IxOcS4RKBGtVzDUu5NMMI+ojHexLJGZ6YqQTGebQ47a+4ehdhBy+EpUHVOxq
+	OeS4QUfptdRbtr1bycO7c23XXMRcLWog=
+X-Received: by 2002:a9d:5d05:0:b0:6c4:c3ac:a9dc with SMTP id b5-20020a9d5d05000000b006c4c3aca9dcmr12810489oti.21.1700232719197;
+        Fri, 17 Nov 2023 06:51:59 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE6cGRYQ0FlUxGklr/fWv+6yUJ3QN2pjQRGps73vnFR9FF6Dp7NF9rcvy6LLMWnjqRYXg3Big==
+X-Received: by 2002:a9d:5d05:0:b0:6c4:c3ac:a9dc with SMTP id b5-20020a9d5d05000000b006c4c3aca9dcmr12810477oti.21.1700232718911;
+        Fri, 17 Nov 2023 06:51:58 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id bs184-20020a6328c1000000b005bd11296584sm1524602pgb.53.2023.11.17.06.51.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 17 Nov 2023 06:51:58 -0800 (PST)
+Date: Fri, 17 Nov 2023 22:51:55 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/726,727: add missing _require_scratch_reflink
+Message-ID: <20231117145155.t7vvq3ksdrhyo5ff@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231108152428.432995-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231108152428.432995-1-hch@lst.de>
 
-generic/459 occasionally fails on bcachefs because the deliberately
-induced I/O errors caused by exhausting the overprovisioned thin
-pool can lead to filesystem shutdown. This test considers this
-expected behavior on certain fs', but only checks for the ext4
-remount read-only behavior. bcachefs does a similar emergency
-read-only transition in response to certain I/O errors, but it
-behaves more similar to an XFS shutdown and doesn't necessarily
-reflect "ro" state in the mount table (unless induced by userspace).
+On Wed, Nov 08, 2023 at 04:24:28PM +0100, Christoph Hellwig wrote:
+> These two tests require reflink functionality, add the correct
+> statement to ensure that.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/726 | 2 ++
+>  tests/generic/727 | 2 ++
+>  2 files changed, 4 insertions(+)
+> 
+> diff --git a/tests/generic/726 b/tests/generic/726
+> index f0d8df2e..77afe10c 100755
+> --- a/tests/generic/726
+> +++ b/tests/generic/726
+> @@ -19,6 +19,7 @@ _begin_fstest auto fiexchange swapext quick
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/reflink
+>  
+>  # real QA test starts here
+>  
+> @@ -28,6 +29,7 @@ _require_user
+>  _require_xfs_io_command swapext '-v vfs -a'
+>  _require_xfs_io_command startupdate
+>  _require_scratch
+> +_require_scratch_reflink
 
-Since the test already runs a touch command to help trigger the ext4
-error handling sequence, this can be tweaked to serve double duty
-and also more accurately detect read-only status on bcachefs.
-Refactor into a small helper, check for an EROFS return to the touch
-command, and consider the fs read-only if either that or the mount
-entry check indicates it.
+Does the "startupdate" actually need reflink feature?
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
-
-Something I realized when writing up the commit log is that the EROFS
-check doesn't technically cover XFS, which IIRC returns EIO in response
-to any sorts of writes once the fs has shutdown. I'm not sure this
-matters currently because XFS doesn't shutdown due to the default
-behavior to retry failed I/Os, but technically if XFS were configured to
-not retry I/O errors and go right to permanent failure, I suspect it
-would fail this test in the same way bcachefs does.
-
-That could be addressed fairly easily by also checking for EIO error
-message output, or just assuming touch failure == shutdown, etc. I don't
-have much preference on that, so thoughts appreciated.
-
-Brian
-
- tests/generic/459 | 30 +++++++++++++++++++++++-------
- 1 file changed, 23 insertions(+), 7 deletions(-)
-
-diff --git a/tests/generic/459 b/tests/generic/459
-index 4dd7a43b..d0c48325 100755
---- a/tests/generic/459
-+++ b/tests/generic/459
-@@ -57,6 +57,26 @@ origpsize=200
- virtsize=300
- newpsize=300
- 
-+# Check whether the filesystem has shutdown or remounted read-only. Behavior can
-+# differ based on filesystem and configuration. Some fs' may not have remounted
-+# without an additional write while others may have shutdown but do not
-+# necessarily reflect read-only state in the mount options. Check both here to
-+# cover the various scenarios.
-+is_shutdown_or_ro()
-+{
-+	ro=0
-+
-+	# if the fs has not shutdown, this may help trigger a remount-ro
-+	touch $SCRATCH_MNT/newfile 2>&1 | \
-+		grep "Read-only file system" > /dev/null
-+	[ $? == 0 ] && ro=1
-+
-+	_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro" > /dev/null
-+	[ $? == 0 ] && ro=1
-+
-+	echo $ro
-+}
-+
- # Ensure we have enough disk space
- _scratch_mkfs_sized $((350 * 1024 * 1024)) >>$seqres.full 2>&1
- 
-@@ -113,13 +133,9 @@ ret=$?
- #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
- #	  without getting stuck.
- if [ $ret -ne 0 ]; then
--	# freeze failed, filesystem should reject further writes and remount
--	# as readonly. Sometimes the previous write process won't trigger
--	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
--	# filesystems see the metadata I/O error.
--	touch $SCRATCH_MNT/newfile >/dev/null 2>&1
--	ISRO=$(_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro")
--	if [ -n "$ISRO" ]; then
-+	# freeze failed, filesystem should reject further writes
-+	ISRO=`is_shutdown_or_ro`
-+	if [ $ISRO == 1 ]; then
- 		echo "Test OK"
- 	else
- 		echo "Freeze failed and FS isn't Read-Only. Test Failed"
--- 
-2.41.0
+>  
+>  _scratch_mkfs >> $seqres.full
+>  _scratch_mount
+> diff --git a/tests/generic/727 b/tests/generic/727
+> index 2cda49ea..1f9eebc5 100755
+> --- a/tests/generic/727
+> +++ b/tests/generic/727
+> @@ -20,6 +20,7 @@ _begin_fstest auto fiexchange swapext quick
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/attr
+> +. ./common/reflink
+>  
+>  # real QA test starts here
+>  
+> @@ -31,6 +32,7 @@ _require_command "$SETCAP_PROG" setcap
+>  _require_xfs_io_command swapext '-v vfs -a'
+>  _require_xfs_io_command startupdate
+>  _require_scratch
+> +_require_scratch_reflink
+>  _require_attrs security
+>  
+>  _scratch_mkfs >> $seqres.full
+> -- 
+> 2.39.2
+> 
+> 
 
