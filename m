@@ -1,215 +1,131 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a26xYpXN"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD608E0
-	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:32:42 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FqYLtQ4D"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B366B130
+	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:42:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700231561;
+	s=mimecast20190719; t=1700232153;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=rt8nJtbM096b0ydwsQ97sgHm3ouYxBcrlSxXwo2xzXU=;
-	b=a26xYpXN+xLVcjehkLiPOmjSOv0SqNkpB37KgQIJ3d4/AeVnPnRcQ77x5Vr0uWK4aoFKaS
-	C7KkrXe2HOfkdHG5cPsdpyx5mrKt3btA3drkhTGNogWnxcIdGrKE/ZTq8TuIn6rfoF+aQU
-	cejFKwvPDd9cu3+QUygirPOFjp2nfbQ=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-329-eefIlv7wPauFGCanDbUORg-1; Fri, 17 Nov 2023 09:32:39 -0500
-X-MC-Unique: eefIlv7wPauFGCanDbUORg-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-6bd5730bef9so2545272b3a.1
-        for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:32:38 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700231557; x=1700836357;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=rt8nJtbM096b0ydwsQ97sgHm3ouYxBcrlSxXwo2xzXU=;
-        b=wA+XA2g0F0VA6A3GCRtwRUhX+JpMun7ibYqlNapBgwrxMX5Wwfragi+0RnEKBgd0nQ
-         NlYWNs+rG1j6s9xj+HOyzZ6mkkmPUcaXJ/wlPqjJjUuacpEYbcsuuVANvZUCR/TGFbcG
-         xXLp/F0USoLoRcCZImrQ3KR2Nl5aD1NQWbpwV3fJ1NysdFfTvaDDIWMgI4hBvJjPoG6A
-         GaHdBsZDwaqdDKfTpXVhwpCmIdpOO+Y+xCHiP7+CgzJ2YE4R3QfE3EA6Tp/1lJcYrFhy
-         1QuhdBZBAdK6uy0xZGhLqVyA/E2znOS/I8bLv0zAqjDd30CGC0aJsr4b2rfZQnpgbWAA
-         njPg==
-X-Gm-Message-State: AOJu0YyBgOBlFgizJ8Q2hahd+Xc7H0ccWEnIRJmxBFTk6FdlI7OssKuO
-	kz29R4TjveEMxYaNGzBc3089oEMk3GZ9pm+dlnn6UVpnrlNghSRxJWLLYjxXNw2Ie9LDUc1ZZ3v
-	Ov/hngA4g/u+muZ6l4Rf9u8ppIWBxp5s=
-X-Received: by 2002:a05:6a00:4a10:b0:68f:c1e0:a2c4 with SMTP id do16-20020a056a004a1000b0068fc1e0a2c4mr6426819pfb.3.1700231557387;
-        Fri, 17 Nov 2023 06:32:37 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEGWDhhuDtlo0qGqKuYGAoYzpSogwfB77s0QzYHhqix1aWlti819m8NrFVNUFHWumFygdxO1g==
-X-Received: by 2002:a05:6a00:4a10:b0:68f:c1e0:a2c4 with SMTP id do16-20020a056a004a1000b0068fc1e0a2c4mr6426796pfb.3.1700231557009;
-        Fri, 17 Nov 2023 06:32:37 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w23-20020aa78597000000b006be5e537b6csm1485444pfn.63.2023.11.17.06.32.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Nov 2023 06:32:36 -0800 (PST)
-Date: Fri, 17 Nov 2023 22:32:32 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org, kernel-team@fb.com
-Subject: Re: [PATCH fstests v2] xfs: test refilling AGFL after lots of btree
- splits
-Message-ID: <20231117143232.jool55gt5zysmm55@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <68cd85697855f686529829a2825b044913148caf.1698699188.git.osandov@fb.com>
- <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
- <20231101064543.uruh3ljicwnedw7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231101155630.GA1203404@frogsfrogsfrogs>
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=viEBw0op9J3Rz65ZIAnnSEgNGq9SfbItEJguo/umJ08=;
+	b=FqYLtQ4DhTGHgDOnVrda1NvDUJahWRqOngHmS7PuXYGituf8zxKfsc+me+bXFTv5wYkHr4
+	Z9c/IlIZ5Z46MZBniyirbw/7jLYNx5+ac/LKv5bVs2xaR91Y+Mkf6Q7GjvbFBk7ztJRDTS
+	n5KIZ4KZIKJiWmQqEuXlv1acgWwsJ44=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-138-Vs4Fr8nHPxucXZYU739o-Q-1; Fri,
+ 17 Nov 2023 09:42:31 -0500
+X-MC-Unique: Vs4Fr8nHPxucXZYU739o-Q-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BD9A1381A8A0;
+	Fri, 17 Nov 2023 14:42:29 +0000 (UTC)
+Received: from bfoster.redhat.com (unknown [10.22.32.99])
+	by smtp.corp.redhat.com (Postfix) with ESMTP id 967352166B2A;
+	Fri, 17 Nov 2023 14:42:29 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-bcachefs@vger.kernel.org
+Subject: [PATCH] generic/459: improve shutdown/read-only check to accommodate bcachefs
+Date: Fri, 17 Nov 2023 09:43:17 -0500
+Message-ID: <20231117144317.10882-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231101155630.GA1203404@frogsfrogsfrogs>
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.6
 
-On Wed, Nov 01, 2023 at 08:56:30AM -0700, Darrick J. Wong wrote:
-> On Wed, Nov 01, 2023 at 02:45:43PM +0800, Zorro Lang wrote:
-> > On Mon, Oct 30, 2023 at 02:00:15PM -0700, Omar Sandoval wrote:
-> > > This is a regression test for patch "xfs: fix internal error from AGFL
-> > > exhaustion"), which is not yet merged. Without the fix, it will fail
-> > > with a "Structure needs cleaning" error.
-> > > 
-> > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
-> > > ---
-> > > Changes since v1 [1]:
-> > > 
-> > > - Fixed to check whether mkfs.xfs supports -m rmapbt.
-> > > - Changed bare $XFS_DB calls to _scratch_xfs_db.
-> > > - Expanded comment about what happens without the fix.
-> > > 
-> > > I didn't add a check for whether everything ended up in AG 0, because it
-> > > wasn't clear to me what to do in that case. We could skip the test, but
-> > > it also doesn't hurt to run it anyways.
-> > > 
-> > > 1: https://lore.kernel.org/linux-xfs/c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com/
-> > > 
-> > >  tests/xfs/601     | 68 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/601.out |  2 ++
-> > 
-> > The xfs/601 has been taken by:
-> >   39f88c55 ("generic: test FALLOC_FL_UNSHARE when pagecache is not loaded")
-> > 
-> > I'll change this case to another number.
-> > 
-> > ...
-> > Hi Darrick, I just noticed that commit has "generic", but that's a case in
-> > tests/xfs, and there's not "_supported_fs xfs" in xfs/601. Do you want to
-> > move it to be a generic case?
-> 
-> Yes, the existing xfs/601 regression test (kernel commit 35d30c9cf127)
-> can become a generic test; and then this one can take its place.
+generic/459 occasionally fails on bcachefs because the deliberately
+induced I/O errors caused by exhausting the overprovisioned thin
+pool can lead to filesystem shutdown. This test considers this
+expected behavior on certain fs', but only checks for the ext4
+remount read-only behavior. bcachefs does a similar emergency
+read-only transition in response to certain I/O errors, but it
+behaves more similar to an XFS shutdown and doesn't necessarily
+reflect "ro" state in the mount table (unless induced by userspace).
 
-If you need to move current xfs/601 to generic/, better to have another patch.
-I'll merge this patch in xfs/ at first. Then you can do that moving in your next
-"random fix" patchset, or I can send a patch to do that.
+Since the test already runs a touch command to help trigger the ext4
+error handling sequence, this can be tweaked to serve double duty
+and also more accurately detect read-only status on bcachefs.
+Refactor into a small helper, check for an EROFS return to the touch
+command, and consider the fs read-only if either that or the mount
+entry check indicates it.
 
-Thanks,
-Zorro
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-> 
-> --D
-> 
-> > >  2 files changed, 70 insertions(+)
-> > >  create mode 100755 tests/xfs/601
-> > >  create mode 100644 tests/xfs/601.out
-> > > 
-> > > diff --git a/tests/xfs/601 b/tests/xfs/601
-> > > new file mode 100755
-> > > index 00000000..68df6ac0
-> > > --- /dev/null
-> > > +++ b/tests/xfs/601
-> > > @@ -0,0 +1,68 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> > > +#
-> > > +# FS QA Test 601
-> > > +#
-> > > +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto prealloc punch
-> > > +
-> > > +. ./common/filter
-> > > +
-> > > +_supported_fs xfs
-> > > +_require_scratch
-> > 
-> > _require_xfs_io_command "fpunch" ?
-> > 
-> > I can help to add that, others look good to me.
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > > +_require_test_program punch-alternating
-> > > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
-> > > +
-> > > +# Disable the rmapbt so we only need to worry about splitting the bnobt and
-> > > +# cntbt at the same time.
-> > > +opts=
-> > > +if $MKFS_XFS_PROG |& grep -q rmapbt; then
-> > > +	opts="-m rmapbt=0"
-> > > +fi
-> > > +_scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
-> > > +. "$tmp.mkfs"
-> > > +_scratch_mount
-> > > +
-> > > +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
-> > > +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
-> > > +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
-> > > +
-> > > +# Create a big file with a size such that the punches below create the exact
-> > > +# free extents we want.
-> > > +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
-> > > +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
-> > > +
-> > > +# Fill in any small free extents in AG 0. After this, there should be only one,
-> > > +# large free extent.
-> > > +_scratch_unmount
-> > > +mapfile -t gaps < <(_scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c btdump |
-> > > +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
-> > > +	tac | tail -n +2)
-> > > +_scratch_mount
-> > > +for gap_i in "${!gaps[@]}"; do
-> > > +	gap=${gaps[$gap_i]}
-> > > +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
-> > > +done
-> > > +
-> > > +# Create enough free space records to make the bnobt and cntbt both full,
-> > > +# 2-level trees, plus one more record to make them split all the way to the
-> > > +# root and become 3-level trees. After this, there is a 7-block free extent in
-> > > +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
-> > > +# than the rightmost two are full. Without the fix, the free list is also
-> > > +# empty.
-> > > +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
-> > > +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
-> > > +
-> > > +# Do an arbitrary operation that refills the free list. Without the fix, this
-> > > +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
-> > > +# the cntbt, then try to insert the remaining 1 block free extent in the
-> > > +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
-> > > +# leaf and fails because the free list is empty, returning EFSCORRUPTED.
-> > > +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
-> > > +
-> > > +echo "Silence is golden"
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/xfs/601.out b/tests/xfs/601.out
-> > > new file mode 100644
-> > > index 00000000..0d70c3e5
-> > > --- /dev/null
-> > > +++ b/tests/xfs/601.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 601
-> > > +Silence is golden
-> > > -- 
-> > > 2.41.0
-> > > 
-> > > 
-> > 
-> > 
-> 
+Something I realized when writing up the commit log is that the EROFS
+check doesn't technically cover XFS, which IIRC returns EIO in response
+to any sorts of writes once the fs has shutdown. I'm not sure this
+matters currently because XFS doesn't shutdown due to the default
+behavior to retry failed I/Os, but technically if XFS were configured to
+not retry I/O errors and go right to permanent failure, I suspect it
+would fail this test in the same way bcachefs does.
+
+That could be addressed fairly easily by also checking for EIO error
+message output, or just assuming touch failure == shutdown, etc. I don't
+have much preference on that, so thoughts appreciated.
+
+Brian
+
+ tests/generic/459 | 30 +++++++++++++++++++++++-------
+ 1 file changed, 23 insertions(+), 7 deletions(-)
+
+diff --git a/tests/generic/459 b/tests/generic/459
+index 4dd7a43b..d0c48325 100755
+--- a/tests/generic/459
++++ b/tests/generic/459
+@@ -57,6 +57,26 @@ origpsize=200
+ virtsize=300
+ newpsize=300
+ 
++# Check whether the filesystem has shutdown or remounted read-only. Behavior can
++# differ based on filesystem and configuration. Some fs' may not have remounted
++# without an additional write while others may have shutdown but do not
++# necessarily reflect read-only state in the mount options. Check both here to
++# cover the various scenarios.
++is_shutdown_or_ro()
++{
++	ro=0
++
++	# if the fs has not shutdown, this may help trigger a remount-ro
++	touch $SCRATCH_MNT/newfile 2>&1 | \
++		grep "Read-only file system" > /dev/null
++	[ $? == 0 ] && ro=1
++
++	_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro" > /dev/null
++	[ $? == 0 ] && ro=1
++
++	echo $ro
++}
++
+ # Ensure we have enough disk space
+ _scratch_mkfs_sized $((350 * 1024 * 1024)) >>$seqres.full 2>&1
+ 
+@@ -113,13 +133,9 @@ ret=$?
+ #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
+ #	  without getting stuck.
+ if [ $ret -ne 0 ]; then
+-	# freeze failed, filesystem should reject further writes and remount
+-	# as readonly. Sometimes the previous write process won't trigger
+-	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
+-	# filesystems see the metadata I/O error.
+-	touch $SCRATCH_MNT/newfile >/dev/null 2>&1
+-	ISRO=$(_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro")
+-	if [ -n "$ISRO" ]; then
++	# freeze failed, filesystem should reject further writes
++	ISRO=`is_shutdown_or_ro`
++	if [ $ISRO == 1 ]; then
+ 		echo "Test OK"
+ 	else
+ 		echo "Freeze failed and FS isn't Read-Only. Test Failed"
+-- 
+2.41.0
 
