@@ -1,56 +1,60 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WayF+8bi"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8773D6F
-	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:24:59 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a26xYpXN"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD608E0
+	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:32:42 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1700231099;
+	s=mimecast20190719; t=1700231561;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=GrGmH37AukiqBUw4dCzrH6AyAH818DeWwDO5VMvtA3E=;
-	b=WayF+8biuhXkFaN60NXLVYVneHs3nwAWb9bq4FObUhNVuspRELiOUmVqXO5rPO1aao44mX
-	5AJBi7QnsyKhDAPGXmFxSmTDGbreuBh6u/+EvTyW5XhiRUcxhzRr5P9dzu+nacwXS//c+e
-	xkc5z5pQGaH1HP4LrZ2ifKAwyvDTzcI=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=rt8nJtbM096b0ydwsQ97sgHm3ouYxBcrlSxXwo2xzXU=;
+	b=a26xYpXN+xLVcjehkLiPOmjSOv0SqNkpB37KgQIJ3d4/AeVnPnRcQ77x5Vr0uWK4aoFKaS
+	C7KkrXe2HOfkdHG5cPsdpyx5mrKt3btA3drkhTGNogWnxcIdGrKE/ZTq8TuIn6rfoF+aQU
+	cejFKwvPDd9cu3+QUygirPOFjp2nfbQ=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-248-Q-o_XD3cPjmG5IkyNMR7jA-1; Fri, 17 Nov 2023 09:24:57 -0500
-X-MC-Unique: Q-o_XD3cPjmG5IkyNMR7jA-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1cc2a0c7c6cso25887335ad.1
-        for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:24:57 -0800 (PST)
+ us-mta-329-eefIlv7wPauFGCanDbUORg-1; Fri, 17 Nov 2023 09:32:39 -0500
+X-MC-Unique: eefIlv7wPauFGCanDbUORg-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-6bd5730bef9so2545272b3a.1
+        for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 06:32:38 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1700231096; x=1700835896;
+        d=1e100.net; s=20230601; t=1700231557; x=1700836357;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=GrGmH37AukiqBUw4dCzrH6AyAH818DeWwDO5VMvtA3E=;
-        b=aLPLHFVZ0PZHFB6mnYukDokH1D5HLyKBJN3uk28zduWh2f2MA7Yy+nKNtFIXvlcXF/
-         Mp3XrsHbvX4emcNkKMj7CsSUfGjrDzPFp2bR/1fAVLnIu1Mabnx0k+XlWle9H7z1WT//
-         6+Uvl9Mw6UAGp1THQjg/bktLn/DTq+fmeOknScsdYHZWSgie1463s8dXSWBOmcuKT+Sz
-         /PGWuWl/Tr7A506UtLLxZeTS/UtR/kRt3f12nOfSg1sCvgfvyR8WwLKvbZXl5FW8fkX6
-         g4C2DXP8FwgGaD+kWcoiafBqbRmi7RxVyHGMu++Znq/8jsri0ECWrL3mGto7jxbQ2WWO
-         eNuA==
-X-Gm-Message-State: AOJu0YwD7eK4PakRSQ4tKLCpw1ETV9yVVw5g+t42j4HCSrZaa2YBHWsS
-	3ixP3w/SEe+PH6Sm+xbNGknZJJRekLd5RTTvuWOuA2ECJmGsF2dvOs1oUEZ5rsbE424yqNJVwVP
-	wMrLnjnZAWHNW6z53WA==
-X-Received: by 2002:a17:903:2301:b0:1cc:3de0:bcc4 with SMTP id d1-20020a170903230100b001cc3de0bcc4mr6188085plh.44.1700231096592;
-        Fri, 17 Nov 2023 06:24:56 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGpUdOyDxRdB1t8GAACeXHdT8WXeEEiOJclSCb4Y0zobMhTwKL5rqi/5Xc10ZuiTSjlxlBjfA==
-X-Received: by 2002:a17:903:2301:b0:1cc:3de0:bcc4 with SMTP id d1-20020a170903230100b001cc3de0bcc4mr6188059plh.44.1700231096188;
-        Fri, 17 Nov 2023 06:24:56 -0800 (PST)
+        bh=rt8nJtbM096b0ydwsQ97sgHm3ouYxBcrlSxXwo2xzXU=;
+        b=wA+XA2g0F0VA6A3GCRtwRUhX+JpMun7ibYqlNapBgwrxMX5Wwfragi+0RnEKBgd0nQ
+         NlYWNs+rG1j6s9xj+HOyzZ6mkkmPUcaXJ/wlPqjJjUuacpEYbcsuuVANvZUCR/TGFbcG
+         xXLp/F0USoLoRcCZImrQ3KR2Nl5aD1NQWbpwV3fJ1NysdFfTvaDDIWMgI4hBvJjPoG6A
+         GaHdBsZDwaqdDKfTpXVhwpCmIdpOO+Y+xCHiP7+CgzJ2YE4R3QfE3EA6Tp/1lJcYrFhy
+         1QuhdBZBAdK6uy0xZGhLqVyA/E2znOS/I8bLv0zAqjDd30CGC0aJsr4b2rfZQnpgbWAA
+         njPg==
+X-Gm-Message-State: AOJu0YyBgOBlFgizJ8Q2hahd+Xc7H0ccWEnIRJmxBFTk6FdlI7OssKuO
+	kz29R4TjveEMxYaNGzBc3089oEMk3GZ9pm+dlnn6UVpnrlNghSRxJWLLYjxXNw2Ie9LDUc1ZZ3v
+	Ov/hngA4g/u+muZ6l4Rf9u8ppIWBxp5s=
+X-Received: by 2002:a05:6a00:4a10:b0:68f:c1e0:a2c4 with SMTP id do16-20020a056a004a1000b0068fc1e0a2c4mr6426819pfb.3.1700231557387;
+        Fri, 17 Nov 2023 06:32:37 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEGWDhhuDtlo0qGqKuYGAoYzpSogwfB77s0QzYHhqix1aWlti819m8NrFVNUFHWumFygdxO1g==
+X-Received: by 2002:a05:6a00:4a10:b0:68f:c1e0:a2c4 with SMTP id do16-20020a056a004a1000b0068fc1e0a2c4mr6426796pfb.3.1700231557009;
+        Fri, 17 Nov 2023 06:32:37 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 13-20020a170902c10d00b001c9d968563csm1446374pli.79.2023.11.17.06.24.54
+        by smtp.gmail.com with ESMTPSA id w23-20020aa78597000000b006be5e537b6csm1485444pfn.63.2023.11.17.06.32.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Nov 2023 06:24:55 -0800 (PST)
-Date: Fri, 17 Nov 2023 22:24:51 +0800
+        Fri, 17 Nov 2023 06:32:36 -0800 (PST)
+Date: Fri, 17 Nov 2023 22:32:32 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Baokun Li <libaokun1@huawei.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, amir73il@gmail.com,
-	ritesh.list@gmail.com, yangerkun@huawei.com
-Subject: Re: [PATCH] ext4: Regression test of ext4_lblk_t overflow
-Message-ID: <20231117142451.mhjdsgbqljzkvzuv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231028070123.971548-1-libaokun1@huawei.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org, kernel-team@fb.com
+Subject: Re: [PATCH fstests v2] xfs: test refilling AGFL after lots of btree
+ splits
+Message-ID: <20231117143232.jool55gt5zysmm55@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <68cd85697855f686529829a2825b044913148caf.1698699188.git.osandov@fb.com>
+ <fe622bff22bca23648ed1154faeadce3ed51ad3b.1698699498.git.osandov@osandov.com>
+ <20231101064543.uruh3ljicwnedw7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20231101155630.GA1203404@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -59,133 +63,153 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231028070123.971548-1-libaokun1@huawei.com>
+In-Reply-To: <20231101155630.GA1203404@frogsfrogsfrogs>
 
-On Sat, Oct 28, 2023 at 03:01:23PM +0800, Baokun Li wrote:
-> Append writes to a file approaching 16T and observe if a kernel crash is
-> caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-> This is a regression test for commit bc056e7163ac ("ext4: fix BUG in
-> ext4_mb_new_inode_pa() due to overflow")
+On Wed, Nov 01, 2023 at 08:56:30AM -0700, Darrick J. Wong wrote:
+> On Wed, Nov 01, 2023 at 02:45:43PM +0800, Zorro Lang wrote:
+> > On Mon, Oct 30, 2023 at 02:00:15PM -0700, Omar Sandoval wrote:
+> > > This is a regression test for patch "xfs: fix internal error from AGFL
+> > > exhaustion"), which is not yet merged. Without the fix, it will fail
+> > > with a "Structure needs cleaning" error.
+> > > 
+> > > Signed-off-by: Omar Sandoval <osandov@osandov.com>
+> > > ---
+> > > Changes since v1 [1]:
+> > > 
+> > > - Fixed to check whether mkfs.xfs supports -m rmapbt.
+> > > - Changed bare $XFS_DB calls to _scratch_xfs_db.
+> > > - Expanded comment about what happens without the fix.
+> > > 
+> > > I didn't add a check for whether everything ended up in AG 0, because it
+> > > wasn't clear to me what to do in that case. We could skip the test, but
+> > > it also doesn't hurt to run it anyways.
+> > > 
+> > > 1: https://lore.kernel.org/linux-xfs/c7be2fe66a297316b934ddd3a1368b14f39a9f22.1698190540.git.osandov@osandov.com/
+> > > 
+> > >  tests/xfs/601     | 68 +++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/601.out |  2 ++
+> > 
+> > The xfs/601 has been taken by:
+> >   39f88c55 ("generic: test FALLOC_FL_UNSHARE when pagecache is not loaded")
+> > 
+> > I'll change this case to another number.
+> > 
+> > ...
+> > Hi Darrick, I just noticed that commit has "generic", but that's a case in
+> > tests/xfs, and there's not "_supported_fs xfs" in xfs/601. Do you want to
+> > move it to be a generic case?
 > 
-> Signed-off-by: Baokun Li <libaokun1@huawei.com>
-> ---
+> Yes, the existing xfs/601 regression test (kernel commit 35d30c9cf127)
+> can become a generic test; and then this one can take its place.
 
-Hi Baokun,
+If you need to move current xfs/601 to generic/, better to have another patch.
+I'll merge this patch in xfs/ at first. Then you can do that moving in your next
+"random fix" patchset, or I can send a patch to do that.
 
-Thanks for this new coverage, some review points as below ...
+Thanks,
+Zorro
 
-
->  tests/ext4/062     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/062.out |  2 ++
->  2 files changed, 55 insertions(+)
->  create mode 100755 tests/ext4/062
->  create mode 100644 tests/ext4/062.out
 > 
-> diff --git a/tests/ext4/062 b/tests/ext4/062
-> new file mode 100755
-> index 00000000..0ae4ed80
-> --- /dev/null
-> +++ b/tests/ext4/062
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 062
-> +#
-> +# Append writes to a file approaching 16T and observe if a kernel crash is
-> +# caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-> +# This is a regression test for commit
-> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick insert
-                                   ^^^
-                                   prealloc
-
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_fixed_by_kernel_commit bc056e7163ac \
-> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
-> +
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_command "open"
-> +_require_xfs_io_command "pwrite"
-
-I think we don't need to check the "open" and "pwrite" operations,
-if you don't need special option for them.
-
-> +_require_scratch_size_nocheck $((100 * 1024))   # 100MB in KB
-
-I think 100MB is small enough, don't need this check.
-
-> +
-> +# Initalize a 4k 100M ext4 fs
-> +dev_size=$((100 * 1024 * 1024))
-> +MKFS_OPTIONS="-b 4096 $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
-> +	>>$seqres.full 2>&1 || _fail "mkfs failed"
-
-Can we use bsize=$(_get_file_block_size ....) to get the real block size,
-to avoid use a specific mkfs option?
-If so, my second question is if this case can be a generic case. The test
-steps look common enough, I'm glad to see what will happen on other
-filesystems through this test.
-
-> +
-> +_scratch_mount
-> +
-> +# Reserve 1M space
-> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full 2>&1
-> +
-> +# Create a file with logical block numbers close to overflow
-> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
-> +$XFS_IO_PROG -f -c "finsert 1M 16777203M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
-
-_require_xfs_io_command "finsert"
-
-> +
-> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
-> +$XFS_IO_PROG -f -c "falloc 0 80388096" "${SCRATCH_MNT}/fill" >> $seqres.full 2>&1
-
-Can we make sure this step fill the whole free space? There's a helper in
-common/populate named _fill_fs, please check if it's what you want?
-
-> +
-> +# Remove reserved space to gain free space for allocation
-> +rm -f ${SCRATCH_MNT}/tmp
-> +
-> +# Trying to allocate two blocks triggers BUG_ON.
-> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 8192" >> $seqres.full 2>&1
-
-Oh, you need open -d option, that means you need direct IO, so you need:
-_require_odirect
-
-And all above xfs_io commands, include falloc, finsert, open and pwrite.
-You can redirect the stdout to $seqres.full, but better *not* to change
-the stderr, for we can find errors if they fail (except that expected ENOSPC).
-
-> +
-> +umount "${SCRATCH_MNT}"
-
-The $SCRATCH_MNT will be unmounted at the end of the testing, don't need to do
-it manually, except this's a necessary step of the reproducer.
-
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/062.out b/tests/ext4/062.out
-> new file mode 100644
-> index 00000000..a1578f48
-> --- /dev/null
-> +++ b/tests/ext4/062.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 062
-> +Silence is golden
-> -- 
-> 2.31.1
+> --D
 > 
+> > >  2 files changed, 70 insertions(+)
+> > >  create mode 100755 tests/xfs/601
+> > >  create mode 100644 tests/xfs/601.out
+> > > 
+> > > diff --git a/tests/xfs/601 b/tests/xfs/601
+> > > new file mode 100755
+> > > index 00000000..68df6ac0
+> > > --- /dev/null
+> > > +++ b/tests/xfs/601
+> > > @@ -0,0 +1,68 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) Meta Platforms, Inc. and affiliates.
+> > > +#
+> > > +# FS QA Test 601
+> > > +#
+> > > +# Regression test for patch "xfs: fix internal error from AGFL exhaustion".
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto prealloc punch
+> > > +
+> > > +. ./common/filter
+> > > +
+> > > +_supported_fs xfs
+> > > +_require_scratch
+> > 
+> > _require_xfs_io_command "fpunch" ?
+> > 
+> > I can help to add that, others look good to me.
+> > 
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > 
+> > > +_require_test_program punch-alternating
+> > > +_fixed_by_kernel_commit XXXXXXXXXXXX "xfs: fix internal error from AGFL exhaustion"
+> > > +
+> > > +# Disable the rmapbt so we only need to worry about splitting the bnobt and
+> > > +# cntbt at the same time.
+> > > +opts=
+> > > +if $MKFS_XFS_PROG |& grep -q rmapbt; then
+> > > +	opts="-m rmapbt=0"
+> > > +fi
+> > > +_scratch_mkfs $opts | _filter_mkfs > /dev/null 2> "$tmp.mkfs"
+> > > +. "$tmp.mkfs"
+> > > +_scratch_mount
+> > > +
+> > > +alloc_block_len=$((_fs_has_crcs ? 56 : 16))
+> > > +allocbt_leaf_maxrecs=$(((dbsize - alloc_block_len) / 8))
+> > > +allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
+> > > +
+> > > +# Create a big file with a size such that the punches below create the exact
+> > > +# free extents we want.
+> > > +num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
+> > > +$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
+> > > +
+> > > +# Fill in any small free extents in AG 0. After this, there should be only one,
+> > > +# large free extent.
+> > > +_scratch_unmount
+> > > +mapfile -t gaps < <(_scratch_xfs_db -c 'agf 0' -c 'addr cntroot' -c btdump |
+> > > +	$SED_PROG -rn 's/^[0-9]+:\[[0-9]+,([0-9]+)\].*/\1/p' |
+> > > +	tac | tail -n +2)
+> > > +_scratch_mount
+> > > +for gap_i in "${!gaps[@]}"; do
+> > > +	gap=${gaps[$gap_i]}
+> > > +	$XFS_IO_PROG -c "falloc 0 $((gap * dbsize))" -f "$SCRATCH_MNT/gap$gap_i"
+> > > +done
+> > > +
+> > > +# Create enough free space records to make the bnobt and cntbt both full,
+> > > +# 2-level trees, plus one more record to make them split all the way to the
+> > > +# root and become 3-level trees. After this, there is a 7-block free extent in
+> > > +# the rightmost leaf of the cntbt, and all of the leaves of the cntbt other
+> > > +# than the rightmost two are full. Without the fix, the free list is also
+> > > +# empty.
+> > > +$XFS_IO_PROG -c "fpunch $dbsize $((7 * dbsize))" "$SCRATCH_MNT/big"
+> > > +"$here/src/punch-alternating" -o 9 "$SCRATCH_MNT/big"
+> > > +
+> > > +# Do an arbitrary operation that refills the free list. Without the fix, this
+> > > +# will allocate 6 blocks from the 7-block free extent in the rightmost leaf of
+> > > +# the cntbt, then try to insert the remaining 1 block free extent in the
+> > > +# leftmost leaf of the cntbt. But that leaf is full, so this tries to split the
+> > > +# leaf and fails because the free list is empty, returning EFSCORRUPTED.
+> > > +$XFS_IO_PROG -c "fpunch 0 $dbsize" "$SCRATCH_MNT/big"
+> > > +
+> > > +echo "Silence is golden"
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/xfs/601.out b/tests/xfs/601.out
+> > > new file mode 100644
+> > > index 00000000..0d70c3e5
+> > > --- /dev/null
+> > > +++ b/tests/xfs/601.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 601
+> > > +Silence is golden
+> > > -- 
+> > > 2.41.0
+> > > 
+> > > 
+> > 
+> > 
 > 
 
