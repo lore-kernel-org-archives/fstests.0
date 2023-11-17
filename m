@@ -1,95 +1,86 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="F85lZgKf"
-X-Greylist: delayed 439 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 16 Nov 2023 11:00:54 PST
-Received: from sandeen.net (sandeen.net [63.231.237.45])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTP id EB336181
-	for <fstests@vger.kernel.org>; Thu, 16 Nov 2023 11:00:54 -0800 (PST)
-Received: from [10.0.0.71] (liberator.sandeen.net [10.0.0.71])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by sandeen.net (Postfix) with ESMTPSA id F18EE7905;
-	Thu, 16 Nov 2023 12:53:34 -0600 (CST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 sandeen.net F18EE7905
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net;
-	s=default; t=1700160815;
-	bh=Bll5EVtak0xdJ9+cFvwgdRxqcAl1PuPU3XngECst/1c=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=F85lZgKf39DzosCB2EON1kRW3ybCPdjJDgwDBNe3wy+bYwwRrkbRHCvCslrg8Wgh7
-	 1jZ6d24UGn5GeYsguY7jNw2wAy5NLgZ4CA+0cw21qKfCBGlhQI6T7oXPboxRjJDmYe
-	 RXPsukXNhEN96k/inQyKfGc7gLFSyX/3+FH2861kjLFNZTFYEGggedpt1KjjSFIBMj
-	 W/4y1+7+xuYxruJJ+wAKgNVs5RS3pnSOZvqN+7iiYA/ms6PMkKhwg8h5FNcJkQ+sH1
-	 3gGuvW6bPEJCwxVfk70/9Wy3RUfkvq9cWfJo7tVbq2UN8yjSv/OOGYPqdUFu1BfQeD
-	 CL1hjwMvetZ9A==
-Message-ID: <678a8d0a-1998-4b66-98c4-56a2e4ca0e28@sandeen.net>
-Date: Thu, 16 Nov 2023 12:53:34 -0600
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E22EDD266;
+	Fri, 17 Nov 2023 05:24:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ATxyc/Di"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3119AC433C8;
+	Fri, 17 Nov 2023 05:24:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1700198672;
+	bh=otj+kKHBEQFfwTQUWipbjkRUInhszzJFCznCNIx193U=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ATxyc/DiM7VHfiLYTA23c9NFxUjE/ye5SZWOACsFqwqLDoJfCwyMf6txGbV0btsIc
+	 Ltm/frn2KzuykZVEoHi67LzTIcBMieWLcwIVhQhwyCd1irla21ej95bzhOJZFoodpP
+	 0+ZYE9k39OCD7kgA89asiIzkd9laHyynXbZ68k3DHt3r1iBCZO1Cif/XB7kdfHncHX
+	 3K3H967cvNF1eXZdWnYlQNRoMqBgz96C2LfOwbRhZ3VW0myEG8X5q67ldeAdMYG9Fm
+	 do35gzwSW/PGN5JVAnDUiP3YhxnlOoyXB8oxQlI2z4STuMAyElDnS5idvTqB2TNwHN
+	 PPh0Gv6+Dm9ig==
+Date: Thu, 16 Nov 2023 21:24:30 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Carlos Maiolino <cem@kernel.org>
+Cc: linux-xfs@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [xfsprogs PATCH] xfs_io/encrypt: support specifying crypto data
+ unit size
+Message-ID: <20231117052430.GB972@sol.localdomain>
+References: <20231013062639.141468-1-ebiggers@kernel.org>
+ <KMvmogj9a91wwFViEyqlFQPlIuusUrW4mllNMHHZWBgZzBLAzrSJ2c93ZZyLh7bh4tkBI-JTjQZ6LJrGHubXcQ==@protonmail.internalid>
+ <20231116035846.GA1583@sol.localdomain>
+ <h7e7q6g7ti4mbre55ap6x5o6suzdiiyykxtn5pgfsf2w6y7esx@tg2qxsplx2zb>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] xfs/263: increase data section size to 1024M
-Content-Language: en-US
-To: "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>,
- Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
- "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-References: <20231115055659.2027-1-xuyang2018.jy@fujitsu.com>
- <20231115160543.GD36175@frogsfrogsfrogs>
- <20231116023341.4be2u2dtpghe5tan@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <OS7PR01MB1183929872AD5D43F1D7724D7FDB0A@OS7PR01MB11839.jpnprd01.prod.outlook.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <OS7PR01MB1183929872AD5D43F1D7724D7FDB0A@OS7PR01MB11839.jpnprd01.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <h7e7q6g7ti4mbre55ap6x5o6suzdiiyykxtn5pgfsf2w6y7esx@tg2qxsplx2zb>
 
-On 11/16/23 1:05 AM, Yang Xu (Fujitsu) wrote:
-> Hi Zorro
+On Thu, Nov 16, 2023 at 11:04:16AM +0100, Carlos Maiolino wrote:
+> On Wed, Nov 15, 2023 at 07:58:46PM -0800, Eric Biggers wrote:
+> > On Thu, Oct 12, 2023 at 11:26:39PM -0700, Eric Biggers wrote:
+> > > From: Eric Biggers <ebiggers@google.com>
+> > >
+> > > Add an '-s' option to the 'set_encpolicy' command of xfs_io to allow
+> > > exercising the log2_data_unit_size field that is being added to struct
+> > > fscrypt_policy_v2 (kernel patch:
+> > > https://lore.kernel.org/linux-fscrypt/20230925055451.59499-6-ebiggers@kernel.org).
+> > >
+> > > The xfs_io support is needed for xfstests
+> > > (https://lore.kernel.org/fstests/20231013061403.138425-1-ebiggers@kernel.org),
+> > > which currently relies on xfs_io to access the encryption ioctls.
+> > >
+> > > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > > ---
+> > >  configure.ac          |  1 +
+> > >  include/builddefs.in  |  4 +++
+> > >  io/encrypt.c          | 72 ++++++++++++++++++++++++++++++++-----------
+> > >  m4/package_libcdev.m4 | 21 +++++++++++++
+> > >  man/man8/xfs_io.8     |  5 ++-
+> > >  5 files changed, 84 insertions(+), 19 deletions(-)
+> > 
+> > Hi!  Any feedback on this patch?
 > 
->> As we've filter out the inode number, so the "inode numbers control" doesn't make sense anymore. It's fine for me to remove the "-d size=xxx" part (if it's still test passed).
-> I have tested and pass. Will send a v2.
+> I've got a limited bandwidth these days, I'll try to review this sometime
+> around next week.
 > 
-> Best Regards
-> Yang Xu
-> 
-> -----Original Message-----
-> From: Zorro Lang <zlang@redhat.com> 
-> Sent: Thursday, November 16, 2023 10:34 AM
-> To: Xu, Yang/徐 杨 <xuyang2018.jy@fujitsu.com>
-> Cc: Darrick J. Wong <djwong@kernel.org>; fstests@vger.kernel.org
-> Subject: Re: [PATCH] xfs/263: increase data section size to 1024M
-> 
-> On Wed, Nov 15, 2023 at 08:05:43AM -0800, Darrick J. Wong wrote:
->> On Wed, Nov 15, 2023 at 12:56:59AM -0500, Yang Xu wrote:
->>> On machine with using raid, this case will trigger the following 
->>> error:
->>> ==== NO CRC ====
->>> +mkfs.xfs: small data volume, ignoring data volume stripe unit 512 
->>> +and stripe width 512
->>> == Options: rw ==
->>> == Options: usrquota,rw ==
->>>
->>> mkfs.xfs generates this error since xfsprogs commit 42371fb36
->>> ("mkfs: ignore data blockdev stripe geometry for small filesystems").
->>> It disables automatic detection of stripe unit and width if the data 
->>> device is less than 1GB.
->>>
->>> To slove false poistive, just increase data section size to 1G.
->>
->> Is there a particular reason why this test needs -d size= at all?
->>
->> There's a single comment about "Control size to control inode numbers"
->> but then filter_quota_state() seds the inode numbers to #XXX.  So 
->> perhaps that part of the mkfs argument isn't necessary anymore?
-> 
-> As we've filter out the inode number, so the "inode numbers control" doesn't make sense anymore. It's fine for me to remove the "-d size=xxx" part (if it's still test passed).
 
-Sorry for the late reply, but I agree that it's not needed now.
+Thanks Carlos.
 
-(I wonder if we should just filter the "small data volume, ignoring data volume
-stripe" message in a common filter, but we don't need to tie up this fix, I
-think it's fine to change the size for this test.)
+BTW, this is really just for xfstests.  To be honest, it might be a good idea to
+remove the encryption commands from xfs_io, and make the encryption tests just
+use an xfstests helper program, potentially in combination with fscryptctl
+(https://github.com/google/fscryptctl) which now contains most of this
+functionality too.  Then the XFS folks would have less to worry about.  Maybe
+xfs_io has a backwards compatibility guarantee that makes this impossible, but
+if not then it may be worth thinking about if the XFS folks don't want to have
+to keep reviewing patches to the encryption commands like this.  The xfs_io
+commands were what Dave had requested when I added the first encryption tests
+back in 2016, so I did it that way, but maybe preferences have changed.
 
-Thanks,
--Eric
+Anyway, review and/or thoughts are appreciated.
+
+- Eric
