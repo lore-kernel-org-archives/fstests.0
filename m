@@ -1,180 +1,176 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 672A1D6A
-	for <fstests@vger.kernel.org>; Fri, 17 Nov 2023 19:08:12 -0800 (PST)
-Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.57])
-	by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4SXJWc6nLbzNm5Z;
-	Sat, 18 Nov 2023 11:03:56 +0800 (CST)
-Received: from [10.174.177.174] (10.174.177.174) by
- dggpeml500021.china.huawei.com (7.185.36.21) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.31; Sat, 18 Nov 2023 11:08:10 +0800
-Message-ID: <d8478c10-56f0-614a-776e-f721048a534f@huawei.com>
-Date: Sat, 18 Nov 2023 11:08:10 +0800
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PfPhta54"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6C99D61
+	for <fstests@vger.kernel.org>; Sat, 18 Nov 2023 03:55:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1700308502;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=FpJYaWnjn61v2hTRrNbnNDF+9YwaNoe+fZbzEhgL7FQ=;
+	b=PfPhta54XVA+9HYqotJo/cQspHz9MVcKJGCFWCwtt7/4UW6cnMkh9iAHMcuIjbBP2Uu8xi
+	ctARUo79WqQRNKe+0qUIdpWelwcSOpTeaw7G9ah0zlEEqSeCakTkxnvGaknXTvpAr6d3ao
+	n0zfEZsxQwGMGXttELJryA74b72jfu4=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-690-h8YLETNrPW-SUrWP1XYicQ-1; Sat, 18 Nov 2023 06:54:58 -0500
+X-MC-Unique: h8YLETNrPW-SUrWP1XYicQ-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 39051811E7B;
+	Sat, 18 Nov 2023 11:54:58 +0000 (UTC)
+Received: from bfoster (unknown [10.22.32.99])
+	by smtp.corp.redhat.com (Postfix) with ESMTPS id 05E0510EA1;
+	Sat, 18 Nov 2023 11:54:57 +0000 (UTC)
+Date: Sat, 18 Nov 2023 06:55:45 -0500
+From: Brian Foster <bfoster@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
+Subject: Re: [PATCH] generic/459: improve shutdown/read-only check to
+ accommodate bcachefs
+Message-ID: <ZVimQVg0/5CNmC1S@bfoster>
+References: <20231117144317.10882-1-bfoster@redhat.com>
+ <20231117221434.GI36175@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.1.2
-Subject: Re: [PATCH] ext4: Regression test of ext4_lblk_t overflow
-To: Zorro Lang <zlang@redhat.com>
-CC: <fstests@vger.kernel.org>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
-	<ritesh.list@gmail.com>, <yangerkun@huawei.com>, Baokun Li
-	<libaokun1@huawei.com>
-References: <20231028070123.971548-1-libaokun1@huawei.com>
- <20231117142451.mhjdsgbqljzkvzuv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Baokun Li <libaokun1@huawei.com>
-In-Reply-To: <20231117142451.mhjdsgbqljzkvzuv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.174.177.174]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpeml500021.china.huawei.com (7.185.36.21)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231117221434.GI36175@frogsfrogsfrogs>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.5
 
-On 2023/11/17 22:24, Zorro Lang wrote:
-> Hi Baokun,
->
-> Thanks for this new coverage, some review points as below ...
->
-Hi Zorro,
+On Fri, Nov 17, 2023 at 02:14:34PM -0800, Darrick J. Wong wrote:
+> On Fri, Nov 17, 2023 at 09:43:17AM -0500, Brian Foster wrote:
+> > generic/459 occasionally fails on bcachefs because the deliberately
+> > induced I/O errors caused by exhausting the overprovisioned thin
+> > pool can lead to filesystem shutdown. This test considers this
+> > expected behavior on certain fs', but only checks for the ext4
+> > remount read-only behavior. bcachefs does a similar emergency
+> > read-only transition in response to certain I/O errors, but it
+> > behaves more similar to an XFS shutdown and doesn't necessarily
+> > reflect "ro" state in the mount table (unless induced by userspace).
+> > 
+> > Since the test already runs a touch command to help trigger the ext4
+> > error handling sequence, this can be tweaked to serve double duty
+> > and also more accurately detect read-only status on bcachefs.
+> > Refactor into a small helper, check for an EROFS return to the touch
+> > command, and consider the fs read-only if either that or the mount
+> > entry check indicates it.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> > 
+> > Something I realized when writing up the commit log is that the EROFS
+> > check doesn't technically cover XFS, which IIRC returns EIO in response
+> > to any sorts of writes once the fs has shutdown. I'm not sure this
+> > matters currently because XFS doesn't shutdown due to the default
+> > behavior to retry failed I/Os, but technically if XFS were configured to
+> > not retry I/O errors and go right to permanent failure, I suspect it
+> > would fail this test in the same way bcachefs does.
+> > 
+> > That could be addressed fairly easily by also checking for EIO error
+> > message output, or just assuming touch failure == shutdown, etc. I don't
+> > have much preference on that, so thoughts appreciated.
+> 
+> I wish there was a better way to signal that a filesystem has shut down,
+> though ATM that isn't even a VFS level concept.  I generally assume that
+> touch failure == shutdown if the fs was previously writable.
+> 
 
-Thank you for your careful review！
+Yeah, mildly annoying there was no good way to detect this. I think all
+we really have atm is dmesg scraping to call out unexpected shutdowns.
+That still needs to be added for bcachefs btw, but I've been holding off
+because it leads to noise on various dm-flakey oriented tests and
+whatnot that complain about shutdowns that otherwise seem to be expected
+from bcachefs. Though perhaps the right thing to do there is to enable
+it and just filter those tests out for the time being.
 
->>   tests/ext4/062     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/ext4/062.out |  2 ++
->>   2 files changed, 55 insertions(+)
->>   create mode 100755 tests/ext4/062
->>   create mode 100644 tests/ext4/062.out
->>
->> diff --git a/tests/ext4/062 b/tests/ext4/062
->> new file mode 100755
->> index 00000000..0ae4ed80
->> --- /dev/null
->> +++ b/tests/ext4/062
->> @@ -0,0 +1,53 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
->> +#
->> +# FS QA Test No. 062
->> +#
->> +# Append writes to a file approaching 16T and observe if a kernel crash is
->> +# caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
->> +# This is a regression test for commit
->> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick insert
->                                     ^^^
->                                     prealloc
-I'll add this.
->> +
->> +# real QA test starts here
->> +_supported_fs ext4
->> +_fixed_by_kernel_commit bc056e7163ac \
->> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
->> +
->> +_require_xfs_io_command "falloc"
->> +_require_xfs_io_command "open"
->> +_require_xfs_io_command "pwrite"
-> I think we don't need to check the "open" and "pwrite" operations,
-> if you don't need special option for them.
-OK!
->> +_require_scratch_size_nocheck $((100 * 1024))   # 100MB in KB
-> I think 100MB is small enough, don't need this check.
-All right!
->> +
->> +# Initalize a 4k 100M ext4 fs
->> +dev_size=$((100 * 1024 * 1024))
->> +MKFS_OPTIONS="-b 4096 $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
->> +	>>$seqres.full 2>&1 || _fail "mkfs failed"
-> Can we use bsize=$(_get_file_block_size ....) to get the real block size,
-> to avoid use a specific mkfs option?
-> If so, my second question is if this case can be a generic case. The test
-> steps look common enough, I'm glad to see what will happen on other
-> filesystems through this test.
-The reason for specifying 4096 for formatting here is that mkfs.ext4 
-specifies a
-default block size of 1024 when the disk image is 100M.
+But that's a separate topic... It sounds reasonable to me to just use
+the touch failure in this particular case. I'll post a v2 with that
+tweak next week.
 
-Although these operations appear to be generic scenarios, the 
-reproduction of
-this problem relies on ext4's pre-allocation mechanism. Block allocation 
-requests
-are scaled up in ext4_mb_normalize_request(), and the extra blocks are 
-used for
-preallocation to reduce fragmentation. Therefore, this test case is 
-placed only in
-the ext4 test suite.
->
->> +
->> +_scratch_mount
->> +
->> +# Reserve 1M space
->> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full 2>&1
->> +
->> +# Create a file with logical block numbers close to overflow
->> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
->> +$XFS_IO_PROG -f -c "finsert 1M 16777203M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
-> _require_xfs_io_command "finsert"
-Okay.
->
->> +
->> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
->> +$XFS_IO_PROG -f -c "falloc 0 80388096" "${SCRATCH_MNT}/fill" >> $seqres.full 2>&1
-> Can we make sure this step fill the whole free space? There's a helper in
-> common/populate named _fill_fs, please check if it's what you want?
-The remaining space for a 100M 4k ext4 image after the previous 
-operations is
-80388096, so we can confirm that we can fill the entire free space here.
-Of course, using _fill_fs is also workable, but it's faster to do it in 
-a single fallocate.
->> +
->> +# Remove reserved space to gain free space for allocation
->> +rm -f ${SCRATCH_MNT}/tmp
->> +
->> +# Trying to allocate two blocks triggers BUG_ON.
->> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 8192" >> $seqres.full 2>&1
-> Oh, you need open -d option, that means you need direct IO, so you need:
-> _require_odirect
+> OTOH with statmount landing soonish, perhaps we ought to apply for a new
+> SB_SHUTDOWN state flag for it to export?
+> 
 
-Indeed!
+Perhaps worth a discussion..? The flipside I suppose is that shutdown
+has historically been a rather hacky, informalized thing with
+inconsistent behavior across fs' simply because it's a last ditch
+failsafe technique that we hope should never happen. Is it worth trying
+to generalize/formalize/document something that is basically a "has my
+filesystem crashed?" check..?
 
-> And all above xfs_io commands, include falloc, finsert, open and pwrite.
-> You can redirect the stdout to $seqres.full, but better *not* to change
-> the stderr, for we can find errors if they fail (except that expected ENOSPC).
-Ok, I'll remove the unnecessary "2>&1"!
->> +
->> +umount "${SCRATCH_MNT}"
-> The $SCRATCH_MNT will be unmounted at the end of the testing, don't need to do
-> it manually, except this's a necessary step of the reproducer.
-Okay, I will remove it.
->
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/ext4/062.out b/tests/ext4/062.out
->> new file mode 100644
->> index 00000000..a1578f48
->> --- /dev/null
->> +++ b/tests/ext4/062.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 062
->> +Silence is golden
->> -- 
->> 2.31.1
->>
->>
->
-Thanks!
--- 
-With Best Regards,
-Baokun Li
-.
+We do have the vfs GOINGDOWN ioctl. I wonder if something like a new
+flag for a nomodify/check goingdown mode or something that would return
+whether a shutdown would occur or already has would be sufficient... hm?
+
+Brian
+
+> --D
+> 
+> > Brian
+> > 
+> >  tests/generic/459 | 30 +++++++++++++++++++++++-------
+> >  1 file changed, 23 insertions(+), 7 deletions(-)
+> > 
+> > diff --git a/tests/generic/459 b/tests/generic/459
+> > index 4dd7a43b..d0c48325 100755
+> > --- a/tests/generic/459
+> > +++ b/tests/generic/459
+> > @@ -57,6 +57,26 @@ origpsize=200
+> >  virtsize=300
+> >  newpsize=300
+> >  
+> > +# Check whether the filesystem has shutdown or remounted read-only. Behavior can
+> > +# differ based on filesystem and configuration. Some fs' may not have remounted
+> > +# without an additional write while others may have shutdown but do not
+> > +# necessarily reflect read-only state in the mount options. Check both here to
+> > +# cover the various scenarios.
+> > +is_shutdown_or_ro()
+> > +{
+> > +	ro=0
+> > +
+> > +	# if the fs has not shutdown, this may help trigger a remount-ro
+> > +	touch $SCRATCH_MNT/newfile 2>&1 | \
+> > +		grep "Read-only file system" > /dev/null
+> > +	[ $? == 0 ] && ro=1
+> > +
+> > +	_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro" > /dev/null
+> > +	[ $? == 0 ] && ro=1
+> > +
+> > +	echo $ro
+> > +}
+> > +
+> >  # Ensure we have enough disk space
+> >  _scratch_mkfs_sized $((350 * 1024 * 1024)) >>$seqres.full 2>&1
+> >  
+> > @@ -113,13 +133,9 @@ ret=$?
+> >  #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
+> >  #	  without getting stuck.
+> >  if [ $ret -ne 0 ]; then
+> > -	# freeze failed, filesystem should reject further writes and remount
+> > -	# as readonly. Sometimes the previous write process won't trigger
+> > -	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
+> > -	# filesystems see the metadata I/O error.
+> > -	touch $SCRATCH_MNT/newfile >/dev/null 2>&1
+> > -	ISRO=$(_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro")
+> > -	if [ -n "$ISRO" ]; then
+> > +	# freeze failed, filesystem should reject further writes
+> > +	ISRO=`is_shutdown_or_ro`
+> > +	if [ $ISRO == 1 ]; then
+> >  		echo "Test OK"
+> >  	else
+> >  		echo "Freeze failed and FS isn't Read-Only. Test Failed"
+> > -- 
+> > 2.41.0
+> > 
+> > 
+> 
+
