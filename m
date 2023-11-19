@@ -1,27 +1,27 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D4CB101D9
-	for <fstests@vger.kernel.org>; Sun, 19 Nov 2023 13:42:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ACDD11C86
+	for <fstests@vger.kernel.org>; Sun, 19 Nov 2023 13:53:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="W6cTUa0J"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F40D3C433C8;
-	Sun, 19 Nov 2023 13:42:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iyFBtdgn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57BD6C433C8;
+	Sun, 19 Nov 2023 13:53:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700401365;
-	bh=NQRp1WeZiR7SJkWWk75kXAwp2rHHB7y3SB7FMlBVOA0=;
+	s=k20201202; t=1700402011;
+	bh=dleudZXks+8e0dDuorAwDkK5cHI/wwnFw/x57em6g18=;
 	h=Date:From:To:Subject:From;
-	b=W6cTUa0JsfL2oiVlvhM/yMs6TYEMp7MXbb/PY1lFzV3MhThxE+MO5c3XaRcD9YpAm
-	 Vl1nvVB3GgFkWugWdgNfdMtCFBJQqnbtftoo9m8PDEsp4I/x8AD4ncHuSI8AFmxo9L
-	 qG2MF4vABqelE+bI4WA5Do79uFzgEXL2m7YIr2GMb8Q0YRb1cbJpnXUXvEP58N523X
-	 ibej3RRIjqkE+qucH4p5XQly6NbS7wUOFUSZGVqAWAs1Zm93IylGgL0JKxW255gkPA
-	 T4OAZ91qMOP7WunN4aTDe8o4X9Yt/A9rNhivTDcbkil8X5DALLQ3ljHpuoSpFUL0vJ
-	 bYrKozVQwgOig==
-Date: Sun, 19 Nov 2023 21:42:41 +0800
-Message-ID: <5fbaeebad0ffc8fc6944b35631ebc117.Zorro Lang <zlang@kernel.org>>
+	b=iyFBtdgnMLD0oN/xDZRooTgGRFyONBfouZkRnPChV/Taisq1sMBAhdMW7P0hurShl
+	 1nLlCRrjXA043XY7uZmxYiQ3xe3J67yuYTsE17q84DuXvu6NYNNB84/+0Egf7i5Uf3
+	 FeWGQRbge9mKuguGAgthmCdD/GtJkPbGiWNoH7O6hYwkbP2rbQiHAyynfZiFwK8Aci
+	 ZoCLEEEWcJh0j2SQogg0yW02iS/r29ML60JPuBYy7ovaxpw33BhF+87JzBsPENkBNh
+	 Ou0EEpnYWY4u7a0mpkpwhjfpucS5+IIdHOZAFYEF7JSGNRuMCURNUyl5k0ANUTPtD1
+	 1godENd5A9ySg==
+Date: Sun, 19 Nov 2023 21:53:27 +0800
+Message-ID: <736e225a5e86d6d33c21115d70b80f72.Zorro Lang <zlang@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2023.10.29 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.11.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -29,105 +29,152 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="KRw6TZXJf1o0"
+	protocol="application/pgp-signature"; boundary="lsuXSdyrY9EQ"
 Content-Disposition: inline
 
 
---KRw6TZXJf1o0
+--lsuXSdyrY9EQ
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2023.10.29 version.
+has just been updated and tagged as v2023.11.19 release.
+
+Release Note:
+1) There're 5 new test cases in this release, include  btrfs/303, generic/733,
+   xfs/602, xfs/603 and xfs/604. There cases won't cause panic or hang on old
+   downstream kernel, so this release is safe for downstream kernel testing.
+2) The FIEXCHANGE ioctl is changed to be a xfs specific ioctl XFS_IOC_EXCHANGE_RANGE,
+   Darrick helped to updated the testing.
+
+More updates refer to below, thanks for all these contribution!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-119146147847 fstests: generic/353 should accomodate other pwrite behaviors
+b9e1a88f8198 xfs: test refilling AGFL after lots of btree splits
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Amir Goldstein (1):
-      [30fc8ed13aa2] overlay: add test for lowerdir mount option parsing
+Anand Jain (6):
+[U]      [22bca8d9a6d9] common/rc: _fs_sysfs_dname fetch fsid using btrfs tool
+[U]      [24c58f2d973c] common/btrfs: add helper _has_btrfs_sysfs_feature_attr
+[U]      [7139a0600084] btrfs/219: fix _cleanup() to successful release the loop-device
+[U]      [6a466743cd17] btrfs/219: cloned-device mount capability update
+[U]      [47737bd3decf] btrfs/219: add to the auto group
+[U]      [59372e8d3f96] common/btrfs: add _btrfs_get_fsid() helper
 
-Bill O'Donnell (1):
-      [119146147847] fstests: generic/353 should accomodate other pwrite behaviors
+Christoph Hellwig (1):
+[U]      [88334112f9cb] xfs/146: require fallocate support
 
-Christoph Hellwig (2):
-      [78469c97a208] xfs/556: call _require_dm_target later
-      [053719c18877] xfs: add missing _require_scratch calls
+Darrick J. Wong (5):
+[N]      [848c6a882a6f] generic: test reads racing with slow reflink operatio
+[U]      [59bf56a1a56e] common: make helpers for ttyprintk usage
+[N]      [b5ba77147bf6] xfs: test unlinked inode list repair on demand
+[U]      [3098851702d1] misc: privatize the FIEXCHANGE ioctl for now
+[U]      [29c3cc742717] misc: update xfs_io swapext usage
 
-Darrick J. Wong (6):
-      [cdd662862926] xfs/178: don't fail when SCRATCH_DEV contains random xfs superblocks
-      [ba2905da44e7] generic/465: only complain about stale disk contents when racing directio
-      [bbeaf7d1cbf2] generic/269,xfs/051: don't drop fsstress failures to stdout
-      [39f88c553cb6] generic: test FALLOC_FL_UNSHARE when pagecache is not loaded
-      [949b7ac96e56] generic/251: don't snapshot $here during a test
-      [95b0db739400] generic/251: check min and max length and minlen for FSTRIM
+Omar Sandoval (1):
+[N]      [b9e1a88f8198] xfs: test refilling AGFL after lots of btree splits
 
-Filipe Manana (2):
-      [6409d61958c5] btrfs/298: fix failure when added device supports trim
-      [6b4920afad0f] btrfs: test snapshotting a subvolume that was just created
+Qu Wenruo (1):
+[N]      [483b1f90c8aa] fstests: btrfs: test snapshot creation with existing qgroup
 
-Su Yue (1):
-      [d9323ad7a05e] generic/245: Filter mv error message
+Yang Xu (1):
+[U]      [5fdd34e76182] xfs/263: Remove mkfs.xfs data section argument
 
 
 Code Diffstat:
 
- .../aio-dio-append-write-read-race.c               |  2 +-
- tests/btrfs/298                                    |  2 +-
- tests/btrfs/302                                    | 61 +++++++++++++++
- tests/btrfs/302.out                                |  4 +
- tests/generic/245                                  |  5 +-
- tests/generic/245.out                              |  2 +-
- tests/generic/251                                  | 67 ++++++++++++++---
- tests/generic/269                                  |  2 +-
- tests/generic/353                                  | 29 ++++----
- tests/generic/353.out                              | 15 +---
- tests/overlay/083                                  | 76 +++++++++++++++++++
- tests/overlay/083.out                              |  2 +
- tests/xfs/051                                      |  2 +-
- tests/xfs/178                                      |  9 ++-
- tests/xfs/178.out                                  |  2 -
- tests/xfs/184                                      |  1 +
- tests/xfs/192                                      |  1 +
- tests/xfs/200                                      |  1 +
- tests/xfs/204                                      |  1 +
- tests/xfs/232                                      |  1 +
- tests/xfs/556                                      |  2 +-
- tests/xfs/601                                      | 87 ++++++++++++++++++++++
- tests/xfs/601.out                                  |  4 +
- 23 files changed, 332 insertions(+), 46 deletions(-)
+ common/btrfs              |  26 +++-
+ common/fuzzy              |   4 +-
+ common/rc                 |  38 +++++-
+ common/xfs                |   2 +-
+ configure.ac              |   3 +-
+ doc/group-names.txt       |   2 +-
+ include/builddefs.in      |   3 +-
+ ltp/Makefile              |   4 +-
+ ltp/fsstress.c            |  10 +-
+ ltp/fsx.c                 |  20 +--
+ m4/package_libcdev.m4     |  19 +--
+ m4/package_xfslibs.m4     |  14 ++
+ src/Makefile              |   8 ++
+ src/fiexchange.h          |  48 +++----
+ src/global.h              |   4 +-
+ src/t_reflink_read_race.c | 339 ++++++++++++++++++++++++++++++++++++++++++++++
+ src/vfs/Makefile          |   4 +
+ tests/btrfs/219           |  74 +++++-----
+ tests/btrfs/303           |  77 +++++++++++
+ tests/btrfs/303.out       |   2 +
+ tests/generic/709         |   2 +-
+ tests/generic/710         |   2 +-
+ tests/generic/711         |   2 +-
+ tests/generic/712         |   2 +-
+ tests/generic/713         |   4 +-
+ tests/generic/714         |   4 +-
+ tests/generic/715         |   4 +-
+ tests/generic/716         |   2 +-
+ tests/generic/717         |   2 +-
+ tests/generic/718         |   2 +-
+ tests/generic/719         |   2 +-
+ tests/generic/720         |   2 +-
+ tests/generic/722         |   4 +-
+ tests/generic/723         |   6 +-
+ tests/generic/724         |   6 +-
+ tests/generic/725         |   2 +-
+ tests/generic/726         |   2 +-
+ tests/generic/727         |   2 +-
+ tests/generic/733         |  76 +++++++++++
+ tests/generic/733.out     |   6 +
+ tests/xfs/122.out         |   1 +
+ tests/xfs/146             |   3 +-
+ tests/xfs/263             |   5 +-
+ tests/xfs/329             |   4 +-
+ tests/xfs/434             |   2 +-
+ tests/xfs/435             |   2 +-
+ tests/xfs/436             |   2 +-
+ tests/xfs/444             |   2 +-
+ tests/xfs/516             |   2 +-
+ tests/xfs/602             | 111 +++++++++++++++
+ tests/xfs/602.out         |   5 +
+ tests/xfs/603             | 215 +++++++++++++++++++++++++++++
+ tests/xfs/603.out         |   6 +
+ tests/xfs/604             |  69 ++++++++++
+ tests/xfs/604.out         |   2 +
+ tests/xfs/789             |   2 +-
+ tests/xfs/790             |   2 +-
+ tests/xfs/791             |   6 +-
+ tests/xfs/792             |   2 +-
+ 59 files changed, 1137 insertions(+), 141 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---KRw6TZXJf1o0
+--lsuXSdyrY9EQ
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmVaEK4ACgkQlNbPkfr2
-tMzb6xAAsJhCfyHL3wCUbqrkLJ+qzUwfl3VfBpVzLjuXzeePiKiFjoiW4d6KiOGt
-hX641iydlhFzi3M6dLmsohAI3mwAO24xvyNOQBosUwVaMdnvEphv4TIgr9pSYP5R
-udkQon+LZspVkBU5DbbgVTPyDDTNtUkm4Pxi90qDcNQ8v9xM0cCfHcoXRJX9+JNH
-5+i6aC205/JIYUaLL9Z4apxgQp3zax9XT4bAvhgtx/c+ejY52SUNSecBCrYA+fYY
-NWBJdYRH8LrFtdQ0G7B0fRKZ4kz1NqGc2fmpzTZ6VrorVaAnLVVjQMwHVNWUKffV
-za1a0wREKAVh5lEX21JpaiNwT3+xUwrxYgqSPnFlB9pT52jSPLPZuGMuKnEoQjdT
-0gMnUsufxAghGY+LNksM1tJr3eKsGctwum02Iq83buVOL8/uRf/NX1MPCHMM7Utr
-+redsHOvFTNCFMmoUfUE2X1gclU0DRhtt4rYxrXnfd1bhmtNt4J5rjbxR2CWDg74
-fiXPt3PbL9/gS2A8IFrIrWLlsH+SCrmmMIGx4GByYvBGz2Ev63UPsslkctFluUU6
-zLnqFTDuNGgoztaRT/DI047tT6IRgIIo8/vfmbuYxsXrJ2gTiAGE79ez+FVPNHhH
-fT9wqcxJMjpk3wdVkKOPIVOnC3m+xCaBF9bUQiGhTYbXSStfWH0=
-=u0cK
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmVaEysACgkQlNbPkfr2
+tMxjeRAApYf3UmcgXaGdGMbpslw8gifoMk8FcrGKJ94IImVoHxK38B+ROTaduVLw
+H9kVoW8yd/FVygqZ0+4MFp8dConToukyZ+vD7r3eoJYG+4SuWjUuo577LTNvadUx
+sXRn9kcYIGJXbcBo2z1pOoM1bYeWcvRbAAnABwL9PeCX3gZE3cbobuqgd5VrCKXx
+yHtFqEk5ErlZdCsCHDn2Ylf618ydXjttOke132KReEh1sTdUWY65oC0h0yttVthn
+Nc65rCs5nYkEk+4r2pOelltvn3k4dBG2SVqihZFvxsIHHHuwX3pZICN8NVg/j6hf
+pJC2RKuKLOzZ812f35sv3SrKxEH9QxE70YN0OQULCnV7Gf/2LDx8klUM6i7/nasf
+6xaXRKh9seBt0DKrGRJuk+rQ02lO83tLcp7ryGa6ajloRl/dbvR/g1hjM85gb5iX
+HGdSuRgPbsq3UbPx9m2CKty0QknGRroVawsLh4VHEbbX+R5QSgGW13bbtGGhPTEl
+EAypSHj60B2RsGzT0SZBGRxIKzkF0z7r7wZvLBoHh9uzCpROQa3/nHb9lkdeTWGw
+m++CiuAlrIUK+O4R88+n9JgjRGKkWpcFiIv4BdJKtk/HOmhujYhvwy0iCr/wz041
+KAW0xhGIU8U++UvCsm93t2tQa8VhTBE0a7Bcw/fSChTq4OWKCsA=
+=mhUP
 -----END PGP SIGNATURE-----
 
---KRw6TZXJf1o0--
+--lsuXSdyrY9EQ--
