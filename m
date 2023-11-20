@@ -1,441 +1,90 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="UXACml2P";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OdA0mpKd"
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="jxxn8Ayz";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="p9kj4eWg"
 Received: from out5-smtp.messagingengine.com (out5-smtp.messagingengine.com [66.111.4.29])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25EA592;
-	Mon, 20 Nov 2023 11:53:01 -0800 (PST)
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-	by mailout.nyi.internal (Postfix) with ESMTP id EBC8E5C0ABF;
-	Mon, 20 Nov 2023 14:52:57 -0500 (EST)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute5.internal (MEProxy); Mon, 20 Nov 2023 14:52:57 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-	:content-transfer-encoding:content-type:content-type:date:date
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:sender:subject:subject:to:to; s=fm2; t=
-	1700509977; x=1700596377; bh=+AWNJrGXrrAethsmDsGzlF4mvdYF9sp19fg
-	iz7FAD5k=; b=UXACml2Pye7oSVgGAPS4X33U9U6sEmjJUJrc5n6d81x5+u9ZrED
-	DfTQnDcTsY6dn02mhe0CNIco9Dhq9rJOHDmgaWRaG3PdqBolM/B6fkMoCpTWda92
-	4OG4E2H148eoTN9k6qlG1xljXoymuaWSDrziyZi/k4SWsGfH6MrwwugxgxtBHF2z
-	rsSBnkcS+Su5uH2BBGrba1KUE8YkTT2iaR27fwxDZJL6MC9vGp1i1I6AKa7JW6G9
-	JYZYX5+HCyJ+lFjccKL6FiUSii8QIXe7c6wSus8YVudJPjqPZOJpeX//RtBRWkX2
-	LJPv7hlAiRW+obSHsyddQ5bzFa4QR0RQvWQ==
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF8D1F5;
+	Mon, 20 Nov 2023 13:10:05 -0800 (PST)
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+	by mailout.nyi.internal (Postfix) with ESMTP id B80DE5C10F9;
+	Mon, 20 Nov 2023 16:10:02 -0500 (EST)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute6.internal (MEProxy); Mon, 20 Nov 2023 16:10:02 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:sender:subject
+	:subject:to:to; s=fm2; t=1700514602; x=1700601002; bh=vAe1jxs0Zk
+	ngAMx0ExLMRLzbU3hnZxCFMpt4PgM/Gis=; b=jxxn8AyzezQE98UyXn6uH6h0vg
+	WNfrciOIlUWNP3w3foopb9p/qgnlT9RQ3Ex8L/ARg447l6ly/PxQpQezugdSMTVj
+	AwdsvfsOUCJ8LFzfHV0Ac1IAA/RD5QSoZ/8mcO47gxxAKBReqDpsrW837rCt8Jeq
+	SWUIrnNsJN9E2uxio+lR13WArBhSxPrJ7hmH/4SOlEqOpQbl6N0KmgCBjKc40EwS
+	mIhGhsZ3/BRN94NiwWV2WTaG3XizIGDOTJgmpmq7WC9APk4OEjDRfBWMCg+9wy3D
+	FvlZStc6zXVFokykaQ0qq+jUfeBnquhPurq/OcTkhBs3IPAqJvOfBiMjtvWQ==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:sender:subject:subject:to:to:x-me-proxy
-	:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=
-	1700509977; x=1700596377; bh=+AWNJrGXrrAethsmDsGzlF4mvdYF9sp19fg
-	iz7FAD5k=; b=OdA0mpKdgOhwvZmIUShaCZFzmDcLXk2v4PrkX8jx5TCtbOTQrdV
-	9xWy3Iw8g41hfhmGwEFn+1AvyLbvFKKkwKPwNbUz0DMMpB5knBCoJ+GNTdkbDAQS
-	GaM2xZVkZE8MOJ4jWbvbSiJK/v/PFy5EvWFy1kR6PInOlD0AD/DJsCtRBDT7WOlO
-	hvkLETfNTvfdbiJE5RSllcmgBLwyHNnzGxaxnSeUjoX2J1zN4QXUvMZ6GMIRCxjq
-	XBra3V4hRnxJW9eOGCr1glatj/U2s0zunwEGuRvKs1OQlO1RaABjnzoun/4FWB2z
-	47Y5ic7rcbL7UPzG4sRNXTK1Mg3qixDnrqQ==
-X-ME-Sender: <xms:GblbZR6SnhipjzxhXetLvlNWvrzwQyl44qx4cYQ7o741fSwzgRxF3w>
-    <xme:GblbZe5GafJ_IHhfF_UhKTgim0BgHUZQQH1cH89oCXRKqjQFb5fHn0ptTiEFvIYIv
-    2xN9g0xuEKvxm3xPjE>
-X-ME-Received: <xmr:GblbZYdfVYuzpnrgsbYy8rH_Iuvng7G5o3FmSk676pX2tGMIoBzqZpPAuom_CIyZBX3iH_03S40YqcA6rd5K0hOg5GI>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrudegjedguddtfecutefuodetggdotefrod
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:sender:subject:subject:to:to
+	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1700514602; x=1700601002; bh=vAe1jxs0ZkngAMx0ExLMRLzbU3hn
+	ZxCFMpt4PgM/Gis=; b=p9kj4eWge2SWHjYBse933nhAOaUyBTWJpDR0nrEldfXa
+	xg6AXGDt2q9X3DWpny9lmQaCm2/wvCAeLk34r0cHxbn2bSX5JAOGZqh1zCFEGgqb
+	xK8ScoDDwAzlURzYuvxWFdp3fhglgFPEK+dlYYyek/7I/coZwgDUJhwU7dywNpg7
+	1QMqUUPclgNMuh/424jEKDqlaXX1C1tDjL1zqh+vAphyMWDLYg/Sh3sk4udqRjSX
+	T75kCHb23zWVQwgfqWYPUVZ1gMjWKPgbNv/9c3N/7YPp09SthxcJcioUBtWqR8lR
+	hAQcc/L7PstGFN3SE3EXMTkbDWmVYQEgmJ9okkyxKw==
+X-ME-Sender: <xms:KstbZakWITlOBtEdfxleYDRH_e5XY1HbBOuydDnmmP8bbLkz5g0FaQ>
+    <xme:KstbZR2YNMcST5goU4L53l5QYUQkZqTrSeJsRCUevi-_zAg9oHeEdgg-N1NXj9xmG
+    RO_5A2Wvbl-5DLt2Bo>
+X-ME-Received: <xmr:KstbZYoqK2qhrBq8PQfK0bH-0xbTbx0HO_5AlFCnsEw1EOH5CGbHsQG3wciWQ3UX6FMd9Rt3lVCfOOyoeXCgljyLx80>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrudegjedguddulecutefuodetggdotefrod
     ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
-    enucfjughrpeffhffvvefukfhfgggtugfgjgesthekredttddtjeenucfhrhhomhepueho
-    rhhishcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrh
-    hnpedulefhtdfhteduvdethfeftdeitdethedvtdekvdeltddvveegtdeuuddtiedtieen
-    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrih
-    hssegsuhhrrdhioh
-X-ME-Proxy: <xmx:GblbZaJihG4cnkaEhtHVOVPO0Z7huj88Uq3xm-zuBcZeZ5oryMBu3Q>
-    <xmx:GblbZVJPl6SCrUbzjKMCmx2aiPJikHRA-4hDWZhqyK0_SppksnH5pQ>
-    <xmx:GblbZTwOL8Jde19zezxkP__WJmYdHxNniFvWbPPzmXqnOYywj1TmjA>
-    <xmx:GblbZcU0alNXQfPPAU-FUaU_se5ZH1TxXuI4kFOj1UdtotSlXZpdoA>
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:KstbZemEtCRFqGVmkjFptyFOnZvEt8HswkgvlUybDW-16A2U11XI-g>
+    <xmx:KstbZY2xVaHw1I8xcwEPKyt8MlCbisG6g1VfU_xtM5uSoAWBOog1mQ>
+    <xmx:KstbZVvj4yPEdXeFSouSWsRRGlOkwCaIG2o1cTd4Py3fdVxAmJIjfw>
+    <xmx:KstbZV_k1eFZLUNwu4f9SJp9CHNdhqZrEYBhW7tAComMiK0LcCjy-A>
 Feedback-ID: i083147f8:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
- 20 Nov 2023 14:52:57 -0500 (EST)
-Date: Mon, 20 Nov 2023 11:53:50 -0800
+ 20 Nov 2023 16:10:02 -0500 (EST)
 From: Boris Burkov <boris@bur.io>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+To: linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com,
 	fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] btrfs/301: fix hardcoded subvolids
-Message-ID: <20231120195350.GA262427@zen.localdomain>
-References: <cover.1700505679.git.boris@bur.io>
- <da0104f52b8253be8b905f77ce467acaf6afc9cd.1700505679.git.boris@bur.io>
- <CAL3q7H5XcFeFFTYjm84y+uc_Jz2eUSzcfq9OyxX3cs=gv2UDfw@mail.gmail.com>
+Subject: [PATCH v2 0/2] btrfs/301: test fixes for squotas vs other features
+Date: Mon, 20 Nov 2023 13:10:53 -0800
+Message-ID: <cover.1700514431.git.boris@bur.io>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H5XcFeFFTYjm84y+uc_Jz2eUSzcfq9OyxX3cs=gv2UDfw@mail.gmail.com>
 
-On Mon, Nov 20, 2023 at 07:45:01PM +0000, Filipe Manana wrote:
-> On Mon, Nov 20, 2023 at 6:44 PM Boris Burkov <boris@bur.io> wrote:
-> >
-> > Hardcoded subvolids break noholes test runs, so change the test to use
-> > _btrfs_get_subvolid instead of assuming 256, 257, etc...
-> 
-> How exactly does no-holes affect the assigned IDs to subvolumes?
-> It's a default feature for quite a while and the test passes with it
-> and without it (-O ^no-holes).
-> 
-> Aren't you confusing this with enabling or disabling features that add
-> some tree?
-> Like disabling the free space tree (which is a default for quite a
-> while now), for example.
+The squotas targeting tests in btrfs/301 do not currently pass test runs
+with compression enabled or free space tree disabled. We can fix the no
+free space tree case by querying subvolid rather than assuming
+256,257,etc.. Skip compression, it is covered anyway by fsck on the rest
+of the tests.
+---
+V2:
+- fix tons of mistakes from global subvid/snapid variables by making
+  them local
+- handle the nested subvol too
+- fix descriptions from previous confusion about noholes
+- run with and without free space tree
 
-Yes I am. Josef reported this to me and I misread the name of his
-configuration that was failing. For completeness it was one that doesn't
-use free space tree, like you say.
+Boris Burkov (2):
+  btrfs/301: fix hardcoded subvolids
+  btrfs/301: require_no_compress
 
-> 
-> For me it fails with -O ^free-space-tree, and it fails even with this
-> patch applied:
+ tests/btrfs/301 | 172 +++++++++++++++++++++++++++++-------------------
+ 1 file changed, 104 insertions(+), 68 deletions(-)
 
-And didn't reproduce it, since he proposed the fix, which seemed
-"straightforward" enough to me.
+-- 
+2.42.0
 
-> 
-> $ MKFS_OPTIONS="-O ^free-space-tree" ./check btrfs/301
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.6.0-rc5-btrfs-next-140+ #1 SMP
-> PREEMPT_DYNAMIC Thu Oct 19 16:55:42 WEST 2023
-> MKFS_OPTIONS  -- -O ^free-space-tree /dev/sdb
-> MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/301 70s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/301.out.bad)
->     --- tests/btrfs/301.out 2023-10-18 23:29:06.029292800 +0100
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/301.out.bad
-> 2023-11-20 19:33:04.988824928 +0000
->     @@ -13,6 +13,16 @@
->      fallocate: Disk quota exceeded
->      pwrite: Disk quota exceeded
->      enable mature
->     +ERROR: unable to limit requested quota group: No such file or directory
->     +/home/fdmanana/git/hub/xfstests/tests/btrfs/301: line 373: [:
-> -lt: unary operator expected
->     +captured usage from before enable  >= 134217728
->     +/home/fdmanana/git/hub/xfstests/tests/btrfs/301: line 377: [:
-> -lt: unary operator expected
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/301.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/301.out.bad'  to see
-> the entire diff)
-> Ran: btrfs/301
-> Failures: btrfs/301
-> Failed 1 of 1 tests
-> 
-> I see variables like subvid below being declared as global in one
-> function and then used in other functions.
-
-I tried to test that they get populated correctly (confused why it works
-sometimes...)
-
-But clearly it's broken in general and I'll do something more robust. I
-think the basic problem is I call prepare() in each test function, so I
-wanted prepare to set the global state, without making each test lookup
-the subvolid. But it's not the end of the world to have the tests get it
-one way or the other.
-
-> Maybe there's something wrong with that... it would be cleaner to make
-> the variable local and pass the subvolume id as an argument to other
-> functions.
-> 
-> Thanks.
-
-Thanks for catching the mistake.
-
-> 
-> >
-> > Signed-off-by: Boris Burkov <boris@bur.io>
-> > ---
-> >  tests/btrfs/301 | 138 ++++++++++++++++++++++++------------------------
-> >  1 file changed, 70 insertions(+), 68 deletions(-)
-> >
-> > diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> > index 7a0b4c0e1..5bb6b16a6 100755
-> > --- a/tests/btrfs/301
-> > +++ b/tests/btrfs/301
-> > @@ -172,25 +172,27 @@ prepare()
-> >         _scratch_mount
-> >         enable_quota "s"
-> >         $BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
-> > -       set_subvol_limit 256 $limit
-> > -       check_subvol_usage 256 0
-> > +       subvid=$(_btrfs_get_subvolid $SCRATCH_MNT subv)
-> > +       set_subvol_limit $subvid $limit
-> > +       check_subvol_usage $subvid 0
-> >
-> >         # Create a bunch of little filler files to generate several levels in
-> >         # the btree, to make snapshotting sharing scenarios complex enough.
-> >         $FIO_PROG $prep_fio_config --output=$fio_out
-> > -       check_subvol_usage 256 $total_fill
-> > +       check_subvol_usage $subvid $total_fill
-> >
-> >         # Create a single file whose extents we will explicitly share/unshare.
-> >         do_write $subv/f $ext_sz
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >  }
-> >
-> >  prepare_snapshotted()
-> >  {
-> >         prepare
-> >         $BTRFS_UTIL_PROG subvolume snapshot $subv $snap >> $seqres.full
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       snapid=$(_btrfs_get_subvolid $SCRATCH_MNT snap)
-> 
-> Make the variable local please.
-> 
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >  }
-> >
-> >  prepare_nested()
-> > @@ -198,13 +200,13 @@ prepare_nested()
-> >         prepare
-> >         $BTRFS_UTIL_PROG qgroup create 1/100 $SCRATCH_MNT
-> >         $BTRFS_UTIL_PROG qgroup limit $limit 1/100 $SCRATCH_MNT
-> > -       $BTRFS_UTIL_PROG qgroup assign 0/256 1/100 $SCRATCH_MNT >> $seqres.full
-> > +       $BTRFS_UTIL_PROG qgroup assign 0/$subvid 1/100 $SCRATCH_MNT >> $seqres.full
-> >         $BTRFS_UTIL_PROG subvolume create $nested >> $seqres.full
-> >         do_write $nested/f $ext_sz
-> > -       check_subvol_usage 257 $ext_sz
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       local subv_usage=$(get_subvol_usage 256)
-> > -       local nested_usage=$(get_subvol_usage 257)
-> > +       check_subvol_usage $snapid $ext_sz
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       local subv_usage=$(get_subvol_usage $subvid)
-> > +       local nested_usage=$(get_subvol_usage $snapid)
-> >         check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> >  }
-> >
-> > @@ -214,8 +216,8 @@ basic_accounting()
-> >         echo "basic accounting"
-> >         prepare
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $total_fill
-> > -       cycle_mount_check_subvol_usage 256 $total_fill
-> > +       check_subvol_usage $subvid $total_fill
-> > +       cycle_mount_check_subvol_usage $subvid $total_fill
-> >         do_write $subv/tmp 512M
-> >         rm $subv/tmp
-> >         do_write $subv/tmp 512M
-> > @@ -245,19 +247,19 @@ snapshot_accounting()
-> >         echo "snapshot accounting"
-> >         prepare_snapshotted
-> >         touch $snap/f
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         do_write $snap/f $ext_sz
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 $ext_sz
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid $ext_sz
-> >         rm $snap/f
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > -       cycle_mount_check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> > +       cycle_mount_check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -267,14 +269,14 @@ delete_snapshot_src_ref()
-> >         echo "delete src ref first"
-> >         prepare_snapshotted
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         rm $snap/f
-> >         trigger_cleaner
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > -       cycle_mount_check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> > +       cycle_mount_check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -284,13 +286,13 @@ delete_snapshot_ref()
-> >         echo "delete snapshot ref first"
-> >         prepare_snapshotted
-> >         rm $snap/f
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > -       cycle_mount_check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> > +       cycle_mount_check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -300,18 +302,18 @@ delete_snapshot_src()
-> >         echo "delete snapshot src first"
-> >         prepare_snapshotted
-> >         $BTRFS_UTIL_PROG subvolume delete $subv >> $seqres.full
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         rm $snap/f
-> >         trigger_cleaner
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> >         $BTRFS_UTIL_PROG subvolume delete $snap >> $seqres.full
-> >         trigger_cleaner
-> > -       check_subvol_usage 256 0
-> > -       check_subvol_usage 257 0
-> > -       cycle_mount_check_subvol_usage 256 0
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid 0
-> > +       check_subvol_usage $snapid 0
-> > +       cycle_mount_check_subvol_usage $subvid 0
-> > +       check_subvol_usage $snapid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -321,12 +323,12 @@ delete_snapshot()
-> >         echo "delete snapshot first"
-> >         prepare_snapshotted
-> >         $BTRFS_UTIL_PROG subvolume delete $snap >> $seqres.full
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $snapid 0
-> >         $BTRFS_UTIL_PROG subvolume delete $subv >> $seqres.full
-> >         trigger_cleaner
-> > -       check_subvol_usage 256 0
-> > -       check_subvol_usage 257 0
-> > +       check_subvol_usage $subvid 0
-> > +       check_subvol_usage $snapid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -337,16 +339,16 @@ nested_accounting()
-> >         echo "nested accounting"
-> >         prepare_nested
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 $ext_sz
-> > -       local subv_usage=$(get_subvol_usage 256)
-> > -       local nested_usage=$(get_subvol_usage 257)
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid $ext_sz
-> > +       local subv_usage=$(get_subvol_usage $subvid)
-> > +       local nested_usage=$(get_subvol_usage $snapid)
-> >         check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> >         rm $nested/f
-> > -       check_subvol_usage 256 $total_fill
-> > -       check_subvol_usage 257 0
-> > -       subv_usage=$(get_subvol_usage 256)
-> > -       nested_usage=$(get_subvol_usage 257)
-> > +       check_subvol_usage $subvid $total_fill
-> > +       check_subvol_usage $snapid 0
-> > +       subv_usage=$(get_subvol_usage $subvid)
-> > +       nested_usage=$(get_subvol_usage $snapid)
-> >         check_qgroup_usage 1/100 $(($subv_usage + $nested_usage))
-> >         do_enospc_falloc $nested/large_falloc 2G
-> >         do_enospc_write $nested/large 2G
-> > @@ -365,21 +367,21 @@ enable_mature()
-> >         # we did before enabling.
-> >         sync
-> >         enable_quota "s"
-> > -       set_subvol_limit 256 $limit
-> > +       set_subvol_limit $subvid $limit
-> >         _scratch_cycle_mount
-> > -       usage=$(get_subvol_usage 256)
-> > +       usage=$(get_subvol_usage $subvid)
-> >         [ $usage -lt $ext_sz ] || \
-> >                 echo "captured usage from before enable $usage >= $ext_sz"
-> >         do_write $subv/g $ext_sz
-> > -       usage=$(get_subvol_usage 256)
-> > +       usage=$(get_subvol_usage $subvid)
-> >         [ $usage -lt $ext_sz ] && \
-> >                 echo "failed to capture usage after enable $usage < $ext_sz"
-> > -       check_subvol_usage 256 $ext_sz
-> > +       check_subvol_usage $subvid $ext_sz
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $ext_sz
-> > +       check_subvol_usage $subvid $ext_sz
-> >         _scratch_cycle_mount
-> >         rm $subv/g
-> > -       check_subvol_usage 256 0
-> > +       check_subvol_usage $subvid 0
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -394,7 +396,7 @@ reflink_accounting()
-> >                 _cp_reflink $subv/f $subv/f.i
-> >         done
-> >         # Confirm that there is no additional data usage from the reflinks.
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -404,11 +406,11 @@ delete_reflink_src_ref()
-> >         echo "delete reflink src ref"
-> >         prepare
-> >         _cp_reflink $subv/f $subv/f.link
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >         rm $subv/f.link
-> > -       check_subvol_usage 256 $(($total_fill))
-> > +       check_subvol_usage $subvid $(($total_fill))
-> >         _scratch_unmount
-> >  }
-> >
-> > @@ -418,11 +420,11 @@ delete_reflink_ref()
-> >         echo "delete reflink ref"
-> >         prepare
-> >         _cp_reflink $subv/f $subv/f.link
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >         rm $subv/f.link
-> > -       check_subvol_usage 256 $(($total_fill + $ext_sz))
-> > +       check_subvol_usage $subvid $(($total_fill + $ext_sz))
-> >         rm $subv/f
-> > -       check_subvol_usage 256 $(($total_fill))
-> > +       check_subvol_usage $subvid $(($total_fill))
-> >         _scratch_unmount
-> >  }
-> >
-> > --
-> > 2.42.0
-> >
-> >
