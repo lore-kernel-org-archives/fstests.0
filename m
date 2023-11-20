@@ -1,180 +1,132 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ACDD11C86
-	for <fstests@vger.kernel.org>; Sun, 19 Nov 2023 13:53:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iyFBtdgn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57BD6C433C8;
-	Sun, 19 Nov 2023 13:53:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700402011;
-	bh=dleudZXks+8e0dDuorAwDkK5cHI/wwnFw/x57em6g18=;
-	h=Date:From:To:Subject:From;
-	b=iyFBtdgnMLD0oN/xDZRooTgGRFyONBfouZkRnPChV/Taisq1sMBAhdMW7P0hurShl
-	 1nLlCRrjXA043XY7uZmxYiQ3xe3J67yuYTsE17q84DuXvu6NYNNB84/+0Egf7i5Uf3
-	 FeWGQRbge9mKuguGAgthmCdD/GtJkPbGiWNoH7O6hYwkbP2rbQiHAyynfZiFwK8Aci
-	 ZoCLEEEWcJh0j2SQogg0yW02iS/r29ML60JPuBYy7ovaxpw33BhF+87JzBsPENkBNh
-	 Ou0EEpnYWY4u7a0mpkpwhjfpucS5+IIdHOZAFYEF7JSGNRuMCURNUyl5k0ANUTPtD1
-	 1godENd5A9ySg==
-Date: Sun, 19 Nov 2023 21:53:27 +0800
-Message-ID: <736e225a5e86d6d33c21115d70b80f72.Zorro Lang <zlang@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2023.11.19
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC14E83
+	for <fstests@vger.kernel.org>; Sun, 19 Nov 2023 19:44:23 -0800 (PST)
+Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.57])
+	by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4SYYFJ4QzRz1P8X4;
+	Mon, 20 Nov 2023 11:40:52 +0800 (CST)
+Received: from [10.174.177.174] (10.174.177.174) by
+ dggpeml500021.china.huawei.com (7.185.36.21) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35; Mon, 20 Nov 2023 11:44:18 +0800
+Message-ID: <a28b6f57-af85-e263-4733-dcb21048b696@huawei.com>
+Date: Mon, 20 Nov 2023 11:44:17 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="lsuXSdyrY9EQ"
-Content-Disposition: inline
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.1.2
+Subject: Re: [PATCH] ext4: Regression test of ext4_lblk_t overflow
+Content-Language: en-US
+To: Zorro Lang <zlang@redhat.com>
+CC: <fstests@vger.kernel.org>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
+	<ritesh.list@gmail.com>, <yangerkun@huawei.com>, Baokun Li
+	<libaokun1@huawei.com>
+References: <20231028070123.971548-1-libaokun1@huawei.com>
+ <20231117142451.mhjdsgbqljzkvzuv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <d8478c10-56f0-614a-776e-f721048a534f@huawei.com>
+ <20231119131427.topibmy2xdi36a7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Baokun Li <libaokun1@huawei.com>
+In-Reply-To: <20231119131427.topibmy2xdi36a7x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.177.174]
+X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
+ dggpeml500021.china.huawei.com (7.185.36.21)
+X-CFilter-Loop: Reflected
 
+On 2023/11/19 21:14, Zorro Lang wrote:
+> On Sat, Nov 18, 2023 at 11:08:10AM +0800, Baokun Li wrote:
+>> On 2023/11/17 22:24, Zorro Lang wrote:
+>>> Hi Baokun,
+>>>
+>>> Thanks for this new coverage, some review points as below ...
+>>>
+>> Hi Zorro,
+>>
+>> Thank you for your careful review！
+>>
+>>>> +
+>>>> +# Initalize a 4k 100M ext4 fs
+>>>> +dev_size=$((100 * 1024 * 1024))
+>>>> +MKFS_OPTIONS="-b 4096 $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
+>>>> +	>>$seqres.full 2>&1 || _fail "mkfs failed"
+>>> Can we use bsize=$(_get_file_block_size ....) to get the real block size,
+>>> to avoid use a specific mkfs option?
+>>> If so, my second question is if this case can be a generic case. The test
+>>> steps look common enough, I'm glad to see what will happen on other
+>>> filesystems through this test.
+>> The reason for specifying 4096 for formatting here is that mkfs.ext4
+>> specifies a
+>> default block size of 1024 when the disk image is 100M.
+> Is the reproducer related with the block size. If it's not, we can use
+> "bsize=$(_get_file_block_size $SCRATCH_MNT)" to get the block size, and change
+> later 4096 to $bsize.
+This problem is really hard to reproduce when the block size is 1024, 
+but the
+good thing is that the default block size specified in 
+_scratch_mkfs_sized()
+is 4096, so we can leave the block size of 4096 unspecified here.
+>
+>> Although these operations appear to be generic scenarios, the reproduction
+>> of
+>> this problem relies on ext4's pre-allocation mechanism. Block allocation
+>> requests
+>> are scaled up in ext4_mb_normalize_request(), and the extra blocks are used
+>> for
+>> preallocation to reduce fragmentation. Therefore, this test case is placed
+>> only in
+>> the ext4 test suite.
+> Sure it's a reproducer for ext4, but it can be run for other filesystems
+> which support falloc and finsert. And:
+>    _require_xfs_io_command "falloc"
+>    _require_xfs_io_command "finsert"
+> will make sure the current FSTYP supports these two features. So it can
+> be a bug coverage for ext4, and a generic test case for other fs.
+Totally agree, I'll put it in generic test suite in next version, the 
+execution of
+this use case takes only 1-2s, it doesn't seem to have any impact.
+>>>> +
+>>>> +_scratch_mount
+>>>> +
+>>>> +# Reserve 1M space
+>>>> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full 2>&1
+>>>> +
+>>>> +# Create a file with logical block numbers close to overflow
+>>>> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
+>>>> +$XFS_IO_PROG -f -c "finsert 1M 16777203M" "${SCRATCH_MNT}/file" >> $seqres.full 2>&1
+>>> _require_xfs_io_command "finsert"
+>> Okay.
+>>>> +
+>>>> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
+>>>> +$XFS_IO_PROG -f -c "falloc 0 80388096" "${SCRATCH_MNT}/fill" >> $seqres.full 2>&1
+>>> Can we make sure this step fill the whole free space? There's a helper in
+>>> common/populate named _fill_fs, please check if it's what you want?
+>> The remaining space for a 100M 4k ext4 image after the previous operations
+>> is
+>> 80388096, so we can confirm that we can fill the entire free space here.
+>> Of course, using _fill_fs is also workable, but it's faster to do it in a
+>> single fallocate.
+> I'm not sure how the reservation works, if there're 90M free space, and you
+> try to reserve 90+M, will once fallocate calling trys to reserve each free
+> blocks, before returning error? If it's not, I think the _fill_fs might be
+> what you want.
+>
+> Thanks,
+> Zorro
+ext4_fallocate will try to allocate all free blocks if the size to be 
+allocated exceeds
+the free space on the filesystem, but will still return an error. I've 
+tested _fill_fs and
+it works well too. I will use _fill_fs in the next release to make this 
+use case more generic.
 
---lsuXSdyrY9EQ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Thanks!
+-- 
+With Best Regards,
+Baokun Li
+.
 
-Hi all,
-
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2023.11.19 release.
-
-Release Note:
-1) There're 5 new test cases in this release, include  btrfs/303, generic/733,
-   xfs/602, xfs/603 and xfs/604. There cases won't cause panic or hang on old
-   downstream kernel, so this release is safe for downstream kernel testing.
-2) The FIEXCHANGE ioctl is changed to be a xfs specific ioctl XFS_IOC_EXCHANGE_RANGE,
-   Darrick helped to updated the testing.
-
-More updates refer to below, thanks for all these contribution!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-b9e1a88f8198 xfs: test refilling AGFL after lots of btree splits
-
-New commits ([N]ew, [U]pdate):
-
-Anand Jain (6):
-[U]      [22bca8d9a6d9] common/rc: _fs_sysfs_dname fetch fsid using btrfs tool
-[U]      [24c58f2d973c] common/btrfs: add helper _has_btrfs_sysfs_feature_attr
-[U]      [7139a0600084] btrfs/219: fix _cleanup() to successful release the loop-device
-[U]      [6a466743cd17] btrfs/219: cloned-device mount capability update
-[U]      [47737bd3decf] btrfs/219: add to the auto group
-[U]      [59372e8d3f96] common/btrfs: add _btrfs_get_fsid() helper
-
-Christoph Hellwig (1):
-[U]      [88334112f9cb] xfs/146: require fallocate support
-
-Darrick J. Wong (5):
-[N]      [848c6a882a6f] generic: test reads racing with slow reflink operatio
-[U]      [59bf56a1a56e] common: make helpers for ttyprintk usage
-[N]      [b5ba77147bf6] xfs: test unlinked inode list repair on demand
-[U]      [3098851702d1] misc: privatize the FIEXCHANGE ioctl for now
-[U]      [29c3cc742717] misc: update xfs_io swapext usage
-
-Omar Sandoval (1):
-[N]      [b9e1a88f8198] xfs: test refilling AGFL after lots of btree splits
-
-Qu Wenruo (1):
-[N]      [483b1f90c8aa] fstests: btrfs: test snapshot creation with existing qgroup
-
-Yang Xu (1):
-[U]      [5fdd34e76182] xfs/263: Remove mkfs.xfs data section argument
-
-
-Code Diffstat:
-
- common/btrfs              |  26 +++-
- common/fuzzy              |   4 +-
- common/rc                 |  38 +++++-
- common/xfs                |   2 +-
- configure.ac              |   3 +-
- doc/group-names.txt       |   2 +-
- include/builddefs.in      |   3 +-
- ltp/Makefile              |   4 +-
- ltp/fsstress.c            |  10 +-
- ltp/fsx.c                 |  20 +--
- m4/package_libcdev.m4     |  19 +--
- m4/package_xfslibs.m4     |  14 ++
- src/Makefile              |   8 ++
- src/fiexchange.h          |  48 +++----
- src/global.h              |   4 +-
- src/t_reflink_read_race.c | 339 ++++++++++++++++++++++++++++++++++++++++++++++
- src/vfs/Makefile          |   4 +
- tests/btrfs/219           |  74 +++++-----
- tests/btrfs/303           |  77 +++++++++++
- tests/btrfs/303.out       |   2 +
- tests/generic/709         |   2 +-
- tests/generic/710         |   2 +-
- tests/generic/711         |   2 +-
- tests/generic/712         |   2 +-
- tests/generic/713         |   4 +-
- tests/generic/714         |   4 +-
- tests/generic/715         |   4 +-
- tests/generic/716         |   2 +-
- tests/generic/717         |   2 +-
- tests/generic/718         |   2 +-
- tests/generic/719         |   2 +-
- tests/generic/720         |   2 +-
- tests/generic/722         |   4 +-
- tests/generic/723         |   6 +-
- tests/generic/724         |   6 +-
- tests/generic/725         |   2 +-
- tests/generic/726         |   2 +-
- tests/generic/727         |   2 +-
- tests/generic/733         |  76 +++++++++++
- tests/generic/733.out     |   6 +
- tests/xfs/122.out         |   1 +
- tests/xfs/146             |   3 +-
- tests/xfs/263             |   5 +-
- tests/xfs/329             |   4 +-
- tests/xfs/434             |   2 +-
- tests/xfs/435             |   2 +-
- tests/xfs/436             |   2 +-
- tests/xfs/444             |   2 +-
- tests/xfs/516             |   2 +-
- tests/xfs/602             | 111 +++++++++++++++
- tests/xfs/602.out         |   5 +
- tests/xfs/603             | 215 +++++++++++++++++++++++++++++
- tests/xfs/603.out         |   6 +
- tests/xfs/604             |  69 ++++++++++
- tests/xfs/604.out         |   2 +
- tests/xfs/789             |   2 +-
- tests/xfs/790             |   2 +-
- tests/xfs/791             |   6 +-
- tests/xfs/792             |   2 +-
- 59 files changed, 1137 insertions(+), 141 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---lsuXSdyrY9EQ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmVaEysACgkQlNbPkfr2
-tMxjeRAApYf3UmcgXaGdGMbpslw8gifoMk8FcrGKJ94IImVoHxK38B+ROTaduVLw
-H9kVoW8yd/FVygqZ0+4MFp8dConToukyZ+vD7r3eoJYG+4SuWjUuo577LTNvadUx
-sXRn9kcYIGJXbcBo2z1pOoM1bYeWcvRbAAnABwL9PeCX3gZE3cbobuqgd5VrCKXx
-yHtFqEk5ErlZdCsCHDn2Ylf618ydXjttOke132KReEh1sTdUWY65oC0h0yttVthn
-Nc65rCs5nYkEk+4r2pOelltvn3k4dBG2SVqihZFvxsIHHHuwX3pZICN8NVg/j6hf
-pJC2RKuKLOzZ812f35sv3SrKxEH9QxE70YN0OQULCnV7Gf/2LDx8klUM6i7/nasf
-6xaXRKh9seBt0DKrGRJuk+rQ02lO83tLcp7ryGa6ajloRl/dbvR/g1hjM85gb5iX
-HGdSuRgPbsq3UbPx9m2CKty0QknGRroVawsLh4VHEbbX+R5QSgGW13bbtGGhPTEl
-EAypSHj60B2RsGzT0SZBGRxIKzkF0z7r7wZvLBoHh9uzCpROQa3/nHb9lkdeTWGw
-m++CiuAlrIUK+O4R88+n9JgjRGKkWpcFiIv4BdJKtk/HOmhujYhvwy0iCr/wz041
-KAW0xhGIU8U++UvCsm93t2tQa8VhTBE0a7Bcw/fSChTq4OWKCsA=
-=mhUP
------END PGP SIGNATURE-----
-
---lsuXSdyrY9EQ--
