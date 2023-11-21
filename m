@@ -1,30 +1,30 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="PUIg+xnv"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="my+4MPCm"
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DA8310C;
-	Mon, 20 Nov 2023 20:35:20 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1A4810F;
+	Mon, 20 Nov 2023 20:35:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
 	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
 	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
 	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=PUIg+xnvBUG8laixsBBSvmt46H
-	dmYShtYi4ePUDDuX/bRbidMmNUib/MfRO3JEosEXDSchfFVZaauDcz7PvVhT+IvVUhMU4MLtW/HOo
-	PMUF/OX7SGPaVmdPw4jDzecIb9/z/AgRd5gWxaM7qsbd3QlhYxfTgaK3Dc7nM7vJQ3PGfF18fWxJu
-	Quq39zru0tjlU+k7NyIeMGAltoFHYjISO5PxkIM4t/9E5nZ1jXMSItGMPpOxH+rmPFu7qNZxnFTUj
-	BGt0Xfbw6yDhZy+b1Jt0EJhc+ElvOGk5clr85DcQztNNru45jnHW7TUL4kp4kb8mODsNP48Mh3Jk0
-	PO48XwNw==;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=my+4MPCmPa79GC+oEhbXaAuFHF
+	btphRb0tIE2/5rkxgY/f7yZjd5FKP41zLOeOHeZN+RgnwJiufKtUEXcefHAX2AE+4ECIbvd+2CbIS
+	eZ6zTX612OU+JQ5Dyk9hnM217nFj5+7DsJEWsE7hhprJ5dFghqwWjp74jpg2Ml0fV3gaBIgyrMNuL
+	syOvhoo0j4ERqUU1F2p+ChO47f9WCjaTJzuTzkxVMphTNx+AkXHwvNHXHIWjyhLOsDbRaBDstzxYA
+	lp+tn6p1Ijp2vRWZgwXRzScd+kOisXdM8rxT0PfNcMUC2BVpcmFYRPt4+Y162Lw+E3oXNUIHItLcH
+	ZPsaR6xQ==;
 Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-	id 1r5ITm-00FbEe-07;
-	Tue, 21 Nov 2023 04:35:18 +0000
-Date: Mon, 20 Nov 2023 20:35:17 -0800
+	id 1r5IU4-00FbHJ-2B;
+	Tue, 21 Nov 2023 04:35:36 +0000
+Date: Mon, 20 Nov 2023 20:35:36 -0800
 From: Christoph Hellwig <hch@infradead.org>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, guan@eryu.me,
 	fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] xfs/601: move this to tests/generic
-Message-ID: <ZVwzhcOEcGc7Aqxa@infradead.org>
+Subject: Re: [PATCH 2/2] xfs/604: add missing falloc test
+Message-ID: <ZVwzmP3WJr+M35k1@infradead.org>
 References: <170050890870.536459.4420904342934916414.stgit@frogsfrogsfrogs>
- <170050891446.536459.11166010762932928186.stgit@frogsfrogsfrogs>
+ <170050892015.536459.5750821914760062267.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,7 +33,7 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <170050891446.536459.11166010762932928186.stgit@frogsfrogsfrogs>
+In-Reply-To: <170050892015.536459.5750821914760062267.stgit@frogsfrogsfrogs>
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
 Looks good:
