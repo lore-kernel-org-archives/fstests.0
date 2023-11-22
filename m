@@ -1,91 +1,80 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E7C625772;
-	Wed, 22 Nov 2023 17:17:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD798200AE
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 23:16:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Gk+ED+R6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 10532C433C9;
-	Wed, 22 Nov 2023 17:17:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CWT7MOSR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FE40C433C7;
+	Wed, 22 Nov 2023 23:16:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700673456;
-	bh=4SQNIhW4HE+A7492Ocnb5PFF5eCDCiW/jabuZx70qaI=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=Gk+ED+R6utbmdysmmXxuGfwvye21N/1wG5dEaSCrQebh240p9wavs6mD+V4UwAhwJ
-	 Uah3UjzdVC9uUyl0PAskFwnGofzctWsp1uBr+daE00UqPzZnUfUNptmqt7C60eQexO
-	 LvfxuTIGWGe6G5XC4Ck1543M7qGiWWVuuCVnGW5xhOt5aDANZRf38w8Pwx+eFXsbQg
-	 +02dReJWxxlyP+uARhUjXIkb2CGVM0Ze2Gz5+sJe42Hm0e5QgpCxQ8su18bCxrJLJY
-	 brBqkL8xMZCkUT6O0uoPOo7jtsh27wWAwYu/S6l21cbj9tXtR7bZRgv5S0QzAdf2Fi
-	 dRl2BRUrGs+Rg==
-Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-543456dbd7bso2109894a12.1;
-        Wed, 22 Nov 2023 09:17:35 -0800 (PST)
-X-Gm-Message-State: AOJu0Yx+y8QTlDEVyWOIX2aGeHJiVLbIkihkgVVWoygxT8zXT84rWr+q
-	vP/MpEwOzgMBmPYTgsP9H1DwLkkzCWL86Hzr0Ic=
-X-Google-Smtp-Source: AGHT+IEt404FYXJNpMOKeFpMKBlO8oq8+U6iGPPo/RS9xma4aUfa+evBATIkK8ZTNQnVIQx+2B8Y4q8y5Y4IRR37wBU=
-X-Received: by 2002:a17:906:b810:b0:a04:eac3:2812 with SMTP id
- dv16-20020a170906b81000b00a04eac32812mr79237ejb.26.1700673454472; Wed, 22 Nov
- 2023 09:17:34 -0800 (PST)
+	s=k20201202; t=1700695010;
+	bh=I9W/2skD4JLmoYRj1WeRWSHO/tEBgeAPFTJP/l9x2yA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=CWT7MOSRPt1d6aqNnS9rroQZO1Qekd39K1RQwBzfpGu9LMErqrQsUsFhnfg+gmbfF
+	 rhkyaY/WeC7APCT4Cndb9zKX5xDv6/asBFuh8vYu7aFJSNd+TNX2qc6AltuPKLZMP9
+	 9Lr2M8y3nbHtpc05wDLnTgmzR2jCMKYAM6PpFNyG3zQKRRPwjrC09SyfO6nauTBNbW
+	 5Vfwq/w+NyoXcCr+uz5hCE0fMghtoHxaJAonSUQAy7/I2EFQCtAtQxp/2WRVRKVKNv
+	 ADdAtyCQZwC8HPbDyo/wkQi06IOOeFh7y+98HiaZhVtR03ChjR7N8xMNHLbbaVrW0f
+	 hKCyqCr1YzWKg==
+Date: Wed, 22 Nov 2023 15:16:48 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: Luis Henriques <lhenriques@suse.de>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/581: remove extra escape character from awk line
+Message-ID: <20231122231648.GA1541@sol.localdomain>
+References: <ZV40XOGNJdru13XE@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <9cfb7fb05fb474cf5c39ff71340db9c1f6a652aa.1700673354.git.josef@toxicpanda.com>
-In-Reply-To: <9cfb7fb05fb474cf5c39ff71340db9c1f6a652aa.1700673354.git.josef@toxicpanda.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 22 Nov 2023 17:16:57 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H70ZTLt-2D2gsqvMooeObQEp7wYRET+jYONcZHhXGcbjg@mail.gmail.com>
-Message-ID: <CAL3q7H70ZTLt-2D2gsqvMooeObQEp7wYRET+jYONcZHhXGcbjg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: don't test -o norecovery in btrfs/220
-To: Josef Bacik <josef@toxicpanda.com>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZV40XOGNJdru13XE@suse.de>
 
-On Wed, Nov 22, 2023 at 5:16=E2=80=AFPM Josef Bacik <josef@toxicpanda.com> =
-wrote:
->
-> This is a deprecated option and it's going away with the new mount api
-> patches, so remove this from the test.
->
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Makes sense, thanks.
-
+On Wed, Nov 22, 2023 at 05:03:24PM +0000, Luis Henriques wrote:
+> Checking the keys in /proc/key-users is buggy, as there's an extra '\'
+> character: in '{print \$4}' the '$4' shouldn't be escaped otherwise the
+> 'awk' command will fail.  This has passed unnoticed because the output
+> is sent to '_user_do' function and the result assigned to a variable.
+> 
+> While there, replace 'awk' by $AWK_PROG.
+> 
+> Signed-off-by: Luis Henriques <lhenriques@suse.de>
 > ---
->  tests/btrfs/220 | 6 ------
->  1 file changed, 6 deletions(-)
->
-> diff --git a/tests/btrfs/220 b/tests/btrfs/220
-> index b092f40b..60b42b6a 100755
-> --- a/tests/btrfs/220
-> +++ b/tests/btrfs/220
-> @@ -212,20 +212,14 @@ test_non_revertible_options()
->         # nologreplay should be used only with readonly
->         test_should_fail "nologreplay"
->
-> -       # norecovery should be used only with readonly.
-> -       # This options is an alias to nologreplay
-> -       test_should_fail "norecovery"
-> -
->         if [ "$enable_rescue_nologreplay" =3D true ]; then
->                 #rescue=3Dnologreplay should be used only with readonly
->                 test_should_fail "rescue=3Dnologreplay"
->
->                 test_mount_opt "nologreplay,ro" "ro,rescue=3Dnologreplay"
-> -               test_mount_opt "norecovery,ro" "ro,rescue=3Dnologreplay"
->                 test_mount_opt "rescue=3Dnologreplay,ro" "ro,rescue=3Dnol=
-ogreplay"
->         else
->                 test_mount_opt "nologreplay,ro" "ro,nologreplay"
-> -               test_mount_opt "norecovery,ro" "ro,nologreplay"
->         fi
->
->         test_mount_opt "rescan_uuid_tree" "rescan_uuid_tree"
-> --
-> 2.41.0
->
->
+>  tests/generic/581 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> Hi!
+> 
+> Please note that I'm not an 'awk' expert and I may be wrong!  But if I do
+> see an error if I run something like:
+> 
+> $ awk '/^[[:space:]]*1000:/{print \$4}' /proc/key-users 
+> awk: cmd. line:1: /^[[:space:]]*1000:/{print \$4}
+> awk: cmd. line:1:                            ^ backslash not last character on line
+> 
+> But maybe this depends on the awk implementation, although I've tried a few.
+> 
+> diff --git a/tests/generic/581 b/tests/generic/581
+> index cabc7e1c69ab..1a4b571d40ce 100755
+> --- a/tests/generic/581
+> +++ b/tests/generic/581
+> @@ -92,7 +92,7 @@ while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
+>  done
+>  
+>  # Set the user key quota to the fsgqa user's current number of keys plus 5.
+> -orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
+> +orig_keys=$(_user_do "$AWK_PROG '/^[[:space:]]*$(id -u fsgqa):/{print $4}' /proc/key-users | cut -d/ -f1")
+
+The backslash is needed to prevent $4 from being expanded by bash, because the
+whole pipeline with 'awk' and 'cut' is in a double-quoted string:
+
+    "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1"
+
+Without escaping the $, bash would replace $4 with the empty string while it's
+doing expansions on the whole double-quoted string.
+
+- Eric
