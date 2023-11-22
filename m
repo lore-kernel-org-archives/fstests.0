@@ -1,30 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECAEB4EB32
-	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 16:32:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QiHflfs3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC94CC433C7;
-	Wed, 22 Nov 2023 16:32:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700670723;
-	bh=YcgHrXsIdoLDp9lJF+jdop2D0D3Gwwz0A4AZo5trQfM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=QiHflfs3fqlXJSc8Mot9cPdF7AeBxTsQY1QNixIUdBvgi31OOS2sfV6lvtZZqsXu2
-	 uXmkckIMQepvHyHsM5ydFyBjBlXnfUWa4iQtTawyBiw7QzRZ5AwA9mGk84kYOEMp5P
-	 16b2c4Erh4kSeV2GnWEACnK19BoWbPG8bDkA9CFd2STo2Tk/COwq6ZYSWyJGt+DdM+
-	 Q2nIXhwD8sS3OagB+UU8b0ExhcwQaQivqdn21SB9vjyuOCkN9EmEoKMqPNAkrb0IVs
-	 aULDCFZy3BxaEOniw5Bxew+i9avwYFpCwzyNOjHVYP1KnN2f5/e+JBd4zlNPbBkanE
-	 CoBDY5Ymx37gg==
-Date: Wed, 22 Nov 2023 08:32:03 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Baokun Li <libaokun1@huawei.com>
-Cc: fstests@vger.kernel.org, zlang@redhat.com, guaneryu@gmail.com,
-	amir73il@gmail.com, ritesh.list@gmail.com, yangerkun@huawei.com
-Subject: Re: [PATCH v3] ext4: Regression test of ext4_lblk_t overflow
-Message-ID: <20231122163203.GJ36175@frogsfrogsfrogs>
-References: <20231122115314.875252-1-libaokun1@huawei.com>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="bygTLAOw";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="0/7K2Wim"
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 359A29F
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 09:03:27 -0800 (PST)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id D4DE21F8D9
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 17:03:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1700672605; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:content-type:content-type;
+	bh=Y9cWYNBWvFgrJR3LV8qvGXBVLv9r/ucd8qJpFz+xXRY=;
+	b=bygTLAOwully1L4Hw4H3GLnylh41BRPotMhzO8eDKolBj9YIRLqo+SnwX+wJPdzj3bfxvj
+	mFpLSP2wvj//LuaDwSOymFVij8toX9Qcy4hZN7Yq0FNfFtkIMskZF0LlWsa7zMaTqRTG0h
+	97u/oi1Hn3h4qBDoDG4cpdXviYBeFSI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1700672605;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:content-type:content-type;
+	bh=Y9cWYNBWvFgrJR3LV8qvGXBVLv9r/ucd8qJpFz+xXRY=;
+	b=0/7K2WimiM+UUud3ukg7gxIklHaMp7pN3uTCm2WP4eflXakK4iD9FyirJHJqbyjtHC3Okz
+	JdZsZgGFbAdWrVCw==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+	(No client certificate requested)
+	by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id B16B213461
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 17:03:25 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+	by imap2.suse-dmz.suse.de with ESMTPSA
+	id wzg2KF00XmW5TgAAMHmgww
+	(envelope-from <lhenriques@suse.de>)
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 17:03:25 +0000
+Received: from localhost (brahms.olymp [local])
+	by brahms.olymp (OpenSMTPD) with ESMTPA id 5bc50212
+	for <fstests@vger.kernel.org>;
+	Wed, 22 Nov 2023 17:03:24 +0000 (UTC)
+Date: Wed, 22 Nov 2023 17:03:24 +0000
+From: Luis Henriques <lhenriques@suse.de>
+To: fstests@vger.kernel.org
+Subject: [PATCH] generic/581: remove extra escape character from awk line
+Message-ID: <ZV40XOGNJdru13XE@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,122 +52,63 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231122115314.875252-1-libaokun1@huawei.com>
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spam-Level: 
+X-Spam-Score: -4.30
+X-Spamd-Result: default: False [-4.30 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 NEURAL_HAM_LONG(-1.00)[-0.999];
+	 MIME_GOOD(-0.10)[text/plain];
+	 PREVIOUSLY_DELIVERED(0.00)[fstests@vger.kernel.org];
+	 TO_DN_NONE(0.00)[];
+	 RCPT_COUNT_ONE(0.00)[1];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_LAST(0.00)[];
+	 MID_RHS_MATCH_FROM(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
 
-On Wed, Nov 22, 2023 at 07:53:14PM +0800, Baokun Li wrote:
-> Append writes to a file approaching 16T and observe if a kernel crash is
-> caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-> This is a regression test for commit bc056e7163ac ("ext4: fix BUG in
-> ext4_mb_new_inode_pa() due to overflow")
-> 
-> Signed-off-by: Baokun Li <libaokun1@huawei.com>
-> ---
-> V1->V2:
-> 	Changes to make the use case more generic, not just for testing
-> 	ext4.(ext4 and xfs have been tested)
-> V2->V3:
-> 	Clean up the code and remove hardcoding.
-> 
->  tests/generic/737     | 53 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/737.out |  2 ++
->  2 files changed, 55 insertions(+)
->  create mode 100755 tests/generic/737
->  create mode 100644 tests/generic/737.out
-> 
-> diff --git a/tests/generic/737 b/tests/generic/737
-> new file mode 100755
-> index 00000000..29d428ad
-> --- /dev/null
-> +++ b/tests/generic/737
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 737
-> +#
-> +# Append writes to a file approaching 16T and observe if a kernel crash is
-> +# caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-> +# This is a regression test for commit
-> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
-> +#
-> +. ./common/preamble
-> +. ./common/populate
-> +_begin_fstest auto quick insert prealloc
-> +
-> +# real QA test starts here
-> +[[ "$FSTYP" =~ ext* ]] && _fixed_by_kernel_commit bc056e7163ac \
-> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
-> +
-> +_require_odirect
-> +_require_xfs_io_command "falloc"
-> +_require_xfs_io_command "finsert"
-> +
-> +dev_size=$((100 * 1024 * 1024))
-> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +_scratch_mount
-> +blksz="$(_get_block_size ${SCRATCH_MNT})"
+Checking the keys in /proc/key-users is buggy, as there's an extra '\'
+character: in '{print \$4}' the '$4' shouldn't be escaped otherwise the
+'awk' command will fail.  This has passed unnoticed because the output
+is sent to '_user_do' function and the result assigned to a variable.
 
-_get_file_block_size, not _get_block_size.  The first one retrieves the
-file allocation unit (e.g. ext4 bigalloc cluster size / xfs rt extent
-size) whereas the second merely returns the base fs block size.
+While there, replace 'awk' by $AWK_PROG.
 
-That is an important distinction when you're messing with fallocate. :)
+Signed-off-by: Luis Henriques <lhenriques@suse.de>
+---
+ tests/generic/581 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> +# Reserve 1M space
-> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full
-> +
-> +# Create a file (~16T) with logical block numbers close to overflow
-> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full
-> +insert_size=$((blksz * 4096 - 10 - 3))
+Hi!
 
-What if blksz == 64k ?  This won't compute a file position slightly
-below 16T.  I think the comment is wrong since you're trying to overflow
-the u32 ext4_lblk_t, correct?
+Please note that I'm not an 'awk' expert and I may be wrong!  But if I do
+see an error if I run something like:
 
-I think what you really want is something more like...
+$ awk '/^[[:space:]]*1000:/{print \$4}' /proc/key-users 
+awk: cmd. line:1: /^[[:space:]]*1000:/{print \$4}
+awk: cmd. line:1:                            ^ backslash not last character on line
 
-# Shift the last 9M of the file preallocations to a position just short
-# of overflowing ext4_lblk_t.
-max_pos=$(( 0xffffffff * file_blksz ))
-finsert_len=$(( max_pos - ((10 + 3) << 20) ))
-$XFS_IO_PROG -f -c "finsert 1M ${finsert_len}" "${SCRATCH_MNT}/file" >> $seqres.full
+But maybe this depends on the awk implementation, although I've tried a few.
 
-Not sure why you shift 9M of data to 13M below what I think is the
-upper range of ext4_lblk_t; I would have thought that would be
-(max_pos - 9MB) but I'm assuming you know the reproduction circumstances
-better than me...
-
---D
-
-> +$XFS_IO_PROG -f -c "finsert 1M ${insert_size}M" "${SCRATCH_MNT}/file" >> $seqres.full
-> +
-> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
-> +nr_free=$(stat -f -c '%f' ${SCRATCH_MNT})
-> +_fill_fs $((nr_free * blksz)) ${SCRATCH_MNT}/fill $blksz 0 >> $seqres.full 2>&1
-> +sync
-> +
-> +# Remove reserved space to gain free space for allocation
-> +rm -f ${SCRATCH_MNT}/tmp
-> +
-> +# Trying to allocate two blocks triggers BUG_ON.
-> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 $((2 * blksz))" >> $seqres.full
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/737.out b/tests/generic/737.out
-> new file mode 100644
-> index 00000000..67b83d78
-> --- /dev/null
-> +++ b/tests/generic/737.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 737
-> +Silence is golden
-> -- 
-> 2.31.1
-> 
-> 
+diff --git a/tests/generic/581 b/tests/generic/581
+index cabc7e1c69ab..1a4b571d40ce 100755
+--- a/tests/generic/581
++++ b/tests/generic/581
+@@ -92,7 +92,7 @@ while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
+ done
+ 
+ # Set the user key quota to the fsgqa user's current number of keys plus 5.
+-orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
++orig_keys=$(_user_do "$AWK_PROG '/^[[:space:]]*$(id -u fsgqa):/{print $4}' /proc/key-users | cut -d/ -f1")
+ : ${orig_keys:=0}
+ echo "orig_keys=$orig_keys" >> $seqres.full
+ orig_maxkeys=$(</proc/sys/kernel/keys/maxkeys)
