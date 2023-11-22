@@ -1,120 +1,69 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D31EA197
-	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 03:49:15 -0800 (PST)
-Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.53])
-	by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4SZzvr4F65z1P8l4;
-	Wed, 22 Nov 2023 19:45:44 +0800 (CST)
-Received: from huawei.com (10.175.127.227) by dggpeml500021.china.huawei.com
- (7.185.36.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.35; Wed, 22 Nov
- 2023 19:49:13 +0800
-From: Baokun Li <libaokun1@huawei.com>
-To: <fstests@vger.kernel.org>
-CC: <zlang@redhat.com>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
-	<ritesh.list@gmail.com>, <yangerkun@huawei.com>, <libaokun1@huawei.com>
-Subject: [PATCH v3] ext4: Regression test of ext4_lblk_t overflow
-Date: Wed, 22 Nov 2023 19:53:14 +0800
-Message-ID: <20231122115314.875252-1-libaokun1@huawei.com>
-X-Mailer: git-send-email 2.31.1
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="AMXn34xe"
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96A31101
+	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 06:07:17 -0800 (PST)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-5cc69df1b9aso7148197b3.3
+        for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 06:07:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1700662037; x=1701266837; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=8++4lViNma3RJHOIDGYVy8A20Z60l8vKvG63SA/z04k=;
+        b=AMXn34xeGbdt27u5qPWx7MEZuBektce0fSlaX+PtjqDafs9eguqALTV+GVdG9ksek0
+         6VFdQsjXolZkfIrcXgEjPrjJUU9gitnqsbJaLn6XkXmomerysW58DpJubBHULcvaMQUm
+         PHqwoop3Aehjw1oMa9wnEQyhOUUENc5Jltmpjx1p5lI5nCAK/jj+4ivolvdzJSFxoqra
+         jMXs5Xb1IIWvbFH1Jf3y7kRjtSzDnddjwduiPdjnTnKSE2/90LB9HeGC93lOA3jwOuKY
+         K+6y5gS1JBLk4Xc/s8HecDogg5lyulFJWmd3UjJm4FhwwJy55AUtrInOOFsQ5gVmPtm5
+         FzBg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1700662037; x=1701266837;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8++4lViNma3RJHOIDGYVy8A20Z60l8vKvG63SA/z04k=;
+        b=oa0xhUQcWPG4y+0eo/O69xueR7HLhSL4EajtjbWWakOBWQ7OjNA1CwINJfoKiF3ge6
+         HgoKAcYwhX1afqWktTv5xeyLuPO9ObyZ6Um6LrNsuThgsCl+gIDUtJNdp1LO2/XJFf9a
+         6SiadWhlQF0isfueoAAbsZcQk/8x6uh0wOKkD2Qcmhx5DbFYnmCnmYrzIRsk5kRtMEXN
+         cShNFX27QnlLoEc6eZxgXzkcra9h+gAhNd58q8n5UPOewtHopywBFGYe+gK6x31QaeCo
+         +vmSr48ucyAbN2MSP+W5vHbOfIxNldbGnJ10wy846YSxBZDKwshWOFkqtVWGN4cZLu9o
+         rAdA==
+X-Gm-Message-State: AOJu0YxHT+msQcJhSbTn5Q7lU6i/nqrENFq0upk6DTpKHzPg6UvIxONf
+	OVpHPljWAFwopd2VJQCcp9Vhzz5bMuLCBgqj83woo0HS
+X-Google-Smtp-Source: AGHT+IG1Y2tl1j2y7t0PxPbcfrAcUD4ydsMVfe1KO1cC4y2RxUyxU8BbPYVfghOtc7+3tJn89DS7lQ==
+X-Received: by 2002:a0d:ca90:0:b0:5ca:7a21:7e22 with SMTP id m138-20020a0dca90000000b005ca7a217e22mr2544381ywd.9.1700662036744;
+        Wed, 22 Nov 2023 06:07:16 -0800 (PST)
+Received: from localhost (cpe-76-182-20-124.nc.res.rr.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id u3-20020a81cf03000000b005cb7fccffe2sm1173392ywi.126.2023.11.22.06.07.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 22 Nov 2023 06:07:16 -0800 (PST)
+Date: Wed, 22 Nov 2023 09:07:15 -0500
+From: Josef Bacik <josef@toxicpanda.com>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] tests/btrfs: add tests to the remount group
+Message-ID: <20231122140715.GC1733890@perftesting>
+References: <a8732c1d8994cced3560d4e35fd82c1b0ec4968d.1700643177.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpeml500021.china.huawei.com (7.185.36.21)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <a8732c1d8994cced3560d4e35fd82c1b0ec4968d.1700643177.git.anand.jain@oracle.com>
 
-Append writes to a file approaching 16T and observe if a kernel crash is
-caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-This is a regression test for commit bc056e7163ac ("ext4: fix BUG in
-ext4_mb_new_inode_pa() due to overflow")
+On Wed, Nov 22, 2023 at 04:55:44PM +0800, Anand Jain wrote:
+> Several test cases under tests/btrfs are missing from the remount
+> group. This patch adds the test cases that use -o remount to the remount
+> group.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
 
-Signed-off-by: Baokun Li <libaokun1@huawei.com>
----
-V1->V2:
-	Changes to make the use case more generic, not just for testing
-	ext4.(ext4 and xfs have been tested)
-V2->V3:
-	Clean up the code and remove hardcoding.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
- tests/generic/737     | 53 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/737.out |  2 ++
- 2 files changed, 55 insertions(+)
- create mode 100755 tests/generic/737
- create mode 100644 tests/generic/737.out
+Thanks,
 
-diff --git a/tests/generic/737 b/tests/generic/737
-new file mode 100755
-index 00000000..29d428ad
---- /dev/null
-+++ b/tests/generic/737
-@@ -0,0 +1,53 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
-+#
-+# FS QA Test No. 737
-+#
-+# Append writes to a file approaching 16T and observe if a kernel crash is
-+# caused by ext4_lblk_t overflow triggering BUG_ON at ext4_mb_new_inode_pa().
-+# This is a regression test for commit
-+# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
-+#
-+. ./common/preamble
-+. ./common/populate
-+_begin_fstest auto quick insert prealloc
-+
-+# real QA test starts here
-+[[ "$FSTYP" =~ ext* ]] && _fixed_by_kernel_commit bc056e7163ac \
-+	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
-+
-+_require_odirect
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "finsert"
-+
-+dev_size=$((100 * 1024 * 1024))
-+_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
-+
-+_scratch_mount
-+blksz="$(_get_block_size ${SCRATCH_MNT})"
-+
-+# Reserve 1M space
-+$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full
-+
-+# Create a file (~16T) with logical block numbers close to overflow
-+$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full
-+insert_size=$((blksz * 4096 - 10 - 3))
-+$XFS_IO_PROG -f -c "finsert 1M ${insert_size}M" "${SCRATCH_MNT}/file" >> $seqres.full
-+
-+# Filling up the free space ensures that the pre-allocated space is the reserved space.
-+nr_free=$(stat -f -c '%f' ${SCRATCH_MNT})
-+_fill_fs $((nr_free * blksz)) ${SCRATCH_MNT}/fill $blksz 0 >> $seqres.full 2>&1
-+sync
-+
-+# Remove reserved space to gain free space for allocation
-+rm -f ${SCRATCH_MNT}/tmp
-+
-+# Trying to allocate two blocks triggers BUG_ON.
-+$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 $((2 * blksz))" >> $seqres.full
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/737.out b/tests/generic/737.out
-new file mode 100644
-index 00000000..67b83d78
---- /dev/null
-+++ b/tests/generic/737.out
-@@ -0,0 +1,2 @@
-+QA output created by 737
-+Silence is golden
--- 
-2.31.1
-
+Josef
