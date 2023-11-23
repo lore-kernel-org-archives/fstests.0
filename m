@@ -1,80 +1,97 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD798200AE
-	for <fstests@vger.kernel.org>; Wed, 22 Nov 2023 23:16:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CWT7MOSR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FE40C433C7;
-	Wed, 22 Nov 2023 23:16:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1700695010;
-	bh=I9W/2skD4JLmoYRj1WeRWSHO/tEBgeAPFTJP/l9x2yA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CWT7MOSRPt1d6aqNnS9rroQZO1Qekd39K1RQwBzfpGu9LMErqrQsUsFhnfg+gmbfF
-	 rhkyaY/WeC7APCT4Cndb9zKX5xDv6/asBFuh8vYu7aFJSNd+TNX2qc6AltuPKLZMP9
-	 9Lr2M8y3nbHtpc05wDLnTgmzR2jCMKYAM6PpFNyG3zQKRRPwjrC09SyfO6nauTBNbW
-	 5Vfwq/w+NyoXcCr+uz5hCE0fMghtoHxaJAonSUQAy7/I2EFQCtAtQxp/2WRVRKVKNv
-	 ADdAtyCQZwC8HPbDyo/wkQi06IOOeFh7y+98HiaZhVtR03ChjR7N8xMNHLbbaVrW0f
-	 hKCyqCr1YzWKg==
-Date: Wed, 22 Nov 2023 15:16:48 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: Luis Henriques <lhenriques@suse.de>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/581: remove extra escape character from awk line
-Message-ID: <20231122231648.GA1541@sol.localdomain>
-References: <ZV40XOGNJdru13XE@suse.de>
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from esa6.hc1455-7.c3s2.iphmx.com (esa6.hc1455-7.c3s2.iphmx.com [68.232.139.139])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3C1B11F
+	for <fstests@vger.kernel.org>; Thu, 23 Nov 2023 00:58:51 -0800 (PST)
+X-IronPort-AV: E=McAfee;i="6600,9927,10902"; a="142214593"
+X-IronPort-AV: E=Sophos;i="6.04,221,1695654000"; 
+   d="scan'208";a="142214593"
+Received: from unknown (HELO yto-r2.gw.nic.fujitsu.com) ([218.44.52.218])
+  by esa6.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Nov 2023 17:58:50 +0900
+Received: from yto-m1.gw.nic.fujitsu.com (yto-nat-yto-m1.gw.nic.fujitsu.com [192.168.83.64])
+	by yto-r2.gw.nic.fujitsu.com (Postfix) with ESMTP id 8E506D6187
+	for <fstests@vger.kernel.org>; Thu, 23 Nov 2023 17:58:47 +0900 (JST)
+Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
+	by yto-m1.gw.nic.fujitsu.com (Postfix) with ESMTP id C0953D296A
+	for <fstests@vger.kernel.org>; Thu, 23 Nov 2023 17:58:46 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab3.gw.nic.fujitsu.com (Postfix) with ESMTP id 563CF20076847
+	for <fstests@vger.kernel.org>; Thu, 23 Nov 2023 17:58:46 +0900 (JST)
+Received: from irides.g08.fujitsu.local (unknown [10.167.226.34])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 0B0E11A006F;
+	Thu, 23 Nov 2023 16:58:45 +0800 (CST)
+From: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: ruansy.fnst@fujitsu.com
+Subject: [PATCH] fsstress: unify verbose output format
+Date: Thu, 23 Nov 2023 16:58:43 +0800
+Message-ID: <20231123085843.1152470-1-ruansy.fnst@fujitsu.com>
+X-Mailer: git-send-email 2.42.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZV40XOGNJdru13XE@suse.de>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28014.006
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28014.006
+X-TMASE-Result: 10--4.019700-10.000000
+X-TMASE-MatchedRID: f7AFKO04MPxlJTodqNqEzk7nLUqYrlslFIuBIWrdOePfUZT83lbkEH38
+	DhskX88zN4nbTwZZBF6bbexJXGYzE5H0YXYnbGozFEUknJ/kEl7dB/CxWTRRu+rAZ8KTspSz/fO
+	JNp+A35t5vRp2WTYpa7Xj7Aq6xvP0grAvaGplPRvHMEDW8dd68Z1fhzxlXPo4KK8FXMWhGPd5W9
+	T2ECMvld+cKtFNzpqXIcmnZRhVxyrE4HwnSlEuHInEpJmLAFfpC1FNc6oqYVV+3BndfXUhXQ==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-On Wed, Nov 22, 2023 at 05:03:24PM +0000, Luis Henriques wrote:
-> Checking the keys in /proc/key-users is buggy, as there's an extra '\'
-> character: in '{print \$4}' the '$4' shouldn't be escaped otherwise the
-> 'awk' command will fail.  This has passed unnoticed because the output
-> is sent to '_user_do' function and the result assigned to a variable.
-> 
-> While there, replace 'awk' by $AWK_PROG.
-> 
-> Signed-off-by: Luis Henriques <lhenriques@suse.de>
-> ---
->  tests/generic/581 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> Hi!
-> 
-> Please note that I'm not an 'awk' expert and I may be wrong!  But if I do
-> see an error if I run something like:
-> 
-> $ awk '/^[[:space:]]*1000:/{print \$4}' /proc/key-users 
-> awk: cmd. line:1: /^[[:space:]]*1000:/{print \$4}
-> awk: cmd. line:1:                            ^ backslash not last character on line
-> 
-> But maybe this depends on the awk implementation, although I've tried a few.
-> 
-> diff --git a/tests/generic/581 b/tests/generic/581
-> index cabc7e1c69ab..1a4b571d40ce 100755
-> --- a/tests/generic/581
-> +++ b/tests/generic/581
-> @@ -92,7 +92,7 @@ while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys; do
->  done
->  
->  # Set the user key quota to the fsgqa user's current number of keys plus 5.
-> -orig_keys=$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1")
-> +orig_keys=$(_user_do "$AWK_PROG '/^[[:space:]]*$(id -u fsgqa):/{print $4}' /proc/key-users | cut -d/ -f1")
+Wrap offset, length within '[]' and remove meanless 't' in
+do_fallocate().
 
-The backslash is needed to prevent $4 from being expanded by bash, because the
-whole pipeline with 'awk' and 'cut' is in a double-quoted string:
+Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+---
+ ltp/fsstress.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-    "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | cut -d/ -f1"
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index abe287425..9778fce82 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -3810,7 +3810,7 @@ do_fallocate(opnum_t opno, long r, int mode)
+ 	mode |= FALLOC_FL_KEEP_SIZE & random();
+ 	e = fallocate(fd, mode, (loff_t)off, (loff_t)len) < 0 ? errno : 0;
+ 	if (v)
+-		printf("%d/%lld: fallocate(%s) %s %st %lld %lld %d\n",
++		printf("%d/%lld: fallocate(%s) %s%s [%lld,%lld] %d\n",
+ 		       procid, opno, translate_falloc_flags(mode),
+ 		       f.path, st, (long long)off, (long long)len, e);
+ 	free_pathname(&f);
+@@ -3932,7 +3932,7 @@ fiemap_f(opnum_t opno, long r)
+ 
+ 	e = ioctl(fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
+ 	if (v)
+-		printf("%d/%lld: ioctl(FIEMAP) %s%s %lld %lld (%s) %d\n",
++		printf("%d/%lld: ioctl(FIEMAP) %s%s [%lld,%lld,%s] %d\n",
+ 		       procid, opno, f.path, st, (long long)fiemap->fm_start,
+ 		       (long long) fiemap->fm_length,
+ 		       translate_fiemap_flags(fiemap->fm_flags), e);
+@@ -4866,7 +4866,7 @@ resvsp_f(opnum_t opno, long r)
+ 	fl.l_len = (off64_t)(random() % (1024 * 1024));
+ 	e = xfsctl(f.path, fd, XFS_IOC_RESVSP64, &fl) < 0 ? errno : 0;
+ 	if (v)
+-		printf("%d/%lld: xfsctl(XFS_IOC_RESVSP64) %s%s %lld %lld %d\n",
++		printf("%d/%lld: xfsctl(XFS_IOC_RESVSP64) %s%s [%lld,%lld] %d\n",
+ 		       procid, opno, f.path, st,
+ 			(long long)off, (long long)fl.l_len, e);
+ 	free_pathname(&f);
+@@ -5334,7 +5334,7 @@ unresvsp_f(opnum_t opno, long r)
+ 	fl.l_len = (off64_t)(random() % (1 << 20));
+ 	e = xfsctl(f.path, fd, XFS_IOC_UNRESVSP64, &fl) < 0 ? errno : 0;
+ 	if (v)
+-		printf("%d/%lld: xfsctl(XFS_IOC_UNRESVSP64) %s%s %lld %lld %d\n",
++		printf("%d/%lld: xfsctl(XFS_IOC_UNRESVSP64) %s%s [%lld,%lld] %d\n",
+ 		       procid, opno, f.path, st,
+ 			(long long)off, (long long)fl.l_len, e);
+ 	free_pathname(&f);
+-- 
+2.42.1
 
-Without escaping the $, bash would replace $4 with the empty string while it's
-doing expansions on the whole double-quoted string.
-
-- Eric
