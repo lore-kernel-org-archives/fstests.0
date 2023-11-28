@@ -1,56 +1,57 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="da/jJ56H"
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AEC7E4
-	for <fstests@vger.kernel.org>; Mon, 27 Nov 2023 07:03:13 -0800 (PST)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-5cc5988f85eso43656447b3.2
-        for <fstests@vger.kernel.org>; Mon, 27 Nov 2023 07:03:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1701097392; x=1701702192; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=vXVBwOB9nLusSs7mzP0iFdl0aR0JW9Fm9CGT0DKW2Tg=;
-        b=da/jJ56HrwTLyeReKx1nikTYOTGxFSm4s0Z6T4yf3RNc2Twg0UghAOn0JP8FyVNq4f
-         mlinlP35AyIzck446UPazZSYnUBXIqbcN1lG+XktVcJwpFQZEt6rWmcnZdNy2M/U9SCz
-         qzxlrE8qenCs1XyWv4INUF6ME6SJKKxlNxoWfQEqjEAaWHcVOEjddENRtECR/Ezp8tKq
-         K0vh9G7/HHCPoJeuTOOwT54Wb1x/EpGv9ZoCUEdcv7ywl2We3ZzPzvGyhDLIm+PArRwF
-         x+e+xlup7OGxU8viRCu/EYpXT8nNWLhDnsHjtQbWG1SRoZl+Z7wzqt/j73XQlT/uXH/r
-         nvVg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701097392; x=1701702192;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vXVBwOB9nLusSs7mzP0iFdl0aR0JW9Fm9CGT0DKW2Tg=;
-        b=c6WWUU/vyW/LLawPUkorrwzT/HW4wemEv8PwCPxljezfHz7fPE2XByVkiUs7FFZGnv
-         oX617ZvfQpNGBz5W3eQ20IZSQWuh9MEaBhIVPq45DByeetvKH0oOFaGwjR9vC577bJRb
-         89lHkm5Cbtrmv5YwTd4BZw59jVVFVxn59HNib2exoOPWrQfB255PW5iYrh3WBBbE8Olq
-         nigxGG20dlt9REjCJ/OOdHkSD1JHnGr4qAW5tJ+LcE4STFaHviMHnvuQuQ2O1m3SQk7S
-         xJ9lp4m10+Xwp4/x98efYEJC4MfDA8qBoUWZNFBKr2cytjYPlY16MLpBLEMfgCwLTfvi
-         zX/w==
-X-Gm-Message-State: AOJu0Yx6DWaEQHJpuphtzbljPQ2xGfN1lGpBv0J+dc6fk9ua8lOGKpGA
-	Wcw+icUZEhLtZ9/pRfim6H2xgA==
-X-Google-Smtp-Source: AGHT+IHz6c6wyrNd3+Y7MUq6OS2h0DIgz7ENzcvGpb/ZaYW309HyOR4TWcaO3oklQA43sRVfbjLSlg==
-X-Received: by 2002:a0d:c843:0:b0:5ca:e7e5:e4f9 with SMTP id k64-20020a0dc843000000b005cae7e5e4f9mr12538649ywd.36.1701097391977;
-        Mon, 27 Nov 2023 07:03:11 -0800 (PST)
-Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id b64-20020a0df243000000b00598d67585d7sm3347051ywf.117.2023.11.27.07.03.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Nov 2023 07:03:11 -0800 (PST)
-Date: Mon, 27 Nov 2023 10:03:10 -0500
-From: Josef Bacik <josef@toxicpanda.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	Sweet Tea Dorminy <sweettea-kernel@dorminy.me>,
-	Filipe Manana <fdmanana@kernel.org>
-Subject: Re: [PATCH 07/12] btrfs: test snapshotting encrypted subvol
-Message-ID: <20231127150310.GA2366036@perftesting>
-References: <cover.1696969376.git.josef@toxicpanda.com>
- <9a17afb133849c2321bb98c07c48cff2aaf1d87a.1696969376.git.josef@toxicpanda.com>
- <CAL3q7H5eg0Xs+-JYnHnh11ogUB=GSaCGT_C0a4QFVnj_--oFng@mail.gmail.com>
- <4507f07c-f101-e223-a804-7d0d69b07b76@oracle.com>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="egRXycHM";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="dNUGz5jY"
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9532B5
+	for <fstests@vger.kernel.org>; Tue, 28 Nov 2023 06:16:48 -0800 (PST)
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 39C481F74B;
+	Tue, 28 Nov 2023 14:16:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1701181006; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6jl2YC6W6W3wySIER/o/p5C4JshzHeS/AZqPrlToeoA=;
+	b=egRXycHMd0r3rOyF+sAQERUq4DUfyBWIs5QhWX3OS/y9NiLi8QevDZnP9dfrDNPPjxwHms
+	j3apTLxonqMgmmbFFjekDCoJAizgia7e7Da5qWaSdnRTy3+zOk0L328wRH6qMgs0WGH61c
+	XiaUa3v1mG+iMXjZhRVpYXvlvZVyUiM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1701181006;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6jl2YC6W6W3wySIER/o/p5C4JshzHeS/AZqPrlToeoA=;
+	b=dNUGz5jY+XbUpmvEfDeqz+UhNZoUC9WK8ezKXCjBU6a1FkJaKf2ALOQPzWPn6HBNaPGHCa
+	bAMEw3d9nPurwpAQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id C26FB1343E;
+	Tue, 28 Nov 2023 14:16:45 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id ynMrKk32ZWUsOgAAD6G6ig
+	(envelope-from <lhenriques@suse.de>); Tue, 28 Nov 2023 14:16:45 +0000
+Received: from localhost (brahms.olymp [local])
+	by brahms.olymp (OpenSMTPD) with ESMTPA id d55bdbca;
+	Tue, 28 Nov 2023 14:16:44 +0000 (UTC)
+From: Luis Henriques <lhenriques@suse.de>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/581: remove extra escape character from awk line
+In-Reply-To: <ZV87sT0lz0QqupDO@camandro.org> (=?utf-8?Q?=22Lu=C3=ADs?=
+ Henriques"'s message of
+	"Thu, 23 Nov 2023 11:46:57 +0000")
+References: <ZV40XOGNJdru13XE@suse.de> <20231122231648.GA1541@sol.localdomain>
+	<ZV87sT0lz0QqupDO@camandro.org>
+Date: Tue, 28 Nov 2023 14:16:44 +0000
+Message-ID: <87plzurmib.fsf@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -58,143 +59,115 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <4507f07c-f101-e223-a804-7d0d69b07b76@oracle.com>
+Content-Transfer-Encoding: quoted-printable
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.30 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 NEURAL_HAM_LONG(-1.00)[-0.999];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCVD_COUNT_THREE(0.00)[4];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email,camandro.org:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_LAST(0.00)[];
+	 MID_RHS_MATCH_FROM(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Score: -4.30
 
-On Mon, Nov 27, 2023 at 10:16:28PM +0800, Anand Jain wrote:
-> 
-> 
-> On 31/10/2023 23:39, Filipe Manana wrote:
-> > On Tue, Oct 10, 2023 at 9:26 PM Josef Bacik <josef@toxicpanda.com> wrote:
-> > > 
-> > > From: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-> > > 
-> > > Make sure that snapshots of encrypted data are readable and writeable.
-> > > 
-> > > Test deliberately high-numbered to not conflict.
-> > > 
-> > > Signed-off-by: Sweet Tea Dorminy <sweettea-kernel@dorminy.me>
-> > > ---
-> > >   tests/btrfs/614     |  76 ++++++++++++++++++++++++++++++
-> > >   tests/btrfs/614.out | 111 ++++++++++++++++++++++++++++++++++++++++++++
-> > >   2 files changed, 187 insertions(+)
-> > >   create mode 100755 tests/btrfs/614
-> > >   create mode 100644 tests/btrfs/614.out
-> > > 
-> > > diff --git a/tests/btrfs/614 b/tests/btrfs/614
-> > > new file mode 100755
-> > > index 00000000..87dd27f9
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/614
-> > > @@ -0,0 +1,76 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 614
-> > > +#
-> > > +# Try taking a snapshot of an encrypted subvolume. Make sure the snapshot is
-> > > +# still readable. Rewrite part of the subvol with the same data; make sure it's
-> > > +# still readable.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto encrypt
-> > 
-> > Should be in the 'snapshot' and 'subvol' groups too, as it creates a
-> > snapshot and a subvolume.
-> > Also maybe in the 'quick' group too, see the comments further below.
-> > 
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/encrypt
-> > > +. ./common/filter
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs btrfs
-> > > +
-> > > +_require_test
-> > 
-> > The test device is not used, so this can go away.
-> > 
-> > > +_require_scratch
-> > > +_require_scratch_encryption -v 2
-> > > +_require_command "$KEYCTL_PROG" keyctl
-> > > +
-> > > +_scratch_mkfs_encrypted &>> $seqres.full
-> > > +_scratch_mount
-> > > +
-> > > +udir=$SCRATCH_MNT/reference
-> > > +dir=$SCRATCH_MNT/subvol
-> > > +dir2=$SCRATCH_MNT/subvol2
-> > > +$BTRFS_UTIL_PROG subvolume create $dir >> $seqres.full
-> > > +mkdir $udir
-> > > +
-> > > +_set_encpolicy $dir $TEST_KEY_IDENTIFIER
-> > > +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-> > > +
-> > > +# get files with lots of extents by using backwards writes.
-> > > +for j in `seq 0 50`; do
-> > > +       for i in `seq 20 -1 1`; do
-> > > +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> > > +               $dir/foo-$j >> $seqres.full | _filter_xfs_io
-> > > +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> > > +               $udir/foo-$j >> $seqres.full | _filter_xfs_io
-> > > +       done
-> > > +done
-> > > +
-> > > +$BTRFS_UTIL_PROG subvolume snapshot $dir $dir2 | _filter_scratch
-> > > +
-> > > +_scratch_remount
-> > > +_add_enckey $SCRATCH_MNT "$TEST_RAW_KEY"
-> > > +sleep 30
-> > 
-> > What's the sleep for?
-> > Is the 30 seconds to wait for a transaction commit?
-> > If it is then I'd rather mount the fs with -o commit=3 (or some other
-> > low value) and then "sleep 3" to make the test run much faster.
-> > A comment explaining why the sleep is there, what is its purpose,
-> > should also be in place.
-> > 
-> > > +echo "Diffing $dir and $dir2"
-> > > +diff $dir $dir2
-> > > +
-> > > +echo "Rewriting $dir2 partly"
-> > > +# rewrite half of each file in the snapshot
-> > > +for j in `seq 0 50`; do
-> > > +       for i in `seq 10 -1 1`; do
-> > > +               $XFS_IO_PROG -f -d -c "pwrite $(($i * 4096)) 4096" \
-> > > +               $dir2/foo-$j >> $seqres.full | _filter_xfs_io
-> > > +       done
-> > > +done
-> > > +
-> > > +echo "Diffing $dir and $dir2"
-> > > +diff $dir $dir2
-> > > +
-> > > +echo "Dropping key and diffing"
-> > > +_rm_enckey $SCRATCH_MNT $TEST_KEY_IDENTIFIER
-> > > +diff $dir $dir2 |& _filter_scratch | _filter_nokey_filenames
-> > > +
-> > > +$BTRFS_UTIL_PROG subvolume delete $dir > /dev/null 2>&1
-> > 
-> > What's the purpose of this subvolume delete?
-> > It's ignoring stdout and stderr, so it doesn't care whether it
-> > succeeds or fails, and we
-> > don't do any tests/checks after it.
-> > 
-> > Thanks.
-> 
-> 
-> Josef, I'm planning to get this patchset ready for the PR. Are you planning
-> to address the review comments as mentioned above? These
-> aren't bugs, but they definitely add more clarity and adds to the
-> missing groups.
-> 
+Lu=C3=ADs Henriques <henrix@camandro.org> writes:
 
-Can you hold off Anand?  I haven't responded because I've been working on this
-series and making appropriate changes to my local branch, I'll send a refreshed
-version of the patches when I send the next set of the fscrypt enablement
-patches.  I've got all the comments addressed locally, it'll save you some work.
-Thanks,
+> (Sorry for replying from private email address)
+>
+> On Wed, Nov 22, 2023 at 03:16:48PM -0800, Eric Biggers wrote:
+>> On Wed, Nov 22, 2023 at 05:03:24PM +0000, Luis Henriques wrote:
+>> > Checking the keys in /proc/key-users is buggy, as there's an extra '\'
+>> > character: in '{print \$4}' the '$4' shouldn't be escaped otherwise the
+>> > 'awk' command will fail.  This has passed unnoticed because the output
+>> > is sent to '_user_do' function and the result assigned to a variable.
+>> >=20
+>> > While there, replace 'awk' by $AWK_PROG.
+>> >=20
+>> > Signed-off-by: Luis Henriques <lhenriques@suse.de>
+>> > ---
+>> >  tests/generic/581 | 2 +-
+>> >  1 file changed, 1 insertion(+), 1 deletion(-)
+>> >=20
+>> > Hi!
+>> >=20
+>> > Please note that I'm not an 'awk' expert and I may be wrong!  But if I=
+ do
+>> > see an error if I run something like:
+>> >=20
+>> > $ awk '/^[[:space:]]*1000:/{print \$4}' /proc/key-users=20
+>> > awk: cmd. line:1: /^[[:space:]]*1000:/{print \$4}
+>> > awk: cmd. line:1:                            ^ backslash not last char=
+acter on line
+>> >=20
+>> > But maybe this depends on the awk implementation, although I've tried =
+a few.
+>> >=20
+>> > diff --git a/tests/generic/581 b/tests/generic/581
+>> > index cabc7e1c69ab..1a4b571d40ce 100755
+>> > --- a/tests/generic/581
+>> > +++ b/tests/generic/581
+>> > @@ -92,7 +92,7 @@ while grep -E -q '^[0-9a-f]+ [^ ]*i[^ ]*' /proc/keys=
+; do
+>> >  done
+>> >=20=20
+>> >  # Set the user key quota to the fsgqa user's current number of keys p=
+lus 5.
+>> > -orig_keys=3D$(_user_do "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4=
+}' /proc/key-users | cut -d/ -f1")
+>> > +orig_keys=3D$(_user_do "$AWK_PROG '/^[[:space:]]*$(id -u fsgqa):/{pri=
+nt $4}' /proc/key-users | cut -d/ -f1")
+>>=20
+>> The backslash is needed to prevent $4 from being expanded by bash, becau=
+se the
+>> whole pipeline with 'awk' and 'cut' is in a double-quoted string:
+>>=20
+>>     "awk '/^[[:space:]]*$(id -u fsgqa):/{print \$4}' /proc/key-users | c=
+ut -d/ -f1"
+>>=20
+>> Without escaping the $, bash would replace $4 with the empty string whil=
+e it's
+>> doing expansions on the whole double-quoted string.
+>
+> /me blushes
+>
+> Yeah, looking closer it makes sense.  Sorry for the noise.  I'm currently
+> investigating a test failure (which I can't reproduce locally) where
+> 'orig_key' unexpectedly is set to '1' and makes the test fail because it
+> was supposed to be '0'.  That's when this caught my attention.  Anyway,
+> I'll go look somewhere else.
 
-Josef
+OK, I'm not 100% sure yet, but I've an idea about what's going on with
+this test failure.
+
+I _think_ that even after the following is done in the test:
+
+    _user_do_rm_enckey $SCRATCH_MNT $keyid
+    _scratch_cycle_mount
+
+the key garbage collector may not have finish running.  And then, when we
+read '/proc/key-users', we can race against key_user_put(), which needs
+key_user_lock, which is also grabbed while the proc file seq_operations
+are run.
+
+Eric, does this make any sense?  There is a loop in the test to wait for
+invalidated keys, but I believe it's not relevant anymore since commit
+d7e7b9af104c ("fscrypt: stop using keyrings subsystem for
+fscrypt_master_key").  But I might be misunderstanding the code.
+
+Cheers,
+--=20
+Lu=C3=ADs
