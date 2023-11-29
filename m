@@ -1,148 +1,142 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2a07:de40:b251:101:10:150:64:1])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE5949D
-	for <fstests@vger.kernel.org>; Tue, 28 Nov 2023 10:25:02 -0800 (PST)
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 5AF01219A5;
-	Tue, 28 Nov 2023 18:25:01 +0000 (UTC)
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 113BB13763;
-	Tue, 28 Nov 2023 18:25:01 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id rMKxAH0wZmVyBwAAD6G6ig
-	(envelope-from <lhenriques@suse.de>); Tue, 28 Nov 2023 18:25:01 +0000
-Received: from localhost (brahms.olymp [local])
-	by brahms.olymp (OpenSMTPD) with ESMTPA id 76b3bab5;
-	Tue, 28 Nov 2023 18:25:00 +0000 (UTC)
-From: Luis Henriques <lhenriques@suse.de>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/581: remove extra escape character from awk line
-In-Reply-To: <20231128173734.GD1148@sol.localdomain> (Eric Biggers's message
-	of "Tue, 28 Nov 2023 09:37:34 -0800")
-References: <ZV40XOGNJdru13XE@suse.de> <20231122231648.GA1541@sol.localdomain>
-	<ZV87sT0lz0QqupDO@camandro.org> <87plzurmib.fsf@suse.de>
-	<20231128173734.GD1148@sol.localdomain>
-Date: Tue, 28 Nov 2023 18:25:00 +0000
-Message-ID: <87edg9spkz.fsf@suse.de>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EED485398
+	for <fstests@vger.kernel.org>; Wed, 29 Nov 2023 05:38:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eLHVxsGZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 67C37C433C7;
+	Wed, 29 Nov 2023 05:38:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701236326;
+	bh=Krc1QphMiJh7YBuxRNayke3cG+JtC7P9Bn8MSEOy090=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=eLHVxsGZjAFFKn06xRe1JsrzVkWyHx1HZ7EH8y5BU93G0Fa4VPCAMjkIQp0xjztpz
+	 ikUjje1Tjwo8Da4FZPctd2RNnit+BRNPrOg4V4ofK1WiGE+7Uyjp4NQjeZ7jmpjBgo
+	 nWHYOK8rFlIxVLfA0iYwhauiNVGphUTZwxJnBhXooj3i23BQIOmx5JmPkIidTavYgv
+	 /40s+iF8kns3ssO9q54YYJcvt+JXT4leHSTECBHaYhMGN1wD090yCch7/ait4xBcUN
+	 pvqLVTmA0TYs2zEqrbmIlFS/HjfAyrVySINc8Y7NZ0ICOl8YlCgOBv3qydyDGCCbhi
+	 YRP3YQWuwX4jA==
+Date: Tue, 28 Nov 2023 21:38:45 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Baokun Li <libaokun1@huawei.com>
+Cc: fstests@vger.kernel.org, zlang@redhat.com, guaneryu@gmail.com,
+	amir73il@gmail.com, ritesh.list@gmail.com, yangerkun@huawei.com
+Subject: Re: [PATCH v5] ext4: Regression test of ext4_lblk_t overflow
+Message-ID: <20231129053845.GP36211@frogsfrogsfrogs>
+References: <20231124115356.2438805-1-libaokun1@huawei.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Spamd-Bar: ++
-X-Spam-Score: 2.73
-X-Rspamd-Server: rspamd1
-Authentication-Results: smtp-out1.suse.de;
-	dkim=none;
-	spf=softfail (smtp-out1.suse.de: 2a07:de40:b281:104:10:150:64:97 is neither permitted nor denied by domain of lhenriques@suse.de) smtp.mailfrom=lhenriques@suse.de;
-	dmarc=fail reason="No valid SPF, No valid DKIM" header.from=suse.de (policy=none)
-X-Rspamd-Queue-Id: 5AF01219A5
-X-Spamd-Result: default: False [2.73 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%];
-	 MIME_GOOD(-0.10)[text/plain];
-	 NEURAL_HAM_LONG(-0.98)[-0.984];
-	 R_SPF_SOFTFAIL(4.60)[~all:c];
-	 RCVD_COUNT_THREE(0.00)[4];
-	 MX_GOOD(-0.01)[];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 NEURAL_HAM_SHORT(-0.08)[-0.375];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 R_DKIM_NA(2.20)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_LAST(0.00)[];
-	 MID_RHS_MATCH_FROM(0.00)[];
-	 DMARC_POLICY_SOFTFAIL(0.10)[suse.de : No valid SPF, No valid DKIM,none]
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231124115356.2438805-1-libaokun1@huawei.com>
 
-Eric Biggers <ebiggers@kernel.org> writes:
+On Fri, Nov 24, 2023 at 07:53:56PM +0800, Baokun Li wrote:
+> Append writes to a file with logical block numbers close to 0xffffffff and
+> observe if a kernel crash is caused by ext4_lblk_t overflow triggering
+> BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
+> bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
+> 
+> Signed-off-by: Baokun Li <libaokun1@huawei.com>
 
-> On Tue, Nov 28, 2023 at 02:16:44PM +0000, Luis Henriques wrote:
->> >
->> > Yeah, looking closer it makes sense.  Sorry for the noise.  I'm curren=
-tly
->> > investigating a test failure (which I can't reproduce locally) where
->> > 'orig_key' unexpectedly is set to '1' and makes the test fail because =
-it
->> > was supposed to be '0'.  That's when this caught my attention.  Anyway,
->> > I'll go look somewhere else.
->>=20
->> OK, I'm not 100% sure yet, but I've an idea about what's going on with
->> this test failure.
->>=20
->> I _think_ that even after the following is done in the test:
->>=20
->>     _user_do_rm_enckey $SCRATCH_MNT $keyid
->>     _scratch_cycle_mount
->>=20
->> the key garbage collector may not have finish running.  And then, when we
->> read '/proc/key-users', we can race against key_user_put(), which needs
->> key_user_lock, which is also grabbed while the proc file seq_operations
->> are run.
->>=20
->> Eric, does this make any sense?  There is a loop in the test to wait for
->> invalidated keys, but I believe it's not relevant anymore since commit
->> d7e7b9af104c ("fscrypt: stop using keyrings subsystem for
->> fscrypt_master_key").  But I might be misunderstanding the code.
->
-> Thanks for looking into this!  I had noticed this test is still flaky on =
-arm64
-> but haven't had a chance to look into it.  Yes, it's probably related to =
-the key
-> garbage collector again.  The test needs to wait for the fscrypt "user" k=
-eys
-> (key_type_fscrypt_user in the kernel) to be released from the quota.  I t=
-hink
-> that loop in the test does not have the intended effect because it waits =
-for
-> "invalidated" keys, but the fscrypt "user" keys (which are charged to the=
- quota)
-> are never invalidated; they're just released normally.  There used to be =
-another
-> key (in the "keyrings" subsystem sense of the word "key") associated with=
- each
-> fscrypt key, and that key was indeed invalidated, but that's no longer th=
-e case.
->
+Looks good to me now,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Awesome, thanks for confirming this.  That loop probably made sense back
-when keys were invalidated -- that behaviour was changed by the commit I
-mentioned, I believe.  Anyway, it's probably better to keep it the loop
-for testing old kernels, as it doesn't really hurt.
+--D
 
->=20
-> Maybe there's a better way to wait for the key garbage collector to
-> finish.
->
-> Or the kernel could be changed to make releasing the key quota be synchro=
-nous.
-> Unfortunately the keyrings subsystem doesn't seem to work that way, and f=
-scrypt
-> is tying into the key quota from the keyrings subsystem, so it is subject=
- to its
-> limitations.  But maybe there's a way to do it.
-
-Hmm... yeah, that requires a closer look at that subsystem to see if
-something can be done.  I'll try to find something there that would make
-that test more reliable.
-
-Cheers,
---=20
-Lu=C3=ADs
+> ---
+> V1->V2:
+> 	Changes to make the use case more generic, not just for testing
+> 	ext4.(ext4 and xfs have been tested)
+> V2->V3:
+> 	Clean up the code and remove hardcoding.
+> V3->V4:
+> 	Correct the description and modify finsert related code to
+> 	make the test case easier to understand.
+> V4->V5:
+> 	Modify the image size to 80M.
+> 	Modify the space reserved in the file to 2M.
+> 	Now the test case can trigger the original problem at ext4
+> 	1k,4k,64k block size.
+> 
+>  tests/generic/737     | 54 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/737.out |  2 ++
+>  2 files changed, 56 insertions(+)
+>  create mode 100755 tests/generic/737
+>  create mode 100644 tests/generic/737.out
+> 
+> diff --git a/tests/generic/737 b/tests/generic/737
+> new file mode 100755
+> index 00000000..b4bf33e4
+> --- /dev/null
+> +++ b/tests/generic/737
+> @@ -0,0 +1,54 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 737
+> +#
+> +# Append writes to a file with logical block numbers close to 0xffffffff
+> +# and observe if a kernel crash is caused by ext4_lblk_t overflow triggering
+> +# BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
+> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
+> +#
+> +. ./common/preamble
+> +. ./common/populate
+> +_begin_fstest auto quick insert prealloc
+> +
+> +# real QA test starts here
+> +[[ "$FSTYP" =~ ext* ]] && _fixed_by_kernel_commit bc056e7163ac \
+> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
+> +
+> +_require_odirect
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "finsert"
+> +
+> +dev_size=$((80 * 1024 * 1024))
+> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +
+> +_scratch_mount
+> +file_blksz="$(_get_file_block_size ${SCRATCH_MNT})"
+> +
+> +# Reserve 1M space
+> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full
+> +
+> +# Create a file with logical block numbers close to 0xffffffff
+> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full
+> +max_pos=$(( 0xffffffff * file_blksz ))
+> +finsert_len=$(( max_pos - ((10 + 2) << 20) ))
+> +$XFS_IO_PROG -f -c "finsert 1M ${finsert_len}" "${SCRATCH_MNT}/file" >> $seqres.full
+> +
+> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
+> +nr_free=$(stat -f -c '%f' ${SCRATCH_MNT})
+> +_fill_fs $((nr_free * file_blksz)) ${SCRATCH_MNT}/fill $file_blksz 0 >> $seqres.full 2>&1
+> +sync
+> +
+> +# Remove reserved space to gain free space for allocation
+> +rm -f ${SCRATCH_MNT}/tmp
+> +
+> +# Trying to allocate two blocks triggers BUG_ON.
+> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 $((2 * file_blksz))" >> $seqres.full
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/737.out b/tests/generic/737.out
+> new file mode 100644
+> index 00000000..67b83d78
+> --- /dev/null
+> +++ b/tests/generic/737.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 737
+> +Silence is golden
+> -- 
+> 2.31.1
+> 
