@@ -1,39 +1,31 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JvJtjDzc"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AAA28F
-	for <fstests@vger.kernel.org>; Wed, 29 Nov 2023 13:36:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1701293808;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5GixFoov6jiXZ9zFkX121wR8CuGEds8cNEpO8FfpBkU=;
-	b=JvJtjDzcv5Q+1rLlz151ol4HifdqxOe4gy36+w1pwpmJIBGD2+2mwafru0y2sMvq+6gv8v
-	TfAfqHeJG1D4Up5Wl8fR1hZ0mnbRs0Ih8iaLTceLciXDSZuI5/ZKL1/foS26bnPear1r5V
-	/Vksispz8W09WDnQMZ064LkwUSwN9l8=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-210-PNTOOKvLOqu9sHIp4FlKfg-1; Wed, 29 Nov 2023 16:36:45 -0500
-X-MC-Unique: PNTOOKvLOqu9sHIp4FlKfg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+Authentication-Results: smtp.subspace.kernel.org; dkim=none
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2a07:de40:b251:101:10:150:64:2])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 243F610D0
+	for <fstests@vger.kernel.org>; Thu, 30 Nov 2023 03:03:10 -0800 (PST)
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BEE8785A58C;
-	Wed, 29 Nov 2023 21:36:44 +0000 (UTC)
-Received: from redhat.com (unknown [10.2.17.161])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id 82FE35028;
-	Wed, 29 Nov 2023 21:36:44 +0000 (UTC)
-Date: Wed, 29 Nov 2023 15:36:43 -0600
-From: Bill O'Donnell <bodonnel@redhat.com>
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
-Subject: Re: [PATCH v2] generic/459: improve shutdown/read-only check to
- accommodate bcachefs
-Message-ID: <ZWeu623M2xNW7IlH@redhat.com>
-References: <20231129201614.347901-1-bfoster@redhat.com>
+	by smtp-out2.suse.de (Postfix) with ESMTPS id B7BBC1FCEE;
+	Thu, 30 Nov 2023 11:03:07 +0000 (UTC)
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 8AAFC138E5;
+	Thu, 30 Nov 2023 11:03:07 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id D7dIH+traGVIPQAAn2gu4w
+	(envelope-from <pvorel@suse.cz>); Thu, 30 Nov 2023 11:03:07 +0000
+Date: Thu, 30 Nov 2023 12:02:57 +0100
+From: Petr Vorel <pvorel@suse.cz>
+To: ltp@lists.linux.it
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] Remove mongo test framework
+Message-ID: <20231130110257.GA3217381@pevik>
+Reply-To: Petr Vorel <pvorel@suse.cz>
+References: <20231013070404.695418-1-pvorel@suse.cz>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,90 +34,60 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231129201614.347901-1-bfoster@redhat.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.5
+In-Reply-To: <20231013070404.695418-1-pvorel@suse.cz>
+X-Spamd-Bar: ++++++++++++
+Authentication-Results: smtp-out2.suse.de;
+	dkim=none;
+	dmarc=none;
+	spf=softfail (smtp-out2.suse.de: 2a07:de40:b281:104:10:150:64:98 is neither permitted nor denied by domain of pvorel@suse.cz) smtp.mailfrom=pvorel@suse.cz
+X-Rspamd-Server: rspamd2
+X-Spamd-Result: default: False [12.16 / 50.00];
+	 ARC_NA(0.00)[];
+	 HAS_REPLYTO(0.30)[pvorel@suse.cz];
+	 REPLYTO_EQ_FROM(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_SPF_SOFTFAIL(4.60)[~all:c];
+	 DMARC_NA(1.20)[suse.cz];
+	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 MX_GOOD(-0.01)[];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 NEURAL_SPAM_LONG(3.48)[0.994];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 R_DKIM_NA(2.20)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.01)[48.45%]
+X-Spam-Score: 12.16
+X-Rspamd-Queue-Id: B7BBC1FCEE
 
-On Wed, Nov 29, 2023 at 03:16:14PM -0500, Brian Foster wrote:
-> generic/459 occasionally fails on bcachefs because the deliberately
-> induced I/O errors caused by exhausting the overprovisioned thin
-> pool can lead to filesystem shutdown. This test considers this
-> expected behavior on certain fs', but only checks for the ext4
-> remount read-only behavior. bcachefs does a similar emergency
-> read-only transition in response to certain I/O errors, but it
-> behaves more similar to an XFS shutdown and doesn't necessarily
-> reflect "ro" state in the mount table (unless induced by userspace).
-> 
-> Since the test already runs a touch command to help trigger the ext4
-> error handling sequence, this can be tweaked to serve double duty
-> and also more accurately detect read-only status on bcachefs.
-> Refactor into a small helper, check for touch command failure, and
-> consider the fs read-only if either that or the mount entry check
-> indicates it.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+Hi,
 
-Looks fine.
+> Nearly 20 years old code for testing reiserfs, ext2 and jfs has never
+> been properly integrated into LTP properly (not in runtest file).
 
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+> The main motivation was probably to test reiserfs, which has been
+> deprecated and no longer used in the production.
 
+FYI merged.
+
+Kind regards,
+Petr
+
+> Signed-off-by: Petr Vorel <pvorel@suse.cz>
 > ---
-> 
-> v2:
-> - Drop error filtering and just check touch failure.
-> - Comment tweaks.
-> v1: https://lore.kernel.org/fstests/20231117144317.10882-1-bfoster@redhat.com/
-> 
->  tests/generic/459 | 28 +++++++++++++++++++++-------
->  1 file changed, 21 insertions(+), 7 deletions(-)
-> 
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index 4dd7a43b..c3f0b2b0 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -57,6 +57,24 @@ origpsize=200
->  virtsize=300
->  newpsize=300
->  
-> +# Check whether the filesystem has shutdown or remounted read-only. Shutdown
-> +# behavior can differ based on filesystem and configuration. Some fs' may not
-> +# have remounted without an additional write while others may have shutdown but
-> +# do not necessarily reflect read-only state in the mount options. Check both
-> +# here by first trying a simple write and following with an explicit ro check.
-> +is_shutdown_or_ro()
-> +{
-> +	ro=0
-> +
-> +	# if the fs has not shutdown, this may help trigger a remount-ro
-> +	touch $SCRATCH_MNT/newfile > /dev/null 2>&1 || ro=1
-> +
-> +	_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro" > /dev/null
-> +	[ $? == 0 ] && ro=1
-> +
-> +	echo $ro
-> +}
-> +
->  # Ensure we have enough disk space
->  _scratch_mkfs_sized $((350 * 1024 * 1024)) >>$seqres.full 2>&1
->  
-> @@ -113,13 +131,9 @@ ret=$?
->  #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
->  #	  without getting stuck.
->  if [ $ret -ne 0 ]; then
-> -	# freeze failed, filesystem should reject further writes and remount
-> -	# as readonly. Sometimes the previous write process won't trigger
-> -	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
-> -	# filesystems see the metadata I/O error.
-> -	touch $SCRATCH_MNT/newfile >/dev/null 2>&1
-> -	ISRO=$(_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro")
-> -	if [ -n "$ISRO" ]; then
-> +	# freeze failed, filesystem should reject further writes
-> +	ISRO=`is_shutdown_or_ro`
-> +	if [ $ISRO == 1 ]; then
->  		echo "Test OK"
->  	else
->  		echo "Freeze failed and FS isn't Read-Only. Test Failed"
-> -- 
-> 2.41.0
-> 
-> 
+> Hi,
 
+> I'm not sure if algorithm in reiser_fract_tree.c or anything else from
+> this very old testsuite would be useful for folks in fstests, I doubt,
+> but just for sure Cc them.
+
+> Kind regards,
+> Petr
+...
