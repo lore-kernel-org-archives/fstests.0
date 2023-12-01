@@ -1,93 +1,92 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2a07:de40:b251:101:10:150:64:2])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 243F610D0
-	for <fstests@vger.kernel.org>; Thu, 30 Nov 2023 03:03:10 -0800 (PST)
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id B7BBC1FCEE;
-	Thu, 30 Nov 2023 11:03:07 +0000 (UTC)
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 8AAFC138E5;
-	Thu, 30 Nov 2023 11:03:07 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id D7dIH+traGVIPQAAn2gu4w
-	(envelope-from <pvorel@suse.cz>); Thu, 30 Nov 2023 11:03:07 +0000
-Date: Thu, 30 Nov 2023 12:02:57 +0100
-From: Petr Vorel <pvorel@suse.cz>
-To: ltp@lists.linux.it
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] Remove mongo test framework
-Message-ID: <20231130110257.GA3217381@pevik>
-Reply-To: Petr Vorel <pvorel@suse.cz>
-References: <20231013070404.695418-1-pvorel@suse.cz>
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="I8zmJv/U";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="xhXAeSrQ"
+Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com [66.111.4.25])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AEA9D54;
+	Fri,  1 Dec 2023 13:08:18 -0800 (PST)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+	by mailout.nyi.internal (Postfix) with ESMTP id B7AE55C01D6;
+	Fri,  1 Dec 2023 16:08:17 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute3.internal (MEProxy); Fri, 01 Dec 2023 16:08:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:sender:subject
+	:subject:to:to; s=fm2; t=1701464897; x=1701551297; bh=nh8JeosZ65
+	b+tKpjl7Qmw/fSpCn0JuTPBXOhkR4kHaU=; b=I8zmJv/UdXXOjksjsLDhsxxI4n
+	fbOdvP0KJ3Mqq8BnjkEmsgaYBJyryvzijP6TvYpwdJua9DxWk/z2QYzygHLPOXdc
+	5VNhsVF4DNfv/CMszhNLLyLRuRo+/s39LBaW25KSy8uP+qyfFFpt4AOPBSEQ2fAX
+	b0BQ5y4omEs84640OrxV9MEQNdNRXiZInprYYvMHhEg11gfo1I/3uQ5b/xQBPrA/
+	rlNpOuc1T6JzhHw/Pf+gOnT4RV2dsVaaWhagNGAQtoE/IFq8okwji3b1YQ4ibb10
+	/8CP6om+5O9975d43stGXOuBTtkicYe2s+O2PiuUOM2YVv7mYbBkDIk4T2Wg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:sender:subject:subject:to:to
+	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1701464897; x=1701551297; bh=nh8JeosZ65b+tKpjl7Qmw/fSpCn0
+	JuTPBXOhkR4kHaU=; b=xhXAeSrQJVozFeYnwwuKJJCqGHTwg9MEVu6jSyG6f5kH
+	3deNIdIyOHO3IofSStbEs1f5vOO0tH0AZE3ldhfSoMMRMnMPrQ758/utre1arAgI
+	7FcMCXTakaAeB2AYWTkQqgofHCi+D0P6OcxPd2j53G8ydhfpmr1Cz00DYl4TOMnf
+	7e4OP/z5k4ASrkHdfjBNjEKOkxHgwv7lm2jMSdzwyAma/3u4z/byiH+V/7eMTxL/
+	5+hh7igegoRjQg+v7WJm69ARlfEo6VOFVNGp1QUKQ5GUqCu5NAaZdQuZdVetI0Wl
+	2FvMNYN+v9zwX1kdTwrbf8QNEyeqWqxfdgg7rFriOA==
+X-ME-Sender: <xms:QUtqZSd_-T5m8PEtm9eOMYsjBUmNZXrxrG8aRZYvc0Cvdk78g7EaeQ>
+    <xme:QUtqZcNJYkq0wBe7O9W0dJA82mQNlL5v3ienJnJ0l89su9BHzZFaMAy7-EwjkVrya
+    dnYd9pM2cgM6yEqIdc>
+X-ME-Received: <xmr:QUtqZTjyQgt2BjMa3YixM3KaFteqB2i4DxwHdPq4BlGmAMaLP8MNWrTmBfyb0SLQVwvBP_q-7FeUazbWgHScA8qOTQk>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrudeiledgudeghecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:QUtqZf_dohFA2w7vyxtCDIZ_bAaiDDP1TGviISIL46qAPrAkBzjE8w>
+    <xmx:QUtqZetjI9tSoyypgT3fEc9SIsA9rmmBkL85O2GdDLW1wFNvBioh6w>
+    <xmx:QUtqZWFJYYFdcysc_EVJmmtu9eBcO61Y7K4InBgRy0FsOiOY4sZpyg>
+    <xmx:QUtqZTUKEgADOHWHTFMfn3j4ELgirKo7_o1cVm0Hw6R3H4oDjN2M4w>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 1 Dec 2023 16:08:17 -0500 (EST)
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: [PATCH] btrfs/303: use quota rescan wrapper
+Date: Fri,  1 Dec 2023 13:09:45 -0800
+Message-ID: <18afc03e67772666190415c742f0793e8207c5e6.1701464909.git.boris@bur.io>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231013070404.695418-1-pvorel@suse.cz>
-X-Spamd-Bar: ++++++++++++
-Authentication-Results: smtp-out2.suse.de;
-	dkim=none;
-	dmarc=none;
-	spf=softfail (smtp-out2.suse.de: 2a07:de40:b281:104:10:150:64:98 is neither permitted nor denied by domain of pvorel@suse.cz) smtp.mailfrom=pvorel@suse.cz
-X-Rspamd-Server: rspamd2
-X-Spamd-Result: default: False [12.16 / 50.00];
-	 ARC_NA(0.00)[];
-	 HAS_REPLYTO(0.30)[pvorel@suse.cz];
-	 REPLYTO_EQ_FROM(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 TO_DN_NONE(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_SPF_SOFTFAIL(4.60)[~all:c];
-	 DMARC_NA(1.20)[suse.cz];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 MX_GOOD(-0.01)[];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 NEURAL_SPAM_LONG(3.48)[0.994];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 R_DKIM_NA(2.20)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.01)[48.45%]
-X-Spam-Score: 12.16
-X-Rspamd-Queue-Id: B7BBC1FCEE
+Content-Transfer-Encoding: 8bit
 
-Hi,
+This new test called quota rescan directly rather than with the new
+wrapper. As a result, it failed with -O squota in MKFS_OPTIONS. Using
+the wrapper, it skips the rescan and passes again.
 
-> Nearly 20 years old code for testing reiserfs, ext2 and jfs has never
-> been properly integrated into LTP properly (not in runtest file).
+Signed-off-by: Boris Burkov <boris@bur.io>
+---
+ tests/btrfs/303 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> The main motivation was probably to test reiserfs, which has been
-> deprecated and no longer used in the production.
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+index b9d6c61d1..410460af5 100755
+--- a/tests/btrfs/303
++++ b/tests/btrfs/303
+@@ -43,7 +43,7 @@ _scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
+ _scratch_mount
+ 
+ $BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
+-$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >> $seqres.full
++_qgroup_rescan $SCRATCH_MNT >> $seqres.full
+ 
+ # Create a qgroup for the first subvolume, this would make the later
+ # subvolume creation to find an existing qgroup, and abort transaction.
+-- 
+2.42.0
 
-FYI merged.
-
-Kind regards,
-Petr
-
-> Signed-off-by: Petr Vorel <pvorel@suse.cz>
-> ---
-> Hi,
-
-> I'm not sure if algorithm in reiser_fract_tree.c or anything else from
-> this very old testsuite would be useful for folks in fstests, I doubt,
-> but just for sure Cc them.
-
-> Kind regards,
-> Petr
-...
