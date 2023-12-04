@@ -1,57 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Bl411l6R"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aG5CNero"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C5C8109
-	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 10:02:56 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13398109
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 10:03:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1701712975;
+	s=mimecast20190719; t=1701713025;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=S07gFdTvxjBn6TX2Pa+e7GXa6i/QSPHuHd8dR5XTGD0=;
-	b=Bl411l6RErcxiHFPqEnicZ7Oeqr5BGllbrZGpX5KSJ+zDoa6hiNGgcJqmFID/TrVQV96fO
-	QeUJd3c8SQV0iD1r/0aqSGJgm+LzqPRKlqTpYRmJ+I1669LJJjvmIBs/kxvPq1LYqV8Gyp
-	mCrvSv9BH6d688s3huNosv4srk8VWTI=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=kEhSjs54nO8InvY+sUNJmDqysmSb2BVyoKp37NKJFbw=;
+	b=aG5CNerowOBsm1wtuENorUaXhd+Frh5iKj7Zr0An9amo5Wwb8l6q+ZP235WC6MHs9Po/J5
+	5LiCdeg4K+jnvteiLKwQXVld4V1/BznaESP9FQZtYVDn18eHtOXI+4sV5x+oi+jUm2OhCM
+	eaMKrnNKcLhvogc49RB04J4K4JQ7vfU=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-59-xy43-7mmMRqWa_nHU3uaHw-1; Mon, 04 Dec 2023 13:02:48 -0500
-X-MC-Unique: xy43-7mmMRqWa_nHU3uaHw-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1cfc2a7e382so25682815ad.0
-        for <fstests@vger.kernel.org>; Mon, 04 Dec 2023 10:02:48 -0800 (PST)
+ us-mta-509-5PKIQLm5P5OzoDBBRyS4pA-1; Mon, 04 Dec 2023 13:03:39 -0500
+X-MC-Unique: 5PKIQLm5P5OzoDBBRyS4pA-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2866c800dd5so3292363a91.0
+        for <fstests@vger.kernel.org>; Mon, 04 Dec 2023 10:03:39 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701712967; x=1702317767;
+        d=1e100.net; s=20230601; t=1701713018; x=1702317818;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=S07gFdTvxjBn6TX2Pa+e7GXa6i/QSPHuHd8dR5XTGD0=;
-        b=qBE8zO2zGmIy2S+8KzMQxXutfpdvfsyS1qML4tY67S98dGuFgeWOWPZMk0nnmJt7ja
-         8SQppgC3e6BOXFl1dFT9teaGqo0ddGvEfOciK8sT7TktKBul0e2pSImjfCYWjfmt/Apl
-         Ic/Owv8h1L2N6uMdbcAgGZS1wf7u49IZOOIkAidYAKtvQVKA2/C77O9teRzVk6QhDp6t
-         yyZI4wNAIUcc0uGI59TqnWdOI2mN5Qc/tI/3XGndLjp4vmv/n4z1M/FGVwUVje5pge46
-         8qwjQddVHTNfd4S0h3nyALlG2Ea2HvuTgi+HfHFPg2dN7HJvEBQShm4zar+FHtLDRqaI
-         rYoA==
-X-Gm-Message-State: AOJu0YxNYI0ZDKC9+Qdx/b35bQuMH73l/TuO54VCUlkZvRuTw2kcJSxs
-	XJxtQZpT/Akns8STWfqBBN5SmNTWVZ9afkFEHJuqTkuEEcTorfv/K5GjBds+K6zn2Ie3el8fiby
-	6J/Wd3szjdroIcbclFOJgx8TDV14cQlM=
-X-Received: by 2002:a17:903:230b:b0:1d0:4759:bb60 with SMTP id d11-20020a170903230b00b001d04759bb60mr149490plh.26.1701712967186;
-        Mon, 04 Dec 2023 10:02:47 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEXz9B6FC1b/LfH3sB1Q1bVeZnMGGU+M5QlJpTmAWV7yePNifpg/xL4KaV2Ekg/rlymbzUgFw==
-X-Received: by 2002:a17:903:230b:b0:1d0:4759:bb60 with SMTP id d11-20020a170903230b00b001d04759bb60mr149473plh.26.1701712966773;
-        Mon, 04 Dec 2023 10:02:46 -0800 (PST)
+        bh=kEhSjs54nO8InvY+sUNJmDqysmSb2BVyoKp37NKJFbw=;
+        b=hHvmQw9BIPrWUyWGcxZ6emuD5Do2vXmkFryYJmBOHSmXgOHN3QCIyuIV0Ht43ruBo9
+         /qFW55QrdOoqDfYkmfHMvJdreVVZLeo+1ucTe6wT22nDzFiliXdKUQxvg78ObLwbblMS
+         flfKRhhcL+sz3iII5U3kLPT0vQ5cLAGeYftB+PK9idQT6zt0tyHqwJEMvjESoWeDjHke
+         /QrNghGp5lWmYfAj5hRHsZreg99CIIOv5RglLF02pHSu//oD+LTcl3a6FnxjLsS3DrEg
+         fh4e4xLFKR1lJ7MGLIbGZiQ2oJ/ux7RhEkPumVBvIBl5sw5htf4WRzFA3sW6sWKt024l
+         L2sQ==
+X-Gm-Message-State: AOJu0Yzg/vStCuST3wLSvPY2+ukoUoAvX8jbkyvwULoq5QrRSKfOMcmw
+	eH/kENXaoSJohWXBLrXIXzKNuf5NjV7O5Ex86gSJl002zR2CBFGFRnhu6YAxXGVI7a/0GCtX7bH
+	/4E+TPx7O0k29r3suk1Q6FgEH3pRnSdk=
+X-Received: by 2002:a17:90a:de8c:b0:286:6cc0:cae1 with SMTP id n12-20020a17090ade8c00b002866cc0cae1mr3195190pjv.88.1701713018395;
+        Mon, 04 Dec 2023 10:03:38 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE8HMPc0sGd+lSFBbe6RxYaY900yBM9NEDJabmoBq/DInD6Ago7d6g2nc046Zj6mbokrn9vVQ==
+X-Received: by 2002:a17:90a:de8c:b0:286:6cc0:cae1 with SMTP id n12-20020a17090ade8c00b002866cc0cae1mr3195179pjv.88.1701713018120;
+        Mon, 04 Dec 2023 10:03:38 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l17-20020a170902eb1100b001d060d6cde0sm6034971plb.162.2023.12.04.10.02.45
+        by smtp.gmail.com with ESMTPSA id d5-20020a17090a8d8500b002867adefbd4sm3937115pjo.48.2023.12.04.10.03.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 04 Dec 2023 10:02:46 -0800 (PST)
-Date: Tue, 5 Dec 2023 02:02:43 +0800
+        Mon, 04 Dec 2023 10:03:37 -0800 (PST)
+Date: Tue, 5 Dec 2023 02:03:34 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 1/2] btrfs: add some tests to the 'compress' group
-Message-ID: <20231204180243.3fn6k4vy7v3rt22s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 2/2] btrfs/048: add missing groups 'subvol', 'snapshot'
+ and 'send'
+Message-ID: <20231204180334.czfdn4y5zi2qpltb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1701704557.git.fdmanana@suse.com>
- <d3a5bded35e8502cdb609bfb0d950c7160461904.1701704559.git.fdmanana@suse.com>
+ <bb893d210f2cb43467f219a817003cbd6b596b6c.1701704559.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,206 +61,37 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <d3a5bded35e8502cdb609bfb0d950c7160461904.1701704559.git.fdmanana@suse.com>
+In-Reply-To: <bb893d210f2cb43467f219a817003cbd6b596b6c.1701704559.git.fdmanana@suse.com>
 
-On Mon, Dec 04, 2023 at 03:45:10PM +0000, fdmanana@kernel.org wrote:
+On Mon, Dec 04, 2023 at 03:45:11PM +0000, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> There are several btrfs test that exercise compression in one way or
-> another but are not listed as part of the 'compress' group, so add them
-> to that group.
+> This test case exercises subvolumes, snapshot and send/receive, so add
+> the corresponding groups to the test.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
 
-Test groups update is warm welcome :) This patch makes sense to me.
+Good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/btrfs/004 | 2 +-
->  tests/btrfs/005 | 2 +-
 >  tests/btrfs/048 | 2 +-
->  tests/btrfs/052 | 2 +-
->  tests/btrfs/056 | 2 +-
->  tests/btrfs/059 | 2 +-
->  tests/btrfs/094 | 2 +-
->  tests/btrfs/112 | 2 +-
->  tests/btrfs/150 | 2 +-
->  tests/btrfs/167 | 2 +-
->  tests/btrfs/173 | 2 +-
->  tests/btrfs/174 | 2 +-
->  tests/btrfs/259 | 2 +-
->  13 files changed, 13 insertions(+), 13 deletions(-)
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/btrfs/004 b/tests/btrfs/004
-> index 78df6a3a..381ad072 100755
-> --- a/tests/btrfs/004
-> +++ b/tests/btrfs/004
-> @@ -10,7 +10,7 @@
->  # We check to end up back at the original file with the correct offset.
->  #
->  . ./common/preamble
-> -_begin_fstest auto rw metadata fiemap logical_resolve
-> +_begin_fstest auto rw metadata fiemap logical_resolve compress
->  
->  noise_pid=0
->  
-> diff --git a/tests/btrfs/005 b/tests/btrfs/005
-> index 878a8c7c..84634770 100755
-> --- a/tests/btrfs/005
-> +++ b/tests/btrfs/005
-> @@ -7,7 +7,7 @@
->  # Btrfs Online defragmentation tests
->  #
->  . ./common/preamble
-> -_begin_fstest auto defrag
-> +_begin_fstest auto defrag compress
->  cnt=119
->  filesize=48000
->  
 > diff --git a/tests/btrfs/048 b/tests/btrfs/048
-> index 93d4a171..7816a997 100755
+> index 7816a997..8a88b8cc 100755
 > --- a/tests/btrfs/048
 > +++ b/tests/btrfs/048
 > @@ -11,7 +11,7 @@
 >  #  btrfs: fix zstd compression parameter
 >  #
 >  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick compress
+> -_begin_fstest auto quick compress
+> +_begin_fstest auto quick compress subvol snapshot send
 >  
 >  # Override the default cleanup function.
 >  _cleanup()
-> diff --git a/tests/btrfs/052 b/tests/btrfs/052
-> index 4408de21..0d60d413 100755
-> --- a/tests/btrfs/052
-> +++ b/tests/btrfs/052
-> @@ -9,7 +9,7 @@
->  # file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone
-> +_begin_fstest auto quick clone compress
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/056 b/tests/btrfs/056
-> index e5ac516d..e1263983 100755
-> --- a/tests/btrfs/056
-> +++ b/tests/btrfs/056
-> @@ -15,7 +15,7 @@
->  #    Btrfs: make fsync work after cloning into a file
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone log
-> +_begin_fstest auto quick clone log compress
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/059 b/tests/btrfs/059
-> index d2ced0ae..76a1e76e 100755
-> --- a/tests/btrfs/059
-> +++ b/tests/btrfs/059
-> @@ -11,7 +11,7 @@
->  #     Btrfs: add missing compression property remove in btrfs_ioctl_setflags
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick
-> +_begin_fstest auto quick compress
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/094 b/tests/btrfs/094
-> index e94cf17b..75804465 100755
-> --- a/tests/btrfs/094
-> +++ b/tests/btrfs/094
-> @@ -18,7 +18,7 @@
->  #   Btrfs: incremental send, fix clone operations for compressed extents
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick send
-> +_begin_fstest auto quick send compress
->  
->  # Override the default cleanup function.
->  _cleanup()
-> diff --git a/tests/btrfs/112 b/tests/btrfs/112
-> index c3f7fe5c..fd7aaad4 100755
-> --- a/tests/btrfs/112
-> +++ b/tests/btrfs/112
-> @@ -8,7 +8,7 @@
->  # corruption or data loss.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick clone prealloc
-> +_begin_fstest auto quick clone prealloc compress
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/150 b/tests/btrfs/150
-> index a7d7d9cc..c21e0a66 100755
-> --- a/tests/btrfs/150
-> +++ b/tests/btrfs/150
-> @@ -11,7 +11,7 @@
->  #	Btrfs: fix kernel oops while reading compressed data
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick dangerous read_repair
-> +_begin_fstest auto quick dangerous read_repair compress
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/167 b/tests/btrfs/167
-> index fb271cfa..2cfcf100 100755
-> --- a/tests/btrfs/167
-> +++ b/tests/btrfs/167
-> @@ -11,7 +11,7 @@
->  # ac0b4145d662 ("btrfs: scrub: Don't use inode pages for device replace")
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick replace volume
-> +_begin_fstest auto quick replace volume compress
->  
->  # Import common functions.
->  . ./common/filter
-> diff --git a/tests/btrfs/173 b/tests/btrfs/173
-> index 4972a5a7..6e78a826 100755
-> --- a/tests/btrfs/173
-> +++ b/tests/btrfs/173
-> @@ -8,7 +8,7 @@
->  # CoW file nor compressed file.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick swap
-> +_begin_fstest auto quick swap compress
->  
->  . ./common/filter
->  
-> diff --git a/tests/btrfs/174 b/tests/btrfs/174
-> index 0acd65f0..16305c18 100755
-> --- a/tests/btrfs/174
-> +++ b/tests/btrfs/174
-> @@ -8,7 +8,7 @@
->  # specific to Btrfs.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick swap
-> +_begin_fstest auto quick swap compress
->  
->  . ./common/filter
->  
-> diff --git a/tests/btrfs/259 b/tests/btrfs/259
-> index 358a4550..7f053ac9 100755
-> --- a/tests/btrfs/259
-> +++ b/tests/btrfs/259
-> @@ -8,7 +8,7 @@
->  # at their max capacity.
->  #
->  . ./common/preamble
-> -_begin_fstest auto quick defrag fiemap
-> +_begin_fstest auto quick defrag fiemap compress
->  
->  # Import common functions.
->  . ./common/filter
 > -- 
 > 2.40.1
 > 
