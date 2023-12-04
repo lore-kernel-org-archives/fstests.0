@@ -1,178 +1,121 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aOG4o0jT"
-Received: from mail-oo1-xc33.google.com (mail-oo1-xc33.google.com [IPv6:2607:f8b0:4864:20::c33])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E927130;
-	Mon,  4 Dec 2023 11:02:09 -0800 (PST)
-Received: by mail-oo1-xc33.google.com with SMTP id 006d021491bc7-58d3c9badf5so3301868eaf.1;
-        Mon, 04 Dec 2023 11:02:09 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ISfLnGdR"
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DCA6107;
+	Mon,  4 Dec 2023 12:16:29 -0800 (PST)
+Received: by mail-lf1-x130.google.com with SMTP id 2adb3069b0e04-50bfd3a5b54so1221579e87.3;
+        Mon, 04 Dec 2023 12:16:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701716529; x=1702321329; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1701720987; x=1702325787; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=AKPTPcF6ICsIrbVFUAAhGYavbyjf6RZckjl5bI3V1zw=;
-        b=aOG4o0jTheuOW9w4RtXFzEtpAc47UPJrW0llV6O8wGmWwoU52F486ENx5dQ2Ku806m
-         IR4ZnJbCEQWHu/S42ITiKymXuzAjC89mK7gHlIzclFDZE3xuJxwBakI9Iqdq2cISqdQz
-         p4q+5SnnujVe6tV1a198Fl1id694FgPmIIjfT0MOC7PBP+5xcKotgtf7ov/XvS8qOVhz
-         4RLRGp0BGyZK52VSdciiMQe+WtLUAu1Ez2GOocHzQ7CJZfSDWA4Pb+yS9exIiSxTioqU
-         cDH/Bp7Q93slbRubcbf7NKZULfDEeKOt0K3SCIS/ngEYJiG1L3C526wS62xBMxG51ZjN
-         Ivyw==
+        bh=Rxnz7PaULk+xJC6024GR3t6cngdVEej7qz+5rlPj9m8=;
+        b=ISfLnGdRJZDZx1DxneKeXnIxWZvrkJlBu8EIeHeqs5JrisJUxsuAMv7/HbzirDTEmy
+         7Xm2Sx1wJo7Za41SZYZ/NnXgDrVT8TeJD6i10c+XNX3dx0MaMLJaJJZlaQEDA/WtVZwg
+         unT8yWF6whAhMXu44yMil5qCTEefXucrzSB1d1nq0Nq3OxqmzuaW9yDwWVZO+hQgwyoC
+         1v0b/kcqKGRiAydqwxc62njQNNzZgmgujBAvDNfEPRN2bPdQctG4wTRC1GFGMS6KGPJd
+         y/GL79dl1eicSXwGnNGsdYcqbk0OK3vDMaqSqguH3aHf+R7WPSueCNBYpQYrYMz8scQb
+         W2DA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701716529; x=1702321329;
+        d=1e100.net; s=20230601; t=1701720987; x=1702325787;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=AKPTPcF6ICsIrbVFUAAhGYavbyjf6RZckjl5bI3V1zw=;
-        b=NO+9vLvAmYxjH21BAAVERHxrczQ/iNZ2bMSVQHr4ThDrmeCE0VU76kuQRZHS9jFtoW
-         PPBSLzbhaWVq/0/1JSJtDiRGZxaC3a0fmERX5NIbgollevprjT6QhpBeOOVwnJJ+lTky
-         UMN54aaaA9XRsWpiWuRbodLdCUdxtbxWfEJkH8WCcxdxLKu0yAUOSqYgwxLq3565nn0x
-         gyEqBjZY5G8J5TUXK9FmfK/bJ7A+UDdGQG/q9fFuVQOlj4GkYTsjABnaHOUAyWfHvoPP
-         2OZBXLVMDrtxbs8CVcfWaZi6WG2sQngPwuF7FB0ZmSZVO8DAF+yX5TrKfYXC5hva81QN
-         XPNA==
-X-Gm-Message-State: AOJu0YzmCip7BOeCi/r6bnp8HKjhfYkNzJlt5aBEb7t4wNaWrP5gq2/D
-	vb4XcnCcoWvSX8TlJ8blj8CkrnddDzHyZ9OIoP5An98fqp4=
-X-Google-Smtp-Source: AGHT+IEU6ihF0p6TqOF8vs0d7mlPZeI/o9hCHovhmbMgVxW9KEOafP3WBTwDr62jriSk/JALLHkvzadc/MOXdvyKQM4=
-X-Received: by 2002:a05:6358:52ca:b0:16b:4f8c:93c7 with SMTP id
- z10-20020a05635852ca00b0016b4f8c93c7mr5213212rwz.23.1701716528597; Mon, 04
- Dec 2023 11:02:08 -0800 (PST)
+        bh=Rxnz7PaULk+xJC6024GR3t6cngdVEej7qz+5rlPj9m8=;
+        b=mxtjHV8zOTZefeKGW4djeuYf5sD4XypKO3coYZ+PJxdv19Jp4atU2RaU5lqSTTl+yR
+         NkHC5gweBpHtLRUFcGXG6iV/bSY8R6MTToBIOWAMwk67UbG3i6Ifl+tijiI9GREJJoAR
+         bjpIO08t1CybBDb+sLaRfDgOb8LVKbwoow3Fw9M6E29KTdSPTOEpBbASRS5KhZxST8iB
+         N/RUokuxZkrZPOBuIZt3hVEJluPaEI2oCXVKHKvVhpT5JYVeJ1DhiTQdV7B2GkVvEQJb
+         pYzm9pzobyIhkjS8U8SHlLi3Q7ZnglYmzZDeAEeY3VnoePIfvRiYDtClczPqxR8iO4MA
+         DCLg==
+X-Gm-Message-State: AOJu0YwAdE4kaT6ogdR7LixZvfxbncLE+j7NvfdZiut6/FrV36Ay4XPE
+	gLIluF/nCFo8a9x1n14BVGQgveUHZU+8uQlsUBo=
+X-Google-Smtp-Source: AGHT+IFFS/LxkhcJWraSuR+9Wwuyd5MEmhcy+jjsGk3cixWkemQBCHl/a25uxzZBP/ANio2oh1Ic/iD5UrKJJHPb+ho=
+X-Received: by 2002:a05:6512:3c9c:b0:50b:f0f2:6cbb with SMTP id
+ h28-20020a0565123c9c00b0050bf0f26cbbmr2056549lfv.60.1701720987006; Mon, 04
+ Dec 2023 12:16:27 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231122152013.2569153-1-amir73il@gmail.com> <20231204165817.6bz2vf2rogo7a6mo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAOQ4uxj8RZzg0+vXQqDZQH6J+xWiD=JyfmKjsH8WLkUQLBAhBg@mail.gmail.com> <20231204175233.vo227ejohm5z55ol@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20231204175233.vo227ejohm5z55ol@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 4 Dec 2023 21:01:57 +0200
-Message-ID: <CAOQ4uxgyvsWXYMLpb_PcMTyjGSy1UtJUx6Wke+P-UHhrKd6zmQ@mail.gmail.com>
-Subject: Re: [PATCH v2] overlay/026: Fix test expectation for newer kernels
-To: Zorro Lang <zlang@redhat.com>
-Cc: Alexander Larsson <alexl@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org
+References: <250053.1701698519@warthog.procyon.org.uk>
+In-Reply-To: <250053.1701698519@warthog.procyon.org.uk>
+From: Steve French <smfrench@gmail.com>
+Date: Mon, 4 Dec 2023 14:16:15 -0600
+Message-ID: <CAH2r5mu1bg6X5wxMpOxWS4t0XUS5-mY3ENfbm_vEytPce4HQxg@mail.gmail.com>
+Subject: Re: [PATCH] cifs: Fix non-availability of dedup breaking generic/304
+To: David Howells <dhowells@redhat.com>
+Cc: Steve French <sfrench@samba.org>, Dave Chinner <david@fromorbit.com>, 
+	Xiaoli Feng <fengxiaoli0714@gmail.com>, Shyam Prasad N <nspmangalore@gmail.com>, 
+	Rohith Surabattula <rohiths.msft@gmail.com>, Jeff Layton <jlayton@kernel.org>, 
+	Darrick Wong <darrick.wong@oracle.com>, fstests@vger.kernel.org, 
+	linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Dec 4, 2023 at 7:52=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
+added missing Signed-off-by line (and also for the two previous
+patches from David) and added Cc: stable and tentatively merged into
+cifs-2.6.git for-next pending additional testing
+
+On Mon, Dec 4, 2023 at 8:02=E2=80=AFAM David Howells <dhowells@redhat.com> =
+wrote:
 >
-> On Mon, Dec 04, 2023 at 07:09:08PM +0200, Amir Goldstein wrote:
-> > On Mon, Dec 4, 2023 at 6:58=E2=80=AFPM Zorro Lang <zlang@redhat.com> wr=
-ote:
-> > >
-> > > On Wed, Nov 22, 2023 at 05:20:13PM +0200, Amir Goldstein wrote:
-> > > > From: Alexander Larsson <alexl@redhat.com>
-> > > >
-> > > > The test checks the expectaion from old kernels that set/get of
-> > > > trusted.overlay.* xattrs is not supported on an overlayfs filesyste=
-m.
-> > > >
-> > > > New kernels support set/get xattr of trusted.overlay.* xattrs, so a=
-dapt
-> > > > the test to check that either both set and get work on new kernel, =
-or
-> > > > neither work on old kernel.
-> > > >
-> > > > Signed-off-by: Alexander Larsson <alexl@redhat.com>
-> > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > > > ---
-> > > >
-> > > > Zorro,
-> > > >
-> > > > Per your request on v1 [1], I've added a helper to check escaped ov=
-erlay
-> > > > xattrs support.
-> > > >
-> > > > The helper was taken from the patch that adds test overlay/084 [2],=
- and
-> > > > re-factored, but other than that, overlay/084 itself is unchanged, =
-so
-> > > > I am not re-posting it nor any of the other patches in the overlay =
-tests
-> > > > for v6.7-rc1.
-> > > >
-> > > > Let me know if this works for you.
-> > >
-> > >
-> > >
-> > >
-> > > >
-> > > > Thanks,
-> > > > Amir.
-> > > >
-> > > > [1] https://lore.kernel.org/fstests/20231116075250.ntopaswush4sn2qf=
-@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
-> > > > [2] https://lore.kernel.org/fstests/20231114064857.1666718-2-amir73=
-il@gmail.com/
-> > > >
-> > > >  common/overlay        | 19 +++++++++++++++++++
-> > > >  tests/overlay/026     | 42 +++++++++++++++++++++++++++++----------=
----
-> > > >  tests/overlay/026.out |  2 --
-> > > >  3 files changed, 48 insertions(+), 15 deletions(-)
-> > > >
-> > > > diff --git a/common/overlay b/common/overlay
-> > > > index 7004187f..8f275228 100644
-> > > > --- a/common/overlay
-> > > > +++ b/common/overlay
-> > > > @@ -201,6 +201,25 @@ _require_scratch_overlay_features()
-> > > >       _scratch_unmount
-> > > >  }
-> > > >
-> > > > +_check_scratch_overlay_xattr_escapes()
-> > > > +{
-> > > > +     local testfile=3D$1
-> > > > +
-> > > > +     touch $testfile
-> > > > +     ! ($GETFATTR_PROG -n trusted.overlay.foo $testfile 2>&1 | gre=
-p -E -q "not (permitted|supported)")
-> > > > +}
-> > > > +
-> > > > +_require_scratch_overlay_xattr_escapes()
-> > > > +{
-> > > > +     _scratch_mkfs > /dev/null 2>&1
-> > > > +     _scratch_mount
-> > > > +
-> > > > +        _check_scratch_overlay_xattr_escapes $SCRATCH_MNT/file || =
-\
-> > > > +                  _notrun "xattr escaping is not supported by over=
-lay"
-> > > > +
-> > > > +     _scratch_unmount
-> > > > +}
-> > > > +
-> > >
-> > > Hi Amir,
-> > >
-> > > Sorry for this late review, got a little busy on other things recentl=
-y.
-> > > Won't this patch be conflict with another patchset which you/Alex hav=
-e sent:
-> > >   https://lore.kernel.org/fstests/20231114064857.1666718-2-amir73il@g=
-mail.com/
-> > >
-> > > So you'll rebase that patchset on this, right?
-> >
-> > I rebased and pushed to this branch:
-> > https://github.com/amir73il/xfstests/commits/overlayfs-devel
-> >
-> > If you want I can re-post the entire series, but really, the only chang=
-e is
-> > the common/overlay chunk in the first patch which should be ignored.
+> Deduplication isn't supported on cifs, but cifs doesn't reject it, instea=
+d
+> treating it as extent duplication/cloning.  This can cause generic/304 to=
+ go
+> silly and run for hours on end.
 >
-> Hi Amir,
+> Fix cifs to indicate EOPNOTSUPP if REMAP_FILE_DEDUP is set in
+> ->remap_file_range().
 >
-> I just tried, there're two _require_scratch_overlay_xattr_escapes() in
-> common/overlay [1].
+> Note that it's unclear whether or not commit b073a08016a1 is meant to cau=
+se
+> cifs to return an error if REMAP_FILE_DEDUP.
+>
+> Fixes: b073a08016a1 ("cifs: fix that return -EINVAL when do dedupe operat=
+ion")
+> Suggested-by: Dave Chinner <david@fromorbit.com>
+> cc: Steve French <sfrench@samba.org>
+> cc: Xiaoli Feng <fengxiaoli0714@gmail.com>
+> cc: Shyam Prasad N <nspmangalore@gmail.com>
+> cc: Rohith Surabattula <rohiths.msft@gmail.com>
+> cc: Jeff Layton <jlayton@kernel.org>
+> cc: Darrick Wong <darrick.wong@oracle.com>
+> cc: fstests@vger.kernel.org
+> cc: linux-cifs@vger.kernel.org
+> cc: linux-fsdevel@vger.kernel.org
+> Link: https://lore.kernel.org/r/3876191.1701555260@warthog.procyon.org.uk=
+/
+> ---
+>  fs/smb/client/cifsfs.c |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/fs/smb/client/cifsfs.c b/fs/smb/client/cifsfs.c
+> index 4d8927b57776..96a65cf9b5ec 100644
+> --- a/fs/smb/client/cifsfs.c
+> +++ b/fs/smb/client/cifsfs.c
+> @@ -1276,7 +1276,9 @@ static loff_t cifs_remap_file_range(struct file *sr=
+c_file, loff_t off,
+>         unsigned int xid;
+>         int rc;
+>
+> -       if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
+> +       if (remap_flags & REMAP_FILE_DEDUP)
+> +               return -EOPNOTSUPP;
+> +       if (remap_flags & ~REMAP_FILE_ADVISORY)
+>                 return -EINVAL;
+>
+>         cifs_dbg(FYI, "clone range\n");
+>
+>
 
-Yes, as I said, the one from *this* patch is the correct one
-the other one is obsolete.
 
-> So please rebase and re-send that patchset, then I can
-> merge them easily and clearly.
-
-Ok. Sent v2.
-You should apply it on top of this patch.
-
+--=20
 Thanks,
-Amir.
+
+Steve
