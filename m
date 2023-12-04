@@ -1,153 +1,76 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="QxR10dg7"
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA432DA
-	for <fstests@vger.kernel.org>; Sun,  3 Dec 2023 16:00:54 -0800 (PST)
-Received: by mail-pf1-x42d.google.com with SMTP id d2e1a72fcca58-6cc02e77a9cso3905329b3a.0
-        for <fstests@vger.kernel.org>; Sun, 03 Dec 2023 16:00:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1701648054; x=1702252854; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=wA9mzrJUkC4Y0SM4FjMDprcAvnu/0rPfrIiWvVZdpKA=;
-        b=QxR10dg7EXHlplNY3r4XNgLrbgKDAIC+4hk2ucrxZCRIhKqcucwYl6I9QOl28gEUiv
-         32p8f8/bSlR0hbuQ5WNiArUnJ9+dlQNrjs8SKgiOptzbjEUA5lLFlA+ZEzUKinqnsn0M
-         AGrm1pUjB/vrr7phnKraZvV1P/0LSoNnRzG1QUxuwog25NK66uF9OtyxQKoruQ2KcOXs
-         ImnWtQnVjqXKykITWAu3fGvLFAAOjLMZnXKvg78WA1VZILVYNgojM7GXnFrfkJjNqVAx
-         bfJvNRXANviDqmeVazW+X3fWrWOvyR7rA+tCmkFKjQLLla5HH19XESRVaI9eqc/YKNIE
-         Tg0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701648054; x=1702252854;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=wA9mzrJUkC4Y0SM4FjMDprcAvnu/0rPfrIiWvVZdpKA=;
-        b=AfBpWz8XHwlPitPzl5Taouchurx2I0RsjpazxtV5gj73wBZgcUQRb2Kbn2qs23LK0y
-         3vEeqy7BBtAsaWs9sFWBxnPZ4tndZjA1gmXgq+mIdMcfNpaU//ubUAFHH8mKuSFvzTgY
-         YOcFvYGUmsUL4mvBB+b9DQ+FBCQX4DU8jRrGolJ/7i5uqh71xAudkGKZE+DGpuIoJa78
-         FQ4MoK6xyxdFwpfiZHoauIcn2U8/aJSmZyRTazgBZIBKqhL51aYyy7AFa09eOEWM+BzL
-         Yknrl7iybYBcveaFhHD20IOXO4bvzSt8wB7cG9rLF7ikuYyDDQJbqUAs4LfeDHBca1M5
-         QanQ==
-X-Gm-Message-State: AOJu0YwxpcunIuVNtFKM97rI0J02EnUX7L8/1RpqXzxUK1r8KgCZUUsO
-	n27spVuK9NesE7rFGqx/W0LDsw==
-X-Google-Smtp-Source: AGHT+IEgi1aLDy6p4K2RqOAGlLrTqzl5tLa4ovdVOOC2E3K5WaL3dOt8jtpIa9XuDDvyMFbVNTVDww==
-X-Received: by 2002:a05:6a00:1256:b0:6cb:a434:b58f with SMTP id u22-20020a056a00125600b006cba434b58fmr3914828pfi.33.1701648054085;
-        Sun, 03 Dec 2023 16:00:54 -0800 (PST)
-Received: from dread.disaster.area (pa49-180-125-5.pa.nsw.optusnet.com.au. [49.180.125.5])
-        by smtp.gmail.com with ESMTPSA id r9-20020a62e409000000b006cbae51f335sm1538619pfh.144.2023.12.03.16.00.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 03 Dec 2023 16:00:53 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-	(envelope-from <david@fromorbit.com>)
-	id 1r9wOJ-003V6Y-0i;
-	Mon, 04 Dec 2023 11:00:51 +1100
-Date: Mon, 4 Dec 2023 11:00:51 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: David Howells <dhowells@redhat.com>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com,
-	Steve French <sfrench@samba.org>, linux-cifs@vger.kernel.org
-Subject: Re: generic/304 doesn't seem terminable for cifs
-Message-ID: <ZW0Ws9Z3t1WnrNjI@dread.disaster.area>
-References: <3876191.1701555260@warthog.procyon.org.uk>
+Received: from esa5.hc1455-7.c3s2.iphmx.com (esa5.hc1455-7.c3s2.iphmx.com [68.232.139.130])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 009D6B0
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 03:34:44 -0800 (PST)
+X-IronPort-AV: E=McAfee;i="6600,9927,10913"; a="141423252"
+X-IronPort-AV: E=Sophos;i="6.04,249,1695654000"; 
+   d="scan'208";a="141423252"
+Received: from unknown (HELO yto-r2.gw.nic.fujitsu.com) ([218.44.52.218])
+  by esa5.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Dec 2023 20:34:40 +0900
+Received: from yto-m4.gw.nic.fujitsu.com (yto-nat-yto-m4.gw.nic.fujitsu.com [192.168.83.67])
+	by yto-r2.gw.nic.fujitsu.com (Postfix) with ESMTP id 906F3D6188
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:37 +0900 (JST)
+Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
+	by yto-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id CEA5CD3F13
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:36 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab3.gw.nic.fujitsu.com (Postfix) with ESMTP id 66B0B202CCD24
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:36 +0900 (JST)
+Received: from rhel93GA.g08.fujitsu.local (unknown [10.167.221.71])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 1370A1A0071;
+	Mon,  4 Dec 2023 19:34:35 +0800 (CST)
+From: Yang Xu <xuyang2018.jy@fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH] generic/733: use correct kernel commit id
+Date: Mon,  4 Dec 2023 06:34:28 -0500
+Message-Id: <20231204113428.68071-1-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 2.39.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <3876191.1701555260@warthog.procyon.org.uk>
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28036.007
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28036.007
+X-TMASE-Result: 10--9.715400-10.000000
+X-TMASE-MatchedRID: fqobMUxwrit4VMEOH2fwTCZm6wdY+F8KwTlc9CcHMZerwqxtE531VIpb
+	wG9fIuITewNtMWg+aObkJdh0Vw0TYx/Qfe1gmZY9joyKzEmtrEdZDdHiTk9OcMwHSQ+yXjTDBk0
+	sRysFrTDE7gW9Nmz5nKau4JLYI3mtiiMVQOiPaXyeAiCmPx4NwBnUJ0Ek6yhj2bNx1HEv7HAqtq
+	5d3cxkNRk9sc7V/Os07QJEaFveglJ+wauT0ePW6psCn7LEqQbcAVGZaYVXI9k=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-On Sat, Dec 02, 2023 at 10:14:20PM +0000, David Howells wrote:
-> 
-> I've been running "-g quick" on a CIFS mount and it got to generic/304... and
-> is still there nearly 30 hours later.  The kernel isn't stuck - userspace is
-> cranking out BTRFS_IOC_FILE_EXTENT_SAME or FIDEDUPERANGE at a great rate.
-> 
-> The ps tree looks like:
-> 
-> S+     0:03       \_ /bin/bash ./check -E .exclude -g quick
-> S+     0:00           \_ /bin/bash /root/xfstests-dev/tests/generic/304
-> S+     0:00               \_ /bin/bash /root/xfstests-dev/tests/generic/304
-> Dl+  316:55               |   \_ /usr/sbin/xfs_io -i -f -c dedupe /xfstest.test/test-304/file0 0 0 9223372036854775807 /xfstest.test/test-
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ tests/generic/733 | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-$ printf "0x%x\n" 9223372036854775807
-0x7fffffffffffffff
-$
-
-So this is asking for dedupe of the entire empty file. The files
-are both sparse, so dedupe should be instantenous because there is
-nothing to dedupe.
-
-
-> S+     0:00               \_ /bin/bash /root/xfstests-dev/tests/generic/304
-> S+     0:00                   \_ sed -e s/^dedupe:/XFS_IOC_FILE_EXTENT_SAME:/g
-> 
-> The xfs_io command strace is an endlessly repeated:
-> 
-> ioctl(4, BTRFS_IOC_FILE_EXTENT_SAME or FIDEDUPERANGE, {src_offset=389438053887770624, src_length=8833933982967005183, dest_count=1, info=[{dest_fd=3, dest_offset=389438053887770624}]} => {info=[{bytes_deduped=1073741824, status=0}]}) = 0
-> ioctl(4, BTRFS_IOC_FILE_EXTENT_SAME or FIDEDUPERANGE, {src_offset=389438054961512448, src_length=8833933981893263359, dest_count=1, info=[{dest_fd=3, dest_offset=389438054961512448}]} => {info=[{bytes_deduped=1073741824, status=0}]}) = 0
-> ioctl(4, BTRFS_IOC_FILE_EXTENT_SAME or FIDEDUPERANGE, {src_offset=389438056035254272, src_length=8833933980819521535, dest_count=1, info=[{dest_fd=3, dest_offset=389438056035254272}]} => {info=[{bytes_deduped=1073741824, status=0}]}) = 0
-> ioctl(4, BTRFS_IOC_FILE_EXTENT_SAME or FIDEDUPERANGE, {src_offset=389438057108996096, src_length=8833933979745779711, dest_count=1, info=[{dest_fd=3, dest_offset=389438057108996096}]}^Cstrace: Process 105030 detache
-
-And this indicates the src_offset is going up by 1GB and the
-src_length is going down by 1GB on each pass.
-
-So what is happening here is that either the CIFS client or the
-server is only able to process dedupe requests in 1GB chunks, yet
-the files are 8EB in size. That's only 8.5 billion round trips to
-the server - it should be done in a few thousand years.
-
-So, nothing apparently wrong with the test of xfs_io - it's the
-filesystem dedupe max range limits that appear to be the issue.
-
-> 
-> with the dest_offset increasing a bit each time.  The log so far is:
-> 
-> wrote 1/1 bytes at offset 9223372036854775806
-> 1.000000 bytes, 1 ops; 0.0000 sec (97.656 KiB/sec and 100000.0000 ops/sec)
-> wrote 1/1 bytes at offset 9223372036854775806
-> 1.000000 bytes, 1 ops; 0.0000 sec (97.656 KiB/sec and 100000.0000 ops/sec)
-> wrote 1/1 bytes at offset 1048575
-> 1.000000 bytes, 1 ops; 0.0000 sec (139.509 KiB/sec and 142857.1429 ops/sec)
-> 
-> Looking in the protocol dump, it's endlessly repeating:
-> 
->   190 0.007930488  192.168.6.2 → 192.168.6.1  SMB2 174 SetInfo Request FILE_INFO/SMB2_FILE_ENDOFFILE_INFO
->   191 0.007962785  192.168.6.1 → 192.168.6.2  SMB2 136 SetInfo Response
->   192 0.007974644  192.168.6.2 → 192.168.6.1  SMB2 230 Ioctl Request FILE_SYSTEM Function:0x00d1
->   193 0.008069283  192.168.6.1 → 192.168.6.2  SMB2 182 Ioctl Response FILE_SYSTEM Function:0x00d1
-
-Huh. I think CIFS is complete broken w.r.t. dedupe requests.
-
-The client passes the ->remap_file_range() call to the server via
-->duplicate_extents() to execute, but it does not pass any of the
-remap flags to the server. One of those remap flags is
-REMAP_FILE_DEDUPE, and that tells the filesysetm that it is a dedupe
-operation, not a clone operation.
-
-The CIFS client implements this callout in smb2_duplicate_extents(),
-which translates to a FSCTL_DUPLICATE_EXTENTS_TO_FILE smb2
-operation. The server side takes this operation and calls
-vfs_clone_file_range() and/or vfs_copy_file_range(), which means
-that the server can only execute a clone operation via this protocol
-request. Hence it executes a clone/copy operation on reciept rather
-than a dedupe operation and hence is potentially destroying the data
-in the destination file.
-
-Yeah, that's bad, but the server is only doing what the client asked
-it to do.
-
-Really, this looks like a CIFS client bug - it should not be
-advertising support for FIDEDUPERANGE to applications. i.e. the smb2
-protocol implementation only appears to support FICLONERANGE
-semantics and so the client should be returning -EOPNOTSUPP when
-REMAP_FILE_DEDUPE is set in ->remap_file_range().
-
--Dave.
+diff --git a/tests/generic/733 b/tests/generic/733
+index ca4dd519..d88d92a4 100755
+--- a/tests/generic/733
++++ b/tests/generic/733
+@@ -6,7 +6,7 @@
+ #
+ # Race file reads with a very slow reflink operation to see if the reads
+ # actually complete while the reflink is ongoing.  This is a functionality
+-# test for XFS commit f3ba4762fa56 "xfs: allow read IO and FICLONE to run
++# test for XFS commit 14a537983b22 "xfs: allow read IO and FICLONE to run
+ # concurrently".
+ #
+ . ./common/preamble
+@@ -26,6 +26,9 @@ _require_test_program "punch-alternating"
+ _require_test_program "t_reflink_read_race"
+ _require_command "$TIMEOUT_PROG" timeout
+ 
++[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 14a537983b22 \
++        "xfs: allow read IO and FICLONE to run concurrently"
++
+ rm -f "$seqres.full"
+ 
+ echo "Format and mount"
 -- 
-Dave Chinner
-david@fromorbit.com
+2.27.0
+
