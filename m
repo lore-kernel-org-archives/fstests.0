@@ -1,43 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 558A42C87D;
-	Mon,  4 Dec 2023 15:59:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C134D2D04B;
+	Mon,  4 Dec 2023 16:05:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iiuze3qT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB986C433C9;
-	Mon,  4 Dec 2023 15:59:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ssE74X8E"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3EB3BC433C8;
+	Mon,  4 Dec 2023 16:05:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701705566;
-	bh=wUvaW2WBFFWOm+BjvuRxx5B6h8PwUfRkrKqvoO+S1Ek=;
+	s=k20201202; t=1701705920;
+	bh=eW/xwmr2Z29kXOy67JOm9RxoY7MTyJYyHuHnVi9Slco=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=iiuze3qTJqY0ZTaLDWQUIF2NRGmLmhT5cPqKSOBEdoxD8APLf12zSaLU4i9VMMfx/
-	 AsFWl3mLBrBPFTvCH8sjW5WCx+wYnZ/LjsuCRgl3LJY9Cuc1J0ZK2Q7np7ffWTdyvp
-	 c3X7Nv7q/CrHH8EhPoZ1yaJNboPu0+W8LmV93MgYFMbUVpFSAae18KwvAZxv2OGBc6
-	 PJgmCCiIuajRmwBelE80Vr1cGWsRdGBuk05rKbN/FbheErA8T/rRiBueScNgDoaTHX
-	 0f7JJs8ciHfzV+Zpmb3tCKGeC/R8chOXuK3E7wxHPamJV+Wu6o7L6SN+CzxPhOejcp
-	 1Yt9eC0AxAlOg==
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a1a496a73ceso417364466b.2;
-        Mon, 04 Dec 2023 07:59:26 -0800 (PST)
-X-Gm-Message-State: AOJu0Ywib7KYMQ6Y3r1LQZqsGiyEGU8UI9Crc0G91Xo/3ju2AeRCP0NW
-	4z0jIH1NJMobF9OsKgli6NBrvkBFiKBg0iGmr3I=
-X-Google-Smtp-Source: AGHT+IFZikvRXz7xJe/MSqAj5aHRG2tIGIeVIfp1iKGY6Wd/BXEaxjGWkA6LP0xDBbcEyHZhWF6L2QwTmsD2sla07JM=
-X-Received: by 2002:a17:906:710f:b0:a19:a19b:78cb with SMTP id
- x15-20020a170906710f00b00a19a19b78cbmr3199252ejj.142.1701705565302; Mon, 04
- Dec 2023 07:59:25 -0800 (PST)
+	b=ssE74X8EGT2596AdtfeMFrCYD8exSWsLI95rnwxQm3KHa+lwi425XRE79awWEFZ1q
+	 SagBb7PIHT5diy+hFNYS+ew40uXMqO80Vx5pk+bHkLvcWn5nK0Ixvj/cb1cZCBBfub
+	 KtfB38+sI7gMoOa2qdB4Jind0CNohZ2+7fV9tJhkuUPpOVcxDqO7nV1F5pFGBafjqH
+	 zKSXydp5ZBnj7y9tyWA4u7u4gNTgws+tf+2re14POQCtNXKnF/Nu66cNIa7ynwNNCf
+	 a5z0hXEBDMRfT1amCgpdvuovp+JeozK+p+VwYdl4OHH23BbH8yeGMfmmmnQW8rrvmU
+	 c7TmvBfuD7BOg==
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-a0029289b1bso601520466b.1;
+        Mon, 04 Dec 2023 08:05:20 -0800 (PST)
+X-Gm-Message-State: AOJu0YyJKO0zFmHS01VWT9G7iYCz8BFmHm5eD9FcBm2ER8EOpr2GRmfE
+	WiRz9i0iVWlW6vvA3mciRE17SMf8BTbCKDjTLFM=
+X-Google-Smtp-Source: AGHT+IF3F3UyQ0YA21qPf/nPMAJuCxrUM1j4fdv+da2fY6eMATdkOc2n8qXeEk94qslUMdlmW5WhWqUMWGHw+ICjAUo=
+X-Received: by 2002:a17:906:3f0a:b0:a19:a1ba:8cb1 with SMTP id
+ c10-20020a1709063f0a00b00a19a1ba8cb1mr3172459ejj.79.1701705918637; Mon, 04
+ Dec 2023 08:05:18 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com> <20231204-btrfs-raid-v1-1-b254eb1bcff8@wdc.com>
-In-Reply-To: <20231204-btrfs-raid-v1-1-b254eb1bcff8@wdc.com>
+References: <20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com> <20231204-btrfs-raid-v1-7-b254eb1bcff8@wdc.com>
+In-Reply-To: <20231204-btrfs-raid-v1-7-b254eb1bcff8@wdc.com>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 4 Dec 2023 15:58:48 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4hHiOpN9v1DnKeU166yp2p78Hy+_g4VZ6k9G9CM83a9g@mail.gmail.com>
-Message-ID: <CAL3q7H4hHiOpN9v1DnKeU166yp2p78Hy+_g4VZ6k9G9CM83a9g@mail.gmail.com>
-Subject: Re: [PATCH 1/7] btrfs: add fstest for stripe-tree metadata with 4k write
+Date: Mon, 4 Dec 2023 16:04:42 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7oXb8N74u6xmio1Q8P7zb4oi+Ohc+7G6fnbLFiZYdOzg@mail.gmail.com>
+Message-ID: <CAL3q7H7oXb8N74u6xmio1Q8P7zb4oi+Ohc+7G6fnbLFiZYdOzg@mail.gmail.com>
+Subject: Re: [PATCH 7/7] fstests: doc: add new raid-stripe-tree group
 To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org, 
 	linux-btrfs@vger.kernel.org
@@ -47,167 +47,34 @@ Content-Transfer-Encoding: quoted-printable
 On Mon, Dec 4, 2023 at 1:25=E2=80=AFPM Johannes Thumshirn
 <johannes.thumshirn@wdc.com> wrote:
 >
-> Test a simple 4k write on all RAID profiles currently supported with the
-> raid-stripe-tree.
->
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  tests/btrfs/302     | 55 +++++++++++++++++++++++++++++++++++++++++++++++=
-+++
->  tests/btrfs/302.out | 58 +++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  2 files changed, 113 insertions(+)
->
-> diff --git a/tests/btrfs/302 b/tests/btrfs/302
-> new file mode 100755
-> index 000000000000..1d6693beff4c
-> --- /dev/null
-> +++ b/tests/btrfs/302
-> @@ -0,0 +1,55 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Western Digital Cooperation.  All Rights Reserved.
-> +#
-> +# FS QA Test 302
-> +#
-> +# Test on-disk layout of RAID Stripe Tree Metadata
+> Add a new test group for testing the raid-stripe-tree feature of btrfs
+> with fstests.
 
-All the tests in the patchset have this exact same description.
-Can we get a more specific description for each one?
+Ideally this patch should come before the tests themselves, as the
+tests are listed in a group that does not exist yet.
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick raid remount volume raid-stripe-tree
-> +
-> +. ./common/filter
-> +. ./common/filter.btrfs
-> +
-> +_supported_fs btrfs
-> +_require_test
-
-The test device is not used, this is not needed.
-
-> +_require_btrfs_command inspect-internal dump-tree
-> +_require_btrfs_mkfs_feature "raid-stripe-tree"
-> +_require_scratch_dev_pool 4
-> +_require_xfs_io_command "pwrite"
-> +_require_xfs_io_command "fsync"
-
-This can be skipped, the checks for the pwrite and fsync commands.
-We never check for those as all xfs_io versions should have those, as
-they belong to the most basic and universally available commands.
-
-> +_require_btrfs_fs_feature "raid_stripe_tree"
-> +
-> +test_4k_write()
-> +{
-> +       profile=3D$1
-> +       ndevs=3D$2
-
-These variables should be made local.
-
-All these comments also apply to all the other tests introduced in the patc=
-hset.
+Other than that, it looks good.
 
 Thanks.
 
-> +
-> +       _scratch_dev_pool_get $ndevs
-> +
-> +       echo "=3D=3D=3D=3D Testing $profile =3D=3D=3D=3D"
-> +       _scratch_pool_mkfs -d $profile -m $profile
-> +       _scratch_mount
-> +
-> +       $XFS_IO_PROG -fc "pwrite 0 4k" "$SCRATCH_MNT/foo" | _filter_xfs_i=
-o
-> +
-> +       _scratch_cycle_mount
-> +       md5sum "$SCRATCH_MNT/foo" | _filter_scratch
-> +
-> +       _scratch_unmount
-> +
-> +       $BTRFS_UTIL_PROG inspect-internal dump-tree -t raid_stripe $SCRAT=
-CH_DEV_POOL |\
-> +               _filter_btrfs_version |  _filter_stripe_tree
-> +
-> +       _scratch_dev_pool_put
-> +}
-> +
-> +echo "=3D Test basic 4k write =3D"
-> +test_4k_write raid0 2
-> +test_4k_write raid1 2
-> +test_4k_write raid10 4
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/302.out b/tests/btrfs/302.out
-> new file mode 100644
-> index 000000000000..149630e69501
-> --- /dev/null
-> +++ b/tests/btrfs/302.out
-> @@ -0,0 +1,58 @@
-> +QA output created by 302
-> +=3D Test basic 4k write =3D
-> +=3D=3D=3D=3D Testing raid0 =3D=3D=3D=3D
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +5fed275e7617a806f94c173746a2a723  SCRATCH_MNT/foo
-> +
-> +raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
-> +leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_T=
-REE
-> +leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-> +checksum stored <CHECKSUM>
-> +checksum calced <CHECKSUM>
-> +fs uuid <UUID>
-> +chunk uuid <UUID>
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
-> +                       encoding: RAID0
-> +                       stripe 0 devid 1 physical XXXXXXXXX
-> +total bytes XXXXXXXX
-> +bytes used XXXXXX
-> +uuid <UUID>
-> +=3D=3D=3D=3D Testing raid1 =3D=3D=3D=3D
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +5fed275e7617a806f94c173746a2a723  SCRATCH_MNT/foo
-> +
-> +raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
-> +leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_T=
-REE
-> +leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-> +checksum stored <CHECKSUM>
-> +checksum calced <CHECKSUM>
-> +fs uuid <UUID>
-> +chunk uuid <UUID>
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> +                       encoding: RAID1
-> +                       stripe 0 devid 1 physical XXXXXXXXX
-> +                       stripe 1 devid 2 physical XXXXXXXXX
-> +total bytes XXXXXXXX
-> +bytes used XXXXXX
-> +uuid <UUID>
-> +=3D=3D=3D=3D Testing raid10 =3D=3D=3D=3D
-> +wrote 4096/4096 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +5fed275e7617a806f94c173746a2a723  SCRATCH_MNT/foo
-> +
-> +raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
-> +leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_T=
-REE
-> +leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-> +checksum stored <CHECKSUM>
-> +checksum calced <CHECKSUM>
-> +fs uuid <UUID>
-> +chunk uuid <UUID>
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> +                       encoding: RAID10
-> +                       stripe 0 devid 1 physical XXXXXXXXX
-> +                       stripe 1 devid 2 physical XXXXXXXXX
-> +total bytes XXXXXXXX
-> +bytes used XXXXXX
-> +uuid <UUID>
+>
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  doc/group-names.txt | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/doc/group-names.txt b/doc/group-names.txt
+> index c3dcca375537..9c1624868518 100644
+> --- a/doc/group-names.txt
+> +++ b/doc/group-names.txt
+> @@ -94,6 +94,7 @@ punch                 fallocate FALLOC_FL_PUNCH_HOLE
+>  qgroup                 btrfs qgroup feature
+>  quota                  filesystem usage quotas
+>  raid                   btrfs RAID
+> +raid-stripe-tree       btrfs raid-stripe-tree feature
+>  read_repair            btrfs error correction on read failure
+>  realtime               XFS realtime volumes
+>  recoveryloop           crash recovery loops
 >
 > --
 > 2.43.0
