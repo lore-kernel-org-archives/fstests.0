@@ -1,76 +1,79 @@
-Received: from esa5.hc1455-7.c3s2.iphmx.com (esa5.hc1455-7.c3s2.iphmx.com [68.232.139.130])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 009D6B0
-	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 03:34:44 -0800 (PST)
-X-IronPort-AV: E=McAfee;i="6600,9927,10913"; a="141423252"
-X-IronPort-AV: E=Sophos;i="6.04,249,1695654000"; 
-   d="scan'208";a="141423252"
-Received: from unknown (HELO yto-r2.gw.nic.fujitsu.com) ([218.44.52.218])
-  by esa5.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Dec 2023 20:34:40 +0900
-Received: from yto-m4.gw.nic.fujitsu.com (yto-nat-yto-m4.gw.nic.fujitsu.com [192.168.83.67])
-	by yto-r2.gw.nic.fujitsu.com (Postfix) with ESMTP id 906F3D6188
-	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:37 +0900 (JST)
-Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
-	by yto-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id CEA5CD3F13
-	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:36 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab3.gw.nic.fujitsu.com (Postfix) with ESMTP id 66B0B202CCD24
-	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 20:34:36 +0900 (JST)
-Received: from rhel93GA.g08.fujitsu.local (unknown [10.167.221.71])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 1370A1A0071;
-	Mon,  4 Dec 2023 19:34:35 +0800 (CST)
-From: Yang Xu <xuyang2018.jy@fujitsu.com>
-To: fstests@vger.kernel.org
-Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH] generic/733: use correct kernel commit id
-Date: Mon,  4 Dec 2023 06:34:28 -0500
-Message-Id: <20231204113428.68071-1-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 2.39.3
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C88B124A11;
+	Mon,  4 Dec 2023 13:08:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Of0xYies"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 35128C433CB;
+	Mon,  4 Dec 2023 13:08:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701695337;
+	bh=k1ihNzR6xEepft0Kz1NIjeYkuQwprPhGUIlw+9TG0As=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=Of0xYies3JDA2qlku0CKH8jvcroWCls7Ux9WGKSbzCAqMrbuWCsbl4UDxTs5ZjEP3
+	 Hr9rfmCiEJrsl4MGn4lasyu996JXCV0DBJ+1HzsqSQos+cebLzPQwqlUzrOCug5ryP
+	 wMuQ5VLkX6K1dIwcbTbGTVwCGiWw5MLVKVxRXtOGaDsH63hMnYNLtEfKS4MmzA5v0b
+	 ipF65z+epTJF2RgTlTb2DmO4v8P4oatO714EM7QUp5W4i8/urfLni171gy63SLe7sJ
+	 G8PEvsZQ3PB+jaDNGfMdRhK+B6gsA2BOFmtjp9p4WWoeJ6mCSyXGkZ9q5brlWt0tw0
+	 D2IfJF7HIAe7A==
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a1b68ae40ffso139711566b.0;
+        Mon, 04 Dec 2023 05:08:57 -0800 (PST)
+X-Gm-Message-State: AOJu0YyTBmvc2UEPtmAva8pMoXfXqVq6nTAEKprmB1b6jeXWQ8oaVfin
+	CZKswabTC46dH2mMvfkrYTNp7a4Q5VTu7QxaYQ4=
+X-Google-Smtp-Source: AGHT+IG8H9vI5rGH1H/7fkqhkGCqVRgTPWIVYm5mNKrWK/l1C7/aY5Z3UpvzE6j8YE8gLGk5X6wNojflMjS0v844WLk=
+X-Received: by 2002:a17:906:1786:b0:a19:1afc:a16a with SMTP id
+ t6-20020a170906178600b00a191afca16amr1844193eje.67.1701695335623; Mon, 04 Dec
+ 2023 05:08:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28036.007
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28036.007
-X-TMASE-Result: 10--9.715400-10.000000
-X-TMASE-MatchedRID: fqobMUxwrit4VMEOH2fwTCZm6wdY+F8KwTlc9CcHMZerwqxtE531VIpb
-	wG9fIuITewNtMWg+aObkJdh0Vw0TYx/Qfe1gmZY9joyKzEmtrEdZDdHiTk9OcMwHSQ+yXjTDBk0
-	sRysFrTDE7gW9Nmz5nKau4JLYI3mtiiMVQOiPaXyeAiCmPx4NwBnUJ0Ek6yhj2bNx1HEv7HAqtq
-	5d3cxkNRk9sc7V/Os07QJEaFveglJ+wauT0ePW6psCn7LEqQbcAVGZaYVXI9k=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+References: <18afc03e67772666190415c742f0793e8207c5e6.1701464909.git.boris@bur.io>
+In-Reply-To: <18afc03e67772666190415c742f0793e8207c5e6.1701464909.git.boris@bur.io>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 4 Dec 2023 13:08:18 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H6PxgZJgNi9soiGbk--E8Wg9x_MfVBqpf72avkPkkszwA@mail.gmail.com>
+Message-ID: <CAL3q7H6PxgZJgNi9soiGbk--E8Wg9x_MfVBqpf72avkPkkszwA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/303: use quota rescan wrapper
+To: Boris Burkov <boris@bur.io>
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- tests/generic/733 | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On Fri, Dec 1, 2023 at 9:08=E2=80=AFPM Boris Burkov <boris@bur.io> wrote:
+>
+> This new test called quota rescan directly rather than with the new
+> wrapper. As a result, it failed with -O squota in MKFS_OPTIONS. Using
+> the wrapper, it skips the rescan and passes again.
+>
+> Signed-off-by: Boris Burkov <boris@bur.io>
 
-diff --git a/tests/generic/733 b/tests/generic/733
-index ca4dd519..d88d92a4 100755
---- a/tests/generic/733
-+++ b/tests/generic/733
-@@ -6,7 +6,7 @@
- #
- # Race file reads with a very slow reflink operation to see if the reads
- # actually complete while the reflink is ongoing.  This is a functionality
--# test for XFS commit f3ba4762fa56 "xfs: allow read IO and FICLONE to run
-+# test for XFS commit 14a537983b22 "xfs: allow read IO and FICLONE to run
- # concurrently".
- #
- . ./common/preamble
-@@ -26,6 +26,9 @@ _require_test_program "punch-alternating"
- _require_test_program "t_reflink_read_race"
- _require_command "$TIMEOUT_PROG" timeout
- 
-+[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 14a537983b22 \
-+        "xfs: allow read IO and FICLONE to run concurrently"
-+
- rm -f "$seqres.full"
- 
- echo "Format and mount"
--- 
-2.27.0
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
+Looks good, thanks.
+
+> ---
+>  tests/btrfs/303 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/tests/btrfs/303 b/tests/btrfs/303
+> index b9d6c61d1..410460af5 100755
+> --- a/tests/btrfs/303
+> +++ b/tests/btrfs/303
+> @@ -43,7 +43,7 @@ _scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs f=
+ailed"
+>  _scratch_mount
+>
+>  $BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
+> -$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" >> $seqres.full
+> +_qgroup_rescan $SCRATCH_MNT >> $seqres.full
+>
+>  # Create a qgroup for the first subvolume, this would make the later
+>  # subvolume creation to find an existing qgroup, and abort transaction.
+> --
+> 2.42.0
+>
+>
