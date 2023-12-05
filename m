@@ -1,248 +1,288 @@
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABBA57ED;
+	Tue,  5 Dec 2023 16:39:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="kw9Kga7P"
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBA2B127;
-	Tue,  5 Dec 2023 04:45:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1701780319; x=1733316319;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=z7vEX4gmj/jJp0gY4rCnLAfsht5j7h66X3R43XmqB5A=;
-  b=kw9Kga7PrYXVpuOFuCdwR+MgPPLkhOsu6jxY6JpoYfCDE+b2onWsg9kx
-   74IQAu1OXoHDmDmmrl0E5234b5mysCr+S48rN0PH7hkqZNrsWk7RkCq00
-   5xkvDgv8giht57Aiu+PvNpNRPUZoBzflRVjg3alAQEzio6EnPbxRJSPE3
-   +rtiyjDKolweGXRwLrppR7JdFVFN4XzYS9oszV2rK5joQde+NR7PB/4U+
-   9JAS+fr0hoKB++vYtCtoquSvg0BiJd2D1sG/Bwwn5hjYeaDIFEVUOfcTf
-   wwld7WCzFUw79krPb21HvIKX5YywolyqIcgtJKvuX8Qq4jDVdXb1q5DuU
-   w==;
-X-CSE-ConnectionGUID: RQUWkVyJRA+Yl5MxnoghHg==
-X-CSE-MsgGUID: vHquBdZqS3mhzcZ++37GtQ==
-X-IronPort-AV: E=Sophos;i="6.04,252,1695657600"; 
-   d="scan'208";a="4043932"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 05 Dec 2023 20:45:19 +0800
-IronPort-SDR: iAu2dKQh9n6JsBTfb4GTx302KtADAjbUNOzt9flpdRK/nqQTSAa7mFHs5gLe7AHJZRcjsDU6aO
- 6gG2Gje7ynTg==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Dec 2023 03:56:21 -0800
-IronPort-SDR: ExkdAK+/WggCk8/tZV5lwNGz6HkHXwDOCASTfD+uS3QDUDuEJkFYDo8b/n0mVG3RP2cOZ6sV94
- QUQBWr/Zhg0g==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
-  by uls-op-cesaip01.wdc.com with ESMTP; 05 Dec 2023 04:45:19 -0800
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Date: Tue, 05 Dec 2023 04:45:13 -0800
-Subject: [PATCH v2 7/7] btrfs: add fstest for overwriting a file partially
- with RST
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="klmjZcJK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 516BAC433C7;
+	Tue,  5 Dec 2023 16:39:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701794367;
+	bh=aiDk4xrw2wvXGQzh51loxHNu4L7Wdhjc1iNbZ6sUlE0=;
+	h=From:To:Cc:Subject:Date:From;
+	b=klmjZcJKYmazo9dvRhAlDXVzTEsY8ENG/DmdM7dEMotUeN4IMcfqGdnrdXd6BGZ2q
+	 ciM6F3Evh6lGfDczEE8P983Drnyd4zFpxaENFwaG1OxChmKOuQorOHA1lJQ+15apFR
+	 P4bPr30LdYJW7eTtBZYomW2Seu+pZ8VmDUtcyiUZoLuiospN3HaVY1CznIhqo0qDA0
+	 eHowzhR6NX5EnYDnuEvOukt5Z2VKXdf0Iz4ayxVQtn4MCMVZdmVYI7hFPqu5FUyzD+
+	 HAi8wT7RiWeG8cIPJchI5X52HZSFJIA4fJ6rVI4BPrPfUFFm/FRnYl437YFKGyb0fd
+	 tda9mjwidoupQ==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic: test reading a large directory while renaming its files
+Date: Tue,  5 Dec 2023 16:39:20 +0000
+Message-Id: <e54239e625f794c62b962c35d06db04571bf73d5.1701794007.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231205-btrfs-raid-v2-7-25f80eea345b@wdc.com>
-References: <20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com>
-In-Reply-To: <20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com>
-To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
- linux-btrfs@vger.kernel.org, 
- Johannes Thumshirn <johannes.thumshirn@wdc.com>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1701780310; l=6665;
- i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
- bh=z7vEX4gmj/jJp0gY4rCnLAfsht5j7h66X3R43XmqB5A=;
- b=eG6cncQta+1fAJR04TIMoeFAv7cjAQKKrYMAtBE9dxI9Ltr1QHc+G3Nf7JYOOeZTjsG4fiEzS
- v2kOu4XHKDbDhyEdMO/AU49W6iZ77N3K3HrlhTnH70aAf9Nkb7f7bYI
-X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
- pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
+Content-Transfer-Encoding: 8bit
 
-Add a test writing 128k to an empty file with one stripe already
-pre-filled on-disk. Then overwrite a portion of the file in the middle.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Test that on a fairly large directory if we keep renaming files while
+holding the directory open and doing readdir(3) calls, we don't end up
+in an infinite loop.
+
+This exercise a bug that existed in btrfs and was fixed in kernel 6.5
+by commit 9b378f6ad48c ("btrfs: fix infinite directory reads").
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/306     |  56 +++++++++++++++++++++++++++
- tests/btrfs/306.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 162 insertions(+)
+ .gitignore                  |   1 +
+ src/Makefile                |   3 +-
+ src/readdir-while-renames.c | 146 ++++++++++++++++++++++++++++++++++++
+ tests/generic/734           |  37 +++++++++
+ tests/generic/734.out       |   2 +
+ 5 files changed, 188 insertions(+), 1 deletion(-)
+ create mode 100644 src/readdir-while-renames.c
+ create mode 100755 tests/generic/734
+ create mode 100644 tests/generic/734.out
 
-diff --git a/tests/btrfs/306 b/tests/btrfs/306
-new file mode 100755
-index 000000000000..f2708bbcd2a5
+diff --git a/.gitignore b/.gitignore
+index 4c32ac42..7508b6e8 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -121,6 +121,7 @@ tags
+ /src/punch-alternating
+ /src/pwrite_mmap_blocked
+ /src/randholes
++/src/readdir-while-renames
+ /src/rename
+ /src/renameat2
+ /src/resvtest
+diff --git a/src/Makefile b/src/Makefile
+index 8160a0e8..d79015ce 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -19,7 +19,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	t_ofd_locks t_mmap_collision mmap-write-concurrent \
+ 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+ 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+-	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test
++	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
++	readdir-while-renames
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/readdir-while-renames.c b/src/readdir-while-renames.c
+new file mode 100644
+index 00000000..afeefb04
 --- /dev/null
-+++ b/tests/btrfs/306
-@@ -0,0 +1,56 @@
++++ b/src/readdir-while-renames.c
+@@ -0,0 +1,146 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2023 SUSE Linux Products GmbH.  All Rights Reserved.
++ */
++#include <dirent.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++#include <unistd.h>
++#include <sys/stat.h>
++
++/* Number of files we add to the test directory. */
++#define NUM_FILES 5000
++
++int main(int argc, char *argv[])
++{
++	struct dirent *entry;
++	DIR *dir = NULL;
++	char *dir_path = NULL;
++	int dentry_count = 0;
++	int ret = 0;
++	int i;
++
++	if (argc != 2) {
++		fprintf(stderr, "Usage:  %s <directory>\n", argv[0]);
++		ret = 1;
++		goto out;
++	}
++
++	dir_path = malloc(strlen(argv[1]) + strlen("/testdir") + 1);
++	if (!dir_path) {
++		fprintf(stderr, "malloc failure\n");
++		ret = ENOMEM;
++		goto out;
++	}
++	i = strlen(argv[1]);
++	memcpy(dir_path, argv[1], i);
++	memcpy(dir_path + i, "/testdir", strlen("/testdir"));
++	dir_path[i + strlen("/testdir")] = '\0';
++
++	ret = mkdir(dir_path, 0700);
++	if (ret == -1) {
++		fprintf(stderr, "Failed to create test directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	ret = chdir(dir_path);
++	if (ret == -1) {
++		fprintf(stderr, "Failed to chdir to the test directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/* Now create all files inside the directory. */
++	for (i = 1; i <= NUM_FILES; i++) {
++		char file_name[32];
++		FILE *f;
++
++		sprintf(file_name, "%s/%d", dir_path, i);
++		f = fopen(file_name, "w");
++		if (f == NULL) {
++			fprintf(stderr, "Failed to create file number %d: %d\n",
++				i, errno);
++			ret = errno;
++			goto out;
++		}
++		fclose(f);
++	}
++
++	dir = opendir(dir_path);
++	if (dir == NULL) {
++		fprintf(stderr, "Failed to open directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/*
++	 * readdir(3) returns NULL when it reaches the end of the directory or
++	 * when an error happens, so reset errno to 0 to distinguish between
++	 * both cases later.
++	 */
++	errno = 0;
++	while ((entry = readdir(dir)) != NULL) {
++		dentry_count++;
++		/*
++		 * The actual number of dentries returned varies per filesystem
++		 * implementation. On a 6.7-rc4 kernel, on x86_64 with default
++		 * mkfs options, xfs returns 5031 dentries while ext4, f2fs and
++		 * btrfs return 5002 (the 5000 files plus "." and ".."). These
++		 * variations are fine and valid according to POSIX, as some of
++		 * the renames may be visible or not while calling readdir(3).
++		 * We only want to check we don't enter into an infinite loop,
++		 * so let the maximum number of dentries be 3 * NUM_FILES, which
++		 * is very reasonable.
++		 */
++		if (dentry_count > 3 * NUM_FILES) {
++			fprintf(stderr,
++				"Found too many directory entries (%d)\n",
++				dentry_count);
++			ret = 1;
++			goto out;
++		}
++		/* Can't rename "." and "..", skip them. */
++		if (strcmp(entry->d_name, ".") == 0 ||
++		    strcmp(entry->d_name, "..") == 0)
++			continue;
++		ret = rename(entry->d_name, "TEMPFILE");
++		if (ret == -1) {
++			fprintf(stderr,
++				"Failed to rename '%s' to TEMPFILE: %d\n",
++				entry->d_name, errno);
++			ret = errno;
++			goto out;
++		}
++		ret = rename("TEMPFILE", entry->d_name);
++		if (ret == -1) {
++			fprintf(stderr,
++				"Failed to rename TEMPFILE to '%s': %d\n",
++				entry->d_name, errno);
++			ret = errno;
++			goto out;
++		}
++	}
++
++	if (errno) {
++		fprintf(stderr, "Failed to read directory: %d\n", errno);
++		ret = errno;
++		goto out;
++	}
++
++	/* It should return at least NUM_FILES entries +2 (for "." and ".."). */
++	if (dentry_count < NUM_FILES + 2) {
++		fprintf(stderr,
++			"Found less directory entries than expected (%d but expected %d)\n",
++			dentry_count, NUM_FILES + 2);
++		ret = 2;
++	}
++out:
++	free(dir_path);
++	if (dir != NULL)
++		closedir(dir);
++
++	return ret;
++}
+diff --git a/tests/generic/734 b/tests/generic/734
+new file mode 100755
+index 00000000..ea3dfb2d
+--- /dev/null
++++ b/tests/generic/734
+@@ -0,0 +1,37 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Western Digital Cooperation.  All Rights Reserved.
++# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test 306
++# FS QA Test 734
 +#
-+# Test on-disk layout of RAID Stripe Tree Metadata by writing 128k to an empty
-+# file on a filesystem that has one stripe already pre-filled. Afterwards
-+# overwrite a portion of the file.
++# Test that on a fairly large directory if we keep renaming files while holding
++# the directory open and doing readdir(3) calls, we don't end up in an infinite
++# loop.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick raid remount volume raid-stripe-tree
++_begin_fstest auto quick dir
 +
-+. ./common/filter
-+. ./common/filter.btrfs
-+
-+_supported_fs btrfs
-+_require_btrfs_command inspect-internal dump-tree
-+_require_btrfs_mkfs_feature "raid-stripe-tree"
-+_require_scratch_dev_pool 4
-+_require_btrfs_fs_feature "raid_stripe_tree"
-+
-+test_128k_write_overwrite()
++_cleanup()
 +{
-+	local profile=$1
-+	local ndevs=$2
-+
-+	_scratch_dev_pool_get $ndevs
-+
-+	echo "==== Testing $profile ===="
-+	_scratch_pool_mkfs -d $profile -m $profile
-+	_scratch_mount
-+
-+	$XFS_IO_PROG -fc "pwrite -W 0 32k" "$SCRATCH_MNT/bar" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 0 128k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 64k 8k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+
-+	_scratch_cycle_mount
-+	md5sum "$SCRATCH_MNT/foo" | _filter_scratch
-+
-+	_scratch_unmount
-+
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t raid_stripe $SCRATCH_DEV_POOL |\
-+		_filter_btrfs_version | _filter_stripe_tree
-+
-+	_scratch_dev_pool_put
++	cd /
++	rm -fr $tmp.*
++	rm -fr $target_dir
 +}
 +
-+echo "= Test 128k write to empty file with 1st stripe partially prefilled then overwrite ="
-+test_128k_write_overwrite raid0 2
-+test_128k_write_overwrite raid1 2
-+test_128k_write_overwrite raid10 4
++_supported_fs generic
++_require_test
++_require_test_program readdir-while-renames
++
++[ $FSTYP == "btrfs" ] && _fixed_by_kernel_commit 9b378f6ad48c \
++	"btrfs: fix infinite directory reads"
++
++target_dir="$TEST_DIR/test-$seq"
++rm -fr $target_dir
++mkdir $target_dir
++
++$here/src/readdir-while-renames $target_dir
 +
 +# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/306.out b/tests/btrfs/306.out
+diff --git a/tests/generic/734.out b/tests/generic/734.out
 new file mode 100644
-index 000000000000..52f3d68f77ff
+index 00000000..4299839b
 --- /dev/null
-+++ b/tests/btrfs/306.out
-@@ -0,0 +1,106 @@
-+QA output created by 306
-+= Test 128k write to empty file with 1st stripe partially prefilled then overwrite =
-+==== Testing raid0 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 2 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid1 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid10 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 3 physical XXXXXXXXX
-+			stripe 1 devid 4 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-
++++ b/tests/generic/734.out
+@@ -0,0 +1,2 @@
++QA output created by 734
++Silence is golden
 -- 
-2.43.0
+2.40.1
 
