@@ -1,225 +1,166 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83CFB18D
-	for <fstests@vger.kernel.org>; Tue,  5 Dec 2023 09:28:56 -0800 (PST)
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id EC92222038;
-	Tue,  5 Dec 2023 17:28:54 +0000 (UTC)
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id AB4661386E;
-	Tue,  5 Dec 2023 17:28:54 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id RKULJtZdb2X+EQAAD6G6ig
-	(envelope-from <lhenriques@suse.de>); Tue, 05 Dec 2023 17:28:54 +0000
-Received: from localhost (brahms.olymp [local])
-	by brahms.olymp (OpenSMTPD) with ESMTPA id 7b663b97;
-	Tue, 5 Dec 2023 17:28:53 +0000 (UTC)
-From: Luis Henriques <lhenriques@suse.de>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/581: remove extra escape character from awk line
-In-Reply-To: <87edg9spkz.fsf@suse.de> (Luis Henriques's message of "Tue, 28
-	Nov 2023 18:25:00 +0000")
-References: <ZV40XOGNJdru13XE@suse.de> <20231122231648.GA1541@sol.localdomain>
-	<ZV87sT0lz0QqupDO@camandro.org> <87plzurmib.fsf@suse.de>
-	<20231128173734.GD1148@sol.localdomain> <87edg9spkz.fsf@suse.de>
-Date: Tue, 05 Dec 2023 17:28:53 +0000
-Message-ID: <875y1c7e3u.fsf@suse.de>
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="RPIKbKKg";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="ENibmazx"
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4B0DCA;
+	Tue,  5 Dec 2023 09:29:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1701797389; x=1733333389;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=GQdLeusgjuMnPdD+gz3h9vf29U15GJsDCdcK0wTuhrE=;
+  b=RPIKbKKg3Iqec5sxB99JqFdjJLZGGPZi2MSavZLwFPpJpM5RM7HLZz6y
+   3i1z+wvd3/EXZTxChfCXgb8dHGJ2PTFlysNLd86NoS3cHeO2hNf3//on+
+   SWdeYcxB7dsqUHQLMsJD3xgpc95Sa766nmfCSFJmd+DQWBDeXUqM4/zq1
+   8xNYgZ9HikAnLNC7KgVP6Z2p3uAX6wSfdKUEFxVPnDLXrHVgcUfhVff74
+   t4eRXKRjZdatIDDUMFuaGWbxJ1CxqE5AswpTAIPZfXWo0fcXiGn2UTuPp
+   0JEDPCFHZtECqlODyamd9trc7WeXUSmIxbu2MukiaGwKC0hkjkxW4KiRS
+   w==;
+X-CSE-ConnectionGUID: //J8/ae2R5GaBpHDdg2tcg==
+X-CSE-MsgGUID: 5K29CVl1Tky8UD7jJ4UmDA==
+X-IronPort-AV: E=Sophos;i="6.04,252,1695657600"; 
+   d="scan'208";a="4108819"
+Received: from mail-mw2nam04lp2168.outbound.protection.outlook.com (HELO NAM04-MW2-obe.outbound.protection.outlook.com) ([104.47.73.168])
+  by ob1.hgst.iphmx.com with ESMTP; 06 Dec 2023 01:29:48 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=SZc27JyaeVWw0omKZr4CBOpYQC0BZoMc/jeF8fqs1FQKJP51UbvjMwvGajsAxQ5bU4boUmQnJdi1AKL1QCjWgp7Gpg+7aBUeDP/BJiFqGCtaDExZJ+OXNVB5T2W1/0rthkJKqAltZHpKq1MAFBj1buK/VJgaghkfapfcxKYUbrdAIIe8K2njtok3rwtsUjF8rmoEeodzmYb+H34HYuaX8yj41K2+PXe4ZDIAGOBs98i6O0fMF++YmXbKmzx+S5x7mAwlD1Dnm0/RfHURrirqMiHuzFjcYLxkE0PwiR+KfURe3HfIg/+yCKwi7npkZ50jZug1vRqg7U39+PRRkppGIg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=GQdLeusgjuMnPdD+gz3h9vf29U15GJsDCdcK0wTuhrE=;
+ b=VYGT59rGshTKaEg58wqvnRNnD2zTKU+XK5n2YnF5gSFduOWrbuAHRsOYND7sdueIJRCIxzoml24rOatsy144kxuQ2Q+Xf76jDEO0dLlsijD6fkwrtUhznSHo0QMvPvdTbBE4FtWWkoxqs2uYDnygJw68wBpf2/uOUJQMfCOnboaPtAbjWLJB46ajSRjGxIhthttDMLV2uGHnI/Ae+/4AZYCIV6lhG2hfmF588qqHq7859Iq+VA4ecA7jMC4rgq5AsqMilgKhasUuNE7vXjDuOggPCaeJBC6UsumbBNby57r9QqCh+xi6zmmwMwiXh7gU7eQgWrJb3ytwTn5422M+2Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=GQdLeusgjuMnPdD+gz3h9vf29U15GJsDCdcK0wTuhrE=;
+ b=ENibmazxnMIs+C1DfqIaZqmL5Jj8Krlb55NpYGH9PkzhC5akywt8C2X9IQ9MCl9J2m4npJZTwPtucKNjXS7yCm/rA9yLiSmcbAS7yGC4Qk2xwpxHnkK1NrraW7B74fUxvbqHnAYvp5VKg9SxxrmDu0tuTGDuW+8fp8YL5XI1C20=
+Received: from PH0PR04MB7416.namprd04.prod.outlook.com (2603:10b6:510:12::17)
+ by MW4PR04MB7300.namprd04.prod.outlook.com (2603:10b6:303:73::19) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7046.34; Tue, 5 Dec
+ 2023 17:29:47 +0000
+Received: from PH0PR04MB7416.namprd04.prod.outlook.com
+ ([fe80::8ea3:9333:a633:c161]) by PH0PR04MB7416.namprd04.prod.outlook.com
+ ([fe80::8ea3:9333:a633:c161%6]) with mapi id 15.20.7046.034; Tue, 5 Dec 2023
+ 17:29:47 +0000
+From: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+To: Filipe Manana <fdmanana@kernel.org>
+CC: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>, Filipe
+ Manana <fdmanana@suse.com>, "fstests@vger.kernel.org"
+	<fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org"
+	<linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH v2 3/7] btrfs: add fstest for stripe-tree metadata with 4k
+ write
+Thread-Topic: [PATCH v2 3/7] btrfs: add fstest for stripe-tree metadata with
+ 4k write
+Thread-Index: AQHaJ3jp4tja0Ok3sk24VFnrCwf3i7Ca7VmAgAAB94CAAADngIAAAiCA
+Date: Tue, 5 Dec 2023 17:29:47 +0000
+Message-ID: <56cf77f2-afc2-4792-9801-e41c195fc451@wdc.com>
+References: <20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com>
+ <20231205-btrfs-raid-v2-3-25f80eea345b@wdc.com>
+ <CAL3q7H62=-Y9KZeLQeVAAy8Q2STDdTsUEJLC9BrEFsVyTJON6A@mail.gmail.com>
+ <dc1aeaf6-ec9d-4035-b61d-7b1d38189830@wdc.com>
+ <CAL3q7H4TqofDBfe+KUE_FRH55D5A3ra-b-3d4aQm5r2B=aFA4Q@mail.gmail.com>
+In-Reply-To:
+ <CAL3q7H4TqofDBfe+KUE_FRH55D5A3ra-b-3d4aQm5r2B=aFA4Q@mail.gmail.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+user-agent: Mozilla Thunderbird
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PH0PR04MB7416:EE_|MW4PR04MB7300:EE_
+x-ms-office365-filtering-correlation-id: 54916410-2b2b-4d54-ec7c-08dbf5b7c74e
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info:
+ lTcz8vlgcq5sU54MgA48io4Ljn8bTI33gKCdDPftha4OsW/I1girvbznr1xJGsKp1f8dOAfxSCdYcD8k6ptNZAkLqXy8pibBlzO3RuH3SncRjgbRoxUCjjh+TY6izdqKLNbODqd8j3/vi5L0uLegLoixhEaIhJK2UlY7urHgkNKvU/t8Pn7B1FPQAXRez3to7ahTVdiVYGEAeHXFeNJURxOL96OSzNRqasRuxC+drEJi7V2pYSQ1D5umJHzWTj91Ov/RV21lHht7WT5n2BmLvavIsQRBEOzznZswpOho/9VnfQA3XVWrOwUefKYqUsZrIsrNndGEBbyOfCGwImw5VtUfmalLTB8oGSrrCEfeNhg6/NsPxf5GSWwxhNZCupH3Jh7rs0qst9bkjq3T563y8YaY+Jf4jdto69gtB+cNg3TF6GXwN30e3Bm0YvJKI9lM0PWIPLg/CRGoi3VXWdgsVRVOiF9Kp7Q0KWH3FX9/ERQZr5L+F3OU4qdgAHlp/vvJ2HL3zV/scCikJcuIUzJ/Cbs4g43YqFPhbL0HW/pQqCD29cbxQ2sCJT95k/cT3zwaAZzWrh/+oaeESAy+osD7luuPKylUwGTFUA70BIzgyh3pffP3+sfN2PIkEBbvE27/yEojwwwcC00qbriOEDUmmr6WVo5WplYYYPnfz4sZ/5bWX9c/d4ps0AxpySvKVZS1
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR04MB7416.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(136003)(376002)(39860400002)(346002)(366004)(396003)(230922051799003)(186009)(64100799003)(451199024)(1800799012)(66476007)(66556008)(6916009)(91956017)(76116006)(54906003)(64756008)(66946007)(66446008)(316002)(478600001)(41300700001)(6486002)(71200400001)(36756003)(5660300002)(4744005)(2906002)(38070700009)(4326008)(8676002)(8936002)(86362001)(2616005)(82960400001)(122000001)(38100700002)(26005)(31696002)(6506007)(31686004)(53546011)(6512007)(43740500002)(45980500001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?K0N1amRpSlNQVDFucHIzRzB5S3Y2dm51ZzgrYnRlVXZUOFNxTEpLREpTTUVi?=
+ =?utf-8?B?V3pxY0JpTFhCWmhCeVQ2aEJGd28vbC9lMnp4ZVc3VnFzcWRTN2tsenpDOEFJ?=
+ =?utf-8?B?V2xUdzZKckNIaDhjNFJXZzJnSHRRYmpTbEc3TlhQYUVpa1hyNFZSUlVJSGpw?=
+ =?utf-8?B?bms3U0dFWWZXTlE4czFXK3FoM2tHa09kaTk0cm5tUzlxLytUL0xrc01CazA3?=
+ =?utf-8?B?VlF5RVNjSFhmNkZWY1VvQ0N2aW9XTzNOL2N5N1UwcDA5czA5dkhGaDNrRXJn?=
+ =?utf-8?B?L0h5Yy9OeW5LY3JXYmxqRGE4eWdQUmUwaE92U1lkYVpKQWpzUkk4eWZMUnRv?=
+ =?utf-8?B?TVgwbDNPd3I4b2NPSytINnNmT1lFckltOXM4WlJwSEdOS3BpZnR2eHFCYmx2?=
+ =?utf-8?B?eGo2eGxiZExNRE43VzUxWjNrYVZTaVRhV3V4d2R5OWJjOGZpaWRYWHFOdDlB?=
+ =?utf-8?B?QU1ta3UySnN6NWlQK051VkRhQytuaE5idDRUSzMzK0lvRXJvR3hpSEZIQWp4?=
+ =?utf-8?B?elVUVi8yaFFGdzhwNmtFeVRwQU9JUjFVb3RFM2NOenFYRDAreE5ESkcyRkRY?=
+ =?utf-8?B?M2J6Mkt6NVdJV2hYSkdTNG5CWGNnSkJQRTUwR2ZyYVhKVHM2czIxUG1laHNH?=
+ =?utf-8?B?ZFdYdmpiVXlDM0JtRHZua1VMeHJKOEptWkg1bm91R0tvdmpiNmxEM09sZnFS?=
+ =?utf-8?B?L3VQNjB1YVhEZklIT0pPazFtMklLMUJ0YUprZklRVjV2QXQ0akFvTm1jU3l3?=
+ =?utf-8?B?d0VsYThaSEFQY0VhckJ3NTBaVjM2dVpGcHZpZ2RSTzNRbGxPbHV1OFJ5QzFJ?=
+ =?utf-8?B?ZTR0NGwwbHNHTjVSdzFKTXIxV0krMDMwNDNyQnY3WjF3cFUvK25UYWhRU3ZX?=
+ =?utf-8?B?MGZlRFVjSVNVeFRrbkNILzgrUmVvbEhyZDBJcDFpcEhId1Zhc2FsaTRMZ1p1?=
+ =?utf-8?B?YktXSjFQVTNmaXFPc2FxTEpqS3JQNVlzWFRlSXByemY2dXRrQ3hXQThYdkZE?=
+ =?utf-8?B?dnpWQXhaU01jeWxSY3ZEbXRQRFNWOUlUaFpNUnVTOGtiTEZUd2dvVEZQWlUr?=
+ =?utf-8?B?RGJFaTVVbjNKY1V6dURLek4wMnhZYVY3QWNSaVdJVlM4WWNUU29LcDlueVox?=
+ =?utf-8?B?NUJxTWc2Y2dncGtRWDB2Y1RIcnJ4azNySktUY2p2d0tsQkNxNVFUM1F1Vkhq?=
+ =?utf-8?B?NjZRS2JLa2tWazl0WXJMMGEvN3VwcVlZUHFSbWJ6Z3dPbjA0bjNtNGg0d2c4?=
+ =?utf-8?B?cVMvUG1wN0hEQ29pQ3dPbnR5YlQ2WUQzYXF1bEJZbkZzZTRoTENWcjNCemdJ?=
+ =?utf-8?B?WHByTkRiOU9IckovZUk4QzU0cFE3bWU0a2NiN3dETWNWM1hNcWQyQVJMRGNI?=
+ =?utf-8?B?L2cyMDBqRVBnU0ZhdEFlcld3NExwdjFWVXBhdS9QaWF3NlUyUGJ0UEJKWFU1?=
+ =?utf-8?B?ODVOSmFONmIyTFpkbmwxYUV6Y1ZVZldCeTd0WUpDWXhJN1BVZW10b1Z2QUtn?=
+ =?utf-8?B?L1hLMk5yTWtFWitSUzlPTmNZRzNySFdTV1l3RDNPYSt4emRUVTAvL0E3R3du?=
+ =?utf-8?B?Vk4rVmVZcThXc3dBa21HdEl4QUhPSFZIeStMeUdkMWttMjFHVVE2ck1OM1E4?=
+ =?utf-8?B?WHo0N0JydkQ0b3AyREVZZkZmaWdhenFCdE9OdE5KT2dEZzN0dEJsU01nNXov?=
+ =?utf-8?B?aEVycXFTZGdmbFV1a2ZTZVN4MmJ4OGY4L0IzcVluUFhuLzJ3QW9yQjFPRDdE?=
+ =?utf-8?B?MlFucmZWVnYzQ0hTcU81bUE0MXloMFhyaldDOFBqQUVvemlXaHJkWmIzYVRm?=
+ =?utf-8?B?VUVQZXByT21ISnBKTXlzaUhpTkx5aUw3Tkl2NWo5Y0VaVXRDSVcwanUzQ1Q2?=
+ =?utf-8?B?NkxGV1laMEdzVDN1T2VNM2hLcG5Jd2NzQUdzaDRVVVl0S1hEQjFUMCtDZlQ3?=
+ =?utf-8?B?WHBEd0pHN0E4T205NjJuaHoxekJjU0gwV2VpVWlWd2g4YnZXWmFMcUpmWE1U?=
+ =?utf-8?B?a21JRTZINXRYc2Zoc1NDMVBwMlhXaGxPQjFTMlFoSXRBaW1la0hRZ0NsSld5?=
+ =?utf-8?B?TGVVeTlNMGV4YjdCeFpQMUNvemFMZmxkZGJJQ1YzdWd6U3NRd09QMzNxNWla?=
+ =?utf-8?B?NGk5SDdwZ2sxcStOaXYraXRNeXJkQlU3SzNYQmRjOHJKSmo0bjN2NXByUjR5?=
+ =?utf-8?B?SEE9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <063EB644B953004E838A511FB5354D98@namprd04.prod.outlook.com>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Spamd-Result: default: False [-3.21 / 50.00];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 R_SPF_SOFTFAIL(0.00)[~all:c];
-	 RCVD_COUNT_THREE(0.00)[4];
-	 MX_GOOD(-0.01)[];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 R_DKIM_NA(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_LAST(0.00)[];
-	 MID_RHS_MATCH_FROM(0.00)[];
-	 ARC_NA(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%];
-	 FROM_HAS_DN(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 DMARC_POLICY_SOFTFAIL(0.10)[suse.de : No valid SPF, No valid DKIM,none]
-X-Spam-Level: 
-X-Spam-Score: -3.21
-X-Rspamd-Server: rspamd1
-Authentication-Results: smtp-out1.suse.de;
-	dkim=none;
-	dmarc=fail reason="No valid SPF, No valid DKIM" header.from=suse.de (policy=none);
-	spf=softfail (smtp-out1.suse.de: 2a07:de40:b281:104:10:150:64:97 is neither permitted nor denied by domain of lhenriques@suse.de) smtp.mailfrom=lhenriques@suse.de
-X-Rspamd-Queue-Id: EC92222038
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	0V/s4jvRUe4HtBnYB3kzdPwwXzbU2XMuS0Ii57McQ+EBRce9rMVAxWgXd+J1VsLctSNBjvbjH1K2VRGrTj2XLBfs3sU9MG++p7n2udUKzyMqr+0pJ4EfMal2Lg1D2AA0mX10djOUWrm1q/L6EdCJuDWSZLFPKk/MdGdUtEKF7eDIR+K9IIGVtEsj2VcMFcf0fHJFOjXgDKJZJ4kcKAjI2myyw3iNMspeSkyJ/RwZNtQC3FtqkigVuRFFKBUmkmWFYsZ7YEXQAXF0gNmghDkaCGzyhtl/u7Y0qV43iRskY4RkB4gt49kzhUWUtxMOsYb7Gxqpn0OfxJdVA2+KDrZX9rQN6Ax846jrDYV/LaHtEH7YkDmTXQlZXyX6AtJdDSe/hVIeqEMn1YgO9LI7cYtclCu4+hoDMiXGCGoQTTygsvQfFpJUidyK0gkgbZLfGRr4q/GmR0mdd1JSnMRPw48R72tKeu3EfKqRS4LjM/FMzVtvsJ444sfiQEyp6ngBAwzOEK1/Ws0J+o0zOn6ftzLTK1r5cMgPWWcioWcPiTL+CIhEebVvaxSKJ+5ujNdE/62Gx0Jxm/ypns9ZKqyq2kn7a6oqKJwR5oNjNzfhDAZb9RNgCv77Wk7VV6eE3gBKh35sEZL5CA1kMtvaa46qc6SbzMrVrdqA5IlcgBJKhSe29amW27Do6MBIlLQdIaw9IXMrEGHyiUszPh0PJMuLP8JL89UDWpwFrYF6GgVWeX/8cRtbZx7fkey/EmdHTJgwMAo/1hTC5AE03SswEclhnS+ZqaboQOe/zyM1kiktyaRHMkojna/3jPSPkhYPgCGjAAPy7iJypZ0CXGJmZuNta6dMN5HkeBKHm4/HAd/PsH3WU5eS67cd9X6ptjEKN1DkLHHYrahSUuG/1Bae9yuaMDVBSg==
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR04MB7416.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 54916410-2b2b-4d54-ec7c-08dbf5b7c74e
+X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Dec 2023 17:29:47.4409
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: B6jT9ED/QhXUqA+iI4GMzlMEvs9BMQbcj5zb4+gSqJ2moQ2MtA6l6+075szs/Q7uqBYm2AA9xuBigkjuhccsWo3KNDdHs3TJKEO1Iq5w12Q=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR04MB7300
 
-Luis Henriques <lhenriques@suse.de> writes:
-
-> Eric Biggers <ebiggers@kernel.org> writes:
->
->> On Tue, Nov 28, 2023 at 02:16:44PM +0000, Luis Henriques wrote:
->>> >
->>> > Yeah, looking closer it makes sense.  Sorry for the noise.  I'm curre=
-ntly
->>> > investigating a test failure (which I can't reproduce locally) where
->>> > 'orig_key' unexpectedly is set to '1' and makes the test fail because=
- it
->>> > was supposed to be '0'.  That's when this caught my attention.  Anywa=
-y,
->>> > I'll go look somewhere else.
->>>=20
->>> OK, I'm not 100% sure yet, but I've an idea about what's going on with
->>> this test failure.
->>>=20
->>> I _think_ that even after the following is done in the test:
->>>=20
->>>     _user_do_rm_enckey $SCRATCH_MNT $keyid
->>>     _scratch_cycle_mount
->>>=20
->>> the key garbage collector may not have finish running.  And then, when =
-we
->>> read '/proc/key-users', we can race against key_user_put(), which needs
->>> key_user_lock, which is also grabbed while the proc file seq_operations
->>> are run.
->>>=20
->>> Eric, does this make any sense?  There is a loop in the test to wait for
->>> invalidated keys, but I believe it's not relevant anymore since commit
->>> d7e7b9af104c ("fscrypt: stop using keyrings subsystem for
->>> fscrypt_master_key").  But I might be misunderstanding the code.
->>
->> Thanks for looking into this!  I had noticed this test is still flaky on=
- arm64
->> but haven't had a chance to look into it.  Yes, it's probably related to=
- the key
->> garbage collector again.  The test needs to wait for the fscrypt "user" =
-keys
->> (key_type_fscrypt_user in the kernel) to be released from the quota.  I =
-think
->> that loop in the test does not have the intended effect because it waits=
- for
->> "invalidated" keys, but the fscrypt "user" keys (which are charged to th=
-e quota)
->> are never invalidated; they're just released normally.  There used to be=
- another
->> key (in the "keyrings" subsystem sense of the word "key") associated wit=
-h each
->> fscrypt key, and that key was indeed invalidated, but that's no longer t=
-he case.
->>
->
-> Awesome, thanks for confirming this.  That loop probably made sense back
-> when keys were invalidated -- that behaviour was changed by the commit I
-> mentioned, I believe.  Anyway, it's probably better to keep it the loop
-> for testing old kernels, as it doesn't really hurt.
->
->>=20
->> Maybe there's a better way to wait for the key garbage collector to
->> finish.
->>
->> Or the kernel could be changed to make releasing the key quota be synchr=
-onous.
->> Unfortunately the keyrings subsystem doesn't seem to work that way, and =
-fscrypt
->> is tying into the key quota from the keyrings subsystem, so it is subjec=
-t to its
->> limitations.  But maybe there's a way to do it.
->
-> Hmm... yeah, that requires a closer look at that subsystem to see if
-> something can be done.  I'll try to find something there that would make
-> that test more reliable.
-
-OK, I've finally spent some time looking at this and I see two options to
-fix this.
-
-- Option 1:
-
-Add some logic to the test to try to close this race.  The loop that adds
-keys and expects the last key to fail could be changed to update the keys
-quota if the number of keys in '/proc/key-users' isn't the one it was
-expected after adding a new one.  It's hacky and still racy, as the GC
-could still run in between.  I've an attempt to implement this, which
-_seems_ to be working, but I haven't spent too much time testing it,
-because... it's ugly and option 2 looks better.
-
-- Option 2:
-
-Modify the '/proc/key-users' ->start() handler so that the first thing it
-does is to call flush_work() and force the GC to run.  This doesn't
-completely close the race window, but I think it makes things a bit more
-reliable to userspace scripts/applications relying on the data.
-
-Also, this flushing should probably be done for '/proc/keys' as well, but
-the patch I've been hammering is doing it for '/proc/key-users' only.  So
-far, it seems to do the job and I can't reproduce the test failure with it
-applied.
-
-Obviously, forcing GC to run will have a performance impact, but I'm also
-not sure how bad that would be and how much userspace expects a read to
-these procfs files to perform.
-
-Anyway, just for reference, I'm attaching bellow the patch I've been
-testing.  Let me know what you think about it.  I'm still running more
-tests, but if the patch looks good to you I can send out a proper RFC.
-
-Cheers,
---=20
-Lu=C3=ADs
-
-diff --git a/security/keys/gc.c b/security/keys/gc.c
-index 3c90807476eb..57b5a54490a0 100644
---- a/security/keys/gc.c
-+++ b/security/keys/gc.c
-@@ -44,6 +44,12 @@ struct key_type key_type_dead =3D {
- 	.name =3D ".dead",
- };
-=20
-+void key_flush_gc(void)
-+{
-+	kenter("");
-+	flush_work(&key_gc_work);
-+}
-+
- /*
-  * Schedule a garbage collection run.
-  * - time precision isn't particularly important
-diff --git a/security/keys/internal.h b/security/keys/internal.h
-index 471cf36dedc0..fee1d0025d96 100644
---- a/security/keys/internal.h
-+++ b/security/keys/internal.h
-@@ -170,6 +170,7 @@ extern void keyring_restriction_gc(struct key *keyring,
- extern void key_schedule_gc(time64_t gc_at);
- extern void key_schedule_gc_links(void);
- extern void key_gc_keytype(struct key_type *ktype);
-+extern void key_flush_gc(void);
-=20
- extern int key_task_permission(const key_ref_t key_ref,
- 			       const struct cred *cred,
-diff --git a/security/keys/proc.c b/security/keys/proc.c
-index d0cde6685627..2837e00a240a 100644
---- a/security/keys/proc.c
-+++ b/security/keys/proc.c
-@@ -277,6 +277,7 @@ static void *proc_key_users_start(struct seq_file *p, l=
-off_t *_pos)
- 	struct rb_node *_p;
- 	loff_t pos =3D *_pos;
-=20
-+	key_flush_gc();
- 	spin_lock(&key_user_lock);
-=20
- 	_p =3D key_user_first(seq_user_ns(p), &key_user_tree);
+T24gMDUuMTIuMjMgMTg6MjIsIEZpbGlwZSBNYW5hbmEgd3JvdGU6DQo+IE9uIFR1ZSwgRGVjIDUs
+IDIwMjMgYXQgNToxOeKAr1BNIEpvaGFubmVzIFRodW1zaGlybg0KPiA8Sm9oYW5uZXMuVGh1bXNo
+aXJuQHdkYy5jb20+IHdyb3RlOg0KPj4NCj4+IE9uIDA1LjEyLjIzIDE4OjEyLCBGaWxpcGUgTWFu
+YW5hIHdyb3RlOg0KPj4+IE9uIFR1ZSwgRGVjIDUsIDIwMjMgYXQgMTI6NDXigK9QTSBKb2hhbm5l
+cyBUaHVtc2hpcm4NCj4+PiA8am9oYW5uZXMudGh1bXNoaXJuQHdkYy5jb20+IHdyb3RlOg0KPj4+
+Pg0KPj4+PiBUZXN0IGEgc2ltcGxlIDRrIHdyaXRlIG9uIGFsbCBSQUlEIHByb2ZpbGVzIGN1cnJl
+bnRseSBzdXBwb3J0ZWQgd2l0aCB0aGUNCj4+Pj4gcmFpZC1zdHJpcGUtdHJlZS4NCj4+Pj4NCj4+
+Pj4gU2lnbmVkLW9mZi1ieTogSm9oYW5uZXMgVGh1bXNoaXJuIDxqb2hhbm5lcy50aHVtc2hpcm5A
+d2RjLmNvbT4NCj4+DQo+Pg0KPj4gWy4uLl0NCj4+DQo+Pj4NCj4+Pg0KPj4+IEFueSBpZGVpYXM/
+DQo+Pj4NCj4+DQo+PiBPaCBmb3Igbm9uLXpvbmVkIGRyaXZlcywgeW91IGRvIGFjdHVhbGx5IG5l
+ZWQgIi1PIHJhaWQtc3RyaXBlLXRyZWUiDQo+PiBhZGRlZCB0byBta2ZzLiBXaWxsIGZpeCB0aGlz
+IEFTQVAsIHNvIGl0IGNhbiBiZSBydW4gb24gbm9uLXpvbmVkIGFzIHdlbGwuDQo+IA0KPiBPaywg
+dGhhdCdzIGl0LCBydW5uaW5nIGFzOiAgIE1LRlNfT1BUSU9OUz0iLU8gcmFpZC1zdHJpcGUtdHJl
+ZSINCj4gLi9jaGVjayBidHJmcy8zMDQNCj4gVGhlIHRlc3QgcGFzc2VzLg0KDQpQZXJmZWN0Lg0K
+DQo=
