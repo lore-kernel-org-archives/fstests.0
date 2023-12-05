@@ -1,84 +1,87 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ISfLnGdR"
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DCA6107;
-	Mon,  4 Dec 2023 12:16:29 -0800 (PST)
-Received: by mail-lf1-x130.google.com with SMTP id 2adb3069b0e04-50bfd3a5b54so1221579e87.3;
-        Mon, 04 Dec 2023 12:16:29 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Wj8UeFAm"
+Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15AB9102
+	for <fstests@vger.kernel.org>; Mon,  4 Dec 2023 16:20:22 -0800 (PST)
+Received: by mail-pl1-x630.google.com with SMTP id d9443c01a7336-1d06819a9cbso17563605ad.1
+        for <fstests@vger.kernel.org>; Mon, 04 Dec 2023 16:20:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701720987; x=1702325787; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Rxnz7PaULk+xJC6024GR3t6cngdVEej7qz+5rlPj9m8=;
-        b=ISfLnGdRJZDZx1DxneKeXnIxWZvrkJlBu8EIeHeqs5JrisJUxsuAMv7/HbzirDTEmy
-         7Xm2Sx1wJo7Za41SZYZ/NnXgDrVT8TeJD6i10c+XNX3dx0MaMLJaJJZlaQEDA/WtVZwg
-         unT8yWF6whAhMXu44yMil5qCTEefXucrzSB1d1nq0Nq3OxqmzuaW9yDwWVZO+hQgwyoC
-         1v0b/kcqKGRiAydqwxc62njQNNzZgmgujBAvDNfEPRN2bPdQctG4wTRC1GFGMS6KGPJd
-         y/GL79dl1eicSXwGnNGsdYcqbk0OK3vDMaqSqguH3aHf+R7WPSueCNBYpQYrYMz8scQb
-         W2DA==
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1701735621; x=1702340421; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=0S1UEF2YyAX6G3igmkROaOCkVf7zG8Kt7ZNcHaiM/7U=;
+        b=Wj8UeFAmWnHXto01ei01WM0JspO9IHHCz8ce+MzVTCOzE7VIrTthCxv0PSOBrkv1ee
+         T5oP3NByIftdornUyof1njAElMthRK2qGs/92mGvcj+qyp1cqhmG57fSCwlpaO9LPJli
+         ET7pb0aCt1W3fCp040KJvc3DZoKUW8Kg8DG4WAUBXe6sFLHwr75lqiCtAO0/jWu1Fawh
+         ArZvYb5qLBb03fL0zz8xA1TZiAcL4el+eeOVHnCAEw7UosOWd6Midapj6gtHeOhyMufJ
+         Mh/UnSxYwC1CaFtt139Otx9auWbe5EF0RJMrOkLsfd22eIXOONjPycjOYwa9QnMHqmq0
+         PAaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701720987; x=1702325787;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Rxnz7PaULk+xJC6024GR3t6cngdVEej7qz+5rlPj9m8=;
-        b=mxtjHV8zOTZefeKGW4djeuYf5sD4XypKO3coYZ+PJxdv19Jp4atU2RaU5lqSTTl+yR
-         NkHC5gweBpHtLRUFcGXG6iV/bSY8R6MTToBIOWAMwk67UbG3i6Ifl+tijiI9GREJJoAR
-         bjpIO08t1CybBDb+sLaRfDgOb8LVKbwoow3Fw9M6E29KTdSPTOEpBbASRS5KhZxST8iB
-         N/RUokuxZkrZPOBuIZt3hVEJluPaEI2oCXVKHKvVhpT5JYVeJ1DhiTQdV7B2GkVvEQJb
-         pYzm9pzobyIhkjS8U8SHlLi3Q7ZnglYmzZDeAEeY3VnoePIfvRiYDtClczPqxR8iO4MA
-         DCLg==
-X-Gm-Message-State: AOJu0YwAdE4kaT6ogdR7LixZvfxbncLE+j7NvfdZiut6/FrV36Ay4XPE
-	gLIluF/nCFo8a9x1n14BVGQgveUHZU+8uQlsUBo=
-X-Google-Smtp-Source: AGHT+IFFS/LxkhcJWraSuR+9Wwuyd5MEmhcy+jjsGk3cixWkemQBCHl/a25uxzZBP/ANio2oh1Ic/iD5UrKJJHPb+ho=
-X-Received: by 2002:a05:6512:3c9c:b0:50b:f0f2:6cbb with SMTP id
- h28-20020a0565123c9c00b0050bf0f26cbbmr2056549lfv.60.1701720987006; Mon, 04
- Dec 2023 12:16:27 -0800 (PST)
+        d=1e100.net; s=20230601; t=1701735621; x=1702340421;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0S1UEF2YyAX6G3igmkROaOCkVf7zG8Kt7ZNcHaiM/7U=;
+        b=xSOLteKHAyaFAfONW20qeiVLfBY/jYR48UY/lXLBPuQbcqP7O88I4IMWhcz7diY8mF
+         XoCYCdlAH92fMfvv4TDXtRux86oCNYCDRCn6smICK6dBdwUdxaZ76su3jzC5ULJ9DO8J
+         j3mqdUL2l3QDjeBOZ/YcukINjq4FMv4hPwt74R3qgOXEDiv9OHL+OtQl9BlUh5R9mnyJ
+         sA2T1on3DOlBR8z0GEVYr2cRFMPO4i18eMxpLeod+hl0A5fdijtelYH6rQG/wkoWbxM1
+         +1JoYNniOK4sbh8PUv1Y0X+9sf5iNELwaPkx+hRfo81VvDA3eldjJ8XtbPx4iwv7K9EW
+         P1vg==
+X-Gm-Message-State: AOJu0YzHHXIHxQ92EVzOtQWKii5jEyfFNB5qcMUK+kiSb0TOfvi/3bZF
+	rC8ddYHcKz2TB74l7b9KRuF+Mw==
+X-Google-Smtp-Source: AGHT+IG6o4lI52BlB5GUEIT3TVt2J+H+u5Y/PhuRO647sp9sdHbA3yjRuBLu7rfx91DSE0IxdNRvqw==
+X-Received: by 2002:a17:902:988c:b0:1d0:6ffd:ae22 with SMTP id s12-20020a170902988c00b001d06ffdae22mr1930912plp.137.1701735621280;
+        Mon, 04 Dec 2023 16:20:21 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-125-5.pa.nsw.optusnet.com.au. [49.180.125.5])
+        by smtp.gmail.com with ESMTPSA id h5-20020a170902748500b001d0b410271fsm1785149pll.218.2023.12.04.16.20.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Dec 2023 16:20:20 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+	(envelope-from <david@fromorbit.com>)
+	id 1rAJAf-003x1T-2z;
+	Tue, 05 Dec 2023 11:20:17 +1100
+Date: Tue, 5 Dec 2023 11:20:17 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: David Howells <dhowells@redhat.com>
+Cc: Steve French <sfrench@samba.org>,
+	Xiaoli Feng <fengxiaoli0714@gmail.com>,
+	Shyam Prasad N <nspmangalore@gmail.com>,
+	Rohith Surabattula <rohiths.msft@gmail.com>,
+	Jeff Layton <jlayton@kernel.org>,
+	Darrick Wong <darrick.wong@oracle.com>, fstests@vger.kernel.org,
+	linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] cifs: Fix non-availability of dedup breaking generic/304
+Message-ID: <ZW5swS8fUXFIeu1F@dread.disaster.area>
+References: <250053.1701698519@warthog.procyon.org.uk>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <250053.1701698519@warthog.procyon.org.uk>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <250053.1701698519@warthog.procyon.org.uk>
-From: Steve French <smfrench@gmail.com>
-Date: Mon, 4 Dec 2023 14:16:15 -0600
-Message-ID: <CAH2r5mu1bg6X5wxMpOxWS4t0XUS5-mY3ENfbm_vEytPce4HQxg@mail.gmail.com>
-Subject: Re: [PATCH] cifs: Fix non-availability of dedup breaking generic/304
-To: David Howells <dhowells@redhat.com>
-Cc: Steve French <sfrench@samba.org>, Dave Chinner <david@fromorbit.com>, 
-	Xiaoli Feng <fengxiaoli0714@gmail.com>, Shyam Prasad N <nspmangalore@gmail.com>, 
-	Rohith Surabattula <rohiths.msft@gmail.com>, Jeff Layton <jlayton@kernel.org>, 
-	Darrick Wong <darrick.wong@oracle.com>, fstests@vger.kernel.org, 
-	linux-cifs@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-added missing Signed-off-by line (and also for the two previous
-patches from David) and added Cc: stable and tentatively merged into
-cifs-2.6.git for-next pending additional testing
-
-On Mon, Dec 4, 2023 at 8:02=E2=80=AFAM David Howells <dhowells@redhat.com> =
-wrote:
->
-> Deduplication isn't supported on cifs, but cifs doesn't reject it, instea=
-d
-> treating it as extent duplication/cloning.  This can cause generic/304 to=
- go
+On Mon, Dec 04, 2023 at 02:01:59PM +0000, David Howells wrote:
+> Deduplication isn't supported on cifs, but cifs doesn't reject it, instead
+> treating it as extent duplication/cloning.  This can cause generic/304 to go
 > silly and run for hours on end.
->
+
+This should also mention that it cloning rather than comparing data
+can cause server-side data corruption in the destination file for
+the benefit of anyone trying to track down weird data corruption
+problems....
+
 > Fix cifs to indicate EOPNOTSUPP if REMAP_FILE_DEDUP is set in
 > ->remap_file_range().
->
-> Note that it's unclear whether or not commit b073a08016a1 is meant to cau=
-se
+> 
+> Note that it's unclear whether or not commit b073a08016a1 is meant to cause
 > cifs to return an error if REMAP_FILE_DEDUP.
 >
-> Fixes: b073a08016a1 ("cifs: fix that return -EINVAL when do dedupe operat=
-ion")
+> Fixes: b073a08016a1 ("cifs: fix that return -EINVAL when do dedupe operation")
 > Suggested-by: Dave Chinner <david@fromorbit.com>
 > cc: Steve French <sfrench@samba.org>
 > cc: Xiaoli Feng <fengxiaoli0714@gmail.com>
@@ -89,33 +92,30 @@ ion")
 > cc: fstests@vger.kernel.org
 > cc: linux-cifs@vger.kernel.org
 > cc: linux-fsdevel@vger.kernel.org
-> Link: https://lore.kernel.org/r/3876191.1701555260@warthog.procyon.org.uk=
-/
+> Link: https://lore.kernel.org/r/3876191.1701555260@warthog.procyon.org.uk/
 > ---
 >  fs/smb/client/cifsfs.c |    4 +++-
 >  1 file changed, 3 insertions(+), 1 deletion(-)
->
+> 
 > diff --git a/fs/smb/client/cifsfs.c b/fs/smb/client/cifsfs.c
 > index 4d8927b57776..96a65cf9b5ec 100644
 > --- a/fs/smb/client/cifsfs.c
 > +++ b/fs/smb/client/cifsfs.c
-> @@ -1276,7 +1276,9 @@ static loff_t cifs_remap_file_range(struct file *sr=
-c_file, loff_t off,
->         unsigned int xid;
->         int rc;
->
-> -       if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
-> +       if (remap_flags & REMAP_FILE_DEDUP)
-> +               return -EOPNOTSUPP;
-> +       if (remap_flags & ~REMAP_FILE_ADVISORY)
->                 return -EINVAL;
->
->         cifs_dbg(FYI, "clone range\n");
->
->
+> @@ -1276,7 +1276,9 @@ static loff_t cifs_remap_file_range(struct file *src_file, loff_t off,
+>  	unsigned int xid;
+>  	int rc;
+>  
+> -	if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
+> +	if (remap_flags & REMAP_FILE_DEDUP)
+> +		return -EOPNOTSUPP;
+> +	if (remap_flags & ~REMAP_FILE_ADVISORY)
+>  		return -EINVAL;
+>  
+>  	cifs_dbg(FYI, "clone range\n");
 
+Apart from updating the commit message, the fix looks fine to me.
 
---=20
-Thanks,
-
-Steve
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
+-- 
+Dave Chinner
+david@fromorbit.com
