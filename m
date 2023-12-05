@@ -1,248 +1,215 @@
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 874DF6AB8B;
+	Tue,  5 Dec 2023 19:50:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="qLnEPYWl"
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 722C018F;
-	Tue,  5 Dec 2023 09:47:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1701798431; x=1733334431;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=L7RwUz52ypeOOfgAxBgi1jSj/I8ZxrfHoMionymVtig=;
-  b=qLnEPYWlBgM3BpkzhQeeZPnvrrNqCsa6EUp2n8af5Veo3FEq+KxtI02T
-   N8oqtMic6ZvssXkx+vaYbR3JEkXbOw31u31bQwWIVIelI7oghlblYkh5g
-   /Ho8nBfz9qyOEmL8NWARlwuSQJd96rLFzMYKUCDxvkqE2b0E8dLI46yfg
-   kzzECQPfqVODZP/mH9RnAwc735X3h2j7isVR9vuzj+sFB4vclkSOCBa1u
-   aQfjjLdncC1PcYQ5b2M/BBfSqXrxXZJNAZ9kEswuBqOOhOnXhSvd8gRB7
-   xALKiWZ9qIkz7yp/g5s6TJcdolIgqyT1JGjF24HNxXuQPJRC6QGKgE5uX
-   w==;
-X-CSE-ConnectionGUID: c/wA5/g3T4+GyZ7M1wmzvA==
-X-CSE-MsgGUID: VzaNV6N4Sq26EytLAFhCPg==
-X-IronPort-AV: E=Sophos;i="6.04,252,1695657600"; 
-   d="scan'208";a="3944975"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 06 Dec 2023 01:47:11 +0800
-IronPort-SDR: Ic6XV94VD/jWOaiWqBqZlxAJP1TDOcoxQFzF9m+W/yP2r91mGRrTwZp8VzkEWxEK9RIQ+HL9rx
- WIw2/zYpCZWA==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Dec 2023 08:52:32 -0800
-IronPort-SDR: i2esY4esalCewl0RQdr/+lg3aQvtEWiqz3x86Tn2ELnTbfHu/vu+PEZzUgCSHtLsrtl0jLKR+k
- d5TGqZBnUjDA==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
-  by uls-op-cesaip01.wdc.com with ESMTP; 05 Dec 2023 09:47:11 -0800
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Date: Tue, 05 Dec 2023 09:47:07 -0800
-Subject: [PATCH v3 7/7] btrfs: add fstest for overwriting a file partially
- with RST
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sQ6zNJmZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EE8CCC433C7;
+	Tue,  5 Dec 2023 19:50:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701805841;
+	bh=xcrAZTBXnUwk73IiUzyWwKsoxLSG00h7H6Qc8EGSjts=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=sQ6zNJmZFcrLdqkVcETYwTad10wYDqiIt7OgSBQ/aMuUcXWXzh1zqeZ6C08eKGQOq
+	 9g+bIeg/8EIf67ftHpgqOqDm4O7sZ2Y/pFdrW2ah/isfHbIy/B4RsPjmD8NANg3+KG
+	 5+YH8IgFKStKkRwZq1//iRX0GvUDy+4fovo3SkgsQ+zvLyBzp5GWCIwQgxT5pl2uTb
+	 +xiIga+3n7s85S71PR4ig3n6v1ho95iXC25sOAMch6EXpekOYrv2kI0PV3QugeVvfn
+	 GoBqusiumxm5DI4HDaeZYU+kKIDhXLpqzr0aLbDQaf2duoXJdbx8OQIc5TmBMGwAO/
+	 ReRXIfXtmt+kg==
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-a1ceae92ab6so6132266b.0;
+        Tue, 05 Dec 2023 11:50:40 -0800 (PST)
+X-Gm-Message-State: AOJu0YyMYw7LkLUPUq3or4lg7nukT+QV/eyHNutfIdzLJLWVmZksqLJn
+	6d4G2nHZ0Kkmc0JL3JZq59MRd6O+gy+PcSQcov4=
+X-Google-Smtp-Source: AGHT+IEmel214zAmbqvtlgVIpNyt4Xv4SGR0RYXpBHAKkjvOIhFWLhzMyScfegGb8Rx5oO3LmQo0R4v/DTu0zcVw00M=
+X-Received: by 2002:a17:906:2616:b0:a17:8181:4f3 with SMTP id
+ h22-20020a170906261600b00a17818104f3mr4923831ejc.49.1701805839347; Tue, 05
+ Dec 2023 11:50:39 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231205-btrfs-raid-v3-7-0e857a5439a2@wdc.com>
 References: <20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com>
 In-Reply-To: <20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com>
-To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
- linux-btrfs@vger.kernel.org, 
- Johannes Thumshirn <johannes.thumshirn@wdc.com>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1701798423; l=6685;
- i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
- bh=L7RwUz52ypeOOfgAxBgi1jSj/I8ZxrfHoMionymVtig=;
- b=JwraXZiezt39foJdf7Hl/ffiCrI6NIzmcSo7J8F8b6L5PIn8b+r8AC8KDvn4/3sMRZmG7wIhh
- M+9XnbQN/UbBB8AlP+8kX2e0Kj7PsJv/LOK9qJM7gcujoQeHYdedtqV
-X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
- pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 5 Dec 2023 19:50:02 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H56L7+m6-SX6oqoaDu89u-QNVR-0F=G3bSt+g4S-uSBPg@mail.gmail.com>
+Message-ID: <CAL3q7H56L7+m6-SX6oqoaDu89u-QNVR-0F=G3bSt+g4S-uSBPg@mail.gmail.com>
+Subject: Re: [PATCH v3 0/7] fstests: add tests for btrfs' raid-stripe-tree feature
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>, 
+	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add a test writing 128k to an empty file with one stripe already
-pre-filled on-disk. Then overwrite a portion of the file in the middle.
+On Tue, Dec 5, 2023 at 5:47=E2=80=AFPM Johannes Thumshirn
+<johannes.thumshirn@wdc.com> wrote:
+>
+> Add tests for btrfs' raid-stripe-tree feature. All of these test work by
+> writing a specific pattern to a newly created filesystem and afterwards
+> using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
+> the placement and the layout of the metadata.
+>
+> The md5sum of each file will be compared as well after a re-mount of the
+> filesystem.
+>
+> ---
+> Changes in v3:
+> - added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
+>   automatically
+> - Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+> - Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea=
+345b@wdc.com
+>
+> Changes in v2:
+> - Re-ordered series so the newly introduced group is added before the
+>   tests
+> - Changes Filipe requested to the tests.
+> - Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1b=
+cff8@wdc.com
+>
+> ---
+> Johannes Thumshirn (7):
+>       fstests: doc: add new raid-stripe-tree group
+>       common: add filter for btrfs raid-stripe dump
+>       btrfs: add fstest for stripe-tree metadata with 4k write
+>       btrfs: add fstest for 8k write spanning two stripes on raid-stripe-=
+tree
+>       btrfs: add fstest for writing to a file at an offset with RST
+>       btrfs: add fstests to write 128k to a RST filesystem
+>       btrfs: add fstest for overwriting a file partially with RST
 
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/308     |  56 +++++++++++++++++++++++++++
- tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 162 insertions(+)
+Just one more thing, and sorry I didn't notice before. All the tests fail
+when running with compression enabled, for example:
 
-diff --git a/tests/btrfs/308 b/tests/btrfs/308
-new file mode 100755
-index 000000000000..e57e32bc7fa2
---- /dev/null
-+++ b/tests/btrfs/308
-@@ -0,0 +1,56 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Western Digital Cooperation.  All Rights Reserved.
-+#
-+# FS QA Test 306
-+#
-+# Test on-disk layout of RAID Stripe Tree Metadata by writing 128k to an empty
-+# file on a filesystem that has one stripe already pre-filled. Afterwards
-+# overwrite a portion of the file.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick raid remount volume raid-stripe-tree
-+
-+. ./common/filter
-+. ./common/filter.btrfs
-+
-+_supported_fs btrfs
-+_require_btrfs_command inspect-internal dump-tree
-+_require_btrfs_mkfs_feature "raid-stripe-tree"
-+_require_scratch_dev_pool 4
-+_require_btrfs_fs_feature "raid_stripe_tree"
-+
-+test_128k_write_overwrite()
-+{
-+	local profile=$1
-+	local ndevs=$2
-+
-+	_scratch_dev_pool_get $ndevs
-+
-+	echo "==== Testing $profile ===="
-+	_scratch_pool_mkfs -d $profile -m $profile -O raid-stripe-tree
-+	_scratch_mount
-+
-+	$XFS_IO_PROG -fc "pwrite -W 0 32k" "$SCRATCH_MNT/bar" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 0 128k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 64k 8k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+
-+	_scratch_cycle_mount
-+	md5sum "$SCRATCH_MNT/foo" | _filter_scratch
-+
-+	_scratch_unmount
-+
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t raid_stripe $SCRATCH_DEV_POOL |\
-+		_filter_btrfs_version | _filter_stripe_tree
-+
-+	_scratch_dev_pool_put
-+}
-+
-+echo "= Test 128k write to empty file with 1st stripe partially prefilled then overwrite ="
-+test_128k_write_overwrite raid0 2
-+test_128k_write_overwrite raid1 2
-+test_128k_write_overwrite raid10 4
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/308.out b/tests/btrfs/308.out
-new file mode 100644
-index 000000000000..c93a3a43b248
---- /dev/null
-+++ b/tests/btrfs/308.out
-@@ -0,0 +1,106 @@
-+QA output created by 308
-+= Test 128k write to empty file with 1st stripe partially prefilled then overwrite =
-+==== Testing raid0 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 2 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid1 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid10 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 3 physical XXXXXXXXX
-+			stripe 1 devid 4 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
+root 19:41:12 /home/fdmanana/git/hub/xfstests > MOUNT_OPTIONS=3D"-o
+compress" ./check btrfs/305
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 debian0 6.7.0-rc3-btrfs-next-143+ #1 SMP
+PREEMPT_DYNAMIC Mon Dec  4 11:01:37 WET 2023
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o compress /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
 
--- 
-2.43.0
+btrfs/305 1s ... - output mismatch (see
+/home/fdmanana/git/hub/xfstests/results//btrfs/305.out.bad)
+    --- tests/btrfs/305.out 2023-12-05 19:35:00.986326843 +0000
+    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/305.out.bad
+2023-12-05 19:43:31.098623435 +0000
+    @@ -14,15 +14,12 @@
+     checksum calced <CHECKSUM>
+     fs uuid <UUID>
+     chunk uuid <UUID>
+    - item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 24
+    + item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+      encoding: RAID0
+      stripe 0 devid 1 physical XXXXXXXXX
+    ...
+    (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/305.out
+/home/fdmanana/git/hub/xfstests/results//btrfs/305.out.bad'  to see
+the entire diff)
+Ran: btrfs/305
+Failures: btrfs/305
+Failed 1 of 1 tests
 
+Also, they all fail when the free space tree is disabled, like this:
+
+root 19:45:30 /home/fdmanana/git/hub/xfstests > MKFS_OPTIONS=3D"-O
+^free-space-tree" ./check btrfs/304
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 debian0 6.7.0-rc3-btrfs-next-143+ #1 SMP
+PREEMPT_DYNAMIC Mon Dec  4 11:01:37 WET 2023
+MKFS_OPTIONS  -- -O ^free-space-tree /dev/sdb
+MOUNT_OPTIONS -- /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+
+btrfs/304 1s ... - output mismatch (see
+/home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad)
+    --- tests/btrfs/304.out 2023-12-05 19:34:01.040411746 +0000
+    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad
+2023-12-05 19:45:36.242621419 +0000
+    @@ -15,6 +15,156 @@
+      item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+      encoding: RAID0
+      stripe 0 devid 1 physical XXXXXXXXX
+    + item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+    + encoding: RAID0
+    + stripe 0 devid 1 physical XXXXXXXXX
+    + item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+    ...
+    (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/304.out
+/home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad'  to see
+the entire diff)
+Ran: btrfs/304
+Failures: btrfs/304
+Failed 1 of 1 tests
+
+And with nodatacow, only one of them fails:
+
+root 19:46:16 /home/fdmanana/git/hub/xfstests > MOUNT_OPTIONS=3D"-o
+nodatacow" ./check btrfs/304 btrfs/305 btrfs/306 btrfs/307 btrfs/308
+FSTYP         -- btrfs
+PLATFORM      -- Linux/x86_64 debian0 6.7.0-rc3-btrfs-next-143+ #1 SMP
+PREEMPT_DYNAMIC Mon Dec  4 11:01:37 WET 2023
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o nodatacow /dev/sdb /home/fdmanana/btrfs-tests/scratch_1
+
+btrfs/304 1s ...  1s
+btrfs/305 1s ...  1s
+btrfs/306 1s ...  1s
+btrfs/307 1s ...  1s
+btrfs/308 0s ... - output mismatch (see
+/home/fdmanana/git/hub/xfstests/results//btrfs/308.out.bad)
+    --- tests/btrfs/308.out 2023-12-05 19:37:38.379355089 +0000
+    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/308.out.bad
+2023-12-05 19:46:33.716457540 +0000
+    @@ -28,9 +28,6 @@
+      item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
+      encoding: RAID0
+      stripe 0 devid 1 physical XXXXXXXXX
+    - item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
+    - encoding: RAID0
+    - stripe 0 devid 1 physical XXXXXXXXX
+     total bytes XXXXXXXX
+    ...
+    (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/308.out
+/home/fdmanana/git/hub/xfstests/results//btrfs/308.out.bad'  to see
+the entire diff)
+Ran: btrfs/304 btrfs/305 btrfs/306 btrfs/307 btrfs/308
+Failures: btrfs/308
+Failed 1 of 5 tests
+
+For the compression, we can just add a "_require_no_compress".
+We should also skip them when free space tree is not enabled or
+nodatacow is enabled for 308 (don't recall if we already have helpers
+for that).
+
+Other than that, everything looks good to me.
+
+Thanks.
+
+
+>
+>  common/filter.btrfs |  14 +++++++
+>  doc/group-names.txt |   1 +
+>  tests/btrfs/304     |  53 ++++++++++++++++++++++++++
+>  tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
+>  tests/btrfs/305     |  58 ++++++++++++++++++++++++++++
+>  tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/306     |  56 +++++++++++++++++++++++++++
+>  tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/307     |  53 ++++++++++++++++++++++++++
+>  tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
+>  tests/btrfs/308     |  56 +++++++++++++++++++++++++++
+>  tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  12 files changed, 677 insertions(+)
+> ---
+> base-commit: 5649843ef186de89f58bc69b04a8dc86adf8f1ae
+> change-id: 20231204-btrfs-raid-75975797f97d
+>
+> Best regards,
+> --
+> Johannes Thumshirn <johannes.thumshirn@wdc.com>
+>
+>
