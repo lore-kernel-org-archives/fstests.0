@@ -1,125 +1,123 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UgGB7cZa"
-Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8B82120;
-	Wed,  6 Dec 2023 02:30:07 -0800 (PST)
-Received: by mail-qt1-x82c.google.com with SMTP id d75a77b69052e-42573090000so4595241cf.0;
-        Wed, 06 Dec 2023 02:30:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1701858607; x=1702463407; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2ManYJ4iH+7Glq1N9TdJT0x0N7GL+Rgw7Mwl32pJ4Fw=;
-        b=UgGB7cZahTq7f6GeA1es/v8OTqk7v21MZsT5WppMym1TE3GfqsEFT7mpHe7s0o7q8e
-         wOCN96UEcKxz1oPmmN+aSo3duAi+THPjrmiVKQ8oj2iLejPTsrm1mjUZgcSCoiuW7d+m
-         dhIGfMVtqFqqUovygrI9CLT0g76R6pvmY3jKTgxYjlOwASoBpLE3NOF1K1Wfgwbq7/bs
-         tRFKElARBj7W7np/y05rZnDtqUHeZKYCTuZwjsIkGK3jV82xV1RI5xzilG8iiWxFbFqE
-         ko/2f/WOfQq4wpZF1SGIratBAi5275jiuN+RmyPvg3BGpC4zu2Avp6nD2Yh1BwzGCKeK
-         SYmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701858607; x=1702463407;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2ManYJ4iH+7Glq1N9TdJT0x0N7GL+Rgw7Mwl32pJ4Fw=;
-        b=H2IAv8aYsfUojw0gWq5uVfZKY2W2kNw2Mh2ttWRgAz3eWBMoVd8Ig7lMJ/1MmRnbAv
-         zOxrHK2/1tgq6euEVrICDf3Bb9YKonDj+Qmco+3ptQ/0zTuoV/zmt6vJgVRoCHnL4SbN
-         /LIaTd/YaKgtUm03Si12NrtxvB0cDUQRjn79HbeXXtcNfl+2lxP0mBNlHfHyQI7Ky871
-         nItF3n+6/zjPw4GdMnGEz65Bj25EiK6GYyxmd7dg2Kz3lbKlCDkdK2KiUvrVY4A9ANYX
-         czHiRPnpTssrm7Z9b24cC/IH/neqQsT6QaKFOiomAYA+NtFvXzByBA2Mf0SPYnOlIhq8
-         qZ+w==
-X-Gm-Message-State: AOJu0YzktPGMSUs1i5yo7frC75Us7eGTeyKmAr/sAs3EZHf8B9yKrIf1
-	C3137Bol+jzDRrrJ7N2pd05IAa6dnzi7EJTJCAE=
-X-Google-Smtp-Source: AGHT+IEJgD8h2sohptearYgmwgCPJtYWnBi6feYXahkhIuVAEljV/+U5+1I5aXd2IcigqM6ACUmMbU1B87vaRzdatuU=
-X-Received: by 2002:a05:6214:cae:b0:67a:55f2:1084 with SMTP id
- s14-20020a0562140cae00b0067a55f21084mr3520404qvs.8.1701858606683; Wed, 06 Dec
- 2023 02:30:06 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="P10H5aq/"
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B6DD9C;
+	Wed,  6 Dec 2023 02:56:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1701860182; x=1733396182;
+  h=from:subject:date:message-id:mime-version:
+   content-transfer-encoding:to:cc;
+  bh=jp/Ui0yLzkKl+eO+byXYHoh44oL1oYqjGRrkdWsfOyU=;
+  b=P10H5aq//+WiUNM4ivCFTcS2rw4dHRTLtrnr+nXGMLNWtawNxdtLIVqD
+   MKjExBJy9oBZfsGRmwZREyndI9hEC115ww7Dv1BXWpGIg+QNB9IFzLJ2l
+   FgOoUA9GaD8ukBaJ+vwiKWr4O0J08qQvfNhB/kZJMJKoY2O0CdPsr2DWi
+   2ngjbxsfKuAyEk2A0mtGyjSCyD9WPmwsyVpXecpRQn2HQFhDIZBd4DeT5
+   RyqzLe6DP2FI61lAjPO2c/EpDqd3MzPMznGey0keQHmOtNiRHhB9DGX7o
+   1iJToINlaUXJvN1axuFWiRQewHCJAAoLjVS9E+U5AKk5CX9ikWMRg7qDh
+   g==;
+X-CSE-ConnectionGUID: 1j2ErnI8QN+4iQB/CpO4kA==
+X-CSE-MsgGUID: 4ztQGMKzTK2X8wVWPzJlqw==
+X-IronPort-AV: E=Sophos;i="6.04,255,1695657600"; 
+   d="scan'208";a="4119707"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 06 Dec 2023 18:56:21 +0800
+IronPort-SDR: dHTk/IqPkg8wlxp1nJw5LPNeJ4VncL7kUQui/fxeT6RJAl9Y0Bq4KQ9rI4HtfmGqepGtjK68qt
+ Jhy9pFJnt58w==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 06 Dec 2023 02:07:22 -0800
+IronPort-SDR: 0Gf99RM642X+WlG0MsgXjRZLmObLJWe9mtQMoHIszR61O5ZE1sjoZlALpkmckacr3ovzcsgDnh
+ eeqZddx7iVQw==
+WDCIronportException: Internal
+Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
+  by uls-op-cesaip02.wdc.com with ESMTP; 06 Dec 2023 02:56:19 -0800
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v4 0/8] fstests: add tests for btrfs' raid-stripe-tree
+ feature
+Date: Wed, 06 Dec 2023 02:56:12 -0800
+Message-Id: <20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231204185859.3731975-1-amir73il@gmail.com> <20231204185859.3731975-3-amir73il@gmail.com>
- <20231206083746.aeokhhylcbpd6rkl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20231206083746.aeokhhylcbpd6rkl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 6 Dec 2023 12:29:54 +0200
-Message-ID: <CAOQ4uxi-64evfEQo3KNbO5-h1LF1Jgy5o1X1niH_EO+U7-2fHA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] overlay: prepare for new lowerdir+,datadir+ tests
-To: Zorro Lang <zlang@redhat.com>
-Cc: Alexander Larsson <alexl@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAExTcGUC/3XMSw7CIBSF4a0YxmIocENx5D6MAx4Xy8DWQIOap
+ nuXdqJNdHhO8v0TyZgiZnLcTSRhiTkOfR1yvyOuM/0VafR1E864aDiT1I4pZJpM9FSBVqC0Clp
+ 5UsE9YYjPNXa+1N3FPA7ptbZLs7w/M6WhjFoOEm1jXQjt6eHdwQ03skQK/4awgbxCDqFliEZIs
+ Fso/kNRIcMWlAEptOEfOM/zG45OL3cUAQAA
+To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
+Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
+ linux-btrfs@vger.kernel.org, 
+ Johannes Thumshirn <johannes.thumshirn@wdc.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1701860179; l=2595;
+ i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
+ bh=jp/Ui0yLzkKl+eO+byXYHoh44oL1oYqjGRrkdWsfOyU=;
+ b=2KIWysUA+tGyXlPVYLU4I6MwlmlbqWX/XJGj5bpF5tNU6efdT0l1xXpoMG0WcOU0qSObHLJLb
+ v1qHoT9WbBOB+Sihv1na59Ft7cm7w4czOJYTWWW96lJGRKtYG8YUmpL
+X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
+ pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
 
-On Wed, Dec 6, 2023 at 10:37=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote=
-:
->
-> On Mon, Dec 04, 2023 at 08:58:57PM +0200, Amir Goldstein wrote:
-> > In preparation to forking tests for new lowerdir+,datadir+ mount option=
-s,
-> > prepare a helper to test kernel support and pass datadirs into mount
-> > helpers in overlay/079 test.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >  common/overlay    | 15 +++++++++++++++
-> >  tests/overlay/079 | 36 +++++++++++++++++++++---------------
-> >  2 files changed, 36 insertions(+), 15 deletions(-)
-> >
-> > diff --git a/common/overlay b/common/overlay
-> > index 8f275228..ea1eb7b1 100644
-> > --- a/common/overlay
-> > +++ b/common/overlay
-> > @@ -247,6 +247,21 @@ _require_scratch_overlay_lowerdata_layers()
-> >       _scratch_unmount
-> >  }
-> >
-> > +# Check kernel support for lowerdir+=3D<lowerdir>,datadir+=3D<lowerdat=
-adir> format
-> > +_require_scratch_overlay_lowerdir_add_layers()
-> > +{
-> > +     local lowerdir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-> > +     local datadir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-> > +
-> > +     _scratch_mkfs > /dev/null 2>&1
-> > +     $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> > +             -o"lowerdir+=3D$lowerdir,datadir+=3D$datadir" \
-> > +             -o"redirect_dir=3Dfollow,metacopy=3Don" > /dev/null 2>&1 =
-|| \
-> > +             _notrun "overlay lowerdir+,datadir+ not supported on ${SC=
-RATCH_DEV}"
->
-> Hi Amir,
->
-> I found overlay cases don't use helpers in common/overlay recently, alway=
-s
-> use raw $MOUNT_PROG directly (not only in this patchset). Although overla=
-y
-> supports new mount format, can we improve the mount helpers in common/ove=
-rlay
-> to support that? It would be to good to use common helpers to do common
-> operation.
->
-> Anyway, that can be changed in another patch, if it takes too much time o=
-r
-> you don't want to do it at here. What do you think?
+Add tests for btrfs' raid-stripe-tree feature. All of these test work by
+writing a specific pattern to a newly created filesystem and afterwards
+using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
+the placement and the layout of the metadata.
 
-I agree. I wouldn't improve the existing helpers to support the new
-lowerdir+,datadir+ options as positional argument like in
-_overlay_scratch_mount_dirs(), but there is an opportunity to reduce
-dedupe of this common line with a helper:
+The md5sum of each file will be compared as well after a re-mount of the
+filesystem.
 
-# Mount with mnt/dev of scratch mount and custom mount options
-_overlay_scratch_mount_opts()
-{
-        $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT $*
-}
+---
+Changes in v4:
+- add _require_btrfs_no_compress to all tests
+- add _require_btrfs_no_nodatacow helper and add to btrfs/308
+- add _require_btrfs_feature "free_space_tree" to all tests
+- Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com
 
-I will work on this cleanup and post a patch when I get to it.
-No need to block this series for the cleanup.
+Changes in v3:
+- added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
+  automatically
+- Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+- Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com
 
-Thanks,
-Amir.
+Changes in v2:
+- Re-ordered series so the newly introduced group is added before the
+  tests
+- Changes Filipe requested to the tests.
+- Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com
+
+---
+Johannes Thumshirn (8):
+      fstests: doc: add new raid-stripe-tree group
+      common: add filter for btrfs raid-stripe dump
+      common: add _require_btrfs_no_nodatacow helper
+      btrfs: add fstest for stripe-tree metadata with 4k write
+      btrfs: add fstest for 8k write spanning two stripes on raid-stripe-tree
+      btrfs: add fstest for writing to a file at an offset with RST
+      btrfs: add fstests to write 128k to a RST filesystem
+      btrfs: add fstest for overwriting a file partially with RST
+
+ common/btrfs        |   7 ++++
+ common/filter.btrfs |  14 +++++++
+ doc/group-names.txt |   1 +
+ tests/btrfs/304     |  55 +++++++++++++++++++++++++++
+ tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/305     |  60 +++++++++++++++++++++++++++++
+ tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/306     |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
+ tests/btrfs/307     |  55 +++++++++++++++++++++++++++
+ tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
+ tests/btrfs/308     |  59 +++++++++++++++++++++++++++++
+ tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 13 files changed, 695 insertions(+)
+---
+base-commit: baca8a2b5cb6e798ce3a07e79a081031370c6cb8
+change-id: 20231204-btrfs-raid-75975797f97d
+
+Best regards,
+-- 
+Johannes Thumshirn <johannes.thumshirn@wdc.com>
+
