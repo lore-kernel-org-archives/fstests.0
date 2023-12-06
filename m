@@ -1,153 +1,248 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="AekG8bSr";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="jtTj6g9X"
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5E5810F6;
-	Wed,  6 Dec 2023 03:08:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1701860921; x=1733396921;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=M5lOWaCx4b7D2jr1Z1kUbQY/YFgwtTg7laUeki+exQk=;
-  b=AekG8bSrcs1pOE9zUpudU7ayhHlaXdx7fXiTv3jLFoIqlrqPRd1Yy3Um
-   p/8Bvg6OkOwsj4xKfl0JP0ivmzjSR1wq3OB2yA743QwlP120XhkUbb+zy
-   q4XWixR6a6WYjMgpTqycNa307MY7kgJVX+BFkC5Ori+ADdmgsnnuKE5Vh
-   aG17mY5AyxSyfcXhJ8XcwqlnONotCa20TJvThqdjPzZ3rbvZQbdJKBd3n
-   Y/ZCYBRzFwaUJs7A0OHa92dBqANRTuRFAd/rHL7qcZ2kMLLTEHRGWDVv/
-   8Hlgv1JqAwKdrN7ZpZSmyH6bWq9rVHHBrNqj9yMi9NbcsJHDsulHlTMBn
-   w==;
-X-CSE-ConnectionGUID: cRL1RpQiTKClYJAhwf4h0g==
-X-CSE-MsgGUID: 9+n3MsE1R6qkakXTU6CB6g==
-X-IronPort-AV: E=Sophos;i="6.04,255,1695657600"; 
-   d="scan'208";a="4147603"
-Received: from mail-mw2nam10lp2101.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.101])
-  by ob1.hgst.iphmx.com with ESMTP; 06 Dec 2023 19:08:40 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=fVrjopoJ1aPT6Zs1pUWniG88IgapbsCjRVTM51JQrMBSIWeosLmB36Jvk7iUWyxlbEPicbJU26LVUTzm3VG1zZ1pPct/COcWnZowDb/Je+zyKnJVl1OZm+zB90lfmj5zHoXwFuO9eRhL2bUp+oEgxfHbZo5vhYQMWDjxV5cOf8GY/3lBnzr46JG71vkGCxJSfOj69hqtOiMQQh09fILL3PotN6Ax66Lt+FFv0cJ8TbdGemZNorHB0ao/K80CHxFVXGhCtuIkYosaOmJqm4rFjTD4Bscjfyw9Lz2LzV7/xv4zq6BzUY4kwO3nIJraXLsPAgj6aJc98BRlSiw4yruPlg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=M5lOWaCx4b7D2jr1Z1kUbQY/YFgwtTg7laUeki+exQk=;
- b=HfeVZ4aSbZUSongyxtXCJGCIsNeT5X50X5zMBEpDXoQlXT5HPKTtPr3YM6jNR4OhDG8zR5TtXFKMtc442LAT4R+w1+CPN3/o26rjU24NZlbNzaHpzdFjwhCFh0xzyYSQ4m11tKXbDUiZuTpkpDlZmRhAC7T884a5mWhc168+PoqihaOTPeDRyrdA1FvH0Z+t1hQIpZwWzG7c6JuK1nlI3KdObUs1t5eNPbFXEFmz62upCX/5BbYYMTQcSJn5GduWnEundv9XaD7LEUaQogm5wz7VsnSN3vOEe7fL3Zi0hUwO16GauckMDpB8gBiuHVfWU4CUNwfZhr3KFdpFkv+Jfw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CnvBj+uo"
+Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC82E9A;
+	Wed,  6 Dec 2023 04:19:02 -0800 (PST)
+Received: by mail-wm1-x332.google.com with SMTP id 5b1f17b1804b1-40c0a0d068bso33435875e9.3;
+        Wed, 06 Dec 2023 04:19:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=M5lOWaCx4b7D2jr1Z1kUbQY/YFgwtTg7laUeki+exQk=;
- b=jtTj6g9XZLeU3eeNJfXaG96u+bAZUty15LpoeirLgI8NiXCeTxoZlFlEXcW479jehZ5gykDsUzs9Jd4jAN+cYr0yelWjvau84swBpaj5SmjNQIbmlHfmteErFNup2VMCCN7sRO7Un+1HxLc/E3TkIFnIi9o6gdIYJ3JJQ+XOlhs=
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com (2603:10b6:510:12::17)
- by DM6PR04MB6510.namprd04.prod.outlook.com (2603:10b6:5:20b::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7046.37; Wed, 6 Dec
- 2023 11:08:38 +0000
-Received: from PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::8ea3:9333:a633:c161]) by PH0PR04MB7416.namprd04.prod.outlook.com
- ([fe80::8ea3:9333:a633:c161%6]) with mapi id 15.20.7046.034; Wed, 6 Dec 2023
- 11:08:38 +0000
-From: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
-CC: Filipe Manana <fdmanana@suse.com>, "fstests@vger.kernel.org"
-	<fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org"
-	<linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH v4 0/8] fstests: add tests for btrfs' raid-stripe-tree
- feature
-Thread-Topic: [PATCH v4 0/8] fstests: add tests for btrfs' raid-stripe-tree
- feature
-Thread-Index: AQHaKDLbE+BaKbd8NEiZIEJmYokgj7CcGLmA
-Date: Wed, 6 Dec 2023 11:08:38 +0000
-Message-ID: <46045c46-5614-4c01-9080-b6f0a7dd8d7a@wdc.com>
-References: <20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com>
-In-Reply-To: <20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-user-agent: Mozilla Thunderbird
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH0PR04MB7416:EE_|DM6PR04MB6510:EE_
-x-ms-office365-filtering-correlation-id: f395180a-1a0c-4f3a-fe64-08dbf64bb290
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info:
- Om+C3v7Pn4NkpPx51RG60ZowO/RPG4efo2aHX6TLVDVc2lBoOyVW5HpqF3mTSE+yDQvQIGxR4liHw3lmPL9MsbwC88GJua604HEkWgQsa6FwQtJwekMZ5QZMqIJJZK18/rQHSVJXpZvmuaHOCYrqV0oP2XLAtHjWtPf1Xm5htuF/dEtU/N7jhQIylX9ord1AETyViz3RJ9F0WrhDg1JIdPv2wN3kJLfzl6lgV1UjpVizh9a/sNNCZ40dJhGLG9oUqXDfdNRTvIamfciGo6aRtkhyjsW+IjWDbHuI1QGFakkJxrLyynfjeR4mnHJ3g1bLSULq8zc4fjOJpMx4u4q9ImR2t+eGwWKC6wdVgb9UAzoskVvV+v83QAZJo9qoB274Iy+DnrTk2NpwEZDpkeSQktuuyaaeiQl624sk3w3afhRfVm0VE1fRAVILkc3kREx+TquTMIJMeSZXU2z0DotY0+selHSFau4IfKXGNKiD9TJ685z3Y3/bGyHsy+CTWnSHLeFyzQsD9m/arAVjMMwaQGhWob+nEhSPdy714zei/rRapF3FMIts6gYWYp1hbRTVqu99XelCf7YWNjTkwdxe61ZUKbftxjbhYvN7TslomqKBpPyHSenmrXmThFBpV9u2rzeWTgBj5v6l/2XthyO5FFYDUBWOUL5sDZSKDiUdg4YPr8Wy+G+YqYHP6PeyMAXU
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR04MB7416.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(396003)(376002)(39860400002)(136003)(366004)(230922051799003)(64100799003)(451199024)(1800799012)(186009)(8676002)(8936002)(66946007)(478600001)(6486002)(4326008)(71200400001)(5660300002)(6506007)(316002)(91956017)(76116006)(31686004)(66476007)(66556008)(64756008)(66446008)(53546011)(54906003)(110136005)(6512007)(4744005)(2906002)(2616005)(36756003)(122000001)(82960400001)(38070700009)(41300700001)(38100700002)(31696002)(86362001)(45980500001)(43740500002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?d1l2VDY3aGNFRjFDZDNCbUxEc3k5d2lQUGNleHVMeldpUXpnL29NNlFQRHJE?=
- =?utf-8?B?VjFwK2Jnb05NMmNZeDUrcXhhSEdoUkl0UlF2RXNBMWpJbUIyNE5KRUVwQkp5?=
- =?utf-8?B?ZDl1TmFpa2c2QkJvV1p6d3hnbW40WUhKUGc1dVYxRGoxZ3pxSmhFTDRQZy9L?=
- =?utf-8?B?Mno5Q2VDVExINEptcVo5THp0Y3lJRU5ZdEpPZm1ySnZDa0dmTFo1TVdUQlBY?=
- =?utf-8?B?cFE1TE5tK25nbVYxSUJCdFA5N0swNnFCa2x2NnF0T3g2SGVPaGE1RTFBU1RL?=
- =?utf-8?B?OHlqVHVaNGJsbzExQ0gxeVJ3SW9zeFFQTXorbWEydXkzVXpRNW1LSFBZUXFH?=
- =?utf-8?B?YXRRbGVaUGxOKytjZ0tEbTR6Y3JlVUhIUXpvSEgzWFg3WTN1OUwrYWs4VUZh?=
- =?utf-8?B?K255dHJxMkExYUlxYUs2SzlqZ3lFVWhqbkZKUFhzOEtIcjJMRTBuSlBTNGdx?=
- =?utf-8?B?L2RlalZybWdXLzFaYW1CYndVWDJsQ2ZjWG9haisrd0ZpZHR2NTE2YlZROGp0?=
- =?utf-8?B?ck9oK3lXMi8xazhsSm43OU5rZjZSSm9RT0MzVDI2NjlSOXBZNUl4VEFFcTA1?=
- =?utf-8?B?d2Y3dkhUZVBZRHN4ajJZamxLOUhhR3ZIbU1Td2xJT3NqM1l2NnhEcXB6Vmgw?=
- =?utf-8?B?L1JGcE44dFYxQW1DMGdSRGdGbEtERlU3NzVhRUVVdmd2eS9oWEhYcmdSdisz?=
- =?utf-8?B?Vk0rNVdRZW9IVkJRdCtHNWFNcnkvbU1YRVdiUXlaSmVXZFJvM2czWjcrU3ds?=
- =?utf-8?B?elpzay91alJjK2Z0cXZ0bDl1MjZId09WdllOUlhKQmxGd1A1c011ditIY1hi?=
- =?utf-8?B?N1N1L2w5b0pVSzRaSEQ1ckp6cEU0eHdENXRaa2xsNTlycHZmLzh2ZGNNREdZ?=
- =?utf-8?B?a2M5aHBXR2k5YmZZK3NtdUdrQld3V2N6SitNUE9RY1Nocnk2M1dRTUFJTmFu?=
- =?utf-8?B?NmtZMjcwcW9PbzBTV2MvOWRxbHFhb2J0ZTkyRFdwd041TmlhL3JOSHRkQi9x?=
- =?utf-8?B?MU9nK3V6eEVvQitZQTNmMzM3WWlaVmlOUlBFdkdVbXNiOXZ0clBZb1lQY2Ir?=
- =?utf-8?B?U2MzVTBhMjkvMk81ZVZ6d0RwaEpqYWZoOEFRTkY3SkhyWmp3MHkzZlIyZXVB?=
- =?utf-8?B?UWFqUG9ydFlyQUU1Q3MvZC9Ic0locVA1N2k3MitYT2kzKzh1MXpoUDBHNnli?=
- =?utf-8?B?M2Q1YUJMd09JaWxBaFVkRkZucEtKaWs0VHN6Z3pvY3pYMU9NU3M3VC8xV2Fa?=
- =?utf-8?B?MzczZE1uWm5jcmpxMml0YXNVaW9SY0liYXNGeXRqSkRzejdCRVA1TVFIZy85?=
- =?utf-8?B?UTBIN0JGUXk0VXd1c2JCQTQ5dnE5NUxQUFZ2eTdDc3J4VzI1WXpmMEpLNnR4?=
- =?utf-8?B?VXFkVkJPQWpaZm9OUjhNL0NnODlmTHRCb1hDYXdxaWpJWlg1TVBlN3NtWCta?=
- =?utf-8?B?YndNVTd2MDg0blhBV2tkY3BHUHpRcGxzRlVkdFAzVEJYZVVMSWc2WUhYK1Qv?=
- =?utf-8?B?S0lRRlRGUzY0cGlJYjFGRWZkamdZRjlJVnB3WHprVkZPZjJKVXR4ZTN2Q2pN?=
- =?utf-8?B?c0MyT2ZOL0JYQjcyZ0E5M2RjOXM2WnhQakNtNTZSem1jRHlLR21WbGw2V2FJ?=
- =?utf-8?B?eHNDMmlidkFyWFZCQXN4a29pYi9CYkFqRXhFNFNnOTBaRDBjeGFHSVRVZm1T?=
- =?utf-8?B?SmdvcTJWNTJRSjZsWUlPTkF2Q3lzUit1QWgzMUdhVkoyY1cxNVFSVHB4NnpW?=
- =?utf-8?B?ZDdXNmhxT3BPREM2UGNVRkR5YkFGSWQ2azdDanJkamU3QitQOTBKSkFqY0Ix?=
- =?utf-8?B?TjVYQjRVOC9Ka2JaVHpIWUFuOCtPNnhETTlPT1U3OEV4YlhkVUM4ZVJvZERT?=
- =?utf-8?B?QnArYlRsTlZOWjd5MnRFdVVtVHJHZkJtMUdyOEQ2U2FiMVpySy91c3hIbFdx?=
- =?utf-8?B?M3dTNTFoY2N6dDRqb1p1ZVRucFVVR2hXNnZmREFvc1YwYy9MY1lkTHJHQTJK?=
- =?utf-8?B?eGc3T3hGV0E0Qm9DRWVRTmlkUFI1Wkp2enFic01lK1FGck1JSGRTU1RMQ3Ey?=
- =?utf-8?B?SFhUVUhQcGw5dUdEU2xXYXJ1MlkvV2kvaVFrK0ZWYkVmTGFEOWNNN2N2R3gz?=
- =?utf-8?B?SERFRVV4bEJ4RzdybXVFaktSQk83MmJ2cDc4STBndUlzNWtFOEtRU3ZCUVV1?=
- =?utf-8?B?eG0vaisvWlZqSDRUVjFmSFY0d1phd1dISVdqRWt5ZU9aRG5HdnZkL1FSc25z?=
- =?utf-8?B?UlQwUUl6bEtHMDRxT1kvc1pKRVJBPT0=?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <7D6536776918CA469A9188BFFEEA757E@namprd04.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        d=gmail.com; s=20230601; t=1701865141; x=1702469941; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=dVeeaUhHA3OEpCfniwSPXjh45fNvtiKeJJRS3qu6+KY=;
+        b=CnvBj+uo+1loN0ICKreIgGbMnAgvh3HBGMh3CAuDMCk1ArRy6Usr1uU43EmFyKJBqk
+         DePryVIrA0VBaYxqmPDkDT2X82feHqLThK+x5Wf21Stc/CYXrveMcOCqbck1yzxVVMJj
+         py8Gd5gF1z1ISg40CBO4xmtNhBNsmU916dvcKweYHBXtGdGSVaqtErq1uuXYID3TY26z
+         yHYrK3RbGMHxUhZ4cMLFB0MS9hrIo3QsZ2x0m59iBXKG0ICnS3I1Qktvd56oaqGAGTC+
+         Q2mAiLW7nheeW2NMUq/4DvK4I5ehN6LKgo1HpBPQ5K8zfmWZ0rY5PK/nDJwXgBvbSM/Z
+         TxIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1701865141; x=1702469941;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=dVeeaUhHA3OEpCfniwSPXjh45fNvtiKeJJRS3qu6+KY=;
+        b=pclhIqeYl6NRexEBPJvm2pbsshs7/OPYka7PHnRYHnVi4Bhr8H7I4WQSK5U02bemeP
+         dnIMBWNiWMKiCax1Yubv86Y13S5qy6TVIO53/iMDJroGpjcmSCdVTE3AjrSYhW4W8SAx
+         92pbM+d5YYwdR/EtEBQFNfh41ZSqrBjdBcCOcstYk7A4G8d+9BaIZAmQ8KB+zw1OSmiZ
+         dfPjm/n/4WD93SjLx1HBcmoTRmmOUw612y17IEmadb6/RxdXBL8BA31w9+SpbNUnMqMh
+         6Up6ciNC4337ApxhqYRreLr5cpO7cjfh1H9abwPyCVj8U7CnlBY0f38T4bApt1T8HnRq
+         tizA==
+X-Gm-Message-State: AOJu0Yw7FtFMaBeC8X8MVTlGWYvgb+lMnRLsAJwV/UjASAgzcVIkfa6l
+	MX6vvbsaAffE+BpZ1U2w0Z8=
+X-Google-Smtp-Source: AGHT+IHRKYDR9yEzgQCVjtEGEgIlHHHcfJBJwGVW+9+NCGtfi8f/Bmx00CZV025jj+PZuhGuQREOuA==
+X-Received: by 2002:a05:600c:a43:b0:40b:45e2:1f56 with SMTP id c3-20020a05600c0a4300b0040b45e21f56mr684953wmq.39.1701865140923;
+        Wed, 06 Dec 2023 04:19:00 -0800 (PST)
+Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
+        by smtp.gmail.com with ESMTPSA id n10-20020a05600c4f8a00b0040b4b2a15ebsm21608082wmq.28.2023.12.06.04.18.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Dec 2023 04:19:00 -0800 (PST)
+From: Amir Goldstein <amir73il@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Alexander Larsson <alexl@redhat.com>,
+	Miklos Szeredi <miklos@szeredi.hu>,
+	linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	Zorro Lang <zlang@kernel.org>
+Subject: [PATCH] overlay: create helper _overlay_scratch_mount_opts()
+Date: Wed,  6 Dec 2023 14:18:57 +0200
+Message-Id: <20231206121857.3873367-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	dAd+ULsBZF+MvBMhbL84eMKgw1I//0vUtqDivksoMfhlnK26Zc3llrO5XLHBlEHN5AwJmt177J76m105orIsVo3iXiBjAjP0ElwfQXF2ykkz5WCGVE0kWOQ32tENS4qt/RU7coCMpzk87kh1y50MY4HHQrcdv0D2CxNGjPQr/JXlRYXrRoc9NyqjMcbHESuDVmjO1k7y118ey2E4kpMLd6HEjKbCJ0M3i3W8lwirEj6Acz0eEzmXGUfGHLmRER4biJZh1uPhxhMJ/pDmsO2og2TwRAB9zKffrtNt4F0+v4LCKfm56fbt7HZHGa3gWPHeN6v0J3NFoJ7gDDQMb+Tp0flXKELQHiH0wn02rnhEjC4/0dSEYJiqLGSOeYFb87F7GSSiCR4pJjMV87Yg6+aMtpyHOO4XiJGw7PNq1aYzRAXPHJIY3OkMAiVPLZXXZNlrR20gw/2xksImQ7a8rAYS4sgld1Wd9t9xCNwotDNpCuIRDNEu4dXqIgqp7JOxXBFMJK0lPjbc9I/kEFURWxdqLOt/mOFEv40yF9MENMmiu0GyUF37QehZ8FwOw497hTLsAsdq+Y4GyRFsKC2wNSLGy4gWFHGR5W7KU8OdwAwJYrRSDr66PdgO+Xp8UkGbL0Zpsqn6bTM0VHgmiiJkVPqcyNNPLT1m9FylTJcDytl7F91MKF0PNcEp8YTnrKSTu+wuBGPl2TM3pI2oJP+EbGYib3JstPQ++mjF4PR5OJr0+2yXRQMjn6KVMqdM5dtKRfnG+LOdQHC79pC6RWQtjt5YdImuDe/9db73YycK2QParP5CI1kJgIqpwf6CxuCWwcHJa10S0q+m7mbF8fDVWZOArWUm7mwcF71xWbCYFjeV1ZA=
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR04MB7416.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f395180a-1a0c-4f3a-fe64-08dbf64bb290
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Dec 2023 11:08:38.1551
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: +E4Y1On+htJKTuEkv8njnGWMWaUy9dQZfDtI7ySEArtsaDr5Z32V0Sr6IgXZvjG+IhUkVb7Odrxq8zRuzg8kE0Yv25/Z7ljapTsAfQToPr8=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB6510
+Content-Transfer-Encoding: 8bit
 
-T24gMDYuMTIuMjMgMTE6NTYsIEpvaGFubmVzIFRodW1zaGlybiB3cm90ZToNCj4gQ2hhbmdlcyBp
-biB2NDoNCj4gLSBhZGQgX3JlcXVpcmVfYnRyZnNfbm9fY29tcHJlc3MgdG8gYWxsIHRlc3RzDQo+
-IC0gYWRkIF9yZXF1aXJlX2J0cmZzX25vX25vZGF0YWNvdyBoZWxwZXIgYW5kIGFkZCB0byBidHJm
-cy8zMDgNCj4gLSBhZGQgX3JlcXVpcmVfYnRyZnNfZmVhdHVyZSAiZnJlZV9zcGFjZV90cmVlIiB0
-byBhbGwgdGVzdHMNCg0KU2hpdCB0aGlzIGRvZXNuJ3Qgd29yayBhcyBpbnRlbnRlZC4gX3JlcXVp
-cmVfYnRyZnNfZmVhdHVyZSBjaGVja3MgdGhlIA0KZ2xvYmFsIGJ0cmZzIHN5c2ZzLiB2NSBpbmNv
-bW1pbmcsIHNvcnJ5IGZvciB0aGUgbm9pc2UgOigNCg==
+The new overlayfs mount options lowerdir+,datadir+ don't fit well
+into any of the existing _overlay_scratch_mount* helpers.
+Add this new helper to reduce a common pattern of custom mount options.
+
+Suggested-by: Zorro Lang <zlang@kernel.org>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+
+Zorro,
+
+Here is the cleanup patch that you suggested.
+
+Note that tests overlay/083 and overlay/086 intentionally use
+$MOUNT_PROG directly because some of the tests cases use escaping
+character "\" and calling _overlay_mount_* helpers can loose the
+special chars escaping when bash is evaluating the arguments.
+
+Maybe it is solvabale, but that would be very high on the list of
+things that I do not want to do.
+
+Thanks,
+Amir.
+
+ common/overlay    | 8 +++++++-
+ tests/overlay/011 | 2 +-
+ tests/overlay/035 | 3 +--
+ tests/overlay/052 | 4 ++--
+ tests/overlay/053 | 4 ++--
+ tests/overlay/062 | 2 +-
+ tests/overlay/079 | 4 ++--
+ tests/overlay/085 | 4 ++--
+ 8 files changed, 18 insertions(+), 13 deletions(-)
+
+diff --git a/common/overlay b/common/overlay
+index ea1eb7b1..faa9339a 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -32,6 +32,12 @@ _overlay_mount_dirs()
+ 	$MOUNT_PROG -t overlay $diropts `_common_dev_mount_options $*`
+ }
+ 
++# Mount with mnt/dev of scratch mount and custom mount options
++_overlay_scratch_mount_opts()
++{
++	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT $*
++}
++
+ # Mount with same options/mnt/dev of scratch mount, but optionally
+ # with different lower/upper/work dirs
+ _overlay_scratch_mount_dirs()
+@@ -254,7 +260,7 @@ _require_scratch_overlay_lowerdir_add_layers()
+ 	local datadir="$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
+ 
+ 	_scratch_mkfs > /dev/null 2>&1
+-	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++	_overlay_scratch_mount_opts \
+ 		-o"lowerdir+=$lowerdir,datadir+=$datadir" \
+ 		-o"redirect_dir=follow,metacopy=on" > /dev/null 2>&1 || \
+ 	        _notrun "overlay lowerdir+,datadir+ not supported on ${SCRATCH_DEV}"
+diff --git a/tests/overlay/011 b/tests/overlay/011
+index 20812d88..09a950ba 100755
+--- a/tests/overlay/011
++++ b/tests/overlay/011
+@@ -37,7 +37,7 @@ $SETFATTR_PROG -n "trusted.overlay.opaque" -v "y" $upperdir/testdir
+ # $upperdir overlaid on top of $lowerdir, so that "trusted.overlay.opaque"
+ # xattr should be honored and should not be listed
+ # mount readonly, because there's no upper and workdir
+-$MOUNT_PROG -t overlay -o ro -o lowerdir=$upperdir:$lowerdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++_overlay_scratch_mount_opts -o ro -o lowerdir=$upperdir:$lowerdir
+ 
+ # Dump trusted.overlay xattr, we should not see the "opaque" xattr
+ _getfattr -d -m overlay $SCRATCH_MNT/testdir
+diff --git a/tests/overlay/035 b/tests/overlay/035
+index 8cd76979..f4c981ad 100755
+--- a/tests/overlay/035
++++ b/tests/overlay/035
+@@ -42,8 +42,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+ 
+ # Mount overlay with lower layers only.
+ # Verify that overlay is mounted read-only and that it cannot be remounted rw.
+-$MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
+-			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++_overlay_scratch_mount_opts -o"lowerdir=$lowerdir2:$lowerdir1"
+ touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+ $MOUNT_PROG -o remount,rw $SCRATCH_MNT 2>&1 | _filter_ro_mount
+ $UMOUNT_PROG $SCRATCH_MNT
+diff --git a/tests/overlay/052 b/tests/overlay/052
+index da8c645b..6abe2e01 100755
+--- a/tests/overlay/052
++++ b/tests/overlay/052
+@@ -133,7 +133,7 @@ unmount_dirs
+ 
+ # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++_overlay_scratch_mount_opts \
+ 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
+ test_file_handles $SCRATCH_MNT/lowertestdir -rp
+ test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
+@@ -144,7 +144,7 @@ unmount_dirs
+ # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
+ # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
+ # directories.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++_overlay_scratch_mount_opts \
+ 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
+ test_file_handles $SCRATCH_MNT -r
+ test_file_handles $SCRATCH_MNT/subdir -rp
+diff --git a/tests/overlay/053 b/tests/overlay/053
+index dfa29d01..cf94f930 100755
+--- a/tests/overlay/053
++++ b/tests/overlay/053
+@@ -162,7 +162,7 @@ unmount_dirs
+ 
+ # Check encode/decode/read of lower file handles on lower layers only r/o overlay.
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++_overlay_scratch_mount_opts \
+ 			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
+ test_file_handles $SCRATCH_MNT/lowertestdir -rp
+ test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
+@@ -173,7 +173,7 @@ unmount_dirs
+ # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
+ # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
+ # directories.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++_overlay_scratch_mount_opts \
+ 		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
+ test_file_handles $SCRATCH_MNT -r
+ test_file_handles $SCRATCH_MNT/subdir -rp
+diff --git a/tests/overlay/062 b/tests/overlay/062
+index 04e13e46..a4e9560a 100755
+--- a/tests/overlay/062
++++ b/tests/overlay/062
+@@ -65,7 +65,7 @@ create_test_files $lowertestdir
+ $MOUNT_PROG --bind $lowertestdir $lowertestdir
+ 
+ # For non-upper overlay mount, nfs_export requires disabling redirect_dir.
+-$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++_overlay_scratch_mount_opts \
+ 	-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$lower:$lower2
+ 
+ # Decode an overlay directory file handle, whose underlying lower dir dentry
+diff --git a/tests/overlay/079 b/tests/overlay/079
+index 078ee816..f28fc313 100755
+--- a/tests/overlay/079
++++ b/tests/overlay/079
+@@ -141,7 +141,7 @@ mount_overlay()
+ {
+ 	local _lowerdir=$1 _datadir2=$2 _datadir=$3
+ 
+-	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++	_overlay_scratch_mount_opts \
+ 		-o"lowerdir=$_lowerdir::$_datadir2::$_datadir" \
+ 		-o"upperdir=$upperdir,workdir=$workdir" \
+ 		-o redirect_dir=on,metacopy=on
+@@ -151,7 +151,7 @@ mount_ro_overlay()
+ {
+ 	local _lowerdir=$1 _datadir2=$2 _datadir=$3
+ 
+-	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++	_overlay_scratch_mount_opts \
+ 		-o"lowerdir=$_lowerdir::$_datadir2::$_datadir" \
+ 		-o redirect_dir=follow,metacopy=on
+ }
+diff --git a/tests/overlay/085 b/tests/overlay/085
+index 07a32c24..0f4e4b06 100755
+--- a/tests/overlay/085
++++ b/tests/overlay/085
+@@ -142,7 +142,7 @@ mount_overlay()
+ {
+ 	local _lowerdir=$1 _datadir2=$2 _datadir=$3
+ 
+-	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++	_overlay_scratch_mount_opts \
+ 		-o"lowerdir+=$_lowerdir,datadir+=$_datadir2,datadir+=$_datadir" \
+ 		-o"upperdir=$upperdir,workdir=$workdir" \
+ 		-o redirect_dir=on,metacopy=on
+@@ -152,7 +152,7 @@ mount_ro_overlay()
+ {
+ 	local _lowerdir=$1 _datadir2=$2 _datadir=$3
+ 
+-	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++	_overlay_scratch_mount_opts \
+ 		-o"lowerdir+=$_lowerdir,datadir+=$_datadir2,datadir+=$_datadir" \
+ 		-o redirect_dir=follow,metacopy=on
+ }
+-- 
+2.34.1
+
