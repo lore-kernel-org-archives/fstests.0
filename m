@@ -1,227 +1,340 @@
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2DDE1A29C;
+	Wed,  6 Dec 2023 10:22:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EAChXuo5"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8499BD71
-	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 00:37:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1701851873;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=CmP2rSIyrA34TpcuoSeBKTOxO0gmbLuteFI1taPbRgQ=;
-	b=EAChXuo5dHtJztoMRECztKsndwifKEqjOYteykrLn/sh8hEWd70Eoq9Xs1AHYxzri6rPji
-	SO9oxJss3U67eeFzgLFaGDBvofdypJxKV+ocBf9uk4drpjA2UZ0h7r3ntsq29mNv2KteL/
-	9HMIKcw78vMzfevPeQqU3vJMNydcohE=
-Received: from mail-ot1-f69.google.com (mail-ot1-f69.google.com
- [209.85.210.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-549-6CRVI2tpMkGJW3_WWa5rUw-1; Wed, 06 Dec 2023 03:37:51 -0500
-X-MC-Unique: 6CRVI2tpMkGJW3_WWa5rUw-1
-Received: by mail-ot1-f69.google.com with SMTP id 46e09a7af769-6d7e70f7e77so7318684a34.3
-        for <fstests@vger.kernel.org>; Wed, 06 Dec 2023 00:37:51 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1701851871; x=1702456671;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=CmP2rSIyrA34TpcuoSeBKTOxO0gmbLuteFI1taPbRgQ=;
-        b=EB8qknE0wM7TgAAif9kILtAdSudeOGk1Hk4N2qb22TUpf9Yx6cnIaeIh5wd98XKTy8
-         h5G2SlRB2XvL5JOFM7za2Dq9HLEzCHPJrBMCQVa7sOfn/zIB2rmVP9Z/o6up1NBbz0gK
-         FSFbdXumcdiwTKYs6MICQ6k4RJzhFOfmKL9J6K44uE2AYgwzJM0QmxHtq7bTi/cRoi43
-         BIaqYgqd//HYgLbFigSAT7ZnSwsOPjHAYCFD3XO/hfVMDzrrF0W7DLtN8YA75x8dQUoa
-         qYsJpBiBQQCcGqZfF6LV5zs9qfwNuHTbRwT51HqTlQHlmOe1zrOFh92UOK9P6Jv+ChVc
-         I89A==
-X-Gm-Message-State: AOJu0YyEPS37cX22IdH8FWhuej4x4o9W3WZa911bihW6Y4fsDfz4T+Jr
-	npvx9zMMKeR2dQCT5PY44fRz7u60CrBYHL1Oeuio7yRLNG1s3XfpkCe5GrLJR/drNUjjoTrx+RY
-	eAogzy2chzFZBIQMLlw==
-X-Received: by 2002:a05:6830:1d6e:b0:6d8:74e2:c08c with SMTP id l14-20020a0568301d6e00b006d874e2c08cmr660238oti.62.1701851871239;
-        Wed, 06 Dec 2023 00:37:51 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFZ9TnHyGNhnRWUUqWRaZSNUGganXtmpOwAiephI6zMDMQPPnkHX8t6P24DWG78PfznndLWNg==
-X-Received: by 2002:a05:6830:1d6e:b0:6d8:74e2:c08c with SMTP id l14-20020a0568301d6e00b006d874e2c08cmr660231oti.62.1701851870970;
-        Wed, 06 Dec 2023 00:37:50 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id n30-20020a63721e000000b005c683937cc5sm5190908pgc.44.2023.12.06.00.37.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Dec 2023 00:37:50 -0800 (PST)
-Date: Wed, 6 Dec 2023 16:37:46 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Alexander Larsson <alexl@redhat.com>,
-	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH v2 2/4] overlay: prepare for new lowerdir+,datadir+ tests
-Message-ID: <20231206083746.aeokhhylcbpd6rkl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231204185859.3731975-1-amir73il@gmail.com>
- <20231204185859.3731975-3-amir73il@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OVdBGS9q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 60487C433C7;
+	Wed,  6 Dec 2023 10:22:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701858159;
+	bh=KdbtOaq9BASBRADbkfDAGNBgK859lQO2m1H/aISSYLI=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=OVdBGS9qBFIUGZc2rQzHK2meXXb+gR6DRrHEtTc61Xc3GNNGz2MBl0d1qNkoFUPHV
+	 vifXWrzvsJjnuoD16xYFEyl0837o9CmR8KbCX0LnvWXHE36quuGA8OmJ4yDkHv5BOc
+	 8LTj9sRTWjq67Q8hPjRPvPnmS3SRAGcrhxenSvn0DtHRD0Gcj/O2NUtSgl0FY0wEMK
+	 z5bMy5ghtUbhSuCrGmBoM3j8Vi6Vcep0sC8x0AA3rmdr3J3s2GYUTUQd7Z0cGfNt5X
+	 SdsJE7BtgjHVKlDUez5ZLp0Qp9XykhAngbO5pa4aZW/XdYPxZp2xFKO+DSc7uuCZg3
+	 0wmFgf+jouGGw==
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-a1cee2c1620so83250166b.2;
+        Wed, 06 Dec 2023 02:22:39 -0800 (PST)
+X-Gm-Message-State: AOJu0YztNZZn4cIeqeQz/GIIJ0WqivF3ApOwOxAOor0epGKeZHPTh6hM
+	OmACE6K2/EwGJw5NZRtSndr87RV/EDyrKgbMlRg=
+X-Google-Smtp-Source: AGHT+IHbNX1yoSze9AfQeh/QGZATjceagLiTpO7KtU6XOAV1FZjnZNXHnjYpFXONEe+r6ZZ28OOlmt0aYnbYULNPGtI=
+X-Received: by 2002:a17:906:10c6:b0:a19:a1ba:bae7 with SMTP id
+ v6-20020a17090610c600b00a19a1babae7mr262606ejv.141.1701858157712; Wed, 06 Dec
+ 2023 02:22:37 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231204185859.3731975-3-amir73il@gmail.com>
+References: <e54239e625f794c62b962c35d06db04571bf73d5.1701794007.git.fdmanana@suse.com>
+ <20231206081747.5rr7zzsfivenaag5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20231206081747.5rr7zzsfivenaag5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 6 Dec 2023 10:22:00 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4y4_fFuxw736vtEC9+mUMAQ=WSuf5+DfMjCX4tRu8f-g@mail.gmail.com>
+Message-ID: <CAL3q7H4y4_fFuxw736vtEC9+mUMAQ=WSuf5+DfMjCX4tRu8f-g@mail.gmail.com>
+Subject: Re: [PATCH] generic: test reading a large directory while renaming
+ its files
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Dec 04, 2023 at 08:58:57PM +0200, Amir Goldstein wrote:
-> In preparation to forking tests for new lowerdir+,datadir+ mount options,
-> prepare a helper to test kernel support and pass datadirs into mount
-> helpers in overlay/079 test.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  common/overlay    | 15 +++++++++++++++
->  tests/overlay/079 | 36 +++++++++++++++++++++---------------
->  2 files changed, 36 insertions(+), 15 deletions(-)
-> 
-> diff --git a/common/overlay b/common/overlay
-> index 8f275228..ea1eb7b1 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -247,6 +247,21 @@ _require_scratch_overlay_lowerdata_layers()
->  	_scratch_unmount
->  }
->  
-> +# Check kernel support for lowerdir+=<lowerdir>,datadir+=<lowerdatadir> format
-> +_require_scratch_overlay_lowerdir_add_layers()
-> +{
-> +	local lowerdir="$OVL_BASE_SCRATCH_MNT/$OVL_UPPER"
-> +	local datadir="$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
-> +
-> +	_scratch_mkfs > /dev/null 2>&1
-> +	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +		-o"lowerdir+=$lowerdir,datadir+=$datadir" \
-> +		-o"redirect_dir=follow,metacopy=on" > /dev/null 2>&1 || \
-> +	        _notrun "overlay lowerdir+,datadir+ not supported on ${SCRATCH_DEV}"
+On Wed, Dec 6, 2023 at 8:17=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Tue, Dec 05, 2023 at 04:39:20PM +0000, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> >
+> > Test that on a fairly large directory if we keep renaming files while
+> > holding the directory open and doing readdir(3) calls, we don't end up
+> > in an infinite loop.
+> >
+> > This exercise a bug that existed in btrfs and was fixed in kernel 6.5
+> > by commit 9b378f6ad48c ("btrfs: fix infinite directory reads").
+> >
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+>
+> This patch looks good to me, I'll add this case into "rename" group too
+> when I merge it.
 
-Hi Amir,
+Sounds good, thanks.
 
-I found overlay cases don't use helpers in common/overlay recently, always
-use raw $MOUNT_PROG directly (not only in this patchset). Although overlay
-supports new mount format, can we improve the mount helpers in common/overlay
-to support that? It would be to good to use common helpers to do common
-operation.
-
-Anyway, that can be changed in another patch, if it takes too much time or
-you don't want to do it at here. What do you think?
-
-Thanks,
-Zorro
-
-> +
-> +	_scratch_unmount
-> +}
-> +
->  # Helper function to check underlying dirs of overlay filesystem
->  _overlay_fsck_dirs()
->  {
-> diff --git a/tests/overlay/079 b/tests/overlay/079
-> index 77f94598..078ee816 100755
-> --- a/tests/overlay/079
-> +++ b/tests/overlay/079
-> @@ -139,16 +139,21 @@ check_file_size_contents()
->  
->  mount_overlay()
->  {
-> -	local _lowerdir=$1
-> +	local _lowerdir=$1 _datadir2=$2 _datadir=$3
->  
-> -	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on
-> +	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +		-o"lowerdir=$_lowerdir::$_datadir2::$_datadir" \
-> +		-o"upperdir=$upperdir,workdir=$workdir" \
-> +		-o redirect_dir=on,metacopy=on
->  }
->  
->  mount_ro_overlay()
->  {
-> -	local _lowerdir=$1
-> +	local _lowerdir=$1 _datadir2=$2 _datadir=$3
->  
-> -	_overlay_scratch_mount_dirs "$_lowerdir" "-" "-" -o ro,redirect_dir=follow,metacopy=on
-> +	$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +		-o"lowerdir=$_lowerdir::$_datadir2::$_datadir" \
-> +		-o redirect_dir=follow,metacopy=on
->  }
->  
->  umount_overlay()
-> @@ -160,14 +165,14 @@ test_no_access()
->  {
->  	local _target=$1
->  
-> -	mount_ro_overlay "$lowerdir::$datadir2::$datadir"
-> +	mount_ro_overlay "$lowerdir" "$datadir2" "$datadir"
->  
->  	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
->  		echo "No access to lowerdata layer $_target"
->  
->  	echo "Unmount and Mount rw"
->  	umount_overlay
-> -	mount_overlay "$lowerdir::$datadir2::$datadir"
-> +	mount_overlay "$lowerdir" "$datadir2" "$datadir"
->  	stat $SCRATCH_MNT/$_target >> $seqres.full 2>&1 || \
->  		echo "No access to lowerdata layer $_target"
->  	umount_overlay
-> @@ -175,11 +180,12 @@ test_no_access()
->  
->  test_common()
->  {
-> -	local _lowerdirs=$1 _target=$2 _size=$3 _blocks=$4 _data="$5"
-> -	local _redirect=$6
-> +	local _lowerdir=$1 _datadir2=$2 _datadir=$3
-> +	local _target=$4 _size=$5 _blocks=$6 _data="$7"
-> +	local _redirect=$8
->  
->  	echo "Mount ro"
-> -	mount_ro_overlay $_lowerdirs
-> +	mount_ro_overlay $_lowerdir $_datadir2 $_datadir
->  
->  	# Check redirect xattr to lowerdata
->  	[ -n "$_redirect" ] && check_redirect $lowerdir/$_target "$_redirect"
-> @@ -191,7 +197,7 @@ test_common()
->  	# Do a mount cycle and check size and contents again.
->  	echo "Unmount and Mount rw"
->  	umount_overlay
-> -	mount_overlay $_lowerdirs
-> +	mount_overlay $_lowerdir $_datadir2 $_datadir
->  	echo "check properties of metadata copied up file $_target"
->  	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
->  	check_file_blocks $SCRATCH_MNT/$_target $_blocks
-> @@ -203,7 +209,7 @@ test_common()
->  	check_file_size_contents $upperdir/$_target $_size ""
->  
->  	# Trigger data copy up and check absence of metacopy xattr.
-> -	mount_overlay $_lowerdirs
-> +	mount_overlay $_lowerdir $_datadir2 $_datadir
->  	$XFS_IO_PROG -c "falloc 0 1" $SCRATCH_MNT/$_target >> $seqres.full
->  	echo "check properties of data copied up file $_target"
->  	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-> @@ -216,7 +222,7 @@ test_lazy()
->  {
->  	local _target=$1
->  
-> -	mount_overlay "$lowerdir::$datadir2::$datadir"
-> +	mount_overlay "$lowerdir" "$datadir2" "$datadir"
->  
->  	# Metadata should be valid
->  	check_file_size $SCRATCH_MNT/$_target $datasize
-> @@ -305,12 +311,12 @@ test_no_access "$sharedname"
->  
->  echo -e "\n== Check follow to lowerdata layer with absolute redirect =="
->  prepare_midlayer "/subdir/$dataname"
-> -test_common "$lowerdir::$datadir2::$datadir" "$dataname" $datasize $datablocks \
-> +test_common "$lowerdir" "$datadir2" "$datadir" "$dataname" $datasize $datablocks \
->  		"$datacontent" "/subdir/$dataname"
-> -test_common "$lowerdir::$datadir2::$datadir" "$dataname2" $datasize $datablocks \
-> +test_common "$lowerdir" "$datadir2" "$datadir" "$dataname2" $datasize $datablocks \
->  		"$datacontent2" "/subdir/$dataname.2"
->  # Shared file should be picked from upper datadir
-> -test_common "$lowerdir::$datadir2::$datadir" "$sharedname" $datasize $datablocks \
-> +test_common "$lowerdir" "$datadir2" "$datadir" "$sharedname" $datasize $datablocks \
->  		"$datacontent2" "/subdir/$dataname.shared"
->  
->  echo -e "\n== Check lazy follow to lowerdata layer =="
-> -- 
-> 2.34.1
-> 
-
+>
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+>
+> >  .gitignore                  |   1 +
+> >  src/Makefile                |   3 +-
+> >  src/readdir-while-renames.c | 146 ++++++++++++++++++++++++++++++++++++
+> >  tests/generic/734           |  37 +++++++++
+> >  tests/generic/734.out       |   2 +
+> >  5 files changed, 188 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/readdir-while-renames.c
+> >  create mode 100755 tests/generic/734
+> >  create mode 100644 tests/generic/734.out
+> >
+> > diff --git a/.gitignore b/.gitignore
+> > index 4c32ac42..7508b6e8 100644
+> > --- a/.gitignore
+> > +++ b/.gitignore
+> > @@ -121,6 +121,7 @@ tags
+> >  /src/punch-alternating
+> >  /src/pwrite_mmap_blocked
+> >  /src/randholes
+> > +/src/readdir-while-renames
+> >  /src/rename
+> >  /src/renameat2
+> >  /src/resvtest
+> > diff --git a/src/Makefile b/src/Makefile
+> > index 8160a0e8..d79015ce 100644
+> > --- a/src/Makefile
+> > +++ b/src/Makefile
+> > @@ -19,7 +19,8 @@ TARGETS =3D dirstress fill fill2 getpagesize holes ls=
+tat64 \
+> >       t_ofd_locks t_mmap_collision mmap-write-concurrent \
+> >       t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+> >       t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale=
+ \
+> > -     t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewindd=
+ir-test
+> > +     t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewindd=
+ir-test \
+> > +     readdir-while-renames
+> >
+> >  LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preallo_rw_pattern=
+_reader \
+> >       preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> > diff --git a/src/readdir-while-renames.c b/src/readdir-while-renames.c
+> > new file mode 100644
+> > index 00000000..afeefb04
+> > --- /dev/null
+> > +++ b/src/readdir-while-renames.c
+> > @@ -0,0 +1,146 @@
+> > +// SPDX-License-Identifier: GPL-2.0
+> > +/*
+> > + * Copyright (c) 2023 SUSE Linux Products GmbH.  All Rights Reserved.
+> > + */
+> > +#include <dirent.h>
+> > +#include <stdio.h>
+> > +#include <stdlib.h>
+> > +#include <string.h>
+> > +#include <errno.h>
+> > +#include <unistd.h>
+> > +#include <sys/stat.h>
+> > +
+> > +/* Number of files we add to the test directory. */
+> > +#define NUM_FILES 5000
+> > +
+> > +int main(int argc, char *argv[])
+> > +{
+> > +     struct dirent *entry;
+> > +     DIR *dir =3D NULL;
+> > +     char *dir_path =3D NULL;
+> > +     int dentry_count =3D 0;
+> > +     int ret =3D 0;
+> > +     int i;
+> > +
+> > +     if (argc !=3D 2) {
+> > +             fprintf(stderr, "Usage:  %s <directory>\n", argv[0]);
+> > +             ret =3D 1;
+> > +             goto out;
+> > +     }
+> > +
+> > +     dir_path =3D malloc(strlen(argv[1]) + strlen("/testdir") + 1);
+> > +     if (!dir_path) {
+> > +             fprintf(stderr, "malloc failure\n");
+> > +             ret =3D ENOMEM;
+> > +             goto out;
+> > +     }
+> > +     i =3D strlen(argv[1]);
+> > +     memcpy(dir_path, argv[1], i);
+> > +     memcpy(dir_path + i, "/testdir", strlen("/testdir"));
+> > +     dir_path[i + strlen("/testdir")] =3D '\0';
+> > +
+> > +     ret =3D mkdir(dir_path, 0700);
+> > +     if (ret =3D=3D -1) {
+> > +             fprintf(stderr, "Failed to create test directory: %d\n", =
+errno);
+> > +             ret =3D errno;
+> > +             goto out;
+> > +     }
+> > +
+> > +     ret =3D chdir(dir_path);
+> > +     if (ret =3D=3D -1) {
+> > +             fprintf(stderr, "Failed to chdir to the test directory: %=
+d\n", errno);
+> > +             ret =3D errno;
+> > +             goto out;
+> > +     }
+> > +
+> > +     /* Now create all files inside the directory. */
+> > +     for (i =3D 1; i <=3D NUM_FILES; i++) {
+> > +             char file_name[32];
+> > +             FILE *f;
+> > +
+> > +             sprintf(file_name, "%s/%d", dir_path, i);
+> > +             f =3D fopen(file_name, "w");
+> > +             if (f =3D=3D NULL) {
+> > +                     fprintf(stderr, "Failed to create file number %d:=
+ %d\n",
+> > +                             i, errno);
+> > +                     ret =3D errno;
+> > +                     goto out;
+> > +             }
+> > +             fclose(f);
+> > +     }
+> > +
+> > +     dir =3D opendir(dir_path);
+> > +     if (dir =3D=3D NULL) {
+> > +             fprintf(stderr, "Failed to open directory: %d\n", errno);
+> > +             ret =3D errno;
+> > +             goto out;
+> > +     }
+> > +
+> > +     /*
+> > +      * readdir(3) returns NULL when it reaches the end of the directo=
+ry or
+> > +      * when an error happens, so reset errno to 0 to distinguish betw=
+een
+> > +      * both cases later.
+> > +      */
+> > +     errno =3D 0;
+> > +     while ((entry =3D readdir(dir)) !=3D NULL) {
+> > +             dentry_count++;
+> > +             /*
+> > +              * The actual number of dentries returned varies per file=
+system
+> > +              * implementation. On a 6.7-rc4 kernel, on x86_64 with de=
+fault
+> > +              * mkfs options, xfs returns 5031 dentries while ext4, f2=
+fs and
+> > +              * btrfs return 5002 (the 5000 files plus "." and ".."). =
+These
+> > +              * variations are fine and valid according to POSIX, as s=
+ome of
+> > +              * the renames may be visible or not while calling readdi=
+r(3).
+> > +              * We only want to check we don't enter into an infinite =
+loop,
+> > +              * so let the maximum number of dentries be 3 * NUM_FILES=
+, which
+> > +              * is very reasonable.
+> > +              */
+> > +             if (dentry_count > 3 * NUM_FILES) {
+> > +                     fprintf(stderr,
+> > +                             "Found too many directory entries (%d)\n"=
+,
+> > +                             dentry_count);
+> > +                     ret =3D 1;
+> > +                     goto out;
+> > +             }
+> > +             /* Can't rename "." and "..", skip them. */
+> > +             if (strcmp(entry->d_name, ".") =3D=3D 0 ||
+> > +                 strcmp(entry->d_name, "..") =3D=3D 0)
+> > +                     continue;
+> > +             ret =3D rename(entry->d_name, "TEMPFILE");
+> > +             if (ret =3D=3D -1) {
+> > +                     fprintf(stderr,
+> > +                             "Failed to rename '%s' to TEMPFILE: %d\n"=
+,
+> > +                             entry->d_name, errno);
+> > +                     ret =3D errno;
+> > +                     goto out;
+> > +             }
+> > +             ret =3D rename("TEMPFILE", entry->d_name);
+> > +             if (ret =3D=3D -1) {
+> > +                     fprintf(stderr,
+> > +                             "Failed to rename TEMPFILE to '%s': %d\n"=
+,
+> > +                             entry->d_name, errno);
+> > +                     ret =3D errno;
+> > +                     goto out;
+> > +             }
+> > +     }
+> > +
+> > +     if (errno) {
+> > +             fprintf(stderr, "Failed to read directory: %d\n", errno);
+> > +             ret =3D errno;
+> > +             goto out;
+> > +     }
+> > +
+> > +     /* It should return at least NUM_FILES entries +2 (for "." and ".=
+."). */
+> > +     if (dentry_count < NUM_FILES + 2) {
+> > +             fprintf(stderr,
+> > +                     "Found less directory entries than expected (%d b=
+ut expected %d)\n",
+> > +                     dentry_count, NUM_FILES + 2);
+> > +             ret =3D 2;
+> > +     }
+> > +out:
+> > +     free(dir_path);
+> > +     if (dir !=3D NULL)
+> > +             closedir(dir);
+> > +
+> > +     return ret;
+> > +}
+> > diff --git a/tests/generic/734 b/tests/generic/734
+> > new file mode 100755
+> > index 00000000..ea3dfb2d
+> > --- /dev/null
+> > +++ b/tests/generic/734
+> > @@ -0,0 +1,37 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test 734
+> > +#
+> > +# Test that on a fairly large directory if we keep renaming files whil=
+e holding
+> > +# the directory open and doing readdir(3) calls, we don't end up in an=
+ infinite
+> > +# loop.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick dir
+> > +
+> > +_cleanup()
+> > +{
+> > +     cd /
+> > +     rm -fr $tmp.*
+> > +     rm -fr $target_dir
+> > +}
+> > +
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_test_program readdir-while-renames
+> > +
+> > +[ $FSTYP =3D=3D "btrfs" ] && _fixed_by_kernel_commit 9b378f6ad48c \
+> > +     "btrfs: fix infinite directory reads"
+> > +
+> > +target_dir=3D"$TEST_DIR/test-$seq"
+> > +rm -fr $target_dir
+> > +mkdir $target_dir
+> > +
+> > +$here/src/readdir-while-renames $target_dir
+> > +
+> > +# success, all done
+> > +echo "Silence is golden"
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/generic/734.out b/tests/generic/734.out
+> > new file mode 100644
+> > index 00000000..4299839b
+> > --- /dev/null
+> > +++ b/tests/generic/734.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 734
+> > +Silence is golden
+> > --
+> > 2.40.1
+> >
+> >
+>
