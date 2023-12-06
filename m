@@ -1,38 +1,34 @@
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WBigEAGM"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A753F1A5
-	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 06:42:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1701873748;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=B2oJud2TeKpzJEG8s4IS0glsFy7yE2HV9z+mk6AEAqk=;
-	b=WBigEAGMXz0/JmYzdgr2Y5lNog+Fr4tXsUC/3KbmdAKvnuH06+7b3v1fB2IdbvO+VApFb0
-	nxfZMFTlNa8ZZFUTimVll8Vw517T9qJOAluJ5sprHKb0rNUvS33oZl9s6r1KNSuO95mygM
-	GhIeLpWMxLhYcx0/07BXdtN+2qGbClw=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-569-AngYVB7OMPmkd9XOPzM96A-1; Wed, 06 Dec 2023 09:42:26 -0500
-X-MC-Unique: AngYVB7OMPmkd9XOPzM96A-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 770B88AADC0;
-	Wed,  6 Dec 2023 14:42:26 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.18.29])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id 3BDA73C2E;
-	Wed,  6 Dec 2023 14:42:26 +0000 (UTC)
-Date: Wed, 6 Dec 2023 08:42:24 -0600
-From: Bill O'Donnell <bodonnel@redhat.com>
-To: Pavel Reichl <preichl@redhat.com>
-Cc: fstests@vger.kernel.org, djwong@kernel.org
-Subject: Re: [PATCH] xfs/598: Add missing "fixed_by" hints
-Message-ID: <ZXCIUBykatrP7KKx@redhat.com>
-References: <20231206071525.168036-1-preichl@redhat.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 709EF6EB64;
+	Wed,  6 Dec 2023 18:48:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VNiL0HtD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9C18C433C7;
+	Wed,  6 Dec 2023 18:47:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1701888479;
+	bh=+ti42Uy3LaDObl3C2cNA/it91T+eOi0j2YArak6KYyE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=VNiL0HtDbCMJEgtw6xQk/Iypp0j8e/QsroWuZHB12LyrOYGCAc9pCPh2PJdmYILhu
+	 Jc7b/ryZmrcof+TPY9lq9kWqOePGpieR3X4xcLY+O24MVM124XkfUychzNL+OHq9NW
+	 uAyGYylocxT802Io2AMScXSvWcxH9V5GdouI4Qj0xY9cvsTRC+/YSQKxadYdBIxyOC
+	 xjZrM98Y7KPh8QL5Tm2XDxdKiwwYtA/wVI0VhWLPV1jNABLQJdu6/6Zo1iMjLASyoW
+	 gp2V90qAOmtvyUWWX0mSeo7p9Pl9Al8NIcYahHmJ7f7EJhstjwlnV31qT38eXvDiWc
+	 hStumjTX/XYHg==
+Date: Wed, 6 Dec 2023 10:47:59 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: fstests@vger.kernel.org, samba-technical@lists.samba.org,
+	linux-cifs@vger.kernel.org, Steve French <sfrench@samba.org>,
+	Paulo Alcantara <pc@manguebit.com>,
+	Dave Chinner <david@fromorbit.com>,
+	Filipe Manana <fdmanana@suse.com>, linux-fsdevel@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: Issues with FIEMAP, xfstests, Samba, ksmbd and CIFS
+Message-ID: <20231206184759.GA3964019@frogsfrogsfrogs>
+References: <447324.1701860432@warthog.procyon.org.uk>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,62 +37,118 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231206071525.168036-1-preichl@redhat.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.1
+In-Reply-To: <447324.1701860432@warthog.procyon.org.uk>
 
-On Wed, Dec 06, 2023 at 08:15:25AM +0100, Pavel Reichl wrote:
-> Kernel patches, the very same as for xfs/597, are necessary for scrub
-> to function as expected.
+On Wed, Dec 06, 2023 at 11:00:32AM +0000, David Howells wrote:
+> Hi,
 > 
-> _check_xfs_filesystem: filesystem on /dev/sda3 failed scrub
+> I've been debugging apparent cifs failures with xfstests, in particular
+> generic/009, and I'm finding that the tests are failing because FIEMAP is not
+> returning exactly the expected extent map.
 > 
-> xfs_scrub -v -d -n output ***
-> EXPERIMENTAL xfs_scrub program in use! Use at your own risk!
-> Phase 1: Find filesystem geometry.
-> /mnt/scratch: using 2 threads to scrub.
-> Phase 2: Check internal metadata.
-> Info: AG 1 superblock: Optimization is possible. (scrub.c line 212)
-> Info: AG 2 superblock: Optimization is possible. (scrub.c line 212)
-> Info: AG 3 superblock: Optimization is possible. (scrub.c line 212)
-> Phase 3: Scan all inodes.
-> Corruption: inode 131 (0/131) directory entries: Repairs are required. (scrub.c line 196)
-> Phase 5: Check directory tree.
-> Info: /mnt/scratch: Filesystem has errors, skipping connectivity checks. (phase5.c line 392)
-> Phase 7: Check summary counters.
-> 203.0MiB data used;  5 inodes used.
-> 64.2MiB data found; 5 inodes found.
-> 5 inodes counted; 5 inodes checked.
-> /mnt/scratch: corruptions found: 1
-> /mnt/scratch: Re-run xfs_scrub without -n.
-> end xfs_scrub output
-> mount output ***
-> 
-> Signed-off-by: Pavel Reichl <preichl@redhat.com>
+> The problem is that the FSCTL_QUERY_ALLOCATED_RANGES smb RPC op can only
+> return a list of ranges that are allocated and does not return any other
+> information about those allocations or the gaps between them - and thus FIEMAP
+> cannot express this information to the extent that the test expects.
 
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
+<shrug> Perhaps that simply makes FSCTL_QUERY_ALLOCATED_RANGES -> FIEMAP
+translation a poor choice?  FIEMAP doesn't have a way to say "written
+status unknown".
 
-> ---
->  tests/xfs/598 | 5 +++++
->  1 file changed, 5 insertions(+)
+> Further, as Steve also observed, the expectation that the individual subtests
+> should return exactly those ranges is flawed.  The filesystem is at liberty to
+> split extents, round up extents, bridge extents and automatically punch out
+> blocks of zeros.  xfstests/common/punch allows for some of this, but I wonder
+> if it needs to be more fuzzy.
 > 
-> diff --git a/tests/xfs/598 b/tests/xfs/598
-> index 449bd711..760cd861 100755
-> --- a/tests/xfs/598
-> +++ b/tests/xfs/598
-> @@ -19,6 +19,11 @@ _cleanup()
->  _fixed_by_git_commit xfsprogs 10a01bcd \
->  	"xfs_db: fix metadump name obfuscation for ascii-ci filesystems"
->  
-> +_fixed_by_kernel_commit a9248538facc \
-> +        "xfs: stabilize the dirent name transformation function used for ascii-ci dir hash computation"
-> +_fixed_by_kernel_commit 9dceccc5822f \
-> +        "xfs: use the directory name hash function for dir scrubbing"
-> +
->  _supported_fs xfs
->  _require_test
->  _require_scratch
-> -- 
-> 2.43.0
-> 
-> 
+> I wonder if the best xfstests can be expected to check is that the data we
+> have written is within the allocated regions.
 
+I think the only expectation that generic/shared tests can have is that
+file ranges they've written must not be reported as SEEK_HOLE.  The
+ranges reported by SEEK_DATA must include the file ranges written by
+application software, but the data ranges can be encompass more range
+than that.
+
+> Which brings me on to FALLOC_FL_ZERO_RANGE - is this guaranteed to result in
+> an allocated region (if successful)?
+
+Yes, that's the distinction between ZERO and PUNCH.
+
+> Samba is translating FSCTL_SET_ZERO_DATA
+> to FALLOC_FL_PUNCH_HOLE, as is ksmbd, and then there is no allocated range to
+
+What does the FSCTL_SET_ZERO_DATA documentation say about the state of
+the file range after a successful operation?
+
+Oh.  Heh.  According to:
+https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_set_zero_data
+
+"If you use the FSCTL_SET_ZERO_DATA control code to write zeros (0) to a
+sparse file and the zero (0) region is large enough, the file system may
+not allocate disk space.
+
+"If you use the FSCTL_SET_ZERO_DATA control code to write zeros (0) to a
+non-sparse file, zeros (0) are written to the file. The system allocates
+disk storage for all of the zero (0) range, which is equivalent to using
+the WriteFile function to write zeros (0) to a file.
+
+> report back (Samba and ksmbd use SEEK_HOLE/SEEK_DATA rather than FIEMAP -
+> would a ZERO_RANGE even show up with that?).
+
+That depends on the local disk's implementation of lseek and ZERO_RANGE.
+
+XFS, for example, implements ZERO_RANGE by unmapping the entire range
+and then reallocating it with an unwritten extent.  There's no reason
+why it couldn't also issue a WRITE_SAME to storage and change the
+mapping state to written.  The user-visible behavior would be the same
+(reads return zeroes, space is allocated).
+
+However.  XFS' SEEK_DATA implementation (aka iomap's) skips over parts
+of unwritten extents if there isn't a folio in the page cache.  If some
+day the implementation were adjusted to do that WRITE_SAME thing I
+mentioned, then SEEK_DATA would return the entire range as data
+regardless of pagecache state.
+
+This difference between SEEK_DATA and FIEMAP has led to data corruption
+problems in the past, because unwritten extents as reported by FIEMAP
+can have dirty page cache sitting around.  SEEK_DATA reports the dirty
+pages as data; FIEMAP is silent.
+
+> Finally, should the Linux cifs filesystem translate gaps in the result of
+> FSCTL_QUERY_ALLOCATED_RANGES into 'unwritten' extents rather than leaving them
+> as gaps in the list (to be reported as holes by xfs_io)?  This smacks a bit of
+> adjusting things for the sake of making the testsuite work when the testsuite
+> isn't quite compatible with the thing being tested.
+
+That doesn't make sense to me.
+
+> So:
+> 
+>  - Should Samba and ksmbd be using FALLOC_FL_ZERO_RANGE rather than
+>    PUNCH_HOLE?
+
+Probably depends on whether or not they present unix files as sparse or
+non-sparse to Windows?
+
+>  - Should Samba and ksmbd be using FIEMAP rather than SEEK_DATA/HOLE?
+
+No.
+
+>  - Should xfstests be less exacting in its FIEMAP analysis - or should this be
+>    skipped for cifs?  I don't want to skip generic/009 as it checks some
+>    corner cases that need testing, but it may not be possible to make the
+>    exact extent matching work.
+
+It's a big lift but I think the generic fstests need to be reworked to
+FIEMAP-check only the file ranges that it actually wrote.  Those can't
+be SEEK_HOLEs.
+
+--D
+
+> 
+> Thanks,
+> David
+> 
+> 
+> 
