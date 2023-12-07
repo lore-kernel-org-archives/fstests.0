@@ -1,25 +1,25 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="IqShDLPt"
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67652D1
-	for <fstests@vger.kernel.org>; Thu,  7 Dec 2023 01:46:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="TYgz/GD4"
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A10F1FA
+	for <fstests@vger.kernel.org>; Thu,  7 Dec 2023 01:49:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
-	s=s31663417; t=1701942381; x=1702547181; i=quwenruo.btrfs@gmx.com;
-	bh=dM4Xi687LC3IL6PTWe9aCZVy+znP+RuwrEbj32hXH1k=;
+	s=s31663417; t=1701942544; x=1702547344; i=quwenruo.btrfs@gmx.com;
+	bh=6mkZFSQBMOHTdEyQR1s5DTbxkqliaYwRufdHch7iHZ4=;
 	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
 	 In-Reply-To;
-	b=IqShDLPtYX2oU4VbRVea7x5xZHqN5UQu2qwkgAmVWs3VObpT4s+C+PvyUKvykpsE
-	 d53XM4aqwptQ65PTGqemk/ZqW6KLE02j6h9kFvQo3MgPp625jGxKbJUYFQgiE2VVT
-	 Eo11Ix707cl+Zwg7EcKe0VyBtqway6ZuF2x7i9vvjH8RL2o4JTVTC4p9OETqb9e6z
-	 o3HWry6w5USZwEM1UN6odsE3OQ+IuKVVu6WYLMFiNSPM1649NB5RLtT6AHuCKDTwa
-	 mGnd+jMRwuXwGnz3F1Sh9GjZflYTJsuySE41Dfm7bojDoFTjmToiUpjhqSuWSwzN+
-	 K2F8gY63S7DRPbgGeA==
+	b=TYgz/GD4C0QVE7VBjR8D1ANW8fF4Cfipqddh2KOVtqz2ojqG9G217YBTRBb7aI1w
+	 aKwOvO/vQo6QCY13/9SRgABBUPU2rLPoxSSmnoWrl3hEFmu/bm8DD9LuYK/oFTEak
+	 llb10uE7GBlFpsJHq4qG1oHPOhFsatZgUe/Dm5bn8gfV7SVxlKpV/P9FMGxx1jDqR
+	 /zDGENwhsamJJHBiP53XYz9zw374vN6dUbSADFBXc/cjP/bBy20SXgBuyeYdHhg1i
+	 k7hQCVUtl6D7wFoYnvY4wpgiLi075WH58B2qU+jGAMidqJg71d6uylbRNjJjVu5Bu
+	 qg/zIHQDwuFSOVGVPg==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.153] ([122.151.37.21]) by mail.gmx.net (mrgmx005
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MY68d-1qjUem0WGT-00YOe0; Thu, 07
- Dec 2023 10:46:21 +0100
-Message-ID: <d54a526b-2ef8-4c76-8d64-352a337ca30e@gmx.com>
-Date: Thu, 7 Dec 2023 20:16:16 +1030
+Received: from [172.16.0.153] ([122.151.37.21]) by mail.gmx.net (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1N49lD-1rJfNW1g9J-0103WT; Thu, 07
+ Dec 2023 10:49:04 +0100
+Message-ID: <949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
+Date: Thu, 7 Dec 2023 20:19:00 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -27,12 +27,11 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/5] btrfs/282: append scrub status output to 282.full
+Subject: Re: [PATCH 0/5] btrfs/282: resolve intermittent failures
 Content-Language: en-US
 To: David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org
 Cc: Qu Wenruo <wqu@suse.com>
 References: <20231207072056.14588-1-ddiss@suse.de>
- <20231207072056.14588-3-ddiss@suse.de>
 From: Qu Wenruo <quwenruo.btrfs@gmx.com>
 Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
  xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
@@ -58,75 +57,56 @@ Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
  INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
  DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
  iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <20231207072056.14588-3-ddiss@suse.de>
+In-Reply-To: <20231207072056.14588-1-ddiss@suse.de>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:McuEO28bzjK25Qi7W+/HgfbF1J14CIKuNT1w/+Ee4oORnuKNx8x
- VNyEo7eIbQWVCkVvn2QjWuXPEgTiKMoVI7xAnFXtu0h1f4UlJPatGvz+wiA/dLC7h0T5laD
- RL18bgAH1C/Z3UEXW6AWlqdN9cmY8wk+WWSpSM6tY58BHvKvueWTYc3HfEa/8I6m/YGqqoQ
- D81m1iwVcawOLYyrjXFHw==
-UI-OutboundReport: notjunk:1;M01:P0:cXYFDMZyq68=;+1C/m7kUNdoVDfeDEom8wAKjh/6
- CDf+6tm8wRnlNcmGuPg/Q/6HVJCEMOOuNUme/jX9CAVjyYdNiv28If6fjDsoUCyNx3Xcm/XxW
- 4ZlrUSr53fMAtrpdnRc/aSWYwnABOthh/yzFWCGrIBLIKxNDwBEs41BoqF4wB/PQBeiIr+Joz
- 62+fM7KbqXHwLFaTFK9huDecd7oO09jEL/jBmjzDRDyRrJczTG7hICi/smE4HVqmXfIKWOgd2
- zf0UfmpQdJj+39T1lex5LhHrREKyNurox8+GLfWMC2K1UwVPfpgV9BCdBaOwi1yk/5CvgUUxv
- 0BS7LcbuHYpuVGR2MSPYFENGbu1jfpAMg/P/9ulOCzUOdz/4dRK19liOVtcdEMpGOVMxQB6ef
- 8fefj8aokEVlslfxxYTd5E8d3Vxn0/2rebBgnApXNOX3tm2+Po/xDypnQmK2XWhDG0m85+ldj
- Q1E+1YkGNzj2eXCuhpPYEH0G3uEjVtvDq+H8NMDbe5joDiu3b3iemHvvo6IM5fm/FYtU9m69U
- iXO8tafi07EB1iZscSOak8LIVCxwm3DBiQqjyr2vk5HHV4YjNEQhNjXlBFeN0CrpZ2pWZLGkm
- oQCOwfmc7t96Z9OUWdTOHk31F6ZNnrvcWhYhLuEFwiLcq3AmpUetrcDwzUmWN8brARuPp0zSJ
- +wUXI+bw/Qyl7OVn23O/9BLXGGgrZjV7YLbdCqrgTytuwnJ36VlKdVjYJv2XfvL1zGkjQ4rnp
- w5WHsFk0y+n1aRDmNTgg6dNQ+d+q4TZFlXlrgNQ8zn8Do9U1i4qU5SyKPPh1Ob+LI69iEl2w7
- +aFM9WaxWTfFyGV4zGSNyEPEnMz8g5lB+qRrTv3zFWumcYcUHk297TKWjwAIDZYCJiSok9mvq
- EHR3sRg7fKyVg0lTqZAKhyp+PxNK632S+POWV5Zh/taQTSxaA4/2F1vZ9W0r/YC49EDEAKBzn
- DAse4gnI7+xYLpjyhWfA42K7uKM=
+X-Provags-ID: V03:K1:5hVhXYEvrsuT4EqVyP4iM/X4E1jEwxAcFJa+37iQjmtWavFQmTp
+ bu7Jfdb+TSbp8G5YyP5XhST0HPJhjoBHP96s9/Am5YlHHDm0rOVOWSEoSOazPxmxsRv26xn
+ UQ5Bf86IUjD+/5ywmT9e/PkKaEHJzDOYDAZh54JPuOG94lg/A0WdzORv9d4z7vlFyd0iKQO
+ smoEnqYoSuV7ZON8cTz+Q==
+UI-OutboundReport: notjunk:1;M01:P0:A+qUhPPrVkQ=;MjWUt2KB6RYpjzRG1M6Bm/77/bJ
+ e6Z9JKyBu4MPGSaYau0wMI8E1MrqolIglp9/QSSF45OvWWMDPjX9iozygP7PkC7nGDZTuvu9G
+ ySZtF7SKrhxYezUVoJX51ETKFsxwSG/9ZWxvrjKS+eE3zKzptFgAkIEV/TDaHhIVUWkQZsDTb
+ 4mpILDfQ8erwhd6Rwg8nvn3fr18x2HF4m7AJuCWzPuT4WmfDym/qkZeJU0HArlh/pfUwnJQ8/
+ qIsD0DudodbBpWCNMQjkNn7OCL1llvhEZv+rbZEqUbWpqr19pWTNjCNj4+VJ9n4GoHBDQvt83
+ fY2yCWfBwVtDyTcyWeQCInrhGUgU6V8iXKbTU2huOkbOJTyqhXIzZJOlKLRklGGNVhsVEsmIi
+ FvpYZFmEOk/KPQfurh9sOQfmMn+vqqJDIQpKG94xwM5A3WgaNJacnLLcyLGTgcqvTZ40J8VQt
+ UMuojP2EL1bsR/zvA2wMDDVYUQPyDXQ58SWfmmNAkHkzCrGYtJy6BfhQ9RnEmm8xc1zn3gYMp
+ 2PuGau47L7ghzTMiC7nDPmcCUEtQ2is6VKF03ZW6WbbNmd5UUpq6Nkag/tHbvl5dqYNp9th/J
+ DutQNAgXuU+j5atlpKxipMY1f3PRqAF6Zl5Zj8BXbFTpXPn5FYgjGUa579UPdqW92fegTNflj
+ OtkBaOPSe+Zg5EdW1CLTxDCY1fD6oRc29CJAd0dvpFf7N0EV7+M0zgwo8gScgOnvCi+HUjcqO
+ Exgo5b0Tj22uCMhNXLhA4dcS08415WnNRa3WJChshoTVGc23ed4kiUVlOEzCzLj17AZi4bsau
+ HX/H3u39PC+uNCZK3WE//U7+SmSI2WEIjxpgPcOc9iFIA02hsUsZLrMyAhBkOjpXTcWHl8Q0V
+ 2zJy2w20201UHnqZ39zJkvmPNOJOul4tUu2azG09jGeq8VwetGwgK+/bhYlhUKgriUdZBMb5v
+ T2rFhHFNMfJiSXPlFrZOqnx/u0I=
 
 
 
 On 2023/12/7 17:50, David Disseldorp wrote:
-> Also, collapse the grep/cut usage into the existing awk one-liner.
->
-> Signed-off-by: David Disseldorp <ddiss@suse.de>
+> btrfs/282 fails intermittently under some circumstances. This patchset
+> adds dmdelay to make storage latencies more uniform and slightly
+> increases throttled rate tolerances.
 
-This change itself is totally fine independent of the fix for btrfs/282.
+My concern using dm_delay is, is the delay per-merged-bio or something els=
+e?
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+If the delay is only per-bio (after merge), then I'm afraid it would not
+be good enough.
+
+The bio plug we use in scrub can have much higher chance to result a
+difference in the scrub speed.
+
+We may want a delay behavior which can take bio size into consideration
+at least.
 
 Thanks,
 Qu
-> ---
->   tests/btrfs/282 | 10 ++++++----
->   1 file changed, 6 insertions(+), 4 deletions(-)
+
 >
-> diff --git a/tests/btrfs/282 b/tests/btrfs/282
-> index 395e0626..66d14f82 100755
-> --- a/tests/btrfs/282
-> +++ b/tests/btrfs/282
-> @@ -60,8 +60,9 @@ $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqre=
-s.full
->   # Error summary:    no errors found
->   #
->   # What we care is that Rate line.
-> -init_speed=3D$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT | grep =
-"Rate:" |\
-> -	     $AWK_PROG '{print $2}' | cut -f1 -d\/)
-> +init_speed=3D$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT |\
-> +	     tee -a $seqres.full |\
-> +	     $AWK_PROG '$1 =3D=3D "Rate:" {sub(/\/s/, "", $2); print $2}')
+>   common/dmdelay      | 13 ++++---------
+>   tests/btrfs/282     | 43 +++++++++++++++++++++++++++++--------------
+>   tests/btrfs/282.out |  2 +-
+>   tests/xfs/311       |  2 +-
+>   4 files changed, 35 insertions(+), 25 deletions(-)
 >
->   # This can happen for older progs
->   if [ -z "$init_speed" ]; then
-> @@ -76,8 +77,9 @@ echo "$target_speed" > "${devinfo_dir}/scrub_speed_max=
-"
 >
->   # The second scrub, to check the throttled speed.
->   $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full
-> -speed=3D$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT | grep "Rate=
-:" |\
-> -	     $AWK_PROG '{print $2}' | cut -f1 -d\/)
-> +speed=3D$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT |\
-> +	tee -a $seqres.full |\
-> +	$AWK_PROG '$1 =3D=3D "Rate:" {sub(/\/s/, "", $2); print $2}')
->
->   # We gave a +- 10% tolerance for the throttle
->   if [ "$speed" -gt "$(( $target_speed * 11 / 10 ))" -o \
