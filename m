@@ -1,155 +1,125 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="bFEGLqym";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="67YvANta";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="S9Jf2AhW";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="wVs3OBRr"
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2a07:de40:b251:101:10:150:64:2])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BCF710E3;
-	Thu,  7 Dec 2023 11:40:40 -0800 (PST)
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id C51FE1FBAB;
-	Thu,  7 Dec 2023 19:40:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1701978038; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=MjYNJYzgt7He/kBaFAEzfCHeJ5IWmtMCX4BFxvREa3k=;
-	b=bFEGLqymlxNoqpS656W38cJsZ0l4kKJ+KY6cNlMHspizDU0fO+X1l+3sfqXvb1hj3ueatg
-	HpZRuxiIXiW/Hf03tw1p1c58wMbxAezgpXXk5vUX7WuthotPjd2J2zgkhupYyt9dvoWJRR
-	o6utAOUUFmqWCenwgN0yWP2X36Cfsy0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1701978038;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=MjYNJYzgt7He/kBaFAEzfCHeJ5IWmtMCX4BFxvREa3k=;
-	b=67YvANta77HWAq9rRwU4v+qBzjJv5kjJjPrx5kSNiJYHjHHoZG95pGYSBilKTRD+zRat6d
-	nQOSPmMyCQZKqAAA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1701978036; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=MjYNJYzgt7He/kBaFAEzfCHeJ5IWmtMCX4BFxvREa3k=;
-	b=S9Jf2AhWPiguItQz4/pbeDtssBlW6c806eDqtfzhYCipx0h+8HG4N/UdnBOQyvGv+0zQHC
-	ZFmD8pG3pw02Lavtyk9NuhUqV/q0pwwRftG4W1R+svS3Qgm5UvVdj4ZKOW5n5YgscjcWF+
-	93o4lcSiw9XH2Rx33tcn4I1g2WPBX1g=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1701978036;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=MjYNJYzgt7He/kBaFAEzfCHeJ5IWmtMCX4BFxvREa3k=;
-	b=wVs3OBRrGMmhkWA4wyWgIGlyfNmRAGm7uaHfx7Oiso/gmL8KXg4oDyA5JDwVLnmdUCgeIa
-	JqgS0TodH01rnqDw==
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 1A5E613907;
-	Thu,  7 Dec 2023 19:40:36 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id CJeYBLQfcmVyBQAAn2gu4w
-	(envelope-from <pvorel@suse.cz>); Thu, 07 Dec 2023 19:40:36 +0000
-From: Petr Vorel <pvorel@suse.cz>
-To: ltp@lists.linux.it
-Cc: Petr Vorel <pvorel@suse.cz>,
-	Cyril Hrubis <chrubis@suse.cz>,
-	Li Wang <liwang@redhat.com>,
-	Richard Palethorpe <rpalethorpe@suse.com>,
-	Jan Stancek <jstancek@redhat.com>,
-	Xiao Yang <yangx.jy@fujitsu.com>,
-	Yang Xu <xuyang2018.jy@fujitsu.com>,
-	Kent Overstreet <kent.overstreet@linux.dev>,
-	Brian Foster <bfoster@redhat.com>,
-	linux-bcachefs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	Amir Goldstein <amir73il@gmail.com>,
-	Jan Kara <jack@suse.cz>
-Subject: [PATCH v2 2/3] lib: Add support bcachefs filesystem to .all_filesystems
-Date: Thu,  7 Dec 2023 20:40:10 +0100
-Message-ID: <20231207194011.273027-3-pvorel@suse.cz>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20231207194011.273027-1-pvorel@suse.cz>
-References: <20231207194011.273027-1-pvorel@suse.cz>
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="bv5S4DzE"
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C87410F7
+	for <fstests@vger.kernel.org>; Thu,  7 Dec 2023 12:02:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
+	s=s31663417; t=1701979328; x=1702584128; i=quwenruo.btrfs@gmx.com;
+	bh=jRozNKwuey+jWtZvv+dMYvYmbqBe4WIqjFy5Vufkl/M=;
+	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
+	 In-Reply-To;
+	b=bv5S4DzE+YMZBI7nuk6WNOUmGeDhsqBaVUEtj6VrcuaKKREcSPg2KtrIZ074mleR
+	 rNxhDCPtkRHZNHspwVxy9pi3K2LJXk6BCC5arnwT/eJVdH6pI762ny4Xj/HFh3v96
+	 4G5UOIBsQ3MesxgONl/c4P1wt3FyROhPRZt+cxx7nVwNHEhgR5K3Wly2vTpH0BB5m
+	 X5QujZMVeu2TMkade+xapuOkNPOfBITBjiMetG/D2NNJO/doSWdJwl+Oz84JvRM1E
+	 nIRigLtK9jgfiudQrgRS6Hm0w/CBZyPTg3TK4WETPs0O3zKC7LKf0aM+f7d/KtN2w
+	 4e5MX1wbPtJ93JUFHw==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.153] ([122.151.37.21]) by mail.gmx.net (mrgmx005
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1MfpOd-1rilde0o3N-00gKdy; Thu, 07
+ Dec 2023 21:02:07 +0100
+Message-ID: <103e1b45-19d9-4438-b70d-892757f695fc@gmx.com>
+Date: Fri, 8 Dec 2023 06:32:03 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Level: 
-X-Spam-Score: -1.10
-X-Spam-Flag: NO
-X-Spamd-Result: default: False [0.28 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	 R_MISSING_CHARSET(2.50)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 REPLY(-4.00)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 R_RATELIMIT(0.00)[to_ip_from(RLecpkqykizks3u9s7xp6n6wei)];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 RCPT_COUNT_TWELVE(0.00)[14];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[lwn.net:url];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 FREEMAIL_CC(0.00)[suse.cz,redhat.com,suse.com,fujitsu.com,linux.dev,vger.kernel.org,gmail.com];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.62)[82.12%]
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spam-Level: 
-X-Spam-Score: 0.28
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/5] btrfs/282: resolve intermittent failures
+Content-Language: en-US
+To: David Disseldorp <ddiss@suse.de>
+Cc: fstests@vger.kernel.org, Qu Wenruo <wqu@suse.com>
+References: <20231207072056.14588-1-ddiss@suse.de>
+ <949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
+ <20231208004902.3df2bed2@echidna>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
+ pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
+ BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
+ XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
+ jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
+ LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
+ mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
+ CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
+ tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
+ INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
+ DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
+ iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
+In-Reply-To: <20231208004902.3df2bed2@echidna>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:qXgtuhkXSwqC6qTNStA2iSySA1b9Yw07o61zO3hGGwc4qn1zWi/
+ TnJHUVWqiGIOyQ98HjPhqfFhOZeqFIDCC7i2ULrinJYcnR6v7sKhqYMZYjymG608uR2GttV
+ PhpkPLIADfBNWgBR3xtygDCaV+o6H0UUPp9BTHNyDep22CoSKQtT9om3E7By1t5uxm0eDik
+ xGwAt9bzOpEbVTa8tpF1A==
+UI-OutboundReport: notjunk:1;M01:P0:6Qt9QABhu7E=;3cczstHtg2j4Uys8BLtbfIA8Ao2
+ fF/vRMt6o/BOq0J7SYFho5T+CVFJnuAjX51/Rp0XcxrkwtCgiqYb4OmsEjIc7YwXX8eoDwFp6
+ iXFJHLLa35MwxBPZxhb0oP/WCnIg+rqOxffgB6ejX72WQXtZloZ5mNEBtfvzvzUO4Enb/ufXa
+ dEfBfgD6rWCBmHwtwUNqxt7Tu543B/FoaWTcIFqYkEqJuf7WIPjIEUqztn8JUfRxdu42vxDOV
+ A0+qFva4cxHXi8MU4JhYr50yjbDv554RivUd6pLhTPrTBulttKp1QIukAZtOKAx552fzE6QTp
+ crBUJw/5xp1ihmOTaYzN+NsFVr2SAKEqULVwR65eZumk8sUD6AqbvQ1qEbufWpgT/EhxcDLzE
+ ixoWOKnifwVmGNohnsgfsAD9g+xMjxFxUgYfamP8u1dpFAG9pu4rhtb2H2qV3xcPuY6B3TnSh
+ M4Z7lCcoetKt0MJTHaVQdfrHridrv9n9+gOJr7k6sb+tgzyzBXU3MUQ0CVQsjPWaInPUWUVP9
+ bKjzE5gXKLR6RC2aN8vNGaAX6mbApboorJuaIERS/GZMsaeh4XtU8oVlee2JMoRUGNaMscsSx
+ TKq9C5FA3PZtAX+tfqHVBNkmAGBJz2TS2lG4j66EYpyir2sCpXjYJCrJa0CHjYTobvAYkd0c5
+ KjTg7Je9jLkztVZBDCQ/ZHHIkediLlanH9ymSldZhxukAJ3ciFbu/NhvPR02n5Cq4+wMoRdX7
+ BsNqkrGyr5xyN3WvFzg1LS1Lhe/v+hqf5Gq/AxrQTcmf0dZUXBfIPqAlBf9DK1+XR61ibcTzI
+ g55rmYHu7a8bAEbZH0T5rQ9NQgLNKs9fZZPSwr8TAE0oDxFLdzmpX95xVorK9NFDHKzMqp41M
+ yF0r22uM6xMM0OVWZ9bijeVa6lzqFUXgnkngPjNEMmJgoMKlUMk8krPJZWvNjekoNHpJBkctZ
+ rF7bmrBbu/RUjO7nz2xEeuNA4f8=
 
-bcachefs has been merged into v6.7-rc1 [1]. Let's add it's support to
-LTP .all_filesystems = 1 and TST_ALL_FILESYSTEMS=1.
 
-[1] https://lwn.net/Articles/934692/
 
-Suggested-by: Cyril Hrubis <chrubis@suse.cz>
-Signed-off-by: Petr Vorel <pvorel@suse.cz>
----
-The same as in v1
+On 2023/12/8 00:19, David Disseldorp wrote:
+> On Thu, 7 Dec 2023 20:19:00 +1030, Qu Wenruo wrote:
+>
+>> On 2023/12/7 17:50, David Disseldorp wrote:
+>>> btrfs/282 fails intermittently under some circumstances. This patchset
+>>> adds dmdelay to make storage latencies more uniform and slightly
+>>> increases throttled rate tolerances.
+>>
+>> My concern using dm_delay is, is the delay per-merged-bio or something =
+else?
+>>
+>> If the delay is only per-bio (after merge), then I'm afraid it would no=
+t
+>> be good enough.
+>
+> The dmdelay device presents itself as a regular block device, so I think
+> delay_map()->delay_bio() handling comes after any merges.
+>
+>> The bio plug we use in scrub can have much higher chance to result a
+>> difference in the scrub speed.
+>>
+>> We may want a delay behavior which can take bio size into consideration
+>> at least.
+>
+> Should we manipulate it a bit by fiddling with queue/max_sectors_kb and
+> queue/nomerges?
 
- lib/tst_supported_fs_types.c | 2 ++
- 1 file changed, 2 insertions(+)
+I'm not sure if delay is our best friend.
 
-diff --git a/lib/tst_supported_fs_types.c b/lib/tst_supported_fs_types.c
-index d4911fa3b..369836717 100644
---- a/lib/tst_supported_fs_types.c
-+++ b/lib/tst_supported_fs_types.c
-@@ -1,6 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0-or-later
- /*
-  * Copyright (c) 2017 Cyril Hrubis <chrubis@suse.cz>
-+ * Copyright (c) Linux Test Project, 2018-2023
-  */
- 
- #include <stdio.h>
-@@ -24,6 +25,7 @@ static const char *const fs_type_whitelist[] = {
- 	"ext4",
- 	"xfs",
- 	"btrfs",
-+	"bcachefs",
- 	"vfat",
- 	"exfat",
- 	"ntfs",
--- 
-2.43.0
+If we have something to limits the read/write speed directly that would
+be the best case.
 
+Unfortunately I didn't see a dm-throttle in upstream, can we limit the
+IO speed on certain device using cgroup?
+
+Thanks,
+Qu
+>
+> Thanks, David
