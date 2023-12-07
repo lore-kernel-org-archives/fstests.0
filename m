@@ -1,154 +1,75 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 862F11AD
+	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:06 -0800 (PST)
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 709EF6EB64;
-	Wed,  6 Dec 2023 18:48:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VNiL0HtD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9C18C433C7;
-	Wed,  6 Dec 2023 18:47:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701888479;
-	bh=+ti42Uy3LaDObl3C2cNA/it91T+eOi0j2YArak6KYyE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=VNiL0HtDbCMJEgtw6xQk/Iypp0j8e/QsroWuZHB12LyrOYGCAc9pCPh2PJdmYILhu
-	 Jc7b/ryZmrcof+TPY9lq9kWqOePGpieR3X4xcLY+O24MVM124XkfUychzNL+OHq9NW
-	 uAyGYylocxT802Io2AMScXSvWcxH9V5GdouI4Qj0xY9cvsTRC+/YSQKxadYdBIxyOC
-	 xjZrM98Y7KPh8QL5Tm2XDxdKiwwYtA/wVI0VhWLPV1jNABLQJdu6/6Zo1iMjLASyoW
-	 gp2V90qAOmtvyUWWX0mSeo7p9Pl9Al8NIcYahHmJ7f7EJhstjwlnV31qT38eXvDiWc
-	 hStumjTX/XYHg==
-Date: Wed, 6 Dec 2023 10:47:59 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: David Howells <dhowells@redhat.com>
-Cc: fstests@vger.kernel.org, samba-technical@lists.samba.org,
-	linux-cifs@vger.kernel.org, Steve French <sfrench@samba.org>,
-	Paulo Alcantara <pc@manguebit.com>,
-	Dave Chinner <david@fromorbit.com>,
-	Filipe Manana <fdmanana@suse.com>, linux-fsdevel@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: Issues with FIEMAP, xfstests, Samba, ksmbd and CIFS
-Message-ID: <20231206184759.GA3964019@frogsfrogsfrogs>
-References: <447324.1701860432@warthog.procyon.org.uk>
+	by smtp-out1.suse.de (Postfix) with ESMTPS id DDF4421D4C;
+	Thu,  7 Dec 2023 07:21:04 +0000 (UTC)
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 54C4913976;
+	Thu,  7 Dec 2023 07:21:02 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id Y5VROF5ycWXdGAAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:02 +0000
+From: David Disseldorp <ddiss@suse.de>
+To: fstests@vger.kernel.org
+Cc: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH 0/5] btrfs/282: resolve intermittent failures
+Date: Thu,  7 Dec 2023 18:20:51 +1100
+Message-Id: <20231207072056.14588-1-ddiss@suse.de>
+X-Mailer: git-send-email 2.35.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <447324.1701860432@warthog.procyon.org.uk>
+Content-Transfer-Encoding: 8bit
+X-Spamd-Bar: ++++++++++++++++++
+Authentication-Results: smtp-out1.suse.de;
+	dkim=none;
+	dmarc=fail reason="No valid SPF, No valid DKIM" header.from=suse.de (policy=none);
+	spf=softfail (smtp-out1.suse.de: 2a07:de40:b281:104:10:150:64:97 is neither permitted nor denied by domain of ddiss@suse.de) smtp.mailfrom=ddiss@suse.de
+X-Rspamd-Server: rspamd2
+X-Spamd-Result: default: False [18.22 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_DN_SOME(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 NEURAL_SPAM_SHORT(2.93)[0.977];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 R_SPF_SOFTFAIL(4.60)[~all:c];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 MX_GOOD(-0.01)[];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 MID_CONTAINS_FROM(1.00)[];
+	 NEURAL_SPAM_LONG(3.50)[1.000];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 R_DKIM_NA(2.20)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.00)[14.98%];
+	 DMARC_POLICY_SOFTFAIL(0.10)[suse.de : No valid SPF, No valid DKIM,none]
+X-Spam-Score: 18.22
+X-Rspamd-Queue-Id: DDF4421D4C
 
-On Wed, Dec 06, 2023 at 11:00:32AM +0000, David Howells wrote:
-> Hi,
-> 
-> I've been debugging apparent cifs failures with xfstests, in particular
-> generic/009, and I'm finding that the tests are failing because FIEMAP is not
-> returning exactly the expected extent map.
-> 
-> The problem is that the FSCTL_QUERY_ALLOCATED_RANGES smb RPC op can only
-> return a list of ranges that are allocated and does not return any other
-> information about those allocations or the gaps between them - and thus FIEMAP
-> cannot express this information to the extent that the test expects.
+btrfs/282 fails intermittently under some circumstances. This patchset
+adds dmdelay to make storage latencies more uniform and slightly
+increases throttled rate tolerances.
 
-<shrug> Perhaps that simply makes FSCTL_QUERY_ALLOCATED_RANGES -> FIEMAP
-translation a poor choice?  FIEMAP doesn't have a way to say "written
-status unknown".
+ common/dmdelay      | 13 ++++---------
+ tests/btrfs/282     | 43 +++++++++++++++++++++++++++++--------------
+ tests/btrfs/282.out |  2 +-
+ tests/xfs/311       |  2 +-
+ 4 files changed, 35 insertions(+), 25 deletions(-)
 
-> Further, as Steve also observed, the expectation that the individual subtests
-> should return exactly those ranges is flawed.  The filesystem is at liberty to
-> split extents, round up extents, bridge extents and automatically punch out
-> blocks of zeros.  xfstests/common/punch allows for some of this, but I wonder
-> if it needs to be more fuzzy.
-> 
-> I wonder if the best xfstests can be expected to check is that the data we
-> have written is within the allocated regions.
-
-I think the only expectation that generic/shared tests can have is that
-file ranges they've written must not be reported as SEEK_HOLE.  The
-ranges reported by SEEK_DATA must include the file ranges written by
-application software, but the data ranges can be encompass more range
-than that.
-
-> Which brings me on to FALLOC_FL_ZERO_RANGE - is this guaranteed to result in
-> an allocated region (if successful)?
-
-Yes, that's the distinction between ZERO and PUNCH.
-
-> Samba is translating FSCTL_SET_ZERO_DATA
-> to FALLOC_FL_PUNCH_HOLE, as is ksmbd, and then there is no allocated range to
-
-What does the FSCTL_SET_ZERO_DATA documentation say about the state of
-the file range after a successful operation?
-
-Oh.  Heh.  According to:
-https://learn.microsoft.com/en-us/windows/win32/api/winioctl/ni-winioctl-fsctl_set_zero_data
-
-"If you use the FSCTL_SET_ZERO_DATA control code to write zeros (0) to a
-sparse file and the zero (0) region is large enough, the file system may
-not allocate disk space.
-
-"If you use the FSCTL_SET_ZERO_DATA control code to write zeros (0) to a
-non-sparse file, zeros (0) are written to the file. The system allocates
-disk storage for all of the zero (0) range, which is equivalent to using
-the WriteFile function to write zeros (0) to a file.
-
-> report back (Samba and ksmbd use SEEK_HOLE/SEEK_DATA rather than FIEMAP -
-> would a ZERO_RANGE even show up with that?).
-
-That depends on the local disk's implementation of lseek and ZERO_RANGE.
-
-XFS, for example, implements ZERO_RANGE by unmapping the entire range
-and then reallocating it with an unwritten extent.  There's no reason
-why it couldn't also issue a WRITE_SAME to storage and change the
-mapping state to written.  The user-visible behavior would be the same
-(reads return zeroes, space is allocated).
-
-However.  XFS' SEEK_DATA implementation (aka iomap's) skips over parts
-of unwritten extents if there isn't a folio in the page cache.  If some
-day the implementation were adjusted to do that WRITE_SAME thing I
-mentioned, then SEEK_DATA would return the entire range as data
-regardless of pagecache state.
-
-This difference between SEEK_DATA and FIEMAP has led to data corruption
-problems in the past, because unwritten extents as reported by FIEMAP
-can have dirty page cache sitting around.  SEEK_DATA reports the dirty
-pages as data; FIEMAP is silent.
-
-> Finally, should the Linux cifs filesystem translate gaps in the result of
-> FSCTL_QUERY_ALLOCATED_RANGES into 'unwritten' extents rather than leaving them
-> as gaps in the list (to be reported as holes by xfs_io)?  This smacks a bit of
-> adjusting things for the sake of making the testsuite work when the testsuite
-> isn't quite compatible with the thing being tested.
-
-That doesn't make sense to me.
-
-> So:
-> 
->  - Should Samba and ksmbd be using FALLOC_FL_ZERO_RANGE rather than
->    PUNCH_HOLE?
-
-Probably depends on whether or not they present unix files as sparse or
-non-sparse to Windows?
-
->  - Should Samba and ksmbd be using FIEMAP rather than SEEK_DATA/HOLE?
-
-No.
-
->  - Should xfstests be less exacting in its FIEMAP analysis - or should this be
->    skipped for cifs?  I don't want to skip generic/009 as it checks some
->    corner cases that need testing, but it may not be possible to make the
->    exact extent matching work.
-
-It's a big lift but I think the generic fstests need to be reworked to
-FIEMAP-check only the file ranges that it actually wrote.  Those can't
-be SEEK_HOLEs.
-
---D
-
-> 
-> Thanks,
-> David
-> 
-> 
-> 
