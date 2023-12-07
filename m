@@ -1,29 +1,29 @@
 Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2a07:de40:b251:101:10:150:64:2])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 035CBD73
-	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:09 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 988D4137
+	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:11 -0800 (PST)
 Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 91E4E1F86B;
-	Thu,  7 Dec 2023 07:21:07 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 40E0B1F86B;
+	Thu,  7 Dec 2023 07:21:10 +0000 (UTC)
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A947513976;
-	Thu,  7 Dec 2023 07:21:05 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 56EE813976;
+	Thu,  7 Dec 2023 07:21:07 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id kIkREWFycWXdGAAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:05 +0000
+	id eEJsOGNycWXdGAAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:07 +0000
 From: David Disseldorp <ddiss@suse.de>
 To: fstests@vger.kernel.org
 Cc: Qu Wenruo <wqu@suse.com>,
 	David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 1/5] common/dmdelay: remove DELAY_X enums
-Date: Thu,  7 Dec 2023 18:20:52 +1100
-Message-Id: <20231207072056.14588-2-ddiss@suse.de>
+Subject: [PATCH 2/5] btrfs/282: append scrub status output to 282.full
+Date: Thu,  7 Dec 2023 18:20:53 +1100
+Message-Id: <20231207072056.14588-3-ddiss@suse.de>
 X-Mailer: git-send-email 2.35.3
 In-Reply-To: <20231207072056.14588-1-ddiss@suse.de>
 References: <20231207072056.14588-1-ddiss@suse.de>
@@ -34,7 +34,7 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Rspamd-Queue-Id: 91E4E1F86B
+X-Rspamd-Queue-Id: 40E0B1F86B
 X-Spam-Score: 4.99
 X-Spamd-Result: default: False [4.99 / 50.00];
 	 ARC_NA(0.00)[];
@@ -64,66 +64,41 @@ Authentication-Results: smtp-out2.suse.de;
 	spf=softfail (smtp-out2.suse.de: 2a07:de40:b281:104:10:150:64:97 is neither permitted nor denied by domain of ddiss@suse.de) smtp.mailfrom=ddiss@suse.de
 X-Rspamd-Server: rspamd1
 
-The DELAY_NONE and DELAY_READ enums map directly to DELAY_TABLE globals,
-so remove the indirection and use the DELAY_TABLE variables instead.
-Rename DELAY_TABLE to DELAY_TABLE_NODELAY to better reflect that the
-table doesn't specify any IO delays.
+Also, collapse the grep/cut usage into the existing awk one-liner.
 
 Signed-off-by: David Disseldorp <ddiss@suse.de>
 ---
- common/dmdelay | 13 ++++---------
- tests/xfs/311  |  2 +-
- 2 files changed, 5 insertions(+), 10 deletions(-)
+ tests/btrfs/282 | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/common/dmdelay b/common/dmdelay
-index 66cac1a7..e85d8d62 100644
---- a/common/dmdelay
-+++ b/common/dmdelay
-@@ -4,16 +4,13 @@
+diff --git a/tests/btrfs/282 b/tests/btrfs/282
+index 395e0626..66d14f82 100755
+--- a/tests/btrfs/282
++++ b/tests/btrfs/282
+@@ -60,8 +60,9 @@ $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full
+ # Error summary:    no errors found
  #
- # common functions for setting up and tearing down a dmdelay device
+ # What we care is that Rate line.
+-init_speed=$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT | grep "Rate:" |\
+-	     $AWK_PROG '{print $2}' | cut -f1 -d\/)
++init_speed=$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT |\
++	     tee -a $seqres.full |\
++	     $AWK_PROG '$1 == "Rate:" {sub(/\/s/, "", $2); print $2}')
  
--DELAY_NONE=0
--DELAY_READ=1
--
- _init_delay()
- {
- 	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- 	DELAY_DEV=/dev/mapper/delay-test
--	DELAY_TABLE="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 0"
-+	DELAY_TABLE_NODELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 0"
- 	DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 10000 $SCRATCH_DEV 0 0"
--	_dmsetup_create delay-test --table "$DELAY_TABLE" || \
-+	_dmsetup_create delay-test --table "$DELAY_TABLE_NODELAY" || \
- 		_fatal "failed to create delay device"
- }
+ # This can happen for older progs
+ if [ -z "$init_speed" ]; then
+@@ -76,8 +77,9 @@ echo "$target_speed" > "${devinfo_dir}/scrub_speed_max"
  
-@@ -44,10 +41,8 @@ _cleanup_delay()
- # table
- _load_delay_table()
- {
--	table="$DELAY_TABLE"
--	[ $1 -eq $DELAY_READ ] && table="$DELAY_TABLE_RDELAY"
--
--	suspend_opt="--nolockfs"
-+	local table="$1"
-+	local suspend_opt="--nolockfs"
- 	[ $# -gt 1 ] && [ $2 -eq 1 ] && suspend_opt=""
+ # The second scrub, to check the throttled speed.
+ $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full
+-speed=$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT | grep "Rate:" |\
+-	     $AWK_PROG '{print $2}' | cut -f1 -d\/)
++speed=$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT |\
++	tee -a $seqres.full |\
++	$AWK_PROG '$1 == "Rate:" {sub(/\/s/, "", $2); print $2}')
  
- 	# run a suspend/resume cycle to avoid excessive resume delays once a
-diff --git a/tests/xfs/311 b/tests/xfs/311
-index d5e3afbf..04161750 100755
---- a/tests/xfs/311
-+++ b/tests/xfs/311
-@@ -50,7 +50,7 @@ _unmount_delay
- _mount_delay
- 
- # introduce a read I/O delay
--_load_delay_table $DELAY_READ
-+_load_delay_table "$DELAY_TABLE_RDELAY"
- 
- # Map the directory and immediately unmount. This should invoke an asynchronous
- # readahead on the first block of the directory. The readahead is delayed by
+ # We gave a +- 10% tolerance for the throttle
+ if [ "$speed" -gt "$(( $target_speed * 11 / 10 ))" -o \
 -- 
 2.35.3
 
