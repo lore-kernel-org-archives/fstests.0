@@ -1,142 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D84AF187B;
-	Thu,  7 Dec 2023 12:12:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L4psUv2o"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52971C433C7;
-	Thu,  7 Dec 2023 12:12:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1701951131;
-	bh=2+aGullRBbfnICMPkRMyx84gPHQIh1abH+d15HDJmeg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=L4psUv2oMN0Lxk13MvTZpzccwxqlsjuHMrlwUf2pzsQOArj80yGb0fpo/tfoggcqT
-	 k5BBL+d5VzBoNHDiiiZ2C+AVxLLAsrqH5s16QMZg3nsyNfwkzhciWTADyE3jlfn7Rq
-	 A7k3aaX7Sdo73YUiLt8TInIUTzVWbgPqITNoz+56BnQsXOeN/47GE8XYSAkwgvzG9P
-	 ubxrREAQV+YSkKro7NXR+OA83OhAkU6Y8tkR2itsM6aqdQ4ryZ3nuSOhUWxpHe+yM4
-	 0yxPQWl0+AGfWW9R6/nS57q3PGLNieMsQU9+KoyxfiAp0rpWkNwFpWv6rA62y5VZXt
-	 xObTtSCW9HvWg==
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-50bf2d9b3fdso752644e87.3;
-        Thu, 07 Dec 2023 04:12:11 -0800 (PST)
-X-Gm-Message-State: AOJu0YxDAxhNiLpOc4kp56pbbLuUeOG7knfpiMoX3f3lkWp+cGVNxKOT
-	90Pis1hIcQYXqQJ17MlLNs6SC4AeUeMIM8lIFZQ=
-X-Google-Smtp-Source: AGHT+IENODZwwZcL7JsTuG04t3TxoMLsR1CQ0Y9xF/ZNA5CA3Y59h+NLADpwxqow75rdnpytfSWpgb+ev3aqEe8iZ9M=
-X-Received: by 2002:a05:6512:3124:b0:50c:a39:ee37 with SMTP id
- p4-20020a056512312400b0050c0a39ee37mr1494200lfd.109.1701951129477; Thu, 07
- Dec 2023 04:12:09 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="EKlH9VGo";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="PDvSxD86"
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2a07:de40:b251:101:10:150:64:1])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DF9810C2
+	for <fstests@vger.kernel.org>; Thu,  7 Dec 2023 05:49:15 -0800 (PST)
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 0ADEC21B3D;
+	Thu,  7 Dec 2023 13:49:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1701956954; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=K3yqzIpfk4tW7oRiQjz5OLluc6v3BUjDnldmkuuvyXM=;
+	b=EKlH9VGo1SXji9Z4B56+azdYWitfOL2odqv87xp9zTXtJdFwGQb1lGlqMJCizGbxWOgE9t
+	1bGVlU6mKV7qTLxsnmPnu/K10RrcEpkzi/XczM2ElPHwZ/djLvZtOXB4mVmZMjoTqboR++
+	C7k58+xaI8EYefnMI6XC7jx1lGhrU/c=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1701956954;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=K3yqzIpfk4tW7oRiQjz5OLluc6v3BUjDnldmkuuvyXM=;
+	b=PDvSxD86Jw8k+2J5SNbTodmGf1xfipS7eRxrQwF+b+zmZfQf2L+BYRfr+RSG1QGfOxZG27
+	nmm1cqsoyS9re4Bw==
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id EE39B13907;
+	Thu,  7 Dec 2023 13:49:11 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id wEyaIlfNcWU3GgAAn2gu4w
+	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 13:49:11 +0000
+Date: Fri, 8 Dec 2023 00:49:02 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: fstests@vger.kernel.org, Qu Wenruo <wqu@suse.com>
+Subject: Re: [PATCH 0/5] btrfs/282: resolve intermittent failures
+Message-ID: <20231208004902.3df2bed2@echidna>
+In-Reply-To: <949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
+References: <20231207072056.14588-1-ddiss@suse.de>
+	<949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com>
-In-Reply-To: <20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 7 Dec 2023 12:11:32 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7pMjbc1-xZ1xDSMRBM2C-FiTi=sx=mQNBqH4MbXQ_WLA@mail.gmail.com>
-Message-ID: <CAL3q7H7pMjbc1-xZ1xDSMRBM2C-FiTi=sx=mQNBqH4MbXQ_WLA@mail.gmail.com>
-Subject: Re: [PATCH v5 0/9] fstests: add tests for btrfs' raid-stripe-tree feature
-To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Cc: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>, 
-	Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spamd-Result: default: False [0.40 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[3];
+	 FREEMAIL_ENVRCPT(0.00)[gmx.com];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_SOME(0.00)[];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 FREEMAIL_TO(0.00)[gmx.com];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.00)[24.23%]
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spam-Level: 
+X-Spam-Score: 0.40
 
-On Thu, Dec 7, 2023 at 9:03=E2=80=AFAM Johannes Thumshirn
-<johannes.thumshirn@wdc.com> wrote:
->
-> Add tests for btrfs' raid-stripe-tree feature. All of these test work by
-> writing a specific pattern to a newly created filesystem and afterwards
-> using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
-> the placement and the layout of the metadata.
->
-> The md5sum of each file will be compared as well after a re-mount of the
-> filesystem.
->
-> ---
-> Changes in v5:
-> - add _require_btrfs_free_space_tree helper and use in tests
-> - Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-578284dd=
-3a70@wdc.com
->
-> Changes in v4:
-> - add _require_btrfs_no_compress to all tests
-> - add _require_btrfs_no_nodatacow helper and add to btrfs/308
-> - add _require_btrfs_feature "free_space_tree" to all tests
-> - Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e857a54=
-39a2@wdc.com
->
-> Changes in v3:
-> - added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
->   automatically
-> - Rename test cases as btrfs/302 and btrfs/303 already exist upstream
-> - Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea=
-345b@wdc.com
->
-> Changes in v2:
-> - Re-ordered series so the newly introduced group is added before the
->   tests
-> - Changes Filipe requested to the tests.
-> - Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1b=
-cff8@wdc.com
->
-> ---
-> Johannes Thumshirn (9):
->       fstests: doc: add new raid-stripe-tree group
->       common: add filter for btrfs raid-stripe dump
->       common: add _require_btrfs_no_nodatacow helper
->       common: add _require_btrfs_free_space_tree
->       btrfs: add fstest for stripe-tree metadata with 4k write
->       btrfs: add fstest for 8k write spanning two stripes on raid-stripe-=
-tree
->       btrfs: add fstest for writing to a file at an offset with RST
->       btrfs: add fstests to write 128k to a RST filesystem
->       btrfs: add fstest for overwriting a file partially with RST
->
->  common/btrfs        |  17 +++++++++
->  common/filter.btrfs |  14 +++++++
->  doc/group-names.txt |   1 +
->  tests/btrfs/304     |  56 +++++++++++++++++++++++++++
->  tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
->  tests/btrfs/305     |  61 ++++++++++++++++++++++++++++++
->  tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/306     |  59 +++++++++++++++++++++++++++++
->  tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
->  tests/btrfs/307     |  56 +++++++++++++++++++++++++++
->  tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
->  tests/btrfs/308     |  60 +++++++++++++++++++++++++++++
->  tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  13 files changed, 710 insertions(+)
-> ---
-> base-commit: baca8a2b5cb6e798ce3a07e79a081031370c6cb8
+On Thu, 7 Dec 2023 20:19:00 +1030, Qu Wenruo wrote:
 
-Btw this base commit does not exist in the official fstests repo.
-That commit is from the staging branch at https://github.com/kdave/xfstests
+> On 2023/12/7 17:50, David Disseldorp wrote:
+> > btrfs/282 fails intermittently under some circumstances. This patchset
+> > adds dmdelay to make storage latencies more uniform and slightly
+> > increases throttled rate tolerances.  
+> 
+> My concern using dm_delay is, is the delay per-merged-bio or something else?
+> 
+> If the delay is only per-bio (after merge), then I'm afraid it would not
+> be good enough.
 
-A "git am" will fail because the official fstests repo doesn't have
-_require_btrfs_no_block_group_tree() at common/btrfs,
-so it needs to be manually adjusted when applying the 3rd patch.
+The dmdelay device presents itself as a regular block device, so I think
+delay_map()->delay_bio() handling comes after any merges.
 
-I tried the tests and they look good, so:
+> The bio plug we use in scrub can have much higher chance to result a
+> difference in the scrub speed.
+> 
+> We may want a delay behavior which can take bio size into consideration
+> at least.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Should we manipulate it a bit by fiddling with queue/max_sectors_kb and
+queue/nomerges?
 
-One question I missed before. Test 304 for example does a 4K write and
-expects in the golden output to get a 4K raid stripe item.
-What happens on a machine with 64K page size? There the default sector
-size is 64K, will the write result in a 64K raid stripe item or will
-it be 4K? In the former case, it will make the test fail.
-
-Thanks.
-
-
-> change-id: 20231204-btrfs-raid-75975797f97d
->
-> Best regards,
-> --
-> Johannes Thumshirn <johannes.thumshirn@wdc.com>
->
->
+Thanks, David
