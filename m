@@ -1,105 +1,169 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="EKlH9VGo";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="PDvSxD86"
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2a07:de40:b251:101:10:150:64:1])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DF9810C2
-	for <fstests@vger.kernel.org>; Thu,  7 Dec 2023 05:49:15 -0800 (PST)
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="J+g5oDVM";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vVt9mI3o";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="J+g5oDVM";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vVt9mI3o"
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 721E110F7;
+	Thu,  7 Dec 2023 06:33:52 -0800 (PST)
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 0ADEC21B3D;
-	Thu,  7 Dec 2023 13:49:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1701956954; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	by smtp-out2.suse.de (Postfix) with ESMTPS id BA6651FB68;
+	Thu,  7 Dec 2023 14:33:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1701959630; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=K3yqzIpfk4tW7oRiQjz5OLluc6v3BUjDnldmkuuvyXM=;
-	b=EKlH9VGo1SXji9Z4B56+azdYWitfOL2odqv87xp9zTXtJdFwGQb1lGlqMJCizGbxWOgE9t
-	1bGVlU6mKV7qTLxsnmPnu/K10RrcEpkzi/XczM2ElPHwZ/djLvZtOXB4mVmZMjoTqboR++
-	C7k58+xaI8EYefnMI6XC7jx1lGhrU/c=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1701956954;
+	bh=cbIILpPU4O/CYPufSjDFVOBlCYtDBe0oPyyPwYROY+Y=;
+	b=J+g5oDVMHGtAEl6TLGLUDijX542rgs/u1O/sUgB1ynFgEEdqUzn1rN5bxGWeD+19uEhe8i
+	CXArRC2WppxAgQ8YocYbAvL3XcK4CfpVO5nCL2QIAKBANid8JHMaR7dVSGJPgWEm8panQr
+	x4b/D0JAXQQXTowet4W0itA1zXX/NgU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1701959630;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
 	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=K3yqzIpfk4tW7oRiQjz5OLluc6v3BUjDnldmkuuvyXM=;
-	b=PDvSxD86Jw8k+2J5SNbTodmGf1xfipS7eRxrQwF+b+zmZfQf2L+BYRfr+RSG1QGfOxZG27
-	nmm1cqsoyS9re4Bw==
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	bh=cbIILpPU4O/CYPufSjDFVOBlCYtDBe0oPyyPwYROY+Y=;
+	b=vVt9mI3o80FYF2dxYM/8KQ/Hc6xQvJNzBbWdaEqVDfqyq/bIqPzP4hPTKU5WwbMyJd9gh2
+	sqJ9jp38bk29R2DA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1701959630; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=cbIILpPU4O/CYPufSjDFVOBlCYtDBe0oPyyPwYROY+Y=;
+	b=J+g5oDVMHGtAEl6TLGLUDijX542rgs/u1O/sUgB1ynFgEEdqUzn1rN5bxGWeD+19uEhe8i
+	CXArRC2WppxAgQ8YocYbAvL3XcK4CfpVO5nCL2QIAKBANid8JHMaR7dVSGJPgWEm8panQr
+	x4b/D0JAXQQXTowet4W0itA1zXX/NgU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1701959630;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=cbIILpPU4O/CYPufSjDFVOBlCYtDBe0oPyyPwYROY+Y=;
+	b=vVt9mI3o80FYF2dxYM/8KQ/Hc6xQvJNzBbWdaEqVDfqyq/bIqPzP4hPTKU5WwbMyJd9gh2
+	sqJ9jp38bk29R2DA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id EE39B13907;
-	Thu,  7 Dec 2023 13:49:11 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id wEyaIlfNcWU3GgAAn2gu4w
-	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 13:49:11 +0000
-Date: Fri, 8 Dec 2023 00:49:02 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: fstests@vger.kernel.org, Qu Wenruo <wqu@suse.com>
-Subject: Re: [PATCH 0/5] btrfs/282: resolve intermittent failures
-Message-ID: <20231208004902.3df2bed2@echidna>
-In-Reply-To: <949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
-References: <20231207072056.14588-1-ddiss@suse.de>
-	<949dd5fe-560f-4986-b653-c84aa9afd778@gmx.com>
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9332113B6A;
+	Thu,  7 Dec 2023 14:33:50 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 6eQuIc7XcWV0NwAAD6G6ig
+	(envelope-from <chrubis@suse.cz>); Thu, 07 Dec 2023 14:33:50 +0000
+Date: Thu, 7 Dec 2023 15:33:40 +0100
+From: Cyril Hrubis <chrubis@suse.cz>
+To: Petr Vorel <pvorel@suse.cz>
+Cc: ltp@lists.linux.it, Li Wang <liwang@redhat.com>,
+	Richard Palethorpe <rpalethorpe@suse.com>,
+	Jan Stancek <jstancek@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>,
+	Yang Xu <xuyang2018.jy@fujitsu.com>,
+	Kent Overstreet <kent.overstreet@linux.dev>,
+	Brian Foster <bfoster@redhat.com>, linux-bcachefs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH 1/1] lib: Add support bcachefs filesystem
+Message-ID: <ZXHXxCRa31xO-Lo_@rei>
+References: <20231116135546.2599273-1-pvorel@suse.cz>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spamd-Result: default: False [0.40 / 50.00];
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231116135546.2599273-1-pvorel@suse.cz>
+X-Spam-Level: 
+X-Spam-Score: 0.40
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spam-Level: 
+X-Spam-Score: -0.80
+X-Spamd-Result: default: False [-0.80 / 50.00];
 	 ARC_NA(0.00)[];
 	 RCVD_VIA_SMTP_AUTH(0.00)[];
 	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 FREEMAIL_ENVRCPT(0.00)[gmx.com];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
 	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 MIME_GOOD(-0.10)[text/plain];
 	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 FREEMAIL_TO(0.00)[gmx.com];
+	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 RCPT_COUNT_SEVEN(0.00)[11];
 	 FUZZY_BLOCKED(0.00)[rspamd.com];
 	 FROM_EQ_ENVFROM(0.00)[];
 	 MIME_TRACE(0.00)[0:+];
 	 MID_RHS_NOT_FQDN(0.50)[];
 	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.00)[24.23%]
-Authentication-Results: smtp-out1.suse.de;
-	none
-X-Spam-Level: 
-X-Spam-Score: 0.40
+	 BAYES_HAM(-0.00)[36.00%]
+X-Spam-Flag: NO
 
-On Thu, 7 Dec 2023 20:19:00 +1030, Qu Wenruo wrote:
-
-> On 2023/12/7 17:50, David Disseldorp wrote:
-> > btrfs/282 fails intermittently under some circumstances. This patchset
-> > adds dmdelay to make storage latencies more uniform and slightly
-> > increases throttled rate tolerances.  
+Hi!
+> bcachefs has been merged into v6.7-rc1 [1]. Let's add it's support to
+> LTP .all_filesystems = 1 and TST_ALL_FILESYSTEMS=1.
 > 
-> My concern using dm_delay is, is the delay per-merged-bio or something else?
+> [1] https://lwn.net/Articles/934692/
 > 
-> If the delay is only per-bio (after merge), then I'm afraid it would not
-> be good enough.
-
-The dmdelay device presents itself as a regular block device, so I think
-delay_map()->delay_bio() handling comes after any merges.
-
-> The bio plug we use in scrub can have much higher chance to result a
-> difference in the scrub speed.
+> Suggested-by: Cyril Hrubis <chrubis@suse.cz>
+> Signed-off-by: Petr Vorel <pvorel@suse.cz>
+> ---
+> Hi,
 > 
-> We may want a delay behavior which can take bio size into consideration
-> at least.
+> this should be merged after v6.7 is released.
 
-Should we manipulate it a bit by fiddling with queue/max_sectors_kb and
-queue/nomerges?
+Agreed, although it's unlikey that they will pull bcachefs off from the
+tree now. Any way I think that we should add the support to the next
+release.
 
-Thanks, David
+> So far I haven't tested all LTP tests on bcachefs temporary directory.
+> I have only tested tests which use .all_filesystems = 1 or TST_ALL_FILESYSTEMS=1.
+> So far it looks like there are only a few tests failing:
+> 
+> statvfs01.c:44: TFAIL: creat(valid_fname, 0444) failed: ENAMETOOLONG (36)
+
+That strange, that would mean that statvfs() reports possibly wrong
+f_namemax. Looking at the code the f_namemax is initialized to
+BCH_NAME_MAX in bch2_statfs().
+
+And the dirent_create_key() does:
+
+        if (name->len > BCH_NAME_MAX)
+                return ERR_PTR(-ENAMETOOLONG);
+
+That does not look like there is any room for a failure. Maybe we can
+print the buf.f_namemax value in the test and check if it's 512 since
+that is the value of BCH_NAME_MAX.
+
+> statx04.c:122: TFAIL: STATX_ATTR_COMPRESSED not supported
+
+This probably just needs:
+
+diff --git a/testcases/kernel/syscalls/statx/statx04.c b/testcases/kernel/syscalls/statx/statx04.c
+index 58296bd24..8d14cef8c 100644
+--- a/testcases/kernel/syscalls/statx/statx04.c
++++ b/testcases/kernel/syscalls/statx/statx04.c
+@@ -97,7 +97,8 @@ static void setup(void)
+                expected_mask |= attr_list[i].attr;
+
+        /* STATX_ATTR_COMPRESSED not supported on XFS, TMPFS */
+-       if (!strcmp(tst_device->fs_type, "xfs") || !strcmp(tst_device->fs_type, "tmpfs"))
++       if (!strcmp(tst_device->fs_type, "xfs") || !strcmp(tst_device->fs_type, "tmpfs") ||
++           !strcmp(tst_device->fs_type, "bcachefs")
+                expected_mask &= ~STATX_ATTR_COMPRESSED;
+
+        /* Attribute support was added to Btrfs statx() in kernel v4.13 */
+
+> fanotify13.c, fanotify15.c and fanotify16.c produce many errors.
+
+That is probably something for Jan Kara or Amir Goldstein.
+
+> I haven't tested on machine with more NUMA nodes, thus
+> set_mempolicy03.c, set_mempolicy04.c has not been tested.
+
+-- 
+Cyril Hrubis
+chrubis@suse.cz
