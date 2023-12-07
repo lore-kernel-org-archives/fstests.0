@@ -1,29 +1,50 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [IPv6:2a07:de40:b251:101:10:150:64:2])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C38F1AD
-	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:14 -0800 (PST)
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="B3nauW9j";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="EEJ/EcGe"
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [IPv6:2a07:de40:b251:101:10:150:64:1])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F06AD5E
+	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:17 -0800 (PST)
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 16D901F86B;
-	Thu,  7 Dec 2023 07:21:13 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id D081121D4C;
+	Thu,  7 Dec 2023 07:21:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1701933675; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=IYIk1jUb9IYFlUI5myqMAeHozydt4/0esTmiXh/p6rE=;
+	b=B3nauW9jTXuac7UrPS8AOKUS7t2lhej429s7k2iR3fwgMx8T4CDcU2l3O5M7KHw/4xx2fb
+	IGBItSnmI9yXDW1c7RdeiaRrXOcoa3xyBFMnG/fo/9s5uRix+DyhGx4uQ44rrGzq30Rgtn
+	stiaT1Rkw4FQV6BJMyH1Gu8GfAoUh4g=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1701933675;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=IYIk1jUb9IYFlUI5myqMAeHozydt4/0esTmiXh/p6rE=;
+	b=EEJ/EcGe9e9Knz4tTEzJRhWYskZcrN8Z1VVgCppQGb+nGjUIbCSNu2xawBTv69CetF9LYJ
+	eMF8Bw01h91gZHBQ==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 042C313976;
-	Thu,  7 Dec 2023 07:21:10 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D7F8313976;
+	Thu,  7 Dec 2023 07:21:13 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 4OpWJGZycWXdGAAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:10 +0000
+	id qK1vHGlycWXdGAAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:13 +0000
 From: David Disseldorp <ddiss@suse.de>
 To: fstests@vger.kernel.org
 Cc: Qu Wenruo <wqu@suse.com>,
 	David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 3/5] btrfs/282: dmdelay scrub I/O to fix intermittent failures
-Date: Thu,  7 Dec 2023 18:20:54 +1100
-Message-Id: <20231207072056.14588-4-ddiss@suse.de>
+Subject: [PATCH 4/5] btrfs/282: reduce scrub dataset size
+Date: Thu,  7 Dec 2023 18:20:55 +1100
+Message-Id: <20231207072056.14588-5-ddiss@suse.de>
 X-Mailer: git-send-email 2.35.3
 In-Reply-To: <20231207072056.14588-1-ddiss@suse.de>
 References: <20231207072056.14588-1-ddiss@suse.de>
@@ -34,114 +55,75 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spamd-Bar: +++++++++++++++++
-Authentication-Results: smtp-out2.suse.de;
-	dkim=none;
-	dmarc=fail reason="No valid SPF, No valid DKIM" header.from=suse.de (policy=none);
-	spf=softfail (smtp-out2.suse.de: 2a07:de40:b281:104:10:150:64:97 is neither permitted nor denied by domain of ddiss@suse.de) smtp.mailfrom=ddiss@suse.de
-X-Rspamd-Server: rspamd2
-X-Spamd-Result: default: False [17.45 / 50.00];
+X-Spam-Score: 10.00
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spamd-Result: default: False [10.00 / 50.00];
 	 ARC_NA(0.00)[];
 	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 TO_DN_SOME(0.00)[];
-	 R_MISSING_CHARSET(2.50)[];
+	 BAYES_SPAM(5.10)[100.00%];
 	 FROM_HAS_DN(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
+	 RCPT_COUNT_THREE(0.00)[3];
+	 R_MISSING_CHARSET(2.50)[];
 	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
 	 BROKEN_CONTENT_TYPE(1.50)[];
-	 R_SPF_SOFTFAIL(4.60)[~all:c];
-	 NEURAL_SPAM_SHORT(2.16)[0.722];
+	 TO_DN_SOME(0.00)[];
 	 RCVD_COUNT_THREE(0.00)[3];
-	 MX_GOOD(-0.01)[];
-	 NEURAL_SPAM_LONG(3.50)[1.000];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
 	 MID_CONTAINS_FROM(1.00)[];
 	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
 	 FUZZY_BLOCKED(0.00)[rspamd.com];
 	 FROM_EQ_ENVFROM(0.00)[];
-	 R_DKIM_NA(2.20)[];
 	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[];
-	 DMARC_POLICY_SOFTFAIL(0.10)[suse.de : No valid SPF, No valid DKIM,none]
-X-Spam-Score: 17.45
-X-Rspamd-Queue-Id: 16D901F86B
+	 RCVD_TLS_ALL(0.00)[]
 
-btrfs/282 can fail intermittently if scrub completes quickly (e.g. atop
-  a RAM backed scratch device):
-- if under one second, the reported scrub duration metric may be rounded
-  down to zero, which results in a "Rate: 0/s" metric
-  + I have a btrfs-progs patch to address this confusing Rate reporting
-- I've also observed one second scrub durations fail intermittently,
-  presumably because scheduling jitter doesn't allow throttling to take
-  effect
-
-Avoid these intermittent failures by injecting a 100ms delay to device
-read I/Os using dm-delay.
+The use of dmdelay means that we can use a smaller dataset while still
+achieving a reasonable scrub duration. This also drops the xfs_io pwrite
+/dev/urandom input file, instead relying on xfs_io's built-in
+pseudorandom pattern generation.
 
 Signed-off-by: David Disseldorp <ddiss@suse.de>
 ---
- tests/btrfs/282 | 20 ++++++++++++++++++--
- 1 file changed, 18 insertions(+), 2 deletions(-)
+ tests/btrfs/282     | 8 +++-----
+ tests/btrfs/282.out | 2 +-
+ 2 files changed, 4 insertions(+), 6 deletions(-)
 
 diff --git a/tests/btrfs/282 b/tests/btrfs/282
-index 66d14f82..f9e22e12 100755
+index f9e22e12..42d992a6 100755
 --- a/tests/btrfs/282
 +++ b/tests/btrfs/282
-@@ -10,6 +10,15 @@
- _begin_fstest auto scrub
+@@ -25,8 +25,7 @@ _supported_fs btrfs
+ _wants_kernel_commit eb3b50536642 \
+ 	"btrfs: scrub: per-device bandwidth control"
  
- . ./common/filter
-+. ./common/dmdelay
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_scratch_unmount > /dev/null 2>&1
-+	_cleanup_delay > /dev/null 2>&1
-+}
- 
- # real QA test starts here
- _supported_fs btrfs
-@@ -18,6 +27,7 @@ _wants_kernel_commit eb3b50536642 \
- 
- # We want at least 5G for the scratch device.
- _require_scratch_size $(( 5 * 1024 * 1024))
-+_require_dm_target delay
+-# We want at least 5G for the scratch device.
+-_require_scratch_size $(( 5 * 1024 * 1024))
++_require_scratch
+ _require_dm_target delay
  
  # Make sure we can create scrub progress data file
- if [ -e /var/lib/btrfs ]; then
-@@ -27,7 +37,8 @@ else
+@@ -49,9 +48,8 @@ if [ ! -f "${devinfo_dir}/scrub_speed_max" ]; then
+ 	_notrun "No sysfs interface for scrub speed throttle"
  fi
  
- _scratch_mkfs >> $seqres.full 2>&1
--_scratch_mount
-+_init_delay
-+_mount_delay
+-# Create a 2G file for later scrub workload.
+-# The 2G size is chosen to fit even DUP on a 5G disk.
+-$XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 2G" $SCRATCH_MNT/file | _filter_xfs_io
++# Create a 100M file for later scrub workload.
++$XFS_IO_PROG -f -c "pwrite 0 100M" $SCRATCH_MNT/file | _filter_xfs_io
  
- uuid=$(findmnt -n -o UUID $SCRATCH_MNT)
- 
-@@ -45,6 +56,10 @@ $XFS_IO_PROG -f -c "pwrite -i /dev/urandom 0 2G" $SCRATCH_MNT/file | _filter_xfs
  # Writeback above data, as scrub only verify the committed data.
  sync
- 
-+# 100ms read I/O delay, so that the scrub doesn't complete too quickly
-+bs=$(blockdev --getsz $SCRATCH_DEV)
-+_load_delay_table "0 $bs delay $SCRATCH_DEV 0 100 $SCRATCH_DEV 0 0"
-+
- # The first scrub, mostly to grab the speed of the scrub.
- $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >> $seqres.full
- 
-@@ -70,7 +85,8 @@ if [ -z "$init_speed" ]; then
- fi
- 
- # Cycle mount to drop any possible cache.
--_scratch_cycle_mount
-+_unmount_delay
-+_mount_delay
- 
- target_speed=$(( $init_speed / 2 ))
- echo "$target_speed" > "${devinfo_dir}/scrub_speed_max"
+diff --git a/tests/btrfs/282.out b/tests/btrfs/282.out
+index 8d53e7eb..840e3826 100644
+--- a/tests/btrfs/282.out
++++ b/tests/btrfs/282.out
+@@ -1,3 +1,3 @@
+ QA output created by 282
+-wrote 2147483648/2147483648 bytes at offset 0
++wrote 104857600/104857600 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 -- 
 2.35.3
 
