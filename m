@@ -1,108 +1,128 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="n0klsBdR";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="7jdEAuxx"
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B199D53
-	for <fstests@vger.kernel.org>; Wed,  6 Dec 2023 23:21:20 -0800 (PST)
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 97A801F86B;
-	Thu,  7 Dec 2023 07:21:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1701933678; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i/rqbQDCPwLDaShfjIjOsG/Sa4ilRPeHucrzmdgp7RU=;
-	b=n0klsBdR2BJGf/0su7gIJW7Clah53kyf5haFm59k/D22fvZV7NWPChBIiwr/7QqW311nJ9
-	53yCd3FlrVZX97WpMYuV0fXi0nMOF2Ki13ZBb2D218ytu+nTQHHs7lQyAcsZd5CME0jVV+
-	IklNBf7Cy/EObwGXFPetJzCyrx/mpZw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1701933678;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i/rqbQDCPwLDaShfjIjOsG/Sa4ilRPeHucrzmdgp7RU=;
-	b=7jdEAuxx6l6pUmT+89XUJOSScm/ubAUegtNKzCS93dO4cZZOJaz575eF0kc3niF+XgfT7F
-	8YBTSkPB0XiSvNAw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 8AB8C13976;
-	Thu,  7 Dec 2023 07:21:16 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id iLhMDmxycWXdGAAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Thu, 07 Dec 2023 07:21:16 +0000
-From: David Disseldorp <ddiss@suse.de>
-To: fstests@vger.kernel.org
-Cc: Qu Wenruo <wqu@suse.com>,
-	David Disseldorp <ddiss@suse.de>
-Subject: [PATCH 5/5] btrfs/282: increase throttled scrub rate tolerance
-Date: Thu,  7 Dec 2023 18:20:56 +1100
-Message-Id: <20231207072056.14588-6-ddiss@suse.de>
-X-Mailer: git-send-email 2.35.3
-In-Reply-To: <20231207072056.14588-1-ddiss@suse.de>
-References: <20231207072056.14588-1-ddiss@suse.de>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="VNxPazfD"
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9555B10B;
+	Thu,  7 Dec 2023 01:03:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1701939815; x=1733475815;
+  h=from:subject:date:message-id:mime-version:
+   content-transfer-encoding:to:cc;
+  bh=ZRb8sPKyykF7MHoj95qT4dSpQ8fUwUeKeauCK55CAmA=;
+  b=VNxPazfDkrRB4JtRFRwCQZC97cBq7cQcenWtkBCM9vG6HWnqtCDPSep3
+   g1fTXwd6P+A9xBhSaQZQ64xc1beXdjyrtO8suSVhi9juixbzqP3fQThYp
+   EiIPlCSufaVOx3zRFHu8YmlJ0SdacdhlNy0yGfEDu7VTDk+60CIxFWWSs
+   OG24m02T17zJkG7KErnl8J54j4f8TYEMOrEcn/+GIEZt6MLyuED1LfQoR
+   qkVTfOrbL7rTvqgjXWL887EokKNl6a3xIGpWx0c843vCZM8rUxaG/YrZk
+   +sejGCk8xgKHPeqjyjxzzvD+qVkQsGH/Q6JzFRtgxk/aAykH8fuJj6574
+   g==;
+X-CSE-ConnectionGUID: aLcaSwHnSMazg5y8veg2cw==
+X-CSE-MsgGUID: UQ/p7pedRSW6cNmm0RK6Pw==
+X-IronPort-AV: E=Sophos;i="6.04,256,1695657600"; 
+   d="scan'208";a="4272766"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 07 Dec 2023 17:03:35 +0800
+IronPort-SDR: WTO09y8qsmmWzgs5dj2dogBvg9A2BLf1WXdone1I+bz3ex+Z3NTeJfjYr9Rhif8RhkczdCMaEV
+ rIR+epgrHaYQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 07 Dec 2023 00:14:35 -0800
+IronPort-SDR: gU68KmssTLuQ3NKjMcUqp3/Cj9hT/txd0kI1JWf/F+siYdgvk7fg3y2qjqIdP5JYg91zoldW4b
+ Iyvj4nKbnooA==
+WDCIronportException: Internal
+Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
+  by uls-op-cesaip02.wdc.com with ESMTP; 07 Dec 2023 01:03:31 -0800
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v5 0/9] fstests: add tests for btrfs' raid-stripe-tree
+ feature
+Date: Thu, 07 Dec 2023 01:03:27 -0800
+Message-Id: <20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Score: 6.09
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spamd-Result: default: False [6.09 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 BAYES_SPAM(1.19)[83.35%];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 TO_DN_SOME(0.00)[];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAF+KcWUC/3XMQQ7CIBCF4asY1mLowAh15T2MCyiDZWFroKmap
+ neXutEmunwv+f6JZUqRMjtsJpZojDn2XRm43bCmtd2FePRlMxAgKxCKuyGFzJONnmusNepah1p
+ 7VsAtUYiPd+x0LruNeejT890eq+X9mRkrLrgDVOQq14Rgjnff7Jr+ypbICN8QVxAKBAxGEFmp0
+ K2h/A9lgYIMaotK1hbWUH3D/QqqAlEbMMp7abX4wHmeX14IMO1NAQAA
+To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
+Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
+ linux-btrfs@vger.kernel.org, 
+ Johannes Thumshirn <johannes.thumshirn@wdc.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1701939810; l=2819;
+ i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
+ bh=ZRb8sPKyykF7MHoj95qT4dSpQ8fUwUeKeauCK55CAmA=;
+ b=f7GnvMWIM6EGGD3O4bUo4MPCUD8xo1/FSP12/N3aIVT+p6pLE5FFIyPBU9qyXkA3hfG77XMFq
+ 3K7UqKSpEWnD1ej6++cTvtw7Qnz4+vQAaTrSZxRaVhltKtD3LahZA+6
+X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
+ pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
 
-Even with dmdelay injected latencies, I still observe occasional test
-failures on shared storage (e.g. VMs). The extra 10% tolerance resolves
-these intermittent failures on my system.
+Add tests for btrfs' raid-stripe-tree feature. All of these test work by
+writing a specific pattern to a newly created filesystem and afterwards
+using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
+the placement and the layout of the metadata.
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
+The md5sum of each file will be compared as well after a re-mount of the
+filesystem.
+
 ---
- tests/btrfs/282 | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+Changes in v5:
+- add _require_btrfs_free_space_tree helper and use in tests
+- Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com
 
-diff --git a/tests/btrfs/282 b/tests/btrfs/282
-index 42d992a6..6649623a 100755
---- a/tests/btrfs/282
-+++ b/tests/btrfs/282
-@@ -95,9 +95,8 @@ speed=$($BTRFS_UTIL_PROG scrub status --raw $SCRATCH_MNT |\
- 	tee -a $seqres.full |\
- 	$AWK_PROG '$1 == "Rate:" {sub(/\/s/, "", $2); print $2}')
- 
--# We gave a +- 10% tolerance for the throttle
--if [ "$speed" -gt "$(( $target_speed * 11 / 10 ))" -o \
--     "$speed" -lt "$(( $target_speed * 9 / 10))" ]; then
-+# We gave a +- 20% tolerance for the throttle
-+if (( speed > target_speed * 12 / 10 || speed < target_speed * 8 / 10 )); then
- 	echo "scrub speed $speed Bytes/s is not properly throttled, target is $target_speed Bytes/s"
- fi
- 
+Changes in v4:
+- add _require_btrfs_no_compress to all tests
+- add _require_btrfs_no_nodatacow helper and add to btrfs/308
+- add _require_btrfs_feature "free_space_tree" to all tests
+- Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com
+
+Changes in v3:
+- added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
+  automatically
+- Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+- Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com
+
+Changes in v2:
+- Re-ordered series so the newly introduced group is added before the
+  tests
+- Changes Filipe requested to the tests.
+- Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com
+
+---
+Johannes Thumshirn (9):
+      fstests: doc: add new raid-stripe-tree group
+      common: add filter for btrfs raid-stripe dump
+      common: add _require_btrfs_no_nodatacow helper
+      common: add _require_btrfs_free_space_tree
+      btrfs: add fstest for stripe-tree metadata with 4k write
+      btrfs: add fstest for 8k write spanning two stripes on raid-stripe-tree
+      btrfs: add fstest for writing to a file at an offset with RST
+      btrfs: add fstests to write 128k to a RST filesystem
+      btrfs: add fstest for overwriting a file partially with RST
+
+ common/btrfs        |  17 +++++++++
+ common/filter.btrfs |  14 +++++++
+ doc/group-names.txt |   1 +
+ tests/btrfs/304     |  56 +++++++++++++++++++++++++++
+ tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/305     |  61 ++++++++++++++++++++++++++++++
+ tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/306     |  59 +++++++++++++++++++++++++++++
+ tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
+ tests/btrfs/307     |  56 +++++++++++++++++++++++++++
+ tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
+ tests/btrfs/308     |  60 +++++++++++++++++++++++++++++
+ tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 13 files changed, 710 insertions(+)
+---
+base-commit: baca8a2b5cb6e798ce3a07e79a081031370c6cb8
+change-id: 20231204-btrfs-raid-75975797f97d
+
+Best regards,
 -- 
-2.35.3
+Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
