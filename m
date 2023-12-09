@@ -1,59 +1,56 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VBTETyRN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aU566Si9"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B550810E6
-	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 21:09:22 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2224C10F1
+	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 21:49:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1702098562;
+	s=mimecast20190719; t=1702100976;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=c1dglHsXHch+sNbPf4lh7SiEjxLw7RXEQLZMwESVvc8=;
-	b=VBTETyRN45ikFHMyKr2Qb6TUxi6Z3b4AJD0xQuLccd5F+J0+224ms1mgMWr5hbGw7Mt8cQ
-	hQxPnpZ102agRrwQAsbEbVxxmMRfWjlNgGcThVSFrslMmxyDx5bXXXBzmT4CJ9JrLylYU4
-	gVrEkh3OVcyT/BUQuhkuqnGh2eDNZvc=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=LmAdNFgIOOkTIFixKQeKmIX9aAlE5fZLWWsdrtYY/yM=;
+	b=aU566Si9gutXW/aTOSTaijcf4NpZnh/atHYUHfmHdAGZlQy5rv3XHne3QI7uReKQg0HZm2
+	YQIufPFp7byLMp24d4NlXHh5IyCFM6svaqvnsjjEHMwn1AyNH8h1m2/a0UV5cTnJWVJzuq
+	LdafjI6DjVGLYNGTVUFElEcoh67l/eY=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-56-eS2UH3gLM5mmYdlG3aAbvg-1; Sat, 09 Dec 2023 00:09:18 -0500
-X-MC-Unique: eS2UH3gLM5mmYdlG3aAbvg-1
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-6ce751b8297so3092540b3a.0
-        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 21:09:18 -0800 (PST)
+ us-mta-684-RCGcrMROMNCS23T-4rPMBw-1; Sat, 09 Dec 2023 00:49:34 -0500
+X-MC-Unique: RCGcrMROMNCS23T-4rPMBw-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6cef51efdb6so80016b3a.0
+        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 21:49:34 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702098557; x=1702703357;
+        d=1e100.net; s=20230601; t=1702100973; x=1702705773;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=c1dglHsXHch+sNbPf4lh7SiEjxLw7RXEQLZMwESVvc8=;
-        b=DjCS3a9cbOUP3fjhli4S6f5Ucqcau5S//Kvpx0kS6b9geZlpZN6DuDqMpl6xaW7AQm
-         HyXBszkd/M35aBqVTvFWytE/X/AdsKyTjP4SWawtN9QFJAYR3IO/rtrp6OUhOpfZ6q7L
-         PW7I37a7oGKrYOgm7CYu5HPBkXuwh0VSgQx9jpj21xHyTSNXn6qYYTXEtX6XDpKRor46
-         d3rZlxcqyGbfI1sFo+Ve8KTLNs6TYml6r5E4cFfr0O0e5V2stLGfnMm0fyVi9J5Y3p7/
-         m0+RAwMR5yk+LImh2uIDKw7tb0EpdPpCOPL+vya4wngQiVoZXCjKOt4RhrM/5CY6N1Wl
-         RP/g==
-X-Gm-Message-State: AOJu0YwLLqXJnVMt9HMOGjwiD53QLfX1kFmO3TW7DSLrR6w2YQP/MT4I
-	8jzWK2b4dGplxS2BeXgJ89e2x8o3xtMiX9RGXWTIDK/F13h9VZ9TgX0X2bRtcKJTkvcMAyOLBH0
-	wnSRkFvar4YoWJGUNXQ==
-X-Received: by 2002:a05:6a20:7d97:b0:18b:e5f7:25c5 with SMTP id v23-20020a056a207d9700b0018be5f725c5mr1651073pzj.11.1702098557273;
-        Fri, 08 Dec 2023 21:09:17 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFmkWzDhUGE41VSpPpvt2T79s4Knv+0nrQ+KK18g8CZEhvRjUfgjLsws69EBA5nKA/u+aCvkw==
-X-Received: by 2002:a05:6a20:7d97:b0:18b:e5f7:25c5 with SMTP id v23-20020a056a207d9700b0018be5f725c5mr1651059pzj.11.1702098556910;
-        Fri, 08 Dec 2023 21:09:16 -0800 (PST)
+        bh=LmAdNFgIOOkTIFixKQeKmIX9aAlE5fZLWWsdrtYY/yM=;
+        b=tbhWOlqAhDJp+Lu2/oeO+cewm22O/iqwuw8CEXYXFnYWGQczyKPeVge+oQ2K0iUCUq
+         f8w0imomGgbu/525nByg7dwn3isEq5R7Jex0CgihDKs2PrSw7C9T72XXd9d9pn7O35ta
+         xrYLcsfiZzWROpPDdmFQz5jjYvytDSDLRMeHqsY8GyH33bpxnnyueMz4tnzSm3hcFDc5
+         NQoxw4DdJtEbfWQmf2pCYgCMV48Re6u6k41+z3GGtE5Kc4u0223UlbT3a/nmcTbhI3Ck
+         AN1oVOMgiMadn/Mrr7IEoPwIJyVzm7L5Kg3Y8iNHSVRw9e9UyhhWhKSl6N5QPdA194c3
+         RjRQ==
+X-Gm-Message-State: AOJu0Yw3CUb4mj0I8pOefkRyc/rVBxFwSlEoQ0Wyn96f/kMwgcSVYfGX
+	LIaP/0ssgnBzxIpldeitCdyflfyzXZCt5YDr+44AeMs6eVoUt75SF6ztfmeDBm6UT24aculL7Xe
+	euVXr7xW1ozyG+FL0GQ==
+X-Received: by 2002:a05:6a00:1394:b0:6ce:66d0:2a78 with SMTP id t20-20020a056a00139400b006ce66d02a78mr2591763pfg.11.1702100973385;
+        Fri, 08 Dec 2023 21:49:33 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHBwTJHgjq9VejRtEOj1f47IP8h3Em88w1O2b+OpBnN2OrCS7LvG1ubigicB9Slj/LOXSAhKA==
+X-Received: by 2002:a05:6a00:1394:b0:6ce:66d0:2a78 with SMTP id t20-20020a056a00139400b006ce66d02a78mr2591753pfg.11.1702100973056;
+        Fri, 08 Dec 2023 21:49:33 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id gw17-20020a17090b0a5100b00285be64e529sm4259574pjb.39.2023.12.08.21.09.15
+        by smtp.gmail.com with ESMTPSA id ff16-20020a056a002f5000b006ce742b6b1fsm2531482pfb.63.2023.12.08.21.49.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Dec 2023 21:09:16 -0800 (PST)
-Date: Sat, 9 Dec 2023 13:09:13 +0800
+        Fri, 08 Dec 2023 21:49:32 -0800 (PST)
+Date: Sat, 9 Dec 2023 13:49:28 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	Jan Kara <jack@suse.cz>, Gao Xiang <hsiangkao@linux.alibaba.com>,
-	Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Subject: Re: [PATCHv3 2/2] generic: Add integrity tests with synchronous
- directio
-Message-ID: <20231209050913.2l42zctsh44bfhit@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <8379b5df9f70a1d75692e029a565199e98a535e8.1700478575.git.ritesh.list@gmail.com>
- <e255d8494511a705bacc5103e15dd532d2f433d0.1700478575.git.ritesh.list@gmail.com>
+To: Baokun Li <libaokun1@huawei.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, amir73il@gmail.com,
+	ritesh.list@gmail.com, djwong@kernel.org, yangerkun@huawei.com
+Subject: Re: [PATCH v5] ext4: Regression test of ext4_lblk_t overflow
+Message-ID: <20231209054928.bfabziprdemtw32r@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231124115356.2438805-1-libaokun1@huawei.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,129 +59,112 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e255d8494511a705bacc5103e15dd532d2f433d0.1700478575.git.ritesh.list@gmail.com>
+In-Reply-To: <20231124115356.2438805-1-libaokun1@huawei.com>
 
-On Mon, Nov 20, 2023 at 04:49:34PM +0530, Ritesh Harjani (IBM) wrote:
-> This test covers data & metadata integrity check with directio with
-> o_sync flag and checks the file contents & size after sudden fileystem
-> shutdown once the directio write is completed. ext4 directio after iomap
-> conversion was broken in the sense that if the FS crashes after
-> synchronous directio write, it's file size is not properly updated.
-> This test adds a testcase to cover such scenario.
+On Fri, Nov 24, 2023 at 07:53:56PM +0800, Baokun Li wrote:
+> Append writes to a file with logical block numbers close to 0xffffffff and
+> observe if a kernel crash is caused by ext4_lblk_t overflow triggering
+> BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
+> bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
 > 
-> Man page of open says that -
-> O_SYNC provides synchronized I/O file integrity completion, meaning write
-> operations will flush data and all associated metadata to the underlying
-> hardware
-> 
-> Reported-by: Gao Xiang <hsiangkao@linux.alibaba.com>
-> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Signed-off-by: Baokun Li <libaokun1@huawei.com>
 > ---
->  tests/generic/733     | 54 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/733.out | 22 ++++++++++++++++++
->  2 files changed, 76 insertions(+)
->  create mode 100755 tests/generic/733
->  create mode 100644 tests/generic/733.out
+> V1->V2:
+> 	Changes to make the use case more generic, not just for testing
+> 	ext4.(ext4 and xfs have been tested)
+> V2->V3:
+> 	Clean up the code and remove hardcoding.
+> V3->V4:
+> 	Correct the description and modify finsert related code to
+> 	make the test case easier to understand.
+> V4->V5:
+> 	Modify the image size to 80M.
+> 	Modify the space reserved in the file to 2M.
+> 	Now the test case can trigger the original problem at ext4
+> 	1k,4k,64k block size.
 > 
-> diff --git a/tests/generic/733 b/tests/generic/733
+>  tests/generic/737     | 54 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/737.out |  2 ++
+>  2 files changed, 56 insertions(+)
+>  create mode 100755 tests/generic/737
+>  create mode 100644 tests/generic/737.out
+> 
+> diff --git a/tests/generic/737 b/tests/generic/737
 > new file mode 100755
-> index 00000000..18021e8a
+> index 00000000..b4bf33e4
 > --- /dev/null
-> +++ b/tests/generic/733
+> +++ b/tests/generic/737
 > @@ -0,0 +1,54 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 IBM Corporation.  All Rights Reserved.
+> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
 > +#
-> +# FS QA Test 471
+> +# FS QA Test No. 737
 > +#
-> +# Integrity test for O_SYNC with buff-io, dio, aio-dio with sudden shutdown.
-> +# Based on a testcase reported by Gao Xiang <hsiangkao@linux.alibaba.com>
+> +# Append writes to a file with logical block numbers close to 0xffffffff
+> +# and observe if a kernel crash is caused by ext4_lblk_t overflow triggering
+> +# BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
+> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
 > +#
-> +
 > +. ./common/preamble
-> +_begin_fstest auto quick shutdown aio
+> +. ./common/populate
+> +_begin_fstest auto quick insert prealloc
 > +
 > +# real QA test starts here
-> +_supported_fs generic
-> +_require_scratch
-> +_require_scratch_shutdown
-> +_require_aiodio aio-dio-write-verify
+> +[[ "$FSTYP" =~ ext* ]] && _fixed_by_kernel_commit bc056e7163ac \
+
+I just noticed this regex, I think the "ext*" matches "ex", "ext", "extxxx". So
+if FSTYP=exfat, then it will matchi the "ext*".
+
+It's better to be "ext.*" or "ext.+" or "ext[0-9]+". I'll change it when I
+merge it.
+
+> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
 > +
-> +_fixed_by_kernel_commit 91562895f803 \
-> +	"ext4: properly sync file size update after O_SYNC direct IO"
-
-As this a generic test case, so:
-
-[[ "$FSTYP" =~ ext* ]] && ...
-
-Anyway, I'll change that when I merge it. Other looks good to me
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> +_require_odirect
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "finsert"
 > +
-> +_scratch_mkfs > $seqres.full 2>&1
+> +dev_size=$((80 * 1024 * 1024))
+> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
+> +
 > +_scratch_mount
+> +file_blksz="$(_get_file_block_size ${SCRATCH_MNT})"
 > +
-> +echo "T-1: Create a 1M file using buff-io & O_SYNC"
-> +$XFS_IO_PROG -fs -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t1 > /dev/null 2>&1
-> +echo "T-1: Shutdown the fs suddenly"
-> +_scratch_shutdown
-> +echo "T-1: Cycle mount"
-> +_scratch_cycle_mount
-> +echo "T-1: File contents after cycle mount"
-> +_hexdump $SCRATCH_MNT/testfile.t1
+> +# Reserve 1M space
+> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full
 > +
-> +echo "T-2: Create a 1M file using O_DIRECT & O_SYNC"
-> +$XFS_IO_PROG -fsd -c "pwrite -S 0x5a 0 1M" $SCRATCH_MNT/testfile.t2 > /dev/null 2>&1
-> +echo "T-2: Shutdown the fs suddenly"
-> +_scratch_shutdown
-> +echo "T-2: Cycle mount"
-> +_scratch_cycle_mount
-> +echo "T-2: File contents after cycle mount"
-> +_hexdump $SCRATCH_MNT/testfile.t2
+> +# Create a file with logical block numbers close to 0xffffffff
+> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full
+> +max_pos=$(( 0xffffffff * file_blksz ))
+> +finsert_len=$(( max_pos - ((10 + 2) << 20) ))
+> +$XFS_IO_PROG -f -c "finsert 1M ${finsert_len}" "${SCRATCH_MNT}/file" >> $seqres.full
 > +
-> +echo "T-3: Create a 1M file using AIO-DIO & O_SYNC"
-> +$AIO_TEST -a size=1048576 -S -N $SCRATCH_MNT/testfile.t3 > /dev/null 2>&1
-> +echo "T-3: Shutdown the fs suddenly"
-> +_scratch_shutdown
-> +echo "T-3: Cycle mount"
-> +_scratch_cycle_mount
-> +echo "T-3: File contents after cycle mount"
-> +_hexdump $SCRATCH_MNT/testfile.t3
+> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
+> +nr_free=$(stat -f -c '%f' ${SCRATCH_MNT})
+> +_fill_fs $((nr_free * file_blksz)) ${SCRATCH_MNT}/fill $file_blksz 0 >> $seqres.full 2>&1
+> +sync
 > +
+> +# Remove reserved space to gain free space for allocation
+> +rm -f ${SCRATCH_MNT}/tmp
+> +
+> +# Trying to allocate two blocks triggers BUG_ON.
+> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 $((2 * file_blksz))" >> $seqres.full
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/733.out b/tests/generic/733.out
+> diff --git a/tests/generic/737.out b/tests/generic/737.out
 > new file mode 100644
-> index 00000000..e0536a4e
+> index 00000000..67b83d78
 > --- /dev/null
-> +++ b/tests/generic/733.out
-> @@ -0,0 +1,22 @@
-> +QA output created by 733
-> +T-1: Create a 1M file using buff-io & O_SYNC
-> +T-1: Shutdown the fs suddenly
-> +T-1: Cycle mount
-> +T-1: File contents after cycle mount
-> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-> +*
-> +100000
-> +T-2: Create a 1M file using O_DIRECT & O_SYNC
-> +T-2: Shutdown the fs suddenly
-> +T-2: Cycle mount
-> +T-2: File contents after cycle mount
-> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-> +*
-> +100000
-> +T-3: Create a 1M file using AIO-DIO & O_SYNC
-> +T-3: Shutdown the fs suddenly
-> +T-3: Cycle mount
-> +T-3: File contents after cycle mount
-> +000000 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  >ZZZZZZZZZZZZZZZZ<
-> +*
-> +100000
+> +++ b/tests/generic/737.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 737
+> +Silence is golden
 > -- 
-> 2.41.0
-> 
+> 2.31.1
 > 
 
