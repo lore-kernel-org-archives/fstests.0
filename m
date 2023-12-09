@@ -1,143 +1,175 @@
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D7CC10F1
-	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 22:06:16 -0800 (PST)
-Received: from dggpeml500021.china.huawei.com (unknown [172.30.72.56])
-	by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4SnHZ96B57zWjC6;
-	Sat,  9 Dec 2023 14:06:09 +0800 (CST)
-Received: from [10.174.177.174] (10.174.177.174) by
- dggpeml500021.china.huawei.com (7.185.36.21) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Sat, 9 Dec 2023 14:06:12 +0800
-Message-ID: <0aabbc42-149c-87bc-9e30-4b2c60a7e34f@huawei.com>
-Date: Sat, 9 Dec 2023 14:06:11 +0800
+Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E217A95;
+	Sat,  9 Dec 2023 11:16:34 -0800 (PST)
+Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2ca02def690so38675061fa.3;
+        Sat, 09 Dec 2023 11:16:34 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702149393; x=1702754193;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=yvIAlV8cR7DKjpVwhZEvex6k5cOHUw6zvJ4KqiQQ7J4=;
+        b=Afqy9cfNXfyam3zY5QBzyBw8JQLYL/l55eW01qRamui4B/GfSEgIHn4gy/s0KRk6ug
+         CekzBhMOqz6rzE8IvmfOH+NYywICh8oiGtkCPAA7uJE05UuGmDLHOJRwGnBcXoKtb0vm
+         pqilQgz2qbXufcLIbDNfmrKl+4Qb0MT+xoaAIm7bk/um4lnkWutUVBV3y/9tcofCq40e
+         93tq2BKiT+2cWLF+wQeAxuxEUCYQZhKN+JufW7n/a9bjLL4ytHvThVbsUkvRMlrVt2x9
+         BPoqsTW3RDrRMDjOKEFOqQtVK75FlltQwm711BScNFPgUvsP/cXP5YYSfqk8fT/v0MfF
+         exHA==
+X-Gm-Message-State: AOJu0YzjHxei+rX9NEqS4j3uj6ZfyVL1VfibgzmlBSFedTQUBrBC/RT1
+	HQfNAUSV2aiORjQt7Bd44FDIFJFVmchCpA==
+X-Google-Smtp-Source: AGHT+IGN0IV821CdXlu7CZ4P485FGl0zRIG8tNc78XYVzaDuaYLBZfHR92pXSu5JbAoB5xdF4JjjoQ==
+X-Received: by 2002:a2e:8619:0:b0:2ca:365b:8585 with SMTP id a25-20020a2e8619000000b002ca365b8585mr685177lji.106.1702149392466;
+        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
+Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com. [209.85.128.54])
+        by smtp.gmail.com with ESMTPSA id th19-20020a1709078e1300b00a1bda8db043sm2496840ejc.120.2023.12.09.11.16.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
+Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-40c317723a8so22972775e9.3;
+        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
+X-Received: by 2002:a05:600c:2b10:b0:40c:16ee:321e with SMTP id
+ y16-20020a05600c2b1000b0040c16ee321emr955135wme.62.1702149391793; Sat, 09 Dec
+ 2023 11:16:31 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.1.2
-Subject: Re: [PATCH v5] ext4: Regression test of ext4_lblk_t overflow
-Content-Language: en-US
-To: Zorro Lang <zlang@redhat.com>
-CC: <fstests@vger.kernel.org>, <guaneryu@gmail.com>, <amir73il@gmail.com>,
-	<ritesh.list@gmail.com>, <djwong@kernel.org>, <yangerkun@huawei.com>, Baokun
- Li <libaokun1@huawei.com>
-References: <20231124115356.2438805-1-libaokun1@huawei.com>
- <20231209054928.bfabziprdemtw32r@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Baokun Li <libaokun1@huawei.com>
-In-Reply-To: <20231209054928.bfabziprdemtw32r@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpeml500021.china.huawei.com (7.185.36.21)
-X-CFilter-Loop: Reflected
+References: <20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com>
+ <CAL3q7H7pMjbc1-xZ1xDSMRBM2C-FiTi=sx=mQNBqH4MbXQ_WLA@mail.gmail.com>
+ <0e13042e-1322-4baf-8ffd-4cd9415acac0@oracle.com> <ea5e3a98-b5ec-46c8-bf0d-e8fbd88cf4eb@wdc.com>
+In-Reply-To: <ea5e3a98-b5ec-46c8-bf0d-e8fbd88cf4eb@wdc.com>
+From: Neal Gompa <neal@gompa.dev>
+Date: Sat, 9 Dec 2023 14:15:54 -0500
+X-Gmail-Original-Message-ID: <CAEg-Je_B87HAvFVhm-_1Q4NDuhyELVrDxvebzrDfNzUL4yi+ww@mail.gmail.com>
+Message-ID: <CAEg-Je_B87HAvFVhm-_1Q4NDuhyELVrDxvebzrDfNzUL4yi+ww@mail.gmail.com>
+Subject: Re: [PATCH v5 0/9] fstests: add tests for btrfs' raid-stripe-tree feature
+To: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
+Cc: Anand Jain <anand.jain@oracle.com>, Filipe Manana <fdmanana@kernel.org>, 
+	Zorro Lang <zlang@redhat.com>, Filipe Manana <fdmanana@suse.com>, 
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
+	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 2023/12/9 13:49, Zorro Lang wrote:
-> On Fri, Nov 24, 2023 at 07:53:56PM +0800, Baokun Li wrote:
->> Append writes to a file with logical block numbers close to 0xffffffff and
->> observe if a kernel crash is caused by ext4_lblk_t overflow triggering
->> BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
->> bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
->>
->> Signed-off-by: Baokun Li <libaokun1@huawei.com>
->> ---
->> V1->V2:
->> 	Changes to make the use case more generic, not just for testing
->> 	ext4.(ext4 and xfs have been tested)
->> V2->V3:
->> 	Clean up the code and remove hardcoding.
->> V3->V4:
->> 	Correct the description and modify finsert related code to
->> 	make the test case easier to understand.
->> V4->V5:
->> 	Modify the image size to 80M.
->> 	Modify the space reserved in the file to 2M.
->> 	Now the test case can trigger the original problem at ext4
->> 	1k,4k,64k block size.
->>
->>   tests/generic/737     | 54 +++++++++++++++++++++++++++++++++++++++++++
->>   tests/generic/737.out |  2 ++
->>   2 files changed, 56 insertions(+)
->>   create mode 100755 tests/generic/737
->>   create mode 100644 tests/generic/737.out
->>
->> diff --git a/tests/generic/737 b/tests/generic/737
->> new file mode 100755
->> index 00000000..b4bf33e4
->> --- /dev/null
->> +++ b/tests/generic/737
->> @@ -0,0 +1,54 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2023 HUAWEI.  All Rights Reserved.
->> +#
->> +# FS QA Test No. 737
->> +#
->> +# Append writes to a file with logical block numbers close to 0xffffffff
->> +# and observe if a kernel crash is caused by ext4_lblk_t overflow triggering
->> +# BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
->> +# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
->> +#
->> +. ./common/preamble
->> +. ./common/populate
->> +_begin_fstest auto quick insert prealloc
->> +
->> +# real QA test starts here
->> +[[ "$FSTYP" =~ ext* ]] && _fixed_by_kernel_commit bc056e7163ac \
-> I just noticed this regex, I think the "ext*" matches "ex", "ext", "extxxx". So
-> if FSTYP=exfat, then it will matchi the "ext*".
+On Fri, Dec 8, 2023 at 4:19=E2=80=AFAM Johannes Thumshirn
+<Johannes.Thumshirn@wdc.com> wrote:
 >
-> It's better to be "ext.*" or "ext.+" or "ext[0-9]+". I'll change it when I
-> merge it.
-Okay. Thanks a lot!
->> +	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
->> +
->> +_require_odirect
->> +_require_xfs_io_command "falloc"
->> +_require_xfs_io_command "finsert"
->> +
->> +dev_size=$((80 * 1024 * 1024))
->> +_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
->> +
->> +_scratch_mount
->> +file_blksz="$(_get_file_block_size ${SCRATCH_MNT})"
->> +
->> +# Reserve 1M space
->> +$XFS_IO_PROG -f -c "falloc 0 1M" "${SCRATCH_MNT}/tmp" >> $seqres.full
->> +
->> +# Create a file with logical block numbers close to 0xffffffff
->> +$XFS_IO_PROG -f -c "falloc 0 10M" "${SCRATCH_MNT}/file" >> $seqres.full
->> +max_pos=$(( 0xffffffff * file_blksz ))
->> +finsert_len=$(( max_pos - ((10 + 2) << 20) ))
->> +$XFS_IO_PROG -f -c "finsert 1M ${finsert_len}" "${SCRATCH_MNT}/file" >> $seqres.full
->> +
->> +# Filling up the free space ensures that the pre-allocated space is the reserved space.
->> +nr_free=$(stat -f -c '%f' ${SCRATCH_MNT})
->> +_fill_fs $((nr_free * file_blksz)) ${SCRATCH_MNT}/fill $file_blksz 0 >> $seqres.full 2>&1
->> +sync
->> +
->> +# Remove reserved space to gain free space for allocation
->> +rm -f ${SCRATCH_MNT}/tmp
->> +
->> +# Trying to allocate two blocks triggers BUG_ON.
->> +$XFS_IO_PROG -c "open -ad ${SCRATCH_MNT}/file" -c "pwrite -S 0xff 0 $((2 * file_blksz))" >> $seqres.full
->> +
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/737.out b/tests/generic/737.out
->> new file mode 100644
->> index 00000000..67b83d78
->> --- /dev/null
->> +++ b/tests/generic/737.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 737
->> +Silence is golden
->> -- 
->> 2.31.1
->>
+> On 08.12.23 02:19, Anand Jain wrote:
+> >
+> >
+> > On 12/7/23 17:41, Filipe Manana wrote:
+> >> On Thu, Dec 7, 2023 at 9:03=E2=80=AFAM Johannes Thumshirn
+> >> <johannes.thumshirn@wdc.com> wrote:
+> >>>
+> >>> Add tests for btrfs' raid-stripe-tree feature. All of these test work=
+ by
+> >>> writing a specific pattern to a newly created filesystem and afterwar=
+ds
+> >>> using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to ve=
+rify
+> >>> the placement and the layout of the metadata.
+> >>>
+> >>> The md5sum of each file will be compared as well after a re-mount of =
+the
+> >>> filesystem.
+> >>>
+> >>> ---
+> >>> Changes in v5:
+> >>> - add _require_btrfs_free_space_tree helper and use in tests
+> >>> - Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-5782=
+84dd3a70@wdc.com
+> >>>
+> >>> Changes in v4:
+> >>> - add _require_btrfs_no_compress to all tests
+> >>> - add _require_btrfs_no_nodatacow helper and add to btrfs/308
+> >>> - add _require_btrfs_feature "free_space_tree" to all tests
+> >>> - Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e85=
+7a5439a2@wdc.com
+> >>>
+> >>> Changes in v3:
+> >>> - added 'raid-stripe-tree' to mkfs options, as only zoned raid gets i=
+t
+> >>>     automatically
+> >>> - Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+> >>> - Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f8=
+0eea345b@wdc.com
+> >>>
+> >>> Changes in v2:
+> >>> - Re-ordered series so the newly introduced group is added before the
+> >>>     tests
+> >>> - Changes Filipe requested to the tests.
+> >>> - Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254=
+eb1bcff8@wdc.com
+> >>>
+> >>> ---
+> >>> Johannes Thumshirn (9):
+> >>>         fstests: doc: add new raid-stripe-tree group
+> >>>         common: add filter for btrfs raid-stripe dump
+> >>>         common: add _require_btrfs_no_nodatacow helper
+> >>>         common: add _require_btrfs_free_space_tree
+> >>>         btrfs: add fstest for stripe-tree metadata with 4k write
+> >>>         btrfs: add fstest for 8k write spanning two stripes on raid-s=
+tripe-tree
+> >>>         btrfs: add fstest for writing to a file at an offset with RST
+> >>>         btrfs: add fstests to write 128k to a RST filesystem
+> >>>         btrfs: add fstest for overwriting a file partially with RST
+> >>>
+> >>>    common/btrfs        |  17 +++++++++
+> >>>    common/filter.btrfs |  14 +++++++
+> >>>    doc/group-names.txt |   1 +
+> >>>    tests/btrfs/304     |  56 +++++++++++++++++++++++++++
+> >>>    tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
+> >>>    tests/btrfs/305     |  61 ++++++++++++++++++++++++++++++
+> >>>    tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
+> >>>    tests/btrfs/306     |  59 +++++++++++++++++++++++++++++
+> >>>    tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
+> >>>    tests/btrfs/307     |  56 +++++++++++++++++++++++++++
+> >>>    tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
+> >>>    tests/btrfs/308     |  60 +++++++++++++++++++++++++++++
+> >>>    tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++=
+++++++++++++
+> >>>    13 files changed, 710 insertions(+)
+> >>> ---
+> >>> base-commit: baca8a2b5cb6e798ce3a07e79a081031370c6cb8
+> >>
+> >> Btw this base commit does not exist in the official fstests repo.
+> >> That commit is from the staging branch at https://github.com/kdave/xfs=
+tests
+> >>
+> >> A "git am" will fail because the official fstests repo doesn't have
+> >> _require_btrfs_no_block_group_tree() at common/btrfs,
+> >> so it needs to be manually adjusted when applying the 3rd patch.
+> >>
+> >> I tried the tests and they look good, so:
+> >>
+> >> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> >>
+> >> One question I missed before. Test 304 for example does a 4K write and
+> >> expects in the golden output to get a 4K raid stripe item.
+> >> What happens on a machine with 64K page size? There the default sector
+> >> size is 64K, will the write result in a 64K raid stripe item or will
+> >> it be 4K? In the former case, it will make the test fail.
+> >>
+> >
+> > Testing on a 64K pagesize. Will run it. Apologies for intermittent
+> > responses; OOO until December 21.
+>
+> Thanks Anand!
+>
+> I don't have a 64k page size system to test, but I _think_ Filipe is
+> right, that will fail. I think we should skip these tests on non 4k secto=
+rs.
+>
 
+Once we land the patch to default to 4k sector size[1] regardless of
+page size, this should all work across all architectures, no?
+
+[1]: https://lore.kernel.org/linux-btrfs/20231116160235.2708131-2-neal@gomp=
+a.dev/
+
+
+
+--
+=E7=9C=9F=E5=AE=9F=E3=81=AF=E3=81=84=E3=81=A4=E3=82=82=E4=B8=80=E3=81=A4=EF=
+=BC=81/ Always, there's only one truth!
