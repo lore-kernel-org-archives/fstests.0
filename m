@@ -1,58 +1,57 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="NeQRDYF1"
-Received: from mail-il1-x136.google.com (mail-il1-x136.google.com [IPv6:2607:f8b0:4864:20::136])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CB8210DA
-	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 20:53:59 -0800 (PST)
-Received: by mail-il1-x136.google.com with SMTP id e9e14a558f8ab-35d72bc5cf2so9700905ab.1
-        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 20:53:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1702097638; x=1702702438; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=Q94zr7fXyaFSY0q/i8vffzz/BPsd7CsCP9j0O5HvOwM=;
-        b=NeQRDYF195AhrxJL5WsTlTtgPvwr8ogJf80pkRIjQ/JBcG4CEKieVPcJP8YKtssrAs
-         vPpiDlMOYSj7cCcQRuxz9KwKK8YJVgSck6m6e314GM2f7ayRYjJHxj+I94v4N9zGXfKx
-         7PiglYar8uBvPhO3INQ5hGlwFSjFf/kgZqNbS/Skj8HhV5Egsr1QZcmcvYnfJlT9WWRk
-         VvQZ7YzsFv+rtFhsszeUSFtJ8oAdTkQtyb3qK5lZTeOmMObMXwFklTcov5R1WN4ommcC
-         mrDtogsKEtDE91qKK7mc6/8Gyh3GzYqCGLlPYKcFrTdL7HaiCH0vW5Fm4yuOOYiH/IbM
-         Wtpw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="P9Y74zsT"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B3FB10EF
+	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 21:06:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1702098385;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zx2KXkKWGXskx9hgbxqcfFshAbEoRjOrA8XTrz3yxFs=;
+	b=P9Y74zsTr3ITtemK18G0mv+zNvSS17Ij0xHUwsX9pmtLLhbs5ddx1CYC4PyL1XDMS+5KKN
+	UbXj6z30CZ+sesVut2S0gShrWRp6iiL/TZjbeMe3dqi9lBkXBbFxnB1g9P4L2f84bJlNtV
+	r6u3Z+jKHxZ9sNNAR3i2NvLg7fgN31g=
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
+ [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-169-unbn32ZxMAyIUs3o6gNA9w-1; Sat, 09 Dec 2023 00:06:21 -0500
+X-MC-Unique: unbn32ZxMAyIUs3o6gNA9w-1
+Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3b9f55676a1so576723b6e.1
+        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 21:06:21 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702097638; x=1702702438;
+        d=1e100.net; s=20230601; t=1702098380; x=1702703180;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Q94zr7fXyaFSY0q/i8vffzz/BPsd7CsCP9j0O5HvOwM=;
-        b=DqmSTcvrRlMgVSD6HqJnlxSJH+7l5XmA5fGmM6emc+8bLfK+b2E315ZzZQuKX/EGCz
-         z1F7ARrrqo1vSaUlfn7uNA/esf51RxSHbl66v/nls2ZGVVw8eWE8vvvVSKTKhFmg01aV
-         f44mktmg7/KeZR5amxETyU1R4ZUj3F6F95FKPipnc+haIvHwNmfsXlBnuIVsty5ieOoe
-         9lGTXIGMKgC9HzExpX9wA8IYcN91wXUhGGBUVU5D4EXTKVlEk65ehai/30NDJJoZszvF
-         0z7cGr5Q3X9emxc3KhQsNHti9xKI/NGdF1JAuRS1gwxHsacpjJ9ONRgJ+trZlKESwDJ9
-         5BFw==
-X-Gm-Message-State: AOJu0YwV/fAc62u3PrPnAA/mgsfFmARQk6q9w035xfsTkZuy6YHCVEd+
-	IltDk1bBxadqB/6fCpUpxG8rbA==
-X-Google-Smtp-Source: AGHT+IHjlKWN++FniqDcZ6+gOzWsqUKFWZyGKGe7yDdh17gZNEzJGXsDiI4L8bI/oFVQrxwnnuY3mQ==
-X-Received: by 2002:a05:6e02:1cae:b0:35d:5af6:5eb4 with SMTP id x14-20020a056e021cae00b0035d5af65eb4mr1632535ill.12.1702097638548;
-        Fri, 08 Dec 2023 20:53:58 -0800 (PST)
-Received: from dread.disaster.area (pa49-180-125-5.pa.nsw.optusnet.com.au. [49.180.125.5])
-        by smtp.gmail.com with ESMTPSA id jg7-20020a17090326c700b001d0d312bc2asm2531341plb.193.2023.12.08.20.53.57
+        bh=zx2KXkKWGXskx9hgbxqcfFshAbEoRjOrA8XTrz3yxFs=;
+        b=n8wAah+iT54ColVBt9Gpbb6N9n5GpPR6Dpsd3wxxFy6hJTwkcoKOGCt7PKNPqXT358
+         Cq4qzDnUooUNUNNMYL51J9ROdFE30tYyhsJBpZsendX8fn8hnKp34TPb9BVCkp/I7zB6
+         DwQFmr5YGrtAF5ujxNKjLxvsG4weFO0hnHz9UEQhhdiDv06CV9OkUHrjCVMV+Zv+J7E9
+         kOgNE3Xd/OcaA8XEucyNr9JsaV9DvAYnEAp1EXe25HuyzwQvAQLEjYWn84vwd9EANkeU
+         t/DU85ur1n/1Sg+WtkL1aFSGcW6+UFHJGQfDz0y8EOXcKK23h/7jQSp8ryACgzifehnJ
+         B87A==
+X-Gm-Message-State: AOJu0Yxm3Qk1h1qP+qu6tppsxva6z4VEmemt2MGaASHlixQlmaj5+43K
+	DONb4VzhYBiW7j1KGiDcjNeX9/FCVFgu02kxWZZQInMgc8iiQsjCgDle1aAMh6U8VNbOjjHPxbw
+	lkd3TTEmAaxrymP0aFQ==
+X-Received: by 2002:a05:6808:38c4:b0:3b9:d586:f18f with SMTP id el4-20020a05680838c400b003b9d586f18fmr1730687oib.63.1702098380493;
+        Fri, 08 Dec 2023 21:06:20 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IECd3K0sY9EZGo2RH5DiJfxKjvWTvRoVlV8FXXIspjT93g5ldddKqeTGXRNnNamvgan+wi9og==
+X-Received: by 2002:a05:6808:38c4:b0:3b9:d586:f18f with SMTP id el4-20020a05680838c400b003b9d586f18fmr1730681oib.63.1702098380226;
+        Fri, 08 Dec 2023 21:06:20 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id r3-20020aa79883000000b006cbb65edcbfsm2522628pfl.12.2023.12.08.21.06.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Dec 2023 20:53:57 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-	(envelope-from <david@fromorbit.com>)
-	id 1rBpLf-005ozR-10;
-	Sat, 09 Dec 2023 15:53:55 +1100
-Date: Sat, 9 Dec 2023 15:53:55 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
-	linux-s390@vger.kernel.org, fstests@vger.kernel.org,
-	Pankaj Raghav <p.raghav@samsung.com>,
-	Daniel Gomez <da.gomez@samsung.com>
-Subject: Re: [Bug report] More xfs courruption issue found on s390x
-Message-ID: <ZXPy4+cXlIt0agNz@dread.disaster.area>
-References: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZUiHBpJTUr3G4//q@dread.disaster.area>
- <ZXO7gd3Ft1di8Okm@bombadil.infradead.org>
+        Fri, 08 Dec 2023 21:06:19 -0800 (PST)
+Date: Sat, 9 Dec 2023 13:06:16 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	Jan Kara <jack@suse.cz>, Gao Xiang <hsiangkao@linux.alibaba.com>,
+	Ojaswin Mujoo <ojaswin@linux.ibm.com>
+Subject: Re: [PATCHv3 1/2] aio-dio-write-verify: Add sync and noverify option
+Message-ID: <20231209050616.lcbfxdbqlgcskh3c@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <8379b5df9f70a1d75692e029a565199e98a535e8.1700478575.git.ritesh.list@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -61,47 +60,97 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZXO7gd3Ft1di8Okm@bombadil.infradead.org>
+In-Reply-To: <8379b5df9f70a1d75692e029a565199e98a535e8.1700478575.git.ritesh.list@gmail.com>
 
-On Fri, Dec 08, 2023 at 04:57:37PM -0800, Luis Chamberlain wrote:
-> On Mon, Nov 06, 2023 at 05:26:14PM +1100, Dave Chinner wrote:
-> > >   XFS: Assertion failed: ip->i_nblocks == 0, file: fs/xfs/xfs_inode.c, line: 2359
-> >
-> > IOWs, all four of these issues are the same problem - journal
-> > recovery is not resulting in a correct and consistent filesystem
-> > after the journal has been flushed at runtime, so please discuss and
-> > consolidate them all in the initial bug report thread....
+On Mon, Nov 20, 2023 at 04:49:33PM +0530, Ritesh Harjani (IBM) wrote:
+> This patch adds -S for O_SYNC and -N for noverify option to
+> aio-dio-write-verify test. We will use this for integrity
+> verification test for aio-dio.
 > 
-> As recently reported, fortunately we now have reproducers for x86_64 too:
-> 
-> https://bugzilla.kernel.org/show_bug.cgi?id=218224
-> 
-> This fails on the following test sections as defined by kdevops [1]:
-> 
->   * xfs_nocrc_2k
->   * xfs_reflink
->   * xfs_reflink_1024
->   * xfs_reflink_2k
->   * xfs_reflink_4k
->   * xfs_reflink_dir_bsize_8k
->   * xfs_reflink_logdev
->   * xfs_reflink_normapbt
->   * xfs_reflink_nrext64
-> 
-> [0] https://github.com/linux-kdevops/kdevops/blob/master/playbooks/roles/fstests/templates/xfs/xfs.config
-> 
-> Example failures:
-> 
->   * generic/475: https://gist.github.com/mcgrof/5d6f504f4695ba27cea7df5d63f35197
->   * generic/388: https://gist.github.com/mcgrof/c1c8b1dc76fdc1032a5f0aab6c2a14bf
->   * generic/648: https://gist.github.com/mcgrof/1e506ecbe898b45428d6e7febfc02db1
+> Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> ---
 
-If this is the same problem, have you tested whether the fix for the
-s390 issue makes all the problems you are seeing on x86-64 go away?
-i.e. commit 7930d9e10370 ("xfs: recovery should not clear di_flushiter
-unconditionally")
+This version is good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+>  src/aio-dio-regress/aio-dio-write-verify.c | 29 ++++++++++++++++------
+>  1 file changed, 21 insertions(+), 8 deletions(-)
+> 
+> diff --git a/src/aio-dio-regress/aio-dio-write-verify.c b/src/aio-dio-regress/aio-dio-write-verify.c
+> index dabbfacd..a7ca8307 100644
+> --- a/src/aio-dio-regress/aio-dio-write-verify.c
+> +++ b/src/aio-dio-regress/aio-dio-write-verify.c
+> @@ -34,13 +34,16 @@
+>  
+>  void usage(char *progname)
+>  {
+> -	fprintf(stderr, "usage: %s [-t truncsize ] <-a size=N,off=M [-a ...]>  filename\n"
+> +	fprintf(stderr, "usage: %s [-t truncsize ] <-a size=N,off=M [-a ...]>  [-S] [-N] filename\n"
+>  	        "\t-t truncsize: truncate the file to a special size before AIO wirte\n"
+>  	        "\t-a: specify once AIO write size and startoff, this option can be specified many times, but less than 128\n"
+>  	        "\t\tsize=N: AIO write size\n"
+>  	        "\t\toff=M:  AIO write startoff\n"
+> -	        "e.g: %s -t 4608 -a size=4096,off=512 -a size=4096,off=4608 filename\n",
+> -	        progname, progname);
+> +			"\t-S: uses O_SYNC flag for open. By default O_SYNC is not used\n"
+> +			"\t-N: no_verify: means no write verification. By default noverify is false\n"
+> +	        "e.g: %s -t 4608 -a size=4096,off=512 -a size=4096,off=4608 filename\n"
+> +	        "e.g: %s -t 1048576 -a size=1048576 -S -N filename\n",
+> +	        progname, progname, progname);
+>  	exit(1);
+>  }
+>  
+> @@ -292,8 +295,10 @@ int main(int argc, char *argv[])
+>  	char *filename = NULL;
+>  	int num_events = 0;
+>  	off_t tsize = 0;
+> +	int o_sync = 0;
+> +	int no_verify = 0;
+>  
+> -	while ((c = getopt(argc, argv, "a:t:")) != -1) {
+> +	while ((c = getopt(argc, argv, "a:t:SN")) != -1) {
+>  		char *endp;
+>  
+>  		switch (c) {
+> @@ -308,6 +313,12 @@ int main(int argc, char *argv[])
+>  		case 't':
+>  			tsize = strtoul(optarg, &endp, 0);
+>  			break;
+> +		case 'S':
+> +			o_sync = O_SYNC;
+> +			break;
+> +		case 'N':
+> +			no_verify = 1;
+> +			break;
+>  		default:
+>  			usage(argv[0]);
+>  		}
+> @@ -324,7 +335,7 @@ int main(int argc, char *argv[])
+>  	else
+>  		usage(argv[0]);
+>  
+> -	fd = open(filename, O_DIRECT | O_CREAT | O_TRUNC | O_RDWR, 0600);
+> +	fd = open(filename, O_DIRECT | O_CREAT | O_TRUNC | O_RDWR | o_sync, 0600);
+>  	if (fd == -1) {
+>  		perror("open");
+>  		return 1;
+> @@ -342,9 +353,11 @@ int main(int argc, char *argv[])
+>  		return 1;
+>  	}
+>  
+> -	if (io_verify(fd) != 0) {
+> -		fprintf(stderr, "Data verification fails\n");
+> -		return 1;
+> +	if (no_verify == 0) {
+> +		if (io_verify(fd) != 0) {
+> +			fprintf(stderr, "Data verification fails\n");
+> +			return 1;
+> +		}
+>  	}
+>  
+>  	close(fd);
+> -- 
+> 2.41.0
+> 
+> 
+
