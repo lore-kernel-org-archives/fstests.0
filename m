@@ -1,57 +1,58 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CIUVAbG7"
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65F3B10D8
-	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 20:49:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1702097375;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kRC6E+82YXg5bJ8iGL1zYBpZDRpXzFFqlBgl+Fu1axk=;
-	b=CIUVAbG7wLsKJwa4x6UPj8MQCnbEKS0knH7CEFx3HzQ8FZVjaKLVp087rxwb+/7KzcCmDT
-	u4O0Cdam3NollXVDh+wWa11pAGWFeTOeXPBuMFmcFffEFdDEEBYnvcPxqFLVco9wNSC3RV
-	rty9R0bUq6dpzZ8ttgf2A1SsZQ0tLNc=
-Received: from mail-io1-f69.google.com (mail-io1-f69.google.com
- [209.85.166.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-691-6k0pX3QgPUaNWInlRQEJPw-1; Fri, 08 Dec 2023 23:49:34 -0500
-X-MC-Unique: 6k0pX3QgPUaNWInlRQEJPw-1
-Received: by mail-io1-f69.google.com with SMTP id ca18e2360f4ac-7b37febeb82so268406539f.2
-        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 20:49:33 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="NeQRDYF1"
+Received: from mail-il1-x136.google.com (mail-il1-x136.google.com [IPv6:2607:f8b0:4864:20::136])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CB8210DA
+	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 20:53:59 -0800 (PST)
+Received: by mail-il1-x136.google.com with SMTP id e9e14a558f8ab-35d72bc5cf2so9700905ab.1
+        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 20:53:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1702097638; x=1702702438; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Q94zr7fXyaFSY0q/i8vffzz/BPsd7CsCP9j0O5HvOwM=;
+        b=NeQRDYF195AhrxJL5WsTlTtgPvwr8ogJf80pkRIjQ/JBcG4CEKieVPcJP8YKtssrAs
+         vPpiDlMOYSj7cCcQRuxz9KwKK8YJVgSck6m6e314GM2f7ayRYjJHxj+I94v4N9zGXfKx
+         7PiglYar8uBvPhO3INQ5hGlwFSjFf/kgZqNbS/Skj8HhV5Egsr1QZcmcvYnfJlT9WWRk
+         VvQZ7YzsFv+rtFhsszeUSFtJ8oAdTkQtyb3qK5lZTeOmMObMXwFklTcov5R1WN4ommcC
+         mrDtogsKEtDE91qKK7mc6/8Gyh3GzYqCGLlPYKcFrTdL7HaiCH0vW5Fm4yuOOYiH/IbM
+         Wtpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702097373; x=1702702173;
+        d=1e100.net; s=20230601; t=1702097638; x=1702702438;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=kRC6E+82YXg5bJ8iGL1zYBpZDRpXzFFqlBgl+Fu1axk=;
-        b=lKudZ4NxM9WJ1vyNXyNYeo4+nzr8ac9kiD+rOc56/WTMYbu2oj46RKnJjbcUL2r7nd
-         nru+G0gr9RqDx+eQctu50L28/xiu317VbYlELuT8pgWyDH1+D0zd1KfPGEmYPCsex8W4
-         rHWGg6N4+y7k1+oy5Qfka+06e7fbbpdyI1SY0gW+Pd3Qxwg36Q/8PplQds3PiIP4fvYF
-         nifnmtTe0RmrzR3k47jD9cDN/2YSkWdjwbjdNLl7Y7BKxScoZUGFGybeZ6Kpl+KzwWa+
-         VJplVUa4SC81yrz9uc57SN8vFOYzzlUKgcxjv5LOnqkww4UKpTqpA1RqH1bHju9WRh7q
-         ZcYA==
-X-Gm-Message-State: AOJu0Yz5rEJ4dfcGeLnBFZFXUs9+bOnZ8FjTjsdpQ4PsBj1neeTNEqAW
-	1V+PaHYaNLTi9RpuZSNQvK3PNVWCexXtTgE6XVQJuZ/2oQ3MqHAwigokTTw0nbX1iuXMLjF4NP4
-	XhLaNGzOXG/sxO1VEqA==
-X-Received: by 2002:a05:6e02:168a:b0:35d:6579:7135 with SMTP id f10-20020a056e02168a00b0035d65797135mr1804637ila.36.1702097373351;
-        Fri, 08 Dec 2023 20:49:33 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFKUV10bCyeVicYQqpK5S9zZPrhV9FtzcSQg5Gdzr7SSyWuUzn93zvenn5f3rlrhLuYyk38Rg==
-X-Received: by 2002:a05:6e02:168a:b0:35d:6579:7135 with SMTP id f10-20020a056e02168a00b0035d65797135mr1804630ila.36.1702097373119;
-        Fri, 08 Dec 2023 20:49:33 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id h8-20020a170902680800b001d0828f2ebfsm2586381plk.273.2023.12.08.20.49.31
+        bh=Q94zr7fXyaFSY0q/i8vffzz/BPsd7CsCP9j0O5HvOwM=;
+        b=DqmSTcvrRlMgVSD6HqJnlxSJH+7l5XmA5fGmM6emc+8bLfK+b2E315ZzZQuKX/EGCz
+         z1F7ARrrqo1vSaUlfn7uNA/esf51RxSHbl66v/nls2ZGVVw8eWE8vvvVSKTKhFmg01aV
+         f44mktmg7/KeZR5amxETyU1R4ZUj3F6F95FKPipnc+haIvHwNmfsXlBnuIVsty5ieOoe
+         9lGTXIGMKgC9HzExpX9wA8IYcN91wXUhGGBUVU5D4EXTKVlEk65ehai/30NDJJoZszvF
+         0z7cGr5Q3X9emxc3KhQsNHti9xKI/NGdF1JAuRS1gwxHsacpjJ9ONRgJ+trZlKESwDJ9
+         5BFw==
+X-Gm-Message-State: AOJu0YwV/fAc62u3PrPnAA/mgsfFmARQk6q9w035xfsTkZuy6YHCVEd+
+	IltDk1bBxadqB/6fCpUpxG8rbA==
+X-Google-Smtp-Source: AGHT+IHjlKWN++FniqDcZ6+gOzWsqUKFWZyGKGe7yDdh17gZNEzJGXsDiI4L8bI/oFVQrxwnnuY3mQ==
+X-Received: by 2002:a05:6e02:1cae:b0:35d:5af6:5eb4 with SMTP id x14-20020a056e021cae00b0035d5af65eb4mr1632535ill.12.1702097638548;
+        Fri, 08 Dec 2023 20:53:58 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-125-5.pa.nsw.optusnet.com.au. [49.180.125.5])
+        by smtp.gmail.com with ESMTPSA id jg7-20020a17090326c700b001d0d312bc2asm2531341plb.193.2023.12.08.20.53.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Dec 2023 20:49:32 -0800 (PST)
-Date: Sat, 9 Dec 2023 12:49:29 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Alexander Larsson <alexl@redhat.com>,
-	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH v2 0/4] Overlayfs tests for 6.7-rc1
-Message-ID: <20231209044929.oogoausuhan5plzd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231204185859.3731975-1-amir73il@gmail.com>
+        Fri, 08 Dec 2023 20:53:57 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.96)
+	(envelope-from <david@fromorbit.com>)
+	id 1rBpLf-005ozR-10;
+	Sat, 09 Dec 2023 15:53:55 +1100
+Date: Sat, 9 Dec 2023 15:53:55 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org,
+	linux-s390@vger.kernel.org, fstests@vger.kernel.org,
+	Pankaj Raghav <p.raghav@samsung.com>,
+	Daniel Gomez <da.gomez@samsung.com>
+Subject: Re: [Bug report] More xfs courruption issue found on s390x
+Message-ID: <ZXPy4+cXlIt0agNz@dread.disaster.area>
+References: <20231029043333.v6wkqsorxdk2dbch@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ZUiHBpJTUr3G4//q@dread.disaster.area>
+ <ZXO7gd3Ft1di8Okm@bombadil.infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,59 +61,47 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231204185859.3731975-1-amir73il@gmail.com>
+In-Reply-To: <ZXO7gd3Ft1di8Okm@bombadil.infradead.org>
 
-On Mon, Dec 04, 2023 at 08:58:55PM +0200, Amir Goldstein wrote:
-> Zorro,
+On Fri, Dec 08, 2023 at 04:57:37PM -0800, Luis Chamberlain wrote:
+> On Mon, Nov 06, 2023 at 05:26:14PM +1100, Dave Chinner wrote:
+> > >   XFS: Assertion failed: ip->i_nblocks == 0, file: fs/xfs/xfs_inode.c, line: 2359
+> >
+> > IOWs, all four of these issues are the same problem - journal
+> > recovery is not resulting in a correct and consistent filesystem
+> > after the journal has been flushed at runtime, so please discuss and
+> > consolidate them all in the initial bug report thread....
 > 
-> This update contains 3 new overlayfs tests for new features added
-> in v6.7-rc1.
+> As recently reported, fortunately we now have reproducers for x86_64 too:
 > 
-> overlay/084, written by Alexander, tests the new nested xattrs feature.
-> overlay/{085,086} test the new lowerdir+,datadir+ mount options.
+> https://bugzilla.kernel.org/show_bug.cgi?id=218224
 > 
-> overlay/086 was partly forked from overlay/083, but overlay/083 is not
-> sensitive to libmount version, because the escaped commas test is not
-> related to any specific mount option, so it wasn't copied over.
+> This fails on the following test sections as defined by kdevops [1]:
 > 
-> All the new tests do not run on older kernels.
+>   * xfs_nocrc_2k
+>   * xfs_reflink
+>   * xfs_reflink_1024
+>   * xfs_reflink_2k
+>   * xfs_reflink_4k
+>   * xfs_reflink_dir_bsize_8k
+>   * xfs_reflink_logdev
+>   * xfs_reflink_normapbt
+>   * xfs_reflink_nrext64
 > 
-> Thanks,
-> Amir.
+> [0] https://github.com/linux-kdevops/kdevops/blob/master/playbooks/roles/fstests/templates/xfs/xfs.config
 > 
-> Changed since v1:
-> - Helper _require_scratch_overlay_xattr_escapes() already added by
->   "overlay/026: Fix test expectation for newer kernels"
+> Example failures:
+> 
+>   * generic/475: https://gist.github.com/mcgrof/5d6f504f4695ba27cea7df5d63f35197
+>   * generic/388: https://gist.github.com/mcgrof/c1c8b1dc76fdc1032a5f0aab6c2a14bf
+>   * generic/648: https://gist.github.com/mcgrof/1e506ecbe898b45428d6e7febfc02db1
 
-This version looks good to me, let's have this feature test coverage
-at first.
+If this is the same problem, have you tested whether the fix for the
+s390 issue makes all the problems you are seeing on x86-64 go away?
+i.e. commit 7930d9e10370 ("xfs: recovery should not clear di_flushiter
+unconditionally")
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> 
-> Amir Goldstein (4):
->   overlay: Add tests for nesting private xattrs
->   overlay: prepare for new lowerdir+,datadir+ tests
->   overlay: test data-only lowerdirs with datadir+ mount option
->   overlay: test parsing of lowerdir+,datadir+ mount options
-> 
->  common/overlay        |  15 ++
->  tests/overlay/079     |  36 +++--
->  tests/overlay/084     | 169 +++++++++++++++++++++
->  tests/overlay/084.out |  61 ++++++++
->  tests/overlay/085     | 332 ++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/085.out |  42 ++++++
->  tests/overlay/086     |  81 +++++++++++
->  tests/overlay/086.out |   2 +
->  8 files changed, 723 insertions(+), 15 deletions(-)
->  create mode 100755 tests/overlay/084
->  create mode 100644 tests/overlay/084.out
->  create mode 100755 tests/overlay/085
->  create mode 100644 tests/overlay/085.out
->  create mode 100755 tests/overlay/086
->  create mode 100644 tests/overlay/086.out
-> 
-> -- 
-> 2.34.1
-> 
-
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
