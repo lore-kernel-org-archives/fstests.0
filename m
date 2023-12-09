@@ -1,56 +1,57 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VqQiXE+f"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CIUVAbG7"
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE548193
-	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 20:41:21 -0800 (PST)
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65F3B10D8
+	for <fstests@vger.kernel.org>; Fri,  8 Dec 2023 20:49:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1702096880;
+	s=mimecast20190719; t=1702097375;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=3mWHZcXaAmj/5u7LgLw6LKkZfHWgV29XQk0gJ0hZWpY=;
-	b=VqQiXE+fToQNQl67rB6KED4/wYiH/FYAaJQPotSkhra8fsitFH6B/BVk7COhUzei6NbnVl
-	05RcyLCee8BKPtbUupJL7u2Nm+0/5Ke0pl919zyN1EIDm0pkcfs3weEskVNTHi/VmOJvqG
-	elej2dvzk34uVl+1qkHdKyjYPgLr+9s=
-Received: from mail-pg1-f198.google.com (mail-pg1-f198.google.com
- [209.85.215.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=kRC6E+82YXg5bJ8iGL1zYBpZDRpXzFFqlBgl+Fu1axk=;
+	b=CIUVAbG7wLsKJwa4x6UPj8MQCnbEKS0knH7CEFx3HzQ8FZVjaKLVp087rxwb+/7KzcCmDT
+	u4O0Cdam3NollXVDh+wWa11pAGWFeTOeXPBuMFmcFffEFdDEEBYnvcPxqFLVco9wNSC3RV
+	rty9R0bUq6dpzZ8ttgf2A1SsZQ0tLNc=
+Received: from mail-io1-f69.google.com (mail-io1-f69.google.com
+ [209.85.166.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-81-p9piWH2rNwuMQAlP1Few_A-1; Fri, 08 Dec 2023 23:41:19 -0500
-X-MC-Unique: p9piWH2rNwuMQAlP1Few_A-1
-Received: by mail-pg1-f198.google.com with SMTP id 41be03b00d2f7-5c641d55e27so1770458a12.1
-        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 20:41:19 -0800 (PST)
+ us-mta-691-6k0pX3QgPUaNWInlRQEJPw-1; Fri, 08 Dec 2023 23:49:34 -0500
+X-MC-Unique: 6k0pX3QgPUaNWInlRQEJPw-1
+Received: by mail-io1-f69.google.com with SMTP id ca18e2360f4ac-7b37febeb82so268406539f.2
+        for <fstests@vger.kernel.org>; Fri, 08 Dec 2023 20:49:33 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702096878; x=1702701678;
+        d=1e100.net; s=20230601; t=1702097373; x=1702702173;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3mWHZcXaAmj/5u7LgLw6LKkZfHWgV29XQk0gJ0hZWpY=;
-        b=meLAlmnT+0rfqlGM2M3dczncQyFJdYcRIHVglUgUielxJE4b14pi/i7pNvYI74MEKu
-         +TPh6ObZ8PqvxLB6AVqj28WwKvyOs1rFPR9bBBZ8S5eYygnx4tMbUTBsGfGOZ6N610+b
-         e5CLp3APn2+Lm8otvihBPlO9U6YRXTc8coC0HA0TGxcR6/JXdlNJy7acgVm5ogWmwVhM
-         Uc8SfuT4kBKSWvO+hLCq5JpJT8USODM9iBNWJ2Ii/q2KoeGrP7XDOCxBRzoZzjaOadMc
-         zz1IeY3/RsSl+tkbGvgdrmeOjjVOiRD3WGuCFAOMB5Kdc+LTr0ehCIYBKQbqk2wvhx/e
-         OxMQ==
-X-Gm-Message-State: AOJu0YzXoMpskiQqee6xbHqkRTz9UfVs5iffHTrmNfNO5s9Li7a2/HRd
-	AIVIEAcjCQXgIfICOxhLxBjCXkkcfH3IwSl5xJ6UEq3yk2t16FDY+kvFeYAdO7OoA9mAnZ6L3cH
-	qnJ5MGlOsdGF1VCZ8iQ==
-X-Received: by 2002:a17:90a:246:b0:286:6cd8:ef18 with SMTP id t6-20020a17090a024600b002866cd8ef18mr2075179pje.48.1702096878410;
-        Fri, 08 Dec 2023 20:41:18 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHUDHO38yZH4Tnbskvnqzmjd3UyZ0cZQXqt8FyXBuY33QNAIZnR9Duur8L535btVrIc5l2h0Q==
-X-Received: by 2002:a17:90a:246:b0:286:6cd8:ef18 with SMTP id t6-20020a17090a024600b002866cd8ef18mr2075171pje.48.1702096878047;
-        Fri, 08 Dec 2023 20:41:18 -0800 (PST)
+        bh=kRC6E+82YXg5bJ8iGL1zYBpZDRpXzFFqlBgl+Fu1axk=;
+        b=lKudZ4NxM9WJ1vyNXyNYeo4+nzr8ac9kiD+rOc56/WTMYbu2oj46RKnJjbcUL2r7nd
+         nru+G0gr9RqDx+eQctu50L28/xiu317VbYlELuT8pgWyDH1+D0zd1KfPGEmYPCsex8W4
+         rHWGg6N4+y7k1+oy5Qfka+06e7fbbpdyI1SY0gW+Pd3Qxwg36Q/8PplQds3PiIP4fvYF
+         nifnmtTe0RmrzR3k47jD9cDN/2YSkWdjwbjdNLl7Y7BKxScoZUGFGybeZ6Kpl+KzwWa+
+         VJplVUa4SC81yrz9uc57SN8vFOYzzlUKgcxjv5LOnqkww4UKpTqpA1RqH1bHju9WRh7q
+         ZcYA==
+X-Gm-Message-State: AOJu0Yz5rEJ4dfcGeLnBFZFXUs9+bOnZ8FjTjsdpQ4PsBj1neeTNEqAW
+	1V+PaHYaNLTi9RpuZSNQvK3PNVWCexXtTgE6XVQJuZ/2oQ3MqHAwigokTTw0nbX1iuXMLjF4NP4
+	XhLaNGzOXG/sxO1VEqA==
+X-Received: by 2002:a05:6e02:168a:b0:35d:6579:7135 with SMTP id f10-20020a056e02168a00b0035d65797135mr1804637ila.36.1702097373351;
+        Fri, 08 Dec 2023 20:49:33 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFKUV10bCyeVicYQqpK5S9zZPrhV9FtzcSQg5Gdzr7SSyWuUzn93zvenn5f3rlrhLuYyk38Rg==
+X-Received: by 2002:a05:6e02:168a:b0:35d:6579:7135 with SMTP id f10-20020a056e02168a00b0035d65797135mr1804630ila.36.1702097373119;
+        Fri, 08 Dec 2023 20:49:33 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id bv190-20020a632ec7000000b005c2967852c5sm2363820pgb.30.2023.12.08.20.41.16
+        by smtp.gmail.com with ESMTPSA id h8-20020a170902680800b001d0828f2ebfsm2586381plk.273.2023.12.08.20.49.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Dec 2023 20:41:17 -0800 (PST)
-Date: Sat, 9 Dec 2023 12:41:14 +0800
+        Fri, 08 Dec 2023 20:49:32 -0800 (PST)
+Date: Sat, 9 Dec 2023 12:49:29 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs/303: add git commit ID to _fixed_by_kernel_commit
-Message-ID: <20231209044114.znk5wbl5fuwgf5hr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <a61891b7afa408c39921c2357d00812292068c9e.1701858258.git.fdmanana@suse.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Alexander Larsson <alexl@redhat.com>,
+	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2 0/4] Overlayfs tests for 6.7-rc1
+Message-ID: <20231209044929.oogoausuhan5plzd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231204185859.3731975-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -59,37 +60,59 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a61891b7afa408c39921c2357d00812292068c9e.1701858258.git.fdmanana@suse.com>
+In-Reply-To: <20231204185859.3731975-1-amir73il@gmail.com>
 
-On Wed, Dec 06, 2023 at 10:24:44AM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, Dec 04, 2023 at 08:58:55PM +0200, Amir Goldstein wrote:
+> Zorro,
 > 
-> The kernel patch for this test was merged into 6.7-rc4, so replace the
-> "xxxxxxxxxxxx" stub with the commit id.
+> This update contains 3 new overlayfs tests for new features added
+> in v6.7-rc1.
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
+> overlay/084, written by Alexander, tests the new nested xattrs feature.
+> overlay/{085,086} test the new lowerdir+,datadir+ mount options.
+> 
+> overlay/086 was partly forked from overlay/083, but overlay/083 is not
+> sensitive to libmount version, because the escaped commas test is not
+> related to any specific mount option, so it wasn't copied over.
+> 
+> All the new tests do not run on older kernels.
+> 
+> Thanks,
+> Amir.
+> 
+> Changed since v1:
+> - Helper _require_scratch_overlay_xattr_escapes() already added by
+>   "overlay/026: Fix test expectation for newer kernels"
+
+This version looks good to me, let's have this feature test coverage
+at first.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
->  tests/btrfs/303 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/btrfs/303 b/tests/btrfs/303
-> index b9d6c61d..521d49d0 100755
-> --- a/tests/btrfs/303
-> +++ b/tests/btrfs/303
-> @@ -15,7 +15,7 @@ _begin_fstest auto quick snapshot subvol qgroup
->  _supported_fs btrfs
->  _require_scratch
->  
-> -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +_fixed_by_kernel_commit 8049ba5d0a28 \
->  	"btrfs: do not abort transaction if there is already an existing qgroup"
->  
->  _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> Amir Goldstein (4):
+>   overlay: Add tests for nesting private xattrs
+>   overlay: prepare for new lowerdir+,datadir+ tests
+>   overlay: test data-only lowerdirs with datadir+ mount option
+>   overlay: test parsing of lowerdir+,datadir+ mount options
+> 
+>  common/overlay        |  15 ++
+>  tests/overlay/079     |  36 +++--
+>  tests/overlay/084     | 169 +++++++++++++++++++++
+>  tests/overlay/084.out |  61 ++++++++
+>  tests/overlay/085     | 332 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/085.out |  42 ++++++
+>  tests/overlay/086     |  81 +++++++++++
+>  tests/overlay/086.out |   2 +
+>  8 files changed, 723 insertions(+), 15 deletions(-)
+>  create mode 100755 tests/overlay/084
+>  create mode 100644 tests/overlay/084.out
+>  create mode 100755 tests/overlay/085
+>  create mode 100644 tests/overlay/085.out
+>  create mode 100755 tests/overlay/086
+>  create mode 100644 tests/overlay/086.out
+> 
 > -- 
-> 2.40.1
-> 
+> 2.34.1
 > 
 
