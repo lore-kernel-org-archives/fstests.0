@@ -1,175 +1,421 @@
-Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E217A95;
-	Sat,  9 Dec 2023 11:16:34 -0800 (PST)
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2ca02def690so38675061fa.3;
-        Sat, 09 Dec 2023 11:16:34 -0800 (PST)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hBa25gtK"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B94A4DB
+	for <fstests@vger.kernel.org>; Sun, 10 Dec 2023 05:35:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1702215334;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=UYdFr7VlS1+56crOb0Lssp2m1tCACCZU1RQkBXa2yYI=;
+	b=hBa25gtKE/aAT5H1FdnmPN05JtA/1PgRtXtxYxZol6aDolqaHkB3kQ9j45w0AgNHixO+pX
+	zefX9PWG6EsjcD/u7jYCsZRvhZGUwhj8U28wRmC0jL6xtSWJ9BWaU8hrf8/LS6MkM9MqBq
+	qOjSq+fio/+i3jkvzH74DohDAvFBDKs=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-321-8O_qHT7IO6qCoBEsS6RpEg-1; Sun, 10 Dec 2023 08:35:32 -0500
+X-MC-Unique: 8O_qHT7IO6qCoBEsS6RpEg-1
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-5b8d4a559ddso3398423a12.1
+        for <fstests@vger.kernel.org>; Sun, 10 Dec 2023 05:35:32 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702149393; x=1702754193;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=yvIAlV8cR7DKjpVwhZEvex6k5cOHUw6zvJ4KqiQQ7J4=;
-        b=Afqy9cfNXfyam3zY5QBzyBw8JQLYL/l55eW01qRamui4B/GfSEgIHn4gy/s0KRk6ug
-         CekzBhMOqz6rzE8IvmfOH+NYywICh8oiGtkCPAA7uJE05UuGmDLHOJRwGnBcXoKtb0vm
-         pqilQgz2qbXufcLIbDNfmrKl+4Qb0MT+xoaAIm7bk/um4lnkWutUVBV3y/9tcofCq40e
-         93tq2BKiT+2cWLF+wQeAxuxEUCYQZhKN+JufW7n/a9bjLL4ytHvThVbsUkvRMlrVt2x9
-         BPoqsTW3RDrRMDjOKEFOqQtVK75FlltQwm711BScNFPgUvsP/cXP5YYSfqk8fT/v0MfF
-         exHA==
-X-Gm-Message-State: AOJu0YzjHxei+rX9NEqS4j3uj6ZfyVL1VfibgzmlBSFedTQUBrBC/RT1
-	HQfNAUSV2aiORjQt7Bd44FDIFJFVmchCpA==
-X-Google-Smtp-Source: AGHT+IGN0IV821CdXlu7CZ4P485FGl0zRIG8tNc78XYVzaDuaYLBZfHR92pXSu5JbAoB5xdF4JjjoQ==
-X-Received: by 2002:a2e:8619:0:b0:2ca:365b:8585 with SMTP id a25-20020a2e8619000000b002ca365b8585mr685177lji.106.1702149392466;
-        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com. [209.85.128.54])
-        by smtp.gmail.com with ESMTPSA id th19-20020a1709078e1300b00a1bda8db043sm2496840ejc.120.2023.12.09.11.16.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-40c317723a8so22972775e9.3;
-        Sat, 09 Dec 2023 11:16:32 -0800 (PST)
-X-Received: by 2002:a05:600c:2b10:b0:40c:16ee:321e with SMTP id
- y16-20020a05600c2b1000b0040c16ee321emr955135wme.62.1702149391793; Sat, 09 Dec
- 2023 11:16:31 -0800 (PST)
+        d=1e100.net; s=20230601; t=1702215331; x=1702820131;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UYdFr7VlS1+56crOb0Lssp2m1tCACCZU1RQkBXa2yYI=;
+        b=G3JfCvyWei0AjX7Wd4Om4f3EeCgEYN82cDxrzWGVbZx2rzPVxg7bXKfeN2EoFDvEAE
+         WPsfpabPOEIF/tgevFGiCPAtv0pg5jGD2QnMNc1Gkv5OsvZ6GH+Dhw3PNQNuyUOy7aAW
+         FJFBm/yJx4sQKGcUPBWrmqp2lqIT813/kfD3HB73DPgY1ATj5Z24dkC99E/QKFywgBvu
+         UzZUFi/1kgUIB+bFsp8KNn7ZHKCk6iX9WpvnIoi1Du5zTgClkCrRtcO30Vt5UKkBgyU4
+         z4tzvotxYYJq2Fze7igJa2KPi8cbWE5eoa7gOxrNUNdAclGK5vVQn8XvQzhHbZJJHa6H
+         yldg==
+X-Gm-Message-State: AOJu0YzHfBNR9b+oy2vj3AOXnkMtslVjqj+fwhw80jrrTIPieTn86GMJ
+	wTuibdQcsdzJQpnzUhVhkHguAiqfPl4/Q4K5ZjbR0axTlKP1orgrDsBOGA0pBRyRdygRJZG4HNu
+	ktOwDtTzp4ScV3Kymgw==
+X-Received: by 2002:a05:6a20:12c7:b0:18c:18d4:d931 with SMTP id v7-20020a056a2012c700b0018c18d4d931mr3986477pzg.34.1702215330924;
+        Sun, 10 Dec 2023 05:35:30 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEYtkcGkerwTq7Gv4m0GhI7TFlx+c7vqyHWXMgSeplJ/IRSHvOW3YDRbm32HHTEfk0jZum/iQ==
+X-Received: by 2002:a05:6a20:12c7:b0:18c:18d4:d931 with SMTP id v7-20020a056a2012c700b0018c18d4d931mr3986467pzg.34.1702215330574;
+        Sun, 10 Dec 2023 05:35:30 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id t20-20020aa79394000000b006ce7e1c37dasm4490386pfe.80.2023.12.10.05.35.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 10 Dec 2023 05:35:30 -0800 (PST)
+Date: Sun, 10 Dec 2023 21:35:26 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Alexander Larsson <alexl@redhat.com>,
+	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/4] overlay: Add tests for nesting private xattrs
+Message-ID: <20231210133526.ei7thr54dff6zjbz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231204185859.3731975-1-amir73il@gmail.com>
+ <20231204185859.3731975-2-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com>
- <CAL3q7H7pMjbc1-xZ1xDSMRBM2C-FiTi=sx=mQNBqH4MbXQ_WLA@mail.gmail.com>
- <0e13042e-1322-4baf-8ffd-4cd9415acac0@oracle.com> <ea5e3a98-b5ec-46c8-bf0d-e8fbd88cf4eb@wdc.com>
-In-Reply-To: <ea5e3a98-b5ec-46c8-bf0d-e8fbd88cf4eb@wdc.com>
-From: Neal Gompa <neal@gompa.dev>
-Date: Sat, 9 Dec 2023 14:15:54 -0500
-X-Gmail-Original-Message-ID: <CAEg-Je_B87HAvFVhm-_1Q4NDuhyELVrDxvebzrDfNzUL4yi+ww@mail.gmail.com>
-Message-ID: <CAEg-Je_B87HAvFVhm-_1Q4NDuhyELVrDxvebzrDfNzUL4yi+ww@mail.gmail.com>
-Subject: Re: [PATCH v5 0/9] fstests: add tests for btrfs' raid-stripe-tree feature
-To: Johannes Thumshirn <Johannes.Thumshirn@wdc.com>
-Cc: Anand Jain <anand.jain@oracle.com>, Filipe Manana <fdmanana@kernel.org>, 
-	Zorro Lang <zlang@redhat.com>, Filipe Manana <fdmanana@suse.com>, 
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>, 
-	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231204185859.3731975-2-amir73il@gmail.com>
 
-On Fri, Dec 8, 2023 at 4:19=E2=80=AFAM Johannes Thumshirn
-<Johannes.Thumshirn@wdc.com> wrote:
->
-> On 08.12.23 02:19, Anand Jain wrote:
-> >
-> >
-> > On 12/7/23 17:41, Filipe Manana wrote:
-> >> On Thu, Dec 7, 2023 at 9:03=E2=80=AFAM Johannes Thumshirn
-> >> <johannes.thumshirn@wdc.com> wrote:
-> >>>
-> >>> Add tests for btrfs' raid-stripe-tree feature. All of these test work=
- by
-> >>> writing a specific pattern to a newly created filesystem and afterwar=
-ds
-> >>> using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to ve=
-rify
-> >>> the placement and the layout of the metadata.
-> >>>
-> >>> The md5sum of each file will be compared as well after a re-mount of =
-the
-> >>> filesystem.
-> >>>
-> >>> ---
-> >>> Changes in v5:
-> >>> - add _require_btrfs_free_space_tree helper and use in tests
-> >>> - Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-5782=
-84dd3a70@wdc.com
-> >>>
-> >>> Changes in v4:
-> >>> - add _require_btrfs_no_compress to all tests
-> >>> - add _require_btrfs_no_nodatacow helper and add to btrfs/308
-> >>> - add _require_btrfs_feature "free_space_tree" to all tests
-> >>> - Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e85=
-7a5439a2@wdc.com
-> >>>
-> >>> Changes in v3:
-> >>> - added 'raid-stripe-tree' to mkfs options, as only zoned raid gets i=
-t
-> >>>     automatically
-> >>> - Rename test cases as btrfs/302 and btrfs/303 already exist upstream
-> >>> - Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f8=
-0eea345b@wdc.com
-> >>>
-> >>> Changes in v2:
-> >>> - Re-ordered series so the newly introduced group is added before the
-> >>>     tests
-> >>> - Changes Filipe requested to the tests.
-> >>> - Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254=
-eb1bcff8@wdc.com
-> >>>
-> >>> ---
-> >>> Johannes Thumshirn (9):
-> >>>         fstests: doc: add new raid-stripe-tree group
-> >>>         common: add filter for btrfs raid-stripe dump
-> >>>         common: add _require_btrfs_no_nodatacow helper
-> >>>         common: add _require_btrfs_free_space_tree
-> >>>         btrfs: add fstest for stripe-tree metadata with 4k write
-> >>>         btrfs: add fstest for 8k write spanning two stripes on raid-s=
-tripe-tree
-> >>>         btrfs: add fstest for writing to a file at an offset with RST
-> >>>         btrfs: add fstests to write 128k to a RST filesystem
-> >>>         btrfs: add fstest for overwriting a file partially with RST
-> >>>
-> >>>    common/btrfs        |  17 +++++++++
-> >>>    common/filter.btrfs |  14 +++++++
-> >>>    doc/group-names.txt |   1 +
-> >>>    tests/btrfs/304     |  56 +++++++++++++++++++++++++++
-> >>>    tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
-> >>>    tests/btrfs/305     |  61 ++++++++++++++++++++++++++++++
-> >>>    tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
-> >>>    tests/btrfs/306     |  59 +++++++++++++++++++++++++++++
-> >>>    tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
-> >>>    tests/btrfs/307     |  56 +++++++++++++++++++++++++++
-> >>>    tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
-> >>>    tests/btrfs/308     |  60 +++++++++++++++++++++++++++++
-> >>>    tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++=
-++++++++++++
-> >>>    13 files changed, 710 insertions(+)
-> >>> ---
-> >>> base-commit: baca8a2b5cb6e798ce3a07e79a081031370c6cb8
-> >>
-> >> Btw this base commit does not exist in the official fstests repo.
-> >> That commit is from the staging branch at https://github.com/kdave/xfs=
-tests
-> >>
-> >> A "git am" will fail because the official fstests repo doesn't have
-> >> _require_btrfs_no_block_group_tree() at common/btrfs,
-> >> so it needs to be manually adjusted when applying the 3rd patch.
-> >>
-> >> I tried the tests and they look good, so:
-> >>
-> >> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> >>
-> >> One question I missed before. Test 304 for example does a 4K write and
-> >> expects in the golden output to get a 4K raid stripe item.
-> >> What happens on a machine with 64K page size? There the default sector
-> >> size is 64K, will the write result in a 64K raid stripe item or will
-> >> it be 4K? In the former case, it will make the test fail.
-> >>
-> >
-> > Testing on a 64K pagesize. Will run it. Apologies for intermittent
-> > responses; OOO until December 21.
->
-> Thanks Anand!
->
-> I don't have a 64k page size system to test, but I _think_ Filipe is
-> right, that will fail. I think we should skip these tests on non 4k secto=
-rs.
->
+On Mon, Dec 04, 2023 at 08:58:56PM +0200, Amir Goldstein wrote:
+> If overlayfs xattr escaping is supported, ensure:
+>  * We can create "overlay.*" xattrs on a file in the overlayfs
+>  * We can create an xwhiteout file in the overlayfs
+> 
+> We check for nesting support by trying to getattr an "overlay.*" xattr
+> in an overlayfs mount, which will return ENOSUPP in older kernels.
+> 
+> Signed-off-by: Alexander Larsson <alexl@redhat.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-Once we land the patch to default to 4k sector size[1] regardless of
-page size, this should all work across all architectures, no?
+Hi Amir,
 
-[1]: https://lore.kernel.org/linux-btrfs/20231116160235.2708131-2-neal@gomp=
-a.dev/
+This test passed with below kernel configuration at first:
+  CONFIG_OVERLAY_FS=m
+  # CONFIG_OVERLAY_FS_REDIRECT_DIR is not set
+  CONFIG_OVERLAY_FS_REDIRECT_ALWAYS_FOLLOW=y
+  # CONFIG_OVERLAY_FS_INDEX is not set
+  # CONFIG_OVERLAY_FS_XINO_AUTO is not set
+  # CONFIG_OVERLAY_FS_METACOPY is not set
 
+But then I found it fails if I enabled below configurations:
+  CONFIG_OVERLAY_FS_REDIRECT_DIR=y
+  CONFIG_OVERLAY_FS_INDEX=y
+  CONFIG_OVERLAY_FS_XINO_AUTO=y
+  CONFIG_OVERLAY_FS_METACOPY=y
 
+Without these configures, this test passed. But with them, it fails as [1].
+The underlying fs is xfs (with default mkfs options), there're not specific
+MOUNT_OPTIONS and MKFS_OPTIONS to use.
 
---
-=E7=9C=9F=E5=AE=9F=E3=81=AF=E3=81=84=E3=81=A4=E3=82=82=E4=B8=80=E3=81=A4=EF=
-=BC=81/ Always, there's only one truth!
+I'll delay merging this patchset temporarily, please check.
+
+Thanks,
+Zorro
+
+[1]
+QA output created by 084
+
+== Check xattr escape trusted ==
+# file: SCRATCH_MNT/layer2/dir
+trusted.overlay.opaque="y"
+user.overlay.opaque="y"
+
+# file: SCRATCH_DEV/mid/layer2/dir
+trusted.overlay.overlay.opaque="y"
+user.overlay.opaque="y"
+
+mount: /mnt/fstests/SCRATCH_DIR/ovl-mnt: mount(2) system call failed: Stale file handle.
+getfattr: /mnt/fstests/SCRATCH_DIR/ovl-mnt/layer2/dir: No such file or directory
+nested xattr mount with trusted.overlay
+mount: /mnt/fstests/SCRATCH_DIR/nested: special device overlayfs does not exist.
+stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/nested: not mounted.
+nested xattr mount with user.overlay
+mount: /mnt/fstests/SCRATCH_DIR/nested: special device overlayfs does not exist.
+stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/nested: not mounted.
+copy-up of escaped xattrs
+touch: cannot touch '/mnt/fstests/SCRATCH_DIR/ovl-mnt/layer2/dir/other_file': No such file or directory
+getfattr: /mnt/fstests/SCRATCH_DIR/upper/layer2/dir: No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/ovl-mnt: not mounted.
+
+== Check xattr escape user ==
+# file: SCRATCH_MNT/layer2/dir
+trusted.overlay.opaque="y"
+user.overlay.opaque="y"
+
+# file: SCRATCH_DEV/mid/layer2/dir
+trusted.overlay.opaque="y"
+user.overlay.overlay.opaque="y"
+
+mount: /mnt/fstests/SCRATCH_DIR/ovl-mnt: mount(2) system call failed: Stale file handle.
+getfattr: /mnt/fstests/SCRATCH_DIR/ovl-mnt/layer2/dir: No such file or directory
+nested xattr mount with trusted.overlay
+mount: /mnt/fstests/SCRATCH_DIR/nested: special device overlayfs does not exist.
+stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/nested: not mounted.
+nested xattr mount with user.overlay
+mount: /mnt/fstests/SCRATCH_DIR/nested: special device overlayfs does not exist.
+stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/nested: not mounted.
+copy-up of escaped xattrs
+touch: cannot touch '/mnt/fstests/SCRATCH_DIR/ovl-mnt/layer2/dir/other_file': No such file or directory
+getfattr: /mnt/fstests/SCRATCH_DIR/upper/layer2/dir: No such file or directory
+umount: /mnt/fstests/SCRATCH_DIR/ovl-mnt: not mounted.
+
+== Check xwhiteout trusted ==
+regular
+stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+
+== Check xwhiteout user ==
+regular
+stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+
+== Check escaped xwhiteout trusted ==
+regular
+stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+
+== Check escaped xwhiteout user ==
+regular
+stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+
+>  tests/overlay/084     | 169 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/084.out |  61 +++++++++++++++
+>  2 files changed, 230 insertions(+)
+>  create mode 100755 tests/overlay/084
+>  create mode 100644 tests/overlay/084.out
+> 
+> diff --git a/tests/overlay/084 b/tests/overlay/084
+> new file mode 100755
+> index 00000000..ff451f38
+> --- /dev/null
+> +++ b/tests/overlay/084
+> @@ -0,0 +1,169 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2023 Red Hat, Inc. All Rights Reserved.
+> +# Copyright (C) 2023 CTERA Networks. All Rights Reserved.
+> +#
+> +# FS QA Test No. 084
+> +#
+> +# Test advanded nesting functionallity
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick nested
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	# Unmount nested mounts if things fail
+> +	$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT/nested  2>/dev/null
+> +	rm -rf $tmp
+> +}
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +# We use non-default scratch underlying overlay dirs, we need to check
+> +# them explicity after test.
+> +_require_scratch_nocheck
+> +_require_scratch_overlay_xattr_escapes
+> +
+> +# remove all files from previous tests
+> +_scratch_mkfs
+> +
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
+> +middir=$OVL_BASE_SCRATCH_MNT/mid
+> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
+> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
+> +nesteddir=$OVL_BASE_SCRATCH_MNT/nested
+> +
+> +umount_overlay()
+> +{
+> +	$UMOUNT_PROG $SCRATCH_MNT
+> +}
+> +
+> +test_escape()
+> +{
+> +	local prefix=$1
+> +
+> +	echo -e "\n== Check xattr escape $prefix =="
+> +
+> +	local extra_options=""
+> +	if [ "$prefix" == "user" ]; then
+> +            extra_options="-o userxattr"
+> +	fi
+> +
+> +	_scratch_mkfs
+> +	mkdir -p $lowerdir $middir $upperdir $workdir $nesteddir
+> +
+> +	_overlay_scratch_mount_dirs $lowerdir $middir $workdir $extra_options
+> +
+> +	mkdir -p $SCRATCH_MNT/layer1/dir/ $SCRATCH_MNT/layer2/dir
+> +
+> +	touch $SCRATCH_MNT/layer1/dir/file
+> +
+> +	# Make layer2/dir an opaque file
+> +	# Only one of these will be escaped, but both should succeed
+> +	setfattr -n user.overlay.opaque -v "y" $SCRATCH_MNT/layer2/dir
+> +	setfattr -n trusted.overlay.opaque -v "y" $SCRATCH_MNT/layer2/dir
+> +
+> +	getfattr -m "overlay\\." --absolute-names -d $SCRATCH_MNT/layer2/dir | _filter_scratch
+> +
+> +	umount_overlay
+> +
+> +	getfattr -m "overlay\\." --absolute-names -d $middir/layer2/dir | _filter_scratch
+> +
+> +	# Remount as lower and try again
+> +	_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir $extra_options
+> +
+> +	getfattr -m "overlay\\." --absolute-names -d $SCRATCH_MNT/layer2/dir | _filter_scratch
+> +
+> +	# Recursively mount and ensure the opaque dir is working with both trusted and user xattrs
+> +	echo "nested xattr mount with trusted.overlay"
+> +	_overlay_mount_dirs $SCRATCH_MNT/layer2:$SCRATCH_MNT/layer1 - - overlayfs $nesteddir
+> +	stat $nesteddir/dir/file  2>&1 | _filter_scratch
+> +	$UMOUNT_PROG $nesteddir
+> +
+> +	echo "nested xattr mount with user.overlay"
+> +	_overlay_mount_dirs $SCRATCH_MNT/layer2:$SCRATCH_MNT/layer1 - - -o userxattr overlayfs $nesteddir
+> +	stat $nesteddir/dir/file  2>&1 | _filter_scratch
+> +	$UMOUNT_PROG $nesteddir
+> +
+> +	# Also ensure propagate the escaped xattr when we copy-up layer2/dir
+> +	echo "copy-up of escaped xattrs"
+> +	touch $SCRATCH_MNT/layer2/dir/other_file
+> +	getfattr -m "$prefix.overlay\\.overlay" --absolute-names -d $upperdir/layer2/dir | _filter_scratch
+> +
+> +	umount_overlay
+> +}
+> +
+> +test_escape trusted
+> +test_escape user
+> +
+> +do_test_xwhiteout()
+> +{
+> +	local prefix=$1
+> +	local basedir=$2
+> +
+> +	local extra_options=""
+> +	if [ "$prefix" == "user" ]; then
+> +            extra_options="-o userxattr"
+> +	fi
+> +
+> +	mkdir -p $basedir/lower $basedir/upper $basedir/work
+> +	touch $basedir/lower/regular $basedir/lower/hidden  $basedir/upper/hidden
+> +	setfattr -n $prefix.overlay.whiteouts -v "y" $basedir/upper
+> +	setfattr -n $prefix.overlay.whiteout -v "y" $basedir/upper/hidden
+> +
+> +	# Test the hidden is invisible
+> +	_overlay_scratch_mount_dirs $basedir/upper:$basedir/lower - - $extra_options
+> +	ls $SCRATCH_MNT
+> +	stat $SCRATCH_MNT/hidden 2>&1 | _filter_scratch
+> +	umount_overlay
+> +}
+> +
+> +# Validate that xwhiteouts work like whiteouts
+> +test_xwhiteout()
+> +{
+> +	local prefix=$1
+> +
+> +	echo -e "\n== Check xwhiteout $prefix =="
+> +
+> +	_scratch_mkfs
+> +
+> +	do_test_xwhiteout $prefix $OVL_BASE_SCRATCH_MNT
+> +}
+> +
+> +test_xwhiteout trusted
+> +test_xwhiteout user
+> +
+> +# Validate that (escaped) xwhiteouts work inside a nested overlayfs mount
+> +test_escaped_xwhiteout()
+> +{
+> +	local prefix=$1
+> +
+> +	echo -e "\n== Check escaped xwhiteout $prefix =="
+> +
+> +	local extra_options=""
+> +	if [ "$prefix" == "user" ]; then
+> +            extra_options="-o userxattr"
+> +	fi
+> +
+> +	_scratch_mkfs
+> +	mkdir -p $lowerdir $upperdir $workdir $nesteddir
+> +
+> +	_overlay_mount_dirs $lowerdir $upperdir $workdir $extra_options overlayfs $nesteddir
+> +
+> +	do_test_xwhiteout $prefix $nesteddir
+> +
+> +	$UMOUNT_PROG $nesteddir
+> +}
+> +
+> +test_escaped_xwhiteout trusted
+> +test_escaped_xwhiteout user
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/overlay/084.out b/tests/overlay/084.out
+> new file mode 100644
+> index 00000000..54b890de
+> --- /dev/null
+> +++ b/tests/overlay/084.out
+> @@ -0,0 +1,61 @@
+> +QA output created by 084
+> +
+> +== Check xattr escape trusted ==
+> +# file: SCRATCH_MNT/layer2/dir
+> +trusted.overlay.opaque="y"
+> +user.overlay.opaque="y"
+> +
+> +# file: SCRATCH_DEV/mid/layer2/dir
+> +trusted.overlay.overlay.opaque="y"
+> +user.overlay.opaque="y"
+> +
+> +# file: SCRATCH_MNT/layer2/dir
+> +trusted.overlay.opaque="y"
+> +user.overlay.opaque="y"
+> +
+> +nested xattr mount with trusted.overlay
+> +stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+> +nested xattr mount with user.overlay
+> +stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+> +copy-up of escaped xattrs
+> +# file: SCRATCH_DEV/upper/layer2/dir
+> +trusted.overlay.overlay.opaque="y"
+> +
+> +
+> +== Check xattr escape user ==
+> +# file: SCRATCH_MNT/layer2/dir
+> +trusted.overlay.opaque="y"
+> +user.overlay.opaque="y"
+> +
+> +# file: SCRATCH_DEV/mid/layer2/dir
+> +trusted.overlay.opaque="y"
+> +user.overlay.overlay.opaque="y"
+> +
+> +# file: SCRATCH_MNT/layer2/dir
+> +trusted.overlay.opaque="y"
+> +user.overlay.opaque="y"
+> +
+> +nested xattr mount with trusted.overlay
+> +stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+> +nested xattr mount with user.overlay
+> +stat: cannot statx 'SCRATCH_DEV/nested/dir/file': No such file or directory
+> +copy-up of escaped xattrs
+> +# file: SCRATCH_DEV/upper/layer2/dir
+> +user.overlay.overlay.opaque="y"
+> +
+> +
+> +== Check xwhiteout trusted ==
+> +regular
+> +stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+> +
+> +== Check xwhiteout user ==
+> +regular
+> +stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+> +
+> +== Check escaped xwhiteout trusted ==
+> +regular
+> +stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+> +
+> +== Check escaped xwhiteout user ==
+> +regular
+> +stat: cannot statx 'SCRATCH_MNT/hidden': No such file or directory
+> -- 
+> 2.34.1
+> 
+
