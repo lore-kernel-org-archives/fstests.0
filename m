@@ -1,19 +1,19 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81F2B51C58;
-	Mon, 11 Dec 2023 18:35:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C5771D696;
+	Mon, 11 Dec 2023 18:41:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="moVwCp+k"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 65EF2C433C9;
-	Mon, 11 Dec 2023 18:35:33 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="uifyJQS8"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B91DC433C7;
+	Mon, 11 Dec 2023 18:41:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1702319733;
-	bh=/s7gEbdJwaHW0VD1uv7csXpND0bUYxljaP+fhJAoeWA=;
+	s=korg; t=1702320096;
+	bh=sbd5i/nTjnELi4z/6kzEQfoDA5HmfqxmI02it/pprsk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=moVwCp+kTMLRyAK/s97NqVHKFGNLsPdMo6Zx629W8EzuZQ8fQrMYYBvbCfnkRjciy
-	 XuSruE+wSwhajrKvOFpH9fVQlT5adBVk3C5mBLYGHFKzhazijd/2943RJtSY6KSgts
-	 aU/lxkRwmHYjds1wXU8h5NQNCXxeTZ+8nanYz180=
+	b=uifyJQS840Rsfu9pd4+ta+fSPf4Jy13QiYklNwZ59bUJpgp3fJTovWZex3x/1iZIG
+	 TugNcv5LIXnBmWAsT5lhz1u4u52/R2llkZ+2vIkhUN6QCPIUOzKv2l0JpVa1vWJBUj
+	 Tee6LB6zYxtcqoOMSwZdYo1U4Ai780V0ISr87qDU=
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To: stable@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -28,13 +28,14 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
 	linux-cifs@vger.kernel.org,
 	linux-fsdevel@vger.kernel.org,
 	David Howells <dhowells@redhat.com>,
-	Steve French <stfrench@microsoft.com>
-Subject: [PATCH 6.6 215/244] cifs: Fix non-availability of dedup breaking generic/304
-Date: Mon, 11 Dec 2023 19:21:48 +0100
-Message-ID: <20231211182055.610436726@linuxfoundation.org>
+	Steve French <stfrench@microsoft.com>,
+	Sasha Levin <sashal@kernel.org>
+Subject: [PATCH 5.10 93/97] cifs: Fix non-availability of dedup breaking generic/304
+Date: Mon, 11 Dec 2023 19:22:36 +0100
+Message-ID: <20231211182023.825980782@linuxfoundation.org>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20231211182045.784881756@linuxfoundation.org>
-References: <20231211182045.784881756@linuxfoundation.org>
+In-Reply-To: <20231211182019.802717483@linuxfoundation.org>
+References: <20231211182019.802717483@linuxfoundation.org>
 User-Agent: quilt/0.67
 X-stable: review
 X-Patchwork-Hint: ignore
@@ -46,13 +47,13 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-6.6-stable review patch.  If anyone has any objections, please let me know.
+5.10-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
 From: David Howells <dhowells@redhat.com>
 
-commit 691a41d8da4b34fe72f09393505f55f28a8f34ec upstream.
+[ Upstream commit 691a41d8da4b34fe72f09393505f55f28a8f34ec ]
 
 Deduplication isn't supported on cifs, but cifs doesn't reject it, instead
 treating it as extent duplication/cloning.  This can cause generic/304 to go
@@ -78,14 +79,16 @@ cc: linux-fsdevel@vger.kernel.org
 Link: https://lore.kernel.org/r/3876191.1701555260@warthog.procyon.org.uk/
 Signed-off-by: David Howells <dhowells@redhat.com>
 Signed-off-by: Steve French <stfrench@microsoft.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- fs/smb/client/cifsfs.c |    4 +++-
+ fs/cifs/cifsfs.c | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
---- a/fs/smb/client/cifsfs.c
-+++ b/fs/smb/client/cifsfs.c
-@@ -1208,7 +1208,9 @@ static loff_t cifs_remap_file_range(stru
+diff --git a/fs/cifs/cifsfs.c b/fs/cifs/cifsfs.c
+index b87d6792b14ad..16155529e449f 100644
+--- a/fs/cifs/cifsfs.c
++++ b/fs/cifs/cifsfs.c
+@@ -1093,7 +1093,9 @@ static loff_t cifs_remap_file_range(struct file *src_file, loff_t off,
  	unsigned int xid;
  	int rc;
  
@@ -96,5 +99,8 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  		return -EINVAL;
  
  	cifs_dbg(FYI, "clone range\n");
+-- 
+2.42.0
+
 
 
