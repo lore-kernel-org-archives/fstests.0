@@ -1,112 +1,134 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="l2vEZ1ua"
-Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3852B7
-	for <fstests@vger.kernel.org>; Wed, 13 Dec 2023 01:21:02 -0800 (PST)
-Received: by mail-qk1-x729.google.com with SMTP id af79cd13be357-77f35b70944so404337885a.0
-        for <fstests@vger.kernel.org>; Wed, 13 Dec 2023 01:21:02 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1702459262; x=1703064062; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=zWdKzoibSqsQvlvQsp6fHPkW+Qs5gKs7uO7ZxxJgrCQ=;
-        b=l2vEZ1uag+zS/GD/gBP50Rk8/DvJTG8I7dwa/+Q4mWB7j4Qm9RnkBhKhMZrUBdnltn
-         7EeNxZiA15S1xe4QPrOy9xfutqJb4ld7fjzEkMW0u5+ZcqHow4qDI3YZbPhJ0GZ4fl7/
-         q2JHDCGlidhP+y0Nb/XhSH80Vu28mdnsua9Fyp50yBVMaVhOIJhu3zqioRkKzsvmwsUx
-         TIwkYrutdZPu7Yiv1IuanKTGumYYJBEI3cvGc+SgZt28Z+cX7CIHu4q2peQIFL5pXIUj
-         duj0UlnrdvA23sv75eWlFzxDC/X6yH5J/NQp5aovrs5jKNK81a1OIVC5U3Lb5PWtxchR
-         IJIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702459262; x=1703064062;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=zWdKzoibSqsQvlvQsp6fHPkW+Qs5gKs7uO7ZxxJgrCQ=;
-        b=llS0KWafgi60IhsrH2jBMNdqRzIXI5hQUvhcfZJ80m/VTJuY4pWkfCTBs4OlNXAbvy
-         ngMCtp93Ocu8PU6EZ9RGnmkZg67SR/tuTuDT53aw81eAvgp8ad5FfUE4EANl6fwR8sK+
-         II7FnWpitdvY+9ghAe7IPL55r8AjeN/K4CNv4gnXqBrzEPO1L9cGDqpMoD7CzmQ7v8CS
-         Gb368Bbw9atJOSpkVob2o03p5IZfUqRuiCmrn97opU3ifZtVBIEX99oLqZIWK/efMsgs
-         zAOKo7Rf5RO9sYiVTtZJpb+qewnComfl3sGz8Cp6kHQ+Sn9MMiEvZxqrzu3HeEHWo7TE
-         eC8w==
-X-Gm-Message-State: AOJu0YwnsdNm096VcGU6R2dHk7BKRGbOwnF9iTQqUg60//2yciIjL4Cl
-	YXbj25OTlVSBEFmT6NEKXGwMP9bMrJw=
-X-Google-Smtp-Source: AGHT+IEHv7gQMoWQnzK+qYYvHGIk+ifEEg9fw0f5a9qojfB22UYd6oVBck4rrtv1QufM/wqOsLTUAw==
-X-Received: by 2002:a05:620a:491a:b0:77f:4c28:7c8e with SMTP id vy26-20020a05620a491a00b0077f4c287c8emr8688220qkn.66.1702459261792;
-        Wed, 13 Dec 2023 01:21:01 -0800 (PST)
-Received: from xzhouw.hosts.qa.psi.rdu2.redhat.com ([66.187.232.127])
-        by smtp.gmail.com with ESMTPSA id dt8-20020a05620a478800b007749dc7881dsm4347681qkb.48.2023.12.13.01.21.01
-        for <fstests@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 13 Dec 2023 01:21:01 -0800 (PST)
-From: Murphy Zhou <jencce.kernel@gmail.com>
-To: fstests@vger.kernel.org
-Subject: [PATCH] generic/new: drop caches while freeze
-Date: Wed, 13 Dec 2023 17:20:43 +0800
-Message-Id: <20231213092043.1621684-1-jencce.kernel@gmail.com>
-X-Mailer: git-send-email 2.31.1
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Efw+pJyX"
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77CE7199;
+	Wed, 13 Dec 2023 03:35:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1702467325; x=1734003325;
+  h=from:subject:date:message-id:mime-version:
+   content-transfer-encoding:to:cc;
+  bh=CFMdVIjYEHRKAW9HT5fnwral3Zbl4aKvKfqrMdBv2r8=;
+  b=Efw+pJyXf8D93c+CoWvkmcnasAFIAlswh2edhF/hgMdD5BHUp9EKH7Xw
+   oz9VeepXSvElGwOIDrRxg9ta9K/ZuqhzbWHdhywms1S/ZLdYUfcpZXzR0
+   qW1IMdWMOzzC/brysk6WhudsGXQh/PbmAqoM4Keat2Ywn8qJusafdjgIB
+   otftDxiY7EBzhtM6ZGu+XQQNYkUYNeBmaqDviQGTyQtUKkWDWFJciZnuG
+   ELC3Qh8a756km4k3JopDyl2b4EH0TMREEIjo3NGnvlNSD+W/JLywzX0Tq
+   tJqWf/HvlsjJ0WXNye0YT8GTyQBLinayPhAF08WgOjTcoRnOzRGcNMqPW
+   A==;
+X-CSE-ConnectionGUID: T/Zw7jMRTOapnFMIdjT4RA==
+X-CSE-MsgGUID: 1FkfndhUTJ24iGvGHuzbzQ==
+X-IronPort-AV: E=Sophos;i="6.04,272,1695657600"; 
+   d="scan'208";a="4718825"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 13 Dec 2023 19:35:24 +0800
+IronPort-SDR: c6BJfNm0BmkZUiCWH4VUNjKlbPHb5Qe9SRELAMftePQrjLspBoAl6qLqxyuKU9xCRucVuB+Lyp
+ +Wz0vjoAqLhQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Dec 2023 02:40:36 -0800
+IronPort-SDR: jvUpEoHthA792O98JBaVOFAXaPdmoiOtOsspMFnTQ1IUUVcv6hGMRfftbHiqrobKwEDR4vxeA7
+ iaa9ndtwlHtA==
+WDCIronportException: Internal
+Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
+  by uls-op-cesaip02.wdc.com with ESMTP; 13 Dec 2023 03:35:24 -0800
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v6 0/9] fstests: add tests for btrfs' raid-stripe-tree
+ feature
+Date: Wed, 13 Dec 2023 03:35:21 -0800
+Message-Id: <20231213-btrfs-raid-v6-0-913738861069@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAPmWeWUC/3XNQW7DIBCF4atErEsEA+PBXfUeURZgoGHRuILIT
+ RT57p1kUyOlyzfS989dtFRLauJ9dxc1LaWV+cxjeNuJ6eTPn0mWyFuAAqNBWRkuNTdZfYmScCS
+ kkfJIUTD4rimX6zN2OPI+lXaZ6+3ZXvTj+jKzaKlkALQp6DDl7D5+4rSf5i/xiCywhdhBYAiYn
+ UrJG4uhh+Z/aBiq5JA8WjN66KHdwqGDliGSA2djNJ5UD3ELqYPI0Frvtc+ZHw9/cF3XXwQqCBi
+ GAQAA
+To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
+Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
+ linux-btrfs@vger.kernel.org, 
+ Johannes Thumshirn <johannes.thumshirn@wdc.com>
+X-Mailer: b4 0.12.3
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1702467323; l=3025;
+ i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
+ bh=CFMdVIjYEHRKAW9HT5fnwral3Zbl4aKvKfqrMdBv2r8=;
+ b=iN2P+hsMiJAiuSlB+vq2DCQH+YkG/MSeNOHELyoUAV9b9Eu4eYiX/4ntnU8LksewJ8FgDJNdx
+ jEVfDXY02AWCe3HsnTshsvQU9W8eV8ZPHlgwq6nEVMnXHJZyRhP+0MD
+X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
+ pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
 
-Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+Add tests for btrfs' raid-stripe-tree feature. All of these test work by
+writing a specific pattern to a newly created filesystem and afterwards
+using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
+the placement and the layout of the metadata.
+
+The md5sum of each file will be compared as well after a re-mount of the
+filesystem.
+
 ---
- tests/generic/734     | 34 ++++++++++++++++++++++++++++++++++
- tests/generic/734.out |  2 ++
- 2 files changed, 36 insertions(+)
- create mode 100755 tests/generic/734
- create mode 100644 tests/generic/734.out
+Changes in v6:
+- require 4k pagesize for all tests as output depends on page size
+- Add Filipe's Reviewed-by
+- Link to v5: https://lore.kernel.org/r/20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com
 
-diff --git a/tests/generic/734 b/tests/generic/734
-new file mode 100755
-index 00000000..8ca91930
---- /dev/null
-+++ b/tests/generic/734
-@@ -0,0 +1,34 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test 734
-+#
-+# Test possible deadlock of umount and reclaim memory
-+# when there are EOF blocks in files.
-+#
-+. ./common/preamble
-+_begin_fstest freeze auto quick
-+
-+_supported_fs generic
-+_require_scratch
-+
-+$XFS_IO_PROG -fc "pwrite 0 64k" $SCRATCH_MNT/testfile >> $seqres.full
-+cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
-+cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
-+
-+sync
-+
-+fsfreeze -f $SCRATCH_MNT
-+
-+# This will hang if bug reproduces
-+echo 3 > /proc/sys/vm/drop_caches &
-+
-+# Manually unfreeze after a while
-+sleep 5
-+fsfreeze -u $SCRATCH_MNT
-+
-+wait
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/734.out b/tests/generic/734.out
-new file mode 100644
-index 00000000..4299839b
---- /dev/null
-+++ b/tests/generic/734.out
-@@ -0,0 +1,2 @@
-+QA output created by 734
-+Silence is golden
+Changes in v5:
+- add _require_btrfs_free_space_tree helper and use in tests
+- Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com
+
+Changes in v4:
+- add _require_btrfs_no_compress to all tests
+- add _require_btrfs_no_nodatacow helper and add to btrfs/308
+- add _require_btrfs_feature "free_space_tree" to all tests
+- Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com
+
+Changes in v3:
+- added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
+  automatically
+- Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+- Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com
+
+Changes in v2:
+- Re-ordered series so the newly introduced group is added before the
+  tests
+- Changes Filipe requested to the tests.
+- Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com
+
+---
+Johannes Thumshirn (9):
+      fstests: doc: add new raid-stripe-tree group
+      common: add filter for btrfs raid-stripe dump
+      common: add _require_btrfs_no_nodatacow helper
+      common: add _require_btrfs_free_space_tree
+      btrfs: add fstest for stripe-tree metadata with 4k write
+      btrfs: add fstest for 8k write spanning two stripes on raid-stripe-tree
+      btrfs: add fstest for writing to a file at an offset with RST
+      btrfs: add fstests to write 128k to a RST filesystem
+      btrfs: add fstest for overwriting a file partially with RST
+
+ common/btrfs        |  17 +++++++++
+ common/filter.btrfs |  14 +++++++
+ doc/group-names.txt |   1 +
+ tests/btrfs/304     |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/304.out |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/305     |  63 +++++++++++++++++++++++++++++++
+ tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/306     |  61 ++++++++++++++++++++++++++++++
+ tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++++++++
+ tests/btrfs/307     |  58 ++++++++++++++++++++++++++++
+ tests/btrfs/307.out |  65 ++++++++++++++++++++++++++++++++
+ tests/btrfs/308     |  62 ++++++++++++++++++++++++++++++
+ tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 13 files changed, 720 insertions(+)
+---
+base-commit: e8a1c16502fad2660d29de5835c4c84700b1f11a
+change-id: 20231204-btrfs-raid-75975797f97d
+
+Best regards,
 -- 
-2.31.1
+Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
