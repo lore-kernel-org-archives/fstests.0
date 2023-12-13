@@ -1,255 +1,163 @@
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="fSnr4J4Q"
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5041610F;
-	Wed, 13 Dec 2023 03:35:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1702467346; x=1734003346;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=c7K6ye4ECrk/rqwJG0NQWH5K0hRc0hdL/n5pdDiHpm4=;
-  b=fSnr4J4QP8x7vcEAc8EwmaiInKFALsKe6F2D9cFSb5RG54IASaIrsj1H
-   /pOnB2hGE1tCqCqy91DT9EWlT5kH2pJBrMZUH6hwNgVd3I7f/SNO6/0a7
-   aCCAfWCLcYEp1npewDuHwBXZAXYj08LemzUennB32A4G1F7S5voozAG+2
-   xHwuCkitzJ1xPavvtIb3QhFgRdEkkUiF2n3gLniHZ4z5gEq37E7DPKJyN
-   kuD38jWVscJ4RmoKIHkjIG7/COpFlkumIAUDNjlsciKJU92z8qWMsGnIx
-   GeyCw5O2GBCDFSgu1Qdp7L1OttRGnf5W1lPG87GRKo0O6NVe8BR18fTaD
-   Q==;
-X-CSE-ConnectionGUID: NP17EFZpTQiOn2O4+mlZkw==
-X-CSE-MsgGUID: 3oERq7KfRKemlpkhyZsZWQ==
-X-IronPort-AV: E=Sophos;i="6.04,272,1695657600"; 
-   d="scan'208";a="4718849"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 13 Dec 2023 19:35:35 +0800
-IronPort-SDR: b3KTwXrLmCMyb7qDUouoOxblHL/h5oyOUFhBxctN0ddANPrwP3pe4dLZFVkUxeU64wFAB492wu
- Bga8XH+T8+5A==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Dec 2023 02:40:47 -0800
-IronPort-SDR: As73M59qLiEn53nmEZo9dSBU3AHWSwQSbne23nGJ/jyk0ZLvfp85QevgSi/4SDANM/3uZzlmen
- 1t8YRBSJHMrw==
-WDCIronportException: Internal
-Received: from unknown (HELO redsun91.ssa.fujisawa.hgst.com) ([10.149.66.6])
-  by uls-op-cesaip02.wdc.com with ESMTP; 13 Dec 2023 03:35:36 -0800
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Date: Wed, 13 Dec 2023 03:35:30 -0800
-Subject: [PATCH v6 9/9] btrfs: add fstest for overwriting a file partially
- with RST
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IP+KgG2F"
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D53210F
+	for <fstests@vger.kernel.org>; Wed, 13 Dec 2023 07:34:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1702481678;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=PGqY0zpAwgtTtqJaGj+enSH2iEuKiSr77nLL5Ee7Nko=;
+	b=IP+KgG2F82z38xUwFkcT0AP5lhqrjD71lOI7/gEQvYnsgD4L/AP0qNYDDCDRH4TKS38Y+e
+	Z2WJCiek0BThrulN2cY79iu8gAPiPIhkfNlXPO3SVOUZhRPe6QV0NToZb2iMd3ckc0mhaA
+	2BjkAig/TDIeQvY6a+cXFB/826NtbOI=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-237-hNisMHDXOwimiJs1EPVeRA-1; Wed, 13 Dec 2023 10:34:37 -0500
+X-MC-Unique: hNisMHDXOwimiJs1EPVeRA-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-28ade5535d4so1164846a91.0
+        for <fstests@vger.kernel.org>; Wed, 13 Dec 2023 07:34:37 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702481676; x=1703086476;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PGqY0zpAwgtTtqJaGj+enSH2iEuKiSr77nLL5Ee7Nko=;
+        b=Bg/tyYotV2NtwDrwiPCri1eAMJO1YQpMtvFXyXByllAguDlPzarl5r2Y7Nm5N+iqc4
+         RuD0YQPsKwi23ANOD2yQGpF86iSW3yilfKU8pAZTleHpeWgvrtx5Ivn97O2I57mtFR71
+         pP15hX+DHE4HuLYxbkPNQcATlb5WOiIaEELqZX28ZgowvLzoTKRw7OOHGp6ub1y9N03M
+         t0FCkDLIxcMDNoGKpLa/qVxlAJaCX7Ntw065HJuAuMzbINXob66yt+vDpsjqNWDOx64y
+         YAbXU/AO0wP0XxqSp8kuZSBGcvlGfwskxl90oFZGDaE/VQdoxpBYiT1T7qPfJMrx0fkr
+         c+TQ==
+X-Gm-Message-State: AOJu0Yx2akCB92b0SgJXJOewT5tgE6wsqGJ5oc0aICuy+Ae186EqScZk
+	KI6iu2nwf4SZDU/XXxyjiMM+AkYU4ILiRwwZ1MtVLBZTyu5oB0RmH/vcccCSUBIx6LfOZ9Ch/eO
+	WCGJV09HUa31v9RaSSQ==
+X-Received: by 2002:a17:90b:2e46:b0:28a:ea3c:4b19 with SMTP id sm6-20020a17090b2e4600b0028aea3c4b19mr540632pjb.95.1702481676088;
+        Wed, 13 Dec 2023 07:34:36 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IF3WnKbhHIngnheK8CjltRNRy0p/KVZGc4KwiIEPxBZpyDoa+fCGF9CmB0zWODQfjgpojhZAQ==
+X-Received: by 2002:a17:90b:2e46:b0:28a:ea3c:4b19 with SMTP id sm6-20020a17090b2e4600b0028aea3c4b19mr540625pjb.95.1702481675737;
+        Wed, 13 Dec 2023 07:34:35 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id c11-20020a17090a020b00b00286d75e10e4sm13744422pjc.37.2023.12.13.07.34.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 13 Dec 2023 07:34:35 -0800 (PST)
+Date: Wed, 13 Dec 2023 23:34:31 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Murphy Zhou <jencce.kernel@gmail.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/new: drop caches while freeze
+Message-ID: <20231213153431.eu4ii7ljmssgynyl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231213092043.1621684-1-jencce.kernel@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20231213-btrfs-raid-v6-9-913738861069@wdc.com>
-References: <20231213-btrfs-raid-v6-0-913738861069@wdc.com>
-In-Reply-To: <20231213-btrfs-raid-v6-0-913738861069@wdc.com>
-To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>
-Cc: Filipe Manana <fdmanana@suse.com>, fstests@vger.kernel.org, 
- linux-btrfs@vger.kernel.org, 
- Johannes Thumshirn <johannes.thumshirn@wdc.com>
-X-Mailer: b4 0.12.3
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1702467323; l=6953;
- i=johannes.thumshirn@wdc.com; s=20230613; h=from:subject:message-id;
- bh=c7K6ye4ECrk/rqwJG0NQWH5K0hRc0hdL/n5pdDiHpm4=;
- b=O3cFdJLqNsHKfVPoX5Bo6JH/xDstDFVDvBt5OuNvKGcS1fPLP9i1RBTcNwVVkg361sbWFzyTN
- +ikUVW4z+GQBUgdKjttQmHyjXYdOxBrH+bULwQ2pNbPc+dtBOzweyMy
-X-Developer-Key: i=johannes.thumshirn@wdc.com; a=ed25519;
- pk=TGmHKs78FdPi+QhrViEvjKIGwReUGCfa+3LEnGoR2KM=
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231213092043.1621684-1-jencce.kernel@gmail.com>
 
-Add a test writing 128k to an empty file with one stripe already
-pre-filled on-disk. Then overwrite a portion of the file in the middle.
+On Wed, Dec 13, 2023 at 05:20:43PM +0800, Murphy Zhou wrote:
+> Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+> ---
+>  tests/generic/734     | 34 ++++++++++++++++++++++++++++++++++
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/308     |  62 ++++++++++++++++++++++++++++++
- tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 168 insertions(+)
+Hi Murphy,
 
-diff --git a/tests/btrfs/308 b/tests/btrfs/308
-new file mode 100755
-index 000000000000..e5210fdfe2bd
---- /dev/null
-+++ b/tests/btrfs/308
-@@ -0,0 +1,62 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2023 Western Digital Cooperation.  All Rights Reserved.
-+#
-+# FS QA Test 308
-+#
-+# Test on-disk layout of RAID Stripe Tree Metadata by writing 128k to an empty
-+# file on a filesystem that has one stripe already pre-filled. Afterwards
-+# overwrite a portion of the file.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick raid remount volume raid-stripe-tree
-+
-+. ./common/filter
-+. ./common/filter.btrfs
-+
-+_supported_fs btrfs
-+_require_btrfs_command inspect-internal dump-tree
-+_require_btrfs_mkfs_feature "raid-stripe-tree"
-+_require_scratch_dev_pool 4
-+_require_btrfs_fs_feature "raid_stripe_tree"
-+_require_btrfs_fs_feature "free_space_tree"
-+_require_btrfs_free_space_tree
-+_require_btrfs_no_compress
-+_require_btrfs_no_nodatacow
-+
-+test _get_page_size -eq 4096 || _notrun "this tests requires 4k pagesize"
-+
-+test_128k_write_overwrite()
-+{
-+	local profile=$1
-+	local ndevs=$2
-+
-+	_scratch_dev_pool_get $ndevs
-+
-+	echo "==== Testing $profile ===="
-+	_scratch_pool_mkfs -d $profile -m $profile -O raid-stripe-tree
-+	_scratch_mount
-+
-+	$XFS_IO_PROG -fc "pwrite -W 0 32k" "$SCRATCH_MNT/bar" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 0 128k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+	$XFS_IO_PROG -fc "pwrite -W 64k 8k" "$SCRATCH_MNT/foo" | _filter_xfs_io
-+
-+	_scratch_cycle_mount
-+	md5sum "$SCRATCH_MNT/foo" | _filter_scratch
-+
-+	_scratch_unmount
-+
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t raid_stripe $SCRATCH_DEV_POOL |\
-+		_filter_btrfs_version | _filter_stripe_tree
-+
-+	_scratch_dev_pool_put
-+}
-+
-+echo "= Test 128k write to empty file with 1st stripe partially prefilled then overwrite ="
-+test_128k_write_overwrite raid0 2
-+test_128k_write_overwrite raid1 2
-+test_128k_write_overwrite raid10 4
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/308.out b/tests/btrfs/308.out
-new file mode 100644
-index 000000000000..c93a3a43b248
---- /dev/null
-+++ b/tests/btrfs/308.out
-@@ -0,0 +1,106 @@
-+QA output created by 308
-+= Test 128k write to empty file with 1st stripe partially prefilled then overwrite =
-+==== Testing raid0 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 2 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
-+			encoding: RAID0
-+			stripe 0 devid 1 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid1 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID1
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
-+==== Testing raid10 ====
-+wrote 32768/32768 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 8192/8192 bytes at offset 65536
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
-+
-+raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0) 
-+leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
-+leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
-+checksum stored <CHECKSUM>
-+checksum calced <CHECKSUM>
-+fs uuid <UUID>
-+chunk uuid <UUID>
-+	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 3 physical XXXXXXXXX
-+			stripe 1 devid 4 physical XXXXXXXXX
-+	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-+			encoding: RAID10
-+			stripe 0 devid 1 physical XXXXXXXXX
-+			stripe 1 devid 2 physical XXXXXXXXX
-+total bytes XXXXXXXX
-+bytes used XXXXXX
-+uuid <UUID>
 
--- 
-2.43.0
+Thanks for this new test. Sorry that g/734 has been taken last weekend,
+please rebase to the latest for-next branch.
+
+>  tests/generic/734.out |  2 ++
+>  2 files changed, 36 insertions(+)
+>  create mode 100755 tests/generic/734
+>  create mode 100644 tests/generic/734.out
+> 
+> diff --git a/tests/generic/734 b/tests/generic/734
+> new file mode 100755
+> index 00000000..8ca91930
+> --- /dev/null
+> +++ b/tests/generic/734
+> @@ -0,0 +1,34 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# FS QA Test 734
+> +#
+> +# Test possible deadlock of umount and reclaim memory
+> +# when there are EOF blocks in files.
+
+Is there a known bug fix for this case? If yes, please specify that by:
+"_fixed_by_kernel_commit xxxxxxxxxx xxxxxxxxxxxxxxxx".
+
+> +#
+> +. ./common/preamble
+> +_begin_fstest freeze auto quick
+> +
+> +_supported_fs generic
+> +_require_scratch
+
+This's a geneirc case, not all fs support fsfreeze, so ...
+_require_freeze
+
+And ...
+
+_scratch_mkfs >> $seqres.full ??
+_scratch_mount ??
+
+> +
+> +$XFS_IO_PROG -fc "pwrite 0 64k" $SCRATCH_MNT/testfile >> $seqres.full
+
+Could you explain why there're two duplicated lines below? If it's intended,
+better to have a comment to explain why do it twice (not once or more times).
+
+> +cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
+> +cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
+> +
+> +sync
+> +
+> +fsfreeze -f $SCRATCH_MNT
+
+All cases in fstests do fs freeze by xfs_freeze. If there's not special
+reason, better to keep consistency. Due to the _require_freeze checks
+that too.
+
+> +
+> +# This will hang if bug reproduces
+> +echo 3 > /proc/sys/vm/drop_caches &
+
+I'm wondering, if the data in cache has been written back and been cleared
+before fsfreeze or this step, what will happen? If the cache data is necessary,
+should we load/read more data/files to provide that?
+
+> +
+> +# Manually unfreeze after a while
+> +sleep 5
+> +fsfreeze -u $SCRATCH_MNT
+> +
+> +wait
+
+As there's a fs freeze in this case, so we'd better to do a "forced" unfreeze
+in _cleanup, to make sure the fs will be unfreezed 100%, no matter what. So
+you can move these two lines to _cleanup.
+
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/generic/734.out b/tests/generic/734.out
+> new file mode 100644
+> index 00000000..4299839b
+> --- /dev/null
+> +++ b/tests/generic/734.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 734
+> +Silence is golden
+> -- 
+> 2.31.1
+> 
+> 
 
