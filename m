@@ -1,64 +1,52 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54F17224E8;
-	Wed, 13 Dec 2023 22:34:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mLej5KPg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF8C1C433C8;
-	Wed, 13 Dec 2023 22:34:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1702506885;
-	bh=G/r4/NYCYySyRnGiCZ+YcKN390745JqsVNvZUyyM5EM=;
-	h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-	b=mLej5KPgPhMEb4uJ3MzILXS3iXD8XCVqTH0+2Oi3F/eOgqPlugzeh9u78q33xbq/5
-	 tjv3MAM/h+ARah2TybBlwJljDvnzd4FY+6lg7s6aQDXgKsFe3KnujtBlpWd+tslRkO
-	 tw4H1VvnxK08mfy3vmI4Ef/JBm1tNBBxbp/6cLVBgIttlBqhVYb3PrMcQnI8d9IK4Q
-	 h0asl/ik5PyH0SWm2k4IOmsi2Mq6ueYBjWPsZHafdE+I87JnWYRgr6grl2mR2Xm2M/
-	 N9UmUZU/f9S4fHsX/JOdovYYF0yvhumL8j5Uu6KXhOA4oAIZVwl3zU0FyG/DIClfZb
-	 2v0FSGcTNRnbg==
-Subject: [PATCH 3/3] generic/735: skip this test if we cannot finsert at pos
- 1M
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: guan@eryu.me, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Date: Wed, 13 Dec 2023 14:34:45 -0800
-Message-ID: <170250688518.1363584.11932716959963736458.stgit@frogsfrogsfrogs>
-In-Reply-To: <170250686802.1363584.16475360795139585624.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="DXpYIuDo"
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64F6585;
+	Wed, 13 Dec 2023 20:44:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=m1NNmrmQD/DoZona1Vw/Txrz8Aj+03lv/Cf8YfFewP4=; b=DXpYIuDoyYqWaZBURKnODjYFq3
+	YNy3vMNzoA3OXAskAASJZXuTZeMRAl8Rsl+oiB9tw+E5ff0sFA536fDnmpBuhupVi4qUuQJxmJ4kG
+	uGjBIaWbk9L9gl0iEaOg0mzd5j3JyzaEhZeqlepKDVkfVLqLdgt9vZvjWBhHq7+EaN5FbiWk23ySN
+	DkYaNHX74pM3yRNCBvYmXjUIywfziqQ+FsL3bztcw7J2BVN0SOSVsa70NkNQ8K5yxtLETKtVyTSyn
+	tXLuzY/2v//YDnoIkHrpD8ETSC8IIC8COxMgaqgvTa7ia41a/ltdzn/T09l63ZF2For8pqUNopy78
+	uPNthOog==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+	id 1rDda4-00GjLC-1d;
+	Thu, 14 Dec 2023 04:44:16 +0000
+Date: Wed, 13 Dec 2023 20:44:16 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, guan@eryu.me, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] generic/615: fix loop termination failures
+Message-ID: <ZXqIIMHEab5gWWde@infradead.org>
 References: <170250686802.1363584.16475360795139585624.stgit@frogsfrogsfrogs>
-User-Agent: StGit/0.19
+ <170250687380.1363584.4078567385149829394.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <170250687380.1363584.4078567385149829394.stgit@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Dec 13, 2023 at 02:34:33PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> On 6.7-rc2, I've noticed that this test hangs unpredictably because the
+> stat loop fails to exit.  While the kill $loop_pid command /should/ take
+> care of it, it clearly isn't.
+> 
+> Set up an additional safety factor by checking for the existence of a
+> sentinel flag before starting the loop body.  In bash, "[" is a builtin
+> so the loop should run almost as tightly as it did before.
 
-Add a _require_congruent_file_oplen to screen out filesystem
-configurations that can't start a finsert operation at file pos 1M
-because the fs block size isn't congruent with 1048576.  For example,
-xfs realtime with 28k rt extents.
+Loks good:
 
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/generic/735 |    1 +
- 1 file changed, 1 insertion(+)
-
-
-diff --git a/tests/generic/735 b/tests/generic/735
-index 44b454771d..75b23d5efc 100755
---- a/tests/generic/735
-+++ b/tests/generic/735
-@@ -25,6 +25,7 @@ dev_size=$((80 * 1024 * 1024))
- _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1 || _fail "mkfs failed"
- 
- _scratch_mount
-+_require_congruent_file_oplen $SCRATCH_MNT 1048576	# finsert at 1M
- file_blksz="$(_get_file_block_size ${SCRATCH_MNT})"
- 
- # Reserve 1M space
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
