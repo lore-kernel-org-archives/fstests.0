@@ -1,102 +1,192 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f177.google.com (mail-qk1-f177.google.com [209.85.222.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE92F612B
-	for <fstests@vger.kernel.org>; Fri, 15 Dec 2023 04:59:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACA8DD27F
+	for <fstests@vger.kernel.org>; Fri, 15 Dec 2023 06:21:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RHzg8gZI"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1702616363;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=AzYme2818bmqCqLCCWWTHl63ngKdsCYvGkGhDR+59hU=;
-	b=RHzg8gZIMOfzpvqV61wHXHljbr//Yyymi+hcg8tRCmiF9SiSz+dRAmFmmDre2QCbLevPss
-	ooMigMWJTk1Cou42lWqP4UYoYmNX96Ve3I360RX7QzBz14hfW56A0AIF3xTj7Ux9zBqRj6
-	DbMqLCiLH6mILuDzHEvfRHS8f1A7bCQ=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-517-SOLVe8W8PpW-JNrUd_UXEg-1; Thu, 14 Dec 2023 23:59:21 -0500
-X-MC-Unique: SOLVe8W8PpW-JNrUd_UXEg-1
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-5ca5b61c841so201164a12.3
-        for <fstests@vger.kernel.org>; Thu, 14 Dec 2023 20:59:21 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702616360; x=1703221160;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CAmO2XFd"
+Received: by mail-qk1-f177.google.com with SMTP id af79cd13be357-77f58040770so29415185a.2
+        for <fstests@vger.kernel.org>; Thu, 14 Dec 2023 22:21:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1702621284; x=1703226084; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=AzYme2818bmqCqLCCWWTHl63ngKdsCYvGkGhDR+59hU=;
-        b=so/4aeh5VNHh8KuPfEtzsk4TQZeqtlKZqpQWZdjqbBSvP7hpUG/rCeeDldc2zkcq7f
-         Zyysu1GrQ22txvpPTvNi3T5BzAlOlf/ow3ma8DkWm3eyU3s06FNK3MVAuE0SnLAHokKO
-         j7E1A6Y2gTFfaJrgPQolHZIQ5S09ieJuCiIh1x5LIJrV6TZVd9vsULMMZukGruiqFvmT
-         ZdosqgxTCVV4oBm+qsiTG/yGbQV11ADRjxbBfOGVPlImCHfSaKvWizj37oqIZIm5Ne2P
-         ab+NoUj9sK53Yonx1FCynkoQ0tIhmbTCGY8eI8yVxoOYfHfs99C0zJBF43dOcn16qIGr
-         a9fw==
-X-Gm-Message-State: AOJu0YzlKDZDFt/bTHVEO9kFxoYnDztuGGQe6bfzSp3/3pwzBlUHfiU1
-	jcEDcVYLxP1Av4WnHL40PyM/XakcscgXc9QQgV+hUxKJMmuzLVZGNCAFaEB5fOmfOQu9OlW7+UZ
-	xKu3yr6PjbYP7dIZTGRHaksOfGwE6
-X-Received: by 2002:a17:902:6e02:b0:1d3:2e0d:cd98 with SMTP id u2-20020a1709026e0200b001d32e0dcd98mr4281252plk.105.1702616360026;
-        Thu, 14 Dec 2023 20:59:20 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEnoz2UEdlxaBQKCM2RChpGukhSgPgtyB6qTVOlALgIThX4mIW3jmmDxgffckfL7+pFxoPumg==
-X-Received: by 2002:a17:902:6e02:b0:1d3:2e0d:cd98 with SMTP id u2-20020a1709026e0200b001d32e0dcd98mr4281250plk.105.1702616359650;
-        Thu, 14 Dec 2023 20:59:19 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id h2-20020a170902f54200b001cfc67d46efsm13151258plf.191.2023.12.14.20.59.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Dec 2023 20:59:19 -0800 (PST)
-Date: Fri, 15 Dec 2023 12:59:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Naohiro Aota <naohiro.aota@wdc.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: filter.btrfs: update
- _filter_transaction_commit()
-Message-ID: <20231215045916.3pobm5dlu5snqjps@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231215030951.449252-1-naohiro.aota@wdc.com>
- <20231215152318.78149dec@echidna>
+        bh=S6Ej4p2VxZXmDGNrPTEiu0fO5tRSyp5RDPM84WMGdmw=;
+        b=CAmO2XFdX9yHzaPKDrRV3lr6Neglq8MOfMriFMauca7Lh3U2QPmWZ2OUsU18oYjy/A
+         5aL14FB0VzRUNtm3pxdlxbqL3ENmYuVt+Z6LsIW8waCuw4WPCrj3Eu7GDnfXi3lRSP2i
+         bTIX8CW0QaiiN5qTFpSmDwyUBahX61FxW3X4sAJP641SyxqI1gf7+6pz4UwHQTdWOPzf
+         fWs4HroOjPOBkKr/5f5PYYAyDrJoJgXc/EQPXFwatfNKWmRl4kWVGvQo5aBvUwkPCKaj
+         EG8l9T7jaR8DlBI7FLEwPFezEnpjxLvOIszPhHqo9/CDjGYcuAWpIOZbzV9HEfmZuPvN
+         OBlQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1702621284; x=1703226084;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=S6Ej4p2VxZXmDGNrPTEiu0fO5tRSyp5RDPM84WMGdmw=;
+        b=TfD48PfNwfV0QMdw9oNy1AEW5qOYLLtA7VkIqLZ9+niPSngnhYYyU/Yesyf2nghbU/
+         ovG/NzV5quDeDm1agUfbUGt6fj4T4M/ZDYrPGy7CDbkegLqhSXYwRgfWqlwZquB4TobD
+         Dt9peWqpJY4JL5nPGsXxNVYr4FIv4qh+Dg5iEJSSoCs+EF4OESlxBDRoM0KKn9EJ5hNc
+         CIozbfQ5fX2/+qyUK9Ne+9djJAoEPc4kKhAsLXCDiTyfDFU1MN+0zbycXTOeYqJkUsLR
+         jyEx5TO7nLwrmX8+h5eLY2WOF5aUnsDKD3o6FlEXY4PgEKzxRnqqhTBDyxwlgn2ooQuP
+         Evlw==
+X-Gm-Message-State: AOJu0Yw00+WxTSttGM6MeU8f7fmEtcez45cCG0ktFH6i2U3A4UbpCpMo
+	l2TO/ldalaoBY46XJebvrdw5UuctiJJEiFtXLZESFSEv
+X-Google-Smtp-Source: AGHT+IHb2V+U45PRVy69Qrs9EWjt+PCw6p3maq/piMpXUIwjyiu97A0wIL6hLBhRHvjrT+bZ57MCm00sICnZCfvc/XI=
+X-Received: by 2002:a05:620a:28c2:b0:77f:3db5:7b69 with SMTP id
+ l2-20020a05620a28c200b0077f3db57b69mr14022032qkp.32.1702621284523; Thu, 14
+ Dec 2023 22:21:24 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231215152318.78149dec@echidna>
+References: <20231213092043.1621684-1-jencce.kernel@gmail.com> <20231213153431.eu4ii7ljmssgynyl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20231213153431.eu4ii7ljmssgynyl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Murphy Zhou <jencce.kernel@gmail.com>
+Date: Fri, 15 Dec 2023 14:21:13 +0800
+Message-ID: <CADJHv_t4fzLjNBfabTSVgSW8QAjq7V=s_wW7cOJ8UPo+t9vdNw@mail.gmail.com>
+Subject: Re: [PATCH] generic/new: drop caches while freeze
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Dec 15, 2023 at 03:23:18PM +1100, David Disseldorp wrote:
-> On Fri, 15 Dec 2023 12:09:51 +0900, Naohiro Aota wrote:
-> ...
-> > diff --git a/common/filter.btrfs b/common/filter.btrfs
-> > index 02c6b92dfa94..cea9911448eb 100644
-> > --- a/common/filter.btrfs
-> > +++ b/common/filter.btrfs
-> > @@ -70,6 +70,7 @@ _filter_btrfs_device_stats()
-> >  
-> >  _filter_transaction_commit() {
-> >  	sed -e "/Transaction commit: none (default)/d" | \
-> > +	sed -e "s/Delete subvolume [0-9]\+/Delete subvolume/g" | \
-> >  	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
-> >  }
-> >  
-> 
-> 
-> Looks fine
-> Reviewed-by: David Disseldorp <ddiss@suse.de>
-> 
-> Nit: the pipe chain can be removed. It might also be a little simpler
-> if each version had an independent filter, e.g.
->   sed -e "/Transaction commit: none (default)/d" \
->       -e "s/Delete subvolume [0-9]\+ (.*commit)/Delete subvolume/g" \
->       -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
+Hi Zorro,
 
-Yup, we use `sed` as this generally. Although I can help to change that,
-but appreciate that if you can do it and make sure it still works.
+On Wed, Dec 13, 2023 at 11:34=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrot=
+e:
+>
+> On Wed, Dec 13, 2023 at 05:20:43PM +0800, Murphy Zhou wrote:
+> > Signed-off-by: Murphy Zhou <jencce.kernel@gmail.com>
+> > ---
+> >  tests/generic/734     | 34 ++++++++++++++++++++++++++++++++++
+>
+> Hi Murphy,
+>
+>
+> Thanks for this new test. Sorry that g/734 has been taken last weekend,
+> please rebase to the latest for-next branch.
 
-Thanks,
-Zorro
+Got it.
+>
+> >  tests/generic/734.out |  2 ++
+> >  2 files changed, 36 insertions(+)
+> >  create mode 100755 tests/generic/734
+> >  create mode 100644 tests/generic/734.out
+> >
+> > diff --git a/tests/generic/734 b/tests/generic/734
+> > new file mode 100755
+> > index 00000000..8ca91930
+> > --- /dev/null
+> > +++ b/tests/generic/734
+> > @@ -0,0 +1,34 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +#
+> > +# FS QA Test 734
+> > +#
+> > +# Test possible deadlock of umount and reclaim memory
+> > +# when there are EOF blocks in files.
+>
+> Is there a known bug fix for this case? If yes, please specify that by:
+> "_fixed_by_kernel_commit xxxxxxxxxx xxxxxxxxxxxxxxxx".
 
-> 
+Maybe a patchset but I'm not sure of it. In this situation I think
+we can skip this part?
 
+>
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest freeze auto quick
+> > +
+> > +_supported_fs generic
+> > +_require_scratch
+>
+> This's a geneirc case, not all fs support fsfreeze, so ...
+> _require_freeze
+
+Got it.
+>
+> And ...
+>
+> _scratch_mkfs >> $seqres.full ??
+> _scratch_mount ??
+
+OK.
+>
+> > +
+> > +$XFS_IO_PROG -fc "pwrite 0 64k" $SCRATCH_MNT/testfile >> $seqres.full
+>
+> Could you explain why there're two duplicated lines below? If it's intend=
+ed,
+> better to have a comment to explain why do it twice (not once or more tim=
+es).
+
+OK.
+>
+> > +cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
+> > +cat $SCRATCH_MNT/testfile >> $SCRATCH_MNT/testfile1
+> > +
+> > +sync
+> > +
+> > +fsfreeze -f $SCRATCH_MNT
+>
+> All cases in fstests do fs freeze by xfs_freeze. If there's not special
+> reason, better to keep consistency. Due to the _require_freeze checks
+> that too.
+
+OK.
+>
+> > +
+> > +# This will hang if bug reproduces
+> > +echo 3 > /proc/sys/vm/drop_caches &
+>
+> I'm wondering, if the data in cache has been written back and been cleare=
+d
+> before fsfreeze or this step, what will happen? If the cache data is nece=
+ssary,
+> should we load/read more data/files to provide that?
+
+Agree. I'll add more files.
+>
+> > +
+> > +# Manually unfreeze after a while
+> > +sleep 5
+> > +fsfreeze -u $SCRATCH_MNT
+> > +
+> > +wait
+>
+> As there's a fs freeze in this case, so we'd better to do a "forced" unfr=
+eeze
+> in _cleanup, to make sure the fs will be unfreezed 100%, no matter what. =
+So
+> you can move these two lines to _cleanup.
+
+Good idea!
+
+Thanks for reviewing!
+
+Murphy
+>
+> > +# success, all done
+> > +echo "Silence is golden"
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/generic/734.out b/tests/generic/734.out
+> > new file mode 100644
+> > index 00000000..4299839b
+> > --- /dev/null
+> > +++ b/tests/generic/734.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 734
+> > +Silence is golden
+> > --
+> > 2.31.1
+> >
+> >
+>
