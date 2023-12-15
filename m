@@ -1,50 +1,94 @@
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A125D267;
+	Fri, 15 Dec 2023 03:11:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="JumNBhjt"
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3950CB9;
-	Wed, 13 Dec 2023 20:45:05 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=XU2rccOahRLzDkCLAoEKuJ26+t93oe6q2nojHArTaoc=; b=JumNBhjt1W/LCuuUGJtM33Yyp7
-	/2999VrySAL6BZTloLACM5REIg0DM8gaj7rNTrsJT/6VYEs2xIGHKXX84T5xIqtA8UDCvnoUFbeft
-	GmOykY/p83ibz2/CuodvFlVxlGLm39YKk8mWKuHEUfdMp6JOfytGFK5vXJoHlpHIulXs4TcGdpCR6
-	/8vhn3YXUtIHjfYx/3YroqEznNHOMwDz+0pTWfqs0ND3VZ4h4AtyLqzDTuwcnKzJHhI8saxuR+7QL
-	nu+SdI/01LeT2DjJRrFioFluNuDOczo+125UPlUFCFzPMRAbRctDSRjCfgNikCP49vjeWi/AR87vC
-	zAD+NiAA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-	id 1rDdam-00GjPt-22;
-	Thu, 14 Dec 2023 04:45:00 +0000
-Date: Wed, 13 Dec 2023 20:45:00 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, guan@eryu.me, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] generic/735: skip this test if we cannot finsert at
- pos 1M
-Message-ID: <ZXqITPlA6cmrDdON@infradead.org>
-References: <170250686802.1363584.16475360795139585624.stgit@frogsfrogsfrogs>
- <170250688518.1363584.11932716959963736458.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="bEBOHVoP"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1702609867; x=1734145867;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Gh5AUfShu/tb5OHGohSqHYmVNwGdi4FZVRNNWWVufO8=;
+  b=bEBOHVoPr/mGL7K9Ur+JUAyItdLv4Fwx7kdEMuwM4urDgzk4pUXILzxc
+   EzOEwmleBvmG/wrRl0kyIkYY8iOvDTd/N79vq5ey4dORAIEP1XU9towTq
+   ioSmSrvJ+XATM3lDgyczngfBmNcwG4aIpiq+qiicwSYnRRK9tvcMqv0EQ
+   JCoW1lrBSp6iOhiEIgM3Qpw6jDw4JKgzQsdBT701y4W3bi8e2zGE0vlJN
+   HHQZk7S5A0saE0FvYB1aVOwopiqxOxpu14j6FRcbUX1AkH5ZAX/omKHIX
+   4L+JaliDY84WGCGBzke6sz6pTo6xOyu5LYbLpmXYXMCu49ny8mFKSCQ1k
+   Q==;
+X-CSE-ConnectionGUID: ksT/0r7TQgmtpMKh0R7V4Q==
+X-CSE-MsgGUID: 7yNH5KoLRLOSU2HEp0vqMw==
+X-IronPort-AV: E=Sophos;i="6.04,277,1695657600"; 
+   d="scan'208";a="4869973"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 15 Dec 2023 11:09:58 +0800
+IronPort-SDR: 2nv/rVvEjIbRzQu5UMX7+1jkiTRsp9CdMnvvDnsndNm16uTlhM9eWuUDysQZJ9Injphzrb3mQx
+ F76Xu3EHk8rQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Dec 2023 18:20:49 -0800
+IronPort-SDR: jA3LjlOEHO/T/NLT4I64/XOVR3hBauPReBrl+g/elg/WE8FjVGeAUy1wrL0kUtUuXvuY+4HD1b
+ Z10HwQoSiaHg==
+WDCIronportException: Internal
+Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.84])
+  by uls-op-cesaip02.wdc.com with ESMTP; 14 Dec 2023 19:09:57 -0800
+From: Naohiro Aota <naohiro.aota@wdc.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] fstests: filter.btrfs: update _filter_transaction_commit()
+Date: Fri, 15 Dec 2023 12:09:51 +0900
+Message-ID: <20231215030951.449252-1-naohiro.aota@wdc.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <170250688518.1363584.11932716959963736458.stgit@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 
-On Wed, Dec 13, 2023 at 02:34:45PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Add a _require_congruent_file_oplen to screen out filesystem
-> configurations that can't start a finsert operation at file pos 1M
-> because the fs block size isn't congruent with 1048576.  For example,
-> xfs realtime with 28k rt extents.
+Recent btrfs-progs commit 5c91264d2dfc ("btrfs-progs: subvol delete:
+print the id of the deleted subvolume") added the id of the deleted
+subvolume to "Delete subvolume" print format.
 
-Looks good:
+As a result, btrfs/001 now always fail by the output difference.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+  - output mismatch (see /host/results/btrfs/001.out.bad)
+      --- tests/btrfs/001.out     2021-02-05 01:44:17.000000000 +0000
+      +++ /host/results/btrfs/001.out.bad 2023-12-15 01:43:07.000000000 +0000
+      @@ -33,7 +33,7 @@
+       Listing subvolumes
+       snap
+       subvol
+      -Delete subvolume 'SCRATCH_MNT/snap'
+      +Delete subvolume 256 (no-commit): 'SCRATCH_MNT/snap'
+       List root dir
+       subvol
+      ...
+
+Fix the issue by updating _filter_transaction_commit().
+
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ common/filter.btrfs | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 02c6b92dfa94..cea9911448eb 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -70,6 +70,7 @@ _filter_btrfs_device_stats()
+ 
+ _filter_transaction_commit() {
+ 	sed -e "/Transaction commit: none (default)/d" | \
++	sed -e "s/Delete subvolume [0-9]\+/Delete subvolume/g" | \
+ 	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
+ }
+ 
+-- 
+2.43.0
+
