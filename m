@@ -1,94 +1,131 @@
-Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A125D267;
-	Fri, 15 Dec 2023 03:11:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7A2C610D;
+	Fri, 15 Dec 2023 04:23:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="bEBOHVoP"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1702609867; x=1734145867;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=Gh5AUfShu/tb5OHGohSqHYmVNwGdi4FZVRNNWWVufO8=;
-  b=bEBOHVoPr/mGL7K9Ur+JUAyItdLv4Fwx7kdEMuwM4urDgzk4pUXILzxc
-   EzOEwmleBvmG/wrRl0kyIkYY8iOvDTd/N79vq5ey4dORAIEP1XU9towTq
-   ioSmSrvJ+XATM3lDgyczngfBmNcwG4aIpiq+qiicwSYnRRK9tvcMqv0EQ
-   JCoW1lrBSp6iOhiEIgM3Qpw6jDw4JKgzQsdBT701y4W3bi8e2zGE0vlJN
-   HHQZk7S5A0saE0FvYB1aVOwopiqxOxpu14j6FRcbUX1AkH5ZAX/omKHIX
-   4L+JaliDY84WGCGBzke6sz6pTo6xOyu5LYbLpmXYXMCu49ny8mFKSCQ1k
-   Q==;
-X-CSE-ConnectionGUID: ksT/0r7TQgmtpMKh0R7V4Q==
-X-CSE-MsgGUID: 7yNH5KoLRLOSU2HEp0vqMw==
-X-IronPort-AV: E=Sophos;i="6.04,277,1695657600"; 
-   d="scan'208";a="4869973"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 15 Dec 2023 11:09:58 +0800
-IronPort-SDR: 2nv/rVvEjIbRzQu5UMX7+1jkiTRsp9CdMnvvDnsndNm16uTlhM9eWuUDysQZJ9Injphzrb3mQx
- F76Xu3EHk8rQ==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Dec 2023 18:20:49 -0800
-IronPort-SDR: jA3LjlOEHO/T/NLT4I64/XOVR3hBauPReBrl+g/elg/WE8FjVGeAUy1wrL0kUtUuXvuY+4HD1b
- Z10HwQoSiaHg==
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.84])
-  by uls-op-cesaip02.wdc.com with ESMTP; 14 Dec 2023 19:09:57 -0800
-From: Naohiro Aota <naohiro.aota@wdc.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Naohiro Aota <naohiro.aota@wdc.com>
-Subject: [PATCH] fstests: filter.btrfs: update _filter_transaction_commit()
-Date: Fri, 15 Dec 2023 12:09:51 +0900
-Message-ID: <20231215030951.449252-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="vuMD/A0d";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="nQF6h5E2";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="W/ETAg7D";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="S7DEMSIC"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id A6E2E21FEA;
+	Fri, 15 Dec 2023 04:23:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1702614206; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=9YLPmSYs18YcsRLgvb0K2o9nyXLwmqnrqPDlTANPjZo=;
+	b=vuMD/A0d3d1SbmLx5g4DaLMiIUabw2N6mJYX6dPiO2AY9W7iffwR9uDtP2SrqoDtG1hc6D
+	mcEXvZWYBAw9cSwGaibvqSuCCLmbeCvivQpL2n9gM4HNIqw4bha6AuTYVdYnYp0J7Yurxe
+	4ZXin6hnEMdVgDnBPGsmNcLaRPskhpk=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1702614206;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=9YLPmSYs18YcsRLgvb0K2o9nyXLwmqnrqPDlTANPjZo=;
+	b=nQF6h5E2ny9+I3768UVyITx9OeatKik7Aid1pHHdOI1NkhLdzC+sC17kYQXM/Q04bOWSPC
+	mlzUB6DCp9OLVTAg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1702614205; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=9YLPmSYs18YcsRLgvb0K2o9nyXLwmqnrqPDlTANPjZo=;
+	b=W/ETAg7D6D+pLy+IWKBTRjE7Xbr/TK2YOgv6JnOpXl85sd8hUZoYircn9up9nwpgXttjzx
+	TI5WaHM5vuln8mmIReNL25/3t+Qn38bMoSfDMR+A49iUsTkNyegkSIYarPnKs07ESTNoE0
+	75l2JlAC0QXNSThGiGzOuEaOfJb8cn0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1702614205;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=9YLPmSYs18YcsRLgvb0K2o9nyXLwmqnrqPDlTANPjZo=;
+	b=S7DEMSICcI6fsfJJshYpzPYez2USYkMm9dYGQrNWoYz+4bu3Qjhqfs3B2SKgI4ywnEbFui
+	ysvj+rhr4CFzmeCQ==
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 1C15813305;
+	Fri, 15 Dec 2023 04:23:23 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id O9dnLrvUe2USUAAAn2gu4w
+	(envelope-from <ddiss@suse.de>); Fri, 15 Dec 2023 04:23:23 +0000
+Date: Fri, 15 Dec 2023 15:23:18 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: Naohiro Aota <naohiro.aota@wdc.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: filter.btrfs: update
+ _filter_transaction_commit()
+Message-ID: <20231215152318.78149dec@echidna>
+In-Reply-To: <20231215030951.449252-1-naohiro.aota@wdc.com>
+References: <20231215030951.449252-1-naohiro.aota@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spam-Level: 
+X-Spam-Score: -0.93
+X-Spam-Flag: NO
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [0.22 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[3];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.18)[70.24%]
+X-Spam-Level: 
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spam-Score: 0.22
 
-Recent btrfs-progs commit 5c91264d2dfc ("btrfs-progs: subvol delete:
-print the id of the deleted subvolume") added the id of the deleted
-subvolume to "Delete subvolume" print format.
+On Fri, 15 Dec 2023 12:09:51 +0900, Naohiro Aota wrote:
+...
+> diff --git a/common/filter.btrfs b/common/filter.btrfs
+> index 02c6b92dfa94..cea9911448eb 100644
+> --- a/common/filter.btrfs
+> +++ b/common/filter.btrfs
+> @@ -70,6 +70,7 @@ _filter_btrfs_device_stats()
+>  
+>  _filter_transaction_commit() {
+>  	sed -e "/Transaction commit: none (default)/d" | \
+> +	sed -e "s/Delete subvolume [0-9]\+/Delete subvolume/g" | \
+>  	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
+>  }
+>  
 
-As a result, btrfs/001 now always fail by the output difference.
 
-  - output mismatch (see /host/results/btrfs/001.out.bad)
-      --- tests/btrfs/001.out     2021-02-05 01:44:17.000000000 +0000
-      +++ /host/results/btrfs/001.out.bad 2023-12-15 01:43:07.000000000 +0000
-      @@ -33,7 +33,7 @@
-       Listing subvolumes
-       snap
-       subvol
-      -Delete subvolume 'SCRATCH_MNT/snap'
-      +Delete subvolume 256 (no-commit): 'SCRATCH_MNT/snap'
-       List root dir
-       subvol
-      ...
+Looks fine
+Reviewed-by: David Disseldorp <ddiss@suse.de>
 
-Fix the issue by updating _filter_transaction_commit().
-
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
----
- common/filter.btrfs | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/common/filter.btrfs b/common/filter.btrfs
-index 02c6b92dfa94..cea9911448eb 100644
---- a/common/filter.btrfs
-+++ b/common/filter.btrfs
-@@ -70,6 +70,7 @@ _filter_btrfs_device_stats()
- 
- _filter_transaction_commit() {
- 	sed -e "/Transaction commit: none (default)/d" | \
-+	sed -e "s/Delete subvolume [0-9]\+/Delete subvolume/g" | \
- 	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
- }
- 
--- 
-2.43.0
-
+Nit: the pipe chain can be removed. It might also be a little simpler
+if each version had an independent filter, e.g.
+  sed -e "/Transaction commit: none (default)/d" \
+      -e "s/Delete subvolume [0-9]\+ (.*commit)/Delete subvolume/g" \
+      -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
