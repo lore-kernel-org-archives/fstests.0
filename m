@@ -1,160 +1,97 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-qv1-f52.google.com (mail-qv1-f52.google.com [209.85.219.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2502844C77;
-	Sun, 17 Dec 2023 15:00:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A912645BE4
+	for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 15:43:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XbV8k6vw"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-33666946422so201499f8f.1;
-        Sun, 17 Dec 2023 07:00:22 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IlpCqDm2"
+Received: by mail-qv1-f52.google.com with SMTP id 6a1803df08f44-67f30d74b68so8405766d6.1
+        for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 07:43:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1702825221; x=1703430021; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=KxQmdvdTsE+BizfZPDHKV4c+mSHHunHuY4qqWDo4SAY=;
-        b=XbV8k6vwgRDVqBMSD7RJaZ0T5oztrm66+KG+9DgrbgIOSXXS/TgKQtieTi0CuXjh/1
-         b6+0E3nzUp0oYSP9+fWLrdT4RWa/FevzvnHKGlf6ygzD+5CTQHV34IyoUSZzGVfj3O7q
-         IQAwHESe5kKyxksGPjJmT7mq8gUIRKlswbAhNnvOSLvJyX1ENW2r1dZ48YVWLzXNMc/m
-         ruoGQjDsrSmDG1V6WKIrdBMEPyvrUUiR1wBt8SuCYsgIKQkUnfaCHpNQ+P/t6GwmtpXL
-         xf/NjNkD4Qa672Et7LbIF01pEkbNCYAJxuipYSEte9RLF2G3JWhGpttrYh4BM7iaEgGf
-         9KgQ==
+        d=gmail.com; s=20230601; t=1702827828; x=1703432628; darn=vger.kernel.org;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=F98IUErsh6KtZrqrULtNIn4eTN8WS7L4PDB0e0NQQ9Y=;
+        b=IlpCqDm29987rk5Bb8P4DjCEncHKOyXloNWnpmnASchuN2vnrvPnyq27Y1RUqxpr8q
+         YZ5bIQmXWLKtaR7RwnIRRvu2M3kgptWd2SqbGCLHN14hcuiA9h19Sh+qzEomKapI4NDM
+         1B4DGhXF6Y5GjatFjPX6n423c5vyqWQolvkbmcmp+UvB2aU8gtOwgZV+ZkNioW3mqvQk
+         BOR9f0Z4GAkjonicJmu5d7+LplZf1q/HEcdn5Cr2hHJJsWbnPD7ShHwSXQjcdvLLW1xq
+         13SoygXKL7FPZeP3owTMnaN43YELKKHNSAmIRCxEGmdGiAqOtOrDYcuRfT/wJJOKM/wm
+         +vXA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702825221; x=1703430021;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=KxQmdvdTsE+BizfZPDHKV4c+mSHHunHuY4qqWDo4SAY=;
-        b=rAgnT5L1SYfHmEabNaDra8MIMNVb5jjykM6EkToiSBxGWo+e0OkrN4dcw7v1OSGpoR
-         j7aBdiGqFbKNXTqKvQIfKhW0Z7nD/ts3srthqjkIHgBvnxY4ait70Y2WG1yEAvPieJCd
-         h908l4brPz7XuQQpp1Od8Y88/sbabUg/k0i9U0ybmfY9J6Vwz7b85D9wmAaAigiS8/1s
-         BKqPBLvn5N84Ql0SEMV7Urw3uok67b9ebWWWS+/mQptFfeHsjrrB8XcEep4IHxlliRYz
-         8TeCKN0t8o5xPKO2tyLgMTs+Yj7N191c7CkzjSvlAK0AgFqqnaKwpfnfWVBcJ6rKPwDq
-         icQQ==
-X-Gm-Message-State: AOJu0YyMWGORtbIkXeE3eQtyNf7oMig5cc0DLstL+O7+dzb/BQNbQhA6
-	5M09ljPpAi2A4xhY41mV9dW0N9rnJtM=
-X-Google-Smtp-Source: AGHT+IHwE3wyVDMVR3X8NVZaB/fG45mbApCAlGWnXeBOWDS8mmlxLgx++sVb9NExUs8RO9+/TfZCAg==
-X-Received: by 2002:adf:db51:0:b0:336:5383:a721 with SMTP id f17-20020adfdb51000000b003365383a721mr2334700wrj.100.1702825221034;
-        Sun, 17 Dec 2023 07:00:21 -0800 (PST)
-Received: from amir-ThinkPad-T480.lan ([5.29.249.86])
-        by smtp.gmail.com with ESMTPSA id w13-20020a5d608d000000b0033662b81ff0sm2280052wrt.91.2023.12.17.07.00.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Dec 2023 07:00:20 -0800 (PST)
-From: Amir Goldstein <amir73il@gmail.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>,
-	linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] overlay/081: fix test when running with index enabled
-Date: Sun, 17 Dec 2023 17:00:17 +0200
-Message-Id: <20231217150017.569077-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        d=1e100.net; s=20230601; t=1702827828; x=1703432628;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=F98IUErsh6KtZrqrULtNIn4eTN8WS7L4PDB0e0NQQ9Y=;
+        b=LAN9AGkWKLCPSbRXOrXk+e06WAaQQonkfYmxAskC7irBQOJF6ryQ79ml4/krBfAdFq
+         XmB9dGCw2z4Zo+t8b0+8KRUCBPCVPdYPgsoXnsijNoL/oXXlAF5aqzby+rgY/qQzURwD
+         qiNVUB9nRP5FPb0xHYTMLLZZvnimpxFBKDN3L7JDa34k6kvI+IXVQW3SyLMHazS8tT+W
+         cHOQVrjceYZaK2CGQ9HbvHAuwlbO8k9/JXOEXLVhY9Wc9eOh6vIrCIN88EDHCE9ksWS2
+         +GwogQINBa2HFdP5Hlp/3ctSUB/KgHDJKjn+c31C23OVpqG01/bnIa5HvqrLCczia1GM
+         LLyA==
+X-Gm-Message-State: AOJu0Yx7qgPb+qVKGH3tQ4GsubNJCNM0JUQJNpjB0Tai2WShs6/vpcm0
+	c+rWb7xYocgh4/49HicfM3VhCBWFJxsvtzLnHJdDE/QBXeD7FVPC
+X-Google-Smtp-Source: AGHT+IH66fa3t855SgbkmvpAHfl7/9P4gJ0D+bMYmzUilFpEmn291ZuvnJNYcFKVFJweYDPUEmeVmQYjNigBvRBTaa0=
+X-Received: by 2002:a05:6214:5007:b0:67f:3aa5:c44b with SMTP id
+ jo7-20020a056214500700b0067f3aa5c44bmr1102438qvb.94.1702827828430; Sun, 17
+ Dec 2023 07:43:48 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: "Alexander E. Patrakov" <patrakov@gmail.com>
+Date: Sun, 17 Dec 2023 23:43:22 +0800
+Message-ID: <CAN_LGv38+54CQrSb=Xod2-g5Tge2ViTT1jpMu25UGN144AEqgg@mail.gmail.com>
+Subject: Excessive media wearout caused by generic/129
+To: fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Test overlay/081 fails with:
- CONFIG_OVERLAY_FS_INDEX=y
-or
- echo Y > /sys/modules/overlay/params/index
+Hello.
 
-The reason is that mount option uuid=off has the undesired side effect
-of disabling index feature.
+While running xfstests on an SMB share exposed by a Windows Server
+2022 VM running on my laptop, I found an unpleasant surprise: a single
+run subtracted 1.5% of the write resource of my SSD, which is quite a
+lot. Could you please modify the test to avoid this booby trap? Or
+actually, let me do it myself...
 
-uuid=null is exactly the same as uuid=off for the purpose of this test
-but without the undesired side effect.
+The root cause is that the test runs this command:
 
-The test was created to test the new modes uuid=null/auto/on, so the
-fact that is is testing the mode uuid=off is just an oversight.
+src/looptest -i 10000 -t -r -w -s -b 102400 /mnt/test/looptest/looptest2.tst
 
-Covert the use of uuid=off to uuid=null to fix this problem.
+strace shows this pattern:
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+lseek(3, 0, SEEK_SET)                   = 0
+ftruncate(3, 0)                         = 0
+lseek(3, 1013145600, SEEK_SET)          = 1013145600
+write(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"...,
+102400) = 102400
+lseek(3, 1013145600, SEEK_SET)          = 1013145600
+read(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"...,
+102400) = 102400
+lseek(3, 0, SEEK_SET)                   = 0
+ftruncate(3, 0)                         = 0
+lseek(3, 1013248000, SEEK_SET)          = 1013248000
+write(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"...,
+102400) = 102400
+lseek(3, 1013248000, SEEK_SET)          = 1013248000
+read(3, "\0\1\2\3\4\5\6\7\10\t\n\v\f\r\16\17\20\21\22\23\24\25\26\27\30\31\32\33\34\35\36\37"...,
+102400) = 102400
 
-Zorro,
+This is completely OK for filesystems that support sparse files,
+however, such 1-gigabyte seeks are emulated by Windows as 1-gigabyte
+writes because the NTFS filesystem does not actually support sparse
+files. The result is the "looptest2" part of the test writes more than
+4 TB of data.
 
-Following your report that the new test overlay/084 is failing with
-non-default overlayfs Kconfig [1], I reran the existing overlay tests
-with non-default config.
+I think that the test should be preceded by a small check of whether
+files intended to be sparse are actually sparse. If not, either fail
+or skip the test.
 
-The run with CONFIG_OVERLAY_FS_INDEX=y found another failure in a test
-that was added recently to cover a new feature in v6.6.
+I might be able to create a patch in the next few hours...
 
-Thanks,
-Amir.
-
-
-[1] https://lore.kernel.org/fstests/20231210204503.poggjg4z57eg2nn7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
-
- tests/overlay/081 | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
-
-diff --git a/tests/overlay/081 b/tests/overlay/081
-index 05156a3c..481e9931 100755
---- a/tests/overlay/081
-+++ b/tests/overlay/081
-@@ -5,7 +5,7 @@
- # FSQA Test No. 081
- #
- # Test persistent (and optionally unique) overlayfs fsid
--# with mount options uuid=null/on introduced in kernel v6.6
-+# with mount options uuid=null/auto/on introduced in kernel v6.6
- #
- . ./common/preamble
- _begin_fstest auto quick
-@@ -55,7 +55,7 @@ _scratch_mount
- 
- ovl_fsid=$(stat -f -c '%i' $test_dir)
- [[ "$ovl_fsid" == "$upper_fsid" ]] || \
--	echo "Overlayfs (uuid=auto) and upper fs fsid differ"
-+	echo "Overlayfs (after uuid=null) and upper fs fsid differ"
- 
- $UMOUNT_PROG $SCRATCH_MNT
- 
-@@ -74,16 +74,16 @@ _scratch_mount
- 
- ovl_fsid=$(stat -f -c '%i' $test_dir)
- [[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
--	echo "Overlayfs (uuid=auto) unique fsid is not persistent"
-+	echo "Overlayfs (after uuid=on) unique fsid is not persistent"
- 
- $UMOUNT_PROG $SCRATCH_MNT
- 
- # Test ignore existing persistent fsid on explicit opt-out
--_scratch_mount -o uuid=off
-+_scratch_mount -o uuid=null
- 
- ovl_fsid=$(stat -f -c '%i' $test_dir)
- [[ "$ovl_fsid" == "$upper_fsid" ]] || \
--	echo "Overlayfs (uuid=off) and upper fs fsid differ"
-+	echo "Overlayfs (uuid=null) and upper fs fsid differ"
- 
- $UMOUNT_PROG $SCRATCH_MNT
- 
-@@ -92,7 +92,7 @@ _overlay_scratch_mount_dirs "$upperdir:$lowerdir" "-" "-" -o ro,uuid=on
- 
- ovl_fsid=$(stat -f -c '%i' $test_dir)
- [[ "$ovl_fsid" == "$lower_fsid" ]] || \
--	echo "Overlayfs (uuid=null) and lower fs fsid differ"
-+	echo "Overlayfs (no upper) and lower fs fsid differ"
- 
- # Re-create fresh overlay layers, so following (uuid=auto) mounts
- # will behave as first time mount of a new overlayfs
-@@ -110,7 +110,7 @@ _scratch_mount
- ovl_fsid=$(stat -f -c '%i' $test_dir)
- ovl_unique_fsid=$ovl_fsid
- [[ "$ovl_fsid" != "$upper_fsid" ]] || \
--	echo "Overlayfs (uuid=auto) and upper fs fsid are the same"
-+	echo "Overlayfs (new) and upper fs fsid are the same"
- 
- $UMOUNT_PROG $SCRATCH_MNT
- 
 -- 
-2.34.1
-
+Alexander E. Patrakov
