@@ -1,148 +1,76 @@
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+Received: from mail-qv1-f53.google.com (mail-qv1-f53.google.com [209.85.219.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4BBB47A51
-	for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 17:24:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94FE61DFD4
+	for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 18:46:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PtK6Y4O6"
-Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-1d3aa0321b5so4907875ad.2
-        for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 09:24:52 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HHJAydOd"
+Received: by mail-qv1-f53.google.com with SMTP id 6a1803df08f44-67f2f1008e1so7656246d6.1
+        for <fstests@vger.kernel.org>; Sun, 17 Dec 2023 10:46:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1702833892; x=1703438692; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1702838762; x=1703443562; darn=vger.kernel.org;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=4pS2BFKTQwbsZbgqVvqs7ajm9hhi1MLPVSLMKKQM8j8=;
-        b=PtK6Y4O6yx1CDZ9Lu3U96HecbqnOA7QBkTnBt2Qs50F1Z0CiPjnzLB/mtleOfdBe91
-         k7mHq6XXKd+SlPueS7ipEY7IXElU4pWg8w4L+UUfN/ud7i7O9WrvIudmnFx5SAAiWuh0
-         o0ntGWnoIaGc7patVsLd1KPuF81diXwFTgWzCjsLdWsX7yHO8HY6RZqMg532oIHnR5IB
-         pdqFo/YewfbVUeOdpu0R+uNstnnpOnHLHKV+uwDH5vf5KI2eLGuCIPG/405ZVYC2WPKb
-         zzCCIk91naNdP+U3x0BPeKKenXXqv8iXEvj/r8YXqrD+1ri+VQGQMGGXC9+TYkBikZ6c
-         xuUQ==
+        bh=TB1M1QLe4scL1dsGM+msSocq7XZyDYsmK+XFDNFDjlU=;
+        b=HHJAydOdbagWejtuwbh4U2QKHSuT8Uh4miyVs54N0AF4meH/2Sm73FFqIcOTld4C4Y
+         oM4H0nolhBVgYhaVE3G7yJlybDzMpwfRiWbZJ+r87XOQrWCgLlpM3al8BXAI3TdCLKjK
+         X/hgZ5SSqa1a4145m1bc312lkD3Cp1U0oKuv24I+vPPof1y+T+BakTN+PWI6qhBlDatc
+         jwBR/SOgHYlf7lmDZ41RgUCyCpERRUs1zDZqvEBF9b8iDLOH9ZCclIGFvTauNZRwc0aL
+         3pK3wEdLzJR6IBxo0tf2gE5+o4/4vDbHDGsVQEAJvLzm0SUA8iSyGk05SmTFnXqhrZc9
+         qv5Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1702833892; x=1703438692;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1702838762; x=1703443562;
+        h=content-transfer-encoding:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=4pS2BFKTQwbsZbgqVvqs7ajm9hhi1MLPVSLMKKQM8j8=;
-        b=VZlqeWEUmG8IktcEyzYeawZeLc6pfeopjCEzV4/1ooAv514q1q66l1+0lOnlSssRg5
-         Vog/uHvWTn2flK5hSQbysLIbtUOVacxnetuqz8rcHhnxhHUBqenCgxlNBcnwudoemc81
-         DLmh/lg0HLXYviG16rAlwOG4QiI/ABivCOwPpTz7r7whaYG5SDHilWL/rk4i26d5fBgJ
-         yxa1G1fDdYzCVlH0S4GJVj0VJpPgB5F3OEDRXCJFRzFwGLo58+jHn6ux32qBWcV47Gbg
-         hIGtMQDco5bDMQtnrWOAKtmCJdC1lRqZoqxP/oGDs2CH/4nWmBfxNBfGGTRSrx29ckwq
-         h9Tw==
-X-Gm-Message-State: AOJu0Yzt1YGDkiOK+G76LBXfIRo9wtzNi9BpquwhKH0xLcBXSfgbEALc
-	71Z8u34lS/8g+D/ywzDYlMBl9sYVD1RORlgP
-X-Google-Smtp-Source: AGHT+IE9KPjJze9peur7aMpoT8UYgAJ3pn3smNHWydurHZDrJGqNV5indBoz+LKP5v/s75BZYM0fFA==
-X-Received: by 2002:a17:903:187:b0:1cc:449b:689e with SMTP id z7-20020a170903018700b001cc449b689emr19459623plg.20.1702833891756;
-        Sun, 17 Dec 2023 09:24:51 -0800 (PST)
-Received: from dell-laptop.lan ([180.190.183.136])
-        by smtp.gmail.com with ESMTPSA id d14-20020a170902cece00b001cfb6a7e41bsm17363232plg.151.2023.12.17.09.24.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Dec 2023 09:24:51 -0800 (PST)
-From: Alexander Patrakov <patrakov@gmail.com>
-To: fstests@vger.kernel.org
-Cc: Alexander Patrakov <patrakov@gmail.com>
-Subject: [PATCH] generic/129: add a safeguard against media wearout
-Date: Mon, 18 Dec 2023 01:24:44 +0800
-Message-ID: <20231217172444.250309-1-patrakov@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <CAN_LGv38+54CQrSb=Xod2-g5Tge2ViTT1jpMu25UGN144AEqgg@mail.gmail.com>
-References: <CAN_LGv38+54CQrSb=Xod2-g5Tge2ViTT1jpMu25UGN144AEqgg@mail.gmail.com>
+        bh=TB1M1QLe4scL1dsGM+msSocq7XZyDYsmK+XFDNFDjlU=;
+        b=p04ihY3V+1fXG/wZ7+tXssnYC03GgttPieAHIgbJ7MhUJPJuc441FPjfpKPGLSEHli
+         dZrc4aLFEg5hSGgIxrmkcLUGM30xaoG020LSu8q2NoA+b27kdbFxpwPs13q36MnR0w0v
+         ooJPiikeBx06UWuqYQM4NV1MXnAshY9lQ3tmG0SXtvDpKFZNie5Jyirtr7W4VtD9+Fsi
+         O+wCuF2nxWT9d7w9Pzig/+mfTl/iaB/Cz/VeUEI1VYdiD8Y7BhmFrYoSHGlMDKrt+VNN
+         FcdQSSWL9nckyW2h1wnV0VCTv9CPehg4jzwMC8Q2mZ2544EcDRw08Z3qt7UYqk/C1vD5
+         YFog==
+X-Gm-Message-State: AOJu0Ywf9FURKaq8YyhT2hgh2L3YDAW8/1CykV4aLcs5lH6F1mU4HHzM
+	TsdZssSR3pOKkMD8yTORhnWsZRDcT6rVB/sssk6UumzIJlFdjA==
+X-Google-Smtp-Source: AGHT+IGiiTUn5CoK8jk469qprQtAJJvVpMiRZMVrcEr8i/rvochp3DIWfRRTSJLjLNzMhZBHEGxVy1j+XQ3Ykzkzq2U=
+X-Received: by 2002:a05:6214:226a:b0:67f:2201:81df with SMTP id
+ gs10-20020a056214226a00b0067f220181dfmr5182636qvb.28.1702838762264; Sun, 17
+ Dec 2023 10:46:02 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <CAN_LGv38+54CQrSb=Xod2-g5Tge2ViTT1jpMu25UGN144AEqgg@mail.gmail.com>
+In-Reply-To: <CAN_LGv38+54CQrSb=Xod2-g5Tge2ViTT1jpMu25UGN144AEqgg@mail.gmail.com>
+From: "Alexander E. Patrakov" <patrakov@gmail.com>
+Date: Mon, 18 Dec 2023 02:45:36 +0800
+Message-ID: <CAN_LGv2UUOZvxN6w83tLudPZ5O9VPN0aJVDJay4rJDsvtcn29Q@mail.gmail.com>
+Subject: Re: Excessive media wearout caused by generic/129
+To: fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-_require_sparse_files is implemented as a list of filesystems known not to
-support sparse files, and so misses some cases.
+On Sun, Dec 17, 2023 at 11:43=E2=80=AFPM Alexander E. Patrakov
+<patrakov@gmail.com> wrote:
+>
+> Hello.
+>
+> While running xfstests on an SMB share exposed by a Windows Server
+> 2022 VM running on my laptop, I found an unpleasant surprise: a single
+> run subtracted 1.5% of the write resource of my SSD, which is quite a
+> lot. Could you please modify the test to avoid this booby trap? Or
+> actually, let me do it myself...
 
-If sparse files do not really work (as it is the case with CIFS and a
-Windows Server 2022), this test writes to the disk all the zeros that
-would normally be free due to sparse files. This amounts to many
-terabytes and presents a significant media wearout concern.
+The same concern, with the same root cause (truncation at a
+hundred-megabyte offset being transformed into a hundred-megabyte
+write, and then repeated 10000 times), exists for generic/014. At this
+point, I have a question: should this be mitigated at the individual
+test level, or should the _require_sparse_files check be modified?
 
-Mitigate this by doing a small-scale test first and checking if the
-resulting file ends up being not sufficiently sparse.
-
-Signed-off-by: Alexander Patrakov <patrakov@gmail.com>
----
- src/looptest.c    | 9 +++++++--
- tests/generic/129 | 8 ++++++++
- 2 files changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/src/looptest.c b/src/looptest.c
-index 7194a97d..2e620a60 100644
---- a/src/looptest.c
-+++ b/src/looptest.c
-@@ -56,6 +56,7 @@ enum {
-     FLAG_FLUSH      = 64,
-     FLAG_DELETE     = 128,
-     FLAG_DIRECT     = 256,
-+    FLAG_LEAVE      = 512,
- };
- 
- void
-@@ -74,6 +75,7 @@ usage(char *argv0)
-         "              -s           = sequential\n"
-         "              -f           = flush\n"
-         "              -D           = direct-IO\n"
-+        "              -L           = skip the final truncation\n"
- 	"              -h           = usage\n",
-             argv0);
- }
-@@ -94,7 +96,7 @@ main(int argc, char *argv[])
-     char                *buf            = NULL;
-     int64_t 		seek_to 	= 0;
-         
--    while ((c = getopt(argc, argv, "i:orwb:svthfFDd?")) != EOF) {
-+    while ((c = getopt(argc, argv, "i:orwb:svthfFDLd?")) != EOF) {
- 	switch (c) {
- 	    case 'i':
- 		count = atoi(optarg);
-@@ -126,6 +128,9 @@ main(int argc, char *argv[])
-             case 'D':
-                 flags |= FLAG_DIRECT;
-                 break;
-+            case 'L':
-+                flags |= FLAG_LEAVE;
-+                break;
-             case 'd':
-                 flags |= FLAG_DELETE;
-                 break;
-@@ -230,7 +235,7 @@ main(int argc, char *argv[])
-             }
-         }
-         
--        if (flags & FLAG_TRUNCATE) {
-+        if ((flags & FLAG_TRUNCATE) && !((flags & FLAG_LEAVE) && (i == count - 1))) {
-             if (flags & FLAG_VERBOSE)
-                 printf("seek 0\n");
- 
-diff --git a/tests/generic/129 b/tests/generic/129
-index 3d3a42a2..d1149b65 100755
---- a/tests/generic/129
-+++ b/tests/generic/129
-@@ -29,6 +29,14 @@ _scratch_mount "-o nosuid"
- 
- mkdir $SCRATCH_MNT/looptest
- 
-+# looptest2, if the missing sparse file support is not detected, writes more
-+# than 4 TB to the device. There was a complaint about media wearout, so do a
-+# small-scale test first.
-+$here/src/looptest -i 10 -L -t -r -w -s -b 102400 $SCRATCH_MNT/looptest/looptest0.tst
-+resulting_file_size_kb=$( du -sk $SCRATCH_MNT/looptest/looptest0.tst | cut -f 1 )
-+rm -f $SCRATCH_MNT/looptest/looptest0.tst
-+[ $resulting_file_size_kb -gt 256 ] && _notrun "Test skipped due to media wearout concerns - sparse files do not work"
-+
- $here/src/looptest -i 100000 -r -w -b 8192 -s $SCRATCH_MNT/looptest/looptest1.tst
- $here/src/looptest -i 10000 -t -r -w -s -b 102400 $SCRATCH_MNT/looptest/looptest2.tst
- $here/src/looptest -i 50000 -r -w -b 256 -s $SCRATCH_MNT/looptest/looptest3.tst
--- 
-2.43.0
-
+--=20
+Alexander E. Patrakov
