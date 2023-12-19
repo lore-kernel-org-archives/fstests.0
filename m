@@ -1,57 +1,49 @@
-Received: from mail-oo1-f42.google.com (mail-oo1-f42.google.com [209.85.161.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DC2A37D29
-	for <fstests@vger.kernel.org>; Tue, 19 Dec 2023 18:34:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=osandov.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05F203B287;
+	Tue, 19 Dec 2023 21:42:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b="f7wb24ZK"
-Received: by mail-oo1-f42.google.com with SMTP id 006d021491bc7-593fa46fd45so252027eaf.2
-        for <fstests@vger.kernel.org>; Tue, 19 Dec 2023 10:34:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1703010889; x=1703615689; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=x8wzkEAhwnyy07xLvpcm93W4I1DVlBneU1+LkbDvD3A=;
-        b=f7wb24ZKZjGbbLV7BKGS+cNTrHmoPKaXYwCCM1EO/yLEXTge0zZjxwvDFFW/4DDIlH
-         +aCctb/HdDy1gN8l7d0ZVz5KfSmNVjD9P8VWQ5Vfdb4+ZNmamwMLh644v2ybAnkkG2OQ
-         A42Xe8PvJMpz1H/LSciWbcA7AJfHAi3URIphs0QR/eMrv+vijHejbTVrUajSg4kNrr2I
-         2pxLh1NJhc6RYOYlOOHGoHun8YBY3tFXDDOO34RqphD4eeiJCoj9fHEqFasAVFEucffC
-         VOQEsYqrKV/e0tEl37wihSz9GCUiimfogyfGAdJGYKqS2d61deXeIeu0iqN5wWmHFP/a
-         /tcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703010889; x=1703615689;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=x8wzkEAhwnyy07xLvpcm93W4I1DVlBneU1+LkbDvD3A=;
-        b=EFReyITgTm3RFFBuaHb6J3YH0PNGKD4EbISdNrzYYB43La0DZN3RxG5BqeTh0MOPit
-         /8s/lELUkyHj5gxf+0hTedEYzB1+vuOxa+++KY0WqBY1ZVa82yRm5AiYZGQUcb2/bMoo
-         xeTolqogtUAO+WeJYEiBs5rF6M5NavVoZYBvviLaVmyLIl3/g9OPqwwCU1HZM6q8VK+E
-         5+gOkcJ25eYh2W2XJ7LkQJQ4xjGfUGPoiLRJF6NOc+jsCsvTO32L4ovTjpRw7MQMt5pw
-         8cVLxVW1vnENCnC5X8TQ7LJhgSDGxFPXtfOY6bCPMnyAwpSZg7nt0F98FsGMXTeFJpeo
-         PM7A==
-X-Gm-Message-State: AOJu0YwONTSsT8wb//B18yO9agoWLNdTpfT3LLRHDoV3yLB7F4AaR6uu
-	1HUrzFLM1hBWldYSW83K3LmfQzWuExAGn0zVuLM=
-X-Google-Smtp-Source: AGHT+IFaIZ224gUPMZpzJ1d8WM/wJBxVb6SKiX+S0sA0DHxQB59QpyR9jsvxHn9CYaKza9fmcMxNVQ==
-X-Received: by 2002:a05:6358:7e48:b0:170:f17f:7070 with SMTP id p8-20020a0563587e4800b00170f17f7070mr10068900rwm.33.1703010889104;
-        Tue, 19 Dec 2023 10:34:49 -0800 (PST)
-Received: from telecaster.hsd1.wa.comcast.net ([2620:10d:c090:400::4:649a])
-        by smtp.gmail.com with ESMTPSA id o8-20020a056a001b4800b006d93c8d0c3esm1090679pfv.183.2023.12.19.10.34.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 19 Dec 2023 10:34:48 -0800 (PST)
-From: Omar Sandoval <osandov@osandov.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Cc: kernel-team@fb.com
-Subject: [PATCH fstests] btrfs: test snapshotting a deleted subvolume
-Date: Tue, 19 Dec 2023 10:34:37 -0800
-Message-ID: <62415ffc97ff2db4fa65cdd6f9db6ddead8105cd.1703010806.git.osandov@osandov.com>
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Zd5+jzmW"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1703022159; x=1734558159;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=tPP2kDEf/tN7yIAxxly8R2bJj7+PWjjcASYnXDyDXAI=;
+  b=Zd5+jzmWEY3tdtsgR7QnSMqXic56XObdc6Ny3K83jNApQgRvE69Wc6Qh
+   nEc0tIpkN4LCYmBxa17L3jhUk7xAINusmbJ0SHMVQ8Nbg7TrDMwM+40qw
+   KxFBygfTAitmM5GrtmenwrDP3NIJiPJGOQgbs8PT/AXKGhpKlQfdnm6LU
+   DvR7aJm2R1sHBrdaQDSBBjPWw2yAl1XRqdFFMZbWVPuExm6Obhyg9h+Sc
+   opUOwHyiRKoBLabV41bSze1xKm+emvaxWMbFxaoIGcrWb+h5PJ4w9tHDV
+   JxECxS3Nvk/CzNIsyyBbVQb1+AOLM3uZfslnZHRa6iOqwQzXlHlifYTAy
+   w==;
+X-CSE-ConnectionGUID: fmJvmysGSFanO9JYKWvAig==
+X-CSE-MsgGUID: cQ+N/ee3T5K/bwRkySxDbA==
+X-IronPort-AV: E=Sophos;i="6.04,289,1695657600"; 
+   d="scan'208";a="5328979"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 20 Dec 2023 05:42:33 +0800
+IronPort-SDR: 7sSVpd69KBg7RW6M4gv3n9j9FpUdMQGueSeLS3P7jSRddWFiN9H/oM/u4xRl5aIvGH0i0ZQ8ZZ
+ 91F0/8ClgqGA==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 19 Dec 2023 12:47:37 -0800
+IronPort-SDR: N0nYHn3UrUEGXVcv3yanexY5Yg7nyGkQT0Mj56efowPshBruEPICk1Y6viY4Q1hI8YxE1DT/5D
+ uNU+QOcGKIdw==
+WDCIronportException: Internal
+Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.90])
+  by uls-op-cesaip02.wdc.com with ESMTP; 19 Dec 2023 13:42:33 -0800
+From: Naohiro Aota <naohiro.aota@wdc.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Naohiro Aota <naohiro.aota@wdc.com>,
+	David Disseldorp <ddiss@suse.de>
+Subject: [PATCH v2] fstests: filter.btrfs: update _filter_transaction_commit()
+Date: Wed, 20 Dec 2023 06:42:30 +0900
+Message-ID: <20231219214230.770724-1-naohiro.aota@wdc.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <068014bd3e90668525c295660862db2932e25087.1703010314.git.osandov@fb.com>
-References: <068014bd3e90668525c295660862db2932e25087.1703010314.git.osandov@fb.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,200 +52,52 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This is a regression test for patch "btrfs: don't abort filesystem when
-attempting to snapshot deleted subvolume". Without the fix, the
-filesystem goes read-only and prints a warning. With the fix, it should
-fail gracefully with ENOENT.
+Recent btrfs-progs commit 5c91264d2dfc ("btrfs-progs: subvol delete:
+print the id of the deleted subvolume") added the id of the deleted
+subvolume to "Delete subvolume" print format.
 
-Signed-off-by: Omar Sandoval <osandov@osandov.com>
+As a result, btrfs/001 now always fail by the output difference.
+
+  - output mismatch (see /host/results/btrfs/001.out.bad)
+      --- tests/btrfs/001.out     2021-02-05 01:44:17.000000000 +0000
+      +++ /host/results/btrfs/001.out.bad 2023-12-15 01:43:07.000000000 +0000
+      @@ -33,7 +33,7 @@
+       Listing subvolumes
+       snap
+       subvol
+      -Delete subvolume 'SCRATCH_MNT/snap'
+      +Delete subvolume 256 (no-commit): 'SCRATCH_MNT/snap'
+       List root dir
+       subvol
+      ...
+
+Fix the issue by updating _filter_transaction_commit().
+
+Reviewed-by: David Disseldorp <ddiss@suse.de>
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
 ---
-Note that the kernel fix was just sent and isn't yet merged.
+ common/filter.btrfs | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-Thanks!
+v2: Fold multiple filters in single sed command, as suggested by David
+Disseldorp.
 
- .gitignore                         |   1 +
- src/Makefile                       |   2 +-
- src/t_snapshot_deleted_subvolume.c | 102 +++++++++++++++++++++++++++++
- tests/btrfs/304                    |  26 ++++++++
- tests/btrfs/304.out                |   2 +
- 5 files changed, 132 insertions(+), 1 deletion(-)
- create mode 100644 src/t_snapshot_deleted_subvolume.c
- create mode 100755 tests/btrfs/304
- create mode 100644 tests/btrfs/304.out
-
-diff --git a/.gitignore b/.gitignore
-index 4c32ac42..b9bf708b 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -165,6 +165,7 @@ tags
- /src/t_readdir_2
- /src/t_readdir_3
- /src/t_rename_overwrite
-+/src/t_snapshot_deleted_subvolume
- /src/t_stripealign
- /src/t_truncate_cmtime
- /src/t_truncate_self
-diff --git a/src/Makefile b/src/Makefile
-index 8160a0e8..53a32370 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -33,7 +33,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
- 	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
- 	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
--	uuid_ioctl
-+	uuid_ioctl t_snapshot_deleted_subvolume
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 02c6b92dfa94..8c6fe5793663 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -69,8 +69,9 @@ _filter_btrfs_device_stats()
+ }
  
- EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
- 	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-diff --git a/src/t_snapshot_deleted_subvolume.c b/src/t_snapshot_deleted_subvolume.c
-new file mode 100644
-index 00000000..c3adb1c4
---- /dev/null
-+++ b/src/t_snapshot_deleted_subvolume.c
-@@ -0,0 +1,102 @@
-+// SPDX-License-Identifier: GPL-2.0
-+// Copyright (c) Meta Platforms, Inc. and affiliates.
-+
-+#include "global.h"
-+
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/ioctl.h>
-+#include <sys/stat.h>
-+#include <unistd.h>
-+
-+#include <linux/types.h>
-+#ifdef HAVE_STRUCT_BTRFS_IOCTL_VOL_ARGS_V2
-+#include <linux/btrfs.h>
-+#else
-+#ifndef BTRFS_IOCTL_MAGIC
-+#define BTRFS_IOCTL_MAGIC 0x94
-+#endif
-+
-+#ifndef BTRFS_IOC_SNAP_DESTROY_V2
-+#define BTRFS_IOC_SNAP_DESTROY_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
-+#ifndef BTRFS_IOC_SNAP_CREATE_V2
-+#define BTRFS_IOC_SNAP_CREATE_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
-+#ifndef BTRFS_IOC_SUBVOL_CREATE_V2
-+#define BTRFS_IOC_SUBVOL_CREATE_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 24, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
-+#ifndef BTRFS_SUBVOL_NAME_MAX
-+#define BTRFS_SUBVOL_NAME_MAX 4039
-+#endif
-+
-+struct btrfs_ioctl_vol_args_v2 {
-+	__s64 fd;
-+	__u64 transid;
-+	__u64 flags;
-+	union {
-+		struct {
-+			__u64 size;
-+			struct btrfs_qgroup_inherit *qgroup_inherit;
-+		};
-+		__u64 unused[4];
-+	};
-+	union {
-+		char name[BTRFS_SUBVOL_NAME_MAX + 1];
-+		__u64 devid;
-+		__u64 subvolid;
-+	};
-+};
-+#endif
-+
-+int main(int argc, char **argv)
-+{
-+	if (argc != 2) {
-+		fprintf(stderr, "usage: %s PATH\n", argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	int dirfd = open(argv[1], O_RDONLY | O_DIRECTORY);
-+	if (dirfd < 0) {
-+		perror(argv[1]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	struct btrfs_ioctl_vol_args_v2 subvol_args = {};
-+	strcpy(subvol_args.name, "subvol");
-+	if (ioctl(dirfd, BTRFS_IOC_SUBVOL_CREATE_V2, &subvol_args) < 0) {
-+		perror("BTRFS_IOC_SUBVOL_CREATE_V2");
-+		return EXIT_FAILURE;
-+	}
-+
-+	int subvolfd = openat(dirfd, "subvol", O_RDONLY | O_DIRECTORY);
-+	if (subvolfd < 0) {
-+		perror("openat");
-+		return EXIT_FAILURE;
-+	}
-+
-+	if (ioctl(dirfd, BTRFS_IOC_SNAP_DESTROY_V2, &subvol_args) < 0) {
-+		perror("BTRFS_IOC_SNAP_DESTROY_V2");
-+		return EXIT_FAILURE;
-+	}
-+
-+	struct btrfs_ioctl_vol_args_v2 snap_args = { .fd = subvolfd };
-+	strcpy(snap_args.name, "snap");
-+	if (ioctl(dirfd, BTRFS_IOC_SNAP_CREATE_V2, &snap_args) < 0) {
-+		if (errno == ENOENT)
-+			return EXIT_SUCCESS;
-+		perror("BTRFS_IOC_SNAP_CREATE_V2");
-+		return EXIT_FAILURE;
-+	}
-+	fprintf(stderr, "BTRFS_IOC_SNAP_CREATE_V2 should've failed\n");
-+	return EXIT_FAILURE;
-+}
-diff --git a/tests/btrfs/304 b/tests/btrfs/304
-new file mode 100755
-index 00000000..65f54b95
---- /dev/null
-+++ b/tests/btrfs/304
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) Meta Platforms, Inc. and affiliates.
-+#
-+# FS QA Test 304
-+#
-+# Try to snapshot a deleted subvolume.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick snapshot subvol
-+
-+_supported_fs btrfs
-+_require_scratch
-+_require_test_program t_snapshot_deleted_subvolume
-+_fixed_by_kernel_commit XXXXXXXXXXXX "btrfs: don't abort filesystem when attempting to snapshot deleted subvolume"
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
-+
-+"$here/src/t_snapshot_deleted_subvolume" "$SCRATCH_MNT"
-+# Make sure the filesystem didn't go read-only.
-+touch "$SCRATCH_MNT/foo"
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/304.out b/tests/btrfs/304.out
-new file mode 100644
-index 00000000..c504111c
---- /dev/null
-+++ b/tests/btrfs/304.out
-@@ -0,0 +1,2 @@
-+QA output created by 304
-+Silence is golden
+ _filter_transaction_commit() {
+-	sed -e "/Transaction commit: none (default)/d" | \
+-	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
++	sed -e "/Transaction commit: none (default)/d" \
++	    -e "s/Delete subvolume [0-9]\+ (.*commit):/Delete subvolume/g" \
++	    -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
+ }
+ 
+ _filter_btrfs_subvol_delete()
 -- 
 2.43.0
 
