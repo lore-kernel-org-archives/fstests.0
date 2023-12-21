@@ -1,49 +1,62 @@
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05F203B287;
-	Tue, 19 Dec 2023 21:42:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1F19D2E1
+	for <fstests@vger.kernel.org>; Thu, 21 Dec 2023 06:12:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Zd5+jzmW"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1703022159; x=1734558159;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=tPP2kDEf/tN7yIAxxly8R2bJj7+PWjjcASYnXDyDXAI=;
-  b=Zd5+jzmWEY3tdtsgR7QnSMqXic56XObdc6Ny3K83jNApQgRvE69Wc6Qh
-   nEc0tIpkN4LCYmBxa17L3jhUk7xAINusmbJ0SHMVQ8Nbg7TrDMwM+40qw
-   KxFBygfTAitmM5GrtmenwrDP3NIJiPJGOQgbs8PT/AXKGhpKlQfdnm6LU
-   DvR7aJm2R1sHBrdaQDSBBjPWw2yAl1XRqdFFMZbWVPuExm6Obhyg9h+Sc
-   opUOwHyiRKoBLabV41bSze1xKm+emvaxWMbFxaoIGcrWb+h5PJ4w9tHDV
-   JxECxS3Nvk/CzNIsyyBbVQb1+AOLM3uZfslnZHRa6iOqwQzXlHlifYTAy
-   w==;
-X-CSE-ConnectionGUID: fmJvmysGSFanO9JYKWvAig==
-X-CSE-MsgGUID: cQ+N/ee3T5K/bwRkySxDbA==
-X-IronPort-AV: E=Sophos;i="6.04,289,1695657600"; 
-   d="scan'208";a="5328979"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Dec 2023 05:42:33 +0800
-IronPort-SDR: 7sSVpd69KBg7RW6M4gv3n9j9FpUdMQGueSeLS3P7jSRddWFiN9H/oM/u4xRl5aIvGH0i0ZQ8ZZ
- 91F0/8ClgqGA==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 19 Dec 2023 12:47:37 -0800
-IronPort-SDR: N0nYHn3UrUEGXVcv3yanexY5Yg7nyGkQT0Mj56efowPshBruEPICk1Y6viY4Q1hI8YxE1DT/5D
- uNU+QOcGKIdw==
-WDCIronportException: Internal
-Received: from unknown (HELO naota-xeon.wdc.com) ([10.225.163.90])
-  by uls-op-cesaip02.wdc.com with ESMTP; 19 Dec 2023 13:42:33 -0800
-From: Naohiro Aota <naohiro.aota@wdc.com>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="taiX/0N+"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3BL5eCA9025980
+	for <fstests@vger.kernel.org>; Thu, 21 Dec 2023 06:12:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=KlSRMoSGX1LzE149zQpmYVylWjyY0qj+wAjVR2LlpAg=;
+ b=taiX/0N+g0jMQLqzRSU5kCffHELhbjaoKG7xmRwK6DV6W90kaVVlpp0qdLm8JLYqDyN0
+ TYiaRZ0niHNnL4YeNZJNaS2nMXuCvQ2WPISs2uiWkPSYHlTOFB0/o5R+Ti8ZMIv9OqsU
+ tEOIdCQAEkLBedYk+2/4aIyG9LtVUrEpMqcKsz3IPuZjGXTTnEfpEZI7rGOoR+5HJR9J
+ 3mkA0GccFO59vXJ2Pv6npXWieUSPUwWgepZSbKZiimHWuHmhPfSZADNlLD1MHPx2mHzZ
+ qR/fnWNk8Ts9PU9uBr0hmpe8ht6zz/rE1t5JricKW2WwrivnddDGnnC2Z5CrizY4XWCB 0A== 
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3v4d645t1w-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Thu, 21 Dec 2023 06:12:44 +0000
+Received: from m0360083.ppops.net (m0360083.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3BL5rKJI022510
+	for <fstests@vger.kernel.org>; Thu, 21 Dec 2023 06:12:44 GMT
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3v4d645t14-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 21 Dec 2023 06:12:43 +0000
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3BL34A3V010840;
+	Thu, 21 Dec 2023 06:12:42 GMT
+Received: from smtprelay02.fra02v.mail.ibm.com ([9.218.2.226])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3v1q7nu5p4-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 21 Dec 2023 06:12:42 +0000
+Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
+	by smtprelay02.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3BL6CdNu25756338
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 21 Dec 2023 06:12:39 GMT
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 49F3120040;
+	Thu, 21 Dec 2023 06:12:39 +0000 (GMT)
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 480B92004B;
+	Thu, 21 Dec 2023 06:12:38 +0000 (GMT)
+Received: from localhost.localdomain (unknown [9.43.87.88])
+	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Thu, 21 Dec 2023 06:12:38 +0000 (GMT)
+From: Disha Goel <disgoel@linux.ibm.com>
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Naohiro Aota <naohiro.aota@wdc.com>,
-	David Disseldorp <ddiss@suse.de>
-Subject: [PATCH v2] fstests: filter.btrfs: update _filter_transaction_commit()
-Date: Wed, 20 Dec 2023 06:42:30 +0900
-Message-ID: <20231219214230.770724-1-naohiro.aota@wdc.com>
-X-Mailer: git-send-email 2.43.0
+Cc: ojaswin@linux.ibm.com, ritesh.list@gmail.com,
+        Disha Goel <disgoel@linux.ibm.com>
+Subject: [PATCH] xfstests: replace custom __u64 definition with uint64_t
+Date: Thu, 21 Dec 2023 11:42:31 +0530
+Message-Id: <20231221061231.44347-1-disgoel@linux.ibm.com>
+X-Mailer: git-send-email 2.39.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,53 +64,81 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 7Di8GXZ-c8M-BQroh1UiLYyjvRaY4uS9
+X-Proofpoint-ORIG-GUID: OVs9fj1Whjck1QtcNpNpi3xOeBLBjnm_
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-12-21_02,2023-12-20_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ lowpriorityscore=0 malwarescore=0 suspectscore=0 impostorscore=0
+ phishscore=0 mlxlogscore=789 clxscore=1011 bulkscore=0 mlxscore=0
+ adultscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311290000 definitions=main-2312210044
 
-Recent btrfs-progs commit 5c91264d2dfc ("btrfs-progs: subvol delete:
-print the id of the deleted subvolume") added the id of the deleted
-subvolume to "Delete subvolume" print format.
+In some distributions, __u64 is already defined in system header files,
+causing compilation errors when building xfstest.
 
-As a result, btrfs/001 now always fail by the output difference.
+	# make
+	    [CC]    ext4_resize
+	ext4_resize.c:17:28: error: conflicting types for '__u64'
+	 typedef unsigned long long __u64;
+	                            ^~~~~
+	In file included from /usr/include/asm/types.h:26:0,
+	                 from /usr/include/linux/types.h:5,
+	                 from /usr/include/linux/mount.h:4,
+	                 from /usr/include/sys/mount.h:32,
+	                 from ext4_resize.c:15:
+	/usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
+	 typedef unsigned long __u64;
+                       ^~~~~
 
-  - output mismatch (see /host/results/btrfs/001.out.bad)
-      --- tests/btrfs/001.out     2021-02-05 01:44:17.000000000 +0000
-      +++ /host/results/btrfs/001.out.bad 2023-12-15 01:43:07.000000000 +0000
-      @@ -33,7 +33,7 @@
-       Listing subvolumes
-       snap
-       subvol
-      -Delete subvolume 'SCRATCH_MNT/snap'
-      +Delete subvolume 256 (no-commit): 'SCRATCH_MNT/snap'
-       List root dir
-       subvol
-      ...
+To address this issue, replace the custom definition of __u64 with the
+standard uint64_t type from <stdint.h>. uint64_t is part of the C99
+standard, offering a standardised approach for representing unsigned
+64-bit integers. This modification enhances code consistency and
+ensures compatibility with standard types.
 
-Fix the issue by updating _filter_transaction_commit().
+Tested on various distributions on Power architecture, by successfully
+compiling xfstest. Additionally, verified the compatibility by running
+ext4/033 and ext4/056 tests, both of which use ext4_resize and
+observed successful test execution.
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
-Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+        # make
+            [CC]    detached_mounts_propagation
+            [CC]    ext4_resize
+            [CC]    t_readdir_3
+
+Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
 ---
- common/filter.btrfs | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ src/ext4_resize.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-v2: Fold multiple filters in single sed command, as suggested by David
-Disseldorp.
-
-diff --git a/common/filter.btrfs b/common/filter.btrfs
-index 02c6b92dfa94..8c6fe5793663 100644
---- a/common/filter.btrfs
-+++ b/common/filter.btrfs
-@@ -69,8 +69,9 @@ _filter_btrfs_device_stats()
- }
+diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+index 78b66432..6e60ee5b 100644
+--- a/src/ext4_resize.c
++++ b/src/ext4_resize.c
+@@ -14,10 +14,8 @@
+ #include <sys/ioctl.h>
+ #include <sys/mount.h>
  
- _filter_transaction_commit() {
--	sed -e "/Transaction commit: none (default)/d" | \
--	sed -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
-+	sed -e "/Transaction commit: none (default)/d" \
-+	    -e "s/Delete subvolume [0-9]\+ (.*commit):/Delete subvolume/g" \
-+	    -e "s/Delete subvolume (.*commit):/Delete subvolume/g"
- }
+-typedef unsigned long long __u64;
+-
+ #ifndef EXT4_IOC_RESIZE_FS
+-#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
++#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, uint64_t)
+ #endif
  
- _filter_btrfs_subvol_delete()
+ #define pr_error(fmt, ...) do { \
+@@ -31,7 +29,7 @@ static void usage(void)
+ 
+ int main(int argc, char **argv)
+ {
+-	__u64	new_size;
++	uint64_t	new_size;
+ 	int	error, fd;
+ 	char	*mnt_dir = NULL, *tmp = NULL;
+ 
 -- 
-2.43.0
+2.39.1
 
