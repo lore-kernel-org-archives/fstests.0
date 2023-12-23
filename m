@@ -1,60 +1,59 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38201168A8
-	for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 18:56:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55D3915E96
+	for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 19:09:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T7ytYGFt"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ce6pmM2z"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1703357780;
+	s=mimecast20190719; t=1703358594;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=19kgDWTE918kY0Eenzx7m/5ckj32KVwstfU7gstsJ1Y=;
-	b=T7ytYGFthNZovSvOG8yShyCqWA+dhJWDaDo1+ZXcY7CqsdMT4G9NA8X04fe9h0QaiXV958
-	A4V51HOzBzb465k6yvMayJPix3I/W3KFuFejq+70uXge1GrcGApgABWT6coAN4puoxBv8G
-	c+9EZk/EcwhysP52aY3OLfCw/RBOJR4=
-Received: from mail-io1-f71.google.com (mail-io1-f71.google.com
- [209.85.166.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=O00j2AIAqRuugHAvC+JIFU1mD3El9Iw99E2KnThZl5Q=;
+	b=Ce6pmM2zFQBRo22fJfvdjkSsMAAzLkUiptWAlRzDwJowK6xkAWzHtNOTyNaytdaQr/TE5R
+	l0OC0kMs5SYU89DsfO+s42vCQweXFGlrzOKs/f1gSuCXjDEES/wjDNvoFphLYFu+PvqTSb
+	PAxMUdjm23bleibpyJsPnH2eQNlmW5w=
+Received: from mail-io1-f69.google.com (mail-io1-f69.google.com
+ [209.85.166.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-571-9cK5CyVlNguPp1rmrSFNsw-1; Sat, 23 Dec 2023 13:56:18 -0500
-X-MC-Unique: 9cK5CyVlNguPp1rmrSFNsw-1
-Received: by mail-io1-f71.google.com with SMTP id ca18e2360f4ac-7b7f996e118so443518539f.3
-        for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 10:56:18 -0800 (PST)
+ us-mta-175-d02k9JxTNRmvk2Ykb3TeBQ-1; Sat, 23 Dec 2023 14:09:52 -0500
+X-MC-Unique: d02k9JxTNRmvk2Ykb3TeBQ-1
+Received: by mail-io1-f69.google.com with SMTP id ca18e2360f4ac-7ba8315d1cbso339080739f.2
+        for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 11:09:52 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703357778; x=1703962578;
+        d=1e100.net; s=20230601; t=1703358591; x=1703963391;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=19kgDWTE918kY0Eenzx7m/5ckj32KVwstfU7gstsJ1Y=;
-        b=CTLq8jqUDU8boXg+NWs9ox+zdmzUHj1N7eB+ceEN1Jmhf4JXn/P4/pmi2X6IRJDLtE
-         /UtroXhGMb9TNFN2g91AoqZnXzUduXb7QHT6isaSO7RNjfCIQQ0b/1uLiSyOiPwNJfW+
-         MyR2dUhB/Brc4s9Y+rUO3D6VjbIG5j1/2qF41sxVfogJqaQ4gIyTEosMBh3VEUXwSnud
-         oISnV7eU53MW0YHZYo5BU9aSZxkRQCfpq1K02oWQu17amIlmDL1b4LxyD1ZToss8tAmo
-         bVpJcDcxIm4n9ZmRFIc0AfBJvZFn723zLQcFqmqmQlzH1Qhysvr0GvTXg385cmNykz6G
-         ZR+A==
-X-Gm-Message-State: AOJu0YyzkqnO9+CG+zFSmeIemzku08yu1WNnfoPQg8HxVO6QI2JVoJgA
-	oG3oIQmSPkYl4b1RdMVxSJop1BbFCTp5gysE+j2zNDVzEcUIQv+xQBjvxkU1qdg9zXvwEwlDl5E
-	a6fH1UfQKcv8kmhhokT94Avp1fw==
-X-Received: by 2002:a05:6e02:156d:b0:35f:edfc:e24b with SMTP id k13-20020a056e02156d00b0035fedfce24bmr1818744ilu.118.1703357778197;
-        Sat, 23 Dec 2023 10:56:18 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHBTfVtM33ExjigK3RknAEWG/JxkctoF056reQA8bjLibebIsrzjNK1iegZs854OEBsbnr8uA==
-X-Received: by 2002:a05:6e02:156d:b0:35f:edfc:e24b with SMTP id k13-20020a056e02156d00b0035fedfce24bmr1818738ilu.118.1703357777935;
-        Sat, 23 Dec 2023 10:56:17 -0800 (PST)
+        bh=O00j2AIAqRuugHAvC+JIFU1mD3El9Iw99E2KnThZl5Q=;
+        b=s8MYpCwsqXkSY51JhZ7rCCGOsOltIUUN7S1qN+6RPit5DfUDrulDU+ZeJGFkTt9OfV
+         oCWZT3a/6+x1on6b+NxEedgBLEgfLGGWYCJCI3cYLnpc8CtQgjHlDHk8n4AHzE1k1Jmy
+         blPaXfpqcknBKqYB3vuRby46p6ieawkT8C5ZqbqI1VbJd5ulfnJ/M1OSksT0g5k3WyPk
+         IEojB1YJubNpgC6NwUrCIuZu77qEP/l9jyYy/D/P+MqgK5A4OLTqYEJ0ln5MVgmDyINS
+         Onn33zFi62PwpySVqkhNNa1nUuFL6QNV5Dr6SJMOEY4PgJi+WqzVAey9nGL2X7Nzxhf9
+         Q8Zw==
+X-Gm-Message-State: AOJu0Yy+ENDpFdEC2vMzy0ryKJv5zFArdRkwJJtdOiQiIM6PPLsDDvxD
+	yR6TWFn1n+Iyd5zyRJzCpHW4pNII/sci/UUYC4fpEsj8LVnM8N0FwRXGAXqICA0orMsf+5rEyfG
+	8Bhj2Vbu7zrxYH5z59J+wIs0FCg==
+X-Received: by 2002:a05:6e02:3b85:b0:35f:b4ef:ff2d with SMTP id cv5-20020a056e023b8500b0035fb4efff2dmr4841503ilb.18.1703358591574;
+        Sat, 23 Dec 2023 11:09:51 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGrU401Ba0/LxUJ5BhpKaXFFxVWVwomwa2YtFMl7VSoyq6t6dstC7nTTq4QTfRL6H8lxpj17A==
+X-Received: by 2002:a05:6e02:3b85:b0:35f:b4ef:ff2d with SMTP id cv5-20020a056e023b8500b0035fb4efff2dmr4841489ilb.18.1703358591335;
+        Sat, 23 Dec 2023 11:09:51 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id c24-20020a170902d91800b001bc676df6a9sm5370892plz.132.2023.12.23.10.56.16
+        by smtp.gmail.com with ESMTPSA id ju22-20020a170903429600b001d1cd7e4acesm5453225plb.68.2023.12.23.11.09.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 23 Dec 2023 10:56:17 -0800 (PST)
-Date: Sun, 24 Dec 2023 02:56:14 +0800
+        Sat, 23 Dec 2023 11:09:51 -0800 (PST)
+Date: Sun, 24 Dec 2023 03:09:48 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] overlay/081: fix test when running with index enabled
-Message-ID: <20231223185614.irccdmam6fwqi2yt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231217150017.569077-1-amir73il@gmail.com>
+To: Yang Xu <xuyang2018.jy@fujitsu.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/650: add kernel commit id
+Message-ID: <20231223190948.4w4hqzmjz2qebu2t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231222024800.138907-1-xuyang2018.jy@fujitsu.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,112 +62,38 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231217150017.569077-1-amir73il@gmail.com>
+In-Reply-To: <20231222024800.138907-1-xuyang2018.jy@fujitsu.com>
 
-On Sun, Dec 17, 2023 at 05:00:17PM +0200, Amir Goldstein wrote:
-> Test overlay/081 fails with:
->  CONFIG_OVERLAY_FS_INDEX=y
-> or
->  echo Y > /sys/modules/overlay/params/index
+On Thu, Dec 21, 2023 at 09:48:00PM -0500, Yang Xu wrote:
+> This week, this case crashed when I test xfstests on xfs. Then, I found
+> this kernel patch to slove this problem, so add it.
 > 
-> The reason is that mount option uuid=off has the undesired side effect
-> of disabling index feature.
-> 
-> uuid=null is exactly the same as uuid=off for the purpose of this test
-> but without the undesired side effect.
-> 
-> The test was created to test the new modes uuid=null/auto/on, so the
-> fact that is is testing the mode uuid=off is just an oversight.
-> 
-> Covert the use of uuid=off to uuid=null to fix this problem.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
 > ---
-> 
-> Zorro,
-> 
-> Following your report that the new test overlay/084 is failing with
-> non-default overlayfs Kconfig [1], I reran the existing overlay tests
-> with non-default config.
-> 
-> The run with CONFIG_OVERLAY_FS_INDEX=y found another failure in a test
-> that was added recently to cover a new feature in v6.6.
 
-Thanks for further fixes!
+Good to me,
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+>  tests/generic/650 | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> Thanks,
-> Amir.
-> 
-> 
-> [1] https://lore.kernel.org/fstests/20231210204503.poggjg4z57eg2nn7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
-> 
->  tests/overlay/081 | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/tests/overlay/081 b/tests/overlay/081
-> index 05156a3c..481e9931 100755
-> --- a/tests/overlay/081
-> +++ b/tests/overlay/081
-> @@ -5,7 +5,7 @@
->  # FSQA Test No. 081
->  #
->  # Test persistent (and optionally unique) overlayfs fsid
-> -# with mount options uuid=null/on introduced in kernel v6.6
-> +# with mount options uuid=null/auto/on introduced in kernel v6.6
->  #
+> diff --git a/tests/generic/650 b/tests/generic/650
+> index 773f93c7..e152c398 100755
+> --- a/tests/generic/650
+> +++ b/tests/generic/650
+> @@ -10,6 +10,9 @@
 >  . ./common/preamble
->  _begin_fstest auto quick
-> @@ -55,7 +55,7 @@ _scratch_mount
+>  _begin_fstest auto rw stress soak
 >  
->  ovl_fsid=$(stat -f -c '%i' $test_dir)
->  [[ "$ovl_fsid" == "$upper_fsid" ]] || \
-> -	echo "Overlayfs (uuid=auto) and upper fs fsid differ"
-> +	echo "Overlayfs (after uuid=null) and upper fs fsid differ"
->  
->  $UMOUNT_PROG $SCRATCH_MNT
->  
-> @@ -74,16 +74,16 @@ _scratch_mount
->  
->  ovl_fsid=$(stat -f -c '%i' $test_dir)
->  [[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
-> -	echo "Overlayfs (uuid=auto) unique fsid is not persistent"
-> +	echo "Overlayfs (after uuid=on) unique fsid is not persistent"
->  
->  $UMOUNT_PROG $SCRATCH_MNT
->  
->  # Test ignore existing persistent fsid on explicit opt-out
-> -_scratch_mount -o uuid=off
-> +_scratch_mount -o uuid=null
->  
->  ovl_fsid=$(stat -f -c '%i' $test_dir)
->  [[ "$ovl_fsid" == "$upper_fsid" ]] || \
-> -	echo "Overlayfs (uuid=off) and upper fs fsid differ"
-> +	echo "Overlayfs (uuid=null) and upper fs fsid differ"
->  
->  $UMOUNT_PROG $SCRATCH_MNT
->  
-> @@ -92,7 +92,7 @@ _overlay_scratch_mount_dirs "$upperdir:$lowerdir" "-" "-" -o ro,uuid=on
->  
->  ovl_fsid=$(stat -f -c '%i' $test_dir)
->  [[ "$ovl_fsid" == "$lower_fsid" ]] || \
-> -	echo "Overlayfs (uuid=null) and lower fs fsid differ"
-> +	echo "Overlayfs (no upper) and lower fs fsid differ"
->  
->  # Re-create fresh overlay layers, so following (uuid=auto) mounts
->  # will behave as first time mount of a new overlayfs
-> @@ -110,7 +110,7 @@ _scratch_mount
->  ovl_fsid=$(stat -f -c '%i' $test_dir)
->  ovl_unique_fsid=$ovl_fsid
->  [[ "$ovl_fsid" != "$upper_fsid" ]] || \
-> -	echo "Overlayfs (uuid=auto) and upper fs fsid are the same"
-> +	echo "Overlayfs (new) and upper fs fsid are the same"
->  
->  $UMOUNT_PROG $SCRATCH_MNT
->  
+> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit ecd49f7a36fb \
+> +        "xfs: fix per-cpu CIL structure aggregation racing with dying cpus"
+> +
+>  # Override the default cleanup function.
+>  _cleanup()
+>  {
 > -- 
-> 2.34.1
+> 2.27.0
+> 
 > 
 
