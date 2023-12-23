@@ -1,124 +1,174 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C2CAD2E0;
-	Fri, 22 Dec 2023 07:30:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38201168A8
+	for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 18:56:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Wm264sNQ";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="5A0ubJ+L";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Wm264sNQ";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="5A0ubJ+L"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 7F8461FCD6;
-	Fri, 22 Dec 2023 07:30:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1703230257; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T7ytYGFt"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1703357780;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=ymDyiqX4ogXhrvbCgVVJhu3sFiirKCyNYF8ej/HXb9E=;
-	b=Wm264sNQKsBSfTbhermQhXPjFXgUro0qj5oDPcmWfOhKhWJwJxd0U4BYSZao7ZDwste+4I
-	ro0eaK329QOFwGCBueuVJu6SAdeDoHFXw4zmJsi64JFS6ed8T8Db+QBZtzeCnmzf+gEUDn
-	XyTvi47qWG/nSXcNYne6o1CHLBGCnQ8=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1703230257;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ymDyiqX4ogXhrvbCgVVJhu3sFiirKCyNYF8ej/HXb9E=;
-	b=5A0ubJ+Lm3w3wO0KyNQJ0JX9sa76fuZxbRMJn8co/a7/kQVm4CraR6gFYFX3cbAV2kBFT3
-	u0umjO3kz8xaFSAA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1703230257; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ymDyiqX4ogXhrvbCgVVJhu3sFiirKCyNYF8ej/HXb9E=;
-	b=Wm264sNQKsBSfTbhermQhXPjFXgUro0qj5oDPcmWfOhKhWJwJxd0U4BYSZao7ZDwste+4I
-	ro0eaK329QOFwGCBueuVJu6SAdeDoHFXw4zmJsi64JFS6ed8T8Db+QBZtzeCnmzf+gEUDn
-	XyTvi47qWG/nSXcNYne6o1CHLBGCnQ8=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1703230257;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=ymDyiqX4ogXhrvbCgVVJhu3sFiirKCyNYF8ej/HXb9E=;
-	b=5A0ubJ+Lm3w3wO0KyNQJ0JX9sa76fuZxbRMJn8co/a7/kQVm4CraR6gFYFX3cbAV2kBFT3
-	u0umjO3kz8xaFSAA==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 7E369136D6;
-	Fri, 22 Dec 2023 07:30:55 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id NdPnCy87hWUSYQAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Fri, 22 Dec 2023 07:30:55 +0000
-Date: Fri, 22 Dec 2023 18:30:47 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Naohiro Aota <Naohiro.Aota@wdc.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH] fstests: btrfs: use proper filter for subvolume
- deletion
-Message-ID: <20231222183047.4dc7d8ba@echidna>
-In-Reply-To: <zc6nx5hyhpticuwhcjiahbp67sjteqqehfhnrpk4kwvhyrwmq4@lf6uhzx6nst3>
-References: <727fc0e695846a43830bdfc2d6757d6edc2d6878.1703213691.git.naohiro.aota@wdc.com>
-	<20231222160726.7206676f@echidna>
-	<zc6nx5hyhpticuwhcjiahbp67sjteqqehfhnrpk4kwvhyrwmq4@lf6uhzx6nst3>
+	bh=19kgDWTE918kY0Eenzx7m/5ckj32KVwstfU7gstsJ1Y=;
+	b=T7ytYGFthNZovSvOG8yShyCqWA+dhJWDaDo1+ZXcY7CqsdMT4G9NA8X04fe9h0QaiXV958
+	A4V51HOzBzb465k6yvMayJPix3I/W3KFuFejq+70uXge1GrcGApgABWT6coAN4puoxBv8G
+	c+9EZk/EcwhysP52aY3OLfCw/RBOJR4=
+Received: from mail-io1-f71.google.com (mail-io1-f71.google.com
+ [209.85.166.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-571-9cK5CyVlNguPp1rmrSFNsw-1; Sat, 23 Dec 2023 13:56:18 -0500
+X-MC-Unique: 9cK5CyVlNguPp1rmrSFNsw-1
+Received: by mail-io1-f71.google.com with SMTP id ca18e2360f4ac-7b7f996e118so443518539f.3
+        for <fstests@vger.kernel.org>; Sat, 23 Dec 2023 10:56:18 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1703357778; x=1703962578;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=19kgDWTE918kY0Eenzx7m/5ckj32KVwstfU7gstsJ1Y=;
+        b=CTLq8jqUDU8boXg+NWs9ox+zdmzUHj1N7eB+ceEN1Jmhf4JXn/P4/pmi2X6IRJDLtE
+         /UtroXhGMb9TNFN2g91AoqZnXzUduXb7QHT6isaSO7RNjfCIQQ0b/1uLiSyOiPwNJfW+
+         MyR2dUhB/Brc4s9Y+rUO3D6VjbIG5j1/2qF41sxVfogJqaQ4gIyTEosMBh3VEUXwSnud
+         oISnV7eU53MW0YHZYo5BU9aSZxkRQCfpq1K02oWQu17amIlmDL1b4LxyD1ZToss8tAmo
+         bVpJcDcxIm4n9ZmRFIc0AfBJvZFn723zLQcFqmqmQlzH1Qhysvr0GvTXg385cmNykz6G
+         ZR+A==
+X-Gm-Message-State: AOJu0YyzkqnO9+CG+zFSmeIemzku08yu1WNnfoPQg8HxVO6QI2JVoJgA
+	oG3oIQmSPkYl4b1RdMVxSJop1BbFCTp5gysE+j2zNDVzEcUIQv+xQBjvxkU1qdg9zXvwEwlDl5E
+	a6fH1UfQKcv8kmhhokT94Avp1fw==
+X-Received: by 2002:a05:6e02:156d:b0:35f:edfc:e24b with SMTP id k13-20020a056e02156d00b0035fedfce24bmr1818744ilu.118.1703357778197;
+        Sat, 23 Dec 2023 10:56:18 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHBTfVtM33ExjigK3RknAEWG/JxkctoF056reQA8bjLibebIsrzjNK1iegZs854OEBsbnr8uA==
+X-Received: by 2002:a05:6e02:156d:b0:35f:edfc:e24b with SMTP id k13-20020a056e02156d00b0035fedfce24bmr1818738ilu.118.1703357777935;
+        Sat, 23 Dec 2023 10:56:17 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id c24-20020a170902d91800b001bc676df6a9sm5370892plz.132.2023.12.23.10.56.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 23 Dec 2023 10:56:17 -0800 (PST)
+Date: Sun, 24 Dec 2023 02:56:14 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] overlay/081: fix test when running with index enabled
+Message-ID: <20231223185614.irccdmam6fwqi2yt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231217150017.569077-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Level: 
-X-Spam-Level: 
-X-Spamd-Result: default: False [0.39 / 50.00];
-	 ARC_NA(0.00)[];
-	 TO_DN_EQ_ADDR_SOME(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.01)[46.77%]
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spam-Score: 0.39
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20231217150017.569077-1-amir73il@gmail.com>
 
-On Fri, 22 Dec 2023 06:02:41 +0000, Naohiro Aota wrote:
-
-> > >  # Import common functions.
-> > >  . ./common/filter
-> > > +. ./common/filter.btrfs  
-> > 
-> > common/filter.btrfs sources common/filter, so you can replace these.  
+On Sun, Dec 17, 2023 at 05:00:17PM +0200, Amir Goldstein wrote:
+> Test overlay/081 fails with:
+>  CONFIG_OVERLAY_FS_INDEX=y
+> or
+>  echo Y > /sys/modules/overlay/params/index
 > 
-> Oh, I didn't notice that. But, there are many test cases importing
-> both. Maybe, it's good to express direct dependency (e.g, for
-> _filter_scratch) explicitly? Or, they should be fixed as well?
+> The reason is that mount option uuid=off has the undesired side effect
+> of disabling index feature.
+> 
+> uuid=null is exactly the same as uuid=off for the purpose of this test
+> but without the undesired side effect.
+> 
+> The test was created to test the new modes uuid=null/auto/on, so the
+> fact that is is testing the mode uuid=off is just an oversight.
+> 
+> Covert the use of uuid=off to uuid=null to fix this problem.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+> 
+> Zorro,
+> 
+> Following your report that the new test overlay/084 is failing with
+> non-default overlayfs Kconfig [1], I reran the existing overlay tests
+> with non-default config.
+> 
+> The run with CONFIG_OVERLAY_FS_INDEX=y found another failure in a test
+> that was added recently to cover a new feature in v6.6.
 
-I don't have a strong preference either way. I don't see any ordering
-dependencies, so separate imports would also work.
+Thanks for further fixes!
 
-Cheers, David
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> 
+> Thanks,
+> Amir.
+> 
+> 
+> [1] https://lore.kernel.org/fstests/20231210204503.poggjg4z57eg2nn7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+> 
+>  tests/overlay/081 | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+> 
+> diff --git a/tests/overlay/081 b/tests/overlay/081
+> index 05156a3c..481e9931 100755
+> --- a/tests/overlay/081
+> +++ b/tests/overlay/081
+> @@ -5,7 +5,7 @@
+>  # FSQA Test No. 081
+>  #
+>  # Test persistent (and optionally unique) overlayfs fsid
+> -# with mount options uuid=null/on introduced in kernel v6.6
+> +# with mount options uuid=null/auto/on introduced in kernel v6.6
+>  #
+>  . ./common/preamble
+>  _begin_fstest auto quick
+> @@ -55,7 +55,7 @@ _scratch_mount
+>  
+>  ovl_fsid=$(stat -f -c '%i' $test_dir)
+>  [[ "$ovl_fsid" == "$upper_fsid" ]] || \
+> -	echo "Overlayfs (uuid=auto) and upper fs fsid differ"
+> +	echo "Overlayfs (after uuid=null) and upper fs fsid differ"
+>  
+>  $UMOUNT_PROG $SCRATCH_MNT
+>  
+> @@ -74,16 +74,16 @@ _scratch_mount
+>  
+>  ovl_fsid=$(stat -f -c '%i' $test_dir)
+>  [[ "$ovl_fsid" == "$ovl_unique_fsid" ]] || \
+> -	echo "Overlayfs (uuid=auto) unique fsid is not persistent"
+> +	echo "Overlayfs (after uuid=on) unique fsid is not persistent"
+>  
+>  $UMOUNT_PROG $SCRATCH_MNT
+>  
+>  # Test ignore existing persistent fsid on explicit opt-out
+> -_scratch_mount -o uuid=off
+> +_scratch_mount -o uuid=null
+>  
+>  ovl_fsid=$(stat -f -c '%i' $test_dir)
+>  [[ "$ovl_fsid" == "$upper_fsid" ]] || \
+> -	echo "Overlayfs (uuid=off) and upper fs fsid differ"
+> +	echo "Overlayfs (uuid=null) and upper fs fsid differ"
+>  
+>  $UMOUNT_PROG $SCRATCH_MNT
+>  
+> @@ -92,7 +92,7 @@ _overlay_scratch_mount_dirs "$upperdir:$lowerdir" "-" "-" -o ro,uuid=on
+>  
+>  ovl_fsid=$(stat -f -c '%i' $test_dir)
+>  [[ "$ovl_fsid" == "$lower_fsid" ]] || \
+> -	echo "Overlayfs (uuid=null) and lower fs fsid differ"
+> +	echo "Overlayfs (no upper) and lower fs fsid differ"
+>  
+>  # Re-create fresh overlay layers, so following (uuid=auto) mounts
+>  # will behave as first time mount of a new overlayfs
+> @@ -110,7 +110,7 @@ _scratch_mount
+>  ovl_fsid=$(stat -f -c '%i' $test_dir)
+>  ovl_unique_fsid=$ovl_fsid
+>  [[ "$ovl_fsid" != "$upper_fsid" ]] || \
+> -	echo "Overlayfs (uuid=auto) and upper fs fsid are the same"
+> +	echo "Overlayfs (new) and upper fs fsid are the same"
+>  
+>  $UMOUNT_PROG $SCRATCH_MNT
+>  
+> -- 
+> 2.34.1
+> 
+
