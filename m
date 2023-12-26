@@ -1,284 +1,170 @@
-Received: from mail-qv1-f42.google.com (mail-qv1-f42.google.com [209.85.219.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71081537FD;
-	Mon, 25 Dec 2023 20:08:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38DF84D109
+	for <fstests@vger.kernel.org>; Tue, 26 Dec 2023 08:44:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="beSAOAYC"
-Received: by mail-qv1-f42.google.com with SMTP id 6a1803df08f44-67f147c04b7so36630106d6.2;
-        Mon, 25 Dec 2023 12:08:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1703534910; x=1704139710; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=shEeyr+LcqwS6mk/WkYt3fmysBoddKrwyyhSaKBTn8A=;
-        b=beSAOAYC777LXTW4wbjH/nA5IY9rg4nIOzphhi5D27IYpBHxihSEwRF/ApUGcxwyPy
-         BQrUZZv1+n7aAX4EoQydFI72qLiacoWfyFf85Z901grjsQrzVsaSQugpnXHKvi0eorhZ
-         OK+wosAtJLin3RwK2qr9mJfXmy5Lr3zdNYkcAzp+z8lb1zuGPzmDN5RvimK0EH7S8Mt3
-         qcoCef5Z4Po1jYUqj6yAQilEx4BlvTGF+zVqsB53j+LOvbzcyR9R5CC4o87ozG8FbmWA
-         QnPXqxvzhTnjVwDbdw0tJSGVAoxLLRHcnkJ0VEfW6SGFyqdBDTldKF6mSfkBo4EsnJ3d
-         17rg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1703534910; x=1704139710;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=shEeyr+LcqwS6mk/WkYt3fmysBoddKrwyyhSaKBTn8A=;
-        b=fEaezmT6xM66Q6RJgpMMh6+M6tCLblaiy4TVM9hUy3JuFVVewFG5V5nK6/X6hhaiPl
-         NjzAgwad7mzoV4PvtUNEP3W64MBQvqru/hYtbg2sVDWsf4eSInUrTeuI5DE9AkLDQNB5
-         VEWPSvsH+PZPC8Y48JBEaIP0mYcdmEtL/PHV4UHsGLyQ2xlNZrtK9oHxSsZPJpMPkNwI
-         ZdsZnevJR1stAeUIlTQfi4KVIS587koeZ1eUusxMroGiQGOwAeZovlvGeWtC6JL4Gx47
-         AST0kgvk1VpbN/fj7EFGuj4oaGhG5pntOnDuT3+zdFZlrLjkOGAtUBL7do935lLIDh/n
-         MCZQ==
-X-Gm-Message-State: AOJu0YyUmVypuz7SrQuxt3PezUChHtc4/A7QrEz04KQPbq0IpjJhJe8n
-	1S3qt+5MNKz5f0Rq3BOjpAqRQe/jzLwbxB7dA+w=
-X-Google-Smtp-Source: AGHT+IGCiTVR/PcvM1XRuO6eXaWJ7WmAEj9XLcrGAzPTKSopYzV3AI3I05M+38un4/HFNG2VNDky+x2szS4KCyzfQbU=
-X-Received: by 2002:a05:6214:18d:b0:67f:de0c:1aa with SMTP id
- q13-20020a056214018d00b0067fde0c01aamr3990646qvr.123.1703534910316; Mon, 25
- Dec 2023 12:08:30 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="hNviSpW8"
+Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3BQ81Asq028617;
+	Tue, 26 Dec 2023 08:44:45 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=UnilGA91H2OJVlilqtPYcajFXVcgOimilaxJp+3xzz4=;
+ b=hNviSpW8T+f42Bq4cBpwemLKbpg9Q/HF65aKpyAUbbZyfEq2RNaWeU5GGXDXMz8+9udf
+ GmILTI1Fug/2Ok+1h98TOefspdf99pi3RHfhDqU/4gDl4QjV4OfW6h4zbV2qv4HZuQY5
+ 6vYWpJLwDopvZCwvWC9Hyjd5yEBhVyPz9sSOxGaw5NOJC4RDBjaBfE/n7aeGC/pV+qbp
+ W+u6EUz0melNAyL+LhFlBEFy4KT66C0YYoAGP2HPS7aaGhFPOEEV+ID/XcRyyM6jR8wZ
+ SHQZmdJb5oeagfFJVVFZknpi61ZZEcJ1QW87PLwZm7CqlzhDJa8ABTWj0KtRWYrjkVh+ IQ== 
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3v6rpfnur9-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 26 Dec 2023 08:44:44 +0000
+Received: from m0360083.ppops.net (m0360083.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3BQ8duWK014333;
+	Tue, 26 Dec 2023 08:44:44 GMT
+Received: from ppma12.dal12v.mail.ibm.com (dc.9e.1632.ip4.static.sl-reverse.com [50.22.158.220])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3v6rpfnur1-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 26 Dec 2023 08:44:44 +0000
+Received: from pps.filterd (ppma12.dal12v.mail.ibm.com [127.0.0.1])
+	by ppma12.dal12v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 3BQ6oRlq008395;
+	Tue, 26 Dec 2023 08:44:43 GMT
+Received: from smtprelay07.fra02v.mail.ibm.com ([9.218.2.229])
+	by ppma12.dal12v.mail.ibm.com (PPS) with ESMTPS id 3v69vskw68-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 26 Dec 2023 08:44:43 +0000
+Received: from smtpav07.fra02v.mail.ibm.com (smtpav07.fra02v.mail.ibm.com [10.20.54.106])
+	by smtprelay07.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 3BQ8ifFJ15598162
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 26 Dec 2023 08:44:41 GMT
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 8583D20043;
+	Tue, 26 Dec 2023 08:44:41 +0000 (GMT)
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 56B0520040;
+	Tue, 26 Dec 2023 08:44:40 +0000 (GMT)
+Received: from [9.43.26.249] (unknown [9.43.26.249])
+	by smtpav07.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue, 26 Dec 2023 08:44:40 +0000 (GMT)
+Message-ID: <6aff22ec-f072-48f5-997f-9ef6a951a0e0@linux.ibm.com>
+Date: Tue, 26 Dec 2023 14:14:38 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20231206121857.3873367-1-amir73il@gmail.com>
-In-Reply-To: <20231206121857.3873367-1-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 25 Dec 2023 22:08:19 +0200
-Message-ID: <CAOQ4uxjFMThryZXt3cS0nAMgBxCgNXvXJv-WqQAgVe4--CZqHw@mail.gmail.com>
-Subject: Re: [PATCH] overlay: create helper _overlay_scratch_mount_opts()
-To: Zorro Lang <zlang@redhat.com>
-Cc: Alexander Larsson <alexl@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] xfstests: replace custom __u64 definition with uint64_t
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, ojaswin@linux.ibm.com, ritesh.list@gmail.com
+References: <20231221061231.44347-1-disgoel@linux.ibm.com>
+ <20231221171247.GB108281@frogsfrogsfrogs>
+Content-Language: en-GB
+From: Disha Goel <disgoel@linux.ibm.com>
+In-Reply-To: <20231221171247.GB108281@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: L1om_8Kscqkd98dlF-D9FTGvpjJMha19
+X-Proofpoint-ORIG-GUID: -OLZdpGkIt_Nshhk-GePEWHPhKNeqlez
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2023-12-26_04,2023-12-26_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 mlxlogscore=999
+ clxscore=1011 malwarescore=0 suspectscore=0 phishscore=0
+ lowpriorityscore=0 mlxscore=0 priorityscore=1501 impostorscore=0
+ adultscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311290000 definitions=main-2312260063
 
-On Wed, Dec 6, 2023 at 2:19=E2=80=AFPM Amir Goldstein <amir73il@gmail.com> =
-wrote:
->
-> The new overlayfs mount options lowerdir+,datadir+ don't fit well
-> into any of the existing _overlay_scratch_mount* helpers.
-> Add this new helper to reduce a common pattern of custom mount options.
->
-> Suggested-by: Zorro Lang <zlang@kernel.org>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->
-> Zorro,
->
-> Here is the cleanup patch that you suggested.
->
-> Note that tests overlay/083 and overlay/086 intentionally use
-> $MOUNT_PROG directly because some of the tests cases use escaping
-> character "\" and calling _overlay_mount_* helpers can loose the
-> special chars escaping when bash is evaluating the arguments.
->
-> Maybe it is solvabale, but that would be very high on the list of
-> things that I do not want to do.
->
+On 21/12/23 10:42 pm, Darrick J. Wong wrote:
 
-Hi Zorro,
+> On Thu, Dec 21, 2023 at 11:42:31AM +0530, Disha Goel wrote:
+>> In some distributions, __u64 is already defined in system header files,
+>> causing compilation errors when building xfstest.
+>>
+>> 	# make
+>> 	    [CC]    ext4_resize
+>> 	ext4_resize.c:17:28: error: conflicting types for '__u64'
+>> 	 typedef unsigned long long __u64;
+>> 	                            ^~~~~
+>> 	In file included from /usr/include/asm/types.h:26:0,
+>> 	                 from /usr/include/linux/types.h:5,
+>> 	                 from /usr/include/linux/mount.h:4,
+>> 	                 from /usr/include/sys/mount.h:32,
+>> 	                 from ext4_resize.c:15:
+>> 	/usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
+>> 	 typedef unsigned long __u64;
+>>                         ^~~~~
+>>
+>> To address this issue, replace the custom definition of __u64 with the
+>> standard uint64_t type from <stdint.h>. uint64_t is part of the C99
+>> standard, offering a standardised approach for representing unsigned
+>> 64-bit integers. This modification enhances code consistency and
+>> ensures compatibility with standard types.
+> ...but isn't consistent with the definition in the kernel uapi headers.
+> ioctls explicitly use __u64, not uint64_t, and there are a few arches
+> (apparently) where __u64 ends up an unsigned long long but uint64_t ends
+> up an unsigned long, and the reverse.
 
-I guess you missed this cleanup patch for the Xmas release.
-Oh well, next time.
+Thanks for reviewing the patch. I will take care of this and address in v2.
 
-Merry Christmas and Happy New Year!
+>> Tested on various distributions on Power architecture, by successfully
+>> compiling xfstest. Additionally, verified the compatibility by running
+>> ext4/033 and ext4/056 tests, both of which use ext4_resize and
+>> observed successful test execution.
+>>
+>>          # make
+>>              [CC]    detached_mounts_propagation
+>>              [CC]    ext4_resize
+>>              [CC]    t_readdir_3
+>>
+>> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+>> ---
+>>   src/ext4_resize.c | 6 ++----
+>>   1 file changed, 2 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+>> index 78b66432..6e60ee5b 100644
+>> --- a/src/ext4_resize.c
+>> +++ b/src/ext4_resize.c
+>> @@ -14,10 +14,8 @@
+>>   #include <sys/ioctl.h>
+>>   #include <sys/mount.h>
+> Why not #include <linux/ext4.h>, which gets you both the __u64 typedef
+> and EXT4_IOC_RESIZE_FS?
+>
+> --D
+>
+The #include <linux/ext4.h> got added in kernel 6.4 and distros which
+I'm testing does not have <linux/ext4.h> present in kernel headers.
+We can add #include <linux/types.h> which also gets the __u64 typedef.
 
-Thanks,
-Amir.
+Let me know your thoughts.
 
->
->  common/overlay    | 8 +++++++-
->  tests/overlay/011 | 2 +-
->  tests/overlay/035 | 3 +--
->  tests/overlay/052 | 4 ++--
->  tests/overlay/053 | 4 ++--
->  tests/overlay/062 | 2 +-
->  tests/overlay/079 | 4 ++--
->  tests/overlay/085 | 4 ++--
->  8 files changed, 18 insertions(+), 13 deletions(-)
->
-> diff --git a/common/overlay b/common/overlay
-> index ea1eb7b1..faa9339a 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -32,6 +32,12 @@ _overlay_mount_dirs()
->         $MOUNT_PROG -t overlay $diropts `_common_dev_mount_options $*`
->  }
->
-> +# Mount with mnt/dev of scratch mount and custom mount options
-> +_overlay_scratch_mount_opts()
-> +{
-> +       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT $*
-> +}
-> +
->  # Mount with same options/mnt/dev of scratch mount, but optionally
->  # with different lower/upper/work dirs
->  _overlay_scratch_mount_dirs()
-> @@ -254,7 +260,7 @@ _require_scratch_overlay_lowerdir_add_layers()
->         local datadir=3D"$OVL_BASE_SCRATCH_MNT/$OVL_LOWER"
->
->         _scratch_mkfs > /dev/null 2>&1
-> -       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +       _overlay_scratch_mount_opts \
->                 -o"lowerdir+=3D$lowerdir,datadir+=3D$datadir" \
->                 -o"redirect_dir=3Dfollow,metacopy=3Don" > /dev/null 2>&1 =
-|| \
->                 _notrun "overlay lowerdir+,datadir+ not supported on ${SC=
-RATCH_DEV}"
-> diff --git a/tests/overlay/011 b/tests/overlay/011
-> index 20812d88..09a950ba 100755
-> --- a/tests/overlay/011
-> +++ b/tests/overlay/011
-> @@ -37,7 +37,7 @@ $SETFATTR_PROG -n "trusted.overlay.opaque" -v "y" $uppe=
-rdir/testdir
->  # $upperdir overlaid on top of $lowerdir, so that "trusted.overlay.opaqu=
-e"
->  # xattr should be honored and should not be listed
->  # mount readonly, because there's no upper and workdir
-> -$MOUNT_PROG -t overlay -o ro -o lowerdir=3D$upperdir:$lowerdir $OVL_BASE=
-_SCRATCH_MNT $SCRATCH_MNT
-> +_overlay_scratch_mount_opts -o ro -o lowerdir=3D$upperdir:$lowerdir
->
->  # Dump trusted.overlay xattr, we should not see the "opaque" xattr
->  _getfattr -d -m overlay $SCRATCH_MNT/testdir
-> diff --git a/tests/overlay/035 b/tests/overlay/035
-> index 8cd76979..f4c981ad 100755
-> --- a/tests/overlay/035
-> +++ b/tests/overlay/035
-> @@ -42,8 +42,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
->
->  # Mount overlay with lower layers only.
->  # Verify that overlay is mounted read-only and that it cannot be remount=
-ed rw.
-> -$MOUNT_PROG -t overlay -o"lowerdir=3D$lowerdir2:$lowerdir1" \
-> -                       $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +_overlay_scratch_mount_opts -o"lowerdir=3D$lowerdir2:$lowerdir1"
->  touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
->  $MOUNT_PROG -o remount,rw $SCRATCH_MNT 2>&1 | _filter_ro_mount
->  $UMOUNT_PROG $SCRATCH_MNT
-> diff --git a/tests/overlay/052 b/tests/overlay/052
-> index da8c645b..6abe2e01 100755
-> --- a/tests/overlay/052
-> +++ b/tests/overlay/052
-> @@ -133,7 +133,7 @@ unmount_dirs
->
->  # Check encode/decode/read of lower file handles on lower layers only r/=
-o overlay.
->  # For non-upper overlay mount, nfs_export requires disabling redirect_di=
-r.
-> -$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +_overlay_scratch_mount_opts \
->                         -o ro,redirect_dir=3Dnofollow,nfs_export=3Don,low=
-erdir=3D$middle:$lower
->  test_file_handles $SCRATCH_MNT/lowertestdir -rp
->  test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-> @@ -144,7 +144,7 @@ unmount_dirs
->  # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new=
- to
->  # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at th=
-ese
->  # directories.
-> -$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +_overlay_scratch_mount_opts \
->                 -o ro,redirect_dir=3Dnofollow,nfs_export=3Don,lowerdir=3D=
-$upper/lowertestdir.new:$lower/lowertestdir
->  test_file_handles $SCRATCH_MNT -r
->  test_file_handles $SCRATCH_MNT/subdir -rp
-> diff --git a/tests/overlay/053 b/tests/overlay/053
-> index dfa29d01..cf94f930 100755
-> --- a/tests/overlay/053
-> +++ b/tests/overlay/053
-> @@ -162,7 +162,7 @@ unmount_dirs
->
->  # Check encode/decode/read of lower file handles on lower layers only r/=
-o overlay.
->  # For non-upper overlay mount, nfs_export requires disabling redirect_di=
-r.
-> -$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +_overlay_scratch_mount_opts \
->                         -o ro,redirect_dir=3Dnofollow,nfs_export=3Don,low=
-erdir=3D$middle:$lower
->  test_file_handles $SCRATCH_MNT/lowertestdir -rp
->  test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-> @@ -173,7 +173,7 @@ unmount_dirs
->  # Overlay lookup cannot follow the redirect from $upper/lowertestdir.new=
- to
->  # $lower/lowertestdir. Instead, we mount an overlay subtree rooted at th=
-ese
->  # directories.
-> -$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +_overlay_scratch_mount_opts \
->                 -o ro,redirect_dir=3Dnofollow,nfs_export=3Don,lowerdir=3D=
-$upper/lowertestdir.new:$lower/lowertestdir
->  test_file_handles $SCRATCH_MNT -r
->  test_file_handles $SCRATCH_MNT/subdir -rp
-> diff --git a/tests/overlay/062 b/tests/overlay/062
-> index 04e13e46..a4e9560a 100755
-> --- a/tests/overlay/062
-> +++ b/tests/overlay/062
-> @@ -65,7 +65,7 @@ create_test_files $lowertestdir
->  $MOUNT_PROG --bind $lowertestdir $lowertestdir
->
->  # For non-upper overlay mount, nfs_export requires disabling redirect_di=
-r.
-> -$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +_overlay_scratch_mount_opts \
->         -o ro,redirect_dir=3Dnofollow,nfs_export=3Don,lowerdir=3D$lower:$=
-lower2
->
->  # Decode an overlay directory file handle, whose underlying lower dir de=
-ntry
-> diff --git a/tests/overlay/079 b/tests/overlay/079
-> index 078ee816..f28fc313 100755
-> --- a/tests/overlay/079
-> +++ b/tests/overlay/079
-> @@ -141,7 +141,7 @@ mount_overlay()
->  {
->         local _lowerdir=3D$1 _datadir2=3D$2 _datadir=3D$3
->
-> -       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +       _overlay_scratch_mount_opts \
->                 -o"lowerdir=3D$_lowerdir::$_datadir2::$_datadir" \
->                 -o"upperdir=3D$upperdir,workdir=3D$workdir" \
->                 -o redirect_dir=3Don,metacopy=3Don
-> @@ -151,7 +151,7 @@ mount_ro_overlay()
->  {
->         local _lowerdir=3D$1 _datadir2=3D$2 _datadir=3D$3
->
-> -       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +       _overlay_scratch_mount_opts \
->                 -o"lowerdir=3D$_lowerdir::$_datadir2::$_datadir" \
->                 -o redirect_dir=3Dfollow,metacopy=3Don
->  }
-> diff --git a/tests/overlay/085 b/tests/overlay/085
-> index 07a32c24..0f4e4b06 100755
-> --- a/tests/overlay/085
-> +++ b/tests/overlay/085
-> @@ -142,7 +142,7 @@ mount_overlay()
->  {
->         local _lowerdir=3D$1 _datadir2=3D$2 _datadir=3D$3
->
-> -       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +       _overlay_scratch_mount_opts \
->                 -o"lowerdir+=3D$_lowerdir,datadir+=3D$_datadir2,datadir+=
-=3D$_datadir" \
->                 -o"upperdir=3D$upperdir,workdir=3D$workdir" \
->                 -o redirect_dir=3Don,metacopy=3Don
-> @@ -152,7 +152,7 @@ mount_ro_overlay()
->  {
->         local _lowerdir=3D$1 _datadir2=3D$2 _datadir=3D$3
->
-> -       $MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +       _overlay_scratch_mount_opts \
->                 -o"lowerdir+=3D$_lowerdir,datadir+=3D$_datadir2,datadir+=
-=3D$_datadir" \
->                 -o redirect_dir=3Dfollow,metacopy=3Don
->  }
-> --
-> 2.34.1
->
+>>   
+>> -typedef unsigned long long __u64;
+>> -
+>>   #ifndef EXT4_IOC_RESIZE_FS
+>> -#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
+>> +#define EXT4_IOC_RESIZE_FS		_IOW('f', 16, uint64_t)
+>>   #endif
+>>   
+>>   #define pr_error(fmt, ...) do { \
+>> @@ -31,7 +29,7 @@ static void usage(void)
+>>   
+>>   int main(int argc, char **argv)
+>>   {
+>> -	__u64	new_size;
+>> +	uint64_t	new_size;
+>>   	int	error, fd;
+>>   	char	*mnt_dir = NULL, *tmp = NULL;
+>>   
+>> -- 
+>> 2.39.1
+>>
+>>
