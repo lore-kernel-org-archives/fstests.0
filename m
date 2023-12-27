@@ -1,108 +1,69 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07450C8CF;
-	Mon,  1 Jan 2024 00:00:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gompa.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-50e7c6f0487so5075970e87.3;
-        Sun, 31 Dec 2023 16:00:49 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1704067248; x=1704672048;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=GB5pl5ZTuPfaCfWoS7lZD2imOyQWT9+xStwkcEg2vuI=;
-        b=HCkPpBNM9S7GttJ8cRxuZjDoOlXsokwyk3ZrU3vT4DqXZLo2otiDB/Q1bnlD1JoAGg
-         DEin4/i5E4JutM/3SFIZp/HW6wcxaF890CwJMjLS1Oe45S9spQt+6ja3/q1RqevjLik/
-         i1JblIfhaB09N0rZibUHBUmj7tRlpjVWiIBZ3+uy6yyGSIPXnMwVx7cUdeKxvC67KfZJ
-         4wFQjwimpXvPeS9KB0zgL1qe4vELLkXx0eNNK/3ouLT8rI3BKAet4omIRfCNuEFDRlsp
-         5CTy4OTUwJERUjv2ZCcuo3f3QdGSMzh3HA2/nXpb88xPuA6/EBjauteeRBNPWzysGnDe
-         Zh9w==
-X-Gm-Message-State: AOJu0YzUSre4p7+3s5Q/rqzW2IPWlM99EvPkh3y5xeb2xKr3Y43jTOHl
-	JiiERaI+jT37Zkx4+l+TMfvU8awQWrwlYA==
-X-Google-Smtp-Source: AGHT+IFiQbNKDsIGVAnCPgx9QFtEyakOt7+dGjhKetQpz7REHmiUXKtQ8XHhawDuvSD1onQHdUU4rA==
-X-Received: by 2002:ac2:4d17:0:b0:50e:771e:e09e with SMTP id r23-20020ac24d17000000b0050e771ee09emr2883943lfi.125.1704067247411;
-        Sun, 31 Dec 2023 16:00:47 -0800 (PST)
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com. [209.85.167.52])
-        by smtp.gmail.com with ESMTPSA id w5-20020a19c505000000b0050e7fe37a29sm1819597lfe.200.2023.12.31.16.00.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 31 Dec 2023 16:00:47 -0800 (PST)
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-50e72e3d435so5927310e87.2;
-        Sun, 31 Dec 2023 16:00:47 -0800 (PST)
-X-Received: by 2002:a05:6512:3ab:b0:50e:70b4:79ce with SMTP id
- v11-20020a05651203ab00b0050e70b479cemr3177755lfp.185.1704067246967; Sun, 31
- Dec 2023 16:00:46 -0800 (PST)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB1336ABF;
+	Mon,  1 Jan 2024 00:42:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="splVlQne"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E718C433C7;
+	Mon,  1 Jan 2024 00:42:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1704069771;
+	bh=cigiQpYKPEGIkOtVAYOeeC4ImoLJyqLbkzqyETM2ry0=;
+	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+	b=splVlQneaeiTbFfdubhX3UC8qBNjk2Ag5w7B0nOcU/dfrf37AFSglxuqSiZqTsXOb
+	 a2RUk/R6drg5wCvqjByllQsMID1SxMaChMcBKAkUZeouU/5wLuAlTonhZLrvHVvo+c
+	 mWySJjHBJ9ckj3vB3hdv0f2fJ0gwCbBHw0tZSO2z/IMIzWhhYctdlXSX6Cy1L3EW4g
+	 0CyWRaJqljCwVdfOVJS16dNKCJL8/4a55xM4yeDetnbxXw8xn4Q21MtyCiCph06byF
+	 3GieEcAdAPGAVckOiLBk0yvzgSQoycOJB+l80jfEXMcTzu6zjd4v5wLY/sWG6+QOI/
+	 7jqBt3kBchEmQ==
+Date: Sun, 31 Dec 2023 16:42:50 +9900
+Subject: [PATCH 1/3] fuzzy: mask off a few more inode fields from the fuzz
+ tests
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: djwong@kernel.org, zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, guan@eryu.me
+Message-ID: <170405025614.1821776.11739533344730730248.stgit@frogsfrogsfrogs>
+In-Reply-To: <170405025600.1821776.14517378233107318876.stgit@frogsfrogsfrogs>
+References: <170405025600.1821776.14517378233107318876.stgit@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <f09fb4edd69cf42fbb816e806384f79340e9d2b4.1703979415.git.wqu@suse.com>
- <CAEg-Je9vT-VwVtkqj2pszP08kmk9npPkf-OsSwe3G93m0YsxXw@mail.gmail.com> <cea1fa09-df9c-4234-9b00-941d07afb706@suse.com>
-In-Reply-To: <cea1fa09-df9c-4234-9b00-941d07afb706@suse.com>
-From: Neal Gompa <neal@gompa.dev>
-Date: Sun, 31 Dec 2023 19:00:10 -0500
-X-Gmail-Original-Message-ID: <CAEg-Je-xcrZ5BKN9tGETgwq-wd8NXmWehDf2AFvLO6Nhgqyc1Q@mail.gmail.com>
-Message-ID: <CAEg-Je-xcrZ5BKN9tGETgwq-wd8NXmWehDf2AFvLO6Nhgqyc1Q@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: remove test case btrfs/131
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-On Sun, Dec 31, 2023 at 5:14=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
->
->
->
-> On 2024/1/1 00:42, Neal Gompa wrote:
-> > On Sat, Dec 30, 2023 at 6:37=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
-> >>
-> >> Test case btrfs/131 is a quick tests for v1/v2 free space related
-> >> behavior, including the mount time conversion and disabling of v2 spac=
-e
-> >> cache.
-> >>
-> >> However there are two problems, mostly related to the v2 cache clearin=
-g.
-> >>
-> >> - There are some features with hard dependency on v2 free space cache
-> >>    Including:
-> >>    * block-group-tree
-> >>    * extent-tree-v2
-> >>    * subpage support
-> >>
-> >>    Note those features may even not support clearing v2 cache.
-> >>
-> >> - The v1 free space cache is going to be deprecated
-> >>    Since v5.15 the default mkfs is already going v2 cache instead.
-> >>    It won't be long before we mark v1 cache deprecated and force to
-> >>    go v2 cache.
-> >>
-> >> This makes the test case to fail unnecessarily, the false failure woul=
-d
-> >> only grow with new features relying on v2 cache.
-> >>
-> >> So here let's removing the test case completely.
-> >>
-> >
-> > Can we pair this change with a corresponding change in btrfs-progs
-> > that blocks using v1? I don't think it's actually worth splitting this
-> > change up in phases, especially when we're explicitly dropping the
-> > tests around it.
->
-> That sounds pretty reasonable.
->
-> I'll craft one to deprecate v1 cache in progs too.
->
+From: Darrick J. Wong <djwong@kernel.org>
 
-As part of the deprecation, it should probably be difficult to use v1
-cache and if we're not already automatically migrating people to v2,
-we should probably start doing that.
+XFS doesn't do any validation for filestreams, so don't waste time
+fuzzing that.  Exclude the bigtime flag, since we already have inode
+timestamps on the no-fuzz list.  Exclude the warning counters, since
+they're defunct now.
+
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ common/fuzzy |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 
+diff --git a/common/fuzzy b/common/fuzzy
+index f5d45cb28f..35cf581cd3 100644
+--- a/common/fuzzy
++++ b/common/fuzzy
+@@ -120,7 +120,11 @@ __filter_unvalidated_xfs_db_fields() {
+ 	    -e '/^entries.*secure/d' \
+ 	    -e '/^a.sfattr.list.*value/d' \
+ 	    -e '/^a.sfattr.list.*root/d' \
+-	    -e '/^a.sfattr.list.*secure/d'
++	    -e '/^a.sfattr.list.*secure/d' \
++	    -e '/^core.filestream/d' \
++	    -e '/^v3.bigtime/d' \
++	    -e '/\.rtbwarns/d' \
++	    -e '/\.[ib]warns/d'
+ }
+ 
+ # Filter the xfs_db print command's field debug information
 
---=20
-=E7=9C=9F=E5=AE=9F=E3=81=AF=E3=81=84=E3=81=A4=E3=82=82=E4=B8=80=E3=81=A4=EF=
-=BC=81/ Always, there's only one truth!
