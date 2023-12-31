@@ -1,62 +1,78 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A30E18F58;
-	Sun, 31 Dec 2023 18:25:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7A35C8CA;
+	Sun, 31 Dec 2023 19:57:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gQIm0HgK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19855C433C8;
-	Sun, 31 Dec 2023 18:25:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LKfbIvRu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADE83C433C7;
+	Sun, 31 Dec 2023 19:57:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704047154;
-	bh=QwW8hn90gcAPdwvISI50BNnLmRAm+x613Da3GnHfS8I=;
-	h=Date:From:To:Subject:From;
-	b=gQIm0HgK3lyG2SYyC7eEu64MF7kslOlpje6BcYZSHHCSzxhpPYvCL868nlrTZvjWr
-	 63Wv8uzr1mYQmX7XMWW3++gipEUpzHJdn7Od9+AYbZS3ATKjAJ4B8M78CS2oJa/RvJ
-	 qbBDIrWp5xhJsKEkX50m5AHTErAPF9jmj3JZJPqN8J2bITcw7B5OvNlLtbDwofxDco
-	 d8G1Xl2kmuZO9Re9l45gevqz01PH7Xfjo6E6eQ7Y3aSNmkp0WxEMw8e5h2IiRtkqVH
-	 sY35cd8R998t7RH7k7bZumD4MzpL3KzwbhvAVVJ13EC8dOF1yXYV7u/F4Up1WYS0VI
-	 A+vHEfwXs1mIA==
-Date: Sun, 31 Dec 2023 10:25:53 -0800
+	s=k20201202; t=1704052629;
+	bh=LqLUZursVvMo1wWB7+mEsO9KR18liySlVejnFr4QU78=;
+	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+	b=LKfbIvRuA5ZYwg3Q9y40ror4F1p4d8U3ARRN0X5BWU5WalqIViy89D2Nahrc+mULB
+	 /XGFlZMzbYJ1IjBKBONROxeabS+HBNCkQDmFS58oP6xUCHd/13FoK4bTCnR2CKyHm+
+	 MwLMmivNXLtBDPnhcMQLfxWtzsd3jmfKS3WEFtcdz0Fg7BcA+ZYik7DU4gyWM13Wxt
+	 2qbq96NwouM8jprGJcIyhdg1UjbVKneJ1G2QPKlaqW8U2f+aCRzTpLJkqIN/WytBV6
+	 O34UTL5bOcTjrcPENpAjJbFlWX2cWZ2jICUmaInv9r2Nj5q3p14dsNKk4fo+wfkZ01
+	 Q6FIiwYvo+UWg==
+Date: Sun, 31 Dec 2023 11:57:09 -0800
+Subject: [PATCHSET 1/8] fstests: fuzz non-root dquots on xfs
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: [NYE PATCHRIVER 4/4] xfs: freespace defrag for online shrink
-Message-ID: <20231231182553.GV361584@frogsfrogsfrogs>
+To: djwong@kernel.org, zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, guan@eryu.me
+Message-ID: <170405025600.1821776.14517378233107318876.stgit@frogsfrogsfrogs>
+In-Reply-To: <20231231181215.GA241128@frogsfrogsfrogs>
+References: <20231231181215.GA241128@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-Hi everyone,
+Hi all,
 
-This fourth patchriver has two faces -- one way of looking at it is that
-it is random odds and ends at the tail of my development tree.  A second
-interpretation is that it is necessary pieces for defragmenting free
-space, which is a precursor for online shrink of XFS filesystems.
+During testing of online fsck part 2, I noticed that the dquot iteration
+code in online fsck had some math bugs that resulted in it only ever
+checking the root dquot.  Loooking into why I never noticed that, I
+discovered that fstests also never checked them.  Strengthen our testing
+by adding that.
 
-The kernel side isn't that exciting -- we export refcounting information
-for space extents, and add a new fallocate mode for mapping exact
-portions of free filesystem space into a file.
+While we're at it, hide a few more inode fields from the fuzzer, since
+their contents are completely user-controlled and have no other
+validation.  Hence they just generate noise in the test system and
+increase runtimes unnecessarily.
 
-Userspace is where things get interesting!  The free space defragmenter
-is an iterative algorithm that assigns free space to a dummy file, and
-then uses the GETFSMAP and GETFSREFCOUNTS information to target file
-space extents in order of decreasing share counts.  Once an extent has
-been targeted, it uses reflinking to freeze the space, copies it
-elsewhere, and uses FIDEDUPERANGE to remap existing file data until the
-dummy file is the sole owner of the targetted space.  If metadata are
-involved, the defrag utility invokes online repair to rebuild the
-metadata somewhere else.
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-Since last year, I've also merged in Dave's xfs_spaceman code to move
-inodes.  I've not had much time to play with it otherwise.
-
-When the defragmenter finishes, all the free space has been isolated to
-the dummy file, which can be unlinked and closed if defragmentation was
-the goal; or it could be passed to a shrinkfs operation.
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fuzz-dquots
+---
+ check           |   12 ++++++++++++
+ common/fuzzy    |   27 ++++++++++++++++++++++++---
+ common/populate |   14 ++++++++++++++
+ tests/xfs/425   |   10 +++++++---
+ tests/xfs/426   |   10 +++++++---
+ tests/xfs/427   |   10 +++++++---
+ tests/xfs/428   |   10 +++++++---
+ tests/xfs/429   |   10 +++++++---
+ tests/xfs/430   |   10 +++++++---
+ tests/xfs/487   |   10 +++++++---
+ tests/xfs/488   |   10 +++++++---
+ tests/xfs/489   |   10 +++++++---
+ tests/xfs/779   |   10 +++++++---
+ tests/xfs/780   |   10 +++++++---
+ tests/xfs/781   |   10 +++++++---
+ 15 files changed, 134 insertions(+), 39 deletions(-)
+
