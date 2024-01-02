@@ -1,194 +1,135 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA38863B2;
-	Tue,  2 Jan 2024 08:44:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8E23DDBA;
+	Tue,  2 Jan 2024 11:18:36 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aaBFR6Hr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34BDDC433C8;
-	Tue,  2 Jan 2024 08:44:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OzkQOQb6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6EEC8C433C8;
+	Tue,  2 Jan 2024 11:18:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704185089;
-	bh=TqUw30VBClGf8EBzxFLjIwlFwak5WEgzCq6DETQbdyI=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=aaBFR6HrK+uHcu5HexeMXMB3F6c2Fh0y7A7RNc6Fo8aVK3CnQ+7oV/74dk+Cmxpxq
-	 lOFPEXeFs1+3JE3F8AGDK3oQlPj0FDxfAXlrTRB5CuUrizTRxHmW2ydMiBSZfiK8r8
-	 QiHz3hbrHlSO/CXOV9Xrk49DzkdOAw1+x+LidBxxhCmjh3Ttl2lj/O1UyNwFEhRgCN
-	 kUz7U8i7WPSmLZoEwsdrsx/d7kI1nHTFk4cYiMHnMxpUUpsc8KLu7YF/RWl2ppw9Wn
-	 bBtv1vz6AXWNqB4f03RE1j0sx7rHC0WMdr+BoYfjmQS3qzxaKrDXamsV1Q1I0zLYVJ
-	 omAUr/LHC+hkQ==
-From: Chandan Babu R <chandanbabu@kernel.org>
-To: fstests@vger.kernel.org
-Cc: Chandan Babu R <chandanbabu@kernel.org>,
-	linux-xfs@vger.kernel.org,
-	djwong@kernel.org,
-	zlang@redhat.com
-Subject: [PATCH 5/5] xfs: Check correctness of metadump/mdrestore's ability to work with dirty log
-Date: Tue,  2 Jan 2024 14:13:52 +0530
-Message-ID: <20240102084357.1199843-6-chandanbabu@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240102084357.1199843-1-chandanbabu@kernel.org>
-References: <20240102084357.1199843-1-chandanbabu@kernel.org>
+	s=k20201202; t=1704194316;
+	bh=rNOu+c5czE0KtPo8iz1r2bSTsy9aL/mniTA7AN4otns=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=OzkQOQb6SxgdQgWeEawgbGfZN7qdQjy8kPjoCHr9i6QafsD7olcrIv+U2d2R2XU9q
+	 K1IulnIB3wkJRQkafyyFWGSkubuFdBccElhPZDcwG+AP9DWQXSBHX78LnhqDDpnFGu
+	 gqbIB13kGJQGr3bahtLQQEgAfBeQfjY2/iE+GYeWIXiwEodM4DAKdeUbVX1lSyzWYb
+	 3JZODuE1moIkQmfuxGHGjk5Cgdkah+VFXqsgVAvohA9/R9Zp/MtJz0TnYg+r0N4jxa
+	 T2qOnU7nW+kws3xpGHm1FLrDlXAJQKNMeZGaoSrVP7oir5pXIyEpnO/CSI3u6fDOQe
+	 z6dK5x6jDRCyA==
+Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-50e7be1c65dso5846081e87.3;
+        Tue, 02 Jan 2024 03:18:36 -0800 (PST)
+X-Gm-Message-State: AOJu0Yy+mhgYUEQnK6GUBN3GFmZnirM6XrOKcwnSFWim9K7zH6s8jYdm
+	n0o4p5zjrFzYBnpLWnglIhMAkkHw21y7DoRc55A=
+X-Google-Smtp-Source: AGHT+IGgsUYGXA4bqYRKpYjLJHjv6nWrKFKnucQsap6r6UJnExeXJRUsvXf6giawUUtzd5X7dNSyjCfo9snU+EmV1Rw=
+X-Received: by 2002:a05:6512:34cb:b0:50e:5c73:f17e with SMTP id
+ w11-20020a05651234cb00b0050e5c73f17emr6464530lfr.123.1704194314603; Tue, 02
+ Jan 2024 03:18:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1703838752.git.anand.jain@oracle.com> <cf58eed9c9b9134b94fb6872d37b75a0c0bbe914.1703838752.git.anand.jain@oracle.com>
+ <CAL3q7H7C10hZKyKgP=6H-+umNVawUn=vwJ6-gqDA8s0QZNFVTw@mail.gmail.com> <0cf6e6a1-c347-4dd9-98cd-4a95f36c84eb@oracle.com>
+In-Reply-To: <0cf6e6a1-c347-4dd9-98cd-4a95f36c84eb@oracle.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 2 Jan 2024 11:17:57 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H5MyiJLgB5Pu5UxG9gNzTo0xJPKYSfqDAeLdVuEFOGTFQ@mail.gmail.com>
+Message-ID: <CAL3q7H5MyiJLgB5Pu5UxG9gNzTo0xJPKYSfqDAeLdVuEFOGTFQ@mail.gmail.com>
+Subject: Re: [PATCH 05/10] common: add _filter_trailing_whitespace
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add a new test to verify if metadump/mdrestore are able to dump and restore
-the contents of a dirty log.
+On Tue, Jan 2, 2024 at 8:02=E2=80=AFAM Anand Jain <anand.jain@oracle.com> w=
+rote:
+>
+>
+>
+> On 12/29/23 20:57, Filipe Manana wrote:
+> > On Fri, Dec 29, 2023 at 11:02=E2=80=AFAM Anand Jain <anand.jain@oracle.=
+com> wrote:
+> >>
+> >> The command 'btrfs inspect-internal dump-tree -t raid_stripe'
+> >> introduces trailing whitespace in its output.
+> >> Apply a filter to remove it. Used in btrfs/30[4-8][.out].
+> >>
+> >> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> >> ---
+> >>   common/filter | 5 +++++
+> >>   1 file changed, 5 insertions(+)
+> >>
+> >> diff --git a/common/filter b/common/filter
+> >> index 509ee95039ac..016d213b8bee 100644
+> >> --- a/common/filter
+> >> +++ b/common/filter
+> >> @@ -651,5 +651,10 @@ _filter_bash()
+> >>          sed -e "s/^bash: line 1: /bash: /"
+> >>   }
+> >>
+> >> +_filter_trailing_whitespace()
+> >> +{
+> >> +       sed -e "s/ $//"
+> >> +}
+> >
+> > If we're having such a generic filter in common file, than I'd rather
+> > have it delete any number of trailing white spaces, not just a single
+> > one, and also account for tabs and other white spaces, so:
+> >
+> > sed -e "s/\s+$//"
+> >
+>
+>   I'll amend.
+>
+>
+> > Also, since this is so specific to the raid stripe tree, I'd rather
+> > have this filter included in the raid stripe tree filter introduced in
+> > patch 2, _filter_stripe_tree(). That would make the tests shorter and
+> > cleaner by avoiding piping yet over another filter that is used only
+> > for the raid stripe tree dump...
+>
+>   I kept this as a separate function so that it can be used elsewhere
+>   when needed. Doesn't that make sense?
 
-Signed-off-by: Chandan Babu R <chandanbabu@kernel.org>
----
- tests/xfs/801     | 115 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/801.out |  14 ++++++
- 2 files changed, 129 insertions(+)
- create mode 100755 tests/xfs/801
- create mode 100644 tests/xfs/801.out
+Not so much if there's only one use case for it... specially if it's
+such a trivial filter...
 
-diff --git a/tests/xfs/801 b/tests/xfs/801
-new file mode 100755
-index 00000000..3ed559df
---- /dev/null
-+++ b/tests/xfs/801
-@@ -0,0 +1,115 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 801
-+#
-+# Test metadump/mdrestore's ability to dump a dirty log and restore it
-+# correctly.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick metadump log logprint punch
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+	_scratch_unmount > /dev/null 2>&1
-+}
-+
-+# Import common functions.
-+. ./common/dmflakey
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_test
-+_require_xfs_debug
-+_require_xfs_io_error_injection log_item_pin
-+_require_dm_target flakey
-+_require_xfs_io_command "pwrite"
-+_require_test_program "punch-alternating"
-+
-+metadump_file=${TEST_DIR}/${seq}.md
-+testfile=${SCRATCH_MNT}/testfile
-+
-+echo "Format filesystem on scratch device"
-+_scratch_mkfs >> $seqres.full 2>&1
-+
-+max_md_version=1
-+_scratch_metadump_v2_supported && max_md_version=2
-+
-+external_log=0
-+if [[ $USE_EXTERNAL = yes && -n "$SCRATCH_LOGDEV" ]]; then
-+	external_log=1
-+fi
-+
-+if [[ $max_md_version == 1 && $external_log == 1 ]]; then
-+	_notrun "metadump v1 does not support external log device"
-+fi
-+
-+echo "Initialize and mount filesystem on flakey device"
-+_init_flakey
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+_mount_flakey
-+
-+echo "Create test file"
-+$XFS_IO_PROG -s -f -c "pwrite 0 5M" $testfile >> $seqres.full
-+
-+echo "Punch alternative blocks of test file"
-+$here/src/punch-alternating $testfile
-+
-+echo "Mount cycle the filesystem on flakey device"
-+_unmount_flakey
-+_mount_flakey
-+
-+device=$(readlink -f $FLAKEY_DEV)
-+device=$(_short_dev $device)
-+
-+echo "Pin log items in the AIL"
-+echo 1 > /sys/fs/xfs/${device}/errortag/log_item_pin
-+
-+echo "Create two checkpoint transactions on ondisk log"
-+for ct in $(seq 1 2); do
-+	offset=$(xfs_io -c 'fiemap' $testfile | tac |  grep -v hole | \
-+			 head -n 1 | awk -F '[\\[.]' '{ print $2 * 512; }')
-+	$XFS_IO_PROG -c "truncate $offset" -c fsync $testfile
-+done
-+
-+echo "Drop writes to filesystem from here onwards"
-+_load_flakey_table $FLAKEY_DROP_WRITES
-+
-+echo "Unpin log items in AIL"
-+echo 0 > /sys/fs/xfs/${device}/errortag/log_item_pin
-+
-+echo "Unmount filesystem on flakey device"
-+_unmount_flakey
-+
-+echo "Clean up flakey device"
-+_cleanup_flakey
-+
-+echo -n "Filesystem has a "
-+_print_logstate
-+
-+echo "Create metadump file, restore it and check restored fs"
-+for md_version in $(seq 1 $max_md_version); do
-+	[[ $md_version == 1 && $external_log == 1 ]] && continue
-+
-+	version=""
-+	if [[ $max_md_version == 2 ]]; then
-+		version="-v $md_version"
-+	fi
-+
-+	_scratch_xfs_metadump $metadump_file -a -o $version
-+	_scratch_xfs_mdrestore $metadump_file
-+
-+	_scratch_mount
-+	_check_scratch_fs
-+	_scratch_unmount
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/801.out b/tests/xfs/801.out
-new file mode 100644
-index 00000000..a2f2abca
---- /dev/null
-+++ b/tests/xfs/801.out
-@@ -0,0 +1,14 @@
-+QA output created by 801
-+Format filesystem on scratch device
-+Initialize and mount filesystem on flakey device
-+Create test file
-+Punch alternative blocks of test file
-+Mount cycle the filesystem on flakey device
-+Pin log items in the AIL
-+Create two checkpoint transactions on ondisk log
-+Drop writes to filesystem from here onwards
-+Unpin log items in AIL
-+Unmount filesystem on flakey device
-+Clean up flakey device
-+Filesystem has a dirty log
-+Create metadump file, restore it and check restored fs
--- 
-2.43.0
+Even if we had multiple cases, doing this pattern in the tests:
 
+$BTRFS_UTIL_PROG inspect-internal dump-tree (... ) |
+_filter_trailing_whitespace | _filter_btrfs_version |
+_filter_stripe_tree
+
+Is ugly and verbose. The filtering could be done in
+_filter_stripe_tree() by calling "_filter_triling_whitespace" there...
+And mentioning that, we could also call _filter_btrfs_version there,
+since it's always wanted and to make tests shorter and easier to read.
+
+So in the end it would only be
+
+$BTRFS_UTIL_PROG inspect-internal dump-tree (... ) | _filter_stripe_tree
+
+With _filter_stripe_tree() as:
+
+_filter_stripe_tree()
+{
+    _filter_trailing_whitespace | _filter_btrfs_version | sed -E -e (....)
+}
+
+Or:
+
+_filter_stripe_tree()
+{
+    _filter_btrfs_version | sed -E -e "s/\s+$//" -e (...)
+}
+
+A lot more clean.
+
+Thanks.
+
+
+>
+> Thanks, Anand
