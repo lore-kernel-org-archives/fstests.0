@@ -1,135 +1,183 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E8E23DDBA;
-	Tue,  2 Jan 2024 11:18:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FF3F156CB;
+	Tue,  2 Jan 2024 18:10:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OzkQOQb6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6EEC8C433C8;
-	Tue,  2 Jan 2024 11:18:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VsmMofMd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F0DC0C433C7;
+	Tue,  2 Jan 2024 18:10:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704194316;
-	bh=rNOu+c5czE0KtPo8iz1r2bSTsy9aL/mniTA7AN4otns=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=OzkQOQb6SxgdQgWeEawgbGfZN7qdQjy8kPjoCHr9i6QafsD7olcrIv+U2d2R2XU9q
-	 K1IulnIB3wkJRQkafyyFWGSkubuFdBccElhPZDcwG+AP9DWQXSBHX78LnhqDDpnFGu
-	 gqbIB13kGJQGr3bahtLQQEgAfBeQfjY2/iE+GYeWIXiwEodM4DAKdeUbVX1lSyzWYb
-	 3JZODuE1moIkQmfuxGHGjk5Cgdkah+VFXqsgVAvohA9/R9Zp/MtJz0TnYg+r0N4jxa
-	 T2qOnU7nW+kws3xpGHm1FLrDlXAJQKNMeZGaoSrVP7oir5pXIyEpnO/CSI3u6fDOQe
-	 z6dK5x6jDRCyA==
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-50e7be1c65dso5846081e87.3;
-        Tue, 02 Jan 2024 03:18:36 -0800 (PST)
-X-Gm-Message-State: AOJu0Yy+mhgYUEQnK6GUBN3GFmZnirM6XrOKcwnSFWim9K7zH6s8jYdm
-	n0o4p5zjrFzYBnpLWnglIhMAkkHw21y7DoRc55A=
-X-Google-Smtp-Source: AGHT+IGgsUYGXA4bqYRKpYjLJHjv6nWrKFKnucQsap6r6UJnExeXJRUsvXf6giawUUtzd5X7dNSyjCfo9snU+EmV1Rw=
-X-Received: by 2002:a05:6512:34cb:b0:50e:5c73:f17e with SMTP id
- w11-20020a05651234cb00b0050e5c73f17emr6464530lfr.123.1704194314603; Tue, 02
- Jan 2024 03:18:34 -0800 (PST)
+	s=k20201202; t=1704219030;
+	bh=Jm0xIsMKfbJBY50vtODW6Wnl3LtBjvCuagNsi5YuUa0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=VsmMofMdAhHHRpXElHEgx911tNSj6tO6Q2IeJ1fc4G2IVVk0V5TklyBshMNdsSjCj
+	 zL1yCXybIembvIqh3fBVfiWE2r+VhQtosAxMXxUjW37u1EQAnWtbf2V87gMyTY68AG
+	 iQ9KiA+lks85vhZe0SQcqPjuYFh/EU6HRXBRSlFxd6n2tmDHIwi/POcenDfBcbxs06
+	 5RrvHnMW15y+GNKdMqXd01avX89lkpVtUZ+iELnc58E/JZUUJpnHjukCr4atzPOU5E
+	 NL4KZuVeS2AOWolcGl9RzE556ZR2YyH5i0Or7ARtieyAoRqmTE5g/b5lgPJrS8wGIC
+	 3aM/yN2wz5f0Q==
+Date: Tue, 2 Jan 2024 10:10:29 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Chandan Babu R <chandanbabu@kernel.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, zlang@redhat.com
+Subject: Re: [PATCH 1/5] common/xfs: Do not append -a and -o options to
+ metadump
+Message-ID: <20240102181029.GD108281@frogsfrogsfrogs>
+References: <20240102084357.1199843-1-chandanbabu@kernel.org>
+ <20240102084357.1199843-2-chandanbabu@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1703838752.git.anand.jain@oracle.com> <cf58eed9c9b9134b94fb6872d37b75a0c0bbe914.1703838752.git.anand.jain@oracle.com>
- <CAL3q7H7C10hZKyKgP=6H-+umNVawUn=vwJ6-gqDA8s0QZNFVTw@mail.gmail.com> <0cf6e6a1-c347-4dd9-98cd-4a95f36c84eb@oracle.com>
-In-Reply-To: <0cf6e6a1-c347-4dd9-98cd-4a95f36c84eb@oracle.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 2 Jan 2024 11:17:57 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H5MyiJLgB5Pu5UxG9gNzTo0xJPKYSfqDAeLdVuEFOGTFQ@mail.gmail.com>
-Message-ID: <CAL3q7H5MyiJLgB5Pu5UxG9gNzTo0xJPKYSfqDAeLdVuEFOGTFQ@mail.gmail.com>
-Subject: Re: [PATCH 05/10] common: add _filter_trailing_whitespace
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240102084357.1199843-2-chandanbabu@kernel.org>
 
-On Tue, Jan 2, 2024 at 8:02=E2=80=AFAM Anand Jain <anand.jain@oracle.com> w=
-rote:
->
->
->
-> On 12/29/23 20:57, Filipe Manana wrote:
-> > On Fri, Dec 29, 2023 at 11:02=E2=80=AFAM Anand Jain <anand.jain@oracle.=
-com> wrote:
-> >>
-> >> The command 'btrfs inspect-internal dump-tree -t raid_stripe'
-> >> introduces trailing whitespace in its output.
-> >> Apply a filter to remove it. Used in btrfs/30[4-8][.out].
-> >>
-> >> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> >> ---
-> >>   common/filter | 5 +++++
-> >>   1 file changed, 5 insertions(+)
-> >>
-> >> diff --git a/common/filter b/common/filter
-> >> index 509ee95039ac..016d213b8bee 100644
-> >> --- a/common/filter
-> >> +++ b/common/filter
-> >> @@ -651,5 +651,10 @@ _filter_bash()
-> >>          sed -e "s/^bash: line 1: /bash: /"
-> >>   }
-> >>
-> >> +_filter_trailing_whitespace()
-> >> +{
-> >> +       sed -e "s/ $//"
-> >> +}
-> >
-> > If we're having such a generic filter in common file, than I'd rather
-> > have it delete any number of trailing white spaces, not just a single
-> > one, and also account for tabs and other white spaces, so:
-> >
-> > sed -e "s/\s+$//"
-> >
->
->   I'll amend.
->
->
-> > Also, since this is so specific to the raid stripe tree, I'd rather
-> > have this filter included in the raid stripe tree filter introduced in
-> > patch 2, _filter_stripe_tree(). That would make the tests shorter and
-> > cleaner by avoiding piping yet over another filter that is used only
-> > for the raid stripe tree dump...
->
->   I kept this as a separate function so that it can be used elsewhere
->   when needed. Doesn't that make sense?
+On Tue, Jan 02, 2024 at 02:13:48PM +0530, Chandan Babu R wrote:
+> xfs/253 requires the metadump to be obfuscated. However _xfs_metadump() would
+> append the '-o' option causing the metadump to be unobfuscated.
+> 
+> This commit fixes the bug by modifying _xfs_metadump() to no longer append any
+> metadump options. The direct/indirect callers of this function now pass the
+> required options explicitly.
+> 
+> Signed-off-by: Chandan Babu R <chandanbabu@kernel.org>
+> ---
+>  common/populate | 2 +-
+>  common/xfs      | 7 +++----
+>  tests/xfs/291   | 2 +-
+>  tests/xfs/336   | 2 +-
+>  tests/xfs/432   | 2 +-
+>  tests/xfs/503   | 2 +-
 
-Not so much if there's only one use case for it... specially if it's
-such a trivial filter...
+Hmm.  Shouldn't "-a -o" be lowered into xfs/168?  It generates a
+metadump if a post-shrinkfs repair fails and someone needs to debug the
+resulting breakage.
 
-Even if we had multiple cases, doing this pattern in the tests:
+I think that in general, tests should be using -a (copy entire fs
+blocks) and -o (do not obfuscate) to reduce the amount of processing
+that fstests has to do; and to make it easy for developers to examine
+the fs metadata.
 
-$BTRFS_UTIL_PROG inspect-internal dump-tree (... ) |
-_filter_trailing_whitespace | _filter_btrfs_version |
-_filter_stripe_tree
+(Also given the number of bugs that we keep finding in the "zero unused
+parts of blocks" code, I almost always use -a to reduce the number of
+pieces that can fail.)
 
-Is ugly and verbose. The filtering could be done in
-_filter_stripe_tree() by calling "_filter_triling_whitespace" there...
-And mentioning that, we could also call _filter_btrfs_version there,
-since it's always wanted and to make tests shorter and easier to read.
+Obviously that does not apply to tests that are exercising metadump
+itself.
 
-So in the end it would only be
+--D
 
-$BTRFS_UTIL_PROG inspect-internal dump-tree (... ) | _filter_stripe_tree
-
-With _filter_stripe_tree() as:
-
-_filter_stripe_tree()
-{
-    _filter_trailing_whitespace | _filter_btrfs_version | sed -E -e (....)
-}
-
-Or:
-
-_filter_stripe_tree()
-{
-    _filter_btrfs_version | sed -E -e "s/\s+$//" -e (...)
-}
-
-A lot more clean.
-
-Thanks.
-
-
->
-> Thanks, Anand
+>  6 files changed, 8 insertions(+), 9 deletions(-)
+> 
+> diff --git a/common/populate b/common/populate
+> index 3d233073..cfbfd88a 100644
+> --- a/common/populate
+> +++ b/common/populate
+> @@ -55,7 +55,7 @@ __populate_fail() {
+>  	case "$FSTYP" in
+>  	xfs)
+>  		_scratch_unmount
+> -		_scratch_xfs_metadump "$metadump"
+> +		_scratch_xfs_metadump "$metadump" -a -o
+>  		;;
+>  	ext4)
+>  		_scratch_unmount
+> diff --git a/common/xfs b/common/xfs
+> index f53b33fc..38094828 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -667,7 +667,6 @@ _xfs_metadump() {
+>  	local compressopt="$4"
+>  	shift; shift; shift; shift
+>  	local options="$@"
+> -	test -z "$options" && options="-a -o"
+>  
+>  	if [ "$logdev" != "none" ]; then
+>  		options="$options -l $logdev"
+> @@ -855,7 +854,7 @@ _check_xfs_filesystem()
+>  	if [ "$ok" -ne 1 ] && [ "$DUMP_CORRUPT_FS" = "1" ]; then
+>  		local flatdev="$(basename "$device")"
+>  		_xfs_metadump "$seqres.$flatdev.check.md" "$device" "$logdev" \
+> -			compress >> $seqres.full
+> +			compress -a -o >> $seqres.full
+>  	fi
+>  
+>  	# Optionally test the index rebuilding behavior.
+> @@ -888,7 +887,7 @@ _check_xfs_filesystem()
+>  		if [ "$rebuild_ok" -ne 1 ] && [ "$DUMP_CORRUPT_FS" = "1" ]; then
+>  			local flatdev="$(basename "$device")"
+>  			_xfs_metadump "$seqres.$flatdev.rebuild.md" "$device" \
+> -				"$logdev" compress >> $seqres.full
+> +				"$logdev" compress -a -o >> $seqres.full
+>  		fi
+>  	fi
+>  
+> @@ -972,7 +971,7 @@ _check_xfs_filesystem()
+>  		if [ "$orebuild_ok" -ne 1 ] && [ "$DUMP_CORRUPT_FS" = "1" ]; then
+>  			local flatdev="$(basename "$device")"
+>  			_xfs_metadump "$seqres.$flatdev.orebuild.md" "$device" \
+> -				"$logdev" compress >> $seqres.full
+> +				"$logdev" compress -a -o >> $seqres.full
+>  		fi
+>  	fi
+>  
+> diff --git a/tests/xfs/291 b/tests/xfs/291
+> index 600dcb2e..54448497 100755
+> --- a/tests/xfs/291
+> +++ b/tests/xfs/291
+> @@ -92,7 +92,7 @@ _scratch_xfs_check >> $seqres.full 2>&1 || _fail "xfs_check failed"
+>  
+>  # Yes they can!  Now...
+>  # Can xfs_metadump cope with this monster?
+> -_scratch_xfs_metadump $tmp.metadump || _fail "xfs_metadump failed"
+> +_scratch_xfs_metadump $tmp.metadump -a -o || _fail "xfs_metadump failed"
+>  SCRATCH_DEV=$tmp.img _scratch_xfs_mdrestore $tmp.metadump || _fail "xfs_mdrestore failed"
+>  SCRATCH_DEV=$tmp.img _scratch_xfs_repair -f &>> $seqres.full || \
+>  	_fail "xfs_repair of metadump failed"
+> diff --git a/tests/xfs/336 b/tests/xfs/336
+> index d7a074d9..43b3790c 100755
+> --- a/tests/xfs/336
+> +++ b/tests/xfs/336
+> @@ -62,7 +62,7 @@ _scratch_cycle_mount
+>  
+>  echo "Create metadump file"
+>  _scratch_unmount
+> -_scratch_xfs_metadump $metadump_file
+> +_scratch_xfs_metadump $metadump_file -a
+>  
+>  # Now restore the obfuscated one back and take a look around
+>  echo "Restore metadump"
+> diff --git a/tests/xfs/432 b/tests/xfs/432
+> index 66315b03..dae68fb2 100755
+> --- a/tests/xfs/432
+> +++ b/tests/xfs/432
+> @@ -86,7 +86,7 @@ echo "qualifying extent: $extlen blocks" >> $seqres.full
+>  test -n "$extlen" || _notrun "could not create dir extent > 1000 blocks"
+>  
+>  echo "Try to metadump"
+> -_scratch_xfs_metadump $metadump_file -w
+> +_scratch_xfs_metadump $metadump_file -a -o -w
+>  SCRATCH_DEV=$metadump_img _scratch_xfs_mdrestore $metadump_file
+>  
+>  echo "Check restored metadump image"
+> diff --git a/tests/xfs/503 b/tests/xfs/503
+> index f5710ece..8805632d 100755
+> --- a/tests/xfs/503
+> +++ b/tests/xfs/503
+> @@ -46,7 +46,7 @@ metadump_file_ag=${metadump_file}.ag
+>  copy_file=$testdir/copy.img
+>  
+>  echo metadump
+> -_scratch_xfs_metadump $metadump_file >> $seqres.full
+> +_scratch_xfs_metadump $metadump_file -a -o >> $seqres.full
+>  
+>  echo metadump a
+>  _scratch_xfs_metadump $metadump_file_a -a >> $seqres.full
+> -- 
+> 2.43.0
+> 
+> 
