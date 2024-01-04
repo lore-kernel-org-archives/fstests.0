@@ -1,160 +1,140 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89C8120DD9
-	for <fstests@vger.kernel.org>; Thu,  4 Jan 2024 10:39:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BB5828DC1
+	for <fstests@vger.kernel.org>; Thu,  4 Jan 2024 18:12:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Y6+jZ4pE";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="zAA5OIoF";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Y6+jZ4pE";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="zAA5OIoF"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 7AA4E1F7FC;
-	Thu,  4 Jan 2024 10:39:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1704364757; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BuRGa8JYfVrC/3lKKOAX8swmHXfmoqOLcl9KOmlgdk4=;
-	b=Y6+jZ4pEvFNsYJNVDjOmwBSRbfRmYQuwEmcGh17oc1ptsmbaPwnKsq7VdZZPHAUxQkPF8D
-	eAGg0DYFujnESpG/QmApKhlnS/E42o2rai9chT9ZCCyycDHMyCqSnK+JQpv9St2MiKgK1Q
-	j8xhZbvEu3u73+oBtE16F5ag+eOOnlw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1704364757;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BuRGa8JYfVrC/3lKKOAX8swmHXfmoqOLcl9KOmlgdk4=;
-	b=zAA5OIoF+fQXrh4lEVFwIEKzm9geWdYvcdn7GNK3gOKpT0dXbPtjPAHuvlb9awlW6tCf0F
-	ezkBx2wb7PYo5lAw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1704364757; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BuRGa8JYfVrC/3lKKOAX8swmHXfmoqOLcl9KOmlgdk4=;
-	b=Y6+jZ4pEvFNsYJNVDjOmwBSRbfRmYQuwEmcGh17oc1ptsmbaPwnKsq7VdZZPHAUxQkPF8D
-	eAGg0DYFujnESpG/QmApKhlnS/E42o2rai9chT9ZCCyycDHMyCqSnK+JQpv9St2MiKgK1Q
-	j8xhZbvEu3u73+oBtE16F5ag+eOOnlw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1704364757;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BuRGa8JYfVrC/3lKKOAX8swmHXfmoqOLcl9KOmlgdk4=;
-	b=zAA5OIoF+fQXrh4lEVFwIEKzm9geWdYvcdn7GNK3gOKpT0dXbPtjPAHuvlb9awlW6tCf0F
-	ezkBx2wb7PYo5lAw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 46A9913C96;
-	Thu,  4 Jan 2024 10:39:14 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 1gNLOtKKlmVadQAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Thu, 04 Jan 2024 10:39:14 +0000
-Date: Thu, 4 Jan 2024 21:39:02 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Chung-Chiang Cheng <cccheng@synology.com>, fstests@vger.kernel.org,
- shepjeng@gmail.com, kernel@cccheng.net
-Subject: Re: [PATCH] README: add a missing necessary package
-Message-ID: <20240104213902.4e2a2386@echidna>
-In-Reply-To: <20240104084108.m3ts24cee7nb7wom@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240104054236.1311678-1-cccheng@synology.com>
-	<20240104084108.m3ts24cee7nb7wom@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Adzsb9Co"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 90723C433C7;
+	Thu,  4 Jan 2024 18:12:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1704391934;
+	bh=DGqUbCCD1prxrR3TqHRvPraM0/tkn1jJYtxuvWLDE/Q=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Adzsb9Co4PZdj5QxVPHwIfWx64RzEiX8uUZsf1nioO7DitHKeuom9b44UN3hiA6fL
+	 KlA8Z7ZGfcdNcjUoq61tGRIpfEbmNEoMXUvadZS+Zh8ZmpdvyHZ2yN7dyw/FR6Uw5Z
+	 RFfy0++wTYrfzpNh48u0DnB3ttI1TOmXHNLqo5KCl6CaPgOEjszmFtZFHfy/IHqXLv
+	 51rb8QPHAXdysBObHKmOR88DwxqeKVLllow2nc8UCcMw66OCNph1O6lQq2RR12r+Ik
+	 DA4fiuHeK0RcfkMn3/npt2kKm4uimOxML7gVCpIjlqOfTY4Q9w+LR78qO/5AkbhUHL
+	 p3JEO2fyzAPWg==
+Date: Thu, 4 Jan 2024 10:12:13 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Disha Goel <disgoel@linux.ibm.com>
+Cc: fstests@vger.kernel.org, ojaswin@linux.ibm.com, ritesh.list@gmail.com
+Subject: Re: [PATCH v2] xfstest: add detection for ext4.h presence in
+ configure.ac
+Message-ID: <20240104181213.GE241128@frogsfrogsfrogs>
+References: <20240103184208.80772-1-disgoel@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Level: 
-X-Spam-Level: 
-X-Spamd-Result: default: False [0.40 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCPT_COUNT_FIVE(0.00)[5];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 FREEMAIL_CC(0.00)[synology.com,vger.kernel.org,gmail.com,cccheng.net];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.00)[12.18%]
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spam-Score: 0.40
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240103184208.80772-1-disgoel@linux.ibm.com>
 
-On Thu, 4 Jan 2024 16:41:08 +0800, Zorro Lang wrote:
-
-> On Thu, Jan 04, 2024 at 01:42:36PM +0800, Chung-Chiang Cheng wrote:
-> > src/dbtests.c requires 'gdbm-ndbm.h' or 'ndbm.h', both of which are
-> > supplied by 'libgdbm-compat-dev' in the latest Ubuntu LTS. However,
-> > this package is not a dependency of the currently listed packages.
-> > Therefore, add it explicitly to the necessary packages list.
-> > 
-> > $ dpkg -L libgdbm-compat-dev
-> > /.
-> > /usr
-> > /usr/include
-> > /usr/include/dbm.h
-> > /usr/include/gdbm-ndbm.h
-> > /usr/include/ndbm.h
-> > 
-> > Signed-off-by: Chung-Chiang Cheng <cccheng@synology.com>
-> > ---
-> >  README | 3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/README b/README
-> > index e0dabe96503a..c46690c4eabb 100644
-> > --- a/README
-> > +++ b/README
-> > @@ -11,7 +11,8 @@ Ubuntu or Debian
-> >     $ sudo apt-get install acl attr automake bc dbench dump e2fsprogs fio gawk \
-> >          gcc git indent libacl1-dev libaio-dev libcap-dev libgdbm-dev libtool \
-> >          libtool-bin liburing-dev libuuid1 lvm2 make psmisc python3 quota sed \
-> > -        uuid-dev uuid-runtime xfsprogs linux-headers-$(uname -r) sqlite3
-> > +        uuid-dev uuid-runtime xfsprogs linux-headers-$(uname -r) sqlite3 \
-> > +        libgdbm-compat-dev  
+On Thu, Jan 04, 2024 at 12:12:08AM +0530, Disha Goel wrote:
+> In some distributions, __u64 is already defined in system header files,
+> causing compilation errors when building xfstest.
 > 
-> Oh, We call it "gdbm-devel" in Fedora. Thanks for this updating for Debian!
+>         # make
+>             [CC]    ext4_resize
+>         ext4_resize.c:17:28: error: conflicting types for '__u64'
+>          typedef unsigned long long __u64;
+>                                     ^~~~~
+>         In file included from /usr/include/asm/types.h:26:0,
+>                          from /usr/include/linux/types.h:5,
+>                          from /usr/include/linux/mount.h:4,
+>                          from /usr/include/sys/mount.h:32,
+>                          from ext4_resize.c:15:
+>         /usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
+>          typedef unsigned long __u64;
+>                        ^~~~~
 > 
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> To address this issue, configure.ac now checks for the presence
+> and compilability of <linux/ext4.h>. If found and compilable, the
+> macro HAVE_LINUX_EXT4_H is defined. If not, a warning message
+> is displayed. The commit also updates src/ext4_resize.c to
+> conditionally include <linux/ext4.h> based on the presence of
+> the header, ensuring compatibility with systems where ext4.h
+> is either present or not. This change enhances the configure
+> process and improves code consistency.
+> 
+> The changes were tested on various distributions on Power
+> architecture, by successfully compiling xfstest. Additionally,
+> verified the compatibility by running ext4/033 and ext4/056
+> tests, both of which use ext4_resize and observed successful
+> test execution.
+> 
+>         # make
+>             [CC]    detached_mounts_propagation
+>             [CC]    ext4_resize
+>             [CC]    t_readdir_3
+> 
+> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+> ---
+> 
+> Changelog:
+> v1 -> v2
+> Drop usage of uint64_t to match the definition in the kernel uapi
+> headers. Use <linux/ext4.h> or <linux/types.h> based on the
+> presence of the header to get the __u64 definition as suggested
+> by Darrick.
+> 
+> Link to v1:
+> https://lore.kernel.org/fstests/20231221061231.44347-1-disgoel@linux.ibm.com/T/#u
+> 
+>  configure.ac      | 8 ++++++++
+>  src/ext4_resize.c | 6 +++++-
+>  2 files changed, 13 insertions(+), 1 deletion(-)
+> 
+> diff --git a/configure.ac b/configure.ac
+> index b22fc52b..76378e6d 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -35,6 +35,14 @@ AC_CHECK_HEADERS([	assert.h		\
+>  			sys/mman.h		\
+>  ])
+>  
+> +AC_COMPILE_IFELSE([
+> +    AC_LANG_PROGRAM([#include <linux/ext4.h>], [])
+> +], [
+> +    AC_DEFINE([HAVE_LINUX_EXT4_H], [1], [Define if ext4.h is present])
+> +], [
+> +    AC_MSG_WARN([ext4.h not found or not compilable.])
+> +])
 
-While you're there, please feel free to collapse in:
+AC_CHECK_HEADERS does this.
 
---- a/README
-+++ b/README
-@@ -76,7 +76,8 @@ SUSE Linux Enterprise or openSUSE
- 
-    $ sudo zypper install acct automake bc dbench duperemove dump fio gcc git \
-         indent libacl-devel libaio-devel libattr-devel libcap libcap-devel \
--        libtool liburing-devel libuuid-devel lvm2 make quota sqlite3 xfsprogs
-+        libtool liburing-devel libuuid-devel lvm2 make quota sqlite3 xfsprogs \
-+        gdbm-devel
+> +
+>  AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
+>  #define _GNU_SOURCE
+>  #include <xfs/libxfs.h>])
+> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+> index 78b66432..51bd8d78 100644
+> --- a/src/ext4_resize.c
+> +++ b/src/ext4_resize.c
+> @@ -14,7 +14,11 @@
+>  #include <sys/ioctl.h>
+>  #include <sys/mount.h>
+>  
+> -typedef unsigned long long __u64;
+> +#ifdef HAVE_LINUX_EXT4_H
+> +#include <linux/ext4.h>
+> +#else
+> +#include <linux/types.h>
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+You might as well include this unconditionally; there's no penalty
+for including it multiple times.
 
-Thanks, David
+--D
+
+> +#endif
+>  
+>  #ifndef EXT4_IOC_RESIZE_FS
+>  #define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
+> -- 
+> 2.39.1
+> 
