@@ -1,310 +1,236 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DCEE1D54A;
-	Thu,  4 Jan 2024 04:35:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2FE31CA98;
+	Thu,  4 Jan 2024 05:48:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TuXNEcTG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED9AEC433CB;
-	Thu,  4 Jan 2024 04:35:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704342953;
-	bh=uGElocd5DPSIFKTsgLCblNzucn/juU6jwH+lYlFTm1s=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=TuXNEcTGIJylEv1pgmLWYVRc1n3jyGUhspiVNqkuGaKmIPC2c00miVmtgrQY73Duj
-	 3QsB56h8DU2eGuzncCqVmLtdbJ50PPazU5UlJyI4qih4Xkki4LKuGUJCCgD917lBvh
-	 ByDmeZOCUhFg/kBStoJVD5XIwGWzGMhBJH4JleWOi3t6+zRaRnqr6P0NXpyws6LUqI
-	 AAKoWtQeSjFdXUOaK1zCZBez4cUDmzPwROGv3lYmKJ0h24VMHVwkJ0HEThE8/lNKvi
-	 amZu8dwcPrbxxrdQY15ZIeyp3+/i4sCyW2iO+pm1DbA8KVmQgwNEIMu9dm/6KQqU8H
-	 Lr2oKTXRLB/kw==
-Date: Wed, 3 Jan 2024 20:35:52 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [xfstests generic/648] 64k directory block size (-n size=65536)
- crash on _xfs_buf_ioapply
-Message-ID: <20240104043552.GU361584@frogsfrogsfrogs>
-References: <20231218140134.gql6oecpezvj2e66@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231218174836.GQ361584@frogsfrogsfrogs>
- <20231219063420.qssutqqhr3hreevw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20231225133854.zfnywywxa6x5re4q@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="VdHI2pUA";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="EEcEMGNy"
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 404280oQ012406;
+	Thu, 4 Jan 2024 05:48:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : content-transfer-encoding : content-type :
+ mime-version; s=corp-2023-11-20;
+ bh=ijUAp12V3dDfgQ90I8Rfe+pqOOXv0G+gzWhn96cqsnw=;
+ b=VdHI2pUAl56Hmxa86eQIBRdCoVcCqroU38gtKj2g9ziH69ZbzfKXRPnYgkdse28AiJTU
+ KEG7D7RUckri7tX9rf5lWy280fv6PJYr+Ze4RRcrNAblpSNo+PtwQT2nHk9EqeAnjG9v
+ IWe1UMW0UwcI75cXLqwvbVxNyemWC5WrnzP+UoyinNHmtsB626eQLN5gkWsXMC/0GWtH
+ LhaX4dBjXNRENNrDe/I8HsdNkxfnR16wc894IUFc58tHuVtOctkg/JSkeEPCxh4QgltQ
+ fSLfd2+b2vWPUbtWmfQ1cZH0jL5UvV2O1SwljTj0kra43yiBkreaP7j2JAV4Daoc2wTy Jw== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3vab3axcgu-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 04 Jan 2024 05:48:31 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 4045K01h025378;
+	Thu, 4 Jan 2024 05:48:29 GMT
+Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2040.outbound.protection.outlook.com [104.47.66.40])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3vdpecspnk-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 04 Jan 2024 05:48:29 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=bWjuGum6avw27UnlcLeEn7awnTZlVD5bFqG2vhkJSLDKDwVDGDlurPzgMVVHa12+jYqQ2xiTgukGnsBIr4aOQgl/4/w4DInEElIaTEMCGnh0aw8EKgKzq6tFKHGVIHtJlPYVHilRftJ26nb3LIyB5LfKWSpzp3/71gMI4cCCW3/R6BbVWrek/iTBDQWaghPkEKSKJg/wBOJkMtUpoDKTrtZojbSfQsN6LCAfuBZLRLzp2jOOZ0UvPgTZoF45sSSv5BGXmZVHUX6u9zZqKtrZHk2lj+7kFY5JgKSNDmqSA/FjQeez6f7XgZYTnWAHPm6Rx106XPAaWya1eVQGusRLWQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ijUAp12V3dDfgQ90I8Rfe+pqOOXv0G+gzWhn96cqsnw=;
+ b=iJ10bGjOB98D8zeYaSLB6L+dl8kssW4dDVeK0AGYXTiKeAD67mVBtCGhSGjtdl403vcptKk5QK1D++5tM5n0bhlOtpDHpBDkkHcyVBVz2BUwYRoB3ZoDFmelmPtm/YVQ4gUtzzuEBN9C43w/gChCJIQb2LxLAZdMq4ObxGWD/7wK1i373+0K9pcsXj/wBI3tzMOXDBu2n9KrZkT7kYIXl/okkjx1DDGPPHY23/S7vdhxUYzhr596pJV1AUhhO3o+Ld8Lo0s9KQn80WqGfbJsNczS5ZRlIsjBmna0BtXx+W72gtE68lzgOwPRO2bV8DQ3bIKY0V0HeD6zV5qdDx4ukA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ijUAp12V3dDfgQ90I8Rfe+pqOOXv0G+gzWhn96cqsnw=;
+ b=EEcEMGNyDUVANRnCKYv6nqLuJUQ+PHOk49tFJ/e06+M3B9L7xjW+6ycvzy88zd2UC5lkAxmpy60YcXiWYqjE/P00x/CGL4AiKOGjHewYc2xGax890xtBwk00VftFqwXgcAj1WPiR/v3RhcrG05PJF5O9pmUZHl/6e0804+Ofy5A=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by PH0PR10MB5611.namprd10.prod.outlook.com (2603:10b6:510:f9::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7159.13; Thu, 4 Jan
+ 2024 05:48:27 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2000:9c78:19f5:176a]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::2000:9c78:19f5:176a%3]) with mapi id 15.20.7135.023; Thu, 4 Jan 2024
+ 05:48:27 +0000
+From: Anand Jain <anand.jain@oracle.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, johannes.thumshirn@wdc.com,
+        fdmanana@kernel.org
+Subject: [PATCH v8 0/10] fstests: add tests for btrfs' raid-stripe-tree feature
+Date: Thu,  4 Jan 2024 11:18:06 +0530
+Message-Id: <cover.1704344811.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.38.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SI2P153CA0032.APCP153.PROD.OUTLOOK.COM
+ (2603:1096:4:190::23) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20231225133854.zfnywywxa6x5re4q@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH0PR10MB5611:EE_
+X-MS-Office365-Filtering-Correlation-Id: 0ac7caf1-12b5-466a-e2da-08dc0ce8c58c
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 
+	fxL1BWAfAo0787gjnpvZgOM4UUjpyyNzJkNadaOhKYvXcm4Uopn1UmY7x3RF3AA9ciZt8Z92cWK4+4cA1tSLDc88uIAYcvmVPFmjGKgsYb5cwPHvTK7sWVPLQknEVzEpQcKRnGPyYwCkg88PkT3NqpMF5wN5lcptcsHxuXXpJr2pmfcsSTT+pVzOK08Od00Qj/hT1FuSU3yeV+0s6CZTnzhgZuErmNzlhzZgGUBJNLA3vKNviJIoHdTmq6L9Iowpu//lPe0XLKhV5HEQuM+4blhl6tZIyG5NX6xCYR9PCl55gzBdA1El/JCX1VmdFVlazdAGWcCavN8ToiwGnTBOnYoa9Hxl8sA9Dh+M3kKG8l4zpdM/ALuEMJKoKniRz5Rexn5122TDabu4x2c9RuDuOTwq+cWwgqytckaOaolsujG0C89lU088rLlJclCE7ahIrb7H3gd08hAYSzJ4wZiqPy8FfZaNhM5n9d+ZFZMy+YvkbBOkwfr0ZmHOnLM1Ym5L0KL/LbkCEjn+etSBR1hQt39FQT6HrFTKvumajVFHHPY=
+X-Forefront-Antispam-Report: 
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376002)(136003)(346002)(39860400002)(366004)(396003)(230922051799003)(186009)(64100799003)(1800799012)(451199024)(5660300002)(2906002)(4326008)(316002)(8936002)(8676002)(66556008)(66476007)(6916009)(66946007)(44832011)(2616005)(26005)(6512007)(83380400001)(41300700001)(38100700002)(36756003)(86362001)(6506007)(6666004)(478600001)(966005)(6486002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: 
+	=?us-ascii?Q?ZK5RiG1/TO/dcKPm+bJjrQRCficZ70BvJMbe7N60FTJ4BJjx6F3C5ltrhwTl?=
+ =?us-ascii?Q?GKW669bNRZmIay6on9t3VwPOzSsbPFiYuvB0HFJ1a2orfvozByC4HgXWaLNF?=
+ =?us-ascii?Q?eBX34wZ/6jSnruMLcMqQ/Y5VfRYZH8HTkbNV16r/DukoKIJkTRmtySc9nuuU?=
+ =?us-ascii?Q?5LsCsE7mxMDt2PWtAzLX3VmniHAGMng3LPaKJufYLFBReJ9YWE07pI+RHb/3?=
+ =?us-ascii?Q?H2q8jpH4ukPTX2UUOwQfWCLdAycdFRaAsqLDt243USZqdk6MjLlXqXviiftr?=
+ =?us-ascii?Q?ocZRHLGzx/g/xCA+Hmy9JLyiMuUoIzaV7hnhTwn+N6hAuAiRYmxMWu/4aXpw?=
+ =?us-ascii?Q?37Ds6MohtllKNpRBLsLdbQyr6JacbdQV33Cl5Qm0PusSs+vsdN1UPJnQf97T?=
+ =?us-ascii?Q?GqmLf2fGTBtA2xmR8yC0cvtj0LUjlMoMt+X1h6wR8XZ+iu/fS3s3YzkTxG/c?=
+ =?us-ascii?Q?PqqEJ2BLb3JQ+09nKKvs8gW9qDgNqe3jQybRabKzf1nGuzL5ijZFTp/T2FOU?=
+ =?us-ascii?Q?iemxKTVYiSqLwv7V706kx08YW0101pUZibtBtuh/4irrjK+KRKaAGfnyFKq0?=
+ =?us-ascii?Q?qOwKovbQJ4i59Dt4HY9OSvdNpRCxMs+Lcr5Aza0QDR6gv/mqZB8oOziGN1ca?=
+ =?us-ascii?Q?suY8mo/qXgXxxuTzt0Iv2mkwg+C5N6/IX6pYngVHajY44lhg/IwS8CoILkuW?=
+ =?us-ascii?Q?r5tbdj6bKlGow8iKl17ipV+BazDuS26Q3bg82ENgEw0MtnFqXpW2xi0drQwE?=
+ =?us-ascii?Q?UgDu8338k5sXod5yqvUn67nS/AeN1OP1fWfmYCKnzhhF94I4aRXoPqloOCeg?=
+ =?us-ascii?Q?G6/L+ybYZOdp8y5dqnd16IgeB9bCz2BMvSz23mt2W4rFw0KP8EaTYjVUoapb?=
+ =?us-ascii?Q?TEuzFTp3tvWRSTd9KuZ2F/0bRwQgD7kmG718ga1AenJF/Y2QRd58gjYlSZkU?=
+ =?us-ascii?Q?kJRp0f+xRYcruGoXLnYkkvrlYbrKcZe609wTsWt2+dGSLyVBXp2yut7q8f4g?=
+ =?us-ascii?Q?+TY4R9u2V8M9e1Kr7HB7NWezsca5uF3KMVcwMGgqEIihDGxoR9kl6gj05HWc?=
+ =?us-ascii?Q?3OsFF/Eks+A6/ZMJ355P1b1yvTfB1wE4zBPdov8SS3/CpCMq5uHeTlW+bjOS?=
+ =?us-ascii?Q?YdZMNaBcACbDe1mTF/jbV7wUzizQgZg0/mx1gyyw+a2wB1MBovSeuX/hIOVM?=
+ =?us-ascii?Q?wDYUq3DWvhBw7sj0zkSK9Mlglff0Rw8qbN6t7RKvyG2zEBBtWQ1Yp24WKdWg?=
+ =?us-ascii?Q?aNzyK0zhmosKmjn0gmcVZc14E/orUYs1iUDN3Nq9ZDXRhNTE2GKcpSwCYThv?=
+ =?us-ascii?Q?nucVWj0X1gib8GgkPQSaBaBZKrjusCJyOIqYFhPRwSqpiowf01wu7BVCtMHi?=
+ =?us-ascii?Q?NFlx7fL1LsW6RsTaPwCkEc6OzqWlNDqnzBGS28GAC05a40gSliQY8YEFlxbB?=
+ =?us-ascii?Q?bD/4SHvLoOXEnN0JRnwc4gf22u6sCftri1LpfdbCuzvv0h6EamCbo+1IMgCu?=
+ =?us-ascii?Q?LS17oPIikZq4lGe/dhb0cM3E6/By1XKfs3PJ2OmhgMQk0DmL/da6cFq819HJ?=
+ =?us-ascii?Q?fBFTUAHJf/sXdEQ6JbK0p5tw/8EplLTi4YEnqyDi?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
+	jxGERdmx7M1ILfW2hqnQOnEijBvQuexyuSxGCa2c1uaTfHsH8qsZg15LwxoGWc+9ZtRuSSZXfX6iChZXWjPij7g8s++UJ90X6TPQSkszhiWUTHWm2vuPHXkJFilnka+O9/PUiLK0+NWWK+9RqDH1nBrJEi+asGZRN9XVvNbsh4PtFHDs8kw3da3W/Jn3xYfPwxdy52Zsgzx9i84AFDciK6opTeCW2t1EFIkxpLPSYtqo7y4s1yF7Rgs30kaEIhWXKnnq19yenLLQk6KsESD/TSXAxD6SwCTdV3Klh+z175yKxxnHI4mhiBbKiFaT+o492xq2UI+euAPc9R8EA7PKb/CA8jq7QLRqwLcVBTDX6wXwKQmEDHSb7PvmfM9R9twKfyRkJxa6NYRMn1N5MdG3M3hVoNe6owx0S/IXlkmOugZ68QHRL+6gzliYLwTL0j6QqC8+x4APcwR8/fJKbTiOph0yHaRmbapW4aCN1uyIJEwxIORXmWhxdZ+TlfNNT0DypwDQ2FuG50t8FHZorNqppGM3VZzkYqJcSOqgPxSFVHFZ3ZgSRALa5ulMspU6u4uYrIhCRRtgYtWTlNIse7J7Y6nl1dOXIVVqQUUnD//hhko=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0ac7caf1-12b5-466a-e2da-08dc0ce8c58c
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Jan 2024 05:48:27.3112
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 5XZHcEtbaeqrfGTBiZu+zXcf8kFAIUdwOtjiM6DFcp2VcuCZ6XQjXS8XNDcJlcuIJApgW8rN8DpZv31i6+R46A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR10MB5611
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-01-04_02,2024-01-03_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 bulkscore=0 mlxscore=0
+ adultscore=0 suspectscore=0 phishscore=0 spamscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2311290000
+ definitions=main-2401040039
+X-Proofpoint-GUID: H1M60ribEogLkS_tTZ4XdEz9UQdMghdm
+X-Proofpoint-ORIG-GUID: H1M60ribEogLkS_tTZ4XdEz9UQdMghdm
 
-On Mon, Dec 25, 2023 at 09:38:54PM +0800, Zorro Lang wrote:
-> On Tue, Dec 19, 2023 at 02:34:20PM +0800, Zorro Lang wrote:
-> > On Mon, Dec 18, 2023 at 09:48:36AM -0800, Darrick J. Wong wrote:
-> > > On Mon, Dec 18, 2023 at 10:01:34PM +0800, Zorro Lang wrote:
-> > > > Hi,
-> > > > 
-> > > > Recently I hit a crash [1] on s390x with 64k directory block size xfs
-> > > > (-n size=65536 -m crc=1,finobt=1,reflink=1,rmapbt=0,bigtime=1,inobtcount=1),
-> > > > even not panic, a assertion failure will happen.
-> > > > 
-> > > > I found it from an old downstream kernel at first, then reproduced it
-> > > > on latest upstream mainline linux (v6.7-rc6). Can't be sure how long
-> > > > time this issue be there, just reported it at first.
-> > > > 
-> > > > I hit and reproduced it several times by running generic/648 on s390x
-> > > > with "-n size=65536" xfs many times. Not sure if s390x is needed, I'll
-> > > > try to check other arches.
-> > > 
-> > > XFS (loop3): Metadata corruption detected at __xfs_dir3_data_check+0x372/0x6c0 [xfs], xfs_dir3_block block 0x1020
-> > > 
-> > > Where in the source code is this             ^^^^^^^^^^^^^^^^^^^^^^^^^^^?
-> > 
-> > The source is just based on HEAD="v6.7-rc6", the decode_stacktrace.sh output is:
-> >   [  979.227613] XFS (loop3): Metadata corruption detected at __xfs_dir3_data_check (fs/xfs/libxfs/xfs_dir2_data.c:137) xfs, xfs_dir3_block block 0x1020
-> > 
-> > The code is as below:
-> > 
-> >         switch (hdr->magic) {
-> >         case cpu_to_be32(XFS_DIR3_BLOCK_MAGIC):
-> >         case cpu_to_be32(XFS_DIR2_BLOCK_MAGIC):
-> >                 btp = xfs_dir2_block_tail_p(geo, hdr);
-> >                 lep = xfs_dir2_block_leaf_p(btp);
-> > 
-> >                 if (be32_to_cpu(btp->count) >=
-> >                     xfs_dir2_data_max_leaf_entries(geo))
-> > 137: ==>                 return __this_address;
-> >                 break;
-> > 
-> > 
-> > More output as below:
-> > 
-> > [  979.225081] XFS: Assertion failed: 0, file: fs/xfs/xfs_buf_item_recover.c, line: 414
-> > [  979.225120] ------------[ cut here ]------------
-> > [  979.225122] WARNING: CPU: 1 PID: 157902 at fs/xfs/xfs_message.c:104 assfail (fs/xfs/xfs_message.c:104 (discriminator 3)) xfs
-> > [  979.225349] Modules linked in: tls loop lcs ctcm fsm qeth ccwgroup zfcp qdio scsi_transport_fc dasd_fba_mod dasd_eckd_mod dasd_mod rfkill sunrpc vfio_ccw mdev vfio_iommu_type1 vfio drm
-> > +fuse i2c_core drm_panel_orientation_quirks xfs libcrc32c ghash_s390 prng des_s390 virtio_net net_failover sha3_512_s390 virtio_blk failover sha3_256_s390 dm_mirror dm_region_hash dm_log
-> > +dm_mod pkey zcrypt aes_s390
-> > [  979.225376] Hardware name: IBM 8561 LT1 400 (KVM/Linux)
-> > [  979.225377] Krnl PSW : 0704c00180000000 000003ff7ffead7a (assfail+0x52/0x68 xfs])
-> > [  979.225457]            R:0 T:1 IO:1 EX:1 Key:0 M:1 W:0 P:0 AS:3 CC:0 PM:0 RI:0 EA:3
-> > [  979.225460] Krnl GPRS: c000000000000021 000003ff800549b0 ffffffffffffffea 000000000000000a
-> > [  979.225462]            0000038000363418 0000000000000000 000003ff80162b74 000000030001c127
-> > [  979.225464]            00000000ccc51d40 000000030001c127 00000000dfa03000 0000000163d19600
-> > [  979.225465]            000003ffa1f2ef68 000003ff80147c28 000003ff7ffead68 00000380003634c0
-> > [ 979.225476] Krnl Code: 000003ff7ffead6e: 95001010 cli 16(%r1),0
-> > All code
-> > ========
-> > 
-> > Code starting with the faulting instruction
-> > ===========================================
-> > [  979.225476]            000003ff7ffead72: a774000a           brc     7,000003ff7ffead86
-> > [  979.225476]           #000003ff7ffead76: af000000           mc      0,0
-> > [  979.225476]           >000003ff7ffead7a: eb6ff0a80004       lmg     %r6,%r15,168(%r15)
-> > [  979.225476]            000003ff7ffead80: 07fe               bcr     15,%r14
-> > [  979.225476]            000003ff7ffead82: 47000700           bc      0,1792
-> > [  979.225476]            000003ff7ffead86: af000000           mc      0,0
-> > [  979.225476]            000003ff7ffead8a: 0707               bcr     0,%r7
-> > [  979.225487] Call Trace:
-> > [  979.225488] assfail (fs/xfs/xfs_message.c:105 (discriminator 3)) xfs
-> > [  979.225568] assfail+0x40/0x68 xfs])
-> > [  979.225648] xlog_recover_validate_buf_type (fs/xfs/xfs_buf_item_recover.c:414 (discriminator 1)) xfs
-> > [  979.225727] xlog_recover_buf_commit_pass2 (fs/xfs/xfs_buf_item_recover.c:971) xfs
-> > [  979.225807] xlog_recover_items_pass2 (fs/xfs/xfs_log_recover.c:1957) xfs
-> > [  979.225886] xlog_recover_commit_trans (./include/linux/list.h:373 ./include/linux/list.h:588 fs/xfs/xfs_log_recover.c:2028) xfs
-> > [  979.225965] xlog_recovery_process_trans (fs/xfs/xfs_log_recover.c:2257) xfs
-> > [  979.226045] xlog_recover_process_ophdr (fs/xfs/xfs_log_recover.c:2405) xfs
-> > [  979.226124] xlog_recover_process_data (fs/xfs/xfs_log_recover.c:2447) xfs
-> > [  979.226204] xlog_recover_process (fs/xfs/xfs_log_recover.c:2901) xfs
-> > [  979.226285] xlog_do_recovery_pass (fs/xfs/xfs_log_recover.c:3153) xfs
-> > [  979.226366] xlog_do_log_recovery (fs/xfs/xfs_log_recover.c:3265) xfs
-> > [  979.226446] xlog_do_recover (fs/xfs/xfs_log_recover.c:3293) xfs
-> > [  979.226526] xlog_recover (./arch/s390/include/asm/atomic_ops.h:71 (discriminator 1) ./arch/s390/include/asm/bitops.h:63 (discriminator 1) ./include/asm-generic/bitops/instrumented-atomic.h:29 (discriminator 1) fs/xfs/xfs_log_recover.c:3427 (discriminator 1)) xfs
-> > [  979.226607] xfs_log_mount (fs/xfs/xfs_log.c:718) xfs
-> > [  979.226686] xfs_mountfs (fs/xfs/xfs_mount.c:822) xfs
-> > [  979.226765] xfs_fs_fill_super (fs/xfs/xfs_super.c:1734) xfs
-> > [  979.226844] get_tree_bdev (fs/super.c:1598) 
-> > [  979.226850] vfs_get_tree (fs/super.c:1771) 
-> > [  979.226852] do_new_mount (fs/namespace.c:3337) 
-> > [  979.226855] path_mount (fs/namespace.c:3664) 
-> > [  979.226857] __s390x_sys_mount (fs/namespace.c:3677 fs/namespace.c:3886 fs/namespace.c:3863 fs/namespace.c:3863) 
-> > [  979.226860] __do_syscall (arch/s390/kernel/syscall.c:144 arch/s390/kernel/syscall.c:168) 
-> > [  979.226864] system_call (arch/s390/kernel/entry.S:309) 
-> > [  979.226868] Last Breaking-Event-Address:
-> > [  979.226868] xfs_printk_level (fs/xfs/xfs_message.c:52) xfs
-> > [  979.226949] ---[ end trace 0000000000000000 ]---
-> > [  979.227613] XFS (loop3): Metadata corruption detected at __xfs_dir3_data_check (fs/xfs/libxfs/xfs_dir2_data.c:137) xfs, xfs_dir3_block block 0x1020
-> > [  979.227732] XFS (loop3): Unmount and run xfs_repair
-> > [  979.227733] XFS (loop3): First 128 bytes of corrupted metadata buffer:
-> > [  979.227736] 00000000: 58 44 42 33 00 00 00 00 00 00 00 00 00 00 10 20  XDB3...........
-> > [  979.227738] 00000010: 00 00 00 00 00 00 00 00 c1 95 44 38 a1 8d 4b 4a  ..........D8..KJ
-> > [  979.227739] 00000020: ad 32 0e 29 c4 07 13 ed 00 00 00 00 00 00 00 80  .2.)............
-> > [  979.227740] 00000030: 02 68 fc c8 00 00 00 00 00 00 00 00 00 00 00 00  .h..............
-> > [  979.227741] 00000040: 00 00 00 00 00 00 00 80 01 2e 02 00 00 00 00 40  ...............@
-> > [  979.227742] 00000050: 00 00 00 00 00 00 00 80 02 2e 2e 02 00 00 00 50  ...............P
-> > [  979.227743] 00000060: 00 00 00 00 00 00 00 83 08 66 73 73 32 36 30 38  .........fss2608
-> > [  979.227745] 00000070: 36 01 00 00 00 00 00 60 00 00 00 00 00 00 00 84  6......`........
-> > [  979.227748] XFS (loop3): Corruption of in-memory data (0x8) detected at __xfs_buf_submit+0x78/0x230 [xfs] (fs/xfs/xfs_buf.c:1558). Shutting down filesystem.
-> > 
-> > 
-> > 
-> > 
-> > > 
-> > > Also, does "xfs: update dir3 leaf block metadata after swap" fix it?
-> > 
-> > OK, I'll merge and give it a try.
-> 
-> It's still reproducible on xfs-linux for-next branch xfs-6.8-merge-2, which
-> contains the 5759aa4f9560 ("xfs: update dir3 leaf block metadata after swap")
+Changes in v8:
+- The RAID stripe tree dump filter has been updated; now, it also handles
+  trailing whitespace and version filtering.
+- Patches re-ordered.
+- Link to v7: https://lore.kernel.org/all/cover.1703838752.git.anand.jain@oracle.com
 
-DOH.  Got a metadump?  I wonder if s390x is more fubar than we used to
-think it was...
+Changes in v7:
+- Fixed trailing whitespace in the .out files
+- Fixed the following test statement in 30[4-8]:
+     test _get_page_size -eq 4096
+- Link to v6: https://lore.kernel.org/r/20231213-btrfs-raid-v6-0-913738861069@wdc.com
 
---D
+--- original cover page from Johannes ----
+Add tests for btrfs' raid-stripe-tree feature. All of these test work by
+writing a specific pattern to a newly created filesystem and afterwards
+using `btrfs inspect-internal -t raid-stripe $SCRATCH_DEV_POOL` to verify
+the placement and the layout of the metadata.
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > (I suspect it won't because that's a dirent block, but for-next has a
-> > > few directory fixes in it.)
-> > > 
-> > > --D
-> > > 
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > [1]
-> > > >  [  899.271221] run fstests generic/648 at 2023-12-18 01:18:03
-> > > >  [  899.454444] XFS (loop1): Mounting V5 Filesystem 9be840e1-9bd1-468e-81c5-179f2ebdce56
-> > > >  [  899.455844] XFS (loop1): Ending clean mount
-> > > >  [  899.463623] XFS (loop1): Unmounting Filesystem 9be840e1-9bd1-468e-81c5-179f2ebdce56
-> > > >  [  899.587365] XFS (dm-3): Mounting V5 Filesystem d636e675-dfc9-4e5d-b777-ff856af136a9
-> > > >  [  899.588501] XFS (dm-3): Ending clean mount
-> > > >  ...
-> > > >  ...
-> > > >  [  974.217814] XFS (loop3): Mounting V5 Filesystem c1954438-a18d-4b4a-ad32-0e29c40713ed
-> > > >  [  974.803146] XFS (loop3): Starting recovery (logdev: internal)
-> > > >  [  974.804634] XFS (loop3): Ending recovery (logdev: internal)
-> > > >  [  975.782734] Direct I/O collision with buffered writes! File: /p2/df/f4f Comm: fsstress
-> > > >  [  976.831942] lo_write_bvec: 15 callbacks suppressed
-> > > >  [  976.831946] loop: Write error at byte offset 1766129664, length 4096.
-> > > >  [  976.831953] I/O error, dev loop3, sector 3449468 op 0x1:(WRITE) flags 0x9800 phys_seg 1 prio class 2
-> > > >  [  976.831957] I/O error, dev loop3, sector 3449468 op 0x1:(WRITE) flags 0x9800 phys_seg 1 prio class 2
-> > > >  [  976.831960] XFS (loop3): log I/O error -5
-> > > >  [  976.831963] XFS (loop3): Filesystem has been shut down due to log error (0x2).
-> > > >  [  976.831964] XFS (loop3): Please unmount the filesystem and rectify the problem(s).
-> > > >  [  976.839603] buffer_io_error: 6 callbacks suppressed
-> > > >  [  976.839604] Buffer I/O error on dev dm-3, logical block 20971392, async page read
-> > > >  [  976.839607] Buffer I/O error on dev dm-3, logical block 20971393, async page read
-> > > >  [  976.839609] Buffer I/O error on dev dm-3, logical block 20971394, async page read
-> > > >  [  976.839611] Buffer I/O error on dev dm-3, logical block 20971395, async page read
-> > > >  [  976.839612] Buffer I/O error on dev dm-3, logical block 20971396, async page read
-> > > >  [  976.839613] Buffer I/O error on dev dm-3, logical block 20971397, async page read
-> > > >  [  976.839614] Buffer I/O error on dev dm-3, logical block 20971398, async page read
-> > > >  [  976.839616] Buffer I/O error on dev dm-3, logical block 20971399, async page read
-> > > >  [  977.419266] XFS (loop3): Unmounting Filesystem c1954438-a18d-4b4a-ad32-0e29c40713ed
-> > > >  [  977.423981] iomap_finish_ioend: 15 callbacks suppressed
-> > > >  [  977.423982] dm-3: writeback error on inode 131, offset 1766125568, sector 4059696
-> > > >  [  977.423988] I/O error, dev loop3, sector 0 op 0x1:(WRITE) flags 0x800 phys_seg 0 prio class 2
-> > > >  [  978.434124] XFS (dm-3): Unmounting Filesystem d636e675-dfc9-4e5d-b777-ff856af136a9
-> > > >  [  978.449156] XFS (dm-3): log I/O error -5
-> > > >  [  978.449159] XFS (dm-3): Filesystem has been shut down due to log error (0x2).
-> > > >  [  978.449160] XFS (dm-3): Please unmount the filesystem and rectify the problem(s).
-> > > >  [  978.449163] XFS (dm-3): log I/O error -5
-> > > >  [  978.449164] XFS (dm-3): log I/O error -5
-> > > >  [  978.449165] XFS (dm-3): log I/O error -5
-> > > >  [  978.449166] XFS (dm-3): log I/O error -5
-> > > >  [  978.449167] XFS (dm-3): log I/O error -5
-> > > >  [  978.498053] XFS (dm-3): Mounting V5 Filesystem d636e675-dfc9-4e5d-b777-ff856af136a9
-> > > >  [  978.513331] XFS (dm-3): Starting recovery (logdev: internal)
-> > > >  [  978.584227] XFS (dm-3): Ending recovery (logdev: internal)
-> > > >  [  978.587276] loop3: detected capacity change from 0 to 6876346
-> > > >  [  978.591588] XFS (loop3): Mounting V5 Filesystem c1954438-a18d-4b4a-ad32-0e29c40713ed
-> > > >  [  979.216565] XFS (loop3): Starting recovery (logdev: internal)
-> > > >  [  979.225078] XFS (loop3): Bad dir block magic!
-> > > >  [  979.225081] XFS: Assertion failed: 0, file: fs/xfs/xfs_buf_item_recover.c, line: 414
-> > > >  [  979.225120] ------------[ cut here ]------------
-> > > >  [  979.225122] WARNING: CPU: 1 PID: 157902 at fs/xfs/xfs_message.c:104 assfail+0x4e/0x68 [xfs]
-> > > >  [  979.225349] Modules linked in: tls loop lcs ctcm fsm qeth ccwgroup zfcp qdio scsi_transport_fc dasd_fba_mod dasd_eckd_mod dasd_mod rfkill sunrpc vfio_ccw mdev vfio_iommu_type1 vfio drm fuse i2c_core drm_panel_orientation_quirks xfs libcrc32c ghash_s390 prng des_s390 virtio_net net_failover sha3_512_s390 virtio_blk failover sha3_256_s390 dm_mirror dm_region_hash dm_log dm_mod pkey zcrypt aes_s390
-> > > >  [  979.225373] CPU: 1 PID: 157902 Comm: mount Kdump: loaded Not tainted 6.7.0-rc6 #1
-> > > >  [  979.225376] Hardware name: IBM 8561 LT1 400 (KVM/Linux)
-> > > >  [  979.225377] Krnl PSW : 0704c00180000000 000003ff7ffead7a (assfail+0x52/0x68 [xfs])
-> > > >  [  979.225457]            R:0 T:1 IO:1 EX:1 Key:0 M:1 W:0 P:0 AS:3 CC:0 PM:0 RI:0 EA:3
-> > > >  [  979.225460] Krnl GPRS: c000000000000021 000003ff800549b0 ffffffffffffffea 000000000000000a
-> > > >  [  979.225462]            0000038000363418 0000000000000000 000003ff80162b74 000000030001c127
-> > > >  [  979.225464]            00000000ccc51d40 000000030001c127 00000000dfa03000 0000000163d19600
-> > > >  [  979.225465]            000003ffa1f2ef68 000003ff80147c28 000003ff7ffead68 00000380003634c0
-> > > >  [  979.225476] Krnl Code: 000003ff7ffead6e: 95001010		cli	16(%r1),0
-> > > >  [  979.225476]            000003ff7ffead72: a774000a		brc	7,000003ff7ffead86
-> > > >  [  979.225476]           #000003ff7ffead76: af000000		mc	0,0
-> > > >  [  979.225476]           >000003ff7ffead7a: eb6ff0a80004	lmg	%r6,%r15,168(%r15)
-> > > >  [  979.225476]            000003ff7ffead80: 07fe		bcr	15,%r14
-> > > >  [  979.225476]            000003ff7ffead82: 47000700		bc	0,1792
-> > > >  [  979.225476]            000003ff7ffead86: af000000		mc	0,0
-> > > >  [  979.225476]            000003ff7ffead8a: 0707		bcr	0,%r7
-> > > >  [  979.225487] Call Trace:
-> > > >  [  979.225488]  [<000003ff7ffead7a>] assfail+0x52/0x68 [xfs] 
-> > > >  [  979.225568] ([<000003ff7ffead68>] assfail+0x40/0x68 [xfs])
-> > > >  [  979.225648]  [<000003ff80004b4e>] xlog_recover_validate_buf_type+0x2a6/0x5c8 [xfs] 
-> > > >  [  979.225727]  [<000003ff80005eca>] xlog_recover_buf_commit_pass2+0x382/0x448 [xfs] 
-> > > >  [  979.225807]  [<000003ff8001077a>] xlog_recover_items_pass2+0x72/0xf0 [xfs] 
-> > > >  [  979.225886]  [<000003ff80011436>] xlog_recover_commit_trans+0x39e/0x3c0 [xfs] 
-> > > >  [  979.225965]  [<000003ff80011598>] xlog_recovery_process_trans+0x140/0x148 [xfs] 
-> > > >  [  979.226045]  [<000003ff80011660>] xlog_recover_process_ophdr+0xc0/0x180 [xfs] 
-> > > >  [  979.226124]  [<000003ff80012126>] xlog_recover_process_data+0xb6/0x168 [xfs] 
-> > > >  [  979.226204]  [<000003ff800122dc>] xlog_recover_process+0x104/0x150 [xfs] 
-> > > >  [  979.226285]  [<000003ff800125a4>] xlog_do_recovery_pass+0x27c/0x748 [xfs] 
-> > > >  [  979.226366]  [<000003ff80012ec8>] xlog_do_log_recovery+0x88/0xd8 [xfs] 
-> > > >  [  979.226446]  [<000003ff80012f64>] xlog_do_recover+0x4c/0x218 [xfs] 
-> > > >  [  979.226526]  [<000003ff8001446a>] xlog_recover+0xda/0x1a0 [xfs] 
-> > > >  [  979.226607]  [<000003ff7fffa51e>] xfs_log_mount+0x11e/0x280 [xfs] 
-> > > >  [  979.226686]  [<000003ff7ffec226>] xfs_mountfs+0x3e6/0x928 [xfs] 
-> > > >  [  979.226765]  [<000003ff7fff3b4c>] xfs_fs_fill_super+0x40c/0x7d8 [xfs] 
-> > > >  [  979.226844]  [<00000001ef53bfd4>] get_tree_bdev+0x144/0x1d0 
-> > > >  [  979.226850]  [<00000001ef539a08>] vfs_get_tree+0x38/0x110 
-> > > >  [  979.226852]  [<00000001ef56c432>] do_new_mount+0x17a/0x2d0 
-> > > >  [  979.226855]  [<00000001ef56d0ac>] path_mount+0x1ac/0x818 
-> > > >  [  979.226857]  [<00000001ef56d81c>] __s390x_sys_mount+0x104/0x148 
-> > > >  [  979.226860]  [<00000001efbb6e00>] __do_syscall+0x1d0/0x1f8 
-> > > >  [  979.226864]  [<00000001efbc7088>] system_call+0x70/0x98 
-> > > >  [  979.226868] Last Breaking-Event-Address:
-> > > >  [  979.226868]  [<000003ff7ffeabc4>] xfs_printk_level+0xac/0xd8 [xfs]
-> > > >  [  979.226949] ---[ end trace 0000000000000000 ]---
-> > > >  [  979.227613] XFS (loop3): Metadata corruption detected at __xfs_dir3_data_check+0x372/0x6c0 [xfs], xfs_dir3_block block 0x1020 
-> > > >  [  979.227732] XFS (loop3): Unmount and run xfs_repair
-> > > >  [  979.227733] XFS (loop3): First 128 bytes of corrupted metadata buffer:
-> > > >  [  979.227736] 00000000: 58 44 42 33 00 00 00 00 00 00 00 00 00 00 10 20  XDB3........... 
-> > > >  [  979.227738] 00000010: 00 00 00 00 00 00 00 00 c1 95 44 38 a1 8d 4b 4a  ..........D8..KJ
-> > > >  [  979.227739] 00000020: ad 32 0e 29 c4 07 13 ed 00 00 00 00 00 00 00 80  .2.)............
-> > > >  [  979.227740] 00000030: 02 68 fc c8 00 00 00 00 00 00 00 00 00 00 00 00  .h..............
-> > > >  [  979.227741] 00000040: 00 00 00 00 00 00 00 80 01 2e 02 00 00 00 00 40  ...............@
-> > > >  [  979.227742] 00000050: 00 00 00 00 00 00 00 80 02 2e 2e 02 00 00 00 50  ...............P
-> > > >  [  979.227743] 00000060: 00 00 00 00 00 00 00 83 08 66 73 73 32 36 30 38  .........fss2608
-> > > >  [  979.227745] 00000070: 36 01 00 00 00 00 00 60 00 00 00 00 00 00 00 84  6......`........
-> > > >  [  979.227748] XFS (loop3): Corruption of in-memory data (0x8) detected at __xfs_buf_submit+0x78/0x230 [xfs] (fs/xfs/xfs_buf.c:1558).  Shutting down filesystem.
-> > > >  [  979.227826] XFS (loop3): Please unmount the filesystem and rectify the problem(s)
-> > > >  [  979.227912] XFS (loop3): log mount/recovery failed: error -117
-> > > >  [  979.228061] XFS (loop3): log mount failed
-> > > >  [  980.224124] XFS (dm-3): Unmounting Filesystem d636e675-dfc9-4e5d-b777-ff856af136a9
-> > > >  [  980.318601] XFS (loop0): Unmounting Filesystem c8777546-cb21-46f2-9963-456588f60b85
-> > > >  [  980.353946] XFS (loop0): Mounting V5 Filesystem c8777546-cb21-46f2-9963-456588f60b85
-> > > >  [  980.355207] XFS (loop0): Ending clean mount
-> > > >  [  982.585362] XFS (loop1): Mounting V5 Filesystem ec19bbbd-e925-41c9-befe-28218e74a23b
-> > > >  [  982.586881] XFS (loop1): Ending clean mount
-> > > >  [  982.588944] XFS (loop1): Unmounting Filesystem ec19bbbd-e925-41c9-befe-28218e74a23b
-> > > >  [  982.603160] XFS (loop0): EXPERIMENTAL online scrub feature in use. Use at your own risk!
-> > > >  [  982.620838] XFS (loop0): Unmounting Filesystem c8777546-cb21-46f2-9963-456588f60b85
-> > > >  [  982.636206] XFS (loop0): Mounting V5 Filesystem c8777546-cb21-46f2-9963-456588f60b85
-> > > >  [  982.637231] XFS (loop0): Ending clean mount
-> > > >  
-> > > > 
-> > > > 
-> > > 
-> 
-> 
+The md5sum of each file will be compared as well after a re-mount of the
+filesystem.
+
+---
+Changes in v6:
+- require 4k pagesize for all tests as output depends on page size
+- Add Filipe's Reviewed-by
+- Link to v5: https://lore.kernel.org/r/20231207-btrfs-raid-v5-0-44aa1affe856@wdc.com
+
+Changes in v5:
+- add _require_btrfs_free_space_tree helper and use in tests
+- Link to v4: https://lore.kernel.org/r/20231206-btrfs-raid-v4-0-578284dd3a70@wdc.com
+
+Changes in v4:
+- add _require_btrfs_no_compress to all tests
+- add _require_btrfs_no_nodatacow helper and add to btrfs/308
+- add _require_btrfs_feature "free_space_tree" to all tests
+- Link to v3: https://lore.kernel.org/r/20231205-btrfs-raid-v3-0-0e857a5439a2@wdc.com
+
+Changes in v3:
+- added 'raid-stripe-tree' to mkfs options, as only zoned raid gets it
+  automatically
+- Rename test cases as btrfs/302 and btrfs/303 already exist upstream
+- Link to v2: https://lore.kernel.org/r/20231205-btrfs-raid-v2-0-25f80eea345b@wdc.com
+
+Changes in v2:
+- Re-ordered series so the newly introduced group is added before the
+  tests
+- Changes Filipe requested to the tests.
+- Link to v1: https://lore.kernel.org/r/20231204-btrfs-raid-v1-0-b254eb1bcff8@wdc.com
+
+Subject: [PATCH v8 00/10] *** SUBJECT HERE ***
+
+*** BLURB HERE ***
+
+Anand Jain (1):
+  common: add _filter_trailing_whitespace
+
+Johannes Thumshirn (9):
+  fstests: doc: add new raid-stripe-tree group
+  common: add _require_btrfs_no_nodatacow helper
+  common: add _require_btrfs_free_space_tree
+  common: add filter for btrfs raid-stripe dump
+  btrfs: add fstest for stripe-tree metadata with 4k write
+  btrfs: add fstest for 8k write spanning two stripes on
+    raid-stripe-tree
+  btrfs: add fstest for writing to a file at an offset with RST
+  btrfs: add fstests to write 128k to a RST filesystem
+  btrfs: add fstest for overwriting a file partially with RST
+
+ common/btrfs        |  17 +++++++
+ common/filter       |   5 +++
+ common/filter.btrfs |  15 +++++++
+ doc/group-names.txt |   1 +
+ tests/btrfs/304     |  58 ++++++++++++++++++++++++
+ tests/btrfs/304.out |  58 ++++++++++++++++++++++++
+ tests/btrfs/305     |  63 ++++++++++++++++++++++++++
+ tests/btrfs/305.out |  82 ++++++++++++++++++++++++++++++++++
+ tests/btrfs/306     |  61 +++++++++++++++++++++++++
+ tests/btrfs/306.out |  75 +++++++++++++++++++++++++++++++
+ tests/btrfs/307     |  58 ++++++++++++++++++++++++
+ tests/btrfs/307.out |  65 +++++++++++++++++++++++++++
+ tests/btrfs/308     |  62 ++++++++++++++++++++++++++
+ tests/btrfs/308.out | 106 ++++++++++++++++++++++++++++++++++++++++++++
+ 14 files changed, 726 insertions(+)
+ create mode 100755 tests/btrfs/304
+ create mode 100644 tests/btrfs/304.out
+ create mode 100755 tests/btrfs/305
+ create mode 100644 tests/btrfs/305.out
+ create mode 100755 tests/btrfs/306
+ create mode 100644 tests/btrfs/306.out
+ create mode 100755 tests/btrfs/307
+ create mode 100644 tests/btrfs/307.out
+ create mode 100755 tests/btrfs/308
+ create mode 100644 tests/btrfs/308.out
+
+-- 
+2.38.1
+
