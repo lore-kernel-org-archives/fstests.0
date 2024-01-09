@@ -1,178 +1,140 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B42F37153
-	for <fstests@vger.kernel.org>; Tue,  9 Jan 2024 11:11:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00AB8360AE
+	for <fstests@vger.kernel.org>; Tue,  9 Jan 2024 11:16:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="A89Hr+Z4"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 409A7Xws017862;
-	Tue, 9 Jan 2024 11:11:25 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : content-transfer-encoding : mime-version; s=pp1;
- bh=0nK57Rnf+VxXgjetCwT2I/M9gwxGP1GNc0nsBHudCIA=;
- b=A89Hr+Z4J2e+QoX6NtPcYRiK4YOuPspdE4ynR2xfXvNn9PBfKtu/AQUR9TkIXCkaMorJ
- NG7RdBToSn7V017SPaB9cZEXQE1Nq9HBvMEmrZpMSDniA60vL9QDmyFvVvDgLcCB9amq
- YlzTAY4Wxx2b+/6Aqv+nuX6LDT7QE2dlzfgvjxy4bFn2Fe4rHNbMuUjskaJ9XjjawA5Q
- dUpj2kRp+4k77sY0XDmUBeud1XUL1+zcrBA4f7T2OYxjkj5p36XcQdaJ+KxJEP3YMQ5D
- ppDerNTk8N8x3kDuxPXxFH19kEk0l9MStAWgdntJO/2+w+cocwTm3WuARxoEuY3GPf4n RA== 
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="VFJBIpwe"
+Received: from pps.filterd (m0353727.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 409BCBxf027804;
+	Tue, 9 Jan 2024 11:15:58 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=4ysfPamaRyLCFCtMqA7Mecaq4lZoIhOMNC7bSaVu4/o=;
+ b=VFJBIpwelERJ0+YcunUAiIODgvySyrLCY2ySmR3Ss29tK5Sjl+ZPUq91hOU2aAoFnZ8r
+ OLKxRzUDSLDPXTKSLMJwrxmlEVkJsYrZh4lmmCbGfTlzp7kWBM7MItvyO25maOyeBxbE
+ xmIL9F4UHxzMrAOYOTmt4uzCUG/AafeGhi1TP+Y5cWKZxCvW0xVG+l1Ik3yIisieJO2K
+ 2ShoBv50gPbbnh4V6M9FT6lG3CaVOXkiPXJXcEkP4exYTYP13gYxHOdgzAZ3jEETHQpU
+ NgzbowV2nmdQMv8WoMWzzcSYXVQ0Hy7DUhSMMPI33yqdaeVHz3C+hto8nZN8LpvJShxv PQ== 
 Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh444hjg7-1
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh52b03y8-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 09 Jan 2024 11:11:25 +0000
-Received: from m0356516.ppops.net (m0356516.ppops.net [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 409B89Zv016598;
-	Tue, 9 Jan 2024 11:11:25 GMT
-Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh444hjfj-1
+	Tue, 09 Jan 2024 11:15:58 +0000
+Received: from m0353727.ppops.net (m0353727.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 409BCZoN028935;
+	Tue, 9 Jan 2024 11:15:57 GMT
+Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh52b03xt-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 09 Jan 2024 11:11:24 +0000
-Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma21.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 409Ao3uK022916;
-	Tue, 9 Jan 2024 11:11:24 GMT
+	Tue, 09 Jan 2024 11:15:57 +0000
+Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma23.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 409BAJ5x004388;
+	Tue, 9 Jan 2024 11:15:56 GMT
 Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
-	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3vfj6ne582-1
+	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3vfjpkp2k9-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 09 Jan 2024 11:11:24 +0000
+	Tue, 09 Jan 2024 11:15:56 +0000
 Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
-	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 409BBLwf18678450
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 409BFsgN590498
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 9 Jan 2024 11:11:21 GMT
+	Tue, 9 Jan 2024 11:15:54 GMT
 Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 37AA020043;
-	Tue,  9 Jan 2024 11:11:21 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 16FF620040;
+	Tue,  9 Jan 2024 11:15:54 +0000 (GMT)
 Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 19F7720040;
-	Tue,  9 Jan 2024 11:11:19 +0000 (GMT)
-Received: from localhost.localdomain (unknown [9.43.53.108])
+	by IMSVA (Postfix) with ESMTP id 9963620043;
+	Tue,  9 Jan 2024 11:15:52 +0000 (GMT)
+Received: from [9.43.53.108] (unknown [9.43.53.108])
 	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Tue,  9 Jan 2024 11:11:18 +0000 (GMT)
-From: Disha Goel <disgoel@linux.ibm.com>
-To: fstests@vger.kernel.org, djwong@kernel.org
-Cc: ojaswin@linux.ibm.com, ritesh.list@gmail.com,
-        Disha Goel <disgoel@linux.ibm.com>
-Subject: [PATCH v3] xfstest: add detection for ext4.h presence in configure.ac
-Date: Tue,  9 Jan 2024 16:41:05 +0530
-Message-Id: <20240109111105.28836-1-disgoel@linux.ibm.com>
-X-Mailer: git-send-email 2.39.1
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: 9pu3N6aikgA_HPQC3knzlO1wDupDExHz
-X-Proofpoint-ORIG-GUID: 2XYy0S8UtSVi-YC6KGFgVSTLdTElvjTB
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+	Tue,  9 Jan 2024 11:15:52 +0000 (GMT)
+Message-ID: <8d5d57da-0140-41a1-b708-0275124096e0@linux.ibm.com>
+Date: Tue, 9 Jan 2024 16:45:51 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] xfstest: add detection for ext4.h presence in
+ configure.ac
+Content-Language: en-GB
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, ojaswin@linux.ibm.com, ritesh.list@gmail.com
+References: <20240103184208.80772-1-disgoel@linux.ibm.com>
+ <20240104181213.GE241128@frogsfrogsfrogs>
+From: Disha Goel <disgoel@linux.ibm.com>
+In-Reply-To: <20240104181213.GE241128@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: WESczbpLtNsqi_H_ORTlHmsMilLzxhRP
+X-Proofpoint-GUID: JrG604XyrxE-MkKtGYh1jrKadhYTtcDC
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
  definitions=2024-01-09_04,2024-01-09_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 clxscore=1015
- suspectscore=0 adultscore=0 priorityscore=1501 impostorscore=0
- malwarescore=0 spamscore=0 phishscore=0 bulkscore=0 lowpriorityscore=0
- mlxlogscore=909 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 mlxlogscore=671
+ lowpriorityscore=0 suspectscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ malwarescore=0 impostorscore=0 priorityscore=1501 phishscore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2311290000 definitions=main-2401090091
 
-In some distributions, __u64 is already defined in system header files,
-causing compilation errors when building xfstest.
+On 04/01/24 11:42 pm, Darrick J. Wong wrote:
 
-        # make
-            [CC]    ext4_resize
-        ext4_resize.c:17:28: error: conflicting types for '__u64'
-         typedef unsigned long long __u64;
-                                    ^~~~~
-        In file included from /usr/include/asm/types.h:26:0,
-                         from /usr/include/linux/types.h:5,
-                         from /usr/include/linux/mount.h:4,
-                         from /usr/include/sys/mount.h:32,
-                         from ext4_resize.c:15:
-        /usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
-         typedef unsigned long __u64;
-                       ^~~~~
+>>   configure.ac      | 8 ++++++++
+>>   src/ext4_resize.c | 6 +++++-
+>>   2 files changed, 13 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/configure.ac b/configure.ac
+>> index b22fc52b..76378e6d 100644
+>> --- a/configure.ac
+>> +++ b/configure.ac
+>> @@ -35,6 +35,14 @@ AC_CHECK_HEADERS([	assert.h		\
+>>   			sys/mman.h		\
+>>   ])
+>>   
+>> +AC_COMPILE_IFELSE([
+>> +    AC_LANG_PROGRAM([#include <linux/ext4.h>], [])
+>> +], [
+>> +    AC_DEFINE([HAVE_LINUX_EXT4_H], [1], [Define if ext4.h is present])
+>> +], [
+>> +    AC_MSG_WARN([ext4.h not found or not compilable.])
+>> +])
+> AC_CHECK_HEADERS does this.
+>
+>> +
+>>   AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
+>>   #define _GNU_SOURCE
+>>   #include <xfs/libxfs.h>])
+>> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+>> index 78b66432..51bd8d78 100644
+>> --- a/src/ext4_resize.c
+>> +++ b/src/ext4_resize.c
+>> @@ -14,7 +14,11 @@
+>>   #include <sys/ioctl.h>
+>>   #include <sys/mount.h>
+>>   
+>> -typedef unsigned long long __u64;
+>> +#ifdef HAVE_LINUX_EXT4_H
+>> +#include <linux/ext4.h>
+>> +#else
+>> +#include <linux/types.h>
+> You might as well include this unconditionally; there's no penalty
+> for including it multiple times.
+>
+> --D
 
-To address this issue, configure.ac now checks for the presence and
-compilability of <linux/ext4.h>. If found and compilable, the macro
-HAVE_LINUX_EXT4_H is defined. The commit also updates src/ext4_resize.c
-to conditionally include <linux/ext4.h> based on the presence of the
-header, ensuring compatibility with systems where ext4.h is either
-present or not. Also include <linux/types.h> which gets __u64
-definition on systems where ext4.h is not present. This change
-enhances the configure process and improves code consistency.
+Thanks for reviewing the patch. I have addressed this in v3.
 
-The changes were tested on various distributions on Power
-architecture, by successfully compiling xfstest. Additionally,
-verified the compatibility by running ext4/033 and ext4/056
-tests, both of which use ext4_resize and observed successful
-test execution.
+Thanks
 
-        # make
-            [CC]    detached_mounts_propagation
-            [CC]    ext4_resize
-            [CC]    t_readdir_3
-
-Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
----
-
-Changelog:
-v2 -> v3
-Addressed below review comments from Darrick.
-Replaced the explicit AC_COMPILE_IFELSE block with a simplified
-check using AC_CHECK_HEADERS for <linux/ext4.h>.
-Added unconditional inclusion of <linux/types.h> regardless of
-the presence of <linux/ext4.h> in ext4_resize.c file.
-
-v1 -> v2
-Drop usage of uint64_t to match the definition in the kernel uapi
-headers. Use <linux/ext4.h> or <linux/types.h> based on the
-presence of the header to get the __u64 definition as suggested
-by Darrick.
-
-Link to v1:
-https://lore.kernel.org/fstests/20231221061231.44347-1-disgoel@linux.ibm.com/T/#u
-
-Link to v2:
-https://lore.kernel.org/fstests/20240103184208.80772-1-disgoel@linux.ibm.com/T/#u
-
- configure.ac      | 4 ++++
- src/ext4_resize.c | 5 ++++-
- 2 files changed, 8 insertions(+), 1 deletion(-)
-
-diff --git a/configure.ac b/configure.ac
-index b22fc52b..8f9fb062 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -35,6 +35,10 @@ AC_CHECK_HEADERS([	assert.h		\
- 			sys/mman.h		\
- ])
- 
-+AC_CHECK_HEADERS([linux/ext4.h], [
-+AC_DEFINE([HAVE_LINUX_EXT4_H], [1])
-+])
-+
- AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
- #define _GNU_SOURCE
- #include <xfs/libxfs.h>])
-diff --git a/src/ext4_resize.c b/src/ext4_resize.c
-index 78b66432..31779225 100644
---- a/src/ext4_resize.c
-+++ b/src/ext4_resize.c
-@@ -13,8 +13,11 @@
- #include <string.h>
- #include <sys/ioctl.h>
- #include <sys/mount.h>
-+#include <linux/types.h>
- 
--typedef unsigned long long __u64;
-+#ifdef HAVE_LINUX_EXT4_H
-+#include <linux/ext4.h>
-+#endif
- 
- #ifndef EXT4_IOC_RESIZE_FS
- #define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
--- 
-2.39.1
-
+>> +#endif
+>>   
+>>   #ifndef EXT4_IOC_RESIZE_FS
+>>   #define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
+>> -- 
+>> 2.39.1
+>>
