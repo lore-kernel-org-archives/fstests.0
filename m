@@ -1,140 +1,178 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75E3F13FE0;
-	Tue,  9 Jan 2024 10:32:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B42F37153
+	for <fstests@vger.kernel.org>; Tue,  9 Jan 2024 11:11:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="Jvkffs1h";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="D1QEvop2";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="Jvkffs1h";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="D1QEvop2"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 329A01F7F6;
-	Tue,  9 Jan 2024 10:32:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1704796321; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOn5eJ+geO/Iv0b3t0P8rCWcuO2Y7FAKYPtyb8WT6M=;
-	b=Jvkffs1h3ZCOgnV+v4rOYd0nDkiMbWnKuqCXkOKj2KatsdD0uGvxuU0DbUlaJg23DmRFl7
-	mhHK+rKb2lmWx5AONisJM10Oo2b/ZqT1X6tqPC3NFyWFyvjTLDyHVkDo9n6an2+u0KphFa
-	di1mlnkd9u3T04oeC5zbEci2KuEuKDA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1704796321;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOn5eJ+geO/Iv0b3t0P8rCWcuO2Y7FAKYPtyb8WT6M=;
-	b=D1QEvop2sHGWz1+93W6SHiqIFVe67oF1z3KLgAXlBUVKaKFrt/XwlgnFYgndq8RXRYOQ17
-	13Bc3C2e8/QslVCQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1704796321; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOn5eJ+geO/Iv0b3t0P8rCWcuO2Y7FAKYPtyb8WT6M=;
-	b=Jvkffs1h3ZCOgnV+v4rOYd0nDkiMbWnKuqCXkOKj2KatsdD0uGvxuU0DbUlaJg23DmRFl7
-	mhHK+rKb2lmWx5AONisJM10Oo2b/ZqT1X6tqPC3NFyWFyvjTLDyHVkDo9n6an2+u0KphFa
-	di1mlnkd9u3T04oeC5zbEci2KuEuKDA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1704796321;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOn5eJ+geO/Iv0b3t0P8rCWcuO2Y7FAKYPtyb8WT6M=;
-	b=D1QEvop2sHGWz1+93W6SHiqIFVe67oF1z3KLgAXlBUVKaKFrt/XwlgnFYgndq8RXRYOQ17
-	13Bc3C2e8/QslVCQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 08773134E8;
-	Tue,  9 Jan 2024 10:32:00 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id UteWO6AgnWVZTAAAD6G6ig
-	(envelope-from <chrubis@suse.cz>); Tue, 09 Jan 2024 10:32:00 +0000
-Date: Tue, 9 Jan 2024 11:32:24 +0100
-From: Cyril Hrubis <chrubis@suse.cz>
-To: Kent Overstreet <kent.overstreet@linux.dev>
-Cc: Petr Vorel <pvorel@suse.cz>, ltp@lists.linux.it,
-	Li Wang <liwang@redhat.com>,
-	Richard Palethorpe <rpalethorpe@suse.com>,
-	Jan Stancek <jstancek@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>,
-	Yang Xu <xuyang2018.jy@fujitsu.com>,
-	Brian Foster <bfoster@redhat.com>, linux-bcachefs@vger.kernel.org,
-	fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>,
-	Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH v2 3/3] statx04: Skip STATX_ATTR_COMPRESSED on Bcachefs
-Message-ID: <ZZ0guBd48WXYapPL@yuki>
-References: <20231207194011.273027-1-pvorel@suse.cz>
- <20231207194011.273027-4-pvorel@suse.cz>
- <20231213024617.vx3epsav2n2lxozi@moria.home.lan>
- <ZZvIBO-a1b_nIHJ8@yuki>
- <gjfjylr4bdytdot7ywjispswvgpvjtkdmtsinsbcbc42ik2y3d@ws4tjmwqywrb>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="A89Hr+Z4"
+Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 409A7Xws017862;
+	Tue, 9 Jan 2024 11:11:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : content-transfer-encoding : mime-version; s=pp1;
+ bh=0nK57Rnf+VxXgjetCwT2I/M9gwxGP1GNc0nsBHudCIA=;
+ b=A89Hr+Z4J2e+QoX6NtPcYRiK4YOuPspdE4ynR2xfXvNn9PBfKtu/AQUR9TkIXCkaMorJ
+ NG7RdBToSn7V017SPaB9cZEXQE1Nq9HBvMEmrZpMSDniA60vL9QDmyFvVvDgLcCB9amq
+ YlzTAY4Wxx2b+/6Aqv+nuX6LDT7QE2dlzfgvjxy4bFn2Fe4rHNbMuUjskaJ9XjjawA5Q
+ dUpj2kRp+4k77sY0XDmUBeud1XUL1+zcrBA4f7T2OYxjkj5p36XcQdaJ+KxJEP3YMQ5D
+ ppDerNTk8N8x3kDuxPXxFH19kEk0l9MStAWgdntJO/2+w+cocwTm3WuARxoEuY3GPf4n RA== 
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh444hjg7-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 09 Jan 2024 11:11:25 +0000
+Received: from m0356516.ppops.net (m0356516.ppops.net [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 409B89Zv016598;
+	Tue, 9 Jan 2024 11:11:25 GMT
+Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3vh444hjfj-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 09 Jan 2024 11:11:24 +0000
+Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma21.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 409Ao3uK022916;
+	Tue, 9 Jan 2024 11:11:24 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3vfj6ne582-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 09 Jan 2024 11:11:24 +0000
+Received: from smtpav04.fra02v.mail.ibm.com (smtpav04.fra02v.mail.ibm.com [10.20.54.103])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 409BBLwf18678450
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 9 Jan 2024 11:11:21 GMT
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 37AA020043;
+	Tue,  9 Jan 2024 11:11:21 +0000 (GMT)
+Received: from smtpav04.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 19F7720040;
+	Tue,  9 Jan 2024 11:11:19 +0000 (GMT)
+Received: from localhost.localdomain (unknown [9.43.53.108])
+	by smtpav04.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue,  9 Jan 2024 11:11:18 +0000 (GMT)
+From: Disha Goel <disgoel@linux.ibm.com>
+To: fstests@vger.kernel.org, djwong@kernel.org
+Cc: ojaswin@linux.ibm.com, ritesh.list@gmail.com,
+        Disha Goel <disgoel@linux.ibm.com>
+Subject: [PATCH v3] xfstest: add detection for ext4.h presence in configure.ac
+Date: Tue,  9 Jan 2024 16:41:05 +0530
+Message-Id: <20240109111105.28836-1-disgoel@linux.ibm.com>
+X-Mailer: git-send-email 2.39.1
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 9pu3N6aikgA_HPQC3knzlO1wDupDExHz
+X-Proofpoint-ORIG-GUID: 2XYy0S8UtSVi-YC6KGFgVSTLdTElvjTB
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <gjfjylr4bdytdot7ywjispswvgpvjtkdmtsinsbcbc42ik2y3d@ws4tjmwqywrb>
-X-Spam-Level: ***
-X-Spamd-Bar: +++
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=Jvkffs1h;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=D1QEvop2
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [3.49 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 DKIM_TRACE(0.00)[suse.cz:+];
-	 MX_GOOD(-0.01)[];
-	 RCPT_COUNT_TWELVE(0.00)[13];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 NEURAL_SPAM_LONG(3.50)[1.000];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 FREEMAIL_CC(0.00)[suse.cz,lists.linux.it,redhat.com,suse.com,fujitsu.com,vger.kernel.org,gmail.com];
-	 RCVD_TLS_ALL(0.00)[]
-X-Spam-Score: 3.49
-X-Rspamd-Queue-Id: 329A01F7F6
-X-Spam-Flag: NO
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.997,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-01-09_04,2024-01-09_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 clxscore=1015
+ suspectscore=0 adultscore=0 priorityscore=1501 impostorscore=0
+ malwarescore=0 spamscore=0 phishscore=0 bulkscore=0 lowpriorityscore=0
+ mlxlogscore=909 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2311290000 definitions=main-2401090091
 
-Hi!
-> > Quite likely, other filesystems does have an inode flag that is set when
-> > file has been compressed and simply report that in the foo_getattr()
-> > callback. Looking at bcachefs I supose that we need to figure out if the
-> > inode is v3 and then unpack the v3 info to get to the compressed flag,
-> > you probably know best how to do that.
-> 
-> I'm still not clear how we want to map STATX_ATTR_COMPRESSED, since it's
-> extents that are compressed, not entire files - and just reporting the
-> compression option is probably not what we want since it can be flipped
-> off, and existing data will still be compressed.
-> 
-> Do you know anything about the intended use case?
+In some distributions, __u64 is already defined in system header files,
+causing compilation errors when building xfstest.
 
-As far as I understand the flag it's a hint that the file I/O may be
-slower/need more memory because of the compression.
+        # make
+            [CC]    ext4_resize
+        ext4_resize.c:17:28: error: conflicting types for '__u64'
+         typedef unsigned long long __u64;
+                                    ^~~~~
+        In file included from /usr/include/asm/types.h:26:0,
+                         from /usr/include/linux/types.h:5,
+                         from /usr/include/linux/mount.h:4,
+                         from /usr/include/sys/mount.h:32,
+                         from ext4_resize.c:15:
+        /usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
+         typedef unsigned long __u64;
+                       ^~~~~
 
+To address this issue, configure.ac now checks for the presence and
+compilability of <linux/ext4.h>. If found and compilable, the macro
+HAVE_LINUX_EXT4_H is defined. The commit also updates src/ext4_resize.c
+to conditionally include <linux/ext4.h> based on the presence of the
+header, ensuring compatibility with systems where ext4.h is either
+present or not. Also include <linux/types.h> which gets __u64
+definition on systems where ext4.h is not present. This change
+enhances the configure process and improves code consistency.
+
+The changes were tested on various distributions on Power
+architecture, by successfully compiling xfstest. Additionally,
+verified the compatibility by running ext4/033 and ext4/056
+tests, both of which use ext4_resize and observed successful
+test execution.
+
+        # make
+            [CC]    detached_mounts_propagation
+            [CC]    ext4_resize
+            [CC]    t_readdir_3
+
+Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+---
+
+Changelog:
+v2 -> v3
+Addressed below review comments from Darrick.
+Replaced the explicit AC_COMPILE_IFELSE block with a simplified
+check using AC_CHECK_HEADERS for <linux/ext4.h>.
+Added unconditional inclusion of <linux/types.h> regardless of
+the presence of <linux/ext4.h> in ext4_resize.c file.
+
+v1 -> v2
+Drop usage of uint64_t to match the definition in the kernel uapi
+headers. Use <linux/ext4.h> or <linux/types.h> based on the
+presence of the header to get the __u64 definition as suggested
+by Darrick.
+
+Link to v1:
+https://lore.kernel.org/fstests/20231221061231.44347-1-disgoel@linux.ibm.com/T/#u
+
+Link to v2:
+https://lore.kernel.org/fstests/20240103184208.80772-1-disgoel@linux.ibm.com/T/#u
+
+ configure.ac      | 4 ++++
+ src/ext4_resize.c | 5 ++++-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index b22fc52b..8f9fb062 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -35,6 +35,10 @@ AC_CHECK_HEADERS([	assert.h		\
+ 			sys/mman.h		\
+ ])
+ 
++AC_CHECK_HEADERS([linux/ext4.h], [
++AC_DEFINE([HAVE_LINUX_EXT4_H], [1])
++])
++
+ AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
+ #define _GNU_SOURCE
+ #include <xfs/libxfs.h>])
+diff --git a/src/ext4_resize.c b/src/ext4_resize.c
+index 78b66432..31779225 100644
+--- a/src/ext4_resize.c
++++ b/src/ext4_resize.c
+@@ -13,8 +13,11 @@
+ #include <string.h>
+ #include <sys/ioctl.h>
+ #include <sys/mount.h>
++#include <linux/types.h>
+ 
+-typedef unsigned long long __u64;
++#ifdef HAVE_LINUX_EXT4_H
++#include <linux/ext4.h>
++#endif
+ 
+ #ifndef EXT4_IOC_RESIZE_FS
+ #define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
 -- 
-Cyril Hrubis
-chrubis@suse.cz
+2.39.1
+
