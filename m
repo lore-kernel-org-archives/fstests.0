@@ -1,257 +1,150 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98B5E14F7F;
-	Thu, 11 Jan 2024 11:59:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 173583AC01;
+	Thu, 11 Jan 2024 14:05:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g9YOsJ+P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DB5DC433C7;
-	Thu, 11 Jan 2024 11:59:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1704974382;
-	bh=oPNdBs2bxoGUIWEmTtDwyWwT8+RMIkbaIskT+rO7CWU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=g9YOsJ+PdidxrMG7xq/mBEWGba84meN2M4XdPMDKyG2PNzpA3Q2LEGG8zmoHVHsbD
-	 AmJWmFF72LZDjzKqmnTXUUGCRyhwZNLfkN6/NV4Vadzt8oEIx1+xG2l9oznYJjm8KC
-	 ASXIBtkki/9qGAKBz2T9HmjfS5eHQaqHK0MLTSjSme167ug2MgjRhf8/HM6nHApjpN
-	 t2/QOvwMjQEF74PeQQun10eJb4iS2/kGwd68DYqf0wAvFn6xxuHJrRB4CQl3Z8eP9/
-	 on6nJAHpvp0xJaKRb/TxlAj4bOv0dkVl7jbq7sCgqXAfUsnqWHQT+rSc6DUI/R8N7H
-	 77rBb4K0rXtsw==
-From: Chandan Babu R <chandanbabu@kernel.org>
-To: fstests@vger.kernel.org
-Cc: Chandan Babu R <chandanbabu@kernel.org>,
-	linux-xfs@vger.kernel.org,
-	djwong@kernel.org,
-	zlang@redhat.com
-Subject: [PATCH V3 5/5] xfs: Check correctness of metadump/mdrestore's ability to work with dirty log
-Date: Thu, 11 Jan 2024 17:28:29 +0530
-Message-ID: <20240111115913.1638668-6-chandanbabu@kernel.org>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240111115913.1638668-1-chandanbabu@kernel.org>
-References: <20240111115913.1638668-1-chandanbabu@kernel.org>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="r6zgnUyw";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="2j6W/8fY";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="r6zgnUyw";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="2j6W/8fY"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 20A2A21F49;
+	Thu, 11 Jan 2024 14:05:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1704981937; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dnnpKqbQulcezH1sSqC8YGoJTprF9iSRIFkHOMZEhsQ=;
+	b=r6zgnUywKzK8kVF/WLdXjJTjXrmUmJCVQtezxFm20Pi64udJu0uUzDlM9b05hCISrgViKI
+	EIfgLfAe/gabN43bZ9dQAbl6K3wjwlVebsLt20KrYcrQDsIfNHpIoCbYo4Va+W5YANbw4N
+	pQaXSKnI8cjcCJkLE937/LccDKG5Nic=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1704981937;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dnnpKqbQulcezH1sSqC8YGoJTprF9iSRIFkHOMZEhsQ=;
+	b=2j6W/8fY8roa5n6UTWHr+PBk+oMv3EfSjNGmJXlN3FGs982SuLi1Mu7RNDhVLz9FIF5Re8
+	L2txLcOzxxFTKaBg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1704981937; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dnnpKqbQulcezH1sSqC8YGoJTprF9iSRIFkHOMZEhsQ=;
+	b=r6zgnUywKzK8kVF/WLdXjJTjXrmUmJCVQtezxFm20Pi64udJu0uUzDlM9b05hCISrgViKI
+	EIfgLfAe/gabN43bZ9dQAbl6K3wjwlVebsLt20KrYcrQDsIfNHpIoCbYo4Va+W5YANbw4N
+	pQaXSKnI8cjcCJkLE937/LccDKG5Nic=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1704981937;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=dnnpKqbQulcezH1sSqC8YGoJTprF9iSRIFkHOMZEhsQ=;
+	b=2j6W/8fY8roa5n6UTWHr+PBk+oMv3EfSjNGmJXlN3FGs982SuLi1Mu7RNDhVLz9FIF5Re8
+	L2txLcOzxxFTKaBg==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0BA1913635;
+	Thu, 11 Jan 2024 14:05:37 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 5pu6ArH1n2WuOQAAD6G6ig
+	(envelope-from <pvorel@suse.de>); Thu, 11 Jan 2024 14:05:37 +0000
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Date: Thu, 11 Jan 2024 15:05:36 +0100
+From: pvorel <pvorel@suse.de>
+To: Cyril Hrubis <chrubis@suse.cz>, Li Wang <liwang@redhat.com>, Jan Stancek
+ <jstancek@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>, Yang Xu
+ <xuyang2018.jy@fujitsu.com>
+Cc: ltp@lists.linux.it, Kent Overstreet <kent.overstreet@linux.dev>, Brian
+ Foster <bfoster@redhat.com>, linux-bcachefs@vger.kernel.org,
+ fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Jan Kara
+ <jack@suse.cz>
+Subject: ENODEV on bcachefs on kernel < 6.7 [was: Re: [PATCH v2 0/3] Add
+ support bcachefs filesystem]
+In-Reply-To: <ZZvK9OL6MduUpWZQ@yuki>
+References: <20231207194011.273027-1-pvorel@suse.cz> <ZZvK9OL6MduUpWZQ@yuki>
+User-Agent: Roundcube Webmail
+Message-ID: <067cf38108dd5b088168628d569f79c1@suse.de>
+X-Sender: pvorel@suse.de
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=r6zgnUyw;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b="2j6W/8fY"
+X-Spamd-Result: default: False [-5.29 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 XM_UA_NO_VERSION(0.01)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_DN_SOME(0.00)[];
+	 FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	 DWL_DNSWL_MED(-2.00)[suse.de:dkim];
+	 BAYES_HAM(-2.99)[99.95%];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DKIM_TRACE(0.00)[suse.de:+];
+	 MX_GOOD(-0.01)[];
+	 RCPT_COUNT_TWELVE(0.00)[12];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 FREEMAIL_CC(0.00)[lists.linux.it,linux.dev,redhat.com,vger.kernel.org,gmail.com,suse.cz];
+	 RCVD_TLS_ALL(0.00)[];
+	 MID_RHS_MATCH_FROM(0.00)[]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: 20A2A21F49
+X-Spam-Level: 
+X-Spam-Score: -5.29
+X-Spam-Flag: NO
 
-Add a new test to verify if metadump/mdrestore are able to dump and restore
-the contents of a dirty log.
+Hi all,
 
-Signed-off-by: Chandan Babu R <chandanbabu@kernel.org>
----
- tests/xfs/801     | 178 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/801.out |  14 ++++
- 2 files changed, 192 insertions(+)
- create mode 100755 tests/xfs/801
- create mode 100644 tests/xfs/801.out
+I'm sorry I haven't tested LTP with bcachefs-tools and kernel < 6.7. 
+Quite a lot of tests fails:
 
-diff --git a/tests/xfs/801 b/tests/xfs/801
-new file mode 100755
-index 00000000..56acc5ed
---- /dev/null
-+++ b/tests/xfs/801
-@@ -0,0 +1,178 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 801
-+#
-+# Test metadump/mdrestore's ability to dump a dirty log and restore it
-+# correctly.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick metadump log logprint punch
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+	_scratch_unmount > /dev/null 2>&1
-+	[[ -n $logdev && $logdev != "none" && $logdev != $SCRATCH_LOGDEV ]] && \
-+		_destroy_loop_device $logdev
-+	[[ -n $datadev ]] && _destroy_loop_device $datadev
-+	rm -r -f $metadump_file $TEST_DIR/data-image \
-+	   $TEST_DIR/log-image
-+}
-+
-+# Import common functions.
-+. ./common/dmflakey
-+. ./common/inject
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_require_scratch
-+_require_test
-+_require_loop
-+_require_xfs_debug
-+_require_xfs_io_error_injection log_item_pin
-+_require_dm_target flakey
-+_require_xfs_io_command "pwrite"
-+_require_test_program "punch-alternating"
-+
-+metadump_file=${TEST_DIR}/${seq}.md
-+testfile=${SCRATCH_MNT}/testfile
-+
-+echo "Format filesystem on scratch device"
-+_scratch_mkfs >> $seqres.full 2>&1
-+
-+max_md_version=1
-+_scratch_metadump_v2_supported && max_md_version=2
-+
-+external_log=0
-+if [[ $USE_EXTERNAL = yes && -n "$SCRATCH_LOGDEV" ]]; then
-+	external_log=1
-+fi
-+
-+if [[ $max_md_version == 1 && $external_log == 1 ]]; then
-+	_notrun "metadump v1 does not support external log device"
-+fi
-+
-+verify_metadump_v1()
-+{
-+	local version=""
-+	if [[ $max_md_version == 2 ]]; then
-+		version="-v 1"
-+	fi
-+
-+	_scratch_xfs_metadump $metadump_file -a -o $version
-+
-+	SCRATCH_DEV=$TEST_DIR/data-image _scratch_xfs_mdrestore $metadump_file
-+
-+	datadev=$(_create_loop_device $TEST_DIR/data-image)
-+
-+	SCRATCH_DEV=$datadev _scratch_mount
-+	SCRATCH_DEV=$datadev _check_scratch_fs
-+	SCRATCH_DEV=$datadev _scratch_unmount
-+
-+	_destroy_loop_device $datadev
-+	datadev=""
-+	rm -f $TEST_DIR/data-image
-+}
-+
-+verify_metadump_v2()
-+{
-+	local version="-v 2"
-+
-+	_scratch_xfs_metadump $metadump_file -a -o $version
-+
-+	# Metadump v2 files can contain contents dumped from an external log
-+	# device. Use a temporary file to hold the log device contents restored
-+	# from such a metadump file.
-+	slogdev=""
-+	if [[ -n $SCRATCH_LOGDEV ]]; then
-+		slogdev=$TEST_DIR/log-image
-+	fi
-+
-+	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV=$slogdev \
-+		   _scratch_xfs_mdrestore $metadump_file
-+
-+	datadev=$(_create_loop_device $TEST_DIR/data-image)
-+
-+	logdev=""
-+	if [[ -s $slogdev ]]; then
-+		logdev=$(_create_loop_device $slogdev)
-+	fi
-+
-+	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_mount
-+	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _check_scratch_fs
-+	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_unmount
-+
-+	if [[ -s $logdev ]]; then
-+		_destroy_loop_device $logdev
-+		logdev=""
-+		rm -f $slogdev
-+	fi
-+
-+	_destroy_loop_device $datadev
-+	datadev=""
-+	rm -f $TEST_DIR/data-image
-+}
-+
-+echo "Initialize and mount filesystem on flakey device"
-+_init_flakey
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+_mount_flakey
-+
-+echo "Create test file"
-+$XFS_IO_PROG -s -f -c "pwrite 0 5M" $testfile >> $seqres.full
-+
-+echo "Punch alternative blocks of test file"
-+$here/src/punch-alternating $testfile
-+
-+echo "Mount cycle the filesystem on flakey device"
-+_unmount_flakey
-+_mount_flakey
-+
-+device=$(readlink -f $FLAKEY_DEV)
-+device=$(_short_dev $device)
-+
-+echo "Pin log items in the AIL"
-+echo 1 > /sys/fs/xfs/${device}/errortag/log_item_pin
-+
-+echo "Create two checkpoint transactions on ondisk log"
-+for ct in $(seq 1 2); do
-+	offset=$($XFS_IO_PROG -c 'fiemap' $testfile | tac |  grep -v hole | \
-+			 head -n 1 | awk -F '[\\[.]' '{ print $2 * 512; }')
-+	$XFS_IO_PROG -c "truncate $offset" -c fsync $testfile
-+done
-+
-+echo "Drop writes to filesystem from here onwards"
-+_load_flakey_table $FLAKEY_DROP_WRITES
-+
-+echo "Unpin log items in AIL"
-+echo 0 > /sys/fs/xfs/${device}/errortag/log_item_pin
-+
-+echo "Unmount filesystem on flakey device"
-+_unmount_flakey
-+
-+echo "Clean up flakey device"
-+_cleanup_flakey
-+
-+echo -n "Filesystem has a "
-+_print_logstate
-+
-+echo "Create metadump file, restore it and check restored fs"
-+
-+if [[ $external_log == 0 ]]; then
-+	verify_metadump_v1 $max_md_version
-+fi
-+
-+if [[ $max_md_version == 2 ]]; then
-+	verify_metadump_v2
-+fi
-+
-+# Mount the fs to replay the contents from the dirty log.
-+_scratch_mount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/801.out b/tests/xfs/801.out
-new file mode 100644
-index 00000000..a2f2abca
---- /dev/null
-+++ b/tests/xfs/801.out
-@@ -0,0 +1,14 @@
-+QA output created by 801
-+Format filesystem on scratch device
-+Initialize and mount filesystem on flakey device
-+Create test file
-+Punch alternative blocks of test file
-+Mount cycle the filesystem on flakey device
-+Pin log items in the AIL
-+Create two checkpoint transactions on ondisk log
-+Drop writes to filesystem from here onwards
-+Unpin log items in AIL
-+Unmount filesystem on flakey device
-+Clean up flakey device
-+Filesystem has a dirty log
-+Create metadump file, restore it and check restored fs
--- 
-2.43.0
+# LTP_SINGLE_FS_TYPE=bcachefs ./chdir01
+tst_buffers.c:56: TINFO: Test is using guarded buffers
+tst_device.c:96: TINFO: Found free device 0 '/dev/loop0'
+tst_test.c:1709: TINFO: LTP version: 20230929-269-g958402a95
+tst_test.c:1593: TINFO: Timeout per run is 0h 00m 30s
+tst_supported_fs_types.c:151: TINFO: WARNING: testing only bcachefs
+tst_supported_fs_types.c:122: TINFO: FUSE does support bcachefs
+tst_supported_fs_types.c:57: TINFO: mkfs.bcachefs does exist
+tst_test.c:1669: TINFO: === Testing on bcachefs ===
+tst_test.c:1117: TINFO: Formatting /dev/loop0 with bcachefs opts='' 
+extra opts=''
+tst_test.c:1131: TINFO: Mounting /dev/loop0 to 
+/tmp/LTP_chdwqhGtZ/mntpoint fstyp=bcachefs flags=0
+tst_test.c:1131: TBROK: mount(/dev/loop0, mntpoint, bcachefs, 0, (nil)) 
+failed: ENODEV (19)
 
+Library fails on safe_mount(). I wonder if we should check for kernel >= 
+6.7 in case of bcachefs, or if we should return 0 in safe_mount() in 
+case of bcachefs and errno == ENODEV (and possibly kernel < 6.7).
+
+Kind regards,
+Petr
