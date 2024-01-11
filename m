@@ -1,71 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A48354F1E1
-	for <fstests@vger.kernel.org>; Thu, 11 Jan 2024 15:27:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 322345025F;
+	Thu, 11 Jan 2024 17:20:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JuMpsgEK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1704986858;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=B0mXNYUaAC/Y45a2Jh64GktsoTC4UJyLIMITBVmGcMM=;
-	b=JuMpsgEKLyhZa0z17x2G5HDBUNpNAdIPzLnP7VI8pD3MNIqFYA3QQZxZ1+bobBktZwE7rr
-	wW150+fPAQxSnciRkvVs+CW6IwLqcCrCNpmPGZVajDqm9JlwbRq7dkIEqCWIJXsLw0Oxic
-	1q3FNcwKmx1ct7dvRjFSiVW7hGSR9iE=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-561-0xI181Q7PF6H-PyJpGWDRw-1; Thu,
- 11 Jan 2024 10:27:32 -0500
-X-MC-Unique: 0xI181Q7PF6H-PyJpGWDRw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id C526A28EC116
-	for <fstests@vger.kernel.org>; Thu, 11 Jan 2024 15:27:31 +0000 (UTC)
-Received: from pasta.redhat.com (unknown [10.45.226.101])
-	by smtp.corp.redhat.com (Postfix) with ESMTP id 41331C15A0C;
-	Thu, 11 Jan 2024 15:27:31 +0000 (UTC)
-From: Andreas Gruenbacher <agruenba@redhat.com>
-To: fstests@vger.kernel.org
-Cc: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] gfs2: Recognize block size in _scratch_mkfs_sized
-Date: Thu, 11 Jan 2024 16:27:30 +0100
-Message-ID: <20240111152730.4339-1-agruenba@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cfpVHdu+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B024C433F1;
+	Thu, 11 Jan 2024 17:20:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1704993622;
+	bh=qJFkRoHYibQPaqBSCnHJ/J/FbJy6JFn5DNlz1gsVamo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=cfpVHdu+gINCefHxHFHOY3kh5ZW9KAJ4jpuomG3v+owh5CWq/SeKvERLZPRZW3d7J
+	 Z2dxRK8nI6BE6SWxXQrsv4jxhoh+Q+AsvVx6WeYCmw5HWwC4Bybo7FFIjBneqH9HJ/
+	 7JHtrStLKHc+M8SBercQwiO7jppz5fUIwbAreOVuHVyES+urfLyYq4YY2fLyrQkoDP
+	 +PemjikIGT7AbLTmUWmBPrHX+FZTyALzZhzqUqYY+hadwe51eCNaHUvmAv5kh8jXzu
+	 rR0hS+bqmJVAWNXWxXs42U951LYzlRc5MyvfMPySVMILpfDGj5K93rU5Y43LmdhdV9
+	 4pKUJANXqsqnA==
+Date: Thu, 11 Jan 2024 09:20:22 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/3] xfs: check that the mountpoint is actually mounted
+ in _supports_xfs_scrub
+Message-ID: <20240111172022.GO723010@frogsfrogsfrogs>
+References: <20240111142407.2163578-1-hch@lst.de>
+ <20240111142407.2163578-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240111142407.2163578-2-hch@lst.de>
 
-Fix the block size recognition logic in _scratch_mkfs_sized() to work
-for gfs2 as well.
+On Thu, Jan 11, 2024 at 03:24:05PM +0100, Christoph Hellwig wrote:
+> Add a sanity check that the passed in mount point is actually mounted
+> to guard against actually calling _supports_xfs_scrub before
+> $SCRATCH_MNT is mounted.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  common/xfs | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index f53b33fc5..9db998837 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -649,6 +649,8 @@ _supports_xfs_scrub()
+>  	test "$FSTYP" = "xfs" || return 1
+>  	test -x "$XFS_SCRUB_PROG" || return 1
+>  
+> +	mountpoint $mountpoint >/dev/null || echo "$mountpoint is not mounted"
 
-Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
----
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The helper needs to return nonzero on failure, e.g.
 
-diff --git a/common/rc b/common/rc
-index cc92fe06..9d947df2 100644
---- a/common/rc
-+++ b/common/rc
-@@ -931,7 +931,7 @@ _scratch_mkfs_sized()
- 	btrfs)
- 		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-s ?+([0-9]+).*/\1/p'`
- 		;;
--	ext2|ext3|ext4|ext4dev|reiser4|ocfs2|reiserfs)
-+	ext2|ext3|ext4|ext4dev|reiser4|ocfs2|reiserfs|gfs2)
- 		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 		;;
- 	udf)
--- 
-2.43.0
+	if ! mountpoint -q $mountpoint; then
+		echo "$mountpoint is not mounted"
+		return 1
+	fi
 
+> +
+>  	# Probe for kernel support...
+>  	$XFS_IO_PROG -c 'help scrub' 2>&1 | grep -q 'types are:.*probe' || return 1
+
+Like it already does down here.
+
+--D
+
+>  	$XFS_IO_PROG -c "scrub probe" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
+> -- 
+> 2.39.2
+> 
