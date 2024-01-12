@@ -1,34 +1,36 @@
-Received: from esa8.hc1455-7.c3s2.iphmx.com (esa8.hc1455-7.c3s2.iphmx.com [139.138.61.253])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39F925EE69
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 09:46:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
-X-IronPort-AV: E=McAfee;i="6600,9927,10950"; a="133959212"
-X-IronPort-AV: E=Sophos;i="6.04,189,1695654000"; 
-   d="scan'208";a="133959212"
-Received: from unknown (HELO oym-r4.gw.nic.fujitsu.com) ([210.162.30.92])
-  by esa8.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jan 2024 18:45:35 +0900
-Received: from oym-m1.gw.nic.fujitsu.com (oym-nat-oym-m1.gw.nic.fujitsu.com [192.168.87.58])
-	by oym-r4.gw.nic.fujitsu.com (Postfix) with ESMTP id 12104D9D8F
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 18:45:34 +0900 (JST)
-Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
-	by oym-m1.gw.nic.fujitsu.com (Postfix) with ESMTP id 50150D501D
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 18:45:33 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id D0BCD68957
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 18:45:32 +0900 (JST)
-Received: from localhost.localdomain (unknown [10.167.226.45])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 556AF1A0070;
-	Fri, 12 Jan 2024 17:45:32 +0800 (CST)
-From: Li Zhijian <lizhijian@fujitsu.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EAFC5EE9D
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:03:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="HeHXXIP1";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="HeHXXIP1"
+Received: from localhost.localdomain (unknown [10.100.128.76])
+	by smtp-out2.suse.de (Postfix) with ESMTP id 51E4A1F8D7
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:03:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1705064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=xwUYiU5Rvwfz3uglZFuX4+oZk7K9EU8NKouG/MB3dJs=;
+	b=HeHXXIP1aCD2OpXL+x3hQ9D9QG9T2DCfPJrG9DCfbZx26qH537bHlhrWMb9mXeuwvBVIQL
+	twQUdk2zPHhpXQbtx4bQfOKydYPU5HCLtFRvgwzTZekv6dt5Qo1lfAHCZ0dT1oHKVMgWLM
+	FP0uqYfSvDW2nit6RSuicHG4OYeqaso=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1705064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=xwUYiU5Rvwfz3uglZFuX4+oZk7K9EU8NKouG/MB3dJs=;
+	b=HeHXXIP1aCD2OpXL+x3hQ9D9QG9T2DCfPJrG9DCfbZx26qH537bHlhrWMb9mXeuwvBVIQL
+	twQUdk2zPHhpXQbtx4bQfOKydYPU5HCLtFRvgwzTZekv6dt5Qo1lfAHCZ0dT1oHKVMgWLM
+	FP0uqYfSvDW2nit6RSuicHG4OYeqaso=
+From: Anthony Iliopoulos <ailiop@suse.com>
 To: fstests@vger.kernel.org
-Cc: Li Zhijian <lizhijian@fujitsu.com>
-Subject: [PATCH] gitignore: Add missing /src/t_reflink_read_race
-Date: Fri, 12 Jan 2024 17:45:24 +0800
-Message-Id: <20240112094524.3797754-1-lizhijian@fujitsu.com>
-X-Mailer: git-send-email 2.31.1
+Subject: [PATCH] src/af_unix: drop unused offsetof macro definition
+Date: Fri, 12 Jan 2024 14:03:31 +0100
+Message-ID: <20240112130331.4079-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.41.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -36,36 +38,52 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28114.006
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28114.006
-X-TMASE-Result: 10--0.563200-10.000000
-X-TMASE-MatchedRID: UpZ+EYxJ0vlSuJfEWZSQfE7nLUqYrlslFIuBIWrdOePfUZT83lbkEJzi
-	pOOCnHvUGYDb3Nl5wdP6iHjvPRitWEkjllSXrjtQFEUknJ/kEl6xlUYThzDU2/oLR4+zsDTtjoc
-	zmuoPCq0h036LQL4lW2P2RuloqrpxVQ2jI+vVZ9OMDfVY0snn+KVu9xx+ZpjDmw0Qaktp+ussz+
-	cQMs/Tnp75MOLIf/j3DF+QsB+Q01JoBmTSwRxjXg==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spam-Level: ***
+X-Spam-Score: 3.80
+X-Spamd-Result: default: False [3.80 / 50.00];
+	 ARC_NA(0.00)[];
+	 BAYES_SPAM(0.00)[12.88%];
+	 FROM_HAS_DN(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 RCPT_COUNT_ONE(0.00)[1];
+	 NEURAL_HAM_LONG(-1.00)[-0.995];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 NEURAL_HAM_SHORT(-0.11)[-0.547];
+	 MID_CONTAINS_FROM(1.00)[];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 RCVD_COUNT_ZERO(0.00)[0];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+]
+X-Spam-Flag: NO
 
-Add the binary to gitignore, make git status clean
+The offsetof macro is causing compiler warnings since it is being
+redefined, but it is anyway not used, so drop it completely.
 
-Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 ---
- .gitignore | 1 +
- 1 file changed, 1 insertion(+)
+ src/af_unix.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/.gitignore b/.gitignore
-index 7508b6e8b282..e567a56ff129 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -165,6 +165,7 @@ tags
- /src/t_readdir_1
- /src/t_readdir_2
- /src/t_readdir_3
-+/src/t_reflink_read_race
- /src/t_rename_overwrite
- /src/t_stripealign
- /src/t_truncate_cmtime
+diff --git a/src/af_unix.c b/src/af_unix.c
+index 41037ee4b7ad..89df76586f27 100644
+--- a/src/af_unix.c
++++ b/src/af_unix.c
+@@ -17,8 +17,6 @@
+ #include <sys/socket.h>
+ #include <sys/un.h>
+ 
+-#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
+-
+ int main(int argc, char *argv[])
+ {
+ 	struct sockaddr_un sun;
 -- 
-2.29.2
+2.41.0
 
