@@ -1,108 +1,95 @@
-Received: from mail-108-mta156.mxroute.com (mail-108-mta156.mxroute.com [136.175.108.156])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 683895D91A
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:39:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=damenly.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=damenly.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98F836D1A3
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:40:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=damenly.org header.i=@damenly.org header.b="F57URQyR"
-Received: from filter006.mxroute.com ([136.175.111.2] filter006.mxroute.com)
- (Authenticated sender: mN4UYu2MZsgR)
- by mail-108-mta156.mxroute.com (ZoneMTA) with ESMTPSA id 18cfde1abf30003727.00d
- for <fstests@vger.kernel.org>
- (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384);
- Fri, 12 Jan 2024 13:34:34 +0000
-X-Zone-Loop: 9d8b02f7c93fca50692c1ffe9f8ab4eda0a3d2a62c10
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=damenly.org
-	; s=x; h=Content-Type:MIME-Version:Message-ID:In-reply-to:Date:Subject:Cc:To:
-	From:References:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=w063HSJyW1ImjwCr5PeZnn5DHNc2eDTl35iwzvMc8iU=; b=F57URQyRqOhdnflP2xaEA5e49y
-	zrHK94RafbXZBNnGBh6LeplVvACf33wxkghqswER47SEwLM03rvvMEcBTwU4USCFL81zjvOebIaRv
-	SGj1lHmtdiwdjgYPEmFg0bRSzu7pUc8mIPjHmNic7SQB9QDSnBwOqeRPzmNZqQUTVVINps6A9ee7J
-	fm35yXrJUhHT1XUAFIPm5M7/N3xRc0memS0giQ/p01bmOBInQIHcG9G5kul+B7qcAGUmpmYnjRVlk
-	+gW8iQkPV+8f+CBAnw3Y9+G/0SWlfJNryqnLGb71dmvdT6o5SWvjFqaM9EtPCQWPT935nI2o8xaGn
-	dbBZT0IA==;
-References: <20231207194011.273027-1-pvorel@suse.cz>
- <20231207194011.273027-2-pvorel@suse.cz>
-User-agent: mu4e 1.7.5; emacs 28.2
-From: Su Yue <l@damenly.org>
-To: Kent Overstreet <kent.overstreet@linux.dev>
-Cc: ltp@lists.linux.it, Cyril Hrubis <chrubis@suse.cz>, Li Wang
- <liwang@redhat.com>, Richard Palethorpe <rpalethorpe@suse.com>, Jan
- Stancek <jstancek@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>, Yang Xu
- <xuyang2018.jy@fujitsu.com>, Kent Overstreet <kent.overstreet@linux.dev>,
- Brian Foster <bfoster@redhat.com>, linux-bcachefs@vger.kernel.org,
- fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Jan Kara
- <jack@suse.cz>, Petr Vorel <pvorel@suse.cz>
-Subject: Re: [PATCH v2 1/3] lib: Add Bcachefs magic
-Date: Fri, 12 Jan 2024 21:18:18 +0800
-In-reply-to: <20231207194011.273027-2-pvorel@suse.cz>
-Message-ID: <frz27k44.fsf@damenly.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="f7VWVK95"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1705066804;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=eR00AhH+shlrnUBx0ovB0jfbN1lij8ctFTdOSWKfP3g=;
+	b=f7VWVK956gOdX8poN8P2Z6Xr3V5FRmBt9FxWup7ssciVJLbhIHD1BxnP78s/TfUaZynvls
+	SpK+9OA1JT9sQ5oKOrQTcF6v/9j3m18pNe8/9hRTAhEz5tbBF588NCNGKmtXiF2nJluI6C
+	hiv0WMcwtZlxS1jBjnlYny9e1AYCQ4g=
+Received: from mail-oo1-f72.google.com (mail-oo1-f72.google.com
+ [209.85.161.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-12-Cni5znL7N4KMvhM1tJF2XA-1; Fri, 12 Jan 2024 08:40:03 -0500
+X-MC-Unique: Cni5znL7N4KMvhM1tJF2XA-1
+Received: by mail-oo1-f72.google.com with SMTP id 006d021491bc7-598b8d4c64aso1515115eaf.3
+        for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 05:40:03 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1705066802; x=1705671602;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eR00AhH+shlrnUBx0ovB0jfbN1lij8ctFTdOSWKfP3g=;
+        b=PWxmk6mcfvJ9crivHI+/I2mGVBF2/uoEaFamHH/leNZ9DM+5wR2KtjsjLlJ28HKkfe
+         1QO8qr5EvoxVkcxRNZeVn9hViQF2hqrc0RvzyZO83WR03XC8shWYflHNNxQF2xr5v77c
+         hgxUDQwJ9V0O0Lx+PfVTeuitTvEwMq9SKlgs/81VdNLTL26pS+Va1Z+l/OyidPM5KSzg
+         aTJOyTx4cFJNND+EtrA3Ob8ZYLjSegkdA4w+OiMu4GbfQCsUsGsP7ebrztUYvl8cxbX7
+         d11zOkeirvqwDVQXDkiDwx0g0+eByoieoz5ubg84+Akx/m2JKo5YKfoCt4W03ee8cNHx
+         2TQg==
+X-Gm-Message-State: AOJu0YxydIG5BLBsXkgo5rAtD9GVlO2qq2hSrt3WBMdM8RMv28zGukvA
+	k+VysfK9Wpt4nvBDb0tgZm80suKNg8OS9xfzLPAIqHLZdooYSCY63eVmU+Dxn1nBehc9uWi/F8N
+	7d7FRiWocRHV18yR83aEj9QlUAA==
+X-Received: by 2002:a05:6358:c3a3:b0:175:960c:17c7 with SMTP id fl35-20020a056358c3a300b00175960c17c7mr1076961rwb.14.1705066802555;
+        Fri, 12 Jan 2024 05:40:02 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGjTs44cWJcLcvET0ZZbx8OE1urr2qihH9EWh/Ho3cygsX8/+2sPzpweq4nclludGIUCKaQqg==
+X-Received: by 2002:a05:6358:c3a3:b0:175:960c:17c7 with SMTP id fl35-20020a056358c3a300b00175960c17c7mr1076952rwb.14.1705066802231;
+        Fri, 12 Jan 2024 05:40:02 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id y11-20020aa7804b000000b006db313c0db8sm3270855pfm.92.2024.01.12.05.40.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Jan 2024 05:40:01 -0800 (PST)
+Date: Fri, 12 Jan 2024 21:39:58 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Daniel Rosenberg <drosen@google.com>
+Subject: Re: [PATCH v2 0/4] xfstests: test custom crypto data unit size
+Message-ID: <20240112133958.pgxs3gl33g5hf7pn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20231121223909.4617-1-ebiggers@kernel.org>
+ <20240111035444.GA3453@sol.localdomain>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; format=flowed
-X-Authenticated-Id: l@damenly.org
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240111035444.GA3453@sol.localdomain>
 
+On Wed, Jan 10, 2024 at 07:54:44PM -0800, Eric Biggers wrote:
+> On Tue, Nov 21, 2023 at 02:39:05PM -0800, Eric Biggers wrote:
+> > This series adds a test that verifies the on-disk format of encrypted
+> > files that use a crypto data unit size that differs from the filesystem
+> > block size.  This tests the functionality that was introduced in Linux
+> > 6.7 by kernel commit 5b1188847180 ("fscrypt: support crypto data unit
+> > size less than filesystem block size").
+> 
+> Hi Zorro, can you consider applying this series?  It's been out for review for
+> 3 months, so I don't think reviews are going to come in.  The prerequisite
+> xfsprogs patch is already present on the for-next branch of xfsprogs.
 
-On Thu 07 Dec 2023 at 20:40, Petr Vorel <pvorel@suse.cz> wrote:
+Sure Eric, I thought about this patchset last week, I saw that xfsprogs
+patchset has been merge. I'll give this patchset a basic test, to make
+sure it won't break xfstests, then merge it.
 
-> Signed-off-by: Petr Vorel <pvorel@suse.cz>
-> ---
-> New in v2
->
->  include/tst_fs.h  | 3 +++
->  lib/tst_fs_type.c | 2 ++
->  2 files changed, 5 insertions(+)
->
-> diff --git a/include/tst_fs.h b/include/tst_fs.h
-> index eb9841165..06f5be896 100644
-> --- a/include/tst_fs.h
-> +++ b/include/tst_fs.h
-> @@ -34,6 +34,9 @@
->  #define TST_VFAT_MAGIC     0x4d44 /* AKA MSDOS */
->  #define TST_EXFAT_MAGIC    0x2011BAB0UL
->
-> +/* fs/bcachefs/bcachefs_format.h */
-> +#define TST_BCACHE_MAGIC		0xca451a4e
-> +
->
-Not object to the patch. There are three MAGIC values in
-bcachefs_format.h: BCACHE_MAGIC, BCHFS_MAGIC, 
-BCACHEFS_STATFS_MAGIC.
+Thanks, and sorry this late.
+Zorro
 
-IIUC, BCACHE_MAGIC is the older one in superblock, BCHFS_MAGIC is 
-the
-new one. BCACHEFS_STATFS_MAGIC is for statfs.
-Kent,
-Would you please export needed magic values to 
-include/uapi/linux/magic.h?
-Since you are the maintainer also I'm confused about variables to 
-be named.
+> 
+> Thanks!
+> 
+> - Eric
+> 
 
---
-Su
-
->  enum tst_fill_access_pattern {
->  	TST_FILL_BLOCKS,
->  	TST_FILL_RANDOM
-> diff --git a/lib/tst_fs_type.c b/lib/tst_fs_type.c
-> index d9c9c0817..7f0d61a8e 100644
-> --- a/lib/tst_fs_type.c
-> +++ b/lib/tst_fs_type.c
-> @@ -36,6 +36,8 @@ const char *tst_fs_type_name(long f_type)
->  		return "9p";
->  	case TST_RAMFS_MAGIC:
->  		return "ramfs";
-> +	case TST_BCACHE_MAGIC:
-> +		return "bcachefs";
->  	case TST_BTRFS_MAGIC:
->  		return "btrfs";
->  	case TST_XFS_MAGIC:
