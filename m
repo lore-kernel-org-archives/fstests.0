@@ -1,29 +1,29 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B141F175B0
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 16:59:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FB67175B8
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 17:00:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j7XfyT0B"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 213C3C433F1;
-	Fri, 12 Jan 2024 16:59:09 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sMCdK6r+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F687C433F1;
+	Fri, 12 Jan 2024 17:00:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1705078749;
-	bh=nVbfdQHWJpWkdcBiZ7Ehfw0gJ9aNdrxrc2X2Of20Akk=;
+	s=k20201202; t=1705078856;
+	bh=k3tzF/7XbGS1+AJGt4Od68mBULRTFmejMZ9d4kNpubo=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=j7XfyT0BM/jATPzH0tAjbcXFG0MTGrTMQ5gYQxEIukMSvqm11QVq8LxXWkYTNb5dU
-	 zW8lOliOzguubjprFc+LslN+InwtvwTbamnF+wWEdr8TwUinleFMNElvqueMKB6PzG
-	 nYD9XaddA6l0rWmpSaL1X9Po1JSejm+GF7BSL7QC/J5YEXb3Ixk+u928+jk+iEIw9y
-	 PUviajCSog1tOGHDAoRr/n+izRGNE6Gc+nOiUA24z6CyGzuDRhhcUdNCrfE4lPytMC
-	 3FCtlyaA0Xd93ZSs6ozG0eal3Ag4tH7FvDkKdKvcKBosWtxgHdVJdGbi704kbfsF0A
-	 To+N66XHYhiRA==
-Date: Fri, 12 Jan 2024 08:59:08 -0800
+	b=sMCdK6r+gqiqNEGWPYcYtbYud6qCrQdxhd7HWTGaT277dSplP6LJECptkHeKadRMx
+	 0oNvGfafQhbyn5hzrIxR5kRPAlugxGjamecmwKEFl2UqCRwtR2h8SSLNNev6z1gMu+
+	 02JXcyLK258DIuzw1H1GUP2XqWHut9pT03jHt72au6o2/MApOuNAzI9WmrQfHe4S/Z
+	 Tj1M8ymB6q/tfHV2GIlmR7Qbm/GFOpXdr7NqEsH4KdDnj3o1aJHx73R9+UhhYJnib6
+	 8EwZzZqQAuOsXkCdMarAv+TR8tsa/xr2gPOj2qKLocpF/hi7+Zp2tNlx5hiwbovPfW
+	 aiieLxXdJMaBw==
+Date: Fri, 12 Jan 2024 09:00:56 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Li Zhijian <lizhijian@fujitsu.com>
+To: Anthony Iliopoulos <ailiop@suse.com>
 Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] gitignore: Add missing /src/t_reflink_read_race
-Message-ID: <20240112165908.GE722968@frogsfrogsfrogs>
-References: <20240112094524.3797754-1-lizhijian@fujitsu.com>
+Subject: Re: [PATCH] src/af_unix: drop unused offsetof macro definition
+Message-ID: <20240112170056.GF722968@frogsfrogsfrogs>
+References: <20240112130331.4079-1-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -32,34 +32,36 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240112094524.3797754-1-lizhijian@fujitsu.com>
+In-Reply-To: <20240112130331.4079-1-ailiop@suse.com>
 
-On Fri, Jan 12, 2024 at 05:45:24PM +0800, Li Zhijian wrote:
-> Add the binary to gitignore, make git status clean
+On Fri, Jan 12, 2024 at 02:03:31PM +0100, Anthony Iliopoulos wrote:
+> The offsetof macro is causing compiler warnings since it is being
+> redefined, but it is anyway not used, so drop it completely.
 > 
-> Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
 
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
 > ---
->  .gitignore | 1 +
->  1 file changed, 1 insertion(+)
+>  src/af_unix.c | 2 --
+>  1 file changed, 2 deletions(-)
 > 
-> diff --git a/.gitignore b/.gitignore
-> index 7508b6e8b282..e567a56ff129 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -165,6 +165,7 @@ tags
->  /src/t_readdir_1
->  /src/t_readdir_2
->  /src/t_readdir_3
-> +/src/t_reflink_read_race
->  /src/t_rename_overwrite
->  /src/t_stripealign
->  /src/t_truncate_cmtime
+> diff --git a/src/af_unix.c b/src/af_unix.c
+> index 41037ee4b7ad..89df76586f27 100644
+> --- a/src/af_unix.c
+> +++ b/src/af_unix.c
+> @@ -17,8 +17,6 @@
+>  #include <sys/socket.h>
+>  #include <sys/un.h>
+>  
+> -#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
+> -
+>  int main(int argc, char *argv[])
+>  {
+>  	struct sockaddr_un sun;
 > -- 
-> 2.29.2
+> 2.41.0
 > 
 > 
