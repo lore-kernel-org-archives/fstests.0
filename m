@@ -1,53 +1,53 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 511036BB49
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:35:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C4F122078
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:36:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="L8aDm6d2"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ifq/DAJM"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1705066552;
+	s=mimecast20190719; t=1705066593;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qpJzkrmj08C5Xizjya0CoNsCINxaksJrnJLamVSYINQ=;
-	b=L8aDm6d2bQtPwoG5Kry977fhd+/vqZhg7Fx0w+wov4wCxDfolpR7r4LxMntamxgCqQ+/0A
-	VwQwg2ULc0iKOlZkRXhgyH5wJh0eU1+V5nEtXjxYSmpeAEYBbo7uFEHFW/vhyJ5aEEklPS
-	PjUyO9b68nSQ7z2KIe/9MhDLIL0BJ2w=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=fvYIYJeLeB06paZmW4hgjS6ozliWuLUPfb3Gvt5MgYU=;
+	b=Ifq/DAJM+LSJfSRPoqTG2O9Kr19rjXxk+/5S6Z3xLZVWt96AaRY1HtZ+zIOo5HuBB3YDAd
+	yGprR0ygU+aN44gJe7exbj6xQrdSvjaAmAE2lxuYM5VAIiNwS5zrHEcH4dvyI6QrlZph5o
+	dkGnIe3vR0tjvlgDkuEexKxcx3HpwwI=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-136-T-4I44KmNxqstPIN_ib-FQ-1; Fri, 12 Jan 2024 08:35:51 -0500
-X-MC-Unique: T-4I44KmNxqstPIN_ib-FQ-1
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-5ca4ee5b97aso2694480a12.1
-        for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 05:35:50 -0800 (PST)
+ us-mta-611-CmmH382QPo-8So_RFYzemA-1; Fri, 12 Jan 2024 08:36:31 -0500
+X-MC-Unique: CmmH382QPo-8So_RFYzemA-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1d5a53749c4so6003485ad.3
+        for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 05:36:31 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705066550; x=1705671350;
+        d=1e100.net; s=20230601; t=1705066591; x=1705671391;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qpJzkrmj08C5Xizjya0CoNsCINxaksJrnJLamVSYINQ=;
-        b=XbQa2JfYUpovlklLKDfE71YoQc+UYrUQT7CVdw0sNcgwmaEnwcU+EqtQ1+Z4Z/M37f
-         beN5+qhswv2UKrPJve/GcDdooND5LOdy8kdKrxtS7y1G1waH/QdNse0zvFz4LSaMoCxO
-         e/gven9P8XmtLwFvqhdiKYaj3OIWKSTKpv4aZqvrv1b8gnrXMH6KzQ/Brj1xM5IyeWSi
-         x2BBk/4K95Wf1eqTXfiIZpF5GXnIBWxUZfIwr/PDfntASF7ZaNzegj5qqDDDHeaDOLfN
-         OvP7maWzj2y0qTiPCEcIbomdJQMlIsvCbNeIELBQfH2M8qBcnb7yDGUL11iTFDB+kPua
-         Ijkg==
-X-Gm-Message-State: AOJu0Yw4OErEUwZCd6M817tGd8UhJLG3RZ4Xt/OVzrfhjJ9Gl3ug98xP
-	3AVjbC31Yl1buKJI6iyXpSQiFnnwZvOu8FIs2j05RTWZor00KUhVrb0oOx96LQddGXOAJESteZU
-	s7kmbfkoHtSLL/el2n91qLu+fl2h8AVY38Lck
-X-Received: by 2002:a17:902:6847:b0:1d4:e31b:11a7 with SMTP id f7-20020a170902684700b001d4e31b11a7mr887470pln.24.1705066549737;
-        Fri, 12 Jan 2024 05:35:49 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHgWzRPRKwiTz4goDaZ0z0X4/uAZD3P4hSq8BnCtR5U+7+r0jvtluQxbe0gX7qcWDSpPNZSuA==
-X-Received: by 2002:a17:902:6847:b0:1d4:e31b:11a7 with SMTP id f7-20020a170902684700b001d4e31b11a7mr887462pln.24.1705066549432;
-        Fri, 12 Jan 2024 05:35:49 -0800 (PST)
+        bh=fvYIYJeLeB06paZmW4hgjS6ozliWuLUPfb3Gvt5MgYU=;
+        b=kC22zNQJgw8KgbMjI5QlDIZiJtG2O6jL2vjw+dF2OpLe+ikW2kbW/R6AeE40oLwvyq
+         PylK3p6i1kImD5fw6d+G7G1X+fXe2zPlucjW0vKlR/oFLudhrE+l53TzcBJzyVmbXaVD
+         7VFBEdDcq25DhuuMJksxGBsr9ZPyg1ekUbd2yIJgazDgT3zST4tjjAcR68lWc7BNf+rq
+         CB0HBkfhk7MOTwhsXJ+zn45zDyvHKzclsyrXh7sK53gmsTJT/xrTr3mqbhdj3sP9phJ5
+         acD3BbDDhUIs+RMdlAQFEz3mYmhsGiFe10f9zeExKR2wVQVQGQNirKTpSIW7hrfywJ9g
+         gnIQ==
+X-Gm-Message-State: AOJu0YzhMcuvwnTj4pnDNXGwagrlEs7yOu4vkQvbF3RhmnHk+dKMvHAA
+	Mx9TP0nTU9+FP3BdeKP0kEpjVNFwDlKy3FHd63QlS/XDtL1F1KoSEJPfdRITbS1bXz2cx/uZY3x
+	RgPNU/2cuENMRnBnY8svYcaMJQA==
+X-Received: by 2002:a17:903:4296:b0:1d4:e36f:7498 with SMTP id ju22-20020a170903429600b001d4e36f7498mr713091plb.21.1705066590807;
+        Fri, 12 Jan 2024 05:36:30 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGlzjj1+nEKKUvBtCuI6OTkb/XBiisQQHeypKqoICjN2Lzpa376TydU/On1iRorLUSiijabKg==
+X-Received: by 2002:a17:903:4296:b0:1d4:e36f:7498 with SMTP id ju22-20020a170903429600b001d4e36f7498mr713077plb.21.1705066590537;
+        Fri, 12 Jan 2024 05:36:30 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id db11-20020a17090ad64b00b00286da7407f2sm6375046pjb.7.2024.01.12.05.35.47
+        by smtp.gmail.com with ESMTPSA id d9-20020a170902aa8900b001d54c61690csm3131070plr.287.2024.01.12.05.36.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jan 2024 05:35:49 -0800 (PST)
-Date: Fri, 12 Jan 2024 21:35:45 +0800
+        Fri, 12 Jan 2024 05:36:30 -0800 (PST)
+Date: Fri, 12 Jan 2024 21:36:26 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Jeff Layton <jlayton@kernel.org>
 Cc: Anna Schumaker <anna@kernel.org>,
@@ -56,7 +56,7 @@ Cc: Anna Schumaker <anna@kernel.org>,
 	Yongcheng Yang <yoyang@redhat.com>, linux-nfs@vger.kernel.org,
 	fstests@vger.kernel.org
 Subject: Re: [PATCH fstests 2/2] generic/732: don't run it on NFS
-Message-ID: <20240112133545.r7obtpchaetmodxv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20240112133626.k6iaqkmnn5ngmzx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20240110-fixes-v1-0-69f5ddd95656@kernel.org>
  <20240110-fixes-v1-2-69f5ddd95656@kernel.org>
  <20240111204931.oqbub6crymt2misb@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
@@ -103,11 +103,9 @@ On Thu, Jan 11, 2024 at 04:13:11PM -0500, Jeff Layton wrote:
 > It might make sense to keep this test in place for stuff like cephfs,
 > but if dropping it altogether is best, then that's fine with me.
 
-OK, thanks for this feedback, if it still makes sense for any one fs,
-we can keep it.
+Oh, I forgot this:
 
-Thanks,
-Zorro
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
 > 
 > > 
