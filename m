@@ -1,89 +1,102 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EAFC5EE9D
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:03:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 147926BB51
+	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:21:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="HeHXXIP1";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="HeHXXIP1"
-Received: from localhost.localdomain (unknown [10.100.128.76])
-	by smtp-out2.suse.de (Postfix) with ESMTP id 51E4A1F8D7
-	for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 13:03:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1705064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=xwUYiU5Rvwfz3uglZFuX4+oZk7K9EU8NKouG/MB3dJs=;
-	b=HeHXXIP1aCD2OpXL+x3hQ9D9QG9T2DCfPJrG9DCfbZx26qH537bHlhrWMb9mXeuwvBVIQL
-	twQUdk2zPHhpXQbtx4bQfOKydYPU5HCLtFRvgwzTZekv6dt5Qo1lfAHCZ0dT1oHKVMgWLM
-	FP0uqYfSvDW2nit6RSuicHG4OYeqaso=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1705064631; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=xwUYiU5Rvwfz3uglZFuX4+oZk7K9EU8NKouG/MB3dJs=;
-	b=HeHXXIP1aCD2OpXL+x3hQ9D9QG9T2DCfPJrG9DCfbZx26qH537bHlhrWMb9mXeuwvBVIQL
-	twQUdk2zPHhpXQbtx4bQfOKydYPU5HCLtFRvgwzTZekv6dt5Qo1lfAHCZ0dT1oHKVMgWLM
-	FP0uqYfSvDW2nit6RSuicHG4OYeqaso=
-From: Anthony Iliopoulos <ailiop@suse.com>
-To: fstests@vger.kernel.org
-Subject: [PATCH] src/af_unix: drop unused offsetof macro definition
-Date: Fri, 12 Jan 2024 14:03:31 +0100
-Message-ID: <20240112130331.4079-1-ailiop@suse.com>
-X-Mailer: git-send-email 2.41.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HJm29UlD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1705065663;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=mhi/+JgNV+S+4kaUsq/RAwFdZECY3i+QjvGNP8Cshdw=;
+	b=HJm29UlDb6pcBCnQlVKuO7dIRqrQ6ogi3gbuCSwq3U2eMdCrIYp4gCLnIhbFlT2mNIjLb2
+	JlUZg4dadx8BL/kTBVnPfE96CV0hhwqf/fvy8WAHgAVAvv5jWxV6QT5y/P+FvODkkc17uB
+	/1CdtvkloQ7vw77v/IIQLhh1z/5Xyp8=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-20-ygR_RYrvPUuWTj4WBysi9g-1; Fri, 12 Jan 2024 08:21:02 -0500
+X-MC-Unique: ygR_RYrvPUuWTj4WBysi9g-1
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-6d9b8fef16aso4797553b3a.0
+        for <fstests@vger.kernel.org>; Fri, 12 Jan 2024 05:21:02 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1705065661; x=1705670461;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mhi/+JgNV+S+4kaUsq/RAwFdZECY3i+QjvGNP8Cshdw=;
+        b=U+R5AEICNBYa3exwNWLb/tR4nmVqwh1wKVIqEYu2G3YC4uy8slX+ozBiTg00ZnlB++
+         PzlZCXEygdAVwqpfHGnYBDw+wrulHfoO3YrjzNKe6ceTfS8/7alyAjOxJpHhRF7jQXnt
+         W2r8fMJMIWWT8XO8bI8RvUR03TW/bDVrRyHjt0tMmnYS6IlQ1Z7QUfFjNJ0EBZVlZwOU
+         C/YAtcnorf0mmzJwP5GiKLwv9W8J3F+i22bnttNDDm7RODwoojHhaKiymA/zwrzX+a9M
+         s/ufRKfdTG7CJ1IUnJM55UXcTzyybteF9xTonbd7VXxQK1966yC4cz06ZWcqSimn1TAv
+         WJuw==
+X-Gm-Message-State: AOJu0YwFjLUVpy0lCXcFnPhJF8IGnCvlrxddX99x5eMW1MN2nx9Z1H4W
+	j8E5kOE3vbQQNOO9dA/9gug6XmxXPMw8gOnbFiCbgq/PGLXvHZakoQXvtJFwICriZBtZ/5NrXd9
+	/x23ZsQRMV/MVAnXdnOP0yStZ55rg7MON6wOz
+X-Received: by 2002:a05:6a00:464f:b0:6d9:acb2:29ac with SMTP id kp15-20020a056a00464f00b006d9acb229acmr1398178pfb.23.1705065661159;
+        Fri, 12 Jan 2024 05:21:01 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHOkbGz4wknQxKd35c5FYm98su9D3XNN32OBsrmlsx3jNtp1Jq9SZFAEwfBLL3+HhBmbphcBQ==
+X-Received: by 2002:a05:6a00:464f:b0:6d9:acb2:29ac with SMTP id kp15-20020a056a00464f00b006d9acb229acmr1398164pfb.23.1705065660850;
+        Fri, 12 Jan 2024 05:21:00 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id j6-20020aa783c6000000b006dab36287bfsm3134732pfn.207.2024.01.12.05.20.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Jan 2024 05:21:00 -0800 (PST)
+Date: Fri, 12 Jan 2024 21:20:57 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: djwong@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/4] xfs: check that the mountpoint is actually mounted
+ in _supports_xfs_scrub
+Message-ID: <20240112132057.2uunfrh4ar6xurk5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240112050833.2255899-1-hch@lst.de>
+ <20240112050833.2255899-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spam-Level: ***
-X-Spam-Score: 3.80
-X-Spamd-Result: default: False [3.80 / 50.00];
-	 ARC_NA(0.00)[];
-	 BAYES_SPAM(0.00)[12.88%];
-	 FROM_HAS_DN(0.00)[];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 TO_DN_NONE(0.00)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 RCPT_COUNT_ONE(0.00)[1];
-	 NEURAL_HAM_LONG(-1.00)[-0.995];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 NEURAL_HAM_SHORT(-0.11)[-0.547];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 RCVD_COUNT_ZERO(0.00)[0];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+]
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240112050833.2255899-2-hch@lst.de>
 
-The offsetof macro is causing compiler warnings since it is being
-redefined, but it is anyway not used, so drop it completely.
+On Fri, Jan 12, 2024 at 06:08:30AM +0100, Christoph Hellwig wrote:
+> Add a sanity check that the passed in mount point is actually mounted
+> to guard against actually calling _supports_xfs_scrub before
+> $SCRATCH_MNT is mounted.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
 
-Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
----
- src/af_unix.c | 2 --
- 1 file changed, 2 deletions(-)
+This version is good to me, thanks!
 
-diff --git a/src/af_unix.c b/src/af_unix.c
-index 41037ee4b7ad..89df76586f27 100644
---- a/src/af_unix.c
-+++ b/src/af_unix.c
-@@ -17,8 +17,6 @@
- #include <sys/socket.h>
- #include <sys/un.h>
- 
--#define offsetof(TYPE, MEMBER)	((size_t)&((TYPE *)0)->MEMBER)
--
- int main(int argc, char *argv[])
- {
- 	struct sockaddr_un sun;
--- 
-2.41.0
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  common/xfs | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index f53b33fc5..4e54d75cc 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -649,6 +649,9 @@ _supports_xfs_scrub()
+>  	test "$FSTYP" = "xfs" || return 1
+>  	test -x "$XFS_SCRUB_PROG" || return 1
+>  
+> +	mountpoint $mountpoint >/dev/null || \
+> +		_fail "$mountpoint is not mounted"
+> +
+>  	# Probe for kernel support...
+>  	$XFS_IO_PROG -c 'help scrub' 2>&1 | grep -q 'types are:.*probe' || return 1
+>  	$XFS_IO_PROG -c "scrub probe" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
+> -- 
+> 2.39.2
+> 
+> 
 
