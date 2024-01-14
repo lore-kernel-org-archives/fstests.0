@@ -1,144 +1,95 @@
-Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com [209.85.208.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6401A1EF0D
-	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 04:41:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="ZuqLTdoz"
-Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-2cdb50d8982so4840651fa.2
-        for <fstests@vger.kernel.org>; Sat, 13 Jan 2024 20:41:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1705207294; x=1705812094; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=6U2f+w2O9S+yoYqv+rungy5KCSJbcHIyBEOzRka1yyY=;
-        b=ZuqLTdozkPvVgIa52QprobGhxuJgu8FYfFts7L7Qqu7oKBKIVKKJGy5UDWhUkWzfq6
-         ZSPdVLhRM+iNozRnQhMJ5BEVknq22OHT9FsLWf/H90DRA3Qs0sfMl7or3k8WifBokDMm
-         OiUhfMs2vfojaubR8O34YVPLc2cLGGh63jTmKqt+Ql1pC4fxUm7ialEsm0p2GOySxScG
-         3kXGFND+zmSK8HgyMSLMDfvJPp0zANAQ4ulhs5S12Qe0pn0sKmOugbVJSZDxO+RDfRvv
-         xGqVvyluqNfTAK45oHtICjaSOwHWSxyaSihCO9YgTga9RjQGlQu56sDTS+Ik8j1g5vbb
-         HVOg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705207294; x=1705812094;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=6U2f+w2O9S+yoYqv+rungy5KCSJbcHIyBEOzRka1yyY=;
-        b=iZ3moLA2TD2qB6R34QJaI1SacgZCmpAz63wLi3d6xBH8pL5c8hjLv+u23fHJBzgC7L
-         RZvqL5x7F4kaBZwQ8dAnKWWvg5xELR/Nko+k9aMb5VopHdy6InYuWrwXMHDuADR1dbsN
-         aAyWPurl5A/CRcUfslECykXMx4bo71a5VOIq2DXT74nuAicIz4lnhre/RLb/gUYvNBCW
-         muTCAb8H5uMgNIdXNcyoWeGMkKGxZ57BfQLXQd+qpqHBAwR4ClnlMEQtxbmlSC33uwAP
-         OdYQKHDxs2DVk43VbOCm5fws7KjQzxcizQ82ZZDwpu3TOSewH5tpo+drY8U/Jb2FfsGq
-         jwzg==
-X-Gm-Message-State: AOJu0Ywbmao8P1mPHGhKCdn6Df/e+plBb0LY6XDMn9+jm4P/dxBB7Hfu
-	25v6vQPtPuo5f2YMv4Fp0UPXkzMdEnb0/yu18Ju5PMauVTM=
-X-Google-Smtp-Source: AGHT+IHln/RL+qs32IcJayDhWnRtC6Qito8UvNhpg5LasgQ1ncf/7R0sEPRVTQdccdYlkMVXkhY07w==
-X-Received: by 2002:a2e:5c44:0:b0:2cd:1d6e:74c9 with SMTP id q65-20020a2e5c44000000b002cd1d6e74c9mr1517874ljb.48.1705207293777;
-        Sat, 13 Jan 2024 20:41:33 -0800 (PST)
-Received: from localhost.localdomain ([23.247.139.60])
-        by smtp.gmail.com with ESMTPSA id eu15-20020a17090af94f00b0028b845f2890sm9330832pjb.33.2024.01.13.20.41.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 13 Jan 2024 20:41:33 -0800 (PST)
-From: Su Yue <glass.su@suse.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE0C21FA3
+	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 09:56:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=nod.at
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nod.at
+Received: from localhost (localhost [127.0.0.1])
+	by lithops.sigma-star.at (Postfix) with ESMTP id 3BF3B6343B2D
+	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 10:56:23 +0100 (CET)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
+	with ESMTP id bQLdx9YPhbUs; Sun, 14 Jan 2024 10:56:22 +0100 (CET)
+Received: from localhost (localhost [127.0.0.1])
+	by lithops.sigma-star.at (Postfix) with ESMTP id D15FE626FAE4;
+	Sun, 14 Jan 2024 10:56:22 +0100 (CET)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id wW870HrKmdPG; Sun, 14 Jan 2024 10:56:22 +0100 (CET)
+Received: from blindfold.corp.sigma-star.at (84-115-239-180.cable.dynamic.surfer.at [84.115.239.180])
+	by lithops.sigma-star.at (Postfix) with ESMTPSA id 97CA16410404;
+	Sun, 14 Jan 2024 10:56:22 +0100 (CET)
+From: Richard Weinberger <richard@nod.at>
 To: fstests@vger.kernel.org
-Cc: linux-bcachefs@vger.kernel.org,
-	l@damenly.org,
-	Su Yue <glass.su@suse.com>
-Subject: [PATCH] fstests: introduce MKFS_BCACHEFS_PROG for bcachefs
-Date: Sun, 14 Jan 2024 12:41:20 +0800
-Message-ID: <20240114044120.140111-1-glass.su@suse.com>
-X-Mailer: git-send-email 2.43.0
+Cc: Richard Weinberger <richard@nod.at>
+Subject: [PATCH] generic/597,598: Require groups
+Date: Sun, 14 Jan 2024 10:56:11 +0100
+Message-Id: <20240114095611.29401-1-richard@nod.at>
+X-Mailer: git-send-email 2.26.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 
-mkfs.bcachefs supports force overwrite when option '-f' is given:
-$ mkfs.bcachefs --help | grep force
-  -f, --force
-After this commit, MKFS_BCACHEFS_PROG will contains ' -f' so
-we don't have to add '-f' to $MKFS_OPTIONS manually.
+Moving to a new test bed is always fun.
+Forgot to add group fsgqa2 and tests 597, 598 failed.
 
-It also fixes generic/466 which unsets MKFS_OPTIONS causing
-that test hangs in mfks.bcachefs waiting for confirmation of
-the force overwrite.
+generic/597       - output mismatch (see /root/xfstests-dev/results//gene=
+ric/597.out.bad)
+    --- tests/generic/597.out   2024-01-14 08:55:20.176084268 +0000
+    +++ /root/xfstests-dev/results//generic/597.out.bad 2024-01-14 09:41:=
+15.548729962 +0000
+    @@ -2,13 +2,17 @@
+     =3D=3D Test symlink follow protection when
+     =3D=3D process !=3D link owner and dir owner !=3D link owner
+     fs.protected_symlinks =3D 0
+    +chown: invalid group: 'fsgqa2:fsgqa2'
+     successfully followed symlink
+     fs.protected_symlinks =3D 1
+    +chown: invalid group: 'fsgqa2:fsgqa2'
 
-Signed-off-by: Su Yue <glass.su@suse.com>
+Signed-off-by: Richard Weinberger <richard@nod.at>
 ---
- common/config |  3 ++-
- common/rc     | 12 +++++++++---
- 2 files changed, 11 insertions(+), 4 deletions(-)
+ tests/generic/597 | 2 ++
+ tests/generic/598 | 2 ++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/common/config b/common/config
-index c9771ff934cb..1f9edceec57a 100644
---- a/common/config
-+++ b/common/config
-@@ -105,7 +105,7 @@ set_mkfs_prog_path_with_opts()
- 	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
- 	# matter since it also prints the help when an invalid option is given.
- 	if [ "$p" != "" ] && \
--		$p --help |& grep -q "[[:space:]]-f[[:space:]|]"; then
-+		$p --help |& grep -q "[[:space:]]-f[[:space:]|,]"; then
- 		echo "$p -f"
- 	else
- 		echo $p
-@@ -313,6 +313,7 @@ export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
- export E2FSCK_PROG=$(type -P e2fsck)
- export TUNE2FS_PROG=$(type -P tune2fs)
- export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
-+export MKFS_BCACHEFS_PROG=$(set_mkfs_prog_path_with_opts bcachefs)
- 
- # SELinux adds extra xattrs which can mess up our expected output.
- # So, mount with a context, and they won't be created.
-diff --git a/common/rc b/common/rc
-index cc92fe0681d6..f2e900bf1166 100644
---- a/common/rc
-+++ b/common/rc
-@@ -611,6 +611,9 @@ _test_mkfs()
-     xfs)
- 	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-+    bcachefs)
-+    $MKFS_BCACHEFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
-+	;;
-     *)
- 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-@@ -753,6 +756,10 @@ _scratch_mkfs()
- 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
- 		;;
-+    bcachefs)
-+		mkfs_cmd="$MKFS_BCACHEFS_PROG"
-+		mkfs_filter="cat"
-+		;;
- 	*)
- 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter="cat"
-@@ -1044,7 +1051,7 @@ _scratch_mkfs_sized()
- 		export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
- 		;;
- 	bcachefs)
--		$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
-+		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
- 		;;
- 	*)
- 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
-@@ -1128,8 +1135,7 @@ _scratch_mkfs_blocksized()
- 						-C $blocksize $SCRATCH_DEV
- 		;;
- 	bcachefs)
--		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
--								$SCRATCH_DEV
-+		_scratch_mkfs --block_size=$blocksize
- 		;;
- 	udf)
- 		_scratch_mkfs -b $blocksize
--- 
-2.43.0
+diff --git a/tests/generic/597 b/tests/generic/597
+index ff985ca61915..a3035489aea3 100755
+--- a/tests/generic/597
++++ b/tests/generic/597
+@@ -32,8 +32,10 @@ _require_test
+ _require_sysctl_variable fs.protected_symlinks
+ _require_sysctl_variable fs.protected_hardlinks
+ _require_user fsgqa2
++_require_group fsgqa2
+ # Do this SECOND so that qa_user is fsgqa, and _user_do uses that accoun=
+t
+ _require_user fsgqa
++_require_group fsgqa
+ _require_symlinks
+=20
+ OWNER=3Dfsgqa2
+diff --git a/tests/generic/598 b/tests/generic/598
+index 769c1b1a1ad9..31b7fde48868 100755
+--- a/tests/generic/598
++++ b/tests/generic/598
+@@ -32,8 +32,10 @@ _require_test
+ _require_sysctl_variable fs.protected_regular
+ _require_sysctl_variable fs.protected_fifos
+ _require_user fsgqa2
++_require_group fsgqa2
+ # Do this SECOND so that qa_user is fsgqa, and _user_do uses that accoun=
+t
+ _require_user fsgqa
++_require_group fsgqa
+ _require_chmod
+=20
+ USER1=3Dfsgqa2
+--=20
+2.26.2
 
