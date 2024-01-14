@@ -1,168 +1,133 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 994D55225
-	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 12:57:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B8182100
+	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 13:15:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cb2j79Nm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1705237064;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=EV9qT0xi0f/EfAM2vWU4Of1/cD06Z7Hd39BHq/uthHs=;
-	b=cb2j79Nm1ixy+ajFdndxj/c1a8sXi5t0RsbUr54sdXu9vM2sjmYVK6zVsOEQikZLinoaiH
-	NI0LCzDKX4FlbH8ydr1vE3IzJHggPoDDmJGSJJ7jmjgLD5BnOQsLqrrMjjzzMQfM6wFZyL
-	5B1ReR857USiDGkvHHiu/9OrR6rwiig=
-Received: from mail-oo1-f69.google.com (mail-oo1-f69.google.com
- [209.85.161.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-504-tyveUM0rNuu0_9bywm-wug-1; Sun, 14 Jan 2024 07:57:37 -0500
-X-MC-Unique: tyveUM0rNuu0_9bywm-wug-1
-Received: by mail-oo1-f69.google.com with SMTP id 006d021491bc7-598f047f034so570989eaf.3
-        for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 04:57:37 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705237057; x=1705841857;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=EV9qT0xi0f/EfAM2vWU4Of1/cD06Z7Hd39BHq/uthHs=;
-        b=JKCCvsYQrS5I1+Fw7KUbhgOrHn9qWN9GuQDC1Nuaq8XK6iYn5uw7ERTJhQv9y5Uy6L
-         b1OA1oQdpnTHg8jS19W/wHHs21/BZLjIGLVD8D0XIqPH11452Zvw9Vr7NGeKSPLrHJRH
-         i7XYS95c48K0IPJ2JEqJGkWLWND8kpeS+JOOTMaxrDt3dIXI75zbktZgDTcx54VIPUrU
-         DMe702T6mvNccGvQV7v+5UOqdnK7dnXbxSyb5ZAheUN+S1nI6MG1QEySNWgq9UYi7mEy
-         dd9f6EKfhztnn8pneq2s516fg+4KygnznE65sym6jsB1WSdsTMvsHdpb/HRBdroYI5zj
-         tYtg==
-X-Gm-Message-State: AOJu0Yy0Z1ouDHB+G5h4xn5axTzWvTJ9GUfAXgPn00cS/8dkdJ04/s7T
-	MZ4XPNv1FKq5jRIj8sZTZ6AMF4uNXpTYjd0bVek4QbdDze4g3UVWaDAe99iWt6lla9fMkwtfksg
-	OVPHmF/pBok2PJ0oy3gbwACPK0Q==
-X-Received: by 2002:a05:6820:505:b0:596:419f:502e with SMTP id m5-20020a056820050500b00596419f502emr2934059ooj.0.1705237057185;
-        Sun, 14 Jan 2024 04:57:37 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IG8oOHaDdPTRniQcbYTAy+7Dj4vGLEtue7MrlKUooDRPzKm1Jr6QGHx9j19qpkoultOKB/JDw==
-X-Received: by 2002:a05:6820:505:b0:596:419f:502e with SMTP id m5-20020a056820050500b00596419f502emr2934049ooj.0.1705237056928;
-        Sun, 14 Jan 2024 04:57:36 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id pt12-20020a17090b3d0c00b0028e3feea296sm1450033pjb.1.2024.01.14.04.57.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Jan 2024 04:57:36 -0800 (PST)
-Date: Sun, 14 Jan 2024 20:57:32 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-	linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Daniel Rosenberg <drosen@google.com>
-Subject: Re: [PATCH v2 4/4] generic: add test for custom crypto data unit size
-Message-ID: <20240114125732.qpdltz52wrjursl2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20231121223909.4617-1-ebiggers@kernel.org>
- <20231121223909.4617-5-ebiggers@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="o9saQPTC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D363C433C7;
+	Sun, 14 Jan 2024 13:15:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1705238114;
+	bh=79aafvODDldRvdusA2FJ7bluMZ3v50PFe7sqc4wal+o=;
+	h=Date:From:To:Subject:From;
+	b=o9saQPTCZsfJDNzSvFwojQjJZ9KFKWXC106Pr3WoP1Vk6Gq8jWo9Mnov6EF1S9nqq
+	 MZQknBWc+wruuMdso8eMJz+f9KBhlwQ78Mr2V91IQ3EkfeG6v2DDW0m2AgFh6Wfnby
+	 qM5230NjfgClJ1ovKbmlc8v42DoWjDF8rRJqhm5tbFgjYFHbBEk7WoOaWHaGhNHZRK
+	 3RsLqe+3z4BNS2mSsOExhg6mThbrxPYNG7ruURmr+iPCrqnjURPeNQVhOEtiohg2rm
+	 2rYNsE82CE/tLK+jS3f+RHwrZKfKJq1YD2/AEJehQ0SL5EsxqDRoWqp6ztxK220eOo
+	 m4+gMicy/OBTA==
+Date: Sun, 14 Jan 2024 21:15:11 +0800
+Message-ID: <d5d28347fd1079d6cf9121feea965a19@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: master branch updated to v2023.12.25
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="2Z4543YglVdZ"
+Content-Disposition: inline
+
+
+--2Z4543YglVdZ
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231121223909.4617-5-ebiggers@kernel.org>
 
-On Tue, Nov 21, 2023 at 02:39:09PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Add a test that verifies the on-disk format of encrypted files that use
-> a crypto data unit size that differs from the filesystem block size.
-> This tests the functionality that was introduced in Linux 6.7 by kernel
-> commit 5b1188847180 ("fscrypt: support crypto data unit size less than
-> filesystem block size").
-> 
-> This depends on the xfsprogs patch
-> "xfs_io/encrypt: support specifying crypto data unit size"
-> (https://lore.kernel.org/r/20231013062639.141468-1-ebiggers@kernel.org)
-> which adds the '-s' option to the set_encpolicy command of xfs_io.
-> 
-> As usual, the test skips itself when any prerequisite isn't met.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  tests/generic/900     | 29 +++++++++++++++++++++++++++++
->  tests/generic/900.out | 11 +++++++++++
->  2 files changed, 40 insertions(+)
->  create mode 100755 tests/generic/900
->  create mode 100644 tests/generic/900.out
-> 
-> diff --git a/tests/generic/900 b/tests/generic/900
-> new file mode 100755
-> index 00000000..8d1b5766
-> --- /dev/null
-> +++ b/tests/generic/900
-> @@ -0,0 +1,29 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright 2023 Google LLC
-> +#
-> +# FS QA Test No. generic/900
-> +#
-> +# Verify the on-disk format of encrypted files that use a crypto data unit size
-> +# that differs from the filesystem block size.  This tests the functionality
-> +# that was introduced in Linux 6.7 by kernel commit 5b1188847180
-> +# ("fscrypt: support crypto data unit size less than filesystem block size").
+Hi all,
 
-I'll write this part as:
+The master branch of the xfstests repository at:
 
-  _wants_kernel_commit 5b1188847180
-	"fscrypt: support crypto data unit size less than filesystem block size"
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-when I merge it.
+has just been updated to v2023.12.25 version.
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick encrypt
-> +
-> +. ./common/filter
-> +. ./common/encrypt
-> +
-> +_supported_fs generic
-> +
-> +# For now, just test 512-byte and 1024-byte data units.  Filesystems accept
-> +# power-of-2 sizes between 512 and the filesystem block size, inclusively.
-> +# Testing 512 and 1024 ensures this test will run for any FS block size >= 1024
-> +# (provided that the filesystem supports sub-block data units at all).
-> +_verify_ciphertext_for_encryption_policy AES-256-XTS AES-256-CTS-CBC v2 log2_dusize=9
+Thanks,
+Zorro
 
-Oh, all _require_scratch_... things are in this helper. I was wondering
-why it doesn't need to _require_scratch :)
+The new head of the master branch is commit:
 
-This patchset looks good to me, tested passed on latest upstream kernel.
-Thanks for this upgrade. Feel free to ping me, if your patchset be blocked
-long time.
+17324dbc7743 fstests: btrfs: use proper filter for subvolume deletion
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+New commits:
 
-> +_verify_ciphertext_for_encryption_policy AES-256-XTS AES-256-CTS-CBC v2 log2_dusize=10
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/900.out b/tests/generic/900.out
-> new file mode 100644
-> index 00000000..3259f08c
-> --- /dev/null
-> +++ b/tests/generic/900.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 900
-> +
-> +Verifying ciphertext with parameters:
-> +	contents_encryption_mode: AES-256-XTS
-> +	filenames_encryption_mode: AES-256-CTS-CBC
-> +	options: v2 log2_dusize=9
-> +
-> +Verifying ciphertext with parameters:
-> +	contents_encryption_mode: AES-256-XTS
-> +	filenames_encryption_mode: AES-256-CTS-CBC
-> +	options: v2 log2_dusize=10
-> -- 
-> 2.42.1
-> 
-> 
+Alexander Patrakov (1):
+      [b4396efc75ab] _require_sparse_files: rewrite as a direct test instead of a black list
 
+Amir Goldstein (5):
+      [f0f8f248dd0b] overlay: Add tests for nesting private xattrs
+      [400ed0ed69d6] overlay: prepare for new lowerdir+,datadir+ tests
+      [308784d1695d] overlay: test data-only lowerdirs with datadir+ mount option
+      [409db1b2972b] overlay: test parsing of lowerdir+,datadir+ mount options
+      [314f38ef20ed] overlay/081: fix test when running with index enabled
+
+Darrick J. Wong (3):
+      [e9b26f8c1649] generic/615: fix loop termination failures
+      [b223ff181a86] generic/410: don't blow away seqres.full during test
+      [abc57c0daaf6] generic/735: skip this test if we cannot finsert at pos 1M
+
+Murphy Zhou (1):
+      [4050ac7b38b0] generic: drop caches while freeze
+
+Naohiro Aota (2):
+      [475f51d9ed55] fstests: filter.btrfs: update _filter_transaction_commit()
+      [17324dbc7743] fstests: btrfs: use proper filter for subvolume deletion
+
+Yang Xu (1):
+      [d6e9d32578af] generic/650: add kernel commit id
+
+
+Code Diffstat:
+
+ common/filter.btrfs   |   5 +-
+ common/overlay        |  15 +++
+ common/rc             |  29 +++--
+ tests/btrfs/208       |   2 +-
+ tests/btrfs/208.out   |   6 +-
+ tests/btrfs/233       |   3 +-
+ tests/btrfs/233.out   |   4 +-
+ tests/btrfs/276       |   3 +-
+ tests/btrfs/276.out   |   2 +-
+ tests/generic/410     |   2 +-
+ tests/generic/615     |   6 +-
+ tests/generic/650     |   3 +
+ tests/generic/735     |   1 +
+ tests/generic/738     |  52 ++++++++
+ tests/generic/738.out |   2 +
+ tests/overlay/079     |  36 +++---
+ tests/overlay/081     |  14 +--
+ tests/overlay/084     | 171 ++++++++++++++++++++++++++
+ tests/overlay/084.out |  61 ++++++++++
+ tests/overlay/085     | 332 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/085.out |  42 +++++++
+ tests/overlay/086     |  81 ++++++++++++
+ tests/overlay/086.out |   2 +
+ 23 files changed, 830 insertions(+), 44 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--2Z4543YglVdZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmWj3jQACgkQlNbPkfr2
+tMyK8BAAi5kmeEauLdiPjAgUM5WggNU7J1qnfdaKstMzpqM6JI2y6xDjGPlZhrOJ
+PR5yNBsojFLy0lwSe4t92lydml7le1vlXbnrLR48o32QVIpxtZ9zjlNAuNhhULLv
+A2qdmNzO8fPs2NuRLazSDtGx5fZRn70QAj0Zx1npPDiHC/b/KIZCfGFDXURj5dFr
+oG9BRNA7lqp+uM+TQFn4pTI+FM6xO717cgKZibf8+YMw+rceS5jjwMeE8tsbuC1C
++YJvee534Zb5TJIVXELqRiQmuk3z5qLpYeY+bFrxI09VQvDiYBOxrPkwmsj+WoAU
+lQEA/NXNWx5HMg+FtVj/YATeyvY2Odf4P5bq4sZgICY5jSk+JPFhvBjwXhhrAcCi
+UjN28QDuM9PNlFcZyOjIJGWcghUuR5tv9D2/fRaJVIDVaNvegQyQYWsp4Oahw2yc
+GdnfAWstrSSrYR62KEURdKbBPmGhPIUHdDFEVyPgKs048tlrV25hSZZPGCzsr5KF
+4S3hWGBIk349bcyRuKyBnAygnrBa4WijLnFaxbtIil3xwKjPKYq+0OOt3DjH7FY1
+MkP8OBiT/aCUrhDVLWaKQZzYAQc3B1IhAdhLzaR+fwag9+hCdoIM/TYNa7ebZQ8C
+91p+MA0+1UA3EGIK+0BtWQn9TtS2WM9T2DTcsdH1o5iC/0xb0jo=
+=++X6
+-----END PGP SIGNATURE-----
+
+--2Z4543YglVdZ--
