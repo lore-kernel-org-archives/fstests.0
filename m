@@ -1,122 +1,74 @@
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+Received: from esa9.hc1455-7.c3s2.iphmx.com (esa9.hc1455-7.c3s2.iphmx.com [139.138.36.223])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 204F61097D
-	for <fstests@vger.kernel.org>; Sun, 14 Jan 2024 20:49:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=nod.at
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nod.at
-Received: from localhost (localhost [127.0.0.1])
-	by lithops.sigma-star.at (Postfix) with ESMTP id BFC416410419;
-	Sun, 14 Jan 2024 21:48:54 +0100 (CET)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
-	with ESMTP id L89zgk94eEQw; Sun, 14 Jan 2024 21:48:54 +0100 (CET)
-Received: from localhost (localhost [127.0.0.1])
-	by lithops.sigma-star.at (Postfix) with ESMTP id 57FEC626FB01;
-	Sun, 14 Jan 2024 21:48:54 +0100 (CET)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id v4uP9DuaRdvQ; Sun, 14 Jan 2024 21:48:54 +0100 (CET)
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-	by lithops.sigma-star.at (Postfix) with ESMTP id 326286410419;
-	Sun, 14 Jan 2024 21:48:54 +0100 (CET)
-Date: Sun, 14 Jan 2024 21:48:53 +0100 (CET)
-From: Richard Weinberger <richard@nod.at>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
-Message-ID: <1829752362.234840.1705265333986.JavaMail.zimbra@nod.at>
-In-Reply-To: <20240114201831.jhaww3xzbfqervc5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <1998649210.233983.1705246961955.JavaMail.zimbra@nod.at> <20240114201831.jhaww3xzbfqervc5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Subject: Re: fsgqa group membership?
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC36F137B
+	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 01:00:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+X-IronPort-AV: E=McAfee;i="6600,9927,10953"; a="134485879"
+X-IronPort-AV: E=Sophos;i="6.04,195,1695654000"; 
+   d="scan'208";a="134485879"
+Received: from unknown (HELO oym-r2.gw.nic.fujitsu.com) ([210.162.30.90])
+  by esa9.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Jan 2024 09:59:20 +0900
+Received: from oym-m2.gw.nic.fujitsu.com (oym-nat-oym-m2.gw.nic.fujitsu.com [192.168.87.59])
+	by oym-r2.gw.nic.fujitsu.com (Postfix) with ESMTP id 5580ED7AE4
+	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:18 +0900 (JST)
+Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
+	by oym-m2.gw.nic.fujitsu.com (Postfix) with ESMTP id 86916BF3C5
+	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:17 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 1B46822CDF3
+	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:17 +0900 (JST)
+Received: from localhost.localdomain (unknown [10.167.226.45])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 49DF51A0072;
+	Mon, 15 Jan 2024 08:59:16 +0800 (CST)
+From: Li Zhijian <lizhijian@fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Li Zhijian <lizhijian@fujitsu.com>
+Subject: [PATCH] xfs: Fix no executable permission
+Date: Mon, 15 Jan 2024 08:59:13 +0800
+Message-Id: <20240115005913.3829532-1-lizhijian@fujitsu.com>
+X-Mailer: git-send-email 2.31.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
-Thread-Topic: fsgqa group membership?
-Thread-Index: 6HKEGPm+vyw8ImDfjX/V/Gr4s4J2Jw==
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28120.003
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28120.003
+X-TMASE-Result: 10--2.370000-10.000000
+X-TMASE-MatchedRID: 0KSlClBsfT6ROBVNmXUDuDyjd/AizytBCZa9cSpBObkrfoFYrvlA5ATg
+	sjIJUJZIWGH5wVAlhqGlEtDJyVR88h8TzIzimOwPO6pzAGRBlFzZs3HUcS/scCq2rl3dzGQ1P0U
+	wwWYR9x5Q2tk/ZySAhhtGKnF33geIXicK2T4zYMf8uHCCP42LxLgPzh0rT9im6yIPuGmYr74s5j
+	DxYPoEN0wNCMOrF1tKhLvAid2uj0YVxRB/din+uJ07T8ZSLiAVvR84/OmB1wQp4n8eQBnwiw==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-Zorro,
+Give them the executable permission, this also make the git status keep clean
+after `./check`
 
------ Urspr=C3=BCngliche Mail -----
->> It turned out that the test failed because the user "fsgqa" did not have=
- the
->> "fsgqa" group assigned.
->> After rectifying this, the test passed successfully.
->=20
-> OK, so you've found out why it's failed :)
+Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
+---
+ tests/xfs/557 | 0
+ tests/xfs/567 | 0
+ tests/xfs/568 | 0
+ 3 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100644 => 100755 tests/xfs/557
+ mode change 100644 => 100755 tests/xfs/567
+ mode change 100644 => 100755 tests/xfs/568
 
-Yeah, but took me more time than it should. ;-)
-=20
->>=20
->> But it is nowhere stated that this has to be that way.
->>=20
->> README says only:
->> 6. (optional) Create fsgqa test users and groups:
->>=20
->>    $ sudo useradd -m fsgqa
->>    $ sudo useradd 123456-fsgqa
->>    $ sudo useradd fsgqa2
->>    $ sudo groupadd fsgqa
->>=20
->> Just in case, users fsgqa and fsgqa2 want the groups fsgqa/fsgqa2 as the=
-ir
->> primary groups
->> to have all tests work as expected?
->=20
-> Actually above steps aren't exact enough. It depends on a default behavio=
-r
-> of useradd command -- "By default, a group will also be created for the
-> new user" (from `man useradd`)
->=20
-> And according to the manual:
->=20
->       -g, --gid GROUP
->           The name or the number of the user's primary group. The group n=
-ame must exist. A
->           group number must refer to an already existing group.
->=20
->           If not specified, the behavior of useradd will depend on the US=
-ERGROUPS_ENAB
->           variable in /etc/login.defs. If this variable is set to yes (or=
- -U/--user-group
->           is specified on
->           the command line), a group will be created for the user, with t=
-he same name as
->           her loginname. If the variable is set to no (or -N/--no-user-gr=
-oup is specified
->           on the command
->           line), useradd will set the primary group of the new user to th=
-e value specified
->           by the GROUP variable in /etc/default/useradd, or 1000 by defau=
-lt.
->=20
-> You said "After migrating to a new test environment", I don't know what's
-> your new test env. Maybe your USERGROUPS_ENAB isn't set to yes by default=
-,
-> or your useradd has an alias "useradd -N", or any other reasons.
+diff --git a/tests/xfs/557 b/tests/xfs/557
+old mode 100644
+new mode 100755
+diff --git a/tests/xfs/567 b/tests/xfs/567
+old mode 100644
+new mode 100755
+diff --git a/tests/xfs/568 b/tests/xfs/568
+old mode 100644
+new mode 100755
+-- 
+2.29.2
 
-SUSE Linux has traditionally not set USERGROUPS_ENAB, this explains the iss=
-ue.
-The old setup was not SUSE based.
-
-> Anyway if you hope to make sure each fsgqa users is assigned to their
-> own group, how about:
->=20
-> $ groupadd fsgqa
-> $ useradd -m -g fsgqa fsgqa
-> $ groupadd fsgqa2
-> $ useradd -g fsgqa2 fsgqa2
-> $ groupadd 123456-fsgqa
-> $ useradd -g 123456-fsgqa 123456-fsgqa
-
-Sounds good! It is verbose but that way everybody will know and it will wor=
-k
-on "strange" systems too.
-
-Thanks,
-//richard
