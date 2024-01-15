@@ -1,74 +1,85 @@
-Received: from esa9.hc1455-7.c3s2.iphmx.com (esa9.hc1455-7.c3s2.iphmx.com [139.138.36.223])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC36F137B
-	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 01:00:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
-X-IronPort-AV: E=McAfee;i="6600,9927,10953"; a="134485879"
-X-IronPort-AV: E=Sophos;i="6.04,195,1695654000"; 
-   d="scan'208";a="134485879"
-Received: from unknown (HELO oym-r2.gw.nic.fujitsu.com) ([210.162.30.90])
-  by esa9.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Jan 2024 09:59:20 +0900
-Received: from oym-m2.gw.nic.fujitsu.com (oym-nat-oym-m2.gw.nic.fujitsu.com [192.168.87.59])
-	by oym-r2.gw.nic.fujitsu.com (Postfix) with ESMTP id 5580ED7AE4
-	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:18 +0900 (JST)
-Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
-	by oym-m2.gw.nic.fujitsu.com (Postfix) with ESMTP id 86916BF3C5
-	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:17 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 1B46822CDF3
-	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 09:59:17 +0900 (JST)
-Received: from localhost.localdomain (unknown [10.167.226.45])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 49DF51A0072;
-	Mon, 15 Jan 2024 08:59:16 +0800 (CST)
-From: Li Zhijian <lizhijian@fujitsu.com>
-To: fstests@vger.kernel.org
-Cc: Li Zhijian <lizhijian@fujitsu.com>
-Subject: [PATCH] xfs: Fix no executable permission
-Date: Mon, 15 Jan 2024 08:59:13 +0800
-Message-Id: <20240115005913.3829532-1-lizhijian@fujitsu.com>
-X-Mailer: git-send-email 2.31.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD16B628
+	for <fstests@vger.kernel.org>; Mon, 15 Jan 2024 02:57:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="bfpEAQQM"
+Received: from cwcc.thunk.org (pool-173-48-115-247.bstnma.fios.verizon.net [173.48.115.247])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 40F2v7NA021497
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 14 Jan 2024 21:57:08 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1705287428; bh=zzWsEGxzDhIpoNhKyW4frvwLTk7wEvh7nSMTRvX4V0E=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=bfpEAQQMCW6f8Ce4fGZKdjJPUBqfvaJX2uv9ZjnkkLqVk6WnNgEiUJo/xzIA6ynuk
+	 2BDqv0DGoCZ5FOp9zbiV4hHt/M00PNWneGzWLoDf0X66yx2cuBb7dhBf6FbReVdgOw
+	 4aVj5fsNdi6reozgMZgBAN1ntmP6uKaZPIPVE/b34cRIM5CUi5eOVaq26YI6O77SEU
+	 bIGDpG3rzR9tGGzb3jMf4KU8luRTgghifgZvC+df7epG3v5poFFb2nMc/dLUtkYzwO
+	 fCT5lJbaNSo/w2BBvpPSF2UVlovxbqCr9RONRkh6+jxo1jR0gMPX79qqsJPzfzCQcR
+	 swQi9Yz2htGXA==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id E967015C0278; Sun, 14 Jan 2024 21:57:06 -0500 (EST)
+Date: Sun, 14 Jan 2024 21:57:06 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Richard Weinberger <richard@nod.at>
+Cc: fstests@vger.kernel.org
+Subject: Re: fsgqa group membership?
+Message-ID: <20240115025706.GF911245@mit.edu>
+References: <1998649210.233983.1705246961955.JavaMail.zimbra@nod.at>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28120.003
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28120.003
-X-TMASE-Result: 10--2.370000-10.000000
-X-TMASE-MatchedRID: 0KSlClBsfT6ROBVNmXUDuDyjd/AizytBCZa9cSpBObkrfoFYrvlA5ATg
-	sjIJUJZIWGH5wVAlhqGlEtDJyVR88h8TzIzimOwPO6pzAGRBlFzZs3HUcS/scCq2rl3dzGQ1P0U
-	wwWYR9x5Q2tk/ZySAhhtGKnF33geIXicK2T4zYMf8uHCCP42LxLgPzh0rT9im6yIPuGmYr74s5j
-	DxYPoEN0wNCMOrF1tKhLvAid2uj0YVxRB/din+uJ07T8ZSLiAVvR84/OmB1wQp4n8eQBnwiw==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1998649210.233983.1705246961955.JavaMail.zimbra@nod.at>
 
-Give them the executable permission, this also make the git status keep clean
-after `./check`
+On Sun, Jan 14, 2024 at 04:42:41PM +0100, Richard Weinberger wrote:
+> It turned out that the test failed because the user "fsgqa" did not
+> have the "fsgqa" group assigned.  After rectifying this, the test
+> passed successfully.
+> 
+> But it is nowhere stated that this has to be that way.
+> 
+> README says only:
+> 6. (optional) Create fsgqa test users and groups:
+> 
+>    $ sudo useradd -m fsgqa
+>    $ sudo useradd 123456-fsgqa
+>    $ sudo useradd fsgqa2
+>    $ sudo groupadd fsgqa
 
-Signed-off-by: Li Zhijian <lizhijian@fujitsu.com>
----
- tests/xfs/557 | 0
- tests/xfs/567 | 0
- tests/xfs/568 | 0
- 3 files changed, 0 insertions(+), 0 deletions(-)
- mode change 100644 => 100755 tests/xfs/557
- mode change 100644 => 100755 tests/xfs/567
- mode change 100644 => 100755 tests/xfs/568
+The useradd program creates the /etc/passwd entry as well as the
+/etc/group entry.  Demonstration:
 
-diff --git a/tests/xfs/557 b/tests/xfs/557
-old mode 100644
-new mode 100755
-diff --git a/tests/xfs/567 b/tests/xfs/567
-old mode 100644
-new mode 100755
-diff --git a/tests/xfs/568 b/tests/xfs/568
-old mode 100644
-new mode 100755
--- 
-2.29.2
+% kvm-xfstests shell
+    ...
+root@kvm-xfstests:~# grep foobarbaz /etc/passwd
+root@kvm-xfstests:~# grep foobarbaz /etc/group
+root@kvm-xfstests:~# useradd foobarbaz
+root@kvm-xfstests:~# grep foobarbaz /etc/passwd
+foobarbaz:x:31418:31418::/home/foobarbaz:/bin/sh
+root@kvm-xfstests:~# grep foobarbaz /etc/group
+foobarbaz:x:31418:
 
+I don't know why that "sudo groupadd fsgqa" is in the README; it's not
+necessary, and it would cause a "group already exists" error message.
+For example:
+
+root@kvm-xfstests:~# groupadd foobarbaz
+groupadd: group 'foobarbaz' already exists
+
+I did this demonstration using on a Debian-based test appliance.  But
+it looks like Fedora's "useradd" works exactly the same way.  See the
+web page here:
+
+https://docs.fedoraproject.org/en-US/fedora/latest/system-administrators-guide/basic-system-configuration/Managing_Users_and_Groups/
+
+						- Ted
