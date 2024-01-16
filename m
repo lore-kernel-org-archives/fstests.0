@@ -1,113 +1,106 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9836E1CA8C;
-	Tue, 16 Jan 2024 17:31:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E4A2159589
+	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 20:00:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.201.40.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705426289; cv=none; b=fDypwbvobGJgRN/7IokQAdTVQvwgtkDIZhuN2MjQSnO6PgxNnjvLj2/U6eB6vrkBiS8uXSN8roloyP2vF7sO8+D++fe28RwRjP3qdbTa8Wmj2ieeQZOdn3hLd4i4761Him92sc1pEQXmm375lvRga/zEKgKGC13oZ1jQRVj4nJQ=
+	t=1705435243; cv=none; b=BnSeNXyQ746zSWJqmWoV5yjErGLSXmbvetCr+RJ6zfIpuSy62fxPjQ1lscnD4Az9gJnOJnOFHOjPiZKTeODwV/Fp84s7+jwna1STQdwSX8SSXJ/b1fNKxa/vnyJEd9et6U5igG9ia3jDB4mF2wnlvWJftGwuRnJO4i9N3CTkZTE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705426289; c=relaxed/simple;
-	bh=U/6k863bSOdTRHr/YigdbpLvuc4GxzvU4FIVevvOFug=;
-	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:
-	 X-Mailer:MIME-Version:Content-Transfer-Encoding; b=L+VzXoVCr4GA0Qvw82/xlYRLDm23cE0sOjONZch/CaS28NXjdAAG0SILbQjf1wBTUq7unRFkwMmjHTkb44ci13a3+Bcg1vW+w2n1nY1JS67Vb5QD4OztXuDyg56NPoILUvMdS8veoix3lO5uvcxufV8mS7bQvJi2NbUZiXT3vC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XxW6C+pT; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XxW6C+pT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CFFE4C433F1;
-	Tue, 16 Jan 2024 17:31:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1705426289;
-	bh=U/6k863bSOdTRHr/YigdbpLvuc4GxzvU4FIVevvOFug=;
-	h=From:To:Cc:Subject:Date:From;
-	b=XxW6C+pT1WK6ZelHTJEgqS50xo2/gLkTjaEs6Q+FmPbs0A+qPH2ixlemnf6VlNPXc
-	 pbEj7qjxDm7D7bsq9VXzatw+2gZluo1zzH2FsgoddfZmbVAiCv2nvHM3ijt/bfPKvX
-	 xVuOHFH1+NZU7JwX/9B3VwakcM+n3A+pRaTm31DIVtck8FLuu8lKcC9X6IyFqTBb6J
-	 VLmEqfddBT+i/WM4jKX+KMeG7Mu/sb4A4MLcvyplhMZ7zixTLB1HD327pardfnrekD
-	 vIHoJ7B59kjk5a/SIhOWzF2S4uDe7nBNzizFSY71eN5N/ShbXBJFJn5OgAYMW8yfX1
-	 0/Nj3Fnegyw+A==
-From: Jeff Layton <jlayton@kernel.org>
-To: fstests@vger.kernel.org
-Cc: linux-nfs@vger.kernel.org
-Subject: [PATCH fstests] common/rc: NFSv2/3 do not support negative timestamps
-Date: Tue, 16 Jan 2024 12:31:27 -0500
-Message-ID: <20240116173127.238994-1-jlayton@kernel.org>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1705435243; c=relaxed/simple;
+	bh=rv6pVYFus65dwTi0VBS7BF4JGdgFRjyJZsSeMFNlka4=;
+	h=Received:Received:Received:Received:Received:Date:From:To:Cc:
+	 Message-ID:In-Reply-To:References:Subject:MIME-Version:
+	 Content-Type:Content-Transfer-Encoding:X-Originating-IP:X-Mailer:
+	 Thread-Topic:Thread-Index; b=Rir2XgfCtJVBIxEx+P0QgvjASeYFrtpwumt4HbbIhgMy5y3a0EuWHQaStMAivLGZJBL+hwGagTDRjd7KduQXyfBEdk2hg1sMCe7EeWm2Y7bLsZfjcQABLbt3K4yDa98wWoCuNa5+QFOR/L8tD+rd/e0xSO3S7w0NTmCAXBhClS0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=nod.at; spf=fail smtp.mailfrom=nod.at; arc=none smtp.client-ip=195.201.40.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=nod.at
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nod.at
+Received: from localhost (localhost [127.0.0.1])
+	by lithops.sigma-star.at (Postfix) with ESMTP id 1E8BE64507CC;
+	Tue, 16 Jan 2024 21:00:38 +0100 (CET)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
+	with ESMTP id iOym_mpAKn9H; Tue, 16 Jan 2024 21:00:37 +0100 (CET)
+Received: from localhost (localhost [127.0.0.1])
+	by lithops.sigma-star.at (Postfix) with ESMTP id A98B464507CF;
+	Tue, 16 Jan 2024 21:00:37 +0100 (CET)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
+	with ESMTP id qcsTeMmPCkqj; Tue, 16 Jan 2024 21:00:37 +0100 (CET)
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+	by lithops.sigma-star.at (Postfix) with ESMTP id 89FBA64507CC;
+	Tue, 16 Jan 2024 21:00:37 +0100 (CET)
+Date: Tue, 16 Jan 2024 21:00:37 +0100 (CET)
+From: Richard Weinberger <richard@nod.at>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>
+Message-ID: <1532659619.242214.1705435237434.JavaMail.zimbra@nod.at>
+In-Reply-To: <20240116171055.on2qz2zi3bijdgyi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240115212402.21888-1-richard@nod.at> <ZaXB6wYpoqjeGHKg@dread.disaster.area> <376534882.240308.1705396776298.JavaMail.zimbra@nod.at> <20240116171055.on2qz2zi3bijdgyi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH] generic/193: Ensure user in expected group
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
+Thread-Topic: generic/193: Ensure user in expected group
+Thread-Index: j6Gv5PbKpwv2hQmer/1u+8J+pQ1qNQ==
 
-The NFSv2 and v3 protocols use unsigned values for timestamps. Fix
-_require_negative_timestamps() to check the NFS version and _notrun if
-it's 2 or 3.
+----- Urspr=C3=BCngliche Mail -----
+> Von: "Zorro Lang" <zlang@redhat.com>
+> An: "richard" <richard@nod.at>
+> CC: "Dave Chinner" <david@fromorbit.com>, "fstests" <fstests@vger.kernel.=
+org>
+> Gesendet: Dienstag, 16. Januar 2024 18:10:55
+> Betreff: Re: [PATCH] generic/193: Ensure user in expected group
 
-Signed-off-by: Jeff Layton <jlayton@kernel.org>
----
- common/rc | 33 ++++++++++++++++++++++++++++++++-
- 1 file changed, 32 insertions(+), 1 deletion(-)
+> On Tue, Jan 16, 2024 at 10:19:36AM +0100, Richard Weinberger wrote:
+>> Dave,
+>>=20
+>> ----- Urspr=C3=BCngliche Mail -----
+>> > Von: "Dave Chinner" <david@fromorbit.com>
+>> > Just do this check in _require_user(). The user needs to be set up
+>> > correctly for all tests - if the user and group is not set up
+>> > correctly, don't run any of the tests that require that user.
+>> >=20
+>> > This means we don't have to play whack-a-mole with "user has no
+>> > group" every time someone assumes that a user is created with a
+>> > group by default.
+>=20
+> I think Dave is right. Due to not only the g/193, lots of cases base
+> on "fsgqa* user is in fsgqa* group". If you hope to check that by
+> the single function _require_user_in_group(), it might need to call
+> it in most of cases which use _require_user.
+>=20
+> But yes, as you said, it's weird to do it in _require_user, that makes
+> the _require_group calling is a bit redundant.
+>=20
+> If I have to choose one way, I think we can keep the _require_user_in_gro=
+up
+> as an independent function, but call it in _require_user, e.g.
+>=20
+> _require_user()
+> {
+>        qa_user=3Dfsgqa
+>        if [ -n "$1" ];then
+>                qa_user=3D$1
+>        fi
+>        _require_user_exists $qa_user
+> +=09# fstests needs each test user is in its own group name, it only need
+> +=09# a user exist, please use _require_user_exists directly.
+> +=09_require_user_in_group $qa_user $qa_user
+>        echo /bin/true | su $qa_user
+>        [ "$?" =3D=3D "0" ] || _notrun "$qa_user cannot execute commands."
+> }
+>=20
+> What do both of you think?
 
-diff --git a/common/rc b/common/rc
-index a9e0ba7e22f1..d4ac0744fab0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2902,6 +2902,27 @@ _require_debugfs()
-     [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
- }
- 
-+#
-+# Return the version of NFS in use on the mount on $1. Returns 0
-+# if it's not NFS.
-+#
-+_nfs_version()
-+{
-+	local mountpoint=$1
-+	local nfsvers=""
-+
-+	case "$FSTYP" in
-+	nfs*)
-+		nfsvers=`_mount | grep $1 | sed -n 's/^.*vers=\([0-9.]*\).*$/\1/p'`
-+		;;
-+	*)
-+		nfsvers="0"
-+		;;
-+	esac
-+
-+	echo "$nfsvers"
-+}
-+
- # The default behavior of SEEK_HOLE is to always return EOF.
- # Filesystems that implement non-default behavior return the offset
- # of holes with SEEK_HOLE. There is no way to query the filesystem
-@@ -2925,7 +2946,7 @@ _fstyp_has_non_default_seek_data_hole()
- 	nfs*)
- 		# NFSv2, NFSv3, and NFSv4.0/4.1 only support default behavior of SEEK_HOLE,
- 		# while NFSv4.2 supports non-default behavior
--		local nfsvers=`_mount() | grep $TEST_DEV | sed -n 's/^.*vers=\([0-9.]*\).*$/\1/p'`
-+		local nfsvers=$( _nfs_version "$TEST_DIR" )
- 		[ "$nfsvers" = "4.2" ]
- 		return $?
- 		;;
-@@ -5129,6 +5150,16 @@ _require_negative_timestamps() {
- 	ceph|exfat)
- 		_notrun "$FSTYP does not support negative timestamps"
- 		;;
-+	nfs*)
-+		#
-+		# NFSv2/3 timestamps use 32-bit unsigned values, and so
-+		# cannot represent values prior to the epoch
-+		#
-+		local nfsvers=$( _nfs_version "$TEST_DIR" )
-+		if [ "$nfsvers" = "2" -o "$nfsvers" = "3" ]; then
-+			_notrun "$FSTYP version $nfsvers does not support negative timestamps"
-+		fi
-+		;;
- 	esac
- }
- 
--- 
-2.43.0
+Fine by me. :-)
 
+Thanks,
+//richard
