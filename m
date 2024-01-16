@@ -1,83 +1,150 @@
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C52512B78
-	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 09:19:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=nod.at
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nod.at
-Received: from localhost (localhost [127.0.0.1])
-	by lithops.sigma-star.at (Postfix) with ESMTP id 14311626FB01;
-	Tue, 16 Jan 2024 10:19:37 +0100 (CET)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
-	with ESMTP id C8U7Ba8G-ZIG; Tue, 16 Jan 2024 10:19:36 +0100 (CET)
-Received: from localhost (localhost [127.0.0.1])
-	by lithops.sigma-star.at (Postfix) with ESMTP id A01BF626FB0A;
-	Tue, 16 Jan 2024 10:19:36 +0100 (CET)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-	by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
-	with ESMTP id Kb-5WTDNXttQ; Tue, 16 Jan 2024 10:19:36 +0100 (CET)
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-	by lithops.sigma-star.at (Postfix) with ESMTP id 7B8EB626FB01;
-	Tue, 16 Jan 2024 10:19:36 +0100 (CET)
-Date: Tue, 16 Jan 2024 10:19:36 +0100 (CET)
-From: Richard Weinberger <richard@nod.at>
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests <fstests@vger.kernel.org>
-Message-ID: <376534882.240308.1705396776298.JavaMail.zimbra@nod.at>
-In-Reply-To: <ZaXB6wYpoqjeGHKg@dread.disaster.area>
-References: <20240115212402.21888-1-richard@nod.at> <ZaXB6wYpoqjeGHKg@dread.disaster.area>
-Subject: Re: [PATCH] generic/193: Ensure user in expected group
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 206061BC4E
+	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 13:36:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bvEEn2yq"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1705412166;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=0Ah6aTcdTYMpyaqib2NnkHjiDGc+iX+PqIWbHGZSyoQ=;
+	b=bvEEn2yqGYl6mJcRni9AZE8fEQgv6YVmRHKfgpiyxQC6yoybFTSMMZZ7HEDLYJXLnpWXCQ
+	yO2NAdG/8z0PX2RSa5mOpvxwqcfVhTqRFE3lGo5afR1+lGOc+Ezux1JuQlb05KGUa4Zo4N
+	qTgBxcnbUu4e+M3Shh+do2Tjmp5qI7I=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-155-_RV9yR67PsK88VGvLdpFgw-1; Tue,
+ 16 Jan 2024 08:36:04 -0500
+X-MC-Unique: _RV9yR67PsK88VGvLdpFgw-1
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.rdu2.redhat.com [10.11.54.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id A38A53C14947;
+	Tue, 16 Jan 2024 13:36:03 +0000 (UTC)
+Received: from bfoster (unknown [10.22.8.116])
+	by smtp.corp.redhat.com (Postfix) with ESMTPS id 5BF0B3C25;
+	Tue, 16 Jan 2024 13:36:03 +0000 (UTC)
+Date: Tue, 16 Jan 2024 08:37:21 -0500
+From: Brian Foster <bfoster@redhat.com>
+To: Su Yue <glass.su@suse.com>
+Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org, l@damenly.org
+Subject: Re: [PATCH] fstests: introduce MKFS_BCACHEFS_PROG for bcachefs
+Message-ID: <ZaaGkadipvNY02HM@bfoster>
+References: <20240114044120.140111-1-glass.su@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
-Thread-Topic: generic/193: Ensure user in expected group
-Thread-Index: VdBp79U9lNmsd4+X4ve3QbjOJAMsQg==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240114044120.140111-1-glass.su@suse.com>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.1
 
-Dave,
+On Sun, Jan 14, 2024 at 12:41:20PM +0800, Su Yue wrote:
+> mkfs.bcachefs supports force overwrite when option '-f' is given:
+> $ mkfs.bcachefs --help | grep force
+>   -f, --force
+> After this commit, MKFS_BCACHEFS_PROG will contains ' -f' so
+> we don't have to add '-f' to $MKFS_OPTIONS manually.
+> 
+> It also fixes generic/466 which unsets MKFS_OPTIONS causing
+> that test hangs in mfks.bcachefs waiting for confirmation of
+> the force overwrite.
+> 
 
------ Urspr=C3=BCngliche Mail -----
-> Von: "Dave Chinner" <david@fromorbit.com>
-> Just do this check in _require_user(). The user needs to be set up
-> correctly for all tests - if the user and group is not set up
-> correctly, don't run any of the tests that require that user.
->=20
-> This means we don't have to play whack-a-mole with "user has no
-> group" every time someone assumes that a user is created with a
-> group by default.
+This seems mostly reasonable to me, but I'm kind of wondering why I
+haven't had to add -f to my MKFS_OPTIONS for bcachefs. Is there
+something unique to the test environment that affects this? I.e., I
+don't see any issue with generic/466 on a recent Fedora, even if I
+pre-format the scratch dev with XFS.
 
-I think _require_user_exists() fits better, because _require_user()
-tests whether the user can run commands via su.
+> Signed-off-by: Su Yue <glass.su@suse.com>
+> ---
+>  common/config |  3 ++-
+>  common/rc     | 12 +++++++++---
+>  2 files changed, 11 insertions(+), 4 deletions(-)
+> 
+> diff --git a/common/config b/common/config
+> index c9771ff934cb..1f9edceec57a 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -105,7 +105,7 @@ set_mkfs_prog_path_with_opts()
+>  	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
+>  	# matter since it also prints the help when an invalid option is given.
+>  	if [ "$p" != "" ] && \
+> -		$p --help |& grep -q "[[:space:]]-f[[:space:]|]"; then
+> +		$p --help |& grep -q "[[:space:]]-f[[:space:]|,]"; then
+>  		echo "$p -f"
+>  	else
+>  		echo $p
+> @@ -313,6 +313,7 @@ export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
+>  export E2FSCK_PROG=$(type -P e2fsck)
+>  export TUNE2FS_PROG=$(type -P tune2fs)
+>  export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
+> +export MKFS_BCACHEFS_PROG=$(set_mkfs_prog_path_with_opts bcachefs)
+>  
+>  # SELinux adds extra xattrs which can mess up our expected output.
+>  # So, mount with a context, and they won't be created.
+> diff --git a/common/rc b/common/rc
+> index cc92fe0681d6..f2e900bf1166 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -611,6 +611,9 @@ _test_mkfs()
+>      xfs)
+>  	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
+>  	;;
+> +    bcachefs)
+> +    $MKFS_BCACHEFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+> +	;;
+>      *)
+>  	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+>  	;;
+> @@ -753,6 +756,10 @@ _scratch_mkfs()
+>  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+>  		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
+>  		;;
+> +    bcachefs)
+> +		mkfs_cmd="$MKFS_BCACHEFS_PROG"
+> +		mkfs_filter="cat"
+> +		;;
+>  	*)
+>  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+>  		mkfs_filter="cat"
+> @@ -1044,7 +1051,7 @@ _scratch_mkfs_sized()
+>  		export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
+>  		;;
+>  	bcachefs)
+> -		$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
+> +		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
 
-Are we all happy with something like that?
-diff --git a/common/rc b/common/rc
-index a9e0ba7e..f1eabf3c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2461,13 +2461,16 @@ _cat_group()
-        cat /etc/group
- }
-=20
--# check if a user exists in the system
-+# check if a user exists in the system and has a user group
- #
- _require_user_exists()
- {
-        local user=3D$1
-        _cat_passwd | grep -q "^$user:"
-        [ "$?" =3D=3D "0" ] || _notrun "$user user not defined."
-+
-+       id -n -G $user | grep -w -q $user
-+       [ "$?" =3D=3D "0" ] || _notrun "$user not in group $user."
- }
-=20
- # check if a user exists and is able to execute commands.
+Should this function have another bcachefs check at the top to set
+def_blksize in the case the config specifies a blocksize to use?
 
-Thanks,
-//richard
+Brian
+
+>  		;;
+>  	*)
+>  		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+> @@ -1128,8 +1135,7 @@ _scratch_mkfs_blocksized()
+>  						-C $blocksize $SCRATCH_DEV
+>  		;;
+>  	bcachefs)
+> -		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
+> -								$SCRATCH_DEV
+> +		_scratch_mkfs --block_size=$blocksize
+>  		;;
+>  	udf)
+>  		_scratch_mkfs -b $blocksize
+> -- 
+> 2.43.0
+> 
+> 
+
