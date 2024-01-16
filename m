@@ -1,156 +1,113 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4A531CD01
-	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 17:11:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9836E1CA8C;
+	Tue, 16 Jan 2024 17:31:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705425065; cv=none; b=n8uKNtweMdYe/j1ghMbw4t/jRvnIP0c0gg4gldHw5LF0VdqO84OtAaLiF3yuQ+E06+cJyFnSH5fK9IsWmID9ltKTtrpz/YP4NYx05jd9UtL/42s63F3HD/fY53fqVB/1EnLzcYQ0SngEJgrO+kIoIwB8sa52KcXRSmVVr2WO1as=
+	t=1705426289; cv=none; b=fDypwbvobGJgRN/7IokQAdTVQvwgtkDIZhuN2MjQSnO6PgxNnjvLj2/U6eB6vrkBiS8uXSN8roloyP2vF7sO8+D++fe28RwRjP3qdbTa8Wmj2ieeQZOdn3hLd4i4761Him92sc1pEQXmm375lvRga/zEKgKGC13oZ1jQRVj4nJQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705425065; c=relaxed/simple;
-	bh=aE0wFqGG+kUfWXofLdxcGx70Ox1AKA2ZmvZjjfJJPd4=;
-	h=DKIM-Signature:Received:X-MC-Unique:Received:
-	 X-Google-DKIM-Signature:X-Gm-Message-State:X-Received:
-	 X-Google-Smtp-Source:X-Received:Received:Date:From:To:Cc:Subject:
-	 Message-ID:References:MIME-Version:Content-Type:
-	 Content-Disposition:Content-Transfer-Encoding:In-Reply-To; b=VfgVXy15hwZmwta0teV6gFfOwM04xmouSA7nQDazW4Vj5H6u01h7m4Req0C/jJdFw6BVH70ZGOY1yTkDR76nUIjNH2Gwoolwh2plZpK6f8IA/kOH2wrr2F+9bYrwTfMV7oMAiE99JZfnUbYQiS1M2BTYJQZW5xb0fttGuwp2+/M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hRIKOKw6
+	s=arc-20240116; t=1705426289; c=relaxed/simple;
+	bh=U/6k863bSOdTRHr/YigdbpLvuc4GxzvU4FIVevvOFug=;
+	h=Received:DKIM-Signature:From:To:Cc:Subject:Date:Message-ID:
+	 X-Mailer:MIME-Version:Content-Transfer-Encoding; b=L+VzXoVCr4GA0Qvw82/xlYRLDm23cE0sOjONZch/CaS28NXjdAAG0SILbQjf1wBTUq7unRFkwMmjHTkb44ci13a3+Bcg1vW+w2n1nY1JS67Vb5QD4OztXuDyg56NPoILUvMdS8veoix3lO5uvcxufV8mS7bQvJi2NbUZiXT3vC4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XxW6C+pT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hRIKOKw6"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1705425061;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=WZZ0q0p3NmlH2EMi8Rk/xDdZtVzc1oDldCK2jlSN9V8=;
-	b=hRIKOKw6+SCD1YRejC0lJvWYJxw8x6eA07xfrihlhaxFc2Id5fT3wGuUwkFq/c9/biXRen
-	Pj7F0neEUJhBBp7hNOo4fFj1Si7OSCbeqTA1iD6lBfXNlaut8iWQrZAA6/GhrS9jqIGfj2
-	8vuX2sYr5PXUHTR+aSmIbiq92iWUsE8=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-319-l6g49TvfOGyyO80l8EZimg-1; Tue, 16 Jan 2024 12:11:00 -0500
-X-MC-Unique: l6g49TvfOGyyO80l8EZimg-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6da0d1d6674so11794445b3a.1
-        for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 09:10:59 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705425059; x=1706029859;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=WZZ0q0p3NmlH2EMi8Rk/xDdZtVzc1oDldCK2jlSN9V8=;
-        b=P0nMh6g5i9QxaIm5E2iW2tlzw7dPi41CISC259tRg5guIBVx8i9i3hGUcj3BWXtHj0
-         M8brhFXMHFsPjCBSJImePXuEsTCS3vgHHfA789Qb3b3jhghPQz8d8n3Pa4zAUAoqIhTh
-         44vMXU5t8g0vGwai9DCXNbkAXFIWrx+KgJeovFwxNdNoG9mw4UUMz4Ei06LEuUCxNGA0
-         vvtf3TnW9xMlJAEk4ZvG+N2i4gCmC0UWR9oolUrbZNsmOnQjHWiGL7VYeFJ/9bCdXYlu
-         d7qr32SShmTNqt2mkiC4HSM+h+lW0KaVg+9osaFUCJuVa9TRCVVEG7knIgXcQwHv+LHz
-         vQ1A==
-X-Gm-Message-State: AOJu0YyMLSpOjqrvVZ167m0Qef5Cdw2wN7NLHt0IaMpg64J8Nq0betfY
-	wPPuw4nev4H7+uSsqbiIKQA/sKZOgbvsVM5JGer3Z2DPNwMyFZvyYXgIhaMoFQ8OqLIQbt+FrAQ
-	pL5aAQeZbkQAHFET7TU8EbTMUHQ==
-X-Received: by 2002:a05:6a00:398b:b0:6db:79f6:777b with SMTP id fi11-20020a056a00398b00b006db79f6777bmr4988007pfb.33.1705425059025;
-        Tue, 16 Jan 2024 09:10:59 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGnRnij+eXeH+EGwPa7QDrwUlgE9sZWP1WQA7uAoMv7sO03sOTXpwHBxxCTbpozV84yxej+UQ==
-X-Received: by 2002:a05:6a00:398b:b0:6db:79f6:777b with SMTP id fi11-20020a056a00398b00b006db79f6777bmr4987998pfb.33.1705425058703;
-        Tue, 16 Jan 2024 09:10:58 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id p124-20020a625b82000000b006d9bdc0f765sm9945581pfb.53.2024.01.16.09.10.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Jan 2024 09:10:58 -0800 (PST)
-Date: Wed, 17 Jan 2024 01:10:55 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Richard Weinberger <richard@nod.at>
-Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] generic/193: Ensure user in expected group
-Message-ID: <20240116171055.on2qz2zi3bijdgyi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240115212402.21888-1-richard@nod.at>
- <ZaXB6wYpoqjeGHKg@dread.disaster.area>
- <376534882.240308.1705396776298.JavaMail.zimbra@nod.at>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XxW6C+pT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CFFE4C433F1;
+	Tue, 16 Jan 2024 17:31:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1705426289;
+	bh=U/6k863bSOdTRHr/YigdbpLvuc4GxzvU4FIVevvOFug=;
+	h=From:To:Cc:Subject:Date:From;
+	b=XxW6C+pT1WK6ZelHTJEgqS50xo2/gLkTjaEs6Q+FmPbs0A+qPH2ixlemnf6VlNPXc
+	 pbEj7qjxDm7D7bsq9VXzatw+2gZluo1zzH2FsgoddfZmbVAiCv2nvHM3ijt/bfPKvX
+	 xVuOHFH1+NZU7JwX/9B3VwakcM+n3A+pRaTm31DIVtck8FLuu8lKcC9X6IyFqTBb6J
+	 VLmEqfddBT+i/WM4jKX+KMeG7Mu/sb4A4MLcvyplhMZ7zixTLB1HD327pardfnrekD
+	 vIHoJ7B59kjk5a/SIhOWzF2S4uDe7nBNzizFSY71eN5N/ShbXBJFJn5OgAYMW8yfX1
+	 0/Nj3Fnegyw+A==
+From: Jeff Layton <jlayton@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-nfs@vger.kernel.org
+Subject: [PATCH fstests] common/rc: NFSv2/3 do not support negative timestamps
+Date: Tue, 16 Jan 2024 12:31:27 -0500
+Message-ID: <20240116173127.238994-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <376534882.240308.1705396776298.JavaMail.zimbra@nod.at>
 
-On Tue, Jan 16, 2024 at 10:19:36AM +0100, Richard Weinberger wrote:
-> Dave,
-> 
-> ----- Ursprüngliche Mail -----
-> > Von: "Dave Chinner" <david@fromorbit.com>
-> > Just do this check in _require_user(). The user needs to be set up
-> > correctly for all tests - if the user and group is not set up
-> > correctly, don't run any of the tests that require that user.
-> > 
-> > This means we don't have to play whack-a-mole with "user has no
-> > group" every time someone assumes that a user is created with a
-> > group by default.
+The NFSv2 and v3 protocols use unsigned values for timestamps. Fix
+_require_negative_timestamps() to check the NFS version and _notrun if
+it's 2 or 3.
 
-I think Dave is right. Due to not only the g/193, lots of cases base
-on "fsgqa* user is in fsgqa* group". If you hope to check that by
-the single function _require_user_in_group(), it might need to call
-it in most of cases which use _require_user.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ common/rc | 33 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 32 insertions(+), 1 deletion(-)
 
-But yes, as you said, it's weird to do it in _require_user, that makes
-the _require_group calling is a bit redundant.
-
-If I have to choose one way, I think we can keep the _require_user_in_group
-as an independent function, but call it in _require_user, e.g.
-
-_require_user()
-{
-        qa_user=fsgqa
-        if [ -n "$1" ];then
-                qa_user=$1
-        fi
-        _require_user_exists $qa_user
-+	# fstests needs each test user is in its own group name, it only need
-+	# a user exist, please use _require_user_exists directly.
-+	_require_user_in_group $qa_user $qa_user
-        echo /bin/true | su $qa_user
-        [ "$?" == "0" ] || _notrun "$qa_user cannot execute commands."
-}
-
-What do both of you think?
-
-Thanks
-Zorro
-
-> 
-> I think _require_user_exists() fits better, because _require_user()
-> tests whether the user can run commands via su.
-> 
-> Are we all happy with something like that?
-> diff --git a/common/rc b/common/rc
-> index a9e0ba7e..f1eabf3c 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2461,13 +2461,16 @@ _cat_group()
->         cat /etc/group
->  }
->  
-> -# check if a user exists in the system
-> +# check if a user exists in the system and has a user group
->  #
->  _require_user_exists()
->  {
->         local user=$1
->         _cat_passwd | grep -q "^$user:"
->         [ "$?" == "0" ] || _notrun "$user user not defined."
-> +
-> +       id -n -G $user | grep -w -q $user
-> +       [ "$?" == "0" ] || _notrun "$user not in group $user."
->  }
->  
->  # check if a user exists and is able to execute commands.
-> 
-> Thanks,
-> //richard
-> 
+diff --git a/common/rc b/common/rc
+index a9e0ba7e22f1..d4ac0744fab0 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2902,6 +2902,27 @@ _require_debugfs()
+     [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
+ }
+ 
++#
++# Return the version of NFS in use on the mount on $1. Returns 0
++# if it's not NFS.
++#
++_nfs_version()
++{
++	local mountpoint=$1
++	local nfsvers=""
++
++	case "$FSTYP" in
++	nfs*)
++		nfsvers=`_mount | grep $1 | sed -n 's/^.*vers=\([0-9.]*\).*$/\1/p'`
++		;;
++	*)
++		nfsvers="0"
++		;;
++	esac
++
++	echo "$nfsvers"
++}
++
+ # The default behavior of SEEK_HOLE is to always return EOF.
+ # Filesystems that implement non-default behavior return the offset
+ # of holes with SEEK_HOLE. There is no way to query the filesystem
+@@ -2925,7 +2946,7 @@ _fstyp_has_non_default_seek_data_hole()
+ 	nfs*)
+ 		# NFSv2, NFSv3, and NFSv4.0/4.1 only support default behavior of SEEK_HOLE,
+ 		# while NFSv4.2 supports non-default behavior
+-		local nfsvers=`_mount() | grep $TEST_DEV | sed -n 's/^.*vers=\([0-9.]*\).*$/\1/p'`
++		local nfsvers=$( _nfs_version "$TEST_DIR" )
+ 		[ "$nfsvers" = "4.2" ]
+ 		return $?
+ 		;;
+@@ -5129,6 +5150,16 @@ _require_negative_timestamps() {
+ 	ceph|exfat)
+ 		_notrun "$FSTYP does not support negative timestamps"
+ 		;;
++	nfs*)
++		#
++		# NFSv2/3 timestamps use 32-bit unsigned values, and so
++		# cannot represent values prior to the epoch
++		#
++		local nfsvers=$( _nfs_version "$TEST_DIR" )
++		if [ "$nfsvers" = "2" -o "$nfsvers" = "3" ]; then
++			_notrun "$FSTYP version $nfsvers does not support negative timestamps"
++		fi
++		;;
+ 	esac
+ }
+ 
+-- 
+2.43.0
 
