@@ -1,60 +1,40 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from out-177.mta0.migadu.com (out-177.mta0.migadu.com [91.218.175.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 782111C290
-	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 16:26:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B1571CA87
+	for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 17:07:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1705424829; cv=none; b=X5Y9rLgvZXq1b/YsjLT27rXCLa2nmbcAoqd+X2uygupF9RbC4Pd0s5TepXOj8cPjF1tDPPV8micYVfThCaLv6x+jG8CPIzgU3mu2jwy3M1XMnVQRbYSXPokAKRLD5iN3VaLiLdK78e5MF01bmv/bCyBa1OvEHU+pIi5zFwQy3uk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1705424829; c=relaxed/simple;
+	bh=hXEzc5dFC/qIa8y8t7HYvYxSv5lMxT9yaa0dVgR3uhU=;
+	h=Date:DKIM-Signature:X-Report-Abuse:From:To:Cc:Subject:Message-ID:
+	 References:MIME-Version:Content-Type:Content-Disposition:
+	 In-Reply-To:X-Migadu-Flow; b=nK5vLt2Wt/5VhI2dcTyI4yZ3/ZnTP6SiWFC/CIJEgOHp9Bf25K7nZ34jZ6s1bIYKB4dy3KGA3dPfjlSKlnMsMNp3kNq4Ug7dPl91OxbbEEicb7Q7vReHILJc6TCEVkPKQLEmvq5dg8O26cIOIOKwjqctVD+8gbz2hFRXBY7mdyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=UdW6eQNm
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cE+BcMdO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1705422411;
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="UdW6eQNm"
+Date: Tue, 16 Jan 2024 12:07:01 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1705424824;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=iQzXUGVo1BU0iuqI7xCmHjIjM8+V/hF0bQHOTaXhutk=;
-	b=cE+BcMdOaaNpPOw8SqwPWUGkVcG/ykdIg7h4AKAe1LjWIe/HdZM5I44SwQRNxxYw/Ex9LX
-	JhtrNF3Esis8pgHBIv+ImcmbwdxNvFHPHVKUAOGC7z/wAX7Ab9XCHHkRGQDuWdaoTJGH3D
-	WnAiWnkKoWk2ab69t/kD7Qq6awVOY3s=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-368-QAXhynHdNbawIW-cz7b7_w-1; Tue, 16 Jan 2024 11:26:48 -0500
-X-MC-Unique: QAXhynHdNbawIW-cz7b7_w-1
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-6d9b266183eso6083308b3a.1
-        for <fstests@vger.kernel.org>; Tue, 16 Jan 2024 08:26:48 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705422407; x=1706027207;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iQzXUGVo1BU0iuqI7xCmHjIjM8+V/hF0bQHOTaXhutk=;
-        b=BtMUo0ejp12PMiXcG/oRp47PhGQt+ltZrqC9C9h2+xHxLL3+FaxWrZzmWbGkrC5ckJ
-         j2C+10jcVe6fd6mj2nHaqdrSXibFipTnn0NJMk/d5+Xjs6E2qYpBQ4vyvJ8MqpUsN1qd
-         g3QV2VfrV24f/e5pdGUzrNPsgAxkFiujQV1bqEdjavW24hXqvSyKnFM/WX4pdja03urR
-         YjucQHxY866jOWESf8HkJcjGPTWQ516faA8u/unHtEkrBFOMlZ/8r7V4iADtazqoZZhR
-         3Aq68L7+z3KNJib30DuMdQbJn3K1xs1/yq2TIesvpn5lYWJqI/ilZlS3mncIIVuSlRHv
-         2yLw==
-X-Gm-Message-State: AOJu0Yxsdd8vOZg/oWXwdDt4PJ8HLOeR5l0+9gdw7ma7EuuGrN+mKppK
-	aoE8cOZ6la080USDvY/UNVsQNmyFyEMBXJxMc9scbGZtOPnvZD/p6xVmxbwL/FsGuSFpQAcgVso
-	JQZ10gcea5dbEdtBHKZJhkPa7lg==
-X-Received: by 2002:a05:6a20:4394:b0:19a:e767:eddb with SMTP id i20-20020a056a20439400b0019ae767eddbmr2572759pzl.114.1705422407444;
-        Tue, 16 Jan 2024 08:26:47 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IE/7+Cb5aEHyqnDj8Wxx6WHRb8ffHnycupTZwcvOO89/HobgKfconwegdWfIvSLzQa8CGhKaA==
-X-Received: by 2002:a05:6a20:4394:b0:19a:e767:eddb with SMTP id i20-20020a056a20439400b0019ae767eddbmr2572748pzl.114.1705422407114;
-        Tue, 16 Jan 2024 08:26:47 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id j21-20020aa78015000000b006d9c972ec57sm9757941pfi.174.2024.01.16.08.26.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Jan 2024 08:26:46 -0800 (PST)
-Date: Wed, 17 Jan 2024 00:26:43 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Richard Weinberger <richard@nod.at>, fstests@vger.kernel.org
-Subject: Re: fsgqa group membership?
-Message-ID: <20240116162643.3esm7icq7igajcoa@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <1998649210.233983.1705246961955.JavaMail.zimbra@nod.at>
- <20240115025706.GF911245@mit.edu>
+	bh=ovamPvw4s8X658nP+4slh6OfwtndzLZL33SXSJd6jfE=;
+	b=UdW6eQNmrFpXid8ikc4tCGzpETmh4SfSRo68+tpzUPb6AmxArOVCRQsY++SM2gZL/9nXdv
+	2IQZyz05ZdCOyPzgD3ihA+3HoxvzSzDWJuUGybuLQE6fHXsQUeIizJNA2Q3BekAIXZaGyw
+	vMpC2UXwX61BaxN7MNMRny3m7c8sGAs=
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Kent Overstreet <kent.overstreet@linux.dev>
+To: Brian Foster <bfoster@redhat.com>
+Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org, 
+	linux-bcachefs@vger.kernel.org, l@damenly.org
+Subject: Re: [PATCH] fstests: introduce MKFS_BCACHEFS_PROG for bcachefs
+Message-ID: <eghzohrxjmbvrokpdnfct7easjgm7szzfvm4qdqoy4zi3lcl5z@l6d4r64ksukf>
+References: <20240114044120.140111-1-glass.su@suse.com>
+ <ZaaGkadipvNY02HM@bfoster>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,59 +43,33 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240115025706.GF911245@mit.edu>
+In-Reply-To: <ZaaGkadipvNY02HM@bfoster>
+X-Migadu-Flow: FLOW_OUT
 
-On Sun, Jan 14, 2024 at 09:57:06PM -0500, Theodore Ts'o wrote:
-> On Sun, Jan 14, 2024 at 04:42:41PM +0100, Richard Weinberger wrote:
-> > It turned out that the test failed because the user "fsgqa" did not
-> > have the "fsgqa" group assigned.  After rectifying this, the test
-> > passed successfully.
+On Tue, Jan 16, 2024 at 08:37:21AM -0500, Brian Foster wrote:
+> On Sun, Jan 14, 2024 at 12:41:20PM +0800, Su Yue wrote:
+> > mkfs.bcachefs supports force overwrite when option '-f' is given:
+> > $ mkfs.bcachefs --help | grep force
+> >   -f, --force
+> > After this commit, MKFS_BCACHEFS_PROG will contains ' -f' so
+> > we don't have to add '-f' to $MKFS_OPTIONS manually.
 > > 
-> > But it is nowhere stated that this has to be that way.
+> > It also fixes generic/466 which unsets MKFS_OPTIONS causing
+> > that test hangs in mfks.bcachefs waiting for confirmation of
+> > the force overwrite.
 > > 
-> > README says only:
-> > 6. (optional) Create fsgqa test users and groups:
-> > 
-> >    $ sudo useradd -m fsgqa
-> >    $ sudo useradd 123456-fsgqa
-> >    $ sudo useradd fsgqa2
-> >    $ sudo groupadd fsgqa
 > 
-> The useradd program creates the /etc/passwd entry as well as the
-> /etc/group entry.  Demonstration:
-> 
-> % kvm-xfstests shell
->     ...
-> root@kvm-xfstests:~# grep foobarbaz /etc/passwd
-> root@kvm-xfstests:~# grep foobarbaz /etc/group
-> root@kvm-xfstests:~# useradd foobarbaz
-> root@kvm-xfstests:~# grep foobarbaz /etc/passwd
-> foobarbaz:x:31418:31418::/home/foobarbaz:/bin/sh
-> root@kvm-xfstests:~# grep foobarbaz /etc/group
-> foobarbaz:x:31418:
-> 
-> I don't know why that "sudo groupadd fsgqa" is in the README; it's not
-> necessary, and it would cause a "group already exists" error message.
-> For example:
-> 
-> root@kvm-xfstests:~# groupadd foobarbaz
-> groupadd: group 'foobarbaz' already exists
+> This seems mostly reasonable to me, but I'm kind of wondering why I
+> haven't had to add -f to my MKFS_OPTIONS for bcachefs. Is there
+> something unique to the test environment that affects this? I.e., I
+> don't see any issue with generic/466 on a recent Fedora, even if I
+> pre-format the scratch dev with XFS.
 
-Hi Ted,
+I think there's still multiple screwy things going on with blkid probing
+and superblock wiping - I've been noticing that there's a bunch of ktest
+tests that don't specify -f and work fine in the CI, but that fail when
+I loop them locally.
 
-Yes, it'll fail as this, if USERGROUPS_ENAB is "yes" in /etc/login.defs.
-That steps aren't correct 100%. I'll update this part description :)
-
-Thanks,
-Zorro
-
-> 
-> I did this demonstration using on a Debian-based test appliance.  But
-> it looks like Fedora's "useradd" works exactly the same way.  See the
-> web page here:
-> 
-> https://docs.fedoraproject.org/en-US/fedora/latest/system-administrators-guide/basic-system-configuration/Managing_Users_and_Groups/
-> 
-> 						- Ted
-> 
-
+It appears wipefs only zeroes out the magic number on our first
+superblock - but it leaves the layout intact before the first
+superblock, so we're still able to find our backup superblocks.
