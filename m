@@ -1,128 +1,57 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out30-132.freemail.mail.aliyun.com (out30-132.freemail.mail.aliyun.com [115.124.30.132])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 571132033F;
-	Thu, 18 Jan 2024 10:23:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0FEB28DBE
+	for <fstests@vger.kernel.org>; Fri, 19 Jan 2024 08:42:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.132
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705573414; cv=none; b=m/TwKzar7vW5jgKs9AFAtCYFK2rCUO5m2BD4lIzcS6kVtp2DUZAVVs/ZwJWiFjjS0iEYaHZ6QASq/V19fLjg1PqN1j+cHHJ8l+qeL9ZgmCk1dz7Lx9Q4cFOIs4NJlUoQbvZpvimZd7RJXf6uJrpb6gZOFyAGZRbLEZFDqSx0MLU=
+	t=1705653782; cv=none; b=of3i38AKiD6p/pnAyHQnoyN/1+NrXQ+Xj6t29DF++BJ9B57YB3oV8ZEtBtpnJFtoo8phIfKzRMEfA+DsLKUpuwceAnhi9ofAXEzFKLhgAwaqG0OHuB2jXu2BWS/EBT+MgJXrtmUBPjCddUd5hiPFdCNK00uAyDgLEOgqvvK479w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705573414; c=relaxed/simple;
-	bh=i44Q+tO21nRCte8LK3OdO9IToapy9RIxLpHeddgpllc=;
-	h=Received:DKIM-Signature:DKIM-Signature:DKIM-Signature:
-	 DKIM-Signature:Received:Received:Date:From:To:Cc:Subject:
-	 Message-ID:Reply-To:References:MIME-Version:Content-Type:
-	 Content-Disposition:In-Reply-To:X-Spam-Level:X-Spam-Score:
-	 X-Spamd-Result:X-Spam-Flag; b=Uq9coSELmxrQRr/SZif4h2rvUGUvB+58TRUaWo+sDQG1z5mLwCQh5q5UBn4tfZFYV0Iw3TvvBffT73lJHXFgzGA+dNZMmIaBlZqrN61ryXBXSqJfcwwOxYTQ49Vw6/HHBr7UKI3zKhZl8zRRZz7vb1b85Q2R+S+ZUCezxX//exE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=jYySnjWF; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=5bIVcwHI; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=jYySnjWF; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=5bIVcwHI; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="jYySnjWF";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="5bIVcwHI";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="jYySnjWF";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="5bIVcwHI"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 4AF061F789;
-	Thu, 18 Jan 2024 10:23:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1705573410;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i44Q+tO21nRCte8LK3OdO9IToapy9RIxLpHeddgpllc=;
-	b=jYySnjWFhjd4HAE62Qd8i3FzPLs33l+8/C3YD0HgL39bqTy9uP+Ml3SQLumoztE+v9Yl6P
-	P1MmlYyOKHvq2zy5ClT9bd8X+pRJn6pcVjhlVM92ePRnJNf/wmeRPvOs+3FhXWtqSktXQi
-	tjfXqIGm7n10otjBLN8xHHLv2zh5XB0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1705573410;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i44Q+tO21nRCte8LK3OdO9IToapy9RIxLpHeddgpllc=;
-	b=5bIVcwHI/XAxQvDdWcUdIKUZwOqaNMJJyvd10E5D89JjBxRe9tayS85rqE8Gzl2Um3gXug
-	nLqjt5Rd6EzTnVCQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1705573410;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i44Q+tO21nRCte8LK3OdO9IToapy9RIxLpHeddgpllc=;
-	b=jYySnjWFhjd4HAE62Qd8i3FzPLs33l+8/C3YD0HgL39bqTy9uP+Ml3SQLumoztE+v9Yl6P
-	P1MmlYyOKHvq2zy5ClT9bd8X+pRJn6pcVjhlVM92ePRnJNf/wmeRPvOs+3FhXWtqSktXQi
-	tjfXqIGm7n10otjBLN8xHHLv2zh5XB0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1705573410;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i44Q+tO21nRCte8LK3OdO9IToapy9RIxLpHeddgpllc=;
-	b=5bIVcwHI/XAxQvDdWcUdIKUZwOqaNMJJyvd10E5D89JjBxRe9tayS85rqE8Gzl2Um3gXug
-	nLqjt5Rd6EzTnVCQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 8FD9E136F5;
-	Thu, 18 Jan 2024 10:23:29 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id SFRkISH8qGVbSwAAD6G6ig
-	(envelope-from <pvorel@suse.cz>); Thu, 18 Jan 2024 10:23:29 +0000
-Date: Thu, 18 Jan 2024 11:23:28 +0100
-From: Petr Vorel <pvorel@suse.cz>
-To: Cyril Hrubis <chrubis@suse.cz>
-Cc: ltp@lists.linux.it, Li Wang <liwang@redhat.com>,
-	Jan Stancek <jstancek@redhat.com>, Xiao Yang <yangx.jy@fujitsu.com>,
-	Yang Xu <xuyang2018.jy@fujitsu.com>,
-	Kent Overstreet <kent.overstreet@linux.dev>,
-	Brian Foster <bfoster@redhat.com>, linux-bcachefs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] tst_supported_fs_types: Disable FUSE bcachefs
-Message-ID: <20240118102328.GA2757244@pevik>
-Reply-To: Petr Vorel <pvorel@suse.cz>
-References: <20240118090004.2748107-1-pvorel@suse.cz>
- <Zaj37NxCU3sIQfrH@yuki>
+	s=arc-20240116; t=1705653782; c=relaxed/simple;
+	bh=qBlIzXY/VFIAUc7GfHGIBBaoPZNCqhvUfOgmqH2Tj98=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=sH4aYArT3XsEgOJSXOGz9uwZWqIG+K81NhGjEC0Ti5SuoZesfrNS/89ES8vndWDZh58udgQaWyt6tqYLHTwHB1RzbbEwjnPf/fstK4HNLEcq7y+r7L8E+5434FW2Ckl857nzWzF6TmkMcSPJbysXvVrx3iDR/7g6X2WCi/tvN4w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; arc=none smtp.client-ip=115.124.30.132
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
+X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R171e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046060;MF=mengferry@linux.alibaba.com;NM=1;PH=DS;RN=2;SR=0;TI=SMTPD_---0W-vOXl7_1705653766;
+Received: from localhost(mailfrom:mengferry@linux.alibaba.com fp:SMTPD_---0W-vOXl7_1705653766)
+          by smtp.aliyun-inc.com;
+          Fri, 19 Jan 2024 16:42:49 +0800
+From: Ferry Meng <mengferry@linux.alibaba.com>
+To: fstests@vger.kernel.org
+Cc: Ferry Meng <mengferry@linux.alibaba.com>
+Subject: [PATCH 0/1] add 'mv' errmsg filter and apply in generic/682
+Date: Fri, 19 Jan 2024 16:42:43 +0800
+Message-Id: <20240119084244.56373-1-mengferry@linux.alibaba.com>
+X-Mailer: git-send-email 2.19.1.6.gb485710b
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Zaj37NxCU3sIQfrH@yuki>
-Authentication-Results: smtp-out2.suse.de;
-	none
-X-Spam-Level: 
-X-Spam-Score: -3.24
-X-Spamd-Result: default: False [-3.24 / 50.00];
-	 ARC_NA(0.00)[];
-	 HAS_REPLYTO(0.30)[pvorel@suse.cz];
-	 REPLYTO_EQ_FROM(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 RCPT_COUNT_SEVEN(0.00)[10];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-2.74)[98.89%]
-X-Spam-Flag: NO
+Content-Transfer-Encoding: 8bit
 
-Hi Li, Cyril,
+Hi, all:
 
-thanks, merged.
+I have noticed that after coreutils 9.4+, generic/682 will meet the same mismatch output
+just like generic/245 (commit d9323ad :'generic/245: Filter mv error message').
+To fix this, we can seperate the filter ,move it into common 
+directory as '_filter_mv_err_msg' and apply it to similar cases.
 
-Kind regards,
-Petr
+Attention: in generic/419 and generic/369, there also exists "cannot move ... to ..." 
+output. After testing, generic/419 don't need to apply filter. But I don't know how to 
+enable 'richacl' on my filesystem, so I can't verify if generic/369 needs to be fixed.
+
+Ferry Meng (1):
+  generic/682: apply 'mv' error message fitler.
+
+ common/filter         | 13 +++++++++++++
+ tests/generic/245     |  9 ++++-----
+ tests/generic/682     |  2 +-
+ tests/generic/682.out |  2 +-
+ 4 files changed, 19 insertions(+), 7 deletions(-)
+
+-- 
+2.19.1.6.gb485710b
+
