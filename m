@@ -1,32 +1,62 @@
-Received: from out30-98.freemail.mail.aliyun.com (out30-98.freemail.mail.aliyun.com [115.124.30.98])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1214D1DDC3
-	for <fstests@vger.kernel.org>; Fri, 19 Jan 2024 08:43:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.124.30.98
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F29D3C484;
+	Fri, 19 Jan 2024 09:27:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705653819; cv=none; b=q2U/mHXNBgTaAkUWLCoIp15QqlBdWgHAfL8UfXG4l/HAjcUkmpfPC/Jt5mxq9v2l0NsrvoB1mMan0FC1wEFXcQbPlRPCa+oOXWRAVZeOI3HJQO3LdPP2I9ix7i9xfiSXCtnKhAew3ZCg4/Rfhst8BIk5DHb5JuYxXt/PdsWg2+4=
+	t=1705656477; cv=none; b=nmId13tqq9tcqKSWlmdJTTgng8bCbrkzeSAwSeMGulmbIkuLemQi05GzClfxQSL7AhhD4TiVoho2FPMXtYOOKvD3sIMOXFIgA/ECYpB2NcEG5Cg9d4F9zvEm+QbqEwYhxA/Vu4FypSNJmiueBxhqSSxgiR2nPEiQwzrByORLQLo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705653819; c=relaxed/simple;
-	bh=qYyAnMcQuIcalrkCRnGZGPf8WtS/vGydunD+OOmYeEM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Bb1TmvU5dIvtn+DTx9sQpMADqlpQRdcqI1BwVfHLORbmwsMg9yzKUd2zbNTz7f+FEqadWAwtF0e1k+cZdP1XcDQoTnS0zNOzHGMbk3u6bPmTs+jL35dqCCyVCrPXYs7qyGYDkmUCYaQIH1twjLV/hMfUUH6iA9247zTUOG+VxDo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com; spf=pass smtp.mailfrom=linux.alibaba.com; arc=none smtp.client-ip=115.124.30.98
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.alibaba.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.alibaba.com
-X-Alimail-AntiSpam:AC=PASS;BC=-1|-1;BR=01201311R391e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046049;MF=mengferry@linux.alibaba.com;NM=1;PH=DS;RN=2;SR=0;TI=SMTPD_---0W-vVsyq_1705653804;
-Received: from localhost(mailfrom:mengferry@linux.alibaba.com fp:SMTPD_---0W-vVsyq_1705653804)
-          by smtp.aliyun-inc.com;
-          Fri, 19 Jan 2024 16:43:27 +0800
-From: Ferry Meng <mengferry@linux.alibaba.com>
+	s=arc-20240116; t=1705656477; c=relaxed/simple;
+	bh=yYNiybOGuoCJPkWJq8aedeJcqBhB7zDPXgVOd7o6YWQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Mv2vqM2R6D51QHB+57rEHTTpsCGkgNt0GrknxcUn5ESYwrSoCO641OuG1mnZD4gsRcqPPjDgAKaje1Zutn8CD3Fblv+fHLl8A90nXBLgt74j8wBOP8Z8dkkTmcSvpMHZqmbz3lXRgBanMNbRM1d67qFcLa2aVbADSRpy1xI3mR8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=O3eLHgbN; arc=none smtp.client-ip=209.85.215.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="O3eLHgbN"
+Received: by mail-pg1-f176.google.com with SMTP id 41be03b00d2f7-5cedfc32250so409148a12.0;
+        Fri, 19 Jan 2024 01:27:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1705656474; x=1706261274; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=PmQXQNgPDNcw0Q7OyNyYioq0dzZz7gCYMv1cL8DlPTg=;
+        b=O3eLHgbNI77bR/3iTKZNt4pgrocNzLB5jC1Spwj+rWq8YbuxiglX5XC6f5a5C1hIYd
+         ng6mUbARy7Df6PnKF+x/mdEH2KoYjW6kqxLxWXHxOxoDzmD3jV2o3rYBd8DWm5Z7aYuI
+         qe+lURdT+kIBzL2qLb0OvcR3OZh5Y6+/TE5voXQ9bq535GNEFKf3VJEg42J7BZqLcA9X
+         uE1hzaPKBksLCPekaBRSyywvhRu2BZ8xsIY46CP1x4f6WVFg9Y82sDiznD3kHAwDxSfj
+         60boGGCe5oTs7qMptlzG9uR0lSp3w81p14dgLpUCZWOR/iKmEjL9ywmsYAwIrNas0fuv
+         N97g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1705656474; x=1706261274;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PmQXQNgPDNcw0Q7OyNyYioq0dzZz7gCYMv1cL8DlPTg=;
+        b=IBIMYDRRJu5n5//OvYZ1khAl8Ri5VrhrBRa79OdIlXg8bXBq+RTl02PEIcO2Y8lG6m
+         /Ge9F1byUKpDM0/1aG7bS2n7+TQcaIHaKZbfJ1PiuyGze5H36kttLbpY8sJ+dFVuOZTd
+         5Iw/GKs9PaBagAHcJN6lFPR9e+Dg4km/d4+kKetOri4DCErgN8xXeMLdej+KNlaCM5k6
+         djw+gvaujBdJS24dMEInL1vAukUmN1+Nq4vwjM3CX9LARVlbKAnmXrW2jfoQIUjBRCfa
+         VdX8nWegMoq6hlmZYB8YI3mwI4pDs3iB+/xRCjk641FIlU/2kU0Q6/d6cp9/bosbXlaT
+         uivQ==
+X-Gm-Message-State: AOJu0YzVidjTMZ8HgR2SQJ+z068b5rg0saBu4Lmi+2KsH31cCiuH9jt0
+	yDIfco91iGRPfqW+sSWcD5b8Va/JddQJyrLSwpVDxz5uCQsZy7SuqUWc4bMY
+X-Google-Smtp-Source: AGHT+IEIg2vovnExzjcq2lnhztK/PmzZKNEPFJndO2FDhcFra+xKQZTL+BsefzdQj5u2ExOnQme5Gw==
+X-Received: by 2002:a05:6a20:20c8:b0:19a:2432:e487 with SMTP id t8-20020a056a2020c800b0019a2432e487mr1237369pza.121.1705656474520;
+        Fri, 19 Jan 2024 01:27:54 -0800 (PST)
+Received: from dw-tp.ihost.com ([171.76.81.10])
+        by smtp.gmail.com with ESMTPSA id sv13-20020a17090b538d00b0028d8fa0171asm3407636pjb.35.2024.01.19.01.27.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 19 Jan 2024 01:27:53 -0800 (PST)
+From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
 To: fstests@vger.kernel.org
-Cc: Ferry Meng <mengferry@linux.alibaba.com>
-Subject: [PATCH 1/1] generic/682: apply 'mv' error message fitler.
-Date: Fri, 19 Jan 2024 16:42:44 +0800
-Message-Id: <20240119084244.56373-2-mengferry@linux.alibaba.com>
-X-Mailer: git-send-email 2.19.1.6.gb485710b
-In-Reply-To: <20240119084244.56373-1-mengferry@linux.alibaba.com>
-References: <20240119084244.56373-1-mengferry@linux.alibaba.com>
+Cc: linux-xfs@vger.kernel.org,
+	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Subject: [PATCH] xfs/604: Make test as _notrun for higher blocksizes filesystem
+Date: Fri, 19 Jan 2024 14:57:45 +0530
+Message-ID: <070f1491c25c37d2a9e01a40aebe87f3404a4b69.1705656364.git.ritesh.list@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -35,96 +65,29 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-As coreutils update to 9.4+, the 'mv' command change also results in
-the mismatch output of generic/682.
+If we have filesystem with blocksize = 64k, then the falloc value will
+be huge which makes fallocate fail hence causing the test to fail.
+Instead make the testcase "_notrun" if the fallocate itself fails.
 
-This case is similar to generic/245, you can refer to 'generic/245:
-Filter mv error message'(commit d9323ad7a0). Now seperate this filter
-as '_filter_mv_err_msg', move it into common/filter, and apply in
-generic/682.
-
-Signed-off-by: Ferry Meng <mengferry@linux.alibaba.com>
+Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
 ---
- common/filter         | 13 +++++++++++++
- tests/generic/245     |  9 ++++-----
- tests/generic/682     |  2 +-
- tests/generic/682.out |  2 +-
- 4 files changed, 19 insertions(+), 7 deletions(-)
+ tests/xfs/604 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/common/filter b/common/filter
-index 509ee950..55f3f855 100644
---- a/common/filter
-+++ b/common/filter
-@@ -651,5 +651,18 @@ _filter_bash()
- 	sed -e "s/^bash: line 1: /bash: /"
- }
+diff --git a/tests/xfs/604 b/tests/xfs/604
+index bb6db797..40596a28 100755
+--- a/tests/xfs/604
++++ b/tests/xfs/604
+@@ -35,7 +35,8 @@ allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
+ # Create a big file with a size such that the punches below create the exact
+ # free extents we want.
+ num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
+-$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
++$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big" ||
++				_notrun "Not enough space on device for bs=$dbsize"
  
-+# coreutils 9.4+ modify the error msg of command 'mv'. To be compitable with
-+# various coreutils versions, we synchronize the output to the latest version.
-+# coreutils change was added by this commit:
-+# commit 3cb862ce5f10db392cc8e6907dd9d888acfa2a30
-+# Author: Paul Eggert <eggert@cs.ucla.edu>
-+# Date:   Sat Jul 22 13:39:17 2023 -0700
-+#
-+#    mv: better diagnostic for 'mv dir x' failure
-+_filter_mv_err_msg()
-+{
-+        sed -e "s,cannot move .* to \(.*\):\(.*\),cannot overwrite \1:\2,g"
-+}
-+
- # make sure this script returns success
- /bin/true
-diff --git a/tests/generic/245 b/tests/generic/245
-index 81ce4d4e..4cf7c112 100755
---- a/tests/generic/245
-+++ b/tests/generic/245
-@@ -29,12 +29,9 @@ _cleanup()
- # According to the rename(2) manpage you can get either EEXIST or ENOTEMPTY as an
- # error for trying to rename a non-empty directory, so just catch the error for
- # ENOTMEMPTY and replace it with the EEXIST output so that either result passes
--# Also, mv v9.4+ modified error message when a nonempty destination directory fails
--# to be overwriteen
- _filter_directory_not_empty()
- {
--	sed -e "s,Directory not empty,File exists,g" \
--	    -e "s,cannot move .* to \(.*\):\(.*\),cannot overwrite \1:\2,g"
-+	sed -e "s,Directory not empty,File exists,g"
- }
-  
- 
-@@ -46,7 +43,9 @@ touch $dir/aa/1
- mkdir $dir/ab/aa
- touch $dir/ab/aa/2
- 
--mv $dir/ab/aa/ $dir 2>&1 | _filter_test_dir | _filter_directory_not_empty
-+# Also, mv v9.4+ modified error message when a nonempty destination directory fails
-+# to be overwriteen, now use _filter_mv_err_msg to ignore the difference
-+mv $dir/ab/aa/ $dir 2>&1 | _filter_test_dir | _filter_directory_not_empty | _filter_mv_err_msg
- 
- status=0
- exit $status
-diff --git a/tests/generic/682 b/tests/generic/682
-index b4cd0cd9..8e6c2497 100755
---- a/tests/generic/682
-+++ b/tests/generic/682
-@@ -62,7 +62,7 @@ for ((i = 0; i < dirents; i++)); do
- 	name=$(printf "y%0254d" $i)
- 	ln $scratchfile $stagedir/$name
- 	su - "$qa_user" -c "mv $stagedir/$name $scratchdir/$name" 2>&1 | \
--		_filter_scratch | sed -e 's/y[0-9]*/yXXX/g'
-+		_filter_mv_err_msg | _filter_scratch | sed -e 's/y[0-9]*/yXXX/g'
- 	test "${PIPESTATUS[0]}" -ne 0 && break
- done
- repquota -upn $SCRATCH_MNT >> $seqres.full
-diff --git a/tests/generic/682.out b/tests/generic/682.out
-index b7470811..db22d5f6 100644
---- a/tests/generic/682.out
-+++ b/tests/generic/682.out
-@@ -1,3 +1,3 @@
- QA output created by 682
--mv: cannot move 'SCRATCH_MNT/staging/yXXX' to 'SCRATCH_MNT/dir/yXXX': Disk quota exceeded
-+mv: cannot overwrite 'SCRATCH_MNT/dir/yXXX': Disk quota exceeded
- Silence is golden
+ # Fill in any small free extents in AG 0. After this, there should be only one,
+ # large free extent.
 -- 
-2.19.1.6.gb485710b
+2.43.0
 
