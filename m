@@ -1,93 +1,172 @@
-Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F29D3C484;
-	Fri, 19 Jan 2024 09:27:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DF8F54667
+	for <fstests@vger.kernel.org>; Fri, 19 Jan 2024 16:07:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705656477; cv=none; b=nmId13tqq9tcqKSWlmdJTTgng8bCbrkzeSAwSeMGulmbIkuLemQi05GzClfxQSL7AhhD4TiVoho2FPMXtYOOKvD3sIMOXFIgA/ECYpB2NcEG5Cg9d4F9zvEm+QbqEwYhxA/Vu4FypSNJmiueBxhqSSxgiR2nPEiQwzrByORLQLo=
+	t=1705680480; cv=none; b=sX0K/Z14mlJOM9wfvtIMwW9PsgnQKBzhLM1iUiOY7ujk1B+kyzmUUthi6m08HoldMh4V0KnKg+keVDrR7IhHV2FGWKmlYhTjf03C2FK8mP8RRQxw5c9ucik69GwYwkgwk57Z1JlbVT1n7fLitnnwshMKbewYtYIx59qk2nG2USQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705656477; c=relaxed/simple;
-	bh=yYNiybOGuoCJPkWJq8aedeJcqBhB7zDPXgVOd7o6YWQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Mv2vqM2R6D51QHB+57rEHTTpsCGkgNt0GrknxcUn5ESYwrSoCO641OuG1mnZD4gsRcqPPjDgAKaje1Zutn8CD3Fblv+fHLl8A90nXBLgt74j8wBOP8Z8dkkTmcSvpMHZqmbz3lXRgBanMNbRM1d67qFcLa2aVbADSRpy1xI3mR8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=O3eLHgbN; arc=none smtp.client-ip=209.85.215.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1705680480; c=relaxed/simple;
+	bh=YCyYbSKIJMFpARo3ntSuLegG9b+aQ8OdHSjhC7Lp8zk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=helprG/hbunyxxw3bZwEcGVFDQM2eHviN2ZSJS324uHc0LcBNoZSe/oe/w8uV/16N1b+85f3c9mC810lsaGpecxdRJDn4y/I+aHR1AKyDYZjvs7bYvLDzabtObOTS7N1PWwzvU87416B3Dt7FvWcQVy3tGG9Ieh5k0mpavZSj3E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IM8L5cD2; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="O3eLHgbN"
-Received: by mail-pg1-f176.google.com with SMTP id 41be03b00d2f7-5cedfc32250so409148a12.0;
-        Fri, 19 Jan 2024 01:27:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1705656474; x=1706261274; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=PmQXQNgPDNcw0Q7OyNyYioq0dzZz7gCYMv1cL8DlPTg=;
-        b=O3eLHgbNI77bR/3iTKZNt4pgrocNzLB5jC1Spwj+rWq8YbuxiglX5XC6f5a5C1hIYd
-         ng6mUbARy7Df6PnKF+x/mdEH2KoYjW6kqxLxWXHxOxoDzmD3jV2o3rYBd8DWm5Z7aYuI
-         qe+lURdT+kIBzL2qLb0OvcR3OZh5Y6+/TE5voXQ9bq535GNEFKf3VJEg42J7BZqLcA9X
-         uE1hzaPKBksLCPekaBRSyywvhRu2BZ8xsIY46CP1x4f6WVFg9Y82sDiznD3kHAwDxSfj
-         60boGGCe5oTs7qMptlzG9uR0lSp3w81p14dgLpUCZWOR/iKmEjL9ywmsYAwIrNas0fuv
-         N97g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1705656474; x=1706261274;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=PmQXQNgPDNcw0Q7OyNyYioq0dzZz7gCYMv1cL8DlPTg=;
-        b=IBIMYDRRJu5n5//OvYZ1khAl8Ri5VrhrBRa79OdIlXg8bXBq+RTl02PEIcO2Y8lG6m
-         /Ge9F1byUKpDM0/1aG7bS2n7+TQcaIHaKZbfJ1PiuyGze5H36kttLbpY8sJ+dFVuOZTd
-         5Iw/GKs9PaBagAHcJN6lFPR9e+Dg4km/d4+kKetOri4DCErgN8xXeMLdej+KNlaCM5k6
-         djw+gvaujBdJS24dMEInL1vAukUmN1+Nq4vwjM3CX9LARVlbKAnmXrW2jfoQIUjBRCfa
-         VdX8nWegMoq6hlmZYB8YI3mwI4pDs3iB+/xRCjk641FIlU/2kU0Q6/d6cp9/bosbXlaT
-         uivQ==
-X-Gm-Message-State: AOJu0YzVidjTMZ8HgR2SQJ+z068b5rg0saBu4Lmi+2KsH31cCiuH9jt0
-	yDIfco91iGRPfqW+sSWcD5b8Va/JddQJyrLSwpVDxz5uCQsZy7SuqUWc4bMY
-X-Google-Smtp-Source: AGHT+IEIg2vovnExzjcq2lnhztK/PmzZKNEPFJndO2FDhcFra+xKQZTL+BsefzdQj5u2ExOnQme5Gw==
-X-Received: by 2002:a05:6a20:20c8:b0:19a:2432:e487 with SMTP id t8-20020a056a2020c800b0019a2432e487mr1237369pza.121.1705656474520;
-        Fri, 19 Jan 2024 01:27:54 -0800 (PST)
-Received: from dw-tp.ihost.com ([171.76.81.10])
-        by smtp.gmail.com with ESMTPSA id sv13-20020a17090b538d00b0028d8fa0171asm3407636pjb.35.2024.01.19.01.27.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Jan 2024 01:27:53 -0800 (PST)
-From: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Subject: [PATCH] xfs/604: Make test as _notrun for higher blocksizes filesystem
-Date: Fri, 19 Jan 2024 14:57:45 +0530
-Message-ID: <070f1491c25c37d2a9e01a40aebe87f3404a4b69.1705656364.git.ritesh.list@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IM8L5cD2"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1705680478;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=G/IYbea0AebPY0Ag11OP4fbl7cOQO4x0KBWk+c1hMjk=;
+	b=IM8L5cD2yFNHEt2oTQc1VNth6qpNXrWTOHyVb+gbiemuEvlZ+My4AS0aEFb8Xkg3O8PUxZ
+	Tik3LBxTlMaiJF7jOGqXRDpnhORca6YXno04xbzbWsCsD26h9Xq3Rq7Eol5Ir+GZ5ZP0rW
+	fCYlvgOSoScqpRKAPhHPj3W0uLLxhYU=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-665-JYGK08IqPZufH4U6jp6jCA-1; Fri,
+ 19 Jan 2024 11:07:51 -0500
+X-MC-Unique: JYGK08IqPZufH4U6jp6jCA-1
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 4B93C3821363;
+	Fri, 19 Jan 2024 16:07:51 +0000 (UTC)
+Received: from bfoster (unknown [10.22.8.116])
+	by smtp.corp.redhat.com (Postfix) with ESMTPS id 1305E2166B35;
+	Fri, 19 Jan 2024 16:07:50 +0000 (UTC)
+Date: Fri, 19 Jan 2024 11:09:09 -0500
+From: Brian Foster <bfoster@redhat.com>
+To: Su Yue <l@damenly.org>
+Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org,
+	linux-bcachefs@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] common/rc: improve block size support for bcachefs
+Message-ID: <ZaqepfRjb1vU+nDw@bfoster>
+References: <20240117092309.1134595-1-glass.su@suse.com>
+ <20240117092309.1134595-2-glass.su@suse.com>
+ <ZagUdl+DlxIw+siv@bfoster>
+ <h6jb49cm.fsf@damenly.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <h6jb49cm.fsf@damenly.org>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.6
 
-If we have filesystem with blocksize = 64k, then the falloc value will
-be huge which makes fallocate fail hence causing the test to fail.
-Instead make the testcase "_notrun" if the fallocate itself fails.
+On Thu, Jan 18, 2024 at 10:59:14AM +0800, Su Yue wrote:
+> 
+> On Wed 17 Jan 2024 at 12:55, Brian Foster <bfoster@redhat.com> wrote:
+> 
+> > On Wed, Jan 17, 2024 at 05:23:09PM +0800, Su Yue wrote:
+> > > For bcachefs, def_blksz is never assigned even MKFS_OPTIONS contains
+> > > option
+> > > '--block_size'. So block size of bcachefs on scratch dev is always
+> > > 4096
+> > > if _scratch_mkfs_sized is called without second parameter.
+> > > 
+> > > Add the pattern to set def_blksz if '--block_size' is given in
+> > > MKFS_OPTIONS.
+> > > 
+> > > Signed-off-by: Su Yue <glass.su@suse.com>
+> > > ---
+> > > changelog:
+> > > v2:
+> > >     Born.
+> > > ---
+> > >  common/rc | 3 +++
+> > >  1 file changed, 3 insertions(+)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 31c21d2a8360..6a01de69cf05 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -950,6 +950,9 @@ _scratch_mkfs_sized()
+> > >  	jfs)
+> > >  		def_blksz=4096
+> > >  		;;
+> > > +	bcachefs)
+> > > +		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(--block_size)[
+> > > =]?+([0-9]+).*/\2/p'`
+> > > +		;;
+> > 
+> > So if the default bcachefs block size is 512b, I wonder if this should
+> > do something like what the udf branch does a few lines above and
+> > 
+> mkfs.bcachefs decides block size by querying statbuf.st_blksize or
+> BLKPBSZGET from the device if the option is not given.
+> 
+> > override the hardcoded default of 4k. ISTM this whole thing would be
+> > more robust if it just elided the param in the default cases and let the
+> > associated mkfs tool use its own default, but that's probably a separate
+> > issue. Hm?
+> > 
+> Since there is no default block size of bcachefs, maybe we can let
+> mkfs.bcachefs decide on its own but it will make chaos when somebody
+> reports an unreproducible BUG due to the different block_size even
+> we have same local.config. It just happened...
+> So for now, I think 4096 is a resonable value of bcachefs block size.
+> 
 
-Signed-off-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
----
- tests/xfs/604 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+I think we run into this no matter what if we pick a size out of a hat,
+regardless of what the value is. If somebody is testing with default
+blocksize (i.e. based on mkfs) on a filesystem where the default isn't
+actually 4k, then it seems quite unexpected that _scratch_mkfs_sized
+would use something different from _scratch_mkfs when a block size isn't
+explicitly specified. That's exactly the situation we ran into with the
+generic/361 thing where I would have expected this test to use 512b
+blocks.
 
-diff --git a/tests/xfs/604 b/tests/xfs/604
-index bb6db797..40596a28 100755
---- a/tests/xfs/604
-+++ b/tests/xfs/604
-@@ -35,7 +35,8 @@ allocbt_node_maxrecs=$(((dbsize - alloc_block_len) / 12))
- # Create a big file with a size such that the punches below create the exact
- # free extents we want.
- num_holes=$((allocbt_leaf_maxrecs * allocbt_node_maxrecs - 1))
--$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big"
-+$XFS_IO_PROG -c "falloc 0 $((9 * dbsize + num_holes * dbsize * 2))" -f "$SCRATCH_MNT/big" ||
-+				_notrun "Not enough space on device for bs=$dbsize"
- 
- # Fill in any small free extents in AG 0. After this, there should be only one,
- # large free extent.
--- 
-2.43.0
+ISTM that the 4k value in _scratch_mkfs_sized() is mainly a last resort
+default value so the $blocks calculation can work for any filesystem
+that might not be properly supported by the function. The function looks
+a little wonky overall, but I think there are at least a couple options
+to improve things for bcachefs. FWIW, it also looks to me that nothing
+actually passes a blocksize param to _scratch_mkfs_sized, so perhaps we
+could just drop that blocksize=$2 parameter across the board as a
+simplification?
+
+With that, I think bcache could either:
+
+1. Do something like def_blksize=`blockdev --getpbsz $SCRATCH_DEV` in
+the first switch if no block size is specified in MKFS_OPTIONS (or
+whatever best mimics mkfs logic).
+
+OR
+
+2. Do something like the following in the last switch:
+
+	[ -n $def_blksize ] && def_blksize="--block_size=$def_blksize"
+	$MKFS_BCACHEFS_PROG ... $def_blksize $SCRATCH_DEV
+
+... to allow mkfs to determine the block size. I _think_ that works
+because the bcachefs format doesn't depend on $blocks at all, so
+whatever $blocksize was set to is irrelevent unless $def_blksize was set
+above, but I could be missing something. That also assumes blocksize
+wasn't set to something by the caller.
+
+If correct, option #2 seems a little cleaner to me, but other
+thoughts/ideas?
+
+Brian
+
+> --
+> Su
+> > 
+> > Brian
+> > 
+> > >  	esac
+> > > 
+> > >  	[ -n "$def_blksz" ] && blocksize=$def_blksz
+> > > --
+> > > 2.43.0
+> > > 
+> 
 
