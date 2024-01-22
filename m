@@ -1,96 +1,190 @@
-Received: from mout-p-103.mailbox.org (mout-p-103.mailbox.org [80.241.56.161])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A0E73A8F8;
-	Mon, 22 Jan 2024 11:23:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.161
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA28C3BB22;
+	Mon, 22 Jan 2024 12:26:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705922607; cv=none; b=hvuEG/8WXHOZkBEynFM04zFGRuUoJ/ya/eWJ6yp4fNC27XpPzMfPgrz6Wb+5o9x1QNeaaFuMIm2J20wF+1k6W9KenwbjLdfTb8VgJfXYcclKwXowSvfVeQijNpKMvdw5rOvlEzFX9MfmD9nivo6DgDiHZiGLYB69TyEEFqId3NI=
+	t=1705926365; cv=none; b=ct5G27Q3GdRtta+5155cf6mF+1dPCPMGLZ5OLU/U2uRwQLAs6gtzBm5+q9Ax5B1cat6QLabZ5b3gcNsxugc05gpUZRbKcwBP7LRKUAlsm7kQcowm/lqe4RkFev1OdrEcN/djP9RR9CNSHNn4yZY9mJuriPYnMhJZ6dAZL/9ozH8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705922607; c=relaxed/simple;
-	bh=PiUmTtv2IoF65WRKvnZQqdzdx384PUXh7bL5OeVPJXQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=vBkGcN5xbBWvPg2Q6itFf2pwN3XDieWahE7BHkqZ/cmdtnTokdeIGoYxddvfvCDimqaXDuvb7u/WzWDxprudrwfARd4Z65xIn++81FuCrxYEMzOCj7oUg3G+ASpaEp8eRfFlgE12F8OsrWVLVl2qwt6Knfg1X9mWWLQd+65H9RQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=NlkjaG/j; arc=none smtp.client-ip=80.241.56.161
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pankajraghav.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+	s=arc-20240116; t=1705926365; c=relaxed/simple;
+	bh=bmWNAOKPTYlERMdCB7AZ9c76bRssMyeNpivF/fb2FnE=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=b3UcKqxzA3CFpAE7JTe+55pDAfhLpO6GB7CqQEgAKauW3sasqWhoRFUpiuMJ1fhE/3BjbmBtRqrtpZ5rC1Q0JMVfaXVR0K/QoIfBN865Om613jwmXKYivktFuoWpj7eMewSXNgM6Uiyw8Vq/y4b2J/nTlGQAaG/UFchXRJTKkmE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=zLm3X1P2; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Lt2wcBiG; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=h67OjtXQ; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=ugXGjEf/; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="NlkjaG/j"
-Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="zLm3X1P2";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Lt2wcBiG";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="h67OjtXQ";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="ugXGjEf/"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mout-p-103.mailbox.org (Postfix) with ESMTPS id 4TJSPf5D0Pz9srx;
-	Mon, 22 Jan 2024 12:17:58 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
-	s=MBO0001; t=1705922278;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 31CD621FEE;
+	Mon, 22 Jan 2024 12:25:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1705926360; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=huwGaMaY18xKBkOb1PiQY/4FgecT6Di7SqBOr/x/ZPg=;
-	b=NlkjaG/jPoF+kH+HhqM5SH2zptGxJHz8/LIc67vGeyu8D2EgdcGIsS121GvRWeIj6fdBHE
-	WDwbBVnynwrjagXjP5oWYNtdRo84tLMRp8+Bl9gTz9kOB2qoMc5O4d+LGwfwU8tELegS3i
-	vAqNj/y2nLU5MQ/eO2WD78KDOMhrdIDnySfG8QOYhDylT/MtxyclNqfPNZwajwQPeA4NMV
-	IQYUGi5IqriBW7SbE6o2fD/ES2ibHik58AJbjV6OmL7HPNj5Itp7QS7c6oC5z0Sm7fjF3j
-	WR34Mr2n/RG7t1X1Kb3gr5e4tzzbey+0cwboLmuuAPJYhI30j5fdxuBDxGcXxw==
-From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-To: zlang@redhat.com,
-	fstests@vger.kernel.org
-Cc: p.raghav@samsung.com,
-	djwong@kernel.org,
-	mcgrof@kernel.org,
-	gost.dev@samsung.com,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 1/2] xfs/558: scale blk IO size based on the filesystem blksz
-Date: Mon, 22 Jan 2024 12:17:50 +0100
-Message-ID: <20240122111751.449762-2-kernel@pankajraghav.com>
-In-Reply-To: <20240122111751.449762-1-kernel@pankajraghav.com>
-References: <20240122111751.449762-1-kernel@pankajraghav.com>
+	bh=WNDs2o2K3jWzu8TeQurE7mCFhHc888AjM0fRIpc2giw=;
+	b=zLm3X1P2n4B5osjUN9h9AEGKh6ee1+0pbrUFYnz86WA9By4tXPEpfMy6iGPT8sR7LocOs+
+	QsBMGhFRrezjx55+v0es8gZNcVdXW5piPPsmJ/eln6XUaGCHlpX66GvLbeH00YEvglmdLH
+	ARTXuml7/3p6WSOi+TifbhfELQk4wVE=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1705926360;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WNDs2o2K3jWzu8TeQurE7mCFhHc888AjM0fRIpc2giw=;
+	b=Lt2wcBiGQsy131RHjrjf2EobN43qX5k0cEJP3Ah0UUXgwZ+jnzGPDzkCwECgBvhRFJKB51
+	iVlO3X4wctKXTMBQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1705926358; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WNDs2o2K3jWzu8TeQurE7mCFhHc888AjM0fRIpc2giw=;
+	b=h67OjtXQN+0N2jfCWwkXA331rhQNMNf7ci3zh3ub3dumJ+m+udeCfayyUbZkDugUe98gy4
+	Cmk7W/WXOqw3+XNOS+/zLdUxi1FDwUASVwJkI7eQ1RqUX7rR6rxNvv7qesT77SF2G/FWL0
+	hOXvQkLO1b5L0FbQkOarHPUDb336o6w=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1705926358;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WNDs2o2K3jWzu8TeQurE7mCFhHc888AjM0fRIpc2giw=;
+	b=ugXGjEf/P7R/YiFtbgHZEriWrT/1i0igli1EdeCb4n/Kl+d8pwoggeGH6uurxfOG6ZeiBQ
+	qGKY7qCZXOVu4UBA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 42A69139A2;
+	Mon, 22 Jan 2024 12:25:55 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id uxH2ONNermW0LQAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Mon, 22 Jan 2024 12:25:55 +0000
+Date: Mon, 22 Jan 2024 23:25:38 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>,
+ fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] btrfs/zoned: test premature ENOSPC because of reclaim
+ being too slow
+Message-ID: <20240122232538.2a2bbca1@echidna>
+In-Reply-To: <20240122105554.1077035-1-johannes.thumshirn@wdc.com>
+References: <20240122105554.1077035-1-johannes.thumshirn@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspamd-Queue-Id: 4TJSPf5D0Pz9srx
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spamd-Result: default: False [-2.60 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCPT_COUNT_FIVE(0.00)[5];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[wdc.com:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spam-Score: -2.60
 
-From: Pankaj Raghav <p.raghav@samsung.com>
+Hi Johannes,
 
-This test fails for >= 64k filesystem block size on a 4k PAGE_SIZE
-system(see LBS efforts[1]). Scale the `blksz` based on the filesystem
-block size instead of fixing it as 64k so that we do get some iomap
-invalidations while doing concurrent writes.
+On Mon, 22 Jan 2024 02:55:54 -0800, Johannes Thumshirn wrote:
 
-Cap the blksz to be at least 64k to retain the same behaviour as before
-for smaller filesystem blocksizes.
+> Add a test writing a file of 60% the drive size on a zoned btrfs and then
+> overwriting the file again.
+> 
+> On fast drives this will cause premature ENOSPC because the reclaim
+> process isn't triggered fast enough.
+> 
+> The kernel patch for this issue is:
+>  btrfs: zoned: wake up cleaner sooner if needed
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> ---
+>  tests/btrfs/310     | 54 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/310.out |  2 ++
+>  2 files changed, 56 insertions(+)
+>  create mode 100755 tests/btrfs/310
+>  create mode 100644 tests/btrfs/310.out
+> 
+> diff --git a/tests/btrfs/310 b/tests/btrfs/310
+> new file mode 100755
+> index 000000000000..6f6f5542f73f
+> --- /dev/null
+> +++ b/tests/btrfs/310
+> @@ -0,0 +1,54 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Western Digital Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test 310
+> +#
+> +# Write a single file with 60% disk size to a zoned btrfs and then overwrite
+> +# it again. On kernels without the fix this results in ENOSPC.
+> +#
+> +# This issue is fixed by the following kernel patch:
+> +#    btrfs: zoned: wake up cleaner sooner if needed
 
-[1] LBS effort: https://lore.kernel.org/lkml/20230915183848.1018717-1-kernel@pankajraghav.com/
+To-be-queued fixes are often flagged in the test via:
+_fixed_by_kernel_commit XXXXXXXXXXXX \
+	"btrfs: zoned: wake up cleaner sooner if needed"
 
-Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
----
- tests/xfs/558 | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+> +
+> +. ./common/preamble
+> +_begin_fstest auto enospc rw zone
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
 
-diff --git a/tests/xfs/558 b/tests/xfs/558
-index 9e9b3be8..270f458c 100755
---- a/tests/xfs/558
-+++ b/tests/xfs/558
-@@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
- $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
- _require_pagecache_access $SCRATCH_MNT
- 
--blksz=65536
-+min_blksz=65536
-+file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-+blksz=$(( 8 * $file_blksz ))
-+
-+blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
-+
- _require_congruent_file_oplen $SCRATCH_MNT $blksz
- 
- # Make sure we have sufficient extent size to create speculative CoW
--- 
-2.43.0
+I don't see anything btrfs specific here, aside from the actual bug
+being triggered.
+Would it make sense to move this to generic, or would that be a waste of
+cycles for non-zone envs?
 
+> +_require_scratch
+> +_require_zoned_device "$SCRATCH_DEV"
+> +
+> +devsize=$(cat /sys/block/$(_short_dev $SCRATCH_DEV)/size)
+> +devsize=$(expr $devsize \* 512)
+> +filesize=$(expr $devsize \* 60 / 100)
+> +
+> +fio_config=$tmp.fio
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	rm -f $tmp.*
+> +}
+
+nit: looks like there's no need to override the default cleanup.
+
+Test looks fine otherwise.
+
+Cheers, David
