@@ -1,57 +1,41 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EED2F153BE8
-	for <fstests@vger.kernel.org>; Mon, 22 Jan 2024 15:19:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A1253FB39;
+	Mon, 22 Jan 2024 16:53:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705936755; cv=none; b=b9rwpMWJcFn6csPA8v3M2ubuw+xBd9kIKi0pLQ52lpGzIw8KDEd0RXUtGpP81lSRwVmPKW32ND/mNrGxmUa6Ghmzm+nrYo2OQJMC69zhG6p6n9ZtWgqIdRyCaRyOPi8DbeZTmz6BtgjDzROOgAJxrON4K74ZzYCdtZIqiPqoIu8=
+	t=1705942417; cv=none; b=ERqL47we0U7v5Bbo/K8Qhbikf2lYLTtJamXiL98iaJdoUyqCD/lxIpX470TMHoc5nTY4JcdryyUWZ9XCIzP7B5DM5r0cluafB3NHmmKHYnhbhBh+zpXl/caYOOGtyDAKr7L15iJV+I1Cdm4S6RvQ8KjPwFAohbuVqom+rRRczm8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705936755; c=relaxed/simple;
-	bh=MPj7YiVsaC9l5OzXpWACt1EH5O5oMMkqcGexFuz+0gE=;
+	s=arc-20240116; t=1705942417; c=relaxed/simple;
+	bh=+fUb/1geYCi6XXls1nF1ZIUE2qfx2ZMySSZL/UG0MSs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WK5ARouc7CV2CLGPLyUI8rNX86kO5YjMdXI28SCQsJmV73zvKqjqQhg36Q0XNDowi3UrMh6/Omo12rXdI/CoToo9zXwZoSSxfdhFx7FeKO0bhHodJrq9XH6lraip9wM15S0Qs7Wmzs+6phJkYkj8FkJAj7zmVE4ILiyGAxYmvi0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=F+SWkK7+; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=FSAZSS0qZOhBzHrLTt5bzGx3PTjeiCd6LJ7KfYENIBiGSiEOvKSUU2ORFavvAI/Mpbl3zL51cmbKIO8oo7rt33uSQh1QjgZQN68yn8C8+qymZVVn/FXNKB2k7RFlwbEHbWpwjGHjvkE53my9HwhW3GDSH2Ww3hFBfqfgV3IFblk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bcC+Ue1X; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="F+SWkK7+"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1705936752;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=+jyXEibcQy/TX9LeZm3CvtEAL8xr/gcskw9vXjBSXmM=;
-	b=F+SWkK7+nkGn9KkNE6P4A+aPRl1+zhGPLbcUrw+ikkW1NF8/6d8/k7lT1ikVbtsmw0ivF9
-	/YZLt4HRJvrx/wbGexKlwz+diHF2mVi/8lFty4PKgSGm56dww9GKncJBvl2ar1m25WRbFT
-	Ux1N59jxhZer4TDP3dx37Rvc4S+Emk8=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-505-9XJeNApqN2OlhCiVExr89A-1; Mon,
- 22 Jan 2024 10:19:09 -0500
-X-MC-Unique: 9XJeNApqN2OlhCiVExr89A-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.rdu2.redhat.com [10.11.54.2])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 1E4153C02747;
-	Mon, 22 Jan 2024 15:19:09 +0000 (UTC)
-Received: from bfoster (unknown [10.22.8.116])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id D76CF40D1B60;
-	Mon, 22 Jan 2024 15:19:08 +0000 (UTC)
-Date: Mon, 22 Jan 2024 10:20:27 -0500
-From: Brian Foster <bfoster@redhat.com>
-To: Su Yue <l@damenly.org>
-Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org,
-	linux-bcachefs@vger.kernel.org
-Subject: Re: [PATCH v2 2/2] common/rc: improve block size support for bcachefs
-Message-ID: <Za6HuxcIl0TNlffY@bfoster>
-References: <20240117092309.1134595-1-glass.su@suse.com>
- <20240117092309.1134595-2-glass.su@suse.com>
- <ZagUdl+DlxIw+siv@bfoster>
- <h6jb49cm.fsf@damenly.org>
- <ZaqepfRjb1vU+nDw@bfoster>
- <cytv49hm.fsf@damenly.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bcC+Ue1X"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 095F4C433F1;
+	Mon, 22 Jan 2024 16:53:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1705942417;
+	bh=+fUb/1geYCi6XXls1nF1ZIUE2qfx2ZMySSZL/UG0MSs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=bcC+Ue1XT04by/DjWImPMpD6ekEvDXjRvFRcU/lVd9u10Ha4/p7O6Lo8ucBI7BY/s
+	 d1H1gkuZDWi82V1wifSj/4XHbLIbldNnnZE3TQrhl6rJCzaclolj3y6gQ1dU9deJRz
+	 aen5yxPpGpbApazoF6fergFPjr1tiwfYhvi5cgCfy7nptqXXmNo3AmOovSfpkLtOpN
+	 kK9hBy8fRKMVksHaclyh6yxuE3eNK+8tzbA+1wlqBPn7CQyjSU2Oe1mCpNGyOA9oQx
+	 Zmhn9oBUF5IfEvClalEADtJ8ieULpehaesef2yjRRl4P8NIQYV4IseTd+7dPAAQ0Qa
+	 JVlqWpzgdXLJg==
+Date: Mon, 22 Jan 2024 08:53:36 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, p.raghav@samsung.com,
+	mcgrof@kernel.org, gost.dev@samsung.com, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/2] xfs/558: scale blk IO size based on the filesystem
+ blksz
+Message-ID: <20240122165336.GA6226@frogsfrogsfrogs>
+References: <20240122111751.449762-1-kernel@pankajraghav.com>
+ <20240122111751.449762-2-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,175 +44,49 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cytv49hm.fsf@damenly.org>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.2
+In-Reply-To: <20240122111751.449762-2-kernel@pankajraghav.com>
 
-On Sun, Jan 21, 2024 at 12:00:47PM +0800, Su Yue wrote:
+On Mon, Jan 22, 2024 at 12:17:50PM +0100, Pankaj Raghav (Samsung) wrote:
+> From: Pankaj Raghav <p.raghav@samsung.com>
 > 
-> On Fri 19 Jan 2024 at 11:09, Brian Foster <bfoster@redhat.com> wrote:
+> This test fails for >= 64k filesystem block size on a 4k PAGE_SIZE
+> system(see LBS efforts[1]). Scale the `blksz` based on the filesystem
+
+Fails how, specifically?
+
+--D
+
+> block size instead of fixing it as 64k so that we do get some iomap
+> invalidations while doing concurrent writes.
 > 
-> > On Thu, Jan 18, 2024 at 10:59:14AM +0800, Su Yue wrote:
-> > > 
-> > > On Wed 17 Jan 2024 at 12:55, Brian Foster <bfoster@redhat.com>
-> > > wrote:
-> > > 
-> > > > On Wed, Jan 17, 2024 at 05:23:09PM +0800, Su Yue wrote:
-> > > > > For bcachefs, def_blksz is never assigned even MKFS_OPTIONS > >
-> > > contains
-> > > > > option
-> > > > > '--block_size'. So block size of bcachefs on scratch dev is > >
-> > > always
-> > > > > 4096
-> > > > > if _scratch_mkfs_sized is called without second parameter.
-> > > > >
-> > > > > Add the pattern to set def_blksz if '--block_size' is given > >
-> > > in
-> > > > > MKFS_OPTIONS.
-> > > > >
-> > > > > Signed-off-by: Su Yue <glass.su@suse.com>
-> > > > > ---
-> > > > > changelog:
-> > > > > v2:
-> > > > >     Born.
-> > > > > ---
-> > > > >  common/rc | 3 +++
-> > > > >  1 file changed, 3 insertions(+)
-> > > > >
-> > > > > diff --git a/common/rc b/common/rc
-> > > > > index 31c21d2a8360..6a01de69cf05 100644
-> > > > > --- a/common/rc
-> > > > > +++ b/common/rc
-> > > > > @@ -950,6 +950,9 @@ _scratch_mkfs_sized()
-> > > > >  	jfs)
-> > > > >  		def_blksz=4096
-> > > > >  		;;
-> > > > > +	bcachefs)
-> > > > > +		def_blksz=`echo $MKFS_OPTIONS | sed -rn > >
-> > > 's/.*(--block_size)[
-> > > > > =]?+([0-9]+).*/\2/p'`
-> > > > > +		;;
-> > > >
-> > > > So if the default bcachefs block size is 512b, I wonder if > this
-> > > should
-> > > > do something like what the udf branch does a few lines above > and
-> > > >
-> > > mkfs.bcachefs decides block size by querying statbuf.st_blksize or
-> > > BLKPBSZGET from the device if the option is not given.
-> > > 
-> > > > override the hardcoded default of 4k. ISTM this whole thing >
-> > > would be
-> > > > more robust if it just elided the param in the default cases > and
-> > > let the
-> > > > associated mkfs tool use its own default, but that's probably > a
-> > > separate
-> > > > issue. Hm?
-> > > >
-> > > Since there is no default block size of bcachefs, maybe we can let
-> > > mkfs.bcachefs decide on its own but it will make chaos when somebody
-> > > reports an unreproducible BUG due to the different block_size even
-> > > we have same local.config. It just happened...
-> > > So for now, I think 4096 is a resonable value of bcachefs block
-> > > size.
-> > > 
-> > 
-> > I think we run into this no matter what if we pick a size out of a hat,
-> > regardless of what the value is. If somebody is testing with default
-> > blocksize (i.e. based on mkfs) on a filesystem where the default isn't
-> > actually 4k, then it seems quite unexpected that _scratch_mkfs_sized
-> > would use something different from _scratch_mkfs when a block size isn't
-> > explicitly specified. That's exactly the situation we ran into with the
-> > generic/361 thing where I would have expected this test to use 512b
-> > blocks.
-> > 
-> > ISTM that the 4k value in _scratch_mkfs_sized() is mainly a last resort
-> > default value so the $blocks calculation can work for any filesystem
-> > that might not be properly supported by the function. The function looks
-> > a little wonky overall, but I think there are at least a couple options
-> > to improve things for bcachefs. FWIW, it also looks to me that nothing
-> > actually passes a blocksize param to _scratch_mkfs_sized, so perhaps we
-> > could just drop that blocksize=$2 parameter across the board as a
-> > simplification?
-> > 
-> Maybe it can be dropped. The only user is generic/466
+> Cap the blksz to be at least 64k to retain the same behaviour as before
+> for smaller filesystem blocksizes.
 > 
-
-Ah, good point.
-
-So generic/466 clears MKFS_OPTIONS so the function will use the provided
-block size over whatever exists in the config, yet generic/466 is the
-only user of this param in the first place.
-
-I wonder if a more useful change might be to change the
-_scratch_mkfs_sized logic to prefer the provided block size over
-whatever is in the config, but then again that might require further
-changes for any of the places that continue to use MKFS_OPTIONS. :/
-
-> > With that, I think bcache could either:
-> > 
-> > 1. Do something like def_blksize=`blockdev --getpbsz $SCRATCH_DEV` in
-> > the first switch if no block size is specified in MKFS_OPTIONS (or
-> > whatever best mimics mkfs logic).
-> > 
-> > OR
-> > 
-> > 2. Do something like the following in the last switch:
-> > 
-> > 	[ -n $def_blksize ] && def_blksize="--block_size=$def_blksize"
-> > 	$MKFS_BCACHEFS_PROG ... $def_blksize $SCRATCH_DEV
-> > 
-> > ... to allow mkfs to determine the block size. I _think_ that works
-> > because the bcachefs format doesn't depend on $blocks at all, so
-> > whatever $blocksize was set to is irrelevent unless $def_blksize was set
-> > above, but I could be missing something. That also assumes blocksize
-> > wasn't set to something by the caller.
-> > 
-> > If correct, option #2 seems a little cleaner to me, but other
-> > thoughts/ideas?
-> > 
-> Option 2 is preferable. I would code it as(on more varaiable for
-> readability):
+> [1] LBS effort: https://lore.kernel.org/lkml/20230915183848.1018717-1-kernel@pankajraghav.com/
 > 
-> local blocksize_opt
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> ---
+>  tests/xfs/558 | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 > 
-> [ -n $def_blksize ] && blockzie_opt="--block_size=$def_blksize"
-> $MKFS_BCACHEFS_PROG ... $blocksize_opt $SCRATCH_DEV
+> diff --git a/tests/xfs/558 b/tests/xfs/558
+> index 9e9b3be8..270f458c 100755
+> --- a/tests/xfs/558
+> +++ b/tests/xfs/558
+> @@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
+>  $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
+>  _require_pagecache_access $SCRATCH_MNT
+>  
+> -blksz=65536
+> +min_blksz=65536
+> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
+> +blksz=$(( 8 * $file_blksz ))
+> +
+> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
+> +
+>  _require_congruent_file_oplen $SCRATCH_MNT $blksz
+>  
+>  # Make sure we have sufficient extent size to create speculative CoW
+> -- 
+> 2.43.0
 > 
-
-That seems reasonable to me. The only caveat is this was assuming the
-blocksize param would go away and so could be ignored for bcachefs.
-
-Without getting too far into the weeds on the higher level parameter
-handling, I wonder if the blocksize parameter was initially put into a
-separate variable (i.e. blocksize_param or some such), if that would at
-least help bcachefs determine between the case where 4096 was requested
-by the caller vs. picked out of a hat by the default handling logic
-earlier in the function, and thus correctly determine when to set a
-blocksize vs. use the mkfs (non-4k) default.
-
-So then IOW the logic might look something like this..?
-
-	[ -n $blocksize_param ] && blocksize_opt="--block_size=$blocksize_param"
-	[ -n $def_blksize ] && blocksize_opt="--block_size=$def_blksize"
-	mkfs ...
-
-Brian
-
-> --
-> Su
-> > 
-> > Brian
-> > 
-> > > --
-> > > Su
-> > > >
-> > > > Brian
-> > > >
-> > > > >  	esac
-> > > > >
-> > > > >  	[ -n "$def_blksz" ] && blocksize=$def_blksz
-> > > > > --
-> > > > > 2.43.0
-> > > > >
-> > > 
-> 
-
