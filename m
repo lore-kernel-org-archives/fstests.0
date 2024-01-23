@@ -1,193 +1,214 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5426F4F5F3;
-	Tue, 23 Jan 2024 23:42:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86CF954BD0;
+	Tue, 23 Jan 2024 23:52:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706053346; cv=none; b=pPsHQ97aCFtUbJTMkgMtoN4pclP6wpzibfWVnohPFLISQNXEgaMZGC7t5KfCDF3xezeqAKRt0X95m/OE5VZdILqfeBJE29CozbhfyKSc7Zyi10dSLCHgFgzA9XuXDbQp6+6pgnBZ6zQB8IYHZJ2p5rTFjdxPGW2pqV/y8Lm/Lsw=
+	t=1706053951; cv=none; b=kW/1csO7OqlNgBApMpRgxq7sifpWARlayUuPpFJzwdIyVPO4tjiZ/UE8YdG9MhGKSABt07ThIUgdwhY+59CICbecJP+Ripm2oNWlZjKLpqvV/hMw5A3sI7XPsO9yDAoO3MTwCbiyLS5wKAVv/BF9XIT2xNCi79eHzBflrSe4ZIo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706053346; c=relaxed/simple;
-	bh=RZxJoOOqHHnySX1PEJh+LSQab+6C7qrc8k9TnC5izSQ=;
+	s=arc-20240116; t=1706053951; c=relaxed/simple;
+	bh=MZXHxi+8P2+9SHjhQXmq7GABP4A394Ds+EowexxIe58=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=T6JDhp2vvZZfcgjnaw+4Pxewv4QOuQ1EAcerOstqyJsGQ/WiInPpu6OZLIyUKLm3Jf4PXC7amRPpJmvf8QXUlT52sjaInWXYyPphNwJmPrq6yeazblsww3ywCiwX7nKp1MUOn8o+j+rnv5zsvBC0CkMJpmuKOg7tNnGMFqhEpD0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gompa.dev; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.208.41
+	 To:Cc:Content-Type; b=erMXdc0YCVXIxxDMSxrVcusWf/Rmd5KjBxE5C0U8LQ9A7xRXr2ihD/i2gffu2yzYn1T53kJi28qIlGgk+Uf/wikiNFa4dJPr32J4fDtJflQ8q159pYeoKnyekzHpwEK7ldkGRtY3DBWMQB43TZxiUpR3//GIf4okO3zBxxO51mM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gompa.dev; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=gompa.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-55a50649ff6so5337315a12.3;
-        Tue, 23 Jan 2024 15:42:24 -0800 (PST)
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-50eabfac2b7so6232477e87.0;
+        Tue, 23 Jan 2024 15:52:29 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706053342; x=1706658142;
+        d=1e100.net; s=20230601; t=1706053947; x=1706658747;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=LkMgn4svPLGyos0vEBAiLxlkJZx1RwZ1fXvcbGlfEEQ=;
-        b=Kgi26hBIzDPHEVb7oX/FIyzK+/zF8fJwms76rem6XH6f/mOJn9aG97CQGaRl4uSFwt
-         KezANQdrYrMQurAe/RHR3BvJEzllu4yudVuzbS9li+8z34Uexzs+5VfIQrWhcEs0RcpO
-         LgaKhWqqc7Ox021+aGPUey7Ci3uCTQhYC58J4Lfufmm2uAxjoqzontwxa0sMWUrvFkiD
-         9TAvWUqjTkd1aSKcKO1//c8VkUqoXEJf5ZVufDWUEcdb+HaefVM3mHb/6CEuZlXJo/BX
-         BQb01avtb06y9MZlUG6SGnwlWnXeEDeFv66v0GLWYs2vLt/F9poLHNyKz9lwu6bK0w7e
-         6HFA==
-X-Gm-Message-State: AOJu0YwNBhiFb1gUq63VXuEFKgpFsx9WLyYSwtTSXnhb11qDbmJbOzWR
-	p6q8l86qLJf6ljLqoa0KlObpICj2vTpt27iEFWMtfXmu+/W70tUyJPSJ7foOZ8T7ZQ==
-X-Google-Smtp-Source: AGHT+IEtWW70+ZiHTcnrGSkydf5i/gewHL18hrsPzI+FzmWEnY3W5bwqv/fRMvqr7uTH+fArYGGxDw==
-X-Received: by 2002:a50:9ec1:0:b0:55c:2cf6:6690 with SMTP id a59-20020a509ec1000000b0055c2cf66690mr1271373edf.67.1706053341846;
-        Tue, 23 Jan 2024 15:42:21 -0800 (PST)
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com. [209.85.208.50])
-        by smtp.gmail.com with ESMTPSA id es18-20020a056402381200b00554b1d1a934sm15814938edb.27.2024.01.23.15.42.21
+        bh=cYUdyDvoLK5RS0LIW51mFYCETSvMhNuSzDAv/X0G7uc=;
+        b=deQEie9j1jXMAq1hy2gzOULWfY0gHgZ+b2ssB6QuSKaVZ81HE5fygKcIRAMOGAxJRF
+         SjJ2m+jptTTiQKPTvnxHtS/F6ygWH1IaQo7YT3GpC4lG6mG9I2jDZNWPIY2pqaY3EUUM
+         v1DtV/e9KJz0i24gsZJ8Bjv4leDTgiWTHhi7FvB/rfbPMRhr3oAxFcYYAnhIbncDcUUQ
+         C5qrP/STumhdnRE7c6s9d83JkA6IbnWiE9QNg8tDLVEuvXHiSiPkB28zwGURcvtattvb
+         peCROfPj3PwM46lKQX9b15DL8VQMmQM3MQolnTHfosKDuo/4T5zmX3Ef8cOjJ+6lGnGL
+         WXqA==
+X-Gm-Message-State: AOJu0Yxi0Nl8NXlswYICaPUvn35aQWNMLr8frk89miKdc8RpedbW3LBz
+	uvFuCaQsQXijj2Kor1eVzL2XtXLXWuH+uLLlZHHYB0DPWcTAhg2aUbxQ/8yldxg15A==
+X-Google-Smtp-Source: AGHT+IEXB1fDoJFuaWUx9OITYWoCBrFWbXujcv6WFu/B3A5xhf4pR1Qfet08fnAJXPVhdR83Lh4+Vw==
+X-Received: by 2002:a05:6512:318d:b0:50f:4ff:6cc5 with SMTP id i13-20020a056512318d00b0050f04ff6cc5mr3357903lfe.130.1706053946863;
+        Tue, 23 Jan 2024 15:52:26 -0800 (PST)
+Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com. [209.85.208.181])
+        by smtp.gmail.com with ESMTPSA id x30-20020a056512131e00b0050eebfbb4fdsm2419634lfu.20.2024.01.23.15.52.26
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 23 Jan 2024 15:42:21 -0800 (PST)
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-55a035669d5so5788759a12.2;
-        Tue, 23 Jan 2024 15:42:21 -0800 (PST)
-X-Received: by 2002:aa7:cf11:0:b0:558:c9c7:130c with SMTP id
- a17-20020aa7cf11000000b00558c9c7130cmr1091834edy.78.1706053341241; Tue, 23
- Jan 2024 15:42:21 -0800 (PST)
+        Tue, 23 Jan 2024 15:52:26 -0800 (PST)
+Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-2cd1232a2c7so65917111fa.0;
+        Tue, 23 Jan 2024 15:52:26 -0800 (PST)
+X-Received: by 2002:a2e:878d:0:b0:2cd:fa80:1125 with SMTP id
+ n13-20020a2e878d000000b002cdfa801125mr296417lji.100.1706053946262; Tue, 23
+ Jan 2024 15:52:26 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <a3f51f2fff6581a6b4dd2e5776b7f40d22dcf65b.1706039782.git.boris@bur.io>
-In-Reply-To: <a3f51f2fff6581a6b4dd2e5776b7f40d22dcf65b.1706039782.git.boris@bur.io>
+References: <20240123034908.25415-1-wqu@suse.com>
+In-Reply-To: <20240123034908.25415-1-wqu@suse.com>
 From: Neal Gompa <neal@gompa.dev>
-Date: Tue, 23 Jan 2024 18:41:44 -0500
-X-Gmail-Original-Message-ID: <CAEg-Je_k29TVpjFizKOvGKb6-xGVguhcpwtYwE4nN4iVxLUEoA@mail.gmail.com>
-Message-ID: <CAEg-Je_k29TVpjFizKOvGKb6-xGVguhcpwtYwE4nN4iVxLUEoA@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: Remove btrfs/303
-To: Boris Burkov <boris@bur.io>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
+Date: Tue, 23 Jan 2024 18:51:49 -0500
+X-Gmail-Original-Message-ID: <CAEg-Je-0JN59m+Cjxf_oFjWn37JxyfVLeqy=wyjo5qyucsp8fQ@mail.gmail.com>
+Message-ID: <CAEg-Je-0JN59m+Cjxf_oFjWn37JxyfVLeqy=wyjo5qyucsp8fQ@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: verify the read behavior of compressed
+ inline extent
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jan 23, 2024 at 3:37=E2=80=AFPM Boris Burkov <boris@bur.io> wrote:
+On Mon, Jan 22, 2024 at 10:49=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
 >
-> This test was reproducing a bug triggered by creating a subvolume qgroup
-> before creating the subvolume itself with a snapshot.
+> [BUG]
+> There is a report about reading a zstd compressed inline file extent
+> would lead to either a VM_BUG_ON() crash, or lead to incorrect file
+> content.
 >
-> The kernel patch:
-> btrfs: forbid creating subvol qgroups
+> [CAUSE]
+> The root cause is a incorrect memcpy_to_page() call, which uses
+> incorrect page offset, and can lead to either the VM_BUG_ON() as we may
+> write beyond the page boundary, or writes into the incorrect offset of
+> the page.
 >
-> explicitly prevents that and makes it fail with EINVAL. I could "fix"
-> this test by expecting the EINVAL message in the output, but at that
-> point it would simply be a test that creating a subvolume and
-> snapshotting it works with qgroups, which is adequately tested by other
-> tests which focus on accurately measuring shared/exclusive usage in
-> various snapshot/reflink scenarios. To avoid confusion, I think it is
-> best to simply delete this test.
+> [TEST CASE]
+> The test case would:
 >
-> Signed-off-by: Boris Burkov
+> - Mount with the specified compress algorithm
+> - Create a 4K file
+> - Verify the 4K file is all inlined and compressed
+> - Verify the content of the initial write
+> - Cycle mount to drop all the page cache
+> - Verify the content of the file again
+> - Unmount and fsck the fs
+>
+> This workload would be applied to all supported compression algorithms.
+> And it can catch the problem correctly by triggering VM_BUG_ON(), as our
+> workload would result decompressed extent size to be 4K, and would
+> trigger the VM_BUG_ON() 100%.
+> And with the revert or the new fix, the test case can pass safely.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
->  tests/btrfs/303     | 77 ---------------------------------------------
->  tests/btrfs/303.out |  2 --
->  2 files changed, 79 deletions(-)
->  delete mode 100755 tests/btrfs/303
->  delete mode 100644 tests/btrfs/303.out
+>  tests/btrfs/310     | 81 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/310.out |  2 ++
+>  2 files changed, 83 insertions(+)
+>  create mode 100755 tests/btrfs/310
+>  create mode 100644 tests/btrfs/310.out
 >
-> diff --git a/tests/btrfs/303 b/tests/btrfs/303
-> deleted file mode 100755
-> index 410460af5..000000000
-> --- a/tests/btrfs/303
-> +++ /dev/null
-> @@ -1,77 +0,0 @@
-> -#! /bin/bash
-> -# SPDX-License-Identifier: GPL-2.0
-> -# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> -#
-> -# FS QA Test 303
-> -#
-> -# A regression test to make sure snapshot creation won't cause transacti=
-on
-> -# abort if there is already an existing qgroup.
-> -#
-> -. ./common/preamble
-> -_begin_fstest auto quick snapshot subvol qgroup
-> -
-> -. ./common/filter
-> -
-> -_supported_fs btrfs
-> -_require_scratch
-> -
-> -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> -       "btrfs: do not abort transaction if there is already an existing =
-qgroup"
-> -
-> -_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> -_scratch_mount
-> -
-> -# Create the first subvolume and get its id.
-> -# This subvolume id should not change no matter if there is an existing
-> -# qgroup for it.
-> -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> -       "$SCRATCH_MNT/snapshot">> $seqres.full
-> -
-> -init_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> -
-> -if [ -z "$init_subvolid" ]; then
-> -       _fail "Unable to get the subvolid of the first snapshot"
-> -fi
-> -
-> -echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
-> -
-> -_scratch_unmount
-> -
-> -# Re-create the fs, as btrfs won't reuse the subvolume id.
-> -_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
-> -_scratch_mount
-> -
-> -$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
-> -_qgroup_rescan $SCRATCH_MNT >> $seqres.full
-> -
-> -# Create a qgroup for the first subvolume, this would make the later
-> -# subvolume creation to find an existing qgroup, and abort transaction.
-> -$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $seq=
-res.full
-> -
-> -# Now create the first snapshot, which should have the same subvolid no =
-matter
-> -# if the quota is enabled.
-> -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> -       "$SCRATCH_MNT/snapshot" >> $seqres.full
-> -
-> -# Either the snapshot create failed and transaction is aborted thus no
-> -# snapshot here, or we should be able to create the snapshot.
-> -new_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> -
-> -echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
-> -
-> -if [ -z "$new_subvolid" ]; then
-> -       _fail "Unable to get the subvolid of the first snapshot"
-> -fi
-> -
-> -# Make sure the subvolumeid for the first snapshot didn't change.
-> -if [ "$new_subvolid" -ne "$init_subvolid" ]; then
-> -       _fail "Subvolumeid for the first snapshot changed, has ${new_subv=
-olid} expect ${init_subvolid}"
-> -fi
-> -
-> -echo "Silence is golden"
-> -
-> -# success, all done
-> -status=3D0
-> -exit
-> diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
-> deleted file mode 100644
-> index d48808e60..000000000
-> --- a/tests/btrfs/303.out
-> +++ /dev/null
-> @@ -1,2 +0,0 @@
-> -QA output created by 303
-> -Silence is golden
+> diff --git a/tests/btrfs/310 b/tests/btrfs/310
+> new file mode 100755
+> index 00000000..b514a8bc
+> --- /dev/null
+> +++ b/tests/btrfs/310
+> @@ -0,0 +1,81 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 310
+> +#
+> +# Make sure reading on an compressed inline extent is behaving correctly
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick compress
+> +
+> +# Import common functions.
+> +# . ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch
+> +
+> +# This test require inlined compressed extents creation, and all the wri=
+tes
+> +# are designed for 4K sector size.
+> +_require_btrfs_inline_extents_creation
+> +_require_btrfs_support_sectorsize 4096
+> +
+> +_fixed_by_kernel_commit e01a83e12604 \
+> +       "Revert \"btrfs: zstd: fix and simplify the inline extent decompr=
+ession\""
+> +
+> +# The correct md5 for the correct 4K file filled with "0xcd"
+> +md5sum_correct=3D"5fed275e7617a806f94c173746a2a723"
+> +
+> +workload()
+> +{
+> +       local algo=3D"$1"
+> +
+> +       echo "=3D=3D=3D Testing compression algorithm ${algo} =3D=3D=3D" =
+>> $seqres.full
+> +       _scratch_mkfs >> $seqres.full
+> +       _scratch_mount -o compress=3D${algo}
+> +
+> +       _pwrite_byte 0xcd 0 4k "$SCRATCH_MNT/inline_file" > /dev/null
+> +       result=3D$(_md5_checksum "$SCRATCH_MNT/inline_file")
+> +       echo "after initial write, md5sum=3D${result}" >> $seqres.full
+> +       if [ "$result" !=3D "$md5sum_correct" ]; then
+> +               _fail "initial write results incorrect content for \"$alg=
+o\""
+> +       fi
+> +       sync
+> +
+> +       $XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/inline_file | tail -n 1 =
+> $tmp.fiemap
+> +       cat $tmp.fiemap >> $seqres.full
+> +       # Make sure we got an inlined compressed file extent.
+> +       # 0x200 means inlined, 0x100 means not block aligned, 0x8 means e=
+ncoded
+> +       # (compressed in this case), and 0x1 means the last extent.
+> +       if ! grep -q "0x309" $tmp.fiemap; then
+> +               rm -f -- $tmp.fiemap
+> +               _notrun "No compressed inline extent created, maybe subpa=
+ge?"
+> +       fi
+> +       rm -f -- $tmp.fiemap
+> +
+> +       # Unmount to clear the page cache.
+> +       _scratch_cycle_mount
+> +
+> +       # For v6.8-rc1 without the revert or the newer fix, this can
+> +       # crash or lead to incorrect contents for zstd.
+> +       result=3D$(_md5_checksum "$SCRATCH_MNT/inline_file")
+> +       echo "after cycle mount, md5sum=3D${result}" >> $seqres.full
+> +       if [ "$result" !=3D "$md5sum_correct" ]; then
+> +               _fail "read for compressed inline extent failed for \"$al=
+go\""
+> +       fi
+> +       _scratch_unmount
+> +       _check_scratch_fs
+> +}
+> +
+> +algo_list=3D($(_btrfs_compression_algos))
+> +for algo in ${algo_list[@]}; do
+> +       workload $algo
+> +done
+> +
+> +echo "Silence is golden"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
+> new file mode 100644
+> index 00000000..7b9eaf78
+> --- /dev/null
+> +++ b/tests/btrfs/310.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 310
+> +Silence is golden
 > --
-> 2.43.0
+> 2.42.0
 >
 >
 
-Seems reasonable.
-
-Reviewed-by: Neal Gompa <neal@gompa.dev>
+This looks reasonable to me, but how is $_btrfs_compression_algos
+defined? Does it include all the algorithm options supported in Btrfs?
 
 
 --=20
