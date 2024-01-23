@@ -1,122 +1,195 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BB06811EE;
-	Tue, 23 Jan 2024 19:42:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D178A823D4;
+	Tue, 23 Jan 2024 19:55:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=66.111.4.26
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706038936; cv=none; b=DqqNeCHAo15jGIfXwSp1RBFp/Y2C9BTS0B8Q+x1DrLNFmiiPyC6wpvs2X+jtt91+M7EVnntctTOEb4jg4fjw7Cv3/Cp8hVY0r+gPGxoaCM4syklLWgCbxR+fzncULwxo1fEuzA9DMlkdtHFLt/1/1VSnKppo3JmzX1Q8ZQ2k850=
+	t=1706039760; cv=none; b=QVitUEBNx0sGTgiiREdl2FITIExuZnH947Qfb9g1BE/qNnxV4v6aELxwb8RDS5ILDaiDhepW3dDqzLKBB724Lxsw3efifzil4B0oOkzHU8lHb+gXbb4Uxj3Ple3wbHhBjFu+Y7iQ4TFurZoHA31OSHtD6ZxHhsihHwtIpAGxOe8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706038936; c=relaxed/simple;
-	bh=MgOh8qSAXOjVsURMY3TnuTHbI3cuWIPLfVNWhmhhrFI=;
-	h=Date:Message-Id:From:To:Cc:Subject:In-Reply-To; b=HxhUTzfxaO9/PKaCK9uqRlMptxH2iGW+4hUP3rS0ogTthI84jdo2tnZS9cy/GFcIQxNCt0lsQdDfFqY04u+fLM9TBxuecRbJB1HJ2znGpcPQvmBSvxue4ueb6p3RRGl5VmnSV9OXigHs9KZNXH23qFnI08lrXqa2NrDDKlpfV7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CnyelzOk; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1706039760; c=relaxed/simple;
+	bh=m0huhoxp7kWvSSu45o3xug39ChTNFf330CKJjkjlW7Y=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Ud3wL6TlKZSkAaluPqjoMrtu8KLWimuroj4aS3CGLmRqOX7e1OY5atZ8ijxOcIc+tW5ArahE6qSVq5i3G0qnG/6zRAWuv1svpC70NenTqF5QJFu3CGvxEKrJecMt6GNXWBA58NQ9GIgo7mY7AH8ho5lCuPYVYymkpxuMjI4m3+c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=G5O17Vld; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=PHXBDKKp; arc=none smtp.client-ip=66.111.4.26
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CnyelzOk"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-1d71c844811so23216995ad.3;
-        Tue, 23 Jan 2024 11:42:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1706038933; x=1706643733; darn=vger.kernel.org;
-        h=in-reply-to:subject:cc:to:from:message-id:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=nOZhThgLXrk3cTydAduZLUncFHwC096MLmwwKuykovA=;
-        b=CnyelzOkgv6xDYVC7yWR6wg5yoYS1SQ1Z26JkuU6aCR2/d1pHgN/TIq2/S3Zdhiqry
-         r1OWymm5aCj+47mdTmoFSjW2N5UoBaivhqoB3NUAv/l8ObbDcoqICpsZEmMEgQSI7gNS
-         YDXUqINGZdFcHaVuaw0JGG3S4EedYG//v0+oRJ06VdDejDbsKBWBJotA2pWCB0q0sdsg
-         q7fhu5Jg9iSZaphuSJ0UnEWYWUEOUFad9mmkM/nIHfA4YsZYGm08quI7HzGgySiMnq2d
-         DQNI29kVYyNt0Szq5zuF53uj8Xci3r16n6PBQAL0P66X3R9Wf7ICReblRCa8tZa/hpPb
-         XmcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706038933; x=1706643733;
-        h=in-reply-to:subject:cc:to:from:message-id:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=nOZhThgLXrk3cTydAduZLUncFHwC096MLmwwKuykovA=;
-        b=PH5jNoDWDoDFZMtqGwed9eI9HJhYzrvDKNums1+Ziry3Hme0GbfwYUY0ILU7YGYDEO
-         ZWTWyCJw8GhXo6hfvsquABxhGLmGwVJhWQo2gqgK/WcvX6fhICUcOggOBenfBzYhNEW8
-         NaXeiG0NOWanSoYUwVKirWyifXD1TuQQk6BVOG9vLXuyt6TpWjfAEPWlG2tBmOUsi756
-         OvfPMOEEuSV6IAHCIN2b41CsnLqovi9JGBmarlO688BotjZOORFbceLAoEokKw136Ml2
-         NexxQxv83DQc2QQy/tlIqdaD2EX1gROyIP0aMY9v2poweD9Go7csa43PAFLqOCiz1HAI
-         KANA==
-X-Gm-Message-State: AOJu0YytCZTt0UbK+lMSYvSpfTtSwPMHAatNliFdH63HdQUvUbEvyGDE
-	3zEF+fw1ffY1gDyMVXnt+e2x6UjPAv5/eayEuSy6Czl447nHSsw4S0luHipY
-X-Google-Smtp-Source: AGHT+IGyNHmGvsgwDy947E3qTBE3jH4X7oLo4cfW+ZeSSX5HBS7jAOJOmCfFp30dyMxIyteA5k4u2A==
-X-Received: by 2002:a17:902:ce8b:b0:1d6:f17e:a03d with SMTP id f11-20020a170902ce8b00b001d6f17ea03dmr4096509plg.95.1706038932878;
-        Tue, 23 Jan 2024 11:42:12 -0800 (PST)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id e12-20020a17090301cc00b001d753a682e6sm3630397plh.96.2024.01.23.11.42.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Jan 2024 11:42:12 -0800 (PST)
-Date: Wed, 24 Jan 2024 01:12:07 +0530
-Message-Id: <87frynkfao.fsf@doe.com>
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: Pankaj Raghav <p.raghav@samsung.com>, Dave Chinner <david@fromorbit.com>, "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, djwong@kernel.org, mcgrof@kernel.org, gost.dev@samsung.com, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 0/2] fstest changes for LBS
-In-Reply-To: <803025df-5381-494d-9325-dd0a45312b8b@samsung.com>
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="G5O17Vld";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="PHXBDKKp"
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+	by mailout.nyi.internal (Postfix) with ESMTP id A82955C0156;
+	Tue, 23 Jan 2024 14:55:56 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute3.internal (MEProxy); Tue, 23 Jan 2024 14:55:56 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to; s=fm1; t=1706039756; x=1706126156; bh=eMl2C/uXpJ/BLXUauamQn
+	oArYSUUhvQB07dKNlFUspk=; b=G5O17Vlda9POE8yd6roDYOkl9Quz0VOyV7mMM
+	lyquzotPB8wVxyjMqYg5geLBeAOqz407ouSChh2O4/4iaHAkb6FC+f3gQbtacKl9
+	IPaFYv3gIv+hSuJeyHn21/BRzLos14N8/c32hk63ihFNb/HnLT3yaLCF6z1mnV9f
+	fJNfjWHNbTsiIl3qkxvpTJD7m94qwge8fBL7wekT6z6mgosurzrq9zzc2dEdOVJo
+	OQT88TvBphsWUGZY0IfDWnMzLcrzpxmANNJSFGbNQWdrGU6XbuGitEFZcZyWSlDC
+	Fsyyc5K3ZYHCmeW3KSEV7WNr4QBA+EMZ7GbxbXRZT7TMGegIw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:subject:subject:to:to
+	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm3; t=1706039756; x=1706126156; bh=eMl2C/uXpJ/BLXUauamQnoArYSUU
+	hvQB07dKNlFUspk=; b=PHXBDKKpGsddWfeupHFWaIZ+VIRjz8ThF5J7Xg0gXANF
+	pFFT670yqASJQnYEwM7Y5ppPnK5cG6uZBC4s7CaYeqH8zmqXH6Fs6xWBPXUC2yTo
+	kjMyxMCG4VX30zsBEBEhtrW5EtNi+36t31NYEz1rL2tBlLXQmkZ1jTscxeHqSkSA
+	r/LcyVXqxO/i/5SQhCvDfVLa3IMjorcRAyO0CVvpDetdOm5Dq6tLiBVW5i9fGmAl
+	XMfS7oi+fA5m/dGUif8qNj0drOFp4+taIqrCVscjuaVwKfOLvDmIiLCzZB7gu43O
+	uynZwJD5SVQMGkvxPmxkMZZkd3WEFDN2a5syE4k8cg==
+X-ME-Sender: <xms:zBmwZcWVlOhAtQibEjVyiWJQGggv09yHw2MgPQAr7SJSOcvnF3hYrg>
+    <xme:zBmwZQnfZLX4a7-1X7RiDh32ZgQJKOh0qb2GT8jlE7yilj4Y6tb4172u7U0ytA6_U
+    RzdIdWh-c4t0IcEvp8>
+X-ME-Received: <xmr:zBmwZQZlAT5Z0N9CyQFqc1EdF1zfzY_HWFjypMEn8-zwud76nmitidOz7zR8NV4gLQNzNKJwWWUiNd8Bdksm4RWR4ck>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrvdekkedguddvkecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:zBmwZbXTxkEq2LnlaZmLLV1SQT9P0Q60iwi5lIWnQ2RYVvac4MJyIA>
+    <xmx:zBmwZWmG_ADGC2abSfDcgcurFrNlQOm2OM1fNvjJG8iINWtC11q-sg>
+    <xmx:zBmwZQct-sOPB3n8EXLJ_vYExuVDN0XiBmozbLhnu7-En6fP6t5ZXw>
+    <xmx:zBmwZavAnhe2iI42CupYhy73BnXVBl1YMF1jsDqJaRztEOf2JBlLGg>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 23 Jan 2024 14:55:56 -0500 (EST)
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: [PATCH] btrfs: Remove btrfs/303
+Date: Tue, 23 Jan 2024 11:56:59 -0800
+Message-ID: <a3f51f2fff6581a6b4dd2e5776b7f40d22dcf65b.1706039782.git.boris@bur.io>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-Pankaj Raghav <p.raghav@samsung.com> writes:
+This test was reproducing a bug triggered by creating a subvolume qgroup
+before creating the subvolume itself with a snapshot.
 
->>> CCing Ritesh as I saw him post a patch to fix a testcase for 64k block size.
->> 
->> Hi Pankaj,
->> 
->> So I tested this on Linux 6.6 on Power8 qemu (which I had it handy).
->> xfs/558 passed with both 64k blocksize & with 4k blocksize on a 64k
->> pagesize system.
+The kernel patch:
+btrfs: forbid creating subvol qgroups
 
-Ok, so it looks like the testcase xfs/558 is failing on linux-next with
-64k blocksize but passing with 4k blocksize.
-It thought it was passing on my previous linux 6.6 release, but I guess
-those too were just some lucky runs. Here is the report -
+explicitly prevents that and makes it fail with EINVAL. I could "fix"
+this test by expecting the EINVAL message in the output, but at that
+point it would simply be a test that creating a subvolume and
+snapshotting it works with qgroups, which is adequately tested by other
+tests which focus on accurately measuring shared/exclusive usage in
+various snapshot/reflink scenarios. To avoid confusion, I think it is
+best to simply delete this test.
 
-linux-next: xfs/558 aggregate results across 11 runs: pass=2 (18.2%), fail=9 (81.8%)
-v6.6: xfs/558 aggregate results across 11 runs: pass=5 (45.5%), fail=6 (54.5%)
+Signed-off-by: Boris Burkov
+---
+ tests/btrfs/303     | 77 ---------------------------------------------
+ tests/btrfs/303.out |  2 --
+ 2 files changed, 79 deletions(-)
+ delete mode 100755 tests/btrfs/303
+ delete mode 100644 tests/btrfs/303.out
 
-So I guess, I will spend sometime analyzing why the failure.
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+deleted file mode 100755
+index 410460af5..000000000
+--- a/tests/btrfs/303
++++ /dev/null
+@@ -1,77 +0,0 @@
+-#! /bin/bash
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+-#
+-# FS QA Test 303
+-#
+-# A regression test to make sure snapshot creation won't cause transaction
+-# abort if there is already an existing qgroup.
+-#
+-. ./common/preamble
+-_begin_fstest auto quick snapshot subvol qgroup
+-
+-. ./common/filter
+-
+-_supported_fs btrfs
+-_require_scratch
+-
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
+-	"btrfs: do not abort transaction if there is already an existing qgroup"
+-
+-_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+-_scratch_mount
+-
+-# Create the first subvolume and get its id.
+-# This subvolume id should not change no matter if there is an existing
+-# qgroup for it.
+-$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
+-$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+-	"$SCRATCH_MNT/snapshot">> $seqres.full
+-
+-init_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+-
+-if [ -z "$init_subvolid" ]; then
+-	_fail "Unable to get the subvolid of the first snapshot"
+-fi
+-
+-echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
+-
+-_scratch_unmount
+-
+-# Re-create the fs, as btrfs won't reuse the subvolume id.
+-_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
+-_scratch_mount
+-
+-$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
+-_qgroup_rescan $SCRATCH_MNT >> $seqres.full
+-
+-# Create a qgroup for the first subvolume, this would make the later
+-# subvolume creation to find an existing qgroup, and abort transaction.
+-$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $seqres.full
+-
+-# Now create the first snapshot, which should have the same subvolid no matter
+-# if the quota is enabled.
+-$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
+-$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+-	"$SCRATCH_MNT/snapshot" >> $seqres.full
+-
+-# Either the snapshot create failed and transaction is aborted thus no
+-# snapshot here, or we should be able to create the snapshot.
+-new_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+-
+-echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
+-
+-if [ -z "$new_subvolid" ]; then
+-	_fail "Unable to get the subvolid of the first snapshot"
+-fi
+-
+-# Make sure the subvolumeid for the first snapshot didn't change.
+-if [ "$new_subvolid" -ne "$init_subvolid" ]; then
+-	_fail "Subvolumeid for the first snapshot changed, has ${new_subvolid} expect ${init_subvolid}"
+-fi
+-
+-echo "Silence is golden"
+-
+-# success, all done
+-status=0
+-exit
+diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+deleted file mode 100644
+index d48808e60..000000000
+--- a/tests/btrfs/303.out
++++ /dev/null
+@@ -1,2 +0,0 @@
+-QA output created by 303
+-Silence is golden
+-- 
+2.43.0
 
-Failure log
-================
-xfs/558 36s ... - output mismatch (see /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad)
-    --- tests/xfs/558.out       2023-06-29 12:06:13.824276289 +0000
-    +++ /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad       2024-01-23 18:54:56.613116520 +0000
-    @@ -1,2 +1,3 @@
-     QA output created by 558
-    +Expected to hear about writeback iomap invalidations?
-     Silence is golden
-    ...
-    (Run 'diff -u /root/xfstests-dev/tests/xfs/558.out /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad'  to see the entire diff)
-
-HINT: You _MAY_ be missing kernel fix:
-      5c665e5b5af6 xfs: remove xfs_map_cow
-
--ritesh
-
->
-> Thanks for testing it out. I will investigate this further, and see why
-> I have this failure in LBS for 64k and not for 32k and 16k block sizes.
->
-> As this test also expects some invalidation during the page cache writeback,
-> this might an issue just with LBS and not for 64k page size machines.
->
-> Probably I will also spend some time to set up a Power8 qemu to test these failures.
->
->> However, since on this system the quota was v4.05, it does not support
->> bigtime feature hence could not run xfs/161. 
->> 
->> xfs/161       [not run] quota: bigtime support not detected
->> xfs/558 7s ...  21s
->> 
->> I will collect this info on a different system with latest kernel and
->> will update for xfs/161 too.
->> 
->
-> Sounds good! Thanks!
->
->> -ritesh
