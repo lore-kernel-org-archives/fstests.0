@@ -1,146 +1,254 @@
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
+Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63D9C7FBAC
-	for <fstests@vger.kernel.org>; Tue, 23 Jan 2024 16:40:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C64D4481DC;
+	Tue, 23 Jan 2024 18:44:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=66.111.4.26
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706028051; cv=none; b=eGyLKCNmQPTzaxxQre1IONA4eB7JCpfgbhgM6evmEyEyL5sLiIlogZI2C/biwDp7yx70w2OLOUp0YYXOGpefo3cn1cA8+JFlq/UpiGNwCNbu8WrX5LT4WUS79mH5dKREpm3N5QAz508X1eOmb3JIPaQXmyF3NLlf+VU/YP9P1lE=
+	t=1706035454; cv=none; b=dK3zHvWLpq7jOV08z9G7LdBmUnM/+1GSl7+xAx9WibPX9847jFL11f0ZuxwDeLst0qHRehrtE34x2JLmAwX7RPcZIsgS53+qYvqeTfe7be28zpbMEkgOmEhmtzeEC59rqAJJFK+jFjvvN0gH00XvwClYsut+AgrhzP3pZjt2TWc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706028051; c=relaxed/simple;
-	bh=zEKOZrd79S8mIE6tD5Er8h8lMCDbyemsd3WOfCrC2k4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
-	 Content-Type:References; b=ofQalnl45KQUQ3UykxhN3Ujs/SchGQ0gSxsSjXDKnT0QpBOJYVSXTiagq6gWkde5SoSWrf/Y7Nb1Ekuyv5LGo/bFvusSjnt8eWMObjefdpT5Mf9iNVjdPjJLlTgBBfMSf1qiN7s/CfwdidDWPB+7KHw4m0R2Vo1G2rTMuV/gd/o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=kkptBV8q; arc=none smtp.client-ip=210.118.77.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1706035454; c=relaxed/simple;
+	bh=dO0erxP+hLsKnnwZUVtSNnhGYpv5CpjENnS5j4nGU1A=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=k9wlCtkX5D0ZeYsKus9LLDdFIrq7JeKHwnuwwDDn/6coRXhq1d7FpNALdYZA+lSxqITyC0hOrZJ2P/w3M/TWk2NxzY+yXjkb4yWmbyc74IJZKs7Z/qtH4HVE357e/43GufPy39Fq7wXqjnuc5AOm21Z8g9Tae7gKchEzqTxTrDs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=tie1Uzfv; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=eDOGeIVm; arc=none smtp.client-ip=66.111.4.26
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="kkptBV8q"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20240123164047euoutp014e07bd5f7172618af7ffd7f1339d9180~tB3hnDdSH1377013770euoutp01e
-	for <fstests@vger.kernel.org>; Tue, 23 Jan 2024 16:40:47 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20240123164047euoutp014e07bd5f7172618af7ffd7f1339d9180~tB3hnDdSH1377013770euoutp01e
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1706028047;
-	bh=d+3rmwVGRJ9k7WznkGJM+ZhfWlZzhnkh2hLWmpwqoEQ=;
-	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-	b=kkptBV8qvq/b8kr8y5UHKookoHvncjPo166Icf2U4GHXz3exitykN7RscAXBUf6k1
-	 jS/jM4PWkFkmW3VQswkRianYeeDigUaFtAEl8D69zXWmsZTzvHZ2uvlSCkvwIUFcN6
-	 rT/uFQhRuWYAiUx5dkTdkESaElKLWyWFsX/7df70=
-Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTP id
-	20240123164047eucas1p2fa350075d32790c348a854d1d7062ecd~tB3hSdP4C1243312433eucas1p2u;
-	Tue, 23 Jan 2024 16:40:47 +0000 (GMT)
-Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-	eusmges3new.samsung.com (EUCPMTA) with SMTP id AF.72.09552.F0CEFA56; Tue, 23
-	Jan 2024 16:40:47 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-	20240123164046eucas1p297c033627bd506b0bf256e9ebc4639fe~tB3g5FST92500825008eucas1p2u;
-	Tue, 23 Jan 2024 16:40:46 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20240123164046eusmtrp2c3092dc549020881ec4ec57a5c3bdc0d~tB3g4dVuw1469014690eusmtrp2W;
-	Tue, 23 Jan 2024 16:40:46 +0000 (GMT)
-X-AuditID: cbfec7f5-853ff70000002550-35-65afec0fad33
-Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-	eusmgms2.samsung.com (EUCPMTA) with SMTP id 1A.CE.10702.E0CEFA56; Tue, 23
-	Jan 2024 16:40:46 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20240123164046eusmtip1fbe8e9570790f99424f59ac815e2d6df~tB3gpk0RR0469404694eusmtip1c;
-	Tue, 23 Jan 2024 16:40:46 +0000 (GMT)
-Received: from [192.168.8.209] (106.210.248.230) by CAMSVWEXC02.scsc.local
-	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-	Tue, 23 Jan 2024 16:40:45 +0000
-Message-ID: <803025df-5381-494d-9325-dd0a45312b8b@samsung.com>
-Date: Tue, 23 Jan 2024 17:40:44 +0100
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="tie1Uzfv";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="eDOGeIVm"
+Received: from compute2.internal (compute2.nyi.internal [10.202.2.46])
+	by mailout.nyi.internal (Postfix) with ESMTP id A226E5C0165;
+	Tue, 23 Jan 2024 13:44:10 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute2.internal (MEProxy); Tue, 23 Jan 2024 13:44:10 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to; s=fm1; t=1706035450; x=1706121850; bh=Ts8xKziiO9cTTvAMeK/mx
+	r8iJ4BCPeJY8CwuPeBF0E0=; b=tie1Uzfv8Ifd4MTR4dO+ZY4bSparWqbndgP5H
+	/xn2+2ZAT+wuuQBqA6PFQ1ZPKMbVqUKQz4pWKB8dsRus3oduNpwmOTMTSWI0jrnY
+	AJ4G4nLEAfWWx0giXd52jF2iakZDZd8lbxjOqvkL5ycmQfwQC7qmIaG6qhiGYdUJ
+	qFdP8JkAKa7hlLbcgs8HF4LrEIGP82isBhVwg3/AZrmY+5iAKz0wTacqQx/hTe/D
+	KZDoawb4ObuhKP08ZCgRSaifPwD+mN9riN6k1dGeQ8tMWXZMvw9FZqFH8grFt75/
+	Exk806HBpvX0u1wEZwPlI/4hJjXM8r6Kuv9DolJ3AWemu+P+w==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:subject:subject:to:to
+	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm3; t=1706035450; x=1706121850; bh=Ts8xKziiO9cTTvAMeK/mxr8iJ4BC
+	PeJY8CwuPeBF0E0=; b=eDOGeIVmwOKMfRw05mj3ElSkRDo23B2ywSmuRFxyliB3
+	ylPKmrGlDW34V5RYFq6SafuUajsZT83W6XgglUqJ/O7Hk6LTS1FU/hULMSzcDbzs
+	qiQcDZIMIqmhlOVvMOZgzENJuaNnSdVlfmkPbyAQDnAoYYQP8Dbpn60KhXvnIF+6
+	iuq5iQbbhCoeh9m5yza3nD7O4LY0kkfhpKjNsSNzfBiftebqnBIBZPFlt01bnQpg
+	mBpzYMaR5AQ9rg4laVsy0IOeAbDWjDRG5v6BvWWJi+GXC2RfK9Cv3ieKuHQ4keG0
+	fRUQYJiDCuARI1+9dQ0SBTadAEm5Fs0IfGJ1YcfgyA==
+X-ME-Sender: <xms:-giwZU6kfFkpBChLXrN4_FiLOj3XXQE4_3a8C_WrjCTA3DLnwyxwHA>
+    <xme:-giwZV4ljnl9_qmZnxagrLqNbpbPkXP1Fmf988n4MqiJPyNIhyq_e0hV3kdeJ4bpt
+    xnugucvmta_JPQYzj0>
+X-ME-Received: <xmr:-giwZTe1IGV5p1UnmwHK3arcsfdH2qoChJc5hs0h3gDV4408O8rLU3Gd25WK2sGJZJiEI8PVFy-nJoJ02mFD_M1OieU>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvkedrvdekkedguddugecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertd
+    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekud
+    duteefkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:-giwZZL-U3f7tOsPGqMqBT46ZdLfNp8eGZg_8KVu27MbWkAC9lzvAg>
+    <xmx:-giwZYJUVsxHBvOHkTjdc60iP2GmtOYy4urYDD0onpF71_h2zBGoCA>
+    <xmx:-giwZaxjbbVYoLkm_y1ifX-nsyzsa-JoHVOh56kPKwZAp7yR-NK-2Q>
+    <xmx:-giwZSiKYSFARM9LY_1NQ0XelRXG5vuWnYhxxO41_egIVci5Vp5kag>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 23 Jan 2024 13:44:09 -0500 (EST)
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: [PATCH v2] btrfs/310: test qgroup deletion
+Date: Tue, 23 Jan 2024 10:45:12 -0800
+Message-ID: <ce4a79cafb6790ef6d1e141d65195f72f469ae4d.1706035378.git.boris@bur.io>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/2] fstest changes for LBS
-Content-Language: en-US
-To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, Dave Chinner
-	<david@fromorbit.com>, "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-CC: <zlang@redhat.com>, <fstests@vger.kernel.org>, <djwong@kernel.org>,
-	<mcgrof@kernel.org>, <gost.dev@samsung.com>, <linux-xfs@vger.kernel.org>
-From: Pankaj Raghav <p.raghav@samsung.com>
-In-Reply-To: <87le8gjc53.fsf@doe.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrKKsWRmVeSWpSXmKPExsWy7djP87r8b9anGtydz2qx5dg9RovLT/gs
-	TrfsZbc48/Izi8WuPzvYLW5MeMpocfBUB7vF3pM7WR04PE4tkvDYOesuu8emVZ1sHmdXOnq8
-	33eVzePzJrkAtigum5TUnMyy1CJ9uwSujOU7njEW/GKveHXwK1MDYxdbFyMnh4SAicTJTZeY
-	uhi5OIQEVjBKzNzdww7hfGGU6Ju+mhmkSkjgM6NEw+XKLkYOsI6/P5IhapYzSuzrfMkM4QDV
-	bFg1gw3C2c0osXvLB0aQbl4BO4lnk2exgXSzCKhK7PniDBEWlDg58wkLiC0qIC9x/9YMdhBb
-	WEBfYvaGRWDnMQuIS9x6Mh/sPBGBXkaJc8eesII4zAKTGCWefDnBBDKUTUBLorETrJkTaP6L
-	t/3MEM2aEq3bf7ND2PIS29/OYYb4QFli6lIviPdrJU5tuQU2X0Kgm1Ni4bb/LBAJF4nXF/ZB
-	2cISr45vYYewZST+7wQ5CMSulnh64zczRHMLo0T/zvVsEAusJfrO5EDUOEpseT+DFSLMJ3Hj
-	rSDEOXwSk7ZNZ57AqDoLKShmIXl5FpIPZiH5YAEjyypG8dTS4tz01GLjvNRyveLE3OLSvHS9
-	5PzcTYzAlHT63/GvOxhXvPqod4iRiYPxEKMEB7OSCO8NyXWpQrwpiZVVqUX58UWlOanFhxil
-	OViUxHlVU+RThQTSE0tSs1NTC1KLYLJMHJxSDUxx9Tn/GDLMfXbIHHKbqyUXp6Siv9y64/bW
-	0AkzDY6vnm7TkjjPLU6jxuDUBIPg84yNGtOaO171f+V2KZ4TtjK2cPXi/edkTPVnlt4Ofnbw
-	SPqtjMDIP9fa3M78NS83MVSa/zSv0G/7/U1Mk5+eNZ49+2PYvUOnNnbxa1wwMNvUmjWn4455
-	kcCDTQkvOj7Y+exPuZ3JkfRi5T/fC5HzZpRbrq3cVbKK7fbeFnbJGT8vm0x4qFq/SFWinj94
-	m6DLnyIdnpSvwmbrlm8S2NHk9b3avSdIvmni8lXRP0Q3ds6ZG2xStPu8sfT+yGv/T7C8Pmql
-	8Ky1z/DsXef/jbUOCzK+1AU7VF7kuj/rXe7muX5KLMUZiYZazEXFiQAM1ipmuAMAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrJIsWRmVeSWpSXmKPExsVy+t/xu7p8b9anGvTvVLPYcuweo8XlJ3wW
-	p1v2slucefmZxWLXnx3sFjcmPGW0OHiqg91i78mdrA4cHqcWSXjsnHWX3WPTqk42j7MrHT3e
-	77vK5vF5k1wAW5SeTVF+aUmqQkZ+cYmtUrShhZGeoaWFnpGJpZ6hsXmslZGpkr6dTUpqTmZZ
-	apG+XYJexvIdzxgLfrFXvDr4lamBsYuti5GDQ0LAROLvj+QuRi4OIYGljBKfFj8CinMCxWUk
-	Nn65ygphC0v8udYFFhcS+Mgo0fvJDKJhN6PEjE87wIp4Bewknk2eBTaURUBVYs8XZ4iwoMTJ
-	mU9YQGxRAXmJ+7dmsIPYwgL6ErM3LAKbySwgLnHryXwmkJkiAr2MEueOPWEFcZgFJjFKPPly
-	gglic4XErwtnGEEWsAloSTR2gg3iBNr14m0/M8QgTYnW7b/ZIWx5ie1v5zBDPKksMXWpF8Qv
-	tRKf/z5jnMAoOgvJebOQnDELyaRZSCYtYGRZxSiSWlqcm55bbKRXnJhbXJqXrpecn7uJERjH
-	24793LKDceWrj3qHGJk4GA8xSnAwK4nw3pBclyrEm5JYWZValB9fVJqTWnyI0RQYRBOZpUST
-	84GJJK8k3tDMwNTQxMzSwNTSzFhJnNezoCNRSCA9sSQ1OzW1ILUIpo+Jg1OqgcnYZbJwdmHh
-	hbbN5Q/fnOJ1ZMtUrbPUj929VPjqll1VNsuSb2nMtNC5zTl1SRlP0dWPMyfxbP/Vp1MSF7rw
-	VbDpUQEbW8038wobTblKUrMu8zAcLClYHt36J1IzZ5uTWUfEseRuS8Ze8XXbHsne3feH4YiC
-	suDFjZL6+go/OvJfmPL+2sf4p/vM3U0ntXw02QqKy3e5li551//ErlpYXrBmz7qjV35wMMet
-	FHsttmqTiyV744PT0p0zD5feSVJokNwdFa+8XexgkE/WHt2smWGh3KuXz52R8fZqu4eDZZPt
-	nL0PTOv494ivj7lZ8fSESOSKwM+3o6ISDi3aGmHMsDx84dS+uMJr3fmHm9WilViKMxINtZiL
-	ihMBCiUaSWwDAAA=
-X-CMS-MailID: 20240123164046eucas1p297c033627bd506b0bf256e9ebc4639fe
-X-Msg-Generator: CA
-X-RootMTR: 20240123153550eucas1p22e283235d636ce5005321ec694528627
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20240123153550eucas1p22e283235d636ce5005321ec694528627
-References: <CGME20240123153550eucas1p22e283235d636ce5005321ec694528627@eucas1p2.samsung.com>
-	<87le8gjc53.fsf@doe.com>
+Content-Transfer-Encoding: 8bit
 
->> CCing Ritesh as I saw him post a patch to fix a testcase for 64k block size.
-> 
-> Hi Pankaj,
-> 
-> So I tested this on Linux 6.6 on Power8 qemu (which I had it handy).
-> xfs/558 passed with both 64k blocksize & with 4k blocksize on a 64k
-> pagesize system.
+When using squotas, an extent's OWNER_REF can long outlive the subvolume
+that is the owner, since it could pick up a different reference that
+keeps it around, but the subvolume can go away.
 
-Thanks for testing it out. I will investigate this further, and see why
-I have this failure in LBS for 64k and not for 32k and 16k block sizes.
+Test this case, as originally, it resulted in a read only btrfs.
 
-As this test also expects some invalidation during the page cache writeback,
-this might an issue just with LBS and not for 64k page size machines.
+Since we can blow up the subvolume in the same transaction as the extent
+is written, we can also increment the usage of a non-existent subvolume.
 
-Probably I will also spend some time to set up a Power8 qemu to test these failures.
+This leaves an OWNER_REF behind with no corresponding incremented usage
+in a qgroup, so if we re-create that qgroup, we can then underflow its
+usage.
 
-> However, since on this system the quota was v4.05, it does not support
-> bigtime feature hence could not run xfs/161. 
-> 
-> xfs/161       [not run] quota: bigtime support not detected
-> xfs/558 7s ...  21s
-> 
-> I will collect this info on a different system with latest kernel and
-> will update for xfs/161 too.
-> 
+Both of these cases are fixed in the kernel by disallowing
+creating subvol qgroups and by disallowing deleting qgroups that still
+have usage.
 
-Sounds good! Thanks!
+Signed-off-by: Boris Burkov <boris@bur.io>
+---
+Changelog:
+v2:
+- removed enable quota helper
+- removed unneeded commented cleanup boilerplate
+- change test number 304 -> 310 (based on v2024.01.14)
 
-> -ritesh
+ tests/btrfs/301     | 14 ++------
+ tests/btrfs/310     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/310.out |  6 ++++
+ 3 files changed, 91 insertions(+), 12 deletions(-)
+ create mode 100755 tests/btrfs/310
+ create mode 100644 tests/btrfs/310.out
+
+diff --git a/tests/btrfs/301 b/tests/btrfs/301
+index db4697247..4c1127aa0 100755
+--- a/tests/btrfs/301
++++ b/tests/btrfs/301
+@@ -157,16 +157,6 @@ do_enospc_falloc()
+ 	do_falloc $file $sz
+ }
+ 
+-enable_quota()
+-{
+-	local mode=$1
+-
+-	[ $mode == "n" ] && return
+-	arg=$([ $mode == "s" ] && echo "--simple")
+-
+-	$BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
+-}
+-
+ get_subvid()
+ {
+ 	_btrfs_get_subvolid $SCRATCH_MNT subv
+@@ -186,7 +176,7 @@ prepare()
+ {
+ 	_scratch_mkfs >> $seqres.full
+ 	_scratch_mount
+-	enable_quota "s"
++	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+ 	$BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
+ 	local subvid=$(get_subvid)
+ 	set_subvol_limit $subvid $limit
+@@ -397,7 +387,7 @@ enable_mature()
+ 	# Sync before enabling squotas to reliably *not* count the writes
+ 	# we did before enabling.
+ 	sync
+-	enable_quota "s"
++	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+ 	set_subvol_limit $subvid $limit
+ 	_scratch_cycle_mount
+ 	usage=$(get_subvol_usage $subvid)
+diff --git a/tests/btrfs/310 b/tests/btrfs/310
+new file mode 100755
+index 000000000..02714d261
+--- /dev/null
++++ b/tests/btrfs/310
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
++#
++# FS QA Test 310
++#
++# Test various race conditions between qgroup deletion and squota writes
++#
++. ./common/preamble
++_begin_fstest auto quick qgroup subvol clone
++
++# Import common functions.
++. ./common/reflink
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_require_scratch_reflink
++_require_cp_reflink
++_require_scratch_enable_simple_quota
++_require_no_compress
++
++_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid deleting live subvol qgroup"
++_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid creating subvol qgroups"
++
++subv1=$SCRATCH_MNT/subv1
++subv2=$SCRATCH_MNT/subv2
++
++prepare()
++{
++    _scratch_mkfs >> $seqres.full
++    _scratch_mount
++    $BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
++    $BTRFS_UTIL_PROG subvolume create $subv1 >> $seqres.full
++    $BTRFS_UTIL_PROG subvolume create $subv2 >> $seqres.full
++    $XFS_IO_PROG -fc "pwrite -q 0 128K" $subv1/f
++    _cp_reflink $subv1/f $subv2/f
++}
++
++# An extent can long outlive its owner. Test this by deleting the owning
++# subvolume, committing the transaction, then deleting the reflinked copy.
++# Deleting the copy will attempt to free space from the missing owner, which
++# should be a no-op.
++free_from_deleted_owner()
++{
++    echo "free from deleted owner"
++    prepare
++    subvid1=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
++
++    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
++    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.full
++    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++    rm $subv2/f
++    _scratch_unmount
++}
++
++# A race where we delete the owner in the same transaction as writing the
++# extent leads to incrementing the squota usage of the missing qgroup.
++# This leaves behind an owner ref with an owner id that cannot exist, so
++# freeing the extent now frees from that qgroup, but there has never
++# been a corresponding usage to free.
++add_to_deleted_owner()
++{
++    echo "add to deleted owner"
++    prepare
++    subvid1=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
++
++    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
++    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.full
++    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++    $BTRFS_UTIL_PROG qgroup create 0/$subvid1 $SCRATCH_MNT >> $seqres.full
++    rm $subv2/f
++    _scratch_unmount
++}
++
++free_from_deleted_owner
++add_to_deleted_owner
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
+new file mode 100644
+index 000000000..d7d4bc0ae
+--- /dev/null
++++ b/tests/btrfs/310.out
+@@ -0,0 +1,6 @@
++QA output created by 310
++free from deleted owner
++ERROR: unable to destroy quota group: Device or resource busy
++add to deleted owner
++ERROR: unable to destroy quota group: Device or resource busy
++ERROR: unable to create quota group: Invalid argument
+-- 
+2.43.0
+
