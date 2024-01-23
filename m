@@ -1,241 +1,151 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 528E329403;
-	Tue, 23 Jan 2024 06:01:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5C265BAEE
+	for <fstests@vger.kernel.org>; Tue, 23 Jan 2024 08:52:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1705989687; cv=none; b=FDPor6raZwWbnjc3AOa2TQKdqeU85idDNOCHhQbgXWhPvFWQd6+3R3e5p9iatn1D7Ga1dShEPjYtlgPz67qtM4tmBPveP8KR9J+b9cuv2PwtkLJs0o1Gvkcm4QjBM2Jz7kfKp0QSqeiztJg2JZy3q7JF/iZVqMlYMnXq6LyJbOg=
+	t=1705999966; cv=none; b=aCNo1p6kI5a5JiNUIYUXD/WXGrSq1vuVeXg5qn8n0fJibs/dRElyptGcn++XY3dm7iTQb7bvpwDW/qHKZFmovZ3iqiwvOEyBaJFqx9tN4HFq61u4DFVA4UqECgFLik5HleRbA30WaRKdJ1JfmlNrGqafNZwrXRhtZhtDa6spbx4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1705989687; c=relaxed/simple;
-	bh=TC06sNmEC5ag2xKTiP8k6lLbg2DX0H9nUT+LaKXgRI0=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=OUIvt5MhlIIz4iFLgULLJ8EKScVeVfNYV8BDDovhz33CSG6LEyjN/7Yh/AKzG/mwe3P3CDlnfVfalLsOP4Dmt5x8U+WP8/nkSIb57Hx+A+5+YeNkKw3+JJk/+GE25h6Mlw0BNxgpG8SCIre0kK8gtrCJuDHV5Aqc/aRsgZMMqZk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=JFK98Nly; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=012p59RR; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=JFK98Nly; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=012p59RR; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1705999966; c=relaxed/simple;
+	bh=zCMObol4b12cq/cEWDKuJLeayppKKIXxi/Yv2nee210=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
+	 Content-Type:References; b=CVsWufHu3ql5oePLbEu5bgFojZRqLKY7zTYfcOhC2l+l3WVN22AjyG+iQbgv66GzjT7uoc9YocX0jkNgdg8b87JBKsK3c2l0Nr1PqcRAWqcYj8+TRQWCezsPGDUTeKnPG0Qg8e3YQkwJ6c7RF9hxmlWvZzvErj8tgYHczp4F2oU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=DdIVAt9O; arc=none smtp.client-ip=210.118.77.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="JFK98Nly";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="012p59RR";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="JFK98Nly";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="012p59RR"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 9D2432228F;
-	Tue, 23 Jan 2024 06:01:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1705989677; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=eBgWpMGs3ed1A1yQv7oC90R+nk5B4eAFbu9MhY7TMpQ=;
-	b=JFK98Nly5Xzc7JMb1LtlyMk7D5JXkmQkZVzO/ksMQtQ0RfTN7so3OgJpE+UeYSIYdcPITr
-	ru9x6hQ4RJT1sZmRf1STU1gsRqfm7LhPP2OtGKknDv9pSFb0+WAm7hZmCWI1zqS063n/X0
-	dRQ9U+MtWKd/3KaCfaoXa/ihg2zBaVQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1705989677;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=eBgWpMGs3ed1A1yQv7oC90R+nk5B4eAFbu9MhY7TMpQ=;
-	b=012p59RRwnppODfluzkIx1nZIFCikP/hRaq3H8ZE1fC+RN4G0rKWdRItyWEA1gw6dqWscS
-	Qyuy3yTCnWoDQdCQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1705989677; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=eBgWpMGs3ed1A1yQv7oC90R+nk5B4eAFbu9MhY7TMpQ=;
-	b=JFK98Nly5Xzc7JMb1LtlyMk7D5JXkmQkZVzO/ksMQtQ0RfTN7so3OgJpE+UeYSIYdcPITr
-	ru9x6hQ4RJT1sZmRf1STU1gsRqfm7LhPP2OtGKknDv9pSFb0+WAm7hZmCWI1zqS063n/X0
-	dRQ9U+MtWKd/3KaCfaoXa/ihg2zBaVQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1705989677;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=eBgWpMGs3ed1A1yQv7oC90R+nk5B4eAFbu9MhY7TMpQ=;
-	b=012p59RRwnppODfluzkIx1nZIFCikP/hRaq3H8ZE1fC+RN4G0rKWdRItyWEA1gw6dqWscS
-	Qyuy3yTCnWoDQdCQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A69E713786;
-	Tue, 23 Jan 2024 06:01:15 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id bphEFStWr2UnSgAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Tue, 23 Jan 2024 06:01:15 +0000
-Date: Tue, 23 Jan 2024 17:01:07 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Boris Burkov <boris@bur.io>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
-Subject: Re: [PATCH] btrfs/304: test qgroup deletion
-Message-ID: <20240123170107.2292abd8@echidna>
-In-Reply-To: <c9fa8fa558e307a5d0d28545ff69433ae8324f4c.1705964751.git.boris@bur.io>
-References: <c9fa8fa558e307a5d0d28545ff69433ae8324f4c.1705964751.git.boris@bur.io>
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="DdIVAt9O"
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240123085241euoutp02e834815e731a48a67aed5ea2fb23b326~s7e01r5qE1897718977euoutp02b
+	for <fstests@vger.kernel.org>; Tue, 23 Jan 2024 08:52:41 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240123085241euoutp02e834815e731a48a67aed5ea2fb23b326~s7e01r5qE1897718977euoutp02b
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1705999961;
+	bh=fVyd12SgA25HZ/4Y6a3Pb/lWglH2MBlmPqT52L5l9a0=;
+	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
+	b=DdIVAt9O7jcMdliU7+nn1+2AkD5QLqQG8n38o5P63R6kmBO1bSpKpTevsonUaJz/9
+	 0czMKMXx1GeKPU1OAfKSWOhRAakTT/cWmdeC+NUhkyYO+Q14mUd8MVHfq9eAqGtRxv
+	 sOWd0tjy4tKRWR+C/PRWlBckViEXQvWNduBF7qEA=
+Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTP id
+	20240123085241eucas1p24a0275737fbe0bd314aaa0e4738a1d3b~s7e0rVo9e1254112541eucas1p2D;
+	Tue, 23 Jan 2024 08:52:41 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+	eusmges3new.samsung.com (EUCPMTA) with SMTP id 7B.B4.09552.95E7FA56; Tue, 23
+	Jan 2024 08:52:41 +0000 (GMT)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20240123085241eucas1p20e4f3568f634213c469737b626f8ce64~s7e0SrWVD3053230532eucas1p2p;
+	Tue, 23 Jan 2024 08:52:41 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240123085241eusmtrp2457249366e4aa6c11531d119710801ba~s7e0R6laz0751907519eusmtrp2G;
+	Tue, 23 Jan 2024 08:52:41 +0000 (GMT)
+X-AuditID: cbfec7f5-853ff70000002550-eb-65af7e59736e
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+	eusmgms2.samsung.com (EUCPMTA) with SMTP id B1.7A.10702.95E7FA56; Tue, 23
+	Jan 2024 08:52:41 +0000 (GMT)
+Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
+	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+	20240123085241eusmtip2c7f634f940bcd39b29b89d87dc592259~s7e0F7fec1989719897eusmtip21;
+	Tue, 23 Jan 2024 08:52:41 +0000 (GMT)
+Received: from [192.168.8.209] (106.210.248.230) by CAMSVWEXC02.scsc.local
+	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
+	Tue, 23 Jan 2024 08:52:40 +0000
+Message-ID: <69e73772-80e2-4cfe-a95d-d680d7686e3c@samsung.com>
+Date: Tue, 23 Jan 2024 09:52:39 +0100
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/2] fstest changes for LBS
+To: Dave Chinner <david@fromorbit.com>, "Pankaj Raghav (Samsung)"
+	<kernel@pankajraghav.com>
+CC: <zlang@redhat.com>, <fstests@vger.kernel.org>, <djwong@kernel.org>,
+	<mcgrof@kernel.org>, <gost.dev@samsung.com>, <linux-xfs@vger.kernel.org>,
+	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Content-Language: en-US
+From: Pankaj Raghav <p.raghav@samsung.com>
+In-Reply-To: <Za8HXDfoIK+lyMvR@dread.disaster.area>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Authentication-Results: smtp-out1.suse.de;
-	none
-X-Spamd-Result: default: False [-2.60 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[4];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Spam-Level: 
-X-Spam-Flag: NO
-X-Spam-Score: -2.60
+X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
+	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrKKsWRmVeSWpSXmKPExsWy7djP87qRdetTDZ4+0LbYcuweo8XlJ3wW
+	p1v2slucefmZxWLXnx3sFjcmPGW0OHiqg91i78mdrA4cHqcWSXjsnHWX3WPTqk42j7MrHT3e
+	77vK5vF5k1wAWxSXTUpqTmZZapG+XQJXxsyLU1gLnnFVnFq0kLmB8TxHFyMnh4SAicSL138Z
+	uxi5OIQEVjBK/Fm1nh3C+cIocfxhLzOE85lR4lfDRzaYloVfLjCD2EICyxklunbHwhVt/tbB
+	AuHsZpR48fA/WAevgJ3E5XefwGwWAVWJ3ZcXsELEBSVOznzCAmKLCshL3L81gx3EFhbQl5i9
+	YRFQPQeHiECsxJ3VWSAzmQWOMEp8/P6aCaSGWUBc4taT+UwgNWwCWhKNnWCtnALGEn33zjFC
+	lGhKtG7/zQ5hy0tsfzuHGaRcQkBZYupSL4hfaiVObbnFBDJeQqCfU+JKdzMLRMJF4sOqm6wQ
+	trDEq+Nb2CFsGYn/O+czQdjVEk9v/GaGaG5hlOjfuZ4NYoG1RN+ZHIgaR4mXn74wQYT5JG68
+	FYQ4h09i0rbpzBMYVWchBcQsJI/NQvLBLCQfLGBkWcUonlpanJueWmycl1quV5yYW1yal66X
+	nJ+7iRGYkk7/O/51B+OKVx/1DjEycTAeYpTgYFYS4b0huS5ViDclsbIqtSg/vqg0J7X4EKM0
+	B4uSOK9qinyqkEB6YklqdmpqQWoRTJaJg1OqgclxZ78t5/rSyLJJ813f7vi1IPzgwvWTdpiy
+	zre0qjjOn5TwLH3akuacdzPm/K/4NnPhHTWWnL5dMbXvzlxOf7ri1o6GPsczv5Z6JZUzNxxY
+	cXs3P6vYYvGwcwXGy6rirnoUX9H12rNe27j49YwChR0z3j/ZqFXXapLWGPu03fP1IWn+BVed
+	ryw87trvvfLzku2WzGvid1tH5v09UPox/9Tpsu3aOkd6jRj+xB9ySl/urLh4ibqRnGmQ5zfz
+	B7xelytS6jt/iSw6bfDB9pjta9ZpzZGvjf0Xs/x2O7048fSU+u1u1UcfKa0xOupy9Mo0Lxfu
+	alXDUBWVFlOFRIEzZXferr9wUX3mtjOdxbMs2B2VWIozEg21mIuKEwE6aBEmuAMAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRmVeSWpSXmKPExsVy+t/xe7qRdetTDTqm8VlsOXaP0eLyEz6L
+	0y172S3OvPzMYrHrzw52ixsTnjJaHDzVwW6x9+ROVgcOj1OLJDx2zrrL7rFpVSebx9mVjh7v
+	911l8/i8SS6ALUrPpii/tCRVISO/uMRWKdrQwkjP0NJCz8jEUs/Q2DzWyshUSd/OJiU1J7Ms
+	tUjfLkEvY+bFKawFz7gqTi1ayNzAeJ6ji5GTQ0LARGLhlwvMXYxcHEICSxklzp9YwAqRkJHY
+	+OUqlC0s8edaFxtE0UdGieaXf1khnN2MEkue72IEqeIVsJO4/O4TG4jNIqAqsfsyxCReAUGJ
+	kzOfsIDYogLyEvdvzWAHsYUF9CVmb1gEVM/BISIQK3FndRbITGaBI4wSH7+/ZoJYsAvIWXIU
+	bAGzgLjErSfzmUAa2AS0JBo7weZwChhL9N07B1WiKdG6/Tc7hC0vsf3tHGaQcgkBZYmpS70g
+	nqmV+Pz3GeMERtFZSK6bhWTBLCSTZiGZtICRZRWjSGppcW56brGRXnFibnFpXrpecn7uJkZg
+	LG879nPLDsaVrz7qHWJk4mA8xCjBwawkwntDcl2qEG9KYmVValF+fFFpTmrxIUZTYBBNZJYS
+	Tc4HJpO8knhDMwNTQxMzSwNTSzNjJXFez4KORCGB9MSS1OzU1ILUIpg+Jg5OqQamtVp1cRoN
+	VS4bn1f/vemcdyf5c6qE0ptPDdP9j8StnzXvkOtSzagXN/kVV894kpf46FffS423AVNiUnKF
+	RN0Kdn6IUVY+8E2DmUvd4SnD//aFpR2vOdxe553zKk041f00u119s/rah5F8FyLLVwTLHjgw
+	/+br7uS90+M6nWc4bubPPMjNGd9tn7yd4cyMLY0xK/edvXvo73+ZBaINzn/02pye3RbNPrFu
+	t89E/eXrph/zeTVDPXPqWbdP1UllrGXNU7bbNj0VfFT/9+4l70jZ/6nTs58nXZrxsKcg1/pz
+	Y/W7U8E2hcs1r012fmsuK687WWnu3qeTy3w2v73HqRqaYnDlUfQN+a4X7zkD2sWvKLEUZyQa
+	ajEXFScCAJyBKepuAwAA
+X-CMS-MailID: 20240123085241eucas1p20e4f3568f634213c469737b626f8ce64
+X-Msg-Generator: CA
+X-RootMTR: 20240123002508eucas1p16e632cbdbc7abf62fc1fde342bbaa3d6
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20240123002508eucas1p16e632cbdbc7abf62fc1fde342bbaa3d6
+References: <20240122111751.449762-1-kernel@pankajraghav.com>
+	<CGME20240123002508eucas1p16e632cbdbc7abf62fc1fde342bbaa3d6@eucas1p1.samsung.com>
+	<Za8HXDfoIK+lyMvR@dread.disaster.area>
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
-
-A few minor nits below which should be addressed prior to merge...
-
-On Mon, 22 Jan 2024 15:06:28 -0800, Boris Burkov wrote:
-
-> When using squotas, an extent's OWNER_REF can long outlive the subvolume
-> that is the owner, since it could pick up a different reference that
-> keeps it around, but the subvolume can go away.
+On 23/01/2024 01:25, Dave Chinner wrote:
+> On Mon, Jan 22, 2024 at 12:17:49PM +0100, Pankaj Raghav (Samsung) wrote:
+>> From: Pankaj Raghav <p.raghav@samsung.com>
+>>
+>> Some tests need to be adapted to for LBS[1] based on the filesystem
+>> blocksize. These are generic changes where it uses the filesystem
+>> blocksize instead of assuming it.
+>>
+>> There are some more generic test cases that are failing due to logdev
+>> size requirement that changes with filesystem blocksize. I will address
+>> them in a separate series.
+>>
+>> [1] https://lore.kernel.org/lkml/20230915183848.1018717-1-kernel@pankajraghav.com/
+>>
+>> Pankaj Raghav (2):
+>>   xfs/558: scale blk IO size based on the filesystem blksz
+>>   xfs/161: adapt the test case for LBS filesystem
 > 
-> Test this case, as originally, it resulted in a read only btrfs.
+> Do either of these fail and require fixing for a 64k page size
+> system running 64kB block size?
 > 
-> Since we can blow up the subvolume in the same transaction as the extent
-> is written, we can also increment the usage of a non-existent subvolume.
+> i.e. are these actual 64kB block size issues, or just issues with
+> the LBS patchset?
 > 
-> This leaves an OWNER_REF behind with no corresponding incremented usage
-> in a qgroup, so if we re-create that qgroup, we can then underflow its
-> usage.
-> 
-> Both of these cases are fixed in the kernel by disallowing
-> creating subvol qgroups and by disallowing deleting qgroups that still
-> have usage.
-> 
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
->  common/btrfs        | 10 +++++
->  tests/btrfs/301     | 14 +------
->  tests/btrfs/304     | 90 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/304.out |  6 +++
 
-btrfs/304 is already taken in fstests v2024.01.14 by
-9d812702 ("btrfs: add fstest for stripe-tree metadata with 4k write").
+I had the same question in mind. Unfortunately, I don't have access to any 64k Page size
+machine at the moment. I will ask around if I can get access to it.
 
->  4 files changed, 108 insertions(+), 12 deletions(-)
->  create mode 100755 tests/btrfs/304
->  create mode 100644 tests/btrfs/304.out
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index f91f8dd86..c8593c1f9 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -775,3 +775,13 @@ _has_btrfs_sysfs_feature_attr()
->  
->  	test -e /sys/fs/btrfs/features/$feature_attr
->  }
-> +
-> +_enable_quota()
-> +{
-> +	local mode=$1
-> +
-> +	[ $mode == "n" ] && return
-> +	arg=$([ $mode == "s" ] && echo "--simple")
-> +
-> +	$BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
+@Zorro I saw you posted a test report for 64k blocksize. Is it possible for you to
+see if these test cases(xfs/161, xfs/558) work in your setup with 64k block size?
 
-It looks as though the "n" mode isn't used, and the "s" -> "--simple"
-mapping is confusing. Can we instead just make this:
-  $BTRFS_UTIL_PROG quota enable $* $SCRATCH_MNT
-
-or drop the helper function altogether?
-
-> +}
-> diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> index db4697247..b3ee66cd9 100755
-> --- a/tests/btrfs/301
-> +++ b/tests/btrfs/301
-> @@ -157,16 +157,6 @@ do_enospc_falloc()
->  	do_falloc $file $sz
->  }
->  
-> -enable_quota()
-> -{
-> -	local mode=$1
-> -
-> -	[ $mode == "n" ] && return
-> -	arg=$([ $mode == "s" ] && echo "--simple")
-> -
-> -	$BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
-> -}
-> -
->  get_subvid()
->  {
->  	_btrfs_get_subvolid $SCRATCH_MNT subv
-> @@ -186,7 +176,7 @@ prepare()
->  {
->  	_scratch_mkfs >> $seqres.full
->  	_scratch_mount
-> -	enable_quota "s"
-> +	_enable_quota "s"
-
-...as mentioned, _enable_quota --simple (or inline $BTRFS_UTIL_PROG ...)
-
->  	$BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
->  	local subvid=$(get_subvid)
->  	set_subvol_limit $subvid $limit
-> @@ -397,7 +387,7 @@ enable_mature()
->  	# Sync before enabling squotas to reliably *not* count the writes
->  	# we did before enabling.
->  	sync
-> -	enable_quota "s"
-> +	_enable_quota "s"
->  	set_subvol_limit $subvid $limit
->  	_scratch_cycle_mount
->  	usage=$(get_subvol_usage $subvid)
-> diff --git a/tests/btrfs/304 b/tests/btrfs/304
-> new file mode 100755
-> index 000000000..3fce0591c
-> --- /dev/null
-> +++ b/tests/btrfs/304
-> @@ -0,0 +1,90 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 304
-> +#
-> +# Test various race conditions between qgroup deletion and squota writes
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick qgroup subvol clone
-> +
-> +# Override the default cleanup function.
-> +# _cleanup()
-> +# {
-> +# 	cd /
-> +# 	rm -r -f $tmp.*
-> +# }
-
-nit: doesn't look like there's a need to override the default.
+CCing Ritesh as I saw him post a patch to fix a testcase for 64k block size.
