@@ -1,253 +1,245 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4366C63104;
-	Wed, 24 Jan 2024 12:26:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C40347A725
+	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 16:05:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706099219; cv=none; b=dO9JdoTUhtSWKi3gdM92R9oi/TYV7EHkm5vmxKha6cbNzseuBUENrjGXhbRbiH7eSMr2bZZHOYbsyBWNsQWxeISIcu1OjeMl3OaHF2KCHP+IL/0s9e76lBqQqZW4lLcAgRhRlZehzDz21pd8zHS71599w5kLXB+QxRr56vxNrw0=
+	t=1706112318; cv=none; b=CDCbVqBJtY1J6Uae8skGXzhLtjU9eXOjlj493DGlVbcqaWsnPy6nz6kz/7za4zwYzw0QpJVjqPDoHQMgz1pV3FcPIEPhQFO8KSjKZAP17cgGnrr2xoANqd9q6P1x5II/CNPYYGamA+9i4IHZ/ghh88zZSWPQG7Od4hpI4fwPNNI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706099219; c=relaxed/simple;
-	bh=sokFyt3mSuavzepIH7e9kSFnlRXWMgM/efjYmTGdEBE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Ts9Q420y1WrmnkEmA9XmhjesQqWf9YX3P4M4ONzE8CwBQ5noizQjz7/uTrakP8KR71DhoBkca6V6cu7OMhkBh3oUy92UWNc4kyOuBfbTTiKDNIO84SzWJVJ3pC4dbZadQQgCyxTYkaKAabJA6dDzpd0yk2x83bAy3Mc5hxKBWiY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YNAKH8EN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706112318; c=relaxed/simple;
+	bh=gxrNZk8iIvXxogGnQy/wfYh59BE5AHGblMMRweEkF2E=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=rsryZxOFMtUITt/NG0m48L6RE09r6pZJlDRw1xaiAW6pX7Dfxrfs72nxKfm8Sg/YQ9CZTrjqtiq2yDEzVaLkS9tCJ0THUaQ7qhdUC7pAXy5JkFVPDi3K9veRkoNZcV8pLN5cgbGA6OzZip1Iy2+kAOZB+65dc0cphIx90lTRApo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=Nf1WnoZm; arc=none smtp.client-ip=209.85.128.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YNAKH8EN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C52A0C43394;
-	Wed, 24 Jan 2024 12:26:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706099218;
-	bh=sokFyt3mSuavzepIH7e9kSFnlRXWMgM/efjYmTGdEBE=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=YNAKH8ENctzvFtyObrHXkiG/CNZaVZsah9AfZsp3JgLGizhSmpr3mOruLohnnB+Uo
-	 I3qKcEWc5Y1/OK9JTcYbEpx6RK+LyVSsUlCl8MtNhabf1/dGzsrUxM+iu146OR/ZCe
-	 IT8kR6e9IPakekAPvlPvdxwsAf2Tggk/qGYyPO3ZhJSohIsWwwCu1LsCPFhZEOAfWY
-	 B/OM/TgaBIuJZh3gNQjVjVaRapq/6LGYTPx4EZ1wbQ+YpNn61R2Olv3+e2KxTEIYcI
-	 gPD6GnuAtO7UwOUXz7Q9JjTC7AyqnZazh9rZiSVQzZf6HzSsXXIPiBUo5XVwQMatuM
-	 gi2bePigJKRCQ==
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5100c3f7df1so1759464e87.0;
-        Wed, 24 Jan 2024 04:26:58 -0800 (PST)
-X-Gm-Message-State: AOJu0Yy1GqbzKaL0yFtnQchtV/zFoMmG41gMByRJ5hZjYg/imIVED0yp
-	4HCJ2/b1cnPr2tCABvjiFkm6XmEpFRAYfYZRAjBAK+wegF+jkU7jxNxJckSoiN1b6JXJb1EFVyk
-	yCp8qkKKeDwD75TviNPiNeZz3dvM=
-X-Google-Smtp-Source: AGHT+IFI/0Fnjm4/qIY5JfFqEhqxq6/gfaLIPVxiqu15KyWN+qWSvw62ZLnZ7jNdrU6QcxMAnZex6fwa4tv2cx6gJ9Y=
-X-Received: by 2002:a19:670c:0:b0:50e:8eff:3980 with SMTP id
- b12-20020a19670c000000b0050e8eff3980mr3418693lfc.30.1706099216896; Wed, 24
- Jan 2024 04:26:56 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="Nf1WnoZm"
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6029b5946f5so6085847b3.1
+        for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 08:05:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1706112315; x=1706717115; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=NiZN5L2vI708v8uAeqXBqzLI7H6F+JAbzEvl/HlMjSk=;
+        b=Nf1WnoZmdBKoNV61ox/dUl/rMw95xiJ0kBVEgvWSim+0/Ct0fASfxd72rGxRl9tjW3
+         mm44yKljdCNzuyeKeZJl2RvlvDJ9PqDgn4n37wjyH9oDAtHbAHIo0eaWp3FCNpNLnoMW
+         fukSFpX8gLaH3Cwts0Mz1hmWIJSks5euLz01kXNXVhYpw7HzVV7eyT5DEKKzuvspn8/R
+         fJ7RqR9o38hnyrR2SavbY7Ss5NKXMooSJmg9H6xmwDEti1hHW5gdN2ryaypvQOSMmqpG
+         7RmKrFnh7GeKr0//goFTb7FBo+96lSA3OHDD8dAlJHSu1NgxqtvtHHHPbjKhLJbvwWdy
+         eRkw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706112315; x=1706717115;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=NiZN5L2vI708v8uAeqXBqzLI7H6F+JAbzEvl/HlMjSk=;
+        b=ptbrVRVyuyQmzTtVT6ZyV3LQQW7ehGNf8MMJ/tuRXiKpjZO9NVKOzRrNa0ZNAQoq8d
+         inFnpGJ1fi83Fn8MQAPoeNP4d1aabNKZGBGHDqctYdVEOfrTxYIN5ZEnoX9O1tSt3Uyj
+         XwcOeiyJa0FxpQnZ8Ij66L50YZvwm3Z/ENYUHrrYmftwEblB5gOc7+xCJuYjOa6C/0sQ
+         48jx5/sN8EOW1alxryWSmmDha22Tx7zKFTV5ODDQyWJdgiPxXIG5ivQ3ZEmqpoWKsIhS
+         iEjk3SzJPmnzoC9buVL+tpAGQC/yOR1TzEFFha6Qf8kExNPNI7o6F8LEqu8W+v94x/tN
+         dcdQ==
+X-Gm-Message-State: AOJu0YzlD0XAts+/CuBKec25zOYpGXYtsUe6DyLDtdOL7JECqR7Rno73
+	5DVpMnVLkkyEezT9/vIiTgHZxGY4eAnhHR3KQPWjrh76QIa+QW9wsJW5GD6B+Gw=
+X-Google-Smtp-Source: AGHT+IGzSH8z49IgamUbf46eh/8vLXqcmsjU/9Yw2HWdL8tBPJqW21v7pSh8OT02wcyDzGIBZwvkZw==
+X-Received: by 2002:a0d:e903:0:b0:600:2220:d7fe with SMTP id s3-20020a0de903000000b006002220d7femr651110ywe.13.1706112315518;
+        Wed, 24 Jan 2024 08:05:15 -0800 (PST)
+Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id ey1-20020a05690c300100b005ffcb4765c9sm22369ywb.28.2024.01.24.08.05.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 24 Jan 2024 08:05:15 -0800 (PST)
+From: Josef Bacik <josef@toxicpanda.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org,
+	kernel-team@fb.com
+Subject: [PATCH] fstests: make read-repair tests md5sum the data
+Date: Wed, 24 Jan 2024 11:05:10 -0500
+Message-ID: <c5d3e27fd544b2ecb1a4b374f500314c1b7b9c56.1706112305.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <ce4a79cafb6790ef6d1e141d65195f72f469ae4d.1706035378.git.boris@bur.io>
-In-Reply-To: <ce4a79cafb6790ef6d1e141d65195f72f469ae4d.1706035378.git.boris@bur.io>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 24 Jan 2024 12:26:19 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H60vbgsv_2RD6DacdV7Um+httPRW6ccqG6qgoYJojya4w@mail.gmail.com>
-Message-ID: <CAL3q7H60vbgsv_2RD6DacdV7Um+httPRW6ccqG6qgoYJojya4w@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs/310: test qgroup deletion
-To: Boris Burkov <boris@bur.io>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jan 23, 2024 at 6:44=E2=80=AFPM Boris Burkov <boris@bur.io> wrote:
->
-> When using squotas, an extent's OWNER_REF can long outlive the subvolume
-> that is the owner, since it could pick up a different reference that
-> keeps it around, but the subvolume can go away.
->
-> Test this case, as originally, it resulted in a read only btrfs.
->
-> Since we can blow up the subvolume in the same transaction as the extent
-> is written, we can also increment the usage of a non-existent subvolume.
->
-> This leaves an OWNER_REF behind with no corresponding incremented usage
-> in a qgroup, so if we re-create that qgroup, we can then underflow its
-> usage.
->
-> Both of these cases are fixed in the kernel by disallowing
-> creating subvol qgroups and by disallowing deleting qgroups that still
-> have usage.
->
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
-> Changelog:
-> v2:
-> - removed enable quota helper
-> - removed unneeded commented cleanup boilerplate
-> - change test number 304 -> 310 (based on v2024.01.14)
->
->  tests/btrfs/301     | 14 ++------
->  tests/btrfs/310     | 83 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/310.out |  6 ++++
->  3 files changed, 91 insertions(+), 12 deletions(-)
->  create mode 100755 tests/btrfs/310
->  create mode 100644 tests/btrfs/310.out
->
-> diff --git a/tests/btrfs/301 b/tests/btrfs/301
-> index db4697247..4c1127aa0 100755
-> --- a/tests/btrfs/301
-> +++ b/tests/btrfs/301
-> @@ -157,16 +157,6 @@ do_enospc_falloc()
->         do_falloc $file $sz
->  }
->
-> -enable_quota()
-> -{
-> -       local mode=3D$1
-> -
-> -       [ $mode =3D=3D "n" ] && return
-> -       arg=3D$([ $mode =3D=3D "s" ] && echo "--simple")
-> -
-> -       $BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
-> -}
-> -
->  get_subvid()
->  {
->         _btrfs_get_subvolid $SCRATCH_MNT subv
-> @@ -186,7 +176,7 @@ prepare()
->  {
->         _scratch_mkfs >> $seqres.full
->         _scratch_mount
-> -       enable_quota "s"
-> +       $BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
->         $BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
->         local subvid=3D$(get_subvid)
->         set_subvol_limit $subvid $limit
-> @@ -397,7 +387,7 @@ enable_mature()
->         # Sync before enabling squotas to reliably *not* count the writes
->         # we did before enabling.
->         sync
-> -       enable_quota "s"
-> +       $BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
->         set_subvol_limit $subvid $limit
->         _scratch_cycle_mount
->         usage=3D$(get_subvol_usage $subvid)
+For validating that read repair works properly we corrupt one mirror and
+then read back the physical location after we do a direct or buffered
+read on the mounted file system and then unmount the file system.  The
+golden output expects all a's, however with encryption this will
+obviously not be the case.
 
-What's the relation of this change with the new test case?
-This is an independent change that should be in its own separate patch.
+However I still broke read repair, so these tests are quite valuable.
+Fix them to dump the on disk values to a temporary file and then md5sum
+the files, and then validate the md5sum to make sure the read repair
+worked properly.
 
-> diff --git a/tests/btrfs/310 b/tests/btrfs/310
-> new file mode 100755
-> index 000000000..02714d261
-> --- /dev/null
-> +++ b/tests/btrfs/310
-> @@ -0,0 +1,83 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 310
-> +#
-> +# Test various race conditions between qgroup deletion and squota writes
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick qgroup subvol clone
-> +
-> +# Import common functions.
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_scratch_reflink
-> +_require_cp_reflink
-> +_require_scratch_enable_simple_quota
-> +_require_no_compress
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid deleting live subvol=
- qgroup"
-> +_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid creating subvol qgro=
-ups"
-> +
-> +subv1=3D$SCRATCH_MNT/subv1
-> +subv2=3D$SCRATCH_MNT/subv2
-> +
-> +prepare()
-> +{
-> +    _scratch_mkfs >> $seqres.full
-> +    _scratch_mount
-> +    $BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
-> +    $BTRFS_UTIL_PROG subvolume create $subv1 >> $seqres.full
-> +    $BTRFS_UTIL_PROG subvolume create $subv2 >> $seqres.full
-> +    $XFS_IO_PROG -fc "pwrite -q 0 128K" $subv1/f
-> +    _cp_reflink $subv1/f $subv2/f
-> +}
-> +
-> +# An extent can long outlive its owner. Test this by deleting the owning
-> +# subvolume, committing the transaction, then deleting the reflinked cop=
-y.
-> +# Deleting the copy will attempt to free space from the missing owner, w=
-hich
-> +# should be a no-op.
-> +free_from_deleted_owner()
-> +{
-> +    echo "free from deleted owner"
-> +    prepare
-> +    subvid1=3D$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/140     | 15 ++++++++++++++-
+ tests/btrfs/140.out | 34 ----------------------------------
+ tests/btrfs/141     | 16 +++++++++++++++-
+ tests/btrfs/141.out | 34 ----------------------------------
+ 4 files changed, 29 insertions(+), 70 deletions(-)
 
-Should be made local.
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+index 247a7356..8e1aafa3 100755
+--- a/tests/btrfs/140
++++ b/tests/btrfs/140
+@@ -77,6 +77,13 @@ devpath=$(get_device_path ${devid})
+ 
+ _scratch_unmount
+ 
++# Grab the contents of the the area so we can compare to the final part
++orig=$(mktemp)
++$XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
++	 _filter_xfs_io_offset > $orig
++origcsum=$(_md5_checksum $orig)
++rm -f $orig
++
+ echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
+ 	>> $seqres.full
+ $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
+@@ -91,10 +98,16 @@ _btrfs_direct_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
+ _scratch_unmount
+ 
+ # check if the repair works
++final=$(mktemp)
+ $XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
+-	_filter_xfs_io_offset
++	_filter_xfs_io_offset > $final
++finalcsum=$(_md5_checksum $final)
++rm -f $final
+ 
+ _scratch_dev_pool_put
++
++[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
++
+ # success, all done
+ status=0
+ exit
+diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+index fb5aa108..58dfb24e 100644
+--- a/tests/btrfs/140.out
++++ b/tests/btrfs/140.out
+@@ -1,37 +1,3 @@
+ QA output created by 140
+ wrote 131072/131072 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-read 512/512 bytes
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/141 b/tests/btrfs/141
+index 90a90d00..41407f90 100755
+--- a/tests/btrfs/141
++++ b/tests/btrfs/141
+@@ -74,6 +74,14 @@ devid=$(get_devid ${logical_in_btrfs} 1)
+ devpath=$(get_device_path ${devid})
+ 
+ _scratch_unmount
++
++# Grab the contents of the area so we can compare to the final part
++orig=$(mktemp)
++$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
++	_filter_xfs_io_offset > $orig
++origcsum=$(_md5_checksum $orig)
++rm -f $orig
++
+ echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
+ 	>> $seqres.full
+ $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
+@@ -88,10 +96,16 @@ _btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
+ _scratch_unmount
+ 
+ # check if the repair works
++final=$(mktemp)
+ $XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
+-	_filter_xfs_io_offset
++	_filter_xfs_io_offset > $final
++finalcsum=$(_md5_checksum $final)
++rm -f $final
+ 
+ _scratch_dev_pool_put
++
++[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
++
+ # success, all done
+ status=0
+ exit
+diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
+index 4b8be189..d8c6940f 100644
+--- a/tests/btrfs/141.out
++++ b/tests/btrfs/141.out
+@@ -1,37 +1,3 @@
+ QA output created by 141
+ wrote 131072/131072 bytes
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+-read 512/512 bytes
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-- 
+2.43.0
 
-> +
-> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-> +    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
-> +    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.f=
-ull
-> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-> +    rm $subv2/f
-> +    _scratch_unmount
-> +}
-> +
-> +# A race where we delete the owner in the same transaction as writing th=
-e
-> +# extent leads to incrementing the squota usage of the missing qgroup.
-> +# This leaves behind an owner ref with an owner id that cannot exist, so
-> +# freeing the extent now frees from that qgroup, but there has never
-> +# been a corresponding usage to free.
-> +add_to_deleted_owner()
-> +{
-> +    echo "add to deleted owner"
-> +    prepare
-> +    subvid1=3D$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
-
-Should be made local as well.
-
-Thanks.
-
-> +
-> +    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
-> +    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.f=
-ull
-> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-> +    $BTRFS_UTIL_PROG qgroup create 0/$subvid1 $SCRATCH_MNT >> $seqres.fu=
-ll
-> +    rm $subv2/f
-> +    _scratch_unmount
-> +}
-> +
-> +free_from_deleted_owner
-> +add_to_deleted_owner
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
-> new file mode 100644
-> index 000000000..d7d4bc0ae
-> --- /dev/null
-> +++ b/tests/btrfs/310.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 310
-> +free from deleted owner
-> +ERROR: unable to destroy quota group: Device or resource busy
-> +add to deleted owner
-> +ERROR: unable to destroy quota group: Device or resource busy
-> +ERROR: unable to create quota group: Invalid argument
-> --
-> 2.43.0
->
->
