@@ -1,245 +1,140 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C40347A725
-	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 16:05:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 823927E563;
+	Wed, 24 Jan 2024 16:58:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706112318; cv=none; b=CDCbVqBJtY1J6Uae8skGXzhLtjU9eXOjlj493DGlVbcqaWsnPy6nz6kz/7za4zwYzw0QpJVjqPDoHQMgz1pV3FcPIEPhQFO8KSjKZAP17cgGnrr2xoANqd9q6P1x5II/CNPYYGamA+9i4IHZ/ghh88zZSWPQG7Od4hpI4fwPNNI=
+	t=1706115494; cv=none; b=EN8TSt9Kd9+vQ3Ccz4+5NlvZHjSrsKZnaioZrCr1VMEglbcr7KlJ6/eKrkmTv+rjRkcXswfmaexRcLPc8BFMfI0FI41gefNTN6zs66EAmwUtw94SFfD9OKaOX3UJv4Nil1YP+lW7QTE3xD/AYQhJw21CiQTM0rg+WAJTgu+/AIo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706112318; c=relaxed/simple;
-	bh=gxrNZk8iIvXxogGnQy/wfYh59BE5AHGblMMRweEkF2E=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=rsryZxOFMtUITt/NG0m48L6RE09r6pZJlDRw1xaiAW6pX7Dfxrfs72nxKfm8Sg/YQ9CZTrjqtiq2yDEzVaLkS9tCJ0THUaQ7qhdUC7pAXy5JkFVPDi3K9veRkoNZcV8pLN5cgbGA6OzZip1Iy2+kAOZB+65dc0cphIx90lTRApo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=Nf1WnoZm; arc=none smtp.client-ip=209.85.128.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1706115494; c=relaxed/simple;
+	bh=IqtdLR2/xNPXwEMdnrgzKKLE1iF0mbOeVibFd1fJboo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=trI0ZwZNuk3NxlltMj+CmTpxXCV7tv3yrFHkqNQAZYghneSsBA4IkynRh6RtvuiyH8E1t/QQZM+oca8WWFhKYkq9bIFWReGOahC8N6BqfxBVo9ISIUHxRDECUKVZeX4XjbjwVpKxuifPnc9IbCaHqtqpeCyR/QMpaCEzg9r1uTE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jJoNl48H; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="Nf1WnoZm"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6029b5946f5so6085847b3.1
-        for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 08:05:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1706112315; x=1706717115; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=NiZN5L2vI708v8uAeqXBqzLI7H6F+JAbzEvl/HlMjSk=;
-        b=Nf1WnoZmdBKoNV61ox/dUl/rMw95xiJ0kBVEgvWSim+0/Ct0fASfxd72rGxRl9tjW3
-         mm44yKljdCNzuyeKeZJl2RvlvDJ9PqDgn4n37wjyH9oDAtHbAHIo0eaWp3FCNpNLnoMW
-         fukSFpX8gLaH3Cwts0Mz1hmWIJSks5euLz01kXNXVhYpw7HzVV7eyT5DEKKzuvspn8/R
-         fJ7RqR9o38hnyrR2SavbY7Ss5NKXMooSJmg9H6xmwDEti1hHW5gdN2ryaypvQOSMmqpG
-         7RmKrFnh7GeKr0//goFTb7FBo+96lSA3OHDD8dAlJHSu1NgxqtvtHHHPbjKhLJbvwWdy
-         eRkw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706112315; x=1706717115;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=NiZN5L2vI708v8uAeqXBqzLI7H6F+JAbzEvl/HlMjSk=;
-        b=ptbrVRVyuyQmzTtVT6ZyV3LQQW7ehGNf8MMJ/tuRXiKpjZO9NVKOzRrNa0ZNAQoq8d
-         inFnpGJ1fi83Fn8MQAPoeNP4d1aabNKZGBGHDqctYdVEOfrTxYIN5ZEnoX9O1tSt3Uyj
-         XwcOeiyJa0FxpQnZ8Ij66L50YZvwm3Z/ENYUHrrYmftwEblB5gOc7+xCJuYjOa6C/0sQ
-         48jx5/sN8EOW1alxryWSmmDha22Tx7zKFTV5ODDQyWJdgiPxXIG5ivQ3ZEmqpoWKsIhS
-         iEjk3SzJPmnzoC9buVL+tpAGQC/yOR1TzEFFha6Qf8kExNPNI7o6F8LEqu8W+v94x/tN
-         dcdQ==
-X-Gm-Message-State: AOJu0YzlD0XAts+/CuBKec25zOYpGXYtsUe6DyLDtdOL7JECqR7Rno73
-	5DVpMnVLkkyEezT9/vIiTgHZxGY4eAnhHR3KQPWjrh76QIa+QW9wsJW5GD6B+Gw=
-X-Google-Smtp-Source: AGHT+IGzSH8z49IgamUbf46eh/8vLXqcmsjU/9Yw2HWdL8tBPJqW21v7pSh8OT02wcyDzGIBZwvkZw==
-X-Received: by 2002:a0d:e903:0:b0:600:2220:d7fe with SMTP id s3-20020a0de903000000b006002220d7femr651110ywe.13.1706112315518;
-        Wed, 24 Jan 2024 08:05:15 -0800 (PST)
-Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id ey1-20020a05690c300100b005ffcb4765c9sm22369ywb.28.2024.01.24.08.05.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Jan 2024 08:05:15 -0800 (PST)
-From: Josef Bacik <josef@toxicpanda.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org,
-	kernel-team@fb.com
-Subject: [PATCH] fstests: make read-repair tests md5sum the data
-Date: Wed, 24 Jan 2024 11:05:10 -0500
-Message-ID: <c5d3e27fd544b2ecb1a4b374f500314c1b7b9c56.1706112305.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jJoNl48H"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F23B7C433F1;
+	Wed, 24 Jan 2024 16:58:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1706115494;
+	bh=IqtdLR2/xNPXwEMdnrgzKKLE1iF0mbOeVibFd1fJboo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=jJoNl48Ho7cuHTEfKIANc5J5cPeQ17w+FhVge/shX6fOcmkw8uw93BspwrmU1HOdR
+	 pZFMywUyZsygxKW3956x/nTXkb+ICUn4OdJkX6iDgdg8Giug178PzpVaAhIVfNG55q
+	 3XeRrNVMzg3DTiCTQYwnyO+McY5kedrhErIbnsxXjZUfVQVbn2lobL477fpxbwB8Tk
+	 Ka6LsEvAlzme0jD0kLYwVTKJ3m/I1ha0sS0+kbyhtMUd8dwD/fKCHGEWk3lpdUDv0M
+	 C6+UX3uM+L2h+1+6RsnW+u6kNqpEF9kOpf0ILwHtJXuAPHz/TwJXvgpT2HRv468zZt
+	 T8nMJcIjCguEw==
+Date: Wed, 24 Jan 2024 08:58:13 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Pankaj Raghav <p.raghav@samsung.com>
+Cc: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
+	Dave Chinner <david@fromorbit.com>,
+	"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>,
+	zlang@redhat.com, fstests@vger.kernel.org, mcgrof@kernel.org,
+	gost.dev@samsung.com, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 0/2] fstest changes for LBS
+Message-ID: <20240124165813.GF6226@frogsfrogsfrogs>
+References: <CGME20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab@eucas1p2.samsung.com>
+ <87frynkfao.fsf@doe.com>
+ <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
 
-For validating that read repair works properly we corrupt one mirror and
-then read back the physical location after we do a direct or buffered
-read on the mounted file system and then unmount the file system.  The
-golden output expects all a's, however with encryption this will
-obviously not be the case.
+On Tue, Jan 23, 2024 at 09:21:50PM +0100, Pankaj Raghav wrote:
+> On 23/01/2024 20:42, Ritesh Harjani (IBM) wrote:
+> > Pankaj Raghav <p.raghav@samsung.com> writes:
+> > 
+> >>>> CCing Ritesh as I saw him post a patch to fix a testcase for 64k block size.
+> >>>
+> >>> Hi Pankaj,
+> >>>
+> >>> So I tested this on Linux 6.6 on Power8 qemu (which I had it handy).
+> >>> xfs/558 passed with both 64k blocksize & with 4k blocksize on a 64k
+> >>> pagesize system.
+> > 
+> > Ok, so it looks like the testcase xfs/558 is failing on linux-next with
+> > 64k blocksize but passing with 4k blocksize.
+> > It thought it was passing on my previous linux 6.6 release, but I guess
+> > those too were just some lucky runs. Here is the report -
+> > 
+> > linux-next: xfs/558 aggregate results across 11 runs: pass=2 (18.2%), fail=9 (81.8%)
+> > v6.6: xfs/558 aggregate results across 11 runs: pass=5 (45.5%), fail=6 (54.5%)
+> > 
+> 
+> Oh, thanks for reporting back!
+> 
+> I can confirm that it happens 100% of time with my LBS patch enabled for 64k bs.
+> 
+> Let's see what Zorro reports back on a real 64k hardware.
+> 
+> > So I guess, I will spend sometime analyzing why the failure.
+> > 
+> 
+> Could you try the patch I sent for xfs/558 and see if it works all the time?
+> 
+> The issue is 'xfs_wb*iomap_invalid' not getting triggered when we have larger
+> bs. I basically increased the blksz in the test based on the underlying bs.
+> Maybe there is a better solution than what I proposed, but it fixes the test.
 
-However I still broke read repair, so these tests are quite valuable.
-Fix them to dump the on disk values to a temporary file and then md5sum
-the files, and then validate the md5sum to make sure the read repair
-worked properly.
+The only improvement I can think of would be to force-disable large
+folios on the file being tested.  Large folios mess with testing because
+the race depends on write and writeback needing to walk multiple pages.
+Right now the pagecache only institutes large folios if the IO patterns
+are large IOs, but in theory that could change some day.
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/btrfs/140     | 15 ++++++++++++++-
- tests/btrfs/140.out | 34 ----------------------------------
- tests/btrfs/141     | 16 +++++++++++++++-
- tests/btrfs/141.out | 34 ----------------------------------
- 4 files changed, 29 insertions(+), 70 deletions(-)
+I suspect that the iomap tracepoint data and possibly
+trace_mm_filemap_add_to_page_cache might help figure out what size
+folios are actually in use during the invalidation test.
 
-diff --git a/tests/btrfs/140 b/tests/btrfs/140
-index 247a7356..8e1aafa3 100755
---- a/tests/btrfs/140
-+++ b/tests/btrfs/140
-@@ -77,6 +77,13 @@ devpath=$(get_device_path ${devid})
- 
- _scratch_unmount
- 
-+# Grab the contents of the the area so we can compare to the final part
-+orig=$(mktemp)
-+$XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
-+	 _filter_xfs_io_offset > $orig
-+origcsum=$(_md5_checksum $orig)
-+rm -f $orig
-+
- echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
- 	>> $seqres.full
- $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-@@ -91,10 +98,16 @@ _btrfs_direct_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
- _scratch_unmount
- 
- # check if the repair works
-+final=$(mktemp)
- $XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
--	_filter_xfs_io_offset
-+	_filter_xfs_io_offset > $final
-+finalcsum=$(_md5_checksum $final)
-+rm -f $final
- 
- _scratch_dev_pool_put
-+
-+[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
-index fb5aa108..58dfb24e 100644
---- a/tests/btrfs/140.out
-+++ b/tests/btrfs/140.out
-@@ -1,37 +1,3 @@
- QA output created by 140
- wrote 131072/131072 bytes
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--read 512/512 bytes
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
-index 90a90d00..41407f90 100755
---- a/tests/btrfs/141
-+++ b/tests/btrfs/141
-@@ -74,6 +74,14 @@ devid=$(get_devid ${logical_in_btrfs} 1)
- devpath=$(get_device_path ${devid})
- 
- _scratch_unmount
-+
-+# Grab the contents of the area so we can compare to the final part
-+orig=$(mktemp)
-+$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
-+	_filter_xfs_io_offset > $orig
-+origcsum=$(_md5_checksum $orig)
-+rm -f $orig
-+
- echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
- 	>> $seqres.full
- $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-@@ -88,10 +96,16 @@ _btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
- _scratch_unmount
- 
- # check if the repair works
-+final=$(mktemp)
- $XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
--	_filter_xfs_io_offset
-+	_filter_xfs_io_offset > $final
-+finalcsum=$(_md5_checksum $final)
-+rm -f $final
- 
- _scratch_dev_pool_put
-+
-+[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
-index 4b8be189..d8c6940f 100644
---- a/tests/btrfs/141.out
-+++ b/tests/btrfs/141.out
-@@ -1,37 +1,3 @@
- QA output created by 141
- wrote 131072/131072 bytes
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
--read 512/512 bytes
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--- 
-2.43.0
+(Perhaps it's time for me to add a 64k bs VM to the test fleet.)
 
+--D
+
+> > Failure log
+> > ================
+> > xfs/558 36s ... - output mismatch (see /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad)
+> >     --- tests/xfs/558.out       2023-06-29 12:06:13.824276289 +0000
+> >     +++ /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad       2024-01-23 18:54:56.613116520 +0000
+> >     @@ -1,2 +1,3 @@
+> >      QA output created by 558
+> >     +Expected to hear about writeback iomap invalidations?
+> >      Silence is golden
+> >     ...
+> >     (Run 'diff -u /root/xfstests-dev/tests/xfs/558.out /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad'  to see the entire diff)
+> > 
+> > HINT: You _MAY_ be missing kernel fix:
+> >       5c665e5b5af6 xfs: remove xfs_map_cow
+> > 
+> > -ritesh
+> > 
+> >>
+> >> Thanks for testing it out. I will investigate this further, and see why
+> >> I have this failure in LBS for 64k and not for 32k and 16k block sizes.
+> >>
+> >> As this test also expects some invalidation during the page cache writeback,
+> >> this might an issue just with LBS and not for 64k page size machines.
+> >>
+> >> Probably I will also spend some time to set up a Power8 qemu to test these failures.
+> >>
+> >>> However, since on this system the quota was v4.05, it does not support
+> >>> bigtime feature hence could not run xfs/161. 
+> >>>
+> >>> xfs/161       [not run] quota: bigtime support not detected
+> >>> xfs/558 7s ...  21s
+> >>>
+> >>> I will collect this info on a different system with latest kernel and
+> >>> will update for xfs/161 too.
+> >>>
+> >>
+> >> Sounds good! Thanks!
+> >>
+> >>> -ritesh
