@@ -1,140 +1,109 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oi1-f173.google.com (mail-oi1-f173.google.com [209.85.167.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 823927E563;
-	Wed, 24 Jan 2024 16:58:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0497C133402;
+	Wed, 24 Jan 2024 19:53:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706115494; cv=none; b=EN8TSt9Kd9+vQ3Ccz4+5NlvZHjSrsKZnaioZrCr1VMEglbcr7KlJ6/eKrkmTv+rjRkcXswfmaexRcLPc8BFMfI0FI41gefNTN6zs66EAmwUtw94SFfD9OKaOX3UJv4Nil1YP+lW7QTE3xD/AYQhJw21CiQTM0rg+WAJTgu+/AIo=
+	t=1706126007; cv=none; b=oR+hePcR81pz33/xyJ8uYUkpSk1eXGyfrHJRpPkKjWBT3mFDJZvB7nBefoFX6Vb5agHArr+iYBqJaVBWmphRDOh/HUmIO+HBg0TAnL3+VaCnfPAVDMbO+t64OwtqC6N7zZ/ZZ1WhZfoKV0bh2zRSaLMXnrgGAJFigdGUoZ9qa8I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706115494; c=relaxed/simple;
-	bh=IqtdLR2/xNPXwEMdnrgzKKLE1iF0mbOeVibFd1fJboo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=trI0ZwZNuk3NxlltMj+CmTpxXCV7tv3yrFHkqNQAZYghneSsBA4IkynRh6RtvuiyH8E1t/QQZM+oca8WWFhKYkq9bIFWReGOahC8N6BqfxBVo9ISIUHxRDECUKVZeX4XjbjwVpKxuifPnc9IbCaHqtqpeCyR/QMpaCEzg9r1uTE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jJoNl48H; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706126007; c=relaxed/simple;
+	bh=GZTZlWytgHqEBqq1p9miq+hYHxH8TGG1eFO0zcNEjP4=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=WuocKDzlg6wYPkqY/6qusXv5uUzCDC0Mkq16CXJ61zW8UW3yNnpFjC9Nm72pqCvT4++LbvvAfSyVb9bWjh/WAccKwnT/8OTNWe49UgjdAXSgBzazw1hpjyVd1tbcC0Dz/Q8+heUPabKp7A2DLcbDv8J82FJ2u5J5qFPQstHw3ms=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=h87dfTpj; arc=none smtp.client-ip=209.85.167.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jJoNl48H"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F23B7C433F1;
-	Wed, 24 Jan 2024 16:58:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706115494;
-	bh=IqtdLR2/xNPXwEMdnrgzKKLE1iF0mbOeVibFd1fJboo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=jJoNl48Ho7cuHTEfKIANc5J5cPeQ17w+FhVge/shX6fOcmkw8uw93BspwrmU1HOdR
-	 pZFMywUyZsygxKW3956x/nTXkb+ICUn4OdJkX6iDgdg8Giug178PzpVaAhIVfNG55q
-	 3XeRrNVMzg3DTiCTQYwnyO+McY5kedrhErIbnsxXjZUfVQVbn2lobL477fpxbwB8Tk
-	 Ka6LsEvAlzme0jD0kLYwVTKJ3m/I1ha0sS0+kbyhtMUd8dwD/fKCHGEWk3lpdUDv0M
-	 C6+UX3uM+L2h+1+6RsnW+u6kNqpEF9kOpf0ILwHtJXuAPHz/TwJXvgpT2HRv468zZt
-	 T8nMJcIjCguEw==
-Date: Wed, 24 Jan 2024 08:58:13 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Pankaj Raghav <p.raghav@samsung.com>
-Cc: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
-	Dave Chinner <david@fromorbit.com>,
-	"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>,
-	zlang@redhat.com, fstests@vger.kernel.org, mcgrof@kernel.org,
-	gost.dev@samsung.com, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 0/2] fstest changes for LBS
-Message-ID: <20240124165813.GF6226@frogsfrogsfrogs>
-References: <CGME20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab@eucas1p2.samsung.com>
- <87frynkfao.fsf@doe.com>
- <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h87dfTpj"
+Received: by mail-oi1-f173.google.com with SMTP id 5614622812f47-3bdc1ac4463so1707124b6e.0;
+        Wed, 24 Jan 2024 11:53:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1706126004; x=1706730804; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=D1rzncq5w78gIVTF9WiuVYRQG2GweIoIZ07vhaxfqJ8=;
+        b=h87dfTpjqMAepefvYlXVRXPG1dgc319Xrv9LV1H9c5vTTllUryU9ayUMjUcCBYejUM
+         ENDkSMMQQkSoTtdFvyhRIWkHCDkz+R//4FFqkJnVYBSuWANLtWriyifQDQWwvGlm91CM
+         89ctS9kD4sZU/WwEqyuZaUWOVamSE5S6J4DNEEro0abTY00bs1XdNJ6O5y6GU1i64+2C
+         uKoi/sFhQ+doubI2r4SeoIJw2AmMHVuP0s++qqQ8o4Km/jjdHx2NLSDxpS+6ZOsJIZwd
+         4pY8soZdj6i7QfRpbd6FT+A3Lmu5kUNMRguTqAy+tiX4GY7C3xvxm3Mj6nYrrgPeuUBq
+         w9rg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706126004; x=1706730804;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=D1rzncq5w78gIVTF9WiuVYRQG2GweIoIZ07vhaxfqJ8=;
+        b=mGaToy76HqJ0JnAiuYEFwRAYXE7OF0ir8VvB2nuoj0W2LoGs/zW0Z6KMoYKVg1kCdU
+         uduI3zBySrIQS0ti/1o0zcwHjJsr/A4hm80R3iYf1NbtvgtaMkdeKuMMIO0ExOiv65IB
+         rCH0UHITqFAEJ8rHd3uNl/r79dwkNpEZNi1FU86H+i0RuuvfVIaC8WqjouaJlOV43PR3
+         4/xQFR7XnTZKbtBblZYkjjHXIi0uCJwHEEcn5ogFfYzjRHNXd4BGran050fOwR7VUCgM
+         PFhEv8UCllOTLdwtoMZYuqxwqDr+Z9R5HqDnY5T5RcqffE3w69QRgS1jGs033AsK+0j+
+         TGyg==
+X-Gm-Message-State: AOJu0Yy4h6+x5vgXPSAZlNX8SGaemKB8C+wDNqI+hYHF5ajB8hnQCWr3
+	L7o/hadNoXyEvu5fce5TDfoPIcyfeWBJggUD4DTE5VMqJYucPKcmgl19FJsK
+X-Google-Smtp-Source: AGHT+IHncofXqnhY0XToOHD/ZXNYevu+0xNwrsyEd/tcex43bNRyAwwML/jzmnv7NUEhiscWhOpB6A==
+X-Received: by 2002:a05:6808:2209:b0:3bb:b700:e2e6 with SMTP id bd9-20020a056808220900b003bbb700e2e6mr2196520oib.114.1706126004651;
+        Wed, 24 Jan 2024 11:53:24 -0800 (PST)
+Received: from localhost.localdomain (h64-35-202-119.cntcnh.broadband.dynamic.tds.net. [64.35.202.119])
+        by smtp.gmail.com with ESMTPSA id w20-20020a05620a095400b007831e92168bsm4344196qkw.124.2024.01.24.11.53.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 24 Jan 2024 11:53:24 -0800 (PST)
+From: Eric Whitney <enwlinux@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org,
+	tytso@mit.edu,
+	Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] generic/459: don't run on non-journaled ext4 file systems
+Date: Wed, 24 Jan 2024 14:53:06 -0500
+Message-Id: <20240124195306.1177737-1-enwlinux@gmail.com>
+X-Mailer: git-send-email 2.30.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jan 23, 2024 at 09:21:50PM +0100, Pankaj Raghav wrote:
-> On 23/01/2024 20:42, Ritesh Harjani (IBM) wrote:
-> > Pankaj Raghav <p.raghav@samsung.com> writes:
-> > 
-> >>>> CCing Ritesh as I saw him post a patch to fix a testcase for 64k block size.
-> >>>
-> >>> Hi Pankaj,
-> >>>
-> >>> So I tested this on Linux 6.6 on Power8 qemu (which I had it handy).
-> >>> xfs/558 passed with both 64k blocksize & with 4k blocksize on a 64k
-> >>> pagesize system.
-> > 
-> > Ok, so it looks like the testcase xfs/558 is failing on linux-next with
-> > 64k blocksize but passing with 4k blocksize.
-> > It thought it was passing on my previous linux 6.6 release, but I guess
-> > those too were just some lucky runs. Here is the report -
-> > 
-> > linux-next: xfs/558 aggregate results across 11 runs: pass=2 (18.2%), fail=9 (81.8%)
-> > v6.6: xfs/558 aggregate results across 11 runs: pass=5 (45.5%), fail=6 (54.5%)
-> > 
-> 
-> Oh, thanks for reporting back!
-> 
-> I can confirm that it happens 100% of time with my LBS patch enabled for 64k bs.
-> 
-> Let's see what Zorro reports back on a real 64k hardware.
-> 
-> > So I guess, I will spend sometime analyzing why the failure.
-> > 
-> 
-> Could you try the patch I sent for xfs/558 and see if it works all the time?
-> 
-> The issue is 'xfs_wb*iomap_invalid' not getting triggered when we have larger
-> bs. I basically increased the blksz in the test based on the underlying bs.
-> Maybe there is a better solution than what I proposed, but it fixes the test.
+generic/459 fails when run on an ext4 file system created without a
+journal or when its journal has not been loaded at mount time.
 
-The only improvement I can think of would be to force-disable large
-folios on the file being tested.  Large folios mess with testing because
-the race depends on write and writeback needing to walk multiple pages.
-Right now the pagecache only institutes large folios if the IO patterns
-are large IOs, but in theory that could change some day.
+The test expects that a file system that it has been unable to freeze
+will be automatically remounted read only.  However, the default error
+handling policy for ext4 is to continue when possible after errors.
 
-I suspect that the iomap tracepoint data and possibly
-trace_mm_filemap_add_to_page_cache might help figure out what size
-folios are actually in use during the invalidation test.
+A workaround was added to the test in the past to force ext4 to
+perform a read only remount in order to meet the test's expectations.
+The touch command was used to create a new file after a freeze failure.
+This forces ext4 to start a new journal transaction, where it discovers
+the journal has previously aborted due to lack of space, and triggers
+special case error handling that results in a read only remount.
 
-(Perhaps it's time for me to add a 64k bs VM to the test fleet.)
+The workaround requires a journal.  Since ext4 is behaving as designed,
+prevent the test from running if there isn't one.
 
---D
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+---
+ tests/generic/459 | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-> > Failure log
-> > ================
-> > xfs/558 36s ... - output mismatch (see /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad)
-> >     --- tests/xfs/558.out       2023-06-29 12:06:13.824276289 +0000
-> >     +++ /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad       2024-01-23 18:54:56.613116520 +0000
-> >     @@ -1,2 +1,3 @@
-> >      QA output created by 558
-> >     +Expected to hear about writeback iomap invalidations?
-> >      Silence is golden
-> >     ...
-> >     (Run 'diff -u /root/xfstests-dev/tests/xfs/558.out /root/xfstests-dev/results//xfs_64k_iomap/xfs/558.out.bad'  to see the entire diff)
-> > 
-> > HINT: You _MAY_ be missing kernel fix:
-> >       5c665e5b5af6 xfs: remove xfs_map_cow
-> > 
-> > -ritesh
-> > 
-> >>
-> >> Thanks for testing it out. I will investigate this further, and see why
-> >> I have this failure in LBS for 64k and not for 32k and 16k block sizes.
-> >>
-> >> As this test also expects some invalidation during the page cache writeback,
-> >> this might an issue just with LBS and not for 64k page size machines.
-> >>
-> >> Probably I will also spend some time to set up a Power8 qemu to test these failures.
-> >>
-> >>> However, since on this system the quota was v4.05, it does not support
-> >>> bigtime feature hence could not run xfs/161. 
-> >>>
-> >>> xfs/161       [not run] quota: bigtime support not detected
-> >>> xfs/558 7s ...  21s
-> >>>
-> >>> I will collect this info on a different system with latest kernel and
-> >>> will update for xfs/161 too.
-> >>>
-> >>
-> >> Sounds good! Thanks!
-> >>
-> >>> -ritesh
+diff --git a/tests/generic/459 b/tests/generic/459
+index c3f0b2b0..63fbbc9b 100755
+--- a/tests/generic/459
++++ b/tests/generic/459
+@@ -49,6 +49,11 @@ _require_command "$THIN_CHECK_PROG" thin_check
+ _require_freeze
+ _require_odirect
+ 
++# non-journaled ext4 won't remount read only after freeze failure
++if [ "$FSTYP" == "ext4" ]; then
++	_require_metadata_journaling
++fi
++
+ vgname=vg_$seq
+ lvname=lv_$seq
+ poolname=pool_$seq
+-- 
+2.30.2
+
