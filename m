@@ -1,37 +1,60 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B8DA1350DD;
-	Wed, 24 Jan 2024 21:00:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6516134747
+	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 21:07:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706130019; cv=none; b=Btz1c8PJERXdMit1hfQuC1WFxH1X0egeFgAa7Xhx0CbBnk9QGNmE+nU0lzZqfw0UkZxOh+5sYPqYfVm1CLMZU4jtyAWaEjuOG+AgQb1qrKhdfgxbrOlsdXjskXNyYy/N0Zg1KGNtAGHe7WMdIwKTaCbuuQ8dNwBpDO2NWKHWzOs=
+	t=1706130427; cv=none; b=iYRfYL24Y4FFfweto+KWTBxWHcIg+IKWyVt49rVWzWG7W97fyr2nLu6a8hj3VUiXGLciFJ8XnuUMTBURhyCjrkS7/Pox73mxnqyRvxdeaXLl10VS0XbLWZ2896hhbjYUPPbS3CLFLsb8rC2oDXPehSQnkUYKBmzZXpJ/PBVsxDQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706130019; c=relaxed/simple;
-	bh=QKfSQXjNPoMyNHmDy3yJdokk4b9mGyEorO7ZOXZFyGE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=pvmo375sEJpjfF794+7YBbCzPr8bhKm0g/xQoxRTFSxJn9UWwVPOP123o8VxvRu0E/5tXZZQNHe2ZYKe5D2vUHrEFqto2kLuOkdoMtbnfi4Mb1vmskzl6gvHmPvyswKG9SYAzR2TarSXZs5Usc284D+O5p2649Gsy2l/I30Qoxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=hmOn+h2e; arc=none smtp.client-ip=212.227.15.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1706130427; c=relaxed/simple;
+	bh=JHNh9Q0BFBWgfcKGghxlNnLwyGg4jg2TwZ4zLWeARQs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
+	 Content-Type:References; b=BEjG53OoDlR24aYDm46t11DqNcKKeU/DtvJvKONXyYUMusIjqQ3dMH4BN1a1SirsAHMLiUgIA5hXonu8OUABSIMWiyAHLP+AdZB+bLof2xyOu4fcnV5i+wAOgToNr2h1Lq2dLhhKFRJr95AVtH4z82suxBrC7vYwbZkCKVw2Z+U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=SZ4rqBZJ; arc=none smtp.client-ip=210.118.77.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="hmOn+h2e"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
-	s=s31663417; t=1706130005; x=1706734805; i=quwenruo.btrfs@gmx.com;
-	bh=QKfSQXjNPoMyNHmDy3yJdokk4b9mGyEorO7ZOXZFyGE=;
-	h=X-UI-Sender-Class:Date:Subject:To:References:From:In-Reply-To;
-	b=hmOn+h2egRypx4oZXV14wqLsra6I7j/51LVqy3tMmslxu4LcaVXX+rKzcCQhA4It
-	 C1dGQTSsJxM0AG2xr5FNzxWy5/TOtniMD3eCycqy4Y8EOC9HaIpXT0TDofzmGZDcN
-	 BSIx/4pxsTIprFdlALklX0JzrsKhmRViks5E2TBSTfnPFf7tpqZ7ZDK5vlZ/3E/tr
-	 WQdEBEjMhvNkpOAJ5GpHu8YLm2xReYZS+oCGI2OPH+SsznBHcP9hxP7Z5gFbqx6Nw
-	 NN20rXE9JW+5fKC7HJx/gWXH9Do5UsJeKvW1VwS8xkSd2GxqM3EIfBZtJlhtm5sMN
-	 xncMvYUSJmiIKPCtMA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.101] ([61.245.157.120]) by mail.gmx.net (mrgmx005
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1Mk0Ne-1qn2p22ItU-00kOIy; Wed, 24
- Jan 2024 22:00:05 +0100
-Message-ID: <9baa2a24-a44a-4f5e-95d7-23509ea450e4@gmx.com>
-Date: Thu, 25 Jan 2024 07:30:00 +1030
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="SZ4rqBZJ"
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20240124210657euoutp01a062fa66e56c8304cab704254e9c1e16~tZJM5Oh7Y1142311423euoutp01s
+	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 21:06:57 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20240124210657euoutp01a062fa66e56c8304cab704254e9c1e16~tZJM5Oh7Y1142311423euoutp01s
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1706130417;
+	bh=OgdKF7VpSJGITwcb08EUfUDksMeLEH7mGRvue6x4pn4=;
+	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
+	b=SZ4rqBZJNDlOJujy/IdUMT37ePrATu+Y6sry8AsvlMWl7XjUZnuL1m0DAnqtN9DOQ
+	 iens4+8EXEayyTMjcUKAY5B+tBMoFBVIcxUrvOmjq8GuyANJ98dSWM5RkO8fF3YY2d
+	 tizNzFy8neCfDESqtLGE8+Djn/qlHkhoadaPHfA4=
+Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
+	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
+	20240124210656eucas1p122b5b7fa4c5ac8f74119bd10a6a97af6~tZJL62m0G1478714787eucas1p1f;
+	Wed, 24 Jan 2024 21:06:56 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+	eusmges3new.samsung.com (EUCPMTA) with SMTP id 9B.8A.09552.0FB71B56; Wed, 24
+	Jan 2024 21:06:56 +0000 (GMT)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+	20240124210655eucas1p124049fc160428b3799354a7837f10d5c~tZJLfwSX-2301123011eucas1p1J;
+	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240124210655eusmtrp22be49531f994bf54bfce3dfac1812643~tZJLfMlZ80146201462eusmtrp23;
+	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
+X-AuditID: cbfec7f5-853ff70000002550-b5-65b17bf09273
+Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
+	eusmgms2.samsung.com (EUCPMTA) with SMTP id 8C.E7.10702.FEB71B56; Wed, 24
+	Jan 2024 21:06:55 +0000 (GMT)
+Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
+	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20240124210655eusmtip1eb51c210b119c4f87a8dbc6329e3aa52~tZJLSaPZ60328003280eusmtip1T;
+	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
+Received: from [192.168.8.209] (106.210.248.230) by CAMSVWEXC02.scsc.local
+	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
+	Wed, 24 Jan 2024 21:06:54 +0000
+Message-ID: <6d79f416-3119-4bf8-899b-88587d176475@samsung.com>
+Date: Wed, 24 Jan 2024 22:06:54 +0100
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -39,264 +62,93 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: btrfs: verify the read behavior of compressed
- inline extent
-To: Anand Jain <anand.jain@oracle.com>, Qu Wenruo <wqu@suse.com>,
- linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20240123034908.25415-1-wqu@suse.com>
- <17e9c07d-9396-4999-8449-b0e3e764c32f@oracle.com>
+Subject: Re: [PATCH 0/2] fstest changes for LBS
+To: "Darrick J. Wong" <djwong@kernel.org>
+CC: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, Dave Chinner
+	<david@fromorbit.com>, "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>,
+	<zlang@redhat.com>, <fstests@vger.kernel.org>, <mcgrof@kernel.org>,
+	<gost.dev@samsung.com>, <linux-xfs@vger.kernel.org>
 Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <17e9c07d-9396-4999-8449-b0e3e764c32f@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:EWkM8gF4R+BBmSO13Q77as6CdumY5Ke2n4OvN68kRRIQp0WIehg
- Ti8A/lu7mAKza1yBNMUGluKpJrBYPXVuapLAhIQDBLdE87K+pQl68CqeI6hgQ+9OFTM/C2A
- 7rFE8psPSNZ9J+mT8/s38Nrx5sC3BkFOkzkhRrlhkFNePiNi8nmtWxt6gEMBotqi8x1XhWk
- 3kBMYGFArKdc5D2+bIJNQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:1Qf9YFU9338=;0AJBSPxPxn3t4SdzBB9hWMwMOvg
- OD5nJ+S5bnWx+T3foANj5y/oI+2F8y2b/tbT34gUy3fU7418pFj4x8P4uBHHUnQtLmlnQc13n
- vNIygdWTHmsCeTryXvAQN6hLwuXg6oB/oTTsXTRDPbQBhltoRlNHAWqhB9lS5pFsXJxl89Vx8
- QdzW/Kv3eLAX0j+tgJgxrVe/XRNitoVr82kQaNiK91ZR/iZ0MVNEz5tYgpqr4J1kgCKwJCom2
- eqghQfeTys6hZaTh3Qo8T/4n0622xJs1Ei/5/ojUwtFCC0DF9Mk5NkmQkOZidY0a0vm8OSAG+
- K87s0K3UoHjWpvkNs3JlQBxIslKfgvv8cwaYsGT3/yafS8c+3JlH7jtUX/fEVvFAt6hm0gT2t
- 6dHypXCp1tqKQofVorcIejcNvfHqKcVqqcwqtO4o66tFai7Rs/BtCXCaFKgwG7Y9/4hwIHR8P
- RlisPALJDDV2ZqcH4i/3qDG6JMmEMN90UcJu7taAZvIQKoUXsBE5wWkcSFdSihvwwN3xhO5Dk
- dUOlyMjQ2n9qe8YZ2IoGfdx1KI9PRzeyCsI+uCTyuPH1IDHUo++hn7Efb3K3QBwZN92OPwWm1
- Gy1F4qNwDVhTkClo2P72/i20eugY1ISut+Mrn7jZHVmnUcFt2SPp6XYgCp15FyXaDnx89KGem
- 9K/Nyr8wsk2Vt/KImzM0+AJDvmzlJUgMJpStsKFOmEnUm9yxJjQIAVIsON5yzfev+dOPl3xmm
- JR8DfFw1UfyHIY15hfBrpsLF+4Xu+V7tbpslfhrYdPMgWk+p9fuILaluyEeo+cDQBJngiUk8t
- 0pc18kOL6CnQ/1l/5oo0nIoVhYaqwNRQ8k7TdXVzxpsAJi0XSXGaqWLaPqjjoGIXS/Sk0A3jn
- ZII1YPC236xbMCIvL6Tx74SqhA8A3gE8gmi9gtSX7oGBj/Rw3trzZBOxR4NfrktZtfTuqrGWC
- PD0fU4Gl2pEoepQZAXj3z+7awSI=
+From: Pankaj Raghav <p.raghav@samsung.com>
+In-Reply-To: <20240124165813.GF6226@frogsfrogsfrogs>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
+	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
+X-Brightmail-Tracker: H4sIAAAAAAAAA02SaUwTURSF8zrTzrQCGQrIdUGSIokgm4hmXFPikiKu/DDGBLWxE0RbIB3B
+	pWmCCSaK0RIFkQqCaKXWjU2kKChEikKNS5WlKovWhSouKWIUBaGjhn/fffec9+65eSQmvsCf
+	Sian7GbUKXKlRCDCayw/HoZ/0VQwUY3tk+hqSzeibQ4vui2rnqCt/S6crvtVS9CdOW8Q3dh6
+	iKDr75v5UlLWWgoys/4lIas0HRbIHlyMlX1ueCaQuSpnrBdsFi1WMMrkDEYduXSbaMfXfjuR
+	1uyx11p4mchEP4TZSEgCFQP17+/h2UhEiikjgoKqRowrBhEM5Dn5XOFCYBw8K/hneW/oEnCN
+	MgT5Izr8v2rk6FseV9xE8MR21W3xpJZCRaMTjTNOBcPd3F4ed+4N9wsc+Dj7UYHQYz9FjLMP
+	FQmny0vdXl8qBO4OtbsvxahsHlTllbvNGOUPdkfxGJOkgAqFA4fdXuHYeIUXbvE5SQgcvDFM
+	cBwINwYKsXE5UEGQZ1jFpdFCa7Wdx/EJIdQV7OF4OZR32BDHPuBsqSY4ng6j5uK/eg286Rx2
+	7wuoLAQ68zUBd/8iOGZVcppY+Kkr+vusF3QOeHPTeMHxmnwsBwXrJyxCPyGXfkIA/YQAJQg3
+	IX8mnVUlMezcFGZPBCtXsekpSRHbU1WVaOwrtY20fKtFRufXiCbEI1ETAhKT+HrGzKtgxJ4K
+	+b79jDp1qzpdybBNaBqJS/w9gxWBjJhKku9mdjFMGqP+1+WRwqmZvCu523QZW5a1N8TZhdWp
+	x6TrRzN6brfM9OmOjdZ2ZAX1bcgUlXc3077e2Vq/8Nld0UOTN8oro848GwzICVAYiz9q8sNA
+	9CLuwWNJq+HRQrrLf8rrJb+pSJvB9OnsOUJxamXxApvEMKrfFNP3ENtviT1UujjkvH0jaXLF
+	9O20rdY6NAmXrHOfSl9VjHioTrIlWqfqjotNPL9CS/S7cqtkM4YP9OpallmevLtlOWpcJ803
+	VG1ITMPiX68pu9e8pKxwZ31NmF089KstkkjQdnfl6Lyj4z8k2II6h7VTOuabIED3XaqxOk7k
+	zXoeei2ajW8K8DATDUfe9ZUp+WuvFyEJzu6QzwnF1Kz8D+CWDiS5AwAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRmVeSWpSXmKPExsVy+t/xu7rvqzemGqzv0bbYcuweo8XlJ3wW
+	p1v2slucefmZxWLXnx3sFjcmPGW0OHiqg91i78mdrA4cHqcWSXjsnHWX3WPTqk42j7MrHT3e
+	77vK5vF5k1wAW5SeTVF+aUmqQkZ+cYmtUrShhZGeoaWFnpGJpZ6hsXmslZGpkr6dTUpqTmZZ
+	apG+XYJexseXt9gLjvJUnJmzhr2B8SdnFyMnh4SAicSLpTfZuhi5OIQEljJKtHX9YYJIyEhs
+	/HKVFcIWlvhzrYsNxBYS+Mgo0fBVGKJhN6PE7v1/wYp4BewkNh58xQhiswioShyZ8oAJIi4o
+	cXLmExYQW1RAXuL+rRnsILawgL7E7A2LwIaKCGhKHPl2jQlkKLNAF5PE5qkbmCA2XGWUWDb9
+	MdgkZgFxiVtP5gPZHBxsAloSjZ1ggziBXpizbA8rRImmROv23+wQtrzE9rdzmEHKJQSUJaYu
+	9YJ4plbi899njBMYRWchOW8WkgWzkEyahWTSAkaWVYwiqaXFuem5xUZ6xYm5xaV56XrJ+bmb
+	GIGxvO3Yzy07GFe++qh3iJGJg/EQowQHs5IIr4npxlQh3pTEyqrUovz4otKc1OJDjKbAMJrI
+	LCWanA9MJnkl8YZmBqaGJmaWBqaWZsZK4ryeBR2JQgLpiSWp2ampBalFMH1MHJxSDUzzzveJ
+	5kl/LPN4MWV2yETvyY6LP1t/PZ+tIv/hYpLMjXrZH1OmhwUJGVgU+1QlZfJsEd3pq+Xb3TXp
+	0ouJL57O+3q1dv7HW9tXTZmsb7vtRpMas0PX1xYehYjFUeZHPu6eMPmb95PYBx6Bi7STX9au
+	X7x36iIvGSOzwkMHZq3Y579o5+z+tE3GxbUdUxclWRva7sjr/WtxmfWVz1zFhfuZ1y2/MF+y
+	Ven2g4UX17yXWiz8uWjub88zMznexc379eDcs85/uxt3BF2/u7tz3x1/HaH8vDV6Hzh3XMxx
+	vpG/UWFj5CuxHbw8D7pzYy+s0lm+PCi6ma2v0CvSIubpLKl/vIxab5PPTE79ELDwev19XiWW
+	4oxEQy3mouJEACh5cEFuAwAA
+X-CMS-MailID: 20240124210655eucas1p124049fc160428b3799354a7837f10d5c
+X-Msg-Generator: CA
+X-RootMTR: 20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab
+References: <CGME20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab@eucas1p2.samsung.com>
+	<87frynkfao.fsf@doe.com> <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
+	<20240124165813.GF6226@frogsfrogsfrogs>
+
+>> The issue is 'xfs_wb*iomap_invalid' not getting triggered when we have larger
+>> bs. I basically increased the blksz in the test based on the underlying bs.
+>> Maybe there is a better solution than what I proposed, but it fixes the test.
+> 
+> The only improvement I can think of would be to force-disable large
+> folios on the file being tested.  Large folios mess with testing because
+> the race depends on write and writeback needing to walk multiple pages.
+> Right now the pagecache only institutes large folios if the IO patterns
+> are large IOs, but in theory that could change some day.
+> 
+
+Hmm, so we create like a debug parameter to disable large folios while the file is
+being tested?
+
+The only issue is that LBS work needs large folio to be enabled.
+
+So I think then the solution is to add a debug parameter to disable large folios
+for normal blocksizes (bs <= ps) while running the test but disable this test
+altogether for LBS(bs > ps)?
 
 
+> I suspect that the iomap tracepoint data and possibly
+> trace_mm_filemap_add_to_page_cache might help figure out what size
+> folios are actually in use during the invalidation test.
+> 
 
-On 2024/1/24 22:40, Anand Jain wrote:
-> On 1/23/24 11:49, Qu Wenruo wrote:
->> [BUG]
->> There is a report about reading a zstd compressed inline file extent
->> would lead to either a VM_BUG_ON() crash, or lead to incorrect file
->> content.
->>
->> [CAUSE]
->> The root cause is a incorrect memcpy_to_page() call, which uses
->> incorrect page offset, and can lead to either the VM_BUG_ON() as we may
->> write beyond the page boundary, or writes into the incorrect offset of
->> the page.
->>
->> [TEST CASE]
->> The test case would:
->>
->> - Mount with the specified compress algorithm
->> - Create a 4K file
->> - Verify the 4K file is all inlined and compressed
->> - Verify the content of the initial write
->> - Cycle mount to drop all the page cache
->> - Verify the content of the file again
->> - Unmount and fsck the fs
->>
->> This workload would be applied to all supported compression algorithms.
->> And it can catch the problem correctly by triggering VM_BUG_ON(), as ou=
-r
->> workload would result decompressed extent size to be 4K, and would
->> trigger the VM_BUG_ON() 100%.
->> And with the revert or the new fix, the test case can pass safely.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->> =C2=A0 tests/btrfs/310=C2=A0=C2=A0=C2=A0=C2=A0 | 81 +++++++++++++++++++=
-++++++++++++++++++++++++++
->> =C2=A0 tests/btrfs/310.out |=C2=A0 2 ++
->> =C2=A0 2 files changed, 83 insertions(+)
->> =C2=A0 create mode 100755 tests/btrfs/310
->> =C2=A0 create mode 100644 tests/btrfs/310.out
->>
->> diff --git a/tests/btrfs/310 b/tests/btrfs/310
->> new file mode 100755
->> index 00000000..b514a8bc
->> --- /dev/null
->> +++ b/tests/btrfs/310
->> @@ -0,0 +1,81 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
->> +#
->> +# FS QA Test 310
->> +#
->> +# Make sure reading on an compressed inline extent is behaving correct=
-ly
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick compress
->> +
->> +# Import common functions.
->> +# . ./common/filter
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_require_scratch
->> +
->> +# This test require inlined compressed extents creation, and all the
->> writes
->> +# are designed for 4K sector size.
->> +_require_btrfs_inline_extents_creation
->> +_require_btrfs_support_sectorsize 4096
->> +
->> +_fixed_by_kernel_commit e01a83e12604 \
->> +=C2=A0=C2=A0=C2=A0 "Revert \"btrfs: zstd: fix and simplify the inline =
-extent
->> decompression\""
->> +
->> +# The correct md5 for the correct 4K file filled with "0xcd"
->> +md5sum_correct=3D"5fed275e7617a806f94c173746a2a723"
->> +
->> +workload()
->> +{
->> +=C2=A0=C2=A0=C2=A0 local algo=3D"$1"
->> +
->> +=C2=A0=C2=A0=C2=A0 echo "=3D=3D=3D Testing compression algorithm ${alg=
-o} =3D=3D=3D" >> $seqres.full
->> +=C2=A0=C2=A0=C2=A0 _scratch_mkfs >> $seqres.full
->> +=C2=A0=C2=A0=C2=A0 _scratch_mount -o compress=3D${algo}
->> +
->> +=C2=A0=C2=A0=C2=A0 _pwrite_byte 0xcd 0 4k "$SCRATCH_MNT/inline_file" >=
- /dev/null
->
->
->
->> +=C2=A0=C2=A0=C2=A0 result=3D$(_md5_checksum "$SCRATCH_MNT/inline_file"=
-)
->> +=C2=A0=C2=A0=C2=A0 echo "after initial write, md5sum=3D${result}" >> $=
-seqres.full
->> +=C2=A0=C2=A0=C2=A0 if [ "$result" !=3D "$md5sum_correct" ]; then
->> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _fail "initial write result=
-s incorrect content for \"$algo\""
->> +=C2=A0=C2=A0=C2=A0 fi
->
-> General rule of thumb is where possible use stdout and compare it with
-> the golden output.
->
-> So something like the below shall suffice.
->
-> echo "after initial write with alog=3D$algo"
-> _md5_checksum "$SCRATCH_MNT/inline_file"
->
-> Also, helps quick debug, when=C2=A0 fails we have the diff.
+Cool! I will see if I can do some analysis by adding trace_mm_filemap_add_to_page_cache
+while running the test.
 
-Nope, for this particular case, golden output is not suitable.
+> (Perhaps it's time for me to add a 64k bs VM to the test fleet.)
+> 
 
-As the workload is dependent on the support compression algorithm, we
-can not reply on golden output to cover all algorithms.
-Or it would always fail for older kernels without zstd, or for newer
-kernel with newer algorithm.
-
-That's why I personally don't believe golden output is always the best
-way to go.
-
-Thanks,
-Qu
->
->
->> +=C2=A0=C2=A0=C2=A0 sync
->
->  =C2=A0Generally, we need comments to explain why sync is necessary.
->
->> +
->> +=C2=A0=C2=A0=C2=A0 $XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/inline_fil=
-e | tail -n 1
->> > $tmp.fiemap
->> +=C2=A0=C2=A0=C2=A0 cat $tmp.fiemap >> $seqres.full
->> +=C2=A0=C2=A0=C2=A0 # Make sure we got an inlined compressed file exten=
-t.
->> +=C2=A0=C2=A0=C2=A0 # 0x200 means inlined, 0x100 means not block aligne=
-d, 0x8 means
->> encoded
->> +=C2=A0=C2=A0=C2=A0 # (compressed in this case), and 0x1 means the last=
- extent.
->> +=C2=A0=C2=A0=C2=A0 if ! grep -q "0x309" $tmp.fiemap; then
->> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 rm -f -- $tmp.fiemap
->> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _notrun "No compressed inli=
-ne extent created, maybe subpage?"
->
->  =C2=A0workload() is called for each compress algo. If we fail
->  =C2=A0for one of the algo then notrun is not a good option here.
->
->  =C2=A0IMO, stdout (with filters?) and comparing it with golden output
->  =C2=A0is better.
->
->> +=C2=A0=C2=A0=C2=A0 fi
->
->
->> +=C2=A0=C2=A0=C2=A0 rm -f -- $tmp.fiemap
->> +
->> +=C2=A0=C2=A0=C2=A0 # Unmount to clear the page cache.
->> +=C2=A0=C2=A0=C2=A0 _scratch_cycle_mount
->> +
->> +=C2=A0=C2=A0=C2=A0 # For v6.8-rc1 without the revert or the newer fix,=
- this can
->> +=C2=A0=C2=A0=C2=A0 # crash or lead to incorrect contents for zstd.
->> +=C2=A0=C2=A0=C2=A0 result=3D$(_md5_checksum "$SCRATCH_MNT/inline_file"=
-)
->> +=C2=A0=C2=A0=C2=A0 echo "after cycle mount, md5sum=3D${result}" >> $se=
-qres.full
->> +=C2=A0=C2=A0=C2=A0 if [ "$result" !=3D "$md5sum_correct" ]; then
->> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _fail "read for compressed =
-inline extent failed for \"$algo\""
->> +=C2=A0=C2=A0=C2=A0 fi
->
->  =C2=A0Here too, same as above, golden output to compare can be done.
->  =C2=A0And remove _fail.
->
-> Thanks, Anand
->
->> +=C2=A0=C2=A0=C2=A0 _scratch_unmount
->> +=C2=A0=C2=A0=C2=A0 _check_scratch_fs
->> +}
->> +
->> +algo_list=3D($(_btrfs_compression_algos))
->> +for algo in ${algo_list[@]}; do
->> +=C2=A0=C2=A0=C2=A0 workload $algo
->> +done
->> +
->> +echo "Silence is golden"
->> +
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
->> new file mode 100644
->> index 00000000..7b9eaf78
->> --- /dev/null
->> +++ b/tests/btrfs/310.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 310
->> +Silence is golden
->
->
+I confirmed with Chandan that Oracle OCI with Ampere supports 64kb page sizes. We (Luis and I)
+are also looking into running kdevops on XFS with 64kb page size and block size as it might
+be useful for the LBS work to cross verify the failures.
