@@ -1,154 +1,295 @@
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-108-mta34.mxroute.com (mail-108-mta34.mxroute.com [136.175.108.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6516134747
-	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 21:07:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4E5C80B
+	for <fstests@vger.kernel.org>; Thu, 25 Jan 2024 02:30:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=136.175.108.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706130427; cv=none; b=iYRfYL24Y4FFfweto+KWTBxWHcIg+IKWyVt49rVWzWG7W97fyr2nLu6a8hj3VUiXGLciFJ8XnuUMTBURhyCjrkS7/Pox73mxnqyRvxdeaXLl10VS0XbLWZ2896hhbjYUPPbS3CLFLsb8rC2oDXPehSQnkUYKBmzZXpJ/PBVsxDQ=
+	t=1706149838; cv=none; b=BZv6tVq6tbaWIsT7ajmnAXrL2cwK2jbXNxnPfYAPHsYjSll0PJoDe8wvQH1BZX+Gyy9nJzfXtWQpUjkzBGY7af3xIsPffbb8BgQXRELrhkcQZ/KkwxsRHUMaydHu0+90FNlRKr9rN6nl7flAj0NXOJeuPpKx6XVZUQrYz5cF/10=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706130427; c=relaxed/simple;
-	bh=JHNh9Q0BFBWgfcKGghxlNnLwyGg4jg2TwZ4zLWeARQs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
-	 Content-Type:References; b=BEjG53OoDlR24aYDm46t11DqNcKKeU/DtvJvKONXyYUMusIjqQ3dMH4BN1a1SirsAHMLiUgIA5hXonu8OUABSIMWiyAHLP+AdZB+bLof2xyOu4fcnV5i+wAOgToNr2h1Lq2dLhhKFRJr95AVtH4z82suxBrC7vYwbZkCKVw2Z+U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=SZ4rqBZJ; arc=none smtp.client-ip=210.118.77.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1706149838; c=relaxed/simple;
+	bh=2AEeLVXZ7AObA+ZDya9xfo4D6zw6kYVmiNEd8XONY/k=;
+	h=References:From:To:Cc:Subject:Date:In-reply-to:Message-ID:
+	 MIME-Version:Content-Type; b=Ep4tndV+qoR9fdBVsQenN6ApcEw3fobzfvsCDemmAdrEcxY3GULt9Or+ijnWG3xxXVGFXRlaJuyXCbotEgPGe6BbaW3GwUxDozEaaWy2HrEK+Vt8FcNkALj+5K8npJIzhu+CaPYQ3dqnToUKzsqZi48WRiRmPoO51cNU549I/F4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=damenly.org; spf=pass smtp.mailfrom=damenly.org; dkim=pass (2048-bit key) header.d=damenly.org header.i=@damenly.org header.b=G4tbBwTQ; arc=none smtp.client-ip=136.175.108.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=damenly.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=damenly.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="SZ4rqBZJ"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20240124210657euoutp01a062fa66e56c8304cab704254e9c1e16~tZJM5Oh7Y1142311423euoutp01s
-	for <fstests@vger.kernel.org>; Wed, 24 Jan 2024 21:06:57 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20240124210657euoutp01a062fa66e56c8304cab704254e9c1e16~tZJM5Oh7Y1142311423euoutp01s
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1706130417;
-	bh=OgdKF7VpSJGITwcb08EUfUDksMeLEH7mGRvue6x4pn4=;
-	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-	b=SZ4rqBZJNDlOJujy/IdUMT37ePrATu+Y6sry8AsvlMWl7XjUZnuL1m0DAnqtN9DOQ
-	 iens4+8EXEayyTMjcUKAY5B+tBMoFBVIcxUrvOmjq8GuyANJ98dSWM5RkO8fF3YY2d
-	 tizNzFy8neCfDESqtLGE8+Djn/qlHkhoadaPHfA4=
-Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20240124210656eucas1p122b5b7fa4c5ac8f74119bd10a6a97af6~tZJL62m0G1478714787eucas1p1f;
-	Wed, 24 Jan 2024 21:06:56 +0000 (GMT)
-Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-	eusmges3new.samsung.com (EUCPMTA) with SMTP id 9B.8A.09552.0FB71B56; Wed, 24
-	Jan 2024 21:06:56 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-	20240124210655eucas1p124049fc160428b3799354a7837f10d5c~tZJLfwSX-2301123011eucas1p1J;
-	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20240124210655eusmtrp22be49531f994bf54bfce3dfac1812643~tZJLfMlZ80146201462eusmtrp23;
-	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
-X-AuditID: cbfec7f5-853ff70000002550-b5-65b17bf09273
-Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-	eusmgms2.samsung.com (EUCPMTA) with SMTP id 8C.E7.10702.FEB71B56; Wed, 24
-	Jan 2024 21:06:55 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20240124210655eusmtip1eb51c210b119c4f87a8dbc6329e3aa52~tZJLSaPZ60328003280eusmtip1T;
-	Wed, 24 Jan 2024 21:06:55 +0000 (GMT)
-Received: from [192.168.8.209] (106.210.248.230) by CAMSVWEXC02.scsc.local
-	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-	Wed, 24 Jan 2024 21:06:54 +0000
-Message-ID: <6d79f416-3119-4bf8-899b-88587d176475@samsung.com>
-Date: Wed, 24 Jan 2024 22:06:54 +0100
+	dkim=pass (2048-bit key) header.d=damenly.org header.i=@damenly.org header.b="G4tbBwTQ"
+Received: from filter006.mxroute.com ([136.175.111.2] filter006.mxroute.com)
+ (Authenticated sender: mN4UYu2MZsgR)
+ by mail-108-mta34.mxroute.com (ZoneMTA) with ESMTPSA id 18d3e6fb8b20003727.003
+ for <fstests@vger.kernel.org>
+ (version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384);
+ Thu, 25 Jan 2024 02:25:25 +0000
+X-Zone-Loop: 70814e2dea2d0f1d631528539e0ef6996ef8d0205b6a
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=damenly.org
+	; s=x; h=Content-Type:MIME-Version:Message-ID:In-reply-to:Date:Subject:Cc:To:
+	From:References:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=EVWMPR3ZrMMF6AtNxDTTH7j2bFLpJqGsV+mDPqywWtc=; b=G4tbBwTQfRh6lgP+FFC0domkBq
+	hj5ZW2cDtYFfdJPqvAH1VKeGXv0SsYwHTnbFh6pn+w5QKTUMHG3sAWllGjPdbrZtiQ1yp0UxqieAL
+	sZms8NLEAtea0jaVqncjWhcj4oG6GEoy5PfSDzYcncZPkOhJezzbmbsaWNgADJ90cbSQMZAStgbh4
+	EdMXZMzVXaMeOlPnnA2A8vi0yZ3yvc+qbZyVYBkeqy6tdKSruxUKmT4b1xSdAhL+IVYAImdA8+LDL
+	3TWP6PJ+PjsxJ1J3I73HkalJnqS8JVfdQiAEHQ5oc/yY6A4OBZhR/DcmS9jwdS5nh1nI/CBAm9q5a
+	Xts+pJMg==;
+References: <20240117092309.1134595-1-glass.su@suse.com>
+ <20240117092309.1134595-2-glass.su@suse.com> <ZagUdl+DlxIw+siv@bfoster>
+ <h6jb49cm.fsf@damenly.org> <ZaqepfRjb1vU+nDw@bfoster>
+ <cytv49hm.fsf@damenly.org> <Za6HuxcIl0TNlffY@bfoster>
+User-agent: mu4e 1.7.5; emacs 28.2
+From: Su Yue <l@damenly.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: Su Yue <l@damenly.org>, Su Yue <glass.su@suse.com>,
+ fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
+Subject: Re: [PATCH v2 2/2] common/rc: improve block size support for bcachefs
+Date: Thu, 25 Jan 2024 10:10:48 +0800
+In-reply-to: <Za6HuxcIl0TNlffY@bfoster>
+Message-ID: <34umi23g.fsf@damenly.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/2] fstest changes for LBS
-To: "Darrick J. Wong" <djwong@kernel.org>
-CC: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, Dave Chinner
-	<david@fromorbit.com>, "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>,
-	<zlang@redhat.com>, <fstests@vger.kernel.org>, <mcgrof@kernel.org>,
-	<gost.dev@samsung.com>, <linux-xfs@vger.kernel.org>
-Content-Language: en-US
-From: Pankaj Raghav <p.raghav@samsung.com>
-In-Reply-To: <20240124165813.GF6226@frogsfrogsfrogs>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA02SaUwTURSF8zrTzrQCGQrIdUGSIokgm4hmXFPikiKu/DDGBLWxE0RbIB3B
-	pWmCCSaK0RIFkQqCaKXWjU2kKChEikKNS5WlKovWhSouKWIUBaGjhn/fffec9+65eSQmvsCf
-	Sian7GbUKXKlRCDCayw/HoZ/0VQwUY3tk+hqSzeibQ4vui2rnqCt/S6crvtVS9CdOW8Q3dh6
-	iKDr75v5UlLWWgoys/4lIas0HRbIHlyMlX1ueCaQuSpnrBdsFi1WMMrkDEYduXSbaMfXfjuR
-	1uyx11p4mchEP4TZSEgCFQP17+/h2UhEiikjgoKqRowrBhEM5Dn5XOFCYBw8K/hneW/oEnCN
-	MgT5Izr8v2rk6FseV9xE8MR21W3xpJZCRaMTjTNOBcPd3F4ed+4N9wsc+Dj7UYHQYz9FjLMP
-	FQmny0vdXl8qBO4OtbsvxahsHlTllbvNGOUPdkfxGJOkgAqFA4fdXuHYeIUXbvE5SQgcvDFM
-	cBwINwYKsXE5UEGQZ1jFpdFCa7Wdx/EJIdQV7OF4OZR32BDHPuBsqSY4ng6j5uK/eg286Rx2
-	7wuoLAQ68zUBd/8iOGZVcppY+Kkr+vusF3QOeHPTeMHxmnwsBwXrJyxCPyGXfkIA/YQAJQg3
-	IX8mnVUlMezcFGZPBCtXsekpSRHbU1WVaOwrtY20fKtFRufXiCbEI1ETAhKT+HrGzKtgxJ4K
-	+b79jDp1qzpdybBNaBqJS/w9gxWBjJhKku9mdjFMGqP+1+WRwqmZvCu523QZW5a1N8TZhdWp
-	x6TrRzN6brfM9OmOjdZ2ZAX1bcgUlXc3077e2Vq/8Nld0UOTN8oro848GwzICVAYiz9q8sNA
-	9CLuwWNJq+HRQrrLf8rrJb+pSJvB9OnsOUJxamXxApvEMKrfFNP3ENtviT1UujjkvH0jaXLF
-	9O20rdY6NAmXrHOfSl9VjHioTrIlWqfqjotNPL9CS/S7cqtkM4YP9OpallmevLtlOWpcJ803
-	VG1ITMPiX68pu9e8pKxwZ31NmF089KstkkjQdnfl6Lyj4z8k2II6h7VTOuabIED3XaqxOk7k
-	zXoeei2ajW8K8DATDUfe9ZUp+WuvFyEJzu6QzwnF1Kz8D+CWDiS5AwAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRmVeSWpSXmKPExsVy+t/xu7rvqzemGqzv0bbYcuweo8XlJ3wW
-	p1v2slucefmZxWLXnx3sFjcmPGW0OHiqg91i78mdrA4cHqcWSXjsnHWX3WPTqk42j7MrHT3e
-	77vK5vF5k1wAW5SeTVF+aUmqQkZ+cYmtUrShhZGeoaWFnpGJpZ6hsXmslZGpkr6dTUpqTmZZ
-	apG+XYJexseXt9gLjvJUnJmzhr2B8SdnFyMnh4SAicSLpTfZuhi5OIQEljJKtHX9YYJIyEhs
-	/HKVFcIWlvhzrYsNxBYS+Mgo0fBVGKJhN6PE7v1/wYp4BewkNh58xQhiswioShyZ8oAJIi4o
-	cXLmExYQW1RAXuL+rRnsILawgL7E7A2LwIaKCGhKHPl2jQlkKLNAF5PE5qkbmCA2XGWUWDb9
-	MdgkZgFxiVtP5gPZHBxsAloSjZ1ggziBXpizbA8rRImmROv23+wQtrzE9rdzmEHKJQSUJaYu
-	9YJ4plbi899njBMYRWchOW8WkgWzkEyahWTSAkaWVYwiqaXFuem5xUZ6xYm5xaV56XrJ+bmb
-	GIGxvO3Yzy07GFe++qh3iJGJg/EQowQHs5IIr4npxlQh3pTEyqrUovz4otKc1OJDjKbAMJrI
-	LCWanA9MJnkl8YZmBqaGJmaWBqaWZsZK4ryeBR2JQgLpiSWp2ampBalFMH1MHJxSDUzzzveJ
-	5kl/LPN4MWV2yETvyY6LP1t/PZ+tIv/hYpLMjXrZH1OmhwUJGVgU+1QlZfJsEd3pq+Xb3TXp
-	0ouJL57O+3q1dv7HW9tXTZmsb7vtRpMas0PX1xYehYjFUeZHPu6eMPmb95PYBx6Bi7STX9au
-	X7x36iIvGSOzwkMHZq3Y579o5+z+tE3GxbUdUxclWRva7sjr/WtxmfWVz1zFhfuZ1y2/MF+y
-	Ven2g4UX17yXWiz8uWjub88zMznexc379eDcs85/uxt3BF2/u7tz3x1/HaH8vDV6Hzh3XMxx
-	vpG/UWFj5CuxHbw8D7pzYy+s0lm+PCi6ma2v0CvSIubpLKl/vIxab5PPTE79ELDwev19XiWW
-	4oxEQy3mouJEACh5cEFuAwAA
-X-CMS-MailID: 20240124210655eucas1p124049fc160428b3799354a7837f10d5c
-X-Msg-Generator: CA
-X-RootMTR: 20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab
-References: <CGME20240123194216eucas1p25b7ad483f93cde66bcfefd22b4a830ab@eucas1p2.samsung.com>
-	<87frynkfao.fsf@doe.com> <d1cd9f19-21ed-430a-b146-906a6b6f0f70@samsung.com>
-	<20240124165813.GF6226@frogsfrogsfrogs>
-
->> The issue is 'xfs_wb*iomap_invalid' not getting triggered when we have larger
->> bs. I basically increased the blksz in the test based on the underlying bs.
->> Maybe there is a better solution than what I proposed, but it fixes the test.
-> 
-> The only improvement I can think of would be to force-disable large
-> folios on the file being tested.  Large folios mess with testing because
-> the race depends on write and writeback needing to walk multiple pages.
-> Right now the pagecache only institutes large folios if the IO patterns
-> are large IOs, but in theory that could change some day.
-> 
-
-Hmm, so we create like a debug parameter to disable large folios while the file is
-being tested?
-
-The only issue is that LBS work needs large folio to be enabled.
-
-So I think then the solution is to add a debug parameter to disable large folios
-for normal blocksizes (bs <= ps) while running the test but disable this test
-altogether for LBS(bs > ps)?
+Content-Type: text/plain; format=flowed
+X-Authenticated-Id: l@damenly.org
 
 
-> I suspect that the iomap tracepoint data and possibly
-> trace_mm_filemap_add_to_page_cache might help figure out what size
-> folios are actually in use during the invalidation test.
-> 
+On Mon 22 Jan 2024 at 10:20, Brian Foster <bfoster@redhat.com> 
+wrote:
 
-Cool! I will see if I can do some analysis by adding trace_mm_filemap_add_to_page_cache
-while running the test.
+> On Sun, Jan 21, 2024 at 12:00:47PM +0800, Su Yue wrote:
+>>
+>> On Fri 19 Jan 2024 at 11:09, Brian Foster <bfoster@redhat.com> 
+>> wrote:
+>>
+>> > On Thu, Jan 18, 2024 at 10:59:14AM +0800, Su Yue wrote:
+>> > >
+>> > > On Wed 17 Jan 2024 at 12:55, Brian Foster 
+>> > > <bfoster@redhat.com>
+>> > > wrote:
+>> > >
+>> > > > On Wed, Jan 17, 2024 at 05:23:09PM +0800, Su Yue wrote:
+>> > > > > For bcachefs, def_blksz is never assigned even 
+>> > > > > MKFS_OPTIONS > >
+>> > > contains
+>> > > > > option
+>> > > > > '--block_size'. So block size of bcachefs on scratch 
+>> > > > > dev is > >
+>> > > always
+>> > > > > 4096
+>> > > > > if _scratch_mkfs_sized is called without second 
+>> > > > > parameter.
+>> > > > >
+>> > > > > Add the pattern to set def_blksz if '--block_size' is 
+>> > > > > given > >
+>> > > in
+>> > > > > MKFS_OPTIONS.
+>> > > > >
+>> > > > > Signed-off-by: Su Yue <glass.su@suse.com>
+>> > > > > ---
+>> > > > > changelog:
+>> > > > > v2:
+>> > > > >     Born.
+>> > > > > ---
+>> > > > >  common/rc | 3 +++
+>> > > > >  1 file changed, 3 insertions(+)
+>> > > > >
+>> > > > > diff --git a/common/rc b/common/rc
+>> > > > > index 31c21d2a8360..6a01de69cf05 100644
+>> > > > > --- a/common/rc
+>> > > > > +++ b/common/rc
+>> > > > > @@ -950,6 +950,9 @@ _scratch_mkfs_sized()
+>> > > > >  	jfs)
+>> > > > >  		def_blksz=4096
+>> > > > >  		;;
+>> > > > > +	bcachefs)
+>> > > > > +		def_blksz=`echo $MKFS_OPTIONS | sed -rn > >
+>> > > 's/.*(--block_size)[
+>> > > > > =]?+([0-9]+).*/\2/p'`
+>> > > > > +		;;
+>> > > >
+>> > > > So if the default bcachefs block size is 512b, I wonder 
+>> > > > if > this
+>> > > should
+>> > > > do something like what the udf branch does a few lines 
+>> > > > above > and
+>> > > >
+>> > > mkfs.bcachefs decides block size by querying 
+>> > > statbuf.st_blksize or
+>> > > BLKPBSZGET from the device if the option is not given.
+>> > >
+>> > > > override the hardcoded default of 4k. ISTM this whole 
+>> > > > thing >
+>> > > would be
+>> > > > more robust if it just elided the param in the default 
+>> > > > cases > and
+>> > > let the
+>> > > > associated mkfs tool use its own default, but that's 
+>> > > > probably > a
+>> > > separate
+>> > > > issue. Hm?
+>> > > >
+>> > > Since there is no default block size of bcachefs, maybe we 
+>> > > can let
+>> > > mkfs.bcachefs decide on its own but it will make chaos when 
+>> > > somebody
+>> > > reports an unreproducible BUG due to the different 
+>> > > block_size even
+>> > > we have same local.config. It just happened...
+>> > > So for now, I think 4096 is a resonable value of bcachefs 
+>> > > block
+>> > > size.
+>> > >
+>> >
+>> > I think we run into this no matter what if we pick a size out 
+>> > of a hat,
+>> > regardless of what the value is. If somebody is testing with 
+>> > default
+>> > blocksize (i.e. based on mkfs) on a filesystem where the 
+>> > default isn't
+>> > actually 4k, then it seems quite unexpected that 
+>> > _scratch_mkfs_sized
+>> > would use something different from _scratch_mkfs when a block 
+>> > size isn't
+>> > explicitly specified. That's exactly the situation we ran 
+>> > into with the
+>> > generic/361 thing where I would have expected this test to 
+>> > use 512b
+>> > blocks.
+>> >
+>> > ISTM that the 4k value in _scratch_mkfs_sized() is mainly a 
+>> > last resort
+>> > default value so the $blocks calculation can work for any 
+>> > filesystem
+>> > that might not be properly supported by the function. The 
+>> > function looks
+>> > a little wonky overall, but I think there are at least a 
+>> > couple options
+>> > to improve things for bcachefs. FWIW, it also looks to me 
+>> > that nothing
+>> > actually passes a blocksize param to _scratch_mkfs_sized, so 
+>> > perhaps we
+>> > could just drop that blocksize=$2 parameter across the board 
+>> > as a
+>> > simplification?
+>> >
+>> Maybe it can be dropped. The only user is generic/466
+>>
+>
+> Ah, good point.
+>
+Sorry for the late reply, was busy with other works.
 
-> (Perhaps it's time for me to add a 64k bs VM to the test fleet.)
-> 
+> So generic/466 clears MKFS_OPTIONS so the function will use the 
+> provided
+> block size over whatever exists in the config, yet generic/466 
+> is the
+> only user of this param in the first place.
+>
+> I wonder if a more useful change might be to change the
+> _scratch_mkfs_sized logic to prefer the provided block size over
+> whatever is in the config, but then again that might require 
+> further
+> changes for any of the places that continue to use MKFS_OPTIONS. 
+> :/
+>
+I am wondering too...
 
-I confirmed with Chandan that Oracle OCI with Ampere supports 64kb page sizes. We (Luis and I)
-are also looking into running kdevops on XFS with 64kb page size and block size as it might
-be useful for the LBS work to cross verify the failures.
+>> > With that, I think bcache could either:
+>> >
+>> > 1. Do something like def_blksize=`blockdev --getpbsz 
+>> > $SCRATCH_DEV` in
+>> > the first switch if no block size is specified in 
+>> > MKFS_OPTIONS (or
+>> > whatever best mimics mkfs logic).
+>> >
+>> > OR
+>> >
+>> > 2. Do something like the following in the last switch:
+>> >
+>> > 	[ -n $def_blksize ] && 
+>> > def_blksize="--block_size=$def_blksize"
+>> > 	$MKFS_BCACHEFS_PROG ... $def_blksize $SCRATCH_DEV
+>> >
+>> > ... to allow mkfs to determine the block size. I _think_ that 
+>> > works
+>> > because the bcachefs format doesn't depend on $blocks at all, 
+>> > so
+>> > whatever $blocksize was set to is irrelevent unless 
+>> > $def_blksize was set
+>> > above, but I could be missing something. That also assumes 
+>> > blocksize
+>> > wasn't set to something by the caller.
+>> >
+>> > If correct, option #2 seems a little cleaner to me, but other
+>> > thoughts/ideas?
+>> >
+>> Option 2 is preferable. I would code it as(on more varaiable 
+>> for
+>> readability):
+>>
+>> local blocksize_opt
+>>
+>> [ -n $def_blksize ] && blockzie_opt="--block_size=$def_blksize"
+>> $MKFS_BCACHEFS_PROG ... $blocksize_opt $SCRATCH_DEV
+>>
+>
+> That seems reasonable to me. The only caveat is this was 
+> assuming the
+> blocksize param would go away and so could be ignored for 
+> bcachefs.
+>
+> Without getting too far into the weeds on the higher level 
+> parameter
+> handling, I wonder if the blocksize parameter was initially put 
+> into a
+> separate variable (i.e. blocksize_param or some such), if that 
+> would at
+> least help bcachefs determine between the case where 4096 was 
+> requested
+> by the caller vs. picked out of a hat by the default handling 
+> logic
+> earlier in the function, and thus correctly determine when to 
+> set a
+> blocksize vs. use the mkfs (non-4k) default.
+>
+After going through the call stack of _scratch_mkfs quickly, I did 
+not
+found something global to describe blocksize.
+So I think blocksize_param is unnecessary?
+
+--
+Su
+
+> So then IOW the logic might look something like this..?
+>
+> 	[ -n $blocksize_param ] && 
+> blocksize_opt="--block_size=$blocksize_param"
+> 	[ -n $def_blksize ] && 
+> blocksize_opt="--block_size=$def_blksize"
+> 	mkfs ...
+>
+> Brian
+>
+>> --
+>> Su
+>> >
+>> > Brian
+>> >
+>> > > --
+>> > > Su
+>> > > >
+>> > > > Brian
+>> > > >
+>> > > > >  	esac
+>> > > > >
+>> > > > >  	[ -n "$def_blksz" ] && blocksize=$def_blksz
+>> > > > > --
+>> > > > > 2.43.0
+>> > > > >
+>> > >
+>>
