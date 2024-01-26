@@ -1,68 +1,68 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58FE51E88B;
-	Fri, 26 Jan 2024 16:45:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D67D225CD
+	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 20:15:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706287532; cv=none; b=d5JFCnZXFMBdhQMX1fqQcRLUwE0rdRG8YuLDbzhvkDodDRtLVZq8B+gBSDqYdelC9yOk6gkxrohiLoMtx4e7EV51Jzye07+F67rZvEFqDHnTVwp7m5zK4bXR9gA46B36WITy0R4Jpue4PMWgtaEtN+9wsPEmWNIQXTXbdz/JVEc=
+	t=1706300152; cv=none; b=T729eipU5FXTJc4Umj94BPBvbZnxx/iDVvyzKvqNBtQ8k5+WUP8sH6AAYUgVmj0vvaceLG95ie446QdsQmBl9R/X8PyOmZ6orc+3VxgsqEWumUTwh0Y6ENzvQ/eSY4P8MZO5qXnAk1hiEd6QQifW9Y3r7Q2JYDQIshrO7jLS+Vk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706287532; c=relaxed/simple;
-	bh=Bw21I3a2DG/QaCV2w89fjIl4mUYqO4JpYBMjJiJgXpU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=joPJj0mE42lqigygVjLOcriIuQIo/GhkgIs1k0mbkiB7Z51MHtzS/JFlRw8TpOrgILhm7dkANxoPXD2lCnNeyHOP9tgQZjmVLUfJZd064ObRy6nlfspQyJQIPGHJIx/5tecO0sE9dqcdPfQ/HscIlvsbo/qIkE0vGKC2d+q1o9o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sjGWGjdc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1706300152; c=relaxed/simple;
+	bh=MJTc7OcLO+Hcu+6JoN0F9NN6bJwBYbc478bUR6J8a50=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=U2tysHO/bqdJsLqX54qrFGBRF/xhTsSVGnPLaqswkIDbLbYFQAr6+muadzq0BD4Qqyh722Kk+mLQ31z0kaVByskP7qT+96RMisFLnUCEa5oKNaubvBqaExg/qwbVYjENLse9a7YGbKWbHMHnivRmcOQW4TlWRqjDLi9LiV0W0sU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k8iFHjZU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sjGWGjdc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4EA0C433A6;
-	Fri, 26 Jan 2024 16:45:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k8iFHjZU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D710EC433C7
+	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 20:15:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1706287530;
-	bh=Bw21I3a2DG/QaCV2w89fjIl4mUYqO4JpYBMjJiJgXpU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=sjGWGjdcMVIPzKzjj7/kxUjxa2Av3jmfzlq8k4V1wmOKEJsjH0ldiNWb0itipi6qE
-	 O7dZOEakt8UcF8+5HcUcGaCk8JEaegff4V/uCV1+XbAV4K/Sn+s7ewroMLwpZ8XpP9
-	 ozPKsYNWevQCmn9vf1vq9U4l4/eBNp9uUeGl2xknZHY6mDMj/tNV59meuJMrSJYyAT
-	 OiMUIsMDjczK79cbF4b/EqMDfKq4JTzBubexTMkGJrDogiB6xovdTiimBd/jcAnNPV
-	 KF/B31MZxGEIWDF3Cwxa3iDGboFV56DHexbHJkmSkOicj6pmdGtFkfKWTfHosX8X88
-	 Wcwum8SiurwDw==
-Date: Fri, 26 Jan 2024 08:45:30 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, guan@eryu.me, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 08/10] xfs/503: split copy and metadump into two tests
-Message-ID: <20240126164530.GA1371843@frogsfrogsfrogs>
-References: <170620924356.3283496.1996184171093691313.stgit@frogsfrogsfrogs>
- <170620924478.3283496.11965906815443674241.stgit@frogsfrogsfrogs>
- <ZbO1Ue1hYr7d-o0R@infradead.org>
+	s=k20201202; t=1706300152;
+	bh=MJTc7OcLO+Hcu+6JoN0F9NN6bJwBYbc478bUR6J8a50=;
+	h=From:To:Subject:Date:From;
+	b=k8iFHjZUb4gRNnptrtfn197+4/YQeyveDGw4koH7KdeCWYxqLbTST+T26fcm15Rj5
+	 ejyxjNAmqqHNMfl2ohHBnbC+msFm48Kj35PwF4nZcvG4xYWbKYc9QrM3I/J8OPQuja
+	 iHlElIhkQBIHJTsxvLJ3t2ucZ25WoRpt/xF++dFJVzrrbzVV4Q+iCnKhXInDKQO9p+
+	 QV3GTNLt2g90q0k3noIkLBEm9l0UZ9bbH9n1Z5m3v9eyfPLCeyvOm7j1TRyipxt2Fb
+	 TxHZBB9TmI19FmTBojallXGm9IE1xmuA5ri9ARszxO+ZU+8TDh5mTdGqew2SV1oper
+	 I+i9MunejOoTQ==
+From: Jeff Layton <jlayton@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [PATCH fstests] generic/089: increase the lock timeout to 120s
+Date: Fri, 26 Jan 2024 15:15:50 -0500
+Message-ID: <20240126201550.109929-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZbO1Ue1hYr7d-o0R@infradead.org>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Jan 26, 2024 at 05:36:17AM -0800, Christoph Hellwig wrote:
-> > +++ b/tests/xfs/1876
-> 
-> What's it with these weird high test numbers?
+On NFS, this test can take a long time. There is enough contention for
+the lock that it can take more than 10s (or even 60s) to acquire it.
 
-Two reasons: I don't have to renumber all my new tests (and update the
-spreadsheet I use to track upstreaming status) every time I rebase with
-upstream; and the maintainer can git-am the patch as-is, without needing
-to hand-edit the patches.
+Bump this value up to 120s, which seems to be long enough for testing
+with kdevops.
 
-(Hmmm maybe fstests needs a git hook to detect a new test and
-automatically renumber it.)
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ src/t_mtab.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/src/t_mtab.c b/src/t_mtab.c
+index c0640a1951a4..4b3b26c86d02 100644
+--- a/src/t_mtab.c
++++ b/src/t_mtab.c
+@@ -16,7 +16,7 @@
+ #include <mntent.h>
+ #include <limits.h>
+ 
+-#define LOCK_TIMEOUT	10
++#define LOCK_TIMEOUT	120
+ #define _(x)		(x)
+ 
+ static char *mounted = "t_mtab";
+-- 
+2.43.0
 
-> 
-> Otherwise looks good:
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> 
