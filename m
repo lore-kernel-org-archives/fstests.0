@@ -1,70 +1,70 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A81CF171A7
-	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 12:32:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA92BBA39
+	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 12:38:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706272341; cv=none; b=QyOtEY0yT+DH8AuiSBUVi68718s4KyKVDBper9lOHl7Ey6vBbPXDoyUrEPeZ8lIlahyEiJNXOlmJUXkfo+ONV8/LQxXMQOhUFtH1jpnPJOdzrysXkDWpe44YYzRGbfuENFwmylCV2ui6qbNBF5MXTUgPtqKzeMs11IrU8tb+Zuw=
+	t=1706272708; cv=none; b=kTyr144uspl1ohE/CMiZIKqIWt9wbDaC0/hlkJse2uAt9d1keayzl1VymJromigUf3zMvYqHJtmafHQLZbqDao9ypjlliVRlsQJxRsESH22ewQ1njNdezvZAu2nTyZhorEQ2GjYQ1Cpp3AVB+/tzhrSezbdZgD6oYQKhiuDuJcE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706272341; c=relaxed/simple;
-	bh=1H3uzI4QHi5Ndkj8uf2Wub9vtRl+nihZODj0BnCzWJg=;
+	s=arc-20240116; t=1706272708; c=relaxed/simple;
+	bh=/q3N+f/OD18jXpPq+chgFsXpSsttpD3ygV3epqchrKY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dwv+wnJSisnBxkN1rp4mt9bWV3n62MmQ9smjmuHyveeUpqAz1fscmk/t8bt/ufK9gr+iu0G6JyCI1oAKJB1G1XTTLQUAgmXsrMlm//fBeEkyvayRWrDFyjEMQMDRa2bI33BIu8kuyBnlivogEmrwZCwgvd0kiAchMtAzvceo/I8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=F1+9F7Kx; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=m7q8TOyP6BBfddV0GS7SasaqZUsoz29ydPhV5/LX5slEbQ4YWiKXjwO8rdX6iqZYoCjnaXs5OPwDx3vlnMOilhhuVfxpNjccla44ZR88X9CI0wsdbqbVrPs+95XVaKepYw3r1QBQxIv98ksbkxbhqgz2q79hTrRlrZEkT1yk0ec=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PiWWm7p0; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="F1+9F7Kx"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PiWWm7p0"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706272338;
+	s=mimecast20190719; t=1706272705;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=sCYS4qYRdFBHd402HHe9dWT2+MHdhxVNAL+zD6tX4U0=;
-	b=F1+9F7KxmIy1Vxxc9Z5Hq7afxLbSX5e8CyLYs6L+ccSSmdfnubzL8x/U6GCP8ORriPNgHu
-	oB+meHAx7NWB00vMVBDjk2lkd0jI9B7sT4ApVWBgmOGMP+7iml9t30I+idXU1jYKG/ugFI
-	CWkDkixxRuQ4cXZejajUC4RWzGGaEBc=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=FpXtWa/FbpyKoHWu9UKHP8n22Llt8QHnUvrPFjiZA/M=;
+	b=PiWWm7p0fg7IBhC4wh8xcoKWVOWZChu1TLfHjg1tVgf0eFEuJT41pLtg4rh7EzmjiqT+ux
+	/mmbCD/zBPDCyXcl0cRn3v2UTTkzEJrrxpamvaP1Q/msXQksS844XnLUYYQYzmi+hGrrlA
+	wIUbjxb3Na4+JqiptDVRI//W31m581o=
+Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com
+ [209.85.218.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-177-WwVY42LZNXOTIamg5wVeGQ-1; Fri, 26 Jan 2024 07:32:17 -0500
-X-MC-Unique: WwVY42LZNXOTIamg5wVeGQ-1
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a2c4e9cb449so9601666b.1
-        for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 04:32:16 -0800 (PST)
+ us-mta-182-txJyA8AzOlaLNTQOr5UX-Q-1; Fri, 26 Jan 2024 07:38:20 -0500
+X-MC-Unique: txJyA8AzOlaLNTQOr5UX-Q-1
+Received: by mail-ej1-f71.google.com with SMTP id a640c23a62f3a-a2b6da35066so13832666b.0
+        for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 04:38:20 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706272336; x=1706877136;
+        d=1e100.net; s=20230601; t=1706272699; x=1706877499;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sCYS4qYRdFBHd402HHe9dWT2+MHdhxVNAL+zD6tX4U0=;
-        b=OzD+OR8aRMf+9Vs+FSQHSBhfwFDVQFF2uMMhiuhkB7c7a5HONAoPrGCNQtdzcyOYF/
-         tjza2XuNrzYR0sUhCFLzE465Tg9n8lK2BBmAdGp8IohdtSgncU0a2vtkSWx8lYi+4kdc
-         sm4PUj594RyYFxOwIiFg0+9jnfLcHZrTdYPcd4zlhvKgdElW25Qf5O4G4rUIrnQtHcPf
-         QB9o2TOB3TNcRgD++JMk9KkHQJ/5AIwIoUriYcEZJNauY/Xire3oYEkHWBx93wmJy/5j
-         ep8X2AjwJCAO9Pz8w5rj9rqg1ymOKvq0jLFLjDbmdcCOPXvC3ct88NCX++jO8TWPW/p6
-         EZqQ==
-X-Gm-Message-State: AOJu0Yx6EzONpzqnyrUFoWaAhzrtGr5BqAONKm1sHygKHraNErsMdafR
-	0BRAzOHykvv38w48v6we9ovMlWBK5LjRWA//XjVn1HMofPSXymEH6gPUjUschchGzdX+M7qdlvN
-	CkiR3irRY3QwZVNibKhW0Ha7d8POOuVu0ix8QC+PY1JVLwlXz26PoOg==
-X-Received: by 2002:aa7:de05:0:b0:55d:71c5:5186 with SMTP id h5-20020aa7de05000000b0055d71c55186mr2162edv.1.1706272335881;
-        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IE21LY4FDpNGEBP68LGb4aRv6P4+kTsAN3BuyvZ1NuWg7wKifsI7z01clN6+dkZshh18Kx22w==
-X-Received: by 2002:aa7:de05:0:b0:55d:71c5:5186 with SMTP id h5-20020aa7de05000000b0055d71c55186mr2155edv.1.1706272335515;
-        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
+        bh=FpXtWa/FbpyKoHWu9UKHP8n22Llt8QHnUvrPFjiZA/M=;
+        b=LnLKQyPiUTvVkDv69jVAtL7aVRIbl5smphN2EX1QnAD6qms9hzZqdGh4Wmq9//lx2W
+         gne4D6pLzMAiNa0q/xZk4xJSf2q7GPs9FLjkzu/sYbBuMrFo1ev3vzDdE3e9BAZ0mcQP
+         Pu6/7+UPll7GrWmLIpfSQSSU2hUUfPj2U73DlT2lJbkIOynfO7UOJEeGvz550H4iKodS
+         1AsSkJ1cPvILFm90zEaIxLtYKRQCQrcpJphLz9b89tHjw0pu52ABxu99W9ki1o6oweOq
+         eVyyxaa5L5ocNUogGrGGg7gvZJcwdgkXuMeRqAnH4UjrlBvJLHP46nkdW0en12b8gDfl
+         hhoQ==
+X-Gm-Message-State: AOJu0Yy/qBLSmUODysK4AA3xE7mSAugxG1Z5Z9rPtiFhW01+6Gx3Xbz0
+	ng38c2cRGVoK9lcnbJEzu+RZqQDC0nXeSKWpnezGcbTn+agMKT6up02ct2Zee9EDXYFBD+fLY1i
+	GIhDHcuisuVG3n3zH1TCZ6St4Dgp+feIoF7mdNL329XHVBdg1pTSFkA==
+X-Received: by 2002:a17:906:68d8:b0:a2d:52dc:1841 with SMTP id y24-20020a17090668d800b00a2d52dc1841mr535545ejr.18.1706272699812;
+        Fri, 26 Jan 2024 04:38:19 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEhUY1JUv7jiHgxMfx06oU/jmhOZo7rXSEL5a6svFyU0TVPHlLZldd7m1QCMRtwJS7HjGKmFA==
+X-Received: by 2002:a17:906:68d8:b0:a2d:52dc:1841 with SMTP id y24-20020a17090668d800b00a2d52dc1841mr535541ejr.18.1706272699470;
+        Fri, 26 Jan 2024 04:38:19 -0800 (PST)
 Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id ez16-20020a056402451000b0055c82e27412sm552694edb.75.2024.01.26.04.32.14
+        by smtp.gmail.com with ESMTPSA id i9-20020a170906264900b00a34a0163ee7sm579868ejc.205.2024.01.26.04.38.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
-Date: Fri, 26 Jan 2024 13:32:14 +0100
+        Fri, 26 Jan 2024 04:38:19 -0800 (PST)
+Date: Fri, 26 Jan 2024 13:38:18 +0100
 From: Andrey Albershteyn <aalbersh@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: zlang@redhat.com, guan@eryu.me, linux-xfs@vger.kernel.org, 
 	fstests@vger.kernel.org
-Subject: Re: [PATCH 01/10] generic/256: constrain runtime with TIME_FACTOR
-Message-ID: <uwmnuifvgbyh3viyfrwneik6swgogqikaqm57ucy7wqonedtf7@zkycyddctajh>
+Subject: Re: [PATCH 10/10] xfs/122: fix for xfs_attr_shortform removal in 6.8
+Message-ID: <rnmqtpiatzcj6ysi5ivz2tbylbu3f6q5lblnot226m3tgoiso3@kfye2yeryfn7>
 References: <170620924356.3283496.1996184171093691313.stgit@frogsfrogsfrogs>
- <170620924382.3283496.6995781268514337077.stgit@frogsfrogsfrogs>
+ <170620924507.3283496.17636943697618850238.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,59 +73,34 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <170620924382.3283496.6995781268514337077.stgit@frogsfrogsfrogs>
+In-Reply-To: <170620924507.3283496.17636943697618850238.stgit@frogsfrogsfrogs>
 
-On 2024-01-25 11:04:14, Darrick J. Wong wrote:
+On 2024-01-25 11:06:35, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> This test runs 500 iterations of a "fill the fs and try to punch" test.
-> Hole punching can be particularly slow if, say, the filesystem is
-> mounted with -odiscard and the DISCARD operation takes a very long time.
-> In extreme cases, I can see test runtimes of 4+ hours.
-> 
-> Constrain the runtime of _test_full_fs_punch by establishing a deadline
-> of (30 seconds * TIME_FACTOR) and breaking out of the for loop if the
-> test goes beyond the time budget.  This keeps the runtime within the
-> customary 30 seconds.
+> The xfs_attr_shortform struct (with multiple flexarrays) was removed in
+> 6.8.  Check the two surviving structures (the attr sf header and entry)
+> instead.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  tests/generic/256 |    7 +++++++
->  1 file changed, 7 insertions(+)
+>  tests/xfs/122.out |    2 ++
+>  1 file changed, 2 insertions(+)
 > 
 > 
-> diff --git a/tests/generic/256 b/tests/generic/256
-> index 808a730f3a..ea6cc2938a 100755
-> --- a/tests/generic/256
-> +++ b/tests/generic/256
-> @@ -44,6 +44,8 @@ _test_full_fs_punch()
->  	local file_len=$(( $(( $hole_len + $hole_interval )) * $iterations ))
->  	local path=`dirname $file_name`
->  	local hole_offset=0
-> +	local start_time
-> +	local stop_time
->  
->  	if [ $# -ne 5 ]
->  	then
-> @@ -57,6 +59,9 @@ _test_full_fs_punch()
->  		-c "fsync" $file_name &> /dev/null
->  	chmod 666 $file_name
->  
-> +	start_time="$(date +%s)"
-> +	stop_time=$(( start_time + (30 * TIME_FACTOR) ))
-> +
->  	# All files are created as a non root user to prevent reserved blocks
->  	# from being consumed.
->  	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
-> @@ -64,6 +69,8 @@ _test_full_fs_punch()
->  
->  	for (( i=0; i<$iterations; i++ ))
->  	do
-> +		test "$(date +%s)" -ge "$stop_time" && break
-> +
->  		# This part must not be done as root in order to
->  		# test that reserved blocks are used when needed
->  		_user_do "$XFS_IO_PROG -f -c \"fpunch $hole_offset $hole_len\" $file_name"
+> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> index 89f7b735b0..067a0ec76b 100644
+> --- a/tests/xfs/122.out
+> +++ b/tests/xfs/122.out
+> @@ -62,6 +62,8 @@ sizeof(struct xfs_agfl) = 36
+>  sizeof(struct xfs_attr3_leaf_hdr) = 80
+>  sizeof(struct xfs_attr3_leafblock) = 88
+>  sizeof(struct xfs_attr3_rmt_hdr) = 56
+> +sizeof(struct xfs_attr_sf_entry) = 3
+> +sizeof(struct xfs_attr_sf_hdr) = 4
+>  sizeof(struct xfs_attr_shortform) = 8
+>  sizeof(struct xfs_attrd_log_format) = 16
+>  sizeof(struct xfs_attri_log_format) = 40
 > 
 > 
 
