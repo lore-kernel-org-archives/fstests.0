@@ -1,135 +1,137 @@
-Received: from esa7.hc1455-7.c3s2.iphmx.com (esa7.hc1455-7.c3s2.iphmx.com [139.138.61.252])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF51C134B0
-	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 08:04:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=139.138.61.252
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A81CF171A7
+	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 12:32:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706256284; cv=none; b=BYHhZ3afK8pOOSbUc4/K5ojAGBXxHgaT9VMOpwFA8utoUzfcYtPQngxUvXJWlnnIOLJdSHZAWZvmx/YuXsjwGLhvJwnwLseXRGwaceGMXCnBpzXapZZicxqa3jb3PujBb/miIlcmBiPx7VtREDG6EQj5Q3HKtdTUhGgMO3lb0do=
+	t=1706272341; cv=none; b=QyOtEY0yT+DH8AuiSBUVi68718s4KyKVDBper9lOHl7Ey6vBbPXDoyUrEPeZ8lIlahyEiJNXOlmJUXkfo+ONV8/LQxXMQOhUFtH1jpnPJOdzrysXkDWpe44YYzRGbfuENFwmylCV2ui6qbNBF5MXTUgPtqKzeMs11IrU8tb+Zuw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706256284; c=relaxed/simple;
-	bh=gE+jcUogNh+MqwTrYP/D1tAJc3B5St1+gPDNo4rwfJo=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=f+8eyuub7T8KwNWHLTga7HS6T8MghvVJ7bwjAUf7OCi3pK4LWNrmZh7ewPewnN6m/DDpr33gxF1GuQKlGfvaEnMRqCbuMeS5s5thX9VUCXu/9yomBEtMqXxtrmEDV+53DMOS2i39iYhwWFJyseQXx5i7SyGok5y/G1HbMKVAm4o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=PBlbs06S; arc=none smtp.client-ip=139.138.61.252
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	s=arc-20240116; t=1706272341; c=relaxed/simple;
+	bh=1H3uzI4QHi5Ndkj8uf2Wub9vtRl+nihZODj0BnCzWJg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=dwv+wnJSisnBxkN1rp4mt9bWV3n62MmQ9smjmuHyveeUpqAz1fscmk/t8bt/ufK9gr+iu0G6JyCI1oAKJB1G1XTTLQUAgmXsrMlm//fBeEkyvayRWrDFyjEMQMDRa2bI33BIu8kuyBnlivogEmrwZCwgvd0kiAchMtAzvceo/I8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=F1+9F7Kx; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="PBlbs06S"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
-  t=1706256281; x=1737792281;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=gE+jcUogNh+MqwTrYP/D1tAJc3B5St1+gPDNo4rwfJo=;
-  b=PBlbs06Sbi4RKOYkiilKCalB+603EOocZ5QFKLhecQB4afXgsgGM06Zh
-   iFutw1O2X82ktVn8voXY7GcPy7K/NCaSFaFSsoWBNJlLcqMZyzDjkjOfD
-   W5RvoFhkDUs8y1rMVYOv0WhHL4xviFchUWwuQ1R2s4oIcVwJfAaUQ4CFn
-   Xr3wpSrIfbrywDv+vyr8TCVUGH+Z9vOY4xWty9k1ggOlMAg/8BRR9QIeq
-   nQeXS0xSaMZY3PUmaHkxfQTfb95XZ97pvO5rmTQ3jZruE55qLVZxaOOs3
-   0n4co/G6Zz9jW48LDfzzXE/XblksJ7WTdc5xXMwPMmKjIKdcaFG3OqdtD
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10964"; a="126140095"
-X-IronPort-AV: E=Sophos;i="6.05,216,1701097200"; 
-   d="scan'208";a="126140095"
-Received: from unknown (HELO yto-r3.gw.nic.fujitsu.com) ([218.44.52.219])
-  by esa7.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Jan 2024 17:04:32 +0900
-Received: from yto-m3.gw.nic.fujitsu.com (yto-nat-yto-m3.gw.nic.fujitsu.com [192.168.83.66])
-	by yto-r3.gw.nic.fujitsu.com (Postfix) with ESMTP id 311D8D4F60
-	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 17:04:30 +0900 (JST)
-Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
-	by yto-m3.gw.nic.fujitsu.com (Postfix) with ESMTP id 641B914252
-	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 17:04:29 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab3.gw.nic.fujitsu.com (Postfix) with ESMTP id E95A620095B4C
-	for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 17:04:28 +0900 (JST)
-Received: from rhel93GA.g08.fujitsu.local (unknown [10.167.221.71])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id 69F381A006A;
-	Fri, 26 Jan 2024 16:04:28 +0800 (CST)
-From: Yang Xu <xuyang2018.jy@fujitsu.com>
-To: fstests@vger.kernel.org
-Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH] t_snapshot_deleted_subvolume: change the position of macro definition
-Date: Fri, 26 Jan 2024 03:04:23 -0500
-Message-Id: <20240126080423.138713-1-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 2.39.3
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="F1+9F7Kx"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1706272338;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=sCYS4qYRdFBHd402HHe9dWT2+MHdhxVNAL+zD6tX4U0=;
+	b=F1+9F7KxmIy1Vxxc9Z5Hq7afxLbSX5e8CyLYs6L+ccSSmdfnubzL8x/U6GCP8ORriPNgHu
+	oB+meHAx7NWB00vMVBDjk2lkd0jI9B7sT4ApVWBgmOGMP+7iml9t30I+idXU1jYKG/ugFI
+	CWkDkixxRuQ4cXZejajUC4RWzGGaEBc=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-177-WwVY42LZNXOTIamg5wVeGQ-1; Fri, 26 Jan 2024 07:32:17 -0500
+X-MC-Unique: WwVY42LZNXOTIamg5wVeGQ-1
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a2c4e9cb449so9601666b.1
+        for <fstests@vger.kernel.org>; Fri, 26 Jan 2024 04:32:16 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706272336; x=1706877136;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sCYS4qYRdFBHd402HHe9dWT2+MHdhxVNAL+zD6tX4U0=;
+        b=OzD+OR8aRMf+9Vs+FSQHSBhfwFDVQFF2uMMhiuhkB7c7a5HONAoPrGCNQtdzcyOYF/
+         tjza2XuNrzYR0sUhCFLzE465Tg9n8lK2BBmAdGp8IohdtSgncU0a2vtkSWx8lYi+4kdc
+         sm4PUj594RyYFxOwIiFg0+9jnfLcHZrTdYPcd4zlhvKgdElW25Qf5O4G4rUIrnQtHcPf
+         QB9o2TOB3TNcRgD++JMk9KkHQJ/5AIwIoUriYcEZJNauY/Xire3oYEkHWBx93wmJy/5j
+         ep8X2AjwJCAO9Pz8w5rj9rqg1ymOKvq0jLFLjDbmdcCOPXvC3ct88NCX++jO8TWPW/p6
+         EZqQ==
+X-Gm-Message-State: AOJu0Yx6EzONpzqnyrUFoWaAhzrtGr5BqAONKm1sHygKHraNErsMdafR
+	0BRAzOHykvv38w48v6we9ovMlWBK5LjRWA//XjVn1HMofPSXymEH6gPUjUschchGzdX+M7qdlvN
+	CkiR3irRY3QwZVNibKhW0Ha7d8POOuVu0ix8QC+PY1JVLwlXz26PoOg==
+X-Received: by 2002:aa7:de05:0:b0:55d:71c5:5186 with SMTP id h5-20020aa7de05000000b0055d71c55186mr2162edv.1.1706272335881;
+        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE21LY4FDpNGEBP68LGb4aRv6P4+kTsAN3BuyvZ1NuWg7wKifsI7z01clN6+dkZshh18Kx22w==
+X-Received: by 2002:aa7:de05:0:b0:55d:71c5:5186 with SMTP id h5-20020aa7de05000000b0055d71c55186mr2155edv.1.1706272335515;
+        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
+Received: from thinky ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id ez16-20020a056402451000b0055c82e27412sm552694edb.75.2024.01.26.04.32.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 26 Jan 2024 04:32:15 -0800 (PST)
+Date: Fri, 26 Jan 2024 13:32:14 +0100
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, guan@eryu.me, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Subject: Re: [PATCH 01/10] generic/256: constrain runtime with TIME_FACTOR
+Message-ID: <uwmnuifvgbyh3viyfrwneik6swgogqikaqm57ucy7wqonedtf7@zkycyddctajh>
+References: <170620924356.3283496.1996184171093691313.stgit@frogsfrogsfrogs>
+ <170620924382.3283496.6995781268514337077.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28142.006
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28142.006
-X-TMASE-Result: 10-0.708300-10.000000
-X-TMASE-MatchedRID: TrF+XMB65Pp9lF0N05iN+FXthr2HxTUWBGvINcfHqhfbspKx4YOD3b8F
-	Hrw7frluf146W0iUu2vv+zsxhXHiFUsuK6d1t+nSngIgpj8eDcBpkajQR5gb3qbj/c4OO+6RKra
-	uXd3MZDVtlNiPa5BG1tC2RdwwCAjWki3gUJ3QeckVyaWjEJRBJ2b4HzCdsI6/VmzGbCIUMuDEh1
-	A7zo4t2IQT5/ARC9dogmwgsF9sowcZTzakhzo0BhXFEH92Kf64nTtPxlIuIBW9Hzj86YHXBCnif
-	x5AGfCL
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <170620924382.3283496.6995781268514337077.stgit@frogsfrogsfrogs>
 
-On some platform, struct btrfs_ioctl_vol_args_v2 is defined, but the
-macros BTRFS_IOC_SNAP_DESTROY_V2, BTRFS_IOC_SNAP_CREATE_V2 and
-BTRFS_IOC_SUBVOL_CREATE_V2 are not defined. This will cause compile
-error. We should always check these macros and manually define them
-if necessary.
+On 2024-01-25 11:04:14, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> This test runs 500 iterations of a "fill the fs and try to punch" test.
+> Hole punching can be particularly slow if, say, the filesystem is
+> mounted with -odiscard and the DISCARD operation takes a very long time.
+> In extreme cases, I can see test runtimes of 4+ hours.
+> 
+> Constrain the runtime of _test_full_fs_punch by establishing a deadline
+> of (30 seconds * TIME_FACTOR) and breaking out of the for loop if the
+> test goes beyond the time budget.  This keeps the runtime within the
+> customary 30 seconds.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/generic/256 |    7 +++++++
+>  1 file changed, 7 insertions(+)
+> 
+> 
+> diff --git a/tests/generic/256 b/tests/generic/256
+> index 808a730f3a..ea6cc2938a 100755
+> --- a/tests/generic/256
+> +++ b/tests/generic/256
+> @@ -44,6 +44,8 @@ _test_full_fs_punch()
+>  	local file_len=$(( $(( $hole_len + $hole_interval )) * $iterations ))
+>  	local path=`dirname $file_name`
+>  	local hole_offset=0
+> +	local start_time
+> +	local stop_time
+>  
+>  	if [ $# -ne 5 ]
+>  	then
+> @@ -57,6 +59,9 @@ _test_full_fs_punch()
+>  		-c "fsync" $file_name &> /dev/null
+>  	chmod 666 $file_name
+>  
+> +	start_time="$(date +%s)"
+> +	stop_time=$(( start_time + (30 * TIME_FACTOR) ))
+> +
+>  	# All files are created as a non root user to prevent reserved blocks
+>  	# from being consumed.
+>  	_fill_fs $(( 1024 * 1024 * 1024 )) $path/fill $block_size 1 \
+> @@ -64,6 +69,8 @@ _test_full_fs_punch()
+>  
+>  	for (( i=0; i<$iterations; i++ ))
+>  	do
+> +		test "$(date +%s)" -ge "$stop_time" && break
+> +
+>  		# This part must not be done as root in order to
+>  		# test that reserved blocks are used when needed
+>  		_user_do "$XFS_IO_PROG -f -c \"fpunch $hole_offset $hole_len\" $file_name"
+> 
+> 
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- src/t_snapshot_deleted_subvolume.c | 30 +++++++++++++++---------------
- 1 file changed, 15 insertions(+), 15 deletions(-)
+LGTM
+Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
 
-diff --git a/src/t_snapshot_deleted_subvolume.c b/src/t_snapshot_deleted_subvolume.c
-index c3adb1c4..d84ba35a 100644
---- a/src/t_snapshot_deleted_subvolume.c
-+++ b/src/t_snapshot_deleted_subvolume.c
-@@ -20,21 +20,6 @@
- #define BTRFS_IOCTL_MAGIC 0x94
- #endif
- 
--#ifndef BTRFS_IOC_SNAP_DESTROY_V2
--#define BTRFS_IOC_SNAP_DESTROY_V2 \
--	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
--#endif
--
--#ifndef BTRFS_IOC_SNAP_CREATE_V2
--#define BTRFS_IOC_SNAP_CREATE_V2 \
--	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
--#endif
--
--#ifndef BTRFS_IOC_SUBVOL_CREATE_V2
--#define BTRFS_IOC_SUBVOL_CREATE_V2 \
--	_IOW(BTRFS_IOCTL_MAGIC, 24, struct btrfs_ioctl_vol_args_v2)
--#endif
--
- #ifndef BTRFS_SUBVOL_NAME_MAX
- #define BTRFS_SUBVOL_NAME_MAX 4039
- #endif
-@@ -58,6 +43,21 @@ struct btrfs_ioctl_vol_args_v2 {
- };
- #endif
- 
-+#ifndef BTRFS_IOC_SNAP_DESTROY_V2
-+#define BTRFS_IOC_SNAP_DESTROY_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
-+#ifndef BTRFS_IOC_SNAP_CREATE_V2
-+#define BTRFS_IOC_SNAP_CREATE_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
-+#ifndef BTRFS_IOC_SUBVOL_CREATE_V2
-+#define BTRFS_IOC_SUBVOL_CREATE_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 24, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
- int main(int argc, char **argv)
- {
- 	if (argc != 2) {
 -- 
-2.39.3
+- Andrey
 
