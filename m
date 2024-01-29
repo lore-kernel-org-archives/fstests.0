@@ -1,189 +1,169 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com [209.85.208.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1587611718;
-	Mon, 29 Jan 2024 04:03:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 257B8657BC
+	for <fstests@vger.kernel.org>; Mon, 29 Jan 2024 14:01:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706500983; cv=none; b=I8eoRchlE4c9Zhu/bWPXg88F1e9+kzgaoNA0KAwLzhYSprHNQfyVepxFLeR7tfzQTw7kptbunxqOP56rNxyRxkh7mOzrkamqKjXDMJr0v8MduBhVFJjj4xoBA6s5yXKClSZFmwakI7hp/26qoVdfIk01a8ADI4zSFs20uHzHqq4=
+	t=1706536880; cv=none; b=K63hhOCfEJ+Y+g6eWbhr78ROxOPE5xbZ+f2Sy8iKKVWTyRj8o2v7rrCExJrosIiiCSLlinzBP8oq7ErVLHnJgDUUFmAsdBWg2cpKClDXtiA1mbtanZuAiB6OljJpYQ4oPLxTb8DfUkVhdLC6h2hZbDrlpVDWv1HRGPMOFF8boQ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706500983; c=relaxed/simple;
-	bh=YT2RWbXxaBiXyuyzShGyHz64yql/pjo1Q3CoTYnSzN0=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Qa1ilo6Q4sHOORGna7YBHcVFhJNDTTnyHZfpvi62SPnRnBC3LnXkwew1Br9tBdMFpHM5P4KeBLzUUl88/NhWm6mrclBKREFTXRFyxJY0kZihdKVVAKsqYgxqTzQ0u1PJZMxRY1xokI38fB85zKViNxZ3nx5JrV9cNddjD4hYhV8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=a/ka+RqE; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=eWGAvAGd; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=a/ka+RqE; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=eWGAvAGd; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1706536880; c=relaxed/simple;
+	bh=jsB6Fb4jKChHeHmoRxJBZsDMl8u82PA/P4RbwHxVqdc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qxxERIvktH1GbvA4oujgSVbYmcIuYAmXl+3xxn6z3UfuBTQBXAUVil11ym+S03qEZtq4jXB/OBgMhL0VzeGaw2FyZWlRj9DVbt8kiim30OyOihpqSjAGnupzWD0M0k99CirAyyF/WHGGn4oZKWu82HAHKZQOCcRd5aa108qh2IM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=aHPkzD7Y; arc=none smtp.client-ip=209.85.208.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="a/ka+RqE";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="eWGAvAGd";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="a/ka+RqE";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="eWGAvAGd"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 15AF41F7CD;
-	Mon, 29 Jan 2024 04:03:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1706500980; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1sx+GOHSFluGUk5NZr+VeRBJMNBf6sjx/2I/jGHwB4Y=;
-	b=a/ka+RqEeP6D0sDWMBVWAMEoPQQauKvyQhPXemozt+kJWKZ3e/M68wuC+AgkSICyl7QM0g
-	6Roqbz32cHrq+6H4gvK2zkSnAfL/CnBVny3czQ1zfst1hSWlS4hVTFq1TvS8+vsS0LBzkl
-	EVr7KEc/wQ+ZNo2UWEkWx/Q4q95nOmE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1706500980;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1sx+GOHSFluGUk5NZr+VeRBJMNBf6sjx/2I/jGHwB4Y=;
-	b=eWGAvAGdhkRRhZMjKd25lgpiWo6EgQ052kJCVQBmq0IO6uIqkfwTPgAF1UsDuP0P3eOcJv
-	Ur3nPVN8/5WZ+CBA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1706500980; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1sx+GOHSFluGUk5NZr+VeRBJMNBf6sjx/2I/jGHwB4Y=;
-	b=a/ka+RqEeP6D0sDWMBVWAMEoPQQauKvyQhPXemozt+kJWKZ3e/M68wuC+AgkSICyl7QM0g
-	6Roqbz32cHrq+6H4gvK2zkSnAfL/CnBVny3czQ1zfst1hSWlS4hVTFq1TvS8+vsS0LBzkl
-	EVr7KEc/wQ+ZNo2UWEkWx/Q4q95nOmE=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1706500980;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1sx+GOHSFluGUk5NZr+VeRBJMNBf6sjx/2I/jGHwB4Y=;
-	b=eWGAvAGdhkRRhZMjKd25lgpiWo6EgQ052kJCVQBmq0IO6uIqkfwTPgAF1UsDuP0P3eOcJv
-	Ur3nPVN8/5WZ+CBA==
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 7A72B13428;
-	Mon, 29 Jan 2024 04:02:58 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id XC4pC3Ijt2UGBQAAn2gu4w
-	(envelope-from <ddiss@suse.de>); Mon, 29 Jan 2024 04:02:58 +0000
-Date: Mon, 29 Jan 2024 15:02:47 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test xfs_growfs with too-small size expansion
-Message-ID: <20240129150247.54c7a27a@echidna>
-In-Reply-To: <20240128155653.1533493-1-zlang@kernel.org>
-References: <20240128155653.1533493-1-zlang@kernel.org>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="aHPkzD7Y"
+Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-2cf0390eddbso31413921fa.3
+        for <fstests@vger.kernel.org>; Mon, 29 Jan 2024 06:01:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1706536876; x=1707141676; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+kk9KCNAFqv/VBIv/yGuF7QaAZ/PCtsVd4gqpBBURvg=;
+        b=aHPkzD7Yzp+wRQjBe2muatN69q6MbyZDQ5pxLudBvTuxtX3TDW+mmRmgHECmuxE/+D
+         E1X2GSU7601UleAeFm5kz5qtSsWvNA9sWfolnX2yFvpReimZpe4fwIlRn7nxhxIhSF6l
+         h5n6dZZ6YuJtVZFsL8GzxBCsPWvj5+iRySyhwcDXPrrcCqp3J+RboJNdzxbcfjB3lUFY
+         GF6wCmo6D+pOM4MUcTiexEH16G++a7EhOxLsK3DNU6yGNGB8QUJE7I5abrR0pT6rr4sR
+         dmaFdps5D3CJIIFmkuVjAuQcJPaGewXbyf2PJmqDewr/EHI4Bz1UnQx1lShzquvBqGGj
+         gY1w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706536876; x=1707141676;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+kk9KCNAFqv/VBIv/yGuF7QaAZ/PCtsVd4gqpBBURvg=;
+        b=HohEy6oD4/ITmwcTrbEBDxbJvCNDJ6R8Yr1ibNnL3cL1RVFNh2iK602vtIQBww60pS
+         31NrscrAC6cpRtXqXMZIqOxralMZvM7dZ1zaPLQWCDIbHQOb6NcOBhLpOR4Y4vKPfOcq
+         xJhl+AH2a3VRiBxjqUxkTVh0Gy8BYABmhV70JEiRSRIfPVJW9nj5gqv8wbuCUgSqcjiD
+         ZntrmdJn+QaSWqdt8dRT40ck9VpZzwjJQcW81fIrXb6/BXIkFggXGxh+FjxzYOcqBIU7
+         ghOux1J/GfSvzh3pOT6MrWXpbaautl1rUGlhn6fTPxL5UTmbvXlc0b+hhRqGfUmHxR0w
+         qeNw==
+X-Gm-Message-State: AOJu0YxGkPyXWF16vOQmSXPMBfHTKneefC0xbLi6AfPy0f4UeEOiY/oi
+	fVv4q85XRExTRP56D0cHIsxAFfEdTNPdAYAnOuw63ZhFBuu7pRzcRvy7PmY2WqQk21btzx7RfDT
+	5Sx0=
+X-Google-Smtp-Source: AGHT+IGpb9VKxJR1vLHwUv4xKDtNC0nqzxRwZ4Q0lmfM9SMSXAHAFdb4K05OJ+4cgO5QgMRL4r9JWQ==
+X-Received: by 2002:a2e:8482:0:b0:2cf:1aa1:beaf with SMTP id b2-20020a2e8482000000b002cf1aa1beafmr4013575ljh.42.1706536875760;
+        Mon, 29 Jan 2024 06:01:15 -0800 (PST)
+Received: from localhost.localdomain ([43.228.146.200])
+        by smtp.gmail.com with ESMTPSA id s3-20020a17090330c300b001d8e2618792sm1871900plc.106.2024.01.29.06.01.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 29 Jan 2024 06:01:14 -0800 (PST)
+From: Su Yue <glass.su@suse.com>
+X-Google-Original-From: Su Yue <l@damenly.org>
+To: fstests@vger.kernel.org
+Cc: linux-bcachefs@vger.kernel.org,
+	l@damenly.org,
+	bfoster@redhat.com,
+	Su Yue <glass.su@suse.com>
+Subject: [PATCH v3 1/2] fstests: introduce MKFS_BCACHEFS_PROG for bcachefs
+Date: Mon, 29 Jan 2024 22:00:58 +0800
+Message-ID: <20240129140101.4259-1-l@damenly.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Level: 
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b="a/ka+RqE";
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=eWGAvAGd
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 DKIM_TRACE(0.00)[suse.de:+];
-	 MX_GOOD(-0.01)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim,suse.de:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Spam-Score: -4.01
-X-Rspamd-Queue-Id: 15AF41F7CD
-X-Spam-Flag: NO
+Content-Transfer-Encoding: 8bit
 
-Looks fine.
-Reviewed-by: David Disseldorp <ddiss@suse.de>
+From: Su Yue <glass.su@suse.com>
 
-A couple of minor comments below...
+mkfs.bcachefs supports force overwrite when option '-f' is given:
+$ mkfs.bcachefs --help | grep force
+  -f, --force
 
-On Sun, 28 Jan 2024 23:56:53 +0800, Zorro Lang wrote:
+There are some tests which call _scratch_mkfs multiple times
+e.g. tests/generic/171. Without '-f' in MKFS_OPTIONS,
+these tests just hang in overwrite confirmation.
+After this commit, MKFS_BCACHEFS_PROG will contains ' -f' so
+we don't have to add '-f' to MKFS_OPTIONS manually to make
+these tests pass.
 
-> This's a regression test of 84712492e6da ("xfs: short circuit
-> xfs_growfs_data_private() if delta is zero").
-> 
-> If try to do growfs with "too-small" size expansion, might lead to a
-> delta of "0" in xfs_growfs_data_private(), then end up in the shrink
-> case and emit the EXPERIMENTAL warning even if we're not changing
-> anything at all.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/xfs/999     | 53 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/999.out |  2 ++
->  2 files changed, 55 insertions(+)
->  create mode 100755 tests/xfs/999
->  create mode 100644 tests/xfs/999.out
-> 
-> diff --git a/tests/xfs/999 b/tests/xfs/999
-> new file mode 100755
-> index 00000000..09192ba3
-> --- /dev/null
-> +++ b/tests/xfs/999
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 999
+It also fixes generic/466 which unsets MKFS_OPTIONS causing
+that test hangs in mfks.bcachefs waiting for confirmation of
+the force overwrite.
 
-I'll assume 999 is just a placeholder...
+Signed-off-by: Su Yue <glass.su@suse.com>
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+---
+changelog:
+v3:
+    Add Brian's Reviewed-by.
+v2:
+    Add more details about why MKFS_BCACHEFS_PROG should contain '-f'.
+    
+ common/config |  3 ++-
+ common/rc     | 12 +++++++++---
+ 2 files changed, 11 insertions(+), 4 deletions(-)
 
-> +#
-> +# Test xfs_growfs with "too-small" size expansion, which lead to a delta of "0"
-> +# in xfs_growfs_data_private. This's a regression test of 84712492e6da ("xfs:
-> +# short circuit xfs_growfs_data_private() if delta is zero").
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick growfs
-> +
-> +_cleanup()
-> +{
-> +	local dev
-> +        $UMOUNT_PROG $LOOP_MNT 2>/dev/null
-> +	dev=$(losetup -j testfile | cut -d: -f1)
-> +	losetup -d $dev 2>/dev/null
-> +        rm -rf $LOOP_IMG $LOOP_MNT
-> +        cd /
-> +        rm -f $tmp.*
+diff --git a/common/config b/common/config
+index c9771ff934cb..1f9edceec57a 100644
+--- a/common/config
++++ b/common/config
+@@ -105,7 +105,7 @@ set_mkfs_prog_path_with_opts()
+ 	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
+ 	# matter since it also prints the help when an invalid option is given.
+ 	if [ "$p" != "" ] && \
+-		$p --help |& grep -q "[[:space:]]-f[[:space:]|]"; then
++		$p --help |& grep -q "[[:space:]]-f[[:space:]|,]"; then
+ 		echo "$p -f"
+ 	else
+ 		echo $p
+@@ -313,6 +313,7 @@ export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
+ export E2FSCK_PROG=$(type -P e2fsck)
+ export TUNE2FS_PROG=$(type -P tune2fs)
+ export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
++export MKFS_BCACHEFS_PROG=$(set_mkfs_prog_path_with_opts bcachefs)
+ 
+ # SELinux adds extra xattrs which can mess up our expected output.
+ # So, mount with a context, and they won't be created.
+diff --git a/common/rc b/common/rc
+index 524ffa02aa6a..31c21d2a8360 100644
+--- a/common/rc
++++ b/common/rc
+@@ -611,6 +611,9 @@ _test_mkfs()
+     xfs)
+ 	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
++    bcachefs)
++    $MKFS_BCACHEFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
++	;;
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
+ 	;;
+@@ -753,6 +756,10 @@ _scratch_mkfs()
+ 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
+ 		;;
++    bcachefs)
++		mkfs_cmd="$MKFS_BCACHEFS_PROG"
++		mkfs_filter="cat"
++		;;
+ 	*)
+ 		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter="cat"
+@@ -1044,7 +1051,7 @@ _scratch_mkfs_sized()
+ 		export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
+ 		;;
+ 	bcachefs)
+-		$MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
++		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
+ 		;;
+ 	*)
+ 		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+@@ -1128,8 +1135,7 @@ _scratch_mkfs_blocksized()
+ 						-C $blocksize $SCRATCH_DEV
+ 		;;
+ 	bcachefs)
+-		${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS --block_size=$blocksize \
+-								$SCRATCH_DEV
++		_scratch_mkfs --block_size=$blocksize
+ 		;;
+ 	udf)
+ 		_scratch_mkfs -b $blocksize
+-- 
+2.43.0
 
-nit: tabs and spaces mixed above
-
-> +}
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_fixed_by_kernel_commit 84712492e6da \
-> +	"xfs: short circuit xfs_growfs_data_private() if delta is zero"
-> +_require_test
-> +_require_loop
-> +_require_xfs_io_command "truncate"
-
-nit: it doesn't seem common for growfs, but you might want to add a:
-  _require_command "$XFS_GROWFS_PROG" xfs_growfs
