@@ -1,71 +1,46 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F3D47F488
-	for <fstests@vger.kernel.org>; Wed, 31 Jan 2024 14:11:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13C74133998;
+	Wed, 31 Jan 2024 18:28:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706710313; cv=none; b=h0h7CpU99284zgdd0fsxO7VxhInp3LK0ehGpi9aRHeLiDkMpalTOskdf5EYn87lVGnyUHCAoU6D5SGrTtXrMkXsWEh0A7mA9A87GhfWk3sEX20gvJRmKKbWKtLXHRKtyr6532KRlZArFLUkcKAWSDcUION5ykla3iIrJjytzpRg=
+	t=1706725740; cv=none; b=hsRF1XadijUx1yQT7vM3DO+/6CLiqpl6uaN4qXcAk34OEnfA0bgNSBTh2QPg0ctxWKJUIM59e7mtKr/rgSuc0dHa3QOegdSXXyCkL2WU/Ha7bEBSSquwSIk6vIXTb2orL88S2vrcpWE41yNDiMrF/c73N227MxdvHmnvvxdjGnQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706710313; c=relaxed/simple;
-	bh=rVR7BNBZBtNMx2j/+oKZJxghwXHKX9iut7QXMbHxjN8=;
+	s=arc-20240116; t=1706725740; c=relaxed/simple;
+	bh=S8Y3/RbLzU/uJ/TIQnn4Jhqnr9PlUTawUzkHdz+tXuc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=snUCU1TCmttIOc5aK0MFCIphkCtL+r8zDSX8nlkoCSFHWPKEFq9HoX7pHNJSOf+HgOgX647tmcRA/tY6eo4F2LyA/ut9O6F4GjQN0SCSzWy1bVVEh9WlJgTQxIZfsxQEFG1sLYOnXXJ7t9FGZFpHL0wk2fKXEzDP81yvXQsCmYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OflN+Rev; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=iCtlM3sOvQh6XlPMlXJrYH6IoenL4bbNolSp9gyjQ0o7qJLB3TD4xBbw8Vy/hpPmJl0tG9wmptgbdxVbszIGdzXVoq2hB4uGBdrySzNVI1r630sKtpJH+SqznZU9mzfWriq9vdm9LLx4oIPPPagy9Ih4rEGb+anuIgDDdFdBYZE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l4R9k7vf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OflN+Rev"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706710310;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=AMjcP4lz0fQtJiuXGiD0XLKEQG2nHpsVAsiofujyr0U=;
-	b=OflN+RevfLy/0GqoATEVoH2tPWfg3oQhxBfCgwZJe7fWuahiqM9TOjGe2p4uqKB9uye+GI
-	Dlrli+No+POO/mGgpo9Asbd+oxzsPcccvivWt7/hNZyDq0umH0kI/LfX8Xn0K7PG3hIU7X
-	9RKVyFagX7+5aGz4nruCgSCDvpTrUcI=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-247-vxwZQN9kOVqPQDAx4oofFg-1; Wed, 31 Jan 2024 09:11:48 -0500
-X-MC-Unique: vxwZQN9kOVqPQDAx4oofFg-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-5d8dc8f906aso1915510a12.2
-        for <fstests@vger.kernel.org>; Wed, 31 Jan 2024 06:11:48 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706710307; x=1707315107;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=AMjcP4lz0fQtJiuXGiD0XLKEQG2nHpsVAsiofujyr0U=;
-        b=CkGEZTtraIGDjpFImWrHnKSa8SOKZjb1jQIvzyqvsLk8aZHByQ4/b7oFSSVjlj//h5
-         iwm4JA9eU2a98QZNjWCKYfjbC/R1RHqw4mLX5heFnSXjyvsOZrZuoS0x2NeKVPWlkyrG
-         hYyfuQ7OhxPJXKehRF2+ca64koXsk1QV3RcLBnaR4yip3BTSTT1WcV3kN7IqzqELKS8V
-         an32R7c6Pvw55zzaWwlDGpqgqaglNh8EoMxsLFtkW+HCmBgFJtodb362BQ2F4vDaXACR
-         uMKXBJ/Ulv8ccg17TrDL+At1RHNXnJKRnl+moZlis0lCzBlom7OtbvGT+Gi9HlBJFgGV
-         9cJA==
-X-Gm-Message-State: AOJu0YzO93+YaG6CaUZF0HHcamwE+qyqcb+Cv8YBZfDxVLRcEL55E7tI
-	k1CAv90jBspp5bsN6XxiPcwy8i8zHz9CGhR02ULvmxOXMpmr4CDXih3RquzphX+u20nHopl/9FU
-	U3YRGwjtkjPrkGNSFT3pank8Jcp4EZ0wXrhD6uCQ8qYWjLiHJ7tjiRF8=
-X-Received: by 2002:a05:6a21:32a3:b0:19c:a988:24b9 with SMTP id yt35-20020a056a2132a300b0019ca98824b9mr1904610pzb.25.1706710307501;
-        Wed, 31 Jan 2024 06:11:47 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHzo2Qd33nCbPvMgXORy+rq2hkew1ZZjh96/HTu6onc924vg6puW7DvQgM4aOjCuH1JYiMreg==
-X-Received: by 2002:a05:6a21:32a3:b0:19c:a988:24b9 with SMTP id yt35-20020a056a2132a300b0019ca98824b9mr1904588pzb.25.1706710307199;
-        Wed, 31 Jan 2024 06:11:47 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCV6cTZZXe+vFjg1zlwg73JXpM1OTkI9xZKxCMJIMNOUsryu+JOD3rAVbd7/UF9mZ5DHMUM4bDaDKs7Xxp86myrMBIUKCarLVLZP2qg7RlJTNhAm6sDvPO1kZxQiWE4saEqf4wwaMtpjqpbNmbz7tOEPDw==
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x7-20020a636307000000b005c259cef481sm10526630pgb.59.2024.01.31.06.11.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 31 Jan 2024 06:11:46 -0800 (PST)
-Date: Wed, 31 Jan 2024 22:11:43 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Su Yue <glass.su@suse.com>
-Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org, l@damenly.org,
-	bfoster@redhat.com
-Subject: Re: [PATCH v4 2/2] common/rc: improve block_size support for bcachefs
-Message-ID: <20240131141143.st3gpqn4iivdyfey@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240129235104.8976-1-l@damenly.org>
- <20240129235104.8976-2-l@damenly.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l4R9k7vf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A145C43390;
+	Wed, 31 Jan 2024 18:28:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1706725739;
+	bh=S8Y3/RbLzU/uJ/TIQnn4Jhqnr9PlUTawUzkHdz+tXuc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=l4R9k7vf8zTWuA4pi2vmBFj6mEYD63WaCnSiPGz9DkD+tBQM9zoByjMFsLDymHliJ
+	 /mFcpqCZDFor7t9Cps4QvKHlvlJ93bqGnVNySjAMKefejhkq1fVmUxW9A1BGrx0oaC
+	 VUMFhkBPqATH3XWYfZ7MO0b1bc3vEemkpWCyU6+301recKLc7d55ylV4EWIDcwf9Th
+	 1q4+XpxRe+lRCeUbn9KL6ScRr5CPhJXpLoNY+dKkCOaUSSWa4W92CJE2UlWw0o6nQX
+	 g7aqcQtr85hWgmAf5Yymf4esojzIqxxb4Ug77yOW5aHd/idSF4x9Hs69L7Iyny8uO5
+	 cewZbJ7zfC5fQ==
+Date: Wed, 31 Jan 2024 10:28:58 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+Cc: Pankaj Raghav <p.raghav@samsung.com>, fstests@vger.kernel.org,
+	zlang@redhat.com, Dave Chinner <david@fromorbit.com>,
+	mcgrof@kernel.org, gost.dev@samsung.com, linux-xfs@vger.kernel.org,
+	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Subject: Re: fstest failure due to filesystem size for 16k, 32k and 64k FSB
+Message-ID: <20240131182858.GG6188@frogsfrogsfrogs>
+References: <CGME20240130131803eucas1p280d9355ca3f8dc94073aff54555e3820@eucas1p2.samsung.com>
+ <fe7fec1c-3b08-430f-9c95-ea76b237acf4@samsung.com>
+ <20240130195602.GJ1371843@frogsfrogsfrogs>
+ <6bea58ad-5b07-4104-a6ff-a2c51a03bd2f@samsung.com>
+ <20240131034851.GF6188@frogsfrogsfrogs>
+ <yhuvl7u466fc6zznulfirtg35m7fteutzhar2dhunrxleterym@3qxydiupxnsx>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,76 +49,236 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240129235104.8976-2-l@damenly.org>
+In-Reply-To: <yhuvl7u466fc6zznulfirtg35m7fteutzhar2dhunrxleterym@3qxydiupxnsx>
 
-On Tue, Jan 30, 2024 at 07:51:04AM +0800, Su Yue wrote:
-> From: Su Yue <glass.su@suse.com>
+On Wed, Jan 31, 2024 at 03:05:48PM +0100, Pankaj Raghav (Samsung) wrote:
+> > > 
+> > > Thanks for the reply. So we can have a small `if` conditional block for xfs
+> > > to have fs size = 500M in generic test cases.
+> > 
+> > I'd suggest creating a helper where you pass in the fs size you want and
+> > it rounds that up to the minimum value.  That would then get passed to
+> > _scratch_mkfs_sized or _scsi_debug_get_dev.
+> > 
+> > (testing this as we speak...)
 > 
-> mkfs.bcachefs now supports option '--block_size' to allow
-> custom block_size.
+> I would be more than happy if you send a patch for
+> this but I also know you are pretty busy, so let me know if you want me
+> to send a patch for this issue.
 > 
-> Add the pattern to set def_blksz if MKFS_OPTIONS contains the
-> option in _scratch_mkfs_sized.
-> Also let mkfs.bcachefs decide blocksize if no option is given in
-> MKFS_OPTIONS or _scratch_mkfs_sized parameter.
-> 
-> Signed-off-by: Su Yue <glass.su@suse.com>
-> ---
-> changelog:
-> v4:
->     Respect block_size in MKFS_OPTIONS. 
-> v3:
->     Add logic to Let mkfs.bcachefs decide blocksize if no option is given in
->     local.config or _scratch_mkfs_sized parameter.
-> v2:
->     Born.
-> ---
+> You had something like this in mind?
 
-Thanks for helping fstests to support bcachefs better, feel
-free to send more patches for bcachefs testing.
+Close, but something more like below.  It's not exhaustive; it merely
+makes the xfs 64k bs tests pass:
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+From: Darrick J. Wong <djwong@kernel.org>
+Subject: [PATCH] misc: fix test that fail formatting with 64k blocksize
 
->  common/rc | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 31c21d2a8360..315a2413f963 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -930,6 +930,7 @@ _scratch_mkfs_sized()
->  	local fssize=$1
->  	local blocksize=$2
->  	local def_blksz
-> +	local blocksize_opt
->  
->  	case $FSTYP in
->  	xfs)
-> @@ -950,6 +951,13 @@ _scratch_mkfs_sized()
->  	jfs)
->  		def_blksz=4096
->  		;;
-> +	bcachefs)
-> +		def_blksz=`echo $MKFS_OPTIONS | sed -rn 's/.*(--block_size)[ =]?+([0-9]+).*/\2/p'`
-> +		[ -n "$blocksize" ] && blocksize_opt="--block_size=$blocksize"
-> +		[ -n "$def_blksize" ] && blocksize_opt="--block_size=$def_blksize"
-> +		# If no block size is given by local.confg or parameter, blocksize_opt is empty.
-> +		# Let MKFS_BCACHEFS_PROG decide block size on its own.
-> +		;;
->  	esac
->  
->  	[ -n "$def_blksz" ] && blocksize=$def_blksz
-> @@ -1051,7 +1059,7 @@ _scratch_mkfs_sized()
->  		export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
->  		;;
->  	bcachefs)
-> -		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize --block_size=$blocksize $SCRATCH_DEV
-> +		$MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt $SCRATCH_DEV
->  		;;
->  	*)
->  		_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
-> -- 
-> 2.43.0
-> 
-> 
+There's a bunch of tests that fail the formatting step when the test run
+is configured to use XFS with a 64k blocksize.  This happens because XFS
+doesn't really support that combination due to minimum log size
+constraints.  Fix the test to format larger devices in that case.
 
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ common/rc         |   29 +++++++++++++++++++++++++++++
+ tests/generic/042 |    9 +--------
+ tests/generic/081 |    7 +++++--
+ tests/generic/108 |    6 ++++--
+ tests/generic/704 |    3 ++-
+ tests/generic/730 |    3 ++-
+ tests/generic/731 |    3 ++-
+ tests/xfs/279     |    7 ++++---
+ 8 files changed, 49 insertions(+), 18 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 29bb90ca4d..953aad85ae 100644
+--- a/common/rc
++++ b/common/rc
+@@ -940,6 +940,35 @@ _check_minimal_fs_size()
+ 	fi
+ }
+ 
++# Round a proposed filesystem size up to the minimium supported size.  The
++# input is in MB and so is the output.
++_small_fs_size_mb()
++{
++	local size="$1"
++	local runner_min_size=0
++	local fs_min_size=0
++
++	case "$FSTYP" in
++	xfs)
++		# xfs no longer supports filesystems smaller than 512m
++		fs_min_size=512
++		;;
++	f2fs)
++		# f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image.
++		# However, f2fs-utils 1.14.0 needs at least 52 MB. Not sure if
++		# it will change again. So just set it 128M.
++		fs_min_size=128
++		;;
++	esac
++	(( size < fs_min_size )) && size="$fs_min_size"
++
++	# If the test runner wanted a minimum size, enforce that here.
++	test -n "$MIN_FSSIZE" && runner_min_size=$((MIN_FSSIZE / 1048576))
++	(( size < runner_min_size)) && size="$runner_min_size"
++
++	echo "$size"
++}
++
+ # Create fs of certain size on scratch device
+ # _scratch_mkfs_sized <size in bytes> [optional blocksize]
+ _scratch_mkfs_sized()
+diff --git a/tests/generic/042 b/tests/generic/042
+index 5116183f79..63a46d6b2b 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -27,14 +27,7 @@ _crashtest()
+ 	img=$SCRATCH_MNT/$seq.img
+ 	mnt=$SCRATCH_MNT/$seq.mnt
+ 	file=$mnt/file
+-	size=25M
+-
+-	# f2fs-utils 1.9.0 needs at least 38 MB space for f2fs image. However,
+-	# f2fs-utils 1.14.0 needs at least 52 MB. Not sure if it will change
+-	# again. So just set it 128M.
+-	if [ $FSTYP == "f2fs" ]; then
+-		size=128M
+-	fi
++	size=$(_small_fs_size_mb 25)M
+ 
+ 	# Create an fs on a small, initialized image. The pattern is written to
+ 	# the image to detect stale data exposure.
+diff --git a/tests/generic/081 b/tests/generic/081
+index 22ac94de53..0996f221d3 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -62,13 +62,16 @@ snapname=snap_$seq
+ mnt=$TEST_DIR/mnt_$seq
+ mkdir -p $mnt
+ 
++size=$(_small_fs_size_mb 300)
++lvsize=$((size * 85 / 100))	 # ~256M
++
+ # make sure there's enough disk space for 256M lv, test for 300M here in case
+ # lvm uses some space for metadata
+-_scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mkfs_sized $((size * 1024 * 1024)) >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+ # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
+ # (like 2.02.95 in RHEL6) don't support --yes option
+-yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
++yes | $LVM_PROG lvcreate -L ${lvsize}M -n $lvname $vgname >>$seqres.full 2>&1
+ # wait for lvcreation to fully complete
+ $UDEV_SETTLE_PROG >>$seqres.full 2>&1
+ 
+diff --git a/tests/generic/108 b/tests/generic/108
+index efe66ba57f..07703fc8f1 100755
+--- a/tests/generic/108
++++ b/tests/generic/108
+@@ -44,9 +44,11 @@ vgname=vg_$seq
+ 
+ physical=`blockdev --getpbsz $SCRATCH_DEV`
+ logical=`blockdev --getss $SCRATCH_DEV`
++size=$(_small_fs_size_mb 300)
++lvsize=$((size * 91 / 100))
+ 
+ # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 300`
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev ${physical:-512} ${logical:-512} 0 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+ echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+ 
+@@ -55,7 +57,7 @@ $LVM_PROG pvcreate -f $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
+ # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
+ # (like 2.02.95 in RHEL6) don't support --yes option
+-yes | $LVM_PROG lvcreate -i 2 -I 4m -L 275m -n $lvname $vgname \
++yes | $LVM_PROG lvcreate -i 2 -I 4m -L ${lvsize}m -n $lvname $vgname \
+ 	>>$seqres.full 2>&1
+ # wait for lv creation to fully complete
+ $UDEV_SETTLE_PROG >>$seqres.full 2>&1
+diff --git a/tests/generic/704 b/tests/generic/704
+index c0142a6051..6cc4bb4af0 100755
+--- a/tests/generic/704
++++ b/tests/generic/704
+@@ -30,8 +30,9 @@ _require_scsi_debug
+ _require_test
+ _require_block_device $TEST_DEV
+ 
++size=$(_small_fs_size_mb 256)
+ echo "Get a device with 4096 physical sector size and 512 logical sector size"
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 256`
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 $size`
+ blockdev --getpbsz --getss $SCSI_DEBUG_DEV
+ 
+ echo "mkfs and mount"
+diff --git a/tests/generic/730 b/tests/generic/730
+index 11308cdaa1..988c47e18e 100755
+--- a/tests/generic/730
++++ b/tests/generic/730
+@@ -27,7 +27,8 @@ _require_test
+ _require_block_device $TEST_DEV
+ _require_scsi_debug
+ 
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 256`
++size=$(_small_fs_size_mb 256)
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+ echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+ 
+diff --git a/tests/generic/731 b/tests/generic/731
+index e1400d062c..b279e3f7b4 100755
+--- a/tests/generic/731
++++ b/tests/generic/731
+@@ -27,7 +27,8 @@ _require_block_device $TEST_DEV
+ _supported_fs generic
+ _require_scsi_debug
+ 
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 256`
++size=$(_small_fs_size_mb 256)
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Failed to initialize scsi debug device"
+ echo "SCSI debug device $SCSI_DEBUG_DEV" >>$seqres.full
+ 
+diff --git a/tests/xfs/279 b/tests/xfs/279
+index 835d187f51..9f366d1e75 100755
+--- a/tests/xfs/279
++++ b/tests/xfs/279
+@@ -26,6 +26,7 @@ _cleanup()
+ _supported_fs xfs
+ 
+ _require_scsi_debug
++size=$(_small_fs_size_mb 128)
+ 
+ # Remove xfs signature so -f isn't needed to re-mkfs
+ _wipe_device()
+@@ -55,7 +56,7 @@ _check_mkfs()
+ (
+ echo "==================="
+ echo "4k physical 512b logical aligned"
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 128`
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Could not get scsi_debug device"
+ # sector size should default to 4k
+ _check_mkfs $SCSI_DEBUG_DEV
+@@ -68,7 +69,7 @@ _put_scsi_debug_dev
+ (
+ echo "==================="
+ echo "4k physical 512b logical unaligned"
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 1 128`
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 1 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Could not get scsi_debug device"
+ # should fail on misalignment
+ _check_mkfs $SCSI_DEBUG_DEV
+@@ -85,7 +86,7 @@ _put_scsi_debug_dev
+ (
+ echo "==================="
+ echo "hard 4k physical / 4k logical"
+-SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 4096 0 128`
++SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 4096 0 $size`
+ test -b "$SCSI_DEBUG_DEV" || _notrun "Could not get scsi_debug device"
+ # block size smaller than sector size should fail 
+ _check_mkfs -b size=2048 $SCSI_DEBUG_DEV
