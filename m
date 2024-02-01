@@ -1,109 +1,135 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mout-p-103.mailbox.org (mout-p-103.mailbox.org [80.241.56.161])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 453A65F48C
-	for <fstests@vger.kernel.org>; Thu,  1 Feb 2024 15:03:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 290A115F332;
+	Thu,  1 Feb 2024 15:51:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.161
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706799838; cv=none; b=VcWVesWJbsKxLoawqf4/noJvvClRBINzjgah+D0eKV93zgRGs3Wam7e5VZ/5vtMWgzWTWaopH0wg8wxEuv1sMbjifh1QnO7wNEG7OLMKlmD0jxPssu/BhMHX7sEuUwkLJcbS7RGNMQJBbB78Raf4cnfh3oZisPvkuFNzSUHplZo=
+	t=1706802672; cv=none; b=WxJFl1Tyc0FKarIFNtoGYdI+z2Ptc1cqaRAOKPwpc5LkTC4Dc3PeMwtkrKi9lie6QkO6Ocq2aciUpdpVqpjgQgkMJFMPuUEY2fqhL1uPJ4KVqZJiOJ3clCegjzLwYmzIsd8BmWEwaTd/NlC7IxMv/E35jESLQ2PoMFNLfT2G/Hg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706799838; c=relaxed/simple;
-	bh=pxxTgIJTz9K7aIFtVClndmfx7TgyFrsDNwdyR5Llcng=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IZ9ChC/60tRJkDVX/f0VwdR6SdUbAsOnfoeTCGfvM9PRBaaVd3wyjXaA/Hw9wOKzNW0q21XnswCAvQesfoktxdvLlGjtTiYzK7qYoneVvcmnUZe2Hl4roUe004GDFzrt2NNF0KciXHLjMSUju/sRzDnXtITjansyMUms916b29s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NV1nm1Sr; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1706802672; c=relaxed/simple;
+	bh=vetQWfc7x0y/pwVcyDLf2pd8BioDkeVM0XD1exOXfBY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gQRd+U2t2+kv1353EZVy0ExTnaNjiE4fjYRW8EIgZ5yDWCPX1bNSpogEjsn2vb5CZnJoW9vOcXeVIffHKiK7Pz3VoNttfyTcd23YqrIfJ8mwCk57TKAJxoIe1eArHDVusEbUxwu+J7TXBW74dn3nfSjGFl5YNXc1g41G5tqBQXQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=QyK0o+71; arc=none smtp.client-ip=80.241.56.161
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pankajraghav.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NV1nm1Sr"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706799836;
+	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="QyK0o+71"
+Received: from smtp202.mailbox.org (smtp202.mailbox.org [IPv6:2001:67c:2050:b231:465::202])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-103.mailbox.org (Postfix) with ESMTPS id 4TQjrl1PfQz9srx;
+	Thu,  1 Feb 2024 16:44:39 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
+	s=MBO0001; t=1706802279;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=H6HpAWNpDHGsf1BQTVsjCsUN+OeOJy6cYnxrx+iISmk=;
-	b=NV1nm1Sr5EI9GxpBcicn2EIyBSa6w9QdYOmvmwT8bvNjryZLSkJLaKAvQnpuBMJAoLWmXs
-	MXk1vC/K6YD4iOfGRUa2HCBkiSR3XdgbieGORgQ/HqJLlkjMSpWflXkvwlOenvs2ziovqR
-	dj9bVnNFW7NtGwBDraM03NYlyPaiPfU=
-Received: from mail-vk1-f199.google.com (mail-vk1-f199.google.com
- [209.85.221.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-120-RtR539wAOXCN6mz7mw3j1A-1; Thu, 01 Feb 2024 10:03:55 -0500
-X-MC-Unique: RtR539wAOXCN6mz7mw3j1A-1
-Received: by mail-vk1-f199.google.com with SMTP id 71dfb90a1353d-4bdb5b84504so385460e0c.1
-        for <fstests@vger.kernel.org>; Thu, 01 Feb 2024 07:03:55 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706799834; x=1707404634;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=H6HpAWNpDHGsf1BQTVsjCsUN+OeOJy6cYnxrx+iISmk=;
-        b=uNq/vs9ZR8lOXWm3KV1ryNG0gwr4+uQfFR+e3kekrU3RdpSdBUXuv31hsuafLW5/2j
-         S4Mm6KXTyfiZXQKhH7wwS4AvA/UqYeCwX1Lfa0tUoq9J6kBilwOsHtPsBDIAcTU0pU8J
-         NIrfOUovlDmsRma/oq6100gcHLyGfvjF+6vsnnevHqKb+B+IMUrsgZCLiU8h0FkvnArG
-         IYacWrkPu/xkcK/nwMOOjNkI737YHKeN/3GawPDq1SKgF+u6/H0KdvVjHGmUHzHZn8Za
-         xZjBFY9RHkC+EeIYe/pELQOHKalEvSDUovpEuSucMUCDk5pzVaIXXO7+Si69zr5nZ5wh
-         0bCg==
-X-Gm-Message-State: AOJu0YyQNYtuf0/XdP3Rn/iQ4vzbN5OVglQ01G7SinxCYhJLoKOgPTDQ
-	wrnWluhpbNTnTyQUwUZegvB50A10L9SKMJgfHtF31PXKrWvKld706Ihxnq8bXIP4ZsrWoLGHqAO
-	ZfmFA0LcZd+T4UwYDSGxaoepK72uIaGiDUPKMFH7xUXS9Rt8JXtufrbmuvlk6Z7YW7Xxe/Rugvb
-	Exu5TB82ggfAjamLAUFsfZBuuq0cd2EphAR2hbhQ==
-X-Received: by 2002:a05:6122:2310:b0:4bd:6861:97ea with SMTP id bq16-20020a056122231000b004bd686197eamr2411159vkb.0.1706799833938;
-        Thu, 01 Feb 2024 07:03:53 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEzlrbpMBjXBnLtAkLwmvEyCeX77OMzK4bMmXA6mBvwP78cmiTkUUw4j4hSy3rrXmbj7dlfxMfBTX4uAxUdb00=
-X-Received: by 2002:a05:6122:2310:b0:4bd:6861:97ea with SMTP id
- bq16-20020a056122231000b004bd686197eamr2411137vkb.0.1706799833693; Thu, 01
- Feb 2024 07:03:53 -0800 (PST)
+	bh=UstRbj1QoskmkDlV/xhfMZvqgMHOETDziO1CqeS+Z0w=;
+	b=QyK0o+71eBjHIRNF/bW3v/dBwbiCIosnlHf3ckaRmyRiAXz4vSU2vt0Dmmrp+GOc59fUrC
+	W0uvJ12wuGBTI63XicTXgOUlW4socgOmlz5pGpkMdXrqYEgnJJ6J632MCJeCLvIN62gGhy
+	rG9OambtWf7n9gQWuhhMjJmxufg91Wl9f4zzkiUYau+5rhch3QAIJTdRIe7F7Z8kgSI8ki
+	JPFTGrUOE9J8YcCpjF3/EZ/7owWxqGcP8sbQdpideaPq9Y56x1CsWl5raAcMyVw8lV8rML
+	sST62OU4Tf0sTXqfl3j/ceQZa25DjTsftrGf2mCgKoK4hlzktYEEAnSQvjkjUA==
+Date: Thu, 1 Feb 2024 16:44:36 +0100
+From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Pankaj Raghav <p.raghav@samsung.com>, fstests@vger.kernel.org, 
+	zlang@redhat.com, Dave Chinner <david@fromorbit.com>, mcgrof@kernel.org, 
+	gost.dev@samsung.com, linux-xfs@vger.kernel.org, 
+	"Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
+Subject: Re: fstest failure due to filesystem size for 16k, 32k and 64k FSB
+Message-ID: <f5wwi5oqok5p6somhubriesmmhlvvid7csszy5cmjqem37jy4g@2of2bw4azlvx>
+References: <CGME20240130131803eucas1p280d9355ca3f8dc94073aff54555e3820@eucas1p2.samsung.com>
+ <fe7fec1c-3b08-430f-9c95-ea76b237acf4@samsung.com>
+ <20240130195602.GJ1371843@frogsfrogsfrogs>
+ <6bea58ad-5b07-4104-a6ff-a2c51a03bd2f@samsung.com>
+ <20240131034851.GF6188@frogsfrogsfrogs>
+ <yhuvl7u466fc6zznulfirtg35m7fteutzhar2dhunrxleterym@3qxydiupxnsx>
+ <20240131182858.GG6188@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230925201827.1703857-1-aahringo@redhat.com> <CAK-6q+hrsfCn+y3yjqnti9JUfSOhOWgiEtSioukL5H3dA6-_8A@mail.gmail.com>
-In-Reply-To: <CAK-6q+hrsfCn+y3yjqnti9JUfSOhOWgiEtSioukL5H3dA6-_8A@mail.gmail.com>
-From: Alexander Aring <aahringo@redhat.com>
-Date: Thu, 1 Feb 2024 10:03:41 -0500
-Message-ID: <CAK-6q+gGtd4eRo=FxM34UFWsSid2QVe=p8HjCSABwPouZo_oCw@mail.gmail.com>
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-To: fstests@vger.kernel.org
-Cc: zlang@redhat.com, gfs2@lists.linux.dev, jlayton@kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240131182858.GG6188@frogsfrogsfrogs>
+X-Rspamd-Queue-Id: 4TQjrl1PfQz9srx
 
-Hi,
+On Wed, Jan 31, 2024 at 10:28:58AM -0800, Darrick J. Wong wrote:
+> On Wed, Jan 31, 2024 at 03:05:48PM +0100, Pankaj Raghav (Samsung) wrote:
+> > > > 
+> > > > Thanks for the reply. So we can have a small `if` conditional block for xfs
+> > > > to have fs size = 500M in generic test cases.
+> > > 
+> > > I'd suggest creating a helper where you pass in the fs size you want and
+> > > it rounds that up to the minimum value.  That would then get passed to
+> > > _scratch_mkfs_sized or _scsi_debug_get_dev.
+> > > 
+> > > (testing this as we speak...)
+> > 
+> > I would be more than happy if you send a patch for
+> > this but I also know you are pretty busy, so let me know if you want me
+> > to send a patch for this issue.
+> > 
+> > You had something like this in mind?
+> 
+> Close, but something more like below.  It's not exhaustive; it merely
+> makes the xfs 64k bs tests pass:
+> 
 
-On Thu, Nov 2, 2023 at 10:37=E2=80=AFAM Alexander Aring <aahringo@redhat.co=
-m> wrote:
->
-> Hi,
->
-> On Mon, Sep 25, 2023 at 4:18=E2=80=AFPM Alexander Aring <aahringo@redhat.=
-com> wrote:
-> >
-> > This patch adds fcntl corner cases that was being used to confirm issue=
-s
-> > on a GFS2 filesystem. The GFS2 filesystem has it's own ->lock()
-> > implementation and in those corner cases issues was being found and
-> > fixed.
-> >
-> > Signed-off-by: Alexander Aring <aahringo@redhat.com>
-> > ---
-> > changes since v2:
-> > - move fcntl tests into one fcntl c file
-> > - remove ofd and same owner tests, should be reflected by only one test
-> > - simplify commit message (remove testname out of it)
-> > - add error messages in fcntl.c to give more information if an error
-> >   occur
->
-> ping, any comments? Would for me nice to have these fcntl() tests
-> upstream and have a starting point to add more tests regarding dlm
-> plock implementation.
->
-> Thanks.
+I still see some errors in generic/081 and generic/108 that have been
+modified in your patch with the same issue.
 
-ping?
+This is the mkfs option I am using:
+-m reflink=1,rmapbt=1, -i sparse=1, -b size=64k
 
-- Alex
+And with that:
+$ ./check -s 64k generic/042 generic/081 generic/108 generic/704 generic/730 generic/731 xfs/279
 
+...
+generic/081.out.bad:
+ +max log size 1732 smaller than min log size 2028, filesystem is too small
+...
+generic/108.out.bad:
++max log size 1876 smaller than min log size 2028, filesystem is too small
+...
+SECTION       -- 64k
+=========================
+Ran: generic/042 generic/081 generic/108 generic/704 generic/730 generic/731 xfs/279
+Failures: generic/081 generic/108
+Failed 2 of 7 tests
+
+**Increasing the size** to 600M fixes all the test in 64k system.
+
+The patch itself including `_small_fs_size_mb()` looks good to me.
+
+> From: Darrick J. Wong <djwong@kernel.org>
+> Subject: [PATCH] misc: fix test that fail formatting with 64k blocksize
+> 
+> There's a bunch of tests that fail the formatting step when the test run
+> is configured to use XFS with a 64k blocksize.  This happens because XFS
+> doesn't really support that combination due to minimum log size
+> constraints.  Fix the test to format larger devices in that case.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  common/rc         |   29 +++++++++++++++++++++++++++++
+>  tests/generic/042 |    9 +--------
+>  tests/generic/081 |    7 +++++--
+>  tests/generic/108 |    6 ++++--
+>  tests/generic/704 |    3 ++-
+>  tests/generic/730 |    3 ++-
+>  tests/generic/731 |    3 ++-
+>  tests/xfs/279     |    7 ++++---
+
+As I indicated at the start of the thread, we need to also fix:
+generic/455 generic/457 generic/482 shared/298
+
+Thanks!
+--
+Pankaj Raghav
