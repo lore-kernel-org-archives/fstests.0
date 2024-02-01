@@ -1,189 +1,133 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+Received: from esa1.hc1455-7.c3s2.iphmx.com (esa1.hc1455-7.c3s2.iphmx.com [207.54.90.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 879303FB37;
-	Thu,  1 Feb 2024 23:37:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A534BE55;
+	Fri,  2 Feb 2024 01:54:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=207.54.90.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706830655; cv=none; b=FQoWKDGY8ByxB5IyoT3r9aEej6SQHNB2ARSH8H3zifYf3LEylWf+mUKG82OX/+xkir8AMoyaJBWkbJWCzxBbyLu4qM87fHJ1md1y1LXvSq6PUz1JoNizC1ql74KibY07bTpTRe2TWGB+QlIKIRg8dzVU0F743p+SCE90fKIevSU=
+	t=1706838855; cv=none; b=U1xggK2bIt3JpVT91mrh4YHKmKBE0r/JkTaWUdnMscv1hN5UCAoBkIg7KorpPPCrmKgXbCPdZmsFmDmhc5IXgZayMbFGJ3KM+HMYwC60xNASlL5TDHtk1bQTtKgwdDPeHxf7OE14gfAn1XryX1aFEo00cfWoNXjUOmFmVt5JVFI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706830655; c=relaxed/simple;
-	bh=ulqo9lIohw2YR3GnVxtwZVMLOLV9R098if/SkPUo+iA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=gniq2kmF/w9B74pGYXNvxC/eLzXAMqIRnXKqk/uKwph9S3P8YAkB9r/Rx9bun07Ei5QBFiGfFUiWG+bC1G0JOPQ1+q8vWBl1kzV3kOSZnGXObh8cY4HSOfH6pXmTf9D6PvEL2aZMJkoE9gFarS1ltA6r4GMqLZJ4ECjwDX22iMo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=MywawCh3; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1706838855; c=relaxed/simple;
+	bh=vsD8NVDlsuUy+gkg9e+2hn/r5frQVC4+m3fkTZ7yDtQ=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Wl7+4CiNGUEkLpvJGOtQHq5kZVmWxe+y4k0qVgIJ3wfoSzbgqmramOAqro4uW4T8Tk2yDGdq6rlNWZBJiNBXt44avSkJMT/EKgHqPPOpFDzR7glelPgLilstqz3Reb2xQMhxjfkABozCOjTtHYZo41lJTxAznziXT/J95qBIsRA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=qciq9Dl/; arc=none smtp.client-ip=207.54.90.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="MywawCh3"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
-	s=s31663417; t=1706830647; x=1707435447; i=quwenruo.btrfs@gmx.com;
-	bh=ulqo9lIohw2YR3GnVxtwZVMLOLV9R098if/SkPUo+iA=;
-	h=X-UI-Sender-Class:Date:Subject:To:References:From:In-Reply-To;
-	b=MywawCh3PpqOsQsLWrIREfz+Gh/ElyjtI/NRovWBZMyWBxrYpiEyNBvqc5/ldKSE
-	 sTNGgJOrs1vOGe8AoTuD92ssJpO4flj9IRbp93RjVyBVddzcThGqqriU6o+hIPCxJ
-	 G2/P3bGktCS63Y2iduFbHMle4jF1xxx0zUDvKJ2NvBk4vvscWrNbR7ipLF+MOoi9v
-	 QVv8R4Zdpvv423zbciPGGjfwFK1q8mKN5m/RWrp0nfPlbnHkkk4Stg1o5bB79yq/8
-	 oiKF5UIH/seRbFLHwmr5lR1vsM2AyrqCPU7ukNmfprUA0c5HEC72QRgTmEYq0If5R
-	 T/y1f7yfI7x3fbC92w==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.117] ([61.245.157.120]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MhlGq-1qsFCI2cGe-00dqBE; Fri, 02
- Feb 2024 00:37:27 +0100
-Message-ID: <92bf9623-48bd-477a-80a9-7c54ed7da20a@gmx.com>
-Date: Fri, 2 Feb 2024 10:07:23 +1030
+	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="qciq9Dl/"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
+  t=1706838854; x=1738374854;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=vsD8NVDlsuUy+gkg9e+2hn/r5frQVC4+m3fkTZ7yDtQ=;
+  b=qciq9Dl/Lwu3m3NYVALd1ewJPCuO50nmLNZ/H01IjmKQLDI74Gw4Gl+J
+   8nDpDnui5euXKqpcolMK0ftwptAuFr1JrwPNKvYch3l0UmTXMQpwKiUYi
+   prvBeOjBpIyzESb2roWgo7+PiSx6EIft6rUriFwMxPpBVohuQIF3YvCBI
+   wx5BHgyoJNTexARoncMhMmMbrKMRydq3qetokZB1fdne55i/m2QjMFCBa
+   MepOMhvqZrIU2GWsQaNTK8ku8tTIlinA4H7SCXuIrci1cZEuqqbUmegfD
+   FVWQf83jzordoVAh9VSgqMjEmEjli5LmjKqBtw3CRQ1bHHW9iS6nwQZEU
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10971"; a="147948400"
+X-IronPort-AV: E=Sophos;i="6.05,236,1701097200"; 
+   d="scan'208";a="147948400"
+Received: from unknown (HELO oym-r3.gw.nic.fujitsu.com) ([210.162.30.91])
+  by esa1.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2024 10:53:02 +0900
+Received: from oym-m2.gw.nic.fujitsu.com (oym-nat-oym-m2.gw.nic.fujitsu.com [192.168.87.59])
+	by oym-r3.gw.nic.fujitsu.com (Postfix) with ESMTP id 67617CA205;
+	Fri,  2 Feb 2024 10:52:59 +0900 (JST)
+Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
+	by oym-m2.gw.nic.fujitsu.com (Postfix) with ESMTP id A5B2FD41E3;
+	Fri,  2 Feb 2024 10:52:58 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 46FE2E253A;
+	Fri,  2 Feb 2024 10:52:58 +0900 (JST)
+Received: from rhel93GA.g08.fujitsu.local (unknown [10.167.221.71])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id E76C41A009A;
+	Fri,  2 Feb 2024 09:52:57 +0800 (CST)
+From: Yang Xu <xuyang2018.jy@fujitsu.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
+Subject: [PATCH v2] t_snapshot_deleted_subvolume: add check for BTRFS_IOC_SNAP_DESTROY_V2
+Date: Wed, 31 Jan 2024 23:23:48 -0500
+Message-Id: <20240201042348.147733-1-xuyang2018.jy@fujitsu.com>
+X-Mailer: git-send-email 2.39.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: add a regression test for fiemap into an mmap
- range
-Content-Language: en-US
-To: Josef Bacik <josef@toxicpanda.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org, kernel-team@fb.com
-References: <795fcb629a2bbfeaf39023d971b7cb3a468aa87f.1706819794.git.josef@toxicpanda.com>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <795fcb629a2bbfeaf39023d971b7cb3a468aa87f.1706819794.git.josef@toxicpanda.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:lkfw5iY3L+zRsjDvozhlWDxrY+GNuBhuLzeJ6zhdOzbYZLGtKWG
- qtRzUg6gzNt9fGRNlnux8uBQP7UxS1BBTWJ3+jkJh87XgvSRNsw/WXLk5jaC63l+csP0KEF
- M1WisUN4+GRcH3W5RglKGuwq3T6n8L0sX4qJEEdwCqocsBauC6+Qz0LqFTFHjutZnYFSDh5
- DRq7iRhYMU8TqzREdlx7g==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:tfGuxug6mmU=;qaFEwW+fuF7GSrd1J1rg1/pLggZ
- evZP7KBbxplxbjzyuLFyEglb3dbZ9uppwNWkHgwC/PTQtTHwotqXIlJEcnnECyWzTlcaeo7Av
- T9A9Nh3Tli8G5B2hrlNKKUsOVIV2tzahUfPPXTgD9I1DxBzQz+bQXu8YeqiZeikFxUyaNZEvB
- G0IuEx+FUwFVvSvEeYBZk1wAte1ndi4uBpS2V5FKDduwBRG/fdQPt/AtjfDUdUGfFWxwRzY5e
- PoRx0AVpxEF8k92PbUIHAcxhldoP7vIq6xihTwsg2Jbk1K3dAK5jHOSWF5uJR+ra6vp/G2t+o
- DDE8wUN2tn8p+YrtM1HI0zokXMbSlvVmTCIUGDTutd1eXMinLCCIbSnVDLZVOjz8Wodcd/pJl
- fZuodzzMtwSAVQdudbota7+GZ2o9ntjjkhFf9rCjbbWub3ME0d7mHLWSQhcr2bsaojNM00LCM
- UBBkq69eJCwuRs2zbsknNr5Nqw8KUUUKx5Cc8o7Etm0KCGqni7LQs6Bq1AZF1kaBn6d7KB4zw
- Gx2tmz+XmcE+77Le5mXog0rOPfw2/kas0hatso2XrQv1wHykXDbalj3Cn51wqck8CVINr25Pc
- QkazoqW4zH0D6wnqGsFsa/tJRGzXAeyY+WEohX+Nlsy3opEsojPLUP+El4xZba63MfNekvEZr
- VFXGh6N1XZQTuG/nwNVAx5HZpEucHFWBYeR/3/OcyUklKt66XSZlZ14dNSfDZE4gUEps6hEaS
- hQrFWbkEZOq3TtSV7fM1zCvtH5pW4LUa0TKaQWORDvHpCFF1a3NP6uJDyAy+O7dnZOCD/lqwU
- BzEuILNDgnA6xCekL8ERyL2tuGSuTyufy21JjYPaRxp4E=
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28158.003
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28158.003
+X-TMASE-Result: 10--0.230800-10.000000
+X-TMASE-MatchedRID: JUGAxiLh1cPcaPLLdBjevxqkhv3OdF4Dh6nwisY6+c0ErOtgylrM6mnX
+	UUBQ4UsQbn+bq+W8j6V2vbKZ0Ubwp5nFDQsuYb5/W1M77Gh1ugYJlr1xKkE5ucC5DTEMxpeQfiq
+	1gj2xET/gr0WZ6u+ypRIlVYCqhV5OHxPMjOKY7A8LbigRnpKlKZx+7GyJjhAUDVqkdheCqj8fYV
+	pT7I/EHPdoaGy1IdC2/4uhiNc5tAeTp/b1uB9fwNvEw5dGxRulytIt/mHZpcMuYHZzOnqbEULkl
+	G2PtdM1mw0Qaktp+ussz+cQMs/Tnp75MOLIf/j3DF+QsB+Q01JoBmTSwRxjXg==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
+On some platform, struct btrfs_ioctl_vol_args_v2 is defined, but the
+macros BTRFS_IOC_SNAP_DESTROY_V2 is not defined. This will cause
+compile error. Add check for BTRFS_IOC_SNAP_DESTROY_V2 to solve this
+problem.
 
+BTRFS_IOC_SNAP_CREATE_V2 and BTRFS_IOC_SUBVOL_CREATE_V2 were
+introduced together with struct btrfs_ioctl_vol_args_v2 by the
+commit 55e301fd57a6 ("Btrfs: move fs/btrfs/ioctl.h to
+include/uapi/linux/btrfs.h"). So there is no need to check them.
 
-On 2024/2/2 07:06, Josef Bacik wrote:
-> Btrfs had a deadlock that you could trigger by mmap'ing a large file and
-> using that as the buffer for fiemap.  This test adds a c program to do
-> this, and the fstest creates a large enough file and then runs the
-> reproducer on the file.  Without the fix btrfs deadlocks, with the fix
-> we pass fine.
->
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
->   src/Makefile          |  2 +-
->   tests/generic/740     | 41 +++++++++++++++++++++++++++++++++++++++++
->   tests/generic/740.out |  2 ++
+Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
+---
+ configure.ac                       |  1 +
+ src/t_snapshot_deleted_subvolume.c | 10 +++++-----
+ 2 files changed, 6 insertions(+), 5 deletions(-)
 
-I guess you forgot to add the source file of fiemap-fault?
+diff --git a/configure.ac b/configure.ac
+index b22fc52b..b14b1ab8 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -109,6 +109,7 @@ AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
+ #include <stddef.h>
+ #include <linux/btrfs.h>
+ ]])
++AC_CHECK_DECLS([BTRFS_IOC_SNAP_DESTROY_V2],,,[#include <linux/btrfs.h>])
+ 
+ AC_CONFIG_HEADERS([include/config.h])
+ AC_CONFIG_FILES([include/builddefs])
+diff --git a/src/t_snapshot_deleted_subvolume.c b/src/t_snapshot_deleted_subvolume.c
+index c3adb1c4..402c0515 100644
+--- a/src/t_snapshot_deleted_subvolume.c
++++ b/src/t_snapshot_deleted_subvolume.c
+@@ -20,11 +20,6 @@
+ #define BTRFS_IOCTL_MAGIC 0x94
+ #endif
+ 
+-#ifndef BTRFS_IOC_SNAP_DESTROY_V2
+-#define BTRFS_IOC_SNAP_DESTROY_V2 \
+-	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
+-#endif
+-
+ #ifndef BTRFS_IOC_SNAP_CREATE_V2
+ #define BTRFS_IOC_SNAP_CREATE_V2 \
+ 	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
+@@ -58,6 +53,11 @@ struct btrfs_ioctl_vol_args_v2 {
+ };
+ #endif
+ 
++#if !HAVE_DECL_BTRFS_IOC_SNAP_DESTROY_V2
++#define BTRFS_IOC_SNAP_DESTROY_V2 \
++	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
++#endif
++
+ int main(int argc, char **argv)
+ {
+ 	if (argc != 2) {
+-- 
+2.39.3
 
-Thanks,
-Qu
->   3 files changed, 44 insertions(+), 1 deletion(-)
->   create mode 100644 tests/generic/740
->   create mode 100644 tests/generic/740.out
->
-> diff --git a/src/Makefile b/src/Makefile
-> index d79015ce..916f6755 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -34,7 +34,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize pr=
-eallo_rw_pattern_reader \
->   	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
->   	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
->   	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
-> -	uuid_ioctl
-> +	uuid_ioctl fiemap-fault
->
->   EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->   	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> diff --git a/tests/generic/740 b/tests/generic/740
-> new file mode 100644
-> index 00000000..46ec5820
-> --- /dev/null
-> +++ b/tests/generic/740
-> @@ -0,0 +1,41 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 708
-> +#
-> +# Test fiemap into an mmaped buffer of the same file
-> +#
-> +# Create a reasonably large file, then run a program which mmaps it and=
- uses
-> +# that as a buffer for an fiemap call.  This is a regression test for b=
-trfs
-> +# where we used to hold a lock for the duration of the fiemap call whic=
-h would
-> +# result in a deadlock if we page faulted.
-> +#
-> +. ./common/preamble
-> +_begin_fstest quick auto
-> +[ $FSTYP =3D=3D "btrfs" ] && \
-> +	_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +		"btrfs: fix deadlock with fiemap and extent locking"
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_test
-> +_require_odirect
-> +_require_test_program fiemap-fault
-> +dst=3D$TEST_DIR/fiemap-fault-$seq
-> +
-> +echo "Silence is golden"
-> +
-> +for i in $(seq 0 2 1000)
-> +do
-> +	$XFS_IO_PROG -d -f -c "pwrite -q $((i * 4096)) 4096" $dst
-> +done
-> +
-> +$here/src/fiemap-fault $dst > /dev/null || _fail "failed doing fiemap"
-> +
-> +rm -f $dst
-> +
-> +# success, all done
-> +status=3D$?
-> +exit
-> +
-> diff --git a/tests/generic/740.out b/tests/generic/740.out
-> new file mode 100644
-> index 00000000..3f841e60
-> --- /dev/null
-> +++ b/tests/generic/740.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 740
-> +Silence is golden
