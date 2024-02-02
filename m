@@ -1,95 +1,156 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECC9C13E217
-	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 11:00:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A65177650;
+	Fri,  2 Feb 2024 11:43:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706871613; cv=none; b=ULEv5YJfUx0W0DwmJqrHPbrqgymOBwxkDxgBbFgYh4DJaBeT6mEFVOIDKgoZZ0Fz6ox+/cmrzdK4HQeqCRFrzaofyRTeEzBF9kNLfI0jznmS9/dWdBGFOfavkBzBDIxa3RjXdwz8pNGWv6oarHtv+0NZ7QVCx6BTrFI0sTDT+O0=
+	t=1706874205; cv=none; b=u/8hGLPS8hEtwS1xRHFH7Nr73+ko8TgzyM3/yUglG6eY6egwo5zJ2z4oJMuX6Dsdi543maj41ndARAXcTUZNbXi+Vvn11UlXjNemJwr5tfAzsf9M/JVBEAr0Pc6dISUP5xST1YIoVAphVZm/DJhy1xIcCFtjvNIst/o3WjCM4uk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706871613; c=relaxed/simple;
-	bh=E6LZIRl5fMTjikSDwPeAEUieRS/Duz8aoor8Vx5URyw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SJa4H3esfGOvjERedel4v9neYY51gGpHU/Eqsm8Wcfac5w8MnLRR1TopZRwLa2WjMEkz1O9TTl0FigyE8WBzwjbwoRgadTOFD7P3JIMhb5G7GuVksffrC2m4wdYuYzH2FUVd4+E2yjQpHJwhPSeJF1Y7K/qK5Nf6oe0NAOdUKXE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MZMZFPRM; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1706874205; c=relaxed/simple;
+	bh=Cwt+nlNJzx2VJHpSilkfvSpekG+LOGiW+i7PlxTL1c4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=J/03WYUwIZQzXUWKjFembPsHq+scqLUZ10ecJYjWAciPdjjrQPW9huLIBurEacKckh2qNecc99CDEpS8bbWotHF6HKIybpTLD2zwIROhHnIAopVhUgP9G8i73j6GjkLI55vAC6XTqRTwe0tOUwocIwIa3m60lEBcVMPjhnGISv8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EswQ9ltq; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MZMZFPRM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706871610;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=oit28KD2elbm89kON77mfWcZigAw6a8sE3t1EdI8mP8=;
-	b=MZMZFPRM1GEOZOHJuxE4Z/kxgDvSBPTNVRQ08peOjnJIkZOIwR8nS/rYmwnzXHzqtC/Epd
-	GAJ2DgqwMrys9o8t6s9/cpz+2hXsFls2/sWVle1+DQroxKjqhOSh936koxAK4l5CBFPw/G
-	fCwSA6hn6aZH7bPTsPeAwsFSU3R90jE=
-Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
- [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-549-aWXBXxjYOAWq0jOHwsq7gw-1; Fri, 02 Feb 2024 06:00:09 -0500
-X-MC-Unique: aWXBXxjYOAWq0jOHwsq7gw-1
-Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-558b84a7eeeso1385425a12.0
-        for <fstests@vger.kernel.org>; Fri, 02 Feb 2024 03:00:09 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706871608; x=1707476408;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oit28KD2elbm89kON77mfWcZigAw6a8sE3t1EdI8mP8=;
-        b=D18w3GNOWgr01Dho5kn/DdkDbUKqdnNu8AT8JyEIuaezU2oKMNXscAPKtmS/PgA9zo
-         9hfe4obI9tpSj/qbvHXiPUOcZJ0CaxThWTGvnmhsUEV81U6ENoQ3bV/USdlmOzhI5dhA
-         /t5KNc8qrArlZqi6uWtc+YAqyC9osF+evQSo5ICE3FImi9CJfipEb6eYv3RkdDlXGPgv
-         EFT++VvoIgmxsErT0kcmjyohnM67oAcabHyaNcSekBOYOQn8/JuzsBMFHKjD8TMtx6OE
-         OG0+oxjM0SYr/lkcwCf/zz0JDk00jxCiPAX8DKDYW+E2zm0Uj4CYgi58wRtePcr3D3wq
-         sNKw==
-X-Gm-Message-State: AOJu0Yysel2HfZYhX8ALRPE1iFDbsGnd+fQFUsRwirtzwJ1uQaKMWe8T
-	ThXQPU4fuHFwlRjGUGPnG0wQI9Sq76GizHVZarNVb6YibWzoHt99JX7pvyArc5shl8r9VBp6Ttj
-	AMthzIsdyCToWxCL1XvRjak4EpyjkvW/iKlH9pg2maWWyDKa51LL5hw==
-X-Received: by 2002:a05:6402:8d5:b0:55f:fe74:bed2 with SMTP id d21-20020a05640208d500b0055ffe74bed2mr497601edz.33.1706871608413;
-        Fri, 02 Feb 2024 03:00:08 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHEi43umMB83PuiXr/e95yZtykK6pxe7Y8TlWz9zYnMT/8CVZhE9Vq3rq84ZzspS5bbCpKxLA==
-X-Received: by 2002:a05:6402:8d5:b0:55f:fe74:bed2 with SMTP id d21-20020a05640208d500b0055ffe74bed2mr497586edz.33.1706871608097;
-        Fri, 02 Feb 2024 03:00:08 -0800 (PST)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id y2-20020a056402134200b0055f17a2c26bsm692899edw.94.2024.02.02.03.00.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Feb 2024 03:00:07 -0800 (PST)
-Date: Fri, 2 Feb 2024 12:00:07 +0100
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: Anthony Iliopoulos <ailiop@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/682: update and fix-up golden output
-Message-ID: <a2y7o7kpuexpbgdb2u3anqsgbu46oyy2qeod2omqiaecqnop45@tfx6uuamvhuw>
-References: <20240201161732.6126-1-ailiop@suse.com>
- <20240201161732.6126-3-ailiop@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EswQ9ltq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B1378C43399;
+	Fri,  2 Feb 2024 11:43:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1706874204;
+	bh=Cwt+nlNJzx2VJHpSilkfvSpekG+LOGiW+i7PlxTL1c4=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=EswQ9ltq7LFNj3eu5TsSmIpvClW0vha7jKz6sVHU/xOVAmiwctpvaBIgIys3vU1li
+	 gMMVghofYnB5PDYnAns+csOcwNpztn0mUHfZeUWSh31RpmHcj6uOb4cnKcbwAnfGbu
+	 gmFz5oGd+2Cup079OOzrOsoyiR29NUEGjeXebPKPdUTe5bdwCzMVJ2V/eN3sTJeJMU
+	 3GNOesbn+gF3XMkjHrjZZmM/OFMV3jxp0x6SUwJL2a1nVgYu7dNM/W2C5VjS6eBrSn
+	 rRw3yW6GqxMAo8Mk+GSRco46650Wr9Ra/Oex3nLxw8RemTy8HyNKnwB5gb4NlC7/0P
+	 qhiKfOZEFBo7g==
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a26ed1e05c7so294172666b.2;
+        Fri, 02 Feb 2024 03:43:24 -0800 (PST)
+X-Gm-Message-State: AOJu0YxkpWGwaQORIoiMPpBvaxrzc3qrcPBi6gLnpKjn2Z98ixgCDxSt
+	vzcMnqyLcW30N0pEj0lwNkhnkKnMewDjfJ+hfBobJ6Fj46gWg6gZzp40YdJ4Nzn2V234lPFr7Qb
+	sM52l4DPX2aUoRuHW7k7DwAUDGgA=
+X-Google-Smtp-Source: AGHT+IE1faJiXlu3WGl/FVluvhrACJZM/jz+gyWvblcuH/zyfr3JZOHUVcGXNZl7vR2yvXJsYksq1oF8DRAH03M6Qfg=
+X-Received: by 2002:a17:906:c52:b0:a36:3c59:3449 with SMTP id
+ t18-20020a1709060c5200b00a363c593449mr3791364ejf.56.1706874203120; Fri, 02
+ Feb 2024 03:43:23 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240201161732.6126-3-ailiop@suse.com>
+References: <795fcb629a2bbfeaf39023d971b7cb3a468aa87f.1706819794.git.josef@toxicpanda.com>
+In-Reply-To: <795fcb629a2bbfeaf39023d971b7cb3a468aa87f.1706819794.git.josef@toxicpanda.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Fri, 2 Feb 2024 11:42:46 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4JsWsW2Ng2DzZj6zwg+qio86w48T9qCd7VXXfkv4nGMg@mail.gmail.com>
+Message-ID: <CAL3q7H4JsWsW2Ng2DzZj6zwg+qio86w48T9qCd7VXXfkv4nGMg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: add a regression test for fiemap into an mmap range
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, kernel-team@fb.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 2024-02-01 17:17:32, Anthony Iliopoulos wrote:
-> coreutils v9.4 introduced a change in the error output of mv under
-> certain errno values via commit 3cb862ce5f10 ("mv: better diagnostic for
-> 'mv dir x' failure"), which broke the golden output.
-> 
-> Update golden output to match the change, and further add an output
-> filter to avoid having the test fail on environments that ran with an
-> older coreutils release, taken from commit d9323ad7a05e ("generic/245:
-> Filter mv error message").
-> 
-> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+On Thu, Feb 1, 2024 at 8:37=E2=80=AFPM Josef Bacik <josef@toxicpanda.com> w=
+rote:
+>
+> Btrfs had a deadlock that you could trigger by mmap'ing a large file and
+> using that as the buffer for fiemap.  This test adds a c program to do
+> this, and the fstest creates a large enough file and then runs the
+> reproducer on the file.  Without the fix btrfs deadlocks, with the fix
+> we pass fine.
+>
+> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 > ---
+>  src/Makefile          |  2 +-
+>  tests/generic/740     | 41 +++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/740.out |  2 ++
+>  3 files changed, 44 insertions(+), 1 deletion(-)
+>  create mode 100644 tests/generic/740
+>  create mode 100644 tests/generic/740.out
+>
+> diff --git a/src/Makefile b/src/Makefile
+> index d79015ce..916f6755 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -34,7 +34,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize pre=
+allo_rw_pattern_reader \
+>         attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles=
+ \
+>         fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail=
+ \
+>         detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+> -       uuid_ioctl
+> +       uuid_ioctl fiemap-fault
+>
+>  EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> diff --git a/tests/generic/740 b/tests/generic/740
+> new file mode 100644
+> index 00000000..46ec5820
+> --- /dev/null
+> +++ b/tests/generic/740
+> @@ -0,0 +1,41 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 708
+> +#
+> +# Test fiemap into an mmaped buffer of the same file
+> +#
+> +# Create a reasonably large file, then run a program which mmaps it and =
+uses
+> +# that as a buffer for an fiemap call.  This is a regression test for bt=
+rfs
+> +# where we used to hold a lock for the duration of the fiemap call which=
+ would
+> +# result in a deadlock if we page faulted.
+> +#
+> +. ./common/preamble
+> +_begin_fstest quick auto
 
-LGTM
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+Besides the missing C file, please also add the "fiemap" group to the test.
 
--- 
-- Andrey
+Thanks.
 
+> +[ $FSTYP =3D=3D "btrfs" ] && \
+> +       _fixed_by_kernel_commit xxxxxxxxxxxx \
+> +               "btrfs: fix deadlock with fiemap and extent locking"
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_test
+> +_require_odirect
+> +_require_test_program fiemap-fault
+> +dst=3D$TEST_DIR/fiemap-fault-$seq
+> +
+> +echo "Silence is golden"
+> +
+> +for i in $(seq 0 2 1000)
+> +do
+> +       $XFS_IO_PROG -d -f -c "pwrite -q $((i * 4096)) 4096" $dst
+> +done
+> +
+> +$here/src/fiemap-fault $dst > /dev/null || _fail "failed doing fiemap"
+> +
+> +rm -f $dst
+> +
+> +# success, all done
+> +status=3D$?
+> +exit
+> +
+> diff --git a/tests/generic/740.out b/tests/generic/740.out
+> new file mode 100644
+> index 00000000..3f841e60
+> --- /dev/null
+> +++ b/tests/generic/740.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 740
+> +Silence is golden
+> --
+> 2.43.0
+>
+>
