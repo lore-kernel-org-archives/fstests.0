@@ -1,133 +1,98 @@
-Received: from esa1.hc1455-7.c3s2.iphmx.com (esa1.hc1455-7.c3s2.iphmx.com [207.54.90.47])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A534BE55;
-	Fri,  2 Feb 2024 01:54:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=207.54.90.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F370413DBA0
+	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 10:57:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706838855; cv=none; b=U1xggK2bIt3JpVT91mrh4YHKmKBE0r/JkTaWUdnMscv1hN5UCAoBkIg7KorpPPCrmKgXbCPdZmsFmDmhc5IXgZayMbFGJ3KM+HMYwC60xNASlL5TDHtk1bQTtKgwdDPeHxf7OE14gfAn1XryX1aFEo00cfWoNXjUOmFmVt5JVFI=
+	t=1706871422; cv=none; b=MYSyF9e/ytrpb0qbW4xLSri2UdHhDtCFlnzKbMbJgzofCUNExDIbR2S9GD31e6l9ZPJgh5OMgH5u08og73c7Z4LSZF2FW+6RGBXz94TElp7zeGrecx29kpxrtb2E8lgg60I1EP6MshRUJBZ9wn5nZ8HsV/aXgcLqv8P3YSzk1wM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706838855; c=relaxed/simple;
-	bh=vsD8NVDlsuUy+gkg9e+2hn/r5frQVC4+m3fkTZ7yDtQ=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Wl7+4CiNGUEkLpvJGOtQHq5kZVmWxe+y4k0qVgIJ3wfoSzbgqmramOAqro4uW4T8Tk2yDGdq6rlNWZBJiNBXt44avSkJMT/EKgHqPPOpFDzR7glelPgLilstqz3Reb2xQMhxjfkABozCOjTtHYZo41lJTxAznziXT/J95qBIsRA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=qciq9Dl/; arc=none smtp.client-ip=207.54.90.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	s=arc-20240116; t=1706871422; c=relaxed/simple;
+	bh=tPZx/nmM3MWUWcxcAWlnmyHLZDWq5GY2HtisZ3Jm13E=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=byeExffM8QJLWp0EQ8nyiW+4zLmgSiFlOFquvKS/YOz0bXPnG9p75CIpa+SQ29VyXezcpMW/Y7XqQJb3+jgJyrWu4YW3/+oceXfHTORheg0adaMu8CZAWG7Rl9bXmIusaMAOjXZ+2GdwPPfLk8SnPr+Q/JHboSk2do3UmVh/6eY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bd0AyLTz; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="qciq9Dl/"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
-  t=1706838854; x=1738374854;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=vsD8NVDlsuUy+gkg9e+2hn/r5frQVC4+m3fkTZ7yDtQ=;
-  b=qciq9Dl/Lwu3m3NYVALd1ewJPCuO50nmLNZ/H01IjmKQLDI74Gw4Gl+J
-   8nDpDnui5euXKqpcolMK0ftwptAuFr1JrwPNKvYch3l0UmTXMQpwKiUYi
-   prvBeOjBpIyzESb2roWgo7+PiSx6EIft6rUriFwMxPpBVohuQIF3YvCBI
-   wx5BHgyoJNTexARoncMhMmMbrKMRydq3qetokZB1fdne55i/m2QjMFCBa
-   MepOMhvqZrIU2GWsQaNTK8ku8tTIlinA4H7SCXuIrci1cZEuqqbUmegfD
-   FVWQf83jzordoVAh9VSgqMjEmEjli5LmjKqBtw3CRQ1bHHW9iS6nwQZEU
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10971"; a="147948400"
-X-IronPort-AV: E=Sophos;i="6.05,236,1701097200"; 
-   d="scan'208";a="147948400"
-Received: from unknown (HELO oym-r3.gw.nic.fujitsu.com) ([210.162.30.91])
-  by esa1.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2024 10:53:02 +0900
-Received: from oym-m2.gw.nic.fujitsu.com (oym-nat-oym-m2.gw.nic.fujitsu.com [192.168.87.59])
-	by oym-r3.gw.nic.fujitsu.com (Postfix) with ESMTP id 67617CA205;
-	Fri,  2 Feb 2024 10:52:59 +0900 (JST)
-Received: from kws-ab4.gw.nic.fujitsu.com (kws-ab4.gw.nic.fujitsu.com [192.51.206.22])
-	by oym-m2.gw.nic.fujitsu.com (Postfix) with ESMTP id A5B2FD41E3;
-	Fri,  2 Feb 2024 10:52:58 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 46FE2E253A;
-	Fri,  2 Feb 2024 10:52:58 +0900 (JST)
-Received: from rhel93GA.g08.fujitsu.local (unknown [10.167.221.71])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id E76C41A009A;
-	Fri,  2 Feb 2024 09:52:57 +0800 (CST)
-From: Yang Xu <xuyang2018.jy@fujitsu.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Cc: Yang Xu <xuyang2018.jy@fujitsu.com>
-Subject: [PATCH v2] t_snapshot_deleted_subvolume: add check for BTRFS_IOC_SNAP_DESTROY_V2
-Date: Wed, 31 Jan 2024 23:23:48 -0500
-Message-Id: <20240201042348.147733-1-xuyang2018.jy@fujitsu.com>
-X-Mailer: git-send-email 2.39.3
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bd0AyLTz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1706871419;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=3sTRmklHraUtWLDdU2myofLcUMY+Af49oeoki8qD2f8=;
+	b=bd0AyLTzwBCFiuvaaNJql6rDdku4is020MX0yXzGB0jiMpUHLA2TuWBNyaXAm5KnIZdKcz
+	Y0hoLDKHH3VqYumBa6SulUjnJSr17xh2skrKkCgx+JUe/YujNyJHXOrZxVoXwwCQrO9Pxa
+	riEz6Zt8eyT9xOpPCYZcbN+9FjndphQ=
+Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
+ [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-209-NaL3sANgMmCqjMHYUlMXWA-1; Fri, 02 Feb 2024 05:56:58 -0500
+X-MC-Unique: NaL3sANgMmCqjMHYUlMXWA-1
+Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a2fba67ec20so136943766b.3
+        for <fstests@vger.kernel.org>; Fri, 02 Feb 2024 02:56:58 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706871417; x=1707476217;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3sTRmklHraUtWLDdU2myofLcUMY+Af49oeoki8qD2f8=;
+        b=LuCxWHKEgy1ZM+PxtfjYDbuqWOY/oQMv8YVciUPDBcBqcULgoY7Ft/bKQDJqp66TEI
+         fZDuphQ19fHBQzxPQjh8ZzQ06/FhCkpP611IMgwM80Twz+eGpR8p1QyMh2EgxZaNBGgt
+         2eygrX+Wc+LAdIs9V0OL9Svgmh+3X8Lh1D9o1yADd5zg3gVxaXz0zd033KfMBuuVrC2G
+         PzbWtSq6mRONwuIYtkDAz97kxMVTIxmyjGbwxfbjT9xpPjLSxZ6M2opgvs9wYcBBOOHd
+         y+jH8zwt5TTuuDxKUoN9HLoAI+Xw3w5EyIlL/OCQzNv+Tyw3X4rvLmFTZpI1RuTWNs68
+         Sa8g==
+X-Gm-Message-State: AOJu0Yx4EL9d8w4CcTbpVEZ9SYRq5/FzR9oxGH/RK6Py3nEREuU1HeTT
+	tzWt/8B5mzi5qDypl24Vd8tfQFU9wuA1sglKlQ6ENp3lNMCbsZCNqMVwIneoI/Jk6XwjMnIXAzA
+	fwEbP12r3+QhL22zkHNpyYiEL3AZhaRMM49F9JS72L0cl6g90Wr9NC6M8g7DC1Q==
+X-Received: by 2002:a17:906:48c7:b0:a35:62a9:a659 with SMTP id d7-20020a17090648c700b00a3562a9a659mr4797155ejt.72.1706871416905;
+        Fri, 02 Feb 2024 02:56:56 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE5rUru5u69EkorpvAYQGRMPITnkSgI0u0BZhQj621h82lgQXwt1/vQWwkiTu81jIQM/mZ6pw==
+X-Received: by 2002:a17:906:48c7:b0:a35:62a9:a659 with SMTP id d7-20020a17090648c700b00a3562a9a659mr4797148ejt.72.1706871416516;
+        Fri, 02 Feb 2024 02:56:56 -0800 (PST)
+Received: from thinky ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id sd25-20020a170906ce3900b00a359558648esm768595ejb.24.2024.02.02.02.56.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Feb 2024 02:56:56 -0800 (PST)
+Date: Fri, 2 Feb 2024 11:56:55 +0100
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: Anthony Iliopoulos <ailiop@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] generic/68[12]: use the dir blocksize for xfs
+ filesystems
+Message-ID: <l562muar7hq7vldj5wngowdfwpsqyrgytlilsc66v44k7iki3b@q2s43fymypp5>
+References: <20240201161732.6126-1-ailiop@suse.com>
+ <20240201161732.6126-2-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28158.003
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28158.003
-X-TMASE-Result: 10--0.230800-10.000000
-X-TMASE-MatchedRID: JUGAxiLh1cPcaPLLdBjevxqkhv3OdF4Dh6nwisY6+c0ErOtgylrM6mnX
-	UUBQ4UsQbn+bq+W8j6V2vbKZ0Ubwp5nFDQsuYb5/W1M77Gh1ugYJlr1xKkE5ucC5DTEMxpeQfiq
-	1gj2xET/gr0WZ6u+ypRIlVYCqhV5OHxPMjOKY7A8LbigRnpKlKZx+7GyJjhAUDVqkdheCqj8fYV
-	pT7I/EHPdoaGy1IdC2/4uhiNc5tAeTp/b1uB9fwNvEw5dGxRulytIt/mHZpcMuYHZzOnqbEULkl
-	G2PtdM1mw0Qaktp+ussz+cQMs/Tnp75MOLIf/j3DF+QsB+Q01JoBmTSwRxjXg==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240201161732.6126-2-ailiop@suse.com>
 
-On some platform, struct btrfs_ioctl_vol_args_v2 is defined, but the
-macros BTRFS_IOC_SNAP_DESTROY_V2 is not defined. This will cause
-compile error. Add check for BTRFS_IOC_SNAP_DESTROY_V2 to solve this
-problem.
+On 2024-02-01 17:17:31, Anthony Iliopoulos wrote:
+> The tests are using the filesystem block size for calculating the number
+> of dirents required to fill a 2-block directory. For v4 xfs filesystems
+> formatted with fs blocksize of 512 bytes this is failing, as the tests
+> do not take into account that the directory block size is not always
+> equal to the filesystem block size. As such, the tests never go over
+> quota, and even if they did there is no hard block limit being set (due
+> to 512 / 1024 = 0 calculation in setquota).
+> 
+> Use the directory blocksize instead of the filesystem blocksize, when
+> the fstype under test is xfs.
+> 
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+> ---
 
-BTRFS_IOC_SNAP_CREATE_V2 and BTRFS_IOC_SUBVOL_CREATE_V2 were
-introduced together with struct btrfs_ioctl_vol_args_v2 by the
-commit 55e301fd57a6 ("Btrfs: move fs/btrfs/ioctl.h to
-include/uapi/linux/btrfs.h"). So there is no need to check them.
+LGTM
+Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
 
-Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
----
- configure.ac                       |  1 +
- src/t_snapshot_deleted_subvolume.c | 10 +++++-----
- 2 files changed, 6 insertions(+), 5 deletions(-)
-
-diff --git a/configure.ac b/configure.ac
-index b22fc52b..b14b1ab8 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -109,6 +109,7 @@ AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
- #include <stddef.h>
- #include <linux/btrfs.h>
- ]])
-+AC_CHECK_DECLS([BTRFS_IOC_SNAP_DESTROY_V2],,,[#include <linux/btrfs.h>])
- 
- AC_CONFIG_HEADERS([include/config.h])
- AC_CONFIG_FILES([include/builddefs])
-diff --git a/src/t_snapshot_deleted_subvolume.c b/src/t_snapshot_deleted_subvolume.c
-index c3adb1c4..402c0515 100644
---- a/src/t_snapshot_deleted_subvolume.c
-+++ b/src/t_snapshot_deleted_subvolume.c
-@@ -20,11 +20,6 @@
- #define BTRFS_IOCTL_MAGIC 0x94
- #endif
- 
--#ifndef BTRFS_IOC_SNAP_DESTROY_V2
--#define BTRFS_IOC_SNAP_DESTROY_V2 \
--	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
--#endif
--
- #ifndef BTRFS_IOC_SNAP_CREATE_V2
- #define BTRFS_IOC_SNAP_CREATE_V2 \
- 	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
-@@ -58,6 +53,11 @@ struct btrfs_ioctl_vol_args_v2 {
- };
- #endif
- 
-+#if !HAVE_DECL_BTRFS_IOC_SNAP_DESTROY_V2
-+#define BTRFS_IOC_SNAP_DESTROY_V2 \
-+	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
-+#endif
-+
- int main(int argc, char **argv)
- {
- 	if (argc != 2) {
 -- 
-2.39.3
+- Andrey
 
