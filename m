@@ -1,140 +1,166 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98EA6141990
-	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 12:20:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65D905FEEC
+	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 12:23:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706876412; cv=none; b=TKoX6VWGBRdcBmHJT+TweK+TaXQNJM/+8iUdsGSGGZq7ww3U3n3ntamRhubEueFQdNsMwkuPKj8cupgKhDcR4Roxsu8oBooVIlrSjN9hqfId5ivqWSbGe+XoroRdg2ePIHM7Plk0kis9hri2b2sh3XnwZBrajYfEcGXaA5iPrIA=
+	t=1706876631; cv=none; b=CnDpbX5DbdQtc7YPAY3oZRypIi9E66lnU416kNuYancXyKRCRUDq8FC4yYDaTUCJ3q6lcO+JMA6opTq5hLIEaj5f7nbNB3AegZe9mn7RDFGS4tBgviy0MYEp8aM9eEWPHXKS54W2YPCD2ERl+jG7JbyiqqqYvt3k96PTudggCVQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706876412; c=relaxed/simple;
-	bh=tbufM01LMGev4Pg+LbNrac1oVsvR6Ipue9czRk3ZHGg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=XhGkuFtKgyBUENxsgU/3k8k2J0Rxr8QHZh70BPRp210gtPifmAKLAIQy96OdYMDLgctXnMdKYHlGB46he6KqUv5OIP2zESXLxFTufRqJ1NN3qy8ctdCLotRcR2kIlR6FwfOK6/4mZ/qMJurikIZnjnvGJSDdZTurSrNDw/a/KEY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W4XxVnHS; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1706876631; c=relaxed/simple;
+	bh=tbUgsLnQ7tCYKSHEJs8dUrJVARjPoAYzZRQBPOe9Ah0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aogvSlouOM7xwgkhymwUPgfR+YjarCQ/tQACePum6nT87uHKHw6aDHockNXuffznEym/LKth0hus7JwiiWM4QJhjRRKKLA9NNoxcF10YYu8RF3eWG6XkVQeGp6HFWUoyCs8sZ4WkN/zKs/i9iOAoxLb5sxz868O4Hfo49GD5J6c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=J2HnKnQ0; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W4XxVnHS"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="J2HnKnQ0"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706876409;
+	s=mimecast20190719; t=1706876627;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=zWPDTjGrjhjMNJrQTp58AfSW6I+1SdSuSRFkFXF1+8I=;
-	b=W4XxVnHStTEzTGzOa1OjXNN2S49p7lAzjOOjDtee9ubXRlnDRXIUd/8VaYgfIUKlePLFtA
-	SB7yrEspWcDZk9zDOR4j76uUBJliT8+mQ9gUsexenyx+2wwW2vCTGvTxIxbQaHf7by92Oy
-	BmKbHp1gAYcHA/ahT14YvLz70DdaK5E=
-Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com
- [209.85.208.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=b/Ys/bWaRqUUFILelFUwnEQZl9VEljCHwt/nwq2h8Gc=;
+	b=J2HnKnQ0is3LNhf9gqdoV3KiA0/qw7A+UrOPcgldLnlDyd1mAAAXQyAeHVPv19yDnw2IXD
+	qHqCdkXnMPXJSogNwSE/CBm2cJ/0esPzz12m/WOFj0JeKv1BvwmBjV02BwhZ00zux4VJeo
+	1FO9aJkPOTf9GDEW/6JqRnSXRuLAzmM=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-260-WbKMfugaMVmZF2-RRohW8g-1; Fri, 02 Feb 2024 07:20:08 -0500
-X-MC-Unique: WbKMfugaMVmZF2-RRohW8g-1
-Received: by mail-ed1-f71.google.com with SMTP id 4fb4d7f45d1cf-55fbf844bacso987694a12.1
-        for <fstests@vger.kernel.org>; Fri, 02 Feb 2024 04:20:07 -0800 (PST)
+ us-mta-605-0UiNzDWhNViuHnypqH5Eag-1; Fri, 02 Feb 2024 07:23:46 -0500
+X-MC-Unique: 0UiNzDWhNViuHnypqH5Eag-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-5dbddee3694so654013a12.1
+        for <fstests@vger.kernel.org>; Fri, 02 Feb 2024 04:23:45 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706876407; x=1707481207;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zWPDTjGrjhjMNJrQTp58AfSW6I+1SdSuSRFkFXF1+8I=;
-        b=ZauQ7Mo4RHpkjQZ0CxGeWkublM5slNGzDJTca0GLn+GBQcGe4xP6THB2O5cefwnJMN
-         hV84PKGR5DaZMrANDUemIbbnsa850KrxMQjghBHgxKEQ5f/LWtYcTTvdalSN217Z7Eq+
-         yyPEjHKDMKx1TMa08r5AcZ11bMENdwEwb09pHK1tQTo2UCQNmoValIL3O1SKr8zCf++M
-         utqVrhnfKckXH+KrTX5OXwwewshgTp8ybessAxDCF4RuHUwWlnMpdidOLe9ZkKqY9K9D
-         IK3dW8gJyPgTHtCEj1Vt6TW54h2RrncX2k4zLSnYbgbdp0eYtzYHntK0QOzi9o20gGa0
-         X1lQ==
-X-Gm-Message-State: AOJu0YyKSussp6mt91/n5OusEuG9JRnkC1m8XySF9YQWTPnOHDf2a1ba
-	2wf4w7uQLL7sEf3zmqqFcowdCGCVT3YuQM13ORlsV3uvB2hIFBzG0BTPuj13BNZ2voDgixGu2NW
-	gbV7Hm2p8pRnaX7tP5Sw8MbId7rLAWmhFmOJSM7sMe4eJAEP79YJcHdaj6s9GDmIdudwVTRQ9ns
-	Azy8mrUjLIdADZxv0q5ytlwTcC1Sc73Q==
-X-Received: by 2002:aa7:d658:0:b0:55f:fe5f:318d with SMTP id v24-20020aa7d658000000b0055ffe5f318dmr723320edr.34.1706876405571;
-        Fri, 02 Feb 2024 04:20:05 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGR4U7ivvBycWNkO9vjimzq3Qe8mpE2HwujRdVJU5dpg0VqWAIR99pGP56VZelEw+1aGxYD6xcwsZ7wOl2LnIE=
-X-Received: by 2002:aa7:d658:0:b0:55f:fe5f:318d with SMTP id
- v24-20020aa7d658000000b0055ffe5f318dmr723287edr.34.1706876404908; Fri, 02 Feb
- 2024 04:20:04 -0800 (PST)
+        d=1e100.net; s=20230601; t=1706876625; x=1707481425;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=b/Ys/bWaRqUUFILelFUwnEQZl9VEljCHwt/nwq2h8Gc=;
+        b=f64brIb2SakMpzPrzmMqFo+BIQ7Eg6jojQCWnW8b3mGJ0pL07kK7azbB4kQucswvqX
+         Agwhc0gWBZb1jI6bzZhUixgkKzip0CFFcJGuCHcC4CRl8PrztOS1IwqXNkZWRgOhL/Zd
+         6ojbtP+NgnJ8r9iIzQEePGboJf01IHXAGrxNzvTUWVXXksEmEiXz0Fp334pgrKMMG/9Z
+         SlqDr8UbLHwL9pVYugUsbAxoZZWlzIgndAAmOeJxp444NV05eoKsVdjE5nKNrSm4SL4M
+         DLmoeCfvTWLvuQA8o0QMciG/1v6KHMZX2Klju5JPir2SEKHtiDnriz1/DSkp+Kysc7hq
+         40IA==
+X-Gm-Message-State: AOJu0Yw8QEDI10n9R4rPO9G05tIAtWRj5Km9cBj09lLKIL4iPuRDeu1e
+	pQ/JhGW46Urx8g4AtCoJtM056xwIvFgnQTLlDur1Kd10j7c0w2KzIh685kJ7yzAfO6kEhYM3I+3
+	4K2gCQZngyEhBI4Nu+wF6a2waRUx1hJcU5Vrd8ZXb8/++wn48MIFrUrc=
+X-Received: by 2002:a05:6a20:3625:b0:19e:3391:343b with SMTP id r37-20020a056a20362500b0019e3391343bmr2313695pze.27.1706876624994;
+        Fri, 02 Feb 2024 04:23:44 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IF/tRczJHCwRf107wwO8GuY10/e2hWMjilaEXprtmw1nSsnD7tt0z7zeyjiGjntn886hBnk9g==
+X-Received: by 2002:a05:6a20:3625:b0:19e:3391:343b with SMTP id r37-20020a056a20362500b0019e3391343bmr2313680pze.27.1706876624646;
+        Fri, 02 Feb 2024 04:23:44 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCX/AxacwBZXYAmg044iBLStcSka1bI+4147SJTqLAu06z9xT8LaVcpXf0+VxTeIdXfpoRDXOBiDVK3BUNO2u730rIvN/r0kftV99Ah1OJIVY4OL03OrJaPhNT7DmY7FLIpl0Q==
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id b19-20020a63eb53000000b005cda7a1d72dsm1450697pgk.74.2024.02.02.04.23.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Feb 2024 04:23:44 -0800 (PST)
+Date: Fri, 2 Feb 2024 20:23:40 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: David Disseldorp <ddiss@suse.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test xfs_growfs with too-small size expansion
+Message-ID: <20240202122340.z2k2ka535fqkmdsh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240128155653.1533493-1-zlang@kernel.org>
+ <20240129150247.54c7a27a@echidna>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230925201827.1703857-1-aahringo@redhat.com> <d9981b21da65517589150792e8511bf192dd2374.camel@kernel.org>
- <20240202120441.xukbskkr26m6egoq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240202120441.xukbskkr26m6egoq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Alexander Aring <aahringo@redhat.com>
-Date: Fri, 2 Feb 2024 07:19:53 -0500
-Message-ID: <CAK-6q+iiSgZBne_C-o3iGz=+dzjVupGX6t04JbzB9DZU__q-0w@mail.gmail.com>
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-To: Zorro Lang <zlang@redhat.com>
-Cc: Jeff Layton <jlayton@kernel.org>, fstests@vger.kernel.org, gfs2@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240129150247.54c7a27a@echidna>
 
-Hi Zorro,
+On Mon, Jan 29, 2024 at 03:02:47PM +1100, David Disseldorp wrote:
+> Looks fine.
+> Reviewed-by: David Disseldorp <ddiss@suse.de>
 
-On Fri, Feb 2, 2024 at 7:04=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Thu, Feb 01, 2024 at 12:10:44PM -0500, Jeff Layton wrote:
-> > On Mon, 2023-09-25 at 16:18 -0400, Alexander Aring wrote:
-> > > This patch adds fcntl corner cases that was being used to confirm iss=
-ues
-> > > on a GFS2 filesystem. The GFS2 filesystem has it's own ->lock()
-> > > implementation and in those corner cases issues was being found and
-> > > fixed.
-> > >
-> > > Signed-off-by: Alexander Aring <aahringo@redhat.com>
-> > > ---
-> > > changes since v2:
-> > > - move fcntl tests into one fcntl c file
-> > > - remove ofd and same owner tests, should be reflected by only one te=
-st
-> > > - simplify commit message (remove testname out of it)
-> > > - add error messages in fcntl.c to give more information if an error
-> > >   occur
-> > >
-> > >  src/Makefile          |   3 +-
-> > >  src/fcntl.c           | 322 ++++++++++++++++++++++++++++++++++++++++=
-++
-> > >  tests/generic/732     |  32 +++++
-> > >  tests/generic/732.out |   2 +
-> > >  4 files changed, 358 insertions(+), 1 deletion(-)
-> > >  create mode 100644 src/fcntl.c
-> > >  create mode 100755 tests/generic/732
-> > >  create mode 100644 tests/generic/732.out
-> > >
-> > > diff --git a/src/Makefile b/src/Makefile
-> > > index 2815f919..67f936d3 100644
-> > > --- a/src/Makefile
-> > > +++ b/src/Makefile
-> > > @@ -19,7 +19,8 @@ TARGETS =3D dirstress fill fill2 getpagesize holes =
-lstat64 \
-> > >     t_ofd_locks t_mmap_collision mmap-write-concurrent \
-> > >     t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> > >     t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale=
- \
-> > > -   t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewindd=
-ir-test
-> > > +   t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewindd=
-ir-test \
-> > > +   fcntl
-> >
-> > I think this function needs a less-generic name than "fcntl". Other the
-> > lock tests themselves look like a nice addition though.
->
-> Yeah, the "fcntl" name is too "big", please rename it to show what it try=
-s
-> to test. Hi Alexander, you can tell me the new name you'd like to change,
-> if you don't want to send a V2. That might help to catch the fstests rele=
-ase
-> of this weekend :)
->
+Thanks for reviewing :)
 
-I was thinking about "fcntl_corner_tests", if this is okay.
+> 
+> A couple of minor comments below...
+> 
+> On Sun, 28 Jan 2024 23:56:53 +0800, Zorro Lang wrote:
+> 
+> > This's a regression test of 84712492e6da ("xfs: short circuit
+> > xfs_growfs_data_private() if delta is zero").
+> > 
+> > If try to do growfs with "too-small" size expansion, might lead to a
+> > delta of "0" in xfs_growfs_data_private(), then end up in the shrink
+> > case and emit the EXPERIMENTAL warning even if we're not changing
+> > anything at all.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> >  tests/xfs/999     | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/999.out |  2 ++
+> >  2 files changed, 55 insertions(+)
+> >  create mode 100755 tests/xfs/999
+> >  create mode 100644 tests/xfs/999.out
+> > 
+> > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > new file mode 100755
+> > index 00000000..09192ba3
+> > --- /dev/null
+> > +++ b/tests/xfs/999
+> > @@ -0,0 +1,53 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 999
+> 
+> I'll assume 999 is just a placeholder...
 
-Thanks.
+Yeah, I'll replace it when I merge it.
 
-- Alex
+> 
+> > +#
+> > +# Test xfs_growfs with "too-small" size expansion, which lead to a delta of "0"
+> > +# in xfs_growfs_data_private. This's a regression test of 84712492e6da ("xfs:
+> > +# short circuit xfs_growfs_data_private() if delta is zero").
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick growfs
+> > +
+> > +_cleanup()
+> > +{
+> > +	local dev
+> > +        $UMOUNT_PROG $LOOP_MNT 2>/dev/null
+> > +	dev=$(losetup -j testfile | cut -d: -f1)
+> > +	losetup -d $dev 2>/dev/null
+> > +        rm -rf $LOOP_IMG $LOOP_MNT
+> > +        cd /
+> > +        rm -f $tmp.*
+> 
+> nit: tabs and spaces mixed above
+
+Oh, mistake, I'll change all of them to tabs.
+
+> 
+> > +}
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_fixed_by_kernel_commit 84712492e6da \
+> > +	"xfs: short circuit xfs_growfs_data_private() if delta is zero"
+> > +_require_test
+> > +_require_loop
+> > +_require_xfs_io_command "truncate"
+> 
+> nit: it doesn't seem common for growfs, but you might want to add a:
+>   _require_command "$XFS_GROWFS_PROG" xfs_growfs
+
+Sure, will do it. If you don't need to check V2, I'll merge this patch
+directly with above changes, as you've given a RVB :)
+
+Thanks,
+Zorro
+
+> 
 
