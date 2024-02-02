@@ -1,198 +1,138 @@
-Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f176.google.com (mail-qk1-f176.google.com [209.85.222.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE108148FEC
-	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 17:18:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9546A8063D;
+	Fri,  2 Feb 2024 19:06:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706894319; cv=none; b=W5BdCP0r8gMa6sTCu5PqymbdAicTnsXsI1LreW6oTP8k1yMxZP4CV4B39nmZdMVBLYmwawiG/CdlKIC13j3CIncfP4dG4/LcDikCaO/sEdouG+sNdoe8yc8VbH67e392C3sgee7KCXPhHRWZkLW+A2PjL7Uru/ShvCB5zyrvpvM=
+	t=1706900780; cv=none; b=V4d9EQP9TVfsiUF/4oVtBqA3Ujx5lc/zZGGp3WTyUrxteNWwZoS2EeRMkYHdKOmuKplbcQqPiWJXxhm+ahVRcG4fRDrgdQoTPqXrVNU0b01OSM7+T+/6I0wlXVD8n7zTsUSsgxlkSdi32VpkX7WIasCIst27AS3ielPRk0IeoHU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706894319; c=relaxed/simple;
-	bh=1ATuCyYNMsNdOcO84pLykDKK59ZrDRVYbQzKaoOWa2Y=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
-	 Content-Type:References; b=S0CCC9oq2zbv1ErUQjnWao62hr6OX/JGoP+MldlvU+8e2lwWi2QM2C/k2LXTQNHL+WccZrNaZIIaCaaeM9YRd+nPGIhOVC5/F1Sc757A/+82DEd8dmbzFjJC9tPZVAodnseBsNvi+jXHezmRz1evxomgoQQpfchm+vg03uUm+7g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=FOi784tn; arc=none smtp.client-ip=210.118.77.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1706900780; c=relaxed/simple;
+	bh=ohvLMN/lkjg6HJuHcx4yTNCeRM8R3822wjzvi5cNijU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Tb6TQsa8luTUqWWY+4bHaPVzFspXlIjQfDmAOUC2sHGxQ0kLRytojUZmfi26CTGo6W6LYvILwLs4qbPhTXlsdxlpmKi0zoDVE6ohTOHMjPemk+7lQIYWnaE+f0DuTyfV3+8/yNMOg4DL11zrVOu1FyECP9FG8/r4udecWL9LrhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PFZhtfgO; arc=none smtp.client-ip=209.85.222.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="FOi784tn"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240202171834euoutp02850dfbe4c482f07d825df263d40cc5ea~wG1XvgFrE0919509195euoutp02k
-	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 17:18:34 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240202171834euoutp02850dfbe4c482f07d825df263d40cc5ea~wG1XvgFrE0919509195euoutp02k
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1706894314;
-	bh=teAIvMgdcx+J+DxlD91mFasQR7cbDW9Hc8S0t+wE7kU=;
-	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-	b=FOi784tnOUrHxrg1wrOXgh2ECnJAnocjoNptAfNhJ3VUFZ2wv11DwRDs9W8ZxhGhy
-	 EUwodeYIs2CHdBTY68Nsrfib6OshemJN6KP3PTdXv4kwivjDGBlU52mzLaJJdyFSvA
-	 zg8trs7y9EEJqHHX9YW9025cV97J2lu6zPX260PY=
-Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20240202171834eucas1p10af753a96222341cd48affe56d68b592~wG1XXwZr62904129041eucas1p16;
-	Fri,  2 Feb 2024 17:18:34 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-	eusmges3new.samsung.com (EUCPMTA) with SMTP id 11.A9.09552.AE32DB56; Fri,  2
-	Feb 2024 17:18:34 +0000 (GMT)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-	20240202171833eucas1p2fa39cd004b2207b1c1b689005abc8757~wG1XBsDRo1985519855eucas1p2F;
-	Fri,  2 Feb 2024 17:18:33 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-	eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-	20240202171833eusmtrp10d0371d2da7c28ac07fc97105285583c~wG1XBHzZj0079700797eusmtrp1h;
-	Fri,  2 Feb 2024 17:18:33 +0000 (GMT)
-X-AuditID: cbfec7f5-83dff70000002550-f8-65bd23eaac49
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-	eusmgms2.samsung.com (EUCPMTA) with SMTP id 2B.DB.10702.9E32DB56; Fri,  2
-	Feb 2024 17:18:33 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20240202171833eusmtip2fb1829840dcb0fedf224ba2fd242e0f0~wG1W3EW4o2332723327eusmtip2-;
-	Fri,  2 Feb 2024 17:18:33 +0000 (GMT)
-Received: from [192.168.8.209] (106.210.248.11) by CAMSVWEXC02.scsc.local
-	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-	Fri, 2 Feb 2024 17:18:32 +0000
-Message-ID: <aa37283d-227f-48af-a639-43dc7113a483@samsung.com>
-Date: Fri, 2 Feb 2024 18:18:32 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PFZhtfgO"
+Received: by mail-qk1-f176.google.com with SMTP id af79cd13be357-783e22a16d4so263164785a.0;
+        Fri, 02 Feb 2024 11:06:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1706900777; x=1707505577; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=qqOS8N2cJiuLBdJn3hLDtD0IeDZMugYcr1CjsPB4GHA=;
+        b=PFZhtfgOfgtIZOe3p6Ea3XBzC6SjiwAxYugCay1LZD2g7hNVazlV3JEJof0v9gQ7yN
+         6Dq0gCJSoi6fANI30WlaeevzG/Tsx8JUR4ej7oodtKgDbooYYX71e2RxIfACGTsMNZES
+         zhl1ZRUa3urgp6Qu3QzH//TIjBynoYw3ZgmTy0b8KsjotMKcfxsUuxPlLsVR95bEToel
+         6dD9vAIJnMM3/+pl8pDS9aYWW605Ue1WAPRb8KeE2cvCCLgxjKg15D/VUsUNuDl8+OlT
+         IfUXCCfJBa5hqwmN17MBqUgCEShJ/IyXwg/PQEdBUV57wm5x/rxZWMxf5AzmnJKv6NNH
+         fh4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1706900777; x=1707505577;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qqOS8N2cJiuLBdJn3hLDtD0IeDZMugYcr1CjsPB4GHA=;
+        b=bENOcOe3NzvVYR6Fw9mdhAa1IklO1eg5h9Z0blyYsy9aeLqKqVlAlku/LdUAdTsNSC
+         tGo9FzOMxMp6ps9Aqk4ANQdfxmT/Kpav7DyEqbaZRvDIUE3yBBI6kOmjQEeDjZH1WN0a
+         +g/9g/Ni4OYvdx8cKk7KsF+ebn5qcGB2F5snYmZincGLJn7CUmet4IwTNin9m0FpP6Bp
+         fgkE3Hnq7cRkYUMCgbkyP/mUWt+M+mg6hOkbz100BnJ2Mc8cFBOWxKkBVFwkcVHjTZGq
+         tcSbTh6h1pHp1a2r6Ov6QeFMoTbGhczUQWInbOaJi8D1JNgHaCmrEoJlsvtLcLT1PTth
+         LjYw==
+X-Gm-Message-State: AOJu0YwSFVVTXELe6Wtidg9ccyUcjj4hXzBze3yfYTfaErIYNFJn2P5k
+	NDp8xcOXzLGDp0XREjkzfb9QGl0otLnsh5EOPkPLv/RwllLcsF5c
+X-Google-Smtp-Source: AGHT+IEM8+IhRnbEgh6CVkE9SkTCRsB5VjLZ/73sTor5W2FxW+gQ7t5qenIiqSW+5QfvXvEzYzzs6w==
+X-Received: by 2002:a05:620a:1342:b0:785:3bbc:9ab4 with SMTP id c2-20020a05620a134200b007853bbc9ab4mr5127111qkl.1.1706900777459;
+        Fri, 02 Feb 2024 11:06:17 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCV00NAnQ/yL9cp8ABoYtzkXtnan8Kur/2rbF9JG3wGW+EleZeeWQC+vpIs9mGReRNQQqzlsz783gSalVkbCkJLX9RY+17ytj8GdkvaT4SLQv3ivzi/A4ZevMqwt678LnYxWKnNHuTxkdmPA+NdbKnLwLto=
+Received: from debian-BULLSEYE-live-builder-AMD64 (h64-35-202-119.cntcnh.broadband.dynamic.tds.net. [64.35.202.119])
+        by smtp.gmail.com with ESMTPSA id br14-20020a05620a460e00b007855df9feabsm374687qkb.3.2024.02.02.11.06.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Feb 2024 11:06:17 -0800 (PST)
+Date: Fri, 2 Feb 2024 14:06:15 -0500
+From: Eric Whitney <enwlinux@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Eric Whitney <enwlinux@gmail.com>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, tytso@mit.edu
+Subject: Re: [PATCH] generic/459: don't run on non-journaled ext4 file systems
+Message-ID: <Zb09Jy8KyxoBAnEN@debian-BULLSEYE-live-builder-AMD64>
+References: <20240124195306.1177737-1-enwlinux@gmail.com>
+ <20240202131529.jn5z64qfm5r5ibte@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: fstest failure due to filesystem size for 16k, 32k and 64k FSB
-To: "Darrick J. Wong" <djwong@kernel.org>, "Pankaj Raghav (Samsung)"
-	<kernel@pankajraghav.com>
-CC: <fstests@vger.kernel.org>, <zlang@redhat.com>, Dave Chinner
-	<david@fromorbit.com>, <mcgrof@kernel.org>, <gost.dev@samsung.com>,
-	<linux-xfs@vger.kernel.org>, "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>
-Content-Language: en-US
-From: Pankaj Raghav <p.raghav@samsung.com>
-In-Reply-To: <20240202164644.GK616564@frogsfrogsfrogs>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA02Se0hTYRjG+3bO2c5Ws+M28+2io+WiwkuajZEhGUUTiRSh6KYtd1BzTtu0
-	K5XVjBKp0SBriKkZ6SqNYa0F07KL6DQjNcxMTeellViYVmiSx1Pgf7/3e573e7/n5SMxURmx
-	hEzVZdF6nVor4wrwR69+vw7yrHDSa5855iurX3UjZavbS+kyOnnKps9juPLJ1GOessM0gJTP
-	Gi/ylM4GB7GJVDWWgsph+chT2ayXuKrmiijVaE07VzVm84/l7hFs1NDa1CO0PiTygCCleaiY
-	m/lVcqzd/J3IQVUL8xBJAhUOd3oT8hCfFFHlCPor4/KQYIZ/IDCNvsdYYQzBtVIFw4z/j6cL
-	saY7CG4YpzhsMWPKGXURbOFAMGgbwZkRQioSrr+OZ7pxKgAqa34TDAspb2i44cYZ9qGk0NN5
-	ncewmIqBFk/t7GQJdQDevjPP3olRrQj6ppwcRsAoX+h03+Qw93OpNXD20mwvn1JAxaD7n2U1
-	5NoneSxLwT5SiLEJZND2pZfH8ilorO6cDQBUAR+uXXiLWGELTLzPJ1gWg6e++l/DMnCZ83GW
-	T8JAxyTGNhsRXHFUcdmdRsDlJi3riYLponGCPfaCjhFv9j1ecPVRAWZCcsucVVjmJLPMiWCZ
-	E6EY4VbkS2cb0pNpwzodfTTYoE43ZOuSg5My0m1o5iO5puvHH6Nyz/fgOsQhUR0CEpNJhCax
-	kxYJNerjJ2h9RqI+W0sb6tBSEpf5CuUaKS2iktVZdBpNZ9L6/yqH5C/J4WgkCyQHs+KSLvZt
-	7btVbN3G/9mSb93vPOi/39498ULf5y17cD5hvCWwZa88WnzGFljIbQj6UZtUebW51NXfQZdt
-	UjQNj35OM4adiX0u9Avwmd8WrbDeDl24Z/heV/zQ5iLKP3JBRIhfw6GHlbCLuEt6uyYzZOYd
-	PhMVkeuldVUC+7fg/pfO7uZFhzJTngY2KvhE64aunzHnzEZNbHZX3LSnbV9aL0H5h9vDdhtX
-	5u6scJREXzksN0XFy4nhavHZhL3bS1qJpfFYmG25YnmEekDbs0xE6LxiEreJd60Lrf+wMTfz
-	2CfZm/D7v2qzPn20vglyh/j69YzdXnV83uLTlicy3JCiDl2D6Q3qv0+QbiW3AwAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrNIsWRmVeSWpSXmKPExsVy+t/xe7ovlfemGqxvMbbYcuweo8XlJ3wW
-	p1v2slucefmZxWLXnx3sFjcmPGW0OHiqg91i78mdrA4cHqcWSXjsnHWX3WPTqk42j7MrHT3e
-	77vK5vF5k1wAW5SeTVF+aUmqQkZ+cYmtUrShhZGeoaWFnpGJpZ6hsXmslZGpkr6dTUpqTmZZ
-	apG+XYJextnnC9gK3ohUXJ38kbWBcT1/FyMnh4SAicTfV3cYuxi5OIQEljJKfLiwgQ0iISOx
-	8ctVVghbWOLPtS42iKKPjBK9+zczQTg7GSUebFjD0sXIwcErYCcx41wwSAOLgIrEun0/wZp5
-	BQQlTs58wgJiiwrIS9y/NYMdxBYW8JY4/2o/M4gtIpAgcenaZFaQmcwClxklHv3ZywSSEBL4
-	wyzx40oKiM0sIC5x68l8JpBdbAJaEo2dYHM4BcwkVj57wgRRoinRuv03O4QtL7H97RxmiAeU
-	JK68fsAOYddKfP77jHECo+gsJOfNQrJhFpJRs5CMWsDIsopRJLW0ODc9t9hIrzgxt7g0L10v
-	OT93EyMwlrcd+7llB+PKVx/1DjEycTAeYpTgYFYS4Z0gvDdViDclsbIqtSg/vqg0J7X4EKMp
-	MIwmMkuJJucDk0leSbyhmYGpoYmZpYGppZmxkjivZ0FHopBAemJJanZqakFqEUwfEwenVAOT
-	T8YzXeFgsdSYUN4JhWdT+FduM9LPro78s3PvM+nSpRcf13+Itcu/eCPf/LWa7qNHES3hdiWv
-	8w0rbY/4Se1hDexifXrp8hPm5fd2xqrrrmv9NINhVucy0RLzVqP9z9hfn13+Oe/q5OrdP3Sd
-	GGa+/KnrHCasyVpW/PPsDZWWrylcnQUf32SdqjxpPSmpZHti5M9Nc64IyRz42Cm3wVAmUr4y
-	78D04r4rNSouyb8l8ndKfq3m+mGsMvFx4CHpj9Uej8815Bz6s7u64rJb8MbpUiWBvluMEjdF
-	PZ3290UzT3fjQ53nHX9841iEwz60PmFzknqQseRG0KGJ1QfXMH2uLE26dvNTqnxjyI44YWUl
-	luKMREMt5qLiRAA+gtTtbgMAAA==
-X-CMS-MailID: 20240202171833eucas1p2fa39cd004b2207b1c1b689005abc8757
-X-Msg-Generator: CA
-X-RootMTR: 20240130131803eucas1p280d9355ca3f8dc94073aff54555e3820
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20240130131803eucas1p280d9355ca3f8dc94073aff54555e3820
-References: <CGME20240130131803eucas1p280d9355ca3f8dc94073aff54555e3820@eucas1p2.samsung.com>
-	<fe7fec1c-3b08-430f-9c95-ea76b237acf4@samsung.com>
-	<20240130195602.GJ1371843@frogsfrogsfrogs>
-	<6bea58ad-5b07-4104-a6ff-a2c51a03bd2f@samsung.com>
-	<20240131034851.GF6188@frogsfrogsfrogs>
-	<yhuvl7u466fc6zznulfirtg35m7fteutzhar2dhunrxleterym@3qxydiupxnsx>
-	<20240131182858.GG6188@frogsfrogsfrogs>
-	<f5wwi5oqok5p6somhubriesmmhlvvid7csszy5cmjqem37jy4g@2of2bw4azlvx>
-	<20240202164644.GK616564@frogsfrogsfrogs>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240202131529.jn5z64qfm5r5ibte@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
->> I still see some errors in generic/081 and generic/108 that have been
->> modified in your patch with the same issue.
->>
->> This is the mkfs option I am using:
->> -m reflink=1,rmapbt=1, -i sparse=1, -b size=64k
->>
->> And with that:
->> $ ./check -s 64k generic/042 generic/081 generic/108 generic/704 generic/730 generic/731 xfs/279
->>
->> ...
->> generic/081.out.bad:
->>  +max log size 1732 smaller than min log size 2028, filesystem is too small
->> ...
->> generic/108.out.bad:
->> +max log size 1876 smaller than min log size 2028, filesystem is too small
->> ...
->> SECTION       -- 64k
->> =========================
->> Ran: generic/042 generic/081 generic/108 generic/704 generic/730 generic/731 xfs/279
->> Failures: generic/081 generic/108
->> Failed 2 of 7 tests
->>
->> **Increasing the size** to 600M fixes all the test in 64k system.
+* Zorro Lang <zlang@redhat.com>:
+> On Wed, Jan 24, 2024 at 02:53:06PM -0500, Eric Whitney wrote:
+> > generic/459 fails when run on an ext4 file system created without a
+> > journal or when its journal has not been loaded at mount time.
+> > 
+> > The test expects that a file system that it has been unable to freeze
+> > will be automatically remounted read only.  However, the default error
+> > handling policy for ext4 is to continue when possible after errors.
+> > 
+> > A workaround was added to the test in the past to force ext4 to
+> > perform a read only remount in order to meet the test's expectations.
+> > The touch command was used to create a new file after a freeze failure.
+> > This forces ext4 to start a new journal transaction, where it discovers
+> > the journal has previously aborted due to lack of space, and triggers
+> > special case error handling that results in a read only remount.
+> > 
+> > The workaround requires a journal.  Since ext4 is behaving as designed,
+> > prevent the test from running if there isn't one.
+> > 
+> > Signed-off-by: Eric Whitney <enwlinux@gmail.com>
+> > ---
+> >  tests/generic/459 | 5 +++++
+> >  1 file changed, 5 insertions(+)
+> > 
+> > diff --git a/tests/generic/459 b/tests/generic/459
+> > index c3f0b2b0..63fbbc9b 100755
+> > --- a/tests/generic/459
+> > +++ b/tests/generic/459
+> > @@ -49,6 +49,11 @@ _require_command "$THIN_CHECK_PROG" thin_check
+> >  _require_freeze
+> >  _require_odirect
+> >  
+> > +# non-journaled ext4 won't remount read only after freeze failure
+> > +if [ "$FSTYP" == "ext4" ]; then
+> > +	_require_metadata_journaling
 > 
-> Huh.  Can you send me the mkfs output (or xfs_info after the fact) so I
-> can compare your setup with mine?  I'm curious about what's affecting
-> the layout here -- maybe you have -s size=4k or something?
+> I'm wondering ... won't other fs need this, besides ext4?
+
+Thanks for looking at this patch.
+
+I'd been mainly concerned with ext4, but since you mention it, ext2 and ext3
+ought to be added as well, since the failure behavior is similar.
+
+The check for metadata journaling is limited to just ext4 here because the
+commit history for this test appears to suggest the touch command workaround
+is specific to ext4.  Perhaps the test should unconditionally require metadata
+journaling for all file system types, but given that I don't work with many
+other file systems I was uncomfortable asserting that in this patch.  If
+freezing any file system requires a metadata journal, then it would make
+sense to do that.
+
+Your thoughts?
+
+Eric
+
 > 
-> (I don't want to stray too far from the /actual/ mkfs minimum fs size of
-> 300M.)
+> > +fi
+> > +
+> >  vgname=vg_$seq
+> >  lvname=lv_$seq
+> >  poolname=pool_$seq
+> > -- 
+> > 2.30.2
+> > 
+> > 
 > 
-
-I am using v6.8-rc2 with xfsprogs 6.5.0 and xfstests v2024.01.14 (with your patch on top)
-
-Using oracle OCI instance with 64k page size support.
-
-config:
-
-[default]
-FSTYP=xfs
-RESULT_BASE=$PWD/results/$HOST/$(uname -r)
-DUMP_CORRUPT_FS=1
-CANON_DEVS=yes
-RECREATE_TEST_DEV=true
-TEST_DEV=/dev/sdb2
-TEST_DIR=/mnt/test
-SCRATCH_DEV=/dev/sdb3
-SCRATCH_MNT=/mnt/scratch
-LOGWRITES_DEV=/dev/sdb4
-
-[64k]
-MKFS_OPTIONS='-f -m reflink=1,rmapbt=1, -i sparse=1, -b size=64k,'
-
-
-If I use 600MB and if the tests run, then this is the xfs_info I am getting on
-the test device (test device should have the same config as scratch as I use RECREATE_TEST_DEV=true):
-
-[nix-shell:/mnt/linux/xfstests]$ sudo xfs_info /dev/sdb2
-meta-data=/dev/sdb2              isize=512    agcount=4, agsize=102400 blks
-         =                       sectsz=4096  attr=2, projid32bit=1
-         =                       crc=1        finobt=1, sparse=1, rmapbt=1
-         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=1
-data     =                       bsize=65536  blocks=409600, imaxpct=25
-         =                       sunit=0      swidth=0 blks
-naming   =version 2              bsize=65536  ascii-ci=0, ftype=1
-log      =internal log           bsize=65536  blocks=2613, version=2
-         =                       sectsz=4096  sunit=1 blks, lazy-count=1
-realtime =none                   extsz=65536  blocks=0, rtextents=0
-
-Let me know if you need more information.
-
---
-Pankaj
