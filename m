@@ -1,146 +1,201 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0127345BE6
-	for <fstests@vger.kernel.org>; Fri,  2 Feb 2024 13:31:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A9417E102;
+	Fri,  2 Feb 2024 14:51:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706880662; cv=none; b=Ey61LrfKqukr1B5bZ4cSUFu7BpOM8KAHyL98VeZPlSB7ypCdURd0snhE5w4gJ9MMrIUlSx5AdIpS54iZ8HvBmsZbJFMRe5Up8fYyqh5scWyGT09x07nAmn4FGnpsKB0x4udPF32U5BLt6tmoT35MKaTCEcEa7KvFFw5OaJFbZkc=
+	t=1706885508; cv=none; b=WwmBp2FSLzqLzgm+oUJgrZ6YluXuMPCSSj//dVboh2YlaqFqLfbsXMR61wVTRWc+n06pPS83oOvjm53ptk32ActuXlmiR13D++yxd8ldAJKc5NZ5l31AXYbuAQhlBk/+wXSXlQRzK5FgVsOI8XS6gk+mlUSRn80raYh0lLfBMDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706880662; c=relaxed/simple;
-	bh=kEzCRv+ixXxMBBwkk8hk2kXrBl/lIlm1jz+UFvPtG8M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=f7Ec9giSHQ5ZitygKvF0/mUkd4KMbapl5IGlO2yjwu9Tq1yNsuo6dyYj8T2h4/H9Uf97rTSPLhL0zFcL5KgH1seR1F+wffkSzzwgsooM9Id4x9/ypmEWVdTxTmuyyiZlpjtjHlOtFotsKp5G97jRBM1lHK28TLoe3adhDi8vjAI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fcuBd29R; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1706885508; c=relaxed/simple;
+	bh=zUhS/GQ8PfrAlJYNfh9JUV5LTVagX+UohjWX8XP81Bc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=dQ8bPGoJf7Set2rYFOI85GbPwL3Mfj/xRj7URS2iLnWdyIlnjuCwqaAa3ZcVuFK7aw/FHFLtq9YcNNyMIktZFSh2iqi/l+Ks/oksUXdvmKJttKG41oON7fK5Abt3t9RYRQNXJI5+qKTcyQUNLC63D4FVnu6Mkhx6dyWNermQBPo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gOjEznbj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fcuBd29R"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1706880659;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=y0N2smS5XbHQrIaMH4pzHfJKZl8Z9zBqbq9w2J5wULM=;
-	b=fcuBd29Rm8Yp9QwuXgOCcfqkO8+qbm2R1HxI5aqYO91DvhmL+QEfJ0XQtyGSAEdUzk4Mpy
-	CWEaDgwVIIVpR7pCJ5V3Mrv04hX9lfgHpc8kYifoFM0HSzo469XIfwkWb4+vPoKdO5TOVx
-	EvyrMPInEGMLADH4q/am+GNt8NI2ng4=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-27-TzL4qi-1Mo-oN-NUmQrTIA-1; Fri, 02 Feb 2024 08:30:58 -0500
-X-MC-Unique: TzL4qi-1Mo-oN-NUmQrTIA-1
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1d955acc0b5so18731355ad.2
-        for <fstests@vger.kernel.org>; Fri, 02 Feb 2024 05:30:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706880657; x=1707485457;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=y0N2smS5XbHQrIaMH4pzHfJKZl8Z9zBqbq9w2J5wULM=;
-        b=ZO2yapUj551DuIsDsdaCrofL+nsLOkAgAw6Diu1ACYuOJoLYRU+xbbV4irzazbJCwQ
-         Uizlj9uc3ezVACdr5jTeoNSBcqqbo7GL9BdfK1kIbdzExS+Ewc7VvLxh3l32oaDWDo+v
-         rnZWXgzyEbqBD7yT9bhWmoo/3Fcs6WL4CnuKZg0dP4gw6RPpL9srrdvDLBMhtggfpVkW
-         LkTP1i6aLoJ0zC4stqUgE9HXlBrQJrC72gYGrtNlENOnEL3Eo9RsEDnr+gPGor87vw+Y
-         m2MfKB1pBfdDU06R9XTeUccQTqRPNnK1m601YIsHLTknsa7FEHSlFFiKkzZIU7vr22Pu
-         u/mw==
-X-Gm-Message-State: AOJu0YzmHDcDnNuMcOJtbT6IfFCDX+CWh6BctQnTqsCaaFICZ1gL+PFx
-	EK8zFfUSmZ+ohF5lNGUGYYZDxxeHfGLTZjVpan267IZqwTICKlGZE38n3EwDfp/nbruEFosoRvp
-	ZtAtzcd+3YqM8LvfTw5+EzfqJS+yizgi91yI631ro3AEjDpDt6EYnmH7QckDYjQKhkw==
-X-Received: by 2002:a17:902:e882:b0:1d9:7095:7e1f with SMTP id w2-20020a170902e88200b001d970957e1fmr2302531plg.67.1706880656871;
-        Fri, 02 Feb 2024 05:30:56 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFMQpWf4228PFb7lWLT8LUMy0LfA6Ud2QaEP2cWIDR0jX7MJhE7n4DYSJsyjIN1hRPR/Ch0YQ==
-X-Received: by 2002:a17:902:e882:b0:1d9:7095:7e1f with SMTP id w2-20020a170902e88200b001d970957e1fmr2302496plg.67.1706880656556;
-        Fri, 02 Feb 2024 05:30:56 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id jh7-20020a170903328700b001d8f82c61cdsm1572653plb.231.2024.02.02.05.30.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Feb 2024 05:30:56 -0800 (PST)
-Date: Fri, 2 Feb 2024 21:30:52 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Richard Weinberger <richard@nod.at>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/020: Compute correct max_attrs for UBIFS
-Message-ID: <20240202133052.2psftidca6rcdlmk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240114135713.10555-1-richard@nod.at>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gOjEznbj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 26CF3C43394;
+	Fri,  2 Feb 2024 14:51:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1706885508;
+	bh=zUhS/GQ8PfrAlJYNfh9JUV5LTVagX+UohjWX8XP81Bc=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=gOjEznbjczG1MU6MtZn2BhbrnOkm9j8li20D86KUpy6XIB7nbmHGvz4OZlLI9tj8h
+	 C50dl9VtfOpcFzuTOk++2AVn3mIRWPKazTp0CY8vlG0dxMxcimwDTrvcQSE7MweyPS
+	 3BOiJo3/GLE7B/jH++5DAIZyBJOq5wrgZgi8MAo0iju9pmIMcIH/mhoffnUQFRVxfw
+	 ZIU66TvtCeaquKNVNlfL+foxXGQ6a+gsY+W33cfKXTAePorYO6magXCDaJc6QmVInj
+	 IVkVxiiYacULtQvOg3yZPjcI4NcclyBEX5waZ0Qj/jVhqmGNTkdne3PaAQrGEKsF77
+	 YxRw/IHy8AEVw==
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a26f73732c5so337595866b.3;
+        Fri, 02 Feb 2024 06:51:48 -0800 (PST)
+X-Gm-Message-State: AOJu0Yw0VjbCXyopU5qm32mJQyfVTnBhFoPH+YLLY3DvQsPyf5Y+5jhY
+	Ig6//Q0+02t12ZxadGicAL0xGdRvEGzpDI7EEiTgRe6axAejvf3i3gUiKxftrxKkcPcBSWZRldX
+	00k5erODdEu8ihxVS6wwI8aRsAeI=
+X-Google-Smtp-Source: AGHT+IFLOWsjZ5xZhJ8fP4Ew9IYBfAXbeGFrejW+f2u8JKX+/ZKIvqieI7WN9UD4+klEaAIxWzidtom7mWohmORU3e0=
+X-Received: by 2002:a17:906:118e:b0:a35:a1dc:8920 with SMTP id
+ n14-20020a170906118e00b00a35a1dc8920mr3728098eja.45.1706885506428; Fri, 02
+ Feb 2024 06:51:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240114135713.10555-1-richard@nod.at>
+References: <a3f51f2fff6581a6b4dd2e5776b7f40d22dcf65b.1706039782.git.boris@bur.io>
+ <20240202131120.q35fe45cmu5e3dqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240202131120.q35fe45cmu5e3dqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Fri, 2 Feb 2024 14:51:09 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H7MsG8pLsrEeKOhtXPMw3psw3pFbTTn5k-LGLxLo2oCBg@mail.gmail.com>
+Message-ID: <CAL3q7H7MsG8pLsrEeKOhtXPMw3psw3pFbTTn5k-LGLxLo2oCBg@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: Remove btrfs/303
+To: Zorro Lang <zlang@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Boris Burkov <boris@bur.io>, kernel-team@fb.com, 
+	fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Sun, Jan 14, 2024 at 02:57:13PM +0100, Richard Weinberger wrote:
-> When testing on a MTD with a rather small erase block
-> size, the default max_attr limit can be too much and the
-> test will fail.
-> Instead compute the actual limit.
-> 
-> Signed-off-by: Richard Weinberger <richard@nod.at>
-> ---
+On Fri, Feb 2, 2024 at 1:11=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Tue, Jan 23, 2024 at 11:56:59AM -0800, Boris Burkov wrote:
+> > This test was reproducing a bug triggered by creating a subvolume qgrou=
+p
+> > before creating the subvolume itself with a snapshot.
+> >
+> > The kernel patch:
+> > btrfs: forbid creating subvol qgroups
+> >
+> > explicitly prevents that and makes it fail with EINVAL. I could "fix"
+> > this test by expecting the EINVAL message in the output, but at that
+> > point it would simply be a test that creating a subvolume and
+> > snapshotting it works with qgroups, which is adequately tested by other
+> > tests which focus on accurately measuring shared/exclusive usage in
+> > various snapshot/reflink scenarios. To avoid confusion, I think it is
+> > best to simply delete this test.
+> >
+> > Signed-off-by: Boris Burkov
+> > ---
+>
+> Just a reminder, this's a test deletion. To avoid test coverage decrease,
+> I'd like to give it more time to get more reviewing of btrfs list. If no
+> one has any concern, I'll merge it :)
 
-Thanks for the updating for UBIFS testing, this patch looks good to me.
-I'm not a good user of ubifs, but as your the maintainer of UBIFS, I
-think I can give more trust to this patch ;) So I'll merge this patch
-after a basic testing.
+It's fine, it's the right thing to do.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
->  common/config     | 1 +
->  common/ubifs      | 9 +++++++++
->  tests/generic/020 | 6 ++++++
->  3 files changed, 16 insertions(+)
->  create mode 100644 common/ubifs
-> 
-> diff --git a/common/config b/common/config
-> index c9771ff9..05f2bb35 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -545,6 +545,7 @@ _source_specific_fs()
->  		;;
->  	ubifs)
->  		[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
-> +		. ./common/ubifs
->  		;;
->  	esac
->  }
-> diff --git a/common/ubifs b/common/ubifs
-> new file mode 100644
-> index 00000000..08323260
-> --- /dev/null
-> +++ b/common/ubifs
-> @@ -0,0 +1,9 @@
-> +#!/bin/bash
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +
-> +_get_leb_size()
-> +{
-> +	local ubivol=$1
-> +
-> +	cat /sys/class/ubi/`basename $ubivol`/usable_eb_size
-> +}
-> diff --git a/tests/generic/020 b/tests/generic/020
-> index da258aa5..4951b9e3 100755
-> --- a/tests/generic/020
-> +++ b/tests/generic/020
-> @@ -101,6 +101,12 @@ _attr_get_max()
->  			let max_attrs=$((($BLOCK_SIZE - 32) / (16 + 12 + 16 )))
->  		fi
->  		;;
-> +	ubifs)
-> +		LEB_SIZE=`_get_leb_size $TEST_DEV`
-> +		# On UBIFS, the number of xattrs has to be less than 50% LEB size
-> +		# divided by 160 (inode size)
-> +		let max_attrs=$((($LEB_SIZE / 2 / 160) - 1))
-> +		;;
->  	*)
->  		# Assume max ~1 block of attrs
->  		BLOCK_SIZE=`_get_block_size $TEST_DIR`
-> -- 
-> 2.35.3
-> 
-> 
+Thanks.
 
+>
+> >  tests/btrfs/303     | 77 ---------------------------------------------
+> >  tests/btrfs/303.out |  2 --
+> >  2 files changed, 79 deletions(-)
+> >  delete mode 100755 tests/btrfs/303
+> >  delete mode 100644 tests/btrfs/303.out
+> >
+> > diff --git a/tests/btrfs/303 b/tests/btrfs/303
+> > deleted file mode 100755
+> > index 410460af5..000000000
+> > --- a/tests/btrfs/303
+> > +++ /dev/null
+> > @@ -1,77 +0,0 @@
+> > -#! /bin/bash
+> > -# SPDX-License-Identifier: GPL-2.0
+> > -# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
+> > -#
+> > -# FS QA Test 303
+> > -#
+> > -# A regression test to make sure snapshot creation won't cause transac=
+tion
+> > -# abort if there is already an existing qgroup.
+> > -#
+> > -. ./common/preamble
+> > -_begin_fstest auto quick snapshot subvol qgroup
+> > -
+> > -. ./common/filter
+> > -
+> > -_supported_fs btrfs
+> > -_require_scratch
+> > -
+> > -_fixed_by_kernel_commit xxxxxxxxxxxx \
+> > -     "btrfs: do not abort transaction if there is already an existing =
+qgroup"
+> > -
+> > -_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> > -_scratch_mount
+> > -
+> > -# Create the first subvolume and get its id.
+> > -# This subvolume id should not change no matter if there is an existin=
+g
+> > -# qgroup for it.
+> > -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.ful=
+l
+> > -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+> > -     "$SCRATCH_MNT/snapshot">> $seqres.full
+> > -
+> > -init_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+> > -
+> > -if [ -z "$init_subvolid" ]; then
+> > -     _fail "Unable to get the subvolid of the first snapshot"
+> > -fi
+> > -
+> > -echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
+> > -
+> > -_scratch_unmount
+> > -
+> > -# Re-create the fs, as btrfs won't reuse the subvolume id.
+> > -_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
+> > -_scratch_mount
+> > -
+> > -$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
+> > -_qgroup_rescan $SCRATCH_MNT >> $seqres.full
+> > -
+> > -# Create a qgroup for the first subvolume, this would make the later
+> > -# subvolume creation to find an existing qgroup, and abort transaction=
+.
+> > -$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $s=
+eqres.full
+> > -
+> > -# Now create the first snapshot, which should have the same subvolid n=
+o matter
+> > -# if the quota is enabled.
+> > -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.ful=
+l
+> > -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
+> > -     "$SCRATCH_MNT/snapshot" >> $seqres.full
+> > -
+> > -# Either the snapshot create failed and transaction is aborted thus no
+> > -# snapshot here, or we should be able to create the snapshot.
+> > -new_subvolid=3D$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
+> > -
+> > -echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
+> > -
+> > -if [ -z "$new_subvolid" ]; then
+> > -     _fail "Unable to get the subvolid of the first snapshot"
+> > -fi
+> > -
+> > -# Make sure the subvolumeid for the first snapshot didn't change.
+> > -if [ "$new_subvolid" -ne "$init_subvolid" ]; then
+> > -     _fail "Subvolumeid for the first snapshot changed, has ${new_subv=
+olid} expect ${init_subvolid}"
+> > -fi
+> > -
+> > -echo "Silence is golden"
+> > -
+> > -# success, all done
+> > -status=3D0
+> > -exit
+> > diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+> > deleted file mode 100644
+> > index d48808e60..000000000
+> > --- a/tests/btrfs/303.out
+> > +++ /dev/null
+> > @@ -1,2 +0,0 @@
+> > -QA output created by 303
+> > -Silence is golden
+> > --
+> > 2.43.0
+> >
+> >
+>
+>
