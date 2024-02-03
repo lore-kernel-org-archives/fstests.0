@@ -1,138 +1,115 @@
-Received: from mail-qk1-f176.google.com (mail-qk1-f176.google.com [209.85.222.176])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9546A8063D;
-	Fri,  2 Feb 2024 19:06:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C98654EB2E;
+	Sat,  3 Feb 2024 08:12:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1706900780; cv=none; b=V4d9EQP9TVfsiUF/4oVtBqA3Ujx5lc/zZGGp3WTyUrxteNWwZoS2EeRMkYHdKOmuKplbcQqPiWJXxhm+ahVRcG4fRDrgdQoTPqXrVNU0b01OSM7+T+/6I0wlXVD8n7zTsUSsgxlkSdi32VpkX7WIasCIst27AS3ielPRk0IeoHU=
+	t=1706947956; cv=none; b=TeM3j1PjHDqbeVQcFiyBglY6VQ5ErE2bIU0i5sagO7a1mGos/gHwHSSiUwYyVZfVlSB2xdOThkmnej1MNhXg9LnjonzY8PXjyZ4NJOcfz2mr9yELmpvHxlVXMWiCzulpYTDR+21nVXRDuFsPt7ZASzrYTYPJlVYwCItVYujxQOU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1706900780; c=relaxed/simple;
-	bh=ohvLMN/lkjg6HJuHcx4yTNCeRM8R3822wjzvi5cNijU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Tb6TQsa8luTUqWWY+4bHaPVzFspXlIjQfDmAOUC2sHGxQ0kLRytojUZmfi26CTGo6W6LYvILwLs4qbPhTXlsdxlpmKi0zoDVE6ohTOHMjPemk+7lQIYWnaE+f0DuTyfV3+8/yNMOg4DL11zrVOu1FyECP9FG8/r4udecWL9LrhI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PFZhtfgO; arc=none smtp.client-ip=209.85.222.176
+	s=arc-20240116; t=1706947956; c=relaxed/simple;
+	bh=ikPZ5zkmsFFcqFxxWf9OWGX1blrGNmVfI7oauxcHJTQ=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=t90P62sENWxu8zOBNN6nO/4RRpqkLHrcqS26xrjdMGEMY5cVFCsxO0QQ/UAYzDIzXe0hthpROUqKMW7MrCghzG2AavMtmvuzAoQ0/HPThZb3EMSQO+V1CqHwueMj/DSHaHgzYv3zUlOEI+Sqij0GZZNdyC3iGYHrHEKUGdtQ6mU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=F1bFrvFX; arc=none smtp.client-ip=209.85.128.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PFZhtfgO"
-Received: by mail-qk1-f176.google.com with SMTP id af79cd13be357-783e22a16d4so263164785a.0;
-        Fri, 02 Feb 2024 11:06:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F1bFrvFX"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-40fb94d42e4so21989985e9.2;
+        Sat, 03 Feb 2024 00:12:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1706900777; x=1707505577; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=qqOS8N2cJiuLBdJn3hLDtD0IeDZMugYcr1CjsPB4GHA=;
-        b=PFZhtfgOfgtIZOe3p6Ea3XBzC6SjiwAxYugCay1LZD2g7hNVazlV3JEJof0v9gQ7yN
-         6Dq0gCJSoi6fANI30WlaeevzG/Tsx8JUR4ej7oodtKgDbooYYX71e2RxIfACGTsMNZES
-         zhl1ZRUa3urgp6Qu3QzH//TIjBynoYw3ZgmTy0b8KsjotMKcfxsUuxPlLsVR95bEToel
-         6dD9vAIJnMM3/+pl8pDS9aYWW605Ue1WAPRb8KeE2cvCCLgxjKg15D/VUsUNuDl8+OlT
-         IfUXCCfJBa5hqwmN17MBqUgCEShJ/IyXwg/PQEdBUV57wm5x/rxZWMxf5AzmnJKv6NNH
-         fh4A==
+        d=gmail.com; s=20230601; t=1706947953; x=1707552753; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4B4yVk7R4ltaRKppNYv78/2Ny52aC23vDArqAHZjJRE=;
+        b=F1bFrvFXPuDrADjj6pss33tQzsDA3/wjxZHrgwbpbWN2li08/55dO/od2jWxfJpyn9
+         PQbL8X0J2MGBLshee7C79hEUFRWUidUuzfjNxvZBOZtXF2d+Y4hFj8ms83sjg6Pk8uZ/
+         RlQLW9xZdETI5DXbBd1JtSv+/Pu+5VkNyCGVcm9b+5HIqn6pq9fJQk/uwChBd8jQSyYi
+         g0YxQG5PvzZCJZVZp+oNsKs1rYzbqurmqVwmVfNXJyJflKbW+Ag6jzZeJkLpiVm2E9uY
+         FpmzwrY4Owo2ZVPuX8QT92RHJJDG+hPjQp8bpuAbYS3qbwbHQ6/+RgsesU4kPoVwCewO
+         oHVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1706900777; x=1707505577;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=qqOS8N2cJiuLBdJn3hLDtD0IeDZMugYcr1CjsPB4GHA=;
-        b=bENOcOe3NzvVYR6Fw9mdhAa1IklO1eg5h9Z0blyYsy9aeLqKqVlAlku/LdUAdTsNSC
-         tGo9FzOMxMp6ps9Aqk4ANQdfxmT/Kpav7DyEqbaZRvDIUE3yBBI6kOmjQEeDjZH1WN0a
-         +g/9g/Ni4OYvdx8cKk7KsF+ebn5qcGB2F5snYmZincGLJn7CUmet4IwTNin9m0FpP6Bp
-         fgkE3Hnq7cRkYUMCgbkyP/mUWt+M+mg6hOkbz100BnJ2Mc8cFBOWxKkBVFwkcVHjTZGq
-         tcSbTh6h1pHp1a2r6Ov6QeFMoTbGhczUQWInbOaJi8D1JNgHaCmrEoJlsvtLcLT1PTth
-         LjYw==
-X-Gm-Message-State: AOJu0YwSFVVTXELe6Wtidg9ccyUcjj4hXzBze3yfYTfaErIYNFJn2P5k
-	NDp8xcOXzLGDp0XREjkzfb9QGl0otLnsh5EOPkPLv/RwllLcsF5c
-X-Google-Smtp-Source: AGHT+IEM8+IhRnbEgh6CVkE9SkTCRsB5VjLZ/73sTor5W2FxW+gQ7t5qenIiqSW+5QfvXvEzYzzs6w==
-X-Received: by 2002:a05:620a:1342:b0:785:3bbc:9ab4 with SMTP id c2-20020a05620a134200b007853bbc9ab4mr5127111qkl.1.1706900777459;
-        Fri, 02 Feb 2024 11:06:17 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCV00NAnQ/yL9cp8ABoYtzkXtnan8Kur/2rbF9JG3wGW+EleZeeWQC+vpIs9mGReRNQQqzlsz783gSalVkbCkJLX9RY+17ytj8GdkvaT4SLQv3ivzi/A4ZevMqwt678LnYxWKnNHuTxkdmPA+NdbKnLwLto=
-Received: from debian-BULLSEYE-live-builder-AMD64 (h64-35-202-119.cntcnh.broadband.dynamic.tds.net. [64.35.202.119])
-        by smtp.gmail.com with ESMTPSA id br14-20020a05620a460e00b007855df9feabsm374687qkb.3.2024.02.02.11.06.16
+        d=1e100.net; s=20230601; t=1706947953; x=1707552753;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4B4yVk7R4ltaRKppNYv78/2Ny52aC23vDArqAHZjJRE=;
+        b=meT77780VpLgk8Ok+dB/k3liM1lSUbvJa+yRGGlF4sOUMOKc+SHEhQNVjvooYXQv7B
+         7f3SFame1PGT7up7xLxk5kaJastkJjqpoTNjn86mPfR/l/cdgxVsMZbm5+Q1RDIysByM
+         g2XlLUyHiFy/otdPQ306yLktCMUm3w5AsBprX5YqCdG3+lQhceApudDRWJlz62V2vpFL
+         TPcni3emNoO0lyyPJGtg4fHwc1UpTehmjRF4GL2Ul5iKQb+JJepEe8DSLFGZ4oqqkz4v
+         Pyr9sO1bpcy4FtDaUtmFWDlqAJFfc3FUhwNB0/yZW7nYtlKVrzHVvz2XsxOknRI/fkyA
+         3OuQ==
+X-Gm-Message-State: AOJu0YyOHOyFAXvGfTave8VX4lTT44keTFOQxN+T0G+Xo/5ttRVDAPyu
+	B14SJz9hgq0/YKx+g2CwnW9R7h4vL1CRh819hTRcM86G9STRaDm0
+X-Google-Smtp-Source: AGHT+IGh0nV/u3+p6qSpzEbN/RE50qBWZD0kcYJzHAdy3xvx2cyxQxqUhqPkonXTGto21cGo1gc0QQ==
+X-Received: by 2002:a05:600c:1d23:b0:40f:2d7:287c with SMTP id l35-20020a05600c1d2300b0040f02d7287cmr495143wms.8.1706947952714;
+        Sat, 03 Feb 2024 00:12:32 -0800 (PST)
+X-Forwarded-Encrypted: i=0; AJvYcCUs2Nf+PV17Sjs8KLJH+2Mjxt9D0dYwFAMQ7VJ4PiC1EqrOQUpL7fbS1vftIJoEfW7/JcELzzZDQejVmvClDXSYdi27vcIyiuHtH4c5WvAEk7yIm1snUAVi0kqkEMVo2yrqgbuSS5EwAAH3wO0RIoV/Vpkop6Sr4nI=
+Received: from amir-ThinkPad-T480.lan (46-117-242-41.bb.netvision.net.il. [46.117.242.41])
+        by smtp.gmail.com with ESMTPSA id i11-20020a05600c354b00b0040fc76ed923sm2157637wmq.6.2024.02.03.00.12.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Feb 2024 11:06:17 -0800 (PST)
-Date: Fri, 2 Feb 2024 14:06:15 -0500
-From: Eric Whitney <enwlinux@gmail.com>
+        Sat, 03 Feb 2024 00:12:32 -0800 (PST)
+From: Amir Goldstein <amir73il@gmail.com>
 To: Zorro Lang <zlang@redhat.com>
-Cc: Eric Whitney <enwlinux@gmail.com>, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, tytso@mit.edu
-Subject: Re: [PATCH] generic/459: don't run on non-journaled ext4 file systems
-Message-ID: <Zb09Jy8KyxoBAnEN@debian-BULLSEYE-live-builder-AMD64>
-References: <20240124195306.1177737-1-enwlinux@gmail.com>
- <20240202131529.jn5z64qfm5r5ibte@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>,
+	Alexander Larsson <alexl@redhat.com>,
+	linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] overlay/084: Fix test to match new xwhiteouts dir on-disk format
+Date: Sat,  3 Feb 2024 10:12:28 +0200
+Message-Id: <20240203081228.1725872-1-amir73il@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240202131529.jn5z64qfm5r5ibte@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
 
-* Zorro Lang <zlang@redhat.com>:
-> On Wed, Jan 24, 2024 at 02:53:06PM -0500, Eric Whitney wrote:
-> > generic/459 fails when run on an ext4 file system created without a
-> > journal or when its journal has not been loaded at mount time.
-> > 
-> > The test expects that a file system that it has been unable to freeze
-> > will be automatically remounted read only.  However, the default error
-> > handling policy for ext4 is to continue when possible after errors.
-> > 
-> > A workaround was added to the test in the past to force ext4 to
-> > perform a read only remount in order to meet the test's expectations.
-> > The touch command was used to create a new file after a freeze failure.
-> > This forces ext4 to start a new journal transaction, where it discovers
-> > the journal has previously aborted due to lack of space, and triggers
-> > special case error handling that results in a read only remount.
-> > 
-> > The workaround requires a journal.  Since ext4 is behaving as designed,
-> > prevent the test from running if there isn't one.
-> > 
-> > Signed-off-by: Eric Whitney <enwlinux@gmail.com>
-> > ---
-> >  tests/generic/459 | 5 +++++
-> >  1 file changed, 5 insertions(+)
-> > 
-> > diff --git a/tests/generic/459 b/tests/generic/459
-> > index c3f0b2b0..63fbbc9b 100755
-> > --- a/tests/generic/459
-> > +++ b/tests/generic/459
-> > @@ -49,6 +49,11 @@ _require_command "$THIN_CHECK_PROG" thin_check
-> >  _require_freeze
-> >  _require_odirect
-> >  
-> > +# non-journaled ext4 won't remount read only after freeze failure
-> > +if [ "$FSTYP" == "ext4" ]; then
-> > +	_require_metadata_journaling
-> 
-> I'm wondering ... won't other fs need this, besides ext4?
+The xwhiteouts feature, which is tested in this test, was added to
+overlayfs in kernel v6.7.
 
-Thanks for looking at this patch.
+The on-disk format of the xwhiteouts directory was changed in kernel
+v6.8-rc2, specfically by commit 420332b94119 ("ovl: mark xwhiteouts
+directory with overlay.opaque='x'") and backported to kernel v6.7.3,
+so this test now fails on kernel >= v6.8-rc2 and => v6.7.3.
 
-I'd been mainly concerned with ext4, but since you mention it, ext2 and ext3
-ought to be added as well, since the failure behavior is similar.
+Adapt the test to the new on-disk format and add a hint to make sure
+that the on-disk format change is backported to v6.7 based kernels.
 
-The check for metadata journaling is limited to just ext4 here because the
-commit history for this test appears to suggest the touch command workaround
-is specific to ext4.  Perhaps the test should unconditionally require metadata
-journaling for all file system types, but given that I don't work with many
-other file systems I was uncomfortable asserting that in this patch.  If
-freezing any file system requires a metadata journal, then it would make
-sense to do that.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/084 | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-Your thoughts?
+diff --git a/tests/overlay/084 b/tests/overlay/084
+index 8465caeb..778396a1 100755
+--- a/tests/overlay/084
++++ b/tests/overlay/084
+@@ -25,6 +25,11 @@ _cleanup()
+ 
+ # real QA test starts here
+ _supported_fs overlay
++# This test does not run on kernels prior ro v6.7 and now it will also make sure
++# that the following on-disk format change was backported to v6.7 based kernels
++_fixed_by_kernel_commit 420332b94119 \
++	"ovl: mark xwhiteouts directory with overlay.opaque='x'"
++
+ # We use non-default scratch underlying overlay dirs, we need to check
+ # them explicity after test.
+ _require_scratch_nocheck
+@@ -115,7 +120,8 @@ do_test_xwhiteout()
+ 
+ 	mkdir -p $basedir/lower $basedir/upper $basedir/work
+ 	touch $basedir/lower/regular $basedir/lower/hidden  $basedir/upper/hidden
+-	setfattr -n $prefix.overlay.whiteouts -v "y" $basedir/upper
++	# overlay.opaque="x" means directory has xwhiteout children
++	setfattr -n $prefix.overlay.opaque -v "x" $basedir/upper
+ 	setfattr -n $prefix.overlay.whiteout -v "y" $basedir/upper/hidden
+ 
+ 	# Test the hidden is invisible
+-- 
+2.34.1
 
-Eric
-
-> 
-> > +fi
-> > +
-> >  vgname=vg_$seq
-> >  lvname=lv_$seq
-> >  poolname=pool_$seq
-> > -- 
-> > 2.30.2
-> > 
-> > 
-> 
