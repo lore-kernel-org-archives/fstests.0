@@ -1,225 +1,419 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FB0379DC
-	for <fstests@vger.kernel.org>; Sun,  4 Feb 2024 07:16:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 532C2224CA
+	for <fstests@vger.kernel.org>; Sun,  4 Feb 2024 13:01:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707030975; cv=none; b=pntuximeqcrMq4nVigBVg/tVzS5O4pg7IoOVIq3/f/aNvAedVYIHZJ1VJ6rREUvvwLC23djgLe8UvB2Lk06g+bTGYRbsYv2fD9/ZUcCW7/OfXdIdVBbJBs/2VMTsyHKtMMT0LDN3Gw51hcaYJcAVRcZiLw2YqViqsw1KCfsx+bo=
+	t=1707051682; cv=none; b=WY3DvYppfZNPVrzrxYHkp3t7epLKIMVbos/VNaW1X7Vc/nCN+IqcQdqLqnzzF9U6MPMJ1WGobrerWRdtCo/K83WG0MBkcrCZAoScFBdMDNVKsXPLBfq+gui2olIN1Y3m9XOogKlBnYd1E1UOq8saFp3kJ6VRotBirgzj2Go2tIU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707030975; c=relaxed/simple;
-	bh=dYeOQG+QUHxdtjaxKBk9OOGcGFH7+9lzVPeiLo6Ynl8=;
+	s=arc-20240116; t=1707051682; c=relaxed/simple;
+	bh=IN04zBPZ9GzPV3o+xFLba8DkLdtW8DainHN60aXhHc8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Xj/uMK4UfW30Cf3fWI92rB1fi7daJkw+jjZAsqAtQzmrz7ROx5H5TkdySAKbgJ/jKQib2rpe4qwTBonu5BrQcOdNf96v+Fz4mT3/ybz5MTa8D5n0ErhBqGrp+Pyxm3339rCdGH/NfxHOWpCdGNwhdrsGvA+54skFRBfkXAE1IWY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h9u65cXO; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=OT++McGc/Eq5T7BKmJE9Gr/xOsV5ivAOGcU04gxrXLz3+PHvgNJmmVIXSeDyQ85U2lOCAyaKBMxmQTwJ5gI7qMEMt/n+BocDA/YiWkAtX3KLm4PiheReN7u2SV99lZCFzKEmhT1bJjYcgUJan408MxDhmOQQ2x6VbCGoes7Kg/0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U0NQQsKv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h9u65cXO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1707030972;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=vlK3YajkS6vAuRFI/v29CUReV4AqGYEhTRG/C9e3Odk=;
-	b=h9u65cXOFc3hTzjR6Ldgs3TueUlXnM3bJOZ8ojikqXag48VoE6q9j5nJ66ABhNs7uPEBbd
-	S5fWF6cynkbTd79s2lze6U99Z3Qni9E+/RAhgWfMCkE2MJLPuAD+dtlEiCS7e1qLnt0gTh
-	M6yR21qcfEw7GXDaA/vFkaf5d7w4P78=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-661-mKUpf5RgPjmDubv3sjl1gA-1; Sun, 04 Feb 2024 02:16:11 -0500
-X-MC-Unique: mKUpf5RgPjmDubv3sjl1gA-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6e03bf3e3b0so178799b3a.1
-        for <fstests@vger.kernel.org>; Sat, 03 Feb 2024 23:16:11 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707030970; x=1707635770;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vlK3YajkS6vAuRFI/v29CUReV4AqGYEhTRG/C9e3Odk=;
-        b=i3EvEYlFRuEoLkjNS2YNWq2rt0AFJ0H7F08+eE8pgiN5eihctDN6Xpqlr5YKh0fKuS
-         kArZhdPP6oNA9mmFgRzTM+pkY4/n4LnsABd9aXHesrWZuPrpNZXYWRl+1dU66PaIgLjW
-         e7lFGzL4q06L+r6sCPa3Y+qPy1e1NYoAHBRlsyQwf013cQFwQhEY6iO2I4/JYsvBjwQV
-         Qn4M4+wygLLxPoYKaM/+Q6WRcfXW7hD7v18feHyK+nekJzXZh6jDZEOw2WHryEH/tByM
-         5AQsjZ9E/Y1iHZ2WN6mzCrJpbblPGOIUovQxZP9qHEk5vrNRj3Es7cv+AOgYiHUoh4AZ
-         4Zbg==
-X-Gm-Message-State: AOJu0YwFZ1VS7AhPc3yR5yVHdceUqQT17OkxpOwNpkeLoSc8h/W5lRmi
-	Bu1wBN56gZahVKj+S014p1Dj4OM0V4NWjiWy9S562TivwK9aBIqkW6fAyRBWQbnLFsE4RKssmCP
-	OO2GGs2PRbpfwIVcDn56uay/JLqzOwuVD3i0M9R5Vkb+i+8uhSSCwOlc=
-X-Received: by 2002:a62:ab04:0:b0:6da:ed17:bfa7 with SMTP id p4-20020a62ab04000000b006daed17bfa7mr2780472pff.6.1707030970395;
-        Sat, 03 Feb 2024 23:16:10 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFz/NKkl+W2C5dKEdzs7ZlWJPOOhNuQ8E4n6DDL8xAVhQIZcdfQ9KblOK/7Yvm0v007PhT/Sw==
-X-Received: by 2002:a62:ab04:0:b0:6da:ed17:bfa7 with SMTP id p4-20020a62ab04000000b006daed17bfa7mr2780456pff.6.1707030970006;
-        Sat, 03 Feb 2024 23:16:10 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCXms7r7HKG+sNWXoTWgqWUwNJTr8YYCEs5aVdj2A6Db4W4Ct4fbKRRyTxejE9gxRhYinyEgx1zfbLZPUVRj9ODjknvSwJYSUS9NLVusVYJKvDUnCePVQlcNVptjqK7vWrzM1cxDR/R5IRU=
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id s26-20020aa78d5a000000b006ddd31a701esm4490513pfe.19.2024.02.03.23.16.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 03 Feb 2024 23:16:09 -0800 (PST)
-Date: Sun, 4 Feb 2024 15:16:05 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: linux-btrfs@vger.kernel.org, Boris Burkov <boris@bur.io>,
-	kernel-team@fb.com, fstests@vger.kernel.org
-Subject: Re: [PATCH] btrfs: Remove btrfs/303
-Message-ID: <20240204071605.qt6famqusr7til43@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <a3f51f2fff6581a6b4dd2e5776b7f40d22dcf65b.1706039782.git.boris@bur.io>
- <20240202131120.q35fe45cmu5e3dqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAL3q7H7MsG8pLsrEeKOhtXPMw3psw3pFbTTn5k-LGLxLo2oCBg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U0NQQsKv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41991C433F1;
+	Sun,  4 Feb 2024 13:01:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1707051682;
+	bh=IN04zBPZ9GzPV3o+xFLba8DkLdtW8DainHN60aXhHc8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=U0NQQsKvdWL+Eit8ZiXqjwyMYHl3PmsYTO0EGJQHum4FKfuQLwgjaJobCT7VoBJkQ
+	 yjfLSFujEbOa/UJLcwUFhahYkNepArBB/wmfg/W0EcJzHT1Ocw4tNxicFcpdLBSqMZ
+	 BRsvyT90c/2dQqgM6wcAHwa1IMtj1ugFe4ieYWVX6JgXr+o4vWQaeHxEr0nk6jt1wO
+	 X7TGCVORCK5Jl31zPN5QmRpIUOrfLxkaLRsdEqfVkB1qtQNL5s27uPptBs3C6gG+/1
+	 DaOj5YULvNiK3XxnFgrV35DptVnSebc6dKEvYEAMLSCkmNT+bedgE0bsG3kOiopjjd
+	 qT9rbsOXaR0EA==
+Date: Sun, 4 Feb 2024 21:01:17 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Anthony Iliopoulos <ailiop@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] build: remove unused m4 macros
+Message-ID: <20240204130117.rtrkhuttkhobuk5f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240112164230.17283-1-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H7MsG8pLsrEeKOhtXPMw3psw3pFbTTn5k-LGLxLo2oCBg@mail.gmail.com>
+In-Reply-To: <20240112164230.17283-1-ailiop@suse.com>
 
-On Fri, Feb 02, 2024 at 02:51:09PM +0000, Filipe Manana wrote:
-> On Fri, Feb 2, 2024 at 1:11 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Tue, Jan 23, 2024 at 11:56:59AM -0800, Boris Burkov wrote:
-> > > This test was reproducing a bug triggered by creating a subvolume qgroup
-> > > before creating the subvolume itself with a snapshot.
-> > >
-> > > The kernel patch:
-> > > btrfs: forbid creating subvol qgroups
-> > >
-> > > explicitly prevents that and makes it fail with EINVAL. I could "fix"
-> > > this test by expecting the EINVAL message in the output, but at that
-> > > point it would simply be a test that creating a subvolume and
-> > > snapshotting it works with qgroups, which is adequately tested by other
-> > > tests which focus on accurately measuring shared/exclusive usage in
-> > > various snapshot/reflink scenarios. To avoid confusion, I think it is
-> > > best to simply delete this test.
-> > >
-> > > Signed-off-by: Boris Burkov
-> > > ---
-> >
-> > Just a reminder, this's a test deletion. To avoid test coverage decrease,
-> > I'd like to give it more time to get more reviewing of btrfs list. If no
-> > one has any concern, I'll merge it :)
+On Fri, Jan 12, 2024 at 05:42:30PM +0100, Anthony Iliopoulos wrote:
+> Remove a whole lot of unused m4 macros from the build system.
 > 
-> It's fine, it's the right thing to do.
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+> ---
 
-OK, thanks, I think two RVBs without any objection is good to this patch, I'll
-merge it.
+This cleanup is great, finally someone would like to help to clean
+these m4 macros things :) This patchset looks goot me, and test
+passed on Fedora and old RHEL-8, I think it's safe to merge this
+patch.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+But I can't test with all environments, if this change cause any
+regression to anyone, please feel free to report.
 
 Thanks,
 Zorro
 
+>  acinclude.m4            |  5 ---
+>  configure.ac            |  1 -
+>  m4/manual_format.m4     | 17 --------
+>  m4/package_libcdev.m4   | 95 -----------------------------------------
+>  m4/package_ncurses.m4   | 27 ------------
+>  m4/package_pthread.m4   | 19 ---------
+>  m4/package_types.m4     | 50 ----------------------
+>  m4/package_xfslibs.m4   | 28 ------------
+>  m4/visibility_hidden.m4 | 22 ----------
+>  9 files changed, 264 deletions(-)
+>  delete mode 100644 m4/manual_format.m4
+>  delete mode 100644 m4/package_ncurses.m4
+>  delete mode 100644 m4/package_pthread.m4
+>  delete mode 100644 m4/package_types.m4
+>  delete mode 100644 m4/visibility_hidden.m4
 > 
-> Thanks.
+> diff --git a/acinclude.m4 b/acinclude.m4
+> index fd92f0d53e95..7632e5cc882e 100644
+> --- a/acinclude.m4
+> +++ b/acinclude.m4
+> @@ -7,11 +7,6 @@ AC_DEFUN([AC_PACKAGE_WANT_LINUX_FIEMAP_H],
+>      AC_SUBST(have_fiemap)
+>    ])
+>  
+> -AC_DEFUN([AC_PACKAGE_WANT_LINUX_PRCTL_H],
+> -  [ AC_CHECK_HEADERS([sys/prctl.h], [ have_prctl=true ], [ have_prctl=false ])
+> -    AC_SUBST(have_prctl)
+> -  ])
+> -
+>  AC_DEFUN([AC_PACKAGE_WANT_LINUX_FS_H],
+>    [ AC_CHECK_HEADER([linux/fs.h])
+>    ])
+> diff --git a/configure.ac b/configure.ac
+> index b22fc52bffef..1a936997b32d 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -61,7 +61,6 @@ AC_PACKAGE_WANT_LIBCAP
+>  AC_PACKAGE_WANT_LINUX_FIEMAP_H
+>  AC_PACKAGE_WANT_FALLOCATE
+>  AC_PACKAGE_WANT_OPEN_BY_HANDLE_AT
+> -AC_PACKAGE_WANT_LINUX_PRCTL_H
+>  AC_PACKAGE_WANT_LINUX_FS_H
+>  AC_PACKAGE_WANT_LIBBTRFSUTIL
+>  
+> diff --git a/m4/manual_format.m4 b/m4/manual_format.m4
+> deleted file mode 100644
+> index 50c6a91480ab..000000000000
+> --- a/m4/manual_format.m4
+> +++ /dev/null
+> @@ -1,17 +0,0 @@
+> -# 
+> -# Find format of installed man pages.
+> -# Always gzipped on Debian, but not Redhat pre-7.0.
+> -# We don't deal with bzip2'd man pages, which Mandrake uses,
+> -# someone will send us a patch sometime hopefully. :-)
+> -# 
+> -AC_DEFUN([AC_MANUAL_FORMAT],
+> -  [ have_zipped_manpages=false
+> -    for d in ${prefix}/share/man ${prefix}/man ; do
+> -        if test -f $d/man1/man.1.gz
+> -        then
+> -            have_zipped_manpages=true
+> -            break
+> -        fi
+> -    done
+> -    AC_SUBST(have_zipped_manpages)
+> -  ])
+> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+> index d5d88b8e4462..a0d50f4d9b68 100644
+> --- a/m4/package_libcdev.m4
+> +++ b/m4/package_libcdev.m4
+> @@ -1,98 +1,3 @@
+> -# 
+> -# Check if we have a working fadvise system call
+> -# 
+> -AC_DEFUN([AC_HAVE_FADVISE],
+> -  [ AC_MSG_CHECKING([for fadvise ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#define _GNU_SOURCE
+> -#define _FILE_OFFSET_BITS 64
+> -#include <fcntl.h>
+> -    ]], [[
+> -	posix_fadvise(0, 1, 0, POSIX_FADV_NORMAL);
+> -    ]])],[have_fadvise=yes
+> -	AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_fadvise)
+> -  ])
+> -
+> -# 
+> -# Check if we have a working madvise system call
+> -# 
+> -AC_DEFUN([AC_HAVE_MADVISE],
+> -  [ AC_MSG_CHECKING([for madvise ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#define _GNU_SOURCE
+> -#define _FILE_OFFSET_BITS 64
+> -#include <sys/mman.h>
+> -    ]], [[
+> -	posix_madvise(0, 0, MADV_NORMAL);
+> -    ]])],[have_madvise=yes
+> -	AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_madvise)
+> -  ])
+> -
+> -# 
+> -# Check if we have a working mincore system call
+> -# 
+> -AC_DEFUN([AC_HAVE_MINCORE],
+> -  [ AC_MSG_CHECKING([for mincore ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#define _GNU_SOURCE
+> -#define _FILE_OFFSET_BITS 64
+> -#include <sys/mman.h>
+> -    ]], [[
+> -	mincore(0, 0, 0);
+> -    ]])],[have_mincore=yes
+> -	AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_mincore)
+> -  ])
+> -
+> -# 
+> -# Check if we have a working sendfile system call
+> -# 
+> -AC_DEFUN([AC_HAVE_SENDFILE],
+> -  [ AC_MSG_CHECKING([for sendfile ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#define _GNU_SOURCE
+> -#define _FILE_OFFSET_BITS 64
+> -#include <sys/sendfile.h>
+> -    ]], [[
+> -         sendfile(0, 0, 0, 0);
+> -    ]])],[have_sendfile=yes
+> -	AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_sendfile)
+> -  ])
+> -
+> -#
+> -# Check if we have a getmntent libc call (Linux)
+> -#
+> -AC_DEFUN([AC_HAVE_GETMNTENT],
+> -  [ AC_MSG_CHECKING([for getmntent ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#include <stdio.h>
+> -#include <mntent.h>
+> -    ]], [[
+> -         getmntent(0);
+> -    ]])],[have_getmntent=yes
+> -       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_getmntent)
+> -  ])
+> -
+> -#
+> -# Check if we have a getmntinfo libc call (FreeBSD, Mac OS X)
+> -#
+> -AC_DEFUN([AC_HAVE_GETMNTINFO],
+> -  [ AC_MSG_CHECKING([for getmntinfo ])
+> -    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+> -#include <sys/param.h>
+> -#include <sys/ucred.h>
+> -#include <sys/mount.h>
+> -    ]], [[
+> -         getmntinfo(0, 0);
+> -    ]])],[have_getmntinfo=yes
+> -       AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+> -    AC_SUBST(have_getmntinfo)
+> -  ])
+> -
+>  #
+>  #
+>  # Check if we have a copy_file_range system call (Linux)
+> diff --git a/m4/package_ncurses.m4 b/m4/package_ncurses.m4
+> deleted file mode 100644
+> index b220dd64122a..000000000000
+> --- a/m4/package_ncurses.m4
+> +++ /dev/null
+> @@ -1,27 +0,0 @@
+> -AC_DEFUN([AC_PACKAGE_NEED_NCURSES_H],
+> -  [ AC_CHECK_HEADERS([ncurses.h])
+> -    if test "$ac_cv_header_ncurses_h" != yes; then
+> -        echo
+> -        echo 'FATAL ERROR: could not find a valid ncurses header.'
+> -        echo 'Install the ncurses development package.'
+> -        exit 1
+> -    fi
+> -  ])
+> -
+> -AC_DEFUN([AC_PACKAGE_WANT_WORKING_LIBNCURSES],
+> -  [ AC_CHECK_LIB(ncurses, initscr,, [
+> -        echo
+> -        echo 'FATAL ERROR: could not find a valid ncurses library.'
+> -        echo 'Install the ncurses library package.'
+> -        exit 1
+> -    ])
+> -    AC_MSG_CHECKING([for bad glibc/ncurses header interaction])
+> -    libcurses="-lncurses"
+> -    LIBS="$LIBS $libcurses"
+> -    CFLAGS="$CFLAGS -D_GNU_SOURCE"
+> -    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+> -#include <ncurses.h>
+> -#include <signal.h>]], [[wgetch(stdscr);]])],[enable_curses=yes; AC_MSG_RESULT([ok])],[enable_curses=no; libcurses=""; AC_MSG_RESULT([disabling curses])])
+> -    AC_SUBST(enable_curses)
+> -    AC_SUBST(libcurses)
+> -  ])
+> diff --git a/m4/package_pthread.m4 b/m4/package_pthread.m4
+> deleted file mode 100644
+> index be21d2935170..000000000000
+> --- a/m4/package_pthread.m4
+> +++ /dev/null
+> @@ -1,19 +0,0 @@
+> -AC_DEFUN([AC_PACKAGE_NEED_PTHREAD_H],
+> -  [ AC_CHECK_HEADERS(pthread.h)
+> -    if test $ac_cv_header_pthread_h = no; then
+> -	AC_CHECK_HEADERS(pthread.h,, [
+> -	echo
+> -	echo 'FATAL ERROR: could not find a valid pthread header.'
+> -	exit 1])
+> -    fi
+> -  ])
+> -
+> -AC_DEFUN([AC_PACKAGE_NEED_PTHREADMUTEXINIT],
+> -  [ AC_CHECK_LIB(pthread, pthread_mutex_init,, [
+> -	echo
+> -	echo 'FATAL ERROR: could not find a valid pthread library.'
+> -	exit 1
+> -    ])
+> -    libpthread=-lpthread
+> -    AC_SUBST(libpthread)
+> -  ])
+> diff --git a/m4/package_types.m4 b/m4/package_types.m4
+> deleted file mode 100644
+> index 91db64e987e6..000000000000
+> --- a/m4/package_types.m4
+> +++ /dev/null
+> @@ -1,50 +0,0 @@
+> -# 
+> -# Check if we have a type for the pointer's size integer (__psint_t)
+> -# 
+> -AC_DEFUN([AC_TYPE_PSINT],
+> -  [ AC_MSG_CHECKING([for __psint_t ])
+> -    AC_TRY_COMPILE([
+> -#include <sys/types.h>
+> -#include <stdlib.h>
+> -#include <stddef.h>
+> -    ], [
+> -         __psint_t  psint;
+> -    ], AC_DEFINE(HAVE___PSINT_T) AC_MSG_RESULT(yes) , AC_MSG_RESULT(no))
+> -  ])
+> -
+> -# 
+> -# Check if we have a type for the pointer's size unsigned (__psunsigned_t)
+> -# 
+> -AC_DEFUN([AC_TYPE_PSUNSIGNED],
+> -  [ AC_MSG_CHECKING([for __psunsigned_t ])
+> -    AC_TRY_COMPILE([
+> -#include <sys/types.h>
+> -#include <stdlib.h>
+> -#include <stddef.h>
+> -    ], [
+> -        __psunsigned_t  psuint;
+> -    ], AC_DEFINE(HAVE___PSUNSIGNED_T) AC_MSG_RESULT(yes) , AC_MSG_RESULT(no))
+> -  ])
+> -
+> -# 
+> -# Check type sizes
+> -# 
+> -AC_DEFUN([AC_SIZEOF_POINTERS_AND_LONG],
+> -  [ if test "$cross_compiling" = yes -a -z "$ac_cv_sizeof_long"; then
+> -      AC_MSG_WARN([Cross compiling; assuming 32bit long and 32bit pointers])
+> -    fi
+> -    AC_CHECK_SIZEOF(long, 4)
+> -    AC_CHECK_SIZEOF(char *, 4)
+> -    if test $ac_cv_sizeof_long -eq 4 -o $ac_cv_sizeof_long -eq 0; then
+> -      AC_DEFINE(HAVE_32BIT_LONG)
+> -    fi
+> -    if test $ac_cv_sizeof_long -eq 8; then
+> -      AC_DEFINE(HAVE_64BIT_LONG)
+> -    fi
+> -    if test $ac_cv_sizeof_char_p -eq 4 -o $ac_cv_sizeof_char_p -eq 0; then
+> -      AC_DEFINE(HAVE_32BIT_PTR)
+> -    fi
+> -    if test $ac_cv_sizeof_char_p -eq 8; then
+> -      AC_DEFINE(HAVE_64BIT_PTR)
+> -    fi
+> -  ])
+> diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
+> index 1549360df60f..2f1dbc695186 100644
+> --- a/m4/package_xfslibs.m4
+> +++ b/m4/package_xfslibs.m4
+> @@ -50,34 +50,6 @@ AC_DEFUN([AC_PACKAGE_NEED_XFS_HANDLE_H],
+>      fi
+>    ])
+>  
+> -AC_DEFUN([AC_PACKAGE_NEED_LIBXFSINIT_LIBXFS],
+> -  [ AC_CHECK_LIB(xfs, libxfs_init,, [
+> -        echo
+> -        echo 'FATAL ERROR: could not find a valid XFS base library.'
+> -        echo 'Install or upgrade the XFS library package.'
+> -        echo 'Alternatively, run "make install-dev" from the xfsprogs source.'
+> -        exit 1
+> -    ])
+> -    libxfs="-lxfs"
+> -    test -f ${libexecdir}${libdirsuffix}/libxfs.la && \
+> -	libxfs="${libexecdir}${libdirsuffix}/libxfs.la"
+> -    AC_SUBST(libxfs)
+> -  ])
+> -
+> -AC_DEFUN([AC_PACKAGE_NEED_OPEN_BY_FSHANDLE],
+> -  [ AC_CHECK_LIB(handle, open_by_fshandle,, [
+> -        echo
+> -        echo 'FATAL ERROR: could not find a current XFS handle library.'
+> -        echo 'Install or upgrade the XFS library package.'
+> -        echo 'Alternatively, run "make install-dev" from the xfsprogs source.'
+> -        exit 1
+> -    ])
+> -    libhdl="-lhandle"
+> -    test -f ${libexecdir}${libdirsuffix}/libhandle.la && \
+> -	libhdl="${libexecdir}${libdirsuffix}/libhandle.la"
+> -    AC_SUBST(libhdl)
+> -  ])
+> -
+>  AC_DEFUN([AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE],
+>    [ AC_CHECK_LIB(handle, attr_list_by_handle,, [
+>          echo
+> diff --git a/m4/visibility_hidden.m4 b/m4/visibility_hidden.m4
+> deleted file mode 100644
+> index bfd74e4b64e6..000000000000
+> --- a/m4/visibility_hidden.m4
+> +++ /dev/null
+> @@ -1,22 +0,0 @@
+> -AC_DEFUN([AC_FUNC_GCC_VISIBILITY],
+> -  [AC_CACHE_CHECK(whether __attribute__((visibility())) is supported,
+> -		  libc_cv_visibility_attribute,
+> -		  [cat > conftest.c <<EOF
+> -		   int foo __attribute__ ((visibility ("hidden"))) = 1;
+> -		   int bar __attribute__ ((visibility ("protected"))) = 1;
+> -EOF
+> -		  libc_cv_visibility_attribute=no
+> -		  if ${CC-cc} -Werror -S conftest.c -o conftest.s \
+> -			>/dev/null 2>&1; then
+> -		    if grep '\.hidden.*foo' conftest.s >/dev/null; then
+> -		      if grep '\.protected.*bar' conftest.s >/dev/null; then
+> -			libc_cv_visibility_attribute=yes
+> -		      fi
+> -		    fi
+> -		  fi
+> -		  rm -f conftest.[cs]
+> -		  ])
+> -   if test $libc_cv_visibility_attribute = yes; then
+> -     AC_DEFINE(HAVE_VISIBILITY_ATTRIBUTE, [], [GCC supports visibility attributes])
+> -   fi
+> -  ])
+> -- 
+> 2.41.0
 > 
-> >
-> > >  tests/btrfs/303     | 77 ---------------------------------------------
-> > >  tests/btrfs/303.out |  2 --
-> > >  2 files changed, 79 deletions(-)
-> > >  delete mode 100755 tests/btrfs/303
-> > >  delete mode 100644 tests/btrfs/303.out
-> > >
-> > > diff --git a/tests/btrfs/303 b/tests/btrfs/303
-> > > deleted file mode 100755
-> > > index 410460af5..000000000
-> > > --- a/tests/btrfs/303
-> > > +++ /dev/null
-> > > @@ -1,77 +0,0 @@
-> > > -#! /bin/bash
-> > > -# SPDX-License-Identifier: GPL-2.0
-> > > -# Copyright (C) 2023 SUSE Linux Products GmbH. All Rights Reserved.
-> > > -#
-> > > -# FS QA Test 303
-> > > -#
-> > > -# A regression test to make sure snapshot creation won't cause transaction
-> > > -# abort if there is already an existing qgroup.
-> > > -#
-> > > -. ./common/preamble
-> > > -_begin_fstest auto quick snapshot subvol qgroup
-> > > -
-> > > -. ./common/filter
-> > > -
-> > > -_supported_fs btrfs
-> > > -_require_scratch
-> > > -
-> > > -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > -     "btrfs: do not abort transaction if there is already an existing qgroup"
-> > > -
-> > > -_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> > > -_scratch_mount
-> > > -
-> > > -# Create the first subvolume and get its id.
-> > > -# This subvolume id should not change no matter if there is an existing
-> > > -# qgroup for it.
-> > > -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> > > -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> > > -     "$SCRATCH_MNT/snapshot">> $seqres.full
-> > > -
-> > > -init_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> > > -
-> > > -if [ -z "$init_subvolid" ]; then
-> > > -     _fail "Unable to get the subvolid of the first snapshot"
-> > > -fi
-> > > -
-> > > -echo "Subvolumeid: ${init_subvolid}" >> $seqres.full
-> > > -
-> > > -_scratch_unmount
-> > > -
-> > > -# Re-create the fs, as btrfs won't reuse the subvolume id.
-> > > -_scratch_mkfs >> $seqres.full 2>&1 || _fail "2nd mkfs failed"
-> > > -_scratch_mount
-> > > -
-> > > -$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" >> $seqres.full
-> > > -_qgroup_rescan $SCRATCH_MNT >> $seqres.full
-> > > -
-> > > -# Create a qgroup for the first subvolume, this would make the later
-> > > -# subvolume creation to find an existing qgroup, and abort transaction.
-> > > -$BTRFS_UTIL_PROG qgroup create 0/"$init_subvolid" "$SCRATCH_MNT" >> $seqres.full
-> > > -
-> > > -# Now create the first snapshot, which should have the same subvolid no matter
-> > > -# if the quota is enabled.
-> > > -$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/subvol" >> $seqres.full
-> > > -$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/subvol" \
-> > > -     "$SCRATCH_MNT/snapshot" >> $seqres.full
-> > > -
-> > > -# Either the snapshot create failed and transaction is aborted thus no
-> > > -# snapshot here, or we should be able to create the snapshot.
-> > > -new_subvolid=$(_btrfs_get_subvolid "$SCRATCH_MNT" "snapshot")
-> > > -
-> > > -echo "Subvolumeid: ${new_subvolid}" >> $seqres.full
-> > > -
-> > > -if [ -z "$new_subvolid" ]; then
-> > > -     _fail "Unable to get the subvolid of the first snapshot"
-> > > -fi
-> > > -
-> > > -# Make sure the subvolumeid for the first snapshot didn't change.
-> > > -if [ "$new_subvolid" -ne "$init_subvolid" ]; then
-> > > -     _fail "Subvolumeid for the first snapshot changed, has ${new_subvolid} expect ${init_subvolid}"
-> > > -fi
-> > > -
-> > > -echo "Silence is golden"
-> > > -
-> > > -# success, all done
-> > > -status=0
-> > > -exit
-> > > diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
-> > > deleted file mode 100644
-> > > index d48808e60..000000000
-> > > --- a/tests/btrfs/303.out
-> > > +++ /dev/null
-> > > @@ -1,2 +0,0 @@
-> > > -QA output created by 303
-> > > -Silence is golden
-> > > --
-> > > 2.43.0
-> > >
-> > >
-> >
-> >
 > 
-
