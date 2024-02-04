@@ -1,144 +1,203 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AA0222337
-	for <fstests@vger.kernel.org>; Sun,  4 Feb 2024 13:15:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A08522615
+	for <fstests@vger.kernel.org>; Sun,  4 Feb 2024 14:23:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707052531; cv=none; b=J2r8hGo7RuyNb9xgKnvvcZFDXkg7G7rkDFFWHdlOOKCibpfk90E+vQl2DlK2dTOZu/dpzumSK74GAE+jAHEjO6glG4zUalRxRRng9LRtGpn8FlSZ6xWVAEmpPBF1pRQeN0C5rI6ObThywrCtRfzrII1yKBAWzJPZw40Qjc03YHs=
+	t=1707056632; cv=none; b=M0JGtDJGqx2GtnysuyjY4s9J5FQvzQ9e9/Ib2Cgq3mqVIGH9v6scrhoxJQjLBdpq3S1/lvfdf8JAc6tdr+6dcq/IgZ/WIJbghe3o/19OVQlfkoMfmtyIgJrLOAhM3INOz4LKcKZsZDY4/cHqcm/+tu8ZubcG9lc8GaO8Fuqntn0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707052531; c=relaxed/simple;
-	bh=CoHXpdBjd4fWUj/c5qQ8LMn61AkWL0vC3uZ+k84u5aE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=P/z0o+n1QaIPUZu1P7uoC9SOAYkCI8wVO3nZ5HTjbiW9ya03hStkjE0JpOP1ZWmVQxjW8EFVEUDOpH8V/v4/a25JREoIyfR997doA/FtIckmBAKh0ft2mf4JJJtEzdZOmduSmK/PfqPOJWHjRAy4fkdXjXaq06dAYc1wLXvdPrk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GV3mDcM+; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1707056632; c=relaxed/simple;
+	bh=CjEJuyFJsTnFhSqjDWXzkz2KUyUnoIflgZ5EX+wQksw=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=tZNbMQO0V2WaLLpwYzHlIgUska86y0mKyNGMOlXuaRPweCE7V4Z4+ElKVAoz9OYHqdjWWf+Bu/48HWKN13AltCIQrJBAL9HABkpXbrEM4WSRNTg7E58R5HqoRC16lLcvO3WRD72Vh+vRBlVLoilazA6qyUjgcQjf2MDEVeRpJIA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jN9SzI/G; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GV3mDcM+"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1707052527;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=lxyP1JsFMLPRUoWk0k5pEtCyUPIcZiMCq+pimvMnsVg=;
-	b=GV3mDcM+VBvlAE2O1RWTDxHbPOfHFDqd4KL5afCmBxD8OpGJ5sfV8Zik7rOIMSCzivFtbz
-	jgA6ARt4ElpWN6U+w7sorHUik8Z48FhVuM1fa08qxsJp5RJToQYufgqf7gQg22pkDxXvtD
-	/lBf/5Fr8ojV6D+6oAbtzeTMUShBDCU=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-459-zN4ddls5Mri8CKthTvCAYQ-1; Sun, 04 Feb 2024 08:15:26 -0500
-X-MC-Unique: zN4ddls5Mri8CKthTvCAYQ-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-6e02aaa5a15so658601b3a.3
-        for <fstests@vger.kernel.org>; Sun, 04 Feb 2024 05:15:25 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707052525; x=1707657325;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lxyP1JsFMLPRUoWk0k5pEtCyUPIcZiMCq+pimvMnsVg=;
-        b=meICj98UKe2gFacesDAddgrYMTuUoT+17kzKy8jxZEppfmlh8h/925D3l5tv+U+MLp
-         YN1uFskre6WDVvquAmxTDvpULk5tDmWpy0vkW/hffACAWr0C9/K8k/4QZSQzPRRm73iQ
-         JmRyc1HVe7VReq1ZUNfj/QdevkVJcwoMlYhji6NkLlDVUbqtr996M5QiXtVZfiDLHUQH
-         V1V0mI9P0qkOJwRl/IfceHxmYzrCUsWVrpG1JAwmDkuxRgM10l2Gg5gKf13COY9LQiQz
-         rKq6tPsAM/hjlo4jpCcjBqMNzjTyd3nZKRXBDd3vegyoRW9KwOSOHgaLs4ha9+4IF0DX
-         7enA==
-X-Gm-Message-State: AOJu0YzcP6pII/Q7o+PVHADuvpawffSQuc3EAyDGsvc4LqvXRD+dDfDi
-	TULo9ou/Klj77qotTF7nb04RAqsWijo/K1kcv4jI6i8u1IEorp5TWtFohgsXzhYyPdG6shanPql
-	4QKZpzMSqyvI4L5LAUBA3IxhzQZE7/ws7ZcHfsNDDuOZiDxVgGb0h00o=
-X-Received: by 2002:a05:6a20:4393:b0:19c:ae4c:1757 with SMTP id i19-20020a056a20439300b0019cae4c1757mr7058218pzl.52.1707052525002;
-        Sun, 04 Feb 2024 05:15:25 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHillRBxEnghE7mYJ3gj+fGKT62tHMay+Pp6uivYAIanVjZ99nOfjKV532TLL1l/4QP9oz/oA==
-X-Received: by 2002:a05:6a20:4393:b0:19c:ae4c:1757 with SMTP id i19-20020a056a20439300b0019cae4c1757mr7058206pzl.52.1707052524630;
-        Sun, 04 Feb 2024 05:15:24 -0800 (PST)
-X-Forwarded-Encrypted: i=0; AJvYcCUk+312/AzI5SqOv46D9p4PGcpkytsM/MnH0ROcIvvo3xqVt4JnkVnyn77PFcPTuDmAvAxjb+70HgDwzbIf+94eI4f02KNTql3NxK0=
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id g8-20020a056a0023c800b006ddb0b0ff0dsm4776259pfc.34.2024.02.04.05.15.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Feb 2024 05:15:24 -0800 (PST)
-Date: Sun, 4 Feb 2024 21:15:21 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Yang Xu <xuyang2018.jy@fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2] t_snapshot_deleted_subvolume: add check for
- BTRFS_IOC_SNAP_DESTROY_V2
-Message-ID: <20240204131521.wnueevl6y4snk5lx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240201042348.147733-1-xuyang2018.jy@fujitsu.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jN9SzI/G"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D10DC433F1;
+	Sun,  4 Feb 2024 14:23:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1707056631;
+	bh=CjEJuyFJsTnFhSqjDWXzkz2KUyUnoIflgZ5EX+wQksw=;
+	h=Date:From:To:Subject:From;
+	b=jN9SzI/G6IcJEYPj4ep7DJoes4Wvmcj2woa5mIh6htSmJzwqpjv96DEo4+Y/jvokd
+	 tzTkSRn1737bjdJ0tw1DCoU05xuQmTDtpWKtLAaCE9D14z2USeOUoc8/mY12I1YQ8T
+	 DXCDs6TEa+CafxAX5OfKbNipTvoRVfIDhBp8hOuqQuFXhF06GOuqptsPcYyDyqousu
+	 BbZg4HpSr4jAYXeUMrqMmA2bUXKHPd3mOXTM4KLVOy7QzIU088swypAddvKTgjF/+F
+	 NHucS4+0mIlCMTLAi48QYcD09UL1TOAR8BOMNqp3bEE990aUj8JnR1P/a7u/Bqeetp
+	 2dYVRklKy77aA==
+Date: Sun, 04 Feb 2024 22:23:48 +0800
+Message-ID: <da480c1cbd70a88598f5d445e1f76469@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.01.14 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="cgdfwFX15KAF"
+Content-Disposition: inline
+
+
+--cgdfwFX15KAF
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240201042348.147733-1-xuyang2018.jy@fujitsu.com>
 
-On Wed, Jan 31, 2024 at 11:23:48PM -0500, Yang Xu wrote:
-> On some platform, struct btrfs_ioctl_vol_args_v2 is defined, but the
-> macros BTRFS_IOC_SNAP_DESTROY_V2 is not defined. This will cause
-> compile error. Add check for BTRFS_IOC_SNAP_DESTROY_V2 to solve this
-> problem.
-> 
-> BTRFS_IOC_SNAP_CREATE_V2 and BTRFS_IOC_SUBVOL_CREATE_V2 were
-> introduced together with struct btrfs_ioctl_vol_args_v2 by the
-> commit 55e301fd57a6 ("Btrfs: move fs/btrfs/ioctl.h to
-> include/uapi/linux/btrfs.h"). So there is no need to check them.
-> 
-> Signed-off-by: Yang Xu <xuyang2018.jy@fujitsu.com>
-> ---
+Hi all,
 
-This patch is good to me, and test passed on rhel-8.
+The master branch of the xfstests repository at:
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
->  configure.ac                       |  1 +
->  src/t_snapshot_deleted_subvolume.c | 10 +++++-----
->  2 files changed, 6 insertions(+), 5 deletions(-)
-> 
-> diff --git a/configure.ac b/configure.ac
-> index b22fc52b..b14b1ab8 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -109,6 +109,7 @@ AC_CHECK_MEMBERS([struct btrfs_ioctl_vol_args_v2.subvolid], [], [], [[
->  #include <stddef.h>
->  #include <linux/btrfs.h>
->  ]])
-> +AC_CHECK_DECLS([BTRFS_IOC_SNAP_DESTROY_V2],,,[#include <linux/btrfs.h>])
->  
->  AC_CONFIG_HEADERS([include/config.h])
->  AC_CONFIG_FILES([include/builddefs])
-> diff --git a/src/t_snapshot_deleted_subvolume.c b/src/t_snapshot_deleted_subvolume.c
-> index c3adb1c4..402c0515 100644
-> --- a/src/t_snapshot_deleted_subvolume.c
-> +++ b/src/t_snapshot_deleted_subvolume.c
-> @@ -20,11 +20,6 @@
->  #define BTRFS_IOCTL_MAGIC 0x94
->  #endif
->  
-> -#ifndef BTRFS_IOC_SNAP_DESTROY_V2
-> -#define BTRFS_IOC_SNAP_DESTROY_V2 \
-> -	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
-> -#endif
-> -
->  #ifndef BTRFS_IOC_SNAP_CREATE_V2
->  #define BTRFS_IOC_SNAP_CREATE_V2 \
->  	_IOW(BTRFS_IOCTL_MAGIC, 23, struct btrfs_ioctl_vol_args_v2)
-> @@ -58,6 +53,11 @@ struct btrfs_ioctl_vol_args_v2 {
->  };
->  #endif
->  
-> +#if !HAVE_DECL_BTRFS_IOC_SNAP_DESTROY_V2
-> +#define BTRFS_IOC_SNAP_DESTROY_V2 \
-> +	_IOW(BTRFS_IOCTL_MAGIC, 63, struct btrfs_ioctl_vol_args_v2)
-> +#endif
-> +
->  int main(int argc, char **argv)
->  {
->  	if (argc != 2) {
-> -- 
-> 2.39.3
-> 
-> 
+has just been updated to v2024.01.14 version.
 
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+c46ca4d1f6c0 generic: add test for custom crypto data unit size
+
+New commits:
+
+Amir Goldstein (1):
+      [a5c3a12796cf] overlay: create helper _overlay_scratch_mount_opts()
+
+Anand Jain (1):
+      [08dbb837f1a8] common: add _filter_trailing_whitespace
+
+Andreas Gruenbacher (1):
+      [3b2312704846] generic/390: Fix test number in comment
+
+Chandan Babu R (5):
+      [e443cadcea48] common/xfs: Do not append -a and -o options to metadump
+      [b0d63321c777] common/xfs: Add function to detect support for metadump v2
+      [5011eb3e04e8] _scratch_xfs_mdrestore: Pass scratch log device when applicable
+      [15356e83bed7] xfs: Add support for testing metadump v2
+      [045050256e1a] xfs: Check correctness of metadump/mdrestore's ability to work with dirty log
+
+Christoph Hellwig (4):
+      [4d04485207fe] xfs: check that the mountpoint is actually mounted in _supports_xfs_scrub
+      [e0864962b2d6] xfs: add a _require_scratch_xfs_scrub helper
+      [35c3794f9d92] xfs/262: call _require_scratch_xfs_scrub
+      [ab0c766d2017] xfs/506: call _require_scratch_xfs_scrub
+
+Chung-Chiang Cheng (1):
+      [66c7b4a49404] README: add a missing necessary package
+
+Eric Biggers (4):
+      [72dad8092e62] fscrypt-crypt-util: rename block to data unit
+      [8716ac9a3eea] common/rc: fix _require_xfs_io_command with digits in argument
+      [077698f5211d] common/encrypt: support custom data unit size
+      [c46ca4d1f6c0] generic: add test for custom crypto data unit size
+
+Filipe Manana (1):
+      [b35af508fb98] btrfs/303: add git commit ID to _fixed_by_kernel_commit
+
+Jeff Layton (2):
+      [8729dc6d13cb] generic/465: don't run it on NFS
+      [4fd042e0465c] generic/732: don't run it on NFS
+
+Johannes Thumshirn (9):
+      [103e0a619bdc] fstests: doc: add new raid-stripe-tree group
+      [81af9975ac4d] common: add _require_btrfs_no_nodatacow helper
+      [91cb623078b3] common: add _require_btrfs_free_space_tree
+      [807b93a1cec7] common: add filter for btrfs raid-stripe dump
+      [9d812702919c] btrfs: add fstest for stripe-tree metadata with 4k write
+      [ba96d1853ac0] btrfs: add fstest for 8k write spanning two stripes on raid-stripe-tree
+      [102b2efcf91e] btrfs: add fstest for writing to a file at an offset with RST
+      [477f3f136125] btrfs: add fstests to write 128k to a RST filesystem
+      [26990e6db2a6] btrfs: add fstest for overwriting a file partially with RST
+
+Omar Sandoval (1):
+      [3a0381a4595e] btrfs: test snapshotting a deleted subvolume
+
+
+Code Diffstat:
+
+ .gitignore                         |   1 +
+ README                             |   3 +-
+ common/btrfs                       |  17 ++++
+ common/encrypt                     |  42 ++++++---
+ common/filter                      |   5 ++
+ common/filter.btrfs                |  15 ++++
+ common/overlay                     |   8 +-
+ common/populate                    |   2 +-
+ common/rc                          |   2 +-
+ common/xfs                         |  42 +++++++--
+ doc/group-names.txt                |   1 +
+ src/Makefile                       |   2 +-
+ src/fscrypt-crypt-util.c           |  93 +++++++++----------
+ src/t_snapshot_deleted_subvolume.c | 102 +++++++++++++++++++++
+ tests/btrfs/303                    |   2 +-
+ tests/btrfs/304                    |  58 ++++++++++++
+ tests/btrfs/304.out                |  58 ++++++++++++
+ tests/btrfs/305                    |  63 +++++++++++++
+ tests/btrfs/305.out                |  82 +++++++++++++++++
+ tests/btrfs/306                    |  61 +++++++++++++
+ tests/btrfs/306.out                |  75 ++++++++++++++++
+ tests/btrfs/307                    |  58 ++++++++++++
+ tests/btrfs/307.out                |  65 ++++++++++++++
+ tests/btrfs/308                    |  62 +++++++++++++
+ tests/btrfs/308.out                | 106 ++++++++++++++++++++++
+ tests/btrfs/309                    |  27 ++++++
+ tests/btrfs/309.out                |   2 +
+ tests/f2fs/002                     |   6 +-
+ tests/generic/390                  |   2 +-
+ tests/generic/465                  |   2 +-
+ tests/generic/732                  |   4 +-
+ tests/generic/739                  |  31 +++++++
+ tests/generic/739.out              |  11 +++
+ tests/overlay/011                  |   2 +-
+ tests/overlay/035                  |   3 +-
+ tests/overlay/052                  |   4 +-
+ tests/overlay/053                  |   4 +-
+ tests/overlay/062                  |   2 +-
+ tests/overlay/079                  |   4 +-
+ tests/overlay/085                  |   4 +-
+ tests/xfs/129                      |  97 +++++++++++++++++---
+ tests/xfs/129.out                  |   4 +-
+ tests/xfs/234                      |  97 +++++++++++++++++---
+ tests/xfs/234.out                  |   4 +-
+ tests/xfs/253                      | 118 ++++++++++++++++++++----
+ tests/xfs/262                      |   3 +
+ tests/xfs/291                      |  25 +++++-
+ tests/xfs/336                      |   2 +-
+ tests/xfs/432                      |  29 ++++--
+ tests/xfs/432.out                  |   3 +-
+ tests/xfs/503                      |  96 ++++++++++++--------
+ tests/xfs/503.out                  |  12 +--
+ tests/xfs/506                      |   3 +
+ tests/xfs/556                      |   2 +-
+ tests/xfs/605                      | 178 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/605.out                  |  14 +++
+ tests/xfs/716                      |   2 +-
+ 57 files changed, 1628 insertions(+), 194 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--cgdfwFX15KAF
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmW/nbgACgkQlNbPkfr2
+tMzOdRAAnZtxImd6HAPFC4TzG+TwINgzivsRM5vwpMa4Ww1TxC5Av1Bcte2K4D/A
+ST12fZfTrhoU8w2Wy9y4PkFy2fliGk1CM7U57CBM3hb62MXBsqZ5wslORCY2gFH0
+FzA/elATj/GGGXbwKTdHIcYzcgG+3reX9mW8DkYh850O0ITpxIo6uCb0QV1ZHV7p
+inxkUrS+cHyJy4/XxOqBk+UPOYWqZQKRTZXu+baS18B24IVGbKSCFHC4PD2isO/e
+RAS0FznSwzRQkGLScmGVBKfgdondo0/BAVwjdznrplMjE4P4ZTlJ62sXEYuaGSQ5
+RwycId9GTZejvLmyux6baTS8CyzSF5X726k8IcMGu7d30KYJUXGTwObwTSdfRDLn
+suviR6rJDZ5pxNO/jxdBjq711fUD4J6mdszdoWU5Tlz9z+On3JxdHIlWe6Hz7qbV
+tyt0pYmVzNbe+sTURj9vfJNvBSJzh2zq8Vw5k+srAI3RKHTQImG5zIawvh4bs8yE
+nkXSAuiEYUMBTmPpioR9buxkHtZWmjiYv6QMcbgrTSHtz+gs9JlsiA1NiWn/o/4M
+7ViQwT8mN/GlvAIH8XOKjbi/wSuJ13usfP1A7TOpVZCkdtS4bZ1rQMRbOMaxOzS1
+sbkc9CfoKqW00eSFYyc+PrHbynYoHJqeDMQK01gn0QFzjYCyBFs=
+=Urx3
+-----END PGP SIGNATURE-----
+
+--cgdfwFX15KAF--
