@@ -1,210 +1,161 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3061D168BC
-	for <fstests@vger.kernel.org>; Mon,  5 Feb 2024 10:20:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B4551B962;
+	Mon,  5 Feb 2024 12:26:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707128412; cv=none; b=j7AOjr6S66TBKbYl1t872IvMW49YRXCSxTiKla1Qg+zy4AE+eVImPl2usXVrwsL5QQX+EXE25Z0v1RhwNtAOlADp5UgiT3B3kLEAARkewAfweZMnA9b+ncguCdKFsIaGFjoS9yfi3p/a/ZK9Fxo4Rs9HXGEC412Iq2p0vLeFOxo=
+	t=1707135974; cv=none; b=t0nCd4RX5+xIwaa35Fe6JOu8BTsYp/mZAOVar88M7U+u3mR4MQEiyJK2dYdLS+GvkU6RnlGsO5hDBQBj8h1fHKtRNE4cHbmj2Jozj2WDKum36V56cYNi7cEVd++00QWIZocE4fsAY+iD4hGBXnVIfG4X7YohumLxYbEZvPXYUww=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707128412; c=relaxed/simple;
-	bh=W8dtk/ZfJxIciXcF5AlukCQc7upicpTsU5u9EryhCC8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=cBzp7bR0+LqLxVpuJyfYdRTEAeTSrCe6Jz0/br7BjgWUpz7/IxV0S+96WFMIXWo7xZbliiaZ4qym8GxOd4ko4AO8FpJOTkaL3MHcEnZO5AeIQhAoOjK9DCADEqtwxzF52grY2EX3IVkWu70O+8p1M8Xk5CV8jjhlGfjZI8UmEKU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=T0ZpOKlh; arc=none smtp.client-ip=209.85.219.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1707135974; c=relaxed/simple;
+	bh=/WWD3To6u+eCPZpMGJRKkDX3WCOFpVPIyW/rSDLnnps=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=Vv4VeibTmlijKx4ZmOfYuuXkBL4XImQSAU7mPcb+Ddcw1vI/WyNVNeazOaj+DsCW4ElPqs/P93wUFzKptaiuzghXaoinpnU+lfSDkAFFttGD/Wjce6G2xLkYLdTQRWglPjpbtWTs/Pqwyv0uD4/wBOdjkcT6+zpUpIdlh0QNXfQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ft2O+wOB; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=VznUUhDs; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ft2O+wOB; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=VznUUhDs; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="T0ZpOKlh"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-dc6de8a699dso3542227276.3
-        for <fstests@vger.kernel.org>; Mon, 05 Feb 2024 02:20:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1707128409; x=1707733209; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=9B/1RGrzSE9AJz8jGcBCjeQb3xtzTlyR6MqQOaTtCeE=;
-        b=T0ZpOKlhld5pFf2J4r/Uo8zG9pLRVDyRjd9j1W8RyDOkaxFlU73JK5soOkqjOgDWXq
-         AkhXnmbVZY5vKFFGZqqO8r1HbxwamzlIkH8+h8u21FsAm9liOLHcWrv8GVUPHc7br65C
-         JBl60C24XmpTo/+3hi3BYlS9XMZSyHs1kS80kovjQqfJTdWHz1sMNQQh7zjvY5yrBU5t
-         3cESH2Z+sPMzvCFDqjE4SYdSE9PdieL1AjRRU8CKz76bfm2QA5aKvG3EpSkI4ZzT8S49
-         Arng6Nu/PicXEJtgANDieACUbGPqTYH688RZZ9EyVFUitl0rcRkVCwkc2931XyX2LfaH
-         dlgQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1707128409; x=1707733209;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=9B/1RGrzSE9AJz8jGcBCjeQb3xtzTlyR6MqQOaTtCeE=;
-        b=MYLBnhsBuatfkHmf4sMaQN+CDxHA0LUJkcmVVYKuWU/JiM+queuUGQSkIQhm+ujAuj
-         Cm49MrZvMFnrTcwyMMVg6lnDtix6jVGaRveEgE4CdLEl7DgCNuwYQLtk9xVI78xuegsl
-         gxxDzVyljvOipxTDJqNbPBKg7lc96iqRlwXy+rUS5gJ0qmPZ6nsCCuGzXrmq5xn/Qs1d
-         IZCA2QqO7vdyH6SdN6BMPRZL0ojcYmAOzLDrMf+8vdLTS0Hdkwkxuuv5AwZDEO3n9/1Q
-         gp57rGy7cnGTfaRrQ09K27ysWTtUoQ784jSdoYs2jlKmP2Yzw+oe28hr11/3WAtHkDa1
-         6+fg==
-X-Gm-Message-State: AOJu0YwKYNjYVzdR0Fl8zGavCWkRn0AtdOHD6eq9TZvuHz/j32tiSUXN
-	IFAbxSDnjxbaYohLEaV3F1xpWufMle1gP3QcVnKO9Trg10lJGkMkcVqHF7A1vVRd0x1H7oyPgtf
-	2Arlq4eHj16t3pW46iByGgyyWSjxeh/Zut1E=
-X-Google-Smtp-Source: AGHT+IEYfrkFCx5OxPuw0lv/m8ZYm8MG0WqtN7WmVdLvU1aNy4xVqLoxa+38yzuV5jNvvbfFaDqBXhhq5kSdutbHToE=
-X-Received: by 2002:a25:2fc2:0:b0:dc6:c669:9914 with SMTP id
- v185-20020a252fc2000000b00dc6c6699914mr12162868ybv.15.1707128409146; Mon, 05
- Feb 2024 02:20:09 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ft2O+wOB";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="VznUUhDs";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ft2O+wOB";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="VznUUhDs"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 65B60220F4;
+	Mon,  5 Feb 2024 12:26:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1707135970; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=q8yovX7ZkSzL2tX8Zi0vM7tz818nJBFWsJQqQ44fHwY=;
+	b=ft2O+wOBVhLzyVuh8m3TJANQEJ54TwrDlbm8wRcPqjtkMDMd0IMp170PoGN5Z7Q3RaobkP
+	IxPQhFZeIzpMisCBmhjEEEA5TQ+cAmrrXiKxpBwt21On9RuywYyDe92RYlKdMlCaxel1Wt
+	v/uhqw3Jw/piEYbw/KGowsk3Gr0w+Iw=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1707135970;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=q8yovX7ZkSzL2tX8Zi0vM7tz818nJBFWsJQqQ44fHwY=;
+	b=VznUUhDsl6kJgB4uhlbT5YfUlRarjPWLvCwambMuaSAtIOLlFC8URCXfK8jk1p/G4U4iwE
+	rQ+5Rpd4XCuVl8Bg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1707135970; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=q8yovX7ZkSzL2tX8Zi0vM7tz818nJBFWsJQqQ44fHwY=;
+	b=ft2O+wOBVhLzyVuh8m3TJANQEJ54TwrDlbm8wRcPqjtkMDMd0IMp170PoGN5Z7Q3RaobkP
+	IxPQhFZeIzpMisCBmhjEEEA5TQ+cAmrrXiKxpBwt21On9RuywYyDe92RYlKdMlCaxel1Wt
+	v/uhqw3Jw/piEYbw/KGowsk3Gr0w+Iw=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1707135970;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=q8yovX7ZkSzL2tX8Zi0vM7tz818nJBFWsJQqQ44fHwY=;
+	b=VznUUhDsl6kJgB4uhlbT5YfUlRarjPWLvCwambMuaSAtIOLlFC8URCXfK8jk1p/G4U4iwE
+	rQ+5Rpd4XCuVl8Bg==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 785E313707;
+	Mon,  5 Feb 2024 12:26:08 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id MSGMCuDTwGV4TwAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Mon, 05 Feb 2024 12:26:08 +0000
+Date: Mon, 5 Feb 2024 23:26:00 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana
+ <fdmanana@suse.com>
+Subject: Re: [PATCH 2/4] btrfs/173: make the test work when mounting with
+ nodatacow
+Message-ID: <20240205232600.15796771@echidna>
+In-Reply-To: <0e243759cb9551eaac8b6f10f4dfbcbd5e880d56.1706810184.git.fdmanana@suse.com>
+References: <cover.1706810184.git.fdmanana@suse.com>
+	<0e243759cb9551eaac8b6f10f4dfbcbd5e880d56.1706810184.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <65bfa42f.050a0220.ab271.eb3aSMTPIN_ADDED_BROKEN@mx.google.com>
- <20240205054502.rsc5rnkkifpr3hn6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240205061626.mve2cp5btbpiijgy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240205065642.3hqhipmnxkg442kg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240205065642.3hqhipmnxkg442kg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 5 Feb 2024 12:19:57 +0200
-Message-ID: <CAOQ4uxiJRkSzOFEDpSC25R2wh8A_v-JSB4h=W3OB6NvihOdMbA@mail.gmail.com>
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.02.04
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spam-Level: 
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=ft2O+wOB;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=VznUUhDs
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-1.01 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[4];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DKIM_TRACE(0.00)[suse.de:+];
+	 MX_GOOD(-0.01)[];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.00)[25.52%];
+	 RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from]
+X-Spam-Score: -1.01
+X-Rspamd-Queue-Id: 65B60220F4
+X-Spam-Flag: NO
 
-On Mon, Feb 5, 2024 at 8:56=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Mon, Feb 05, 2024 at 02:16:26PM +0800, Zorro Lang wrote:
-> > On Mon, Feb 05, 2024 at 02:00:16PM +0800, Zorro Lang wrote:
-> > > On Mon, Feb 05, 2024 at 01:45:02PM +0800, Zorro Lang wrote:
-> > > > On Sun, Feb 04, 2024 at 10:48:47PM +0800, Zorro Lang wrote:
-> > > > > Hi all,
-> > > > >
-> > > > > The for-next branch of the xfstests repository at:
-> > > > >
-> > > > >         git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > > > >
-> > > > > has just been updated and tagged as v2024.02.04 release.
-> > > > >
-> > > > > Release Notes:
-> > > > > 1) There's 4 new test cases in this release -- btrfs/310, generic=
-/740, xfs/601,
-> > > > >    and xfs/606.
-> > > > > 2) btrfs/303 is removed.
-> > > > > 3) Supports XFS metadump V1 and V2 testing, refer to common/xfs_m=
-etadump_tests
-> > > > >    new file (might be renamed to common/metadump if more other fs=
- need).
-> > > > > 4) Some fixes and updates for UBIFS, BCACHEFS and NFS testing, we=
-lcome more
-> > > > >    updates for more filesystems.
-> > > > > 5) Some updates/fixes for source building, if anyone find buildin=
-g issues in
-> > > > >    this release, please report to us.
-> > > > >
-> > > > > More details refer to below, thanks for all your contributions!
-> > > > >
-> > > > > Thanks,
-> > > > > Zorro
-> > > > >
-> > > > > The new head of the for-next branch is commit:
-> > > > >
-> > > > > 9b63adb69add t_snapshot_deleted_subvolume: add check for BTRFS_IO=
-C_SNAP_DESTROY_V2
-> > > > >
-> > > > > New commits ([N]ew, [U]pdate, [D]elete):
-> > > > >
-> > > > > Alexander Aring (1):
-> > > > > [N]      [56625c897fd9] generic: add fcntl lock corner cases test=
-s
-> > > > >
-> > > > > Anthony Iliopoulos (2):
-> > > > > [U]      [42f3cb7e56e3] src/af_unix: drop unused offsetof macro d=
-efinition
-> > > > > [U]      [79d98d94e58c] build: remove unused m4 macros
-> > > > >
-> > > > > Boris Burkov (1):
-> > > > > [D]      [a6e196af46cc] btrfs: Remove btrfs/303
-> > > > >
-> > > > > Darrick J. Wong (10):
-> > > > > [U]      [e7eadc3ee835] generic/256: constrain runtime with TIME_=
-FACTOR
-> > > > > [U]      [8c8be04c1065] common/xfs: simplify maximum metadump for=
-mat detection
-> > > > > [U]      [42f797643529] common/populate: always metadump full met=
-adata blocks
-> > > > > [U]      [56ccc8cc69d1] xfs/336: fix omitted -a and -o in metadum=
-p call
-> > > > > [N]      [85c1e0f518ff] common: refactor metadump v1 and v2 tests
-> > > > > [U]      [1bdc3a5f1c9a] xfs/{129,234,253,605}: disable metadump v=
-1 testing with external devices
-> > > > > [U]      [329671426287] xfs/503: test metadump obfuscation, not p=
-rogressbars
-> > > > > [N]      [c31a500edc04] xfs/503: split copy and metadump into two=
- tests
-> > > > > [U]      [7e2bf5955c2d] common/xfs: only pass -l in _xfs_mdrestor=
-e for v2 metadumps
-> > > > > [U]      [6f4223b6865f] xfs/122: fix for xfs_attr_shortform remov=
-al in 6.8
-> > > >
-> > > > Note: A regression problem on this release sometimes after running =
-xfs/605 or
-> > > > xfs/129, it only affect XFS testing, it might kill all later testin=
-g, I'm
-> > > > looking into it, and fix ASAP, please linux-xfs don't not update to=
- this
-> > > > release temporarily, wait for a fix. Sorry for this trouble.
-> > >
-> > > !!! It's a critical dangerous bug! Please don't use this release on x=
-fs testing, it might
-> > > kill your system!
-> > >
-> > > The problem comes from common/xfs_metadump_tests:_cleanup_verify_meta=
-dump():
-> > >
-> > >    rm -f "$XFS_METADUMP_FILE" "$XFS_METADUMP_IMG"*
-> > >
-> > > The XFS_METADUMP_FILE and XFS_METADUMP_IMG are set in _setup_verify_m=
-etadump(), but
-> > > if the _setup_verify_metadump isn't called due to someone case _notru=
-n before calling
-> > > it, its _cleanup will still do _cleanup_verify_metadump, likes this:
-> > >
-> > >   _cleanup()
-> > >   {
-> > >         cd /
-> > >         rm -r -f $tmp.*
-> > >         _cleanup_verify_metadump
-> > >
-> > > Then boooomb, it does "rm -f *" in "/" .... The "*" after "rm" must b=
-e written
-> > > carefully. I'll send a patch to fix this problem soon, please don't u=
-pdate
-> > > fstests until the fix be merged.
-> >
-> > I decide to make a respin, I think this bug is dangerous enough due to =
-it might kill
-> > the whole testing system. If someone use fstests without the fix, that'=
-s too dangerous.
-> >
-> > I think most of people haven't shifted to the new release, and this ver=
-sion hasn't
-> > been merged into master branch. So I decide to do a respin with a manua=
-lly fix to
-> > avoid this problem ASAP. Then we can do more jobs later. Sorry for this=
- trouble,
-> > hope it hasn't affected you.
->
-> I've reset the for-next branch to last v2024.01.14 version. Please don't =
-worry, the
-> patches already got RVBs are in my local branch, I'll make a new release =
-in this
-> week soon, after some discussion and testing.
->
+On Thu,  1 Feb 2024 18:03:48 +0000, fdmanana@kernel.org wrote:
 
-Would you consider including my ovl test fix in this release:
-https://lore.kernel.org/fstests/20240203081228.1725872-1-amir73il@gmail.com=
-/
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Currently btrfs/173 fails when passing "-o nodatacow" to MOUNT_OPTIONS
+> because it assumes that when creating a file it does not have the
+> nodatacow flag set, which is obviously not true if the fs is mounted with
+> "-o nodatacow". To allow the test to run successfully with nodatacow,
+> just make sure it clears the nodatacow flag from the file if the fs was
+> mounted with "-o nodatacow".
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/btrfs/173 | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/tests/btrfs/173 b/tests/btrfs/173
+> index 6e78a826..42af2d26 100755
+> --- a/tests/btrfs/173
+> +++ b/tests/btrfs/173
+> @@ -23,6 +23,11 @@ echo "COW file"
+>  # unset it after the swap file has been created.
+>  rm -f "$SCRATCH_MNT/swap"
+>  touch "$SCRATCH_MNT/swap"
+> +# Make sure we have a COW file if we were mounted with "-o nodatacow".
+> +if _normalize_mount_options "$MOUNT_OPTIONS" | grep -q "nodatacow"; then
+> +	_require_chattr C
+> +	$CHATTR_PROG -C "$SCRATCH_MNT/swap"
+> +fi
 
-Without this fix, overlay/084 fails on master and on v.6.7.3.
+Nit: _format_swapfile already calls $CHATTR_PROG +C, so might as well
+put the _require_chattr call alongside _require_scratch_swapfile
 
-Thanks,
-Amir.
+>  chmod 0600 "$SCRATCH_MNT/swap"
+>  _pwrite_byte 0x61 0 $(($(_get_page_size) * 10)) "$SCRATCH_MNT/swap" >> $seqres.full
+>  $MKSWAP_PROG "$SCRATCH_MNT/swap" >> $seqres.full
+
