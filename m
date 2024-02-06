@@ -1,44 +1,51 @@
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A598DF56
-	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5989579F2
+	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707241064; cv=none; b=bBxxeYkbZ7HBVY9iVmJ7Y4ZVDPVFxkPyOb6j3F1U4HVfEjEbEpONf2V9VHQ8kTdB3fWIcuTg47d3mzvXk6LUCBFGV4BSZpk4FSD9BnZ0gs0AxuYpmlD57q7otxrJJj5dupZrqr0YfOSqBRUya7SSWymZQqTIeamPSMofZoLNTvs=
+	t=1707241069; cv=none; b=r8hBtFaKRxa2UpQOhZva/8HbAtU//y3Mk+mctmzl+e4Utq7B8Nz6qSEF+kHuq+h10+U61dWjm1hKF131PalpxMP7RN+qlWRvVhgQkKJ9ai5ahtRrwyvWpCDcXjGYnKm3HlN796zX7pfxq8TiOaPsNlro+zdAj0rvuEpcbZob2UY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707241064; c=relaxed/simple;
-	bh=ScUbqvsjCmu4V6erhlYMKST3zPwdzkj6+/0whR+CZEQ=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Ok81b+a8zuvoxmIyAbabFPOyYg+DIhuV7Sl6YdekMyUmN9MPUiMc3mJA5oRoVgb5n8qtysW4QQDp32U68fEpWrIplSLz6cjRDGZ3D6Y1POH9g59EvxqCQ3HhkOR57jSWKdeZyLKQhWjZ2+/r+J7DG4cc+BFj6TLk2XggoJOOerM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ajXGWa74; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ajXGWa74; arc=none smtp.client-ip=195.135.223.130
+	s=arc-20240116; t=1707241069; c=relaxed/simple;
+	bh=y+cpoC9AoC5Spff4qgcrDBSODR4q7A7GL+GwTPihhmg=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=TG07q7XrLAFfWbqzr73tCCKmSS2kCO+FoTB8d7mBgBvcrp8EAnMTkERTYD4iwY4gPXio207aqK521iih8vlxCAjR0Kripn5samx0qjAEz2HH4755wKSCBux/tQio6ZBYQ/zVrER0swpybu4wQj2tfHTFZairOpJ+STzBl2+w8fs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=eOo+SWyr; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=eOo+SWyr; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ajXGWa74";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ajXGWa74"
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="eOo+SWyr";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="eOo+SWyr"
 Received: from localhost.localdomain (unknown [10.100.128.76])
-	by smtp-out1.suse.de (Postfix) with ESMTP id B476B22124
-	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:40 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTP id 8A1F422123
+	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1707241060; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=oAFpqUwk7I/3p0ShvgA19aRFC97OB/W2wqIxDSvVnFQ=;
-	b=ajXGWa74PuBaTKpwxUtLHEEbq0EbdQyTzMUtGYEhgZVh4iFaa+CK7VWC3Np/VL27a769B5
-	24tIFoYqO7XRjHD16uc1iPCW3y8JHKqDBns4/aWxXX9ZwCk/hyP2KuRdBCCmvq9wAR3y5B
-	k2L9o+Ygsh4HI93YW/ZCfJ+YC+jWa6M=
+	t=1707241065; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=xQqE9JgwqELkuuv0Rz9lC+sI4PtSDfGNl6JNjXKwalo=;
+	b=eOo+SWyrd2yNunT9H3ACl4rTNu0qC6fW3xD9Y6IIVoMSgsQPxrU97Wwsas3/WoOG6ijIna
+	yc2t3D4Z+KojSxQ9mfLRvG3zijCVUHO0Eo6VrbuoRfz7PvalYKtZ+P3E8QMGT/sslpgwDy
+	ZinfidgttMDf5Pytlv0ipELtncnp+bg=
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1707241060; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=oAFpqUwk7I/3p0ShvgA19aRFC97OB/W2wqIxDSvVnFQ=;
-	b=ajXGWa74PuBaTKpwxUtLHEEbq0EbdQyTzMUtGYEhgZVh4iFaa+CK7VWC3Np/VL27a769B5
-	24tIFoYqO7XRjHD16uc1iPCW3y8JHKqDBns4/aWxXX9ZwCk/hyP2KuRdBCCmvq9wAR3y5B
-	k2L9o+Ygsh4HI93YW/ZCfJ+YC+jWa6M=
+	t=1707241065; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=xQqE9JgwqELkuuv0Rz9lC+sI4PtSDfGNl6JNjXKwalo=;
+	b=eOo+SWyrd2yNunT9H3ACl4rTNu0qC6fW3xD9Y6IIVoMSgsQPxrU97Wwsas3/WoOG6ijIna
+	yc2t3D4Z+KojSxQ9mfLRvG3zijCVUHO0Eo6VrbuoRfz7PvalYKtZ+P3E8QMGT/sslpgwDy
+	ZinfidgttMDf5Pytlv0ipELtncnp+bg=
 From: Anthony Iliopoulos <ailiop@suse.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH v2 0/2] generic/681 and generic/682 fixes
-Date: Tue,  6 Feb 2024 18:36:23 +0100
-Message-ID: <20240206173625.18623-1-ailiop@suse.com>
+Subject: [PATCH v2 1/2] generic/68[12]: use the dir blocksize for xfs filesystems
+Date: Tue,  6 Feb 2024 18:36:24 +0100
+Message-ID: <20240206173625.18623-2-ailiop@suse.com>
 X-Mailer: git-send-email 2.41.0
+In-Reply-To: <20240206173625.18623-1-ailiop@suse.com>
+References: <20240206173625.18623-1-ailiop@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,44 +55,96 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Authentication-Results: smtp-out1.suse.de;
 	none
-X-Spamd-Result: default: False [4.90 / 50.00];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_DN_NONE(0.00)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 RCVD_COUNT_ZERO(0.00)[0];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 BAYES_HAM(-0.00)[26.66%];
+X-Spamd-Result: default: False [1.90 / 50.00];
 	 ARC_NA(0.00)[];
 	 FROM_HAS_DN(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
 	 TO_MATCH_ENVRCPT_ALL(0.00)[];
 	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
 	 RCPT_COUNT_ONE(0.00)[1];
 	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
 	 MID_CONTAINS_FROM(1.00)[];
-	 FUZZY_BLOCKED(0.00)[rspamd.com]
-X-Spam-Level: ****
-X-Spam-Score: 4.90
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 RCVD_COUNT_ZERO(0.00)[0];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Level: *
+X-Spam-Score: 1.90
 X-Spam-Flag: NO
 
-A couple of fixes on g/68[12].
+The tests are using the filesystem block size for calculating the number
+of dirents required to fill a 2-block directory. For v4 xfs filesystems
+formatted with fs blocksize of 512 bytes this is failing, as the tests
+do not take into account that the directory block size is not always
+equal to the filesystem block size. As such, the tests never go over
+quota, and even if they did there is no hard block limit being set (due
+to 512 / 1024 = 0 calculation in setquota).
 
-v2:
-  - add Andrey's rvb in first patch (no changes)
-  - consolidate g/245 and g/682 mv filter into common/filter
+Use the directory blocksize instead of the filesystem blocksize, when
+the fstype under test is xfs.
 
-Anthony Iliopoulos (2):
-  generic/68[12]: use the dir blocksize for xfs filesystems
-  generic/682: update and fix-up golden output
+Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
+Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+---
+v2: add rvb
 
- common/filter         | 14 ++++++++++++++
- common/rc             | 11 +++++++++++
- tests/generic/245     | 14 +-------------
- tests/generic/681     |  2 +-
- tests/generic/682     |  4 ++--
- tests/generic/682.out |  2 +-
- 6 files changed, 30 insertions(+), 17 deletions(-)
+ common/rc         | 11 +++++++++++
+ tests/generic/681 |  2 +-
+ tests/generic/682 |  2 +-
+ 3 files changed, 13 insertions(+), 2 deletions(-)
 
+diff --git a/common/rc b/common/rc
+index 524ffa02aa6a..44832657e549 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4719,6 +4719,17 @@ _get_block_size()
+ 	stat -f -c %S $1
+ }
+ 
++# Obtain the directory block size of an fs.
++_get_dir_block_size()
++{
++	case "$FSTYP" in
++	xfs)
++		_xfs_get_dir_blocksize $1 ;;
++	*)
++		_get_block_size $1 ;;
++	esac
++}
++
+ # Require that the fundamental allocation unit of a file is the same as the
+ # filesystem block size.  The sole parameter must be the root dir of a
+ # filesystem.
+diff --git a/tests/generic/681 b/tests/generic/681
+index 090da795ce64..f41647741a7d 100755
+--- a/tests/generic/681
++++ b/tests/generic/681
+@@ -30,7 +30,7 @@ _scratch_mkfs > "$seqres.full" 2>&1
+ _qmount_option usrquota
+ _qmount
+ 
+-blocksize=$(_get_block_size $SCRATCH_MNT)
++blocksize=$(_get_dir_block_size $SCRATCH_MNT)
+ scratchdir=$SCRATCH_MNT/dir
+ scratchfile=$SCRATCH_MNT/file
+ mkdir $scratchdir
+diff --git a/tests/generic/682 b/tests/generic/682
+index b4cd0cd9dd2e..a51d18338742 100755
+--- a/tests/generic/682
++++ b/tests/generic/682
+@@ -30,7 +30,7 @@ _scratch_mkfs > "$seqres.full" 2>&1
+ _qmount_option usrquota
+ _qmount
+ 
+-blocksize=$(_get_block_size $SCRATCH_MNT)
++blocksize=$(_get_dir_block_size $SCRATCH_MNT)
+ scratchdir=$SCRATCH_MNT/dir
+ scratchfile=$SCRATCH_MNT/file
+ stagedir=$SCRATCH_MNT/staging
 -- 
 2.41.0
 
