@@ -1,159 +1,91 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC9ACDDAB
-	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:31:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A598DF56
+	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707240713; cv=none; b=esTXMuoCzEG4qV9+U3SlpX77rDBQq6OOMcCw40vezc64jfL6b1jn7LVkiNG+igiUAZB61ud/H7pCwBN06FRs45T03rk2snHqAy50d8U2Wm08tVr7DkiiHBNvHJxaHGLBoqdP7p9IT3+e7Xdb6p4p5uPohDFjgI/MUhTSf7KLFso=
+	t=1707241064; cv=none; b=bBxxeYkbZ7HBVY9iVmJ7Y4ZVDPVFxkPyOb6j3F1U4HVfEjEbEpONf2V9VHQ8kTdB3fWIcuTg47d3mzvXk6LUCBFGV4BSZpk4FSD9BnZ0gs0AxuYpmlD57q7otxrJJj5dupZrqr0YfOSqBRUya7SSWymZQqTIeamPSMofZoLNTvs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707240713; c=relaxed/simple;
-	bh=RFImBWq842DPRd4XSe0xxpK+KGwL5bpkfTOQh9/jEqg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZPnauRBZXh9dpf3F+eF/Obw3YhVcugVhS1vgQ9eUCU13k6BnDthezZSCMn411i7VVkRSzWafhZG/c6joQ9JvWxbySdI0/Ub7JlEX5OXSOB275lt1N7BD3Bga9AkWBcWhJcrp9vov+SYNYw9Tt6GR8u0n2SFhJG9TOLX0zGVQvf0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=UU3RTJho; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=UU3RTJho; arc=none smtp.client-ip=195.135.223.131
+	s=arc-20240116; t=1707241064; c=relaxed/simple;
+	bh=ScUbqvsjCmu4V6erhlYMKST3zPwdzkj6+/0whR+CZEQ=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Ok81b+a8zuvoxmIyAbabFPOyYg+DIhuV7Sl6YdekMyUmN9MPUiMc3mJA5oRoVgb5n8qtysW4QQDp32U68fEpWrIplSLz6cjRDGZ3D6Y1POH9g59EvxqCQ3HhkOR57jSWKdeZyLKQhWjZ2+/r+J7DG4cc+BFj6TLk2XggoJOOerM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ajXGWa74; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ajXGWa74; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="UU3RTJho";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="UU3RTJho"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id A7C7E1FB89;
-	Tue,  6 Feb 2024 17:31:47 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ajXGWa74";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ajXGWa74"
+Received: from localhost.localdomain (unknown [10.100.128.76])
+	by smtp-out1.suse.de (Postfix) with ESMTP id B476B22124
+	for <fstests@vger.kernel.org>; Tue,  6 Feb 2024 17:37:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1707240707; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2DfvkSDb73yGGkzrk4jRqaeZJij+AHWETW2ZfdR3E8Q=;
-	b=UU3RTJhoaB578leYvclL9Kwd1p+w6SYu+daORIleaWjCL0qVTLbBlN4rhLVghgKmCgKLK4
-	pXf6GG/ySg+e7EOVa+dlBjP/O6MaOFE9YgNEEUUys/jbZg3+OOP4n7wgXnNxLZ5ydFWBR2
-	bBaSd2ErmaNUcEjJLMokvpYzAU7xXA0=
+	t=1707241060; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=oAFpqUwk7I/3p0ShvgA19aRFC97OB/W2wqIxDSvVnFQ=;
+	b=ajXGWa74PuBaTKpwxUtLHEEbq0EbdQyTzMUtGYEhgZVh4iFaa+CK7VWC3Np/VL27a769B5
+	24tIFoYqO7XRjHD16uc1iPCW3y8JHKqDBns4/aWxXX9ZwCk/hyP2KuRdBCCmvq9wAR3y5B
+	k2L9o+Ygsh4HI93YW/ZCfJ+YC+jWa6M=
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1707240707; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2DfvkSDb73yGGkzrk4jRqaeZJij+AHWETW2ZfdR3E8Q=;
-	b=UU3RTJhoaB578leYvclL9Kwd1p+w6SYu+daORIleaWjCL0qVTLbBlN4rhLVghgKmCgKLK4
-	pXf6GG/ySg+e7EOVa+dlBjP/O6MaOFE9YgNEEUUys/jbZg3+OOP4n7wgXnNxLZ5ydFWBR2
-	bBaSd2ErmaNUcEjJLMokvpYzAU7xXA0=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 64F04132DD;
-	Tue,  6 Feb 2024 17:31:47 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 8RUCFQNtwmVKBQAAD6G6ig
-	(envelope-from <ailiop@suse.com>); Tue, 06 Feb 2024 17:31:47 +0000
-Date: Tue, 6 Feb 2024 18:31:42 +0100
+	t=1707241060; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=oAFpqUwk7I/3p0ShvgA19aRFC97OB/W2wqIxDSvVnFQ=;
+	b=ajXGWa74PuBaTKpwxUtLHEEbq0EbdQyTzMUtGYEhgZVh4iFaa+CK7VWC3Np/VL27a769B5
+	24tIFoYqO7XRjHD16uc1iPCW3y8JHKqDBns4/aWxXX9ZwCk/hyP2KuRdBCCmvq9wAR3y5B
+	k2L9o+Ygsh4HI93YW/ZCfJ+YC+jWa6M=
 From: Anthony Iliopoulos <ailiop@suse.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/682: update and fix-up golden output
-Message-ID: <ZcJs_jsbiTpx6HyO@technoir>
-References: <20240201161732.6126-1-ailiop@suse.com>
- <20240201161732.6126-3-ailiop@suse.com>
- <20240202115605.he7ciqxubrlglnzh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: fstests@vger.kernel.org
+Subject: [PATCH v2 0/2] generic/681 and generic/682 fixes
+Date: Tue,  6 Feb 2024 18:36:23 +0100
+Message-ID: <20240206173625.18623-1-ailiop@suse.com>
+X-Mailer: git-send-email 2.41.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240202115605.he7ciqxubrlglnzh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-Spam-Level: 
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=UU3RTJho
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 MIME_GOOD(-0.10)[text/plain];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 DKIM_TRACE(0.00)[suse.com:+];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 MX_GOOD(-0.01)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
+Content-Transfer-Encoding: 8bit
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spamd-Result: default: False [4.90 / 50.00];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 RCVD_COUNT_ZERO(0.00)[0];
 	 FROM_EQ_ENVFROM(0.00)[];
 	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Spam-Score: -4.01
-X-Rspamd-Queue-Id: A7C7E1FB89
+	 BAYES_HAM(-0.00)[26.66%];
+	 ARC_NA(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCPT_COUNT_ONE(0.00)[1];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 MID_CONTAINS_FROM(1.00)[];
+	 FUZZY_BLOCKED(0.00)[rspamd.com]
+X-Spam-Level: ****
+X-Spam-Score: 4.90
 X-Spam-Flag: NO
 
-On Fri, Feb 02, 2024 at 07:56:05PM +0800, Zorro Lang wrote:
-> On Thu, Feb 01, 2024 at 05:17:32PM +0100, Anthony Iliopoulos wrote:
-> > coreutils v9.4 introduced a change in the error output of mv under
-> > certain errno values via commit 3cb862ce5f10 ("mv: better diagnostic for
-> > 'mv dir x' failure"), which broke the golden output.
-> > 
-> > Update golden output to match the change, and further add an output
-> > filter to avoid having the test fail on environments that ran with an
-> > older coreutils release, taken from commit d9323ad7a05e ("generic/245:
-> > Filter mv error message").
-> > 
-> > Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
-> > ---
-> >  tests/generic/682     | 8 +++++++-
-> >  tests/generic/682.out | 2 +-
-> >  2 files changed, 8 insertions(+), 2 deletions(-)
-> > 
-> > diff --git a/tests/generic/682 b/tests/generic/682
-> > index a51d18338742..417598804bde 100755
-> > --- a/tests/generic/682
-> > +++ b/tests/generic/682
-> > @@ -54,6 +54,12 @@ repquota -upn $SCRATCH_MNT >> $seqres.full
-> >  echo $(ls $scratchdir | wc -l) files in $scratchdir  >> $seqres.full
-> >  ls -sld $scratchdir  >> $seqres.full
-> >  
-> > +_filter_mv_output()
-> > +{
-> > +	sed -e "s,cannot move .* to \(.*\):\(.*\),cannot overwrite \1:\2,g" \
-> 
-> Hi Anthony,
-> 
-> Thanks for this fix, I remember there's a mv filter in generic/245, we
-> just merged a patch same with above line:
->   d9323ad7a05e ("generic/245: Filter mv error message")
-> 
-> I think you can merge the _filter_directory_not_empty() of g/245 with
-> this patch into one _filter_mv_output() function, and call it in g/245
-> and g/682 (check if there're more cases need mv output).
+A couple of fixes on g/68[12].
 
-Make sense, I'll send out a v2 shortly with the filters consolidated.
+v2:
+  - add Andrey's rvb in first patch (no changes)
+  - consolidate g/245 and g/682 mv filter into common/filter
 
-AFAICT only g/245 and g/682 are affected by the particular coreutils mv
-error output change, due to their golden output.
+Anthony Iliopoulos (2):
+  generic/68[12]: use the dir blocksize for xfs filesystems
+  generic/682: update and fix-up golden output
 
-The only other tests are g/{369,419}:
+ common/filter         | 14 ++++++++++++++
+ common/rc             | 11 +++++++++++
+ tests/generic/245     | 14 +-------------
+ tests/generic/681     |  2 +-
+ tests/generic/682     |  4 ++--
+ tests/generic/682.out |  2 +-
+ 6 files changed, 30 insertions(+), 17 deletions(-)
 
-$ git grep 'cannot move' tests/
-tests/generic/369.out:mv: cannot move 'h' to 'd7/h': Permission denied
-tests/generic/369.out:mv: cannot move 'h' to 's7/h': Permission denied
-tests/generic/419.out:mv: cannot move 'SCRATCH_MNT/edir/NOKEY_NAME' to
-'SCRATCH_MNT/edir/NOKEY_NAME': Required key not available
+-- 
+2.41.0
 
-but those aren't affected as coreutils commit 3cb862ce5f10 only changed
-the error output for specific err codes (EDQUOT, EEXIST, EISDIR, EMLINK,
-ENOSPC, ENOTEMPTY, ETXTBSY), while g/369 is expecting EPERM and g/419 is
-ENOKEY.
-
-Regards,
-Anthony
