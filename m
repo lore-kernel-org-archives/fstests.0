@@ -1,216 +1,1046 @@
-Received: from esa15.fujitsucc.c3s2.iphmx.com (esa15.fujitsucc.c3s2.iphmx.com [68.232.156.107])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF0521115;
-	Wed,  7 Feb 2024 06:09:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.156.107
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707286204; cv=fail; b=swdgRCX16E9xbCbpC6WMzYsEUVzcTRNyXWLyUn8tjd0AOLyBt2gns+zJ7arhIcMa+GXB/yvol557ZavEHgj4BmTRl4AhxRS7bKV56Ip+/QgyifgYFq6wjr7+d/tltXRBqAN/d+b+nFes+9oibRJafKK7W1ntWE3WD6gMk+IDzI0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707286204; c=relaxed/simple;
-	bh=x+30uNKHMnnMLMI3ppsuw31Wtd6tGEChuDxBok3SjVQ=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=GKGgOFXwlIyXzJF0oxyXzCHb0l/OEAWd8//BSqYi19Eiov4o3MtBFSBqwNzof/xJbXWRDBxfIUpRDB0uI2O6o1eDpLF9caO693LiSTtALEP6SJjADIwFCWlnY3LYC6zm1KHer1/a/nBusmHOaIscckLgcMfnQTiMpu9Gx/w22Ks=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=A47gPTIT; arc=fail smtp.client-ip=68.232.156.107
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DCD220DC3
+	for <fstests@vger.kernel.org>; Wed,  7 Feb 2024 09:15:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1707297318; cv=none; b=igtbyaD2tucYXhgbaUMrmOJwmNUp+DYjUF4TE1tIDURFC3JsSHrOI3ZRX8ARHgYn/081gOq0JcARFIDtPwQzmm0/osDsqwd3fGOKZWxKd9BvZkXoMS3AzZoAWPeJu755lUhS+Ntk+lHC6SRnwwQWVkyJ9/lkm7RPeoKao0UamYk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1707297318; c=relaxed/simple;
+	bh=iiGDFXBJC3XAZSAh2BozT2NZDaUZVo6heqsvbnK/ZX0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eb37gHQbctkN4Ep0CZ6sklXh9ivxrr9KunJyfYh8qRljCY9vIRC3MnKHEi2fbvIZxzdpaIWbiHx9bwsGeT3hrK2Cfs+GOyNxHpOGJHdVG5XuOk9NEQY0QeJQ3zkGNJ/U87XAIglQSDF5O8SniUoI0Rqp9jiW3uL9hFd3xDQQnJQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dZcfO4fL; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="A47gPTIT"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj1;
-  t=1707286201; x=1738822201;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-id:content-transfer-encoding:
-   mime-version;
-  bh=x+30uNKHMnnMLMI3ppsuw31Wtd6tGEChuDxBok3SjVQ=;
-  b=A47gPTIT7JmVcFNZISfXI9AVp8fjX3GTCtAk222Z3fYNsuMwCUWW4a/i
-   t1JV+59mnFZko8+g4nY4npanbEhXIQGg3Z1Expd7zm6zniTAHMVesdSlk
-   KCzW+iDyGP/levXnp+SlNQsUaZlS3tVpPJdqrMs8Ll82O5EhbM6cJcGFA
-   IOKVCgygPVD5bp4VWTDQ/4fG8Z29cmxZcbJaNAvs2w1HyIWOqLq9GmfHW
-   LkvSxa7BPmoGBrj1erRqzb3JHF+2Bxald+D5oi5e4fIFpCaIqiNmH17Jq
-   IIw+9SnaENrMvCxJKfngeKMkVz0EZLrTEkCPQmZ0qCBEZO0+EkTCYCLUO
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10976"; a="110660775"
-X-IronPort-AV: E=Sophos;i="6.05,250,1701097200"; 
-   d="scan'208";a="110660775"
-Received: from mail-os0jpn01lp2105.outbound.protection.outlook.com (HELO JPN01-OS0-obe.outbound.protection.outlook.com) ([104.47.23.105])
-  by ob1.fujitsucc.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Feb 2024 15:08:48 +0900
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=g6e0hriNobYbV2pX/942JZXO0YMy+bxMblBcRGi4uLoeQFhsF9MkVSB2c2HqsTInHHcpxatL4Hj6KmepQJUDnX0I08U9h30HjK5nbuA+5P6/qIkHvS8gyggVyifRTP+QgYImgO4h2yIL/DeiS5zuv0DFd5nL9mgTNmASLRxO42dekUi9CJDuavmeyGYcsnOX857PR64JcGHJJEdvMNQzNaxJ0yquBCsq94993vUxHlh0yMEzxkPb11iNJx6CFiNV1nihsLlzABej3wAEIV34qh4T7PYCaHihvJVUi2z3BRQMNfL/cfBgcqCOWmb+ZBpoAPnH6rWyo22c9Wm/1csmqQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=x+30uNKHMnnMLMI3ppsuw31Wtd6tGEChuDxBok3SjVQ=;
- b=G7fvvjMBeKpaqenNC98Rs647rajNGpdbBHcJOjKe/7bmHAcgqA8vvvUyY9HxV6WlRNY9ORL9aLNdPA4Q00HFuQYuSDHt2Zlu0lOilCipbXbFXROlCaG92dFA/mopqVoZHi7bcDOmNWm+aPc434Kn+vezNF8qKbd1ZhY2Rr71GqC+gOX36OjDa3p72JMlGvTO48aRD9iqjP4SBp2UBFZEBB7Fn8HR90pDG4fMnJjVnceXIIejCaJ726O1IeOFvA35zWoEyYnEhzsiS8SjZZnoAH3O+TRFpfA7QuGwB4ds9oGcDw7v8dlNO1Je0ctAkmPDQsTbV0XlRpotqYjJ1H12nA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fujitsu.com; dmarc=pass action=none header.from=fujitsu.com;
- dkim=pass header.d=fujitsu.com; arc=none
-Received: from TY1PR01MB1578.jpnprd01.prod.outlook.com (2603:1096:403:2::22)
- by OS3PR01MB8398.jpnprd01.prod.outlook.com (2603:1096:604:191::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7249.36; Wed, 7 Feb
- 2024 06:08:44 +0000
-Received: from TY1PR01MB1578.jpnprd01.prod.outlook.com
- ([fe80::a9eb:1475:e04a:3271]) by TY1PR01MB1578.jpnprd01.prod.outlook.com
- ([fe80::a9eb:1475:e04a:3271%6]) with mapi id 15.20.7249.035; Wed, 7 Feb 2024
- 06:08:44 +0000
-From: "Yang Xu (Fujitsu)" <xuyang2018.jy@fujitsu.com>
-To: Zorro Lang <zlang@redhat.com>, David Sterba <dsterba@suse.cz>
-CC: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
-Subject: Re: [PATCH v2] t_snapshot_deleted_subvolume: add check for
- BTRFS_IOC_SNAP_DESTROY_V2
-Thread-Topic: [PATCH v2] t_snapshot_deleted_subvolume: add check for
- BTRFS_IOC_SNAP_DESTROY_V2
-Thread-Index:
- AQHaVXqNcCeL1XNwmE6JJgZI6dBvc7D76r+AgAEzm4CAAB9GgIAAGU6AgAAEFoCAAB1YAIAA9OCA
-Date: Wed, 7 Feb 2024 06:08:44 +0000
-Message-ID: <3b2bd3e2-be39-43f7-b541-5d70a06b0db7@fujitsu.com>
-References: <20240201042348.147733-1-xuyang2018.jy@fujitsu.com>
- <20240205154907.GH355@twin.jikos.cz>
- <20240206101005.u2mrxlg4pg3cdoxq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240206120201.GL355@twin.jikos.cz>
- <20240206133235.rizvxggjnsv2ppcf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240206134713.GO355@twin.jikos.cz>
- <20240206153214.kskmv2ug7b7rmtdq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To:
- <20240206153214.kskmv2ug7b7rmtdq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Accept-Language: ja-JP, zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=fujitsu.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY1PR01MB1578:EE_|OS3PR01MB8398:EE_
-x-ms-office365-filtering-correlation-id: b0d51bb0-9d0e-4a74-c58c-08dc27a33da8
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info:
- qdwzGncC2wnI+ZULAAguL4+iXyQb3cjDHz5vAkWlN5leaf4AkrCgeFczNeHnXxJH5f+hL0F3I/EptsEzW6Wx5t1jrHo+5X8VnRGyR+5iPp1zsJk0Lz/jLBqUP2Ww0YLcF6vvrR+f3a7Fkq5F9lZQh54yVKNjyRM5g/8vijhNES+kzvKEOkP//Gm/v+9XaC7uRSgg9udEy/lhVv2qBZQLJAN0QxubhdukGuxfNBtgJ3LCV3DCTEXWFSIBNKeH3OjcoMiOERGgwD8FV75Lc5rcftvITjkKdsxRTjsf4MR+MH8sTIbgWq2VkwfVB+tLjiJnqb6gIFpBA3tvUqqv0qX3SIHjo4ruPt5CAQJnQpmdmGbJ+DYU3aQZkyv8VTIRYuegNynfxEwLwOPSYgD2pOYP5IozNWBNeu8TeB3E0Z+LAgYShM3LopxZgZtIQI2yRTSaSSCYMjhwYirj9L+wfFFjS3EQebjhZEeDHrUBH8pee3YNxl5QU3UqOMhUvV/2zD8pA7vQCI5WzZgLCxU4YgNmxObsEyRx8upabpErmNhbe+vHgK1PuyvJQr6iEgwM/jb4/NiH9Vp5KAFhKNUebBFpPapii4S34o7yCbwixRGbhbfgtd58DGGx3Cm5N4b5ur49VYLXMHNCpinCbuS9uZK67Ursxd0LW5wT2VN/B3qb3VA=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY1PR01MB1578.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376002)(396003)(136003)(366004)(346002)(39860400002)(230922051799003)(1590799021)(186009)(451199024)(64100799003)(1800799012)(38100700002)(82960400001)(31686004)(5660300002)(1580799018)(122000001)(41300700001)(478600001)(6486002)(110136005)(85182001)(6512007)(966005)(36756003)(2906002)(66446008)(54906003)(64756008)(66476007)(66556008)(76116006)(316002)(38070700009)(66946007)(83380400001)(71200400001)(86362001)(26005)(6506007)(2616005)(8936002)(4326008)(8676002)(31696002)(45980500001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?dWEwQW9XRUw5VGI1amZHOFU0UTdkaFlmZ0pDQUxFYlRURU5vVUM1dFQ3eEFJ?=
- =?utf-8?B?Q0IrTERiOE9Cc3VYR2lVR05tY2RoSmpyeWhqdVBOYldKVVRHTXZSTW1mZzlx?=
- =?utf-8?B?VDcrcy9mSFM0Nng0ODBnMGxVT2dlNklrQmdNSlVEeTlHZkFnckswYk8vcWZJ?=
- =?utf-8?B?WjEwVG02TVYyN29VbmNHeGlsOE1ZV2hXT09JVWFZOXBaUzRYQVU4VEFyN0FB?=
- =?utf-8?B?YjYxcjUwREorMWJUd0ptbW5WMjRnQ1NmQlBhZDhWN3NrbVh3WE1KUFZDNGlV?=
- =?utf-8?B?UHJPd2lNZnl3K0djc2FSazlOREJMT0J1SmFVOWx3NTIyOStFZEVaZ2x6TFBE?=
- =?utf-8?B?WTZSY3lodHRCYm9JemJ1ZkU2QWJXaHliZVczYkQrMW45RUgwUFRJR3pwTTJG?=
- =?utf-8?B?djJlanhyeFBQSzJNN2ZEN3pQMEVtLzZwMVU3eEtQZ3Y4dWZNd3g2ejhxTnVz?=
- =?utf-8?B?TzU4d1psaStXYzE4RkVpQndOYTdHdllOUG5mTS9iclUrNmd1YUMzMjRYQkdR?=
- =?utf-8?B?WGc5YkVUUnBpZE10dGpFbWJSR1VSbE80Y2lCeFRGODBNaXZRejFSMXNyR1Zi?=
- =?utf-8?B?MGQ5UytYV09DNUZPK21Ra1p6ajhVT2Y2TzMrQnNQQ2VmemthMUdFRGNwTUla?=
- =?utf-8?B?OEVQV2VjcUVmbE4vc2NVM1Y2NFlLUGIvSExKVDVQTWdJNmVJeDRHVmNXRWdF?=
- =?utf-8?B?S0FlcDQ2VmdmL3NHV21yNkJZOHdycVFoYituaFlUK2FlcmJ5cVI4Q29reGZN?=
- =?utf-8?B?bmJCbVFQOUtVemtsR2t3NnZtdVVsa1drM1JJb2hIMWRqREZSV1lna1pvWHlI?=
- =?utf-8?B?ckd3ditiWkF4am9SRWQwRExKQjVhKzdnOCtQdFZqOXNvWC9KNmlvMG96WVR2?=
- =?utf-8?B?b3ovajZkemRXRmhKZXErR0l6U1dpSXdIeVliZUEyK3BzYVdHbGdjVlNJMGNn?=
- =?utf-8?B?UURwVW1zZHpBZ2J4dUlWNVFmWVRLc1hXYVAybk52WXlwMFFoTUVBWE9PQTJY?=
- =?utf-8?B?aWMvL0JpUm9Zd0NyWDFEQzRyZVJtNjdJNFVxaHA4ejRTd2RvUjRJLzNNMU1Z?=
- =?utf-8?B?eitPelVjckxHYXJOalo4MkZtY0NsOS9zQ2dtTDA0NnZVa2w1dWIrTXRHVFJ2?=
- =?utf-8?B?L1NaVUlRQlZWZVBFQ0xvaGJzTUpkWjh4UExhaDluM21JZ1FLTU9HaUlMbEUx?=
- =?utf-8?B?MzFtU01OWjBGYWNENnNxT2xtNDZYdTFwWW1pL3YxbTFGT0pubmpaQ3Z5WkZN?=
- =?utf-8?B?Z3FUa1drMGhjc2p0ZnNQZEhEN0tPSU51NUF1dUxLZ1VacmVHc3AvQ2pNc0Vl?=
- =?utf-8?B?RHJzUUFsV2UzV0ZScEhWdVQ0TDNndFZ6L2dubVZFWVh1UlFRTzFxY0IwaTBu?=
- =?utf-8?B?V294NEFyWFZmVjlNNVJaM0pFWFA5dTdTN1ZYQ0FSSWFUMCthYnR0TVZNSXJM?=
- =?utf-8?B?U3JKNm0xUFdVQWMyNDBDQ1ljc21FdThRSHI3REhoY2tYdzZFWVhWRlQxSGpm?=
- =?utf-8?B?SUxqS3NEQ3Jtc05GdS8rOVFyN2xZOTRvM0hBenJ2cXU1QVhWZ1N0VTJOemlp?=
- =?utf-8?B?TENidG1uMjhaWVlzVDZ1SThXcVlzcXhWOVlMRFFGNS9LNk5FSVpHWGI5bzF1?=
- =?utf-8?B?UDBZSnpqd2IwWEQ4bGxhcDRKVGpTWngrQzZzVGRLNzl6cnFLcHZGQmoyUHk0?=
- =?utf-8?B?YWFYUGlGbFZFZjRWQk41R09FMTgwaEU3YnhDVGF3eDA5ckNja1Nwd0FhTjM3?=
- =?utf-8?B?TmVRYTFXeDBUSHlQM212OHlpQ0p4RGg3UzlGNW5obXpRZjExdzllalcxUktx?=
- =?utf-8?B?UjFGcDZqdm9UWlB2YUVIK0hrYkVlemNpSEhOQzJZVDJ4OW5oVlRYOHd5VHUr?=
- =?utf-8?B?VjgwL2NSVDh5VW8xWk1GdW1EaFBuRS9EZldmKzhSQlkzaUo5dUNGOGRBUWhi?=
- =?utf-8?B?dm5ybXQvUCt4MHlQWlNRMFhPL0JES2MrbWREa2ZxdXh0QVpGOFVRRXpPSjdP?=
- =?utf-8?B?eUU2amJKYkR1L1pKem1GcXJZM3J3amRWQm1QZnhaNFdqQkwvYUpmWWlDZ2xp?=
- =?utf-8?B?d2d0bzQ2ZVJ0K2U0cXh4V3I5M1JMZFErT1dMdENyNldFbFVEWElaSkJhQVpR?=
- =?utf-8?B?ZWFsd0ZwN2xXVzh3ZEJRYWNWZVEzTzlaMS9qeVNMQlVPTFRaa2NObWlBM3Vr?=
- =?utf-8?B?b2c9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <D8C2A84139CC1944929120685F129C85@jpnprd01.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dZcfO4fL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1707297314;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ZwUtlQlcJHDGZfcGJdrALl5b0U0UyNML3i4iNVvkKc0=;
+	b=dZcfO4fLRB/5QHLh1IKYof//MnK/PsZ8vUZMgGXxgoowgIBVuNim890EXdORGq4q/O91lz
+	Hv5lNz+W0bgF6LRZUtqWJ73MiiqSR4p0feuruxyezP6SMs7Hl4TpMw1pTHUmFyMmXh4gfu
+	Py5tIg4ug/8fjwSEvRvpTequJ+6cS1I=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-202-SILjdMhjOjGWs0eWHfIy6Q-1; Wed, 07 Feb 2024 04:15:11 -0500
+X-MC-Unique: SILjdMhjOjGWs0eWHfIy6Q-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1d97eb98e1cso5256075ad.2
+        for <fstests@vger.kernel.org>; Wed, 07 Feb 2024 01:15:10 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707297310; x=1707902110;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZwUtlQlcJHDGZfcGJdrALl5b0U0UyNML3i4iNVvkKc0=;
+        b=m01sY/7ym6ilQOQBnFY50+0jv6tlfWqXl16nSqgGuxLnZ8wQ7vZgvos/MePNtvvfn7
+         tjCLcDKzFuxEQr5fzADPIFDu0+uleZng2IE72J3HoMgBAYLhYIGpVDesvTmOXfjXw/W8
+         qhtEy5WxLaw3TPQniea5a2GK5H9gIIJvCPatyJH6ayMXfY7O2ACqr13anI0sDbEhZO/v
+         3i6kkqpXJLfuUkaDbGLzqLiUQ5SqxMD0Z7O9/xIXEx+B20JC0puivw1q2w4Ijt3s7SAH
+         D/ne0GfeoKScRpzEWfs4LcgWRItAWNh/SKGOyAUorVHR3h+joi/8fVoq6fcbA7i2bOun
+         9zGA==
+X-Gm-Message-State: AOJu0Yx2UCcjqBLOOiBOuS2Wbs44SSQLk8jn3H6vonmmOWidMiACxORJ
+	1fgZg7Uvd+WPdT/O86Cma9kjrdoptUa1BA3n6GLb0EgAj6q+aULThzYQvN0XPE5iCuFF4VqosXF
+	2+YJZ3liFxOImkd9srMBRQDOrGz5SwigC0Fzz0MOQg/ZrXxiI1grLMaE=
+X-Received: by 2002:a17:902:a3c6:b0:1d9:e182:2bf8 with SMTP id q6-20020a170902a3c600b001d9e1822bf8mr3441882plb.6.1707297309676;
+        Wed, 07 Feb 2024 01:15:09 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGzasRkkacG+bsrQHikxdK8dw9uXx2ZdRf5k2dU6ACgot3jvIM9UYWGcmjyyaRc+IBWao5mSg==
+X-Received: by 2002:a17:902:a3c6:b0:1d9:e182:2bf8 with SMTP id q6-20020a170902a3c600b001d9e1822bf8mr3441865plb.6.1707297309147;
+        Wed, 07 Feb 2024 01:15:09 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCW00V1VftjOiZzL4k1OwblsfTIUPC0EX951DacpggSdUzEP0XeRHe5FOMCTzTbPZ3uxTsr1fWhN/VVo9jpcSf0ErdjPImxQpQ==
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id l18-20020a170902d35200b001d9a42f6183sm948241plk.45.2024.02.07.01.15.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Feb 2024 01:15:08 -0800 (PST)
+Date: Wed, 7 Feb 2024 17:15:05 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 05/10] common: refactor metadump v1 and v2 tests, version
+ 2
+Message-ID: <20240207091505.rpxirtdacyollzeo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <170727231361.3726171.14834727104549554832.stgit@frogsfrogsfrogs>
+ <170727234241.3726171.5377809483090058891.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	/YBYPdXjqJsH7rTI1VTeB7jx87zekVHoaDj4hI31tjQvqDt0GgLC77Z78CasXALj2VFGWscySabee1IVvr9NuQ6Lq7wB+e6jnXKrOy7IgdZSh8BMQESzWzePHMDFknunU0oQ76eZLGWB6B6SlWCazfWXGbTdOeWuDzIhsvZ/LUJ3d8XEr5a7gW4CjIdQpYFsJkXYuLnb4zQWSsbGYLEDrZf0gApTQuIduJNVyk8jSyxqizH3SFAKa4IBhXDEocPsf/jfI2YLBrf9Z+kS6bLnf97lM6VwDUrlVwyfO7QI4vxkvB8sfOp18RvazmHs+JFUkPmPwS7sm6otBvx7irv3D/vbV223L4Q7J7lOuZGeS1kC2i9aP0VuDE3tFniBHitbOWe+Jy4y+mHIELCToxblOSfm7ipe5X2Nbw5nx60PD8L0OJAeE3ymYRSHldkxyRkpKKcfEjNhiddsB+lSyn5fa1+up1RtQfEj81wC18SiwonnNNYd73LtZLUkNcFQhRPZxhmqdQz9Qqt/5bG2u03/0Pu39yNcyi6yWJ3xcgz0E8riPOzQ3fdhvtSOiLKUPX3SPsfmhdcf5dKQic7ixviSj0649hWmLKdyHlqrpYGb7BIghRHLvwatJ5jPFfqiGKOf
-X-OriginatorOrg: fujitsu.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY1PR01MB1578.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b0d51bb0-9d0e-4a74-c58c-08dc27a33da8
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Feb 2024 06:08:44.6997
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: a19f121d-81e1-4858-a9d8-736e267fd4c7
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: ykPpDuYVkkXalL6CkAsjeiIVmnUSQOIeXC8CaHHF6SXEDV9CrA+aL47Ea20Ok5FZ2WCB+/QGqVlCvzPJgrNi/s98tSkAzMcuuOZqu/Vyf4Q=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB8398
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <170727234241.3726171.5377809483090058891.stgit@frogsfrogsfrogs>
 
-DQo+IE9uIFR1ZSwgRmViIDA2LCAyMDI0IGF0IDAyOjQ3OjEzUE0gKzAxMDAsIERhdmlkIFN0ZXJi
-YSB3cm90ZToNCj4+IE9uIFR1ZSwgRmViIDA2LCAyMDI0IGF0IDA5OjMyOjM1UE0gKzA4MDAsIFpv
-cnJvIExhbmcgd3JvdGU6DQo+Pj4gT24gVHVlLCBGZWIgMDYsIDIwMjQgYXQgMDE6MDI6MDFQTSAr
-MDEwMCwgRGF2aWQgU3RlcmJhIHdyb3RlOg0KPj4+PiBPbiBUdWUsIEZlYiAwNiwgMjAyNCBhdCAw
-NjoxMDowNVBNICswODAwLCBab3JybyBMYW5nIHdyb3RlOg0KPj4+Pj4gT24gTW9uLCBGZWIgMDUs
-IDIwMjQgYXQgMDQ6NDk6MDdQTSArMDEwMCwgRGF2aWQgU3RlcmJhIHdyb3RlOg0KPj4+Pj4+IE9u
-IFdlZCwgSmFuIDMxLCAyMDI0IGF0IDExOjIzOjQ4UE0gLTA1MDAsIFlhbmcgWHUgd3JvdGU6DQo+
-Pj4+Pj4+IEBAIC0yMCwxMSArMjAsNiBAQA0KPj4+Pj4+PiAgICNkZWZpbmUgQlRSRlNfSU9DVExf
-TUFHSUMgMHg5NA0KPj4+Pj4+PiAgICNlbmRpZg0KPj4+Pj4+PiAgIA0KPj4+Pj4+PiAtI2lmbmRl
-ZiBCVFJGU19JT0NfU05BUF9ERVNUUk9ZX1YyDQo+Pj4+Pj4+IC0jZGVmaW5lIEJUUkZTX0lPQ19T
-TkFQX0RFU1RST1lfVjIgXA0KPj4+Pj4+PiAtCV9JT1coQlRSRlNfSU9DVExfTUFHSUMsIDYzLCBz
-dHJ1Y3QgYnRyZnNfaW9jdGxfdm9sX2FyZ3NfdjIpDQo+Pj4+Pj4+IC0jZW5kaWYNCj4+Pj4+Pj4g
-LQ0KPj4+Pj4+PiAgICNpZm5kZWYgQlRSRlNfSU9DX1NOQVBfQ1JFQVRFX1YyDQo+Pj4+Pj4+ICAg
-I2RlZmluZSBCVFJGU19JT0NfU05BUF9DUkVBVEVfVjIgXA0KPj4+Pj4+PiAgIAlfSU9XKEJUUkZT
-X0lPQ1RMX01BR0lDLCAyMywgc3RydWN0IGJ0cmZzX2lvY3RsX3ZvbF9hcmdzX3YyKQ0KPj4+Pj4+
-PiBAQCAtNTgsNiArNTMsMTEgQEAgc3RydWN0IGJ0cmZzX2lvY3RsX3ZvbF9hcmdzX3YyIHsNCj4+
-Pj4+Pj4gICB9Ow0KPj4+Pj4+PiAgICNlbmRpZg0KPj4+Pj4+PiAgIA0KPj4+Pj4+PiArI2lmICFI
-QVZFX0RFQ0xfQlRSRlNfSU9DX1NOQVBfREVTVFJPWV9WMg0KPj4+Pj4+DQo+Pj4+Pj4gVGhpcyBp
-cyByaWdodCBmb3IgQUNfQ0hFQ0tfREVDTFMuIE90aGVyIG1hY3JvcyBsaWtlIEFDX0NIRUNLX0hF
-QURFUlMgZG8NCj4+Pj4+PiBub3QgZGVmaW5lIHRoZSBIQVZFXy4uLiBpbiBjYXNlIGl0J3Mgbm90
-IGZvdW5kIHNvIHRoZSAjaWYgIUhBVkVfLi4uDQo+Pj4+Pj4gd291bGQgYmUgd3JvbmcuIFNsaWdo
-dGx5IGNvbmZ1c2luZy4NCj4+Pj4+DQo+Pj4+PiBXb24ndCBBQ19DSEVDS19IRUFERVJTIGRlZmlu
-ZSB0aGUgSEFWRV8uLi4gPyBCdXQgaG93IGRvIHdlIGdldCB0aGUgLi4uDQo+Pj4+Pg0KPj4+Pj4g
-ICAgLyogRGVmaW5lIHRvIDEgaWYgeW91IGhhdmUgdGhlIDxsaW51eC9mYWxsb2MuaD4gaGVhZGVy
-IGZpbGUuICovDQo+Pj4+PiAgICAjZGVmaW5lIEhBVkVfTElOVVhfRkFMTE9DX0ggMQ0KPj4+Pj4N
-Cj4+Pj4+IGluIGluY2x1ZGUvY29uZmlnLmggZmlsZT8NCj4+Pj4NCj4+Pj4gWWVzIHRoZSBIQVZF
-XyBtYWNyb3MgYXJlIGRlZmluZWQsIGp1c3QgdGhhdCBpdCBhY3R1YWxseSBhbHNvIGRlZmluZXMN
-Cj4+Pj4NCj4+Pj4gI2RlZmluZSBIQVZFX0xJTlVYX0ZBTExPQ19IIDANCj4+Pg0KPj4+IE9oIEkg
-ZGlkbid0IGZpbmQgdGhhdCBpbiBteSBsb2NhbCBmc3Rlc3RzIGNvZGUgKGhhcyBiZWVuIGJ1aWx0
-KSwgSSBnb3QNCj4+PiBzb21ldGhpbmcgbGlrZXMgdGhpcyBpbiBpbmNsdWRlL2NvbmZpZy5oIChm
-b3IgZGVmaW5lZCBvciB1bi1kZWZpbmVkKToNCj4+Pg0KPj4+ICAgIC8qIERlZmluZSB0byAxIGlm
-IHlvdSBoYXZlIHRoZSA8Y2lmcy9pb2N0bC5oPiBoZWFkZXIgZmlsZS4gKi8NCj4+PiAgICAvKiAj
-dW5kZWYgSEFWRV9DSUZTX0lPQ1RMX0ggKi8NCj4+Pg0KPj4+ICAgIC8qIERlZmluZSB0byAxIGlm
-IHlvdSBoYXZlIHRoZSBkZWNsYXJhdGlvbiBvZiBgQlRSRlNfSU9DX1NOQVBfREVTVFJPWV9WMics
-IGFuZA0KPj4+ICAgICAgIHRvIDAgaWYgeW91IGRvbid0LiAqLw0KPj4+ICAgICNkZWZpbmUgSEFW
-RV9ERUNMX0JUUkZTX0lPQ19TTkFQX0RFU1RST1lfVjIgMQ0KPj4+DQo+Pj4+DQo+Pj4+IGlmIG5v
-dCBmb3VuZCwgdW5saWtlIG90aGVyIG1hY3JvcyByZXN1bHQgaW4NCj4+Pj4NCj4+Pj4gLyogI3Vu
-ZGVmIEhBVkVfU09NRV9GVU5DVElPTiAqLw0KPj4+Pg0KPj4+PiBXaGF0IHlvdSBkaWQgd2lsbCB3
-b3JrLCB0aGUgaW5jb25zaXN0ZW5jeSBpcyBpbiB0aGUgYXV0b2NvbmYgbWFjcm9zLg0KPj4+DQo+
-Pj4gQnV0IEknbSBub3QgZmFtaWxhciB3aXRoIHRoZXNlIEFDX0NIRUNLIHRoaW5nczopIE1heWJl
-IGl0cyBiZWhhdmlvciBpc24ndA0KPj4+IHN1cmUsIEFDX0NIRUNLX0RFQ0xTIGlzIHN1cmUgdG8g
-ZGVmaW5lIEhBVkVfLi4uLiB0byAxLCBBQ19DSEVDS19IRUFERVJTIGlzDQo+Pj4gc3VyZSB0byBo
-YXZlIGEgZGVmaW5pdGlvbiBidXQgbm90IHN1cmUgd2hhdCdzIGRlZmluZWQuIERvIHlvdSBtZWFu
-IHRoYXQ/DQo+Pj4NCj4+PiBCVFcsIEkgdGhpbmsgeW91J3JlIG5vdCBuYWNraW5nIHRoaXMgcGF0
-Y2gsIHJpZ2h0PyA6KQ0KPj4NCj4+IE5vIEknbSBub3QsIHNvcnJ5IGlmIHRoaXMgd2FzIGNvbmZ1
-c2luZywgaXQgd2FzIGEgY29tbWVudCBhYm91dCB0aGUNCj4+IGF1dG9jb25mIG1hY3JvcyBhbmQg
-aG93IGFyZSB0aGUgZGVmaW5lcyBzdXBwb3NlZCB0byBiZSBjaGVja2VkLiBXZSBvbmNlDQo+PiBo
-YWQgYSBidWcgd2hlcmUNCj4+DQo+PiAjaWZkZWYgTUFDUk8NCj4+DQo+PiB2cw0KPj4NCj4+ICNp
-ZiBNQUNSTw0KPj4NCj4+IHdhcyBub3QgZG9pbmcgdGhlIHNhbWUgdGhpbmcgYmVjYXVzZSBvZiB0
-aGUgc29tZXRpbWVzL2Fsd2F5cyBkZWZpbmVkDQo+PiBzZW1hbnRpY3MuDQo+IA0KPiBTdXJlLCB0
-aGFua3MgZm9yIHRoaXMgY2xhcmlmaWNhdGlvbiwgYW5kIHRoZSBkb3VibGUgY2hlY2tpbmcgZnJv
-bSB5b3UgOikNCj4gDQo+Pg0KPiANCkluIHRoZSBkb2N1bWVudCBvZiBHTlUgYXV0b2NvbmYuDQpo
-dHRwczovL3d3dy5nbnUub3JnL3NvZnR3YXJlL2F1dG9jb25mL21hbnVhbC9hdXRvY29uZi0yLjY3
-L2h0bWxfbm9kZS9HZW5lcmljLURlY2xhcmF0aW9ucy5odG1sDQoNCkl0IHNheXMgdGhlIEFDX0NI
-RUNLX0RFQ0xTIGlzIGRpZmZlcmVudCBmcm9tIG90aGVyIEFDX0NIRUNLXypTLg0KV2hlbiBhIHN5
-bWJvbCBpcyBub3QgZGVjbGFyZWQsIEhBVkVfREVDTF9zeW1ib2wgaXMgZGVmaW5lZCB0byDigJgw
-4oCZIA0KaW5zdGVhZCBvZiBsZWF2aW5nIEhBVkVfREVDTF9zeW1ib2wgdW5kZWNsYXJlZC4NCg0K
-SXRzIHNhbXBsZSBpcyBhbHNvIGluIHRoZSBmb2xsb3dpbmcgZm9ybWF0Og0KDQojaWYgIUhBVkVf
-REVDTF9TWU1CT0wNCiNkbyBzb21ldGhpbmcgaGVyZQ0KI2VuZGlmDQoNClRoaXMgZGlmZmVyZW5j
-ZSBpcyByZWFsbHkgYSBiaXQgZGlmZmljdWx0IHRvIHVuZGVyc3RhbmQu
+On Tue, Feb 06, 2024 at 06:19:02PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Refactor the copy-pasta'd code in xfs/129, xfs/234, xfs/253, xfs/291,
+> xfs/432, xfs/503, and xfs/605 so that we don't have to maintain nearly
+> duplicate copies of the same code.
+> 
+> While we're at it, fix the fsck so that it includes xfs_scrub.
+> 
+> [v2]
+> 
+> After the first version of this patch was committed to fstests for-next,
+> Zorro reported that the cleanup function in common/xfs_metadump_tests
+> zapped one of his test machines because of a well known shell variable
+> expansion + globbing footgun.  This can trigger when running fstests on
+> older configurations where a test adds _cleanup_verify_metadump to the
+> local _cleanup function but exits before calling _setup_verify_metadump
+> to set XFS_METADUMP_IMG to a non-empty value.
+> 
+> Redesign the cleanup function to check for non-empty values of
+> XFS_METADUMP_{FILE,IMG} before proceeding with the rm.  Change the
+> globbed parameter of "rm -f $XFS_METADUMP_IMG*" to a for loop so that if
+> the glob does not match any files, the loop variable will be set to a
+> path that does not resolve anywhere.
+> 
+> The for-next branch was reverted to v2024.01.14, hence this patch is
+> being resubmitted with the fix inline instead of as a separate fix
+> patch.
+> 
+> Longer term maybe we ought to set -u or something.  Or figure out how to
+> make the root directory readonly.
+> 
+> Reported-by: Zorro Lang <zlang@redhat.com>
+> Link: https://lore.kernel.org/fstests/20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+
+Thanks Darrick, this version looks good to me. I'll make a fstests
+release again ASAP, after some testing jobs done.
+
+Thanks,
+Zorro
+
+>  common/metadump |  137 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/rc       |   10 ----
+>  common/xfs      |   14 ++++++
+>  tests/xfs/129   |   90 ++----------------------------------
+>  tests/xfs/234   |   91 ++-----------------------------------
+>  tests/xfs/253   |   89 ++----------------------------------
+>  tests/xfs/291   |   31 ++++--------
+>  tests/xfs/432   |   30 ++----------
+>  tests/xfs/503   |   60 +++---------------------
+>  tests/xfs/605   |   84 ++--------------------------------
+>  10 files changed, 195 insertions(+), 441 deletions(-)
+>  create mode 100644 common/metadump
+> 
+> 
+> diff --git a/common/metadump b/common/metadump
+> new file mode 100644
+> index 0000000000..4b576f045e
+> --- /dev/null
+> +++ b/common/metadump
+> @@ -0,0 +1,137 @@
+> +##/bin/bash
+> +# SPDX-License-Identifier: GPL-2.0-or-later
+> +# Copyright (c) 2024 Oracle.  All Rights Reserved.
+> +#
+> +# Filesystem metadata dump testing functions.
+> +#
+> +
+> +# Set up environment variables for a metadump test.  Requires the test and
+> +# scratch devices.  Sets XFS_METADUMP_{FILE,IMG} and MAX_XFS_METADUMP_VERSION.
+> +_xfs_setup_verify_metadump()
+> +{
+> +	XFS_METADUMP_FILE="$TEST_DIR/${seq}_metadump"
+> +	XFS_METADUMP_IMG="$TEST_DIR/${seq}_image"
+> +	MAX_XFS_METADUMP_VERSION="$(_xfs_metadump_max_version)"
+> +
+> +	rm -f "$XFS_METADUMP_FILE" "$XFS_METADUMP_IMG"*
+> +}
+> +
+> +_xfs_cleanup_verify_metadump()
+> +{
+> +	local img
+> +
+> +	_scratch_unmount &>> $seqres.full
+> +
+> +	test -n "$XFS_METADUMP_FILE" && rm -f "$XFS_METADUMP_FILE"
+> +
+> +	if [ -n "$XFS_METADUMP_IMG" ]; then
+> +		losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev; do
+> +			losetup -d "$ldev"
+> +		done
+> +
+> +		# Don't call rm directly with a globbed argument here to avoid
+> +		# issues issues with variable expansions.
+> +		for img in "$XFS_METADUMP_IMG"*; do
+> +			test -e "$img" && rm -f "$img"
+> +		done
+> +	fi
+> +}
+> +
+> +# Create a metadump in v1 format, restore it to fs image files, then mount the
+> +# images and fsck them.
+> +_xfs_verify_metadump_v1()
+> +{
+> +	local metadump_args="$1"
+> +	local extra_test="$2"
+> +
+> +	local metadump_file="$XFS_METADUMP_FILE"
+> +	local version=""
+> +	local data_img="$XFS_METADUMP_IMG.data"
+> +	local data_loop
+> +
+> +	# Force v1 if we detect v2 support
+> +	if [[ $MAX_XFS_METADUMP_FORMAT > 1 ]]; then
+> +		version="-v 1"
+> +	fi
+> +
+> +	# Capture metadump, which creates metadump_file
+> +	_scratch_xfs_metadump $metadump_file $metadump_args $version
+> +
+> +	# Restore metadump, which creates data_img
+> +	SCRATCH_DEV=$data_img _scratch_xfs_mdrestore $metadump_file
+> +
+> +	# Create loopdev for data device so we can mount the fs
+> +	data_loop=$(_create_loop_device $data_img)
+> +
+> +	# Mount fs, run an extra test, fsck, and unmount
+> +	SCRATCH_DEV=$data_loop _scratch_mount
+> +	if [ -n "$extra_test" ]; then
+> +		SCRATCH_DEV=$data_loop $extra_test
+> +	fi
+> +	SCRATCH_DEV=$data_loop _check_xfs_scratch_fs
+> +	SCRATCH_DEV=$data_loop _scratch_unmount
+> +
+> +	# Tear down what we created
+> +	_destroy_loop_device $data_loop
+> +	rm -f $data_img
+> +}
+> +
+> +# Create a metadump in v2 format, restore it to fs image files, then mount the
+> +# images and fsck them.
+> +_xfs_verify_metadump_v2()
+> +{
+> +	local metadump_args="$1"
+> +	local extra_test="$2"
+> +
+> +	local metadump_file="$XFS_METADUMP_FILE"
+> +	local version="-v 2"
+> +	local data_img="$XFS_METADUMP_IMG.data"
+> +	local data_loop
+> +	local log_img=""
+> +	local log_loop
+> +
+> +	# Capture metadump, which creates metadump_file
+> +	_scratch_xfs_metadump $metadump_file $metadump_args $version
+> +
+> +	#
+> +	# Metadump v2 files can contain contents dumped from an external log
+> +	# device. Use a temporary file to hold the log device contents restored
+> +	# from such a metadump file.
+> +	test -n "$SCRATCH_LOGDEV" && log_img="$XFS_METADUMP_IMG.log"
+> +
+> +	# Restore metadump, which creates data_img and log_img
+> +	SCRATCH_DEV=$data_img SCRATCH_LOGDEV=$log_img \
+> +		_scratch_xfs_mdrestore $metadump_file
+> +
+> +	# Create loopdev for data device so we can mount the fs
+> +	data_loop=$(_create_loop_device $data_img)
+> +
+> +	# Create loopdev for log device if we recovered anything
+> +	test -s "$log_img" && log_loop=$(_create_loop_device $log_img)
+> +
+> +	# Mount fs, run an extra test, fsck, and unmount
+> +	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _scratch_mount
+> +	if [ -n "$extra_test" ]; then
+> +		SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop $extra_test
+> +	fi
+> +	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _check_xfs_scratch_fs
+> +	SCRATCH_DEV=$data_loop _scratch_unmount
+> +
+> +	# Tear down what we created
+> +	if [ -b "$log_loop" ]; then
+> +		_destroy_loop_device $log_loop
+> +		rm -f $log_img
+> +	fi
+> +	_destroy_loop_device $data_loop
+> +	rm -f $data_img
+> +}
+> +
+> +# Verify both metadump formats if possible
+> +_xfs_verify_metadumps()
+> +{
+> +	_xfs_verify_metadump_v1 "$@"
+> +
+> +	if [[ $MAX_XFS_METADUMP_FORMAT == 2 ]]; then
+> +		_xfs_verify_metadump_v2 "$@"
+> +	fi
+> +}
+> diff --git a/common/rc b/common/rc
+> index 524ffa02aa..0b69f7f54f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3320,15 +3320,7 @@ _check_scratch_fs()
+>  
+>      case $FSTYP in
+>      xfs)
+> -	local scratch_log="none"
+> -	local scratch_rt="none"
+> -	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> -	    scratch_log="$SCRATCH_LOGDEV"
+> -
+> -	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+> -	    scratch_rt="$SCRATCH_RTDEV"
+> -
+> -	_check_xfs_filesystem $device $scratch_log $scratch_rt
+> +	_check_xfs_scratch_fs $device
+>  	;;
+>      udf)
+>  	_check_udf_filesystem $device $udf_fsize
+> diff --git a/common/xfs b/common/xfs
+> index 248ccefda3..6a48960a7f 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -1035,6 +1035,20 @@ _check_xfs_test_fs()
+>  	return $?
+>  }
+>  
+> +_check_xfs_scratch_fs()
+> +{
+> +	local device="${1:-$SCRATCH_DEV}"
+> +	local scratch_log="none"
+> +	local scratch_rt="none"
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> +	    scratch_log="$SCRATCH_LOGDEV"
+> +
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+> +	    scratch_rt="$SCRATCH_RTDEV"
+> +
+> +	_check_xfs_filesystem $device $scratch_log $scratch_rt
+> +}
+> +
+>  # modeled after _scratch_xfs_repair
+>  _test_xfs_repair()
+>  {
+> diff --git a/tests/xfs/129 b/tests/xfs/129
+> index cdac2349df..ec1a2ff3da 100755
+> --- a/tests/xfs/129
+> +++ b/tests/xfs/129
+> @@ -16,98 +16,23 @@ _cleanup()
+>  {
+>      cd /
+>      _scratch_unmount > /dev/null 2>&1
+> -    [[ -n $logdev && $logdev != "none" && $logdev != $SCRATCH_LOGDEV ]] && \
+> -	    _destroy_loop_device $logdev
+> -    [[ -n $datadev ]] && _destroy_loop_device $datadev
+> -    rm -rf $tmp.* $testdir $metadump_file $TEST_DIR/data-image \
+> -       $TEST_DIR/log-image
+> +    _xfs_cleanup_verify_metadump
+> +    rm -rf $tmp.* $testdir
+>  }
+>  
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/metadump
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+>  _require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_loop
+>  _require_scratch_reflink
+> -
+> -metadump_file=$TEST_DIR/${seq}_metadump
+> -
+> -verify_metadump_v1()
+> -{
+> -	local max_version=$1
+> -	local version=""
+> -
+> -	if [[ $max_version == 2 ]]; then
+> -		version="-v 1"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file $version
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV="" \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	SCRATCH_DEV=$datadev _scratch_mount
+> -	SCRATCH_DEV=$datadev _scratch_unmount
+> -
+> -	logdev=$SCRATCH_LOGDEV
+> -	[[ -z $logdev ]] && logdev=none
+> -	_check_xfs_filesystem $datadev $logdev none
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> -
+> -verify_metadump_v2()
+> -{
+> -	version="-v 2"
+> -
+> -	_scratch_xfs_metadump $metadump_file $version
+> -
+> -	# Metadump v2 files can contain contents dumped from an external log
+> -	# device. Use a temporary file to hold the log device contents restored
+> -	# from such a metadump file.
+> -	slogdev=""
+> -	if [[ -n $SCRATCH_LOGDEV ]]; then
+> -		slogdev=$TEST_DIR/log-image
+> -	fi
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV=$slogdev \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	logdev=${SCRATCH_LOGDEV}
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		logdev=$(_create_loop_device $TEST_DIR/log-image)
+> -	fi
+> -
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_mount
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_unmount
+> -
+> -	[[ -z $logdev ]] && logdev=none
+> -	_check_xfs_filesystem $datadev $logdev none
+> -
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		_destroy_loop_device $logdev
+> -		logdev=""
+> -		rm -f $TEST_DIR/log-image
+> -	fi
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> +_xfs_setup_verify_metadump
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+> -
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+>  _scratch_mount
+>  
+>  testdir=$SCRATCH_MNT/test-$seq
+> @@ -127,12 +52,7 @@ done
+>  _scratch_unmount
+>  
+>  echo "Create metadump file, restore it and check restored fs"
+> -
+> -verify_metadump_v1 $max_md_version
+> -
+> -if [[ $max_md_version == 2 ]]; then
+> -	verify_metadump_v2
+> -fi
+> +_xfs_verify_metadumps
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/234 b/tests/xfs/234
+> index f4f8af6d3a..6fdea42d21 100755
+> --- a/tests/xfs/234
+> +++ b/tests/xfs/234
+> @@ -15,16 +15,13 @@ _begin_fstest auto quick rmap punch metadump
+>  _cleanup()
+>  {
+>      cd /
+> -    _scratch_unmount > /dev/null 2>&1
+> -    [[ -n $logdev && $logdev != "none" && $logdev != $SCRATCH_LOGDEV ]] && \
+> -	    _destroy_loop_device $logdev
+> -    [[ -n $datadev ]] && _destroy_loop_device $datadev
+> -    rm -rf $tmp.* $testdir $metadump_file $TEST_DIR/image \
+> -       $TEST_DIR/log-image
+> +    _xfs_cleanup_verify_metadump
+> +    rm -rf $tmp.* $testdir
+>  }
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/metadump
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> @@ -32,82 +29,9 @@ _require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_loop
+>  _require_xfs_scratch_rmapbt
+>  _require_xfs_io_command "fpunch"
+> -
+> -metadump_file=$TEST_DIR/${seq}_metadump
+> -
+> -verify_metadump_v1()
+> -{
+> -	local max_version=$1
+> -	local version=""
+> -
+> -	if [[ $max_version == 2 ]]; then
+> -		version="-v 1"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file $version
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV="" \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	SCRATCH_DEV=$datadev _scratch_mount
+> -	SCRATCH_DEV=$datadev _scratch_unmount
+> -
+> -	logdev=$SCRATCH_LOGDEV
+> -	[[ -z $logdev ]] && logdev=none
+> -	_check_xfs_filesystem $datadev $logdev none
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> -
+> -verify_metadump_v2()
+> -{
+> -	version="-v 2"
+> -
+> -	_scratch_xfs_metadump $metadump_file $version
+> -
+> -	# Metadump v2 files can contain contents dumped from an external log
+> -	# device. Use a temporary file to hold the log device contents restored
+> -	# from such a metadump file.
+> -	slogdev=""
+> -	if [[ -n $SCRATCH_LOGDEV ]]; then
+> -		slogdev=$TEST_DIR/log-image
+> -	fi
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV=$slogdev \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	logdev=${SCRATCH_LOGDEV}
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		logdev=$(_create_loop_device $TEST_DIR/log-image)
+> -	fi
+> -
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_mount
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_unmount
+> -
+> -	[[ -z $logdev ]] && logdev=none
+> -	_check_xfs_filesystem $datadev $logdev none
+> -
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		_destroy_loop_device $logdev
+> -		logdev=""
+> -		rm -f $TEST_DIR/log-image
+> -	fi
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> +_xfs_setup_verify_metadump
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+> -
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+>  _scratch_mount
+>  
+>  testdir=$SCRATCH_MNT/test-$seq
+> @@ -127,12 +51,7 @@ done
+>  _scratch_unmount
+>  
+>  echo "Create metadump file, restore it and check restored fs"
+> -
+> -verify_metadump_v1 $max_md_version
+> -
+> -if [[ $max_md_version == 2 ]]; then
+> -	verify_metadump_v2
+> -fi
+> +_xfs_verify_metadumps
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/253 b/tests/xfs/253
+> index 3b567999d8..18c58eb8d5 100755
+> --- a/tests/xfs/253
+> +++ b/tests/xfs/253
+> @@ -26,23 +26,21 @@ _cleanup()
+>      cd /
+>      rm -f $tmp.*
+>      rm -rf "${OUTPUT_DIR}"
+> -    rm -f "${METADUMP_FILE}"
+> -    [[ -n $logdev && $logdev != $SCRATCH_LOGDEV ]] && \
+> -	    _destroy_loop_device $logdev
+> -    [[ -n $datadev ]] && _destroy_loop_device $datadev
+> +    _xfs_cleanup_verify_metadump
+>  }
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/metadump
+>  
+>  _require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_test
+>  _require_scratch
+> +_xfs_setup_verify_metadump
+>  
+>  # real QA test starts here
+>  
+>  OUTPUT_DIR="${SCRATCH_MNT}/test_${seq}"
+> -METADUMP_FILE="${TEST_DIR}/${seq}_metadump"
+>  ORPHANAGE="lost+found"
+>  
+>  _supported_fs xfs
+> @@ -52,24 +50,7 @@ function create_file() {
+>  	touch $(printf "$@")
+>  }
+>  
+> -verify_metadump_v1()
+> -{
+> -	local max_version=$1
+> -	local version=""
+> -
+> -	if [[ $max_version == 2 ]]; then
+> -		version="-v 1"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $METADUMP_FILE $version
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV="" \
+> -		   _scratch_xfs_mdrestore $METADUMP_FILE
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	SCRATCH_DEV=$datadev _scratch_mount
+> -
+> +extra_test() {
+>  	cd "${SCRATCH_MNT}"
+>  
+>  	# Get a listing of all the files after obfuscation
+> @@ -78,60 +59,6 @@ verify_metadump_v1()
+>  	ls -R | od -c >> $seqres.full
+>  
+>  	cd /
+> -
+> -	SCRATCH_DEV=$datadev _scratch_unmount
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> -
+> -verify_metadump_v2()
+> -{
+> -	version="-v 2"
+> -
+> -	_scratch_xfs_metadump $METADUMP_FILE $version
+> -
+> -	# Metadump v2 files can contain contents dumped from an external log
+> -	# device. Use a temporary file to hold the log device contents restored
+> -	# from such a metadump file.
+> -	slogdev=""
+> -	if [[ -n $SCRATCH_LOGDEV ]]; then
+> -		slogdev=$TEST_DIR/log-image
+> -	fi
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV=$slogdev \
+> -		   _scratch_xfs_mdrestore $METADUMP_FILE
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	logdev=${SCRATCH_LOGDEV}
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		logdev=$(_create_loop_device $TEST_DIR/log-image)
+> -	fi
+> -
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_mount
+> -
+> -	cd "${SCRATCH_MNT}"
+> -
+> -	# Get a listing of all the files after obfuscation
+> -	echo "Metadump v2" >> $seqres.full
+> -	ls -R >> $seqres.full
+> -	ls -R | od -c >> $seqres.full
+> -
+> -	cd /
+> -
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_unmount
+> -
+> -	if [[ -s $TEST_DIR/log-image ]]; then
+> -		_destroy_loop_device $logdev
+> -		logdev=""
+> -		rm -f $TEST_DIR/log-image
+> -	fi
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+>  }
+>  
+>  echo "Disciplyne of silence is goed."
+> @@ -233,13 +160,7 @@ cd $here
+>  
+>  _scratch_unmount
+>  
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+> -verify_metadump_v1 $max_md_version
+> -
+> -if [[ $max_md_version == 2 ]]; then
+> -	verify_metadump_v2
+> -fi
+> +_xfs_verify_metadumps '' extra_test
+>  
+>  # Finally, re-make the filesystem since to ensure we don't
+>  # leave a directory with duplicate entries lying around.
+> diff --git a/tests/xfs/291 b/tests/xfs/291
+> index 1433140821..2bd94d7b9b 100755
+> --- a/tests/xfs/291
+> +++ b/tests/xfs/291
+> @@ -9,11 +9,21 @@
+>  . ./common/preamble
+>  _begin_fstest auto repair metadump
+>  
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	_xfs_cleanup_verify_metadump
+> +}
+> +
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/metadump
+>  
+>  _supported_fs xfs
+>  _require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+> +_xfs_setup_verify_metadump
+>  
+>  # real QA test starts here
+>  _require_scratch
+> @@ -92,26 +102,7 @@ _scratch_xfs_check >> $seqres.full 2>&1 || _fail "xfs_check failed"
+>  
+>  # Yes they can!  Now...
+>  # Can xfs_metadump cope with this monster?
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $tmp.metadump -a -o $version || \
+> -		_fail "xfs_metadump failed"
+> -
+> -	slogdev=$SCRATCH_LOGDEV
+> -	if [[ -z $version || $version == "-v 1" ]]; then
+> -		slogdev=""
+> -	fi
+> -	SCRATCH_DEV=$tmp.img SCRATCH_LOGDEV=$slogdev _scratch_xfs_mdrestore \
+> -		   $tmp.metadump || _fail "xfs_mdrestore failed"
+> -	SCRATCH_DEV=$tmp.img _scratch_xfs_repair -f &>> $seqres.full || \
+> -		_fail "xfs_repair of metadump failed"
+> -done
+> +_xfs_verify_metadumps '-a -o'
+>  
+>  # Yes it can; success, all done
+>  status=0
+> diff --git a/tests/xfs/432 b/tests/xfs/432
+> index 7e402aa88f..4eae92e75b 100755
+> --- a/tests/xfs/432
+> +++ b/tests/xfs/432
+> @@ -20,16 +20,19 @@ _begin_fstest auto quick dir metadata metadump
+>  _cleanup()
+>  {
+>  	cd /
+> -	rm -f "$tmp".* $metadump_file $metadump_img
+> +	rm -f "$tmp".*
+> +	_xfs_cleanup_verify_metadump
+>  }
+>  
+>  # Import common functions.
+>  . ./common/filter
+> +. ./common/metadump
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+>  _require_command "$XFS_MDRESTORE_PROG" "xfs_mdrestore"
+>  _require_scratch
+> +_xfs_setup_verify_metadump
+>  
+>  rm -f "$seqres.full"
+>  
+> @@ -54,9 +57,6 @@ echo "Format and mount"
+>  _scratch_mkfs -b size=1k -n size=64k > "$seqres.full" 2>&1
+>  _scratch_mount >> "$seqres.full" 2>&1
+>  
+> -metadump_file="$TEST_DIR/meta-$seq"
+> -metadump_img="$TEST_DIR/img-$seq"
+> -rm -f $metadump_file $metadump_img
+>  testdir="$SCRATCH_MNT/test-$seq"
+>  max_fname_len=255
+>  blksz=$(_get_block_size $SCRATCH_MNT)
+> @@ -87,27 +87,7 @@ echo "qualifying extent: $extlen blocks" >> $seqres.full
+>  test -n "$extlen" || _notrun "could not create dir extent > 1000 blocks"
+>  
+>  echo "Try to metadump, restore and check restored metadump image"
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -a -o -w $version
+> -
+> -	slogdev=$SCRATCH_LOGDEV
+> -	if [[ -z $version || $version == "-v 1" ]]; then
+> -		slogdev=""
+> -	fi
+> -
+> -	SCRATCH_DEV=$metadump_img SCRATCH_LOGDEV=$slogdev \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	SCRATCH_DEV=$metadump_img _scratch_xfs_repair -n &>> $seqres.full || \
+> -		echo "xfs_repair on restored fs returned $?"
+> -done
+> +_xfs_verify_metadumps '-a -o -w'
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/503 b/tests/xfs/503
+> index 8643c3d483..854cc74bbe 100755
+> --- a/tests/xfs/503
+> +++ b/tests/xfs/503
+> @@ -17,11 +17,13 @@ _cleanup()
+>  {
+>  	cd /
+>  	rm -rf $tmp.* $testdir
+> +	_xfs_cleanup_verify_metadump
+>  }
+>  
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/populate
+> +. ./common/metadump
+>  
+>  testdir=$TEST_DIR/test-$seq
+>  
+> @@ -35,6 +37,7 @@ _require_scratch_nocheck
+>  _require_populate_commands
+>  _xfs_skip_online_rebuild
+>  _xfs_skip_offline_rebuild
+> +_xfs_setup_verify_metadump
+>  
+>  echo "Format and populate"
+>  _scratch_populate_cached nofill > $seqres.full 2>&1
+> @@ -43,66 +46,17 @@ mkdir -p $testdir
+>  metadump_file=$testdir/scratch.md
+>  copy_file=$testdir/copy.img
+>  
+> -check_restored_metadump_image()
+> -{
+> -	local image=$1
+> -
+> -	loop_dev=$(_create_loop_device $image)
+> -	SCRATCH_DEV=$loop_dev _scratch_mount
+> -	SCRATCH_DEV=$loop_dev _check_scratch_fs
+> -	SCRATCH_DEV=$loop_dev _scratch_unmount
+> -	_destroy_loop_device $loop_dev
+> -}
+> -
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+>  echo "metadump and mdrestore"
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -a -o $version >> $seqres.full
+> -	SCRATCH_DEV=$TEST_DIR/image _scratch_xfs_mdrestore $metadump_file
+> -	check_restored_metadump_image $TEST_DIR/image
+> -done
+> +_xfs_verify_metadumps '-a -o'
+>  
+>  echo "metadump a and mdrestore"
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -a $version >> $seqres.full
+> -	SCRATCH_DEV=$TEST_DIR/image _scratch_xfs_mdrestore $metadump_file
+> -	check_restored_metadump_image $TEST_DIR/image
+> -done
+> +_xfs_verify_metadumps '-a'
+>  
+>  echo "metadump g and mdrestore"
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -g $version >> $seqres.full
+> -	SCRATCH_DEV=$TEST_DIR/image _scratch_xfs_mdrestore $metadump_file
+> -	check_restored_metadump_image $TEST_DIR/image
+> -done
+> +_xfs_verify_metadumps '-g' >> $seqres.full
+>  
+>  echo "metadump ag and mdrestore"
+> -for md_version in $(seq 1 $max_md_version); do
+> -	version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v $md_version"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -a -g $version >> $seqres.full
+> -	SCRATCH_DEV=$TEST_DIR/image _scratch_xfs_mdrestore $metadump_file
+> -	check_restored_metadump_image $TEST_DIR/image
+> -done
+> +_xfs_verify_metadumps '-a -g' >> $seqres.full
+>  
+>  echo copy
+>  $XFS_COPY_PROG $SCRATCH_DEV $copy_file >> $seqres.full
+> diff --git a/tests/xfs/605 b/tests/xfs/605
+> index f2cd7aba98..13cf065495 100755
+> --- a/tests/xfs/605
+> +++ b/tests/xfs/605
+> @@ -15,17 +15,13 @@ _cleanup()
+>  {
+>  	cd /
+>  	rm -r -f $tmp.*
+> -	_scratch_unmount > /dev/null 2>&1
+> -	[[ -n $logdev && $logdev != "none" && $logdev != $SCRATCH_LOGDEV ]] && \
+> -		_destroy_loop_device $logdev
+> -	[[ -n $datadev ]] && _destroy_loop_device $datadev
+> -	rm -r -f $metadump_file $TEST_DIR/data-image \
+> -	   $TEST_DIR/log-image
+> +	_xfs_cleanup_verify_metadump
+>  }
+>  
+>  # Import common functions.
+>  . ./common/dmflakey
+>  . ./common/inject
+> +. ./common/metadump
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> @@ -37,85 +33,22 @@ _require_xfs_io_error_injection log_item_pin
+>  _require_dm_target flakey
+>  _require_xfs_io_command "pwrite"
+>  _require_test_program "punch-alternating"
+> +_xfs_setup_verify_metadump
+>  
+> -metadump_file=${TEST_DIR}/${seq}.md
+>  testfile=${SCRATCH_MNT}/testfile
+>  
+>  echo "Format filesystem on scratch device"
+>  _scratch_mkfs >> $seqres.full 2>&1
+>  
+> -max_md_version=$(_xfs_metadump_max_version)
+> -
+>  external_log=0
+>  if [[ $USE_EXTERNAL = yes && -n "$SCRATCH_LOGDEV" ]]; then
+>  	external_log=1
+>  fi
+>  
+> -if [[ $max_md_version == 1 && $external_log == 1 ]]; then
+> +if [[ $MAX_XFS_METADUMP_FORMAT == 1 && $external_log == 1 ]]; then
+>  	_notrun "metadump v1 does not support external log device"
+>  fi
+>  
+> -verify_metadump_v1()
+> -{
+> -	local version=""
+> -	if [[ $max_md_version == 2 ]]; then
+> -		version="-v 1"
+> -	fi
+> -
+> -	_scratch_xfs_metadump $metadump_file -a -o $version
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	SCRATCH_DEV=$datadev _scratch_mount
+> -	SCRATCH_DEV=$datadev _check_scratch_fs
+> -	SCRATCH_DEV=$datadev _scratch_unmount
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> -
+> -verify_metadump_v2()
+> -{
+> -	local version="-v 2"
+> -
+> -	_scratch_xfs_metadump $metadump_file -a -o $version
+> -
+> -	# Metadump v2 files can contain contents dumped from an external log
+> -	# device. Use a temporary file to hold the log device contents restored
+> -	# from such a metadump file.
+> -	slogdev=""
+> -	if [[ -n $SCRATCH_LOGDEV ]]; then
+> -		slogdev=$TEST_DIR/log-image
+> -	fi
+> -
+> -	SCRATCH_DEV=$TEST_DIR/data-image SCRATCH_LOGDEV=$slogdev \
+> -		   _scratch_xfs_mdrestore $metadump_file
+> -
+> -	datadev=$(_create_loop_device $TEST_DIR/data-image)
+> -
+> -	logdev=""
+> -	if [[ -s $slogdev ]]; then
+> -		logdev=$(_create_loop_device $slogdev)
+> -	fi
+> -
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_mount
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _check_scratch_fs
+> -	SCRATCH_DEV=$datadev SCRATCH_LOGDEV=$logdev _scratch_unmount
+> -
+> -	if [[ -s $logdev ]]; then
+> -		_destroy_loop_device $logdev
+> -		logdev=""
+> -		rm -f $slogdev
+> -	fi
+> -
+> -	_destroy_loop_device $datadev
+> -	datadev=""
+> -	rm -f $TEST_DIR/data-image
+> -}
+> -
+>  echo "Initialize and mount filesystem on flakey device"
+>  _init_flakey
+>  _load_flakey_table $FLAKEY_ALLOW_WRITES
+> @@ -160,14 +93,7 @@ echo -n "Filesystem has a "
+>  _print_logstate
+>  
+>  echo "Create metadump file, restore it and check restored fs"
+> -
+> -if [[ $external_log == 0 ]]; then
+> -	verify_metadump_v1 $max_md_version
+> -fi
+> -
+> -if [[ $max_md_version == 2 ]]; then
+> -	verify_metadump_v2
+> -fi
+> +_xfs_verify_metadumps '-a -o'
+>  
+>  # Mount the fs to replay the contents from the dirty log.
+>  _scratch_mount
+> 
+> 
+
