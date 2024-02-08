@@ -1,205 +1,298 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E6831095A;
-	Wed,  7 Feb 2024 15:01:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D31BA50A83
+	for <fstests@vger.kernel.org>; Thu,  8 Feb 2024 22:52:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707318098; cv=none; b=sU2qQ9Ajn/5LM6dNDu8cO6jqBsBEzVMilk+U3kUy4Op6nm4rmkDXQ5Ko49FBPntsIaG55jPFQRooKwc/ikZQ7bXYoYjjdjd18SFDzuxqycP33tdldhNXMdXyHPWO91jaOb4iOCakbqnrVoyzJibIVqdwfz4GofmJG75HyY8UDdA=
+	t=1707432774; cv=none; b=Vox3Qyj9Tb2DrAELV/yKO963rNITQGfGbHTJ0WQ+8fXUDvmYZbDd5w5eqb6kWLGCPCNE5TTQmx8c3WwS7GxqA3WltrFIJiFzMvRUbm2U3JzGzk0/ahgFEUf4EiP/IZjYkEDgyS/wPhb5W49mZo8ZYOyZH2swWeUqU3PqLLQaJYo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707318098; c=relaxed/simple;
-	bh=/vgCAuSNs6gB+VdL6aXHg2WLg2R5391HBmpmQgQeePw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=lWsy+mqqSHDJY7Z9TmnEpW7I/lES27jRwP9v48zDHenT56EQhXZgHO2sZO4ygeryIZcL+Jlwm2Sdhtc2i9v4Td8Br8rbGyUdduiIDXdwY1y5CiSjBH2X4y/ZyIUhakS+nrfr3Cp99ug/PsGYyxxXMsVaqoM684lcwtVkApBC2iA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uS9n6nNS; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1707432774; c=relaxed/simple;
+	bh=Z+g2FDgnZIEkDLMDrQIsORQmm63IjtKrkTiYhzlTFeU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=TastmmhZdUQSBD3hQFKvYVT9AB297EJ6K0bbKyYeD3nYKCxSo1QCNrzeDQ2hBUOXnVFx0sbYN12XMIQp4g11znKNNnDtpQeq50Jc7CRg1GUqZPJYVZBZTvgWF36aZW0dCC1jpqD1vJSWofdLxzHWUEJ3NpiFWZPeuFXb4NB7vTs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hobsPOr5; arc=none smtp.client-ip=209.85.128.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uS9n6nNS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92D53C43390;
-	Wed,  7 Feb 2024 15:01:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1707318097;
-	bh=/vgCAuSNs6gB+VdL6aXHg2WLg2R5391HBmpmQgQeePw=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=uS9n6nNSUom35ND9RI7sRkj5+mzrdYS2/U8rUj6imZSGMn/XaZ5MIvST6W9EfkW+h
-	 HNs7MWoBNz8P3WU7SV+BkBVCINnYeWhgp3XOt1kzG5/gT8DHTMfXTvKEa2TCUzOBrt
-	 G9oBQUvme8UrfpgPWzKkvatX2u1TejLOZrheG02iOIwEEKwI6C+nWR3uuaKRWHg2VV
-	 QhjzkykTRtIosoltY3PAVNB48yWN4l2gvVHb7y1o9HZ2ewfiNgpXDexHhQvXSbRvQO
-	 s061mpL/1vBWF8mkRTwnjbQZaV+ZDIPp0Gv3nfYvyhUlHCZOKx+eQPQX5LkJmyFjFr
-	 fmsSV2X+qIt+g==
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-a388c5542e9so80466066b.1;
-        Wed, 07 Feb 2024 07:01:37 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCW4EI/aY1TpK8b5iqUnl4kijA7oglBqKMBTw75skyHk9w53QU5/AiOkWeJRuXa/fyLl0Aa0HbYFf/PsZv/jYYmnweL1Dv6oDg==
-X-Gm-Message-State: AOJu0YxPtYkLhnkN3JpZq4YCpxhVPsYp80ZfEBA40nwj0nUP+F/yqBx3
-	tgW4p2vLvsVgiFz5r5xcpB2+r/l1+ToqBJtr6ZWhPLoLNa7CJvwvVLauP+3ibHtqGnzXn/MQxrx
-	amcizjPWSklR++aIKwaOnqhEv8y4=
-X-Google-Smtp-Source: AGHT+IG+XIwwERR8Q53YhqtILZBk4MDebABH6+/p156YEx7Zuif88yjToDWGYTQSiFz9svAb8lvN/fu0AJp1c59rlnA=
-X-Received: by 2002:a17:907:77ca:b0:a38:9ade:d8a2 with SMTP id
- kz10-20020a17090777ca00b00a389aded8a2mr585871ejc.1.1707318095955; Wed, 07 Feb
- 2024 07:01:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hobsPOr5"
+Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-4106344eafdso1033305e9.3
+        for <fstests@vger.kernel.org>; Thu, 08 Feb 2024 14:52:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1707432771; x=1708037571; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0Ax03EBWzhAbur9lM9kduU783cF+R7aFb6z4iKC/jpk=;
+        b=hobsPOr5T8iyxvyzG9r3m2HavZYlJtkV5vgY5J/F3uKVghBlWT8+hBH67XmfWx/aRx
+         fCRh0BOEFG+M9Y45X3BB2NhJApweVeBW2/yeAfN3I+JExznSu17kYgtLcjdw1ZfFMABY
+         QnINmWMC7C8ataH+MTUyCV3CdurVfQToKuAIo39J7gIKesrSIRa4aQ/gqWYzaTJvOOAs
+         rLVZHrcynQc3brGgsWOyZtvIHKdwuMRKQSvZrQop7zl6V/kDmvXEX8e+2U9dZ+zUCD7w
+         FQ8AkMb9Pbi/G+T9tnQO3j333PRM3R7f1S7X+CldJ9EERXFNnalSKANKpVZ7KPfTDLH5
+         Eqfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707432771; x=1708037571;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0Ax03EBWzhAbur9lM9kduU783cF+R7aFb6z4iKC/jpk=;
+        b=B2zmFgmCyX2DokEsWrErHISduEazadg+Hdk1D67Wv4lb7VNPyQ0XO6lbNfXU6YEbZ7
+         YWUfSSoYjjivLNA0iTRtoDKSePQSypBf87C+UVLtEZX23WsWuX8qpmXxeq92pX4SjnZD
+         P3tu6OXHEO8HQXfGHyRMFJfbbclsCPM+Ti1viXFHsfjUDnUB1aIrnKA6jwEhgVzQwgnq
+         n79iaeW13qxvkDhm8ryBDQ3TqpzlqPqY8PF47IzOsiXtEeGH1h7Ybk/fT3lm1hB5+JAB
+         m5MzST21ku4rR/5+FwcZZK+ffr8VOrUYUEF9mtsQCFU02vSDhdkC/peXYuvs42dGmfBn
+         fONQ==
+X-Gm-Message-State: AOJu0YyNjjTYuNX6vhoaBrdMP3MEiSISs28901p4wzyjTC7oIXjbL/f/
+	uGcjvmyYxlGvF3Z+Uyb7XCOy8TPoyEFQKyHz5BuA+oEO8UYKMtv1TpHz2LtY
+X-Google-Smtp-Source: AGHT+IExLJxfUYxfmIF2kJu9BTaNbite0P4rNZeI4h8ia7YPpf7AfVIpCzd0zTObWEPZ/gAo0Hy2aw==
+X-Received: by 2002:a5d:6d83:0:b0:33b:649a:1aba with SMTP id l3-20020a5d6d83000000b0033b649a1abamr26985wrs.53.1707432770752;
+        Thu, 08 Feb 2024 14:52:50 -0800 (PST)
+Received: from localhost (ip-109-238-218-228.aim-net.cz. [109.238.218.228])
+        by smtp.gmail.com with ESMTPSA id p12-20020adff20c000000b0033905a60689sm344190wro.45.2024.02.08.14.52.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 08 Feb 2024 14:52:50 -0800 (PST)
+From: Martin Jansa <martin.jansa@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Martin Jansa <martin.jansa@gmail.com>
+Subject: [PATCH] tests/*/Makefile: make sure group.list DIRT exists before install
+Date: Thu,  8 Feb 2024 23:52:41 +0100
+Message-ID: <20240208225241.644701-1-martin.jansa@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240206233024.35399-1-wqu@suse.com>
-In-Reply-To: <20240206233024.35399-1-wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 7 Feb 2024 15:00:59 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H5fBLhnsp2iVEXDWvM-V-0=VnRhwRvL0O74sf9+xyXQXg@mail.gmail.com>
-Message-ID: <CAL3q7H5fBLhnsp2iVEXDWvM-V-0=VnRhwRvL0O74sf9+xyXQXg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: make sure defrag doesn't increase space usage
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Tue, Feb 6, 2024 at 11:30=E2=80=AFPM Qu Wenruo <wqu@suse.com> wrote:
->
-> [BUG]
-> There is a bug report that, the following simple file layout would make
-> btrfs defrag to wrongly defrag part of the file, and results in
-> increased space usage:
->
->  # mkfs.btrfs -f $dev
->  # mount $dev $mnt
->  # xfs_io -f -c "pwrite 0 40m" $mnt/foobar
->  # sync
->  # xfs_io -f -c "pwrite 40m 64k" $mnt/foobar.
->  # sync
->  # btrfs filesystem defrag $mnt/foobar
->  # sync
->
-> [CAUSE]
-> It's a bug in the defrag decision part, where we use the length to the
-> end of the extent to determine if it meets our extent size threshold.
->
-> That cause us to do different defrag decision inside the same file
-> extent, and such defrag would cause extra space caused by btrfs data
-> CoW.
->
-> [TEST CASE]
-> The test case would just use the above workload as the core, and use
-> qgroups to properly record the data usage of the fs tree, to make sure
-> the defrag at least won't cause extra space usage in this particular
-> case.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/btrfs/310     | 63 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/310.out |  2 ++
->  2 files changed, 65 insertions(+)
->  create mode 100755 tests/btrfs/310
->  create mode 100644 tests/btrfs/310.out
->
-> diff --git a/tests/btrfs/310 b/tests/btrfs/310
-> new file mode 100755
-> index 00000000..ca535f99
-> --- /dev/null
-> +++ b/tests/btrfs/310
-> @@ -0,0 +1,63 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 YOUR NAME HERE.  All Rights Reserved.
+* sometimes make install was failing with:
+  cp: cannot stat 'group.list': No such file or directory
+  and bunch of non-fatal messages:
+  mv: failed to preserve ownership for 'group.list': Invalid argument
 
-Don't forget to update this.
+* this was when tools/mkgroupfile did
+  mv -f "$new_groups" "$groupfile"
+  overwritting the group.list file while install-sh was already
+  copying it to output
 
-> +#
-> +# FS QA Test 310
-> +#
-> +# what am I here for?
+* in the end easily reproducible by
+  1) removing tests/*/group.list before each make install
+  2) adding some sleep in mkgroupfile before the mv call
 
-And this too.
+Signed-off-by: Martin Jansa <martin.jansa@gmail.com>
+---
+ tests/btrfs/Makefile    | 2 +-
+ tests/ceph/Makefile     | 2 +-
+ tests/cifs/Makefile     | 2 +-
+ tests/ext4/Makefile     | 2 +-
+ tests/f2fs/Makefile     | 2 +-
+ tests/generic/Makefile  | 2 +-
+ tests/nfs/Makefile      | 2 +-
+ tests/ocfs2/Makefile    | 2 +-
+ tests/overlay/Makefile  | 2 +-
+ tests/perf/Makefile     | 2 +-
+ tests/selftest/Makefile | 2 +-
+ tests/shared/Makefile   | 2 +-
+ tests/tmpfs/Makefile    | 2 +-
+ tests/udf/Makefile      | 2 +-
+ tests/xfs/Makefile      | 2 +-
+ 15 files changed, 15 insertions(+), 15 deletions(-)
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick defrag qgroup
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_btrfs_no_nodatacow
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +       "btrfs: btrfs: defrag: avoid unnecessary defrag caused by incorre=
-ct extent size"
-> +
-> +_scratch_mkfs >> $seqres.full
-> +
-> +# We require no compression and enable datacow.
-> +# As we rely on qgroup to give us an accurate number of used space,
-> +# which is based on on-disk extent size, thus we have to disable compres=
-sion.
-> +#
-> +# And we rely COW to cause wasted space on unpatched kernels, thus data =
-cow
-> +# is required.
-> +_scratch_mount -o compress=3Dno,datacow
+diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
+index 1b72a1a1..6d9995b4 100644
+--- a/tests/btrfs/Makefile
++++ b/tests/btrfs/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/ceph/Makefile b/tests/ceph/Makefile
+index 2761e1e9..5f24d518 100644
+--- a/tests/ceph/Makefile
++++ b/tests/ceph/Makefile
+@@ -12,7 +12,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
+index 62c48935..0b89a01d 100644
+--- a/tests/cifs/Makefile
++++ b/tests/cifs/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
+index a2a0d561..296e3850 100644
+--- a/tests/ext4/Makefile
++++ b/tests/ext4/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
+index 9d1ed3c6..0a90b465 100644
+--- a/tests/f2fs/Makefile
++++ b/tests/f2fs/Makefile
+@@ -15,7 +15,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/generic/Makefile b/tests/generic/Makefile
+index b464b22b..d6ed3e55 100644
+--- a/tests/generic/Makefile
++++ b/tests/generic/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
+index 128d2a3a..51590b5c 100644
+--- a/tests/nfs/Makefile
++++ b/tests/nfs/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
+index 260ad31b..17e01bf3 100644
+--- a/tests/ocfs2/Makefile
++++ b/tests/ocfs2/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
+index 2785b94d..c71e78d6 100644
+--- a/tests/overlay/Makefile
++++ b/tests/overlay/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/perf/Makefile b/tests/perf/Makefile
+index 0c74ba39..d72c04d9 100644
+--- a/tests/perf/Makefile
++++ b/tests/perf/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/selftest/Makefile b/tests/selftest/Makefile
+index 3ddfca37..cabc35a9 100644
+--- a/tests/selftest/Makefile
++++ b/tests/selftest/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/shared/Makefile b/tests/shared/Makefile
+index f3128714..2e6aa718 100644
+--- a/tests/shared/Makefile
++++ b/tests/shared/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/tmpfs/Makefile b/tests/tmpfs/Makefile
+index 46544313..46b62dad 100644
+--- a/tests/tmpfs/Makefile
++++ b/tests/tmpfs/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/udf/Makefile b/tests/udf/Makefile
+index ed4434f0..feda69a6 100644
+--- a/tests/udf/Makefile
++++ b/tests/udf/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
+index 5f413e67..6bfafdb1 100644
+--- a/tests/xfs/Makefile
++++ b/tests/xfs/Makefile
+@@ -14,7 +14,7 @@ default: $(DIRT)
+ 
+ include $(BUILDRULES)
+ 
+-install:
++install: default
+ 	$(INSTALL) -m 755 -d $(TARGET_DIR)
+ 	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
+ 	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+-- 
+2.43.0
 
-datacow is redundant here, _require_btrfs_no_nodatacow was already called a=
-bove.
-
-Should also use  _require_btrfs_no_compress()
-
-> +
-> +# Enable quota to account the wasted bookend space.
-> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT 2>> $seqres.full &
-> +_qgroup_rescan $SCRATCH_MNT >> $seqres.full
-> +
-> +# Create the following layout
-> +# [0, 40M)             A regular uncompressed extent
-> +# [40M, 40M+64K)       A small regular extent allowing merging
-> +$XFS_IO_PROG -f -c "pwrite 0 40M" -c sync "$SCRATCH_MNT/foobar" >> $seqr=
-es.full
-> +$XFS_IO_PROG -f -c "pwrite 40M 64K" -c sync "$SCRATCH_MNT/foobar" >> $se=
-qres.full
-> +
-> +# Then record the current qgroup number, which should be 40M + 64K + nod=
-esize
-> +qgroup_before=3D$($BTRFS_UTIL_PROG qgroup show --sync --raw "$SCRATCH_MN=
-T" | tail -n1 | $AWK_PROG '{print $2}')
-> +echo "qgroup number before defrag: $qgroup_before" >> $seqres.full
-> +
-> +# Now defrag the file with the default 32M extent size threshold.
-> +$BTRFS_UTIL_PROG filesystem defrag -t 32M "$SCRATCH_MNT/foobar" >> $seqr=
-es.full
-> +
-> +# Write back the re-dirtied content of defrag and update qgroup.
-> +sync
-> +
-> +# Now check the newer qgroup numbers
-> +qgroup_after=3D$($BTRFS_UTIL_PROG qgroup show --sync --raw "$SCRATCH_MNT=
-" | tail -n1 | $AWK_PROG '{print $2}')
-> +echo "qgroup number after defrag: $qgroup_after" >> $seqres.full
-> +
-> +# The new number should not exceed the old one, or the defrag itself is
-> +# doing more damage.
-
-Damage is not exactly the proper wording here, I would say wasting
-space, as damage I would think of something like corruption, data
-loss, etc.
-
-Otherwise it looks fine.
-Thanks.
-
-> +if [ "$qgroup_after" -gt "$qgroup_before" ]; then
-> +       echo "defrag caused more space usage: before=3D$qgroup_before aft=
-er=3D$qgroup_after"
-> +fi
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
-> new file mode 100644
-> index 00000000..7b9eaf78
-> --- /dev/null
-> +++ b/tests/btrfs/310.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 310
-> +Silence is golden
-> --
-> 2.42.0
->
->
