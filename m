@@ -1,220 +1,105 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAFE22E644;
-	Fri,  9 Feb 2024 12:03:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1859359178;
+	Sun, 11 Feb 2024 11:28:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707480239; cv=none; b=BUjokvnqdrVCNk3qkKJoRwpK8nD3mD1lWCkjKOgLbFCz+nd7QfXKAAv0apYJo9Wv9wFLFdLlGNEmNoWSdlEfZKNL9FmlGkbSlNj4P7mXaA3K8zzvt6KkUbaeLcMlBBwEeH2rishaT7k9MX8H73ZkBnecRRRODSyOA0U7Ot4TKwU=
+	t=1707650915; cv=none; b=LM2iap3c/auWLE3ZY1vqD8fInElCxZvZThVV6nf2vWufmRo1nJwJNvfsB9jRM4a4n3Dy4uz5RSfehZeZhGID+xGjujDPrktIHAebWJohETDq1BIv6to0FwekSZwikrzNM57hv3VShb6U3feD6gBTBeLPUjuCfu1Tcdy6UQytNsw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707480239; c=relaxed/simple;
-	bh=OI2YP8ZiUtciMlouFAe6xGmzB0pYKMZ70d9pOF8ad/8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JQNMucWywblVPBBwW0iVPmtUCzowBrZeLg1rIBfUDn2j7n9Jy79bhIL1OT3wPGuTHspGPvrMTH9Vztzm9AMvh3CrNm+zIkyoaaLdwfLAksFNzMjDggOad94iwd9WOvOa+qUKXGtojAOrM7OEH+zY3+gz82G0gnoiVQfwDbGXNNI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ubpnEC5x; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1707650915; c=relaxed/simple;
+	bh=HjFd7lp/Wz0hf76j/PPhbXj5G+2sKMlVNXJoiKDg4bk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=rL7pk+u0U2z5UIjgrEysbxA63kz0BEb+aQRWaUXsfg89XYkgV6UCOw9J6yxGOY3Xzz0wtJY/l1dxbWi5o81f3/OzUoK2Wk4r09obUaxo97ymKjywuxXt3Y9wN41vTK6jZMRX441yDMZsrcYP8GDvSth8XN6S6rui4NB4oirvVps=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VVNmiy9g; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ubpnEC5x"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADE2FC43390;
-	Fri,  9 Feb 2024 12:03:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VVNmiy9g"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A543BC433C7;
+	Sun, 11 Feb 2024 11:28:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1707480238;
-	bh=OI2YP8ZiUtciMlouFAe6xGmzB0pYKMZ70d9pOF8ad/8=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=ubpnEC5xo9KxVmWJTtT7+sfn5KcfFe479MZhnptEJzhSksp07s4CtKPKwE1qvDEU5
-	 uV5TbDNnrsPrMp5LgKRRnmLEDPczHF0w4PLwvDylzKXiPkUbuYThy3mhX3uTXBa5BV
-	 XuLEIkGKT3IGQRletz5Fm24MaUfbOfsq+QjRt5JBPUs8JE/2aae/7hgmub+TzUikCd
-	 7MDp9ok1XLDRtExmjDZLZ7neajAnQjY5Er4KErWz175Rv7Ts4MRvnnPEx4ewnTejt5
-	 AAJvOhHYmRl/lzjf8Anq5Fwm8l4Jo0vG2pQrOgzPW/Yp0hH79lKXd4JdX3WkfGjZIZ
-	 dN9+N8RHE1Scg==
-Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-a3c00c98d32so39733466b.3;
-        Fri, 09 Feb 2024 04:03:58 -0800 (PST)
-X-Gm-Message-State: AOJu0YyuZqHQ8dgJUnQIR1IUeNX0gDiEaaJLSHlV9H+gFOBhtfWk2Ho/
-	akGuaiHrwnOxW77r3zutLFt0wg/BBTLZoo9UaOvamjVgIqyhJ8f733TNr6AlkRP/RD2AuQjnGg5
-	Ty1pH+W2JIcWJ3QRrxPTS5hPWA8E=
-X-Google-Smtp-Source: AGHT+IHg+DgbEBRj1ZeBg2CJTi2XtC/KBpCxX8LUTYQ9jYYlECa9vtcBgoKx4/utVO7asyTsQRzupniteTRgE+9DmLw=
-X-Received: by 2002:a17:906:fb85:b0:a37:2c8f:6cb5 with SMTP id
- lr5-20020a170906fb8500b00a372c8f6cb5mr1095407ejb.42.1707480237163; Fri, 09
- Feb 2024 04:03:57 -0800 (PST)
+	s=k20201202; t=1707650914;
+	bh=HjFd7lp/Wz0hf76j/PPhbXj5G+2sKMlVNXJoiKDg4bk=;
+	h=From:To:Cc:Subject:Date:From;
+	b=VVNmiy9grWrh3Zghjq5VGseh9AZAxFhShNAxddA6Ljq7aQ76yle1iMM1/tgdIgH4c
+	 IKVR8g2pcge19Jal2LNd+WQa0oS3P71yvkhNnXuoPl30DjHRRO+R5BUA6TchnyUFCq
+	 ickFciymG4iBb4XDNt9nAS7zu0OIYQfVp/wFhGmUOg7e60l1Y+syUgUXmWQVdjQkkG
+	 uuZHt4WYLyV6YzP3T53xqQ0xR4zoSRNDD9/7RxjIk/9rAGxiIHo4+kQHR90PjXFsou
+	 g6s+Lc11/M6Uptcxd+AKa4hWK0GPE7DbP/5qEnDrlVeHt28Rx03ZfJZh0cETewE7kt
+	 w/VWrw8a5r7yw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic/736: fix a buffer overflow in readdir-while-renames.c
+Date: Sun, 11 Feb 2024 11:28:26 +0000
+Message-Id: <eff8549698ca7a61089e17727b3e1d45a4839e6f.1707650891.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240209115057.1918103-1-johannes.thumshirn@wdc.com>
-In-Reply-To: <20240209115057.1918103-1-johannes.thumshirn@wdc.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 9 Feb 2024 12:03:20 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H6N-4vF-Sp+755_scxAZRvtT+Xkf_KCPoRuxBD6g9OYGQ@mail.gmail.com>
-Message-ID: <CAL3q7H6N-4vF-Sp+755_scxAZRvtT+Xkf_KCPoRuxBD6g9OYGQ@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: check conversion of zoned fileystems
-To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Cc: fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>, 
-	Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Fri, Feb 9, 2024 at 11:51=E2=80=AFAM Johannes Thumshirn
-<johannes.thumshirn@wdc.com> wrote:
->
-> Recently we had a bug where a zoned filesystem could be converted to a
-> higher data redundancy profile than supported.
->
-> Add a test-case to check the conversion on zoned filesystems.
->
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  tests/btrfs/310     | 75 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/310.out | 31 +++++++++++++++++++
->  2 files changed, 106 insertions(+)
->  create mode 100755 tests/btrfs/310
->  create mode 100644 tests/btrfs/310.out
->
-> diff --git a/tests/btrfs/310 b/tests/btrfs/310
-> new file mode 100755
-> index 00000000..5a9664d1
-> --- /dev/null
-> +++ b/tests/btrfs/310
-> @@ -0,0 +1,75 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Western Digital Corperation.  All Rights Reserved.
+From: Filipe Manana <fdmanana@suse.com>
 
-Typo here, "Corperation".
+The test is using a 32 characters buffer to print the full path for each
+file name, which in some setups it's not enough because $TEST_DIR can
+point to a path name longer than that, or even smaller but then the buffer
+is still not large enough after appending a file name. When that's the
+case it results in a core dump like this:
 
-> +#
-> +# FS QA Test 310
-> +#
-> +# Test that btrfs convert can ony be run to convert to supported profile=
-s on a
-> +# zoned filesystem
-> +#
-> +. ./common/preamble
-> +_begin_fstest volume raid convert
+  generic/736       QA output created by 736
+  *** buffer overflow detected ***: terminated
+  /opt/xfstests/tests/generic/736: line 32:  9217 Aborted                 (core dumped) $here/src/readdir-while-renames $target_dir
+  Silence is golden
+  - output mismatch (see /opt/xfstests/results//generic/736.out.bad)
+      --- tests/generic/736.out	2024-01-14 12:01:35.000000000 -0500
+      +++ /opt/xfstests/results//generic/736.out.bad	2024-01-23 18:58:37.990000000 -0500
+      @@ -1,2 +1,4 @@
+       QA output created by 736
+      +*** buffer overflow detected ***: terminated
+      +/opt/xfstests/tests/generic/736: line 32:  9217 Aborted                 (core dumped) $here/src/readdir-while-renames $target_dir
+       Silence is golden
+      ...
+      (Run diff -u /opt/xfstests/tests/generic/736.out /opt/xfstests/results//generic/736.out.bad  to see the entire diff)
+  Ran: generic/736
+  Failures: generic/736
+  Failed 1 of 1 tests
 
+We don't actually need to print the full path into the buffer, because we
+have previously set the current directory (chdir) to the path pointed by
+"dir_path". So fix this by printing only the relative path name which
+uses at most 5 characters (NUM_FILES is 5000 plus the nul terminator).
 
-> +
-> +_fixed_by_kernel_commit XXXXXXXXXX \
-> +       "btrfs: zoned: don't skip block group profile checks on conv zone=
-s"
-> +
-> +. common/filter
-> +. common/filter.btrfs
-> +
-> +_supported_fs btrfs
-> +_require_scratch_dev_pool 4
-> +_require_zoned_device "$SCRATCH_DEV"
-> +
-> +
-> +_filter_convert()
-> +{
-> +       _filter_scratch | \
-> +       sed -e "s/relocate [0-9]\+ out of [0-9]\+ chunks/relocate X out o=
-f X chunks/g"
-> +}
-> +
-> +_filter_add()
-> +{
-> +       _filter_scratch | _filter_scratch_pool | \
-> +       sed -e "s/Resetting device zones SCRATCH_DEV ([0-9]\+/Resetting d=
-evice zones SCRATCH_DEV (XXX/g"
-> +
-> +}
-> +
-> +devs=3D( $SCRATCH_DEV_POOL )
-> +
-> +# Create and mount single device FS
-> +_scratch_mkfs -msingle -dsingle 2>&1 > /dev/null
-> +_scratch_mount
-> +
-> +# Convert FS to metadata/system DUP
-> +$BTRFS_UTIL_PROG balance start -f -mconvert=3Ddup -sconvert=3Ddup $SCRAT=
-CH_MNT 2>&1 | _filter_convert
-> +
-> +# Convert FS to data DUP, must fail
-> +$BTRFS_UTIL_PROG balance start -dconvert=3Ddup $SCRATCH_MNT 2>&1 | _filt=
-er_convert
-> +
-> +# Add device
-> +$BTRFS_UTIL_PROG device add ${devs[1]} $SCRATCH_MNT | _filter_add
-> +
-> +# Convert FS to data RAID1, must fail
-> +$BTRFS_UTIL_PROG balance start -dconvert=3Draid1 $SCRATCH_MNT 2>&1 | _fi=
-lter_convert
-> +
-> +# Convert FS to data RAID0, must fail
-> +$BTRFS_UTIL_PROG balance start -dconvert=3Draid0 $SCRATCH_MNT 2>&1 | _fi=
-lter_convert
-> +
-> +# Add device
-> +$BTRFS_UTIL_PROG device add ${devs[2]} $SCRATCH_MNT | _filter_add
-> +
-> +# Convert FS to data RAID5, must fail
-> +$BTRFS_UTIL_PROG balance start -f -dconvert=3Draid5 $SCRATCH_MNT 2>&1 | =
-_filter_convert
-> +
-> +# Add device
-> +$BTRFS_UTIL_PROG device add ${devs[3]} $SCRATCH_MNT | _filter_add
-> +
-> +# Convert FS to data RAID10, must fail
-> +$BTRFS_UTIL_PROG balance start -dconvert=3Draid10 $SCRATCH_MNT 2>&1 | _f=
-ilter_convert
-> +
-> +# Convert FS to data RAID6, must fail
-> +$BTRFS_UTIL_PROG balance start -f -dconvert=3Draid6 $SCRATCH_MNT 2>&1 | =
-_filter_convert
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
-> new file mode 100644
-> index 00000000..f1e44af6
-> --- /dev/null
-> +++ b/tests/btrfs/310.out
-> @@ -0,0 +1,31 @@
-> +QA output created by 310
-> +Done, had to relocate X out of X chunks
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +Resetting device zones SCRATCH_DEV (XXX zones) ...
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +Resetting device zones SCRATCH_DEV (XXX zones) ...
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +WARNING:
-> +
-> +       RAID5/6 support has known problems and is strongly discouraged
-> +       to be used besides testing or evaluation. It is recommended that
-> +       you use one of the other RAID profiles.
-> +       Safety timeout skipped due to --force
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ src/readdir-while-renames.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-Btw, instead of relying on all these lines staying the same across
-btrfs-progs releases,
-we could rely only on the first line only, the one with the error
-message or success indication, by piping into a "| head -1".
+diff --git a/src/readdir-while-renames.c b/src/readdir-while-renames.c
+index afeefb04..b99c0490 100644
+--- a/src/readdir-while-renames.c
++++ b/src/readdir-while-renames.c
+@@ -55,10 +55,16 @@ int main(int argc, char *argv[])
+ 
+ 	/* Now create all files inside the directory. */
+ 	for (i = 1; i <= NUM_FILES; i++) {
+-		char file_name[32];
++		/* 8 characters is enough for NUM_FILES name plus '\0'. */
++		char file_name[8];
+ 		FILE *f;
+ 
+-		sprintf(file_name, "%s/%d", dir_path, i);
++		ret = snprintf(file_name, sizeof(file_name), "%d", i);
++		if (ret < 0 || ret >= sizeof(file_name)) {
++			fprintf(stderr, "Buffer to small for filename %i\n", i);
++			ret = EOVERFLOW;
++			goto out;
++		}
+ 		f = fopen(file_name, "w");
+ 		if (f == NULL) {
+ 			fprintf(stderr, "Failed to create file number %d: %d\n",
+-- 
+2.40.1
 
-But anyway, minor things.
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-> +
-> +Resetting device zones SCRATCH_DEV (XXX zones) ...
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-> +There may be more info in syslog - try dmesg | tail
-> +WARNING:
-> +
-> +       RAID5/6 support has known problems and is strongly discouraged
-> +       to be used besides testing or evaluation. It is recommended that
-> +       you use one of the other RAID profiles.
-> +       Safety timeout skipped due to --force
-> +
-> --
-> 2.35.3
->
->
