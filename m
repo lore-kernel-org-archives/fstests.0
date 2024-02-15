@@ -1,216 +1,124 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44F2A58ABC;
-	Thu, 15 Feb 2024 13:03:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 593B9131752
+	for <fstests@vger.kernel.org>; Thu, 15 Feb 2024 14:02:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708002230; cv=none; b=tG0z0UrUM4o6mU+Raza1gHkKVj5qxRIRUicdyu3zQ1ux0eng0zkX4SokXCbKm/29ovmVsxwCN/OUkdc2BacPoHy6ZOxJp73kpLIERmhHcbbIXMJQJcxMJeB7K5//yuqG447EKWoBbfrR2GsEOsK2aqdBbtAS52FtWeVOh8ieqp4=
+	t=1708005779; cv=none; b=V2HEp7c710cboiVUXx54KifcD5dpE5dIjbp7tw60S85JyCHTlPRvvYZ0p5GFkDAwGMP7IaIbtjCaz7ejRN2poMN2I7IB6z9eC9suPy605A2AlLAZCLtrjl5k3fvoERVBPLFylr+ITT+oFLZqn039GZ9doKmWGZF5Gpr3UDvfmfg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708002230; c=relaxed/simple;
-	bh=cSiqPdkGsSl5r6mRmKhcO/Xcytc2FP/LhJihLhlLWpg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=D9Y/A920iT7G8EJ7CWOPhZJkZe4m1Yfa5gTwZnIJOMjKdPcWjZ2ExJGylymGoZcRc3l2j6XUMEPyrw6wUkJpD6blCMJk7dBgRQQGXKxSyrtukzaD0EGor93cvEBG2toeaXwR0Zj72U7Tghj/K9KYgG3OYU0Tnm1pwD5wj28q77w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qx6E4KOf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708005779; c=relaxed/simple;
+	bh=+FIG/JudQed41NWCcAarzj82jAbxGRH6EmEM9lcn0K8=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=F9Jm9qzmh6QYMLzgb9Dyaj/HcJhvgbSZtr8ROoo90ml7KpO3Zlzx3xG4Qy74Aoje8aXOsZu4Q+mJu7F1F7Xvt5hBf6WciL70k0W9h1cNk6MP9R9LpmXHheW0+sTqInLzNYjJ7wNnAsvV+qZKi9bLtU0wuN10inK5AKbzogkv4zE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=ci2paeJD; arc=none smtp.client-ip=209.85.208.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qx6E4KOf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D844C433F1;
-	Thu, 15 Feb 2024 13:03:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708002229;
-	bh=cSiqPdkGsSl5r6mRmKhcO/Xcytc2FP/LhJihLhlLWpg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=qx6E4KOfljMTlXZOoiQfrlpyhCdAv+fF2RlZWf9mubVeFs/PolEhAUI5nyW7kGWHQ
-	 dcIKBisxKcsQsMoMiJqpcbNDrn83jwvQCNITinf6Vbc5HzDb2XoyAVNhmMaNK7jWrb
-	 /5wP1YKvgBeWDWSNMzJdnmnfwWHpUPwvl7hpBjImiNEmVU7WmJPTdv5fyUdbg9JS2l
-	 HykDWQaWjLf1x67Fws1M5jVq1BJqQbYS+W+7I7LR2BzbapHK9uGcYGQJRKSGpJ+tB4
-	 xaTCK0JdDzLjNhenFK43HnVMn4N7srv3bycGzB5OLEfG9huV9+ijoya4OfKRCknpxA
-	 IdwcuDUP8POOA==
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-55ad2a47b7aso1165209a12.3;
-        Thu, 15 Feb 2024 05:03:49 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCViX0ety8yDmlBuTZ5x386pASwl8x0phxr/vmvYpPeTmOvMgJ857kvh2mZf3ahE10h1tqf/4rDl+5dE6uoluf9ZQ6FnsrDhB2dt0OE=
-X-Gm-Message-State: AOJu0YxgaoQzZmNHY9XcebeO9gef6ohgijXU4vPeXLyf7tBBwj1KehOV
-	/+gdfG0Q3O3k6ucwHSqZI3Pli2mT3h1644uaAbQxedNX3vQfdYTBf4r/II1VBb6tiqsFNtyc0yo
-	u3ZXSv9xfQ3IG297HVJ3E7kaH6rg=
-X-Google-Smtp-Source: AGHT+IE6XqtyNUy5RgHToqWjbeCSja3zyxdUFeT16JMuR11Iz3fTdDz5P1hCUu1twYFbXczawvDxNqy+NjbYJdAy3QY=
-X-Received: by 2002:a17:906:395b:b0:a3c:d7a5:6ab1 with SMTP id
- g27-20020a170906395b00b00a3cd7a56ab1mr1223256eje.0.1708002227971; Thu, 15 Feb
- 2024 05:03:47 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="ci2paeJD"
+Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-2d109e82bd0so10658661fa.3
+        for <fstests@vger.kernel.org>; Thu, 15 Feb 2024 06:02:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1708005775; x=1708610575; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=XaqEU9VJ/hJSZRWPgoI8e97jFvUw+UwwiOVKeIsG770=;
+        b=ci2paeJDSAPFnOkMfdpihsMSaXWYWYhYzH+uBgdxYIH2pzCbQfpuZdkDShAZKu1Sv5
+         Ay2/VNyGb/ZxEpMsur01g32aJ6RcocJ50ojweA3uCVuz3GoMNvs6cBFabEEgVk1BvfJZ
+         /w+vtPgp3NG8hyVA0x2+AWFvFg9CAuSpwNvh1aoBEdZX6n9JjoxOLcEIvUU0mO6M/AnA
+         DA/QLA66kh6h16xjBdJoycbog28ZnwjaYv8nyeM/yEu4YD0cWXEEC4xphp47cu0YWnKb
+         /b71DuDXg5sXevrc7J2b43fMOXJPytjVg1EeXL89KuOIxyRejxxnDU+6ix6kwehd8buz
+         R+BA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708005775; x=1708610575;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=XaqEU9VJ/hJSZRWPgoI8e97jFvUw+UwwiOVKeIsG770=;
+        b=a42MOxFyzPoUA/saPK++d0djF9OA0tXwyporyirSxdeC6b6NEYTARmbRVN4nYFNkvl
+         79yMsC6ngW/KaUzKYeH7HnQPxGsT/K+/aW2knzPYTlstaukwqTqCrqFZkQY5mWIxbXEL
+         ErxkagULEF93UlZUPkKMhJjcm/xEaqFhikpPme8wwkmrzf3CpuymAbPZg4JMveVrD3K8
+         qiK0UZ7jWfGIePSEVjDtQiPpeQOsS1AmDnryDvlQa/5rRigynt7NF6CvXsqr6Z+Qjqeh
+         xu9/LHdEfULigUXqqz33mC7Gbwyzb6eaWdIcBgVOR37UadjhHATQWdthTlkYRjTdRpXM
+         QXkQ==
+X-Gm-Message-State: AOJu0YyfIyNWtXHZXmHM93fPXHWDZtbI4caZj/bw8sKhw6kA2t9UvK/O
+	viHqVosfMdC7Ep/XNeK/vH1LHLw4G6lhmFnEd3J2Oyt6IDt9nfFcSGaL5IL9yis3gMq0ixVOBk5
+	k
+X-Google-Smtp-Source: AGHT+IE6oQKRBaExTwRQiJ1iVb0FhqZVJezI+ztPKaMIxOSeQ7J6Njjm+hU10qzUIUCM7VjFToK/4w==
+X-Received: by 2002:a2e:b6c6:0:b0:2d0:fa56:84ce with SMTP id m6-20020a2eb6c6000000b002d0fa5684cemr1358467ljo.52.1708005774638;
+        Thu, 15 Feb 2024 06:02:54 -0800 (PST)
+Received: from localhost.localdomain ([2406:4440:0:105::28:a])
+        by smtp.gmail.com with ESMTPSA id k13-20020a170902f28d00b001d706e373a9sm1296201plc.292.2024.02.15.06.02.51
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Thu, 15 Feb 2024 06:02:53 -0800 (PST)
+From: Su Yue <glass.su@suse.com>
+X-Google-Original-From: Su Yue <l@damenly.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	l@damenly.org,
+	Su Yue <glass.su@suse.com>
+Subject: [PATCH] btrfs/172,206: call _log_writes_cleanup in _cleanup
+Date: Thu, 15 Feb 2024 22:02:36 +0800
+Message-Id: <20240215140236.29171-1-l@damenly.org>
+X-Mailer: git-send-email 2.39.3 (Apple Git-145)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1707969354.git.anand.jain@oracle.com> <325a9476e06cebee3752d32fd06e75b2f478b8bc.1707969354.git.anand.jain@oracle.com>
-In-Reply-To: <325a9476e06cebee3752d32fd06e75b2f478b8bc.1707969354.git.anand.jain@oracle.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 15 Feb 2024 13:03:11 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H77SEYPongbHn9auS7jyvOetD-8gD3oyQ3e+7pJuPVbSQ@mail.gmail.com>
-Message-ID: <CAL3q7H77SEYPongbHn9auS7jyvOetD-8gD3oyQ3e+7pJuPVbSQ@mail.gmail.com>
-Subject: Re: [PATCH 12/12] btrfs: test tempfsid with device add, seed, and balance
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Feb 15, 2024 at 6:35=E2=80=AFAM Anand Jain <anand.jain@oracle.com> =
-wrote:
->
-> Make sure that basic functions such as seeding and device add fail,
-> while balance runs successfully with tempfsid.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  common/filter.btrfs |  6 ++++
->  tests/btrfs/315     | 79 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/315.out | 11 +++++++
->  3 files changed, 96 insertions(+)
->  create mode 100755 tests/btrfs/315
->  create mode 100644 tests/btrfs/315.out
->
-> diff --git a/common/filter.btrfs b/common/filter.btrfs
-> index 8ab76fcb193a..d48e96c6f66b 100644
-> --- a/common/filter.btrfs
-> +++ b/common/filter.btrfs
-> @@ -68,6 +68,12 @@ _filter_btrfs_device_stats()
->         sed -e "s/ *$NUMDEVS /<NUMDEVS> /g"
->  }
->
-> +_filter_btrfs_device_add()
-> +{
-> +       _filter_scratch_pool | \
-> +               sed -E 's/\(([0-9]+(\.[0-9]+)?)[a-zA-Z]+B\)/\(NUM\)/'
+From: Su Yue <glass.su@suse.com>
 
-Why do we need this new filter?
-We are testing for a failure, where none of this is relevant except
-filtering device names.
+Because block group tree requires require no-holes feature,
+_log_writes_mkfs "-O ^no-holes" fails when "-O block-group-tree" is
+given in MKFS_OPTION.
+Without explicit _log_writes_cleanup, the two tests fail with
+logwrites-test device left. And all next tests will fail due to
+SCRATCH DEVICE EBUSY.
 
-The test can just filter with  _filter_scratch_pool only.
+Fix it by overriding _cleanup to call _log_writes_cleanup.
 
-> +}
-> +
->  _filter_transaction_commit() {
->         sed -e "/Transaction commit: none (default)/d" \
->             -e "s/Delete subvolume [0-9]\+ (.*commit):/Delete subvolume/g=
-" \
-> diff --git a/tests/btrfs/315 b/tests/btrfs/315
-> new file mode 100755
-> index 000000000000..7ad0dfbc9c32
-> --- /dev/null
-> +++ b/tests/btrfs/315
-> @@ -0,0 +1,79 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 YOUR NAME HERE.  All Rights Reserved.
-> +#
-> +# FS QA Test 315
-> +#
-> +# Verify if the seed and device add to a tempfsid filesystem fails.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick volume seed tempfsid
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       umount $tempfsid_mnt 2>/dev/null
+Signed-off-by: Su Yue <glass.su@suse.com>
+---
+ tests/btrfs/172 | 6 ++++++
+ tests/btrfs/206 | 6 ++++++
+ 2 files changed, 12 insertions(+)
 
-$UMOUNT_PROG
+diff --git a/tests/btrfs/172 b/tests/btrfs/172
+index f5acc6982cd7..fceff56c9d37 100755
+--- a/tests/btrfs/172
++++ b/tests/btrfs/172
+@@ -13,6 +13,12 @@
+ . ./common/preamble
+ _begin_fstest auto quick log replay recoveryloop
+ 
++# Override the default cleanup function.
++_cleanup()
++{
++	_log_writes_cleanup &> /dev/null
++}
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/dmlogwrites
+diff --git a/tests/btrfs/206 b/tests/btrfs/206
+index f6571649076f..e05adf75b67e 100755
+--- a/tests/btrfs/206
++++ b/tests/btrfs/206
+@@ -14,6 +14,12 @@
+ . ./common/preamble
+ _begin_fstest auto quick log replay recoveryloop punch prealloc
+ 
++# Override the default cleanup function.
++_cleanup()
++{
++	_log_writes_cleanup &> /dev/null
++}
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/dmlogwrites
+-- 
+2.43.0
 
-> +       rm -r -f $tmp.*
-> +       rm -r -f $tempfsid_mnt
-> +}
-> +
-> +. ./common/filter.btrfs
-> +
-> +_supported_fs btrfs
-> +_require_btrfs_sysfs_fsid
-> +_require_scratch_dev_pool 3
-> +_require_btrfs_fs_feature temp_fsid
-> +_require_btrfs_command inspect-internal dump-super
-> +_require_btrfs_mkfs_uuid_option
-> +
-> +_scratch_dev_pool_get 3
-> +
-> +# mount point for the tempfsid device
-> +tempfsid_mnt=3D$TEST_DIR/$seq/tempfsid_mnt
-> +
-> +seed_device_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
-> +
-> +       _scratch_mount 2>&1 | _filter_scratch
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt} 2>&1 | _filter_test=
-_dir
-> +}
-> +
-> +device_add_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +       _scratch_mount
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> +
-> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
-> +                                                       _filter_xfs_io
-> +
-> +$BTRFS_UTIL_PROG device add -f ${SCRATCH_DEV_NAME[2]} ${tempfsid_mnt} 2>=
-&1 |\
-> +                                                       _filter_btrfs_dev=
-ice_add
-
-We are testing for failure, so no need for the new filter
-_filter_btrfs_device_add.
-Just filter through  _filter_scratch_pool here and nothing more.
-
-Thanks.
-
-> +
-> +       echo Balance must be successful
-> +       _run_btrfs_balance_start ${tempfsid_mnt}
-> +}
-> +
-> +mkdir -p $tempfsid_mnt
-> +
-> +seed_device_must_fail
-> +
-> +_scratch_unmount
-> +_cleanup
-> +mkdir -p $tempfsid_mnt
-> +
-> +device_add_must_fail
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
-> new file mode 100644
-> index 000000000000..32149972beb4
-> --- /dev/null
-> +++ b/tests/btrfs/315.out
-> @@ -0,0 +1,11 @@
-> +QA output created by 315
-> +---- seed_device_must_fail ----
-> +mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
-> +mount: TEST_DIR/315/tempfsid_mnt: mount(2) system call failed: File exis=
-ts.
-> +---- device_add_must_fail ----
-> +wrote 9000/9000 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +ERROR: error adding device 'SCRATCH_DEV': Invalid argument
-> +Performing full device TRIM SCRATCH_DEV (NUM) ...
-> +Balance must be successful
-> +Done, had to relocate 3 out of 3 chunks
-> --
-> 2.39.3
->
->
