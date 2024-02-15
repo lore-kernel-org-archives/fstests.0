@@ -1,77 +1,130 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA7F0127B61;
-	Wed, 14 Feb 2024 17:42:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B9976ABA;
+	Thu, 15 Feb 2024 03:54:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707932533; cv=none; b=ojQrl7/a9k3HI7hYDakYFd3NyBN/p0OV7WmqQRjUP0pJjCJ2rRibum4Q+CLFz86W/RSBG8FqWEGGshOagpac2A6wUxWbIhbD3NcLtJdnNaXptvc6HZiFYYHHwtupyftHBB8RVGKkCbVtv2NpSrE9UiNsE3O9xW9qWk1HTUbZzwE=
+	t=1707969283; cv=none; b=jCA4c7wetvWEwbMq0xUu5/U+jC0Di+XnWojxfbj5joBJpIu37FbZkxpmi+FURUi6BZfzD+v3swV8L2vB8fJbIqczbeLtzRlKpt46B0FoKjwOMqPss20L1PuuWx9HqbSqK2uoYrYYrhhflFfgkz9HEBxOtlbtJUMDbY4+gG/+EzE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707932533; c=relaxed/simple;
-	bh=9HAt1wH13l4e0td53MGTulRzGQf3ZC8x9JSGKEjhRPc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=d3FNgccesC7WdPbhtOBxFepTDZubR8x/1ZMzGcooNhUWgVClBkPBzqJphfG2MHFJz2J3j2/vxj3Y9J4zuHLoF84Y2vsfWmw+OM3eZydS2G9LNSSDzA7aVx8eP1OXHx2380iyADoP00s1RIqpWsbJZ8yXSxscTMgT3uXkCP/Cnuk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ZZE+mQ5S; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1707969283; c=relaxed/simple;
+	bh=u9GREmREsa9K16Mj/qJJepYXwLaWhgNfbB48MjQKbpk=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=ITAW7d305g74QfuV/l19JfLRziS9n/cV7zzKXNRk8KbnEBYemPRLcXQkGNyU4QQzxvD9CnhgwuUQCtmON6c+piX/sfFMTY9nPsNhpeRK0ytEXwWONwhIqfdqA1JzA+2EqllU0nb95w5zNEZZ5+1W155jqnkRFICRgbBN22X3aLU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=u1yChdZw; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=QxaIbbKd; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=u1yChdZw; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=QxaIbbKd; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ZZE+mQ5S"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=rCqjAOgUyt+KMQLgmOWKy4Rs0nGvE2mK6EC5NStgV8w=; b=ZZE+mQ5See51z9iONY/ajauZMI
-	LG1Qhb8X+IG7BISS8BakhilYQMPpTfsVxD2LWepJLQBUKOtFLhiglbuurDPppkrMxWRaZL+Og1Y6L
-	wZuLU+GYHsQqrCgGucwWqX1DfOrAns/gfmVKEUzgrEtnSkWXbutxgEKVFFZJjAShiazMNX+QMtuVl
-	MHx8+l8TFookK3bmI6LB3nsJOKVJ0MYZlo2h15peXjSoOnVhyTN3/+vTSlTtlth+ZeGFnP84B7bLF
-	DTBHK6nvo3lMdxNsj9X3Cl1xtrOBQMuEs+XX2AD7hh1pFAkXipPHlFUO4iz1s0vtORhBHWw5wAYd2
-	gYspOO3g==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1raJGt-0000000DmZm-1rQf;
-	Wed, 14 Feb 2024 17:42:11 +0000
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org,
-	patches@lists.linux.dev,
-	Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH fstests] common/config: fix CANON_DEVS=yes when file does not exist
-Date: Wed, 14 Feb 2024 09:42:08 -0800
-Message-ID: <20240214174209.3284958-1-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="u1yChdZw";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="QxaIbbKd";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="u1yChdZw";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="QxaIbbKd"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 300E91F844;
+	Thu, 15 Feb 2024 03:54:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1707969280; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5kN76w+1MfjsyiMW5EtqFNsorHmy7CzsOWoopjdKlgo=;
+	b=u1yChdZw7tSy04b6f69Vjus7ecHVSfxFWVzBVEjkOjvWQURYBvJLR7ZF7Ai/sqtHrOffKH
+	1Fm8Md/G1P2eNfZxAhJzgGhq8VEVwLY0dRK6JGjv5p0JTDGmsPcvdf+ujUw2cOUm2VhWNF
+	lLffWvy2HU1fAjek49m0u07iUacOXio=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1707969280;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5kN76w+1MfjsyiMW5EtqFNsorHmy7CzsOWoopjdKlgo=;
+	b=QxaIbbKd+/HVbVptW3t9ootZU1tck9HajlzdIJR9Hbz3bhARbBbRQF3u6DdlfDOVYx5Tds
+	xLH2n0Z1APTFUmCA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1707969280; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5kN76w+1MfjsyiMW5EtqFNsorHmy7CzsOWoopjdKlgo=;
+	b=u1yChdZw7tSy04b6f69Vjus7ecHVSfxFWVzBVEjkOjvWQURYBvJLR7ZF7Ai/sqtHrOffKH
+	1Fm8Md/G1P2eNfZxAhJzgGhq8VEVwLY0dRK6JGjv5p0JTDGmsPcvdf+ujUw2cOUm2VhWNF
+	lLffWvy2HU1fAjek49m0u07iUacOXio=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1707969280;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5kN76w+1MfjsyiMW5EtqFNsorHmy7CzsOWoopjdKlgo=;
+	b=QxaIbbKd+/HVbVptW3t9ootZU1tck9HajlzdIJR9Hbz3bhARbBbRQF3u6DdlfDOVYx5Tds
+	xLH2n0Z1APTFUmCA==
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 2CB95139E2;
+	Thu, 15 Feb 2024 03:54:37 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id GueuM/2KzWWjKgAAn2gu4w
+	(envelope-from <ddiss@suse.de>); Thu, 15 Feb 2024 03:54:37 +0000
+Date: Thu, 15 Feb 2024 14:54:22 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ patches@lists.linux.dev
+Subject: Re: [PATCH fstests] common/config: fix CANON_DEVS=yes when file
+ does not exist
+Message-ID: <20240215145422.2e12bb9b@echidna>
+In-Reply-To: <20240214174209.3284958-1-mcgrof@kernel.org>
+References: <20240214174209.3284958-1-mcgrof@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spamd-Result: default: False [0.40 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[4];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.00)[23.61%]
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spam-Score: 0.40
 
-CANON_DEVS=yes allows you to use symlinks for devices, so fstests
-resolves them back to the real backind device. The iteration for
-resolving the backind device works obviously if you have the file
-present, but if one was not present there is a parsing error. Fix
-this parsing error introduced by a0c36009103b8 ("fstests: add helper
-to canonicalize devices used to enable persistent disks").
+On Wed, 14 Feb 2024 09:42:08 -0800, Luis Chamberlain wrote:
 
-Fixes: a0c36009103b8 ("fstests: add helper to canonicalize devices used to enable persistent disks"
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
----
- common/config | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> CANON_DEVS=yes allows you to use symlinks for devices, so fstests
+> resolves them back to the real backind device. The iteration for
+> resolving the backind device works obviously if you have the file
 
-diff --git a/common/config b/common/config
-index a3b15b96f336..2a1434bb11b9 100644
---- a/common/config
-+++ b/common/config
-@@ -679,7 +679,7 @@ _canonicalize_devices()
- 			if [ -L $i ]; then
- 				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $(readlink -e $i)"
- 			else
--				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i)"
-+				NEW_SCRATCH_POOL="$NEW_SCRATCH_POOL $i"
- 			fi
- 		done
- 		SCRATCH_DEV_POOL="$NEW_SCRATCH_POOL"
--- 
-2.42.0
+s/backind/backing
 
+> present, but if one was not present there is a parsing error. Fix
+> this parsing error introduced by a0c36009103b8 ("fstests: add helper
+> to canonicalize devices used to enable persistent disks").
+> 
+> Fixes: a0c36009103b8 ("fstests: add helper to canonicalize devices used to enable persistent disks"
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+
+Reviewed-by: David Disseldorp <ddiss@suse.de>
