@@ -1,189 +1,131 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A33E91BC2D
-	for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 09:03:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C222F2576D
+	for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 10:26:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708074219; cv=none; b=WE4vukHVflAMDIO1SFSjuooKfP7UjdbPMk6ejkLOzt+lHJpKZdPsbK0SDA50ooAeyzXQOkgCo5mb95ZxSjqaa1UH0lhB7Xb0MneRYvDy1HzXkA1001C6ZoZkcIjpxVTg1unicug7ejzmPlRdmUj50VmA8yN3DbAV/shRpTN30UM=
+	t=1708079168; cv=none; b=GT1RphNmWwyqQ1RFzmdyxwajNhA6Zw1r1hLiv2gZJvxeehVeie56dTdAct/gj6r0VpFYv0YugmAaozVeDZSZRNXRVlTo4lC2kYoOOzWNlriy+/goRlGONTKJ6YDgs8UZFlzORB8ZKNkImQK9OQD25yazgDPimykuT/0kXFwpvqU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708074219; c=relaxed/simple;
-	bh=ZZmNR1RQyZgQYNy7KMuqoWTZAUI0q4bYpQEL09wbr/4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=expajfxoBVJmUSUtwsdktjfRZxrtpNKAC+fmgPBM0rKypFiwpvWN+HdLrIqnLay7m5UrsRhG1W+QusaneiLCLHlEEscNtZSK992T6I9i2PZoGmTlVWFjlBLZFNE9JUA5LbItbjI6fv2uVwhjrZMZQBRwcXmvQO9jjiGWPQvCIFI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JcOlZH1R; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1708079168; c=relaxed/simple;
+	bh=WHZ8aicHcfz1BdeGy1eQGCFjn9bzG9XO5BXtRPyB2Bw=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=W8tRGug1Uz/vOk2jPjA8Dq688aTrhSJCUeSJ+JFGy2Y+BozSM3cukH/oXWDUI2bPmCgZ5VaoYGb4WO+T5Cm25cl7CqUYK7Btr36r36+t1cswwfGUbS7a/ApUVNl/0ocN2FRKbrVZ/2bF12uRu97Sepf8Xr4pf1z4lbBWMnV8zDA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Ontfsx2r; arc=none smtp.client-ip=209.85.208.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JcOlZH1R"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708074216;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=l0t0U+TrlyzELsdu+pcbq8tjnR7+g1Se07mMCMUwE7g=;
-	b=JcOlZH1RdXEBQ62BEOEaRVQwP337v34vfDqPweMds51k7t/q+K2FFknnSEczKVB4gykowe
-	0w5V8QeH+R5+7y+dFmnKfa49sdAEl6GpGumgOCQkpLXfisnFp7eoJYc7IGSlNOQnpHZtIi
-	2j2mE/HU82+7gupaXnTWT34BQNdjYgc=
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
- [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-687-R_jY4pQnMuKOWGJb-zY8hw-1; Fri, 16 Feb 2024 04:03:35 -0500
-X-MC-Unique: R_jY4pQnMuKOWGJb-zY8hw-1
-Received: by mail-ed1-f72.google.com with SMTP id 4fb4d7f45d1cf-563b95440e6so856752a12.0
-        for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 01:03:34 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Ontfsx2r"
+Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-2d0d95e8133so22346671fa.1
+        for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 02:26:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1708079163; x=1708683963; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Y45aiho0adrCXEin8SrebLklNXqNIMifPcfGGWVb2sA=;
+        b=Ontfsx2rH7l62VaMCRl009wV2oAu/L2wu4NpGgRVRcUs+609njCsqykQzG+gHk4o+X
+         gYHOThPF0tdN1rWDdYsEUAAv1u6iRw6GATUTunRj1NV+li7xvqE4DpIItvhZD2R6/G6p
+         Qn6ZiNWYTGWmaIdmlL98BbcmMMetOpAP8pi9gc2K3AVybjl0udUyWMFQU3HTtxkZz5kP
+         czeFb+cIYbtQpcmnUjfG5RcZYkM0KFn0QZ2VhMmVPg3haWzX5zNVGxtfLBgRplk3pCme
+         jqDOH6DYjnO2NT0YocHFCzVmbs5LeMefCNCQVrlmX8n7LRyv7KoS3n0Y1k2JP23WS46m
+         Z6Rg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708074213; x=1708679013;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=l0t0U+TrlyzELsdu+pcbq8tjnR7+g1Se07mMCMUwE7g=;
-        b=c8ubUSnSyXAOgcYT103+lXsbDvEeaH+yAykyTUahegm3yWD7d8UpK+uAjiksbuuczr
-         ZXXA8gyRlBVv0COfNJrJ8Z6/c4feYYfU+GFXrCYRxbW1VPE3It7E6dOUyWc1pzr514Zn
-         kAq+G7eFqFm91+A5fv4fZvtQCz8P/ylMwzKFrwM/J3hBTPyYQeMRK8hMCT6r2r48W7E+
-         GkOB23xgDgwZ9fjn5ItEHeP0fGmFyMMsUW/WC1appMlMud6etRJbZcNRJ3f1VOSGZylW
-         9HZ02TGmmxs1tSMiAtyn0A2sgTFK/ZQaiZzK1rBzrtYannDv4w2PnNrzmJtYen8tUUR5
-         3PAA==
-X-Gm-Message-State: AOJu0YyoDTlLTPyYPsECP0Wt9T1yarr1rtnjcukND10pouJF7bw5oKa4
-	nYuBrJtwx6SK46vQ8rWT9fs9dO59ff0sQXmFzDMHlCf+6u6o4v8AMYsUtCTnyqNspKVrOL0GfEH
-	B9Pj0dJehmBFPgeR8JUeHusBaBrxXF7nnG/06YTwNAk9mVXLbU4S+Qw==
-X-Received: by 2002:a17:906:22d1:b0:a3d:64b3:7f5a with SMTP id q17-20020a17090622d100b00a3d64b37f5amr2465199eja.52.1708074213383;
-        Fri, 16 Feb 2024 01:03:33 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGmsSNAx1+TbQlNwu28mkAFyVIt52uWjGlLtUrIWKGXpAv5Da14jN0NIkotw8oyj18FxHVzkg==
-X-Received: by 2002:a17:906:22d1:b0:a3d:64b3:7f5a with SMTP id q17-20020a17090622d100b00a3d64b37f5amr2465182eja.52.1708074212812;
-        Fri, 16 Feb 2024 01:03:32 -0800 (PST)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id vx2-20020a170907a78200b00a3d9a94b13fsm1256749ejc.136.2024.02.16.01.03.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Feb 2024 01:03:32 -0800 (PST)
-Date: Fri, 16 Feb 2024 10:03:31 +0100
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, anand.jain@oracle.com, 
-	linux-fsdevel@vger.kernel.org, kdevops@lists.linux.dev, patches@lists.linux.dev
-Subject: Re: [PATCH v2 fstests] check: add support for --start-after
-Message-ID: <avlvdgunqc4hf5p2gzrb22cptsybskifpejylpehzcofkpbkm3@mvnva74o4boy>
-References: <20240216010803.164750-1-mcgrof@kernel.org>
+        d=1e100.net; s=20230601; t=1708079163; x=1708683963;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Y45aiho0adrCXEin8SrebLklNXqNIMifPcfGGWVb2sA=;
+        b=lGd9xUM+gomnWo7IY4/p5fZn411s1p7Co9f+Ywu3dxfPPHkf5gGLFJQg8rKnih8wt/
+         XNRaH4ZKw9E4KSZnyy1vZs2dcKisSHdYQVS2zbbvdNKo8NCQ0pffNZT6rJjlp84/cbur
+         RhhXDtczNDqNZNwqGE2hqZcscXGmnUrn18MCIxG8sYVh5OfuygLGRMNeAENn7da6Aopo
+         NnUCTnvaqCbw8eR52POYO6rVISOVSuyHX2a0AwpI2YUfxaqGSoOCRqBXJlgPwTdSM0V5
+         ucV91wFGZQz+BczIY5SzXlOjMXxmRLLWQS7SDe/dGiZAtQRgKIBitAeN90oNwpEWxwPR
+         wNJw==
+X-Gm-Message-State: AOJu0Ywds8dX5JWUdY6nx4Jz6zIxdRiRNYg0jtiDPJNuF6M8VgF09M9h
+	gjaaK9UVTlUURDBUCwjvoHld4H4RnkapX1EERy/kEMiKegdmQGP4PHk4Z0hpzYj5j/Um6yurS/P
+	+
+X-Google-Smtp-Source: AGHT+IElFD9WtprpaNo+KJRxX4nOhQK04CKmxOaXBkM3KIdxkPX/38lwbEXWAtsrVjowlHPwBq+5LQ==
+X-Received: by 2002:a2e:805a:0:b0:2d0:b29b:2350 with SMTP id p26-20020a2e805a000000b002d0b29b2350mr2992711ljg.1.1708079162905;
+        Fri, 16 Feb 2024 02:26:02 -0800 (PST)
+Received: from localhost.localdomain ([2406:4440:0:105::28:a])
+        by smtp.gmail.com with ESMTPSA id l14-20020a17090aec0e00b002990cc5afe8sm2824414pjy.42.2024.02.16.02.26.00
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Fri, 16 Feb 2024 02:26:02 -0800 (PST)
+From: Su Yue <glass.su@suse.com>
+X-Google-Original-From: Su Yue <l@damenly.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	l@damenly.org,
+	Su Yue <glass.su@suse.com>,
+	Filipe Manana <fdmanana@suse.com>,
+	Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2] btrfs/172,206: call _log_writes_cleanup in _cleanup
+Date: Fri, 16 Feb 2024 18:25:50 +0800
+Message-Id: <20240216102550.46210-1-l@damenly.org>
+X-Mailer: git-send-email 2.39.3 (Apple Git-145)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240216010803.164750-1-mcgrof@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On 2024-02-15 17:08:02, Luis Chamberlain wrote:
-> Often times one is running a new test baseline we want to continue to
-> start testing where we left off if the last test was a crash. To do
-> this the first thing that occurred to me was to use the check.time
-> file as an expunge file but that doesn't work so well if you crashed
-> as the file turns out empty.
-> 
-> So instead add super simple argument --start-after which let's you
-> skip all tests until the test infrastructure has "seen" the test
-> you want to skip. This does obviously work best if you are not using
-> a random order, but that is rather implied. If you do use a random
-> order --start-after still works, the final output will however just
-> be randomized of course, but it should let you skip a failed known
-> crash at least. The real value to --start-after though is for when
-> you use a non-randomized order.
-> 
-> If the target test is not found in your test list we complain and
-> bail. This is not as obvious when you specify groups, so likewise
-> we do a special check when you use groups to ensure the test is at
-> least part of one group.
-> 
-> Demo:
-> 
-> root@demo-xfs-reflink /var/lib/xfstests # ./check -s xfs_reflink -n -g soak --start-after generic/025
-> Start after test generic/025 not found in any group specified.
-> Be sure you specify a test present in one of your test run groups if using --start-after.
-> 
-> Your set of groups have these tests:
-> 
-> generic/476 generic/521 generic/522 generic/616 generic/617 generic/642 generic/650
-> 
-> root@demo-xfs-reflink /var/lib/xfstests # ./check -s xfs_reflink -n -g soak --start-after generic/522
-> SECTION       -- xfs_reflink
-> RECREATING    -- xfs on /dev/loop16
-> FSTYP         -- xfs (non-debug)
-> PLATFORM      -- Linux/x86_64 demo-xfs-reflink 6.5.0-5-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.5.13-1 (2023-11-29)
-> MKFS_OPTIONS  -- -f -f -m reflink=1,rmapbt=1, -i sparse=1, /dev/loop5
-> MOUNT_OPTIONS -- /dev/loop5 /media/scratch
-> 
-> generic/616
-> generic/617
-> generic/642
-> generic/650
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
-> 
-> Changes since v1:
-> 
-> This all addresses Anand Jain's feedback.
-> 
->  - Skip tests completely which are not going to be run
->  - Sanity test to ensure the test is part of a group, if you listed
->    groups, and if not provide a useful output giving the list of all
->    tests in your group so you can know better which one is a valid test
->    to skip
->  - Sanity test to ensure the test you specified is valid
->  - Moves the trim during file processing now using a routine
->    trim_start_after()
-> 
->  check | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 52 insertions(+)
-> 
-> diff --git a/check b/check
-> index 71b9fbd07522..1c76f33192ba 100755
-> --- a/check
-> +++ b/check
-> @@ -18,6 +18,8 @@ showme=false
->  have_test_arg=false
->  randomize=false
->  exact_order=false
-> +start_after=false
-> +start_after_test=""
->  export here=`pwd`
->  xfile=""
->  subdir_xfile=""
-> @@ -80,6 +82,7 @@ check options
->      -b			brief test summary
->      -R fmt[,fmt]	generate report in formats specified. Supported formats: xunit, xunit-quiet
->      --large-fs		optimise scratch device for large filesystems
-> +    --start-after	only start testing after the test specified
->      -s section		run only specified section from config file
->      -S section		exclude the specified section from the config file
->      -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
-> @@ -120,6 +123,8 @@ examples:
->   check -x stress xfs/*
->   check -X .exclude -g auto
->   check -E ~/.xfstests.exclude
-> + check --start-after btrfs/010
-> + check -n -g soak --start-after generic/522
->  '
->  	    exit 1
->  }
-> @@ -204,6 +209,24 @@ trim_test_list()
->  	rm -f $tmp.grep
->  }
->  
-> +# takes the list of tests to run in $tmp.list and skips all tests until
-> +# the specified test is found. This will ensure the tests start after the
-> +# test specified, it skips the test specified.
-> +trim_start_after()
-> +{
-> +	local skip_test="$1"
-> +	local starts_regexp=$(echo $skip_test | sed -e 's|\/|\\/|')
-> +	local grep_start_after=" | awk 'f;/.*'$starts_regexp'/{f=1}'"
+From: Su Yue <glass.su@suse.com>
 
-Looks like grep_start_after is not used
-Otherwise, LGTM:
-Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
+Because block group tree requires require no-holes feature,
+_log_writes_mkfs "-O ^no-holes" fails when "-O block-group-tree" is
+given in MKFS_OPTION.
+Without explicit _log_writes_cleanup, the two tests fail with
+logwrites-test device left. And all next tests will fail due to
+SCRATCH DEVICE EBUSY.
 
+Fix it by overriding _cleanup to call _log_writes_cleanup.
+
+Signed-off-by: Su Yue <glass.su@suse.com>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+---
+changelog:
+v2:
+    Remove unneeded comments for _cleanup.
+    Add rvbs.
+---
+ tests/btrfs/172 | 5 +++++
+ tests/btrfs/206 | 5 +++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/tests/btrfs/172 b/tests/btrfs/172
+index f5acc6982cd7..e5e16681ec21 100755
+--- a/tests/btrfs/172
++++ b/tests/btrfs/172
+@@ -13,6 +13,11 @@
+ . ./common/preamble
+ _begin_fstest auto quick log replay recoveryloop
+ 
++_cleanup()
++{
++	_log_writes_cleanup &> /dev/null
++}
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/dmlogwrites
+diff --git a/tests/btrfs/206 b/tests/btrfs/206
+index f6571649076f..d9ce33b659e7 100755
+--- a/tests/btrfs/206
++++ b/tests/btrfs/206
+@@ -14,6 +14,11 @@
+ . ./common/preamble
+ _begin_fstest auto quick log replay recoveryloop punch prealloc
+ 
++_cleanup()
++{
++	_log_writes_cleanup &> /dev/null
++}
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/dmlogwrites
 -- 
-- Andrey
+2.43.0
 
