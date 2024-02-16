@@ -1,70 +1,44 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A37D81E481
-	for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 15:02:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D63C12F36A;
+	Fri, 16 Feb 2024 16:40:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708095734; cv=none; b=MpUxQVsfbPkErB8z6JkP+9NxNdjfRijUBGs/B2MANIYNJoDXoMVAmqCKYFuzqDcz94tGkdkibYG8como1dai2wVgF8p//3Wrn0+brYf0QfRzwtBJAbADanWdEOZ2Ev09dk2sG9CMI9Jj6iocnrInjtaHXlDlrDtPs0aTgje5EOM=
+	t=1708101625; cv=none; b=iunBzwQZ6cP0zLC/gUyhXpA4jQNP3ecJk0iedFxXaZPBU9CPpajQB6O4QpgEfl/TUqNph7G+bHCBCydx6Bm20UBhExiI4RpLanlq8ISCXtUmHIpNAN2jTl6XaP82k0Igrd+qONOxTvo0apIkoy3YwkYqMaxXZgyyyHTEG6xwBN4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708095734; c=relaxed/simple;
-	bh=VY15cb4sPWY/OGxNmTWPbGHd6YcBZkubimp6kxl3e9c=;
+	s=arc-20240116; t=1708101625; c=relaxed/simple;
+	bh=2fpSaUSpmNmZFejPzHSidGZ2KRLUi8JLJZRr4uGD0eM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=icLvD88q/xt6TEvhpqRmBKInU3rOkdaqf2VAttW695DWda+mCFtmgso4BItRzHDIYroRqp4c8drGTeKir0SQ3gqnSzBl6pw+biMLf9Dl3U1xOVta3Nm4RnjZgxWNH8GpdLYaLVTPitCt5RJ4axa9JO6yclwk4gE2t5zXcqr8GZU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AGT9aZS4; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=pt12NxOpfPGmxFrorHF0uJoLqhpOyDgXSFcB5CiWZzkdF/L3pCJraVh5j+Ys7NoeHmCEiKEwEZbrMz+7nyTHICCcCLLsj1UdjC/M8gCbxszeulFsBNR8xfrfW3UQW7QBwuBKI9XwRb5/nQayFiBZNene1zUOIU4CRevCLdgTzwQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=0YvxCAIK; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AGT9aZS4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708095731;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=uCSjgbj1ymwLX1C6dMEt9pKF79OFfPS7StJJLrlC8i0=;
-	b=AGT9aZS4bV4XSN3YXHD+3AJOSdmMkZ4gWaDzGYSW9IIXGTNcKWttX8ViPZ7IE+AvZxRZYA
-	RNBG2N/NAwV4jvfP57f2Ti+rxlh+JHwicCNz6PjVvUFi9Xdl4ZSB7L8Mg+fo0SizP364uw
-	ysknvzZDpq7yWkrMhG8IqF2FZyQpSV8=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-694-4hF1nYNINwaBX3FdPgRHkA-1; Fri, 16 Feb 2024 10:02:09 -0500
-X-MC-Unique: 4hF1nYNINwaBX3FdPgRHkA-1
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-6e089fc10c9so1348821b3a.1
-        for <fstests@vger.kernel.org>; Fri, 16 Feb 2024 07:02:09 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708095728; x=1708700528;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=uCSjgbj1ymwLX1C6dMEt9pKF79OFfPS7StJJLrlC8i0=;
-        b=apcmCCoZ3wiR5uhCbBxr3ueAaeDqthMw3HiYijVERjOYo8Ly276j4R0BQgbr42nI63
-         FWaD86Fhi0bsO7bc/jlSPfVbXU299a0XLIP5qJ5QanenILYOXQgRqdvGcu40E2Saxojo
-         CjnvZueYpq34jXQ0Hiemd0eucNeV+/NR0c4drI1T+C5ilCoT8Wk4LOQ0j18CNNy97MjB
-         nPXMmm4HeBjfAqq8+87mfgp5ppmYBqb5ynHnjDmQ9HxMt88kwlBBp4JwWGgYeYhh9dm+
-         psZ2Vs2z3oL7CngKjdadWnJR7tcK0tXTiayGsOXChC0RTq84GuGJ1CMd4OW5JpJYKShP
-         sgMw==
-X-Gm-Message-State: AOJu0YwDdjqtBFeJDeNQQk4dYTjn2JD7cEBIznBrOTQm4Y0yAGD8K5jR
-	dnR/JQQZOiyOSlYNVqYTbh3WMCQFPATHE/MMs1lzJTGtjUgP52XNqTtsfRC0v3fQJy1/XYED4kR
-	HiMo/pAovvaHUz3hurGoOl9iAmQriUeZYGjZTIeebE+x2+PsSWH6A+9c=
-X-Received: by 2002:a05:6a00:2291:b0:6e0:e52f:dbdd with SMTP id f17-20020a056a00229100b006e0e52fdbddmr6478798pfe.26.1708095727992;
-        Fri, 16 Feb 2024 07:02:07 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFLHqe+sLnHRZaNmnvRIKB/n+wsjsx1DGh4ifROLPJCNnMazL6yVB+FIfvvQ9OYaciVNQgcGg==
-X-Received: by 2002:a05:6a00:2291:b0:6e0:e52f:dbdd with SMTP id f17-20020a056a00229100b006e0e52fdbddmr6478758pfe.26.1708095727542;
-        Fri, 16 Feb 2024 07:02:07 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id k18-20020a628e12000000b006e09140e686sm41816pfe.60.2024.02.16.07.02.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Feb 2024 07:02:07 -0800 (PST)
-Date: Fri, 16 Feb 2024 23:02:02 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 04/12] btrfs: create a helper function, check_fsid(), to
- verify the tempfsid
-Message-ID: <20240216150202.vjkedtqtka3i5lec@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1707969354.git.anand.jain@oracle.com>
- <cd8342fb284a1983d7645698464debecf417e52a.1707969354.git.anand.jain@oracle.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="0YvxCAIK"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=wKsTqNR6AtcCk0lTtaZMcMyccUl13BohQSF+nkXoPn0=; b=0YvxCAIKf89JEmy5lmXcvqvL3N
+	g/cFYXDUHlfXg0GuPTW65E0cJUCYBhtQ46Zwl8U11yeGQ6kIUCRhU9/Nv5/TsW9vnpN1eb/f0T4Cf
+	+5dq6gHVBrnwkRvRh9yQ2QwdXSiOp3r7OIyULjTLjVVPAmq/22QQuFfJ1lPTldZ0XVRytqWVhXg7r
+	TS49wU9+aQQho33IPDmaECGmoJvHQ1YpiT/zit9dytM27GHaM05OXlfA6z6Qj5P2mtvNp3+RU/OVl
+	DjsHzPokcn3zkByCpztDTxSNkkRSGjX5YstJ9KYPxtuauFmu/Pp6xEuTGrD9EJ0m9DRatTjud0DXx
+	dpaao4Uw==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rb1GB-000000031jo-2JX2;
+	Fri, 16 Feb 2024 16:40:23 +0000
+Date: Fri, 16 Feb 2024 08:40:23 -0800
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, aalbersh@redhat.com, chandan.babu@oracle.com,
+	amir73il@gmail.com, djwong@kernel.org,
+	linux-fsdevel@vger.kernel.org, patches@lists.linux.dev
+Subject: Re: [PATCH] check: add support for --start-after
+Message-ID: <Zc-P91LVKAZAgSwy@bombadil.infradead.org>
+References: <20230907221030.3037715-1-mcgrof@kernel.org>
+ <20230908052727.ccyxadtibouis74h@zlang-mailbox>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,66 +47,92 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cd8342fb284a1983d7645698464debecf417e52a.1707969354.git.anand.jain@oracle.com>
+In-Reply-To: <20230908052727.ccyxadtibouis74h@zlang-mailbox>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On Thu, Feb 15, 2024 at 02:34:07PM +0800, Anand Jain wrote:
-> check_fsid() provides a method to verify if the given device is mounted
-> with the tempfsid in the kernel. Function sb() is an internal only
-> function.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  common/btrfs | 34 ++++++++++++++++++++++++++++++++++
->  1 file changed, 34 insertions(+)
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index e1b29c613767..5cba9b16b4de 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -792,3 +792,37 @@ _has_btrfs_sysfs_feature_attr()
->  
->  	test -e /sys/fs/btrfs/features/$feature_attr
->  }
-> +
-> +# Dump key members of the on-disk super-block from the given disk; helps debug
-> +sb()
-> +{
-> +	local dev1=$1
-> +	local parameters="device|devid|^metadata_uuid|^fsid|^incom|^generation|\
-> +		^flags| \|$| \)$|compat_flags|compat_ro_flags|dev_item.uuid"
-> +
-> +	$BTRFS_UTIL_PROG inspect-internal dump-super $dev1 | egrep "$parameters"
+Sorry for some reason I missed this.
 
-Please don't use "egrep", it's deprecated, might hit a warning output.
-Replace it with "grep -E" :)
-
-> +}
-> +
-> +check_fsid()
-> +{
-> +	local dev1=$1
-> +	local fsid
-> +
-> +	# on disk fsid
-> +	fsid=$(sb $dev1 | grep ^fsid | awk -d" " '{print $2}')
-> +	echo -e "On disk fsid:\t\t$fsid" | sed -e "s/$fsid/FSID/g"
-> +
-> +	echo -e -n "Metadata uuid:\t\t"
-> +	cat /sys/fs/btrfs/$fsid/metadata_uuid | sed -e "s/$fsid/FSID/g"
-> +
-> +	# This returns the temp_fsid if set
-> +	tempfsid=$(_btrfs_get_fsid $dev1)
-> +	if [[ $tempfsid == $fsid ]]; then
-> +		echo -e "Temp fsid:\t\tFSID"
-> +	else
-> +		echo -e "Temp fsid:\t\tTEMPFSID"
-> +	fi
-> +
-> +	echo -e -n "Tempfsid status:\t"
-> +	cat /sys/fs/btrfs/$tempfsid/temp_fsid
-> +}
-> -- 
-> 2.39.3
+On Fri, Sep 08, 2023 at 01:27:27PM +0800, Zorro Lang wrote:
+> On Thu, Sep 07, 2023 at 03:10:30PM -0700, Luis Chamberlain wrote:
+> > Often times one is running a new test baseline we want to continue to
+> > start testing where we left off if the last test was a crash. To do
+> > this the first thing that occurred to me was to use the check.time
+> > file as an expunge file but that doesn't work so well if you crashed
+> > as the file turns out empty.
+> > 
+> > So instead add super simple argument --start-after which let's you
+> > skip all tests until the test infrastructure has "seen" the test
+> > you want to skip. This does obviously work best if you are not using
+> > a random order, but that is rather implied.
+> > 
+> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> > ---
+> >  check | 17 +++++++++++++++++
+> >  1 file changed, 17 insertions(+)
+> > 
+> > diff --git a/check b/check
+> > index 71b9fbd07522..1ecf07c1cb37 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -18,6 +18,8 @@ showme=false
+> >  have_test_arg=false
+> >  randomize=false
+> >  exact_order=false
+> > +start_after=false
+> > +start_after_test=""
+> >  export here=`pwd`
+> >  xfile=""
+> >  subdir_xfile=""
+> > @@ -80,6 +82,7 @@ check options
+> >      -b			brief test summary
+> >      -R fmt[,fmt]	generate report in formats specified. Supported formats: xunit, xunit-quiet
+> >      --large-fs		optimise scratch device for large filesystems
+> > +    --start-after	only start testing after the test specified
 > 
-> 
+> This option conflicts with "-r" option.
 
+I will add a check.
+
+> >      -s section		run only specified section from config file
+> >      -S section		exclude the specified section from the config file
+> >      -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
+> > @@ -313,6 +316,11 @@ while [ $# -gt 0 ]; do
+> >  				<(sed "s/#.*$//" $xfile)
+> >  		fi
+> >  		;;
+> > +	--start-after)
+> > +		start_after=true
+> > +		start_after_test="$2"
+> 
+> Do we really need two variables at here?
+
+We can stick with one but we just need to use:
+
+if [[ "$start_after_test != "" ]]
+
+> 
+> > +		shift
+> > +		;;
+> >  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+> >  	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
+> >  	-l)	diff="diff" ;;
+> > @@ -591,6 +599,15 @@ _expunge_test()
+> >  {
+> >  	local TEST_ID="$1"
+> >  
+> > +	if $start_after; then
+> > +		if [[ "$start_after_test" == ${TEST_ID}* ]]; then
+> > +			start_after=false
+> > +		fi
+> > +		echo "       [skipped]"
+> > +		return 0
+> > +
+> > +	fi
+> 
+> I can't understand how you use the --start-after. I though you'd like to remove
+> all cases before the "start-after" from the running list. But when I saw here,
+> I'm a little confused.
+
+I hope the demo in the 2nd version of the patch helps. I'll send a v3.
+
+  Luis
