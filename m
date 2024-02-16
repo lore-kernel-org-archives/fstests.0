@@ -1,153 +1,232 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBD8D41C61;
-	Thu, 15 Feb 2024 23:10:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7261F13FF2;
+	Fri, 16 Feb 2024 01:08:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708038630; cv=none; b=MgLRzOSQZK6j4wZLSnNaW+5jhDf/f/eT+A6dWqX1bE6bvwnA0DbfIrxSFod42G1+fE8LMNxDU0MiB8bTVMG21FfcICQKTW4YzLrIvjqhzR24c+NveyLmW47Z7K+cgl/I6X/Ygp89nK9vBGG1tS75n82jwI9RkMfKoL2+ZrdwkVU=
+	t=1708045687; cv=none; b=kw+1CnCJtZcFe1oHonRVpAo8xkEG8hH8Y+iEeh1ILZSRKl+mImHunNYbajLe2k9+VGdbICSMvgZynM7hcnAhX/DX7agDZtgacZDp7POEqJ8f72triHB0+3o1JFEMeVM7YJFuH+hCXyrMIuEo/sPqLlNqyCmxdm+GiswnJyDVOY4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708038630; c=relaxed/simple;
-	bh=SnTN3OnmtC+RDD2neRXVW/CMrueTh8CjUAe6Fj30LVI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=GPinP52tlkngfDWro+DL1Mg+MFRdgVP8nWxjor5X6xViEKnGdjfj48I7u5HGqAxW4GMN3UkzEphLYKb79dXQz9K01SgboRCA8TwU3C0Mtd7Moilwela6LkkFKDwTVQpPL2laCxpE9eP/B00LoBNyKPVSZLoxHYCQ/5t5nmiOmWE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=QsIbnrII; arc=none smtp.client-ip=212.227.15.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1708045687; c=relaxed/simple;
+	bh=My17f7uHZuJxcTtAV9t+RcWRqII/pvS+5iVRXxFEj/A=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dd9EcJBdSvPLvocdS4KOhutdsI0rcSrjji7ATCUnc+0Jw/dtJnvsHOE1V5FpG+1ICAdasVU4CtQDAZfRhsrEendbgZqOZe5UkGD5EM/pGlHzlYFgXrGEWu0Zb0FHxG+Br30+2KuhqX4Z4z1jnW7BhcnYnDK3Aoo5N9w3RVsgqR4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=IJuHR3LP; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="QsIbnrII"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.com;
-	s=s31663417; t=1708038605; x=1708643405; i=quwenruo.btrfs@gmx.com;
-	bh=SnTN3OnmtC+RDD2neRXVW/CMrueTh8CjUAe6Fj30LVI=;
-	h=X-UI-Sender-Class:Date:Subject:To:Cc:References:From:
-	 In-Reply-To;
-	b=QsIbnrIIuL9JrobVjip/zGphcVwLi3/MGPpCqh0hlw+BjR4O1t6CoBBdYoz4WoL3
-	 xKhTL8X9vbSAY9KinZJFCl6b9ZCCHGRRhT2zLQgDRapDMUeixWrl9/RP5kmFOilu+
-	 gO9nyibmumwr2KwNDWBwzGGXEEQIHyT6xDEznCbGgaNurEr5xBfRJ2cTdG/OeGDuP
-	 qhvs6Yxt/QGoSlW929pZFCgRzC7QpEzgkgZ3TH/+V7yQvMjadaiQ1NgqwxLBK71+A
-	 SEnNvApBjBQZwR2YcQYbU5OyC7RCoggZyvI3D49m5ZK9i8BYSMhex5mdCfvbABpve
-	 4/hO5Vb8qZcNsuBZsQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.219] ([159.196.52.54]) by mail.gmx.net (mrgmx005
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MpDJd-1rB3dT3gwZ-00qgpl; Fri, 16
- Feb 2024 00:10:05 +0100
-Message-ID: <47af15e7-3945-4563-afed-c779d393dd08@gmx.com>
-Date: Fri, 16 Feb 2024 09:40:01 +1030
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="IJuHR3LP"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=qm60aItTwcr3Su9bNh4f1xdBtrQH68Cvyk9SmUymlAQ=; b=IJuHR3LPpMwjbWKKIimIXZMjWd
+	Nxpf9YZhVXkj1dbBwMnQuRq6RwN0tq2cjBXB5liLBa+ze8ZaRBHuCAV+VNhqZRgYA7gPZzJyjErDz
+	z71tLa9Y3wFs5ihE+2lTWNzH9YWkk3nVAzsOWHPvNPlOx9KLFKbJKaYyD6r2tG1VCriQEnlykv4kc
+	3OO6kiQS8QtJWosbwb/JfBmlnAvBnihks+ICUPQUU+MHo71eOnsT7Y7vsK/L/gutbJwji/wOVTOEU
+	4Jk4Cu8bjowRkSrV6hvFpSNYKCZrYER2Gpk6/Jt+qCA6nSrMJx/Z7U8VCB6gluXmzYkccWgWwIo/J
+	fX36Z5+Q==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1ramhx-00000000gsF-0EMQ;
+	Fri, 16 Feb 2024 01:08:05 +0000
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: fstests@vger.kernel.org,
+	anand.jain@oracle.com
+Cc: linux-fsdevel@vger.kernel.org,
+	kdevops@lists.linux.dev,
+	patches@lists.linux.dev,
+	Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH v2 fstests] check: add support for --start-after
+Date: Thu, 15 Feb 2024 17:08:02 -0800
+Message-ID: <20240216010803.164750-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs/172,206: call _log_writes_cleanup in _cleanup
-Content-Language: en-US
-To: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, l@damenly.org
-References: <20240215140236.29171-1-l@damenly.org>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <20240215140236.29171-1-l@damenly.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:9IUoEhCsZGqGuGHWNCbS52+I8/zEfbVmTvUDxDrS5x4DDL6+Ff/
- JNUm6Jlzf2qzmC1hHkL9lp+ufNX/LVCz2xX03iQfi2Nyfu+HMWZunuT86itjuOQgokmlGjN
- uHtztlvQVmC4ANiR9qs3D1QG332BNw6bU5MbloAJOJ9xzYmE5vXObJ5CgQHDDtnUpEMFEke
- 3ziLZEe0kacUNT+IpQGQQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:+yUByT9BlEQ=;MO9yhGURVb97fyqM4Qcjwe6Jzw5
- +9IdTJxGOq5PSu2FgR0HrJBe4kyDDffTxNXzc5CYWbtWJAFQcqXp6/zWb+GmD5WrLzzh8i/Rz
- P+p3zjrKSquqQBzWjaFv78q43KVGvIDOVwaN2BTZD5PD6WPTic56w3X6G7cd36rAMDgwl/VkY
- rgpnhrPLlUPbEA1nZ/0BCkomnQnA+6o0fmvrGH+tiXDmo+wz3KZtBy4ZEoI8iCWJh6OcH8v/5
- wT3ecgrxtQ3bZ9Tj5kSJWMlyHdS56WLmZZj6meSdRQH6JSBNFVlb2DmxJO5QSsA8xKTwKolbk
- dDgZcGeWKwpCQATLc0f7XenqsvBghdQyoGHxnmfLn+z5esnUCez1bGkhCw/dDOcm+bvmgUNJG
- VnJEeOlTtywQPUiS8hwC6Quhta7wTaw4Pmd17HL1s3lG1nXKi+Wb6D5//WIlnOb70kS5MvF+F
- 56lME4RgUxujyIlAiwqqxYxhKKt0OLOBx0bMU6i3WIcBPYey9HaKHTRlbF34tCm63fhV2q3qJ
- QyqjKwRqTv7z2EefHI2wevEeWPpfqE9aLzU8UWECnLjeLKie/nSexcc4H8zOI/HoZIujaxMAu
- DAM/dob5pu/j9gStFj7rfIkUy3BCJpnixwMeMaUBPiO64zWcL2JekxJNEPf+32B8pHCSPcL4S
- G6F0e29/6I2XXg5AZJa+Wn8cxnFYlJFcTGWJJ9zIucu6woJWo84vGA5Qno/SHnHvHmcLriOjw
- rykoGumjcdO/hCOgOdl6Tm2b9cjjv4FyeLDrMza8q4GTU5d9tYchJGpMfyfbGZegKLDEbrruZ
- +KxAsaYecCH3JUYOX4EQgbKA0pU4NgwVBxHF1D4jIsiH4=
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
+Often times one is running a new test baseline we want to continue to
+start testing where we left off if the last test was a crash. To do
+this the first thing that occurred to me was to use the check.time
+file as an expunge file but that doesn't work so well if you crashed
+as the file turns out empty.
 
+So instead add super simple argument --start-after which let's you
+skip all tests until the test infrastructure has "seen" the test
+you want to skip. This does obviously work best if you are not using
+a random order, but that is rather implied. If you do use a random
+order --start-after still works, the final output will however just
+be randomized of course, but it should let you skip a failed known
+crash at least. The real value to --start-after though is for when
+you use a non-randomized order.
 
-=E5=9C=A8 2024/2/16 00:32, Su Yue =E5=86=99=E9=81=93:
-> From: Su Yue <glass.su@suse.com>
->
-> Because block group tree requires require no-holes feature,
-> _log_writes_mkfs "-O ^no-holes" fails when "-O block-group-tree" is
-> given in MKFS_OPTION.
-> Without explicit _log_writes_cleanup, the two tests fail with
-> logwrites-test device left. And all next tests will fail due to
-> SCRATCH DEVICE EBUSY.
->
-> Fix it by overriding _cleanup to call _log_writes_cleanup.
->
-> Signed-off-by: Su Yue <glass.su@suse.com>
+If the target test is not found in your test list we complain and
+bail. This is not as obvious when you specify groups, so likewise
+we do a special check when you use groups to ensure the test is at
+least part of one group.
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
+Demo:
 
-Thanks,
-Qu
-> ---
->   tests/btrfs/172 | 6 ++++++
->   tests/btrfs/206 | 6 ++++++
->   2 files changed, 12 insertions(+)
->
-> diff --git a/tests/btrfs/172 b/tests/btrfs/172
-> index f5acc6982cd7..fceff56c9d37 100755
-> --- a/tests/btrfs/172
-> +++ b/tests/btrfs/172
-> @@ -13,6 +13,12 @@
->   . ./common/preamble
->   _begin_fstest auto quick log replay recoveryloop
->
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	_log_writes_cleanup &> /dev/null
-> +}
-> +
->   # Import common functions.
->   . ./common/filter
->   . ./common/dmlogwrites
-> diff --git a/tests/btrfs/206 b/tests/btrfs/206
-> index f6571649076f..e05adf75b67e 100755
-> --- a/tests/btrfs/206
-> +++ b/tests/btrfs/206
-> @@ -14,6 +14,12 @@
->   . ./common/preamble
->   _begin_fstest auto quick log replay recoveryloop punch prealloc
->
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	_log_writes_cleanup &> /dev/null
-> +}
-> +
->   # Import common functions.
->   . ./common/filter
->   . ./common/dmlogwrites
+root@demo-xfs-reflink /var/lib/xfstests # ./check -s xfs_reflink -n -g soak --start-after generic/025
+Start after test generic/025 not found in any group specified.
+Be sure you specify a test present in one of your test run groups if using --start-after.
+
+Your set of groups have these tests:
+
+generic/476 generic/521 generic/522 generic/616 generic/617 generic/642 generic/650
+
+root@demo-xfs-reflink /var/lib/xfstests # ./check -s xfs_reflink -n -g soak --start-after generic/522
+SECTION       -- xfs_reflink
+RECREATING    -- xfs on /dev/loop16
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 demo-xfs-reflink 6.5.0-5-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.5.13-1 (2023-11-29)
+MKFS_OPTIONS  -- -f -f -m reflink=1,rmapbt=1, -i sparse=1, /dev/loop5
+MOUNT_OPTIONS -- /dev/loop5 /media/scratch
+
+generic/616
+generic/617
+generic/642
+generic/650
+
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+
+Changes since v1:
+
+This all addresses Anand Jain's feedback.
+
+ - Skip tests completely which are not going to be run
+ - Sanity test to ensure the test is part of a group, if you listed
+   groups, and if not provide a useful output giving the list of all
+   tests in your group so you can know better which one is a valid test
+   to skip
+ - Sanity test to ensure the test you specified is valid
+ - Moves the trim during file processing now using a routine
+   trim_start_after()
+
+ check | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
+
+diff --git a/check b/check
+index 71b9fbd07522..1c76f33192ba 100755
+--- a/check
++++ b/check
+@@ -18,6 +18,8 @@ showme=false
+ have_test_arg=false
+ randomize=false
+ exact_order=false
++start_after=false
++start_after_test=""
+ export here=`pwd`
+ xfile=""
+ subdir_xfile=""
+@@ -80,6 +82,7 @@ check options
+     -b			brief test summary
+     -R fmt[,fmt]	generate report in formats specified. Supported formats: xunit, xunit-quiet
+     --large-fs		optimise scratch device for large filesystems
++    --start-after	only start testing after the test specified
+     -s section		run only specified section from config file
+     -S section		exclude the specified section from the config file
+     -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
+@@ -120,6 +123,8 @@ examples:
+  check -x stress xfs/*
+  check -X .exclude -g auto
+  check -E ~/.xfstests.exclude
++ check --start-after btrfs/010
++ check -n -g soak --start-after generic/522
+ '
+ 	    exit 1
+ }
+@@ -204,6 +209,24 @@ trim_test_list()
+ 	rm -f $tmp.grep
+ }
+ 
++# takes the list of tests to run in $tmp.list and skips all tests until
++# the specified test is found. This will ensure the tests start after the
++# test specified, it skips the test specified.
++trim_start_after()
++{
++	local skip_test="$1"
++	local starts_regexp=$(echo $skip_test | sed -e 's|\/|\\/|')
++	local grep_start_after=" | awk 'f;/.*'$starts_regexp'/{f=1}'"
++
++	if grep -q $skip_test $tmp.list ; then
++		rm -f $tmp.grep
++		awk 'f;/.*'$starts_regexp'/{f=1}' $tmp.list > $tmp.tmp
++		mv $tmp.tmp $tmp.list
++	else
++		echo "Test $skip_test not found in test list, be sure to use a valid test if using --start-after"
++		exit 1
++	fi
++}
+ 
+ _wallclock()
+ {
+@@ -233,6 +256,9 @@ _prepare_test_list()
+ 		# no test numbers, do everything
+ 		get_all_tests
+ 	else
++		local group_all
++		local start_after_found=0
++		list=""
+ 		for group in $GROUP_LIST; do
+ 			list=$(get_group_list $group)
+ 			if [ -z "$list" ]; then
+@@ -240,11 +266,28 @@ _prepare_test_list()
+ 				exit 1
+ 			fi
+ 
++			if [[ $start_after && $start_after_found -ne 1 ]]; then
++				echo $list | grep -q $start_after_test
++				if [[ $? -eq 0 ]]; then
++					start_after_found=1
++				fi
++			fi
+ 			for t in $list; do
+ 				grep -s "^$t\$" $tmp.list >/dev/null || \
+ 							echo "$t" >>$tmp.list
+ 			done
++			group_all="$group_all $list"
+ 		done
++		if [[ $start_after && $start_after_found -ne 1 ]]; then
++			group_all=$(echo $group_all | sed -e 's|tests/||g')
++			echo "Start after test $start_after_test not found in any group specified."
++			echo "Be sure you specify a test present in one of your test run groups if using --start-after."
++			echo
++			echo "Your set of groups have these tests:"
++			echo
++			echo -e $group_all
++			exit 1
++		fi
+ 	fi
+ 
+ 	# Specified groups to exclude
+@@ -258,6 +301,10 @@ _prepare_test_list()
+ 		trim_test_list $list
+ 	done
+ 
++	if [[ $start_after ]]; then
++		trim_start_after $start_after_test
++	fi
++
+ 	# sort the list of tests into numeric order unless we're running tests
+ 	# in the exact order specified
+ 	if ! $exact_order; then
+@@ -313,6 +360,11 @@ while [ $# -gt 0 ]; do
+ 				<(sed "s/#.*$//" $xfile)
+ 		fi
+ 		;;
++	--start-after)
++		start_after=true
++		start_after_test="$2"
++		shift
++		;;
+ 	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+ 	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
+ 	-l)	diff="diff" ;;
+-- 
+2.43.0
+
