@@ -1,246 +1,237 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53BCA1C15;
-	Sat, 17 Feb 2024 04:31:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708144304; cv=fail; b=PoLyw9PuTH6rbAIghS4MBnWkO5eqJ1alKAK6F4WEwrjddpX1Vwj3RXqJMhqi9Jz2jKbPTEXh1+TWLgYoQuILd2jL228pIoE4AOcLvwgqBJ/LO4pAsOwb1NMkrDFVbkg/JcmVTEKFBpuoBQqABkmATyNaqqve/lT0yaDoW7TaxqM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708144304; c=relaxed/simple;
-	bh=CEHW1rONELDFaDb7kIf1+Z3t13H+XMmad8MimTP+mI4=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=sbbfauIX7J9dKmy9WuowwlsUF1a1FuGnPeXbl4TgGTGN4exkUanPUYRTeUaRhLlwU8Jd+qWUeek3gD7JSxYbI3RZfqKWlevRC6MS2H1V9fOZC5eNYLJn1Nsa1fny7dZapZEFUTqXqy3uCA68IYa83e3TNuSaJ1oBd1O/XeLjls8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=AnDUemnT; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=YvFBS7Jn; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1832B1B7F2
+	for <fstests@vger.kernel.org>; Sat, 17 Feb 2024 09:31:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.171
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1708162297; cv=none; b=nL8tFNmODYuJkXsEmbh16VqzlbIkZ65N+pY/tEQFCRiycT6XnO8PxAfNsGlQhJpO1XzTLYPrx6cbpA1rF7MnMVXkxdx74MByj9SJ+CAp0vsJWQoTMLQu8VpmM4Ii52SNXOuv0VckfU7QehGuOCDS9ZGrT24ycQG0w6Q4VaRB7fc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1708162297; c=relaxed/simple;
+	bh=/+VVou+7x0qjLg6ShaydQjjiNMeL+0T802ytQMF3+sg=;
+	h=Message-ID:Date:MIME-Version:Subject:From:To:References:
+	 In-Reply-To:Content-Type; b=T0cRt1itcON8qSyZa2i8Pv+6Yty71ZwK91Gg7EbzDj9XNHv0G5OiQwHPD74GaLtqxkCQdMNP7NbmVaS0lJoc+gEn6ymMWXvrP7bOZQ+O/mR7sS4uEXjWeAO1N1XI3pi+K3PIN/IjNheDRKeKm3byzRArwz+hZlWdt4ab9yGYJzY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=KCdzMhjR; arc=none smtp.client-ip=209.85.208.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="AnDUemnT";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="YvFBS7Jn"
-Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 41H25sEW024278;
-	Sat, 17 Feb 2024 04:31:39 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-11-20;
- bh=YmHysESDr8oEr+PrHIwImV+V3t2hj2Tce0go1wuYS+I=;
- b=AnDUemnTMwa98d1Q+W/Cla4TM1D4vpyXgO4Xjr8z5o4sGV6onqauTV52YqLHULaG7Cbo
- ttBPDNawprakEj//4oJ6WQ9WGgJB7kcev5GBZoFJWd8Ok4ZNzLUdhP4hgaNmfkpGgZmr
- iuRxOcqzg4V7mpdeuatwpFWKhrLhQtJqCacpCKuECtltxReWPl7iHYQqR8Trfglo1924
- acphy+zzR1RPEnO44AvAF6i3uItUqec5ONX8sFVjmOjxVqXYHVHuyjHtlzKdTgWlCXMd
- C4eiEyATm/3SpxAgwJXGHCL4+RDCQxGr1cTo4Mm0sZGSW9T3SjsEnOv9OZTqSEQh8CZI pw== 
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3wakqc05bh-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 17 Feb 2024 04:31:39 +0000
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 41H1XDlP029066;
-	Sat, 17 Feb 2024 04:31:37 GMT
-Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2040.outbound.protection.outlook.com [104.47.66.40])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3wak83uaxs-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 17 Feb 2024 04:31:37 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=To2oH+ICo4bCJlX/3TOEXBkt6X65UxpyJVAcnWcS1Ae6u0jd5OTM6v6FDqovDWVOr8G4jBfZBdItJEPNdahKOEKYRFPM+yZoBziAgIdTD4az/z9KRD/EFWchi3tRTGmihQCpXXIFzuBJhklhpHrcCAv8OM33ElLKytY/fuHfLxDcAn1ZfdyzATfarxAUSc3/kjfWV/50hD81V94IvymvJudlosQc6bTOgf8U5K0n10+YGZCSGevLhGbOvoNhl5Pe1UfZ/w08Ltaaz8KOiwRc3B0Ag0Nra6T2hOFf+qUWpGkHzAVGWqAlosCTu+7/Bj4unOJpzG1EKNavhhyUr14u8A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=YmHysESDr8oEr+PrHIwImV+V3t2hj2Tce0go1wuYS+I=;
- b=YGC77CKm66k0JyN17giaQj0U3TsM+6zb6DlBIBlR9z4SD+Ghg2FklGIRTZZZsfKKSDMhZczJRlOnSCf2V6j0qnrmPXUpGW79y1SSEH3jOcwJNTR+4XK8xrGCVBz/nUxqONeRSfTDRz2T4s8NbwptZ0uUULE7xYuQosEvy6TVRspn6hWVqnD5cPMzgv2iksH1mMweXsngeQUD/atRCmspm9PIl4WVB1/lF08HkA2dfVDzgAn3La+VPz6ikMh+MXeJu2gps/pJnEemFtu9o/dpLRn9GVSInlAc7sa/I2Kj8FJ+iVDGkoY3fTBmZDXzIatszJFNCxOWK0W4wNCDeVkTkA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="KCdzMhjR"
+Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-2d228a132acso6893861fa.0
+        for <fstests@vger.kernel.org>; Sat, 17 Feb 2024 01:31:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YmHysESDr8oEr+PrHIwImV+V3t2hj2Tce0go1wuYS+I=;
- b=YvFBS7JndL4H7FDvCwevB6KFWKT+CMHnQzFATgWyjyU9HopCP9fikDmuPBPLYopOp21smhDEp1jBuxY+r+4ICjHjokrDmrF992HSY3hTkLFLCK9/sdJwYU2Q701+6zo5gdsygjzQYRZ5lBBlc8g6LJhmVQMnXd9BDwyQBsLsN4o=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by CH3PR10MB6714.namprd10.prod.outlook.com (2603:10b6:610:142::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7292.27; Sat, 17 Feb
- 2024 04:31:35 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::9a3e:7f11:fbb:1690]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::9a3e:7f11:fbb:1690%3]) with mapi id 15.20.7292.029; Sat, 17 Feb 2024
- 04:31:35 +0000
-Message-ID: <72e7772b-5e06-4393-b252-003237e839ed@oracle.com>
-Date: Sat, 17 Feb 2024 10:01:04 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 09/12] btrfs: introduce helper for creating cloned devices
- with mkfs
-Content-Language: en-US
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-References: <cover.1707969354.git.anand.jain@oracle.com>
- <b6026821942d5898dfc5f60d7a7c2b19574f764f.1707969354.git.anand.jain@oracle.com>
- <CAL3q7H5fp8=SBeAbkmaJahTYCZQ5LQtbkcXR_2d1tXmhJ_Q87A@mail.gmail.com>
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <CAL3q7H5fp8=SBeAbkmaJahTYCZQ5LQtbkcXR_2d1tXmhJ_Q87A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: MA0PR01CA0105.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:af::19) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+        d=suse.com; s=google; t=1708162286; x=1708767086; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:references:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=AAg8r278QlNExvnpu5jrbibudRzXtG3KWVJiC4utMto=;
+        b=KCdzMhjRFCFTJNnTX4dINe1zWE2zjuRZspZcljvRsMEkNzL3vnYJI6QWoq/V+3E5+O
+         Bwq3wwDyFnDfLVjHQrkw9JRcunAE1U51FzGrGROCVdTZ4YuVD3Kfx5sN9YYpMpmS5z+M
+         6n78QqhaHmaSygs5o84S0YTRfbfTVazJsnhcBvdWynTOdHzAc6snjwoQ+2eQyAyd4+OT
+         GlOj5wiq/nLSrT2YGIdtFpQUXR7f9p4n+EKosJPyXhyEWbnuLEbRpJMCJDCSsS6TPg6d
+         aHPoOdVyNego/bQd9Day5D++ZKZicPcSYvQ46PRT1LyifWkl7Mh4NXhbcFJwZxTzAbCe
+         yRFg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708162286; x=1708767086;
+        h=content-transfer-encoding:in-reply-to:autocrypt:references:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=AAg8r278QlNExvnpu5jrbibudRzXtG3KWVJiC4utMto=;
+        b=p6iVCCcapyLjellc68bPD4Nm1OZyBQiQVbhupMTAyWbiCkfGBqAuxHy2n31PHvwxc1
+         5cl2zqUN0pUMYCkLDYyd2B129BpZ5yL2YHxbH7MHZKE65TyNXIZvEE27NkfVArjlo1dL
+         H5rFF7youM09PIF1loQDJBYCLsTYwCNGfYQvj4rfvPdRnizK47Smn7hzfd7IlD8fnFZm
+         P41+DP8YAqdEe+tMGXfWT8fI0xBmT0eGJvp/SJlIc5YsmlnkuprNdvekRmR03XzyYuFl
+         saLAIR1G3Su762S3sktjrJoo5WOnxLS2tnm6B4fy8oqvuWEkLYGPHeYZqzcSGyT6rr29
+         xNgg==
+X-Forwarded-Encrypted: i=1; AJvYcCXG0qhS1/yOUh8IhCbaC8Gb7GZVgayuu47Q3RAZ66DNAqb7Wmcey1DY3nafJRReM5huv/nynHcqILCYejhGGvsEYIWGALm7yQ==
+X-Gm-Message-State: AOJu0YwoxNQNiUURlt+tcljsJv/5nNBA3DgYZMOrOdA7wRlSa7snvjQ1
+	k8Y9cV56P6+G6tC1autWiCvuVTSUIj6PN2M/Y7fmNo7aniVrQcW0z5oPfXtE4yI=
+X-Google-Smtp-Source: AGHT+IGaqeH/3Gmg8KUpHHSHjc3tJAw11pn0r8K0dHA5K39CaheZh7/A4IyD+qewrDs38W0TKZ09Cg==
+X-Received: by 2002:a2e:3a07:0:b0:2d2:1d51:333e with SMTP id h7-20020a2e3a07000000b002d21d51333emr2219665lja.49.1708162286260;
+        Sat, 17 Feb 2024 01:31:26 -0800 (PST)
+Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
+        by smtp.gmail.com with ESMTPSA id l9-20020a170902eb0900b001db63cfe07dsm1081632plb.283.2024.02.17.01.31.24
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 17 Feb 2024 01:31:25 -0800 (PST)
+Message-ID: <8352b5c0-0820-4156-b2a1-d80aa03418a7@suse.com>
+Date: Sat, 17 Feb 2024 20:01:21 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CH3PR10MB6714:EE_
-X-MS-Office365-Filtering-Correlation-Id: 6b107d6c-d1c3-47b1-9774-08dc2f7152f8
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 
-	ROsjl548ETOpnw4bgN/fUWKgKbtvD3tj6U2EXg7ZnrdqmN8vat8htrbMJCLYqeTjy9jJWDj6rRnyLgvPSgUr6r4UxQrNdU7D/pw4goC8CFGLWllOYmA5PE7LgJlK/rUV41/5CZKdHg9U6iBO0OiUvk0OJyAP4BXw3CJcQBPIBMlCJjdjVtut27lH06IyJeS7441ODlT9lDTIEgjMI/+Iry2Uvmz5zbsL/LbMU49HG7rpaKFfo0yb47GbGHltL4J6BihjaFf3E1QnLDam2/MPuA94+/v78avc63LIppVju8fJ0VeMKj1EAR5o4/s0HEF39uvOwgCCfG04RP1uuzdFGY4Ivr6KgDeu0q8dEPs79l4W5ScabX79GlXViQPM5v43baj8USIL2pgEU3HbA3/HFnceNp7TmRSNGDHfnSpVh74aVrfD/lhtJ8pWilxMkj2ChjeDiciOePgO+RjPH478NSJ8fe8f1rcQFMHdR5bLhcR5jKGKn+nfsylT7vQTs+/AQD+5J8M89bS11cD6bCoZvZGiiGPAGQzbdUYV6g7T7rrIJI0+qGz4dmq8OyiTmPT+
-X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(346002)(39860400002)(366004)(396003)(376002)(136003)(230922051799003)(186009)(64100799003)(451199024)(1800799012)(31686004)(478600001)(6512007)(6486002)(41300700001)(6666004)(2906002)(4326008)(8936002)(8676002)(5660300002)(2616005)(66556008)(6916009)(6506007)(316002)(53546011)(66946007)(66476007)(44832011)(86362001)(31696002)(83380400001)(38100700002)(36756003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?utf-8?B?L2o5YlNKUkRpdjY3SXcwZzdVTDR1V0lhTGFsMW53OXhKWG9GbzB4Y2NhNDFQ?=
- =?utf-8?B?VDBlZFR6dStKaitrc0dvK1hxUElRd2QwMDdiZlV4RW1QTUY2R3A3WFlyMTAv?=
- =?utf-8?B?OTlyeTdwZHB6RkdGVHpDVXBtT2wxWHRTQW51U1V6NU53SFNVZWJYdmdjRnhi?=
- =?utf-8?B?dDBRREtyWkZyaVBoUE53QkJwMjVVZ1NxK2J0Nm9BaEJrWmtXOWVPRjJ5Z2FT?=
- =?utf-8?B?Z01EYjdYYU1qLzlzcWF4VWErRnljWXlYbEV3MFRKNzRYMDlkL1Rqd2s1SUhH?=
- =?utf-8?B?bGRGTmNHdzlzTnVTQUVLU1hjUURUaU8rNktObnJEZnZadU5lcmM5WWhXRmpJ?=
- =?utf-8?B?VUh2d2xja0ZqcHNDeURrTE4xamVZRzlSYXM2NFA3N013VEI2OStsT1ExN3JL?=
- =?utf-8?B?aWlkSGJua0lRa0VwK0NUZTA2NzQybXpwSW9ZZVpHZzFUTk1pc3JIN3lnbzRa?=
- =?utf-8?B?alhsKzAvUkl3amptRHpZcEpzUGFmSjJ4Q0dLVXFudXdRcnNITVVyWmc5aVRq?=
- =?utf-8?B?OTZ2OXdnS0hjNU5FdFhGa1l4bjJHYUlQVGFBWHZoNytJaWs4NWdPdklzMDZt?=
- =?utf-8?B?dUhZdGdycENPTm8ra1R3UzhlT0FKQTVkOVNFVC82L0YrWncweEIwN1l6UGtu?=
- =?utf-8?B?amc4ZXBUaHFNVVJlZkw1TG4vRnNjVzRPWE90blBkdXJGRUY5VGhJYTZtRTRo?=
- =?utf-8?B?TnNsOGVZcm90TGgzSmRwL2FEUVpIaHVWTGRDSlRxdFZWYWtTYnNHRVFpaVZ6?=
- =?utf-8?B?SkRvOFVxZnVyc1FyQ3NoczhXWFJtSys0TmRJV3JXUjJFY3hTRjY2L3VKZWMr?=
- =?utf-8?B?TWhNbk1hRWFzcHNBZGc4L2FyNThVRUozV0hXWi9rVVFjLzR3U2prZ2VmVTIw?=
- =?utf-8?B?dlRzNmJ6Uk05dk82TmxPS1ZwS3BLMjZQeUJPWE1sWEJ5TkFpVXVlS0I5aWZl?=
- =?utf-8?B?OEl1RkdUbk9yOFRyWnhTamQ3MVczOGxvTjZCRzBQVk1zYy9GQVpNMEpBYmtD?=
- =?utf-8?B?bXlNQWVxaU5KN25rOFg0aDlwMmJjL3dtRmdJUzZsdVpubUcvUzJGVGtBMVRE?=
- =?utf-8?B?N21qYnpMb1FZZVNaT1MxZVZHTWhBWFdtWEI2TXZlMndiSjZMYVZaT2JiREo3?=
- =?utf-8?B?TDhYVnUwMUJrZzZIR3VvaU0yWUxZaDkybFIySTZjc0cvc0l0OUlBcFZ1ZFVq?=
- =?utf-8?B?L1p6ZlRXYUtrWEJ3d0ZiMlVnUW1TWll6b2EzcVBHaCtwNUV1b1I4ZnpCUy9L?=
- =?utf-8?B?K3VKcDAwZjVmV2dkbjZjdHlicWZNcGxjM2hkNlVOSmF3SWJkR25yRXMweGU5?=
- =?utf-8?B?QXJ5bGhDZTRMSkd0OVBqWkNwanBlN25RK3psaUFOYUhKMlpjYnBKclhINDJk?=
- =?utf-8?B?NWdwUG8zQzJoa1laYXpubExtSWtaSXZ4K2xJazZwVEVaRGI3VWNSMVZpTE9X?=
- =?utf-8?B?SWxGeHlFYllCalF4SjQ0d0VRR2I5YkE5ZVlxTlV4c29KN3AvSWgvK0lVeVJJ?=
- =?utf-8?B?S0xSVHdpeXRGenZJdSs1Ty9EcWJqZEYvYlpsSElBSkNvNGdFQks1S1lPN3F4?=
- =?utf-8?B?bkhnZzFhaVVFY2ZoZy9SQmVDMFlaQzBzU3I3MlYyNVB6SVNDOHhQN2tZc3JH?=
- =?utf-8?B?K0RhMkx5Qzh6Z1RJZDlQU3lFdUJYdHJPOUk5SlZaMEJFUlFmV2NBRWczaTZR?=
- =?utf-8?B?UmFub054ckVRbmg3UkJSZWM4K1pOcWhwMkZJYVdZZnludDl3SENuUzVCYXhG?=
- =?utf-8?B?WWE2c0Z3UWk4TzIzWTdGazFwTDYvZXgxWUNyZnJQR1RPKy9uM3o3R1F4eDhv?=
- =?utf-8?B?eVNoVk9EZnlHbG9Qd2pxWVF4dWg2MkFVcnRXOGt4NXNiZkN1cERweWd5dCtB?=
- =?utf-8?B?SVhRZElFcHpKQUpQRm83Rnl3N0I2dVNXdk80OEhOUElGWTdYRzFjd2JSWVpG?=
- =?utf-8?B?b1cwU1NYQlJiMExYYmw5blVMZE9wejN3Y1QxVkpZRzNZMUpEVGdlQVVDcWUy?=
- =?utf-8?B?bERLalUwYytIKytZQ2xMR2o2MEN0cGFQQktJSnV5ZDZqZHlTUzB3Qkc1dmox?=
- =?utf-8?B?VFU5U29UYlMxamR6UE5zNjlTK3lmNGV6MmlTaDZTOFo5WjV6RWs1SE1Rc2Ny?=
- =?utf-8?B?WGhLV1BlcUwxSlp2NHBzdU5hUmN1QmVxVWdxb3ZobUxkdlN3QkRFRVRMcDJU?=
- =?utf-8?Q?ESJiJciu+bmscefsduRI+wSrzFxGnA9owp8Te4N3UbDG?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	gv+scGXGfPq8ZOf5m4qj2mu8gYZFagJGduYLjN8nQaWP2mmXGICcoUIw3gxj2EOkgGKSm2dLaE86OnRNS7vU9VTxsqgjygtqzI45tRjSOUfBhT7ezQOEu9ylCTOMkIh6hDSNyhx/BqIniY0hubqUtdSBGWEDrOrvWRebIfN7/kZ9hBfdEowtPLbuL68KF7iopcuQvHTal6/VKURJJlUinH9S2bLCuMTCAUXIdObcOdfXmvUDcU3HUL+hyX9WIfEO88f29aju6wEmhMEqdqNHZRKvO6Q1ObrPk++N5Qz7p+rMtzr4Gn7Fa/uDBbF4RVQPpghEJky+DlLXr4MITz8l0h+F8F+O0C7O6/ll0EmfI1liTbLfICR0fyyo+Fx4PfnXr74HqvH3D8WvGU9aTr1Fx41v4sGOUBOQRt0R7wuAtHpiJo53wYYOm6JgJVYL9t2a+EXktp7eaeXjzqlaBiPRmQoDwgjGg+YCSDaPEB6ZDSMAO1wkROm1qoUT4LfuqYeEdxP9dBe8PChCVRycIjjL63p0ToYrehkD9fRtomvq3Ves3lqvQLGfneZY98oPjR2aX+I7qM1pn1UsO1A3pm4UhTqAJm73E6W5ZVIS7LsaTcg=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6b107d6c-d1c3-47b1-9774-08dc2f7152f8
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Feb 2024 04:31:35.2843
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: rf8RoPitrHRB+oJs+qMMYNh4NHm785qmOmk9lO1lKOOspggN5AfTR5ZAWSlxQrrlCPFBPQgPbi3EfOQgWGHocg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR10MB6714
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-02-17_01,2024-02-16_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 suspectscore=0
- mlxscore=0 spamscore=0 mlxlogscore=999 phishscore=0 bulkscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2311290000 definitions=main-2402170031
-X-Proofpoint-GUID: -sW8Wgemmg_3qCdEp6rg-DoN9yRgt_yX
-X-Proofpoint-ORIG-GUID: -sW8Wgemmg_3qCdEp6rg-DoN9yRgt_yX
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs/016: fix a false alert due to xattrs mismatch
+Content-Language: en-US
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <ae441bd376587124becd9141ed690598d4ed281a.1703741660.git.wqu@suse.com>
+Autocrypt: addr=wqu@suse.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
+ FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJVBQkNOgemAAoJEMI9kfOh
+ Jf6oapEH/3r/xcalNXMvyRODoprkDraOPbCnULLPNwwp4wLP0/nKXvAlhvRbDpyx1+Ht/3gW
+ p+Klw+S9zBQemxu+6v5nX8zny8l7Q6nAM5InkLaD7U5OLRgJ0O1MNr/UTODIEVx3uzD2X6MR
+ ECMigQxu9c3XKSELXVjTJYgRrEo8o2qb7xoInk4mlleji2rRrqBh1rS0pEexImWphJi+Xgp3
+ dxRGHsNGEbJ5+9yK9Nc5r67EYG4bwm+06yVT8aQS58ZI22C/UeJpPwcsYrdABcisd7dddj4Q
+ RhWiO4Iy5MTGUD7PdfIkQ40iRcQzVEL1BeidP8v8C4LVGmk4vD1wF6xTjQRKfXHOwE0EWdWB
+ rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
+ Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
+ E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
+ vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
+ g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
+ AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJuBQkNOge/AAoJEMI9kfOhJf6o
+ rq8H/3LJmWxL6KO2y/BgOMYDZaFWE3TtdrlIEG8YIDJzIYbNIyQ4lw61RR+0P4APKstsu5VJ
+ 9E3WR7vfxSiOmHCRIWPi32xwbkD5TwaA5m2uVg6xjb5wbdHm+OhdSBcw/fsg19aHQpsmh1/Q
+ bjzGi56yfTxxt9R2WmFIxe6MIDzLlNw3JG42/ark2LOXywqFRnOHgFqxygoMKEG7OcGy5wJM
+ AavA+Abj+6XoedYTwOKkwq+RX2hvXElLZbhYlE+npB1WsFYn1wJ22lHoZsuJCLba5lehI+//
+ ShSsZT5Tlfgi92e9P7y+I/OzMvnBezAll+p/Ly2YczznKM5tV0gboCWeusM=
+In-Reply-To: <ae441bd376587124becd9141ed690598d4ed281a.1703741660.git.wqu@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 2/15/24 18:12, Filipe Manana wrote:
-> On Thu, Feb 15, 2024 at 6:37 AM Anand Jain <anand.jain@oracle.com> wrote:
->>
->> Use newer mkfs.btrfs option to generate two cloned devices,
->> used in test cases.
->>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->>   common/btrfs | 24 ++++++++++++++++++------
->>   1 file changed, 18 insertions(+), 6 deletions(-)
->>
->> diff --git a/common/btrfs b/common/btrfs
->> index 9a7fa2c71ec5..8ffce3c39695 100644
->> --- a/common/btrfs
->> +++ b/common/btrfs
->> @@ -91,13 +91,7 @@ _require_btrfs_mkfs_feature()
->>   _require_btrfs_mkfs_uuid_option()
->>   {
->>          local cnt
->> -       local feature
->>
->> -       if [ -z $1 ]; then
->> -               echo "Missing option name argument for _require_btrfs_mkfs_option"
->> -               exit 1
->> -       fi
->> -       feature=$1
-> 
-> This is confusing... It was just introduced in the previous patch that
-> introduced this function (_require_btrfs_mkfs_uuid_option).
-> 
-> If there was never any need for this code, why was it added in the
-> previous patch and removed in this one, without any users in between?
-> 
+A gentle ping.
 
-This change was mistakenly introduced here; it should have been in
-the previous patch. I will move it. Thx.
+As the test case still failed in the latest for-next branch due to the 
+SELinux xattr mismatch.
 
->>          cnt=$($MKFS_BTRFS_PROG --help 2>&1 |grep -E --count "\-\-uuid|\-\-device-uuid")
->>          if [ $cnt != 2 ]; then
->>                  _notrun "Require $MKFS_BTRFS_PROG with --uuid and --device-uuid option"
->> @@ -864,3 +858,21 @@ create_cloned_devices()
->>                                                          _fail "dd failed: $?"
->>          echo done
->>   }
->> +
->> +mkfs_clone()
->> +{
->> +       local dev1=$1
->> +       local dev2=$2
->> +
->> +       [[ -z $dev1 || -z $dev2 ]] && \
->> +               _fail "BUGGY code, mkfs_clone needs arg1 arg2"
+Thanks,
+Qu
+
+在 2023/12/28 16:06, Qu Wenruo 写道:
+> [BUG]
+> When running btrfs/016 after any other test case, it would fail on a
+> SELinux enabled environment:
 > 
-> Rather more clear and informative to say "mkfs_clone requires two
-> devices as arguments".
-
-Sure.
-
+>    btrfs/015 1s ...  0s
+>    btrfs/016 1s ... [failed, exit status 1]- output mismatch (see ~/xfstests-dev/results//btrfs/016.out.bad)
+>        --- tests/btrfs/016.out	2023-12-28 10:39:36.481027970 +1030
+>        +++ ~/xfstests-dev/results//btrfs/016.out.bad	2023-12-28 15:53:10.745436664 +1030
+>        @@ -1,2 +1,3 @@
+>         QA output created by 016
+>        -Silence is golden
+>        +fssum failed
+>        +(see ~/xfstests-dev/results//btrfs/016.full for details)
+>        ...
+>        (Run 'diff -u ~/xfstests-dev/tests/btrfs/016.out ~/xfstests-dev/results//btrfs/016.out.bad'  to see the entire diff)
+>    Ran: btrfs/015 btrfs/016
+>    Failures: btrfs/016
+>    Failed 1 of 2 tests
 > 
->> +
->> +       _mkfs_dev -fq $dev1
->> +
->> +       fsid=$($BTRFS_UTIL_PROG inspect-internal dump-super $dev1 | \
->> +                                       grep -E ^fsid | $AWK_PROG '{print $2}')
->> +       uuid=$($BTRFS_UTIL_PROG inspect-internal dump-super $dev1 | \
->> +                               grep -E ^dev_item.uuid | $AWK_PROG '{print $2}')
+> [CAUSE]
+> The test case itself would try to use a blank SELinux context for the
+> SCRATCH_MNT, to control the xattrs.
 > 
-> Make the variables local please.
+> But the initial send stream is generated from $TEST_DIR, which may still
+> have the default SELinux mount context.
 > 
-
-Sure.
-
-Thanks, Anand
-> Thanks.
+> And such mismatch in the SELinux xattr (source on $TEST_DIR still has
+> the extra xattr, meanwhile the receve end on $SCRATCH_MNT doesn't) would
+> lead to above mismatch.
 > 
->> +
->> +       _mkfs_dev -fq --uuid $fsid --device-uuid $uuid $dev2
->> +}
->> --
->> 2.39.3
->>
->>
-
+> [FIX]
+> Instead of doing all the edge juggling using $TEST_DIR, this time we do
+> all the work on $SCRATCH_MNT.
+> 
+> This means we would generate the initial send stream from $SCRATCH_MNT,
+> then reformat the fs, mount scratch again, receive and verify.
+> 
+> This does not only fix the above false alerts, but also simplify the
+> cleanup.
+> We no longer needs to cleanup the extra file for the initial send
+> stream, as they are on the scratch device and would be formatted anyway.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>   tests/btrfs/016 | 46 ++++++++++++++++++++++------------------------
+>   1 file changed, 22 insertions(+), 24 deletions(-)
+> 
+> diff --git a/tests/btrfs/016 b/tests/btrfs/016
+> index 35609329ba0e..9371b3316332 100755
+> --- a/tests/btrfs/016
+> +++ b/tests/btrfs/016
+> @@ -12,22 +12,11 @@ _begin_fstest auto quick send prealloc
+>   tmp=`mktemp -d`
+>   tmp_dir=send_temp_$seq
+>   
+> -# Override the default cleanup function.
+> -_cleanup()
+> -{
+> -	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap > /dev/null 2>&1
+> -	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap1 > /dev/null 2>&1
+> -	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send > /dev/null 2>&1
+> -	rm -rf $TEST_DIR/$tmp_dir
+> -	rm -f $tmp.*
+> -}
+> -
+>   # Import common functions.
+>   . ./common/filter
+>   
+>   # real QA test starts here
+>   _supported_fs btrfs
+> -_require_test
+>   _require_scratch
+>   _require_fssum
+>   _require_xfs_io_command "falloc"
+> @@ -41,29 +30,33 @@ export SELINUX_MOUNT_OPTIONS=""
+>   
+>   _scratch_mount
+>   
+> -mkdir $TEST_DIR/$tmp_dir
+> -$BTRFS_UTIL_PROG subvolume create $TEST_DIR/$tmp_dir/send \
+> +mkdir $SCRATCH_MNT/$tmp_dir
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/$tmp_dir/send \
+>   	> $seqres.full 2>&1 || _fail "failed subvolume create"
+>   
+> -_ddt of=$TEST_DIR/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
+> +_ddt of=$SCRATCH_MNT/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
+>   	2>&1 || _fail "dd failed"
+> -$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
+> -	$TEST_DIR/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
+> -$XFS_IO_PROG -c "fpunch 1m 1m" $TEST_DIR/$tmp_dir/send/foo
+> -$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
+> -	$TEST_DIR/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
+> +	$SCRATCH_MNT/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
+> +$XFS_IO_PROG -c "fpunch 1m 1m" $SCRATCH_MNT/$tmp_dir/send/foo
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
+> +	$SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
+>   
+> -$FSSUM_PROG -A -f -w $tmp/fssum.snap $TEST_DIR/$tmp_dir/snap >> $seqres.full \
+> +$FSSUM_PROG -A -f -w $tmp/fssum.snap $SCRATCH_MNT/$tmp_dir/snap >> $seqres.full \
+>   	2>&1 || _fail "fssum gen failed"
+> -$FSSUM_PROG -A -f -w $tmp/fssum.snap1 $TEST_DIR/$tmp_dir/snap1 >> $seqres.full \
+> +$FSSUM_PROG -A -f -w $tmp/fssum.snap1 $SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full \
+>   	2>&1 || _fail "fssum gen failed"
+>   
+> -$BTRFS_UTIL_PROG send -f $tmp/send.snap $TEST_DIR/$tmp_dir/snap >> \
+> +$BTRFS_UTIL_PROG send -f $tmp/send.snap $SCRATCH_MNT/$tmp_dir/snap >> \
+>   	$seqres.full 2>&1 || _fail "failed send"
+> -$BTRFS_UTIL_PROG send -p $TEST_DIR/$tmp_dir/snap \
+> -	-f $tmp/send.snap1 $TEST_DIR/$tmp_dir/snap1 \
+> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/$tmp_dir/snap \
+> +	-f $tmp/send.snap1 $SCRATCH_MNT/$tmp_dir/snap1 \
+>   	>> $seqres.full 2>&1 || _fail "failed send"
+>   
+> +_scratch_unmount
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +
+>   $BTRFS_UTIL_PROG receive -f $tmp/send.snap $SCRATCH_MNT >> $seqres.full 2>&1 \
+>   	|| _fail "failed recv"
+>   $BTRFS_UTIL_PROG receive -f $tmp/send.snap1 $SCRATCH_MNT >> $seqres.full 2>&1 \
+> @@ -74,5 +67,10 @@ $FSSUM_PROG -r $tmp/fssum.snap $SCRATCH_MNT/snap >> $seqres.full 2>&1 \
+>   $FSSUM_PROG -r $tmp/fssum.snap1 $SCRATCH_MNT/snap1 >> $seqres.full 2>&1 \
+>   	|| _fail "fssum failed"
+>   
+> +# Unset the selinux mount options and restore whatever the default one for
+> +# test device.
+> +unset SELINUX_MOUNT_OPTIONS
+> +_test_cycle_mount
+> +
+>   echo "Silence is golden"
+>   status=0 ; exit
