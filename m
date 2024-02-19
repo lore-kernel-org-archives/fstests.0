@@ -1,58 +1,38 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E627420DCB;
-	Mon, 19 Feb 2024 08:00:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3BAAE2E40D;
+	Mon, 19 Feb 2024 12:02:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708329617; cv=none; b=kbKrEP4uyi9WpmHmL4O5Ha6RxJBM0hPizR9/6Qq7tQZsw6nKp/QEOKdJqcK77RTKzK5l6IZrtxArSFWdapbOWMf7npAbD3SIJfJsxmP4qJJfZNaPryvrXFWDeOnnZg5TnlkXINnG6M2GOduY2dVqFMRxXRw7Fd3V8qvtxq74ZEs=
+	t=1708344137; cv=none; b=e5uu6Y+UA022VSgclLb+QCCy5yaF33+Yf5lVEjjImwMKTUIJwY5xVpyFHNB+Wr7D2CqnPRdajz0LTTaPmcGFfsNl0QQ9CGSN1wT68RcDSfgAVQ1y11u/cDc2sO251ke9ckWRfTwI/uly1MoAGDjJZYSWnoRZQJxGenCVEG07y3w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708329617; c=relaxed/simple;
-	bh=HO3LpJVkyUxBJMSpfYK2zIVW52LP1sIPeKNOxbtrLHY=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Q/HYF6iHBzmc2NmEacJMOs7YdGmh7ZFix7yHzzuFT6NU8SQcByhN8UObA0E3z+Pawn9Ym9LlzTveJxQ6VlpXDiiTsZ7e4bgVyHWpU6FVgpusnjz4amhnnL3s60nDwLRF4NkpL/kKpIAmaO58y/kBt/Zcg+BnaP2nXumO7sTn3PM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=idMZwNQT; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=idMZwNQT; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1708344137; c=relaxed/simple;
+	bh=eKLRGH3mdIBGAMsL3XgHldAAyqteY4/uy4LPWPp14xQ=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=K95D7eHTOT9b3cRNPlQdKUVTrY1rp4GoP/epZXLBFOPRVGvtT5YCZTK1oR5XPUkn3hUqTTdg8SU1ry1hAqPcRMtQN5qchNNyANbmr2fFxTlrk82mjd/62gyVBBCUxbh6+Q7gne+wZNB+TiyfaJImabAYSXkK7s8DCuscITQVmAA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nlFvlVF6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="idMZwNQT";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="idMZwNQT"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 8E8C11FD0C;
-	Mon, 19 Feb 2024 08:00:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1708329611; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=E4+gffStzxRy8aKVtcC4o0uv08VNjyH3EAUYiYtf960=;
-	b=idMZwNQTFyTlCrwOuJE+ckwERS9ChVHPWwJaPCFtiyWVT5k6E17u54JQgrkOgsbEhDgbS1
-	V0yBOPuvRY4rloeEogr1oWeG2lT3Noir5z4F9BUf/UB2VGVnYMa6yiRNtXsORKGl/MmxEY
-	Z2TCzI/sk/jrd2OYgV7PavDRouBCVMc=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1708329611; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=E4+gffStzxRy8aKVtcC4o0uv08VNjyH3EAUYiYtf960=;
-	b=idMZwNQTFyTlCrwOuJE+ckwERS9ChVHPWwJaPCFtiyWVT5k6E17u54JQgrkOgsbEhDgbS1
-	V0yBOPuvRY4rloeEogr1oWeG2lT3Noir5z4F9BUf/UB2VGVnYMa6yiRNtXsORKGl/MmxEY
-	Z2TCzI/sk/jrd2OYgV7PavDRouBCVMc=
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 836EB13585;
-	Mon, 19 Feb 2024 08:00:10 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id 0egAEYoK02UxOgAAn2gu4w
-	(envelope-from <wqu@suse.com>); Mon, 19 Feb 2024 08:00:10 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] btrfs/016: fix a false alert due to xattrs mismatch
-Date: Mon, 19 Feb 2024 18:30:07 +1030
-Message-ID: <20240219080007.70318-1-wqu@suse.com>
-X-Mailer: git-send-email 2.43.2
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nlFvlVF6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E2183C433F1;
+	Mon, 19 Feb 2024 12:02:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708344136;
+	bh=eKLRGH3mdIBGAMsL3XgHldAAyqteY4/uy4LPWPp14xQ=;
+	h=From:To:Cc:Subject:Date:From;
+	b=nlFvlVF6CJOYeLfSaeswXHppfb3ORFn/yZwWj+iuBujpadUJZw4g6ur/rnHsSl/Iv
+	 q5LP3dtebTYz90LlJaF47DPYKcsCIf14mQ816aWhrPfXNrzB3AHi7NkPQ28ceYKsV9
+	 wiUIGXUouQEmzrhogTYXzyk0x68IhD5nZcvvFxkqaKPXr+6CblVHmiXC8cPLYA0c2R
+	 1lsjHHMVyU4cSjyWRNhaR1WZ8zEATOuZNQH1dlwHD8lRSdgYqf1BBKRvAWAa/9kyQP
+	 6ck9p5s0y0kAGtVc0NHt36xYWlHuswE7Rzv7buadCxfAw6A2BWXDwQWimNkjvTrJNf
+	 rIlFrtECkoKFg==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test incremental send on sparse file with trailing hole
+Date: Mon, 19 Feb 2024 12:01:30 +0000
+Message-Id: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -60,183 +40,153 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Level: 
-X-Spamd-Bar: /
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=idMZwNQT
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-0.51 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
-	 FROM_HAS_DN(0.00)[];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 TO_DN_NONE(0.00)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 DWL_DNSWL_LOW(-1.00)[suse.com:dkim];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 DKIM_TRACE(0.00)[suse.com:+];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 MID_CONTAINS_FROM(1.00)[];
-	 MX_GOOD(-0.01)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 NEURAL_HAM_SHORT(-0.20)[-0.997];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Spam-Score: -0.51
-X-Rspamd-Queue-Id: 8E8C11FD0C
-X-Spam-Flag: NO
 
-[BUG]
-When running btrfs/016 after any other test case, it would fail on a
-SELinux enabled environment:
+From: Filipe Manana <fdmanana@suse.com>
 
-  btrfs/015 1s ...  0s
-  btrfs/016 1s ... [failed, exit status 1]- output mismatch (see ~/xfstests-dev/results//btrfs/016.out.bad)
-      --- tests/btrfs/016.out	2023-12-28 10:39:36.481027970 +1030
-      +++ ~/xfstests-dev/results//btrfs/016.out.bad	2023-12-28 15:53:10.745436664 +1030
-      @@ -1,2 +1,3 @@
-       QA output created by 016
-      -Silence is golden
-      +fssum failed
-      +(see ~/xfstests-dev/results//btrfs/016.full for details)
-      ...
-      (Run 'diff -u ~/xfstests-dev/tests/btrfs/016.out ~/xfstests-dev/results//btrfs/016.out.bad'  to see the entire diff)
-  Ran: btrfs/015 btrfs/016
-  Failures: btrfs/016
-  Failed 1 of 2 tests
+Test that an incremental send does not issue unnecessary writes for a
+sparse file that got one new extent between its previous extent and the
+file's size.
 
-[CAUSE]
-The test case itself would try to use a blank SELinux context for the
-SCRATCH_MNT, to control the xattrs.
+This exercises a fix by the following patch:
 
-But the initial send stream is generated from $TEST_DIR, which may still
-have the default SELinux mount context.
+  "btrfs: send: don't issue unnecessary zero writes for trailing hole"
 
-And such mismatch in the SELinux xattr (source on $TEST_DIR still has
-the extra xattr, meanwhile the receve end on $SCRATCH_MNT doesn't) would
-lead to above mismatch.
-
-[FIX]
-Fix the false alerts by disable XATTR checks.
-
-Furthermore instead of doing all the edge juggling using $TEST_DIR, this
-time we do all the work on $SCRATCH_MNT.
-
-This means we would generate the initial send stream from $SCRATCH_MNT,
-then reformat the fs, mount scratch again, receive and verify.
-
-We no longer needs to cleanup the extra file for the initial send
-stream, as they are on the scratch device and would be formatted anyway.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changelog:
-v2:
-- Add -T option to avoid xattrs checks
-  Since this test case is only verify the hole punching behavior, XATTR
-  is not our interest.
----
- tests/btrfs/016 | 53 ++++++++++++++++++++-----------------------------
- 1 file changed, 22 insertions(+), 31 deletions(-)
+ tests/btrfs/303     | 92 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/303.out | 24 ++++++++++++
+ 2 files changed, 116 insertions(+)
+ create mode 100755 tests/btrfs/303
+ create mode 100644 tests/btrfs/303.out
 
-diff --git a/tests/btrfs/016 b/tests/btrfs/016
-index 35609329..37119363 100755
---- a/tests/btrfs/016
-+++ b/tests/btrfs/016
-@@ -12,58 +12,48 @@ _begin_fstest auto quick send prealloc
- tmp=`mktemp -d`
- tmp_dir=send_temp_$seq
- 
--# Override the default cleanup function.
--_cleanup()
--{
--	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap > /dev/null 2>&1
--	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap1 > /dev/null 2>&1
--	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send > /dev/null 2>&1
--	rm -rf $TEST_DIR/$tmp_dir
--	rm -f $tmp.*
--}
--
- # Import common functions.
- . ./common/filter
- 
- # real QA test starts here
- _supported_fs btrfs
--_require_test
- _require_scratch
- _require_fssum
- _require_xfs_io_command "falloc"
- 
- _scratch_mkfs > /dev/null 2>&1
--
--#receive needs to be able to setxattrs, including the selinux context, if we use
--#the normal nfs context thing it screws up our ability to set the
--#security.selinux xattrs so we need to disable this for this test
--export SELINUX_MOUNT_OPTIONS=""
--
- _scratch_mount
- 
--mkdir $TEST_DIR/$tmp_dir
--$BTRFS_UTIL_PROG subvolume create $TEST_DIR/$tmp_dir/send \
-+mkdir $SCRATCH_MNT/$tmp_dir
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/$tmp_dir/send \
- 	> $seqres.full 2>&1 || _fail "failed subvolume create"
- 
--_ddt of=$TEST_DIR/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
-+_ddt of=$SCRATCH_MNT/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
- 	2>&1 || _fail "dd failed"
--$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
--	$TEST_DIR/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
--$XFS_IO_PROG -c "fpunch 1m 1m" $TEST_DIR/$tmp_dir/send/foo
--$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
--	$TEST_DIR/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
-+	$SCRATCH_MNT/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
-+$XFS_IO_PROG -c "fpunch 1m 1m" $SCRATCH_MNT/$tmp_dir/send/foo
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
-+	$SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
- 
--$FSSUM_PROG -A -f -w $tmp/fssum.snap $TEST_DIR/$tmp_dir/snap >> $seqres.full \
-+# -A disable access time check.
-+# And -T disable xattrs to prevent SELinux changes causing false alerts, and the
-+# test case only cares about hole punching.
-+$FSSUM_PROG -AT -f -w $tmp/fssum.snap $SCRATCH_MNT/$tmp_dir/snap >> $seqres.full \
- 	2>&1 || _fail "fssum gen failed"
--$FSSUM_PROG -A -f -w $tmp/fssum.snap1 $TEST_DIR/$tmp_dir/snap1 >> $seqres.full \
-+$FSSUM_PROG -AT -f -w $tmp/fssum.snap1 $SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full \
- 	2>&1 || _fail "fssum gen failed"
- 
--$BTRFS_UTIL_PROG send -f $tmp/send.snap $TEST_DIR/$tmp_dir/snap >> \
-+$BTRFS_UTIL_PROG send -f $tmp/send.snap $SCRATCH_MNT/$tmp_dir/snap >> \
- 	$seqres.full 2>&1 || _fail "failed send"
--$BTRFS_UTIL_PROG send -p $TEST_DIR/$tmp_dir/snap \
--	-f $tmp/send.snap1 $TEST_DIR/$tmp_dir/snap1 \
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/$tmp_dir/snap \
-+	-f $tmp/send.snap1 $SCRATCH_MNT/$tmp_dir/snap1 \
- 	>> $seqres.full 2>&1 || _fail "failed send"
- 
-+_scratch_unmount
-+_scratch_mkfs > /dev/null 2>&1
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+new file mode 100755
+index 00000000..26bcfe41
+--- /dev/null
++++ b/tests/btrfs/303
+@@ -0,0 +1,92 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 303
++#
++# Test that an incremental send does not issue unnecessary writes for a sparse
++# file that got one new extent between its previous extent and the file's size.
++#
++. ./common/preamble
++_begin_fstest auto quick snapshot send fiemap
++
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	rm -fr $send_files_dir
++}
++
++. ./common/filter
++. ./common/punch  # for _filter_fiemap
++
++_supported_fs btrfs
++_require_test
++_require_scratch
++_require_xfs_io_command "fiemap"
++
++_fixed_by_kernel_commit XXXXXXXXXXXX \
++	"btrfs: send: don't issue unnecessary zero writes for trailing hole"
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
 +_scratch_mount
 +
- $BTRFS_UTIL_PROG receive -f $tmp/send.snap $SCRATCH_MNT >> $seqres.full 2>&1 \
- 	|| _fail "failed recv"
- $BTRFS_UTIL_PROG receive -f $tmp/send.snap1 $SCRATCH_MNT >> $seqres.full 2>&1 \
-@@ -75,4 +65,5 @@ $FSSUM_PROG -r $tmp/fssum.snap1 $SCRATCH_MNT/snap1 >> $seqres.full 2>&1 \
- 	|| _fail "fssum failed"
- 
- echo "Silence is golden"
--status=0 ; exit
++$XFS_IO_PROG -f -c "truncate 1G" $SCRATCH_MNT/foobar
++
++# Now create the base snapshot, which is going to be the parent snapshot for
++# a later incremental send.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++		 $SCRATCH_MNT/mysnap1 > /dev/null
++
++# Create send stream (full send) for the first snapshot.
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
++		 $SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
++
++# Now write one extent at the beginning of the file and one somewhere in the
++# middle, leaving a gap between the end of this second extent and the file's
++# size.
++$XFS_IO_PROG -c "pwrite -S 0xab -b 64K 0 64K" \
++	     -c "pwrite -S 0xcd -b 64K 512M 64K" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Now create a second snapshot which is going to be used for an incremental
++# send operation.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++		 $SCRATCH_MNT/mysnap2 > /dev/null
++
++# Create send stream (incremental send) for the second snapshot.
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
++		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had and file foobar has only two
++# extents with a size of 64K each.
++_scratch_unmount
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
++
++echo "File content in the new filesystem:"
++_hexdump $SCRATCH_MNT/mysnap2/foobar
++
++echo "File fiemap in the new filesystem:"
++# Should have:
++#
++# 64K extent at file range [0, 64K[
++# hole at file range [64K, 512M[
++# 64K extent at file range [512M, 512M + 64K[
++# hole at file range [512M + 64K, 1G[
++$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/mysnap2/foobar | _filter_fiemap
++
++# File should be using only 128K of data (two 64K extents).
++echo "Space used by the file: $(du -h $SCRATCH_MNT/mysnap2/foobar | cut -f 1)"
++
 +status=0
 +exit
+diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+new file mode 100644
+index 00000000..7659a794
+--- /dev/null
++++ b/tests/btrfs/303.out
+@@ -0,0 +1,24 @@
++QA output created by 303
++At subvol SCRATCH_MNT/mysnap1
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 536870912
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++At subvol SCRATCH_MNT/mysnap2
++At subvol mysnap1
++File content in the new filesystem:
++000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
++*
++010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++20000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
++*
++20010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++40000000
++File fiemap in the new filesystem:
++0: [0..127]: data
++1: [128..1048575]: hole
++2: [1048576..1048703]: data
++3: [1048704..2097151]: hole
++Space used by the file: 128K
 -- 
-2.43.1
+2.40.1
 
