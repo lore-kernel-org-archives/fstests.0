@@ -1,273 +1,252 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55E8E36124;
-	Mon, 19 Feb 2024 13:21:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11AC6364B8;
+	Mon, 19 Feb 2024 13:29:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708348862; cv=none; b=X90NGmd4HCj6deLBWdGlXH1qM733ip96fJ3pcIVoCZnCt3+aTQGuFObPhqEeSmwvAVrBt6Atqqbp7731kHKBEy8WUq2uhbhmdVCWYP6JZiBo6ytaLUf0eA5mCX9CRgNsrJBp87DmZWeld+mOZ/B8KYQ4Oo/AG2fXpCRKUruJjE4=
+	t=1708349387; cv=none; b=hfZTb1sxlsL1c5mCsCjh/raPUfMwSkZEP34hAuVcsXv7sLsZdOpkcntpWDq3P8T3dR+om3/5Yu5NEc0AQr6HIoUiOW7qNbm6O36fJBeLvs7ske2q/Nh3hWC/g8rh2B8l4u6q1G/3wvCw3SGxM0HWT96rohDxJkBs5BGOlfV9Ads=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708348862; c=relaxed/simple;
-	bh=PHxysolwHCICHguH06UI9CO3yBfYK+0gqoHhV2sQpAo=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=jc9D6m2Xp/Gb5aL7nGueruYcbh3dAR1U+chL4RWL54IbsA5XlNcPdEvfKZyGD6kA+PH0Wwrvj2/QgKeOWAKKCu20vNqTckAfxmzfkFNPjgVcCp503zOij+4V2Re+pIhYEs5dQyXsZujp5q4m1+Q7qcpQlA8b2eg2NQsu3ILN1ao=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=UXJHEsA4; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Kva81qCp; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=UXJHEsA4; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Kva81qCp; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1708349387; c=relaxed/simple;
+	bh=Y5UzJYRiDU28XlxmCnqX4l+H0rrTv7XK+utp1ECxtqw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=babqrfYZky/WxwOjLDkdWOnN2hs+9oh8ozenujE7K7pV5A91odmkWcAPJQRH/XkEcyhzwxMZQz78Zq0vkaALrlzRiTLAKjWT9eT7EGCiTlDrz4xrjN4aoreRHLSx4ZM6P0USXPe25f8VfjHtsPwQbckhGkyQEjbRjGeQHAAoj54=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OFDp3qfn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="UXJHEsA4";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Kva81qCp";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="UXJHEsA4";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Kva81qCp"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 6AD8F1FD14;
-	Mon, 19 Feb 2024 13:20:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1708348858; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bxhXTOS+wh3BB5bUSZa4GxJ5gFzvL6KQIPRFGLV4sIk=;
-	b=UXJHEsA4fYqr4+pG0+PzXHuISQOnic/4yiJsENKU8rREcUVfyWl1keP5WEdKBqfVAiyxk+
-	1wOg/5zMWXcXtjGacfLe0xlcze26aIuDIxL3xRsQ0uW8DaL5wyjzl1y5gG6LDdsSxBhrEd
-	3ROS8w0qrKb2TQsvTvchT21r8UBl/A0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1708348858;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bxhXTOS+wh3BB5bUSZa4GxJ5gFzvL6KQIPRFGLV4sIk=;
-	b=Kva81qCp7jb0cj7grfn+mgRIRTYkkXqnUiaguSBdr3zrocwqkwu6jlfmwi9awGibikrsiL
-	sCv9G/ySqlcWPBBA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1708348858; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bxhXTOS+wh3BB5bUSZa4GxJ5gFzvL6KQIPRFGLV4sIk=;
-	b=UXJHEsA4fYqr4+pG0+PzXHuISQOnic/4yiJsENKU8rREcUVfyWl1keP5WEdKBqfVAiyxk+
-	1wOg/5zMWXcXtjGacfLe0xlcze26aIuDIxL3xRsQ0uW8DaL5wyjzl1y5gG6LDdsSxBhrEd
-	3ROS8w0qrKb2TQsvTvchT21r8UBl/A0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1708348858;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=bxhXTOS+wh3BB5bUSZa4GxJ5gFzvL6KQIPRFGLV4sIk=;
-	b=Kva81qCp7jb0cj7grfn+mgRIRTYkkXqnUiaguSBdr3zrocwqkwu6jlfmwi9awGibikrsiL
-	sCv9G/ySqlcWPBBA==
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 8F5D313585;
-	Mon, 19 Feb 2024 13:20:55 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id PtGyD7dV02U6BAAAn2gu4w
-	(envelope-from <ddiss@suse.de>); Mon, 19 Feb 2024 13:20:55 +0000
-Date: Tue, 20 Feb 2024 00:20:15 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, anand.jain@oracle.com, aalbersh@redhat.com,
- linux-fsdevel@vger.kernel.org, kdevops@lists.linux.dev,
- patches@lists.linux.dev
-Subject: Re: [PATCH v3 fstests] check: add support for --start-after
-Message-ID: <20240220002015.52ba31bc@echidna>
-In-Reply-To: <20240216180946.784869-1-mcgrof@kernel.org>
-References: <20240216180946.784869-1-mcgrof@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OFDp3qfn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 815B4C433F1;
+	Mon, 19 Feb 2024 13:29:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708349386;
+	bh=Y5UzJYRiDU28XlxmCnqX4l+H0rrTv7XK+utp1ECxtqw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=OFDp3qfnWKtuNzHDQzKKhT3dVIP2sC0PnmaAIvrzWxaw84AE64V0rJzj6/CFtAtt1
+	 EHmpKfh3TWD9Yzp0T6yg56t5a8u+3RgFtXROAUtNvKrILTgPRIt/h4lTHccEt+e0Lg
+	 15C2hr+iBHMZMb6cxUI/wemUETdKl4NsDbhXwiLsdwNbCo5aJO5Zb/SoEar0DN/bfU
+	 LuS0izgX+65pS2NZK1tkt8XfsnLTAVKHvLxyEK53Fxu/PT5xqm56rJnTVg0YjbvK6U
+	 PohL3a0u2wPIajSW93faAnOS65nRwQ8L1H8hg8bdN7mourCDQRMc0B4phDCMW49d6N
+	 OqrA2gK39GC0w==
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-a3d484a58f6so560684166b.3;
+        Mon, 19 Feb 2024 05:29:46 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCW6pRb8zGkVmeFnPsqxgkm0tupb1CLkbvTiDrD0zkFfRImaBLcaim5N1LRDbRxsLazYaF9d9QGYO02EIdqj9O2uftKKIQc6x5ifB1A=
+X-Gm-Message-State: AOJu0YxS8vf+gHvss3Y2FY6pgMqkIYgNYc54P7kd9mpyw7JT6bDOIgM5
+	Yw73eR9E74teYDsLVExd8tyj/oCvqvn2awqgqW+AD3EHgZEfe7PuhkkL57b241lZQ15FObRMR1z
+	NwWYJsYUEwKVzwKdMygUw2RdNrTc=
+X-Google-Smtp-Source: AGHT+IFynw0A8C1JawaUwbi351syygdwJCz/LweSRE2E4WEaW5Sn4ZUXUOAQ7h8d4kOZSIyOyBA1s7NreUsT4VZfJA0=
+X-Received: by 2002:a17:906:8cf:b0:a3e:aadd:f962 with SMTP id
+ o15-20020a17090608cf00b00a3eaaddf962mr1350354eje.62.1708349384838; Mon, 19
+ Feb 2024 05:29:44 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=UXJHEsA4;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=Kva81qCp
-X-Spamd-Result: default: False [-2.81 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
-	 FROM_HAS_DN(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	 DKIM_TRACE(0.00)[suse.de:+];
-	 MX_GOOD(-0.01)[];
-	 RCPT_COUNT_SEVEN(0.00)[7];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 MID_RHS_NOT_FQDN(0.50)[];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Rspamd-Queue-Id: 6AD8F1FD14
-X-Spam-Level: 
-X-Spam-Score: -2.81
-X-Spam-Flag: NO
+References: <cover.1707969354.git.anand.jain@oracle.com> <325a9476e06cebee3752d32fd06e75b2f478b8bc.1707969354.git.anand.jain@oracle.com>
+ <CAL3q7H77SEYPongbHn9auS7jyvOetD-8gD3oyQ3e+7pJuPVbSQ@mail.gmail.com> <c754b3c6-040c-44bd-9e50-ce95f4c4c4c7@oracle.com>
+In-Reply-To: <c754b3c6-040c-44bd-9e50-ce95f4c4c4c7@oracle.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 19 Feb 2024 13:29:07 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H45Sm1JMTHHpvBP9hB3ogOgRpq9cXyAQ9n9-oyPxdAMVQ@mail.gmail.com>
+Message-ID: <CAL3q7H45Sm1JMTHHpvBP9hB3ogOgRpq9cXyAQ9n9-oyPxdAMVQ@mail.gmail.com>
+Subject: Re: [PATCH 12/12] btrfs: test tempfsid with device add, seed, and balance
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 16 Feb 2024 10:09:46 -0800, Luis Chamberlain wrote:
+On Mon, Feb 19, 2024 at 1:18=E2=80=AFPM Anand Jain <anand.jain@oracle.com> =
+wrote:
+>
+> On 2/15/24 18:33, Filipe Manana wrote:
+> > On Thu, Feb 15, 2024 at 6:35=E2=80=AFAM Anand Jain <anand.jain@oracle.c=
+om> wrote:
+> >>
+> >> Make sure that basic functions such as seeding and device add fail,
+> >> while balance runs successfully with tempfsid.
+> >>
+> >> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> >> ---
+> >>   common/filter.btrfs |  6 ++++
+> >>   tests/btrfs/315     | 79 +++++++++++++++++++++++++++++++++++++++++++=
+++
+> >>   tests/btrfs/315.out | 11 +++++++
+> >>   3 files changed, 96 insertions(+)
+> >>   create mode 100755 tests/btrfs/315
+> >>   create mode 100644 tests/btrfs/315.out
+> >>
+> >> diff --git a/common/filter.btrfs b/common/filter.btrfs
+> >> index 8ab76fcb193a..d48e96c6f66b 100644
+> >> --- a/common/filter.btrfs
+> >> +++ b/common/filter.btrfs
+> >> @@ -68,6 +68,12 @@ _filter_btrfs_device_stats()
+> >>          sed -e "s/ *$NUMDEVS /<NUMDEVS> /g"
+> >>   }
+> >>
+> >> +_filter_btrfs_device_add()
+> >> +{
+> >> +       _filter_scratch_pool | \
+> >> +               sed -E 's/\(([0-9]+(\.[0-9]+)?)[a-zA-Z]+B\)/\(NUM\)/'
+> >
+> > Why do we need this new filter?
+> > We are testing for a failure, where none of this is relevant except
+> > filtering device names.
+> >
+>
+> 2nd part filters out the size part as seen in the raw
+> btrfs device add output below.
+>
+> $ btrfs device add /dev/sdb2 /btrfs
+> Performing full device TRIM /dev/sdb2 (731.00MiB) ...
+>
+> I will add a comment.
 
-...
->  check | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 53 insertions(+)
-> 
-> diff --git a/check b/check
-> index 71b9fbd07522..f081bf8ce685 100755
-> --- a/check
-> +++ b/check
-> @@ -18,6 +18,7 @@ showme=false
->  have_test_arg=false
->  randomize=false
->  exact_order=false
-> +start_after_test=""
->  export here=`pwd`
->  xfile=""
->  subdir_xfile=""
-> @@ -80,6 +81,7 @@ check options
->      -b			brief test summary
->      -R fmt[,fmt]	generate report in formats specified. Supported formats: xunit, xunit-quiet
->      --large-fs		optimise scratch device for large filesystems
-> +    --start-after	only start testing after the test specified
+So that means the test will fail the golden output if the device does
+not support trim,
+as in that case progs does not do the trim.
 
-The usage text should include the <test> parameter.
+That line about performing TRIM must be filtered out. Replacing the
+size with NUM is irrelevant.
 
->      -s section		run only specified section from config file
->      -S section		exclude the specified section from the config file
->      -L <n>		loop tests <n> times following a failure, measuring aggregate pass/fail metrics
-> @@ -120,6 +122,8 @@ examples:
->   check -x stress xfs/*
->   check -X .exclude -g auto
->   check -E ~/.xfstests.exclude
-> + check --start-after btrfs/010
-> + check -n -g soak --start-after generic/522
->  '
->  	    exit 1
->  }
-> @@ -204,6 +208,23 @@ trim_test_list()
->  	rm -f $tmp.grep
->  }
->  
-> +# takes the list of tests to run in $tmp.list and skips all tests until
-> +# the specified test is found. This will ensure the tests start after the
-> +# test specified, it skips the test specified.
-> +trim_start_after()
-> +{
-> +	local skip_test="$1"
-> +	local starts_regexp=$(echo $skip_test | sed -e 's|\/|\\/|')
-> +
-> +	if grep -q $skip_test $tmp.list ; then
-> +		rm -f $tmp.grep
-> +		awk 'f;/.*'$starts_regexp'/{f=1}' $tmp.list > $tmp.tmp
-> +		mv $tmp.tmp $tmp.list
-> +	else
-> +		echo "Test $skip_test not found in test list, be sure to use a valid test if using --start-after"
-> +		exit 1
-> +	fi
-> +}
+Thanks.
 
-nit: it should be possible to collapse the sed+grep+awk into something a
-bit more straightforward, e.g.
 
-trim_start_after()
-{
-        if awk -v skip_test="tests/$1" \
-           'f; $0 == skip_test {f=1} END {exit f}' $tmp.list > $tmp.tmp; then
-                echo "$1 not found in test list, be sure to use a valid test if using --start-after"
-                rm $tmp.tmp
-                exit 1
-        fi
-        mv $tmp.tmp $tmp.list
-}
-
->  
->  _wallclock()
->  {
-> @@ -233,6 +254,9 @@ _prepare_test_list()
->  		# no test numbers, do everything
->  		get_all_tests
->  	else
-> +		local group_all
-> +		local start_after_found=0
-> +		list=""
->  		for group in $GROUP_LIST; do
->  			list=$(get_group_list $group)
->  			if [ -z "$list" ]; then
-> @@ -240,11 +264,28 @@ _prepare_test_list()
->  				exit 1
->  			fi
->  
-> +			if [[ "$start_after_test" != "" && $start_after_found -ne 1 ]]; then
-> +				echo $list | grep -q $start_after_test
-> +				if [[ $? -eq 0 ]]; then
-> +					start_after_found=1
-> +				fi
-> +			fi
->  			for t in $list; do
->  				grep -s "^$t\$" $tmp.list >/dev/null || \
->  							echo "$t" >>$tmp.list
->  			done
-> +			group_all="$group_all $list"
->  		done
-> +		if [[ "$start_after_test" != "" && $start_after_found -ne 1 ]]; then
-> +			group_all=$(echo $group_all | sed -e 's|tests/||g')
-> +			echo "Start after test $start_after_test not found in any group specified."
-> +			echo "Be sure you specify a test present in one of your test run groups if using --start-after."
-> +			echo
-> +			echo "Your set of groups have these tests:"
-> +			echo
-> +			echo $group_all
-> +			exit 1
-> +		fi
->  	fi
-
-Can't all of the _prepare_test_list() changes above be dropped?
-trim_start_after() already performs the check that the test exists, and
-with the above dropped we could also do things like, e.g.
-  ./check --start-after generic/002 generic/00[1-9]
-
->  	# Specified groups to exclude
-> @@ -258,6 +299,10 @@ _prepare_test_list()
->  		trim_test_list $list
->  	done
->  
-> +	if [[ "$start_after_test" != "" ]]; then
-> +		trim_start_after $start_after_test
-> +	fi
-> +
->  	# sort the list of tests into numeric order unless we're running tests
->  	# in the exact order specified
->  	if ! $exact_order; then
-> @@ -313,6 +358,14 @@ while [ $# -gt 0 ]; do
->  				<(sed "s/#.*$//" $xfile)
->  		fi
->  		;;
-> +	--start-after)
-> +		if $randomize; then
-> +			echo "Cannot specify -r and --start-after."
-> +			exit 1
-> +		fi
-
-IIUC, this will only trigger if -r is parsed before --start-after, so it
-should be moved after the loop.
-
-> +		start_after_test="$2"
-> +		shift
-> +		;;
->  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
->  	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
->  	-l)	diff="diff" ;;
-
+>
+> > The test can just filter with  _filter_scratch_pool only.
+> >
+> >> +}
+> >> +
+> >>   _filter_transaction_commit() {
+> >>          sed -e "/Transaction commit: none (default)/d" \
+> >>              -e "s/Delete subvolume [0-9]\+ (.*commit):/Delete subvolu=
+me/g" \
+> >> diff --git a/tests/btrfs/315 b/tests/btrfs/315
+> >> new file mode 100755
+> >> index 000000000000..7ad0dfbc9c32
+> >> --- /dev/null
+> >> +++ b/tests/btrfs/315
+> >> @@ -0,0 +1,79 @@
+> >> +#! /bin/bash
+> >> +# SPDX-License-Identifier: GPL-2.0
+> >> +# Copyright (c) 2024 YOUR NAME HERE.  All Rights Reserved.
+> >> +#
+> >> +# FS QA Test 315
+> >> +#
+> >> +# Verify if the seed and device add to a tempfsid filesystem fails.
+> >> +#
+> >> +. ./common/preamble
+> >> +_begin_fstest auto quick volume seed tempfsid
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +       cd /
+> >> +       umount $tempfsid_mnt 2>/dev/null
+> >
+> > $UMOUNT_PROG
+> >
+>
+> got it.
+>
+> >> +       rm -r -f $tmp.*
+> >> +       rm -r -f $tempfsid_mnt
+> >> +}
+> >> +
+> >> +. ./common/filter.btrfs
+> >> +
+> >> +_supported_fs btrfs
+> >> +_require_btrfs_sysfs_fsid
+> >> +_require_scratch_dev_pool 3
+> >> +_require_btrfs_fs_feature temp_fsid
+> >> +_require_btrfs_command inspect-internal dump-super
+> >> +_require_btrfs_mkfs_uuid_option
+> >> +
+> >> +_scratch_dev_pool_get 3
+> >> +
+> >> +# mount point for the tempfsid device
+> >> +tempfsid_mnt=3D$TEST_DIR/$seq/tempfsid_mnt
+> >> +
+> >> +seed_device_must_fail()
+> >> +{
+> >> +       echo ---- $FUNCNAME ----
+> >> +
+> >> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+> >> +
+> >> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
+> >> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
+> >> +
+> >> +       _scratch_mount 2>&1 | _filter_scratch
+> >> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt} 2>&1 | _filter_t=
+est_dir
+> >> +}
+> >> +
+> >> +device_add_must_fail()
+> >> +{
+> >> +       echo ---- $FUNCNAME ----
+> >> +
+> >> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+> >> +       _scratch_mount
+> >> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+> >> +
+> >> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
+> >> +                                                       _filter_xfs_io
+> >> +
+> >> +$BTRFS_UTIL_PROG device add -f ${SCRATCH_DEV_NAME[2]} ${tempfsid_mnt}=
+ 2>&1 |\
+> >> +                                                       _filter_btrfs_=
+device_add
+> >
+> > We are testing for failure, so no need for the new filter
+> > _filter_btrfs_device_add.
+> > Just filter through  _filter_scratch_pool here and nothing more.
+> >
+>
+> As shown above, we need to filter out the size part too.
+>
+> Thanks, Anand
+>
+> > Thanks.
+> >
+> >> +
+> >> +       echo Balance must be successful
+> >> +       _run_btrfs_balance_start ${tempfsid_mnt}
+> >> +}
+> >> +
+> >> +mkdir -p $tempfsid_mnt
+> >> +
+> >> +seed_device_must_fail
+> >> +
+> >> +_scratch_unmount
+> >> +_cleanup
+> >> +mkdir -p $tempfsid_mnt
+> >> +
+> >> +device_add_must_fail
+> >> +
+> >> +_scratch_dev_pool_put
+> >> +
+> >> +# success, all done
+> >> +status=3D0
+> >> +exit
+> >> diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
+> >> new file mode 100644
+> >> index 000000000000..32149972beb4
+> >> --- /dev/null
+> >> +++ b/tests/btrfs/315.out
+> >> @@ -0,0 +1,11 @@
+> >> +QA output created by 315
+> >> +---- seed_device_must_fail ----
+> >> +mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-onl=
+y.
+> >> +mount: TEST_DIR/315/tempfsid_mnt: mount(2) system call failed: File e=
+xists.
+> >> +---- device_add_must_fail ----
+> >> +wrote 9000/9000 bytes at offset 0
+> >> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >> +ERROR: error adding device 'SCRATCH_DEV': Invalid argument
+> >> +Performing full device TRIM SCRATCH_DEV (NUM) ...
+> >> +Balance must be successful
+> >> +Done, had to relocate 3 out of 3 chunks
+> >> --
+> >> 2.39.3
+> >>
+> >>
+>
