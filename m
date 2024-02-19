@@ -1,106 +1,242 @@
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55FF85220
-	for <fstests@vger.kernel.org>; Mon, 19 Feb 2024 03:42:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E627420DCB;
+	Mon, 19 Feb 2024 08:00:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708314157; cv=none; b=s/E/78dqc1iZr2YP/mQKU5ZAGS6sxQceMJgtNF6hc+Giqn8lJDG/ZefL8KxEBhGLe4tifTRGfQpOLuidkfv3nQquVoqmkkovRRY0heZanVmK6KSRZ3GKG0OQi7e30t/lthUel9dk8aVuDsU+Bs4LtTUv7uPWazz9XjY7AdymilM=
+	t=1708329617; cv=none; b=kbKrEP4uyi9WpmHmL4O5Ha6RxJBM0hPizR9/6Qq7tQZsw6nKp/QEOKdJqcK77RTKzK5l6IZrtxArSFWdapbOWMf7npAbD3SIJfJsxmP4qJJfZNaPryvrXFWDeOnnZg5TnlkXINnG6M2GOduY2dVqFMRxXRw7Fd3V8qvtxq74ZEs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708314157; c=relaxed/simple;
-	bh=Hu/euHj5j899YVWzN9wf612S7R2Z3CPK4e4MYBKPJa8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QVZR61sioATb2RYfxuMX3dxpiwDu6QM8rg65bvTHZxZcVfcDyn3lCD5eQPhNJWv4HokJFj/HpU4HgmN7wsjFTunBYwmGPuYHeDXdirpxoSkT5L5vrPbVVDS6Eq+cjFem5b96LMAGkJugCsFVm4zGyelAMoPnnUrOsM5nzPcfFVs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=gvt1Zjfh; arc=none smtp.client-ip=209.85.167.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1708329617; c=relaxed/simple;
+	bh=HO3LpJVkyUxBJMSpfYK2zIVW52LP1sIPeKNOxbtrLHY=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=Q/HYF6iHBzmc2NmEacJMOs7YdGmh7ZFix7yHzzuFT6NU8SQcByhN8UObA0E3z+Pawn9Ym9LlzTveJxQ6VlpXDiiTsZ7e4bgVyHWpU6FVgpusnjz4amhnnL3s60nDwLRF4NkpL/kKpIAmaO58y/kBt/Zcg+BnaP2nXumO7sTn3PM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=idMZwNQT; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=idMZwNQT; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="gvt1Zjfh"
-Received: by mail-oi1-f169.google.com with SMTP id 5614622812f47-3bd4e6a7cb0so2892436b6e.3
-        for <fstests@vger.kernel.org>; Sun, 18 Feb 2024 19:42:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1708314155; x=1708918955; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=eyiPZACU0oUbgHtW/CjAbawigtEMb+yd9pHo7XpiTxc=;
-        b=gvt1Zjfh/BkhzRyOHCVwRbDXyKyPx+drUq56KoK6c8jbXgHTXNF2lKIhVB37MxDOO5
-         SYqzsFNAKJpbFU4S6V8EyBugOcgTPNhxYDTnTZoqFE413oLG+p+yYcXjhYjAhRy+2Gst
-         sD2DkdsAzXVEtJYtQja0P6kI9fDGS7GXwydBvdZ/rM40b6ufDyiWw+Y3wdq70p3QxVjQ
-         F9qzMt6zonQpccFi/1aOYwvR0wJeavHoGSAe1QtuxNiM3iGoukiZDEDIdpPALWkKeL10
-         H3pBfTlvnYyG8lAVuFTTGO1v3y1ovgfxrTiTbzRZjZFfcfWkPvf+qHcIwkFBZ/eBbJr/
-         Ah9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708314155; x=1708918955;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=eyiPZACU0oUbgHtW/CjAbawigtEMb+yd9pHo7XpiTxc=;
-        b=l0bAK/fM7FCS1CwmNE6Cc05Hs3UFSVKlpX0uNXOzsQkCFGJY9+k494I1x8Mq+eS2ad
-         eJkazOg/tuJwU1I/6ZHMBbPI9YvchipwqeOI90/s0d1FCqPY7E9ZcNsAcJXzj7jF1edT
-         GI8nrwUApsoEyglxx7Y7m/aCrU5VTOJVDwEmjlda275WI1C31XAMezoQaWwp5VSgNqwr
-         fLnS/vYBh3W7/NPhW4K88eJaBb90J32llx8O/pVC6NE1pImH70htwlpVSqFX2fY/j64N
-         PdpvBQWQvFVFXGQvZirNEs7syHa6nwrOxP0dgKv044Egwe9ElrAap11qez6kl3Z9Ywxv
-         NhjA==
-X-Gm-Message-State: AOJu0YxRx8HsSIqYO7K33Rc23J1qIsMWKJSCjpyuYBtJPdBnlbmMkd8D
-	SPGGZEiRWQVxOld/l6jSJHBfj1YKEpqOvjaGnAUeLXmtwi4oxRKJaVi4UI4GGOA=
-X-Google-Smtp-Source: AGHT+IG247sHaGRl0dGx31RZj3qfKm4TNVdNxXI0dcCXMIdpylbZRR4lU0I0kGWWKmP/wgjk9l782Q==
-X-Received: by 2002:a05:6808:1296:b0:3c0:4653:6e9e with SMTP id a22-20020a056808129600b003c046536e9emr13956348oiw.6.1708314155496;
-        Sun, 18 Feb 2024 19:42:35 -0800 (PST)
-Received: from dread.disaster.area (pa49-181-247-196.pa.nsw.optusnet.com.au. [49.181.247.196])
-        by smtp.gmail.com with ESMTPSA id fb39-20020a056a002da700b006e44bce8318sm1695413pfb.124.2024.02.18.19.42.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Feb 2024 19:42:35 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-	(envelope-from <david@fromorbit.com>)
-	id 1rbuY4-008SAI-30;
-	Mon, 19 Feb 2024 14:42:32 +1100
-Date: Mon, 19 Feb 2024 14:42:32 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, anand.jain@oracle.com, aalbersh@redhat.com,
-	djwong@kernel.org, linux-fsdevel@vger.kernel.org,
-	kdevops@lists.linux.dev, patches@lists.linux.dev
-Subject: Re: [PATCH 3/3] check: add --print-start-done to enhance watchdogs
-Message-ID: <ZdLOKCYnM3XybqQp@dread.disaster.area>
-References: <20240216181859.788521-1-mcgrof@kernel.org>
- <20240216181859.788521-4-mcgrof@kernel.org>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="idMZwNQT";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="idMZwNQT"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 8E8C11FD0C;
+	Mon, 19 Feb 2024 08:00:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708329611; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=E4+gffStzxRy8aKVtcC4o0uv08VNjyH3EAUYiYtf960=;
+	b=idMZwNQTFyTlCrwOuJE+ckwERS9ChVHPWwJaPCFtiyWVT5k6E17u54JQgrkOgsbEhDgbS1
+	V0yBOPuvRY4rloeEogr1oWeG2lT3Noir5z4F9BUf/UB2VGVnYMa6yiRNtXsORKGl/MmxEY
+	Z2TCzI/sk/jrd2OYgV7PavDRouBCVMc=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708329611; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=E4+gffStzxRy8aKVtcC4o0uv08VNjyH3EAUYiYtf960=;
+	b=idMZwNQTFyTlCrwOuJE+ckwERS9ChVHPWwJaPCFtiyWVT5k6E17u54JQgrkOgsbEhDgbS1
+	V0yBOPuvRY4rloeEogr1oWeG2lT3Noir5z4F9BUf/UB2VGVnYMa6yiRNtXsORKGl/MmxEY
+	Z2TCzI/sk/jrd2OYgV7PavDRouBCVMc=
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 836EB13585;
+	Mon, 19 Feb 2024 08:00:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id 0egAEYoK02UxOgAAn2gu4w
+	(envelope-from <wqu@suse.com>); Mon, 19 Feb 2024 08:00:10 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] btrfs/016: fix a false alert due to xattrs mismatch
+Date: Mon, 19 Feb 2024 18:30:07 +1030
+Message-ID: <20240219080007.70318-1-wqu@suse.com>
+X-Mailer: git-send-email 2.43.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240216181859.788521-4-mcgrof@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spamd-Bar: /
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=idMZwNQT
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-0.51 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
+	 FROM_HAS_DN(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 DWL_DNSWL_LOW(-1.00)[suse.com:dkim];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 DKIM_TRACE(0.00)[suse.com:+];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 MID_CONTAINS_FROM(1.00)[];
+	 MX_GOOD(-0.01)[];
+	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 NEURAL_HAM_SHORT(-0.20)[-0.997];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Score: -0.51
+X-Rspamd-Queue-Id: 8E8C11FD0C
+X-Spam-Flag: NO
 
-On Fri, Feb 16, 2024 at 10:18:59AM -0800, Luis Chamberlain wrote:
-> fstests specific watchdogs want to know when the full test suite will
-> start and end. Right now the kernel ring buffer can get augmented but we
-> can't know for sure if it was due to a test or some odd hardware issue
-> after fstests ran. This is specially true for systems left running tests in
-> loops in automation where we are not running things ourselves but rather just
-> get access to kernel logs, or for filesystem runner watdogs such as the one
-> in kdevops [0]. It is also often not easy to determine for sure based on
-> just logs when fstests check really has completed unless we have a
-> matching log of who spawned that test runner. Although we could keep track of
-> this ourselves by an annotation locally on the test runner, it is useful to
-> have independent tools which are not attached to the process which spawned
-> check to just peak into a system and verify the system's progress with
-> fstests by just using the kernel log. Keeping this in the test target kernel
-> ring buffer enables these use cases.
-> 
-> This is useful for example for filesyste checker specific watchdogs like the
-> one in kdevops so that the watchdog knows when to start hunting for crashes
-> based just on the kernel ring buffer, and so it also knows when the show is
-> over.
+[BUG]
+When running btrfs/016 after any other test case, it would fail on a
+SELinux enabled environment:
 
-Why can't the runner that requires timing information in the
-kernel log just emit a message to the kernel log before it
-runs check and again immediately after completion of the check
-script?
+  btrfs/015 1s ...  0s
+  btrfs/016 1s ... [failed, exit status 1]- output mismatch (see ~/xfstests-dev/results//btrfs/016.out.bad)
+      --- tests/btrfs/016.out	2023-12-28 10:39:36.481027970 +1030
+      +++ ~/xfstests-dev/results//btrfs/016.out.bad	2023-12-28 15:53:10.745436664 +1030
+      @@ -1,2 +1,3 @@
+       QA output created by 016
+      -Silence is golden
+      +fssum failed
+      +(see ~/xfstests-dev/results//btrfs/016.full for details)
+      ...
+      (Run 'diff -u ~/xfstests-dev/tests/btrfs/016.out ~/xfstests-dev/results//btrfs/016.out.bad'  to see the entire diff)
+  Ran: btrfs/015 btrfs/016
+  Failures: btrfs/016
+  Failed 1 of 2 tests
 
--Dave.
+[CAUSE]
+The test case itself would try to use a blank SELinux context for the
+SCRATCH_MNT, to control the xattrs.
+
+But the initial send stream is generated from $TEST_DIR, which may still
+have the default SELinux mount context.
+
+And such mismatch in the SELinux xattr (source on $TEST_DIR still has
+the extra xattr, meanwhile the receve end on $SCRATCH_MNT doesn't) would
+lead to above mismatch.
+
+[FIX]
+Fix the false alerts by disable XATTR checks.
+
+Furthermore instead of doing all the edge juggling using $TEST_DIR, this
+time we do all the work on $SCRATCH_MNT.
+
+This means we would generate the initial send stream from $SCRATCH_MNT,
+then reformat the fs, mount scratch again, receive and verify.
+
+We no longer needs to cleanup the extra file for the initial send
+stream, as they are on the scratch device and would be formatted anyway.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+Changelog:
+v2:
+- Add -T option to avoid xattrs checks
+  Since this test case is only verify the hole punching behavior, XATTR
+  is not our interest.
+---
+ tests/btrfs/016 | 53 ++++++++++++++++++++-----------------------------
+ 1 file changed, 22 insertions(+), 31 deletions(-)
+
+diff --git a/tests/btrfs/016 b/tests/btrfs/016
+index 35609329..37119363 100755
+--- a/tests/btrfs/016
++++ b/tests/btrfs/016
+@@ -12,58 +12,48 @@ _begin_fstest auto quick send prealloc
+ tmp=`mktemp -d`
+ tmp_dir=send_temp_$seq
+ 
+-# Override the default cleanup function.
+-_cleanup()
+-{
+-	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap > /dev/null 2>&1
+-	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/snap1 > /dev/null 2>&1
+-	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send > /dev/null 2>&1
+-	rm -rf $TEST_DIR/$tmp_dir
+-	rm -f $tmp.*
+-}
+-
+ # Import common functions.
+ . ./common/filter
+ 
+ # real QA test starts here
+ _supported_fs btrfs
+-_require_test
+ _require_scratch
+ _require_fssum
+ _require_xfs_io_command "falloc"
+ 
+ _scratch_mkfs > /dev/null 2>&1
+-
+-#receive needs to be able to setxattrs, including the selinux context, if we use
+-#the normal nfs context thing it screws up our ability to set the
+-#security.selinux xattrs so we need to disable this for this test
+-export SELINUX_MOUNT_OPTIONS=""
+-
+ _scratch_mount
+ 
+-mkdir $TEST_DIR/$tmp_dir
+-$BTRFS_UTIL_PROG subvolume create $TEST_DIR/$tmp_dir/send \
++mkdir $SCRATCH_MNT/$tmp_dir
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/$tmp_dir/send \
+ 	> $seqres.full 2>&1 || _fail "failed subvolume create"
+ 
+-_ddt of=$TEST_DIR/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
++_ddt of=$SCRATCH_MNT/$tmp_dir/send/foo bs=1M count=10 >> $seqres.full \
+ 	2>&1 || _fail "dd failed"
+-$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
+-	$TEST_DIR/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
+-$XFS_IO_PROG -c "fpunch 1m 1m" $TEST_DIR/$tmp_dir/send/foo
+-$BTRFS_UTIL_PROG subvolume snapshot -r $TEST_DIR/$tmp_dir/send \
+-	$TEST_DIR/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
++	$SCRATCH_MNT/$tmp_dir/snap >> $seqres.full 2>&1 || _fail "failed snap"
++$XFS_IO_PROG -c "fpunch 1m 1m" $SCRATCH_MNT/$tmp_dir/send/foo
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/$tmp_dir/send \
++	$SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full 2>&1 || _fail "failed snap"
+ 
+-$FSSUM_PROG -A -f -w $tmp/fssum.snap $TEST_DIR/$tmp_dir/snap >> $seqres.full \
++# -A disable access time check.
++# And -T disable xattrs to prevent SELinux changes causing false alerts, and the
++# test case only cares about hole punching.
++$FSSUM_PROG -AT -f -w $tmp/fssum.snap $SCRATCH_MNT/$tmp_dir/snap >> $seqres.full \
+ 	2>&1 || _fail "fssum gen failed"
+-$FSSUM_PROG -A -f -w $tmp/fssum.snap1 $TEST_DIR/$tmp_dir/snap1 >> $seqres.full \
++$FSSUM_PROG -AT -f -w $tmp/fssum.snap1 $SCRATCH_MNT/$tmp_dir/snap1 >> $seqres.full \
+ 	2>&1 || _fail "fssum gen failed"
+ 
+-$BTRFS_UTIL_PROG send -f $tmp/send.snap $TEST_DIR/$tmp_dir/snap >> \
++$BTRFS_UTIL_PROG send -f $tmp/send.snap $SCRATCH_MNT/$tmp_dir/snap >> \
+ 	$seqres.full 2>&1 || _fail "failed send"
+-$BTRFS_UTIL_PROG send -p $TEST_DIR/$tmp_dir/snap \
+-	-f $tmp/send.snap1 $TEST_DIR/$tmp_dir/snap1 \
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/$tmp_dir/snap \
++	-f $tmp/send.snap1 $SCRATCH_MNT/$tmp_dir/snap1 \
+ 	>> $seqres.full 2>&1 || _fail "failed send"
+ 
++_scratch_unmount
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
+ $BTRFS_UTIL_PROG receive -f $tmp/send.snap $SCRATCH_MNT >> $seqres.full 2>&1 \
+ 	|| _fail "failed recv"
+ $BTRFS_UTIL_PROG receive -f $tmp/send.snap1 $SCRATCH_MNT >> $seqres.full 2>&1 \
+@@ -75,4 +65,5 @@ $FSSUM_PROG -r $tmp/fssum.snap1 $SCRATCH_MNT/snap1 >> $seqres.full 2>&1 \
+ 	|| _fail "fssum failed"
+ 
+ echo "Silence is golden"
+-status=0 ; exit
++status=0
++exit
 -- 
-Dave Chinner
-david@fromorbit.com
+2.43.1
+
