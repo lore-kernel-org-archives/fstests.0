@@ -1,108 +1,144 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E2CB65E04;
-	Tue, 20 Feb 2024 11:12:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06B9376056;
+	Tue, 20 Feb 2024 16:18:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708427550; cv=none; b=OuK/O1KkXj3JdZPKn4I1K/Gp/4Qy8fy9Miw7IDxe3xhvquYjrFl97EreNuSYqctgjdVwY5FwJKIH2ZCQGjGSZYwqzsV1DO698owgzsePjUaosg/mL1XVcfgHbl/JL9JGH/qD+iirjYbUyFjRNp1+MBLx/NJ2JpaoxklIjP5CBU4=
+	t=1708445907; cv=none; b=Vb2VEiREM2p9JKhCRkp1Kyc7+KCVlcT1OJddJmP5JzJ+6So7NrlHhnxqB2PSlH1UFz49RkRhaLiOfdMID1EC1OD9+Jir3UJPaf7Z3KH1YwO2TF8KKAo32/SbPKGIm1fEqtSKHlk3McfmjnSps5xyB9eePlChTpc8WFQntWRuyIs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708427550; c=relaxed/simple;
-	bh=Xb4/s+kosKU2CuRPNlHl4pCLV+8G+VKyqXf1AIQiJqA=;
+	s=arc-20240116; t=1708445907; c=relaxed/simple;
+	bh=x4p9E4jPEmGxL2kLRMPSkWs0aphgvbe/YiEDX+S5PKU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=gjD8tUhxKCDOEhFAuOXjYk9zr0zu7KYatUslatqV2Dx4uIBD+yojeyZA3Tyudo2ixAyn/OEHOm67PQA+GXk8+mqiSUpZx6Q1Jq9ADY+1FYvdhd1ReYZGm/XhI2Lflb+wTOGUeCaaZwmXMul/cIFwDGZjXEPbsMDDCVkVEEIfiSs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=A0tGIYHt; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=SUcVeq+qPVplb9upIXl+moaUlHnpvi5Nw48uafw47UNs7QHlg5bNhoWR/QtsiBXTOBvS+tRwibvC59S2pvG46kD2rllq27yuBr6OoCx8shRME7BTRBHOQ/36trAnl/AqY+BWTXa8Js1/NhlIRYkeTnU+5GF3ahmo/B1TYaweFNc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cHv3Hhb5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="A0tGIYHt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6F39C433F1;
-	Tue, 20 Feb 2024 11:12:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cHv3Hhb5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8B77EC433C7;
+	Tue, 20 Feb 2024 16:18:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708427549;
-	bh=Xb4/s+kosKU2CuRPNlHl4pCLV+8G+VKyqXf1AIQiJqA=;
+	s=k20201202; t=1708445905;
+	bh=x4p9E4jPEmGxL2kLRMPSkWs0aphgvbe/YiEDX+S5PKU=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=A0tGIYHtipcHQuah6pptgAlEPnA8rm/5y0WhSiZyH8c9YO0lsGBjlcX69zyRlkTZz
-	 4DsJWSXYmf7tlFsZT+jbpTb7zq7KuQJA8IBtpgKJywtY1q14/oCxI0mZZXfHEdghtk
-	 yBy3PwiHbrqXMF2hsutjws9epH19apBrOymVLUV6bnYARYtHQ3sHpSU3VgpIQw43rp
-	 ewTI+La43z/FT5K4JZ9GfZBwb3PCeTZ+JBnWsHCDym8Vt3qMZ9GvR79q2VPwHE5I7W
-	 TA9x8b5d9nZteUSFVwk5dIhhNs7P2Yf1AzTJNIccJ2VpZ4x6wdtFyETi9c1Ctoq2Ys
-	 FCQGAj3v+haCQ==
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a3e82664d53so267132066b.3;
-        Tue, 20 Feb 2024 03:12:29 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVlcWZiS4yiDhP9CdEayLFik+WCRI7u2xGigzkhUzMn+QgunYuq/eEcR863RYU55iH3rPGGC5W9phT7zAtclnKaqBdmM/vgVA==
-X-Gm-Message-State: AOJu0YyhZ3w9NkGMtpgAELCnoS9dIUP5/rCmrlO+jlWO9odhjhUOdaU3
-	d1GJ8ECcs/so0es3ekTCoQErjK02rILn1B7yQ6nEz+E3mZ+tqPX7xPYCvRu3KhJgHNEp0WrJKPW
-	7/cir+joO0Er8Wyj6unZ7O6siaec=
-X-Google-Smtp-Source: AGHT+IHSz2aKT6H24/ToIuzfIUS0cAOdmdauKfNGuVy9PwQ9kOgq40GlcKnK2JBIzGmsP5uixsQjW7bHdILAoWoAn9E=
-X-Received: by 2002:a17:906:1d51:b0:a3e:f0ee:fc73 with SMTP id
- o17-20020a1709061d5100b00a3ef0eefc73mr1360863ejh.1.1708427548049; Tue, 20 Feb
- 2024 03:12:28 -0800 (PST)
+	b=cHv3Hhb5PhxFk2TI8qmGhEEC2mr25RIXnizzujNcAqLB+OvHA8W6fR2c3ZsaX44K9
+	 UVjHGzYyuZmdjois6Wo7oZJLOGc2/DMJN8Bu5/K2F0idKWjG3ntWQ/5ewB7xapjzdb
+	 YTq2CgjDuMhXNQONyPFvDwSRxQ2rxNwzHAR8uD3IPK0HGEMPuoM9hLM8USk54U0GSx
+	 6XsmwTFsk8CPuhAsPmk8OReBuM0bv8BCounEX3SEsm5ErhyYUS570QIXqlcQvXR43/
+	 NIfjsxbSCOZT/1/IQPTRew+yyx00VoU44LKAyEOr9ZlPa3QxZ8g7vijU7ykJ/9zVY8
+	 Vtxp4kwQyHVXA==
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-a28a6cef709so647599966b.1;
+        Tue, 20 Feb 2024 08:18:25 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCV7j7t+U8fUp4rRIn2aoJZVV9ywT8OeOKgSI3KvIWfpTnn0pCyRPAAO9uZNmeq95M8z5vkpOQTaPz5lzihQJ9annGG1kGQAHlQ3OLE=
+X-Gm-Message-State: AOJu0Yxd8DM5NpaMOr6A4kLLpljJGrZSyw5X7cjyIBj3XKevr0wJMxzN
+	t3l4MBlrvKmQ+uoBlumzBSKqEJyx/fasbM23pnxGM7S6FfQ5VxtFYMtdfjKKw4zTZ/sMemULcwa
+	N3MjeJN0dGobSZ/N+mmQibUB9+No=
+X-Google-Smtp-Source: AGHT+IE11M9nAx8t9pbi+vcR+O95tIwuys/F9eNMwDIKPtygsUDFs0j5GqbCPq6dBrYr47IzgLUDbWG4DPCLsaHqWzk=
+X-Received: by 2002:a17:906:3508:b0:a3f:1ce8:198a with SMTP id
+ r8-20020a170906350800b00a3f1ce8198amr597701eja.35.1708445903880; Tue, 20 Feb
+ 2024 08:18:23 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240220040134.81084-1-wqu@suse.com>
-In-Reply-To: <20240220040134.81084-1-wqu@suse.com>
+References: <cover.1708362842.git.anand.jain@oracle.com> <a234d5aa2612e0d28e3f9b4e6ced8e5a4dec98a7.1708362842.git.anand.jain@oracle.com>
+In-Reply-To: <a234d5aa2612e0d28e3f9b4e6ced8e5a4dec98a7.1708362842.git.anand.jain@oracle.com>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 20 Feb 2024 11:11:51 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H61S_DF9oBOwN6FDCgVYaqD53KtHXOMdsqq67S+BhSYzw@mail.gmail.com>
-Message-ID: <CAL3q7H61S_DF9oBOwN6FDCgVYaqD53KtHXOMdsqq67S+BhSYzw@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs: detect regular qgroup for older kernels correctly
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Date: Tue, 20 Feb 2024 16:17:46 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H656_AhD9eyuYhEkYm2pN1CdOAvpN-HQsrtOFb1_tO8Zw@mail.gmail.com>
+Message-ID: <CAL3q7H656_AhD9eyuYhEkYm2pN1CdOAvpN-HQsrtOFb1_tO8Zw@mail.gmail.com>
+Subject: Re: [PATCH v2 01/10] assign SCRATCH_DEV_POOL to an array
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, zlang@redhat.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 20, 2024 at 4:01=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+On Mon, Feb 19, 2024 at 7:49=E2=80=AFPM Anand Jain <anand.jain@oracle.com> =
+wrote:
 >
-> [BUG]
-> When running an older (vendoer v6.4) kernel, some qgroup test cases
-> would be skipped:
+> Many test cases use local variables to manage the names of each device in
+> SCRATCH_DEV_POOL. Let _scratch_dev_pool_get set an array, SCRATCH_DEV_NAM=
+E,
+> for it.
 >
->   btrfs/017 1s ... [not run] not running normal qgroups
+> Usage:
 >
-> [CAUSE]
-> With the introduce of simple quota mode, there is a new sysfs interface,
-> /sys/fs/btrfs/<uuid>/qgroups/mode to indicate the currently running
-> qgroup modes.
+>         _scratch_dev_pool_get <n>
 >
-> And _qgroup_mode() from `common/btrfs` is using that new interface to
-> detect the mode.
+>         # device names are in the array SCRATCH_DEV_NAME.
+>         ${SCRATCH_DEV_NAME[0]} ${SCRATCH_DEV_NAME[1]} ...
 >
-> Unfortuantely for older kernels without simple quota support,
-> _qgroup_mode() would return "disabled" directly, causing those test case
-> to be skipped.
+>         _scratch_dev_pool_put
 >
-> [FIX]
-> Fallback to regular qgroup if that sysfs interface is not accessible, as
-> qgroup is introduced from the very beginning of btrfs, thus the regular
-> qgroup is always supported.
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> v2:
+>  Fix typo in the commit log.
+>  Fix array SCRATCH_DEV_POOL_SAVED handling.
 >
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>  common/rc | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index 524ffa02aa6a..5d249af3df37 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -830,6 +830,8 @@ _spare_dev_put()
+>  # required number of scratch devices by a-test-case excluding
+>  # the replace-target and spare device. So this function will
+>  # set SCRATCH_DEV_POOL to the specified number of devices.
+> +# Also, this functions assigns array SCRATCH_DEV_NAME to the
+> +# array SCRATCH_DEV_POOL.
+
+I'm not a native English speaker, but when it's phrased like that it
+gives the idea of:
+
+SCRATCH_DEV_POOL =3D SCRATCH_DEV_NAME
+
+Maybe a "Sets a SCRATCH_DEV_NAME array with the names of the devices."
+
+But anyway:
 
 Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Looks good, thanks.
-
-> ---
->  common/btrfs | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/common/btrfs b/common/btrfs
-> index e1b29c61..0a3f0f0b 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -728,7 +728,7 @@ _qgroup_mode()
->         if _has_fs_sysfs_attr $dev /qgroups/mode; then
->                 _get_fs_sysfs_attr $dev qgroups/mode
->         else
-> -               echo "disabled"
-> +               echo "qgroup"
->         fi
+>  #
+>  # Usage:
+>  #  _scratch_dev_pool_get() <ndevs>
+> @@ -860,19 +862,28 @@ _scratch_dev_pool_get()
+>         export SCRATCH_DEV_POOL_SAVED
+>         SCRATCH_DEV_POOL=3D${devs[@]:0:$test_ndevs}
+>         export SCRATCH_DEV_POOL
+> +       SCRATCH_DEV_NAME=3D( $SCRATCH_DEV_POOL )
+> +       export SCRATCH_DEV_NAME
 >  }
 >
-> --
-> 2.42.0
+>  _scratch_dev_pool_put()
+>  {
+> +       local ret1
+> +       local ret2
+> +
+>         typeset -p SCRATCH_DEV_POOL_SAVED >/dev/null 2>&1
+> -       if [ $? -ne 0 ]; then
+> +       ret1=3D$?
+> +       typeset -p SCRATCH_DEV_NAME >/dev/null 2>&1
+> +       ret2=3D$?
+> +       if [[ $ret1 -ne 0 || $ret2 -ne 0 ]]; then
+>                 _fail "Bug: unset val, must call _scratch_dev_pool_get be=
+fore _scratch_dev_pool_put"
+>         fi
 >
+> -       if [ -z "$SCRATCH_DEV_POOL_SAVED" ]; then
+> +       if [[ -z "$SCRATCH_DEV_POOL_SAVED" || -z "${SCRATCH_DEV_NAME[@]}"=
+ ]]; then
+>                 _fail "Bug: str empty, must call _scratch_dev_pool_get be=
+fore _scratch_dev_pool_put"
+>         fi
+>
+> +       export SCRATCH_DEV_NAME=3D()
+>         export SCRATCH_DEV_POOL=3D$SCRATCH_DEV_POOL_SAVED
+>         export SCRATCH_DEV_POOL_SAVED=3D""
+>  }
+> --
+> 2.39.3
 >
