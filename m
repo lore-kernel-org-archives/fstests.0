@@ -1,207 +1,93 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E122768F3;
-	Tue, 20 Feb 2024 17:05:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3E1D152DF8
+	for <fstests@vger.kernel.org>; Tue, 20 Feb 2024 22:05:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708448740; cv=none; b=MEn2+LVvnhW4jJUnWP6uYFFoPrUdJxpYaatvu0onC6B/isJDRyNKRPkxT/570YUl1y5cYmIcqOPUL08szA5HLyFj0Csa4YMUD2rY3cvwmPbV9M19zyQwRwa6bHarQx08p+EG/FVS0lS3n31DVjEXRSiwS6GwhVU9hbauvb/e2Tk=
+	t=1708466744; cv=none; b=f1imypjvrG5rA6nerevxEMJ2FPFmLFAwsMBNe/YLZ7vNnztWPwjgFhU3eFKvaWfgp6LzdeyAee/i9YmAtQZyaPeTS84fpx+/paByYG9NZyEQlvAWhB0WBScR9YVTGU3RwA9/7f6zTniYmbhgnjJ9d0N0NIBtsEtEHCm1o04n7JY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708448740; c=relaxed/simple;
-	bh=RnU3sWGshZPuiiFG3B6xS1J9IoNHulqhv/N+LIER66k=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M7YM3X7Ro/x+ayfSvGzD2zBZ6E1tL4CZCeSu7q31GGYgw0oUSd+bG4IUaLNxMAqEJQbxQPuKOBOPHapjIe19feyiQqg06pyTfI0OozET6cYudh0E4+ZFylx61OE3FywN3bTNtfDyWy3DlUAf1wf8ai/vOUtnAjbUR/KcV8f42ys=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YndGKXkR; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708466744; c=relaxed/simple;
+	bh=75lg/qgBc/1j5MphW+ZyZV+N/b+e3l+xbuclvUi/Usk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=F+5nXekOKkedxay/NRqOllqMzKWkcl7fNHoh+NJHtSrWOmdPXtfEP0ToS0x7cOj821EJzGU4KFsRse36YZyM2phAV8RyihQb5Bu9t//6z/zspV8FyF6Sm2bm5+s0PmHVjMS87amquvEloogPMpMWPk2zi75kwCcLWPEsd4oP/2o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=XPVG6Jov; arc=none smtp.client-ip=209.85.219.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YndGKXkR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C7D2C43394;
-	Tue, 20 Feb 2024 17:05:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708448740;
-	bh=RnU3sWGshZPuiiFG3B6xS1J9IoNHulqhv/N+LIER66k=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=YndGKXkRSKa1lYfn7L7CpMa1arjG+nizzN8MxNI7NaKQhL+L1STdsAvZxTYAWm9gb
-	 AnqJUfaOI6NMYd1hVSqF/+fz2iW5ii+8L+2+wtiN6om6s3STkwL6IUTl2U4CHvROKJ
-	 2UhgWP/bSQ9YvxYAwZIvw3EGztdKB9ia8bTWoC0ug/qr8P0oWbCbZobKtCqqRf6sIX
-	 522SZgQP+I6JV3hQoB8C5z2dlZeLeX4XibV4Nt37aD40W/JiSZjEZpvpF3M9KaDpMp
-	 rateIq9R3qV8dFSLbh2Bi7LEOa+XA5PJPvq9TGlGDpBb11P77H95embJPp0yLe3jRP
-	 /IUm9ffcDVm6w==
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a3ddc13bbb3so792623666b.0;
-        Tue, 20 Feb 2024 09:05:40 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCX2VtGNBOs+kAmph3omoxJOAEKd4CMSUy8n92j92luqlxfzsIain6H9P5dDZBQ6YrdubSs+4Tz8QAP4DkA4P4LfCwrSQsKFYT7trSk=
-X-Gm-Message-State: AOJu0YwFeRw80NuhHLWYWGJBDKAD0ACrKOcN5Ra1MV18FH97LWTbbs4y
-	qucE09FnOzZjgMPvXpNeiYf9bPqAWZywZ53Busm5lUbtaS10NEgcWyKV1R4agiInaC/9Wfj5EGL
-	GUzEs6dIzYA6DPpVGIQGCNtYdTp8=
-X-Google-Smtp-Source: AGHT+IEL1iR/UBTMnQNNYTpcxwRNTpOFGFxwPdSokNnWX+qQyqwQViC4YPRrGTrdSIoGkX6T6Z7hPoeV02Rxs6XDCIo=
-X-Received: by 2002:a17:906:1c02:b0:a3e:4cfc:2186 with SMTP id
- k2-20020a1709061c0200b00a3e4cfc2186mr7234014ejg.17.1708448738485; Tue, 20 Feb
- 2024 09:05:38 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="XPVG6Jov"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-dcd9e34430cso6051340276.1
+        for <fstests@vger.kernel.org>; Tue, 20 Feb 2024 14:05:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1708466741; x=1709071541; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=/2G51AsG1bsr7uNPjzTnaLkotIbnpZerEq4UgFBBh8Y=;
+        b=XPVG6JovKC9CY+2GSudesJR7CxWcxo/zPRICCCAXvK9kIKY8YbEvrcr5I73XkD4Mo1
+         He672605Qs2pfVjyTlbiJeFjz1Kzkb6uwnGUdMpk484OEcianEDi6tOxjipfl2BQYP8r
+         BKlVwjebKWlE6hPW0s3sxHURiZRVU/r5OnJHuktJnYry9Fn33yQ/j4vFmgt2kixiFap+
+         lID5GgmZEnR4hb18zZ2MnZXh+UtnApjYtRk+pEw8e3RkT7LNVcp0C0upzcEOxgMOgsJl
+         Jn52R3ugynKDSwMq0xV4zkF4IbmX/dQnwezzN7XBYmbpAKkQsB+lPgkHJNlyyDY/8dqN
+         Lqxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708466741; x=1709071541;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/2G51AsG1bsr7uNPjzTnaLkotIbnpZerEq4UgFBBh8Y=;
+        b=P+pprV6RV1idCHKmz1jFS4VGGS1BkKn7oCciHEgU2Hz9zhwclNQDMnRDfEEZRgzOtw
+         4cxT6r626wEqVqV5DPIZNPDcfaDsijp+Qhzu55rcOZ7jIOCtSRoJ2dIwN0HeIViFZjfx
+         VK2ipeSADgQZ5ahsvEQ0I/Zl+lDPC6ruuNGT24KumnTwvC3LdKeNZ916dyE63GQLGQz0
+         O7j3dbFnDlIR0gfflegE/NLYPn8OnPY/tbKHtG8Gzig2TKWyiYu4Zp9CWs14ZxaZJgB/
+         JjsrI9hPMGzsxUAPV29ojIqeiDsVPYyaVY6vlnh/rb+1tb7xINyBLezLqIOk+D0fh5y+
+         2VkQ==
+X-Gm-Message-State: AOJu0YwEYxk0KjzQEHnV2NjU/zksMZ5HNXp/0BR0gankiTluWFgDfVk1
+	buG2r0NNEKTdPh+DKpPVKS9q9g/NpMSBOeUBxU4nWEzyUjbnMjiPe0ys978SDtcKp+1tIAq8Hlb
+	M
+X-Google-Smtp-Source: AGHT+IFQefU52rW3ziQGRz3HvFf4dJ6Y8GbBr7zStkqZDySZmn+wNkoA3854WKjBfwe3a5vPfkOPWw==
+X-Received: by 2002:a25:4155:0:b0:dcc:e854:d453 with SMTP id o82-20020a254155000000b00dcce854d453mr6794480yba.1.1708466740883;
+        Tue, 20 Feb 2024 14:05:40 -0800 (PST)
+Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id v192-20020a252fc9000000b00dc74efa1bb4sm2191779ybv.13.2024.02.20.14.05.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 20 Feb 2024 14:05:40 -0800 (PST)
+Date: Tue, 20 Feb 2024 17:05:39 -0500
+From: Josef Bacik <josef@toxicpanda.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: test incremental send on sparse file with
+ trailing hole
+Message-ID: <20240220220539.GA1024959@perftesting>
+References: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1708362842.git.anand.jain@oracle.com> <bd72599f2b44e4062262421ca52f83c3dedca1c8.1708362842.git.anand.jain@oracle.com>
-In-Reply-To: <bd72599f2b44e4062262421ca52f83c3dedca1c8.1708362842.git.anand.jain@oracle.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Tue, 20 Feb 2024 17:05:01 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4tNZ5uLzyojf3rU36Pnsz3sWPVgQ6H1y+Vw8PtFCV50A@mail.gmail.com>
-Message-ID: <CAL3q7H4tNZ5uLzyojf3rU36Pnsz3sWPVgQ6H1y+Vw8PtFCV50A@mail.gmail.com>
-Subject: Re: [PATCH v2 10/10] btrfs: test tempfsid with device add, seed, and balance
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, zlang@redhat.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
 
-On Mon, Feb 19, 2024 at 7:50=E2=80=AFPM Anand Jain <anand.jain@oracle.com> =
-wrote:
->
-> Make sure that basic functions such as seeding and device add fail,
-> while balance runs successfully with tempfsid.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v2:
->  Remove unnecessary function.
->  Add clone group
->  use $UMOUNT_PROG
->  Let _cp_reflink fail on the stdout.
->
->  tests/btrfs/315     | 79 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/315.out |  9 ++++++
->  2 files changed, 88 insertions(+)
->  create mode 100755 tests/btrfs/315
->  create mode 100644 tests/btrfs/315.out
->
-> diff --git a/tests/btrfs/315 b/tests/btrfs/315
-> new file mode 100755
-> index 000000000000..4376c7f1849c
-> --- /dev/null
-> +++ b/tests/btrfs/315
-> @@ -0,0 +1,79 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 YOUR NAME HERE.  All Rights Reserved.
+On Mon, Feb 19, 2024 at 12:01:30PM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that an incremental send does not issue unnecessary writes for a
+> sparse file that got one new extent between its previous extent and the
+> file's size.
+> 
+> This exercises a fix by the following patch:
+> 
+>   "btrfs: send: don't issue unnecessary zero writes for trailing hole"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Your name here...
+Made sure it ran with the patches applied and all of our CI test variations,
+also reviewed the code obviously, you can add
 
-> +#
-> +# FS QA Test 315
-> +#
-> +# Verify if the seed and device add to a tempfsid filesystem fails.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-And balance too...
+Thanks,
 
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick volume seed tempfsid
-
-Missing 'balance' group.
-
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       $UMOUNT_PROG $tempfsid_mnt 2>/dev/null
-> +       rm -r -f $tmp.*
-> +       rm -r -f $tempfsid_mnt
-> +}
-> +
-> +. ./common/filter.btrfs
-> +
-> +_supported_fs btrfs
-> +_require_btrfs_sysfs_fsid
-> +_require_scratch_dev_pool 3
-> +_require_btrfs_fs_feature temp_fsid
-> +_require_btrfs_command inspect-internal dump-super
-> +_require_btrfs_mkfs_uuid_option
-
-So same as before, these last 2 _require_* are because of the
-mkfs_clone() function,
-defined at common/btrfs, so they should be in the function and not
-spread over every test case that calls it.
-
-> +
-> +_scratch_dev_pool_get 3
-> +
-> +# mount point for the tempfsid device
-> +tempfsid_mnt=3D$TEST_DIR/$seq/tempfsid_mnt
-> +
-> +seed_device_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
-> +
-> +       _scratch_mount 2>&1 | _filter_scratch
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt} 2>&1 | _filter_test=
-_dir
-> +}
-> +
-> +device_add_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +       _scratch_mount
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> +
-> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
-> +                                                       _filter_xfs_io
-> +
-> +$BTRFS_UTIL_PROG device add -f ${SCRATCH_DEV_NAME[2]} ${tempfsid_mnt} >>=
- \
-> +                       $seqres.full 2>&1 && _fail "Failed to file device=
- add"
-
-Can't we do without the && _fail?
-Just call device add and put the expected error message in the golden outpu=
-t.
-It's the preferred pattern in fstests in general, and makes everything
-shorter and easier to read.
-
-Thanks.
-
-> +
-> +       echo Balance must be successful
-> +       _run_btrfs_balance_start ${tempfsid_mnt}
-> +}
-> +
-> +mkdir -p $tempfsid_mnt
-> +
-> +seed_device_must_fail
-> +
-> +_scratch_unmount
-> +_cleanup
-> +mkdir -p $tempfsid_mnt
-> +
-> +device_add_must_fail
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
-> new file mode 100644
-> index 000000000000..e882fe41146d
-> --- /dev/null
-> +++ b/tests/btrfs/315.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 315
-> +---- seed_device_must_fail ----
-> +mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
-> +mount: TEST_DIR/315/tempfsid_mnt: mount(2) system call failed: File exis=
-ts.
-> +---- device_add_must_fail ----
-> +wrote 9000/9000 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Balance must be successful
-> +Done, had to relocate 3 out of 3 chunks
-> --
-> 2.39.3
->
+Josef
