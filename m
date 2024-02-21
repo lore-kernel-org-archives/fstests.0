@@ -1,45 +1,40 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8BB180C08;
-	Wed, 21 Feb 2024 16:46:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D97C33F7;
+	Wed, 21 Feb 2024 17:13:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708534001; cv=none; b=uB8ka+SukxwHzYORKBytl/5YSvTJnkZw4Uox1ljR2oZvalFitCk/5Q0bnv73n4Wnyu6BkTr8Yhh7uZY6TNxhYHlH/x3LjpX4UWObJP2PrzlKKNZSoD6Zy2Ym6PsHTF7gWeGvO5PF/1ZzD5wfCA6QTG6wfTrlMhAzvfr4OP0LjkI=
+	t=1708535624; cv=none; b=CFYOGL1KcyrE8dpQFcKyLWpp1GRNMSrUJ6DIaN9VxUVjh3/01kmjf5gSaCmrJwsEkAsA2h6K1w0ZDiXYKO9Nf/ncUOR+UuJnN1Ckdf3F4yjZSloBUaOtW4hn3NkkS+yyDKxde6/eYg0dX3PGM4yI8SZWRNBJid1AvSZ0AxilB0A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708534001; c=relaxed/simple;
-	bh=luA14+I6agAb3WN5vu4hfd77tv/XVl+XGCXKT2dSywU=;
+	s=arc-20240116; t=1708535624; c=relaxed/simple;
+	bh=SPC7GdXwmp+ng7T99WcMMxyAlOO+M5BdhoieuR7EFgI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O/NmuNjUalKQQ9GbCKeErKmSEinBOsaGhZnalqu49yWAq/EV6WwvT3A8EZYtNA9+BlT+DQDUD24QYd1skzGhDaREB4R7alm5HkUk262rbaviajeCkL7Sk5deueKZyZyw9h13i2KSfbN482ky8g2KM6fJi4/aMGVcLxnzpNU2mZk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=LIZnfZSb; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=HQW5zd0lvh6ZvJOegG7dwap3OSs8ZojbRu5/Eo77LXYOzSojEptvMoylvaszd24wmQuGkoI9wBG3P+SK1rjm78ScgxGOEVcgiiMPYlPgjYn0AQP9y9itQfmLEsxau2kMjuiyCB70W07Kno24NHtoQ+rGijW/4KlGKlpjJ7s2hTI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a+l+GiT7; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="LIZnfZSb"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=vF4GgIZYKuqOR3J0iKSalWbeQz2cXnj9J6PDCw6QbdU=; b=LIZnfZSbF8BBDRZJKgm/dANAND
-	Pj5o4ch1ijcAdKTXqu/PHyN4BOjz1UNbWo1yfvHfhYqeXS6vqlD4XhzL3NCKSrLF0v7JHy88R4UEw
-	QRgJD7w8D5BaTHlGn8746lF9PdG+6aGkkMFsJvRikkCymDHmAbB+cia5F+khV1bPMoP0X09cgj449
-	1Srv9rvO2zVLgGiT0eeXimbsxdTohA5aAEoCet6oTs93rs54pifPdkYHS7sitdSkuy5o0Fq7c1E8E
-	dPzMzf8bMT3XAlxyFznlWVhE/Jo0T5CIRvFbx2yEx9OOpG5sbo0hL3QaOGT1yx/y0VDn4bLFVEucB
-	XZfobmgQ==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1rcpjz-00000001miw-0uED;
-	Wed, 21 Feb 2024 16:46:39 +0000
-Date: Wed, 21 Feb 2024 08:46:39 -0800
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, anand.jain@oracle.com, aalbersh@redhat.com,
-	djwong@kernel.org, linux-fsdevel@vger.kernel.org,
-	kdevops@lists.linux.dev, patches@lists.linux.dev
-Subject: Re: [PATCH 3/3] check: add --print-start-done to enhance watchdogs
-Message-ID: <ZdYo7zjD_lDlOdia@bombadil.infradead.org>
-References: <20240216181859.788521-1-mcgrof@kernel.org>
- <20240216181859.788521-4-mcgrof@kernel.org>
- <ZdLOKCYnM3XybqQp@dread.disaster.area>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a+l+GiT7"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D49F0C433F1;
+	Wed, 21 Feb 2024 17:13:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708535623;
+	bh=SPC7GdXwmp+ng7T99WcMMxyAlOO+M5BdhoieuR7EFgI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=a+l+GiT7+Ejq6HYWZ/EAQUkblCthVnNoEfsbNC3doUt0kOMmdqydm2SIINQvCaFTD
+	 sqCxduJ831rnB5/sv+QXbaMmBcKqa+TWVE2QqKgQnaTKJWVMzyIZxu/q2rgBtW3JWH
+	 RmUPOhu0yBmjHG7ZtcFxu/eQFdwtN6tpntrYmH+UYAlyBC8W9TFK3iWTM5ulIJjP7J
+	 SM6spI3+kivNZbLp0xPrGi3/CayJPtC0v8nFBxm0+IJfbjZqrQxNanclsDhBtnS05N
+	 rzQRXj4kASY8OWdorIhbr/6O8TyjrBEsOCZY0GQxLbRChOnW2TffVCCUPaaTtoD3P2
+	 JVkKAW4dQPtEg==
+Date: Wed, 21 Feb 2024 09:13:43 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] generic/449: don't run with RT devices
+Message-ID: <20240221171343.GI6226@frogsfrogsfrogs>
+References: <20240221063524.3562890-1-hch@lst.de>
+ <20240221155338.GF616564@frogsfrogsfrogs>
+ <20240221162515.GA25439@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,38 +43,23 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZdLOKCYnM3XybqQp@dread.disaster.area>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+In-Reply-To: <20240221162515.GA25439@lst.de>
 
-On Mon, Feb 19, 2024 at 02:42:32PM +1100, Dave Chinner wrote:
-> On Fri, Feb 16, 2024 at 10:18:59AM -0800, Luis Chamberlain wrote:
-> > fstests specific watchdogs want to know when the full test suite will
-> > start and end. Right now the kernel ring buffer can get augmented but we
-> > can't know for sure if it was due to a test or some odd hardware issue
-> > after fstests ran. This is specially true for systems left running tests in
-> > loops in automation where we are not running things ourselves but rather just
-> > get access to kernel logs, or for filesystem runner watdogs such as the one
-> > in kdevops [0]. It is also often not easy to determine for sure based on
-> > just logs when fstests check really has completed unless we have a
-> > matching log of who spawned that test runner. Although we could keep track of
-> > this ourselves by an annotation locally on the test runner, it is useful to
-> > have independent tools which are not attached to the process which spawned
-> > check to just peak into a system and verify the system's progress with
-> > fstests by just using the kernel log. Keeping this in the test target kernel
-> > ring buffer enables these use cases.
+On Wed, Feb 21, 2024 at 05:25:15PM +0100, Christoph Hellwig wrote:
+> On Wed, Feb 21, 2024 at 07:53:38AM -0800, Darrick J. Wong wrote:
+> > Odd... this test only takes ~50s on my rt testing rig.
 > > 
-> > This is useful for example for filesyste checker specific watchdogs like the
-> > one in kdevops so that the watchdog knows when to start hunting for crashes
-> > based just on the kernel ring buffer, and so it also knows when the show is
-> > over.
+> > _scratch_mkfs_sized should restrict the size of both the data device and
+> > the rt volume to 256M, right?  Looking at tot, it sets "-d size=$fssize"
+> > and "-r size=$fssize", so I don't think I understand what's going on
+> > here.
 > 
-> Why can't the runner that requires timing information in the
-> kernel log just emit a message to the kernel log before it
-> runs check and again immediately after completion of the check
-> script?
+> You are right.  I have some local patches that messed things up and
+> increased the data device size based on paramters of the RT device
+> in _scratch_mkfs_sized.  I've fixed this up now.
 
-That's exactly what is done today, it just seemed to me that since this
-has been useful to a test runner now for years, it might make sense to
-generalize this.
- 
-  Luis
+Increases the data device size?  Does it do that to sidestep the case
+where fstests fails because the rtbitmap needs more space than is
+available in the data device? ;)
+
+--D
