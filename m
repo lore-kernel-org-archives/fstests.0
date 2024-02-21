@@ -1,93 +1,89 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3E1D152DF8
-	for <fstests@vger.kernel.org>; Tue, 20 Feb 2024 22:05:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C4CF3C1D;
+	Wed, 21 Feb 2024 06:35:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708466744; cv=none; b=f1imypjvrG5rA6nerevxEMJ2FPFmLFAwsMBNe/YLZ7vNnztWPwjgFhU3eFKvaWfgp6LzdeyAee/i9YmAtQZyaPeTS84fpx+/paByYG9NZyEQlvAWhB0WBScR9YVTGU3RwA9/7f6zTniYmbhgnjJ9d0N0NIBtsEtEHCm1o04n7JY=
+	t=1708497330; cv=none; b=so9H3fEOcpStykcxBsHLwAI0ZdI+LMsYRVyFgKw5zfJehrA0B4ETb20fBSJEFZ7n9IvJzSHbX26gzcuf4mdwu7LozG5XuWzGvjzXaRnS3ZmVTXbhXJVJFr2BZQMiRv6u0TpumL0xpq5XBHcUxwMzfKOjxQm57ndIJXpAx3HFdwA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708466744; c=relaxed/simple;
-	bh=75lg/qgBc/1j5MphW+ZyZV+N/b+e3l+xbuclvUi/Usk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=F+5nXekOKkedxay/NRqOllqMzKWkcl7fNHoh+NJHtSrWOmdPXtfEP0ToS0x7cOj821EJzGU4KFsRse36YZyM2phAV8RyihQb5Bu9t//6z/zspV8FyF6Sm2bm5+s0PmHVjMS87amquvEloogPMpMWPk2zi75kwCcLWPEsd4oP/2o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=XPVG6Jov; arc=none smtp.client-ip=209.85.219.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1708497330; c=relaxed/simple;
+	bh=0yeTZ3OjETOFd8XemPOVecqMystiahoyul/JpImvp10=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Y110Ko7RIaGQRvlCgGXmA59sZoMCJsmyZbv4YlI1zpAgyaLXLRiniD6CyRo29bDIIJgG1ZeqX+6MyPO3i/+CTSh4W51FsPPdiZpFmVwhD4DGGCSwTe6L6CkbMPa4xMs2DasfNsqBTuqcMia9QT9TlnnoHRW8FSJA019eAR0pBJs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=wk6FgalT; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="XPVG6Jov"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-dcd9e34430cso6051340276.1
-        for <fstests@vger.kernel.org>; Tue, 20 Feb 2024 14:05:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1708466741; x=1709071541; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=/2G51AsG1bsr7uNPjzTnaLkotIbnpZerEq4UgFBBh8Y=;
-        b=XPVG6JovKC9CY+2GSudesJR7CxWcxo/zPRICCCAXvK9kIKY8YbEvrcr5I73XkD4Mo1
-         He672605Qs2pfVjyTlbiJeFjz1Kzkb6uwnGUdMpk484OEcianEDi6tOxjipfl2BQYP8r
-         BKlVwjebKWlE6hPW0s3sxHURiZRVU/r5OnJHuktJnYry9Fn33yQ/j4vFmgt2kixiFap+
-         lID5GgmZEnR4hb18zZ2MnZXh+UtnApjYtRk+pEw8e3RkT7LNVcp0C0upzcEOxgMOgsJl
-         Jn52R3ugynKDSwMq0xV4zkF4IbmX/dQnwezzN7XBYmbpAKkQsB+lPgkHJNlyyDY/8dqN
-         Lqxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708466741; x=1709071541;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/2G51AsG1bsr7uNPjzTnaLkotIbnpZerEq4UgFBBh8Y=;
-        b=P+pprV6RV1idCHKmz1jFS4VGGS1BkKn7oCciHEgU2Hz9zhwclNQDMnRDfEEZRgzOtw
-         4cxT6r626wEqVqV5DPIZNPDcfaDsijp+Qhzu55rcOZ7jIOCtSRoJ2dIwN0HeIViFZjfx
-         VK2ipeSADgQZ5ahsvEQ0I/Zl+lDPC6ruuNGT24KumnTwvC3LdKeNZ916dyE63GQLGQz0
-         O7j3dbFnDlIR0gfflegE/NLYPn8OnPY/tbKHtG8Gzig2TKWyiYu4Zp9CWs14ZxaZJgB/
-         JjsrI9hPMGzsxUAPV29ojIqeiDsVPYyaVY6vlnh/rb+1tb7xINyBLezLqIOk+D0fh5y+
-         2VkQ==
-X-Gm-Message-State: AOJu0YwEYxk0KjzQEHnV2NjU/zksMZ5HNXp/0BR0gankiTluWFgDfVk1
-	buG2r0NNEKTdPh+DKpPVKS9q9g/NpMSBOeUBxU4nWEzyUjbnMjiPe0ys978SDtcKp+1tIAq8Hlb
-	M
-X-Google-Smtp-Source: AGHT+IFQefU52rW3ziQGRz3HvFf4dJ6Y8GbBr7zStkqZDySZmn+wNkoA3854WKjBfwe3a5vPfkOPWw==
-X-Received: by 2002:a25:4155:0:b0:dcc:e854:d453 with SMTP id o82-20020a254155000000b00dcce854d453mr6794480yba.1.1708466740883;
-        Tue, 20 Feb 2024 14:05:40 -0800 (PST)
-Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id v192-20020a252fc9000000b00dc74efa1bb4sm2191779ybv.13.2024.02.20.14.05.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Feb 2024 14:05:40 -0800 (PST)
-Date: Tue, 20 Feb 2024 17:05:39 -0500
-From: Josef Bacik <josef@toxicpanda.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: test incremental send on sparse file with
- trailing hole
-Message-ID: <20240220220539.GA1024959@perftesting>
-References: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="wk6FgalT"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=vz1234MI/q1d572V2OGpLnsGE/tN67cbxSb0Sk41xns=; b=wk6FgalTxuIuoYY+lhIfHXBDoJ
+	NyvxMzn/3IRtVvUm9EYOT72DKPk1G2RSjRye/2fdMMqdUtkshUYeJwIPNf9Q6/hG3DCS4UuTHhnQO
+	pBK31/8FKR8hEbb/WXifnEXa2iZ1CQHkZv4NaabXydRTVWG4/T2Fjhp0bSVFw1d9l85dogdyiYpUo
+	cs/QNdMYqL4Bnahv0I3NWdsBp1XctURh+t3q6FJ1ZzysvutUTaEs/Xy0hs+oiYRxAYzHm8vMgKrDe
+	jsdSdeRZD8hNwM8bOAU07GXEqcAaVVHPggLAvpl4ZW/1z1dR5EjxEkG2DiQpBjU/J0HWZ0hIPwcNF
+	63Hgfyzw==;
+Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rcgCV-0000000HM16-1MqP;
+	Wed, 21 Feb 2024 06:35:27 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: [PATCH] generic/449: don't run with RT devices
+Date: Wed, 21 Feb 2024 07:35:24 +0100
+Message-Id: <20240221063524.3562890-1-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Feb 19, 2024 at 12:01:30PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that an incremental send does not issue unnecessary writes for a
-> sparse file that got one new extent between its previous extent and the
-> file's size.
-> 
-> This exercises a fix by the following patch:
-> 
->   "btrfs: send: don't issue unnecessary zero writes for trailing hole"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+generic/449 tests of xattr behavior when we run out of disk space for
+xattrs which are on the main device, but _scratch_mkfs_sized will control
+the size of the RT device.
 
-Made sure it ran with the patches applied and all of our CI test variations,
-also reviewed the code obviously, you can add
+Skip it when a RT device is in used, as otherwise it won't test what it
+is supposed to while taking a long time to fill the unrestricted data
+device.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/generic/449 | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-Thanks,
+diff --git a/tests/generic/449 b/tests/generic/449
+index 2b77a6a49..4269703f6 100755
+--- a/tests/generic/449
++++ b/tests/generic/449
+@@ -24,14 +24,15 @@ _require_test
+ _require_acls
+ _require_attrs trusted
+ 
++# This is a test of xattr behavior when we run out of disk space for xattrs,
++# but _scratch_mkfs_sized will control the size of the RT device.  Skip it
++# when a RT device is in used, as otherwise it won't test what it is supposed
++# to while taking a long time to fill the unrestricted data device
++_require_no_realtime
++
+ _scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+ _scratch_mount || _fail "mount failed"
+ 
+-# This is a test of xattr behavior when we run out of disk space for xattrs,
+-# so make sure the pwrite goes to the data device and not the rt volume.
+-test "$FSTYP" = "xfs" && \
+-	_xfs_force_bdev data $SCRATCH_MNT
+-
+ TFILE=$SCRATCH_MNT/testfile.$seq
+ 
+ # Create the test file and choose its permissions
+-- 
+2.39.2
 
-Josef
