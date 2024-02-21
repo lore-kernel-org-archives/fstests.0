@@ -1,77 +1,38 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 949947D401
-	for <fstests@vger.kernel.org>; Wed, 21 Feb 2024 14:10:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAADE811E7;
+	Wed, 21 Feb 2024 15:53:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708524640; cv=none; b=dBTySondt6zEZJDth/t75zxQuv1jH04OpbqGYj8gXKDwOfSL0eJGaZOHWcvRdHoOdn5Nc32GP0lLMEQVp8Gr9Bb9fvbAaKSjwTMi7uINC68wZm/jvI91h+H32Ok+DWHIgt6S/BKwcIHvQkss0PNUAmR3uXoV9eOPflcmeTv9AKE=
+	t=1708530821; cv=none; b=rgz+CnaHB2EHjy8+nknSGd1flV4+rhh2DZMDmOQX7zuxTvNFfLzDhw4DJ6h1uy9K91aGnNiOZWNDHdpmD+A3cxKk1CTriqs8gWbyHPGkZ27RA9coXcmHcqxMHqn+eLgX6LHDjGS6JLxoiOyLnzyjZIBOHwvgZbYeaafPUvHLZhU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708524640; c=relaxed/simple;
-	bh=Zz2jGkUJhyq7BD+ErNQZRXNUj2zxn27RRmEVk8rMbFY=;
-	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=IElINEMNJBEhge3AiTmt2JMSmSLG9KLhzD0TV2eTsylHy9CTe8243WYaXUIoelfOdU6BbfIEoEL0I3q+oOcRtADfK6ELGJqelYHMZ7CGNNgSr7ryhTOgH4+n2DLPVuCUsAd6lTqsfQ8/iIyVX9Uu+nAqLMg9IBbJxqxKumxC4Sw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=pBPmAol3; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=vhmLR9GW; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=pBPmAol3; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=vhmLR9GW; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1708530821; c=relaxed/simple;
+	bh=L8h6fmxX3pRDkloTW4YJmr4FZiEeI2L+eRYgyBcy7N4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PyA1cGNnIK+1e3pO01JyMf3dt5303xfD1lRpGJAveT9X9caKl2aYJ3c6MNGKt2Py02T09v1R52o6NiUMUlnTZJNwvosLwuvd73ztSeTav4bEioJATGb6LzdKPwCIjGJ4nexoUm1+DQBFqNdWmCj+IwRkGgXcHIUNXD1cL0rFEUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eqfL7FvG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="pBPmAol3";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vhmLR9GW";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="pBPmAol3";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vhmLR9GW"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C4B52210E9;
-	Wed, 21 Feb 2024 14:10:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1708524636;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type;
-	bh=mQ37BimbNDaBDqoIp4pL5Dn0btXGSiQ4te/cpoDWDgE=;
-	b=pBPmAol3h3lQEi+Cd8WjezYLMgmD/awL6HQUrDed/vqes5ESN9V1MsvYVLXl1zJjiBHPFD
-	E8cPB3sTAN+3T6NcpwR7jB3x2wb7Un0eVFLpo+0kObOzT4jymW/JBEVL9qoUXkaxiSsanK
-	g4Jr6V8W8bFyLwwh2O9JnihYLinSr2I=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1708524636;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type;
-	bh=mQ37BimbNDaBDqoIp4pL5Dn0btXGSiQ4te/cpoDWDgE=;
-	b=vhmLR9GWqrSgBkxREBhS999H+1BZitci4FFozBFIb828D2EzNSpn8JjgE6hroSESmPJtOO
-	mKDlvx7ecvrG4uCg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1708524636;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type;
-	bh=mQ37BimbNDaBDqoIp4pL5Dn0btXGSiQ4te/cpoDWDgE=;
-	b=pBPmAol3h3lQEi+Cd8WjezYLMgmD/awL6HQUrDed/vqes5ESN9V1MsvYVLXl1zJjiBHPFD
-	E8cPB3sTAN+3T6NcpwR7jB3x2wb7Un0eVFLpo+0kObOzT4jymW/JBEVL9qoUXkaxiSsanK
-	g4Jr6V8W8bFyLwwh2O9JnihYLinSr2I=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1708524636;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type;
-	bh=mQ37BimbNDaBDqoIp4pL5Dn0btXGSiQ4te/cpoDWDgE=;
-	b=vhmLR9GWqrSgBkxREBhS999H+1BZitci4FFozBFIb828D2EzNSpn8JjgE6hroSESmPJtOO
-	mKDlvx7ecvrG4uCg==
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id A9C31139D1;
-	Wed, 21 Feb 2024 14:10:36 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id Xa3OKFwE1mVtRwAAn2gu4w
-	(envelope-from <dsterba@suse.cz>); Wed, 21 Feb 2024 14:10:36 +0000
-Date: Wed, 21 Feb 2024 15:09:51 +0100
-From: David Sterba <dsterba@suse.cz>
-To: fstests@vger.kernel.org, zlang@redhat.com
-Subject: Dangerous commands (was:[ANNOUNCE] fstests: for-next branch updated
- to v2024.02.04)
-Message-ID: <20240221140951.GJ355@suse.cz>
-Reply-To: dsterba@suse.cz
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eqfL7FvG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 84619C433C7;
+	Wed, 21 Feb 2024 15:53:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708530819;
+	bh=L8h6fmxX3pRDkloTW4YJmr4FZiEeI2L+eRYgyBcy7N4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=eqfL7FvGsUcQAjDKHQYrJDdwtkj7XWbXmOXDiCrdL+GnYLvJ16HQMVuzoL1UciVXI
+	 vHhwKguOAoaxO8Xh+AzZ/rPYQzVfozURTYFZglhBj5I+UZsHHN0MibLnYtA10RW5GC
+	 SutLrEvM7I+W8OZtKDvWRXy37ec2s0yqRGwCM6ZwiDIEEHOLWmypH+yItCn44KCsTs
+	 zOuumr+Qck5zg3Z3yG88dLlrPfLoIuZGgo1GbIvrAEXJWfhWd0PEBiyEJcPjwgTt+H
+	 B5qqqCxBrv8psJRhNPzQTMomWZIoQWvJaoIafKUuYTtVpT48Iyzpn4J6UVkXlWDl8k
+	 1SUbwf2O6Hcvg==
+Date: Wed, 21 Feb 2024 07:53:38 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] generic/449: don't run with RT devices
+Message-ID: <20240221155338.GF616564@frogsfrogsfrogs>
+References: <20240221063524.3562890-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,60 +41,65 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-Authentication-Results: smtp-out1.suse.de;
-	none
-X-Spamd-Result: default: False [-0.04 / 50.00];
-	 ARC_NA(0.00)[];
-	 HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 BAYES_HAM(-0.24)[72.91%];
-	 MIME_GOOD(-0.10)[text/plain];
-	 REPLYTO_ADDR_EQ_FROM(0.00)[];
-	 TO_DN_NONE(0.00)[];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 RCPT_COUNT_TWO(0.00)[2];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[];
-	 MID_RHS_MATCH_FROM(0.00)[]
-X-Spam-Level: 
-X-Spam-Flag: NO
-X-Spam-Score: -0.04
+In-Reply-To: <20240221063524.3562890-1-hch@lst.de>
 
-Hi,
+On Wed, Feb 21, 2024 at 07:35:24AM +0100, Christoph Hellwig wrote:
+> generic/449 tests of xattr behavior when we run out of disk space for
+> xattrs which are on the main device, but _scratch_mkfs_sized will control
+> the size of the RT device.
+> 
+> Skip it when a RT device is in used, as otherwise it won't test what it
+> is supposed to while taking a long time to fill the unrestricted data
+> device.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/449 | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
+> 
+> diff --git a/tests/generic/449 b/tests/generic/449
+> index 2b77a6a49..4269703f6 100755
+> --- a/tests/generic/449
+> +++ b/tests/generic/449
+> @@ -24,14 +24,15 @@ _require_test
+>  _require_acls
+>  _require_attrs trusted
+>  
+> +# This is a test of xattr behavior when we run out of disk space for xattrs,
+> +# but _scratch_mkfs_sized will control the size of the RT device.  Skip it
+> +# when a RT device is in used, as otherwise it won't test what it is supposed
+> +# to while taking a long time to fill the unrestricted data device
+> +_require_no_realtime
+> +
+>  _scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
 
-reading [1] and how late it was found that effectively a "rm -rf /" can
-happen makes me worried about what I can expect from fstests after git
-pull. Many people contribute and the number for custom _cleanup()
-functions with unquoted 'rm' commands is just asking for more problems.
+Odd... this test only takes ~50s on my rt testing rig.
 
-[1] https://lore.kernel.org/all/20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+_scratch_mkfs_sized should restrict the size of both the data device and
+the rt volume to 256M, right?  Looking at tot, it sets "-d size=$fssize"
+and "-r size=$fssize", so I don't think I understand what's going on
+here.
 
-Unquoted arguments in shell scripts is IMO a big anti-pattern,
-unfortunately present everywhere in xfstests since the beginning.
-Rewriting all scripts would be quite a lot of work, could you at least
-provide safe versions of the cleanup helpers?
+>  _scratch_mount || _fail "mount failed"
+>  
+> -# This is a test of xattr behavior when we run out of disk space for xattrs,
+> -# so make sure the pwrite goes to the data device and not the rt volume.
+> -test "$FSTYP" = "xfs" && \
+> -	_xfs_force_bdev data $SCRATCH_MNT
 
-For example:
+Shouldn't this ^^^^ be sufficient to cause $TFILE and all the xattrs to
+be allocated from the data device?  Or are they ending up on the rt
+volume?
 
-_rm_tmp() {
-    rm -rf -- $tmp
-}
+<confused>
 
-and used as
+--D
 
-_cleanup() {
-    _rm_tmp
-}
-
-or at least mandate the "--" separator and quoting arguments in new code
-and gradually fix the existing code.
-
-I can send patches at least for btrfs and generic as this affects me but
-first I'd like to know that this will become standard coding style
-requirement in fstests.
+> -
+>  TFILE=$SCRATCH_MNT/testfile.$seq
+>  
+>  # Create the test file and choose its permissions
+> -- 
+> 2.39.2
+> 
+> 
