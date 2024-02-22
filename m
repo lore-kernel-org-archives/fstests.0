@@ -1,65 +1,124 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D97C33F7;
-	Wed, 21 Feb 2024 17:13:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37D08381A1;
+	Thu, 22 Feb 2024 09:51:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708535624; cv=none; b=CFYOGL1KcyrE8dpQFcKyLWpp1GRNMSrUJ6DIaN9VxUVjh3/01kmjf5gSaCmrJwsEkAsA2h6K1w0ZDiXYKO9Nf/ncUOR+UuJnN1Ckdf3F4yjZSloBUaOtW4hn3NkkS+yyDKxde6/eYg0dX3PGM4yI8SZWRNBJid1AvSZ0AxilB0A=
+	t=1708595494; cv=none; b=i937J3PoqGLBoA56MQsNCER3RR72ETbKgpZWqkPAC8nXw5/vOoveFXtxPnXS4gkAR1E1wOo5Go9aDzQs2VqLtwVHEHRDvc0+9+AnPPIFMoTUogW0yFTKU4hZ1zCxrDPOAPDjJWgDDBoVZ43uI/2xECArNSH8GlnqWzKbg5ZzVXw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708535624; c=relaxed/simple;
-	bh=SPC7GdXwmp+ng7T99WcMMxyAlOO+M5BdhoieuR7EFgI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HQW5zd0lvh6ZvJOegG7dwap3OSs8ZojbRu5/Eo77LXYOzSojEptvMoylvaszd24wmQuGkoI9wBG3P+SK1rjm78ScgxGOEVcgiiMPYlPgjYn0AQP9y9itQfmLEsxau2kMjuiyCB70W07Kno24NHtoQ+rGijW/4KlGKlpjJ7s2hTI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a+l+GiT7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1708595494; c=relaxed/simple;
+	bh=3WONCnNWN9FRJjQj+9p32J5snbIKrp1z3T6eI6wv6j0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=I4mwZLUUfsE2RUI3FYuGEvW98P9NSxK5/VWSmhrXIZPh3vWaH3y1tPEdxd/MLW9l8h1vgYUBYx3xVkIIa8q6r4xH3x6eBITHaQXY2PzRlqdTn7lvXMCtUvpEemJDHDbgTajLSVsI5nZztlyFC6Y6c57gJm92rrPMQCf1QldC/bQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=QzFke9kG; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=QzFke9kG; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a+l+GiT7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D49F0C433F1;
-	Wed, 21 Feb 2024 17:13:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1708535623;
-	bh=SPC7GdXwmp+ng7T99WcMMxyAlOO+M5BdhoieuR7EFgI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=a+l+GiT7+Ejq6HYWZ/EAQUkblCthVnNoEfsbNC3doUt0kOMmdqydm2SIINQvCaFTD
-	 sqCxduJ831rnB5/sv+QXbaMmBcKqa+TWVE2QqKgQnaTKJWVMzyIZxu/q2rgBtW3JWH
-	 RmUPOhu0yBmjHG7ZtcFxu/eQFdwtN6tpntrYmH+UYAlyBC8W9TFK3iWTM5ulIJjP7J
-	 SM6spI3+kivNZbLp0xPrGi3/CayJPtC0v8nFBxm0+IJfbjZqrQxNanclsDhBtnS05N
-	 rzQRXj4kASY8OWdorIhbr/6O8TyjrBEsOCZY0GQxLbRChOnW2TffVCCUPaaTtoD3P2
-	 JVkKAW4dQPtEg==
-Date: Wed, 21 Feb 2024 09:13:43 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] generic/449: don't run with RT devices
-Message-ID: <20240221171343.GI6226@frogsfrogsfrogs>
-References: <20240221063524.3562890-1-hch@lst.de>
- <20240221155338.GF616564@frogsfrogsfrogs>
- <20240221162515.GA25439@lst.de>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QzFke9kG";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="QzFke9kG"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 4D168222AB;
+	Thu, 22 Feb 2024 09:51:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708595490; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=0UpGcDW7WT60+FpypPVhdOPN2sYsjG/UaW8e4cftZfA=;
+	b=QzFke9kGd7lITrxJkKZ7LPkKO0jk+Dzn5hkQ+RabrFUvJ/vdyCquDOlw5rIRxmBvrxWXU7
+	R0NE54g/K95mwwOadMFcv6PCT8FTrBjCaombRPi8JJA8B6DWTNYtE6E4RogkO7XzSEZcNW
+	KFOulHqeAE31qIfhw1CdVo8uW1UTQGM=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708595490; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=0UpGcDW7WT60+FpypPVhdOPN2sYsjG/UaW8e4cftZfA=;
+	b=QzFke9kGd7lITrxJkKZ7LPkKO0jk+Dzn5hkQ+RabrFUvJ/vdyCquDOlw5rIRxmBvrxWXU7
+	R0NE54g/K95mwwOadMFcv6PCT8FTrBjCaombRPi8JJA8B6DWTNYtE6E4RogkO7XzSEZcNW
+	KFOulHqeAE31qIfhw1CdVo8uW1UTQGM=
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 4193C13A6B;
+	Thu, 22 Feb 2024 09:51:30 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id hhK8DyIZ12UxJgAAn2gu4w
+	(envelope-from <dsterba@suse.com>); Thu, 22 Feb 2024 09:51:30 +0000
+From: David Sterba <dsterba@suse.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	David Sterba <dsterba@suse.com>,
+	Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH] generic/733: disable for btrfs
+Date: Thu, 22 Feb 2024 10:50:48 +0100
+Message-ID: <20240222095048.14211-1-dsterba@suse.com>
+X-Mailer: git-send-email 2.42.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240221162515.GA25439@lst.de>
+Content-Transfer-Encoding: 8bit
+X-Spam-Level: 
+X-Spamd-Bar: /
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=QzFke9kG
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-0.03 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[4];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 TO_DN_SOME(0.00)[];
+	 DWL_DNSWL_LOW(-1.00)[suse.com:dkim];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 DKIM_TRACE(0.00)[suse.com:+];
+	 MX_GOOD(-0.01)[];
+	 MID_CONTAINS_FROM(1.00)[];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:email];
+	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-2.52)[97.83%]
+X-Spam-Score: -0.03
+X-Rspamd-Queue-Id: 4D168222AB
+X-Spam-Flag: NO
 
-On Wed, Feb 21, 2024 at 05:25:15PM +0100, Christoph Hellwig wrote:
-> On Wed, Feb 21, 2024 at 07:53:38AM -0800, Darrick J. Wong wrote:
-> > Odd... this test only takes ~50s on my rt testing rig.
-> > 
-> > _scratch_mkfs_sized should restrict the size of both the data device and
-> > the rt volume to 256M, right?  Looking at tot, it sets "-d size=$fssize"
-> > and "-r size=$fssize", so I don't think I understand what's going on
-> > here.
-> 
-> You are right.  I have some local patches that messed things up and
-> increased the data device size based on paramters of the RT device
-> in _scratch_mkfs_sized.  I've fixed this up now.
+This tests if a clone source can be read but in btrfs there's an
+exclusive lock and the test always fails. The functionality might be
+implemented in btrfs in the future but for now disable the test.
 
-Increases the data device size?  Does it do that to sidestep the case
-where fstests fails because the rtbitmap needs more space than is
-available in the data device? ;)
+CC: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ tests/generic/733 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---D
+diff --git a/tests/generic/733 b/tests/generic/733
+index d88d92a4705add..b26fa47dad776f 100755
+--- a/tests/generic/733
++++ b/tests/generic/733
+@@ -18,7 +18,7 @@ _begin_fstest auto clone punch
+ . ./common/reflink
+ 
+ # real QA test starts here
+-_supported_fs generic
++_supported_fs generic ^btrfs
+ _require_scratch_reflink
+ _require_cp_reflink
+ _require_xfs_io_command "fpunch"
+-- 
+2.42.1
+
