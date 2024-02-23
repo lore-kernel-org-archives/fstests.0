@@ -1,146 +1,190 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 68EE6DDA6
-	for <fstests@vger.kernel.org>; Fri, 23 Feb 2024 03:53:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D2D981B26E;
+	Fri, 23 Feb 2024 08:58:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708660413; cv=none; b=kD2rjQxvWz+mSeFvgSBC4rdCNS8V1ifSlHrqUQPnzacXmixUCJ/o2+QXDHO0Zh+FYJ8xGCjEEZCgrsLXgCPwqDsOHSX3pcM0V/s4cdvpPfUB8tFRrKw6NFq9aKlghAEYfyVL0PbwsdmRqNqaUuRpWFE3uJvTS28+xHgo7Bdqi7M=
+	t=1708678683; cv=none; b=P+4QyeQPjQjHMPe6K1ArMxfIiU2Ay9vUYGzCq9G5Bu9s0aQb5uX58SZWMHkLyN5evcb9Yzav20x2Ig8L1opTNGHivDlVoalFKp5ljCrSJvDOj6qWJAA4W923H48mtyETE/77+FAxmmG10nJ1kHXoDr3Uab++naAPZ2cWqzlraPU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708660413; c=relaxed/simple;
-	bh=HUyTKm3/kixE4IM78xtx98tGvx+TYD3lsMmOQi/hV+Y=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EirwP/NEPAam1uF9tUN/ByPAfrEAlPCzzx9F8D4CC19yqHEtAGOt3+WNbun2Fn34mB2VSGl1LAmdZwy3DAZJUClP3+rPVxoxfVku9bd0yMV5pP6zF1modGWYrWI5qnj914E9H0U+ws8Ckpfm/jAsIK1Pgy8tVG+E2ATlb7kFoZ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=da9/hgj0; arc=none smtp.client-ip=209.85.219.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1708678683; c=relaxed/simple;
+	bh=SQW76QkyMK9hJWR0WhIpehsh9HGkOmcHPKMHgXfSTNk=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=lOH8jXNdEug9jNyqQjjYRwokLDk5hA7uvpOYpZVg1DZ+t6fRwGU7m4quq2LqxShsqKs1TwoES49n9HxlZVsPd6RIuKx3zrXU+V63Ra5Es3VmFK5wHg1llsKaRz/weeragt7xd5EuGBsgzZHx6z8vl5+RcMXFHS6pMlOZKvSvzd8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=RFXc8hxg; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=RFXc8hxg; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="da9/hgj0"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-dc6d8bd612dso404605276.1
-        for <fstests@vger.kernel.org>; Thu, 22 Feb 2024 19:53:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1708660410; x=1709265210; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=0T1JHqJ2SbFtcN4PnlbSFkth1RENsJLYDjl9Fju0/KU=;
-        b=da9/hgj0ohINe4z9Pu3CT9R7LWfJx24n63vWIpYIbIYih1MH1QgzgIVEo5BdZqXjB1
-         eKk7goXjmL3VLdUDTS7v1daTQ0nsZakm7CK3crk3biAM/ZoSX4jVpqfpKpT6YMsOGtYd
-         beOTRTxLqoSIq/3xxbvpPiQAq3QLWY8WNe4kpr7sDnBKCoGnPggTAzCM1C+0uDbnhnQE
-         gbyIFlpREayY4rvXcEmE5tw/7Kn/2Stp3raxoNiOCExfcn7segrU2Nhv29SSwPeMxbYe
-         d2vxIbMJgNkuxAyxPThPDHOOo7z0ZSeZrT7GO3cm7X5+1aevOr/b3+oboEibVdfkxbNN
-         7Z9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708660410; x=1709265210;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0T1JHqJ2SbFtcN4PnlbSFkth1RENsJLYDjl9Fju0/KU=;
-        b=cplXo9yL4p0f+djzcHE+IRB81C1jfJqDM2O1ANiogDzMgzTd0XLdO+DKv3E53zmHTt
-         9Ic8KMPaerj0Xz8v4qstIBwCv1/aL+pJigW/u/z/4C1Q0Kfa4AxKmjfEGnmx/oFmFn2k
-         qJyUHhFCySU9QrdhUOI/7/4Zs6jJ377MfdcaP55lxHiigEQqPkIqCcZCEI12qrComyWr
-         dcrCb84R7adHHNB0fPIlqC0n2zgoFfJe92mk8r3sqtGiopLUchcBcNmrCrCkC70IBstM
-         J5g4H4pBURAXVKHLogOrpvM+hqHF/dDBO1UtjOsG5OdAHTO2jGAtiTwqMyZhjyj7WzUM
-         xmqw==
-X-Gm-Message-State: AOJu0Yw2qL5HoKjywQeeA51m/Gb52/qHM2EIuKBnlYE1987yBEX7bN1X
-	JS08r8eZKLAA7QvvjFkRZcMmnq2JjmfaPT/fw8CO3LqlC59Z682V+kq7aNzTsAqLCF9be4//eK7
-	X
-X-Google-Smtp-Source: AGHT+IHr6kNJgxpOadllt83NUK5QFGEQLk/fJNDZ0uxKBmw7ETCADp27IZTE2tYrOXPkBf8Un6EJ9w==
-X-Received: by 2002:a25:1689:0:b0:dcd:5635:5c11 with SMTP id 131-20020a251689000000b00dcd56355c11mr1028221ybw.45.1708660410164;
-        Thu, 22 Feb 2024 19:53:30 -0800 (PST)
-Received: from dread.disaster.area (pa49-181-247-196.pa.nsw.optusnet.com.au. [49.181.247.196])
-        by smtp.gmail.com with ESMTPSA id i73-20020a636d4c000000b005b458aa0541sm11231813pgc.15.2024.02.22.19.53.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 22 Feb 2024 19:53:29 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.96)
-	(envelope-from <david@fromorbit.com>)
-	id 1rdMcp-00AFQv-0A;
-	Fri, 23 Feb 2024 14:53:27 +1100
-Date: Fri, 23 Feb 2024 14:53:27 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: David Sterba <dsterba@suse.cz>
-Cc: fstests@vger.kernel.org, zlang@redhat.com
-Subject: Re: Dangerous commands (was:[ANNOUNCE] fstests: for-next branch
- updated to v2024.02.04)
-Message-ID: <ZdgWt8gz4815Nr/F@dread.disaster.area>
-References: <20240221140951.GJ355@suse.cz>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="RFXc8hxg";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="RFXc8hxg"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 08C0521FD0;
+	Fri, 23 Feb 2024 08:57:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708678679; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=NwLEgcXKyhDCZ1E1QGn7pBJFfD9SZ0hkOseylp5pv2g=;
+	b=RFXc8hxgn/E/X5FdUAkDOk+f6GqFkWkf6JOTmX851MsZ/miymS4I0dgcBLzvieMrjqFFGM
+	M7+zinMThQ1aXzpJ3msW46WowoQh8AaYSmWC3znrdXGZe7Uvwf4DLDJ1dXUlsvY5+N/JGz
+	aUR+x38QGKdwEJjNrelxCLEeh9d3pA4=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1708678679; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=NwLEgcXKyhDCZ1E1QGn7pBJFfD9SZ0hkOseylp5pv2g=;
+	b=RFXc8hxgn/E/X5FdUAkDOk+f6GqFkWkf6JOTmX851MsZ/miymS4I0dgcBLzvieMrjqFFGM
+	M7+zinMThQ1aXzpJ3msW46WowoQh8AaYSmWC3znrdXGZe7Uvwf4DLDJ1dXUlsvY5+N/JGz
+	aUR+x38QGKdwEJjNrelxCLEeh9d3pA4=
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 0D16913776;
+	Fri, 23 Feb 2024 08:57:57 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id nMzfMBVe2GVMOQAAn2gu4w
+	(envelope-from <wqu@suse.com>); Fri, 23 Feb 2024 08:57:57 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs: add a test case to make sure inconsitent qgroup won't leak reserved data space
+Date: Fri, 23 Feb 2024 19:27:40 +1030
+Message-ID: <20240223085740.138791-1-wqu@suse.com>
+X-Mailer: git-send-email 2.43.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240221140951.GJ355@suse.cz>
+Content-Transfer-Encoding: 8bit
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spamd-Result: default: False [1.90 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 MID_CONTAINS_FROM(1.00)[];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Level: *
+X-Spam-Score: 1.90
+X-Spam-Flag: NO
 
-On Wed, Feb 21, 2024 at 03:09:51PM +0100, David Sterba wrote:
-> Hi,
-> 
-> reading [1] and how late it was found that effectively a "rm -rf /" can
-> happen makes me worried about what I can expect from fstests after git
-> pull. Many people contribute and the number for custom _cleanup()
-> functions with unquoted 'rm' commands is just asking for more problems.
-> 
-> [1] https://lore.kernel.org/all/20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+There is a kernel regression caused by commit e15e9f43c7ca ("btrfs:
+introduce BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup
+accounting"), where if qgroup is inconsistent (not that hard to trigger)
+btrfs would leak its qgroup data reserved space, and cause a warning at
+unmount time.
 
-I started down the _cleanup() path a couple of years ago and one of
-the reasons for that was getting rid of all the open coded rm
-commands that were often just plain wrong. That start was here:
+The test case would verify the behavior by:
 
-https://lore.kernel.org/fstests/20220524073411.1943480-1-david@fromorbit.com/
+- Enable qgroup first
 
-But I got little interest except for one person picking at
-irrelevant details and wanting unnecessary API and naming changes
-that did nothing to really further the cleanup work.
+- Intentionally mark qgroup inconsistent
+  This is done by taking a snapshot and assign it to a higher level
+  qgroup, meanwhile the source has no higher level qgroup.
 
-It did seem like anyone was interested in having this code cleaned
-up and so I basically couldn't find the motivation to slog through
-hundreds of tests trying do stuff that nobody really seemed to care
-about....
+- Trigger a large enough write to cause qgroup data space leak
 
-Shame, this whole problem would have not existed if that work sort
-of infrastructure technical debt reduction was encouraged, and if it
-did there'd only be one line of code to change... :/
+- Unmount and check the dmesg for the qgroup rsv leak warning
 
-> Unquoted arguments in shell scripts is IMO a big anti-pattern,
-> unfortunately present everywhere in xfstests since the beginning.
-> Rewriting all scripts would be quite a lot of work, could you at least
-> provide safe versions of the cleanup helpers?
-> 
-> For example:
-> 
-> _rm_tmp() {
->     rm -rf -- $tmp
-> }
-> 
-> and used as
-> 
-> _cleanup() {
->     _rm_tmp
-> }
->
-> I can send patches at least for btrfs and generic as this affects
-> me but first I'd like to know that this will become standard
-> coding style requirement in fstests.
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/303     | 60 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/303.out |  2 ++
+ 2 files changed, 62 insertions(+)
+ create mode 100755 tests/btrfs/303
+ create mode 100644 tests/btrfs/303.out
 
-I think it would adress this specific issue, but I think it doesn't
-address the bigger problem that fixing cleanup behaviour requires
-touching a couple of thousand tests. i.e.  it doesn't reduce the
-maintenance burden of this code at all.
-
-The vast majority of cleanup functions are identical and/or
-unnecessary, so the right thing to do is to only have cleanup
-functions for tests that need them, and for those that do need to
-clean up to only have to clean up their own mess.
-
-i.e. the test harness itself should be responsible for cleaning up
-$tmp stuff and doing stuff like returning to the correct directory
-after the test completes, not require every test to duplicate the
-same cargo-culted behaviour...
-
-Cheers,
-
-Dave.
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+new file mode 100755
+index 00000000..44dbaeab
+--- /dev/null
++++ b/tests/btrfs/303
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 303
++#
++# Make sure btrfs qgroup won't leak its reserved data space if qgroup is
++# marked inconsistent.
++#
++# This exercises a regression introduced in v6.1 kernel by the following commit:
++#
++# e15e9f43c7ca ("btrfs: introduce BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup accounting")
++#
++. ./common/preamble
++_begin_fstest auto quick qgroup
++
++_supported_fs btrfs
++_require_scratch
++
++_fixed_by_kernel_commit eb96e221937a \
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: qgroup: always free reserved space for extent records"
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount
++
++$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
++$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
++
++$BTRFS_UTIL_PROG qgroup create 1/0 $SCRATCH_MNT >> $seqres.full
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv1 >> $seqres.full
++
++# This would mark qgroup inconsistent, as the snapshot belows to a different
++# higher level qgroup, we have to do full rescan on both source and snapshot.
++# This can be very slow for large subvolumes, so btrfs only marks qgroup
++# inconsitent and let users to determine when to do a full rescan
++$BTRFS_UTIL_PROG subvolume snapshot -i 1/0 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1 >> $seqres.full
++
++# This write would lead to a qgroup extent record holding the reserved 128K.
++# And for unpatched kernels, the reserved space would not be freed properly
++# due to qgroup is inconsistent.
++_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/foobar >> $seqres.full
++
++# The qgroup leak detection is only triggered at unmount time.
++_scratch_unmount
++
++# Check the dmesg warning for data rsv leak.
++#
++# If CONFIG_BTRFS_DEBUG is enabled, we would have a kernel wanring with
++# backtrace, but for release builds, it's just a warning line.
++# So here we manually check the warning message.
++if _dmesg_since_test_start | grep -q "leak"; then
++	_fail "qgroup data reserved space leaked"
++fi
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+new file mode 100644
+index 00000000..d48808e6
+--- /dev/null
++++ b/tests/btrfs/303.out
+@@ -0,0 +1,2 @@
++QA output created by 303
++Silence is golden
 -- 
-Dave Chinner
-david@fromorbit.com
+2.42.0
+
