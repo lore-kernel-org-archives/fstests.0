@@ -1,200 +1,316 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFEC15C5F5;
-	Fri, 23 Feb 2024 09:36:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708680971; cv=none; b=ljbE6NyVmVWhGSGgspnLLSSBilbDk1MuXwKcOJ/iy8Rz7wrdE0EceLMS8wJpv5boG4y5iJSo1TTJg+G9Uk433D3bYwms0KYsnSG/jK6eU//zkN5p/xdnkC4ktueWsjqlEYQX+k02Vvluoax6wlmgeF4w3/Q85SZKANt9b1HxGVg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708680971; c=relaxed/simple;
-	bh=SfD1x2uXOhQiq8D1e6uxb+w+Vx35SJavUl99hHFJ8ok=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RgFu0lO7JLrS+ikaMkVZgL9rM2HGuCov0XnMw3KdS+2X480NNfQlpGjWymWz/XG4F6u2kkLeHyQ9T3FYIF5R2/Xlhj+sJ99JjmwBT/gYTNc2C/M0P7+bZehzyOkPubqHLD5Q4r6gAdgs13eKcoOI05nuCpge25JwlyoKWkv9U+w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=NNaLxdt1; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=NNaLxdt1; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83C752E3EB;
+	Fri, 23 Feb 2024 17:06:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1708708021; cv=fail; b=hmJpp/To2WJLMxa+2y3UdH58zUV/fZF/b6zQRsUnPMpTcAOXAORLNV1XPP2J3k0CvSbyBHVUvAjWObBM+pqY2nhvXgXV427NzRr2JjCTK0T0XSeBYMLj9EAAnTUlXFX7tQqMDN2afE1f/qsZr/eR+rF0VouXdJEO2L8FKC+mPnU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1708708021; c=relaxed/simple;
+	bh=ZbZunei+QpXAaDYrwsCo473nKWpUUFaujVnNlRJZdoM=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=JJ5GtpuqODbKjjv2dySnIR7IXjk3NBD4Bgz2pRNBvDYfAsnZ6ULvdgeM2R/3Q3QUCkgRtLSh38AKitly2ELiqiSYjZE+P2OIy83EXBWScEMjgo3MRa8jdcYhB/TVzSHB5+WBS/+serI8qWeQH7X5vIDu0SRKTLdf4STRZZtaC+A=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=cSdqh91f; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=enV+eUg4; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="NNaLxdt1";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="NNaLxdt1"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 0AA6521ECB;
-	Fri, 23 Feb 2024 09:36:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1708680967; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=s0P6TwD58I1gF/AjXUxapwkwMmSmoaZckwOmPRuBWUU=;
-	b=NNaLxdt1E6+yZOHcNfvBAOMJyfaALSIHW9Xt/pbsnovo/WJWL9Bxa0JgRb0bNnwKfI7HnK
-	qYXaqr0odC3FDwWvMJfvgKoZIw3ydfTbxhDjoQs0kKZ1Kx0pfbGrmG4jaW3zYUP8Prk/Zh
-	1KPZDMluyT9LCZRUub+nVd+HpYD46aw=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1708680967; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=s0P6TwD58I1gF/AjXUxapwkwMmSmoaZckwOmPRuBWUU=;
-	b=NNaLxdt1E6+yZOHcNfvBAOMJyfaALSIHW9Xt/pbsnovo/WJWL9Bxa0JgRb0bNnwKfI7HnK
-	qYXaqr0odC3FDwWvMJfvgKoZIw3ydfTbxhDjoQs0kKZ1Kx0pfbGrmG4jaW3zYUP8Prk/Zh
-	1KPZDMluyT9LCZRUub+nVd+HpYD46aw=
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 8506613776;
-	Fri, 23 Feb 2024 09:36:05 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id uWuGDwVn2GUsQgAAn2gu4w
-	(envelope-from <wqu@suse.com>); Fri, 23 Feb 2024 09:36:05 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: btrfs: add a test case to make sure inconsitent qgroup won't leak reserved data space
-Date: Fri, 23 Feb 2024 20:05:47 +1030
-Message-ID: <20240223093547.150915-1-wqu@suse.com>
-X-Mailer: git-send-email 2.43.2
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="cSdqh91f";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="enV+eUg4"
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 41NG4ADo006104;
+	Fri, 23 Feb 2024 17:06:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : cc : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2023-11-20;
+ bh=jzwDJHn1CVZAsWtwVHfRbaVcf+62vFxc70Qi67vBnz8=;
+ b=cSdqh91flAorCfy9K5xBSGL4j0lJa6kDMRb8ij3p4rZAMNfH3j6XJUj7y+lm2f/tkRFc
+ MXcoRAaumQ+PXIem2uZ+eD7Qnx2Xp21TZCdX4y/Ub1QmiPNyWfqYV8Ggy8kHv7Pv/N+6
+ E1Y5ot7P8ndPGoMxV/naPxjQYcIR14whVk3qUmGR3IAvCCcWT95g1nFa1wduvi0ENH3o
+ uC9YOMlCQ+NA7pPt02AzuOyqWo3qmqMA/P2PI/bo8kutnYLjVarFj75eg/WoZMdyjeOe
+ R//P/i1anJdCUkGgS97IEtk0onn6obyTTfKitvMDf4g1ptpjhunRBXJWcy7RCDIDDBzG WQ== 
+Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3wanbvr695-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 23 Feb 2024 17:06:46 +0000
+Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 41NFn5hU020074;
+	Fri, 23 Feb 2024 17:06:45 GMT
+Received: from nam10-bn7-obe.outbound.protection.outlook.com (mail-bn7nam10lp2100.outbound.protection.outlook.com [104.47.70.100])
+	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3wak8cdus1-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 23 Feb 2024 17:06:45 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=ObWEGPgtR5JXf5IOvuAhx/Jxs9eQ64v5bSpS/Aao/PL7mNHYFFwkI2BOW/u/AAcfPHqGIiFI9+U2lcohmRFNW1DELMLh0FThhq86SSnsvJ8RGWZ/3cNOWGgEEf1NsXsnhxdVf1ufS6aQq3xrmmgl4bAklkibSoInddaKbyW+G+uj6C9ViUIO/Q9WOJ9y/VpIHIr9Q+6J3bFkFybHmwlLI99qZOas3po7302AjqrFCDk+pxzuIlyYSmwEOOjuTMm1EFyT1ZdfZEvIOzcVeOEInhurK9+gTUhBs57W3Oy3hv75xazyMNS0klvmmzjlbtXGa/2MlaMLw56uEXSKPRQS6w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=jzwDJHn1CVZAsWtwVHfRbaVcf+62vFxc70Qi67vBnz8=;
+ b=QljqaFkh4M0aZLBwD/Q3kbtgls+lXEwl1ndBs3ZTr4SqKV/RwpQoOEpJ2qQi87KUI9kkAuVEYt1XTmyHOGQ9JHbOAtA8WmyauQbLN9+eA4I73ffBZ8Eccl2HwK1RYTWLpN9rCFDV7YSqeECoTY/rWHBHp9KtmSCmJNtl9SBzJbCNvMVFbZx6Y303TDj9QDWo0n9LBHPHIB38WWbSA9pgsv24N7FWivVkVtvjxNHkJ0zQlSgRM1IizjubNY656zmH/4KcFJQjWvsxxYyML1f/xb6e4ZsQQ2V7lRHeS5C4hKxCWdD5aBkMd1+H7HYVrtQhnQZrnpchWDa0qXPZgugrIQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=jzwDJHn1CVZAsWtwVHfRbaVcf+62vFxc70Qi67vBnz8=;
+ b=enV+eUg4gU14kwgajhd0dpStS4Bw0l4G4aS3e9LepHRSadNtP17tsMMxk+36rzWwMh2eYqzg6PpamBn633wsISvDiUJMaCIS2LZNt7r54NkHWJqK5UxN1xQ5FrffVM+qdE8mLqOH2RPNMyTpcSFQC+cul5Qoc5bNsK7tvIfk3ZM=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by CO1PR10MB4450.namprd10.prod.outlook.com (2603:10b6:303:93::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7316.24; Fri, 23 Feb
+ 2024 17:06:43 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::9a3e:7f11:fbb:1690]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::9a3e:7f11:fbb:1690%3]) with mapi id 15.20.7292.029; Fri, 23 Feb 2024
+ 17:06:42 +0000
+Message-ID: <b3812d6a-e4fd-42e7-92e0-8257a38f2f05@oracle.com>
+Date: Fri, 23 Feb 2024 22:36:33 +0530
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs: test incremental send on sparse file with trailing
+ hole
+Content-Language: en-US
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+References: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <fdf9b90760477ef48547efa1a5eecf273deaa09b.1708261420.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: MA0PR01CA0073.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:a01:ad::12) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Authentication-Results: smtp-out1.suse.de;
-	none
-X-Spam-Level: 
-X-Spam-Score: 0.70
-X-Spamd-Result: default: False [0.70 / 50.00];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 TO_DN_SOME(0.00)[];
-	 R_MISSING_CHARSET(2.50)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 BAYES_HAM(-3.00)[100.00%];
-	 ARC_NA(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 MIME_GOOD(-0.10)[text/plain];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 RCVD_TLS_ALL(0.00)[]
-X-Spam-Flag: NO
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CO1PR10MB4450:EE_
+X-MS-Office365-Filtering-Correlation-Id: 637b0431-5634-436e-91de-08dc3491ce86
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 
+	1Y6BHfo5Hf1ql5vNKVVqJYN9sZgatNMIEFPyAYmRpP+/Qzuwu571gE0RLbGj497G5wab7ijd+zkhUU82QNm/ghb6qi4jtetVN2FOaV8GYTBhNkOa1zDDDtNV0PdjYjPcxcZNi4LrOgybaQjzK5HGQsJJ2Ov/81FnvK7YWUq1DQZugRGJr0G7CUfTnfth/5dldZysufakKX8UUbDEpx4MnbZbPeO7b3g1k7ythq/hhlAPgnMo7v97T5D1Ee1FqwYAuMwSWzrwHFgxKo7Pe68kX48hoyuN3Z1k041kdJ0kwkLdQD1GV8jw1a8oUn55NrCHc/p/p7gpWeW6cucP60wrFoASCxcQFIZopmIUyk29tQ8CvEIMEMUGv8CyLloTn4IXbdB8J1eAKnMaSRB35KbEtT96++xHRvePKKu9ZhvREWWuyBLCmDndYNcpzUomGr9KhrtWPt5aseXaFTXxTZi539gHhq0Kxp57RHaOW4EN1pXCprLCtf1okTWdZBLY78TcgYNC6wGoz4CpJiDe+7wSzX6QU2cCYIOGPC3mcAeQISM=
+X-Forefront-Antispam-Report: 
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: 
+	=?utf-8?B?Tk9ock84VWxxa0pyZEFGR0Zjd2dJSUx0Mkkvb3hzSkZObEYxaFUybVJWeWJE?=
+ =?utf-8?B?NjRYay83R25zZGFsb1RiUHowemlIZWFHRlZuZ3lkby9xaUg0cnVzcWdxSlNH?=
+ =?utf-8?B?NnV6YUdDK3hTUlNINjhHVmJkSmRwR0R6RTdmeGF6b1AvTVNpWHBKNGZpYi9Y?=
+ =?utf-8?B?WWRYQ0NNaHZ5YWhQN0FHWVRsVlFFRFVJYzhWTm5YY2dabDdvQm42SWxKUWpp?=
+ =?utf-8?B?ZGFTZm92R1pkYXV1OWI0cjZqOEhKejM5UU0vU0hqSW56ZkhKVGRxcWV5Z1lt?=
+ =?utf-8?B?YjczME80d1c5MXdmVnEvbHdoQTQ0U0RNLys0RzNhQURpYTM1TDBodW5HVm1W?=
+ =?utf-8?B?WThWdzc3bzY5dWc0NTRYb0tLVUF3MEIrZ3RqSGNWTHpSSDJKZkFXcWV0aGVG?=
+ =?utf-8?B?QjF5NVRVdVBPVXNhZVFjbkdTbEoxU3JKUmxyR3Jqak9IODREbElCL0ZGekpy?=
+ =?utf-8?B?blZGUXU3M2luQkczczZxZlYzVEcyb0tBUldwQjFWRStQVzdyMVhtVSsxZ3U1?=
+ =?utf-8?B?NmpRNStFc3BTS3FxTGxCNjlMTVpIblFOSXQyUVY5RXA2STZCRmN4RHpmdXBE?=
+ =?utf-8?B?T2w4WVBBd1FOYVVsS0JLWldSU1Z1TlRWRVNJcUFkbVRvSTM2cnhWTTVORVVn?=
+ =?utf-8?B?RDY1WEZKR3l6N3pkRmMzWUsxbVJkUWlWaHpDVG96OXkwS1VOQmxrV0xUTVlk?=
+ =?utf-8?B?Zlhpa0IyVXljZ3dieVRwL0VFM1YzNFJ5cVFzRGMxNWhteHRBQW9seFdEcVMr?=
+ =?utf-8?B?eW1PT2NDSkxmUWpnanB5aEZCWWhpeXE0WW1LUE41SmJLTjdSM29lbzFNaita?=
+ =?utf-8?B?WE1aTUdWN3RVWFJoK0hNVGNSVithQnNIenYraDQ5ZlMxYXVhTExqbFNCM28r?=
+ =?utf-8?B?OUhuUjJhMll5VWx0dTR1MUdXMTcwMEdQcnU3SytaaGRnTU9kcXJTZFFua01M?=
+ =?utf-8?B?UUIrbUMvRUdzUkxIQnA0Vml4cGg3SVZXVnpFYzZuN2xia2lFZm90TDhjWUNi?=
+ =?utf-8?B?SUdjWU1IUXlDM0xMbjRIN3B0RlFJdnZNRkFQNlZ0ejNSYlZFK2NMa1dEWG9K?=
+ =?utf-8?B?MWZQZzk3Y243d1c1VlJ5ci9selpueFhRNXVyb2xtakh6S0k3cjVpejJHTzZq?=
+ =?utf-8?B?bFg2MUZRNHlPYTJ3Vlo1K1R5Ty9Ja2VIRFNGUmxsTzZjMUc3a2Z6dmx4NEU0?=
+ =?utf-8?B?TGIxeTBBNzJnZWhNREtvdHJKdmVSR1VWYWY3U0NpRUJYbDd6YU5NUjJmWlFL?=
+ =?utf-8?B?N1RyQjR5ZVA0K0loWE1kempDS2ZPN0JwOGhIOTMxZE1iSnlxaHM0bVFnYW55?=
+ =?utf-8?B?TDE4YXRicEgvazUwUlQxU1ZmT1B4bEdXaW95RCs1Mnh0Y2pya0RSdjFlYjlz?=
+ =?utf-8?B?cHFid3pJdTYzMU9JdWlQMGU0OGJyaTkrY0NXQlpYUThoRW12dTZFMi9iSFh4?=
+ =?utf-8?B?SFFGQWJnMEVmbFREUlpudmxpYno0Z2dQRjVaZ1QwYlN1WkU5enhOeDB4YWNr?=
+ =?utf-8?B?ekJEZ0VhZlBmc2NqL1JSbitFbkFiSnJyaXBacmJLNHRoaEUzb3RlZlJMNmxw?=
+ =?utf-8?B?VktMT1RTTXFsNDl3UFpqeDdNc1dqWS9HUjlHVDc5bnNGSEk3Mnd5NFRjTGxE?=
+ =?utf-8?B?MHUvRE1nMGpGUkdSVWN0UnBaS0VxRkNvdmxSZ0kvUmlVSm82VkJWclBCOGNj?=
+ =?utf-8?B?R3hKNkxTWjJmWjd5aUVmc0FBUWwzMm1WYysxbkNGWEhXKytnajJZMlU4anJJ?=
+ =?utf-8?B?dHBMVHhOeWVGYnZpdTMyaXBUSmFtOVVwSWdmZnpncHBheHRZUjJWSVZ4R3dp?=
+ =?utf-8?B?akxUZXl2TFVCK200M0d3ZkhCWnlrd3F0U203Y09HbnBOa1NiQXBCWGhaYTU3?=
+ =?utf-8?B?K2JhWGpOMWpLNG5TUVJkL25mam5WZnMxenNVT1JraDYrKy8wUUFmUW14ajAr?=
+ =?utf-8?B?eDVhZjhiWGFEREEzaTJhSnl3d1ZlSXNHN0VEQTZqcVdZVy80YWZaWFJuWlds?=
+ =?utf-8?B?M0VuMEFxWVdEZHJDMnJ6TTg0blFITGs0YU9lTzZLdEpwVm5Sdm9YN0JuVzM5?=
+ =?utf-8?B?V2gvc2VrMTEwWWF3NXNscDFnSzV5dTVrOGpjZHkyb0s5ODZaalh2Y3hydkpr?=
+ =?utf-8?Q?ocDkrmp4H9hCuyMmiIpJOsdMf?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
+	WDJ/rR8NJwc34fSzlhk+U+mTNjaOIhlNQyqmzLu+jh6cU3bdd+4eoH9ySBMMwS7v2k0G9lXVjh1jOlOHoeZh33Gx9NHjuidzfSXILK++AclLP2ypLGZCu29mIyJRKABcT20AE4gBJzeHtSpJqBO2+V3uWRMVnIUypU1oKI7/JXeAjqxJoTgyxRZVH7crcP1b5HHzfzThbgB5G2PxL2lRF0sgB1qA1eu01H05e71clMU2tqorGkUHTmHnlgA7/XSqPXaBiLYcjhLORZvKb/NRJAlew9cA2mrEjwAdkpjSRH9estR/XBkmk9a6PVc2SdYtgj4Oit4cYw7HRyvExmtrAIhY489aDgdoQ0heFPN94Qy8GqMCNKkmlPC3Z0HgxyGaRs0guxLjDvHKJzMsOkhiWTUKKpktj31LwAssnwLF7YEG6ixeYO4XVcBvu7WvcqIf51kGofjrznFMeKzXPD8GpbAjunDQIu7kKBpDJZeMyjK4pz6cS6Gb73Q4g4i1lI+9YbXYPUcsw4uyRn0vWrU1EaSJI9ka7z94LZtJCwL0f/DjcKsWlYGa3EjU7n4NYBgGlSWguk0ImMvJZNH79Uf2zf0Rln6TU7iKZh+XSxG7oy8=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 637b0431-5634-436e-91de-08dc3491ce86
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Feb 2024 17:06:42.3779
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: yZhP039ssYrNfz9WnXe1vETU1DDC41z+92INkGg4gfyvNXH9RTg3bSM/MpZS+Itkq7qIxj/ilbGOomsd7nKxew==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO1PR10MB4450
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-02-23_03,2024-02-23_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 phishscore=0 malwarescore=0
+ bulkscore=0 adultscore=0 suspectscore=0 spamscore=0 mlxlogscore=999
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2311290000
+ definitions=main-2402230124
+X-Proofpoint-GUID: SmHRoGEwus6rm3xpC3T1eYQn3-YBFsQE
+X-Proofpoint-ORIG-GUID: SmHRoGEwus6rm3xpC3T1eYQn3-YBFsQE
 
-There is a kernel regression caused by commit e15e9f43c7ca ("btrfs:
-introduce BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup
-accounting"), where if qgroup is inconsistent (not that hard to trigger)
-btrfs would leak its qgroup data reserved space, and cause a warning at
-unmount time.
+On 2/19/24 17:31, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Test that an incremental send does not issue unnecessary writes for a
+> sparse file that got one new extent between its previous extent and the
+> file's size.
+> 
+> This exercises a fix by the following patch:
+> 
+>    "btrfs: send: don't issue unnecessary zero writes for trailing hole"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-The test case would verify the behavior by:
+looks good
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-- Enable qgroup first
+Queued for the upcoming pull request.
 
-- Intentionally mark qgroup inconsistent
-  This is done by taking a snapshot and assign it to a higher level
-  qgroup, meanwhile the source has no higher level qgroup.
+Thanks, Anand
 
-- Trigger a large enough write to cause qgroup data space leak
-
-- Unmount and check the dmesg for the qgroup rsv leak warning
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/303     | 59 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/303.out |  2 ++
- 2 files changed, 61 insertions(+)
- create mode 100755 tests/btrfs/303
- create mode 100644 tests/btrfs/303.out
----
-Changelog:
-v2:
-- Fix various spelling errors
-
-- Remove a copied _fixed_by_kernel_commit line
-  Which was used to align the number of 'x', but forgot to remove
-
-diff --git a/tests/btrfs/303 b/tests/btrfs/303
-new file mode 100755
-index 00000000..9f7605ab
---- /dev/null
-+++ b/tests/btrfs/303
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 303
-+#
-+# Make sure btrfs qgroup won't leak its reserved data space if qgroup is
-+# marked inconsistent.
-+#
-+# This exercises a regression introduced in v6.1 kernel by the following commit:
-+#
-+# e15e9f43c7ca ("btrfs: introduce BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup accounting")
-+#
-+. ./common/preamble
-+_begin_fstest auto quick qgroup
-+
-+_supported_fs btrfs
-+_require_scratch
-+
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: qgroup: always free reserved space for extent records"
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-+$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-+
-+$BTRFS_UTIL_PROG qgroup create 1/0 $SCRATCH_MNT >> $seqres.full
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv1 >> $seqres.full
-+
-+# This would mark qgroup inconsistent, as the snapshot belongs to a different
-+# higher level qgroup, we have to do full rescan on both source and snapshot.
-+# This can be very slow for large subvolumes, so btrfs only marks qgroup
-+# inconsistent and let users to determine when to do a full rescan
-+$BTRFS_UTIL_PROG subvolume snapshot -i 1/0 $SCRATCH_MNT/subv1 $SCRATCH_MNT/snap1 >> $seqres.full
-+
-+# This write would lead to a qgroup extent record holding the reserved 128K.
-+# And for unpatched kernels, the reserved space would not be freed properly
-+# due to qgroup is inconsistent.
-+_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/foobar >> $seqres.full
-+
-+# The qgroup leak detection is only triggered at unmount time.
-+_scratch_unmount
-+
-+# Check the dmesg warning for data rsv leak.
-+#
-+# If CONFIG_BTRFS_DEBUG is enabled, we would have a kernel warning with
-+# backtrace, but for release builds, it's just a warning line.
-+# So here we manually check the warning message.
-+if _dmesg_since_test_start | grep -q "leak"; then
-+	_fail "qgroup data reserved space leaked"
-+fi
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
-new file mode 100644
-index 00000000..d48808e6
---- /dev/null
-+++ b/tests/btrfs/303.out
-@@ -0,0 +1,2 @@
-+QA output created by 303
-+Silence is golden
--- 
-2.42.0
+> ---
+>   tests/btrfs/303     | 92 +++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/303.out | 24 ++++++++++++
+>   2 files changed, 116 insertions(+)
+>   create mode 100755 tests/btrfs/303
+>   create mode 100644 tests/btrfs/303.out
+> 
+> diff --git a/tests/btrfs/303 b/tests/btrfs/303
+> new file mode 100755
+> index 00000000..26bcfe41
+> --- /dev/null
+> +++ b/tests/btrfs/303
+> @@ -0,0 +1,92 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 303
+> +#
+> +# Test that an incremental send does not issue unnecessary writes for a sparse
+> +# file that got one new extent between its previous extent and the file's size.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick snapshot send fiemap
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	rm -fr $send_files_dir
+> +}
+> +
+> +. ./common/filter
+> +. ./common/punch  # for _filter_fiemap
+> +
+> +_supported_fs btrfs
+> +_require_test
+> +_require_scratch
+> +_require_xfs_io_command "fiemap"
+> +
+> +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +	"btrfs: send: don't issue unnecessary zero writes for trailing hole"
+> +
+> +send_files_dir=$TEST_DIR/btrfs-test-$seq
+> +
+> +rm -fr $send_files_dir
+> +mkdir $send_files_dir
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +$XFS_IO_PROG -f -c "truncate 1G" $SCRATCH_MNT/foobar
+> +
+> +# Now create the base snapshot, which is going to be the parent snapshot for
+> +# a later incremental send.
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+> +		 $SCRATCH_MNT/mysnap1 > /dev/null
+> +
+> +# Create send stream (full send) for the first snapshot.
+> +$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
+> +		 $SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
+> +
+> +# Now write one extent at the beginning of the file and one somewhere in the
+> +# middle, leaving a gap between the end of this second extent and the file's
+> +# size.
+> +$XFS_IO_PROG -c "pwrite -S 0xab -b 64K 0 64K" \
+> +	     -c "pwrite -S 0xcd -b 64K 512M 64K" \
+> +	     $SCRATCH_MNT/foobar | _filter_xfs_io
+> +
+> +# Now create a second snapshot which is going to be used for an incremental
+> +# send operation.
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
+> +		 $SCRATCH_MNT/mysnap2 > /dev/null
+> +
+> +# Create send stream (incremental send) for the second snapshot.
+> +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
+> +		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
+> +
+> +# Now recreate the filesystem by receiving both send streams and verify we get
+> +# the same content that the original filesystem had and file foobar has only two
+> +# extents with a size of 64K each.
+> +_scratch_unmount
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
+> +$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
+> +
+> +echo "File content in the new filesystem:"
+> +_hexdump $SCRATCH_MNT/mysnap2/foobar
+> +
+> +echo "File fiemap in the new filesystem:"
+> +# Should have:
+> +#
+> +# 64K extent at file range [0, 64K[
+> +# hole at file range [64K, 512M[
+> +# 64K extent at file range [512M, 512M + 64K[
+> +# hole at file range [512M + 64K, 1G[
+> +$XFS_IO_PROG -r -c "fiemap -v" $SCRATCH_MNT/mysnap2/foobar | _filter_fiemap
+> +
+> +# File should be using only 128K of data (two 64K extents).
+> +echo "Space used by the file: $(du -h $SCRATCH_MNT/mysnap2/foobar | cut -f 1)"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+> new file mode 100644
+> index 00000000..7659a794
+> --- /dev/null
+> +++ b/tests/btrfs/303.out
+> @@ -0,0 +1,24 @@
+> +QA output created by 303
+> +At subvol SCRATCH_MNT/mysnap1
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 65536/65536 bytes at offset 536870912
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +At subvol SCRATCH_MNT/mysnap2
+> +At subvol mysnap1
+> +File content in the new filesystem:
+> +000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
+> +*
+> +010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+> +*
+> +20000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
+> +*
+> +20010000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+> +*
+> +40000000
+> +File fiemap in the new filesystem:
+> +0: [0..127]: data
+> +1: [128..1048575]: hole
+> +2: [1048576..1048703]: data
+> +3: [1048704..2097151]: hole
+> +Space used by the file: 128K
 
