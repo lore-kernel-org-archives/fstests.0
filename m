@@ -1,275 +1,139 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D67329429;
-	Sat, 24 Feb 2024 16:44:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708793075; cv=fail; b=ChIwKCpWVz3Ti770ZQWyhnAGSoLx/PfiRBu2dGXKjne6IENsMkXGowyT7j8nfGVrRZMAR+toohvDeGJA2xJQVT+4tabHJYDTxqbaaMpgz6OrcBCEw8mPaVs0u9znov8pUwgSJ2ejX7cQ9k7wbp650YM52TQALyb3jJ5204lbaxU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708793075; c=relaxed/simple;
-	bh=4F+Lzy17z0nBgfBSy9PvaiLuapXli7ElBA99jEOvmrQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=P1stjv4BcwwOpygSm5jw4fDaGj5zrJzG43sEou3kujS+eTc4o7JKwrLfVZuwFntJTeoBcurBkVkZY23eZP+tB/8GlhQrXo1SVYaRoxVa+52pjUF8F+BYDNWVP4PZnQfHKV3puTqPYK/sm9eSZlNcraMQFqYmWs4EdLZWc8amqmg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=AX/D+GLf; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=jx8I8uWt; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 548E517991
+	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 15:16:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1708874187; cv=none; b=eq97JlPU0g6XTrJG7CI4zyENxPVPQXmPuAWKW4Bz87pCiHIoFlZuEehYwWFzPw2rGVKXjzJO4YE9jWQo6IQ+8NOcdtvPxP7VGko41rcCYfkH6VXbUzLBKudKhy92JM+sl5IETPOfwfzQ/d/WTIjce7t0Me8UhGSlqpTGBIDJXkk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1708874187; c=relaxed/simple;
+	bh=oO66jRicjwIgxs/QAggbE42TS3XjYg/8FvrEkHvO2yY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=e2VXHRPUQK+C4QIEWvHZJe4IU5F3sJzloIwnQu0CDjSCiPbFMrjmZh/fViVHvmtYK66ccRCAv/1jMmQE71qYbnqbOPkv2rR2JX/QBX5n/iPss81KgSUSBp3JHO6Alh4EeCZsZG1GFrWQQNwRIg3t1RgtAMzWNNSpR15YQvPauUk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FPPdOUKH; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="AX/D+GLf";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="jx8I8uWt"
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 41OFT6LH020711;
-	Sat, 24 Feb 2024 16:44:32 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references :
- content-transfer-encoding : content-type : mime-version;
- s=corp-2023-11-20; bh=XOf38tn0A3RVodriu713qf1iu+1c1iNDX7AXX/s0OGo=;
- b=AX/D+GLfCTnEO0CcM68zTn4TnVaO92UPNseDC0z8mhJj831574UmUG2ZlN+CNpiCcFz0
- bU4faCO0s8QtIJ0f+03uqvdLQ836h+vT2C8+1qeKvabtTSLdX64v1w3k010HDufd3RJ2
- THZX36x7K9tX/8y8PuOzypHwSdE11KD2DxzT4SASqRbJ4IK8u7fQplq9muz+Z3fcju8j
- tN6ByIHFwsqSqXewmo9B6DSxKmxok22mQZ8kKcH0xc5fr7VAH9/6KhERMCIFq8C1L8T/
- DSH20GUmESGlY0XBVcknpmsGWQsL0jXN3vpflT/q6x0f7fYUoV5hSmZaylJIMzbjJZNQ ZQ== 
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3wf90v1106-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 24 Feb 2024 16:44:32 +0000
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 41OEvgXt017320;
-	Sat, 24 Feb 2024 16:44:30 GMT
-Received: from nam02-bn1-obe.outbound.protection.outlook.com (mail-bn1nam02lp2040.outbound.protection.outlook.com [104.47.51.40])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3wf6wa9h9w-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Sat, 24 Feb 2024 16:44:30 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=OdH55QYwMl2iuynB77nAKHYtInaaDWcm5o5P+Df8DcHMqq3DAKzgtr26dMmDUW5yxB7apeRzARwo7M0Gf3x4J+/OUjCe/6r0Ek5vHqBEggFDf4pSPxEpv1mMt00zrYd5LL4kZ258cUp+dnYgM+WhhWI3bOcTfKt2zyzT4aEFTs5PWTtjBvGc6I8I/04qS2o+qzFXGS9o/khmspQkrfvKQRrs32mX4X/AuwU3EAKs1ofROm8rlBXFO4Uh9s1YtJ1YwF1FNqVJMi9+Fem+zd0Du7TF081NBjkTUZC2pOz9HiVa9ywmsNHYTMJulTPLzRtpucY+SFO1YULQQXp/QLw3ug==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=XOf38tn0A3RVodriu713qf1iu+1c1iNDX7AXX/s0OGo=;
- b=KrFLo4okag/YI5fh5bhGBB00rCr4qCsU2uGZ1tRBvaRc/JlrhmDYVvnTa6ymnnAAgvMbxHQWJuiPgxoltw5T+wPUk8sLg5Hskrekva6ypEiY+VT6j4aoqRbA3cRG1pvUfmtiLrPfFZUFI5sNIIdyCmBVh6IBYxTGauMZnLuppuebW7UI9V6q6X6twYF3C3vi1BzGStlMkzhs+LrSiPM5kYU7XURie5UE6OCMn9kGQkZgHuYALZWflY1OLWE06vtFQdED7e4eg0nApifUwPERumRcE81xrGiy2XUyNsTVDs+wmf7nKxggl1l6Vgd+rg5lriKd9FZqC1R0bdKu08sTeA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=XOf38tn0A3RVodriu713qf1iu+1c1iNDX7AXX/s0OGo=;
- b=jx8I8uWtxZT7O/jrjPE/yTCQMOtXdaXwDbgIGmWkKgmwemSCCXeuMaEd9Sx2/Tvcs6MeoUOXW6Sdp8esbNNO34HUhAY6XKXKWvo4vKPCcVzmTRFi0cN/C9qRl/fL22CY2pVUh2h9Ymsw7Vzq1jGS7qOow0UR6AnQLrS/n5eQ/94=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by SA1PR10MB7754.namprd10.prod.outlook.com (2603:10b6:806:3a7::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7316.33; Sat, 24 Feb
- 2024 16:44:29 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::9a3e:7f11:fbb:1690]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::9a3e:7f11:fbb:1690%3]) with mapi id 15.20.7292.029; Sat, 24 Feb 2024
- 16:44:28 +0000
-From: Anand Jain <anand.jain@oracle.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, fdmanana@kernel.org
-Subject: [PATCH v3 10/10] btrfs: test tempfsid with device add, seed, and balance
-Date: Sat, 24 Feb 2024 22:13:11 +0530
-Message-ID: <faeda97208d0a2ecca94490b35a4dc8e98e7fdc6.1708772619.git.anand.jain@oracle.com>
-X-Mailer: git-send-email 2.42.0
-In-Reply-To: <cover.1708772619.git.anand.jain@oracle.com>
-References: <cover.1708772619.git.anand.jain@oracle.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: MA0PR01CA0090.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:ae::19) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FPPdOUKH"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1708874184;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=qA2rpmLN1OGofh/yzE09y5VKDuVkZzuaXCWipYuWZqo=;
+	b=FPPdOUKHNQnuaXV6hJt7gL31P6bABaRwsKr6CfKXPQseAD2xmUbP9gl5VC3ona8PamwA0g
+	vhTXcM86OjdMIC2AIc5boBG92S51J1rHvIVnLrKet+T9thF05XxyeZA9p55ITxLBIxPrNq
+	jMyfcNQrXhNXI+WDD/7vdrfidcBRXw8=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-320-xDKsagJRNwG7_haxJO7EGQ-1; Sun, 25 Feb 2024 10:16:22 -0500
+X-MC-Unique: xDKsagJRNwG7_haxJO7EGQ-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-290e7a0a585so1941822a91.3
+        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 07:16:22 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708874181; x=1709478981;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qA2rpmLN1OGofh/yzE09y5VKDuVkZzuaXCWipYuWZqo=;
+        b=eOpG/SQQQ9vIq+t2oZpxBTGi4BXwfo1ieYMTk7MP4fn7r5iEhh2Z3HF0taDSm/1gA2
+         zSKBHI/BxO3kdT/JoIy/VD4RsaFUG2TV0m5+4DEW/vw6MTU9lX9+rnkvW/bBg/akfMxX
+         cv2oBcrQlraNekc0F4vGyfpM17y0Zb9xncwVCvP31LUQsziTFwrvOUKArKbOKItwQ0uV
+         ZkXdphymosv3nzQ4acuzOVClCxKAP8x7I2bbV1DN+KyNGHGlmIIw9CtmU0L1IsKzUAcz
+         46cFDY5ffrOLczJm9+HFbqk3BWr4c4suVGAE+J9/z2R06I6fKllggQ49piLNYB1WbiHS
+         IsCQ==
+X-Gm-Message-State: AOJu0YziH1smsoNPcZsUBmklBFi+/59N/qnA4AnhS3hDu1EfucMwn8SJ
+	oM8vVkp1yAgjpvmIosrlSy2KtgJxLlq0RtZaszYyPd/ay3tNeQ1QfSwWTmwFz++VMYZg+TPU6GX
+	ZZ5lyaty6Z+8ZsynPyrMnjeZ+jxbWvgFNskTMnMN8L7QarKmCQCTP6hEo7CEI4w75Ug==
+X-Received: by 2002:a17:90b:354b:b0:299:54bb:5cac with SMTP id lt11-20020a17090b354b00b0029954bb5cacmr3913136pjb.11.1708874180950;
+        Sun, 25 Feb 2024 07:16:20 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFyzwLdYBicxoHOrvuW46D9cxIj47JND9v9kRBsMuQZhq2Q9q6JGiZMK4gpqDj0j1YkLo90VA==
+X-Received: by 2002:a17:90b:354b:b0:299:54bb:5cac with SMTP id lt11-20020a17090b354b00b0029954bb5cacmr3913117pjb.11.1708874180586;
+        Sun, 25 Feb 2024 07:16:20 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id fy16-20020a17090b021000b0029aac9c523fsm1635539pjb.47.2024.02.25.07.16.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 25 Feb 2024 07:16:20 -0800 (PST)
+Date: Sun, 25 Feb 2024 23:16:16 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: David Sterba <dsterba@suse.cz>
+Cc: fstests@vger.kernel.org
+Subject: Re: Dangerous commands (was:[ANNOUNCE] fstests: for-next branch
+ updated to v2024.02.04)
+Message-ID: <20240225151616.owk5v4ioplhrioe6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240221140951.GJ355@suse.cz>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|SA1PR10MB7754:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7e27eabf-13b7-4aac-4210-08dc3557de35
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 
-	Q2l9iOJ9CMht8e0Ypooc9hVnj2n7VfyiANYfSe0gkYRws1eLfvbQf2jtH81PgNAxWfq6nkKTDWXErl0FJdod12STGHXelt/4Mudl6zgwFXyUMywAHiJIXQbyz+Pi67/vS9VDxVvgZn+d8yqiAF72A8cHeAEGUJSff9/Dk3tFmhd6KHy9W59QQ1bWucEgR/0SvIaN+bbOtF59wolQ020FyO/xg/A3ppK16cHPFNDZwoljLyIuFb04nkwtcSGR7hAzJOD6SnNjoQ+lr14lXTva79aeRnUavDzTMEP0Ndr5W3Yof/9lUwYinC27z1DHjq/CFUl0lUdDBMhmBzNnNgfHBi9SGNvybz8UAQ+RFV36pzTCZn7DEQClcs7l+m71uKypWjVhgZoWAiUOw/vV18MPAoNnMDmd7ITcYJxKRY6wTv8M3qnYHjOGKUWLyyM07Jya3jpSITfdJiY9GqSqpsKFNaI7JN0PuvzHIhv6nALa8qLj7XBCKr4m58ZpiJL6l5jmVR2+sR2pQV3xxA55SJcOQdaDOYfHwSlbQa/u4CoeX4IkYeFLk2MAVx5hrL/CWtV2
-X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(230273577357003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?us-ascii?Q?u0zBFujCKQJcIBO7UTLs7mIgIBoqaAyjeRyWDgegcC9IM1V6u5s3cpOcg7ph?=
- =?us-ascii?Q?AgUsFMDHLJ0QRAwikM+jUg2Wv/5BhmVwIAnhZeNGOGn/xDoSxeLLFexKm2o5?=
- =?us-ascii?Q?BOvndHC3LcUCm2Ayh7znDxXLlItP5nyHpi7Ox/s3tOS/k6z9Pe3HvRqh0NQr?=
- =?us-ascii?Q?joTOwMoSlsiJsH68LjIbt1SIh0WEV36Ajwoj5DX2MMvetoS9BPVZ5qWFbhU0?=
- =?us-ascii?Q?FrR2A+JMSxP5IAUZtAyu34LHgTs39+gjVCjdchpdQv1jAl/WBZ46Fov0MThi?=
- =?us-ascii?Q?cHk8pfGTClo7C0fzztBVxt9zq399/x+YbIYoPivuPg/uXy1X00D4Nih/vDFj?=
- =?us-ascii?Q?snYk7WA9BkFa6jOWaLalJ0H/ofMNRVpE1/FaHr7Sl5osrctuD/JsbPGB+WoU?=
- =?us-ascii?Q?W9x7JVByS7IAyotzvDk+Ne2vRPnGz+00vKimb/DqhwuZfZGGKKOj7PuLSMXy?=
- =?us-ascii?Q?c63dl4K6IAiC+v0BUVEhPn7QZaltDXDRtMtcr2jpkXPUUDuyoDTuLnke0ue6?=
- =?us-ascii?Q?tpT1apj73mwEqkgiXSStTux6F4n9Mkh/Esd1W+2+XaoCnPEe1WgrJSOYvibd?=
- =?us-ascii?Q?DboujpV+GC03vIkwFS7zv/0I46yTT8xHE+zpH2akukCLgOTjOkpQP1h5OZYR?=
- =?us-ascii?Q?c5AE2lurRAosskwuc+rojJjsS4aKud093IL9TWeg0p9R7X9MVxx/whiObebb?=
- =?us-ascii?Q?hszgxXw4rsEhvaDPlhQwH805KdBlYO5cn3k7F3ZJ+X8r8UR8igCD1Uxeo9RG?=
- =?us-ascii?Q?iS3jxvCgvvhCq2JgWHcmEQdmx/pUQqi3nw0DBVZy8hdRJ0zRuYTGLntSWxOO?=
- =?us-ascii?Q?ezf9K4h43qifupsJS7TJ9Nx+y0g4T+qzCT4SwZ69XYFwlu5iqmjaYgy1LIXZ?=
- =?us-ascii?Q?e1XUZUd7oSJMKzjOxTDqeEudpXFXfFF5Rj3FBgtvRpAIgTchMj8sfNEjIIIz?=
- =?us-ascii?Q?WNgEOgesb4k5Et7r0LMmkj2fxNlHOZ5BL/XvzJZQa/s4wEGTOz/GUZKU26g7?=
- =?us-ascii?Q?pQuFn1ue3b3MqrCCCllq06GrOcJuDhDL3zJ7Ia2W9aB82QYYibz+s3wSw2Ih?=
- =?us-ascii?Q?U0WrjvAtJaRKJB6ZAP3RA560qArTt55xm0sS4kB31SenwCio7y52LV9vL5e+?=
- =?us-ascii?Q?IUA1fdNd6TuFOARC9w6oaWpMynyBGwz/9ruEd2mSjXQv1pZOHxOE+wNnX5nz?=
- =?us-ascii?Q?Kprrz5zTkBXLUPp9ZX+JvAqK3yT7eBt5yaGMFkGm7Nyw9abSv9LgY1eZH5DP?=
- =?us-ascii?Q?y6jZpEC6okadfC3seYhMZsb9a44Lk+6EWfuCYYLTI+M/O2vJGLluzV9hu+d8?=
- =?us-ascii?Q?r0wk+p1YKrJGExqFmnPKt5pKKd8bMAWGOtUsPCBc3CUpb4okIJI0FA9JArLm?=
- =?us-ascii?Q?svihJgo4gvBAItekxXboSgJS2F0IAqCMOpil4LO2E0llyW4rpiQkuY5nJQR4?=
- =?us-ascii?Q?lDVp2UyKwss67xX20ZuNZ/nOEKewTKVFFUUI+TBbQTox4JiiKdHd4NRgCRaG?=
- =?us-ascii?Q?4JHtV4R2qulVnuSbqHvE/vynQFbA2s988HN198LJM8sVV0a4baOumNDNTRsL?=
- =?us-ascii?Q?60EiYcZjrL8ITXyCC4pzRmNbBwKCICLkCX+KxHGj?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	ctuVJloDQIvoxy9eZa6aqvDb/r22b/a+PO/2DirqVbMQH9QlgyzgxPAL5eqmU7sb3/1Fd7V85hcLyn8R34a/6znz815LV0hk9PI+9IjPUG3XxUBnn5R26Ig4eCXV0ROCpoUg4Vkqmo7rje21ZLGaH3u42pMGcRQRCQvSQ4+McDH5OwYr0yi9ibWIBVbsfPj5Xh6IkVdmw20FqGrEDzfzhaL6g3nTUB4ohDpDKs7a079YaP/DOilfgRcQt4GC3XICA50JaQVP3DzgXqKBJcET/Q9e2yffNuR8FbD7a8HOim+m250zDYnwAnG8q9sY+TW+GDzLDy8gnCNsTmXeG3M9ztXCR+dxlYiZUyRqbmNm6O0mIl+9qvqIgXk1Fp/PejThCad5HX5ddzJyl6dXZpPu8Mz+tNqJ6fhd4AXy44OnhJpH4OESTieL2AMnCf7TbtoGfAnV+rcBfnfVFD77TbyYtQwbJAajGcwcjg+VipNzsFksEiwcmF3LpPA7//a0CaM/r1KLzfJNJNDewdTQyOvOwj0aWFV1mGme91zDRNz5dMVSynQsAlcN3epxgIlUEe6I/mvNVXg95Y+MjVG2SqlvZIKKWfOqkVPn6s/NHpeS4Tk=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7e27eabf-13b7-4aac-4210-08dc3557de35
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Feb 2024 16:44:28.9210
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: gVGQOOk03PfFWcr+fQWl+JxhLgRT3yhflfo3ewjJanH/udrC/ZjTkEf1qJrAonqlrMNABjYncYGBLW1k2ZWc9g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR10MB7754
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-02-24_12,2024-02-23_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 phishscore=0
- adultscore=0 mlxlogscore=999 malwarescore=0 spamscore=0 bulkscore=0
- mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2311290000 definitions=main-2402240140
-X-Proofpoint-GUID: ZdtFf94pHTcA85RFTnDkpzsMIltvK1w-
-X-Proofpoint-ORIG-GUID: ZdtFf94pHTcA85RFTnDkpzsMIltvK1w-
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240221140951.GJ355@suse.cz>
 
-Make sure that basic functions such as seeding and device add fail,
-while balance runs successfully with tempfsid.
+On Wed, Feb 21, 2024 at 03:09:51PM +0100, David Sterba wrote:
+> Hi,
+> 
+> reading [1] and how late it was found that effectively a "rm -rf /" can
+> happen makes me worried about what I can expect from fstests after git
+> pull. Many people contribute and the number for custom _cleanup()
+> functions with unquoted 'rm' commands is just asking for more problems.
+> 
+> [1] https://lore.kernel.org/all/20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+> 
+> Unquoted arguments in shell scripts is IMO a big anti-pattern,
+> unfortunately present everywhere in xfstests since the beginning.
+> Rewriting all scripts would be quite a lot of work, could you at least
+> provide safe versions of the cleanup helpers?
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-v3:
- Comment updated.
- Add balance group.
- Drop prerequisite checks.
- Use error (from subvol create) in the golden output instead of calling _fail.
+Hi David,
 
-v2:
- Remove unnecessary function.
- Add clone group
- use $UMOUNT_PROG
- Let _cp_reflink fail on the stdout.
+Thanks for taking care about it :)
 
- tests/btrfs/315     | 78 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/315.out | 10 ++++++
- 2 files changed, 88 insertions(+)
- create mode 100755 tests/btrfs/315
- create mode 100644 tests/btrfs/315.out
+> 
+> For example:
+> 
+> _rm_tmp() {
+>     rm -rf -- $tmp
 
-diff --git a/tests/btrfs/315 b/tests/btrfs/315
-new file mode 100755
-index 000000000000..696e26fe339c
---- /dev/null
-+++ b/tests/btrfs/315
-@@ -0,0 +1,78 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oracle. All Rights Reserved.
-+#
-+# FS QA Test 315
-+#
-+# Verify if the seed and device add to a tempfsid filesystem fails
-+# and balance devices is successful.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick volume seed balance tempfsid
-+
-+_cleanup()
-+{
-+	cd /
-+	$UMOUNT_PROG $tempfsid_mnt 2>/dev/null
-+	rm -r -f $tmp.*
-+	rm -r -f $tempfsid_mnt
-+}
-+
-+. ./common/filter.btrfs
-+
-+_supported_fs btrfs
-+_require_btrfs_sysfs_fsid
-+_require_scratch_dev_pool 3
-+_require_btrfs_fs_feature temp_fsid
-+
-+_scratch_dev_pool_get 3
-+
-+# mount point for the tempfsid device
-+tempfsid_mnt=$TEST_DIR/$seq/tempfsid_mnt
-+
-+seed_device_must_fail()
-+{
-+	echo ---- $FUNCNAME ----
-+
-+	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-+
-+	$BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
-+	$BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
-+
-+	_scratch_mount 2>&1 | _filter_scratch
-+	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt} 2>&1 | _filter_test_dir
-+}
-+
-+device_add_must_fail()
-+{
-+	echo ---- $FUNCNAME ----
-+
-+	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-+	_scratch_mount
-+	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-+
-+	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
-+							_filter_xfs_io
-+
-+$BTRFS_UTIL_PROG device add -f ${SCRATCH_DEV_NAME[2]} ${tempfsid_mnt} 2>&1 | \
-+		grep -v "Performing full device TRIM" | _filter_scratch_pool
-+
-+	echo Balance must be successful
-+	_run_btrfs_balance_start ${tempfsid_mnt}
-+}
-+
-+mkdir -p $tempfsid_mnt
-+
-+seed_device_must_fail
-+
-+_scratch_unmount
-+_cleanup
-+mkdir -p $tempfsid_mnt
-+
-+device_add_must_fail
-+
-+_scratch_dev_pool_put
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
-new file mode 100644
-index 000000000000..56301f9f069e
---- /dev/null
-+++ b/tests/btrfs/315.out
-@@ -0,0 +1,10 @@
-+QA output created by 315
-+---- seed_device_must_fail ----
-+mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
-+mount: TEST_DIR/315/tempfsid_mnt: mount(2) system call failed: File exists.
-+---- device_add_must_fail ----
-+wrote 9000/9000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+ERROR: error adding device 'SCRATCH_DEV': Invalid argument
-+Balance must be successful
-+Done, had to relocate 3 out of 3 chunks
--- 
-2.39.3
+It's "$tmp.*"
+
+May I ask what problem does the "--" hope to avoid? If the "$tmp" is empty,
+"rm -rf" and "rm -rf --"" looks like both doing nothing. So what kind
+of situation does the "--" hope to fix?
+
+The root problem in above [1] is about "${FOO}*". If someone does "rm -rf ${FOO}*"
+in its custom _cleanup_xxxxx function, then it's dangerous if "$FOO" is empty.
+
+I thought some ways to avoid that:
+1) Try to avoid doing rm -rf ${FOO}*, if not necessary.
+2) Must checks [ -n "$FOO" ] before doing any rm -rf ${FOO}*
+3) Someone's custom _cleanup_xxxxx better to be called before default _cleanup
+does "cd /".
+4) Think about bringing in someone "Static program analysis" tool about bash
+script, but I don't know if there're someone good, feel free to give me
+suggestions.
+
+> }
+> 
+> and used as
+> 
+> _cleanup() {
+>     _rm_tmp
+> }
+> 
+> or at least mandate the "--" separator and quoting arguments in new code
+> and gradually fix the existing code.
+> 
+> I can send patches at least for btrfs and generic as this affects me but
+> first I'd like to know that this will become standard coding style
+> requirement in fstests.
+
+If you'd like to send a patch to cleanup the cleanup things, that's welcome.
+(just don't bring in regression issue, please:)
+
+> 
 
