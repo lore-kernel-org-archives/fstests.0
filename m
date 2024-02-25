@@ -1,252 +1,228 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55D7C16427
-	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 15:53:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 860741798E
+	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 15:57:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708876431; cv=none; b=VuceyD1GleAGB/qANFtzpWfCimKC2w/9rpaVhvK8HkUoNGeL7++sXIDLMwHpts+XincGyADT04FC9Ku1yT0S3TbMQVyxpvlsYFhXHB5pWlCLAwxXDaY2ScsebJVYkjygL0e92ta6TFIeyWM8wLZvpOIhlrZurSQEa4HOrz/rpxg=
+	t=1708876628; cv=none; b=iU1gLH2ydRPj6lxPyJuibosa/EB2aQyJeeE9s8wr4+7Y3CX5W5vhY2QFzKBbUT1Z+aVixraGTy94dahmJNhLUPCJK2EAIDopkBdqL90Uk3wYXOktLsvlQDPaLpgnsFP+K7pKy5QoBH05WxmEz+LyOaj2Uqe8YnTV8uz7PMMyfs8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708876431; c=relaxed/simple;
-	bh=dGKfEgI4uQGIUphF5KwuvJ3kPWzHhT5gQJ6IXjaC79E=;
+	s=arc-20240116; t=1708876628; c=relaxed/simple;
+	bh=fiKrljcZXZtlcaof47hzFGF90stgf/tcm7LbBRNJnbQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cJq1hTEwgy46qgVfreU+ESYvcA2/HYA/DhdZSJ2yG5v7gksgHCZOYWrVfhN9stqNlC+1slQvO0lnZdwPgJYRoqCoKezoXzIl2TKT9grlfmezfOCkCIYLJLyG6NayKgvmKMGiRzBZuf9ouIFdzDneIrGcKp9RsPDhLT+yA/ETzQE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aEHHFyBd; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=KLHkCicVdqWiupqARjfF2tvSb1N4PE5aWEoA8hqupw01xCehYJVihe8sc8nLCDXYhkGj1nL8pVEhZEhY27N20xuIXJNXAjKgY4M4ygUXOW4tVg6ObCm1D/EXMZYCX+FO9cNvTOrgeSyPWYg4kEWbGruI/Fv8iP3aYd8JnrU7rCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aIGtpTVl; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aEHHFyBd"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aIGtpTVl"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708876428;
+	s=mimecast20190719; t=1708876623;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=99B0rowVwJJjMFnxcFeFBY1xvNAOcFSS03jBJSy/yZs=;
-	b=aEHHFyBdyi7NGD1rwRrijYjLpyOZ2Wg5BDfBajrjvAvX7Y/hwqEtXtnznUGKLtAyEKaHaQ
-	KpXd+114I6vbRoUOhFFEQ/RVX5j0R6Lu7YnImM2kv1xUKZClHqbSmXV6nLMS0B8gm2LwBW
-	Z4GeoRe7YHNZ6BjdSPNzTkYayURRA6Y=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=6hOtPeX/xXFWzaT6G1FW9bL5Z9wtGd/xkqwGLhxqceY=;
+	b=aIGtpTVlJzSWVamlegya+wZmtlC/9TYD3yCgQWl5nRp1JLUHzjrThvrc7UV75Qtfv9k3dq
+	zw/fdx23bJgy3HhsA8FB3unWRGNSNGmTNJ/0/mLu24/APhIxgnej4MHmF7ywVETEqp/27u
+	ZsbpybmyCH3pae+yBt/Kc5jIZPlEObQ=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-136-BdjdIGlSPcei3lxW2s1uBQ-1; Sun, 25 Feb 2024 10:53:45 -0500
-X-MC-Unique: BdjdIGlSPcei3lxW2s1uBQ-1
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-290e7a0a585so1960264a91.3
-        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 07:53:45 -0800 (PST)
+ us-mta-696-lxDsR1wtPb61h3TnBaX8Eg-1; Sun, 25 Feb 2024 10:57:02 -0500
+X-MC-Unique: lxDsR1wtPb61h3TnBaX8Eg-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1dc685df4adso7916285ad.2
+        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 07:57:01 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708876424; x=1709481224;
+        d=1e100.net; s=20230601; t=1708876620; x=1709481420;
         h=in-reply-to:content-transfer-encoding:content-disposition
          :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=99B0rowVwJJjMFnxcFeFBY1xvNAOcFSS03jBJSy/yZs=;
-        b=mAquBfh8L/vEnyC4YQ30AFqwZpcuKtpvPcLLDpV1hpCjbGrIGK6f5clCOB9UYYP4HQ
-         ifTxdZNiShCxxV8XFZyhA5xZzeBAPjq8Pyj+wnSRMNeL+f0+DR7FUPMmrjd2fBT/WqPw
-         60bWjfvu9bj/G0C3+Jjvpx3S8kYYix7MfyxbF8cRITSisG+u0B+FmmQnIZk5KKogW0WS
-         SeF97rc9qfsCk5xDtYDJEhUcvQfa7YQ5NpWJRT7ruS3KyHiyqboyVKfmk7bbBRsrqiGS
-         iE44KF834EoOw1Z72YpQYP54slqi1OCpZ8JMNS0GhGuV+TN1unHA7zq1av4oSJfwu41X
-         HTdg==
-X-Forwarded-Encrypted: i=1; AJvYcCUZw0ViYtQN8icPWi1pqEAxgchkjfvAosoDWyGA+oMYddcdiLrh65HHPPox8iQs7KV9r1u7vod30bYi0V1JesmcMp9R2zhGSA==
-X-Gm-Message-State: AOJu0YxbCZ4CgHi3Ntt5q780sxfEZ6z2u6lTCXN5ibEIwzS7t1LnELPA
-	6o66rGPW757Lu9TNo/WhpDvYDignJsH/M8uJeRFO1XZALGLlOU69ZSadZblIbZSiQJTN/KXBdRl
-	0QqKpkeLrLQ4HTaXbeVd9g8n69etrq+27T25ZJfIuODKqPOHKsdVBJMo=
-X-Received: by 2002:a17:90a:6d88:b0:299:2b9a:88bc with SMTP id a8-20020a17090a6d8800b002992b9a88bcmr3698092pjk.37.1708876424414;
-        Sun, 25 Feb 2024 07:53:44 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFCL5Ei6/rDqcXb5NrE2CkDWn8q2M/2b/TGwBFAH68RPjEEl9aNqkQYwMX9SaxrIepu6P5cjQ==
-X-Received: by 2002:a17:90a:6d88:b0:299:2b9a:88bc with SMTP id a8-20020a17090a6d8800b002992b9a88bcmr3698082pjk.37.1708876424068;
-        Sun, 25 Feb 2024 07:53:44 -0800 (PST)
+        bh=6hOtPeX/xXFWzaT6G1FW9bL5Z9wtGd/xkqwGLhxqceY=;
+        b=Stt+i4z1L6Ci5V0I8OMTZPm9bCE7PRTsDi20KYyThhGKnK0uZrEeccQdTZcInjF0/Z
+         RY6sFg9FEnV7i8RdvkwmOlyDkYZGajLRD3Cj7f82JaO4e61jxn+b2qVHCvqwj08ZKoer
+         so8+/DfGU1eqA/CaTYPUgd2Ce4GDD3Bczo/jNyMpsxsjoC7k1soiTcfTBi1dKETaqcmP
+         Mzp+86O5lUS9BlEH2BF7OoBcsHl+x4oyJ8s9dK3lJkqliAyiXZQ+h2y/a+Wuw5wVY3RL
+         n8BCHGikC7fMCtS4NwFI7EE8RfKGCQK3oD3EC2m9dbA/ViQk09jXNTyyT7wKdxRrh1kz
+         EQAA==
+X-Forwarded-Encrypted: i=1; AJvYcCUd+PwFKDBBgRuS4hBNgAAu7TRiq0FFEWunWaQAll6luYtz3ZMKgg+svEkGcwg/XtjYgJoLKSpg0khWVM4Zt+Zpk1W+FbSneg==
+X-Gm-Message-State: AOJu0YxihBLPuMZU4Qv/9HNBm7ebyMyMs4/y8WPkKgt82i5lrupbNKeK
+	M4YHPIZyhD3/lvyNm8u/tAgxTST4L780VI+NkgUc3ej0j2IEgQFjTzusAC3PySVTYlIjm42pBWr
+	785FVz8AYp8lEXBEyngJL/rwhrjZ+23UlbyhVCzWocH83YU88rv3hZ1oKQJc0wQ8BaA==
+X-Received: by 2002:a17:902:cecc:b0:1dc:8f8e:63e2 with SMTP id d12-20020a170902cecc00b001dc8f8e63e2mr2027331plg.46.1708876620693;
+        Sun, 25 Feb 2024 07:57:00 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGYD4OIDKtJnVeUt3DUnxm+IFnlP4E8s3oJlEmqVr8y1fFPpOWIYUhm+rDjzfFzfsZ2c4W4Tw==
+X-Received: by 2002:a17:902:cecc:b0:1dc:8f8e:63e2 with SMTP id d12-20020a170902cecc00b001dc8f8e63e2mr2027319plg.46.1708876620334;
+        Sun, 25 Feb 2024 07:57:00 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id f21-20020a17090a9b1500b0029a45b28d43sm2810432pjp.14.2024.02.25.07.53.41
+        by smtp.gmail.com with ESMTPSA id x2-20020a170902b40200b001db9c3d6506sm2357596plr.209.2024.02.25.07.56.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Feb 2024 07:53:43 -0800 (PST)
-Date: Sun, 25 Feb 2024 23:53:39 +0800
+        Sun, 25 Feb 2024 07:56:59 -0800 (PST)
+Date: Sun, 25 Feb 2024 23:56:56 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] fstests: btrfs: add a test case to make sure
- inconsitent qgroup won't leak reserved data space
-Message-ID: <20240225155339.dg3vrmvkvowirmiw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240223093547.150915-1-wqu@suse.com>
- <12c20a26-5632-4c53-a011-7e74a781724b@oracle.com>
- <ded4aab0-1bf7-43d2-8a19-12197fe19f88@suse.com>
+To: Luis Henriques <lhenriques@suse.de>
+Cc: Christian Brauner <brauner@kernel.org>, linux-ext4@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] vfs: fix check for tmpfile support
+Message-ID: <20240225155656.yjqyuyjxsbtiqvb2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <87jzmxisqm.fsf@suse.de>
+ <20240222-mango-batterie-505564cecb69@brauner>
+ <87cysoh9wf.fsf@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <ded4aab0-1bf7-43d2-8a19-12197fe19f88@suse.com>
+In-Reply-To: <87cysoh9wf.fsf@suse.de>
 
-On Sat, Feb 24, 2024 at 06:21:44AM +1030, Qu Wenruo wrote:
+On Thu, Feb 22, 2024 at 02:05:20PM +0000, Luis Henriques wrote:
+> Christian Brauner <brauner@kernel.org> writes:
 > 
+> > When ext4 is used with quota support the test fails with EINVAL because
+> > it is run after we idmapped the mount. If the caller's fs{g,u}ids aren't
+> > mapped then we fail and log a misleading error. Move the checks for
+> > tmpfile support right at the beginning of the test in all tests.
+> >
+> > Reported-by: Luis Henriques <lhenriques@suse.de>
+> > Link: https://lore.kernel.org/r/20240222-knast-reifen-953312ce17a9@brauner
+> > Signed-off-by: Christian Brauner <brauner@kernel.org>
 > 
-> 在 2024/2/24 03:37, Anand Jain 写道:
-> > On 2/23/24 15:05, Qu Wenruo wrote:
-> > > There is a kernel regression caused by commit e15e9f43c7ca ("btrfs:
-> > > introduce BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup
-> > > accounting"), where if qgroup is inconsistent (not that hard to trigger)
-> > > btrfs would leak its qgroup data reserved space, and cause a warning at
-> > > unmount time.
-> > > 
-> > > The test case would verify the behavior by:
-> > > 
-> > > - Enable qgroup first
-> > > 
-> > > - Intentionally mark qgroup inconsistent
-> > >    This is done by taking a snapshot and assign it to a higher level
-> > >    qgroup, meanwhile the source has no higher level qgroup.
-> > > 
-> > > - Trigger a large enough write to cause qgroup data space leak
-> > > 
-> > > - Unmount and check the dmesg for the qgroup rsv leak warning
-> > > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> > 
-> > looks good.
-> > 
-> > Reviewed-by: Anand Jain <anand.jain@oracle.com>
-> 
-> Thanks for the review.
-> 
-> > 
-> > 
-> > Queued for the upcoming pull request.
-> 
-> So for the btrfs fstests part, you'll do the pull request to upstream
-> fstests, right?
+> FWIW I've just tested this patch and I can confirm it fixes the failures I
+> was seeing in ext4.  Again, thanks a lot, Christian.
 
-Anand helps to merge some complicated btrfs patches, he'll help to give
-it more reviewing and testing on btrfs side. Thanks for his help. Some
-small changes for btrfs might be merged by me directly for quick
-response/fix.
+Thanks for your confirm, I think we can have your "Tested-by" if you don't
+mind.
 
 > 
-> In that case, if we have some conflicting test case number, how do we
-> resolve it?
+> Cheers,
+> -- 
+> Lu�s
 > 
-> It would be resolved by you or the author would be notified and need a
-> resend?
-
-Don't worry, that would be resolved by maintainer, to avoid you always need
-to resend a patch only for changing a case number :)
-
 > 
-> And do we have a branch to base our new test cases upon? (Mostly to avoid
-> the number conflicting)
-
-Sometimes it's hard to make sure the final case number before release.
-
-If you need, I can provide a branch for "patches wating for pushing", but
-that branch might be unstable, and might be removed & recreated sometimes.
-
-Thanks,
-Zorro
-
+> > ---
+> >  src/vfs/idmapped-mounts.c | 24 ++++++++++++------------
+> >  1 file changed, 12 insertions(+), 12 deletions(-)
+> >
+> > diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+> > index 547182fe..e490f3d7 100644
+> > --- a/src/vfs/idmapped-mounts.c
+> > +++ b/src/vfs/idmapped-mounts.c
+> > @@ -3815,6 +3815,8 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -3838,8 +3840,6 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	pid = fork();
+> >  	if (pid < 0) {
+> >  		log_stderr("failure: fork");
+> > @@ -3991,6 +3991,8 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -4014,8 +4016,6 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	pid = fork();
+> >  	if (pid < 0) {
+> >  		log_stderr("failure: fork");
+> > @@ -7715,6 +7715,8 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -7738,8 +7740,6 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	pid = fork();
+> >  	if (pid < 0) {
+> >  		log_stderr("failure: fork");
+> > @@ -7929,6 +7929,8 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -7952,8 +7954,6 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	/*
+> >  	 * Below we verify that setgid inheritance for a newly created file or
+> >  	 * directory works correctly. As part of this we need to verify that
+> > @@ -8163,6 +8163,8 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -8186,8 +8188,6 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	pid = fork();
+> >  	if (pid < 0) {
+> >  		log_stderr("failure: fork");
+> > @@ -8518,6 +8518,8 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
+> > +
+> >  	/* Changing mount properties on a detached mount. */
+> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
+> >  	if (attr.userns_fd < 0) {
+> > @@ -8541,8 +8543,6 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
+> >  		goto out;
+> >  	}
+> >  
+> > -	supported = openat_tmpfile_supported(open_tree_fd);
+> > -
+> >  	/*
+> >  	 * Below we verify that setgid inheritance for a newly created file or
+> >  	 * directory works correctly. As part of this we need to verify that
+> > -- 
+> >
+> > 2.43.0
+> >
 > 
-> Thanks,
-> Qu
-> 
-> > 
-> > Thanks, Anand
-> > 
-> > > ---
-> > >   tests/btrfs/303     | 59 +++++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/btrfs/303.out |  2 ++
-> > >   2 files changed, 61 insertions(+)
-> > >   create mode 100755 tests/btrfs/303
-> > >   create mode 100644 tests/btrfs/303.out
-> > > ---
-> > > Changelog:
-> > > v2:
-> > > - Fix various spelling errors
-> > > 
-> > > - Remove a copied _fixed_by_kernel_commit line
-> > >    Which was used to align the number of 'x', but forgot to remove
-> > > 
-> > > diff --git a/tests/btrfs/303 b/tests/btrfs/303
-> > > new file mode 100755
-> > > index 00000000..9f7605ab
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/303
-> > > @@ -0,0 +1,59 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 303
-> > > +#
-> > > +# Make sure btrfs qgroup won't leak its reserved data space if qgroup is
-> > > +# marked inconsistent.
-> > > +#
-> > > +# This exercises a regression introduced in v6.1 kernel by the
-> > > following commit:
-> > > +#
-> > > +# e15e9f43c7ca ("btrfs: introduce
-> > > BTRFS_QGROUP_RUNTIME_FLAG_NO_ACCOUNTING to skip qgroup accounting")
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick qgroup
-> > > +
-> > > +_supported_fs btrfs
-> > > +_require_scratch
-> > > +
-> > > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > +    "btrfs: qgroup: always free reserved space for extent records"
-> > > +
-> > > +_scratch_mkfs >> $seqres.full
-> > > +_scratch_mount
-> > > +
-> > > +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> > > +$BTRFS_UTIL_PROG quota rescan -w $SCRATCH_MNT >> $seqres.full
-> > > +
-> > > +$BTRFS_UTIL_PROG qgroup create 1/0 $SCRATCH_MNT >> $seqres.full
-> > > +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subv1 >> $seqres.full
-> > > +
-> > > +# This would mark qgroup inconsistent, as the snapshot belongs to a
-> > > different
-> > > +# higher level qgroup, we have to do full rescan on both source and
-> > > snapshot.
-> > > +# This can be very slow for large subvolumes, so btrfs only marks qgroup
-> > > +# inconsistent and let users to determine when to do a full rescan
-> > > +$BTRFS_UTIL_PROG subvolume snapshot -i 1/0 $SCRATCH_MNT/subv1
-> > > $SCRATCH_MNT/snap1 >> $seqres.full
-> > > +
-> > > +# This write would lead to a qgroup extent record holding the
-> > > reserved 128K.
-> > > +# And for unpatched kernels, the reserved space would not be freed
-> > > properly
-> > > +# due to qgroup is inconsistent.
-> > > +_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/foobar >> $seqres.full
-> > > +
-> > > +# The qgroup leak detection is only triggered at unmount time.
-> > > +_scratch_unmount
-> > > +
-> > > +# Check the dmesg warning for data rsv leak.
-> > > +#
-> > > +# If CONFIG_BTRFS_DEBUG is enabled, we would have a kernel warning with
-> > > +# backtrace, but for release builds, it's just a warning line.
-> > > +# So here we manually check the warning message.
-> > > +if _dmesg_since_test_start | grep -q "leak"; then
-> > > +    _fail "qgroup data reserved space leaked"
-> > > +fi
-> > > +
-> > > +echo "Silence is golden"
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
-> > > new file mode 100644
-> > > index 00000000..d48808e6
-> > > --- /dev/null
-> > > +++ b/tests/btrfs/303.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 303
-> > > +Silence is golden
-> > 
 > 
 
