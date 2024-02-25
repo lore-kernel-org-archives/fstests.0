@@ -1,228 +1,120 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 860741798E
-	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 15:57:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E95A17991
+	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 16:09:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708876628; cv=none; b=iU1gLH2ydRPj6lxPyJuibosa/EB2aQyJeeE9s8wr4+7Y3CX5W5vhY2QFzKBbUT1Z+aVixraGTy94dahmJNhLUPCJK2EAIDopkBdqL90Uk3wYXOktLsvlQDPaLpgnsFP+K7pKy5QoBH05WxmEz+LyOaj2Uqe8YnTV8uz7PMMyfs8=
+	t=1708877352; cv=none; b=s/G9QnwQT/BMHEo1C7jrz7KXN0Q/16LrL8NZbTx/F08ggL3EDQqvzT6ThR4Qb9t70It0KTFVCZwhNOPzU0IJaaiSyWh1IM5KKY2egndH48bFqAaeFk0HKVX9L8QaBO65URBwn0cd9aKr0lyejdodKFiJjbU41JWz72TeqQVHiGc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708876628; c=relaxed/simple;
-	bh=fiKrljcZXZtlcaof47hzFGF90stgf/tcm7LbBRNJnbQ=;
+	s=arc-20240116; t=1708877352; c=relaxed/simple;
+	bh=bWVyG4ooUn4bG6bWqWfbJrqunJLdeEr0h0UomtvKp+A=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KLHkCicVdqWiupqARjfF2tvSb1N4PE5aWEoA8hqupw01xCehYJVihe8sc8nLCDXYhkGj1nL8pVEhZEhY27N20xuIXJNXAjKgY4M4ygUXOW4tVg6ObCm1D/EXMZYCX+FO9cNvTOrgeSyPWYg4kEWbGruI/Fv8iP3aYd8JnrU7rCM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aIGtpTVl; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=eqcEGYPppw8NkfWq8qSl0d/L3WJK7BNGQ/ZPNSRH/RfuwVEfAYwHppoDCZFPhDbF1LmQY/9i3VIyvKAQ4TYaqHW6PUxMNf93684FdAxJTNIPp6InUt7yfeFP18S8JoBGM01SwivBJclz9e+zYEj9SMF0vqpJJADaoBfPOqqPj+w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RdvY2ymJ; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aIGtpTVl"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RdvY2ymJ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708876623;
+	s=mimecast20190719; t=1708877349;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=6hOtPeX/xXFWzaT6G1FW9bL5Z9wtGd/xkqwGLhxqceY=;
-	b=aIGtpTVlJzSWVamlegya+wZmtlC/9TYD3yCgQWl5nRp1JLUHzjrThvrc7UV75Qtfv9k3dq
-	zw/fdx23bJgy3HhsA8FB3unWRGNSNGmTNJ/0/mLu24/APhIxgnej4MHmF7ywVETEqp/27u
-	ZsbpybmyCH3pae+yBt/Kc5jIZPlEObQ=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=4M+DNtT1zWFOoFWAPUy1ymTQkIScq55vkJSM4JvyW08=;
+	b=RdvY2ymJl5DU36bhHKSBU9FGfuXS2Rrjc8K9gTOuI+7vcAB3+kGjHxEfUEL+0Z/Y+qzGDZ
+	lzsFjJtxZ0uq2ZKdkLGE1tLVOwRdT9lyom9cv97cUyNrgEi1r7LkFsMfmT6OjkoAssD/pB
+	K8J94/KBTfys8/otKXfakQoFgpyiWOs=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-696-lxDsR1wtPb61h3TnBaX8Eg-1; Sun, 25 Feb 2024 10:57:02 -0500
-X-MC-Unique: lxDsR1wtPb61h3TnBaX8Eg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1dc685df4adso7916285ad.2
-        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 07:57:01 -0800 (PST)
+ us-mta-581-ZMr8zYbbO_60sxWlxk8JIw-1; Sun, 25 Feb 2024 11:09:06 -0500
+X-MC-Unique: ZMr8zYbbO_60sxWlxk8JIw-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-6e50831226dso274544b3a.2
+        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 08:09:06 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708876620; x=1709481420;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=6hOtPeX/xXFWzaT6G1FW9bL5Z9wtGd/xkqwGLhxqceY=;
-        b=Stt+i4z1L6Ci5V0I8OMTZPm9bCE7PRTsDi20KYyThhGKnK0uZrEeccQdTZcInjF0/Z
-         RY6sFg9FEnV7i8RdvkwmOlyDkYZGajLRD3Cj7f82JaO4e61jxn+b2qVHCvqwj08ZKoer
-         so8+/DfGU1eqA/CaTYPUgd2Ce4GDD3Bczo/jNyMpsxsjoC7k1soiTcfTBi1dKETaqcmP
-         Mzp+86O5lUS9BlEH2BF7OoBcsHl+x4oyJ8s9dK3lJkqliAyiXZQ+h2y/a+Wuw5wVY3RL
-         n8BCHGikC7fMCtS4NwFI7EE8RfKGCQK3oD3EC2m9dbA/ViQk09jXNTyyT7wKdxRrh1kz
-         EQAA==
-X-Forwarded-Encrypted: i=1; AJvYcCUd+PwFKDBBgRuS4hBNgAAu7TRiq0FFEWunWaQAll6luYtz3ZMKgg+svEkGcwg/XtjYgJoLKSpg0khWVM4Zt+Zpk1W+FbSneg==
-X-Gm-Message-State: AOJu0YxihBLPuMZU4Qv/9HNBm7ebyMyMs4/y8WPkKgt82i5lrupbNKeK
-	M4YHPIZyhD3/lvyNm8u/tAgxTST4L780VI+NkgUc3ej0j2IEgQFjTzusAC3PySVTYlIjm42pBWr
-	785FVz8AYp8lEXBEyngJL/rwhrjZ+23UlbyhVCzWocH83YU88rv3hZ1oKQJc0wQ8BaA==
-X-Received: by 2002:a17:902:cecc:b0:1dc:8f8e:63e2 with SMTP id d12-20020a170902cecc00b001dc8f8e63e2mr2027331plg.46.1708876620693;
-        Sun, 25 Feb 2024 07:57:00 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGYD4OIDKtJnVeUt3DUnxm+IFnlP4E8s3oJlEmqVr8y1fFPpOWIYUhm+rDjzfFzfsZ2c4W4Tw==
-X-Received: by 2002:a17:902:cecc:b0:1dc:8f8e:63e2 with SMTP id d12-20020a170902cecc00b001dc8f8e63e2mr2027319plg.46.1708876620334;
-        Sun, 25 Feb 2024 07:57:00 -0800 (PST)
+        d=1e100.net; s=20230601; t=1708877345; x=1709482145;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4M+DNtT1zWFOoFWAPUy1ymTQkIScq55vkJSM4JvyW08=;
+        b=gaeWLhCQKv29NpnfJFwiYUQlp94peQUqLsnSOFbPBVz9Be8kDObgADgFShKEXNsGY8
+         PDUctRS9KuGDQN+P2YCnbJFPE+nhCiwb8K8gnXfExnDDddCYp1ZLIqoeti2teCOfSPHE
+         uP0buw1QTK/51FONnoo+VtSLaeN0Hb0sYoRO679r/F59g4uOn7sWE37jzusjTWG3LyKI
+         bgKK42Rm6HLoJnd2IdBmZGJ58S0ZU5tkGIZu1mMu19zz67kTIiWG4B4SdO61iv5Q2yz1
+         PE4zSdpdomQWt2oikomIFj2DPczrSL6ht7IxuJxLXeYEwmx1gbW6xkh4SEy/3LNaWesH
+         3PHQ==
+X-Forwarded-Encrypted: i=1; AJvYcCX9GYgK4oGJV7XO6Ia0l3wCx3vurgGl8JS4zekNcvX+/NGC0GdSlgXwuGfAFrtS62m2GSSBeEXK5J/ufN+zar7fILM6SfGfhA==
+X-Gm-Message-State: AOJu0YyHD3U5DZ5DARwCTOYjbefmabnHKZqKZqvaAC+SYfDZ/T6UUp/M
+	G3uv3/Xh/Hljw5tZw1IdTVAl3GTWRWb3yX6wjcP4hiAVfAECBP1AqxNfuCch56IlA01jOxxJ2JX
+	3YJf4FBs5fJrnOzcItdXnLBnZx+2k4VO9uNGzyCELa5qFDWtws3Tbxt0=
+X-Received: by 2002:aa7:8693:0:b0:6e4:59b3:928c with SMTP id d19-20020aa78693000000b006e459b3928cmr3576539pfo.10.1708877345546;
+        Sun, 25 Feb 2024 08:09:05 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IELhdpuksSCkCVmptASRnZV0pLXZtX48KEkxUmfLHWYV0Z7mnKZWeD/8mPjgbAgBqUzUgyzRw==
+X-Received: by 2002:aa7:8693:0:b0:6e4:59b3:928c with SMTP id d19-20020aa78693000000b006e459b3928cmr3576528pfo.10.1708877345170;
+        Sun, 25 Feb 2024 08:09:05 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x2-20020a170902b40200b001db9c3d6506sm2357596plr.209.2024.02.25.07.56.58
+        by smtp.gmail.com with ESMTPSA id f6-20020a056a00238600b006e0dd50b0d0sm2485386pfc.8.2024.02.25.08.09.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Feb 2024 07:56:59 -0800 (PST)
-Date: Sun, 25 Feb 2024 23:56:56 +0800
+        Sun, 25 Feb 2024 08:09:04 -0800 (PST)
+Date: Mon, 26 Feb 2024 00:08:59 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Luis Henriques <lhenriques@suse.de>
-Cc: Christian Brauner <brauner@kernel.org>, linux-ext4@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] vfs: fix check for tmpfile support
-Message-ID: <20240225155656.yjqyuyjxsbtiqvb2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <87jzmxisqm.fsf@suse.de>
- <20240222-mango-batterie-505564cecb69@brauner>
- <87cysoh9wf.fsf@suse.de>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org,
+	anand.jain@oracle.com, aalbersh@redhat.com, djwong@kernel.org,
+	linux-fsdevel@vger.kernel.org, kdevops@lists.linux.dev,
+	patches@lists.linux.dev
+Subject: Re: [PATCH 2/3] check: add support for --list-group-tests
+Message-ID: <20240225160859.tqbs2ltiqcj72ozj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240216181859.788521-1-mcgrof@kernel.org>
+ <20240216181859.788521-3-mcgrof@kernel.org>
+ <ZdLNJD5pYaK84w3r@dread.disaster.area>
+ <ZdYosXHe9ec04kBr@bombadil.infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <87cysoh9wf.fsf@suse.de>
+In-Reply-To: <ZdYosXHe9ec04kBr@bombadil.infradead.org>
 
-On Thu, Feb 22, 2024 at 02:05:20PM +0000, Luis Henriques wrote:
-> Christian Brauner <brauner@kernel.org> writes:
+On Wed, Feb 21, 2024 at 08:45:37AM -0800, Luis Chamberlain wrote:
+> On Mon, Feb 19, 2024 at 02:38:12PM +1100, Dave Chinner wrote:
+> > On Fri, Feb 16, 2024 at 10:18:58AM -0800, Luis Chamberlain wrote:
+> > > Since the prior commit adds the ability to list groups but is used
+> > > only when we use --start-after, let's add an option which leverages this
+> > > to also allow us to easily query which tests are part of the groups
+> > > specified.
+> > > 
+> > > This can be used for dynamic test configuration suites such as kdevops
+> > > which may want to take advantage of this information to deterministically
+> > > determine if a test falls part of a specific group.
+> > > Demo:
+> > > 
+> > > root@demo-xfs-reflink /var/lib/xfstests # ./check --list-group-tests -g soak
+> > > 
+> > > generic/019 generic/388 generic/475 generic/476 generic/521 generic/522 generic/616 generic/617 generic/642 generic/648 generic/650 xfs/285 xfs/517 xfs/560 xfs/561 xfs/562 xfs/565 xfs/570 xfs/571 xfs/572 xfs/573 xfs/574 xfs/575 xfs/576 xfs/577 xfs/578 xfs/579 xfs/580 xfs/581 xfs/582 xfs/583 xfs/584 xfs/585 xfs/586 xfs/587 xfs/588 xfs/589 xfs/590 xfs/591 xfs/592 xfs/593 xfs/594 xfs/595 xfs/727 xfs/729 xfs/800
+> > 
+> > So how is this different to ./check -n -g soak?
+> > 
+> > '-n' is supposed to show you want tests are going to be run
+> > without actually running them, so why can't you use that?
 > 
-> > When ext4 is used with quota support the test fails with EINVAL because
-> > it is run after we idmapped the mount. If the caller's fs{g,u}ids aren't
-> > mapped then we fail and log a misleading error. Move the checks for
-> > tmpfile support right at the beginning of the test in all tests.
-> >
-> > Reported-by: Luis Henriques <lhenriques@suse.de>
-> > Link: https://lore.kernel.org/r/20240222-knast-reifen-953312ce17a9@brauner
-> > Signed-off-by: Christian Brauner <brauner@kernel.org>
-> 
-> FWIW I've just tested this patch and I can confirm it fixes the failures I
-> was seeing in ext4.  Again, thanks a lot, Christian.
+> '-n' will replicate as if you are running all tests but just skip while
+> --list-group-tests will just look for the tests for the group and bail right
+> away, and it is machine readable.
 
-Thanks for your confirm, I think we can have your "Tested-by" if you don't
-mind.
+What do you mean "replicate as if you are running all tests but just skip"?
+Sorry I don't understand this explanation 100%, can you show us some examples
+to explain what kind of job you hope "--list-group-tests" to do, but the "-n"
+is helpless?
+
+Thanks,
+Zorro
 
 > 
-> Cheers,
-> -- 
-> Luís
-> 
-> 
-> > ---
-> >  src/vfs/idmapped-mounts.c | 24 ++++++++++++------------
-> >  1 file changed, 12 insertions(+), 12 deletions(-)
-> >
-> > diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
-> > index 547182fe..e490f3d7 100644
-> > --- a/src/vfs/idmapped-mounts.c
-> > +++ b/src/vfs/idmapped-mounts.c
-> > @@ -3815,6 +3815,8 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -3838,8 +3840,6 @@ int tcore_setgid_create_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	pid = fork();
-> >  	if (pid < 0) {
-> >  		log_stderr("failure: fork");
-> > @@ -3991,6 +3991,8 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -4014,8 +4016,6 @@ int tcore_setgid_create_idmapped_in_userns(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	pid = fork();
-> >  	if (pid < 0) {
-> >  		log_stderr("failure: fork");
-> > @@ -7715,6 +7715,8 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -7738,8 +7740,6 @@ static int setgid_create_umask_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	pid = fork();
-> >  	if (pid < 0) {
-> >  		log_stderr("failure: fork");
-> > @@ -7929,6 +7929,8 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -7952,8 +7954,6 @@ static int setgid_create_umask_idmapped_in_userns(const struct vfstest_info *inf
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	/*
-> >  	 * Below we verify that setgid inheritance for a newly created file or
-> >  	 * directory works correctly. As part of this we need to verify that
-> > @@ -8163,6 +8163,8 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -8186,8 +8188,6 @@ static int setgid_create_acl_idmapped(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	pid = fork();
-> >  	if (pid < 0) {
-> >  		log_stderr("failure: fork");
-> > @@ -8518,6 +8518,8 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > +	supported = openat_tmpfile_supported(info->t_dir1_fd);
-> > +
-> >  	/* Changing mount properties on a detached mount. */
-> >  	attr.userns_fd	= get_userns_fd(0, 10000, 10000);
-> >  	if (attr.userns_fd < 0) {
-> > @@ -8541,8 +8543,6 @@ static int setgid_create_acl_idmapped_in_userns(const struct vfstest_info *info)
-> >  		goto out;
-> >  	}
-> >  
-> > -	supported = openat_tmpfile_supported(open_tree_fd);
-> > -
-> >  	/*
-> >  	 * Below we verify that setgid inheritance for a newly created file or
-> >  	 * directory works correctly. As part of this we need to verify that
-> > -- 
-> >
-> > 2.43.0
-> >
-> 
+>   Luis
 > 
 
