@@ -1,324 +1,118 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1CD3DDA8
-	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 16:30:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47D5312E71
+	for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 16:38:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708878653; cv=none; b=E8rAygP08CH4BKiVJRRrgceL23rmtz9596BQ+mX31et482WOrP0mTNyI2KbA6PokgoXrLL70nNfN+hTA2MTOWtvQqsxWO9oC7c35hmgyJOM3hsHePt2pczLfB5gV+XV3xEv1N53vm2ATAEzy33edYkaNskmJGCxPJ87zvKwR7GQ=
+	t=1708879117; cv=none; b=eodHn8ZdCZsmwTH54JXA4S707CuIW8tOVux/xBlNqEmpBnOgN3/vSZB6QrbLXgn7OtStlLg8TyjNimrsePacIXHO1Np36IUvoIRG+lvkEs5jgOGskpTSdJcfaZZOw9bopAtTrSCVsy0IMBs5BCJjnKnqE4AcKBH9fVKIdYdU2ls=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708878653; c=relaxed/simple;
-	bh=WxiP7F68RSJ87rzcxYBpZWvoQ3nnn47X/jIvBgI4zd4=;
+	s=arc-20240116; t=1708879117; c=relaxed/simple;
+	bh=UCqTkXTA6LgnlAdiKrDdNeBduGWk2xf5nQNKZB5T3Gg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uJ/3ZmLhvjy8JByZ/V/rKJCSNp67j9oIxwir0kniRsCkUHvhyj0YYVRkHbwGswAddH24RU5Qg/vHyv/ZmbXbV20+SYEJuACyW1ZgtzClbyl+qMpqYA8O2DKPjisW2rAXzfzJiKG6CeM21C9d+Gj76IjzMJMc61JVRBSgSY/5V9E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JgNH1rjh; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=TbHFH4UYxJ/m4WIZoNaUCMVNfIL3NBPpipMsVSkfe6O6f+0wrye4OThoOWJjsttl5AcqcsGv8KEyhbSjwH7MwUeFcwtJKFAkQrGt9w8z/zVUO/9G/64AwHrF7wezLHMF6R9L7MS8joMADCRY6oI1fDbj5qTbQ9pToMSJwl/dxiA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=csgByTgA; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JgNH1rjh"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="csgByTgA"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708878650;
+	s=mimecast20190719; t=1708879115;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=SSlJib+z8G6JyqJPxqUox75szUmw+vOptrkfrW5q6K8=;
-	b=JgNH1rjhvA4M9+s4lwnzWiwrzl9FjgJQmQpUQsmlAw6uUbb1nbQC0SQz2uqMFR4T8QGc9Q
-	STKwgpjlU0McgZfggXLJ7/84hYIaK1d3XpJ5OtZYsfMxcUF5DN3MLz6njbkKi6Iqa3TEfj
-	8VRcM1jqjBw2pJGOUmyD8m4BeJOCevo=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=gT00iK1792I1ru6cy3dmEyZDGBGyy5dsWmrhf416F50=;
+	b=csgByTgAjhHSKTXuly0OvmfTbVYkUO/l3cG8yLJuX+QYXhZ87yEZzsua7dEQyGfR5DBaJK
+	TPii5BgEI/YSpzOiY1aHCWrqSJBKCQLcSeVPx9bqbxSAN68A4jgTfv3+rXAy03ADbyKRek
+	deVhxDcHYy7sMenWB5OyaNWXo3ekHjQ=
+Received: from mail-oo1-f72.google.com (mail-oo1-f72.google.com
+ [209.85.161.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-135-lKOh6k8VNbiVRPpDnCMkkQ-1; Sun, 25 Feb 2024 11:30:48 -0500
-X-MC-Unique: lKOh6k8VNbiVRPpDnCMkkQ-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1dc6f251034so5739055ad.1
-        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 08:30:48 -0800 (PST)
+ us-mta-680-AzIuYv3-MX-qpG4behhcHQ-1; Sun, 25 Feb 2024 11:38:33 -0500
+X-MC-Unique: AzIuYv3-MX-qpG4behhcHQ-1
+Received: by mail-oo1-f72.google.com with SMTP id 006d021491bc7-59fe9adf734so1997724eaf.1
+        for <fstests@vger.kernel.org>; Sun, 25 Feb 2024 08:38:33 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708878647; x=1709483447;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=SSlJib+z8G6JyqJPxqUox75szUmw+vOptrkfrW5q6K8=;
-        b=pnIqfiaTEhVHEcRPYm1x6+Dg9NHRqBiE8tbAUMPh3YcurRSCZqSxyTRZj92q+8bole
-         otWurvpb4I/cmq+fgb7HW/4xW1xDS4okC5NTvWSLeawHVyCFkGUl8FwZWdaOHsUjl3Lm
-         5QRkgk0CuF8YT7Fn6cOjIGSSDLJc4jKUAyd4vC+yRoU5P+FUyq40Vb4kwcp0ENpAZLCb
-         HaY3wKOUmmHRuH5Sy2iGISCHfDfR1bZ0DLEhOHMiUH+ta72ruuifPH5KL4YtltuC7IhS
-         y15m83DTbYCK36WJYLh3A9CoLdQ+lLZeOvLUhuVtn/6Giivt/feSi3YzFTdd+9w6NDKl
-         XBBg==
-X-Gm-Message-State: AOJu0Yy1KMTAdYwDVDa9HTAcwx2nA5H/cHcN0il8xq33ynmoh6yQyWkt
-	HiTLgNnPkZA6B9crb8EJ6Mjqkkl3+ULvq0dWDukjCPWDqxVeQLOPYB9K0/tVi3wp7kLTOvJtu8s
-	imhEm1YWR7XEnGRo8tnq26/XhxLn9Ip6c8vnXxVb68F4Z+u8m4iJrFlU=
-X-Received: by 2002:a17:902:9a46:b0:1dc:3402:354e with SMTP id x6-20020a1709029a4600b001dc3402354emr3869400plv.54.1708878647211;
-        Sun, 25 Feb 2024 08:30:47 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF8COilNSGsmLhlJ4fe6fbsoQz+ngPMmCyGiYXqvkzUrkm2xgLK4FLifCv1FWuNagVX2Y3hMQ==
-X-Received: by 2002:a17:902:9a46:b0:1dc:3402:354e with SMTP id x6-20020a1709029a4600b001dc3402354emr3869392plv.54.1708878646853;
-        Sun, 25 Feb 2024 08:30:46 -0800 (PST)
+        d=1e100.net; s=20230601; t=1708879113; x=1709483913;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=gT00iK1792I1ru6cy3dmEyZDGBGyy5dsWmrhf416F50=;
+        b=XifBRvTbi2Rz2b2wJqPPEfd2ZMNqbX5YHVOlqBcRaV8855fApSd0QWnVOsjmngEnXt
+         dBTnwMOmbohQ2fH7vAfwgv7nTynAjbyfP0oo5P/6zI/eDzFBqAmCGnvE6yauprIKx6AT
+         +oDrPFYd9UFsbaUllzFHoq+u3MXVU2AzlHVvC8OwilOhqeaty57QLubiNKVoPuvYiqM7
+         RAC5/bnpXTehNOyAo9RjN/RHFxKALLXu/IstmaDhKWVM7nL8cfj8NowO8wv0w0NtIkkn
+         pOdQJmyk0DH1e1DqAzPlrj9YLiiw1LBiMj1TNMAvsLGJI/bvM12sLyEQ+2m/pe4OfOB+
+         3bSw==
+X-Gm-Message-State: AOJu0YwTrwii+/OOpRTH/s0gr8b02OqdPn0PkU5Y+WpiiSWiP2/ajStw
+	S7uKD+StSA+LKsbQb/WQ44rBBTUmbFGvzXdeaXVytBRbITlkSAyarD43EBhy9DeZLdaA8Mb0Nn/
+	V8ftv7o+2GBUwDSOPK5P33fnOf7kboiwIJJSFsXip4C3m9JbejgzDtF8=
+X-Received: by 2002:a05:6358:5484:b0:17a:f909:2cef with SMTP id v4-20020a056358548400b0017af9092cefmr5411427rwe.31.1708879113140;
+        Sun, 25 Feb 2024 08:38:33 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGTEyZX16SeUmrh06Nd3Kw38b4HWrd3T4V9wM3gv4GP/RwlXqtbMeJFCF71UKjQ0hg8dAfZNA==
+X-Received: by 2002:a05:6358:5484:b0:17a:f909:2cef with SMTP id v4-20020a056358548400b0017af9092cefmr5411423rwe.31.1708879112824;
+        Sun, 25 Feb 2024 08:38:32 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id ke3-20020a170903340300b001d8aa88f59esm2427871plb.110.2024.02.25.08.30.45
+        by smtp.gmail.com with ESMTPSA id sc9-20020a17090b510900b00298c633bd5fsm4813920pjb.30.2024.02.25.08.38.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Feb 2024 08:30:46 -0800 (PST)
-Date: Mon, 26 Feb 2024 00:30:42 +0800
+        Sun, 25 Feb 2024 08:38:32 -0800 (PST)
+Date: Mon, 26 Feb 2024 00:38:28 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Martin Jansa <martin.jansa@gmail.com>
+To: Christoph Hellwig <hch@lst.de>
 Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] tests/*/Makefile: make sure group.list DIRT exists
- before install
-Message-ID: <20240225163042.rrb6djrhbs6e2fk5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240208225241.644701-1-martin.jansa@gmail.com>
+Subject: Re: [PATCH] common: dm-error now supports zoned devices
+Message-ID: <20240225163828.7a3tntpg5kaywlw7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240221063741.3563039-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20240208225241.644701-1-martin.jansa@gmail.com>
+In-Reply-To: <20240221063741.3563039-1-hch@lst.de>
 
-On Thu, Feb 08, 2024 at 11:52:41PM +0100, Martin Jansa wrote:
-> * sometimes make install was failing with:
->   cp: cannot stat 'group.list': No such file or directory
->   and bunch of non-fatal messages:
->   mv: failed to preserve ownership for 'group.list': Invalid argument
+On Wed, Feb 21, 2024 at 07:37:41AM +0100, Christoph Hellwig wrote:
+> Since kernel commit a951104333bd ("dm error: Add support for zoned block
+> devices") dm-error fully supports zoned devices.  Make use of that to
+> also run error injection tests for zoned device.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  common/rc | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 524ffa02a..f207d8ab2 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2193,12 +2193,10 @@ _require_dm_target()
+>  		_notrun "This test requires dm $target support"
+>  	fi
+>  
+> -	# dm-error cannot handle the zone information
+> -	#
+>  	# dm-snapshot and dm-thin-pool cannot ensure sequential writes on
+>  	# the backing device
+>  	case $target in
+> -	error|snapshot|thin-pool)
+> +	snapshot|thin-pool)
 
-I'm wondering ... isn't that expected?
+This patch makes sense to me, but I think this patch might cause
+failures on old kernel which doesn't has kernel commit a951104333bd, right?
 
-Why not let "make install" fail directly, if there's not a completed "make" ?
-Isn't that more familiar?
+Is there a simple way to check if dm-error supports zoned block device? If
+there's not, I think we have to let it fails on old kernel, to make it run
+on newer kernel.
 
 Thanks,
 Zorro
 
-> 
-> * this was when tools/mkgroupfile did
->   mv -f "$new_groups" "$groupfile"
->   overwritting the group.list file while install-sh was already
->   copying it to output
-> 
-> * in the end easily reproducible by
->   1) removing tests/*/group.list before each make install
->   2) adding some sleep in mkgroupfile before the mv call
-
-
-
-> 
-> Signed-off-by: Martin Jansa <martin.jansa@gmail.com>
-> ---
->  tests/btrfs/Makefile    | 2 +-
->  tests/ceph/Makefile     | 2 +-
->  tests/cifs/Makefile     | 2 +-
->  tests/ext4/Makefile     | 2 +-
->  tests/f2fs/Makefile     | 2 +-
->  tests/generic/Makefile  | 2 +-
->  tests/nfs/Makefile      | 2 +-
->  tests/ocfs2/Makefile    | 2 +-
->  tests/overlay/Makefile  | 2 +-
->  tests/perf/Makefile     | 2 +-
->  tests/selftest/Makefile | 2 +-
->  tests/shared/Makefile   | 2 +-
->  tests/tmpfs/Makefile    | 2 +-
->  tests/udf/Makefile      | 2 +-
->  tests/xfs/Makefile      | 2 +-
->  15 files changed, 15 insertions(+), 15 deletions(-)
-> 
-> diff --git a/tests/btrfs/Makefile b/tests/btrfs/Makefile
-> index 1b72a1a1..6d9995b4 100644
-> --- a/tests/btrfs/Makefile
-> +++ b/tests/btrfs/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/ceph/Makefile b/tests/ceph/Makefile
-> index 2761e1e9..5f24d518 100644
-> --- a/tests/ceph/Makefile
-> +++ b/tests/ceph/Makefile
-> @@ -12,7 +12,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/cifs/Makefile b/tests/cifs/Makefile
-> index 62c48935..0b89a01d 100644
-> --- a/tests/cifs/Makefile
-> +++ b/tests/cifs/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/ext4/Makefile b/tests/ext4/Makefile
-> index a2a0d561..296e3850 100644
-> --- a/tests/ext4/Makefile
-> +++ b/tests/ext4/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/f2fs/Makefile b/tests/f2fs/Makefile
-> index 9d1ed3c6..0a90b465 100644
-> --- a/tests/f2fs/Makefile
-> +++ b/tests/f2fs/Makefile
-> @@ -15,7 +15,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/generic/Makefile b/tests/generic/Makefile
-> index b464b22b..d6ed3e55 100644
-> --- a/tests/generic/Makefile
-> +++ b/tests/generic/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/nfs/Makefile b/tests/nfs/Makefile
-> index 128d2a3a..51590b5c 100644
-> --- a/tests/nfs/Makefile
-> +++ b/tests/nfs/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/ocfs2/Makefile b/tests/ocfs2/Makefile
-> index 260ad31b..17e01bf3 100644
-> --- a/tests/ocfs2/Makefile
-> +++ b/tests/ocfs2/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/overlay/Makefile b/tests/overlay/Makefile
-> index 2785b94d..c71e78d6 100644
-> --- a/tests/overlay/Makefile
-> +++ b/tests/overlay/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/perf/Makefile b/tests/perf/Makefile
-> index 0c74ba39..d72c04d9 100644
-> --- a/tests/perf/Makefile
-> +++ b/tests/perf/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/selftest/Makefile b/tests/selftest/Makefile
-> index 3ddfca37..cabc35a9 100644
-> --- a/tests/selftest/Makefile
-> +++ b/tests/selftest/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/shared/Makefile b/tests/shared/Makefile
-> index f3128714..2e6aa718 100644
-> --- a/tests/shared/Makefile
-> +++ b/tests/shared/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/tmpfs/Makefile b/tests/tmpfs/Makefile
-> index 46544313..46b62dad 100644
-> --- a/tests/tmpfs/Makefile
-> +++ b/tests/tmpfs/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/udf/Makefile b/tests/udf/Makefile
-> index ed4434f0..feda69a6 100644
-> --- a/tests/udf/Makefile
-> +++ b/tests/udf/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
-> diff --git a/tests/xfs/Makefile b/tests/xfs/Makefile
-> index 5f413e67..6bfafdb1 100644
-> --- a/tests/xfs/Makefile
-> +++ b/tests/xfs/Makefile
-> @@ -14,7 +14,7 @@ default: $(DIRT)
->  
->  include $(BUILDRULES)
->  
-> -install:
-> +install: default
->  	$(INSTALL) -m 755 -d $(TARGET_DIR)
->  	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->  	$(INSTALL) -m 644 group.list $(TARGET_DIR)
+>  		_require_non_zoned_device ${SCRATCH_DEV}
+>  		;;
+>  	esac
 > -- 
-> 2.43.0
-> 
+> 2.39.2
 > 
 
