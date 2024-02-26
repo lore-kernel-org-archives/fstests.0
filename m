@@ -1,72 +1,45 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 512EB12EBC1
-	for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 18:07:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EF2E12C815
+	for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 18:18:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708970853; cv=none; b=TW/D5LlWuoC51UUq4YOazLH7RSyrBpyt3NNHq1lJ3GUgdN81j2JWjSulzpT68/7dEg/Uwi11zg5wRhUP62HhFiI/o8XPvyX7biKP8/POy5f+sBo4yqwC61hM6HhIYAK8QH3T3+d4JqcuxTgGaAIa1WkOt7mfPXfuGHsiMIrBpKI=
+	t=1708971492; cv=none; b=kHRlQsaQ8xCLNrs0a6HwbWdaJIs9+bDxrABymi4BVxm6QJwExAPzSo+hVsVXCFN4u9Mbilfq/pCHU0zfb+PlKdrPjOpZuJRHy40P4ZOjiG7ZUhi025in05C2BkHKi6uh0/nzuHHbfqcPrdGFsSO5qPAxUv+Anhongxl7RQOonN0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708970853; c=relaxed/simple;
-	bh=k+9pdQXQLhu1gADE7VNhX5nIsCjdAoNtvJT8Q7dGESo=;
+	s=arc-20240116; t=1708971492; c=relaxed/simple;
+	bh=81VgLstUKyJm5J4Zk72zdMYMZcABshDjRorkQzCFXLs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pQX+Ts6FI7gk6tbHKKZm3sBT5OspbpI5Zv5yHoPYYnj4XmPtYYAwJJAfv06EocHfzOyidvQnuSbaSoECGAoM6AYny2TmkMtCB5XF0IYJ657JAPT/MRkvFd3kqu3n0mklKbHqRDU+GEu857akbun17bEZgNmR0ksn2utl4WDa0o0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Yb/9X/mH; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=sS40UveZIHFnY7QrtfPyr/jg3S6fH9CJv4cj0vtb7P++qRjlLcOtalPbnOzTmOP7NghuVTQPaSnQxAAcjm0L6FVA3XxRFeGGA164stnEK9BX+mRgeK3hiCmYvcaa6IC9B1P4ysGZNsIMkf/gTgyezLK/s83q2U7Zxhz841ES7iw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GGqk5JM+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Yb/9X/mH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1708970850;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=BHWEeo6gkPchWCXcP+12DKyqGyi2WU8dn8uAcENCj1A=;
-	b=Yb/9X/mHSy8xbumn/b0rRsfLEKfwi2m0ceEFzOeFfufphMN3gkG/PFhsvL90OWOJI2dHm5
-	qBMl84G4M/2B2StGAoolr73AZdECttiZymZkwUPYBozITElsLRMPJ5mniitZV8r4JWk9cR
-	eqVXgDNoiL8rdBo4AaM7kLNPvKsZBhc=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-494-oRLOlxwiP6m0FbYlXmWzAA-1; Mon, 26 Feb 2024 13:07:28 -0500
-X-MC-Unique: oRLOlxwiP6m0FbYlXmWzAA-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1dcadac3185so7298305ad.0
-        for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 10:07:28 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708970848; x=1709575648;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BHWEeo6gkPchWCXcP+12DKyqGyi2WU8dn8uAcENCj1A=;
-        b=mO4v3eKsUnGc2xsJajG6WGbEVbV8jZu15zP7lwUKMjEIpMhqiWiKIgjQQ6b5/2YR33
-         n9g2+IFwLK9Yi2Oj/mr0skq64KimriOTYThKS+tNsZ2M+dBuZWyca7M6puQ6v2j0emVE
-         CV75WsB2gAoT4YiXadNLdI8JkQtcymGZm9/A1qLqeyxsnpaWUjp29RDB2C4Ix5u0SNqb
-         RXiXtKx9J55PSb3fEs8dI5sdCcTHm0ZHFeyOrBBS1eJlPOhSTQuejeqCIua7eMu2dT70
-         4uGjXXN2HsZtrgb4fEsfgQ/tqJIeAmwFD1hDlJoISewlt72Cm3t3CBGMFdhKELsrbkiB
-         SGQQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXOssnEGAIoMVjWIok6gCmjqnh28bjErgiSDixvKlWcotLXqs/IaFKTo37J0otGkBhxJX93O8cPnz6dluAzZ0xvnTPnb2YrPA==
-X-Gm-Message-State: AOJu0YyyNUsZ9RzrvLFZWqrJnTrQAYBAPi9LRuxSv/0ocB4UDuddhmx+
-	hPNI0u2tRw8vIO2X0pE8qjQWjPCJ1yfu4e2yyKWG5Ktlbr0D7iAUa54hn4aVMD+4WhAr90L9xo2
-	81ahuX1OKmlBZ+LJyzL8SSWTyS2TSkrle+81U1v1D4k3YAAEsXLyiZ5c=
-X-Received: by 2002:a17:902:654a:b0:1dc:afd1:9c37 with SMTP id d10-20020a170902654a00b001dcafd19c37mr1169930pln.24.1708970847748;
-        Mon, 26 Feb 2024 10:07:27 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHKy1YCX6iEOgyTMy5XQhCVEkUXOlx7hnxY9IpY+j5ouxh7OMq1KLporovDtdlY1lLmPogqAg==
-X-Received: by 2002:a17:902:654a:b0:1dc:afd1:9c37 with SMTP id d10-20020a170902654a00b001dcafd19c37mr1169914pln.24.1708970847220;
-        Mon, 26 Feb 2024 10:07:27 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x2-20020a170902820200b001da34166cd2sm4226795pln.180.2024.02.26.10.07.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 26 Feb 2024 10:07:26 -0800 (PST)
-Date: Tue, 27 Feb 2024 02:07:23 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: David Sterba <dsterba@suse.cz>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, Josef Bacik <josef@toxicpanda.com>
-Subject: Re: [PATCH] generic/733: disable for btrfs
-Message-ID: <20240226180723.v4vwjts4dxndifaq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240222095048.14211-1-dsterba@suse.com>
- <20240225154123.pswx5nznphszonns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240226113340.GA17966@suse.cz>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GGqk5JM+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E3A70C433C7;
+	Mon, 26 Feb 2024 18:18:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1708971491;
+	bh=81VgLstUKyJm5J4Zk72zdMYMZcABshDjRorkQzCFXLs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=GGqk5JM+ee2pSrhsQ669MDxh1CChgKoJ0znq18Rz0JNFg6dRxFkxYbEEX3XUowiAN
+	 bIOJ5zjpFQvq8ZvAan7JfQ2qp1iHNw46HK35+ff0GozRABqmY4zrggYKE0r3KiaDIV
+	 cuYqJ8E1MJY+2qfiWwyhI0x+mSXn88LGRZmQe7hn8g1arfLjkcMQ6ji8xv3LpdpMXV
+	 5RkCATogtbg5Cx1LWdJzko6uYjHG+wnBh+xGZ66HTF3CWRvYuYLVeKo7pXZEdqYAHf
+	 dWoDJGRYPb/OV9cpRjj8x7fatnADFL9zRGzXDfiPwbWRWEcq+2h3t7YJMpsWG/WIFT
+	 gV8xtjriIl+3Q==
+Date: Mon, 26 Feb 2024 10:18:10 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Eric Biggers <ebiggers@kernel.org>, David Sterba <dsterba@suse.cz>,
+	fstests@vger.kernel.org
+Subject: Re: Dangerous commands (was:[ANNOUNCE] fstests: for-next branch
+ updated to v2024.02.04)
+Message-ID: <20240226181810.GR6188@frogsfrogsfrogs>
+References: <20240221140951.GJ355@suse.cz>
+ <20240225151616.owk5v4ioplhrioe6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240225165128.GA1128@sol.localdomain>
+ <20240225170304.GO6188@frogsfrogsfrogs>
+ <20240225174527.GB1128@sol.localdomain>
+ <20240226025629.2a2dn6fksjywyqjz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,44 +48,105 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240226113340.GA17966@suse.cz>
+In-Reply-To: <20240226025629.2a2dn6fksjywyqjz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Mon, Feb 26, 2024 at 12:33:40PM +0100, David Sterba wrote:
-> On Sun, Feb 25, 2024 at 11:41:23PM +0800, Zorro Lang wrote:
-> > On Thu, Feb 22, 2024 at 10:50:48AM +0100, David Sterba wrote:
-> > > This tests if a clone source can be read but in btrfs there's an
-> > > exclusive lock and the test always fails. The functionality might be
-> > > implemented in btrfs in the future but for now disable the test.
-> > > 
-> > > CC: Josef Bacik <josef@toxicpanda.com>
-> > > Signed-off-by: David Sterba <dsterba@suse.com>
-> > > ---
-> > >  tests/generic/733 | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/generic/733 b/tests/generic/733
-> > > index d88d92a4705add..b26fa47dad776f 100755
-> > > --- a/tests/generic/733
-> > > +++ b/tests/generic/733
-> > > @@ -18,7 +18,7 @@ _begin_fstest auto clone punch
-> > >  . ./common/reflink
-> > >  
-> > >  # real QA test starts here
-> > > -_supported_fs generic
-> > > +_supported_fs generic ^btrfs
-> > 
-> > If only need a blacklist, you can write "^btrfs" directly, e.g.
-> > 
-> >   _supported_fs ^btrfs
-> > 
-> > then others (except btrfs) are in whitelist, don't need the "generic".
+On Mon, Feb 26, 2024 at 10:56:29AM +0800, Zorro Lang wrote:
+> On Sun, Feb 25, 2024 at 09:45:27AM -0800, Eric Biggers wrote:
+> > On Sun, Feb 25, 2024 at 09:03:04AM -0800, Darrick J. Wong wrote:
+> > > On Sun, Feb 25, 2024 at 08:51:28AM -0800, Eric Biggers wrote:
+> > > > On Sun, Feb 25, 2024 at 11:16:16PM +0800, Zorro Lang wrote:
+> > > > > On Wed, Feb 21, 2024 at 03:09:51PM +0100, David Sterba wrote:
+> > > > > > Hi,
+> > > > > > 
+> > > > > > reading [1] and how late it was found that effectively a "rm -rf /" can
+> > > > > > happen makes me worried about what I can expect from fstests after git
+> > > > > > pull. Many people contribute and the number for custom _cleanup()
+> > > > > > functions with unquoted 'rm' commands is just asking for more problems.
+> > > > > > 
+> > > > > > [1] https://lore.kernel.org/all/20240205060016.7fgiyafbnrvf5chj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+> > > > > > 
+> > > > > > Unquoted arguments in shell scripts is IMO a big anti-pattern,
+> > > > > > unfortunately present everywhere in xfstests since the beginning.
+> > > > > > Rewriting all scripts would be quite a lot of work, could you at least
+> > > > > > provide safe versions of the cleanup helpers?
+> > > > > 
+> > > > > Hi David,
+> > > > > 
+> > > > > Thanks for taking care about it :)
+> > > > > 
+> > > > > > 
+> > > > > > For example:
+> > > > > > 
+> > > > > > _rm_tmp() {
+> > > > > >     rm -rf -- $tmp
+> > > > > 
+> > > > > It's "$tmp.*"
+> > > > > 
+> > > > > May I ask what problem does the "--" hope to avoid? If the "$tmp" is empty,
+> > > > > "rm -rf" and "rm -rf --"" looks like both doing nothing. So what kind
+> > > > > of situation does the "--" hope to fix?
+> > > > > 
+> > > > > The root problem in above [1] is about "${FOO}*". If someone does "rm -rf ${FOO}*"
+> > > > > in its custom _cleanup_xxxxx function, then it's dangerous if "$FOO" is empty.
+> > > > > 
+> > > > > I thought some ways to avoid that:
+> > > > > 1) Try to avoid doing rm -rf ${FOO}*, if not necessary.
+> > > > > 2) Must checks [ -n "$FOO" ] before doing any rm -rf ${FOO}*
+> > > > > 3) Someone's custom _cleanup_xxxxx better to be called before default _cleanup
+> > > > > does "cd /".
+> > > > > 4) Think about bringing in someone "Static program analysis" tool about bash
+> > > > > script, but I don't know if there're someone good, feel free to give me
+> > > > > suggestions.
+> > > > 
+> > > > "--" prevents the following arguments from being interpreted as options if they
+> > > > begin with "-".  That's a good practice, but it doesn't help with ${FOO} being
 > 
-> Ok thanks, do I need to resend or would you update the commit?
-
-I can help to change that, it's simple enough.
-
-Thanks,
-Zorro
-
+> Thanks Eric, I know "--" can do that, just didn't understand how it helps the
+> empty variable problem. So looks like it doesn't.
 > 
+> > > > empty.  To cause the script to exit if ${FOO} is empty, it can be written as
+> > > > ${FOO:?}.  Alternatively, 'set -u' can be used.
+> > > 
+> > > I said that four days ago.  Did nobody receive that reply?
+> > > 
+> > > https://lore.kernel.org/fstests/20240225165128.GA1128@sol.localdomain/T/#m0efd851c5a1fb0dbe418f4aff818d20f4355638b
+> > > 
+> > 
+> > You didn't mention the :? option, and I thought that would be worth mentioning.
 
+I wasn't even aware that existed.  It seems like a good way to enable
+erroring on unset variable on a case by case basis.  Though TBH I
+suspect that setting -u and using ${FOO:-} for the cases where we're
+actually ok with unset variables is better practice.
+
+Too bad it's going to be a lot of work to do /that/.
+
+> Actually:
+> 
+> [ -n "$FOO" ] && rm -rf ${FOO}*
+> 
+> or
+> 
+> rm -rf ${FOO:?}*
+> 
+> Both of them are good to me, depends on what's expected. The 1st one ignore empty $FOO and
+> keep running, the 2nd one breaks case running if $FOO is empty.
+> 
+> But they all need the programer to realize that his variable might be dangerous if
+> it's empty, and write as that. So it still depends on the programer or the reviewers
+> to notice that.
+
+<nod>
+
+--D
+
+> Thanks,
+> Zorro
+> 
+> > 
+> > Of course ideally -u would be used everywhere, as you said.
+> > 
+> > - Eric
+> > 
+> 
+> 
