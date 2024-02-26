@@ -1,160 +1,291 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01F5A1CA82
-	for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 08:01:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 312C067E96;
+	Mon, 26 Feb 2024 08:56:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708934501; cv=none; b=id4Bge175GjqqKVCn1j/Jc5SZxfQmmYG1nzK98lzCdEIyCX+5JuOsMQVll8AgRFFiFxEKa3WCHiLcfYq3XUfL/GWBRmCAWThc5rVX0qt/KMrF+Fcxak47V0M8ZCfAWpNVdgXmGEBWPhV3WeNjLX9QsLcfthSsKK7aN95oZOjWMs=
+	t=1708937817; cv=none; b=htB03rY5RfL7UuBJi8Ts0jS6J/3sZ4VK8pvnuJHyl7TTuj9B2BdTujEc8ap8XPr++9jcWBhDoHamtyZNMRDTGbuOTv0ZkxCM1xFx/E3c4tvsIQ6KAcCveqovFh8Eb19HpMjoPjsslx/ToSunMCy50RKVfg0gnYozXZJJDC4zIS8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708934501; c=relaxed/simple;
-	bh=ChlTkJdoRIcTPEm5INNJMu+ECH3w0pCZC/rM0eTbZ4w=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=dMxG1TM7nHpfK+upDabBfQeI82BoqhVjl/Sxc6TdVa2pUuONEcbzVIG5tbgRFRp9aVC/jus90Bn132f84bD+LtuvbuaAZ3e6TQJ017wJVeM5uiJNyOzI/Div+jL8+HDri52JsS6VJStwS78iwXBJmTjynE+3iBcz4C0HveTVFbI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=fgm/64c0; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1708937817; c=relaxed/simple;
+	bh=j3jQOjfyPOtE2YQnPs/VXE4MDlrAN2V5BFxBNgD4QDI=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=f7soaLO/Scl4hVcUo2WJx3YUYDa7QHkpXKcwkqCEpaPPXh1q6BxcFd8asXCuJZq+uyNGmaRZrbpezYoq5BORFRpFnUvyXCPMP3gwCMrMcZXkqSwIxb0q6zZyFe6VE33RLqWDKA8ILrohkMMww5PPZK4bgsneXtiqgQzckJd10b4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=tsRSY52w; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=UfvIIU9B; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=Bpq0HGn0; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=fZfHNK0t; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="fgm/64c0"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-512ed314881so2427172e87.2
-        for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 00:01:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1708934497; x=1709539297; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=1wOgetBj7kTlzEZY9MZ/bv98My8Au0BZDB6BD5byc9o=;
-        b=fgm/64c0w0KzeD5aXMESlUOLnVSITTDiyG7yi1gWUg6m3Bk7Js+LFDwkUhjIjgLlNa
-         VJS5CDQK2PGzPHsSlcwWJIqL6wq5NLY1g8TcV9UMdMG5bh3nIjMQvZqLbHAqRpnQcNBU
-         qOLTuRDjyltBjN9ncd+W4qAsMtqsG6HhokuAPfqTUJ3ibT6rV4CEEhaynBh9s220fPeR
-         asMMwNz6hhXptBPprLJFwhovXKu7AmWxQNH2swbw+HVmy23eVP3E2jdvqsoxnZ3Zm+u+
-         Z93WxubDBjh2/fQ2a+/P/H45ComOAm8KoHvt2uif3V7iwYkEupl2vBP+DjY/5xzOl8cz
-         RQXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1708934497; x=1709539297;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=1wOgetBj7kTlzEZY9MZ/bv98My8Au0BZDB6BD5byc9o=;
-        b=JsKuY7wqtnWZ0UHCEzag3b+f78vLcQ47pJg0ckjqykQd93ix1A7wHvc3JrikFLO1+I
-         uqpKUjHsYUQXeddmpSjYxwQ1xsyGSCm67DV2prC+vsnoDhMN/00JCz8phuEcFsedJVux
-         Z2SYefvazKv6x0ak93Ap3j3UOVIoXJRilucVxVZVqIYyc8cycYKvzIASprRAg/qXA6o2
-         YrRKHUNy97Pf9BxzI4OEh6DuNwM6hCpVZ9xbRwOn2bFQjwLMHgohThUdotYfOA1U0yPs
-         Nq/qMDKn5hU8i0uto5Ggixe7GVTqYk8sx86ouHCpXjQRtU9uZrs4aXUqXsGGqQTF47FO
-         gUMw==
-X-Forwarded-Encrypted: i=1; AJvYcCUBy08RT+H8UHZUP2XtgCpf0oQMhB22rCfEarc7r1EZqorIG4YtJzhxOnZbedGAbMBNAGgBFkvbllrFPcmp+KjCnfgO2KzntQ==
-X-Gm-Message-State: AOJu0YzBx3JlKx/WSeSr08FEpFAWoaOxaqfszVGyXmmmKCo433Z50BbG
-	l5CbCcUrDLNrgNSA22BOXgYLmsz0nIRiF9Ng3Ww+RQThuDLbdeIv2pC2Gqa5C7U=
-X-Google-Smtp-Source: AGHT+IG5lgF+BKQjMgKPZQzUq39O7D+KNOnPQb8jPVcS2mbNCEouaP1WuRNfXcHFWTJR3ZDOvi6FKw==
-X-Received: by 2002:a05:6512:11c9:b0:512:fab6:6df6 with SMTP id h9-20020a05651211c900b00512fab66df6mr1611451lfr.4.1708934497107;
-        Mon, 26 Feb 2024 00:01:37 -0800 (PST)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id o7-20020a63f147000000b005dc9439c56bsm3414673pgk.13.2024.02.26.00.01.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 Feb 2024 00:01:36 -0800 (PST)
-Message-ID: <57068435-f797-4eec-ab7d-79161269cd0d@suse.com>
-Date: Mon, 26 Feb 2024 18:31:31 +1030
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="tsRSY52w";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="UfvIIU9B";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="Bpq0HGn0";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="fZfHNK0t"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 6B3DC1FB3C;
+	Mon, 26 Feb 2024 08:56:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1708937814; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Rl0c+mVdc0GJb9vzvhqq6VQauGkma+sAeF02W8Azrz8=;
+	b=tsRSY52whCF9KgqCVTMMZXRK+tecV0QuqSBOn7MXSkpSJZbzTZa6SZ1uhH/U7GoAYflUNj
+	FP6JMNT7p6tTBGX+eC9nIYZIaQFk7BB1bULD7mLwkxVwgrXc8IJvKGGjnaH/GC8vEDGayy
+	H5j+rkyiiZoHx4PKsc/YB9gNnfkisDk=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1708937814;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Rl0c+mVdc0GJb9vzvhqq6VQauGkma+sAeF02W8Azrz8=;
+	b=UfvIIU9BnGEGSMEGG48f06VhHSgNhiMyvn3qio4qRwzM4NgfdKsOuVtP/Vni1+Z1Ag1l3t
+	NVxozXEsB0yO5wBw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1708937813; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Rl0c+mVdc0GJb9vzvhqq6VQauGkma+sAeF02W8Azrz8=;
+	b=Bpq0HGn0q0mMWs1xH9UfxohpqrKhS04uc5vxX4USXBzkEDsQNajzJE6f8VUYmDDofFIyXK
+	rMEYmu3FE86mQzsU5YtNsrzcFoi3HfsRxLgypQ0oFbiBbgBP8JybXl2jjoJSDmJbT8SBt7
+	CMsLDvPXHpzN2UkVYXYRG0+vCAl8ONI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1708937813;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Rl0c+mVdc0GJb9vzvhqq6VQauGkma+sAeF02W8Azrz8=;
+	b=fZfHNK0txnS69ris+tZ1m7evxsL2P7OejMNIeGHHurL9C4+z2e2BsduE0SJ6vB6hrBx7mf
+	xjSTfR/fMGmtBoAA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0DA5C13A58;
+	Mon, 26 Feb 2024 08:56:52 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id DaEvO1RS3GWNGAAAD6G6ig
+	(envelope-from <lhenriques@suse.de>); Mon, 26 Feb 2024 08:56:52 +0000
+Received: from localhost (brahms.olymp [local])
+	by brahms.olymp (OpenSMTPD) with ESMTPA id b3419c9c;
+	Mon, 26 Feb 2024 08:56:50 +0000 (UTC)
+From: Luis Henriques <lhenriques@suse.de>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christian Brauner <brauner@kernel.org>,  linux-ext4@vger.kernel.org,
+  fstests@vger.kernel.org
+Subject: Re: [PATCH] vfs: fix check for tmpfile support
+In-Reply-To: <20240225155656.yjqyuyjxsbtiqvb2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	(Zorro Lang's message of "Sun, 25 Feb 2024 23:56:56 +0800")
+References: <87jzmxisqm.fsf@suse.de>
+	<20240222-mango-batterie-505564cecb69@brauner>
+	<87cysoh9wf.fsf@suse.de>
+	<20240225155656.yjqyuyjxsbtiqvb2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Date: Mon, 26 Feb 2024 08:56:50 +0000
+Message-ID: <87frxfhact.fsf@suse.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: btrfs/224: do not assign snapshot to a subvolume
- qgroup
-Content-Language: en-US
-To: Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org, Sidong Yang <realwakka@gmail.com>
-References: <20240226040234.102767-1-wqu@suse.com>
- <e4703a32-9b16-48c2-b5ea-9477be071a9b@oracle.com>
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJVBQkNOgemAAoJEMI9kfOh
- Jf6oapEH/3r/xcalNXMvyRODoprkDraOPbCnULLPNwwp4wLP0/nKXvAlhvRbDpyx1+Ht/3gW
- p+Klw+S9zBQemxu+6v5nX8zny8l7Q6nAM5InkLaD7U5OLRgJ0O1MNr/UTODIEVx3uzD2X6MR
- ECMigQxu9c3XKSELXVjTJYgRrEo8o2qb7xoInk4mlleji2rRrqBh1rS0pEexImWphJi+Xgp3
- dxRGHsNGEbJ5+9yK9Nc5r67EYG4bwm+06yVT8aQS58ZI22C/UeJpPwcsYrdABcisd7dddj4Q
- RhWiO4Iy5MTGUD7PdfIkQ40iRcQzVEL1BeidP8v8C4LVGmk4vD1wF6xTjQRKfXHOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJuBQkNOge/AAoJEMI9kfOhJf6o
- rq8H/3LJmWxL6KO2y/BgOMYDZaFWE3TtdrlIEG8YIDJzIYbNIyQ4lw61RR+0P4APKstsu5VJ
- 9E3WR7vfxSiOmHCRIWPi32xwbkD5TwaA5m2uVg6xjb5wbdHm+OhdSBcw/fsg19aHQpsmh1/Q
- bjzGi56yfTxxt9R2WmFIxe6MIDzLlNw3JG42/ark2LOXywqFRnOHgFqxygoMKEG7OcGy5wJM
- AavA+Abj+6XoedYTwOKkwq+RX2hvXElLZbhYlE+npB1WsFYn1wJ22lHoZsuJCLba5lehI+//
- ShSsZT5Tlfgi92e9P7y+I/OzMvnBezAll+p/Ly2YczznKM5tV0gboCWeusM=
-In-Reply-To: <e4703a32-9b16-48c2-b5ea-9477be071a9b@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Authentication-Results: smtp-out2.suse.de;
+	none
+X-Spamd-Result: default: False [-3.10 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[4];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 RCVD_COUNT_THREE(0.00)[4];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_LAST(0.00)[];
+	 MID_RHS_MATCH_FROM(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spam-Score: -3.10
+
+Zorro Lang <zlang@redhat.com> writes:
+
+> On Thu, Feb 22, 2024 at 02:05:20PM +0000, Luis Henriques wrote:
+>> Christian Brauner <brauner@kernel.org> writes:
+>>=20
+>> > When ext4 is used with quota support the test fails with EINVAL because
+>> > it is run after we idmapped the mount. If the caller's fs{g,u}ids aren=
+'t
+>> > mapped then we fail and log a misleading error. Move the checks for
+>> > tmpfile support right at the beginning of the test in all tests.
+>> >
+>> > Reported-by: Luis Henriques <lhenriques@suse.de>
+>> > Link: https://lore.kernel.org/r/20240222-knast-reifen-953312ce17a9@bra=
+uner
+>> > Signed-off-by: Christian Brauner <brauner@kernel.org>
+>>=20
+>> FWIW I've just tested this patch and I can confirm it fixes the failures=
+ I
+>> was seeing in ext4.  Again, thanks a lot, Christian.
+>
+> Thanks for your confirm, I think we can have your "Tested-by" if you don't
+> mind.
+
+Ah, yes of course.  I should have sent it explicitly.
+
+Tested-by: Luis Henriques <lhenriques@suse.de>
+
+Cheers,
+--=20
+Lu=C3=ADs
 
 
+>>=20
+>> > ---
+>> >  src/vfs/idmapped-mounts.c | 24 ++++++++++++------------
+>> >  1 file changed, 12 insertions(+), 12 deletions(-)
+>> >
+>> > diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+>> > index 547182fe..e490f3d7 100644
+>> > --- a/src/vfs/idmapped-mounts.c
+>> > +++ b/src/vfs/idmapped-mounts.c
+>> > @@ -3815,6 +3815,8 @@ int tcore_setgid_create_idmapped(const struct vf=
+stest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -3838,8 +3840,6 @@ int tcore_setgid_create_idmapped(const struct vf=
+stest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	pid =3D fork();
+>> >  	if (pid < 0) {
+>> >  		log_stderr("failure: fork");
+>> > @@ -3991,6 +3991,8 @@ int tcore_setgid_create_idmapped_in_userns(const=
+ struct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -4014,8 +4016,6 @@ int tcore_setgid_create_idmapped_in_userns(const=
+ struct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	pid =3D fork();
+>> >  	if (pid < 0) {
+>> >  		log_stderr("failure: fork");
+>> > @@ -7715,6 +7715,8 @@ static int setgid_create_umask_idmapped(const st=
+ruct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -7738,8 +7740,6 @@ static int setgid_create_umask_idmapped(const st=
+ruct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	pid =3D fork();
+>> >  	if (pid < 0) {
+>> >  		log_stderr("failure: fork");
+>> > @@ -7929,6 +7929,8 @@ static int setgid_create_umask_idmapped_in_usern=
+s(const struct vfstest_info *inf
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -7952,8 +7954,6 @@ static int setgid_create_umask_idmapped_in_usern=
+s(const struct vfstest_info *inf
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	/*
+>> >  	 * Below we verify that setgid inheritance for a newly created file =
+or
+>> >  	 * directory works correctly. As part of this we need to verify that
+>> > @@ -8163,6 +8163,8 @@ static int setgid_create_acl_idmapped(const stru=
+ct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -8186,8 +8188,6 @@ static int setgid_create_acl_idmapped(const stru=
+ct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	pid =3D fork();
+>> >  	if (pid < 0) {
+>> >  		log_stderr("failure: fork");
+>> > @@ -8518,6 +8518,8 @@ static int setgid_create_acl_idmapped_in_userns(=
+const struct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > +	supported =3D openat_tmpfile_supported(info->t_dir1_fd);
+>> > +
+>> >  	/* Changing mount properties on a detached mount. */
+>> >  	attr.userns_fd	=3D get_userns_fd(0, 10000, 10000);
+>> >  	if (attr.userns_fd < 0) {
+>> > @@ -8541,8 +8543,6 @@ static int setgid_create_acl_idmapped_in_userns(=
+const struct vfstest_info *info)
+>> >  		goto out;
+>> >  	}
+>> >=20=20
+>> > -	supported =3D openat_tmpfile_supported(open_tree_fd);
+>> > -
+>> >  	/*
+>> >  	 * Below we verify that setgid inheritance for a newly created file =
+or
+>> >  	 * directory works correctly. As part of this we need to verify that
+>> > --=20
+>> >
+>> > 2.43.0
+>> >
+>>=20
+>>=20
+>
 
-在 2024/2/26 16:58, Anand Jain 写道:
-> On 2/26/24 09:32, Qu Wenruo wrote:
->> For "btrfs subvolume snapshot -i <qgroupid>", we only expect the target
->> qgroup to be a higher level one.
->>
->> Assigning a 0 level qgroup to another 0 level qgroup is only going to
->> cause confusion, and I'm planning to do extra sanity checks both in
->> kernel and btrfs-progs to reject such behavior.
->>
->> So change the test case to do regular higher level qgroup assignment
->> only.
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> 
-> looks good.
-> 
-> Reviewed-by: Anand Jain <anand.jain@oracle.com>
-> 
->   Applied to
->     https://github.com/asj/fstests.git for-next
-
-Thanks for the review and merge, although I'd also like to get some 
-feedback from the original author, to make sure there are not some weird 
-use case.
-
-Thanks,
-Qu
-> 
-> Thanks, Anand
-> 
->> ---
->>   tests/btrfs/224 | 6 +++---
->>   1 file changed, 3 insertions(+), 3 deletions(-)
->>
->> diff --git a/tests/btrfs/224 b/tests/btrfs/224
->> index de10942f..611df3ab 100755
->> --- a/tests/btrfs/224
->> +++ b/tests/btrfs/224
->> @@ -67,7 +67,7 @@ assign_no_shared_test()
->>       _check_scratch_fs
->>   }
->> -# Test snapshot with assigning qgroup for submodule
->> +# Test snapshot with assigning qgroup for higher level qgroup
->>   snapshot_test()
->>   {
->>       _scratch_mkfs > /dev/null 2>&1
->> @@ -78,9 +78,9 @@ snapshot_test()
->>       _qgroup_rescan $SCRATCH_MNT >> $seqres.full
->>       $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a >> $seqres.full
->> +    $BTRFS_UTIL_PROG qgroup create 1/0 $SCRATCH_MNT >> $seqres.full
->>       _ddt of="$SCRATCH_MNT"/a/file1 bs=1M count=1 >> $seqres.full 2>&1
->> -    subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
->> -    $BTRFS_UTIL_PROG subvolume snapshot -i 0/$subvolid $SCRATCH_MNT/a 
->> $SCRATCH_MNT/b >> $seqres.full
->> +    $BTRFS_UTIL_PROG subvolume snapshot -i 1/0 $SCRATCH_MNT/a 
->> $SCRATCH_MNT/b >> $seqres.full
->>       _scratch_unmount
->>       _check_scratch_fs
-> 
