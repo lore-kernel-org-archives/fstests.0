@@ -1,168 +1,111 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E51C813AA4C;
-	Tue, 27 Feb 2024 12:25:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF82213AA2B
+	for <fstests@vger.kernel.org>; Tue, 27 Feb 2024 13:15:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709036737; cv=none; b=TW3BnDAwkEe1xOWOss9EbbS0u55HgAPHRbObtTZQCPkXcM+8cbsztfgoFWyFqtyTvPxhuXOSoHaqiA4u8fJ6AWiQezsRN1J2HSFyOZUFisQhhO4LC9U2t/jQumrqY7bCmRaEdCeuSwhbSrw6grCklCeqpwCn32gpy/zt69JZ+oo=
+	t=1709039709; cv=none; b=DQ8ZfMfllweN39i0y5ggsC6VRug+mrSw+Am23pmWa/IA3J1JIyqDG9bPna2Xj0VAjkRX7VbcmzbIU6HEHthvbzMdLCP/mTvm0mMAQKVS0W3rrWz9d1MNcI28hknWt/PqAB6h8C2mzvDEhtv3B9lA/MvFDSDgMYhT2azTpOQ2YIM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709036737; c=relaxed/simple;
-	bh=s/ocJovMVVz66LH8YmsguObW/ovi0MzCtC0l/SvpLzo=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=AkhrEGWg0Kty/9/es28Aju6Ri8TkMRRRFZ/dMiLN+KvYiNz+IaKglFStOhJEOq+RO77roKqNKOhSJox4IYTiA9XNavMnBzPY5x+UfaC6kkHz+eb/B6318RkpvdeKiFvCLLNRM6uVtzXnLVllyic4IoiNtINxS6bippKvpMAB8A0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.218.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-a3f5808b0dfso574726066b.1;
-        Tue, 27 Feb 2024 04:25:35 -0800 (PST)
+	s=arc-20240116; t=1709039709; c=relaxed/simple;
+	bh=RdoEZdnKeMwHhIufQgp4wD6pluHZy4XXTgVN0yUnGUU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EGVslbn7mLHAUaZfrsGlf8NTl1aIxuomQZPnZohTBvJNczGIavD4hhkuaATCEtNMMeBixMZsLma1sU+ybWTq8SFw9epE4Zasb64Ms+Qx9HSo5iq+NyiHNNPZOXRVVCMbUE4hy5PsMdauyyC/qRNtmiJBk5q73WEM9t9XILZ7jZE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=TIrOLQsx; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="TIrOLQsx"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1709039705;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=T9T4qxEfQQkvSyKLRfkGUn8zmmW0fCrKdZvbzLLoJxY=;
+	b=TIrOLQsxFGHlYuQkQ/BRjOWcOXWVDOR/WMFC9B6FUtbME5C7KoBm+zQdEGbXyLn/jHPM6+
+	ViHkMUvwk9xaTDKzqt2Wcg/dUr3Fg7VyhIROohIRDLnHAPTmLbPwdT1jfrBWYmfgUAmwbc
+	vcX67mpkeMO/mgjJHQnsDPdTzEiD5jM=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-651-aCBDkgvTODOiGIDGvme7WQ-1; Tue, 27 Feb 2024 08:15:04 -0500
+X-MC-Unique: aCBDkgvTODOiGIDGvme7WQ-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-5dc4ffda13fso3047961a12.0
+        for <fstests@vger.kernel.org>; Tue, 27 Feb 2024 05:15:04 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709036734; x=1709641534;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=qpzVidqk0eRWGSDOtuDFjtvaTVT5ktnhlxcnQjxF1yo=;
-        b=ON7FHIjGQ7Zha90KSorPB7L+As+BzqaqPfIqeAivTNvqNAWwXy6WXdBeT5/UlCS6wf
-         zdVICxBFZJrv8nbqoHqVnZiBITtWjrJFFE/BRHoX8ETQK5G3tVkOFJh6e9WFiWKYkMDY
-         pAYKCmTONEzX83zyPDSPxud98nKMTdSQTOLTrDEMWOhbArsP2opZ3/xZy0BNsysVyy4+
-         /kwab+LeAJKcxJfWV2i7Hh3pDVw8J1hVw+MGlJj8WiIXl/E7KqqeOFC37otCHbelZyZm
-         LjBVG50gWljFlwn6i/4AAEAYtpiv9a/J7ma6uVr2vsdWR3ZLZJ5KSFVFNRpcWLuNZh7B
-         5DGA==
-X-Forwarded-Encrypted: i=1; AJvYcCXmZgPN5E2w8vpfT2dZBnL9CvczXJu9W72KTIu5KGIIFKqqsoUS4/CFjAdsXvujRxZ5/Us357uxRlv/iyx9TwLD3f8Y2IOs15ighiC6OlOIk2QUbZ+bvCDDTBJrorcEblvZwDms
-X-Gm-Message-State: AOJu0YwprCayTzVsSO1ygvYECfQcdY+itxNfviSqlsWZ+Sc3YcFj4eIk
-	WgKgjtrVKYaLQesLEmDzFWT3Y5ku+8S7RERjlRSF/HDZObbvKRcSUZxnSIdZA2w=
-X-Google-Smtp-Source: AGHT+IHYWrYYerbBpePBbqHqVFRigzPZHBQ/9s78w2bn27T5NlfUFZ2AyFFWaD1Wx68/OJ2cI6JnqQ==
-X-Received: by 2002:a17:906:4748:b0:a3f:357b:d995 with SMTP id j8-20020a170906474800b00a3f357bd995mr6483184ejs.1.1709036734308;
-        Tue, 27 Feb 2024 04:25:34 -0800 (PST)
-Received: from nuc.fritz.box (p200300f6f7068b00fa633ffffe02074c.dip0.t-ipconnect.de. [2003:f6:f706:8b00:fa63:3fff:fe02:74c])
-        by smtp.gmail.com with ESMTPSA id vo14-20020a170907a80e00b00a4136d18988sm721938ejc.36.2024.02.27.04.25.33
+        d=1e100.net; s=20230601; t=1709039703; x=1709644503;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=T9T4qxEfQQkvSyKLRfkGUn8zmmW0fCrKdZvbzLLoJxY=;
+        b=B/ax3knFyVPwqLZ1bBUm8V3LPF0yC8yZF8yLwfgJijhATIOefTFeZiN0Iwrw+WdnQK
+         pK8HJaUZuZH9NZZ+o2+P1BRlaBbTYUM8bMcmwpOS9n5DKMd/wqYlnZK+q6n8dndOb3a5
+         DsxhRJxB1npjEmZCxyn/R3Mus3DC6mXcUveZ+Cl3eiEDd4XCWC/DldM6/QvFGvFRwT2Y
+         TP9SAf2wGPCznhdoMTciDt9L9flLHbpaItG/2haCweN0InEa1eQrv4PPQ4pnUxltWEUX
+         lJUuDUk2O0VMcDM1zN7fbvWF5BHU+spGHFp+WjYeaJ/CjogH08JTQbSK9/zlLkdJSPYg
+         dJwg==
+X-Forwarded-Encrypted: i=1; AJvYcCVyWTk6pLOfXTyjzHZcLdikdEAuVSqS4p7dilxkjRr0MEdSJQP0ONmH4K5jLFq/OgBTtUT1F775f5nvM/ixSPx7AxjNj82ORA==
+X-Gm-Message-State: AOJu0Yw9LNcUC6re0SCVYL64nQXbf/Q08wt2o8sUzcT6V34mlsTMpvQ7
+	m85wDmLc67X5pwmamwYhIyMTq4GyurSpClFrXV/9a4BGonXcTOC79IL7sylj6xlS1GsKPx9D9KQ
+	owuQokanqKlyyZFmQ1tJhv+FbZWfa6mkpHAsLYmUgqHHBbLkA2tib3cw=
+X-Received: by 2002:a17:90a:6581:b0:299:a5a7:7579 with SMTP id k1-20020a17090a658100b00299a5a77579mr13130339pjj.10.1709039703685;
+        Tue, 27 Feb 2024 05:15:03 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGO3ubgAsXdpCQuwb7JVy+YhkjlQr/tcNGQCR2qWazznV/vQpwgX9UJwdvsoV1Iduq4JLjqhA==
+X-Received: by 2002:a17:90a:6581:b0:299:a5a7:7579 with SMTP id k1-20020a17090a658100b00299a5a77579mr13130313pjj.10.1709039703363;
+        Tue, 27 Feb 2024 05:15:03 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id g16-20020aa78750000000b006e45daf9e8bsm5874881pfo.153.2024.02.27.05.15.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Feb 2024 04:25:33 -0800 (PST)
-From: Johannes Thumshirn <jth@kernel.org>
-Date: Tue, 27 Feb 2024 13:25:31 +0100
-Subject: [PATCH v4 3/3] fstests: btrfs: check conversion of zoned
- fileystems
+        Tue, 27 Feb 2024 05:15:03 -0800 (PST)
+Date: Tue, 27 Feb 2024 21:14:59 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Cc: Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org, fdmanana@suse.com
+Subject: Re: [PATCH v3 0/3] fstests: btrfs: add test for zoned balance
+ profile conversion bug
+Message-ID: <20240227131459.soq3af64vffgj3n2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240215-balance-fix-v3-0-79df5d5a940f@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20240227-balance-fix-v4-3-d22d63972d93@kernel.org>
-References: <20240227-balance-fix-v4-0-d22d63972d93@kernel.org>
-In-Reply-To: <20240227-balance-fix-v4-0-d22d63972d93@kernel.org>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: Johannes Thumshirn <jth@kernel.org>, linux-btrfs@vger.kernel.org, 
- fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>, 
- Johannes Thumshirn <johannes.thumshirn@wdc.com>, 
- Filipe Manana <fdmanana@suse.com>
-X-Mailer: b4 0.12.4
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240215-balance-fix-v3-0-79df5d5a940f@wdc.com>
 
-From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+On Thu, Feb 15, 2024 at 03:47:03AM -0800, Johannes Thumshirn wrote:
+> Recently we had a report, that a zoned filesystem can be converted to a
+> RAID although the RAID stripe tree feature was not enabled.
+> 
+> Add a regression test for the fix commit.
+> 
+> ---
+> Johannes Thumshirn (3):
+>       filter.brtfs: add filter for conversion
+>       filter.btrfs: add filter for btrfs device add
 
-Recently we had a bug where a zoned filesystem could be converted to a
-higher data redundancy profile than supported.
+Actually these two filters are added for the 3rd patch, so these 3 patches
+can be in one patch, don't need one patch one helper. Anyway 3 patches are
+good to me too, if you prefer that.
 
-Add a test-case to check the conversion on zoned filesystems.
+Thanks,
+Zorro
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
----
- tests/btrfs/310     | 67 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/310.out |  9 +++++++
- 2 files changed, 76 insertions(+)
-
-diff --git a/tests/btrfs/310 b/tests/btrfs/310
-new file mode 100755
-index 00000000..c39f6016
---- /dev/null
-+++ b/tests/btrfs/310
-@@ -0,0 +1,67 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Western Digital Corporation.  All Rights Reserved.
-+#
-+# FS QA Test 310
-+#
-+# Test that btrfs convert can ony be run to convert to supported profiles on a
-+# zoned filesystem
-+#
-+. ./common/preamble
-+_begin_fstest volume raid convert
-+
-+_fixed_by_kernel_commit XXXXXXXXXX \
-+	"btrfs: zoned: don't skip block group profile checks on conv zones"
-+
-+. common/filter.btrfs
-+
-+_supported_fs btrfs
-+_require_scratch_dev_pool 4
-+_require_zoned_device "$SCRATCH_DEV"
-+
-+devs=( $SCRATCH_DEV_POOL )
-+
-+# Create and mount single device FS
-+_scratch_mkfs -msingle -dsingle 2>&1 > /dev/null
-+_scratch_mount
-+
-+# Convert FS to metadata/system DUP
-+_run_btrfs_balance_start -f -mconvert=dup -sconvert=dup $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert
-+
-+# Convert FS to data DUP, must fail
-+_run_btrfs_balance_start -dconvert=dup $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert
-+
-+# Add device
-+$BTRFS_UTIL_PROG device add ${devs[1]} $SCRATCH_MNT | _filter_device_add
-+
-+# Convert FS to data RAID1, must fail
-+_run_btrfs_balance_start -dconvert=raid1 $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert | head -1
-+
-+# Convert FS to data RAID0, must fail
-+_run_btrfs_balance_start -dconvert=raid0 $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert | head -1
-+
-+# Add device
-+$BTRFS_UTIL_PROG device add ${devs[2]} $SCRATCH_MNT | _filter_device_add
-+
-+# Convert FS to data RAID5, must fail
-+_run_btrfs_balance_start -f -dconvert=raid5 $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert | head -1
-+
-+# Add device
-+$BTRFS_UTIL_PROG device add ${devs[3]} $SCRATCH_MNT | _filter_device_add
-+
-+# Convert FS to data RAID10, must fail
-+_run_btrfs_balance_start -dconvert=raid10 $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert | head -1
-+
-+# Convert FS to data RAID6, must fail
-+_run_btrfs_balance_start -f -dconvert=raid6 $SCRATCH_MNT 2>&1 |\
-+	_filter_balance_convert | head -1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
-new file mode 100644
-index 00000000..cef2e5ab
---- /dev/null
-+++ b/tests/btrfs/310.out
-@@ -0,0 +1,9 @@
-+QA output created by 310
-+Done, had to relocate X out of X chunks
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-+There may be more info in syslog - try dmesg | tail
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-+ERROR: error during balancing 'SCRATCH_MNT': Invalid argument
-
--- 
-2.35.3
+>       fstests: btrfs: check conversion of zoned fileystems
+> 
+>  common/filter.btrfs | 15 ++++++++++++
+>  tests/btrfs/310     | 67 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/310.out | 12 ++++++++++
+>  3 files changed, 94 insertions(+)
+> ---
+> base-commit: 5d761594fc5832d6d940f113b811157e332e14af
+> change-id: 20240215-balance-fix-6bd7998efad0
+> 
+> Best regards,
+> -- 
+> Johannes Thumshirn <johannes.thumshirn@wdc.com>
+> 
 
