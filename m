@@ -1,70 +1,71 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 120FE52F81
-	for <fstests@vger.kernel.org>; Tue, 27 Feb 2024 05:31:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1B3552F87
+	for <fstests@vger.kernel.org>; Tue, 27 Feb 2024 06:00:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709011907; cv=none; b=c9xI6j9YJsSTLB0FevriY8QUCBJenWgvcJIyweLqSql7gqhVeLCqZEw5ZSUy7IAbKvM2XJaiRLxDV73xpnv6xqetz8n+lGT0SOBBK+o8tBd/bigjnRuNpe6LEy//wkncnfKp/0ykn4WvsNoZTRiM9xJO0zSs7xsqQjJi4lqU2KQ=
+	t=1709013632; cv=none; b=JfaWJLZks8Sii4JjsrdLVuDpfcFfCMMHnN57DXrB8t7dl8WrTxNrqHNGjN+SEIu9qtp8/UB1dqd4Zonp7PJZ79uigXcrncNfnV+7I6H2oQ1kiS1M8Qx2WStMCvLeoSBiPq8KiKXVgKDnV9w4GUnrTD8PMJfpsCtAjx05uJEmUxQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709011907; c=relaxed/simple;
-	bh=ocw5XcIWZQgQ1y1hNyqTVBXOjBjFZuD+T6I3/da+R5s=;
+	s=arc-20240116; t=1709013632; c=relaxed/simple;
+	bh=5kKxge7WqQPz3FG4qgp/EapY9NOsOSueUeU3UeetsCM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=q4u6GZNmZtP4K/As6ouf43UPzqFSsaMa/fv3cxSnOofqw/kbo+6XnNoruCtLUBvJmmWat/Bq3gifpIti2iDENSpPQ85hWgLGHqLYjMcQkI9X8LYkqPyO2I4OzNeoQH6aAu8a8XOOSKac23PVm+BXO7TDt0kdKKijXGKUyGXtryM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NXRr7FEd; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=NfWCUS8w8kTFTJ7m1H2qhoqekvs/90Ekw3lwW5EmcHQrZAEHk4WlZupqMMMpei5wT+UIUpfvjg4wFgeYs324rkne1Gmi2Kp5FvmDjwc1tSpdINGZyq5yfA6fxUi55lBUWoHl4HzuYNqMpiOqOs97a4eK078T3Hgc+uNbIz0B56M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZFAgD3Cq; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NXRr7FEd"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZFAgD3Cq"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709011903;
+	s=mimecast20190719; t=1709013628;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=tQUtK6n1GJcIihAKCH5DiOFWaCsLOMH/Ad/lhD9WCAE=;
-	b=NXRr7FEd5LoBptKSPcjeZcD9gg3om4Vs9VEDXjjSL+4frUwA9FTheDWZdHZwTVY0Rti4YJ
-	DlFcFGLEK+UjqKozPIzBK0jXPymVg9GnKwdwK9Ngo4lLX6ZaNOKlQF3bTU+pvqc+xc4GYn
-	OUK2b8mngm1K2YIF0Yi8dTiQAUtzmzY=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=sWGQCTwr0SlLr9SzcIRIzUuc5ksWr4ISnzZMS4BZZdo=;
+	b=ZFAgD3CqMDkqgM4cX7iKeiWgJEA0mUnZmawodrPZJTOe7F8yO+TXeDPBogpU2QkPs+llkg
+	90rFu9HCre7J5peeXYS5fvSpZjyEr5ozqWzUAYQMWABp3csJ43Eo6O16ZT/u4fbtZA6fVJ
+	caAGN36j+nRcY/v5xI2ECGMmMsiib2I=
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
+ [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-567-cKAH1CBJNyev4Pe8Bt3Ulw-1; Tue, 27 Feb 2024 00:31:40 -0500
-X-MC-Unique: cKAH1CBJNyev4Pe8Bt3Ulw-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1dbcf647a9dso29723775ad.1
-        for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 21:31:40 -0800 (PST)
+ us-mta-47-IMGnYzRvNYiamFMV3k2hrg-1; Tue, 27 Feb 2024 01:00:26 -0500
+X-MC-Unique: IMGnYzRvNYiamFMV3k2hrg-1
+Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3bbaf0ee0d9so5132547b6e.1
+        for <fstests@vger.kernel.org>; Mon, 26 Feb 2024 22:00:26 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709011900; x=1709616700;
+        d=1e100.net; s=20230601; t=1709013625; x=1709618425;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=tQUtK6n1GJcIihAKCH5DiOFWaCsLOMH/Ad/lhD9WCAE=;
-        b=Vh3K6MEK5NkufL3A4Hhikkbnl0bhK7dCsTM9PCdg5UF6r18YsoAF2/URN/gJolpnfg
-         unHxe6QRCEWJ3VogOwEjsoigij8Cj6dKqCbUYYsmGBr7deaVGEwfx14DP9DKEOnUj0iD
-         cgy8tA9/8B0bzzDBJlC+nW3S8ntcgKEC8ZpJVPCJSRQZZ+t4P95lKyZjVC46Bjqgxcpo
-         sF+5pA1O9xPYEZSs2BpSIu9BaFVHvDQJPLVPJBANURVpr3ubywJefFjLB6iFirmhrOSd
-         rv5mTsr+Ot2zETcBTc28Xhs+zHHAnWqBsKi7JyuQASSubsA1vQAHSsgwFKZ4UYMlVoT+
-         rlQA==
-X-Forwarded-Encrypted: i=1; AJvYcCXHQg7QcSWimjLghidrBDWt4iWkg8GuJhJkEpVC24e8dx8DfZYe5h7D2BvGabn+qgnJprKZPkjHHu/+/KInXaWFhzWOYOiPOg==
-X-Gm-Message-State: AOJu0YyPnWItVUzkTPtW1vywkiF7H+n/Ns5koF33Wm3NXgaPXp0JrOrS
-	BtYTr+6nTwR+zYfl3Ij2ORdLJwi9eAFzcn+Fi/FoCCMX0EclX3Ex0dPiDFEclNtDljcs5/lAdIn
-	woqMdt8ZQTlDb+SApCpjsweWHMGldEjJUF+ofBIrw+GHI5m5yE7iPQzA=
-X-Received: by 2002:a17:903:2306:b0:1d9:e1aa:f217 with SMTP id d6-20020a170903230600b001d9e1aaf217mr12386056plh.22.1709011899946;
-        Mon, 26 Feb 2024 21:31:39 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHo/vef3aoVXNFHEOfKG7LNo7c6Zcpyv1MQWxBKBr/6toWUwDL6pc0pjjmcmSHuxYBdO+/Xkw==
-X-Received: by 2002:a17:903:2306:b0:1d9:e1aa:f217 with SMTP id d6-20020a170903230600b001d9e1aaf217mr12386038plh.22.1709011899551;
-        Mon, 26 Feb 2024 21:31:39 -0800 (PST)
+        bh=sWGQCTwr0SlLr9SzcIRIzUuc5ksWr4ISnzZMS4BZZdo=;
+        b=Qbikw3q8T9sz3Jc6MojSZXgrgT5aqhgyz/UI9uFDX04M72pxBbmcPmusNi/4oYEfYE
+         hd5C9U+Od3T5jMN6WqPmE7MwcAPSg13oG+bgkHWt2c59OYXQ+HQ1N72DqVHuUB0y58mp
+         9U6ny5fGtQtYPDq6elq5683jo412XXQMTqHpqeI+G1dG7uZu3OgqOR8lUHseotvqoPNJ
+         aF2iRNugU6vr5ZUU+/vI6Z6kQfipIUWSydUgK/Y5Qhd8LiTaAsUdd3mW8seD+5Q0ZjvA
+         mGCERAnDdhkidGp6jz9mY0Ayb7qa8Ut7l6NnrSUNidWvSsjXeO2X0HpDzpmojrq79hmA
+         gnrA==
+X-Forwarded-Encrypted: i=1; AJvYcCXCmqROl4txrVm/2QrBCJQYGHT9i8QzFgIr9wOwl8lkIrlwZPjplFTzbg6miaCR4lbgpTx4H47xFvZVBipM9c3B1UCIDTmECg==
+X-Gm-Message-State: AOJu0YzJK3CZZEIec7WFL9Tmq8of89Ssnicq3ta9xPN6NUJzqz3ZLjYT
+	w6OwujGL+nTAIfcnE4ct87DVMAQbaUC9BBhLj6tZvUTI9bymP8GciR2W2rmK5UtGRO3Ubg2QUdQ
+	z2XXu2UkmSoSP0L7BpY/M8ViWQFk9NUwPK5G0kppCdCZGLiQ2C8Y9AMAtzPymm28QNA==
+X-Received: by 2002:a05:6808:f89:b0:3bf:e478:6f41 with SMTP id o9-20020a0568080f8900b003bfe4786f41mr1409288oiw.14.1709013625141;
+        Mon, 26 Feb 2024 22:00:25 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEt93/xJ794qXrwWUsaCfvWEc+xYpB538F4g7MuBstr8UXMgdxETV+vIolB+NSVZCZUNed/gA==
+X-Received: by 2002:a05:6808:f89:b0:3bf:e478:6f41 with SMTP id o9-20020a0568080f8900b003bfe4786f41mr1409271oiw.14.1709013624836;
+        Mon, 26 Feb 2024 22:00:24 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id v11-20020a170902d68b00b001dca9b21267sm590386ply.186.2024.02.26.21.31.38
+        by smtp.gmail.com with ESMTPSA id f6-20020a63f746000000b005dcc8a3b26esm4959652pgk.16.2024.02.26.22.00.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 26 Feb 2024 21:31:39 -0800 (PST)
-Date: Tue, 27 Feb 2024 13:31:36 +0800
+        Mon, 26 Feb 2024 22:00:24 -0800 (PST)
+Date: Tue, 27 Feb 2024 14:00:21 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 7/8] xfs/43[4-6]: make module reloading optional
-Message-ID: <20240227053136.47rc2ftu3eysmu4u@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 8/8] xfs: test for premature ENOSPC with large cow
+ delalloc extents
+Message-ID: <20240227060021.5hcpvn2ar5xsup6d@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
- <170899915319.896550.14222768162023866668.stgit@frogsfrogsfrogs>
+ <170899915333.896550.18395785595853879309.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,168 +74,199 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <170899915319.896550.14222768162023866668.stgit@frogsfrogsfrogs>
+In-Reply-To: <170899915333.896550.18395785595853879309.stgit@frogsfrogsfrogs>
 
-On Mon, Feb 26, 2024 at 06:02:21PM -0800, Darrick J. Wong wrote:
+On Mon, Feb 26, 2024 at 06:02:37PM -0800, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> These three tests examine two things -- first, can xfs CoW staging
-> extent recovery handle corruptions in the refcount btree gracefully; and
-> second, can we avoid leaking incore inodes and dquots.
+> On a higly fragmented filesystem a Direct IO write can fail with -ENOSPC error
+> even though the filesystem has sufficient number of free blocks.
 > 
-> The only cheap way to check the second condition is to rmmod and
-> modprobe the XFS module, which triggers leak detection when rmmod tears
-> down the caches.  Currently, the entire test is _notrun if module
-> reloading doesn't work.
+> This occurs if the file offset range on which the write operation is being
+> performed has a delalloc extent in the cow fork and this delalloc extent
+> begins much before the Direct IO range.
 > 
-> Unfortunately, these tests never run for the majority of XFS developers
-> because their testbeds either compile the xfs kernel driver into vmlinux
-> statically or the rootfs is xfs so the module cannot be reloaded.  The
-> author's testbed boots from NFS and does not have this limitation.
+> In such a scenario, xfs_reflink_allocate_cow() invokes xfs_bmapi_write() to
+> allocate the blocks mapped by the delalloc extent. The extent thus allocated
+> may not cover the beginning of file offset range on which the Direct IO write
+> was issued. Hence xfs_reflink_allocate_cow() ends up returning -ENOSPC.
 > 
-> Because we've had repeated instances of CoW recovery regressions not
-> being caught by testing until for-next hits my machine, let's make the
-> module reloading optional in all three tests to improve coverage.
+> This test addresses this issue.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
 > ---
->  common/module |   34 +++++++++++++++++++++++++++++-----
->  tests/xfs/434 |    3 +--
->  tests/xfs/435 |    3 +--
->  tests/xfs/436 |    3 +--
->  4 files changed, 32 insertions(+), 11 deletions(-)
+>  common/rc          |   14 +++++++++
+>  tests/xfs/1923     |   85 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1923.out |    8 +++++
+>  3 files changed, 107 insertions(+)
+>  create mode 100755 tests/xfs/1923
+>  create mode 100644 tests/xfs/1923.out
 > 
 > 
-> diff --git a/common/module b/common/module
-> index 6efab71d34..f6814be34e 100644
-> --- a/common/module
-> +++ b/common/module
-> @@ -48,12 +48,15 @@ _require_loadable_module()
->  	modprobe "${module}" || _notrun "${module} load failed"
+> diff --git a/common/rc b/common/rc
+> index 30c44dddd9..d3a2a0718b 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1873,6 +1873,20 @@ _require_scratch_delalloc()
+>  	_scratch_unmount
 >  }
 >  
-> -# Check that the module for FSTYP can be loaded.
-> -_require_loadable_fs_module()
-> +# Test if the module for FSTYP can be unloaded and reloaded.
-> +#
-> +# If not, returns 1 if $FSTYP is not a loadable module; 2 if the module could
-> +# not be unloaded; or 3 if loading the module fails.
-> +_test_loadable_fs_module()
->  {
->  	local module="$1"
->  
-> -	modinfo "${module}" > /dev/null 2>&1 || _notrun "${module}: must be a module."
-> +	modinfo "${module}" > /dev/null 2>&1 || return 1
->  
->  	# Unload test fs, try to reload module, remount
->  	local had_testfs=""
-> @@ -68,8 +71,29 @@ _require_loadable_fs_module()
->  	modprobe "${module}" || load_ok=0
->  	test -n "${had_scratchfs}" && _scratch_mount 2> /dev/null
->  	test -n "${had_testfs}" && _test_mount 2> /dev/null
-> -	test -z "${unload_ok}" || _notrun "Require module ${module} to be unloadable"
-> -	test -z "${load_ok}" || _notrun "${module} load failed"
-> +	test -z "${unload_ok}" || return 2
-> +	test -z "${load_ok}" || return 3
-> +	return 0
+> +# Require test fs supports delay allocation.
+> +_require_test_delalloc()
+> +{
+> +	_require_command "$FILEFRAG_PROG" filefrag
+> +
+> +	rm -f $TEST_DIR/testy
+> +	$XFS_IO_PROG -f -c 'pwrite 0 64k' $TEST_DIR/testy &> /dev/null
+> +	$FILEFRAG_PROG -v $TEST_DIR/testy 2>&1 | grep -q delalloc
+
+I'm wondering if it's a 100% reliable way to get the "delalloc" flag when
+the delalloc is supported? If not, is it worth testing with several files
+or a loop, then return 0 if one of them get delalloc ?
+
+> +	res=$?
+> +	rm -f $TEST_DIR/testy
+> +	test $res -eq 0 || \
+> +		_notrun "test requires delayed allocation buffered writes"
 > +}
 > +
-> +_require_loadable_fs_module()
-> +{
-> +	local module="$1"
+>  # this test needs a test partition - check we're ok & mount it
+>  #
+>  _require_test()
+> diff --git a/tests/xfs/1923 b/tests/xfs/1923
+> new file mode 100755
+> index 0000000000..4e494ad8c2
+> --- /dev/null
+> +++ b/tests/xfs/1923
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2022-2024 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 1923
+> +#
+> +# This is a regression test for "xfs: Fix false ENOSPC when performing direct
+> +# write on a delalloc extent in cow fork".  If there is a lot of free space but
+> +# it is very fragmented, it's possible that a very large delalloc reservation
+> +# could be created in the CoW fork by a buffered write.  If a directio write
+> +# tries to convert the delalloc reservation to a real extent, it's possible
+> +# that the allocation will succeed but fail to convert even the first block of
+> +# the directio write range.  In this case, XFS will return ENOSPC even though
+> +# all it needed to do was to keep converting until the allocator returns ENOSPC
+> +# or the first block of the direct write got some space.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick clone
 > +
-> +	_test_loadable_fs_module "${module}"
-> +	ret=$?
-> +	case "$ret" in
-> +	1)
-> +		_notrun "${module}: must be a module."
-> +		;;
-> +	2)
-> +		_notrun "${module}: module could not be unloaded"
-> +		;;
-> +	3)
-> +		_notrun "${module}: module reload failed"
-> +		;;
-> +	esac
-> +	return "${ret}"
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $file1 $file2 $fragmentedfile
+> +}
+> +
+> +# Import common functions.
+> +. ./common/reflink
+> +. ./common/inject
+> +
+> +# real QA test starts here
+> +_fixed_by_kernel_commit XXXXX \
+> +	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
 
-I think nobody checks the return value of a _require_xxx helper. The
-_require helper generally notrun or keep running. So if ret=0, then
-return directly, other return values trigger different _notrun.
+Is it this commit below, or a new fix with same subject?
 
->  }
->  
->  # Print the value of a filesystem module parameter
-> diff --git a/tests/xfs/434 b/tests/xfs/434
-> index 12d1a0c9da..ca80e12753 100755
-> --- a/tests/xfs/434
-> +++ b/tests/xfs/434
-> @@ -30,7 +30,6 @@ _begin_fstest auto quick clone fsr
->  
->  # real QA test starts here
->  _supported_fs xfs
-> -_require_loadable_fs_module "xfs"
->  _require_quota
->  _require_scratch_reflink
->  _require_cp_reflink
-> @@ -77,7 +76,7 @@ _scratch_unmount 2> /dev/null
->  rm -f ${RESULT_DIR}/require_scratch
->  
->  echo "See if we leak"
-> -_reload_fs_module "xfs"
-> +_test_loadable_fs_module "xfs"
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/435 b/tests/xfs/435
-> index 44135c7653..b52e9287df 100755
-> --- a/tests/xfs/435
-> +++ b/tests/xfs/435
-> @@ -24,7 +24,6 @@ _begin_fstest auto quick clone
->  
->  # real QA test starts here
->  _supported_fs xfs
-> -_require_loadable_fs_module "xfs"
->  _require_quota
->  _require_scratch_reflink
->  _require_cp_reflink
-> @@ -55,7 +54,7 @@ _scratch_unmount 2> /dev/null
->  rm -f ${RESULT_DIR}/require_scratch
->  
->  echo "See if we leak"
-> -_reload_fs_module "xfs"
-> +_test_loadable_fs_module "xfs"
+commit d62113303d691bcd8d0675ae4ac63e7769afc56c
+Author: Chandan Babu R <chandan.babu@oracle.com>
+Date:   Thu Aug 4 08:59:27 2022 -0700
 
-So we don't care about if the fs module reload success or not, just
-try it then keep running?
+    xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork
 
-Thanks,
-Zorro
+If it's an old commit, please replace the "XXXXX" to "d62113303d69".
 
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/436 b/tests/xfs/436
-> index d010362785..02bcd66900 100755
-> --- a/tests/xfs/436
-> +++ b/tests/xfs/436
-> @@ -27,7 +27,6 @@ _begin_fstest auto quick clone fsr
->  
->  # real QA test starts here
->  _supported_fs xfs
-> -_require_loadable_fs_module "xfs"
->  _require_scratch_reflink
->  _require_cp_reflink
->  _require_xfs_io_command falloc # fsr requires support for preallocation
-> @@ -72,7 +71,7 @@ _scratch_unmount 2> /dev/null
->  rm -f ${RESULT_DIR}/require_scratch
->  
->  echo "See if we leak"
-> -_reload_fs_module "xfs"
-> +_test_loadable_fs_module "xfs"
->  
->  # success, all done
->  status=0
-> 
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+
+"xfs"? As it's in tests/xfs/ directory.
+
+> +_require_test_program "punch-alternating"
+> +_require_test_reflink
+> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
+> +_require_test_delalloc
+> +
+> +file1=$TEST_DIR/file1.$seq
+> +file2=$TEST_DIR/file2.$seq
+> +fragmentedfile=$TEST_DIR/fragmentedfile.$seq
+
+As you use the $TEST_DIR, it might be worth making sure these files
+aren't existed. Due to the files (from other cases) in $TEST_DIR might
+not be cleaned, especially if they don't take much free space.
+
+So if these 3 files won't take much space, we can keep them, don't need
+a specific _cleanup(). And move the "rm -f $file1 $file2 $fragmentedfile"
+at here.
+
+> +
+> +# COW operates on pages, so we must not perform operations in units smaller
+> +# than a page.
+> +blksz=$(_get_file_block_size $TEST_DIR)
+> +pagesz=$(_get_page_size)
+> +if (( $blksz < $pagesz )); then
+> +	blksz=$pagesz
+> +fi
+
+Just curious, this's a xfs specific test case, can xfs support blocksize >
+pagesize? If not, can we just use pagesz directly at here ?
+
+> +
+> +echo "Create source file"
+> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 256))" $file1 >> $seqres.full
+> +
+> +sync
+> +
+> +echo "Create Reflinked file"
+> +_cp_reflink $file1 $file2 >> $seqres.full
+> +#$XFS_IO_PROG -f -c "reflink $file1" $file2 >> $seqres.full
+
+There's a "#", do you hope to run it or not?
+
+> +
+> +echo "Set cowextsize"
+> +$XFS_IO_PROG -c "cowextsize $((blksz * 128))" -c stat $file1 >> $seqres.full
+> +
+> +echo "Fragment FS"
+> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 512))" $fragmentedfile >> $seqres.full
+> +sync
+> +$here/src/punch-alternating $fragmentedfile
+> +
+> +echo "Allocate block sized extent from now onwards"
+> +_test_inject_error bmap_alloc_minlen_extent 1
+> +
+> +echo "Create big delalloc extent in CoW fork"
+> +$XFS_IO_PROG -c "pwrite 0 $blksz" $file1 >> $seqres.full
+> +
+> +sync
+> +
+> +$XFS_IO_PROG -c 'bmap -elpv' -c 'bmap -celpv' $file1 >> $seqres.full
+> +
+> +echo "Direct I/O write at offset 3FSB"
+> +$XFS_IO_PROG -d -c "pwrite $((blksz * 3)) $((blksz * 2))" $file1 >> $seqres.full
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/1923.out b/tests/xfs/1923.out
+> new file mode 100644
+> index 0000000000..a0553cf3ee
+> --- /dev/null
+> +++ b/tests/xfs/1923.out
+> @@ -0,0 +1,8 @@
+> +QA output created by 1923
+> +Create source file
+> +Create Reflinked file
+> +Set cowextsize
+> +Fragment FS
+> +Allocate block sized extent from now onwards
+> +Create big delalloc extent in CoW fork
+> +Direct I/O write at offset 3FSB
 > 
 
