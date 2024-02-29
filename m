@@ -1,196 +1,79 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60A617C6DF;
-	Thu, 29 Feb 2024 11:45:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FFC863113;
+	Thu, 29 Feb 2024 17:48:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709207127; cv=none; b=nJwnmldDOPt5SlgYUwI5J0iUUYguWIfFjIkPajdbZDHjksyTjvDEIqqMC3AzCIeF5ThrfTdoc87mdtJiL1YH18b5SM2bXZRHVUJLm3ADJYypgLe+3G0ai8+kE+//gduZYSvD6cPHAyRyKZs00NMRHYCDBRnG0RDAe1KG1nEAhW4=
+	t=1709228912; cv=none; b=VWRQhAqu57St/J9augpjxrAgYEAZWVMUV60HnF3AKWfaRe1t6m8Q0PvhXhHnQtUT9ivQU6R1kCWuvPWbyENHmG5EdCUoXkojJbkO6YYyVfchoap4Mrr1KCe/rerdMJCU1dzh3sLxGXsdtfr90CIZ73lJzGLt4V7bdQw11CvDsOw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709207127; c=relaxed/simple;
-	bh=BwGxvTIC5QfyAHuNmavEUlUkmJvI9bEW1N2gwc6Wxtk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MIJZOH+7KXyzTzGjMkJDnRpyYcLHaTThHqMjwb63pMFwCnrAdRlurNa+3zD8BP5x4kuEbZ9d21HTDMovKnSWXPxktIXvTWnpI+wRRBRHx7MZZDPmVFPc3E0OSaL4Q9F83aMiESlR/yj8IqBqUzsXHtv4WhryD1sSMrO2XYQjYmM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dOpZgSuj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1709228912; c=relaxed/simple;
+	bh=UNiYCunT2UCAvBD2uQlgDLdoBs42SZ66NYTMKIDSauo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=X7VomalT50yxku+Jh9qJJ4Lfbczyyb7ZddALdVCMdHW4AzNa7L/vrCxA67Klmv26iNSJttkQusTKd0nmb3kGJ8Lit3uAetDAVkAG5W5OlcNbvvRauyh+fRaNY/Z9584Sh1sMmq6dbmeILfKNew8kp5vFHdtTmW9n9dzeh0hXflA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DT53xOyh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dOpZgSuj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F3707C43390;
-	Thu, 29 Feb 2024 11:45:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DT53xOyh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C517AC433F1;
+	Thu, 29 Feb 2024 17:48:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709207126;
-	bh=BwGxvTIC5QfyAHuNmavEUlUkmJvI9bEW1N2gwc6Wxtk=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=dOpZgSujJQ+dOuaRf3n4anNtRFm5chUAcAhNnyc7BAMnQk4MZE9rlexIqsN4mxaqn
-	 0IOzELg9p68qLKXjjXqcyYqQXmKDnmFhR4PcR98oeGfaow508TASWxaRYbD25A1IQl
-	 j21pvJgFwiJ8CW6GHApqjzjw5lZAiyvY/emCQUejaI04IOxWSDw3YeL2rXkd3NeBfw
-	 XJ3v/ot09Uofj40cwDZFlb+0GtLxmyQNMaCKWq1cKJoz0xoSsQEmN4QO24CTmBLxuD
-	 AiZt+KRG/pFhyFo7HN9NaSwFpK7kGqw3J++VxHVhC9A+jeDP2PrEfxca1xsuwozS/S
-	 sbjQxyYN/FMCA==
-Received: by mail-ed1-f52.google.com with SMTP id 4fb4d7f45d1cf-564647bcdbfso1043471a12.2;
-        Thu, 29 Feb 2024 03:45:25 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCV9iQl3GoIY20GKNOzynQwZJG6dj7BgW07wVmSOvI6g2BR3OyVlvgjzR5hoHrk+2W1CgxKS6WjxPZouNSUR053m5//mI1Ykbsybt5I=
-X-Gm-Message-State: AOJu0Yw6V6sKouY1K8c+F7zYeYxeDCnyla0vuxwhxmS/wcTnT6hYrX2T
-	x4sWLQNUkbL5qCgZ9UEFOlgoNUFiardEbQTdYmkYEsY0J4dPe2H0Qo5Dec5YrD1bpbOkmQMHSxR
-	HBUIdeDXg0JU9UFfJQJP4aWoV5ac=
-X-Google-Smtp-Source: AGHT+IFIlZ+110Y14vIyDA3oT2S+t3yiHoZJMWfNlGjDGIspH7vaAGC5HO4Lk1wsaFi901SXGLzc5qSSuEsLx2aoX5I=
-X-Received: by 2002:a17:906:495a:b0:a3f:384a:73ab with SMTP id
- f26-20020a170906495a00b00a3f384a73abmr1209686ejt.71.1709207124463; Thu, 29
- Feb 2024 03:45:24 -0800 (PST)
+	s=k20201202; t=1709228911;
+	bh=UNiYCunT2UCAvBD2uQlgDLdoBs42SZ66NYTMKIDSauo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=DT53xOyhc42jrzlkIUrnv67nkShugzMH/Ua5T1J24WvWuHFo0mz3pPFDl4Xg3NPKT
+	 hTyrDTi2ayKLJqjCpxymflBFEQCubbhyQsCcRUikbLBeVFzlac86TCENuMNw0D1o66
+	 Mz1BpdPM33QoZGfr3cclVGQ5kixQLwnMj2EXYNtrrS2g72z0kGTFgNvUrOjw5G3EpZ
+	 KUiff8tHiw1nLXiKmmTLbXIV13CsPUtRutpbF3W97b/tNjnEVtNtcTOF04q6JzqgjI
+	 zC8x1GWoRczM119vIMNp0Gdq07MfdCI1ZwnvHjeMY6+7CCG+TTAV9cBVsi/cKuWl3e
+	 nTV4RlNk1Au9w==
+Date: Thu, 29 Feb 2024 09:48:31 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, guan@eryu.me,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH 6/8] xfs/122: update test to pick up rtword/suminfo
+ ondisk unions
+Message-ID: <20240229174831.GB1927156@frogsfrogsfrogs>
+References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
+ <170899915304.896550.17104868811908659798.stgit@frogsfrogsfrogs>
+ <Zd33sVBc4GSA5y1I@infradead.org>
+ <20240228012704.GU6188@frogsfrogsfrogs>
+ <Zd9TsVxjRTXu8sa5@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1709162170.git.anand.jain@oracle.com> <f5c5894f51e8d19f292f5fb7df3976e397c8e4eb.1709162170.git.anand.jain@oracle.com>
-In-Reply-To: <f5c5894f51e8d19f292f5fb7df3976e397c8e4eb.1709162170.git.anand.jain@oracle.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 29 Feb 2024 11:44:47 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H5BAVoMMqwqwQC5bqq_f9i7fzZ8Xb7Caps_+hpRVY7G0w@mail.gmail.com>
-Message-ID: <CAL3q7H5BAVoMMqwqwQC5bqq_f9i7fzZ8Xb7Caps_+hpRVY7G0w@mail.gmail.com>
-Subject: Re: [PATCH v4 10/10] btrfs: test tempfsid with device add, seed, and balance
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Zd9TsVxjRTXu8sa5@infradead.org>
 
-On Thu, Feb 29, 2024 at 1:51=E2=80=AFAM Anand Jain <anand.jain@oracle.com> =
-wrote:
->
-> Make sure that basic functions such as seeding and device add fail,
-> while balance runs successfully with tempfsid.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+On Wed, Feb 28, 2024 at 07:39:29AM -0800, Christoph Hellwig wrote:
+> On Tue, Feb 27, 2024 at 05:27:04PM -0800, Darrick J. Wong wrote:
+> > On Tue, Feb 27, 2024 at 06:54:41AM -0800, Christoph Hellwig wrote:
+> > > Can we please just kill the goddamn test?  Just waiting for the
+> > > xfsprogs 6.8 resync to submit the static_asserts for libxfs that
+> > > will handle this much better.
+> > 
+> > I'll be very happen when we scuttle xfs/122 finally.
+> > 
+> > However, in theory it's still be useful for QA departments to make sure
+> > that xfsprogs backports (HA!) don't accidentally break things.
+> > 
+> > IOWs, I advocate for _notrunning this test if xfsprogs >= 6.8 is
+> > detected, not removing it completely.
+> > 
+> > Unless someone wants to chime in and say that actually, nobody backports
+> > stuff to old xfsprogs?  (We don't really...)
+> 
+> Well, who is going to backport changes to the on-disk format in a way
+> that is complex enough to change strutures, and not also backport the
+> patch to actually check the sizes?  Sounds like a weird use case to
+> optimize for.
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+It turns out that xfs/122 also captures ioctl structure sizes, and those
+are /not/ captured by xfs_ondisk.h.  I think we should add those before
+we kill xfs/122.
 
-Thanks.
-
-> ---
->  tests/btrfs/315     | 91 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/315.out | 10 +++++
->  2 files changed, 101 insertions(+)
->  create mode 100755 tests/btrfs/315
->  create mode 100644 tests/btrfs/315.out
->
-> diff --git a/tests/btrfs/315 b/tests/btrfs/315
-> new file mode 100755
-> index 000000000000..7e5c74df4316
-> --- /dev/null
-> +++ b/tests/btrfs/315
-> @@ -0,0 +1,91 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 315
-> +#
-> +# Verify if the seed and device add to a tempfsid filesystem fails
-> +# and balance devices is successful.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick volume seed balance tempfsid
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       $UMOUNT_PROG $tempfsid_mnt 2>/dev/null
-> +       rm -r -f $tmp.*
-> +       rm -r -f $tempfsid_mnt
-> +}
-> +
-> +. ./common/filter.btrfs
-> +
-> +_supported_fs btrfs
-> +_require_scratch_dev_pool 3
-> +_require_btrfs_fs_feature temp_fsid
-> +
-> +_scratch_dev_pool_get 3
-> +
-> +# mount point for the tempfsid device
-> +tempfsid_mnt=3D$TEST_DIR/$seq/tempfsid_mnt
-> +
-> +_filter_mount_error()
-> +{
-> +       # There are two different errors that occur at the output when
-> +       # mounting fails; as shown below, pick out the common part. And,
-> +       # remove the dmesg line.
-> +
-> +       # mount: <mnt-point>: mount(2) system call failed: File exists.
-> +
-> +       # mount: <mnt-point>: fsconfig system call failed: File exists.
-> +       # dmesg(1) may have more information after failed mount system ca=
-ll.
-> +
-> +       grep -v dmesg | _filter_test_dir | sed -e "s/mount(2)\|fsconfig//=
-g"
-> +}
-> +
-> +seed_device_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV}
-> +       $BTRFS_TUNE_PROG -S 1 ${SCRATCH_DEV_NAME[1]}
-> +
-> +       _scratch_mount 2>&1 | _filter_scratch
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt} 2>&1 | _filter_moun=
-t_error
-> +}
-> +
-> +device_add_must_fail()
-> +{
-> +       echo ---- $FUNCNAME ----
-> +
-> +       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> +       _scratch_mount
-> +       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> +
-> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
-> +                                                       _filter_xfs_io
-> +
-> +$BTRFS_UTIL_PROG device add -f ${SCRATCH_DEV_NAME[2]} ${tempfsid_mnt} 2>=
-&1 | \
-> +               grep -v "Performing full device TRIM" | _filter_scratch_p=
-ool
-> +
-> +       echo Balance must be successful
-> +       _run_btrfs_balance_start ${tempfsid_mnt}
-> +}
-> +
-> +mkdir -p $tempfsid_mnt
-> +
-> +seed_device_must_fail
-> +
-> +_scratch_unmount
-> +_cleanup
-> +mkdir -p $tempfsid_mnt
-> +
-> +device_add_must_fail
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
-> new file mode 100644
-> index 000000000000..3ea7a35ab040
-> --- /dev/null
-> +++ b/tests/btrfs/315.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 315
-> +---- seed_device_must_fail ----
-> +mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-only.
-> +mount: TEST_DIR/315/tempfsid_mnt:  system call failed: File exists.
-> +---- device_add_must_fail ----
-> +wrote 9000/9000 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +ERROR: error adding device 'SCRATCH_DEV': Invalid argument
-> +Balance must be successful
-> +Done, had to relocate 3 out of 3 chunks
-> --
-> 2.39.3
->
+--D
