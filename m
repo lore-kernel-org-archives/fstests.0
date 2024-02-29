@@ -1,42 +1,74 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from wout1-smtp.messagingengine.com (wout1-smtp.messagingengine.com [64.147.123.24])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B0F6134411
-	for <fstests@vger.kernel.org>; Thu, 29 Feb 2024 20:05:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCA5A55E76;
+	Thu, 29 Feb 2024 23:31:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.24
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709237111; cv=none; b=JRnZK/blsvrLNnGxP3CesCtAZaxligkpF5tSttVMSvoCJOBBXBJcBsDSaoMEX9XnSGDbbxB2pyWKSBwZ4Ve4oWFiFqdHxDkyv37tU9SDa6dVBS46gmJxDZDptjIPGeG+ZTS+imBMEvhgba6IMDMpnxInfCa7BK1LONu4LXEbRQ0=
+	t=1709249493; cv=none; b=c5j8QGjvg3uP0WRmFifYTKg2rTcsPssT7t2DRS62bnRxD0c0RNcryShV5bCsiy3UjahFnaEfCHDyVoow8tWYo1/QpY/3NOMz6S0rD9i/bvTSPouTlFbzEHVyhvwfk2vZZwejUfstdRWk67PwUCWSpUs8SjxFC0ytCHi7FWsKiHM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709237111; c=relaxed/simple;
-	bh=MtiZQBSmnCbnWC4ZC6+ag7RczifXh2zJd8RsBSZcEBQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dPWEt9YNfkf0Oi+O4WvSGE5x3bwxqv9+W5CHgk5Ub/z8Cdos1dbrxtzSjJD9EqMuSaOnXUdNzbmNqCUlLZKU/vsEC7BEAho/G5EiL9ZNwTWTJGnstggaiXs0uZ6B9SsHty35YixhsYMGIEfkXbeVoHo3gnA5wmLRTUos4fvUIHI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KCDqCyeR; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1709249493; c=relaxed/simple;
+	bh=HTzbY+8vxLKQQqFf7V17Hpy9/TsUTY4T2yxeLQj7sH0=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DwZtiBNS/WC3FDRqe6EXR/8g9ty39RrnFk9w2HKii9hg0X1RwYFLHCDBGkGzVXZdrHIdycmpfeseNQ19j3FtoC01afWrhuj4zVysUgb3bS0PqslxuRPk1bOaI2WiCrauxOIBWYJ4ebQKtEbJx3CFHexhblsLME2xv8bUsnD9y5U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=KS/+/uy9; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=HOAp1roy; arc=none smtp.client-ip=64.147.123.24
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KCDqCyeR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 61163C433F1;
-	Thu, 29 Feb 2024 20:05:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709237109;
-	bh=MtiZQBSmnCbnWC4ZC6+ag7RczifXh2zJd8RsBSZcEBQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=KCDqCyeRuvYNEIF6Xt1REOgypokftYe72o+zQeFGY+w+2vuX7pUApaJzqEwuKc4fu
-	 wUzmtqVlnBoZsov4s5QBzRT8CR7KEz51bTlxi1m0lQb0RtlcnHJBL9NN3pyRlDSAfP
-	 4BmzNktb5KPWlS18XU1UkDFh+0Bf04enoaGH96/YbJYNidRudrhn6dOdtD3s7gPioS
-	 fd2sJDh0InpGA8UR8DlVGuirAjtTYRPmx1yKtfu7qBokuhvD3OfhdhguBU2dc2lfCW
-	 38BkXRjNXGyNd5ymJ5IZ5sGUGbMWCPV2WFztav0widLffmmwSgpEX2WQeCV922QfI6
-	 49wWfj0JSh8Hw==
-Date: Thu, 29 Feb 2024 12:05:07 -0800
-From: Eric Biggers <ebiggers@kernel.org>
-To: David Sterba <dsterba@suse.cz>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-	zlang@redhat.com
-Subject: Re: Dangerous commands (was:[ANNOUNCE] fstests: for-next branch
- updated to v2024.02.04)
-Message-ID: <20240229200507.GB1454@sol.localdomain>
-References: <20240221140951.GJ355@suse.cz>
- <20240221161358.GM6188@frogsfrogsfrogs>
- <20240229184452.GB2604@suse.cz>
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="KS/+/uy9";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="HOAp1roy"
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+	by mailout.west.internal (Postfix) with ESMTP id 643673200A91;
+	Thu, 29 Feb 2024 18:31:29 -0500 (EST)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute6.internal (MEProxy); Thu, 29 Feb 2024 18:31:29 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm2; t=1709249488; x=1709335888; bh=yeqqb4gtfY
+	X/6l8Ur5nv7zJk04vGMoYp8+PwYU6YTvg=; b=KS/+/uy9+TLubk2fVoAepM9abu
+	uIgsXWYAd320sew0Z5lyeor+dqfVVVQq+05MTwDhKvI2Zr+IfyfMy7XkIlwK8B9r
+	Iz/XSfFTZV8RvfyYZ+ek720bwFI7l0mFs/GIlRNnAwCfB7SJzEj9kDkU+OXV6ROj
+	VBXHRIvchJ8UAzVfWK/K0U65UPRl9/XrSFL5esYSRVTRP+wLKauV72tE+iqlL6tn
+	bvNJew5aYujnjimjuJwkVz5nNupwmsUccW3IwghBgKmCxu1G2ff566QmEDW09VUS
+	vPcwU9B/lWHYL90nRp9i7WLUOzvoAupCaBZPmVl3cOkpgJIXPzsXrs+xa/4g==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1709249488; x=1709335888; bh=yeqqb4gtfYX/6l8Ur5nv7zJk04vG
+	MoYp8+PwYU6YTvg=; b=HOAp1royy9E5SVX4dvB+TZO2W/WIXwlyQCgYojQl2aBl
+	s4oYnHcsu9Ys8JUtG1XfJjwlIhUjwFnTKYBmR/EMC60ZjUu57TgAMreD+iGUwmX/
+	LuhBVGGVCWywjFozDTAThXUjGB3RQFxBe6YLGlwA5fxocxjIEZ5GBcGrLyNvluQd
+	CXKrFiFR9iXBEJTn5QjjJqADIGHpD7jclAvHOVA0xNTHfwhQepuSdvVPvWFOnv4p
+	3TiN17sZp/XBsYP1lJyQFdX+wS0Idm26NelO5CHeWnz9NWKz6Lm1hT9hypW4/oEJ
+	K6uKJMMG/T6/xoJOINd7m7JqgCYn318soQnfy9ZFTA==
+X-ME-Sender: <xms:0BPhZRoXzqvOCi8ZbwfArazim6714k3mEPnhKY6Azeg2Dx7uI45kXw>
+    <xme:0BPhZTpOb2-kFeAvsFkvZe4XG4clIuuiyUr5I1oHo4x5QdJP9zhp8HXjPxYFLrHpc
+    1tlZmDv683B7otELgU>
+X-ME-Received: <xmr:0BPhZePChNN8l6iXWsvtuHb0nyLQ_-G4us07eOIiZRl73BWIXqd1PJ6uJdUUlmW6xevKXgdmyg4Nut1VWaVD5FqCOs0>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrhedtgddtlecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecunecujfgurhepfffhvffukfhfgggtuggjsehttdertd
+    dttddvnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
+    oheqnecuggftrfgrthhtvghrnhepheduveelkeeiteelveeiuefhudehtdeigfehkeeffe
+    egledvueevgefgudeuveefnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:0BPhZc5Yxh5yS-7Br8x5QSd1sc6gyey07njxqX0CCPp_gUjVSQuuXQ>
+    <xmx:0BPhZQ6oaAwuB_zTokxxX6-hWJn4B_FW7ovWtOFanBonYoDxEzpy3w>
+    <xmx:0BPhZUi-WuHnCYSQbzNuFEUypckXm4orozWasgo3b4JcCJzMWYvpdg>
+    <xmx:0BPhZeRv1guj-RBMo8JAEVCPEIzDl49r_N21hUTdTf1RpC0k2Bjclw>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 29 Feb 2024 18:31:28 -0500 (EST)
+Date: Thu, 29 Feb 2024 15:32:40 -0800
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] btrfs: add test for shifting devt
+Message-ID: <20240229233240.GA1799927@zen.localdomain>
+References: <27bad2e06121a6cd5cb34146e37b8e2dc46dec0c.1709231457.git.boris@bur.io>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,41 +77,193 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240229184452.GB2604@suse.cz>
+In-Reply-To: <27bad2e06121a6cd5cb34146e37b8e2dc46dec0c.1709231457.git.boris@bur.io>
 
-On Thu, Feb 29, 2024 at 07:44:52PM +0100, David Sterba wrote:
-> > I worried about this a long time ago, and tried running shellcheck on
-> > the entire codebase.  Thousands of error messages about sloppy quoting
-> > later I gave up.  Later I turned that into a patch in djwong-wtf that
-> > runs it only on the files changed by the head commit.
-> > 
-> > It **didn't notice** the cleanup error!  So that wouldn't have saved me.
-> > 
-> > Long term we ought to rewrite fstests in any language that isn't as much
-> > of a foot gun.  Or someone starts a project to set -e -u and deals with
-> > the massive treewide change that's going to be.
+This is a pretty poor submission, I forgot to write a commit message and
+there are some random obvious problems with the style of the test
+itself. Please disregard until I resend.
+
+Sorry for the spam!
+Boris
+
+On Thu, Feb 29, 2024 at 10:36:41AM -0800, Boris Burkov wrote:
+> ---
+>  common/config       |   1 +
+>  common/rc           |   4 ++
+>  tests/btrfs/303     | 127 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/303.out |   2 +
+>  4 files changed, 134 insertions(+)
+>  create mode 100755 tests/btrfs/303
+>  create mode 100644 tests/btrfs/303.out
 > 
-> I see from your and Dave's response that the problems are known and that
-> everybody tried to fix it in some way. What I also see that it's kind of
-> futile so that people carry their patches in own branches for testing.
-> The amount of treewide changes is probably killing the idea or this
-> would have to be coordinated or done in sprints or idk.
-
-At the risk of being blamed for posting a "redundant" response again:
-
-What I tend to do in new shell scripts outside xfstests is use
-'set -e -u -o pipefail', and also make sure they pass shellcheck.
-
-For example, I did that for the tests I wrote for the fscrypt command-line tool:
-https://github.com/google/fscrypt/tree/master/cli-tests.  And I made the
-shellcheck be enforced by GitHub Actions, so new warnings don't get introduced.
-
-So, the point is, I'm very much in favor of 'set -e -u -o pipefail' plus
-shellcheck as a modern, less error-prone way to write shell scripts.
-
-What can realistically be done with the existing 170000 (?) lines of shell
-script in xfstests is another question.  Perhaps common/ could be updated first,
-and then individual tests could opt into strict mode as they get updated too.
-It would be a lot of work in any case.
-
-- Eric
+> diff --git a/common/config b/common/config
+> index a3b15b96f..43b517fda 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -235,6 +235,7 @@ export BLKZONE_PROG="$(type -P blkzone)"
+>  export GZIP_PROG="$(type -P gzip)"
+>  export BTRFS_IMAGE_PROG="$(type -P btrfs-image)"
+>  export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
+> +export PARTED_PROG="$(type -P parted)"
+>  
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/common/rc b/common/rc
+> index 30c44dddd..8e009aca9 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5375,6 +5375,10 @@ _require_unshare() {
+>  		_notrun "unshare $*: command not found, should be in util-linux"
+>  }
+>  
+> +_require_parted() {
+> +	$PARTED_PROG --list &>/dev/null || _notrun "parted: command not found"
+> +}
+> +
+>  # Return a random file in a directory. A directory is *not* followed
+>  # recursively.
+>  _random_file() {
+> diff --git a/tests/btrfs/303 b/tests/btrfs/303
+> new file mode 100755
+> index 000000000..dece3eacc
+> --- /dev/null
+> +++ b/tests/btrfs/303
+> @@ -0,0 +1,127 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 Meta, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 303
+> +#
+> +# Test an edge case of multi device volume management in btrfs.
+> +# If a device changes devt between mounts of a multi device fs, we can trick
+> +# btrfs into mounting the same device twice fully (not as a bind mount). From
+> +# there, it is trivial to induce corruption.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick volume
+> +
+> +# Override the default cleanup function.
+> +# _cleanup()
+> +# {
+> +# 	cd /
+> +# 	rm -r -f $tmp.*
+> +# }
+> +
+> +# Import common functions.
+> +# . ./common/filter
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_test
+> +_require_parted
+> +
+> +#BARE_MOUNT_PROG=$here/src/bare-mount
+> +
+> +_cleanup() {
+> +	cd /
+> +	umount $MNT
+> +	umount $BIND
+> +	losetup -d $DEV0
+> +	losetup -d $DEV1
+> +	losetup -d $DEV2
+> +	rm $IMG0
+> +	rm $IMG1
+> +	rm $IMG2
+> +}
+> +
+> +do_mkpart() {
+> +	local dev=$1
+> +	$PARTED_PROG $dev 'mkpart mypart 1M 100%' --script
+> +}
+> +
+> +do_rmpart() {
+> +	local dev=$1
+> +	$PARTED_PROG $dev 'rm 1' --script
+> +}
+> +
+> +# Prepare 3 loop devices on the test device
+> +IMG0=$TEST_DIR/$$.img0
+> +IMG1=$TEST_DIR/$$.img1
+> +IMG2=$TEST_DIR/$$.img2
+> +truncate -s 1G $IMG0
+> +truncate -s 1G $IMG1
+> +truncate -s 1G $IMG2
+> +DEV0=$(losetup -f $IMG0 --show)
+> +DEV1=$(losetup -f $IMG1 --show)
+> +DEV2=$(losetup -f $IMG2 --show)
+> +D0P1=$DEV0"p1"
+> +D1P1=$DEV1"p1"
+> +MNT=$TEST_DIR/mnt
+> +BIND=$TEST_DIR/bind
+> +
+> +# Setup partition table with one partition on each device
+> +$PARTED_PROG $DEV0 'mktable gpt' --script
+> +$PARTED_PROG $DEV1 'mktable gpt' --script
+> +do_mkpart $DEV0
+> +do_mkpart $DEV1
+> +
+> +# mkfs with two devices to avoid clearing devices on close
+> +# single raid to allow removing DEV2
+> +$MKFS_BTRFS_PROG -f -msingle -dsingle $D0P1 $DEV2 &>/dev/null
+> +
+> +# Cycle mount the two device fs to populate both devices into the
+> +# stale device cache
+> +mkdir -p $MNT
+> +mount $D0P1 $MNT
+> +umount $MNT
+> +
+> +# Swap the partition dev_ts. This leaves the dev_t in the cache out of date.
+> +do_rmpart $DEV0
+> +do_rmpart $DEV1
+> +do_mkpart $DEV1
+> +do_mkpart $DEV0
+> +
+> +# Mount with mismatched dev_t!
+> +mount $D0P1 $MNT || _fail "failed to remount; don't proceed and do dangerous stuff on raw mount point"
+> +
+> +# Remove extra device to bring temp-fsid back in the fray
+> +$BTRFS_UTIL_PROG device remove $DEV2 $MNT
+> +
+> +# Create the should be bind mount
+> +mkdir -p $BIND
+> +mount $D0P1 $BIND
+> +mount_show=$($BTRFS_UTIL_PROG filesystem show $MNT)
+> +bind_show=$($BTRFS_UTIL_PROG filesystem show $BIND)
+> +# If they're different, we are in trouble.
+> +[ "$mount_show" = "$bind_show" ] || echo "$mount_show != $bind_show"
+> +
+> +# now prove it by corrupting it
+> +for i in $(seq 20); do
+> +	# TODO diff prog
+> +	dd if=/dev/urandom of=$MNT/foo.$i bs=50M count=1 &>/dev/null
+> +done
+> +for i in $(seq 20); do
+> +	# TODO diff prog
+> +	dd if=/dev/urandom of=$BIND/foo.$i bs=50M count=1 &>/dev/null
+> +done
+> +sync
+> +find $BIND -type f -delete
+> +sync
+> +$FSTRIM_PROG $BIND
+> +sleep 5
+> +echo 3 > /proc/sys/vm/drop_caches
+> +$BTRFS_UTIL_PROG scrub start -B $MNT >>$seqres.full 2>&1
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/303.out b/tests/btrfs/303.out
+> new file mode 100644
+> index 000000000..d48808e60
+> --- /dev/null
+> +++ b/tests/btrfs/303.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 303
+> +Silence is golden
+> -- 
+> 2.43.0
+> 
