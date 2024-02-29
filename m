@@ -1,41 +1,72 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F1EF32C6C;
-	Thu, 29 Feb 2024 01:41:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EB512E405
+	for <fstests@vger.kernel.org>; Thu, 29 Feb 2024 01:43:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709170902; cv=none; b=OaAJe3Bb9k3r1XKQlQrRDJ1QL0ehbFT8ifFVDZfD/ZU7rmJMu2bUmUD3PF6x4pdAVfUfCs7sC+wveTn0ZAh+tsWi0u/VuaN0xlHgysPspFgqvkajXAKwZ/Y4B077F2R2B/XJW0WkUaD3pjt3IbWwNIg1is0weZ5c7gzGBe+7N9w=
+	t=1709171034; cv=none; b=MPouNQpGMVCGWnfkQu5W1CqGbXa2u3jyzmBZNuTKdWgQZklubMAQgQ7NeKzu0hNnci273OIfjvgbRn7QrLA1TyztbZbicCxoLPqlXx7MMneo+L0pzDAgZzxV7dVnl70Zsw5g52yq9mi+ruO3bo5P+gepz0e6k30YXBK2bRHTOvM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709170902; c=relaxed/simple;
-	bh=EbS7KTe9Idjh2tZmuWfIU803UZCyxj8oM773ssgElcg=;
+	s=arc-20240116; t=1709171034; c=relaxed/simple;
+	bh=h5CJevDeVLAgOM8PlGSAD+6pp7wbEEAill3QMPTNCcQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=n2wQhitYKUdNtFvzWtF2Hr8rbyQzmAL4Em7sGOdcIIQGqrDQBjuQT4RZSmEoeTELOOJ8sZHqWhG7Lm2Eo1X8ZrHZZqf7/emxE95E22fDkvfhOMkfweYopuxK1BdiM4ohJlb2q3EGZSv4gu4takRRZYhhBVhc4kKTOuEp8stcW/Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PadnlnQN; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=VYusxSAwKDuSn+8MXceoGGXVr/LRcPJIQg7N+Ne8fH3C0poPgpFp+2ParhqxPc9zTAQVqoE0fCj8sfFDBUbACahY7bdFQjuUqPSukPgOvQbl+h7eF+VJSPLhDsKmFzalhFVrQvGgmmvX7REAYb6tSLfeUI8Qe4dTAt+f3wx5Dl4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=d8umfnC1; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PadnlnQN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 10F4CC433F1;
-	Thu, 29 Feb 2024 01:41:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709170901;
-	bh=EbS7KTe9Idjh2tZmuWfIU803UZCyxj8oM773ssgElcg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=PadnlnQNA5LCuXFlDK5Sr6MxvFGgfek3vCYZ4+rxBWtENAALBX7Jn+IIBROIIfeT8
-	 wCd2B6r+9lkWoGFdpxrtSL6U/J1z0Mivqt9a4zzyeIjw4PDA4YJ2dPvAz2tGzoo4fR
-	 +SCkxdtIpivtszRL4e3ntiIlmE/60R16xnSulasLnELvAELVkiCgquApiTz0oshU+e
-	 ytBPlhZvtDpNiT31NOOL5pnMXsYXmNLXmmRXrEUIefJLgdWj/lKSazj9gpWf2qCk8C
-	 /jr3gMPLoXhESG0zjeWxHJF2MGAZyhFgYFLP2qpIux00IRhPoKF9ix3SR0zniINKWR
-	 ebau0tqDfG5rw==
-Date: Wed, 28 Feb 2024 17:41:40 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] generic: check logical-sector sized O_DIRECT
-Message-ID: <20240229014140.GU6226@frogsfrogsfrogs>
-References: <20221107045618.2772009-1-zlang@kernel.org>
- <20240228155929.GD1927156@frogsfrogsfrogs>
- <20240229005218.pwgakn5x3fwwcjnj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="d8umfnC1"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1709171031;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=cp2uZ/Q+UnJoC/yZxBWM0l/WE9YN4IlAsRchJZIA5Ls=;
+	b=d8umfnC1iYbENaSmkkqAFE6sRHj6Gk5lgiosm6wt83tNONR4agJQAP8DmzsN3QnDWXx44Q
+	WZDeBtK+BmOnBoJ769+Nw5YtAalzA6Frvzj8J28OA190lenukV4SOzXoor+oiKVHwndVaB
+	9UpaNdiaxaIBLAAH33kTRRHvvNb0i4I=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-22-paRfdSZNPeixAj3uBB57fw-1; Wed, 28 Feb 2024 20:43:49 -0500
+X-MC-Unique: paRfdSZNPeixAj3uBB57fw-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1dc0cf01899so3472995ad.2
+        for <fstests@vger.kernel.org>; Wed, 28 Feb 2024 17:43:49 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709171028; x=1709775828;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=cp2uZ/Q+UnJoC/yZxBWM0l/WE9YN4IlAsRchJZIA5Ls=;
+        b=oF5H0cyNo2pCJoeFROhV74Iiv/OS7z6+dUy4iz24+cmmsxU2w/uewzbPd4OT273aOt
+         K40T3Zqx5a0Vi7EFdsI8Uc/FatlPbgAHkiU6rBva4iMWQB6En5m4iiVADHjy/r10S6Kd
+         D2D5hVh0q6/FyhMmOtNdn9QlXvlVOCWg0cUd8mI458s7q54gbPdpdfKJx/bUgoYj+A2d
+         Loyhcqwuqcg3RRx3gEPDyzdapARQGKbXoyF+gcf7if3fhI8X+WUV4EudGSCp3jReDM0t
+         ctQM0INyZHKLlCutHXVuuq+ACi4TKHPTC51pWGnsLZz4ojjuHIr0OwppbWVdltW7jVu0
+         UDqA==
+X-Gm-Message-State: AOJu0Yya+TK6RhEtINy2RjrQP/6NgQdIW0/bpBIj1z363eDkza2ujk5a
+	/GRXOXlN05Rk/j/xJwupC+Hs+VhkuTquVjj1k+hAxPyLjXW2Fq0GHCr5nWQTnTJnWS1cQ8H/iV3
+	iosTB/1pgAj/yxmZ/XFY0q+4j6DGd0MU7CamVeOYGyrNsFRjl7IeSD7Y=
+X-Received: by 2002:a17:902:d2c2:b0:1db:8fd6:915e with SMTP id n2-20020a170902d2c200b001db8fd6915emr983990plc.33.1709171028722;
+        Wed, 28 Feb 2024 17:43:48 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE8eSN+jPorPo/AeEJbYjM2MQMeA2ypoIIBoQpNf5SwynBm/qEoEiWpH4kKEDKwWQ3sL0ppXg==
+X-Received: by 2002:a17:902:d2c2:b0:1db:8fd6:915e with SMTP id n2-20020a170902d2c200b001db8fd6915emr983960plc.33.1709171028447;
+        Wed, 28 Feb 2024 17:43:48 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id e12-20020a170902d38c00b001dc05535632sm111923pld.170.2024.02.28.17.43.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Feb 2024 17:43:48 -0800 (PST)
+Date: Thu, 29 Feb 2024 09:43:44 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, dm-devel@lists.linux.dev,
+	Mike Snitzer <snitzer@kernel.org>,
+	Damien Le Moal <dlemoal@kernel.org>
+Subject: Re: [PATCH] common: dm-error now supports zoned devices
+Message-ID: <20240229014344.ftd6v3zrjbvtnhth@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240221063741.3563039-1-hch@lst.de>
+ <20240225163828.7a3tntpg5kaywlw7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240226095829.GB26465@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,159 +75,28 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240229005218.pwgakn5x3fwwcjnj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240226095829.GB26465@lst.de>
 
-On Thu, Feb 29, 2024 at 08:52:18AM +0800, Zorro Lang wrote:
-> On Wed, Feb 28, 2024 at 07:59:29AM -0800, Darrick J. Wong wrote:
-> > On Mon, Nov 07, 2022 at 12:56:18PM +0800, Zorro Lang wrote:
-> > > If the physical sector size is 4096, but the logical sector size
-> > > is 512, the 512b dio write/read should be allowed.
+On Mon, Feb 26, 2024 at 10:58:29AM +0100, Christoph Hellwig wrote:
+> On Mon, Feb 26, 2024 at 12:38:28AM +0800, Zorro Lang wrote:
+> > This patch makes sense to me, but I think this patch might cause
+> > failures on old kernel which doesn't has kernel commit a951104333bd, right?
 > > 
-> > Huh, did we all completely forget to review this patch?
+> > Is there a simple way to check if dm-error supports zoned block device? If
+> > there's not, I think we have to let it fails on old kernel, to make it run
+> > on newer kernel.
 > 
-> Hmm?? This patch has been reviewed and merged in 2022, refer to g/704.
-> Why did it appear (be refreshed) at here suddenly ?
-
-Doh!
-
-Sorry, I saw this patch sitting by itself with no replies or "Hey I
-merged this" messages and thought we'd forgotten it.
-
-And if it's running without problems (I haven't seen any in generic/704)
-then I'll leave well enough alone.
-
---D
-
-> > 
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > This reproducer was written for xfs, I try to make it to be a generic
-> > > test case for localfs. Current it test passed on xfs, extN and btrfs,
-> > > the bug can be reproduced on old rhel-6.6 [1]. If it's not right for
-> > > someone fs, please feel free to tell me.
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > [1]
-> > > # ./check generic/888
-> > > FSTYP         -- xfs (non-debug)
-> > > PLATFORM      -- Linux/x86_64 xxx-xxxxx-xxxxxx 2.6.32-504.el6.x86_64
-> > > MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
-> > > MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/loop1 /mnt/scratch
-> > > 
-> > > generic/888      - output mismatch (see /root/xfstests-dev/results//generic/888.out.bad)
-> > >     --- tests/generic/888.out   2022-11-06 23:42:44.683040977 -0500
-> > >     +++ /root/xfstests-dev/results//generic/888.out.bad 2022-11-06 23:48:33.986481844 -0500
-> > >     @@ -4,3 +4,4 @@
-> > >      512
-> > >      mkfs and mount
-> > >      DIO read/write 512 bytes
-> > >     +pwrite64: Invalid argument
-> > >     ...
-> > >     (Run 'diff -u tests/generic/888.out /root/xfstests-dev/results//generic/888.out.bad'  to see the entire diff)
-> > > Ran: generic/888
-> > > Failures: generic/888
-> > > Failed 1 of 1 tests
-> > > 
-> > >  tests/generic/888     | 52 +++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/888.out |  6 +++++
-> > >  2 files changed, 58 insertions(+)
-> > >  create mode 100755 tests/generic/888
-> > >  create mode 100644 tests/generic/888.out
-> > > 
-> > > diff --git a/tests/generic/888 b/tests/generic/888
-> > > new file mode 100755
-> > > index 00000000..b5075d1e
-> > > --- /dev/null
-> > > +++ b/tests/generic/888
-> > > @@ -0,0 +1,52 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 888
-> > > +#
-> > > +# Make sure logical-sector sized O_DIRECT write is allowed
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> > > +
-> > > +# Override the default cleanup function.
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -r -f $tmp.*
-> > > +	[ -d "$SCSI_DEBUG_MNT" ] && $UMOUNT_PROG $SCSI_DEBUG_MNT 2>/dev/null
-> > > +	_put_scsi_debug_dev
-> > > +}
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/scsi_debug
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_fixed_by_kernel_commit 7c71ee78031c "xfs: allow logical-sector sized O_DIRECT"
-> > > +_require_scsi_debug
-> > > +# If TEST_DEV is block device, make sure current fs is a localfs which can be
-> > > +# written on scsi_debug device
-> > > +_require_test
-> > > +_require_block_device $TEST_DEV
-> > 
-> > _require_odirect?
-> > 
-> > > +
-> > > +echo "Get a device with 4096 physical sector size and 512 logical sector size"
-> > > +SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 256`
-> > > +blockdev --getpbsz --getss $SCSI_DEBUG_DEV
-> > > +
-> > > +echo "mkfs and mount"
-> > > +_mkfs_dev $SCSI_DEBUG_DEV || _fail "Can't make $FSTYP on scsi_debug device"
-> > > +SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-> > > +rm -rf $SCSI_DEBUG_MNT
-> > > +mkdir $SCSI_DEBUG_MNT
-> > > +run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-> > 
-> > /me wonders, should we try to use $MKFS_OPTIONS and $MOUNT_OPTIONS
-> > on the scsidebug device?  To catch cases where the config actually
-> > matters for that kind of thing?
+> I don't know any way.  But as this just affects zoned devices on btrfs
+> for now I guess the usual parties can just make sure it works by
+> backporting the right patches.  The previous don't work wasn't even
+> a not supported, but a case of dm-error being buggy for zoned devices.
 > 
-> It's been merged, if we need to change something, better to send a new
-> patch to change that :)
+> In other words the original exclusion in xfstests should have never
+> gone in and whoever put it there should have fixed dm-error instead.
+
+OK, let's have this patch, and see the response from others :)
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
 > 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > +
-> > > +echo "DIO read/write 512 bytes"
-> > > +# This dio write should succeed, even the physical sector size is 4096, but
-> > > +# the logical sector size is 512
-> > > +$XFS_IO_PROG -d -f -c "pwrite 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
-> > > +$XFS_IO_PROG -d -c "pread 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/888.out b/tests/generic/888.out
-> > > new file mode 100644
-> > > index 00000000..0f142ce9
-> > > --- /dev/null
-> > > +++ b/tests/generic/888.out
-> > > @@ -0,0 +1,6 @@
-> > > +QA output created by 888
-> > > +Get a device with 4096 physical sector size and 512 logical sector size
-> > > +4096
-> > > +512
-> > > +mkfs and mount
-> > > +DIO read/write 512 bytes
-> > > -- 
-> > > 2.31.1
-> > > 
-> > 
-> 
+
