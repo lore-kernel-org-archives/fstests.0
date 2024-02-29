@@ -1,165 +1,220 @@
-Received: from smtp-fw-2101.amazon.com (smtp-fw-2101.amazon.com [72.21.196.25])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C5E786266
-	for <fstests@vger.kernel.org>; Wed, 28 Feb 2024 21:16:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=72.21.196.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A3CCC208A9
+	for <fstests@vger.kernel.org>; Thu, 29 Feb 2024 00:52:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709155009; cv=none; b=ngvsmSYX92g2c9g3TxSF1Wi17MWzUqfEwudJFfk5SGfIZSlCBOU2kjtZ9l8wMPgczgVjZCgRByhmtMI17Lq8lXRKoIm0cpjLVU4NMtSBR252NBTz7fDv9qGUzA4ubdXUncLkkQr3gZ/6d3tTGC94TqPaklWOI816xcPrjq+GZpo=
+	t=1709167950; cv=none; b=ubn/XAKJOdAFLJSW2di6yIYgPMegwMcQRMFAy+kRaTYDWUL0fmNPsXvQsqVXIuIeHQx7r2kHJmXO9BY+OLJw+FxVzX7HxJlzFLsvzvGLjLAhioRTvZOVEsPS3BqEq9KB2CQB8tNTrfh8ah68/EI6s3aLQ0RfuV8wi6qe/PGaTLc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709155009; c=relaxed/simple;
-	bh=5CbfDHq0taE18XJANyJep67L9uDlQEDqUHb2h/lB0lo=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=uOl/89FYqcC+NTGlsU9V9vRReXBYp07nmg11Maj8nR40Wyg4TGpM89u3/TkaGVUxTEX/rCK22LZWn6hLDXfKFc8sKYeiPPTU031wiKsqj7tqlwXusKZapdVS/9oyqekZMzhhYCAoozVtGEoaOu2zg8MA11K0upBgCQRyYH8ASII=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com; spf=pass smtp.mailfrom=amazon.com; dkim=pass (1024-bit key) header.d=amazon.com header.i=@amazon.com header.b=EwPZThWO; arc=none smtp.client-ip=72.21.196.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amazon.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amazon.com
+	s=arc-20240116; t=1709167950; c=relaxed/simple;
+	bh=7kiqRo4C79jX86NZ18PktkpiDlDKvHpWW3tGyaFWQzU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=GWJQf+xj9qVlrLwiAEJhOLfytFHY4gcWoS68nVLc74ZlaJEd0F3x9obKVCxCSnJEzCgiUj926ThS9xWpPRKcHFkSLyXiRPqzRcA84yni97ntvud/kW9uwsQRXCrmEya3IbpQyVIkCx17ZtY/PmvLTYkSvTRCYZ2fhobmsaLz8Js=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YhAwYReS; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amazon.com header.i=@amazon.com header.b="EwPZThWO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazon201209;
-  t=1709155008; x=1740691008;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=uwAIEbyZUj3YM1qV3W5HSvub7xA7PzbTPiAG7BlMbPM=;
-  b=EwPZThWOJPsgn9kqbBP5EVKyVbAhLj+4KlEzCPCHB2WXaZ3YZEDS6nNw
-   Xb848uCWqVisoy+69QAnR+LWAVAK3OP6AdC/LO1J9ZFrNGTwPA+pgJwcW
-   av90YhPPHH4MSSD0jy6JTvlM3fvJasnq0q3htZl/Q43xdGdpmVKb2RjAM
-   8=;
-X-IronPort-AV: E=Sophos;i="6.06,191,1705363200"; 
-   d="scan'208";a="384376661"
-Received: from iad12-co-svc-p1-lb1-vlan3.amazon.com (HELO smtpout.prod.us-west-2.prod.farcaster.email.amazon.dev) ([10.43.8.6])
-  by smtp-border-fw-2101.iad2.amazon.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Feb 2024 21:16:47 +0000
-Received: from EX19MTAUWC002.ant.amazon.com [10.0.7.35:8690]
- by smtpin.naws.us-west-2.prod.farcaster.email.amazon.dev [10.0.44.165:2525] with esmtp (Farcaster)
- id ea0815db-1fe6-4bce-b42a-eb34d388842d; Wed, 28 Feb 2024 21:16:46 +0000 (UTC)
-X-Farcaster-Flow-ID: ea0815db-1fe6-4bce-b42a-eb34d388842d
-Received: from EX19D030UWB002.ant.amazon.com (10.13.139.182) by
- EX19MTAUWC002.ant.amazon.com (10.250.64.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.40; Wed, 28 Feb 2024 21:16:36 +0000
-Received: from u1e958862c3245e.ant.amazon.com (10.187.171.32) by
- EX19D030UWB002.ant.amazon.com (10.13.139.182) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.28; Wed, 28 Feb 2024 21:16:36 +0000
-From: Suraj Jitindar Singh <surajjs@amazon.com>
-To: <fstests@vger.kernel.org>
-CC: <surajjs@amazon.com>, <sjitindarsingh@gmail.com>
-Subject: [PATCH] ext4/060: Test marking last group as trimmed
-Date: Wed, 28 Feb 2024 13:16:12 -0800
-Message-ID: <20240228211612.2602355-1-surajjs@amazon.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YhAwYReS"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1709167947;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=S4Z4XMdfXLVsJomLpJcEF3QLXH+UPaiCBCHNXDpOapE=;
+	b=YhAwYReSmuLZNGMd5mRhUf5CROas4Xwtgoc6cg8+RFpbqYQhIbaBr7btuLGI4eM3oI6yA+
+	H35N+SeuOOxhgWWqQBL1kkab+U3hTfJFPL8ogl9iVJRmIl00fzDe/R8XNb+jkK7gS7rOR/
+	1v3ieeFtekfog011g9M9A/v5USyLzRM=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-653-r6B9j24UMa-HYiXglnblNA-1; Wed, 28 Feb 2024 19:52:23 -0500
+X-MC-Unique: r6B9j24UMa-HYiXglnblNA-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1dbcbffd853so4242475ad.3
+        for <fstests@vger.kernel.org>; Wed, 28 Feb 2024 16:52:23 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709167942; x=1709772742;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=S4Z4XMdfXLVsJomLpJcEF3QLXH+UPaiCBCHNXDpOapE=;
+        b=XlIq6fZ1Ts9cSoL2KIP01wMwb4Y6CvkQ5jM4JYLFlV8KjNW6UVyyao9tboqQOT1sEk
+         nSIMYVoOPTmkOJJDRV9KH8nIpEKfQQg/rYv2ZzysuwWGwhfmeT17IDL+/7ApXARJDiUW
+         BNIFMwirxaz0A9PFgM1gb6KOP0T0/6wq/47Ct42vntevi+Sy3ttllbeVbN7M2yhSpKG0
+         TGyLtWp+hF5zn4oR4azDFPyakS2sw4pGDDuNfqpk8IpSMsk6Ydy2I3PnN3qRJTJlMQ79
+         t0SrtUMV5TpJ8c7UBXVfezzNJdrqZCdL/qnZ8v8gusRe1FPqif90QyvAL6/i2OuHv+h/
+         TEdQ==
+X-Gm-Message-State: AOJu0YxRXMSZUTM+j4sek99as5xi6M776ibkBAzkjxMtuCcpJ/7UMUrC
+	kAWmCS2IG/2YTyp4BzeWAr2XhRm9Kkdgwo3yvbKzYtqFieiLhJnC36k9Ik54y5ac9hFpFa+LXv7
+	Vr/jIT8ACjQ3KsQ/qwPJStev69ndt4GsQfLp3oTqKRkgaYGhZmJbmmC108Xszxq3MRQ==
+X-Received: by 2002:a17:902:c155:b0:1db:c3cb:b088 with SMTP id 21-20020a170902c15500b001dbc3cbb088mr635630plj.35.1709167942502;
+        Wed, 28 Feb 2024 16:52:22 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHddbT9jLp0nFF1SIAMxDtA7omHOJn5KfcUqbi8RyeXC3q/MWfBxPHm7PHVB+A37liroboBFQ==
+X-Received: by 2002:a17:902:c155:b0:1db:c3cb:b088 with SMTP id 21-20020a170902c15500b001dbc3cbb088mr635617plj.35.1709167942098;
+        Wed, 28 Feb 2024 16:52:22 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id c7-20020a170902d48700b001db5079b705sm76031plg.36.2024.02.28.16.52.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 Feb 2024 16:52:21 -0800 (PST)
+Date: Thu, 29 Feb 2024 08:52:18 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] generic: check logical-sector sized O_DIRECT
+Message-ID: <20240229005218.pwgakn5x3fwwcjnj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20221107045618.2772009-1-zlang@kernel.org>
+ <20240228155929.GD1927156@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: EX19D035UWA001.ant.amazon.com (10.13.139.101) To
- EX19D030UWB002.ant.amazon.com (10.13.139.182)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240228155929.GD1927156@frogsfrogsfrogs>
 
-Regression test for upstream commit added in v6.8-rc1:
-7c784d624819a ext4: allow for the last group to be marked as trimmed
+On Wed, Feb 28, 2024 at 07:59:29AM -0800, Darrick J. Wong wrote:
+> On Mon, Nov 07, 2022 at 12:56:18PM +0800, Zorro Lang wrote:
+> > If the physical sector size is 4096, but the logical sector size
+> > is 512, the 512b dio write/read should be allowed.
+> 
+> Huh, did we all completely forget to review this patch?
 
-Which fixes bug introduced by upstream commit in v6.6-rc2:
-45e4ab320c9b5 ext4: move setting of trimmed bit into ext4_try_to_trim_range()
+Hmm?? This patch has been reviewed and merged in 2022, refer to g/704.
+Why did it appear (be refreshed) at here suddenly ?
 
-Applicable to kernels 4.19..6.7:
-Kernel		Bug Introduced			Bug Fixed
-		kver      - commit sha		kver      - commit sha
-4.19		v4.19.296 - d61445f6a5c57	v4.19.307 - 5b6a7f323b533
-5.4		v5.4.258  - 4db34feaf2977	v5.4.269  - a7edaf40fccae
-5.10		v5.10.198 - c502b09d9befc	v5.10.210 - fa94912241835
-5.15		v5.15.134 - a9d3bb58da959	v5.15.149 - cb904f5c71629
-6.1		v6.1.56   - b4d5db1c77fac	v6.1.76   - 852b6b2a2f7b7
-6.6		v6.6-rc2  - 45e4ab320c9b5	v6.6.15   - da9008da96404
-6.7		v6.6-rc2  - 45e4ab320c9b5	v6.7.3    - 73986e8d2808c
+> 
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> > 
+> > Hi,
+> > 
+> > This reproducer was written for xfs, I try to make it to be a generic
+> > test case for localfs. Current it test passed on xfs, extN and btrfs,
+> > the bug can be reproduced on old rhel-6.6 [1]. If it's not right for
+> > someone fs, please feel free to tell me.
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > [1]
+> > # ./check generic/888
+> > FSTYP         -- xfs (non-debug)
+> > PLATFORM      -- Linux/x86_64 xxx-xxxxx-xxxxxx 2.6.32-504.el6.x86_64
+> > MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
+> > MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/loop1 /mnt/scratch
+> > 
+> > generic/888      - output mismatch (see /root/xfstests-dev/results//generic/888.out.bad)
+> >     --- tests/generic/888.out   2022-11-06 23:42:44.683040977 -0500
+> >     +++ /root/xfstests-dev/results//generic/888.out.bad 2022-11-06 23:48:33.986481844 -0500
+> >     @@ -4,3 +4,4 @@
+> >      512
+> >      mkfs and mount
+> >      DIO read/write 512 bytes
+> >     +pwrite64: Invalid argument
+> >     ...
+> >     (Run 'diff -u tests/generic/888.out /root/xfstests-dev/results//generic/888.out.bad'  to see the entire diff)
+> > Ran: generic/888
+> > Failures: generic/888
+> > Failed 1 of 1 tests
+> > 
+> >  tests/generic/888     | 52 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/888.out |  6 +++++
+> >  2 files changed, 58 insertions(+)
+> >  create mode 100755 tests/generic/888
+> >  create mode 100644 tests/generic/888.out
+> > 
+> > diff --git a/tests/generic/888 b/tests/generic/888
+> > new file mode 100755
+> > index 00000000..b5075d1e
+> > --- /dev/null
+> > +++ b/tests/generic/888
+> > @@ -0,0 +1,52 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 888
+> > +#
+> > +# Make sure logical-sector sized O_DIRECT write is allowed
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +	[ -d "$SCSI_DEBUG_MNT" ] && $UMOUNT_PROG $SCSI_DEBUG_MNT 2>/dev/null
+> > +	_put_scsi_debug_dev
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/scsi_debug
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_fixed_by_kernel_commit 7c71ee78031c "xfs: allow logical-sector sized O_DIRECT"
+> > +_require_scsi_debug
+> > +# If TEST_DEV is block device, make sure current fs is a localfs which can be
+> > +# written on scsi_debug device
+> > +_require_test
+> > +_require_block_device $TEST_DEV
+> 
+> _require_odirect?
+> 
+> > +
+> > +echo "Get a device with 4096 physical sector size and 512 logical sector size"
+> > +SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 256`
+> > +blockdev --getpbsz --getss $SCSI_DEBUG_DEV
+> > +
+> > +echo "mkfs and mount"
+> > +_mkfs_dev $SCSI_DEBUG_DEV || _fail "Can't make $FSTYP on scsi_debug device"
+> > +SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
+> > +rm -rf $SCSI_DEBUG_MNT
+> > +mkdir $SCSI_DEBUG_MNT
+> > +run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
+> 
+> /me wonders, should we try to use $MKFS_OPTIONS and $MOUNT_OPTIONS
+> on the scsidebug device?  To catch cases where the config actually
+> matters for that kind of thing?
 
-Signed-off-by: Suraj Jitindar Singh <surajjs@amazon.com>
----
- tests/ext4/060     | 62 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/060.out |  2 ++
- 2 files changed, 64 insertions(+)
- create mode 100755 tests/ext4/060
- create mode 100644 tests/ext4/060.out
+It's been merged, if we need to change something, better to send a new
+patch to change that :)
 
-diff --git a/tests/ext4/060 b/tests/ext4/060
-new file mode 100755
-index 00000000..cc5f3819
---- /dev/null
-+++ b/tests/ext4/060
-@@ -0,0 +1,62 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. 309
-+#
-+# Regression test for upstream commit added in v6.8-rc1:
-+# 7c784d624819a ext4: allow for the last group to be marked as trimmed
-+#
-+# Which fixes bug introduced by upstream commit in v6.6-rc2:
-+# 45e4ab320c9b5 ext4: move setting of trimmed bit into ext4_try_to_trim_range()
-+#
-+# Applicable to kernels 4.19..6.7:
-+# Kernel	Bug Introduced			Bug Fixed
-+#		kver      - commit sha		kver      - commit sha
-+# 4.19		v4.19.296 - d61445f6a5c57	v4.19.307 - 5b6a7f323b533
-+# 5.4		v5.4.258  - 4db34feaf2977	v5.4.269  - a7edaf40fccae
-+# 5.10		v5.10.198 - c502b09d9befc	v5.10.210 - fa94912241835
-+# 5.15		v5.15.134 - a9d3bb58da959	v5.15.149 - cb904f5c71629
-+# 6.1		v6.1.56   - b4d5db1c77fac	v6.1.76   - 852b6b2a2f7b7
-+# 6.6		v6.6-rc2  - 45e4ab320c9b5	v6.6.15   - da9008da96404
-+# 6.7		v6.6-rc2  - 45e4ab320c9b5	v6.7.3    - 73986e8d2808c
-+
-+. ./common/preamble
-+_begin_fstest auto
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+    _scratch_unmount
-+}
-+
-+# Import common functions.
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs ext4
-+
-+_require_scratch
-+_require_fstrim
-+
-+# Make an ext4 fs where the last group has fewer blocks than blocks per group
-+blksz=$(_get_page_size)
-+blocks_per_group=8192
-+
-+$MKFS_EXT4_PROG -F -b $blksz -g $blocks_per_group $SCRATCH_DEV $(( blocks_per_group - 1 )) >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$FSTRIM_PROG -v $SCRATCH_MNT >>$seqres.full 2>&1
-+# If we have the fix commit then the above trim command should have marked the
-+# group as trimmed and subsequent trim operations shouldn't discard anything.
-+# If we don't have the fix commit then the group won't have been marked as
-+# trimmed and the below trim operation will discard more than 0.
-+bytes=$($FSTRIM_PROG -v $SCRATCH_MNT | tee -a $seqres.full | _filter_fstrim)
-+if [ $bytes -gt 0 ]; then
-+	status=1
-+	echo "Final group in filesystem not marked as trimmed after trimming entire fs."
-+else
-+	status=0
-+	echo "Final group in filesystem correctly marked as trimmed after trimming entire fs."
-+fi
-+
-+exit
-diff --git a/tests/ext4/060.out b/tests/ext4/060.out
-new file mode 100644
-index 00000000..f3457134
---- /dev/null
-+++ b/tests/ext4/060.out
-@@ -0,0 +1,2 @@
-+QA output created by 060
-+Final group in filesystem correctly marked as trimmed after trimming entire fs.
--- 
-2.34.1
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > +
+> > +echo "DIO read/write 512 bytes"
+> > +# This dio write should succeed, even the physical sector size is 4096, but
+> > +# the logical sector size is 512
+> > +$XFS_IO_PROG -d -f -c "pwrite 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
+> > +$XFS_IO_PROG -d -c "pread 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/888.out b/tests/generic/888.out
+> > new file mode 100644
+> > index 00000000..0f142ce9
+> > --- /dev/null
+> > +++ b/tests/generic/888.out
+> > @@ -0,0 +1,6 @@
+> > +QA output created by 888
+> > +Get a device with 4096 physical sector size and 512 logical sector size
+> > +4096
+> > +512
+> > +mkfs and mount
+> > +DIO read/write 512 bytes
+> > -- 
+> > 2.31.1
+> > 
+> 
 
