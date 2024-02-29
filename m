@@ -1,259 +1,203 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DB91651A1
-	for <fstests@vger.kernel.org>; Thu, 29 Feb 2024 11:40:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 530417C0BE;
+	Thu, 29 Feb 2024 11:40:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709206807; cv=none; b=lb0EBGojyosGah1I8/kBjNB3s92GOAr2nws10BkbQxJc3c1glZ+5Fg9+P2xtyUEuIoOJ5SHflHhEfTZUZ11LHqJ+W0F1702lqrtycBMD+zaQ778jqZdYyYZLb2rEJxi5Aob7O0qqRTwAsVJo5G1q1Z7S8bqbMqECM1RNWzYN94o=
+	t=1709206822; cv=none; b=iJWqb4ISL3YFByd5zyzd0hp7FvVgeXnsl/nNjJBS+koR3rxZH1jpEvPtdmFR4OF568hCMoQvX1fk7OLFN1jFUTV3O9eUVJdD2wAZJQ56huvM3Yl+tB5QwOiXW4XeWfeAJ5FJW/vDmZUWtRuxVXQMmP+twhGgc4RpiFXWc3ilHNI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709206807; c=relaxed/simple;
-	bh=Vr4XqUeTB3QMdPUr91fnbjV2uoHjfAzfzJlB0dlzj2o=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RXDImX5VBIdviHRimhJnWH6Qnvok1vSqlIXvJuYg6PScj6UEJRujvpRp7pvwjzGSogiScskMfNBsMuCphHG/1Ev4ZZ8BWWqimvVOEwZTtMuB9ufqkhzdpZ9jbzAPyPtjILsxjuVxmAkPnmefmeFw9oVWiJechn29SIPKL2KSikE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NCrUoRwU; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1709206822; c=relaxed/simple;
+	bh=h22fpUGoeHfkK4cKpUV5W4h0ZN5ecAy91mgTV+Y4isw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=CimsWWqwvv/iz2+2hR8AkWSAbpMCoNKwGlJ0JBc+Pg/ZwR3n+ibtocNJiuFVVEvrmZvShWPSYmmuwlQUNet3a/3AD/SADO71OSZTXSrK9kd8YurF0s+i9LxgUO6NPKjob7j7/jm58G17VbwMzQoJmZ9Rdk0IhX3a0gqxzXMXUZo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mrZK57nG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NCrUoRwU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709206803;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=13GnZXU0qbANNRDEiYRIXhFGscFc23PREgerHpFd+fM=;
-	b=NCrUoRwU5be57cHhNJBeznVHRuZ17riDv4qIMhbeJyp0fddjq7pefib8rTMsZWBqRc5O3C
-	Wr7VcT3w303/5Qfmt8A9klNaYlv9yZGia52eBB1hOC+rtHoVQU1TIYWuaFoggRcIXtkVJG
-	awP97iUB9olX+REDJodPUfQKYZH2VCw=
-Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
- [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-641-l8AnSiLIOn-vWBz5jcDrfw-1; Thu, 29 Feb 2024 06:40:02 -0500
-X-MC-Unique: l8AnSiLIOn-vWBz5jcDrfw-1
-Received: by mail-ed1-f69.google.com with SMTP id 4fb4d7f45d1cf-566aa1c194bso270602a12.2
-        for <fstests@vger.kernel.org>; Thu, 29 Feb 2024 03:40:01 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709206800; x=1709811600;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=13GnZXU0qbANNRDEiYRIXhFGscFc23PREgerHpFd+fM=;
-        b=kja7DdBjCovG0sCRKtmOmeaqnGOyckeyY4y0pQDGSN97Ka/NDKILM5usxcEc9wweGR
-         cO+0nD2EZhZ8pyFt9LPRPV4Uw2H0HaXCocb0Jpm1n7eklNdy9DwCzf1tOYUr6CgfYivB
-         7iYYL8SDXhO31BatQ7tSQ4tcTci4Rdtz/aZWMcst5Nk++uXNguy0sI/JTEqzcXv80+Z5
-         HaZLs7vfyA7/u/qXySde4r0Eg+B8/plqjXWSfy96q6mvhDX06A72eJ25p5A6GOhjyTtT
-         qehKHgY97J/Ogf3oQssKwtED3y/2j2ieDAW4bq68/+AcTQ+bNPFyivEk0VtBsm8jPGjW
-         XbwQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXYFGe/qiFXMJOUiNgjVILr6rUpYvY/AWY0vx9I40/cxYp+GzBzkqEKGliShLiQ3kV0jWiF6ZYmzbL0+8hXRok4VdjW+GCVtQ==
-X-Gm-Message-State: AOJu0YwqqUsANvZOiRL+iig/qiwx4c4GhkGGQLRWn2SMdNLO8M0MMq0R
-	lvYp2KHWMhquQtzZ1Ec/grcQZk8NzTqxabtynDy+QVKbq8iJuCFavsJsqg8s40ia/r1wk1GP2TS
-	EEPU4C5XXqKDmNZDTJnJdQuW6yH5eyRJkjKx+PlFHoCF9tjL6AysQhcHBJ3N0lQ==
-X-Received: by 2002:a05:6402:5247:b0:566:a44d:c642 with SMTP id t7-20020a056402524700b00566a44dc642mr1084423edd.15.1709206800086;
-        Thu, 29 Feb 2024 03:40:00 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFJkYHFAWvLdcumzwYhhjCC6QYC9n2jJDV5utuSTJf29rD4f2IvH8bD+Zt6Z5Lq6d8IuHp0Bg==
-X-Received: by 2002:a05:6402:5247:b0:566:a44d:c642 with SMTP id t7-20020a056402524700b00566a44dc642mr1084404edd.15.1709206799452;
-        Thu, 29 Feb 2024 03:39:59 -0800 (PST)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id j1-20020a50ed01000000b005667629f6e1sm537935eds.39.2024.02.29.03.39.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Feb 2024 03:39:58 -0800 (PST)
-Date: Thu, 29 Feb 2024 12:39:58 +0100
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org, 
-	linux-xfs@vger.kernel.org, Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] generic: check logical-sector sized O_DIRECT
-Message-ID: <kxhp3he7t53sr2g3khet3lw3nq47uqku7ttr3rwn2ai7nlw2hk@lo5f677t7svz>
-References: <20221107045618.2772009-1-zlang@kernel.org>
- <20240228155929.GD1927156@frogsfrogsfrogs>
- <20240229005218.pwgakn5x3fwwcjnj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240229014140.GU6226@frogsfrogsfrogs>
- <20240229015521.yuof45wulkneq5ij@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mrZK57nG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DFA89C433A6;
+	Thu, 29 Feb 2024 11:40:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1709206821;
+	bh=h22fpUGoeHfkK4cKpUV5W4h0ZN5ecAy91mgTV+Y4isw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=mrZK57nGdNHejH0G9Iz+Zb7Uv7czeF/oTRdYrqj/gwXC/+fMlGhrUhV/nf0XkyzvQ
+	 Kz8fAB3YvIvhVQd4kYgRO5RPX42k28JLbvAoWjqDdTdZWLBnUzRaGsFx+6PxWqsrLm
+	 fa5N+/gSJpbB+xmEld1vsm7bgE7U291EQSGwktR2c7BzQa80mOYf2dFHhnI7QtC75l
+	 nV93CUnb3SAtoIPM0GeoF600kc4oRgrE1z570K9JclfO+mcg9w2Ub4eJOZQLitU9Ud
+	 TCCQ2Jx2jYdijhq1FCgONFAgucCtHVEWK9sncAqM16a40yEslMFJ07w9IptASy81AX
+	 /QUDQts2toKGQ==
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a43f922b2c5so104564966b.3;
+        Thu, 29 Feb 2024 03:40:21 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCVW0iP4wPwdUDJH1YO1NuaOEYUA8vRF/k6e99ILKuE+SYUIzDeaP589IzBg+2CNky8BdGLK+sTab75R8eSnWLiN8UolUMNmXdX4GOs=
+X-Gm-Message-State: AOJu0Ywt2/LFCj5e5pECUm6lA41WV1IpwSxwL1KmZDLmlIRIwdVWyYOs
+	sjOEt/82W9uqGxTriIm7XpySmyACQaMN3MjFeelWEh5EkaONS6dK5H2EiEkyNEDiULyhCHZymOi
+	IxgGoe0V7dHp1Kgno10ILP6E8bZI=
+X-Google-Smtp-Source: AGHT+IFDeQOl2q0ukTXHFttYv+3pIOY+qTJBHHBeUKyRjVDsCe3CEoju1AV8wLH9RNMkwrw+OFFvZSkSpBCSSsKIK8M=
+X-Received: by 2002:a17:906:6b85:b0:a43:1940:c7f8 with SMTP id
+ l5-20020a1709066b8500b00a431940c7f8mr1321415ejr.31.1709206820328; Thu, 29 Feb
+ 2024 03:40:20 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240229015521.yuof45wulkneq5ij@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1709162170.git.anand.jain@oracle.com> <377e9a27befd2d4b7f771f082ffafe57876d7cce.1709162170.git.anand.jain@oracle.com>
+In-Reply-To: <377e9a27befd2d4b7f771f082ffafe57876d7cce.1709162170.git.anand.jain@oracle.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Thu, 29 Feb 2024 11:39:43 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H6K2nZnX3oWyWwLf0OKFa1c=JgMPi4yqKqhYidA_ZRLjA@mail.gmail.com>
+Message-ID: <CAL3q7H6K2nZnX3oWyWwLf0OKFa1c=JgMPi4yqKqhYidA_ZRLjA@mail.gmail.com>
+Subject: Re: [PATCH v4 05/10] btrfs: check if cloned device mounts with tempfsid
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 2024-02-29 09:55:21, Zorro Lang wrote:
-> On Wed, Feb 28, 2024 at 05:41:40PM -0800, Darrick J. Wong wrote:
-> > On Thu, Feb 29, 2024 at 08:52:18AM +0800, Zorro Lang wrote:
-> > > On Wed, Feb 28, 2024 at 07:59:29AM -0800, Darrick J. Wong wrote:
-> > > > On Mon, Nov 07, 2022 at 12:56:18PM +0800, Zorro Lang wrote:
-> > > > > If the physical sector size is 4096, but the logical sector size
-> > > > > is 512, the 512b dio write/read should be allowed.
-> > > > 
-> > > > Huh, did we all completely forget to review this patch?
-> > > 
-> > > Hmm?? This patch has been reviewed and merged in 2022, refer to g/704.
-> > > Why did it appear (be refreshed) at here suddenly ?
-> > 
-> > Doh!
-> > 
-> > Sorry, I saw this patch sitting by itself with no replies or "Hey I
-> > merged this" messages and thought we'd forgotten it.
-> 
-> Thanks for taking care this test :)
-> 
-> There was a RVB for this patch:
-> https://lore.kernel.org/fstests/20221107105309.khksga5m7p766sed@aalbersh.remote.csb/
+On Thu, Feb 29, 2024 at 1:50=E2=80=AFAM Anand Jain <anand.jain@oracle.com> =
+wrote:
+>
+> If another device with the same fsid and uuid would mount then verify if
+> it mounts with a temporary fsid.
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>  tests/btrfs/312     | 78 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/312.out | 19 +++++++++++
+>  2 files changed, 97 insertions(+)
+>  create mode 100755 tests/btrfs/312
+>  create mode 100644 tests/btrfs/312.out
+>
+> diff --git a/tests/btrfs/312 b/tests/btrfs/312
+> new file mode 100755
+> index 000000000000..eedcf11a2308
+> --- /dev/null
+> +++ b/tests/btrfs/312
+> @@ -0,0 +1,78 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 312
+> +#
+> +# On a clone a device check to see if tempfsid is activated.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick clone tempfsid
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       $UMOUNT_PROG $mnt1 > /dev/null 2>&1
+> +       rm -r -f $tmp.*
+> +       rm -r -f $mnt1
+> +}
+> +
+> +. ./common/filter.btrfs
+> +. ./common/reflink
+> +
+> +_supported_fs btrfs
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +_require_btrfs_fs_feature temp_fsid
+> +
+> +mnt1=3D$TEST_DIR/$seq/mnt1
+> +mkdir -p $mnt1
+> +
+> +create_cloned_devices()
+> +{
+> +       local dev1=3D$1
+> +       local dev2=3D$2
+> +
+> +       echo -n Creating cloned device...
+> +       _mkfs_dev -fq -b $((1024 * 1024 * 300)) $dev1
+> +
+> +       _mount $dev1 $SCRATCH_MNT
+> +
+> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
+> +                                                               _filter_x=
+fs_io
+> +       $UMOUNT_PROG $SCRATCH_MNT
+> +       # device dump of $dev1 to $dev2
+> +       dd if=3D$dev1 of=3D$dev2 bs=3D300M count=3D1 conv=3Dfsync status=
+=3Dnone || \
+> +                                                       _fail "dd failed:=
+ $?"
+> +       echo done
+> +}
+> +
+> +mount_cloned_device()
+> +{
+> +       echo ---- $FUNCNAME ----
+> +       create_cloned_devices ${SCRATCH_DEV_NAME[0]} ${SCRATCH_DEV_NAME[1=
+]}
+> +
+> +       echo Mounting original device
+> +       _mount ${SCRATCH_DEV_NAME[0]} $SCRATCH_MNT
+> +       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/foo | \
+> +                                                               _filter_x=
+fs_io
+> +       check_fsid ${SCRATCH_DEV_NAME[0]}
+> +
+> +       echo Mounting cloned device
+> +       _mount ${SCRATCH_DEV_NAME[1]} $mnt1 || \
+> +                               _fail "mount failed, tempfsid didn't work=
+"
+> +
+> +       echo cp reflink must fail
+> +       _cp_reflink $SCRATCH_MNT/foo $mnt1/bar 2>&1 | \
+> +                                               _filter_testdir_and_scrat=
+ch
+> +
+> +       check_fsid ${SCRATCH_DEV_NAME[1]}
+> +}
+> +
+> +mount_cloned_device
 
-Sorry, it's probably because I somehow dropped CC to linux-xfs
+I believe I have commented this before, or maybe it was another test
+that did the same, but there's no point
+in placing the test code in a function if it's only called once and
+the test only exercises this scenario.
+It's unnecessary indentation...
 
-> 
-> This remind me that I still have some patches in my local branch, they were
-> not merged by some reasons. I'll check if some of them are suitable for now :)
-> 
-> Thanks,
-> Zorro
-> 
-> > 
-> > And if it's running without problems (I haven't seen any in generic/704)
-> > then I'll leave well enough alone.
-> > 
-> > --D
-> > 
-> > > > 
-> > > > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > > > ---
-> > > > > 
-> > > > > Hi,
-> > > > > 
-> > > > > This reproducer was written for xfs, I try to make it to be a generic
-> > > > > test case for localfs. Current it test passed on xfs, extN and btrfs,
-> > > > > the bug can be reproduced on old rhel-6.6 [1]. If it's not right for
-> > > > > someone fs, please feel free to tell me.
-> > > > > 
-> > > > > Thanks,
-> > > > > Zorro
-> > > > > 
-> > > > > [1]
-> > > > > # ./check generic/888
-> > > > > FSTYP         -- xfs (non-debug)
-> > > > > PLATFORM      -- Linux/x86_64 xxx-xxxxx-xxxxxx 2.6.32-504.el6.x86_64
-> > > > > MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop1
-> > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:nfs_t:s0 /dev/loop1 /mnt/scratch
-> > > > > 
-> > > > > generic/888      - output mismatch (see /root/xfstests-dev/results//generic/888.out.bad)
-> > > > >     --- tests/generic/888.out   2022-11-06 23:42:44.683040977 -0500
-> > > > >     +++ /root/xfstests-dev/results//generic/888.out.bad 2022-11-06 23:48:33.986481844 -0500
-> > > > >     @@ -4,3 +4,4 @@
-> > > > >      512
-> > > > >      mkfs and mount
-> > > > >      DIO read/write 512 bytes
-> > > > >     +pwrite64: Invalid argument
-> > > > >     ...
-> > > > >     (Run 'diff -u tests/generic/888.out /root/xfstests-dev/results//generic/888.out.bad'  to see the entire diff)
-> > > > > Ran: generic/888
-> > > > > Failures: generic/888
-> > > > > Failed 1 of 1 tests
-> > > > > 
-> > > > >  tests/generic/888     | 52 +++++++++++++++++++++++++++++++++++++++++++
-> > > > >  tests/generic/888.out |  6 +++++
-> > > > >  2 files changed, 58 insertions(+)
-> > > > >  create mode 100755 tests/generic/888
-> > > > >  create mode 100644 tests/generic/888.out
-> > > > > 
-> > > > > diff --git a/tests/generic/888 b/tests/generic/888
-> > > > > new file mode 100755
-> > > > > index 00000000..b5075d1e
-> > > > > --- /dev/null
-> > > > > +++ b/tests/generic/888
-> > > > > @@ -0,0 +1,52 @@
-> > > > > +#! /bin/bash
-> > > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > > +# Copyright (c) 2022 Red Hat, Inc.  All Rights Reserved.
-> > > > > +#
-> > > > > +# FS QA Test No. 888
-> > > > > +#
-> > > > > +# Make sure logical-sector sized O_DIRECT write is allowed
-> > > > > +#
-> > > > > +. ./common/preamble
-> > > > > +_begin_fstest auto quick
-> > > > > +
-> > > > > +# Override the default cleanup function.
-> > > > > +_cleanup()
-> > > > > +{
-> > > > > +	cd /
-> > > > > +	rm -r -f $tmp.*
-> > > > > +	[ -d "$SCSI_DEBUG_MNT" ] && $UMOUNT_PROG $SCSI_DEBUG_MNT 2>/dev/null
-> > > > > +	_put_scsi_debug_dev
-> > > > > +}
-> > > > > +
-> > > > > +# Import common functions.
-> > > > > +. ./common/scsi_debug
-> > > > > +
-> > > > > +# real QA test starts here
-> > > > > +_supported_fs generic
-> > > > > +_fixed_by_kernel_commit 7c71ee78031c "xfs: allow logical-sector sized O_DIRECT"
-> > > > > +_require_scsi_debug
-> > > > > +# If TEST_DEV is block device, make sure current fs is a localfs which can be
-> > > > > +# written on scsi_debug device
-> > > > > +_require_test
-> > > > > +_require_block_device $TEST_DEV
-> > > > 
-> > > > _require_odirect?
-> > > > 
-> > > > > +
-> > > > > +echo "Get a device with 4096 physical sector size and 512 logical sector size"
-> > > > > +SCSI_DEBUG_DEV=`_get_scsi_debug_dev 4096 512 0 256`
-> > > > > +blockdev --getpbsz --getss $SCSI_DEBUG_DEV
-> > > > > +
-> > > > > +echo "mkfs and mount"
-> > > > > +_mkfs_dev $SCSI_DEBUG_DEV || _fail "Can't make $FSTYP on scsi_debug device"
-> > > > > +SCSI_DEBUG_MNT="$TEST_DIR/scsi_debug_$seq"
-> > > > > +rm -rf $SCSI_DEBUG_MNT
-> > > > > +mkdir $SCSI_DEBUG_MNT
-> > > > > +run_check _mount $SCSI_DEBUG_DEV $SCSI_DEBUG_MNT
-> > > > 
-> > > > /me wonders, should we try to use $MKFS_OPTIONS and $MOUNT_OPTIONS
-> > > > on the scsidebug device?  To catch cases where the config actually
-> > > > matters for that kind of thing?
-> > > 
-> > > It's been merged, if we need to change something, better to send a new
-> > > patch to change that :)
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > --D
-> > > > 
-> > > > > +
-> > > > > +echo "DIO read/write 512 bytes"
-> > > > > +# This dio write should succeed, even the physical sector size is 4096, but
-> > > > > +# the logical sector size is 512
-> > > > > +$XFS_IO_PROG -d -f -c "pwrite 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
-> > > > > +$XFS_IO_PROG -d -c "pread 0 512" $SCSI_DEBUG_MNT/testfile >> $seqres.full
-> > > > > +
-> > > > > +# success, all done
-> > > > > +status=0
-> > > > > +exit
-> > > > > diff --git a/tests/generic/888.out b/tests/generic/888.out
-> > > > > new file mode 100644
-> > > > > index 00000000..0f142ce9
-> > > > > --- /dev/null
-> > > > > +++ b/tests/generic/888.out
-> > > > > @@ -0,0 +1,6 @@
-> > > > > +QA output created by 888
-> > > > > +Get a device with 4096 physical sector size and 512 logical sector size
-> > > > > +4096
-> > > > > +512
-> > > > > +mkfs and mount
-> > > > > +DIO read/write 512 bytes
-> > > > > -- 
-> > > > > 2.31.1
-> > > > > 
-> > > > 
-> > > 
-> > 
-> 
-> 
+But, I won't make you send yet another patch version for that.
 
--- 
-- Andrey
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
+Thanks.
+
+> +
+> +_scratch_dev_pool_put
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/312.out b/tests/btrfs/312.out
+> new file mode 100644
+> index 000000000000..b7de6ce3cc6e
+> --- /dev/null
+> +++ b/tests/btrfs/312.out
+> @@ -0,0 +1,19 @@
+> +QA output created by 312
+> +---- mount_cloned_device ----
+> +Creating cloned device...wrote 9000/9000 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +done
+> +Mounting original device
+> +wrote 9000/9000 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +On disk fsid:          FSID
+> +Metadata uuid:         FSID
+> +Temp fsid:             FSID
+> +Tempfsid status:       0
+> +Mounting cloned device
+> +cp reflink must fail
+> +cp: failed to clone 'TEST_DIR/312/mnt1/bar' from 'SCRATCH_MNT/foo': Inva=
+lid cross-device link
+> +On disk fsid:          FSID
+> +Metadata uuid:         FSID
+> +Temp fsid:             TEMPFSID
+> +Tempfsid status:       1
+> --
+> 2.39.3
+>
