@@ -1,275 +1,130 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 589EE6EF1B
-	for <fstests@vger.kernel.org>; Fri,  1 Mar 2024 14:08:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92481386
+	for <fstests@vger.kernel.org>; Fri,  1 Mar 2024 14:08:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709302101; cv=none; b=PD8r5gq3Vj9Hla2WANs+jyEwNzJNeoyo4UDrz74Ho8i4blpW7pr9YRKiZyTDNcLK5rhIK2G7EuM+TEHB6RKj8CeGZMKIYAgdZaVVlWStaHro/oWr1KmpL7dd23+e8cQr1Z3RvjN4F8LqvmBI1sqwREP4vZ3UJ7vbtpEaR/KvGZg=
+	t=1709302136; cv=none; b=mhHwJ2QqeQrjFyVTybZD7HJtBEagviTksHt9bXif9dfLC3hhinU8drDd0I7osORTJBiaZemcrxaBbTEuv8rmS+RBOiILEqUr2nY4Dwl69vQjsIEbL2/rHtlZHBLY8RRdWtWIsO3szu2r/whwVyFB6+OpxR9N4eSFdBwbf4OyJ+o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709302101; c=relaxed/simple;
-	bh=QRtrVHbGg6UBQF5jFjC+e9A1xTeKiSYlPPerRwyxsXg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ji91iZ1NDm7OC92BuT2pKDV/yiS1xxglu85quVgxf9XK3+/HMpSwTCojUk7vdefaFBCPjzLqSmtGHNZmE9mh96CECOrhGsAGj6SQHccY9Xtw6ZYZA0WOzek7TFM3clOittI3J/NXaFieuiqAkiuf+u2Othw1IUsy8M+1i//vEdM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AgdaEvcj; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1709302136; c=relaxed/simple;
+	bh=iT6JJmiRbb+kh1+RgPYgYNnUnOvZ0AoJcZwUvgBzKnY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=RtIM4qus8slEv6rHsnV1YHdm0NfGy1c5X0EoUmkPMYnBrKTqJW7RhWAZdls/ueh4ZOBWA/zM+2FTHwXvTJQUJnxC7IGOkwi9DtxsTy1M1n9RTIpi+Jm8FKNLjPyODMKO+2GVUB8K35RRQBJ1PpgHo64wUwIJyTm6GeAPml/QL/E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EZaRsLJh; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AgdaEvcj"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EZaRsLJh"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709302094;
+	s=mimecast20190719; t=1709302133;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=gCEh9C5EA4GsZD/OC1r5YlOqs5g+H8xXFiHuMW4Cy74=;
-	b=AgdaEvcjLxjDsNsw0gx2DqyVxRLgYFnsc+81tZJpPjARHKWutLT1veDuLNcxAV0UGqoxg3
-	WU1OoycwFL2lromE1fSNTyDCqAzzQc8hrinOVTRSUARqIG+aUFrxycaPLJqp5EKcO4DuVH
-	OMt+N82gKG632fddn/6dlW7AaIq6d1w=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=eZNB7Cp4kFaNUO1dt4k9gvrovl60pZyh1b4xj20qO2c=;
+	b=EZaRsLJhYNGkGK42KP6HJwKrLeeQLQyyckxa278quaauXCG4REhv86PrbDju+chiIceiaJ
+	akLHTyE+IWqR8M6IaGkTLjuJdi0NnAsF6FLDIj1heXrQhtmORH4ao85CFqjFXiSMV32TQf
+	zu2dNGRVrBKNe4QlW5NdB+aUV0CMimA=
+Received: from mail-lj1-f198.google.com (mail-lj1-f198.google.com
+ [209.85.208.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-643-RqqCxpySMci85eAQJoTN6w-1; Fri, 01 Mar 2024 09:08:13 -0500
-X-MC-Unique: RqqCxpySMci85eAQJoTN6w-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6e50831226dso1556301b3a.2
-        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 06:08:13 -0800 (PST)
+ us-mta-696-eDSL7BOZN6aAkIyv8FvMGg-1; Fri, 01 Mar 2024 09:08:52 -0500
+X-MC-Unique: eDSL7BOZN6aAkIyv8FvMGg-1
+Received: by mail-lj1-f198.google.com with SMTP id 38308e7fff4ca-2d2c98de907so13695701fa.1
+        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 06:08:51 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709302092; x=1709906892;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gCEh9C5EA4GsZD/OC1r5YlOqs5g+H8xXFiHuMW4Cy74=;
-        b=RzqY8pGJEOGM3sOk9FOvl/Ts21KzLnCOG1KjfbkEH2oTRsHBjOLPgngzdAsGJ6lR1A
-         WB0QAQ8l5Hc9QVpqJQBQIc5LM4VLFhA8dJJubwwhPCCJTHv49GQ9/3t4tUL1vf7J4T1A
-         aWGX7ZdfkTeFSZdsOhvMs/4HP1oWBzD6OMcdw3nRYxJQ/YfoFveCk6SKbRVEU5eW2uCi
-         TU/KUdVdbfuA5/GCMhpne7DpvzdWityqmyOImSOsBtyyXgyEWIKhpWxh3vV2kF5fYcRM
-         J6AeRZgqAPmSUZYOi26iWaxmXpLAxu0XRlChceL8Azd2Xw6FgT/AwzY++ayJsL24e78t
-         MiTA==
-X-Forwarded-Encrypted: i=1; AJvYcCVGoAp55lk8qufu77lR2PrubOmkhIPhb7NGfthB6ytzAyf6G7Mf3C87cb6kBWC6ql4djRBsf578nIiPzcPwv4VmF0u25KM1Eg==
-X-Gm-Message-State: AOJu0YynSRnLg4KA8IDtxTcUP6N70ObW41yb8WxMSEqM6T3jCDtF15ky
-	AFFcAWWiSSllW4kNqigpV9qRhYLeMxEdXkC8BO5SXuJPscW7YiFMVT4zDFb7TX1hgMCwwbdObkQ
-	iul123tjuIWfQSvdAfqGIFaEULmbfkAQjEyftuiD9X3Y1TfFvkYp1A8E=
-X-Received: by 2002:a05:6a00:1707:b0:6e2:d162:6315 with SMTP id h7-20020a056a00170700b006e2d1626315mr1876139pfc.29.1709302091632;
-        Fri, 01 Mar 2024 06:08:11 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF4z3UoeV8S6LT9aGh3Xva9wXhKEudLeCku7yeWFpEZLdB70HoWuhrCEBidtC1j8OJMgYdRfg==
-X-Received: by 2002:a05:6a00:1707:b0:6e2:d162:6315 with SMTP id h7-20020a056a00170700b006e2d1626315mr1876103pfc.29.1709302091107;
-        Fri, 01 Mar 2024 06:08:11 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q13-20020a62e10d000000b006e560192a7dsm2983892pfh.105.2024.03.01.06.08.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Mar 2024 06:08:10 -0800 (PST)
-Date: Fri, 1 Mar 2024 22:08:07 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Josef Bacik <josef@toxicpanda.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
-	kernel-team@fb.com
-Subject: Re: [PATCH] fstests: make read-repair tests md5sum the data
-Message-ID: <20240301140807.a74ipz344klfk2y5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <c5d3e27fd544b2ecb1a4b374f500314c1b7b9c56.1706112305.git.josef@toxicpanda.com>
+        d=1e100.net; s=20230601; t=1709302130; x=1709906930;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=eZNB7Cp4kFaNUO1dt4k9gvrovl60pZyh1b4xj20qO2c=;
+        b=pAxG9bB+X5Vs20zHL+mqFZ54xsCGTcoMH/hzU/EuPzqYjmu7gLchqxlCAJBDomn0TN
+         wqPmUzNDeV7nRcBLIHDkVq9KRzC/rTK4REP+pNjHl3heluEVfPRnfnGnKtt+uFdY1hKM
+         EqHFW11tfiOtNS4kK8ek2XgB/Mjxz4UlXVipH9ESidDZ1ZYzffeH8aRfwCIrrPDvJPfv
+         BBig7CDIkS/HjcMSDb9Nt1mlkXWZYMrOO7rJpK/wx7wq2uNF9aK6poFR+FTr2UpARHhH
+         4mmCzap3PVRIXKi0Dp714B6XO2I+T5kD3LF1ZJdIAgZo+e5Ey71ijQ1rOCYkmm7/IsNp
+         IZVQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUIFgtZ3MNVPH3+t14YfKd3Tum+G6X+PadsNI2fM1YHQzMG7rHZvzh/oEpQu2vlvzfF3YJ47TJzXZuXxzg0soQ1H7M4khgjrQ==
+X-Gm-Message-State: AOJu0YygzWJIcARZprziiz1S9FwcJx0q0UicNlv4NLuD92+KoZZWABQ1
+	qtDdAoXUuHUFWcLH/cZb5OQ7d4pI8x6BNq9zqwIKEKWMFrbDTDykKhyi6LKPXIo+MwK6DUm58ay
+	Ub8mo6of1uS/ezdpeghZ2FR3LM2Qc4AETxvEpfEpiSZYi5tElQdC2ipJx4URr9Sa0JplVLFgue3
+	7Cwp7ogs3uyMBxVRifbWaudGV3uoyTlA==
+X-Received: by 2002:a2e:a545:0:b0:2d2:c83c:ffd7 with SMTP id e5-20020a2ea545000000b002d2c83cffd7mr1484966ljn.42.1709302130748;
+        Fri, 01 Mar 2024 06:08:50 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFSDJeJpN277d+Vv9za9OxHPDSkM2MaL7PivkBpn5DLbwMNlURIgc/uCGOC+jzzIJ/SUczkiXhxW0KtMRkM6us=
+X-Received: by 2002:a2e:a545:0:b0:2d2:c83c:ffd7 with SMTP id
+ e5-20020a2ea545000000b002d2c83cffd7mr1484941ljn.42.1709302130433; Fri, 01 Mar
+ 2024 06:08:50 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c5d3e27fd544b2ecb1a4b374f500314c1b7b9c56.1706112305.git.josef@toxicpanda.com>
+References: <20230925201827.1703857-1-aahringo@redhat.com> <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
+ <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Alexander Aring <aahringo@redhat.com>
+Date: Fri, 1 Mar 2024 09:08:39 -0500
+Message-ID: <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
+Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
+To: Zorro Lang <zlang@kernel.org>, pc@manguebit.com
+Cc: Zorro Lang <zlang@redhat.com>, Steve French <smfrench@gmail.com>, fstests@vger.kernel.org, 
+	gfs2@lists.linux.dev, jlayton@kernel.org, linux-cifs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jan 24, 2024 at 11:05:10AM -0500, Josef Bacik wrote:
-> For validating that read repair works properly we corrupt one mirror and
-> then read back the physical location after we do a direct or buffered
-> read on the mounted file system and then unmount the file system.  The
-> golden output expects all a's, however with encryption this will
-> obviously not be the case.
-> 
-> However I still broke read repair, so these tests are quite valuable.
-> Fix them to dump the on disk values to a temporary file and then md5sum
-> the files, and then validate the md5sum to make sure the read repair
-> worked properly.
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> ---
->  tests/btrfs/140     | 15 ++++++++++++++-
->  tests/btrfs/140.out | 34 ----------------------------------
->  tests/btrfs/141     | 16 +++++++++++++++-
->  tests/btrfs/141.out | 34 ----------------------------------
->  4 files changed, 29 insertions(+), 70 deletions(-)
-> 
-> diff --git a/tests/btrfs/140 b/tests/btrfs/140
-> index 247a7356..8e1aafa3 100755
-> --- a/tests/btrfs/140
-> +++ b/tests/btrfs/140
-> @@ -77,6 +77,13 @@ devpath=$(get_device_path ${devid})
->  
->  _scratch_unmount
->  
-> +# Grab the contents of the the area so we can compare to the final part
-> +orig=$(mktemp)
+Hi,
 
-We don't use mktemp for tmpfile. Please use $tmp (it's defined at the
-beginning of each test case), then it'll be sure to be removed in _cleanup().
+On Fri, Mar 1, 2024 at 5:38=E2=80=AFAM Zorro Lang <zlang@kernel.org> wrote:
+>
+> On Fri, Feb 09, 2024 at 07:43:10PM +0800, Zorro Lang wrote:
+> > On Thu, Feb 08, 2024 at 11:35:06PM -0600, Steve French wrote:
+> > > Could you forward the changeset for this so we could try it?
+> >
+> > Hi Steve,
+> >
+> > Thanks for your reply. Sure, there's a temporary branch "patches-in-que=
+ue",
+> > you can get it by:
+> >   # git clone -b patches-in-queue git://git.kernel.org/pub/scm/fs/xfs/x=
+fstests-dev.git
+> >
+> > Then you can see a generic/740 test case in it, run it on cifs. I teste=
+d
+> > with cifs 3.11, and wrote the /etc/samba/smb.conf as:
+> >   [TEST_dev]
+> >   path =3D $dir
+> >   writable =3D yes
+> >   ea support =3D yes
+> >   strict allocate =3D yes
+> > And set:
+> >   MOUNT_OPTIONS=3D"-o vers=3D3.11,mfsymlinks,username=3Droot,password=
+=3Dxxxxxxxxxx"
+> >   TEST_FS_MOUNT_OPTS=3D"-o vers=3D3.11,mfsymlinks,username=3Droot,passw=
+ord=3Dxxxxxxxx"
+> >
+> > I'm not sure if it's a cifs issue, Alexander writes this case for gfs2,=
+ it
+> > works for other fs, but blocked (until kill it manually) on cifs. So ho=
+pe
+> > to get some suggestions from cifs list.
+>
+> Hi Steve,
+>
+> Any feedback about this? Just to make sure if it's a cifs bug or a case i=
+ssue.
+>
 
-> +$XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
-> +	 _filter_xfs_io_offset > $orig
-> +origcsum=$(_md5_checksum $orig)
-> +rm -f $orig
-> +
->  echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
->  	>> $seqres.full
->  $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-> @@ -91,10 +98,16 @@ _btrfs_direct_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
->  _scratch_unmount
->  
->  # check if the repair works
-> +final=$(mktemp)
->  $XFS_IO_PROG -d -c "pread -v -b 512 $physical 512" $devpath |\
-> -	_filter_xfs_io_offset
-> +	_filter_xfs_io_offset > $final
-> +finalcsum=$(_md5_checksum $final)
-> +rm -f $final
->  
->  _scratch_dev_pool_put
-> +
-> +[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
+I talked yesterday with Paulo Alcantara (cifs developer), he is
+currently looking into it.
 
-Might be worth outputting the $orig and $final into .full file, at least
-when the test fails, to help debug.
+Paulo, is there any feedback yet? Thanks.
 
-Same review points below.
+Thanks for the ping Zorro.
 
-If there's not objection from the the original author of these two cases
-and btrfs list, I'm good with this change if it helps for more testing.
-
-Thanks,
-Zorro
-
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
-> index fb5aa108..58dfb24e 100644
-> --- a/tests/btrfs/140.out
-> +++ b/tests/btrfs/140.out
-> @@ -1,37 +1,3 @@
->  QA output created by 140
->  wrote 131072/131072 bytes
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -read 512/512 bytes
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/141 b/tests/btrfs/141
-> index 90a90d00..41407f90 100755
-> --- a/tests/btrfs/141
-> +++ b/tests/btrfs/141
-> @@ -74,6 +74,14 @@ devid=$(get_devid ${logical_in_btrfs} 1)
->  devpath=$(get_device_path ${devid})
->  
->  _scratch_unmount
-> +
-> +# Grab the contents of the area so we can compare to the final part
-> +orig=$(mktemp)
-> +$XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
-> +	_filter_xfs_io_offset > $orig
-> +origcsum=$(_md5_checksum $orig)
-> +rm -f $orig
-> +
->  echo " corrupt stripe #1, devid $devid devpath $devpath physical $physical" \
->  	>> $seqres.full
->  $XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical 64K" $devpath > /dev/null
-> @@ -88,10 +96,16 @@ _btrfs_buffered_read_on_mirror 1 2 "$SCRATCH_MNT/foobar" 0 128K
->  _scratch_unmount
->  
->  # check if the repair works
-> +final=$(mktemp)
->  $XFS_IO_PROG -c "pread -v -b 512 $physical 512" $devpath |\
-> -	_filter_xfs_io_offset
-> +	_filter_xfs_io_offset > $final
-> +finalcsum=$(_md5_checksum $final)
-> +rm -f $final
->  
->  _scratch_dev_pool_put
-> +
-> +[ "$origcsum" == "$finalcsum" ] || _fail "repair failed, csums don't match"
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
-> index 4b8be189..d8c6940f 100644
-> --- a/tests/btrfs/141.out
-> +++ b/tests/btrfs/141.out
-> @@ -1,37 +1,3 @@
->  QA output created by 141
->  wrote 131072/131072 bytes
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> -read 512/512 bytes
-> -XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -- 
-> 2.43.0
-> 
-> 
+- Alex
 
