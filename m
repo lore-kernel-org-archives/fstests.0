@@ -1,156 +1,77 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE35239FE4;
-	Fri,  1 Mar 2024 14:56:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF72D38DC3;
+	Fri,  1 Mar 2024 15:29:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709304965; cv=none; b=cObwbaINFtInFkQ54jMNV+UDtJXHD6s62KzHJWfEH1FcjOG9NQcYv8Hc6AoxmdZi5yKThyC238tRG0WiteIijCUs+6PdPytkkOVdFLcq7/FPw05U7BUh0ty/UlI6/C7S6n4XN9xfo7shBdtnNXk4SWbTLHDHKJ8QtWPj+GyH+Rc=
+	t=1709306949; cv=none; b=bwDgC+kBAhc/yOb6NN0octf9zp00fO6V7o8OHHTnGQ80q9Mo6hfT5j/fY7ecDDjO+oKrHJkTta1EZjQopT/i1XpKl7JLg7v/8kun8wLDqlN0OHxHUt7p2nVn9LMEk+dEg5xKgrk0kwc/HUbNvoXWj3vrTAWxri/5tNfnblWzoSY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709304965; c=relaxed/simple;
-	bh=/8e4n4keYQlLa9223HzAGst+I0zKCUGxT4R0w+TpmXE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mnubKs/SM9g3aJK7pOhrHCQSmIEbB+roOasHigeBy6+TniBxZA6VTJlU4RnEp1js059s78B81ma7K9QIVacpHgHTSZvs7bXfMeu1hEGnHCEA+PmqDmBatMS7E9648YXInrQSO8Ob5zJcpgQ7xQsPBQwhsAvnL3TjtteX4qepGN8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vMcoo8/m; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1709306949; c=relaxed/simple;
+	bh=LYlptxBO4Vd+P5/3+/J09lsZDdds7WZzOHBzrUmbm5o=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=XRRWaEopkFVzM4lXdeFi9jRWuXppa7vgc3B9UfH4hhZaHVxb0j0dfVutYsN1kw67FAcbTtNjEWvp5gDuGUulc8EbuLQXtAosKJaU7oJykJM1QeNfaTxV0V29zwZsh+IHax8Y4P263dj3nhuBri5wS8MfI6MZ8Wg/YSyiF0q8FSQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=NsMBI7dP; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vMcoo8/m"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F965C433C7;
-	Fri,  1 Mar 2024 14:56:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709304965;
-	bh=/8e4n4keYQlLa9223HzAGst+I0zKCUGxT4R0w+TpmXE=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=vMcoo8/maHaApx6XsoccXyfjZN4jC01DbAZlJOlGQ5+atQADyH0iOG6p5pawvNsrQ
-	 QEyhudSqizc4HlNhkw4fbxLHbtR25Ai8kSq1hjP/cuHhk0ld8tgv4Cm+UXpSPoFLCJ
-	 NiuL5o+jWQbKgm7SXBNZWjbndMT2BmJ9tQPClHnSGrZMd3wKt8MgmBLsofgNyShqCD
-	 0/obgT80bEVCmpBwc6u3mLJE8kVJspN5w1cIU0z/cc7Tvs3yd4qmVnFMF7UZaFX0JH
-	 OKhI2r2vBTgwyUtOku2cWDt8ohhmrS7qmEluKZEKsVva0+rHovtB9ZDapS+iHcL96r
-	 RwrRBz+BkmShg==
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a43f922b2c5so272667066b.3;
-        Fri, 01 Mar 2024 06:56:05 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCXR3+S2hxw6jfYny+Se99BbDoA44m1BXGxo+QxGgNAZAgRKVGlA2C/eKSgyADe4BMD3Gi9cpuHmI5V28VX6QlYf4zt1r1c9TcX248h/SHHq4mCioUE1Vq6RKK5D8qaxhYHw1w05
-X-Gm-Message-State: AOJu0YxovS8MjR0TQc3OuBaHr+Q+pfin8mjFFhuETfl4bBFSDUEuT2bq
-	Hq2FqivtAdKvLesEvQqtdlVL0jANHx2N91VlaqpP6Xzxh0/b5JSJPMuMIVL6vvsGaNTSRUyHnjA
-	hpk2hiAODKUjv+00uemWIu9fpk9U=
-X-Google-Smtp-Source: AGHT+IFn0NauetGFyDbj6fis8Q9V8S8MaCaIN9ppLBTeRUy8gRV0V5p1wJMVVdXHwa+kHf4kytKSTQU9Ks2vMtg9scw=
-X-Received: by 2002:a17:906:560e:b0:a44:1b36:22c3 with SMTP id
- f14-20020a170906560e00b00a441b3622c3mr1392318ejq.42.1709304963738; Fri, 01
- Mar 2024 06:56:03 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="NsMBI7dP"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=RQNzufGH4y+iWEiOdnipdlGIHxmIIS+h1rKtZYecMTM=; b=NsMBI7dPdk4u+hNbvIpTWCvPVI
+	6quqTpaB44KBYhtUuUEAoI/JQAxIOgC8AjrQa9ghildfnjpACitBdDjkPvAgHfpaas/FxG1wXeMc3
+	Ba7kD71VUlh0hS9Fh3ls3o9IOIlS3SC+YGDTM0OzJX8gqw+uOqYzDntYdJyUBkLFNAt2qlB8F5yGj
+	E8UCxXjAphRD+MW6I1t5Gp9gr2MHFmRyfEuhQsh+RhTJ9QteoZc5EvB9Ku/504vMV7yqlqZ8CpeXP
+	/ON2GN6KNWiixwAOSf5LdnamWK/heC1amErNVJlUB8EpUTKvVnkamTyS1QkpJB+dmgkKdKnFDpOEv
+	IvV4c0aA==;
+Received: from [206.0.71.40] (helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rg4oP-00000000tDe-2CF2;
+	Fri, 01 Mar 2024 15:29:06 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: [PATCH] shared/298: run xfs_db against the loop device instead of the image file
+Date: Fri,  1 Mar 2024 08:28:20 -0700
+Message-Id: <20240301152820.1149483-1-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240215140236.29171-1-l@damenly.org> <20240301134914.dgcv4vh2jbx2egfp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240301134914.dgcv4vh2jbx2egfp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 1 Mar 2024 14:55:26 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H53QTzMVdJwEJBOyoB3fBem-2zi3FH411JugRDkq9Bqvg@mail.gmail.com>
-Message-ID: <CAL3q7H53QTzMVdJwEJBOyoB3fBem-2zi3FH411JugRDkq9Bqvg@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/172,206: call _log_writes_cleanup in _cleanup
-To: Zorro Lang <zlang@redhat.com>
-Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
-	l@damenly.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Fri, Mar 1, 2024 at 1:49=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Thu, Feb 15, 2024 at 10:02:36PM +0800, Su Yue wrote:
-> > From: Su Yue <glass.su@suse.com>
-> >
-> > Because block group tree requires require no-holes feature,
-> > _log_writes_mkfs "-O ^no-holes" fails when "-O block-group-tree" is
-> > given in MKFS_OPTION.
-> > Without explicit _log_writes_cleanup, the two tests fail with
-> > logwrites-test device left. And all next tests will fail due to
-> > SCRATCH DEVICE EBUSY.
-> >
-> > Fix it by overriding _cleanup to call _log_writes_cleanup.
-> >
-> > Signed-off-by: Su Yue <glass.su@suse.com>
-> > ---
-> >  tests/btrfs/172 | 6 ++++++
-> >  tests/btrfs/206 | 6 ++++++
-> >  2 files changed, 12 insertions(+)
-> >
-> > diff --git a/tests/btrfs/172 b/tests/btrfs/172
-> > index f5acc6982cd7..fceff56c9d37 100755
-> > --- a/tests/btrfs/172
-> > +++ b/tests/btrfs/172
-> > @@ -13,6 +13,12 @@
-> >  . ./common/preamble
-> >  _begin_fstest auto quick log replay recoveryloop
-> >
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +     _log_writes_cleanup &> /dev/null
->
-> This _cleanup will override the default one, so better to copy the
-> default cleanup in this function,
->
->   cd /
->   rm -r -f $tmp.*
+xfs_db fails to properly detect the device sector size and thus segfaults
+when run again an image file with 4k sector size.  While that's something
+we should fix in xfs_db it will require a fair amount of refactoring of
+the libxfs init code.  For now just change shared/298 to run xfs_db
+against the loop device created on the image file that is used for I/O,
+which feels like the right thing to do anyway to avoid cache coherency
+issues.
 
-Zorro,
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/shared/298 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-You had already replied to v2 of this patch with exactly the same comments:
+diff --git a/tests/shared/298 b/tests/shared/298
+index 071c03dee..f657578c7 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -69,7 +69,7 @@ get_free_sectors()
+ 	agsize=`$XFS_INFO_PROG $loop_mnt | $SED_PROG -n 's/.*agsize=\(.*\) blks.*/\1/p'`
+ 	# Convert free space (agno, block, length) to (start sector, end sector)
+ 	_umount $loop_mnt
+-	$XFS_DB_PROG -r -c "freesp -d" $img_file | $SED_PROG '/^.*from/,$d'| \
++	$XFS_DB_PROG -r -c "freesp -d" $loop_dev | $SED_PROG '/^.*from/,$d'| \
+ 		 $AWK_PROG -v spb=$sectors_per_block -v agsize=$agsize \
+ 		'{ print spb * ($1 * agsize + $2), spb * ($1 * agsize + $2 + $3) - 1 }'
+ 	;;
+-- 
+2.39.2
 
-https://lore.kernel.org/fstests/20240225162212.qcidpyb2bhdburl6@dell-per750=
--06-vm-08.rhts.eng.pek2.redhat.com/
-
-It's trivial to do those changes.
-Do you expect Su to send yet another version just for that, or could
-you amend the patch?
-
-Can you please be more clear in future replies about that, i.e. if you
-expect the author to send a new version or if you'll amend the patch
-for trivial changes?
-
-Speaking for myself, I very often get confused with your replies, and
-I feel that some patches often get stalled for that reason.
-Usually with Eryu or Dave that didn't happen, the course of action was clea=
-r.
-
-Thanks.
-
->
-> You can refer to btrfs/196 or generic/482 etc.
->
-> > +}
-> > +
-> >  # Import common functions.
-> >  . ./common/filter
-> >  . ./common/dmlogwrites
-> > diff --git a/tests/btrfs/206 b/tests/btrfs/206
-> > index f6571649076f..e05adf75b67e 100755
-> > --- a/tests/btrfs/206
-> > +++ b/tests/btrfs/206
-> > @@ -14,6 +14,12 @@
-> >  . ./common/preamble
-> >  _begin_fstest auto quick log replay recoveryloop punch prealloc
-> >
-> > +# Override the default cleanup function.
-> > +_cleanup()
-> > +{
-> > +     _log_writes_cleanup &> /dev/null
->
->
-> Same as above.
->
-> Thanks,
-> Zorro
->
-> > +}
-> > +
-> >  # Import common functions.
-> >  . ./common/filter
-> >  . ./common/dmlogwrites
-> > --
-> > 2.43.0
-> >
-> >
->
->
