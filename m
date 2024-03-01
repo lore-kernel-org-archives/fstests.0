@@ -1,130 +1,263 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92481386
-	for <fstests@vger.kernel.org>; Fri,  1 Mar 2024 14:08:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C14A94087A
+	for <fstests@vger.kernel.org>; Fri,  1 Mar 2024 14:12:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709302136; cv=none; b=mhHwJ2QqeQrjFyVTybZD7HJtBEagviTksHt9bXif9dfLC3hhinU8drDd0I7osORTJBiaZemcrxaBbTEuv8rmS+RBOiILEqUr2nY4Dwl69vQjsIEbL2/rHtlZHBLY8RRdWtWIsO3szu2r/whwVyFB6+OpxR9N4eSFdBwbf4OyJ+o=
+	t=1709302361; cv=none; b=k3h5VkFubnsGBxGsGF6e+ZLvS/myAbi1MEjTrwACr7woHD35kK1okw8gbKzLpTfx8uU6IFAwrvZsXW91t2vhdsFWWVIN6oLuZbSey5bzYibLgijUujrKjzLQMFYTTBTey51Pt8YdbRPL5Ylb/iyafr8OsvjQZ+0/U2hFADcHYdc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709302136; c=relaxed/simple;
-	bh=iT6JJmiRbb+kh1+RgPYgYNnUnOvZ0AoJcZwUvgBzKnY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RtIM4qus8slEv6rHsnV1YHdm0NfGy1c5X0EoUmkPMYnBrKTqJW7RhWAZdls/ueh4ZOBWA/zM+2FTHwXvTJQUJnxC7IGOkwi9DtxsTy1M1n9RTIpi+Jm8FKNLjPyODMKO+2GVUB8K35RRQBJ1PpgHo64wUwIJyTm6GeAPml/QL/E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EZaRsLJh; arc=none smtp.client-ip=170.10.133.124
+	s=arc-20240116; t=1709302361; c=relaxed/simple;
+	bh=pIfWibMpp5XPXyNj1sNFiUM1Hfjlj5ujCxHao5zNgEM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=laMZJgMhyA7/v+aeLmhRvWcif2nDgly++C2XGlNqLU6XqFFoArauGYAYO3pdiphJeSfBT8Fw622ocKEWyV56o4NOkNBGvIDMsY7DSc35ZZ5cK3vHSNA1ZX+mWtoMx5JhtCmBsRFqJscXdnRZvz4yvaj+Ehb/csIZn4utd3K6Vxo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=L4luTfMw; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EZaRsLJh"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="L4luTfMw"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709302133;
+	s=mimecast20190719; t=1709302358;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=eZNB7Cp4kFaNUO1dt4k9gvrovl60pZyh1b4xj20qO2c=;
-	b=EZaRsLJhYNGkGK42KP6HJwKrLeeQLQyyckxa278quaauXCG4REhv86PrbDju+chiIceiaJ
-	akLHTyE+IWqR8M6IaGkTLjuJdi0NnAsF6FLDIj1heXrQhtmORH4ao85CFqjFXiSMV32TQf
-	zu2dNGRVrBKNe4QlW5NdB+aUV0CMimA=
-Received: from mail-lj1-f198.google.com (mail-lj1-f198.google.com
- [209.85.208.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=2YSORZ73UJDAidZR+pC0izmOtZN3r6vj44aflxQx8oM=;
+	b=L4luTfMw4dfQZubert2zLPB6zIrnVJdwK5ZFa/F9inb0RBDS3J5eIfjpMZmcJFYw96w+az
+	Nz315YQLaM1nxcxAdnUiAjDS/ooJZ9ovyWyLQxc0N3APBizoSCwrasugq64lPAjUor8ahM
+	EKbVVoZ/MnFzyuv8WPd3accghS6Wno0=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-696-eDSL7BOZN6aAkIyv8FvMGg-1; Fri, 01 Mar 2024 09:08:52 -0500
-X-MC-Unique: eDSL7BOZN6aAkIyv8FvMGg-1
-Received: by mail-lj1-f198.google.com with SMTP id 38308e7fff4ca-2d2c98de907so13695701fa.1
-        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 06:08:51 -0800 (PST)
+ us-mta-247-KocBVTs9PfC4djRRJ1u0xQ-1; Fri, 01 Mar 2024 09:12:37 -0500
+X-MC-Unique: KocBVTs9PfC4djRRJ1u0xQ-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6e50831226dso1560128b3a.2
+        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 06:12:37 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709302130; x=1709906930;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=eZNB7Cp4kFaNUO1dt4k9gvrovl60pZyh1b4xj20qO2c=;
-        b=pAxG9bB+X5Vs20zHL+mqFZ54xsCGTcoMH/hzU/EuPzqYjmu7gLchqxlCAJBDomn0TN
-         wqPmUzNDeV7nRcBLIHDkVq9KRzC/rTK4REP+pNjHl3heluEVfPRnfnGnKtt+uFdY1hKM
-         EqHFW11tfiOtNS4kK8ek2XgB/Mjxz4UlXVipH9ESidDZ1ZYzffeH8aRfwCIrrPDvJPfv
-         BBig7CDIkS/HjcMSDb9Nt1mlkXWZYMrOO7rJpK/wx7wq2uNF9aK6poFR+FTr2UpARHhH
-         4mmCzap3PVRIXKi0Dp714B6XO2I+T5kD3LF1ZJdIAgZo+e5Ey71ijQ1rOCYkmm7/IsNp
-         IZVQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUIFgtZ3MNVPH3+t14YfKd3Tum+G6X+PadsNI2fM1YHQzMG7rHZvzh/oEpQu2vlvzfF3YJ47TJzXZuXxzg0soQ1H7M4khgjrQ==
-X-Gm-Message-State: AOJu0YygzWJIcARZprziiz1S9FwcJx0q0UicNlv4NLuD92+KoZZWABQ1
-	qtDdAoXUuHUFWcLH/cZb5OQ7d4pI8x6BNq9zqwIKEKWMFrbDTDykKhyi6LKPXIo+MwK6DUm58ay
-	Ub8mo6of1uS/ezdpeghZ2FR3LM2Qc4AETxvEpfEpiSZYi5tElQdC2ipJx4URr9Sa0JplVLFgue3
-	7Cwp7ogs3uyMBxVRifbWaudGV3uoyTlA==
-X-Received: by 2002:a2e:a545:0:b0:2d2:c83c:ffd7 with SMTP id e5-20020a2ea545000000b002d2c83cffd7mr1484966ljn.42.1709302130748;
-        Fri, 01 Mar 2024 06:08:50 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFSDJeJpN277d+Vv9za9OxHPDSkM2MaL7PivkBpn5DLbwMNlURIgc/uCGOC+jzzIJ/SUczkiXhxW0KtMRkM6us=
-X-Received: by 2002:a2e:a545:0:b0:2d2:c83c:ffd7 with SMTP id
- e5-20020a2ea545000000b002d2c83cffd7mr1484941ljn.42.1709302130433; Fri, 01 Mar
- 2024 06:08:50 -0800 (PST)
+        d=1e100.net; s=20230601; t=1709302356; x=1709907156;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2YSORZ73UJDAidZR+pC0izmOtZN3r6vj44aflxQx8oM=;
+        b=xAREJ1vLKToIrpUh8t2x9x+93GPxTxCBsZI6vhev8y3AdEqylHfEL0guLoytl4YJRC
+         9xD7XeDSchY1GQCPCakxo3fILdfXzkYPGEBuzE4V3puWxdu3C4BBapwhfjaGDgUT6m5Y
+         h8liJ3gO3Gw9iT3gQjT87zox2fE5DCPggG71dnlrrMYwxwhXQ+2rZmvxvA4ir53KdNJK
+         8J46ImEsyeT0RNfY4NKtOVpUY1H3LvfXFDDltlPLYA3rnpW0S2EVtvwg/DyCfZZmPDqs
+         F0jnULjcZg0fSZJu3V+HyTiHGRYq9aQx+jaNZCEq6S9+YWK1anT6KSfSbDc+dn0jbfXZ
+         /9qQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWRLO6lM0SPpo1RQ2RAAahEPlccPUKs8v3Mkyq48jtUvgfr5FJpVmkAi6GVm6EwDVNGvpC2Pc2Mwdx6IZlusGXj9Lo62WekBQ==
+X-Gm-Message-State: AOJu0Yz0cbPRiO2qQ77RJgl+eBphOg0NZmR02gUWYZ1UWbv6aIzgmg0l
+	zCLnwV2vceG19QuVSxJbq1GOXbK+jJ8P7dFGTGnQ3Vo0ylSuJ9zK0gofVgSTz24RHjPUwS3u0Ju
+	DOf8SmJ1EXlBQHp1W/FyULIIdx1cf5jInhyyyCqrrgVkTO/tUWlFUcBY=
+X-Received: by 2002:a05:6a00:cc5:b0:6e1:482b:8c8e with SMTP id b5-20020a056a000cc500b006e1482b8c8emr1989360pfv.17.1709302356373;
+        Fri, 01 Mar 2024 06:12:36 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFuxBK7zBihtdvgKHRlq/iODTmyT4skyvDkmj2PsD0ftCUsDrOJPIG5oa8I6dVTHxivHy0kBw==
+X-Received: by 2002:a05:6a00:cc5:b0:6e1:482b:8c8e with SMTP id b5-20020a056a000cc500b006e1482b8c8emr1989332pfv.17.1709302355968;
+        Fri, 01 Mar 2024 06:12:35 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id w5-20020a056a0014c500b006e543b59587sm2963979pfu.126.2024.03.01.06.12.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Mar 2024 06:12:35 -0800 (PST)
+Date: Fri, 1 Mar 2024 22:12:32 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Boris Burkov <boris@bur.io>
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2] btrfs/310: test qgroup deletion
+Message-ID: <20240301141232.komz4o2ir63nptfj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <ce4a79cafb6790ef6d1e141d65195f72f469ae4d.1706035378.git.boris@bur.io>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20230925201827.1703857-1-aahringo@redhat.com> <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
- <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Alexander Aring <aahringo@redhat.com>
-Date: Fri, 1 Mar 2024 09:08:39 -0500
-Message-ID: <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-To: Zorro Lang <zlang@kernel.org>, pc@manguebit.com
-Cc: Zorro Lang <zlang@redhat.com>, Steve French <smfrench@gmail.com>, fstests@vger.kernel.org, 
-	gfs2@lists.linux.dev, jlayton@kernel.org, linux-cifs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ce4a79cafb6790ef6d1e141d65195f72f469ae4d.1706035378.git.boris@bur.io>
 
-Hi,
+On Tue, Jan 23, 2024 at 10:45:12AM -0800, Boris Burkov wrote:
+> When using squotas, an extent's OWNER_REF can long outlive the subvolume
+> that is the owner, since it could pick up a different reference that
+> keeps it around, but the subvolume can go away.
+> 
+> Test this case, as originally, it resulted in a read only btrfs.
+> 
+> Since we can blow up the subvolume in the same transaction as the extent
+> is written, we can also increment the usage of a non-existent subvolume.
+> 
+> This leaves an OWNER_REF behind with no corresponding incremented usage
+> in a qgroup, so if we re-create that qgroup, we can then underflow its
+> usage.
+> 
+> Both of these cases are fixed in the kernel by disallowing
+> creating subvol qgroups and by disallowing deleting qgroups that still
+> have usage.
+> 
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+> Changelog:
+> v2:
+> - removed enable quota helper
+> - removed unneeded commented cleanup boilerplate
+> - change test number 304 -> 310 (based on v2024.01.14)
 
-On Fri, Mar 1, 2024 at 5:38=E2=80=AFAM Zorro Lang <zlang@kernel.org> wrote:
->
-> On Fri, Feb 09, 2024 at 07:43:10PM +0800, Zorro Lang wrote:
-> > On Thu, Feb 08, 2024 at 11:35:06PM -0600, Steve French wrote:
-> > > Could you forward the changeset for this so we could try it?
-> >
-> > Hi Steve,
-> >
-> > Thanks for your reply. Sure, there's a temporary branch "patches-in-que=
-ue",
-> > you can get it by:
-> >   # git clone -b patches-in-queue git://git.kernel.org/pub/scm/fs/xfs/x=
-fstests-dev.git
-> >
-> > Then you can see a generic/740 test case in it, run it on cifs. I teste=
-d
-> > with cifs 3.11, and wrote the /etc/samba/smb.conf as:
-> >   [TEST_dev]
-> >   path =3D $dir
-> >   writable =3D yes
-> >   ea support =3D yes
-> >   strict allocate =3D yes
-> > And set:
-> >   MOUNT_OPTIONS=3D"-o vers=3D3.11,mfsymlinks,username=3Droot,password=
-=3Dxxxxxxxxxx"
-> >   TEST_FS_MOUNT_OPTS=3D"-o vers=3D3.11,mfsymlinks,username=3Droot,passw=
-ord=3Dxxxxxxxx"
-> >
-> > I'm not sure if it's a cifs issue, Alexander writes this case for gfs2,=
- it
-> > works for other fs, but blocked (until kill it manually) on cifs. So ho=
-pe
-> > to get some suggestions from cifs list.
->
-> Hi Steve,
->
-> Any feedback about this? Just to make sure if it's a cifs bug or a case i=
-ssue.
->
+You don't need to write the number of a test case in commit subject, due to
+it might be changed. If you write a new case, the subject can be "btrfs: ...."
+or "fstests/btrfs: ..." or others similar you like.
 
-I talked yesterday with Paulo Alcantara (cifs developer), he is
-currently looking into it.
+Thanks,
+Zorro
 
-Paulo, is there any feedback yet? Thanks.
-
-Thanks for the ping Zorro.
-
-- Alex
+> 
+>  tests/btrfs/301     | 14 ++------
+>  tests/btrfs/310     | 83 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/310.out |  6 ++++
+>  3 files changed, 91 insertions(+), 12 deletions(-)
+>  create mode 100755 tests/btrfs/310
+>  create mode 100644 tests/btrfs/310.out
+> 
+> diff --git a/tests/btrfs/301 b/tests/btrfs/301
+> index db4697247..4c1127aa0 100755
+> --- a/tests/btrfs/301
+> +++ b/tests/btrfs/301
+> @@ -157,16 +157,6 @@ do_enospc_falloc()
+>  	do_falloc $file $sz
+>  }
+>  
+> -enable_quota()
+> -{
+> -	local mode=$1
+> -
+> -	[ $mode == "n" ] && return
+> -	arg=$([ $mode == "s" ] && echo "--simple")
+> -
+> -	$BTRFS_UTIL_PROG quota enable $arg $SCRATCH_MNT
+> -}
+> -
+>  get_subvid()
+>  {
+>  	_btrfs_get_subvolid $SCRATCH_MNT subv
+> @@ -186,7 +176,7 @@ prepare()
+>  {
+>  	_scratch_mkfs >> $seqres.full
+>  	_scratch_mount
+> -	enable_quota "s"
+> +	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+>  	$BTRFS_UTIL_PROG subvolume create $subv >> $seqres.full
+>  	local subvid=$(get_subvid)
+>  	set_subvol_limit $subvid $limit
+> @@ -397,7 +387,7 @@ enable_mature()
+>  	# Sync before enabling squotas to reliably *not* count the writes
+>  	# we did before enabling.
+>  	sync
+> -	enable_quota "s"
+> +	$BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+>  	set_subvol_limit $subvid $limit
+>  	_scratch_cycle_mount
+>  	usage=$(get_subvol_usage $subvid)
+> diff --git a/tests/btrfs/310 b/tests/btrfs/310
+> new file mode 100755
+> index 000000000..02714d261
+> --- /dev/null
+> +++ b/tests/btrfs/310
+> @@ -0,0 +1,83 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 310
+> +#
+> +# Test various race conditions between qgroup deletion and squota writes
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick qgroup subvol clone
+> +
+> +# Import common functions.
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_require_scratch_reflink
+> +_require_cp_reflink
+> +_require_scratch_enable_simple_quota
+> +_require_no_compress
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid deleting live subvol qgroup"
+> +_fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: forbid creating subvol qgroups"
+> +
+> +subv1=$SCRATCH_MNT/subv1
+> +subv2=$SCRATCH_MNT/subv2
+> +
+> +prepare()
+> +{
+> +    _scratch_mkfs >> $seqres.full
+> +    _scratch_mount
+> +    $BTRFS_UTIL_PROG quota enable --simple $SCRATCH_MNT
+> +    $BTRFS_UTIL_PROG subvolume create $subv1 >> $seqres.full
+> +    $BTRFS_UTIL_PROG subvolume create $subv2 >> $seqres.full
+> +    $XFS_IO_PROG -fc "pwrite -q 0 128K" $subv1/f
+> +    _cp_reflink $subv1/f $subv2/f
+> +}
+> +
+> +# An extent can long outlive its owner. Test this by deleting the owning
+> +# subvolume, committing the transaction, then deleting the reflinked copy.
+> +# Deleting the copy will attempt to free space from the missing owner, which
+> +# should be a no-op.
+> +free_from_deleted_owner()
+> +{
+> +    echo "free from deleted owner"
+> +    prepare
+> +    subvid1=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
+> +
+> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+> +    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
+> +    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.full
+> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+> +    rm $subv2/f
+> +    _scratch_unmount
+> +}
+> +
+> +# A race where we delete the owner in the same transaction as writing the
+> +# extent leads to incrementing the squota usage of the missing qgroup.
+> +# This leaves behind an owner ref with an owner id that cannot exist, so
+> +# freeing the extent now frees from that qgroup, but there has never
+> +# been a corresponding usage to free.
+> +add_to_deleted_owner()
+> +{
+> +    echo "add to deleted owner"
+> +    prepare
+> +    subvid1=$(_btrfs_get_subvolid $SCRATCH_MNT subv1)
+> +
+> +    $BTRFS_UTIL_PROG subvolume delete $subv1 >> $seqres.full
+> +    $BTRFS_UTIL_PROG qgroup destroy 0/$subvid1 $SCRATCH_MNT >> $seqres.full
+> +    $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+> +    $BTRFS_UTIL_PROG qgroup create 0/$subvid1 $SCRATCH_MNT >> $seqres.full
+> +    rm $subv2/f
+> +    _scratch_unmount
+> +}
+> +
+> +free_from_deleted_owner
+> +add_to_deleted_owner
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/310.out b/tests/btrfs/310.out
+> new file mode 100644
+> index 000000000..d7d4bc0ae
+> --- /dev/null
+> +++ b/tests/btrfs/310.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 310
+> +free from deleted owner
+> +ERROR: unable to destroy quota group: Device or resource busy
+> +add to deleted owner
+> +ERROR: unable to destroy quota group: Device or resource busy
+> +ERROR: unable to create quota group: Invalid argument
+> -- 
+> 2.43.0
+> 
+> 
 
