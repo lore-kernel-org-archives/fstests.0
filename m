@@ -1,169 +1,177 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mx.manguebit.com (mx.manguebit.com [167.235.159.17])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D279920DCB
-	for <fstests@vger.kernel.org>; Fri,  1 Mar 2024 18:06:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709316392; cv=none; b=a7lFkgp9IR++2WjmkJAkDExvt244qdlIIRz5VHSVTClSwonW1tYWmhgNIhrRSrurpL2XelCXD8v8wjb9SvKoJmDOBagHMPzyBUTH+4rYb3uGWw317TrK+8HcDpZCczZHNWUrFYf0tpnxEI2PW5Tf19X/+LRXDj14xtT+4m9SK7I=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709316392; c=relaxed/simple;
-	bh=SHpbBHzsd6RmrbLS3iETdVX177OY4l2TrVGPKYPhMyE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TG7iPJdjqiJnr8AM7ZLXjGX32B7St/Bchl9Qv4xiPM7OLVsAVLUg1nsJ3+jVaLtJx3SPSjrQla2NET0CNdBY3FUj0bdEja9qYpyKxdczTkEdySPJBqkgdGGfTNs1sth26Fzz+QYaRrSEjj5Viz2zGb1vIV3tUxLfv6VKald4wnU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nUQPb/J7; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 143C85EE9F;
+	Fri,  1 Mar 2024 23:59:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=167.235.159.17
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1709337548; cv=pass; b=GOo9+ca/+vy7bpFU1cyoz5ZOrpBoLq14WUi+iYm6B+0l58Y/emVVl39EddV8/azVUy2HIcL2D8JKbPLV+6zYfwJkx4aibIjyUYCS9BtRgUWQr9s2xCtvDHDsNqk0iuLenVgjQzgg/HJBpMU6g3ZJ3CWGFajYCb9dvHtEEfF8aQc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1709337548; c=relaxed/simple;
+	bh=b7iGs5UorpFBfMmXzHrE0vl1I1RNOESfi7LLrC2VNzw=;
+	h=Message-ID:From:To:Cc:Subject:In-Reply-To:References:Date:
+	 MIME-Version:Content-Type; b=nbjVwtztCIuiLaT+CL+eUJxILvwKdzhDnLS6xSQrUDWTMQcjFnl7dUbXZRiq4Ooi6sTBI+y5EVc7l5vpftS7hfoGqGbWPrN64SwCuqRPgiDSDBn+42Mtes874YXOaXiQ25LUZIDKXGuV1LBoNtvwuFmd/SFc4T6iErdxa7ESbRM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.com; spf=pass smtp.mailfrom=manguebit.com; dkim=pass (2048-bit key) header.d=manguebit.com header.i=@manguebit.com header.b=e34oTyxS; arc=pass smtp.client-ip=167.235.159.17
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manguebit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nUQPb/J7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 31720C433C7;
-	Fri,  1 Mar 2024 18:06:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709316392;
-	bh=SHpbBHzsd6RmrbLS3iETdVX177OY4l2TrVGPKYPhMyE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=nUQPb/J7mUfzxTvx2qDHJuAOU9kOkvKcuBAVtIrzyYhPROueix2txawRIL5NbamOf
-	 cpGPQFWaT8cVz5HpCBZSUATpuD8G9N5/j35o4w7svMS7RQkt9br6qDZfQWzbAMAh3l
-	 3hExxQju7ui1N/SZcjKA+N5XOLxTVvACLq3zwCpW7EAaWrZSVHXuuZaTyIThmM8H65
-	 rwBX97QmOJV+5c0MHjmDBDqb0xJCGiJsrvNk1OZXPEcCsZf0lMoVJBgvnV5smkref2
-	 LrnG44EhDG7DeM+qfJrzEknFSFnd4q1FDb1m3coOgj9kFs99opXhMRVoFS5qAjypM3
-	 6Uk6lKoYLh0pw==
-Date: Fri, 1 Mar 2024 10:06:31 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Disha Goel <disgoel@linux.ibm.com>
-Cc: fstests@vger.kernel.org, ojaswin@linux.ibm.com, ritesh.list@gmail.com
-Subject: Re: [PATCH v4] xfstest: add detection for ext4.h presence in
- configure.ac
-Message-ID: <20240301180631.GX6188@frogsfrogsfrogs>
-References: <20240301081540.30236-1-disgoel@linux.ibm.com>
+	dkim=pass (2048-bit key) header.d=manguebit.com header.i=@manguebit.com header.b="e34oTyxS"
+Message-ID: <a6806fcca760e734f272596cafc2390f@manguebit.com>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manguebit.com;
+	s=dkim; t=1709337544;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zEyMTCFAs1SAtQhp69C4mqxLGhIQmOhVu8yX2dqx08w=;
+	b=e34oTyxSeSwdOxCSVZlNeKVqsNK37tDLXfoiHZgL01UCDYXiKPRqwTqfJLA6I6xcBnxcap
+	cpsJxAPN+3elV00/xPETMxNdye4pnFQvHVxmkNOgb8s7zQXdxYdUHYGSyqp69KUneYauzE
+	WXCKNStlwStctYXpxWJE9GAh7vLZN6wuZy3i/4YpUNRySk0KvJKyV/SK1q/VdQyjUOnJEd
+	TB6IZtNDZ48a4bx7Shck8D6HZqxLQsEBOF99CVE6pUKWrKVriqCtd9j9tkGx+z023/OMp7
+	YFs9DKuiyz4N4EFyV0LXEzPVOmHk0+RsQ+nd8SjvRk27/Q8VC+AL6tpMzMHfow==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=manguebit.com;
+	s=dkim; t=1709337544; h=from:from:sender:reply-to:subject:subject:date:date:
+	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
+	 content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=zEyMTCFAs1SAtQhp69C4mqxLGhIQmOhVu8yX2dqx08w=;
+	b=Tn9/jmag78+KmofTDsIgrAXw1vG7qqHIOJ0SDwWX3pcpY/HZf8HXqMkQDxbDhuG0h35GZZ
+	binYKr13F/qdlsIX+7fUo3qvS65f+qadfMvlGcASzDbS/f9n8H7mgc1G9aa3+1OtuPBooS
+	/5t7Ara9CW4bDe2J/UJBWe52aEaOSmihlqH/Hy5oC9MTKF2Uhc2wyAFK2ZM2+EdA2ufAbG
+	6lYtAWEZlg+lHjkpyYOenBpEeleOWQQMIFdEEFZoHSPDAO1eqewqvDaPUsqnXnxOnvMD2r
+	boka9+X575SbSPA3m5qp11wL4l2GxzGsxAo3zMpAv9FqEedms0WN7WJemItu0w==
+ARC-Authentication-Results: i=1;
+	ORIGINATING;
+	auth=pass smtp.mailfrom=pc@manguebit.com
+ARC-Seal: i=1; s=dkim; d=manguebit.com; t=1709337544; a=rsa-sha256;
+	cv=none;
+	b=GlnKQwA9XwFvGaPOONT/gkPLnx2Z0nVKdu/DIAMcBYaLe23Z0dgx71g53k1GEox18InTiN
+	1e7w1bNRhgJQ7H7dsPB8cc2vsiXi1Iglc7ZB3RKc0cwVl6xZ8YVHU5DKnyzA+uZj+cqFUh
+	jZCXjIZR19qvFGsMdkjn0e7ReTtE7CTqiZG4m2GBGUz/6CSKCqS0Gi8Isqo0uIDfb/97I0
+	+9KB+9z1HLeXWIzXaAwh7mILirRyMgY2Irae5Wt9BAWOkuLeLmzbQjHTtY+H5B+wD9htfH
+	a9pIuj3tdq6Rd5gsepykaJhRPh1l/MSkfTwkSS8jPqHruJN9EbP8MYtdaax2Og==
+From: Paulo Alcantara <pc@manguebit.com>
+To: Alexander Aring <aahringo@redhat.com>, Steve French <smfrench@gmail.com>
+Cc: Zorro Lang <zlang@kernel.org>, Zorro Lang <zlang@redhat.com>,
+ fstests@vger.kernel.org, gfs2@lists.linux.dev, jlayton@kernel.org,
+ linux-cifs@vger.kernel.org
+Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
+In-Reply-To: <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
+References: <20230925201827.1703857-1-aahringo@redhat.com>
+ <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
+ <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
+ <a5eb6c3a2de1b959117d49c436b81904@manguebit.com>
+ <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
+Date: Fri, 01 Mar 2024 20:59:01 -0300
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240301081540.30236-1-disgoel@linux.ibm.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Mar 01, 2024 at 01:45:40PM +0530, Disha Goel wrote:
-> In some distributions, __u64 is already defined in system header files,
-> causing compilation errors when building xfstest.
-> 
->         # make
->             [CC]    ext4_resize
->         ext4_resize.c:17:28: error: conflicting types for '__u64'
->          typedef unsigned long long __u64;
->                                     ^~~~~
->         In file included from /usr/include/asm/types.h:26:0,
->                          from /usr/include/linux/types.h:5,
->                          from /usr/include/linux/mount.h:4,
->                          from /usr/include/sys/mount.h:32,
->                          from ext4_resize.c:15:
->         /usr/include/asm-generic/int-l64.h:30:23: note: previous declaration of '__u64' was here
->          typedef unsigned long __u64;
->                        ^~~~~
-> 
-> To address this issue, configure.ac now checks for the presence and
-> compilability of <linux/ext4.h>. If found and compilable, the macro
-> HAVE_LINUX_EXT4_H is defined. The commit also updates src/ext4_resize.c
-> to conditionally include <linux/ext4.h> based on the presence of the
-> header, ensuring compatibility with systems where ext4.h is either
-> present or not. Also include <linux/types.h> which gets __u64
-> definition on systems where ext4.h is not present. This change
-> enhances the configure process and improves code consistency.
-> 
-> The changes were tested on various distributions on Power
-> architecture, by successfully compiling xfstest. Additionally,
-> verified the compatibility by running ext4/033 and ext4/056
-> tests, both of which use ext4_resize and observed successful
-> test execution.
-> 
->         # make
-> 	checking linux/ext4.h usability... yes
->         checking linux/ext4.h presence... yes
->         checking for linux/ext4.h... yes
->             [CC]    detached_mounts_propagation
->             [CC]    ext4_resize
->             [CC]    t_readdir_3
-> 
->         # make
->         checking linux/ext4.h usability... no
->         checking linux/ext4.h presence... no
->         checking for linux/ext4.h... no
->             [CC]    detached_mounts_propagation
->             [CC]    ext4_resize
->             [CC]    t_snapshot_deleted_subvolume
-> 
-> Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+Alexander Aring <aahringo@redhat.com> writes:
 
-Looks great, thank you for getting this done!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> Hi,
+>
+> On Fri, Mar 1, 2024 at 11:25=E2=80=AFAM Paulo Alcantara <pc@manguebit.com=
+> wrote:
+>>
+>> Hi Zorro,
+>>
+>> The problem is that cifs.ko is returning -EACCES from fcntl(2) called
+>> in do_test_equal_file_lock() but it is expecting -EAGAIN to be
+>> returned, so it hangs in wait4(2):
+>>
+>> ...
+>> [pid 14846] fcntl(3, F_SETLK, {l_type=3DF_WRLCK, l_whence=3DSEEK_SET, l_=
+start=3D0, l_len=3D1}) =3D -1 EACCES (Permission denied)
+>> [pid 14846] wait4(-1,
+>>
+>> The man page says:
+>>
+>>       F_SETLK (struct flock *)
+>>               Acquire a lock (when l_type is F_RDLCK or F_WRLCK) or rele=
+ase  a
+>>               lock  (when  l_type  is  F_UNLCK)  on the bytes specified =
+by the
+>>               l_whence, l_start, and l_len fields of lock.  If  a  confl=
+icting
+>>               lock  is  held by another process, this call returns -1 an=
+d sets
+>>               errno to EACCES or EAGAIN.  (The error  returned  in  this=
+  case
+>>               differs across implementations, so POSIX requires a portab=
+le ap=E2=80=90
+>>               plication to check for both errors.)
+>>
+>> so fcntl_lock_corner_tests should also handle -EACCES.
+>>
+>
+> yes, that is a bug in the test but in my opinion there is still an
+> issue. The mentioned fcntl(F_SETLK) above is just a sanity check to
+> print out if something is not correct and it will print out that
+> something is not correct and fails.
 
---D
+Yes, I agree it might be a cifs.ko issue.  However, it's still important
+making sure that the test exits gracefully and then report an error
+rather than hanging.
 
-> ---
-> 
-> Changelog:
-> v3 -> v4
-> Addressed review comment from Darrick by incorporating autoconf
-> best practices by only using AC_CHECK_HEADERS which is by default
-> going to define header file, to align with autoconf documentation.
-> 
-> v2 -> v3
-> Addressed below review comments from Darrick.
-> Replaced the explicit AC_COMPILE_IFELSE block with a simplified
-> check using AC_CHECK_HEADERS for <linux/ext4.h>.
-> Added unconditional inclusion of <linux/types.h> regardless of
-> the presence of <linux/ext4.h> in ext4_resize.c file.
-> 
-> v1 -> v2
-> Drop usage of uint64_t to match the definition in the kernel uapi
-> headers. Use <linux/ext4.h> or <linux/types.h> based on the
-> presence of the header to get the __u64 definition as suggested
-> by Darrick.
-> 
-> Link to v1:
-> https://lore.kernel.org/fstests/20231221061231.44347-1-disgoel@linux.ibm.com/T/#u
-> 
-> Link to v2:
-> https://lore.kernel.org/fstests/20240103184208.80772-1-disgoel@linux.ibm.com/T/#u
-> 
-> Link to v3:
-> https://lore.kernel.org/fstests/20240109111105.28836-1-disgoel@linux.ibm.com/
-> 
->  configure.ac      | 1 +
->  src/ext4_resize.c | 5 ++++-
->  2 files changed, 5 insertions(+), 1 deletion(-)
-> 
-> diff --git a/configure.ac b/configure.ac
-> index b22fc52b..f45bc68e 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -33,6 +33,7 @@ AC_CHECK_HEADERS([	assert.h		\
->  			btrfs/ioctl.h		\
->  			cifs/ioctl.h		\
->  			sys/mman.h		\
-> +			linux/ext4.h		\
->  ])
->  
->  AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
-> diff --git a/src/ext4_resize.c b/src/ext4_resize.c
-> index 78b66432..31779225 100644
-> --- a/src/ext4_resize.c
-> +++ b/src/ext4_resize.c
-> @@ -13,8 +13,11 @@
->  #include <string.h>
->  #include <sys/ioctl.h>
->  #include <sys/mount.h>
-> +#include <linux/types.h>
->  
-> -typedef unsigned long long __u64;
-> +#ifdef HAVE_LINUX_EXT4_H
-> +#include <linux/ext4.h>
-> +#endif
->  
->  #ifndef EXT4_IOC_RESIZE_FS
->  #define EXT4_IOC_RESIZE_FS		_IOW('f', 16, __u64)
-> -- 
-> 2.39.1
-> 
-> 
+> The problem is that wait() below, the child processes are not
+> returning and are in a blocking state which should not be the case.
+>
+> What the test is doing is the following:
+>
+> parent:
+>
+> 1. lock(A) # should be successful to acquire
+
+Client successfully acquires it.
+
+> child:
+> thread0:
+> 2. lock(A) # should block
+> thread1:
+> 3. lock(A) # should block
+
+OK - both threads are blocked.
+
+> parent:
+>
+> 5. sleep(3) #wait until child are in blocking state of lock(A)
+
+OK.
+
+> 5. unlock(A) # both threads of the child should unlock and exit
+
+At this point, both threads are woken up and one of them acquires the
+lock and returns.  The other thread gets blocked again because it finds
+a conflicting lock that was taken from the other thread.  The child then
+never exits because it is waiting in pthread_join().
+
+> 6. sleep 3 # wait for pending unlock op (not really sure if it's necessar=
+y)
+> ...
+> 7. trylock(A) # mentioned sanity check
+
+Client returns -EACCES because one of the child threads acquired the
+lock.
+
+> The unlock(A) should unblock the child threads, it is important to
+> mention that this test does a lock corner test and the lock(A) in both
+> threads ends in a ->lock() call with a "struct file_lock" that has
+> mostly the same fields. We had issues with that in gfs2 and a lookup
+> function to find the right request with an async complete handler of
+> the lock operation.
+
+Alex, thanks for the explanation!  As we've talked, there might be a
+missing check of fl_owner or some sort of protocol limitation while
+checking for lock conflicts.
+
+Steve, any thoughts on this?
