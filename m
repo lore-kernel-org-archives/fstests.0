@@ -1,125 +1,237 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E71479FE
-	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 04:56:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3B5523A0
+	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 07:03:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709355362; cv=none; b=aZaEz+49sq/bLe7xtNh4o4gHctcrRAzwWt/gcdaPrAnYr+eafsaHVa/pbOx5+3h8k/vWzL4xMkjz3MCwNv2YuSPnXdl/9gvAA+iZrpVOj9eaphszxiAuqUJ6/JRAp4H5pB310XQWcRR0SD1RbV3JwJNaAutFFxDYNr4/kBqWJDs=
+	t=1709363003; cv=none; b=B2UNsHMpNnahWQwg7WcHiWLSzk8OyVl2FXOVfWI5Y0u1nmh8wwdZ7G5Cl82bs4raYaqyYl1U0fgTWg4AKeQSZA/GDrYRCkAu/rxU0eEHBAKBOnrbhM8WDKaqE7BIXsxVI2HAdWvUOnHTWpeUVc93DHGPhxAOJQ0S+dUy0Z+4Oyo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709355362; c=relaxed/simple;
-	bh=ELKAZn2jZUtNyzdQvQKmYWmloxvvGBV1ci2VitltL+c=;
+	s=arc-20240116; t=1709363003; c=relaxed/simple;
+	bh=Oe8LCqQk6Jl5vQmSQQGx4uSLWfw29owThSDN4hwrknw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CtFre+6d0sHDAhefd4EaVKYDG2Dymsc08GT5qCu3rn4fU5ATVMOAPFcWfRpyFVtuUDRgUjlYQrNNxdWZibqhrxWd+C2jiocksCtGFI2qeQvpAkHgstx0/ewuBYQLrN8ffW5tAEGIjsa92O3AcneEgu8MVyoXYjsdmExe3PJFrkM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=D46aT29J; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ILtME/w0sTLU2sYx4BPGwNeEu4QJ2lcD92hyqrrihLUsKRl8+U/080luLS5zBHKoSMa5ieDelWnG77UifWlzzO+WO+SwSJMwo0bPn1q6xlk7rZJy7yxFXYehNwwfS/swni6LpgYdSGstfPYSCltZim0BUDBObtIVTM0myfFz/bQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hVViXooH; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="D46aT29J"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hVViXooH"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709355359;
+	s=mimecast20190719; t=1709363000;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=3vEEF94P6LHoJobRm9XM8bCTELFJaK1bASos2j2n+m8=;
-	b=D46aT29Jqi4GLSyBBj1Z+D8zFXncwai7tIKIm6bXb8J6iuVDXCIjK8WejrK5kGSNL5SL3X
-	IxRGpTofw3fmgy2Mmee8X0Og09FDmXurxWygKZ0fA1e1XTkR4dqoLu7tDnqXu1A7UspYnO
-	zWjsRqKphufppoiSAfMHecSNuiY0Yk0=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=sLZNvbOpD8vnvAhMOsSvxCiLNlhv5ugl0GHIOirJo7w=;
+	b=hVViXooHWTsu944OkT7zny5YKu6mAi3778D5an8qo9u2UcULyylaEBRAJB/iUTu94aewcc
+	Tcn6bY3ItJ5iP77PkKMZB0029dMB+lN5iY2xuHad3Xh+JHSlQiE1ytn8fBn1XJguI9RL1M
+	+xGnqo5Ye0HitTplLRwpR0f/E29YXd8=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-662-LAtrohQFMnmAeTiHrGt__A-1; Fri, 01 Mar 2024 23:55:57 -0500
-X-MC-Unique: LAtrohQFMnmAeTiHrGt__A-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6e5b5e8e39bso844498b3a.3
-        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 20:55:57 -0800 (PST)
+ us-mta-563-JMXoAZthObqfU5BeSpi7Hg-1; Sat, 02 Mar 2024 02:03:18 -0500
+X-MC-Unique: JMXoAZthObqfU5BeSpi7Hg-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-5cec090b2bdso2315592a12.0
+        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 23:03:18 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709355356; x=1709960156;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3vEEF94P6LHoJobRm9XM8bCTELFJaK1bASos2j2n+m8=;
-        b=w6fWqtaN15Po7k6S0Srb0IrmhqgYB0kZmmaDpPN0+p9wSWqHiWFIOGQd0FGWBVWoKN
-         Xq16s9WjG8uC3CGfKWWMc77vNNIBdugBjRxzeIXOUtTSI7ZH5stb45UMjtEi2eYU0Qfk
-         M45PgBlLJ32Ef37wLjQEp3RZkckKvw9jRxi63IqWVYwjjE6H345lDPNfjZOzut9w8N/k
-         Gf9FC71McxOm9hixZvTIIeRGfgGHFlM9yNcvMpg+OHk3SN4ChjO3xAtZjJ0Wkt3fAFo5
-         7GhhGNq2q6rRXtZaAJKtCKgxXo+go7Nz9F0KujKSoiSBcNqUZtyWBFAFKQ4neqypSSxN
-         zRhg==
-X-Forwarded-Encrypted: i=1; AJvYcCVx4f13E5Bx5qExIOYAp+x/tuYVUOo3k/NQ257bw9et3t8MX4tlF/UmeJQCE3mO2FDfx3x81qWhdeg6GnbL6fc4DTWJ0wzgSw==
-X-Gm-Message-State: AOJu0YwNLFycH0Ud2EVGRF7KxBi1GiCw2jpABbJrYOwrLyhcmklfZYdb
-	MY80bmtxtxgCzlT2x6kWVJ4wVWhi428/G97jcrtp7yHt2ELF+89SO4xZTygCXeEMSh8fyPfSfWL
-	uodyQkfFnpWIUi2trUIpLTfZy90e95eS8lJZkR2tEh+HumZCECyassc0=
-X-Received: by 2002:a05:6a00:2315:b0:6e4:fa4b:b6e0 with SMTP id h21-20020a056a00231500b006e4fa4bb6e0mr4754017pfh.15.1709355356560;
-        Fri, 01 Mar 2024 20:55:56 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEX+/CUQCoWwE5bwh+2jYPNb5NWU9Xp5nCSNDz0WoaWiXH6v2Ujc2DvTNLtNXWyPA+zspIsRQ==
-X-Received: by 2002:a05:6a00:2315:b0:6e4:fa4b:b6e0 with SMTP id h21-20020a056a00231500b006e4fa4bb6e0mr4754005pfh.15.1709355356118;
-        Fri, 01 Mar 2024 20:55:56 -0800 (PST)
+        d=1e100.net; s=20230601; t=1709362997; x=1709967797;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=sLZNvbOpD8vnvAhMOsSvxCiLNlhv5ugl0GHIOirJo7w=;
+        b=MkdgkESzo6WttVKnEB3d02Ck3HHLf8lCdktC7UlZqBWQcZbB2A722t6L6qiT3qAqyu
+         xWRIKRx+celjAfvaj+pTgEoK8L9rf72hrYAEFhULv+ALoeiUvkdEmudFI0kTBVz2zz8r
+         Vkda94WC0ihRXxtdecL2UY1MGa71cqR6sgEJIucdbgEzxGSb/oYR2oF5QdnVBqM4wkMH
+         Y4DggJypQDJxxbAboT+IUnm2viB43ItdYm7W0LOSDyeWJMXYZQ/K/zBjc8+ptmAbpK1U
+         3i1vqciiGYMZ9i5m0GvXs4JIW1PewWKtwrfl7QxY3iw4pR+TPRXOOGqeBCrZgzydoV6H
+         0cxw==
+X-Forwarded-Encrypted: i=1; AJvYcCVYsTMiK74eY61hEEzW11tTXdSD7RKtjc9ySuCvUiCs547CvuRkdQnuW/82OGqBsMgJpcVvE4zjhYf8NSInu8Doo+2dIh3Gcw==
+X-Gm-Message-State: AOJu0YzHI/3LyzTjMU0tx1jyUoFzDcYHZPq05c8tMbGwNAwxA+G7wkTC
+	L9snE6QGSGyg30wNQrqat4z20c589vRVXUS/J/ELVyrAcT13BXH7gG5pnpVHKwP2bpL9LX34b8V
+	9xX7nrkEOFH66erIhqz6vXBqACHxvB4Gpjs4m6MKS7iJ8GPiBeyNnk9yrxaDojsjIdQ==
+X-Received: by 2002:a05:6a20:5483:b0:1a0:9117:5892 with SMTP id i3-20020a056a20548300b001a091175892mr4608222pzk.15.1709362997464;
+        Fri, 01 Mar 2024 23:03:17 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEosXbcldllceXlJufOqOXih0rmRhxQ8ndh1/suLKPTqpBH1Dv3IV87x/FLE+eV4CKXDKweew==
+X-Received: by 2002:a05:6a20:5483:b0:1a0:9117:5892 with SMTP id i3-20020a056a20548300b001a091175892mr4608202pzk.15.1709362997118;
+        Fri, 01 Mar 2024 23:03:17 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id fh8-20020a056a00390800b006e55530067bsm3747721pfb.167.2024.03.01.20.55.54
+        by smtp.gmail.com with ESMTPSA id y9-20020a62f249000000b006e535bf8da4sm3894283pfl.57.2024.03.01.23.03.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Mar 2024 20:55:55 -0800 (PST)
-Date: Sat, 2 Mar 2024 12:55:52 +0800
+        Fri, 01 Mar 2024 23:03:16 -0800 (PST)
+Date: Sat, 2 Mar 2024 15:03:13 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/8] xfs/122: update test to pick up rtword/suminfo
- ondisk unions
-Message-ID: <20240302045552.cq4dmvvyrkfm2fmv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
- <170899915304.896550.17104868811908659798.stgit@frogsfrogsfrogs>
- <Zd33sVBc4GSA5y1I@infradead.org>
- <20240228012704.GU6188@frogsfrogsfrogs>
- <Zd9TsVxjRTXu8sa5@infradead.org>
- <20240229174831.GB1927156@frogsfrogsfrogs>
- <ZeDeD9v9m8C0PsvG@infradead.org>
- <20240301131848.krj2cdt4u6ss74gz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240301175020.GI1927156@frogsfrogsfrogs>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: Su Yue <glass.su@suse.com>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, l@damenly.org
+Subject: Re: [PATCH] btrfs/172,206: call _log_writes_cleanup in _cleanup
+Message-ID: <20240302070313.5tc5ylqpv6dyjgmf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240215140236.29171-1-l@damenly.org>
+ <20240301134914.dgcv4vh2jbx2egfp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAL3q7H53QTzMVdJwEJBOyoB3fBem-2zi3FH411JugRDkq9Bqvg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20240301175020.GI1927156@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL3q7H53QTzMVdJwEJBOyoB3fBem-2zi3FH411JugRDkq9Bqvg@mail.gmail.com>
 
-On Fri, Mar 01, 2024 at 09:50:20AM -0800, Darrick J. Wong wrote:
-> On Fri, Mar 01, 2024 at 09:18:48PM +0800, Zorro Lang wrote:
-> > On Thu, Feb 29, 2024 at 11:42:07AM -0800, Christoph Hellwig wrote:
-> > > On Thu, Feb 29, 2024 at 09:48:31AM -0800, Darrick J. Wong wrote:
-> > > > It turns out that xfs/122 also captures ioctl structure sizes, and those
-> > > > are /not/ captured by xfs_ondisk.h.  I think we should add those before
-> > > > we kill xfs/122.
-> > > 
-> > > Sure, I can look into that.
-> > 
-> > Hi Darrick,
-> > 
-> > Do you still want to have this patch?
-> > 
-> > Half of this patchset got RVB. As it's a random fix patchset, we can choose
-> > merging those reviewed patches at first. Or you'd like to have them together
-> > in next next release?
+On Fri, Mar 01, 2024 at 02:55:26PM +0000, Filipe Manana wrote:
+> On Fri, Mar 1, 2024 at 1:49 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Thu, Feb 15, 2024 at 10:02:36PM +0800, Su Yue wrote:
+> > > From: Su Yue <glass.su@suse.com>
+> > >
+> > > Because block group tree requires require no-holes feature,
+> > > _log_writes_mkfs "-O ^no-holes" fails when "-O block-group-tree" is
+> > > given in MKFS_OPTION.
+> > > Without explicit _log_writes_cleanup, the two tests fail with
+> > > logwrites-test device left. And all next tests will fail due to
+> > > SCRATCH DEVICE EBUSY.
+> > >
+> > > Fix it by overriding _cleanup to call _log_writes_cleanup.
+> > >
+> > > Signed-off-by: Su Yue <glass.su@suse.com>
+> > > ---
+> > >  tests/btrfs/172 | 6 ++++++
+> > >  tests/btrfs/206 | 6 ++++++
+> > >  2 files changed, 12 insertions(+)
+> > >
+> > > diff --git a/tests/btrfs/172 b/tests/btrfs/172
+> > > index f5acc6982cd7..fceff56c9d37 100755
+> > > --- a/tests/btrfs/172
+> > > +++ b/tests/btrfs/172
+> > > @@ -13,6 +13,12 @@
+> > >  . ./common/preamble
+> > >  _begin_fstest auto quick log replay recoveryloop
+> > >
+> > > +# Override the default cleanup function.
+> > > +_cleanup()
+> > > +{
+> > > +     _log_writes_cleanup &> /dev/null
+> >
+> > This _cleanup will override the default one, so better to copy the
+> > default cleanup in this function,
+> >
+> >   cd /
+> >   rm -r -f $tmp.*
 > 
-> I was about to resend the second to last patch.  If you decide to remove
-> xfs/122 then I'll drop this one.
+> Zorro,
+> 
+> You had already replied to v2 of this patch with exactly the same comments:
+> 
+> https://lore.kernel.org/fstests/20240225162212.qcidpyb2bhdburl6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
 
-xfs/122 is a xfs specific test case, it's more important for xfs list than me.
-As it doesn't break the fstests testing, I respect the decision from xfs folks,
-about keeping or removing it :)
+Hi Filipe,
+
+Oh, sorry for this duplicated review, I tried to scan the email list to
+make sure I didn't miss something.
+
+> 
+> It's trivial to do those changes.
+> Do you expect Su to send yet another version just for that, or could
+> you amend the patch?
+
+I expect to get a simple response from the author, for his patch.
+E.g.:
+1) "Yes, agree, could you help to change that when you merge it?"
+2) "No, I think it doesn't make sense"
+3) "Sure, I'll make a bit change in next version"
+4) "Oh, that reminds me, I should cleanup more, I think I can change more about that"
+...
+
+Is that hard?
+
+If the author doesn't have any opinions, just asks for the amending from me,
+I'll do that if there's not risk. Or I suppose the author always hope to change
+his code by himself, maybe not follow the review points 100%.
+
+> 
+> Can you please be more clear in future replies about that, i.e. if you
+> expect the author to send a new version or if you'll amend the patch
+> for trivial changes?
+
+You think it's trivial, due to you think you don't need more changes about
+that. But I'm not sure before you say that. You can check the list, I say
+"I'll help to change that when I merge it", but just when I'm sure it's clear
+enough. You shouldn't use your measure to think my standard.
+
+I didn't say I'll amend that means my review point is a reference, to check
+if you have more ideas.
+We just got a big regression in a _cleanup function which does:
+  cd /
+  rm -r -f $tmp.*
+  specific_xxxx_cleanup
+
+Then that specific_xxxx_cleanup() remove all things in "/".
+
+If it's
+  specific_xxxx_cleanup
+  cd /
+  rm -r -f $tmp.*
+
+things might be different or not.
+
+I'm not saying that change must makes differences. But the cleanup things
+(e.g. theorder of the steps) might worth a bit evaluating, not just changed
+by myself without any response. And a reply from the author to the review
+points of his patch is not hard. Even just say "yes, please help that",
+that means you reviewed and agreed my review points at least.
+
+I'm not anyone else. Each one has his distinctive style. I don't know what's
+wrong with that way to deal with patches, to make you such unsatisfied. It is
+difficult to cater to all tastes.
 
 Thanks,
 Zorro
 
 > 
-> --D
+> Speaking for myself, I very often get confused with your replies, and
+> I feel that some patches often get stalled for that reason.
+> Usually with Eryu or Dave that didn't happen, the course of action was clear.
 > 
+> Thanks.
+> 
+> >
+> > You can refer to btrfs/196 or generic/482 etc.
+> >
+> > > +}
+> > > +
+> > >  # Import common functions.
+> > >  . ./common/filter
+> > >  . ./common/dmlogwrites
+> > > diff --git a/tests/btrfs/206 b/tests/btrfs/206
+> > > index f6571649076f..e05adf75b67e 100755
+> > > --- a/tests/btrfs/206
+> > > +++ b/tests/btrfs/206
+> > > @@ -14,6 +14,12 @@
+> > >  . ./common/preamble
+> > >  _begin_fstest auto quick log replay recoveryloop punch prealloc
+> > >
+> > > +# Override the default cleanup function.
+> > > +_cleanup()
+> > > +{
+> > > +     _log_writes_cleanup &> /dev/null
+> >
+> >
+> > Same as above.
+> >
 > > Thanks,
 > > Zorro
-> > 
-> > > 
-> > > 
-> > 
-> > 
+> >
+> > > +}
+> > > +
+> > >  # Import common functions.
+> > >  . ./common/filter
+> > >  . ./common/dmlogwrites
+> > > --
+> > > 2.43.0
+> > >
+> > >
+> >
+> >
 > 
 
