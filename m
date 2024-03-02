@@ -1,177 +1,125 @@
-Received: from mx.manguebit.com (mx.manguebit.com [167.235.159.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 143C85EE9F;
-	Fri,  1 Mar 2024 23:59:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=167.235.159.17
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709337548; cv=pass; b=GOo9+ca/+vy7bpFU1cyoz5ZOrpBoLq14WUi+iYm6B+0l58Y/emVVl39EddV8/azVUy2HIcL2D8JKbPLV+6zYfwJkx4aibIjyUYCS9BtRgUWQr9s2xCtvDHDsNqk0iuLenVgjQzgg/HJBpMU6g3ZJ3CWGFajYCb9dvHtEEfF8aQc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709337548; c=relaxed/simple;
-	bh=b7iGs5UorpFBfMmXzHrE0vl1I1RNOESfi7LLrC2VNzw=;
-	h=Message-ID:From:To:Cc:Subject:In-Reply-To:References:Date:
-	 MIME-Version:Content-Type; b=nbjVwtztCIuiLaT+CL+eUJxILvwKdzhDnLS6xSQrUDWTMQcjFnl7dUbXZRiq4Ooi6sTBI+y5EVc7l5vpftS7hfoGqGbWPrN64SwCuqRPgiDSDBn+42Mtes874YXOaXiQ25LUZIDKXGuV1LBoNtvwuFmd/SFc4T6iErdxa7ESbRM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.com; spf=pass smtp.mailfrom=manguebit.com; dkim=pass (2048-bit key) header.d=manguebit.com header.i=@manguebit.com header.b=e34oTyxS; arc=pass smtp.client-ip=167.235.159.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manguebit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manguebit.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E71479FE
+	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 04:56:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1709355362; cv=none; b=aZaEz+49sq/bLe7xtNh4o4gHctcrRAzwWt/gcdaPrAnYr+eafsaHVa/pbOx5+3h8k/vWzL4xMkjz3MCwNv2YuSPnXdl/9gvAA+iZrpVOj9eaphszxiAuqUJ6/JRAp4H5pB310XQWcRR0SD1RbV3JwJNaAutFFxDYNr4/kBqWJDs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1709355362; c=relaxed/simple;
+	bh=ELKAZn2jZUtNyzdQvQKmYWmloxvvGBV1ci2VitltL+c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CtFre+6d0sHDAhefd4EaVKYDG2Dymsc08GT5qCu3rn4fU5ATVMOAPFcWfRpyFVtuUDRgUjlYQrNNxdWZibqhrxWd+C2jiocksCtGFI2qeQvpAkHgstx0/ewuBYQLrN8ffW5tAEGIjsa92O3AcneEgu8MVyoXYjsdmExe3PJFrkM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=D46aT29J; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manguebit.com header.i=@manguebit.com header.b="e34oTyxS"
-Message-ID: <a6806fcca760e734f272596cafc2390f@manguebit.com>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manguebit.com;
-	s=dkim; t=1709337544;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="D46aT29J"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1709355359;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=zEyMTCFAs1SAtQhp69C4mqxLGhIQmOhVu8yX2dqx08w=;
-	b=e34oTyxSeSwdOxCSVZlNeKVqsNK37tDLXfoiHZgL01UCDYXiKPRqwTqfJLA6I6xcBnxcap
-	cpsJxAPN+3elV00/xPETMxNdye4pnFQvHVxmkNOgb8s7zQXdxYdUHYGSyqp69KUneYauzE
-	WXCKNStlwStctYXpxWJE9GAh7vLZN6wuZy3i/4YpUNRySk0KvJKyV/SK1q/VdQyjUOnJEd
-	TB6IZtNDZ48a4bx7Shck8D6HZqxLQsEBOF99CVE6pUKWrKVriqCtd9j9tkGx+z023/OMp7
-	YFs9DKuiyz4N4EFyV0LXEzPVOmHk0+RsQ+nd8SjvRk27/Q8VC+AL6tpMzMHfow==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=manguebit.com;
-	s=dkim; t=1709337544; h=from:from:sender:reply-to:subject:subject:date:date:
-	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-	 content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=zEyMTCFAs1SAtQhp69C4mqxLGhIQmOhVu8yX2dqx08w=;
-	b=Tn9/jmag78+KmofTDsIgrAXw1vG7qqHIOJ0SDwWX3pcpY/HZf8HXqMkQDxbDhuG0h35GZZ
-	binYKr13F/qdlsIX+7fUo3qvS65f+qadfMvlGcASzDbS/f9n8H7mgc1G9aa3+1OtuPBooS
-	/5t7Ara9CW4bDe2J/UJBWe52aEaOSmihlqH/Hy5oC9MTKF2Uhc2wyAFK2ZM2+EdA2ufAbG
-	6lYtAWEZlg+lHjkpyYOenBpEeleOWQQMIFdEEFZoHSPDAO1eqewqvDaPUsqnXnxOnvMD2r
-	boka9+X575SbSPA3m5qp11wL4l2GxzGsxAo3zMpAv9FqEedms0WN7WJemItu0w==
-ARC-Authentication-Results: i=1;
-	ORIGINATING;
-	auth=pass smtp.mailfrom=pc@manguebit.com
-ARC-Seal: i=1; s=dkim; d=manguebit.com; t=1709337544; a=rsa-sha256;
-	cv=none;
-	b=GlnKQwA9XwFvGaPOONT/gkPLnx2Z0nVKdu/DIAMcBYaLe23Z0dgx71g53k1GEox18InTiN
-	1e7w1bNRhgJQ7H7dsPB8cc2vsiXi1Iglc7ZB3RKc0cwVl6xZ8YVHU5DKnyzA+uZj+cqFUh
-	jZCXjIZR19qvFGsMdkjn0e7ReTtE7CTqiZG4m2GBGUz/6CSKCqS0Gi8Isqo0uIDfb/97I0
-	+9KB+9z1HLeXWIzXaAwh7mILirRyMgY2Irae5Wt9BAWOkuLeLmzbQjHTtY+H5B+wD9htfH
-	a9pIuj3tdq6Rd5gsepykaJhRPh1l/MSkfTwkSS8jPqHruJN9EbP8MYtdaax2Og==
-From: Paulo Alcantara <pc@manguebit.com>
-To: Alexander Aring <aahringo@redhat.com>, Steve French <smfrench@gmail.com>
-Cc: Zorro Lang <zlang@kernel.org>, Zorro Lang <zlang@redhat.com>,
- fstests@vger.kernel.org, gfs2@lists.linux.dev, jlayton@kernel.org,
- linux-cifs@vger.kernel.org
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-In-Reply-To: <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
-References: <20230925201827.1703857-1-aahringo@redhat.com>
- <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
- <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
- <a5eb6c3a2de1b959117d49c436b81904@manguebit.com>
- <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
-Date: Fri, 01 Mar 2024 20:59:01 -0300
+	bh=3vEEF94P6LHoJobRm9XM8bCTELFJaK1bASos2j2n+m8=;
+	b=D46aT29Jqi4GLSyBBj1Z+D8zFXncwai7tIKIm6bXb8J6iuVDXCIjK8WejrK5kGSNL5SL3X
+	IxRGpTofw3fmgy2Mmee8X0Og09FDmXurxWygKZ0fA1e1XTkR4dqoLu7tDnqXu1A7UspYnO
+	zWjsRqKphufppoiSAfMHecSNuiY0Yk0=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-662-LAtrohQFMnmAeTiHrGt__A-1; Fri, 01 Mar 2024 23:55:57 -0500
+X-MC-Unique: LAtrohQFMnmAeTiHrGt__A-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-6e5b5e8e39bso844498b3a.3
+        for <fstests@vger.kernel.org>; Fri, 01 Mar 2024 20:55:57 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709355356; x=1709960156;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3vEEF94P6LHoJobRm9XM8bCTELFJaK1bASos2j2n+m8=;
+        b=w6fWqtaN15Po7k6S0Srb0IrmhqgYB0kZmmaDpPN0+p9wSWqHiWFIOGQd0FGWBVWoKN
+         Xq16s9WjG8uC3CGfKWWMc77vNNIBdugBjRxzeIXOUtTSI7ZH5stb45UMjtEi2eYU0Qfk
+         M45PgBlLJ32Ef37wLjQEp3RZkckKvw9jRxi63IqWVYwjjE6H345lDPNfjZOzut9w8N/k
+         Gf9FC71McxOm9hixZvTIIeRGfgGHFlM9yNcvMpg+OHk3SN4ChjO3xAtZjJ0Wkt3fAFo5
+         7GhhGNq2q6rRXtZaAJKtCKgxXo+go7Nz9F0KujKSoiSBcNqUZtyWBFAFKQ4neqypSSxN
+         zRhg==
+X-Forwarded-Encrypted: i=1; AJvYcCVx4f13E5Bx5qExIOYAp+x/tuYVUOo3k/NQ257bw9et3t8MX4tlF/UmeJQCE3mO2FDfx3x81qWhdeg6GnbL6fc4DTWJ0wzgSw==
+X-Gm-Message-State: AOJu0YwNLFycH0Ud2EVGRF7KxBi1GiCw2jpABbJrYOwrLyhcmklfZYdb
+	MY80bmtxtxgCzlT2x6kWVJ4wVWhi428/G97jcrtp7yHt2ELF+89SO4xZTygCXeEMSh8fyPfSfWL
+	uodyQkfFnpWIUi2trUIpLTfZy90e95eS8lJZkR2tEh+HumZCECyassc0=
+X-Received: by 2002:a05:6a00:2315:b0:6e4:fa4b:b6e0 with SMTP id h21-20020a056a00231500b006e4fa4bb6e0mr4754017pfh.15.1709355356560;
+        Fri, 01 Mar 2024 20:55:56 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEX+/CUQCoWwE5bwh+2jYPNb5NWU9Xp5nCSNDz0WoaWiXH6v2Ujc2DvTNLtNXWyPA+zspIsRQ==
+X-Received: by 2002:a05:6a00:2315:b0:6e4:fa4b:b6e0 with SMTP id h21-20020a056a00231500b006e4fa4bb6e0mr4754005pfh.15.1709355356118;
+        Fri, 01 Mar 2024 20:55:56 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id fh8-20020a056a00390800b006e55530067bsm3747721pfb.167.2024.03.01.20.55.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Mar 2024 20:55:55 -0800 (PST)
+Date: Sat, 2 Mar 2024 12:55:52 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 6/8] xfs/122: update test to pick up rtword/suminfo
+ ondisk unions
+Message-ID: <20240302045552.cq4dmvvyrkfm2fmv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
+ <170899915304.896550.17104868811908659798.stgit@frogsfrogsfrogs>
+ <Zd33sVBc4GSA5y1I@infradead.org>
+ <20240228012704.GU6188@frogsfrogsfrogs>
+ <Zd9TsVxjRTXu8sa5@infradead.org>
+ <20240229174831.GB1927156@frogsfrogsfrogs>
+ <ZeDeD9v9m8C0PsvG@infradead.org>
+ <20240301131848.krj2cdt4u6ss74gz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240301175020.GI1927156@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240301175020.GI1927156@frogsfrogsfrogs>
 
-Alexander Aring <aahringo@redhat.com> writes:
+On Fri, Mar 01, 2024 at 09:50:20AM -0800, Darrick J. Wong wrote:
+> On Fri, Mar 01, 2024 at 09:18:48PM +0800, Zorro Lang wrote:
+> > On Thu, Feb 29, 2024 at 11:42:07AM -0800, Christoph Hellwig wrote:
+> > > On Thu, Feb 29, 2024 at 09:48:31AM -0800, Darrick J. Wong wrote:
+> > > > It turns out that xfs/122 also captures ioctl structure sizes, and those
+> > > > are /not/ captured by xfs_ondisk.h.  I think we should add those before
+> > > > we kill xfs/122.
+> > > 
+> > > Sure, I can look into that.
+> > 
+> > Hi Darrick,
+> > 
+> > Do you still want to have this patch?
+> > 
+> > Half of this patchset got RVB. As it's a random fix patchset, we can choose
+> > merging those reviewed patches at first. Or you'd like to have them together
+> > in next next release?
+> 
+> I was about to resend the second to last patch.  If you decide to remove
+> xfs/122 then I'll drop this one.
 
-> Hi,
->
-> On Fri, Mar 1, 2024 at 11:25=E2=80=AFAM Paulo Alcantara <pc@manguebit.com=
-> wrote:
->>
->> Hi Zorro,
->>
->> The problem is that cifs.ko is returning -EACCES from fcntl(2) called
->> in do_test_equal_file_lock() but it is expecting -EAGAIN to be
->> returned, so it hangs in wait4(2):
->>
->> ...
->> [pid 14846] fcntl(3, F_SETLK, {l_type=3DF_WRLCK, l_whence=3DSEEK_SET, l_=
-start=3D0, l_len=3D1}) =3D -1 EACCES (Permission denied)
->> [pid 14846] wait4(-1,
->>
->> The man page says:
->>
->>       F_SETLK (struct flock *)
->>               Acquire a lock (when l_type is F_RDLCK or F_WRLCK) or rele=
-ase  a
->>               lock  (when  l_type  is  F_UNLCK)  on the bytes specified =
-by the
->>               l_whence, l_start, and l_len fields of lock.  If  a  confl=
-icting
->>               lock  is  held by another process, this call returns -1 an=
-d sets
->>               errno to EACCES or EAGAIN.  (The error  returned  in  this=
-  case
->>               differs across implementations, so POSIX requires a portab=
-le ap=E2=80=90
->>               plication to check for both errors.)
->>
->> so fcntl_lock_corner_tests should also handle -EACCES.
->>
->
-> yes, that is a bug in the test but in my opinion there is still an
-> issue. The mentioned fcntl(F_SETLK) above is just a sanity check to
-> print out if something is not correct and it will print out that
-> something is not correct and fails.
+xfs/122 is a xfs specific test case, it's more important for xfs list than me.
+As it doesn't break the fstests testing, I respect the decision from xfs folks,
+about keeping or removing it :)
 
-Yes, I agree it might be a cifs.ko issue.  However, it's still important
-making sure that the test exits gracefully and then report an error
-rather than hanging.
+Thanks,
+Zorro
 
-> The problem is that wait() below, the child processes are not
-> returning and are in a blocking state which should not be the case.
->
-> What the test is doing is the following:
->
-> parent:
->
-> 1. lock(A) # should be successful to acquire
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > 
+> > 
+> > 
+> 
 
-Client successfully acquires it.
-
-> child:
-> thread0:
-> 2. lock(A) # should block
-> thread1:
-> 3. lock(A) # should block
-
-OK - both threads are blocked.
-
-> parent:
->
-> 5. sleep(3) #wait until child are in blocking state of lock(A)
-
-OK.
-
-> 5. unlock(A) # both threads of the child should unlock and exit
-
-At this point, both threads are woken up and one of them acquires the
-lock and returns.  The other thread gets blocked again because it finds
-a conflicting lock that was taken from the other thread.  The child then
-never exits because it is waiting in pthread_join().
-
-> 6. sleep 3 # wait for pending unlock op (not really sure if it's necessar=
-y)
-> ...
-> 7. trylock(A) # mentioned sanity check
-
-Client returns -EACCES because one of the child threads acquired the
-lock.
-
-> The unlock(A) should unblock the child threads, it is important to
-> mention that this test does a lock corner test and the lock(A) in both
-> threads ends in a ->lock() call with a "struct file_lock" that has
-> mostly the same fields. We had issues with that in gfs2 and a lookup
-> function to find the right request with an async complete handler of
-> the lock operation.
-
-Alex, thanks for the explanation!  As we've talked, there might be a
-missing check of fl_owner or some sort of protocol limitation while
-checking for lock conflicts.
-
-Steve, any thoughts on this?
