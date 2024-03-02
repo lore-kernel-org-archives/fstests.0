@@ -1,73 +1,71 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B57C215EA2
-	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 11:44:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08B9F15EA2
+	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 12:04:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709379886; cv=none; b=KRGX/u8TuZD578wuzAGgQWDVbpsntWy713iK3Kxkj/Qo4QMbO/F3WFIZbTh4o1AzCbBjZ+KyRHh5Gr6W+ujI1DiV/t2gZrbQ/YBEc4GBgiyPctw2bYa6PvU9wX7trHQIGwmRQ+Oi3leYcpFIRVVbbfXZ2lG1Sg0zsx8126Yzhqc=
+	t=1709381097; cv=none; b=FR1O33WsY1BQMKQBSI+lGcyeIpKsF1Zs5woMQjWX3YRaCs1wSwFJa0NSA0X3CMH6n3MfI41JweFPYTxEkwFyOma//4OQbnazMbJMPS9X8BMLhQZ3pJJmQBNUoUz6WNav3Eo2hI6RB0GYJLNA//gx+pO3h0uPiaMgUcfBAmST7Vc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709379886; c=relaxed/simple;
-	bh=kISp3bhCOxt0BYZt0fgu021JmRNiNY8HUqznGoI7dls=;
+	s=arc-20240116; t=1709381097; c=relaxed/simple;
+	bh=gPUKPRjyr5YXTXbr77SysTatb9hnunEvFtTgC+c+TOM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=InT/VxR8jK90HO0HPzQmWEEGXo5jpSlddEE1MORVZWsn5XLmpg2YAl4xMGPZI5yJJi4ri5G6TUWOPsmR7H23bRqxMBNynfz5z9nX5erPMgSMSavonTfAVa8dMX88MzLBxPxoBSoP+wXP2RM4IVhRPQWy2WoCMlPDP/cpEaN6k3c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CAvKCgpg; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Lq2nnvwvy01Q+2yDHpdhgm08lzefHzi60NmnQoT2yJpUNKU6o3SrKjxpIHstsn/jJiRpygCegWSm1AgCBWb0eD+efza7GWhH1rO/r3BO9giccIvKYONLGAB7OUwTX1NVvkM5KzG6oF+XvYqZYMi5D69xRK+EMiqYwW6O8asAd80=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=FQIP/heO; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CAvKCgpg"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="FQIP/heO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709379883;
+	s=mimecast20190719; t=1709381093;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=waoeQMshhPIHP+ysFHgEEpI9xz6MLHl2AVo370Y4TEs=;
-	b=CAvKCgpgHJRtKRIU8jzKyaKAPl/0EUFZAuUCZIuUvK5GGguVIFiIiXaKImZcqQn/CphBHU
-	xqjvzwN6BZTMfN4AUR4cmk6mwKx0rz/z+ktEdkxEgaVwVxzoNxGIjcg7dFw8H3M9fjWZ0/
-	nhP9KPOJa3sDv0BHOf36Ag2KuoBL/Dg=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=OeCuK7shauYTVK7z/EIc+QlIF7Xp4Ex/ANVnzxXVIVs=;
+	b=FQIP/heOIemrC46nuHJmgDQXPQdAzjEJF1mSzSzRlCtQM92kdBP7KGZwAFgd/8ZEAgisY5
+	wjgwVBoH/2HR9UqsU9UH2lYcEgyahO/6FuR/hG0oMl4WhEWX6+Zk7wK8xQ91qYN1TZrADS
+	ogF51hxdcmrCXZwMkfbvowO6jznuHR8=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-679-P8BIyX3dNJm92mXrY_Wkvw-1; Sat, 02 Mar 2024 06:44:42 -0500
-X-MC-Unique: P8BIyX3dNJm92mXrY_Wkvw-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1dbc6ff68ffso34702595ad.1
-        for <fstests@vger.kernel.org>; Sat, 02 Mar 2024 03:44:41 -0800 (PST)
+ us-mta-695-ooLVK01jPM-3BJZMoh8HHQ-1; Sat, 02 Mar 2024 07:04:52 -0500
+X-MC-Unique: ooLVK01jPM-3BJZMoh8HHQ-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1dc157e4778so30655975ad.0
+        for <fstests@vger.kernel.org>; Sat, 02 Mar 2024 04:04:51 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709379881; x=1709984681;
+        d=1e100.net; s=20230601; t=1709381091; x=1709985891;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=waoeQMshhPIHP+ysFHgEEpI9xz6MLHl2AVo370Y4TEs=;
-        b=UQ076LZFX637CgjkncPPwrnQUsGOEmuy5GqYqXrDiz0MKXqQLGVisvoHISpw9Pe7qB
-         QqUaDAXv1FuZ6mgBAgH4HG8CrzJexLukjYZDDZLOQT4/G4uJbTJBYN6UmnMLNG1F82Ds
-         LyO9brL46ImYBLX9rmYXkNdHkCOlYxTAu5MTOPJx9UiQ53v4iM1W5QnGshNMXPIjA4GA
-         ejgXajzZ3TSVUW7UktYSaH/bo9FtDIyjX3zaKzdVs0K7JZFmwKvNWfUIINMSQ3Zr1p9I
-         X15Xwtrr1iz29ltvRWBnYoHCTyto8O45edvFRb/pUXY1v2q8uSMv19vUtBVs6FS2XkMO
-         N7Jg==
-X-Forwarded-Encrypted: i=1; AJvYcCUallmVowHH+96r30zptk55FtXjYRXlLYrm3fkuiRSxZ4ndEsdfY3DtwVJ/mVlt/SsAu30XFDM3jNpSedzxfA/5qjnuPa7T5A==
-X-Gm-Message-State: AOJu0YySpXscepDXL/NBFP8sQlLi8uia4hx/c1VBEvjDnj6U6wNyE33w
-	M5V2Rdvd6UEFbRxW4GVexf6ZKyFK7g22Tg8+J2zaqLnndYr/JG4dF6+BhZhurCrDxSaE0gbS0N+
-	BpCxPshRygEmvjvr2K8t8+lmASXV4PWsInjV/EOR8zQvRtiRibSLvsl4=
-X-Received: by 2002:a17:902:e843:b0:1dc:faab:3452 with SMTP id t3-20020a170902e84300b001dcfaab3452mr1879662plg.28.1709379881009;
-        Sat, 02 Mar 2024 03:44:41 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEUnvhW4EKTQeqfQmf34Bk3BSz0xt/dD6vf2DGxsnWnbr6pkJuov5yH5lvHz7vkqxYTKZAKmQ==
-X-Received: by 2002:a17:902:e843:b0:1dc:faab:3452 with SMTP id t3-20020a170902e84300b001dcfaab3452mr1879646plg.28.1709379880622;
-        Sat, 02 Mar 2024 03:44:40 -0800 (PST)
+        bh=OeCuK7shauYTVK7z/EIc+QlIF7Xp4Ex/ANVnzxXVIVs=;
+        b=hcFOlEroWbWGgvZCPr0R3UPcN2sNAoB0BEjXqQ+qbErzT/n18Z6RfO0sTiIyuYVNAH
+         w6ynWWxtzPBLESkirGPZGonj9GlUwnOTyh+6L0DBxRsCYEZC9p0jIEXtV5vMJpDt9p+a
+         U3mkhL7apesQ8p45/a0JIVBoQ9J/8NP245+q5OGWXNJsJHsMt525DXDGl0uVIvTGDiFR
+         am32CL8dtGgv9JFazdzRRQiBQxLs4l/Sjz3WEebDorBcQFf4X/mEu+ZLHFzsCFRiV/G8
+         FyCjxeb97tug3q12WymSEqYtJequjf3zoAcOzWYmOZFLFvX2MznEGNtzNW/q/yFL3Axk
+         Xo9w==
+X-Forwarded-Encrypted: i=1; AJvYcCVNF0P4N+i7VPfjK8c3n7dIwANhD2MJ4cHfbHRrCMePONQt09/33wGba0OH1UwiA/e1CkNIxwBISLL4EoE55X5jWyD4IykJSg==
+X-Gm-Message-State: AOJu0YzdR4rqe+4QXCQvnRsC+pnzFMsd6Zj1ivzIN8+WGhiCtDYS1ObO
+	W+Dw4tKnmWeDZjEHLrlU1hEM+nC2r9yAWvSOjuh0JN1kGE5zOJzxqAqln/OC7+OoJ/TuqlFT//4
+	bcZ4MrMWsNzRCcqQC76X4SGthXheHwlopPeGbB6GCBJuCPBt2ymBvMY4=
+X-Received: by 2002:a17:903:2286:b0:1dc:3ab7:cc80 with SMTP id b6-20020a170903228600b001dc3ab7cc80mr4971547plh.48.1709381090970;
+        Sat, 02 Mar 2024 04:04:50 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGAa8iIzAx3bCotIJDvsnfiExtckKCzlDrPCrg1je3s/KpLsrWP37EwY64YH/PMj4xxIJ7xPQ==
+X-Received: by 2002:a17:903:2286:b0:1dc:3ab7:cc80 with SMTP id b6-20020a170903228600b001dc3ab7cc80mr4971531plh.48.1709381090567;
+        Sat, 02 Mar 2024 04:04:50 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id kw13-20020a170902f90d00b001dc90ac1cecsm5048923plb.284.2024.03.02.03.44.39
+        by smtp.gmail.com with ESMTPSA id w16-20020a1709026f1000b001dc90b62393sm5175328plk.216.2024.03.02.04.04.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 02 Mar 2024 03:44:40 -0800 (PST)
-Date: Sat, 2 Mar 2024 19:44:36 +0800
+        Sat, 02 Mar 2024 04:04:50 -0800 (PST)
+Date: Sat, 2 Mar 2024 20:04:47 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH v1.1 1/8] generic/604: try to make race occur reliably
-Message-ID: <20240302114436.wb6uw3w7yrqnozf4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v1.1 7/8] xfs/43[4-6]: make module reloading optional
+Message-ID: <20240302120447.5tbxra7d5gvvvyzk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
- <170899915233.896550.17140520436176386775.stgit@frogsfrogsfrogs>
- <20240227044021.GT616564@frogsfrogsfrogs>
- <Zd33JY8qn7urdMjB@infradead.org>
+ <170899915319.896550.14222768162023866668.stgit@frogsfrogsfrogs>
+ <20240301175124.GJ1927156@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,51 +74,159 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Zd33JY8qn7urdMjB@infradead.org>
+In-Reply-To: <20240301175124.GJ1927156@frogsfrogsfrogs>
 
-On Tue, Feb 27, 2024 at 06:52:21AM -0800, Christoph Hellwig wrote:
-> On Mon, Feb 26, 2024 at 08:40:21PM -0800, Darrick J. Wong wrote:
-> > This test will occasionaly fail like so:
-> > 
-> >   --- /tmp/fstests/tests/generic/604.out	2024-02-03 12:08:52.349924277 -0800
-> >   +++ /var/tmp/fstests/generic/604.out.bad	2024-02-05 04:35:55.020000000 -0800
-> >   @@ -1,2 +1,5 @@
-> >    QA output created by 604
-> >   -Silence is golden
-> >   +mount: /opt: /dev/sda4 already mounted on /opt.
-> >   +       dmesg(1) may have more information after failed mount system call.
-> >   +mount -o usrquota,grpquota,prjquota, /dev/sda4 /opt failed
-> >   +(see /var/tmp/fstests/generic/604.full for details)
-> > 
-> > As far as I can tell, the cause of this seems to be _scratch_mount
-> > getting forked and exec'd before the backgrounded umount process has a
-> > chance to enter the kernel.  When this occurs, the mount() system call
-> > will return -EBUSY because this isn't an attempt to make a bind mount.
-> > Slow things down slightly by stalling the mount by 10ms.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> > v1.1: indent commit message, fix busted comment
-> > ---
-> >  tests/generic/604 |    8 +++++---
-> >  1 file changed, 5 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/tests/generic/604 b/tests/generic/604
-> > index cc6a4b214f..00da56dd70 100755
-> > --- a/tests/generic/604
-> > +++ b/tests/generic/604
-> > @@ -24,10 +24,12 @@ _scratch_mount
-> >  for i in $(seq 0 500); do
-> >  	$XFS_IO_PROG -f -c "pwrite 0 4K" $SCRATCH_MNT/$i >/dev/null
-> >  done
-> > -# For overlayfs, avoid unmouting the base fs after _scratch_mount
-> > -# tries to mount the base fs
-> > +# For overlayfs, avoid unmouting the base fs after _scratch_mount tries to
+On Fri, Mar 01, 2024 at 09:51:24AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> s/unmouting/unmounting/ ?
-
-Sure, I've changed that when I merged it. Thanks for pointing out that.
-
+> These three tests examine two things -- first, can xfs CoW staging
+> extent recovery handle corruptions in the refcount btree gracefully; and
+> second, can we avoid leaking incore inodes and dquots.
 > 
+> The only cheap way to check the second condition is to rmmod and
+> modprobe the XFS module, which triggers leak detection when rmmod tears
+> down the caches.  Currently, the entire test is _notrun if module
+> reloading doesn't work.
+> 
+> Unfortunately, these tests never run for the majority of XFS developers
+> because their testbeds either compile the xfs kernel driver into vmlinux
+> statically or the rootfs is xfs so the module cannot be reloaded.  The
+> author's testbed boots from NFS and does not have this limitation.
+> 
+> Because we've had repeated instances of CoW recovery regressions not
+> being caught by testing until for-next hits my machine, let's make the
+> module reloading optional in all three tests to improve coverage.
+> 
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+> v1.1: address some review comments from maintainer
+
+This version looks good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> ---
+>  common/module |   33 ++++++++++++++++++++++++++++-----
+>  tests/xfs/434 |    3 +--
+>  tests/xfs/435 |    3 +--
+>  tests/xfs/436 |    3 +--
+>  4 files changed, 31 insertions(+), 11 deletions(-)
+> 
+> diff --git a/common/module b/common/module
+> index 6efab71d34..a8d5f492d3 100644
+> --- a/common/module
+> +++ b/common/module
+> @@ -48,12 +48,15 @@ _require_loadable_module()
+>  	modprobe "${module}" || _notrun "${module} load failed"
+>  }
+>  
+> -# Check that the module for FSTYP can be loaded.
+> -_require_loadable_fs_module()
+> +# Test if the module for FSTYP can be unloaded and reloaded.
+> +#
+> +# If not, returns 1 if $FSTYP is not a loadable module; 2 if the module could
+> +# not be unloaded; or 3 if loading the module fails.
+> +_test_loadable_fs_module()
+>  {
+>  	local module="$1"
+>  
+> -	modinfo "${module}" > /dev/null 2>&1 || _notrun "${module}: must be a module."
+> +	modinfo "${module}" > /dev/null 2>&1 || return 1
+>  
+>  	# Unload test fs, try to reload module, remount
+>  	local had_testfs=""
+> @@ -68,8 +71,28 @@ _require_loadable_fs_module()
+>  	modprobe "${module}" || load_ok=0
+>  	test -n "${had_scratchfs}" && _scratch_mount 2> /dev/null
+>  	test -n "${had_testfs}" && _test_mount 2> /dev/null
+> -	test -z "${unload_ok}" || _notrun "Require module ${module} to be unloadable"
+> -	test -z "${load_ok}" || _notrun "${module} load failed"
+> +	test -z "${unload_ok}" || return 2
+> +	test -z "${load_ok}" || return 3
+> +	return 0
+> +}
+> +
+> +_require_loadable_fs_module()
+> +{
+> +	local module="$1"
+> +
+> +	_test_loadable_fs_module "${module}"
+> +	ret=$?
+> +	case "$ret" in
+> +	1)
+> +		_notrun "${module}: must be a module."
+> +		;;
+> +	2)
+> +		_notrun "${module}: module could not be unloaded"
+> +		;;
+> +	3)
+> +		_notrun "${module}: module reload failed"
+> +		;;
+> +	esac
+>  }
+>  
+>  # Print the value of a filesystem module parameter
+> diff --git a/tests/xfs/434 b/tests/xfs/434
+> index 12d1a0c9da..ca80e12753 100755
+> --- a/tests/xfs/434
+> +++ b/tests/xfs/434
+> @@ -30,7 +30,6 @@ _begin_fstest auto quick clone fsr
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> -_require_loadable_fs_module "xfs"
+>  _require_quota
+>  _require_scratch_reflink
+>  _require_cp_reflink
+> @@ -77,7 +76,7 @@ _scratch_unmount 2> /dev/null
+>  rm -f ${RESULT_DIR}/require_scratch
+>  
+>  echo "See if we leak"
+> -_reload_fs_module "xfs"
+> +_test_loadable_fs_module "xfs"
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/435 b/tests/xfs/435
+> index 44135c7653..b52e9287df 100755
+> --- a/tests/xfs/435
+> +++ b/tests/xfs/435
+> @@ -24,7 +24,6 @@ _begin_fstest auto quick clone
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> -_require_loadable_fs_module "xfs"
+>  _require_quota
+>  _require_scratch_reflink
+>  _require_cp_reflink
+> @@ -55,7 +54,7 @@ _scratch_unmount 2> /dev/null
+>  rm -f ${RESULT_DIR}/require_scratch
+>  
+>  echo "See if we leak"
+> -_reload_fs_module "xfs"
+> +_test_loadable_fs_module "xfs"
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/xfs/436 b/tests/xfs/436
+> index d010362785..02bcd66900 100755
+> --- a/tests/xfs/436
+> +++ b/tests/xfs/436
+> @@ -27,7 +27,6 @@ _begin_fstest auto quick clone fsr
+>  
+>  # real QA test starts here
+>  _supported_fs xfs
+> -_require_loadable_fs_module "xfs"
+>  _require_scratch_reflink
+>  _require_cp_reflink
+>  _require_xfs_io_command falloc # fsr requires support for preallocation
+> @@ -72,7 +71,7 @@ _scratch_unmount 2> /dev/null
+>  rm -f ${RESULT_DIR}/require_scratch
+>  
+>  echo "See if we leak"
+> -_reload_fs_module "xfs"
+> +_test_loadable_fs_module "xfs"
+>  
+>  # success, all done
+>  status=0
 > 
 
