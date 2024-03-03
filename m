@@ -1,193 +1,161 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 214904C99
-	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 05:09:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 735391869;
+	Sun,  3 Mar 2024 06:53:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709442545; cv=none; b=LuqTuX8vV7oGHtZV6VAi0DdN3ZpZHAEHgF3Pa+GBlSEjB0i897aC8Eyd48bpc3k7uGrklOK3MUvQyIHAqcX0zSPiwsnlwn2KgwGNuUcrcgWADaC1bQB2Y3+4sWb/ALqHmUxzT1rFBFwFLYLPiz+mMMwr0s7Cdof1DiNU39N93hc=
+	t=1709448800; cv=none; b=URQJBvpLm0vBySp1Zg7zlqSpviAvZ76i0t87i09FdZEJGHtyhbSG8Na8XQF0rOTpfx4xyporlc3ry0zRnM3Obe2DGG7Zv6E0EN9le8Uma32mZzhcN6baR+eMl45lai71smugXVeNiXkzOsTBKr+oU/ggJ6HsqP/EjesK0cxFiVg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709442545; c=relaxed/simple;
-	bh=l8gGo5ufDURZHmdvzVjci3F2EHTlOcDdHG1mCj3W+XI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OqCISI8ouCh+H9O+3yppiNjX0xJAtUmEcpQu7cQPEKQz2XXzMQefgpAId0VJAU6uwGCpu6aiMP5MQM+GHnZQP6kSdAnQvvd4HqBp8bYn+xX5llaXbF0oHp/ukAE852qyQLsw+YyxiskcLIzVjdA5F9Kq6m+TdLyHbzEcdnsMqFE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GX3y8m9c; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1709448800; c=relaxed/simple;
+	bh=JZYlh57dA/FGjvp/vNYvOfBSnBWJgCn4AEfwDQmrdd8=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=lpTXzzRMorNkvpCpQx6i8QOKSTvrrC8Vp15RL90593jtWAXhN4Swt9w0zSvOXdubKHqFTKc724a0EYfMyzpEuiXVbIDmHq6+Tcsh6uyYpHIGKgimW/gz/U9TTdiA/0ZQolvGW/kBos2+hWkePCzVJllel2LFDCxwWXjpuLAfipc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XEXJaeNI; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=XEXJaeNI; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GX3y8m9c"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709442541;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JjpbPJcNRbSanMTpfhHKtMnGxhnRcTaRo2vwe3NOWtk=;
-	b=GX3y8m9c7DArfzRfTudoDwSWiDgOU0WQLxoVFHTXvexXz0YomhHqIDwZKfDheyRL40IgrL
-	TJIDxjTWWG3J7B2dGatsm/cJ7miIwEtSq5BmK9HSWtXHBUblmPlfIRsQgUuDRcN9wGMA+U
-	dEuKMxCjK3ZLKZj4V+x/nw1+FudVXXk=
-Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
- [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-407-pqJrsiJTMRK6nC4e0H34uw-1; Sun, 03 Mar 2024 00:08:59 -0500
-X-MC-Unique: pqJrsiJTMRK6nC4e0H34uw-1
-Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3c1b8b34512so3272149b6e.2
-        for <fstests@vger.kernel.org>; Sat, 02 Mar 2024 21:08:59 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709442539; x=1710047339;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=JjpbPJcNRbSanMTpfhHKtMnGxhnRcTaRo2vwe3NOWtk=;
-        b=bILKIozshh90QO8UWQ9a5MYF4BZntd1VdjMJ/AO1uXiDuqs7NZ0m1W+c/YByBx1mWs
-         dfafDF9YU7pMtcLwN7nMSGKGcDSbwPpgaHqYjhBecfVzH7ylw+QAoWxdoMVmXrPonRNf
-         a86ePuvu7NnM419zS+dkAcfXP1kzY8MPItiPYwEvlHf+dfngFZc+5r3jMj4lgDwkWB+Z
-         DBDsB1viKFyXJ92zepZhxm2euUwfHG4WHLkjdLHWBCQPcAQZJdUKpfaYJv0q17+XPa50
-         lnfkPXPDkW0oXhBUzxqHWKd5OSlXzRprMXuSKzk+c98BTDDanZ6KeWypGbXTcWW/fC6D
-         uSuQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWG24zD6eRBKApIfZwkXQOyi6GBcGU8MwNxkdR3loMWl7+mJlBvZUBPXpDku0ziRDQyNhu9AesC4qVjE+/4msKeGqQnMfo+VA==
-X-Gm-Message-State: AOJu0YzERIjewAOGz01DtsHBuy2mfKzRnkiGYCSXVrrf7pGNEK8EiFoY
-	UjxKaPYeKAxOG+CHdRkNLMEiGJEhojAW+lwvds1yrEOorayZQmOVCRHpBHUgoXu1wu1hswah8rH
-	Gfc3S/joqN17IH7Wu1g6pevVW0Yazup03FpSStptjkGKcW5rRV5zpqtg=
-X-Received: by 2002:a54:4388:0:b0:3c1:e835:3f8a with SMTP id u8-20020a544388000000b003c1e8353f8amr2050890oiv.39.1709442538709;
-        Sat, 02 Mar 2024 21:08:58 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHjv5iSXFkzoq34jTrZUzYGVoxQrDPBhk2ZX6DFNrWuKHpObbhXi7qJfeoIgV8G5L/hrfVcZA==
-X-Received: by 2002:a54:4388:0:b0:3c1:e835:3f8a with SMTP id u8-20020a544388000000b003c1e8353f8amr2050878oiv.39.1709442538325;
-        Sat, 02 Mar 2024 21:08:58 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id v8-20020a17090a458800b0029af67d4fd0sm5526321pjg.44.2024.03.02.21.08.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 02 Mar 2024 21:08:57 -0800 (PST)
-Date: Sun, 3 Mar 2024 13:08:53 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Paulo Alcantara <pc@manguebit.com>,
-	Alexander Aring <aahringo@redhat.com>
-Cc: Steve French <smfrench@gmail.com>, fstests@vger.kernel.org,
-	gfs2@lists.linux.dev, jlayton@kernel.org,
-	linux-cifs@vger.kernel.org
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-Message-ID: <20240303050853.f7wslqfkkgdfv37i@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230925201827.1703857-1-aahringo@redhat.com>
- <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
- <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
- <a5eb6c3a2de1b959117d49c436b81904@manguebit.com>
- <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
- <a6806fcca760e734f272596cafc2390f@manguebit.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XEXJaeNI";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="XEXJaeNI"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 534BD38386;
+	Sun,  3 Mar 2024 06:53:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1709448791; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=cE5ZtzSla9kbiTxnqEwsKKvmr5RV35bJfa7H3lUceI8=;
+	b=XEXJaeNIw3HBymcOeXiy62UNNi1mEYlLOg4Lhq284h3Ag/fJ+dP3BkM9I5IG17OBJb5m6B
+	+fQ8ngGojWHxpNvar300YtvxuTfGdD60O6DPgzWZd3iNPA9ificab3PXwPNN/lvv5Nu8pe
+	7TfPl+GygAGocDghyjGLJa5b34AjEg4=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1709448791; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=cE5ZtzSla9kbiTxnqEwsKKvmr5RV35bJfa7H3lUceI8=;
+	b=XEXJaeNIw3HBymcOeXiy62UNNi1mEYlLOg4Lhq284h3Ag/fJ+dP3BkM9I5IG17OBJb5m6B
+	+fQ8ngGojWHxpNvar300YtvxuTfGdD60O6DPgzWZd3iNPA9ificab3PXwPNN/lvv5Nu8pe
+	7TfPl+GygAGocDghyjGLJa5b34AjEg4=
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 12B25139D1;
+	Sun,  3 Mar 2024 06:53:09 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([10.150.64.162])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id llTIL1Ue5GVoegAAn2gu4w
+	(envelope-from <wqu@suse.com>); Sun, 03 Mar 2024 06:53:09 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/121: allow snapshot with invalid qgroup to return error
+Date: Sun,  3 Mar 2024 17:22:51 +1030
+Message-ID: <20240303065251.111868-1-wqu@suse.com>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <a6806fcca760e734f272596cafc2390f@manguebit.com>
+Authentication-Results: smtp-out1.suse.de;
+	none
+X-Spamd-Result: default: False [1.90 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 FROM_HAS_DN(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 TO_DN_NONE(0.00)[];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	 RCPT_COUNT_TWO(0.00)[2];
+	 MID_CONTAINS_FROM(1.00)[];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%]
+X-Spam-Level: *
+X-Spam-Score: 1.90
+X-Spam-Flag: NO
 
-On Fri, Mar 01, 2024 at 08:59:01PM -0300, Paulo Alcantara wrote:
-> Alexander Aring <aahringo@redhat.com> writes:
-> 
-> > Hi,
-> >
-> > On Fri, Mar 1, 2024 at 11:25 AM Paulo Alcantara <pc@manguebit.com> wrote:
-> >>
-> >> Hi Zorro,
-> >>
-> >> The problem is that cifs.ko is returning -EACCES from fcntl(2) called
-> >> in do_test_equal_file_lock() but it is expecting -EAGAIN to be
-> >> returned, so it hangs in wait4(2):
-> >>
-> >> ...
-> >> [pid 14846] fcntl(3, F_SETLK, {l_type=F_WRLCK, l_whence=SEEK_SET, l_start=0, l_len=1}) = -1 EACCES (Permission denied)
-> >> [pid 14846] wait4(-1,
-> >>
-> >> The man page says:
-> >>
-> >>       F_SETLK (struct flock *)
-> >>               Acquire a lock (when l_type is F_RDLCK or F_WRLCK) or release  a
-> >>               lock  (when  l_type  is  F_UNLCK)  on the bytes specified by the
-> >>               l_whence, l_start, and l_len fields of lock.  If  a  conflicting
-> >>               lock  is  held by another process, this call returns -1 and sets
-> >>               errno to EACCES or EAGAIN.  (The error  returned  in  this  case
-> >>               differs across implementations, so POSIX requires a portable ap‐
-> >>               plication to check for both errors.)
-> >>
-> >> so fcntl_lock_corner_tests should also handle -EACCES.
-> >>
-> >
-> > yes, that is a bug in the test but in my opinion there is still an
-> > issue. The mentioned fcntl(F_SETLK) above is just a sanity check to
-> > print out if something is not correct and it will print out that
-> > something is not correct and fails.
-> 
-> Yes, I agree it might be a cifs.ko issue.  However, it's still important
-> making sure that the test exits gracefully and then report an error
-> rather than hanging.
+[BUG]
+After incoming kernel commit "btrfs: qgroup: verify btrfs_qgroup_inherit
+parameter", test case btrfs/121 would fail like this:
 
-Thanks for all of you look into it!
+btrfs/121 1s ... [failed, exit status 1]- output mismatch (see /xfstests/results//btrfs/121.out.bad)
+    --- tests/btrfs/121.out	2022-05-11 09:55:30.739999997 +0800
+    +++ /xfstests/results//btrfs/121.out.bad	2024-03-03 13:33:38.076666665 +0800
+    @@ -1,2 +1,3 @@
+     QA output created by 121
+    -Silence is golden
+    +failed: '/usr/bin/btrfs subvolume snapshot -i 1/10 /mnt/scratch /mnt/scratch/snap1'
+    +(see /xfstests/results//btrfs/121.full for details)
+    ...
+    (Run 'diff -u /xfstests/tests/btrfs/121.out /xfstests/results//btrfs/121.out.bad'  to see the entire diff)
 
-If the C program can deal with issue (report error rather than hang),
-that would be good. Or how about give the fcntl testing process a (long enough)
-timeout number, to avoid it block the whole fstests test running, and report
-error if it exits unnormally.
+[CAUSE]
+The incoming kernel commit would do early qgroups validation before
+subvolume/snapshot creation, and reject invalid qgroups immediately.
 
-Thanks,
-Zorro
+Meanwhile that test case itself still assume the ioctl would go on
+without any error, thus the new behavior would break the test case.
 
-> 
-> > The problem is that wait() below, the child processes are not
-> > returning and are in a blocking state which should not be the case.
-> >
-> > What the test is doing is the following:
-> >
-> > parent:
-> >
-> > 1. lock(A) # should be successful to acquire
-> 
-> Client successfully acquires it.
-> 
-> > child:
-> > thread0:
-> > 2. lock(A) # should block
-> > thread1:
-> > 3. lock(A) # should block
-> 
-> OK - both threads are blocked.
-> 
-> > parent:
-> >
-> > 5. sleep(3) #wait until child are in blocking state of lock(A)
-> 
-> OK.
-> 
-> > 5. unlock(A) # both threads of the child should unlock and exit
-> 
-> At this point, both threads are woken up and one of them acquires the
-> lock and returns.  The other thread gets blocked again because it finds
-> a conflicting lock that was taken from the other thread.  The child then
-> never exits because it is waiting in pthread_join().
-> 
-> > 6. sleep 3 # wait for pending unlock op (not really sure if it's necessary)
-> > ...
-> > 7. trylock(A) # mentioned sanity check
-> 
-> Client returns -EACCES because one of the child threads acquired the
-> lock.
-> 
-> > The unlock(A) should unblock the child threads, it is important to
-> > mention that this test does a lock corner test and the lock(A) in both
-> > threads ends in a ->lock() call with a "struct file_lock" that has
-> > mostly the same fields. We had issues with that in gfs2 and a lookup
-> > function to find the right request with an async complete handler of
-> > the lock operation.
-> 
-> Alex, thanks for the explanation!  As we've talked, there might be a
-> missing check of fl_owner or some sort of protocol limitation while
-> checking for lock conflicts.
-> 
-> Steve, any thoughts on this?
-> 
+[FIX]
+Instead of relying on the snapshot creation ioctl return value, we just
+completely ignore the output of that snapshot creation.
+Then manually check if the fs is still read-write.
+
+For different kernels (3 cases), they would lead to the following
+results:
+
+- Older unpatched kernel
+  The filesystem would trigger a transaction abort (would be caught by
+  dmesg filter), and also fail the "touch" command.
+
+- Older but patched kernel
+  The filesystem continues to create the snapshot, while still keeps the
+  fs read-write.
+
+- Latest kernel with qgroup validation
+  The filesystem refuses to create the snapshot, while still keeps the
+  fs read-write.
+
+Both "older but patched" and "latest" kernels would still pass the test
+case, even with different behaviors.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/121 | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/tests/btrfs/121 b/tests/btrfs/121
+index f4d54962..15a54274 100755
+--- a/tests/btrfs/121
++++ b/tests/btrfs/121
+@@ -24,8 +24,14 @@ _require_scratch
+ _scratch_mkfs >/dev/null
+ _scratch_mount
+ _run_btrfs_util_prog quota enable $SCRATCH_MNT
+-# The qgroup '1/10' does not exist and should be silently ignored
+-_run_btrfs_util_prog subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1
++# The qgroup '1/10' does not exist. The kernel should either gives an error
++# (newer kernel with invalid qgroup detection) or ignore it (older kernel with
++# above fix).
++# Either way, we just ignore the output completely, and we will check if the fs
++# is still RW later.
++$BTRFS_UTIL_PROG subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1 &> /dev/null
++
++touch $SCRATCH_MNT/foobar
+ 
+ echo "Silence is golden"
+ 
+-- 
+2.42.0
 
