@@ -1,254 +1,193 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65FED883D
-	for <fstests@vger.kernel.org>; Sat,  2 Mar 2024 20:51:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 214904C99
+	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 05:09:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709412668; cv=none; b=HgzuuXvK1gUqmP6Gu4jU/JI2PtyYmWF/Y8IU8+gseIq2BKMODYlocBk8otE5ZPpI1m1SHuJN4z6jzmN2aXbtrIniOKLA0djLGvItVaFYZWEqoOFJcCWgIf4/WjR9d0xuekFyYtLeWxREPHJna7Dgl8EoKGaD6cwHwp5Tkq2aI7s=
+	t=1709442545; cv=none; b=LuqTuX8vV7oGHtZV6VAi0DdN3ZpZHAEHgF3Pa+GBlSEjB0i897aC8Eyd48bpc3k7uGrklOK3MUvQyIHAqcX0zSPiwsnlwn2KgwGNuUcrcgWADaC1bQB2Y3+4sWb/ALqHmUxzT1rFBFwFLYLPiz+mMMwr0s7Cdof1DiNU39N93hc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709412668; c=relaxed/simple;
-	bh=BVrw5LhkTYuopDPUL6smrZOomjBsxOCbR2f5PIrP4PA=;
+	s=arc-20240116; t=1709442545; c=relaxed/simple;
+	bh=l8gGo5ufDURZHmdvzVjci3F2EHTlOcDdHG1mCj3W+XI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pbfgN+ip28tdmwVSozFnlAFcEEZg51vcgN0vcXGED+9XCyQd+Sa0MMzB7Y9waEQSQJ+CtNogsx9YrAJ9kkbMsC6wYIPgJqKcn1txUiDelo23SzFGOtjArMo5mFnNVnBfbqf6GL46h/jFXA7V1nWttkDG7csh54DdxC2sRq8YA7o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=N8CU7PSC; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=OqCISI8ouCh+H9O+3yppiNjX0xJAtUmEcpQu7cQPEKQz2XXzMQefgpAId0VJAU6uwGCpu6aiMP5MQM+GHnZQP6kSdAnQvvd4HqBp8bYn+xX5llaXbF0oHp/ukAE852qyQLsw+YyxiskcLIzVjdA5F9Kq6m+TdLyHbzEcdnsMqFE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GX3y8m9c; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="N8CU7PSC"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GX3y8m9c"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709412665;
+	s=mimecast20190719; t=1709442541;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=NiyWFGpgIt47rDjjJWLUKS580snu9a6YNBj3glQK/HI=;
-	b=N8CU7PSCtgbWt1A/zuViruyQWDgIq4k3SuQhm/RCQWtUSFbmH9weO6tLKuMkzSfQpbHWp8
-	cuIMdI2pnUuEffegK0m5hOOPGnvFXPuim1FGnDAooKZcwgrOgM4+HcX+RVvHfL2BCblWHs
-	NscIMNOGz+zCqpjeV+LWMWUNZc5P/Nc=
-Received: from mail-oa1-f72.google.com (mail-oa1-f72.google.com
- [209.85.160.72]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=JjpbPJcNRbSanMTpfhHKtMnGxhnRcTaRo2vwe3NOWtk=;
+	b=GX3y8m9c7DArfzRfTudoDwSWiDgOU0WQLxoVFHTXvexXz0YomhHqIDwZKfDheyRL40IgrL
+	TJIDxjTWWG3J7B2dGatsm/cJ7miIwEtSq5BmK9HSWtXHBUblmPlfIRsQgUuDRcN9wGMA+U
+	dEuKMxCjK3ZLKZj4V+x/nw1+FudVXXk=
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
+ [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-465-DnwXoDZnNlaLNQifj-XFkw-1; Sat, 02 Mar 2024 15:51:04 -0500
-X-MC-Unique: DnwXoDZnNlaLNQifj-XFkw-1
-Received: by mail-oa1-f72.google.com with SMTP id 586e51a60fabf-21ea3c5425cso2667348fac.0
-        for <fstests@vger.kernel.org>; Sat, 02 Mar 2024 12:51:03 -0800 (PST)
+ us-mta-407-pqJrsiJTMRK6nC4e0H34uw-1; Sun, 03 Mar 2024 00:08:59 -0500
+X-MC-Unique: pqJrsiJTMRK6nC4e0H34uw-1
+Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3c1b8b34512so3272149b6e.2
+        for <fstests@vger.kernel.org>; Sat, 02 Mar 2024 21:08:59 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709412663; x=1710017463;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NiyWFGpgIt47rDjjJWLUKS580snu9a6YNBj3glQK/HI=;
-        b=unIubR3qIyr8NZ2LIC+wON7DX6hZNtlyXYTyynF3bRHOtoS9eg7d+wh68O6z6e3VqT
-         A1XsqQZhMRFgep9GpvEQP4rvpiISYCDo0r4FgF0h8ZLZffg0vFOxPSCJHlbp8wJlR93g
-         3+FdHYEySZmoobeM6illUz1QRbEea+OT/xCw7RRycAy/Qt7VKJoC+bQmv2gAtqkeL1dd
-         5wtgeHxikYUzQw2qzLvamkZvT4CfcQ2UhoaSFgM63C9AMe3vMBusn8Fra8g9gF5ZkHkg
-         yb2bKpyzy4kmyRAq8QKwt/gSIzvKbwi1RKuEd7Q+Hdq0L7aEQ0bmHVM13hHm1jzLD6BZ
-         o5ww==
-X-Forwarded-Encrypted: i=1; AJvYcCUiiqN/oTGhPKY+lt0XlQpceJ5TWTKhUDuXCL4O0BQkjf4dgu3S9KL5WzggvN77EHUrkCcP0QscjXzPhfe0IWOeTKRZkp6noQ==
-X-Gm-Message-State: AOJu0YwjGEzA+rjazOdZLFfslvT7j43YmMyE3vLNyw7DLEslQoWnU28y
-	uQUvpCU6iBGLe6hNSFpudVN26do5Zci8N7yx0pyzaAxWwaQSU5mJ5z7N90aWCawAK6aVbp83QQn
-	MloPyOGPpvcbGxjiA/s7V7SP0pIq6LoJCq4gs2d6UN90Zl3UWCs4XbMtJhSF2LxwecA==
-X-Received: by 2002:a05:6870:5708:b0:21e:3c57:18d4 with SMTP id k8-20020a056870570800b0021e3c5718d4mr5680425oap.19.1709412661666;
-        Sat, 02 Mar 2024 12:51:01 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHkv2uc4EZFgiv/aeHOSxLVWWmJ3ZKm06w2+fL+h6BsAZrTzzh5lymgtHj6VndwqSkGKD7cFA==
-X-Received: by 2002:a05:6870:5708:b0:21e:3c57:18d4 with SMTP id k8-20020a056870570800b0021e3c5718d4mr5680380oap.19.1709412660431;
-        Sat, 02 Mar 2024 12:51:00 -0800 (PST)
+        d=1e100.net; s=20230601; t=1709442539; x=1710047339;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=JjpbPJcNRbSanMTpfhHKtMnGxhnRcTaRo2vwe3NOWtk=;
+        b=bILKIozshh90QO8UWQ9a5MYF4BZntd1VdjMJ/AO1uXiDuqs7NZ0m1W+c/YByBx1mWs
+         dfafDF9YU7pMtcLwN7nMSGKGcDSbwPpgaHqYjhBecfVzH7ylw+QAoWxdoMVmXrPonRNf
+         a86ePuvu7NnM419zS+dkAcfXP1kzY8MPItiPYwEvlHf+dfngFZc+5r3jMj4lgDwkWB+Z
+         DBDsB1viKFyXJ92zepZhxm2euUwfHG4WHLkjdLHWBCQPcAQZJdUKpfaYJv0q17+XPa50
+         lnfkPXPDkW0oXhBUzxqHWKd5OSlXzRprMXuSKzk+c98BTDDanZ6KeWypGbXTcWW/fC6D
+         uSuQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWG24zD6eRBKApIfZwkXQOyi6GBcGU8MwNxkdR3loMWl7+mJlBvZUBPXpDku0ziRDQyNhu9AesC4qVjE+/4msKeGqQnMfo+VA==
+X-Gm-Message-State: AOJu0YzERIjewAOGz01DtsHBuy2mfKzRnkiGYCSXVrrf7pGNEK8EiFoY
+	UjxKaPYeKAxOG+CHdRkNLMEiGJEhojAW+lwvds1yrEOorayZQmOVCRHpBHUgoXu1wu1hswah8rH
+	Gfc3S/joqN17IH7Wu1g6pevVW0Yazup03FpSStptjkGKcW5rRV5zpqtg=
+X-Received: by 2002:a54:4388:0:b0:3c1:e835:3f8a with SMTP id u8-20020a544388000000b003c1e8353f8amr2050890oiv.39.1709442538709;
+        Sat, 02 Mar 2024 21:08:58 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHjv5iSXFkzoq34jTrZUzYGVoxQrDPBhk2ZX6DFNrWuKHpObbhXi7qJfeoIgV8G5L/hrfVcZA==
+X-Received: by 2002:a54:4388:0:b0:3c1:e835:3f8a with SMTP id u8-20020a544388000000b003c1e8353f8amr2050878oiv.39.1709442538325;
+        Sat, 02 Mar 2024 21:08:58 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w62-20020a636241000000b005e485fbd455sm4986934pgb.45.2024.03.02.12.50.58
+        by smtp.gmail.com with ESMTPSA id v8-20020a17090a458800b0029af67d4fd0sm5526321pjg.44.2024.03.02.21.08.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 02 Mar 2024 12:50:59 -0800 (PST)
-Date: Sun, 3 Mar 2024 04:50:56 +0800
+        Sat, 02 Mar 2024 21:08:57 -0800 (PST)
+Date: Sun, 3 Mar 2024 13:08:53 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v1.1 8/8] xfs: test for premature ENOSPC with large cow
- delalloc extents
-Message-ID: <20240302205056.saexqlexlmwpfy4e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
- <170899915333.896550.18395785595853879309.stgit@frogsfrogsfrogs>
- <20240301175202.GK1927156@frogsfrogsfrogs>
+To: Paulo Alcantara <pc@manguebit.com>,
+	Alexander Aring <aahringo@redhat.com>
+Cc: Steve French <smfrench@gmail.com>, fstests@vger.kernel.org,
+	gfs2@lists.linux.dev, jlayton@kernel.org,
+	linux-cifs@vger.kernel.org
+Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
+Message-ID: <20240303050853.f7wslqfkkgdfv37i@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230925201827.1703857-1-aahringo@redhat.com>
+ <20240209052631.wfbjveicfosubwns@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAH2r5msWwX7QdXrzmR3tapU85WMga9Y-waNOHm+hMWmWPUF=tQ@mail.gmail.com>
+ <20240209114310.c4ny2dptikr24wx5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240301103835.gylf2lzud2azgvx7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAK-6q+jZVfK2=Z6RCCU+K+TLYuHgC4ynqOBz3K-nhcypCoN3ww@mail.gmail.com>
+ <a5eb6c3a2de1b959117d49c436b81904@manguebit.com>
+ <CAK-6q+isU4cQN6OV_bLmoKwULsisAUpkAZA+c6SRgOCk8Z9T=g@mail.gmail.com>
+ <a6806fcca760e734f272596cafc2390f@manguebit.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20240301175202.GK1927156@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <a6806fcca760e734f272596cafc2390f@manguebit.com>
 
-On Fri, Mar 01, 2024 at 09:52:02AM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Fri, Mar 01, 2024 at 08:59:01PM -0300, Paulo Alcantara wrote:
+> Alexander Aring <aahringo@redhat.com> writes:
 > 
-> On a higly fragmented filesystem a Direct IO write can fail with -ENOSPC error
-> even though the filesystem has sufficient number of free blocks.
+> > Hi,
+> >
+> > On Fri, Mar 1, 2024 at 11:25 AM Paulo Alcantara <pc@manguebit.com> wrote:
+> >>
+> >> Hi Zorro,
+> >>
+> >> The problem is that cifs.ko is returning -EACCES from fcntl(2) called
+> >> in do_test_equal_file_lock() but it is expecting -EAGAIN to be
+> >> returned, so it hangs in wait4(2):
+> >>
+> >> ...
+> >> [pid 14846] fcntl(3, F_SETLK, {l_type=F_WRLCK, l_whence=SEEK_SET, l_start=0, l_len=1}) = -1 EACCES (Permission denied)
+> >> [pid 14846] wait4(-1,
+> >>
+> >> The man page says:
+> >>
+> >>       F_SETLK (struct flock *)
+> >>               Acquire a lock (when l_type is F_RDLCK or F_WRLCK) or release  a
+> >>               lock  (when  l_type  is  F_UNLCK)  on the bytes specified by the
+> >>               l_whence, l_start, and l_len fields of lock.  If  a  conflicting
+> >>               lock  is  held by another process, this call returns -1 and sets
+> >>               errno to EACCES or EAGAIN.  (The error  returned  in  this  case
+> >>               differs across implementations, so POSIX requires a portable ap‐
+> >>               plication to check for both errors.)
+> >>
+> >> so fcntl_lock_corner_tests should also handle -EACCES.
+> >>
+> >
+> > yes, that is a bug in the test but in my opinion there is still an
+> > issue. The mentioned fcntl(F_SETLK) above is just a sanity check to
+> > print out if something is not correct and it will print out that
+> > something is not correct and fails.
 > 
-> This occurs if the file offset range on which the write operation is being
-> performed has a delalloc extent in the cow fork and this delalloc extent
-> begins much before the Direct IO range.
-> 
-> In such a scenario, xfs_reflink_allocate_cow() invokes xfs_bmapi_write() to
-> allocate the blocks mapped by the delalloc extent. The extent thus allocated
-> may not cover the beginning of file offset range on which the Direct IO write
-> was issued. Hence xfs_reflink_allocate_cow() ends up returning -ENOSPC.
-> 
-> This test addresses this issue.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
-> v1.1: address some missing bits and remove extraneous code
-> ---
->  common/rc          |   14 ++++++++
->  tests/xfs/1923     |   86 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1923.out |    8 +++++
->  3 files changed, 108 insertions(+)
->  create mode 100755 tests/xfs/1923
->  create mode 100644 tests/xfs/1923.out
-> 
-> diff --git a/common/rc b/common/rc
-> index 30c44dddd9..d3a2a0718b 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1873,6 +1873,20 @@ _require_scratch_delalloc()
->  	_scratch_unmount
->  }
->  
-> +# Require test fs supports delay allocation.
-> +_require_test_delalloc()
-> +{
-> +	_require_command "$FILEFRAG_PROG" filefrag
-> +
-> +	rm -f $TEST_DIR/testy
-> +	$XFS_IO_PROG -f -c 'pwrite 0 64k' $TEST_DIR/testy &> /dev/null
-> +	$FILEFRAG_PROG -v $TEST_DIR/testy 2>&1 | grep -q delalloc
-> +	res=$?
-> +	rm -f $TEST_DIR/testy
-> +	test $res -eq 0 || \
-> +		_notrun "test requires delayed allocation buffered writes"
-> +}
-> +
->  # this test needs a test partition - check we're ok & mount it
->  #
->  _require_test()
-> diff --git a/tests/xfs/1923 b/tests/xfs/1923
-> new file mode 100755
-> index 0000000000..7068fda64c
-> --- /dev/null
-> +++ b/tests/xfs/1923
-> @@ -0,0 +1,86 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2022-2024 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 1923
-> +#
-> +# This is a regression test for "xfs: Fix false ENOSPC when performing direct
-> +# write on a delalloc extent in cow fork".  If there is a lot of free space but
-> +# it is very fragmented, it's possible that a very large delalloc reservation
-> +# could be created in the CoW fork by a buffered write.  If a directio write
-> +# tries to convert the delalloc reservation to a real extent, it's possible
-> +# that the allocation will succeed but fail to convert even the first block of
-> +# the directio write range.  In this case, XFS will return ENOSPC even though
-> +# all it needed to do was to keep converting until the allocator returns ENOSPC
-> +# or the first block of the direct write got some space.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick clone
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $file1 $file2 $fragmentedfile
-> +}
-> +
-> +# Import common functions.
-> +. ./common/reflink
-> +. ./common/inject
-> +
-> +# real QA test starts here
-> +_fixed_by_kernel_commit d62113303d69 \
-> +	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_require_test_program "punch-alternating"
-> +_require_test_reflink
-> +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
-> +_require_test_delalloc
-> +
-> +file1=$TEST_DIR/file1.$seq
-> +file2=$TEST_DIR/file2.$seq
-> +fragmentedfile=$TEST_DIR/fragmentedfile.$seq
-> +
-> +rm -f $file1 $file2 $fragmentedfile
-> +
-> +# COW operates on pages, so we must not perform operations in units smaller
-> +# than a page.
-> +blksz=$(_get_file_block_size $TEST_DIR)
-> +pagesz=$(_get_page_size)
-> +if (( $blksz < $pagesz )); then
-> +	blksz=$pagesz
-> +fi
-> +
-> +echo "Create source file"
-> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 256))" $file1 >> $seqres.full
-> +
-> +sync
-> +
-> +echo "Create Reflinked file"
-> +_cp_reflink $file1 $file2 >> $seqres.full
-> +
-> +echo "Set cowextsize"
-> +$XFS_IO_PROG -c "cowextsize $((blksz * 128))" -c stat $file1 >> $seqres.full
-> +
-> +echo "Fragment FS"
-> +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 512))" $fragmentedfile >> $seqres.full
-> +sync
-> +$here/src/punch-alternating $fragmentedfile
-> +
-> +echo "Allocate block sized extent from now onwards"
-> +_test_inject_error bmap_alloc_minlen_extent 1
-> +
-> +echo "Create big delalloc extent in CoW fork"
-> +$XFS_IO_PROG -c "pwrite 0 $blksz" $file1 >> $seqres.full
-> +
-> +sync
-> +
-> +$XFS_IO_PROG -c 'bmap -elpv' -c 'bmap -celpv' $file1 >> $seqres.full
+> Yes, I agree it might be a cifs.ko issue.  However, it's still important
+> making sure that the test exits gracefully and then report an error
+> rather than hanging.
 
-The "-c" option might get:
+Thanks for all of you look into it!
 
-  $ xfs_io -c "bmap -celpv" testfile 
-  xfs_io: xfsctl(XFS_IOC_GETBMAPX) iflags=0x28 ["testfile"]: Invalid argument
-
-It will break the golden image, can we redirect stderr to $seqres.full,
-as it's just for debug? If you agree, I can help to change that by adding
-"2>&1" at the end. Or you hope to deal with it by other method?
+If the C program can deal with issue (report error rather than hang),
+that would be good. Or how about give the fcntl testing process a (long enough)
+timeout number, to avoid it block the whole fstests test running, and report
+error if it exits unnormally.
 
 Thanks,
 Zorro
 
-
-> +
-> +echo "Direct I/O write at offset 3FSB"
-> +$XFS_IO_PROG -d -c "pwrite $((blksz * 3)) $((blksz * 2))" $file1 >> $seqres.full
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1923.out b/tests/xfs/1923.out
-> new file mode 100644
-> index 0000000000..a0553cf3ee
-> --- /dev/null
-> +++ b/tests/xfs/1923.out
-> @@ -0,0 +1,8 @@
-> +QA output created by 1923
-> +Create source file
-> +Create Reflinked file
-> +Set cowextsize
-> +Fragment FS
-> +Allocate block sized extent from now onwards
-> +Create big delalloc extent in CoW fork
-> +Direct I/O write at offset 3FSB
+> 
+> > The problem is that wait() below, the child processes are not
+> > returning and are in a blocking state which should not be the case.
+> >
+> > What the test is doing is the following:
+> >
+> > parent:
+> >
+> > 1. lock(A) # should be successful to acquire
+> 
+> Client successfully acquires it.
+> 
+> > child:
+> > thread0:
+> > 2. lock(A) # should block
+> > thread1:
+> > 3. lock(A) # should block
+> 
+> OK - both threads are blocked.
+> 
+> > parent:
+> >
+> > 5. sleep(3) #wait until child are in blocking state of lock(A)
+> 
+> OK.
+> 
+> > 5. unlock(A) # both threads of the child should unlock and exit
+> 
+> At this point, both threads are woken up and one of them acquires the
+> lock and returns.  The other thread gets blocked again because it finds
+> a conflicting lock that was taken from the other thread.  The child then
+> never exits because it is waiting in pthread_join().
+> 
+> > 6. sleep 3 # wait for pending unlock op (not really sure if it's necessary)
+> > ...
+> > 7. trylock(A) # mentioned sanity check
+> 
+> Client returns -EACCES because one of the child threads acquired the
+> lock.
+> 
+> > The unlock(A) should unblock the child threads, it is important to
+> > mention that this test does a lock corner test and the lock(A) in both
+> > threads ends in a ->lock() call with a "struct file_lock" that has
+> > mostly the same fields. We had issues with that in gfs2 and a lookup
+> > function to find the right request with an async complete handler of
+> > the lock operation.
+> 
+> Alex, thanks for the explanation!  As we've talked, there might be a
+> missing check of fl_owner or some sort of protocol limitation while
+> checking for lock conflicts.
+> 
+> Steve, any thoughts on this?
 > 
 
