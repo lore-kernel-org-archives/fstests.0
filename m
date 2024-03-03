@@ -1,69 +1,69 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 20DD1B66F
-	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 13:10:55 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61084CA73
+	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 13:28:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709471457; cv=none; b=jQxJY3Yr8kSPIlwssxcwr77PUL1mhCiBEi8fXB3mfoqogNPheBJ9sUKbVhU2HfMQb4urNKIpq2/QKOqUKkaCyi4P37ZbRL1DtmQAI4LY0YFEkxFmP3HdLf2oSv7bRXH6IWl7LAUW9MapXNITFaExiyjgYrQe3/DGYTUe6Cy8zxk=
+	t=1709472500; cv=none; b=MaSR8XWuu9vIOcTcZiaKi2bBOeN059WdEMOTtLhZ0BaSqr2PnHaI1y7IF4HwRGWTaaM9JcNOFDGMPEpwZrhvorCm5g+aXsPGOYu5iWDlGUt0wrm0POJ2f+9SXj9G6xGpA8lFIt4wCpzLm3m4t7e0zff8h0MpQj+Obhe4y+dArCo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709471457; c=relaxed/simple;
-	bh=aTMzKaZRxU23i409OjT26LlFjB63Hs/hnKqJHhzYDYQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rQkLA/p9PHXrAvCJe9+L3aVZhj1ojXvTHcZLVAR7y46XwXyg2z9PL8NKvVULqnLWrl/yh5Ll2CpuU9oSkw3L9ZBe9qGRCNapnAF6ZwOsYw8DWTHdh9h+Pi3XtIlYdY1IzV8flyG/vGkQJlc01VdJbW61GhcxNj0nb/tWH4z7pT0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ckfGKAr1; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1709472500; c=relaxed/simple;
+	bh=5PlyVdKlLtGt3EncopBr0Wf6brpJK5ywvIy4MoZ9bFI=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lL+v9Qmqyo/Jz1UqQwKyfVjx5+y4Nd7+DRDrEporaodoSZvzr8flBDk86fnib6Vs7RKT9mF0PxKGUtAdkPTrdTN+x7gkwdmFBILf9Chvx3aAiNxN6QyLkL2Ao1zZo7qaptYgekBrBdljkwBwOGg1kLdn/8tTVMsPzVqDzB6snnM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QHyZYaKR; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ckfGKAr1"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QHyZYaKR"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709471454;
+	s=mimecast20190719; t=1709472497;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 to:to:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=K7+CBVUOb3nwftCqW3xQMHPRcaIeoQg9DrW8Xr4mB3U=;
-	b=ckfGKAr1q2XVTRcJxue/zbfVbYc2qg4dWdJCgLT9MeZCkGDs1CoPeycqD0h+nh/MzyX9d1
-	cK0src5rADoINPmF8hJ4x2SQUY/13v9TU6yXb1ZuxBfTj43bau+RrHIVZlbl7gib1uV6Mx
-	TOxqaGILTFUW++rPA+/GwUH2CEnqmvo=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=fXfGPnOAXRwe3xwghwuzhuQwB/xFxJashKXfI+3yDak=;
+	b=QHyZYaKRrcjnFw2Jr9z9T9h14LdlA9+Hny/9X3D6s1OuIeZMfNRocdihnNGkVS1fgBwsz0
+	PpoJjtmF2ETgmfqt2FGBDReULUOlhQLR/a493BBqtiY5dF3burcM4khNYGgruTftfWgs2g
+	d42/+vVrKLkJU8/4Gf9JG++xbax6b0s=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-235-yK1j4coDO2KzcOH5EAm8sw-1; Sun, 03 Mar 2024 08:10:53 -0500
-X-MC-Unique: yK1j4coDO2KzcOH5EAm8sw-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-5d8dbe37d56so3174918a12.0
-        for <fstests@vger.kernel.org>; Sun, 03 Mar 2024 05:10:52 -0800 (PST)
+ us-mta-369--oPTXffaMBub79dv8VR3Ig-1; Sun, 03 Mar 2024 08:28:14 -0500
+X-MC-Unique: -oPTXffaMBub79dv8VR3Ig-1
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1dccac85165so34576895ad.0
+        for <fstests@vger.kernel.org>; Sun, 03 Mar 2024 05:28:14 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709471452; x=1710076252;
+        d=1e100.net; s=20230601; t=1709472493; x=1710077293;
         h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :subject:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=K7+CBVUOb3nwftCqW3xQMHPRcaIeoQg9DrW8Xr4mB3U=;
-        b=qe2rM2x37p83P/IsGbOPpABxiT7Va2y8cbEfOiehA7GcvSOfKO6oqUaaUkyo3TpJTO
-         D1eZeOy+LNT0vwDS8b8t55bNSTAoHPOQFPQLujkTiCu26AsOFxhqEnjNog074/0YoUKQ
-         JwRsmC+OIsh5VKGnaZFhOYFg9fvSC12kJF1HN2bJF0xqoAOUzxaTL/RLG7dtrfFCujaN
-         Mg0yQF6e1CbT5O2fFo7/a/BARValsmqAGEbJKyWH6DToW287jyu4vUdlPgqpm5nkn3mU
-         +r0ERIVgBeH+yxGIZKEpZijt7qMftjMVF0l+6i7q3Bje74phZ3aw/rX6oeD3Sa7onSS/
-         OJKQ==
-X-Gm-Message-State: AOJu0YytrUIoc7P3bpBLKYRETC+e+Yo3oEeA6yH1h05lC73cpQt/eEns
-	2zgXLVSgLL4GeQE+v1aJHnBwWhxRKneo7DOkMbjB6zVFSzDiGnwhV4t1cBkOAX4CZyds+bxQkVl
-	SsU8tCCrLiCtcQ17tKnJtvsO+lVrw9TGJnXyKs6Vp8KJPEq8gTQ2zLR4=
-X-Received: by 2002:a17:903:288:b0:1dc:df18:c5c1 with SMTP id j8-20020a170903028800b001dcdf18c5c1mr6473855plr.33.1709471452164;
-        Sun, 03 Mar 2024 05:10:52 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IH0JtfiD4ETPl4rGH/BswkXyPj0FZ70SYDWMJOlWEhTAhFy3wQuGYIewUydxmrq5H/Mq39Cig==
-X-Received: by 2002:a17:903:288:b0:1dc:df18:c5c1 with SMTP id j8-20020a170903028800b001dcdf18c5c1mr6473830plr.33.1709471451688;
-        Sun, 03 Mar 2024 05:10:51 -0800 (PST)
+        bh=fXfGPnOAXRwe3xwghwuzhuQwB/xFxJashKXfI+3yDak=;
+        b=bwrYdJ83quHRGNTFhwXXX6dGQAqe0mv5BODqFoyQ3SguwM02XWaa8zxUzAwQoUVDki
+         BHsrnlmFWTn8Mb5D39E8u63GxS32RwwBJRsLYM9NkKHSoSA6WN90Nkg+Ey0LIB6XsuQb
+         73HXqyiXQUPjY8QldqHRunDyR9m/quPV47xCMz4waSZf5Fgx6WdN+8DIbrt5d61Qc4gH
+         Dj57utThbax7lLnkBpMkQD9CbBc2kXQQ1YLGMK8HAN0w6L/601dSzCsBuEULX3Y6GX5v
+         Z3/gJ88t93QUa03ZQlD67KypNzCUyLtbxrf8F//yvOVdNMqh1mJr0l2z5u9Vnqw3xuHX
+         z8vQ==
+X-Gm-Message-State: AOJu0YwEj+KJ/WPWPOL6ohT81pIfDtzBmbIMVvG6RBBim9KwyQygfzQx
+	cwJ50FPRw59Ncs2Rq76ZlonGJcWKzSQKSIR2ayEre76WF3BoyXbVcBiN1cCJDR5enjvMSRda6IC
+	iA6TZfhAxE/r30B4/BoypV7RfTk0/quGJkMLfjYu/1PBqiCDRABUZEfoZi70QWRhNGUKrehWaOJ
+	j/DhdLLQH638ETvbviQtGjnguK2Fo33CwhOX0DXw==
+X-Received: by 2002:a17:902:e74d:b0:1dc:c0c8:6bfa with SMTP id p13-20020a170902e74d00b001dcc0c86bfamr7520629plf.17.1709472493640;
+        Sun, 03 Mar 2024 05:28:13 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEXvqc1GPha+f+iUZ1hdRp3GS6ZcmfP4/eOoCDRjplIbBvRnreRsOXkkhw9fomRtdOzib6RQA==
+X-Received: by 2002:a17:902:e74d:b0:1dc:c0c8:6bfa with SMTP id p13-20020a170902e74d00b001dcc0c86bfamr7520608plf.17.1709472493128;
+        Sun, 03 Mar 2024 05:28:13 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 12-20020a170902c20c00b001dbab519ce7sm6584824pll.212.2024.03.03.05.10.50
+        by smtp.gmail.com with ESMTPSA id im15-20020a170902bb0f00b001dcfae01c63sm2766651plb.43.2024.03.03.05.28.12
+        for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 03 Mar 2024 05:10:51 -0800 (PST)
-Date: Sun, 3 Mar 2024 21:10:48 +0800
+        Sun, 03 Mar 2024 05:28:12 -0800 (PST)
+Date: Sun, 3 Mar 2024 21:28:10 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] shared/298: run xfs_db against the loop device instead
- of the image file
-Message-ID: <20240303131048.kx4a4b2463deud7t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240301152820.1149483-1-hch@lst.de>
+To: fstests@vger.kernel.org
+Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.03.03
+Message-ID: <20240303132810.n7hvnglcea4arkal@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <65e4719a.050a0220.eb82c.d42fSMTPIN_ADDED_BROKEN@mx.google.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -72,49 +72,155 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240301152820.1149483-1-hch@lst.de>
+In-Reply-To: <65e4719a.050a0220.eb82c.d42fSMTPIN_ADDED_BROKEN@mx.google.com>
 
-On Fri, Mar 01, 2024 at 08:28:20AM -0700, Christoph Hellwig wrote:
-> xfs_db fails to properly detect the device sector size and thus segfaults
-> when run again an image file with 4k sector size.  While that's something
-> we should fix in xfs_db it will require a fair amount of refactoring of
-> the libxfs init code.  For now just change shared/298 to run xfs_db
-> against the loop device created on the image file that is used for I/O,
-> which feels like the right thing to do anyway to avoid cache coherency
-> issues.
+On Sun, Mar 03, 2024 at 08:48:10PM +0800, Zorro Lang wrote:
+> Content-Type: text/plain; charset=us-ascii
+> Content-Disposition: inline
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/shared/298 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Hi all,
 > 
-> diff --git a/tests/shared/298 b/tests/shared/298
-> index 071c03dee..f657578c7 100755
-> --- a/tests/shared/298
-> +++ b/tests/shared/298
-> @@ -69,7 +69,7 @@ get_free_sectors()
->  	agsize=`$XFS_INFO_PROG $loop_mnt | $SED_PROG -n 's/.*agsize=\(.*\) blks.*/\1/p'`
->  	# Convert free space (agno, block, length) to (start sector, end sector)
->  	_umount $loop_mnt
-        ^^^^^^^
-Above line causes a conflict, due to it doesn't match the current shared/298 code. It's
-"$UMOUNT_PROG $loop_mnt" in current fstests. So you might have another patch to do this
-change.
+> The for-next branch of the xfstests repository at:
+> 
+> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> has just been updated and tagged as v2024.03.03 release.
+> 
+> Release Note:
+> This's a release for btrfs testing mainly. There're 8 btrfs new test cases,
+> (include btrfs/303 and btrfs/311 ~ 317), and some new helpers, new test
+> groups, bug fixes and so on. Thanks for the reviewers and Anand Jain helped
+> much.
+> 
+> There're also some bug fixes and updates for common/*, Makefile and some
+> generic cases. More details refer to below. Thanks for all these contribution!
 
-> -	$XFS_DB_PROG -r -c "freesp -d" $img_file | $SED_PROG '/^.*from/,$d'| \
-> +	$XFS_DB_PROG -r -c "freesp -d" $loop_dev | $SED_PROG '/^.*from/,$d'| \
-
-As this patch focus on this change, so I'll only make this change. But if above
-"_umount $loop_mnt" is needed too, please tell me.
+As some buddies hope to check/use the patches might be in next release. I pushed
+my local "patches-in-queue" branch. This branch contains some patches under
+my testing. But not all of them are acked, this's a testing branch, and might
+be reconstructed sometimes. Feel free to check it if you need.
 
 Thanks,
 Zorro
 
->  		 $AWK_PROG -v spb=$sectors_per_block -v agsize=$agsize \
->  		'{ print spb * ($1 * agsize + $2), spb * ($1 * agsize + $2 + $3) - 1 }'
->  	;;
-> -- 
-> 2.39.2
+> 
+> Thanks,
+> Zorro
+> 
+> The new head of the for-next branch is commit:
+> 
+> 9b6df9a01ac8 btrfs/016: fix a false alert due to xattrs mismatch
+> 
+> New commits ([N]ew, [U]pdate):
+> 
+> Anand Jain (10):
+> [U]      [c5c8a2223881] common/rc: assign SCRATCH_DEV_POOL to an array
+> [U]      [b89613e85fe2] btrfs: introduce tempfsid test group
+> [U]      [257d00e13dca] btrfs: create a helper function, check_fsid(), to verify the tempfsid
+> [N]      [e6c1d2ab76a9] btrfs: verify that subvolume mounts are unaffected by tempfsid
+> [N]      [408376708514] btrfs: check if cloned device mounts with tempfsid
+> [U]      [5673516f9824] btrfs: test case prerequisite _require_btrfs_mkfs_uuid_option
+> [U]      [3ec2d4378c6c] btrfs: introduce helper for creating cloned devices with mkfs
+> [N]      [0a50ae6c2006] btrfs: verify tempfsid clones using mkfs
+> [N]      [4af68c15504d] btrfs: validate send-receive operation with tempfsid.
+> [N]      [a6c984e10159] btrfs: test tempfsid with device add, seed, and balance
+> 
+> Anthony Iliopoulos (2):
+> [U]      [cc23dcb3ebe6] generic/68[12]: use the dir blocksize for xfs filesystems
+> [U]      [28928ea7af86] generic/682: update and fix-up golden output
+> 
+> Filipe Manana (6):
+> [N]      [faabc4852ad9] btrfs: test incremental send on sparse file with trailing hole
+> [U]      [15c084fe1137] btrfs: require no nodatacow for tests that exercise compression
+> [U]      [45d779c9d241] btrfs/173: make the test work when mounting with nodatacow
+> [U]      [d9d267ada5a0] btrfs/299: skip test if we were mounted with nodatacow
+> [U]      [07e9d3d39c3c] btrfs: require no nodatacow for tests that exercise read repair
+> [U]      [3f740470e96b] generic/736: fix a buffer overflow in readdir-while-renames.c
+> 
+> Johannes Thumshirn (3):
+> [U]      [43f4d620203e] filter.brtfs: add filter for conversion
+> [U]      [fe6326040eb3] filter.btrfs: add filter for btrfs device add
+> [N]      [8c9102789fec] btrfs: check conversion of zoned fileystems
+> 
+> Luis Chamberlain (1):
+> [U]      [cb1f76a28453] common/config: fix CANON_DEVS=yes when file does not exist
+> 
+> Martin Jansa (1):
+> [U]      [a8fbb364834f] tests/*/Makefile: make sure group.list DIRT exists before install
+> 
+> Qu Wenruo (4):
+> [N]      [00989655e212] btrfs: validate inconsitent qgroup won't leak reserved data space
+> [U]      [779ae21a305d] btrfs: btrfs/224 do not assign snapshot to a subvolume qgroup
+> [U]      [662db2673538] btrfs: detect regular qgroup for older kernels correctly
+> [U]      [9b6df9a01ac8] btrfs/016: fix a false alert due to xattrs mismatch
 > 
 > 
+> Code Diffstat:
+> 
+>  common/btrfs                | 76 ++++++++++++++++++++++++++++++++++++-
+>  common/config               |  2 +-
+>  common/filter.btrfs         | 15 ++++++++
+>  common/rc                   | 29 ++++++++++++--
+>  doc/group-names.txt         |  1 +
+>  src/readdir-while-renames.c | 10 ++++-
+>  tests/btrfs/016             | 53 +++++++++++---------------
+>  tests/btrfs/024             |  1 +
+>  tests/btrfs/048             |  1 +
+>  tests/btrfs/059             |  1 +
+>  tests/btrfs/138             |  1 +
+>  tests/btrfs/140             |  3 +-
+>  tests/btrfs/141             |  2 +
+>  tests/btrfs/157             |  2 +
+>  tests/btrfs/158             |  2 +
+>  tests/btrfs/173             |  5 +++
+>  tests/btrfs/215             |  2 +
+>  tests/btrfs/224             |  6 +--
+>  tests/btrfs/234             |  1 +
+>  tests/btrfs/265             |  2 +
+>  tests/btrfs/266             |  2 +
+>  tests/btrfs/267             |  2 +
+>  tests/btrfs/268             |  2 +
+>  tests/btrfs/269             |  2 +
+>  tests/btrfs/281             |  1 +
+>  tests/btrfs/289             |  2 +
+>  tests/btrfs/299             |  3 ++
+>  tests/btrfs/303             | 92 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/303.out         | 24 ++++++++++++
+>  tests/btrfs/311             | 87 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/311.out         | 24 ++++++++++++
+>  tests/btrfs/312             | 78 ++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/312.out         | 19 ++++++++++
+>  tests/btrfs/313             | 52 +++++++++++++++++++++++++
+>  tests/btrfs/313.out         | 16 ++++++++
+>  tests/btrfs/314             | 78 ++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/314.out         | 23 ++++++++++++
+>  tests/btrfs/315             | 91 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/315.out         | 10 +++++
+>  tests/btrfs/316             | 59 +++++++++++++++++++++++++++++
+>  tests/btrfs/316.out         |  2 +
+>  tests/btrfs/317             | 67 +++++++++++++++++++++++++++++++++
+>  tests/btrfs/317.out         |  9 +++++
+>  tests/btrfs/Makefile        |  2 +-
+>  tests/ceph/Makefile         |  2 +-
+>  tests/cifs/Makefile         |  2 +-
+>  tests/ext4/Makefile         |  2 +-
+>  tests/f2fs/Makefile         |  2 +-
+>  tests/generic/681           |  2 +-
+>  tests/generic/682           | 10 ++++-
+>  tests/generic/682.out       |  2 +-
+>  tests/generic/Makefile      |  2 +-
+>  tests/nfs/Makefile          |  2 +-
+>  tests/ocfs2/Makefile        |  2 +-
+>  tests/overlay/Makefile      |  2 +-
+>  tests/perf/Makefile         |  2 +-
+>  tests/selftest/Makefile     |  2 +-
+>  tests/shared/Makefile       |  2 +-
+>  tests/tmpfs/Makefile        |  2 +-
+>  tests/udf/Makefile          |  2 +-
+>  tests/xfs/Makefile          |  2 +-
+>  61 files changed, 942 insertions(+), 62 deletions(-)
+> --
+> Zorro Lang
+> zlang@kernel.org
+
 
