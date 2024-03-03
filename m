@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78189BA27
-	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 12:22:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC53FC2C4
+	for <fstests@vger.kernel.org>; Sun,  3 Mar 2024 12:48:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709468544; cv=none; b=S1gxbwgWQx4nPq0+Ojfo16zE80EswolctTk1TQbcVE1kr7tQidAOj5DgAE0ZL1pqEYVc/nuVKzFd30REoS3EA78Sus4XxuyMfp2mnW7DYVV0d5Osz4I6bwZa9iCT3ZLPAk7Ce5TVrd8lxrxnl5sR9Ahy6xiBh79L1pg2aLvwsRI=
+	t=1709470093; cv=none; b=EIpGsNxPLoviRMDvOHfbT13892wLP+GiR/ITKRMhvnYhABqotL8dGH2ewvEnFxVH2LBGPYPnVScdGPDu62VW/foawDPtkXpdGrDEOt0YSk3erKEeDg45P2EChL1ukZKCWOqTyXgCnyg31HywLUUxwh9oLPQd5wcPq/x97xsWL5o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709468544; c=relaxed/simple;
-	bh=lN1UHQf2EO9zLmhMy6QAwJNGhE3bIzbkxLWVP9R4bKw=;
+	s=arc-20240116; t=1709470093; c=relaxed/simple;
+	bh=wS6jp+xNk7aq8E+ZiUtcV27pA5jbV/gkTwob3/bAZYs=;
 	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=n8IcZIYJIh2EMfjg10AGIc8dI9bPlQjDxrJXCsuBZVRymhCa1UAySdOqlhslm1c5+2XEqGCssOPLSawZmF1eH0kMm6Ry8Prhy64UsQ1sSL6MFB2Jomwqo+ri9iKvQCE16TJYYt5hC5cxUt16EbC2N7h0YJw6EipYB4a51Z8DfW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cXXU0t6L; arc=none smtp.client-ip=10.30.226.201
+	 Content-Disposition; b=WwQjhV+QCfq3QJ3SQKnFLRntVkduUk6gzF8j6tJfVxXgB1xDWbpAR1wNqEbAvv8wcDfDcFUHGEdPMNWtB1NBLENmAXphg7YfYovaNxhFg15Ddmabm7nv5+dCwp0r6W3TRgfyy8bsl2EA0PBLzSX+NoIFpIrbJkowKUJds9aO2Is=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=K7JqONx+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cXXU0t6L"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8DC1AC433C7;
-	Sun,  3 Mar 2024 12:22:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="K7JqONx+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C165DC433C7;
+	Sun,  3 Mar 2024 12:48:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709468544;
-	bh=lN1UHQf2EO9zLmhMy6QAwJNGhE3bIzbkxLWVP9R4bKw=;
+	s=k20201202; t=1709470093;
+	bh=wS6jp+xNk7aq8E+ZiUtcV27pA5jbV/gkTwob3/bAZYs=;
 	h=Date:From:To:Subject:From;
-	b=cXXU0t6LG+DHKEBn714VI2c2C/cqANgYE2+08QJdKgbyTjRm8XKoWLi2c0Uq/zVM4
-	 EnfZyW6LwQypHjh2fgKamKxumJaZHxMuVZA2AeCJLdnWzdBwUm8fhg8nGWoSx4wJDO
-	 1jMRyKCxp25NANWasRfr2QqupzSMx8aHw/j8y1dsPTj5fRy6/P35Dl1/6yObUDYRrd
-	 kfgSLHGYLONJzXX94S45/wQAccgExO4twUDR7wapbnU8H4gl3NmhH7vyh114wsXzKc
-	 agwYylx7fGOQ6Aca3xxMxAoqzEj+t120Q/eKoHLdGm7U5zTii4JhghJGJYUPAoetFd
-	 ODsB4qKG/+jTw==
-Date: Sun, 03 Mar 2024 20:22:20 +0800
-Message-ID: <b57d8c60db51700b9f061fa95a2de046@kernel.org>>
+	b=K7JqONx+RIjsyL6nWbw7ooQ2IBxxEnMXdjY3/YcIJeN2sKfjwsrfNd1Id6LCvD5V6
+	 rCaCM47JA67Wy++0v/mx7GzxUBKb153ItR1/WkyL7tVbR1T5NURPiJZDyEfN4tqcD5
+	 SAR3CpFlifD0xxSVwchk+Cj05LNiDZuU3MNECE0P2/Mpec0NzB8GtZ/MVrj6S97CP2
+	 HF7wOE5tl5mGkgmY3emnIkzsxaO5m/NRxLGZe4aS6/mkFN2s3pQMbK4ZPn0HDNTL6b
+	 TeAUFGxOYJXIBxxJ/8DGPtrnm8OYyA1l4NCrGQX+Fov10sHTMrPn5fuzI/C6fptYuP
+	 UWnMC05FqU/KQ==
+Date: Sun, 03 Mar 2024 20:48:10 +0800
+Message-ID: <0cb72053ac86fa0cbf68addbfe7f14d4@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2024.02.09 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.03.03
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,154 +38,169 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="SToSNO7yGPVt"
+	protocol="application/pgp-signature"; boundary="Ls7fEUR7l19B"
 Content-Disposition: inline
 
 
---SToSNO7yGPVt
+--Ls7fEUR7l19B
+
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2024.02.09 stable version.
+has just been updated and tagged as v2024.03.03 release.
+
+Release Note:
+This's a release for btrfs testing mainly. There're 8 btrfs new test cases,
+(include btrfs/303 and btrfs/311 ~ 317), and some new helpers, new test
+groups, bug fixes and so on. Thanks for the reviewers and Anand Jain helped
+much.
+
+There're also some bug fixes and updates for common/*, Makefile and some
+generic cases. More details refer to below. Thanks for all these contribution!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-386c7b6aa69e xfs/122: fix for xfs_attr_shortform removal in 6.8
+9b6df9a01ac8 btrfs/016: fix a false alert due to xattrs mismatch
 
-New commits:
+New commits ([N]ew, [U]pdate):
 
-Amir Goldstein (1):
-      [c3eff0947047] overlay/084: Fix test to match new xwhiteouts dir on-disk format
+Anand Jain (10):
+[U]      [c5c8a2223881] common/rc: assign SCRATCH_DEV_POOL to an array
+[U]      [b89613e85fe2] btrfs: introduce tempfsid test group
+[U]      [257d00e13dca] btrfs: create a helper function, check_fsid(), to verify the tempfsid
+[N]      [e6c1d2ab76a9] btrfs: verify that subvolume mounts are unaffected by tempfsid
+[N]      [408376708514] btrfs: check if cloned device mounts with tempfsid
+[U]      [5673516f9824] btrfs: test case prerequisite _require_btrfs_mkfs_uuid_option
+[U]      [3ec2d4378c6c] btrfs: introduce helper for creating cloned devices with mkfs
+[N]      [0a50ae6c2006] btrfs: verify tempfsid clones using mkfs
+[N]      [4af68c15504d] btrfs: validate send-receive operation with tempfsid.
+[N]      [a6c984e10159] btrfs: test tempfsid with device add, seed, and balance
 
 Anthony Iliopoulos (2):
-      [4e90abbc4d23] src/af_unix: drop unused offsetof macro definition
-      [d2c077611de7] build: remove unused m4 macros
+[U]      [cc23dcb3ebe6] generic/68[12]: use the dir blocksize for xfs filesystems
+[U]      [28928ea7af86] generic/682: update and fix-up golden output
 
-Boris Burkov (1):
-      [750daa897667] btrfs: Remove btrfs/303
+Filipe Manana (6):
+[N]      [faabc4852ad9] btrfs: test incremental send on sparse file with trailing hole
+[U]      [15c084fe1137] btrfs: require no nodatacow for tests that exercise compression
+[U]      [45d779c9d241] btrfs/173: make the test work when mounting with nodatacow
+[U]      [d9d267ada5a0] btrfs/299: skip test if we were mounted with nodatacow
+[U]      [07e9d3d39c3c] btrfs: require no nodatacow for tests that exercise read repair
+[U]      [3f740470e96b] generic/736: fix a buffer overflow in readdir-while-renames.c
 
-Darrick J. Wong (10):
-      [20e0cf8b78d4] generic/256: constrain runtime with TIME_FACTOR
-      [a5339f1aeb00] common/xfs: simplify maximum metadump format detection
-      [1b36ec27ecfc] common/populate: always metadump full metadata blocks
-      [5261c7b46fd4] xfs/336: fix omitted -a and -o in metadump call
-      [31238f2b0f50] common: refactor metadump v1 and v2 tests, version 2
-      [9c01c6997c30] xfs/{129,234,253,605}: disable metadump v1 testing with external devices
-      [76bfc02c31b8] xfs/503: test metadump obfuscation, not progressbars
-      [b809844c72b9] xfs/503: split copy and metadump into two tests
-      [e595ffddd23e] common/xfs: only pass -l in _xfs_mdrestore for v2 metadumps
-      [386c7b6aa69e] xfs/122: fix for xfs_attr_shortform removal in 6.8
+Johannes Thumshirn (3):
+[U]      [43f4d620203e] filter.brtfs: add filter for conversion
+[U]      [fe6326040eb3] filter.btrfs: add filter for btrfs device add
+[N]      [8c9102789fec] btrfs: check conversion of zoned fileystems
 
-Jeff Layton (2):
-      [b3da25544c60] common/rc: NFSv2/3 do not support negative timestamps
-      [cf72e89fdc2d] src/t_mtab.c: increase the lock timeout to 120s
+Luis Chamberlain (1):
+[U]      [cb1f76a28453] common/config: fix CANON_DEVS=yes when file does not exist
 
-Li Zhijian (1):
-      [acff198213e3] gitignore: Add missing /src/t_reflink_read_race
+Martin Jansa (1):
+[U]      [a8fbb364834f] tests/*/Makefile: make sure group.list DIRT exists before install
 
-Pavel Reichl (1):
-      [c689690fa3b0] xfs/598: Add missing "fixed_by" hints
-
-Qu Wenruo (1):
-      [52c6d0f30ae5] btrfs: verify the read behavior of compressed inline extent
-
-Richard Weinberger (2):
-      [ef62fdb75bc6] generic/020: Compute correct max_attrs for UBIFS
-      [8ba89cc8bff1] generic/597,598: Require groups
-
-Ritesh Harjani (IBM) (1):
-      [d99636b8efdc] xfs/604: Make test as _notrun for higher blocksizes filesystem
-
-Su Yue (2):
-      [f836422ec228] fstests: introduce MKFS_BCACHEFS_PROG for bcachefs
-      [79e87ccf207f] common/rc: improve block_size support for bcachefs
-
-Yang Xu (1):
-      [6b0efdc02753] t_snapshot_deleted_subvolume: add check for BTRFS_IOC_SNAP_DESTROY_V2
-
-Zorro Lang (1):
-      [7e1ca29d3038] xfs: test xfs_growfs with too-small size expansion
+Qu Wenruo (4):
+[N]      [00989655e212] btrfs: validate inconsitent qgroup won't leak reserved data space
+[U]      [779ae21a305d] btrfs: btrfs/224 do not assign snapshot to a subvolume qgroup
+[U]      [662db2673538] btrfs: detect regular qgroup for older kernels correctly
+[U]      [9b6df9a01ac8] btrfs/016: fix a false alert due to xattrs mismatch
 
 
 Code Diffstat:
 
- .gitignore                         |   1 +
- acinclude.m4                       |   5 --
- common/config                      |   4 +-
- common/metadump                    | 152 +++++++++++++++++++++++++++++++++++++
- common/populate                    |   2 +-
- common/rc                          |  63 +++++++++++----
- common/ubifs                       |   9 +++
- common/xfs                         |  51 +++++++++++--
- configure.ac                       |   2 +-
- m4/manual_format.m4                |  17 -----
- m4/package_libcdev.m4              |  95 -----------------------
- m4/package_ncurses.m4              |  27 -------
- m4/package_pthread.m4              |  19 -----
- m4/package_types.m4                |  50 ------------
- m4/package_xfslibs.m4              |  28 -------
- m4/visibility_hidden.m4            |  22 ------
- src/af_unix.c                      |   2 -
- src/t_mtab.c                       |   2 +-
- src/t_snapshot_deleted_subvolume.c |  10 +--
- tests/btrfs/303                    |  77 -------------------
- tests/btrfs/303.out                |   2 -
- tests/btrfs/310                    |  83 ++++++++++++++++++++
- tests/btrfs/310.out                |   2 +
- tests/generic/020                  |   6 ++
- tests/generic/256                  |   7 ++
- tests/generic/597                  |   2 +
- tests/generic/598                  |   2 +
- tests/overlay/084                  |   8 +-
- tests/xfs/122.out                  |   2 +
- tests/xfs/129                      |  91 ++--------------------
- tests/xfs/234                      |  92 ++--------------------
- tests/xfs/253                      |  90 ++--------------------
- tests/xfs/284                      |   4 +-
- tests/xfs/291                      |  32 +++-----
- tests/xfs/336                      |   2 +-
- tests/xfs/432                      |  31 ++------
- tests/xfs/503                      |  82 +++-----------------
- tests/xfs/503.out                  |   6 +-
- tests/xfs/598                      |   5 ++
- tests/xfs/601                      |  54 +++++++++++++
- tests/xfs/601.out                  |   4 +
- tests/xfs/604                      |   4 +-
- tests/xfs/605                      |  92 +---------------------
- tests/xfs/606                      |  56 ++++++++++++++
- tests/xfs/606.out                  |   2 +
- 45 files changed, 556 insertions(+), 843 deletions(-)
+ common/btrfs                | 76 ++++++++++++++++++++++++++++++++++++-
+ common/config               |  2 +-
+ common/filter.btrfs         | 15 ++++++++
+ common/rc                   | 29 ++++++++++++--
+ doc/group-names.txt         |  1 +
+ src/readdir-while-renames.c | 10 ++++-
+ tests/btrfs/016             | 53 +++++++++++---------------
+ tests/btrfs/024             |  1 +
+ tests/btrfs/048             |  1 +
+ tests/btrfs/059             |  1 +
+ tests/btrfs/138             |  1 +
+ tests/btrfs/140             |  3 +-
+ tests/btrfs/141             |  2 +
+ tests/btrfs/157             |  2 +
+ tests/btrfs/158             |  2 +
+ tests/btrfs/173             |  5 +++
+ tests/btrfs/215             |  2 +
+ tests/btrfs/224             |  6 +--
+ tests/btrfs/234             |  1 +
+ tests/btrfs/265             |  2 +
+ tests/btrfs/266             |  2 +
+ tests/btrfs/267             |  2 +
+ tests/btrfs/268             |  2 +
+ tests/btrfs/269             |  2 +
+ tests/btrfs/281             |  1 +
+ tests/btrfs/289             |  2 +
+ tests/btrfs/299             |  3 ++
+ tests/btrfs/303             | 92 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/303.out         | 24 ++++++++++++
+ tests/btrfs/311             | 87 ++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/311.out         | 24 ++++++++++++
+ tests/btrfs/312             | 78 ++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/312.out         | 19 ++++++++++
+ tests/btrfs/313             | 52 +++++++++++++++++++++++++
+ tests/btrfs/313.out         | 16 ++++++++
+ tests/btrfs/314             | 78 ++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/314.out         | 23 ++++++++++++
+ tests/btrfs/315             | 91 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/315.out         | 10 +++++
+ tests/btrfs/316             | 59 +++++++++++++++++++++++++++++
+ tests/btrfs/316.out         |  2 +
+ tests/btrfs/317             | 67 +++++++++++++++++++++++++++++++++
+ tests/btrfs/317.out         |  9 +++++
+ tests/btrfs/Makefile        |  2 +-
+ tests/ceph/Makefile         |  2 +-
+ tests/cifs/Makefile         |  2 +-
+ tests/ext4/Makefile         |  2 +-
+ tests/f2fs/Makefile         |  2 +-
+ tests/generic/681           |  2 +-
+ tests/generic/682           | 10 ++++-
+ tests/generic/682.out       |  2 +-
+ tests/generic/Makefile      |  2 +-
+ tests/nfs/Makefile          |  2 +-
+ tests/ocfs2/Makefile        |  2 +-
+ tests/overlay/Makefile      |  2 +-
+ tests/perf/Makefile         |  2 +-
+ tests/selftest/Makefile     |  2 +-
+ tests/shared/Makefile       |  2 +-
+ tests/tmpfs/Makefile        |  2 +-
+ tests/udf/Makefile          |  2 +-
+ tests/xfs/Makefile          |  2 +-
+ 61 files changed, 942 insertions(+), 62 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---SToSNO7yGPVt
+--Ls7fEUR7l19B
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmXka08ACgkQlNbPkfr2
-tMyY1w/+NMnqdCH0+QXs+NU/FNcKqAx5US3SjQMhBVy2cuU9n/DqOzVPWDiVk8kR
-o0kx4tXRhcjqUig6SXJsCL/xOsdyjotjXZOpx/93AJ6TwLt7i3KcXrk/9BXT2TwY
-lAlk+oM5Qrz0IZXUPPyFYmYCefnXmRloMHPPRkgzyFMZiZHt8SuO4rmHLXJ3bqws
-D2ud/y/MbA4JN/P/Q68WqVoC+hnkhkvPhrsZWvs0D2z/PBMyvAiHDKv7harg19xG
-T10Uufe0MAV0k4WJsarTSAS5klRbZOXp1DWLcZcqB2qvvnNUHcxtG5XAsSU0Rayh
-S1bSKVPhPO9a29HneH+rI2Z485tQ6RzCT4XSa+tVmYBgaMw4SHp2vF3kab97N848
-ihE2Pd7Q809EqaMphzKWf10sDmMp518OKmZj0eM/c1Eq2gGlt7LMQx6g/N52v2Vh
-Gh0nh4FIenTsaOXPg6zCaLXezXxm1WKBGOFHve/aENti73D8qzsH07B2Yp/p/qQG
-826SHSBjgnLLj53pNraMzhTYHHxhbiHRjFz/7/wh8TMiRNfR+6oWlJSVe7cogGqi
-Hs+wEalKO4DeM4iakepJOPAhsRzxk3MOUft4LwtiXu/6mPuG4/RIblb0sIwtHy6A
-9BFQE8BqLAolTa1buzVQJ01yX9rCKzr1254mylb3zIlANQcBa00=
-=j6d2
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmXkcTwACgkQlNbPkfr2
+tMyemxAAsOj7HlXyriXRTFzlEmTw0wcYvjYV5zF5AUVdw1vvvGf3JrNbLy9r6M3r
+wHgmcDh2iqnBiO65e+v3aUYksRBxmcw32Yt+if3AAvW0mLgpG+ynthWXL2oZ4pEA
+wZ8yK1BJmRSfCjrNrKTqQW8qWcK1DysMvz8n5idnOdyoVP2E3a8XKx4xwWkYeCwn
+MONVnLyLodWfHi7LqeRYuLZ59viwavWROpc4ot6jHGvTUpkC7EjdgiCLWGD7VisI
+rBxXY0tclFFD54Q5r5TPAO5kDWx41X4IibL0Iwr+E4BPqOPrRfWFRa0pMoLQkbYG
+ayZVreVN3Ap1Xxin+Q3JKsBd/7I2UE3qJkKh3BJ4R5LjZXJbpZkOZ+rAsTefJWHm
+FikIq7g3PVXVwPjYTJWt4vjPhLsJihdeI/jcWjmaZVa6PWujtwfu314zTxgwBMWx
+UtwFAI3meHPye9gfRHPbRYLrHyDDbrg6EQshAsxk0ugPyJ++B4f0OWf0uz8kwfQA
+wYSphpVPS8xbqHa/unVwvP+BR+O2h/B0js/du71H8eVGz/yK787MIjkDqixqFxHD
+ZQTBwdifX6/67FkpWsPn/ydr7ECw2Qai+NAzIKymNdQ5I/yO1MKr374FzFaKNdT3
+0JHSxWeV0U6aMTzI9Z3oYVwsSqpUvLwB6YrDGSyP5fDj1gvHFww=
+=VEra
 -----END PGP SIGNATURE-----
 
---SToSNO7yGPVt--
+--Ls7fEUR7l19B--
