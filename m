@@ -1,156 +1,350 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C05CD17C8;
-	Mon,  4 Mar 2024 04:41:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC5C959B5E;
+	Tue,  5 Mar 2024 12:13:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709527285; cv=none; b=XYH0MkTuX220qPZcMspip7iy8x0Pysbv6ITEBTR3LVe5R6BYbgsEnYwkQ7Dod/ScXJazRPi/hcuq1A0iQwYfSUj1FuoqajzxvVBqYLZR4TtIBd1w2OqoGy/PJ7cyygxnq15zhe93+GCa2yteAE9Y+qq9cqRyAnHrImiRBYupXvg=
+	t=1709640826; cv=none; b=gyHOr0QkCEDrvtK5d2Lf5gFOT/v70N5oAMFoYQACEZYpdCFWXfTnUStmQndcl3FDyXq78Vfl0IKEF6S2d47dqSwNV1hJShtj6JuIGvb3JRIAE1HByxHKJRiajHmK/4LHtoy2oXV6NF1QjpDQVeRASTfMxGC0W6P7rHJiVzSib1c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709527285; c=relaxed/simple;
-	bh=D5UrnjkSVi1B31YirTTPQjJwrThMIxeGFHPF9BbjHKI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SwmGCUq1/tJQEy0i7WviZzTL1uACvhDspNdmDabA33RWaBOTCyO6Zk52yz2uKgmEUek0PCpIaq565W/q2QySO6coqSNBU0RGRmEt/z5kdQ9IVcuvv6Y+I9YadZ/tdjpdnGu43mJ7PWzqoxuN4qwj6wZ1uCSpJPXe3/r2PF4XXGw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BJx95N8t; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1709640826; c=relaxed/simple;
+	bh=tk1PzqBKjnQr+HzxIeuaLfWQGg4edV3ZqHMTlOMAHu8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=c99Ml/0SH/gsPvjXoqWWOlZ0nbOTYAD2ygNoEVkwMI/RzkPGUsmBwuKOL2tMWfzmbISYBHYbG6od/4MB/s4UZCh01scm9QNl8s6DxCySUZqhp67kwatvaYJg0GrKjJilQD6ZCtjcXNq0F4rAWPCel7wvAnMQUcYvFDeYpsCG1YM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=g1crNso9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BJx95N8t"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11E68C433C7;
-	Mon,  4 Mar 2024 04:41:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g1crNso9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BB52C433C7;
+	Tue,  5 Mar 2024 12:13:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1709527285;
-	bh=D5UrnjkSVi1B31YirTTPQjJwrThMIxeGFHPF9BbjHKI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=BJx95N8tqkOpYlrv78wdeXTaFI4Mc6UZ8F9IpIy4t6x6MPXIBCNxF1LYGwUwITSBH
-	 aHV2Q5dyx7iWyAxXi1J3fI29vL/qbP1S9tEmue2q4P60iznGV6LGZNwapw+NkelJWO
-	 oh2EcHaaCWMx6JsbPT32dKCY7yTH6X+TF0EB3uOUP6Xn0F1iaUkxLT53gj29hSQgVQ
-	 MIQjo2rERVQS/rKjpOSEnvLVqTPaPogbqjeR3CsQKwxrVTB9WINiUofsHRPWajfGxM
-	 Of2Vo2Ay1hrso7T0ZREV9nGa6g5h8r2GlJ9sup6ocu0A5qbXaGypKyir4Ur47bNk/X
-	 sjStMf6mfoMnQ==
-Date: Mon, 4 Mar 2024 12:41:19 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Qu Wenruo <wqu@suse.com>
-Cc: Zorro Lang <zlang@redhat.com>, linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/121: allow snapshot with invalid qgroup
- to return error
-Message-ID: <20240304044119.oqndhpriif5lfvju@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240303065251.111868-1-wqu@suse.com>
- <20240304041840.rfn6mhkk5a6mlxnf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <25153f23-a1b0-41b1-9cb7-4f18f08d659b@suse.com>
+	s=k20201202; t=1709640826;
+	bh=tk1PzqBKjnQr+HzxIeuaLfWQGg4edV3ZqHMTlOMAHu8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=g1crNso9BATPmFoBoRFiSBjNoCatpcemDAkv2urH9xfu18y7RqJ4lgfaSw9DJqmE9
+	 4rA1mt6tGjBDsTLTV9mD7ovLMHinI1m3qbj/DIRUyxokEiIVruYHNsiJp+RqoCU2kI
+	 bNzX1ExViLlhcV0hv8Y1/2DPyAaOVVk3JV97A+ytqujVUf6l9Y9k0ljjUQyLfR2vjj
+	 6GFSNBw38zRw9upeOfzOXOkxP82Khy8zB5pB5QfXJvXj2IRA6puRA5SH3ksR3BE1aY
+	 EnjPqhCAvP4BSUawqO/4vNeaVkCwDzy3S6b5LgnhgR3ly5Peh5PiyjbKawfd9So/g4
+	 TJQEYOGWd0qCw==
+Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-a44e3176120so340375066b.1;
+        Tue, 05 Mar 2024 04:13:46 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWIkIwRVK5+/7QvEhu5FDqZqm2g8nYMokRRGodaRlqRQWOhhJcZTM8ycQkzqr5+bV93/7h5K6+99xxpFv7+BGsx0CmZxPI8bw==
+X-Gm-Message-State: AOJu0YxHIpFn8sFVCvkUj/fYM0gX0KhtxpHd10niOvh8pM8DGajP5sG0
+	TIcBy+NfYcKD8w3RqTi7fAV5leBA0I3eoywTSQ7Ah96p6o651qH0oBpimn3+nr1qDB96ccb0PHf
+	IBZp7v3zITmF+Q8x5xydUuHJfOEM=
+X-Google-Smtp-Source: AGHT+IFl6Cu4XlVaoSwyKzj2OmkGNOnrlyrAWK+cQRbMz0zCbM6wONXOh6VDNKJPNa1W2ZnZcGx9R0q7+QEicH33TCM=
+X-Received: by 2002:a17:906:560b:b0:a45:7dc6:5bb with SMTP id
+ f11-20020a170906560b00b00a457dc605bbmr2625236ejq.71.1709640824731; Tue, 05
+ Mar 2024 04:13:44 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <25153f23-a1b0-41b1-9cb7-4f18f08d659b@suse.com>
+References: <f40e347d5a4b4b28201b1a088d38a3c75dd10ebd.1709251328.git.boris@bur.io>
+In-Reply-To: <f40e347d5a4b4b28201b1a088d38a3c75dd10ebd.1709251328.git.boris@bur.io>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 5 Mar 2024 12:13:07 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4rYdJidxKja2YZDdXcu3NtsYhKS--YhTUHRi5OqzwijQ@mail.gmail.com>
+Message-ID: <CAL3q7H4rYdJidxKja2YZDdXcu3NtsYhKS--YhTUHRi5OqzwijQ@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs/311: new test for devt change between mounts
+To: Boris Burkov <boris@bur.io>
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Mar 04, 2024 at 02:57:45PM +1030, Qu Wenruo wrote:
-> 
-> 
-> 在 2024/3/4 14:48, Zorro Lang 写道:
-> > On Sun, Mar 03, 2024 at 05:22:51PM +1030, Qu Wenruo wrote:
-> > > [BUG]
-> > > After incoming kernel commit "btrfs: qgroup: verify btrfs_qgroup_inherit
-> > > parameter", test case btrfs/121 would fail like this:
-> > > 
-> > > btrfs/121 1s ... [failed, exit status 1]- output mismatch (see /xfstests/results//btrfs/121.out.bad)
-> > >      --- tests/btrfs/121.out	2022-05-11 09:55:30.739999997 +0800
-> > >      +++ /xfstests/results//btrfs/121.out.bad	2024-03-03 13:33:38.076666665 +0800
-> > >      @@ -1,2 +1,3 @@
-> > >       QA output created by 121
-> > >      -Silence is golden
-> > >      +failed: '/usr/bin/btrfs subvolume snapshot -i 1/10 /mnt/scratch /mnt/scratch/snap1'
-> > >      +(see /xfstests/results//btrfs/121.full for details)
-> > >      ...
-> > >      (Run 'diff -u /xfstests/tests/btrfs/121.out /xfstests/results//btrfs/121.out.bad'  to see the entire diff)
-> > > 
-> > > [CAUSE]
-> > > The incoming kernel commit would do early qgroups validation before
-> > > subvolume/snapshot creation, and reject invalid qgroups immediately.
-> > > 
-> > > Meanwhile that test case itself still assume the ioctl would go on
-> > > without any error, thus the new behavior would break the test case.
-> > > 
-> > > [FIX]
-> > > Instead of relying on the snapshot creation ioctl return value, we just
-> > > completely ignore the output of that snapshot creation.
-> > > Then manually check if the fs is still read-write.
-> > > 
-> > > For different kernels (3 cases), they would lead to the following
-> > > results:
-> > > 
-> > > - Older unpatched kernel
-> > >    The filesystem would trigger a transaction abort (would be caught by
-> > >    dmesg filter), and also fail the "touch" command.
-> > > 
-> > > - Older but patched kernel
-> > >    The filesystem continues to create the snapshot, while still keeps the
-> > >    fs read-write.
-> > > 
-> > > - Latest kernel with qgroup validation
-> > >    The filesystem refuses to create the snapshot, while still keeps the
-> > >    fs read-write.
-> > > 
-> > > Both "older but patched" and "latest" kernels would still pass the test
-> > > case, even with different behaviors.
-> > > 
-> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > > ---
-> > >   tests/btrfs/121 | 10 ++++++++--
-> > >   1 file changed, 8 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/tests/btrfs/121 b/tests/btrfs/121
-> > > index f4d54962..15a54274 100755
-> > > --- a/tests/btrfs/121
-> > > +++ b/tests/btrfs/121
-> > > @@ -24,8 +24,14 @@ _require_scratch
-> > >   _scratch_mkfs >/dev/null
-> > >   _scratch_mount
-> > >   _run_btrfs_util_prog quota enable $SCRATCH_MNT
-> > > -# The qgroup '1/10' does not exist and should be silently ignored
-> > > -_run_btrfs_util_prog subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1
-> > > +# The qgroup '1/10' does not exist. The kernel should either gives an error
-> > > +# (newer kernel with invalid qgroup detection) or ignore it (older kernel with
-> > > +# above fix).
-> > > +# Either way, we just ignore the output completely, and we will check if the fs
-> > > +# is still RW later.
-> > 
-> > The explanation makes sense to me, just ask if you might want to output to .full
-> > file, to save some information for debug if the test fails? I can help to change
-> > the "&> /dev/null" to "&> $seqres.full" if you only need to change.
-> 
-> Oh, that's very kind of you.
-> 
-> Although in that case "&>" would overwrite the .full file,
-> ">> $seqres.full 2>&1" would be better IHMO.
+On Fri, Mar 1, 2024 at 12:02=E2=80=AFAM Boris Burkov <boris@bur.io> wrote:
+>
+> It is possible to confuse the btrfs device cache (fs_devices) by
+> starting with a multi-device filesystem, then removing and re-adding a
+> device in a way which changes its dev_t while the filesystem is
+> unmounted. After this procedure, if we remount, then we are in a funny
+> state where struct btrfs_device's "devt" field does not match the bd_dev
+> of the "bdev" field. I would say this is bad enough, as we have violated
+> a pretty clear invariant.
+>
+> But for style points, we can then remove the extra device from the fs,
+> making it a single device fs, which enables the "temp_fsid" feature,
+> which permits multiple separate mounts of different devices with the
+> same fsid. Since btrfs is confused and *thinks* there are different
+> devices (based on device->devt), it allows a second redundant mount of
+> the same device (not a bind mount!). This then allows us to corrupt the
+> original mount by doing stuff to the one that should be a bind mount.
+>
+> This is fixed by the combination of the kernel patch:
+> btrfs: support device name lookup in forget
+> and the btrfs-progs patches:
+> btrfs-progs: allow btrfs device scan -u on dead dev
+> btrfs-progs: add udev rule to forget removed device
 
-Oh, you're right, thanks for point out that! It's in "patches-in-queue" branch now,
-and will be in next release if no more review points from others.
+May I suggest to make this more readable, easier to the eye?
+My inserting blank lines and indenting the lines with the patch
+subjects, like for example:
 
-Thanks,
-Zorro
+"""
+This is fixed by the combination of the kernel patch:
 
-> 
-> Thanks,
-> Qu
-> 
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > +$BTRFS_UTIL_PROG subvolume snapshot -i 1/10 $SCRATCH_MNT $SCRATCH_MNT/snap1 &> /dev/null
-> > > +
-> > > +touch $SCRATCH_MNT/foobar
-> > >   echo "Silence is golden"
-> > > -- 
-> > > 2.42.0
-> > > 
-> > > 
-> > 
-> 
+    btrfs: support device name lookup in forget
+
+and the btrfs-progs patches:
+
+   btrfs-progs: allow btrfs device scan -u on dead dev
+   btrfs-progs: add udev rule to forget removed device
+"""
+
+And these should be placed in the test case itself with:
+
+   _fixed_by_git_commit btrfs-progs xxxxxxxxxx "btrfs-progs: allow
+btrfs device scan -u on dead dev"
+
+For btrfs-progs commits, and for the kernel:
+
+   _fixed_by_kernel_commit xxxxxxxxxxxx "btrfs: support device name
+lookup in forget"
+
+I see however that there's discussion for those patches between you,
+Anand and David, and it
+seems there's a chance those patches won't be merged to fix this bug,
+especially the kernel one
+for which Anand submitted an alternative. If those are added to the
+test case itself, can always be
+updated later if needed.
+
+Also avoid putting the test number in the subject - there's no
+guarantee it will end up with that number when merged.
+
+>
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+>  common/config       |   1 +
+>  common/rc           |   4 ++
+>  tests/btrfs/311     | 101 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/311.out |   2 +
+>  4 files changed, 108 insertions(+)
+>  create mode 100755 tests/btrfs/311
+>  create mode 100644 tests/btrfs/311.out
+>
+> diff --git a/common/config b/common/config
+> index a3b15b96f..43b517fda 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -235,6 +235,7 @@ export BLKZONE_PROG=3D"$(type -P blkzone)"
+>  export GZIP_PROG=3D"$(type -P gzip)"
+>  export BTRFS_IMAGE_PROG=3D"$(type -P btrfs-image)"
+>  export BTRFS_MAP_LOGICAL_PROG=3D$(type -P btrfs-map-logical)
+> +export PARTED_PROG=3D"$(type -P parted)"
+>
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/common/rc b/common/rc
+> index 30c44dddd..8e009aca9 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5375,6 +5375,10 @@ _require_unshare() {
+>                 _notrun "unshare $*: command not found, should be in util=
+-linux"
+>  }
+>
+> +_require_parted() {
+
+These three last functions from common/rc use that style, the { after
+the function name in the same line,
+but everywhere else the { is on a new line, and that's the most common
+style in fstests.
+I wish we had some consistency.
+
+> +       $PARTED_PROG --list &>/dev/null || _notrun "parted: command not f=
+ound"
+
+Why not just call:
+
+_require_command "$PARTED_PROG" parted
+
+Could even do that in the test and no need for a common function in
+this file, as we do in many other tests
+(grep for "'_require_command'" in tests/generic for example).
+
+> +}
+> +
+>  # Return a random file in a directory. A directory is *not* followed
+>  # recursively.
+>  _random_file() {
+> diff --git a/tests/btrfs/311 b/tests/btrfs/311
+> new file mode 100755
+> index 000000000..887c46ba0
+> --- /dev/null
+> +++ b/tests/btrfs/311
+> @@ -0,0 +1,101 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 Meta, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 311
+> +#
+> +# Test an edge case of multi device volume management in btrfs.
+> +# If a device changes devt between mounts of a multi device fs, we can t=
+rick
+> +# btrfs into mounting the same device twice fully (not as a bind mount).=
+ From
+> +# there, it is trivial to induce corruption.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick volume
+
+Missing 'scrub' group.
+
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_test
+> +_require_parted
+> +
+> +_cleanup() {
+> +       cd /
+> +       umount $MNT
+> +       umount $BIND
+> +       losetup -d $DEV0
+> +       losetup -d $DEV1
+> +       losetup -d $DEV2
+> +       rm $IMG0
+> +       rm $IMG1
+> +       rm $IMG2
+> +}
+> +
+> +IMG0=3D$TEST_DIR/$$.img0
+> +IMG1=3D$TEST_DIR/$$.img1
+> +IMG2=3D$TEST_DIR/$$.img2
+> +truncate -s 1G $IMG0
+> +truncate -s 1G $IMG1
+> +truncate -s 1G $IMG2
+> +DEV0=3D$(losetup -f $IMG0 --show)
+> +DEV1=3D$(losetup -f $IMG1 --show)
+> +DEV2=3D$(losetup -f $IMG2 --show)
+> +D0P1=3D$DEV0"p1"
+> +D1P1=3D$DEV1"p1"
+> +MNT=3D$TEST_DIR/mnt
+> +BIND=3D$TEST_DIR/bind
+> +
+> +# Setup partition table with one partition on each device.
+> +$PARTED_PROG $DEV0 'mktable gpt' --script
+> +$PARTED_PROG $DEV1 'mktable gpt' --script
+> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
+> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
+> +
+> +# mkfs with two devices to avoid clearing devices on close
+> +# single raid to allow removing DEV2.
+> +$MKFS_BTRFS_PROG -f -msingle -dsingle $D0P1 $DEV2 &>/dev/null
+
+Please redirect to the $seqres.full instead, and _fail if mkfs fails.
+That's what we do nowadays due to unpleasant surprises in the past.
+
+> +
+> +# Cycle mount the two device fs to populate both devices into the
+> +# stale device cache.
+> +mkdir -p $MNT
+> +mount $D0P1 $MNT
+
+Use the _mount() helper.
+
+> +umount $MNT
+
+We use $UMOUNT_PROG in fstests.
+
+> +
+> +# Swap the partition dev_ts. This leaves the dev_t in the cache out of d=
+ate.
+> +$PARTED_PROG $DEV0 'rm 1' --script
+> +$PARTED_PROG $DEV1 'rm 1' --script
+> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
+> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
+> +
+> +# Mount with mismatched dev_t!
+> +mount $D0P1 $MNT || _fail "failed to remount; don't proceed and do dange=
+rous stuff on raw mount point"
+
+Same here.
+
+> +
+> +# Remove the extra device to bring temp-fsid back in the fray.
+> +$BTRFS_UTIL_PROG device remove $DEV2 $MNT
+> +
+> +# Create the would be bind mount.
+> +mkdir -p $BIND
+> +mount $D0P1 $BIND
+
+Same here.
+
+> +mount_show=3D$($BTRFS_UTIL_PROG filesystem show $MNT)
+> +bind_show=3D$($BTRFS_UTIL_PROG filesystem show $BIND)
+> +# If they're different, we are in trouble.
+> +[ "$mount_show" =3D "$bind_show" ] || echo "$mount_show !=3D $bind_show"
+> +
+> +# Now really prove it by corrupting the first mount with the second.
+> +for i in $(seq 20); do
+> +       $XFS_IO_PROG -f -c "pwrite 0 50M" $MNT/foo.$i >$seqres.full 2>&1
+
+This is overriding the .full file, use >>
+
+> +done
+> +for i in $(seq 20); do
+> +       $XFS_IO_PROG -f -c "pwrite 0 50M" $BIND/foo.$i >$seqres.full 2>&1
+
+Same here, this is overriding the .full file, use >>
+
+> +done
+> +sync
+
+Can we please have a comment mentioning why the sync is needed?
+
+> +find $BIND -type f -delete
+> +sync
+
+Same here.
+
+> +
+> +# This should blow up both mounts, if the writes somehow didn't overlap =
+at all.
+> +$FSTRIM_PROG $BIND
+
+Since it's using the fstrim program and needs trim to be supported,
+the test misses a:
+
+_require_batched_discard "$TEST_DIR"
+
+at the top.
+
+> +echo 3 > /proc/sys/vm/drop_caches
+
+Please add a comment mentioning why we are dropping caches.
+
+> +$BTRFS_UTIL_PROG scrub start -B $MNT >>$seqres.full 2>&1
+
+The test passes whether scrub fails or succeeds, as it's redirecting
+stdout and stderr to the .full file and ignoring the exit status of
+the command.
+
+The ideal fstests way is to put the expected output in the golden
+output file and just call the command without redirecting anything.
+If that's not doable for some reason, at the very least do a (...) ||
+echo "Scrub failed, check $seqres.full for details."
+
+Thanks.
+
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/311.out b/tests/btrfs/311.out
+> new file mode 100644
+> index 000000000..62f253029
+> --- /dev/null
+> +++ b/tests/btrfs/311.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 311
+> +Silence is golden
+> --
+> 2.43.0
+>
+>
