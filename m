@@ -1,145 +1,133 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5018313DB9C
-	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 19:56:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F8CB1BC56;
+	Wed,  6 Mar 2024 22:59:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709755009; cv=none; b=HuXyI0nTmM5p1p1BNqNl9Gdre3Ugp+Z8gRu1O4UGQP9A0+1usLZO7tcmkOp87cY2NmnttsUWzUmqDg0qqRrtq0/7/Mi5RNT4DdjJk4/oLmu0poLqRkDro8s6Bp3Z/fr52HK08uqC2RKxW0VADLMYLInUE3HgDEa/SIIOVC9Grhs=
+	t=1709765986; cv=none; b=jdv0qwM+cvHnrw/q5j7plL5fv9PD3H4ZAZPxoAo6XN/t5H9jnyZJVYOgGYioWvHVc/ByyWCHrzt0TTGhVtz50KkO2kUhsGzMz8mLXT50jgitKBtEj8DwJdPjrAuXE4OA7y/22X4uBl+OWXTgDy9vIl2X/XZctYuZ9RvwvU761VI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709755009; c=relaxed/simple;
-	bh=WwOZGOqufCnM+LmoEghJpWEI1xXGACezWh6JBXJEnow=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=X9wnCt/Db8Bf4mkZGSj6X9YvOyyNHmxnsREfVkZXXZPH/1gVo5cGckwqX6KvwQ1tv177lXqGHNvNiViUcViJrYYPqxiKnGK0HJ8lfGqQgEyn7bB/mS7lYuwgmfN2UwJGOI6dX1FoKXZf1IPitVDBUK0StyQW9XtEppg+evwgwmQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=PBkOrV/i; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1709765986; c=relaxed/simple;
+	bh=n9lp6KzgmSJZX15lATRUaJ4Y7gE2ttqa6DPS8e9OnWU=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=HU0fM67SMkEBsSPp2QQkDJ/90hUAzaTTxOY+PVFrUB+m3wi5L7MXNOwKv431lE8qHpusTUXgnrSYTGRU82gyJQJEJ/h0Nr63ti15DUWOZCtBg9GtFTI79WhSuE/t7gPix1+1B5boPf+pBTm4zxCsx18jLLQ+1SfiS9LipawTU3I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=gpWTi6k6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=mjV8Vewx; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=gpWTi6k6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=mjV8Vewx; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="PBkOrV/i"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709755006;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="gpWTi6k6";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="mjV8Vewx";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="gpWTi6k6";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="mjV8Vewx"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 140665271;
+	Wed,  6 Mar 2024 22:59:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1709765983; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qO3+X1vd5aHEnwQ+NjGahRyBGY8kyboJlNxdOazaIPA=;
-	b=PBkOrV/iwqXs9XrzfMCLToWB7kZVnj5Idk3yeVCdgHs5qI1IurxtEA9mW/ocj4q3tyQpBy
-	C+tnI8Bxq8Z/5GcV0/zmbt2hD9bXVIdxhPROyybk0/WpJz4pHi6hxEQXGrUKambj+ExtzC
-	PNVI5reCBUIO+fGRdb8P9ZRubZEBKgM=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-307-k23uokb7OQWO3oXzyJjF2w-1; Wed, 06 Mar 2024 14:56:44 -0500
-X-MC-Unique: k23uokb7OQWO3oXzyJjF2w-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1dcabec8fddso867515ad.2
-        for <fstests@vger.kernel.org>; Wed, 06 Mar 2024 11:56:43 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709755003; x=1710359803;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=qO3+X1vd5aHEnwQ+NjGahRyBGY8kyboJlNxdOazaIPA=;
-        b=B52ikwF3qsyvLBrEGIr8KSI86Hn92YWw1CXA5lnSEb7BGhlK4nXTo42fQuTUsaO2t8
-         0jTi7s+kGiJPZarp8xrZOkAZNzKHHBBjPRzzI/zwIUoyWWSCdY9BJFaHmFWXC5T9QTMH
-         PdL674BvDtCw1r/FS+MaQ7U3pdzKeX5t1mJu9vqbXnEvCkJOatNI2bk2p6xDCf1z/Aeu
-         r99OEZvY6AYhBd/y5wDbPP/dqZp5uyDkr1Fd+T9EUPrTgfDJvWzeMHVniexNEkk8V0rS
-         RE0I1dzSwIAD5pviSwoCGIafAw2aBLnHpyhx48pfjSlYiKgZSr5fkZV/gjsRAMl6Vi42
-         Vhgw==
-X-Forwarded-Encrypted: i=1; AJvYcCU/z/n1DfszQOpc967N7WAUWQPiPjv+zSkCcIa2nl8fa7u0DOGjm+98eQCcLTQJk4R0IL05GEkt6jkC2p39d9Telfm6K0+rSQ==
-X-Gm-Message-State: AOJu0Yx2rW8PUvY/wfGuN/jqs3JsVygK/yH3lX3RqvKNoMYPA/pJ0hwz
-	5G2IZD/+yd8e1hZG71lyklEaCD/tVgQccDtKPrwRYJZP7gz3sToVU5fwi3cI94MuN6fzL9AfPXV
-	3gFeH52ai0NscXJW1hysJ7P6n3uWvKDrJd/lbms0ixXlEArUZGQlfOFw=
-X-Received: by 2002:a17:903:2444:b0:1dc:d52e:a038 with SMTP id l4-20020a170903244400b001dcd52ea038mr6928129pls.60.1709755002913;
-        Wed, 06 Mar 2024 11:56:42 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IF3pdt14LeJcO+vMvbgZMi+SWe62XrZ0xOE7dTcMXpGNHHQdUwxALtEVQ1SEC6ra+fJ1ZF6dg==
-X-Received: by 2002:a17:903:2444:b0:1dc:d52e:a038 with SMTP id l4-20020a170903244400b001dcd52ea038mr6928109pls.60.1709755002381;
-        Wed, 06 Mar 2024 11:56:42 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id m18-20020a170902f21200b001da34166cd2sm13016388plc.180.2024.03.06.11.56.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Mar 2024 11:56:42 -0800 (PST)
-Date: Thu, 7 Mar 2024 03:56:38 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
-	io-uring@vger.kernel.org
-Subject: Re: [PATCH 3/3] common/rc: force enable io_uring in _require_io_uring
-Message-ID: <20240306195638.tdw7upqc7om7x65b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240306091935.4090399-1-zlang@kernel.org>
- <20240306091935.4090399-4-zlang@kernel.org>
- <20240306154324.GZ6188@frogsfrogsfrogs>
- <x495xxzuzaa.fsf@segfault.usersys.redhat.com>
+	bh=Xrop4YUdGRKvNQXA/6BgUnP3lgV2h11ozYJeVBha7MY=;
+	b=gpWTi6k6T2tP5n18kwFvxQamMJ72+SAqsKIFsoDra5AqA9kQBCt8RyEbqMVp9poB+71r2Z
+	TCvxDK3dD9qP3s0iNApYeg3QE05Jda+PgWrIuQ+C33k7/eGH/LNGU6kOvOrpGw8Q2S99Kb
+	nLMeQkO0DF3yHIsZ2Mv59GY1PIfAuFc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1709765983;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Xrop4YUdGRKvNQXA/6BgUnP3lgV2h11ozYJeVBha7MY=;
+	b=mjV8VewxMKVH8OlLYZ17Z3Ti2XnjFCSRm9ClrYH2J0t2CWk+8vf1huPFTsqrhmYOo9iWbH
+	QckUexC+TJ4VFvAw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1709765983; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Xrop4YUdGRKvNQXA/6BgUnP3lgV2h11ozYJeVBha7MY=;
+	b=gpWTi6k6T2tP5n18kwFvxQamMJ72+SAqsKIFsoDra5AqA9kQBCt8RyEbqMVp9poB+71r2Z
+	TCvxDK3dD9qP3s0iNApYeg3QE05Jda+PgWrIuQ+C33k7/eGH/LNGU6kOvOrpGw8Q2S99Kb
+	nLMeQkO0DF3yHIsZ2Mv59GY1PIfAuFc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1709765983;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Xrop4YUdGRKvNQXA/6BgUnP3lgV2h11ozYJeVBha7MY=;
+	b=mjV8VewxMKVH8OlLYZ17Z3Ti2XnjFCSRm9ClrYH2J0t2CWk+8vf1huPFTsqrhmYOo9iWbH
+	QckUexC+TJ4VFvAw==
+Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 1E8C11377D;
+	Wed,  6 Mar 2024 22:59:40 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap2.dmz-prg2.suse.org with ESMTPSA
+	id 5UZZMFz16GWzXAAAn2gu4w
+	(envelope-from <ddiss@suse.de>); Wed, 06 Mar 2024 22:59:40 +0000
+Date: Thu, 7 Mar 2024 09:59:08 +1100
+From: David Disseldorp <ddiss@suse.de>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana
+ <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs: fix grep warning at
+ _require_btrfs_mkfs_uuid_option()
+Message-ID: <20240307095908.34913ff0@echidna>
+In-Reply-To: <ef2df19486ef71adccd14b3df0bf475ecc7f3b38.1709737287.git.fdmanana@suse.com>
+References: <ef2df19486ef71adccd14b3df0bf475ecc7f3b38.1709737287.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <x495xxzuzaa.fsf@segfault.usersys.redhat.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spam-Level: 
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=gpWTi6k6;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=mjV8Vewx
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Spamd-Result: default: False [-1.05 / 50.00];
+	 ARC_NA(0.00)[];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 FROM_HAS_DN(0.00)[];
+	 RCPT_COUNT_THREE(0.00)[4];
+	 TO_DN_SOME(0.00)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 MIME_GOOD(-0.10)[text/plain];
+	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 NEURAL_HAM_SHORT(-0.20)[-1.000];
+	 RCVD_COUNT_THREE(0.00)[3];
+	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 DKIM_TRACE(0.00)[suse.de:+];
+	 MX_GOOD(-0.01)[];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim,suse.de:email];
+	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
+	 MID_RHS_NOT_FQDN(0.50)[];
+	 RCVD_TLS_ALL(0.00)[];
+	 BAYES_HAM(-0.04)[57.52%]
+X-Spam-Score: -1.05
+X-Rspamd-Queue-Id: 140665271
+X-Spam-Flag: NO
 
-On Wed, Mar 06, 2024 at 10:59:25AM -0500, Jeff Moyer wrote:
-> "Darrick J. Wong" <djwong@kernel.org> writes:
-> 
-> > On Wed, Mar 06, 2024 at 05:19:35PM +0800, Zorro Lang wrote:
-> >> If kernel supports io_uring, userspace still can/might disable that
-> >> supporting by set /proc/sys/kernel/io_uring_disabled=2. Let's set
-> >> it to 0, to always enable io_uring (ignore error if there's not
-> >> that file).
-> >> 
-> >> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> >> ---
-> >>  common/rc | 3 +++
-> >>  1 file changed, 3 insertions(+)
-> >> 
-> >> diff --git a/common/rc b/common/rc
-> >> index 50dde313..966c92e3 100644
-> >> --- a/common/rc
-> >> +++ b/common/rc
-> >> @@ -2317,6 +2317,9 @@ _require_aiodio()
-> >>  # this test requires that the kernel supports IO_URING
-> >>  _require_io_uring()
-> >>  {
-> >> +	# Force enable io_uring if kernel supports it
-> >> +	sysctl -w kernel.io_uring_disabled=0 &> /dev/null
-> >
-> > _require_XXX functions are supposed to be predicates that _notrun the
-> > test if XXX isn't configured or available.  Shouldn't this be:
-> >
-> > 	local io_uring_knob="$(sysctl --values kernel.io_uring_disabled)"
-> > 	test "$io_uring_knob" -ne 0 && _notrun "io_uring disabled by admin"
-> 
-> That sounds like a good option to me.
-> 
-> > Alternately -- if it _is_ ok to turn this knob, then there should be a
-> > cleanup method to put it back after the test.
-> 
-> I think it would be better not to change the setting, especially if the
-> admin had disabled it.
+On Wed,  6 Mar 2024 15:01:57 +0000, fdmanana@kernel.org wrote:
+...
+>  	cnt=$($MKFS_BTRFS_PROG --help 2>&1 | \
+> -				grep -E --count "\-\-uuid|\-\-device-uuid")
+> +				grep -E --count -- "--uuid|--device-uuid")
+>  	if [ $cnt != 2 ]; then
+>  		_notrun "Require $MKFS_BTRFS_PROG with --uuid and --device-uuid options"
+>  	fi
 
-As a testing environment/system, even if fstests doesn't touch the io_uring_disabled
-sysctl, the testers should care about that before doing his test. So the fstests
-users might need to change the io_uring_disabled=0 manually, or do it in their CI
-test scripts. Maybe we should leave this job to the users.
-
-Thanks,
-Zorro
-
-> 
-> Cheers,
-> Jeff
-> 
-> >
-> > --D
-> >
-> >> +
-> >>  	$here/src/feature -R
-> >>  	case $? in
-> >>  	0)
-> >> -- 
-> >> 2.43.0
-> >> 
-> >> 
-> 
-> 
+Reviewed-by: David Disseldorp <ddiss@suse.de>
 
