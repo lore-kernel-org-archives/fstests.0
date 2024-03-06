@@ -1,118 +1,148 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3653C60912
-	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 15:59:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6399A133425
+	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 19:34:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709740772; cv=none; b=HPjkfcwst5l62+RaT+YHEa4NoF24DjPNSl0c/c7Sq4ZvTrc9VssULvBAvxOM4Pp8omaSHrJ45d9JBHCkiOarO3JZ4yyzgP1CzO+0CLlyR/4bwdYUTEz4/GzqgnjJagzHasmq52LeG739S+BgRb6/57wSrYMv7m9odDyEK9DqeTg=
+	t=1709753655; cv=none; b=cPl6zPmx+kViQAWIoqLGfuNKVyNTTRyvjSixE2Otrbs/Rp7HVzLJuAZ7MTlJM6F90DU5BL9xlsbcFMRxHfA6f934gbqpHVB1104l61mjcJCwuQe33v5rLf9qCVXsldFctZrHsYNOBrYduV7PhcRIusWbN10X3ruv61tYDV4yYXM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709740772; c=relaxed/simple;
-	bh=MmNU8B5WZ1uxg9hzl7F9DTcdKIes0O/zojf1g0ttm/A=;
-	h=From:To:Cc:Subject:References:Date:In-Reply-To:Message-ID:
-	 MIME-Version:Content-Type; b=K/lr8Abq6J4ts5X050rf2wrZoL/eA1Yrblashb1oaHS8c1dKbrfwhPRj0UHCZkuyJP8NKo9UdFoIoTIHdLWXnb8l3u3DhCbMAX2aiAlYSEo/0LPOlf7xZY4Yam4FwqRdFfnM6S2mkkvYTWsGAKfzNTuw3yXXG+6dDVITvS1KkAE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UqvZCObD; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1709753655; c=relaxed/simple;
+	bh=SxfVJURIzirgXEki2Q1gUtvHaP3zQ5tvvv5gZnyQEG8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=uDLEehPGbRM+hsOfLrd9fJ5UNiLSVBrtVytY29SMOwj5GHe/ckv02706pwJT/AymROqVu+r4ekHznmjQSGrgbMzZ+0VP9A29vdJe2zCNzpDVoNhcXrKHQoYGhPwpqwXuNy5MM1oirmpn78NNiN7sXOq0hqYuXmy3xDdsIm9wuI8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Whooe1W+; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UqvZCObD"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Whooe1W+"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709740770;
+	s=mimecast20190719; t=1709753652;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=bH0P49jS3FWbQfHXDiYtOjvFX14vKajotnvHNPLkcuQ=;
-	b=UqvZCObDkrhwhFKstiTnR4W+zmW3qjzEDeA+0bDkGYKppPGWMTu9RpkKY+lrUOvD70cFeL
-	ExVilbixKhpTw5f2aUWjuVEP3L0I6vyzMdWQTlTs9PEAuCOCw9BuT1tjHEDUcF9LrdOYf6
-	+ly4s3TcgPb39Fcc9lIRT2Qsw3iZ6xI=
-Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
- by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-657-BU_t23jiPlCKz1XRGR5__w-1; Wed,
- 06 Mar 2024 10:59:27 -0500
-X-MC-Unique: BU_t23jiPlCKz1XRGR5__w-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 931653C025B6;
-	Wed,  6 Mar 2024 15:59:26 +0000 (UTC)
-Received: from segfault.usersys.redhat.com (unknown [10.22.10.44])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id 568951C060D6;
-	Wed,  6 Mar 2024 15:59:26 +0000 (UTC)
-From: Jeff Moyer <jmoyer@redhat.com>
+	bh=VbAJeOilxQrVj/80d5nm/++aGvn6LYNYkNZHnrvuyCM=;
+	b=Whooe1W+iO0Ulxw+YIVYJcJ4XfXUF+Jez+8JXk49PgAK87udfeOvfU86SW95+Dl7yygFgH
+	YGGMPUudiT9vCVBlR0lkNcgAzciYMbgx00HAiCPdoLgeOHzrCGiaGnfaLJG83Spv8QcB/7
+	ueIQK3aFJ+UjBk3bajOEH71xh2FBjqg=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-182-_gl4n9NcOvel2G5JbHHvqQ-1; Wed, 06 Mar 2024 14:34:10 -0500
+X-MC-Unique: _gl4n9NcOvel2G5JbHHvqQ-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1dc157e4778so928495ad.0
+        for <fstests@vger.kernel.org>; Wed, 06 Mar 2024 11:34:10 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1709753650; x=1710358450;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VbAJeOilxQrVj/80d5nm/++aGvn6LYNYkNZHnrvuyCM=;
+        b=W5Sbxzzi9oLrVJ2EihTMfHx9DfP76DA/sB1q70K0aOWDO187onFPh4LkCkolg8FIet
+         0cMzJJvHL7J7CLYPkLI9qguTXAuCK09AocrSi1TB4tX/ngtyU6gy0tzrYlF+yURU9cFm
+         w51/hFHGtlvn+L+Ge+f4AIplzXBeZu77P5K0LmMewSP7kVl/qxaQJVMaZ2ZD6jbvLAa5
+         2yG+eFjP77gZ4Ku8ugDmI64QWSRQA0G1nQLpOmPzOAymsA0MMir7SeynbreWQk1kvwV9
+         RRzsai/CD5xBllZFI+aKknUyzNTe+B4aAQW3dI+tNvAj3VsOj4yo17s4ePEJXExvuQX6
+         FJiw==
+X-Gm-Message-State: AOJu0YzP5YeR7cQsUWkijtj4FQNrtEi7uFEkxeiFn9KQLvuvbYdUzEun
+	3+jYT+o5Yt3ggIXzJCA5ALQHZ7JX0G4dt2fDEtN3+Q2zJ4+3cn7ibZyI1Uh3mOynkpf7rVb58L6
+	/GJt8t5FSpFbJD1xRnslXpUBzAJ88J4wrQXcgKMjJ7LHJk609gco46Io=
+X-Received: by 2002:a17:902:8bc9:b0:1db:f952:eebf with SMTP id r9-20020a1709028bc900b001dbf952eebfmr5673842plo.44.1709753649605;
+        Wed, 06 Mar 2024 11:34:09 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEWUyGcsbKzjZYh7Y/HcUnkwnNTWxR58rpCHLc8BJPLSI18GJCeamj6Oyk/s1kDQGkFvdS9bA==
+X-Received: by 2002:a17:902:8bc9:b0:1db:f952:eebf with SMTP id r9-20020a1709028bc900b001dbf952eebfmr5673802plo.44.1709753648885;
+        Wed, 06 Mar 2024 11:34:08 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id kw14-20020a170902f90e00b001db70183611sm12984720plb.270.2024.03.06.11.34.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Mar 2024 11:34:08 -0800 (PST)
+Date: Thu, 7 Mar 2024 03:34:04 +0800
+From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>,  fstests@vger.kernel.org,
-  io-uring@vger.kernel.org
-Subject: Re: [PATCH 3/3] common/rc: force enable io_uring in _require_io_uring
+Cc: fstests@vger.kernel.org, io-uring@vger.kernel.org
+Subject: Re: [PATCH 1/3] fsstress: check io_uring_queue_init errno properly
+Message-ID: <20240306193404.oc34ks4p5ez37s57@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20240306091935.4090399-1-zlang@kernel.org>
-	<20240306091935.4090399-4-zlang@kernel.org>
-	<20240306154324.GZ6188@frogsfrogsfrogs>
-X-PGP-KeyID: 1F78E1B4
-X-PGP-CertKey: F6FE 280D 8293 F72C 65FD  5A58 1FF8 A7CA 1F78 E1B4
-Date: Wed, 06 Mar 2024 10:59:25 -0500
-In-Reply-To: <20240306154324.GZ6188@frogsfrogsfrogs> (Darrick J. Wong's
-	message of "Wed, 6 Mar 2024 07:43:24 -0800")
-Message-ID: <x495xxzuzaa.fsf@segfault.usersys.redhat.com>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.2 (gnu/linux)
+ <20240306091935.4090399-2-zlang@kernel.org>
+ <20240306155357.GA6188@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240306155357.GA6188@frogsfrogsfrogs>
 
-"Darrick J. Wong" <djwong@kernel.org> writes:
+On Wed, Mar 06, 2024 at 07:53:57AM -0800, Darrick J. Wong wrote:
+> On Wed, Mar 06, 2024 at 05:19:33PM +0800, Zorro Lang wrote:
+> > As the manual of io_uring_queue_init says "io_uring_queue_init(3)
+> > returns 0 on success and -errno on failure". We should check if the
+> > return value is -ENOSYS, not the errno.
+> 
+> /me checks liburing source code and sees that the library returns a
+> negative error code without touching errno (the semi global error code
+> variable) at all.  That's an unfortunate quirk of the manpage, but this
+> code here is correct...
 
-> On Wed, Mar 06, 2024 at 05:19:35PM +0800, Zorro Lang wrote:
->> If kernel supports io_uring, userspace still can/might disable that
->> supporting by set /proc/sys/kernel/io_uring_disabled=2. Let's set
->> it to 0, to always enable io_uring (ignore error if there's not
->> that file).
->> 
->> Signed-off-by: Zorro Lang <zlang@kernel.org>
->> ---
->>  common/rc | 3 +++
->>  1 file changed, 3 insertions(+)
->> 
->> diff --git a/common/rc b/common/rc
->> index 50dde313..966c92e3 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -2317,6 +2317,9 @@ _require_aiodio()
->>  # this test requires that the kernel supports IO_URING
->>  _require_io_uring()
->>  {
->> +	# Force enable io_uring if kernel supports it
->> +	sysctl -w kernel.io_uring_disabled=0 &> /dev/null
->
-> _require_XXX functions are supposed to be predicates that _notrun the
-> test if XXX isn't configured or available.  Shouldn't this be:
->
-> 	local io_uring_knob="$(sysctl --values kernel.io_uring_disabled)"
-> 	test "$io_uring_knob" -ne 0 && _notrun "io_uring disabled by admin"
+Yeah, that confuse me too, especially some io_uring functions set errno,
+some return -errno ...
 
-That sounds like a good option to me.
+> 
+> > Fixes: d15b1721f284 ("ltp/fsstress: don't fail on io_uring ENOSYS")
+> > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > ---
+> >  ltp/fsstress.c | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index 63c75767..482395c4 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -763,8 +763,8 @@ int main(int argc, char **argv)
+> >  #ifdef URING
+> >  			have_io_uring = true;
+> >  			/* If ENOSYS, just ignore uring, other errors are fatal. */
+> > -			if (io_uring_queue_init(URING_ENTRIES, &ring, 0)) {
+> > -				if (errno == ENOSYS) {
+> > +			if ((c = io_uring_queue_init(URING_ENTRIES, &ring, 0)) != 0) {
+> > +				if (c == -ENOSYS) {
+> >  					have_io_uring = false;
+> >  				} else {
+> >  					fprintf(stderr, "io_uring_queue_init failed\n");
+> 
+> But why not:
+> 
+> 			c = io_uring_queue_init(...);
+> 			switch (c) {
+> 			case 0:
+> 				have_io_uring = true;
+> 				break;
+> 			case -ENOSYS:
+> 				have_io_uring = false;
+> 				break;
+> 			default:
+> 				fprintf(stderr, "io_uring_queue_init failed\n");
+> 				break;
+> 			}
+> 
+> Especially since you add another case in the next patch?
 
-> Alternately -- if it _is_ ok to turn this knob, then there should be a
-> cleanup method to put it back after the test.
+Sure, that looks more clearly, I'll change this part. Thanks!
 
-I think it would be better not to change the setting, especially if the
-admin had disabled it.
-
-Cheers,
-Jeff
-
->
+> 
+> I'll leave the style nits up to you though:
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> 
 > --D
->
->> +
->>  	$here/src/feature -R
->>  	case $? in
->>  	0)
->> -- 
->> 2.43.0
->> 
->> 
+> 
+> 
+> --D
+> 
+> > -- 
+> > 2.43.0
+> > 
+> > 
+> 
 
