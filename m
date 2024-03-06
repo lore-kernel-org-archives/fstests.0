@@ -1,66 +1,42 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62E631BC26;
-	Tue,  5 Mar 2024 18:59:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3A661BF3B
+	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 01:22:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709665175; cv=none; b=IJec0boMkrtq7K6bHh+5y293TtrKO9i+cCjK0//tHl/hucHzxLW9vw4ZbEFo6odqK8z0CaJzXYm0huf0wXmvVt0dmK1C/J8GJJhBEGIkOQXGQJo+8dMPHAZry6mpYCQ1y8hksTfjAwn3MbTNK4SjGyWjQn7x6BGsRDyFYuST3TY=
+	t=1709688175; cv=none; b=CnUetzhIyjepEMH3Z13+xoeL7aq7nKYdcdFEyAP4ra0eD0RMSLSJyCJq9t0qUDzmILpya59VZ7JCne+Vg3Q1VFxSU8ROk3dYGkZSaT28T9qL4YO3HJKDEthn/uq6QR4gT/qONEsYy7DERCMTyvyqsSlL4oeJNyTlK7ShWa7CydU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709665175; c=relaxed/simple;
-	bh=bEPViQRIALUwLRmHbD4kPtiF/bNpw/Bj6eDl1xFqdsc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bUx3JV0n17NE6EEhj4PUpDaAhBdhYdxWHSg+80OOXBaplEAC7xwt3AbkNb6GQtPC2oqanK3/aJbynEKEHaxKA9YzCHxrkzmk1af1dg4utjVurZbTFkPDqPf4/1Jq9/LoaeFM8DGIHHZHJpwXnOZ0ngZuM1WuVefMcuR2bK7Y3rE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=oHGVpTYT; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=oHGVpTYT; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1709688175; c=relaxed/simple;
+	bh=HfZ2cf411PMQaEI5hxMVHdIWGe96vH82XhotXvef7Ew=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=mUIS+MKN5a4bum/YyI4rB9V1Pzqf9hkYcpVektIKabo4klZ47D2ojK890Smm4+f37VVZktnnFLs5G/zxzniWvX8zCOJTH7H2av9R08KZXMgwmoNP6AR4byUBwr+k3gWaIYEJudMYzTI6xLXMn372fXisjlgnamOrf9oC0Fn7rsQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vz+wv1Pr; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="oHGVpTYT";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="oHGVpTYT"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 65CC134B4C;
-	Tue,  5 Mar 2024 18:59:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1709665169; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2vKSPm1DbA2X+OhDsfsV30BH30GefQh7qeubHQ5HUhI=;
-	b=oHGVpTYTx8t2V+TeY7aPmR0fIevyZx6Ex424561POCvjJ9jXUSkBYE7M1pHfC8ryC2Oj3J
-	jNMS64RTV36npt+8tiT6xnfLF34J2GG9wnt3qmmJmJivvGzbimd996rOG+CbRmRFlBXLMl
-	veqbOwsFryBbAkDdLE4xHG8Q+Xw775Q=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1709665169; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2vKSPm1DbA2X+OhDsfsV30BH30GefQh7qeubHQ5HUhI=;
-	b=oHGVpTYTx8t2V+TeY7aPmR0fIevyZx6Ex424561POCvjJ9jXUSkBYE7M1pHfC8ryC2Oj3J
-	jNMS64RTV36npt+8tiT6xnfLF34J2GG9wnt3qmmJmJivvGzbimd996rOG+CbRmRFlBXLMl
-	veqbOwsFryBbAkDdLE4xHG8Q+Xw775Q=
-Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 5F4E613466;
-	Tue,  5 Mar 2024 18:59:29 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id 4ApBF5Fr52VQBQAAn2gu4w
-	(envelope-from <dsterba@suse.com>); Tue, 05 Mar 2024 18:59:29 +0000
-From: David Sterba <dsterba@suse.com>
-To: fstests@vger.kernel.org
-Cc: Josef Bacik <josef@toxicpanda.com>,
-	linux-btrfs@vger.kernel.org
-Subject: [PATCH 8/8] btrfs/400: test normal qgroup operations in a compress friendly way
-Date: Tue,  5 Mar 2024 19:52:24 +0100
-Message-ID: <7d8ea24daf7f62ff620f8ebca9e81aa9d6021d01.1709664047.git.dsterba@suse.com>
-X-Mailer: git-send-email 2.42.1
-In-Reply-To: <cover.1709664047.git.dsterba@suse.com>
-References: <cover.1709664047.git.dsterba@suse.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vz+wv1Pr"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=5/s3YYegi2uefwhNdSbPPv3H1w1kEfchnzw69RfAvIo=; b=vz+wv1Pr6WzdPGyGNt1UC8FQvn
+	z4NHKO0qbdAEBQpnvjTqHCvLqlfdxr46VPAcROXYRVGAC/2X/YRZETjnlmzUBG39xE9QGgpZfMnq1
+	Sh6zY6602/hv2CwcpBY1+fYZTcGNTEAsbXKfnWe95dMnX9N712fP3IAS9Lt1wJWdmsZgAXoREywmM
+	3QJb/NwYvXrMF7O6AX/R3IJtNpmf/dLOZXevajYGKvYznc/pEYyYZo1ypC0bCdwczuMYjPaibVj1G
+	nhnEYB/vDTAzzOw4HJTIv553LKTfjclJIf4QFb9qhtDuGKe9FSwnZ6N9JTR2hYUzW3A+ev685pZeR
+	th4JubxQ==;
+Received: from [66.60.99.14] (helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rhfzb-0000000FrFn-2tGy;
+	Wed, 06 Mar 2024 01:22:48 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] shared/298: call fs commands on the loop device
+Date: Tue,  5 Mar 2024 18:22:46 -0700
+Message-Id: <20240306012246.162729-1-hch@lst.de>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -68,298 +44,84 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=oHGVpTYT
-X-Spamd-Result: default: False [1.69 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 TO_DN_SOME(0.00)[];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 DKIM_TRACE(0.00)[suse.com:+];
-	 MX_GOOD(-0.01)[];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-3.00)[100.00%]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Score: 1.69
-X-Rspamd-Queue-Id: 65CC134B4C
-X-Spam-Level: *
-X-Spam-Flag: NO
-X-Spamd-Bar: +
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Josef Bacik <josef@toxicpanda.com>
+In general calling fs tools is best done on the block device used for
+the file system and not the backing device of a loop file.  Thus switch
+shared/298 to call all fs commands on the loop device.  Also add a
+common on why the xfs_io fiemap command is called on the backing file,
+and to have a good place for the comment stop passing the backing file
+as the argument to get_holes function and just use it implicitly as
+the other helpers to with the loop device.
 
-btrfs/022 currently fails if you are testing with -o compress because it
-does a limit exceed test which will pass with compression on.
-
-However the other functionality this test tests is completely acceptable
-with compression enabled.  Handle this by breaking the test into two
-tests, one that simply tests the qgroup exceed limits test that requires
-no compression, and the rest of the tests that do not have the no
-compression restriction.
-
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- tests/btrfs/022     |  86 ++---------------------------------
- tests/btrfs/400     | 107 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/400.out |   2 +
- 3 files changed, 112 insertions(+), 83 deletions(-)
- create mode 100755 tests/btrfs/400
- create mode 100644 tests/btrfs/400.out
+ tests/shared/298 | 18 +++++++++++-------
+ 1 file changed, 11 insertions(+), 7 deletions(-)
 
-diff --git a/tests/btrfs/022 b/tests/btrfs/022
-index b1ef2fdf787640..32ad80bf9c64e8 100755
---- a/tests/btrfs/022
-+++ b/tests/btrfs/022
-@@ -4,7 +4,7 @@
- #
- # FS QA Test No. 022
- #
--# Test the basic functionality of qgroups
-+# Test the basic qgroup exceed case
- #
- . ./common/preamble
- _begin_fstest auto qgroup limit
-@@ -17,59 +17,8 @@ _require_scratch
- _require_qgroup_rescan
- _require_btrfs_qgroup_report
- 
--# Test to make sure we can actually turn it on and it makes sense
--_basic_test()
--{
--	echo "=== basic test ===" >> $seqres.full
--	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
--	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
--	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
--	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
--	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep $subvolid >> \
--		$seqres.full 2>&1
--	[ $? -eq 0 ] || _fail "couldn't find our subvols quota group"
--	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
--		$FSSTRESS_AVOID
--	_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT/a \
--		$SCRATCH_MNT/b
--
--	# the shared values of both the original subvol and snapshot should
--	# match
--	a_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
--	a_shared=$(echo $a_shared | $AWK_PROG '{ print $2 }')
--	echo "subvol a id=$subvolid" >> $seqres.full
--	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
--	echo "subvol b id=$subvolid" >> $seqres.full
--	b_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
--	b_shared=$(echo $b_shared | $AWK_PROG '{ print $2 }')
--	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT >> $seqres.full
--	[ $b_shared -eq $a_shared ] || _fail "shared values don't match"
--}
--
--#enable quotas, do some work, check our values and then rescan and make sure we
--#come up with the same answer
--_rescan_test()
--{
--	echo "=== rescan test ===" >> $seqres.full
--	# first with a blank subvol
--	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
--	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
--	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
--	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
--		$FSSTRESS_AVOID
--	sync
--	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
--	echo "qgroup values before rescan: $output" >> $seqres.full
--	refer=$(echo $output | $AWK_PROG '{ print $2 }')
--	excl=$(echo $output | $AWK_PROG '{ print $3 }')
--	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
--	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
--	echo "qgroup values after rescan: $output" >> $seqres.full
--	[ $refer -eq $(echo $output | $AWK_PROG '{ print $2 }') ] || \
--		_fail "reference values don't match after rescan"
--	[ $excl -eq $(echo $output | $AWK_PROG '{ print $3 }') ] || \
--		_fail "exclusive values don't match after rescan"
--}
-+# This test requires specific data usage, skip if we have compression enabled
-+_require_no_compress
- 
- #basic exceed limit testing
- _limit_test_exceed()
-@@ -82,43 +31,14 @@ _limit_test_exceed()
- 	_ddt of=$SCRATCH_MNT/a/file bs=10M count=1 >> $seqres.full 2>&1
- 	[ $? -ne 0 ] || _fail "quota should have limited us"
+diff --git a/tests/shared/298 b/tests/shared/298
+index a6e368143..1d4e8d943 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -46,7 +46,11 @@ get_holes()
+ 	# to established convention which requires the filesystem to be
+ 	# unmounted while we probe the underlying file.
+ 	$UMOUNT_PROG $loop_mnt
+-	$XFS_IO_PROG -F -c fiemap $1 | grep hole | $SED_PROG 's/.*\[\(.*\)\.\.\(.*\)\].*/\1 \2/'
++
++	# FIEMAP only works on regular files, so call it on the backing file
++	# and not the loop device like everything else
++	$XFS_IO_PROG -F -c fiemap $img_file | grep hole | \
++		$SED_PROG 's/.*\[\(.*\)\.\.\(.*\)\].*/\1 \2/'
+ 	_mount $loop_dev $loop_mnt
  }
--
--#basic noexceed limit testing
--_limit_test_noexceed()
--{
--	echo "=== limit not exceed test ===" >> $seqres.full
--	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
--	_run_btrfs_util_prog quota enable $SCRATCH_MNT
--	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
--	_run_btrfs_util_prog qgroup limit 5M 0/$subvolid $SCRATCH_MNT
--	_ddt of=$SCRATCH_MNT/a/file bs=4M count=1 >> $seqres.full 2>&1
--	[ $? -eq 0 ] || _fail "should have been allowed to write"
--}
--
- units=`_btrfs_qgroup_units`
  
--_scratch_mkfs > /dev/null 2>&1
--_scratch_mount
--_basic_test
--_scratch_unmount
--_check_scratch_fs
--
--_scratch_mkfs > /dev/null 2>&1
--_scratch_mount
--_rescan_test
--_scratch_unmount
--_check_scratch_fs
--
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- _limit_test_exceed
- _scratch_unmount
- _check_scratch_fs
+@@ -55,7 +59,7 @@ get_free_sectors()
+ 	case $FSTYP in
+ 	ext4)
+ 	$UMOUNT_PROG $loop_mnt
+-	$DUMPE2FS_PROG $img_file  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
++	$DUMPE2FS_PROG $loop_dev  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
+ 		tr ',' '\n' | $SED_PROG 's/^ //' | \
+ 		$AWK_PROG -v spb=$sectors_per_block 'BEGIN{FS="-"};
+ 		     NF {
+@@ -77,15 +81,15 @@ get_free_sectors()
+ 		local device_size=$($BTRFS_UTIL_PROG filesystem show --raw $loop_mnt 2>&1 \
+ 			| sed -n "s/^.*size \([0-9]*\).*$/\1/p")
  
--_scratch_mkfs > /dev/null 2>&1
--_scratch_mount
--_limit_test_noexceed
--
- # success, all done
- echo "Silence is golden"
- status=0
-diff --git a/tests/btrfs/400 b/tests/btrfs/400
-new file mode 100755
-index 00000000000000..ad0363fb72d186
---- /dev/null
-+++ b/tests/btrfs/400
-@@ -0,0 +1,107 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2021 Facebook.  All Rights Reserved.
-+#
-+# FS QA Test No. 400
-+#
-+# Test qgroups to validate the creation works, the counters are sane, rescan
-+# works, and we do not get failures when we write less than the limit amount.
-+#
-+. ./common/preamble
-+_begin_fstest auto qgroup limit
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_supported_fs btrfs
-+_require_scratch
-+_require_btrfs_qgroup_report
-+
-+# Test to make sure we can actually turn it on and it makes sense
-+_basic_test()
-+{
-+	echo "=== basic test ===" >> $seqres.full
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep $subvolid >> \
-+		$seqres.full 2>&1
-+	[ $? -eq 0 ] || _fail "couldn't find our subvols quota group"
-+	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
-+		$FSSTRESS_AVOID
-+	_run_btrfs_util_prog subvolume snapshot $SCRATCH_MNT/a \
-+		$SCRATCH_MNT/b
-+
-+	# the shared values of both the original subvol and snapshot should
-+	# match
-+	a_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	a_shared=$(echo $a_shared | $AWK_PROG '{ print $2 }')
-+	echo "subvol a id=$subvolid" >> $seqres.full
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT b)
-+	echo "subvol b id=$subvolid" >> $seqres.full
-+	b_shared=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	b_shared=$(echo $b_shared | $AWK_PROG '{ print $2 }')
-+	$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT >> $seqres.full
-+	[ $b_shared -eq $a_shared ] || _fail "shared values don't match"
-+}
-+
-+#enable quotas, do some work, check our values and then rescan and make sure we
-+#come up with the same answer
-+_rescan_test()
-+{
-+	echo "=== rescan test ===" >> $seqres.full
-+	# first with a blank subvol
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT/a
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	run_check $FSSTRESS_PROG -d $SCRATCH_MNT/a -w -p 1 -n 2000 \
-+		$FSSTRESS_AVOID
-+	sync
-+	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	echo "qgroup values before rescan: $output" >> $seqres.full
-+	refer=$(echo $output | $AWK_PROG '{ print $2 }')
-+	excl=$(echo $output | $AWK_PROG '{ print $3 }')
-+	_run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
-+	output=$($BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | grep "0/$subvolid")
-+	echo "qgroup values after rescan: $output" >> $seqres.full
-+	[ $refer -eq $(echo $output | $AWK_PROG '{ print $2 }') ] || \
-+		_fail "reference values don't match after rescan"
-+	[ $excl -eq $(echo $output | $AWK_PROG '{ print $3 }') ] || \
-+		_fail "exclusive values don't match after rescan"
-+}
-+
-+#basic noexceed limit testing
-+_limit_test_noexceed()
-+{
-+	echo "=== limit not exceed test ===" >> $seqres.full
-+	_run_btrfs_util_prog subvolume create $SCRATCH_MNT/a
-+	_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+	subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT a)
-+	_run_btrfs_util_prog qgroup limit 5M 0/$subvolid $SCRATCH_MNT
-+	_ddt of=$SCRATCH_MNT/a/file bs=4M count=1 >> $seqres.full 2>&1
-+	[ $? -eq 0 ] || _fail "should have been allowed to write"
-+}
-+
-+units=`_btrfs_qgroup_units`
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_basic_test
-+_scratch_unmount
-+_check_scratch_fs
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_rescan_test
-+_scratch_unmount
-+_check_scratch_fs
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+_limit_test_noexceed
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/400.out b/tests/btrfs/400.out
-new file mode 100644
-index 00000000000000..c940c6206bcd81
---- /dev/null
-+++ b/tests/btrfs/400.out
-@@ -0,0 +1,2 @@
-+QA output created by 400
-+Silence is golden
+-		local nodesize=$($BTRFS_UTIL_PROG inspect-internal dump-super $img_file  \
++		local nodesize=$($BTRFS_UTIL_PROG inspect-internal dump-super $loop_dev \
+ 			| sed -n 's/nodesize\s*\(.*\)/\1/p')
+ 
+ 		# Get holes within block groups
+-		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $img_file \
++		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $loop_dev \
+ 			| $AWK_PROG -v sectorsize=512 -v nodesize=$nodesize -f $here/src/parse-extent-tree.awk
+ 
+ 		# Get holes within unallocated space on disk
+-		$BTRFS_UTIL_PROG inspect-internal dump-tree -t dev $img_file \
++		$BTRFS_UTIL_PROG inspect-internal dump-tree -t dev $loop_dev \
+ 			| $AWK_PROG -v sectorsize=512 -v devsize=$device_size -f $here/src/parse-dev-tree.awk
+ 
+ 	;;
+@@ -159,7 +163,7 @@ done
+ 
+ # Get reference fiemap, this can contain i.e. uninitialized inode table
+ sync
+-get_holes $img_file > $fiemap_ref
++get_holes > $fiemap_ref
+ 
+ # Delete some files
+ find $loop_mnt -type f -print | $AWK_PROG \
+@@ -173,7 +177,7 @@ echo "done."
+ echo -n "Detecting interesting holes in image..."
+ # Get after-trim fiemap
+ sync
+-get_holes $img_file > $fiemap_after
++get_holes > $fiemap_after
+ echo "done."
+ 
+ echo -n "Comparing holes to the reported space from FS..."
 -- 
-2.42.1
+2.39.2
 
