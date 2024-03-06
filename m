@@ -1,57 +1,58 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48E28137938
-	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 15:57:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3653C60912
+	for <fstests@vger.kernel.org>; Wed,  6 Mar 2024 15:59:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709740634; cv=none; b=kBpY3DDk4hBaJF/SYNLOe8LNS1miHAnImgdpwTUQDY5gcDGj3ghIZIihBQddX6rnxLshf0LkF6Y11QQaTM0MvVx/cQvUOgaMtprUsZsR0XnLppR/4Sb0Zp6hRe3OLWj4dWFuLEv+gDONZLiiMiFemuo1FPve6lVOmuOWXs5Bf4s=
+	t=1709740772; cv=none; b=HPjkfcwst5l62+RaT+YHEa4NoF24DjPNSl0c/c7Sq4ZvTrc9VssULvBAvxOM4Pp8omaSHrJ45d9JBHCkiOarO3JZ4yyzgP1CzO+0CLlyR/4bwdYUTEz4/GzqgnjJagzHasmq52LeG739S+BgRb6/57wSrYMv7m9odDyEK9DqeTg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709740634; c=relaxed/simple;
-	bh=AL8vTSnXLt4IGpMVHaBA4vBpZopWqBrqVcPDZeqahRs=;
+	s=arc-20240116; t=1709740772; c=relaxed/simple;
+	bh=MmNU8B5WZ1uxg9hzl7F9DTcdKIes0O/zojf1g0ttm/A=;
 	h=From:To:Cc:Subject:References:Date:In-Reply-To:Message-ID:
-	 MIME-Version:Content-Type; b=SwPd3znWJT6vylt3gPre3RE9uVaUW0ozeBYL7PIAhv28XyhPvD4NrqBhMMURP6QVQhmso9YNr6bvlNIX+VnE7mSJ5rNPo0toP7tWkvEx/pnN9TC+dp8vdO+j/CQUZLq0czPQEgk+C3fuSR/CdALXDyFMvvdZ0pWXGs9YsRirY8k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LpKF1NTp; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version:Content-Type; b=K/lr8Abq6J4ts5X050rf2wrZoL/eA1Yrblashb1oaHS8c1dKbrfwhPRj0UHCZkuyJP8NKo9UdFoIoTIHdLWXnb8l3u3DhCbMAX2aiAlYSEo/0LPOlf7xZY4Yam4FwqRdFfnM6S2mkkvYTWsGAKfzNTuw3yXXG+6dDVITvS1KkAE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UqvZCObD; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LpKF1NTp"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UqvZCObD"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709740632;
+	s=mimecast20190719; t=1709740770;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=0N93XVbJI5R2zzyhqgdjxio2vvEPajw0kGYYTW4HY2o=;
-	b=LpKF1NTp6h8wmrUANgmm2H5rMJSh8+BzcBFm0PAsfarRDp5vO9zUPcjcPCFx1TWgX+pvmi
-	elVZ4nBWB3P+XLimmTSwpJaGEgTuga8I0KknH/svJ8tcoCmDpHeXfDR1t2/5kVoeSkfdWr
-	UNnNtuuWW/PMQzy6wUefmxL5BfthDS8=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-362-4WbMzTJyO_Kv794jV5g1AQ-1; Wed, 06 Mar 2024 10:57:08 -0500
-X-MC-Unique: 4WbMzTJyO_Kv794jV5g1AQ-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.rdu2.redhat.com [10.11.54.8])
+	bh=bH0P49jS3FWbQfHXDiYtOjvFX14vKajotnvHNPLkcuQ=;
+	b=UqvZCObDkrhwhFKstiTnR4W+zmW3qjzEDeA+0bDkGYKppPGWMTu9RpkKY+lrUOvD70cFeL
+	ExVilbixKhpTw5f2aUWjuVEP3L0I6vyzMdWQTlTs9PEAuCOCw9BuT1tjHEDUcF9LrdOYf6
+	+ly4s3TcgPb39Fcc9lIRT2Qsw3iZ6xI=
+Received: from mimecast-mx02.redhat.com (mx-ext.redhat.com [66.187.233.73])
+ by relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-657-BU_t23jiPlCKz1XRGR5__w-1; Wed,
+ 06 Mar 2024 10:59:27 -0500
+X-MC-Unique: BU_t23jiPlCKz1XRGR5__w-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.rdu2.redhat.com [10.11.54.7])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9BAE8101A526;
-	Wed,  6 Mar 2024 15:57:08 +0000 (UTC)
+	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 931653C025B6;
+	Wed,  6 Mar 2024 15:59:26 +0000 (UTC)
 Received: from segfault.usersys.redhat.com (unknown [10.22.10.44])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id 6E30DC017A0;
-	Wed,  6 Mar 2024 15:57:08 +0000 (UTC)
+	by smtp.corp.redhat.com (Postfix) with ESMTPS id 568951C060D6;
+	Wed,  6 Mar 2024 15:59:26 +0000 (UTC)
 From: Jeff Moyer <jmoyer@redhat.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org,  io-uring@vger.kernel.org
-Subject: Re: [PATCH 2/3] fsstress: bypass io_uring testing if
- io_uring_queue_init returns EPERM
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>,  fstests@vger.kernel.org,
+  io-uring@vger.kernel.org
+Subject: Re: [PATCH 3/3] common/rc: force enable io_uring in _require_io_uring
 References: <20240306091935.4090399-1-zlang@kernel.org>
-	<20240306091935.4090399-3-zlang@kernel.org>
+	<20240306091935.4090399-4-zlang@kernel.org>
+	<20240306154324.GZ6188@frogsfrogsfrogs>
 X-PGP-KeyID: 1F78E1B4
 X-PGP-CertKey: F6FE 280D 8293 F72C 65FD  5A58 1FF8 A7CA 1F78 E1B4
-Date: Wed, 06 Mar 2024 10:57:08 -0500
-In-Reply-To: <20240306091935.4090399-3-zlang@kernel.org> (Zorro Lang's message
-	of "Wed, 6 Mar 2024 17:19:34 +0800")
-Message-ID: <x49a5nbuze3.fsf@segfault.usersys.redhat.com>
+Date: Wed, 06 Mar 2024 10:59:25 -0500
+In-Reply-To: <20240306154324.GZ6188@frogsfrogsfrogs> (Darrick J. Wong's
+	message of "Wed, 6 Mar 2024 07:43:24 -0800")
+Message-ID: <x495xxzuzaa.fsf@segfault.usersys.redhat.com>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.2 (gnu/linux)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -60,70 +61,58 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.8
+X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.7
 
-Zorro Lang <zlang@kernel.org> writes:
+"Darrick J. Wong" <djwong@kernel.org> writes:
 
-> I found the io_uring testing still fails as:
->   io_uring_queue_init failed
-> even if kernel supports io_uring feature.
+> On Wed, Mar 06, 2024 at 05:19:35PM +0800, Zorro Lang wrote:
+>> If kernel supports io_uring, userspace still can/might disable that
+>> supporting by set /proc/sys/kernel/io_uring_disabled=2. Let's set
+>> it to 0, to always enable io_uring (ignore error if there's not
+>> that file).
+>> 
+>> Signed-off-by: Zorro Lang <zlang@kernel.org>
+>> ---
+>>  common/rc | 3 +++
+>>  1 file changed, 3 insertions(+)
+>> 
+>> diff --git a/common/rc b/common/rc
+>> index 50dde313..966c92e3 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -2317,6 +2317,9 @@ _require_aiodio()
+>>  # this test requires that the kernel supports IO_URING
+>>  _require_io_uring()
+>>  {
+>> +	# Force enable io_uring if kernel supports it
+>> +	sysctl -w kernel.io_uring_disabled=0 &> /dev/null
 >
-> That because of the /proc/sys/kernel/io_uring_disabled isn't 0.
+> _require_XXX functions are supposed to be predicates that _notrun the
+> test if XXX isn't configured or available.  Shouldn't this be:
 >
-> Different value means:
->   0 All processes can create io_uring instances as normal.
->   1 io_uring creation is disabled (io_uring_setup() will fail with
->     -EPERM) for unprivileged processes not in the io_uring_group
->     group. Existing io_uring instances can still be used.  See the
->     documentation for io_uring_group for more information.
->   2 io_uring creation is disabled for all processes. io_uring_setup()
->     always fails with -EPERM. Existing io_uring instances can still
->     be used.
->
-> So besides the CONFIG_IO_URING kernel config, there's another switch
-> can on or off the io_uring supporting. And the "2" or "1" might be
-> the default on some systems.
->
-> On this situation the io_uring_queue_init returns -EPERM, so I change
-> the fsstress to ignore io_uring testing if io_uring_queue_init returns
-> -ENOSYS or -EPERM. And print different verbose message for debug.
->
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
->  ltp/fsstress.c | 15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
->
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 482395c4..9c75f27b 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -762,12 +762,23 @@ int main(int argc, char **argv)
->  #endif
->  #ifdef URING
->  			have_io_uring = true;
-> -			/* If ENOSYS, just ignore uring, other errors are fatal. */
-> +			/*
-> +			 * If ENOSYS, just ignore uring, due to kernel doesn't support it.
-> +			 * If EPERM, might due to sysctl kernel.io_uring_disabled isn't 0,
-> +			 *           or some selinux policies, etc.
-> +			 * Other errors are fatal.
-> +			 */
->  			if ((c = io_uring_queue_init(URING_ENTRIES, &ring, 0)) != 0) {
->  				if (c == -ENOSYS) {
->  					have_io_uring = false;
-> +					if (verbose)
-> +						printf("io_uring isn't supported by kernel\n");
-> +				} else if (c == -EPERM) {
-> +					have_io_uring = false;
-> +					if (verbose)
-> +						printf("io_uring isn't allowed, check io_uring_disabled sysctl or selinux policy\n");
->  				} else {
-> -					fprintf(stderr, "io_uring_queue_init failed\n");
-> +					fprintf(stderr, "io_uring_queue_init failed, errno=%d\n", c);
+> 	local io_uring_knob="$(sysctl --values kernel.io_uring_disabled)"
+> 	test "$io_uring_knob" -ne 0 && _notrun "io_uring disabled by admin"
 
-I think you want to use -c here, right?
+That sounds like a good option to me.
 
-Other than that:
+> Alternately -- if it _is_ ok to turn this knob, then there should be a
+> cleanup method to put it back after the test.
 
-Reviewed-by: Jeff Moyer <jmoyer@redhat.com>
+I think it would be better not to change the setting, especially if the
+admin had disabled it.
+
+Cheers,
+Jeff
+
+>
+> --D
+>
+>> +
+>>  	$here/src/feature -R
+>>  	case $? in
+>>  	0)
+>> -- 
+>> 2.43.0
+>> 
+>> 
 
