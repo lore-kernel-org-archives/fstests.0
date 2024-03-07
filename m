@@ -1,70 +1,69 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3815E12EBF6
-	for <fstests@vger.kernel.org>; Thu,  7 Mar 2024 14:59:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFBF563121
+	for <fstests@vger.kernel.org>; Thu,  7 Mar 2024 15:16:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1709823554; cv=none; b=Jg1rgb3D0PpxD6HcrdDWkyG+6ErTCH5+G3XvvgT4/i/4V0BFoFd3VhkGanUs1C5r9Div01mgVTTzPwVsP1cB+ypW+hcjDHwE+UCN1/O5EhOUGgH/Uk8/eGeK3jCQZWgHmj1nBypigd4vnJNnq7xebhPmqnRV5oN5pBfx8xBuUo0=
+	t=1709824595; cv=none; b=QTZt3p/Q5OaIqQiQXjzixtjYeIQYDJgKEoerYDHpqfjrniTjSsiElEgbDJ3xCFo5sglrhuUwWhXc7+D64IBx4YixnYMJB+o6NsoHqMaE2+xgbUsMUOsfVSo207F7yOXjKrkvr5N8ZbAV8lhbsFFtO2zv7fi6QYmQxDkZRb5IfH4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1709823554; c=relaxed/simple;
-	bh=fmRqBEVV40Yjjz3PTXDmYJrKgLsAdYWHBdPb6XnDVig=;
+	s=arc-20240116; t=1709824595; c=relaxed/simple;
+	bh=fmB/2fYDC523eDr7fhnoE0bYTJ4w/9VUvVJotNmRj6c=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pKQEM5TRb0Y8R6ghaVVLC3rlrnCXpMwqx3xMZn0qbb8NvpRJUpMYN4pynyehoi9NAN7YQToxgeSGt4bI3sisrEnWc+KL88Tcem8eygKCtYO7nfk1noOONGlF5CL70Hv8q4ROgLpR1O4pkQrGkCu6RNdNFdHpwaDDKaFHdS4a5Uc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VnIBkW+k; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=p1iJdbE8BCdwxWZcVXmVL+O82qJw34R1jDkWkG9Ygn9u56aacadvtFck8HSGuw4CDsSdZtw/R1yEpO5+kafl24BpSPEPKyWd0+TW+tdlZaJTdx2E0jhUBZBr7NBA4pG4Rg4KtadBwYei0O3ARJ7DhYmI/KG9JHCuQqPpirmSCaM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R1//8ObO; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VnIBkW+k"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R1//8ObO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1709823552;
+	s=mimecast20190719; t=1709824592;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=5AOKrFzi4NM/z9oNoC48caJkwObGeU/CqSl0/584WbI=;
-	b=VnIBkW+kLz8+YaoXfdVONwSZxCxvYVxpNoDaqxEwMp7sAnob78MXt7ooZMjTt3Zh/KrSV+
-	KzCI/rV/0q+XNJBk/2+PS6mfdDavZLHAh7ceTHp56M4RfshbOH9c5YQhZhcTXOCgfi1Igu
-	7u0vS8E1m5QeJMDRoAujCA5UWEhEmSk=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=9XgGCF6Ao6NnaPFHwjjrVnnOgsuHOgFMm7iHKQvatCo=;
+	b=R1//8ObO5c3KxE57oKAyxJ8oNoS2w2/pOU7s6CIVBCZM/5qtCWS5Dd1SQ4cYsDRtd+SjU5
+	sePWXs8lnG7nT8KM9biXjn5YMfRTcdiuflahJtdrrBofdNr20dxgIDAxK9/jFpF6VdkBgS
+	oSJhuxJ7zURMtQUIClENgRVCgxXRdmo=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-381-QXQ10yY5NuaCnyJ9gbNkOg-1; Thu, 07 Mar 2024 09:59:10 -0500
-X-MC-Unique: QXQ10yY5NuaCnyJ9gbNkOg-1
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-5c17cff57f9so711201a12.0
-        for <fstests@vger.kernel.org>; Thu, 07 Mar 2024 06:59:10 -0800 (PST)
+ us-mta-49-4nFzP-D6MsKNcRC5Hg-kTQ-1; Thu, 07 Mar 2024 10:16:27 -0500
+X-MC-Unique: 4nFzP-D6MsKNcRC5Hg-kTQ-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1dc4f385c16so10962595ad.1
+        for <fstests@vger.kernel.org>; Thu, 07 Mar 2024 07:16:27 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1709823550; x=1710428350;
+        d=1e100.net; s=20230601; t=1709824586; x=1710429386;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=5AOKrFzi4NM/z9oNoC48caJkwObGeU/CqSl0/584WbI=;
-        b=IX6Zeeg0pgIhwIE94pt11TaPq1+ovYLHBDF1NLcv33C6VVuLquPpS1ZEskBEslzeQ3
-         75utxqqMmu9ZO5i72J2jL4cR2ajxstWPPjqS0R5jAcRqWLujmyNxpXdeuE3bKYZ3iq3u
-         CAOzVGl0NI40XcYj5UlkYHKu6Vmn4DqDZCNGVm4l4ayXcE7vUUbGotFMS5AQIN8eRDNA
-         dqM4lX71TCqgVPeS2/t1r5Zkx/ltGstMa/H+8ToiRNTpMfsSk/tIdpb5Ukg5cBxS3vqJ
-         oMqiR1l6ZoojySSUWsSwAwxAsPemPBppcF7Yu1IVUihrxFYTNI0QKz+w+pMn10TdDpL1
-         CFtA==
-X-Gm-Message-State: AOJu0Yz+M91rPL3ju4jnATur2IiTMTcnwVky5WNMiEhst7PqTd9Fhky7
-	UApnJ7trAYr4DFQugl+1W2jt8t3udcj3DNIH8ykH/zzQ+sCujBQj8yB40+gLQJY14Y/90mLcb45
-	IWUKuSAC2xQjD5CWibVwMn+5netTreGGPABq9En90d1VHXapl09cKV3c=
-X-Received: by 2002:a05:6a20:d396:b0:1a1:6dac:5ce0 with SMTP id iq22-20020a056a20d39600b001a16dac5ce0mr3204149pzb.16.1709823549583;
-        Thu, 07 Mar 2024 06:59:09 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEMJLJ09xLLkPEFGmwTDNyphDURUkSvySpNrP2FrSI7rjKCoGrFjLfhzXbR0yL8hfXer8+ApQ==
-X-Received: by 2002:a05:6a20:d396:b0:1a1:6dac:5ce0 with SMTP id iq22-20020a056a20d39600b001a16dac5ce0mr3204123pzb.16.1709823549077;
-        Thu, 07 Mar 2024 06:59:09 -0800 (PST)
+        bh=9XgGCF6Ao6NnaPFHwjjrVnnOgsuHOgFMm7iHKQvatCo=;
+        b=tElGIpC6jTCTRaNrldUu2t/jBbz/MmFVUJ+yXhA4squej1QXRdHy7L1E9PBiLTy9os
+         C1UucoIVzdwJGZRn9guGbnxSXQuorKVYNmUsYoOKHuERXEIo4D+r1m2d4fNla2KuvkLt
+         iVrXa3eW4Bb/15+1IHlhrp4GD1x1JBZP7TgMZX2XlRKu4cjCU9Fns7E1gMu3RFkl7X/x
+         mQT+vAZXl3qH85YRoTXyuPF5zv4tQYSz/iWaYby9WuWQkOYRRnAKZm/v0ZxDRe6LdJHZ
+         yiunhZyvTdOYO1G7KC/rNqrIpyHd+tMHpBDQ63qOL56UIyoK1VKIXFQyswWFxi6wSvNC
+         n3pw==
+X-Gm-Message-State: AOJu0YzhnhM5Wf4tgUMwA0uAWK8YYHIbOJfLNcEiyrCACE3LHwF9bgt1
+	VPXWTLWuIpGfnY9g3L9CCzKPDrbPFnsA8XgqrMp9WMZ176iduyO3BDOSzLEHHCmNa4c3VozIlCG
+	AA6oD2RixZMebKxWEJNtrIZx+ieRIISVRzw3BnpBVgvSYBqtGRRIgnbI=
+X-Received: by 2002:a17:902:ecc4:b0:1dd:8f6:69ee with SMTP id a4-20020a170902ecc400b001dd08f669eemr12105088plh.20.1709824586278;
+        Thu, 07 Mar 2024 07:16:26 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHFeqqO13RNZOBuElM9XVsP4yRu2BZGZcUUvMyWoakciyNzXFKfBQCybZBmZT2MgZNewLWW9w==
+X-Received: by 2002:a17:902:ecc4:b0:1dd:8f6:69ee with SMTP id a4-20020a170902ecc400b001dd08f669eemr12105058plh.20.1709824585829;
+        Thu, 07 Mar 2024 07:16:25 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id o133-20020a62cd8b000000b006e06aaf5e58sm13171374pfg.34.2024.03.07.06.59.07
+        by smtp.gmail.com with ESMTPSA id d14-20020a170903230e00b001da15580ca8sm14715056plh.52.2024.03.07.07.16.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Mar 2024 06:59:08 -0800 (PST)
-Date: Thu, 7 Mar 2024 22:59:05 +0800
+        Thu, 07 Mar 2024 07:16:25 -0800 (PST)
+Date: Thu, 7 Mar 2024 23:16:22 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Anand Jain <anand.jain@oracle.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 3/3] btrfs: test mount fails on physical device with
- configured dm volume
-Message-ID: <20240307145905.izlzrjjugg34ksdu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH 2/3] common/rc: specify required device size
+Message-ID: <20240307151622.warzurzdxovxh2gn@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <cover.1709806478.git.anand.jain@oracle.com>
- <c68878cb99025b8c8465221205d5de9e40777b18.1709806478.git.anand.jain@oracle.com>
+ <c74dc3a6f1dc8d45bc54ef6ac087e5e92a778509.1709806478.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,96 +72,70 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <c68878cb99025b8c8465221205d5de9e40777b18.1709806478.git.anand.jain@oracle.com>
+In-Reply-To: <c74dc3a6f1dc8d45bc54ef6ac087e5e92a778509.1709806478.git.anand.jain@oracle.com>
 
-On Thu, Mar 07, 2024 at 06:20:24PM +0530, Anand Jain wrote:
-> When a flakey device is configured, we have access to both the physical
-> device and the DM flaky device. Ensure that when the flakey device is
-> configured, the physical device mount fails.
+On Thu, Mar 07, 2024 at 06:20:23PM +0530, Anand Jain wrote:
+> The current _notrun call states that the scratch device is too small but
+> does not specify the required size. Simply update the _notrun messages.
 > 
 > Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  tests/btrfs/318     | 45 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/318.out |  3 +++
->  2 files changed, 48 insertions(+)
->  create mode 100755 tests/btrfs/318
->  create mode 100644 tests/btrfs/318.out
+
+OK, I think that makes sense to me.
+
+>  common/rc | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 > 
-> diff --git a/tests/btrfs/318 b/tests/btrfs/318
-> new file mode 100755
-> index 000000000000..015950fbd93c
-> --- /dev/null
-> +++ b/tests/btrfs/318
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 318
-> +#
-> +# Create multiple device nodes with the same device try mount
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto volume tempfsid
+> diff --git a/common/rc b/common/rc
+> index 50dde313b851..5680995b2366 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1834,7 +1834,8 @@ _require_scratch_size()
+>  
+>  	_require_scratch
+>  	local devsize=`_get_device_size $SCRATCH_DEV`
+> -	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+> +	[ $devsize -lt $1 ] && \
+> +_notrun "scratch device $SCRATCH_DEV should be minimum $1, currently $devsize"
 
-May I ask why it's a "tempfsid" related test?
 
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	umount $extra_mnt &> /dev/null
-> +	rm -rf $extra_mnt &> /dev/null
+>  }
+>  
+>  # require a scratch dev of a minimum size (in kb) and should not be checked
+> @@ -1845,7 +1846,8 @@ _require_scratch_size_nocheck()
+>  
+>  	_require_scratch_nocheck
+>  	local devsize=`_get_device_size $SCRATCH_DEV`
+> -	[ $devsize -lt $1 ] && _notrun "scratch dev too small"
+> +	[ $devsize -lt $1 ] && \
+> +_notrun "require scratch device $SCRATCH_DEV atleast $1, currently $devsize"
 
-The "&> /dev/null" isn't needed, if you use "-f" for rm
+"at least"
 
-> +	_unmount_flakey
-> +	_cleanup_flakey
-> + 	cd /
-> + 	rm -r -f $tmp.*
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_scratch
-> +_require_dm_target flakey
-> +
-> +_scratch_mkfs >> $seqres.full
-> +_init_flakey
-> +
-> +_mount_flakey
-> +extra_mnt=$TEST_DIR/extra_mnt
+Why don't output same message with above ? And why not have indentation at here?
 
-_require_test ?
 
-> +rm -rf $extra_mnt
-> +mkdir -p $extra_mnt
-> +_mount $SCRATCH_DEV $extra_mnt 2>&1 | _filter_testdir_and_scratch
+I think the message is long enough, so the $SCRATCH_DEV maybe not necessary,
+how about
 
-Recommend calling "_filter_error_mount" too
+	[ $devsize -lt $1 ] && \
+		_notrun "scratch device too small, $devsize < $1"
+
+(same above)
+
+With this change:
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+As I've given review points to patch 3/3, so I suppose you can change this
+patch with the 3rd one together :)
 
 Thanks,
 Zorro
 
-> +
-> +_flakey_drop_and_remount
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/318.out b/tests/btrfs/318.out
-> new file mode 100644
-> index 000000000000..5cdbea8c4b2a
-> --- /dev/null
-> +++ b/tests/btrfs/318.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 318
-> +mount: TEST_DIR/extra_mnt: wrong fs type, bad option, bad superblock on SCRATCH_DEV, missing codepage or helper program, or other error.
-> +       dmesg(1) may have more information after failed mount system call.
+
+>  }
+>  
+>  # Require scratch fs which supports >16T of filesystem size.
 > -- 
 > 2.39.3
 > 
