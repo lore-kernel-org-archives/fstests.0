@@ -1,126 +1,249 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02AE71D6BD;
-	Sun, 10 Mar 2024 17:09:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53FC734CD5;
+	Sun, 10 Mar 2024 17:17:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710090546; cv=none; b=knYI0GzGzgMZrmE+55m1/MAywR+HM655NJ+9IOVIqb33Ll18/T1HDvcLUuDGUPR3m0EkRBD+pATJwMyHWVPKEQOOmqmloCXMTkf6NVWl6j8OdfivncRS1T0Vq54REQp13J4y+L+hRhENnjRy4L1cPEmz0JLHV40zjtt4FHo1n/g=
+	t=1710091025; cv=none; b=riPtjISybmZ1X9+EN6wMy1qbImGxOn6piVqGvOoJhdLuAe1RuJlUTmOCKvbO7rqiGKyWlYR8iNjhWw+091i7ly9A56BaV5eeqvssj/Mf/tM9dyr+Mv3rFD6ojDREQBBWQuuQC0pQ8D8Ga0HxYTSIOkWuELVhyLzZaXVP83E0pGk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710090546; c=relaxed/simple;
-	bh=QeBArc98gNceVCiAzt+Zh+AJ56g7clTlWkaToNoAZYU=;
+	s=arc-20240116; t=1710091025; c=relaxed/simple;
+	bh=R5st3OtZPxFq6/X1mhigQsYpUvB5OFFyd7hUwnjq4ME=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UNe82R1sB15v2M5DVeE4IgEIB7bsqkKNGFDhqCXnVOJG2IKSDhoOaSzywg5vQSWG1V+LhlqMZvApRnIPpOO3FOVMCJJIpSjLk4DEYnv5jo+UzdlRoxKxJM6NU68BkyzJ2ggnaZz1+Ic0FE1Ks1KTrV69YjJDMgKB68B8knlFzFQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Chngrsgl; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=gICRCPdHIElfPc9Yg4YtDD1OzMri3Oc5qseembznnjKXN44mWPqyH41B05MTwsqIB4HIlt+MScW4/8HaMnXhl0KffZuhWJCWitLFrAzRaPcQXUi5UN5cHF/xwgsZEfGuONoh0JN3IEHN2UoOEqZHePYX9USExc2xSyt2gF7dfRs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c8/XCi4B; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Chngrsgl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 76719C43394;
-	Sun, 10 Mar 2024 17:09:05 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c8/XCi4B"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CA0E7C433C7;
+	Sun, 10 Mar 2024 17:17:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710090545;
-	bh=QeBArc98gNceVCiAzt+Zh+AJ56g7clTlWkaToNoAZYU=;
+	s=k20201202; t=1710091024;
+	bh=R5st3OtZPxFq6/X1mhigQsYpUvB5OFFyd7hUwnjq4ME=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=Chngrsgl6PofedBkgopm/G9T8pYO/NwBIfoCJ1vUtmJK5pM3OfYAIjSmuuDoo72Mm
-	 BsGlNW63T6iLoVDXqxx4pSfKZsYgO25vbMbCoESomypY/FLZqCE/JUjdegXSnuLvTZ
-	 151qNTTkEJZafxk5VJrxNPT5l3ereZVoWLQ+ieIyNiln1TyWepiv6SIXdZfq89aIUy
-	 976jxGPKQiZV2iQvi15CVK6N6Kbzw6zflZZ4cfbtDzUBO/V6+Y8pWcXfdt1mztKY6C
-	 LWjHZOjAbnfN7WCM/DIzYMCskri8FIrxsxCNZdTQE/b5gED5DWjmFS5giw7/z+3A04
-	 gXrUtTTAxGnGg==
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a28a6cef709so338081066b.1;
-        Sun, 10 Mar 2024 10:09:05 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVun47M/AKSruMBkLqYPyVh72Wz9KzmOXmxUeZwJlOvzb2yfjqBBz84acxlTCAZzchhhPKrGzystBHSXP7kJLDeSMPEfi28gjuRZyMqcOMdXew9LiqAGqybraUO0ZQejj3oBKR1
-X-Gm-Message-State: AOJu0YwIpVhD6LxrzJ+qnBS7kRXHxqWh6qT1xuV+LPLkaBp/YcE800lM
-	zzhCnrChIMoUwnr5XfflYoIMlCqSy5TdY1XrVXHknNHDlFGOjLoTjYXsPiqSHsEmU7/c0NAcY7t
-	V4mjbU6u3Si1Wv6AeL+ul1ODJvbU=
-X-Google-Smtp-Source: AGHT+IHydvY/oyoXkMX6CDqu3RBRMsHeek7U10tjVF1swbiJP75o6SIGVqt22m3MGWcAMEW9ZCHXBUBh6TUFZiY4pCs=
-X-Received: by 2002:a17:906:7084:b0:a3f:804f:c1a4 with SMTP id
- b4-20020a170906708400b00a3f804fc1a4mr3074617ejk.74.1710090543839; Sun, 10 Mar
- 2024 10:09:03 -0700 (PDT)
+	b=c8/XCi4BmgquN48G4veBMZrCmU+Uc2CwWwNgQqdWVZ494ywFUD6qM2tP2YVCX1c5h
+	 bURdkRyFUyYS4JvZQ4K7Jhb1qVlvxPScvwi2CN08/J0D4OBlux/kRxEwdgGxsf3iZK
+	 f9Bs7DyIKwYEQ2Z85v8WC0B9eLs5OHSDTpd0lhFdQmpSGIkU2pYep0vzpPILXMsVyv
+	 TVeM2RUzdFJ+yZdfJYvvJ2FX7Nrs142Ih59z6fNzVrUurbyqHDhJmsL9Wq/KGxfDOd
+	 IvBbGH9hTTxZSzm4mruNmLqxaVY7F/P9N/WuW7dB97w/vuXHbbwZ4hROWAjLXNrr0u
+	 D1ln9ZfDLhhSQ==
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-a461c50deccso54174766b.0;
+        Sun, 10 Mar 2024 10:17:04 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWADhQSNWPyUzaIAtyjtMFv1HecfBVZmh2DF9fQCEUVxdAPY7pQb26hTFVhoH/KJgnosrSwJUIEnXeeZS6f8tnWbAcmskZuIA==
+X-Gm-Message-State: AOJu0YyA+iHK6/VIc5zy7W1H92f4ATc0Vkz7TrTK57cUzDv2kn6/CiR5
+	/WV7CUfQV9pE2v1QRIl9yexBv1g/UqaCzHikojvlcV2epyaqNz2dRvOWlMNV7Q4Ela+RUC8D4k1
+	F/ra7XO66PM7QzYd0QWPmWMSL/6E=
+X-Google-Smtp-Source: AGHT+IGfsIqhCETYcuLnWMEMicOfiaJKPyMkeBi+9a3G86Dq/T4ykuYLXOhKKZKQ2rrBzFk9D+0S6HYJStlBB/Ko98U=
+X-Received: by 2002:a17:906:5947:b0:a45:c931:5703 with SMTP id
+ g7-20020a170906594700b00a45c9315703mr2139521ejr.70.1710091023242; Sun, 10 Mar
+ 2024 10:17:03 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240308144537.16995-1-anand.jain@oracle.com>
-In-Reply-To: <20240308144537.16995-1-anand.jain@oracle.com>
+References: <9dde3b18f00a30cae78197c9069db503f720fe71.1709844612.git.boris@bur.io>
+In-Reply-To: <9dde3b18f00a30cae78197c9069db503f720fe71.1709844612.git.boris@bur.io>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Sun, 10 Mar 2024 17:08:27 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H69ec3URubLKdqFUiWfjRjQ=CaYtN=75eq4jMDggudtJQ@mail.gmail.com>
-Message-ID: <CAL3q7H69ec3URubLKdqFUiWfjRjQ=CaYtN=75eq4jMDggudtJQ@mail.gmail.com>
-Subject: Re: [GIT PULL] fstests: btrfs changes for for-next v2024.03.08
-To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Date: Sun, 10 Mar 2024 17:16:26 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H5FPa8336s3ZXtScvjTnUHjBaFETBa3eUDAtxzb46jBcw@mail.gmail.com>
+Message-ID: <CAL3q7H5FPa8336s3ZXtScvjTnUHjBaFETBa3eUDAtxzb46jBcw@mail.gmail.com>
+Subject: Re: [PATCH v3] btrfs: new test for devt change between mounts
+To: Boris Burkov <boris@bur.io>
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Mar 8, 2024 at 2:46=E2=80=AFPM Anand Jain <anand.jain@oracle.com> w=
-rote:
+On Fri, Mar 8, 2024 at 5:42=E2=80=AFPM Boris Burkov <boris@bur.io> wrote:
 >
-> Zorro,
+> It is possible to confuse the btrfs device cache (fs_devices) by
+> starting with a multi-device filesystem, then removing and re-adding a
+> device in a way which changes its dev_t while the filesystem is
+> unmounted. After this procedure, if we remount, then we are in a funny
+> state where struct btrfs_device's "devt" field does not match the bd_dev
+> of the "bdev" field. I would say this is bad enough, as we have violated
+> a pretty clear invariant.
 >
-> Please pull this branch containing bug fixes.
-> This changes are based on your branch for-next as below.
+> But for style points, we can then remove the extra device from the fs,
+> making it a single device fs, which enables the "temp_fsid" feature,
+> which permits multiple separate mounts of different devices with the
+> same fsid. Since btrfs is confused and *thinks* there are different
+> devices (based on device->devt), it allows a second redundant mount of
+> the same device (not a bind mount!). This then allows us to corrupt the
+> original mount by doing stuff to the one that should be a bind mount.
 >
-> Thank you.
->
-> The following changes since commit 9b6df9a01ac8ee3f28a2a24d71e45792e21b6d=
-48:
->
->   btrfs/016: fix a false alert due to xattrs mismatch (2024-03-01 19:24:1=
-6 +0800)
->
-> are available in the Git repository at:
->
->   https://github.com/asj/fstests.git staged-20240308
->
-> for you to fetch changes up to 9a03e88a04b6cf6e161c8902a3a523ca22601277:
->
->   btrfs: test normal qgroup operations in a compress friendly way (2024-0=
-3-08 22:31:51 +0800)
->
-> ----------------------------------------------------------------
-> Anand Jain (1):
->       common/rc: specify required device size
->
-> Filipe Manana (1):
->       btrfs: fix grep warning at _require_btrfs_mkfs_uuid_option()
+> Signed-off-by: Boris Burkov <boris@bur.io>
 
-David's review tag is missing for that patch btw (and it came before
-your review and cherry pick):
+It fails on for-next (as expected) and it passes with the following
+patch applied:
 
-https://lore.kernel.org/fstests/20240307095908.34913ff0@echidna/
+    "btrfs: validate device maj:min during open"
 
+If the consensus is to use that patch as a fix, we can later add the
+_fixed_by_kernel_commit call to the test.
+Also, the test number 311 has been taken for a week now.
 
+Anyway:
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Thanks.
+
+> ---
+> Changelog:
+> v3:
+> - fstests convention improvements (helpers, output, comments, etc...)
+> v2:
+> - fix numerous fundamental issues, v1 wasn't really ready
 >
-> Josef Bacik (8):
->       btrfs/011: increase the runtime for replace cancel
->       btrfs/012: adjust how we populate the fs to convert
->       btrfs/131: don't run with subpage blocksizes
->       btrfs/213: make the test more reliable
->       btrfs/271: adjust failure condition
->       btrfs/287,btrfs/293: filter all btrfs subvolume delete calls
->       btrfs/291: remove image file after teardown
->       btrfs: test normal qgroup operations in a compress friendly way
+>  common/config       |   1 +
+>  tests/btrfs/311     | 105 ++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/311.out |   2 +
+>  3 files changed, 108 insertions(+)
+>  create mode 100755 tests/btrfs/311
+>  create mode 100644 tests/btrfs/311.out
 >
->  check               |   6 ---
->  common/btrfs        |   2 +-
->  common/rc           |   9 ++++-
->  tests/btrfs/011     |   9 ++++-
->  tests/btrfs/012     |  14 ++++---
->  tests/btrfs/022     |  86 ++---------------------------------------
->  tests/btrfs/131     |   4 ++
->  tests/btrfs/213     |  20 +++++-----
->  tests/btrfs/271     |  11 +++---
->  tests/btrfs/287     |   4 +-
->  tests/btrfs/287.out |   2 +-
->  tests/btrfs/291     |   2 +-
->  tests/btrfs/293     |   6 +--
->  tests/btrfs/293.out |   4 +-
->  tests/btrfs/320     | 107 ++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/btrfs/320.out |   2 +
->  16 files changed, 164 insertions(+), 124 deletions(-)
->  create mode 100755 tests/btrfs/320
->  create mode 100644 tests/btrfs/320.out
+> diff --git a/common/config b/common/config
+> index a3b15b96f..43b517fda 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -235,6 +235,7 @@ export BLKZONE_PROG=3D"$(type -P blkzone)"
+>  export GZIP_PROG=3D"$(type -P gzip)"
+>  export BTRFS_IMAGE_PROG=3D"$(type -P btrfs-image)"
+>  export BTRFS_MAP_LOGICAL_PROG=3D$(type -P btrfs-map-logical)
+> +export PARTED_PROG=3D"$(type -P parted)"
+>
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/tests/btrfs/311 b/tests/btrfs/311
+> new file mode 100755
+> index 000000000..a7fa541c4
+> --- /dev/null
+> +++ b/tests/btrfs/311
+> @@ -0,0 +1,105 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 Meta, Inc. All Rights Reserved.
+> +#
+> +# FS QA Test 311
+> +#
+> +# Test an edge case of multi device volume management in btrfs.
+> +# If a device changes devt between mounts of a multi device fs, we can t=
+rick
+> +# btrfs into mounting the same device twice fully (not as a bind mount).=
+ From
+> +# there, it is trivial to induce corruption.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick volume scrub
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_require_test
+> +_require_command "$PARTED_PROG" parted
+> +_require_batched_discard "$TEST_DIR"
+> +
+> +_cleanup() {
+> +       cd /
+> +       $UMOUNT_PROG $MNT
+> +       $UMOUNT_PROG $BIND
+> +       losetup -d $DEV0
+> +       losetup -d $DEV1
+> +       losetup -d $DEV2
+> +       rm $IMG0
+> +       rm $IMG1
+> +       rm $IMG2
+> +}
+> +
+> +IMG0=3D$TEST_DIR/$$.img0
+> +IMG1=3D$TEST_DIR/$$.img1
+> +IMG2=3D$TEST_DIR/$$.img2
+> +truncate -s 1G $IMG0
+> +truncate -s 1G $IMG1
+> +truncate -s 1G $IMG2
+> +DEV0=3D$(losetup -f $IMG0 --show)
+> +DEV1=3D$(losetup -f $IMG1 --show)
+> +DEV2=3D$(losetup -f $IMG2 --show)
+> +D0P1=3D$DEV0"p1"
+> +D1P1=3D$DEV1"p1"
+> +MNT=3D$TEST_DIR/mnt
+> +BIND=3D$TEST_DIR/bind
+> +
+> +# Setup partition table with one partition on each device.
+> +$PARTED_PROG $DEV0 'mktable gpt' --script
+> +$PARTED_PROG $DEV1 'mktable gpt' --script
+> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
+> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
+> +
+> +# mkfs with two devices to avoid clearing devices on close
+> +# single raid to allow removing DEV2.
+> +$MKFS_BTRFS_PROG -f -msingle -dsingle $D0P1 $DEV2 >>$seqres.full 2>&1 ||=
+ _fail "failed to mkfs.btrfs"
+> +
+> +# Cycle mount the two device fs to populate both devices into the
+> +# stale device cache.
+> +mkdir -p $MNT
+> +_mount $D0P1 $MNT
+> +$UMOUNT_PROG $MNT
+> +
+> +# Swap the partition dev_ts. This leaves the dev_t in the cache out of d=
+ate.
+> +$PARTED_PROG $DEV0 'rm 1' --script
+> +$PARTED_PROG $DEV1 'rm 1' --script
+> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
+> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
+> +
+> +# Mount with mismatched dev_t!
+> +_mount $D0P1 $MNT || _fail "failed to remount; don't proceed and do dang=
+erous stuff on raw mount point"
+> +
+> +# Remove the extra device to bring temp-fsid back in the fray.
+> +$BTRFS_UTIL_PROG device remove $DEV2 $MNT
+> +
+> +# Create the would be bind mount.
+> +mkdir -p $BIND
+> +_mount $D0P1 $BIND
+> +mount_show=3D$($BTRFS_UTIL_PROG filesystem show $MNT)
+> +bind_show=3D$($BTRFS_UTIL_PROG filesystem show $BIND)
+> +# If they're different, we are in trouble.
+> +[ "$mount_show" =3D "$bind_show" ] || echo "$mount_show !=3D $bind_show"
+> +
+> +# Now really prove it by corrupting the first mount with the second.
+> +for i in $(seq 20); do
+> +       $XFS_IO_PROG -f -c "pwrite 0 50M" $MNT/foo.$i >>$seqres.full 2>&1
+> +done
+> +for i in $(seq 20); do
+> +       $XFS_IO_PROG -f -c "pwrite 0 50M" $BIND/foo.$i >>$seqres.full 2>&=
+1
+> +done
+> +
+> +# sync so that we really write the large file data out to the shared dev=
+ice
+> +sync
+> +
+> +# now delete from one view of the shared device
+> +find $BIND -type f -delete
+> +# sync so that fstrim definitely has deleted data to trim
+> +sync
+> +# This should blow up both mounts, if the writes somehow didn't overlap =
+at all.
+> +$FSTRIM_PROG $BIND
+> +# drop caches to improve the odds we read from the corrupted device whil=
+e scrubbing.
+> +echo 3 > /proc/sys/vm/drop_caches
+> +$BTRFS_UTIL_PROG scrub start -B $MNT | grep "Error summary:"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/311.out b/tests/btrfs/311.out
+> new file mode 100644
+> index 000000000..70a6db809
+> --- /dev/null
+> +++ b/tests/btrfs/311.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 311
+> +Error summary:    no errors found
+> --
+> 2.43.0
+>
 >
