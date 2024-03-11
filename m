@@ -1,240 +1,271 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1076D53AC;
-	Mon, 11 Mar 2024 02:01:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710122497; cv=fail; b=ls29z7/xEzS4gM90HxLi14TZoGHhz8Vyrz1XdYwvwoZY1nw6FNRD9nlxP9Kxcx65UgXCqs/9Z/n1gJ4ugtfWLL4qI9xp2d7QaY/fOWoV4M2/wjr3/gyngDzk8PV0xl5mGDBUpS0tDiFSJxllzJ2/y7Fq4wGDowDcP+0BsBg6w8c=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710122497; c=relaxed/simple;
-	bh=ly8MdDVZReiPTCMkiw1bYcmaVHBH0vnMCuIlwg4o/IE=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=clZt/PQiG86bW9FkwNecME8ogifr/wtwE3KKdO+lEOFsG4YtrpA9KAgwziF2XrcniMh616gAohwzw2dPtpb6tpdJ2HhIYG/yN+ROq0QJsP7eBSF5od2o81ZHXO/qC8PWY/xCIyp1L1hNKJiNaG3u9qQHC+2DavIgQxlri06G9jU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=GbpF3ZsF; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=genVoPmL; arc=fail smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A77E3FB2D
+	for <fstests@vger.kernel.org>; Mon, 11 Mar 2024 13:40:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1710164411; cv=none; b=PfGoD5sVc/ST57hxneR/mGRxxViasbZM0j3Qp/ZHUNDjIsSGQS4eFWMHGFDcgHCvxUug06teRgU/yj3x8ZpBiIJKdQpiEpo7ODYjbh+yuiPAJkiftOCiCPDLE5ZxH4lQMJ7bIR2w1BEpSViRa+hQbZUF3vNfXeL3S2DqtxaTUpg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1710164411; c=relaxed/simple;
+	bh=XmHZUU1gtyxj/mKkPjonZ1VWZyeSVZkoZZ4SqIzeo78=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YQfo+/sbZ0ExGx6t93AnT/EwnCow4lsYS/7JKfdurg5gQ6JoJ7fJICjLSDMJM4I39ihlJSS/0pMWDUDYV31Q5Uxv+G7IcnozdRGKZEdp5g2O5QdH+odGBjDzhI1oK1jqWwOEoY8c4655AEz2DiQJmTTSTbWUHFZ0Yh6p4Zy/yfI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GU6wB8+e; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="GbpF3ZsF";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="genVoPmL"
-Received: from pps.filterd (m0333520.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42ALGHU8014742;
-	Mon, 11 Mar 2024 02:01:28 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-11-20;
- bh=oY3sBnPI8YEyGhJ94M2QORO1oBhKuGTELo6ZNeXiCmA=;
- b=GbpF3ZsFLxq9AEk45zvct4BGbG7mzG74+Zzi79GlBuF36b5ErEBYtu38eZiF8iTmz/3r
- eyeJem+b1jVcBdR7Lb1VcnDgflyGUwDCpy++1iqpurTygZL5wl4vcSTeMg8g22Qht5rG
- njcZgQ+ppgoY8xhwyimF+y9iN5qQDIf4/SYLg6rJjGEm9C+ZmLpKq6t+CiwvIpRtUxG3
- 2FkhnS583gpLdZY+6ZE7L+OFN1Drs+IUS6LEhv/fxkpK6yh+NUybraPC4tqpTU5fT4Mw
- n8k4OOlc+X5RQ5Ga2Q5Ssp/G53WqwZz2l3WFmSoPFYd7kAaOFWQJEXBd8btbf4/KYmXP jQ== 
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3wrftda5g6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 11 Mar 2024 02:01:27 +0000
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42ANjQRT004954;
-	Mon, 11 Mar 2024 02:01:27 GMT
-Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2100.outbound.protection.outlook.com [104.47.55.100])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3wre754b02-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 11 Mar 2024 02:01:27 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mrr3qpib9NzcBYsrtZDq0vMr/S6EdS9h0HhAi6WDFmR3KSMkWikvRAh9ye5Y7d6xRhEL3kcSWj47TWvp7GM1nNxQkJgnBP7bH/4ku5kIIdcCAsNFYVQqsE9duFjFPXAsEoNxJ8ls8TFAgx6KfoIDstoIH/eFdyCKESJu//sMBDR5cr5PUrsTWloD5XdtKJJ48A/FBypYtxJ8vZZFgwdvb2/djYRmcZ5gDYjMAHUKrvnyBrUNnZOeEqomOMeT1FiZ88tuOnrYONaHJkBJhFO1N41Y9Erkn15forv3IoGFakbpit0sFvoIkXioQgu3k08BF4h8cHMv5v7nA9miBkof+Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oY3sBnPI8YEyGhJ94M2QORO1oBhKuGTELo6ZNeXiCmA=;
- b=WtGwBLV3JDbMjOoJ/95fIRS/xdYfZJwaB0F/z//Ra/SQZrzIJ/Iw0LOonH6pAIte2upY5FJIx6kB3TUhGAIEOfWQkf3lkC9t0XO17a0tBWda1ArfnIn5aD3hza8BYXFPqKEp7IwC/gmujUYLKHT9fLxJlJXC8diicMhla17yDDNMXeUqvJ1gGPs/vSRTnbfiVQ7D0EhHqEndCpZzkmVM4Ss731GzalMvnETKIJ6cqoVxitma1FyLMv1qo5xvyVPSMcqAUQ12coC+G/D6SIGV4+0Qqcqk0p1d0z+eJmFlvuqF4EfNUYNzvHoPsgzQfV3UMX99a95iNJ9TchWpln/hHg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oY3sBnPI8YEyGhJ94M2QORO1oBhKuGTELo6ZNeXiCmA=;
- b=genVoPmLpvrYYtthNTGkO5GvVSOzGIKa9yfCSDvSoJwh/egqS+gT9SFU1Vtahvpq4NkF3QNzQPFfYTT+86OqkIUH4AWv+6VuR/amseMG6fMEkZO7gj2SYqVJBXOA+piWrGmQ9IhPjzLE7WnBmt0Wm6dmRVQNwYPX1guWo9AMINs=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by DS0PR10MB6152.namprd10.prod.outlook.com (2603:10b6:8:c4::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7362.24; Mon, 11 Mar
- 2024 02:01:24 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::814:3d5c:443b:17b]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::814:3d5c:443b:17b%7]) with mapi id 15.20.7362.035; Mon, 11 Mar 2024
- 02:01:24 +0000
-Message-ID: <e12f4474-da8a-48ef-a9c7-59eb10b7c86f@oracle.com>
-Date: Mon, 11 Mar 2024 07:31:22 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [GIT PULL] fstests: btrfs changes for for-next v2024.03.08
-To: zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Filipe Manana <fdmanana@kernel.org>
-References: <20240308144537.16995-1-anand.jain@oracle.com>
- <CAL3q7H69ec3URubLKdqFUiWfjRjQ=CaYtN=75eq4jMDggudtJQ@mail.gmail.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <CAL3q7H69ec3URubLKdqFUiWfjRjQ=CaYtN=75eq4jMDggudtJQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: MA0PR01CA0069.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:ad::10) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GU6wB8+e"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1710164408;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=BQ5gRcz9vCw4j+6t6CSgpSEUvEz1f4NIff2T1meHZP8=;
+	b=GU6wB8+etf4evmS+kBYVsm6T90ucy6j9EmdkE683apPCL7BGV+Vuht6w9uCdZrXo++2XXR
+	kJc9fRVQDoDC3PKbxkrEyHnsqqs5WYbH4rCmn6EA5yStD+56Fsm7BMllOybmh1fzUH4a+t
+	Urp+I8uLcuz9tQ7iksCz1NAEY+rCPJY=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-580-jMB4fqZ4OE6kANCtsMpSkg-1; Mon, 11 Mar 2024 09:40:06 -0400
+X-MC-Unique: jMB4fqZ4OE6kANCtsMpSkg-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-6dd65194396so4750612b3a.0
+        for <fstests@vger.kernel.org>; Mon, 11 Mar 2024 06:40:06 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1710164405; x=1710769205;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BQ5gRcz9vCw4j+6t6CSgpSEUvEz1f4NIff2T1meHZP8=;
+        b=EFkbLhyy8cBQbToaVf0yUooPxNGjGXsWMaH5c8O2nSJzVBDofX6Eh6gTrpzApH221R
+         x6JImlUB9icE6j+vHDp+oqr/OiADneh0GmG8ozON6PqauvKYtcNxJ1w4eQDIwjajHYg8
+         Yg49J+8rdIo/tmu0cnB5BPfrtgUAiTcXVrRgcmEu5zUzuv62LTKBupg5zJwE2C0KHIYI
+         5trWNZRhb1wn497LtyqOLDHo8CVQzBW9eoAsoIEyZW2Vz4d/5UtzpYIfrSGbJ4Ubt0Uk
+         tzOK3qiBSMP9xQkSmzLD/gzGeqyn3mvCjEIS/B1f9H3Nb3nmLgHtV9nqgHCoJ8HRQNZ5
+         q2yg==
+X-Forwarded-Encrypted: i=1; AJvYcCUThBe8gF6EHt6kTsXm6J+h3c3qK4nMbNSAal7ZO2ExP5lda5q6tk4u4PXCMwULoyfjfG2CFoqZ/S8KUTvJKwy2fWIDi+ohoQ==
+X-Gm-Message-State: AOJu0Ywpwj5CgRaBLLWs2UfokyreVkNegwp4fHRggVHVjZbRSQ83Dtt9
+	vEVroY2ckDlQ1kqWCbBIicDVirIILfr0Xg3UeFZdG4/QUOtNrDJNXg4OOyvwpv0Pg9KYEgClgyn
+	WWYv+NPghWlJD2dO2Chiio4yfGtI6z4xjaZUcNB2j1xHYYWptaBnU4Bs=
+X-Received: by 2002:a05:6a20:12cb:b0:1a1:87b5:4b28 with SMTP id v11-20020a056a2012cb00b001a187b54b28mr8563709pzg.0.1710164405064;
+        Mon, 11 Mar 2024 06:40:05 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGMQFGzmOdUxFzKMo4ozsJtB90XObc8kPKNmFnDhBOUeXD0jYODDfC45/6o2orzBcj86D4GNA==
+X-Received: by 2002:a05:6a20:12cb:b0:1a1:87b5:4b28 with SMTP id v11-20020a056a2012cb00b001a187b54b28mr8563669pzg.0.1710164404462;
+        Mon, 11 Mar 2024 06:40:04 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id du3-20020a056a002b4300b006e5ed7c0b35sm4351111pfb.67.2024.03.11.06.40.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Mar 2024 06:40:04 -0700 (PDT)
+Date: Mon, 11 Mar 2024 21:40:01 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v1.2 8/8] xfs: test for premature ENOSPC with large cow
+ delalloc extents
+Message-ID: <20240311134001.6qflb7gjyjnwwetr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <170899915207.896550.7285890351450610430.stgit@frogsfrogsfrogs>
+ <170899915333.896550.18395785595853879309.stgit@frogsfrogsfrogs>
+ <20240307232255.GG1927156@frogsfrogsfrogs>
+ <20240310091734.hn3twqri6cdgtxaf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240310162654.GB6226@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS0PR10MB6152:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9d4061a1-4919-4ebc-555e-08dc416f27bb
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 
-	zuPMLmBsDBDfKJjXV6jE3iPVAD5hgCUlar5ZFo1BCQ3qxXxhVbJXuk6Q3SO/89KQSLeSSPoyv7ZZRd13FUqrB3BC1LrZg5+dCIWZybWxTOHUvjBn2cs/wHDQCgwDGABhaOMCB/jQggEP8KVD9tDlhS5i4Tnb08DeCDEZEewqHrX5Fp2lneFntHEUQ5Rud8dl22SxTYl8dyp6V1r3zk01E83rNVDr8+3VRkSHEuw4DPo/zDfaMcda4tpnhk/sJzb+yq/VA/PIymoue2XB876Lx7f+6hBRh+9M+mKsphgnx5DFTr2VvH0H8vhRykKlXSvNUyAc4E8XAFMUyRJfz7TkpIxFB0Ml6E9k++4tOghVlqNtO08w/guRsmRb92emE9kicwAw26zWcAYbwNuDjJm3AVed+XQdPZSM4UH6b+e1P2yhyHMuNkSQocL4Cd4KDghSPBMcyMcGxZeJQJ+d0JUpnc2EUucpYHlhsAjoEfd+dB5LUdYV27lncELUUphnEcnMSwFRknDAeu58ZQnPPygbVJLOQ3ZzGNy+hjpTdmeFVP7GIpFj0LBYCwNyyhmD7ZlvOG6e+T5DQSNjSY3Te4bo3zdckNi+KI9EQSlzeT5Km6FdGeL8JWj/L84a2xnwh5dJ
-X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(1800799015)(376005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?utf-8?B?MU95SUJZejJ4Y3ZxcldleGtMRXh4NllOMWc0WHRYRStHVW5qdjk5T0xUNkpE?=
- =?utf-8?B?Qm03NFhTeW9NUHFoYTNaWDdYS1BxUktKUmdUK2dtM280YVF1WHNpWWVQa3VJ?=
- =?utf-8?B?cGcxeDRIbnFpOXRvUVUzNHI4YzYwbmZJQU5zeUJzV0N0eG9wdXIyL1B2MkhJ?=
- =?utf-8?B?QUZ5a2FBZUNiQnNRekFrdlBIOW0xWm92NThETHEwdERuUENxS1Q2RldFdFF5?=
- =?utf-8?B?Zld2OEIrc1MrN1hpVHB4WUxZa00xaGtjdmJkdGl5S240T0gxU3pBbTRlZktT?=
- =?utf-8?B?bFEvRnJFRWN1NTZZdmlGYUxJOXVPQlZrclF6SVp3c3prTjdxWU5wS2VKekc3?=
- =?utf-8?B?OWVUaTdESGhjb3ltUHhDS3p0RXR1RFFKSCtOUW1DWXNDcU9oZzJhNmN5RFVM?=
- =?utf-8?B?dU9vY01WUWJtc3liMXdJYUNZWkhCQjR6a1l0RFlwSUg3Y1loVFFMbllDWVFr?=
- =?utf-8?B?Y2xpVkY0dW0xYTVyQXBmQ0ZhU0FveGlwVSswNDEvY0pacFFjRnBtbVhRMUVV?=
- =?utf-8?B?dHFXN3c4SGgvRWJVcUg4L1prSTMrRzJmSW9TREhUOVorZzhJVXB4ZmJ2UDU0?=
- =?utf-8?B?ZVhCWGJTOHdrOVphZjhweVJnTnZRZU1FRE5SWFFWM2lHVkhFODdGYnd3TExk?=
- =?utf-8?B?blVUZmZGWG5SNlNOV2ZZaWpNODBKYy9qWTNHTUlyRnZZQVhPKzZPS3AxZmdD?=
- =?utf-8?B?UEdKd29kNDllOXBUdXVyaEFXL0RXTGRYTkhUbHJNUzNaV05LcjdyaEtCbjlF?=
- =?utf-8?B?TU9BTWhMZnZrVzkwN0ZpOUpQd3FDazB6YTFUSHRYNTRDbzJjOENocmV2dGxq?=
- =?utf-8?B?S0V4WkxQM052WHVEdlpURzcwZGlibkJOdkVtV1FIRDZ3aGpHYmx3dE5ncEpP?=
- =?utf-8?B?enRNTWF3b0lTL1RCOW0ySWxYcUlZYWJLb3lmMXE2SktCYkpYWTN0TTR4SDNi?=
- =?utf-8?B?NVdtcjlMUE5TWnRYWFlycjNYY1VHSittZU9TVWk3TjVHUS9aR2Yva2tMalFI?=
- =?utf-8?B?bU9PYmFVMHkwWWVhb2FJYzFxS0NWZWxDRmRIK2pQRE5zUDlHTW1ydnA1TmlE?=
- =?utf-8?B?ckpqV29LZVlJajlUeXpja0ZvZTU1WENPUHdpMXFtaXlYaVRLNE1PVkdzZm5Z?=
- =?utf-8?B?MFd2RGx3d29aTVRvWEtNOFovQTFwWjA5enNIRnpxcVAxMTZqQlp6NkpjUWdj?=
- =?utf-8?B?WEt3aFNJT0lQVDBoUFBBakNxUkIxU3ArQVRjZ2h3dDc0Unl2N3FQbU12Tndl?=
- =?utf-8?B?bVJTSUxhZ2lxWTNaMkQzanpvT1FDUWxBcTN5anVuVHBobmlnN2JPRkkwc0lv?=
- =?utf-8?B?S280RFFrbjlmRndaSmpLRkhqZ1BlS1d5Tmx6ZEtpdHROQU1XcXNGcnpjU2Zh?=
- =?utf-8?B?OEE2RzcwbE41SEdackhRamVxdUNnSFV1WWlITW5FOHQwZm9lTjd4Nk9oWkdh?=
- =?utf-8?B?YTM3Rml1Ri9OdUtrSUxuSEpQcW9FL2JYYVptWWVqdUxFaGF4QnpYbDB6NXBO?=
- =?utf-8?B?eHJ6NDkwMnhVMm5jZi8vUWhxZWQxSnZhU09RRWRCQkJDOFdCelJUTC9FR0xN?=
- =?utf-8?B?UHUxcjU5L3BBTWVuc3hDTWlzeVg4SkNpK21uQThKQmM2NWlHaWV5Mzdxd05q?=
- =?utf-8?B?TEwxcXIxTzhBOTVVTGE2dDE5b2V1cXIwZW5STDlwTzRGTSs0TjdpM2p1VzYy?=
- =?utf-8?B?MmhzRWdVZkhiNTVrWmVUNDhENk9tQ3l6dDVvdG02cUQ5VkFiZysxd3kwTlQz?=
- =?utf-8?B?Ly9ZZzJnUnBvaGF5MWd5Tkw1Y0dSdlF6a21yVjBoOFNwa09QczFndFVEelpo?=
- =?utf-8?B?K0lkQWxnYzZoZU9ialVvL0hyU0VkYU9yYUY0K0tESi9mWE9aLzFNT015R0RJ?=
- =?utf-8?B?Rlh1RXgwY2NKSkpFN3E3a2Nkd1prK3NzRkRyR3VNYmdQQWJ2OTdQTXN0eVF3?=
- =?utf-8?B?QlRiTWE1KzNDTk4vZzhncm56VGxkd0lyMjdNQ0FwZWpIM204MHM2V3BiQ0Zq?=
- =?utf-8?B?NDNaZDJtSWlFZE0xNnlyUnNhMEdVRTZxTkRBbTZtYUUxOVM2eDhYb0sxVlMw?=
- =?utf-8?B?Vy9wdDVKVTliTXNDV0hQSWN0Um8reGtlT2lOcE9TQllURmo1K0hTWE1IMkUr?=
- =?utf-8?B?dTlQbWJSZjF1OUxaUnNxYjVNZ0ViaWxHK3VJMENvaVgxWklOcWJCSGtyRlFI?=
- =?utf-8?Q?sekW1vXJsk/1tTq9IKK0tkUT/vLH7AiM98oCPkWHxEen?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	l+GfyceHF3gB7tQGTSvXe1BxDTdQBROB2aveVbt4FxaY3gITXXpm/uYurXmZEKiINVUEckQvfAH1VDEQQZyte5apo8zcFE0ax2tyhivOzLDbEoXo2ZrENHnVnMtszEobS4x1bMI2iACN1+BHFC+Wb7Lhi1uZWvuxabXf6VJNnv4Pm/QMKJNIubQRRiSHxHywVDhLzZFqKLHg2VAajk2eOYlfjvZrRx5DDpTd7YfM6s3WWjw1YCenItNv1ygfAsawk5ENUQtLd+F3439mfOQHvRWCzMoW+ZTiYdoyTd4zfErXvKFLPwpzDOnKE7DzOlOnWeRf98R9/0ZMCUGDh1swonTN3cicGOqKOfQFD0ZSOTifyFzwJhsx7ksGWphz8LGW6xgxc5Sbz73mTIAEfTkXZdJWJ+uStTEFYD8kMZZHRCR0WHlN2BtKmEKJUKnt8ihEddEzIkZMBkbHmEcuuOci34NgflIfWui/yhPG9EDbve9m0vPboKL8yMFggrs509bTW7qzfBtyKGENw/hWaRnZTH+/xFC6HBm+E4Z4XoSUKZo/I9YYXdAWAL/Kwbqk9uN0DqWR0DuH8OWafYlAnWvYWngBXEZnk3d4npkubBaL0X0=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9d4061a1-4919-4ebc-555e-08dc416f27bb
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Mar 2024 02:01:24.6559
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: GLKy9k61UIJOgWCF8OE/Mc30bdAlztACZRfFFN5l1BLct8E5My8lzfD2LvKC4fJqR1fPEm+LxFUwso0U324J6w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB6152
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-03-10_16,2024-03-06_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 bulkscore=0 adultscore=0
- mlxscore=0 phishscore=0 spamscore=0 suspectscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2311290000
- definitions=main-2403110014
-X-Proofpoint-ORIG-GUID: vmOg1HzFRu_r5p56WFv5DjMAPan8zhPZ
-X-Proofpoint-GUID: vmOg1HzFRu_r5p56WFv5DjMAPan8zhPZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240310162654.GB6226@frogsfrogsfrogs>
 
-
-
-On 3/10/24 22:38, Filipe Manana wrote:
-> On Fri, Mar 8, 2024 at 2:46 PM Anand Jain <anand.jain@oracle.com> wrote:
->>
->> Zorro,
->>
->> Please pull this branch containing bug fixes.
->> This changes are based on your branch for-next as below.
->>
->> Thank you.
->>
->> The following changes since commit 9b6df9a01ac8ee3f28a2a24d71e45792e21b6d48:
->>
->>    btrfs/016: fix a false alert due to xattrs mismatch (2024-03-01 19:24:16 +0800)
->>
->> are available in the Git repository at:
->>
->>    https://github.com/asj/fstests.git staged-20240308
->>
->> for you to fetch changes up to 9a03e88a04b6cf6e161c8902a3a523ca22601277:
->>
->>    btrfs: test normal qgroup operations in a compress friendly way (2024-03-08 22:31:51 +0800)
->>
->> ----------------------------------------------------------------
->> Anand Jain (1):
->>        common/rc: specify required device size
->>
-
-
->> Filipe Manana (1):
->>        btrfs: fix grep warning at _require_btrfs_mkfs_uuid_option()
+On Sun, Mar 10, 2024 at 09:26:54AM -0700, Darrick J. Wong wrote:
+> On Sun, Mar 10, 2024 at 05:17:34PM +0800, Zorro Lang wrote:
+> > On Thu, Mar 07, 2024 at 03:22:55PM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > On a higly fragmented filesystem a Direct IO write can fail with -ENOSPC error
+> > > even though the filesystem has sufficient number of free blocks.
+> > > 
+> > > This occurs if the file offset range on which the write operation is being
+> > > performed has a delalloc extent in the cow fork and this delalloc extent
+> > > begins much before the Direct IO range.
+> > > 
+> > > In such a scenario, xfs_reflink_allocate_cow() invokes xfs_bmapi_write() to
+> > > allocate the blocks mapped by the delalloc extent. The extent thus allocated
+> > > may not cover the beginning of file offset range on which the Direct IO write
+> > > was issued. Hence xfs_reflink_allocate_cow() ends up returning -ENOSPC.
+> > > 
+> > > This test addresses this issue.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > > ---
+> > > v1.1: address some missing bits and remove extraneous code
+> > > v1.2: fix cow fork dumping screwing up golden output
+> > 
+> > This version is good to me, I'll merge it.
+> > 
+> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+> > 
+> > BTW, I only see this patch for [PATCH 8/8], but I didn't see the "later" patch
+> > for [PATCH 6/8], just to make sure if I missed something :)
 > 
-> David's review tag is missing for that patch btw (and it came before
-> your review and cherry pick):
+> Oh!  Yeah, on re-reading that thread, I remembered that Christoph said
+> he'd look into making xfs_ondisk.h check ioctl structure sizes like
+> xfs/122 currently does.
 > 
-> https://lore.kernel.org/fstests/20240307095908.34913ff0@echidna/
+> In the meantime, there weren't any changes other than your RVB tag.  If
+> you want, I can resend it with that added.
+
+Oh, if that patch don't need to be changed, I'll merge it directly, don't
+need resending it :)
+
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > ---
+> > >  common/rc          |   14 ++++++++
+> > >  tests/xfs/1923     |   86 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/1923.out |    8 +++++
+> > >  3 files changed, 108 insertions(+)
+> > >  create mode 100755 tests/xfs/1923
+> > >  create mode 100644 tests/xfs/1923.out
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 50dde313b8..9f54ab1e77 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -1883,6 +1883,20 @@ _require_scratch_delalloc()
+> > >  	_scratch_unmount
+> > >  }
+> > >  
+> > > +# Require test fs supports delay allocation.
+> > > +_require_test_delalloc()
+> > > +{
+> > > +	_require_command "$FILEFRAG_PROG" filefrag
+> > > +
+> > > +	rm -f $TEST_DIR/testy
+> > > +	$XFS_IO_PROG -f -c 'pwrite 0 64k' $TEST_DIR/testy &> /dev/null
+> > > +	$FILEFRAG_PROG -v $TEST_DIR/testy 2>&1 | grep -q delalloc
+> > > +	res=$?
+> > > +	rm -f $TEST_DIR/testy
+> > > +	test $res -eq 0 || \
+> > > +		_notrun "test requires delayed allocation buffered writes"
+> > > +}
+> > > +
+> > >  # this test needs a test partition - check we're ok & mount it
+> > >  #
+> > >  _require_test()
+> > > diff --git a/tests/xfs/1923 b/tests/xfs/1923
+> > > new file mode 100755
+> > > index 0000000000..4ad3dfa764
+> > > --- /dev/null
+> > > +++ b/tests/xfs/1923
+> > > @@ -0,0 +1,86 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2022-2024 Oracle.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 1923
+> > > +#
+> > > +# This is a regression test for "xfs: Fix false ENOSPC when performing direct
+> > > +# write on a delalloc extent in cow fork".  If there is a lot of free space but
+> > > +# it is very fragmented, it's possible that a very large delalloc reservation
+> > > +# could be created in the CoW fork by a buffered write.  If a directio write
+> > > +# tries to convert the delalloc reservation to a real extent, it's possible
+> > > +# that the allocation will succeed but fail to convert even the first block of
+> > > +# the directio write range.  In this case, XFS will return ENOSPC even though
+> > > +# all it needed to do was to keep converting until the allocator returns ENOSPC
+> > > +# or the first block of the direct write got some space.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick clone
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $file1 $file2 $fragmentedfile
+> > > +}
+> > > +
+> > > +# Import common functions.
+> > > +. ./common/reflink
+> > > +. ./common/inject
+> > > +
+> > > +# real QA test starts here
+> > > +_fixed_by_kernel_commit d62113303d69 \
+> > > +	"xfs: Fix false ENOSPC when performing direct write on a delalloc extent in cow fork"
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs xfs
+> > > +_require_test_program "punch-alternating"
+> > > +_require_test_reflink
+> > > +_require_xfs_io_error_injection "bmap_alloc_minlen_extent"
+> > > +_require_test_delalloc
+> > > +
+> > > +file1=$TEST_DIR/file1.$seq
+> > > +file2=$TEST_DIR/file2.$seq
+> > > +fragmentedfile=$TEST_DIR/fragmentedfile.$seq
+> > > +
+> > > +rm -f $file1 $file2 $fragmentedfile
+> > > +
+> > > +# COW operates on pages, so we must not perform operations in units smaller
+> > > +# than a page.
+> > > +blksz=$(_get_file_block_size $TEST_DIR)
+> > > +pagesz=$(_get_page_size)
+> > > +if (( $blksz < $pagesz )); then
+> > > +	blksz=$pagesz
+> > > +fi
+> > > +
+> > > +echo "Create source file"
+> > > +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 256))" $file1 >> $seqres.full
+> > > +
+> > > +sync
+> > > +
+> > > +echo "Create Reflinked file"
+> > > +_cp_reflink $file1 $file2 >> $seqres.full
+> > > +
+> > > +echo "Set cowextsize"
+> > > +$XFS_IO_PROG -c "cowextsize $((blksz * 128))" -c stat $file1 >> $seqres.full
+> > > +
+> > > +echo "Fragment FS"
+> > > +$XFS_IO_PROG -f -c "pwrite 0 $((blksz * 512))" $fragmentedfile >> $seqres.full
+> > > +sync
+> > > +$here/src/punch-alternating $fragmentedfile
+> > > +
+> > > +echo "Allocate block sized extent from now onwards"
+> > > +_test_inject_error bmap_alloc_minlen_extent 1
+> > > +
+> > > +echo "Create big delalloc extent in CoW fork"
+> > > +$XFS_IO_PROG -c "pwrite 0 $blksz" $file1 >> $seqres.full
+> > > +
+> > > +sync
+> > > +
+> > > +$XFS_IO_PROG -c 'bmap -elpv' -c 'bmap -celpv' $file1 &>> $seqres.full
+> > > +
+> > > +echo "Direct I/O write at offset 3FSB"
+> > > +$XFS_IO_PROG -d -c "pwrite $((blksz * 3)) $((blksz * 2))" $file1 >> $seqres.full
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/xfs/1923.out b/tests/xfs/1923.out
+> > > new file mode 100644
+> > > index 0000000000..a0553cf3ee
+> > > --- /dev/null
+> > > +++ b/tests/xfs/1923.out
+> > > @@ -0,0 +1,8 @@
+> > > +QA output created by 1923
+> > > +Create source file
+> > > +Create Reflinked file
+> > > +Set cowextsize
+> > > +Fragment FS
+> > > +Allocate block sized extent from now onwards
+> > > +Create big delalloc extent in CoW fork
+> > > +Direct I/O write at offset 3FSB
+> > > 
+> > 
 > 
 
-Filipe, thanks for verifying.
-
-Zorro, would you mind adding
-   "Reviewed-by: David Disseldorp ddiss@suse.de"
-to the patch while it's still in your patches-in-queue branch?
-
-Thanks, Anand
-
->>
->> Josef Bacik (8):
->>        btrfs/011: increase the runtime for replace cancel
->>        btrfs/012: adjust how we populate the fs to convert
->>        btrfs/131: don't run with subpage blocksizes
->>        btrfs/213: make the test more reliable
->>        btrfs/271: adjust failure condition
->>        btrfs/287,btrfs/293: filter all btrfs subvolume delete calls
->>        btrfs/291: remove image file after teardown
->>        btrfs: test normal qgroup operations in a compress friendly way
->>
->>   check               |   6 ---
->>   common/btrfs        |   2 +-
->>   common/rc           |   9 ++++-
->>   tests/btrfs/011     |   9 ++++-
->>   tests/btrfs/012     |  14 ++++---
->>   tests/btrfs/022     |  86 ++---------------------------------------
->>   tests/btrfs/131     |   4 ++
->>   tests/btrfs/213     |  20 +++++-----
->>   tests/btrfs/271     |  11 +++---
->>   tests/btrfs/287     |   4 +-
->>   tests/btrfs/287.out |   2 +-
->>   tests/btrfs/291     |   2 +-
->>   tests/btrfs/293     |   6 +--
->>   tests/btrfs/293.out |   4 +-
->>   tests/btrfs/320     | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/320.out |   2 +
->>   16 files changed, 164 insertions(+), 124 deletions(-)
->>   create mode 100755 tests/btrfs/320
->>   create mode 100644 tests/btrfs/320.out
->>
