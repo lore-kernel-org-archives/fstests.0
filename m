@@ -1,52 +1,38 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 157287C6D0
-	for <fstests@vger.kernel.org>; Tue, 12 Mar 2024 15:30:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B30715BF;
+	Tue, 12 Mar 2024 16:43:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710257459; cv=none; b=poiTkR/NSvjHscFM+WRLp5JZcYanFU5e8ReNaT+VuH8jgAEWRwSvopY25i8J8ZmCJ945v0rfApT0xTW8IxHz1eOQyzgJlDVEKZYmLMD4h1H29hdLOINbIqReSV+y7nek3lWqLVKq8oMNP0mbegk2loYYEy8/7grzx42zvzt7B3Q=
+	t=1710261807; cv=none; b=n5HPk6GNHqmp0QhCU4BQ6ptDkLGXIkifCY8Wwp06pmkyTXRnxMSW+FlvaaN3zmGgjOQErSHDd7+vypKCwoybPoMn9e4n3uT5FeiGlb4wb2dSRshECZFuKr6cOn+MlaTjzeJxmUQparl1i44JIJdOQKH86tc6HKnyDxdNTz7dEfc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710257459; c=relaxed/simple;
-	bh=Jsp9I9KJn8kCpy0UeYbTZpYiw5/jOjiQwY5R2bqjNH4=;
+	s=arc-20240116; t=1710261807; c=relaxed/simple;
+	bh=17FOXx1nLCnnWA1EnE0keMOYSdNFCopEojc86M3xO58=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZiOZeyaybkCGZ2e3yK4dNK7dkUx0oucaehKhYEKoct3I2CFPmY33BglfwTDeo4yhbazy9ujYZ3Tt/hZscuRvYcWcK8Mp7iZ6sdyhJQ9JCYh4YP1SKLDjBL2zzMTZoQbiVk95TxK5VXX74uGVNd0Yb1Tyt1+ssMyGbgqk4KcL0cw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XaGmoE/z; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=kCFBXovhJE6pmGGQlNA32Tizc/JlTK9VPhBD1vyAbF4RqPYhD6Cx1Ze2HSuEp25SyX4kHw7ZMw6yB9sotAqkZ4TzOciHT1Wc5n9G2J3Wues1SdmsB/5+T1XxqR8Z6gPZbwnplXfxJf9+uvdHW6l41+Y3YvqhNkBLSpbYpIJS1Ek=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d3EEBQPI; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XaGmoE/z"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1710257457;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=rw1sMZMo38uoygI0s1R4qBPry1mRi70suqTvVWHYqSY=;
-	b=XaGmoE/zzFc5vg59zxLTheKygUxQwCQSS5iitlv0v0gu43mXharFHQcsqBAv6SzK+Nxm4K
-	mVqwyvCcRTXyqrK4auvDE2lx4xb33dm3qg1Gbzu+0xRcLHmRckTtRyZddsD1iFpriFQ7nG
-	J95EJJlhzJREoRJmwzo5JAvvMAcBDqw=
-Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
- [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-279-IKbm46ubMK2LeH28ALUevw-1; Tue, 12 Mar 2024 11:30:50 -0400
-X-MC-Unique: IKbm46ubMK2LeH28ALUevw-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mimecast-mx02.redhat.com (Postfix) with ESMTPS id D82C3185A784;
-	Tue, 12 Mar 2024 15:30:48 +0000 (UTC)
-Received: from redhat.com (unknown [10.22.32.83])
-	by smtp.corp.redhat.com (Postfix) with ESMTPS id 79A9C111FA;
-	Tue, 12 Mar 2024 15:30:48 +0000 (UTC)
-Date: Tue, 12 Mar 2024 10:30:47 -0500
-From: Bill O'Donnell <bodonnel@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d3EEBQPI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9183BC433F1;
+	Tue, 12 Mar 2024 16:43:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1710261806;
+	bh=17FOXx1nLCnnWA1EnE0keMOYSdNFCopEojc86M3xO58=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=d3EEBQPIAGOHhD2aSjpYbbvvt2HFXabGB+tI7Ty+kDfaVsPwx2bRufYzGTZCL8gcY
+	 faFZLl4Jmfq8wH146w4KhMQlBRmDwBWf68Z4J9BWdzER+RUIAUhqyjcgW15vfugjOC
+	 31Met1/yvJk/vm/FyfUmGZolWebBjVa2KIWQm2FSQYs9FoRfiya6UvsXBLaMFstikj
+	 ribThlAsdGdaMx8qTo8B+ENnZaaA9F7M6b8vrxp3tsXCLr2XKElA9uHVUYrvYZZ2bE
+	 2G0L50YJWW3/lr/D7lcg4Em/i9CYjit4KmxqWbHOIj8sHrfzYYacAI/Iare6qaY1mb
+	 x3jOtRKcXLcgA==
+Date: Tue, 12 Mar 2024 09:43:24 -0700
+From: Eric Biggers <ebiggers@kernel.org>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Eric Biggers <ebiggers@kernel.org>, fstests <fstests@vger.kernel.org>,
-	xfs <linux-xfs@vger.kernel.org>, aalbersh@redhat.com,
-	Zorro Lang <zlang@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>,
+	aalbersh@redhat.com, Zorro Lang <zlang@redhat.com>
 Subject: Re: [PATCH] generic/574: don't fail the test on intentional coredump
-Message-ID: <ZfB1J2YWg83KcMDJ@redhat.com>
+Message-ID: <20240312164324.GA1148@sol.localdomain>
 References: <20240312145720.GE6188@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -57,7 +43,6 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20240312145720.GE6188@frogsfrogsfrogs>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.11.54.5
 
 On Tue, Mar 12, 2024 at 07:57:20AM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
@@ -66,10 +51,6 @@ On Tue, Mar 12, 2024 at 07:57:20AM -0700, Darrick J. Wong wrote:
 > causes xfs_io to segfault and then dump core.
 > 
 > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-
-Looks fine.
-Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
-
 > ---
 >  tests/generic/574 |    3 ++-
 >  1 file changed, 2 insertions(+), 1 deletion(-)
@@ -88,5 +69,7 @@ Reviewed-by: Bill O'Donnell <bodonnel@redhat.com>
 >  		-c 'mmap -r 0 $map_len' \
 >  		-c 'mread -v $offset $length'; true"
 >  }
-> 
 
+Reviewed-by: Eric Biggers <ebiggers@google.com>
+
+- Eric
