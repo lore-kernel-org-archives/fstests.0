@@ -1,75 +1,115 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B30715BF;
-	Tue, 12 Mar 2024 16:43:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C024340BE1;
+	Wed, 13 Mar 2024 13:39:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710261807; cv=none; b=n5HPk6GNHqmp0QhCU4BQ6ptDkLGXIkifCY8Wwp06pmkyTXRnxMSW+FlvaaN3zmGgjOQErSHDd7+vypKCwoybPoMn9e4n3uT5FeiGlb4wb2dSRshECZFuKr6cOn+MlaTjzeJxmUQparl1i44JIJdOQKH86tc6HKnyDxdNTz7dEfc=
+	t=1710337187; cv=none; b=TeOXELNCwyjpp2L5qe3pdxHOcf/byBvbCE55vq1LKLhVV6TMoLFrdGzQX8wMvmsOdkOdFnXbuDps6gwXJnXc82zqHyhH4VgEuqatvUeuI/oFwz0iRHNE/+TZ7+TGKm2PuVGAJIGGYhLlfOKQeSyICGkdjevnJWm/8i4lMVp1Azw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710261807; c=relaxed/simple;
-	bh=17FOXx1nLCnnWA1EnE0keMOYSdNFCopEojc86M3xO58=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kCFBXovhJE6pmGGQlNA32Tizc/JlTK9VPhBD1vyAbF4RqPYhD6Cx1Ze2HSuEp25SyX4kHw7ZMw6yB9sotAqkZ4TzOciHT1Wc5n9G2J3Wues1SdmsB/5+T1XxqR8Z6gPZbwnplXfxJf9+uvdHW6l41+Y3YvqhNkBLSpbYpIJS1Ek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d3EEBQPI; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1710337187; c=relaxed/simple;
+	bh=Inj0078X2a6s/TBXSMB2LiAPr7+cFZC/zP8TfODVyUk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kkuQDFJIu/swmSpoc5Fk0dTKt2/qvjL6O4GB+6QitkXwzmuP6sb/pjPg0wMi/C+zXl2C2O5jXwYPeO20tOEkCfHLhagmUWfgPeGKKGvglU0IhnwTlLyjPVc+25FPy8CxnepqnBZUhWPU3cKAX6sBn9sTazU/MmR4kMrIZOHVRa4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qqsfTS96; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d3EEBQPI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9183BC433F1;
-	Tue, 12 Mar 2024 16:43:26 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qqsfTS96"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E815C433C7;
+	Wed, 13 Mar 2024 13:39:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710261806;
-	bh=17FOXx1nLCnnWA1EnE0keMOYSdNFCopEojc86M3xO58=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=d3EEBQPIAGOHhD2aSjpYbbvvt2HFXabGB+tI7Ty+kDfaVsPwx2bRufYzGTZCL8gcY
-	 faFZLl4Jmfq8wH146w4KhMQlBRmDwBWf68Z4J9BWdzER+RUIAUhqyjcgW15vfugjOC
-	 31Met1/yvJk/vm/FyfUmGZolWebBjVa2KIWQm2FSQYs9FoRfiya6UvsXBLaMFstikj
-	 ribThlAsdGdaMx8qTo8B+ENnZaaA9F7M6b8vrxp3tsXCLr2XKElA9uHVUYrvYZZ2bE
-	 2G0L50YJWW3/lr/D7lcg4Em/i9CYjit4KmxqWbHOIj8sHrfzYYacAI/Iare6qaY1mb
-	 x3jOtRKcXLcgA==
-Date: Tue, 12 Mar 2024 09:43:24 -0700
-From: Eric Biggers <ebiggers@kernel.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>,
-	aalbersh@redhat.com, Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] generic/574: don't fail the test on intentional coredump
-Message-ID: <20240312164324.GA1148@sol.localdomain>
-References: <20240312145720.GE6188@frogsfrogsfrogs>
+	s=k20201202; t=1710337187;
+	bh=Inj0078X2a6s/TBXSMB2LiAPr7+cFZC/zP8TfODVyUk=;
+	h=From:To:Cc:Subject:Date:From;
+	b=qqsfTS96o4huqsU0BV4254EzJOGo/vNV0MfiJSUTX6Sep2NP7v1QHTz5wxsUSFmr3
+	 4b1QdMcIjEiiKgtsUuPWKsErzKvO6P+9FKu67ykgCC9QSC4+JLSQ9VfxiZA4IpoQou
+	 EzfG6ZlA7Kp/NzS9rqPG1UBhFil6J0N3i6O5krT+c+jrGgPtYHR17J7TuufEgypa/P
+	 MldThIk8n4vqtllccY+9qtKQ7ph3csAq6vyVVRlbrr7TzOOcXQ2DCmUnABUkhtyXYv
+	 z/2XaJ1MbwXwVg/rIp2ENb7JVoFz+TW2ceanIzT/RfEsQyuUHgt9x+3jx6Ucx3+zF3
+	 +5BlzYNiFgEqw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: add missing kernel commit IDs to _fixed_by_kernel_commit() calls
+Date: Wed, 13 Mar 2024 13:39:28 +0000
+Message-ID: <d0c99b30b1f0b777375fa3512ff21b35d1d3a805.1710337140.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240312145720.GE6188@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Mar 12, 2024 at 07:57:20AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Don't fail this test just because the mmap read of a corrupt verity file
-> causes xfs_io to segfault and then dump core.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/generic/574 |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/574 b/tests/generic/574
-> index 067b3033a8..cb42baaa67 100755
-> --- a/tests/generic/574
-> +++ b/tests/generic/574
-> @@ -74,7 +74,8 @@ mread()
->  	# shell instance from optimizing out the fork and directly exec'ing
->  	# xfs_io.  The easiest way to do that is to append 'true' to the
->  	# commands, so that xfs_io is no longer the last command the shell sees.
-> -	bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $file \
-> +	# Don't let it write core files to the filesystem.
-> +	bash -c "trap '' SIGBUS; ulimit -c 0; $XFS_IO_PROG -r $file \
->  		-c 'mmap -r 0 $map_len' \
->  		-c 'mread -v $offset $length'; true"
->  }
+From: Filipe Manana <fdmanana@suse.com>
 
-Reviewed-by: Eric Biggers <ebiggers@google.com>
+Some tests are still using a 'xxx...' commit ID but the respective patches
+were already merged to Linus' tree, so update them with the correct commit
+IDs and in one case update the subject as well, because it was modified
+after the test case was added and before being sent to Linus (btrfs/317).
 
-- Eric
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/303 | 2 +-
+ tests/btrfs/309 | 2 +-
+ tests/btrfs/316 | 2 +-
+ tests/btrfs/317 | 4 ++--
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/tests/btrfs/303 b/tests/btrfs/303
+index 26bcfe41..ed3abcc1 100755
+--- a/tests/btrfs/303
++++ b/tests/btrfs/303
+@@ -25,7 +25,7 @@ _require_test
+ _require_scratch
+ _require_xfs_io_command "fiemap"
+ 
+-_fixed_by_kernel_commit XXXXXXXXXXXX \
++_fixed_by_kernel_commit 5897710b28ca \
+ 	"btrfs: send: don't issue unnecessary zero writes for trailing hole"
+ 
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
+diff --git a/tests/btrfs/309 b/tests/btrfs/309
+index 5cbcd223..d1eb953f 100755
+--- a/tests/btrfs/309
++++ b/tests/btrfs/309
+@@ -12,7 +12,7 @@ _begin_fstest auto quick snapshot subvol
+ _supported_fs btrfs
+ _require_scratch
+ _require_test_program t_snapshot_deleted_subvolume
+-_fixed_by_kernel_commit XXXXXXXXXXXX \
++_fixed_by_kernel_commit 7081929ab257 \
+ 	"btrfs: don't abort filesystem when attempting to snapshot deleted subvolume"
+ 
+ _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+diff --git a/tests/btrfs/316 b/tests/btrfs/316
+index 07a94334..f78a0235 100755
+--- a/tests/btrfs/316
++++ b/tests/btrfs/316
+@@ -17,7 +17,7 @@ _begin_fstest auto quick qgroup
+ _supported_fs btrfs
+ _require_scratch
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit d139ded8b9cd \
+ 	"btrfs: qgroup: always free reserved space for extent records"
+ 
+ _scratch_mkfs >> $seqres.full
+diff --git a/tests/btrfs/317 b/tests/btrfs/317
+index 59686b72..b17ba584 100755
+--- a/tests/btrfs/317
++++ b/tests/btrfs/317
+@@ -10,8 +10,8 @@
+ . ./common/preamble
+ _begin_fstest auto volume raid convert
+ 
+-_fixed_by_kernel_commit XXXXXXXXXX \
+-	"btrfs: zoned: don't skip block group profile checks on conv zones"
++_fixed_by_kernel_commit 5906333cc4af \
++	"btrfs: zoned: don't skip block group profile checks on conventional zones"
+ 
+ . common/filter.btrfs
+ 
+-- 
+2.43.0
+
