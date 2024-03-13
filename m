@@ -1,122 +1,99 @@
-Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCE5C5E066
-	for <fstests@vger.kernel.org>; Wed, 13 Mar 2024 23:46:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 578401E480;
+	Wed, 13 Mar 2024 23:51:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710373619; cv=none; b=tL7oWJSr6XCfY0aa8LRNu5rT+xnQ5xZKFssnF2NKEg5V8ztHYT1sSyYVgQfH2wEzvRoIS89pNZEKMZoZ+DQXxLQpKJ8b+7wH+fHwmhZYQDCo75Rq9U1DXc0FMQgFgJUP1yt34V/jznRHzmw6oD9S1qY47lnhgvqn3B8RVAQuRAs=
+	t=1710373890; cv=none; b=gb8/xnsCeEeVbosmNXzQRLbIspncZPPPJULV53Ochhknheq0H9yfJ97jJqHqTYubLvlhKbGVccGoSLjDEcIvajdYa+IWsMWe8MLjK7Q3NF4hy8miaMh/+ulaL/OkuSyfXaiTWvleKCZAENC1mGGILIO/KxsByMqMVdEjwiHlRUk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710373619; c=relaxed/simple;
-	bh=sfuHMsjcDWTcvKyqIuBcCKVXerqATN2ObSYpO9zvKD8=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ew9PzHSCW/54T6f0RjpueAwK7TWoKDKJI20Rik/TdYEoEBixf7kG+an8SDgnlM5RaKZ6OeIi9ntrzqH2K0OEtYZvfZvRMQfWmWmeO7YGZ0E1XYILLU6aHTVuoW4+ySHoJTW84vImZH7JwD5R1c6fwz1Y8ZpKUKVydEdiBvJfNEY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=ZYEjq3pa; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=lNS0NPOh; arc=none smtp.client-ip=64.147.123.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
+	s=arc-20240116; t=1710373890; c=relaxed/simple;
+	bh=GjpCbexXpLMXd1IAkFUOU7wqs4IKJrvCV6IEnuALe98=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hOC4s5r7MFZrVjVn+6tPorm59aNqEYeuSrKiBELHrYfKWZwcempgbxhRVe4juCQrdZCky6hEDwTjlgr9nNYlcaudNiuqveOBm8gdwXDqUjAvkjzlDwNgUTsPdgNzcJlXEkdVqJxeLPXKckoKYcxaVlJmnIb0XPAMskn6KmTFbXQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GVGIVh6I; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="ZYEjq3pa";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="lNS0NPOh"
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-	by mailout.west.internal (Postfix) with ESMTP id D5CF732009FD;
-	Wed, 13 Mar 2024 19:46:56 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute4.internal (MEProxy); Wed, 13 Mar 2024 19:46:57 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-	:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to; s=fm2; t=1710373616; x=1710460016; bh=rJ2JXLR/hcZWo0bDWIcPL
-	RNVWRH5442XsgL3VHN/iFs=; b=ZYEjq3pae32RGCARyzfBnv8+5AvNoobki+Mq4
-	NEHVwKPaM3LIvRIPlmvwESW4uUs5aO9wsiff1HiG2WCbjEDcXfUHZvrj4wMMXw1o
-	9H9rkG/MPjcWhNxcpSPjhmkmIDsA4t+/UGprP7frZuG7WQLVS/VB7EPE1xcu0gR+
-	un82rTnPWhdrQmKddRTWiz4qSZOrxYePCLPJ/S9K6sMOxcdRjulZBjdzZBlBUdgR
-	WabMu1UFQJduaB9cPO8BhUeIpugbK9czn3TGbpz8dTJQTS2jgwT2dYb/rgk4PODQ
-	E7FvwtAe3BO7krgslbtLE9yAl/p6q0XRfrY/MhIG9Fg2VMCLA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:date:date:feedback-id:feedback-id:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm1; t=1710373616; x=1710460016; bh=rJ2JXLR/hcZWo0bDWIcPLRNVWRH5
-	442XsgL3VHN/iFs=; b=lNS0NPOhm5SMON3rusv8Qi80+ZQU2liLMiOfFFeeuN5h
-	i77bRjCd0HQ0su2IZGU2RM9Ol9YBDDXKXXTXgs/V3FJOIHoAQVAqixQ88kE+qHFh
-	uwjPE2npp1g7kLdUgBnlFkc+UY76UPwALeMFwr4tFbDF/pVVL10ZTCo0rx7Omx/u
-	4c6UJNgsMdjjrlzv0VzdCU0O5wABxoI8a2/5DTGcrOJl7YP6sJDFiujpfEkPr1Xt
-	N7Ccz1wxBKR8YmaZWy31dKSMSC1MgzlW99MD+FKNkATCcPINt3x5hEJr6F2OdGhI
-	TBLMRDriK9X79n2gNkeNv7chzHqnXVedmBz4Exl1qQ==
-X-ME-Sender: <xms:8DryZarlOQ5cb0yCBVSRAmSk-KPo2NdtqkfUwUhVmjuD6dBlKkkx1g>
-    <xme:8DryZYqhq38oDiMTNwe5QA6WNeeDFYI-KOoF6ZmAHo3CLzjVxfjFVbwisK1F6ZOOe
-    qdN_5l8Py20-83jI-w>
-X-ME-Received: <xmr:8DryZfMbzh0NiuHo37cxHTpy6XEBsR7DgFkS0pCPhS7h9dOBXRYZc7QmJC4D7VjFLNEZumRK41z_GND_hpjgX1UUO78>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrjeeigdduvdcutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefhvfevufffkffoggfgsedtkeertdertddtnecuhfhrohhmpeeuohhrihhsuceu
-    uhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepieegle
-    ehjeelfeeifeeiuefhfefgvefgkedtjefhiedvveetgfduleejheeifffgnecuffhomhgr
-    ihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmh
-    epmhgrihhlfhhrohhmpegsohhrihhssegsuhhrrdhioh
-X-ME-Proxy: <xmx:8DryZZ6kxaCgJt3OdLNCld9Fn3cPaj7CQYtpsH-m7pJYQQDJ8_LqBw>
-    <xmx:8DryZZ7P-AeFf5MhhJyF1RExUWXbdOajqFV_8r5_YHf7uDhvAdpdsw>
-    <xmx:8DryZZj2Bto3lRBedBxQ1bgz6vvX-vOOSgkqQszTfgoptn3W0RHrag>
-    <xmx:8DryZT4gQa3KL3BX8FiDzkrURG99xS74C7GkOotUR6gzLqBtMPIYuA>
-    <xmx:8DryZZHypnDREWRCHPLINYhfXn64GQeNJxtl37kgMrLy3pf-M_9xMg>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 13 Mar 2024 19:46:55 -0400 (EDT)
-From: Boris Burkov <boris@bur.io>
-To: kernel-team@fb.com,
-	fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH RFC] generic/730: ensure EIO after device delete
-Date: Wed, 13 Mar 2024 16:47:47 -0700
-Message-ID: <6165b0018426e58e7427a26eebea3d63e66fed15.1710373423.git.boris@bur.io>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GVGIVh6I"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D03FEC43394;
+	Wed, 13 Mar 2024 23:51:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1710373889;
+	bh=GjpCbexXpLMXd1IAkFUOU7wqs4IKJrvCV6IEnuALe98=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=GVGIVh6IOeTDcCB8cC1zNzFsxvG6HSKYsnSbCTkfVaggCJMHXgEKBYvlz4r+37r+L
+	 tD7lvDZTr9+ctljUSVnsy5sTceIdrZhsZNc7XbkdSOjk2BPlsbrL5VlcPyNE0HOTrO
+	 ru86NZ8BL/Cv8lDxuSj+qkFAMrRJLe/iKOtt+yAPQ73TnNBXlNDlnCXYYZu0gBkgTK
+	 9aWF6bh/TNNfDONIE2FFl+AUdhTS1cJJIqtj0mxt/rL8wy2sS2IQO50jXboPolIZdW
+	 QRAD/yFryRJ5oxqf8T5/LaJlCoc9lzXCCWkt0ZR+e+VnOGZvgeGHSb7q1TdgdQOzIA
+	 u+jxs+9hw3Tbg==
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-513a08f2263so534101e87.3;
+        Wed, 13 Mar 2024 16:51:29 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUFWaWwJkZJrsSE9RH88stvRb16dr2bdB+ir2MVi9Zfzp8L8ZcE3oHDjfiPOfiTpGCTm5g3UubH1jTjtPgDk5Z1du3iXiDTrw==
+X-Gm-Message-State: AOJu0YwL5igbSQMum20SC0PyLYLIzE8tI0/XSKoCrIc9Yf3qkcRLG9XJ
+	6ArsZjoZsD/KPiE+Wl7VBgHgDMqWluGQ6poDSrUFiIXsbKTWWhgiqtaTVfXi1n2j2Ffc9zwtoPh
+	N6DcE7b7DjtNmdHGxUok/4PsbGjA=
+X-Google-Smtp-Source: AGHT+IFC5MqtiTG9CU8SOHsz4iN2pmyLhf2pX4wh4MP+q/nEkLjV+TWBOIt1RyzmP2XK7X8aCjpyC1oJ1Z5fPL6cTY4=
+X-Received: by 2002:ac2:5b5b:0:b0:513:3435:5120 with SMTP id
+ i27-20020ac25b5b000000b0051334355120mr40147lfp.32.1710373887867; Wed, 13 Mar
+ 2024 16:51:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <3528774789271f9e46918f8b1d1461dad0e11cc4.1710373423.git.boris@bur.io>
+ <37d57d3ae473b67270137151e4fa18ed7464cba1.1710373423.git.boris@bur.io>
+In-Reply-To: <37d57d3ae473b67270137151e4fa18ed7464cba1.1710373423.git.boris@bur.io>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 13 Mar 2024 23:50:51 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H4yP5r3NOEjT3ddMkaoGhgz39+sJqkdNoBgD9WDG986YQ@mail.gmail.com>
+Message-ID: <CAL3q7H4yP5r3NOEjT3ddMkaoGhgz39+sJqkdNoBgD9WDG986YQ@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: fix _require_btrfs_mkfs_uuid_option
+To: Boris Burkov <boris@bur.io>
+Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-This test removes a SCSI debug device out from under a mounted
-filesystem with a (probably) dirty file. This assumes that page cache
-cannot save us from EIO, for a reason that I can't quite explain. In
-fact, this test fails for exactly that reason, at least on btrfs.
+On Wed, Mar 13, 2024 at 11:46=E2=80=AFPM Boris Burkov <boris@bur.io> wrote:
+>
+> currently, this helper causes tests to fail on my system due to
+> unexpected warning messages about dangling '\' characters from grep.
+> Change the invocation to not escape the '-' characters but instead to
+> use -- to instruct grep that the options list is over. Fixes
+> btrfs/31[345] for me (and I believe the btrfs github ci)
+>
+> Signed-off-by: Boris Burkov <boris@bur.io>
+> ---
+>  common/btrfs | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/common/btrfs b/common/btrfs
+> index 3eb2a91b7..aa344706c 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -93,7 +93,7 @@ _require_btrfs_mkfs_uuid_option()
+>         local cnt
+>
+>         cnt=3D$($MKFS_BTRFS_PROG --help 2>&1 | \
+> -                               grep -E --count "\-\-uuid|\-\-device-uuid=
+")
+> +                               grep -E --count -- "--uuid|--device-uuid"=
+)
 
-The original patches:
+This was already fixed and it's in the patches-in-queue branch:
 
-      https://lore.kernel.org/fstests/20230807112100.GB15405@lst.de/
+https://lore.kernel.org/fstests/ef2df19486ef71adccd14b3df0bf475ecc7f3b38.17=
+09737287.git.fdmanana@suse.com/
 
-refer to this passing on xfs and not btrfs, so I suspect I am missing
-something. With that said, on my machine this actually fails on xfs with
-and without my patch, so this is clearly not enough.
+https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/log/?h=3Dpatches-in-=
+queue
 
-High level, I am trying to understand what is really the expected
-behavior from a filesystem under this condition and what this test is
-getting at. Of btrfs, ext4, and xfs, only ext4 passes it, while btrfs
-does pass with this additional syncing/cache dropping to nudge it to an
-error.
-
-Signed-off-by: Boris Burkov <boris@bur.io>
----
- tests/generic/730 | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/tests/generic/730 b/tests/generic/730
-index 11308cdaa..ca5037c57 100755
---- a/tests/generic/730
-+++ b/tests/generic/730
-@@ -47,6 +47,9 @@ exec 3< $SCSI_DEBUG_MNT/testfile
- # delete the scsi debug device while it still has dirty data
- echo 1 > /sys/block/$(_short_dev $SCSI_DEBUG_DEV)/device/delete
- 
-+sync
-+echo 3 > /proc/sys/vm/drop_caches
-+
- # try to read from the file, which should give us -EIO
- cat <&3 > /dev/null
- 
--- 
-2.43.0
-
+>         if [ $cnt !=3D 2 ]; then
+>                 _notrun "Require $MKFS_BTRFS_PROG with --uuid and --devic=
+e-uuid options"
+>         fi
+> --
+> 2.43.0
+>
+>
