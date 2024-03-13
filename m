@@ -1,48 +1,75 @@
-Received: from mout-p-201.mailbox.org (mout-p-201.mailbox.org [80.241.56.171])
+Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8718A22071;
-	Wed, 13 Mar 2024 20:38:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 189505D74E;
+	Wed, 13 Mar 2024 23:45:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710362308; cv=none; b=obOIvrqSi+S9dLAwU29v1L5sYbuf6+HzoLeXeUvEEtGqly95FUDCE7rkq6nH+B1upL4+8vguKbTS7nE50yZv4eXOSJAHu0S8EYkuD5wvTsAPkL9LUnVgaPrEvidNM9ajxbDY8PtSJkMw/1Hzs7ToSa3KBfU4V3Z6h6dKd1hQybg=
+	t=1710373545; cv=none; b=Hb8SJwJiuZSkb1DmfeK2t+tW+rx/j8iSNcBs7M9o6UCQ0Lt0f5LVy96pXWUhUdLs025EkBcX6bfapO9v7MroAleJmOOwEaw9kOQw42S7YNp8MyMK49mywumEWtULGvvncDliHdtXjzlBwRtizv7SQQTxuZSQ8QgjEs0baf0FoqI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710362308; c=relaxed/simple;
-	bh=DOgEKBoPtja17MkZZ+RaTWVd+mk8fXIApEPm224DWPQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YT8gdLHBDpLoKzzA3AwmfkIfYhWOuudpLeFfon79SmqGjMIut28FQBnexVONhFRB23+6dtpd0DJRY34lJYLg5CNIyw6Kr1ZeIjaUzONgGIeE+//MkasFKy02dh06bv8JoCHF92N26CYp01Oa8NLvapSnqOkCEbho7Oy5QlpzHVk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=YtfRkkxZ; arc=none smtp.client-ip=80.241.56.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+	s=arc-20240116; t=1710373545; c=relaxed/simple;
+	bh=l3SS3zhNbAcmNY2Y0cNYgZjOSCY/WmbTxrlSMAXhjx8=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=RF/sRK/M8QlN9KLLYS6yUDTr4rXs043lDBC5Po50E5GU56GWIxNogXGzLeQoKsE6murjyb55lyK33Ynb79hwPkwqqEdf0eaJfbw58rUesV9KRKywvEc6I7v95UjE77YkkbTnP4ipELwfTQA5BP2YrXIsmFDw3+tZMutJ6kxaaM8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=VCz0zsXw; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=GYH1dLnx; arc=none smtp.client-ip=64.147.123.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="YtfRkkxZ"
-Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-201.mailbox.org (Postfix) with ESMTPS id 4Tw2Qj35Cnz9spF;
-	Wed, 13 Mar 2024 21:38:21 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
-	s=MBO0001; t=1710362301;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=jBVMMbKg44qa1I9vQfP5N4/miUCY6magYeOwG0Cym+c=;
-	b=YtfRkkxZFRGVTGzeo2TGVK2ntvhgj9AlnHhIG8rvS6rDxTVd6mrJtscDmrWex/R9+jmqvS
-	8lH2Kzqs/MPANhTCB0ZPMhk2RaqzTOn8KDZjg+SIUp9Vmx0yqTYGJJI2jLj0GYaDkR4di7
-	KyecvE637gq5pinTAv00FlLu/dV4NCnAb1YFjdBtxbdXZcGVsuXJKQvMnXntrhvoo8PbxM
-	WQGZofXEqDFGgNkERKRxFkepx2DiZLltw+t2pQLdSsLoJ24tzbDyI9BQ+qEq8PuNAKhMO7
-	DMrV43sUYSYUNZLH3gDRFK80h+XPmUELoSw44FNUHsmTAFWz9Qh+Mev0Zpz9LQ==
-From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-To: fstests@vger.kernel.org,
-	zlang@redhat.com
-Cc: djwong@kernel.org,
-	p.raghav@samsung.com,
-	linux-xfs@vger.kernel.org,
-	gost.dev@samsung.com,
-	mcgrof@kernel.org
-Subject: [PATCH] xfs/558: scale blk IO size based on the filesystem blksz
-Date: Wed, 13 Mar 2024 21:38:18 +0100
-Message-ID: <20240313203818.2361119-1-kernel@pankajraghav.com>
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="VCz0zsXw";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="GYH1dLnx"
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+	by mailout.west.internal (Postfix) with ESMTP id B4F5532009FD;
+	Wed, 13 Mar 2024 19:45:41 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute6.internal (MEProxy); Wed, 13 Mar 2024 19:45:42 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	:content-transfer-encoding:content-type:date:date:from:from
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to; s=fm2; t=1710373541; x=1710459941; bh=IT8meFKXO8+79QKh7WmT/
+	2X5ESCARYejQK37eU8VGkk=; b=VCz0zsXwBkDiaJ6aU8EXUU0o0IMir0Ny26/at
+	g89betjoeN+bQMpU1R4OdDFoeJ93GwaBP30EydRXyeGmDR0mZwkgeNn3jRW8pEsm
+	H1WFyRA4mIWxuCC/wpErIqWZeiy+T+np8rfW7L6M6PVifLwehY3xFkpmgluQlEuw
+	8pBXHLZOuR5JTdnaKjrh6/jBGWEEfd/x5kosHZSXK+U6Ii2xRlaAmecuegn+oSpr
+	NS6vwYBIJwkWvWBko+BybXhR5q1WUaOQRZjXuzHbhC0poNUw8xka2HPbRnxNdMSP
+	Mv02bNMApSZPTqSM0kf5nIQ4oyWlPaM5NawWgRp/Sc4k5b32A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:content-transfer-encoding:content-type
+	:date:date:feedback-id:feedback-id:from:from:in-reply-to
+	:message-id:mime-version:reply-to:subject:subject:to:to
+	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1710373541; x=1710459941; bh=IT8meFKXO8+79QKh7WmT/2X5ESCA
+	RYejQK37eU8VGkk=; b=GYH1dLnxfTpJtnh0tLRv68WxIhFSjbmfYaqDqodbqo4a
+	1g67CHCMtA/IYddVtfth9sFbUoJs3LwHaM3fVtu3HSdCa0BVU3pzlGLMAgSlflr8
+	I6rh5B73J/XJcEY6zD9E92Thgwr9XG3WRo6MRm23kSCptjKCwxOy0cqcJ2cy1M2d
+	ICxhrK9lQXhT0QailGA8F7lS0/GY0qh2m0RONnlKfV8WlPFBcwzlKpL5LwWNXMWe
+	COe28okIgWPttFQuT0LXWRhkIMAZAWmFy6CV3eEU/0qofRb8haVN/0JN23omtcDr
+	oP6Mzn1mFRI8ijeLS9uLFBH4c/8NWvy4UiZ3Dz5tCg==
+X-ME-Sender: <xms:pTryZV11iUzoKn-nWjyScpmK4VOgo6FIxWSQzvyH125TaCeWwxjE2Q>
+    <xme:pTryZcGiqjWQyxnI302JkXGJUKM2-Bwmx1WF2KBm67AUuehHcyzVA2LsBw46SzG_8
+    12kdbvCc_xwsC5tTvc>
+X-ME-Received: <xmr:pTryZV4KLYeulRDfjObgd_JPbI6X2yBJiTioEDheaJbxsL89qXnLnU1HNJ-s1MPCWayNqCSUy63HqkDNAnOorEnArXw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrjeeigdduvdcutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertdertd
+    dtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheq
+    necuggftrfgrthhtvghrnhepudeitdelueeijeefleffveelieefgfejjeeigeekuddute
+    efkefffeethfdvjeevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghi
+    lhhfrhhomhepsghorhhishessghurhdrihho
+X-ME-Proxy: <xmx:pTryZS1KCV3zIY7A1y9G0iXstWp298_EGYvgV95IC2QyQRdMmx16Ww>
+    <xmx:pTryZYHHWJm2Mdb7fEerf1iyEDLm3-qktKOONxSpSC1q9cEBCFlXoQ>
+    <xmx:pTryZT903VeuHVXi4NE7lqxPHwdjU1qNLM8uIa3Nb8_NPiEkAsWSIA>
+    <xmx:pTryZVmqbJ7IWOK7pb97HqENxvp-9L9IuzVYer2ttAvGiLlZGOSLSQ>
+    <xmx:pTryZdTjypktr1BGNEGfY5iwzdgJ3gB5dkWaNZxD2r47k3rpIVlzDQ>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
+ 13 Mar 2024 19:45:40 -0400 (EDT)
+From: Boris Burkov <boris@bur.io>
+To: linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com,
+	fstests@vger.kernel.org
+Subject: [PATCH] btrfs/277: specify protocol version 3 for verity send
+Date: Wed, 13 Mar 2024 16:46:29 -0700
+Message-ID: <3528774789271f9e46918f8b1d1461dad0e11cc4.1710373423.git.boris@bur.io>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,46 +77,31 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Rspamd-Queue-Id: 4Tw2Qj35Cnz9spF
 
-From: Pankaj Raghav <p.raghav@samsung.com>
+This test uses btrfs send with fs-verity which relies on protocol
+version 3. The default in progs is version 2, so we need to explicitly
+specify the protocol version. Note that the max protocol version in
+progs is also currently broken (not properly gated by EXPERIMENTAL) so
+that needs fixing as well.
 
-This test fails for 64k filesystem block size on a 4k PAGE_SIZE
-system. Scale the `blksz` based on the filesystem block size instead of
-fixing it as 64k so that we do get some iomap invalidations while doing
-concurrent writes.
-
-Cap the blksz to be at least 64k to retain the same behaviour as before
-for smaller filesystem blocksizes.
-
-This fixes the "Expected to hear about writeback iomap invalidations?"
-message for 64k filesystems.
-
-Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-Tested-by: Darrick J. Wong <djwong@kernel.org>
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Signed-off-by: Boris Burkov <boris@bur.io>
 ---
- tests/xfs/558 | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ tests/btrfs/277 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/xfs/558 b/tests/xfs/558
-index 9e9b3be8..270f458c 100755
---- a/tests/xfs/558
-+++ b/tests/xfs/558
-@@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
- $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
- _require_pagecache_access $SCRATCH_MNT
+diff --git a/tests/btrfs/277 b/tests/btrfs/277
+index f5684fde1..3898bda4d 100755
+--- a/tests/btrfs/277
++++ b/tests/btrfs/277
+@@ -84,7 +84,7 @@ _test_send_verity() {
+ 	echo "set subvolume read only"
+ 	$BTRFS_UTIL_PROG property set $subv ro true
+ 	echo "send subvolume"
+-	$BTRFS_UTIL_PROG send $subv -f $stream -q >> $seqres.full
++	$BTRFS_UTIL_PROG send $subv -f $stream -q --proto=3 >> $seqres.full
  
--blksz=65536
-+min_blksz=65536
-+file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-+blksz=$(( 8 * $file_blksz ))
-+
-+blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
-+
- _require_congruent_file_oplen $SCRATCH_MNT $blksz
- 
- # Make sure we have sufficient extent size to create speculative CoW
+ 	echo "blow away fs"
+ 	_scratch_unmount
 -- 
 2.43.0
 
