@@ -1,79 +1,76 @@
 Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71DB05DF23;
-	Wed, 13 Mar 2024 23:45:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCE5C5E066
+	for <fstests@vger.kernel.org>; Wed, 13 Mar 2024 23:46:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710373550; cv=none; b=WybkzcBlR5bfHKzKRrEIpn8F9OvR0zRO1fPA9AE8mNf/Ek0pYsEBGqMlAjYzV8c+GULGAT6L22sCuuZexPIzvP1C+m9l7pRfBX5EQjBqEcTA4XktybSM0sqUqXWuu7BQ4cSJ7LZqaJfcp+nAkWQKNwMOuW+2+GZUd1nfEoZq8+c=
+	t=1710373619; cv=none; b=tL7oWJSr6XCfY0aa8LRNu5rT+xnQ5xZKFssnF2NKEg5V8ztHYT1sSyYVgQfH2wEzvRoIS89pNZEKMZoZ+DQXxLQpKJ8b+7wH+fHwmhZYQDCo75Rq9U1DXc0FMQgFgJUP1yt34V/jznRHzmw6oD9S1qY47lnhgvqn3B8RVAQuRAs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710373550; c=relaxed/simple;
-	bh=hhieElAaqS6OmOm+yhjdw4TRnqZFL+gfcqDh7gU76p4=;
-	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=lmyl1hsO7CVoZp2igegbZqGent51aaJnuaF43KWcxVgxmuYDPc6DnPCn7eBWm5Aq6rp967S16EyoZ0exwUC+3IUwMsgD4vI3qCuzbkeZl8bKfnFvpdt3bu3ZkX1LK6eUN91II7l+hw8O4+k62Rffkhm4yFQfJspBqCebN8UrKrk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=n+CtNB6V; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=i0grKGAk; arc=none smtp.client-ip=64.147.123.19
+	s=arc-20240116; t=1710373619; c=relaxed/simple;
+	bh=sfuHMsjcDWTcvKyqIuBcCKVXerqATN2ObSYpO9zvKD8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ew9PzHSCW/54T6f0RjpueAwK7TWoKDKJI20Rik/TdYEoEBixf7kG+an8SDgnlM5RaKZ6OeIi9ntrzqH2K0OEtYZvfZvRMQfWmWmeO7YGZ0E1XYILLU6aHTVuoW4+ySHoJTW84vImZH7JwD5R1c6fwz1Y8ZpKUKVydEdiBvJfNEY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=ZYEjq3pa; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=lNS0NPOh; arc=none smtp.client-ip=64.147.123.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="n+CtNB6V";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="i0grKGAk"
-Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
-	by mailout.west.internal (Postfix) with ESMTP id 483B832009FD;
-	Wed, 13 Mar 2024 19:45:47 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute1.internal (MEProxy); Wed, 13 Mar 2024 19:45:47 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="ZYEjq3pa";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="lNS0NPOh"
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+	by mailout.west.internal (Postfix) with ESMTP id D5CF732009FD;
+	Wed, 13 Mar 2024 19:46:56 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute4.internal (MEProxy); Wed, 13 Mar 2024 19:46:57 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
 	:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:in-reply-to:message-id:mime-version:references
-	:reply-to:subject:subject:to:to; s=fm2; t=1710373546; x=
-	1710459946; bh=RUiufpH62OWLBOhOEK4N/hzsHkPzFZsiNnnTy0oJ1UY=; b=n
-	+CtNB6V5ywGB3/OxNa96c9fvZ0/l6Knhg5DvkFMXKFCgqwP1DgnCpKS9RAS2CxI3
-	fxM3L0SbtAMuxVRohvoxEHE8AFPQXj3K8CVqEpSkqytYI6ijPQAvc0kq2jCB1QSQ
-	e+SRty25ctSIv7dERWRymVIljLp32yu4dMkJvHf5IuPs0q+f8m2F/0BWeaYvX5KJ
-	yl1PLn2aVzxn0sb35Xhsc6IwUyCjlN2ZBKW+swYKAmFg77Cn5M5DVPUTaQOWm4y1
-	BSvcvTPg5XMPgbd5w9XrPDFFfkrYQ4RgxhV4Cp0g4wTutwJXuPM1+8yzqigu/SMJ
-	fbdvDdurbbCfyUjIJ7aYA==
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to; s=fm2; t=1710373616; x=1710460016; bh=rJ2JXLR/hcZWo0bDWIcPL
+	RNVWRH5442XsgL3VHN/iFs=; b=ZYEjq3pae32RGCARyzfBnv8+5AvNoobki+Mq4
+	NEHVwKPaM3LIvRIPlmvwESW4uUs5aO9wsiff1HiG2WCbjEDcXfUHZvrj4wMMXw1o
+	9H9rkG/MPjcWhNxcpSPjhmkmIDsA4t+/UGprP7frZuG7WQLVS/VB7EPE1xcu0gR+
+	un82rTnPWhdrQmKddRTWiz4qSZOrxYePCLPJ/S9K6sMOxcdRjulZBjdzZBlBUdgR
+	WabMu1UFQJduaB9cPO8BhUeIpugbK9czn3TGbpz8dTJQTS2jgwT2dYb/rgk4PODQ
+	E7FvwtAe3BO7krgslbtLE9yAl/p6q0XRfrY/MhIG9Fg2VMCLA==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:content-transfer-encoding:content-type
-	:date:date:feedback-id:feedback-id:from:from:in-reply-to
-	:in-reply-to:message-id:mime-version:references:reply-to:subject
-	:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-	:x-sasl-enc; s=fm1; t=1710373546; x=1710459946; bh=RUiufpH62OWLB
-	OhOEK4N/hzsHkPzFZsiNnnTy0oJ1UY=; b=i0grKGAk7RyYhqlq+V+/+wBPVV1+H
-	vyn3ChGv0be+j6pyryoApLWECP2VwCDBA6pWVbczDaxomGjkh4d78YuUyU4UTuMO
-	y3HeubhWY/dKVTLRy0lh0eb069YbFxPF2Y1mh//1bLUqYTxt1FbcOtCm+Wkm/8cm
-	erhcbiglf2S9NRgeso+vSPsGIVx0QEILRY6Klj3gl50r/dqMHSElhZI4Iqmu6exp
-	R6DFlrHweukNps0f0wUhKn0sCVQVXkpq8AAHldz4prZ72DWceqhO9qsjwaT9OjEh
-	awFjaI8wF4OQ6B61ysKCpKytggyVoBiTYkpy7QvM87QH8ZOBSUSgAvx6g==
-X-ME-Sender: <xms:qjryZWauWS6YaHjC_VxJWWUoQ5FBxdhfGnXba041TvSoKRp-GNXVFA>
-    <xme:qjryZZYB3dAfpX2MxORyD9n0aVrcqigI5TRk3IseqRlv3YeKENL_AOk4tOTfGVSHE
-    4_iVVe7y9hj-rx6h6k>
-X-ME-Received: <xmr:qjryZQ_JLv-QFRLLo6Rb3c4kM5Vqv2Ubn88Cb9q1oucEpZN-5DS2wZQwzQenD21RZuLWrNa-lOQ9Z9EafAdt1yVvSHY>
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:date:date:feedback-id:feedback-id:from:from
+	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1710373616; x=1710460016; bh=rJ2JXLR/hcZWo0bDWIcPLRNVWRH5
+	442XsgL3VHN/iFs=; b=lNS0NPOhm5SMON3rusv8Qi80+ZQU2liLMiOfFFeeuN5h
+	i77bRjCd0HQ0su2IZGU2RM9Ol9YBDDXKXXTXgs/V3FJOIHoAQVAqixQ88kE+qHFh
+	uwjPE2npp1g7kLdUgBnlFkc+UY76UPwALeMFwr4tFbDF/pVVL10ZTCo0rx7Omx/u
+	4c6UJNgsMdjjrlzv0VzdCU0O5wABxoI8a2/5DTGcrOJl7YP6sJDFiujpfEkPr1Xt
+	N7Ccz1wxBKR8YmaZWy31dKSMSC1MgzlW99MD+FKNkATCcPINt3x5hEJr6F2OdGhI
+	TBLMRDriK9X79n2gNkeNv7chzHqnXVedmBz4Exl1qQ==
+X-ME-Sender: <xms:8DryZarlOQ5cb0yCBVSRAmSk-KPo2NdtqkfUwUhVmjuD6dBlKkkx1g>
+    <xme:8DryZYqhq38oDiMTNwe5QA6WNeeDFYI-KOoF6ZmAHo3CLzjVxfjFVbwisK1F6ZOOe
+    qdN_5l8Py20-83jI-w>
+X-ME-Received: <xmr:8DryZfMbzh0NiuHo37cxHTpy6XEBsR7DgFkS0pCPhS7h9dOBXRYZc7QmJC4D7VjFLNEZumRK41z_GND_hpjgX1UUO78>
 X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrjeeigdduvdcutefuodetggdotefrodftvf
     curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffojghfggfgsedtkeertd
-    ertddtnecuhfhrohhmpeeuohhrihhsuceuuhhrkhhovhcuoegsohhrihhssegsuhhrrdhi
-    oheqnecuggftrfgrthhtvghrnhepieeuffeuvdeiueejhfehiefgkeevudejjeejffevvd
-    ehtddufeeihfekgeeuheelnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
-    rghilhhfrhhomhepsghorhhishessghurhdrihho
-X-ME-Proxy: <xmx:qjryZYqBRlCBNaurUOaWxbdATXPtTw6XiXt846amPXaPuXeeAmBLZw>
-    <xmx:qjryZRro4tkgQjcl39YxbaiD0mAqjFoTNMNCIqYdumAaeBeyUBxpbg>
-    <xmx:qjryZWTLAqdyeFFYe0ucY9-BdXREM7QeRiY7bcf1oT9hwQgqDm0dfQ>
-    <xmx:qjryZRoDuknBjzTk17QMNUZXTeAQtdWdCI7LjNWmQnyhYIVK30NrYg>
-    <xmx:qjryZY0e9XKkWPpFf8-45F1tohAAaxb9NPoEdenVVYyyEhrgAgYLHg>
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefhvfevufffkffoggfgsedtkeertdertddtnecuhfhrohhmpeeuohhrihhsuceu
+    uhhrkhhovhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhepieegle
+    ehjeelfeeifeeiuefhfefgvefgkedtjefhiedvveetgfduleejheeifffgnecuffhomhgr
+    ihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmh
+    epmhgrihhlfhhrohhmpegsohhrihhssegsuhhrrdhioh
+X-ME-Proxy: <xmx:8DryZZ6kxaCgJt3OdLNCld9Fn3cPaj7CQYtpsH-m7pJYQQDJ8_LqBw>
+    <xmx:8DryZZ7P-AeFf5MhhJyF1RExUWXbdOajqFV_8r5_YHf7uDhvAdpdsw>
+    <xmx:8DryZZj2Bto3lRBedBxQ1bgz6vvX-vOOSgkqQszTfgoptn3W0RHrag>
+    <xmx:8DryZT4gQa3KL3BX8FiDzkrURG99xS74C7GkOotUR6gzLqBtMPIYuA>
+    <xmx:8DryZZHypnDREWRCHPLINYhfXn64GQeNJxtl37kgMrLy3pf-M_9xMg>
 Feedback-ID: i083147f8:Fastmail
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 13 Mar 2024 19:45:46 -0400 (EDT)
+ 13 Mar 2024 19:46:55 -0400 (EDT)
 From: Boris Burkov <boris@bur.io>
-To: linux-btrfs@vger.kernel.org,
-	kernel-team@fb.com,
+To: kernel-team@fb.com,
 	fstests@vger.kernel.org
-Subject: [PATCH] btrfs: fix _require_btrfs_mkfs_uuid_option
-Date: Wed, 13 Mar 2024 16:46:31 -0700
-Message-ID: <37d57d3ae473b67270137151e4fa18ed7464cba1.1710373423.git.boris@bur.io>
+Cc: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH RFC] generic/730: ensure EIO after device delete
+Date: Wed, 13 Mar 2024 16:47:47 -0700
+Message-ID: <6165b0018426e58e7427a26eebea3d63e66fed15.1710373423.git.boris@bur.io>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <3528774789271f9e46918f8b1d1461dad0e11cc4.1710373423.git.boris@bur.io>
-References: <3528774789271f9e46918f8b1d1461dad0e11cc4.1710373423.git.boris@bur.io>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -82,30 +79,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-currently, this helper causes tests to fail on my system due to
-unexpected warning messages about dangling '\' characters from grep.
-Change the invocation to not escape the '-' characters but instead to
-use -- to instruct grep that the options list is over. Fixes
-btrfs/31[345] for me (and I believe the btrfs github ci)
+This test removes a SCSI debug device out from under a mounted
+filesystem with a (probably) dirty file. This assumes that page cache
+cannot save us from EIO, for a reason that I can't quite explain. In
+fact, this test fails for exactly that reason, at least on btrfs.
+
+The original patches:
+
+      https://lore.kernel.org/fstests/20230807112100.GB15405@lst.de/
+
+refer to this passing on xfs and not btrfs, so I suspect I am missing
+something. With that said, on my machine this actually fails on xfs with
+and without my patch, so this is clearly not enough.
+
+High level, I am trying to understand what is really the expected
+behavior from a filesystem under this condition and what this test is
+getting at. Of btrfs, ext4, and xfs, only ext4 passes it, while btrfs
+does pass with this additional syncing/cache dropping to nudge it to an
+error.
 
 Signed-off-by: Boris Burkov <boris@bur.io>
 ---
- common/btrfs | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/730 | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/common/btrfs b/common/btrfs
-index 3eb2a91b7..aa344706c 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -93,7 +93,7 @@ _require_btrfs_mkfs_uuid_option()
- 	local cnt
+diff --git a/tests/generic/730 b/tests/generic/730
+index 11308cdaa..ca5037c57 100755
+--- a/tests/generic/730
++++ b/tests/generic/730
+@@ -47,6 +47,9 @@ exec 3< $SCSI_DEBUG_MNT/testfile
+ # delete the scsi debug device while it still has dirty data
+ echo 1 > /sys/block/$(_short_dev $SCSI_DEBUG_DEV)/device/delete
  
- 	cnt=$($MKFS_BTRFS_PROG --help 2>&1 | \
--				grep -E --count "\-\-uuid|\-\-device-uuid")
-+				grep -E --count -- "--uuid|--device-uuid")
- 	if [ $cnt != 2 ]; then
- 		_notrun "Require $MKFS_BTRFS_PROG with --uuid and --device-uuid options"
- 	fi
++sync
++echo 3 > /proc/sys/vm/drop_caches
++
+ # try to read from the file, which should give us -EIO
+ cat <&3 > /dev/null
+ 
 -- 
 2.43.0
 
