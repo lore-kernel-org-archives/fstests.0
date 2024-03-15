@@ -1,40 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7FA11CA4E
-	for <fstests@vger.kernel.org>; Fri, 15 Mar 2024 02:49:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6C2512E47
+	for <fstests@vger.kernel.org>; Fri, 15 Mar 2024 02:51:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710470965; cv=none; b=mWAhUu2CGQT7plcWrsUTbeXC0ED55GNnrP7ZeVckTnCD0TseSUn2CRZtFoEAXh56ChN7UskkI2VZJEhMVEg8gVqFoxDKq6A5NSl5GEph1HnRKFXlZFyk24sfqdOSIzQs9uPpJEgcEeBCbSg4/eDs0UenHBuJe/VIioW8X5b5tEQ=
+	t=1710471099; cv=none; b=pmeP8RzsbZmylBejA7Y2DOvAWXTOozoxzrUw5sv+mNjxJXdAJN8gDmXanQOMp9y3dKSVVXH2ukIkj6Javrqt8vW2vI+//kQ4/V19VH1+WxWNj2GgSdhBd981MkeWjb3XeI3NeX0GdsrBGXnw80J3JJ5J3vqUXzSegNZ/MGiXOnk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710470965; c=relaxed/simple;
-	bh=5i/c6GayHjy0PokdUvTmAvKMPpi26IeaBaFV3jKxmpM=;
+	s=arc-20240116; t=1710471099; c=relaxed/simple;
+	bh=WoFPsGsNiUGOEaSLZRnO4a0w0dtn7FylOlFKSCjc4Ow=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uWh7ln2XBidWA1sGjBag4RS5Hz9ORBGCjygieylTo8KMFOVjmaYbsCWMJZOiJIxbFcwyt4ITNA3QJOkYR3YjaHU/nhqY072rqLl/mB9GoyhFu2GHG4JZJiXe45GR28mevv2fYgO9NffYOHZFABpk8qS1VIOgoxWIo9eR9RQYbc8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QwCgUvPe; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=E7SF7pZdqpFNNcR4c7L5K0XSxI/P5O3rXFDKS2M3WYWFmIIiwdC1sF1OnSCbeTUnH+Y854x6YH+8nJ5hdaKa88TOcXZPFlxgKYEOCIxgSwhekxNQvJtoK5ht+eapn9SM9yLSeM8kketIZZM+Bx5JNjK0z/f6DGinZ//dsDkCQTs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gn6jBqlp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QwCgUvPe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5426DC433C7;
-	Fri, 15 Mar 2024 02:49:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gn6jBqlp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3C828C433C7;
+	Fri, 15 Mar 2024 02:51:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710470965;
-	bh=5i/c6GayHjy0PokdUvTmAvKMPpi26IeaBaFV3jKxmpM=;
+	s=k20201202; t=1710471099;
+	bh=WoFPsGsNiUGOEaSLZRnO4a0w0dtn7FylOlFKSCjc4Ow=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=QwCgUvPeCWI5NTaeeanIua3JV+9Cvu9QN26buoXv9e3MlM+3QLJMnUZ1XSfHXvRQn
-	 /t2w3AJZlmdEayo6aBnprXPpUcHyaOe8KQLEqKh57GGLU30XN3VHeMeEezfv3ssrf/
-	 CYPOoUY0yGCEsvpFXwlMf0BKVAadndVpXVzZmjuQiTBwbCQbWH/W7vRrpBmkM5B4df
-	 AVFyYYAZMjWxT/VBFxsYUFj/1DqzU0m8SrwzyNa7HffYWnSDcxykSOQYwIEo6L9xT0
-	 LUKii6Fg/Fb4vau3zhZAzpI8RxgRxMisqWCTgnq/lQA1HYgDxCnFnKl+4QurZJVuh+
-	 KdTEn5yRtVG4A==
-Date: Thu, 14 Mar 2024 19:49:24 -0700
+	b=gn6jBqlpR6zzIBw47Bu8JujBRlP23w7Lncy+vx9e9wO2zPBMpFez9PD8JUr5Ucp88
+	 XY/nwJ83Cl4ediRkTT6eTVA0/mGO/gA0ghMMRauz827XUHJMSRUz5e1XY70XeJvpJ7
+	 /8lG68bkpq0x8L5x0ummBpicCa6I2J+h/PU2nYA+6LpMnMDlIVpw4OJnLynG015AuS
+	 ykTm5VN6Ni+ZOGexa7+vIRgjcfARxaLRSInu6zb/JjPFS+nDCBBHJcWh1BTcvi5yLQ
+	 AR/NTejeGB1fUEZbkENBtDaBqbjFzs2LcSZndirRzY5MY+SA7Dsjt1wjfesBsUHjf3
+	 QiC25gBSRkpfA==
+Date: Thu, 14 Mar 2024 19:51:38 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: "Luis Henriques (SUSE)" <luis.henriques@linux.dev>
 Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] common/fuzzy: make _scratch_fuzz_modify work for
- non-xfs filesystems
-Message-ID: <20240315024924.GF6188@frogsfrogsfrogs>
+Subject: Re: [PATCH 2/2] ext4/006: take into account updates to
+ _scratch_fuzz_modify()
+Message-ID: <20240315025138.GG6188@frogsfrogsfrogs>
 References: <20240314172512.28293-1-luis.henriques@linux.dev>
- <20240314172512.28293-2-luis.henriques@linux.dev>
+ <20240314172512.28293-3-luis.henriques@linux.dev>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,55 +43,32 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240314172512.28293-2-luis.henriques@linux.dev>
+In-Reply-To: <20240314172512.28293-3-luis.henriques@linux.dev>
 
-On Thu, Mar 14, 2024 at 05:25:11PM +0000, Luis Henriques (SUSE) wrote:
-> Since commit 9bab148bb3c7 ("common/fuzzy: exercise the filesystem a little
-> harder after repairing") funtion _scratch_fuzz_modify() has become
-> xfs-specific due to the use of some functions that assume this filesytem,
-> namely _xfs_force_bdev() and _xfs_has_feature().
-> 
-> Ensure _scratch_fuzz_modify() works again with other filesystems by using
-> these functions only when testing xfs.
-> 
-> Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
+On Thu, Mar 14, 2024 at 05:25:12PM +0000, Luis Henriques (SUSE) wrote:
+> Since function _scratch_fuzz_modify() has been updated, its output has
+> changed.  Modify test ext4/006 to take this change into account.
 
-Oooooops sorry about that. :(
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Now that you've blocked off the XFS stuff, what line changed?
 
 --D
 
+> Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
 > ---
->  common/fuzzy | 16 +++++++++-------
->  1 file changed, 9 insertions(+), 7 deletions(-)
+>  tests/ext4/006 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/common/fuzzy b/common/fuzzy
-> index f5d45cb28f07..218fe1654386 100644
-> --- a/common/fuzzy
-> +++ b/common/fuzzy
-> @@ -8,15 +8,17 @@
->  _scratch_fuzz_modify() {
->  	echo "+++ stressing filesystem"
->  	mkdir -p $SCRATCH_MNT/data
-> -	_xfs_force_bdev data $SCRATCH_MNT/data
-> +	[ "$FSTYP" == "xfs" ] && _xfs_force_bdev data $SCRATCH_MNT/data
->  	$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/data
+> diff --git a/tests/ext4/006 b/tests/ext4/006
+> index 8792167bd9c2..b73692aa5b81 100755
+> --- a/tests/ext4/006
+> +++ b/tests/ext4/006
+> @@ -131,7 +131,7 @@ echo "++ check fs (2)" >> $seqres.full
+>  _check_scratch_fs >> $seqres.full 2>&1
 >  
-> -	if _xfs_has_feature "$SCRATCH_MNT" realtime; then
-> -		mkdir -p $SCRATCH_MNT/rt
-> -		_xfs_force_bdev realtime $SCRATCH_MNT/rt
-> -		$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/rt
-> -	else
-> -		echo "+++ xfs realtime not configured"
-> +	if [ "$FSTYP" = "xfs" ]; then
-> +		if _xfs_has_feature "$SCRATCH_MNT" realtime; then
-> +			mkdir -p $SCRATCH_MNT/rt
-> +			_xfs_force_bdev realtime $SCRATCH_MNT/rt
-> +			$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/rt
-> +		else
-> +			echo "+++ xfs realtime not configured"
-> +		fi
->  	fi
->  }
->  
+>  grep -E -q '(did not fix|makes no progress)' $seqres.full && echo "e2fsck failed" | tee -a $seqres.full
+> -if [ "$(wc -l < "$ROUND2_LOG")" -ne 8 ]; then
+> +if [ "$(wc -l < "$ROUND2_LOG")" -ne 7 ]; then
+>  	echo "e2fsck did not fix everything" | tee -a $seqres.full
+>  fi
+>  echo "finished fuzzing" | tee -a "$seqres.full"
 > 
