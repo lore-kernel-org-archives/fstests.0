@@ -1,40 +1,30 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B9551CD1F;
-	Sun, 17 Mar 2024 16:53:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58FC3A2A
+	for <fstests@vger.kernel.org>; Sun, 17 Mar 2024 20:38:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710694414; cv=none; b=ANtsQXQ02g34phGyyeRLuxML3UA9U2c+G2nUa6sHldGT1uiSpp97NLcTZNSGxOONqjDJAGwRqejZ+4vVPiA7LkIwXlGLuP0VneqMDagW6JatXxRo17o8ms+oVX7NUONQf+dlhcGv8XDg1iMO6C9/yPedbAvNhvNIJvrHN6m/O1w=
+	t=1710707905; cv=none; b=rFOoimTuilYZTLl9qeIdKA0zRlOUmPzJWLVPX3m/dGIhB6WuF8+s+/IDpKdxSzfr5B2j3oxsXWrg3Fj/nqrB4qWAbTWjHxAL0YpBTgGqghED2OMzLXODMGJM/Yds55Rws19o6sr9IjAYLB1ajjwqsJbNB/CytmWmkZABj1RcEco=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710694414; c=relaxed/simple;
-	bh=NvVEy+UL4F7Ica1lAxSJkcql2WZ1Sh8WJGokKutUW/U=;
+	s=arc-20240116; t=1710707905; c=relaxed/simple;
+	bh=xt9VgBkPcK99+z+hid07/Bt1iBWmOpVPQONcSS4oni8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GipNgCZ4EyaisDn5iL8Z/4TFf+Q76SgznoU9riMOHc4kfQ0qpoJNy1XX238kUXOffhCUHrkvf9UZeEDPAluWfWcEK/8Waqaf7glQp68mOyemgHqCIJLlSNr36Gc18br83d7zcfU8yyHGBYYGSSt7/H2zgUFOkzRJatxyf03SEO0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=o4qyS3vM; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="o4qyS3vM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 075D5C433F1;
-	Sun, 17 Mar 2024 16:53:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710694414;
-	bh=NvVEy+UL4F7Ica1lAxSJkcql2WZ1Sh8WJGokKutUW/U=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=o4qyS3vMpopBBgAys30XOgNamkiF8DmvS+Igfqh+n75uqSWxq6jYjhm0fVYHgOlAm
-	 zMWTbzL4VXeZ9YQ7W34I20Bmd2VdPsXGQYpJPaFXwKltDT7c9EwTHpCzIPzeDNVQY0
-	 2mVHADRFWsQUYK9QdwqD+plT6ld6uRkkxkc3ag3W/v8ZDHN9K1U2pE4uoBiyU6EdyW
-	 vYnqeFdVnNS21KO/WvJ2KUr7HQGeIS1oOtpSQaO7wUOWo671QLAxJTcISaySy7wKXj
-	 4RiCwdvBXAIAD8bfDMymQQUKUKaB+Z4E3nBhhsbfo9+CNqWXzf5WJvV/S+hb6PlYMj
-	 D8O4fYjeWq98Q==
-Date: Sun, 17 Mar 2024 09:53:33 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: David Hildenbrand <david@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-	fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-Subject: [RFC PATCH] fstests: test MADV_POPULATE_READ with IO errors
-Message-ID: <20240317165333.GF1927156@frogsfrogsfrogs>
-References: <20240314161300.382526-1-david@redhat.com>
- <20240317165157.GE1927156@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=PPEE+tDx1FFMaYhy4mDqfIhMZkmC179zwOP63AcAK9sFI9Hu5ZDzSM6REDv6LS5M0QAlucdDX/cNIT3K7FEuPrNrT8UlsqFTPxim9dGzeC7gyxTmyV3c5QBlRHS7Dd7xXJZvzhmwO+GAh/8VSXkb3yQb7BawCTxmM5fg/4IOs0g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 4B8EC68C7B; Sun, 17 Mar 2024 21:38:20 +0100 (CET)
+Date: Sun, 17 Mar 2024 21:38:18 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: Boris Burkov <boris@bur.io>, "Darrick J. Wong" <djwong@kernel.org>,
+	kernel-team@fb.com, fstests@vger.kernel.org,
+	Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH RFC] generic/730: ensure EIO after device delete
+Message-ID: <20240317203818.GC5975@lst.de>
+References: <6165b0018426e58e7427a26eebea3d63e66fed15.1710373423.git.boris@bur.io> <20240315025628.GH6188@frogsfrogsfrogs> <20240315233054.GA3597569@zen.localdomain> <CAL3q7H71Roae5kqc0Hh2=CZxCfLd9Kp7bqAfgo5OcUz==opVow@mail.gmail.com> <20240316144008.GA3615790@zen.localdomain> <CAL3q7H7=szVzNCVdPQnC5T57TV_HXUyYNTirv9Kz_=zZa-jEQQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,100 +33,16 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240317165157.GE1927156@frogsfrogsfrogs>
+In-Reply-To: <CAL3q7H7=szVzNCVdPQnC5T57TV_HXUyYNTirv9Kz_=zZa-jEQQ@mail.gmail.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Sat, Mar 16, 2024 at 05:42:30PM +0000, Filipe Manana wrote:
+> Mine is also non-debug and yet it always succeeds for me (without your
+> patch or any other of course):
 
-This is a regression test for "mm/madvise: make
-MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly".
+Same here.
 
-Cc: David Hildenbrand <david@redhat.com>
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/generic/1835     |   65 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/1835.out |    4 +++
- 2 files changed, 69 insertions(+)
- create mode 100755 tests/generic/1835
- create mode 100644 tests/generic/1835.out
+And the idea behind the test is that when the device is removed the
+file system should always return an error, i.e. have a check for shutdown
+fs in the read path.
 
-diff --git a/tests/generic/1835 b/tests/generic/1835
-new file mode 100755
-index 0000000000..07479ab712
---- /dev/null
-+++ b/tests/generic/1835
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 1835
-+#
-+# This is a regression test for a kernel hang that I saw when creating a memory
-+# mapping, injecting EIO errors on the block device, and invoking
-+# MADV_POPULATE_READ on the mapping to fault in the pages.
-+#
-+. ./common/preamble
-+_begin_fstest auto rw
-+
-+# Override the default cleanup function.
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_unmount
-+	_dmerror_cleanup
-+}
-+
-+# Import common functions.
-+. ./common/dmerror
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"mm/madvise: make MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly"
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_require_xfs_io_command madvise -R
-+_require_scratch
-+_require_dm_target error
-+_require_command "$TIMEOUT_PROG" "timeout"
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_dmerror_init
-+
-+filesz=2m
-+
-+# Create a file that we'll read, then cycle mount to zap pagecache
-+_dmerror_mount
-+$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $filesz" "$SCRATCH_MNT/a" >> $seqres.full
-+_dmerror_unmount
-+_dmerror_mount
-+
-+# Try to read the file data in a regular fashion just to prove that it works.
-+echo read with no errors
-+timeout -s KILL 10s $XFS_IO_PROG -c "mmap -r 0 $filesz" -c "madvise -R 0 $filesz" "$SCRATCH_MNT/a"
-+_dmerror_unmount
-+_dmerror_mount
-+
-+# Load file metadata and induce EIO errors on read.  Try to provoke the kernel;
-+# kill the process after 10s so we can clean up.
-+stat "$SCRATCH_MNT/a" >> $seqres.full
-+echo read with IO errors
-+_dmerror_load_error_table
-+timeout -s KILL 10s $XFS_IO_PROG -c "mmap -r 0 $filesz" -c "madvise -R 0 $filesz" "$SCRATCH_MNT/a"
-+_dmerror_load_working_table
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/1835.out b/tests/generic/1835.out
-new file mode 100644
-index 0000000000..1b03586e8c
---- /dev/null
-+++ b/tests/generic/1835.out
-@@ -0,0 +1,4 @@
-+QA output created by 1835
-+read with no errors
-+read with IO errors
-+madvise: Bad address
