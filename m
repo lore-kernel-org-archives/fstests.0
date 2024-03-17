@@ -1,218 +1,185 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAF261BDC4
-	for <fstests@vger.kernel.org>; Sun, 17 Mar 2024 14:02:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9689C1CA96;
+	Sun, 17 Mar 2024 16:23:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710684138; cv=none; b=NObbq9tk5kFDx5RW19dbNW4U8gELLpn98MvXro+0dT2XLyB7OrCyog61Nwn76TfgjnDUtKy5keNq4iB6pjXRbySpStGg5oiGUwNfalTPEKCzFrQ1l8LssiBdZDMKcot2l1yxtyOtaTD6Y5hA1m66jESv8056Kfa32qoy5g7fe0M=
+	t=1710692604; cv=none; b=RWu/L7cyYf87ZHw3utVzqvbpTNCS40iqSDFgPahydxaxAhmA1nBr6g9IppFQnqpE+k1HwbxzBKOxuxbPyH2rr1JC9PKlomqQZO25mUMAFSWHU2UnY7GltnOBifxKoMFDwYgqNcC3vHlM+h6wsbL4YHWAjct2dbFbES35ABskqlw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710684138; c=relaxed/simple;
-	bh=DCB1idMndcZYOLUS+YtirsfcYXXHApueHlRHqaFT3Vw=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=cnkDFouxFPXCKDNoevvaIVcWMqIY5ApGcZ9LTXMVie4Hlh8wKPZLRJV/K0Lx5h/69As0TqGKW1k1YSTKDbU0wSy4ACQGlsXawvhW9jgv+MyiW0Ofn5DOb9soayk+Q96l0QxAjBZtNVzdtMRSiET3NNaAwGGJWllZJoW8GxLpZOs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p52EKmC1; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1710692604; c=relaxed/simple;
+	bh=KI16EBOhLwH6waiRsWWAx3GpeEy4DbKP9iRPEORBXrQ=;
+	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=sdjxYL+0I6Jc8Bq73Iq2UmLKoDSyvlmVz/YLB8H516uNUcpXNJUQB439TOV7MEfP98QD2Og8l9H6FkRlQjNXLxPntk6rFbKgHxmvTGCe0VJ8j37MTL2RsHj91U9P95R49iKP2acuL3w4bBX8Vx6YOLI28V4Jy+fHJhsWGqrCTOI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=agFV64D5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p52EKmC1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C7F4EC433C7;
-	Sun, 17 Mar 2024 14:02:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="agFV64D5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 271DDC433F1;
+	Sun, 17 Mar 2024 16:23:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1710684138;
-	bh=DCB1idMndcZYOLUS+YtirsfcYXXHApueHlRHqaFT3Vw=;
-	h=Date:From:To:Subject:From;
-	b=p52EKmC1XuiDDKysjYSGhnYUHlz6KZQapXZHqPOcbWP+lfANo7ScPbyTAwNDrIoou
-	 OI6OSWWhcFJqWIU05OyAU8UdWoWjHdu1gJAth/6bPFFJ8zPSPma3gBzkhmTz5SgSh0
-	 aGQR4//Lx47u8IMm3JsZFyPWrMlBme4wCQ9olpvU7XyqfQlV3BKo2ogFA65UtabLX6
-	 9ASYA1Sa2xEYGV8G4Q7vF2tM6wvTHT1tQOzPBqlFHYpN5kk1Ytk+3U0H17K5pbUbjn
-	 yailU7WpD/dqO734Bm7s/FbWqDlLfTb3iR2Db7Cpzt1Cogvt5eNFX8lWpdK1JfVKjC
-	 3x6VqzpCKRrxA==
-Date: Sun, 17 Mar 2024 22:02:13 +0800
-Message-ID: <fb2f60b1aeb1b031f6eda8868b73887a@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.03.17
+	s=k20201202; t=1710692604;
+	bh=KI16EBOhLwH6waiRsWWAx3GpeEy4DbKP9iRPEORBXrQ=;
+	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+	b=agFV64D5BwWEax4CgHngeHOvx1cfz7dovhsCK6DxCwqvSMACldB6DbLYIWHmS3BRZ
+	 hXIfwTgUbK/fc+XeDMDW+4PmWhXbpnuy6Mc4Tcb6UgdtcqapNQ61Tg49WrryMh6pRB
+	 RL+ZG6JO3VIzMEfnVJtXWH7GsxM+NGSCWboByEL3psU2aHpNy56Fe1VvpuP0q/dSU8
+	 rMVX0uDMTEZq+Y3Y7VSE9LnEJPUlSlHmo2T+PLzGRQP4xKEVSNOvBUl6wk7b4ifHbW
+	 nRXn4B4fxs+/IPOF1rfQdOIYWZdtYBqEBNZT0AHIivcnGauyw18eeqDidwv2y1H6h0
+	 z53lP0CjX0mTA==
+Date: Sun, 17 Mar 2024 09:23:23 -0700
+Subject: [PATCHSET v5.3] fstests: fs-verity support for XFS
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: aalbersh@redhat.com, ebiggers@kernel.org, djwong@kernel.org,
+ zlang@redhat.com
+Cc: Andrey Albershteyn <andrey.albershteyn@gmail.com>,
+ fsverity@lists.linux.dev, fstests@vger.kernel.org,
+ linux-fsdevel@vger.kernel.org, guan@eryu.me, linux-xfs@vger.kernel.org
+Message-ID: <171069248832.2687004.7611830288449050659.stgit@frogsfrogsfrogs>
+In-Reply-To: <20240317161954.GC1927156@frogsfrogsfrogs>
+References: <20240317161954.GC1927156@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="znGUu1YkAN61"
-Content-Disposition: inline
-
-
---znGUu1YkAN61
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
 Hi all,
 
-The for-next branch of the xfstests repository at:
+From Darrick J. Wong:
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+This v5.3 patchset builds upon v5.2 of Andrey's patchset to implement
+fsverity for XFS.
 
-has just been updated and tagged as v2024.03.17 release.
+The biggest thing that I didn't like in the v5 patchset is the abuse of
+the data device's buffer cache to store the incore version of the merkle
+tree blocks.  Not only do verity state flags end up in xfs_buf, but the
+double-alloc flag wastes memory and doesn't remain internally consistent
+if the xattrs shift around.
 
-Release Notes:
-1) There're 32 commits in this release, but most of them are fixes and updates.
-   Then One new test cases -- xfs/607. Another new case btrfs/320 is splited from
-   old btrfs/022.
-2) As upstream dm-error supports zoned devices now, so fstests allow dm-error
-   tests on zoned devices too. But it might cause some failures on old kernel,
-   if you test with zoned devices.
-3) Some of cases are improved for 64k blocksize testing, feel free to give it
-   a try.
+I replaced all of that with a per-inode xarray that indexes incore
+merkle tree blocks.  For cache hits, this dramatically reduces the
+amount of work that xfs has to do to feed fsverity.  The per-block
+overhead is much lower (8 bytes instead of ~300 for xfs_bufs), and we no
+longer have to entertain layering violations in the buffer cache.  I
+also added a per-filesystem shrinker so that reclaim can cull cached
+merkle tree blocks, starting with the leaf tree nodes.
 
-There're also lots of fixes or improvements, more details refer to below. Thanks
-for all these contributions!
+I've also rolled in some changes recommended by the fsverity maintainer,
+fixed some organization and naming problems in the xfs code, fixed a
+collision in the xfs_inode iflags, and improved dead merkle tree cleanup
+per the discussion of the v5 series.  At this point I'm happy enough
+with this code to start integrating and testing it in my trees, so it's
+time to send it out a coherent patchset for comments.
 
-Thanks,
-Zorro
+For v5.3, I've added bits and pieces of online and offline repair
+support, reduced the size of partially filled merkle tree blocks by
+removing trailing zeroes, changed the xattr hash function to better
+avoid collisions between merkle tree keys, made the fsverity
+invalidation bitmap unnecessary, and made it so that we can save space
+on sparse verity files by not storing merkle tree blocks that hash
+totally zeroed data blocks.
 
-The new head of the for-next branch is commit:
+From Andrey Albershteyn:
 
-ec5b77f70e60 fstests: add missing commit IDs to some tests
+Here's v5 of my patchset of adding fs-verity support to XFS.
 
-New commits ([N]ew, [U]pdate):
+This implementation uses extended attributes to store fs-verity
+metadata. The Merkle tree blocks are stored in the remote extended
+attributes. The names are offsets into the tree.
 
-Anand Jain (1):
-[U]      [2b0216017bc2] common/rc: specify required device size
+A few key points of this patchset:
+- fs-verity can work with Merkle tree blocks based caching (xfs) and
+  PAGE caching (ext4, f2fs, btrfs)
+- iomap does fs-verity verification
+- In XFS, fs-verity metadata is stored in extended attributes
+- per-sb workqueue for verification processing
+- Inodes with fs-verity have new on-disk diflag
+- xfs_attr_get() can return a buffer with an extended attribute
+- xfs_buf can allocate double space for Merkle tree blocks. Part of
+  the space is used to store  the extended attribute data without
+  leaf headers
+- xfs_buf tracks verified status of merkle tree blocks
 
-Christoph Hellwig (4):
-[U]      [5e1e51df9f29] shared/298: call fs commands on the loop device
-[U]      [926ae266c86a] shared/298: run xfs_db against the loop device instead of the image file
-[U]      [cfb92ce9070c] common: dm-error now supports zoned devices
-[U]      [7bb78927c0f5] generic/392: stop checking st_blocks
+The patchset consists of five parts:
+- [1]: fs-verity spinlock removal pending in fsverity/for-next
+- [2..4]: Parent pointers adding binary xattr names
+- [5]: Expose FS_XFLAG_VERITY for fs-verity files
+- [6..9]: Changes to fs-verity core
+- [10]: Integrate fs-verity to iomap
+- [11-24]: Add fs-verity support to XFS
 
-Darrick J. Wong (10):
-[U]      [d46a46c7d5d0] generic/604: try to make race occur reliably
-[U]      [ed6967784854] xfs/155: fail the test if xfs_repair hangs for too long
-[U]      [0943fadcf0e9] generic/192: fix spurious timeout
-[U]      [a3ce52894e0e] generic/491: increase test timeout
-[U]      [27f314276da9] xfs/599: reduce the amount of attrs created here
-[U]      [480bf0025bff] xfs/122: update test to pick up rtword/suminfo ondisk unions
-[U]      [b41b9ca96f69] xfs/43[4-6]: make module reloading optional
-[N]      [70fc4244b7dc] xfs: test for premature ENOSPC with large cow delalloc extents
-[U]      [7a97d9c0fa1b] misc: fix test that fail formatting with 64k blocksize
-[U]      [c9d50e4d1c2a] generic/574: don't fail the test on intentional coredump
+Testing:
+The patchset is tested with xfstests -g verity on xfs_1k, xfs_4k,
+xfs_1k_quota, xfs_4k_quota, ext4_4k, and ext4_4k_quota. With
+KMEMLEAK and KASAN enabled. More testing on the way.
 
-Disha Goel (1):
-[U]      [7a338a6af80d] xfstest: add detection for ext4.h presence in configure.ac
+Changes from V4:
+- Mainly fs-verity changes; removed unnecessary functions
+- Replace XFS workqueue with per-sb workqueue created in
+  fsverity_set_ops()
+- Drop patch with readahead calculation in bytes
+Changes from V3:
+- redone changes to fs-verity core as previous version had an issue
+  on ext4
+- add blocks invalidation interface to fs-verity
+- move memory ordering primitives out of block status check to fs
+  read block function
+- add fs-verity verification to iomap instead of general post read
+  processing
+Changes from V2:
+- FS_XFLAG_VERITY extended attribute flag
+- Change fs-verity to use Merkle tree blocks instead of expecting
+  PAGE references from filesystem
+- Change approach in iomap to filesystem provided bio_set and
+  submit_io instead of just callouts to filesystem
+- Add possibility for xfs_buf allocate more space for fs-verity
+  extended attributes
+- Make xfs_attr module to copy fs-verity blocks inside the xfs_buf,
+  so XFS can get data without leaf headers
+- Add Merkle tree removal for error path
+- Makae scrub aware of new dinode flag
+Changes from V1:
+- Added parent pointer patches for easier testing
+- Many issues and refactoring points fixed from the V1 review
+- Adjusted for recent changes in fs-verity core (folios, non-4k)
+- Dropped disabling of large folios
+- Completely new fsverity patches (fix, callout, log_blocksize)
+- Change approach to verification in iomap to the same one as in
+  write path. Callouts to fs instead of direct fs-verity use.
+- New XFS workqueue for post read folio verification
+- xfs_attr_get() can return underlying xfs_buf
+- xfs_bufs are marked with XBF_VERITY_CHECKED to track verified
+  blocks
 
-Filipe Manana (2):
-[U]      [07fa85f11232] btrfs: fix grep warning at _require_btrfs_mkfs_uuid_option()
-[U]      [ec5b77f70e60] fstests: add missing commit IDs to some tests
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-Josef Bacik (8):
-[U]      [18ecbf559bc5] btrfs/011: increase the runtime for replace cancel
-[U]      [51f280cfa124] btrfs/012: adjust how we populate the fs to convert
-[U]      [46bc2d68fa74] btrfs/131: don't run with subpage blocksizes
-[U]      [e990496ffc09] btrfs/213: make the test more reliable
-[U]      [94937700f4ee] btrfs/271: adjust failure condition
-[U]      [f682432926a0] btrfs/287,btrfs/293: filter all btrfs subvolume delete calls
-[U]      [3552178f39be] btrfs/291: remove image file after teardown
-[N]      [512dba4fdbfc] btrfs: test normal qgroup operations in a compress friendly way
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
 
-Li Zhijian (1):
-[U]      [d76c4886ba83] xfs: Fix no executable permission
+--D
 
-Qu Wenruo (1):
-[U]      [8000febb32af] fstests: btrfs/121: allow snapshot with invalid qgroup to return error
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=fsverity
 
-Su Yue (1):
-[U]      [b3ff58fa319a] btrfs/172,206: call _log_writes_cleanup in _cleanup
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=fsverity
 
-Zorro Lang (3):
-[U]      [46b783fe67fc] fsstress: check io_uring_queue_init errno properly
-[U]      [7bad5527e2bc] fsstress: bypass io_uring testing if io_uring_queue_init returns EPERM
-[U]      [790a9e7c3c94] common/rc: notrun if io_uring is disabled by sysctl
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsverity
+---
+Commits in this patchset:
+ * common/verity: enable fsverity for XFS
+ * xfs/{021,122}: adapt to fsverity xattrs
+ * common/populate: add verity files to populate xfs images
+---
+ common/populate   |   21 +++++++++++++++++++++
+ common/verity     |   29 ++++++++++++++++++++++++++++-
+ tests/xfs/021     |    3 +++
+ tests/xfs/122.out |    1 +
+ 4 files changed, 53 insertions(+), 1 deletion(-)
 
-
-Code Diffstat:
-
- README              |   6 +++
- check               |   6 ---
- common/btrfs        |   2 +-
- common/module       |  33 +++++++++++++---
- common/rc           |  66 +++++++++++++++++++++++++++++---
- configure.ac        |   1 +
- ltp/fsstress.c      |  32 ++++++++++++----
- src/ext4_resize.c   |   5 ++-
- src/feature.c       |  19 ++++++----
- tests/btrfs/011     |   9 ++++-
- tests/btrfs/012     |  14 ++++---
- tests/btrfs/022     |  86 ++---------------------------------------
- tests/btrfs/121     |  10 ++++-
- tests/btrfs/131     |   4 ++
- tests/btrfs/172     |   7 ++++
- tests/btrfs/206     |   7 ++++
- tests/btrfs/213     |  20 +++++-----
- tests/btrfs/249     |   2 +-
- tests/btrfs/271     |  11 +++---
- tests/btrfs/287     |   4 +-
- tests/btrfs/287.out |   2 +-
- tests/btrfs/291     |   2 +-
- tests/btrfs/293     |   6 +--
- tests/btrfs/293.out |   4 +-
- tests/btrfs/303     |   2 +-
- tests/btrfs/309     |   2 +-
- tests/btrfs/316     |   2 +-
- tests/btrfs/317     |   4 +-
- tests/btrfs/320     | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/320.out |   2 +
- tests/generic/042   |   9 +----
- tests/generic/081   |   7 +++-
- tests/generic/108   |   6 ++-
- tests/generic/192   |  16 ++++++--
- tests/generic/392   |  16 ++------
- tests/generic/455   |   3 +-
- tests/generic/457   |   3 +-
- tests/generic/482   |   3 +-
- tests/generic/491   |   2 +-
- tests/generic/574   |   3 +-
- tests/generic/604   |   8 ++--
- tests/generic/704   |   3 +-
- tests/generic/707   |   4 +-
- tests/generic/730   |   3 +-
- tests/generic/731   |   3 +-
- tests/shared/298    |  22 ++++++-----
- tests/xfs/122       |   2 +-
- tests/xfs/122.out   |   2 +
- tests/xfs/155       |   5 +++
- tests/xfs/279       |   7 ++--
- tests/xfs/434       |   3 +-
- tests/xfs/435       |   3 +-
- tests/xfs/436       |   3 +-
- tests/xfs/557       |   0
- tests/xfs/567       |   0
- tests/xfs/568       |   0
- tests/xfs/599       |   9 ++---
- tests/xfs/607       |  86 +++++++++++++++++++++++++++++++++++++++++
- tests/xfs/607.out   |   8 ++++
- 59 files changed, 495 insertions(+), 221 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---znGUu1YkAN61
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmX2968ACgkQlNbPkfr2
-tMwDLhAArBdi2QPcraNixtze9x1RBHkoAdByWI9ItFVREkLSksXO0C20NbflURDR
-tT/B4iSqNkTEjFsySOHrGasKslBsUpLbVNhBXWS2aYA3MRcW5AkI0rDHI8QVb6tp
-QXljgdBgIPw7NE8OnbvKhqdeAP66M0Y8+1EZCWlnv1zzmAL6WYpk/EgY24NuWBc5
-/nIq/9xn/520GK167aExGP80m4O8jMKM799B++4C5S+MAzaKJj4W0j7xU7ZMZuK/
-h0bksNDEVEdZOODVxTxJ5GXoCY31JkZ7z3V52/CDwKGNBGCQ1AqJGFxTDa3EjWEq
-eCIKYNaccxxNC72kgpOf+yNvEhasnYHZWYuyc6NumWN9BHqFEkN1QpGtPIgwGZV7
-aeOhiUKA/sFfbGo6atr8ToioysMMioqPHdwSbfGUBnN1UBQBYdy6naP1BrRtwLKH
-C9XMdA3aTqLU0O/VhQx/9lKUuO5Th7fwef1mgl8zg/8MtKdedvSCcv1/kkpy/DkL
-gp50pjU/zQBHlNUkMeK9TA42MEXOS91r1kPns4kpu448p142q5LXFKuvVPq/kmQk
-vcwOsCJ+WUEz7ml0kH9kdmm9XB2cze9OpAVcw7jumdSodgCYJwWSpGLOeCxrFam9
-SeWUJJq8FYP6nvj+YuU3fVcWjvO34hZYPN9c8SBsAnGL2WU5ENk=
-=GLeI
------END PGP SIGNATURE-----
-
---znGUu1YkAN61--
