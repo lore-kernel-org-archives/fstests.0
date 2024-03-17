@@ -1,30 +1,44 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58FC3A2A
-	for <fstests@vger.kernel.org>; Sun, 17 Mar 2024 20:38:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95B361E525;
+	Sun, 17 Mar 2024 21:14:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710707905; cv=none; b=rFOoimTuilYZTLl9qeIdKA0zRlOUmPzJWLVPX3m/dGIhB6WuF8+s+/IDpKdxSzfr5B2j3oxsXWrg3Fj/nqrB4qWAbTWjHxAL0YpBTgGqghED2OMzLXODMGJM/Yds55Rws19o6sr9IjAYLB1ajjwqsJbNB/CytmWmkZABj1RcEco=
+	t=1710710058; cv=none; b=BpelAJoSMPF0Cittl/FJJAd911Zh8oJ0R+AzMnVhR4uvxx2sdGFdQVF6NgcbdrkqzOAmLQ6C5GXxVe5LgPraRt7K005xJvjLXQbg7f6hOF6U+0v4YisGz+R/GZQHJ3VLb6+c25QpnKyGMsAcGr8EMWSQMka0MlyCbxgZMU3W6A8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710707905; c=relaxed/simple;
-	bh=xt9VgBkPcK99+z+hid07/Bt1iBWmOpVPQONcSS4oni8=;
+	s=arc-20240116; t=1710710058; c=relaxed/simple;
+	bh=/hoO7QwdP4DgNBUhw0wieNFBS6Wc4NbIBy8G9TdddUI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PPEE+tDx1FFMaYhy4mDqfIhMZkmC179zwOP63AcAK9sFI9Hu5ZDzSM6REDv6LS5M0QAlucdDX/cNIT3K7FEuPrNrT8UlsqFTPxim9dGzeC7gyxTmyV3c5QBlRHS7Dd7xXJZvzhmwO+GAh/8VSXkb3yQb7BawCTxmM5fg/4IOs0g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 4B8EC68C7B; Sun, 17 Mar 2024 21:38:20 +0100 (CET)
-Date: Sun, 17 Mar 2024 21:38:18 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: Boris Burkov <boris@bur.io>, "Darrick J. Wong" <djwong@kernel.org>,
-	kernel-team@fb.com, fstests@vger.kernel.org,
-	Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH RFC] generic/730: ensure EIO after device delete
-Message-ID: <20240317203818.GC5975@lst.de>
-References: <6165b0018426e58e7427a26eebea3d63e66fed15.1710373423.git.boris@bur.io> <20240315025628.GH6188@frogsfrogsfrogs> <20240315233054.GA3597569@zen.localdomain> <CAL3q7H71Roae5kqc0Hh2=CZxCfLd9Kp7bqAfgo5OcUz==opVow@mail.gmail.com> <20240316144008.GA3615790@zen.localdomain> <CAL3q7H7=szVzNCVdPQnC5T57TV_HXUyYNTirv9Kz_=zZa-jEQQ@mail.gmail.com>
+	 Content-Type:Content-Disposition:In-Reply-To; b=n2caFU3uDtELEsf4tr07gHIm7whYrnKPyEMklxXh8hg+egRtYG7gK2UMXZfSg3MVI5hfEHQLscN49aZZ56EkxOsI6uQx/uil9KEfrveKU6BpQ+sJhVMFEMVuhF95Hy1AanQ44lpEL3BGhhm49OhGc/EMEJf2TKMA51Jm/3oUno0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Y+s2Jfnv; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Y+s2Jfnv"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=TCCmjmMAc3H/rSZhFRq2kqhRinVJ/Se0iD+aRpD6GuU=; b=Y+s2Jfnvr1GLntBNxWu27Jxf7r
+	Wl9Ub4lVpPOUypbTjnBC+PBWROjTPqYdu9guU+7sjnvvPKPAmHlVWrGd/JvTxIsfnP5nkKc7nZk2D
+	JvND9qqmwDaL5NFzTKsQ+uH9fPkT7X6FlhiNpDrBX7xPyv3BfYA+G7j7W5JUFihtKZdPf0ly+dhtr
+	3BE2QeOkdrUjKSi9FLjBDX83/mbLQuwsyvlw6kodbTOfJEncYgRdSVrq9EHtC1ny6UQx1auhY7IFU
+	398h8AA7lT8A6PXWAhQVo/0tDvO8WLde6MlcnelOSsTLKMxD9w6HejJOFWYHrU9Pc+FqlHiJoJOxO
+	avXmaxgg==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rlxpg-00000006SyX-3HQ5;
+	Sun, 17 Mar 2024 21:14:16 +0000
+Date: Sun, 17 Mar 2024 14:14:16 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: David Hildenbrand <david@redhat.com>, linux-kernel@vger.kernel.org,
+	linux-mm@kvack.org, fstests <fstests@vger.kernel.org>,
+	xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [RFC PATCH] xfs_io: add linux madvise advice codes
+Message-ID: <ZfddKAS2GUOG41wb@infradead.org>
+References: <20240314161300.382526-1-david@redhat.com>
+ <20240317165157.GE1927156@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -33,16 +47,29 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H7=szVzNCVdPQnC5T57TV_HXUyYNTirv9Kz_=zZa-jEQQ@mail.gmail.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20240317165157.GE1927156@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Sat, Mar 16, 2024 at 05:42:30PM +0000, Filipe Manana wrote:
-> Mine is also non-debug and yet it always succeeds for me (without your
-> patch or any other of course):
+> +#
+> +# Check if asm/mman.h can be included
+> +#
+> +AC_DEFUN([AC_HAVE_KERNEL_MADVISE_FLAGS],
+> +  [ AC_MSG_CHECKING([for kernel madvise flags in asm/mman.h ])
+> +    AC_COMPILE_IFELSE(
+> +    [	AC_LANG_PROGRAM([[
+> +#include <asm/mman.h>
+> +	]], [[
+> +int moo = MADV_COLLAPSE;
+> +	]])
+> +    ], have_kernel_madvise=yes
+> +       AC_MSG_RESULT(yes),
+> +       AC_MSG_RESULT(no))
+> +    AC_SUBST(have_kernel_madvise)
+> +  ])
+> +
 
-Same here.
+I don't think we really need this check, as madvise and asm/mman.h
+have been around forever.  We can probably also drop most of the
+actual flag idefs, probably for everything older than MADV_WIPEONFORK.
 
-And the idea behind the test is that when the device is removed the
-file system should always return an error, i.e. have a check for shutdown
-fs in the read path.
-
+The rest looks good to me.
