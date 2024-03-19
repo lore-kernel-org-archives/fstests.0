@@ -1,122 +1,148 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F2E7C0AA
-	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 04:16:41 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE6F57D07C
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 09:00:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710821806; cv=none; b=aDA22ysIOexnYRSM9J2naVUBVehpipnHwXad/R2Q2CAvb4A2XGHUUGsO92mNwgzqBXX/5oKhKRses+712H1hVzIoXB2O0ZmFxvtnuWGQ4pmmCj/EH3tt6dAJGDpbxNRMD4wkgxUqRVo+aL+9t0m3ER5fydndWnMZT+cyqn8r/Ww=
+	t=1710838804; cv=none; b=PNyt0Glq81lTVkyjyuS3OlTCbZj5etXqToF8FW8GlFmi8L6sQH90uwDIzDvOeVI91HY0ylmcOS9IS0xk7PSY0Com9NCHFjeqBlH8DGTaAqxoSWpU471qSQ7vI4r3JRttc4HoFjhH4++GRzwlg0Bb8Z9RvD7iflNKlYamZlrhjWo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710821806; c=relaxed/simple;
-	bh=oBUFix4xJ9HmyXtK0FS0msR1Uprvu8MvzrmK3K0DUcQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=bixXvyamLv37itwEzWc+qEPwwnj8J+60S34/2XV3rPX5Hn3nF4U1yhjjO4ABNSkxH4mG8x8hgxOTyxaCckzm3Es7ooERvs7lL75hfixMPQGGyzPbgjpTT0Ac+RtYSM9MLtp5d5ZrtByhetZwZWvWYm+ozOElp5WEbeIf6w1lQ4k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IBrWqd+t; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1710838804; c=relaxed/simple;
+	bh=CgA0e+m8BBExrEbwYamwe1j/QwTE5GIpu4sDF98nzT8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=S8zESdidNudjhMpTRRRfgMD4YoSiclKUSpFQkpFpADwQCnfI05rnJAaoC9CGNn2fvWIIwkNBMmKMpR84MwpgJeHlKjxKTcb+PH8tF264Zh9h+Of/zS+YtZZaHJ+Oqn/w70zz1n1py982D+GseQJ1ynlA1nv0xa8dTtaHr2iON58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Adg90mxH; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IBrWqd+t"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Adg90mxH"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1710821800;
+	s=mimecast20190719; t=1710838801;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0cFtfNnxEJ01CephbW6v2igIJA6n9Y9cgi1+keL4pqM=;
-	b=IBrWqd+tm0dV0Puo/dZ6lTwhl7uikaFzpNCPzUts73SDkVPGlBvEBuRmpkvNUADjk92dcn
-	hMexHChJj3t4bpTHaN07grLhGv+td8U8Qr0JIUPUdpj3iEGRRHKMgwF7QLc2Um7HVT5O2l
-	Jfr3A6fTskyv5/FiyZmzVCmSiMbyJWA=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=5BUiLcNn6QrFnn0+/s3dZixFiyFIk9LWlyemfwmVJOQ=;
+	b=Adg90mxHETj1Xy+eQ3gW06W+hDXjBPmHT4EivlZBgqZirWhdd3oXfecqwln1wgmvKp4AgL
+	IIMvyGD/W8dJ3iKU8grhm25MIamNpsSmBMAVImT6MBia/2Fk+ssE7QQ5WMcPqcC4i7U1Eu
+	KMKLH/lnAqcP2qm1pYo7lsF3803WyuQ=
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
+ [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-447-SvsDY94PPKWQtxdh1SG9lg-1; Tue, 19 Mar 2024 00:16:38 -0400
-X-MC-Unique: SvsDY94PPKWQtxdh1SG9lg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1e004445facso19040095ad.1
-        for <fstests@vger.kernel.org>; Mon, 18 Mar 2024 21:16:38 -0700 (PDT)
+ us-mta-695-_svPNevqO2WAf-zjVwysZA-1; Tue, 19 Mar 2024 04:59:57 -0400
+X-MC-Unique: _svPNevqO2WAf-zjVwysZA-1
+Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-40e435a606aso28806485e9.3
+        for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 01:59:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710821797; x=1711426597;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20230601; t=1710838796; x=1711443596;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
+         :references:cc:to:content-language:subject:user-agent:mime-version
+         :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=0cFtfNnxEJ01CephbW6v2igIJA6n9Y9cgi1+keL4pqM=;
-        b=A2obr0BFAC1wvMJbpfct+N/YQjYOl+pFwBk6CKCOujHBsQNbaudsKT3BcBYtTFXefH
-         B3rB9f66+M8knTNsEfeD7DaJ7u+UMW/+ncSDJTQDeezXaLViXZNm+7JZCIKd32ewUh+K
-         T1HVMjBQW6xPx+ntkLnPFK7dnPtKfVnEQnzM8aFJ1gME/LHHAHIi5Pc4DhIWO4IStL6t
-         AYy8O0qMcBOSWeDMtJtI9eiHclyUR5ytEXE2bqQVVFiE7v4LpeplcFVlOafIhQECjIEW
-         3ZI/DdfYw6koBa3ZujYlVKrOz97V/TSuhY4sOqmwpMBVjfZSxgAL7w3fbEOMIQbpcV/S
-         swKQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWwcET7GdS9KMe+m42nEOd0HVUk8lypShzRZpqTQVB3iWJ+MvWQB8EV/aUriLdiHr76pdub+UyvP6E6cjhxaLqBh+Dq/piRcQ==
-X-Gm-Message-State: AOJu0YztSiFof/qLQHdBmV+1V5ccK6Ny6NRXjDx+OR0EY1/bCAMNX+R4
-	OBvf5dCz1M+LVWuNlXelM6BNXANn370xC7+koFLhxHn0gNyGczfxnQ4rzp2fmxa3S0PeCsr0O7c
-	CpzAxYevsOgg4LrW39fhhQtfJME6rSBeRPu0xK/K4oUTerFubfogSTwk=
-X-Received: by 2002:a17:903:28c7:b0:1e0:16e0:b28e with SMTP id kv7-20020a17090328c700b001e016e0b28emr1771083plb.34.1710821797370;
-        Mon, 18 Mar 2024 21:16:37 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGXqPBbawYv4+8ogQd1QC/W45is8KfuwC92ZEvUpNhC7nvb5U26hp8nT3MoMN1hCB0pmM35Cg==
-X-Received: by 2002:a17:903:28c7:b0:1e0:16e0:b28e with SMTP id kv7-20020a17090328c700b001e016e0b28emr1771060plb.34.1710821796769;
-        Mon, 18 Mar 2024 21:16:36 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id t188-20020a625fc5000000b006e6f8e9ab6asm7247539pfb.15.2024.03.18.21.16.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Mar 2024 21:16:36 -0700 (PDT)
-Date: Tue, 19 Mar 2024 12:16:33 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: David Sterba <dsterba@suse.cz>
-Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, fdmanana@kernel.org
-Subject: Re: [PATCH v2 1/2] shared: move btrfs clone device testcase to the
- shared group
-Message-ID: <20240319041633.l75ifryeidjxltat@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <cover.1710599671.git.anand.jain@oracle.com>
- <440eff6d16407f12ec55df69db283ba6eb9b278c.1710599671.git.anand.jain@oracle.com>
- <20240318220219.GI16737@twin.jikos.cz>
+        bh=5BUiLcNn6QrFnn0+/s3dZixFiyFIk9LWlyemfwmVJOQ=;
+        b=JiUt1TSMi0mzrGSu86RxhX+FYHRFbpF8sEowzuBn5OuiOYj/1F9vdF5w7UAeXbMqFS
+         ODEAHYWAFKk7cXmWnnnRivRRf3rRizQLN/plM2M2EGawI8Hho02NJiERlKJJayb6ZbQT
+         ubZaFieJanGthjw/pfTFYMbqJGIVQbo0x6IwY8GE59xZqUfhTvjAvAcnAnMj2SdAu+P4
+         RTGLYbCTU749f77q98mbdsZH7NofTsleyOT4GgG1Jv1VqbyC2tl9GPvTdMzdSPxIzep9
+         wYXEwuZ22fMBUsRJuJHu2Dz6Ep1IfrwQuye9HVY3rfcnYx+HuTu9xCj560i18R/KTbTu
+         F+uA==
+X-Forwarded-Encrypted: i=1; AJvYcCXgZuc5jdVmuYVPPHf+6DCTT2tPiTuYrURPHNFDhLfO9dsa8+6c0lhNCWX1wdg9zxavThcB83IpieYZ5bQp6X9XP39kzy6xbg==
+X-Gm-Message-State: AOJu0Yw70EJdIRxuL2oF0kAzoMbixCE8vvy54gZg8x/4PaUv5jUqIF6+
+	N+ovVrS6EkMRhhB3vwNl5AVHrZ1bR80TcYfn9Z0QVPLmO55Dg3kTqI5XoOysn8rmg7yivTVdUPx
+	1uQi+O7S3RXCZZ1WFCTZqCgJ66veOCoqzUoRDo5SeWED4hrBXO/zsZn4=
+X-Received: by 2002:a5d:4112:0:b0:33e:48f9:169d with SMTP id l18-20020a5d4112000000b0033e48f9169dmr1203193wrp.31.1710838796624;
+        Tue, 19 Mar 2024 01:59:56 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFIM4IDI7VXvSvTa0BBGChXMEYTwyRL5BUK1Me/WgRfKde71DR/+U3BeXiu0iUxcOCA442zHw==
+X-Received: by 2002:a5d:4112:0:b0:33e:48f9:169d with SMTP id l18-20020a5d4112000000b0033e48f9169dmr1203183wrp.31.1710838796239;
+        Tue, 19 Mar 2024 01:59:56 -0700 (PDT)
+Received: from ?IPV6:2003:cb:c741:2200:2adc:9a8d:ae91:2e9f? (p200300cbc74122002adc9a8dae912e9f.dip0.t-ipconnect.de. [2003:cb:c741:2200:2adc:9a8d:ae91:2e9f])
+        by smtp.gmail.com with ESMTPSA id k4-20020adfe3c4000000b0033e48db23bdsm11838179wrm.100.2024.03.19.01.59.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 19 Mar 2024 01:59:55 -0700 (PDT)
+Message-ID: <615b39c1-a439-4fe2-aa8e-f8721dbb896a@redhat.com>
+Date: Tue, 19 Mar 2024 09:59:54 +0100
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240318220219.GI16737@twin.jikos.cz>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH] fstests: test MADV_POPULATE_READ with IO errors
+Content-Language: en-US
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+ fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+References: <20240314161300.382526-1-david@redhat.com>
+ <20240317165157.GE1927156@frogsfrogsfrogs>
+ <20240317165333.GF1927156@frogsfrogsfrogs>
+From: David Hildenbrand <david@redhat.com>
+Autocrypt: addr=david@redhat.com; keydata=
+ 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
+ WNyWQQ==
+Organization: Red Hat
+In-Reply-To: <20240317165333.GF1927156@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Mon, Mar 18, 2024 at 11:02:19PM +0100, David Sterba wrote:
-> On Sat, Mar 16, 2024 at 10:32:33PM +0530, Anand Jain wrote:
-> > Given that ext4 also allows mounting of a cloned filesystem, the btrfs
-> > test case btrfs/312, which assesses the functionality of cloned filesystem
-> > support, can be refactored to be under the shared group.
-> > 
-> > Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> > ---
-> > v2:
-> > Move to shared testcase instead of generic.
+On 17.03.24 17:53, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> What's the purpose of shared/ ? We have tests that make sense for a
-> subset of supported filesystems in generic/, with proper _required and
-> other the checks it works fine.
+> This is a regression test for "mm/madvise: make
+> MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly".
 > 
-> I see that v1 did the move to generic/ but then the 'shared' got
-> suggested, which is IMHO the wrong direction. I remember some distant
-> past discussions about shared/ and what to put there. Right now there
-> are 3 remaining tests which I think is a good opportunity to make it 0.
+> Cc: David Hildenbrand <david@redhat.com>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-I didn't suggest to make it a shared case directly, I asked if there's a
-_require_xxxx helper to make this case notrun on "not proper" fs, not
-just use "btrfs ext4" to be whitelist :
+Thanks for including this test, very helpful!
 
-https://lore.kernel.org/fstests/20240312044629.hpaqdkl24nxaa3dv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+It's my first time reading fstests code, so I cannot give any feedback 
+that would be of a lot of value. Having that said, nothing jumped at me :)
 
-In my personal opinion, the "shared" directory is a place to store the cases
-which are nearly to be generic, but not ready. It's a place to remind us
-there're still some cases use something likes "supported btrfs ext4" as the
-hard condition of _notrun, rather than a flexible _require_xxx helper. These
-cases in shared better to be moved to generic, if we can improve it in one day.
+-- 
+Cheers,
 
-It more likes a "TODO" list of generic. If we just write it in generic/
-directory, I'm afraid we'll leave it in hundreds of generic cases then forget it.
-
-What do you think?
-
-Thanks,
-Zorro
-
-> 
+David / dhildenb
 
