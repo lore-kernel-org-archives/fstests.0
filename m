@@ -1,141 +1,103 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BABC765198
-	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 14:59:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8AD017F6
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 16:56:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710860397; cv=none; b=Pbywt4IbdhLl7IOCD8HGNCMVRPe97Q9KOCUebWWmI4Uut/fkasqyWY3Pixdi814gAgAMUOiHUgqIs5ya9TQyBky0G+Sgipf2eXvUznxdc4AYpwW6Pqbi9ARtoIMe8ByCn4K03NnBsW1jmrmp55Gm90DfJ1AzI+r+b9dH0thfQ0o=
+	t=1710867369; cv=none; b=GLe2kychLiD7RGPma79Mbxi9yC7494BxQQGOGUQc9fsUJZZsjX9JKTALaiBtJe/KUnUNYDPCU4+zGqPOwzR25rAM1Gcv6+IfU+JB/cA7LO0URirV73ilmCp1o6b0TgAVIMMlvUXkii6CjPBhgHHGmC8K521fDZWLR5//rKhBBVQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710860397; c=relaxed/simple;
-	bh=ajxpaMC3T8IunaZ5P+9lA5RJwsCq/EAHYOIJkPgl3hw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OrQ8zlxYC53BHGXnYhoc/i2Lcm1iVLt+whAcwZysY/6GZk79DN0aZvBsGDi49TmxLnWYswAC7BzJvXulk2M7qeeCrQPu/0aGk8d3KAWR/0vwafk4Noq12Py2NMOmKqcshdqq9haf5Ij/Srxgrh8xG9c78mHKa9FKR1X/kQQLUTU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ftQkLnC5; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1710867369; c=relaxed/simple;
+	bh=DEQzuGdh/RFV3KyLDUUjh92Ui9vcGc8EmPhCgoj4mGc=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=lnMuY2psb0KBYDRm4wQcGkianJHkZZlsW+wtkAUr78E1xplhm1Hufmz+JB5LnvcA3eRGPOx9HsM7N/eaQVMzhoAWPcgtR/jSm7KxaqHIpYylTo0CObUaPBAbsYDE9RXMKnFGLWO3f8ZnAkj0KrNyWSuNRF7a5h3mcPEjhGSOsxc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=NxLvbpLI; arc=none smtp.client-ip=209.85.219.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ftQkLnC5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1710860394;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Ia2sWuwHy79VhH6nPO9UUd5RJV3cIBJb+5/X2TNMkJY=;
-	b=ftQkLnC5O/Dmjtes3F7rp/e/yek9cX4Pv2Ds+azFcwA1dsugi6SC2vD2zlMQeH9HV7oi1Z
-	YAQt88tugdPVggNK3yPax8fPKMMD7cyNJU75dDDi0iv1f0mbVsioKcVnmQnNgrOiuLS+xs
-	6wzK2EYOKznDQWZrmX7uCtzKg/cyq+8=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-672-GTZePIi6Na2GSPoN7wWwEQ-1; Tue, 19 Mar 2024 10:59:52 -0400
-X-MC-Unique: GTZePIi6Na2GSPoN7wWwEQ-1
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a464f5e2499so252810666b.2
-        for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 07:59:51 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="NxLvbpLI"
+Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-6928a5e2479so17454406d6.0
+        for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 09:56:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1710867365; x=1711472165; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=KOHEs5TMclfhBIu2JgoX4uMTBWl5ctndV3O904uCrs0=;
+        b=NxLvbpLIigTXLfgR02X86MY6L8IoPOa8m3+KQgA1FrGsDoUncyd2sEt6WDKkYCV0EJ
+         ucVh/V9rgegXmj+Hf2sF8SJQBBAORM1aVCl+gAORGmUjoq6iCkYjnYTx26rZ3NKrPcAF
+         RWzTH1UMd7QG505hrDDJH1s+OErkc7I6GKc7DUgKhnXrSfE7IWLdBHQbQoKYUcW0FzY+
+         tEDKjhKpMdJHCx14hUpqGO/t1J0dGHNktobp2tlvGhp4/yGB3rPoxCCIbFJL0XOkt6yg
+         0H/hIVE6aL+WmpkCiCiPYUpcxwtYNc8IH0ZBT6dSY5uX8ENw3xSzXK2dah7n8+g15yyu
+         sveA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710860391; x=1711465191;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ia2sWuwHy79VhH6nPO9UUd5RJV3cIBJb+5/X2TNMkJY=;
-        b=pVYUcIvgZ3xIOO/vGgfIZhFF+PnN3tjWxu8cvM3HEz8EC1E+nhpRyffI1fF/0RkvO3
-         ycu5m6HmFkUjRcnyh0FJaA59MfMa9gk5sSDOxLxDCw8i6cEmaf1vWlPDH/alnLTYrufP
-         3yx5iqDyqttakZFgVnkUy80azcZGo/QpqnUByHAHSanU2DjBj2fIDaThWZCYVPajNK/b
-         2Ucr08u3mr8bNu1pFj5hwL/rs+L6Li5JM2lZM/GOhoTEK+afGDneqyOKpTDe2uBj7PZY
-         EGORSi77T7xfu/1R3TOhZxj6jsv23dGyrMpf8L2PxxdYmA18uoIPp1MHPQig5537FoHL
-         xstA==
-X-Forwarded-Encrypted: i=1; AJvYcCVzqhv1YRNZ2XHYFtLpMblqM8DUlaSL/kdCMuubgjz/dQ+K7Yvkcd3blqgAOmjBS8KQTBih4a3lL9wmovQPmfkw1Ko8MjgyAw==
-X-Gm-Message-State: AOJu0Yy5FZe8gWLZh3CXbBoDOGm/oae1ysBpEjtyjAJMxrE+dcDTKAY2
-	EaTo7YoknVrJPlVxP74SQiEHpDLnl0zsJ194s24t+E/oXcf3Hg+gpUczGVr68+FURD54UL0ItyQ
-	btapsqJtwwhA61LQSGhFmMhb/+wLoYDCXimAraM9mp84Kw+36fTbvjQ==
-X-Received: by 2002:a17:906:bc95:b0:a46:9b71:b852 with SMTP id lv21-20020a170906bc9500b00a469b71b852mr1799579ejb.26.1710860390633;
-        Tue, 19 Mar 2024 07:59:50 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHGkhUvQ74NDR8xixLTTUY2PjtMB1t6xn8SFEqwr9V0Tb0eFn1ewzSnxrxKXEH+0uqKR3BI3w==
-X-Received: by 2002:a17:906:bc95:b0:a46:9b71:b852 with SMTP id lv21-20020a170906bc9500b00a469b71b852mr1799556ejb.26.1710860390115;
-        Tue, 19 Mar 2024 07:59:50 -0700 (PDT)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id nb33-20020a1709071ca100b00a46da83f7fdsm1040601ejc.145.2024.03.19.07.59.49
+        d=1e100.net; s=20230601; t=1710867365; x=1711472165;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=KOHEs5TMclfhBIu2JgoX4uMTBWl5ctndV3O904uCrs0=;
+        b=kXTpd1Qdf1DG0i2LN5zfoVzgVBQP1XN3BY012TbKKlOtmlDhc11JtGouucnFKaO64h
+         Ztgonza+L+pocbe+CSzW1U74CPZ+Po9g+tasco2DtDN0VcmK5Nlt5Q/wJmZZ/ZC5Bnq9
+         pBp0XNM8RrlIRg1DKmKPo0ZU5UW29MCMqIO6RoizM8KR8olaq4sPcLt1y+OvcRumuFc5
+         PJObE8wnhp4jIBx2q5jS/xQHY7gU4H2tBUi3t6uYHuaT4OUQBzGodTIhYHd6pNLsN0EB
+         O7ZPAE7gDOg9Y2+slM/aKe2MJm6D/oQug2VzLvskneOkMS6tmuA9i0yZ858QZlC6BpK7
+         3Z8Q==
+X-Gm-Message-State: AOJu0YzOoWNO2KnCW6PsoFbgVLlnVW3K/EKaWo5pNVdyFPRtMSD8/6IP
+	7UcUP/0WJPOJgEbY6L8qEr0mVsIpnpxD5naAZWr0HI+MwWlnJKNo21zLtdDavXIziGFC9PeVyW/
+	T
+X-Google-Smtp-Source: AGHT+IEzk+DigbjcpG9d8BJ5EIcnJJVJ5oYqSA39ZdGY3sYvR65ocN4W0ZZgZWPW2lDAnFHdDbKzqg==
+X-Received: by 2002:ad4:4682:0:b0:696:315f:55f1 with SMTP id pl2-20020ad44682000000b00696315f55f1mr2918852qvb.16.1710867364690;
+        Tue, 19 Mar 2024 09:56:04 -0700 (PDT)
+Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id iw14-20020a0562140f2e00b0069154e0670asm6663090qvb.90.2024.03.19.09.56.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 19 Mar 2024 07:59:49 -0700 (PDT)
-Date: Tue, 19 Mar 2024 15:59:48 +0100
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: ebiggers@kernel.org, zlang@redhat.com, fsverity@lists.linux.dev, 
-	fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, guan@eryu.me, 
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/3] xfs/{021,122}: adapt to fsverity xattrs
-Message-ID: <qwe6bnzuqkmef5hpwf6hzv5ce447xij7ko67vvasjcnzxy4eho@xnvyvawp5mba>
-References: <171069248832.2687004.7611830288449050659.stgit@frogsfrogsfrogs>
- <171069248865.2687004.1285202749756679401.stgit@frogsfrogsfrogs>
+        Tue, 19 Mar 2024 09:56:04 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com
+Subject: [PATCH 0/3] fstests: various RAID56 related fixes for btrfs
+Date: Tue, 19 Mar 2024 12:55:55 -0400
+Message-ID: <cover.1710867187.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <171069248865.2687004.1285202749756679401.stgit@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 
-On 2024-03-17 09:39:33, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> Adjust these tests to accomdate the use of xattrs to store fsverity
-> metadata.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+Hello,
 
-Is it against one of pptrs branches? doesn't seem to apply on
-for-next
+While trying to get CI setup internally I noticed that we were sometimes failing
+raid56 tests even though I had specified BTRFS_PROFILE_CONFIGS without raid56 in
+them.
 
-> ---
->  tests/xfs/021     |    3 +++
->  tests/xfs/122.out |    1 +
->  2 files changed, 4 insertions(+)
-> 
-> 
-> diff --git a/tests/xfs/021 b/tests/xfs/021
-> index ef307fc064..dcecf41958 100755
-> --- a/tests/xfs/021
-> +++ b/tests/xfs/021
-> @@ -118,6 +118,7 @@ _scratch_xfs_db -r -c "inode $inum_1" -c "print a.sfattr"  | \
->  	perl -ne '
->  /\.secure/ && next;
->  /\.parent/ && next;
-> +/\.verity/ && next;
->  	print unless /^\d+:\[.*/;'
->  
->  echo "*** dump attributes (2)"
-> @@ -128,6 +129,7 @@ _scratch_xfs_db -r -c "inode $inum_2" -c "a a.bmx[0].startblock" -c print  \
->  	| perl -ne '
->  s/,secure//;
->  s/,parent//;
-> +s/,verity//;
->  s/info.hdr/info/;
->  /hdr.info.crc/ && next;
->  /hdr.info.bno/ && next;
-> @@ -135,6 +137,7 @@ s/info.hdr/info/;
->  /hdr.info.lsn/ && next;
->  /hdr.info.owner/ && next;
->  /\.parent/ && next;
-> +/\.verity/ && next;
->  s/^(hdr.info.magic =) 0x3bee/\1 0xfbee/;
->  s/^(hdr.firstused =) (\d+)/\1 FIRSTUSED/;
->  s/^(hdr.freemap\[0-2] = \[base,size]).*/\1 [FREEMAP..]/;
-> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-> index 3a99ce77bb..ff886b4eec 100644
-> --- a/tests/xfs/122.out
-> +++ b/tests/xfs/122.out
-> @@ -141,6 +141,7 @@ sizeof(struct xfs_scrub_vec) = 16
->  sizeof(struct xfs_scrub_vec_head) = 32
->  sizeof(struct xfs_swap_extent) = 64
->  sizeof(struct xfs_unmount_log_format) = 8
-> +sizeof(struct xfs_verity_merkle_key) = 8
->  sizeof(struct xfs_xmd_log_format) = 16
->  sizeof(struct xfs_xmi_log_format) = 80
->  sizeof(union xfs_rtword_raw) = 4
-> 
+This is because tests where we require raid56 to work only check to see if it's
+enabled by the kernel, not to check and see if we're configured to use it with
+our profile configs.
+
+One test needed to be updated to skip any configurations that weren't in our
+profile configs, and then a few tests didn't use the 
+
+_require_btrfs_fs_feature raid56
+
+check in the top of their test.  This series fixes everything up and honors the
+user settings which makes my internal CI runs clean where we don't want to test
+raid56.  Thanks,
+
+Josef
+
+Josef Bacik (3):
+  fstests: check btrfs profile configs before allowing raid56
+  fstests: btrfs/195: skip raid setups not in the profile configs
+  fstests: add _require_btrfs_fs_feature raid56 to a few tests
+
+ common/btrfs    | 8 ++++++--
+ tests/btrfs/195 | 8 ++++++++
+ tests/btrfs/197 | 1 +
+ tests/btrfs/198 | 1 +
+ tests/btrfs/297 | 1 +
+ 5 files changed, 17 insertions(+), 2 deletions(-)
 
 -- 
-- Andrey
+2.43.0
 
