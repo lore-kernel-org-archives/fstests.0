@@ -1,148 +1,151 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE6F57D07C
-	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 09:00:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D560953379
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 11:16:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710838804; cv=none; b=PNyt0Glq81lTVkyjyuS3OlTCbZj5etXqToF8FW8GlFmi8L6sQH90uwDIzDvOeVI91HY0ylmcOS9IS0xk7PSY0Com9NCHFjeqBlH8DGTaAqxoSWpU471qSQ7vI4r3JRttc4HoFjhH4++GRzwlg0Bb8Z9RvD7iflNKlYamZlrhjWo=
+	t=1710846990; cv=none; b=gNo1IzOxvaUpqczLPicbsi6o3OYeWvsDxNwgA2CN+bqI09lMJrZASkU/mUozdD9eO842xb9rGB/jMccMuJvn72cmc+Jpq9VQaMg/GUDMsN6Mv3XLEEPAm6dlZ7wmtv0r90JRoZmGwhmSybskYpGvtWIoeNIhP1oygbN5rAQQjBQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710838804; c=relaxed/simple;
-	bh=CgA0e+m8BBExrEbwYamwe1j/QwTE5GIpu4sDF98nzT8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=S8zESdidNudjhMpTRRRfgMD4YoSiclKUSpFQkpFpADwQCnfI05rnJAaoC9CGNn2fvWIIwkNBMmKMpR84MwpgJeHlKjxKTcb+PH8tF264Zh9h+Of/zS+YtZZaHJ+Oqn/w70zz1n1py982D+GseQJ1ynlA1nv0xa8dTtaHr2iON58=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Adg90mxH; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1710846990; c=relaxed/simple;
+	bh=5/VN/K4I7YGKuSbmN0XMRCLL+ElRxEwOk8rOUm8mV2c=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=igxwTT+w0jKdYwP3wYRykOP20/5/hyBwWvb88ATBZWFFwXHs+OPj1a4GVeruT/esMHYPSGu1+9G0bmD9G0aUq3Nv4sxFeR4bkbX6QzzniCL5/UEDZhSZPDhnmwr0TjA3MZuWX1p+fyLIJHS/aFFUCmgkKsppOqKd4iU0wVp1wL8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=A1SZgt2T; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Adg90mxH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1710838801;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=5BUiLcNn6QrFnn0+/s3dZixFiyFIk9LWlyemfwmVJOQ=;
-	b=Adg90mxHETj1Xy+eQ3gW06W+hDXjBPmHT4EivlZBgqZirWhdd3oXfecqwln1wgmvKp4AgL
-	IIMvyGD/W8dJ3iKU8grhm25MIamNpsSmBMAVImT6MBia/2Fk+ssE7QQ5WMcPqcC4i7U1Eu
-	KMKLH/lnAqcP2qm1pYo7lsF3803WyuQ=
-Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com
- [209.85.128.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-695-_svPNevqO2WAf-zjVwysZA-1; Tue, 19 Mar 2024 04:59:57 -0400
-X-MC-Unique: _svPNevqO2WAf-zjVwysZA-1
-Received: by mail-wm1-f72.google.com with SMTP id 5b1f17b1804b1-40e435a606aso28806485e9.3
-        for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 01:59:57 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1710838796; x=1711443596;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
-         :references:cc:to:content-language:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5BUiLcNn6QrFnn0+/s3dZixFiyFIk9LWlyemfwmVJOQ=;
-        b=JiUt1TSMi0mzrGSu86RxhX+FYHRFbpF8sEowzuBn5OuiOYj/1F9vdF5w7UAeXbMqFS
-         ODEAHYWAFKk7cXmWnnnRivRRf3rRizQLN/plM2M2EGawI8Hho02NJiERlKJJayb6ZbQT
-         ubZaFieJanGthjw/pfTFYMbqJGIVQbo0x6IwY8GE59xZqUfhTvjAvAcnAnMj2SdAu+P4
-         RTGLYbCTU749f77q98mbdsZH7NofTsleyOT4GgG1Jv1VqbyC2tl9GPvTdMzdSPxIzep9
-         wYXEwuZ22fMBUsRJuJHu2Dz6Ep1IfrwQuye9HVY3rfcnYx+HuTu9xCj560i18R/KTbTu
-         F+uA==
-X-Forwarded-Encrypted: i=1; AJvYcCXgZuc5jdVmuYVPPHf+6DCTT2tPiTuYrURPHNFDhLfO9dsa8+6c0lhNCWX1wdg9zxavThcB83IpieYZ5bQp6X9XP39kzy6xbg==
-X-Gm-Message-State: AOJu0Yw70EJdIRxuL2oF0kAzoMbixCE8vvy54gZg8x/4PaUv5jUqIF6+
-	N+ovVrS6EkMRhhB3vwNl5AVHrZ1bR80TcYfn9Z0QVPLmO55Dg3kTqI5XoOysn8rmg7yivTVdUPx
-	1uQi+O7S3RXCZZ1WFCTZqCgJ66veOCoqzUoRDo5SeWED4hrBXO/zsZn4=
-X-Received: by 2002:a5d:4112:0:b0:33e:48f9:169d with SMTP id l18-20020a5d4112000000b0033e48f9169dmr1203193wrp.31.1710838796624;
-        Tue, 19 Mar 2024 01:59:56 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFIM4IDI7VXvSvTa0BBGChXMEYTwyRL5BUK1Me/WgRfKde71DR/+U3BeXiu0iUxcOCA442zHw==
-X-Received: by 2002:a5d:4112:0:b0:33e:48f9:169d with SMTP id l18-20020a5d4112000000b0033e48f9169dmr1203183wrp.31.1710838796239;
-        Tue, 19 Mar 2024 01:59:56 -0700 (PDT)
-Received: from ?IPV6:2003:cb:c741:2200:2adc:9a8d:ae91:2e9f? (p200300cbc74122002adc9a8dae912e9f.dip0.t-ipconnect.de. [2003:cb:c741:2200:2adc:9a8d:ae91:2e9f])
-        by smtp.gmail.com with ESMTPSA id k4-20020adfe3c4000000b0033e48db23bdsm11838179wrm.100.2024.03.19.01.59.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 Mar 2024 01:59:55 -0700 (PDT)
-Message-ID: <615b39c1-a439-4fe2-aa8e-f8721dbb896a@redhat.com>
-Date: Tue, 19 Mar 2024 09:59:54 +0100
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="A1SZgt2T"
+Received: from pps.filterd (m0353723.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42JAkgCh004608
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 11:16:28 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : mime-version : content-transfer-encoding; s=pp1;
+ bh=7l/vtGSqqMkY38HmSmnrSPY6/n/JOvoqWnVrqsNBSNU=;
+ b=A1SZgt2TqW3jG3gYsxh+T5mAYispFttZsaoTPWDo9/+/6nKqz8Bzt7W1YQseckV/4Iki
+ g/+O785DDb+Y+WZ+twW4gWTNOf9OSTIwG/jhWqtx7XC1exFUQ7iw8AgwfgOFIS4sDgsk
+ UZ6T+ZbY5kWaYVsybFjhTHerkob0ftoUkwkBJTex2gcdiGF4oyCBtCVYlps1lU8Vywyt
+ ZybSlMnOmZ+VXVhVxp7+QJsW36QDxbbsTZUBkRLBWXCDKXUXO7dFz3ehivl7CkIMLD8W
+ h8kLEhcA3czF35BMHDY8Lw1m9zuI7/bYp8d4uvEjJWno2kIkj/eO4Coh3D6INUNcYEPi 8Q== 
+Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3wy8trrc2w-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 11:16:27 +0000
+Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma23.wdc07v.mail.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 42J8RKZC011594
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 11:16:27 GMT
+Received: from smtprelay03.fra02v.mail.ibm.com ([9.218.2.224])
+	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 3wwq8kxtpc-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 11:16:27 +0000
+Received: from smtpav07.fra02v.mail.ibm.com (smtpav07.fra02v.mail.ibm.com [10.20.54.106])
+	by smtprelay03.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 42JBGLoO51773858
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Tue, 19 Mar 2024 11:16:23 GMT
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 560F62004D;
+	Tue, 19 Mar 2024 11:16:21 +0000 (GMT)
+Received: from smtpav07.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 7B94320040;
+	Tue, 19 Mar 2024 11:16:20 +0000 (GMT)
+Received: from localhost.localdomain (unknown [9.109.252.32])
+	by smtpav07.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Tue, 19 Mar 2024 11:16:20 +0000 (GMT)
+From: Disha Goel <disgoel@linux.ibm.com>
+To: fstests@vger.kernel.org
+Cc: ojaswin@linux.ibm.com, Disha Goel <disgoel@linux.ibm.com>
+Subject: [PATCH] generic/735: improve test by incorporating extra hints
+Date: Tue, 19 Mar 2024 16:46:13 +0530
+Message-Id: <20240319111613.11029-1-disgoel@linux.ibm.com>
+X-Mailer: git-send-email 2.39.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH] fstests: test MADV_POPULATE_READ with IO errors
-Content-Language: en-US
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-kernel@vger.kernel.org, linux-mm@kvack.org,
- fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
-References: <20240314161300.382526-1-david@redhat.com>
- <20240317165157.GE1927156@frogsfrogsfrogs>
- <20240317165333.GF1927156@frogsfrogsfrogs>
-From: David Hildenbrand <david@redhat.com>
-Autocrypt: addr=david@redhat.com; keydata=
- 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
- WNyWQQ==
-Organization: Red Hat
-In-Reply-To: <20240317165333.GF1927156@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: shFKmmsavW0bajOXD1GTebku0kcZbw2H
+X-Proofpoint-ORIG-GUID: shFKmmsavW0bajOXD1GTebku0kcZbw2H
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-03-18_12,2024-03-18_03,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015
+ priorityscore=1501 phishscore=0 adultscore=0 mlxscore=0 mlxlogscore=938
+ lowpriorityscore=0 impostorscore=0 bulkscore=0 spamscore=0 malwarescore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2403140000 definitions=main-2403190086
 
-On 17.03.24 17:53, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
-> 
-> This is a regression test for "mm/madvise: make
-> MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly".
-> 
-> Cc: David Hildenbrand <david@redhat.com>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+On power systems with 64k block size (where default page size is 64k) we
+encountered a kernel oops due to an integer overflow issue when writing
+near the last logical block of a file. The allocator could allocate a
+range where the end exceeds the maximum supported logical block
+(UINT32_MAX), leading to a subsequent BUG_ON. This issue has been
+addressed in the upstream kernel with commit 2dcf5fde6dff
+("ext4: prevent the normalized size from exceeding EXT_MAX_BLOCKS").
 
-Thanks for including this test, very helpful!
+	==================================================
+	kernel BUG at fs/ext4/mballoc.c:4448!
+	Oops: Exception in kernel mode, sig: 5 [#1]
+	CPU: 8 PID: 2880554 Comm: xfs_io
+	NIP ext4_mb_use_inode_pa+0x110/0x160 [ext4]
+	LR ext4_mb_use_inode_pa+0xac/0x160 [ext4]
+	Call Trace:
+		ext4_mb_new_inode_pa+0x134/0x3a0 [ext4]
+		ext4_mb_try_best_found+0x158/0x280 [ext4]
+		ext4_mb_regular_allocator+0x16c/0x940 [ext4]
+		ext4_mb_new_blocks+0x610/0x960 [ext4]
+		ext4_ext_map_blocks+0x858/0xa90 [ext4]
+		ext4_map_blocks+0x218/0x800 [ext4]
+		ext4_iomap_alloc+0x10c/0x260 [ext4]
+		ext4_iomap_begin+0xfc/0x1f0 [ext4]
+		iomap_iter+0xf0/0x190
+		__iomap_dio_rw+0x208/0x690
+		iomap_dio_rw+0x20/0x80
+		ext4_dio_write_iter+0x210/0x4d0 [ext4]
+		vfs_write+0x364/0x4e0
+		sys_pwrite64+0xd4/0x120
+		system_call_exception+0x164/0x310
+		system_call_vectored_common+0xe8/0x278
+	==================================================
 
-It's my first time reading fstests code, so I cannot give any feedback 
-that would be of a lot of value. Having that said, nothing jumped at me :)
+This test has been extended to provide a hint about the relevant fix
+in case of failure.
 
+Signed-off-by: Disha Goel <disgoel@linux.ibm.com>
+---
+ tests/generic/735 | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/tests/generic/735 b/tests/generic/735
+index 75b23d5e..0ba111a6 100755
+--- a/tests/generic/735
++++ b/tests/generic/735
+@@ -6,16 +6,19 @@
+ #
+ # Append writes to a file with logical block numbers close to 0xffffffff
+ # and observe if a kernel crash is caused by ext4_lblk_t overflow triggering
+-# BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for commit
+-# bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
+-#
++# BUG_ON at ext4_mb_new_inode_pa(). This is a regression test for
++# commit bc056e7163ac ("ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow")
++# commit 2dcf5fde6dff ("ext4: prevent the normalized size from exceeding EXT_MAX_BLOCKS")
++
+ . ./common/preamble
+ . ./common/populate
+ _begin_fstest auto quick insert prealloc
+ 
+ # real QA test starts here
+-[[ "$FSTYP" =~ ext[0-9]+ ]] && _fixed_by_kernel_commit bc056e7163ac \
+-	"ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
++if [[ "$FSTYP" =~ ext[0-9]+ ]]; then
++	_fixed_by_kernel_commit bc056e7163ac "ext4: fix BUG in ext4_mb_new_inode_pa() due to overflow"
++	_fixed_by_kernel_commit 2dcf5fde6dff "ext4: prevent the normalized size from exceeding EXT_MAX_BLOCKS"
++fi
+ 
+ _require_odirect
+ _require_xfs_io_command "falloc"
 -- 
-Cheers,
-
-David / dhildenb
+2.39.1
 
