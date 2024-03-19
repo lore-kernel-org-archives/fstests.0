@@ -1,125 +1,121 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D23D638DC3
-	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 18:19:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BBF439FC1;
+	Tue, 19 Mar 2024 19:25:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710872368; cv=none; b=QwfOxRGAnk585ANy0kBeM9u00t9zfGtiNhFWVhSTKsjJIMYauJ1l3YrA8QNzADQ/vGu/ZXDxSl36E0cNfFqmTzAsKhnnjYtYzYPKzO3jjUXTlVkw8e/OtW3A383M3z4n6AGZBtGYGJ6HhxL6WfBLACASSrrgVwHqv0kN66AJNVQ=
+	t=1710876310; cv=none; b=sDC9GHU7L9wflMGMUGm2Ai/BSE+ou2rlkWKlDz5uRMk5XN/UWCQ+MKhfsun57N8ZI7l2HuNDc2a/WdPIL46Ii+N41JDONB4jOalwrkcblOxTuRMEvmwc56kezA1OKFuxKqxbtbEmsHQG0DJdr/3F/TmxaLKkXQrvm0+U6Eqir50=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710872368; c=relaxed/simple;
-	bh=VwVDcY0TO2axL/jWjtCB35X3LH+tkbbNehoTlHqUSVw=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PXFoOa5dYxDEkYPQaLpNEKKa8fXGIkkzEjqR9MeH+p2SWhc5i2zNlwWmjghHgHmjaZmj1rsMnBizIERiOLvpo529q37lIRfvOQSJCt/vyQPUD5D96BNEAEip/uDURJuff+HVl8sV6sTRoijlVs14uZlYiJgI5lKObnBiLWLLvYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=sH6AynCi; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Rh4mmzfS; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1710876310; c=relaxed/simple;
+	bh=9kkXaFY+dcIbI8X8UIhDiP1ieJRGCHl1BCf86Hlb0x4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KfGbBJPA1vq7gob93GrupDzBNCAHcrTt8PB2572pJXF63F1pnOXKSEh4lXfIBBQGXOkPRgxSosblxLv+eXVLqi7m+n0H1ZzdIC3Wf9DwTzn6v64w8+UlN/XHkZ5WOuftHUP+b47TMKyB5mqNHixw2Zb1QKJmyT1dQYU/aQ86lTE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fWQXHfyh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="sH6AynCi";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Rh4mmzfS"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 00E7221CE8;
-	Tue, 19 Mar 2024 18:19:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1710872365; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=87IJRYlCZc3nG6YSubJqk7fid/9rRgikDam7bMyuKxM=;
-	b=sH6AynCiM9FPRp3LixF9qWnWL0yDMMxKgYKnSXLwidEcvp7SVkacXatCzNrKmjGxze3O+8
-	vkEd6Hi/CIzdHtne/iyZ3Io4foPASOzOFsKP+/BsaCUfkjOYuZWbZ8IRBQyxUHOZs5wnfy
-	6p1NXigdl71RGHcrUOkiQ2LuJElc2cY=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1710872363; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=87IJRYlCZc3nG6YSubJqk7fid/9rRgikDam7bMyuKxM=;
-	b=Rh4mmzfSoM4XY4kRRZfpO7wvHPQrfU75XeokDZcOSpGqnvBIrPX28CPRgRdol35kL8ATzi
-	r+Y4BZ0kSXtqDTdDqsgRB6sNIYFCneS/NaGkYTaIw4Xu95B4J72S09G1Bj/t+eKr6vuNFm
-	xq/8zkVdrEEmYSI0M/O4jGtNSUIMIA4=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id EEC84136D6;
-	Tue, 19 Mar 2024 18:19:22 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id aWVJOirX+WWaSwAAD6G6ig
-	(envelope-from <dsterba@suse.com>); Tue, 19 Mar 2024 18:19:22 +0000
-From: David Sterba <dsterba@suse.com>
-To: fstests@vger.kernel.org
-Cc: David Sterba <dsterba@suse.com>,
-	Josef Bacik <josef@toxicpanda.com>,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH 5/5] generic/733: disable for btrfs
-Date: Tue, 19 Mar 2024 19:12:10 +0100
-Message-ID: <094a1bdc304b236ba41aff4da454abe3c93a355c.1710871719.git.dsterba@suse.com>
-X-Mailer: git-send-email 2.42.1
-In-Reply-To: <cover.1710871719.git.dsterba@suse.com>
-References: <cover.1710871719.git.dsterba@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fWQXHfyh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED755C433F1;
+	Tue, 19 Mar 2024 19:25:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1710876309;
+	bh=9kkXaFY+dcIbI8X8UIhDiP1ieJRGCHl1BCf86Hlb0x4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fWQXHfyhnnmjiec8fQp0CeFYwGUy12wgCxI7HGD9Se1v7oUHy1VMAIUdbu1lBM/Q7
+	 SdEb3eHEtx9NvWV5fy8xtArwfACtWLX8B+Zm5fzd1KXmbXwZhHh26rD/fBRIa1dYdj
+	 vyO3Fskz7fOlpO0zBZGgJcvQT6hO6x+x3RP+rguRXg5e0Qy6NLizPNfGoDM4NUEbAU
+	 8ywh3unsoAwfNXXMgBS9Fc3WyNd7ACOdiexkGTiiSRi2kg9eNWQThJpCThBiZJasYB
+	 BPOUuOThV+MAAQwiFGMs46Z6ABxhcpiuuCMaqbsB8kGgiwBjw4myoiEVTuZl37Ma7z
+	 jyQc3thRC0AqQ==
+Date: Tue, 19 Mar 2024 12:25:08 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: ebiggers@kernel.org, zlang@redhat.com, fsverity@lists.linux.dev,
+	fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	guan@eryu.me, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/3] xfs/{021,122}: adapt to fsverity xattrs
+Message-ID: <20240319192508.GK6188@frogsfrogsfrogs>
+References: <171069248832.2687004.7611830288449050659.stgit@frogsfrogsfrogs>
+ <171069248865.2687004.1285202749756679401.stgit@frogsfrogsfrogs>
+ <qwe6bnzuqkmef5hpwf6hzv5ce447xij7ko67vvasjcnzxy4eho@xnvyvawp5mba>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Authentication-Results: smtp-out1.suse.de;
-	none
-X-Spam-Level: ***
-X-Spam-Score: 3.32
-X-Spamd-Result: default: False [3.32 / 50.00];
-	 ARC_NA(0.00)[];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[4];
-	 R_MISSING_CHARSET(2.50)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 TO_DN_SOME(0.00)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[toxicpanda.com:email,suse.com:email];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 RCVD_TLS_ALL(0.00)[];
-	 BAYES_HAM(-0.38)[77.34%]
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <qwe6bnzuqkmef5hpwf6hzv5ce447xij7ko67vvasjcnzxy4eho@xnvyvawp5mba>
 
-This tests if a clone source can be read but in btrfs there's an
-exclusive lock and the test always fails. The functionality might be
-implemented in btrfs in the future but for now disable the test.
+On Tue, Mar 19, 2024 at 03:59:48PM +0100, Andrey Albershteyn wrote:
+> On 2024-03-17 09:39:33, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Adjust these tests to accomdate the use of xattrs to store fsverity
+> > metadata.
+> > 
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> 
+> Is it against one of pptrs branches? doesn't seem to apply on
+> for-next
 
-CC: Josef Bacik <josef@toxicpanda.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: David Sterba <dsterba@suse.com>
----
- tests/generic/733 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+See
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsverity
 
-diff --git a/tests/generic/733 b/tests/generic/733
-index d88d92a4705add..adb141e190b7b0 100755
---- a/tests/generic/733
-+++ b/tests/generic/733
-@@ -18,7 +18,7 @@ _begin_fstest auto clone punch
- . ./common/reflink
- 
- # real QA test starts here
--_supported_fs generic
-+_supported_fs ^btrfs
- _require_scratch_reflink
- _require_cp_reflink
- _require_xfs_io_command "fpunch"
--- 
-2.42.1
+(as mentioned in the cover letter)
 
+--D
+
+> 
+> > ---
+> >  tests/xfs/021     |    3 +++
+> >  tests/xfs/122.out |    1 +
+> >  2 files changed, 4 insertions(+)
+> > 
+> > 
+> > diff --git a/tests/xfs/021 b/tests/xfs/021
+> > index ef307fc064..dcecf41958 100755
+> > --- a/tests/xfs/021
+> > +++ b/tests/xfs/021
+> > @@ -118,6 +118,7 @@ _scratch_xfs_db -r -c "inode $inum_1" -c "print a.sfattr"  | \
+> >  	perl -ne '
+> >  /\.secure/ && next;
+> >  /\.parent/ && next;
+> > +/\.verity/ && next;
+> >  	print unless /^\d+:\[.*/;'
+> >  
+> >  echo "*** dump attributes (2)"
+> > @@ -128,6 +129,7 @@ _scratch_xfs_db -r -c "inode $inum_2" -c "a a.bmx[0].startblock" -c print  \
+> >  	| perl -ne '
+> >  s/,secure//;
+> >  s/,parent//;
+> > +s/,verity//;
+> >  s/info.hdr/info/;
+> >  /hdr.info.crc/ && next;
+> >  /hdr.info.bno/ && next;
+> > @@ -135,6 +137,7 @@ s/info.hdr/info/;
+> >  /hdr.info.lsn/ && next;
+> >  /hdr.info.owner/ && next;
+> >  /\.parent/ && next;
+> > +/\.verity/ && next;
+> >  s/^(hdr.info.magic =) 0x3bee/\1 0xfbee/;
+> >  s/^(hdr.firstused =) (\d+)/\1 FIRSTUSED/;
+> >  s/^(hdr.freemap\[0-2] = \[base,size]).*/\1 [FREEMAP..]/;
+> > diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> > index 3a99ce77bb..ff886b4eec 100644
+> > --- a/tests/xfs/122.out
+> > +++ b/tests/xfs/122.out
+> > @@ -141,6 +141,7 @@ sizeof(struct xfs_scrub_vec) = 16
+> >  sizeof(struct xfs_scrub_vec_head) = 32
+> >  sizeof(struct xfs_swap_extent) = 64
+> >  sizeof(struct xfs_unmount_log_format) = 8
+> > +sizeof(struct xfs_verity_merkle_key) = 8
+> >  sizeof(struct xfs_xmd_log_format) = 16
+> >  sizeof(struct xfs_xmi_log_format) = 80
+> >  sizeof(union xfs_rtword_raw) = 4
+> > 
+> 
+> -- 
+> - Andrey
+> 
+> 
