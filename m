@@ -1,83 +1,65 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com [209.85.210.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1957554BCA
-	for <fstests@vger.kernel.org>; Wed, 20 Mar 2024 15:34:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7B2523B0
+	for <fstests@vger.kernel.org>; Wed, 20 Mar 2024 15:37:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710948861; cv=none; b=iB0BQAvGnm2IrmqyAsTMLgIKQK9nFhI1xwkkds3zdqp8FmaFuqbRrmErWSmZf4Si9Iy+YU8t2XTTNlXigqbyhyzQjjFhZrDXXKh0pkC+1roicnZKeYfEug+CLY9vusv4AGu2ThxFpdwbiuvklBF4ZDyadFQByeQwQlMMGuFgbJQ=
+	t=1710949078; cv=none; b=oubAf7m+Nlt8uBJaAlP682cUtJtZ3BQK5wmyKavaNGqtZ8PepQEjn+8lOYTVslV/2B5gQJ17aRLQ5MArp/JC00aqEqtvor9sUMmNK1fEKya5479kTVNnfL9xzwo8LPalpV0qapdbtc5nTMhT6y+8RTWrn+c2yGaiGaqunzh3Hbw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710948861; c=relaxed/simple;
-	bh=IobDSOtJXN0NlUz7Ab9+xbg9/jGC5/3KxGWBpusLR/0=;
+	s=arc-20240116; t=1710949078; c=relaxed/simple;
+	bh=0fQW1hFsR5d/EL+UAsyG//WejcbamhFcoXDsRxnNQjs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mQqRgyONpk3mC2stVJc+vaP8P7ghw/vBfy1pxz+BRZe5I15X3ZB6xSJx+SAs7GhLUSfbxCUeu3DJ9th7diyMM2yLUYkExD4/cbFM3pC6CjbDqDDjEQyPKZgZF99Fw661QF6cww918pE+vasrlJcODbyJTUSwYI1eoFTUgQeBfZw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=1pnGcnvw; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=FZANjgAB; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=1pnGcnvw; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=FZANjgAB; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=dj3CuZIyD93jkrsT5Sz5ayLaZaTzrfje8clF2KYAqPZW3aUCFqjH5NDCWj9R/e2ThfQIS1PuaGfEtgkSizNu/p6IZX9YRMX2BpxsqepFUUXvWLSeqbujmdXlsV+zn6Qr+SG+pOXyQ8/KE7zGodhKIHOjvVT/oolGf37sRZGWAks=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=RmnWbUSm; arc=none smtp.client-ip=209.85.210.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="1pnGcnvw";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="FZANjgAB";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="1pnGcnvw";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="FZANjgAB"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 21624346F7;
-	Wed, 20 Mar 2024 15:34:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1710948858;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0VpEoc1dSxvnYkjxPQxYsQcCNX1TNGpaw6RCae/P4Is=;
-	b=1pnGcnvwQqcXkAE/+3+/f+DjKQxj+dho1iEM9aWCUISDORA5rISDsg3Ogyfl7P+da++nXv
-	Nh/Rdwpc13i93zC+GqSBLHpmzXedsUSUz+JEh1Nnkd0MZLzdFmb/HzBgbU4vaw2i1O9QER
-	zsqdAONMPPEayvvxOKdSeFc/im4Rxqs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1710948858;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0VpEoc1dSxvnYkjxPQxYsQcCNX1TNGpaw6RCae/P4Is=;
-	b=FZANjgABO0/OffMhwBMRMDGvQ9cY2KsG5dr+vToHEaRiKQ6/Kw8dOB+tzvbCgVmb1SQf+t
-	iFM3sUn/7BuESOCQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1710948858;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0VpEoc1dSxvnYkjxPQxYsQcCNX1TNGpaw6RCae/P4Is=;
-	b=1pnGcnvwQqcXkAE/+3+/f+DjKQxj+dho1iEM9aWCUISDORA5rISDsg3Ogyfl7P+da++nXv
-	Nh/Rdwpc13i93zC+GqSBLHpmzXedsUSUz+JEh1Nnkd0MZLzdFmb/HzBgbU4vaw2i1O9QER
-	zsqdAONMPPEayvvxOKdSeFc/im4Rxqs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1710948858;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0VpEoc1dSxvnYkjxPQxYsQcCNX1TNGpaw6RCae/P4Is=;
-	b=FZANjgABO0/OffMhwBMRMDGvQ9cY2KsG5dr+vToHEaRiKQ6/Kw8dOB+tzvbCgVmb1SQf+t
-	iFM3sUn/7BuESOCQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 15835136CD;
-	Wed, 20 Mar 2024 15:34:18 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id CuEeBfoB+2UwVgAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Wed, 20 Mar 2024 15:34:18 +0000
-Date: Wed, 20 Mar 2024 16:26:59 +0100
-From: David Sterba <dsterba@suse.cz>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH 0/5] Btrfs fstests fixups and updates
-Message-ID: <20240320152659.GC14596@suse.cz>
-Reply-To: dsterba@suse.cz
-References: <cover.1710871719.git.dsterba@suse.com>
- <1ff88b4e-1bef-47ef-9384-5a1708ebbfae@oracle.com>
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="RmnWbUSm"
+Received: by mail-ot1-f43.google.com with SMTP id 46e09a7af769-6e674136ba4so4349377a34.2
+        for <fstests@vger.kernel.org>; Wed, 20 Mar 2024 08:37:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1710949076; x=1711553876; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=kpAYNhYsQiCJK4G3sMFc+12YE2oSOi1flnZkQrVDKtY=;
+        b=RmnWbUSmIvLHPVkAc4GsHL6T8ZUnico9yQhjOq28IWt88anBxBNxnlMsDEmqz6xgEV
+         kngIfId8w1TN440IDsGhx8mUVL5bBWyy9RkzsILCO1Whs0XndnXrcgL8vCNFgGWt1nUa
+         sIeN9GZm1eDjJXVLMPHwZd37Z7fkfYmNS45rUr86a2DG240APoGsxEsTFH4qYyaIOY++
+         BcmVUQqcKsAKoKD+NJlJY8D0m70pafcBCPx33CBlXyb9J9D7ycO/lvD3SW7ceYdhW0Ib
+         x1eAJltoI7uAN5ESLicAfKL87evacz7lgjuIHTYd2wHH55vJeR7rlfW0K2koZlzHibhp
+         QrLQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1710949076; x=1711553876;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=kpAYNhYsQiCJK4G3sMFc+12YE2oSOi1flnZkQrVDKtY=;
+        b=Tsjqf61fk1hOlxpunOQ+ZJLwF3pnWQ18bunLUOfPAvRWXKPUsgU30/tOn2+VFlkoa9
+         1Um0TzLbyayssoe+xcYS1XwUrzzm68s9oxtxLpAoUePXEQcUMvd0Sbqz23XjgV0ifMNp
+         WREf9M4l5bmufvwYL5UiZCaUlVgGY74mdZl81+2HZAbpANAMyxBai5Z2H9euT42ffupo
+         ThpIEceEuzb0cxhygVouQW995nZAN7VAvDNN/s4h+r5JYcvWnLcey3Qc1QlYqkuF6pEj
+         IQ+XcZdzS1ejc02FuvNR4e6Ql1IdSAUSVMzk+11FowTAd+kf76Cvpcialrfw9INCDC68
+         RWFA==
+X-Gm-Message-State: AOJu0YzM/8eetbWiludolxHugVlc39n82cFNeOgjhuSbqjhzBe2BzHrc
+	vNoRaraEYKW2/59nBxtCYuaMPl1SvVY7alUOFpdzr74kJnVnSQ9pIijtiKMt9aQ=
+X-Google-Smtp-Source: AGHT+IGwid02o98Akjo+0yXjeeoTDE5DkvdziSL4K41kJ3t4q45vAehj0cuHgmoF2sMXeKWa+sWh8A==
+X-Received: by 2002:a05:6358:65a3:b0:17b:ee6f:b6ae with SMTP id x35-20020a05635865a300b0017bee6fb6aemr6789463rwh.9.1710949075864;
+        Wed, 20 Mar 2024 08:37:55 -0700 (PDT)
+Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id ev15-20020a05622a510f00b00430ea220b32sm2073376qtb.71.2024.03.20.08.37.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Mar 2024 08:37:55 -0700 (PDT)
+Date: Wed, 20 Mar 2024 11:37:54 -0400
+From: Josef Bacik <josef@toxicpanda.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com
+Subject: Re: [PATCH v3] generic/808: add a regression test for fiemap into an
+ mmap range
+Message-ID: <20240320153754.GB3092095@perftesting>
+References: <076b7d22d653a046bf3710c4fa04cc155b6cf07b.1710945314.git.josef@toxicpanda.com>
+ <20240320152531.GO6188@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -86,64 +68,202 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1ff88b4e-1bef-47ef-9384-5a1708ebbfae@oracle.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Spam-Level: 
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=1pnGcnvw;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=FZANjgAB
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-1.60 / 50.00];
-	 ARC_NA(0.00)[];
-	 HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	 R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 FROM_HAS_DN(0.00)[];
-	 RCPT_COUNT_THREE(0.00)[3];
-	 TO_DN_SOME(0.00)[];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
-	 MIME_GOOD(-0.10)[text/plain];
-	 REPLYTO_ADDR_EQ_FROM(0.00)[];
-	 NEURAL_HAM_LONG(-1.00)[-1.000];
-	 DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	 BAYES_HAM(-0.39)[77.38%];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	 DKIM_TRACE(0.00)[suse.cz:+];
-	 MX_GOOD(-0.01)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:dkim];
-	 FUZZY_BLOCKED(0.00)[rspamd.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 NEURAL_HAM_SHORT(-0.20)[-1.000];
-	 RCVD_TLS_ALL(0.00)[];
-	 MID_RHS_MATCH_FROM(0.00)[]
-X-Spam-Score: -1.60
-X-Rspamd-Queue-Id: 21624346F7
-X-Spam-Flag: NO
+In-Reply-To: <20240320152531.GO6188@frogsfrogsfrogs>
 
-On Wed, Mar 20, 2024 at 03:19:12PM +0530, Anand Jain wrote:
-> On 3/19/24 23:41, David Sterba wrote:
-> > Hi,
+On Wed, Mar 20, 2024 at 08:25:31AM -0700, Darrick J. Wong wrote:
+> On Wed, Mar 20, 2024 at 10:36:42AM -0400, Josef Bacik wrote:
+> > Btrfs had a deadlock that you could trigger by mmap'ing a large file and
+> > using that as the buffer for fiemap.  This test adds a c program to do
+> > this, and the fstest creates a large enough file and then runs the
+> > reproducer on the file.  Without the fix btrfs deadlocks, with the fix
+> > we pass fine.
 > > 
-> > a few more fixup from our repository.  They have been in our CI branch
-> > and consider them tested and working for our needs. All of them are
-> > btrfs-specific and will not affect other filesystems.
+> > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> > ---
+> > v2->v3:
+> > - Add fiemap-fault to .gitignore
+> > - Added a _cleanup() helper
+> > - Just let the output of fiemap-fault go instead of using || _fail
+> > - Added the munmap
+> > - Moved $dst to $TEST_DIR/$seq
 > > 
-> > Please apply, thanks.
+> >  .gitignore            |  1 +
+> >  src/Makefile          |  2 +-
+> >  src/fiemap-fault.c    | 74 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/808     | 48 ++++++++++++++++++++++++++++
+> >  tests/generic/808.out |  2 ++
+> >  5 files changed, 126 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/fiemap-fault.c
+> >  create mode 100755 tests/generic/808
+> >  create mode 100644 tests/generic/808.out
 > > 
-> > David Sterba (2):
-> >    common/rc: use proper temporary file path in _repair_test_fs()
-> >    generic/733: disable for btrfs
-> > 
-> > Josef Bacik (3):
-> >    common/verity: use the correct options for btrfs-corrupt-block
-> >    btrfs/131,btrfs/172,btrfs/206: add check for block-group-tree feature
-> >      in btrfs
-> >    btrfs/330: add test to validate ro/rw subvol mounting
-> > 
+> > diff --git a/.gitignore b/.gitignore
+> > index 3b160209..f0fb72bd 100644
+> > --- a/.gitignore
+> > +++ b/.gitignore
+> > @@ -205,6 +205,7 @@ tags
+> >  /src/vfs/mount-idmapped
+> >  /src/log-writes/replay-log
+> >  /src/perf/*.pyc
+> > +/src/filemap-fault
+> >  
+> >  # Symlinked files
+> >  /tests/generic/035.out
+> > diff --git a/src/Makefile b/src/Makefile
+> > index e7442487..ab98a06f 100644
+> > --- a/src/Makefile
+> > +++ b/src/Makefile
+> > @@ -34,7 +34,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+> >  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+> >  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+> > -	uuid_ioctl t_snapshot_deleted_subvolume
+> > +	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault
+> >  
+> >  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+> >  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> > diff --git a/src/fiemap-fault.c b/src/fiemap-fault.c
+> > new file mode 100644
+> > index 00000000..73260068
+> > --- /dev/null
+> > +++ b/src/fiemap-fault.c
+> > @@ -0,0 +1,74 @@
+> > +// SPDX-License-Identifier: GPL-2.0
+> > +/*
+> > + * Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
+> > + */
+> > +
+> > +#include <sys/ioctl.h>
+> > +#include <sys/mman.h>
+> > +#include <sys/types.h>
+> > +#include <sys/stat.h>
+> > +#include <linux/fs.h>
+> > +#include <linux/types.h>
+> > +#include <linux/fiemap.h>
+> > +#include <err.h>
+> > +#include <errno.h>
+> > +#include <fcntl.h>
+> > +#include <stdio.h>
+> > +#include <string.h>
+> > +#include <unistd.h>
+> > +
+> > +int prep_mmap_buffer(int fd, void **addr)
+> > +{
+> > +	struct stat st;
+> > +	int ret;
+> > +
+> > +	ret = fstat(fd, &st);
+> > +	if (ret)
+> > +		err(1, "failed to stat %d", fd);
+> > +
+> > +	*addr = mmap(NULL, st.st_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+> > +	if (*addr == MAP_FAILED)
+> > +		err(1, "failed to mmap %d", fd);
+> > +
+> > +	return st.st_size;
+> > +}
+> > +
+> > +int main(int argc, char *argv[])
+> > +{
+> > +	struct fiemap *fiemap;
+> > +	size_t sz, last = 0;
+> > +	void *buf = NULL;
+> > +	int ret, fd;
+> > +
+> > +	if (argc != 2)
+> > +		errx(1, "no in and out file name arguments given");
+> > +
+> > +	fd = open(argv[1], O_RDWR, 0666);
+> > +	if (fd == -1)
+> > +		err(1, "failed to open %s", argv[1]);
+> > +
+> > +	sz = prep_mmap_buffer(fd, &buf);
+> > +
+> > +	fiemap = (struct fiemap *)buf;
+> > +	fiemap->fm_flags = 0;
+> > +	fiemap->fm_extent_count = (sz - sizeof(struct fiemap)) /
+> > +				  sizeof(struct fiemap_extent);
+> > +
+> > +	while (last < sz) {
+> > +		int i;
+> > +
+> > +		fiemap->fm_start = last;
+> > +		fiemap->fm_length = sz - last;
+> > +
+> > +		ret = ioctl(fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
+> > +		if (ret < 0)
+> > +			err(1, "fiemap failed %d", errno);
+> > +		for (i = 0; i < fiemap->fm_mapped_extents; i++)
+> > +		       last = fiemap->fm_extents[i].fe_logical +
+> > +			       fiemap->fm_extents[i].fe_length;
+> > +	}
+> > +
+> > +	munmap(buf, sz);
+> > +	close(fd);
+> > +	return 0;
+> > +}
+> > diff --git a/tests/generic/808 b/tests/generic/808
+> > new file mode 100755
+> > index 00000000..36015f35
+> > --- /dev/null
+> > +++ b/tests/generic/808
+> > @@ -0,0 +1,48 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 808
+> > +#
+> > +# Test fiemap into an mmaped buffer of the same file
+> > +#
+> > +# Create a reasonably large file, then run a program which mmaps it and uses
+> > +# that as a buffer for an fiemap call.  This is a regression test for btrfs
+> > +# where we used to hold a lock for the duration of the fiemap call which would
+> > +# result in a deadlock if we page faulted.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest quick auto fiemap
+> > +[ $FSTYP == "btrfs" ] && \
+> > +	_fixed_by_kernel_commit b0ad381fa769 \
+> > +		"btrfs: fix deadlock with fiemap and extent locking"
+> > +
+> > +_cleanup()
+> > +{
+> > +	rm -f $dst
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +}
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_require_test
+> > +_require_odirect
+> > +_require_test_program fiemap-fault
+> > +dst=$TEST_DIR/$seq/fiemap-fault
+> > +
+> > +mkdir -p $TEST_DIR/$seq
+> > +
+> > +echo "Silence is golden"
+> > +
+> > +for i in $(seq 0 2 1000)
+> > +do
+> > +	$XFS_IO_PROG -d -f -c "pwrite -q $((i * 4096)) 4096" $dst
+> > +done
 > 
-> Which repo base is this from? Fails to apply without conflicts.
+> I don't know if there's a specific reason that this does directio writes
+> at alternating offsets other than forcing allocations, but usually we do:
+> 
+> $XFS_IO_PROG -f -c "pwrite -q 0 409600" $dst
+> $src/punch-alternating $dst
+> 
+> to generate a file with a bunch of extent records.  Also, since this is
+> a generic test that wants to create a file with sparse holes, it really
+> ought to be querying the file's allocation unit size:
+> 
+> blksz=$(_get_file_block_size $TEST_DIR)
+> $XFS_IO_PROG -f -c "pwrite -q 0 $((blksz * 100))" $dst
 
-I used for-next (ec5b77f70e602b2312) as a base as it was most up to
-date, unlike patches-in-queue.
+Ok I can do that instead, you're correct, all I want is a bunch of extents, and
+for btrfs at least doing alternating directio writes to get that.  Thanks,
+
+Josef
