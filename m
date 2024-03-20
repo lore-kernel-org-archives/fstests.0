@@ -1,46 +1,40 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D56FC3C47C
-	for <fstests@vger.kernel.org>; Tue, 19 Mar 2024 21:16:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E78E96FC3
+	for <fstests@vger.kernel.org>; Wed, 20 Mar 2024 01:20:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710882971; cv=none; b=Ob+dOj1BFCfSsRuDdXyQDrwThP2irx1Kf8JnCbPz5dJtkTXA/qtIWBCyzC+1rAkTaYHxR5D76Hs3lwgcg5sLYil0J+OmNxtd/WeJclwCxBBiJqIrOrczeC5tCwcjmDbM+AEoQfnhJvWedA/x1YOXm7sKi5NuTcEHVlHrMu+WDR4=
+	t=1710897644; cv=none; b=LlxdU922EbYHiyroQbTY6uwwtUNd8KkOwGXiCRlQf5/W2HEYXgnNg84gBKzQWLPyBIEhXNQtTWj631r0dU8x9wi0cvjBtf8Wqh75iiepVaQNn0e/9WGiKez9HLASNaZK91BqVAongIqbJ5GkaiFWTBN+Sq+1bXatdQfW6Ev0xB8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710882971; c=relaxed/simple;
-	bh=QLeKrWuxA65FL2TxwwlTBWYgJNgOhnsVDDZoBmQeafw=;
+	s=arc-20240116; t=1710897644; c=relaxed/simple;
+	bh=mRtEKanQvbBvRR8dPnS+hUrOpdupYCgp4TUP30XJdr8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NZ+i7vbut8MY8yuaCDuTDU1kRgxtiKXRxCpu/u8/7m1CAOvXJmJEPMZOOr3WmhefKg8EiBHps9oSKRRBkn8r8EUr/ad1Xn7uOEQ6PXsNKw6OVf0jSHcNlD1pY2/2pB1MjaqGAMJUvUD43/Dl4laKGQ8FIW9jD/1iMgovNsGqac0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=van+clLf; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=GPvYgpNcmLiYbqCder8jvh73/Cbj+xwM7i6la6k0wFXWvZM/eeol6ELNdHbpp8zt6wMc/b7qANqWQ3zhnFzy7Y/2qPEGyV6DJ6rSLC/tq2gilXsbqsc7W/iu6Im62T70FPEu73n0ZbY4EpFD6dzkc4qgneRfGE2YxNb5aAm2SK8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lhbJptic; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="van+clLf"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=7jGKfeaLspQlrVuaXasC/Ct4R22k9ljhc2sGi2xXb8E=; b=van+clLfPb33A3V/3tThhB62+/
-	6CSvcXaVY90CAIorgPKOU3OWa96i3Bt1ta2MoADzQA7qvlDeGEIeDkQrmCFpEe0/wSGPXpD3T6TWE
-	kWf2zhqv5Wy3vpr4OZRhOS4GzXlhd1zrqWWnyUbno0+gYK9+tjacpEsYmVWw78kyLjLdsteYdpTC2
-	kegjkiifyoe8WU8hJg3XUH+SqUaQgMg7A8wG2WmXz89h4a925vZ+dgnYrYmagVIZmPp0QYkAt0hbk
-	p/zsXgGSFrgpg4h12JR92zyufvkdWETbgZ4X4rYHfRqijFeQOm3ahP0OmaO0TY8Jy6tRKzveV+gja
-	DgfOetEw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1rmgoX-0000000EGGf-0tLk;
-	Tue, 19 Mar 2024 21:16:05 +0000
-Date: Tue, 19 Mar 2024 14:16:05 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, David Sterba <dsterba@suse.com>,
-	fstests@vger.kernel.org, Josef Bacik <josef@toxicpanda.com>,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH 5/5] generic/733: disable for btrfs
-Message-ID: <ZfoAlbEAM2nzA3OW@infradead.org>
-References: <cover.1710871719.git.dsterba@suse.com>
- <094a1bdc304b236ba41aff4da454abe3c93a355c.1710871719.git.dsterba@suse.com>
- <Zfn9DMR8UQQMiyiL@infradead.org>
- <20240319211050.GL6188@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lhbJptic"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 60455C433C7;
+	Wed, 20 Mar 2024 01:20:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1710897643;
+	bh=mRtEKanQvbBvRR8dPnS+hUrOpdupYCgp4TUP30XJdr8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=lhbJpticyAq8blOk4SVoolINKoU5ivnRiprjElkN27BCEwGHz164/T20YZT97Ntkg
+	 BBZZYvBBMvcKLdBVaD0XGueNxLiBsEeg4ezMGbN/leQiOJT1W8q3qSN60O7ROu/+uv
+	 Opnp6QGQP31jjttFFSAMp6g32RhvVzMPKoDWaTlKTh8HOx6124uWStcDOPJMvooiVz
+	 JJSSokhNizFlKu/53/umB00dElJ0Er8TOJcv0/ZDxoh1YrYWOGWnoMEe12vPRFBf9P
+	 S2ZZEPuS0HH1HqgplEuggu7cXYSfnbuWb62vrCnr3BAO6efK5Is9FGqoke6mcH3/U/
+	 rWNmKdm22nu5w==
+Date: Tue, 19 Mar 2024 18:20:42 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Luis Henriques (SUSE)" <luis.henriques@linux.dev>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] common/fuzzy: make _scratch_fuzz_modify work for
+ non-xfs filesystems
+Message-ID: <20240320012042.GM6188@frogsfrogsfrogs>
+References: <20240315171325.2885-1-luis.henriques@linux.dev>
+ <20240315171325.2885-2-luis.henriques@linux.dev>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,15 +43,55 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240319211050.GL6188@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20240315171325.2885-2-luis.henriques@linux.dev>
 
-On Tue, Mar 19, 2024 at 02:10:50PM -0700, Darrick J. Wong wrote:
-> I don't think there's a good way to _require-test for holding i_rwsem in
-> exclusive or shared mode during an FICLONE operation.  But that ought to
-> be a comment somewhere at least.
+On Fri, Mar 15, 2024 at 05:13:24PM +0000, Luis Henriques (SUSE) wrote:
+> Since commit 9bab148bb3c7 ("common/fuzzy: exercise the filesystem a little
+> harder after repairing") funtion _scratch_fuzz_modify() has become
+> xfs-specific due to the use of some functions that assume this filesytem,
+> namely _xfs_force_bdev() and _xfs_has_feature().
+> 
+> Ensure _scratch_fuzz_modify() works again with other filesystems by using
+> these functions only when testing xfs.
+> 
+> Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
 
-Throwing random per-fs hacks into generic tests simply does not
-scale.  We'll need a way to describe and opt into these behaviors
-in common helpers.
+Still looks ok,
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
+--D
+
+> ---
+>  common/fuzzy | 16 +++++++++-------
+>  1 file changed, 9 insertions(+), 7 deletions(-)
+> 
+> diff --git a/common/fuzzy b/common/fuzzy
+> index f5d45cb28f07..218fe1654386 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -8,15 +8,17 @@
+>  _scratch_fuzz_modify() {
+>  	echo "+++ stressing filesystem"
+>  	mkdir -p $SCRATCH_MNT/data
+> -	_xfs_force_bdev data $SCRATCH_MNT/data
+> +	[ "$FSTYP" == "xfs" ] && _xfs_force_bdev data $SCRATCH_MNT/data
+>  	$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/data
+>  
+> -	if _xfs_has_feature "$SCRATCH_MNT" realtime; then
+> -		mkdir -p $SCRATCH_MNT/rt
+> -		_xfs_force_bdev realtime $SCRATCH_MNT/rt
+> -		$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/rt
+> -	else
+> -		echo "+++ xfs realtime not configured"
+> +	if [ "$FSTYP" = "xfs" ]; then
+> +		if _xfs_has_feature "$SCRATCH_MNT" realtime; then
+> +			mkdir -p $SCRATCH_MNT/rt
+> +			_xfs_force_bdev realtime $SCRATCH_MNT/rt
+> +			$FSSTRESS_PROG -n $((TIME_FACTOR * 10000)) -p $((LOAD_FACTOR * 4)) -d $SCRATCH_MNT/rt
+> +		else
+> +			echo "+++ xfs realtime not configured"
+> +		fi
+>  	fi
+>  }
+>  
+> 
