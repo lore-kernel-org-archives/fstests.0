@@ -1,87 +1,82 @@
 Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3EB3B657
-	for <fstests@vger.kernel.org>; Thu, 21 Mar 2024 03:52:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03519BA4B;
+	Thu, 21 Mar 2024 04:10:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710993142; cv=fail; b=LmhxejD9+NquwHv6MIg7PSwfk4i+g1soVdayq19MujXRuPDq/ElsjJTDkvTwHbk/O2tXHmj0HKCT/YrW217eV9UUsF5qGn4Qat7bmCecAHGdl19eyaGGnAlS54bwVrHHNVJVWHGj050GgUF9IwmWgstiEvrV7oUPXIVu+0xCK6U=
+	t=1710994206; cv=fail; b=HXHy7+r3+lyKplceux9+ABGgnz6Zf7yNUg/ueuptdiIMI/5qr0+U4ARFrtTmqCdudMkkpxYPUWjVQabKdZSTvQLNoqjk3w3J6Flmnnv9BeseBUqbEHWSSDr5UO44hAfFe9uUQoxwfJVgrbROgUzrjfWXB5f1sCIDSIK3kuppcXg=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710993142; c=relaxed/simple;
-	bh=wDOhvECLd44PuM8hEpfmhMotvm9Yzoh6ukgC3VbVsvo=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=PkeeZkVzI7lUC5RgsWRYNxMryv3x2TJfnU8+WRXsi91tJz9fVBSJz+V2jEPsdreB2Vh++IAo4O4BnSzSF8+2gz8GCpEuWQweibdYu6UcwHt6T48Z+ExTrkIswkMNPan28yxTwT7jIm8rpvR5D+yRUDw0fiM0NI85kdjMzR8SYHM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=ZY3px+9+; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=sheAK7E/; arc=fail smtp.client-ip=205.220.177.32
+	s=arc-20240116; t=1710994206; c=relaxed/simple;
+	bh=u1M1OIFNzImBmuTak3YnZ004B+qua/oeA3cegEUbVIs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=Rx+noJbM40m5wwB6WRBeU5juTQ8kAoVggOMY01dYtkaciICZBHQNHazzdFx+3ReBexPsakf0ryN6nfbQXNukz3hAA/ZysSc8oMor6wJX1ppWrFxSKSv9YF1Jm3Y2JnLP6khA881451Il8WQ5SGSHyScUweHaTrfZBjJsYKGZIGk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=DvEIQZDj; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=m0SestVS; arc=fail smtp.client-ip=205.220.177.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="ZY3px+9+";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="sheAK7E/"
-Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42L23tiQ030753;
-	Thu, 21 Mar 2024 03:52:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-11-20;
- bh=2wqi4WDjULbmdV8hdWD9E6cAflklWiKnh/t7G2WnvSA=;
- b=ZY3px+9+m+UzisdiRfM11fsr4LuCv0wU5tT+yjz1GIjkU4IZ1snWDYzC3hGK+eWnQrvF
- Sy3HsQzkcRCYTcOyE9u/asXlXfTVITjnl3XtsGb2cQi80nn2YqKdN8kIpQdCo7Nnfr5p
- LC5KVvR12iAr0Tkf/TPI6IUlOi2ShRillKelruoMgB+n2diC7bImDn7r5TL6F+AE/B4I
- 37djaa9fL6BLq67MMWcIUjkSw8fC9z+U8rDrEYtu3/HJVpS3f7Pq+D8ERKUnh4rgf0yH
- L/2QILHlNimVp83DWBN00oEqje0hVJPpVc7vaKoYPBwXwpRE9MMSy8GnzyVRyO26TIil Kw== 
-Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3ww31tskc8-1
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="DvEIQZDj";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="m0SestVS"
+Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42L23wmZ013524;
+	Thu, 21 Mar 2024 04:09:59 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references :
+ content-transfer-encoding : content-type : mime-version;
+ s=corp-2023-11-20; bh=8I7g+JwzXZyiOJMzdR7g+IClS/+qdohdDZcPL2Yj/Q0=;
+ b=DvEIQZDjZ3l2jjZb2iAkHGgGQzOFkCPCmhSJYMJo4O0VicrkI66aPhQt03qhAnXOGeHn
+ bsjVtDnAlg5lfGW1HjKOzYjDeAUTZoT+1AbV4FaJl/A6u8UN3vIADK+1cFpVIf+D8hwR
+ SbwONSNa+r11/S/ZYaYJY0JaFycEBcHiBf0XL3NuxHBtEfqBUEqzjD5gRjo8e3M8W3Hk
+ Xm3C49I9VNYaR0kdteYdKFRmtrObW7rgg8BQGcCJnI7D0nLZ5KF7v6xRvDQi19tnbNXm
+ b9hLUn6P/ytSzqvmee9nFmHQpxSSNkiTqXqTWA89Gc8lDhdQZeqakYo+zbwKVaev6BEA Aw== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3ww1udhgw8-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 21 Mar 2024 03:52:04 +0000
-Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42L3gc6r006027;
-	Thu, 21 Mar 2024 03:52:03 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2169.outbound.protection.outlook.com [104.47.59.169])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3ww1v8p75d-1
+	Thu, 21 Mar 2024 04:09:59 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42L43VEI021918;
+	Thu, 21 Mar 2024 04:09:58 GMT
+Received: from nam10-bn7-obe.outbound.protection.outlook.com (mail-bn7nam10lp2101.outbound.protection.outlook.com [104.47.70.101])
+	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3ww1v8p3hb-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 21 Mar 2024 03:52:03 +0000
+	Thu, 21 Mar 2024 04:09:58 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=gEZm0wrSu7gl3YxCgTL1HI55h97bTbXxYHxPsB364Zctk6UbgNUzZ4OsvSF3/v89Ny1qe6dU6RQKHiZBdCLg9dgqH2shOKpNtUj6HniyI5odQRwTnZ/IJIqy+4S4KqJms3oQ3ZFtJH716ydaxHDhvp0UIQp99ZhdxhWcWHP9wadRiWTNgK53H19tacVnkhtXgBFmE5aLCn20axOlY1rlg4nw3JxwWXFKrH38TEo8edT9mZBS4t9TNB11mUK3piN+YixUmIRX9U1OAtHTnqgrboLubGyeKogbsiLDm27TXhKzDQo+ZVa+NNP5tC2fFoV+TIjMIs8j1xEDPeB5andwow==
+ b=atVJeV74+8hzL01iK0FkzS+eOg4rZgle0gmf61y8xYWEslT7qK0Jp2NR/xM2EvJlTD5WxKRPtfcQ5L90OA0fcjDPJyjywTCrOtjTQe/1LpZtzdrjwqgc9CRK1heasyxGJMGUxV8NCuZfEtb89W6Wdy2n9PAkuZDs3z5eLB40LoSGlJJsywLPGtrjnC8NBdJ3BMLqL7Ptv11jpKRQyFtDCnFz3lSbV8ZUoG6AWJMbZhOfB36bgFXk8+JBI4LdfW0hmKEV5/p6PincSBxlb0Rh64GsCRERcr6Cikdg/z9LTSE30GwMWocIv8voBn/xlGWMzhySdvdm9jY70rp8T+uInw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=2wqi4WDjULbmdV8hdWD9E6cAflklWiKnh/t7G2WnvSA=;
- b=aAPbVcMoHLg3skG2y7XuJTPUxiM1J4tDAWY7afqRlkmTjMtmegcKxjHND3OXeiGPnMP47gtZbAXsUQR8mUg7ETTfwTG9tpEIc4LCb4Gew3KNTS98owrjr7UqldJk3KKEG4tqEQelQNbBpnH7WeshHck9YimQOnA3w61cs6GDKXNCQ4YwaAPynRgvs36iNCBfmjJvHaag/txAEMOR6hmWtv5JI4DqsGxD4D6TBdbTUcl8xV06h3n1b3u+F2MUPCLt5OQc+RsRExZKhP76V+YCIQ7ufFEHiN0ydOa/1oh6fEnmUcehkMwfOMXPdYsHDKvvb19Y7J93jLQ+wMMdeV8T2A==
+ bh=8I7g+JwzXZyiOJMzdR7g+IClS/+qdohdDZcPL2Yj/Q0=;
+ b=EAhDBmaaehxUbYe2JAX5ig5KLGjB5XJBWfR1ItMz1iPlq0s22elC7IH7nGu2V45T7/Q6YkoL1+FDi3J8EeX9PIQTiS+RVBG1qstLEnE6uJwHmIkf5TuOoHdnomFMRISXeBUqotOLWMpGb5EVhBSClDhG/9HweIToHworD1Fwqr/6gzRFYjbtv+YwyADD72kPXaDunLumDHZxtWWf2kCBUhVApny+KGWs/DLtONccA7Mgs/v2soqaQOYF4orrn7CfJbZsBq/uiWRJ924Z9c3WX7HSwd/SzJiKlX1cNS7Ph/ASMgpo+zxH8b2x0icQJsZ/CZN3O7Dgt9StfxCsbAfVtA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=2wqi4WDjULbmdV8hdWD9E6cAflklWiKnh/t7G2WnvSA=;
- b=sheAK7E/kqebN18AEfppj06SrXRR21NYz7CBron1bPEvEYkeK5gkxZEow6AzOoPaqdCxrU7gn+FrsDcvF2+eNAP6fNd8qKeJ7Bvc+CD+JabEwrWY/UcPZRKh8ZO2qsADBmaER97IYvB03hD+BeArHhRJYmgv9JWg5JE37qNIW9o=
+ bh=8I7g+JwzXZyiOJMzdR7g+IClS/+qdohdDZcPL2Yj/Q0=;
+ b=m0SestVSNhCPAnc1hL9XoPJbwlG+2OEzNHI50xiNOubfGq8t6U4Y00XKkkN55b+JXm86ILcbdDvdpATooo2bb6BzOQbGC964KVx7olltC+0PXIehn0k6MY0lGkPX6VAi/MiSlX/UZWz7mPEAGlJjhRAhq3QxUrDuP4969AWkYrY=
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by PH0PR10MB5595.namprd10.prod.outlook.com (2603:10b6:510:f7::9) with
+ by IA1PR10MB6075.namprd10.prod.outlook.com (2603:10b6:208:3ad::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7386.30; Thu, 21 Mar
- 2024 03:52:01 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.15; Thu, 21 Mar
+ 2024 04:09:56 +0000
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::814:3d5c:443b:17b]) by PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::814:3d5c:443b:17b%7]) with mapi id 15.20.7386.025; Thu, 21 Mar 2024
- 03:52:01 +0000
-Message-ID: <a7c192ba-301d-4872-a6d9-7aa8e4f83bc3@oracle.com>
-Date: Thu, 21 Mar 2024 09:21:54 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/5] btrfs/330: add test to validate ro/rw subvol mounting
-Content-Language: en-US
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org,
-        Josef Bacik <josef@toxicpanda.com>
-References: <cover.1710871719.git.dsterba@suse.com>
- <d61b8bd818a8f9403982f532ac21586f6c96269c.1710871719.git.dsterba@suse.com>
- <f9dc2fdf-e468-4525-bb74-47d5bc30dcc0@oracle.com>
- <CAL3q7H7wrATcAKOxy6xSy6USBFULAujfKEkP5Giv23n_5n+zgA@mail.gmail.com>
+ 04:09:56 +0000
 From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <CAL3q7H7wrATcAKOxy6xSy6USBFULAujfKEkP5Giv23n_5n+zgA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, dsterba@suse.cz
+Subject: [PATCH] common/btrfs: set BTRFS_CORRUPT_BLOCK_OPT_<VALUE|OFFSET>
+Date: Thu, 21 Mar 2024 09:39:22 +0530
+Message-ID: <eb2493499d2f30f43afa09e980589bb4f15e9789.1710984595.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <cover.1710871719.git.dsterba@suse.com>
+References: <cover.1710871719.git.dsterba@suse.com>
 Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: MA1PR01CA0174.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:d::12) To PH0PR10MB5706.namprd10.prod.outlook.com
+Content-Type: text/plain
+X-ClientProxiedBy: BMXPR01CA0079.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:b00:54::19) To PH0PR10MB5706.namprd10.prod.outlook.com
  (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -90,179 +85,221 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH0PR10MB5595:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7ee14491-2511-47a2-5a0e-08dc495a43a3
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|IA1PR10MB6075:EE_
+X-MS-Office365-Filtering-Correlation-Id: 9a596afd-e958-4837-77d5-08dc495cc43e
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
 X-Microsoft-Antispam-Message-Info: 
-	uRmzGpnIudsFKlwlun9ScdhpOVgi/69JkeOiu0JyHxGceDjo14184afN5chMioiC+3S4ukKY0clfKBgJc+wwu0JLRWULSchGEnYFgiynlFGpqKbQx9AKbqvdZMbIWuWTv5rTtpd5YYgt/bB87QwIJ+gZJdQupmkEZMAW+FkpoC4Uy0TkDL0uvLQ+hW7HiiMkCdCOM0zVZ9/6Yf9mV42y9x3WqlLPtNsqNoXlQa+/4T0cIJ6f9keadSOXIjFTRAn78EZRVAqbgjrvGFcJslToBOxRvJUjtcKykRUyj8JiB6JbLGsJzgRT1+QMEWyvYt8zadBUjPDkW18kh2ObmjoZYpKsK7cMZYH/h1/gZHwuD9mrHSUoggpaCpxomDusJtyNTt6+4a1xtKfVUuL0idLhEdT1JtCHJK3EiAG135AmLxTB4MK/366Y1qYgE11lAYHicP41wgqF2k5Zcbry4c4QYM+gJnneTsPKBzdO/rOC39hQE6vDJ8Wqm3egRBw4VSg+yDg1e0jh/fIC3NQ3C+FTe1hq0UKbxWJIm5OJU+4hMsAlg0VZpxow/veaUcq47OOzqNeTV56nnlJ1nFY5oEKoVCkuKXmnbcet7zqbhUbtnLU=
+	78aShnu1rFOx+K4E7sYE6s9PoXYxSUq9XeyU3He17OjrenofV1Vm1elF4VQUtIkYOD+yy6vxgNVhXZc/aPuZ891Goo4Hoj0oNqvJfDd19L2zepVrMK/i8bVehzvqe05Y7SjhCuVaMQCq+8/aMuwii4uDPcxDZvr6uXkIVwGvANe4wdJdPl/xuSlaFwSpuurq1TVIVFHQSAtCA0I3Ya8ZqJD5FYQX+jhac36j0/YiQi30KlcrXc/ucsJmLuc7VnLTefcOwvAgl3svKjX9IP1Xqv/5r6THiAbFZbl9bYa7RN/mcZ1i1zxPrLfSYqwnCmvsoc1n/Zji5LmFB/ZNL0Imb1oByJbtbmnu2JQq/ujLejqXoewZitWp0DHul+C2xegL+mn590M1sG2Bl1opQcAQefbHVvJvIJ+ErnIJzEIdGooqc9cdNCYJFvj7K/db2lOlD05ORLaGYctqYUNO57YBc3tZxGKC8PvlY8x+HkTWQavqTWwXzHoc1q2frrUj1YY0CFK1RElhaAKv65THHb3kmSF9Ebv7AdolI5lqLx+gLQNEZ7NPJ5irJLDGQFtD1x2q5Iafvtmb69YKT7tJioAA1opmB4yNZn/gLjYQXpMV5ETUYjKFKudxlqmakim6ZNPXMaBb0YHSr56WCLrL5viAai/5DLuhItomtbaouOROHW0=
 X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(1800799015)(376005);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376005)(1800799015)(366007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?utf-8?B?aldsUXhXRENXQXVpdEhHdThGSDRnM3lxRitlck8vUjhGZWhrcExjNGNQRmE2?=
- =?utf-8?B?UUJlOE4wN01OZUxzYnBUSWN4L3FINzVDTDlPN3RGYkc4cnNub3k2cjI0MzN3?=
- =?utf-8?B?bGZCTlpGcFZ2MmVXNWVmNGhMUmZEUVpYSm84bTZ6T1kvYVV1UjV1RXkxeDI5?=
- =?utf-8?B?M1N0N0t0M0JyTEJyYUZRYWQyUFduay9xRkhOWGlyeWpTeUhHNDQxMGxJc1hX?=
- =?utf-8?B?Zm1ZWWtJc0FoZVcyNVFacXAwR0ZMY3Fsdi9EeG1OSHJRd0ppRndMZitKbkhq?=
- =?utf-8?B?OTF6V1FxV2MrMUVwRHBOb1oybFdCNzd2dXdDYU5ESXpVTWQ3UzBkUXkyaExM?=
- =?utf-8?B?N2Npd3YwcUREejlGNUdvSk51OGdWRlN2bGc3dkswQTRIdE0zSHBEZk9ZTWVW?=
- =?utf-8?B?UlhXdjNRNWp3REZVNUYwWTQwNExBSUFxZGtQaWhkbFB0MUZZQ2VPQ3pUSTJ6?=
- =?utf-8?B?WjkxNUgvcTZRQVM5V1FDbC9rSDQyWkt5bHhpdlpjYkdLOThSM2hDV0FyUjFi?=
- =?utf-8?B?amdlVUcvWE81b3EzWTVqTHp5R0IwUVlQSkx5OUp0YVl0dVhQWWJFdmVqS2l0?=
- =?utf-8?B?NGN1Ulh5R1k5MFpWZ1JkVkhMdDFuV0xNeXAxME1JMDdJaUlZWndwSTVHMlJ4?=
- =?utf-8?B?MnlHbUV0bWVxaisyeW9jaWxSSnN3R0gvRDNVN3VwRkpBRWFsMXV3ZWUvdk5V?=
- =?utf-8?B?VUFoK01nU1dmUklIL3dGOXlzaEJRbWhrbkpDQVpIKzZLMkVoS2NFb1cyL290?=
- =?utf-8?B?d3h6emlPVkhzUzBOZGwrb3BoajlmOVp1bmNlRWdWWnhQZkx5cTUvWWNNUXVZ?=
- =?utf-8?B?Sk5DMVdqeGZ3SGptb3AxV3dUMmRCTmNwczVKNENSU0FBcHltdjVTbmRxNjQ0?=
- =?utf-8?B?TENidGJkcUprMHVhV1FZZFMxa3FXS0c2ZkZDSi8vQWY0TFJBVXQrZHdjNld6?=
- =?utf-8?B?R3ljNVc1UEg4eDdadTUvTVNYN3VQODJ2TDRuc2s3MmNRa2lESFBsYU9oZlk0?=
- =?utf-8?B?TXVLNGkzc0hzc1htcFlGK1dpTERnQnQxUTVyeS8wWkt6RjhsUVhTcU1PSmJk?=
- =?utf-8?B?Nlo5WUUyNWFhaUd5NTFtWEJoNGpYK2ttOHZIRGlMM1djckVhUUpONTg1aG51?=
- =?utf-8?B?cktHa2p5WTh6N0ZxcUwwYzBGRUh2WnNBaEJiNmdISnpoR2NJWkJ6N2E2YmQz?=
- =?utf-8?B?elgvWnUvcEVMZ3NOb0t1Wk1RK1lGRGdPcHNVS0k0Z0Y4U3Jxdkd1dXpSTHM0?=
- =?utf-8?B?ZktMY3hjbmF1TlRENjBWNXJva1M4RUZyb25tMzBiK0dpK0dMeTNEQk9lMXAz?=
- =?utf-8?B?M2tDMVF6djMzUE9neklsLzdVMFZxYndxNENncy85aGY4S0JEeVc2ZWZCVUJM?=
- =?utf-8?B?TXRTOElCclEzcUVJOEl3eW5BcktNRXB5dEFIYk9TWjZLQ2dPWDZua3k4Rmh3?=
- =?utf-8?B?Q2JWbDBPdlJZN2M2dTJPMVBYYjV0bm5id2xYT21aY3ZIaE9FZHlLVTB2Q2tE?=
- =?utf-8?B?NzJFQ0dNN3daWGZsalY5dDBxWEdjbVZMV0p0dzlCMVhZNjF6d240eEw4a3l4?=
- =?utf-8?B?UW9Rand5eHM4S2xwQ2w2SFlsTmFad0RrRWFNNlNWK0pIUXVyNVFvR0ZCemRr?=
- =?utf-8?B?T3VCbGlJWTQ2YkMzRG10aWYvZmhxU2xPSWt5Ni81WE5ldGNXWCt1dFZmNEtS?=
- =?utf-8?B?eExtUVl2QXR1V3pTVTVuU0NyL0UrZzFYdzFXUVdxQ244dUJxS084NTY1WGlD?=
- =?utf-8?B?b3ZQRUZlbnZubDRkamtkVEdMUDVjd3BNTWlyemFSRHVaWitnZU5NeVJvZHdW?=
- =?utf-8?B?RFVIbVovWlRsOFpKTFNNVW93YXBlc3lmdHYvQnkzLzBuTWx3RFZZSnVUMUM3?=
- =?utf-8?B?b1d1RmQ0SHpDb1d5ODZMcUM4UW8yM2NqSGxnT2tiY1VSeE5YY1o4ZHBkbTVh?=
- =?utf-8?B?MjFkeHZkbDRSWklvMDZvSWQ5dzRCQTJmL0xZQ00raEhDLzRSVXFYdUY4V2lF?=
- =?utf-8?B?UE5tUFVPRUZNN0dXbldPL1ltVS9mVndlaGdVSDlERzJWbDUvNHB2aFZxQ2Nk?=
- =?utf-8?B?c2taVmVsdmU1MWxMMENJQzFFVzQ2ZDZGMXh0MW8xMTlabUVmYXJVVStTSmRo?=
- =?utf-8?Q?1IgJ5SLA1NNqQ66sal5BEpp2h?=
+	=?us-ascii?Q?5tbLauaOm/8bwkJnjcCoGcluE6byxVaQgpxq3JfKXKq2i7Aep2FrIk2n/38l?=
+ =?us-ascii?Q?SgxddqmSvQmqLiEErKZFqCT0QiPqWZKRNq0e0flADWM8xtz8vbL6RMbl60LK?=
+ =?us-ascii?Q?L96+So8kQalaS+/B68R2Uw51aAQSOHdSiTDLDQ2ZOq+y7qzA2FvRcSTipeXs?=
+ =?us-ascii?Q?Dc9AHwufc9XZX3ybQvPDWFHILgsOtYLG5hWb7PdKdEKydGfvQKE50IhQqO1f?=
+ =?us-ascii?Q?+bsKGKwBTxs/MdESxKmdye11LZj1frtJSkRKd6PtchQu/VxjFyM11HLDapAl?=
+ =?us-ascii?Q?GqG3rFRidBlEr/uV+Q//68VMs/Qk0GqpmVTp+Eyw13LbLd+N1PJuX0A+WWSk?=
+ =?us-ascii?Q?P7RN24shVeqbtxpuV8YT7k976yvyE94BdWH6m7+BcPqnsOdvz77+fuxR9x4a?=
+ =?us-ascii?Q?vfJuRKcz1IFTQ2KFbDq5anLGAIE7nyyDXjgKefW7GubcvhxNLXrCwkxLtbEm?=
+ =?us-ascii?Q?0CwcxodeBxlqmJQJutZ52CeiJsvYqIj/HcvYi/U/dpLugXgpc+L3mCf93W/B?=
+ =?us-ascii?Q?7ZxfCvkhSU+5iXeyhnfyFosz8ucjsrYO7CCIcBLb1n5yxqmvSlo0jS/DHItG?=
+ =?us-ascii?Q?QWkNpom8Qf0pLJXs+GSfgRqQNm+X5hy0eHzFccwHCBMeHdRcND42YZ/WXy0p?=
+ =?us-ascii?Q?G0vKzQyGX9y+ETy6O+Vx1+nPL3o7hzGqFRaFTVoXHHk6KICFPXwNfrk43mk0?=
+ =?us-ascii?Q?qfznDGPp8f4z4cWYlG3jau/nBtooETqN8PpFw7UAAqX80uaYV7xXMOMkwbfe?=
+ =?us-ascii?Q?FOMsbxX0vkz/uh6aF8EgwrJggo+VEdUifNy6Fvvwzj+3xYAImZsdBt2yj2+H?=
+ =?us-ascii?Q?UT1di7Eb9EMZZ2uV/ZxgW1uQm79yJlj0Jsa5PvfC8GXx4LwoVLJJiZfy5kBZ?=
+ =?us-ascii?Q?X9IIYDdTbg6PbKEr7TtThmHPXcn653QXZJ+v2Q6W7oj/pchet1G/4mk5XnhK?=
+ =?us-ascii?Q?50nJOcpTHO+kkWE7CrWVV4dpMEeSz+OOPokqikrBUn7RKJH6UkE3BdH6NkGV?=
+ =?us-ascii?Q?QUtM0uz08CgDHraRyYWKCNc17S3lshQ50rgd5TkVFH4ft33T+O0inbYaYhTt?=
+ =?us-ascii?Q?XzpwdtSq5mVF713zUiTX1cy6cuGMvfyAkuCfO02LvUUfvQXiJ2wVhpRcmcOS?=
+ =?us-ascii?Q?FSZQQ1of1lEGHdfvuVTl1yxC+NE/IeJ1phU+rvTRu1o+zF5KunGTs+Cfnjn5?=
+ =?us-ascii?Q?8KIr/M/bhRl6c/n+vdqqW/8e5iM57ac2149ZA7IqkvzbQbWvl+bD675Lhlrt?=
+ =?us-ascii?Q?IhSFU2an1TvJzSlqvgvZykUn7xEPOVat5fsmNenhZYOAa3mXMvl2R8nCuG6d?=
+ =?us-ascii?Q?7wX1xJ5Oa67aJTzs/lMcbs80XsL5t4nALPZCxEuawM1+dIZkkgjEPCHqzLf8?=
+ =?us-ascii?Q?jbbZk87jf7dK1pvdi8PiADJjs2xAD8P823MBHcoOXLX2LipPKffBsTrOQGop?=
+ =?us-ascii?Q?SAIdHl8lvW31Pwep85ts17YwBJ11gKJB2aU4dVqjiB3qt13k3QmTh4tA9E5u?=
+ =?us-ascii?Q?Nz3xncy/0FwcdJPLRbdVVfDFP5mUCWYLztqMAppuIFs8kRvst+kEFlgsYiAP?=
+ =?us-ascii?Q?kGGMv/USWtvONdSFX0fGxm6YpAenCprXS4dkge94?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	U/F7llTSbSrHQY+obCWEcD5M9ZVPCkKmOmhC56RBVugjxO5XX5AqAN5THNJ4KmRAEEnQr2HKDdm2SLPkPf5zffszj5MgjKO56/c9WNwBEMPapz0bULWLtzwhS0mMSkAXHL5A8T+no6NiXX451nASfAfEmLgs3PLU/toqrHkUsUaH1/9Py1k1tw/40aEQ+8akBwwdaY3cc0bw2Heiuqxj8VIwH4d1fdE98vqQUFV582CkZRbIo/mh9YGHnA3RcbAlSMdEnU3vgHeob2J9026RA2BsaThqnznNr84CRIjGZpGunu196JN1UQkNP6VTFomlAfb3LIcTCtjlyq97mjH9Mf0QWM/DAIhXKbFWP0lFcoomMc5t684KoslcIok9GO+dBo88LWnOyVKnAjD+KR2lanoYpRw0ls95jb+yhx5PgfNgVyEiKLiVF31Za8co9d6x7DSKaUA79BLsgrffxO1C5SXysm0WICzoIZtH33sZpdwaXFbJMrBgen22qJGTybYtWpFa+2HwAAfFCPqC5AsE/oG14S9zv6GrAo4bBL/6aSXYXp5xVktw/bfT22H/yx+bf3x9WgDBOVCkfXU84rD1507p1Az2OdgJeXIvBqmyRf4=
+	0yq+KXhIklU0fOkPz2+xZhCoCxgrXP5iCqZ0zHk8MUYLXjzWJOR1OnpnNuR3SfPfc7u7EJjuZWNnWiOc+EZpOGFudNAuYAGJs8wvWf7a3MQ+U6r+PARm9CD4qROJUMPpvh1kYR4i2bF7xaMXk4XPUS0be5HRZHGTNp9ZZ88vA+vzAmLR/oDOwFdSPL7eEsPS6xsRW7M/o56oplAZrpdtAU3ojjAPNzeQvkAVC7Avv3q198Mj9oGSneNAq/A9jIHj1c8xSfv/OQ0j6l5LEerqCEKZCQubDeEYMVL9JQYrSoy8BNpm3kNM6sh85zxLRTfMV0MCR+M843Rl3WdDXMUOEH+BpkeluiJUAVpI4CWi4TBXFzqgZpdB/OTYmjk0f3yjqQ3cJkz1jJlzOgHuamk8irOPWMS4LwsIFSD/ye3j/jdUfwg7YeZk0V2UMk+XWgo4KU9EXPrl/9TY3A+Z4Gg5Vi0zqRUGatP8D029QnJUHTFHHb+9FLpfFpFh0ty5D2fUDKwXXW2zR/m3MePFvh7FZcvZdXA128QEroeEI0UieRVpXceko4Sdk4SkhpDXFr8ILES6/raAOV1Qc7abc1A3atflw0CQe77idlpm5ErDb/A=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7ee14491-2511-47a2-5a0e-08dc495a43a3
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9a596afd-e958-4837-77d5-08dc495cc43e
 X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Mar 2024 03:52:01.3830
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Mar 2024 04:09:56.1846
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 5f7CdfkEgu+J3Fpj3mNc/07xMvcFwPWhKFMSyZoAnkuUgn3zkln4+SRbvgnX2dCS5LliAQb4zq4tOAqVex4ouQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR10MB5595
+X-MS-Exchange-CrossTenant-UserPrincipalName: vlAKmNCtfgXhK00z+L6PMgukNewqt5T7v6r27mEQ5/5gBzG4+Z2jsgLDslPPbJN9paOwJpMXwWPbhBCqT/Th6A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR10MB6075
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
  definitions=2024-03-20_14,2024-03-18_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 mlxlogscore=999
- malwarescore=0 adultscore=0 suspectscore=0 mlxscore=0 phishscore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2403140000 definitions=main-2403210023
-X-Proofpoint-ORIG-GUID: WWEdK-WuERHfKxPAhYJgV6hePO0U-Zhf
-X-Proofpoint-GUID: WWEdK-WuERHfKxPAhYJgV6hePO0U-Zhf
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 adultscore=0 mlxscore=0
+ bulkscore=0 mlxlogscore=999 suspectscore=0 phishscore=0 spamscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2403140000
+ definitions=main-2403210025
+X-Proofpoint-GUID: UVNSNkB_FAFIX8n9l79U7ws8xARqH14S
+X-Proofpoint-ORIG-GUID: UVNSNkB_FAFIX8n9l79U7ws8xARqH14S
 
+As btrfs-corrupt-block now uses --value instead of -v, and --offset
+instead of -o, provide backward compatibility for the testcases, by
+storing the option to be used in BTRFS_CORRUPT_BLOCK_OPT_VALUE and
+BTRFS_CORRUPT_BLOCK_OPT_OFFSET. Also, removes the stdout and stderr
+redirection to /dev/null.
 
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+This replaces the patch:
+   [PATCH 1/5] common/verity: use the correct options for btrfs-corrupt-block
 
-On 3/20/24 22:31, Filipe Manana wrote:
-> On Wed, Mar 20, 2024 at 11:34 AM Anand Jain <anand.jain@oracle.com> wrote:
->>
->> On 3/19/24 23:42, David Sterba wrote:
->>> From: Josef Bacik <josef@toxicpanda.com>
->>>
->>> Btrfs has had the ability for almost a decade to allow ro and rw
->>> mounting of subvols.  This behavior specifically
->>>
->>> mount -o subvol=foo,ro /some/dir
->>> mount -o subvol=bar,rw /some/other/dir
->>>
->>> This seems simple, but because of the limitations of how we did mounting
->>> in ye olde days we would mark the super block as RO and the mount if we
->>> mounted RO first.  In the case above /some/dir would instantiate the
->>> super block as read only and the mount point.  So the second mount
->>> command under the covers would convert the super block to RW, and then
->>> allow the mount to continue.
->>>
->>> The results were still consistent, /some/dir was still read only because
->>> the mount was marked read only, but /some/other/dir could be written to.
->>>
->>> This is a test to make sure we maintain this behavior, as I almost
->>> regressed this behavior while converting us to the new mount API.
->>>
->>> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
->>
->> looks good.
->>
->> Reviewed-by: Anand Jain <anand.jain@oracle.com>
->>
->> Nits below.
->>
->>> ---
->>>    tests/btrfs/330     | 54 +++++++++++++++++++++++++++++++++++++++++++++
->>>    tests/btrfs/330.out |  6 +++++
->>>    2 files changed, 60 insertions(+)
->>>    create mode 100755 tests/btrfs/330
->>>    create mode 100644 tests/btrfs/330.out
->>>
->>> diff --git a/tests/btrfs/330 b/tests/btrfs/330
->>> new file mode 100755
->>> index 00000000000000..3ce9840e76d028
->>> --- /dev/null
->>> +++ b/tests/btrfs/330
->>> @@ -0,0 +1,54 @@
->>> +#! /bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0
->>> +# Copyright (c) 2023 Meta Platforms, Inc.  All Rights Reserved.
->>> +#
->>> +# FS QA Test No. btrfs/330
->>> +#
->>> +# Test mounting one subvolume as ro and another as rw
->>> +#
->>> +. ./common/preamble
->>> +_begin_fstest auto quick subvol
->>> +
->>> +_cleanup()
->>> +{
->>> +     rm -rf $TEST_DIR/$seq
->>> +}
->>> +
->>> +# Import common functions.
->>
->>> +. ./common/filter
->>
->> This can be deleted, as the filter.btrfs also calls the filter.
->>
->>> +. ./common/filter.btrfs
->>
->>
->>> +
->>> +# real QA test starts here
->>> +_supported_fs btrfs
->>> +_require_scratch
->>> +
->>> +$MOUNT_PROG -V | grep -q 'fd-based-mount'
->>> +[ "$?" -eq 0 ] && _notrun "mount uses the new mount api"
->>> +
->>> +_scratch_mkfs > /dev/null 2>&1
->>
->> _scratch_mkfs >> $seqres.full
->>
->> Errors, if any, go to stdout.
-> 
-> We typically redirect stderr to stdout because in the past mkfs.btrfs
-> used to output to stderr a message when it performed trim.
-> See this old commit:
-> 
-> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=afadb6e5958c5acf2425d6a8a9372b63afcb4f2a
-> 
-> And nowadays we're encouraged to do:
-> 
-> _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> 
-> So in case mkfs fails the test doesn't continue and silently passes by
-> using the filesystem SCRATCH_MNT belongs to.
+ common/btrfs    | 16 ++++++++++++++++
+ common/verity   |  9 ++++++---
+ tests/btrfs/290 | 30 ++++++++++++++++++++++--------
+ 3 files changed, 44 insertions(+), 11 deletions(-)
 
-Darn it, I keep forgetting about the trimmed message history that went 
-to stderr. My bad. And I did search mkfs for what went to stderr, but it 
-wasn't an error. Btrfs/303 fixed.
+diff --git a/common/btrfs b/common/btrfs
+index ae13fb55cbc6..11d74bea9111 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -660,6 +660,22 @@ _btrfs_buffered_read_on_mirror()
+ _require_btrfs_corrupt_block()
+ {
+ 	_require_command "$BTRFS_CORRUPT_BLOCK_PROG" btrfs-corrupt-block
++
++	# In the newer version, the option -v is replaced by --value,
++	# and -o is replaced by --offset, so normalize them.
++	$BTRFS_CORRUPT_BLOCK_PROG -h 2>&1 | grep -q "value VALUE"
++	if [ $? == 0 ]; then
++		export BTRFS_CORRUPT_BLOCK_OPT_VALUE="--value"
++	else
++		export BTRFS_CORRUPT_BLOCK_OPT_VALUE="-v"
++	fi
++
++	$BTRFS_CORRUPT_BLOCK_PROG -h 2>&1 | grep -q "offset OFFSET"
++	if [ $? == 0 ]; then
++		export BTRFS_CORRUPT_BLOCK_OPT_OFFSET="--offset"
++	else
++		export BTRFS_CORRUPT_BLOCK_OPT_OFFSET="-o"
++	fi
+ }
+ 
+ _require_btrfs_send_version()
+diff --git a/common/verity b/common/verity
+index 03d175ce1b7a..33a1c12f558e 100644
+--- a/common/verity
++++ b/common/verity
+@@ -400,9 +400,12 @@ _fsv_scratch_corrupt_merkle_tree()
+ 			local ascii=$(printf "%d" "'$byte'")
+ 			# This command will find a Merkle tree item for the inode (-I $ino,37,0)
+ 			# in the default filesystem tree (-r 5) and corrupt one byte (-b 1) at
+-			# $offset (-o $offset) with the ascii representation of the byte we read
+-			# (-v $ascii)
+-			$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 -v $ascii -o $offset -b 1 $SCRATCH_DEV
++			# $offset (-o|--offset $offset) with the ascii
++			# representation of the byte we read (-v|--value $ascii)
++			$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 \
++				$BTRFS_CORRUPT_BLOCK_OPT_VALUE $ascii \
++				$BTRFS_CORRUPT_BLOCK_OPT_OFFSET $offset \
++							-b 1 $SCRATCH_DEV
+ 			(( offset += 1 ))
+ 		done
+ 		_scratch_mount
+diff --git a/tests/btrfs/290 b/tests/btrfs/290
+index 61e741faeb45..d6f777776838 100755
+--- a/tests/btrfs/290
++++ b/tests/btrfs/290
+@@ -58,7 +58,7 @@ corrupt_inline() {
+ 	_scratch_unmount
+ 	# inline data starts at disk_bytenr
+ 	# overwrite the first u64 with random bogus junk
+-	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f disk_bytenr $SCRATCH_DEV > /dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f disk_bytenr $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -72,7 +72,8 @@ corrupt_prealloc_to_reg() {
+ 	_scratch_unmount
+ 	# ensure non-zero at the pre-allocated region on disk
+ 	# set extent type from prealloc (2) to reg (1)
+-	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type -v 1 $SCRATCH_DEV >/dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type \
++				$BTRFS_CORRUPT_BLOCK_OPT_VALUE 1 $SCRATCH_DEV
+ 	_scratch_mount
+ 	# now that it's a regular file, reading actually looks at the previously
+ 	# preallocated region, so ensure that has non-zero contents.
+@@ -88,7 +89,8 @@ corrupt_reg_to_prealloc() {
+ 	_fsv_enable $f
+ 	_scratch_unmount
+ 	# set type from reg (1) to prealloc (2)
+-	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type -v 2 $SCRATCH_DEV >/dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 0 -f type \
++				$BTRFS_CORRUPT_BLOCK_OPT_VALUE 2 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -104,7 +106,8 @@ corrupt_punch_hole() {
+ 	_fsv_enable $f
+ 	_scratch_unmount
+ 	# change disk_bytenr to 0, representing a hole
+-	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr -v 0 $SCRATCH_DEV > /dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr \
++				$BTRFS_CORRUPT_BLOCK_OPT_VALUE 0 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -118,7 +121,8 @@ corrupt_plug_hole() {
+ 	_fsv_enable $f
+ 	_scratch_unmount
+ 	# change disk_bytenr to some value, plugging the hole
+-	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr -v 13639680 $SCRATCH_DEV > /dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -i $ino -x 4096 -f disk_bytenr \
++			$BTRFS_CORRUPT_BLOCK_OPT_VALUE 13639680 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -132,7 +136,11 @@ corrupt_verity_descriptor() {
+ 	_scratch_unmount
+ 	# key for the descriptor item is <inode, BTRFS_VERITY_DESC_ITEM_KEY, 1>,
+ 	# 88 is X. So we write 5 Xs to the start of the descriptor
+-	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 -v 88 -o 0 -b 5 $SCRATCH_DEV > /dev/null 2>&1
++	btrfs in dump-tree -t 5 $SCRATCH_DEV > $tmp.desc_dump_tree
++	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 \
++					$BTRFS_CORRUPT_BLOCK_OPT_VALUE 88 \
++					$BTRFS_CORRUPT_BLOCK_OPT_OFFSET 0 \
++					-b 5 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -144,7 +152,10 @@ corrupt_root_hash() {
+ 	local ino=$(get_ino $f)
+ 	_fsv_enable $f
+ 	_scratch_unmount
+-	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 -v 88 -o 16 -b 1 $SCRATCH_DEV > /dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,36,1 \
++					$BTRFS_CORRUPT_BLOCK_OPT_VALUE 88 \
++					$BTRFS_CORRUPT_BLOCK_OPT_OFFSET 16 \
++					-b 1 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+@@ -159,7 +170,10 @@ corrupt_merkle_tree() {
+ 	# key for the descriptor item is <inode, BTRFS_VERITY_MERKLE_ITEM_KEY, 0>,
+ 	# 88 is X. So we write 5 Xs to somewhere in the middle of the first
+ 	# merkle item
+-	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 -v 88 -o 100 -b 5 $SCRATCH_DEV > /dev/null 2>&1
++	$BTRFS_CORRUPT_BLOCK_PROG -r 5 -I $ino,37,0 \
++					$BTRFS_CORRUPT_BLOCK_OPT_VALUE 88 \
++					$BTRFS_CORRUPT_BLOCK_OPT_OFFSET 100 \
++					-b 5 $SCRATCH_DEV
+ 	_scratch_mount
+ 	validate $f
+ }
+-- 
+2.39.3
 
-Thanks, Anand
