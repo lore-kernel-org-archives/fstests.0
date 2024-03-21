@@ -1,49 +1,44 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from out-171.mta1.migadu.com (out-171.mta1.migadu.com [95.215.58.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83C50132489;
-	Thu, 21 Mar 2024 21:41:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 568FA85265
+	for <fstests@vger.kernel.org>; Thu, 21 Mar 2024 21:52:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711057269; cv=none; b=WEXHGIDRKVAD4kVgXU1kbyA0ZJEGyM+QIg8OdyUM0wZv+PgtGp3/9u2DZya5ZlU1jFl74NLF/Lktm2QGW/+Fp39yTUT/k1nWObzF2EaqUiI0/z/HtQMQc+xdWqB+oomBuwjlzjMmL+mWmkEJa9rK08Ueau+eYxxic75qf7WwPyo=
+	t=1711057961; cv=none; b=jQ2h2M0K9cYgjvF5XGvKJ4lOMS38PjjhkrpvxtrfQL5Pcb0SGy9RI1tPUjGZ281C2BNXvQAyfuZckbsJA6Q3LK+dUVUHTA+PIimTjVkyQT2xM6Ay9u78hMHAUbX68Uf7+ywsF3HGOlultS0soFS/ePaks/6936Vans9pScfey9s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711057269; c=relaxed/simple;
-	bh=cddODeBi/hStXwNzhxsGIzhgaV24iIK5uc/BU/XrWQE=;
+	s=arc-20240116; t=1711057961; c=relaxed/simple;
+	bh=SFT7I/mQlV+cGCSM2WRt4PbAhxOR14W4gxZ5zmRphRE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DCfOECHDqo5l1x/hC2qu78M5RsYpg/kBUxuWH8M2arO52tzFfGC3vxo/0g0UGhH+HNvsUNHg42YzcjXaPYZd1rA5aB6OiiuGB0JS3JMyrYJv5ej+9Y2jzzTVkabEo/Cu2KXtIukvvmkNmmltpbVn7+4tKMWXZR5T6P78F6Q5NTM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=mCOhezx8; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=j1JFHslh+GzJMK+hq+gwNIkDLqlXjvcQ4baIh79bSWEF6IHnB9agysjPmuh3Ukydvs+dW5B1MrZMTgU6vuzPrLWKo9XetHpCN3I6qYs5fWjPS735b6nP98YXSKPnYTkE2C6TaBQdISJYk5WZbjS0h5KQIFVxSylBsdsqvJFyCno=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=c8Y8IvLY; arc=none smtp.client-ip=95.215.58.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="mCOhezx8"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=0Qj6WavbTTSyR6bJ6c46PUhs+EgCRaMncymugl59LOg=; b=mCOhezx85EWRCq927mwSnlvDfW
-	lvRWTFgdoeMngXe6mV/g+pSZuPepYeXi2rLerU35zZPut+UVYxGSmFTwpnviFabaJeUshlkhF2+F2
-	6GX8XNc5DR+XJd5CJrAG7U2F9K1ZFsIabKO2V/cYkItI69Kf2ierd3yKptldsJoSuMsSTYD7aigFV
-	RIoyRK5IqR6cHLFxvlsOwlwZHVJ28F+RQR1aLz2orJR971T/JCa/cWEh64zMgBrpqkl+xHpHVo0zw
-	cVhh+TG3CsBZXbhN7sl9YvZXlS6o06WWNeWU/Ds/2qw9uiyk80qZZYBgDdjNb0lYY1CJlexBehDO2
-	Q4Vnr6MQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1rnQ9r-00000004lF3-28Sj;
-	Thu, 21 Mar 2024 21:41:07 +0000
-Date: Thu, 21 Mar 2024 14:41:07 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: David Sterba <dsterba@suse.cz>
-Cc: Christoph Hellwig <hch@infradead.org>, Zorro Lang <zlang@redhat.com>,
-	Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org, fdmanana@kernel.org
-Subject: Re: [PATCH v2 1/2] shared: move btrfs clone device testcase to the
- shared group
-Message-ID: <Zfypc1dUeazjsoQz@infradead.org>
-References: <cover.1710599671.git.anand.jain@oracle.com>
- <440eff6d16407f12ec55df69db283ba6eb9b278c.1710599671.git.anand.jain@oracle.com>
- <20240318220219.GI16737@twin.jikos.cz>
- <20240319041633.l75ifryeidjxltat@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <Zfn412vXi8V7Sqd3@infradead.org>
- <20240320160802.GE14596@suse.cz>
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="c8Y8IvLY"
+Date: Thu, 21 Mar 2024 17:52:33 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1711057957;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=xfhX1Zv/6rp02fX/o3lb/6IWJxq/LqZe80g/A8558VM=;
+	b=c8Y8IvLYJFlySlIOlfcLdJFyRwU4KMGiuCIMu+1my89U18mFmXWTPzHNnPCGIFa+cSddWp
+	MC/RU0GoGJ1SbpHLCTIqIhoE4kdRhBCsYAf5hZCMYPmzRopJAXdQ7TjngQK4UIhvTotSca
+	HN80C4RLyrfv+ajzURFqu3ZqyXDQLIo=
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Kent Overstreet <kent.overstreet@linux.dev>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: David Sterba <dsterba@suse.cz>, David Sterba <dsterba@suse.com>, 
+	fstests@vger.kernel.org, Josef Bacik <josef@toxicpanda.com>, 
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 5/5] generic/733: disable for btrfs
+Message-ID: <xlwjfzviowyls5wnomqzufkfr6zm6mot3rpy6ct7rwyrwixjpt@uf47gsudlhxn>
+References: <cover.1710871719.git.dsterba@suse.com>
+ <094a1bdc304b236ba41aff4da454abe3c93a355c.1710871719.git.dsterba@suse.com>
+ <Zfn9DMR8UQQMiyiL@infradead.org>
+ <20240320155824.GD14596@suse.cz>
+ <Zfyob_7NV9Kbd9pU@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -52,40 +47,20 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240320160802.GE14596@suse.cz>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <Zfyob_7NV9Kbd9pU@infradead.org>
+X-Migadu-Flow: FLOW_OUT
 
-On Wed, Mar 20, 2024 at 05:08:02PM +0100, David Sterba wrote:
-> This could work, the number of exceptions is short:
+On Thu, Mar 21, 2024 at 02:36:47PM -0700, Christoph Hellwig wrote:
+> On Wed, Mar 20, 2024 at 04:58:24PM +0100, David Sterba wrote:
+> > It is a bug in the test, it should have been xfs specific and never
+> > promoted to generic/ and not affect btrfs unless explained how
+> > in the first place.
 > 
-> tests/generic:
->     547 _supported_fs generic
->       4 _supported_fs ^nfs
->       2 _supported_fs ^overlay
->       1 _supported_fs ^xfs
->       1 _supported_fs ^btrfs ^nfs
->       1 _supported_fs ^btrfs
-> 
-> The example from generic/187:
-> 
-> # btrfs can't fragment free space. This test is unreliable on NFS, as it
-> # depends on the exported filesystem.
-> _supported_fs ^btrfs ^nfs
-> 
-> There are different reasons for the exclusion but at least for btrfs
-> could be transformed to e.g.
-> 
-> _require_can_fragment_free_space
-> 
-> Not sure about the NFS part, it can be either excluding remote
-> filesystems or mandating a local one.
+> Well, the concept that reflinks are reasonably fast and are not live
+> locked by ongoing I/O seems pretty natural.  But I guess we can't
+> just asusme quality of implementation everywhere, and do an opt-in
+> like _require_non_sucky_reflink.  Either way we need to document
+> the assumptions and not add a magic exclude for a single fs.
 
-I think the same applies for NFS.  The underlying fs on the other
-side might or might not allow fragmenting free space, but it doesn't
-matter to NFS testing.
-
-(then again reading through the actual test I have no idea what it has
-to do with fragmenting freespace vs just stressing the test, and
-I hope not work / unreliable just means it takes forever as no
-one should be corrupting files with this workload).
-
+generic/733 runs just fine on bcachefs, sounds like btrfs folks just
+need to fix their filesystem
