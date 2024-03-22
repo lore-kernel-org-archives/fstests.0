@@ -1,40 +1,38 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from out-178.mta1.migadu.com (out-178.mta1.migadu.com [95.215.58.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 835204AEC1
-	for <fstests@vger.kernel.org>; Fri, 22 Mar 2024 15:45:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83F9B664CA
+	for <fstests@vger.kernel.org>; Fri, 22 Mar 2024 18:28:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=95.215.58.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711122333; cv=none; b=PyXUV/L3NVcchr1r1rJ+68clf5wtBOkIRuINWwsy1IW+kZTxyKKCsvhmRvTa9I1uLSwAuWe6Ov0bdLGJgQXIq5Uof1zu4tnJ2Jcqk5N/LsPF0xoIMX3veklMwT4FGEnt2R2m6G9AOTH60tEmK0k87EN7w5XbS9bb710BURmtbCc=
+	t=1711132124; cv=none; b=ijLsvNcfnVFZpBg8M9EL3ldPajkKKePXzWWKyq+7WaL+DP6JGVWwC8libmXYZDsDAO3CqCpluElVwk5BSNZPchpujTKMy5Pp8Ey3v3Dus8GuVdTtdFsURWg5GVkyTZC4GYZVvDyPgVGSnxTwfP3CKlmfLaFL1S68WOeOHYttvng=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711122333; c=relaxed/simple;
-	bh=SpWffDsOiYfe9UAVwKDajs0WKLC62KTKWwjb2G1it6g=;
+	s=arc-20240116; t=1711132124; c=relaxed/simple;
+	bh=xfNyht6zn2+gFr5Z3sOaOZh/nFNZN2hgvgh1UQY2bpk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VoM/ddeco0cYKfp2r8P+hQn2DRr5um4+e2SGQeF67m8nKpLy4GIojkPCdNiNli3i76llvFAPyciqYB3Oe/g750KY2GBVw+jSeJhA0FBUfoGaiNN3bmpmxwX+g7fP8o7BTmY975ftblOAS1AswicUJsuuwPKTmh9wD7hurJDO/w8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aWhQl2Do; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=HD8QOiJ0pPmJUn2rsY+V0EEjBnVEnoOX6IT9fjZcQv+/kQE/w8d/lifJ1EJaO5CYS7WAyLFOFGh2wrwdKqYRnE9avhrAwIlX1y6BsCuEipoTPiax2CPPkyphZK7hgRpnLA7BCdc5Tuwmk5kxSPdIQmwVTDjoZXu8m+CjAVwmwgo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev; spf=pass smtp.mailfrom=linux.dev; dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b=b+lM9ObN; arc=none smtp.client-ip=95.215.58.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aWhQl2Do"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E876CC433F1;
-	Fri, 22 Mar 2024 15:45:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711122333;
-	bh=SpWffDsOiYfe9UAVwKDajs0WKLC62KTKWwjb2G1it6g=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=aWhQl2DoddYv45S0tfCHzvZS85kaY+se3bFK/ASGZgvaUNlls5uC8MnlJTs8zdgQx
-	 LPEzUWyWKsYVQNasVVBSzkO3Jt0WKV7RBwAAE0W2qXBDBdmNxCeWRQG1GrVpZA61b6
-	 VXlEw7ylCK4G6H5hAIyVAD+jvUBD9ZOQ+OMIA2jrfZB/bZqhR7sbe1KgUqx5ynOfqe
-	 ZWXJ0T/CMqpwmt+f+tDtP0chLostjAKjhD3Y5vTftmwNh4ScQXb7Q0EIJ0EqRkiSDP
-	 9JVuD0ONeWRsHRB96oSuyZINT6J5XPmxTHqAAzBKYGxK82jtbu3tzStvDos45l/G5P
-	 PPqwERPjqJGgw==
-Date: Fri, 22 Mar 2024 08:45:32 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (1024-bit key) header.d=linux.dev header.i=@linux.dev header.b="b+lM9ObN"
+Date: Fri, 22 Mar 2024 14:28:37 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.dev; s=key1;
+	t=1711132120;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Q0gxqzSRBMHN56kuDfFnQoTeE3+D2UwXrbXUzOy2WZg=;
+	b=b+lM9ObNS4Sw9grsNQw9TrOENMt5+EQoQ4kxZ91KOK/jy9elYKv3fo/acPohnAHfs/oq+g
+	u4CVwbiEVM/Qwzq8W3T3lonUVK97prgQv3WcCs7l1hteq/UIIM0q6WlhT9WBwCPEmwVKkd
+	cKdVsLxFTFJ8foRxDaED8c3alrkX4oc=
+X-Report-Abuse: Please report any abuse attempt to abuse@migadu.com and include these headers.
+From: Kent Overstreet <kent.overstreet@linux.dev>
 To: Josef Bacik <josef@toxicpanda.com>
-Cc: Kent Overstreet <kent.overstreet@linux.dev>,
-	Christoph Hellwig <hch@infradead.org>,
-	David Sterba <dsterba@suse.cz>, David Sterba <dsterba@suse.com>,
-	fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: Christoph Hellwig <hch@infradead.org>, David Sterba <dsterba@suse.cz>, 
+	David Sterba <dsterba@suse.com>, fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 Subject: Re: [PATCH 5/5] generic/733: disable for btrfs
-Message-ID: <20240322154532.GA23679@frogsfrogsfrogs>
+Message-ID: <wnpr4jzuwtcjcnxcm2irktlm2bk4zcdvqvp4d2x227p7ckakyd@lp3qusnpdc5c>
 References: <cover.1710871719.git.dsterba@suse.com>
  <094a1bdc304b236ba41aff4da454abe3c93a355c.1710871719.git.dsterba@suse.com>
  <Zfn9DMR8UQQMiyiL@infradead.org>
@@ -51,6 +49,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20240322150800.GB3202449@perftesting>
+X-Migadu-Flow: FLOW_OUT
 
 On Fri, Mar 22, 2024 at 11:08:00AM -0400, Josef Bacik wrote:
 > On Thu, Mar 21, 2024 at 05:52:33PM -0400, Kent Overstreet wrote:
@@ -86,16 +85,10 @@ On Fri, Mar 22, 2024 at 11:08:00AM -0400, Josef Bacik wrote:
 > excluding it in our own fstests branch and ignore the upstream branch.  I'm good
 > with either solution.  Thanks,
 
-Frankly I'd have been ok with a per-test exclusion with some
-documentation:
+Well, if you really don't intend to change btrfs that's fine; if it was
+me I consider performance bugs to be bugs - not cases where we're off by
+some small ratio, but if it's significant I'd want to fix it.
 
-test $FSTYP = btrfs && \
-	_notrun 'FIXME: btrfs does not support concurrent read+ficlone'
-
-There's nothing in the FICLONE spec about implementations needing to
-support concurrent reads and clones on the source file.
-
---D
-
-> Josef
-> 
+But if it's just that you're doing range locks (not locking the whole
+inode, as was my previous impression) - that makes sense, there's a read
+vs. write atomicity tradeoff there.
