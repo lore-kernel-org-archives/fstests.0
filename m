@@ -1,138 +1,106 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A5F01F19A;
-	Mon, 25 Mar 2024 16:58:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2EA1A13B5BE
+	for <fstests@vger.kernel.org>; Mon, 25 Mar 2024 17:53:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711385891; cv=none; b=uBvvfUHeIAZnpGK1QpRFexRTTdOQg1PgntlfqQbrjTZ97i2K+vbPMDd/izdmje0Gv2RCm2sdEFQuVy2QAgFl0HJGMgUqZzlTwYhJiGodd3W9K/jZ0pK3t2yXfSanKhOaCHHQqJe9+WCMnAzK7F3Z7SWHKo7ZLdFoyZEzKPR4Znw=
+	t=1711389208; cv=none; b=C58LHxsBl/1KJy3MrMLAFPedq9kulSpcQWGdd65qkbJYV+mbvtSNWVD865wqGC48ZiTXcb41LyEPvMcEUkye8+05+5UWek8r8kuiwdy7SH4y5Xw1PDMYyXe2BAHZtH+LMkPtp7SdXgpnJfJ4DE45JQDiuKsuEZJx80Jl5UGIm/E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711385891; c=relaxed/simple;
-	bh=e/xVjJ+Txpn1jD1gz/wJzBhLRQKHwgW2fvvAbF8e0lI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hFATnhJ6hxGSNFRJeaf+T1jgnyw5OTqlJYFxPQnZB9aAvbAKoulW7ikAAWMcbkXRXJE4gkSTamFxD9F8EyM4ZIxu/591WOpSVGCePk1r747/2IAw+tBpaR7XpADW4+tD7VZ40RK3Mw5KaoE54Z22Ypx9DfY022UcwZMxFrEShao=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UI8R1bM8; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711389208; c=relaxed/simple;
+	bh=fApQh+id8isTcKopewm7maXcm+sPWkJ8+t5uySRhP+o=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=mtHqm/NI2Bo+Afl0Uw2iJzpa10yEBBQPiFL1iy992r9moxH2Fw0pkTTh5rLMEAv/ra1F409f3cSJCH7anzgLK1C60lw4aE3H66xpscgp9Ziljo6DzQExiQsumjxRuP+tA+xQuwr66K90IzWdw+ZcvT9B6qRzbTIOuVYtcb+L9KM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aLeykw1b; arc=none smtp.client-ip=209.85.210.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UI8R1bM8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9C9C4C43330;
-	Mon, 25 Mar 2024 16:58:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711385890;
-	bh=e/xVjJ+Txpn1jD1gz/wJzBhLRQKHwgW2fvvAbF8e0lI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=UI8R1bM8qckBeAcjnlUX7Lgl53Io6VRBEFb4dyb/JkoXuYoy+lw58qfSUQPD/9tXa
-	 adf9zddaD6dtBR+CBDJzW4z8uAhi/kbOzH4AoceK0tcA9yw47Z7MVd7hlAghwLxPxf
-	 UH7TI206OX9qQOULEZF50QcJRWHiTNp9mIRfbb/iqCnzwAn9WD/dmaa+bpwFvrTyeW
-	 OGZkfF6iVg4120XyhlmoNa8vsGb687faS2ekMhLG6NIwFjqo2QFRv/zTrjD+jiFRrG
-	 BiEKehUeyaNrJln4unEr15fMRykb5r+gygnHJcdaZAUzHD3zNvj3WTXsVUrOCvBYSt
-	 qu551LF2Metkg==
-Date: Mon, 25 Mar 2024 09:58:09 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christian Brauner <brauner@kernel.org>,
-	Dave Chinner <david@fromorbit.com>
-Cc: kernel test robot <oliver.sang@intel.com>,
-	Taylor Jackson <taylor.a.jackson@me.com>, oe-lkp@lists.linux.dev,
-	lkp@intel.com, Linux Memory Management List <linux-mm@kvack.org>,
-	linux-fsdevel@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>,
-	fstests <fstests@vger.kernel.org>
-Subject: Re: [linux-next:master] [fs/mnt_idmapping.c]  b4291c7fd9:
- xfstests.generic.645.fail
-Message-ID: <20240325165809.GA6375@frogsfrogsfrogs>
-References: <202402191416.17ec9160-oliver.sang@intel.com>
- <20240220-fungieren-nutzen-311ef3e57e8a@brauner>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aLeykw1b"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-6e6b54a28d0so2985394b3a.2
+        for <fstests@vger.kernel.org>; Mon, 25 Mar 2024 10:53:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1711389206; x=1711994006; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sOPWuqKnERY7yQtIfn7iVIOMl/7WW/izTcReguLeUDA=;
+        b=aLeykw1bRksC4uhkUZ3uD49P0dBNsPrnPVq20RcMtPQnA12tBGIE2/ag6+c9wwDqTR
+         QhWJlLbpDt6AUO4jggSip7rvKqm6vFyYKg0W3Ii7iCUez8FTFrNUNShCtQDcCQevQkmp
+         WOK6lSebyXdvM5ESE18vl3A7v0OpNbBPPs+ujj7AJIMWvo7lGyTOPf8hLWLXeYROwjzT
+         ZxFNfjw5Qd2gi2P5vxkrvRMW33ap4T9ChdLQjQddhRCWoPhgpINcJJDgYLPsC+U2LBz8
+         9ZYWVl/0LmEhap28dXWcLFiT65EpykbokUdPzbMiJVJZlcpnoVzGlgt10BXXqnRxQyEU
+         BX0A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711389206; x=1711994006;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=sOPWuqKnERY7yQtIfn7iVIOMl/7WW/izTcReguLeUDA=;
+        b=oj+KF3OqXFSjMmCOsDmlXrFU4hoNZm9ewP+D9snVfvoA8Vli4LDEe+Km9+RDkMfN37
+         asRiN8znrEorGBjjtbwupt5pFh/+bxbvnJOj11czEmORNJJxvma/lM7swQgThBC0WEDO
+         YA60JDhirZ1EGTUMhGdLeu27nJ80Llg33kFtOf03Nfl0ulDkc7vKu9oV+itjVMdJvYRN
+         QM7hC2+vh2JNN8U2Y/eEHvGVWRVpMmRfridRkYxjJxn7m4v8L/Y0uCuVf2v5Z/SrDlvN
+         uwCxt24Wgy4uoseV3rfwhHrljdfseqFZUFjU/SgiHsxLCKntQa0a7jyDDcwI4IILeI/J
+         n93w==
+X-Gm-Message-State: AOJu0YzrA82fXPZoYg03s7CoBGTeGgc6ShqCiy+Fi7Ey/ncZTehchTfo
+	5ArMWJ56lX3JgtYkN39B91I+9ZaUSY5b6YP+lkFnhiRTTGhuk2FLQy25iv5Q
+X-Google-Smtp-Source: AGHT+IFoUBOWeRNl2ITGr2V983nxCdu2RDOt+I0s9em2pFZwDXrgydhyVeFYUV18WAkeMHNKACTPXQ==
+X-Received: by 2002:a05:6a00:c90:b0:6ea:699f:8dbb with SMTP id a16-20020a056a000c9000b006ea699f8dbbmr8133105pfv.21.1711389206098;
+        Mon, 25 Mar 2024 10:53:26 -0700 (PDT)
+Received: from apollo.hsd1.ca.comcast.net ([2601:646:9d80:4380::5eba])
+        by smtp.gmail.com with ESMTPSA id z5-20020aa79e45000000b006e641fee598sm4513867pfq.141.2024.03.25.10.53.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Mar 2024 10:53:25 -0700 (PDT)
+From: Khem Raj <raj.khem@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Khem Raj <raj.khem@gmail.com>
+Subject: [PATCH 2/2] Add missing STATX_ATTR_* defines from musl sys/stat.h
+Date: Mon, 25 Mar 2024 10:53:23 -0700
+Message-ID: <20240325175323.3450750-2-raj.khem@gmail.com>
+X-Mailer: git-send-email 2.44.0
+In-Reply-To: <20240325175323.3450750-1-raj.khem@gmail.com>
+References: <20240325175323.3450750-1-raj.khem@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240220-fungieren-nutzen-311ef3e57e8a@brauner>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Feb 20, 2024 at 09:57:30AM +0100, Christian Brauner wrote:
-> On Mon, Feb 19, 2024 at 02:55:42PM +0800, kernel test robot wrote:
-> > 
-> > 
-> > Hello,
-> > 
-> > kernel test robot noticed "xfstests.generic.645.fail" on:
-> > 
-> > commit: b4291c7fd9e550b91b10c3d7787b9bf5be38de67 ("fs/mnt_idmapping.c: Return -EINVAL when no map is written")
-> > https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git master
-> 
-> The test needs to be updated. We now explicitly fail when no map is
-> written.
+These defines are not provided by sys/stat.h on musl but are
+in glibc's sys/stat.h, therefore to compile the tests on musl
+based systems add the missing defines from linux/stat.h
+if they are not provided
 
-Has there been any progress on updating generic/645?  6.9-rc1 is out,
-and Dave and I have both noticed this regressing.
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ src/statx.h | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
---D
+diff --git a/src/statx.h b/src/statx.h
+index 3f239d79..12599f5b 100644
+--- a/src/statx.h
++++ b/src/statx.h
+@@ -12,6 +12,18 @@
+ #define AT_STATX_DONT_SYNC      0x4000  /* - Don't sync attributes with the server */
+ #endif
+ 
++#ifndef STATX_ATTR_COMPRESSED
++#define STATX_ATTR_COMPRESSED		0x00000004 /* [I] File is compressed by the fs */
++#define STATX_ATTR_IMMUTABLE		0x00000010 /* [I] File is marked immutable */
++#define STATX_ATTR_APPEND		0x00000020 /* [I] File is append-only */
++#define STATX_ATTR_NODUMP		0x00000040 /* [I] File is not to be dumped */
++#define STATX_ATTR_ENCRYPTED		0x00000800 /* [I] File requires key to decrypt in fs */
++#define STATX_ATTR_AUTOMOUNT		0x00001000 /* Dir: Automount trigger */
++#define STATX_ATTR_MOUNT_ROOT		0x00002000 /* Root of a mount */
++#define STATX_ATTR_VERITY		0x00100000 /* [I] Verity protected file */
++#define STATX_ATTR_DAX			0x00200000 /* File is currently in DAX state */
++#endif
++
+ #ifndef AT_NO_AUTOMOUNT
+ #define AT_NO_AUTOMOUNT		0x800	/* Suppress terminal automount traversal */
+ #endif
+-- 
+2.44.0
 
-> > 
-> > [test failed on linux-next/master d37e1e4c52bc60578969f391fb81f947c3e83118]
-> > 
-> > in testcase: xfstests
-> > version: xfstests-x86_64-c46ca4d1-1_20240205
-> > with following parameters:
-> > 
-> > 	disk: 4HDD
-> > 	fs: f2fs
-> > 	test: generic-645
-> > 
-> > 
-> > 
-> > compiler: gcc-12
-> > test machine: 4 threads Intel(R) Core(TM) i5-6500 CPU @ 3.20GHz (Skylake) with 32G memory
-> > 
-> > (please refer to attached dmesg/kmsg for entire log/backtrace)
-> > 
-> > 
-> > 
-> > 
-> > If you fix the issue in a separate patch/commit (i.e. not just a new version of
-> > the same patch/commit), kindly add following tags
-> > | Reported-by: kernel test robot <oliver.sang@intel.com>
-> > | Closes: https://lore.kernel.org/oe-lkp/202402191416.17ec9160-oliver.sang@intel.com
-> > 
-> > 2024-02-17 15:04:19 export TEST_DIR=/fs/sda1
-> > 2024-02-17 15:04:19 export TEST_DEV=/dev/sda1
-> > 2024-02-17 15:04:19 export FSTYP=f2fs
-> > 2024-02-17 15:04:19 export SCRATCH_MNT=/fs/scratch
-> > 2024-02-17 15:04:19 mkdir /fs/scratch -p
-> > 2024-02-17 15:04:19 export SCRATCH_DEV=/dev/sda4
-> > 2024-02-17 15:04:19 export MKFS_OPTIONS=-f
-> > 2024-02-17 15:04:19 echo generic/645
-> > 2024-02-17 15:04:19 ./check generic/645
-> > FSTYP         -- f2fs
-> > PLATFORM      -- Linux/x86_64 lkp-skl-d03 6.8.0-rc1-00033-gb4291c7fd9e5 #1 SMP PREEMPT_DYNAMIC Sat Feb 17 22:11:35 CST 2024
-> > MKFS_OPTIONS  -- -f /dev/sda4
-> > MOUNT_OPTIONS -- -o acl,user_xattr /dev/sda4 /fs/scratch
-> > 
-> > generic/645       [failed, exit status 1]- output mismatch (see /lkp/benchmarks/xfstests/results//generic/645.out.bad)
-> >     --- tests/generic/645.out	2024-02-05 17:37:40.000000000 +0000
-> >     +++ /lkp/benchmarks/xfstests/results//generic/645.out.bad	2024-02-17 15:07:42.613312168 +0000
-> >     @@ -1,2 +1,4 @@
-> >      QA output created by 645
-> >      Silence is golden
-> >     +idmapped-mounts.c: 6671: nested_userns - Invalid argument - failure: sys_mount_setattr
-> >     +vfstest.c: 2418: run_test - Invalid argument - failure: test that nested user namespaces behave correctly when attached to idmapped mounts
-> >     ...
-> >     (Run 'diff -u /lkp/benchmarks/xfstests/tests/generic/645.out /lkp/benchmarks/xfstests/results//generic/645.out.bad'  to see the entire diff)
-> > Ran: generic/645
-> > Failures: generic/645
-> > Failed 1 of 1 tests
-> > 
-> > 
-> > 
-> > 
-> > The kernel config and materials to reproduce are available at:
-> > https://download.01.org/0day-ci/archive/20240219/202402191416.17ec9160-oliver.sang@intel.com
-> > 
-> > 
-> > 
-> > -- 
-> > 0-DAY CI Kernel Test Service
-> > https://github.com/intel/lkp-tests/wiki
-> > 
-> 
