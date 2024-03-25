@@ -1,88 +1,92 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FD901A38F5
-	for <fstests@vger.kernel.org>; Sun, 24 Mar 2024 16:58:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from m16.mail.163.com (m16.mail.163.com [117.135.210.5])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 771F1250802
+	for <fstests@vger.kernel.org>; Mon, 25 Mar 2024 02:47:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=117.135.210.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711299523; cv=none; b=mOTdEWkvVdlkWrxwKVQKsA/3O1fv59HbcOdIecscbHt7OOhIKA1jP/w6RT3p4NUK3d6D0Ds1/XqqgMNi9W+OanfyGov45O5oqLtu0jEN5nqtImrppmaPSQyUPCjR7tsGn8GNosvtdjb8Nk6dNeM7i2uZsCjBX55pWQaDnYeOtQg=
+	t=1711334850; cv=none; b=i7b2zk/4osVJ+qjCuhZjvQFnn9cIRScZLn4aghmmaPiNO8Omc0xAFJMrdlMXSduyLr9Zqu+a1j16yJLpfhs24JiG4ukqD7Tj1JmfqfcwF0YveLNe7mykmoBEcRLurKgdFeZJdO+W6brPMoBuG+pJO+Xz1tu8HtcH1faShv9EkJ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711299523; c=relaxed/simple;
-	bh=EEu1yKTtLMxUOAEsqoJBkdSMEIvqd9Yt4Uc+wIVTeG0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mcfWCiwFFLepCx2JR7Lh6a1hM+WBaKLF7jReEsXnx4+MkNlDQ7GpPNx9JlWVG6R1mF5YbetRjUrlrqyyJJjOaOLSrzI5xf3BqXKJmyjqiGZrPFFOWgxapryN4ee3MagqzW1O1Ddj/N58mdV2zz2Z819afPPAZkL57tAUw7ZNm7w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fU/5BniE; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711334850; c=relaxed/simple;
+	bh=kfifwMxxcCbw44caVqoDLGhXjWhnDCiBOfEGzqM93Ds=;
+	h=Date:From:To:Subject:Content-Type:MIME-Version:Message-ID; b=HENFsW0IlU/0fZ7AYn8679uz5NBQUSYXggIWhTuGHbTVAyRU3MpkQYm74eTO1yNN3DfqVcDr65mdb2AL3Del+t2xj5bYrb+Gd47a+QwrVXTdarLQT6u0xhPsoJ0qrFpOPemHqDdLwOX7I9YMILsd1hbZu5stWfY99I0y7mAnfdc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com; spf=pass smtp.mailfrom=163.com; dkim=fail (1024-bit key) header.d=163.com header.i=@163.com header.b=AdQJtcUR reason="signature verification failed"; arc=none smtp.client-ip=117.135.210.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fU/5BniE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC05AC433F1;
-	Sun, 24 Mar 2024 16:58:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711299522;
-	bh=EEu1yKTtLMxUOAEsqoJBkdSMEIvqd9Yt4Uc+wIVTeG0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fU/5BniERWWAH7twIhpUV+D4zRCaBeCwsarSXaBIgESdFLEJ/cKhTSRIIY7fzIddo
-	 a+nXNl0mudsNdWm1XXDA1th52VwtR3m8Dojsbo5q1B1t43a5GM2SlN/CjwSlLVhJIL
-	 OeKXLVWdZtjl3PJPOKWARkxdrSirbsw3EwQMRks45BEcrHeAjTeGgq+k2NLrBH/yA9
-	 Vb21BQ9Egm+kwt91ZbCiJ1dd7XuaW4PiZ0P91cq1sJZ7KN7Gl94c8GjxjCggWBnU5p
-	 BIcc4lkaudDzVpfZMAenwuArvCuBuCmkuMuMPyRYTbwh1okUolcBzukldARXNW9M7k
-	 aiIoT4SL645MQ==
-Date: Sun, 24 Mar 2024 09:58:42 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] common/rc: fix unknown _xfs_repair_test_fs function name
-Message-ID: <20240324165842.GA6379@frogsfrogsfrogs>
-References: <20240324141707.303321-1-zlang@kernel.org>
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=163.com header.i=@163.com header.b="AdQJtcUR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+	s=s110527; h=Date:From:Subject:Content-Type:MIME-Version:
+	Message-ID; bh=IZfvZG4MdszZgzMseOv6kJH9SEQ0C4r68C+jridNjsQ=; b=A
+	dQJtcURsVawqx6Q/g+nISqz05HhCupS/D5tRpwy3sukcHsgIvvCwttNa8HT3AhYo
+	GnsYE2qFbvu57DQEJV4jiTndA2WXc9TJgjJqqGqh7fed3mrU24kCSEjD9JoOOjaP
+	Ur55JP2f/utC7zvpzEGEnUOy4OVFGa2CaBbGH14xos=
+Received: from caixiaobin0807$163.com ( [121.8.166.34] ) by
+ ajax-webmail-wmsvr-40-128 (Coremail) ; Mon, 25 Mar 2024 10:47:22 +0800
+ (CST)
+Date: Mon, 25 Mar 2024 10:47:22 +0800 (CST)
+From: =?UTF-8?B?6JSh5pmT5paM?= <caixiaobin0807@163.com>
+To: fstests@vger.kernel.org
+Subject: Question: Why tests/generic/482 and tests/generic/487 can't pass
+ both at the same time.
+X-Priority: 3
+X-Mailer: Coremail Webmail Server Version XT5.0.14 build 20230109(dcb5de15)
+ Copyright (c) 2002-2024 www.mailtech.cn 163com
+X-NTES-SC: AL_Qu2aA/+Yu0Av5CGbZukZk0kSg+Y5WsuwvPsi1IdfN5k0liT03T4fcmB7HHXX09mkCx6VrweKQTFV0vtkd4JbVpmpwDLj1Z34jyQ4bERhC6z0
+Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240324141707.303321-1-zlang@kernel.org>
+Message-ID: <7d19c3c3.51df.18e73815f19.Coremail.caixiaobin0807@163.com>
+X-Coremail-Locale: zh_CN
+X-CM-TRANSID:_____wD3n2e65QBmTl8OAA--.26267W
+X-CM-SenderInfo: xfdl5xpdrex0iqyqlqqrwthudrp/xtbB0garXWWXwuzvfQAGsq
+X-Coremail-Antispam: 1U5529EdanIXcx71UUUUU7vcSsGvfC2KfnxnUU==
 
-On Sun, Mar 24, 2024 at 10:17:07PM +0800, Zorro Lang wrote:
-> Sometimes I hit below errors:
->   ./common/rc: line 1293: _xfs_repair_test_fs: command not found
->   ./common/rc: line 1298: _xfs_repair_test_fs: command not found
-> 
-> The _repair_test_fs trys to call _xfs_repair_test_fs(), but there's
-> not that function in fstests. According to commit c7d81cdecbef,
-> it brought in _test_xfs_repair, but called wrong name. So fix it.
-> 
-> Fixes: c7d81cdecbef ("check: try to fix the test device if it gets corrupted")
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
-> ---
->  common/rc | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 37d26bf2..47736dc3 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1290,12 +1290,12 @@ _repair_test_fs()
->  			res=$?
->  			if [ $res -gt 0 ]; then
->  				echo "mount returns $res; zap log?" >>$tmp.repair
-> -				_xfs_repair_test_fs -L >>$tmp.repair 2>&1
-> +				_test_xfs_repair -L >>$tmp.repair 2>&1
->  				echo "log zap returns $?" >> $tmp.repair
->  			else
->  				umount "$TEST_DEV"
->  			fi
-> -			_xfs_repair_test_fs "$@" >>$tmp.repair 2>&1
-> +			_test_xfs_repair "$@" >>$tmp.repair 2>&1
->  			res=$?
->  		fi
->  		;;
-> -- 
-> 2.44.0
-> 
-> 
+CkhpLCBJIGhhdmUgYSBxdWVzdGlvbiB3aGVuIEkgcmFuIHRoZSB4ZnN0ZXN0cywgcGxlYXNlIGhl
+bHAgbWUgdG8gc29sdmUgdGhpcyBxdWVzdGlvbiwgdGtzLgoKCkluIG15wqBlbnZpcm9ubWVudCwg
+SSB1ZXMgdGhlIG1hY2hpbmUgd2l0aMKgYXJjaGl0ZWN0dXJlIG9mIGFhcmNoNjQsIGFuZCB0aGVu
+IHNldHRpbmcgdGhlIGVudiBpbiBsb2NhbC5jb25maWcgZmlsZSBsaWtlIGJlbG93OgoKCgoKIyBJ
+ZGVhbGx5IGRlZmluZSBhdCBsZWFzdCB0aGVzZSA0IHRvIG1hdGNoIHlvdXIgZW52aXJvbm1lbnQK
+IyBUaGUgZmlyc3QgMiBhcmUgcmVxdWlyZWQuCiMgU2VlIFJFQURNRSBmb3Igb3RoZXIgdmFyaWFi
+bGVzIHdoaWNoIGNhbiBiZSBzZXQuCiMKIyBOb3RlOiBTQ1JBVENIX0RFViA+d2lsbDwgZ2V0IG92
+ZXJ3cml0dGVuIQoKCmV4cG9ydCBURVNUX0RFVj0vZGV2L21tY2JsazBwMTIKZXhwb3J0IFRFU1Rf
+RElSPS9tbnQveGZzdGVzdHMvZGlyCmV4cG9ydCBGU1RZUD1leHQ0CmV4cG9ydCBTQ1JBVENIX0RF
+Vj0vZGV2L21tY2JsazBwMTMKZXhwb3J0IFNDUkFUQ0hfTU5UPS9tbnQveGZzdGVzdHMvZGlyLW1u
+dApleHBvcnQgU0NSQVRDSF9MT0dERVY9L2Rldi9tbWNibGswcDE0CmV4cG9ydCBVU0VfRVhURVJO
+QUw9eWVzCmV4cG9ydCBEVU1QX0NPUlJVUFRfRlM9MQpleHBvcnQgS0VFUF9ETUVTRz15ZXMKZXhw
+b3J0IFVTRV9LTUVNTEVLPXllcwpleHBvcnQgTE9HV1JJVEVTX0RFVj0vZGV2L21tY2JsazBwMTUK
+ZXhwb3J0IE1JTl9GU1NJWkU9MTA0ODU3NjAgIyAxME1CCmV4cG9ydCBESUZGX0xFTkdUSD0wCgoK
+QW5kIGV4ZWN1dGUgdGhlIGNvbW1hbmQgIi4vY2hlY2sgLWwgLVQgdGVzdHMvZ2VuZXJpYy9bMC05
+XVswLTldWzAtOV0iIHRvIHJ1biB0aGUgeGZzdGVzdHMuIFdoZW4gaXQgcmFuIG91dCwgSSBmaW5k
+IHRoYXQgInRlc3RzL2dlbmVyaWMvNDgyIiB3YXMgZmFpbGVkLCBhbmQgInRlc3RzL2dlbmVyaWMv
+NDg3IiB3YXMgc3VjY2Vzc2VkLsKgCgoKU28gSSBjaGVjayB0aGUgc291cmNlIGNvZGUgZm9yIHRo
+b3NlIHR3byB0ZXN0cywgYW5kIEkgZm91bmQgdGhhdCB1c2VkIGRpZmZlcmVudCBmdW5jdGlvbiBp
+biB0aGVtLCBsaWtlIGJlbG93IDoKCgp0ZXN0cy9nZW5lcmljLzQ4MiA6CgoKIyByZWFsIFFBIHRl
+c3Qgc3RhcnRzIGhlcmUKCgojIE1vZGlmeSBhcyBhcHByb3ByaWF0ZS4KX3N1cHBvcnRlZF9mcyBn
+ZW5lcmljCgoKX3JlcXVpcmVfbm9fbG9nZGV2Cl9yZXF1aXJlX2NvbW1hbmQgIiRLSUxMQUxMX1BS
+T0ciIGtpbGxhbGwKCgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLQoKCnRlc3RzL2dlbmVyaWMvNDg3IDrCoAoKCgojIHJlYWwgUUEg
+dGVzdCBzdGFydHMgaGVyZQpfcmVxdWlyZV9zY3JhdGNoX25vY2hlY2sKCgpzZmxhZz0nLXMnCmNh
+c2UgJEZTVFlQIGluCsKgIMKgIMKgIMKgIGJ0cmZzKQrCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBf
+bm90cnVuICJidHJmcyBoYXMgYSBzcGVjaWFsaXplZCB0ZXN0IGZvciB0aGlzIgrCoCDCoCDCoCDC
+oCDCoCDCoCDCoCDCoCA7OwrCoCDCoCDCoCDCoCAqKQrCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCA7
+Owplc2FjCgoKX3JlcXVpcmVfbG9nZGV2Cl9yZXF1aXJlX2RtX3RhcmdldCBlcnJvcgoKClRoZW4g
+Y29udGludWUgdG8gY2hlY2sgdGhlIHNvdXJjZSBjb2RlIDoKCmNvbW1vbi9yYyA6CgoKCiMgdGhp
+cyB0ZXN0IG5lZWRzIGEgbG9nZGV2CiMKX3JlcXVpcmVfbG9nZGV2KCkKewrCoCDCoCBbIC16ICIk
+U0NSQVRDSF9MT0dERVYiIC1vICEgLWIgIiRTQ1JBVENIX0xPR0RFViIgXSAmJiBcCsKgIMKgIMKg
+IMKgIF9ub3RydW4gIlRoaXMgdGVzdCByZXF1aXJlcyBhIHZhbGlkIFwkU0NSQVRDSF9MT0dERVYi
+CsKgIMKgIFsgIiRVU0VfRVhURVJOQUwiICE9IHllcyBdICYmIFwKwqAgwqAgwqAgwqAgX25vdHJ1
+biAiVGhpcyB0ZXN0IHJlcXVpcmVzIFVTRV9FWFRFUk5BTCB0byBiZSBlbmFibGVkIgoKCsKgIMKg
+ICMgZW5zdXJlIGl0cyBub3QgbW91bnRlZArCoCDCoCAkVU1PVU5UX1BST0cgJFNDUkFUQ0hfTE9H
+REVWIDI+L2Rldi9udWxsCn0KCgojIFRoaXMgdGVzdCByZXF1aXJlcyB0aGF0IGFuIGV4dGVybmFs
+IGxvZyBkZXZpY2UgaXMgbm90IGluIHVzZQojCl9yZXF1aXJlX25vX2xvZ2RldigpCnsKWyAiJFVT
+RV9FWFRFUk5BTCIgPSAieWVzIiBdICYmIFsgLW4gIiRTQ1JBVENIX0xPR0RFViIgXSAmJiBcCl9u
+b3RydW4gIlRlc3Qgbm90IGNvbXBhdGlibGUgd2l0aCBleHRlcm5hbCBsb2dzLCBza2lwcGVkIHRo
+aXMgdGVzdCIKfQoKCkkgZmluZCB0aGF0IHRoZXNlIHR3byBmdW5jdGlvbnMgYmVoYXZlIGFzIG11
+dHVhbGx5IGV4Y2x1c2l2ZSBpbiB1c2UsIHNvIEkgZG9uJ3QgdW5kZXJzdGFuZCB3aHkgeGZzdGVz
+dHMgY2FuJ3QgcGFzcyBib3RoIHRlc3RzIGF0IHRoZSBzYW1lIHRpbWUuIFBsZWFzZSBoZWxwIG1l
+IHRvIHNvbHZlIHRoaXMgcXVlc3Rpb24sIHRoYW5rIHlvdSBhZ2Fpbi7CoAoKCkxvb2tpbmcgZm9y
+d2FyZCB0byB5b3VyIHJlcGx5LgoK
