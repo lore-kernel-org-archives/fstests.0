@@ -1,101 +1,86 @@
-Received: from mout-p-202.mailbox.org (mout-p-202.mailbox.org [80.241.56.172])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424D51CFBE
-	for <fstests@vger.kernel.org>; Tue, 26 Mar 2024 17:20:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F12C13D50C
+	for <fstests@vger.kernel.org>; Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711473635; cv=none; b=rqBnPhoZBLlkb0Gt+Y9cxeRMwif2SyznwuKwpqme/tqqeG8CdYUlsTly2u3u837Jhn16X2H+F9u/7H07koE1bGnjeKMpRSfmrngDXAW8qMIqXoN6QjExqRcgVPYklJ4ChxtstUZuu/GpnnvDCZqkRu534AHfMevTzAyvrEsl4Zg=
+	t=1711485237; cv=none; b=VNUrt7nfIO17c03KwOa0D3jGrxfuWokEVwOylNfjmRTlxfvo7NvhJtsfTRIu3XTKHYnf5an0BQA8oscUJlVQWpkR7GS+NuwuhGbGckgMflBrOs5IL9EPiAXi+XxPyUvAJJG03D+2LgDxyWhNImJFxPvdwk/uHALJUBOGgoI8Wno=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711473635; c=relaxed/simple;
-	bh=T+Q9vmW+e4gEapMtepx4nZC7hh2gf/WmtDSAxAV5P/E=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fhYa981EY3J8dMEMYbWbb62V9hgD7+0DbLx16eNI/7ea8VTFbYDsSujimzFX5FDRWs8HZAy2bntUDiMBGDRVLjME5/jxjtrKFMRQcwdpuUjua2DTHgPYsGVWYSVXZEF1UKMZI20fXTQ6XGiZac/KsfOAkwN12xIO6LhagwkFbGU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=aLS+G9Gl; arc=none smtp.client-ip=80.241.56.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+	s=arc-20240116; t=1711485237; c=relaxed/simple;
+	bh=PMxWRHdvu3D8YQkMSw7UxQB8NcT07jaMLKw5AW6qsVA=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=MqTGDO4FdX7tQjjIy7NFu5iYmf61XHbAON4qY65iyN621MDn8Sx0c9BGPh9H5m9GvQRfgvETRFtDGgNjMfF0bPaGro9xL3zaouZni19Kal0FhGTe/Vl9n2sxgvAMuO3gYhBCw7Y35G3leHxZNxY5u0dthiMUQL/c6qRMzv7ZPS4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=afUd/3SG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="aLS+G9Gl"
-Received: from smtp202.mailbox.org (smtp202.mailbox.org [IPv6:2001:67c:2050:b231:465::202])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-202.mailbox.org (Postfix) with ESMTPS id 4V3xQP4Mmjz9sbP;
-	Tue, 26 Mar 2024 18:20:29 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
-	s=MBO0001; t=1711473629;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=nSoX2U2+bja76VJttji7swbGJQawRgvJz9HjlWCHZgo=;
-	b=aLS+G9GlUkRmPBUjSrE5xn4pRVba064Ne9DsOROxnVoa3I+rd54D3les5y3dBTvEazrcfW
-	vAUoGfK343ICBzdCaD5FH8ryafiCwT5GiKNNDREiHjW+K2ccqOq0iKCCOwlPe5B/ZZ/9nv
-	skqA6fQU3Sx7A9hdS6WPeDFMTfR3iKewp7lEAYMjORVurPObyreTpeLmDGpj5hZIsE3O8j
-	PX0gCBRWgjjdSbdplGYpARQw70t8iH0YPS01voUHVWthLevDT/EVxWPxpKjwwBunCN+8Ap
-	+kH9U/2kBFRbWetNmjAbS7HiH+nd+0wjw6RKI4og5McaB9oizcdcanfJKVCquA==
-Message-ID: <7f1c749d-069d-4a42-8b87-637f2dfa6f5d@pankajraghav.com>
-Date: Tue, 26 Mar 2024 18:20:27 +0100
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="afUd/3SG"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 364FEC433F1;
+	Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711485237;
+	bh=PMxWRHdvu3D8YQkMSw7UxQB8NcT07jaMLKw5AW6qsVA=;
+	h=From:Subject:Date:To:Cc:Reply-To:From;
+	b=afUd/3SGpMPxEfWdqQhyuWF+fNvqWfI3Limbx2eoYO/nNVJxzcZ238N37RoI7gww2
+	 MlhWofUchHNzjwdkn7H6nbNKvpBzP+pPX5NiBJuC6p4WvOLwDUNcdHditM/54yY8Zd
+	 hAGVsF+sL+ZtO9T9bPDR3x+M+q3WoECnnx/MI8NKM6P8GYWQnXIaZr56K77t2YZjrS
+	 9gG7J9kJuuw/Ht1OHocrEFhjd6iErEK6GZoaT2fJ+7VRalQVyZSlAE13ZJG21vjQUU
+	 vrC4JGqFE2fJdJXGL05Wn+wymYROdZbrixsuL10U6XK7kxZxJz4MiKC/Bd0G3j2T7g
+	 CXgXpjnv1g6Fw==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CC23CD11DF;
+	Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
+From: Taylor Jackson via B4 Relay <devnull+tjackson9431.gmail.com@kernel.org>
+Subject: [PATCH 0/2] Patches to update xfs test "generic/645" for
+ mount_setattr
+Date: Tue, 26 Mar 2024 20:33:50 +0000
+Message-Id: <20240326-mount-setattr-test-v1-0-c061b040d0f7@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs/558: scale blk IO size based on the filesystem blksz
-Content-Language: en-US
-To: fstests@vger.kernel.org, zlang@redhat.com
-Cc: djwong@kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
- "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-References: <CGME20240313203828eucas1p22e2b127e8597e2e72397f26370c54b42@eucas1p2.samsung.com>
- <20240313203818.2361119-1-kernel@pankajraghav.com>
-From: Pankaj Raghav <kernel@pankajraghav.com>
-In-Reply-To: <20240313203818.2361119-1-kernel@pankajraghav.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Queue-Id: 4V3xQP4Mmjz9sbP
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-B4-Tracking: v=1; b=H4sIAC4xA2YC/x3MQQqDQAxA0atI1gZiHKr2KuJisGmbhWOZxCKId
+ 3dw+Rb/H2CSVQye1QFZ/mq6poKmrmD+xvQR1FcxMHGglh+4rFtyNPHontHFHAcaAoeO5p4JSvj
+ L8tb9no7TeV4bHpMcZAAAAA==
+To: fstests@vger.kernel.org
+Cc: Christian Brauner <brauner@kernel.org>, 
+ Seth Forshee <sforshee@kernel.org>, Taylor Jackson <tjackson9431@gmail.com>, 
+ kernel test robot <oliver.sang@intel.com>
+X-Mailer: b4 0.12.4
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1711485236; l=835;
+ i=tjackson9431@gmail.com; s=20240206; h=from:subject:message-id;
+ bh=PMxWRHdvu3D8YQkMSw7UxQB8NcT07jaMLKw5AW6qsVA=;
+ b=SPKYaSZcsgzRgXMpio/t7r2Pt5e/Q9GmtvFAxgnKm1oF0dbjXgDG2E7hxm5y8p9FM4ljF0IM7
+ mSdgNikKDEVDmJw9z5jjM/FmgPFtCj+B3aQ0l+kjXSEekAdp2gSH2Ce
+X-Developer-Key: i=tjackson9431@gmail.com; a=ed25519;
+ pk=NO7ntQpjIG1IGTO7F8OnLJDKSHUakhrhAli+PL72OLA=
+X-Endpoint-Received: by B4 Relay for tjackson9431@gmail.com/20240206 with
+ auth_id=145
+X-Original-From: Taylor Jackson <tjackson9431@gmail.com>
+Reply-To: tjackson9431@gmail.com
 
-On 13/03/2024 21:38, Pankaj Raghav (Samsung) wrote:
-> From: Pankaj Raghav <p.raghav@samsung.com>
-> 
-> This test fails for 64k filesystem block size on a 4k PAGE_SIZE
-> system. Scale the `blksz` based on the filesystem block size instead of
-> fixing it as 64k so that we do get some iomap invalidations while doing
-> concurrent writes.
-> 
-> Cap the blksz to be at least 64k to retain the same behaviour as before
-> for smaller filesystem blocksizes.
-> 
-> This fixes the "Expected to hear about writeback iomap invalidations?"
-> message for 64k filesystems.
-> 
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> Tested-by: Darrick J. Wong <djwong@kernel.org>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+The following patches fix the "generic/645" xfs test which was 
+affected by the mount_setattr change in kernel commit dacfd001eaf2 
+(“fs/mnt_idmapping.c: Return -EINVAL when no map is written”). 
 
-Hi Zorro,
-  I checked xfstests/for-next and didn't see this patch queued up. Do I need
-to do something or will it get queued up for the next release?
+Reported-by: kernel test robot <oliver.sang@intel.com>
+Closes: https://lore.kernel.org/oe-lkp/202402191416.17ec9160-oliver.sang@intel.com
+Signed-off-by: Taylor Jackson <tjackson9431@gmail.com>
+---
+Taylor Jackson (2):
+      vfs/idmapped_mounts.c: Incorrect array index for nested user ns
+      vfs/idmapped_mounts.c: Change mount_setattr expected output
 
->  tests/xfs/558 | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/xfs/558 b/tests/xfs/558
-> index 9e9b3be8..270f458c 100755
-> --- a/tests/xfs/558
-> +++ b/tests/xfs/558
-> @@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
->  $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
->  _require_pagecache_access $SCRATCH_MNT
->  
-> -blksz=65536
-> +min_blksz=65536
-> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> +blksz=$(( 8 * $file_blksz ))
-> +
-> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
-> +
->  _require_congruent_file_oplen $SCRATCH_MNT $blksz
->  
->  # Make sure we have sufficient extent size to create speculative CoW
+ src/vfs/idmapped-mounts.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
+---
+base-commit: 9b6df9a01ac8ee3f28a2a24d71e45792e21b6d48
+change-id: 20240326-mount-setattr-test-90942470c820
+
+Best regards,
+-- 
+Taylor Jackson <tjackson9431@gmail.com>
+
+
