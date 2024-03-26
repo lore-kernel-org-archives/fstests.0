@@ -1,81 +1,101 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mout-p-202.mailbox.org (mout-p-202.mailbox.org [80.241.56.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3628F58220;
-	Tue, 26 Mar 2024 15:22:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424D51CFBE
+	for <fstests@vger.kernel.org>; Tue, 26 Mar 2024 17:20:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711466549; cv=none; b=GsDWE7h62et0uwZY/XQU+i413/8BtNNdJt0DR0pTrOBSc6PP8GeUi0wHCPUmidb9PatBCBavF+lrmI6ZfYyMO/8eJCkA0dyl+rKtPtLdpqVA22nyBYszAkbCN4cUrty9bB85LK2H/IJQFfsQWDbj6q9pmr8uzmmt6SEI6zAyjNE=
+	t=1711473635; cv=none; b=rqBnPhoZBLlkb0Gt+Y9cxeRMwif2SyznwuKwpqme/tqqeG8CdYUlsTly2u3u837Jhn16X2H+F9u/7H07koE1bGnjeKMpRSfmrngDXAW8qMIqXoN6QjExqRcgVPYklJ4ChxtstUZuu/GpnnvDCZqkRu534AHfMevTzAyvrEsl4Zg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711466549; c=relaxed/simple;
-	bh=ANF//h4LPnYK7Djd4mKh0asA8VARUBkQkFQlNgabfis=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=r8ClPd66kkaW0jimFlHCa2LjlL7R5yraSYuBaAALNDNRvGLXf5btrgJpYtt4o3X8NsVENyhJZuYmZrjv5jXdi3fYoL5ezzr7/c1xDog/J/0euvXvq+Xx0kgIJebGj/8OkG+0ftfyt5lfuDld2VexjIdT+t+8eZgz01v5szs7sgY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MNcOZ0TX; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1711473635; c=relaxed/simple;
+	bh=T+Q9vmW+e4gEapMtepx4nZC7hh2gf/WmtDSAxAV5P/E=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fhYa981EY3J8dMEMYbWbb62V9hgD7+0DbLx16eNI/7ea8VTFbYDsSujimzFX5FDRWs8HZAy2bntUDiMBGDRVLjME5/jxjtrKFMRQcwdpuUjua2DTHgPYsGVWYSVXZEF1UKMZI20fXTQ6XGiZac/KsfOAkwN12xIO6LhagwkFbGU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=aLS+G9Gl; arc=none smtp.client-ip=80.241.56.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MNcOZ0TX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0266DC433F1;
-	Tue, 26 Mar 2024 15:22:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711466549;
-	bh=ANF//h4LPnYK7Djd4mKh0asA8VARUBkQkFQlNgabfis=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=MNcOZ0TXcjEkJtIq7KtpyRbx6DDIvwGgULe6ixp2wDu8L40hNxC+JeqfeqPJLzAHg
-	 0XNsnlZ7E4fmGlyBtg6ZO2Cw3CkqQ1ffyt5Gq0n9NlJ9KOEKglCIQn0mSqPmfsox7K
-	 2RAx90Sm04ZWwIecTWDDM77+rvBPODOvFaG3S+YO3u5RqVMiGkoupRVuSRn1mW9OSN
-	 CVtgSGin7l77/WPpX1odsfB4XGvDj/T85oZZd+OWkw7XR42hA7Nvvok34QBOJC/mFi
-	 MQoTv7vb6md2YrwjEKoWxYC5Bgs+VGBbsoQBN5Ibfah1daY2E3XzyjWjUUgLjO4Lzm
-	 Ak51LXqcfrd+g==
-Date: Tue, 26 Mar 2024 08:22:28 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christian Brauner <brauner@kernel.org>
-Cc: Dave Chinner <david@fromorbit.com>,
-	kernel test robot <oliver.sang@intel.com>,
-	Taylor Jackson <taylor.a.jackson@me.com>, oe-lkp@lists.linux.dev,
-	lkp@intel.com, Linux Memory Management List <linux-mm@kvack.org>,
-	linux-fsdevel@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>,
-	fstests <fstests@vger.kernel.org>
-Subject: Re: [linux-next:master] [fs/mnt_idmapping.c]  b4291c7fd9:
- xfstests.generic.645.fail
-Message-ID: <20240326152228.GC6379@frogsfrogsfrogs>
-References: <202402191416.17ec9160-oliver.sang@intel.com>
- <20240220-fungieren-nutzen-311ef3e57e8a@brauner>
- <20240325165809.GA6375@frogsfrogsfrogs>
- <20240326-dampf-angemacht-35d6993d67fa@brauner>
+	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="aLS+G9Gl"
+Received: from smtp202.mailbox.org (smtp202.mailbox.org [IPv6:2001:67c:2050:b231:465::202])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-202.mailbox.org (Postfix) with ESMTPS id 4V3xQP4Mmjz9sbP;
+	Tue, 26 Mar 2024 18:20:29 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
+	s=MBO0001; t=1711473629;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=nSoX2U2+bja76VJttji7swbGJQawRgvJz9HjlWCHZgo=;
+	b=aLS+G9GlUkRmPBUjSrE5xn4pRVba064Ne9DsOROxnVoa3I+rd54D3les5y3dBTvEazrcfW
+	vAUoGfK343ICBzdCaD5FH8ryafiCwT5GiKNNDREiHjW+K2ccqOq0iKCCOwlPe5B/ZZ/9nv
+	skqA6fQU3Sx7A9hdS6WPeDFMTfR3iKewp7lEAYMjORVurPObyreTpeLmDGpj5hZIsE3O8j
+	PX0gCBRWgjjdSbdplGYpARQw70t8iH0YPS01voUHVWthLevDT/EVxWPxpKjwwBunCN+8Ap
+	+kH9U/2kBFRbWetNmjAbS7HiH+nd+0wjw6RKI4og5McaB9oizcdcanfJKVCquA==
+Message-ID: <7f1c749d-069d-4a42-8b87-637f2dfa6f5d@pankajraghav.com>
+Date: Tue, 26 Mar 2024 18:20:27 +0100
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240326-dampf-angemacht-35d6993d67fa@brauner>
+Subject: Re: [PATCH] xfs/558: scale blk IO size based on the filesystem blksz
+Content-Language: en-US
+To: fstests@vger.kernel.org, zlang@redhat.com
+Cc: djwong@kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
+ "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+References: <CGME20240313203828eucas1p22e2b127e8597e2e72397f26370c54b42@eucas1p2.samsung.com>
+ <20240313203818.2361119-1-kernel@pankajraghav.com>
+From: Pankaj Raghav <kernel@pankajraghav.com>
+In-Reply-To: <20240313203818.2361119-1-kernel@pankajraghav.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Rspamd-Queue-Id: 4V3xQP4Mmjz9sbP
 
-On Tue, Mar 26, 2024 at 12:43:27PM +0100, Christian Brauner wrote:
-> On Mon, Mar 25, 2024 at 09:58:09AM -0700, Darrick J. Wong wrote:
-> > On Tue, Feb 20, 2024 at 09:57:30AM +0100, Christian Brauner wrote:
-> > > On Mon, Feb 19, 2024 at 02:55:42PM +0800, kernel test robot wrote:
-> > > > 
-> > > > 
-> > > > Hello,
-> > > > 
-> > > > kernel test robot noticed "xfstests.generic.645.fail" on:
-> > > > 
-> > > > commit: b4291c7fd9e550b91b10c3d7787b9bf5be38de67 ("fs/mnt_idmapping.c: Return -EINVAL when no map is written")
-> > > > https://git.kernel.org/cgit/linux/kernel/git/next/linux-next.git master
-> > > 
-> > > The test needs to be updated. We now explicitly fail when no map is
-> > > written.
-> > 
-> > Has there been any progress on updating generic/645?  6.9-rc1 is out,
-> > and Dave and I have both noticed this regressing.
+On 13/03/2024 21:38, Pankaj Raghav (Samsung) wrote:
+> From: Pankaj Raghav <p.raghav@samsung.com>
 > 
-> Iirc, Taylor wanted to fix this but it seems that hasn't happened yet.
-> I'll ping again and if nothing's happened until tomorrow I'll send a
-> patch.
+> This test fails for 64k filesystem block size on a 4k PAGE_SIZE
+> system. Scale the `blksz` based on the filesystem block size instead of
+> fixing it as 64k so that we do get some iomap invalidations while doing
+> concurrent writes.
+> 
+> Cap the blksz to be at least 64k to retain the same behaviour as before
+> for smaller filesystem blocksizes.
+> 
+> This fixes the "Expected to hear about writeback iomap invalidations?"
+> message for 64k filesystems.
+> 
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> Tested-by: Darrick J. Wong <djwong@kernel.org>
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> ---
 
-Ok, glad to hear that this is still on your radar.  Thank you for
-following up!
+Hi Zorro,
+  I checked xfstests/for-next and didn't see this patch queued up. Do I need
+to do something or will it get queued up for the next release?
 
---D
+>  tests/xfs/558 | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/558 b/tests/xfs/558
+> index 9e9b3be8..270f458c 100755
+> --- a/tests/xfs/558
+> +++ b/tests/xfs/558
+> @@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
+>  $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
+>  _require_pagecache_access $SCRATCH_MNT
+>  
+> -blksz=65536
+> +min_blksz=65536
+> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
+> +blksz=$(( 8 * $file_blksz ))
+> +
+> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
+> +
+>  _require_congruent_file_oplen $SCRATCH_MNT $blksz
+>  
+>  # Make sure we have sufficient extent size to create speculative CoW
