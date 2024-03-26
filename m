@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F0E713D28E
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B59FE13D537
 	for <fstests@vger.kernel.org>; Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711485237; cv=none; b=jPb3psL+MiefV0/Mp51uX3NpgaNh72oVNAvkGXHWAzFRSEbUSJnmtpMK4WPCh/Zp16X4/0C8cAsmL/eYyP7lBAqB5NFBXSsv976TE5aplginDbDbelytCNubbDHhsTvrvWYuyY5u3KWseR6VHUUgjCtuGLvraSbDHyDEpjeej4U=
+	t=1711485237; cv=none; b=hvvgmfDkugDhXEsXbiUvLKVC9242qoHaECCGKADCwWRXJSnQ15UeLnx3ZC/mUit+Q/2r4Za4QbXKtcnLx+rELh3jsuh5/s55NSk9BQzO+lc39f5joONe794jsjrSn4/K6BzPe40P77dQAvF/iGGh1voqQCg4rNTdJcbLfCMDAlo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1711485237; c=relaxed/simple;
-	bh=J53LfGOXaCjeFGCYYuupOZle6kEoD+N/VGasq3MzP4w=;
+	bh=pXk+NpAOBrH2BZU+ERvSkplmhqIvqC1ZbTpd5h+82Qg=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=ftLC08rWQ7O67A+mpQSuSDKD9RCqj69XWpNaoQoICfBq0/W9mnvSGzwSNUYIZwkz4nHxhHEUIIPdTlsWIL2JNMk6sYslB68ow/Tfaa/uWY99Xica5y0UqzI3U1YhYjYuEitemu46jdeDcrMK501vP7eXoUYJlrwJTpgzl0EfL5U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ccAOxVXJ; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:To:Cc; b=WKLillvMncYesPbuNa/eDDPPyn+pNw9o0Q9ZScoPNmsvy2FGkLYt+meRVcyJ0Jt2m9Q/HtQ6m04KHyOvjz72IimlpTx9VJwLo0KoGy+6or1c3XSOfyLa+kjUEV7kB0J7sA2pQwWfMgPy+wxoEwbZ/JdEEfq6AYq4wV43IIw4P0Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E6zsDKgi; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ccAOxVXJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 40A77C433C7;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E6zsDKgi"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 4E374C43394;
 	Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1711485237;
-	bh=J53LfGOXaCjeFGCYYuupOZle6kEoD+N/VGasq3MzP4w=;
+	bh=pXk+NpAOBrH2BZU+ERvSkplmhqIvqC1ZbTpd5h+82Qg=;
 	h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-	b=ccAOxVXJllCd9W9YjB17DXQ2xlk6bRHGrOPJh6/vDNu4uAcmsGXpsCo9dE7lYEEDy
-	 CYf15Mrf/EPSp1EqTelOLE78xtI/HkE4iNAZvfxQMXgfVnmkGR/d6rcrh95nZN2DnK
-	 2gbip+oJ3CeqNh5oZyZml4yWPs7RkD1YuP7DQbOIDAieIQbR8TaDNrhDP+TY4cWIwc
-	 k1nxYPG5uyu7K1teOoUsxJ5Sszqv2wFfsu2AkftdWVUR8wkBH8F1GQWiRVnp0z/iaj
-	 I6fiPX6SOlnRWK0F5wAoqbVdEPwVMtU6lZmIFwICNDdTqhxACITgbCLMAVHB5KDwZn
-	 g2OGYLUQer64A==
+	b=E6zsDKgiNbo3QB0j1nNd+AK2FqbXq2QXvJhrOfv7ANJ/cahs18bWAiot9RDcTBGh/
+	 ieSW6/j+ZCLaK8wXky+hLwd7x4/jfDKCoqkxIsP56S5NotBlTMGZfEloAqJfvxOHWm
+	 rKj2OET/qlJZGGxydc2hECGC7UVB826iTJ3ewgGJZCU4sl8qgRWfHQxDaZL7SdbuOF
+	 b2Zv0rvhXMIHBwvM4ycrQD6kXVR2D+u6TDziJTLvdM/O6KnQQp6kmZVQ9LCrqiPRQF
+	 tDqqq7jgQOI+cjBb7RwwrG27uVwee5pwrKCdg5szbabaNuKf7o7bq3p4UoS9qY+gc8
+	 j1Rf2ZX0FXgMg==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AB60C54E67;
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46A2CCD1283;
 	Tue, 26 Mar 2024 20:33:57 +0000 (UTC)
 From: Taylor Jackson via B4 Relay <devnull+tjackson9431.gmail.com@kernel.org>
-Date: Tue, 26 Mar 2024 20:33:51 +0000
-Subject: [PATCH 1/2] vfs/idmapped_mounts.c: Incorrect array index for
- nested user ns
+Date: Tue, 26 Mar 2024 20:33:52 +0000
+Subject: [PATCH 2/2] vfs/idmapped_mounts.c: Change mount_setattr expected
+ output
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -40,8 +40,8 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20240326-mount-setattr-test-v1-1-c061b040d0f7@gmail.com>
+Content-Transfer-Encoding: 8bit
+Message-Id: <20240326-mount-setattr-test-v1-2-c061b040d0f7@gmail.com>
 References: <20240326-mount-setattr-test-v1-0-c061b040d0f7@gmail.com>
 In-Reply-To: <20240326-mount-setattr-test-v1-0-c061b040d0f7@gmail.com>
 To: fstests@vger.kernel.org
@@ -49,11 +49,11 @@ Cc: Christian Brauner <brauner@kernel.org>,
  Seth Forshee <sforshee@kernel.org>, Taylor Jackson <tjackson9431@gmail.com>, 
  kernel test robot <oliver.sang@intel.com>
 X-Mailer: b4 0.12.4
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1711485236; l=997;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1711485236; l=1608;
  i=tjackson9431@gmail.com; s=20240206; h=from:subject:message-id;
- bh=BKnBnlQxMR6w2lLKErcrcTyWMWPn+55we5Ja40IlR0M=;
- b=Tc2NSJaI/jjx2h2N++FNwEVoviaql9msmHiGB/4Cp0TYGrg0TbYUHLw3hVC5kZKu3iF4Egz6Z
- 80LD7eHGYvqABQm4fNwPF46Plu+cwyCwsdED+6PoA0o56yVeeeT5fZU
+ bh=2hauqK72ItpVFiPIDTfm1+0Ak2rYzw7tFM3DP+H91uU=;
+ b=sV5+jr4uCvsdK+uySs+MkAtagvqhBfdDtpJAWq8BurlIHYhWzLvNwre8oLUPmkW3mtZzTsQ4f
+ CsZDldH5ELMBoO1nKCet2/npXcUL8+l38Icj2mQk9G99mR8xHpDw0gw
 X-Developer-Key: i=tjackson9431@gmail.com; a=ed25519;
  pk=NO7ntQpjIG1IGTO7F8OnLJDKSHUakhrhAli+PL72OLA=
 X-Endpoint-Received: by B4 Relay for tjackson9431@gmail.com/20240206 with
@@ -63,31 +63,44 @@ Reply-To: tjackson9431@gmail.com
 
 From: Taylor Jackson <tjackson9431@gmail.com>
 
-Within the vfs test for idmapped mounts, the function nested_userns()
-is using an incorrect array index when attempting to set up the mapping
-for the 4th nested user ns within hierarchy[4]. The correct index that
-belongs to the 4th nested user ns is actually hierarchy[3].
-And hierarchy[4] is reserved for the dummy entry that marks the end
-of the array.
+In kernel commit dacfd001eaf2 (“fs/mnt_idmapping.c: Return -EINVAL
+when no map is written”), the behavior of mount_setattr changed to
+return EINVAL when attempting to create an idmapped mount when using
+a user namespace with no mappings. The following commit updates the test
+to expect no mount to be created in that case. And since no mount is created,
+this commit also removes the check for overflow IDs because it does not make
+sense to check for overflow IDs for a mount that was not created.
 
 Signed-off-by: Taylor Jackson <tjackson9431@gmail.com>
 ---
- src/vfs/idmapped-mounts.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/vfs/idmapped-mounts.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
 diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
-index 547182fe..34052ca3 100644
+index 34052ca3..f4dfc3f3 100644
 --- a/src/vfs/idmapped-mounts.c
 +++ b/src/vfs/idmapped-mounts.c
-@@ -6556,7 +6556,7 @@ static int nested_userns(const struct vfstest_info *info)
+@@ -6667,7 +6667,7 @@ static int nested_userns(const struct vfstest_info *info)
  	}
  
- 	/* Don't write a mapping in the 4th userns. */
--	list_empty(&hierarchy[4].id_map);
-+	list_empty(&hierarchy[3].id_map);
+ 	if (sys_mount_setattr(fd_open_tree_level4, "", AT_EMPTY_PATH,
+-			      &attr_level4, sizeof(attr_level4))) {
++			      &attr_level4, sizeof(attr_level4)) != -1 || errno != EINVAL) {
+ 		log_stderr("failure: sys_mount_setattr");
+ 		goto out;
+ 	}
+@@ -6706,11 +6706,6 @@ static int nested_userns(const struct vfstest_info *info)
+ 			log_stderr("failure: check ownership %s", file);
+ 			goto out;
+ 		}
+-
+-		if (!expected_uid_gid(fd_open_tree_level4, file, 0, info->t_overflowuid, info->t_overflowgid)) {
+-			log_stderr("failure: check ownership %s", file);
+-			goto out;
+-		}
+ 	}
  
- 	/* Create the actual userns hierarchy. */
- 	ret = create_userns_hierarchy(hierarchy);
+ 	/* Verify that ownership looks correct for callers in the first userns. */
 
 -- 
 2.34.1
