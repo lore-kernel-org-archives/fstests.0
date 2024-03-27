@@ -1,71 +1,44 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE2521598EB
-	for <fstests@vger.kernel.org>; Wed, 27 Mar 2024 13:37:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61D3E13A3F7;
+	Wed, 27 Mar 2024 16:59:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711546662; cv=none; b=IVCBRjG6OdaRqjEc7rv3xcMlYajveq/JxQ00lFaYagYKFAqeFtnPyWWQTaCbBOXEd5tuUpSrZ5YJD7lTa9O1PYJWs03r4roX8kzlYwjwpGW3ci1WESXTc9Qw9+sk1BkxxBKiR/0RTGXgs24wssOLclxO/crxIwqfeDmvDx+ZrFc=
+	t=1711558758; cv=none; b=pnvPHGVQN5T42FoDZeEpxL8g7UhGjWJrfvYGwzesPLwVHlJ99SGIg3dyG2Iw82qhn3N8hCC85PKDFyKT6ylYeY2GJNYZjJt1+EvYMMlY2/mv1Nk31BDEOEeGJOf/wpaj3zXA2JICpcK4rQT/VJg01FvHK4WKDNQqIF/qwHEkRzY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711546662; c=relaxed/simple;
-	bh=T0OuOfqK+Sh9vITWjtn5UWtHDCh9Sz3rkuhNleAjrj0=;
+	s=arc-20240116; t=1711558758; c=relaxed/simple;
+	bh=ajm5OQI0eRDnM1c9YdwiR+ZNtPG3FggbkX8BzzzSehE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d1ihWpwb55tPPHb6AmPFKySVlCUlxAxiLOkmR/HUqTvp279JJC2ra7PlZTBxOj+xmTd7i/h1ckYIBKH9lCLerm24L4r7xD9vG3T2puwONF78uF6dwu+ctYYxhm0qxfpNdv48YXgTbi/Dl0PvUhYa9frSLKUcSPRHf0CBI0Nkio8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VPGXOYK9; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=uMFM16v6FVE4oq3EUBXSyLVLOR7yMZ+wPkVJnpyzMKlPVpR05pleYYEDe7RpwOq0ZDfFCNPGiIBHNW4zQqB8hufDcVKqvwjGLZdI9F5c7l1RBInBw9AMro5Pky68KCd2fCrp09T5/DznmsR/3PNR8Blgg+DMnRmbcdqrk6MuBPM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ZZUppb7e; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VPGXOYK9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1711546659;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=SYcpvlQkMRgSYon5/5H4M4hhbmQVd9vDrzANDvntUjw=;
-	b=VPGXOYK98PK82eaPcS9x/QO+FD2zorfTkfWmZNcHaKPcxtWbUoeQX36Na9KnGSLIdIinEx
-	gv/i+TQ88mgtrsM+Q8ZT7dJ8/uFaacQZA2aT6Bdqu8kK4/fM7BcS36doUjyXHEqM9rRon3
-	qTHu35x0MsAKC1J2bGVG2P3bNPeD0v4=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-513-85jx4rIfNymd-HVrKKZaJg-1; Wed, 27 Mar 2024 09:37:38 -0400
-X-MC-Unique: 85jx4rIfNymd-HVrKKZaJg-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1e0f50354d4so7222515ad.1
-        for <fstests@vger.kernel.org>; Wed, 27 Mar 2024 06:37:38 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711546657; x=1712151457;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=SYcpvlQkMRgSYon5/5H4M4hhbmQVd9vDrzANDvntUjw=;
-        b=AKTC0K+oiCtLkmTq0kEUIjCpPP82DiKH5LxaQ+99oc9Tkw9alHGsaturae1a0EyeCY
-         4qe4Zn/UBDWqlUYEh0HjUSB0VhCrwv+RvMOrDgTkTFL/RVK7lQqPzcuQqRhS0vMzfhpX
-         RCLJ3uvYLhRb88+A23FuEIrEtRoH506CViJovD8iav0tLZK2W+AUhKmd/jwqrHIbos36
-         Jzed81t6jIP9yBC4Vml8ignI8K43njnD/uNNMwP9vr0cO1uw6kteQYkasGPP3pkXTuCo
-         zarqDw0u73SQqyNOT8WjM9JE+EBlDJ4R772GFA2wpl5C/TFwXeObJHvrhfUPIZK+3aZI
-         EwkA==
-X-Gm-Message-State: AOJu0YzUsZqVe5GRHBj27wyAmVKWJZwi7RPFb+Xw1XJoaA1Hevkp6a/J
-	clSnC7HbR+VRg+iITJQnAjqOt737+tY9dqzr94acVbUNg4bzGYk1f66fB46FLt0yBr4Rkt4C2+6
-	xWApQmdNoa2vCKFbHx8+uPyaWBNR2BGhDSiLtsDOCNmAfTmd3JRo0ALo=
-X-Received: by 2002:a17:902:cece:b0:1e0:b5ee:e9cb with SMTP id d14-20020a170902cece00b001e0b5eee9cbmr6841885plg.22.1711546657063;
-        Wed, 27 Mar 2024 06:37:37 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGExWZjtADkajIpzPdg6Z1MPdxJkMLWqmfDw/IkZGPcaU19J4/jbBSgqN/aYRfl/OtycFegWQ==
-X-Received: by 2002:a17:902:cece:b0:1e0:b5ee:e9cb with SMTP id d14-20020a170902cece00b001e0b5eee9cbmr6841852plg.22.1711546656544;
-        Wed, 27 Mar 2024 06:37:36 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id q7-20020a170902a3c700b001e005a58237sm9208789plb.93.2024.03.27.06.37.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Mar 2024 06:37:36 -0700 (PDT)
-Date: Wed, 27 Mar 2024 21:37:31 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Pankaj Raghav <kernel@pankajraghav.com>
-Cc: fstests@vger.kernel.org, djwong@kernel.org, gost.dev@samsung.com,
-	mcgrof@kernel.org
-Subject: Re: [PATCH] xfs/558: scale blk IO size based on the filesystem blksz
-Message-ID: <20240327133731.f36a5wtz7hoe7r5b@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <CGME20240313203828eucas1p22e2b127e8597e2e72397f26370c54b42@eucas1p2.samsung.com>
- <20240313203818.2361119-1-kernel@pankajraghav.com>
- <7f1c749d-069d-4a42-8b87-637f2dfa6f5d@pankajraghav.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ZZUppb7e"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=SKk0i2OTam2me4BcDSIDIjfRC5F9vU9QGRHsjHGlJug=; b=ZZUppb7eqTzB8lbBAopa03Re2y
+	PIMj5JdPw1GAqyCg5BUK94NHj3IzceR+4B2Jq2pAX98mnpz9Qd1asPa7Yde8pGcfhlzXvcAIF7Dbj
+	TB6mrTZtkVdyN1ECKaCC0UrfAzC6KHyMTR+gEDw2b+0zYIqk25EmAiRLIYWOOON1LRq5BtG+EIaRD
+	9tYabUwRHc7WK5RWw7bRJBtWakZN8QDBjqiCXeyGzHcOXIA2l4tW5RnCboDgaaqEU6+qEE+zkT76o
+	OBHFkU3ldeH/lNYvqPJyKIpH8p4ltixvmJ4heu98VQ43u9Uq+ehWDCCHDTmVD1oBbZyPYZEHzjvdd
+	AyXWN5ag==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rpWcL-0000000ABJT-3qPB;
+	Wed, 27 Mar 2024 16:59:13 +0000
+Date: Wed, 27 Mar 2024 09:59:13 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	guan@eryu.me
+Subject: Re: [PATCH 3/4] generic/{166,167,333,334,671}: actually fill the
+ filesystem with snapshots
+Message-ID: <ZgRQYV_uc94IImTk@infradead.org>
+References: <171150739778.3286541.16038231600708193472.stgit@frogsfrogsfrogs>
+ <171150741593.3286541.18115194618541313905.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,66 +47,19 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7f1c749d-069d-4a42-8b87-637f2dfa6f5d@pankajraghav.com>
+In-Reply-To: <171150741593.3286541.18115194618541313905.stgit@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Mar 26, 2024 at 06:20:27PM +0100, Pankaj Raghav wrote:
-> On 13/03/2024 21:38, Pankaj Raghav (Samsung) wrote:
-> > From: Pankaj Raghav <p.raghav@samsung.com>
-> > 
-> > This test fails for 64k filesystem block size on a 4k PAGE_SIZE
-> > system. Scale the `blksz` based on the filesystem block size instead of
-> > fixing it as 64k so that we do get some iomap invalidations while doing
-> > concurrent writes.
-> > 
-> > Cap the blksz to be at least 64k to retain the same behaviour as before
-> > for smaller filesystem blocksizes.
-> > 
-> > This fixes the "Expected to hear about writeback iomap invalidations?"
-> > message for 64k filesystems.
-> > 
-> > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> > Tested-by: Darrick J. Wong <djwong@kernel.org>
-> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
+On Tue, Mar 26, 2024 at 07:43:35PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
 > 
-> Hi Zorro,
->   I checked xfstests/for-next and didn't see this patch queued up. Do I need
-> to do something or will it get queued up for the next release?
+> XFS has this behavior in its reflink implementation where it returns
+> ENOSPC if one of the AGs that would be involved in the sharing operation
+> becomes more than 90% full.  As Kent Overstreet points out, that means
+> the snapshot creator shuts down when the filesystem is only about a
+> third full.  We could exercise the system harder by not *forcing*
+> reflink, which will actually fill the filesystem full.
 
-Oh sorry, due to this patch was in a patchset with:
-
-  [PATCH 2/2] xfs/161: adapt the test case for LBS filesystem
-
-So I don't know if you'd like to have them both together, or merge
-this one (with RVB) at first:)
-
-If you hope to have this one at first, I'll merge it in patches-in-queue branch,
-then have it in next branch.
-
-Thanks,
-Zorro
-
-> 
-> >  tests/xfs/558 | 7 ++++++-
-> >  1 file changed, 6 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/xfs/558 b/tests/xfs/558
-> > index 9e9b3be8..270f458c 100755
-> > --- a/tests/xfs/558
-> > +++ b/tests/xfs/558
-> > @@ -127,7 +127,12 @@ _scratch_mount >> $seqres.full
-> >  $XFS_IO_PROG -c 'chattr -x' $SCRATCH_MNT &> $seqres.full
-> >  _require_pagecache_access $SCRATCH_MNT
-> >  
-> > -blksz=65536
-> > +min_blksz=65536
-> > +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> > +blksz=$(( 8 * $file_blksz ))
-> > +
-> > +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
-> > +
-> >  _require_congruent_file_oplen $SCRATCH_MNT $blksz
-> >  
-> >  # Make sure we have sufficient extent size to create speculative CoW
-> 
+All these tests are supposed to test the reflink code, how does
+using cp --reflink=auto make sense for that?
 
