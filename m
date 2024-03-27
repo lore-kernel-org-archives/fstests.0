@@ -1,74 +1,63 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FFE022612;
-	Wed, 27 Mar 2024 02:48:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7AC55024E
+	for <fstests@vger.kernel.org>; Wed, 27 Mar 2024 10:31:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711507733; cv=none; b=CKvVFn+JYxCwB80TkZXxBVzG2FUn6vl0Nrd0fFknx2w45mqzfOW4nWdYTSI45AyzdRMhUQWHGCFY4MtrEYUGKvVFiz25/OO7hZ8linVS8WPXR0Rzsj2iFfWxbcl7iLRpfmqF0vVNDB8e6ZKW3kOvlKUfKcnInUvFwv/qT1de9gw=
+	t=1711535501; cv=none; b=dp5WGFHmr1RsJf87gnVk4fQ+yVSX8XKWIJa9QbGCFAiRkdaqqufp1PLXxBHBuPvYS/WQTv5DdUc9QNTTfzNaeQ2XTttmoO7hdXCfO1AFvV3CYu/89hipIOoIaGnLSnpoI6YurdNVL+89YYCONp/Td8PeXmMrm8owwr80jHXkQOI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711507733; c=relaxed/simple;
-	bh=pZ/Bf03pufna1pa92HztpRJaoixdZfAnfs4pP4zupYg=;
+	s=arc-20240116; t=1711535501; c=relaxed/simple;
+	bh=8nsIBdtQPUHnrKngo2Llur3/q3uCGo541pWvjvUNM9A=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Fs8xj1xLlAx/jBl2f654y2hX0rL+x2WnVdc0hYvb5zrSlxKeSX/eP007y+ItFZCfsUaB407OMOmgleBtaNe62JJoP6hlWtrWIKSGAe1DZki/XxM74GcGy2DMMNeewkNdr2AG+7FoWLNrYX/z9YhH9K28N+LFgWA+UixUirHx81U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gXZeK7Vi; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=axkxx1xHRjSFlMveiox/oi85fb7l0/i2DRQh+I0IWx8Lsxvi7b87tsbKBjaq95CRvfk76XDMh0v0T6nJAD2uT4lVp5R2NAltb/lmjv6g0nddOLuhXk+PWUbj/mbPbgAdMPcfuDe5aZnfIIxGSebPA2e7DcusreLsoBKr0b5dVy4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Id6DRlrN; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gXZeK7Vi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DA84C433F1;
-	Wed, 27 Mar 2024 02:48:53 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Id6DRlrN"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B11BC43330;
+	Wed, 27 Mar 2024 10:31:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711507733;
-	bh=pZ/Bf03pufna1pa92HztpRJaoixdZfAnfs4pP4zupYg=;
+	s=k20201202; t=1711535501;
+	bh=8nsIBdtQPUHnrKngo2Llur3/q3uCGo541pWvjvUNM9A=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gXZeK7ViToVIyapLFNomOMf+AZB3iLKpDSTu5UjjkSuPbKr+VPPcoMdftAiDSifrw
-	 8C0ZE43Yon8laFQi9Z/ryWCM9HmAI3kOQoXl8jyEOEi8QOtkokWUWd3cUJks8Bfp5f
-	 Jk/36UZocA6QhLOHo+oJLHmyB5RiauBZW8LEKn2lzryuN/MPwb6J5In+WA8BLrreyS
-	 lR/mq/ikxw7vnWjwPCvifOHScg2RAaDEPUYpqLbOFgMIdIGpZ2N9Gn6G6LEPCaBMr6
-	 KCnBXge4O/RB9pyVgtAPW66zT4znRZphomGafIJixMgVCG64qOK2aXOahz1H+8s+wn
-	 NbWmZialkT2FA==
-Date: Tue, 26 Mar 2024 19:48:52 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, guan@eryu.me
-Subject: [PATCH v1.1 1/4] xfs/270: fix rocompat regex
-Message-ID: <20240327024852.GV6390@frogsfrogsfrogs>
-References: <171150739778.3286541.16038231600708193472.stgit@frogsfrogsfrogs>
- <171150740360.3286541.8931841089205728326.stgit@frogsfrogsfrogs>
+	b=Id6DRlrNdqv0hViZfp7Z8xbKX6rE4FI166ooQgJUJ4dsXcJFDB7pe3Q6A6Uol4Xun
+	 2JI+SoVELux7w+Pc0poRGnzO01rcq129OMeytCJvE5jRroUQCrj8umECJqmnXHs9ed
+	 +coi9+MG9MVj4quNrxzuilf1O1v6W9n5eBe/uDN0/ljnDQY3LazfbPZuomkgU839CS
+	 GLTGCrqQeSv1GkH2uSMX6faHwFgeXAR/k3v8bEoTXwE13pu6W6wwte6iQaVLlIMHCJ
+	 h4YrF04m39xRzzlR4EH0KfpoA2eI6ZsB8sa5P6yXVUYsRnJ07OlDaxbyf1531aTnp9
+	 doO2kdIgYxrsw==
+Date: Wed, 27 Mar 2024 11:31:37 +0100
+From: Christian Brauner <brauner@kernel.org>
+To: tjackson9431@gmail.com
+Cc: fstests@vger.kernel.org, Seth Forshee <sforshee@kernel.org>, 
+	kernel test robot <oliver.sang@intel.com>
+Subject: Re: [PATCH 1/2] vfs/idmapped_mounts.c: Incorrect array index for
+ nested user ns
+Message-ID: <20240327-zerrt-abstammen-6aecd73043ef@brauner>
+References: <20240326-mount-setattr-test-v1-0-c061b040d0f7@gmail.com>
+ <20240326-mount-setattr-test-v1-1-c061b040d0f7@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <171150740360.3286541.8931841089205728326.stgit@frogsfrogsfrogs>
+In-Reply-To: <20240326-mount-setattr-test-v1-1-c061b040d0f7@gmail.com>
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Mar 26, 2024 at 08:33:51PM +0000, Taylor Jackson via B4 Relay wrote:
+> From: Taylor Jackson <tjackson9431@gmail.com>
+> 
+> Within the vfs test for idmapped mounts, the function nested_userns()
+> is using an incorrect array index when attempting to set up the mapping
+> for the 4th nested user ns within hierarchy[4]. The correct index that
+> belongs to the 4th nested user ns is actually hierarchy[3].
+> And hierarchy[4] is reserved for the dummy entry that marks the end
+> of the array.
+> 
+> Signed-off-by: Taylor Jackson <tjackson9431@gmail.com>
+> ---
 
-This test fails with the fsverity patchset because the rocompat feature
-bit for verity is 0x10.  The regular expression used to check if the
-output is hexadecimal requires a single-digit answer, which is no longer
-the case.
-
-Fixes: 5bb78c56ef ("xfs/270: Fix ro mount failure when nrext64 option is enabled")
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
-v1.1: remove debug message
----
- tests/xfs/270 |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/xfs/270 b/tests/xfs/270
-index 4e4f767dc1..0c3ddc5b61 100755
---- a/tests/xfs/270
-+++ b/tests/xfs/270
-@@ -30,7 +30,7 @@ _require_scratch_shutdown
- # change this case.
- set_bad_rocompat() {
- 	ro_compat=$(_scratch_xfs_get_metadata_field "features_ro_compat" "sb 0")
--	echo $ro_compat | grep -q -E '^0x[[:xdigit:]]$'
-+	echo $ro_compat | grep -q -E '^0x[[:xdigit:]]+$'
- 	if [[ $? != 0  ]]; then
- 		echo "features_ro_compat has an invalid value."
- 		return 1
+Ah, thanks for fixing this!
+Reviewed-by: Christian Brauner <brauner@kernel.org>
