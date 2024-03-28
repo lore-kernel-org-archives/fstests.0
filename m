@@ -1,260 +1,239 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A73A657887;
-	Thu, 28 Mar 2024 12:17:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711628276; cv=none; b=IxVLLdtJZWEYNFb01FbVO5NZnhzgX0kTdguZibc2atSU1nNFCnrw71yWQ2X3vWWCAJxph2huZAAhqkwz6EZaCvZN6XiX1HmRFgeaCl3RhY0FQOcXr2GrT97AnyFv10nd308PB0mi1LehxoxCoCjXEZmsw6FTVlu/itoQdIQ6kts=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711628276; c=relaxed/simple;
-	bh=4YBQQyYuqNCOgcMkuqoqHnXPT99Jmu7JOUKYG3Neg7c=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=jyIPIBBiCxo7eK+O1zAVUTLioCV6u8RlBbxg7yrff/45zceJ4tymxfODDoBVcp/19iHhO7ShXJq9rhCyEzATD51m6M26t4euyw9bzQXaobKCbmgOMEoEuZGC5OTHXPmeq7XdPdFXqJNcC5BAbyTLNnZ0uYGPQ1Y93HZPs2gZjKQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=M0JxAFAA; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 158F93A1AB;
+	Thu, 28 Mar 2024 12:50:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1711630244; cv=fail; b=KB4ERhvMSMoXMyXGKbH01y8v7wBgG+vTHSwqB9qfGnt73nG+rkrcw05RIhIZVxwjMiL1bRzIbbdmLDlQj9KrkgBOjNXCUyTOtc6yh5aw46ItKInC+hoqzMzH8HRjuIjbrcnYehgMs0XPMRqG6fuZW9E3UPUsk8qGEI00EbOrZR4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1711630244; c=relaxed/simple;
+	bh=mEq3kkyQkldQvdiZdEgFm77/6PFrLulgdeWMnYROWL4=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=dNVJK35ngTvq6tOLp/scKOKA1rHzMqZ0uHgoEPvVVsKJUtogTBXktWZwg2ZIn25y7VviZKVNYrJi9Rws5tBl7saVDIF7woIetrYK1CRct33a3KcGkON12C5HdSJBRE4K1ZVZEkR4etxQLApsdQGK3b5N0a2XLgf9YlQsV748s6c=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=lFyKInDf; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=qb22Izxv; arc=fail smtp.client-ip=205.220.165.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="M0JxAFAA"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=fYcVsvzSzgRT2hWUN2C8LYLHIN23HduZRyNulyjglkc=; b=M0JxAFAAOaz0uu7FD2N3JJ2qQ2
-	JapPLRvaDvhIt1K//kXHgwIFhuHgHKIw32ikngguskFJcoKCxsv9EZBk+A4l8RYpPbcfLygnF3Te0
-	cHlyoQ4EQKG664XPSanGF0oIPpHNLrmmrbF62K2fx+0MC0B3nU7won0361zwQa/IbUixnpSMfCj7h
-	qYI8dwso6l7xOQzDriPJKUj0IaCZ6ugumMEoE5bIJmKGeP1TMOzUONY+DfP1hN2k50z+L+5fFv3gl
-	JCftAMaboIRW1fzFmbdfwG54HQmtWPyYmgDCE9q7y5bfs8PLkxjf7gR+5kHvKB/ZTDh+F/uycXdXS
-	FMaDedyw==;
-Received: from 2a02-8389-2341-5b80-39d3-4735-9a3c-88d8.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:39d3:4735:9a3c:88d8] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1rpohc-0000000Dryh-3nOE;
-	Thu, 28 Mar 2024 12:17:53 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org
-Cc: djwong@kernel.org,
-	linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] xfs: don't run tests that require v4 file systems when not supported
-Date: Thu, 28 Mar 2024 13:17:49 +0100
-Message-Id: <20240328121749.15274-1-hch@lst.de>
-X-Mailer: git-send-email 2.39.2
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="lFyKInDf";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="qb22Izxv"
+Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42SCeoO6023840;
+	Thu, 28 Mar 2024 12:50:39 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
+ subject : to : cc : references : from : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=corp-2023-11-20;
+ bh=eb5/csXb35YN7eTLxWgugChQ4WR5529nqRvjXf3FJF0=;
+ b=lFyKInDfZJE/zz+0RSG6Z2rDm/F0z803N6SlES2jlvTADAMlRSkW5SeN1aylcRPwrxon
+ Ru/o4SlnXl9WpsmovIYaM2bY8P54FUS6/ftMtkvQWGEwGrHEq6a91osZfOAsZuM7fr6m
+ P3nexhVZKjVcQH1bw0hLBSJPmolQGZXOzqfa9s5aiPdSqZkUGNATar+ri4M7WtJKkLhe
+ 8jHtyJtC/mk5x0D/4sZaCvULiceKUu8IyIk3MxlfbJk6sGR6MB3/HZIJzTbg64pzYln6
+ aGAcu3Fcw0YoGfY/Nk5x6NRrbEGrs9sI+rspGrSad6WPp9FOT1DvbBgzLvUtXJ3u4pz0 7g== 
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3x2s9h02p6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 28 Mar 2024 12:50:38 +0000
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42SB8b6H014379;
+	Thu, 28 Mar 2024 12:50:37 GMT
+Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2168.outbound.protection.outlook.com [104.47.59.168])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3x1nh9xwhk-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 28 Mar 2024 12:50:37 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=XoQAvdRbn+feSv/3Ya7lVBTfafnQzhe88vnjdieWkNF/utgBcO5l5TdRznR7qsO1kmTgP3ftADQuNeeTmBAw7berontlpoS0vv84emyKdwu4dkxpGTF7K2o1Qxp1wxKepiS5VtIrKbOXFVnL+UfkyslsCd7VnWTbAchGiFwIqjokn9doTgGjI4O9io6fRFp6nio+efOQmbANpoqryv8JFIO/HFn+9ivDOWV/N1JczNaYFh7uACb4nhFio9xvctZrhsYMb8CDJQrzFGrYx9UOSG17n+SIw3SeJ/Ds+rHoop5IJBCWxO0satZ0F4TDDpspVL9lxp0NGB6xb8xkMNIl3A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=eb5/csXb35YN7eTLxWgugChQ4WR5529nqRvjXf3FJF0=;
+ b=mq7j8EwDOrzEWOMCkkalbU59lDOd90f9ArED6ERexpovK2s8u6LKxQCyO2J1CaeevmRYDZtfYx1y8p8dFA0xfr3rcaaTsgJbM0PtK/Hm5yYFwtM9UUlMgqk4kRwmr6YxPz5l1bNobx4SSWKK9PARMDIB98KlGSyj7MwcW291Qa9Ym2srZoFnUTc5YjGm2wLRH2YdiEwByPBOfRPZOW4CAK8MvMnIJxhx8L2nsAloOjBPKD2OEnJGomf150YUA1Hor1OVKuJSmmzZzXBr3J7/O6TotlQ2tlLPC4ZtrkIIR5l8O9KPinO1sgo7X+UeBUg8xfzxDXwEtUN9niUWqYTZtQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=eb5/csXb35YN7eTLxWgugChQ4WR5529nqRvjXf3FJF0=;
+ b=qb22IzxvKTZ2mMwNJXKvtcNGUqY8kMRJLxbqU9hB+MpI/D2z7iSMON7iTQZvJiaEeUWPJnqIWRffi2Nygennogx4THBspa+iIuc25m4CTxFI7MZAuYkRmapoM01g3wO47PbzlQfbY6BBQmsizn/lfoPynV1VAvoxbNEu13aW0Bs=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by PH0PR10MB4600.namprd10.prod.outlook.com (2603:10b6:510:36::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.33; Thu, 28 Mar
+ 2024 12:50:33 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::814:3d5c:443b:17b]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::814:3d5c:443b:17b%7]) with mapi id 15.20.7409.031; Thu, 28 Mar 2024
+ 12:50:33 +0000
+Message-ID: <947c24f4-5271-414b-ae1c-a359fa7139db@oracle.com>
+Date: Thu, 28 Mar 2024 20:50:26 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 06/10] btrfs: add helper to kill background process
+ running _btrfs_stress_remount_compress
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Filipe Manana <fdmanana@suse.com>
+References: <cover.1711558345.git.fdmanana@suse.com>
+ <0689a969e9834f4c2e694404f41f0bf8b7a34a2f.1711558345.git.fdmanana@suse.com>
+ <9383298f-a74b-4e2e-8f62-f1359ae68bc8@oracle.com>
+ <58997574-3333-4ddd-aa37-3b177f19c0e0@oracle.com>
+ <CAL3q7H4GjntZwft1tixdOK-0Kj1HyFEmixMHopA+XMP6nS1aWA@mail.gmail.com>
+Content-Language: en-US
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <CAL3q7H4GjntZwft1tixdOK-0Kj1HyFEmixMHopA+XMP6nS1aWA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SG2PR01CA0122.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:40::26) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH0PR10MB4600:EE_
+X-MS-Office365-Filtering-Correlation-Id: 6c18a43f-1563-4c56-ecd3-08dc4f25a820
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 
+	33Rd6ZKjwyCzKKX1zvnf05IpW/QFAfUEq5/SQ6VTtfs0j+y9sz29Mi2Slt/HgV1grBW5pJ5zHabCATF7Gcv4NYAOxiax5135y+RtdhEFMg4bvKCMEPYmbzz+6FfCgsvh+sjbkkZFNGHKDkqN9AjJDFbU3GmFle5sN18APioDmPGxCjnKb0nw5/mfyc9uPVV9B227Vs+5z/BW/4c+zDGP1GOie7rCNhoEY5PwAVW34Cn0jR7T1XCrsIkr5D8fXECqqbVB0vGqv1DXABuTAFfvZNGqMLsv6e1L7n76qf6xDM9JFzObnu813dTBq30jbrQW/GZ7Q2XOlPK9oew1oz8onoKUehErTtiyM3rudDTBqr3h3BmCdiUYfC8NZW2diz787t1GsxNTkLZFnX4Dgnoe5GsXz+KOgF/2JmR0oDbnU4RMFVBzj0jKvCvgZgRxyhf+NIcZXwLq3qlwqjNx33HPw3bt0qygiCDGyI0sWPUNWO/Q3Kl9U1aYcmuODJfhNlKvMko4DQKYFP7H9mRBynPNDR3sDMcZjW+MnMbrWrLyAUzliunv1C8ATOxl2kcorG/u+537Ih4y0dLio2axyi/hvtJopJha8+1p7+QRA9Y8LwCsGIY2Cp7HfJyBCuFcvkQe4CQQsrnDkNwBEYQUoCXNquB5rz35hQvB0dKqz7HLt1c=
+X-Forefront-Antispam-Report: 
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(1800799015)(376005);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: 
+	=?utf-8?B?QmxRSGRaUk40NWZkbmlLbE1VNVNQMmxrL0lHdnRWTEIyS001bFFlaVBMNTNH?=
+ =?utf-8?B?Nk95b2N2b1c5akIrQW8vZmp6eGhCWlpCWVF2eWE2akpMdlh2ZVJZOHZUUDVM?=
+ =?utf-8?B?SndTalpDRlovNklwZ28zU2tGZW5jWjc3cXMwQm1YTjJsOFZCRk0wa1JpYW94?=
+ =?utf-8?B?MlM5eURlMWx2S2NmWU16Vnpuck5ZTXdaSDZVQWZ1Wm9oRUIrZTN3V0JCblJ2?=
+ =?utf-8?B?WU9BbzBDMkxpVFRvUVVXWktGQ3psd1ljRVpkYmFHWnNlUnlldkQrYVBpUEZM?=
+ =?utf-8?B?cVg3dlV6eVFSa0U5S0hEcXFVR2lPMzZkd3NMYVBWeXNabDh4cDQzR05BdHlT?=
+ =?utf-8?B?dE9hK1g2UzBlaDBTRjhpbkM3Qy9HY1hSc2xuaVhLYWtYYnlUbnE3dTlvTDVj?=
+ =?utf-8?B?TEgraGtyZUhDcWRNMklzMDM4MSt4OFlEc3dZM0V2Qm9ZK0hQRHgrWHhLRG9x?=
+ =?utf-8?B?aFdVZ3habjNiajJYWVZ6U0NwQXNLVERtOUdyc0VqenNUTHlqalVWQ0d6WSt5?=
+ =?utf-8?B?RlozQ250L2FNUWpXT0tYd05WNnNaWVhoUVJyNk4rVUdaZnJxVjhNMUVva3BC?=
+ =?utf-8?B?QUVVNWJLLzNGdXlDQWllVit1c29ON2JHdDZkRkVtMEF3MUxwZFZGZG5XeGE1?=
+ =?utf-8?B?MkQvUERuWm1aelZ6OUtpaGQyUVhLSVVmZFFkRzZ0Qi9UUk4yL2lHZFJyUGFQ?=
+ =?utf-8?B?bHZTZzlEbnNRRmxpSmx3WFk5d1E5V24rdVBEamMwbk5TZnhzdFJtS1B0UEcx?=
+ =?utf-8?B?aXI3dFNneERiZEw3anV1ekpucXBaT2I3TmlRQTIveUVyazBseGVHSnN3M3VJ?=
+ =?utf-8?B?a055eEs2aGl3eEx0WWJtMVpWcFNpVDYySzI3Z01KcE1TTFBtNmc5R0VWOThE?=
+ =?utf-8?B?bWdWZU9JaTFtdk0rbjRlZXp2Q2N1elplNTQxMENtL2dENjl6bHFTSURHUEJF?=
+ =?utf-8?B?MUlHUVExTHBpY29LWGlBSHVXbE9SOVpSTVV4cGxBbGY2NEYyTE9JRGhFOXlL?=
+ =?utf-8?B?QlFtdUN5clZpM3VrL2NTRGNaVldxeUJDQnVrbFowYVY3T1J4QmFqSm5nRnk3?=
+ =?utf-8?B?b3AweFJzSWt1RUg3TGlYaFVHellHVC9OOXZhYU9KeFp6R0YxMVYzU3V2RkVO?=
+ =?utf-8?B?azRGUlJwcndrUDAyaU80blB3dTgzOXFnNjZDWFVhaVhzakgvMXBzWVc3Tld2?=
+ =?utf-8?B?N1p0Tlg5a092S0tKajl5ZWVWNFZyUDVHK2pHVG9tZ0RGTW9qRitHSHRjY0Zi?=
+ =?utf-8?B?T1huSDZkMDZPZFcrYUFkNVR5Tm1iTVd3a0tBRHdteFRxdHAvaWsvem9KcExI?=
+ =?utf-8?B?cU0xcyszOXM1TGdXUVBlUDcwSzVPR0h1cUd6S296VHN6UkFOdGJSYkh3T1Y5?=
+ =?utf-8?B?MjZhdFlaTkFDaDRmMTJLaW9ueEdGUmtQMEVxZ3psUlBOZWh6c0w1dGtGcFMy?=
+ =?utf-8?B?U0RpQi9mQWRKbU91czJEbW9sM3dLeXFqNHRpMDJkOSsxSHNYL0h5S2xBbFZz?=
+ =?utf-8?B?cWVaNzRqTXVWK3ZKaWMzNjVBcFkvM2thcGl5eExFOXdyZGN1VGR0ait4WWcw?=
+ =?utf-8?B?ZmxSN0FCYUlrYnpqWEJrd1oyL3hVeU1HRWNoUm43ZjVGenNLTDl3RUpTa2Iw?=
+ =?utf-8?B?cUNKY1dQbDBiWFJob2w1YUR5L1NYc08rV2RnU0xPWHJmUUFTQXRtQkwrb3Vo?=
+ =?utf-8?B?QWJ6MXR5YVltUS9nNjc2TlNrT25HS0RFME9MZHVhUTAwNWtMRVF5eXdhTHNT?=
+ =?utf-8?B?U3liVEYvMTBLdVEvMThIb0x0QmQ4ZFA3eThVemREUmx5Vm5YR0Y1dzhNZDFK?=
+ =?utf-8?B?a1g2OS9tcGQvbGdqUmc2Nno1cTMyeXVONGFwb2hjb2lvUm9ndk96SWpmZWxZ?=
+ =?utf-8?B?MlhubW1YWC80SEJNeDlubUxSZTZxaWZoRUs5RXA0a3RkL0o4SlNscXRzWVgy?=
+ =?utf-8?B?TTF6WDZyQmR3YU92NXk4SDlQZzZjT0xkV1VrNzZ5SVhSZWd0Slhxdkhhd1o5?=
+ =?utf-8?B?bDk4NVBJWDR2R0h2RGxJU090bWREbktTb3V6QVZxazl1RGtGNXBDRnFPYjg0?=
+ =?utf-8?B?NU5rMmtjNHdPSVArbmJEUFNDRTB3UE13K0JEMHpHV25vNVNqclI4RUs3Um00?=
+ =?utf-8?B?N1NuUDJMVGRKa0RPdUErZjI0NGMyUWEzYzcvVzhYN0tiUjRIb3lVZHJmS1gz?=
+ =?utf-8?B?YlE9PQ==?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
+	rrm9r37MehnbW/AeBM5ztEPQF4pacHRDxES1GGaEQYm2JR5qvmXsscmhb4qF3KsC8Fx3DJgzBcZCxgoygn/URH4gDlCCujVd8mxqRUiNFXplBL8D+TuBSwthSoVE4L6fbnV8F06pYaNhnDHxXBxeXg1v7cmUKKXaMYCE+bdvBQdKFlCks0qTp/zFFjwK0l+c3ut3tkToZHMNlI71l1S36u19IqAIzc4Igf0Tb1uhgxTuHuD/CdD/egnKJOHG4fD42TRtrafOxGzg1aHTKA3TCm0NprReGRYZTkMLBuIN7wIGH35QCtcgN1KyztcKpbn5ph8zIvIPK6zlFVp4senC8tWrBMaIGtUtKAlc/5VsibsXJrnZCkzV2ZQnmiOaZxPw8eeRAkfuP9w/gnWLwdPebHOQTaQSDUZj2hMPmaUZzdhLa8G1ys2q/6wfvoJWSMPNsnLKapV+pVbHp3Gr0uNAhXviYnYxyULi8zMTpXnGCEYdltaAVJKNTKVRlP5cCILlZu46iTfo/Dc4+lvmYI/C1urU0Qk8TziKe99Ke8uCXSmUOCrzFeucmV2KFJQpy9jByjwp01ED+ZgjYxkSGFAptvt3u4c+qlC1MmkwvlqJSCg=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6c18a43f-1563-4c56-ecd3-08dc4f25a820
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Mar 2024 12:50:33.6187
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: KxLi1O4j4nPzW/93aEI8P+x6vO6kkOXX1sKr3UmcLk7WZFQ/DGh4HCSzGCyGyThSwzVBt1+qhrms3nFrCMSgSQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR10MB4600
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-03-28_12,2024-03-27_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 malwarescore=0
+ phishscore=0 mlxscore=0 mlxlogscore=999 spamscore=0 bulkscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2403210000 definitions=main-2403280087
+X-Proofpoint-GUID: v3DLvVorOqveo7yR_QS8Q_08atEmUYNN
+X-Proofpoint-ORIG-GUID: v3DLvVorOqveo7yR_QS8Q_08atEmUYNN
 
-Add a _require_xfs_nocrc helper that checks that we can mkfs and mount
-a crc=0 file systems before running tests that rely on it to avoid failures
-on kernels with CONFIG_XFS_SUPPORT_V4 disabled.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- common/xfs    | 10 ++++++++++
- tests/xfs/002 |  4 +---
- tests/xfs/045 |  1 +
- tests/xfs/095 |  1 +
- tests/xfs/132 |  3 ++-
- tests/xfs/148 |  2 +-
- tests/xfs/158 |  1 +
- tests/xfs/160 |  1 +
- tests/xfs/194 |  2 ++
- tests/xfs/199 |  1 +
- tests/xfs/263 |  1 +
- tests/xfs/513 |  1 +
- tests/xfs/522 |  1 +
- tests/xfs/526 |  1 +
- 14 files changed, 25 insertions(+), 5 deletions(-)
 
-diff --git a/common/xfs b/common/xfs
-index 65b509691..5da6987b2 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1887,3 +1887,13 @@ _xfs_discard_max_offset_kb()
- 	$XFS_IO_PROG -c 'statfs' "$1" | \
- 		awk '{g[$1] = $3} END {print (g["geom.bsize"] * g["geom.datablocks"] / 1024)}'
- }
-+
-+# check if mkfs and the kernel support nocrc (v4) file systems
-+_require_xfs_nocrc()
-+{
-+	_scratch_mkfs_xfs -m crc=0 > /dev/null 2>&1 || \
-+		_notrun "v4 file systems not supported"
-+	_try_scratch_mount > /dev/null 2>&1 || \
-+		_notrun "v4 file systems not supported"
-+	_scratch_unmount
-+}
-diff --git a/tests/xfs/002 b/tests/xfs/002
-index 6c0bb4d04..26d0cd6e4 100755
---- a/tests/xfs/002
-+++ b/tests/xfs/002
-@@ -23,9 +23,7 @@ _begin_fstest auto quick growfs
- _supported_fs xfs
- _require_scratch_nocheck
- _require_no_large_scratch_dev
--
--# So we can explicitly turn it _off_:
--_require_xfs_mkfs_crc
-+_require_xfs_nocrc
- 
- _scratch_mkfs_xfs -m crc=0 -d size=128m >> $seqres.full 2>&1 || _fail "mkfs failed"
- 
-diff --git a/tests/xfs/045 b/tests/xfs/045
-index d8cc9ac29..69531ba71 100755
---- a/tests/xfs/045
-+++ b/tests/xfs/045
-@@ -22,6 +22,7 @@ _supported_fs xfs
- 
- _require_test
- _require_scratch_nocheck
-+_require_xfs_nocrc
- 
- echo "*** get uuid"
- uuid=`_get_existing_uuid`
-diff --git a/tests/xfs/095 b/tests/xfs/095
-index a3891c85e..e7dc3e9f4 100755
---- a/tests/xfs/095
-+++ b/tests/xfs/095
-@@ -19,6 +19,7 @@ _begin_fstest log v2log auto
- _supported_fs xfs
- _require_scratch
- _require_v2log
-+_require_xfs_nocrc
- 
- if [ "$(blockdev --getss $SCRATCH_DEV)" != "512" ]; then
- 	_notrun "need 512b sector size"
-diff --git a/tests/xfs/132 b/tests/xfs/132
-index fa36c09c2..1b8de82f5 100755
---- a/tests/xfs/132
-+++ b/tests/xfs/132
-@@ -19,12 +19,13 @@ _supported_fs xfs
- 
- # we intentionally corrupt the filesystem, so don't check it after the test
- _require_scratch_nocheck
-+_require_xfs_nocrc
- 
- # on success, we'll get a shutdown filesystem with a really noisy log message
- # due to transaction cancellation.  Hence we don't want to check dmesg here.
- _disable_dmesg_check
- 
--_require_xfs_mkfs_crc
-+
- _scratch_mkfs -m crc=0 > $seqres.full 2>&1
- 
- # The files that EIO in the golden output changes if we have quotas enabled
-diff --git a/tests/xfs/148 b/tests/xfs/148
-index 5d0a0bf42..789b8d0a4 100755
---- a/tests/xfs/148
-+++ b/tests/xfs/148
-@@ -27,7 +27,7 @@ _cleanup()
- _supported_fs xfs
- _require_test
- _require_attrs
--_require_xfs_mkfs_crc
-+_require_xfs_nocrc
- _disable_dmesg_check
- 
- imgfile=$TEST_DIR/img-$seq
-diff --git a/tests/xfs/158 b/tests/xfs/158
-index 4440adf6e..0107fa3d6 100755
---- a/tests/xfs/158
-+++ b/tests/xfs/158
-@@ -18,6 +18,7 @@ _supported_fs xfs
- _require_scratch_xfs_inobtcount
- _require_command "$XFS_ADMIN_PROG" "xfs_admin"
- _require_xfs_repair_upgrade inobtcount
-+_require_xfs_nocrc
- 
- # Make sure we can't format a filesystem with inobtcount and not finobt.
- _scratch_mkfs -m crc=1,inobtcount=1,finobt=0 &> $seqres.full && \
-diff --git a/tests/xfs/160 b/tests/xfs/160
-index 399fe4bcf..134b38a18 100755
---- a/tests/xfs/160
-+++ b/tests/xfs/160
-@@ -18,6 +18,7 @@ _supported_fs xfs
- _require_command "$XFS_ADMIN_PROG" "xfs_admin"
- _require_scratch_xfs_bigtime
- _require_xfs_repair_upgrade bigtime
-+_require_xfs_nocrc
- 
- date --date='Jan 1 00:00:00 UTC 2040' > /dev/null 2>&1 || \
- 	_notrun "Userspace does not support dates past 2038."
-diff --git a/tests/xfs/194 b/tests/xfs/194
-index 5a1dff5d2..2ef9403bb 100755
---- a/tests/xfs/194
-+++ b/tests/xfs/194
-@@ -30,6 +30,8 @@ _supported_fs xfs
- # real QA test starts here
- 
- _require_scratch
-+_require_xfs_nocrc
-+
- _scratch_mkfs_xfs >/dev/null 2>&1
- 
- # For this test we use block size = 1/8 page size
-diff --git a/tests/xfs/199 b/tests/xfs/199
-index 4669f2c3e..f99b04db3 100755
---- a/tests/xfs/199
-+++ b/tests/xfs/199
-@@ -26,6 +26,7 @@ _cleanup()
- _supported_fs xfs
- 
- _require_scratch
-+_require_xfs_nocrc
- 
- # clear any mkfs options so that we can directly specify the options we need to
- # be able to test the features bitmask behaviour correctly.
-diff --git a/tests/xfs/263 b/tests/xfs/263
-index bce4e13f9..99c97a104 100755
---- a/tests/xfs/263
-+++ b/tests/xfs/263
-@@ -25,6 +25,7 @@ _require_xfs_quota
- # Only test crc and beyond (but we will test with and without the feature)
- _require_xfs_mkfs_crc
- _require_xfs_crc
-+_require_xfs_nocrc
- 
- function option_string()
- {
-diff --git a/tests/xfs/513 b/tests/xfs/513
-index ce2bb3491..42eceeb90 100755
---- a/tests/xfs/513
-+++ b/tests/xfs/513
-@@ -37,6 +37,7 @@ _fixed_by_kernel_commit 237d7887ae72 \
- _require_test
- _require_loop
- _require_xfs_io_command "falloc"
-+_require_xfs_nocrc
- 
- LOOP_IMG=$TEST_DIR/$seq.dev
- LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
-diff --git a/tests/xfs/522 b/tests/xfs/522
-index 2475d5844..7db3bb9fc 100755
---- a/tests/xfs/522
-+++ b/tests/xfs/522
-@@ -27,6 +27,7 @@ _supported_fs xfs
- _require_test
- _require_scratch_nocheck
- _require_xfs_mkfs_cfgfile
-+_require_xfs_nocrc
- 
- def_cfgfile=$TEST_DIR/a
- fsimg=$TEST_DIR/a.img
-diff --git a/tests/xfs/526 b/tests/xfs/526
-index 4261e8497..188d0d514 100755
---- a/tests/xfs/526
-+++ b/tests/xfs/526
-@@ -26,6 +26,7 @@ _supported_fs xfs
- _require_test
- _require_scratch_nocheck
- _require_xfs_mkfs_cfgfile
-+_require_xfs_nocrc
- 
- cfgfile=$TEST_DIR/a
- rm -rf $cfgfile
--- 
-2.39.2
+On 3/28/24 20:03, Filipe Manana wrote:
+> On Thu, Mar 28, 2024 at 11:46 AM Anand Jain <anand.jain@oracle.com> wrote:
+>>
+>>
+>>>> diff --git a/tests/btrfs/071 b/tests/btrfs/071
+>>>> index 6ebbd8cc..7ba15390 100755
+>>>> --- a/tests/btrfs/071
+>>>> +++ b/tests/btrfs/071
+>>>> @@ -58,17 +58,15 @@ run_test()
+>>>>        echo "$remount_pid" >>$seqres.full
+>>
+>>
+>>
+>>>>        echo "Wait for fsstress to exit and kill all background workers"
+>>>>>> $seqres.full
+>>>> -    wait $fsstress_pid
+>>>> -    kill $replace_pid $remount_pid
+>>>> -    wait
+>>>> +    kill $replace_pid
+>>>> +    wait $fsstress_pid $replace_pid
+>>
 
+>> The change first kills the replace and then wait for fsstress. Was this
+>> intentional?
+> 
+
+> It wasn't.
+
+Ok. Thanks for confirming. I will fix it.
+
+-Anand
+
+
+> But after all patches applied, everything's correct, we
+> wait for fsstress to finish and then kill replace.
+> Do you want me to fix that?
+> 
+> The sequence will have to be:
+> 
+> wait $fsstress_pid
+> kill $replace_pid
+> wait $replace_pid
+> 
+> Thanks.
+> 
+>>
+>> This patch is causing a regression. The replace never gets killed, as
+>> the echo-comment specifically states to wait for fsstress and then kill
+>> the replace. Following it fixes the issue.
+>>
+>> Which the patch 7/10 reversed the order to fix. But why?
+>>
+>> Thanks, Anand
+>>
+>>
+>>>> -    # wait for the remount and replace operations to finish
+>>>> +    # wait for the replace operationss to finish
+>>
+>>
+>>
+>>
+>>>>        while ps aux | grep "replace start" | grep -qv grep; do
+>>>>            sleep 1
+>>>>        done
+>>>> -    while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
+>>>> -        sleep 1
+>>>> -    done
+>>>> +
+>>>> +    _btrfs_kill_stress_remount_compress_pid $remount_pid $SCRATCH_MNT
+>>>>        echo "Scrub the filesystem" >>$seqres.full
+>>>>        $BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
