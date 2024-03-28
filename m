@@ -1,85 +1,85 @@
 Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8A1A54775;
-	Thu, 28 Mar 2024 08:17:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FF3351C43;
+	Thu, 28 Mar 2024 08:41:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711613834; cv=fail; b=NK78Up5hl2tvU2Tbr6Co2BSmHi7GZ5PkwZYJ1A6URT1k6Dfzeg8plU41X673G0ikGakzv6Pg+BBT/bqI7lwhBcwVitafuKL5kxJ00wa1kY6dMTyjmbpz5ZSJQUrytVPnridiJqldy4rAlmKjJHMehw/1tcWqjvw7CcTNO7BEymQ=
+	t=1711615281; cv=fail; b=oHfPlBcvSOO8l0nUU2nPm5VHqaxLxmzeBF1fx7zuxyFJZs5dRota6FYAZnb+YJvOTn9MF2nNfKaXYMQiHSSJdqYPaUhNrUVYqFrSSqd4ZBpKhWvFXPjWemsrQNFiWpn7o8eBNRs0NUcNCq5Br9B9wLSP3EDwrDAOyjV7yNT47gI=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711613834; c=relaxed/simple;
-	bh=n+5+0MQ2BVwhyc+LD30PuIgc43e+4dkt2cEuput+syI=;
+	s=arc-20240116; t=1711615281; c=relaxed/simple;
+	bh=T/PmX7VkuyuoHp3km6thOJnZLamJ+Cb8DG01zYfqPE4=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=m+TKt2g+l2WIwacnYrhY43jr4gzWYb+VXF257OXfOeAcqtSPqzHxnNQuvngwqaGl221UZg+f2iCvqm8+mnsULD30NxoIhN3ChdOLJttnRF1xcm8zPgUhPuIvMg0CL2w2v+vxGbDXNSK9woJc17Tim+ks/EHcDsf45iRDmuVjyf8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=Qg1lV7wP; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=ZReUH/Bs; arc=fail smtp.client-ip=205.220.165.32
+	 Content-Type:MIME-Version; b=D1Fry1QLDPWShk7gte9WTmGv1a4DWfpgHchKlMGt47xBdFEDSYOAFeg3/7TYBoLnhXmZT70oPDXF0OWXxBtsh+BpnCN9HgV//LFH7buDjPqWocVWja4u0ocBUdVGS1xH2m7vkjsnUGZmIehQSqjYfm/yISjC3SluQmYPydvJHtI=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=PQwe85Ic; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=qXwi1Ciy; arc=fail smtp.client-ip=205.220.165.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="Qg1lV7wP";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="ZReUH/Bs"
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42S7EERp000491;
-	Thu, 28 Mar 2024 08:17:06 GMT
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="PQwe85Ic";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="qXwi1Ciy"
+Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 42S7BXxO020333;
+	Thu, 28 Mar 2024 08:41:15 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
  subject : to : cc : references : from : in-reply-to : content-type :
  content-transfer-encoding : mime-version; s=corp-2023-11-20;
- bh=ve8qgIQ6UV1+Kcem92NrKQgumjWOmy0mhChMLzOuZ1o=;
- b=Qg1lV7wPyWfYBN6AtG8rd6fR/ypeeVRdLq0nmMu/MbGPz0Wx3zLb/YcoFdfTpGJ5HsuT
- z23aEKmuhG5Fbpn0AoR0S7wt6/b9xRNBPnSw6saM1iv1hb7fXwahib5ucQ4sVt29rxIc
- TnZQ0qirqqWMBn8gnzUclqqqLukMII+N4MB2fd2kSCt/CBqM86t6Az7W5+0fr7Mupw79
- K+xSwc1gsnAmrDrUYnjK/Zct03f/n/D8/sh5CL4iABENGr1Xl2qr0k6ncwXMjEB+Nztb
- wQvP5/QcL4Da6x8RU5FEOngdW5S3Z7OOcw6xnvO2CNjKbXdVHHImp9OAWnK3tJ/S4mZi wg== 
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3x2s9gymfx-1
+ bh=Pkhguf6tO9Nn7kU0E2ipw4MsTznfOiUONRn4lHlqd5Q=;
+ b=PQwe85IcmyvcPx6NbL2mvedJRQqbOLSt0PjxzqXMxpGjZ8QPSiEmUBmL2pXkri5OUXq2
+ y30tSsdhN+pxSHsipVaKtOWVXFF4OBxO5zS5kud+YfhetH44WaWYErc+uOuB4y9542dB
+ WqJKaWOa1tSOM1yw0xM+x2Ocwq2N/VFOtXPg37z0fKyRDA2GCUHZEsxp7fr3KYewl61s
+ n8HUaGtmyeZHVz4ZCvGHSmLPLHn18ElfXsFPw+fUos/b7C99YqiscKObcdppcdayXBcL
+ 9Emw92Dt5IWjZXX0tc9bCHu1tU3GqfqmaAg1FU6JxzuhYdxo8Vha0/3PM7PnJ9yQqidT 9A== 
+Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3x28ct8hmt-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 28 Mar 2024 08:17:06 +0000
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42S6FcP5019057;
-	Thu, 28 Mar 2024 08:17:05 GMT
-Received: from nam04-mw2-obe.outbound.protection.outlook.com (mail-mw2nam04lp2168.outbound.protection.outlook.com [104.47.73.168])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3x1nhfxudr-1
+	Thu, 28 Mar 2024 08:41:14 +0000
+Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 42S6hMAc015060;
+	Thu, 28 Mar 2024 08:41:13 GMT
+Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2168.outbound.protection.outlook.com [104.47.57.168])
+	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3x1nhfxrya-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 28 Mar 2024 08:17:05 +0000
+	Thu, 28 Mar 2024 08:41:13 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=L2Y0a6frOgLnY8H/v/w4M/Xk+s85CBi9ckipRg2pYzhx1h34c3rRTmD+qauGXpWrW6VrN8jAS6Dz7NLkF4eSqE3Vo3i827e4kJvJxdCWPAQB/fJU76rYPZvyJi6T5IjBx7ZL1AyCnxN4uJQVmTV9s3LLIcwoTMUnXswwW2kmICStRmphMSDJt6wJqUorYjhOz2EGKr/I7MBEso9cpPsJEvxRMsFf7oUMwQAthkZv+FWo4arqw2z6T65YzGMHVCiCtIBWjF701v79E1668WGxnuama8TW/uaA2gjvBfDirdtu/PrJ2PqOO0OfvEZzDobYo1hxXSCGfeocNfJyV6zIpA==
+ b=h6C+lK8AKAWYbb/YtrJo7T2HTT9GXBhGhP8MDDbMJMbWO6rriKVnFAZbn6YqqS8gpn815hSlOUm8IM3I4Nbt8s/FWHjkD2RwEMmEzW7tVYCVq4R3RvkAo+g6PUcWepeBEn5/IhB2IUCyXjKyE8YvnkCZarHccMSpGx0ODfsG38iSIeh5pfEZYEgIWkpEgxhssKZqjBgpFOkVCnUt2RED7ndkvMKnhOKLJ+Oy1cBhX/Z2Rp5ma+G4Lg/QXb39QmImP2tPNJw6gl91ltrjGBSDBysgo5rs73kH8V2AcUDFFK69Q0quMKu0EzSBv1cShvH0bralHA+pZPG5/ZMz/u+YHg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ve8qgIQ6UV1+Kcem92NrKQgumjWOmy0mhChMLzOuZ1o=;
- b=Yua265vkLKJtMe/vnNkGEyzaka2wW23GvVZPPzLEnArTZykpVN6GVqi5Mz7fKqot+7HENreBILaWXhwSO51+Zr2SG5Y1gwdKnl/pu9MFdfuoPnXl2niOuESPzC5s49evogzqjjSnBRWfrT9kX1v4b8ng37gHP98OaQSFz0OpZRUEjFuPyGPnn07pD8D8ZQ/gNQFEDxmIMBO104W27dYT+W8exWBwVeh6jO4qs507hEqBY0R9MwX4lfxbocdMzRGyMVfc7IZ1xHiw5Giwxv9flagBh7rA2qbwma5JLZPeYhLD2T9QmkyLKS/RUZiv+ZQCtvJZtm7A8DTA4JEan8D86A==
+ bh=Pkhguf6tO9Nn7kU0E2ipw4MsTznfOiUONRn4lHlqd5Q=;
+ b=dlM5x+8aDcDi+eBZkvCoiojl2ae2JXAvKgHpeWw1qaAzltvhfIwfcsYxwb4hRg4oL1yFJVYW8om6+HJ/mFP9zcjRnk/iB6yb9jgHjhz4qOUeU7LKQI2BR5s+kEEHtnFNsa4phLiGo9HGbOgf26mgG/c6Qc9zb4Yxf+8rWGlrtutC6qy625c2gJKpnREPKhSxup2hJBFiB6WkX13TdYg6GJZK84GopxuhHDbEDvVbXaVZ4nGNEdVXJZp9IJZtu10R+ZwQtoymTbJLsKigOW9/KKpG9a+sln4XRMAO2qVBSankuLO/XYYQqYX+VAI+tAZd88hIgQRAIpTp/6x97HXWeA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ve8qgIQ6UV1+Kcem92NrKQgumjWOmy0mhChMLzOuZ1o=;
- b=ZReUH/BsaJyUe/TngrcoiuHbZ6ncZammRDt8uD8/DuW77NZRuAVEFWtC0GolGELF/RHwf5xlCkM2f+KjhMKNn9pJjxXpLWdTrCO68YRN/EgY4+ZEME1yLPFXMEmwwEQbO7ktYNyNehCMGF3zJ7f0cvfcmMSGJUNblJmC8ydEbxY=
+ bh=Pkhguf6tO9Nn7kU0E2ipw4MsTznfOiUONRn4lHlqd5Q=;
+ b=qXwi1CiyxSTxAiR8JSKCFXgpgvuHVxgb/WV8qKN25esYAHO4EB1rKs5KYuh0AMt/nzY3mb2Y6tIr/d7DbfJseC3BhbTMCdFZ6YnwYFQVMY9fsW30JMGzh6aOdIY1ACfxIUJLHULr9iKbHzr0KSOTnPh/Ks5njkChjqAsgDu9e8Q=
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by DS7PR10MB4992.namprd10.prod.outlook.com (2603:10b6:5:3a1::13) with
+ by PH7PR10MB6084.namprd10.prod.outlook.com (2603:10b6:510:1f8::10) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.33; Thu, 28 Mar
- 2024 08:17:02 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7409.32; Thu, 28 Mar
+ 2024 08:41:10 +0000
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::814:3d5c:443b:17b]) by PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::814:3d5c:443b:17b%7]) with mapi id 15.20.7409.031; Thu, 28 Mar 2024
- 08:17:02 +0000
-Message-ID: <15593268-e561-4054-865a-98c704fbf65e@oracle.com>
-Date: Thu, 28 Mar 2024 16:16:55 +0800
+ 08:41:10 +0000
+Message-ID: <82afe79c-3408-47da-b0ff-346371263689@oracle.com>
+Date: Thu, 28 Mar 2024 16:41:04 +0800
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 01/10] btrfs: add helper to kill background process
- running _btrfs_stress_balance
+Subject: Re: [PATCH 04/10] btrfs: add helper to kill background process
+ running _btrfs_stress_scrub
 To: fdmanana@kernel.org, fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 References: <cover.1711558345.git.fdmanana@suse.com>
- <e5f1141cbe307e6057554e1c8fb8cff188ab68f0.1711558345.git.fdmanana@suse.com>
+ <091a8f4e0211299e21c3a3231584d0e8dac49ed1.1711558345.git.fdmanana@suse.com>
 Content-Language: en-US
 From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <e5f1141cbe307e6057554e1c8fb8cff188ab68f0.1711558345.git.fdmanana@suse.com>
+In-Reply-To: <091a8f4e0211299e21c3a3231584d0e8dac49ed1.1711558345.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SG2PR02CA0127.apcprd02.prod.outlook.com
- (2603:1096:4:188::7) To PH0PR10MB5706.namprd10.prod.outlook.com
+X-ClientProxiedBy: SG2PR01CA0143.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:8f::23) To PH0PR10MB5706.namprd10.prod.outlook.com
  (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -88,91 +88,88 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS7PR10MB4992:EE_
-X-MS-Office365-Filtering-Correlation-Id: f6d0ee57-ddb2-45d4-ed0e-08dc4eff722e
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|PH7PR10MB6084:EE_
+X-MS-Office365-Filtering-Correlation-Id: eadc86fc-c1b7-49b4-7e09-08dc4f02d17b
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
 X-Microsoft-Antispam-Message-Info: 
-	mYWq+MJMtDRoiSLlSgDMd299kQSIWCEpURQ5CT5fudDFROTjsFofvjnsQu8RADGzbqsU8V6e4gnTGr5A38P/v3mFm8RdoLo9bmqEWnhKhywWxvBEb+6w45wD02q1hNltSnASJqRfQRWIYpgUcSv2XbmnXEZQnufLl8slUmw+h1IZrhqiQBI/0n1bXe54Hs+up0KBFJtaHXfv2Wnd0Xt2y1uNpg4lNT5kFNovGIbjoktarMgHeK/iYq95KXHaychhvm6peRVxDeMbfHP9Mkq8laOF1Bgno7rXD6D/hLmgAlB/ppnOFzNVb8ZH2B9YNRuQ23HGzaOHXDEuzc+in5PKNsALeS1B/HDQ0BjxVA3G3b1YUgwX8B61G4LGB3wCCDO0rTTJtBN0ye0ynpyDTf4jkkfh28KxJl1yW2+4My5zLLa3kMe0/H70J+3VJSZKr4ti9TDZu7ZifaS1dhid4OP/zeb5R2MZFRcprIYXWURcVHAlMvEQ5kwwkkVvhAxeT+8QQV5RhygiRNgjhV3Kf8/DxHUkSnUgMi1g5pY9If0OKSxy6HJj6s535WUjWR5Ztc3E9u2MXFaNRcbrC7Tmt+fZy+fkjbUbG9Ze0MNtiAyDnlYCj6DEIral0cuBbt1ySutaUbNRBxJlgI6LD2BsYRq9b/BJrvfJbGufBlAwOwba75s=
+	0PO1hDK8pklDA+UWlV51xw1COfzySCinUtdMBeOBJ8kY2faJ6tNxp+QNrTfIadUMPtrykwfl5WTNPYkovBSH7tujff7bdjsow4yQs/f+TBrZjxhyG7eAVaMmk0Pw1ec9UL3xkcUFL8C0oLUSc/sO4z0TFiBdrnt691OxxleU9n+eKERBtWEjZhYlbrB5oTogYnlI+esYp8tUlywZIP0ua8QxOij93shnVRfDJ9Y+O5Dy4LHjI1WlLO/d+pTmZFEvMLLN/1h2xtGiSVqnTiCHJcLbiotUDGc215fv/z88PG9Zg8m86Wda2Ccfg9IrXBYrGyneDp2OBka8+eH+N7va2o7qbrz6t0lx55Av9J15YKHCpGIltiKYRXMCOOESraqw9urDSBXLD4S1iwJ5l1caHwg50Txu5psDpEFeOFaXSj2/6Zw9udx5RCYhQKFykCFMhK9FjHp40+c3inKQyLotUv3tZlDef9gjWiJjdu6x1l3J/Tj8Ipnyjoc9DMMsKcKvdtQKnBNSvfV6cDrRTdzUvVP6MOzU/N8UTsMbd24Zyf4dHq/y4wcedLmCKsmdY5pIFA5KWUxpz05xGUk535KxWpAgFdBzr3UAWIqXthXj0Th4Tx6h1ytS90FHgLdU0eAumqvvaR1eZJSNqwmvEZmjtgAIv5wsTQH3vn/uET6FTHg=
 X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(376005)(1800799015)(366007);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(1800799015)(376005)(366007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?utf-8?B?bms1QzBCZUhXQ2FnMUtQNUVEd2ZlRUhxT01GR2ltRjdkK0hWRDZELzc4b0x0?=
- =?utf-8?B?a0J2S1kvVE45dE5xR0lOWXFQZy9tRFpJMzRtZFNaRzlhUUZQQkxaY0orYzAv?=
- =?utf-8?B?R0UwT3lpQ1h2S01FSG1LT0tzVmVFTVNwbFA3V2ZFKyt5UDR0TEl3NlRGRldE?=
- =?utf-8?B?c2NhWSs2WUJVYXZWZ2VLVG9XRzJCanFYSVoveUI3ZDRwaUVjSWdoY3dFaFFq?=
- =?utf-8?B?VVdKVjZtanRLajVETW1NVHV6azdOcWt3bCtUcjRFcksyQW9jODB3d2JhM2NE?=
- =?utf-8?B?cFZNekhkNDBxY3kydDI0U2JlQWZNV1N5VEF1OXE5RnBuTjBRRFRsek1HeVBh?=
- =?utf-8?B?ZUUxZU9jUVM1REt2SkgySE1keTZuSWhua1BNZzFQSVovQ2tUTVlpS1hZTnZ4?=
- =?utf-8?B?N2Z2REh1aFZnUWkra3NURVhQU2ZBZzd4OGxOcVlxYnZoVTRBeU1PUFlabHFJ?=
- =?utf-8?B?NE1FMlNSRFJYOHU5Q2RtT2hxeTRFUVhoR3kyYktSR0F4S0dzbG53dWVDTmZv?=
- =?utf-8?B?ZzZPdXYzM1VQNnpwLzhJdkdISHIvbXZjTjcwQXRxclNOU0ZsZWo5bVc3WXZH?=
- =?utf-8?B?OTBMWjl2SlBYZ0l4NWduS3pBSGlSNHozeEJPem9HYnFnUUhMOFNHMDRxUFZC?=
- =?utf-8?B?cnZvLzRVQ1hGTHo1RVNDVU14Ylo0SUtBZ0RwZ0x1YmhMTGpmelBTWVJYbFNl?=
- =?utf-8?B?TWxoVjd6UjJSVlNZV0tucmIvYm82YXQ3VEZMQ3RrOE5iNllQallzY2QvVnYx?=
- =?utf-8?B?NkpUNVVZTStmSVVMVjhHb3A0ZFRGZ05sOUJYTG9WYnJDOUhKZEIrbW41MWs0?=
- =?utf-8?B?Y21MTENkZlR6SWdiVlZMODVLWVBlV2NCOTVZaTU2VUlqYkh6dkF6RjdoRkxM?=
- =?utf-8?B?bTBpWmttdHh1TkFVcjByMlZPRUR6d1lvUGxyUVZFRUFwL1Jsb1VtZVpRRUVQ?=
- =?utf-8?B?YzNRc0s4UTA2U0pINEJ5bC9GeU12Q3M4V2c4TFRxdytNeWcrYThqOXNVQnRI?=
- =?utf-8?B?Q0JLb1g5MjF6ZXFDZms1L0dSK1UzejVrVnlOUSt3MjBQTktZdDBxS1c4cnRC?=
- =?utf-8?B?eDdqL053aFUwY2Ezd0ZZdHdNclg3d1F6dTZEYjBxMzI0SzdJaDArUFhoUGJ1?=
- =?utf-8?B?ODV4ZmJyZU54RHpGdjhBZ1dGenN2REMvZ0x2OGFYRlUvemZ6UWNMU0JxSm4y?=
- =?utf-8?B?VEtuNmwyNEE3KzJsYUtsSTMwTmZKeDdzQVNuM3NPN3haUmZjSnRSSTIzZEg0?=
- =?utf-8?B?dHU3d2dmeFJJT0U5RnM4aFZEVXZ4SnJsK1FKQ0ptdDVkOWIwRkFzSkJRL3di?=
- =?utf-8?B?aGF6L3l3ZUhkLzJzWEdERnpzZGcwY0g0akx5Mi80eUF2K3J3ZVlrbXZUR3Uy?=
- =?utf-8?B?dGh0U0dta3A4YzZrMXBEWGtjUlBDREpBMEk5TEQxV0srU2JoM1RESUdQVTNE?=
- =?utf-8?B?UVFFYStwM0liWjZLM3BVbTBKYlB6YTJlVjUxV0RyVWx2QnFxbWtjMHpjMmtU?=
- =?utf-8?B?cWNBai9OaExKS20zV3c4UXFKUlIzYTZkdjZBeHZJRDQvVmFJOGlmNEVaS0VO?=
- =?utf-8?B?THA0NmVDbDYyVVE5dEs2eGU4MkN1QTBRaFEwUGJqa3RON29NVU11NldXeUlH?=
- =?utf-8?B?N2h3K3krTTBLdmFGTlRjeC80NjRLVCtHU3dBc0JtSTBSaFVucm01anErczB0?=
- =?utf-8?B?bHVVbjUwQ0R3WnA4Mis0ZnVHSWgwYVpzY2dTRW8wV2hZeWpodW03MHp6NU9t?=
- =?utf-8?B?T1JMdUN3M1ZzZ216dW9hRFYwc0ppT05TU0ttMFFQeDhQVThubklxVHVYY2NQ?=
- =?utf-8?B?U29aZjJJTDdycTJEcVhtS0R6K3NMcnNZcXJKUWpSNlExaGpXVm1IeFdFbzUw?=
- =?utf-8?B?eE95ZnFNOUk1MWNHOGVXQTA4bmVqWU5OQWx6ZUc3UnJSTW1qZEdJcFkvNWNN?=
- =?utf-8?B?V2RuelBqbjVKdXhLWEN4NU40VVdGNVdtWDFRbzhycnE2bWpkbE1MeDNBdW85?=
- =?utf-8?B?a25ZMzFNaEFtMzZiRjN3T0YxMFd5c2lKU2hoSVpzamlSWGUvdEM3WlE3aXlJ?=
- =?utf-8?B?TDJGY3QrZ2twTWRYWGJWUm5yS3gxQWtwc2wxSW0yZUxzRnd5R2JTd0JEV1NS?=
- =?utf-8?B?bERCRkJxOE1jYlR3MURxeXFHZnVqRW9YbVl5cmc0azhKUFdwQ2p4bG9rL1Z1?=
- =?utf-8?B?cVE9PQ==?=
+	=?utf-8?B?NW9Xb05ZY21hVmZLUUlyTzRNQStuWFk3ZkRVMHlXR0IyU3dkTUFjYi8yODJ2?=
+ =?utf-8?B?Vmsyd0xGY3JzOWRvRjVrZW1Tc3lVRDZlQlJPc1ZUNTR3L0xXcHJTbUY3Slht?=
+ =?utf-8?B?Sm9pUzFyZGFhVE1uNExWNXMwNUxsc3VUWUNVK2Nib1pUWW5wZTZQbzN4bWgz?=
+ =?utf-8?B?VlBPa2pKWVlzRGM5cE1maVpiVHRFdGs2OFBXMTNLQmErZE9WQUtsRTlOL0pj?=
+ =?utf-8?B?MGQxRVp1Tkt3REJjMU9iVGxJSnozYVBUajkzbm5uckNOaThJNG5JNkhOQk1T?=
+ =?utf-8?B?OHhzVEFqc0s3b3dqRkRsTGp3aW9SUlBTL3dNOXI5WjNVRmFUdzFubk1PcG1F?=
+ =?utf-8?B?RlFuckkwVTFleUhhY1QyWXNQUHhLQjlDV29KRktVbS84K2E4OUFsMllxZytV?=
+ =?utf-8?B?SW9mbnFFMUpKNFBGVWpSdTNPVVJUVFdkaFFxWnNpM1FXbndMTEQyNXhwZXpu?=
+ =?utf-8?B?ZkE4ejJNVWZtK1h5MThnSmxEZ1FoVm1Sb1lvaS9VMGVYd0RwaCtQeVVDOWUx?=
+ =?utf-8?B?STdGWjJYTWJPd2lldm9yWUdKclZxdVBxZ0c0UUJwM3gxRkhEWVhlVFBjY1I3?=
+ =?utf-8?B?WG1WcTl4cHduTTRqZXp1NWx2Y043eHgyVFhBRHN5b3E4T3htdGJwN2pidGg2?=
+ =?utf-8?B?U1FUZmtVNURIeHgvRnVXZE9IQTZCajhGSGp5SnJkZDNZS3NibncrVDJkejhQ?=
+ =?utf-8?B?YlBoRit0bG8wVU5zWXhlNWttSHhOSkowaGE0ZHd6Y2VHamw3R24rWHRIWW1p?=
+ =?utf-8?B?ZXR0ZGhnaVdoZ1puaVFCR2lsZ2lOaDhGTnpXd1JNMU5ZNGR0S0lSdnJIQlJj?=
+ =?utf-8?B?eTB6MkFJcnE1ZzdtOEI4S25nK0ZZYkltalVnUW05ekxyS0g4RVhqa214QUpo?=
+ =?utf-8?B?S2JrL0lXRndSNjVGOUtyVDh3N2laRW9IYzBnNFo3QUhZck9mUGpkUXUxVXdk?=
+ =?utf-8?B?NTc3L200bW5jelB4L3B5RWhnUDI4eTdVUDByZC9ycDRYK2lkNmY5S3NvckdH?=
+ =?utf-8?B?TGF2Vm56WXJmQ3FVOXVMZ2FrZ1pTNVc5dU5WczBUbFlYSFdhcFZYeGd2Q1d1?=
+ =?utf-8?B?a0NRN2VZc2xnRHdJbk9uMnAzU3BpZVJoS1d1Q2V0QjdGN3RKTis0RGFRY01M?=
+ =?utf-8?B?eFVGYjFYWUErM2s3RUdIZjVCR3lMUDM2bmhRRWFVZFpUakRvVXVrU0hEeWR0?=
+ =?utf-8?B?NTJGVGEwSkJaREFVYmhST3YzMFUvNzZxUC9kSXNHd0thclJkbTN1OFkycmNq?=
+ =?utf-8?B?aXhQdTBqR3p6Y0s4SS91VVBmNys4L2tUYldKaUhLSVEwSjJaWk9JYys3R3ZI?=
+ =?utf-8?B?R1dYS1BzcU1wWTFUbGhGZzRmZUVFMm9KaVpyaXN5MUFxZjQyN0pmb0pzOU92?=
+ =?utf-8?B?YnBtV1hQWmJJV0dwSGNyWW94Vy9teGppa05sTUJ2dkN4M1FvUmNvdjdJTlJ6?=
+ =?utf-8?B?ckRKQ05CQkU2akZFVGRPVEI4NlNzRWhoS2gwL1NqbzlWWW13bnBrekhDL2Nx?=
+ =?utf-8?B?ZmoxeHR6dHBiVno0Mm5YNFUxNVM2aTg2YjdYbTl5K2kwTXVqM0gxTUd6cDg2?=
+ =?utf-8?B?cjQ5NGVyYURuZndvdWk0T1ozaERhSVBuTVdiVDNsakNiaHpoRFJyY1BmRWJZ?=
+ =?utf-8?B?aU9vWjVvT294SmJwWWtGUStiakdiV1FGVnFsKzRnbXFFUUUrQlhWaFBPUTZj?=
+ =?utf-8?B?ZUNoczhwOGh0ajF1bnNiSTBEZ2RSSFBqQ3BxbVUxWFBxbVhTNS9Nd1lpcTY4?=
+ =?utf-8?B?clhkUjdTQVBsWTY4blI0djNEWnJiN0JkSHM0Q2luUVA3Vjk3RDIvazZOUlZ5?=
+ =?utf-8?B?S2gyWFpQL0l4aHVmSVFsdWZ2VFZTdkxUakJZZmlFR3ZESFhvcmdqdzBEc21q?=
+ =?utf-8?B?c3JSeGdvdWtlUGFtQ0poL29OZnhJS25FQVgrZDMrWUdEY2tVQTV4L3p1V3Zv?=
+ =?utf-8?B?aE5FL2N5TkdxdGxhbFErZUFVbjVNbXlKbExheERCc2UrcHZJbXh0MHpvL3Mv?=
+ =?utf-8?B?andFMDFjL1RJdUpZSzNXU0RMUmhZUkNLbEpwVFpsWjNqNDdGbDNDeDE1aDll?=
+ =?utf-8?B?TjFreXJvWDdjdWdHbmFvMGRHT2svQjl0b2F6S1NaVDBYdnFhR0dmWjlBS0Zj?=
+ =?utf-8?B?Tm9FWmhqbFNPWC9tZnhYT250MCs1S2ZxcmovNVBhUVh0NjF0bWJ5dkdXZW1L?=
+ =?utf-8?B?dWc9PQ==?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	KuZkiiLVFbCXEEmsmpLoliZNPK2tieSO2ijfUJzTFu0qM4LJxgnAugTOOKVvQAczI2pqpV/mcYWX0kjmyYPEz9zUNkebcjXkBKsj13sBG+kbwfUT8KuyoBi2XAGnNqxz7ui1vdnoAKDHuLZkEsk/ZBL+0JH2AWfHTQ4+ZiT6z3PVren0CFPkcvWXBFY6asr+Iumhl6cVbyUAj17/2o+Mc26S1Wn5euOGrf/2w5p8juinToCgpIM1DAfJzaYrZUiZ3q+0N68AX8BeLmMjAn6fDtqvQTAprwKlJQeW4EVjT8OR2c9KHakhDbIVLiwmm4+Slr0F7R8LmOzBQH2hfRLFDcZ8QmPVxO14dGFXiewIUUoOw0SLceEbBsEdhq7CZRljA73jV44VJLVotXWvptx2dlLsu2MmmNWo5r1+9kfyAFX1EKHsB4dFPGkrsOK/Fll7y//OBdgMrqzSlD7sWvV2ipcuSI40SQo3idPYRRWs8Jx9SFjO5zdwPIYj8MW+X5JyE1lKD66M26on+UsFvQkRZC/uQJJtXzxRGnMZi6BkInFMR0luoRT4zOFclTMS5qwW8mlnsBLeHuFavxzGNUX28YRNaC4/41jId0GWke7YL78=
+	fPaHMTeGaxfHm2rjQfDKgO4ROp//O67syzlDZLElKs47y1rPYefQHkL0SSfX4VAYlBJY4UjKs2OTBpvf4CJfr1i64Wz8mvwB47M7D1VlPfSHsq8sLgOoCUMPU2BygzCSEm0I3DDAwCZB8+3ZUwDBrkgQ6qUmh3V9ZT6cpSdb2WX8CTmiNw5LdZEPD54v9+QRF7xL1v2533F6OnWUYnTBONJV40D7lD2uBFSE4xHXJw1q2QOoP1kA9LjyOaqyVoW7R7NZCPlNG0p6MLzYjrcXXax+3k5+z67PojB5bkCyOdPwj8Th2l2Ct+hreUOCRc4rMGHrvPxm/qrxvOebeKacymix5c5CWUlfhWqNACflAiqmMhgDJDbGrUHa5x5HwesJlx1MY2QaYt9fd1S+W5g1ZUvDOpU+7FF4HLi5BomNul3+ZDTDcog0Rna59ypJD/1oe8J5ipC8Up3VnpUBxQjSqnZ4G5IYQ4ZzjqGNrPTftDwCyu85B14+2y2ce8LoReleV5zRVRnPQCTMriBxAX+3Zdy3FZzzsAwV18JKpJjlX/p3OIoquwks+heVlGzQpesUYLaiZsU8uOF5pqcAeovgxUnFh9eAtVvdhjYpjNTYGrY=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f6d0ee57-ddb2-45d4-ed0e-08dc4eff722e
+X-MS-Exchange-CrossTenant-Network-Message-Id: eadc86fc-c1b7-49b4-7e09-08dc4f02d17b
 X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Mar 2024 08:17:02.0571
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Mar 2024 08:41:10.6195
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 0uFAsd444Xz/q/2dK02vxbT2mkTaoeoVMOpULrHieXK4awlnUqkF1DWzQy69R62hiXSVijV9R6qKio9nlM/pAQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB4992
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9HHRa/zcVYZLlKo44oHfmC3LbJucR0aukMn5hOqckCkt0/kOmQJ0ocgPhpvSunt5xHiIiZQzSrPXbpJj8WFt3A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR10MB6084
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
  definitions=2024-03-28_07,2024-03-27_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 bulkscore=0
- adultscore=0 mlxscore=0 phishscore=0 malwarescore=0 spamscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2403210000 definitions=main-2403280053
-X-Proofpoint-GUID: AJnqGHMjPuKyYGIs-ZwBZa-_HyDG3ERu
-X-Proofpoint-ORIG-GUID: AJnqGHMjPuKyYGIs-ZwBZa-_HyDG3ERu
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 phishscore=0 suspectscore=0
+ mlxlogscore=999 bulkscore=0 spamscore=0 adultscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2403210000
+ definitions=main-2403280057
+X-Proofpoint-GUID: rzPMZGMTbJqZHuyDDM_nnJ3fznPhqc2F
+X-Proofpoint-ORIG-GUID: rzPMZGMTbJqZHuyDDM_nnJ3fznPhqc2F
 
 On 3/28/24 01:11, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> Killing a background process running _btrfs_stress_balance() is not as
+> Killing a background process running _btrfs_stress_scrub() is not as
 > simple as sending a signal to the process and waiting for it to die.
 > Therefore we have the following logic to terminate such process:
 > 
 >     kill $pid
 >     wait $pid
->     # Wait for the balance operation to finish.
->     while ps aux | grep "balance start" | grep -qv grep; do
-
-
+>     while ps aux | grep "scrub start" | grep -qv grep; do
 >         sleep 1
 >     done
 > 
@@ -181,181 +178,164 @@ On 3/28/24 01:11, fdmanana@kernel.org wrote:
 > repeating the same code again several times in upcoming changes.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-
-A few minor things below.
-
 > ---
 >   common/btrfs    | 14 ++++++++++++++
->   tests/btrfs/060 |  8 ++------
->   tests/btrfs/061 | 10 ++++------
->   tests/btrfs/062 | 10 ++++------
->   tests/btrfs/063 | 10 ++++------
->   tests/btrfs/064 | 10 ++++------
->   tests/btrfs/255 |  8 ++------
->   7 files changed, 34 insertions(+), 36 deletions(-)
+>   tests/btrfs/061 |  7 +------
+>   tests/btrfs/066 |  8 ++------
+>   tests/btrfs/069 | 11 +++++------
+>   tests/btrfs/072 | 11 +++++------
+>   tests/btrfs/073 | 11 +++++------
+>   6 files changed, 32 insertions(+), 30 deletions(-)
 > 
 > diff --git a/common/btrfs b/common/btrfs
-> index aa344706..e95cff7f 100644
+> index e95cff7f..d0adeea1 100644
 > --- a/common/btrfs
 > +++ b/common/btrfs
-> @@ -308,6 +308,20 @@ _btrfs_stress_balance()
+> @@ -349,6 +349,20 @@ _btrfs_stress_scrub()
 >   	done
 >   }
 >   
-> +# Kill a background process running _btrfs_stress_balance()
-> +_btrfs_kill_stress_balance_pid()
+> +# Kill a background process running _btrfs_stress_scrub()
+> +_btrfs_kill_stress_scrub_pid()
 > +{
-> +	local balance_pid=$1
+> +       local scrub_pid=$1
 > +
-> +	# Ignore if process already died.
-> +	kill $balance_pid &> /dev/null
-> +	wait $balance_pid &> /dev/null
-> +	# Wait for the balance operation to finish.
-> +	while ps aux | grep "balance start" | grep -qv grep; do
+> +       # Ignore if process already died.
+> +       kill $scrub_pid &> /dev/null
+> +       wait $scrub_pid &> /dev/null
+> +       # Wait for the scrub operation to finish.
 
 
-  We can use pgrep instead. I will make the following changes before
-  merging if you are okay with it.
+> +       while ps aux | grep "scrub start" | grep -qv grep; do
 
--       while ps aux | grep "balance start" | grep -qv grep; do
-+       while pgrep -f "btrfs balance start" > /dev/null; do
+This can be replaced by pgrep. I'll make the change if there are
+no objections.
 
+       while pgrep -f "btrfs scrub start" > /dev/null; do
 
+Thanks, Anand
 
-> +		sleep 1
-> +	done
+> +               sleep 1
+> +       done
 > +}
 > +
->   # stress btrfs by creating/mounting/umounting/deleting subvolume in a loop
->   _btrfs_stress_subvolume()
->   {
-> diff --git a/tests/btrfs/060 b/tests/btrfs/060
-> index a0184891..58167cc6 100755
-> --- a/tests/btrfs/060
-> +++ b/tests/btrfs/060
+>   # stress btrfs by defragmenting every file/dir in a loop and compress file
+>   # contents while defragmenting if second argument is not "nocompress"
+>   _btrfs_stress_defrag()
+> diff --git a/tests/btrfs/061 b/tests/btrfs/061
+> index d0b55e48..b8b2706c 100755
+> --- a/tests/btrfs/061
+> +++ b/tests/btrfs/061
+> @@ -52,12 +52,7 @@ run_test()
+>   	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
+>   	wait $fsstress_pid
+>   	_btrfs_kill_stress_balance_pid $balance_pid
+> -	kill $scrub_pid
+> -	wait $scrub_pid
+> -	# wait for the crub operation to finish
+> -	while ps aux | grep "scrub start" | grep -qv grep; do
+> -		sleep 1
+> -	done
+> +	_btrfs_kill_stress_scrub_pid $scrub_pid
+>   
+>   	echo "Scrub the filesystem" >>$seqres.full
+>   	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
+> diff --git a/tests/btrfs/066 b/tests/btrfs/066
+> index a29034bb..29821fdd 100755
+> --- a/tests/btrfs/066
+> +++ b/tests/btrfs/066
 > @@ -57,12 +57,8 @@ run_test()
 >   	wait $fsstress_pid
 >   
 >   	touch $stop_file
-> -	kill $balance_pid
+> -	kill $scrub_pid
 > -	wait
-> -	# wait for the balance operation to finish
-> -	while ps aux | grep "balance start" | grep -qv grep; do
+> -	# wait for the scrub operation to finish
+> -	while ps aux | grep "scrub start" | grep -qv grep; do
 > -		sleep 1
 > -	done
 > +	wait $subvol_pid
-> +	_btrfs_kill_stress_balance_pid $balance_pid
+> +	_btrfs_kill_stress_scrub_pid $scrub_pid
 >   
 >   	echo "Scrub the filesystem" >>$seqres.full
 >   	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
-> diff --git a/tests/btrfs/061 b/tests/btrfs/061
-> index c1010413..d0b55e48 100755
-> --- a/tests/btrfs/061
-> +++ b/tests/btrfs/061
-> @@ -51,12 +51,10 @@ run_test()
+> diff --git a/tests/btrfs/069 b/tests/btrfs/069
+> index 139dde48..20f44b39 100755
+> --- a/tests/btrfs/069
+> +++ b/tests/btrfs/069
+> @@ -59,17 +59,16 @@ run_test()
 >   
 >   	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 >   	wait $fsstress_pid
-> -	kill $balance_pid $scrub_pid
+> -	kill $replace_pid $scrub_pid
 > -	wait
-> -	# wait for the balance and scrub operations to finish
-> -	while ps aux | grep "balance start" | grep -qv grep; do
+> +	kill $replace_pid
+> +	wait $replace_pid
+>   
+> -	# wait for the scrub and replace operations to finish
+> -	while ps aux | grep "scrub start" | grep -qv grep; do
 > -		sleep 1
 > -	done
-> +	_btrfs_kill_stress_balance_pid $balance_pid
-> +	kill $scrub_pid
-> +	wait $scrub_pid
-> +	# wait for the crub operation to finish
-
-s/crub/scrub/
-
-Thanks, Anand
-
->   	while ps aux | grep "scrub start" | grep -qv grep; do
+> +	# wait for the replace operation to finish
+>   	while ps aux | grep "replace start" | grep -qv grep; do
 >   		sleep 1
 >   	done
-> diff --git a/tests/btrfs/062 b/tests/btrfs/062
-> index 818a0156..a2639d6c 100755
-> --- a/tests/btrfs/062
-> +++ b/tests/btrfs/062
-> @@ -52,12 +52,10 @@ run_test()
+>   
+> +	_btrfs_kill_stress_scrub_pid $scrub_pid
+> +
+>   	echo "Scrub the filesystem" >>$seqres.full
+>   	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
+>   	if [ $? -ne 0 ]; then
+> diff --git a/tests/btrfs/072 b/tests/btrfs/072
+> index 4b6b6fb5..6c15b51f 100755
+> --- a/tests/btrfs/072
+> +++ b/tests/btrfs/072
+> @@ -52,16 +52,15 @@ run_test()
 >   
 >   	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 >   	wait $fsstress_pid
-> -	kill $balance_pid $defrag_pid
+> -	kill $scrub_pid $defrag_pid
 > -	wait
-> -	# wait for the balance and defrag operations to finish
-> -	while ps aux | grep "balance start" | grep -qv grep; do
+> -	# wait for the scrub and defrag operations to finish
+> -	while ps aux | grep "scrub start" | grep -qv grep; do
 > -		sleep 1
 > -	done
-> +	_btrfs_kill_stress_balance_pid $balance_pid
 > +	kill $defrag_pid
 > +	wait $defrag_pid
 > +	# wait for the defrag operation to finish
 >   	while ps aux | grep "btrfs filesystem defrag" | grep -qv grep; do
 >   		sleep 1
 >   	done
-> diff --git a/tests/btrfs/063 b/tests/btrfs/063
-> index 2f771baf..baf0c356 100755
-> --- a/tests/btrfs/063
-> +++ b/tests/btrfs/063
-> @@ -51,12 +51,10 @@ run_test()
+>   
+> +	_btrfs_kill_stress_scrub_pid $scrub_pid
+> +
+>   	echo "Scrub the filesystem" >>$seqres.full
+>   	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
+>   	if [ $? -ne 0 ]; then
+> diff --git a/tests/btrfs/073 b/tests/btrfs/073
+> index b1604f94..49a4abd1 100755
+> --- a/tests/btrfs/073
+> +++ b/tests/btrfs/073
+> @@ -51,16 +51,15 @@ run_test()
 >   
 >   	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
 >   	wait $fsstress_pid
-> -	kill $balance_pid $remount_pid
+> -	kill $scrub_pid $remount_pid
 > -	wait
-> -	# wait for the balance and remount loop to finish
-> -	while ps aux | grep "balance start" | grep -qv grep; do
+> -	# wait for the scrub and remount operations to finish
+> -	while ps aux | grep "scrub start" | grep -qv grep; do
 > -		sleep 1
 > -	done
-> +	_btrfs_kill_stress_balance_pid $balance_pid
 > +	kill $remount_pid
 > +	wait $remount_pid
-> +	# wait for the remount loop to finish
+> +	# wait for the remount operation to finish
 >   	while ps aux | grep "mount.*$SCRATCH_MNT" | grep -qv grep; do
 >   		sleep 1
 >   	done
-> diff --git a/tests/btrfs/064 b/tests/btrfs/064
-> index e9b46ce6..58b53afe 100755
-> --- a/tests/btrfs/064
-> +++ b/tests/btrfs/064
-> @@ -63,12 +63,10 @@ run_test()
 >   
->   	echo "Wait for fsstress to exit and kill all background workers" >>$seqres.full
->   	wait $fsstress_pid
-> -	kill $balance_pid $replace_pid
-> -	wait
-> -	# wait for the balance and replace operations to finish
-> -	while ps aux | grep "balance start" | grep -qv grep; do
-> -		sleep 1
-> -	done
-> +	_btrfs_kill_stress_balance_pid $balance_pid
-> +	kill $replace_pid
-> +	wait $replace_pid
-> +	# wait for the replace operation to finish
->   	while ps aux | grep "replace start" | grep -qv grep; do
->   		sleep 1
->   	done
-> diff --git a/tests/btrfs/255 b/tests/btrfs/255
-> index 7e70944a..aa250467 100755
-> --- a/tests/btrfs/255
-> +++ b/tests/btrfs/255
-> @@ -41,12 +41,8 @@ for ((i = 0; i < 20; i++)); do
->   	$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
->   	$BTRFS_UTIL_PROG quota disable $SCRATCH_MNT
->   done
-> -kill $balance_pid &> /dev/null
-> -wait
-> -# wait for the balance operation to finish
-> -while ps aux | grep "balance start" | grep -qv grep; do
-> -	sleep 1
-> -done
+> +	_btrfs_kill_stress_scrub_pid $scrub_pid
 > +
-> +_btrfs_kill_stress_balance_pid $balance_pid
->   
->   echo "Silence is golden"
->   status=0
+>   	echo "Scrub the filesystem" >>$seqres.full
+>   	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
+>   	if [ $? -ne 0 ]; then
 
