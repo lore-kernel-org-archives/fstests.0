@@ -1,42 +1,40 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0CB3613E8B8;
-	Fri, 29 Mar 2024 23:07:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91A0713FD75
+	for <fstests@vger.kernel.org>; Fri, 29 Mar 2024 23:09:00 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711753641; cv=none; b=FfkZfOAQAHyOMKxhk7t5X0EKEf16FCfHEtN1CV9TZLeXL04xWptPJjuoANmJ9LzejdCPXDdr4WedUHNHSgGpBpof5jYU5QJMR4bo2OCfgq1yKZDbg3asY1Jw7VaatAvsIQcv1EqYg1nOSKV/XQ2d/Y/f0ts4UW/XrlH6oBDNnEY=
+	t=1711753740; cv=none; b=P+BB9VyphC9RHxDWICFGbd1j24o0jr3RwqhLf26OoYJHDR+LjGERT2j9E5gKICvly3/X1ox0yIHiXfQAIlwiEagrFHS/8QohnHKm1JM1S3HmEyR+JkwXMaKauuFFJRTpzVcA6BWGy++uvNxXlIu8ogBNKlNA2O6QBS8hkqa/sJ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711753641; c=relaxed/simple;
-	bh=c3dZuRLMGPfeGBh58rShTMt8UR7t7s8U0R1tItqt2Vg=;
+	s=arc-20240116; t=1711753740; c=relaxed/simple;
+	bh=+SfaYb87LwmPudlwlBslVccmpg6/aPTRkc/7YLFcFWE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=c0Yc+9Cyj+QZIxJAz9PvTRyUmP1neiku+2/DEjN4wQsbK60j5rjmtsOb6KRcWT8lWbfNObJvdXT6mF+6hMGgqrGzn/UkQMSOlYFI4krGPBOqb6rQXH3H8W1luE1SQUkeRtihyADa+SwbdbLy5ysa+de2PXfZYE8Hf0FQOdIUzrk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d+trecTR; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=owYotKuH6L9ToqwYktqIUhnqvlWWxOKLFvfrHgVCZUh/HfcyV8AXskb1AdViHgs9pgAOrisdcgTVIog+iDR9DSbZcjxT+dgUAttXsKaKlCLgaeb8M+tVutO/1CAEOWNqaF+/iEFzxu/gSUCEW+PrH19Xy7yUQ6UzsbaH4g7ZDyg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KzCqW8Uc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d+trecTR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8CF5BC433C7;
-	Fri, 29 Mar 2024 23:07:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KzCqW8Uc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0725EC433F1;
+	Fri, 29 Mar 2024 23:09:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711753640;
-	bh=c3dZuRLMGPfeGBh58rShTMt8UR7t7s8U0R1tItqt2Vg=;
+	s=k20201202; t=1711753740;
+	bh=+SfaYb87LwmPudlwlBslVccmpg6/aPTRkc/7YLFcFWE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=d+trecTRXXuAISVG7ocjgOLA9Gn+X9Jgnsd3fshtIBiI/FPpyG1SHLcUx5GO7HLYc
-	 zhS5VUoshYSKr/UN8GTFO8A7Nh9cO/RYUlPO7jHDC4yu9HIBhSEwQxXvcCk5cmsHuz
-	 0W9q2bxWNkQkcxN/+HFpURM/sHpqHJ3wWKN5a5lE24QWfKhQlcmve1zlHZIUSjck9Q
-	 T5IVH4Mv36RaIbFpvwzVz0UiCh9IbIAZaA5FjrCcUf234IGLgL2ESOqAzHBJPm20y8
-	 oCyTJMcd7c6aKp47z66i8vbAZcr0Ql3Fdz7P2R7OZkTAkHNdrve44McAUVqFpQ/PhH
-	 ybVUABlAnqL2Q==
-Date: Fri, 29 Mar 2024 16:07:20 -0700
+	b=KzCqW8UcMRo321W376r98ZER+qoUb0SUaM8OPJvrGBTbpzRulwHzt5hVIPAifu6SF
+	 dj4uZ7pA7QVjQUBxa66R8pRH0PCkoQGAIpT0SO3dWMBxb9DJwqxjNLezZOFLkWjd25
+	 6fZEleDHWZjUuaCOZMjQOFDyQph9/rgagVvxus/7L4lP3TUS/Js4a1WiBf6UylHEye
+	 V5KIAu2Fx6SVX/69MTvE0ps7K8uTCtMqG1M42EQlWMgGKDeHQ0HS48Nv4OqrK8vDax
+	 PzuDMQ7o+jxOFwi+/yoWA2hnXC/dZ3/wHWvznBk/zpcbbpXWOc2VSVTcTDU4MkIpK8
+	 FMnKItd0JjV/A==
+Date: Fri, 29 Mar 2024 16:08:59 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	guan@eryu.me
-Subject: Re: [PATCH 3/4] generic/{166,167,333,334,671}: actually fill the
- filesystem with snapshots
-Message-ID: <20240329230720.GE6379@frogsfrogsfrogs>
-References: <171150739778.3286541.16038231600708193472.stgit@frogsfrogsfrogs>
- <171150741593.3286541.18115194618541313905.stgit@frogsfrogsfrogs>
- <ZgRQYV_uc94IImTk@infradead.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: "Luis Henriques (SUSE)" <luis.henriques@linux.dev>,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4/01{2,9}: remove invalid filesystem option 'journal'
+Message-ID: <20240329230859.GF6379@frogsfrogsfrogs>
+References: <20240328170620.334-1-luis.henriques@linux.dev>
+ <20240329225020.GB1189142@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,31 +43,59 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZgRQYV_uc94IImTk@infradead.org>
+In-Reply-To: <20240329225020.GB1189142@mit.edu>
 
-On Wed, Mar 27, 2024 at 09:59:13AM -0700, Christoph Hellwig wrote:
-> On Tue, Mar 26, 2024 at 07:43:35PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Fri, Mar 29, 2024 at 06:50:20PM -0400, Theodore Ts'o wrote:
+> On Thu, Mar 28, 2024 at 05:06:20PM +0000, Luis Henriques (SUSE) wrote:
+> > Creating an ext4 filesystem using '-O journal' will fail with:
 > > 
-> > XFS has this behavior in its reflink implementation where it returns
-> > ENOSPC if one of the AGs that would be involved in the sharing operation
-> > becomes more than 90% full.  As Kent Overstreet points out, that means
-> > the snapshot creator shuts down when the filesystem is only about a
-> > third full.  We could exercise the system harder by not *forcing*
-> > reflink, which will actually fill the filesystem full.
+> >     Invalid filesystem option set: journal
+> > 
+> > I didn't do any archaeological investigation to check if this option ever
+> > existed, but the two tests using it will fail to create the scratch
+> > filesystems.
+> > 
+> > Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
 > 
-> All these tests are supposed to test the reflink code, how does
-> using cp --reflink=auto make sense for that?
+> The feature name has never been journal, but rather has_journal.  The
+> reason why no once noticed is because the file system was created by
+> the _require_attrs before the attempted _scratch_mkfs_ext4.  So when
+> _scratch_mkfs_ext4 failed, it was a no-op that didn't actually do
+> anything, and there was still a file system the default configuration
+> for the test scenario.
+> 
+> What puzzles me is why there was an attempt to enable the journal
+> feature in the first place.  As near as I can tell, the tests don't
+> change what gets tested whether or not the journal is enabled.
+> Darrick; you had added these tests were you were working on ext4's
+> metadata checksum feature; do you remember your thinking at the time?
 
-Hmm.  Well my initial thought was that the snapshot could fall back to
-buffered copies of file1 so that we wouldn't abort the test well before
-actually filling up the filesystem.
+"Qwklgjwlqaetwqjetlweqqlgqgqtrrt", most likely.
 
-But you're right that my solution smells off -- we want to test reflink
-dealing with ENOSPC.  Perhaps the right thing to do is to truncate and
-rewrite file1 after a _cp_reflink fails, so that the next time through
-the loop we'll be reflinking extents from a (probably less full) AG.
+> In any case, either better fix is to replace:
+> 
+> _scratch_mkfs_ext4 -O journal > /dev/null 2>&1
+> 
+> with:
+> 
+> _scratch_mkfs_ext4 -O has_journal >> $seqres.full 2>&1
+> 
+> Or:
+> 
+> _scratch_mkfs -O has_journal >> $seqres.full 2>&1
+> 
+> My preference would be latter, since I'm regularly testing with and
+> without the journal, and I'd much rather run the test with whatever
+> configuration I'm currently testing (e.g., ext4/4k, ext4/1k,
+> ext4/nojournal, ext4/ext3conv, ext4/bigalloc, etc.)
 
-Ok let's see how that does.
+I'm ok with either, though _scratch_mkfs -O has_journal is more
+consistent with the way XFS fuzz tests do things.
+
+Sorry about that. :/
 
 --D
+
+> 						- Ted
+> 
+> 
