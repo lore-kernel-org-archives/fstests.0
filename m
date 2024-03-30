@@ -1,68 +1,41 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C72F41C0DE8
-	for <fstests@vger.kernel.org>; Sat, 30 Mar 2024 07:25:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE640381CC;
+	Sat, 30 Mar 2024 15:31:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711783512; cv=none; b=avCJaCbFaJzXoK9O2kaJ+4ydxmw9sn5RaAWt2fDzTOQXwXccfGqyIj7TTCvjF+DmNuzRk3IHOLGnTnXr0gO42p9qE49RaTDGsl8NHFpl4iHWZp3AtADz0VKpjPnzBTcC73XXMMGkF88+8oEGwrx3BX9vcE1YRFhDPld4cGGWnek=
+	t=1711812707; cv=none; b=sB6iPsHjx81ppVdIpUDktBVnCCaJ+duAqI27uZjvzSY4qwh+O7hT7SN1e6+u3yKE1tleD9UORkBxrcrZdOjcnAZKzPZLE2F3MWYuJkYu1HWET6hfpS9IEGq/RH6g5uqv57b9mTxOAxScvteovPF3NKg4KgeQ+sDrFK6FYqPiqr8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711783512; c=relaxed/simple;
-	bh=2ml+VvnRcec4A3LwHhOolExZ1Df47SRTWchtzfr2/aU=;
+	s=arc-20240116; t=1711812707; c=relaxed/simple;
+	bh=lBBWaVACCEXBNvvAEejfoAeohL86BY41s2TY13yzTo0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OeoaYAyVaRJUs4dbmeg5lo7aSts5uf2LBTyreigajjxk9eHkZvQctERAJm9/DQBxDA86K8X3ZeWxsobvG7LytVQo7y7Ej2yyFAdCVN8Z6ACMRWOpoqhSF+5QMVNSHEm5syu7cUtrV/5AR4wvKj1wFYPkpBjTPKjoyq9vDnset+k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=G+/FJyhN; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=C8am1dZjuiHKuA5LYeSI89/gxTLOyhEbd2tE3ZFCrMjsNs29Q7G9ysAhIWFuDtoqtE0caht1cQ6Cdx6JCTm9brfTpzlxz5zELGG500XFGcARX6NMVuZ4hvED0v0h6OBTmmJvX26avy8glVNdyBWf/2iP+Y/q6mIrFlNyt4myGPw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mS6n9Z5D; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="G+/FJyhN"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1711783509;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LEXwxnia+I9FUvVWYy9eqOh+s4AgHAmik8d9pwtzgMw=;
-	b=G+/FJyhNBx9WDDIlvhRVVEDhIAVX62450FtZF95eA419Kqh/RXmQkjvf0hi6HC4to3IHMi
-	wjpKNvxhuq1Ru8ad+uh+um35XljA0mYBG5BbIj0k3tiOo0g6p7vZ9LfCwqeOWcw7pejpyF
-	MNF7HRidlkOQ/bOi+TGigQh8exTK+Ac=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-311-Ve0TGhzJOm-aTZXlKM4D6Q-1; Sat, 30 Mar 2024 03:25:07 -0400
-X-MC-Unique: Ve0TGhzJOm-aTZXlKM4D6Q-1
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-5c65e666609so2134755a12.1
-        for <fstests@vger.kernel.org>; Sat, 30 Mar 2024 00:25:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1711783506; x=1712388306;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LEXwxnia+I9FUvVWYy9eqOh+s4AgHAmik8d9pwtzgMw=;
-        b=xSxcy0VPxv1SR3I00RWr8f2viOMUbfyyFNiHX98VhBJiq3/fXhZ3JnP8/djEGNoHwE
-         Y45iD/fVG+kW6RbKXIotE/juL8+NSm77FYNGxc6BLPHY1o3h06Z1m0SbpcbgkRb1Sks+
-         H1P0hoO8HMxuPD4yFbYZrGcMqxdv8NfKovt1cSTyBz4pgAvJ8xCcyc5xw2QVC8EkvV6n
-         2aJY0qqHHY0GB1ezrPerypINw/MUN8kyn7vmicnlNKR6YtX6nQnYWppEp0+H3stGuya8
-         A5vecyiGxaD4DhpHAcq7qrkhl9owZJcUxX7a7eAbRLTa1GaEOD6CAx34tUDYqWHgzqt9
-         o72Q==
-X-Gm-Message-State: AOJu0YzdLESYqW/wwESmHBd6I/ACQQuaYA3FvfPYADqwcgLbbni67z4H
-	CJuKDHOn1eE7B397RcrG0QkhPdrxu8djOCt3jN8cT5s3Twdvh4T8kC0KCcB3uPoT4ANrXGOpxPf
-	ww2U4bcHR+WnK/VKBcO/8kYRpxoTA2+HSdN21B4daUaEVGHqrll/GOcm+tDTD3eIg+w==
-X-Received: by 2002:a17:902:d507:b0:1e0:bd7f:194 with SMTP id b7-20020a170902d50700b001e0bd7f0194mr5420758plg.36.1711783506013;
-        Sat, 30 Mar 2024 00:25:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE9/nqrZA4v7SIreT10FRYoN+6f2FC07vSQUZAaDK6VjshuPzbMa+ABfutjB2jt8GmJ5CsMbw==
-X-Received: by 2002:a17:902:d507:b0:1e0:bd7f:194 with SMTP id b7-20020a170902d50700b001e0bd7f0194mr5420727plg.36.1711783505497;
-        Sat, 30 Mar 2024 00:25:05 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id v12-20020a170902d08c00b001dcfaab3457sm4612478plv.104.2024.03.30.00.25.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 30 Mar 2024 00:25:05 -0700 (PDT)
-Date: Sat, 30 Mar 2024 15:25:00 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Alexander Aring <aahringo@redhat.com>
-Cc: fstests@vger.kernel.org, gfs2@lists.linux.dev, jlayton@kernel.org
-Subject: Re: [PATCHv2] generic: add fcntl corner cases tests
-Message-ID: <20240330072500.qs73uzweykk3npsq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20230925201827.1703857-1-aahringo@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mS6n9Z5D"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F196C433C7;
+	Sat, 30 Mar 2024 15:31:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1711812707;
+	bh=lBBWaVACCEXBNvvAEejfoAeohL86BY41s2TY13yzTo0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=mS6n9Z5Djv0cno9qfAyvxmZyEkMedtRoWXzUuxKlxBBMYUQvKxZ3kA7f1IId2JplN
+	 mBEfm3aHY1qDl88kvR/P5LvIPywTov6pqHxRrQ9rOcprpmnAr8E0IvHwulucneg7UA
+	 zbbUu6FpEJ/1SbJGjZNFYKbYDmqvrVX+q69zVoabmFPbBHLaXP/qO6MFkkoO3C+7xv
+	 jAf9msaZltG60q+6ETWtXf9mNcVo86Bf5jsbUfXWoR4oFI2TouRlBWhLqxxkNqIMa3
+	 7bFhF2ObNeJVzS4Eak4i5uz/w0HqefYGSnv5DRL8iSGivjvgy6Yr8zjDLtJTgZCs2f
+	 PaDUfpSuMBHgA==
+Date: Sat, 30 Mar 2024 08:31:46 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: David Hildenbrand <david@redhat.com>, Christoph Hellwig <hch@lst.de>,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 4/4] generic: test MADV_POPULATE_READ with IO errors
+Message-ID: <20240330153146.GU6390@frogsfrogsfrogs>
+References: <171150739778.3286541.16038231600708193472.stgit@frogsfrogsfrogs>
+ <171150742156.3286541.2986329968568619601.stgit@frogsfrogsfrogs>
+ <20240330071200.jmljkdyccwgdzmej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -71,427 +44,125 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230925201827.1703857-1-aahringo@redhat.com>
+In-Reply-To: <20240330071200.jmljkdyccwgdzmej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Mon, Sep 25, 2023 at 04:18:27PM -0400, Alexander Aring wrote:
-> This patch adds fcntl corner cases that was being used to confirm issues
-> on a GFS2 filesystem. The GFS2 filesystem has it's own ->lock()
-> implementation and in those corner cases issues was being found and
-> fixed.
+On Sat, Mar 30, 2024 at 03:12:00PM +0800, Zorro Lang wrote:
+> On Tue, Mar 26, 2024 at 07:43:41PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > This is a regression test for "mm/madvise: make
+> > MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly".
+> > 
+> > Cc: David Hildenbrand <david@redhat.com>
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > ---
+> >  tests/generic/1835     |   65 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/1835.out |    4 +++
+> >  2 files changed, 69 insertions(+)
+> >  create mode 100755 tests/generic/1835
+> >  create mode 100644 tests/generic/1835.out
+> > 
+> > 
+> > diff --git a/tests/generic/1835 b/tests/generic/1835
+> > new file mode 100755
+> > index 0000000000..07479ab712
+> > --- /dev/null
+> > +++ b/tests/generic/1835
+> > @@ -0,0 +1,65 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024 Oracle.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 1835
+> > +#
+> > +# This is a regression test for a kernel hang that I saw when creating a memory
+> > +# mapping, injecting EIO errors on the block device, and invoking
+> > +# MADV_POPULATE_READ on the mapping to fault in the pages.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto rw
+>                          ^^ eio
 > 
-> Signed-off-by: Alexander Aring <aahringo@redhat.com>
-> ---
-> changes since v2:
-> - move fcntl tests into one fcntl c file
-> - remove ofd and same owner tests, should be reflected by only one test
-> - simplify commit message (remove testname out of it)
-> - add error messages in fcntl.c to give more information if an error
->   occur
-
-Any update? :) It's still in "patches-in-queue" branch.
-
-Thanks,
-Zorro
-
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	_dmerror_unmount
+> > +	_dmerror_cleanup
+> > +}
+> > +
+> > +# Import common functions.
+> > +. ./common/dmerror
+> > +
+> > +_fixed_by_kernel_commit XXXXXXXXXXXX \
+> > +	"mm/madvise: make MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly"
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_require_xfs_io_command madvise -R
+> > +_require_scratch
+> > +_require_dm_target error
+> > +_require_command "$TIMEOUT_PROG" "timeout"
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1
+> > +_dmerror_init
+> > +
+> > +filesz=2m
+> > +
+> > +# Create a file that we'll read, then cycle mount to zap pagecache
+> > +_dmerror_mount
+> > +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $filesz" "$SCRATCH_MNT/a" >> $seqres.full
+> > +_dmerror_unmount
+> > +_dmerror_mount
+> > +
+> > +# Try to read the file data in a regular fashion just to prove that it works.
+> > +echo read with no errors
+> > +timeout -s KILL 10s $XFS_IO_PROG -c "mmap -r 0 $filesz" -c "madvise -R 0 $filesz" "$SCRATCH_MNT/a"
 > 
->  src/Makefile          |   3 +-
->  src/fcntl.c           | 322 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/732     |  32 +++++
->  tests/generic/732.out |   2 +
->  4 files changed, 358 insertions(+), 1 deletion(-)
->  create mode 100644 src/fcntl.c
->  create mode 100755 tests/generic/732
->  create mode 100644 tests/generic/732.out
+> timeout -> $TIMEOUT_PROG
 > 
-> diff --git a/src/Makefile b/src/Makefile
-> index 2815f919..67f936d3 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -19,7 +19,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
->  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
-> -	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test
-> +	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
-> +	fcntl
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/fcntl.c b/src/fcntl.c
-> new file mode 100644
-> index 00000000..8e375357
-> --- /dev/null
-> +++ b/src/fcntl.c
-> @@ -0,0 +1,322 @@
-> +// SPDX-License-Identifier: GPL-2.0+
-> +/* Copyright (c) 2023 Alexander Aring.  All Rights Reserved.
-> + */
-> +
-> +#include <pthread.h>
-> +#include <unistd.h>
-> +#include <string.h>
-> +#include <limits.h>
-> +#include <stdlib.h>
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <wait.h>
-> +
-> +static char filename[PATH_MAX + 1];
-> +static int fd;
-> +
-> +static void usage(char *name, const char *msg)
-> +{
-> +	printf("Fatal: %s\nUsage:\n"
-> +	       "%s <file for fcntl>\n", msg, name);
-> +	_exit(1);
-> +}
-> +
-> +static void *do_equal_file_lock_thread(void *arg)
-> +{
-> +       struct flock fl = {
-> +	       .l_type = F_WRLCK,
-> +	       .l_whence = SEEK_SET,
-> +	       .l_start = 0L,
-> +	       .l_len = 1L,
-> +       };
-> +       int rv;
-> +
-> +       rv = fcntl(fd, F_SETLKW, &fl);
-> +       if (rv == -1) {
-> +	       perror("fcntl");
-> +	       _exit(1);
-> +       }
-> +
-> +       return NULL;
-> +}
-> +
-> +static void do_test_equal_file_lock(void)
-> +{
-> +	struct flock fl;
-> +	pthread_t t[2];
-> +	int pid, rv;
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0L;
-> +	fl.l_len = 1L;
-> +
-> +	/* acquire range 0-0 */
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +	       perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	pid = fork();
-> +	if (pid == 0) {
-> +		rv = pthread_create(&t[0], NULL, do_equal_file_lock_thread, NULL);
-> +		if (rv != 0) {
-> +			fprintf(stderr, "failed to create pthread\n");
-> +			_exit(1);
-> +		}
-> +
-> +		rv = pthread_create(&t[1], NULL, do_equal_file_lock_thread, NULL);
-> +		if (rv != 0) {
-> +			fprintf(stderr, "failed to create pthread\n");
-> +			_exit(1);
-> +		}
-> +
-> +		pthread_join(t[0], NULL);
-> +		pthread_join(t[1], NULL);
-> +
-> +		_exit(0);
-> +	}
-> +
-> +	/* wait until threads block on 0-0 */
-> +	sleep(3);
-> +
-> +	fl.l_type = F_UNLCK;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	sleep(3);
-> +
-> +	/* check if the ->lock() implementation got the
-> +	 * right locks granted because two waiter with the
-> +	 * same file_lock fields are waiting
-> +	 */
-> +	fl.l_type = F_WRLCK;
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1 && errno == EAGAIN) {
-> +		fprintf(stderr, "deadlock, pthread not cleaned up correctly\n");
-> +		_exit(1);
-> +	}
-> +
-> +	wait(NULL);
-> +}
-> +
-> +static void catch_alarm(int num) { }
-> +
-> +static void do_test_signal_interrupt_child(int *pfd)
-> +{
-> +	struct sigaction act;
-> +	unsigned char m;
-> +	struct flock fl;
-> +	int rv;
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 1;
-> +	fl.l_len = 1;
-> +
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	memset(&act, 0, sizeof(act));
-> +	act.sa_handler = catch_alarm;
-> +	sigemptyset(&act.sa_mask);
-> +	sigaddset(&act.sa_mask, SIGALRM);
-> +	sigaction(SIGALRM, &act, NULL);
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	/* interrupt SETLKW by signal in 3 secs */
-> +	alarm(3);
-> +	rv = fcntl(fd, F_SETLKW, &fl);
-> +	if (rv == 0) {
-> +		fprintf(stderr, "fcntl interrupt successful but should fail with EINTR\n");
-> +		_exit(1);
-> +	}
-> +
-> +	/* synchronize to move parent to test region 1-1 */
-> +	write(pfd[1], &m, sizeof(m));
-> +
-> +	/* keep child alive */
-> +	read(pfd[1], &m, sizeof(m));
-> +}
-> +
-> +static void do_test_signal_interrupt(void)
-> +{
-> +	struct flock fl;
-> +	unsigned char m;
-> +	int pid, rv;
-> +	int pfd[2];
-> +
-> +	rv = pipe(pfd);
-> +	if (rv == -1) {
-> +		perror("pipe");
-> +		_exit(1);
-> +	}
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	pid = fork();
-> +	if (pid == 0) {
-> +		do_test_signal_interrupt_child(pfd);
-> +		_exit(0);
-> +	}
-> +
-> +	/* wait until child writes */
-> +	read(pfd[0], &m, sizeof(m));
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 1;
-> +	fl.l_len = 1;
-> +	/* parent testing childs region, the child will think
-> +	 * it has region 1-1 locked because it was interrupted
-> +	 * by region 0-0. Due bugs the interruption also unlocked
-> +	 * region 1-1.
-> +	 */
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == 0) {
-> +		fprintf(stderr, "fcntl trylock successful but should fail because child still acquires region\n");
-> +		_exit(1);
-> +	}
-> +
-> +	write(pfd[0], &m, sizeof(m));
-> +
-> +	wait(NULL);
-> +
-> +	close(pfd[0]);
-> +	close(pfd[1]);
-> +
-> +	/* cleanup everything */
-> +	fl.l_type = F_UNLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 2;
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +}
-> +
-> +static void do_test_kill_child(void)
-> +{
-> +	struct flock fl;
-> +	int rv;
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	rv = fcntl(fd, F_SETLKW, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +}
-> +
-> +static void do_test_kill(void)
-> +{
-> +	struct flock fl;
-> +	int pid_to_kill;
-> +	int rv;
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	pid_to_kill = fork();
-> +	if (pid_to_kill == 0) {
-> +		do_test_kill_child();
-> +		_exit(0);
-> +	}
-> +
-> +	/* wait until child blocks */
-> +	sleep(3);
-> +
-> +	kill(pid_to_kill, SIGKILL);
-> +
-> +	/* wait until Linux did plock cleanup */
-> +	sleep(3);
-> +
-> +	fl.l_type = F_UNLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	/* cleanup parent lock */
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if (rv == -1) {
-> +		perror("fcntl");
-> +		_exit(1);
-> +	}
-> +
-> +	fl.l_type = F_WRLCK;
-> +	fl.l_whence = SEEK_SET;
-> +	fl.l_start = 0;
-> +	fl.l_len = 1;
-> +
-> +	/* check if the child still holds the lock
-> +	 * and killing the child was not cleaning
-> +	 * up locks.
-> +	 */
-> +	rv = fcntl(fd, F_SETLK, &fl);
-> +	if ((rv == -1 && errno == EAGAIN)) {
-> +		fprintf(stderr, "fcntl trylock failed but should be successful because killing child should cleanup acquired lock\n");
-> +		_exit(1);
-> +	}
-> +}
-> +
-> +int main(int argc, char * const argv[])
-> +{
-> +	if (optind != argc - 1)
-> +		usage(argv[0], "<file for fcntl> is mandatory to tell the file where to run fcntl() on it");
-> +
-> +	strncpy(filename, argv[1], PATH_MAX);
-> +
-> +	fd = open(filename, O_RDWR | O_CREAT, 0700);
-> +	if (fd == -1) {
-> +		perror("open");
-> +		_exit(1);
-> +	}
-> +
-> +	/* test to have to equal struct file_lock requests in ->lock() */
-> +	do_test_equal_file_lock();
-> +	/* test to interrupt F_SETLKW by a signal and cleanup only canceled the pending interrupted request */
-> +	do_test_signal_interrupt();
-> +	/* test if cleanup is correct if a child gets killed while being blocked in F_SETLKW */
-> +	do_test_kill();
-> +
-> +	close(fd);
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/732 b/tests/generic/732
-> new file mode 100755
-> index 00000000..d77f9fc2
-> --- /dev/null
-> +++ b/tests/generic/732
-> @@ -0,0 +1,32 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2023 Alexander Aring.  All Rights Reserved.
-> +#
-> +# FS QA Test 732
-> +#
-> +# This tests performs some fcntl() corner cases. See fcntl test
-> +# program for more details.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_require_test
-> +_require_test_program fcntl
-> +
-> +echo "Silence is golden"
-> +
-> +$here/src/fcntl $TEST_DIR/testfile
-> +if [ $? -ne 0 ]
-> +then
-> +	exit
-> +fi
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/732.out b/tests/generic/732.out
-> new file mode 100644
-> index 00000000..451f82ce
-> --- /dev/null
-> +++ b/tests/generic/732.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 732
-> +Silence is golden
-> -- 
-> 2.31.1
-> 
+> Others looks good to me, if there's not more review points, I'll merge this
+> patch with above changes, after testing done.
 
+Ok.  I don't have any further changes to make to this test, other than
+the XXXXX above whenever the fixes get merged.
+
+--D
+
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+> Thanks,
+> Zorro
+> 
+> > +_dmerror_unmount
+> > +_dmerror_mount
+> > +
+> > +# Load file metadata and induce EIO errors on read.  Try to provoke the kernel;
+> > +# kill the process after 10s so we can clean up.
+> > +stat "$SCRATCH_MNT/a" >> $seqres.full
+> > +echo read with IO errors
+> > +_dmerror_load_error_table
+> > +timeout -s KILL 10s $XFS_IO_PROG -c "mmap -r 0 $filesz" -c "madvise -R 0 $filesz" "$SCRATCH_MNT/a"
+> > +_dmerror_load_working_table
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/1835.out b/tests/generic/1835.out
+> > new file mode 100644
+> > index 0000000000..1b03586e8c
+> > --- /dev/null
+> > +++ b/tests/generic/1835.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 1835
+> > +read with no errors
+> > +read with IO errors
+> > +madvise: Bad address
+> > 
+> 
+> 
