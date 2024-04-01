@@ -1,37 +1,44 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA27D446D5
-	for <fstests@vger.kernel.org>; Mon,  1 Apr 2024 14:55:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85AFB481D1
+	for <fstests@vger.kernel.org>; Mon,  1 Apr 2024 16:56:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711983354; cv=none; b=YJd6T39RE2r8PefJgeYEFkAA3fUCN9BIi1xnpYY9C6FOyYP2ksQWu4G5OPurF7r44L5XDjtyrJT+UYB0itXskAxKX+zIFGIdQgWbj2Az57jWutShSPpjF2CER7FNH1CM7Y92WmrjoQLAYuKKe0CJBUR9KuL+OT7yrdW0lAbK/m4=
+	t=1711990607; cv=none; b=aA5DbZb4+Fd7OEhCvWm88Bq9+YAOI0b8DQmAj4Gt6O6DLchWWOzGQlFEXm7EYOZHBWnZT0tVXRmwtKfhtCClu3iAc+Kd6b7tLPVL1pAdBZPvE23WU4SYRtdwofA4r8uP242T8aiu03WXFumYOdP5PanQbblcKS/G2qUTy8hHvaU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711983354; c=relaxed/simple;
-	bh=GbbsKn53wCdF9dSL9v3D/o/fnJuHHus5ZcB0NfHWoQU=;
+	s=arc-20240116; t=1711990607; c=relaxed/simple;
+	bh=KTk2nCoSXUN+1PHwig9llu+Iv0hvMQO2Mk3LcqM24P0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VZHOR8qf0pSDime+DUEOT2cbuV48BIQjyQZsLs4u8t742882YjsByY7IWIDNnEojrZKV5QfibVZOImD3muDJlFY+aC40/CNe2q9H+Nzj+wkr9HJEG2GnDFbA8WK9DlM9YuW+Ory0v11w2KJuKyPc+uw8beF/Hyt+6QKC/Uvd6gs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PHsDeUvn; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=flJV9+M9iUdxhRUpmYvQFPvKSGTPsJlx7ZkYs/VKYgJS9F9Lo2HZ8Vymq3MdtB3epgbgLZIIW3lW4HoLchDRAbRLtX3f70pGFYeY0W2T8uSiP/VgEJCoz+cF5wcnv3DX0H4JuD1cEGGucedTblAIr2bV8arUPeOt4SlHsNq7Ph8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=XdPWtyhq; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PHsDeUvn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7517CC433C7;
-	Mon,  1 Apr 2024 14:55:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1711983354;
-	bh=GbbsKn53wCdF9dSL9v3D/o/fnJuHHus5ZcB0NfHWoQU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=PHsDeUvnS476WMJ0tvwrXQ97YA0rTan2+UEor20CRFOL0nFdzlj2caGZ3L2BaxNdK
-	 xWAMyUPi5+Xz34zLXussB9V8nMsEF9spxZnDeJBW6AdxFaSSTiWI6qhEczY1rGnpfn
-	 WuU+j+Qj8X9341GxgS5BZcWi7pBwn1enza7Fqas8mgl8y3KBHVpM96y5tT+PrDi8O7
-	 SmqHlfk9LYvSmk70/jwVesk9ABmOFiIXZIylB98OPDP3d00m3BLyAqoTXukYgNBtwS
-	 6pju+njoMHv0a90qn9Xkoxzbff8hCL62oIYL+/oidwx9zoBESSvGhvifEzAH2kcyZ9
-	 nrE5MIxIFEw/w==
-Date: Mon, 1 Apr 2024 07:55:53 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="XdPWtyhq"
+Received: from cwcc.thunk.org (pool-173-48-113-232.bstnma.fios.verizon.net [173.48.113.232])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 431GuDVS014708
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 1 Apr 2024 12:56:14 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1711990575; bh=DGDWIPhbXO5gyTI7L9SBAFsHMJAybqTBJB97J3SSDYU=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=XdPWtyhqTKz3MdpXcQJo5Z3XpV1JJUEP/eQCaI6OqpnzU8ZET4pQFwNVawGKF9iNF
+	 wiBVHb7MJwKFnr8daQquv8TiFwDrmn563ZIkC4H8bNYOT5hEES72u7cvVzJt7D9FFM
+	 sGhlen8mNzlHqPAuZsYdFosMc8FyjMLEFRcPMwOXDMQtS3Pmu6slZOdj/iasNwVfV/
+	 5bjb/tJ0BSMnOOz1Ld88W7PasueXkEDDaYbq3AxrY3f6VppR9uSngKUnVPewp7S37e
+	 +PK/y9R8TLsyQ0ceLtjgI/L1HM3ToTZK1sNs852TsxiJYL43Owl3a6zHlP0B5PN3aB
+	 MeVKJnK9SW1Tw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id 4F5BB15C00DC; Mon,  1 Apr 2024 12:56:13 -0400 (EDT)
+Date: Mon, 1 Apr 2024 12:56:13 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
 To: "Luis Henriques (SUSE)" <luis.henriques@linux.dev>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+Cc: "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
 Subject: Re: [PATCH v2] ext4/01{2,9}: fix invalid filesystem option 'journal'
-Message-ID: <20240401145553.GG6379@frogsfrogsfrogs>
+Message-ID: <20240401165613.GA2046915@mit.edu>
 References: <20240401095709.12304-1-luis.henriques@linux.dev>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -54,45 +61,4 @@ On Mon, Apr 01, 2024 at 10:57:08AM +0100, Luis Henriques (SUSE) wrote:
 > 
 > Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
-
-> ---
-> changes since v1 (after tytso's review):
-> - instead of dropping '-O journal', replace it by '-O has_journal'
-> - redirect std{out,err} to log
-> - use _scratch_mkfs instead of _scratch_mkfs_ext4
-> 
->  tests/ext4/012 | 2 +-
->  tests/ext4/019 | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/ext4/012 b/tests/ext4/012
-> index c49e8ef4483b..358874a1caf1 100755
-> --- a/tests/ext4/012
-> +++ b/tests/ext4/012
-> @@ -32,7 +32,7 @@ TESTDIR="${SCRATCH_MNT}/scratchdir"
->  TESTFILE="${TESTDIR}/testfile"
->  
->  echo "+ create scratch fs"
-> -_scratch_mkfs_ext4 -O journal > /dev/null 2>&1
-> +_scratch_mkfs -O has_journal >> $seqres.full 2>&1
->  
->  echo "+ mount fs image"
->  _scratch_mount
-> diff --git a/tests/ext4/019 b/tests/ext4/019
-> index ab5f50c66b6f..f0514093981b 100755
-> --- a/tests/ext4/019
-> +++ b/tests/ext4/019
-> @@ -32,7 +32,7 @@ TESTDIR="${SCRATCH_MNT}/scratchdir"
->  TESTFILE="${TESTDIR}/testfile"
->  
->  echo "+ create scratch fs"
-> -_scratch_mkfs_ext4 -O journal > /dev/null 2>&1
-> +_scratch_mkfs -O has_journal >> $seqres.full 2>&1
->  
->  echo "+ mount fs image"
->  _scratch_mount
-> 
+Reviewed-by: Theodore Ts'o <tytso@mit.edu>
