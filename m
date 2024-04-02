@@ -1,64 +1,121 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85AFB481D1
-	for <fstests@vger.kernel.org>; Mon,  1 Apr 2024 16:56:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+Received: from m16.mail.163.com (m16.mail.163.com [220.197.31.2])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id DA2143201
+	for <fstests@vger.kernel.org>; Tue,  2 Apr 2024 01:20:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.2
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711990607; cv=none; b=aA5DbZb4+Fd7OEhCvWm88Bq9+YAOI0b8DQmAj4Gt6O6DLchWWOzGQlFEXm7EYOZHBWnZT0tVXRmwtKfhtCClu3iAc+Kd6b7tLPVL1pAdBZPvE23WU4SYRtdwofA4r8uP242T8aiu03WXFumYOdP5PanQbblcKS/G2qUTy8hHvaU=
+	t=1712020849; cv=none; b=pH+sWYA1QZbnS0UR4fMfuktBL0FWw9UZwAU9hqQVHCg5A+bsYjCkV9UDEhLFoMjkZLu4DZ91DzJsLNRM2R47Ja4NOdxQTJyX08z3bg7Sw+rubWZhatvRf1Yvd4GhAPW2cx9aTOYUK1Ic1KSxCh1YrQtEFD3AastWAgIeXssjOEc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711990607; c=relaxed/simple;
-	bh=KTk2nCoSXUN+1PHwig9llu+Iv0hvMQO2Mk3LcqM24P0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=flJV9+M9iUdxhRUpmYvQFPvKSGTPsJlx7ZkYs/VKYgJS9F9Lo2HZ8Vymq3MdtB3epgbgLZIIW3lW4HoLchDRAbRLtX3f70pGFYeY0W2T8uSiP/VgEJCoz+cF5wcnv3DX0H4JuD1cEGGucedTblAIr2bV8arUPeOt4SlHsNq7Ph8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=XdPWtyhq; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1712020849; c=relaxed/simple;
+	bh=TvBumXNc2EV4bKpsOE3o8yicTHbX004D2vPHJ2vKB9A=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:Content-Type:
+	 MIME-Version:Message-ID; b=uL9mFuqG7P2DKBbAZxZYevM5ONxKl0+rVGEdkD/d2l2GbNTH5VXPkj8YGtdUfNQ7HQWn8H+uYacpknPICNa1yG5pUTqErklplYD1GLHELd5Ae5KmvW0R7UO1ZV7AmzO/vMtelkl2z/E7HBp2SSpck3jCDZaadSx3ozWpzX4S3CY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com; spf=pass smtp.mailfrom=163.com; dkim=fail (1024-bit key) header.d=163.com header.i=@163.com header.b=RAh2tmmz reason="signature verification failed"; arc=none smtp.client-ip=220.197.31.2
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="XdPWtyhq"
-Received: from cwcc.thunk.org (pool-173-48-113-232.bstnma.fios.verizon.net [173.48.113.232])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 431GuDVS014708
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 1 Apr 2024 12:56:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1711990575; bh=DGDWIPhbXO5gyTI7L9SBAFsHMJAybqTBJB97J3SSDYU=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=XdPWtyhqTKz3MdpXcQJo5Z3XpV1JJUEP/eQCaI6OqpnzU8ZET4pQFwNVawGKF9iNF
-	 wiBVHb7MJwKFnr8daQquv8TiFwDrmn563ZIkC4H8bNYOT5hEES72u7cvVzJt7D9FFM
-	 sGhlen8mNzlHqPAuZsYdFosMc8FyjMLEFRcPMwOXDMQtS3Pmu6slZOdj/iasNwVfV/
-	 5bjb/tJ0BSMnOOz1Ld88W7PasueXkEDDaYbq3AxrY3f6VppR9uSngKUnVPewp7S37e
-	 +PK/y9R8TLsyQ0ceLtjgI/L1HM3ToTZK1sNs852TsxiJYL43Owl3a6zHlP0B5PN3aB
-	 MeVKJnK9SW1Tw==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 4F5BB15C00DC; Mon,  1 Apr 2024 12:56:13 -0400 (EDT)
-Date: Mon, 1 Apr 2024 12:56:13 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: "Luis Henriques (SUSE)" <luis.henriques@linux.dev>
-Cc: "Darrick J . Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] ext4/01{2,9}: fix invalid filesystem option 'journal'
-Message-ID: <20240401165613.GA2046915@mit.edu>
-References: <20240401095709.12304-1-luis.henriques@linux.dev>
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=163.com header.i=@163.com header.b="RAh2tmmz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+	s=s110527; h=Date:From:Subject:Content-Type:MIME-Version:
+	Message-ID; bh=DfLzGrNYvL/cjP0VWvosZrRsQmbE29YmzdKVI4/eImE=; b=R
+	Ah2tmmzF/9K6dtL4DK1jcnzu0PWfrZe1oaUzCcRIkVp1oyEYqTfGhumqYVjiq+Y/
+	hh3xinl6EWcioV/oa3YdPgDloW49aofrj6kYXLgXtdZSgOuzA+xQlkjeZKoKIvkr
+	jcW5Q9hlPD5BXHfw8MOXxkueKMS22q/PV8v6R72HHE=
+Received: from caixiaobin0807$163.com ( [121.8.166.34] ) by
+ ajax-webmail-wmsvr-40-113 (Coremail) ; Tue, 2 Apr 2024 09:20:33 +0800 (CST)
+Date: Tue, 2 Apr 2024 09:20:33 +0800 (CST)
+From: =?UTF-8?B?6JSh5pmT5paM?= <caixiaobin0807@163.com>
+To: "Zorro Lang" <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re:Re: Question: Why tests/generic/482 and tests/generic/487 can't
+ pass both at the same time.
+X-Priority: 3
+X-Mailer: Coremail Webmail Server Version XT5.0.14 build 20230109(dcb5de15)
+ Copyright (c) 2002-2024 www.mailtech.cn 163com
+In-Reply-To: <20240326141613.ekd5wk4zmeqnde3x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <7d19c3c3.51df.18e73815f19.Coremail.caixiaobin0807@163.com>
+ <20240326141613.ekd5wk4zmeqnde3x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-NTES-SC: AL_Qu2aAPyZv0Ao5SmcZ+lS+TNp0o1WAZrw5qd9m/YQdt4emADc/RgfXn1HA2vz0uI4rLqwVykI9vhsrh/e4q0Z
+Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240401095709.12304-1-luis.henriques@linux.dev>
+Message-ID: <36091b82.19fa.18e9c64c69d.Coremail.caixiaobin0807@163.com>
+X-Coremail-Locale: zh_CN
+X-CM-TRANSID:_____wD3n5ZiXQtmrDsmAA--.6111W
+X-CM-SenderInfo: xfdl5xpdrex0iqyqlqqrwthudrp/1tbiqBq0XWVODI2dLAAAsA
+X-Coremail-Antispam: 1U5529EdanIXcx71UUUUU7vcSsGvfC2KfnxnUU==
 
-On Mon, Apr 01, 2024 at 10:57:08AM +0100, Luis Henriques (SUSE) wrote:
-> Creating an ext4 filesystem using '-O journal' will fail with:
-> 
->     Invalid filesystem option set: journal
-> 
-> Fix it by replacing it by '-O has_journal', which ensures the filesystem
-> (ext3 or ext4) is created with a journal.  While there, also redirect stderr
-> and stdout to the full log.
-> 
-> Signed-off-by: Luis Henriques (SUSE) <luis.henriques@linux.dev>
-
-Reviewed-by: Theodore Ts'o <tytso@mit.edu>
+CgoKQXQgMjAyNC0wMy0yNiAyMjoxNjoxMywgIlpvcnJvIExhbmciIDx6bGFuZ0ByZWRoYXQuY29t
+PiB3cm90ZToKPk9uIE1vbiwgTWFyIDI1LCAyMDI0IGF0IDEwOjQ3OjIyQU0gKzA4MDAsIOiUoeaZ
+k+aWjCB3cm90ZToKPj4gCj4+IEhpLCBJIGhhdmUgYSBxdWVzdGlvbiB3aGVuIEkgcmFuIHRoZSB4
+ZnN0ZXN0cywgcGxlYXNlIGhlbHAgbWUgdG8gc29sdmUgdGhpcyBxdWVzdGlvbiwgdGtzLgo+PiAK
+Pj4gCj4+IEluIG15wqBlbnZpcm9ubWVudCwgSSB1ZXMgdGhlIG1hY2hpbmUgd2l0aMKgYXJjaGl0
+ZWN0dXJlIG9mIGFhcmNoNjQsIGFuZCB0aGVuIHNldHRpbmcgdGhlIGVudiBpbiBsb2NhbC5jb25m
+aWcgZmlsZSBsaWtlIGJlbG93Ogo+PiAKPj4gCj4+IAo+PiAKPj4gIyBJZGVhbGx5IGRlZmluZSBh
+dCBsZWFzdCB0aGVzZSA0IHRvIG1hdGNoIHlvdXIgZW52aXJvbm1lbnQKPj4gIyBUaGUgZmlyc3Qg
+MiBhcmUgcmVxdWlyZWQuCj4+ICMgU2VlIFJFQURNRSBmb3Igb3RoZXIgdmFyaWFibGVzIHdoaWNo
+IGNhbiBiZSBzZXQuCj4+ICMKPj4gIyBOb3RlOiBTQ1JBVENIX0RFViA+d2lsbDwgZ2V0IG92ZXJ3
+cml0dGVuIQo+PiAKPj4gCj4+IGV4cG9ydCBURVNUX0RFVj0vZGV2L21tY2JsazBwMTIKPj4gZXhw
+b3J0IFRFU1RfRElSPS9tbnQveGZzdGVzdHMvZGlyCj4+IGV4cG9ydCBGU1RZUD1leHQ0Cj4+IGV4
+cG9ydCBTQ1JBVENIX0RFVj0vZGV2L21tY2JsazBwMTMKPj4gZXhwb3J0IFNDUkFUQ0hfTU5UPS9t
+bnQveGZzdGVzdHMvZGlyLW1udAo+PiBleHBvcnQgU0NSQVRDSF9MT0dERVY9L2Rldi9tbWNibGsw
+cDE0Cj4+IGV4cG9ydCBVU0VfRVhURVJOQUw9eWVzCj4+IGV4cG9ydCBEVU1QX0NPUlJVUFRfRlM9
+MQo+PiBleHBvcnQgS0VFUF9ETUVTRz15ZXMKPj4gZXhwb3J0IFVTRV9LTUVNTEVLPXllcwo+PiBl
+eHBvcnQgTE9HV1JJVEVTX0RFVj0vZGV2L21tY2JsazBwMTUKPj4gZXhwb3J0IE1JTl9GU1NJWkU9
+MTA0ODU3NjAgIyAxME1CCj4+IGV4cG9ydCBESUZGX0xFTkdUSD0wCj4+IAo+PiAKPj4gQW5kIGV4
+ZWN1dGUgdGhlIGNvbW1hbmQgIi4vY2hlY2sgLWwgLVQgdGVzdHMvZ2VuZXJpYy9bMC05XVswLTld
+WzAtOV0iIHRvIHJ1biB0aGUgeGZzdGVzdHMuIFdoZW4gaXQgcmFuIG91dCwgSSBmaW5kIHRoYXQg
+InRlc3RzL2dlbmVyaWMvNDgyIiB3YXMgZmFpbGVkLCBhbmQgInRlc3RzL2dlbmVyaWMvNDg3IiB3
+YXMgc3VjY2Vzc2VkLsKgCj4+IAo+PiAKPj4gU28gSSBjaGVjayB0aGUgc291cmNlIGNvZGUgZm9y
+IHRob3NlIHR3byB0ZXN0cywgYW5kIEkgZm91bmQgdGhhdCB1c2VkIGRpZmZlcmVudCBmdW5jdGlv
+biBpbiB0aGVtLCBsaWtlIGJlbG93IDoKPj4gCj4+IAo+PiB0ZXN0cy9nZW5lcmljLzQ4MiA6Cj4+
+IAo+PiAKPj4gIyByZWFsIFFBIHRlc3Qgc3RhcnRzIGhlcmUKPj4gCj4+IAo+PiAjIE1vZGlmeSBh
+cyBhcHByb3ByaWF0ZS4KPj4gX3N1cHBvcnRlZF9mcyBnZW5lcmljCj4+IAo+PiAKPj4gX3JlcXVp
+cmVfbm9fbG9nZGV2Cj4+IF9yZXF1aXJlX2NvbW1hbmQgIiRLSUxMQUxMX1BST0ciIGtpbGxhbGwK
+Pj4gCj4+IAo+PiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLQo+PiAKPj4gCj4+IHRlc3RzL2dlbmVyaWMvNDg3IDrCoAo+PiAKPj4g
+Cj4+IAo+PiAjIHJlYWwgUUEgdGVzdCBzdGFydHMgaGVyZQo+PiBfcmVxdWlyZV9zY3JhdGNoX25v
+Y2hlY2sKPj4gCj4+IAo+PiBzZmxhZz0nLXMnCj4+IGNhc2UgJEZTVFlQIGluCj4+IMKgIMKgIMKg
+IMKgIGJ0cmZzKQo+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCBfbm90cnVuICJidHJmcyBoYXMg
+YSBzcGVjaWFsaXplZCB0ZXN0IGZvciB0aGlzIgo+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCA7
+Owo+PiDCoCDCoCDCoCDCoCAqKQo+PiDCoCDCoCDCoCDCoCDCoCDCoCDCoCDCoCA7Owo+PiBlc2Fj
+Cj4+IAo+PiAKPj4gX3JlcXVpcmVfbG9nZGV2Cj4+IF9yZXF1aXJlX2RtX3RhcmdldCBlcnJvcgo+
+PiAKPj4gCj4+IFRoZW4gY29udGludWUgdG8gY2hlY2sgdGhlIHNvdXJjZSBjb2RlIDoKPj4gCj4+
+IGNvbW1vbi9yYyA6Cj4+IAo+PiAKPj4gCj4+ICMgdGhpcyB0ZXN0IG5lZWRzIGEgbG9nZGV2Cj4+
+ICMKPj4gX3JlcXVpcmVfbG9nZGV2KCkKPj4gewo+PiDCoCDCoCBbIC16ICIkU0NSQVRDSF9MT0dE
+RVYiIC1vICEgLWIgIiRTQ1JBVENIX0xPR0RFViIgXSAmJiBcCj4+IMKgIMKgIMKgIMKgIF9ub3Ry
+dW4gIlRoaXMgdGVzdCByZXF1aXJlcyBhIHZhbGlkIFwkU0NSQVRDSF9MT0dERVYiCj4+IMKgIMKg
+IFsgIiRVU0VfRVhURVJOQUwiICE9IHllcyBdICYmIFwKPj4gwqAgwqAgwqAgwqAgX25vdHJ1biAi
+VGhpcyB0ZXN0IHJlcXVpcmVzIFVTRV9FWFRFUk5BTCB0byBiZSBlbmFibGVkIgo+PiAKPj4gCj4+
+IMKgIMKgICMgZW5zdXJlIGl0cyBub3QgbW91bnRlZAo+PiDCoCDCoCAkVU1PVU5UX1BST0cgJFND
+UkFUQ0hfTE9HREVWIDI+L2Rldi9udWxsCj4+IH0KPj4gCj4+IAo+PiAjIFRoaXMgdGVzdCByZXF1
+aXJlcyB0aGF0IGFuIGV4dGVybmFsIGxvZyBkZXZpY2UgaXMgbm90IGluIHVzZQo+PiAjCj4+IF9y
+ZXF1aXJlX25vX2xvZ2RldigpCj4+IHsKPj4gWyAiJFVTRV9FWFRFUk5BTCIgPSAieWVzIiBdICYm
+IFsgLW4gIiRTQ1JBVENIX0xPR0RFViIgXSAmJiBcCj4+IF9ub3RydW4gIlRlc3Qgbm90IGNvbXBh
+dGlibGUgd2l0aCBleHRlcm5hbCBsb2dzLCBza2lwcGVkIHRoaXMgdGVzdCIKPj4gfQo+PiAKPj4g
+Cj4+IEkgZmluZCB0aGF0IHRoZXNlIHR3byBmdW5jdGlvbnMgYmVoYXZlIGFzIG11dHVhbGx5IGV4
+Y2x1c2l2ZSBpbiB1c2UsIHNvIEkgZG9uJ3QgdW5kZXJzdGFuZCB3aHkgeGZzdGVzdHMgY2FuJ3Qg
+cGFzcyBib3RoIHRlc3RzIGF0IHRoZSBzYW1lIHRpbWUuIFBsZWFzZSBoZWxwIG1lIHRvIHNvbHZl
+IHRoaXMgcXVlc3Rpb24sIHRoYW5rIHlvdSBhZ2Fpbi7CoAo+Cj5Ob3Qgc3VyZSB3aGF0J3MgdGhl
+IHByb2JsZW0geW91IGhpdC4gZy80ODIgYW5kIGcvNDg3IGFyZSB0b3RhbGx5IGRpZmZlcmVudCB0
+d28KPnRlc3QgY2FzZXMuCj4KPlRoZSBnLzQ4MiBjYWxscyBfcmVxdWlyZV9ub19sb2dkZXYgZHVl
+IHRvIGl0IG5lZWRzIGRtbG9nd3JpdGVzIGRldmljZSwgYW5kOgo+Cj4gIGNvbW1pdCA1MGY2ZDQ2
+NDEwMzY3NTg2YWIxNTFiMzU3ZTY3MzkzNTk5ZWViZDFjCj4gIEF1dGhvcjogRGFycmljayBKLiBX
+b25nIDxkandvbmdAa2VybmVsLm9yZz4KPiAgRGF0ZTogICBUdWUgSnVsIDI2IDEyOjQ4OjUxIDIw
+MjIgLTA3MDAKPgo+ICAgICAgZG1sb2d3cml0ZXM6IHNraXAgZ2VuZXJpYyB0ZXN0cyB3aGVuIGV4
+dGVybmFsIGxvZ2RldiBpbiB1c2UKPgo+YnV0IHRoZSBnLzQ4NyBjYWxscyBfcmVxdWlyZV9sb2dk
+ZXYgZHVlIHRvIGl0IG5lZWRzIGFuIGV4dGVybmFsIGxvZyBkZXZpY2UsIHRvCj5hdm9pZCB0aGUg
+ZWZmZWN0aW9uIGZyb20gdGhlIGRtLWVycm9yIG9mIGRhdGEgZGV2aWNlLgo+Cj5UaGUgZy80ODIg
+c2hvdWxkbid0IGZhaWwgaWYgdGhlcmUncyBhIFNDUkFUQ0hfTE9HREVWLCBpdCBzaG91bGQgX25v
+dHJ1bi4gSWYgaXQKPmZhaWxlZCB5b3UnZCBiZXR0ZXIgdG8gY2hlY2sgdGhhdCBmYWlsdXJlLgo+
+Cj5BYm91dCBob3cgdG8gcnVuIGcvNDgyIGFuZCBnLzQ4NywgYXMgb25lIHJlcXVpcmVzIGxvZ2Rl
+diwgdGhlIG90aGVyIG9uZSByZXF1aXJlcwo+bm9fbG9nLCBzbyB5b3Ugc2hvdWxkIGhhdmUgdHdv
+IGNvbmZpZyBzZWN0aW9ucyBhdCBsZWFzdCwgb25lIGhhdmUgU0NSQVRDSF9MT0dERVYsCj50aGUg
+b3RoZXIgb25lIHVuc2V0IGl0LiBUaGVuIHJ1biB0d28ga2luZHMgb2YgdGVzdHMgKHdpdGggb3Ig
+d2l0aG91dCBsb2cgZGV2aWNlKS4KPgo+VGhhbmtzLAo+Wm9ycm8KCj4KCgpIaSBab3JybywgdGhh
+bmsgeW91IGZvciByZXNvbHZpbmcgbXkgcXVlc3Rpb24sIEkga25vdyB3aGF0IHRvIGRvIG5leHQu
+Cgo+PiAKPj4gCj4+IExvb2tpbmcgZm9yd2FyZCB0byB5b3VyIHJlcGx5Lgo+PiAK
