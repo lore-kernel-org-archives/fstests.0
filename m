@@ -1,270 +1,119 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB6E3171658;
-	Fri,  5 Apr 2024 16:46:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 116C6173347
+	for <fstests@vger.kernel.org>; Fri,  5 Apr 2024 19:56:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712335604; cv=none; b=uCtaZd7sQxegKhFrP3kXsnTlg+wzChUS9zzPD7BMX3HN6/rxAbl+GUYcZxY/LmBhR9g+sccEiB88c7dcDtR86o7QC7B4WaUIewkm26Lgut5YwsJ9CE9l6vbyLRfgDPi2apJhg1H301xHy/34ZC4SL5axEiPXAmo4rIGP+NQuuvA=
+	t=1712346986; cv=none; b=fqRFNemda2Hei5MCHhBiNZgzXY560ZXFO/zZfbUFSO7tF4zoS1VKb8fmsO9dFGrARxMrKL7OxrscsNPaTaaYRCLNpgj/uFd07ueZksbOV8UMEDIhoIoIxCuHaG+fgr3kC5jyiSdEv4vO5e9b3cpCbtHqfP3CRqnrcW87bouIbAE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712335604; c=relaxed/simple;
-	bh=9xN+QFnJfEH0uo3iEiBotij/j5TUI4NkAqYKS+lENfg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ThHo5bPXsDGj1FAapkKc7Rn5TDDszbtnmZjSJmRavmrSjnovUsDfm0CmpdOk5UVHtiG++EvWCRKEXNDtMZaemRfxdKykgP6MaMvpoyWclTl+++jo5usvfrVMog1oGVQ1btTtsQHgRRRvrcC91Nzesc/8KHwIWtCQ1jN61s1btPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VICq3Rk3; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1712346986; c=relaxed/simple;
+	bh=IftFNAyGMW0+PC4UaymkIiJKu1SRGfJ2M7zYBEQQiOM=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=GmH7r5tdamHtXPHAONPL1SKJPCqzMXXQolnlXs/nOBUcolJOpSorN2teHCFGnQspVD1U7AYS44M5RCk9UqzLsYZ52V7mfwFo+iEXHjioZAg0LamBv2SFk6znHR1CVArCckiXH9Z3dTeGq98LYeJd7cmBl9Z+aG6nNE9ktbLwI5k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=LvduprAs; arc=none smtp.client-ip=209.85.219.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VICq3Rk3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 787C9C433F1;
-	Fri,  5 Apr 2024 16:46:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1712335604;
-	bh=9xN+QFnJfEH0uo3iEiBotij/j5TUI4NkAqYKS+lENfg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=VICq3Rk3TjzwgE1GXOERM315gIHnZUh6x6IxuG/j3TM81X2fc0zi/CPdXuUz+o7t8
-	 gIlwlXUpcJ8+uWMjzlPih/SAt/28fiY5Ey2dzNRXhYTJNkPTocO6kk4W4iyvdkY+I8
-	 hE2jOFt7iakWURsSJ0DIUScr/DH39HAzpIAW5VLtfbZVLxO8tEbJr4oUwNaocsodQV
-	 ojUe2zTEL2iTGpvdOAJK/fI006o7HTcQgaxKKA43TUJRvQVcsh/0F5p5ZKUzM3FiK3
-	 c8FpK732crC7cHww+EMXbVAvi3gqJxt7B9wb6Z4dxVxjfFHFnkxJuKo3qExj1Yg5Qa
-	 b7ZqAGfIkYDjg==
-Date: Fri, 5 Apr 2024 09:46:43 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Anand Jain <anand.jain@oracle.com>, zlang@kernel.org,
-	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	josef@toxicpanda.com, dsterba@suse.cz
-Subject: Re: [PATCH 1/2] common/filter.btrfs: add a new _filter_snapshot
-Message-ID: <20240405164643.GA634366@frogsfrogsfrogs>
-References: <cover.1712306454.git.anand.jain@oracle.com>
- <3d035b4355abc0cf9e95da134d89e3fbb58939d0.1712306454.git.anand.jain@oracle.com>
- <a62dbef2-0371-49e7-b5eb-9bb5fed32a17@gmx.com>
- <37e0ae3f-54b0-45a4-b62a-7caca994c38a@oracle.com>
- <eb9530e1-7626-41fb-978e-b830b46a04f4@gmx.com>
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="LvduprAs"
+Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-6962950c6bfso17104126d6.2
+        for <fstests@vger.kernel.org>; Fri, 05 Apr 2024 12:56:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1712346983; x=1712951783; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=JDCIjcfLg5/A+ZSk8y5tQbAFPHorahyNXBBJAhi7Wtk=;
+        b=LvduprAsB6e40uSX9dSMtQZzTeVoq+oXuTIBaKRnmz/Zpl6dqiehuiKRrzlcR9VyjT
+         HClxRXAsssBx9NDGHtHjAoH/BHXEOqDihJxeiCKMd+h4S5ayKscaUz6uhMIeTcWl2F7P
+         CdI+s/9CuN7axlIFl8p8P92IWd5tDRe3RiyW1eUlk7lyUw8mH8JMI/Xr3ZBIWTxy6401
+         OTU7QmGyvLdqKrcG/ABPWPTExBJGSkibtWT0rx/Zx+R6nY0z/2JZPy/B5U+EsW2TeR8i
+         l7qwwgfG+6LAFkT3B8cXvRo8iINm8vqGRQ3Bq56Gvb3H5YlQebWkxPo4Y2hgeEbc4i9C
+         P7iA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1712346983; x=1712951783;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=JDCIjcfLg5/A+ZSk8y5tQbAFPHorahyNXBBJAhi7Wtk=;
+        b=cNp4GolqQefOo7v6TeQ8u8zEC63tM1PnxIRzdvVjXsiIaPh1ZesXifQjVMIlGXAVkt
+         vj+2rPZS4GTvNN+G8uTnUFBDHE8wREQXkZtgQ5H+MoeaAnJlHTVXUwOGeHrJMZRWuq9w
+         2JJOS+X2MwTzMp7UN7482Xb6iuLnN89X2JDZbHPx1syqqhhfndw4W9Ige3fT5D8bkQtm
+         AAsozgrBWJg6iVXIMKNHaykHXDlxK4gUEjod5pIPfXoDQSXw9eTyQQThvPLz8IsVYJ4Z
+         /X4a0lzwUch0Zfxkmk3mF0xEomjj+tqUpkU1p4yyaVc18prdruoq+AUoobyOj6YpXGTJ
+         CILA==
+X-Gm-Message-State: AOJu0YxYEbiNDMipB287e673OWJLnhLCoj3ZfZn9Jl4IP916Np6Q61S9
+	EvFeQ9Dchgac2iv3UBGXRlIX7u9sTMXhvO7tFR7c5FwRQavQXdXMaKKf6U8Ho6rVoFmDhpHIX8E
+	n
+X-Google-Smtp-Source: AGHT+IFn8EGoGAx6UlDJiFtZmMVsPPatBp/kAQ3QgwLYF/mxCjpgwHtlmNbejCmRRXx6ZdN0n4QSRA==
+X-Received: by 2002:ad4:5d6c:0:b0:699:3025:566f with SMTP id fn12-20020ad45d6c000000b006993025566fmr3384305qvb.38.1712346982873;
+        Fri, 05 Apr 2024 12:56:22 -0700 (PDT)
+Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id f2-20020a0cf7c2000000b006991a92642esm876550qvo.138.2024.04.05.12.56.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 05 Apr 2024 12:56:22 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	kernel-team@fb.com
+Subject: [PATCH v2 0/3] fstests: various RAID56 related fixes for btrfs
+Date: Fri,  5 Apr 2024 15:56:11 -0400
+Message-ID: <cover.1712346845.git.josef@toxicpanda.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <eb9530e1-7626-41fb-978e-b830b46a04f4@gmx.com>
 
-On Fri, Apr 05, 2024 at 08:20:59PM +1030, Qu Wenruo wrote:
-> 
-> 
-> 在 2024/4/5 19:55, Anand Jain 写道:
-> > 
-> > 
-> > On 4/5/24 16:52, Qu Wenruo wrote:
-> > > 
-> > > 
-> > > 在 2024/4/5 19:15, Anand Jain 写道:
-> > > > As the newer btrfs-progs have changed the output of the command
-> > > > "btrfs subvolume snapshot," which is part of the golden output,
-> > > > create a helper filter to ensure the test cases pass on older
-> > > > btrfs-progs.
-> > > > 
-> > > > Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> > > 
-> > > Can we stop the golden output filter game?
-> > > 
-> > >  From day one I'm not a big fan of the golden output idea.
-> > > For snapshot/subvolume creation, we don't really care about what the
-> > > output is, we only care if there is any error (which would come from
-> > > stderr).
-> > > 
-> > > In that case, why not just redirect the stdout to null?
-> > > 
-> > > To me, if we really care something from the stdout, we can still save it
-> > > and let bash/awk/grep to process it, like what we did for various test
-> > > cases, and then save the result to seqres.full.
+v1: https://lore.kernel.org/linux-btrfs/cover.1710867187.git.josef@toxicpanda.com/
 
-That sums up what output filters do; I don't understand the objection
-here...
+v1->v2:
+- Reworked the golden output of btrfs/197 and btrfs/198 to handle running some
+  of the RAID profiles.
+- Added a new way to require RAID profiles in the tests, updated all the
+  different tests.
+- Changed btrfs/197, btrfs/198, and btrfs/297 to skip any RAID profiles that
+  aren't supported by our RAID profile settings.
 
-> > > 
-> > 
-> > This is a bug-fix patch; it's not a good idea to change the concept of
-> > fstests' golden output. Perhaps an RFC patch about your idea can help
-> > to discuss and achieve consensus.
-> 
-> Even as bug-fix, a simple redirect to seqres.full and remove the
-> corresponding line from golden output is very valid to me.
-> 
-> In fact, introducing a filter looks very over-engineered in this
-> particular case.
+--- Original email ---
+Hello,
 
-...but having said that , I also dislike overfixation on golden output.
-Patches welcome. ;)
+While trying to get CI setup internally I noticed that we were sometimes failing
+raid56 tests even though I had specified BTRFS_PROFILE_CONFIGS without raid56 in
+them.
 
---D
+This is because tests where we require raid56 to work only check to see if it's
+enabled by the kernel, not to check and see if we're configured to use it with
+our profile configs.
 
-> 
-> > 
-> > Thanks, Anand
-> > 
-> > 
-> > > Thanks,
-> > > Qu
-> > > > ---
-> > > >   common/filter.btrfs | 9 +++++++++
-> > > >   tests/btrfs/001     | 3 ++-
-> > > >   tests/btrfs/152     | 6 +++---
-> > > >   tests/btrfs/168     | 6 +++---
-> > > >   tests/btrfs/202     | 4 ++--
-> > > >   tests/btrfs/302     | 4 ++--
-> > > >   6 files changed, 21 insertions(+), 11 deletions(-)
-> > > > 
-> > > > diff --git a/common/filter.btrfs b/common/filter.btrfs
-> > > > index 9ef9676175c9..415ed6dfd088 100644
-> > > > --- a/common/filter.btrfs
-> > > > +++ b/common/filter.btrfs
-> > > > @@ -156,5 +156,14 @@ _filter_device_add()
-> > > > 
-> > > >   }
-> > > > 
-> > > > +_filter_snapshot()
-> > > > +{
-> > > > +    # btrfs-progs commit 5f87b467a9e7 ("btrfs-progs: subvolume:
-> > > > output the
-> > > > +    # prompt line only when the ioctl succeeded") changed the output
-> > > > for
-> > > > +    # btrfs subvolume snapshot, ensure that the latest fstests
-> > > > continue to
-> > > > +    # work on older btrfs-progs without the above commit.
-> > > > +    _filter_scratch | sed -e "s/Create a/Create/g"
-> > > > +}
-> > > > +
-> > > >   # make sure this script returns success
-> > > >   /bin/true
-> > > > diff --git a/tests/btrfs/001 b/tests/btrfs/001
-> > > > index 6c2639990373..cfcf2ade4590 100755
-> > > > --- a/tests/btrfs/001
-> > > > +++ b/tests/btrfs/001
-> > > > @@ -26,7 +26,8 @@ dd if=/dev/zero of=$SCRATCH_MNT/foo bs=1M count=1
-> > > > &> /dev/null
-> > > >   echo "List root dir"
-> > > >   ls $SCRATCH_MNT
-> > > >   echo "Creating snapshot of root dir"
-> > > > -$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap |
-> > > > _filter_scratch
-> > > > +$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | \
-> > > > +                            _filter_snapshot
-> > > >   echo "List root dir after snapshot"
-> > > >   ls $SCRATCH_MNT
-> > > >   echo "List snapshot dir"
-> > > > diff --git a/tests/btrfs/152 b/tests/btrfs/152
-> > > > index 75f576c3cfca..b89fe361e84e 100755
-> > > > --- a/tests/btrfs/152
-> > > > +++ b/tests/btrfs/152
-> > > > @@ -11,7 +11,7 @@
-> > > >   _begin_fstest auto quick metadata qgroup send
-> > > > 
-> > > >   # Import common functions.
-> > > > -. ./common/filter
-> > > > +. ./common/filter.btrfs
-> > > > 
-> > > >   # real QA test starts here
-> > > >   _supported_fs btrfs
-> > > > @@ -32,9 +32,9 @@ touch $SCRATCH_MNT/subvol{1,2}/foo
-> > > > 
-> > > >   # Create base snapshots and send them
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol1 \
-> > > > -    $SCRATCH_MNT/subvol1/.snapshots/1 | _filter_scratch
-> > > > +    $SCRATCH_MNT/subvol1/.snapshots/1 | _filter_snapshot
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol2 \
-> > > > -    $SCRATCH_MNT/subvol2/.snapshots/1 | _filter_scratch
-> > > > +    $SCRATCH_MNT/subvol2/.snapshots/1 | _filter_snapshot
-> > > >   for recv in recv1_1 recv1_2 recv2_1 recv2_2; do
-> > > >       $BTRFS_UTIL_PROG send $SCRATCH_MNT/subvol1/.snapshots/1 2>
-> > > > /dev/null | \
-> > > >           $BTRFS_UTIL_PROG receive $SCRATCH_MNT/${recv} |
-> > > > _filter_scratch
-> > > > diff --git a/tests/btrfs/168 b/tests/btrfs/168
-> > > > index acc58b51ee39..78bc9b8f81bb 100755
-> > > > --- a/tests/btrfs/168
-> > > > +++ b/tests/btrfs/168
-> > > > @@ -20,7 +20,7 @@ _cleanup()
-> > > >   }
-> > > > 
-> > > >   # Import common functions.
-> > > > -. ./common/filter
-> > > > +. ./common/filter.btrfs
-> > > > 
-> > > >   # real QA test starts here
-> > > >   _supported_fs btrfs
-> > > > @@ -74,7 +74,7 @@ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro
-> > > > false
-> > > >   # Create a snapshot of the subvolume, to be used later as the
-> > > > parent snapshot
-> > > >   # for an incremental send operation.
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1
-> > > > $SCRATCH_MNT/snap1 \
-> > > > -    | _filter_scratch
-> > > > +                            | _filter_snapshot
-> > > > 
-> > > >   # First do a full send of this snapshot.
-> > > >   $FSSUM_PROG -A -f -w $send_files_dir/snap1.fssum $SCRATCH_MNT/snap1
-> > > > @@ -88,7 +88,7 @@ $XFS_IO_PROG -c "pwrite -S 0x19 4K 8K"
-> > > > $SCRATCH_MNT/sv1/baz >>$seqres.full
-> > > >   # Create a second snapshot of the subvolume, to be used later as
-> > > > the send
-> > > >   # snapshot of an incremental send operation.
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1
-> > > > $SCRATCH_MNT/snap2 \
-> > > > -    | _filter_scratch
-> > > > +                            | _filter_snapshot
-> > > > 
-> > > >   # Temporarily turn the second snapshot to read-write mode and then
-> > > > open a file
-> > > >   # descriptor on its foo file.
-> > > > diff --git a/tests/btrfs/202 b/tests/btrfs/202
-> > > > index 5f0429f18bf9..57ecbe47c0bb 100755
-> > > > --- a/tests/btrfs/202
-> > > > +++ b/tests/btrfs/202
-> > > > @@ -8,7 +8,7 @@
-> > > >   . ./common/preamble
-> > > >   _begin_fstest auto quick subvol snapshot
-> > > > 
-> > > > -. ./common/filter
-> > > > +. ./common/filter.btrfs
-> > > > 
-> > > >   _supported_fs btrfs
-> > > >   _require_scratch
-> > > > @@ -28,7 +28,7 @@ _scratch_mount
-> > > >   $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
-> > > >   $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
-> > > > -    | _filter_scratch
-> > > > +                            | _filter_snapshot
-> > > > 
-> > > >   # Need the dummy entry created so that we get the invalid removal
-> > > > when we rmdir
-> > > >   ls $SCRATCH_MNT/c/b
-> > > > diff --git a/tests/btrfs/302 b/tests/btrfs/302
-> > > > index f3e6044b5251..52d712ac50de 100755
-> > > > --- a/tests/btrfs/302
-> > > > +++ b/tests/btrfs/302
-> > > > @@ -15,7 +15,7 @@
-> > > >   . ./common/preamble
-> > > >   _begin_fstest auto quick snapshot subvol
-> > > > 
-> > > > -. ./common/filter
-> > > > +. ./common/filter.btrfs
-> > > > 
-> > > >   _supported_fs btrfs
-> > > >   _require_scratch
-> > > > @@ -46,7 +46,7 @@ $FSSUM_PROG -A -f -w $fssum_file $SCRATCH_MNT/subvol
-> > > >   # Now create a snapshot of the subvolume and make it accessible
-> > > > from within the
-> > > >   # subvolume.
-> > > >   $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol \
-> > > > -         $SCRATCH_MNT/subvol/snap | _filter_scratch
-> > > > +                 $SCRATCH_MNT/subvol/snap | _filter_snapshot
-> > > > 
-> > > >   # Now unmount and mount again the fs. We want to verify we are able
-> > > > to read all
-> > > >   # metadata for the snapshot from disk (no IO failures, etc).
-> > 
-> 
+One test needed to be updated to skip any configurations that weren't in our
+profile configs, and then a few tests didn't use the 
+
+_require_btrfs_fs_feature raid56
+
+check in the top of their test.  This series fixes everything up and honors the
+user settings which makes my internal CI runs clean where we don't want to test
+raid56.  Thanks,
+
+Josef
+
+Josef Bacik (3):
+  fstests: change btrfs/197 and btrfs/198 golden output
+  fstests: change how we test for supported raid configs
+  fstests: update tests to skip unsupported raid profile types
+
+ common/btrfs        | 29 ++++++++++++++++++++++++-----
+ tests/btrfs/125     |  2 +-
+ tests/btrfs/148     |  3 ++-
+ tests/btrfs/157     |  2 +-
+ tests/btrfs/158     |  2 +-
+ tests/btrfs/197     | 17 +++++++++++++----
+ tests/btrfs/197.out | 25 +------------------------
+ tests/btrfs/198     | 17 +++++++++++++----
+ tests/btrfs/198.out | 25 +------------------------
+ tests/btrfs/297     | 10 ++++++++++
+ 10 files changed, 67 insertions(+), 65 deletions(-)
+
+-- 
+2.43.0
+
