@@ -1,276 +1,300 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 684B81420A2
-	for <fstests@vger.kernel.org>; Wed,  3 Apr 2024 11:20:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712143260; cv=none; b=d8kbggqfTq9zTccOiaqht70/0shcD1l8ttUqw89twHlurD9pfuQ5W8/mtwJBUH4EtY3DXbbJH06VonMRjFrRyFoH1YXEeaSFl0Faeq+IqO1fD5xYpwGR7VQjx7Ci92BG/yJPNnlV1b2MnOdvRUfiRO0eRcpGU8ygH0p2BOv7YJ8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712143260; c=relaxed/simple;
-	bh=SxuRDEE43AmdGAHjZ75XhPtG49iOqobU9JdG396+J6g=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VTY+YMvZuQwonYyjYp2SilM/0PLJl0o02Omsk03UJgTWyj1NDAixSUisi/O9nJc62Ept2x3f6AMazbsmK/w1hIml+E/8TjzxotitLl2rtG4cbApER+PSE/nGSPYcaNbbEovc7D8aqrxfaqtqU/Oa7EebcF3DdpMuSTDrLSvl4MM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ug9PMAPC; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B8623DB97;
+	Fri,  5 Apr 2024 08:45:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1712306736; cv=fail; b=EvWkZXD1zYOColl+caGSu/Ypj7gpzpjVbUVsrvbXSL15WDUS+2oosFX47hNZcbQw6hqRg9mRTt8Go6PPMr007nGLDnEoDUkyISUpTzsZjjhv28Fioakd8iuR5iUXOlE4qhcbF9aiE3d4tHpQQLZNyouXTaO6Acg/gpD9bOnwXpk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1712306736; c=relaxed/simple;
+	bh=BvAm4mtMeK3JlGKUWOSDicIz5Ze8SlONeG/LGWXY6VI=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=PuHzNYSIEJmFioad0lQ8aPNaOgBCcTcN0u/r2ZMGtWMXP/GAN87jmq3OTkeu/ZRVGXoBBOkUGWVnaR4p/jjmnKjqI1KzoJMW8JyTL+DooATbxXMK16LUcF/RRhFaQILydM3kFuEAKE1whbKoih71B5XQfR7Zpol7F9/wc6vMFMM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=dyvYKP/P; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=fU/YKGja; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ug9PMAPC"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1712143257;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=KREh2dqyEacrAl+2F5FOzFyXaUiu2kZA6fO1nkDtqNU=;
-	b=Ug9PMAPCLfKf1Dkq/XYeA+MXqKxWtAOi2FD5vywqVql88fhnyVviijY6u3F9mgEZa/mu0t
-	5CiJhZWsJ1YpPYSna++wB7X9h8LBkDI/2e8lnRlxQSbvaaSyHYdvcPI6n8hTRmvsbaG9vS
-	vNGFhu5LcIbmQwB8TqjtnraqSrHxiDM=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-691-WTLmTXhtPyGXITd_CWJSeA-1; Wed, 03 Apr 2024 07:20:56 -0400
-X-MC-Unique: WTLmTXhtPyGXITd_CWJSeA-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1e0f50354d4so7776015ad.1
-        for <fstests@vger.kernel.org>; Wed, 03 Apr 2024 04:20:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712143255; x=1712748055;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KREh2dqyEacrAl+2F5FOzFyXaUiu2kZA6fO1nkDtqNU=;
-        b=KNuiRhHnu6gx3exxt25vHH8ASGoPd7PoNW5+jb6C1qkc92dDhSdAiRLOoAzCvzqip8
-         GPeJqXr/lVGueHRwa9XKGAuU7pxAiguPU/CqJPPJRQjGGaWgn0ujTl57R5sZ85IoUoAE
-         7018Xpcf1d5Zxy118QegXbIbMIE1qDTFF9qSfTUkKUfSUp2t2re1DgV+IERkL/YxDIrZ
-         PDJUSKd3dp5ufqtWBdnPfkFocbMsXApxawqx8aaa6m5MO13fMiEjfoa6EvQol4PA9u52
-         Jt0zR6QAhCQjWCK2kqr2g5H5YUkpVZQZsGScKBYu0gp2z9z2qdZ6jRE0HSN9Bpi5EdPL
-         uvHw==
-X-Forwarded-Encrypted: i=1; AJvYcCWdk+2MNc/TWYLGUUQYRw0ljkyRaLzov9cVOgOxfTt4zPuVDRjei93AVRBgGF7QFK67cCLnif+zI8aM8Og2mfXW1EvYedhU7w==
-X-Gm-Message-State: AOJu0Yw7KhaeyMGmsIVHfNQkTVnNGlIqQNQBEe++kXnZ6fr17liZmhg4
-	lhrUwPpWcDkhwhJuokS4ZypOOXn3s5XrYOzHi+Zob4z1y6AQvEQqV3QFw2irm2OnGwnNF4IYCvM
-	BTzg8iJQYiYwb73m5qrn3tb1t+zxikcSySxuxB6oFOM873+GYXkRDjM0=
-X-Received: by 2002:a17:902:ea09:b0:1e2:8f1d:6f98 with SMTP id s9-20020a170902ea0900b001e28f1d6f98mr2224686plg.31.1712143254774;
-        Wed, 03 Apr 2024 04:20:54 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFaOEmBmMO4HQwCpLtzg464+JVCd3k1I2apvUuiFMsuclmBoHgJPn7rIicEfuJxTiAyZe4Ffw==
-X-Received: by 2002:a17:902:ea09:b0:1e2:8f1d:6f98 with SMTP id s9-20020a170902ea0900b001e28f1d6f98mr2224661plg.31.1712143254239;
-        Wed, 03 Apr 2024 04:20:54 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id k10-20020a170902694a00b001e088a9e2bcsm12931736plt.292.2024.04.03.04.20.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Apr 2024 04:20:53 -0700 (PDT)
-Date: Wed, 3 Apr 2024 19:20:49 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Boris Burkov <boris@bur.io>
-Cc: linux-btrfs@vger.kernel.org, kernel-team@fb.com,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH v4] btrfs: new test for devt change between mounts
-Message-ID: <20240403112049.awm3kvsl2zeukjvr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <ab39a4385d586a0b82dafdec73f625cf434fe026.1710184289.git.boris@bur.io>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="dyvYKP/P";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="fU/YKGja"
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 4358Xxb0024038;
+	Fri, 5 Apr 2024 08:45:26 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references :
+ content-transfer-encoding : content-type : mime-version;
+ s=corp-2023-11-20; bh=ki5mrWuVU+IefQh1cwbk51ayOvkHRxXaLB7IDhmF19A=;
+ b=dyvYKP/Pp/B2mMIyO1PpZ+9aWjxMoJ4owCIoxfRfqOj199QUbXE6fzCT3nkzYsqaodFA
+ WwytJSWg46brqhxxHFsCpghjjsF3h92HDs86mlwa9KEz97NfaHaT2Kaq8fbozirgmF2e
+ 8Nn2Qc1IlLseWXgpQeSh86cXHCe4yFf8CDJYUOAcioLsNpAMEroTfJFvnZiQx2Z2Gc9B
+ d54Ak0Jekjc54vMwRfxHyNBP/CEd28+xKoBIW9PqxsYwiwjEO9i8wRFhFozrHJpFRwIb
+ d5q/kK5oSsknsgrbuHRhz48Ft1uqMCh5LpwH1xwbb0RXcp9x8B+ntxdzJEGejHgUNLtA tg== 
+Received: from phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta02.appoci.oracle.com [147.154.114.232])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3x9f8pay09-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 05 Apr 2024 08:45:26 +0000
+Received: from pps.filterd (phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 43572REP009227;
+	Fri, 5 Apr 2024 08:45:25 GMT
+Received: from nam02-dm3-obe.outbound.protection.outlook.com (mail-dm3nam02lp2040.outbound.protection.outlook.com [104.47.56.40])
+	by phxpaimrmta02.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3x9emmu17r-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 05 Apr 2024 08:45:25 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=E2C6YSaCnQVRh7CmRcgDdRLlEuga79EO+JVEzNaMc75MSMvE1c8IWYH8UxphU2QtfaArwCK3P69AbhGvJY50ZLB9/0sz+WLH7DZ5rBNAo8syFqCLTG9mFS/ILez5WUe7iCa61Cz+c4+CLa+DyaiPj/cvxPiwsRUo4vHcwQjFvjM8Qt7AacrgcbIBYWWvXCK6zr2VCXkX5aBX5FlUiYpqRRqA3cAEwKvOvglHEXTTW0//SNPbwGUKBuTnQJc/InRl9zzyEtogAuOATCs7jS7culDL/qeFwCqokbOVHMQIhJZfRkCaQs6mVF3emcNkKcd49E3lqKqUwLw9l+TMeXJ/AA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ki5mrWuVU+IefQh1cwbk51ayOvkHRxXaLB7IDhmF19A=;
+ b=jh4pvIJHtcQty64DL6AcM/WplCovInGjwo3fvel8X7YPrYUK/D8bbLhfI8KPa20FUUs/kO7RhkgeG2VgMATvW4Auoatq9adk/nOr5q1DW7Ut20WB1K80Zi/z9pThhPQ/CFRxe7PNp2izgRbiTnpOw986OJZ13pTTLhyqKYDN59oY/VCttNdakyPY5lhRjiAldCi74h49+oLWC0KtPOwUdfJyJ7K+ZlDf++7EBeLm2U/ejD6jVwYe4bI92O0AqHlbRmABnJ/Mrb6Hlmm37C1YzbFtvPEfIjS5MYycjnckSvWyeyScUwG1zuowjlU8jvczpQ891mGERYmarlADN/9csA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ki5mrWuVU+IefQh1cwbk51ayOvkHRxXaLB7IDhmF19A=;
+ b=fU/YKGja/moHjQezhrOYfhNJjwkJKFEdWdc2U+Bl2tuUKyRHRogi+2LeqXvVL5wJm9lihjwudKxUhwwK602zrX71xyOMNmjXxDeyl2MqbimyVnF1sKF0/x+ztEx1G/GFP68E0Hx0tEXGacxgxh6l6ZAHAxmxrL6OTd6f2Ru9384=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by DS7PR10MB7323.namprd10.prod.outlook.com (2603:10b6:8:ec::7) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7409.46; Fri, 5 Apr 2024 08:45:23 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::814:3d5c:443b:17b]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::814:3d5c:443b:17b%7]) with mapi id 15.20.7409.042; Fri, 5 Apr 2024
+ 08:45:23 +0000
+From: Anand Jain <anand.jain@oracle.com>
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, josef@toxicpanda.com,
+        dsterba@suse.cz
+Subject: [PATCH 1/2] common/filter.btrfs: add a new _filter_snapshot
+Date: Fri,  5 Apr 2024 16:45:02 +0800
+Message-ID: <3d035b4355abc0cf9e95da134d89e3fbb58939d0.1712306454.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.42.0
+In-Reply-To: <cover.1712306454.git.anand.jain@oracle.com>
+References: <cover.1712306454.git.anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR04CA0194.apcprd04.prod.outlook.com
+ (2603:1096:4:14::32) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ab39a4385d586a0b82dafdec73f625cf434fe026.1710184289.git.boris@bur.io>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS7PR10MB7323:EE_
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 
+	3x6sqTVlANQHjRIwPFs8d78C7qQR+jIsOLjmQOBNq0/avLCMc9qpZRvfL7+x2DPOi5Kr8cyJ1FEsK5LTpMxsTQueyakaNHohL1paDCTb41eyZkpJTshoPAikR+gZ4CjW3/thZyYA7qXoCQajkvi07zMJsTP24RhygUs+vvKJn4/ZAjlp2yvRbB4yW5DnkuBJ6vith03h4nZX1nZQDKQYm+th2Isjk6InhUyZ8ANiDu6045PBGg1pNFA+Ja2fgA8JZijGnQ+KukBPny/4FSzP3w9bbXtz/Yxwcj1vWXkhPHd9OC7i3qLOQIQtyXy157pVNrhV9vXrAeF/VTSqW9k7IhpUNAHTWVAK+8EIZmkp2txqOw5vFM4wHGf8RRNEBSHwH6TkL86WrRguw8fI2FoHTm7ct8riMgPNnpYR+KKxNad9Y9U9bV9nrQ3u3jYels0dgX3LjRZ72nUsgnapaE+I/7mYEYJ38qVzb9lm/vH0Wk24W3B7WtNu+EXMwOtqK8QnvrGROF0GWi3fyJHESYDIJFv8dnHGxD9YQeZgTW+iekX+6IXGHBHr/7PxeDDK17zE/NBqrBCP4846YiZmr3CCXh0NLVeZlE9/q6rxtey263haPjFxua3S7jWtbeyRugg5lJgcd1zyQgobIO/IYqTIcKymm3OxyHxMN6ZewmN2Gcs=
+X-Forefront-Antispam-Report: 
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(1800799015)(376005);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: 
+	=?us-ascii?Q?f1YIt8obw5JgY4XqJu1tEX8FlSQDsQlS036l7tzKwOhlKrd9jrGGGsiqYYW8?=
+ =?us-ascii?Q?AqEsKWb+7R2Wcc5AcUIbSrd8p1ayw3xazxpNnJoLZQxdslX16EiLOMiTlcpQ?=
+ =?us-ascii?Q?LGxtSZk1HE4uhv86OfXoDuZ4/SMh8UpMReMZQ3NAwfCTn7P4oRmM7QNkiViu?=
+ =?us-ascii?Q?4q3ozc9e4HYeh5BuVGeSHX8OvnopNdm9ISy2akfqSM5dskLFBVEdSqVMaXhC?=
+ =?us-ascii?Q?vOVHDoVF+ZqOijjuMp8oFu+AwDf9/CHcFmsyjTr8lZwtiB6nOINoMAExPSFj?=
+ =?us-ascii?Q?WDXUGKjvzRvNrAmmAPSzoSv5E6mfHvTLel5pspF8p1cVc8CWRW4bDV2JkVS2?=
+ =?us-ascii?Q?DTqUAomcUrc9SuBgF/9wzcU+n3OsaTAiAUPMVgHNk5DGUKGq32QEmQb+gXiD?=
+ =?us-ascii?Q?t+a82GWPXmnnFgwf/TFY0Ujzy4YJVJG5odKNedalp9V02evKXcLNLJNx3A3N?=
+ =?us-ascii?Q?i9JL9sIr/6RXvDGjN7/AX/nA3Bq54p0l9BE/Ij1R9sqOzORIJEMtMweD+hRp?=
+ =?us-ascii?Q?wrxjEcGGnw67oOyye1ron1SPoYB6vW4/eS+HPPswGUS+e3ED2mKuu7vPk7w6?=
+ =?us-ascii?Q?5/kyr3YPtXg/EK4KmMH1Rdg5S46LL7Tcyh6PbxoJv9wPbZcrqLLlcnktgE8p?=
+ =?us-ascii?Q?a7dIu+Gfn0fpt3lqZRmvZNKVZuD5b9Zp7BH+V3ESnDsFq2LI3W0AlohosaQJ?=
+ =?us-ascii?Q?I62khwjwGAXb9OEqY9Mu2DJu+TLVfGpjLTGKUSLj7hhgnS4g3A2b1bPmfbIw?=
+ =?us-ascii?Q?9ce4NvMDBnVPsZnbD30nI/vxueLsyi+4HVKSGPCg0OJ89s67lAZ3wuezedPf?=
+ =?us-ascii?Q?a8iIn/j1nCXLXlsZNlEp94FyvZG7ivnDsM7HkVp5yR5YPdWgT+CmdkBYC2UA?=
+ =?us-ascii?Q?5JJcB0Yisg1WgyUGrxi/0KE2tt38WSRNhxfqet9argfMVMyUGFIdL8WywBze?=
+ =?us-ascii?Q?H/5cqRack3jnSELxh3Uq3A0LFpJMz3E1vVi4E+J/qLehku3tC1G34axdVaoG?=
+ =?us-ascii?Q?BN8LfoAwqi9YA5dihJl+7P7yR3bB/N0fQI6pLrWYkiUKOrV19hhcnVpB7nw0?=
+ =?us-ascii?Q?e/ZrMU7Y+6M/GYqClsh2+8o5cLAoqro4W5B578XGEiBFtKcc3s1ztj+E3aJd?=
+ =?us-ascii?Q?Lm/dWCUPWAk8ZnuMZO2bcgBbrRUMZbeg4R3nAysQpZEl0IxxpMAyfBxfTSiK?=
+ =?us-ascii?Q?RaIaBvcWLkrG4lFjvWm7FTycjG0AAgkkXthrhaDrAYhTDSNkAD+c4v7a9ySy?=
+ =?us-ascii?Q?iIbv6y8q4pk/Xnnqtij0ClQhaIYxKg1AEkuYXKD5GdyOIXVF2q1yqVrP5s0a?=
+ =?us-ascii?Q?lpBN+8owtt7iVZGQcnFE9swl4PQRZkZ+TAz2/puqXSEJYV7N7eG+VCaCP+Rk?=
+ =?us-ascii?Q?u0UtGymBhw12JisnjRpG0uVK9SrlsMwya7rR0QeKtyXNhIfmuNx8nBliz4d5?=
+ =?us-ascii?Q?32bNKu/hrugLGu5PqTReWLq/mygVvbk+xkfmhX5BMgEHGFCk/9jt746hBBvw?=
+ =?us-ascii?Q?s6lSkUJLt4Zlbaz4q5DCc12uzdWk8IAHHdRcteRUwFVTKfVIrh1132ESXD9+?=
+ =?us-ascii?Q?FqyOTXa714afCEP+ChMqVR+xOT/SFshCtufPF36ue4NU1jJsQcWWXX1xeBOw?=
+ =?us-ascii?Q?Yg=3D=3D?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
+	eKRqbyUiyj/P1iLClVNgFdvuzoa4pziVrsBwla2BlWc/1YjPmDlqKyI83etHEZNX4vzXElDDeDGnY0pmSx/WGo238WSoXVSdb5a9ipt9xAxxeZCaG9wVAG7OU5v17j3HgQf7LYCwYfveYXnBL6UW44mXlxg6OBK9QzK7WTsf5cp4orBPTqzdY4IsBtMqY6KAPXk5Z78CIkt3VklfVAEzq+A3ZQw5Af8xwstY3UCSBp9bdTyP5ERazotLMxBfkZVggFeSdwiVFJva2UwExTKDFfeihzhWqGt9J6fqsBl0qQLijrA4e2Y1Kautdnq36yfU+sWCEmYDv1+RtazlsuAmXPfr7ZHAzD0PsVHWqS1UgAADB9Bn9qokBDdiSUnPKgix64UUtxLw3TpVDYK3vpT0lKMewUl3cMNxvffNYwRRzgNg0IKbJtwJs6rC4EWEMP841DlYvoPQJz6yjKjrQV6QdS/J8pagL2kKuP9d8Koz9hKpHPC5wv8UJhBkLF1l+cJY2eSYBi/VMnIgVoG4E22I4HLneFTYn5/WA/+W9AfU8bGGnnkkw683f7VHTHLWDsu+QCIV+KICF8V6BauB7LoH1+a87Tb7hrr0cdx+ZiqXNLE=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 33b073c4-cfae-4cf5-2624-08dc554cbb5d
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Apr 2024 08:45:23.2698
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: aHHyPKqNuG0tZ+Rd1hdg+Fv40dnRvPbIo8jFU+PWaY/zyQvWbGNsSEKOiZHq0uR3qNwGNq++p+03hLo0ueWhHg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB7323
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
+ definitions=2024-04-05_08,2024-04-04_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 malwarescore=0
+ suspectscore=0 adultscore=0 mlxscore=0 spamscore=0 bulkscore=0
+ mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2404010000 definitions=main-2404050063
+X-Proofpoint-GUID: vvknCSHVh9ceO3AkHlRunDJvnHyzWbU_
+X-Proofpoint-ORIG-GUID: vvknCSHVh9ceO3AkHlRunDJvnHyzWbU_
 
-On Mon, Mar 11, 2024 at 12:13:44PM -0700, Boris Burkov wrote:
-> It is possible to confuse the btrfs device cache (fs_devices) by
-> starting with a multi-device filesystem, then removing and re-adding a
-> device in a way which changes its dev_t while the filesystem is
-> unmounted. After this procedure, if we remount, then we are in a funny
-> state where struct btrfs_device's "devt" field does not match the bd_dev
-> of the "bdev" field. I would say this is bad enough, as we have violated
-> a pretty clear invariant.
-> 
-> But for style points, we can then remove the extra device from the fs,
-> making it a single device fs, which enables the "temp_fsid" feature,
-> which permits multiple separate mounts of different devices with the
-> same fsid. Since btrfs is confused and *thinks* there are different
-> devices (based on device->devt), it allows a second redundant mount of
-> the same device (not a bind mount!). This then allows us to corrupt the
-> original mount by doing stuff to the one that should be a bind mount.
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> Signed-off-by: Boris Burkov <boris@bur.io>
-> ---
-> Changelog:
-> v4:
-> - add tempfsid group
-> - remove fail check on mount command
-> - btrfs/311 -> btrfs/318
-> - add fixed_by annotation
-> v3:
-> - fstests convention improvements (helpers, output, comments, etc...)
-> v2:
-> - fix numerous fundamental issues, v1 wasn't really ready
-> 
->  common/config       |   1 +
->  tests/btrfs/318     | 108 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/318.out |   2 +
->  3 files changed, 111 insertions(+)
->  create mode 100755 tests/btrfs/318
->  create mode 100644 tests/btrfs/318.out
-> 
-> diff --git a/common/config b/common/config
-> index 2a1434bb1..d8a4508f4 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -235,6 +235,7 @@ export BLKZONE_PROG="$(type -P blkzone)"
->  export GZIP_PROG="$(type -P gzip)"
->  export BTRFS_IMAGE_PROG="$(type -P btrfs-image)"
->  export BTRFS_MAP_LOGICAL_PROG=$(type -P btrfs-map-logical)
-> +export PARTED_PROG="$(type -P parted)"
->  
->  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->  # newer systems have udevadm command but older systems like RHEL5 don't.
-> diff --git a/tests/btrfs/318 b/tests/btrfs/318
-> new file mode 100755
-> index 000000000..796f09d13
-> --- /dev/null
-> +++ b/tests/btrfs/318
-> @@ -0,0 +1,108 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2024 Meta, Inc. All Rights Reserved.
-> +#
-> +# FS QA Test 318
-> +#
-> +# Test an edge case of multi device volume management in btrfs.
-> +# If a device changes devt between mounts of a multi device fs, we can trick
-> +# btrfs into mounting the same device twice fully (not as a bind mount). From
-> +# there, it is trivial to induce corruption.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick volume scrub tempfsid
-> +
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +	"btrfs: validate device maj:min during open"
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_require_test
-> +_require_command "$PARTED_PROG" parted
-> +_require_batched_discard "$TEST_DIR"
-> +
-> +_cleanup() {
-> +	cd /
-> +	$UMOUNT_PROG $MNT
-> +	$UMOUNT_PROG $BIND
-> +	losetup -d $DEV0
-> +	losetup -d $DEV1
-> +	losetup -d $DEV2
-> +	rm $IMG0
-> +	rm $IMG1
-> +	rm $IMG2
+As the newer btrfs-progs have changed the output of the command
+"btrfs subvolume snapshot," which is part of the golden output,
+create a helper filter to ensure the test cases pass on older
+btrfs-progs.
 
-losetup -d $DEV0 $DEV1 $DEV2
-rm -f $IMG0 $IMG1 $IMG2
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ common/filter.btrfs | 9 +++++++++
+ tests/btrfs/001     | 3 ++-
+ tests/btrfs/152     | 6 +++---
+ tests/btrfs/168     | 6 +++---
+ tests/btrfs/202     | 4 ++--
+ tests/btrfs/302     | 4 ++--
+ 6 files changed, 21 insertions(+), 11 deletions(-)
 
-> +}
-> +
-> +IMG0=$TEST_DIR/$$.img0
-> +IMG1=$TEST_DIR/$$.img1
-> +IMG2=$TEST_DIR/$$.img2
-> +truncate -s 1G $IMG0
-> +truncate -s 1G $IMG1
-> +truncate -s 1G $IMG2
-> +DEV0=$(losetup -f $IMG0 --show)
-> +DEV1=$(losetup -f $IMG1 --show)
-> +DEV2=$(losetup -f $IMG2 --show)
-
-_create_loop_device ?
-
-
-
-> +D0P1=$DEV0"p1"
-> +D1P1=$DEV1"p1"
-> +MNT=$TEST_DIR/mnt
-> +BIND=$TEST_DIR/bind
-
-Not sure if these two directories will be taken, better to remove
-them at first. And use "$seq" (or others) to be a prefix or suffix,
-e.g.
-
-  $TEST_DIR/mnt-${seq}
-
-Others look good to me.
-
-Thanks,
-Zorro
-
-
-> +
-> +# Setup partition table with one partition on each device.
-> +$PARTED_PROG $DEV0 'mktable gpt' --script
-> +$PARTED_PROG $DEV1 'mktable gpt' --script
-> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
-> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
-> +
-> +# mkfs with two devices to avoid clearing devices on close
-> +# single raid to allow removing DEV2.
-> +$MKFS_BTRFS_PROG -f -msingle -dsingle $D0P1 $DEV2 >>$seqres.full 2>&1 || _fail "failed to mkfs.btrfs"
-> +
-> +# Cycle mount the two device fs to populate both devices into the
-> +# stale device cache.
-> +mkdir -p $MNT
-> +_mount $D0P1 $MNT
-> +$UMOUNT_PROG $MNT
-> +
-> +# Swap the partition dev_ts. This leaves the dev_t in the cache out of date.
-> +$PARTED_PROG $DEV0 'rm 1' --script
-> +$PARTED_PROG $DEV1 'rm 1' --script
-> +$PARTED_PROG $DEV1 'mkpart mypart 1M 100%' --script
-> +$PARTED_PROG $DEV0 'mkpart mypart 1M 100%' --script
-> +
-> +# Mount with mismatched dev_t!
-> +_mount $D0P1 $MNT
-> +
-> +# Remove the extra device to bring temp-fsid back in the fray.
-> +$BTRFS_UTIL_PROG device remove $DEV2 $MNT
-> +
-> +# Create the would be bind mount.
-> +mkdir -p $BIND
-> +_mount $D0P1 $BIND
-> +mount_show=$($BTRFS_UTIL_PROG filesystem show $MNT)
-> +bind_show=$($BTRFS_UTIL_PROG filesystem show $BIND)
-> +# If they're different, we are in trouble.
-> +[ "$mount_show" = "$bind_show" ] || echo "$mount_show != $bind_show"
-> +
-> +# Now really prove it by corrupting the first mount with the second.
-> +for i in $(seq 20); do
-> +	$XFS_IO_PROG -f -c "pwrite 0 50M" $MNT/foo.$i >>$seqres.full 2>&1
-> +done
-> +for i in $(seq 20); do
-> +	$XFS_IO_PROG -f -c "pwrite 0 50M" $BIND/foo.$i >>$seqres.full 2>&1
-> +done
-> +
-> +# sync so that we really write the large file data out to the shared device
-> +sync
-> +
-> +# now delete from one view of the shared device
-> +find $BIND -type f -delete
-> +# sync so that fstrim definitely has deleted data to trim
-> +sync
-> +# This should blow up both mounts, if the writes somehow didn't overlap at all.
-> +$FSTRIM_PROG $BIND
-> +# drop caches to improve the odds we read from the corrupted device while scrubbing.
-> +echo 3 > /proc/sys/vm/drop_caches
-> +$BTRFS_UTIL_PROG scrub start -B $MNT | grep "Error summary:"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/318.out b/tests/btrfs/318.out
-> new file mode 100644
-> index 000000000..2798c4ba7
-> --- /dev/null
-> +++ b/tests/btrfs/318.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 318
-> +Error summary:    no errors found
-> -- 
-> 2.43.0
-> 
-> 
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 9ef9676175c9..415ed6dfd088 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -156,5 +156,14 @@ _filter_device_add()
+ 
+ }
+ 
++_filter_snapshot()
++{
++	# btrfs-progs commit 5f87b467a9e7 ("btrfs-progs: subvolume: output the
++	# prompt line only when the ioctl succeeded") changed the output for
++	# btrfs subvolume snapshot, ensure that the latest fstests continue to
++	# work on older btrfs-progs without the above commit.
++	_filter_scratch | sed -e "s/Create a/Create/g"
++}
++
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/btrfs/001 b/tests/btrfs/001
+index 6c2639990373..cfcf2ade4590 100755
+--- a/tests/btrfs/001
++++ b/tests/btrfs/001
+@@ -26,7 +26,8 @@ dd if=/dev/zero of=$SCRATCH_MNT/foo bs=1M count=1 &> /dev/null
+ echo "List root dir"
+ ls $SCRATCH_MNT
+ echo "Creating snapshot of root dir"
+-$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | _filter_scratch
++$BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT $SCRATCH_MNT/snap | \
++							_filter_snapshot
+ echo "List root dir after snapshot"
+ ls $SCRATCH_MNT
+ echo "List snapshot dir"
+diff --git a/tests/btrfs/152 b/tests/btrfs/152
+index 75f576c3cfca..b89fe361e84e 100755
+--- a/tests/btrfs/152
++++ b/tests/btrfs/152
+@@ -11,7 +11,7 @@
+ _begin_fstest auto quick metadata qgroup send
+ 
+ # Import common functions.
+-. ./common/filter
++. ./common/filter.btrfs
+ 
+ # real QA test starts here
+ _supported_fs btrfs
+@@ -32,9 +32,9 @@ touch $SCRATCH_MNT/subvol{1,2}/foo
+ 
+ # Create base snapshots and send them
+ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol1 \
+-	$SCRATCH_MNT/subvol1/.snapshots/1 | _filter_scratch
++	$SCRATCH_MNT/subvol1/.snapshots/1 | _filter_snapshot
+ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol2 \
+-	$SCRATCH_MNT/subvol2/.snapshots/1 | _filter_scratch
++	$SCRATCH_MNT/subvol2/.snapshots/1 | _filter_snapshot
+ for recv in recv1_1 recv1_2 recv2_1 recv2_2; do
+ 	$BTRFS_UTIL_PROG send $SCRATCH_MNT/subvol1/.snapshots/1 2> /dev/null | \
+ 		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/${recv} | _filter_scratch
+diff --git a/tests/btrfs/168 b/tests/btrfs/168
+index acc58b51ee39..78bc9b8f81bb 100755
+--- a/tests/btrfs/168
++++ b/tests/btrfs/168
+@@ -20,7 +20,7 @@ _cleanup()
+ }
+ 
+ # Import common functions.
+-. ./common/filter
++. ./common/filter.btrfs
+ 
+ # real QA test starts here
+ _supported_fs btrfs
+@@ -74,7 +74,7 @@ $BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro false
+ # Create a snapshot of the subvolume, to be used later as the parent snapshot
+ # for an incremental send operation.
+ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1 $SCRATCH_MNT/snap1 \
+-	| _filter_scratch
++							| _filter_snapshot
+ 
+ # First do a full send of this snapshot.
+ $FSSUM_PROG -A -f -w $send_files_dir/snap1.fssum $SCRATCH_MNT/snap1
+@@ -88,7 +88,7 @@ $XFS_IO_PROG -c "pwrite -S 0x19 4K 8K" $SCRATCH_MNT/sv1/baz >>$seqres.full
+ # Create a second snapshot of the subvolume, to be used later as the send
+ # snapshot of an incremental send operation.
+ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1 $SCRATCH_MNT/snap2 \
+-	| _filter_scratch
++							| _filter_snapshot
+ 
+ # Temporarily turn the second snapshot to read-write mode and then open a file
+ # descriptor on its foo file.
+diff --git a/tests/btrfs/202 b/tests/btrfs/202
+index 5f0429f18bf9..57ecbe47c0bb 100755
+--- a/tests/btrfs/202
++++ b/tests/btrfs/202
+@@ -8,7 +8,7 @@
+ . ./common/preamble
+ _begin_fstest auto quick subvol snapshot
+ 
+-. ./common/filter
++. ./common/filter.btrfs
+ 
+ _supported_fs btrfs
+ _require_scratch
+@@ -28,7 +28,7 @@ _scratch_mount
+ $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a | _filter_scratch
+ $BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/a/b | _filter_scratch
+ $BTRFS_UTIL_PROG subvolume snapshot $SCRATCH_MNT/a $SCRATCH_MNT/c \
+-	| _filter_scratch
++							| _filter_snapshot
+ 
+ # Need the dummy entry created so that we get the invalid removal when we rmdir
+ ls $SCRATCH_MNT/c/b
+diff --git a/tests/btrfs/302 b/tests/btrfs/302
+index f3e6044b5251..52d712ac50de 100755
+--- a/tests/btrfs/302
++++ b/tests/btrfs/302
+@@ -15,7 +15,7 @@
+ . ./common/preamble
+ _begin_fstest auto quick snapshot subvol
+ 
+-. ./common/filter
++. ./common/filter.btrfs
+ 
+ _supported_fs btrfs
+ _require_scratch
+@@ -46,7 +46,7 @@ $FSSUM_PROG -A -f -w $fssum_file $SCRATCH_MNT/subvol
+ # Now create a snapshot of the subvolume and make it accessible from within the
+ # subvolume.
+ $BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol \
+-		 $SCRATCH_MNT/subvol/snap | _filter_scratch
++				 $SCRATCH_MNT/subvol/snap | _filter_snapshot
+ 
+ # Now unmount and mount again the fs. We want to verify we are able to read all
+ # metadata for the snapshot from disk (no IO failures, etc).
+-- 
+2.39.3
 
