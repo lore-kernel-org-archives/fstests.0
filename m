@@ -1,62 +1,67 @@
-Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 116C6173347
-	for <fstests@vger.kernel.org>; Fri,  5 Apr 2024 19:56:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4B8217334B
+	for <fstests@vger.kernel.org>; Fri,  5 Apr 2024 19:56:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712346986; cv=none; b=fqRFNemda2Hei5MCHhBiNZgzXY560ZXFO/zZfbUFSO7tF4zoS1VKb8fmsO9dFGrARxMrKL7OxrscsNPaTaaYRCLNpgj/uFd07ueZksbOV8UMEDIhoIoIxCuHaG+fgr3kC5jyiSdEv4vO5e9b3cpCbtHqfP3CRqnrcW87bouIbAE=
+	t=1712346987; cv=none; b=u+CCxMfOU21W5PkP5p7ui+CwGEUmbSmrX5bytNQIVB7nLV+vTccWzQoLx5JmzgUHZvxZXcVgEcg++fSlsC3oQAs3J9d1dwqbtvULsTcDTF7C1ultVk95zQ/l9Zhihh+1HEE9Esfhyqy4uBEAGQgSZ7XNEyaDWFtkA/sKy3JSH3g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712346986; c=relaxed/simple;
-	bh=IftFNAyGMW0+PC4UaymkIiJKu1SRGfJ2M7zYBEQQiOM=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=GmH7r5tdamHtXPHAONPL1SKJPCqzMXXQolnlXs/nOBUcolJOpSorN2teHCFGnQspVD1U7AYS44M5RCk9UqzLsYZ52V7mfwFo+iEXHjioZAg0LamBv2SFk6znHR1CVArCckiXH9Z3dTeGq98LYeJd7cmBl9Z+aG6nNE9ktbLwI5k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=LvduprAs; arc=none smtp.client-ip=209.85.219.48
+	s=arc-20240116; t=1712346987; c=relaxed/simple;
+	bh=f7n9wQyvNkyfre4dBDX+1wJDTsB+exwyeh1Cu5coEfk=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=EUyRy28J4P1QKg77LZW8nY4U2PYGaBB+2YDbAymcZ4i2l+siqzZ7WxmT50SBsHdD7ggyLmjhoTFUK/ekxn5gjOR7k77SlIItWQto5jyQMhaa3Rv8dRUlslBp4wwKSWgA2yC6M29NL3Pxw+s0tpV5byhmQKTiE1lzXtmCA/9Fw7w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=R5+rgcOX; arc=none smtp.client-ip=209.85.128.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="LvduprAs"
-Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-6962950c6bfso17104126d6.2
-        for <fstests@vger.kernel.org>; Fri, 05 Apr 2024 12:56:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="R5+rgcOX"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-617cd7bd929so11840877b3.3
+        for <fstests@vger.kernel.org>; Fri, 05 Apr 2024 12:56:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1712346983; x=1712951783; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=JDCIjcfLg5/A+ZSk8y5tQbAFPHorahyNXBBJAhi7Wtk=;
-        b=LvduprAsB6e40uSX9dSMtQZzTeVoq+oXuTIBaKRnmz/Zpl6dqiehuiKRrzlcR9VyjT
-         HClxRXAsssBx9NDGHtHjAoH/BHXEOqDihJxeiCKMd+h4S5ayKscaUz6uhMIeTcWl2F7P
-         CdI+s/9CuN7axlIFl8p8P92IWd5tDRe3RiyW1eUlk7lyUw8mH8JMI/Xr3ZBIWTxy6401
-         OTU7QmGyvLdqKrcG/ABPWPTExBJGSkibtWT0rx/Zx+R6nY0z/2JZPy/B5U+EsW2TeR8i
-         l7qwwgfG+6LAFkT3B8cXvRo8iINm8vqGRQ3Bq56Gvb3H5YlQebWkxPo4Y2hgeEbc4i9C
-         P7iA==
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1712346984; x=1712951784; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=8jAQhTkshKgHWtfiyScKAvltEzvkerS8QAtp+/c9zro=;
+        b=R5+rgcOXxgl5Aog2REqlDfWiynn08q/QW+O6Bs0QczTidM1O+YgWpunNvKepYyuftx
+         0ABwtsE8yWnnGkIEly80lzi6lWj9h3sHL7cIxsy5+tQMvHdkbWv4FcF9kgFT2DOvTmd9
+         ETlMEHx5rYKUUxSStv1iPMQw88y74Pvt6nSar9u0g4whdw91r4hiBoIYm3fBlHfdmBLo
+         cdXWO+G8sdAXfqvTA+Lc6L2mT8IulwMk26h+BWRo3RlVpxphPZ2bQ4Laj4sA3u6JaZ02
+         ihE4S+HJT/CD+lTuLcGSESRDEii7CUauFprwpDSmA7+bl7Hucxvjt5GJgNYKtSx+AvEH
+         r2RQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1712346983; x=1712951783;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=JDCIjcfLg5/A+ZSk8y5tQbAFPHorahyNXBBJAhi7Wtk=;
-        b=cNp4GolqQefOo7v6TeQ8u8zEC63tM1PnxIRzdvVjXsiIaPh1ZesXifQjVMIlGXAVkt
-         vj+2rPZS4GTvNN+G8uTnUFBDHE8wREQXkZtgQ5H+MoeaAnJlHTVXUwOGeHrJMZRWuq9w
-         2JJOS+X2MwTzMp7UN7482Xb6iuLnN89X2JDZbHPx1syqqhhfndw4W9Ige3fT5D8bkQtm
-         AAsozgrBWJg6iVXIMKNHaykHXDlxK4gUEjod5pIPfXoDQSXw9eTyQQThvPLz8IsVYJ4Z
-         /X4a0lzwUch0Zfxkmk3mF0xEomjj+tqUpkU1p4yyaVc18prdruoq+AUoobyOj6YpXGTJ
-         CILA==
-X-Gm-Message-State: AOJu0YxYEbiNDMipB287e673OWJLnhLCoj3ZfZn9Jl4IP916Np6Q61S9
-	EvFeQ9Dchgac2iv3UBGXRlIX7u9sTMXhvO7tFR7c5FwRQavQXdXMaKKf6U8Ho6rVoFmDhpHIX8E
-	n
-X-Google-Smtp-Source: AGHT+IFn8EGoGAx6UlDJiFtZmMVsPPatBp/kAQ3QgwLYF/mxCjpgwHtlmNbejCmRRXx6ZdN0n4QSRA==
-X-Received: by 2002:ad4:5d6c:0:b0:699:3025:566f with SMTP id fn12-20020ad45d6c000000b006993025566fmr3384305qvb.38.1712346982873;
-        Fri, 05 Apr 2024 12:56:22 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1712346984; x=1712951784;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=8jAQhTkshKgHWtfiyScKAvltEzvkerS8QAtp+/c9zro=;
+        b=QeYAM9K0UVvcl6khSfpjn9cqfCHgls/wSpgAIB25mFNuZUwFhxmsIAceVyFNToSXp7
+         98D5rVoTRB/j9Sa8YoYGz3qbVrQ+040wD1S+F9R3LMxa7iVCON6iiHFT8t7+czo6fb76
+         2RKYEiaqBVF93jHdqQZE4sf4xswTQq1LjR5s7+0iR1d4zMCjAUSJP4Kicl18VFnkQWB/
+         B6BmfoYW3Fshegb7CWV45BvO2/hf9R7vQj2N+XHa6ZikTGuxIJk/8SXJqWuCL4Cfa+zV
+         gJIDWPwjyRgj2Emjxh4abv2elIb+KKsOXbUsjUE44tBUVTWEyJE1OtjwGFrH02QjOEbP
+         a2tQ==
+X-Gm-Message-State: AOJu0Yx2W9gfzkbtIH/Rtyg+HLjEs82TrVQbyLCH4VURebPtKpl6YSUU
+	prbkzlrV7Tppmta1Zn+h7wioodtYGAxIMKpqvYrEdf0qaIuAvqK5w7l1mUI9v9Z2pSYzCeXdydO
+	o
+X-Google-Smtp-Source: AGHT+IHlxvNbcraq11Ixwrgn9+7FOq4UV97HdVb/zuWGIY6ttwfEZ/vmoA47sHnSaW2/GqaMsDY1CQ==
+X-Received: by 2002:a0d:d554:0:b0:615:800d:67b2 with SMTP id x81-20020a0dd554000000b00615800d67b2mr2246292ywd.29.1712346984422;
+        Fri, 05 Apr 2024 12:56:24 -0700 (PDT)
 Received: from localhost (076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id f2-20020a0cf7c2000000b006991a92642esm876550qvo.138.2024.04.05.12.56.21
+        by smtp.gmail.com with ESMTPSA id fb17-20020a05622a481100b00434383f2518sm1049910qtb.87.2024.04.05.12.56.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 05 Apr 2024 12:56:22 -0700 (PDT)
+        Fri, 05 Apr 2024 12:56:23 -0700 (PDT)
 From: Josef Bacik <josef@toxicpanda.com>
 To: fstests@vger.kernel.org,
 	linux-btrfs@vger.kernel.org,
 	kernel-team@fb.com
-Subject: [PATCH v2 0/3] fstests: various RAID56 related fixes for btrfs
-Date: Fri,  5 Apr 2024 15:56:11 -0400
-Message-ID: <cover.1712346845.git.josef@toxicpanda.com>
+Subject: [PATCH v2 1/3] fstests: change btrfs/197 and btrfs/198 golden output
+Date: Fri,  5 Apr 2024 15:56:12 -0400
+Message-ID: <88b11129c00fb9b07e36569b4b5fe823c0a98c39.1712346845.git.josef@toxicpanda.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <cover.1712346845.git.josef@toxicpanda.com>
+References: <cover.1712346845.git.josef@toxicpanda.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -65,55 +70,146 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-v1: https://lore.kernel.org/linux-btrfs/cover.1710867187.git.josef@toxicpanda.com/
+Both btrfs/197 and btrfs/198 check several raid types.  We may not have
+support for raid5/6 for our available profiles, but we'd like to be able
+to test the other profiles.  In order to enable this, update the golden
+output to have no output, and simply have the test check for the device
+we removed to see if it still exists in the device list output.  This
+will allow us to add a check to skip unsupported raid configurations in
+our config.
 
-v1->v2:
-- Reworked the golden output of btrfs/197 and btrfs/198 to handle running some
-  of the RAID profiles.
-- Added a new way to require RAID profiles in the tests, updated all the
-  different tests.
-- Changed btrfs/197, btrfs/198, and btrfs/297 to skip any RAID profiles that
-  aren't supported by our RAID profile settings.
-
---- Original email ---
-Hello,
-
-While trying to get CI setup internally I noticed that we were sometimes failing
-raid56 tests even though I had specified BTRFS_PROFILE_CONFIGS without raid56 in
-them.
-
-This is because tests where we require raid56 to work only check to see if it's
-enabled by the kernel, not to check and see if we're configured to use it with
-our profile configs.
-
-One test needed to be updated to skip any configurations that weren't in our
-profile configs, and then a few tests didn't use the 
-
-_require_btrfs_fs_feature raid56
-
-check in the top of their test.  This series fixes everything up and honors the
-user settings which makes my internal CI runs clean where we don't want to test
-raid56.  Thanks,
-
-Josef
-
-Josef Bacik (3):
-  fstests: change btrfs/197 and btrfs/198 golden output
-  fstests: change how we test for supported raid configs
-  fstests: update tests to skip unsupported raid profile types
-
- common/btrfs        | 29 ++++++++++++++++++++++++-----
- tests/btrfs/125     |  2 +-
- tests/btrfs/148     |  3 ++-
- tests/btrfs/157     |  2 +-
- tests/btrfs/158     |  2 +-
- tests/btrfs/197     | 17 +++++++++++++----
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ tests/btrfs/197     |  7 +++++--
  tests/btrfs/197.out | 25 +------------------------
- tests/btrfs/198     | 17 +++++++++++++----
+ tests/btrfs/198     |  7 +++++--
  tests/btrfs/198.out | 25 +------------------------
- tests/btrfs/297     | 10 ++++++++++
- 10 files changed, 67 insertions(+), 65 deletions(-)
+ 4 files changed, 12 insertions(+), 52 deletions(-)
 
+diff --git a/tests/btrfs/197 b/tests/btrfs/197
+index d259fd99..2ce41b32 100755
+--- a/tests/btrfs/197
++++ b/tests/btrfs/197
+@@ -38,7 +38,7 @@ workout()
+ 	raid=$1
+ 	device_nr=$2
+ 
+-	echo $raid
++	echo $raid >> $seqres.full
+ 	_scratch_dev_pool_get $device_nr
+ 	_spare_dev_get
+ 
+@@ -62,7 +62,9 @@ workout()
+ 	_mount -o degraded $device_2 $SCRATCH_MNT
+ 	# Check if missing device is reported as in the .out
+ 	$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
+-						_filter_btrfs_filesystem_show
++		_filter_btrfs_filesystem_show > $tmp.output 2>&1
++	cat $tmp.output >> $seqres.full
++	grep -q "$device_1" $tmp.output && _fail "found stale device"
+ 
+ 	$BTRFS_UTIL_PROG device remove "$device_1" "$TEST_DIR/$seq.mnt"
+ 	$UMOUNT_PROG $TEST_DIR/$seq.mnt
+@@ -77,5 +79,6 @@ workout "raid6" "4"
+ workout "raid10" "4"
+ 
+ # success, all done
++echo "Silence is golden"
+ status=0
+ exit
+diff --git a/tests/btrfs/197.out b/tests/btrfs/197.out
+index 79237b85..3bbd3143 100644
+--- a/tests/btrfs/197.out
++++ b/tests/btrfs/197.out
+@@ -1,25 +1,2 @@
+ QA output created by 197
+-raid1
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid5
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid6
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid10
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
++Silence is golden
+diff --git a/tests/btrfs/198 b/tests/btrfs/198
+index 7d23ffce..a326a8ca 100755
+--- a/tests/btrfs/198
++++ b/tests/btrfs/198
+@@ -28,7 +28,7 @@ workout()
+ 	raid=$1
+ 	device_nr=$2
+ 
+-	echo $raid
++	echo $raid >> $seqres.full
+ 	_scratch_dev_pool_get $device_nr
+ 
+ 	_scratch_pool_mkfs "-d$raid -m$raid" >> $seqres.full 2>&1 || \
+@@ -46,7 +46,9 @@ workout()
+ 	_mount -o degraded $device_2 $SCRATCH_MNT
+ 	# Check if missing device is reported as in the 196.out
+ 	$BTRFS_UTIL_PROG filesystem show -m $SCRATCH_MNT | \
+-						_filter_btrfs_filesystem_show
++		_filter_btrfs_filesystem_show > $tmp.output 2>&1
++	cat $tmp.output >> $seqres.full
++	grep -q "$device_1" $tmp.output && _fail "found stale device"
+ 
+ 	_scratch_unmount
+ 	_scratch_dev_pool_put
+@@ -58,5 +60,6 @@ workout "raid6" "4"
+ workout "raid10" "4"
+ 
+ # success, all done
++echo "Silence is golden"
+ status=0
+ exit
+diff --git a/tests/btrfs/198.out b/tests/btrfs/198.out
+index af904a39..cb4c7854 100644
+--- a/tests/btrfs/198.out
++++ b/tests/btrfs/198.out
+@@ -1,25 +1,2 @@
+ QA output created by 198
+-raid1
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid5
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid6
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
+-raid10
+-Label: none  uuid: <UUID>
+-	Total devices <NUM> FS bytes used <SIZE>
+-	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+-	*** Some devices missing
+-
++Silence is golden
 -- 
 2.43.0
 
