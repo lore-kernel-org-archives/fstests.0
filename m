@@ -1,59 +1,59 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C7098493;
-	Fri,  5 Apr 2024 22:58:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21CBB19479;
+	Sat,  6 Apr 2024 05:19:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712357933; cv=none; b=N36GRKSw2DSmFh6n5YgNsFQk0ucs8ru/Y4/n+/jOrnLggXnkOqz7it0cMEOEQIrBiFuFZ542/k9NjaG35qjWhVs12XmF+CKJYcxt/8wnif0G9vPHOnyhPAJ3xm8kPSSRJPNZ66ZslrwHGjAZHvbGJEehJPuxBYrzLBRxtaa5MhQ=
+	t=1712380758; cv=none; b=TbY+bMIQc8VsZZfFe8dNdPEYNp8TaGTYku2lur0JeUCizZmag9L31bOcQLDSZuQMS4ZPWNZinM91h7uwaXO9ocTqNxrbVmypC6xac0s6gIjMTfGdDbL4W+MIl3sJ7fwHOawMjKyjzHRLLBb6pL73ay1GnutvpaKT9TxLg3fXh/0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712357933; c=relaxed/simple;
-	bh=Zq2ZzXIRTa+xobQCBwy1nrjeX2AHEvtOYOcBpfQuJkE=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=V7nR8A2xUtzXEUg5aOMQRM8f5rPWd3sShzQSCXRcwH4d3MDDewbDStpg+jQVebeqiNB9ibHis9XDk9VSrZy8VIt/GUIsiGUqEqy67V6U/baJnnoFnUB20WmvkDNcsghueVjPfdxSJLm3dWoE66wqfQlbU+zyualxHTJfXlb2KLo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=GJAggg4h; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=GJAggg4h; arc=none smtp.client-ip=195.135.223.131
+	s=arc-20240116; t=1712380758; c=relaxed/simple;
+	bh=a0LF/GmwDEwQDlJY6d5KwzJyLpBWobx1d/F+pBPawPA=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=t0xJMZ6NjbprGIRpTMf6ic85sbGJ7ucSRKraksmzGSKkMZtruyQIGLLvhQwswqqmYeJR5wl35M4QZTlPyIDK7xpDOQjP/8nBEvhK9n7JZB6/jIFhABy8Ptt1GgmGtpKYySvY8qlnWY7Bv1lkFbMkYcXo+HAxy3guitscZ/ZRVp8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Y4eKrsz9; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=o6HD3yT1; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="GJAggg4h";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="GJAggg4h"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Y4eKrsz9";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="o6HD3yT1"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 3FE6A1F79C;
-	Fri,  5 Apr 2024 22:58:48 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id F1D3921AD9;
+	Sat,  6 Apr 2024 05:19:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1712357928; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	t=1712380753; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
 	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=p69uUv2mW1Mp7hHdAhCj+oWdSjxS/Aq5GjLd4egksPw=;
-	b=GJAggg4hYL6c3BGdh0a1nWBMHy6gdSzCs2OXFyZ3yOqDKQPGbDp5Ep1hCcRLtLgFvD3iMS
-	IM2bf8tXjoyVIWI2mXxNZ6Jg88IjtXK2Y1IOIUpqHULZ+pV/RrFn/StYYKYY6l7g1+srjr
-	CZIz0RO44EMUra2Q3cPwLODxPFeaFM8=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=GJAggg4h
+	bh=pHK2AK5ELY6VhiJb3kLBCUD9fQ0f1FVpYQpOlDsSVaE=;
+	b=Y4eKrsz97BL37i6mzhzBkDj3UNRv5NenRF/WRTqMs3M8kdnuJbk/7lLqjnYyk/MfPeOlAY
+	PrqgkMQeTplVq98GWzaZQHL1sYrz8oPOoNC6Jp2SLqrthntBSaMAtOtNe28qInNZoXakc9
+	qNM/JpN342mz+wioD04CBOdrhv4DRQw=
+Authentication-Results: smtp-out1.suse.de;
+	none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1712357928; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	t=1712380752; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
 	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=p69uUv2mW1Mp7hHdAhCj+oWdSjxS/Aq5GjLd4egksPw=;
-	b=GJAggg4hYL6c3BGdh0a1nWBMHy6gdSzCs2OXFyZ3yOqDKQPGbDp5Ep1hCcRLtLgFvD3iMS
-	IM2bf8tXjoyVIWI2mXxNZ6Jg88IjtXK2Y1IOIUpqHULZ+pV/RrFn/StYYKYY6l7g1+srjr
-	CZIz0RO44EMUra2Q3cPwLODxPFeaFM8=
+	bh=pHK2AK5ELY6VhiJb3kLBCUD9fQ0f1FVpYQpOlDsSVaE=;
+	b=o6HD3yT1QXz2/uJwhtPyigUTiYSPhY6oDM5D4W9kB55dLIEbvxHHjfEJZ4DoaTgoJhBp0L
+	D55wq0T0AhnxppLZd71PqGT/fD5b2m/z1Xk73dR5UrczWmMvFo4DFI6+MnzEdbpipO1BJm
+	68WvIiZTFK8u1L3HiTSDRdBYe4mHItE=
 Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id C0756139E8;
-	Fri,  5 Apr 2024 22:58:46 +0000 (UTC)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 66448139E8;
+	Sat,  6 Apr 2024 05:19:10 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id WXTPHCaCEGYPWQAAn2gu4w
-	(envelope-from <wqu@suse.com>); Fri, 05 Apr 2024 22:58:46 +0000
+	id 1TAZB07bEGbcOAAAn2gu4w
+	(envelope-from <wqu@suse.com>); Sat, 06 Apr 2024 05:19:10 +0000
 From: Qu Wenruo <wqu@suse.com>
 To: linux-btrfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Subject: [PATCH] fstests: btrfs: redirect stdout of "btrfs subvolume snapshot" to fix output change
-Date: Sat,  6 Apr 2024 09:28:24 +1030
-Message-ID: <20240405225824.8230-1-wqu@suse.com>
+Subject: [PATCH v2] fstests: btrfs: redirect stdout of "btrfs subvolume snapshot" to fix output change
+Date: Sat,  6 Apr 2024 15:48:47 +1030
+Message-ID: <20240406051847.75347-1-wqu@suse.com>
 X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -62,36 +62,28 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -3.01
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 3FE6A1F79C
 X-Spam-Level: 
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-3.01 / 50.00];
+X-Spamd-Result: default: False [-2.80 / 50.00];
 	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_CONTAINS_FROM(1.00)[];
 	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
 	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:dkim,suse.com:email];
-	ARC_NA(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DWL_DNSWL_BLOCKED(0.00)[suse.com:dkim];
 	RCPT_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
 	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FROM_EQ_ENVFROM(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
 	FROM_HAS_DN(0.00)[];
 	MIME_TRACE(0.00)[0:+];
-	RCVD_TLS_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
 	TO_DN_NONE(0.00)[];
 	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.com:+]
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Score: -2.80
+X-Spam-Flag: NO
 
 [BUG]
 All the touched test cases would fail after btrfs-progs commit
@@ -126,6 +118,10 @@ Signed-off-by: Qu Wenruo <wqu@suse.com>
 This is just a quick fix for the test failures, if accepted, further
 cleanup would be done for unnecessary golden output for "btrfs
 subvolume" subgroup.
+
+v2:
+- Revert the change of btrfs/208.out
+  That was part of the later cleanup, wrongly included in the fix.
 ---
  tests/btrfs/001     | 2 +-
  tests/btrfs/001.out | 1 -
@@ -151,7 +147,6 @@ subvolume" subgroup.
  tests/btrfs/202.out | 1 -
  tests/btrfs/203     | 8 ++++----
  tests/btrfs/203.out | 2 --
- tests/btrfs/208.out | 6 ------
  tests/btrfs/226     | 2 +-
  tests/btrfs/226.out | 1 -
  tests/btrfs/276     | 2 +-
@@ -172,7 +167,7 @@ subvolume" subgroup.
  tests/btrfs/302.out | 1 -
  tests/btrfs/314     | 2 +-
  tests/btrfs/314.out | 2 --
- 45 files changed, 48 insertions(+), 83 deletions(-)
+ 44 files changed, 48 insertions(+), 77 deletions(-)
 
 diff --git a/tests/btrfs/001 b/tests/btrfs/001
 index 6c263999..7d79c454 100755
@@ -600,28 +595,6 @@ index 58739a98..67ec1bd7 100644
  At subvol SCRATCH_MNT/incr
  File foobar digest in the original filesystem:
  2b76b23b62fdbbbcae1ee37eec84fd7d
-diff --git a/tests/btrfs/208.out b/tests/btrfs/208.out
-index dc5761ba..d8f2b31a 100644
---- a/tests/btrfs/208.out
-+++ b/tests/btrfs/208.out
-@@ -1,17 +1,11 @@
- QA output created by 208
--Create subvolume 'SCRATCH_MNT/subvol1'
--Create subvolume 'SCRATCH_MNT/subvol2'
--Create subvolume 'SCRATCH_MNT/subvol3'
- Current subvolume ids:
- subvol1
- subvol2
- subvol3
--Delete subvolume 'SCRATCH_MNT/subvol1'
- After deleting one subvolume:
- subvol2
- subvol3
--Delete subvolume 'SCRATCH_MNT/subvol3'
- Last remaining subvolume:
- subvol2
--Delete subvolume 'SCRATCH_MNT/subvol2'
- All subvolumes removed.
 diff --git a/tests/btrfs/226 b/tests/btrfs/226
 index 7034fcc7..017ff479 100755
 --- a/tests/btrfs/226
