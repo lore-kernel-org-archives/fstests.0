@@ -1,66 +1,144 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 039401DFC7;
-	Wed, 10 Apr 2024 19:38:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15F857F9
+	for <fstests@vger.kernel.org>; Thu, 11 Apr 2024 01:53:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1712777903; cv=none; b=BZW9SYFYPbWruBqAxDXmmEm5gbxulElFhXCrHnjGxOp2RoROS3vJk+GFn2O3KluC0Go7oAuf+YYcylya1jyJpqA+bb8JG+KvHV+XAI1ML8wZW28Sn5AXM222pEnUNn5MfZpwUYMJgOMUfnhEW27mMn6x3cWFofhrzKVz4hbuHuA=
+	t=1712800402; cv=none; b=LAYCRvwcTRkTZv5Z2T9DKb/XwHv5Ua5CAvmuD+mk8EU+YEs2T0DCfnmAU4swdBojmU6EU+MZFTXGMHD6k0dl/M+vHCqv+U7rUZFhpFU/o0Kk/6X+KrqTi91FZ4b6A97+CUIzkUyTmA9oVdeSn74Sy1/iOYqHK7q3WLJp0WgmdtY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1712777903; c=relaxed/simple;
-	bh=7hBCC6ywCyJIa/cVrT9SYRnB+UaMeotrDbjLGzG8utU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RL047F1zIVu7KTSW46lj5f+po38z1rLD3pHkARQ9ugBvIwr9u4FwAAbZtyyQ2+rZ3/TMGbsBxtC+b+7NzZofBynzky0tU8Ri8jzhovqEqbZsz5bQA9NR22SDmR7fcKbHim5L8u3o3rUIyZki4RJ26ijLfiCriIPKLkwFH2MhvOY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=a+HUwLQi; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1712800402; c=relaxed/simple;
+	bh=k5YAWDhg1y/vYKMik1yWZtZ86FJZwSvxP72809MaOeA=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=PkE6YCBo6r6rUSqKp+WwSjp64+D6eTXHdLp74BKLEvXUcDAcH7p3/JOmRhFFaCegqMC+Lj9+Goa4tPCbS2tSYYgRn4L2FyAqK3SoX30VO56lvaiT2i4okR0G8wzpPEAu38YzJocxXj95lFYqrP0ujVAZ0CiUvC4Z6xk1evv43PQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=aInnzxPM; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=MtDJtIvY; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=aInnzxPM; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=MtDJtIvY; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="a+HUwLQi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA1FBC433C7;
-	Wed, 10 Apr 2024 19:38:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1712777902;
-	bh=7hBCC6ywCyJIa/cVrT9SYRnB+UaMeotrDbjLGzG8utU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=a+HUwLQi9g/bhYdDw5rlpmgKnktntcFu+03L2gwnxQ8wO9SqBoJiB+Dz7ubHT7QeT
-	 nAyfVsV6eruADdyMLh60/jy3PBPx23Lo05zcvtlvMCPUdQkz6ZhRJNpPnqlvLdyBrF
-	 pFtTDyfomtkc7C3IBla8mX1KkP8+O9iaMQnbBvflV32LIMi2Y9st83cL+clLtBhabB
-	 xUpzx4/QGUjzSWH+gqEvX7jaCqxSXYSCLF+tlx3PyU7ig+XNPYfFGkIpcrn1N+FqeL
-	 QMrTMdJNjBX1QYWh5QonW1Fs5Ujj/IsaJcJSOJeVYgDDVgjdO18VCqXbRWZ5PBQaO2
-	 bMt/oe9CSjhBQ==
-Date: Thu, 11 Apr 2024 03:38:17 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@redhat.com>, "Darrick J . Wong " <djwong@kernel.org>,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: fix kernels without v5 support
-Message-ID: <20240410193817.lu5t6khar4edflh6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240408133243.694134-1-hch@lst.de>
- <20240408145554.ezvbgolzjppua4in@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240408145939.GA26949@lst.de>
- <20240408190043.oib4lmiri7ssw3ez@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240410144254.iiqrxlm64xc6mqa6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240410145140.GA8219@lst.de>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="aInnzxPM";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="MtDJtIvY";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="aInnzxPM";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="MtDJtIvY"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 2FBBA22DBE;
+	Thu, 11 Apr 2024 01:53:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1712800399; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HtL/LdKg/3s7bkuVeR5qPNDNY+Vnm1vecryRm9sepdw=;
+	b=aInnzxPMQRNXgxSL+ibDKD3FkUrPjeKY+tfDIIId2+8kdA7g2Fdajq7XTWCUM23/s/W9ky
+	9M3qbbCk2RnN1/LP+m+cu/1hWr5RPtBOE2x+eHs/wDkgBTC4gYEqrWQjSMoyrJWRYTa5VU
+	GyJgmu1EhXqrToVJXo+hDAAqF6d2qE4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1712800399;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HtL/LdKg/3s7bkuVeR5qPNDNY+Vnm1vecryRm9sepdw=;
+	b=MtDJtIvYmoFyXg/7VufMXWz+72Q5UF+TnzeKukxQ17OQ06SSOG1iTMLcOfCZYynFD2vnam
+	3o5jmCEwlQF7A3Cw==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1712800399; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HtL/LdKg/3s7bkuVeR5qPNDNY+Vnm1vecryRm9sepdw=;
+	b=aInnzxPMQRNXgxSL+ibDKD3FkUrPjeKY+tfDIIId2+8kdA7g2Fdajq7XTWCUM23/s/W9ky
+	9M3qbbCk2RnN1/LP+m+cu/1hWr5RPtBOE2x+eHs/wDkgBTC4gYEqrWQjSMoyrJWRYTa5VU
+	GyJgmu1EhXqrToVJXo+hDAAqF6d2qE4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1712800399;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HtL/LdKg/3s7bkuVeR5qPNDNY+Vnm1vecryRm9sepdw=;
+	b=MtDJtIvYmoFyXg/7VufMXWz+72Q5UF+TnzeKukxQ17OQ06SSOG1iTMLcOfCZYynFD2vnam
+	3o5jmCEwlQF7A3Cw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id E225E13929;
+	Thu, 11 Apr 2024 01:53:17 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id jrGCJI1CF2ZNVgAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Thu, 11 Apr 2024 01:53:17 +0000
+Date: Thu, 11 Apr 2024 11:53:10 +1000
+From: David Disseldorp <ddiss@suse.de>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/027: use 300M FS to accommodate XFS limits
+Message-ID: <20240411115310.6de56970@echidna>
+In-Reply-To: <20240410152806.GH634366@frogsfrogsfrogs>
+References: <20240410070720.9035-1-ddiss@suse.de>
+	<20240410152806.GH634366@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240410145140.GA8219@lst.de>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spam-Level: 
+X-Spamd-Result: default: False [-1.40 / 50.00];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	BAYES_HAM(-0.60)[81.76%];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
+X-Spam-Score: -1.40
+X-Spam-Flag: NO
 
-On Wed, Apr 10, 2024 at 04:51:40PM +0200, Christoph Hellwig wrote:
-> On Wed, Apr 10, 2024 at 10:42:54PM +0800, Zorro Lang wrote:
-> > But as the review points from XFS list, looks like the patch 4/6 is better
-> > to not be merged, and the patch 6/6 need further changes? So I'll look forward
-> > the V2, to take more actions.
+On Wed, 10 Apr 2024 08:28:06 -0700, Darrick J. Wong wrote:
+
+> On Wed, Apr 10, 2024 at 05:07:20PM +1000, David Disseldorp wrote:
+> > As of xfsprogs commit 6e0ed3d1 ("mkfs: stop allowing tiny filesystems")
+> > attempts to create XFS filesystems sized under 300M fail.
+> > 
+> > Lacking MIN_FSSIZE configuration, failure of _scratch_mkfs_sized() in
+> > generic/027 doesn't halt the test, leading _scratch_mount() to mount any
+> > previously created (full-size) filesystem. As a result create_file()
+> > may loop near-endlessly awaiting ENOSPC.
+> > 
+> > Use a 300M sized filesystem to support XFS' limit, and explicitly check
+> > for _scratch_mkfs_sized() failure to avoid endless loops if the limit
+> > changes again in future.  
 > 
-> Maybe you can take 1-3 and 5 for now and I'll rework the others?
+> Hmmm.  Does your test environment export (as in, the bash keyword)
+> TEST_DEV and TEST_DIR?  mkfs.xfs is supposed to detect fstests and allow
+> sub-300M filesystems for testing.
 
-Sure, you can find these 4 patches in "patches-in-queue" branch. Feel free to
-tell me if you hope to change something.
+Ah, I missed that getenv() logic in xfs_mkfs.
 
-Thanks,
-Zorro
+> The detection breaks if TEST_{DEV,DIR} are set but not exported in the
+> config file; perhaps fstests ought to be exporting them like it does for
+> the <cough> other detection key.
 
-> 
+Yep, in my case I have a configs/$hostname.config environment and
+common.config doesn't explicitly export TEST_DEV. I'll rework this
+fix.
