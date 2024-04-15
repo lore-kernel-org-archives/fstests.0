@@ -1,105 +1,417 @@
-Received: from mail-il1-f179.google.com (mail-il1-f179.google.com [209.85.166.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C26F76033
-	for <fstests@vger.kernel.org>; Mon, 15 Apr 2024 18:26:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7548913B78F
+	for <fstests@vger.kernel.org>; Mon, 15 Apr 2024 20:05:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713205599; cv=none; b=mx6n+h6xc0AHbGK/TJijqYDwPWpDkGVH73wKJ1Gv7B+luK0kiB+pPO2zcKZGX3+gHBIPsRtDx9fMRWFUVlcVIdJjf3jiViBdiIM5DNEtMe4ifUikyQHJQtnGwjUmkDxn73xXIqlkFf+5Ki7+kRdm7WoQKJoQEpA9dkIcve8JEpk=
+	t=1713211553; cv=none; b=Zh+he31NoKUBwiQ/qQzXjICOd1HBrSWpAuZKQ7WHsXiNo81wBUVbyj3kbCFuWWK98d6687jTWTl/lAeJeLXE2yOAUAekzUIrsfpMekLp4XZxR/d1FfPU1Gx7EvewHn2PbJlMzan33nSwX/wRUFKMPl6u50SBuqe/y6im4dX7v2Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713205599; c=relaxed/simple;
-	bh=DeyeRnhAf6E/BpqhO8gU057lCZiiDEWJC6amSBNKtb4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=WnOb8kb7W96H+tAI0vvUR2B6lRslPvIxOw7/vpIExDFKf/TRY1XsS6eGMZHooJ+iM86Xunu5aZPo9C1ow/0u//NNF2y/eMx3b729LwM9DMyDOG9tMW+AP7JZQ8zFSMmeXvVwz2mSaHKZ3qCKZQPTuZ3InyxADZ1UZyDe8N4rrLY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=yciqbuqU; arc=none smtp.client-ip=209.85.166.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1713211553; c=relaxed/simple;
+	bh=aXWaiVtOoKdwBTIUitFW7m8qZPFa01tXJcaSJUWNagQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KTP2PL5rN995Edz9oPWHaosMeR2LCz0QbZQ/F+0pkOYvNKu1V0ph9R0qhcJfE0wkp0PlPCXsZ7yr2hwzoSmkSHSmM3e8CjmKgbW05WaAfGbZcmKyWfnYamBW4XQ4lznc9JfedS8hS/LRqWp3fLPqgOPek6KFWCfaSM73SU+nmfU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LR2kr7/1; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="yciqbuqU"
-Received: by mail-il1-f179.google.com with SMTP id e9e14a558f8ab-36a11328dfeso1987625ab.1
-        for <fstests@vger.kernel.org>; Mon, 15 Apr 2024 11:26:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1713205596; x=1713810396; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=oUbBMxfJPjfbHcg8vCOm4zxO7L0+Lq97n8Cjp037fwY=;
-        b=yciqbuqULpqewN5FWPiAUQB0TKIgBzl10oLCsgSoMFM9xWwLjCFKuIkd3LivBUsQat
-         ZFgpzKQmEfnQUO2mRxqEyD4n3+n8l0l1VJr300iePdcjZ16vESH1aFY8XOdfaib+P5E2
-         /FkIwgJIeSlNrarRjepbhEybgB67MJzkRhm8D0VTALc7onyd98uryvUuKYN+uRNciP+4
-         LLAuF+Vu5mSPbhxWhTK/Axm5tHfYiTQIPLvTjKwZSASI3j4AZuItr0xFDqHYJlBO9ZXo
-         MvI4NDL0EIjqPtr9LvrUfeg5TuHr4DOTqbSlcrHMkOJvCYWeCHkf5q2PszBy76aD2LO+
-         nlGQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LR2kr7/1"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1713211550;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=D5CZ1D81mkUoRoN0akrhw8IpUnU1JIN4ADzHwggVAfw=;
+	b=LR2kr7/1YQ/X1t/kdu7c9k9MbVe+slEBALBjrWXpwVeGBWqOdkDdPu7c82d0MOhvOHNc75
+	Uvw0OPvnlmp1TymNwwzdsyatB3d6fQwvJjSPVmON5uivNRTHjPTzFTHFWBEtYnEkFga7pB
+	dWlOy6VwfVHMgWbu8e24SwxlstaVHwc=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-383-T9t3xLczNkmXDL-ieA2Iug-1; Mon, 15 Apr 2024 16:05:49 -0400
+X-MC-Unique: T9t3xLczNkmXDL-ieA2Iug-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1e4b70e0dc9so34120585ad.3
+        for <fstests@vger.kernel.org>; Mon, 15 Apr 2024 13:05:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713205596; x=1713810396;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=oUbBMxfJPjfbHcg8vCOm4zxO7L0+Lq97n8Cjp037fwY=;
-        b=D50ajsG9Nv8BAvJJlkJLXkf5zAn4RLdfaXb4PapapLvEwaBfihVmS1n94r4hVmzhuV
-         /WuaSUmyYjCvgs7NM+VwEv+vyVd/CKqQuNHNMXSV+/eLuBmiUnR+4d+wkSzu5mFMkEyp
-         po4TTL9VFTbYHtd2t6fKCu/1eXZWpQB1YlbyOWMR1FELMsdVt9/FGh/LQd05rPnEc8HP
-         JLHdCT3PeA686uOJFjXRpXJLf8BDwGSGp0dUiUBTAkqe5UYVYpahKbemX084O/SQTHn6
-         fia7i/HnEjwnOtT8doNgQI85ghGV55XRbnljtzsymHR8rLgzjndDk0rc2lrUAIJH5O3H
-         TClw==
-X-Forwarded-Encrypted: i=1; AJvYcCWH9E9R0bvJHAgNY+BjNtUuzkLJpuHFH0SriYswqrgg709rccsFeIH9cp65wKGmZMIS6KfqMv7C7W/2jS4m+obB4ix9JtB23A==
-X-Gm-Message-State: AOJu0YxuvfkbgVndXbEtUFUSJ6IXOfhyHSitBZbrT2qK4xx0iTWVpvVJ
-	0tt3I9fNViVIX29Nfl70VRpQauvyK6dkdsrbskEu7JF0fYG0RIWrOvV6YirYppg=
-X-Google-Smtp-Source: AGHT+IFLKpDxw0MLVKJ4m/TqdlEfRRC6666wYiLDl+wtONmeTvX3fNpWr5uXTERukSmhD1mZwMS82A==
-X-Received: by 2002:a5d:94c3:0:b0:7d9:892f:389d with SMTP id y3-20020a5d94c3000000b007d9892f389dmr2798844ior.1.1713205596100;
-        Mon, 15 Apr 2024 11:26:36 -0700 (PDT)
-Received: from [192.168.1.116] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id bm6-20020a05663842c600b0047f100b70e1sm3334513jab.105.2024.04.15.11.26.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 15 Apr 2024 11:26:35 -0700 (PDT)
-Message-ID: <a8f03f2c-5951-4aea-856b-218326815302@kernel.dk>
-Date: Mon, 15 Apr 2024 12:26:34 -0600
+        d=1e100.net; s=20230601; t=1713211548; x=1713816348;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=D5CZ1D81mkUoRoN0akrhw8IpUnU1JIN4ADzHwggVAfw=;
+        b=cbpCOtY8Id8V8QwB5HrZqBd/JmVGYF8oC68A2N1GVyWqI9Um3/HJAoU+hgZW/Foypi
+         aJo0TMaZCXxH8ta3eYIeCPoEQ3l2PM4TvTt8OJp/NctCeZxummrMqDPSj0Bjbtcg3H8n
+         lEhl6aSD+TEI6ovVO5Q2minhZPSZhsHi1TFMd+chM5MvcqZNbFFdzpsarhASEdaPdWcS
+         6eX9ugwtHQEczrGADrvOLYR5OjjokBRhY684Wwpnc/thMZ8He6jGCPFy2YtQmwnZFpAm
+         0XXtSyuyepLSnCPtvn6zw+KcVsgpKiDa5/ABLuxCC+LZKZ8oMjJbokliYHzrBQitv4sB
+         QzZg==
+X-Gm-Message-State: AOJu0YydR2HhnODaW0oF9GTwKPlxdXgdDQuFrOS5FkK7WSc8VGKownM+
+	nqLbgbxFA19P8+hgJNqaEYMQoqM0doCjRrltm6hFxNogYnhvFhi+BbhmFuMTV12lq+WwccSRSwB
+	elmU6GYZwzhZRP6voDMCT+1HhKp8usALTe10gYx136VIfxzxgdro+TdFUZ6g+zWA=
+X-Received: by 2002:a17:903:41cf:b0:1e2:bc3c:bef6 with SMTP id u15-20020a17090341cf00b001e2bc3cbef6mr11422420ple.37.1713211547681;
+        Mon, 15 Apr 2024 13:05:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHjgzwCGe0UZzwJjL5GmXGc2aEUQUE4ZOewXA3Atf5N+7IVVHJAYgjX8NEjHcb/yS7ImFYdDw==
+X-Received: by 2002:a17:903:41cf:b0:1e2:bc3c:bef6 with SMTP id u15-20020a17090341cf00b001e2bc3cbef6mr11422378ple.37.1713211546963;
+        Mon, 15 Apr 2024 13:05:46 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id h1-20020a170902f54100b001db8a5ea0a3sm8347548plf.94.2024.04.15.13.05.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Apr 2024 13:05:46 -0700 (PDT)
+Date: Tue, 16 Apr 2024 04:05:42 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	willy@infradead.org, p.raghav@samsung.com, da.gomez@samsung.com,
+	hare@suse.de, john.g.garry@oracle.com, linux-xfs@vger.kernel.org,
+	patches@lists.linux.dev
+Subject: Re: [RFC] fstests: add mmap page boundary tests
+Message-ID: <20240415200542.bww7gupflrq3mqoo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240415081054.1782715-1-mcgrof@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: xfstests flakiness in generic/095 triggered by fio 3.37
-Content-Language: en-US
-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-References: <20240415182231.GA2649469@mit.edu>
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20240415182231.GA2649469@mit.edu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240415081054.1782715-1-mcgrof@kernel.org>
 
-On 4/15/24 12:22 PM, Theodore Ts'o wrote:
-> I was updating various components in my xfstests test appliance, and
-> it appears that fio 3.37 is causing generic/095 to become flaky.
-> Previously, I had been using fio 3.35 and a quick test shows that fio
-> 3.36 seems to be OK.  So the change seems to be somethinig that was
-> introduced between fio 3.36 and 3.37.
+On Mon, Apr 15, 2024 at 01:10:54AM -0700, Luis Chamberlain wrote:
+> mmap() POSIX compliance says we should zero fill data beyond a file
+> size up to page boundary, and issue a SIGBUS if we go beyond. While fsx
+> helps us test zero-fill sometimes, fsstress also let's us sometimes test
+> for SIGBUS however that is based on a random value and its not likley we
+> always test it. Dedicate a specic test for this to make testing for
+> this specific situation and to easily expand on other corner cases.
 > 
-> The test failures seem to be caused by the following unexpected
-> message in the output file:
+> Suggested-by: Matthew Wilcox <willy@infradead.org>
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> ---
 > 
-> fio: first I/O failed. If /xt-vdc/file1 is a zoned block device, consider --zonemode=zbd
+> Does enough to get us to use to test this, however I'm aware of a bit
+> more polishing up to do:
 > 
-> The following comment in tests/generic/095 suggests to my suspicious
-> mind that the above warning message isn't getting suppressed when
-> --ignore_error=,EIO is passed to fio:
+>   * maybe moving mread to common as generic/574 did it first
+>   * sharing round_up_to_page_boundary() as well
 > 
->   # There's a known EIO failure to report collisions between directio and buffered
->   # writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
->   # at here.
+> generic/574 is special, it was just testing for correctness of
+> integrity if we muck with mmap() however if you don't have verity
+> stuff available obviously you won't end up testing it.
 > 
-> .... but I could be wrong about that.
+> This generalizes mmap() zero-fill and SIGBUS corner case tests.
 > 
-> For now, I've just switched to using fio 3.36, since there's nothing
-> in my testing that really _requires_ 3.37.  It might be that we should
-> just work around this by filtering out the warning message in
-> xfstests.  Or maybe we should make a change in fio?
+> I've tested so far only 4k and it works well there. For 16k bs on LBS
+> just the SIGBUS issue exists, I'll test smaller block sizes later like
+> 512, 1k, 2k as well. We'll fix triggering the SIBGUS when LBS is used,
+> we'll address that in the next iteration.
+> 
+> Is this a worthy test as a generic test?
+> 
+>  common/filter         |   6 ++
+>  tests/generic/740     | 231 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/740.out |   2 +
+>  3 files changed, 239 insertions(+)
+>  create mode 100755 tests/generic/740
+>  create mode 100644 tests/generic/740.out
+> 
+> diff --git a/common/filter b/common/filter
+> index 36d51bd957dd..d7add06f3be7 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -194,6 +194,12 @@ _filter_xfs_io_unique()
+>      common_line_filter | _filter_xfs_io
+>  }
+>  
+> +_filter_xfs_io_data_unique()
+> +{
+> +    _filter_xfs_io_offset | sed -e 's| |\n|g' | egrep -v "\.|XX|\*" | \
 
-I'll just revert that change, not sure how it slipped by that it also
-change it from informational to an error message.
+The egrep is deprecated, please use 'grep -E'.
 
--- 
-Jens Axboe
+> +	sort | uniq | tr -d '\n'
+
+Isn't "sort | uniq" equal to "sort -u" ?
+
+> +}
+
+Do we need this filter to be a common helper? Will it be used widely? If not,
+this can be a local function of below single test case.
+
+> +
+>  _filter_xfs_io_units_modified()
+>  {
+>  	UNIT=$1
+> diff --git a/tests/generic/740 b/tests/generic/740
+> new file mode 100755
+> index 000000000000..cbb823014600
+> --- /dev/null
+> +++ b/tests/generic/740
+> @@ -0,0 +1,231 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) Luis Chamberlain. All Rights Reserved.
+> +#
+> +# FS QA Test 740
+> +#
+> +# As per POSIX NOTES mmap(2) maps multiples of the system page size, but if the
+> +# data mapped is not multiples of the page size the remaining bytes are zeroed
+> +# out when mapped and modifications to that region are not written to the file.
+> +# On Linux when you write data to such partial page after the end of the
+> +# object, the data stays in the page cache even after the file is closed and
+> +# unmapped and  even  though  the data  is never written to the file itself,
+> +# subsequent mappings may see the modified content. If you go *beyond* this
+> +# page, you should get a SIGBUS. This test verifies we zero-fill to page
+> +# boundary and ensures we get a SIGBUS if we write to data beyond the system
+> +# page size even if the block size is greater than the system page size.
+> +. ./common/preamble
+> +. ./common/rc
+> +_begin_fstest auto quick
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+
+This _cleanup is same with the default one, don't need this override.
+
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_require_scratch_nocheck
+> +_require_test
+> +
+> +setup_zeroed_file()
+> +{
+> +	local file_len=$1
+> +	local sparse=$2
+> +
+> +	if $sparse; then
+> +		$XFS_IO_PROG -f -c "truncate $file_len" $test_file
+
+_require_xfs_io_command "truncate"
+
+> +	else
+> +		$XFS_IO_PROG -f -c "falloc 0 $file_len" $test_file
+
+_require_xfs_io_command "falloc"
+
+And with this, better to add this case into "prealloc" group
+
+> +	fi
+> +}
+> +
+> +round_up_to_page_boundary()
+> +{
+> +	local n=$1
+> +	local page_size=$(_get_page_size)
+> +
+> +	echo $(( (n + page_size - 1) & ~(page_size - 1) ))
+> +}
+> +
+> +mread()
+> +{
+> +	local file=$1
+> +	local map_len=$2
+> +	local offset=$3
+> +	local length=$4
+> +
+> +	# Some callers expect xfs_io to crash with SIGBUS due to the mread,
+> +	# causing the shell to print "Bus error" to stderr.  To allow this
+> +	# message to be redirected, execute xfs_io in a new shell instance.
+> +	# However, for this to work reliably, we also need to prevent the new
+> +	# shell instance from optimizing out the fork and directly exec'ing
+> +	# xfs_io.  The easiest way to do that is to append 'true' to the
+> +	# commands, so that xfs_io is no longer the last command the shell sees.
+> +	bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $file \
+> +		-c 'mmap -r 0 $map_len' \
+> +		-c 'mread $offset $length'; true"
+> +}
+> +
+> +do_mmap_tests()
+> +{
+> +	local block_size=$1
+> +	local file_len=$2
+> +	local offset=$3
+> +	local len=$4
+> +	local use_sparse_file=${5:-false}
+> +	local new_filelen=0
+> +	local map_len=0
+> +	local csum=0
+> +	local fs_block_size=$(_get_block_size $SCRATCH_MNT)
+
+Generally the _get_file_block_size is recommended, rather than _get_block_size.
+
+> +
+> +	echo -en "\n\n==> Testing blocksize $block_size " >> $seqres.full
+> +	echo -en "file_len: $file_len offset: $offset " >> $seqres.full
+> +	echo -e "len: $len sparse: $use_sparse_file" >> $seqres.full
+> +
+> +	if ((fs_block_size != block_size)); then
+> +		echo "Block size created ($block_size) doesn't match _get_block_size on mount ($fs_block_size)"
+> +		_fail
+
+
+_fail "Block size created ($block_size) doesn't match _get_block_size on mount ($fs_block_size)" ?
+
+Generally we don't use an empty _fail, same as all "_fail" call in this patch.
+
+> +	fi
+> +
+> +	rm -rf "${SCRATCH_MNT:?}"/*
+> +
+> +	# This let's us also test against sparse files
+> +	setup_zeroed_file $file_len $use_sparse_file
+> +
+> +	# This will overwrite the old data, the file size is the
+> +	# delta between offset and len now.
+> +	$XFS_IO_PROG -f -c "pwrite -S 0xaa -b 512 $offset $len" \
+> +		$test_file >> $seqres.full
+> +
+> +	sync
+> +	new_filelen=$(_get_filesize $test_file)
+> +	map_len=$(round_up_to_page_boundary $new_filelen)
+> +	csum_orig="$(_md5_checksum $test_file)"
+> +
+> +	# A couple of mmap() tests:
+> +	#
+> +	# We are allowed to mmap() up to the boundary of the page size of a
+> +	# data object, but there a few rules to follow we must check for:
+> +	#
+> +	# a) zero-fill test for the data: POSIX says we should zero fill any
+> +	#    partial page after the end of the object. Verify zero-fill.
+> +	# b) do not write this bogus data to disk: on Linux, if we write data
+> +	#    to a partially filled page, it will stay in the page cache even
+> +	#    after the file is closed and unmapped even if it never reaches the
+> +	#    file. Subsequent mappings *may* see the modified content, but it
+> +	#    also can get other data. Since the data read after the actual
+> +	#    object data can vary we just verify the filesize does not change.
+> +	#    This is not true for tmpfs.
+> +	if [[ $map_len -gt $new_filelen ]]; then
+> +		zero_filled_data_len=$((map_len - new_filelen))
+> +		_scratch_cycle_mount
+> +		expected_zero_data="00"
+> +		zero_filled_data=$($XFS_IO_PROG -r $test_file \
+> +			-c "mmap -r 0 $map_len" \
+> +			-c "mread -v $new_filelen $zero_filled_data_len" \
+> +			-c "munmap" | \
+> +			_filter_xfs_io_data_unique)
+> +		if [[ "$zero_filled_data" != "$expected_zero_data" ]]; then
+> +			echo "Expected data: $expected_zero_data"
+> +			echo "  Actual data: $zero_filled_data"
+> +			echo "Zero-fill broken see mmap() requirements"
+> +			_fail
+> +		fi
+> +
+> +		if [[ "$FSTYP" != "tmpfs" ]]; then
+> +			_scratch_cycle_mount
+> +			$XFS_IO_PROG $test_file \
+> +				-c "mmap -w 0 $map_len" \
+> +				-c "mwrite $new_filelen $zero_filled_data_len" \
+> +				-c "munmap"
+> +			sync
+> +			csum_post="$(_md5_checksum $test_file)"
+> +			if [[ "$csum_orig" != "$csum_post" ]]; then
+> +				echo "Expected csum: $csum_orig"
+> +				echo " Actual  csum: $csum_post"
+> +				_fail
+> +			fi
+> +
+> +			local filelen_test=$(_get_filesize $test_file)
+> +			if [[ "$filelen_test" != "$new_filelen" ]]; then
+> +				echo "Expected file length: $new_filelen"
+> +				echo " Actual  file length: $filelen_test"
+> +				_fail
+> +			fi
+> +		fi
+> +	fi
+> +
+> +	# Now lets ensure we get SIGBUS when we go beyond the page boundary
+> +	if [[ "$FSTYP" != "tmpfs" ]]; then
+> +		_scratch_cycle_mount
+> +		new_filelen=$(_get_filesize $test_file)
+> +		map_len=$(round_up_to_page_boundary $new_filelen)
+> +		csum_orig="$(_md5_checksum $test_file)"
+> +		mread $test_file $map_len 0 $map_len >> $seqres.full  2>$tmp.err
+> +		if grep -q 'Bus error' $tmp.err; then
+> +			echo "Not expecting SIGBUS when reading up to page boundary"
+> +			cat $tmp.err
+> +			_fail
+> +		fi
+> +
+> +		# This should just work
+> +		mread $test_file $map_len 0 $map_len >> $seqres.full  2>$tmp.err
+> +		if [[ $? -ne 0 ]]; then
+> +			_fail
+> +		fi
+> +
+> +		# If we mmap() on the boundary but try to read beyond it just
+> +		# fails, we don't get a SIGBUS
+> +		$XFS_IO_PROG -r $test_file \
+> +			-c "mmap -r 0 $map_len" \
+> +			-c "mread 0 $((map_len + 10))" >> $seqres.full  2>$tmp.err
+> +		local mread_err=$?
+> +		if [[ $mread_err -eq 0 ]]; then
+> +			echo "mmap() to page boundary works as expected but reading beyond should fail"
+> +			echo "err: $?"
+> +			_fail
+> +		fi
+> +
+> +		# Now let's go beyond the allowed mmap() page boundary
+> +		mread $test_file $((map_len + 10)) 0 $((map_len + 10)) >> $seqres.full  2>$tmp.err
+> +		if ! grep -q 'Bus error' $tmp.err; then
+> +			echo "Expected SIGBUS when mmap() reading beyond page boundary"
+> +			_fail
+> +		fi
+> +		local filelen_test=$(_get_filesize $test_file)
+> +		if [[ "$filelen_test" != "$new_filelen" ]]; then
+> +			echo "Expected file length: $new_filelen"
+> +			echo " Actual  file length: $filelen_test"
+> +			_fail
+> +		fi
+> +	fi
+> +}
+> +
+> +test_block_size()
+> +{
+> +	local block_size=$1
+> +
+> +	do_mmap_tests $block_size 512 3 5
+> +	do_mmap_tests $block_size 16k 0 $((16384+3))
+> +	do_mmap_tests $block_size 16k $((16384-10)) $((16384+20))
+> +	do_mmap_tests $block_size 64k 0 $((65536+3))
+> +	do_mmap_tests $block_size 4k 4090 30 true
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +test_file=$SCRATCH_MNT/file
+> +block_size=$(_get_block_size "$SCRATCH_MNT")
+> +test_block_size $block_size
+> +_scratch_unmount
+> +_check_scratch_fs
+
+The _scratch_unmount && _check_scratch_fs aren't needed, they'll be done
+after this test done.
+
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/generic/740.out b/tests/generic/740.out
+> new file mode 100644
+> index 000000000000..3f841e600ed3
+> --- /dev/null
+> +++ b/tests/generic/740.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 740
+> +Silence is golden
+> -- 
+> 2.43.0
+> 
+> 
 
