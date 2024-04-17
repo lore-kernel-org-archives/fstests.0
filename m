@@ -1,70 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA0A18F4A
-	for <fstests@vger.kernel.org>; Wed, 17 Apr 2024 03:16:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96BE3132803
+	for <fstests@vger.kernel.org>; Wed, 17 Apr 2024 12:43:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713323805; cv=none; b=T2Zz+B3tpLwMSsJ+R4c2zJG15a9bL2/MkPDW23ohL1GLtn9ycQqYz6s+UctwC0khRjrQCB6OQfItPzshQT+5TNfSsFAOOgI8OtQNI4mIxEwrSmWc7MnyKeDaoHx75A9L+HrWLKLHWg+9Y70vTFNoCm06UTUePGtcCfX4PfXej/I=
+	t=1713357809; cv=none; b=b69uuwUJNm0CP6+uW9hkItWOfp++rHOYaV3o3QgYAB/vDxl7wQ5cWMXWm/c4ROFHMhyNOvosgb5tVYx5CZRQz4EyL09XiARrA7y9IJ+sdoUU7c/Xs99tM3xGbH2Rvy5uhQ3h0cxEp5dPRHG75SN/lRv2GVH7P0SNfFbT4+g2iDs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713323805; c=relaxed/simple;
-	bh=goNnZszRXBLLlVgpzHK7Vjmqe+cgMPZY7MyIUwk0ANI=;
+	s=arc-20240116; t=1713357809; c=relaxed/simple;
+	bh=BB4busvcVoi4T96zjKX8SM2EO5+oa0uNorRb2gHxi1k=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jFp1ktwZI90mDi8SLaGKxgZJeDZb/evmwQa3OCaRn5XjSVIR34j+HLt1ipXdnGb+1UKrR8QTkn4eZp4LkuypXHFpxABdSUBCMBIFmMK4lPBB1/mcBQt0o60d4s9EWuHY+mO8XKzM+uOvo8lmTJqZRyZVst5jM7tUZN7m2bfjimQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WFE5axbn; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=jCGozTurDK/wbJMd0Mq3XSty6MWuDxo5K6vi9cyVpCxQxFpP5P7dzyzCUL3YmjHqHz2N5/gXKIBOybNoOhll8T8pdWq+u+HP5CD0UPmP5jETS13I3U6l4cOeLsTZNeHjgK2vN2EhpWer+lX9zz5MMvePd2otnZcP1Rpl95oKeqo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VnLVbS+G; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WFE5axbn"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VnLVbS+G"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1713323802;
+	s=mimecast20190719; t=1713357806;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=nid1SGsDjBVi4vfnINteaorQ2WAwGabIOLIsBWDkZGk=;
-	b=WFE5axbnzrn+nRqiKH4mn1EzPV4e9L2XqHiPRhuCEVCMBKjWf6z9eKAXc/tl0oKI3Haode
-	BdfJPkDDF8ttuUeRBLIupTcrcWdKovMnGzwyKBZqNULJ4LS1p6OM70xXopnIhTBF/9x0EK
-	aDhx7TOZ5f5aydE4h9kS6JcXAsJJJrY=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=9LjbpfzKnmmd9QFgHl5uwGiaL0jc3hFvBc6FeYRCc88=;
+	b=VnLVbS+G3DEp7d+SJcRJIHjqla3MVv2WsFy8hC6aAVcPsN++GngBdj4v17l+5rjZAXggF1
+	AiUDGRC2hSDhGlHyBAlw/b86GivyRBy82SNhbHdukvh5HVC8/pa+yPrwVdf1MgxXCITZEA
+	+bHW7TJLc6pQTb0/UVFUBBhK20pLgJw=
+Received: from mail-ot1-f69.google.com (mail-ot1-f69.google.com
+ [209.85.210.69]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-589-aWVdOlMKOEKNa7vMHeGR6A-1; Tue, 16 Apr 2024 23:16:39 -0400
-X-MC-Unique: aWVdOlMKOEKNa7vMHeGR6A-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1e3c8d7d87cso3460195ad.1
-        for <fstests@vger.kernel.org>; Tue, 16 Apr 2024 20:16:38 -0700 (PDT)
+ us-mta-578-OWhee6OaO82hezdOsOJwRw-1; Wed, 17 Apr 2024 08:43:25 -0400
+X-MC-Unique: OWhee6OaO82hezdOsOJwRw-1
+Received: by mail-ot1-f69.google.com with SMTP id 46e09a7af769-6eb76c24132so4081223a34.2
+        for <fstests@vger.kernel.org>; Wed, 17 Apr 2024 05:43:25 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713323798; x=1713928598;
+        d=1e100.net; s=20230601; t=1713357804; x=1713962604;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=nid1SGsDjBVi4vfnINteaorQ2WAwGabIOLIsBWDkZGk=;
-        b=UMl+TXBwnqwe54oMEur9S2PXqeedokZEEHrcvURf87WhbQklvtH9CuOQ4fh8OP8MNs
-         QIFLi2LEWgcnj+6dRyLr69wbfPrpB3ilaiEUUl7z91NjxyM14RrElg9kpj59UttoS+Z8
-         1l1naBbbd0rxvWqKiD1s9x6jV4NYlbLcEOoY/ON+OHvCgF5LaFLgDnrNq0wINvW7p7Tw
-         6Y8ZLFfF9vpnni3DjTyl470HJNDetCmnpOp1l0/VQKFGKZ/F8+BHIeN1gDjaf2vH5bZa
-         m4cfI2bfP/9q5g8UU6Ggpvf3ogyd/dGdEMIYIg9aUrR7mbG8sXqfPryue0KfyUNARioh
-         rtYA==
-X-Gm-Message-State: AOJu0Ywv3tzy7zP1+amBzSNdHY5xCjrA7oF49i1Lwo5DG/xpWDOaGCw6
-	4U2rhmKrUl1ybxc+1ML7wOmDkVJeUuqAcTra5jqUzjltiK8HCpyQ4wgkrKn6JVkOvlHtoeCLaaE
-	VEU6F1liTVkNb98iIfMaJEb6QqFhRUm3B8v9MW9Ej+P8pP3Cwsnvatvw=
-X-Received: by 2002:a17:902:a987:b0:1e5:a3b2:3da9 with SMTP id bh7-20020a170902a98700b001e5a3b23da9mr4104682plb.17.1713323797996;
-        Tue, 16 Apr 2024 20:16:37 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHRK6+pU2sdfdG+AF8eD73PL3wQrawl+MN5871gFXL371xA1tmtVwzZlYl3vCik72K7QtIFwA==
-X-Received: by 2002:a17:902:a987:b0:1e5:a3b2:3da9 with SMTP id bh7-20020a170902a98700b001e5a3b23da9mr4104657plb.17.1713323797495;
-        Tue, 16 Apr 2024 20:16:37 -0700 (PDT)
+        bh=9LjbpfzKnmmd9QFgHl5uwGiaL0jc3hFvBc6FeYRCc88=;
+        b=LzNPtEvrRmRnZWtt08RtwnX7RkXZIWRZg+Q/ZYlhDmnEMI63CBepY8oJtahYKHj7ss
+         bYqcCMbbmetmTYyZ/JYQQZTk9kVRiAMKX1mXwATrBcPdm5Z40/R/sN4Np1MFKWR00q9P
+         m9itBZreZEhpNT5fqcRN+6xK0rnWD7UqCEuWajgKC/mgdgFDTCisayhW7OH5rVndHVjH
+         xSBvhSvla5+Y4yhSXbyerfXqv/RRCfT7BtbLa4Qt4YfBJos4BEVCFn+c8jwUv0UoaLf0
+         dO2QXoaIFo8twEFXBhtQgBKyhiZg75VV9N/74KM5yYlWgG/lmgDj0iCM8ZYmrisj8uxU
+         6Zvw==
+X-Forwarded-Encrypted: i=1; AJvYcCU5RfvF9XmHPBnYS2mdv4xn65h8pdlar4NjyASvJw/XkcblHkSE/Yn3A8R0WqJ2Lwldx73gej2sMQt5MtmEEt/rkz6g9+U2BA==
+X-Gm-Message-State: AOJu0Yxg8Bg5YGdNIe1QmqikQXapkoXa1eWBWp85qjNAMzo6LcNsZCwV
+	QChSA4D7c9qwbJSz0vhHQErZRFyVIrixRljd2xx9S+92rZK04qfCKlGDGQ/cf8EIPj0h2lgHDQj
+	202N72XTr54j0gZHdNmpe/dgPpLEzTpTjg4MfHEe5bdOgRhAlph3Llp8=
+X-Received: by 2002:a9d:624b:0:b0:6ea:2d0c:6140 with SMTP id i11-20020a9d624b000000b006ea2d0c6140mr16544797otk.29.1713357804349;
+        Wed, 17 Apr 2024 05:43:24 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH3Vk8IXEgwGvvM7EiHYNmj94OxFf/2Pbr90Y9Q8sQ8UOhUz9exqy6BOK3H5GiUv7YpQ5Bq4g==
+X-Received: by 2002:a9d:624b:0:b0:6ea:2d0c:6140 with SMTP id i11-20020a9d624b000000b006ea2d0c6140mr16544768otk.29.1713357803940;
+        Wed, 17 Apr 2024 05:43:23 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id w10-20020a170902e88a00b001e3e0a8b32asm10486438plg.45.2024.04.16.20.16.35
+        by smtp.gmail.com with ESMTPSA id w9-20020a63f509000000b005b458aa0541sm10352488pgh.15.2024.04.17.05.43.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 16 Apr 2024 20:16:37 -0700 (PDT)
-Date: Wed, 17 Apr 2024 11:16:33 +0800
+        Wed, 17 Apr 2024 05:43:23 -0700 (PDT)
+Date: Wed, 17 Apr 2024 20:43:17 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH v2] common/quota: update keywords of quota feature in
- _require_prjquota() for f2fs
-Message-ID: <20240417031633.chckvd5ebnakmp7g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240416101650.53078-1-chao@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Hans Holmberg <Hans.Holmberg@wdc.com>,
+	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+	Damien Le Moal <Damien.LeMoal@wdc.com>,
+	Matias =?utf-8?B?QmrDuHJsaW5n?= <Matias.Bjorling@wdc.com>,
+	Naohiro Aota <Naohiro.Aota@wdc.com>,
+	Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+	"hch@lst.de" <hch@lst.de>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH] generic: add gc stress test
+Message-ID: <20240417124317.lje5w5hgawy4drkr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240415112259.21760-1-hans.holmberg@wdc.com>
+ <e748ee35-e53e-475a-8f38-68522fb80bee@wdc.com>
+ <20240416185437.GC11935@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,52 +81,194 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240416101650.53078-1-chao@kernel.org>
+In-Reply-To: <20240416185437.GC11935@frogsfrogsfrogs>
 
-On Tue, Apr 16, 2024 at 06:16:50PM +0800, Chao Yu wrote:
-> Previously, in f2fs, sysfile quota feature has different name:
-> - "quota" in mkfs.f2fs
-> - and "quota_ino" in dump.f2fs
+On Tue, Apr 16, 2024 at 11:54:37AM -0700, Darrick J. Wong wrote:
+> On Tue, Apr 16, 2024 at 09:07:43AM +0000, Hans Holmberg wrote:
+> > +Zorro (doh!)
+> > 
+> > On 2024-04-15 13:23, Hans Holmberg wrote:
+> > > This test stresses garbage collection for file systems by first filling
+> > > up a scratch mount to a specific usage point with files of random size,
+> > > then doing overwrites in parallel with deletes to fragment the backing
+> > > storage, forcing reclaim.
+> > > 
+> > > Signed-off-by: Hans Holmberg <hans.holmberg@wdc.com>
+> > > ---
+> > > 
+> > > Test results in my setup (kernel 6.8.0-rc4+)
+> > > 	f2fs on zoned nullblk: pass (77s)
+> > > 	f2fs on conventional nvme ssd: pass (13s)
+> > > 	btrfs on zoned nublk: fails (-ENOSPC)
+> > > 	btrfs on conventional nvme ssd: fails (-ENOSPC)
+> > > 	xfs on conventional nvme ssd: pass (8s)
+> > > 
+> > > Johannes(cc) is working on the btrfs ENOSPC issue.
+> > > 	
+> > >   tests/generic/744     | 124 ++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/generic/744.out |   6 ++
+> > >   2 files changed, 130 insertions(+)
+> > >   create mode 100755 tests/generic/744
+> > >   create mode 100644 tests/generic/744.out
+> > > 
+> > > diff --git a/tests/generic/744 b/tests/generic/744
+> > > new file mode 100755
+> > > index 000000000000..2c7ab76bf8b1
+> > > --- /dev/null
+> > > +++ b/tests/generic/744
+> > > @@ -0,0 +1,124 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2024 Western Digital Corporation.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 744
+> > > +#
+> > > +# Inspired by btrfs/273 and generic/015
+> > > +#
+> > > +# This test stresses garbage collection in file systems
+> > > +# by first filling up a scratch mount to a specific usage point with
+> > > +# files of random size, then doing overwrites in parallel with
+> > > +# deletes to fragment the backing zones, forcing reclaim.
+> > > +
+> > > +. ./common/preamble
+> > > +_begin_fstest auto
+> > > +
+> > > +# real QA test starts here
+> > > +
+> > > +_require_scratch
+> > > +
+> > > +# This test requires specific data space usage, skip if we have compression
+> > > +# enabled.
+> > > +_require_no_compress
+> > > +
+> > > +M=$((1024 * 1024))
+> > > +min_fsz=$((1 * ${M}))
+> > > +max_fsz=$((256 * ${M}))
+> > > +bs=${M}
+> > > +fill_percent=95
+> > > +overwrite_percentage=20
+> > > +seq=0
+> > > +
+> > > +_create_file() {
+> > > +	local file_name=${SCRATCH_MNT}/data_$1
+> > > +	local file_sz=$2
+> > > +	local dd_extra=$3
+> > > +
+> > > +	POSIXLY_CORRECT=yes dd if=/dev/zero of=${file_name} \
+> > > +		bs=${bs} count=$(( $file_sz / ${bs} )) \
+> > > +		status=none $dd_extra  2>&1
+> > > +
+> > > +	status=$?
+> > > +	if [ $status -ne 0 ]; then
+> > > +		echo "Failed writing $file_name" >>$seqres.full
+> > > +		exit
+> > > +	fi
+> > > +}
 > 
-> Now, it has unified the name to "quota" since commit 92cc5edeb7
-> ("f2fs-tools: reuse feature_table to clean up print_sb_state()").
-> 
-> It needs to update keywords "quota" in _require_prjquota() for f2fs,
-> Otherwise, quota testcase will fail as below.
-> 
-> generic/383 1s ... [not run] quota sysfile not enabled in this device /dev/vdc
-> 
-> This patch keeps keywords "quota_ino" in _require_prjquota() to
-> keep compatibility for old f2fs-tools.
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v2:
-> - keep keywords "quota_ino" for compatibility of old f2fs-tools
-> suggested by Zorro Lang.
+> I wonder, is there a particular reason for doing all these file
+> operations with shell code instead of using fsstress to create and
+> delete files to fill the fs and stress all the zone-gc code?  This test
+> reminds me a lot of generic/476 but with more fork()ing.
 
-This version looks good to me, thanks
+/me has the same confusion. Can this test cover more things than using
+fsstress (to do reclaim test) ? Or does it uncover some known bugs which
+other cases can't?
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Thanks,
+Zorro
 
->  common/quota | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/common/quota b/common/quota
-> index 6b529bf4..4c1d3dcd 100644
-> --- a/common/quota
-> +++ b/common/quota
-> @@ -145,7 +145,7 @@ _require_prjquota()
->      if [ "$FSTYP" == "f2fs" ]; then
->  	dump.f2fs $_dev 2>&1 | grep -qw project_quota
->  	[ $? -ne 0 ] && _notrun "Project quota not enabled in this device $_dev"
-> -	dump.f2fs $_dev 2>&1 | grep -qw quota_ino
-> +	dump.f2fs $_dev 2>&1 | grep -Eqw "quota|quota_ino"
->  	[ $? -ne 0 ] && _notrun "quota sysfile not enabled in this device $_dev"
->  	cat /sys/fs/f2fs/features/project_quota | grep -qw supported
->  	[ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
-> -- 
-> 2.40.1
+> --D
+> 
+> > > +
+> > > +_total_M() {
+> > > +	local total=$(stat -f -c '%b' ${SCRATCH_MNT})
+> > > +	local bs=$(stat -f -c '%S' ${SCRATCH_MNT})
+> > > +	echo $(( ${total} * ${bs} / ${M}))
+> > > +}
+> > > +
+> > > +_used_percent() {
+> > > +	local available=$(stat -f -c '%a' ${SCRATCH_MNT})
+> > > +	local total=$(stat -f -c '%b' ${SCRATCH_MNT})
+> > > +	echo $((100 - (100 * ${available}) / ${total} ))
+> > > +}
+> > > +
+> > > +
+> > > +_delete_random_file() {
+> > > +	local to_delete=$(find ${SCRATCH_MNT} -type f | shuf | head -1)
+> > > +	rm $to_delete
+> > > +	sync ${SCRATCH_MNT}
+> > > +}
+> > > +
+> > > +_get_random_fsz() {
+> > > +	local r=$RANDOM
+> > > +	echo $(( ${min_fsz} + (${max_fsz} - ${min_fsz}) * (${r} % 100) / 100 ))
+> > > +}
+> > > +
+> > > +_direct_fillup () {
+> > > +	while [ $(_used_percent) -lt $fill_percent ]; do
+> > > +		local fsz=$(_get_random_fsz)
+> > > +
+> > > +		_create_file $seq $fsz "oflag=direct conv=fsync"
+> > > +		seq=$((${seq} + 1))
+> > > +	done
+> > > +}
+> > > +
+> > > +_mixed_write_delete() {
+> > > +	local dd_extra=$1
+> > > +	local total_M=$(_total_M)
+> > > +	local to_write_M=$(( ${overwrite_percentage} * ${total_M} / 100 ))
+> > > +	local written_M=0
+> > > +
+> > > +	while [ $written_M -lt $to_write_M ]; do
+> > > +		if [ $(_used_percent) -lt $fill_percent ]; then
+> > > +			local fsz=$(_get_random_fsz)
+> > > +
+> > > +			_create_file $seq $fsz "$dd_extra"
+> > > +			written_M=$((${written_M} + ${fsz}/${M}))
+> > > +			seq=$((${seq} + 1))
+> > > +		else
+> > > +			_delete_random_file
+> > > +		fi
+> > > +	done
+> > > +}
+> > > +
+> > > +seed=$RANDOM
+> > > +RANDOM=$seed
+> > > +echo "Running test with seed=$seed" >>$seqres.full
+> > > +
+> > > +_scratch_mkfs_sized $((8 * 1024 * 1024 * 1024)) >>$seqres.full
+> > > +_scratch_mount
+> > > +
+> > > +echo "Starting fillup using direct IO"
+> > > +_direct_fillup
+> > > +
+> > > +echo "Starting mixed write/delete test using direct IO"
+> > > +_mixed_write_delete "oflag=direct"
+> > > +
+> > > +echo "Starting mixed write/delete test using buffered IO"
+> > > +_mixed_write_delete ""
+> > > +
+> > > +echo "Syncing"
+> > > +sync ${SCRATCH_MNT}/*
+> > > +
+> > > +echo "Done, all good"
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/744.out b/tests/generic/744.out
+> > > new file mode 100644
+> > > index 000000000000..b40c2f43108e
+> > > --- /dev/null
+> > > +++ b/tests/generic/744.out
+> > > @@ -0,0 +1,6 @@
+> > > +QA output created by 744
+> > > +Starting fillup using direct IO
+> > > +Starting mixed write/delete test using direct IO
+> > > +Starting mixed write/delete test using buffered IO
+> > > +Syncing
+> > > +Done, all good
+> > 
 > 
 
