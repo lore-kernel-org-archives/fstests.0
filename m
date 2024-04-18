@@ -1,100 +1,211 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B31681BF53
-	for <fstests@vger.kernel.org>; Wed, 17 Apr 2024 19:35:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F0C6181;
+	Thu, 18 Apr 2024 00:13:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713382507; cv=none; b=rUkrgunz0o2YwBErnZbZpRm51oDtUTlk1MAQL6TIencDHH6H6SBwZsmDpM/AhGBoKVgG+Ptt58hgLLvIg77KpBeFPrVqqwVCUHwyYTOMfPrvajxHZ4G2Az8d43t5QCpr0cNQ4GjtKmbr65m0/D2FkXmiue45KkOV5odYIXRENzA=
+	t=1713399241; cv=none; b=icX+z0PuZjV4dL/KtwIkHhBhR4B5i9nMzMFHgjrpLES7h+DBgRRt9zZS17Bq4h6A9+ZR1HoEXfwgihSlYAD38Vx5t0LMDU1U9Qpc+b0QasZf4fakHckISQ4zwM1SenmL1DWbE026P5NycVKImcR2Puxe4Bsae/KViYt7Sh8ExTQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713382507; c=relaxed/simple;
-	bh=t1LI4uFe6h7QWmvdJF1QRAnZyhwOhmlzPQ3qzotm4Ok=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=gyLTdRVnI96ZOn3Yw9GNdjf/ybq7ftTR/HSUP3JR/feNYdwYFENb7FPIRFVgYRAUzqe4csjrlL1VbADGbr8smuBdLMnivzpLvg9rEZk5O0LQ6+NyN/Gkyhp/MJFIQVcmqyzf2EXU3KCzTMo8nEaoipGvOGdoXp4pxs6G/f/V/HU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dz2r/+2+; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1713399241; c=relaxed/simple;
+	bh=2mR9+iBLxKQaQvSC1xlCx/tRVkq11IAb/GVR9khq/Zc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Oz+VGiTMIwFOWx3nzYKAYFROlksAB4WfSxiwFsZdE9a/9mrdpUm0+Xi++Q1TMK1HdkiwSLgoOdbHLqMWqNW5vsumrWKXipVOaEyNUzF3JZfmUeb286f3s93j1qZrRomxP9TbmiVovW61NOPuUYntYuBT+d36AR9qP6X7ErwOXNQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=ecONMVNC; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dz2r/+2+"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 61154C072AA;
-	Wed, 17 Apr 2024 19:35:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1713382507;
-	bh=t1LI4uFe6h7QWmvdJF1QRAnZyhwOhmlzPQ3qzotm4Ok=;
-	h=From:Date:Subject:To:Cc:Reply-To:From;
-	b=dz2r/+2+MXCDS0gbrgQOmLtG7K2OcAhovl4NJVoLSNH0BZFjqLzW7z8x9fo6G6mfn
-	 qTI19DvdyxocTm0rcRXvjy8Z3SgdtAT8CZnNavJ1fj6yza37RXAbELhBrNGKl6h0Fj
-	 PVFFmerjyoF34lV2XJgYXzI/HDTRAhfQGxF0AIfyQ1jzL0yGSbAhVKhDNCjAC0Ejou
-	 ouZXzjyxuhqOq9a5jN2LzyKDMrKg0b6iKNLwDv1kabdgX5Boq+qZxTEpi9AA8s5JIn
-	 z+mAb93Rz4F6SQ0J57ZYDCYhJuRmoK4zZnoWWx/k7Z8ofKplvDChl/1e2sNxvtKljC
-	 5qejI791oN6ig==
-Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BA6EC4345F;
-	Wed, 17 Apr 2024 19:35:07 +0000 (UTC)
-From: Taylor Jackson via B4 Relay <devnull+tjackson9431.gmail.com@kernel.org>
-Date: Wed, 17 Apr 2024 19:34:24 +0000
-Subject: [PATCH] generic/645: Add hint for expected failure with old kernel
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ecONMVNC"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=Fc9W3NDlawC6i8CUcs20Bxa//1KfA2ETQ6jFvKSlCKk=; b=ecONMVNC6Mu9hrfLzfZ1uco50U
+	N/UcJ7LR6OTvkC1P4rsF/uYOt1uKo9EIR89BANXn2fZpy3Q1FpB/qC8dXzHCb4MSRDv0io9cKgC4t
+	uScHC6O6mXYXiF7OXUbeaI7YYeqclAwB5JbcA4FHUJ0ziWm6h5azTAiAvLkvx68RZMDCkVdkQBXVn
+	FF1Nicxfk3c37vJTQIw0ftzmHP301rNhMysOhNeaP4xczcDA75CX0J5beFvgnzbfLuy3hmWxO5ssz
+	XJWPKqqMLSjCFj10TybpdjLhnA7povBP64w680mUKnlFH0Blkom4sfPQPMueqUz+/73DPQxKJz7km
+	fbbbgKeg==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rxFPZ-00000000OwW-3Abv;
+	Thu, 18 Apr 2024 00:13:57 +0000
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: fstests@vger.kernel.org
+Cc: kdevops@lists.linux.dev,
+	linux-xfs@vger.kernel.org,
+	linux-mm@kvack.org,
+	linux-fsdevel@vger.kernel.org,
+	willy@infradead.org,
+	david@redhat.com,
+	linmiaohe@huawei.com,
+	muchun.song@linux.dev,
+	osalvador@suse.de,
+	Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH] fstests: add fsstress + compaction test
+Date: Wed, 17 Apr 2024 17:13:56 -0700
+Message-ID: <20240418001356.95857-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20240417-generic-test-645-v1-1-7f6f496af06a@gmail.com>
-X-B4-Tracking: v=1; b=H4sIAD8kIGYC/x3MQQqAIBBA0avErBvQSTO6SrQInWo2FioRRHdPW
- v7F+w9kTsIZxuaBxJdkOWIN3Tbg9yVujBJqAykyymiHG8cqPBbOBXtjUQ/OqqDIUsdQ2Zl4lft
- fTvP7fk25UwViAAAA
-To: fstests@vger.kernel.org
-Cc: Christian Brauner <brauner@kernel.org>, 
- Seth Forshee <sforshee@kernel.org>, Taylor Jackson <tjackson9431@gmail.com>, 
- Zorro Lang <zlang@redhat.com>
-X-Mailer: b4 0.12.4
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1713382506; l=1100;
- i=tjackson9431@gmail.com; s=20240206; h=from:subject:message-id;
- bh=rNdH0c61gNgISeRXRPFYYO+c6i1S4rlqeXA+MtehszM=;
- b=aOMZYB6wtyZDA5Pkb6xeHV4orfPQemndp/bMkenvJMErmglLVYwOtRfDdlhuPNb3lFSPCbOJa
- jk/2M4JmcUuCMRCLjh1mOTqFYryxqxabBEmod/rvpoWKYTaM3FEyvgP
-X-Developer-Key: i=tjackson9431@gmail.com; a=ed25519;
- pk=NO7ntQpjIG1IGTO7F8OnLJDKSHUakhrhAli+PL72OLA=
-X-Endpoint-Received: by B4 Relay for tjackson9431@gmail.com/20240206 with
- auth_id=145
-X-Original-From: Taylor Jackson <tjackson9431@gmail.com>
-Reply-To: tjackson9431@gmail.com
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-From: Taylor Jackson <tjackson9431@gmail.com>
+Running compaction while we run fsstress can crash older kernels as per
+korg#218227 [0], the fix for that [0] has been posted [1] but that patch
+is not yet on v6.9-rc4 and the patch requires changes for v6.9.
 
-The following hint is added to reflect that any old kernel
-without kernel commit dacfd001eaf2 (“fs/mnt_idmapping.c: Return
--EINVAL when no map is written”) is expected to fail this generic
-645 test since without that commit, mount_setattr won’t return
-EINVAL when attempting to create an idmapped mount using a user
-namespace with no mappings.
+Today I find that v6.9-rc4 is also hitting an unrecoverable hung task
+between compaction and fsstress while running generic/476 on the
+following kdevops test sections [2]:
 
-Reported-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Taylor Jackson <tjackson9431@gmail.com>
+  * xfs_nocrc
+  * xfs_nocrc_2k
+  * xfs_nocrc_4k
+
+Analyzing the trace I see the guest uses loopback block devices for the
+fstests TEST_DEV, the loopback file uses sparsefiles on a btrfs
+partition. The contention based on traces [3] [4] seems to be that we
+have somehow have fsstress + compaction race on folio_wait_bit_common().
+
+We have this happening:
+
+  a) kthread compaction --> migrate_pages_batch()
+                --> folio_wait_bit_common()
+  b) workqueue on btrfs writeback wb_workfn  --> extent_write_cache_pages()
+                --> folio_wait_bit_common()
+  c) workqueue on loopback loop_rootcg_workfn() --> filemap_fdatawrite_wbc()
+                --> folio_wait_bit_common()
+  d) kthread xfsaild --> blk_mq_submit_bio() --> wbt_wait()
+
+I tried to reproduce but couldn't easily do so, so I wrote this test
+to help, and with this I have 100% failure rate so far out of 2 runs.
+
+Given we also have korg#218227 and that patch likely needing
+backporting, folks will want a reproducer for this issue. This should
+hopefully help with that case and this new separate issue.
+
+To reproduce with kdevops just:
+
+make defconfig-xfs_nocrc_2k  -j $(nproc)
+make -j $(nproc)
+make fstests
+make linux
+make fstests-baseline TESTS=generic/733
+tail -f guestfs/*-xfs-nocrc-2k/console.log
+
+[0] https://bugzilla.kernel.org/show_bug.cgi?id=218227
+[1] https://lore.kernel.org/all/7ee2bb8c-441a-418b-ba3a-d305f69d31c8@suse.cz/T/#u
+[2] https://github.com/linux-kdevops/kdevops/blob/main/playbooks/roles/fstests/templates/xfs/xfs.config
+[3] https://gist.github.com/mcgrof/4dfa3264f513ce6ca398414326cfab84
+[4] https://gist.github.com/mcgrof/f40a9f31a43793dac928ce287cfacfeb
+
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 ---
- tests/generic/645 | 2 ++
- 1 file changed, 2 insertions(+)
 
-diff --git a/tests/generic/645 b/tests/generic/645
-index 556d2450..bcc3e3b5 100755
---- a/tests/generic/645
-+++ b/tests/generic/645
-@@ -17,6 +17,8 @@ _begin_fstest auto quick idmapped mount
- _supported_fs generic
- _require_idmapped_mounts
- _require_test
-+_fixed_by_kernel_commit dacfd001eaf2 \
-+	"fs/mnt_idmapping.c: Return -EINVAL when no map is written"
+Note: kdevops uses its own fork of fstests which has this merged
+already, so the above should just work. If it's your first time using
+kdevops be sure to just read the README for the first time users:
+
+https://github.com/linux-kdevops/kdevops/blob/main/docs/kdevops-first-run.md
+
+ common/rc             |  7 ++++++
+ tests/generic/744     | 56 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/744.out |  2 ++
+ 3 files changed, 65 insertions(+)
+ create mode 100755 tests/generic/744
+ create mode 100644 tests/generic/744.out
+
+diff --git a/common/rc b/common/rc
+index b7b77ac1b46d..d4432f5ce259 100644
+--- a/common/rc
++++ b/common/rc
+@@ -120,6 +120,13 @@ _require_hugepages()
+ 		_notrun "Kernel does not report huge page size"
+ }
  
- echo "Silence is golden"
- 
-
----
-base-commit: e72e052d56c3f05e533f4b67056f86931f688368
-change-id: 20240417-generic-test-645-18750d02523e
-
-Best regards,
++# Requires CONFIG_COMPACTION
++_require_compaction()
++{
++	if [ ! -f /proc/sys/vm/compact_memory ]; then
++	    _notrun "Need compaction enabled CONFIG_COMPACTION=y"
++	fi
++}
+ # Get hugepagesize in bytes
+ _get_hugepagesize()
+ {
+diff --git a/tests/generic/744 b/tests/generic/744
+new file mode 100755
+index 000000000000..2b3c0c7e92fb
+--- /dev/null
++++ b/tests/generic/744
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2024 Luis Chamberlain.  All Rights Reserved.
++#
++# FS QA Test 744
++#
++# fsstress + compaction test
++#
++. ./common/preamble
++_begin_fstest auto rw long_rw stress soak smoketest
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++}
++
++# Import common functions.
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++
++_require_scratch
++_require_compaction
++_require_command "$KILLALL_PROG" "killall"
++
++echo "Silence is golden."
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++nr_cpus=$((LOAD_FACTOR * 4))
++nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
++fsstress_args=(-w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus)
++
++# start a background getxattr loop for the existing xattr
++runfile="$tmp.getfattr"
++touch $runfile
++while [ -e $runfile ]; do
++	echo 1 > /proc/sys/vm/compact_memory
++	sleep 15
++done &
++getfattr_pid=$!
++
++test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
++
++$FSSTRESS_PROG $FSSTRESS_AVOID "${fsstress_args[@]}" >> $seqres.full
++
++rm -f $runfile
++wait > /dev/null 2>&1
++
++status=0
++exit
+diff --git a/tests/generic/744.out b/tests/generic/744.out
+new file mode 100644
+index 000000000000..205c684fa995
+--- /dev/null
++++ b/tests/generic/744.out
+@@ -0,0 +1,2 @@
++QA output created by 744
++Silence is golden
 -- 
-Taylor Jackson <tjackson9431@gmail.com>
-
+2.43.0
 
