@@ -1,72 +1,49 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mout-p-101.mailbox.org (mout-p-101.mailbox.org [80.241.56.151])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D11F17C72
-	for <fstests@vger.kernel.org>; Sat, 20 Apr 2024 14:02:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC39E15099E;
+	Mon, 22 Apr 2024 14:09:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.151
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713621774; cv=none; b=BjHzUkblgTmfw9Ip5EpFKOUkvJTlnMf2wP8LvtSt16mlQS+Z706rAuCmj54DlFSb+Mk1lPHsAiL9Wmizl+vC7Xh+vLlVBWWyD3aUp0+SmAG1I0jAu+t+dSojgWhj774t4evsGYHG/5ikr7WCiIdGxDHncxNDzna7UaigmpGAa2w=
+	t=1713794982; cv=none; b=D0d3BOAq704KKk3tJ6mN6oSzqGweir11DhPRb/a0Iadv7mq/eNVgK+A2DZsBFdny0TIkmvtIlJ+/lOeBk+oBZkcbf3YqnGdaRDkPHzCP+7Oma5pkNzDP7HAU0JUx7PVlxSQbjWmRzAEOO9Nd69d8HyOR4iC5++jiaQpAPRL/WoY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713621774; c=relaxed/simple;
-	bh=0napQ7pi0k55WEnQiDhsd00EYcSZufBSSb/xqU60oe0=;
+	s=arc-20240116; t=1713794982; c=relaxed/simple;
+	bh=N3QI/yvfE9mMO9UX56rE9oNZSYLeaFSevm4oA3XFCiM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d3gPEnRbxvH86j4Iz7kx6ehqw9DDdlgumaaKgofsW0aq9HRmc2lo/0Q+y4/+Z8G1rDdMnZUytssdXJRiKkHvXQmrk1CfYsnV4rs4M2PNEKzhRXMBhgz79PRa/cbgUXe9G1skFCKqZYF5b+ZhDNy+twVvaZSNEajL/sGCG2ujnYA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fT8ruQ4G; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=rl4GfYr3D8woOMutEROa9MBT4fvGjLD074iCfrCRmXUoovmt/js1zOogETcM7bpRXvIX4VvY4P1xNhv6TlOs3popcUYqtUzcN0dRTMP6p9jiCny5Z+vIBhB8Azq1JFDC6Q6htKeOB8q+xo6pJHdjqiEIoOLifaShti6JTP3BBrQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=L5B7yx4f; arc=none smtp.client-ip=80.241.56.151
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fT8ruQ4G"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1713621770;
+	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="L5B7yx4f"
+Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-101.mailbox.org (Postfix) with ESMTPS id 4VNRvj25tqz9sqs;
+	Mon, 22 Apr 2024 16:09:37 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
+	s=MBO0001; t=1713794977;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=9lfgJeEkDXQcf1eXq96/sWgcK53JbCs/dnLvPig9JJw=;
-	b=fT8ruQ4Gj9NVw4KNiMsOBY6N1q8QOsqi+gTF6EUn+xskYhchVraDZZXZehzFG/TDAnz+Rh
-	CJ2JtSlaNfT0JUwMNTXIVvCnU9pBvDYyuCd6rJO2h3qMyruoU//cha/nHB6Ex1qdPHF3J2
-	QoZMJGIWHfmrphY87Oa9hE9cWV8gk50=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-496-0aKKJjEAPEiY5kYUCF17fg-1; Sat, 20 Apr 2024 10:02:49 -0400
-X-MC-Unique: 0aKKJjEAPEiY5kYUCF17fg-1
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1e2ae0153e2so37920075ad.3
-        for <fstests@vger.kernel.org>; Sat, 20 Apr 2024 07:02:48 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713621768; x=1714226568;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=9lfgJeEkDXQcf1eXq96/sWgcK53JbCs/dnLvPig9JJw=;
-        b=QeR3hGn/MgGYRmUy7qE5bPop+JpPoE5dFsk/J0ke41bVN4p0QaZDKp+DAu7aMi7hRI
-         3JdZdDULZTqyMYPo+6oBArh2/sHqMG0dReefvJibFTDuCmGXBFfenIr/VXBzoV5tQs2h
-         Zay6Vi4F9A7AnbtcmslYhj0WnffK/CzBVrYORlHQVWgfDfEnmKASIhRgYspKiMmj4vXv
-         CUwAwi+dZJzSivUlB3Buxi474NOhHJW0l/mdipvqFowvdqHYM98a1JCNlIoApjTTBdfF
-         4gb9QeoGbbkLtTy6ItVugoaPqAUCwv8ZuPc250Ocq42T1IvVcbsdIf6WW72ZOK2KSzWc
-         llng==
-X-Gm-Message-State: AOJu0YyQyIidrm85glc1AQ+T9zpZnZtWlIHycsQWlPo2ltUUaQY4eWD+
-	XDm4dn84hq6xoKHjg17ssshoc4fZNRPO8DybV+Z2BqU9vkUTZZLRMnBo0/iGRdDxfwIQZeI1SFH
-	KbNdHwe8P03z/fxtf/jUDwif/Zrq+Uwrh3jwTU3/jp5/oGUvXS5socRY=
-X-Received: by 2002:a17:903:22c5:b0:1dc:de65:623b with SMTP id y5-20020a17090322c500b001dcde65623bmr6365703plg.60.1713621767730;
-        Sat, 20 Apr 2024 07:02:47 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IH+B4ecgGbiEbteqjqIcALgwRnV6lNA+X+RJ7IVvcGmdcjPMSR3Dzt2AzFx0d+Gyiael9DH1Q==
-X-Received: by 2002:a17:903:22c5:b0:1dc:de65:623b with SMTP id y5-20020a17090322c500b001dcde65623bmr6365648plg.60.1713621767054;
-        Sat, 20 Apr 2024 07:02:47 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id e4-20020a17090301c400b001dd59b54f9fsm5095275plh.136.2024.04.20.07.02.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 20 Apr 2024 07:02:46 -0700 (PDT)
-Date: Sat, 20 Apr 2024 22:02:41 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, kdevops@lists.linux.dev,
-	linux-xfs@vger.kernel.org, linux-mm@kvack.org,
-	linux-fsdevel@vger.kernel.org, willy@infradead.org,
-	david@redhat.com, linmiaohe@huawei.com, muchun.song@linux.dev,
-	osalvador@suse.de
-Subject: Re: [PATCH] fstests: add fsstress + compaction test
-Message-ID: <20240420140241.wez2x3zoirzlmat6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240418001356.95857-1-mcgrof@kernel.org>
+	bh=hiZJhujvPgZHkOD9PJsqHhFuCGuUZLC3pFCvmi4/afs=;
+	b=L5B7yx4f8IdB/n8OlpIVFYN0mwK6BIUitWtyeu8ipcinpiwhr5BZvd5G0hNIXI2szK0Vcq
+	JIIxqRKqLOpCNoOtruRt4CfsDwJNH2kbg7bIuDgm2lcSBetJEz8DPeHwKhWGG/5E+/GrmS
+	QDJ0r3Qo6nSHqpI9paq3DunEWYXYYWC41cK53Cry93r5OykdW3O7H99csdK28YmAmwlnSb
+	Fy1+GTnYRJpZqNXB4//IQQp7ATHEo25V1Vf0yrtrbphhlHHwmC+4YeAyYcIUdGvB9z2jHv
+	Df7WjB1BxNxCQHksvPD1HQbUNkx2TdHuLaNnaR6TDN6TL1g55iZHC057JMtRgw==
+Date: Mon, 22 Apr 2024 16:09:33 +0200
+From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Luis Chamberlain <mcgrof@kernel.org>, fstests@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org, willy@infradead.org, p.raghav@samsung.com, da.gomez@samsung.com, 
+	hare@suse.de, john.g.garry@oracle.com, linux-xfs@vger.kernel.org, 
+	patches@lists.linux.dev
+Subject: Re: [RFC] fstests: add mmap page boundary tests
+Message-ID: <ldgz6z4r6bt44evqe46ngmd5w5ienxjnrk446ktxpdpksqxsl4@fw4sjusyq6ub>
+References: <20240415081054.1782715-1-mcgrof@kernel.org>
+ <20240415155825.GC11948@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,190 +52,31 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240418001356.95857-1-mcgrof@kernel.org>
+In-Reply-To: <20240415155825.GC11948@frogsfrogsfrogs>
+X-Rspamd-Queue-Id: 4VNRvj25tqz9sqs
 
-On Wed, Apr 17, 2024 at 05:13:56PM -0700, Luis Chamberlain wrote:
-> Running compaction while we run fsstress can crash older kernels as per
-> korg#218227 [0], the fix for that [0] has been posted [1] but that patch
-> is not yet on v6.9-rc4 and the patch requires changes for v6.9.
+> > +setup_zeroed_file()
+> > +{
+> > +	local file_len=$1
+> > +	local sparse=$2
+> > +
+> > +	if $sparse; then
+> > +		$XFS_IO_PROG -f -c "truncate $file_len" $test_file
+> > +	else
+> > +		$XFS_IO_PROG -f -c "falloc 0 $file_len" $test_file
+> > +	fi
+> > +}
+> > +
+> > +round_up_to_page_boundary()
+> > +{
+> > +	local n=$1
+> > +	local page_size=$(_get_page_size)
+> > +
+> > +	echo $(( (n + page_size - 1) & ~(page_size - 1) ))
 > 
-> Today I find that v6.9-rc4 is also hitting an unrecoverable hung task
-> between compaction and fsstress while running generic/476 on the
-> following kdevops test sections [2]:
-> 
->   * xfs_nocrc
->   * xfs_nocrc_2k
->   * xfs_nocrc_4k
-> 
-> Analyzing the trace I see the guest uses loopback block devices for the
-> fstests TEST_DEV, the loopback file uses sparsefiles on a btrfs
-> partition. The contention based on traces [3] [4] seems to be that we
-> have somehow have fsstress + compaction race on folio_wait_bit_common().
-> 
-> We have this happening:
-> 
->   a) kthread compaction --> migrate_pages_batch()
->                 --> folio_wait_bit_common()
->   b) workqueue on btrfs writeback wb_workfn  --> extent_write_cache_pages()
->                 --> folio_wait_bit_common()
->   c) workqueue on loopback loop_rootcg_workfn() --> filemap_fdatawrite_wbc()
->                 --> folio_wait_bit_common()
->   d) kthread xfsaild --> blk_mq_submit_bio() --> wbt_wait()
-> 
-> I tried to reproduce but couldn't easily do so, so I wrote this test
-> to help, and with this I have 100% failure rate so far out of 2 runs.
-> 
-> Given we also have korg#218227 and that patch likely needing
-> backporting, folks will want a reproducer for this issue. This should
-> hopefully help with that case and this new separate issue.
-> 
-> To reproduce with kdevops just:
-> 
-> make defconfig-xfs_nocrc_2k  -j $(nproc)
-> make -j $(nproc)
-> make fstests
-> make linux
-> make fstests-baseline TESTS=generic/733
-> tail -f guestfs/*-xfs-nocrc-2k/console.log
-> 
-> [0] https://bugzilla.kernel.org/show_bug.cgi?id=218227
-> [1] https://lore.kernel.org/all/7ee2bb8c-441a-418b-ba3a-d305f69d31c8@suse.cz/T/#u
-> [2] https://github.com/linux-kdevops/kdevops/blob/main/playbooks/roles/fstests/templates/xfs/xfs.config
-> [3] https://gist.github.com/mcgrof/4dfa3264f513ce6ca398414326cfab84
-> [4] https://gist.github.com/mcgrof/f40a9f31a43793dac928ce287cfacfeb
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
-> 
-> Note: kdevops uses its own fork of fstests which has this merged
-> already, so the above should just work. If it's your first time using
-> kdevops be sure to just read the README for the first time users:
-> 
-> https://github.com/linux-kdevops/kdevops/blob/main/docs/kdevops-first-run.md
-> 
->  common/rc             |  7 ++++++
->  tests/generic/744     | 56 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/744.out |  2 ++
->  3 files changed, 65 insertions(+)
->  create mode 100755 tests/generic/744
->  create mode 100644 tests/generic/744.out
-> 
-> diff --git a/common/rc b/common/rc
-> index b7b77ac1b46d..d4432f5ce259 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -120,6 +120,13 @@ _require_hugepages()
->  		_notrun "Kernel does not report huge page size"
->  }
->  
-> +# Requires CONFIG_COMPACTION
-> +_require_compaction()
+> Does iomap put a large folio into the pagecache that crosses EOF, or
+> does it back down to base page size?
 
-I'm not sure if we should name it as "_require_vm_compaction", does linux
-have other "compaction" or only memory compaction?
-
-> +{
-> +	if [ ! -f /proc/sys/vm/compact_memory ]; then
-> +	    _notrun "Need compaction enabled CONFIG_COMPACTION=y"
-> +	fi
-> +}
->  # Get hugepagesize in bytes
->  _get_hugepagesize()
->  {
-> diff --git a/tests/generic/744 b/tests/generic/744
-> new file mode 100755
-> index 000000000000..2b3c0c7e92fb
-> --- /dev/null
-> +++ b/tests/generic/744
-> @@ -0,0 +1,56 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Luis Chamberlain.  All Rights Reserved.
-> +#
-> +# FS QA Test 744
-> +#
-> +# fsstress + compaction test
-
-fsstress + memory compaction ?
-
-Looks like this case is copied from g/476, just add memory_compaction
-test. That makes sense to me from the test side.
-
-I'm a bit confused on your discussion about an old bug and a new bug(?)
-you just found. Looks like you're reporting a bug, and provide a test
-case to fstests@ by the way. Anyway, I think there's not objection on
-this test itself, right? And is this test for someone known bug or not?
-
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto rw long_rw stress soak smoketest
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> +}
-> +
-> +# Import common functions.
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-
-Useless comment~
-
-> +_supported_fs generic
-> +
-> +_require_scratch
-> +_require_compaction
-> +_require_command "$KILLALL_PROG" "killall"
-> +
-> +echo "Silence is golden."
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +nr_cpus=$((LOAD_FACTOR * 4))
-> +nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
-> +fsstress_args=(-w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus)
-> +
-> +# start a background getxattr loop for the existing xattr
-> +runfile="$tmp.getfattr"
-> +touch $runfile
-> +while [ -e $runfile ]; do
-> +	echo 1 > /proc/sys/vm/compact_memory
-> +	sleep 15
-> +done &
-> +getfattr_pid=$!
-
-I didn't see any other place use this "getfattr_pid". Better to deal with
-it in _cleanup().
-
-> +
-> +test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
-> +
-> +$FSSTRESS_PROG $FSSTRESS_AVOID "${fsstress_args[@]}" >> $seqres.full
-> +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-
-Better to do these things in _cleanup() function, make sure all background
-processes can be done in _cleanup.
-
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/744.out b/tests/generic/744.out
-> new file mode 100644
-> index 000000000000..205c684fa995
-> --- /dev/null
-> +++ b/tests/generic/744.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 744
-> +Silence is golden
-> -- 
-> 2.43.0
-> 
-> 
-
+No, we back it down to the base page size if the higher order folio
+crosses EOF. But this changes when we have the LBS support as we need to
+guarantee the base folio order that will be based on the filesystem BS.
