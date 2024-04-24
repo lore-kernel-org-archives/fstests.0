@@ -1,101 +1,149 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4373E158DBE
-	for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 11:25:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB90315AD9A;
+	Wed, 24 Apr 2024 12:22:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713957905; cv=none; b=iFApH+oBXRsudUOry04b/QhRix8tuXELkV7amiOAfSz3gWICMepxYZhLaLVBHlYbM6X1Suqr7cqjtZmKRaGQhuAeAyj6fwECIrX15NPlMf+BMwFx3drH6+yMheZQuBj+DGZeCtCdciOJjrLckIz3es2schZQjzZTXJqeQOrkojc=
+	t=1713961341; cv=none; b=NdJrEnXCr70sCHfJlI+8oeOf4eKbvAKRBFvLEgGdBGp6CQQuKcdZ2SSwfww6BxWb5AASa9FmhR3lxH30JgRtfeu3/4ujYalDj0Qh59tl1Hmln9opSpUaH8FvGpSFTezCPA3BfFjdxPUbos3dDVDte+0jvOBvSgugC9FORK1MZE8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713957905; c=relaxed/simple;
-	bh=6q76qNl/gjUEJ5R8vVEuNalEJoOMwXU5zJ/bJIpXnRk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RsS0/vkCFF8ywQrsxUyiKMfCVIfu2KqCHS4CDlGftmvLgVxD2vXGhtgb0tJEOHZ4gfCQKvF8hIOueNYwuPNoaj8e4ysHb1SiXWyVEkM9Q8VmGbNBDtoLfyMfpn079gf3/P/u46Hl9xVPMurz48S5Cz8cdYBujdVHS95x4JdUcts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=PcAmRVUb; arc=none smtp.client-ip=209.85.208.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1713961341; c=relaxed/simple;
+	bh=RNFMIGsJI88vo1qm0jd0HAOyWgVKl7wYglQwOsOUgi0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MVs/i7JDOPhQBs0RiYaX00l5ayjAbtDoES1zF0wf2/Ju13dGwP9XkcbFZn40wB0fauMCzubKgTsi0yOmqPr0byr0mFrnETlcN/icQLNndGWS8XilrQIyXkIcguj7xiAY8ZHtJfqTb5ke9IpoRql2CYkUuSnYQOYKB9jJd4gjK2U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=QFRYELDz; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=JqZNZjSl; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=QFRYELDz; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=JqZNZjSl; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="PcAmRVUb"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-2d895e2c6efso101123971fa.0
-        for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 04:25:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1713957900; x=1714562700; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=hjguGVI21JYZb/wzAfcONkBTpl7IuZ+8BGZJwL6ABdY=;
-        b=PcAmRVUb8fkda7yexhbs598W8xzBKgod4/dGdlBCU41KFUe6tH5jqSQ9yYtf/VecaI
-         D04wvuQZZpZByi36RNP8dFDal3KdumE3YpDfH6vGUIkyca5yic58SZO6OH9dnsJ+dovy
-         vpZXMRzZBRBJrUtLtkdhBhXk9DBXTuM1hV6Q0VCZKC7Xk5e81dcqh8K+Pot0Pz6MAimf
-         n1lCw4RFkdTrieLf1uPbTykyI8bk1s9SujpovRM2MC3kZHOQZ0vdV+SZmBYH05kBUy9G
-         HK0rpMfV/z4pBf10tMFkZ5ocam64ckZncOg8V3ecdgvmImdBgoKo8fIfvfaBaQN5Khis
-         5aZQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713957900; x=1714562700;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=hjguGVI21JYZb/wzAfcONkBTpl7IuZ+8BGZJwL6ABdY=;
-        b=r/1n8hTHj0wkXzb5SI5aVKGwBWlvf3EZiEb54IHXjG3gt2ghjadJmRyoaSOY7QhKz0
-         ew22nEx77WUXbi/286b8lVtz3A5F/jrM3rDDIBf1tqESlOZv49CNHOtLlZd+Pq4rKG76
-         tS5ZCOiz060ftlHtsbsu210Q+681dqrr53hYUD1simMqVSuVwACHYy0XhIlUrSKEdg0G
-         gkj5Yw9TWoHV82N4CRE2ZMjd6iKjurCEi9QRlaWW7iTe5xLP2ZwIqt0XmLVdJTXZzq8y
-         lzsICqe71MjspvIhRepYCs3jwKnCrVKSpXPZ08PW6Ckv1Ht6a7hVy5BYYnHjaoIpTpC+
-         yjdw==
-X-Gm-Message-State: AOJu0YxM39+VxilBNUMmlHdpuEhNAs7T5k6CQt9j0nrv96QNAMQ91M6/
-	Pma8TP8K3TMIMKDiwMjQ8FqxXAROb0vODM66x25u6Kn8sWyQrul6fpMlwI+z7lopYe1qSqs+gYc
-	CdLccIQ==
-X-Google-Smtp-Source: AGHT+IEGHXMspiJx+vfX1Rv5J5SJ+X9yildy2PuKAHQ0pBCV0aL0f0vg9k5bb9myujw/BKMuXpzFNg==
-X-Received: by 2002:a05:651c:1a2c:b0:2d8:4a22:7536 with SMTP id by44-20020a05651c1a2c00b002d84a227536mr1630401ljb.48.1713957899803;
-        Wed, 24 Apr 2024 04:24:59 -0700 (PDT)
-Received: from localhost.asia ([202.127.77.110])
-        by smtp.gmail.com with ESMTPSA id o24-20020a170902779800b001e5119c0f9asm11696124pll.66.2024.04.24.04.24.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Apr 2024 04:24:59 -0700 (PDT)
-From: Yong Sun <yosun@suse.com>
-To: fstests@vger.kernel.org
-Cc: Yong Sun <yosun@suse.com>
-Subject: [PATCH] fstests: solve no-return-in-nonvoid-function issue
-Date: Wed, 24 Apr 2024 19:24:08 +0800
-Message-ID: <20240424112444.20964-1-yosun@suse.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="QFRYELDz";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="JqZNZjSl";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="QFRYELDz";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="JqZNZjSl"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 1930566D76;
+	Wed, 24 Apr 2024 12:22:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1713961338;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NPQiUe+KZuzXoThRfw9yAf3ItUBduY+5PfjWZmD2p48=;
+	b=QFRYELDzdEJQh61BpbK3Nwo8G40NiawpBYOC0pAaXT9gUi0Z/HlWhI/fZcpCmFwhcWbrsS
+	BLWyFXtGYxUM4OHHXe/+oWaC5QRjvNAdogHT0Jk8Lb8TN8U9d84QxdQ0L8nI8MpNSn+o/I
+	CAKMW0U6p6qeaxOQT5LCRYGmqp2i+OU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1713961338;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NPQiUe+KZuzXoThRfw9yAf3ItUBduY+5PfjWZmD2p48=;
+	b=JqZNZjSln9tB99LX51Z9zTiLxMNAQOxVMT0GP0xLCYIA60UEmCka1AJobNzaz94tof9M5Q
+	A7RxHWKY6hpNWSBg==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1713961338;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NPQiUe+KZuzXoThRfw9yAf3ItUBduY+5PfjWZmD2p48=;
+	b=QFRYELDzdEJQh61BpbK3Nwo8G40NiawpBYOC0pAaXT9gUi0Z/HlWhI/fZcpCmFwhcWbrsS
+	BLWyFXtGYxUM4OHHXe/+oWaC5QRjvNAdogHT0Jk8Lb8TN8U9d84QxdQ0L8nI8MpNSn+o/I
+	CAKMW0U6p6qeaxOQT5LCRYGmqp2i+OU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1713961338;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NPQiUe+KZuzXoThRfw9yAf3ItUBduY+5PfjWZmD2p48=;
+	b=JqZNZjSln9tB99LX51Z9zTiLxMNAQOxVMT0GP0xLCYIA60UEmCka1AJobNzaz94tof9M5Q
+	A7RxHWKY6hpNWSBg==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0C08F1393C;
+	Wed, 24 Apr 2024 12:22:18 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id MVu+Anr5KGbKbAAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Wed, 24 Apr 2024 12:22:18 +0000
+Date: Wed, 24 Apr 2024 14:14:36 +0200
+From: David Sterba <dsterba@suse.cz>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Anand Jain <anand.jain@oracle.com>, zlang@kernel.org,
+	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [GIT PULL] fstests: btrfs changes staged-20240418
+Message-ID: <20240424121436.GK3492@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20240423220656.4994-1-anand.jain@oracle.com>
+ <20240424091243.72n37q2xlwf5hxky@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240424091243.72n37q2xlwf5hxky@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Flag: NO
+X-Spam-Score: -4.00
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCPT_COUNT_FIVE(0.00)[5]
 
-When build xfstests in some platform it will return
-no-return-in-nonvoid-function error in dio-buf-fault.c:83 and
-fake-dump-rootino.c:224, add return value to solve the issue.
+On Wed, Apr 24, 2024 at 05:12:43PM +0800, Zorro Lang wrote:
+> On Wed, Apr 24, 2024 at 06:06:43AM +0800, Anand Jain wrote:
+> > (I just realized that the previous attempt to send this PR failed. Resending it now.)
+> > 
+> > Zorro,
+> > 
+> > Several of the btrfs test cases were failing due to a change in the golden
+> > output. The commits here fix them. These patches are on top of the last PR
+> > branch staged-20240414.
+> 
+> Hi Anand,
+> 
+> I found lots of patches in this branch doesn't have RVB. That's not safe, if
+> we always do things like that. We need one single peer review at least, that
+> requirement is low enough I think.
+> 
+> Better to ping btrfs-list or fstests-list or particular reviewers to get
+> review, if some patches missed RVB.
 
-Signed-off-by: Yong Sun <yosun@suse.com>
----
- src/dio-buf-fault.c     | 2 +-
- src/fake-dump-rootino.c | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+Anand is maintainer within fstests and I guess he reviews the patches
+when putting them to the branch for merge. Filipe is mentioned as
+reviewer but please don't expect him to reivew each and every patch.
 
-diff --git a/src/dio-buf-fault.c b/src/dio-buf-fault.c
-index 911c3e1f..6b07c729 100644
---- a/src/dio-buf-fault.c
-+++ b/src/dio-buf-fault.c
-@@ -79,5 +79,5 @@ int main(int argc, char *argv[]) {
- 	c = ((char *)buf)[0];
- 	printf("%u\n", c);
- 
--	do_dio(argv[2], buf, sz);
-+	return do_dio(argv[2], buf, sz);
- }
-diff --git a/src/fake-dump-rootino.c b/src/fake-dump-rootino.c
-index 8a30dffd..cada223a 100644
---- a/src/fake-dump-rootino.c
-+++ b/src/fake-dump-rootino.c
-@@ -221,4 +221,5 @@ int main(int argc, char *argv[]) {
- 
- 	munmap(header, GLOBAL_HDR_SZ);
- 	close(fd);
-+        return 0;
- }
--- 
-2.43.0
+I have a feeling that you're following process of merging patches that
+is maybe modeled after linux kernel, with the multiple branches and
+even merge window (mentioned in previsous PR), but this is IMO
+inadequate for a testsuite where we need quick fixups to test cases to
+be released in a much shorter turnaround.
 
+I was expecting that if there was a dedicated maintainer for a
+filesystem then things would go smoothly and we could skip formalities
+because the maintainer is expected to do reviews that count too.
