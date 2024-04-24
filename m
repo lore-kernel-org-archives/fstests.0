@@ -1,249 +1,241 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5A5716D4E7
-	for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 15:49:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A795C16C856;
+	Wed, 24 Apr 2024 22:46:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713973774; cv=none; b=GlT/fnYX3LICXWGrfkeC33r09NRlMA94YKRWPVo4T4wgoLR33l0KoR4LrnIBOWx74Tzeaj/RgL90LMXeeKb+Qy9loT1yewP/arN12jsGPnVHq/M4EuYZTbRZqctHkf9nnTGNYwObsufP/zaNMJZtnUdfCDVSCl986Mqv34k2TEU=
+	t=1713998814; cv=none; b=FFSX5k/oGsGOsRd6378DanpaW6iaAa5hPpT9yDazV9OIG/FNPlk41o6kwBu6/ZqPVxcFChMl6/eWmn39Ga5zHaOA2wHvk/s3MB3116ScQNE+bG83SJNIEfi04KoEeU/SDcr9WXiIO+oEoR8QV+FJZQgdHrhsk7m+8JE54mtTTAI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713973774; c=relaxed/simple;
-	bh=kXJk6kNFF4nFAEWQIzEOfIIfxOY1xgcDmy6PHzr3pKQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QCEyBa34lm7nys7NpSCsrlIlC7TsAJE0YMeLlQnFGEnNWUUq6i7ORQBmhqzewtfmLESKJ4eZymWQo6bbLMagXwtvj3CPD+B/g/ohElS9InhVF9lCkwsYJ70FXu3woaI9FwR6XWld0Y6guE72vdxAwcm/kV4QAqccD0+41KepT7A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ATd3/GrT; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1713998814; c=relaxed/simple;
+	bh=Pzly7aLzb0VvZCh/3FgpujjjD/iX/9vyr6mKhufDIK8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pn4QZWx8znS0t867FdiA5CK1zBujVC5tWtnR6PoQR2m3pmAUA4VwDhrAp7CIsG1Bw2yGvZkCk2mp/1Un7bQdZGSS0DP3EdwaomxY9WROCIRLO1n2ImdxzOc82oFSXZWS9/G/HCDB38DG4gZIBFByDciOUoLHIR3TxR2AgRhBfP0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=AfsSgbqP; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ATd3/GrT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1713973771;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JzQjLglwKUFTRFQABxbDKmlx68vnFPiDHmxbq9YCs3c=;
-	b=ATd3/GrThRo+aMQt3itfDp2cHbEmRzWdi06GgAuFdC0Ywf5gbRhY75YHtC7fqgBZmqzsj1
-	e5Ep8eSQbAU9cjKjz6UMd1SSf74e7rcceLcXGTC/kWR3NQ0HkHYS7ODYzaA01r6c3M+oeE
-	muNrDjKjPkQMcnleC1Pe6C0ZeB1EEsc=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-36-VglNrW_oN8OO61I7Kgzw6A-1; Wed, 24 Apr 2024 11:49:30 -0400
-X-MC-Unique: VglNrW_oN8OO61I7Kgzw6A-1
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2a5c5e69461so44374a91.2
-        for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 08:49:29 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713973769; x=1714578569;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JzQjLglwKUFTRFQABxbDKmlx68vnFPiDHmxbq9YCs3c=;
-        b=KYAI8vRj3TuiqlQz3z9jDmVMLwvszNRiFumh+hpCVgWDrM7KNQ8fhw8njHzIQc6yHA
-         14l6ihadpFylfOdEaDGV2WhKH6BUrgmDQbZw6IVOp1UpkaMLP8QR7RUN3XMSXgrGCE7A
-         JewmQwgEzeiXiLWc7dhs2YJZjvV+LZfMlapU+TUiaVcYx1Nm9rs7E09BuZ2Q3dAMCqQm
-         6oj6xkymfUZEUMgle5RhJUOaKPXHq4fdQaa3uc+uuK/cVrTvke8OXRZp839JY6iEKBEx
-         FkvNfUlFZToebCCXZ2eA7tgAvave8GQRYfh22iQtxd2zbVEBonMWrG4AfsAX4ghfyMEO
-         xMoQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW3ezevexm8ddidPtf9NUtT4K+AhVMj/36VAmOmTypx28AXtprDtn1Ur/9lWQCmhRgsg5FtkqU7n6f6bFmaAzHXUhtkRJtNhA==
-X-Gm-Message-State: AOJu0YyF58kNKi4PZLX8QBC+dv1zGb/CWIyqloOD1rGRXm1Y+anpoLSL
-	qJiAnwN2lHirfIqjGj1X8b2H1BfLdMtwgn0tsMC+IhEEQeTu7UAyZtlcWdCJkwdXeGFRGuC3ELc
-	ZnPT3n0G7dR2JIUivp/WGxm8FoaPYbF2rvEAGSUQ0CwCiJ6PuBHPMFnY=
-X-Received: by 2002:a17:90a:fa06:b0:2ac:d9f:de9b with SMTP id cm6-20020a17090afa0600b002ac0d9fde9bmr3003766pjb.45.1713973768971;
-        Wed, 24 Apr 2024 08:49:28 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IE+HDBpNiZnNg1utwK3fYvcD12Jg84gdzbHjuvxcA4YpTBSLcIh3eSP8ueBc9z856iMhGHxCA==
-X-Received: by 2002:a17:90a:fa06:b0:2ac:d9f:de9b with SMTP id cm6-20020a17090afa0600b002ac0d9fde9bmr3003733pjb.45.1713973768368;
-        Wed, 24 Apr 2024 08:49:28 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id x6-20020a17090ad68600b002a20c0dcebbsm11508653pju.31.2024.04.24.08.49.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Apr 2024 08:49:28 -0700 (PDT)
-Date: Wed, 24 Apr 2024 23:49:23 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [GIT PULL] fstests: btrfs changes staged-20240418
-Message-ID: <20240424154923.fo526va22bplhaug@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240423220656.4994-1-anand.jain@oracle.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="AfsSgbqP"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=Hw0HmQ2VEKVgbWiNSP0dEFNkBKekQpwn0LXOF19HUZ0=; b=AfsSgbqPr+n7jTybbzd1M0TyvG
+	BBhEO1mkSDpfZqZMdokLbmyzCxQQDKFWDp8hEQ+ya00glLCUlpjpvCsQ80LKupeQs8uf589jw+3gT
+	nsoWeyw5LFhF6I3yjKkk2e/T2Pam5TGzSlPSdsn9hHYqZDoUkg+nZLFguqD/JGiUro+DGWME4bNTo
+	YlwDW5s1kAjPhSp3e33E5scxlbhlen8f50kRupmfx150AiganALAjrexnuUVv+umhhRGxGwefHdRx
+	mjU+0yHQ0Faa7YQDStrplqKEdbvYn1aOiaWPG142aOVEDK9Htwgghi1WdklSP03lED9P2Zp2ACZWV
+	4gZxZ+vA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1rzlO5-00000006GgV-35I8;
+	Wed, 24 Apr 2024 22:46:49 +0000
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org,
+	willy@infradead.org,
+	p.raghav@samsung.com,
+	da.gomez@samsung.com,
+	hare@suse.de,
+	john.g.garry@oracle.com,
+	ziy@nvidia.com,
+	linux-xfs@vger.kernel.org,
+	patches@lists.linux.dev,
+	Luis Chamberlain <mcgrof@kernel.org>
+Subject: [RFC] fstests: add fsstress + writeback + debugfs folio split test
+Date: Wed, 24 Apr 2024 15:46:48 -0700
+Message-ID: <20240424224649.1494092-1-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240423220656.4994-1-anand.jain@oracle.com>
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On Wed, Apr 24, 2024 at 06:06:43AM +0800, Anand Jain wrote:
-> (I just realized that the previous attempt to send this PR failed. Resending it now.)
-> 
-> Zorro,
-> 
-> Several of the btrfs test cases were failing due to a change in the golden
-> output. The commits here fix them. These patches are on top of the last PR
-> branch staged-20240414.
+Stress test folio splits by using the debugfs interface to a target
+a new smaller folio order. This is dangerous at the moment as its using
+a debugfs API which requires two out of tree fixes [0] [1] which will
+be posted shortly. With these patches applied no crash is possible yet.
+However, this test was designed to try to exacerbate races with folio
+splits and writeback, at least running generic/447 twice ends up
+producing a crash only if large folio splits with minimum folio order
+is enabled.
 
-Hi Anand,
+With the known fixes for the debugfs interface, this test produces no
+crashes even after 3 hour soaking for 4k and LBS. We should enhance
+this test a bit more so to reproduce the issues observed by running
+generic/447 twice.
 
-Thanks for working on this! Now I've merged all 12 patches with below changes:
+This also begs the question if something like MADV_NOHUGEPAGE might be
+desirable from userspace, so to enable userspace to request splits when
+possible.
 
-I added your RVB to:
-  fstests: btrfs: use _btrfs for 'subvolume snapshot' command
-due to I trust you've reviewed it as you'd like to push it.
+If inspecting more closely, you'll want to enable on your kernel boot:
 
-Then I reviewed those 4 patches from you (refer to mail list):
-  generic: move btrfs clone device testcase to the generic group
-  common/verity: fix btrfs-corrupt-block -v option
-  btrfs/290: fix btrfs_corrupt_block options
-  common/btrfs: refactor _require_btrfs_corrupt_block to check option
+	dyndbg='file mm/huge_memory.c +p'
 
-and merged these 4 patches with the review points (to save time).
+[0] https://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/linux.git/commit/?h=20240424-lbs&id=80f6df5037fd0ad560526af45bd7f4d779fe03f6
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/linux.git/commit/?h=20240424-lbs&id=38f6fac5b4283ea48b1876fc56728f062168f8c3
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
 
-Please check the "patches-in-queue" branch of upstream fstests. If you
-(or other btrfs folks) feel anything wrong, feel free to tell me. If
-no more changes are needed, you'll see them in next release :)
+For those that want to help stress test folio splits to an order, hopefully
+this will help start to enable this. Perhaps there are better ways to create
+more easy targets to stress test folio splits, and in particular try to
+reproduce the issue which so far is only possible by running generic/447 twice
+on LBS. The issue with generic/447 on LBS is not observed on 4k, and this test
+produces no crashes on LBS...
 
-Thanks,
-Zorro
+ common/rc             | 20 +++++++++
+ tests/generic/745     | 97 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/745.out |  2 +
+ 3 files changed, 119 insertions(+)
+ create mode 100755 tests/generic/745
+ create mode 100644 tests/generic/745.out
 
-> 
-> Thank you.
-> 
-> The following changes since commit 943bbbc1ce0a3f8af862a7f9f11ecec00146edfe:
-> 
->   btrfs: remove useless comments (2024-04-14 08:38:14 +0800)
-> 
-> are available in the Git repository at:
-> 
->   https://github.com/asj/fstests.git staged-20240418
-> 
-> for you to fetch changes up to 6fc18c4142c9470013dae598cdc29a2f67887a94:
-> 
->   fstests: btrfs: use _btrfs for 'subvolume snapshot' command (2024-04-18 20:16:21 +0800)
-> 
-> ----------------------------------------------------------------
-> Qu Wenruo (2):
->       fstests: btrfs: rename _run_btrfs_util_prog to _btrfs
->       fstests: btrfs: use _btrfs for 'subvolume snapshot' command
-> 
->  common/btrfs        | 15 ++++++++-------
->  tests/btrfs/001     |  2 +-
->  tests/btrfs/001.out |  1 -
->  tests/btrfs/004     |  2 +-
->  tests/btrfs/007     |  6 +++---
->  tests/btrfs/011     | 10 +++++-----
->  tests/btrfs/017     |  6 +++---
->  tests/btrfs/022     |  6 +++---
->  tests/btrfs/025     | 20 ++++++++++----------
->  tests/btrfs/028     |  2 +-
->  tests/btrfs/030     | 12 ++++++------
->  tests/btrfs/034     | 12 ++++++------
->  tests/btrfs/038     | 20 ++++++++++----------
->  tests/btrfs/039     | 12 ++++++------
->  tests/btrfs/040     | 12 ++++++------
->  tests/btrfs/041     |  2 +-
->  tests/btrfs/042     | 10 +++++-----
->  tests/btrfs/043     | 12 ++++++------
->  tests/btrfs/044     | 12 ++++++------
->  tests/btrfs/045     | 12 ++++++------
->  tests/btrfs/046     | 14 +++++++-------
->  tests/btrfs/048     | 16 ++++++++--------
->  tests/btrfs/050     |  6 +++---
->  tests/btrfs/051     |  6 +++---
->  tests/btrfs/052     |  2 +-
->  tests/btrfs/053     | 12 ++++++------
->  tests/btrfs/054     | 18 +++++++++---------
->  tests/btrfs/057     |  6 +++---
->  tests/btrfs/058     |  4 ++--
->  tests/btrfs/077     | 12 ++++++------
->  tests/btrfs/080     |  2 +-
->  tests/btrfs/083     | 12 ++++++------
->  tests/btrfs/084     | 12 ++++++------
->  tests/btrfs/085     |  4 ++--
->  tests/btrfs/087     | 12 ++++++------
->  tests/btrfs/090     |  2 +-
->  tests/btrfs/091     |  8 ++++----
->  tests/btrfs/092     | 12 ++++++------
->  tests/btrfs/094     | 12 ++++++------
->  tests/btrfs/097     | 12 ++++++------
->  tests/btrfs/099     |  4 ++--
->  tests/btrfs/100     |  6 +++---
->  tests/btrfs/101     |  6 +++---
->  tests/btrfs/104     | 10 +++++-----
->  tests/btrfs/105     | 14 +++++++-------
->  tests/btrfs/108     |  6 +++---
->  tests/btrfs/109     |  6 +++---
->  tests/btrfs/110     | 16 ++++++++--------
->  tests/btrfs/111     | 20 ++++++++++----------
->  tests/btrfs/117     | 18 +++++++++---------
->  tests/btrfs/118     |  8 ++++----
->  tests/btrfs/119     |  6 +++---
->  tests/btrfs/120     |  4 ++--
->  tests/btrfs/121     |  2 +-
->  tests/btrfs/122     | 10 +++++-----
->  tests/btrfs/123     |  2 +-
->  tests/btrfs/124     | 10 +++++-----
->  tests/btrfs/125     | 18 +++++++++---------
->  tests/btrfs/126     |  4 ++--
->  tests/btrfs/127     | 12 ++++++------
->  tests/btrfs/128     | 12 ++++++------
->  tests/btrfs/129     | 12 ++++++------
->  tests/btrfs/130     |  2 +-
->  tests/btrfs/139     |  6 +++---
->  tests/btrfs/152     | 14 ++++++--------
->  tests/btrfs/152.out |  2 --
->  tests/btrfs/153     |  4 ++--
->  tests/btrfs/161     |  4 ++--
->  tests/btrfs/162     |  6 +++---
->  tests/btrfs/163     | 12 ++++++------
->  tests/btrfs/164     | 12 ++++++------
->  tests/btrfs/166     |  2 +-
->  tests/btrfs/167     |  2 +-
->  tests/btrfs/168     |  6 ++----
->  tests/btrfs/168.out |  2 --
->  tests/btrfs/169     |  6 ++----
->  tests/btrfs/169.out |  2 --
->  tests/btrfs/170     |  3 +--
->  tests/btrfs/170.out |  1 -
->  tests/btrfs/187     |  6 ++----
->  tests/btrfs/187.out |  2 --
->  tests/btrfs/188     |  6 ++----
->  tests/btrfs/188.out |  2 --
->  tests/btrfs/189     |  6 ++----
->  tests/btrfs/189.out |  2 --
->  tests/btrfs/191     |  6 ++----
->  tests/btrfs/191.out |  2 --
->  tests/btrfs/200     |  6 ++----
->  tests/btrfs/200.out |  2 --
->  tests/btrfs/202     |  3 +--
->  tests/btrfs/202.out |  1 -
->  tests/btrfs/203     |  6 ++----
->  tests/btrfs/203.out |  2 --
->  tests/btrfs/218     |  2 +-
->  tests/btrfs/226     |  3 +--
->  tests/btrfs/226.out |  1 -
->  tests/btrfs/272     | 14 +++++++-------
->  tests/btrfs/273     |  6 +++---
->  tests/btrfs/276     |  2 +-
->  tests/btrfs/276.out |  1 -
->  tests/btrfs/278     | 14 +++++++-------
->  tests/btrfs/280     |  2 +-
->  tests/btrfs/280.out |  1 -
->  tests/btrfs/281     |  3 +--
->  tests/btrfs/281.out |  1 -
->  tests/btrfs/283     |  3 +--
->  tests/btrfs/283.out |  1 -
->  tests/btrfs/287     |  6 ++----
->  tests/btrfs/287.out |  2 --
->  tests/btrfs/293     |  4 ++--
->  tests/btrfs/293.out |  2 --
->  tests/btrfs/300     |  2 +-
->  tests/btrfs/300.out |  1 -
->  tests/btrfs/302     |  3 +--
->  tests/btrfs/302.out |  1 -
->  tests/btrfs/314     |  3 +--
->  tests/btrfs/314.out |  2 --
->  tests/btrfs/320     | 16 ++++++++--------
->  118 files changed, 375 insertions(+), 435 deletions(-)
-> 
+diff --git a/common/rc b/common/rc
+index d4432f5ce259..1eefb53aa84b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -127,6 +127,26 @@ _require_compaction()
+ 	    _notrun "Need compaction enabled CONFIG_COMPACTION=y"
+ 	fi
+ }
++
++# Requires CONFIG_DEBUGFS and truncation knobs
++SPLIT_DEBUGFS="/sys/kernel/debug/split_huge_pages"
++_require_split_debugfs()
++{
++       if [ ! -f $SPLIT_DEBUGFS ]; then
++           _notrun "Needs CONFIG_DEBUGFS and split_huge_pages"
++       fi
++}
++
++_split_huge_pages_file_full()
++{
++	local file=$1
++	local offset="0x0"
++	local len=$(printf "%x" $(stat --format='%s' $file))
++	local order="0"
++	local split_cmd="$file,$offset,0x${len},$order"
++	echo $split_cmd > $SPLIT_DEBUGFS
++}
++
+ # Get hugepagesize in bytes
+ _get_hugepagesize()
+ {
+diff --git a/tests/generic/745 b/tests/generic/745
+new file mode 100755
+index 000000000000..0a30dbee35bd
+--- /dev/null
++++ b/tests/generic/745
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 Luis Chamberlain. All Rights Reserved.
++#
++# FS QA Test No. 734
++#
++# Run fsstress in a loop, and in the background force some writeback and
++# folio splits for every file. If you're enabling this and want to check
++# underneath the hood you may want to enable:
++#
++# dyndbg='file mm/huge_memory.c +p'
++. ./common/preamble
++_begin_fstest long_rw stress soak smoketest dangerous_fuzzers
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++}
++
++# Import common functions.
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_require_test
++_require_scratch
++_require_split_debugfs
++_require_command "$KILLALL_PROG" "killall"
++
++echo "Silence is golden"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++nr_cpus=$((LOAD_FACTOR * 4))
++nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
++
++fsstress_args=(-w -d $SCRATCH_MNT/test -n $nr_ops -p $nr_cpus)
++
++# used to let our loops know when to stop
++runfile="$tmp.keep.running.loop"
++touch $runfile
++
++# The background ops are out of bounds, the goal is to race with fsstress.
++
++# Force folio split if possible, this seems to be screaming for MADV_NOHUGEPAGE
++# for large folios.
++while [ -e $runfile ]; do
++	for i in $(find $SCRATCH_MNT/test \( -type f \) 2>/dev/null); do
++		_split_huge_pages_file_full $i >/dev/null 2>&1
++	done
++	sleep 2
++done &
++split_huge_pages_files_pid=$!
++
++blocksize=$(_get_file_block_size $SCRATCH_MNT)
++export XFS_DIO_MIN=$((blocksize * 2))
++
++test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
++
++# Our general goal here is to race with ops which can stress folio addition,
++# removal, edits, and writeback.
++
++# zero frequencies for write ops to minimize writeback
++fsstress_args+=(-R)
++
++# XXX: we can improve this, so to increase the chances to allow more
++# folio splits. Also running generic/447 twice triggers a corner case we can't
++# capture here on folio splits and write_cache_pages, increasing the chances of
++# this test to cover that same corner case would be ideal.
++#
++# https://gist.github.com/mcgrof/d12f586ec6ebe32b2472b5d634c397df
++fsstress_args+=(-f creat=1)
++fsstress_args+=(-f write=1)
++fsstress_args+=(-f dwrite=1)
++fsstress_args+=(-f truncate=1)
++fsstress_args+=(-f zero=1)
++fsstress_args+=(-f unlink=1)
++fsstress_args+=(-f fsync=1)
++fsstress_args+=(-f punch=2)
++fsstress_args+=(-f copyrange=4)
++fsstress_args+=(-f clonerange=4)
++
++if [[ "$FSTYP" != "xfs" || "$FSTYP" == "ext4" ]]; then
++	fsstress_args+=(-f collapse=1)
++fi
++
++$FSSTRESS_PROG $FSSTRESS_AVOID "${fsstress_args[@]}" >> $seqres.full
++
++rm -f $runfile
++wait > /dev/null 2>&1
++
++status=0
++exit
+diff --git a/tests/generic/745.out b/tests/generic/745.out
+new file mode 100644
+index 000000000000..fce6b7f5489d
+--- /dev/null
++++ b/tests/generic/745.out
+@@ -0,0 +1,2 @@
++QA output created by 745
++Silence is golden
+-- 
+2.43.0
 
