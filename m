@@ -1,69 +1,69 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BFD9158A31
-	for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 09:12:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 749C613D530
+	for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 10:45:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1713949973; cv=none; b=NMeIBHFZ+yJrgNFFUcptTfS+96DExW0eQKnDjpzhqtxClg0W2U1zFYrUvQtUDR/kp9QUDtT8q0SVbLdKxBUCahEoOF75qMul/edD2S7B33vq8HtghO+PC8lGrdQfQy25ES1qr9q7jEK/FBfyPD+6PjdPkhVjcf2ghv5DowWXMEI=
+	t=1713955521; cv=none; b=rFQ9rD0N6A4vAkmi1K8HIz+p+0Pyx5HcbyvQpg4jneO+lhGxOpL3d6PvUbm/tP2ok6QFUPIQdx5aUlAVZT7j1XUjUuDpjc5vJljZhxUC9u7c5+iGHg2FHtya6N4igX3F0S5QNrliN2Ji8JDeuZzDoqdfucEKcrnBS2Il+kcn4xA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1713949973; c=relaxed/simple;
-	bh=jV48hhl6PEhyr/6wHOChojTMe6HRPDNOOYzcYU7Cy1c=;
+	s=arc-20240116; t=1713955521; c=relaxed/simple;
+	bh=oYdr+4ECfPljc9nZHDgEev1XJp4TZPmPq1RsiCQieqE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eggJMyUbMiC06v68jLHel/7YxrbjtqJ6wZbO5AWgHBLE2Bd4Qn0jR9hIiff1DG04Q7Knf9Typgm9T2LLcGPXmrMcFuKQF9htzLS833r3n3tM6xjojuNsI/EclIObcAsj1od1iF2jIKSaUApgzr95ROIaehYQQlLiKDrLXQp5mHI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=jP2Ozju2; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=U8CgjFk+GNWS7ZfKuPW7IimuabOHlaTCG6kGRScNvSPYOQr4bpnztw8WFB1UraTRkTqaBDG5Ueeyqf12WO9XtmghXoiAAKJEejSb8mkHvLGmjTg9zRi8uP+sW6LI8MV2iOO3I0RtWFp+0HnDjGbZk/Icc7Uh6sx1FOdWwTvukYM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YSlW2hCg; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="jP2Ozju2"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YSlW2hCg"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1713949971;
+	s=mimecast20190719; t=1713955518;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=lUS+agYprfM+Bpal/Up1Af2H7C8tQy3CjTwX1w/sipM=;
-	b=jP2Ozju2h/lGls9Wh66dsiQGGNuCYwyii+SYINyiqmfLxoDE9xQ53y1zSgRdhYdZcfs5X6
-	0cBcY4tfIB5HPQLSbBo1oKXpsrvLb5n5t0v8w5wPMSEl1bqN14/xdpP/pghfj3vIEn5f7t
-	VKUDGlhzQobRGfjgz0nUAVQ6KANSQQw=
-Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
- [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=MhLKBDyUWL12GpGYJ1jx0HSvWWh5C5Y3SvvgqgF+lpc=;
+	b=YSlW2hCgGm04dm0pQu+LWT7wGRc1W9I2NSmicq8WN1EjJPqDnKKYuDSoD20v34dFldQgKI
+	SMjwJuzyQmNznKXeblxg3sl57hHv6WPwfUqHhKi10VAW2+5CGbz+VFGUgC5v5Ptq8yxz5Z
+	3j09lSAVzQ7UfJ9omEYEf12xtJGFB0s=
+Received: from mail-oa1-f72.google.com (mail-oa1-f72.google.com
+ [209.85.160.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-659-S-zIa-yUNrGGZQuTB8QHew-1; Wed, 24 Apr 2024 05:12:49 -0400
-X-MC-Unique: S-zIa-yUNrGGZQuTB8QHew-1
-Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3c709618a03so8747474b6e.1
-        for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 02:12:49 -0700 (PDT)
+ us-mta-379-8Q4qf-jSPyiCIIrewQwEPQ-1; Wed, 24 Apr 2024 06:45:17 -0400
+X-MC-Unique: 8Q4qf-jSPyiCIIrewQwEPQ-1
+Received: by mail-oa1-f72.google.com with SMTP id 586e51a60fabf-22f0faa1b0cso7754416fac.0
+        for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 03:45:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1713949968; x=1714554768;
+        d=1e100.net; s=20230601; t=1713955516; x=1714560316;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=lUS+agYprfM+Bpal/Up1Af2H7C8tQy3CjTwX1w/sipM=;
-        b=TauehG5EoS3CvjU2rf9QpOzSTSOzurlfOm0cmO8F60t109VBrCwF6cMUEDzP9+zGbo
-         W42va9LtYzeTQ42thAyMcYN6d6Kxp6TUe4t+3/nW84Zh9Mwhw+zzCr/87dcwLLit8Rcc
-         XSuhBDuvQBE8sNUhSntsEnGV1bk43XwuQdqdhruEzxLLutAA7fYSRZUjpeqftmQAmY6S
-         noa1W9Btk5Y3ccEJEtikjtTJX0UtajoKcL/L0uaYCwlu//r+zObuEUcqUmWXkWSzg495
-         ux/8z1+PS4RE+AuXVCyDXxHZOWSZmDO+vIuIAJ0L67GW6v/OnQJBRceVMMUetUaSQThr
-         VS/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXaH1xGOioSkhOz+Ni8m5Ky29heQIlS4W8+yMNRT7sLPbPXxPJAGTlwVASQorKoJg4Nzn4lCaRJfzF7DHhwBJITG8VxXASK6g==
-X-Gm-Message-State: AOJu0YzHtgeZn5ALgymEVoUE/2wNpELIs5ebXURd4FccjYiXGqmDmFGR
-	GAPhCMuHuTqMGWxrlVOwke6wJ19QM3mIebUNrUNsJdwiTFQTTBgWaLtjqIaMPXipsxEB+uJ4/NA
-	dd3q5fwO3KoMQ08d59jJMPvKXybeQ9jamHtLuzaL0SguccXJtfyCZ/qYaPxCIr/IpjA==
-X-Received: by 2002:a05:6870:5309:b0:229:e574:9c82 with SMTP id j9-20020a056870530900b00229e5749c82mr1945352oan.3.1713949968330;
-        Wed, 24 Apr 2024 02:12:48 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEd1StJDHzP4IfXK0Ev0mA1jSpYOsoNXzvQrxuNXNYZRnn+npcx56WL/RIKAKUAhg6OIczkcg==
-X-Received: by 2002:a05:6870:5309:b0:229:e574:9c82 with SMTP id j9-20020a056870530900b00229e5749c82mr1945319oan.3.1713949967798;
-        Wed, 24 Apr 2024 02:12:47 -0700 (PDT)
+        bh=MhLKBDyUWL12GpGYJ1jx0HSvWWh5C5Y3SvvgqgF+lpc=;
+        b=eH1IM2Epcjd97NruHByEW6hFosVHt3VA66WEIXhrLpeKbUGoguuNsoCubkMoak7mwq
+         dIQzjMr1v8J2m8KmDesvCrvstMB1L/xvkW0EE5ssq/dXiM9CT3OBgGvC7azUQri4Kz34
+         tNG4Ifa8OyUdySHhFOF1cvnyrrJGANGJptyzicMrGZ6EId7vtyNipi2EA9MctJju7XP0
+         YnB4M52ePsDsUwxYDs4bEqhzRmS7GfqoDFzSLivomjZaOUSOF8wfrF3u/9n5E6RmXbVO
+         AV11U+iI5XkL2ORX1GVuuFjKGevdBlMdZr7oHyHNZ0nwm6/kf6NDOISdp0gQC0YAK10g
+         IXlQ==
+X-Gm-Message-State: AOJu0Yy7s7Go2Cq3Tyn+bcYE6lmMDUlqAFOMEbFXjbGsr9Q9wfbLjWjF
+	wJTHQKPFp6etH2hf/gIqSyhSlCiLuAvzy65sNrdowR/+2bOQjdrmQFlMcuajotdF8ifY/AiMK0w
+	H9tQMrVllQu+qtXAqOteAiBi+xh0PQS16FWxyZqsXyuycdAHaJvuOhJk9vFifsiU=
+X-Received: by 2002:a05:6870:b629:b0:22b:a8f3:36b7 with SMTP id cm41-20020a056870b62900b0022ba8f336b7mr2066600oab.55.1713955515976;
+        Wed, 24 Apr 2024 03:45:15 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHOgye3ggXXpsi1HlvXAJ6YrfSfe6rqzYNGfAQcUGgQdgPn48hZzxDjU8Xi4nnBZ0T36aOSZA==
+X-Received: by 2002:a05:6870:b629:b0:22b:a8f3:36b7 with SMTP id cm41-20020a056870b62900b0022ba8f336b7mr2066582oab.55.1713955515268;
+        Wed, 24 Apr 2024 03:45:15 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id ka4-20020a056a00938400b006f3aa6a03dbsm460983pfb.127.2024.04.24.02.12.45
+        by smtp.gmail.com with ESMTPSA id i6-20020a62c106000000b006ed0199bd57sm11931942pfg.177.2024.04.24.03.45.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Apr 2024 02:12:47 -0700 (PDT)
-Date: Wed, 24 Apr 2024 17:12:43 +0800
+        Wed, 24 Apr 2024 03:45:14 -0700 (PDT)
+Date: Wed, 24 Apr 2024 18:45:10 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [GIT PULL] fstests: btrfs changes staged-20240418
-Message-ID: <20240424091243.72n37q2xlwf5hxky@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240423220656.4994-1-anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH v3 1/1] generic: move btrfs clone device testcase to the
+ generic group
+Message-ID: <20240424104510.oopqvmtqlyc3e442@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <670fe32950d328b6a6dd071a53d8a25e50ce6647.1712673602.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -72,167 +72,215 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240423220656.4994-1-anand.jain@oracle.com>
+In-Reply-To: <670fe32950d328b6a6dd071a53d8a25e50ce6647.1712673602.git.anand.jain@oracle.com>
 
-On Wed, Apr 24, 2024 at 06:06:43AM +0800, Anand Jain wrote:
-> (I just realized that the previous attempt to send this PR failed. Resending it now.)
+On Tue, Apr 09, 2024 at 10:43:42PM +0800, Anand Jain wrote:
+> Given that ext4 also allows mounting of a cloned filesystem, the btrfs
+> test case btrfs/312, which assesses the functionality of cloned filesystem
+> support, can be refactored to be under the generic group.
 > 
-> Zorro,
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> v3:
+> Move back to generic
 > 
-> Several of the btrfs test cases were failing due to a change in the golden
-> output. The commits here fix them. These patches are on top of the last PR
-> branch staged-20240414.
+> v2:
+> Move to shared testcase instead of generic.
+> commit log updated,
+> add _require_block_device $TEST_DEV.
+> add _require_duplicated_fsid
+> 
+> https://lore.kernel.org/all/440eff6d16407f12ec55df69db283ba6eb9b278c.1710599671.git.anand.jain@oracle.com/T/#m576217a155aee49af607aa1f2aaa102ac92835e9
+> 
+> v1:
+> https://lore.kernel.org/linux-btrfs/dd10c332377f315cd17abc46e08f296b87aed31c.1709970025.git.anand.jain@oracle.com/
+> 
+>  common/rc             | 14 +++++++
+>  tests/btrfs/312       | 78 --------------------------------------
+>  tests/btrfs/312.out   | 19 ----------
+>  tests/generic/744     | 87 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/744.out |  4 ++
+>  5 files changed, 105 insertions(+), 97 deletions(-)
+>  delete mode 100755 tests/btrfs/312
+>  delete mode 100644 tests/btrfs/312.out
+>  create mode 100755 tests/generic/744
+>  create mode 100644 tests/generic/744.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 3ef70dfdddaa..6b9d218e3b1c 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5495,6 +5495,20 @@ _random_file() {
+>  	echo "$basedir/$(ls -U $basedir | shuf -n 1)"
+>  }
+>  
+> +_require_duplicate_fsid()
+> +{
+> +	case "$FSTYP" in
+> +	"btrfs")
+> +		_require_btrfs_fs_feature temp_fsid
+> +		;;
+> +	"ext4")
+> +		;;
+> +	*)
+> +		_notrun "$FSTYP cannot support mounting with duplicate fsid"
 
-Hi Anand,
+We didn't do a visible "mount" at here, how about say:
+  "$FSTYP does not support duplicate fsid" ?
 
-I found lots of patches in this branch doesn't have RVB. That's not safe, if
-we always do things like that. We need one single peer review at least, that
-requirement is low enough I think.
+> +		;;
+> +	esac
+> +}
 
-Better to ping btrfs-list or fstests-list or particular reviewers to get
-review, if some patches missed RVB.
+OK, with this helper, we can move it into generic/. I'm not familar with
+other filesystems, if any of other filesystems supports this feature, please
+remind me.
+
+> +
+>  init_rc
+>  
+
+[snip]
+
+> diff --git a/tests/generic/744 b/tests/generic/744
+> new file mode 100755
+> index 000000000000..5c7edf6499c1
+> --- /dev/null
+> +++ b/tests/generic/744
+> @@ -0,0 +1,87 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 744
+> +#
+> +# Set up a filesystem, create a clone, mount both, and verify if the cp reflink
+> +# operation between these two mounts fails.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick clone volume tempfsid
+
+I think it's not "quick" enough, right? It still need to take ~60s.
+
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +
+> +	$UMOUNT_PROG $mnt2 &> /dev/null
+> +	rm -r -f $mnt2
+> +	_destroy_loop_device $loop_dev2 &> /dev/null
+> +	rm -r -f $loop_file2
+> +
+> +	$UMOUNT_PROG $mnt1 &> /dev/null
+> +	rm -r -f $mnt1
+> +	_destroy_loop_device $loop_dev1 &> /dev/null
+
+The _destroy_loop_device will exit directly if it fails, so the "&> /dev/null"
+isn't helpful. If the test _notrun by a _require_xxx helper, I doubt the
+_destroy_loop_device might cause _fail. So how about use `losetup -d` directly?
+
+$UMOUNT_PROG $mnt2 &> /dev/null
+$UMOUNT_PROG $mnt1 &> /dev/null
+[ -b "$loop_dev2" ] && losetup -d $loop_dev2
+[ -b "$loop_dev1" ] && losetup -d $loop_dev1
+[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
+
+> +	rm -r -f $loop_file1
+> +}
+> +
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_require_duplicate_fsid
+> +_require_cp_reflink
+> +_require_test
+> +_require_block_device $TEST_DEV
+> +_require_loop
+> +
+> +clone_filesystem()
+> +{
+> +	local dev1=$1
+> +	local dev2=$2
+> +
+> +	_mkfs_dev $dev1
+> +
+> +	_mount $dev1 $mnt1
+> +	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $mnt1/foo >> $seqres.full
+> +	$UMOUNT_PROG $mnt1
+> +
+> +	# device dump of $dev1 to $dev2
+> +	dd if=$dev1 of=$dev2 conv=fsync status=none || _fail "dd failed: $?"
+> +}
+> +
+> +mnt1=$TEST_DIR/$seq/mnt1
+> +rm -r -f $mnt1
+> +mkdir -p $mnt1
+> +
+> +mnt2=$TEST_DIR/$seq/mnt2
+> +rm -r -f $mnt2
+> +mkdir -p $mnt2
+
+You might want to remove the "$TEST_DIR/$seq" directly, e.g.
+
+mnt1=$TEST_DIR/$seq/mnt1
+mnt2=$TEST_DIR/$seq/mnt2
+rm -rf $TEST_DIR/$seq
+mkdir -p $mnt1 $mnt2
+
+
+> +
+> +loop_file1="$TEST_DIR/$seq/image1"
+> +rm -r -f $loop_file1
+> +truncate -s 300m "$loop_file1"
+> +loop_dev1=$(_create_loop_device "$loop_file1")
+> +
+> +loop_file2="$TEST_DIR/$seq/image2"
+> +rm -r -f $loop_file2
+> +truncate -s 300m "$loop_file2"
+> +loop_dev2=$(_create_loop_device "$loop_file2")
+> +
+> +clone_filesystem ${loop_dev1} ${loop_dev2}
+> +
+> +# Mounting original device
+> +_mount $loop_dev1 $mnt1
+> +$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $mnt1/foo | _filter_xfs_io
+> +
+> +# Mounting cloned device
+> +_mount $loop_dev2 $mnt2 || _fail "mount of cloned device failed"
+> +
+> +# cp reflink across two different filesystems must fail
+> +_cp_reflink $mnt1/foo $mnt2/bar 2>&1 | _filter_test_dir
+
+Don't we need to make sure the $FSTYP supports reflink feature? The
+_require_cp_reflink only checks if the "cp" command has "reflink" option.
+
+There's not a helper to check if $mnt1 and $mnt2 support reflink directly, but
+I think we can use "_require_test_reflink".
 
 Thanks,
 Zorro
 
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/744.out b/tests/generic/744.out
+> new file mode 100644
+> index 000000000000..1850a0ea2a5e
+> --- /dev/null
+> +++ b/tests/generic/744.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 744
+> +wrote 9000/9000 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +cp: failed to clone 'TEST_DIR/744/mnt2/bar' from 'TEST_DIR/744/mnt1/foo': Invalid cross-device link
+> -- 
+> 2.39.3
 > 
-> Thank you.
-> 
-> The following changes since commit 943bbbc1ce0a3f8af862a7f9f11ecec00146edfe:
-> 
->   btrfs: remove useless comments (2024-04-14 08:38:14 +0800)
-> 
-> are available in the Git repository at:
-> 
->   https://github.com/asj/fstests.git staged-20240418
-> 
-> for you to fetch changes up to 6fc18c4142c9470013dae598cdc29a2f67887a94:
-> 
->   fstests: btrfs: use _btrfs for 'subvolume snapshot' command (2024-04-18 20:16:21 +0800)
-> 
-> ----------------------------------------------------------------
-> Qu Wenruo (2):
->       fstests: btrfs: rename _run_btrfs_util_prog to _btrfs
->       fstests: btrfs: use _btrfs for 'subvolume snapshot' command
-> 
->  common/btrfs        | 15 ++++++++-------
->  tests/btrfs/001     |  2 +-
->  tests/btrfs/001.out |  1 -
->  tests/btrfs/004     |  2 +-
->  tests/btrfs/007     |  6 +++---
->  tests/btrfs/011     | 10 +++++-----
->  tests/btrfs/017     |  6 +++---
->  tests/btrfs/022     |  6 +++---
->  tests/btrfs/025     | 20 ++++++++++----------
->  tests/btrfs/028     |  2 +-
->  tests/btrfs/030     | 12 ++++++------
->  tests/btrfs/034     | 12 ++++++------
->  tests/btrfs/038     | 20 ++++++++++----------
->  tests/btrfs/039     | 12 ++++++------
->  tests/btrfs/040     | 12 ++++++------
->  tests/btrfs/041     |  2 +-
->  tests/btrfs/042     | 10 +++++-----
->  tests/btrfs/043     | 12 ++++++------
->  tests/btrfs/044     | 12 ++++++------
->  tests/btrfs/045     | 12 ++++++------
->  tests/btrfs/046     | 14 +++++++-------
->  tests/btrfs/048     | 16 ++++++++--------
->  tests/btrfs/050     |  6 +++---
->  tests/btrfs/051     |  6 +++---
->  tests/btrfs/052     |  2 +-
->  tests/btrfs/053     | 12 ++++++------
->  tests/btrfs/054     | 18 +++++++++---------
->  tests/btrfs/057     |  6 +++---
->  tests/btrfs/058     |  4 ++--
->  tests/btrfs/077     | 12 ++++++------
->  tests/btrfs/080     |  2 +-
->  tests/btrfs/083     | 12 ++++++------
->  tests/btrfs/084     | 12 ++++++------
->  tests/btrfs/085     |  4 ++--
->  tests/btrfs/087     | 12 ++++++------
->  tests/btrfs/090     |  2 +-
->  tests/btrfs/091     |  8 ++++----
->  tests/btrfs/092     | 12 ++++++------
->  tests/btrfs/094     | 12 ++++++------
->  tests/btrfs/097     | 12 ++++++------
->  tests/btrfs/099     |  4 ++--
->  tests/btrfs/100     |  6 +++---
->  tests/btrfs/101     |  6 +++---
->  tests/btrfs/104     | 10 +++++-----
->  tests/btrfs/105     | 14 +++++++-------
->  tests/btrfs/108     |  6 +++---
->  tests/btrfs/109     |  6 +++---
->  tests/btrfs/110     | 16 ++++++++--------
->  tests/btrfs/111     | 20 ++++++++++----------
->  tests/btrfs/117     | 18 +++++++++---------
->  tests/btrfs/118     |  8 ++++----
->  tests/btrfs/119     |  6 +++---
->  tests/btrfs/120     |  4 ++--
->  tests/btrfs/121     |  2 +-
->  tests/btrfs/122     | 10 +++++-----
->  tests/btrfs/123     |  2 +-
->  tests/btrfs/124     | 10 +++++-----
->  tests/btrfs/125     | 18 +++++++++---------
->  tests/btrfs/126     |  4 ++--
->  tests/btrfs/127     | 12 ++++++------
->  tests/btrfs/128     | 12 ++++++------
->  tests/btrfs/129     | 12 ++++++------
->  tests/btrfs/130     |  2 +-
->  tests/btrfs/139     |  6 +++---
->  tests/btrfs/152     | 14 ++++++--------
->  tests/btrfs/152.out |  2 --
->  tests/btrfs/153     |  4 ++--
->  tests/btrfs/161     |  4 ++--
->  tests/btrfs/162     |  6 +++---
->  tests/btrfs/163     | 12 ++++++------
->  tests/btrfs/164     | 12 ++++++------
->  tests/btrfs/166     |  2 +-
->  tests/btrfs/167     |  2 +-
->  tests/btrfs/168     |  6 ++----
->  tests/btrfs/168.out |  2 --
->  tests/btrfs/169     |  6 ++----
->  tests/btrfs/169.out |  2 --
->  tests/btrfs/170     |  3 +--
->  tests/btrfs/170.out |  1 -
->  tests/btrfs/187     |  6 ++----
->  tests/btrfs/187.out |  2 --
->  tests/btrfs/188     |  6 ++----
->  tests/btrfs/188.out |  2 --
->  tests/btrfs/189     |  6 ++----
->  tests/btrfs/189.out |  2 --
->  tests/btrfs/191     |  6 ++----
->  tests/btrfs/191.out |  2 --
->  tests/btrfs/200     |  6 ++----
->  tests/btrfs/200.out |  2 --
->  tests/btrfs/202     |  3 +--
->  tests/btrfs/202.out |  1 -
->  tests/btrfs/203     |  6 ++----
->  tests/btrfs/203.out |  2 --
->  tests/btrfs/218     |  2 +-
->  tests/btrfs/226     |  3 +--
->  tests/btrfs/226.out |  1 -
->  tests/btrfs/272     | 14 +++++++-------
->  tests/btrfs/273     |  6 +++---
->  tests/btrfs/276     |  2 +-
->  tests/btrfs/276.out |  1 -
->  tests/btrfs/278     | 14 +++++++-------
->  tests/btrfs/280     |  2 +-
->  tests/btrfs/280.out |  1 -
->  tests/btrfs/281     |  3 +--
->  tests/btrfs/281.out |  1 -
->  tests/btrfs/283     |  3 +--
->  tests/btrfs/283.out |  1 -
->  tests/btrfs/287     |  6 ++----
->  tests/btrfs/287.out |  2 --
->  tests/btrfs/293     |  4 ++--
->  tests/btrfs/293.out |  2 --
->  tests/btrfs/300     |  2 +-
->  tests/btrfs/300.out |  1 -
->  tests/btrfs/302     |  3 +--
->  tests/btrfs/302.out |  1 -
->  tests/btrfs/314     |  3 +--
->  tests/btrfs/314.out |  2 --
->  tests/btrfs/320     | 16 ++++++++--------
->  118 files changed, 375 insertions(+), 435 deletions(-)
 > 
 
