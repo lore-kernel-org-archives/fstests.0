@@ -1,343 +1,171 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46A8E3BB48
-	for <fstests@vger.kernel.org>; Thu, 25 Apr 2024 05:32:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F82184DFA
+	for <fstests@vger.kernel.org>; Thu, 25 Apr 2024 09:40:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714023124; cv=none; b=pPezVr1xwvcOZ/LUk+PLlVTrsa6MQUa9xk2/uDTiOG7z7pSMab6EG0Wzc6u0Ncpqi/4aLnPc907jh4fLT/f5yQuDarAaypQzRRfNaFZJFUH+xzOGd8habkUxn30YtMLY6udTMq233sWbpFD5FLv9z2QrZIstkjcJdv0cmiVBIc8=
+	t=1714038057; cv=none; b=WDNpGbMEnkb9kVM98Y28TuDUTpALAUBAFEBK5MjTzS0eOJ9mjPRh+0IfD1cENO5BbHCUte8O/2n6iNvmDdI8Aca3zCtxfcUTfZHXv4D8qdFxq2mTd8tFaCGrx8BTVA+4xfrY5OkcM8qfo4j8rDcIaPH0cUy2sQ6IC/DHPQNc+Mo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714023124; c=relaxed/simple;
-	bh=7zEfJIiF3FivC8A8nCfn1uyLMo6vziSgrYc4tCU5fE0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=q4JrfgFeV/TG/WlBZU3cMRDAI8AcS7dMEU9D13s1E+NdWt8ss15Tq7FxqKtYGU3LCVIk27+gRb9Rm5raDWsHdmNCCFTgzacl6nQqpD0pyq+jE/Hf4zZ4bleyUCNpwfE8K6VxRwdzC7kHm7wkVDFeZmAMSR4KbXzwX9rg/hQ8cns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=B5TMmec4; arc=none smtp.client-ip=170.10.129.124
+	s=arc-20240116; t=1714038057; c=relaxed/simple;
+	bh=B0UaMrfggGcH0NuJgBoeH/FZELb8DvPiOgF/+f2euR4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Kk6DIJsExhRJiqqziOoA1J42br70b+klrQCpfb4cpxif/MOesDHojQxI/J+5Po91mENMFYPERgpIPL0ZFGl6bL1BeADtTEUm6LLq8GsYIU3PG5nlXrZox7G1JVPsqpMhjW3SES25SwlWtPhZ/Pr/tykxM1FrjZpcQ1360Rz9+o4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JZ7XluEL; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="B5TMmec4"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JZ7XluEL"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714023120;
+	s=mimecast20190719; t=1714038054;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=TXt+za/0JniFUhxuXePW/X/JHM72efTXKoPa8YCXUF0=;
-	b=B5TMmec4fp/HJ+uST2Zi3CLFGAQj1tRL/RP84rV1nFZDnFHlzRYaMJ11dp6OBX57bMCCKE
-	Mf9ZzetEB6Er1ZlA35sBgSrI1G1OQbtoJkX6oe+YsnuwYkNDilWiBsrO3XKhxqr4VJs4vh
-	sSibr7NxpxKOctiiQtibOjoxc683qao=
-Received: from mail-ot1-f70.google.com (mail-ot1-f70.google.com
- [209.85.210.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
+	bh=v38K8DHxFEe4iXrXoGabe9MWX7Uzru577IllYM1Hxig=;
+	b=JZ7XluEL7yXYkvnpuTsCDeyZ/+dJb2UnNnfLyo4CU3iJZwQaQ16WdU5XVA5t+uByeXIbsg
+	/DFnoGVEJ4uMgSmXAURVKCJ3zzzJf+5tDNjTpUnl6B4002jpbFnmCgOMBs5dLQfY9aanaU
+	dkjNE+ZVC2DR7WWsV3yTxFK+WclNpTw=
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
+ [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-483-gNcqBBDyMpqd6HlZQVGPFQ-1; Thu, 25 Apr 2024 01:31:57 -0400
-X-MC-Unique: gNcqBBDyMpqd6HlZQVGPFQ-1
-Received: by mail-ot1-f70.google.com with SMTP id 46e09a7af769-6eb86b1deb1so854239a34.3
-        for <fstests@vger.kernel.org>; Wed, 24 Apr 2024 22:31:57 -0700 (PDT)
+ us-mta-414-e0tJAfRIP06bV_Q9BvCSmQ-1; Thu, 25 Apr 2024 05:40:51 -0400
+X-MC-Unique: e0tJAfRIP06bV_Q9BvCSmQ-1
+Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-34b3fb802ddso345618f8f.0
+        for <fstests@vger.kernel.org>; Thu, 25 Apr 2024 02:40:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714023116; x=1714627916;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        d=1e100.net; s=20230601; t=1714038051; x=1714642851;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=TXt+za/0JniFUhxuXePW/X/JHM72efTXKoPa8YCXUF0=;
-        b=T53HGkeMY023Pgt5G9mvsT12RWbcm6QgAf826eO80V8cQUZxxAvhzIp1NkQaEIJJBe
-         FiAUNJqqC0kvmASSqQqKvaTPRpwRQ37GC3S/Sh2gjGEwCWdbXp2y9NaFwG8z8I/LvSTP
-         5EYWCH0qWQ5l8e0/GP+f2RmQRbbCdXZdOucajzEo/8tgYJbb9K8QPHq53wgT5aXqSNqR
-         tkEttTljxn6gWITPRP8rnAAYSYdJCbYnhMsjyE6bSgg0UqjdO6qI/+eO0HKaxwpVL2Py
-         J3AQViYCk+aTeeIRPxRji7aUF1+rH2FNZK7SFSLMHkPGTqPGEnSUxVU06OYsyg2Px9sS
-         mayw==
-X-Gm-Message-State: AOJu0Yxz4nZKGLpDmg1UHU9wB1zBaOxh3seHMuOEb53CgVApvW7KQhtK
-	Ft3mZKu1HKIh2aGsC6IzYDyEuZU0oW1cK0bL0BRL1HeuI7FLiV22neRQQcmsxVKFITb04ovSQBC
-	CDGXbu9uGXnxVT6RTgLuVbGk78wjjRgdp5chjR7pnHA7uDyJWrhtZ+pE=
-X-Received: by 2002:a9d:4e92:0:b0:6ea:2789:8b62 with SMTP id v18-20020a9d4e92000000b006ea27898b62mr5918170otk.19.1714023116353;
-        Wed, 24 Apr 2024 22:31:56 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IExurcrNElXyLE2fPdow34mnWbyvknAw7mkB5c43l+DZ+XlqhkPienYAmSwwKvMbS+xxLYbAw==
-X-Received: by 2002:a9d:4e92:0:b0:6ea:2789:8b62 with SMTP id v18-20020a9d4e92000000b006ea27898b62mr5918140otk.19.1714023115768;
-        Wed, 24 Apr 2024 22:31:55 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id l185-20020a6391c2000000b005ffd8019f01sm6334919pge.20.2024.04.24.22.31.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Apr 2024 22:31:55 -0700 (PDT)
-Date: Thu, 25 Apr 2024 13:31:50 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Luis Chamberlain <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	willy@infradead.org, p.raghav@samsung.com, da.gomez@samsung.com,
-	hare@suse.de, john.g.garry@oracle.com, ziy@nvidia.com,
-	linux-xfs@vger.kernel.org, patches@lists.linux.dev
-Subject: Re: [RFC] fstests: add fsstress + writeback + debugfs folio split
- test
-Message-ID: <20240425053150.tx7pdosbfv5adat6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240424224649.1494092-1-mcgrof@kernel.org>
+        bh=v38K8DHxFEe4iXrXoGabe9MWX7Uzru577IllYM1Hxig=;
+        b=OxSBUDfAxNuUnTczMTjfb/fzCu+szmktt7zpjn+zLVt2ucFtU0qx2+iPbUwSSOZ81S
+         5Lxecf3ZeWUkXMux5VL9cay7cXJ1vVW16QJ5KxmEtqjkpLwYMw0LWbi2FXcX/BOTROCQ
+         o/vqRU+l7dEwIgdKctT6P/N6mwobQKMv6pnG7kM2qoMOfCBQ5gPVvMLM4MKbkzEtDAPj
+         yjKcrgaWg3PAN2Y7RacanxAR7lOr9INVMlvz3GgwE6pRAomoH9ZArWE1M2o14eNcUPO3
+         uuru/A7vvbbv6IidD/gE8S/TaKFVapTw+6360UVp6XMuGYGiPskpMe9c/wndT0lD5p5Z
+         09Aw==
+X-Gm-Message-State: AOJu0YyuOpdr+sEDTTu+vlvi3yIukAncSp9MJSZGd/4NCEionBAl3sts
+	l849fPKosu7QJMZEtvtOQeCQWZEWHwqQdsl657rhNMTi+Kb8kBMUw8U8ypXKNhKjqCfF9VA1Z5A
+	IWJUQxqbhOrtCN5YuNqY8h5rp8UdbgHY6mhE7YI8iHym27qXhR164rrQ=
+X-Received: by 2002:adf:ed0b:0:b0:349:fc93:1dc with SMTP id a11-20020adfed0b000000b00349fc9301dcmr3572197wro.8.1714038050809;
+        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEWXrnyfBd1VmrKlXc5UDNH3YOWGt4ItpbfDi7CcurW+2K9XvvVA34hnoa6v1pHskx7y6GGFg==
+X-Received: by 2002:adf:ed0b:0:b0:349:fc93:1dc with SMTP id a11-20020adfed0b000000b00349fc9301dcmr3572175wro.8.1714038050414;
+        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
+Received: from ?IPV6:2003:cb:c719:8200:487a:3426:a17e:d7b7? (p200300cbc7198200487a3426a17ed7b7.dip0.t-ipconnect.de. [2003:cb:c719:8200:487a:3426:a17e:d7b7])
+        by smtp.gmail.com with ESMTPSA id e4-20020adff344000000b0034349225fbcsm19331393wrp.114.2024.04.25.02.40.49
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
+Message-ID: <37374089-895f-4c6f-a2f5-33859eb02b13@redhat.com>
+Date: Thu, 25 Apr 2024 11:40:48 +0200
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240424224649.1494092-1-mcgrof@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mm/huge_memory: move writeback and truncation checks
+ early
+To: Luis Chamberlain <mcgrof@kernel.org>, akpm@linux-foundation.org,
+ ziy@nvidia.com, linux-mm@kvack.org
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+ linux-kernel@vger.kernel.org, willy@infradead.org, hare@suse.de,
+ john.g.garry@oracle.com, p.raghav@samsung.com, da.gomez@samsung.com
+References: <20240424225736.1501030-1-mcgrof@kernel.org>
+Content-Language: en-US
+From: David Hildenbrand <david@redhat.com>
+Autocrypt: addr=david@redhat.com; keydata=
+ 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
+ WNyWQQ==
+Organization: Red Hat
+In-Reply-To: <20240424225736.1501030-1-mcgrof@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, Apr 24, 2024 at 03:46:48PM -0700, Luis Chamberlain wrote:
-> Stress test folio splits by using the debugfs interface to a target
-> a new smaller folio order. This is dangerous at the moment as its using
-> a debugfs API which requires two out of tree fixes [0] [1] which will
-> be posted shortly. With these patches applied no crash is possible yet.
-> However, this test was designed to try to exacerbate races with folio
-> splits and writeback, at least running generic/447 twice ends up
-> producing a crash only if large folio splits with minimum folio order
-> is enabled.
+On 25.04.24 00:57, Luis Chamberlain wrote:
+> We should check as early as possible if we should bail due to writeback
+> or truncation. This will allow us to add further sanity checks earlier
+> as well.
 > 
-> With the known fixes for the debugfs interface, this test produces no
-> crashes even after 3 hour soaking for 4k and LBS. We should enhance
-> this test a bit more so to reproduce the issues observed by running
-> generic/447 twice.
+> This introduces no functional changes.
 > 
-> This also begs the question if something like MADV_NOHUGEPAGE might be
-> desirable from userspace, so to enable userspace to request splits when
-> possible.
-> 
-> If inspecting more closely, you'll want to enable on your kernel boot:
-> 
-> 	dyndbg='file mm/huge_memory.c +p'
-> 
-> [0] https://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/linux.git/commit/?h=20240424-lbs&id=80f6df5037fd0ad560526af45bd7f4d779fe03f6
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/mcgrof/linux.git/commit/?h=20240424-lbs&id=38f6fac5b4283ea48b1876fc56728f062168f8c3
 > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 > ---
+>   mm/huge_memory.c | 23 +++++++++++------------
+>   1 file changed, 11 insertions(+), 12 deletions(-)
 > 
-> For those that want to help stress test folio splits to an order, hopefully
-> this will help start to enable this. Perhaps there are better ways to create
-> more easy targets to stress test folio splits, and in particular try to
-> reproduce the issue which so far is only possible by running generic/447 twice
-> on LBS. The issue with generic/447 on LBS is not observed on 4k, and this test
-> produces no crashes on LBS...
+> While working on min order support for LBS this came up as an improvement
+> as we can check for the min order early earlier, so this sets the stage
+> up for that.
 > 
->  common/rc             | 20 +++++++++
->  tests/generic/745     | 97 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/745.out |  2 +
->  3 files changed, 119 insertions(+)
->  create mode 100755 tests/generic/745
->  create mode 100644 tests/generic/745.out
-> 
-> diff --git a/common/rc b/common/rc
-> index d4432f5ce259..1eefb53aa84b 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -127,6 +127,26 @@ _require_compaction()
->  	    _notrun "Need compaction enabled CONFIG_COMPACTION=y"
->  	fi
->  }
+> diff --git a/mm/huge_memory.c b/mm/huge_memory.c
+> index 86a8c7b3b8dc..32c701821e0d 100644
+> --- a/mm/huge_memory.c
+> +++ b/mm/huge_memory.c
+> @@ -3055,8 +3055,17 @@ int split_huge_page_to_list_to_order(struct page *page, struct list_head *list,
+>   	if (new_order >= folio_order(folio))
+>   		return -EINVAL;
+>   
+> -	/* Cannot split anonymous THP to order-1 */
+> -	if (new_order == 1 && folio_test_anon(folio)) {
+> +	if (folio_test_writeback(folio))
+> +		return -EBUSY;
 > +
-> +# Requires CONFIG_DEBUGFS and truncation knobs
-> +SPLIT_DEBUGFS="/sys/kernel/debug/split_huge_pages"
-> +_require_split_debugfs()
-> +{
-> +       if [ ! -f $SPLIT_DEBUGFS ]; then
-> +           _notrun "Needs CONFIG_DEBUGFS and split_huge_pages"
-> +       fi
-> +}
 
-The global SPLIT_DEBUGFS isn't necessary, you can just use:
+Why earlier than basic input parameter checks (new_order?
 
-  $DEBUGFS_MNT/split_huge_pages
+Sorry, but I don't see the reason for that change. It's all happening 
+extremely early, what are we concerned about?
 
-And this remind me we have a _require_debugfs helper in common/rc, but
-it's not used by any one test case. And it looks like not correct:
+It's likely better to send that patch with the actual patch "to add 
+further sanity checks earlier as well", and why they have to be that early.
 
-  _require_debugfs()
-  {
-      #boot_params always present in debugfs
-      [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
-  }
+-- 
+Cheers,
 
-I can't find "boot_params" in /sys/kernel/debug/. So we might need to
-fix this helper, and then call it in debugfs related test cases.
-
-I'll send another patch to talk about that fix. For this case, it needs
-_require_debugfs and $DEBUGFS_MNT.
-
-> +
-> +_split_huge_pages_file_full()
-
-May we have a comment to explain what this common helper for? Thanks.
-
-> +{
-> +	local file=$1
-> +	local offset="0x0"
-> +	local len=$(printf "%x" $(stat --format='%s' $file))
-> +	local order="0"
-> +	local split_cmd="$file,$offset,0x${len},$order"
-> +	echo $split_cmd > $SPLIT_DEBUGFS
-                           ^^^^^^^^^^^^^
-$DEBUGFS_MNT/split_huge_pages is good enough.
-
-> +}
-> +
->  # Get hugepagesize in bytes
->  _get_hugepagesize()
->  {
-> diff --git a/tests/generic/745 b/tests/generic/745
-> new file mode 100755
-> index 000000000000..0a30dbee35bd
-> --- /dev/null
-> +++ b/tests/generic/745
-> @@ -0,0 +1,97 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2024 Luis Chamberlain. All Rights Reserved.
-> +#
-> +# FS QA Test No. 734
-> +#
-> +# Run fsstress in a loop, and in the background force some writeback and
-> +# folio splits for every file. If you're enabling this and want to check
-> +# underneath the hood you may want to enable:
-> +#
-> +# dyndbg='file mm/huge_memory.c +p'
-> +. ./common/preamble
-> +_begin_fstest long_rw stress soak smoketest dangerous_fuzzers
-
-Just double check, is it a dangerous_fuzzers test, and not good to be in auto group?
-
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> +}
-> +
-> +# Import common functions.
-> +. ./common/filter
-
-I didn't see any filters called in this case, so don't need to
-import it.
-
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_require_test
-
-I didn't see TEST_DIR or TEST_DEV in this test case, so don't need
-_require_test
-
-> +_require_scratch
-> +_require_split_debugfs
-> +_require_command "$KILLALL_PROG" "killall"
-> +
-> +echo "Silence is golden"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +nr_cpus=$((LOAD_FACTOR * 4))
-> +nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
-> +
-> +fsstress_args=(-w -d $SCRATCH_MNT/test -n $nr_ops -p $nr_cpus)
-> +
-> +# used to let our loops know when to stop
-> +runfile="$tmp.keep.running.loop"
-> +touch $runfile
-> +
-> +# The background ops are out of bounds, the goal is to race with fsstress.
-> +
-> +# Force folio split if possible, this seems to be screaming for MADV_NOHUGEPAGE
-> +# for large folios.
-> +while [ -e $runfile ]; do
-> +	for i in $(find $SCRATCH_MNT/test \( -type f \) 2>/dev/null); do
-
-May I ask why the "\( .. \)" is needed?
-
-> +		_split_huge_pages_file_full $i >/dev/null 2>&1
-
-Just make sure, don't you want to output to $seqres.full file to get more information
-for debug, if something wrong.
-
-> +	done
-> +	sleep 2
-> +done &
-> +split_huge_pages_files_pid=$!
-
-This split_huge_pages_files_pid isn't be used anywhere, you can deal with it in
-_cleanup.
-
-> +
-> +blocksize=$(_get_file_block_size $SCRATCH_MNT)
-> +export XFS_DIO_MIN=$((blocksize * 2))
-
-Oh, I even forgot we have this parameter in fsstress.c :)
-
-> +
-> +test -n "$SOAK_DURATION" && fsstress_args+=(--duration="$SOAK_DURATION")
-> +
-> +# Our general goal here is to race with ops which can stress folio addition,
-> +# removal, edits, and writeback.
-> +
-> +# zero frequencies for write ops to minimize writeback
-> +fsstress_args+=(-R)
-
-But you set "fsstress_args=(-w -d $SCRATCH_MNT/test -n $nr_ops -p $nr_cpus)" above,
-so you zeros frequencies of non-write operations (-w) and then zeros frequencies of
-write operations (-R). Do you want to use "-z" directly, to zeros frequencies of
-all operations ?
-
-> +
-> +# XXX: we can improve this, so to increase the chances to allow more
-> +# folio splits. Also running generic/447 twice triggers a corner case we can't
-> +# capture here on folio splits and write_cache_pages, increasing the chances of
-> +# this test to cover that same corner case would be ideal.
-> +#
-> +# https://gist.github.com/mcgrof/d12f586ec6ebe32b2472b5d634c397df
-> +fsstress_args+=(-f creat=1)
-> +fsstress_args+=(-f write=1)
-> +fsstress_args+=(-f dwrite=1)
-> +fsstress_args+=(-f truncate=1)
-> +fsstress_args+=(-f zero=1)
-> +fsstress_args+=(-f unlink=1)
-> +fsstress_args+=(-f fsync=1)
-> +fsstress_args+=(-f punch=2)
-> +fsstress_args+=(-f copyrange=4)
-> +fsstress_args+=(-f clonerange=4)
-> +
-> +if [[ "$FSTYP" != "xfs" || "$FSTYP" == "ext4" ]]; then
-> +	fsstress_args+=(-f collapse=1)
-
-Can you explain why the FALLOC_FL_COLLAPSE_RANGE is special, and not suitable
-for xfs?
-
-And I think the range of $FSTYP" != "xfs" contains "$FSTYP" == "ext4", so
-this logic makes me confused.
-
-> +fi
-> +
-> +$FSSTRESS_PROG $FSSTRESS_AVOID "${fsstress_args[@]}" >> $seqres.full
-> +
-> +rm -f $runfile
-> +wait > /dev/null 2>&1
-
-Better to move this to _cleanup. e.g.
-
-rm -f $runfile
-[ -n "$split_huge_pages_files_pid" ] && kill $split_huge_pages_files_pid
-$KILLALL_PROG -9 fsstress
-wait
-
-
-Thanks,
-Zorro
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/745.out b/tests/generic/745.out
-> new file mode 100644
-> index 000000000000..fce6b7f5489d
-> --- /dev/null
-> +++ b/tests/generic/745.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 745
-> +Silence is golden
-> -- 
-> 2.43.0
-> 
-> 
+David / dhildenb
 
