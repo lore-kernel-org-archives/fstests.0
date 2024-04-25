@@ -1,171 +1,55 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F82184DFA
-	for <fstests@vger.kernel.org>; Thu, 25 Apr 2024 09:40:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49D31631;
+	Thu, 25 Apr 2024 21:01:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714038057; cv=none; b=WDNpGbMEnkb9kVM98Y28TuDUTpALAUBAFEBK5MjTzS0eOJ9mjPRh+0IfD1cENO5BbHCUte8O/2n6iNvmDdI8Aca3zCtxfcUTfZHXv4D8qdFxq2mTd8tFaCGrx8BTVA+4xfrY5OkcM8qfo4j8rDcIaPH0cUy2sQ6IC/DHPQNc+Mo=
+	t=1714078888; cv=none; b=N7v3b4C/eBRItoeRkQqKVEI9PtjaHeX4/Y4XNC8F/hMigyNb83ax3tsaXdow3T0Yae/xf2V31o/8CdFYsvAEKB5I8f5azOnwsRgV6xl9dWNTGenchFdIVW6kOWRkKQ/D6uaEQ2JOmjKYQU4bD6mkesjcZVYX4ncK+wJMEREPCYI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714038057; c=relaxed/simple;
-	bh=B0UaMrfggGcH0NuJgBoeH/FZELb8DvPiOgF/+f2euR4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Kk6DIJsExhRJiqqziOoA1J42br70b+klrQCpfb4cpxif/MOesDHojQxI/J+5Po91mENMFYPERgpIPL0ZFGl6bL1BeADtTEUm6LLq8GsYIU3PG5nlXrZox7G1JVPsqpMhjW3SES25SwlWtPhZ/Pr/tykxM1FrjZpcQ1360Rz9+o4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JZ7XluEL; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1714078888; c=relaxed/simple;
+	bh=WddoWrRbeR1iHMtp/qfJ1PoQ1YAx1kckTTOIrZin9ZU=;
+	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
+	 Mime-Version:Content-Type; b=RPw7MQnaqOHn5xBia+1s88iqxPIV7ofGrTIzHw9EOsu0d9KjET7i9jQp8b9Y6ZihTq2ku4uO9EOJA0iJflvvKWXhGZbkN+MdLAH+sOxQTQ6KRqRGyYb39Tk0h9D71PM++ULXlqh3JqFZ0atG2z52JUeFmywTC/wsRXjKHkCKb/o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=v3QTKtLT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JZ7XluEL"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714038054;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references:autocrypt:autocrypt;
-	bh=v38K8DHxFEe4iXrXoGabe9MWX7Uzru577IllYM1Hxig=;
-	b=JZ7XluEL7yXYkvnpuTsCDeyZ/+dJb2UnNnfLyo4CU3iJZwQaQ16WdU5XVA5t+uByeXIbsg
-	/DFnoGVEJ4uMgSmXAURVKCJ3zzzJf+5tDNjTpUnl6B4002jpbFnmCgOMBs5dLQfY9aanaU
-	dkjNE+ZVC2DR7WWsV3yTxFK+WclNpTw=
-Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
- [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-414-e0tJAfRIP06bV_Q9BvCSmQ-1; Thu, 25 Apr 2024 05:40:51 -0400
-X-MC-Unique: e0tJAfRIP06bV_Q9BvCSmQ-1
-Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-34b3fb802ddso345618f8f.0
-        for <fstests@vger.kernel.org>; Thu, 25 Apr 2024 02:40:51 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714038051; x=1714642851;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=v38K8DHxFEe4iXrXoGabe9MWX7Uzru577IllYM1Hxig=;
-        b=OxSBUDfAxNuUnTczMTjfb/fzCu+szmktt7zpjn+zLVt2ucFtU0qx2+iPbUwSSOZ81S
-         5Lxecf3ZeWUkXMux5VL9cay7cXJ1vVW16QJ5KxmEtqjkpLwYMw0LWbi2FXcX/BOTROCQ
-         o/vqRU+l7dEwIgdKctT6P/N6mwobQKMv6pnG7kM2qoMOfCBQ5gPVvMLM4MKbkzEtDAPj
-         yjKcrgaWg3PAN2Y7RacanxAR7lOr9INVMlvz3GgwE6pRAomoH9ZArWE1M2o14eNcUPO3
-         uuru/A7vvbbv6IidD/gE8S/TaKFVapTw+6360UVp6XMuGYGiPskpMe9c/wndT0lD5p5Z
-         09Aw==
-X-Gm-Message-State: AOJu0YyuOpdr+sEDTTu+vlvi3yIukAncSp9MJSZGd/4NCEionBAl3sts
-	l849fPKosu7QJMZEtvtOQeCQWZEWHwqQdsl657rhNMTi+Kb8kBMUw8U8ypXKNhKjqCfF9VA1Z5A
-	IWJUQxqbhOrtCN5YuNqY8h5rp8UdbgHY6mhE7YI8iHym27qXhR164rrQ=
-X-Received: by 2002:adf:ed0b:0:b0:349:fc93:1dc with SMTP id a11-20020adfed0b000000b00349fc9301dcmr3572197wro.8.1714038050809;
-        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEWXrnyfBd1VmrKlXc5UDNH3YOWGt4ItpbfDi7CcurW+2K9XvvVA34hnoa6v1pHskx7y6GGFg==
-X-Received: by 2002:adf:ed0b:0:b0:349:fc93:1dc with SMTP id a11-20020adfed0b000000b00349fc9301dcmr3572175wro.8.1714038050414;
-        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
-Received: from ?IPV6:2003:cb:c719:8200:487a:3426:a17e:d7b7? (p200300cbc7198200487a3426a17ed7b7.dip0.t-ipconnect.de. [2003:cb:c719:8200:487a:3426:a17e:d7b7])
-        by smtp.gmail.com with ESMTPSA id e4-20020adff344000000b0034349225fbcsm19331393wrp.114.2024.04.25.02.40.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 25 Apr 2024 02:40:50 -0700 (PDT)
-Message-ID: <37374089-895f-4c6f-a2f5-33859eb02b13@redhat.com>
-Date: Thu, 25 Apr 2024 11:40:48 +0200
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="v3QTKtLT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 60154C113CC;
+	Thu, 25 Apr 2024 21:01:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linux-foundation.org;
+	s=korg; t=1714078887;
+	bh=WddoWrRbeR1iHMtp/qfJ1PoQ1YAx1kckTTOIrZin9ZU=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=v3QTKtLTXH5dOykrJSj2tlJ/7MBrHwawwmkcuOxDVU1yB0fmMRU34CiMK70rfe95P
+	 4hh/P4b5ruo+RX4VlrkSOdwBmeaWQIIjhS6884Mj4sYbChmT8Nyro8fcgcdmqK2WAL
+	 GH+nvOrLfYJtvey8FB5I1WWI8rfd1wG6C+HCRwaI=
+Date: Thu, 25 Apr 2024 14:01:26 -0700
+From: Andrew Morton <akpm@linux-foundation.org>
+To: Luis Chamberlain <mcgrof@kernel.org>
+Cc: ziy@nvidia.com, linux-mm@kvack.org, fstests@vger.kernel.org,
+ linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
+ willy@infradead.org, hare@suse.de, john.g.garry@oracle.com,
+ p.raghav@samsung.com, da.gomez@samsung.com
+Subject: Re: [PATCH 1/2] mm/huge_memory: skip invalid debugfs file entry for
+ folio split
+Message-Id: <20240425140126.2a62a5ec686813ee7deea658@linux-foundation.org>
+In-Reply-To: <20240424225449.1498244-2-mcgrof@kernel.org>
+References: <20240424225449.1498244-1-mcgrof@kernel.org>
+	<20240424225449.1498244-2-mcgrof@kernel.org>
+X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mm/huge_memory: move writeback and truncation checks
- early
-To: Luis Chamberlain <mcgrof@kernel.org>, akpm@linux-foundation.org,
- ziy@nvidia.com, linux-mm@kvack.org
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
- linux-kernel@vger.kernel.org, willy@infradead.org, hare@suse.de,
- john.g.garry@oracle.com, p.raghav@samsung.com, da.gomez@samsung.com
-References: <20240424225736.1501030-1-mcgrof@kernel.org>
-Content-Language: en-US
-From: David Hildenbrand <david@redhat.com>
-Autocrypt: addr=david@redhat.com; keydata=
- xsFNBFXLn5EBEAC+zYvAFJxCBY9Tr1xZgcESmxVNI/0ffzE/ZQOiHJl6mGkmA1R7/uUpiCjJ
- dBrn+lhhOYjjNefFQou6478faXE6o2AhmebqT4KiQoUQFV4R7y1KMEKoSyy8hQaK1umALTdL
- QZLQMzNE74ap+GDK0wnacPQFpcG1AE9RMq3aeErY5tujekBS32jfC/7AnH7I0v1v1TbbK3Gp
- XNeiN4QroO+5qaSr0ID2sz5jtBLRb15RMre27E1ImpaIv2Jw8NJgW0k/D1RyKCwaTsgRdwuK
- Kx/Y91XuSBdz0uOyU/S8kM1+ag0wvsGlpBVxRR/xw/E8M7TEwuCZQArqqTCmkG6HGcXFT0V9
- PXFNNgV5jXMQRwU0O/ztJIQqsE5LsUomE//bLwzj9IVsaQpKDqW6TAPjcdBDPLHvriq7kGjt
- WhVhdl0qEYB8lkBEU7V2Yb+SYhmhpDrti9Fq1EsmhiHSkxJcGREoMK/63r9WLZYI3+4W2rAc
- UucZa4OT27U5ZISjNg3Ev0rxU5UH2/pT4wJCfxwocmqaRr6UYmrtZmND89X0KigoFD/XSeVv
- jwBRNjPAubK9/k5NoRrYqztM9W6sJqrH8+UWZ1Idd/DdmogJh0gNC0+N42Za9yBRURfIdKSb
- B3JfpUqcWwE7vUaYrHG1nw54pLUoPG6sAA7Mehl3nd4pZUALHwARAQABzSREYXZpZCBIaWxk
- ZW5icmFuZCA8ZGF2aWRAcmVkaGF0LmNvbT7CwZgEEwEIAEICGwMGCwkIBwMCBhUIAgkKCwQW
- AgMBAh4BAheAAhkBFiEEG9nKrXNcTDpGDfzKTd4Q9wD/g1oFAl8Ox4kFCRKpKXgACgkQTd4Q
- 9wD/g1oHcA//a6Tj7SBNjFNM1iNhWUo1lxAja0lpSodSnB2g4FCZ4R61SBR4l/psBL73xktp
- rDHrx4aSpwkRP6Epu6mLvhlfjmkRG4OynJ5HG1gfv7RJJfnUdUM1z5kdS8JBrOhMJS2c/gPf
- wv1TGRq2XdMPnfY2o0CxRqpcLkx4vBODvJGl2mQyJF/gPepdDfcT8/PY9BJ7FL6Hrq1gnAo4
- 3Iv9qV0JiT2wmZciNyYQhmA1V6dyTRiQ4YAc31zOo2IM+xisPzeSHgw3ONY/XhYvfZ9r7W1l
- pNQdc2G+o4Di9NPFHQQhDw3YTRR1opJaTlRDzxYxzU6ZnUUBghxt9cwUWTpfCktkMZiPSDGd
- KgQBjnweV2jw9UOTxjb4LXqDjmSNkjDdQUOU69jGMUXgihvo4zhYcMX8F5gWdRtMR7DzW/YE
- BgVcyxNkMIXoY1aYj6npHYiNQesQlqjU6azjbH70/SXKM5tNRplgW8TNprMDuntdvV9wNkFs
- 9TyM02V5aWxFfI42+aivc4KEw69SE9KXwC7FSf5wXzuTot97N9Phj/Z3+jx443jo2NR34XgF
- 89cct7wJMjOF7bBefo0fPPZQuIma0Zym71cP61OP/i11ahNye6HGKfxGCOcs5wW9kRQEk8P9
- M/k2wt3mt/fCQnuP/mWutNPt95w9wSsUyATLmtNrwccz63XOwU0EVcufkQEQAOfX3n0g0fZz
- Bgm/S2zF/kxQKCEKP8ID+Vz8sy2GpDvveBq4H2Y34XWsT1zLJdvqPI4af4ZSMxuerWjXbVWb
- T6d4odQIG0fKx4F8NccDqbgHeZRNajXeeJ3R7gAzvWvQNLz4piHrO/B4tf8svmRBL0ZB5P5A
- 2uhdwLU3NZuK22zpNn4is87BPWF8HhY0L5fafgDMOqnf4guJVJPYNPhUFzXUbPqOKOkL8ojk
- CXxkOFHAbjstSK5Ca3fKquY3rdX3DNo+EL7FvAiw1mUtS+5GeYE+RMnDCsVFm/C7kY8c2d0G
- NWkB9pJM5+mnIoFNxy7YBcldYATVeOHoY4LyaUWNnAvFYWp08dHWfZo9WCiJMuTfgtH9tc75
- 7QanMVdPt6fDK8UUXIBLQ2TWr/sQKE9xtFuEmoQGlE1l6bGaDnnMLcYu+Asp3kDT0w4zYGsx
- 5r6XQVRH4+5N6eHZiaeYtFOujp5n+pjBaQK7wUUjDilPQ5QMzIuCL4YjVoylWiBNknvQWBXS
- lQCWmavOT9sttGQXdPCC5ynI+1ymZC1ORZKANLnRAb0NH/UCzcsstw2TAkFnMEbo9Zu9w7Kv
- AxBQXWeXhJI9XQssfrf4Gusdqx8nPEpfOqCtbbwJMATbHyqLt7/oz/5deGuwxgb65pWIzufa
- N7eop7uh+6bezi+rugUI+w6DABEBAAHCwXwEGAEIACYCGwwWIQQb2cqtc1xMOkYN/MpN3hD3
- AP+DWgUCXw7HsgUJEqkpoQAKCRBN3hD3AP+DWrrpD/4qS3dyVRxDcDHIlmguXjC1Q5tZTwNB
- boaBTPHSy/Nksu0eY7x6HfQJ3xajVH32Ms6t1trDQmPx2iP5+7iDsb7OKAb5eOS8h+BEBDeq
- 3ecsQDv0fFJOA9ag5O3LLNk+3x3q7e0uo06XMaY7UHS341ozXUUI7wC7iKfoUTv03iO9El5f
- XpNMx/YrIMduZ2+nd9Di7o5+KIwlb2mAB9sTNHdMrXesX8eBL6T9b+MZJk+mZuPxKNVfEQMQ
- a5SxUEADIPQTPNvBewdeI80yeOCrN+Zzwy/Mrx9EPeu59Y5vSJOx/z6OUImD/GhX7Xvkt3kq
- Er5KTrJz3++B6SH9pum9PuoE/k+nntJkNMmQpR4MCBaV/J9gIOPGodDKnjdng+mXliF3Ptu6
- 3oxc2RCyGzTlxyMwuc2U5Q7KtUNTdDe8T0uE+9b8BLMVQDDfJjqY0VVqSUwImzTDLX9S4g/8
- kC4HRcclk8hpyhY2jKGluZO0awwTIMgVEzmTyBphDg/Gx7dZU1Xf8HFuE+UZ5UDHDTnwgv7E
- th6RC9+WrhDNspZ9fJjKWRbveQgUFCpe1sa77LAw+XFrKmBHXp9ZVIe90RMe2tRL06BGiRZr
- jPrnvUsUUsjRoRNJjKKA/REq+sAnhkNPPZ/NNMjaZ5b8Tovi8C0tmxiCHaQYqj7G2rgnT0kt
- WNyWQQ==
-Organization: Red Hat
-In-Reply-To: <20240424225736.1501030-1-mcgrof@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 
-On 25.04.24 00:57, Luis Chamberlain wrote:
-> We should check as early as possible if we should bail due to writeback
-> or truncation. This will allow us to add further sanity checks earlier
-> as well.
+On Wed, 24 Apr 2024 15:54:48 -0700 Luis Chamberlain <mcgrof@kernel.org> wrote:
+
+> If the file entry is too long we may easily end up going out of bounds
+> and crash after strsep() on sscanf(). 
 > 
-> This introduces no functional changes.
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
->   mm/huge_memory.c | 23 +++++++++++------------
->   1 file changed, 11 insertions(+), 12 deletions(-)
-> 
-> While working on min order support for LBS this came up as an improvement
-> as we can check for the min order early earlier, so this sets the stage
-> up for that.
-> 
-> diff --git a/mm/huge_memory.c b/mm/huge_memory.c
-> index 86a8c7b3b8dc..32c701821e0d 100644
-> --- a/mm/huge_memory.c
-> +++ b/mm/huge_memory.c
-> @@ -3055,8 +3055,17 @@ int split_huge_page_to_list_to_order(struct page *page, struct list_head *list,
->   	if (new_order >= folio_order(folio))
->   		return -EINVAL;
->   
-> -	/* Cannot split anonymous THP to order-1 */
-> -	if (new_order == 1 && folio_test_anon(folio)) {
-> +	if (folio_test_writeback(folio))
-> +		return -EBUSY;
-> +
 
-Why earlier than basic input parameter checks (new_order?
-
-Sorry, but I don't see the reason for that change. It's all happening 
-extremely early, what are we concerned about?
-
-It's likely better to send that patch with the actual patch "to add 
-further sanity checks earlier as well", and why they have to be that early.
-
--- 
-Cheers,
-
-David / dhildenb
-
+Can you explain why?  I'm not seeing it.
