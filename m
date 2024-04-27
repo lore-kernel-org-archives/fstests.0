@@ -1,70 +1,69 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CA9663BF
-	for <fstests@vger.kernel.org>; Sat, 27 Apr 2024 08:42:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E025412B75
+	for <fstests@vger.kernel.org>; Sat, 27 Apr 2024 17:50:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714207323; cv=none; b=DlXKbuhHAxc+l9ZCbrdvr3dY1CWxpNqJW4/4BHa+0hOFZWrLDXJ6TSQe4AjDWrUXyiNSi/+lnxkf/xiMqBfVGnXBf0eSyaHo4FNUdGw+xd5jYbNXUGKHYVtEcovh1HvOP3OroVYzmY6RqUbDYCoLIx7uHUhuVvca0e383cVnjHk=
+	t=1714240205; cv=none; b=UEgiaz03VsZbN5K2j8Q+TZOi1InbxufsSwYOXFLLpVhllWdYR44COyEm7cvcLDfYouQH64v3oqJIhzK/gpKDK9eDC6itFC/gFuck7IotEhtv+ip3u7gkyr+0pCXnQ0EbZCeIEg9eJVibTJfDwFUvCfgv0RjLynW03SVDGwwDtVc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714207323; c=relaxed/simple;
-	bh=WPTj3/it2R3hb02X5zxvJdaRG2Uc+iPVGmUc88GPtTE=;
+	s=arc-20240116; t=1714240205; c=relaxed/simple;
+	bh=oDUhJrhO43xS+Nv+3gF0pnVE+nJuYFMqHZ7qT5yLBSQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uU8JA6wf013acvsSUM5kWscL9YyN46bKzvP0Kvjh4ttzOX9wr2mjQPTXv0jDyNZRHgN1UTXrGw7jhmEPHZhhEw/SLFubmIb7w8ExSWcQbzDtz/okOGBvHsNfw41U6fG97wDEZswWviZ6FXWrk92Qz5vMCl0gEWOJutk06S7uVEU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=i3fR0jFn; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ja7mZ9qm01xEt860t/n4qYj0udm5Fb3Rmxk+ShZybMpeOOUhZpijZd2iJGmAyM+nBCiK/nvhMmjH62CIykekdqIpquwd9xRBLYWLbBAOY1YA4VBLfZ9cb2Vq9cczl1/josSdn/J4wzuE6bBApZpxoyzGkDc+KcLTTdvdYzMdAog=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SzoHPU9o; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="i3fR0jFn"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SzoHPU9o"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714207320;
+	s=mimecast20190719; t=1714240202;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=sB9oBTgT7zU4StsoU0EVqRO62eooka0kO7SEhcjgnsg=;
-	b=i3fR0jFnlPNOJJ9IgbXMNJzHF+H3DH+UnPfMdPpbTE85Wofgaw4RkeZwjXtGgrqHxhFucX
-	jLlsnnn68Ef85wCtovd7Y09r4ooTl2E3vuNuSdP8ZXp8SNw7nwRtiPwWFny9i0I6nLnjYy
-	u+6SOJzvzb3XrrPkXL2fKoljwsXKr04=
-Received: from mail-oi1-f200.google.com (mail-oi1-f200.google.com
- [209.85.167.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=N1864z29QRtLXA75xiJm/1XW0KYMpBoYBwIE13EyJHk=;
+	b=SzoHPU9ohqvQySU9Uc5L0gD5MT1u2tHWoLMzbr2LCHxd4xkmgRnUx1Xz5rtYsNzU2AVKKu
+	u+QSCXvUCbOHVraHZE3KedTNjejyrRDq8rsOpnYFxrm2pCSLARl7njP8Be+ll4Nyu0KG6x
+	lnW9UbqfZnKnYaH6A4R8GoWtvfcc5mc=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-613-Rsz2HHemP0eL0cKB4rtZPw-1; Sat, 27 Apr 2024 04:41:59 -0400
-X-MC-Unique: Rsz2HHemP0eL0cKB4rtZPw-1
-Received: by mail-oi1-f200.google.com with SMTP id 5614622812f47-3c861f6e19aso170845b6e.0
-        for <fstests@vger.kernel.org>; Sat, 27 Apr 2024 01:41:59 -0700 (PDT)
+ us-mta-272-h--E6tstPdiCCu8A6QfKQg-1; Sat, 27 Apr 2024 13:50:00 -0400
+X-MC-Unique: h--E6tstPdiCCu8A6QfKQg-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2a4b4418a69so3701561a91.1
+        for <fstests@vger.kernel.org>; Sat, 27 Apr 2024 10:50:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714207318; x=1714812118;
+        d=1e100.net; s=20230601; t=1714240199; x=1714844999;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sB9oBTgT7zU4StsoU0EVqRO62eooka0kO7SEhcjgnsg=;
-        b=VO8BFZXOqkZPZ3YYpjcXIUONDMCfTObsFWNUqMnE7KyHH3FoEsV4sasYzRs8vLj2QE
-         J80h+bZ1hgFQqKp/8Njndj+bNtZg2SP9bUpa6smjGkEtk60AQ9G2SZWInOzXHAAOfJHb
-         6YlwKDrLnmEXKJ5Okowk29WZE9mNNFbg9NDdUcRBWFl8ASj80kr2zm6KhtgCMCCMgRfC
-         mYjdMTJcgUwz/a4BqhrDVNk51rU00Ofz024Ol2R8AZPSBLt1UTXsQ7Yu/xBqA99DvJbD
-         RorJJL9XRvYVGqVzs/N93f8I+IAO3EHWpTCC7zFLYBEyFFtZYv7nR9ZBYrciqsw80DSu
-         GqiQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXKeKKQILedzX+77a2R9XJvsTm521cvF+IwNOCgzgTyjYCnf2C9MGG/vZCGpBB3FBEUpaFAJodH+Uh3n0LRvYv2LsoLTZ0row==
-X-Gm-Message-State: AOJu0YxZVGDbxUBnVHpTKOVWV6A55+v1TI+FU27XIJ6cL98Wm1fInNi4
-	ONpXXjmAoaoEDEotk2Kp7ZMELZ1Upb7FVHwbtB3RKzezpaHbqGgkNZ/+2BS/veWI1JSPSimeWQN
-	apBLvjDt331FQefy3/hT8ZiUxn6AeDdxzhaWe0WHSKNH71ugiEseigrk=
-X-Received: by 2002:aca:1201:0:b0:3c5:fa5c:7762 with SMTP id 1-20020aca1201000000b003c5fa5c7762mr4692088ois.44.1714207318234;
-        Sat, 27 Apr 2024 01:41:58 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEr6xMuDIk42RJgRyoxcJob6T22q2/I10x6SHnA+tIoFDgYrs/hs2AL2+mXI8Pkdf41u2a6lg==
-X-Received: by 2002:aca:1201:0:b0:3c5:fa5c:7762 with SMTP id 1-20020aca1201000000b003c5fa5c7762mr4692070ois.44.1714207317478;
-        Sat, 27 Apr 2024 01:41:57 -0700 (PDT)
+        bh=N1864z29QRtLXA75xiJm/1XW0KYMpBoYBwIE13EyJHk=;
+        b=NRbth3wvTwmY2Zp2XGano2Xq5YtjhS/kIWAvnfg9cfSo2qyNuwX56G8tUjCSS00rRZ
+         uixEMcdN0+xTKJ0ANMTgKNGpmewLrtkcZFx76Pm4dBhplI925Pe5lIoaWOpuCpR/ymSE
+         CI9wpLDCx9No6lXB1/cvmbrhCjQgFT0vdC/azxOGPCwgOh33RqbTaMQ+hK+Ik0pYaTLK
+         4rJi5L1Hc+lnLh2/H/OIcbX1SHRokPEeInnJFetjdYqKaEriX8dwLBc1z/mEJ8EI7icd
+         krJDANIoW/JSt1BqBr5t+H4eHCvRLWvGApAZ1UFlbQynredUjovihnKmJpJ0h613bRAk
+         eZDw==
+X-Forwarded-Encrypted: i=1; AJvYcCWHpmq1YLCJ0Ys3UxhhNPN8V4VgRhZKYe4PDQzgtq9HuxFRrejiKhPFIierG+UAxDjETknT4bvEU8XiXNhaWXNs0QEc2waAqA==
+X-Gm-Message-State: AOJu0Yy45wCncjMXfJK5uhSjoeTVfLh8w8U4dHvkvlCCzVKEgI7aFuwQ
+	3G5v4YrVCn/osFz3hz5E9imX+2MNKCY5HKOVHkkoNy55nSuYiMiXR5L7fxwU2JijACTej8KZ2TX
+	dyuFlgv2U06xWOr3BhgWpBZ3deaSRAC2DA4kgaz90zov93BiQnSp79a0=
+X-Received: by 2002:a17:90a:a582:b0:2a2:eb67:b20a with SMTP id b2-20020a17090aa58200b002a2eb67b20amr2499672pjq.42.1714240199224;
+        Sat, 27 Apr 2024 10:49:59 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH8BFGKkCxJgeUfO2W5N8exa995dtAMkQ+xK5i7PAWYSxYySmlUN4iLu+qU4UvMeMaiyfmxxQ==
+X-Received: by 2002:a17:90a:a582:b0:2a2:eb67:b20a with SMTP id b2-20020a17090aa58200b002a2eb67b20amr2499658pjq.42.1714240198652;
+        Sat, 27 Apr 2024 10:49:58 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id i28-20020a63585c000000b005d5445349edsm15481690pgm.19.2024.04.27.01.41.43
+        by smtp.gmail.com with ESMTPSA id so13-20020a17090b1f8d00b002aff85b97dfsm4334617pjb.27.2024.04.27.10.49.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 27 Apr 2024 01:41:44 -0700 (PDT)
-Date: Sat, 27 Apr 2024 16:41:40 +0800
+        Sat, 27 Apr 2024 10:49:58 -0700 (PDT)
+Date: Sun, 28 Apr 2024 01:49:53 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Yong Sun <yosun@suse.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: solve no-return-in-nonvoid-function issue
-Message-ID: <20240427084140.6eaalb3tsoe3o35a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240424112444.20964-1-yosun@suse.com>
- <ZiySu-TX-5kR3VOx@infradead.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/095: add to the quick group
+Message-ID: <20240427174953.nlw5gfi36syp5jnw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240427075530.1236045-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,25 +72,39 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZiySu-TX-5kR3VOx@infradead.org>
+In-Reply-To: <20240427075530.1236045-1-hch@lst.de>
 
-On Fri, Apr 26, 2024 at 10:52:59PM -0700, Christoph Hellwig wrote:
-> On Wed, Apr 24, 2024 at 07:24:08PM +0800, Yong Sun wrote:
-> > --- a/src/fake-dump-rootino.c
-> > +++ b/src/fake-dump-rootino.c
-> > @@ -221,4 +221,5 @@ int main(int argc, char *argv[]) {
-> >  
-> >  	munmap(header, GLOBAL_HDR_SZ);
-> >  	close(fd);
-> > +        return 0;
+On Sat, Apr 27, 2024 at 09:55:30AM +0200, Christoph Hellwig wrote:
+> generic/095 doesn't take more than 4 seconds on any of my test setups,
+
+Yeah, it generally takes ~5 seconds. But there's a "LOAD_FACTOR", so
+before we add it into quick group, I'd like to ask
+do you think if it's worth increasing the default LOAD_FACTOR a bit to
+give it more stress, or move it to quick group directly?
+
+> but is exercises code that handles buffered write iterations interrupted
+> by concurrent direct I/O that no other test in the quick group does.
 > 
-> This needs to use a tab instead of spaces.  Otherwise looks good:
-
-Yes, I'll help to change that, thanks!
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/095 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> diff --git a/tests/generic/095 b/tests/generic/095
+> index 80448200b..9d0446e98 100755
+> --- a/tests/generic/095
+> +++ b/tests/generic/095
+> @@ -7,7 +7,7 @@
+>  # Concurrent mixed I/O (buffer I/O, aiodio, mmap, splice) on the same files
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto rw stress
+> +_begin_fstest auto quick rw stress
+>  
+>  # Import common functions.
+>  . ./common/filter
+> -- 
+> 2.39.2
+> 
 > 
 
