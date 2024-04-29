@@ -1,140 +1,161 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B045B45017
-	for <fstests@vger.kernel.org>; Mon, 29 Apr 2024 11:30:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB0E053378
+	for <fstests@vger.kernel.org>; Mon, 29 Apr 2024 12:00:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714390255; cv=none; b=fbhlb6S04/mGw57FN2erCKExYNe1KmOFE+r4Y0dqK2yzbEJcdoSdDRNw+ygwMtD/R5Ikh42Qb1zQJw8dJkN6qRWbHjlpYQna7LxIUI7UWLbdUF6eYjSDIAAubsM1xvOcZ2aRhxycvEv9K0jTfS7Ua082cOJ2Jh2gU07MLD08kLk=
+	t=1714392041; cv=none; b=qBIoRtgBDVEENvJaRZfZ5z3KGeyzYs46L9kcK6jsRMI6RsKeZnGPUocRHR8yrYH+89/WhF+fVF0QroY3jilX7CH2+ovL1tnBbr9glAxRveeKWFmhsiT2TnysKnGfklCMGAR6w+7KfopNXqpFJgv4gJobdmvMq7qyFcaLRvfUQM0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714390255; c=relaxed/simple;
-	bh=AZGVZHPOsqOTZuN1zYDqO1bwzLRpAH1iXr75ynExPYg=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=CNxvQ/Zx6PrHp4gqYADkionDQY0kRBnxmaUOkvizzsPnKFl/yhso9T0MoO6BBBXccZvgtoSUb3ViefmK/JcVy4e1DO0W4wjGsUmkdrXTUtkC3Rb5gEB5RJflaaGUwh9h4sAYv6CToBNf2H/4PymHPJfIpZtGibn5N1L1/iAUDbE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=HGl34HkD; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=jjL9ZAV5; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=HGl34HkD; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=jjL9ZAV5; arc=none smtp.client-ip=195.135.223.130
+	s=arc-20240116; t=1714392041; c=relaxed/simple;
+	bh=aax5oJ319yELPWk4UsoqNR0nSNOBC5ozvtcWGiNjlMw=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=BvGaKgwDZcCiU/TueBG5ih9mYY8Tf47N3XOMt3mDmapgWw6vtlZkmw8udeZ+8YQj9jp1YcAg92aN+XgvGyFnkGEXPUo+uDwjuUf/9EiQECNwD2yMtX7TbA450/ac7AuaZBdlQIlM0OQzeQ0/Wo+46m7VBj2wqSI2OIUtv8iWUlQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=OGAv+1ZL; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Ir4/FYTh; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=oMuKAb6t; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=fe5QpaAk; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="HGl34HkD";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="jjL9ZAV5";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="HGl34HkD";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="jjL9ZAV5"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="OGAv+1ZL";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Ir4/FYTh";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="oMuKAb6t";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="fe5QpaAk"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id C4C4E225FD;
-	Mon, 29 Apr 2024 11:30:51 +0000 (UTC)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id F32F21F387;
+	Mon, 29 Apr 2024 12:00:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1714390251; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=weUtItYO0UjJZ1FU+2GnKZtp30F/mc/6jfNXcSLN6/c=;
-	b=HGl34HkDBnrAWLu5X7DHnSoXATvMtgrxLuc7fI6q4P3l5fGD9OZnk8886q9VTAWTFMbo5x
-	2cPKf2rgw3WK/d6mLC+FH9TgxY9OGyeB2olVa8SBG6VezNAUZbJFyonPwV7G6L+XqJ1hFR
-	4mPU7iS0Gu7BbTWyRLT/NrD7tWV3g0I=
+	t=1714392036; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=TUkIIiVeSCd+y6Mt5zCkOmkXScHonPyjj6mC3Kizhzk=;
+	b=OGAv+1ZLfKzYJs5s5i6zBxWaaxxlp5LYPFhE5P3kHNLQio3RXdRfTgV2/A4l2o7K0hHqjZ
+	0BQKYWlSFg31e3fGD2uaxsDRS5h626+hVjVFEMlwd1BYiK4aYR1yNYl8F4kVN0KdFm2I8N
+	y+bpZZLwHkJRdtXDqrmH1faYRlBR1go=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1714390251;
+	s=susede2_ed25519; t=1714392036;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=weUtItYO0UjJZ1FU+2GnKZtp30F/mc/6jfNXcSLN6/c=;
-	b=jjL9ZAV56ugG2L78qp8KRacmSV2fgdlXcYr8rDllTQ2o+riwMbsjJjKe1XEO/pvBXBXTIj
-	OkFZLpxPtOhP+yAw==
-Authentication-Results: smtp-out1.suse.de;
-	none
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=TUkIIiVeSCd+y6Mt5zCkOmkXScHonPyjj6mC3Kizhzk=;
+	b=Ir4/FYThHjldsAXU/oQd8fohrJru0h2reIl8XpRRYVQm75Zu8H0fQZkTSDI8YiMeZYRmO8
+	ib4Vv8W9bvaIBOAQ==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=oMuKAb6t;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=fe5QpaAk
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1714390251; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=weUtItYO0UjJZ1FU+2GnKZtp30F/mc/6jfNXcSLN6/c=;
-	b=HGl34HkDBnrAWLu5X7DHnSoXATvMtgrxLuc7fI6q4P3l5fGD9OZnk8886q9VTAWTFMbo5x
-	2cPKf2rgw3WK/d6mLC+FH9TgxY9OGyeB2olVa8SBG6VezNAUZbJFyonPwV7G6L+XqJ1hFR
-	4mPU7iS0Gu7BbTWyRLT/NrD7tWV3g0I=
+	t=1714392034; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=TUkIIiVeSCd+y6Mt5zCkOmkXScHonPyjj6mC3Kizhzk=;
+	b=oMuKAb6thzUZh0GqSrb/eaeHVB1ADktDBNN+RUJYWfAYRsXUi8vP5nj0LAnY+4yJzMB2/Y
+	cihDIQthCNtvx3N8PQCdgoaM1AUP8Tb7HiEfub2QVZo721YGS1MC5LfR8bJuU0F17ruwgW
+	hNiNJ7u5KHGv8MHNm2j2dKRUXwK7nrk=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1714390251;
+	s=susede2_ed25519; t=1714392034;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=weUtItYO0UjJZ1FU+2GnKZtp30F/mc/6jfNXcSLN6/c=;
-	b=jjL9ZAV56ugG2L78qp8KRacmSV2fgdlXcYr8rDllTQ2o+riwMbsjJjKe1XEO/pvBXBXTIj
-	OkFZLpxPtOhP+yAw==
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=TUkIIiVeSCd+y6Mt5zCkOmkXScHonPyjj6mC3Kizhzk=;
+	b=fe5QpaAkKB5oMB9rDKeX80jzSJ0o/exts3yXNJjqOTs2baSTeDMkITvmmZOlIs/5huI41q
+	DWD7W7MY/XKlp3Aw==
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 7FF6F138A7;
-	Mon, 29 Apr 2024 11:30:50 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 66411139DE;
+	Mon, 29 Apr 2024 12:00:33 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id m6dgDOqEL2b8SAAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Mon, 29 Apr 2024 11:30:50 +0000
-Date: Mon, 29 Apr 2024 21:28:45 +1000
+	id KgZbBuGLL2Y+UwAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Mon, 29 Apr 2024 12:00:33 +0000
 From: David Disseldorp <ddiss@suse.de>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] common/config: export TEST_DEV for mkfs.xfs
-Message-ID: <20240429212845.0094c51c@echidna>
-In-Reply-To: <20240428053717.qsvzt6jo7w32tfsh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240411063234.30110-1-ddiss@suse.de>
-	<20240428053717.qsvzt6jo7w32tfsh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: fstests@vger.kernel.org
+Cc: David Disseldorp <ddiss@suse.de>,
+	"Darrick J . Wong" <djwong@kernel.org>
+Subject: [PATCH v2] tests: _fail on _scratch_mkfs_sized failure
+Date: Mon, 29 Apr 2024 21:58:27 +1000
+Message-Id: <20240429115826.9171-1-ddiss@suse.de>
+X-Mailer: git-send-email 2.35.3
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Flag: NO
-X-Spam-Score: -3.65
+Content-Transfer-Encoding: 8bit
 X-Spam-Level: 
-X-Spamd-Result: default: False [-3.65 / 50.00];
-	BAYES_HAM(-2.85)[99.35%];
+X-Spamd-Result: default: False [-3.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	MID_CONTAINS_FROM(1.00)[];
 	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
 	NEURAL_HAM_SHORT(-0.20)[-1.000];
 	MIME_GOOD(-0.10)[text/plain];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	RCPT_COUNT_TWO(0.00)[2];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	MX_GOOD(-0.01)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim,suse.de:email];
 	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
 	TO_DN_SOME(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	MISSING_XM_UA(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
 	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.de:email]
+	FROM_EQ_ENVFROM(0.00)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_TLS_ALL(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	DKIM_TRACE(0.00)[suse.de:+]
+X-Rspamd-Action: no action
+X-Rspamd-Queue-Id: F32F21F387
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Flag: NO
+X-Spam-Score: -3.01
 
-On Sun, 28 Apr 2024 13:37:17 +0800, Zorro Lang wrote:
+If _scratch_mkfs_sized() fails, e.g. due to an FS not supporting the
+provided size, tests may subsequently mount and run atop a previously
+created (e.g. non-size-bound) filesystem.
+This can lead to difficult to debug failures, or for some -ENOSPC
+exercising tests, near infinite runtimes. Avoid this by renaming the
+current function to _try_scratch_mkfs_sized() and _fail in the parent
+_scratch_mkfs_sized() wrapper.
 
-> On Thu, Apr 11, 2024 at 04:32:33PM +1000, David Disseldorp wrote:
-> > As of xfsprogs commit 6e0ed3d1 ("mkfs: stop allowing tiny filesystems")
-> > attempts to create XFS filesystems sized under 300M fail, unless
-> > TEST_DIR, TEST_DEV and QA_CHECK_FS environment variables are exported
-> > (or a --unsupported mkfs parameter is provided).
-> > 
-> > TEST_DIR and QA_CHECK_FS are already exported, while TEST_DEV may only
-> > be locally set if provided via e.g. configs/$HOSTNAME.config. Explicitly
-> > export TEST_DEV to ensure that tests which call _scratch_mkfs_sized()
-> > with an fssize under 300M run normally.
-> > 
-> > Signed-off-by: David Disseldorp <ddiss@suse.de>
-> > ---  
-> 
-> Actually, using "export" in xfstests/local.config for each parameter could
-> help too.
-> 
-> The 2nd patch still has some disagreement, I'll merge this patch at first,
-> as it's simple enough and got two RVBs.
+Signed-off-by: David Disseldorp <ddiss@suse.de>
+Suggested-by: Darrick J. Wong <djwong@kernel.org>
+---
+Changes since v1:
+- call _fail in a wrapper function, instead of adding failure handlers
+  to individual test _scratch_mkfs_sized() callers.
 
-Thanks. I'll send an updated 2/2 today following Darrick's suggestion of
-_try_scratch_mkfs_sized $* || _fail
+ common/rc | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 56f1afb6..e95070dd 100644
+--- a/common/rc
++++ b/common/rc
+@@ -968,8 +968,8 @@ _small_fs_size_mb()
+ }
+ 
+ # Create fs of certain size on scratch device
+-# _scratch_mkfs_sized <size in bytes> [optional blocksize]
+-_scratch_mkfs_sized()
++# _try_scratch_mkfs_sized <size in bytes> [optional blocksize]
++_try_scratch_mkfs_sized()
+ {
+ 	local fssize=$1
+ 	local blocksize=$2
+@@ -1111,6 +1111,11 @@ _scratch_mkfs_sized()
+ 	esac
+ }
+ 
++_scratch_mkfs_sized()
++{
++	_try_scratch_mkfs_sized $* || _fail "_scratch_mkfs_sized failed"
++}
++
+ # Emulate an N-data-disk stripe w/ various stripe units
+ # _scratch_mkfs_geom <sunit bytes> <swidth multiplier> [optional blocksize]
+ _scratch_mkfs_geom()
+-- 
+2.35.3
+
