@@ -1,152 +1,161 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 50D4F623
-	for <fstests@vger.kernel.org>; Tue, 30 Apr 2024 00:25:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08F74DDDA;
+	Tue, 30 Apr 2024 03:19:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714436725; cv=none; b=RjrnR41xIMUUTWL/UeES6vc5VvfENUNrcHPxoJ2Ac06K3FUUAiNKDtYdFxu/VJDYCVVrLzi2AJndzrUVXBAA+ikc4Kbm9bAmlZrDLUkMbYtbHfcq5XoGu9Hl75EQX5SyobV+C4TD9+Cl5MvLPixFAIUHr/GpPvyNFm496skgdUM=
+	t=1714447166; cv=none; b=cwt6zQub3omfK2b1jhcLt75hpoab+snXCi8cy6mSyRkaRvMuGeHu4RWGFlkGrVCKMEqduwvSJ4tyXVgjPZp5CjcTSB8mMRTltxzEbd0PYGYYBS7esdJUJPhaDR/zSyVaYF7BJCHbIYG4kcwCHj1bvv7RH2PGGErrjkxDBsdA370=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714436725; c=relaxed/simple;
-	bh=E7yeTsQ05YaKQnBQ++5sGcFFglnr1Eq0KvlRV+EUs7E=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=hhtGgRsH7tkK8Upyey6ibT9AkxIKLwg8dZCQz5bn3YIA5yx655h80aIu28VAUKmNUT7l05Jril53dQLidsgiO/zzv6z2aSva61lyY2u7/ZL+jtwPZDE6Vav0IINRydyh27b5f1bFLSYwcZYaMnCw0bS6yF0OAzwSwcfs5RCrpwo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=horPz0+X; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XxQ4GRhM; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=horPz0+X; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=XxQ4GRhM; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1714447166; c=relaxed/simple;
+	bh=FHlcZvFx6GfuKtymFK4OGO+74fcA3bU1aWNe4GeLjZ4=;
+	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=G72RkFWPvw1u8EdHpFZKCZ/zpaCXJuAlP1Tf5j9ckufriFJMR5UofbZsYX6XKf7h068tHLsm1Q/SQkrz9XXX/k8Us2fD9zGDRDm3u0Pt7KDq0uO4C1wFYYTbrTO/UGJqnmR+H917NgswDXCjQRLAzdOtlI0tZ/v1f0ng8eDAYfw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k3DNxmWQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="horPz0+X";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XxQ4GRhM";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="horPz0+X";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="XxQ4GRhM"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 701251F79A;
-	Tue, 30 Apr 2024 00:25:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1714436720; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=D9qADJVbY7IHPqLtvmsGihBptkOd9eYSS4aKaMED5HE=;
-	b=horPz0+X0ECqcQPbjOHwHkY19HbIUii7WJJzKO0AVbWLFJ1bCRqWVv503rfUboHRbiOd40
-	8ZUfR9jjD5+4pBL0W9sxOVcswy822CsfcD8fLbZEQv97GiCmQAt+F4j6t135xiozci1RV9
-	hSxmjjkIqPjBv+BxDJRlsyMcLv1PK74=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1714436720;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=D9qADJVbY7IHPqLtvmsGihBptkOd9eYSS4aKaMED5HE=;
-	b=XxQ4GRhMeHtyjJN/FoL+l/LVGBXZAuM1NbJh7tHcsuCt4OlgSUNDBDZFZbDkUP3xtm5N/l
-	9ST8TRQmJRXj5wCw==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=horPz0+X;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=XxQ4GRhM
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1714436720; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=D9qADJVbY7IHPqLtvmsGihBptkOd9eYSS4aKaMED5HE=;
-	b=horPz0+X0ECqcQPbjOHwHkY19HbIUii7WJJzKO0AVbWLFJ1bCRqWVv503rfUboHRbiOd40
-	8ZUfR9jjD5+4pBL0W9sxOVcswy822CsfcD8fLbZEQv97GiCmQAt+F4j6t135xiozci1RV9
-	hSxmjjkIqPjBv+BxDJRlsyMcLv1PK74=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1714436720;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=D9qADJVbY7IHPqLtvmsGihBptkOd9eYSS4aKaMED5HE=;
-	b=XxQ4GRhMeHtyjJN/FoL+l/LVGBXZAuM1NbJh7tHcsuCt4OlgSUNDBDZFZbDkUP3xtm5N/l
-	9ST8TRQmJRXj5wCw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id C7B6213889;
-	Tue, 30 Apr 2024 00:25:18 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id D/H+HW46MGYOOgAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Tue, 30 Apr 2024 00:25:18 +0000
-Date: Tue, 30 Apr 2024 10:25:02 +1000
-From: David Disseldorp <ddiss@suse.de>
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH v3] tests: _fail on _scratch_mkfs_sized failure
-Message-ID: <20240430102502.3167c16a@echidna>
-In-Reply-To: <20240429190244.lr2xg74pzk2erwji@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240429153751.23515-1-ddiss@suse.de>
-	<20240429160516.GD360908@frogsfrogsfrogs>
-	<20240429190244.lr2xg74pzk2erwji@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k3DNxmWQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7EDA0C116B1;
+	Tue, 30 Apr 2024 03:19:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1714447165;
+	bh=FHlcZvFx6GfuKtymFK4OGO+74fcA3bU1aWNe4GeLjZ4=;
+	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+	b=k3DNxmWQoP2K48vdbyGH39ytCfxdcelEgltdFCfKM2eyqwVu5NXUNsXgWKzleWpoc
+	 o4DiCm3AFtbtQhV2wsK8UHhMG/mCKz0rtXj6lTryLXnJYl5THJC8+o8ELyO/2HAnIH
+	 10V2iInASne6/cBg6ZM1DLHVpIkC6HSeqmVzJ8sQiPPWh6l/9Ikh8VbZfjXks6Zf6a
+	 ap8vhUzr6Hksd8+PP1WJwX4fc32kNnGM9Wo/qvXegzWLNNjRrqPZ55Wfp1W0phSamL
+	 UHHBCCtQUDHey15yOQDHMpiDGvcBMKO6AA0PkdeK4rRy1VuO4o9y/wx5betFugUcXD
+	 1frt7lygLi99w==
+Date: Mon, 29 Apr 2024 20:19:24 -0700
+Subject: [PATCHSET v5.6] fstests: fs-verity support for XFS
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: aalbersh@redhat.com, zlang@redhat.com, ebiggers@kernel.org,
+ djwong@kernel.org
+Cc: Andrey Albershteyn <andrey.albershteyn@gmail.com>,
+ fsverity@lists.linux.dev, linux-fsdevel@vger.kernel.org, guan@eryu.me,
+ linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Message-ID: <171444687971.962488.18035230926224414854.stgit@frogsfrogsfrogs>
+In-Reply-To: <20240430031134.GH360919@frogsfrogsfrogs>
+References: <20240430031134.GH360919@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-Spam-Level: 
-X-Spamd-Result: default: False [-5.01 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	DWL_DNSWL_LOW(-1.00)[suse.de:dkim];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	MISSING_XM_UA(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DNSWL_BLOCKED(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCPT_COUNT_THREE(0.00)[3];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	DKIM_TRACE(0.00)[suse.de:+]
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: 701251F79A
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
-X-Spam-Score: -5.01
 
-On Tue, 30 Apr 2024 03:02:44 +0800, Zorro Lang wrote:
+Hi all,
 
-> On Mon, Apr 29, 2024 at 09:05:16AM -0700, Darrick J. Wong wrote:
-...
-> > > +_scratch_mkfs_sized()
-> > > +{
-> > > +	_try_scratch_mkfs_sized $* || _fail "_scratch_mkfs_sized (size=${1}) failed"  
-> > 
-> > I wonder if you ought to dump all the arguments, but the maintainer did
-> > say to print the *size*. :)  
-> 
-> Sorry I didn't say that clearly, I mean the arguments related with size :-D
+This patchset adds support for fsverity to XFS.  In keeping with
+Andrey's original design, XFS stores all fsverity metadata in the
+extended attribute data.  However, I've made a few changes to the code:
+First, it now caches merkle tree blocks directly instead of abusing the
+buffer cache.  This reduces lookup overhead quite a bit, at a cost of
+needing a new shrinker for cached merkle tree blocks.
 
-No worries :) I'm fine with it either way.
+To reduce the ondisk footprint further, I also made the verity
+enablement code detect trailing zeroes whenever fsverity tells us to
+write a buffer, and elide storing the zeroes.  To further reduce the
+footprint of sparse files, I also skip writing merkle tree blocks if the
+block contents are entirely hashes of zeroes.
 
-> 
-> If both of you don't have more suggestions, I can help to change this line to:
-> 
-> _try_scratch_mkfs_sized $* || \
-> 	_fail "_scratch_mkfs_sized failed with ($*)"
-> 
-> when I merge it.
+Next, I implemented more of the tooling around verity, such as debugger
+support, as much fsck support as I can manage without knowing the
+internal format of the fsverity information; and added support for
+xfs_scrub to read fsverity files to validate the consistency of the data
+against the merkle tree.
 
-Sure, works for me.
+Finally, I add the ability for administrators to turn off fsverity,
+which might help recovering damaged data from an inconsistent file.
 
-Cheers, David
+From Andrey Albershteyn:
+
+Here's v5 of my patchset of adding fs-verity support to XFS.
+
+This implementation uses extended attributes to store fs-verity
+metadata. The Merkle tree blocks are stored in the remote extended
+attributes. The names are offsets into the tree.
+From Darrick J. Wong:
+
+This v5.3 patchset builds upon v5.2 of Andrey's patchset to implement
+fsverity for XFS.
+
+The biggest thing that I didn't like in the v5 patchset is the abuse of
+the data device's buffer cache to store the incore version of the merkle
+tree blocks.  Not only do verity state flags end up in xfs_buf, but the
+double-alloc flag wastes memory and doesn't remain internally consistent
+if the xattrs shift around.
+
+I replaced all of that with a per-inode xarray that indexes incore
+merkle tree blocks.  For cache hits, this dramatically reduces the
+amount of work that xfs has to do to feed fsverity.  The per-block
+overhead is much lower (8 bytes instead of ~300 for xfs_bufs), and we no
+longer have to entertain layering violations in the buffer cache.  I
+also added a per-filesystem shrinker so that reclaim can cull cached
+merkle tree blocks, starting with the leaf tree nodes.
+
+I've also rolled in some changes recommended by the fsverity maintainer,
+fixed some organization and naming problems in the xfs code, fixed a
+collision in the xfs_inode iflags, and improved dead merkle tree cleanup
+per the discussion of the v5 series.  At this point I'm happy enough
+with this code to start integrating and testing it in my trees, so it's
+time to send it out a coherent patchset for comments.
+
+For v5.3, I've added bits and pieces of online and offline repair
+support, reduced the size of partially filled merkle tree blocks by
+removing trailing zeroes, changed the xattr hash function to better
+avoid collisions between merkle tree keys, made the fsverity
+invalidation bitmap unnecessary, and made it so that we can save space
+on sparse verity files by not storing merkle tree blocks that hash
+totally zeroed data blocks.
+
+From Andrey Albershteyn:
+
+Here's v5 of my patchset of adding fs-verity support to XFS.
+
+This implementation uses extended attributes to store fs-verity
+metadata. The Merkle tree blocks are stored in the remote extended
+attributes. The names are offsets into the tree.
+
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
+
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=fsverity
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=fsverity
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsverity
+---
+Commits in this patchset:
+ * common/verity: enable fsverity for XFS
+ * xfs/{021,122}: adapt to fsverity xattrs
+ * xfs/122: adapt to fsverity
+ * xfs: test xfs_scrub detection and correction of corrupt fsverity metadata
+ * xfs: test disabling fsverity
+ * common/populate: add verity files to populate xfs images
+---
+ common/populate    |   24 +++++++++
+ common/verity      |   39 ++++++++++++++-
+ tests/xfs/021      |    3 +
+ tests/xfs/122.out  |    3 +
+ tests/xfs/1880     |  135 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1880.out |   37 ++++++++++++++
+ tests/xfs/1881     |  111 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1881.out |   28 +++++++++++
+ 8 files changed, 378 insertions(+), 2 deletions(-)
+ create mode 100755 tests/xfs/1880
+ create mode 100644 tests/xfs/1880.out
+ create mode 100755 tests/xfs/1881
+ create mode 100644 tests/xfs/1881.out
+
