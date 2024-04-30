@@ -1,72 +1,43 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43DA3171669
-	for <fstests@vger.kernel.org>; Tue, 30 Apr 2024 13:22:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C23E1527AF;
+	Tue, 30 Apr 2024 15:35:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714483377; cv=none; b=n2evfCQDma2JY8irQmGCKhil33b6/m+lOvrtUiWAk4xQ+kXTGneuIYLKiXiLY6+d/8eKfLBj+F+IT8UtM5C0Pk2GPI+/zIs7nNgfRqIHXDxccMlgkAiS8yzF0Nv+f3IIJckimSpTJO1/p6OFFeV+sXicHpletzCqLHfjXJEgaBY=
+	t=1714491316; cv=none; b=lJRzjA6LlzR7+/WYMQfscTv3obsnRdwuU7PMCJQmpR/i37P+9pmKofHT54xDFK8eDWp34KDazpO3XSrbWBC1dKq7eugDa+3zmLJR9S0LFNA2tsKzDuON0IiYYSbrvOdAWEZY53+AdVkfryE2n8ODT/V9piSihzxmQOOxCwKJ78g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714483377; c=relaxed/simple;
-	bh=YnEJ0sEcEqRvMruWiehseLaJw4OasqybHAEjGtiIl2s=;
+	s=arc-20240116; t=1714491316; c=relaxed/simple;
+	bh=MbkN7pDkKZZWrXoY+9HjWqjVPDtjbX2R4sqx3TF+2/o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=koa3qAL536WYlafrSXfYopUkNzdRef0zZrJYYeJvNLXaPeo+bvMr5FfaE5vzFyjqlizA4lG/CHB2HNHmd+7T0hdZY21sr7J05XFo1nkL1FLJjH7PU2bqvsP/pn/UgmQH9RzkTnEuqQVWWm25bi1/a06xZ989fIaPVqVj3JQ3P6s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Id0L6v32; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=NGmrtmFbZTJcp46L6rfODrEGcHM8OzukdcDQRRit9JAgWZO0eEkiVfcTD6JoSs31RZ2tEkcibEexceUbwlqxsNBFQrAgrOFg+F/cYZBAUCHnHBTPrD0UImu+hvSJPw8V/PFGg0n984G1Jz3Ka0KOl/zSeyOBoIUBIWWkclbecVA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZwHFCjwQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Id0L6v32"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714483375;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kf4VuVjSkqqaSBuXyiy9b+enj0lsiQgUxAzYhGA5mE8=;
-	b=Id0L6v32oey+N40rOj0hWK9lp0rb6ECgGCXCDpFwqAIbtqL0BVZjxS49n4xdQMhhWylc+8
-	eebXv6PQGUAN3/Qwl69nd9n3o8+YgqCAfS/Zy2NYjZXxPMcNtDpGzFKK7iEJ/XJj1Xox3l
-	TacriKsOAV+THXxRjqfi/nrNyfsFMJ8=
-Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com
- [209.85.208.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-607-e46F3_TJP9epA2zNGM07Cg-1; Tue, 30 Apr 2024 09:22:53 -0400
-X-MC-Unique: e46F3_TJP9epA2zNGM07Cg-1
-Received: by mail-ed1-f70.google.com with SMTP id 4fb4d7f45d1cf-5726d06aa18so559496a12.2
-        for <fstests@vger.kernel.org>; Tue, 30 Apr 2024 06:22:53 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714483372; x=1715088172;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=kf4VuVjSkqqaSBuXyiy9b+enj0lsiQgUxAzYhGA5mE8=;
-        b=FwZYsab9t8oHJf7FRRcmmwn+f1ReDI/G+Qhm6BZ2VyvrTIdXG9B2g4fDv0zgn29m4k
-         smxffWowtcpkOruOvr3hnyG+kC8X840fa7TEumJR3Ifm+QtgQS2EQZ1TIAeJmxBWiLnL
-         axo5avyqblW7pJ1zzMtrbMDnhzsoPl2RSiuEopA/WeBwU9ZrIeNzu9S9qY6RCOKXD9GN
-         38tVRgyZv/N7FBre4gm/GVJB+gAfgdhb+ei1ca1KtY6YI0weqxMnqN916YBFcGK5axig
-         TpKWJb8aC8KDs0PbpZ53OVRzOQ//iqObni9RkA1njJmDPOr5iszTmcTNh6Xe4P0xxEjG
-         /nZg==
-X-Forwarded-Encrypted: i=1; AJvYcCVnbRFGNrmyUPlF4dBvEV6PN/mwA8tGw40xXFMR3kdcDNwqCLeHGoBJXSgPtEGqTTIlFll5RN4AoR2ihj+xz33htPJf/7RgDQ==
-X-Gm-Message-State: AOJu0YzOBgPyGM8l0lITnWatpq970VRpfqjro9HDKzJqYETygY0dWDDa
-	3bHNwLJPaAn0+pzHcHqqU6Q2hqTml8k4u7gIsQMYzcZKPJLMREOLTVp15qAzg+OQNQkMAzlc6QO
-	u8rB/dJAQFF0SUX/y6JvwKWECqbBcLVMgInHogn3DStZ+xCsZ7NMcIw==
-X-Received: by 2002:a50:9993:0:b0:572:9e96:cdd0 with SMTP id m19-20020a509993000000b005729e96cdd0mr891914edb.2.1714483372166;
-        Tue, 30 Apr 2024 06:22:52 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGEpwaRQV/7d7WM8xQJn8O8slwrFWWcV0hlAQMVCF07J1eFJuZ01TvonvPaHMPCXLdzduGgyw==
-X-Received: by 2002:a50:9993:0:b0:572:9e96:cdd0 with SMTP id m19-20020a509993000000b005729e96cdd0mr891893edb.2.1714483371609;
-        Tue, 30 Apr 2024 06:22:51 -0700 (PDT)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id b61-20020a509f43000000b0056e51535a2esm14826411edf.82.2024.04.30.06.22.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Apr 2024 06:22:51 -0700 (PDT)
-Date: Tue, 30 Apr 2024 15:22:50 +0200
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, ebiggers@kernel.org, fsverity@lists.linux.dev, 
-	linux-fsdevel@vger.kernel.org, guan@eryu.me, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 6/6] common/populate: add verity files to populate xfs
- images
-Message-ID: <jalepm6lu3nwy4bext62pj2fii6s2iknkgbsh5p3ltz65yeqcs@5z4s72utnopv>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZwHFCjwQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B1100C4AF18;
+	Tue, 30 Apr 2024 15:35:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1714491315;
+	bh=MbkN7pDkKZZWrXoY+9HjWqjVPDtjbX2R4sqx3TF+2/o=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ZwHFCjwQLj8OrvPqlUqBGFI7Elph1AP0qS1oXee51RVpufvEYrlgFOuWpzBS2HfnH
+	 GkM1pQWVLCgFBqK40OnYkRaQr4PaDrCy0O48B7RSYbIXvRTPfTni2BbwBRlQaeb4Ja
+	 iVydtk85OZS3SpY0bosB7hp9JLrgbGGxiwLtWU1lYWQpQUZls7TjJUwBJQ98GVqQp7
+	 F9XgUXF9oR1RZcqkLqI2xv+I3pzzwGam75XDXEVNYUbB96R6m1KpfLxVO/2y0ZV3+v
+	 mGKgFKEpvUJV3fvnY0L/cQGTcK0tsLR1qKZ1E1oRgS2JGFySX5xvphQ8wy3zafP7Iy
+	 taw7XI1m0Ogow==
+Date: Tue, 30 Apr 2024 08:35:15 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: zlang@redhat.com, ebiggers@kernel.org,
+	Andrey Albershteyn <andrey.albershteyn@gmail.com>,
+	fsverity@lists.linux.dev, linux-fsdevel@vger.kernel.org,
+	guan@eryu.me, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/6] common/verity: enable fsverity for XFS
+Message-ID: <20240430153515.GI360919@frogsfrogsfrogs>
 References: <171444687971.962488.18035230926224414854.stgit@frogsfrogsfrogs>
- <171444688070.962488.15915265664424203708.stgit@frogsfrogsfrogs>
+ <171444687994.962488.5112127418406573234.stgit@frogsfrogsfrogs>
+ <owfufxxoyiv3f67shc42n7pxvw4ippzjgukn3lfhayu5uraeci@pmqvwjh2u424>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,61 +46,127 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <171444688070.962488.15915265664424203708.stgit@frogsfrogsfrogs>
+In-Reply-To: <owfufxxoyiv3f67shc42n7pxvw4ippzjgukn3lfhayu5uraeci@pmqvwjh2u424>
 
-On 2024-04-29 20:42:21, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Apr 30, 2024 at 02:39:04PM +0200, Andrey Albershteyn wrote:
+> On 2024-04-29 20:41:03, Darrick J. Wong wrote:
+> > From: Andrey Albershteyn <aalbersh@redhat.com>
+> > 
+> > XFS supports verity and can be enabled for -g verity group.
+> > 
+> > Signed-off-by: Andrey Albershteyn <andrey.albershteyn@gmail.com>
+> > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> > ---
+> >  common/verity |   39 +++++++++++++++++++++++++++++++++++++--
+> >  1 file changed, 37 insertions(+), 2 deletions(-)
+> > 
+> > 
+> > diff --git a/common/verity b/common/verity
+> > index 59b67e1201..20408c8c0e 100644
+> > --- a/common/verity
+> > +++ b/common/verity
+> > @@ -43,7 +43,16 @@ _require_scratch_verity()
+> >  
+> >  	# The filesystem may be aware of fs-verity but have it disabled by
+> >  	# CONFIG_FS_VERITY=n.  Detect support via sysfs.
+> > -	if [ ! -e /sys/fs/$fstyp/features/verity ]; then
+> > +	case $FSTYP in
+> > +	xfs)
+> > +		_scratch_unmount
+> > +		_check_scratch_xfs_features VERITY &>>$seqres.full
+> > +		_scratch_mount
+> > +	;;
+> > +	*)
+> > +		test -e /sys/fs/$fstyp/features/verity
+> > +	esac
+> > +	if [ ! $? ]; then
+> >  		_notrun "kernel $fstyp isn't configured with verity support"
+> >  	fi
+> >  
+> > @@ -201,6 +210,9 @@ _scratch_mkfs_verity()
+> >  	ext4|f2fs)
+> >  		_scratch_mkfs -O verity
+> >  		;;
+> > +	xfs)
+> > +		_scratch_mkfs -i verity
+> > +		;;
+> >  	btrfs)
+> >  		_scratch_mkfs
+> >  		;;
+> > @@ -334,12 +346,19 @@ _fsv_scratch_corrupt_bytes()
+> >  	local lstart lend pstart pend
+> >  	local dd_cmds=()
+> >  	local cmd
+> > +	local device=$SCRATCH_DEV
+> >  
+> >  	sync	# Sync to avoid unwritten extents
+> >  
+> >  	cat > $tmp.bytes
+> >  	local end=$(( offset + $(_get_filesize $tmp.bytes ) ))
+> >  
+> > +	# If this is an xfs realtime file, switch @device to the rt device
+> > +	if [ $FSTYP = "xfs" ]; then
+> > +		$XFS_IO_PROG -r -c 'stat -v' "$file" | grep -q -w realtime && \
+> > +			device=$SCRATCH_RTDEV
+> > +	fi
+> > +
+> >  	# For each extent that intersects the requested range in order, add a
+> >  	# command that writes the next part of the data to that extent.
+> >  	while read -r lstart lend pstart pend; do
+> > @@ -355,7 +374,7 @@ _fsv_scratch_corrupt_bytes()
+> >  		elif (( offset < lend )); then
+> >  			local len=$((lend - offset))
+> >  			local seek=$((pstart + (offset - lstart)))
+> > -			dd_cmds+=("head -c $len | dd of=$SCRATCH_DEV oflag=seek_bytes seek=$seek status=none")
+> > +			dd_cmds+=("head -c $len | dd of=$device oflag=seek_bytes seek=$seek status=none")
+> >  			(( offset += len ))
+> >  		fi
+> >  	done < <($XFS_IO_PROG -r -c "fiemap $offset $((end - offset))" "$file" \
+> > @@ -408,6 +427,22 @@ _fsv_scratch_corrupt_merkle_tree()
+> >  		done
+> >  		_scratch_mount
+> >  		;;
+> > +	xfs)
+> > +		local ino=$(stat -c '%i' $file)
 > 
-> If verity is enabled on a filesystem, we should create some sample
-> verity files.
-> 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  common/populate |   24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
-> 
-> 
-> diff --git a/common/populate b/common/populate
-> index 35071f4210..ab9495e739 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -520,6 +520,30 @@ _scratch_xfs_populate() {
->  		done
->  	fi
->  
-> +	# verity merkle trees
-> +	is_verity="$(_xfs_has_feature "$SCRATCH_MNT" verity -v)"
-> +	if [ $is_verity -gt 0 ]; then
-> +		echo "+ fsverity"
-> +
-> +		# Create a biggish file with all zeroes, because metadump
-> +		# won't preserve data blocks and we don't want the hashes to
-> +		# stop working for our sample fs.
+> I didn't know about xfs_db's "path" command, this can be probably
+> replace with -c "path $file", below in _scratch_xfs_db.
 
-Hashes of the data blocks in the merkle tree? All zeros to use
-.zero_digest in fs-verity? Not sure if got this comment right
+You /can/ use the xfs_db path command here, but then you have to strip
+out $SCRATCH_MNT from $file since it of course doesn't know about mount
+points.  Since $file is a file path, we might as well use stat to find
+the inumber.
 
-> +		for ((pos = 0, i = 88; pos < 23456789; pos += 234567, i++)); do
-> +			$XFS_IO_PROG -f -c "pwrite -S 0 $pos 234567" "$SCRATCH_MNT/verity"
-> +		done
-> +
-> +		fsverity enable "$SCRATCH_MNT/verity"
-> +
-> +		# Create a sparse file
-> +		$XFS_IO_PROG -f -c "pwrite -S 0 0 3" -c "pwrite -S 0 23456789 3" "$SCRATCH_MNT/sparse_verity"
-> +		fsverity enable "$SCRATCH_MNT/sparse_verity"
-> +
-> +		# Create a salted sparse file
-> +		$XFS_IO_PROG -f -c "pwrite -S 0 0 3" -c "pwrite -S 0 23456789 3" "$SCRATCH_MNT/salted_verity"
-> +		local salt="5846532066696e616c6c7920686173206461746120636865636b73756d732121"	# XFS finally has data checksums!!
-> +		fsverity enable --salt="$salt" "$SCRATCH_MNT/salted_verity"
-> +	fi
-> +
->  	# Copy some real files (xfs tests, I guess...)
->  	echo "+ real files"
->  	test $fill -ne 0 && __populate_fill_fs "${SCRATCH_MNT}" 5
+> > +		local attr_offset=$(( $offset % $FSV_BLOCK_SIZE ))
+> > +		local attr_index=$(printf "%08d" $(( offset - attr_offset )))
+> > +		_scratch_unmount
+> > +		# Attribute name is 8 bytes long (byte position of Merkle tree block)
+> > +		_scratch_xfs_db -x -c "inode $ino" \
+>                                 here   ^^^^^^^^^^
+> > +			-c "attr_modify -f -m 8 -o $attr_offset $attr_index \"BUG\"" \
+> > +			-c "ablock 0" -c "print" \
+> > +			>>$seqres.full
+> > +		# In case bsize == 4096 and merkle block size == 1024, by
+> > +		# modifying attribute with 'attr_modify we can corrupt quota
+> > +		# account. Let's repair it
+> > +		_scratch_xfs_repair >> $seqres.full 2>&1
+> > +		_scratch_mount
+> > +		;;
+> >  	*)
+> >  		_fail "_fsv_scratch_corrupt_merkle_tree() unimplemented on $FSTYP"
+> >  		;;
+> > 
+> > 
 > 
+> Otherwise, looks good to me:
+> Reviewed-by: Andrey Albershteyn <aalbersh@redhat.com>
 
--- 
-- Andrey
+<nod>
 
+--D
+
+> -- 
+> - Andrey
+> 
+> 
