@@ -1,73 +1,46 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2705B181B8D
-	for <fstests@vger.kernel.org>; Tue, 30 Apr 2024 18:06:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC3DB1649A8;
+	Wed,  1 May 2024 22:06:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714500398; cv=none; b=KRewR+yz/Pcza+h9FRkGE9spn2GyhArkREsVqTGZX2OTLlFEqx68FyPFmD8DHYYmIVKgBAidxdGsJBP3tZ0+4/WSx3qLUQWbzgah9PskOPLGQzdFPBz0juFIz8Q+gT8s2LONlPEEg0s3LopITzjVlyORAX8MRyTEpSH9oOpJSTo=
+	t=1714601174; cv=none; b=BMju/YlitrRB4m6FKMByVfEUVlPnrdcDk91BDgeJ7weOHcUuZTZfxc8FilmLXfdBeUI8WheGveD3CgMP6bMevTit0TuSP1d9/feVvGat7J6KQ0eMf7/fphP36cftry4IC7iAMnab8lLHWUkDTHzdU9uMei2DK0qfKd9TQ24v+z0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714500398; c=relaxed/simple;
-	bh=PwI1PrOotdPpKXX5QAwi15HY6YoGol2geJBgw3UZ8VY=;
+	s=arc-20240116; t=1714601174; c=relaxed/simple;
+	bh=h5/Bf9TDZQL4DKdeJo0EsruEaQY9edKPqbpWJiW44JI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nIRnKPr3ABY7q1vWm/Bw6IguCIdn1dR7Bu/kTXOYhCe0BhR9PRl46NjFJGScGYOa3MRj86n4xF0IFOSCSv9J/a8y2F9ngPXofmTBdy0Whz226pbbgJQ7IRWkh1Yv12p8Xviq9EPBs1KBy/ssXh7cYZSoml2qP2UxuCNCgsLikWM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YBbaj8b8; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=BEIfz2kF9vMgNVc0q6T6TOuzrahJ/ok3fqi/hj9hWXq7eVvLMv0i6rsD7qMW5q+fBzBnzrPVhfNW6SVH4jfd3TfZakfDL7KwzQ9ZIWk+/6qlJcJIBzlS0rTWAgxrNzKToH+J4/al6NwXUTehCeEtmqDo5qAiHKipATqTY/QApnc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=PUA60mfw; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YBbaj8b8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1714500395;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=imQQal1msniqCC7SSyjMUlHWjAzNmLrGF8VoQ2n0MHk=;
-	b=YBbaj8b8v3VgFe35Zz4dlqJI0LAoM+u8xkEz1Dwdq00FJStc+DMAx5x8Hr3n/3SdrkXUuR
-	ceNqljQBgi3cD3ts3guzYNbwVh5GnEmxQel+1h0O/GOGXAPXuHhyyyAm0eDRafv45xMNrY
-	6LwURBhIZmAXt4NfygpuEywVKJtmvpI=
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com
- [209.85.218.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-556-QwQ63dyYMFmTOyKpNtu3yg-1; Tue, 30 Apr 2024 14:06:32 -0400
-X-MC-Unique: QwQ63dyYMFmTOyKpNtu3yg-1
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-a58b9cf05afso329741866b.1
-        for <fstests@vger.kernel.org>; Tue, 30 Apr 2024 11:06:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714500391; x=1715105191;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=imQQal1msniqCC7SSyjMUlHWjAzNmLrGF8VoQ2n0MHk=;
-        b=hOL7/ftk3wg8z27fsR09oI7U76lXN8Oty3VyFwMuJDC7AfWDTxdeWgb/gyJulA+BPV
-         StdbcV488m6nMoxU8G2JwHX1shpBg6BWX/ARFUyuX+etexNKu8ItXUtQpScCSNSbVNsR
-         R5b3+R7RaWtGXmrDwX0zNgqmaTe/F/QM5L6SUQxPdDoK+FLYGWDm8pesX3EDcrv8izzk
-         d4YDkQxlskctBLEpwnzD235zQg/+Zsf6rUuHMzPBaEAc68FQvir/31nzjdCyX42JS0QD
-         hMpS5wMkcAnlZ8KgCr5Bnp52qF1lz4e7aV2jj+lZiVLBaBlB2X1PX7M5AxT6fxUeMamN
-         vk4A==
-X-Forwarded-Encrypted: i=1; AJvYcCVuPU+U9veXP5TMnPG5i/gc2hNLXGutwu2nTUPDxzjUu3riK5cD4+G8R/z7kdxZzefRF0NyPkjulaD8d6pmFpa1BNLTm66luw==
-X-Gm-Message-State: AOJu0YziG7VUqeFtFmXagc92oRJbFkAWoAHVKSiRbO9pBySxktNjJPRH
-	bD+BSKpbd7fTjIWwyvdZ0FSWvvJmo0ffbkvlJRrp82ekF0PG0lAVneunr0+LnAMzn9GhfHhtEd5
-	3NH9ifgToo82ILAp2IGd2G4v027KDdUzZqbYqfXEYOHsmRtNQumUEayzTekmz2w==
-X-Received: by 2002:a17:906:3952:b0:a52:2c4f:7957 with SMTP id g18-20020a170906395200b00a522c4f7957mr336763eje.66.1714500390999;
-        Tue, 30 Apr 2024 11:06:30 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEjmyO5251sKWtcwGbGfFOrVzhA6dBFSD9UqK7uJf0jtnRf/sKg9Lc8u0v7WdZoeggiao3A+Q==
-X-Received: by 2002:a17:906:3952:b0:a52:2c4f:7957 with SMTP id g18-20020a170906395200b00a522c4f7957mr336746eje.66.1714500390308;
-        Tue, 30 Apr 2024 11:06:30 -0700 (PDT)
-Received: from thinky ([109.183.6.197])
-        by smtp.gmail.com with ESMTPSA id v5-20020a170906380500b00a58f36e5fecsm3720608ejc.67.2024.04.30.11.06.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Apr 2024 11:06:29 -0700 (PDT)
-Date: Tue, 30 Apr 2024 20:06:29 +0200
-From: Andrey Albershteyn <aalbersh@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, ebiggers@kernel.org, fsverity@lists.linux.dev, 
-	linux-fsdevel@vger.kernel.org, guan@eryu.me, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 5/6] xfs: test disabling fsverity
-Message-ID: <uffkpx5hbin4ym3jmechs4yuby3x2azze56mo4afyy6op3ysro@y6kpnc2ixyue>
-References: <171444687971.962488.18035230926224414854.stgit@frogsfrogsfrogs>
- <171444688055.962488.12884471948592949028.stgit@frogsfrogsfrogs>
- <cjwdgeptjooy65czttyopop4ipkxmdxgdkxxdpfsmtdtzr5jbj@6bu7ql72wtue>
- <20240430154810.GM360919@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="PUA60mfw"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=sm0RzHylR5Zw9bOYvZFFoHhRX899/0BlSNXO6Xo2wxI=; b=PUA60mfwCcmYT5Y4hGx/5oenxS
+	JcgVYk8xSO4t/Iktb2IEdf8FSfSP5/+Q8uDWlEt1sAyG7YWVLHmfAw2CXARVf6u4dktB7l1dL9npd
+	pEg2ZZyTdDRg9wU+MDdQw7nB3mo5S7kbH2/ioilACesFLIop/JtDuSx0hWYimDbEKebt6gjNArEXR
+	3rJ9rqMmv8QCYyFDivehLSsg1UU3vIwj2QhAU/j40xmLMfO96RwOHc20ZgmbR6YfPaZSVGWJ78LJE
+	Fm9IS2M355V6DPt0w4Gyckjp+iGMaYPGbuCCee1w9RcQvl+S2jQHq4Dew4HKLYFQbiXZZMMl03QDM
+	oa7yPR1Q==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1s2I5U-0000000Amjt-1n7n;
+	Wed, 01 May 2024 22:06:04 +0000
+Date: Wed, 1 May 2024 15:06:04 -0700
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: David Hildenbrand <david@redhat.com>
+Cc: akpm@linux-foundation.org, ziy@nvidia.com, linux-mm@kvack.org,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org, willy@infradead.org, hare@suse.de,
+	john.g.garry@oracle.com, p.raghav@samsung.com, da.gomez@samsung.com
+Subject: Re: [PATCH] mm/huge_memory: move writeback and truncation checks
+ early
+Message-ID: <ZjK8zDzIjN3xPR9n@bombadil.infradead.org>
+References: <20240424225736.1501030-1-mcgrof@kernel.org>
+ <37374089-895f-4c6f-a2f5-33859eb02b13@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,147 +49,48 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240430154810.GM360919@frogsfrogsfrogs>
+In-Reply-To: <37374089-895f-4c6f-a2f5-33859eb02b13@redhat.com>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On 2024-04-30 08:48:10, Darrick J. Wong wrote:
-> On Tue, Apr 30, 2024 at 03:11:11PM +0200, Andrey Albershteyn wrote:
-> > On 2024-04-29 20:42:05, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Add a test to make sure that we can disable fsverity on a file that
-> > > doesn't pass fsverity validation on its contents anymore.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/xfs/1881     |  111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/1881.out |   28 +++++++++++++
-> > >  2 files changed, 139 insertions(+)
-> > >  create mode 100755 tests/xfs/1881
-> > >  create mode 100644 tests/xfs/1881.out
-> > > 
-> > > 
-> > > diff --git a/tests/xfs/1881 b/tests/xfs/1881
-> > > new file mode 100755
-> > > index 0000000000..411802d7c7
-> > > --- /dev/null
-> > > +++ b/tests/xfs/1881
-> > > @@ -0,0 +1,111 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Oracle.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 1881
-> > > +#
-> > > +# Corrupt fsverity descriptor, merkle tree blocks, and file contents.  Ensure
-> > > +# that we can still disable fsverity, at least for the latter cases.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick verity
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	_restore_fsverity_signatures
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +. ./common/verity
-> > > +. ./common/filter
-> > > +. ./common/fuzzy
-> > > +
-> > > +_supported_fs xfs
-> > > +_require_scratch_verity
-> > > +_disable_fsverity_signatures
-> > > +_require_fsverity_corruption
-> > > +_require_xfs_io_command noverity
-> > > +_require_scratch_nocheck	# corruption test
-> > > +
-> > > +_scratch_mkfs >> $seqres.full
-> > > +_scratch_mount
-> > > +
-> > > +_require_xfs_has_feature "$SCRATCH_MNT" verity
-> > > +VICTIM_FILE="$SCRATCH_MNT/a"
-> > > +_fsv_can_enable "$VICTIM_FILE" || _notrun "cannot enable fsverity"
-> > > +
-> > > +create_victim()
-> > > +{
-> > > +	local filesize="${1:-3}"
-> > > +
-> > > +	rm -f "$VICTIM_FILE"
-> > > +	perl -e "print 'moo' x $((filesize / 3))" > "$VICTIM_FILE"
-> > > +	fsverity enable --hash-alg=sha256 --block-size=1024 "$VICTIM_FILE"
-> > > +	fsverity measure "$VICTIM_FILE" | _filter_scratch
-> > > +}
-> > > +
-> > > +disable_verity() {
-> > > +	$XFS_IO_PROG -r -c 'noverity' "$VICTIM_FILE" 2>&1 | _filter_scratch
-> > > +}
-> > > +
-> > > +cat_victim() {
-> > > +	$XFS_IO_PROG -r -c 'pread -q 0 4096' "$VICTIM_FILE" 2>&1 | _filter_scratch
-> > > +}
-> > > +
-> > > +echo "Part 1: Delete the fsverity descriptor" | tee -a $seqres.full
-> > > +create_victim
-> > > +_scratch_unmount
-> > > +_scratch_xfs_db -x -c "path /a" -c "attr_remove -f vdesc" -c 'ablock 0' -c print >> $seqres.full
-> > > +_scratch_mount
-> > > +cat_victim
-> > > +
-> > > +echo "Part 2: Disable fsverity, which won't work" | tee -a $seqres.full
-> > > +disable_verity
-> > > +cat_victim
-> > > +
-> > > +echo "Part 3: Corrupt the fsverity descriptor" | tee -a $seqres.full
-> > > +create_victim
-> > > +_scratch_unmount
-> > > +_scratch_xfs_db -x -c "path /a" -c 'attr_modify -f "vdesc" -o 0 "BUGSAHOY"' -c 'ablock 0' -c print >> $seqres.full
-> > > +_scratch_mount
-> > > +cat_victim
-> > > +
-> > > +echo "Part 4: Disable fsverity, which won't work" | tee -a $seqres.full
-> > > +disable_verity
-> > > +cat_victim
-> > > +
-> > > +echo "Part 5: Corrupt the fsverity file data" | tee -a $seqres.full
-> > > +create_victim
-> > > +_scratch_unmount
-> > > +_scratch_xfs_db -x -c "path /a" -c 'dblock 0' -c 'blocktrash -3 -o 0 -x 24 -y 24 -z' -c print >> $seqres.full
-> > > +_scratch_mount
-> > > +cat_victim
-> > > +
-> > > +echo "Part 6: Disable fsverity, which should work" | tee -a $seqres.full
-> > > +disable_verity
-> > > +cat_victim
-> > > +
-> > > +echo "Part 7: Corrupt a merkle tree block" | tee -a $seqres.full
-> > > +create_victim 1234 # two merkle tree blocks
-> > > +_fsv_scratch_corrupt_merkle_tree "$VICTIM_FILE" 0
+On Thu, Apr 25, 2024 at 11:40:48AM +0200, David Hildenbrand wrote:
+> On 25.04.24 00:57, Luis Chamberlain wrote:
+> > We should check as early as possible if we should bail due to writeback
+> > or truncation. This will allow us to add further sanity checks earlier
+> > as well.
 > > 
-> > hmm, _fsv_scratch_corrupt_merkle_tree calls _scratch_xfs_repair, and
-> > now with xfs_repair knowing about fs-verity is probably a problem. I
+> > This introduces no functional changes.
+> > 
+> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> > ---
+> >   mm/huge_memory.c | 23 +++++++++++------------
+> >   1 file changed, 11 insertions(+), 12 deletions(-)
+> > 
+> > While working on min order support for LBS this came up as an improvement
+> > as we can check for the min order early earlier, so this sets the stage
+> > up for that.
+> > 
+> > diff --git a/mm/huge_memory.c b/mm/huge_memory.c
+> > index 86a8c7b3b8dc..32c701821e0d 100644
+> > --- a/mm/huge_memory.c
+> > +++ b/mm/huge_memory.c
+> > @@ -3055,8 +3055,17 @@ int split_huge_page_to_list_to_order(struct page *page, struct list_head *list,
+> >   	if (new_order >= folio_order(folio))
+> >   		return -EINVAL;
+> > -	/* Cannot split anonymous THP to order-1 */
+> > -	if (new_order == 1 && folio_test_anon(folio)) {
+> > +	if (folio_test_writeback(folio))
+> > +		return -EBUSY;
+> > +
 > 
-> It shouldn't be -- xfs_repair doesn't check the contents of the merkle
-> tree itself.
+> Why earlier than basic input parameter checks (new_order?
 > 
-> (xfs_scrub sort of does, but only by calling out to the kernel fsverity
-> code to get rough tree geometry and calling MADV_POPULATE_READ to
-> exercise the read validation.)
-
-oh right, it's xfs_scrub, I meant re-reading file validation
-
+> Sorry, but I don't see the reason for that change. It's all happening
+> extremely early, what are we concerned about?
 > 
-> > don't remember what was the problem with quota (why xfs_repiar is
-> > there), I can check it.
-> 
-> If the attr_modify commandline changes the block count of the file, it
-> won't update the quota accounting information.  That can happen if the
-> dabtree changes shape, or if the new attr requires the creation of a new
-> attr leaf block, or if the remote value block count changes due to
-> changes in the size of the attr value.
+> It's likely better to send that patch with the actual patch "to add further
+> sanity checks earlier as well", and why they have to be that early.
 
-aha, yeah
+It's a clear eye-sore when we add min order, I'll leave the eyesores for
+others. It can wait.
 
--- 
-- Andrey
-
+  Luis
