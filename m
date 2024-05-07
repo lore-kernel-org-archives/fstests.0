@@ -1,60 +1,46 @@
 Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C23716D9C8
-	for <fstests@vger.kernel.org>; Tue,  7 May 2024 19:07:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 684E114E2EF
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 19:07:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715108861; cv=none; b=I8Liwk3Dgsis7A3vbvHGX4o/bZHtxaHXYGEjepmH7JeRvz3Q3QcKv2a9W62JXhGugqynxltSjvsCAWJIbdqZTqGgB/v0DJuVTvf9uBzXhVsW4vAZcnWSknYD9X3EyTZgM0HplBgc75Y45ufj/vPNS3an8rP10ljlR91xRaOsogY=
+	t=1715108862; cv=none; b=lpdspYOPwx8M54yB0YyFa1oxqtZu7FR6cOzT5VAlUBz9ezPZIas9eeoP/noTsbyrG2Cw/zRsOJiqUl7hsctlcozJ/Dhdmti98SOvfDbH1/SvC8uNHBKemw8oeuYn/agY2orgPRy/q+9E1NsrSDimN8itYmHirOqUow91VoiqjTw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715108861; c=relaxed/simple;
-	bh=4NCy7XQ5ZHhVRTuDj2PfamdVbNEOZ7xcRTGSgYTznOs=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LiZkzuvwlU9MqLKCPrzC4eJXR1HsQRmSR+XXYhGsIqGUt4mOxyHY8RYHPRyZyULpGSthSMkl/YO/cUJokm8QjoTmt6DgBN29HeQnXSimm2LgN+u3/iH5AK7mtR/nI/KDAjp/a9pKFtD87Jl43kPSanT53ifjl8LH95qRnCIpmLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=DabalCUr; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=DabalCUr; arc=none smtp.client-ip=195.135.223.131
+	s=arc-20240116; t=1715108862; c=relaxed/simple;
+	bh=wxPK/4AD+k1jetfimDtAld4bz0aRchuxfSE5P8wC2vg=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=fxavQj7Rbi1GCCiyrBEY7YnVBw6j+tQSNNEUKKIPj8vpwVblXgQGx5SlDNVGITU43VTATJRRnvUWcLepxnDMGz6WU9RlOZQ5LRI7rsL4xDXvc/YRqz2IVsB7yI/tYdlHOnlpcxhyhi8FGB3BcrgmHgAbsYMkNKnxm5ccjox5GQQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; arc=none smtp.client-ip=195.135.223.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="DabalCUr";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="DabalCUr"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 40E8A20F66;
-	Tue,  7 May 2024 19:07:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1715108855; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=RAjKbeiZ8GatQ+jv78/luqhXWvSt3RrtjveH6b1n/5A=;
-	b=DabalCUrr6XjJEeEfQqYceSN9Z5c31QvN8SZgGh48sFnt1yT82lFhMundlDz2HhPZeBVqx
-	9bGZOCyBuM6+kBL7Xmrrx/1RHJLQvkPeeyIm0sIKuj81VGSUPPdIbSv8lXlXBwhlUkYaxQ
-	IFWoVGaeHgaWvaPHeCl1uwrePTMCDv4=
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 9827D20F65;
+	Tue,  7 May 2024 19:07:37 +0000 (UTC)
 Authentication-Results: smtp-out2.suse.de;
 	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1715108855; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=RAjKbeiZ8GatQ+jv78/luqhXWvSt3RrtjveH6b1n/5A=;
-	b=DabalCUrr6XjJEeEfQqYceSN9Z5c31QvN8SZgGh48sFnt1yT82lFhMundlDz2HhPZeBVqx
-	9bGZOCyBuM6+kBL7Xmrrx/1RHJLQvkPeeyIm0sIKuj81VGSUPPdIbSv8lXlXBwhlUkYaxQ
-	IFWoVGaeHgaWvaPHeCl1uwrePTMCDv4=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 37C15139CB;
-	Tue,  7 May 2024 19:07:35 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9157A139CB;
+	Tue,  7 May 2024 19:07:37 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id /f9FDfd7OmZHGwAAD6G6ig
-	(envelope-from <dsterba@suse.com>); Tue, 07 May 2024 19:07:35 +0000
+	id ynZ6I/l7OmZeGwAAD6G6ig
+	(envelope-from <dsterba@suse.com>); Tue, 07 May 2024 19:07:37 +0000
 From: David Sterba <dsterba@suse.com>
 To: fstests@vger.kernel.org
 Cc: David Sterba <dsterba@suse.com>
-Subject: [PATCH 0/4] Move test cased from shared to generic
-Date: Tue,  7 May 2024 21:07:28 +0200
-Message-ID: <cover.1715108589.git.dsterba@suse.com>
+Subject: [PATCH 1/4] Move shared/032 to generic/740
+Date: Tue,  7 May 2024 21:07:36 +0200
+Message-ID: <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
 X-Mailer: git-send-email 2.44.0
+In-Reply-To: <cover.1715108589.git.dsterba@suse.com>
+References: <cover.1715108589.git.dsterba@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,59 +48,53 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: -0.30
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
 X-Spam-Level: 
-X-Spamd-Result: default: False [-0.30 / 50.00];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	BAYES_HAM(-0.50)[79.95%];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
-	RCVD_TLS_ALL(0.00)[]
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	REPLY(-4.00)[]
+X-Spam-Flag: NO
+X-Spam-Score: -4.00
+X-Rspamd-Queue-Id: 9827D20F65
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
+X-Rspamd-Action: no action
 
-Hi,
+The shared/ directory was supposed to host tests that apply to a subset
+of all supported filesystems but this is not utilized much and creates a
+split from the generic tests. Move the test to generic.
 
-as discussed recently, the tests in shared should be in generic.
-
-Based on branch patches-in-queue, commit e098483c662d8f0b7583edca1501d8addd3b7549.
-
-David Sterba (4):
-  Move shared/298 to generic/740
-  Move shared/002 to generic/745
-  Move shared/298 to generic/746
-  Remove rest of shared/
-
- check                                     |  2 +-
- tests/{shared/032 => generic/740}         |  2 +-
- tests/{shared/032.out => generic/740.out} |  0
- tests/{shared/002 => generic/745}         |  2 +-
- tests/{shared/002.out => generic/745.out} |  0
- tests/{shared/298 => generic/746}         |  2 +-
- tests/{shared/298.out => generic/746.out} |  0
- tests/shared/Makefile                     | 24 -----------------------
- 8 files changed, 4 insertions(+), 28 deletions(-)
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ tests/{shared/032 => generic/740}         | 2 +-
+ tests/{shared/032.out => generic/740.out} | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
  rename tests/{shared/032 => generic/740} (99%)
  rename tests/{shared/032.out => generic/740.out} (100%)
- rename tests/{shared/002 => generic/745} (99%)
- rename tests/{shared/002.out => generic/745.out} (100%)
- rename tests/{shared/298 => generic/746} (99%)
- rename tests/{shared/298.out => generic/746.out} (100%)
- delete mode 100644 tests/shared/Makefile
 
+diff --git a/tests/shared/032 b/tests/generic/740
+similarity index 99%
+rename from tests/shared/032
+rename to tests/generic/740
+index 131323ab5b0ff8..6ed248617eaa6b 100755
+--- a/tests/shared/032
++++ b/tests/generic/740
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
+ #
+-# FS QA Test No. 032
++# FS QA Test No. 740
+ #
+ # cross check mkfs detection of foreign filesystems
+ #
+diff --git a/tests/shared/032.out b/tests/generic/740.out
+similarity index 100%
+rename from tests/shared/032.out
+rename to tests/generic/740.out
 -- 
 2.44.0
 
