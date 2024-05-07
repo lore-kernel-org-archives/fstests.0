@@ -1,39 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5079978C76
-	for <fstests@vger.kernel.org>; Tue,  7 May 2024 22:38:30 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6CC2078C76
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 22:39:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715121512; cv=none; b=eLJZfULmqlTjkgxxjZD7BRc2m8YVJVA8Hj/j5+eDnNL5QiW0pVcXJpbrNpE2QQw4KMkW6Whu643bVQg6/k7pPPm3ndTgltcjfsehSS3rjya7LkhybbR/Tib9yfGR1v96zR0r7YGyHbCO9WWJBsj5rhvIu68p/oYUO+xJfqQCwNE=
+	t=1715121589; cv=none; b=RMarv8HXZKOs13iLdGM/vMftxyNns88+euBBBMS8DUiijH/fm6ExiPu52nvJY5O6suZ/CP1RP6gsFsIAUMgcRPrndgKZkQlHn5QlBq7EsPmusVhG5Fj3j+WnJWe1CgiB4n4WORj1ea1xFCGtbhOygT8kTuUUVyJpmTIl3g4FtSM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715121512; c=relaxed/simple;
-	bh=7CH/1qYtb3A1zCQx+VwzyZ8CPqDpC67PhKYtR1qY5gI=;
+	s=arc-20240116; t=1715121589; c=relaxed/simple;
+	bh=vLNAfSLPbgYTqbLgo2Ary2P5sKAK2h89YC2UyQSiBZs=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cVdVpry6jw13xkGIJtqLdUT6KUNdDUWQGk8ME0t49AlooR5uTAdspTXlo5zgbHy8FoVTVW9pLRf57z56TDhbULPVFlF5YonK9Mq2k1sh2+y6NyMo/L/cjvBFX+o4lQktvj1CPLfKriu9J+g6+x31xO+8s9PgcM6nXsSi1EqKX98=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QvBG1heI; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=QvwA+K8UpoFVZgwdoK6dcUuNjWDeT7aZuFDxjFd2VVmTbiwHp7KR/Dgwph5u/SU6ZvZoKMiw19UfZVit1mCqpHLW4ds4ks0ODeTkIMkBb2fm6Ei/40Vzcpq/5t2d3/DJcF4CbGkYD1e+yQaOfx2JJoNZRb3hvipG5qqaUtYBtbU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tHgX9Gos; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QvBG1heI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5FF9C3277B;
-	Tue,  7 May 2024 22:38:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tHgX9Gos"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E314CC3277B;
+	Tue,  7 May 2024 22:39:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715121510;
-	bh=7CH/1qYtb3A1zCQx+VwzyZ8CPqDpC67PhKYtR1qY5gI=;
+	s=k20201202; t=1715121589;
+	bh=vLNAfSLPbgYTqbLgo2Ary2P5sKAK2h89YC2UyQSiBZs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=QvBG1heIht41e1V6Sx5TyAgZCaFA6eJvvYXjjp/y6Ae/vuSB0JFPoh282L/3FJ8Vm
-	 nGLDv3vw6kImbXGw7tVmYZ15AW78AHMQgih6PAHtCj0rukkN1/7CEZIP8U4YH2K/lI
-	 D985h6SjVWJNBaYL8ZDPaqrKw1QFkhStuWNy1Yn3wP89hx6P9AoNZDgMUYqqLD43AJ
-	 DUjEC6eghbYW4ZS5KaAQIBUOToaiGovn+Ajxj5NBE2kNOxWdESRrVE1RKInrr4zJJq
-	 a7htRdyrs9DQcnhVSKD+qgAbCiGYfgxfkbBmY65M4cKv7pgCTwXd9DP5TMI4Thto0z
-	 NACgpv074vynQ==
-Date: Tue, 7 May 2024 15:38:30 -0700
+	b=tHgX9GoswbzQBhbGUKBhKNZ2c5EqQUiEDgUfuoenNjpRaIH/Y8xyF8SV7n9sobjiX
+	 oTms1gpyb/6zIgX5RFT7FlXhIcEgikK8COOMdRA13LdVU3Ezb5lgIgpGDj/QIZCYq3
+	 L4VI87whxwS3jkypV3rmSpoC4WxTtGiLy+chRqoFIxQCMXZau2C8tsNlctespVPbIv
+	 57Hf6lG+wYvkSxK/3KCEv/nkXmYaFPjVtyVTAr8EFdiroie8O6udbHSEXI/P3NhNQe
+	 svRGxA66ACiebjNHubvbfIpQAMxH09IT4Mq4tyUQ6c0AoMG5RyRylclnqa/pFn6lUE
+	 g3oUqBlORChiA==
+Date: Tue, 7 May 2024 15:39:48 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: David Sterba <dsterba@suse.com>
 Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 1/4] Move shared/032 to generic/740
-Message-ID: <20240507223830.GE360908@frogsfrogsfrogs>
+Subject: Re: [PATCH 0/4] Move test cased from shared to generic
+Message-ID: <20240507223948.GF360908@frogsfrogsfrogs>
 References: <cover.1715108589.git.dsterba@suse.com>
- <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,49 +41,46 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
+In-Reply-To: <cover.1715108589.git.dsterba@suse.com>
 
-On Tue, May 07, 2024 at 09:07:36PM +0200, David Sterba wrote:
-> The shared/ directory was supposed to host tests that apply to a subset
-> of all supported filesystems but this is not utilized much and creates a
-> split from the generic tests. Move the test to generic.
+On Tue, May 07, 2024 at 09:07:28PM +0200, David Sterba wrote:
+> Hi,
 > 
-> Signed-off-by: David Sterba <dsterba@suse.com>
-> ---
->  tests/{shared/032 => generic/740}         | 2 +-
->  tests/{shared/032.out => generic/740.out} | 0
->  2 files changed, 1 insertion(+), 1 deletion(-)
->  rename tests/{shared/032 => generic/740} (99%)
->  rename tests/{shared/032.out => generic/740.out} (100%)
+> as discussed recently, the tests in shared should be in generic.
 > 
-> diff --git a/tests/shared/032 b/tests/generic/740
-> similarity index 99%
-> rename from tests/shared/032
-> rename to tests/generic/740
-> index 131323ab5b0ff8..6ed248617eaa6b 100755
-> --- a/tests/shared/032
-> +++ b/tests/generic/740
-> @@ -2,7 +2,7 @@
->  # SPDX-License-Identifier: GPL-2.0
->  # Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
->  #
-> -# FS QA Test No. 032
-> +# FS QA Test No. 740
->  #
->  # cross check mkfs detection of foreign filesystems
->  #
-> diff --git a/tests/shared/032.out b/tests/generic/740.out
-> similarity index 100%
-> rename from tests/shared/032.out
-> rename to tests/generic/740.out
+> Based on branch patches-in-queue, commit e098483c662d8f0b7583edca1501d8addd3b7549.
 
-Don't you need to update the "QA output created by 032" in 032.out as
-well?
+I'm glad to get rid of shared/ finally.  Modulo my question about the
+.out files, I agree with this change.
 
-tools/mvtest handles at least the simple cases.
+Acked-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
+> 
+> David Sterba (4):
+>   Move shared/298 to generic/740
+>   Move shared/002 to generic/745
+>   Move shared/298 to generic/746
+>   Remove rest of shared/
+> 
+>  check                                     |  2 +-
+>  tests/{shared/032 => generic/740}         |  2 +-
+>  tests/{shared/032.out => generic/740.out} |  0
+>  tests/{shared/002 => generic/745}         |  2 +-
+>  tests/{shared/002.out => generic/745.out} |  0
+>  tests/{shared/298 => generic/746}         |  2 +-
+>  tests/{shared/298.out => generic/746.out} |  0
+>  tests/shared/Makefile                     | 24 -----------------------
+>  8 files changed, 4 insertions(+), 28 deletions(-)
+>  rename tests/{shared/032 => generic/740} (99%)
+>  rename tests/{shared/032.out => generic/740.out} (100%)
+>  rename tests/{shared/002 => generic/745} (99%)
+>  rename tests/{shared/002.out => generic/745.out} (100%)
+>  rename tests/{shared/298 => generic/746} (99%)
+>  rename tests/{shared/298.out => generic/746.out} (100%)
+>  delete mode 100644 tests/shared/Makefile
+> 
 > -- 
 > 2.44.0
 > 
