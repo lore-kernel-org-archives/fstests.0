@@ -1,41 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83BA571B3B
-	for <fstests@vger.kernel.org>; Tue,  7 May 2024 22:23:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B43771B3B
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 22:24:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715120604; cv=none; b=jLnhKOcMX0DbDDR9bbSuE1T78NgbC2jizNC/g+y6AknaCS7StHg1mVNpQ5jQXwZEXTfKnoC8FZDc6DRUiyko8//SBpsV+oOHR/+Z1uQWrxj0nlRER0iuOaPGKL45Uc5kzibUY4ym40pK3Q5XTdEZxA42p7+Eh15Q8lntdxLVVNw=
+	t=1715120648; cv=none; b=Vtt7Nxtj7gLm8gitWWJMJFzH64OMSBfeqf7wf6bjgGWA52Bmq47WTQ6ZCqhbU7LSC3tVbEZAJHdsoafUalqBMnwruX1GK8BppvdEebaz5W1MHpjERfYmuhnvvTFthyd5Aerv4wxlmi2DSEHajgdboSyO0NxIrKnCUHfQ86Ck3wk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715120604; c=relaxed/simple;
-	bh=w0Fq3Oo5Lri/ddv4vtGj4aTicir445avYE0Qcii3Lqw=;
+	s=arc-20240116; t=1715120648; c=relaxed/simple;
+	bh=3ymh5udtU7Z0J+Sf+ilBNoJc76E2iJbVdcVg1sgjYiQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=D6Y98G0UGex78qvjliXCNZ4Vz/ztTFLFDUZOD5JTq52yXzOVIH0bEF8EQM6gaDxicQFoujYkNoCscu34Sh6MaSREQCkzZl9fCLmhlTSK/Hm/DpYMpKpW3QvqrQ6/BvLjzKo7AIJbntmcnLIMhadnk0sUfLSCNsYzOW1/Um9aIyY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PFdze5H+; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PBFkQQcC34GMt4ZULJ6kTDvMdkGlQ7jBUwS3Z2MUn/iPxFZy21Tv5wmzkWYTzqGxqQ90wmXqa00/CXnrdehqcWNZAma4HAZXFBOzrwMym2hzlJg/YlPNa572qOqg/1GHrJ2xmCzd3xef1cv/JZXQWlHAzgUAPzY0JKpcoyrgauE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YYeY1HVv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PFdze5H+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E5865C2BBFC;
-	Tue,  7 May 2024 22:23:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YYeY1HVv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AA796C2BBFC;
+	Tue,  7 May 2024 22:24:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715120604;
-	bh=w0Fq3Oo5Lri/ddv4vtGj4aTicir445avYE0Qcii3Lqw=;
+	s=k20201202; t=1715120647;
+	bh=3ymh5udtU7Z0J+Sf+ilBNoJc76E2iJbVdcVg1sgjYiQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=PFdze5H+QWfzs/GUOPRAoq4wnPfYHoYEzm7OHgshmEzvVw+pbrL+PCFG/6OnnsBS6
-	 KVqeNMzw6MrQcrWBDP9ZYZ8SuXmBCbZHXAwrqCb5ovOkwWDHNlBn91fSEra5iXmJ/m
-	 FWBE+ObUTk3esbPFLFkkXfPvtut9dQj9EhFi0Wxp5JdKek0Dil91QVjjBQDnwd1t0c
-	 FzTJQljcJB1R2X9MNXGaw8tPjFwDv/SYQRHy/tUWLWPViETvBf37BroERhRdpFn6Xv
-	 BwaEAa832DYPPuh7Tte5kZ0G2GdQlpYYjZdA6yJqs+UlFZUhzWQPU23U05NjEhj4h5
-	 8FGaNVmibRZYQ==
-Date: Tue, 7 May 2024 15:23:23 -0700
+	b=YYeY1HVvLc+jSysxGcvtWQ6TO5FUXC/EOh3JjUUFCXEB6F62pO0NV9Az0/QlSFrmj
+	 LWyw6LYqog00fpJwifKuUL6z6dYuy/MaRolCAB9M5fxgGUJCAECpQzsPYkYX98CMYy
+	 VJLMc4tsW746G+DK/UeITffUFJ3Qt5D+cxyLMxPTPiUnW1oopazcwSB+wYb9R1CGWV
+	 UaTlGF5hWoXRx1+lsSN9Gieti2UPImOvMix7uoK16YhXtHSMZLvRm1txLz0iYqLxz/
+	 o3sMYq2aqH5Qjf4HxGlq4p+DdYGyc46dKJ09WmsiwAt1ctNH150JU3gZJ23WMcj1au
+	 OyJoPDOKIYK/A==
+Date: Tue, 7 May 2024 15:24:07 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
 Cc: fstests@vger.kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
 	ritesh.list@gmail.com, zlang@redhat.com,
 	Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH 1/3] xfs/161: adapt the test case for 64k FS blocksize
-Message-ID: <20240507222323.GC2049409@frogsfrogsfrogs>
+Subject: Re: [PATCH 2/3] generic/436: round up bufsz to nearest filesystem
+ blksz
+Message-ID: <20240507222407.GD2049409@frogsfrogsfrogs>
 References: <20240506150119.184097-1-kernel@pankajraghav.com>
- <20240506150119.184097-2-kernel@pankajraghav.com>
+ <20240506150119.184097-3-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,66 +45,71 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240506150119.184097-2-kernel@pankajraghav.com>
+In-Reply-To: <20240506150119.184097-3-kernel@pankajraghav.com>
 
-On Mon, May 06, 2024 at 05:01:17PM +0200, Pankaj Raghav (Samsung) wrote:
+On Mon, May 06, 2024 at 05:01:18PM +0200, Pankaj Raghav (Samsung) wrote:
 > From: Pankaj Raghav <p.raghav@samsung.com>
 > 
-> This test fails when xfs is formatted with 64k filesystem block size*.
-> It fails because the soft quota is not exceeded with the hardcoded 64k
-> pwrite, thereby, the grace time is not set. Even though soft quota is
-> set to 12k for uid1, it is rounded up to the nearest blocksize.
+> SEEK_HOLE and SEEK_DATA work in filesystem block size granularity. So
+> while filling up the buffer for test 13 - 16, round up the bufsz to the
+> closest filesystem blksz.
 > 
-> *** Report for user quotas on device /dev/sdb3
-> Block grace time: 7days; Inode grace time: 7days
->                         Block limits                File limits
-> User            used    soft    hard  grace    used  soft  hard  grace
-> ----------------------------------------------------------------------
-> 0        --       0       0       0      0       3     0     0      0
-> 1        --      64      64    1024      0       1     0     0      0
-> 2        --      64       0       0      0       1     0     0      0
+> As we only allowed blocksizes lower than the pagesize, this was never an
+> issue and it always aligned. Once we have blocksize > pagesize, this
+> assumption will break.
 > 
-> Adapt the pwrite to do more than 64k write when the FS blocksize is 64k.
-> 
-> Cap the blksz to be at least 64k to retain the same behaviour as before
-> for smaller filesystem blocksizes.
-> 
-> * This happens even on a 64k pagesize system and it is not related to
->   LBS effort.
+> Fixes the test for LBS configuration.
 > 
 > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
 > ---
->  tests/xfs/161 | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+>  src/seek_sanity_test.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/xfs/161 b/tests/xfs/161
-> index 486fa6ca..94290f18 100755
-> --- a/tests/xfs/161
-> +++ b/tests/xfs/161
-> @@ -38,9 +38,15 @@ _qmount_option "usrquota"
->  _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
->  _scratch_mount >> $seqres.full
->  
-> +min_blksz=65536
-> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> +# Write more than one block to exceed the soft block quota limit.
-> +blksz=$(( 2 * $file_blksz))
-> +
-> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
+> diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+> index 48b3ccc0..bc30f77c 100644
+> --- a/src/seek_sanity_test.c
+> +++ b/src/seek_sanity_test.c
+> @@ -541,7 +541,7 @@ static int test16(int fd, int testnum)
+>  {
+>  	int ret = 0;
+>  	char *buf = NULL;
+> -	int bufsz = sysconf(_SC_PAGE_SIZE);
+> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
 
-If we don't set $min_blksize and always write (2 * $file_blksz) does the
-test still work?
+Why is the page size multiplied by 14?
 
 --D
 
->  # Force the block counters for uid 1 and 2 above zero
-> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/a >> $seqres.full
-> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/b >> $seqres.full
-> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/a >> $seqres.full
-> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/b >> $seqres.full
->  sync
->  chown 1 $SCRATCH_MNT/a
->  chown 2 $SCRATCH_MNT/b
+>  	int filsz = 4 << 20;
+>  
+>  	if (!unwritten_extents) {
+> @@ -591,7 +591,7 @@ static int test15(int fd, int testnum)
+>  {
+>  	int ret = 0;
+>  	char *buf = NULL;
+> -	int bufsz = sysconf(_SC_PAGE_SIZE);
+> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
+>  	int filsz = 4 << 20;
+>  
+>  	if (!unwritten_extents) {
+> @@ -643,7 +643,7 @@ static int test14(int fd, int testnum)
+>  {
+>  	int ret = 0;
+>  	char *buf = NULL;
+> -	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
+> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
+>  	int filsz = 4 << 20;
+>  
+>  	if (!unwritten_extents) {
+> @@ -692,7 +692,7 @@ static int test13(int fd, int testnum)
+>  {
+>  	int ret = 0;
+>  	char *buf = NULL;
+> -	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
+> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
+>  	int filsz = 4 << 20;
+>  
+>  	if (!unwritten_extents) {
 > -- 
 > 2.34.1
 > 
