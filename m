@@ -1,104 +1,109 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF220187326
-	for <fstests@vger.kernel.org>; Tue,  7 May 2024 20:09:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83BA571B3B
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 22:23:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715112542; cv=none; b=euHaC6Hpvpgy620yIFA0kD0A4+PVMFKpvJdF46US+flGcbSF13ZpCj2xCqh8Vbxa0E1sm3SnOOvEbcgmsHnRTXaazyIn3dH/kEY56K5MhNM5D9iLeqFu159LZGPrNkGAZvo4kFVPlj/ygfiaNO/vcBK1kArJVuchSGWShjNZ8qk=
+	t=1715120604; cv=none; b=jLnhKOcMX0DbDDR9bbSuE1T78NgbC2jizNC/g+y6AknaCS7StHg1mVNpQ5jQXwZEXTfKnoC8FZDc6DRUiyko8//SBpsV+oOHR/+Z1uQWrxj0nlRER0iuOaPGKL45Uc5kzibUY4ym40pK3Q5XTdEZxA42p7+Eh15Q8lntdxLVVNw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715112542; c=relaxed/simple;
-	bh=jZ3U1Q871r6OkJ2Njb2rrJaKylS3FSiliBkBOejtF3c=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=bmbjtQOr3g3SwelrfcB4fSyJf91pTEovL+56UPBIyLE6v8QCVrKmkGRJ8JaRxg30I+866Wag0rZCi3aejQ4FEtKjSROwGX38M40BoOUhaobroiyjUuv1dpqsd1i5l+xhGpMYVHF4rcrcFBL9/0j8HMlZbYRc/bjRUk1bbeIGI6Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=JJfTKXi2; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1715120604; c=relaxed/simple;
+	bh=w0Fq3Oo5Lri/ddv4vtGj4aTicir445avYE0Qcii3Lqw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=D6Y98G0UGex78qvjliXCNZ4Vz/ztTFLFDUZOD5JTq52yXzOVIH0bEF8EQM6gaDxicQFoujYkNoCscu34Sh6MaSREQCkzZl9fCLmhlTSK/Hm/DpYMpKpW3QvqrQ6/BvLjzKo7AIJbntmcnLIMhadnk0sUfLSCNsYzOW1/Um9aIyY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PFdze5H+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="JJfTKXi2"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-62026f59233so1151517b3.1
-        for <fstests@vger.kernel.org>; Tue, 07 May 2024 13:09:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1715112539; x=1715717339; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=tbIHQekgsaQ5/Cm+qVmozu3CZtSxRReTFO8xYZYOjVY=;
-        b=JJfTKXi23o+uQz+jsDxDBMnQ1UynCX2Rc9MByTymj8mEJ6rukXpG5XY6sJzhryFdvZ
-         Tv8GCzd6Gp/xLy3E6PXFSvC1zeHx7NSAMHf8qw+hDroz4g+KDdFATAtCSfy3hZtlfoAv
-         ei76iLL9V4dkx+GAEfApy4OHDNJ2oNunQkhV9pbajq2JB3rJ2ZqcrTu5y9teMNCz++TQ
-         2bD5LNunQxnFfSSvMzsGH7GQ3x23pqiSm74rhz73WjSS2dnBiXBvZQHFTpj4kO9rg5/2
-         XSsP/cslqUl0Cz6zRSL8u3X3kj7rz8AOaWI4J0ji0NRpgh0OJdqj50DCI8/wWcobVeOU
-         EmpQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715112539; x=1715717339;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=tbIHQekgsaQ5/Cm+qVmozu3CZtSxRReTFO8xYZYOjVY=;
-        b=Gvq/UKvMeBrEj3FqRwSZVPmp/iY4S0BD6o+bmZ50RSnOouuOz9B1IdqBQhOfNk1l9G
-         Mgjz/PfWxwKYLCLDRMahaxHErbxXxEnQNbogCA8mt9OvEdWsD4bOQ4ijCTwAaYyI/wbP
-         TEvTut+ndKIm2o1O3MaL1iJApQ9lON7FGsIrT0rEeUf+pbabhsBYPn4MXFlv36PjkN20
-         bpBoJ5aAn4WSgfJMGbTjhZnPQ30X+erXMb11xpYEywThkLKr534Jhp9iPnAcwT163x9+
-         AJHWNvn4uC3zYpy5+piOHMXFZiKiRxCuYsTPnXQEpwn86t1HrnabL8XbXeKF1FD/sYMK
-         Lsxg==
-X-Gm-Message-State: AOJu0Ywl0ARV85SVs09KJT/LcHAoalmHrJHvoianHkUJdFwAfjUb+dv9
-	7WXIRQPYtSxsXGAuUDo9hFnIqIj1s3vUyvwhEumkqWo19bTrcOKBUbg4IxsApyArBt9/ylgREN7
-	V
-X-Google-Smtp-Source: AGHT+IGgb89OtzaPXuT0sJCrOv/hOba8x4kDLz1fk/CrBUZiBSX6TF+HlydZP4MRPw5Xwu38SsP+7w==
-X-Received: by 2002:a81:4f58:0:b0:614:35a7:4c40 with SMTP id 00721157ae682-620766308a9mr26624847b3.22.1715112538188;
-        Tue, 07 May 2024 13:08:58 -0700 (PDT)
-Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id v67-20020a814846000000b0061b8e9593d4sm2912170ywa.3.2024.05.07.13.08.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 May 2024 13:08:57 -0700 (PDT)
-From: Josef Bacik <josef@toxicpanda.com>
-To: fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org,
-	kernel-team@fb.com
-Subject: [PATCH] fstests: mkfs the scratch device if we have missing profiles
-Date: Tue,  7 May 2024 16:08:53 -0400
-Message-ID: <adcf935ecd3d44957ee244b91790ee7b73df134b.1715112528.git.josef@toxicpanda.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PFdze5H+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E5865C2BBFC;
+	Tue,  7 May 2024 22:23:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1715120604;
+	bh=w0Fq3Oo5Lri/ddv4vtGj4aTicir445avYE0Qcii3Lqw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PFdze5H+QWfzs/GUOPRAoq4wnPfYHoYEzm7OHgshmEzvVw+pbrL+PCFG/6OnnsBS6
+	 KVqeNMzw6MrQcrWBDP9ZYZ8SuXmBCbZHXAwrqCb5ovOkwWDHNlBn91fSEra5iXmJ/m
+	 FWBE+ObUTk3esbPFLFkkXfPvtut9dQj9EhFi0Wxp5JdKek0Dil91QVjjBQDnwd1t0c
+	 FzTJQljcJB1R2X9MNXGaw8tPjFwDv/SYQRHy/tUWLWPViETvBf37BroERhRdpFn6Xv
+	 BwaEAa832DYPPuh7Tte5kZ0G2GdQlpYYjZdA6yJqs+UlFZUhzWQPU23U05NjEhj4h5
+	 8FGaNVmibRZYQ==
+Date: Tue, 7 May 2024 15:23:23 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+Cc: fstests@vger.kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
+	ritesh.list@gmail.com, zlang@redhat.com,
+	Pankaj Raghav <p.raghav@samsung.com>
+Subject: Re: [PATCH 1/3] xfs/161: adapt the test case for 64k FS blocksize
+Message-ID: <20240507222323.GC2049409@frogsfrogsfrogs>
+References: <20240506150119.184097-1-kernel@pankajraghav.com>
+ <20240506150119.184097-2-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240506150119.184097-2-kernel@pankajraghav.com>
 
-I have a btrfs config where I specifically exclude raid56 testing, and
-this resulted in btrfs/011 failing with an inconsistent file system.
-This happens because the last test we run does a btrfs device replace of
-the $SCRATCH_DEV, leaving it with no valid file system.  We then skip
-the remaining profiles and exit, but then we go to check the device on
-$SCRATCH_DEV and it fails because there is no file system.
+On Mon, May 06, 2024 at 05:01:17PM +0200, Pankaj Raghav (Samsung) wrote:
+> From: Pankaj Raghav <p.raghav@samsung.com>
+> 
+> This test fails when xfs is formatted with 64k filesystem block size*.
+> It fails because the soft quota is not exceeded with the hardcoded 64k
+> pwrite, thereby, the grace time is not set. Even though soft quota is
+> set to 12k for uid1, it is rounded up to the nearest blocksize.
+> 
+> *** Report for user quotas on device /dev/sdb3
+> Block grace time: 7days; Inode grace time: 7days
+>                         Block limits                File limits
+> User            used    soft    hard  grace    used  soft  hard  grace
+> ----------------------------------------------------------------------
+> 0        --       0       0       0      0       3     0     0      0
+> 1        --      64      64    1024      0       1     0     0      0
+> 2        --      64       0       0      0       1     0     0      0
+> 
+> Adapt the pwrite to do more than 64k write when the FS blocksize is 64k.
+> 
+> Cap the blksz to be at least 64k to retain the same behaviour as before
+> for smaller filesystem blocksizes.
+> 
+> * This happens even on a 64k pagesize system and it is not related to
+>   LBS effort.
+> 
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> ---
+>  tests/xfs/161 | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/xfs/161 b/tests/xfs/161
+> index 486fa6ca..94290f18 100755
+> --- a/tests/xfs/161
+> +++ b/tests/xfs/161
+> @@ -38,9 +38,15 @@ _qmount_option "usrquota"
+>  _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
+>  _scratch_mount >> $seqres.full
+>  
+> +min_blksz=65536
+> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
+> +# Write more than one block to exceed the soft block quota limit.
+> +blksz=$(( 2 * $file_blksz))
+> +
+> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
 
-Fix this to re-make the scratch device if we skip any of the raid
-profiles.  This only happens in the case of some idiot user configuring
-their testing in a special way, in normal runs of this test we'll never
-re-make the fs.
+If we don't set $min_blksize and always write (2 * $file_blksz) does the
+test still work?
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/btrfs/011 | 6 ++++++
- 1 file changed, 6 insertions(+)
+--D
 
-diff --git a/tests/btrfs/011 b/tests/btrfs/011
-index d8b5a978..b8c14f3b 100755
---- a/tests/btrfs/011
-+++ b/tests/btrfs/011
-@@ -257,6 +257,12 @@ for t in "-m single -d single:1 no 64" \
- 	workout_option=${t#*:}
- 	if [[ "${_btrfs_profile_configs[@]}" =~ "${mkfs_option/ -M}"( |$) ]]; then
- 		workout "$mkfs_option" $workout_option
-+	else
-+		# If we have limited the profile configs we could leave
-+		# $SCRATCH_DEV in an inconsistent state (because it was
-+		# replaced), so mkfs the scratch device to make sure we don't
-+		# trip the fs check at the end.
-+		_scratch_mkfs > /dev/null 2>&1
- 	fi
- done
- 
--- 
-2.43.0
-
+>  # Force the block counters for uid 1 and 2 above zero
+> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/a >> $seqres.full
+> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/b >> $seqres.full
+> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/a >> $seqres.full
+> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/b >> $seqres.full
+>  sync
+>  chown 1 $SCRATCH_MNT/a
+>  chown 2 $SCRATCH_MNT/b
+> -- 
+> 2.34.1
+> 
