@@ -1,81 +1,92 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 891AC3209;
-	Tue,  7 May 2024 00:31:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C4733FBA2
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 04:00:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715041864; cv=none; b=F+TMHyPEbVyRp5yHF7Y5TrDkUB98J8S9ojVbynj6kYo9yTFTdwxcgcSNIdR1kMh5Px3TtIcmD/ThG10adDAh5w3shjJnxWR/vvcNbMTCn8eaZIFoX0SEI8UCEWRutTLJBz0NFNlv8pt5qIAnrt9oRqrYnFem6CAk/GfZvJeqBKE=
+	t=1715054440; cv=none; b=RClbmdcAuegsaTAr1vaqa0aTQaryaP2E8B2+wqVKem74sbdwzHmBqqxfGyNIoUylA9VywuOgIu62BZxnV6VYctVuL5+C0TqyZSZ4F83hfZZAkGY1kA6GFxaYBzLFN+ww7zifoG/wphD7PmPno/MhzhvpW0s6nzt5fNn2kABcwro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715041864; c=relaxed/simple;
-	bh=6K/qVLxvWM+JIRdXSYZ3gg4O0292aBjfYPKpsDaPkkc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=r9IwFaWtj0XFW+QGM6xWmZ1NtJnwxzyeNdQPR7SltuMINtrzEV8cFOTKuWrgsTLHLKxn5qzFlX9g+DmLvHsU9F3AYP3cn4QpVGpMCR45i9MvlxcNB9t2VUtAgAWz57mQQHwsqXZvVR04aRTGagzSvwk9Dmms7qp2HBir+4PbUGs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=mWLcirb8; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1715054440; c=relaxed/simple;
+	bh=guSDgRvIz5THolBRVoCsRSS7c3u5tGU9us9dwNqnjKY=;
+	h=Date:Message-Id:From:To:Cc:Subject; b=aBbWgcXaZyQhrSP8lSj2M4u/SThUpDLZMioFd0lB+0Be8PlrOu9AF4kPTaIZREaLcL5udssEyH428klwVn07PWv3LmOGu9vIBuAqoXDj5eqVCFkjorm5p7zDt37VPkc/n6ncXpibQB1nzyn3FdQV1IWvtBA+1zXjVdy8spwYhE0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XyY3aK0F; arc=none smtp.client-ip=209.85.214.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="mWLcirb8"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=eVoHe7gki5cWDhouGnejYKP4ZymSrtyZjdYp0G0mgKs=; b=mWLcirb8e/jEqvmhJ5A9D8/csD
-	GZZ6qmjoVb/dLSKXjivspzcuigXDctbMT0xjlSfuxYiNClIYJRz5tk4mOOh/tlTKRSoxpSCb10GEH
-	qxpWb0wEa4LHrM62CK7RezooI1KocproXqycgvEfDhml8xak9raWOh7W36eU2O6VJcj9mqcL0TDt9
-	Vk6AWv+cSLHqbslgSgK23PX2aNc9yf55LiY3DxSs+6pN9qIMmAiTgMdSeEnxF74MOgXfqXVywu7lm
-	xulB4lhrD0MDVF5NTWxLh+Gxg0ExHXWZlXw0Dsa9sSee5/3frZ+/pvlVLFFTUjlemnyLWuIodKEEM
-	rrcABVHw==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1s48jT-00000009A5v-15iX;
-	Tue, 07 May 2024 00:30:59 +0000
-Date: Mon, 6 May 2024 17:30:59 -0700
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: ziy@nvidia.com, linux-mm@kvack.org, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org,
-	willy@infradead.org, hare@suse.de, john.g.garry@oracle.com,
-	p.raghav@samsung.com, da.gomez@samsung.com
-Subject: Re: [PATCH 1/2] mm/huge_memory: skip invalid debugfs file entry for
- folio split
-Message-ID: <Zjl2Q5fjudt75uvk@bombadil.infradead.org>
-References: <20240424225449.1498244-1-mcgrof@kernel.org>
- <20240424225449.1498244-2-mcgrof@kernel.org>
- <20240425140126.2a62a5ec686813ee7deea658@linux-foundation.org>
- <Zi8cYrtxyO7Uw-Mc@bombadil.infradead.org>
- <20240429092307.37bf51c79f70bad4922f6277@linux-foundation.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XyY3aK0F"
+Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-1edf506b216so11637835ad.2
+        for <fstests@vger.kernel.org>; Mon, 06 May 2024 21:00:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1715054439; x=1715659239; darn=vger.kernel.org;
+        h=subject:cc:to:from:message-id:date:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=NEtlCf+yOKu3a4/WEarpwXqu9I3FSSQ5S4myO7He2K8=;
+        b=XyY3aK0F+ljAiz1biWU7PTZiDWA7Dqr37XbUlps1Q/lHprNKdRq7b1hyOf9P3kSbcE
+         EVpjdMRBkGS/l81cIOgPL9HOioXkPlta7FbQH1RTf3znTcChiUxHWRwHnnlBxvcvd12h
+         tzDsYA1cpDRWF0N8Ncec9uqxtEVfbdyBPuYAnbMPjHPb/6wtH6WAg6lbokuiLQgunsbR
+         e007rmLWli2MjHa/Q2wXHEXhA6erIf5fBcAjLtWaXp4lL99t5Ur48pIa79yFllZVjPeI
+         R7k6/incuL8Qg6yAcZpTFp9ABhtA4sfnSlXqwduazmoBn9eRyYvB5SK2Jx92QBZueThS
+         bLcw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1715054439; x=1715659239;
+        h=subject:cc:to:from:message-id:date:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=NEtlCf+yOKu3a4/WEarpwXqu9I3FSSQ5S4myO7He2K8=;
+        b=OQAJjin09j3i3+sSmpiDK8mZ/uSdDzohpXHJYiad/Fi02wcr100dsXKFvQVqjsRXWT
+         f3FqGTYYIvdEEqSZuVgjE/h9d8vK8jeYdielaetks0iopyIy77N5zVqzh+FiqHctpQTR
+         saRVXykIdI2Uy48JecN3yOICd7D4KYQFQAAT+BUWF42vfzM7Z1pIPERSyqxLcJ3MD3li
+         Eg5FI45gNIAcEuOQYc6LtxNT6H3Vshva8V1PvSV2eNCtLEEO96iX2WjWafjoEiWK/Vwo
+         26SHSj2T1TNSMLsY/39XM89GHSwn+b1aaCjRbfFAJ3V6NYhrzTnCpkQl8NE+Ka2j48o1
+         K/GQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXmb6U1oTJ+KMMVEnN68qa6aOwLLyOQ/z9LLGR2jzpat8iT2Qi8oRpqX3tsjyaVToCbvqGfY7JEjZrvYmMAuquWtZH37+D5kw==
+X-Gm-Message-State: AOJu0YyKV2r5Ph7h0QAnkqhxsz5umCQDxX1lDKxbJAVOGTZpPKM+vvM/
+	7E9k1URaAqwBGuCTNo+ma13fwala/pb6hAfCAb+JYgbrPdGVEfbr
+X-Google-Smtp-Source: AGHT+IEjIZTiq3CPsOasjTy+CEKVJ44PIaiGuwhV0rsqStVW/X5xTIJ89PCDzqPQ+CFjeU34yO4sBg==
+X-Received: by 2002:a17:902:ef81:b0:1e0:119e:f935 with SMTP id iz1-20020a170902ef8100b001e0119ef935mr8854954plb.15.1715054438778;
+        Mon, 06 May 2024 21:00:38 -0700 (PDT)
+Received: from dw-tp ([171.76.81.176])
+        by smtp.gmail.com with ESMTPSA id e2-20020a170902f1c200b001e088a9e2bcsm9032294plc.292.2024.05.06.21.00.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 May 2024 21:00:38 -0700 (PDT)
+Date: Tue, 07 May 2024 09:30:24 +0530
+Message-Id: <87jzk6nuef.fsf@gmail.com>
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>, fstests@vger.kernel.org
+Cc: djwong@kernel.org, gost.dev@samsung.com, mcgrof@kernel.org, kernel@pankajraghav.com, zlang@redhat.com, Pankaj Raghav <p.raghav@samsung.com>
+Subject: Re: [PATCH 1/3] xfs/161: adapt the test case for 64k FS blocksize
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240429092307.37bf51c79f70bad4922f6277@linux-foundation.org>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On Mon, Apr 29, 2024 at 09:23:07AM -0700, Andrew Morton wrote:
-> On Sun, 28 Apr 2024 21:04:50 -0700 Luis Chamberlain <mcgrof@kernel.org> wrote:
-> 
-> > On Thu, Apr 25, 2024 at 02:01:26PM -0700, Andrew Morton wrote:
-> > > On Wed, 24 Apr 2024 15:54:48 -0700 Luis Chamberlain <mcgrof@kernel.org> wrote:
-> > > 
-> > > > If the file entry is too long we may easily end up going out of bounds
-> > > > and crash after strsep() on sscanf(). 
-> > > > 
-> > > 
-> > > Can you explain why?  I'm not seeing it.
-> > 
-> > I couldn't see it either but I just looked at the crash below and
-> > its the only thing I could think of. So I think its when userspace
-> > somehow abuses MAX_INPUT_BUF_SZ a lot somehow.
-> 
-> This isn't a good basis for making kernel changes :(
-> 
-> Can you investigate a little further please?
+"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com> writes:
 
-Sure, this will require some more time, feel free to ignore these two
-patches for now then.
+> From: Pankaj Raghav <p.raghav@samsung.com>
+>
+> This test fails when xfs is formatted with 64k filesystem block size*.
+> It fails because the soft quota is not exceeded with the hardcoded 64k
+> pwrite, thereby, the grace time is not set. Even though soft quota is
+> set to 12k for uid1, it is rounded up to the nearest blocksize.
+>
+> *** Report for user quotas on device /dev/sdb3
+> Block grace time: 7days; Inode grace time: 7days
+>                         Block limits                File limits
+> User            used    soft    hard  grace    used  soft  hard  grace
+> ----------------------------------------------------------------------
+> 0        --       0       0       0      0       3     0     0      0
+> 1        --      64      64    1024      0       1     0     0      0
+> 2        --      64       0       0      0       1     0     0      0
+>
+> Adapt the pwrite to do more than 64k write when the FS blocksize is 64k.
+>
+> Cap the blksz to be at least 64k to retain the same behaviour as before
+> for smaller filesystem blocksizes.
+>
+> * This happens even on a 64k pagesize system and it is not related to
+>   LBS effort.
 
-  Luis
+Indeed! Thanks for fixing this for 64k bs. Please feel free to add -
+
+Reviewed-and-tested-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
