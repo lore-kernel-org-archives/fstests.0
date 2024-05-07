@@ -1,146 +1,120 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 023B716E865
-	for <fstests@vger.kernel.org>; Tue,  7 May 2024 18:11:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C23716D9C8
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 19:07:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715105462; cv=none; b=F6aTJNqIYHRB+BlQSDLOYfYkiAYntwx3bG/1GcuHU32a05Wm0akMb6oaFpcYgBqWPVJ19DOWoJf8fL5CEFA6Xzju//otb39r6LsSFKHnvCDteYuOzrDv/ucYfVYLCOw6AsD9Nxt894mdWxiIa3R9A0hkJQneoYRi2NXIJnC9Iy4=
+	t=1715108861; cv=none; b=I8Liwk3Dgsis7A3vbvHGX4o/bZHtxaHXYGEjepmH7JeRvz3Q3QcKv2a9W62JXhGugqynxltSjvsCAWJIbdqZTqGgB/v0DJuVTvf9uBzXhVsW4vAZcnWSknYD9X3EyTZgM0HplBgc75Y45ufj/vPNS3an8rP10ljlR91xRaOsogY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715105462; c=relaxed/simple;
-	bh=NSsUX26r7vAZQWPLCDAcmo977ZWLzVvQcfJaa4jlmsE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZChXq4PM+Hx+ypViwpFmvFyOyXxxxSsmyCeYZyA8M/xxGMWU/bWM/bQmWEZz3rIKYbZV3Y2ZniwfaH7SsnmDqjMLmKcpFNkx86eBS4/HoFp6+Pya9XmVx0Nhl0FMmsBOGNCigkNV5TZHwPImToyBvwY5RXWfuP5AX081YfZsR/4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AcsRc3SW; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1715108861; c=relaxed/simple;
+	bh=4NCy7XQ5ZHhVRTuDj2PfamdVbNEOZ7xcRTGSgYTznOs=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LiZkzuvwlU9MqLKCPrzC4eJXR1HsQRmSR+XXYhGsIqGUt4mOxyHY8RYHPRyZyULpGSthSMkl/YO/cUJokm8QjoTmt6DgBN29HeQnXSimm2LgN+u3/iH5AK7mtR/nI/KDAjp/a9pKFtD87Jl43kPSanT53ifjl8LH95qRnCIpmLA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=DabalCUr; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=DabalCUr; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AcsRc3SW"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1715105460;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=nOezcvxSVzcfUz4S/Bx0GNXDNNhLebcSp97/GHBNB0E=;
-	b=AcsRc3SWQ7WHS1qZGP3SA4xtrudY3fB1kxOlvkiqN/vxFVDUH9ytFSyxrM5D8e9GSpk46e
-	L2lBkrlnQfIiaOSfHW5CuOr5Uv0ZKH5/hCt0DzDl5vYNSOHuTYWMlo2DoFK6Zz+mQ37KFA
-	/wgsEZVWqswaYpD+44CtItL26IF4yiU=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-554-rTzg_WztMUC8V1MeOEdVrw-1; Tue, 07 May 2024 14:10:59 -0400
-X-MC-Unique: rTzg_WztMUC8V1MeOEdVrw-1
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2b294c5ebc1so2863514a91.2
-        for <fstests@vger.kernel.org>; Tue, 07 May 2024 11:10:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715105458; x=1715710258;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nOezcvxSVzcfUz4S/Bx0GNXDNNhLebcSp97/GHBNB0E=;
-        b=UTnI767rk9gedf/qHpfAa6yFX/zFEj9Ek7TiukTKxRu7mzMurIM5eIJ6Rbh02Ubda9
-         U1UQgVSQCQHFjvIp/YwNVZT7h002h4tCqLHlnAyumUryrhE92/KsMkw/++6Z/dGKaGbd
-         N/1fzQAJpJolMGwan5QSDRuBaubC6ylhq/dslTwWAJ1wvXjPHOHJ/1SSNSp4JOActHWR
-         9nif/cFt48fQhEHhghLuTdU7WTj1kWO8tNW673M7T5OLlVR9VyfNs/n563bEowB/XmQj
-         tqINN7LEZalX311KMEr/axbcWE/HT06E3zf5dfXOclwa1oZGhiMvUyV5nkjhexOfLEkx
-         Skww==
-X-Gm-Message-State: AOJu0YwKqhx00nw1kGPd6wzi+fhk/WehVb1Vs6ay9Ea3S0QNhFF6jO8H
-	ldGAhO2JV4jWHwcbi5IZXnZut6t3xAt5QLqymXfmuBUjPLdeH8EUUUboT+O+FPaHY/+4lph1Mqj
-	5BqDWLmlxtk9Iy3EC5UwkWZMi1FN7SLittfbbCRuxolc+I5O+cyrd+w5+rGXBL9Tzrw==
-X-Received: by 2002:a17:90a:c8:b0:2b4:3a1e:2400 with SMTP id 98e67ed59e1d1-2b6165a14c5mr385173a91.18.1715105457626;
-        Tue, 07 May 2024 11:10:57 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFcpfwOHT3voUtq9XH1Xu55Y7C4xSD6uq8kE+BqyUrJzMKa9rH+rj7gBhkLVJxYr5cdgUQLBg==
-X-Received: by 2002:a17:90a:c8:b0:2b4:3a1e:2400 with SMTP id 98e67ed59e1d1-2b6165a14c5mr385154a91.18.1715105457134;
-        Tue, 07 May 2024 11:10:57 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id m5-20020a17090a71c500b002b436698285sm8395711pjs.43.2024.05.07.11.10.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 May 2024 11:10:56 -0700 (PDT)
-Date: Wed, 8 May 2024 02:10:51 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-Cc: fstests@vger.kernel.org, djwong@kernel.org, gost.dev@samsung.com,
-	mcgrof@kernel.org, ritesh.list@gmail.com,
-	Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH 2/3] generic/436: round up bufsz to nearest filesystem
- blksz
-Message-ID: <20240507181051.3kclut23noosrmoe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240506150119.184097-1-kernel@pankajraghav.com>
- <20240506150119.184097-3-kernel@pankajraghav.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="DabalCUr";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="DabalCUr"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 40E8A20F66;
+	Tue,  7 May 2024 19:07:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1715108855; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=RAjKbeiZ8GatQ+jv78/luqhXWvSt3RrtjveH6b1n/5A=;
+	b=DabalCUrr6XjJEeEfQqYceSN9Z5c31QvN8SZgGh48sFnt1yT82lFhMundlDz2HhPZeBVqx
+	9bGZOCyBuM6+kBL7Xmrrx/1RHJLQvkPeeyIm0sIKuj81VGSUPPdIbSv8lXlXBwhlUkYaxQ
+	IFWoVGaeHgaWvaPHeCl1uwrePTMCDv4=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1715108855; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=RAjKbeiZ8GatQ+jv78/luqhXWvSt3RrtjveH6b1n/5A=;
+	b=DabalCUrr6XjJEeEfQqYceSN9Z5c31QvN8SZgGh48sFnt1yT82lFhMundlDz2HhPZeBVqx
+	9bGZOCyBuM6+kBL7Xmrrx/1RHJLQvkPeeyIm0sIKuj81VGSUPPdIbSv8lXlXBwhlUkYaxQ
+	IFWoVGaeHgaWvaPHeCl1uwrePTMCDv4=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 37C15139CB;
+	Tue,  7 May 2024 19:07:35 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id /f9FDfd7OmZHGwAAD6G6ig
+	(envelope-from <dsterba@suse.com>); Tue, 07 May 2024 19:07:35 +0000
+From: David Sterba <dsterba@suse.com>
+To: fstests@vger.kernel.org
+Cc: David Sterba <dsterba@suse.com>
+Subject: [PATCH 0/4] Move test cased from shared to generic
+Date: Tue,  7 May 2024 21:07:28 +0200
+Message-ID: <cover.1715108589.git.dsterba@suse.com>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240506150119.184097-3-kernel@pankajraghav.com>
+Content-Transfer-Encoding: 8bit
+X-Spam-Flag: NO
+X-Spam-Score: -0.30
+X-Spam-Level: 
+X-Spamd-Result: default: False [-0.30 / 50.00];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	BAYES_HAM(-0.50)[79.95%];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCPT_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	RCVD_TLS_ALL(0.00)[]
 
-On Mon, May 06, 2024 at 05:01:18PM +0200, Pankaj Raghav (Samsung) wrote:
-> From: Pankaj Raghav <p.raghav@samsung.com>
-> 
-> SEEK_HOLE and SEEK_DATA work in filesystem block size granularity. So
-> while filling up the buffer for test 13 - 16, round up the bufsz to the
-> closest filesystem blksz.
-> 
-> As we only allowed blocksizes lower than the pagesize, this was never an
-> issue and it always aligned. Once we have blocksize > pagesize, this
-> assumption will break.
-> 
-> Fixes the test for LBS configuration.
-> 
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> ---
+Hi,
 
-Makes sense to me,
+as discussed recently, the tests in shared should be in generic.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Based on branch patches-in-queue, commit e098483c662d8f0b7583edca1501d8addd3b7549.
 
->  src/seek_sanity_test.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> index 48b3ccc0..bc30f77c 100644
-> --- a/src/seek_sanity_test.c
-> +++ b/src/seek_sanity_test.c
-> @@ -541,7 +541,7 @@ static int test16(int fd, int testnum)
->  {
->  	int ret = 0;
->  	char *buf = NULL;
-> -	int bufsz = sysconf(_SC_PAGE_SIZE);
-> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
->  	int filsz = 4 << 20;
->  
->  	if (!unwritten_extents) {
-> @@ -591,7 +591,7 @@ static int test15(int fd, int testnum)
->  {
->  	int ret = 0;
->  	char *buf = NULL;
-> -	int bufsz = sysconf(_SC_PAGE_SIZE);
-> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
->  	int filsz = 4 << 20;
->  
->  	if (!unwritten_extents) {
-> @@ -643,7 +643,7 @@ static int test14(int fd, int testnum)
->  {
->  	int ret = 0;
->  	char *buf = NULL;
-> -	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
->  	int filsz = 4 << 20;
->  
->  	if (!unwritten_extents) {
-> @@ -692,7 +692,7 @@ static int test13(int fd, int testnum)
->  {
->  	int ret = 0;
->  	char *buf = NULL;
-> -	int bufsz = sysconf(_SC_PAGE_SIZE) * 14;
-> +	int bufsz = roundup(sysconf(_SC_PAGE_SIZE) * 14, alloc_size);
->  	int filsz = 4 << 20;
->  
->  	if (!unwritten_extents) {
-> -- 
-> 2.34.1
-> 
+David Sterba (4):
+  Move shared/298 to generic/740
+  Move shared/002 to generic/745
+  Move shared/298 to generic/746
+  Remove rest of shared/
+
+ check                                     |  2 +-
+ tests/{shared/032 => generic/740}         |  2 +-
+ tests/{shared/032.out => generic/740.out} |  0
+ tests/{shared/002 => generic/745}         |  2 +-
+ tests/{shared/002.out => generic/745.out} |  0
+ tests/{shared/298 => generic/746}         |  2 +-
+ tests/{shared/298.out => generic/746.out} |  0
+ tests/shared/Makefile                     | 24 -----------------------
+ 8 files changed, 4 insertions(+), 28 deletions(-)
+ rename tests/{shared/032 => generic/740} (99%)
+ rename tests/{shared/032.out => generic/740.out} (100%)
+ rename tests/{shared/002 => generic/745} (99%)
+ rename tests/{shared/002.out => generic/745.out} (100%)
+ rename tests/{shared/298 => generic/746} (99%)
+ rename tests/{shared/298.out => generic/746.out} (100%)
+ delete mode 100644 tests/shared/Makefile
+
+-- 
+2.44.0
 
