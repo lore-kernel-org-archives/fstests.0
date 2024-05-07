@@ -1,89 +1,71 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C22A2D796;
-	Tue,  7 May 2024 17:10:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58DC916C870
+	for <fstests@vger.kernel.org>; Tue,  7 May 2024 18:10:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715101821; cv=none; b=gfjZrSc1TuOsB0o2UbnS1+yLCqNbYbYT70i2fMLe/MAPjOcW/XVtnMCUQ1saoU8ndayrtucbpts16P/vXZDnfs7BiJpPA/PYNeudyNkvBBynda8qgAWi8GtbmBSy7sFQdULdUZt7w4SvbAw/dxGeBJwBs3K/LrFoaJyACD0NdAc=
+	t=1715105421; cv=none; b=aCwrHMfliCMrlbXXTr+INwXA2GvBGMpiW1xlpVtAFSURnWhtiwi8iz3tOCTkXSmtK0rvvrYZCduQod9ajF2IlYlrmZx30YTQZdO2/oJ/9piKXXUeqCfP81kGrgFpkKoT3m8FPU2zjN5ykMCmhFx/J6yta+ARhx3bEIkM+E42HHI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715101821; c=relaxed/simple;
-	bh=/c8AFSLV/1NL0Dd7ZkJwB0P3hG63sLt7CBqVz94VouM=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZBurz/mMPOSSAU9FaOFIl3Gs5ZbATggImhfUDkWSOaccu6xjqPFmQQo3MTI9ckLSbAE3C9hB6nfBvl8bKudjNJE06Fj6KJoEZFsfIRQQW9hsGfzZkSa94zUJuiivGzz8DDRyjSyomixfYpZatpB7oqTfpK40ENTtv6i+FouoMG4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=i10UIPYJ; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=tmU0IhJX; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=i10UIPYJ; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=tmU0IhJX; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1715105421; c=relaxed/simple;
+	bh=3OQ/TScbH6oBn/UigGEy06iQiF4YgddFY1fnVRVdAR0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=E+jtI370L1jrUz6ZhKIc4oHpE/vjry/3Dgf2d/u0g7p0XNx2mXtUEeHconQnLhqe7gF1kzZq0a9tOQyZlh1BO6PnGi2DonQbou7/OrfGPYJOyzQzWRiwqOOA0esFHEVPuVGIHWbkGTUsgetQ1pocdwAh5YgAic2tRaXNmEzpCYQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NNmkJArl; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="i10UIPYJ";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="tmU0IhJX";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="i10UIPYJ";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="tmU0IhJX"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 096593426D;
-	Tue,  7 May 2024 17:10:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1715101817;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NNmkJArl"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1715105418;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=DZOKUnpatth1b1zUgcTKXKQo0PaAikCnEX/XiIcwXPY=;
-	b=i10UIPYJ3ZmLyunyDrubyAmIvEa61/pnCdqu3K3SKh7ufcdyzFb6Wr8S8foOQKHAtGYtqm
-	9ONWaYmz8d/JGw2F2w8WfaRBoUCattsZIASe8Q179rJWzW/RvSpbJuLRmi6ki67Ktj0DR8
-	ygXKxMiJnod3WyLKAVfU9cHpDvVOViw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1715101817;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOKUnpatth1b1zUgcTKXKQo0PaAikCnEX/XiIcwXPY=;
-	b=tmU0IhJXYWclpLSSqttKk1SNU0YtkckqxX0fUoQ2QovfaPNemPbMqTZTzlBF08kZOpkHU8
-	YrDy6cVnbhTKwEDQ==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1715101817;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOKUnpatth1b1zUgcTKXKQo0PaAikCnEX/XiIcwXPY=;
-	b=i10UIPYJ3ZmLyunyDrubyAmIvEa61/pnCdqu3K3SKh7ufcdyzFb6Wr8S8foOQKHAtGYtqm
-	9ONWaYmz8d/JGw2F2w8WfaRBoUCattsZIASe8Q179rJWzW/RvSpbJuLRmi6ki67Ktj0DR8
-	ygXKxMiJnod3WyLKAVfU9cHpDvVOViw=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1715101817;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=DZOKUnpatth1b1zUgcTKXKQo0PaAikCnEX/XiIcwXPY=;
-	b=tmU0IhJXYWclpLSSqttKk1SNU0YtkckqxX0fUoQ2QovfaPNemPbMqTZTzlBF08kZOpkHU8
-	YrDy6cVnbhTKwEDQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id BD20D139CB;
-	Tue,  7 May 2024 17:10:16 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([10.150.64.162])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id FVEeLHhgOmZTdwAAD6G6ig
-	(envelope-from <pvorel@suse.cz>); Tue, 07 May 2024 17:10:16 +0000
-Date: Tue, 7 May 2024 19:10:11 +0200
-From: Petr Vorel <pvorel@suse.cz>
-To: Cyril Hrubis <chrubis@suse.cz>,
-	Kent Overstreet <kent.overstreet@linux.dev>,
-	Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org,
-	linux-bcachefs@vger.kernel.org,
-	Richard Palethorpe <rpalethorpe@suse.com>, ltp@lists.linux.it
-Subject: Re: [LTP] [PATCH 1/1] lib: Add support bcachefs filesystem
-Message-ID: <20240507171011.GD157588@pevik>
-Reply-To: Petr Vorel <pvorel@suse.cz>
-References: <20231116135546.2599273-1-pvorel@suse.cz>
- <ZXHXxCRa31xO-Lo_@rei>
- <20231207175538.GA248849@pevik>
+	bh=u6F025a9ow/HuJgUM7vW3/RmXKNwnaCf9AJQNwpJyuM=;
+	b=NNmkJArl5uhhh0Ljh7tbiJ3S/R66UIC6o0kwCau7vzcY/kxI7wRr58WqMxn/G7nYL5qvGe
+	wZicNny3sfbqY+yYTejMjokB8j80SD4UZouKmGzWTSB4szjEP2KrnR+BuwcWQ3YsCoGz5y
+	xvTrHhOm0e3E6+rSkcH1pXhwdcNndHY=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-680-F07bMiC1MuWdMZIXvnbV1g-1; Tue, 07 May 2024 14:10:13 -0400
+X-MC-Unique: F07bMiC1MuWdMZIXvnbV1g-1
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-6f454878580so2983861b3a.3
+        for <fstests@vger.kernel.org>; Tue, 07 May 2024 11:10:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1715105412; x=1715710212;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=u6F025a9ow/HuJgUM7vW3/RmXKNwnaCf9AJQNwpJyuM=;
+        b=GrB50Hc7g+cdD/3yHbFdHzs/SAket4D9C0+1/yhaWL5wyNzQryPpRGU0SpOtJ43MWW
+         GllyaW2xvyssHrXudUxDMpMOuXKVA3P2d3stHDd9gQ5P4NhYhvJpY8Z52Avi9VFdgdZf
+         oqnfOHDCbpmpnHX40VlSS1ttN61lAuldiRW40kpCUULdygddq6cgEATLGXRuImIeo5tf
+         AP6/x0SPUrYAF/3uGKC2zreHikxvbNXky2YPiYZuyej2Ym0gRSp+auEZM8afFrAJjx6h
+         tbSqYrCumb7/dGUk50sEskXaaFts3XztdUffW+IIl01yMIwPJBD5GFc3nw0vF7ZIo3BN
+         B5gQ==
+X-Gm-Message-State: AOJu0Yw9/r2Jma0GKF5PBC+6pYwwZXLzhQBpXX2Neda5gWAAGJQJgfjE
+	/70TORtZ4lxJguFOXRdi1jWVwAGwtRMLGZL1L2U5XoZtqZ/hX2BpgyJd6b9vgChJJNKCzp5KrLN
+	2MXPpPVsE8jcE1VPx044N+upIaYEvXtUzPlq2fFCrSyuJdrT3E82UEhk=
+X-Received: by 2002:a62:aa1a:0:b0:6ec:e785:98b9 with SMTP id d2e1a72fcca58-6f49c2a2b29mr446406b3a.27.1715105412327;
+        Tue, 07 May 2024 11:10:12 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IESJFN4MHTca1chlAH0Vgf9pvD2GaAGkUuRXEkVr12DLi3QKuUVIfbKF99JtFoHztsjFI/wAQ==
+X-Received: by 2002:a62:aa1a:0:b0:6ec:e785:98b9 with SMTP id d2e1a72fcca58-6f49c2a2b29mr446370b3a.27.1715105411744;
+        Tue, 07 May 2024 11:10:11 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id ei46-20020a056a0080ee00b006f446816ae0sm9002789pfb.147.2024.05.07.11.10.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 May 2024 11:10:11 -0700 (PDT)
+Date: Wed, 8 May 2024 02:10:06 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+Cc: fstests@vger.kernel.org, djwong@kernel.org, gost.dev@samsung.com,
+	mcgrof@kernel.org, ritesh.list@gmail.com,
+	Pankaj Raghav <p.raghav@samsung.com>
+Subject: Re: [PATCH 3/3] xfs/008: use block size instead of the pagesize
+Message-ID: <20240507181006.ohncfaneb6uili3x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240506150119.184097-1-kernel@pankajraghav.com>
+ <20240506150119.184097-4-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,75 +74,111 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20231207175538.GA248849@pevik>
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.50 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	HAS_REPLYTO(0.30)[pvorel@suse.cz];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	MISSING_XM_UA(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_SEVEN(0.00)[7];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	REPLYTO_EQ_FROM(0.00)[]
-X-Spam-Score: -3.50
-X-Spam-Flag: NO
+In-Reply-To: <20240506150119.184097-4-kernel@pankajraghav.com>
 
-Hi all,
+On Mon, May 06, 2024 at 05:01:19PM +0200, Pankaj Raghav (Samsung) wrote:
+> From: Pankaj Raghav <p.raghav@samsung.com>
+> 
+> The testcase estimates to have ratio of 1:3/4 for holes:filesize. This
+> holds true where the blocksize is always less than or equal to pagesize
+> and the total size of the file is calculated based on the pagesize.
+> There is an implicit assumption that blocksize will always be less than
+> the pagesize.
+> 
+> LBS support will enable bs > ps where a minimum IO size is one block,
+> which can be greater than a page. Adjust the size calculation to be
+> based on the blocksize and not the pagesize.
+> 
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> ---
 
-> > Hi!
-> > > bcachefs has been merged into v6.7-rc1 [1]. Let's add it's support to
-> > > LTP .all_filesystems = 1 and TST_ALL_FILESYSTEMS=1.
+Looks good to me, thanks!
 
-> > > [1] https://lwn.net/Articles/934692/
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-> > > Suggested-by: Cyril Hrubis <chrubis@suse.cz>
-> > > Signed-off-by: Petr Vorel <pvorel@suse.cz>
-> > > ---
-> > > Hi,
+>  tests/xfs/008     | 19 ++++++++++---------
+>  tests/xfs/008.out |  8 ++++----
+>  2 files changed, 14 insertions(+), 13 deletions(-)
+> 
+> diff --git a/tests/xfs/008 b/tests/xfs/008
+> index e7d6153b..e37e435a 100755
+> --- a/tests/xfs/008
+> +++ b/tests/xfs/008
+> @@ -11,7 +11,8 @@ _begin_fstest rw ioctl auto quick
+>  
+>  status=0	# success is the default!
+>  pgsize=`$here/src/feature -s`
+> -
+> +fileblksize=$(_get_file_block_size "$TEST_DIR")
+> +blksize=$((fileblksize > pgsize ? fileblksize : pgsize))
+>  # Override the default cleanup function.
+>  _cleanup()
+>  {
+> @@ -21,7 +22,7 @@ _cleanup()
+>  
+>  _filter()
+>  {
+> -    sed -e "s/-b $pgsize/-b PGSIZE/g" \
+> +    sed -e "s/-b $blksize/-b BLKSIZE/g" \
+>  	-e "s/-l .* -c/-l FSIZE -c/g"
+>  }
+>  
+> @@ -73,17 +74,17 @@ _require_test
+>  # We are trying to create roughly 50 or 100 holes in a file
+>  # using random writes. Assuming a good distribution of 50 writes
+>  # in a file, the file only needs to be 3-4x the size of the write
+> -# size muliplied by the number of writes. Hence we use 200 * pgsize
+> -# for files we want 50 holes in and 400 * pgsize for files we want
+> +# size muliplied by the number of writes. Hence we use 200 * blksize
+> +# for files we want 50 holes in and 400 * blksize for files we want
+>  # 100 holes in. This keeps the runtime down as low as possible.
+>  #
+> -_do_test 1 50 "-l `expr 200 \* $pgsize` -c 50 -b $pgsize"
+> -_do_test 2 100 "-l `expr 400 \* $pgsize` -c 100 -b $pgsize"
+> -_do_test 3 100 "-l `expr 400 \* $pgsize` -c 100 -b 512"   # test partial pages
+> +_do_test 1 50 "-l `expr 200 \* $blksize` -c 50 -b $blksize"
+> +_do_test 2 100 "-l `expr 400 \* $blksize` -c 100 -b $blksize"
+> +_do_test 3 100 "-l `expr 400 \* $blksize` -c 100 -b 512"   # test partial blocks
+>  
+>  # rinse, lather, repeat for direct IO
+> -_do_test 4 50 "-d -l `expr 200 \* $pgsize` -c 50 -b $pgsize"
+> -_do_test 5 100 "-d -l `expr 400 \* $pgsize` -c 100 -b $pgsize"
+> +_do_test 4 50 "-d -l `expr 200 \* $blksize` -c 50 -b $blksize"
+> +_do_test 5 100 "-d -l `expr 400 \* $blksize` -c 100 -b $blksize"
+>  # note: direct IO requires page aligned IO
+>  
+>  # todo: realtime.
+> diff --git a/tests/xfs/008.out b/tests/xfs/008.out
+> index 5e3ae8e3..0941e218 100644
+> --- a/tests/xfs/008.out
+> +++ b/tests/xfs/008.out
+> @@ -1,10 +1,10 @@
+>  QA output created by 008
+>  
+> -randholes.1 : -l FSIZE -c 50 -b PGSIZE
+> +randholes.1 : -l FSIZE -c 50 -b BLKSIZE
+>  ------------------------------------------
+>  holes is in range
+>  
+> -randholes.2 : -l FSIZE -c 100 -b PGSIZE
+> +randholes.2 : -l FSIZE -c 100 -b BLKSIZE
+>  ------------------------------------------
+>  holes is in range
+>  
+> @@ -12,10 +12,10 @@ randholes.3 : -l FSIZE -c 100 -b 512
+>  ------------------------------------------
+>  holes is in range
+>  
+> -randholes.4 : -d -l FSIZE -c 50 -b PGSIZE
+> +randholes.4 : -d -l FSIZE -c 50 -b BLKSIZE
+>  ------------------------------------------
+>  holes is in range
+>  
+> -randholes.5 : -d -l FSIZE -c 100 -b PGSIZE
+> +randholes.5 : -d -l FSIZE -c 100 -b BLKSIZE
+>  ------------------------------------------
+>  holes is in range
+> -- 
+> 2.34.1
+> 
 
-> > > this should be merged after v6.7 is released.
-
-> > Agreed, although it's unlikey that they will pull bcachefs off from the
-> > tree now. Any way I think that we should add the support to the next
-> > release.
-
-> Yep, now it's 6.7-rc4. I'll prepare v2
-
-> > > So far I haven't tested all LTP tests on bcachefs temporary directory.
-> > > I have only tested tests which use .all_filesystems = 1 or TST_ALL_FILESYSTEMS=1.
-> > > So far it looks like there are only a few tests failing:
-
-> > > statvfs01.c:44: TFAIL: creat(valid_fname, 0444) failed: ENAMETOOLONG (36)
-
-> > That strange, that would mean that statvfs() reports possibly wrong
-> > f_namemax. Looking at the code the f_namemax is initialized to
-> > BCH_NAME_MAX in bch2_statfs().
-
-> > And the dirent_create_key() does:
-
-> >         if (name->len > BCH_NAME_MAX)
-> >                 return ERR_PTR(-ENAMETOOLONG);
-
-> > That does not look like there is any room for a failure. Maybe we can
-> > print the buf.f_namemax value in the test and check if it's 512 since
-> > that is the value of BCH_NAME_MAX.
-
-FYI Unfortunately ENAMETOOLONG is still problem on statvfs() on bcachefs.
-
-Kind regards,
-Petr
-
-...
