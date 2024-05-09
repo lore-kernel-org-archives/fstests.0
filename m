@@ -1,71 +1,45 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D100014B062
-	for <fstests@vger.kernel.org>; Thu,  9 May 2024 10:00:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A5DD1FAA
+	for <fstests@vger.kernel.org>; Thu,  9 May 2024 12:41:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715248827; cv=none; b=GjTBc+O5OG9RWLDQW3boHFv2STQA6z9FKbtabooc3S3+PxrA7EV8WZb/o60zqGTzUhqcgEY2IJ37q3SgNoanu2nTvO26as8vn7zezLLh7sBxeCSU5Ws1JjzNTyIjKKqi+NRrARFNe2Qx0AU85Rwo8zZtAce6tA4jUVwjRQut5pE=
+	t=1715258482; cv=none; b=eDE0cLbIrTLnc5ErIrDrwia4lc/IXSOs2ruQYAct07kAeOyUiMApJI8j96BTbRGCdW/WU0Q6x0zKDtwaQXwJANsYOtMqHdZhekY5gfYM9TuMwPNm2NFLpJzK4/kalqY6j7T+4J6yBf0YAwG9i7n+/gNSgncOIlrUyyCvkzkHi/c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715248827; c=relaxed/simple;
-	bh=jTIOY9naCn6mX+kkUaWozuodjgVbYUtReGjl3ptNHEQ=;
+	s=arc-20240116; t=1715258482; c=relaxed/simple;
+	bh=rVs5WagxfOm/ocw4Q31Uld2JCftU4nJGWzVGhnG1UIM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=THT98g8YF3zsohqVqumksQ7DxehVqvQ1aZSS+gkOb6wfvENvbVzSGvGksZNfYG7gEcJ/W/rjsowNy5O2eLjTfMA2i4lwlpyWqDdG1pirPMoRN2fAphIZRkut+dBns7jcnV1lKZt6dJJMy8joF1GjEZ2S28IidWk82EAk+3h04Es=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IXIIZIAK; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=GusYyYBf5qwRYcY5sFkdhSb2Zpg4J+ADbkNYv7SE/vvXaWJ2WXuDH60QzPMjFEAsK8v0BYX/ytZelOFn3P9oIjLjMwoVY4I7cgV+XIEUfty+LmD/ODnoQd+pr1WLAiPQ3poxQN7qLV0xbkTNDBIP3tDcsdQ/PymwjAtJqboxUDc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vFrk2uOR; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IXIIZIAK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1715248824;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=i4DUonvQeAigT1OfKNSVy7siZn8r1lTduEdKfVs50jA=;
-	b=IXIIZIAKRvu//igqOx4Rx8MzUopsMb1XQ12WFpCyi0fCe9hB9po4qBfknkXBVgPnMMrKgR
-	dCFtMinknPavmioA/sBHnXo8Z1DBItggUFgoAfsJcCt5oq/MRHfYGVsQTTj8e7lwRhVeMk
-	4Y8DD320hGMSRCV2IJpfigmHcVDEurQ=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-427-wwMwckQzNLqZDCFp8nEEoA-1; Thu, 09 May 2024 06:00:23 -0400
-X-MC-Unique: wwMwckQzNLqZDCFp8nEEoA-1
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1ee2078c2d4so6633815ad.0
-        for <fstests@vger.kernel.org>; Thu, 09 May 2024 03:00:23 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715248822; x=1715853622;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=i4DUonvQeAigT1OfKNSVy7siZn8r1lTduEdKfVs50jA=;
-        b=L4rryD3C753JiOHbyAih/ZgBqlTGw2yXZppce0uQ/eiYwlHHFaYgtvkcC1Ee8yreHs
-         R+cCLBI7B2DGs+zo+HkC3gXQFKie2Fb0iO2TqgNVjRqih+uu/IK01pddo7bAXncdgM9A
-         rCaPOjScmonLEt1RoI3kR76NFDSe9zninDfFZ8BX2OtnLVIUbZLIGcuL0bCQ1mDAWOXJ
-         1MTA3VRq4ONA3tJcEGf92cwBiK9PXvhSXWgK6EbQuQ8lJ5qFLO2QNwPRIZmZeD/GVac5
-         kwiMizXroV4p5h/CgyqKit0o78zrvDQAH7PnsrPNvQBS5/0V4qGxDgRG5CBMfwOhVJ91
-         pl7A==
-X-Forwarded-Encrypted: i=1; AJvYcCX/pnxRdwSFSvnq52qwst40xFvEV6/uoMxU4javUPcddKjI/+6pqY13g4TB8eORdSgogjNGXG8D4DcFTyIQb+yACqVo3hKcGQ==
-X-Gm-Message-State: AOJu0YxzTwsBjPy9UKse+l8RhQpMpYUtpjlak6/O5+nh7mqi5GI9cU7Y
-	u0Tg24j0oVNsym7O9Xi3gssSmFn2Cs+ndMxMZGnVZVqE1R/9UHiIzfv4YprrSTUpNnsWrqb4phI
-	IZOrXtqrU8ijbUR9MrlKLwotIfTzJyd/A2f6LKBCnNFh9WCxcT3lxVHM=
-X-Received: by 2002:a17:902:ab82:b0:1eb:3d24:3f7a with SMTP id d9443c01a7336-1eeb05936edmr45309935ad.26.1715248821906;
-        Thu, 09 May 2024 03:00:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFvEuRnKdGeRQyDspP8Ot4KYYgZ+chEOXHtIE3dVhBDliUkc5oanw7l0XIlxY07tgSbWblpIQ==
-X-Received: by 2002:a17:902:ab82:b0:1eb:3d24:3f7a with SMTP id d9443c01a7336-1eeb05936edmr45309655ad.26.1715248821071;
-        Thu, 09 May 2024 03:00:21 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0c2565b6sm10287605ad.295.2024.05.09.03.00.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 May 2024 03:00:20 -0700 (PDT)
-Date: Thu, 9 May 2024 18:00:16 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vFrk2uOR"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=6sy1df8lvguNQjEVQBQiyHTJpuKGgAGIRqFF6TAMXpY=; b=vFrk2uORbSlyAfwpZUcoX7KPQP
+	WRmeNbhqTLlEx57oVrOb0grWTVAiApZmqERlIGEZEPyjq2nKNdRtwQds1Kc08aDnBY9oV3teJgYCj
+	aFRiDODErTY6Y1rGxzzFa9cxI8MEAxzC322FZejhUnPqnKfwZdEW102AVYPMlnIOPqYJTmpkmY/4s
+	iEoq5XxZ8IDTl3qabW4B9J5z5bzsodcnIrgg+l3LMsnQV13nvK9CuFsgkFM8o8J6h4HW8gsd16Hz+
+	aAOmGrjibDT8769stUzeJAWXWfbWjs5e2HR0ldmsv1bcwVJ657BW5VnJu7MSDlRqU25993K697r2I
+	uUeIMsbA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1s535M-00000001SkM-39MY;
+	Thu, 09 May 2024 12:41:20 +0000
+Date: Thu, 9 May 2024 05:41:20 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, David Sterba <dsterba@suse.com>,
+	fstests@vger.kernel.org
 Subject: Re: [PATCH 1/4] Move shared/032 to generic/740
-Message-ID: <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <ZjzEcG8Z1_Ly2x-X@infradead.org>
 References: <cover.1715108589.git.dsterba@suse.com>
  <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
  <Zjxht5OKsau5QJYm@infradead.org>
+ <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,35 +48,23 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Zjxht5OKsau5QJYm@infradead.org>
+In-Reply-To: <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Wed, May 08, 2024 at 10:40:07PM -0700, Christoph Hellwig wrote:
-> On Tue, May 07, 2024 at 09:07:36PM +0200, David Sterba wrote:
-> > The shared/ directory was supposed to host tests that apply to a subset
-> > of all supported filesystems but this is not utilized much and creates a
-> > split from the generic tests. Move the test to generic.
+On Thu, May 09, 2024 at 06:00:16PM +0800, Zorro Lang wrote:
+> Yeah, that's the reason I still keep the shared as a "prefix directory"
+> of generic. The hardcode whitelist or blacklist of _supported_fs is a
+> bit rude. If a fs isn't supported by a test case totally, that's fine.
+> But if the condition of _notrun can be smaller and more precise (refer
+> to some _require_xxx helpers) that would be great.
 > 
-> While we're at it, can we please have a
-> 
-> _have_mkfs_overwrite detetion instead of hardcoding ext4 and btrfs
-> with another check for that is supported for btrfs?
-> 
-> I'm also pretty sure at least ext4 supports overwrite detection as
-> well..
+> Of course we can move shared to generic at first, then improve it later.
+> But I doubt if we can keep that in mind, due to there're hundreds of
+> generic cases :)
 
-Yeah, that's the reason I still keep the shared as a "prefix directory"
-of generic. The hardcode whitelist or blacklist of _supported_fs is a
-bit rude. If a fs isn't supported by a test case totally, that's fine.
-But if the condition of _notrun can be smaller and more precise (refer
-to some _require_xxx helpers) that would be great.
+# git-grep _supported_fs tests/generic/ | grep -v generic
 
-Of course we can move shared to generic at first, then improve it later.
-But I doubt if we can keep that in mind, due to there're hundreds of
-generic cases :)
-
-Thanks,
-Zorro
-
-> 
-> 
+will do the job.  But before this turns into an endless discussion
+I can just sign up for adding the proper helpers after the merge
+is applied.
 
