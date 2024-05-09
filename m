@@ -1,118 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C4448663E
-	for <fstests@vger.kernel.org>; Wed,  8 May 2024 16:06:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 366A7D26D
+	for <fstests@vger.kernel.org>; Thu,  9 May 2024 05:29:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715184388; cv=none; b=ouXTlps/+99+/CX2IHuOIeuRTP4l6FB6vJWAiHwwtCLPW7pn3oVf0VSe0dbFjiQt2K6AEKQqZwK53MdB/Z0Qa+CkbH2gs+kI30TjsVgQ61QzNufzY0JHvXqlKDjqotksOGcfBzQ/nd9asJYjsMGgfvksuoOezyGjM4ujTBRNcjc=
+	t=1715232551; cv=none; b=D0gtFofWyJ9+1U8qlzRQ3JGy+2tcM3oxbxVMrpTzAriMzK5PRsV8iaRa4UTlF0J2c95iijppohGDe9ywJ9szUH1JiGdhm3mnHsHOOjVqDRNcdcqxRWXqtZnYmTCUOAObu+Fy7BcMT7aIwYFGC1Pt+bPQYtXZzrpxRuARI2Rcp7k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715184388; c=relaxed/simple;
-	bh=7QIWJ6il5KR7wDJnPqFFgMP8rnG3+fLQWhdaJEnoxoY=;
+	s=arc-20240116; t=1715232551; c=relaxed/simple;
+	bh=zwvt5SsEFHHM+B5YhfALy68/FN2fqTXaOAa7MnwxUYM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RNsg3c/ZRpfXa7ddCmfeYIJn4GOjhmmxVDRumpyi9gjC9/d56ByiTq+lRo5JkN8b5Yfz5e04kMa7NPnPfFPAJtlXpQB3EksaNRiM9X12KXMlttvnhI3799GD4fz0NbUo2NTDmBOieTv6MipOiYR1GSaeUfdvwP9tb0hMMOYbMcI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lGHqJt1T; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Lpv2g/7yxpLAVq11/DCFacwV+nmBLZRPrUDMoOzcI9sLpXd8iglodp0HmF4MPnqCSUgmHVHvbP7me4gHA1uVDeUsJ80x+ki7nVodyVHvj40k9K7Ld+PciXY71ho+uU6f9mSJWZn3nPgDM+xV1ll/kMamd+8sK8xVrpMExUbgpAc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HOZE0+o8; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lGHqJt1T"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 094DAC2BD10;
-	Wed,  8 May 2024 16:06:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715184388;
-	bh=7QIWJ6il5KR7wDJnPqFFgMP8rnG3+fLQWhdaJEnoxoY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=lGHqJt1TU6/dbhQtOmqhyXE6Jl3YOQ8rGoDQqUm5k9NGHXgYYnjw9xvnmpQX9tBlE
-	 O2k+AgxPwrFPT4MRoUKVhCsXh2jNiXUx7sUYkznBc/zFi7OAw6F66v7AbMk3hgvXW4
-	 8531zlu9tfrJs8jhoSreWyFCDgeahBBxslbjSl8oB14Qq8t8g9gmKvvo2mynMhzJxG
-	 Ie/E7s2HZBL7eZ/aFlXwMuexycz5Y5zllRttbnLYOsrpQmbxTFP5jNleWZOOP1XBkf
-	 ZcUR1ejowsrrGhGyKhLbqUSFEbzQliZFgI8mrcFTmOuEybNTNeHbIGzX9uyMjhL2zr
-	 1yZMcAQrVdpkA==
-Date: Wed, 8 May 2024 09:06:27 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Ritesh Harjani <ritesh.list@gmail.com>
-Cc: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>,
-	fstests@vger.kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
-	zlang@redhat.com, Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH 1/3] xfs/161: adapt the test case for 64k FS blocksize
-Message-ID: <20240508160627.GG360908@frogsfrogsfrogs>
-References: <20240506150119.184097-1-kernel@pankajraghav.com>
- <20240506150119.184097-2-kernel@pankajraghav.com>
- <20240507222323.GC2049409@frogsfrogsfrogs>
- <CALk7dXqCD2MDPavit0mkD061bEHTswFxuwbfPZuAuCtNcFAPFA@mail.gmail.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HOZE0+o8"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1715232548;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TQ1dm4GYV1MPikK2vvMUPjpCddz8i01f+p+0VbawVEo=;
+	b=HOZE0+o8UAfcpWd8e6PkEBrA4tzpEFtGCPWGf/lqtwkEqiLa+Mp0XddrRXgR3bNoR7/b2a
+	sVsRZotoOcxUI07s8eDQ3PTB7UBhMu6SlrpFHamEkqxn02rpWeT9SOEaWTPkDXX9eGN+1a
+	cojYvuiWrgY73Yu8kUDaFk0jWkRRWDU=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-86-pcopUwM3MceuIW_qlXugMg-1; Thu, 09 May 2024 01:29:07 -0400
+X-MC-Unique: pcopUwM3MceuIW_qlXugMg-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1edf507b9e4so4879305ad.1
+        for <fstests@vger.kernel.org>; Wed, 08 May 2024 22:29:07 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1715232546; x=1715837346;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=TQ1dm4GYV1MPikK2vvMUPjpCddz8i01f+p+0VbawVEo=;
+        b=NEhYacCNHGJJJ7ie5OZP5e2s1Ies0u3SQVGs51zElzTkEGpjcZLnChlIgbXo2caHuB
+         hMFwEkfpGGFSSO+qvgqNx/iViO8TTC4uu4HINWO8xbq4FsP05T4g/v3KuTDE56KFKKyF
+         dI6ulhg6Jy3znr93WS55qE0fcgMXWB+jmlhQrKgWpEnV8rvhMmAvl+YV9eC5RpNqvCQH
+         7OdNKgmFshwkQKJ/yfK08KXz9z8fVIiPvcwozCE9nTGtvbr+G4eJ5CHVilJWTeFgWVAM
+         bbr8ihMnVd+ZP3iuTt3JSzXj7vC97hCVQ5woWHI5PPzTokhKs0O0eSd9emWEB4sO+lWh
+         +iZA==
+X-Gm-Message-State: AOJu0YyxXrm2k+SY84leRSmgYMr2crZr62m1Iy3oPAJVIMPfB/cUwy5b
+	6wpTQxu1B0D5ILhA+jxd38iTqDFk+1IbdI/rOZD09x5M+uZdvGetSk19pWeocouSpyoxLzhKYi0
+	8gqMpf56rOGQ1ajswtqlWw/gSkllGiqXZhFhvqe8xksMHfsTJsgHtzbQAtvcOfxeEnw==
+X-Received: by 2002:a17:902:e749:b0:1eb:dae:bdab with SMTP id d9443c01a7336-1eeb078ffabmr65567345ad.46.1715232546173;
+        Wed, 08 May 2024 22:29:06 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEmok6exOOzyIbFklpXpou6q1WJnRMypkj8fcEBLtWewDWDqdBuj3kzH6oyJwkk7ZUSdx59KQ==
+X-Received: by 2002:a17:902:e749:b0:1eb:dae:bdab with SMTP id d9443c01a7336-1eeb078ffabmr65567135ad.46.1715232545695;
+        Wed, 08 May 2024 22:29:05 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0badc8ffsm4960905ad.73.2024.05.08.22.29.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 May 2024 22:29:05 -0700 (PDT)
+Date: Thu, 9 May 2024 13:29:01 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: David Sterba <dsterba@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 0/4] Move test cased from shared to generic
+Message-ID: <20240509052901.dna2xq3yd4p2b7m3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1715108589.git.dsterba@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CALk7dXqCD2MDPavit0mkD061bEHTswFxuwbfPZuAuCtNcFAPFA@mail.gmail.com>
+In-Reply-To: <cover.1715108589.git.dsterba@suse.com>
 
-On Wed, May 08, 2024 at 08:20:01AM +0530, Ritesh Harjani wrote:
-> On Wed, May 8, 2024 at 3:53 AM Darrick J. Wong <djwong@kernel.org> wrote:
-> >
-> > On Mon, May 06, 2024 at 05:01:17PM +0200, Pankaj Raghav (Samsung) wrote:
-> > > From: Pankaj Raghav <p.raghav@samsung.com>
-> > >
-> > > This test fails when xfs is formatted with 64k filesystem block size*.
-> > > It fails because the soft quota is not exceeded with the hardcoded 64k
-> > > pwrite, thereby, the grace time is not set. Even though soft quota is
-> > > set to 12k for uid1, it is rounded up to the nearest blocksize.
-> > >
-> > > *** Report for user quotas on device /dev/sdb3
-> > > Block grace time: 7days; Inode grace time: 7days
-> > >                         Block limits                File limits
-> > > User            used    soft    hard  grace    used  soft  hard  grace
-> > > ----------------------------------------------------------------------
-> > > 0        --       0       0       0      0       3     0     0      0
-> > > 1        --      64      64    1024      0       1     0     0      0
-> > > 2        --      64       0       0      0       1     0     0      0
-> > >
-> > > Adapt the pwrite to do more than 64k write when the FS blocksize is 64k.
-> > >
-> > > Cap the blksz to be at least 64k to retain the same behaviour as before
-> > > for smaller filesystem blocksizes.
-> > >
-> > > * This happens even on a 64k pagesize system and it is not related to
-> > >   LBS effort.
-> > >
-> > > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> > > ---
-> > >  tests/xfs/161 | 10 ++++++++--
-> > >  1 file changed, 8 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/tests/xfs/161 b/tests/xfs/161
-> > > index 486fa6ca..94290f18 100755
-> > > --- a/tests/xfs/161
-> > > +++ b/tests/xfs/161
-> > > @@ -38,9 +38,15 @@ _qmount_option "usrquota"
-> > >  _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
-> > >  _scratch_mount >> $seqres.full
-> > >
-> > > +min_blksz=65536
-> > > +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> > > +# Write more than one block to exceed the soft block quota limit.
+On Tue, May 07, 2024 at 09:07:28PM +0200, David Sterba wrote:
+> Hi,
 > 
-> Maybe we should improve this comment to -
+> as discussed recently, the tests in shared should be in generic.
 > 
-> # Write more than the soft block quota limit of 12k which is set later
-> via xfs_quota
-> # On 64k bs this will get rounded to the nearest blocksize which is 64k
+> Based on branch patches-in-queue, commit e098483c662d8f0b7583edca1501d8addd3b7549.
 > 
-> > > +blksz=$(( 2 * $file_blksz))
-> > > +
-> > > +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
-> >
-> > If we don't set $min_blksize and always write (2 * $file_blksz) does the
-> > test still work?
-> 
-> I guess it won't (even for bs=4k), because we set the bsoft=12k via xfs_quota.
-> So we have to write more than 12k to trigger the grace timer.
+> David Sterba (4):
+>   Move shared/298 to generic/740
+>   Move shared/002 to generic/745
+>   Move shared/298 to generic/746
 
-Ah, ok.  Yes, that makes sense with the improved comment. :)
+Thanks David! There're two shared/298 above, I think the former is shared/032 :)
+And I foundd that all .out files were not changed properly, so I suppose you
+did that manually. The "mvtest" tool will help you, e.g.
 
---D
+# ./tools/mvtest shared/032 generic/740
+# ./tools/mvtest shared/002 generic/745
+# ./tools/mvtest shared/298 generic/746
 
-> -ritesh
+Thanks,
+Zorro
+
+>   Remove rest of shared/
 > 
+>  check                                     |  2 +-
+>  tests/{shared/032 => generic/740}         |  2 +-
+>  tests/{shared/032.out => generic/740.out} |  0
+>  tests/{shared/002 => generic/745}         |  2 +-
+>  tests/{shared/002.out => generic/745.out} |  0
+>  tests/{shared/298 => generic/746}         |  2 +-
+>  tests/{shared/298.out => generic/746.out} |  0
+>  tests/shared/Makefile                     | 24 -----------------------
+>  8 files changed, 4 insertions(+), 28 deletions(-)
+>  rename tests/{shared/032 => generic/740} (99%)
+>  rename tests/{shared/032.out => generic/740.out} (100%)
+>  rename tests/{shared/002 => generic/745} (99%)
+>  rename tests/{shared/002.out => generic/745.out} (100%)
+>  rename tests/{shared/298 => generic/746} (99%)
+>  rename tests/{shared/298.out => generic/746.out} (100%)
+>  delete mode 100644 tests/shared/Makefile
+> 
+> -- 
+> 2.44.0
+> 
+> 
+
