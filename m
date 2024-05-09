@@ -1,88 +1,71 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35F1614B09F
-	for <fstests@vger.kernel.org>; Thu,  9 May 2024 09:42:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D100014B062
+	for <fstests@vger.kernel.org>; Thu,  9 May 2024 10:00:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715247740; cv=none; b=h4jKdpD/sLXI7q+2XA259X//w5e+jv77k+ggi9VDKD5N0iskJSl7A5bpvZBcyQiYbOEoPwik1MRQENs1ER7r/fsEH9neHezBrAJZYl/x8EVVHXX5OKL4qPd9P7Xm8GUzyjFroq56ZwG7Jt7tgohbHsfIJmnaDtJEyk5+laXHKK8=
+	t=1715248827; cv=none; b=GjTBc+O5OG9RWLDQW3boHFv2STQA6z9FKbtabooc3S3+PxrA7EV8WZb/o60zqGTzUhqcgEY2IJ37q3SgNoanu2nTvO26as8vn7zezLLh7sBxeCSU5Ws1JjzNTyIjKKqi+NRrARFNe2Qx0AU85Rwo8zZtAce6tA4jUVwjRQut5pE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715247740; c=relaxed/simple;
-	bh=XMqM3z5Dc6oQ4SdVUzaG0GSlWEfmSFSbkadFDxMlSws=;
+	s=arc-20240116; t=1715248827; c=relaxed/simple;
+	bh=jTIOY9naCn6mX+kkUaWozuodjgVbYUtReGjl3ptNHEQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gZd9leHGSVsxDTXc1YVnAhQotXr9ZlYDuG4d7CejjjRNshH3zD8uuxr2qHOiONMMO0VkCSvOwZILf5N1XXoQsyxR/b9XVjxelEfHU5FGXPcs1cQbnzsngjA/SkP/4qHuCteqgItYPCltojD/bvocyRVr4erxU/x0t2NaqKr6B1E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hrA7RvPo; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=THT98g8YF3zsohqVqumksQ7DxehVqvQ1aZSS+gkOb6wfvENvbVzSGvGksZNfYG7gEcJ/W/rjsowNy5O2eLjTfMA2i4lwlpyWqDdG1pirPMoRN2fAphIZRkut+dBns7jcnV1lKZt6dJJMy8joF1GjEZ2S28IidWk82EAk+3h04Es=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=IXIIZIAK; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hrA7RvPo"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IXIIZIAK"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1715247738;
+	s=mimecast20190719; t=1715248824;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=lqh+8QSbSkOoBZk3pRadu9LwOPPbnmF9UEzo6RF70qE=;
-	b=hrA7RvPo31qsNnWCVWzOYki7YjjOovG7qLm89o969yH4XH1FqaDhbs7WbgsNwO0b/RbNvL
-	CRbO9VeGX0tRnHDC7suTAah2NIc4ng6IFjDXeuMlmSULJ7MukRNt84VMq2mns7VIG3gLTo
-	LTEKADMiu0Xy/EG76JfnRB4qUVLjvZU=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=i4DUonvQeAigT1OfKNSVy7siZn8r1lTduEdKfVs50jA=;
+	b=IXIIZIAKRvu//igqOx4Rx8MzUopsMb1XQ12WFpCyi0fCe9hB9po4qBfknkXBVgPnMMrKgR
+	dCFtMinknPavmioA/sBHnXo8Z1DBItggUFgoAfsJcCt5oq/MRHfYGVsQTTj8e7lwRhVeMk
+	4Y8DD320hGMSRCV2IJpfigmHcVDEurQ=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-372-wz2wpaw1M7--4Ba7MVgI0A-1; Thu, 09 May 2024 05:42:16 -0400
-X-MC-Unique: wz2wpaw1M7--4Ba7MVgI0A-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1ed057cc183so7552685ad.2
-        for <fstests@vger.kernel.org>; Thu, 09 May 2024 02:42:16 -0700 (PDT)
+ us-mta-427-wwMwckQzNLqZDCFp8nEEoA-1; Thu, 09 May 2024 06:00:23 -0400
+X-MC-Unique: wwMwckQzNLqZDCFp8nEEoA-1
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-1ee2078c2d4so6633815ad.0
+        for <fstests@vger.kernel.org>; Thu, 09 May 2024 03:00:23 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715247735; x=1715852535;
+        d=1e100.net; s=20230601; t=1715248822; x=1715853622;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=lqh+8QSbSkOoBZk3pRadu9LwOPPbnmF9UEzo6RF70qE=;
-        b=M1XAo4enKHGKSiIgly9ufLV4BiKsqO7NX+MP7IxHiinVt+1EElc6dURlyK1E6lE/Ef
-         fqHF1cK5bMC9O4b+FSO62Kxzy7QYogPf4v2m0MP0ghwYpS8rZOECTMGB3OL/3fK1Taz4
-         HTBqB6WeWJz8p1DZoUJwTmz6DG00Om+cnitYZFvBy0LNWBfLs/eBnfcpknYd5qO0c2VX
-         WI11+orxDq1EfqigWs9ch6fLByxAv1beUMIsnhhiVpvMkmezC1moVLZoU/KrV+nE0s/M
-         nKEUpDR2HslGfjKkajTo6nS0hmXRowBvooSXFyqQIYcI8e0iTNXtVSdRn4ujIW5dvCyI
-         yQuA==
-X-Forwarded-Encrypted: i=1; AJvYcCVxT9LxiNQhwq90SSBlKUR+GowL8UEig7OaiN5Qn6YeV7gxBtECQkiV15fXrjiNGObS8ps5hCyOHI71Z6rxOkj1rzBi6JE0xQ==
-X-Gm-Message-State: AOJu0Yz8bf6hN0iPNEMjhg88rct73rHPpOKPlv2XSwxjjwJwBfP/e7zI
-	1+nm1eLaOYnrysdsaZXBrmzVasZwmdA/K0aH/LstqM10pcpj73T0DNbRUrRpabhO+J2DVrNdFyg
-	BRJ+PwRyX01akBnB0b41OsKwe0+OFV/OoPtxOJ3H+ftHuhBMoS9wkJyc=
-X-Received: by 2002:a17:903:41cc:b0:1e3:e093:b5f0 with SMTP id d9443c01a7336-1eeb018707dmr61316795ad.8.1715247735047;
-        Thu, 09 May 2024 02:42:15 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGz+AzRz16AHwoNSL1VXfhuWRJQuY7crCwH+qvCCOX3Z71AblXQ2ogcArxIxEhWcTfO/SRFKA==
-X-Received: by 2002:a17:903:41cc:b0:1e3:e093:b5f0 with SMTP id d9443c01a7336-1eeb018707dmr61316555ad.8.1715247734432;
-        Thu, 09 May 2024 02:42:14 -0700 (PDT)
+        bh=i4DUonvQeAigT1OfKNSVy7siZn8r1lTduEdKfVs50jA=;
+        b=L4rryD3C753JiOHbyAih/ZgBqlTGw2yXZppce0uQ/eiYwlHHFaYgtvkcC1Ee8yreHs
+         R+cCLBI7B2DGs+zo+HkC3gXQFKie2Fb0iO2TqgNVjRqih+uu/IK01pddo7bAXncdgM9A
+         rCaPOjScmonLEt1RoI3kR76NFDSe9zninDfFZ8BX2OtnLVIUbZLIGcuL0bCQ1mDAWOXJ
+         1MTA3VRq4ONA3tJcEGf92cwBiK9PXvhSXWgK6EbQuQ8lJ5qFLO2QNwPRIZmZeD/GVac5
+         kwiMizXroV4p5h/CgyqKit0o78zrvDQAH7PnsrPNvQBS5/0V4qGxDgRG5CBMfwOhVJ91
+         pl7A==
+X-Forwarded-Encrypted: i=1; AJvYcCX/pnxRdwSFSvnq52qwst40xFvEV6/uoMxU4javUPcddKjI/+6pqY13g4TB8eORdSgogjNGXG8D4DcFTyIQb+yACqVo3hKcGQ==
+X-Gm-Message-State: AOJu0YxzTwsBjPy9UKse+l8RhQpMpYUtpjlak6/O5+nh7mqi5GI9cU7Y
+	u0Tg24j0oVNsym7O9Xi3gssSmFn2Cs+ndMxMZGnVZVqE1R/9UHiIzfv4YprrSTUpNnsWrqb4phI
+	IZOrXtqrU8ijbUR9MrlKLwotIfTzJyd/A2f6LKBCnNFh9WCxcT3lxVHM=
+X-Received: by 2002:a17:902:ab82:b0:1eb:3d24:3f7a with SMTP id d9443c01a7336-1eeb05936edmr45309935ad.26.1715248821906;
+        Thu, 09 May 2024 03:00:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFvEuRnKdGeRQyDspP8Ot4KYYgZ+chEOXHtIE3dVhBDliUkc5oanw7l0XIlxY07tgSbWblpIQ==
+X-Received: by 2002:a17:902:ab82:b0:1eb:3d24:3f7a with SMTP id d9443c01a7336-1eeb05936edmr45309655ad.26.1715248821071;
+        Thu, 09 May 2024 03:00:21 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0bad5f0esm10049455ad.67.2024.05.09.02.42.10
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0c2565b6sm10287605ad.295.2024.05.09.03.00.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 May 2024 02:42:14 -0700 (PDT)
-Date: Thu, 9 May 2024 17:42:08 +0800
+        Thu, 09 May 2024 03:00:20 -0700 (PDT)
+Date: Thu, 9 May 2024 18:00:16 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "hch@lst.de" <hch@lst.de>
-Cc: Hans Holmberg <Hans.Holmberg@wdc.com>, Zorro Lang <zlang@kernel.org>,
-	"Darrick J. Wong" <djwong@kernel.org>,
-	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
-	Damien Le Moal <Damien.LeMoal@wdc.com>,
-	Matias Bj??rling <Matias.Bjorling@wdc.com>,
-	Naohiro Aota <Naohiro.Aota@wdc.com>,
-	Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Jaegeuk Kim <jaegeuk@kernel.org>,
-	"bvanassche@acm.org" <bvanassche@acm.org>,
-	"daeho43@gmail.com" <daeho43@gmail.com>
-Subject: Re: [PATCH] generic: add gc stress test
-Message-ID: <20240509094208.ulez6lg7ymesmhej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240415112259.21760-1-hans.holmberg@wdc.com>
- <e748ee35-e53e-475a-8f38-68522fb80bee@wdc.com>
- <20240416185437.GC11935@frogsfrogsfrogs>
- <20240417124317.lje5w5hgawy4drkr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <eddca2b5-0c15-4060-ba7b-89552de4a45d@wdc.com>
- <20240417140648.k3drgreciyiozkbq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <edcb31e0-cddb-4458-b45e-34518fbb828d@wdc.com>
- <20b38963-2994-401c-88f8-0a9d0729a101@wdc.com>
- <20240508085135.gwo3wiaqwhptdkju@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240509054347.GA5519@lst.de>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH 1/4] Move shared/032 to generic/740
+Message-ID: <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1715108589.git.dsterba@suse.com>
+ <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
+ <Zjxht5OKsau5QJYm@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -91,45 +74,35 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240509054347.GA5519@lst.de>
+In-Reply-To: <Zjxht5OKsau5QJYm@infradead.org>
 
-On Thu, May 09, 2024 at 07:43:47AM +0200, hch@lst.de wrote:
-> [really annoying multi-level full quote snipped]
+On Wed, May 08, 2024 at 10:40:07PM -0700, Christoph Hellwig wrote:
+> On Tue, May 07, 2024 at 09:07:36PM +0200, David Sterba wrote:
+> > The shared/ directory was supposed to host tests that apply to a subset
+> > of all supported filesystems but this is not utilized much and creates a
+> > split from the generic tests. Move the test to generic.
 > 
-> On Wed, May 08, 2024 at 04:51:35PM +0800, Zorro Lang wrote:
-> > I remembered you metioned btrfs fails on this test, and I can reproduce it
-> > on btrfs [1] with general disk. Have you figured out the reason? I don't
-> > want to give btrfs a test failure suddently without a proper explanation :)
-> > If it's a case issue, better to fix it for btrfs.
+> While we're at it, can we please have a
 > 
-> As a rule of thumb, what do we about generally useful tests that fail
-> on a fs due to fs bugs?  Not adding the test seems a bit counter productive.
-> Do we need a
+> _have_mkfs_overwrite detetion instead of hardcoding ext4 and btrfs
+> with another check for that is supported for btrfs?
 > 
-> _expected_failure $FSTYP
-> 
-> helper to annotate them instead of blocking the test?
+> I'm also pretty sure at least ext4 supports overwrite detection as
+> well..
 
-Hmm, what kind of situation is this _expected_failure for?
+Yeah, that's the reason I still keep the shared as a "prefix directory"
+of generic. The hardcode whitelist or blacklist of _supported_fs is a
+bit rude. If a fs isn't supported by a test case totally, that's fine.
+But if the condition of _notrun can be smaller and more precise (refer
+to some _require_xxx helpers) that would be great.
 
-For now we have two methods to deal with a test failure:
-
-1) If a test always fails on a fs, and can't be fixed (in case or kernel). We can
-add this fs type into black list of the case, e.g. _supported_fs ^$fstype
-
-2) If a test fails on a fs as an expected bug? We have _fixed_by_xxx ... or
-_wants_xxx_commit helpers to record that.
-
-3) Besides that, I generally metion some new failures in [ANNOUNCE] email of each
-release. (That's the last way I can choose).
-
-I hope we can fix the obvious case issue in reviewing phase, or deal with the
-failure by 1) or 2). For this patch, I think we can find a way to avoid the
-failure for btrfs, or let this test "not supported" by btrfs. Or any other
-better ideas :)
+Of course we can move shared to generic at first, then improve it later.
+But I doubt if we can keep that in mind, due to there're hundreds of
+generic cases :)
 
 Thanks,
 Zorro
 
+> 
 > 
 
