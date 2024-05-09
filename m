@@ -1,45 +1,39 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A5DD1FAA
-	for <fstests@vger.kernel.org>; Thu,  9 May 2024 12:41:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97C1917579;
+	Thu,  9 May 2024 12:54:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715258482; cv=none; b=eDE0cLbIrTLnc5ErIrDrwia4lc/IXSOs2ruQYAct07kAeOyUiMApJI8j96BTbRGCdW/WU0Q6x0zKDtwaQXwJANsYOtMqHdZhekY5gfYM9TuMwPNm2NFLpJzK4/kalqY6j7T+4J6yBf0YAwG9i7n+/gNSgncOIlrUyyCvkzkHi/c=
+	t=1715259258; cv=none; b=t2Vz4LuTyj74s3kr5ZSfhiN7bnI7qSMaPzFyOI2JlTjx6szakJ+mdbLlFx5oVcPF7ZCLqY7NxwWcfWDZceFSzZdmF6BX//W4xeCkkJHorC2loFQ08f33PcOZF9CXo1oECjsu3MmsX+VOhtgM1ILIlSPmR5Xs4Z8AbKPMkO6JuME=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715258482; c=relaxed/simple;
-	bh=rVs5WagxfOm/ocw4Q31Uld2JCftU4nJGWzVGhnG1UIM=;
+	s=arc-20240116; t=1715259258; c=relaxed/simple;
+	bh=Bqk+rtNpdO6EGtvjIYubK1QLxzWtDcvjN8jAUeLTt9o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GusYyYBf5qwRYcY5sFkdhSb2Zpg4J+ADbkNYv7SE/vvXaWJ2WXuDH60QzPMjFEAsK8v0BYX/ytZelOFn3P9oIjLjMwoVY4I7cgV+XIEUfty+LmD/ODnoQd+pr1WLAiPQ3poxQN7qLV0xbkTNDBIP3tDcsdQ/PymwjAtJqboxUDc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=vFrk2uOR; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="vFrk2uOR"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=6sy1df8lvguNQjEVQBQiyHTJpuKGgAGIRqFF6TAMXpY=; b=vFrk2uORbSlyAfwpZUcoX7KPQP
-	WRmeNbhqTLlEx57oVrOb0grWTVAiApZmqERlIGEZEPyjq2nKNdRtwQds1Kc08aDnBY9oV3teJgYCj
-	aFRiDODErTY6Y1rGxzzFa9cxI8MEAxzC322FZejhUnPqnKfwZdEW102AVYPMlnIOPqYJTmpkmY/4s
-	iEoq5XxZ8IDTl3qabW4B9J5z5bzsodcnIrgg+l3LMsnQV13nvK9CuFsgkFM8o8J6h4HW8gsd16Hz+
-	aAOmGrjibDT8769stUzeJAWXWfbWjs5e2HR0ldmsv1bcwVJ657BW5VnJu7MSDlRqU25993K697r2I
-	uUeIMsbA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1s535M-00000001SkM-39MY;
-	Thu, 09 May 2024 12:41:20 +0000
-Date: Thu, 9 May 2024 05:41:20 -0700
-From: Christoph Hellwig <hch@infradead.org>
+	 Content-Type:Content-Disposition:In-Reply-To; b=WYuZTOfXP+MPDrwuOeFpbPvcx26gJXHsAbN60tQWK8ESfAiNj+79QXDTm9MApAc17/fnkpqnzXpC9kHCftBmcTy98WRRIsPPju6C7UV1ju2gPlZ11K48q0zHKjHsmPC4C05ubLrqj8u66UdJJmmuzRjyLox5ALMWfKCsUssqZh8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id A9FC268C4E; Thu,  9 May 2024 14:54:12 +0200 (CEST)
+Date: Thu, 9 May 2024 14:54:12 +0200
+From: "hch@lst.de" <hch@lst.de>
 To: Zorro Lang <zlang@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, David Sterba <dsterba@suse.com>,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 1/4] Move shared/032 to generic/740
-Message-ID: <ZjzEcG8Z1_Ly2x-X@infradead.org>
-References: <cover.1715108589.git.dsterba@suse.com>
- <8dcb7d564180452eec0c2888740c1b0919e171d3.1715108589.git.dsterba@suse.com>
- <Zjxht5OKsau5QJYm@infradead.org>
- <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: "hch@lst.de" <hch@lst.de>, Hans Holmberg <Hans.Holmberg@wdc.com>,
+	Zorro Lang <zlang@kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+	Damien Le Moal <Damien.LeMoal@wdc.com>,
+	Matias Bj??rling <Matias.Bjorling@wdc.com>,
+	Naohiro Aota <Naohiro.Aota@wdc.com>,
+	Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	"bvanassche@acm.org" <bvanassche@acm.org>,
+	"daeho43@gmail.com" <daeho43@gmail.com>
+Subject: Re: [PATCH] generic: add gc stress test
+Message-ID: <20240509125412.GA12191@lst.de>
+References: <e748ee35-e53e-475a-8f38-68522fb80bee@wdc.com> <20240416185437.GC11935@frogsfrogsfrogs> <20240417124317.lje5w5hgawy4drkr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <eddca2b5-0c15-4060-ba7b-89552de4a45d@wdc.com> <20240417140648.k3drgreciyiozkbq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <edcb31e0-cddb-4458-b45e-34518fbb828d@wdc.com> <20b38963-2994-401c-88f8-0a9d0729a101@wdc.com> <20240508085135.gwo3wiaqwhptdkju@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <20240509054347.GA5519@lst.de> <20240509094208.ulez6lg7ymesmhej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,23 +42,23 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240509100016.ov23vek643renv36@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20240509094208.ulez6lg7ymesmhej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Thu, May 09, 2024 at 06:00:16PM +0800, Zorro Lang wrote:
-> Yeah, that's the reason I still keep the shared as a "prefix directory"
-> of generic. The hardcode whitelist or blacklist of _supported_fs is a
-> bit rude. If a fs isn't supported by a test case totally, that's fine.
-> But if the condition of _notrun can be smaller and more precise (refer
-> to some _require_xxx helpers) that would be great.
-> 
-> Of course we can move shared to generic at first, then improve it later.
-> But I doubt if we can keep that in mind, due to there're hundreds of
-> generic cases :)
+On Thu, May 09, 2024 at 05:42:08PM +0800, Zorro Lang wrote:
+> Hmm, what kind of situation is this _expected_failure for?
 
-# git-grep _supported_fs tests/generic/ | grep -v generic
+Well, the one we are talking about here.  We have a new and useful
+test, and a file systems fails it because it has a bug.
 
-will do the job.  But before this turns into an endless discussion
-I can just sign up for adding the proper helpers after the merge
-is applied.
+Personally I'd be fine with just letting it fail, but you seemed to
+indicate that this is a reason to not merge the test yet.
+
+> I hope we can fix the obvious case issue in reviewing phase, or deal with the
+> failure by 1) or 2). For this patch, I think we can find a way to avoid the
+> failure for btrfs, or let this test "not supported" by btrfs. Or any other
+> better ideas :)
+
+It is a normal use case that every file system should handle and btrfs
+developers are looking into it, but it might take a while.
 
