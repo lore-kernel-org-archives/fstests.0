@@ -1,203 +1,201 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD9734C8B
-	for <fstests@vger.kernel.org>; Thu,  9 May 2024 17:50:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1444013A889
+	for <fstests@vger.kernel.org>; Fri, 10 May 2024 01:37:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715277006; cv=none; b=ILndBUSPb2POQcHJH8Yep8ELQeosjhs27Ri3p+r++HNVTjxBRnMEbA9nkVtB6iQ0r7HeUBOFPrsvDBjhnBC0F/ddnYRPEk+XZ0Gr/+jHQniTiZn4Y8aJsS5D5ZOAWiPKBhkSdBIGKyVFQa4zmKmAzwgEDj+cFLzUwatK9uQu+z4=
+	t=1715305055; cv=none; b=l5NjfLcnCEyADU3PgDukQ84BHoIK9xecJ/eFVI6bE7SDUv60BA6LV7wTN3eTC9DYP7cmfEqY3NQDS7o6THTCdBRFeoy/FiIrSW4d1OV9zxSatyNxdnh2g3zItpgbo++ZfAkgULaCRC2Nu6GKw4j4QjtGmmgRbUN3dAW+GanhCGE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715277006; c=relaxed/simple;
-	bh=wGvYko9mrjKp7qwIXMYfpSX+/bd6yuj2Id+rovX9JQI=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=dQH5QcfLgC7gbSC8MbZx2JVFAcnSHLyBCP2+BSWY3zwX6wy0Dk3LQUTpynP2CnjAe5h5clH/TTYVecB3y2ImhRqdzu2Pgz91ZCqIUlumJQby/7eSlZb9bpkqr9fbw6BzSzIDpfrotoAb2L7Wqp2+AwkzSwgk+YWvzk/WCQ2XKuI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=evwDa5M6; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1715305055; c=relaxed/simple;
+	bh=2x1QcpK3Xr4UQS/EQDFVE8Rg0s5EfpJIPBNznxJp0b0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rJYbQoUBv37y50Ta2seXO3z72Jo6lZQ2WiJrRWR65QCDIRCsJU0Ro/9HyZRj957YfDJ7t9RKkZYuX7kUkxa60j8zFD7y9GBvwudsu0pjQ/Zg/IFvBBuzahIaffdFQiIUeS7wQeOroyr9qwrBo2V1MOIkSV09k0QjBxgYS99b6gI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=b4Nytnzf; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="evwDa5M6"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-1ee38966529so16370445ad.1
-        for <fstests@vger.kernel.org>; Thu, 09 May 2024 10:50:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1715277004; x=1715881804; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=CM9TM2Fc4373HXKk7BNn2KtcUSgLT/GhDivpRLbK3xo=;
-        b=evwDa5M6s/OmPnHLFo3hsgMySIjWO2l2dH0Nv+fQfQpl2OqbuCd3nKDgOTOfOUDUUa
-         78Os+X1m0eoYhMqNLYyXiymqRJXGfnH72/EMgITF0143j+9eKKTDQ91Nla40sfkjDJzi
-         5VVOuum5JDPQ8S4Ej1QZ5ZJpvV4atF73mOG9aMhDjZSelRJSe88FbhKwBPq/9tQWeQou
-         AgWFZbdQG+6XPtDT4OdIyZSZnp099MkuC+7iI+gXMaAqrtiEzotC9vYBqqyAt4UN9p/h
-         2I2paMZbMJ7dHf9Sv0UZt7yaeJVpEYPCG8KDpXEHur5IlgY5Kqh1vy4UWyAF5JWGe1K8
-         QEaQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="b4Nytnzf"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1715305053;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5mq5BCNTjbEWbMjSyCFN2M5+u34I5+NTcC/1Lb7n7C8=;
+	b=b4NytnzfGJIwKJeqruJoOlLcMgYCMe7sQ6WT3EhlHuJjMbAedVygP6aj6GvyG+sOlQqgFX
+	4e87LXWaW29SKhA6l5jZtpOEKkhGhMc48d6ZXf0ymMeRqGXDTY18hnoNLZWVW3DvugGW8p
+	Vm8pTG15L7UNvUjRK7xA8ULImJI8JCc=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-34-f7IFtsUzO0aea9TZnpnO2w-1; Thu, 09 May 2024 21:37:31 -0400
+X-MC-Unique: f7IFtsUzO0aea9TZnpnO2w-1
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2b2a648f23dso1337742a91.3
+        for <fstests@vger.kernel.org>; Thu, 09 May 2024 18:37:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715277004; x=1715881804;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=CM9TM2Fc4373HXKk7BNn2KtcUSgLT/GhDivpRLbK3xo=;
-        b=XE95laZOjw81Q3BA+UvuoFST0DraZmNQBf+AUty1UJEtdFit8JxdyzE7JU2+Q62sNF
-         KNv8tfIJEvvI5wyVWeuKab0sSSIzhcSkN/7ac0/jZdVovk2C62Uwt4Sk3MOW6Mta/q8h
-         IEOUMHGK2lsHBH+W98iVcTuGyIDXGdOJBk4DN4XN/Ly6S0KfB1OtxbcaQFS5L1BwDxk4
-         B3Jd0xSrFInvgDWEF8TJr1PAh701E7cTFl3kmBrDWMpWjkVusJvAZfsBhucpIGHKJkOz
-         08gwDljqkMO+bfpYXPNG9TGva+sL2c28o16a2e6HysLIt9DEUVLeeADNvPPZVC38zO8h
-         CoOw==
-X-Gm-Message-State: AOJu0YyjvSo59kwLbsS34fucIIoqfem9uD28UIV8N7l6zblz0U4GQQHM
-	kurq1eJTUj/k9D9v12FlrMXbL2w7G+5j7X8VZh3LzyffboagEtsX
-X-Google-Smtp-Source: AGHT+IGvWPtJOgiKV0V2IppVKjasN2Qi9OkWtxIZwt3dQ4vXTorsuJykks/SwYW3XCYwtyb+ssMwwA==
-X-Received: by 2002:a17:902:e806:b0:1e2:58f:7ed4 with SMTP id d9443c01a7336-1ef42d69b6amr6119005ad.5.1715277003989;
-        Thu, 09 May 2024 10:50:03 -0700 (PDT)
-Received: from dw-tp ([171.76.81.176])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0b9d4733sm17110725ad.54.2024.05.09.10.50.01
+        d=1e100.net; s=20230601; t=1715305050; x=1715909850;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=5mq5BCNTjbEWbMjSyCFN2M5+u34I5+NTcC/1Lb7n7C8=;
+        b=FodRmp5/1iT4C1hmdqj350DK2vDYfZ6HBuzSGgo8KTvBu47yEb2QIlvjo/uND1w/pN
+         Xw6Gr97zNdH8xCWznklqB5nitNyfYnwBChBsF8FBNj/Qaf1yFbwEouT6pswOxyJFNRzd
+         CizN4l9O7KbgFpJscXMRAQCo4ILJ+c7I1v0H9n/+YeRF5OCipDs50k9u46U3JhSoi8n6
+         GVGL42TXijlH3N5ROWM2Bch+ybTroIdvFgoTg/t4CXnchJJhZHRNMmLYjuJjr+661z00
+         0s+PV3AVFzrgWCLd9IomVr3hvmxOwmPe/0F7j4RiGcZkdlEDdHqph2VDyP0wEm+7RA79
+         hfhA==
+X-Forwarded-Encrypted: i=1; AJvYcCXp7Jyfw6PzVt6QUaSIV/7TAQpE04iWwzB6wcPJOS6wN3SEspJgrd10EGr2ETsb0d0YJOLUfyeZ5lGD21WYn+dnx1hF6b0l5g==
+X-Gm-Message-State: AOJu0YyBJqCTI2HyYo9PZI95Yzecg8WUhOS5HNKP10uOVVjU8wpQnsGf
+	Dbl/vU5VOmzkDSVtPV0XnAA68sEvBqqbNKmN38naFU/tJbd7dWRK2qhvmrEReXsTr9t8L0YnIA2
+	CIB/4oe6uT3mGDyOV8YKuhHg7RYKfgjjA4Uo7efZ1PZ3UUgXe3orJBsE=
+X-Received: by 2002:a17:90b:1058:b0:2b4:39cd:1fb8 with SMTP id 98e67ed59e1d1-2b6cc758bfdmr1344248a91.23.1715305050205;
+        Thu, 09 May 2024 18:37:30 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHGr0CbhDOnZ1kF0gHcPmzqXnfKjsfDH9t1zuh27/AtamvlVZkV3bNVBYj9G0/xiOLIPCm8gg==
+X-Received: by 2002:a17:90b:1058:b0:2b4:39cd:1fb8 with SMTP id 98e67ed59e1d1-2b6cc758bfdmr1344226a91.23.1715305049580;
+        Thu, 09 May 2024 18:37:29 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2b62886f143sm3971835a91.32.2024.05.09.18.37.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 May 2024 10:50:03 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>, "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, gost.dev@samsung.com, mcgrof@kernel.org, zlang@redhat.com, Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH 1/3] xfs/161: adapt the test case for 64k FS blocksize
-In-Reply-To: <20240508105852.nfjtlp53v24xb3tw@quentin>
-Date: Thu, 09 May 2024 23:03:08 +0530
-Message-ID: <87ttj6gaaz.fsf@gmail.com>
-References: <20240506150119.184097-1-kernel@pankajraghav.com> <20240506150119.184097-2-kernel@pankajraghav.com> <20240507222323.GC2049409@frogsfrogsfrogs> <20240508105852.nfjtlp53v24xb3tw@quentin>
+        Thu, 09 May 2024 18:37:29 -0700 (PDT)
+Date: Fri, 10 May 2024 09:37:26 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: fix _require_debugfs and call it properly
+Message-ID: <20240510013726.fp72gsarkggnnys6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240429060906.465135-1-zlang@kernel.org>
+ <20240429160356.GC360908@frogsfrogsfrogs>
+ <20240429185857.n32qxnmfzghd5nuf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240429185857.n32qxnmfzghd5nuf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com> writes:
+On Tue, Apr 30, 2024 at 02:58:57AM +0800, Zorro Lang wrote:
+> On Mon, Apr 29, 2024 at 09:03:56AM -0700, Darrick J. Wong wrote:
+> > On Mon, Apr 29, 2024 at 02:09:06PM +0800, Zorro Lang wrote:
+> > > The old _require_debugfs helper doesn't work now, fix it to check
+> > > a system supports debugfs. And then call this helper in cases which
+> > > need $DEBUGFS_MNT.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > > ---
+> > >  common/rc       | 10 ++++++++--
+> > >  tests/btrfs/150 |  1 +
+> > >  tests/ceph/001  |  2 +-
+> > >  tests/xfs/499   |  1 +
+> > >  4 files changed, 11 insertions(+), 3 deletions(-)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 56f1afb6..6f0bdf60 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -2978,8 +2978,14 @@ _require_sparse_files()
+> > >  
+> > >  _require_debugfs()
+> > >  {
+> > > -    #boot_params always present in debugfs
+> > > -    [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
+> > > +	local type
+> > > +
+> > > +	if [ -d "$DEBUGFS_MNT" ];then
+> > > +		type=$(findmnt -rncv -T $DEBUGFS_MNT -S debugfs -o FSTYPE)
+> > > +		[ "$type" = "debugfs" ] && return 0
+> > > +	fi
+> > > +
+> > > +	_notrun "Cannot find debugfs on $DEBUGFS_MNT"
+> > >  }
+> > >  
+> > >  #
+> > > diff --git a/tests/btrfs/150 b/tests/btrfs/150
+> > > index a02bdafc..fd386d92 100755
+> > > --- a/tests/btrfs/150
+> > > +++ b/tests/btrfs/150
+> > > @@ -17,6 +17,7 @@ _begin_fstest auto quick dangerous read_repair compress
+> > >  . ./common/fail_make_request
+> > >  
+> > >  _supported_fs btrfs
+> > > +_require_debugfs
+> > >  _require_scratch
+> > >  _require_fail_make_request
+> > >  _require_scratch_dev_pool 2
+> > > diff --git a/tests/ceph/001 b/tests/ceph/001
+> > > index 060c4c45..79a5f58a 100755
+> > > --- a/tests/ceph/001
+> > > +++ b/tests/ceph/001
+> > > @@ -20,7 +20,7 @@ _begin_fstest auto quick copy_range
+> > >  
+> > >  # real QA test starts here
+> > >  _supported_fs ceph
+> > > -
+> > > +_require_debugfs
+> > >  _require_xfs_io_command "copy_range"
+> > >  _exclude_test_mount_option "test_dummy_encryption"
+> > >  _require_attrs
+> > > diff --git a/tests/xfs/499 b/tests/xfs/499
+> > > index 9672f95d..6421cc4b 100755
+> > > --- a/tests/xfs/499
+> > > +++ b/tests/xfs/499
+> > > @@ -18,6 +18,7 @@ _register_cleanup "_cleanup" BUS
+> > >  # real QA test starts here
+> > >  _supported_fs xfs
+> > >  _require_command "$CC_PROG" "cc"
+> > > +_require_debugfs
+> > 
+> > This test doesn't mess around with debugfs per se; it actually wants
+> > tracefs.  Perhaps this should be _require_ftrace instead?
 
-> On Tue, May 07, 2024 at 03:23:23PM -0700, Darrick J. Wong wrote:
->> On Mon, May 06, 2024 at 05:01:17PM +0200, Pankaj Raghav (Samsung) wrote:
->> > From: Pankaj Raghav <p.raghav@samsung.com>
->> > 
->> > This test fails when xfs is formatted with 64k filesystem block size*.
->> > It fails because the soft quota is not exceeded with the hardcoded 64k
->> > pwrite, thereby, the grace time is not set. Even though soft quota is
->> > set to 12k for uid1, it is rounded up to the nearest blocksize.
->> > 
->> > *** Report for user quotas on device /dev/sdb3
->> > Block grace time: 7days; Inode grace time: 7days
->> >                         Block limits                File limits
->> > User            used    soft    hard  grace    used  soft  hard  grace
->> > ----------------------------------------------------------------------
->> > 0        --       0       0       0      0       3     0     0      0
->> > 1        --      64      64    1024      0       1     0     0      0
->> > 2        --      64       0       0      0       1     0     0      0
->> > 
->> > Adapt the pwrite to do more than 64k write when the FS blocksize is 64k.
->> > 
->> > Cap the blksz to be at least 64k to retain the same behaviour as before
->> > for smaller filesystem blocksizes.
->> > 
->> > * This happens even on a 64k pagesize system and it is not related to
->> >   LBS effort.
->> > 
->> > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
->> > ---
->> >  tests/xfs/161 | 10 ++++++++--
->> >  1 file changed, 8 insertions(+), 2 deletions(-)
->> > 
->> > diff --git a/tests/xfs/161 b/tests/xfs/161
->> > index 486fa6ca..94290f18 100755
->> > --- a/tests/xfs/161
->> > +++ b/tests/xfs/161
->> > @@ -38,9 +38,15 @@ _qmount_option "usrquota"
->> >  _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
->> >  _scratch_mount >> $seqres.full
->> >  
->> > +min_blksz=65536
->> > +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
->> > +# Write more than one block to exceed the soft block quota limit.
->> > +blksz=$(( 2 * $file_blksz))
->> > +
->> > +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
->> 
->> If we don't set $min_blksize and always write (2 * $file_blksz) does the
->> test still work?
->
-> I think something like this is more clean where we don't have anymore
-> hardcoded variables:
->
+Oh, I just found you've created a _require_ftrace helper in common/tracing:
 
-Yes, why not.
+  FTRACE_INSTANCES_DIR="/sys/kernel/debug/tracing/instances/"
 
-> Author: Pankaj Raghav <p.raghav@samsung.com>
-> Date:   Thu Jan 18 18:40:39 2024 +0100
->
->     xfs/161: adapt the test case for 64k FS blocksize
->     
->     This test fails when xfs is formatted with 64k filesystem block size*.
->     It fails because the soft quota is not exceeded with the hardcoded 64k
->     pwrite, thereby, the grace time is not set. Even though soft quota is
->     set to 12k for uid1, it is rounded up to the nearest blocksize.
->     
->     *** Report for user quotas on device /dev/sdb3
->     Block grace time: 7days; Inode grace time: 7days
->                             Block limits                File limits
->     User            used    soft    hard  grace    used  soft  hard  grace
->     ----------------------------------------------------------------------
->     0        --       0       0       0      0       3     0     0      0
->     1        --      64      64    1024      0       1     0     0      0
->     2        --      64       0       0      0       1     0     0      0
->     
->     Adapt the pwrite to do twice the FS block size and set the soft limit
->     to be 1 FS block.
->     
->     * This happens even on a 64k pagesize system and it is not related to
->       LBS effort.
->     
->     Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
->
-> diff --git a/tests/xfs/161 b/tests/xfs/161
-> index 486fa6ca..074acddc 100755
-> --- a/tests/xfs/161
-> +++ b/tests/xfs/161
-> @@ -38,15 +38,21 @@ _qmount_option "usrquota"
->  _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
->  _scratch_mount >> $seqres.full
->  
-> +
-> +pgsize=`$here/src/feature -s`
-> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
+  _require_ftrace() {
+          test -d "$FTRACE_INSTANCES_DIR" || \
+                  _notrun "kernel does not support ftrace"
+  }
 
-small bit: maybe just $blksz is fine.
+Newer kernel has /sys/kernel/tracing/, to avoid the dependence of debugfs.
+But there's still /sys/kernel/debug/tracing/, so I'm wondering
+if we should try to use /sys/kernel/debug/tracing at first?
 
-> +# Write more than one block to exceed the soft block quota limit.
-> +blksz=$(( 2 * $file_blksz))
+For example:
 
-small nit: Instead of blksz here maybe writesz or filesz then?
+_require_ftrace() {
+	if [ -d /sys/kernel/tracing/instances/ ];then
+		FTRACE_DIR="/sys/kernel/tracing"
+		FTRACE_INSTANCES_DIR="/sys/kernel/tracing/instances"
+	elif [ -d /sys/kernel/debug/tracing/instances/ ];then
+		FTRACE_DIR="/sys/kernel/debug/tracing"
+		FTRACE_INSTANCES_DIR="/sys/kernel/debug/tracing/instances"
+	else
+		_notrun "The ftrace is not supported, or tracefs is not mounted"
+	fi
+}
 
-Then let's make:
-lim_bsoft=$blksz, lim_bhard=$(( 10 * blksz )) and writesz=$(( 2 * blksz ))
+Thanks,
+Zorro
 
+> 
+> Sure, but if it depends tracefs only, should we use /sys/kernel/debug/tracing or
+> /sys/kernel/tracing ? If we use /sys/kernel/debug/tracing, is the debugfs needed
+> at first?
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > >  cprog=$tmp.ftrace.c
+> > >  oprog=$tmp.ftrace
+> > > -- 
+> > > 2.44.0
+> > > 
+> > > 
+> > 
 
-> +
->  # Force the block counters for uid 1 and 2 above zero
-> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/a >> $seqres.full
-> -_pwrite_byte 0x61 0 64k $SCRATCH_MNT/b >> $seqres.full
-> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/a >> $seqres.full
-> +_pwrite_byte 0x61 0 $blksz $SCRATCH_MNT/b >> $seqres.full
->  sync
->  chown 1 $SCRATCH_MNT/a
->  chown 2 $SCRATCH_MNT/b
->  
->  # Set quota limits on uid 1 before upgrading
-> -$XFS_QUOTA_PROG -x -c 'limit -u bsoft=12k bhard=1m 1' $SCRATCH_MNT
-> +$XFS_QUOTA_PROG -x -c 'limit -u bsoft='"$file_blksz"' bhard=1m 1' $SCRATCH_MNT
-
-Then we can use $lim_bsoft and $lim_bhard here.
-
->  
->  # Make sure the grace period is at /some/ point in the future.  We have to
->  # use bc because not all bashes can handle integer comparisons with 64-bit
-> @@ -71,7 +77,7 @@ _scratch_mount
->  
->  # Set a very generous grace period and quota limits on uid 2 after upgrading
->  $XFS_QUOTA_PROG -x -c 'timer -u -b -d 2147483647' $SCRATCH_MNT
-> -$XFS_QUOTA_PROG -x -c 'limit -u bsoft=10000 bhard=150000 2' $SCRATCH_MNT
-> +$XFS_QUOTA_PROG -x -c 'limit -u bsoft='"$file_blksz"' bhard=150000 2' $SCRATCH_MNT
->  
->  # Query the grace periods to see if they got set properly after the upgrade.
->  repquota -upn $SCRATCH_MNT > $tmp.repquota
->
-
-
--ritesh
