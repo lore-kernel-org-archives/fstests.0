@@ -1,41 +1,89 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AD6913E881
-	for <fstests@vger.kernel.org>; Fri, 10 May 2024 02:31:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2696613BAC8
+	for <fstests@vger.kernel.org>; Fri, 10 May 2024 03:22:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715308307; cv=none; b=PW8LYykR2RlFSdc/etSoP1nq6dzHgOJVlS14uIxvDb2n/VXRQgAzNqsM/Tbo3iBo/gehzUQkxfoCogPtkrWxGLFPr8Rcm53BjVqAdlMxQKXybEBlcOozpcnwrAP28qajrCqDJ20nfrsy6tHuoCYvto3YvAWj6JV6O4O0wje/ooM=
+	t=1715311346; cv=none; b=Xs3iNMaNM7ndJVxnf02JOG5wxPx+KDC1mkHMbtcOgGajBFcs6h8E4T10p4XP9nMQUrHD8UgiAmzGz1PTUOjtx1bI9KyxYfIECFKSKwDS0X65jAPNyE2KoimwRxOkZzRAtQ5fAwDfOxmI/jKbGfqz8Fek3PXTOEWDoBcI8vsX/IY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715308307; c=relaxed/simple;
-	bh=fZ5UOKfkhYvB5XKwqPdG9CKerS/l8vNUL3a8IG6eXOc=;
+	s=arc-20240116; t=1715311346; c=relaxed/simple;
+	bh=dfj1a9mMMxT4kK+dZUBfu/t7gAVZmC7ec0NRlZI6TxU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=U32Iuc1cyaABdI/uR38yoL57AR3kmWRFNbq2RHy/idzTTj6mdog/WGJewVl62n60DjvnvW01s5c+a6LGase+EqvLXF/EJyiqB3EQyHxBGQY3hZsf2tORhWFgT+vcwlVxjtgUnwL/J+uhxw8fqJj4nbXxrr4YYlklTXrdXOfSA+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Fl4ljHGG; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZiHW7cBFvIwsLyHnXH3ndLSgWGCVyZVSTpdoPFL1VW+yKu25mlUEEmarQQaybp56/T+zC/6/IUsWZZE4Fp+o4D21M1qbohgcyMQZ52ai5Y6AMSASqaQvFe0Mg+ZOHxbiKWjaq/sQ+nYsABRpMow2U3mCsiNcFjEx4oldjjgS/t0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LJBch75e; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Fl4ljHGG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DDEAAC116B1;
-	Fri, 10 May 2024 02:31:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715308306;
-	bh=fZ5UOKfkhYvB5XKwqPdG9CKerS/l8vNUL3a8IG6eXOc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Fl4ljHGGEo16fnaf4qGdwQu1T1reh+CKG1AVGxOe4I+EbARxvjB/EMmpfZfNTIQ+z
-	 8Ok8ygIC4EgNNP/f8hM7ZQX216RGqHwWbzEhqihIjiYX9ZxKncVAqRKdSxcrz9H7Vi
-	 N0iUhFFJPx72OziYkXWQCiOsww2FwVNi8Ak/9v2hKhBd9SRaGAXC3fiPj73lcEu+FF
-	 rq9Z8EPZrcXV/FfsOdiXvytqWRMKqNvemHexu30CpKj1SJ/LPpLYLd8DvE9bNT5BA+
-	 /CWYEVr/ktIRu0VxTyfdOEmfP7GchsB4lzVNG+6Txr7G0l5E9g+gY69UJAK05zK4L7
-	 UHzcpE0QuKuVA==
-Date: Thu, 9 May 2024 19:31:46 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH] fstests: fix _require_debugfs and call it properly
-Message-ID: <20240510023146.GI2049409@frogsfrogsfrogs>
-References: <20240429060906.465135-1-zlang@kernel.org>
- <20240429160356.GC360908@frogsfrogsfrogs>
- <20240429185857.n32qxnmfzghd5nuf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240510013726.fp72gsarkggnnys6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LJBch75e"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1715311344;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=F93Nx1PCHKVz+GEqI50pwrgN+2Fg4a5U/4umyOXXuI8=;
+	b=LJBch75eAUgLs8EMHcEiPd/kXN8pdvt9ttQV7NgrglJNFREuZh82VpTjHUoblNBHbmihrU
+	Tw583+PnzZLPvkXxQHTKXGOyN7vYxSK/RGYrvZmajJF/hKjOcGSYG2OwYyIDvUziV7kUX9
+	mVKO9D7HYGZEVdLkfXg8EFxNN0IVZpQ=
+Received: from mail-oi1-f197.google.com (mail-oi1-f197.google.com
+ [209.85.167.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-335-DVKZ_Sw6NHK_JCZUoJFbUQ-1; Thu, 09 May 2024 23:21:27 -0400
+X-MC-Unique: DVKZ_Sw6NHK_JCZUoJFbUQ-1
+Received: by mail-oi1-f197.google.com with SMTP id 5614622812f47-3c992e34f58so1201915b6e.0
+        for <fstests@vger.kernel.org>; Thu, 09 May 2024 20:21:27 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1715311286; x=1715916086;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=F93Nx1PCHKVz+GEqI50pwrgN+2Fg4a5U/4umyOXXuI8=;
+        b=wJU1eGwSCXUuFX/cp/ldYk0TBlTECHvX19mwxIxvekms7lpMS2TpyXtT5xjDiBDTE9
+         NPPnfmOg8559fjr8s43R9xLJnQCDVNuVEYRSPPKPPuoCrLDBcMi9lS2QEctpinJDs5gC
+         qsWhc6ycF3bI24V2yhevnuksVrgMlxgIBr4cPH5aqiCcRStn/ILsYpAG6zCzNwh8APk9
+         oSyjYQ8eV1SX++ORZd2iyRXscr3byQsO1/MQVDQvR3GzdScsY4nz2mZ9gVy9VYGcbqaM
+         rn5w3nu5TeyEyOzEaBsEwS5K618TLsvZuEmSYqA5f9AY5o0qoUbiEsUB031KPoO5aPrE
+         QXQg==
+X-Forwarded-Encrypted: i=1; AJvYcCWFnZ7KpGmW5oZIs3cAsJ5QeHipo7/xMuDq64hF/GVXEMpHnu8CZEhn5SKoBuT3h4dpBo/fy0L43gi1dLZatFfY6srjvvV2yg==
+X-Gm-Message-State: AOJu0YxWMiksrF0ln80iphypTT8v/rlVj5+YKHFdBc5uyS4asjZnj68n
+	V7vICYuq8Uk6wewhBl9cUS+pOEzmi2mxAVvWDPp6OztGmiQ1v5To6oe3R/xHyKaRzgc30WRc2+y
+	6ybEbPKjvbQP9T8PbtHrGgomcbcRWCCBWq19jn0oNPA30BXMLYegfpyQ=
+X-Received: by 2002:a05:6808:a96:b0:3c5:f86f:a5e5 with SMTP id 5614622812f47-3c9970b95aamr1467577b6e.38.1715311286369;
+        Thu, 09 May 2024 20:21:26 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHVK0mX2Zr8NcBzEuHFd8MYcbtUE1gM4CdantqigyBVvdCDdLMA2R32p1LAEkQ3iSAkLsuB0g==
+X-Received: by 2002:a05:6808:a96:b0:3c5:f86f:a5e5 with SMTP id 5614622812f47-3c9970b95aamr1467563b6e.38.1715311285849;
+        Thu, 09 May 2024 20:21:25 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-63411346dc1sm1795584a12.83.2024.05.09.20.21.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 May 2024 20:21:25 -0700 (PDT)
+Date: Fri, 10 May 2024 11:21:20 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "hch@lst.de" <hch@lst.de>
+Cc: Hans Holmberg <Hans.Holmberg@wdc.com>, Zorro Lang <zlang@kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>,
+	Damien Le Moal <Damien.LeMoal@wdc.com>,
+	Matias Bj??rling <Matias.Bjorling@wdc.com>,
+	Naohiro Aota <Naohiro.Aota@wdc.com>,
+	Johannes Thumshirn <Johannes.Thumshirn@wdc.com>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	"bvanassche@acm.org" <bvanassche@acm.org>,
+	"daeho43@gmail.com" <daeho43@gmail.com>,
+	Qu Wenruo <quwenruo.btrfs@gmx.com>
+Subject: Re: [PATCH] generic: add gc stress test
+Message-ID: <20240510032120.5oywsrifwxr2jjuz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240416185437.GC11935@frogsfrogsfrogs>
+ <20240417124317.lje5w5hgawy4drkr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <eddca2b5-0c15-4060-ba7b-89552de4a45d@wdc.com>
+ <20240417140648.k3drgreciyiozkbq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <edcb31e0-cddb-4458-b45e-34518fbb828d@wdc.com>
+ <20b38963-2994-401c-88f8-0a9d0729a101@wdc.com>
+ <20240508085135.gwo3wiaqwhptdkju@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240509054347.GA5519@lst.de>
+ <20240509094208.ulez6lg7ymesmhej@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240509125412.GA12191@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,136 +92,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240510013726.fp72gsarkggnnys6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240509125412.GA12191@lst.de>
 
-On Fri, May 10, 2024 at 09:37:26AM +0800, Zorro Lang wrote:
-> On Tue, Apr 30, 2024 at 02:58:57AM +0800, Zorro Lang wrote:
-> > On Mon, Apr 29, 2024 at 09:03:56AM -0700, Darrick J. Wong wrote:
-> > > On Mon, Apr 29, 2024 at 02:09:06PM +0800, Zorro Lang wrote:
-> > > > The old _require_debugfs helper doesn't work now, fix it to check
-> > > > a system supports debugfs. And then call this helper in cases which
-> > > > need $DEBUGFS_MNT.
-> > > > 
-> > > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > > ---
-> > > >  common/rc       | 10 ++++++++--
-> > > >  tests/btrfs/150 |  1 +
-> > > >  tests/ceph/001  |  2 +-
-> > > >  tests/xfs/499   |  1 +
-> > > >  4 files changed, 11 insertions(+), 3 deletions(-)
-> > > > 
-> > > > diff --git a/common/rc b/common/rc
-> > > > index 56f1afb6..6f0bdf60 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -2978,8 +2978,14 @@ _require_sparse_files()
-> > > >  
-> > > >  _require_debugfs()
-> > > >  {
-> > > > -    #boot_params always present in debugfs
-> > > > -    [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
-> > > > +	local type
-> > > > +
-> > > > +	if [ -d "$DEBUGFS_MNT" ];then
-> > > > +		type=$(findmnt -rncv -T $DEBUGFS_MNT -S debugfs -o FSTYPE)
-> > > > +		[ "$type" = "debugfs" ] && return 0
-> > > > +	fi
-> > > > +
-> > > > +	_notrun "Cannot find debugfs on $DEBUGFS_MNT"
-> > > >  }
-> > > >  
-> > > >  #
-> > > > diff --git a/tests/btrfs/150 b/tests/btrfs/150
-> > > > index a02bdafc..fd386d92 100755
-> > > > --- a/tests/btrfs/150
-> > > > +++ b/tests/btrfs/150
-> > > > @@ -17,6 +17,7 @@ _begin_fstest auto quick dangerous read_repair compress
-> > > >  . ./common/fail_make_request
-> > > >  
-> > > >  _supported_fs btrfs
-> > > > +_require_debugfs
-> > > >  _require_scratch
-> > > >  _require_fail_make_request
-> > > >  _require_scratch_dev_pool 2
-> > > > diff --git a/tests/ceph/001 b/tests/ceph/001
-> > > > index 060c4c45..79a5f58a 100755
-> > > > --- a/tests/ceph/001
-> > > > +++ b/tests/ceph/001
-> > > > @@ -20,7 +20,7 @@ _begin_fstest auto quick copy_range
-> > > >  
-> > > >  # real QA test starts here
-> > > >  _supported_fs ceph
-> > > > -
-> > > > +_require_debugfs
-> > > >  _require_xfs_io_command "copy_range"
-> > > >  _exclude_test_mount_option "test_dummy_encryption"
-> > > >  _require_attrs
-> > > > diff --git a/tests/xfs/499 b/tests/xfs/499
-> > > > index 9672f95d..6421cc4b 100755
-> > > > --- a/tests/xfs/499
-> > > > +++ b/tests/xfs/499
-> > > > @@ -18,6 +18,7 @@ _register_cleanup "_cleanup" BUS
-> > > >  # real QA test starts here
-> > > >  _supported_fs xfs
-> > > >  _require_command "$CC_PROG" "cc"
-> > > > +_require_debugfs
-> > > 
-> > > This test doesn't mess around with debugfs per se; it actually wants
-> > > tracefs.  Perhaps this should be _require_ftrace instead?
+On Thu, May 09, 2024 at 02:54:12PM +0200, hch@lst.de wrote:
+> On Thu, May 09, 2024 at 05:42:08PM +0800, Zorro Lang wrote:
+> > Hmm, what kind of situation is this _expected_failure for?
 > 
-> Oh, I just found you've created a _require_ftrace helper in common/tracing:
+> Well, the one we are talking about here.  We have a new and useful
+> test, and a file systems fails it because it has a bug.
 > 
->   FTRACE_INSTANCES_DIR="/sys/kernel/debug/tracing/instances/"
-> 
->   _require_ftrace() {
->           test -d "$FTRACE_INSTANCES_DIR" || \
->                   _notrun "kernel does not support ftrace"
->   }
-> 
-> Newer kernel has /sys/kernel/tracing/, to avoid the dependence of debugfs.
+> Personally I'd be fine with just letting it fail, but you seemed to
+> indicate that this is a reason to not merge the test yet.
 
-Ah, I didn't realize that!  I wonder how long that's been in place...
+The failure itself is not the reason to not merge :) It's not clear
+what this case tests for, especially there's a failure. If it's a
+regression test case, we can mark the kernel commit.
 
-> But there's still /sys/kernel/debug/tracing/, so I'm wondering
-> if we should try to use /sys/kernel/debug/tracing at first?
-> 
-> For example:
-> 
-> _require_ftrace() {
-> 	if [ -d /sys/kernel/tracing/instances/ ];then
-> 		FTRACE_DIR="/sys/kernel/tracing"
-> 		FTRACE_INSTANCES_DIR="/sys/kernel/tracing/instances"
-> 	elif [ -d /sys/kernel/debug/tracing/instances/ ];then
-> 		FTRACE_DIR="/sys/kernel/debug/tracing"
-> 		FTRACE_INSTANCES_DIR="/sys/kernel/debug/tracing/instances"
-> 	else
-> 		_notrun "The ftrace is not supported, or tracefs is not mounted"
-> 	fi
-> }
+Or if we treat it as a simple stress test for "garbage collection in
+file systems", does it bring in more test coverage? As the "garbage
+collection" is common, most of random stress test cases cover that.
+But sure, I can treat it as a generic version of btrfs/273. It's copied
+from btrfs case, then fail on btrfs. So I hope to know what's wrong :)
 
-Yes.
-
---D
-
-> Thanks,
-> Zorro
 > 
-> > 
-> > Sure, but if it depends tracefs only, should we use /sys/kernel/debug/tracing or
-> > /sys/kernel/tracing ? If we use /sys/kernel/debug/tracing, is the debugfs needed
-> > at first?
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > >  cprog=$tmp.ftrace.c
-> > > >  oprog=$tmp.ftrace
-> > > > -- 
-> > > > 2.44.0
-> > > > 
-> > > > 
-> > > 
+> > I hope we can fix the obvious case issue in reviewing phase, or deal with the
+> > failure by 1) or 2). For this patch, I think we can find a way to avoid the
+> > failure for btrfs, or let this test "not supported" by btrfs. Or any other
+> > better ideas :)
 > 
+> It is a normal use case that every file system should handle and btrfs
+> developers are looking into it, but it might take a while.
+
+If it needs longer time to fix, and if btrfs list (has known and) doesn't mind
+this failure, I can merge it into "patches-in-queue" branch at first. If we
+find a way to fix it before next release, let's fix, or I'll push it. Does that
+make sense to you?
+(CC btrfs list)
+
+Thanks,
+Zorro
+
+> 
+
