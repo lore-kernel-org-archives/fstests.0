@@ -1,65 +1,44 @@
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6137D3FE4
-	for <fstests@vger.kernel.org>; Thu, 16 May 2024 22:12:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A67F83FE4
+	for <fstests@vger.kernel.org>; Thu, 16 May 2024 22:12:52 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715897572; cv=none; b=iMr97WRuHMQrRq4g7YsHQzEum6ueCF5jy+Yned7rwyv/7g5r0iSNIuSPVfyLLo+lsbQMbt9T2HjRJA6fQxbiLjlpbIYdznxjzyJZu/F05xJdHrHmiCqCvHaSwLqT2RdtBfIxYjzV2i/i/iWHaWxTDqDKkM/FqlYPBrvUdTHLhBA=
+	t=1715897574; cv=none; b=qqYQEZ7/ILC44D4OfJKZEcwQApz5cc7/klIb0iqV18lubdzsoGwbkGPxYD+D5HWKQA3sCNumCisq95cp4E358fFj/Q8zjlvflsveTaqvqDQmUyPGtGkSES+9JzbDhvp+CNjDMpfmTjvlzNM1P5Or3+ii4qPPi9c2ZuOpp2Hfy3I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715897572; c=relaxed/simple;
-	bh=Ae0ZoTRVdIvMjS4oMpnl/QFpwKih8AA+Nro/wpllR1w=;
+	s=arc-20240116; t=1715897574; c=relaxed/simple;
+	bh=kr79FLlesgvWXYM0MJ+3wQ3nnLs90oOT+xL3h/x/LhY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jbgOT+Fvc1db4cvBsaft5nmeyqVZtvviyjfJ5ttOOqjyNxAHqqaG4FkwgKazOHzUMfnjBA9ZSPQM7MJWRGScoFLTcgZWibe627Hs43Fkn1umMkgNQ/YvozYlm/+U/UBVyAwD6BAU/CJYtk4GtcSC2nh/lhNKrKZmCRwdceKhqkE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=BQGFy3+R; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=BQGFy3+R; arc=none smtp.client-ip=195.135.223.130
+	 MIME-Version; b=Vqk27mprNQlNrEeoHHOWQf54xXzR7VOhpsxaFyW1kZ4RKQdeDaoQ9iK/eT8plmd19M41Z036EXTpFTIc9zpoJ+P0r5DqgzOMFIWAuJNw1lW82wwmE6pbLb8XWBJOj21aWZ0XVHsMQ98Upc1n7RJ5QCUxmxJ63Ylksw4X5lJkhvk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; arc=none smtp.client-ip=195.135.223.130
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="BQGFy3+R";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="BQGFy3+R"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id AB70C35053;
-	Thu, 16 May 2024 22:12:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1715897568; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1Cfr8qAtafzBxCcrlf+Nd8rvoFxCDMHxcdO9en3nkdQ=;
-	b=BQGFy3+ReBYWcDACmx3Eq3Z4TuD1dGhVL8ZsxkD6Cy5exL/32PHJhJ7nbODCTrXdXRgPcJ
-	dyxI/CIBoEIEqoy0tv8xqNI8DghLHhd0AitQBEla4ZZDb+94UUrC8gw3D75inDuapCz7yj
-	s+KK59ghEE6udWeezmWw5GE0WVPClnU=
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 13E1B35055;
+	Thu, 16 May 2024 22:12:51 +0000 (UTC)
 Authentication-Results: smtp-out1.suse.de;
 	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1715897568; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=1Cfr8qAtafzBxCcrlf+Nd8rvoFxCDMHxcdO9en3nkdQ=;
-	b=BQGFy3+ReBYWcDACmx3Eq3Z4TuD1dGhVL8ZsxkD6Cy5exL/32PHJhJ7nbODCTrXdXRgPcJ
-	dyxI/CIBoEIEqoy0tv8xqNI8DghLHhd0AitQBEla4ZZDb+94UUrC8gw3D75inDuapCz7yj
-	s+KK59ghEE6udWeezmWw5GE0WVPClnU=
 Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A52AE137C3;
-	Thu, 16 May 2024 22:12:48 +0000 (UTC)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0DE2E137C3;
+	Thu, 16 May 2024 22:12:51 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
 	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 9wxRKOCERmYdaAAAD6G6ig
-	(envelope-from <dsterba@suse.com>); Thu, 16 May 2024 22:12:48 +0000
+	id wzNiA+OERmbTaAAAD6G6ig
+	(envelope-from <dsterba@suse.com>); Thu, 16 May 2024 22:12:51 +0000
 From: David Sterba <dsterba@suse.com>
 To: fstests@vger.kernel.org
 Cc: josef@toxicpanda.com,
 	David Sterba <dsterba@suse.com>
-Subject: [PATCH 4/6] generic/269: require no compression
-Date: Fri, 17 May 2024 00:12:48 +0200
-Message-ID: <ea5a2c054381fccd48bdf5dd987247a0c6bd55fe.1715896529.git.dsterba@suse.com>
+Subject: [PATCH 5/6] btrfs/011: mkfs the scratch dev before exiting
+Date: Fri, 17 May 2024 00:12:50 +0200
+Message-ID: <19804c4e3c319678768d5d24a15b000e05dd0af2.1715896529.git.dsterba@suse.com>
 X-Mailer: git-send-email 2.45.0
 In-Reply-To: <cover.1715896529.git.dsterba@suse.com>
 References: <cover.1715896529.git.dsterba@suse.com>
@@ -70,63 +49,61 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
 X-Spam-Level: 
-X-Spamd-Result: default: False [-6.80 / 50.00];
-	REPLY(-4.00)[];
-	BAYES_HAM(-3.00)[99.99%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MIME_TRACE(0.00)[0:+];
-	TO_DN_SOME(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Score: -6.80
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	REPLY(-4.00)[]
 X-Spam-Flag: NO
+X-Spam-Score: -4.00
+X-Rspamd-Queue-Id: 13E1B35055
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
+X-Rspamd-Action: no action
 
 From: Josef Bacik <josef@toxicpanda.com>
 
-This is meant to test ENOSPC, but we're dd'ing /dev/zero, which won't
-fill up anything with compression on.
+When testing encryption I started getting failures because the scratch
+dev didn't have a valid fs at the end of the test.  This is because for
+encryption we have to disable raid5/6, which changes how the test is
+run.
 
-Additionally we're killing dd and then immediately trying to unmount.
-With compression we could have references to the inode being held by the
-async compression workers, so sometimes this will fail with EBUSY on the
-unmount.
+Normally with raid6 we end up cancelling the device replace, and thus
+$SCRATCH_DEV has a valid file system on it.  However with raid5/6
+disabled we end with a normal DUP profile, and the replace doesn't end
+up cancelled, so $SCRATCH_DEV is wiped.  Then when the test finishes we
+do the normal fsck and see that there's no fs on the $SCRATCH_DEV and
+error.
 
-Make it easier on us and just skip this if we have compression enabled.
+This test does all the fsck'ing during the workout period, so we don't
+need the final scratch check, simply re-make the $SCRATCH_DEV at the end
+as it could have been replaced during the test.
 
 Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 Signed-off-by: David Sterba <dsterba@suse.com>
 ---
- tests/generic/269 | 3 +++
- 1 file changed, 3 insertions(+)
+ tests/btrfs/011 | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/tests/generic/269 b/tests/generic/269
-index b7cdecd94f219a..6ee0cb04581632 100755
---- a/tests/generic/269
-+++ b/tests/generic/269
-@@ -11,6 +11,9 @@ _begin_fstest auto rw prealloc ioctl enospc stress
+diff --git a/tests/btrfs/011 b/tests/btrfs/011
+index bf63a72b11c42f..d99624fb941cce 100755
+--- a/tests/btrfs/011
++++ b/tests/btrfs/011
+@@ -258,6 +258,11 @@ for t in "-m single -d single:1 no 64" \
+ 	fi
+ done
  
- # Import common functions.
- . ./common/filter
++# If we exclude certain RAID profiles we can end up where the scratch dev
++# doesn't have a valid fs on it because it was replaced during workout, so mkfs
++# the scratch device so we don't get _check_btrfs_filesystem errors
++_scratch_mkfs > /dev/null 2>&1
 +
-+_require_no_compress
-+
- # Disable all sync operations to get higher load
- FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
- _workout()
+ echo "*** done"
+ status=0
+ exit
 -- 
 2.45.0
 
