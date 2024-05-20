@@ -1,119 +1,192 @@
-Received: from mail-qt1-f172.google.com (mail-qt1-f172.google.com [209.85.160.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8698A136E37
-	for <fstests@vger.kernel.org>; Mon, 20 May 2024 15:54:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E4DB134406
+	for <fstests@vger.kernel.org>; Mon, 20 May 2024 17:00:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716220497; cv=none; b=AkDQUooQI4VQaIqq3K8Q7lQWEmPmkPBbMSOYqo6X8z0m9w5p+qq+u4sFDHXtToeRpI+UqtgWd4f0hNpWzgQOclbYtUeg9983UZ10Cwz1vL24hHmkoKtVGkM0jZaDMmkK/yz5QOnMp8dqRXdhO4vhuTUFsxK4A11l1+Z4OPzzSOg=
+	t=1716224452; cv=none; b=D6EiGVjiGNZPU/wm+v/wB4HnxoOh5zMIFZYvMJSOF9H2WXoB7Y6qi00pojGM1yZNmUO1rkJt1yCdqO46ajqSv+0Tcy5SZK5dixO2dF/+AIc+jTHRRGyh68Rgqj/bW6tdrBntoOw8A23+orz93rY3Q3ELWRnyZFqHqVex+gXUs/g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716220497; c=relaxed/simple;
-	bh=Homzp/63aiX0b0frqJlJfO8Q6OA7Jf4akX4P+wX3COw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=INS8rNcqxcjS8a9verFMSn54qyZzi3K7xVEk/krPWPrIh/CgEOOCw0NQZujaJBfa3kWiAcgEVrerNZPXx/m6148p295YiSGkjDKmugD1XQJwx2pG7dDAQdfxwwoyH3z5RLrMrSriBar3QkTlDpGUH2WF73n0sIwN040Hm9qGF9Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=snitzer.net; arc=none smtp.client-ip=209.85.160.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=snitzer.net
-Received: by mail-qt1-f172.google.com with SMTP id d75a77b69052e-43df7f42ac9so15237731cf.2
-        for <fstests@vger.kernel.org>; Mon, 20 May 2024 08:54:55 -0700 (PDT)
+	s=arc-20240116; t=1716224452; c=relaxed/simple;
+	bh=1APxhd3ckTAzVBTdLTLt3c5andKLLsC+U+pcDI4EGBM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kbWZfqa/3QZgfR9kvGFMN2PFM8SyQF64PYro+h5vqCXM64T0TLKxPY9UpCXfnXOtRCV6US2OSvQjTrhYM7uEIVnZ+eMbil74IY/l4Z+hKcYdumCUe3WOLJpZ2kWvaSy0KZUTGPFelmqodSJCBfAbnXQAjJ+Mi2TWM/wuOOgjI08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JamLfRcC; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JamLfRcC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1716224450;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=4qWhkh1epTlmJSat3qjeiKyBc/qMan6DIng62vymx/0=;
+	b=JamLfRcCE2sCeqkWH1uYbnuo7kDYPe4YK4PRxkRy95aomlees3AtSDZfT2qxiXX996GYxu
+	bErQaf47fXmoRKQ7nxlBvgSwl9gWWij623ye+1nRLX3AqJRom3G8S2vB9cj+0VWrmxt1kQ
+	MTBU1ejGM05yG8Lu4HckUREiJq46Dww=
+Received: from mail-lf1-f71.google.com (mail-lf1-f71.google.com
+ [209.85.167.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-46-9BZzNJXTN7289HOYQb4YEQ-1; Mon, 20 May 2024 13:00:48 -0400
+X-MC-Unique: 9BZzNJXTN7289HOYQb4YEQ-1
+Received: by mail-lf1-f71.google.com with SMTP id 2adb3069b0e04-51f6fb04b82so10331114e87.2
+        for <fstests@vger.kernel.org>; Mon, 20 May 2024 10:00:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716220494; x=1716825294;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IaIyNEamC/GOVmXOOEefzqW6FyJnCYusfseZnVHqXxo=;
-        b=nF5vB6QAeqsK+RDqWBSPCWogRsK4EMBTXQiSG1lemNDDOU+ce2sjrHcDAnaUxmvVyi
-         ZpGkWLzq9x9OBR5LHGlEb3CTDQ61k6l5GWrCF0SRGRMCtSqEbSnT+cAu1bZuYI4tYybW
-         eo8LAMhkE080rbkcp1MSlVhOpAc4+l/ew5m2TjqWKMtlAM17SulJ1QP+Qpw6zYP2bhES
-         QotBcJj5FOoBHMaUIjUjL+6mqxPZ9C1IC/7bakjhLFR5bqECCOlK/wwMDLEI2DRIvFYj
-         yeJ3l1qoma2s0bpfGG2XZwLmzf4+mEd4UY+p8b4lpjSiREhT519Vo0XywlSX/O6UWz80
-         zLjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUxR1ySergQ9EYGkEfMEi14xPQvnrUDM2KN35iRosBwJfR4dIWxbwzc4pVnWtKhWhs8lCFgicNakEIcUkS1RN7OK67bC84XyA==
-X-Gm-Message-State: AOJu0YztYq9QsO2XNwuAoMLcs2ZoT1EteHbTU2z1iA8R4+M1yQ0wZ/9c
-	BleZsrdw2jBOFgQPBf+9TZTJrw6r28jDDRCXYnTwNMyKWPsQK1AKoqq9Z1Yc1vc=
-X-Google-Smtp-Source: AGHT+IFEI2WIsnG6E5eeNjkDC8pyDKtauCuIbSxAV0M2We8mLigkzXUeIcnUOFltjNKjK00xd2PSYQ==
-X-Received: by 2002:ac8:5d49:0:b0:43a:a82d:4fa with SMTP id d75a77b69052e-43dfdaa9ab4mr263199961cf.15.1716220494481;
-        Mon, 20 May 2024 08:54:54 -0700 (PDT)
-Received: from localhost (pool-68-160-141-91.bstnma.fios.verizon.net. [68.160.141.91])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-43dfa0fc2e1sm142427401cf.56.2024.05.20.08.54.53
+        d=1e100.net; s=20230601; t=1716224446; x=1716829246;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4qWhkh1epTlmJSat3qjeiKyBc/qMan6DIng62vymx/0=;
+        b=MqhQgKswUysiYBMATGt7ofytBAZjzmo45sfPVOAjRuFhGZzGVVphmWgZV3MZpnrbpZ
+         P2LYsRbN4Hc+M8UK7Shw+n70kLQjoz45dPAvcVnqb8rKOb7xvXBkPkS38G4BO74YiAnQ
+         5JyBz0QiaTw70mmdEsWgO2I/At8kSGig2rNdhVc587h/c/GaAnL+DkDWu/4JeZSIg2Iz
+         Auh71LdT+Qmmq0sbsssmzWChox/qt2KLHvHk1f1/UnMyAgWBBiHvXZs5X3VW1f3yr1EC
+         z27QxT564d7w8vlrAMWfl46uetQjGjPv7HlobZRhbw76RBzhMF0bdUgMVPh1N78TCbdr
+         Wt1A==
+X-Gm-Message-State: AOJu0YzHI6bjyri3b6nFNqH0acvr+sM3t6zf3P7Z2tCrKGaiDdkdCvJx
+	L1gSjGBL2NjwoRxu9SaCvjYLz6E/cMJTHxvT80eYv1OqujTvXiGPC0MiD/IIuBNpJvmi9JPvDD6
+	lsE0TvftaC6jo5QFc+tKrZKYBGjZ5yovd5PH7OhN+FCQnF5PcyLTY20kF+oK48JoIefI5hYSc+q
+	ImCtW2SA+Rr/ufp+LCFfFGKkB0bu/KAuMN+N5ukA==
+X-Received: by 2002:a19:4309:0:b0:523:e073:36c6 with SMTP id 2adb3069b0e04-523e0733873mr5466678e87.48.1716224446031;
+        Mon, 20 May 2024 10:00:46 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHgR8006pqsvLSuExNivh1ntHtStjT+2FJZqDTI8e/r+3CL4gn8WqYjw0cmtsM+4aOotKUz3w==
+X-Received: by 2002:a19:4309:0:b0:523:e073:36c6 with SMTP id 2adb3069b0e04-523e0733873mr5466658e87.48.1716224445257;
+        Mon, 20 May 2024 10:00:45 -0700 (PDT)
+Received: from thinky.redhat.com ([109.183.6.197])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5733c2cb54csm15074896a12.60.2024.05.20.10.00.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 May 2024 08:54:54 -0700 (PDT)
-Date: Mon, 20 May 2024 11:54:53 -0400
-From: Mike Snitzer <snitzer@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Theodore Ts'o <tytso@mit.edu>, dm-devel@lists.linux.dev,
-	fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	regressions@lists.linux.dev, linux-block@vger.kernel.org
-Subject: Re: dm: use queue_limits_set
-Message-ID: <ZktyTYKySaauFcQT@kernel.org>
-References: <20240518022646.GA450709@mit.edu>
- <ZkmIpCRaZE0237OH@kernel.org>
- <ZkmRKPfPeX3c138f@kernel.org>
- <20240520150653.GA32461@lst.de>
- <ZktuojMrQWH9MQJO@kernel.org>
- <20240520154425.GB1104@lst.de>
+        Mon, 20 May 2024 10:00:44 -0700 (PDT)
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Cc: Andrey Albershteyn <aalbersh@redhat.com>
+Subject: [PATCH] xfs: test quota's project ID on special files
+Date: Mon, 20 May 2024 19:00:05 +0200
+Message-ID: <20240520170004.669254-2-aalbersh@redhat.com>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240520154425.GB1104@lst.de>
+Content-Transfer-Encoding: 8bit
 
-On Mon, May 20, 2024 at 05:44:25PM +0200, Christoph Hellwig wrote:
-> On Mon, May 20, 2024 at 11:39:14AM -0400, Mike Snitzer wrote:
-> > That's fair.  My criticism was more about having to fix up DM targets
-> > to cope with the new normal of max_discard_sectors being set as a
-> > function of max_hw_discard_sectors and max_user_discard_sectors.
-> > 
-> > With stacked devices in particular it is _very_ hard for the user to
-> > know their exerting control over a max discard limit is correct.
-> 
-> The user forcing a limit is always very sketchy, which is why I'm
-> not a fan of it.
-> 
-> > Yeah, but my concern is that if a user sets a value that is too low
-> > it'll break targets like DM thinp (which Ted reported).  So forcibly
-> > setting both to indirectly set the required max_discard_sectors seems
-> > necessary.
-> 
-> Dm-think requiring a minimum discard size is a rather odd requirement.
-> Is this just a debug asswert, or is there a real technical reason
-> for it?  If so we can introduce a now to force a minimum size or
-> disable user setting the value entirely. 
+With addition of FS_IOC_FSSETXATTRAT xfs_quota now can set project
+ID on filesystem inodes behind special files. Previously, quota
+reporting didn't count inodes of special files created before
+project initialization. Only new inodes had project ID set.
 
-thinp's discard implementation is constrained by the dm-bio-prison's
-constraints.  One of the requirements of dm-bio-prison is that a
-discard not exceed BIO_PRISON_MAX_RANGE.
+Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
+---
 
-My previous reply is a reasonible way to ensure best effort to respect
-a users request but that takes into account the driver provided
-discard_granularity.  It'll force suboptimal (too small) discards be
-issued but at least they'll cover a full thinp block.
- 
-> > diff --git a/drivers/md/dm-thin.c b/drivers/md/dm-thin.c
-> > index 4793ad2aa1f7..c196f39579af 100644
-> > --- a/drivers/md/dm-thin.c
-> > +++ b/drivers/md/dm-thin.c
-> > @@ -4497,7 +4499,8 @@ static void thin_io_hints(struct dm_target *ti, struct queue_limits *limits)
-> >  
-> >  	if (pool->pf.discard_enabled) {
-> >  		limits->discard_granularity = pool->sectors_per_block << SECTOR_SHIFT;
-> > -		limits->max_discard_sectors = pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
-> > +		limits->max_hw_discard_sectors = limits->max_user_discard_sectors =
-> > +			pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
-> >  	}
-> 
-> Drivers really have no business setting max_user_discard_sector,
-> the whole point of the field is to separate device/driver capabilities
-> from user policy.  So if dm-think really has no way of handling
-> smaller discards, we need to ensure they can't be set.
+Notes:
+    This is part of the patchset which introduces
+    FS_IOC_FS[GET|SET]XATTRAT:
+    https://lore.kernel.org/linux-xfs/20240520164624.665269-2-aalbersh@redhat.com/T/#t
+    https://lore.kernel.org/linux-xfs/20240520165200.667150-2-aalbersh@redhat.com/T/#u
 
-It can handle smaller so long as they respect discard_granularity.
+ tests/xfs/608     | 73 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/608.out | 10 +++++++
+ 2 files changed, 83 insertions(+)
+ create mode 100755 tests/xfs/608
+ create mode 100644 tests/xfs/608.out
 
-> I'm also kinda curious what actually sets a user limit in Ted's case
-> as that feels weird.
+diff --git a/tests/xfs/608 b/tests/xfs/608
+new file mode 100755
+index 000000000000..3573c764c5f4
+--- /dev/null
++++ b/tests/xfs/608
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2024 Red Hat.  All Rights Reserved.
++#
++# FS QA Test 608
++#
++# Test that XFS can set quota project ID on special files
++#
++. ./common/preamble
++_begin_fstest auto quota
++
++# Override the default cleanup function.
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	rm -f $tmp.proects $tmp.projid
++}
++
++
++# Import common functions.
++. ./common/quota
++. ./common/filter
++
++# Modify as appropriate.
++_supported_fs xfs
++_require_scratch
++_require_xfs_quota
++_require_user
++
++_scratch_mkfs >/dev/null 2>&1
++_qmount_option "pquota"
++_scratch_mount
++_require_test_program "af_unix"
++_require_symlinks
++_require_mknod
++
++function create_af_unix () {
++	$here/src/af_unix $* || echo af_unix failed
++}
++
++function filter_quota() {
++	_filter_quota | sed "s~$tmp.proects~PROJECTS_FILE~"
++}
++
++projectdir=$SCRATCH_MNT/prj
++id=42
++
++mkdir $projectdir
++mkfifo $projectdir/fifo
++mknod $projectdir/chardev c 1 1
++mknod $projectdir/blockdev b 1 1
++create_af_unix $projectdir/socket
++touch $projectdir/foo
++ln -s $projectdir/foo $projectdir/symlink
++touch $projectdir/bar
++ln -s $projectdir/bar $projectdir/broken-symlink
++rm -f $projectdir/bar
++
++$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
++	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
++$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
++	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
++$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
++	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
++$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
++	-c "report -inN -p" $SCRATCH_DEV
++$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
++	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/608.out b/tests/xfs/608.out
+new file mode 100644
+index 000000000000..c3d56c3c7682
+--- /dev/null
++++ b/tests/xfs/608.out
+@@ -0,0 +1,10 @@
++QA output created by 608
++Setting up project 42 (path SCRATCH_MNT/prj)...
++Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
++Checking project 42 (path SCRATCH_MNT/prj)...
++Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
++#0                   3          0          0     00 [--------]
++#42                  8         20         20     00 [--------]
++
++Clearing project 42 (path SCRATCH_MNT/prj)...
++Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+-- 
+2.42.0
 
-I agree, not sure... maybe the fstests is using the knob?
