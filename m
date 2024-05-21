@@ -1,283 +1,110 @@
-Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0243E81E
-	for <fstests@vger.kernel.org>; Tue, 21 May 2024 00:45:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB05E7F
+	for <fstests@vger.kernel.org>; Tue, 21 May 2024 01:06:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716252332; cv=none; b=QBgFw+upzncjWWvSKnbZtyzNJmU6GcinUa7nre2LCOQ03uVGjuzE1z00LjE0nHXrEFoNbnUwjIJ74X084Ye2uu4/bvvkEYs84aTRLPXIXgul2rZtKuhERjOBvL3SwS8ubK7U8fSpMpf5vhz40GmubUHy1e/dWg+fc7H5wixOij4=
+	t=1716253582; cv=none; b=g3o9ZPA7nJe4PBxrk3JpnZBTdFAo9TFPm1tSBeJDWt63lf3Zet8DYf72XQAb61SUe9euXovqMhfTChbVF/kKxKaaO9mR2ttGPjE/zVQg4AF6zG0Quw8a7caZyHdjSfatc/U77sVXTNWzz1o5VUokZ5IymYgYdX3tbNbTvTPCPI4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716252332; c=relaxed/simple;
-	bh=M3IGua52fbiYvVXmDO9/O5jfEFfSwxKvM3kbq6LZ/ME=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mWMJZPYMuD/NBzZiHYVh71PSgmWE/wUqrUvzlYhFKq3pctUvUIRbFlIZixk1uCV2e5Fgbsvx6b1DbHf0IQMVo2hhthkyQ5eYy511+bZpknDsGkUr/zxvDMd7jnT9L5ZwddhoIwRU8ORSVERF8EPmUN+k7RFu/F5scv2hzJDzf/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=snitzer.net; arc=none smtp.client-ip=209.85.167.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=snitzer.net
-Received: by mail-oi1-f170.google.com with SMTP id 5614622812f47-3c99e6b8b1fso2372504b6e.1
-        for <fstests@vger.kernel.org>; Mon, 20 May 2024 17:45:30 -0700 (PDT)
+	s=arc-20240116; t=1716253582; c=relaxed/simple;
+	bh=sODGnfmKfl05kirINZM0ji46vr8FOdY8tSVDyJHhRbE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=QY+UmVKLY1sVTEbRJSMfIHrmkW1ZCKo3BR/dI7QH49Ryl53V5Ozrhk3iHA1GUcY2X95O+qBNUAi1xdD62+GYVggz/XMMGrvGxsuQpwOqDLtfY3RqUS6yB8j3/OYtSCYtbHhUhFMJ3EBXOiUtMrZBwtS9c0Wm4hmPInpqreggUh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AuqX0+Tr; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AuqX0+Tr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1716253579;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=p+IRLtr3CD5713sw58Oz9jeFDrRIoC1ExmWuiRLK+04=;
+	b=AuqX0+TrAezCeBsyxRwRzWPEzXudF2uvSnAp4jv0i/07B9uerGkJEQ17nIopwvvu8Idyvc
+	axwu6mq9tKZdUr0gxVeLScCp/wzVqHdqQ+apATaG0iSuDRLaUcu9MwgfIX8hCf7EzDFiHv
+	gUMp5pB+310unTYpIfdE3tQtormZtQs=
+Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
+ [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-290-oWfiDTK7MHKJfwlQLkIYFw-1; Mon, 20 May 2024 21:05:47 -0400
+X-MC-Unique: oWfiDTK7MHKJfwlQLkIYFw-1
+Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-a59ad2436f8so714481966b.2
+        for <fstests@vger.kernel.org>; Mon, 20 May 2024 18:05:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716252330; x=1716857130;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WAQ7EZw2gT8mUoiA62o4QOdC/XHNNwGQwfkkzt04Rds=;
-        b=EMSNATvqyd2aWQYlrO+mxeS1//rpMkYrR5c4MURMA7wpawNE5GrLKV3AyQoyrQ1Y83
-         KrIsFNRoCrQJkb2COhHp5jSI14lRVSUBBGM2YrxHPJg7uEHonT5budcOT1mA8Gh4gchL
-         Q4t0/KzJqt794EhruuSdKsz66vpo3CUctj79esaRIk7xFoSNWAupykYdSToUP7Z2XR+o
-         gGMAO4oxkWifU2M9pvfB7Isp+g7xRre3JxDPFNn7L3ePm/c/dF+DFQmEsmOYDzjQorCs
-         BcmhyAuf7JOO+zQbDDTNXlf+1abCd47jNb8KH73FtbqR6FiBGbXJ3IWoC6VMU+RY57vk
-         MGcQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVN2+8n/fF/m0HD3LQf2yJ6zLTKDagq1jHOMZsihjqHzpbrgYDJmEXx9z494DYjZCvWj9CtsZTq4rqs+vAoajMEz6y2zVCAfw==
-X-Gm-Message-State: AOJu0Yx5fz9x+4v0sdxy8wua6XOPTbfhZ4+QgPannFlqoNLBe32zV5g6
-	WFI81kKTlHGurlvKA+esEiXEL3MJYYOnIm1kYZG435lmdKJfKD7IsMA7mnhLpv8=
-X-Google-Smtp-Source: AGHT+IGMn6xjydCtb38kyKvLjZDgFdGue2uUOR537cPk5ZgFt4ChObkqOmoaYUFS+4P+IGBFARHGTQ==
-X-Received: by 2002:a05:6808:18a8:b0:3c9:c3ad:53b9 with SMTP id 5614622812f47-3c9c3ad58ddmr21150431b6e.26.1716252330121;
-        Mon, 20 May 2024 17:45:30 -0700 (PDT)
-Received: from localhost (pool-68-160-141-91.bstnma.fios.verizon.net. [68.160.141.91])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-792bf2757b5sm1237989085a.17.2024.05.20.17.45.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 May 2024 17:45:29 -0700 (PDT)
-Date: Mon, 20 May 2024 20:45:28 -0400
-From: Mike Snitzer <snitzer@kernel.org>
-To: Christoph Hellwig <hch@lst.de>, Theodore Ts'o <tytso@mit.edu>
-Cc: dm-devel@lists.linux.dev, fstests@vger.kernel.org,
-	linux-ext4@vger.kernel.org, regressions@lists.linux.dev,
-	linux-block@vger.kernel.org
-Subject: Re: dm: use queue_limits_set
-Message-ID: <ZkvuqNXaNOMe6Gfj@kernel.org>
-References: <20240518022646.GA450709@mit.edu>
- <ZkmIpCRaZE0237OH@kernel.org>
- <ZkmRKPfPeX3c138f@kernel.org>
- <20240520150653.GA32461@lst.de>
- <ZktuojMrQWH9MQJO@kernel.org>
- <20240520154425.GB1104@lst.de>
- <ZktyTYKySaauFcQT@kernel.org>
- <ZkuFuqo3dNw8bOA2@kernel.org>
- <20240520201237.GA6235@lst.de>
- <ZkvIn73jAqz94LjI@kernel.org>
+        d=1e100.net; s=20230601; t=1716253546; x=1716858346;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=p+IRLtr3CD5713sw58Oz9jeFDrRIoC1ExmWuiRLK+04=;
+        b=AJhJECzjlaphDDrAY4DmwVNaPkZpN7OdVTk/hQ5z4dJ2OIMd4CJkUR/1uO9arWr+T9
+         S/NjE4JGNT7bOscsf9s+k5M8Typ7Iwn+67Inz5JFHtcdATNfvAWUxeVN5YwT2qmX6TFj
+         /KQJUhpow+LFE8to2S8GFotWLUbYtdbWf0Ma7zPGSsv0lWitcZldPyJykdnIbGWYuPEA
+         8rm9tL8rFaUZ38f8k40+s660uzOf+4Nj8EnLD3Q84KmRSPHA8MvxFvGRnFnWby31CT7c
+         mY6BM7qSVTMBjmvLSQmb9zhTIv/5xNaT5fP1Zq5ekUHzHHpNaITl5yfgOy7dchMba9CX
+         mkSg==
+X-Forwarded-Encrypted: i=1; AJvYcCXAOBC1lDGWCpnQDpphQKT3M/g5Xxs8z0HcOHR4c/FIR70dq34chlD1+RTZ2zmQni3vaXrDmamHkZ5jYgBC81KBWiCNAsFwAQ==
+X-Gm-Message-State: AOJu0YysciD7l0gh7oHT2KMts7YV1n8QL4xaF6jJPI/h1HmQrAXN84pt
+	LxSXuV18wNw+QxE/QuI6L/4nzQ8jhe7qwmPBrB8BkXykqLybHdXmpJ/r6yanm95w3Wn/Nr65YQG
+	mUlSNdwuiXEHB+ccYZ3BykPZnCxYfX/9q1o45QgG90KSKgjSln5YjdfpNdy8x3t7ddX2gpfCOWU
+	ozRxCWg5lTqlnrXjbVSKxoUDCtCBgd8A==
+X-Received: by 2002:a17:906:eb52:b0:a5a:769d:1f8f with SMTP id a640c23a62f3a-a5a769d1fb5mr1326814166b.68.1716253546265;
+        Mon, 20 May 2024 18:05:46 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFmLA8Se8SsEJHpWJGihreHRU2FyfqBzUvAldKqKbqZ3YYcBppqSSpDm5brTkI9ODNGufLxUVJm562I8U/37oM=
+X-Received: by 2002:a17:906:eb52:b0:a5a:769d:1f8f with SMTP id
+ a640c23a62f3a-a5a769d1fb5mr1326813166b.68.1716253545613; Mon, 20 May 2024
+ 18:05:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZkvIn73jAqz94LjI@kernel.org>
+References: <CAGS2=Ypq9_X23syZw8tpybjc_hPk7dQGqdYNbpw0KKN1A1wbNA@mail.gmail.com>
+ <ZktnrDCSpUYOk5xm@infradead.org>
+In-Reply-To: <ZktnrDCSpUYOk5xm@infradead.org>
+From: Guangwu Zhang <guazhang@redhat.com>
+Date: Tue, 21 May 2024 09:05:34 +0800
+Message-ID: <CAGS2=YqCD15RVtZ=NWVjPMa22H3wks1z6TSMVk7jmE_k1A-csg@mail.gmail.com>
+Subject: Re: [bug report] Internal error isnullstartblock(got.br_startblock) a
+ t line 6005 of file fs/xfs/libxfs/xfs_bmap.c.
+To: Christoph Hellwig <hch@infradead.org>
+Cc: linux-block@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, May 20, 2024 at 06:03:11PM -0400, Mike Snitzer wrote:
-> On Mon, May 20, 2024 at 10:12:37PM +0200, Christoph Hellwig wrote:
-> > On Mon, May 20, 2024 at 01:17:46PM -0400, Mike Snitzer wrote:
-> > > Doubt there was anything in fstests setting max discard user limit
-> > > (max_user_discard_sectors) in Ted's case. blk_set_stacking_limits()
-> > > sets max_user_discard_sectors to UINT_MAX, so given the use of
-> > > min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors) I
-> > > suspect blk_stack_limits() stacks up max_discard_sectors to match the
-> > > underlying storage's max_hw_discard_sectors.
-> > > 
-> > > And max_hw_discard_sectors exceeds BIO_PRISON_MAX_RANGE, resulting in
-> > > dm_cell_key_has_valid_range() triggering on:
-> > > WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
-> > 
-> > Oh, that makes more sense.
-> > 
-> > I think you just want to set the max_hw_discard_sectors limit before
-> > stacking in the lower device limits so that they can only lower it.
-> > 
-> > (and in the long run we should just stop stacking the limits except
-> > for request based dm which really needs it)
-> 
-> This is what I staged, I cannot send a patch out right now.. 
-> 
-> Ted if you need the patch in email (rather than from linux-dm.git) I
-> can send it later tonight.  Please see:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git/commit/?h=dm-6.10&id=825d8bbd2f32cb229c3b6653bd454832c3c20acb
+yes,
+the branch header info.
+commit 04d3822ddfd11fa2c9b449c977f340b57996ef3d
+Merge: 59ef81807482 7b815817aa58
+Author: Jens Axboe <axboe@kernel.dk>
+Date:   Fri May 17 09:40:38 2024 -0600
 
-From: Mike Snitzer <snitzer@kernel.org>
-Date: Mon, 20 May 2024 13:34:06 -0400
-Subject: [PATCH] dm: always manage discard support in terms of max_hw_discard_sectors
+    Merge branch 'block-6.10' into for-next
 
-Commit 4f563a64732d ("block: add a max_user_discard_sectors queue
-limit") changed block core to set max_discard_sectors to:
- min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors)
+    * block-6.10:
+      blk-mq: add helper for checking if one CPU is mapped to specified hct=
+x
 
-Since commit 1c0e720228ad ("dm: use queue_limits_set") it was reported
-dm-thinp was failing in a few fstests (generic/347 and generic/405)
-with the first WARN_ON_ONCE in dm_cell_key_has_valid_range() being
-reported, e.g.:
-WARNING: CPU: 1 PID: 30 at drivers/md/dm-bio-prison-v1.c:128 dm_cell_key_has_valid_range+0x3d/0x50
+Christoph Hellwig <hch@infradead.org> =E4=BA=8E2024=E5=B9=B45=E6=9C=8820=E6=
+=97=A5=E5=91=A8=E4=B8=80 23:09=E5=86=99=E9=81=93=EF=BC=9A
+>
+> On Mon, May 20, 2024 at 07:48:13PM +0800, Guangwu Zhang wrote:
+> > Hi,
+> > I get a xfs error when run xfstests  generic/461 testing with
+> > linux-block for-next branch.
+> > looks it easy to reproduce with s390x arch.
+>
+> Just to clarify, you see this with the block for-next branch, but not
+> with Linux 6.9 or current Linus tree?
+>
+>
 
-blk_set_stacking_limits() sets max_user_discard_sectors to UINT_MAX,
-so given how block core now sets max_discard_sectors (detailed above)
-it follows that blk_stack_limits() stacks up the underlying device's
-max_hw_discard_sectors and max_discard_sectors is set to match it. If
-max_hw_discard_sectors exceeds dm's BIO_PRISON_MAX_RANGE, then
-dm_cell_key_has_valid_range() will trigger the warning with:
-WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
 
-Aside from this warning, the discard will fail.  Fix this and other DM
-issues by governing discard support in terms of max_hw_discard_sectors
-instead of max_discard_sectors.
-
-Reported-by: Theodore Ts'o <tytso@mit.edu>
-Fixes: 1c0e720228ad ("dm: use queue_limits_set")
-Signed-off-by: Mike Snitzer <snitzer@kernel.org>
----
- drivers/md/dm-cache-target.c | 5 ++---
- drivers/md/dm-clone-target.c | 4 ++--
- drivers/md/dm-log-writes.c   | 2 +-
- drivers/md/dm-snap.c         | 2 +-
- drivers/md/dm-target.c       | 1 -
- drivers/md/dm-thin.c         | 4 ++--
- drivers/md/dm-zero.c         | 1 -
- drivers/md/dm-zoned-target.c | 1 -
- drivers/md/dm.c              | 2 +-
- 9 files changed, 9 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/md/dm-cache-target.c b/drivers/md/dm-cache-target.c
-index 911f73f7ebba..1f0bc1173230 100644
---- a/drivers/md/dm-cache-target.c
-+++ b/drivers/md/dm-cache-target.c
-@@ -3394,8 +3394,8 @@ static void set_discard_limits(struct cache *cache, struct queue_limits *limits)
- 
- 	if (!cache->features.discard_passdown) {
- 		/* No passdown is done so setting own virtual limits */
--		limits->max_discard_sectors = min_t(sector_t, cache->discard_block_size * 1024,
--						    cache->origin_sectors);
-+		limits->max_hw_discard_sectors = min_t(sector_t, cache->discard_block_size * 1024,
-+						       cache->origin_sectors);
- 		limits->discard_granularity = cache->discard_block_size << SECTOR_SHIFT;
- 		return;
- 	}
-@@ -3404,7 +3404,6 @@ static void set_discard_limits(struct cache *cache, struct queue_limits *limits)
- 	 * cache_iterate_devices() is stacking both origin and fast device limits
- 	 * but discards aren't passed to fast device, so inherit origin's limits.
- 	 */
--	limits->max_discard_sectors = origin_limits->max_discard_sectors;
- 	limits->max_hw_discard_sectors = origin_limits->max_hw_discard_sectors;
- 	limits->discard_granularity = origin_limits->discard_granularity;
- 	limits->discard_alignment = origin_limits->discard_alignment;
-diff --git a/drivers/md/dm-clone-target.c b/drivers/md/dm-clone-target.c
-index 94b2fc33f64b..2332d9798141 100644
---- a/drivers/md/dm-clone-target.c
-+++ b/drivers/md/dm-clone-target.c
-@@ -2050,7 +2050,8 @@ static void set_discard_limits(struct clone *clone, struct queue_limits *limits)
- 	if (!test_bit(DM_CLONE_DISCARD_PASSDOWN, &clone->flags)) {
- 		/* No passdown is done so we set our own virtual limits */
- 		limits->discard_granularity = clone->region_size << SECTOR_SHIFT;
--		limits->max_discard_sectors = round_down(UINT_MAX >> SECTOR_SHIFT, clone->region_size);
-+		limits->max_hw_discard_sectors = round_down(UINT_MAX >> SECTOR_SHIFT,
-+							    clone->region_size);
- 		return;
- 	}
- 
-@@ -2059,7 +2060,6 @@ static void set_discard_limits(struct clone *clone, struct queue_limits *limits)
- 	 * device limits but discards aren't passed to the source device, so
- 	 * inherit destination's limits.
- 	 */
--	limits->max_discard_sectors = dest_limits->max_discard_sectors;
- 	limits->max_hw_discard_sectors = dest_limits->max_hw_discard_sectors;
- 	limits->discard_granularity = dest_limits->discard_granularity;
- 	limits->discard_alignment = dest_limits->discard_alignment;
-diff --git a/drivers/md/dm-log-writes.c b/drivers/md/dm-log-writes.c
-index f17a6cf2284e..8d7df8303d0a 100644
---- a/drivers/md/dm-log-writes.c
-+++ b/drivers/md/dm-log-writes.c
-@@ -871,7 +871,7 @@ static void log_writes_io_hints(struct dm_target *ti, struct queue_limits *limit
- 	if (!bdev_max_discard_sectors(lc->dev->bdev)) {
- 		lc->device_supports_discard = false;
- 		limits->discard_granularity = lc->sectorsize;
--		limits->max_discard_sectors = (UINT_MAX >> SECTOR_SHIFT);
-+		limits->max_hw_discard_sectors = (UINT_MAX >> SECTOR_SHIFT);
- 	}
- 	limits->logical_block_size = bdev_logical_block_size(lc->dev->bdev);
- 	limits->physical_block_size = bdev_physical_block_size(lc->dev->bdev);
-diff --git a/drivers/md/dm-snap.c b/drivers/md/dm-snap.c
-index 0ace06d1bee3..f40c18da4000 100644
---- a/drivers/md/dm-snap.c
-+++ b/drivers/md/dm-snap.c
-@@ -2410,7 +2410,7 @@ static void snapshot_io_hints(struct dm_target *ti, struct queue_limits *limits)
- 
- 		/* All discards are split on chunk_size boundary */
- 		limits->discard_granularity = snap->store->chunk_size;
--		limits->max_discard_sectors = snap->store->chunk_size;
-+		limits->max_hw_discard_sectors = snap->store->chunk_size;
- 
- 		up_read(&_origins_lock);
- 	}
-diff --git a/drivers/md/dm-target.c b/drivers/md/dm-target.c
-index 0c4efb0bef8a..652627aea11b 100644
---- a/drivers/md/dm-target.c
-+++ b/drivers/md/dm-target.c
-@@ -249,7 +249,6 @@ static int io_err_iterate_devices(struct dm_target *ti,
- 
- static void io_err_io_hints(struct dm_target *ti, struct queue_limits *limits)
- {
--	limits->max_discard_sectors = UINT_MAX;
- 	limits->max_hw_discard_sectors = UINT_MAX;
- 	limits->discard_granularity = 512;
- }
-diff --git a/drivers/md/dm-thin.c b/drivers/md/dm-thin.c
-index 4793ad2aa1f7..e0528a4f809c 100644
---- a/drivers/md/dm-thin.c
-+++ b/drivers/md/dm-thin.c
-@@ -4100,7 +4100,7 @@ static void pool_io_hints(struct dm_target *ti, struct queue_limits *limits)
- 	if (pt->adjusted_pf.discard_enabled) {
- 		disable_discard_passdown_if_not_supported(pt);
- 		if (!pt->adjusted_pf.discard_passdown)
--			limits->max_discard_sectors = 0;
-+			limits->max_hw_discard_sectors = 0;
- 		/*
- 		 * The pool uses the same discard limits as the underlying data
- 		 * device.  DM core has already set this up.
-@@ -4497,7 +4497,7 @@ static void thin_io_hints(struct dm_target *ti, struct queue_limits *limits)
- 
- 	if (pool->pf.discard_enabled) {
- 		limits->discard_granularity = pool->sectors_per_block << SECTOR_SHIFT;
--		limits->max_discard_sectors = pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
-+		limits->max_hw_discard_sectors = pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
- 	}
- }
- 
-diff --git a/drivers/md/dm-zero.c b/drivers/md/dm-zero.c
-index 3b13e6eb1aa4..9a0bb623e823 100644
---- a/drivers/md/dm-zero.c
-+++ b/drivers/md/dm-zero.c
-@@ -61,7 +61,6 @@ static int zero_map(struct dm_target *ti, struct bio *bio)
- 
- static void zero_io_hints(struct dm_target *ti, struct queue_limits *limits)
- {
--	limits->max_discard_sectors = UINT_MAX;
- 	limits->max_hw_discard_sectors = UINT_MAX;
- 	limits->discard_granularity = 512;
- }
-diff --git a/drivers/md/dm-zoned-target.c b/drivers/md/dm-zoned-target.c
-index 621794a9edd6..12236e6f46f3 100644
---- a/drivers/md/dm-zoned-target.c
-+++ b/drivers/md/dm-zoned-target.c
-@@ -1001,7 +1001,6 @@ static void dmz_io_hints(struct dm_target *ti, struct queue_limits *limits)
- 
- 	limits->discard_alignment = 0;
- 	limits->discard_granularity = DMZ_BLOCK_SIZE;
--	limits->max_discard_sectors = chunk_sectors;
- 	limits->max_hw_discard_sectors = chunk_sectors;
- 	limits->max_write_zeroes_sectors = chunk_sectors;
- 
-diff --git a/drivers/md/dm.c b/drivers/md/dm.c
-index 7d0746b37c8e..3adfc6b83c01 100644
---- a/drivers/md/dm.c
-+++ b/drivers/md/dm.c
-@@ -1086,7 +1086,7 @@ void disable_discard(struct mapped_device *md)
- 	struct queue_limits *limits = dm_get_queue_limits(md);
- 
- 	/* device doesn't really support DISCARD, disable it */
--	limits->max_discard_sectors = 0;
-+	limits->max_hw_discard_sectors = 0;
- }
- 
- void disable_write_zeroes(struct mapped_device *md)
--- 
-2.44.0
+--=20
+Guangwu Zhang
+Thanks
 
