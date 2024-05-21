@@ -1,69 +1,61 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f179.google.com (mail-qk1-f179.google.com [209.85.222.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E4AA770F3
-	for <fstests@vger.kernel.org>; Tue, 21 May 2024 14:01:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BD951442EF
+	for <fstests@vger.kernel.org>; Tue, 21 May 2024 15:29:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716300106; cv=none; b=WsApy9q+nBlEGHw3daHmw35Tf4+aPA7GrLXDkCN25BSiN2y0e1l/uKv4EyVrgVdHhg861n0jX5iCG5o94+hzGAZypm4IW1517poVhfO5eg2XgMG3cwsmwa8u46C2ERY8CkkpmeSiKLjk2KzDP9Sz6WfE9dL7x6OiRhHpqAXNHzQ=
+	t=1716305387; cv=none; b=Dsdb0Dzt0hY+K1PO/Vw2H7XcjFrJnJTC6Mf56WAXaI/mUlVTBnN+alIs5ZMDAuXOAlq1Y8yO20ymjbqts/q2AWnbLhyE/wV11k+KwxekO5NpZBlpiW3Y/kV/VEGUpTmVV2zXt0hDPatSh0ielYtO/kYG+GvTtwbtRD3VI5pOcVg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716300106; c=relaxed/simple;
-	bh=EYqKcCI3tv2tT6clHDjGD3Z92vug3Et1dPHP3EkvB1s=;
+	s=arc-20240116; t=1716305387; c=relaxed/simple;
+	bh=UvH4ktnL1tc7jDTG/u5fqTldApC2eZfE4ZdoJUo2544=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HTdQF9dGDEEtdVFhpNOKW+5hCgiyu29FN1eFtOLS7Ptfu+eeyMVYYH+6KGUFPh3Tu/aHy+dqMaw0ti04qh3hqxNcWEe3ZmAbmQ5qcBIYuSRfhp/FYHlgIBYu591oVkVPJI9woX5aEIC82nUnCeasO0V+Y0vHXsQvDRK41hoOJ/0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UV1QgDqX; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UV1QgDqX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1716300104;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=L9UZBaBm0Gs/lAN/t3Z/bR3D6w1BaSGi3sD1JXjc9P0=;
-	b=UV1QgDqXds38NQqT+RFHjuZXIuPD1LSTCeugMMMVSg+ImAHRJ/dIyc6ydCTqMMr1K7eGYo
-	iYJ/DTJukKha7WEIKbou2JM3dT3FUPVxyOB8EmrEyqLoA2zf0Dz7ovyOOx1zqPbRX0fAYJ
-	tf2d7hKiK43BDD4d6rGjTgrZ248AvT8=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-558-gxtMyTwbN9SHd5_IA8kFrA-1; Tue, 21 May 2024 10:01:41 -0400
-X-MC-Unique: gxtMyTwbN9SHd5_IA8kFrA-1
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-1f2dba0679aso48890725ad.3
-        for <fstests@vger.kernel.org>; Tue, 21 May 2024 07:01:41 -0700 (PDT)
+	 Content-Type:Content-Disposition:In-Reply-To; b=vEFoztgrmFk2MclZdbEYJ5jOoTruqrljGdURS9G/YlU3mpJwdhF4S+oirzCZI1QjM8R641onLGVNQRufGldg2qU6RkjlRy/SO3xmIeEV5frJ7h3uBNjwELEtJHn/FY923+TUHaFTI6bASu1i8TUMlEsAVcd+2HF8j6PMsDlrugk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=snitzer.net; arc=none smtp.client-ip=209.85.222.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=snitzer.net
+Received: by mail-qk1-f179.google.com with SMTP id af79cd13be357-792b8ebc4eeso312506185a.1
+        for <fstests@vger.kernel.org>; Tue, 21 May 2024 08:29:46 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716300100; x=1716904900;
+        d=1e100.net; s=20230601; t=1716305385; x=1716910185;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=L9UZBaBm0Gs/lAN/t3Z/bR3D6w1BaSGi3sD1JXjc9P0=;
-        b=TrfB5F4BBYwVGapdVICISfAf5AtxLP7ZCcFKcfcUExcmBP6Az5WClvbnSakow7KVqY
-         AofZeX1Fo6ACwJmq3mHNgARET1v78kdKLIkrdck3cXrO7IBsTHsXxvrR/9vBX3aov+XB
-         EC1CQsgBvzDEMe+kC0IXf68LRZl7zsyqHH7Px0xKlxaZo315g33Vs9BtKGPO+PX3xyVV
-         kmE3ptB2sFPHkS2s6PEYH0eE0mq5Id4K8Bm5jT9BRYyU8AvWTNqPvZcn3D9YMwnRSwPu
-         xUPKmofcAlEDpqVKBuNrX6t8p0WyaQIqCnOViVPhPJ1b+fH9iMRhXSCZLzqR1oic0bQQ
-         i1ow==
-X-Gm-Message-State: AOJu0YwMluMgDa7dzs2ZsUA/iSlAYevGOyv43z8UHHis5D1/70sOe6sT
-	dRTsvM3RPA4fiszokEGBQod71h+198DC7r9SCYewzVyd1DnzCc56Ab/SktrUn+FY0duxLLyBpMN
-	lHNRRa/BfkmPJEOhoriNisCjlpUJodZsR4ZCMS9Y7e2K6ryoiS75ns94=
-X-Received: by 2002:a17:902:e546:b0:1f2:f107:5a71 with SMTP id d9443c01a7336-1f2f107618fmr102622485ad.44.1716300099081;
-        Tue, 21 May 2024 07:01:39 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IECtVoYVSuGzI2BlB2iJoT8bqImwLA9462R5K2Fv1nNwba64aKryGPgjWXLKArNybXPfq7WiQ==
-X-Received: by 2002:a17:902:e546:b0:1f2:f107:5a71 with SMTP id d9443c01a7336-1f2f107618fmr102621755ad.44.1716300098211;
-        Tue, 21 May 2024 07:01:38 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1ef0badadacsm222621585ad.111.2024.05.21.07.01.36
+        bh=3+XPV7zuv4ms1R7vIYpXPZzY3GXErYi4LFqsxLAG47I=;
+        b=fHK3164fSr/Y5+zouzVKsFpR422uAJ+lmBfCT3WhQCvkGorHB3qJNldsb0kNC7LG4W
+         pqZWpomdhvr7WUbJurUXvSx7Pt07Lb7qlDoyAQcJszGamtb+nbF2IJtD3goT5DwjlJEN
+         pc0pga3Yfah6DaX5O+mr122ryB6oIIm0C+Fzpm4ZR20eoJTau9mgoScWgs14+XTPOnku
+         uWer04+CInx2uUSYjDGT7jn4bmsTs6098mwS959LOe2I/shpd4tqd1tG/JwTFCt1ljpw
+         CqxIFTzxnQt8KgzJbEzlP+opdWEefqRWrAgFu687rL/JXGdJbredTCESd8Dd9knn1cKW
+         W5og==
+X-Forwarded-Encrypted: i=1; AJvYcCVJP0/L0x3l90Z/Uudp4A5sbRqBQbZk9rOs5gdgltfEKIQYghkcb3x1/KVGjHSGDlcfMTPfXoeHPDva6bQ6tq5FylUfrtS4PQ==
+X-Gm-Message-State: AOJu0Yyhu4OKnqPcED+s0iN3gU/cAEuA2JissCti0hXTuMuKqDcmF8MU
+	2VP5W2fnxShfLzDCaCwo+WBExuBQV5+BjpbDDo7McfT+ExCSkfgR8+Q/THdT1iM=
+X-Google-Smtp-Source: AGHT+IF8uzIllLEK1FILZCyeg/sSMiPh8GED2VV5AYcL1qdc3iolbJlLULo4eghby1CQfxaYqUkGog==
+X-Received: by 2002:a05:620a:244a:b0:790:797d:2c4a with SMTP id af79cd13be357-792c75763e2mr3967911485a.14.1716305385299;
+        Tue, 21 May 2024 08:29:45 -0700 (PDT)
+Received: from localhost (pool-68-160-141-91.bstnma.fios.verizon.net. [68.160.141.91])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-792bf2fc789sm1291554285a.93.2024.05.21.08.29.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 May 2024 07:01:37 -0700 (PDT)
-Date: Tue, 21 May 2024 22:01:34 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic/733: add commit ID for btrfs
-Message-ID: <20240521140134.gicbq65cksob5yno@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <dd6b7b2fad05501bead1b786babcb825548b9566.1716292871.git.fdmanana@suse.com>
+        Tue, 21 May 2024 08:29:44 -0700 (PDT)
+Date: Tue, 21 May 2024 11:29:43 -0400
+From: Mike Snitzer <snitzer@kernel.org>
+To: Christoph Hellwig <hch@lst.de>, Theodore Ts'o <tytso@mit.edu>
+Cc: dm-devel@lists.linux.dev, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, regressions@lists.linux.dev,
+	linux-block@vger.kernel.org
+Subject: Re: dm: use queue_limits_set
+Message-ID: <Zky951XVqcqI48P3@kernel.org>
+References: <ZkmIpCRaZE0237OH@kernel.org>
+ <ZkmRKPfPeX3c138f@kernel.org>
+ <20240520150653.GA32461@lst.de>
+ <ZktuojMrQWH9MQJO@kernel.org>
+ <20240520154425.GB1104@lst.de>
+ <ZktyTYKySaauFcQT@kernel.org>
+ <ZkuFuqo3dNw8bOA2@kernel.org>
+ <20240520201237.GA6235@lst.de>
+ <ZkvIn73jAqz94LjI@kernel.org>
+ <ZkvuqNXaNOMe6Gfj@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -72,61 +64,68 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <dd6b7b2fad05501bead1b786babcb825548b9566.1716292871.git.fdmanana@suse.com>
+In-Reply-To: <ZkvuqNXaNOMe6Gfj@kernel.org>
 
-On Tue, May 21, 2024 at 01:01:29PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, May 20, 2024 at 08:45:28PM -0400, Mike Snitzer wrote:
+> On Mon, May 20, 2024 at 06:03:11PM -0400, Mike Snitzer wrote:
+> > On Mon, May 20, 2024 at 10:12:37PM +0200, Christoph Hellwig wrote:
+> > > On Mon, May 20, 2024 at 01:17:46PM -0400, Mike Snitzer wrote:
+> > > > Doubt there was anything in fstests setting max discard user limit
+> > > > (max_user_discard_sectors) in Ted's case. blk_set_stacking_limits()
+> > > > sets max_user_discard_sectors to UINT_MAX, so given the use of
+> > > > min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors) I
+> > > > suspect blk_stack_limits() stacks up max_discard_sectors to match the
+> > > > underlying storage's max_hw_discard_sectors.
+> > > > 
+> > > > And max_hw_discard_sectors exceeds BIO_PRISON_MAX_RANGE, resulting in
+> > > > dm_cell_key_has_valid_range() triggering on:
+> > > > WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
+> > > 
+> > > Oh, that makes more sense.
+> > > 
+> > > I think you just want to set the max_hw_discard_sectors limit before
+> > > stacking in the lower device limits so that they can only lower it.
+> > > 
+> > > (and in the long run we should just stop stacking the limits except
+> > > for request based dm which really needs it)
+> > 
+> > This is what I staged, I cannot send a patch out right now.. 
+> > 
+> > Ted if you need the patch in email (rather than from linux-dm.git) I
+> > can send it later tonight.  Please see:
+> > 
+> > https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git/commit/?h=dm-6.10&id=825d8bbd2f32cb229c3b6653bd454832c3c20acb
 > 
-> As of commit 5d6f0e9890ed ("btrfs: stop locking the source extent range
-> during reflink"), btrfs now does reflink operations without locking the
-> source file's range, allowing concurrent reads in the whole source file.
-> So update the test to annotate that commit.
+> From: Mike Snitzer <snitzer@kernel.org>
+> Date: Mon, 20 May 2024 13:34:06 -0400
+> Subject: [PATCH] dm: always manage discard support in terms of max_hw_discard_sectors
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
+> Commit 4f563a64732d ("block: add a max_user_discard_sectors queue
+> limit") changed block core to set max_discard_sectors to:
+>  min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors)
+> 
+> Since commit 1c0e720228ad ("dm: use queue_limits_set") it was reported
+> dm-thinp was failing in a few fstests (generic/347 and generic/405)
+> with the first WARN_ON_ONCE in dm_cell_key_has_valid_range() being
+> reported, e.g.:
+> WARNING: CPU: 1 PID: 30 at drivers/md/dm-bio-prison-v1.c:128 dm_cell_key_has_valid_range+0x3d/0x50
+> 
+> blk_set_stacking_limits() sets max_user_discard_sectors to UINT_MAX,
+> so given how block core now sets max_discard_sectors (detailed above)
+> it follows that blk_stack_limits() stacks up the underlying device's
+> max_hw_discard_sectors and max_discard_sectors is set to match it. If
+> max_hw_discard_sectors exceeds dm's BIO_PRISON_MAX_RANGE, then
+> dm_cell_key_has_valid_range() will trigger the warning with:
+> WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
+> 
+> Aside from this warning, the discard will fail.  Fix this and other DM
+> issues by governing discard support in terms of max_hw_discard_sectors
+> instead of max_discard_sectors.
+> 
+> Reported-by: Theodore Ts'o <tytso@mit.edu>
+> Fixes: 1c0e720228ad ("dm: use queue_limits_set")
+> Signed-off-by: Mike Snitzer <snitzer@kernel.org>
 
-Make sense to me, Thanks!
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
->  tests/generic/733 | 15 ++++++++++++---
->  1 file changed, 12 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/generic/733 b/tests/generic/733
-> index d88d92a4..f6ee7f71 100755
-> --- a/tests/generic/733
-> +++ b/tests/generic/733
-> @@ -7,7 +7,8 @@
->  # Race file reads with a very slow reflink operation to see if the reads
->  # actually complete while the reflink is ongoing.  This is a functionality
->  # test for XFS commit 14a537983b22 "xfs: allow read IO and FICLONE to run
-> -# concurrently".
-> +# concurrently" and for BTRFS commit 5d6f0e9890ed "btrfs: stop locking the
-> +# source extent range during reflink".
->  #
->  . ./common/preamble
->  _begin_fstest auto clone punch
-> @@ -26,8 +27,16 @@ _require_test_program "punch-alternating"
->  _require_test_program "t_reflink_read_race"
->  _require_command "$TIMEOUT_PROG" timeout
->  
-> -[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 14a537983b22 \
-> -        "xfs: allow read IO and FICLONE to run concurrently"
-> +case "$FSTYP" in
-> +"btrfs")
-> +	_fixed_by_kernel_commit 5d6f0e9890ed \
-> +		"btrfs: stop locking the source extent range during reflink"
-> +	;;
-> +"xfs")
-> +	_fixed_by_kernel_commit 14a537983b22 \
-> +		"xfs: allow read IO and FICLONE to run concurrently"
-> +	;;
-> +esac
->  
->  rm -f "$seqres.full"
->  
-> -- 
-> 2.43.0
-> 
-> 
-
+With this patch applied, I verified xfstests generic/347 and
+generic/405 no longer trigger the dm_cell_key_has_valid_range
+WARN_ON_ONCE.  I'm sending the fix to Linus now.
