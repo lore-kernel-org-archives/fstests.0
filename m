@@ -1,110 +1,138 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from wfout5-smtp.messagingengine.com (wfout5-smtp.messagingengine.com [64.147.123.148])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB05E7F
-	for <fstests@vger.kernel.org>; Tue, 21 May 2024 01:06:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B7FE4A09;
+	Tue, 21 May 2024 01:17:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=64.147.123.148
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716253582; cv=none; b=g3o9ZPA7nJe4PBxrk3JpnZBTdFAo9TFPm1tSBeJDWt63lf3Zet8DYf72XQAb61SUe9euXovqMhfTChbVF/kKxKaaO9mR2ttGPjE/zVQg4AF6zG0Quw8a7caZyHdjSfatc/U77sVXTNWzz1o5VUokZ5IymYgYdX3tbNbTvTPCPI4=
+	t=1716254237; cv=none; b=r9QjWLpB9VRCwE1lKHOpI07+FwaBODbepqUxpueLlcGTSpOZMZTpLyRF+8iccHVBeELI04rE2qcimA7E8+S0WOTAKZrJ+GtpiD5TrnVod2tykbTDfJ94QAF3AhnYglRxyDY8UN9cf0VaPkrMzzuC3dXv3cqQIryr2y4mRM51vV8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716253582; c=relaxed/simple;
-	bh=sODGnfmKfl05kirINZM0ji46vr8FOdY8tSVDyJHhRbE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QY+UmVKLY1sVTEbRJSMfIHrmkW1ZCKo3BR/dI7QH49Ryl53V5Ozrhk3iHA1GUcY2X95O+qBNUAi1xdD62+GYVggz/XMMGrvGxsuQpwOqDLtfY3RqUS6yB8j3/OYtSCYtbHhUhFMJ3EBXOiUtMrZBwtS9c0Wm4hmPInpqreggUh0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AuqX0+Tr; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1716254237; c=relaxed/simple;
+	bh=4+Vh0ysn4OLjzpyY20xVlQbJAvMB9VCACx6lyWAFEIw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jjQve1E4Fpr1EeHJqq2oUII/JA9dqqWs7bW8GAs00s27VZNaXHs4omMB57sNCpGHxeL7U6xIuZiIKu3VSBlgBanc4JskNf/WnYvyRbhk+WmZvNcG25dLZIXLW7ye0yCTOWSSlxc6bsoS9jMUH9dwBFh8x5BZ7uhXG/cACgmON7g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=m2a/uHaD; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=oIGN/IMp; arc=none smtp.client-ip=64.147.123.148
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AuqX0+Tr"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1716253579;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=p+IRLtr3CD5713sw58Oz9jeFDrRIoC1ExmWuiRLK+04=;
-	b=AuqX0+TrAezCeBsyxRwRzWPEzXudF2uvSnAp4jv0i/07B9uerGkJEQ17nIopwvvu8Idyvc
-	axwu6mq9tKZdUr0gxVeLScCp/wzVqHdqQ+apATaG0iSuDRLaUcu9MwgfIX8hCf7EzDFiHv
-	gUMp5pB+310unTYpIfdE3tQtormZtQs=
-Received: from mail-ej1-f70.google.com (mail-ej1-f70.google.com
- [209.85.218.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-290-oWfiDTK7MHKJfwlQLkIYFw-1; Mon, 20 May 2024 21:05:47 -0400
-X-MC-Unique: oWfiDTK7MHKJfwlQLkIYFw-1
-Received: by mail-ej1-f70.google.com with SMTP id a640c23a62f3a-a59ad2436f8so714481966b.2
-        for <fstests@vger.kernel.org>; Mon, 20 May 2024 18:05:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716253546; x=1716858346;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=p+IRLtr3CD5713sw58Oz9jeFDrRIoC1ExmWuiRLK+04=;
-        b=AJhJECzjlaphDDrAY4DmwVNaPkZpN7OdVTk/hQ5z4dJ2OIMd4CJkUR/1uO9arWr+T9
-         S/NjE4JGNT7bOscsf9s+k5M8Typ7Iwn+67Inz5JFHtcdATNfvAWUxeVN5YwT2qmX6TFj
-         /KQJUhpow+LFE8to2S8GFotWLUbYtdbWf0Ma7zPGSsv0lWitcZldPyJykdnIbGWYuPEA
-         8rm9tL8rFaUZ38f8k40+s660uzOf+4Nj8EnLD3Q84KmRSPHA8MvxFvGRnFnWby31CT7c
-         mY6BM7qSVTMBjmvLSQmb9zhTIv/5xNaT5fP1Zq5ekUHzHHpNaITl5yfgOy7dchMba9CX
-         mkSg==
-X-Forwarded-Encrypted: i=1; AJvYcCXAOBC1lDGWCpnQDpphQKT3M/g5Xxs8z0HcOHR4c/FIR70dq34chlD1+RTZ2zmQni3vaXrDmamHkZ5jYgBC81KBWiCNAsFwAQ==
-X-Gm-Message-State: AOJu0YysciD7l0gh7oHT2KMts7YV1n8QL4xaF6jJPI/h1HmQrAXN84pt
-	LxSXuV18wNw+QxE/QuI6L/4nzQ8jhe7qwmPBrB8BkXykqLybHdXmpJ/r6yanm95w3Wn/Nr65YQG
-	mUlSNdwuiXEHB+ccYZ3BykPZnCxYfX/9q1o45QgG90KSKgjSln5YjdfpNdy8x3t7ddX2gpfCOWU
-	ozRxCWg5lTqlnrXjbVSKxoUDCtCBgd8A==
-X-Received: by 2002:a17:906:eb52:b0:a5a:769d:1f8f with SMTP id a640c23a62f3a-a5a769d1fb5mr1326814166b.68.1716253546265;
-        Mon, 20 May 2024 18:05:46 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFmLA8Se8SsEJHpWJGihreHRU2FyfqBzUvAldKqKbqZ3YYcBppqSSpDm5brTkI9ODNGufLxUVJm562I8U/37oM=
-X-Received: by 2002:a17:906:eb52:b0:a5a:769d:1f8f with SMTP id
- a640c23a62f3a-a5a769d1fb5mr1326813166b.68.1716253545613; Mon, 20 May 2024
- 18:05:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="m2a/uHaD";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="oIGN/IMp"
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+	by mailfout.west.internal (Postfix) with ESMTP id 3417A1C0009A;
+	Mon, 20 May 2024 21:17:14 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute4.internal (MEProxy); Mon, 20 May 2024 21:17:14 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
+	:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm2; t=1716254233; x=1716340633; bh=Wh+Rt4kDp1
+	vWoSPUJJ1Pj7uBJFi66PlqEsO+fjH/VbQ=; b=m2a/uHaDINC2fSlYC5Pxmy3Qkf
+	zByoGhIZAbt1VYsUG66FVYm6RI4e/ub2SEj4h0N1m9bikGeg4haTfd5Y4Fzgg8bL
+	Y8ZwKnZF2rLRKd9wlBeDihrAB47U4FjUJhjwuN6cpRx53SrIjgnXu5Rt/8cio6te
+	5tO83pG9eY2p+3scbz5SsJDza/wxNNxZNdcpPC3Rf9b9SyWYz/HlB8PAHB83QGnH
+	bgZin8WmlD3/VjVlq8HKk4LSIxuIAFBfTQGIO98lzfZn3ABQ+dLos9CNHTxSOQnT
+	lW3Zcl0yd9hMC8gJ2YVvQ4Ggnto1/2Z0ZKfLgCkLbbcHLJTY6CwBrfMVwYpQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1716254233; x=1716340633; bh=Wh+Rt4kDp1vWoSPUJJ1Pj7uBJFi6
+	6PlqEsO+fjH/VbQ=; b=oIGN/IMpAHWZXLxjXGy7p46JAslsasE+mcass5HjSjPh
+	OLI6VcOhSN74HTZMUpsEz27eVM6++C2B9Wx768sScOsmTO1KBJOtj8rnodguQ1jH
+	p9cL0HLUMQayEJXBfOyB69NI2rVlBcSQ7gJIEWqZJJjlOZmO202UEp+FLclJq9Gv
+	AFCylAvm1yo+76e6UyMe7Vahdopt7Cs8OQ2jdwG4of/U5iOzYqdMNCWKpX+qDicV
+	WYlDwSehWcn+zlzoHOmNRm/aCP/SxAvVCKpJA03alD011j9vYhMjKrmO87YJY/wf
+	UrqdSG+OyG/XqmSf44HSJXGCU8p5jwpArlT8ZPtmlg==
+X-ME-Sender: <xms:GfZLZpeXxOsiI30R9bVVpeKI3-VjNuoHYIxVxi4IxDuQz3eDDnSUmg>
+    <xme:GfZLZnNREPxjpvY2sVq4RyS3fKVPtvmj-U7r6XTkpqFmnC5pFsJcmCnFf9guBAXm7
+    tVlnBjjVPlc-dKSQu0>
+X-ME-Received: <xmr:GfZLZihYhMPkxl7exCAKgA1XYLC4XFqXiej3xzeqiq7swVCOmevJw2n0GnQYDSyKfBLBgnOXYghK4zU18IKj-UMJMy4>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvledrvdeiuddggeefucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepfffhvfevuffkfhggtggujgesthdtredttddtvdenucfhrhhomhepuehorhhi
+    shcuuehurhhkohhvuceosghorhhishessghurhdrihhoqeenucggtffrrghtthgvrhhnpe
+    ekvdekffejleelhfevhedvjeduhfejtdfhvdevieeiiedugfeugfdtjefgfeeljeenucev
+    lhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegsohhrihhsse
+    gsuhhrrdhioh
+X-ME-Proxy: <xmx:GfZLZi_lUGD8BBlD1tiHddnWcwF0c7nxMWxnjqv2rsro_UX-BJSZEA>
+    <xmx:GfZLZluT8fVYM8lALtaAXTRw4XeK7-hnJsFYMU2fwtSfCrB_0MM_fA>
+    <xmx:GfZLZhEcCgUIbQ_AVfEFovZQIjiAkeX2proZUCDLZELUR1vDwqZC9g>
+    <xmx:GfZLZsPKzko89Q_pEHglllTrfrybeNgF4ybGD5MJ84_dfsaYarlFhw>
+    <xmx:GfZLZtKS2XCcQxAD9z4JzspHFEWbPepC6xZODMVYfca97uVRNDdn-ZHq>
+Feedback-ID: i083147f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
+ 20 May 2024 21:17:13 -0400 (EDT)
+Date: Mon, 20 May 2024 18:19:11 -0700
+From: Boris Burkov <boris@bur.io>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: btrfs/301: handle auto-removed qgroups
+Message-ID: <20240521011911.GA1837452@zen.localdomain>
+References: <20240507070606.64126-1-wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAGS2=Ypq9_X23syZw8tpybjc_hPk7dQGqdYNbpw0KKN1A1wbNA@mail.gmail.com>
- <ZktnrDCSpUYOk5xm@infradead.org>
-In-Reply-To: <ZktnrDCSpUYOk5xm@infradead.org>
-From: Guangwu Zhang <guazhang@redhat.com>
-Date: Tue, 21 May 2024 09:05:34 +0800
-Message-ID: <CAGS2=YqCD15RVtZ=NWVjPMa22H3wks1z6TSMVk7jmE_k1A-csg@mail.gmail.com>
-Subject: Re: [bug report] Internal error isnullstartblock(got.br_startblock) a
- t line 6005 of file fs/xfs/libxfs/xfs_bmap.c.
-To: Christoph Hellwig <hch@infradead.org>
-Cc: linux-block@vger.kernel.org, linux-xfs@vger.kernel.org, 
-	fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240507070606.64126-1-wqu@suse.com>
 
-yes,
-the branch header info.
-commit 04d3822ddfd11fa2c9b449c977f340b57996ef3d
-Merge: 59ef81807482 7b815817aa58
-Author: Jens Axboe <axboe@kernel.dk>
-Date:   Fri May 17 09:40:38 2024 -0600
+On Tue, May 07, 2024 at 04:36:06PM +0930, Qu Wenruo wrote:
+> There are always attempts to auto-remove empty qgroups after dropping a
+> subvolume.
+> 
+> For squota mode, not all qgroups can or should be dropped, as there are
+> common cases where the dropped subvolume are still referred by other
+> snapshots.
+> In that case, the numbers can only be freed when the last referencer
+> got dropped.
+> 
+> The latest kernel attempt would only try to drop empty qgroups for
+> squota mode.
+> But even with such safe change, the test case still needs to handle
+> auto-removed qgroups, by explicitly echoing "0", or later calculation
+> would break bash grammar.
+> 
+> This patch would add extra handling for such removed qgroups, to be
+> future proof for qgroup auto-removal behavior change.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-    Merge branch 'block-6.10' into for-next
+Looks good, thanks!
+Reviewed-by: Boris Burkov <boris@bur.io>
 
-    * block-6.10:
-      blk-mq: add helper for checking if one CPU is mapped to specified hct=
-x
-
-Christoph Hellwig <hch@infradead.org> =E4=BA=8E2024=E5=B9=B45=E6=9C=8820=E6=
-=97=A5=E5=91=A8=E4=B8=80 23:09=E5=86=99=E9=81=93=EF=BC=9A
->
-> On Mon, May 20, 2024 at 07:48:13PM +0800, Guangwu Zhang wrote:
-> > Hi,
-> > I get a xfs error when run xfstests  generic/461 testing with
-> > linux-block for-next branch.
-> > looks it easy to reproduce with s390x arch.
->
-> Just to clarify, you see this with the block for-next branch, but not
-> with Linux 6.9 or current Linus tree?
->
->
-
-
---=20
-Guangwu Zhang
-Thanks
-
+> ---
+>  tests/btrfs/301 | 12 ++++++++++--
+>  1 file changed, 10 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/btrfs/301 b/tests/btrfs/301
+> index db469724..bb18ab04 100755
+> --- a/tests/btrfs/301
+> +++ b/tests/btrfs/301
+> @@ -51,9 +51,17 @@ _require_fio $fio_config
+>  get_qgroup_usage()
+>  {
+>  	local qgroupid=$1
+> +	local output
+>  
+> -	$BTRFS_UTIL_PROG qgroup show --sync --raw $SCRATCH_MNT | \
+> -				grep "$qgroupid" | $AWK_PROG '{print $3}'
+> +	output=$($BTRFS_UTIL_PROG qgroup show --sync --raw $SCRATCH_MNT | \
+> +		 grep "$qgroupid" | $AWK_PROG '{print $3}')
+> +	# The qgroup is auto-removed, this can only happen if its numbers are
+> +	# already all zeros, so here we only need to explicitly echo "0".
+> +	if [ -z "$output" ]; then
+> +		echo "0"
+> +	else
+> +		echo "$output"
+> +	fi
+>  }
+>  
+>  get_subvol_usage()
+> -- 
+> 2.44.0
+> 
