@@ -1,300 +1,283 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8F3DB67E
-	for <fstests@vger.kernel.org>; Tue, 21 May 2024 00:38:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716251885; cv=fail; b=IVhzA5NLA61j3kVz15CV9ABz+inKYlyxgImfyuft53FthqO3cP3kRndQjjT5YTjb88H7zvFaYfsVrkVMHqLZKztbdKPcFzUhdD9Euee0xunqQkQ/q9kLAaEhuiXRGWm9UDcU7AzmUYudBoEtMKaI47+OBR7WsC8NZonyv+Xwwg4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716251885; c=relaxed/simple;
-	bh=R7oWGb7hMe3O/H2rWcHtE7SKIEBDuYhGinBKPbzgR5E=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=csTC5r5YvbQ+UPg969+tLpMW3rp+h8yWrZTvCKeJuuiAW2McIbYEV+u69dT6J+rmi5CUl7/An9ENPOxXynMoxcFYZ+1KCbGaGRQlTVbSs5AooReL61+mI6WkRTGlvjqHI7xW5uZ1Dmi0RLSmpZ0ZUNyL7MqIeQFvJrpizDyfTHg=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=lKV7BA4Y; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=wylqEJKO; arc=fail smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="lKV7BA4Y";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="wylqEJKO"
-Received: from pps.filterd (m0333520.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 44KMwset016874;
-	Tue, 21 May 2024 00:38:00 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=message-id : date :
- subject : to : cc : references : from : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2023-11-20;
- bh=zgc6vyvsLMxAKa0ZlcKCzZUvQRpvkO5kJB+HuUJZvrs=;
- b=lKV7BA4YsJMJ/8Cj1QsAILK7/05I5fNOoRryOvuOHpnCOEIKoQzq8S3lxcNviJKw8agq
- MwaeDxfAS/tk3edErxmGC4xCsRR5SUXuGUDk+KvkSFKHFSSXJf9tgQPyqT4YLu9I7Zsl
- 0wloXH+awU1dVZ8FGVJIk40XqUg89OuRdJ3bJ423JDe+VCqYQL5OITPybznV9Q/gvs5t
- eOsUzU18GsndpuXydDwWrCyCrp/iaWxNIGD2tc78HApIhkEmf0O0XLu1gWmr35dQ018S
- T2maXJxFnYfAMzsW3CnCutOgl3+ngtSKXkMckEZQlznz+h3Jf7Zhx2IR2JXz+OFautj/ 1g== 
-Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3y6mcduwqx-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 21 May 2024 00:38:00 +0000
-Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 44KNiE0F004930;
-	Tue, 21 May 2024 00:37:59 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2169.outbound.protection.outlook.com [104.47.59.169])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 3y6js75b4a-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 21 May 2024 00:37:59 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ULbvxu7vAUxVRyq983CyfLh8+HpO9xfVWTmJ+GhkU912jZjsKV1eaUq0OPOANbaQ77RzgDIPwMvcREmLPAzhs3jSo8Pfv9DIStpbIhpp8rXSfTEW8uc1BhLPGgUTx0wF5qt1DGtib4qicoAp5EXjl0hG6sDap0yMq+J5Q21Z6yob43PBEGOzOkdMsXO/4qOsytDblxxJw9PMvFYp3ypAE/i5AhHV9UMPrjB7v8neP3BBdYAhDBaERTlJUrFSDznrTRQl23W6H9BuHDF7aaUasEkZtqPJtL9PFLSv+DpHNzZi14QTW0JvE4DJ3C/BWU+dVjBTga4D68uRAoP+bodFSw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zgc6vyvsLMxAKa0ZlcKCzZUvQRpvkO5kJB+HuUJZvrs=;
- b=Q+KkIMZQ735dvEJXaAQpZGuLOov6JdZuOB8WCOcxD+avqYSey+u9H94gdAtySeXrqtczZn+30SVLh7bbWxiuN7ldftJEagVT28mWbt5xvgIvLhbAdEb+f1xaYqAoPpdv7sKEkFmEI7zM5+D62yvwQyZe2DhTqmNIhfYoOFrI7rkbYHL5lsWsj7UTGGdzT3siLgFtVKz3c8EW8rJGPaw4duq0BwZxU8wpTRGVrYnSnyPdSxSY4NO4HSfYdd6WPthjkEAzgHYmgDjCcX/6mrIDBxBZwLi67irlQ7iDlrTWgWatrBlLFqknXfOAcVlRmRMTWUzpGPh2i1Uu9G8gI1N/ug==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zgc6vyvsLMxAKa0ZlcKCzZUvQRpvkO5kJB+HuUJZvrs=;
- b=wylqEJKOGu3g8HOmVjMEaG7MLCm2fiM13VqPzBDdK8dUOGod/MJX/uBnX9q+Gk845ZCn+utNNunWXWboHBSf52hXMW9/M6BWd9ho5bL5zPhnkNOWOLEVS9wkEVB6PAUsmcM1oDX6O6ij2DquokguBXkRPFKr9QNjGHBuiHZgHO4=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by CY5PR10MB6011.namprd10.prod.outlook.com (2603:10b6:930:28::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7587.35; Tue, 21 May
- 2024 00:37:56 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%6]) with mapi id 15.20.7587.028; Tue, 21 May 2024
- 00:37:56 +0000
-Message-ID: <1ac790bb-4afa-417d-8e1e-e8539b48b8dc@oracle.com>
-Date: Tue, 21 May 2024 08:37:48 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 4/6] generic/269: require no compression
-To: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
-Cc: josef@toxicpanda.com
-References: <cover.1715896529.git.dsterba@suse.com>
- <ea5a2c054381fccd48bdf5dd987247a0c6bd55fe.1715896529.git.dsterba@suse.com>
-Content-Language: en-GB
-From: Anand Jain <anand.jain@oracle.com>
-Autocrypt: addr=anand.jain@oracle.com; keydata=
- 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
- y4F0QrzFk5Hg4pvnpDur6Cbp
-In-Reply-To: <ea5a2c054381fccd48bdf5dd987247a0c6bd55fe.1715896529.git.dsterba@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SG2PR02CA0060.apcprd02.prod.outlook.com
- (2603:1096:4:54::24) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0243E81E
+	for <fstests@vger.kernel.org>; Tue, 21 May 2024 00:45:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.170
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1716252332; cv=none; b=QBgFw+upzncjWWvSKnbZtyzNJmU6GcinUa7nre2LCOQ03uVGjuzE1z00LjE0nHXrEFoNbnUwjIJ74X084Ye2uu4/bvvkEYs84aTRLPXIXgul2rZtKuhERjOBvL3SwS8ubK7U8fSpMpf5vhz40GmubUHy1e/dWg+fc7H5wixOij4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1716252332; c=relaxed/simple;
+	bh=M3IGua52fbiYvVXmDO9/O5jfEFfSwxKvM3kbq6LZ/ME=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mWMJZPYMuD/NBzZiHYVh71PSgmWE/wUqrUvzlYhFKq3pctUvUIRbFlIZixk1uCV2e5Fgbsvx6b1DbHf0IQMVo2hhthkyQ5eYy511+bZpknDsGkUr/zxvDMd7jnT9L5ZwddhoIwRU8ORSVERF8EPmUN+k7RFu/F5scv2hzJDzf/8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=snitzer.net; arc=none smtp.client-ip=209.85.167.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=snitzer.net
+Received: by mail-oi1-f170.google.com with SMTP id 5614622812f47-3c99e6b8b1fso2372504b6e.1
+        for <fstests@vger.kernel.org>; Mon, 20 May 2024 17:45:30 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716252330; x=1716857130;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WAQ7EZw2gT8mUoiA62o4QOdC/XHNNwGQwfkkzt04Rds=;
+        b=EMSNATvqyd2aWQYlrO+mxeS1//rpMkYrR5c4MURMA7wpawNE5GrLKV3AyQoyrQ1Y83
+         KrIsFNRoCrQJkb2COhHp5jSI14lRVSUBBGM2YrxHPJg7uEHonT5budcOT1mA8Gh4gchL
+         Q4t0/KzJqt794EhruuSdKsz66vpo3CUctj79esaRIk7xFoSNWAupykYdSToUP7Z2XR+o
+         gGMAO4oxkWifU2M9pvfB7Isp+g7xRre3JxDPFNn7L3ePm/c/dF+DFQmEsmOYDzjQorCs
+         BcmhyAuf7JOO+zQbDDTNXlf+1abCd47jNb8KH73FtbqR6FiBGbXJ3IWoC6VMU+RY57vk
+         MGcQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVN2+8n/fF/m0HD3LQf2yJ6zLTKDagq1jHOMZsihjqHzpbrgYDJmEXx9z494DYjZCvWj9CtsZTq4rqs+vAoajMEz6y2zVCAfw==
+X-Gm-Message-State: AOJu0Yx5fz9x+4v0sdxy8wua6XOPTbfhZ4+QgPannFlqoNLBe32zV5g6
+	WFI81kKTlHGurlvKA+esEiXEL3MJYYOnIm1kYZG435lmdKJfKD7IsMA7mnhLpv8=
+X-Google-Smtp-Source: AGHT+IGMn6xjydCtb38kyKvLjZDgFdGue2uUOR537cPk5ZgFt4ChObkqOmoaYUFS+4P+IGBFARHGTQ==
+X-Received: by 2002:a05:6808:18a8:b0:3c9:c3ad:53b9 with SMTP id 5614622812f47-3c9c3ad58ddmr21150431b6e.26.1716252330121;
+        Mon, 20 May 2024 17:45:30 -0700 (PDT)
+Received: from localhost (pool-68-160-141-91.bstnma.fios.verizon.net. [68.160.141.91])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-792bf2757b5sm1237989085a.17.2024.05.20.17.45.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 20 May 2024 17:45:29 -0700 (PDT)
+Date: Mon, 20 May 2024 20:45:28 -0400
+From: Mike Snitzer <snitzer@kernel.org>
+To: Christoph Hellwig <hch@lst.de>, Theodore Ts'o <tytso@mit.edu>
+Cc: dm-devel@lists.linux.dev, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, regressions@lists.linux.dev,
+	linux-block@vger.kernel.org
+Subject: Re: dm: use queue_limits_set
+Message-ID: <ZkvuqNXaNOMe6Gfj@kernel.org>
+References: <20240518022646.GA450709@mit.edu>
+ <ZkmIpCRaZE0237OH@kernel.org>
+ <ZkmRKPfPeX3c138f@kernel.org>
+ <20240520150653.GA32461@lst.de>
+ <ZktuojMrQWH9MQJO@kernel.org>
+ <20240520154425.GB1104@lst.de>
+ <ZktyTYKySaauFcQT@kernel.org>
+ <ZkuFuqo3dNw8bOA2@kernel.org>
+ <20240520201237.GA6235@lst.de>
+ <ZkvIn73jAqz94LjI@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CY5PR10MB6011:EE_
-X-MS-Office365-Filtering-Correlation-Id: 8abf1fd4-e262-49cf-5c9a-08dc792e419f
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230031|1800799015|366007|376005;
-X-Microsoft-Antispam-Message-Info: 
-	=?utf-8?B?Q204S2loTzZoS3hnVkYvVkxpY1JhMWIvaDF6V2VGWTdJdWcvUVZjaXgxMjVZ?=
- =?utf-8?B?dnhpaHJQdGlPWThUbTJwVTJSQXNtWGlCVWUvSzYyLzlyaVhTQ0N6Q1JuS3JI?=
- =?utf-8?B?bks2VmN3VTBtVFdYUC9qSEdlY0NYQWNSZmhtZmpGMFh4bDlwSHAybnRNL3Nq?=
- =?utf-8?B?dlY2UkZ2anRVeTVFMXU4MHFkNUFnMlNaUmN4aFFGYzRmQUpWZmN5enFRTkRi?=
- =?utf-8?B?TWkxL1kxZDRpc2dmNkhVVWlRUVZzRzBoUG50MGpab2trRVdtbG92b0duV0Y3?=
- =?utf-8?B?aHdtcEl2UVJoN2x2aDhkOXQ5UEVqTmdWT1E2dTdpTTUzdmZGTXJOdFdlYjJp?=
- =?utf-8?B?MCsvTmNpTUZGSlpKRUlPUHVsUmZZbjlpbHh5cmxybXB6dC9MR1VjelQ4M0Zj?=
- =?utf-8?B?SG4zZGJzWms0TmVKV0dHamhtTlVLdDhtOC9mYVNVL0VrS2dLV2pqN0NkQWhD?=
- =?utf-8?B?WjI4WSt3MGhXbWdRY0QrTlBBaXRBREd6K0ZYeVpLQ2JLRlBPR1dMUjh4OHd3?=
- =?utf-8?B?czlkUjgwRE53V1pVTUpmM0lwR2syY1UydlpoWUVJclRNdlpud2Z0a0JTTSsx?=
- =?utf-8?B?emxzR0l1b3dRZ1RtWC9nL0RyS0xGUE5mRXJ4Mi9sRWVRdTBSZmh2eVR5WXFr?=
- =?utf-8?B?TFJYakhiTjBCYlp3ODZnclJSMnZiOURUUnd2ZEM4QkNBTFh4UjFEK3hRU21E?=
- =?utf-8?B?QWd5UVI2b3pBYnBTQ1duY0Z3V3htcWhSbDJBSkpiV2RjUjh6UjBZU21rQ1k4?=
- =?utf-8?B?NkNtekNWN3g2NWFGYmlicVE1UE1aUkV2Q2t1TVRaQTZuZHlVbTBwZGVWUDRl?=
- =?utf-8?B?U0hxMjNoNk4zOGEwZWxzNkI5SCtIeHlmN1JWZnFiR2UrK1ZxRmozSnczQ1dK?=
- =?utf-8?B?MmgyY3ZwK1JBWUhERlRtM25yZzh4Uzc5MEF4OTdLQ0tCU2lWUXQzdDQ4TFhX?=
- =?utf-8?B?T1VlK3pHd1JrdzJ5c2lTTUhxdDJkMXlTbmtzY1d6T3dSVlUwOGJJSWFHSENS?=
- =?utf-8?B?WGNMc21Qb3Zub2ZRZmZsUHZBSGhQK1lHS3J5Qndvc1hlS3JwUnl0QW9IUW9t?=
- =?utf-8?B?VG42aHpVNHBPQ1NMU1ZTbGh2d1ZaUVQrM25FbU50SFZKbXNBT2ZsM2RoRllK?=
- =?utf-8?B?MnJhREJOVU1KS3l4ODdvdWFPcmhMOFRXOW1PZU8wNHdIZkZkVXAwbEVyYThF?=
- =?utf-8?B?N2hraVZEeS9tMHJPWWxVc2M1QUxHaWFhRmFKenErOFhHdkF3NFV2ejA2cG1Z?=
- =?utf-8?B?WnZNT3lsd1d2aFVOZk5HeXlQam1oRWI5YURUNmlBZzg1S3hEZjdXdzhlYjBV?=
- =?utf-8?B?Mml1cGs0RHBZYllENDdPWFlZSVhGT1Vub2RnM2NyRWE4ckExR2RBRkxqNjRD?=
- =?utf-8?B?UHpITThLWDBJZXl3bi9YZVNoWWxGUDBZVldCVndkWXNCS1puaVNTbERqSlM1?=
- =?utf-8?B?OXdkY3VHZGFSMmZjZlhBaE8xR0dtcEVqeWd4YmczYm5DenViczFGQ2xLSkVY?=
- =?utf-8?B?QlIrWUZveEVrM1k3Vi9HYU1jVkc2ak9TRkhqdGh1RE5pSEUzVWdQQlRLOWlY?=
- =?utf-8?B?ckcxZC9JaTJkNDJNdDF2dUozcE04amhVOWd4NUtoblUyaldlNDM2a0toNGJk?=
- =?utf-8?B?cklZNnUwRHN4eGhVaUNsekhhaGdzTlEycmFhSlgrN2d6d0ZtR01zVlpESkNr?=
- =?utf-8?B?Sll4U1k4NGRpT3oyVlNUa05yQkowUGZFTXU3d0VEMnJGTzJmWGVLZDVRPT0=?=
-X-Forefront-Antispam-Report: 
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(1800799015)(366007)(376005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: 
-	=?utf-8?B?UXJVR1FwRVliMnVJU1pZeWxXQU0wYWlvQU5zcC9Qb3Q2VlJqcFFmUjVoeGhV?=
- =?utf-8?B?YTNraHFTbHU1OFpJTmpicW1kbEdnZVRvdGZGeUttNG9EdHU5TTQvdzJ3TDdk?=
- =?utf-8?B?Wml2S0VhS1MyUnp1Vmp5Y252a21xdG9RTzFYbDIrR1Q5Rlp4dXg4K25sVGFz?=
- =?utf-8?B?RjN1eXF0OVVNbU1ieGdyeWhPQ1gwMUdUUGJveUxnTkNGcHo3T1J1SGQ4dkVW?=
- =?utf-8?B?RngxR2dtb1JwWWdoNllGaStwSFo4VCtyTkl1TVNCTW9ucjVlUk5YQ3RISEFZ?=
- =?utf-8?B?QjFRcG1JUkN1UWZiNFZYQ285djBQK3lKYTQ1bFFpUlhzU3UxaU5IRVNidS9J?=
- =?utf-8?B?RUQrTDRncm85eDRCbThlRG84NTA2cHF3TDZIOHZVNWFjb0RFeWU0T0t2RFZi?=
- =?utf-8?B?OXNxc3llT0lTQUdNZkRFdFViTXkrWmdFUllJVDMwQ29IQVV6dk1UUHJLNC9W?=
- =?utf-8?B?WXloVlh5S0pGSDdCSFNaWDExbGdXRStZL3I1aHk4TDZvM0xmckpSOG5ibnJS?=
- =?utf-8?B?ei9UZ2tLL0ZMTC9ad2VDTXg5SWVBU05JK2ZhaStBWk1wN2dBMmRzN0xFTVR4?=
- =?utf-8?B?UTYwS0JVaDdBcGJweFpkR3haWXQ2aVFKc1JSMjBLandSczJ5Qi9zQjVrV0Qx?=
- =?utf-8?B?VVc4WkgxZi84cVdCclZqQjczU0lnMXBtTTlqL05ZeVIwNFNCSy9YMkI5bXMw?=
- =?utf-8?B?VnVieFVHQ1psdWNpYUQ2dkNkT3NkVWtwdzhiZ3FRSkZDenNFbzBnakFhV00v?=
- =?utf-8?B?VDJxNWFpRnpUZ2hMZ3VPYS9nRlZwNll6Zkg4bXBYbllKdjA0cG43SDNnRE0w?=
- =?utf-8?B?Z3ZvRlJPK2Jmd3RoKzZGLzRmWi9hVENhQzQxOWc1dllTYWpMb2xCTFRzT0Z5?=
- =?utf-8?B?M1I0RVZwUnprN1FFb0xIS2swandTOEcvdDdXTnBBZkFNWjFoeWxtZ3FLSk9B?=
- =?utf-8?B?QllpdW91RFRRazBITjhRcFNhdW80b1RxQXRIT2s0VjlJVStaenV6MUVHVi9W?=
- =?utf-8?B?WC9jeUEyS1ZacCtOUUllOVk5dHZPRDdCS0x5SkVEdFlBbFltYU1VZ2ZCRXp1?=
- =?utf-8?B?TWFLV0QvQmNwZkxsbjZqRitYZzBZcTZXald6YXcyVkE2ZDBxeDUrZXRuaWx6?=
- =?utf-8?B?bzFhUGV0WjVOVHlFWXltWmNyYVVuY1JuQzhtLzhkbC93U3RuUnpib2loRVU3?=
- =?utf-8?B?WEQ2YTNSbXdtcXdUVkQzcTlxc3ZLU0U2WUlqenhLaGxOakl3bmJ0UVZkWE0x?=
- =?utf-8?B?b1ptVTlhNCsrMmYzRTRUOFhtYitMN3poZ0Fub3RtQU9jMytzV3M1SzhHaWdW?=
- =?utf-8?B?MWpTb3BRZ3J4VGxzNU9xaXBsRExpWUF3THAzTDBnL2JwTlBKZTlrTWxUbWJq?=
- =?utf-8?B?aUlWczVBZUFzWmw0dFUrcElnWGNTdXZKN2wwWGtWVjMrZE93d2g4NGw0di9y?=
- =?utf-8?B?WkM0Q0h0WHp3NXhKQWkrZFBNV0dib0hHT1JBY3hMWWZpMVAwcnc2UCtBanR2?=
- =?utf-8?B?TVlod2dUbUxxRUg3aDNsTVVuWEdrUXkwMkxEZWRCL2xXcFhCd1hNRW5EOEJF?=
- =?utf-8?B?THNZK1g4alFodVpiYTVBcU5abkIwK1JvcTlabE02SnRBMkJPZ2FqdHovWmox?=
- =?utf-8?B?S1RyNXNJbHpEd2d4ck5FdkVKeSswVE1qSk8vbkxNMURoVlZjdDdhKzJTWUw1?=
- =?utf-8?B?UHFBV3lPUTZhb2lOSHRCdTlRbi9paGpXalI3S2VkT0pBdjN3ZHBzOUYxK0E3?=
- =?utf-8?B?LzVrR0FycUFxdmx0WFkvYkpvQ1JTcmZzbE9iSWNZT3M1TEZqNnFFOTVBeFRR?=
- =?utf-8?B?dmdWSDUxM1lDQVZJSDEyb2c5SFZDcnpPWHJlQ1dyQnhiNTcvcG15cDFFN1Bn?=
- =?utf-8?B?d1RhOHc1dnpoMnVFa09USjNNWFdBMWNlcDZVM3Fib3Nob1daa2JkWWdpeG5X?=
- =?utf-8?B?TEk0Zis4aHMyWHlGSE9lbDQ2VjJ4RURFbjk0RXpBRERZcjhJd01pMVRjdDJR?=
- =?utf-8?B?SVBhQ1YyRDJOQUhtUzdvNzgvNGJIeENOQythU2t5NTE1MGpUV2Z1ZEhydHRO?=
- =?utf-8?B?a285RTBVWm1lUEFiT2VKUFhRZ3M4cE4yTi9jZ1BBS2NML1YwYXFGSkl4Vncw?=
- =?utf-8?B?UEJZTUFNa0R4NWlTN1dMR09Ycko0MzkwbnhTVGNVZFprQmxablZFTkxFKy9o?=
- =?utf-8?B?aEE9PQ==?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 
-	LroTtQmP4kghdUf1K3IxMEqMoglDWvVnLbJJzjwwp/I6HZHPp9DnIl6NpBesXFQQBlzF189IazS2h+IJkwN7C/C1yVDqYCjS1FF0L3LxU+heg6ytZKZBpo7CKzXbK/5mPH9hr9VpOd6WaUtOiZx366K+DgoLoDiIPYoQ8U2ji7pTmH2nsS6xuJ2z4kqFRsV9tnkXhKJIchFxNc+zfJ/msi2i3UTL4lyrHaJmEUPWwXmHp47wRf9x6guni7ER5HywQ50xWspBzjGYZFK1qcsu4Jic+zYyn2JGppKEcJua6UGXUZHfbYY98pAmgCjL+mQt+7lHgSakCJw37CC6dM/9j8bAZ7emPOHZR1E6CEG7I4/LIuXuvY4q9SyQUVEqolYH41nGq8OkQH/vbhivXW+A4g9EF3hiyOdZ20G4JHkmUedGuAv0GuDqI/5+IWZWkVFwoxa72iCtS/dp7bao65kCKy+tE8Cxb6W3Qw1HqHrz5i0js2Zyi70wx5XtCd1FjQJCVT0+d3+e7qscJnL5ADfEl3o5HDqbyRhX3aT+ZBuog5R7hcg4fDf2M9S2EfWl5FRGYQwTvsOsBZDC1doinJvJkqvmchVt0KNjzQBbZm+d1WI=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8abf1fd4-e262-49cf-5c9a-08dc792e419f
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 May 2024 00:37:56.2632
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 2rPz8TFBcs8CzO1n8uF1ZiHxBiE++2rMKIdIP6eAdS3X+Wg6CM3d1WFpp9HqEiiZYXzHQkWDt6GULuDN8J4d8A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY5PR10MB6011
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.650,FMLib:17.12.28.16
- definitions=2024-05-20_13,2024-05-17_03,2024-05-17_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 phishscore=0
- suspectscore=0 mlxscore=0 adultscore=0 mlxlogscore=999 spamscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2405010000 definitions=main-2405210003
-X-Proofpoint-ORIG-GUID: SVn3FqKSee_2KiUEya6VxZ-ppzLS3QY7
-X-Proofpoint-GUID: SVn3FqKSee_2KiUEya6VxZ-ppzLS3QY7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZkvIn73jAqz94LjI@kernel.org>
 
-On 5/17/24 06:12, David Sterba wrote:
-> From: Josef Bacik <josef@toxicpanda.com>
+On Mon, May 20, 2024 at 06:03:11PM -0400, Mike Snitzer wrote:
+> On Mon, May 20, 2024 at 10:12:37PM +0200, Christoph Hellwig wrote:
+> > On Mon, May 20, 2024 at 01:17:46PM -0400, Mike Snitzer wrote:
+> > > Doubt there was anything in fstests setting max discard user limit
+> > > (max_user_discard_sectors) in Ted's case. blk_set_stacking_limits()
+> > > sets max_user_discard_sectors to UINT_MAX, so given the use of
+> > > min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors) I
+> > > suspect blk_stack_limits() stacks up max_discard_sectors to match the
+> > > underlying storage's max_hw_discard_sectors.
+> > > 
+> > > And max_hw_discard_sectors exceeds BIO_PRISON_MAX_RANGE, resulting in
+> > > dm_cell_key_has_valid_range() triggering on:
+> > > WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
+> > 
+> > Oh, that makes more sense.
+> > 
+> > I think you just want to set the max_hw_discard_sectors limit before
+> > stacking in the lower device limits so that they can only lower it.
+> > 
+> > (and in the long run we should just stop stacking the limits except
+> > for request based dm which really needs it)
 > 
-> This is meant to test ENOSPC, but we're dd'ing /dev/zero, which won't
-> fill up anything with compression on.
+> This is what I staged, I cannot send a patch out right now.. 
 > 
-> Additionally we're killing dd and then immediately trying to unmount.
-> With compression we could have references to the inode being held by the
-> async compression workers, so sometimes this will fail with EBUSY on the
-> unmount.
+> Ted if you need the patch in email (rather than from linux-dm.git) I
+> can send it later tonight.  Please see:
 > 
-> Make it easier on us and just skip this if we have compression enabled.
-> 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> Signed-off-by: David Sterba <dsterba@suse.com>
-> ---
->   tests/generic/269 | 3 +++
->   1 file changed, 3 insertions(+)
-> 
-> diff --git a/tests/generic/269 b/tests/generic/269
-> index b7cdecd94f219a..6ee0cb04581632 100755
-> --- a/tests/generic/269
-> +++ b/tests/generic/269
-> @@ -11,6 +11,9 @@ _begin_fstest auto rw prealloc ioctl enospc stress
->   
->   # Import common functions.
->   . ./common/filter
-> +
-> +_require_no_compress
-> +
->   # Disable all sync operations to get higher load
->   FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
->   _workout()
+> https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git/commit/?h=dm-6.10&id=825d8bbd2f32cb229c3b6653bd454832c3c20acb
 
+From: Mike Snitzer <snitzer@kernel.org>
+Date: Mon, 20 May 2024 13:34:06 -0400
+Subject: [PATCH] dm: always manage discard support in terms of max_hw_discard_sectors
 
-Can we use _ddt to fill the file with partially compressible data?
-On a laptop, with compression, it takes 63s (otherwise 45s).
-If we're ok with this, I'll sort it out here. Git diff below.
+Commit 4f563a64732d ("block: add a max_user_discard_sectors queue
+limit") changed block core to set max_discard_sectors to:
+ min(lim->max_hw_discard_sectors, lim->max_user_discard_sectors)
 
-Thanks, Anand
+Since commit 1c0e720228ad ("dm: use queue_limits_set") it was reported
+dm-thinp was failing in a few fstests (generic/347 and generic/405)
+with the first WARN_ON_ONCE in dm_cell_key_has_valid_range() being
+reported, e.g.:
+WARNING: CPU: 1 PID: 30 at drivers/md/dm-bio-prison-v1.c:128 dm_cell_key_has_valid_range+0x3d/0x50
 
+blk_set_stacking_limits() sets max_user_discard_sectors to UINT_MAX,
+so given how block core now sets max_discard_sectors (detailed above)
+it follows that blk_stack_limits() stacks up the underlying device's
+max_hw_discard_sectors and max_discard_sectors is set to match it. If
+max_hw_discard_sectors exceeds dm's BIO_PRISON_MAX_RANGE, then
+dm_cell_key_has_valid_range() will trigger the warning with:
+WARN_ON_ONCE(key->block_end - key->block_begin > BIO_PRISON_MAX_RANGE)
 
-------
-MOUNT_OPTIONS -- -o compress /dev/sdc1 /mnt/scratch
+Aside from this warning, the discard will fail.  Fix this and other DM
+issues by governing discard support in terms of max_hw_discard_sectors
+instead of max_discard_sectors.
 
-generic/269 45s ...  63s
-Ran: generic/269
-Passed all 1 tests
-------
+Reported-by: Theodore Ts'o <tytso@mit.edu>
+Fixes: 1c0e720228ad ("dm: use queue_limits_set")
+Signed-off-by: Mike Snitzer <snitzer@kernel.org>
+---
+ drivers/md/dm-cache-target.c | 5 ++---
+ drivers/md/dm-clone-target.c | 4 ++--
+ drivers/md/dm-log-writes.c   | 2 +-
+ drivers/md/dm-snap.c         | 2 +-
+ drivers/md/dm-target.c       | 1 -
+ drivers/md/dm-thin.c         | 4 ++--
+ drivers/md/dm-zero.c         | 1 -
+ drivers/md/dm-zoned-target.c | 1 -
+ drivers/md/dm.c              | 2 +-
+ 9 files changed, 9 insertions(+), 13 deletions(-)
 
-
-diff --git a/tests/generic/269 b/tests/generic/269
-index b7cdecd94f21..29f453735fc2 100755
---- a/tests/generic/269
-+++ b/tests/generic/269
-@@ -29,7 +29,7 @@ _workout()
-         for ((i=0; i < num_iterations; i++))
-         do
-                 # File will be opened with O_TRUNC each time
--               dd if=/dev/zero of=$SCRATCH_MNT/SPACE_CONSUMER bs=1M \
-+               _ddt of=$SCRATCH_MNT/SPACE_CONSUMER bs=1M \
-                         >> $seqres.full 2>&1
-                 sleep $enospc_time
-         done
-
-
+diff --git a/drivers/md/dm-cache-target.c b/drivers/md/dm-cache-target.c
+index 911f73f7ebba..1f0bc1173230 100644
+--- a/drivers/md/dm-cache-target.c
++++ b/drivers/md/dm-cache-target.c
+@@ -3394,8 +3394,8 @@ static void set_discard_limits(struct cache *cache, struct queue_limits *limits)
+ 
+ 	if (!cache->features.discard_passdown) {
+ 		/* No passdown is done so setting own virtual limits */
+-		limits->max_discard_sectors = min_t(sector_t, cache->discard_block_size * 1024,
+-						    cache->origin_sectors);
++		limits->max_hw_discard_sectors = min_t(sector_t, cache->discard_block_size * 1024,
++						       cache->origin_sectors);
+ 		limits->discard_granularity = cache->discard_block_size << SECTOR_SHIFT;
+ 		return;
+ 	}
+@@ -3404,7 +3404,6 @@ static void set_discard_limits(struct cache *cache, struct queue_limits *limits)
+ 	 * cache_iterate_devices() is stacking both origin and fast device limits
+ 	 * but discards aren't passed to fast device, so inherit origin's limits.
+ 	 */
+-	limits->max_discard_sectors = origin_limits->max_discard_sectors;
+ 	limits->max_hw_discard_sectors = origin_limits->max_hw_discard_sectors;
+ 	limits->discard_granularity = origin_limits->discard_granularity;
+ 	limits->discard_alignment = origin_limits->discard_alignment;
+diff --git a/drivers/md/dm-clone-target.c b/drivers/md/dm-clone-target.c
+index 94b2fc33f64b..2332d9798141 100644
+--- a/drivers/md/dm-clone-target.c
++++ b/drivers/md/dm-clone-target.c
+@@ -2050,7 +2050,8 @@ static void set_discard_limits(struct clone *clone, struct queue_limits *limits)
+ 	if (!test_bit(DM_CLONE_DISCARD_PASSDOWN, &clone->flags)) {
+ 		/* No passdown is done so we set our own virtual limits */
+ 		limits->discard_granularity = clone->region_size << SECTOR_SHIFT;
+-		limits->max_discard_sectors = round_down(UINT_MAX >> SECTOR_SHIFT, clone->region_size);
++		limits->max_hw_discard_sectors = round_down(UINT_MAX >> SECTOR_SHIFT,
++							    clone->region_size);
+ 		return;
+ 	}
+ 
+@@ -2059,7 +2060,6 @@ static void set_discard_limits(struct clone *clone, struct queue_limits *limits)
+ 	 * device limits but discards aren't passed to the source device, so
+ 	 * inherit destination's limits.
+ 	 */
+-	limits->max_discard_sectors = dest_limits->max_discard_sectors;
+ 	limits->max_hw_discard_sectors = dest_limits->max_hw_discard_sectors;
+ 	limits->discard_granularity = dest_limits->discard_granularity;
+ 	limits->discard_alignment = dest_limits->discard_alignment;
+diff --git a/drivers/md/dm-log-writes.c b/drivers/md/dm-log-writes.c
+index f17a6cf2284e..8d7df8303d0a 100644
+--- a/drivers/md/dm-log-writes.c
++++ b/drivers/md/dm-log-writes.c
+@@ -871,7 +871,7 @@ static void log_writes_io_hints(struct dm_target *ti, struct queue_limits *limit
+ 	if (!bdev_max_discard_sectors(lc->dev->bdev)) {
+ 		lc->device_supports_discard = false;
+ 		limits->discard_granularity = lc->sectorsize;
+-		limits->max_discard_sectors = (UINT_MAX >> SECTOR_SHIFT);
++		limits->max_hw_discard_sectors = (UINT_MAX >> SECTOR_SHIFT);
+ 	}
+ 	limits->logical_block_size = bdev_logical_block_size(lc->dev->bdev);
+ 	limits->physical_block_size = bdev_physical_block_size(lc->dev->bdev);
+diff --git a/drivers/md/dm-snap.c b/drivers/md/dm-snap.c
+index 0ace06d1bee3..f40c18da4000 100644
+--- a/drivers/md/dm-snap.c
++++ b/drivers/md/dm-snap.c
+@@ -2410,7 +2410,7 @@ static void snapshot_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ 
+ 		/* All discards are split on chunk_size boundary */
+ 		limits->discard_granularity = snap->store->chunk_size;
+-		limits->max_discard_sectors = snap->store->chunk_size;
++		limits->max_hw_discard_sectors = snap->store->chunk_size;
+ 
+ 		up_read(&_origins_lock);
+ 	}
+diff --git a/drivers/md/dm-target.c b/drivers/md/dm-target.c
+index 0c4efb0bef8a..652627aea11b 100644
+--- a/drivers/md/dm-target.c
++++ b/drivers/md/dm-target.c
+@@ -249,7 +249,6 @@ static int io_err_iterate_devices(struct dm_target *ti,
+ 
+ static void io_err_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ {
+-	limits->max_discard_sectors = UINT_MAX;
+ 	limits->max_hw_discard_sectors = UINT_MAX;
+ 	limits->discard_granularity = 512;
+ }
+diff --git a/drivers/md/dm-thin.c b/drivers/md/dm-thin.c
+index 4793ad2aa1f7..e0528a4f809c 100644
+--- a/drivers/md/dm-thin.c
++++ b/drivers/md/dm-thin.c
+@@ -4100,7 +4100,7 @@ static void pool_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ 	if (pt->adjusted_pf.discard_enabled) {
+ 		disable_discard_passdown_if_not_supported(pt);
+ 		if (!pt->adjusted_pf.discard_passdown)
+-			limits->max_discard_sectors = 0;
++			limits->max_hw_discard_sectors = 0;
+ 		/*
+ 		 * The pool uses the same discard limits as the underlying data
+ 		 * device.  DM core has already set this up.
+@@ -4497,7 +4497,7 @@ static void thin_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ 
+ 	if (pool->pf.discard_enabled) {
+ 		limits->discard_granularity = pool->sectors_per_block << SECTOR_SHIFT;
+-		limits->max_discard_sectors = pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
++		limits->max_hw_discard_sectors = pool->sectors_per_block * BIO_PRISON_MAX_RANGE;
+ 	}
+ }
+ 
+diff --git a/drivers/md/dm-zero.c b/drivers/md/dm-zero.c
+index 3b13e6eb1aa4..9a0bb623e823 100644
+--- a/drivers/md/dm-zero.c
++++ b/drivers/md/dm-zero.c
+@@ -61,7 +61,6 @@ static int zero_map(struct dm_target *ti, struct bio *bio)
+ 
+ static void zero_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ {
+-	limits->max_discard_sectors = UINT_MAX;
+ 	limits->max_hw_discard_sectors = UINT_MAX;
+ 	limits->discard_granularity = 512;
+ }
+diff --git a/drivers/md/dm-zoned-target.c b/drivers/md/dm-zoned-target.c
+index 621794a9edd6..12236e6f46f3 100644
+--- a/drivers/md/dm-zoned-target.c
++++ b/drivers/md/dm-zoned-target.c
+@@ -1001,7 +1001,6 @@ static void dmz_io_hints(struct dm_target *ti, struct queue_limits *limits)
+ 
+ 	limits->discard_alignment = 0;
+ 	limits->discard_granularity = DMZ_BLOCK_SIZE;
+-	limits->max_discard_sectors = chunk_sectors;
+ 	limits->max_hw_discard_sectors = chunk_sectors;
+ 	limits->max_write_zeroes_sectors = chunk_sectors;
+ 
+diff --git a/drivers/md/dm.c b/drivers/md/dm.c
+index 7d0746b37c8e..3adfc6b83c01 100644
+--- a/drivers/md/dm.c
++++ b/drivers/md/dm.c
+@@ -1086,7 +1086,7 @@ void disable_discard(struct mapped_device *md)
+ 	struct queue_limits *limits = dm_get_queue_limits(md);
+ 
+ 	/* device doesn't really support DISCARD, disable it */
+-	limits->max_discard_sectors = 0;
++	limits->max_hw_discard_sectors = 0;
+ }
+ 
+ void disable_write_zeroes(struct mapped_device *md)
+-- 
+2.44.0
 
