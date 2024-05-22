@@ -1,66 +1,82 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9667D81ACA
-	for <fstests@vger.kernel.org>; Wed, 22 May 2024 11:34:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 972F51A29A
+	for <fstests@vger.kernel.org>; Wed, 22 May 2024 14:42:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716377656; cv=none; b=IvDoP/Qi2+mDFA620fNOiI23qmsxbwYhzn0VqzHWl0hIPwIN4/oDNf6NAHA0wTu6Ezjr75Xy7lpWxudUfJwafHdYXxENDkcFqVNi0GzSk8kuXFok3PT78t4APA6Kyrt6ry6j54fOnbbZ/sb8Fpn2eOOXpogI4rOIoXCFP9KfH64=
+	t=1716388962; cv=none; b=cyDFtDQm/VC8zs4TXBy6JMlee8hmv/NIWsCqTIEDrVQS94DsHipsHuXIRE3Q+u35MlmTPJstZ2eeX+SjPzRbat/ZXeek+acoP6Vowot6PbaHJjBUbhiNM/tpqq4Z6WNLcQFw1ZkLaqHXX8RA/OcAUQcETUtAsZoFXf3iWch60aA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716377656; c=relaxed/simple;
-	bh=NfVZmv6HXwa09F2oJKEOXUVTF58lSd5K2m7vizrKfg8=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=NhJDboyExZJidmBGBdlJq1TvxiX7+CDttuHRJaS1+n58isqJLnIVJmgBMY3Dt6Pg6qGytUcUdHxYuHqckrnVelEe2IlY+UFJRE5ZaqGlYcFNOR4zyWObgco1F8HMKUuIyIPIkmQ8FLfv4u5k2tlGx0sK41a2KSwU42PmslsCxyw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D3zrzmU9; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1716388962; c=relaxed/simple;
+	bh=6iFYPVcmTxjkFScdWbvrsxfYnLxutrMiBw9O96s+PmY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hKT5bELJqPZej+pbIx209QT0iVG7RA2nl77nWkb+UNVQp26iqlfb9Z52D5zHnkPkBSmRKpAW1QjewWkFGC8KBMKzXTxqfuSbCHHOBqqNXRXw9M59UIn8JYpKyL/WR3SqidgQyTWqGDIDMOtrS4eylRDq4M5TJ+nUnd8xtNGhq14=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HjizFZPB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D3zrzmU9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97EB1C2BD11
-	for <fstests@vger.kernel.org>; Wed, 22 May 2024 11:34:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HjizFZPB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72039C2BBFC;
+	Wed, 22 May 2024 14:42:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1716377656;
-	bh=NfVZmv6HXwa09F2oJKEOXUVTF58lSd5K2m7vizrKfg8=;
-	h=From:To:Subject:Date:From;
-	b=D3zrzmU99TOZevgQz5xlz+XniUL3/nd/vBHjMIBt4Edl0StQtSBfHgI7ccuBFFgzX
-	 jwEQ4z4mnO+AtZCYjnfYVEHQKTWfyQHkve4BbDyATBzLGF1ETVOV6QYgN0dER6NGFR
-	 WgX7FBKNK5Q3r9hCgo6WxQ8XXDt6xj7TAmyfTaooYOy+Gf3I6Jbh+xpcxWJyPtWXRu
-	 el1Cz5SVzqMLvBlQQrkGByUivawBif3BaNWd6dbkQQwsgzt3uy3YSghf2Kdrl5u/00
-	 uInW90q7tGpo9uFP2iWPw3xFObjCCRuh9N7KCEvVfZQWZ9HNj3dBoaGGZwClxkl868
-	 WHK+21KWwXQSA==
-From: cem@kernel.org
-To: fstests@vger.kernel.org
-Subject: [PATCH] Log kernel version in check.log
-Date: Wed, 22 May 2024 13:33:38 +0200
-Message-ID: <20240522113408.392468-1-cem@kernel.org>
-X-Mailer: git-send-email 2.45.1
+	s=k20201202; t=1716388962;
+	bh=6iFYPVcmTxjkFScdWbvrsxfYnLxutrMiBw9O96s+PmY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=HjizFZPBcGHidrPo94oV7dsEB/odjyHgZEsEHgv4J/uUefTspSSBFMg5v0mM5sjoN
+	 EGK5igMwk877aAOZFAkfbO8WaEVtYAHQpnfUfWtYnwm0C8BSnjgH8GZJXhf2rXFDIA
+	 gfEF70prLSF2CwErLhbe5Atsx+YlAPyfeiPTqtP/aVlC6hrTHLd+SPbcWZaUWKVD2L
+	 5UTd72XpdkCLO2eIul783eSvubXF5t4Z0YU8HLB+AIoiTpJNvAaoBrYVVccDLzRr2S
+	 NfH6+vY2Y2nRkbUIwxfjoKrwfgZ/CGV9dR0lYXOUs5hOQgvXoIvgMvRrHiru0mKIZb
+	 +khg+4nXe4zAQ==
+Date: Wed, 22 May 2024 07:42:41 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: cem@kernel.org
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] Log kernel version in check.log
+Message-ID: <20240522144241.GA25508@frogsfrogsfrogs>
+References: <20240522113408.392468-1-cem@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240522113408.392468-1-cem@kernel.org>
 
-From: Carlos Maiolino <cem@kernel.org>
+On Wed, May 22, 2024 at 01:33:38PM +0200, cem@kernel.org wrote:
+> From: Carlos Maiolino <cem@kernel.org>
+> 
+> After collecting several xfstests runs, it's useful to keep track on
+> which kernel a specific run happened.
+> 
+> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
 
-After collecting several xfstests runs, it's useful to keep track on
-which kernel a specific run happened.
+I wonder if you want to capture more of the system variables, like
+__generate_report_vars does?
 
-Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
----
- check | 1 +
- 1 file changed, 1 insertion(+)
+(Should we be capturing ${FSTYP}progs version too?)
 
-diff --git a/check b/check
-index c6dba89b..7703c128 100755
---- a/check
-+++ b/check
-@@ -478,6 +478,7 @@ _wrapup()
- 		fi
- 
- 		_global_log ""
-+		_global_log "Kernel version: $(uname -r)"
- 		_global_log "$(date)"
- 
- 		echo "SECTION       -- $section" >>$tmp.summary
--- 
-2.45.1
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
+--D
+
+> ---
+>  check | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/check b/check
+> index c6dba89b..7703c128 100755
+> --- a/check
+> +++ b/check
+> @@ -478,6 +478,7 @@ _wrapup()
+>  		fi
+>  
+>  		_global_log ""
+> +		_global_log "Kernel version: $(uname -r)"
+>  		_global_log "$(date)"
+>  
+>  		echo "SECTION       -- $section" >>$tmp.summary
+> -- 
+> 2.45.1
+> 
+> 
