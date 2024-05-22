@@ -1,172 +1,220 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5A422B9A7
-	for <fstests@vger.kernel.org>; Tue, 21 May 2024 18:30:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9FD215C0
+	for <fstests@vger.kernel.org>; Wed, 22 May 2024 00:46:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716316207; cv=none; b=tafAq0RhgRcWoZuvKscW0xqLp2G1cOfVtoalxSAdtVX3COpb/siRg3oZuGgU71U+UMk+LV1/Sl2jVybuBoyKWy2BaPCTW23wEkDXAOaDztgmxoHALey4RQpiqJDH3LVUpAqF8K90P4KwAmSnBgEP9l/3tQV0QPTAZpeHbApWQvk=
+	t=1716338795; cv=none; b=RemGhkpqUw4g+Jd33KCXX6cdKVDqfKLWInkmPGnxt4DM6B09BYlUKu+iHN2YK0Azl0vR7wpTVd96OmmqAVpvENg5Bop0wY+P/hj5+gb4cUXiJBItUBTd8JC/3Oq50tdiyA2CLhTd0y6Q7M5Of41IzybmyQBpK6TN/Qnf9OqlyEo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716316207; c=relaxed/simple;
-	bh=lCiPf7BHukCiIwrq9n1wBhdUyoJl1XciLrcb6fSIJ1o=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ud/0k9lLCQe1azJyHBeJd85XCm+kULsnp5tOorDqyndOmro5/SE9XEHPsMLMgRBMd6+byGoRRBk63W1BcbVIJBikqQ5+tWclPTrS1iKzUE1xM3xz1aZbeXFB1VbjtIj2JMk7FE4a0Hl/nfWo9LtXZS+O6vH4ccKsbZGiKPJuT/8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=kPfumN2w; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=lRkURuA0; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZPRhPdmY; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=U3mSJL1o; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1716338795; c=relaxed/simple;
+	bh=7BY9RRmh2VxZZEuSvcnwCMC9/YP698MeCwYo///rW6g=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=jN+ekburc7uRgqcfJ8gOkY1d405Qgx/8k226g4giym2t5H+FYVAtHuWsvs3tC8zKEK1tVbESp1IEzrVgfZs57YbKMEbb7uX7wykgk2vwRycAgo8GsScsfdZpUETaZNX2AfoIJfk5CfVJXg0CgWtJwiV/8QRlmHNO9f0Q/I8hjbs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=S4X/9AI2; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="kPfumN2w";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="lRkURuA0";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZPRhPdmY";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="U3mSJL1o"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id CD4CB5C357;
-	Tue, 21 May 2024 18:30:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1716316204;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="S4X/9AI2"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1716338792;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qCmmJX758N2ckgfBFpLZ95+d90Y8IODAoKLGOVCc/w8=;
-	b=kPfumN2wAMqDqs+z7HSQVHwoWo0rQyUzssmKGS6zpQGVAUB+fVS4YG9mUR2Wl38Kijru8p
-	XDfACWNMT2DDl43SRYV6n/nYLRyt1y0LT612BDT0tNXpXJSKjOQ/3WD8geZSe9zwczED9t
-	jg7riS4jFmYH7UDSe5WM+DQCQ427gbA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1716316204;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=qCmmJX758N2ckgfBFpLZ95+d90Y8IODAoKLGOVCc/w8=;
-	b=lRkURuA0Y8PMVY+pCw9ZniUlq8TG8/S9hQGErqWezGBfruNuwdBitfDMU5A55kNw6QalmA
-	JwGkRXPS8pJFWRBA==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=ZPRhPdmY;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=U3mSJL1o
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1716316203;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=qCmmJX758N2ckgfBFpLZ95+d90Y8IODAoKLGOVCc/w8=;
-	b=ZPRhPdmYqD7OwYpCSGa7CZRMw8PE0zmsWW0xQAezMuKvSQZBVJVHYQ3L5wDUCWsOK3W6wX
-	xQh9hU/5Miqtas4ZdlmMSlqEv4eRlW9ScWuO9hwvNbZshALLVQ92wgAMgbbWyRDj2rbd/w
-	k+4rotvof/hpAQ8vyJI+85k5MHd7BT0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1716316203;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=qCmmJX758N2ckgfBFpLZ95+d90Y8IODAoKLGOVCc/w8=;
-	b=U3mSJL1oUez6ScoUWO0ph10ib8qFrrlCYfuLpiCG0lMZSeShY5CYrdgM6pWNdQ+76IUtkB
-	/0l7xkbkdwD+LGAA==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id AFEB013A1E;
-	Tue, 21 May 2024 18:30:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id EXHKKivoTGb7YAAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Tue, 21 May 2024 18:30:03 +0000
-Date: Tue, 21 May 2024 20:29:54 +0200
-From: David Sterba <dsterba@suse.cz>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org,
-	josef@toxicpanda.com
-Subject: Re: [PATCH 4/6] generic/269: require no compression
-Message-ID: <20240521182954.GU17126@suse.cz>
-Reply-To: dsterba@suse.cz
-References: <cover.1715896529.git.dsterba@suse.com>
- <ea5a2c054381fccd48bdf5dd987247a0c6bd55fe.1715896529.git.dsterba@suse.com>
- <1ac790bb-4afa-417d-8e1e-e8539b48b8dc@oracle.com>
+	bh=qzEDAxoabsUEZMbG3hl5HQi6iHnRf8Nl1CTVdR+bflc=;
+	b=S4X/9AI2v+ZlhfOofKnwjNv/qgncCTvLlKSrugZn8RPyk/vYFT3JEB1e5NsEE2sinfdZW6
+	2lQScMKwtfNeJoQOtsDguf1E+EBQh30Hz01Cpq9x0XNXDtbppmvL6Co8OkvLhjHvIVmgfm
+	Pa3p6ALgTnGcGG31JXAnagNcnqeTvtQ=
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
+ [209.85.221.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-477-Rw4lW_qdMHqGlHdQK1sOyA-1; Tue, 21 May 2024 20:46:30 -0400
+X-MC-Unique: Rw4lW_qdMHqGlHdQK1sOyA-1
+Received: by mail-wr1-f71.google.com with SMTP id ffacd0b85a97d-34d99cc6c3dso7494753f8f.3
+        for <fstests@vger.kernel.org>; Tue, 21 May 2024 17:46:30 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716338789; x=1716943589;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=qzEDAxoabsUEZMbG3hl5HQi6iHnRf8Nl1CTVdR+bflc=;
+        b=WiobtXlaWfrgXXxv0z/+/qBUgJG2mF+x0TYBsQhqrZlNWI0lGL0BtB6J5Ymy6lW3Gk
+         phCrLMm9gtwmsdfBEeuHckP3PdNXUPGoPbDsmglQRMdbyAuWI5bbB/WcURIMesUzqY5o
+         o3P+pPp2orpbnoo/R862qEu9QbcF/13uKR/u3Ox2Lj9hZop947avkqMMdRcpkd3CkyLD
+         J4iBFyQkIqkYnmFxrsnKMajbPKAjz45B2GMK9IReyV2o9rS5dTJUbzO43YFVRsXADvs+
+         TYtGASty7iXZ5rVCsEe62d1zNfy6XhzxUhpN8V57xHGic4edAPVuluGm/IAn8Q3IFHur
+         BjKw==
+X-Forwarded-Encrypted: i=1; AJvYcCW3wOZn6AQrbjhjjHPxPnNFs6evMSe+cPHrzJ65SEW0vu/doZduGE8iqx+5tUJspq3OzOJMa5jMQ8MdqF0icPimuJVeHhhtMA==
+X-Gm-Message-State: AOJu0YxolWR5NZM9CCVcnkXJDHgsHAZToIEEB8Co29n6plw/ie0jk91x
+	WEe3qwrBQzkLEisuDBECoqq6O+aJHnwMA0e1W1szROZPDZDzxnO8AA/k9SwkOY+Ai/6eSQSVyjQ
+	W9VCG54y0VLsRxyPdMZSOlHyMbfmmy4fZTPf8pc4k/D33Ri+JAqSE4AQPzrZr3Q7l8CiR3b5RLy
+	962QJ401K9fcLhETY+EObYkt9VEDGfh3CHS7DeSihF
+X-Received: by 2002:a5d:5551:0:b0:351:d3e2:c091 with SMTP id ffacd0b85a97d-354d8ccc817mr280080f8f.14.1716338789147;
+        Tue, 21 May 2024 17:46:29 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IH803zTZAlHW8RmQX2UUect5Ovp9GTkq/vRtljmi6erFRzzLrXu2m8K40SYmpvYmNO/bD7pTlC1tCAROotS5FE=
+X-Received: by 2002:a5d:5551:0:b0:351:d3e2:c091 with SMTP id
+ ffacd0b85a97d-354d8ccc817mr280077f8f.14.1716338788669; Tue, 21 May 2024
+ 17:46:28 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1ac790bb-4afa-417d-8e1e-e8539b48b8dc@oracle.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Spam-Flag: NO
-X-Spam-Score: -4.21
-X-Rspamd-Action: no action
-X-Rspamd-Queue-Id: CD4CB5C357
-X-Spam-Level: 
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_SOME(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	MID_RHS_MATCH_FROM(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCPT_COUNT_THREE(0.00)[4];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.com:email]
+References: <CAGS2=Ypq9_X23syZw8tpybjc_hPk7dQGqdYNbpw0KKN1A1wbNA@mail.gmail.com>
+ <ae36c333-29fe-1bfd-9558-894b614e916d@huaweicloud.com> <CAGS2=YrG7+k7ufEcX5NY2GFy69A7QQwq6BCku2biLHXVEOxWow@mail.gmail.com>
+ <a053e948-791c-3233-3791-83bf9ea90bde@huaweicloud.com>
+In-Reply-To: <a053e948-791c-3233-3791-83bf9ea90bde@huaweicloud.com>
+From: Guangwu Zhang <guazhang@redhat.com>
+Date: Wed, 22 May 2024 08:46:17 +0800
+Message-ID: <CAGS2=YrkFxiQxWCPyuLgdb_DJHkfXm=nCG9egRHpQ9MG8tEXWA@mail.gmail.com>
+Subject: Re: [bug report] Internal error isnullstartblock(got.br_startblock) a
+ t line 6005 of file fs/xfs/libxfs/xfs_bmap.c.
+To: Zhang Yi <yi.zhang@huaweicloud.com>
+Cc: linux-block@vger.kernel.org, linux-xfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 21, 2024 at 08:37:48AM +0800, Anand Jain wrote:
-> On 5/17/24 06:12, David Sterba wrote:
-> > From: Josef Bacik <josef@toxicpanda.com>
-> > 
-> > This is meant to test ENOSPC, but we're dd'ing /dev/zero, which won't
-> > fill up anything with compression on.
-> > 
-> > Additionally we're killing dd and then immediately trying to unmount.
-> > With compression we could have references to the inode being held by the
-> > async compression workers, so sometimes this will fail with EBUSY on the
-> > unmount.
-> > 
-> > Make it easier on us and just skip this if we have compression enabled.
-> > 
-> > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> > Signed-off-by: David Sterba <dsterba@suse.com>
-> > ---
-> >   tests/generic/269 | 3 +++
-> >   1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/tests/generic/269 b/tests/generic/269
-> > index b7cdecd94f219a..6ee0cb04581632 100755
-> > --- a/tests/generic/269
-> > +++ b/tests/generic/269
-> > @@ -11,6 +11,9 @@ _begin_fstest auto rw prealloc ioctl enospc stress
-> >   
-> >   # Import common functions.
-> >   . ./common/filter
-> > +
-> > +_require_no_compress
-> > +
-> >   # Disable all sync operations to get higher load
-> >   FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
-> >   _workout()
-> 
-> 
-> Can we use _ddt to fill the file with partially compressible data?
-> On a laptop, with compression, it takes 63s (otherwise 45s).
-> If we're ok with this, I'll sort it out here. Git diff below.
+Could not reproduce the error after applying your four patches
+thanks.
 
-Yeah the incompressible data would be better. According to the changelog
-the async workers could block umount but I'm not sure this actually
-happens, umount should wait until the IO is done and all inodes closed.
+Zhang Yi <yi.zhang@huaweicloud.com> =E4=BA=8E2024=E5=B9=B45=E6=9C=8821=E6=
+=97=A5=E5=91=A8=E4=BA=8C 19:58=E5=86=99=E9=81=93=EF=BC=9A
+>
+> On 2024/5/21 18:06, Guangwu Zhang wrote:
+> > Hi,
+> > I use the below script reproduce the error.
+> >
+> >         mkdir -p /media/xfs
+> >         mkdir -p /media/scratch
+> >         dev0=3D$(losetup --find)
+> >         dd if=3D/dev/zero of=3D1.tar bs=3D1G count=3D1
+> >         dd if=3D/dev/zero of=3D2.tar bs=3D1G count=3D1
+> >         losetup $dev0 1.tar
+> >         dev1=3D$(losetup --find)
+> >         losetup $dev1 2.tar
+> >         mkfs.xfs -f $dev0
+> >         mkfs.xfs -f $dev1
+> >         mount $dev0 /media/xfs
+> >         mount $dev1 /media/scratch
+> >         export TEST_DEV=3D"$(mount | grep '/media/xfs' | awk '{ print $=
+1 }')"
+> >         export TEST_DIR=3D"/media/xfs"
+> >         export SCRATCH_DEV=3D"$(mount | grep '/media/scratch' | awk '{
+> > print $1 }')"
+> >         export SCRATCH_MNT=3D"/media/scratch"
+> >
+> >         git clone git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> >         cd xfstests-dev
+> >         make
+> >         for i in $(seq 20);do
+> >             ./check generic/461
+> >         done
+> >
+> > @YI,  Could you list your 4 patch links here ?  the kernel don't work
+> > well after apply the patch [1]
+> > [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/=
+commit/?id=3D5ce5674187c345dc31534d2024c09ad8ef29b7ba
+> >
+>
+> Please try:
+>
+> 5ce5674187c3 ("xfs: convert delayed extents to unwritten when zeroing pos=
+t eof blocks")
+> 2e08371a83f1 ("xfs: make xfs_bmapi_convert_delalloc() to allocate the tar=
+get offset")
+> fc8d0ba0ff5f ("xfs: make the seq argument to xfs_bmapi_convert_delalloc()=
+ optional")
+> bb712842a85d ("xfs: match lock mode in xfs_buffered_write_iomap_begin()")
+>
+> Yi.
+>
+> >
+> > Zhang Yi <yi.zhang@huaweicloud.com> =E4=BA=8E2024=E5=B9=B45=E6=9C=8821=
+=E6=97=A5=E5=91=A8=E4=BA=8C 13:05=E5=86=99=E9=81=93=EF=BC=9A
+> >
+> >>
+> >> On 2024/5/20 19:48, Guangwu Zhang wrote:
+> >>> Hi,
+> >>> I get a xfs error when run xfstests  generic/461 testing with
+> >>> linux-block for-next branch.
+> >>> looks it easy to reproduce with s390x arch.
+> >>>
+> >>> kernel info :
+> >>> commit 04d3822ddfd11fa2c9b449c977f340b57996ef3d
+> >>> 6.9.0+
+> >>> reproducer
+> >>> git clone xfstests
+> >>>  ./check generic/461
+> >>>
+> >>>
+> >>
+> >> I guess this issue should be fixed by 5ce5674187c3 ("xfs: convert dela=
+yed
+> >> extents to unwritten when zeroing post eof blocks"), please merge this=
+ commit
+> >> series (include 4 patches) and try again.
+> >>
+> >> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/com=
+mit/?id=3D5ce5674187c345dc31534d2024c09ad8ef29b7ba
+> >>
+> >> Yi.
+> >>
+> >>> [ 5322.046654] XFS (loop1): Internal error isnullstartblock(got.br_st=
+artblock) a
+> >>> t line 6005 of file fs/xfs/libxfs/xfs_bmap.c.  Caller xfs_bmap_insert=
+_extents+0x
+> >>> 2ee/0x420 [xfs]
+> >>> [ 5322.046859] CPU: 0 PID: 157526 Comm: fsstress Kdump: loaded Not ta=
+inted 6.9.0
+> >>> + #1
+> >>> [ 5322.046863] Hardware name: IBM 8561 LT1 400 (z/VM 7.2.0)
+> >>> [ 5322.046864] Call Trace:
+> >>> [ 5322.046866]  [<0000022f504d8fc4>] dump_stack_lvl+0x8c/0xb0
+> >>> [ 5322.046876]  [<0000022ed00fc308>] xfs_corruption_error+0x70/0xa0 [=
+xfs]
+> >>> [ 5322.046955]  [<0000022ed00b7206>] xfs_bmap_insert_extents+0x3fe/0x=
+420 [xfs]
+> >>> [ 5322.047024]  [<0000022ed00f55a6>] xfs_insert_file_space+0x1be/0x24=
+8 [xfs]
+> >>> [ 5322.047105]  [<0000022ed00ff1dc>] xfs_file_fallocate+0x244/0x400 [=
+xfs]
+> >>> [ 5322.047186]  [<0000022f4fe90000>] vfs_fallocate+0x218/0x338
+> >>> [ 5322.047190]  [<0000022f4fe9112e>] ksys_fallocate+0x56/0x98
+> >>> [ 5322.047193]  [<0000022f4fe911aa>] __s390x_sys_fallocate+0x3a/0x48
+> >>> [ 5322.047196]  [<0000022f505019d2>] __do_syscall+0x23a/0x2c0
+> >>> [ 5322.047200]  [<0000022f50511d20>] system_call+0x70/0x98
+> >>> [ 5322.054644] XFS (loop1): Corruption detected. Unmount and run xfs_=
+repair
+> >>> [ 5322.977488] XFS (loop1): User initiated shutdown received.
+> >>> [ 5322.977505] XFS (loop1): Log I/O Error (0x6) detected at xfs_fs_go=
+ingdown+0xb
+> >>> 4/0xf8 [xfs] (fs/xfs/xfs_fsops.c:458).  Shutting down filesystem.
+> >>> [ 5322.977772] XFS (loop1): Please unmount the filesystem and rectify=
+ the proble
+> >>> m(s)
+> >>> [ 5322.977877] loop1: writeback error on inode 755831, offset 32768, =
+sector 1804
+> >>> 712
+> >>> 00:00:00
+> >>>
+> >>>
+> >>> .
+> >>>
+> >>
+> >>
+> >
+> >
+> > --
+> > Guangwu Zhang
+> > Thanks
+> >
+>
+
+
+--=20
+Guangwu Zhang
+Thanks
+
