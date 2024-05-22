@@ -1,130 +1,99 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f177.google.com (mail-pf1-f177.google.com [209.85.210.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F7841EA91
-	for <fstests@vger.kernel.org>; Wed, 22 May 2024 19:37:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A3E1E1422D3
+	for <fstests@vger.kernel.org>; Wed, 22 May 2024 21:14:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716406657; cv=none; b=V5B0BE7bqj9Rzp0pLJxLzHJ0ifcEft7de6CuE3DfXxCTQGarIOlVmS4/VgRP8G6A9oLao0NYbMkb1X5VgOzZZVYy3VMOIEkX/TzgcGkhNb9AlNQeSCom85Wx++TXlRDXQDd9/NaSkAgD3uOcUzb1ki8eR5YsMqR/GkP3Z93jcj8=
+	t=1716412479; cv=none; b=s7Bj6nI15S+isqAehDLsBjkOZB+GgbXPNllPOwEne1NtlH8JxVdNP93iF/WdinzOEgsiC10GjLEvPTraXb4HZJ9yK5cLPm83i7Vk3m8oNcrCdimV/W+RO6j6rFa537LH47ir0c72O4PL3q630V+2XQRQzf3CHOU5IsAReCxQs8s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716406657; c=relaxed/simple;
-	bh=6jQnQHEufZWV8OQw9gGw22QmBxbGhD0v0w5JrwRwqsY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IrYM+KKK5sx/zSV4tPbOkPEmFE0YBih27u4oBAHFVLfeQhjzQLLG3FHDIg9dUwt6J9GlDVf7OTh4ETLfdUFXcp+Us9yacvqTIufeEpy6vpbcUfMO2EwHolxPzMWdctNWhYrzj1pB71S3ZgGDypJh6E5Mvgk7bMcwqRiHwfUSmcc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=a/Fm7uxT; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1716412479; c=relaxed/simple;
+	bh=9hhu19l6Tibe9dCBv+75UPZ1RJi472SyGoP7inIIObo=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=mT+wXIVPFrkZMMqh/DMadD4ikYoSf1P6vQeQUm0euazGDfeWBW4I12TVG5p3w1Q2hmMPWpTn9hwFKprXA90wh3vLN5zwO1q85QHaDJ5TUe1p3WJ+fQPO57QAIeZV6au/Tp4HCzdcha/0ZMBNcua6oMRLMqKdpgoO7Aaj48/RIPs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cOz1zdAt; arc=none smtp.client-ip=209.85.210.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="a/Fm7uxT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1716406655;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=/+vXJUvYDvXqK/fj5nHxClrjyNfJ6w+vU6wonQDU4jY=;
-	b=a/Fm7uxTYL3IQXe5SozOUW+VjWT5oUQ/rCcG31lIeyqVl4crDWnVjwBa+0FBhQohz/OuFu
-	V/BEbk/HvCJREEzHbd2PHtjTojVILq2yNvQjNT5vnm+vC3ucAr5nU3OeGQKGgM0l7zC0gM
-	nkf8Tf3/cEQYD6SlFwQjZudCQ87Zwdw=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-191-6VHY3XzPOwmuMZQ5gpgVng-1; Wed, 22 May 2024 15:37:33 -0400
-X-MC-Unique: 6VHY3XzPOwmuMZQ5gpgVng-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2b413f9999eso19348a91.1
-        for <fstests@vger.kernel.org>; Wed, 22 May 2024 12:37:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cOz1zdAt"
+Received: by mail-pf1-f177.google.com with SMTP id d2e1a72fcca58-6f693306b7cso2230840b3a.1
+        for <fstests@vger.kernel.org>; Wed, 22 May 2024 14:14:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1716412477; x=1717017277; darn=vger.kernel.org;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=6o3TjEpXc4tM5DhVm69vl/YhKN0gViPNosikqlLpRxs=;
+        b=cOz1zdAtvdSbTEND/yaYWclsWKRunXdpJqpNm389QsgxV1LWg34bGS8nFYPk1QHi1j
+         yBx1qPtNNeczcU7tdZUsK8l/htt3xsFfniEqGs6Q7pnBTDkL1X3bV2ilvlCqOCTa+mb7
+         C9g5hN0oslZ7JF8ItAqxXcOZC/95GsUkLwk8GPk/pmgoS6Hz+ihhu1LkxKtG3+Uf4asf
+         9TqiqgJRKUB50K8rH9KLuk2uXaBLParSzhvnPWAY7JqMvPYIhEKZFndAi+cbrwV5R+6n
+         3j106m9U9VH1VpPG66ti6WQDT5wNk68GTZa/nJVWL+s83mHhSYOEKPt57TvcbE52aP2F
+         HXkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716406652; x=1717011452;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/+vXJUvYDvXqK/fj5nHxClrjyNfJ6w+vU6wonQDU4jY=;
-        b=rAEWot3Q6K5W3T4038omFwnRIZkxbJdXyGbBtzIthcSjeij0HcdrP/cjHRyqgHJSx8
-         Lmm6iDz+9MDL5A72x2xY7AqYuqm/yGiA0tRn524w5S8QwiAWfIVMG6qk/f2ook2Zf9A9
-         eN8q12feS/j+tddPRzPIBFREXDoudWpIEsbmD4yVnI3gQvR3zVTurO1I/hbnOB7Vs6o+
-         y5bQbygPUEHW8NEIwApRckCBDU3Ti7vtZlnrnmt/JiuCIykIFnOHQOemC19SR/iCR31V
-         mLIgvu+GpTBCodMmQJs1py1GNEthK4DZBptHq8ebPhYpiFunFNNYDiZpQVn2Pa1XsXJz
-         f7UA==
-X-Forwarded-Encrypted: i=1; AJvYcCWzBFfSKXKFIquRz0yj5qiO6DFLihNvfSdW7E4K5yx1+CUlvnMx1oZN8emiEs90qZ5g0l/sz4R4MHP8zctWkIkuyI7TC/1R5w==
-X-Gm-Message-State: AOJu0YxToq5YE61Ou+iTLydwqKEMQAVItGt/VdA12gZ0hprBEtliUJ27
-	07GXQB4dYaQBcPCIRtBlEItmK3MaTtIKYCuCy9F4e27Y0uPodgKu8eENUklEyFCr4h2QkBnAy9R
-	AY+WRuTZLmib5fAHiYrXgRXqRHKUiBIZ1SKvaQAkSDx5rmeRufaC/mraUJpV2ExCxdw==
-X-Received: by 2002:a17:90b:37c8:b0:2b9:fc72:547e with SMTP id 98e67ed59e1d1-2bddceca852mr325864a91.18.1716406652076;
-        Wed, 22 May 2024 12:37:32 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEOpPnRVoydR52gfv/O08YpoOUtaMqE6WsdHBfqvRG4EVN9apq0QQWcJ2W5yB01zY7ZyNdADw==
-X-Received: by 2002:a17:90b:37c8:b0:2b9:fc72:547e with SMTP id 98e67ed59e1d1-2bddceca852mr325837a91.18.1716406651399;
-        Wed, 22 May 2024 12:37:31 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2bdd9ef7622sm172490a91.16.2024.05.22.12.37.30
+        d=1e100.net; s=20230601; t=1716412477; x=1717017277;
+        h=references:message-id:date:in-reply-to:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6o3TjEpXc4tM5DhVm69vl/YhKN0gViPNosikqlLpRxs=;
+        b=nDGZTr4ptS99VinFM1zSDat1x6GkVnlNCI2IfvChnQ++wWTYBkWm3ADfAEPl+vI486
+         E0AOUqn08glFuYrbs+Otr6VakKaakflKhbJcWeXBQCUQSAGhDMILnKrTKNMj+/0B5Cfv
+         DJPjzSsEjTPkEYEWoXJtSUhHiaanDtIDO3iJzq3rLOZZK+ds+o4oDL5HnP8ojh8BstyE
+         YwImAKEvcglocjs2+w8iF0I3oUfCjA+XL335cZAvvCBuhTpT+ELpWwp5wj7yeCPvql3T
+         asryilj5i1vNXx0/xNaDTH+6bV58MHL4NqLr1QyMBdj2l1qfUiY/mstYC0EUlMNUkUnq
+         AmTw==
+X-Forwarded-Encrypted: i=1; AJvYcCUEvwtlhz4G+idTRyEtkY52ChPJS92sdAv+Se7qvXjfsaQmoKuBCuj+InFapko7FMP9zw4m2KW4QNITJ1RJGLg36vaZmDNbFw==
+X-Gm-Message-State: AOJu0Yyjl7XmfOlxO1TvN9y50pEkv5FRKvMKQ6xlypn2NTV0K9tH56MW
+	0gK7ZAPBX+b9s89I8SnReZWLUokc56XazQK31/a+azC4kjESI5BuxTewEg==
+X-Google-Smtp-Source: AGHT+IHaWX9hKu5KZ4plaB2IJjK7Us9a6qXDE6C4kkIhYKkME8Pyd0zgRbV5EnNGnn+bDrAY4SietQ==
+X-Received: by 2002:a05:6a00:2e95:b0:6f0:b53c:dfb4 with SMTP id d2e1a72fcca58-6f6d616ad9bmr3791565b3a.22.1716412476910;
+        Wed, 22 May 2024 14:14:36 -0700 (PDT)
+Received: from dw-tp ([171.76.81.79])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f4d2a665ccsm22875004b3a.23.2024.05.22.14.14.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 May 2024 12:37:31 -0700 (PDT)
-Date: Thu, 23 May 2024 03:37:28 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: cem@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] Log kernel version in check.log
-Message-ID: <20240522193728.uw3nxitq5jho3a6c@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240522113408.392468-1-cem@kernel.org>
- <20240522144241.GA25508@frogsfrogsfrogs>
+        Wed, 22 May 2024 14:14:36 -0700 (PDT)
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>, fstests@vger.kernel.org
+Cc: kernel@pankajraghav.com, gost.dev@samsung.com, mcgrof@kernel.org, djwong@kernel.org, zlang@redhat.com, Pankaj Raghav <p.raghav@samsung.com>
+Subject: Re: [PATCH v2 2/3] generic/436: round up bufsz to nearest filesystem blksz
+In-Reply-To: <20240513131254.92412-3-kernel@pankajraghav.com>
+Date: Thu, 23 May 2024 02:18:21 +0530
+Message-ID: <87wmnlshd6.fsf@gmail.com>
+References: <20240513131254.92412-1-kernel@pankajraghav.com> <20240513131254.92412-3-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240522144241.GA25508@frogsfrogsfrogs>
 
-On Wed, May 22, 2024 at 07:42:41AM -0700, Darrick J. Wong wrote:
-> On Wed, May 22, 2024 at 01:33:38PM +0200, cem@kernel.org wrote:
-> > From: Carlos Maiolino <cem@kernel.org>
-> > 
-> > After collecting several xfstests runs, it's useful to keep track on
-> > which kernel a specific run happened.
-> > 
-> > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
-> 
-> I wonder if you want to capture more of the system variables, like
-> __generate_report_vars does?
-> 
-> (Should we be capturing ${FSTYP}progs version too?)
+"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com> writes:
 
-That's good to me, but my concern is: It's hard to have a common method to
-get the ${FSTYP}progs version. For most of localfs, "mkfs.$FSTYP -V" can
-get a version message, but not all can do that. Even if we can let each
-$FSTYP get its version through its own way, but the testers can install
-the ${FSTYP}progs by many different ways, e.g. make & make install, or
-a .rpm, or a .deb or something else.
+> From: Pankaj Raghav <p.raghav@samsung.com>
+>
+> SEEK_HOLE and SEEK_DATA work in filesystem block size granularity. So
+> while filling up the buffer for test 13 - 16, round up the bufsz to the
+> closest filesystem blksz.
+>
+> As we only allowed blocksizes lower than the pagesize, this was never an
+> issue and it always aligned. Once we have blocksize > pagesize, this
+> assumption will break.
+>
+> Fixes the test for LBS configuration.
+>
+> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> ---
+>  src/seek_sanity_test.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 
-If you have any good idea, please feel free to tell me:)
+The change looks logical to me to align the bufsz to blocksize rather
+than pagesize for bs > ps. roundup() will not have any effect on bs ==
+ps or bs < ps.
 
-Thanks,
-Zorro
+Also IIUC for LBS, even the page cache will have large folios. So
+essentially the folio's folio_size() that we have in the pagecache
+matches it's FS blocksize. (So blocksize = folio_size() is anyway true
+for LBS). I was curious about this because SEEK_HOLE/SEEK_DATA can query
+the pagecache if the filesystem has unwritten extents.
 
-> 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> 
-> --D
-> 
-> > ---
-> >  check | 1 +
-> >  1 file changed, 1 insertion(+)
-> > 
-> > diff --git a/check b/check
-> > index c6dba89b..7703c128 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -478,6 +478,7 @@ _wrapup()
-> >  		fi
-> >  
-> >  		_global_log ""
-> > +		_global_log "Kernel version: $(uname -r)"
-> >  		_global_log "$(date)"
-> >  
-> >  		echo "SECTION       -- $section" >>$tmp.summary
-> > -- 
-> > 2.45.1
-> > 
-> > 
-> 
+So this make sense that rather than aligning bufsz with base pagesize,
+it should be rounded up to FS blocksize to make SEEK_HOLE/SEEK_DATA work
+with LBS.
 
+Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
