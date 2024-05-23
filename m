@@ -1,189 +1,152 @@
-Received: from mail-oa1-f48.google.com (mail-oa1-f48.google.com [209.85.160.48])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65B1C1370
-	for <fstests@vger.kernel.org>; Thu, 23 May 2024 04:31:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D31DE1E495
+	for <fstests@vger.kernel.org>; Thu, 23 May 2024 13:40:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716438693; cv=none; b=F8w8i5bNAQXG3B9ckvaR0VwNVKqOlU7CkgDZWCkseWVgLCjXOPwRjbct0M+TIKB5q56sGpHQfeAk1UNXY1bIV+NzI6Ss75ZKrjF+/79Z5K2gRrJdIyK374KIRnM7YITWEIgw9hZ5RLkeMCWeoUESnUVad1F0wVvqm809hZp5m9E=
+	t=1716471629; cv=none; b=JQU5n/VEb1GWy5DUvjKC/r1iRUyfzDVeAskNCHMR84ANI6ymt7i5W1YAe+yozhkqpkVuPVorGXENLNstFVSp9/wVd9nZzcrZUnj6fyaRUsie4StvWJlvYwI8wdKhL6jzKc4HEGcUVbB4sk7y8eHXC+KhGqdfiLj1MkIS2fM0aOI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716438693; c=relaxed/simple;
-	bh=/e2WuitijyhY3uNh5WYuR66hAdcYwa3EJfiakyKK574=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=nzgFFIiRUldoLReWMZiK0AEHU5oMCnLJxKiAXiVT7tz7SnwtFi1gTQGt61vHMg+kBn2S3NVrPuo5hiWCVtgoqfSl8ydYNHzWFX0e1b9mnEW2XXS4JUhuHLihAoJgceN1tAq6x1C5nxkYNBt2nXCNgy/McVC6P9BkDGbPFoIlK7U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EhJW/jKm; arc=none smtp.client-ip=209.85.160.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1716471629; c=relaxed/simple;
+	bh=EU+40jrszV50W/K9NPcWcA59VXQltAbOcopCbtAig4I=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=BonY7rHs/upPwn2Su6l8GfXQ690tTGB4DzjAdcw+upM2bAn4BPs5/Wq8u5a4yQSzyNll2pf6I/6fWGYV8KTKD2yaLIXLV+GKmXk8BBDSVf4YKITa5ANhoDofUh2Zvmj99pfELhgNPg1+79XF2E+n6RNujn5eCkQKGWHMTq84CBs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=CuoZHmhk; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=pZTYGsTP; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=1eW87Nng; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=nUmP2qlc; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EhJW/jKm"
-Received: by mail-oa1-f48.google.com with SMTP id 586e51a60fabf-23f0d7d2ce6so3879038fac.2
-        for <fstests@vger.kernel.org>; Wed, 22 May 2024 21:31:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1716438690; x=1717043490; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=PvFiIGsww+fro+gR9eKRjfzkCuXMhXbFpsEkPb8fPX4=;
-        b=EhJW/jKmeSx2wC/NglwuYxH7ouuxwCgixmuoWjuG2ir+e4AsamEsnDhoKJiHYz0g3U
-         KIXMCO3ASuV2faLGoYRYON9tsWwbq+GnwBR/RFyfqZK92G8C19F/pSUqNHzgeVWl7KiJ
-         SKlcj0NJla72vYupZznLDucwRAK4YH6SkbEoLsdrOmGLtGfAtlrrgrl4o+ntq/imGIjn
-         fS0Feqn0FndkHFzPZRpz/9hwvL27G+sIDDbCW4sQNpiXn2cGKYYvpzXMtJNoFHJnHavD
-         D+IdPl4aW5yHGWgcmCajKGpEJ1KVB8BzNPwDqY9a5RoDlwOVmIoCU8Ke/WXkWVNffDKM
-         Takw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716438690; x=1717043490;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PvFiIGsww+fro+gR9eKRjfzkCuXMhXbFpsEkPb8fPX4=;
-        b=iLd9M+QTUeAh747/q3P9rILr85BdA4r1dRSXsMDj7W8brjtX+Hg6YCjlNDokiGlwe0
-         SSWn1fV6PnUKivcUSlEMoMiG0h+q8kUjznVEH2oaYtVnl3esZ/9mCpH7XBDNN93I0fAW
-         mROPNfK4hkizLYn1HXTaWxA0Bv9jbY+cRkWqjbBVb7sae8UYGSZCqN1e+WjCgfaW0Fxu
-         eRRg8Uudv34cfUfCwvuEinxgfE/bv3CntZc6oyL9y2xx/zuKUEfjozulpADymebf0Q3k
-         P57T2u5fivTh6P+IcSSY2v5sQ6syytpv+kmF/beUG3c4KHSrq1Yiwep0QssUKwq/ovVm
-         xRyw==
-X-Forwarded-Encrypted: i=1; AJvYcCUXFSyeflwynhfIMmGNzq5pCB8vOoKvp5McXKG7piMPEARAmdL2XnWbuZDXhDAF+RdqTJgUDwbrthmP5CwtVYfsFT4FH4Pk5g==
-X-Gm-Message-State: AOJu0Yxl5wVPlYCW+hulLeKy1/sfhh/VRNcpEuISD8cjT3ci8MSFqXmZ
-	iW88KRySxjeA9LS4B6sFSsgkeGahPl/e8VMzePUrzwOo9WAMXW8ojI5a3A==
-X-Google-Smtp-Source: AGHT+IGjlpoMlpBSncP5L0Ur/WVcLLXhtVUUwSSxVWLVM+o2zFFKmcPFBG3r0rC1i0MRaigxzP2iZg==
-X-Received: by 2002:a05:6870:5d8f:b0:24c:647a:719 with SMTP id 586e51a60fabf-24c68e3f40dmr4513745fac.50.1716438690363;
-        Wed, 22 May 2024 21:31:30 -0700 (PDT)
-Received: from dw-tp ([171.76.81.79])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f4d2a828c9sm23184987b3a.53.2024.05.22.21.31.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 May 2024 21:31:29 -0700 (PDT)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>, fstests@vger.kernel.org
-Cc: kernel@pankajraghav.com, gost.dev@samsung.com, mcgrof@kernel.org, djwong@kernel.org, zlang@redhat.com, Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH v2 3/3] xfs/008: use block size instead of the pagesize
-In-Reply-To: <20240513131254.92412-4-kernel@pankajraghav.com>
-Date: Thu, 23 May 2024 09:55:25 +0530
-Message-ID: <87v835rw7e.fsf@gmail.com>
-References: <20240513131254.92412-1-kernel@pankajraghav.com> <20240513131254.92412-4-kernel@pankajraghav.com>
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="CuoZHmhk";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="pZTYGsTP";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="1eW87Nng";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="nUmP2qlc"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id B33AE20228;
+	Thu, 23 May 2024 13:40:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1716471625;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Gl8KiUBHufSNBXCsC1aDjFFXIrJvpp0GOuMoLi14J5o=;
+	b=CuoZHmhkNeyxtjYeogW4vN+9DelUvzT8HP3KNX2KeQkT0o2jM1xarVjoKqK9X4rKY/W+af
+	YXWWkfuMaDKaFHSWARr6RTzgalCUf6ItxvB6ZM+4gWX1S4Y5TXRAKFjur1eW8UvS+GMyuI
+	1oduH1SdIa5Q1ke8pqeYfDStqalOsak=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1716471625;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Gl8KiUBHufSNBXCsC1aDjFFXIrJvpp0GOuMoLi14J5o=;
+	b=pZTYGsTPurE/N7OMHnBTrp1+FLTjOpN4++LPUDlHuyxHuiynnRkpCIp7oyLWqfLndWjr9t
+	8IpU5JdIUmcToVBg==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1716471624;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Gl8KiUBHufSNBXCsC1aDjFFXIrJvpp0GOuMoLi14J5o=;
+	b=1eW87NngQ9/Uz3uZju3cwa3COcSjqMAWNaLHuKpx0JfvZHPZtfnAtF9aPMca3JZRAv35ka
+	WeR85Eh9podWQO04PJethy38vLFtemSrO+NfKMVUp2e9j/UEuNu7WHTHbReVMvjimP/0dH
+	E8N2M//aVQGz7O4xYSrW1odxIdWBYk8=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1716471624;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Gl8KiUBHufSNBXCsC1aDjFFXIrJvpp0GOuMoLi14J5o=;
+	b=nUmP2qlcTQ2pKo8SvZufweA3LiVayqDtyr0mnPQiWXOZAiUYLoQwP+P9ACrtQgCK03KT44
+	j8GqFHBZo6zXIdAQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A05F713A6C;
+	Thu, 23 May 2024 13:40:24 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 2FQDJ0hHT2YpIgAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Thu, 23 May 2024 13:40:24 +0000
+Date: Thu, 23 May 2024 15:40:19 +0200
+From: David Sterba <dsterba@suse.cz>
+To: Zorro Lang <zlang@redhat.com>
+Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] Remove richacl support
+Message-ID: <20240523134019.GB17126@suse.cz>
+Reply-To: dsterba@suse.cz
+References: <20240522173048.30558-1-dsterba@suse.com>
+ <20240523040922.ozy5drxg7w4svrj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240523040922.ozy5drxg7w4svrj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Flag: NO
+X-Spam-Score: -4.00
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	TO_DN_SOME(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_THREE(0.00)[3];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	MID_RHS_MATCH_FROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:replyto,suse.com:email,lkml.org:url,bestbits.at:url,imap1.dmz-prg2.suse.org:helo,samba.org:url,lwn.net:url]
 
-"Pankaj Raghav (Samsung)" <kernel@pankajraghav.com> writes:
+On Thu, May 23, 2024 at 12:09:22PM +0800, Zorro Lang wrote:
+> On Wed, May 22, 2024 at 07:30:48PM +0200, David Sterba wrote:
+> > There's no support for richacl in Linux and based on information in the
+> > links will never be. Remove all related files and support code.
+> > 
+> > References:
+> > - https://wiki.samba.org/index.php/NFS4_ACL_overview#Linux
+> > - https://lwn.net/Articles/661357/ (article, 2015)
+> > - https://lwn.net/Articles/661078/ (patches, 2015)
+> > - https://github.com/andreas-gruenbacher/richacl/
+> > - http://www.bestbits.at/richacl/ (n/a anymore)
+> > 
+> > Signed-off-by: David Sterba <dsterba@suse.com>
+> > ---
+> 
+> Thanks! The richacl testing was brought in by:
+> 
+>   commit 73f9e47abdc58f39b7e39b3729bc88db624c9771
+>   Author: Andreas Gruenbacher <agruenba@redhat.com>
+>   Date:   Tue Jun 28 14:47:26 2016 +0200
+> 
+>       generic: Add richacl tests
+> 
+> Looks like we were too hurry to merge the test things before the kernel
+> patchset get merged.
+> 
+> Sorry I didn't learn about the details. From above links, I can see how
+> we tried to implement the richacl, but I didn't see how we denied it and
+> never have it in the future. Is there any record (e.g. an email reply) to
+> learn about the "history"?
 
-> From: Pankaj Raghav <p.raghav@samsung.com>
->
-> The testcase estimates to have ratio of 1:3/4 for holes:filesize. This
-> holds true where the blocksize is always less than or equal to pagesize
-> and the total size of the file is calculated based on the pagesize.
-> There is an implicit assumption that blocksize will always be less than
-> the pagesize.
->
-> LBS support will enable bs > ps where a minimum IO size is one block,
-> which can be greater than a page. Adjust the size calculation to be
-> based on the blocksize and not the pagesize.
->
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> Reviewed-by: Zorro Lang <zlang@redhat.com>
-> ---
->  tests/xfs/008     | 19 ++++++++++---------
->  tests/xfs/008.out |  8 ++++----
->  2 files changed, 14 insertions(+), 13 deletions(-)
->
-> diff --git a/tests/xfs/008 b/tests/xfs/008
-> index e7d6153b..e37e435a 100755
-> --- a/tests/xfs/008
-> +++ b/tests/xfs/008
-> @@ -11,7 +11,8 @@ _begin_fstest rw ioctl auto quick
->  
->  status=0	# success is the default!
->  pgsize=`$here/src/feature -s`
-> -
-> +fileblksize=$(_get_file_block_size "$TEST_DIR")
-> +blksize=$((fileblksize > pgsize ? fileblksize : pgsize))
-
-I assume when the test might be written it might have assumed blocksize =
-pagesize. Hence the dependency on pagesize in this test. 
-If that assumption is correct, then we might not need these two paths
-and can just make it blocksize.
-
-Do you see any problem with blocksize for any of the paths
-(bs = ps, bs < ps and bs > ps)?
-
-
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> @@ -21,7 +22,7 @@ _cleanup()
->  
->  _filter()
->  {
-> -    sed -e "s/-b $pgsize/-b PGSIZE/g" \
-> +    sed -e "s/-b $blksize/-b BLKSIZE/g" \
->  	-e "s/-l .* -c/-l FSIZE -c/g"
->  }
->  
-> @@ -73,17 +74,17 @@ _require_test
->  # We are trying to create roughly 50 or 100 holes in a file
->  # using random writes. Assuming a good distribution of 50 writes
->  # in a file, the file only needs to be 3-4x the size of the write
-> -# size muliplied by the number of writes. Hence we use 200 * pgsize
-> -# for files we want 50 holes in and 400 * pgsize for files we want
-> +# size muliplied by the number of writes. Hence we use 200 * blksize
-> +# for files we want 50 holes in and 400 * blksize for files we want
->  # 100 holes in. This keeps the runtime down as low as possible.
->  #
-> -_do_test 1 50 "-l `expr 200 \* $pgsize` -c 50 -b $pgsize"
-> -_do_test 2 100 "-l `expr 400 \* $pgsize` -c 100 -b $pgsize"
-> -_do_test 3 100 "-l `expr 400 \* $pgsize` -c 100 -b 512"   # test partial pages
-> +_do_test 1 50 "-l `expr 200 \* $blksize` -c 50 -b $blksize"
-> +_do_test 2 100 "-l `expr 400 \* $blksize` -c 100 -b $blksize"
-> +_do_test 3 100 "-l `expr 400 \* $blksize` -c 100 -b 512"   # test partial blocks
->  
->  # rinse, lather, repeat for direct IO
-> -_do_test 4 50 "-d -l `expr 200 \* $pgsize` -c 50 -b $pgsize"
-> -_do_test 5 100 "-d -l `expr 400 \* $pgsize` -c 100 -b $pgsize"
-> +_do_test 4 50 "-d -l `expr 200 \* $blksize` -c 50 -b $blksize"
-> +_do_test 5 100 "-d -l `expr 400 \* $blksize` -c 100 -b $blksize"
->  # note: direct IO requires page aligned IO
-
-^^^ This last comment about direct-io alignment is not valid anymore since kernel
-2.6. Maybe it's time to rip that comment off.
-
-From man 2 open
-O_DIRECT
-<...>
-       If  none  of  the  above is available, then direct I/O support and alignment restrictions can only be assumed from known characteristics of the filesystem, the individual file, the underlying storage device(s), and the kernel
-       version.  In Linux 2.4, most filesystems based on block devices require that the file offset and the length and memory address of all I/O segments be multiples of the filesystem block size (typically 4096  bytes).   In  Linux
-       2.6.0, this was relaxed to the logical block size of the block device (typically 512 bytes).  A block device's logical block size can be determined using the ioctl(2) BLKSSZGET operation or from the shell using the command:
-
--ritesh
-
->  
->  # todo: realtime.
-> diff --git a/tests/xfs/008.out b/tests/xfs/008.out
-> index 5e3ae8e3..0941e218 100644
-> --- a/tests/xfs/008.out
-> +++ b/tests/xfs/008.out
-> @@ -1,10 +1,10 @@
->  QA output created by 008
->  
-> -randholes.1 : -l FSIZE -c 50 -b PGSIZE
-> +randholes.1 : -l FSIZE -c 50 -b BLKSIZE
->  ------------------------------------------
->  holes is in range
->  
-> -randholes.2 : -l FSIZE -c 100 -b PGSIZE
-> +randholes.2 : -l FSIZE -c 100 -b BLKSIZE
->  ------------------------------------------
->  holes is in range
->  
-> @@ -12,10 +12,10 @@ randholes.3 : -l FSIZE -c 100 -b 512
->  ------------------------------------------
->  holes is in range
->  
-> -randholes.4 : -d -l FSIZE -c 50 -b PGSIZE
-> +randholes.4 : -d -l FSIZE -c 50 -b BLKSIZE
->  ------------------------------------------
->  holes is in range
->  
-> -randholes.5 : -d -l FSIZE -c 100 -b PGSIZE
-> +randholes.5 : -d -l FSIZE -c 100 -b BLKSIZE
->  ------------------------------------------
->  holes is in range
-> -- 
-> 2.34.1
+There were many revisions of the patches, talks at LSF and LWN articles
+over the years so I'd consider it a common knowledge. Web search leads
+me to lkml.org links that does not work today so I can't point you to a
+mail where Christop said a clear 'no, never'.
