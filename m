@@ -1,88 +1,160 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D60D2200C3
-	for <fstests@vger.kernel.org>; Fri, 24 May 2024 15:07:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 779E61DFFC
+	for <fstests@vger.kernel.org>; Fri, 24 May 2024 20:58:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716563223; cv=none; b=AofFWPXikaUNAnhONgZFKyRuNohC7fCi/LRlaIl54Yep+kBrk+pa1JT0XTxyk0tswf/4fae8atGfImfhOWB42n7t7SdY481JP7m2Qj2fKFK1JM6TC4P0HL10Sdyf0feHPxEsrhaanDJYYyKsvxI+m8bI5IaXxtojv7NgUXxczf0=
+	t=1716584321; cv=none; b=kB21D8IpQme2JiOcjCpg8mxHURWsyk6gYBSY55RjazgN+BAZfLfnFwjIq0RZCQz+83qQp5rzlm+YSqUxqRfgulS3rxJW6Vq7HPN0teTlJULExkkk5wWy9lEd5ZmxjfkvKkDBEvp5dplz7BwbyeH6O1opbfHtTsvxcpvUW4G2FsI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716563223; c=relaxed/simple;
-	bh=pLoOu9rh7C0J4zwpXjshA36p9Pn+TZNTv3nqLvlkNw4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qPWwEo3H1Bc/smR84RwIwKyGuSBfGcQ2uCvb94SlRW4vauPLp/y8XxHEp8l1MpHThL4KHzrJZuFE8uMVUQPxd+PTYYoWcnpzZUB2cRUrd2K2jScyRrizPFmr5kA/ocI/zkoFL8fla9Oa/mb47Y6C5jVQ+0NcBaDxd2DDKMU1Cdg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M1cjEumH; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1716584321; c=relaxed/simple;
+	bh=ECQm2GVEkuxakTj0yWho2TKp1LuuyzIjDK0PEt/XSds=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=t1kxJsCn0OJyDOt2QANztHhey2ge03nulDh8ggvcbFEY2e7bdUsCNMeIB9eWZu8tYHs3VSajxNxN4HqdzCas9FE3ZVG0VGEf4Rqh433HbNhg09HngSvt/QuR/cUQuBJ7/kQDUNzJWyuIJN/V5d45f0dhzkHVbrwX9KWuXNotMT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com; spf=none smtp.mailfrom=osandov.com; dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b=BvHdfz9F; arc=none smtp.client-ip=209.85.214.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=osandov.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M1cjEumH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6FCF8C2BD11;
-	Fri, 24 May 2024 15:07:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1716563223;
-	bh=pLoOu9rh7C0J4zwpXjshA36p9Pn+TZNTv3nqLvlkNw4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=M1cjEumHXCK8REmFYFkt/HbKTHMRezOPCuJSFOyuf6jFKZt5gvjutUC67CxYndmU5
-	 7v87qFLgAE3iuKHvBneEyWPPODuHehPSfo810ZRNwSuUEBIjwfbKgltCjqwQJbOwSw
-	 ti19ZhjJpzO55ZvHn0ptdwD57R3UXyYCTvPJgBTzljoZVF3X82ihQlhP5oW4ZGebHa
-	 jeFL4xAmUEz99Z0Zkve5Eg4OYmPhlJGUuEX7Z4rkEuCVCFrtYzIQMRUYKxXO7WQTOs
-	 n5f5f4a+Sht6eY/nVpIa7mj7gisUdrzlq3dMi33qRvQmFVzOhsSHK2/5ylxrREuD/o
-	 oW4EDAm7SoWvQ==
-Date: Fri, 24 May 2024 08:07:02 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Chandan Babu R <chandanbabu@kernel.org>
-Cc: fstests@vger.kernel.org, zlang@kernel.org
-Subject: Re: [PATCH] _test_mkfs: Include external log device (if any) when
- creating fs on TEST_DEV
-Message-ID: <20240524150702.GA52977@frogsfrogsfrogs>
-References: <20240524073104.615253-1-chandanbabu@kernel.org>
+	dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b="BvHdfz9F"
+Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-1f44b59f8daso9425725ad.2
+        for <fstests@vger.kernel.org>; Fri, 24 May 2024 13:58:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1716584319; x=1717189119; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=euAfIUewsrHV6jYyHDKNLiq1F5HukPN8Ycx3flKpibM=;
+        b=BvHdfz9F70ff14zu10opS+lZ4JH22yPCci/NI8u5Oo+z0SP4/HBJx174GiFcp4eEwO
+         YkJ+J1/DDZV7c4WjzCpLaxuogvP0fV9M2I++X/3/KlyaNUW4teWMTizpBTyAkSBPMAt+
+         KG04wqy78SLPIUJGvRGYpxozIXt118Fd4a5TDu308s1szBoT0N8OptVGXTo5rGV3B/Gc
+         1kvFI0e9RyXYux24g1CNOlnZF/xvayHFdhu5bmoGtW6anw4YVk7lH+ocS9+AaQLpc7l6
+         pIJ1tpujTHmO4jmW1z92sVaJ1jiY06ePjERlcS8idKU794oKU6nqtQgp34TjmTR55RkY
+         8BqQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716584319; x=1717189119;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=euAfIUewsrHV6jYyHDKNLiq1F5HukPN8Ycx3flKpibM=;
+        b=WNCE+zUs+Yl3+XuatnoopUMHcjJ/gU026KUgBKWoQbeiKPDCHLpx9HOkcZjWn9Mwvi
+         LiIE+YnWZVK4v6MQndRFC9sefLvpFoejtnbs8NndwPKYnYN1PVo2L8M392gH1cPEspzr
+         CvOW6yk9XNXZNby8OnCw+bx3QopSmpGJhYu40YkBBI7DRxC+mFdDt1MTfLh4UyHdCNOB
+         S0hstpJcRV+XGQkPVu0hs8avefOMwg6UznCeAufIdsyS3gmeWMfZDMhnmPGkEi4fmnTi
+         TUdISEWmWhTtZFWW48l/mpAEz5HafaOsF9uib6jhQmEwUy8rHF3vJEiyy0myRzOxdGvA
+         4INQ==
+X-Gm-Message-State: AOJu0YxNBGccKaXTi8ggC9bYlPHvnpEyCDvwrpR+Qs16hdPBMIo013MZ
+	OIAOx7vNZlZSVK2NP6KSGvqif1B/ll3H6spdiol0HKqFutRP4J0jjWa4orBxpe6HcpvtP13N842
+	gUA0=
+X-Google-Smtp-Source: AGHT+IHHNK7YpmI5ZCGM+7NDB82gP/JWDoTp6hIJnNyvgbbLFl5k7ZAnRcj+NHfB2W3SiiJ3BQOWIw==
+X-Received: by 2002:a17:902:e84f:b0:1f3:11ec:cbbd with SMTP id d9443c01a7336-1f4486bd9b4mr36831695ad.5.1716584319381;
+        Fri, 24 May 2024 13:58:39 -0700 (PDT)
+Received: from telecaster.thefacebook.com ([2620:10d:c090:500::7:763e])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f44c9a9dabsm18166175ad.236.2024.05.24.13.58.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 May 2024 13:58:38 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: kernel-team@fb.com
+Subject: [PATCH fstests v2] generic: test Btrfs fsync vs. size-extending prealloc write crash
+Date: Fri, 24 May 2024 13:58:33 -0700
+Message-ID: <d032e0b964f163229b684c0ac72b656ec9bf7b48.1716584019.git.osandov@osandov.com>
+X-Mailer: git-send-email 2.45.1
+In-Reply-To: <29a4df3b9a36eb17a958e92e375e03daf9312fa5.1716583705.git.osandov@fb.com>
+References: <29a4df3b9a36eb17a958e92e375e03daf9312fa5.1716583705.git.osandov@fb.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240524073104.615253-1-chandanbabu@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Fri, May 24, 2024 at 01:01:01PM +0530, Chandan Babu R wrote:
-> Test execution fails when testing XFS with external log device and when
-> RECREATE_TEST_DEV is set to true. This is because _test_mkfs() is invoked as
-> part of recreating the filesystem on test device and this function does not
-> include the external log device as part of the mkfs.xfs command line.
-> 
-> _test_mount() invoked later fails since it passes an external log device to
-> the mount syscall which the kernel does not expect to find.
-> 
-> To fix this bug, this commit modifies _test_mkfs() to invoke _test_options()
-> in order to compute the value of TEST_OPTIONS and includes the resulting value
-> in the mkfs.xfs command line.
-> 
-> Signed-off-by: Chandan Babu R <chandanbabu@kernel.org>
+From: Omar Sandoval <osandov@fb.com>
 
-Doh
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+This is a regression test for a Btrfs bug, but there's nothing
+Btrfs-specific about it. Since it's a race, we just try to make the race
+happen in a loop and pass if it doesn't crash after all of our attempts.
 
---D
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+Changes from v1 [1]:
 
-> ---
->  common/rc | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 0fe56382..6562ccd7 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -614,7 +614,8 @@ _test_mkfs()
->  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
->  	;;
->      xfs)
-> -	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $* $TEST_DEV
-> +	_test_options mkfs
-> +	$MKFS_PROG -t $FSTYP -- -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
->  	;;
->      bcachefs)
->  	$MKFS_BCACHEFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
-> -- 
-> 2.43.0
-> 
-> 
+- Added missing groups and requires.
+- Simplified $XFS_IO_PROG calls.
+- Removed -i flag from $XFS_IO_PROG to make race reproduce more
+  reliably.
+- Removed all of the file creation and dump-tree parsing since the only
+  file on a fresh filesystem is guaranteed to be at the end of a leaf
+  anyways.
+- Rewrote to be a generic test.
+
+1: https://lore.kernel.org/linux-btrfs/297da2b53ce9b697d82d89afd322b2cc0d0f392d.1716492850.git.osandov@osandov.com/
+
+ tests/generic/745     | 44 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/745.out |  2 ++
+ 2 files changed, 46 insertions(+)
+ create mode 100755 tests/generic/745
+ create mode 100644 tests/generic/745.out
+
+diff --git a/tests/generic/745 b/tests/generic/745
+new file mode 100755
+index 00000000..925adba9
+--- /dev/null
++++ b/tests/generic/745
+@@ -0,0 +1,44 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# FS QA Test 745
++#
++# Repeatedly prealloc beyond i_size, set an xattr, direct write into the
++# prealloc while extending i_size, then fdatasync. This is a regression test
++# for a Btrfs crash.
++#
++. ./common/preamble
++. ./common/attr
++_begin_fstest auto quick log preallocrw dangerous
++
++_supported_fs generic
++_require_scratch
++_require_attrs
++_require_xfs_io_command falloc -k
++_fixed_by_kernel_commit XXXXXXXXXXXX \
++	"btrfs: fix crash on racing fsync and size-extending write into prealloc"
++
++# -i slows down xfs_io startup and makes the race much less reliable.
++export XFS_IO_PROG="$(echo "$XFS_IO_PROG" | sed 's/ -i\b//')"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++blksz=$(_get_block_size "$SCRATCH_MNT")
++
++# On Btrfs, since this is the only file on the filesystem, its metadata is at
++# the end of a B-tree leaf. We want an ordered extent completion to add an
++# extent item at the end of the leaf while we're logging prealloc extents
++# beyond i_size after an xattr was set.
++for ((i = 0; i < 5000; i++)); do
++	$XFS_IO_PROG -ftd -c "falloc -k 0 $((blksz * 3))" -c "pwrite -q -w 0 $blksz" "$SCRATCH_MNT/file"
++	$SETFATTR_PROG -n user.a -v a "$SCRATCH_MNT/file"
++	$XFS_IO_PROG -d -c "pwrite -q -w $blksz $blksz" "$SCRATCH_MNT/file"
++done
++
++# If it didn't crash, we're good.
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/745.out b/tests/generic/745.out
+new file mode 100644
+index 00000000..fce6b7f5
+--- /dev/null
++++ b/tests/generic/745.out
+@@ -0,0 +1,2 @@
++QA output created by 745
++Silence is golden
+-- 
+2.45.1
+
