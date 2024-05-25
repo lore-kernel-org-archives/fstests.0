@@ -1,68 +1,70 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26C88B65C
-	for <fstests@vger.kernel.org>; Sat, 25 May 2024 05:42:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56EF863BF
+	for <fstests@vger.kernel.org>; Sat, 25 May 2024 05:48:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716615781; cv=none; b=ikh6CV3AKlWNnFM/G3VQqotrGGH+bGNsSXAgB7rZQzTztJczLhtLd6ANX7dtSYB3EqECfRwZZwcGxzbrwUJxsBl+HHKunJFj4Q6H7VAVxrRRPmWbaZnm9HhXVOX0P+F/mUOv2lrXXi6Ne9Q75s0+Rf9qe4qSufl5e2Yd7b6bGWo=
+	t=1716616134; cv=none; b=QumawKOnU/XN/8HUD6zIJKvsCf+zZTGrHh1KX1/Zyv+YC09c6EsSk8J4eEumkl5p0XxzWEsvn6U7zu1zr0gLJoTTnnPo4hlY2vsoGXCqcZCdiSVa0xpsv61j9H1NIkVRYMkSC9zEK0MYMhI+JMLXjercPgOFPo4F6hBPk0VV5io=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716615781; c=relaxed/simple;
-	bh=QH6CiInNA+sLUcWIGlusgioN1a9ALec6l+HzsZTZk8o=;
+	s=arc-20240116; t=1716616134; c=relaxed/simple;
+	bh=pdBb/0j5R7hlvaam/Yl3zWaN49Ts5cq/slwTFJFyZrU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hZNH6EavrUlx6bkQ/KYd+T/N3nkue2Th5p0snm/bkKwaE3RwFcns2++uQoudy+qIYn2B3qoBJ57iC+7VyGG4n37/3HkkvKBAI2z31V884ust4gBMPWavlyJXowDZ8gFUqlxOjPnJjAPxCgXb5rW6dOX0uMikyv28zjkBR8uFeDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WzmcXmxf; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=J3oqQnj+ZBcQY1KOy4Ad+D5phBqS4HvWJYPImQ9uNYz3e9eQy0hHqYqbkG0UUQS+YGxbGBZvSEZQb2d9QLOAg6OmWuyLPNvdVWlXC56TvmwIVbyL7k/S0C7U1lIfS2TVYrEmqPPfQIQpY8O6TONl4Ip7oMW4TmOaxcU9vXVR/GI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aApg1Bcj; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WzmcXmxf"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aApg1Bcj"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1716615779;
+	s=mimecast20190719; t=1716616132;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=bjVVpyovcTh1KhIZeNxJ7zyNZ65WzYBVUyV7DNwDnA4=;
-	b=WzmcXmxfai+p7MZtmGPPm6hwwzikcNVyKTVkrybPUZsaEOH4zPkXdTlYt/taI2QNN/jSqX
-	mz+kXkOcoxtX2cA82VmP0HqdTvLlX0jBAjJzCsc/S2xuqnucgOKv8SO7RWnRuprSoTRrBD
-	i6+hY8uvOrv9O1Q9DE/7CaDrL19n7xM=
-Received: from mail-oa1-f71.google.com (mail-oa1-f71.google.com
- [209.85.160.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=PBX4lOH54XFAMj+rQ8FNv3GNU9PLV4YIpHFYn5Jmk5w=;
+	b=aApg1BcjCSb55GPM67KtfSyh4XQywYov6P+4OHIK656BLdrt639vBFqh4ACvWF80b6q3/P
+	mHR32G21zzMnMdeupcGCIrIPy8IhcNnNkZOaoXvUstOxLBFFOfPn4lkBoS4e32q2wuT93O
+	w/wnssJAVFLXXJvGOywha7g/dNPVGM8=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-641-2NnavgBQOVqnmDuwCZUltg-1; Sat, 25 May 2024 01:42:57 -0400
-X-MC-Unique: 2NnavgBQOVqnmDuwCZUltg-1
-Received: by mail-oa1-f71.google.com with SMTP id 586e51a60fabf-24c89a883d8so2718939fac.1
-        for <fstests@vger.kernel.org>; Fri, 24 May 2024 22:42:57 -0700 (PDT)
+ us-mta-583-J6F8Mg17Mdmx1vnoRTqofw-1; Sat, 25 May 2024 01:48:50 -0400
+X-MC-Unique: J6F8Mg17Mdmx1vnoRTqofw-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2bf9410c954so148442a91.3
+        for <fstests@vger.kernel.org>; Fri, 24 May 2024 22:48:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716615776; x=1717220576;
+        d=1e100.net; s=20230601; t=1716616129; x=1717220929;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=bjVVpyovcTh1KhIZeNxJ7zyNZ65WzYBVUyV7DNwDnA4=;
-        b=TTbe3lDNZ2PXZF53d7wVhOG182SjLsESIII6IsWzuAK3oISB1Y01Xm2p2TlLJ07BZN
-         RSVs3nX4E7wA9Qm+dMUUUWYKZhUGN1Q7PMvmCgq6cFfmfZkFS6jLphjyQUjAheBTjm9r
-         RFXIluf1xpXmJL9PBOIQjP0L6U8VJTlQayl6n+iyUmIsCI8KOTvEaHAlj708E235kmAo
-         pwsMM/61EcA7fjQze4rQaFQQ00C3mlO9K9gD+jywtkf56Cr1+zUOy54Tc9WsE5EB4j2O
-         Rq0B2sbfUdL7NkO5csznmFo1g8j+/RKjQh4ogBM3o8IXFpQRUtnEpS+hx+cNTXBSKdPg
-         Z4Zg==
-X-Gm-Message-State: AOJu0Yxd5KbEPrOwContZ70nUoImrYnVZnoTUf3hsExv/qUXOwnCQxfH
-	Musb1lKyvfK/Xztprdtgz6SVnirC69q+ErMyNmH77i/MotHp99k0GDlRuHnlecEPcy5seMPEHRG
-	aS5ckz7mGiGC/ZSBuiNEcNd95TAUzkkdrM9jF0qDN2DfPdrusGDuByng=
-X-Received: by 2002:a05:6870:35d4:b0:23e:7764:7795 with SMTP id 586e51a60fabf-24ca12e174bmr4328496fac.28.1716615776134;
-        Fri, 24 May 2024 22:42:56 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGk9UhLE5f2euh3S/6RGiQf+H/9ZsQZ/LN/AwdFjGW/6xBaFtTpItRSIrQ0p4cepqh+YgZiEg==
-X-Received: by 2002:a05:6870:35d4:b0:23e:7764:7795 with SMTP id 586e51a60fabf-24ca12e174bmr4328484fac.28.1716615775532;
-        Fri, 24 May 2024 22:42:55 -0700 (PDT)
+        bh=PBX4lOH54XFAMj+rQ8FNv3GNU9PLV4YIpHFYn5Jmk5w=;
+        b=LUhfhS5mA0WmrGiYi1R/nt4w/kqXzbeHSwNen5SgPYMBMKezrersDuE3ZxskRxdsoW
+         b/WNxqgbR0cBzCvqm2HBpC3eEphUepkwkQsA7QZfnV5JJq/6vze4OLT31mebiivhOmsS
+         f2NAzK5fvx2DT4XruGkysHtm55I0w/oboQR9kFQ2tlum9aFEqfnA2DoXZrbO1zyXh5a7
+         FMJHlCcTouxPUAbo2bTMyyUhmka2jDVQjKMfRGgzXAaUkJMz0k+6CvD/7ojgSt+Xsf0/
+         dNM0WXOcdP/HE+aJQcU6YqmvhM0Dlw+KedaXZy/+vGgr9nmTrIjT0hsBMW6Tvh+GNqNQ
+         diiA==
+X-Gm-Message-State: AOJu0Yybsp1R8f3O412ZaRbSRhFAQnq95Muo5j6m70dMQCDKUOuBz/Fl
+	JGhYKUwSlYB7yQsBHudI9tppjFKLw1joGsbvz5Vq/Wr6f6XP6WW7d1cOQRSWcmvAkz6mqrvkjV/
+	vuoIwE+iRnUx7SEu7QBUgNKHPIc4azu9p7MrDXKwyKKZ5EP+HhZMFCqo=
+X-Received: by 2002:a17:902:ecd2:b0:1f3:38e2:3f51 with SMTP id d9443c01a7336-1f4499017a7mr62049475ad.68.1716616129349;
+        Fri, 24 May 2024 22:48:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFXwmZ49wto2r0o9q3YM9HIEgdHJdsuKcPyWKkk+DKUKJR/dijR8xbyo12lsL4N5Gsfgv87lQ==
+X-Received: by 2002:a17:902:ecd2:b0:1f3:38e2:3f51 with SMTP id d9443c01a7336-1f4499017a7mr62049225ad.68.1716616128848;
+        Fri, 24 May 2024 22:48:48 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f8fcfe64b1sm1951721b3a.146.2024.05.24.22.42.54
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f44c9e43c2sm23020805ad.308.2024.05.24.22.48.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 May 2024 22:42:55 -0700 (PDT)
-Date: Sat, 25 May 2024 13:42:52 +0800
+        Fri, 24 May 2024 22:48:48 -0700 (PDT)
+Date: Sat, 25 May 2024 13:48:44 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Andrey Albershteyn <aalbersh@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test quota's project ID on special files
-Message-ID: <20240525054252.2h55e2oer65mpy6s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240520170004.669254-2-aalbersh@redhat.com>
+To: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+Cc: fstests@vger.kernel.org, gost.dev@samsung.com, mcgrof@kernel.org,
+	ritesh.list@gmail.com, djwong@kernel.org,
+	Pankaj Raghav <p.raghav@samsung.com>
+Subject: Re: [PATCH v2 0/3] more lbs test fixes
+Message-ID: <20240525054844.5qcuyhwwnmhlpev5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240513131254.92412-1-kernel@pankajraghav.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -71,158 +73,44 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240520170004.669254-2-aalbersh@redhat.com>
+In-Reply-To: <20240513131254.92412-1-kernel@pankajraghav.com>
 
-On Mon, May 20, 2024 at 07:00:05PM +0200, Andrey Albershteyn wrote:
-> With addition of FS_IOC_FSSETXATTRAT xfs_quota now can set project
-> ID on filesystem inodes behind special files. Previously, quota
-> reporting didn't count inodes of special files created before
-> project initialization. Only new inodes had project ID set.
-> 
-> Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
-> ---
-> 
-> Notes:
->     This is part of the patchset which introduces
->     FS_IOC_FS[GET|SET]XATTRAT:
->     https://lore.kernel.org/linux-xfs/20240520164624.665269-2-aalbersh@redhat.com/T/#t
->     https://lore.kernel.org/linux-xfs/20240520165200.667150-2-aalbersh@redhat.com/T/#u
-
-So this test fails on old xfsprogs and kernel which doesn't support
-above feature? Do we need a _require_xxxx helper to skip this test?
-Or you hope to fail on old kernel to clarify this feature missing?
-
-As this test requires some new patches, better to point out:
-  _wants_kernel_commit xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxx
-  _wants_git_commit xfsprogs xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxx
-
-> 
->  tests/xfs/608     | 73 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/608.out | 10 +++++++
->  2 files changed, 83 insertions(+)
->  create mode 100755 tests/xfs/608
->  create mode 100644 tests/xfs/608.out
-> 
-> diff --git a/tests/xfs/608 b/tests/xfs/608
-> new file mode 100755
-> index 000000000000..3573c764c5f4
-> --- /dev/null
-> +++ b/tests/xfs/608
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Red Hat.  All Rights Reserved.
-> +#
-> +# FS QA Test 608
-> +#
-> +# Test that XFS can set quota project ID on special files
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quota
-> +
-> +# Override the default cleanup function.
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -r -f $tmp.*
-> +	rm -f $tmp.proects $tmp.projid
-                      ^^^^
-                   projects? (same below)
-
-And won't "rm -f $tmp.*" help to remove $tmp.proects and $tmp.projid ?
-If it does, we can remove this _cleanup, just use the default one.
-
-> +}
-> +
-> +
-> +# Import common functions.
-> +. ./common/quota
-> +. ./common/filter
-> +
-> +# Modify as appropriate.
-> +_supported_fs xfs
-> +_require_scratch
-> +_require_xfs_quota
-> +_require_user
-
-Does this patch use "fsgqa" user/group?
-
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_qmount_option "pquota"
-> +_scratch_mount
-
-If there's not special reason, we generally do all _require_xxx checking
-at first, then mkfs & mount.
-
-> +_require_test_program "af_unix"
-> +_require_symlinks
-> +_require_mknod
-
-So you might can move above 3 lines over the _scratch_mkfs, looks like
-they don't need a SCRATCH_DEV with $FSTYP.
-
-> +
-> +function create_af_unix () {
-
-We generally don't use "function", but that's fine if you intend that :)
+Looks like this patchset still has some review points to discuss. I'll
+give it more time. The release of this weekend won't have it :)
 
 Thanks,
 Zorro
 
-> +	$here/src/af_unix $* || echo af_unix failed
-> +}
-> +
-> +function filter_quota() {
-> +	_filter_quota | sed "s~$tmp.proects~PROJECTS_FILE~"
-> +}
-> +
-> +projectdir=$SCRATCH_MNT/prj
-> +id=42
-> +
-> +mkdir $projectdir
-> +mkfifo $projectdir/fifo
-> +mknod $projectdir/chardev c 1 1
-> +mknod $projectdir/blockdev b 1 1
-> +create_af_unix $projectdir/socket
-> +touch $projectdir/foo
-> +ln -s $projectdir/foo $projectdir/symlink
-> +touch $projectdir/bar
-> +ln -s $projectdir/bar $projectdir/broken-symlink
-> +rm -f $projectdir/bar
-> +
-> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
-> +	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
-> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
-> +	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
-> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
-> +	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
-> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
-> +	-c "report -inN -p" $SCRATCH_DEV
-> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
-> +	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/608.out b/tests/xfs/608.out
-> new file mode 100644
-> index 000000000000..c3d56c3c7682
-> --- /dev/null
-> +++ b/tests/xfs/608.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 608
-> +Setting up project 42 (path SCRATCH_MNT/prj)...
-> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-> +Checking project 42 (path SCRATCH_MNT/prj)...
-> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-> +#0                   3          0          0     00 [--------]
-> +#42                  8         20         20     00 [--------]
-> +
-> +Clearing project 42 (path SCRATCH_MNT/prj)...
-> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
-> -- 
-> 2.42.0
+On Mon, May 13, 2024 at 07:12:51AM -0600, Pankaj Raghav (Samsung) wrote:
+> From: Pankaj Raghav <p.raghav@samsung.com>
 > 
+> These are some of the tests that failed when we were working on LBS
+> patches [1].
+> 
+> generic/436 and xfs/008 are adapted to work with bs > ps systems.
+> 
+> xfs/161 is an upstream failure, and it happens even on bs <= ps systems.
+> 
+> Changes since v1:
+> - Corrected copy pasta error in generic/436
+> - xfs/161 removed hardcoded and incorporated ritesh's comments
+> 
+> [1] https://lore.kernel.org/linux-xfs/20240503095353.3798063-1-mcgrof@kernel.org/
+> 
+> Pankaj Raghav (3):
+>   xfs/161: adapt the test case for 64k FS blocksize
+>   generic/436: round up bufsz to nearest filesystem blksz
+>   xfs/008: use block size instead of the pagesize
+> 
+>  src/seek_sanity_test.c |  8 ++++----
+>  tests/xfs/008          | 19 ++++++++++---------
+>  tests/xfs/008.out      |  8 ++++----
+>  tests/xfs/161          | 16 ++++++++++++----
+>  4 files changed, 30 insertions(+), 21 deletions(-)
+> 
+> 
+> base-commit: b26d68da08e47e6508a96bee72b25823040ab67e
+> -- 
+> 2.34.1
 > 
 
