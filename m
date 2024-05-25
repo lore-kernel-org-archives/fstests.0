@@ -1,71 +1,68 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C988663BF
-	for <fstests@vger.kernel.org>; Sat, 25 May 2024 05:12:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26C88B65C
+	for <fstests@vger.kernel.org>; Sat, 25 May 2024 05:42:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716613960; cv=none; b=i6ayAmcmi3Jr5r081fXLEWEZg+Ryho8ypGI+s+4YgR+un5T5JOpDQ0lfNNfw211fEGaxG5Av4cZY/taUW/UQ6nmDSXgME44+bVAfm7YMnpC8e0fC7rtc+52frsM/KRyNGd5Q4dic2soxOlO9DFxO3Gs7Cje6/Ou7em5myqCYvVE=
+	t=1716615781; cv=none; b=ikh6CV3AKlWNnFM/G3VQqotrGGH+bGNsSXAgB7rZQzTztJczLhtLd6ANX7dtSYB3EqECfRwZZwcGxzbrwUJxsBl+HHKunJFj4Q6H7VAVxrRRPmWbaZnm9HhXVOX0P+F/mUOv2lrXXi6Ne9Q75s0+Rf9qe4qSufl5e2Yd7b6bGWo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716613960; c=relaxed/simple;
-	bh=NoScc7BCnT3a7Y9eXMZYmu+gOCtFm6drlEkQt5/JKFE=;
+	s=arc-20240116; t=1716615781; c=relaxed/simple;
+	bh=QH6CiInNA+sLUcWIGlusgioN1a9ALec6l+HzsZTZk8o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=R8bcf1Fq0R+XK06u6TSDxRtZ5s+Tat/iE0Y3oBtqm7AfaUFAG+gl4wjrOpzRboMcn47fSD6pQFJ2bPnTUMDfbgpy6+QFf/9waYM1zFFPKtBy3WrAIixodVb4vs2G+g6SJ7U4lVnu8uwDVbNNfZv8ereedf5csHtTo0ZbvoUD4ts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WDWx6dcX; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=hZNH6EavrUlx6bkQ/KYd+T/N3nkue2Th5p0snm/bkKwaE3RwFcns2++uQoudy+qIYn2B3qoBJ57iC+7VyGG4n37/3HkkvKBAI2z31V884ust4gBMPWavlyJXowDZ8gFUqlxOjPnJjAPxCgXb5rW6dOX0uMikyv28zjkBR8uFeDU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WzmcXmxf; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WDWx6dcX"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WzmcXmxf"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1716613957;
+	s=mimecast20190719; t=1716615779;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=AcgeABkqh/36IYL9u08JfhPgkrwxMk2ZrXDmFh4maBg=;
-	b=WDWx6dcXvCVJxp7L9BUqAqHSw07LdTxrCUfyMDDldgpV/rsRXS68B6H/hqIDdTZMrweQsw
-	4hQb1SZA0HGbL2l1aDrapqUSO6tT/Tpn7SM/FXxl0tBTIkQtbiktp0783eftp4F4i6KEhi
-	z140Cc9swubIuc6/zxI6mIGH4DcmWNc=
-Received: from mail-oa1-f70.google.com (mail-oa1-f70.google.com
- [209.85.160.70]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=bjVVpyovcTh1KhIZeNxJ7zyNZ65WzYBVUyV7DNwDnA4=;
+	b=WzmcXmxfai+p7MZtmGPPm6hwwzikcNVyKTVkrybPUZsaEOH4zPkXdTlYt/taI2QNN/jSqX
+	mz+kXkOcoxtX2cA82VmP0HqdTvLlX0jBAjJzCsc/S2xuqnucgOKv8SO7RWnRuprSoTRrBD
+	i6+hY8uvOrv9O1Q9DE/7CaDrL19n7xM=
+Received: from mail-oa1-f71.google.com (mail-oa1-f71.google.com
+ [209.85.160.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-619-nbu3AyqLO4uwVznvnEqITw-1; Sat, 25 May 2024 01:12:36 -0400
-X-MC-Unique: nbu3AyqLO4uwVznvnEqITw-1
-Received: by mail-oa1-f70.google.com with SMTP id 586e51a60fabf-24ca074ea92so1602341fac.3
-        for <fstests@vger.kernel.org>; Fri, 24 May 2024 22:12:35 -0700 (PDT)
+ us-mta-641-2NnavgBQOVqnmDuwCZUltg-1; Sat, 25 May 2024 01:42:57 -0400
+X-MC-Unique: 2NnavgBQOVqnmDuwCZUltg-1
+Received: by mail-oa1-f71.google.com with SMTP id 586e51a60fabf-24c89a883d8so2718939fac.1
+        for <fstests@vger.kernel.org>; Fri, 24 May 2024 22:42:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716613955; x=1717218755;
+        d=1e100.net; s=20230601; t=1716615776; x=1717220576;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=AcgeABkqh/36IYL9u08JfhPgkrwxMk2ZrXDmFh4maBg=;
-        b=OYGkQmPjLPhS2WuNrH4+mJoPxzCl3HjSPry2vSIlKBCySMug4rxZc35ajbm2zJ5ftQ
-         V1C8Y7rkZv5Q4VPdKjVnfXx217LXvtrIZcpJ9SNUIxrWW+R1ivFnbCSJUCeRZETj181g
-         6F+nsFbz+oL/je+p4+mSGTnXjQwn5Rp52pBsbCPG9Qr/gx30DoEpwfjU4lJW5uqPp8pl
-         +prUy6nh827WqlRMdx3TU+z1gVjYvhfFu38EQxl47+ai3pDwOFsSF2hXwePuYXsAEnuz
-         ikejTuKWGxTAxe7MNmiJX1CnKNZvPZrXLIOr0eOncTc7xQ8RGP4fRMp9rAGWrbBwwk2u
-         ZTdg==
-X-Forwarded-Encrypted: i=1; AJvYcCUBhGZcMKTvlC518UynRldlBCM8vXGwRn7l/oc+uPxUpQHEuhVx3vmlIGvr4BOxyhBPVb76XKqSN3IKvpHlggWQBoHRfVI7cQ==
-X-Gm-Message-State: AOJu0YzmeaABImNgxjWUadbFq3Fh/8oJ5BhAAUfTh2cvVmGqGV8Rpr44
-	fhfRFRsVvSfWAoNKTVvy84voFaqF2o+WeWBOhcb/74h9W25n0paxlz8x+Eaxn/4Tg68NNclWKyh
-	58ubBaHI+a+4tG8n+NAqFx+fuxLa/A2Yuer436dQPE5Ukt534eegqILRjjgkAdoedgA==
-X-Received: by 2002:a05:6871:58a6:b0:22a:b358:268 with SMTP id 586e51a60fabf-24ca127e786mr4447412fac.25.1716613954916;
-        Fri, 24 May 2024 22:12:34 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHBn2NBrqgN/WNwQWZF7aWHOyNNdC0gBZqQ424yFD0MDqKOyqkb41ON4L8dHWCSRVyCryTQww==
-X-Received: by 2002:a05:6871:58a6:b0:22a:b358:268 with SMTP id 586e51a60fabf-24ca127e786mr4447406fac.25.1716613954502;
-        Fri, 24 May 2024 22:12:34 -0700 (PDT)
+        bh=bjVVpyovcTh1KhIZeNxJ7zyNZ65WzYBVUyV7DNwDnA4=;
+        b=TTbe3lDNZ2PXZF53d7wVhOG182SjLsESIII6IsWzuAK3oISB1Y01Xm2p2TlLJ07BZN
+         RSVs3nX4E7wA9Qm+dMUUUWYKZhUGN1Q7PMvmCgq6cFfmfZkFS6jLphjyQUjAheBTjm9r
+         RFXIluf1xpXmJL9PBOIQjP0L6U8VJTlQayl6n+iyUmIsCI8KOTvEaHAlj708E235kmAo
+         pwsMM/61EcA7fjQze4rQaFQQ00C3mlO9K9gD+jywtkf56Cr1+zUOy54Tc9WsE5EB4j2O
+         Rq0B2sbfUdL7NkO5csznmFo1g8j+/RKjQh4ogBM3o8IXFpQRUtnEpS+hx+cNTXBSKdPg
+         Z4Zg==
+X-Gm-Message-State: AOJu0Yxd5KbEPrOwContZ70nUoImrYnVZnoTUf3hsExv/qUXOwnCQxfH
+	Musb1lKyvfK/Xztprdtgz6SVnirC69q+ErMyNmH77i/MotHp99k0GDlRuHnlecEPcy5seMPEHRG
+	aS5ckz7mGiGC/ZSBuiNEcNd95TAUzkkdrM9jF0qDN2DfPdrusGDuByng=
+X-Received: by 2002:a05:6870:35d4:b0:23e:7764:7795 with SMTP id 586e51a60fabf-24ca12e174bmr4328496fac.28.1716615776134;
+        Fri, 24 May 2024 22:42:56 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGk9UhLE5f2euh3S/6RGiQf+H/9ZsQZ/LN/AwdFjGW/6xBaFtTpItRSIrQ0p4cepqh+YgZiEg==
+X-Received: by 2002:a05:6870:35d4:b0:23e:7764:7795 with SMTP id 586e51a60fabf-24ca12e174bmr4328484fac.28.1716615775532;
+        Fri, 24 May 2024 22:42:55 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f8fd1d725fsm1848592b3a.169.2024.05.24.22.12.33
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f8fcfe64b1sm1951721b3a.146.2024.05.24.22.42.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 May 2024 22:12:34 -0700 (PDT)
-Date: Sat, 25 May 2024 13:12:31 +0800
+        Fri, 24 May 2024 22:42:55 -0700 (PDT)
+Date: Sat, 25 May 2024 13:42:52 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: David Sterba <dsterba@suse.cz>
-Cc: David Sterba <dsterba@suse.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH] Remove richacl support
-Message-ID: <20240525051231.wwam6g4zf6efy5y7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240522173048.30558-1-dsterba@suse.com>
- <20240523040922.ozy5drxg7w4svrj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240523134019.GB17126@suse.cz>
+To: Andrey Albershteyn <aalbersh@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test quota's project ID on special files
+Message-ID: <20240525054252.2h55e2oer65mpy6s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240520170004.669254-2-aalbersh@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,53 +71,158 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240523134019.GB17126@suse.cz>
+In-Reply-To: <20240520170004.669254-2-aalbersh@redhat.com>
 
-On Thu, May 23, 2024 at 03:40:19PM +0200, David Sterba wrote:
-> On Thu, May 23, 2024 at 12:09:22PM +0800, Zorro Lang wrote:
-> > On Wed, May 22, 2024 at 07:30:48PM +0200, David Sterba wrote:
-> > > There's no support for richacl in Linux and based on information in the
-> > > links will never be. Remove all related files and support code.
-> > > 
-> > > References:
-> > > - https://wiki.samba.org/index.php/NFS4_ACL_overview#Linux
-> > > - https://lwn.net/Articles/661357/ (article, 2015)
-> > > - https://lwn.net/Articles/661078/ (patches, 2015)
-> > > - https://github.com/andreas-gruenbacher/richacl/
-> > > - http://www.bestbits.at/richacl/ (n/a anymore)
-> > > 
-> > > Signed-off-by: David Sterba <dsterba@suse.com>
-> > > ---
-> > 
-> > Thanks! The richacl testing was brought in by:
-> > 
-> >   commit 73f9e47abdc58f39b7e39b3729bc88db624c9771
-> >   Author: Andreas Gruenbacher <agruenba@redhat.com>
-> >   Date:   Tue Jun 28 14:47:26 2016 +0200
-> > 
-> >       generic: Add richacl tests
-> > 
-> > Looks like we were too hurry to merge the test things before the kernel
-> > patchset get merged.
-> > 
-> > Sorry I didn't learn about the details. From above links, I can see how
-> > we tried to implement the richacl, but I didn't see how we denied it and
-> > never have it in the future. Is there any record (e.g. an email reply) to
-> > learn about the "history"?
+On Mon, May 20, 2024 at 07:00:05PM +0200, Andrey Albershteyn wrote:
+> With addition of FS_IOC_FSSETXATTRAT xfs_quota now can set project
+> ID on filesystem inodes behind special files. Previously, quota
+> reporting didn't count inodes of special files created before
+> project initialization. Only new inodes had project ID set.
 > 
-> There were many revisions of the patches, talks at LSF and LWN articles
-> over the years so I'd consider it a common knowledge. Web search leads
-> me to lkml.org links that does not work today so I can't point you to a
-> mail where Christop said a clear 'no, never'.
+> Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
+> ---
+> 
+> Notes:
+>     This is part of the patchset which introduces
+>     FS_IOC_FS[GET|SET]XATTRAT:
+>     https://lore.kernel.org/linux-xfs/20240520164624.665269-2-aalbersh@redhat.com/T/#t
+>     https://lore.kernel.org/linux-xfs/20240520165200.667150-2-aalbersh@redhat.com/T/#u
 
-OK, that's clear enough, if you've made a decision in LSF. This patch removes
-any cases, so I have to confirm :) Sorry I didn't attend the LSF this year, feel
-free to tell me if I missed anything.
+So this test fails on old xfsprogs and kernel which doesn't support
+above feature? Do we need a _require_xxxx helper to skip this test?
+Or you hope to fail on old kernel to clarify this feature missing?
 
-This patch looks good to me, it totally reverts the 73f9e47abdc5 ("generic: Add
-richacl tests"). So,
+As this test requires some new patches, better to point out:
+  _wants_kernel_commit xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxx
+  _wants_git_commit xfsprogs xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxx
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+>  tests/xfs/608     | 73 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/608.out | 10 +++++++
+>  2 files changed, 83 insertions(+)
+>  create mode 100755 tests/xfs/608
+>  create mode 100644 tests/xfs/608.out
+> 
+> diff --git a/tests/xfs/608 b/tests/xfs/608
+> new file mode 100755
+> index 000000000000..3573c764c5f4
+> --- /dev/null
+> +++ b/tests/xfs/608
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Red Hat.  All Rights Reserved.
+> +#
+> +# FS QA Test 608
+> +#
+> +# Test that XFS can set quota project ID on special files
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quota
+> +
+> +# Override the default cleanup function.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	rm -f $tmp.proects $tmp.projid
+                      ^^^^
+                   projects? (same below)
 
+And won't "rm -f $tmp.*" help to remove $tmp.proects and $tmp.projid ?
+If it does, we can remove this _cleanup, just use the default one.
+
+> +}
+> +
+> +
+> +# Import common functions.
+> +. ./common/quota
+> +. ./common/filter
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_xfs_quota
+> +_require_user
+
+Does this patch use "fsgqa" user/group?
+
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_qmount_option "pquota"
+> +_scratch_mount
+
+If there's not special reason, we generally do all _require_xxx checking
+at first, then mkfs & mount.
+
+> +_require_test_program "af_unix"
+> +_require_symlinks
+> +_require_mknod
+
+So you might can move above 3 lines over the _scratch_mkfs, looks like
+they don't need a SCRATCH_DEV with $FSTYP.
+
+> +
+> +function create_af_unix () {
+
+We generally don't use "function", but that's fine if you intend that :)
+
+Thanks,
+Zorro
+
+> +	$here/src/af_unix $* || echo af_unix failed
+> +}
+> +
+> +function filter_quota() {
+> +	_filter_quota | sed "s~$tmp.proects~PROJECTS_FILE~"
+> +}
+> +
+> +projectdir=$SCRATCH_MNT/prj
+> +id=42
+> +
+> +mkdir $projectdir
+> +mkfifo $projectdir/fifo
+> +mknod $projectdir/chardev c 1 1
+> +mknod $projectdir/blockdev b 1 1
+> +create_af_unix $projectdir/socket
+> +touch $projectdir/foo
+> +ln -s $projectdir/foo $projectdir/symlink
+> +touch $projectdir/bar
+> +ln -s $projectdir/bar $projectdir/broken-symlink
+> +rm -f $projectdir/bar
+> +
+> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
+> +	-c "project -sp $projectdir $id" $SCRATCH_DEV | filter_quota
+> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
+> +	-c "limit -p isoft=20 ihard=20 $id " $SCRATCH_DEV | filter_quota
+> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
+> +	-c "project -cp $projectdir $id" $SCRATCH_DEV | filter_quota
+> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
+> +	-c "report -inN -p" $SCRATCH_DEV
+> +$XFS_QUOTA_PROG -D $tmp.proects -P $tmp.projid -x \
+> +	-c "project -Cp $projectdir $id" $SCRATCH_DEV | filter_quota
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/608.out b/tests/xfs/608.out
+> new file mode 100644
+> index 000000000000..c3d56c3c7682
+> --- /dev/null
+> +++ b/tests/xfs/608.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 608
+> +Setting up project 42 (path SCRATCH_MNT/prj)...
+> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+> +Checking project 42 (path SCRATCH_MNT/prj)...
+> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+> +#0                   3          0          0     00 [--------]
+> +#42                  8         20         20     00 [--------]
+> +
+> +Clearing project 42 (path SCRATCH_MNT/prj)...
+> +Processed 1 (PROJECTS_FILE and cmdline) paths for project 42 with recursion depth infinite (-1).
+> -- 
+> 2.42.0
+> 
 > 
 
