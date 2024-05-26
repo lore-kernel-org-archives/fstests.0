@@ -1,178 +1,148 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D5968C1D;
-	Sun, 26 May 2024 11:48:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BC53F9DF
+	for <fstests@vger.kernel.org>; Sun, 26 May 2024 14:36:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716724108; cv=none; b=r+B7JU7ShmuPihw6FJgwVLZHM7gTir/mTd8h4krmqaNUZShOnghSgHJLB7UHHIKzCcJoutoiUL0gLn4hnWKGae0+ofDwpFMyuIz3gv9dGXImKqP3rWfamniwYDZEAsl8MsTktuiysbyavBhvN2qJMSF+dXVRiwn8BwQNgLDADo8=
+	t=1716734210; cv=none; b=VuvK/3PGxTe08Y+N9J+6GBV9kcoOFzBEUjE5zx4FQBnhSP/jozq41EWtA/Qzs1RJN7wGeHw/fLx16PdiWJKspO0C5KRgYXj5fdUaYbTNUjtybagYkG1kNbtg7KqSzrCe0dVhbTJWFYlWVhO7rjt1LXXokuqAZvXA5XyYJ3tFtnw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716724108; c=relaxed/simple;
-	bh=WQ+HPlElvkl/Ez2zfyiK7lLhLsIU5yGlsyVlZUVUFZI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UqYHy+r1JjhjhlHdO6UXpArAXX0UirtdKOWUCqoUpkI7jT2ZEhH+MJkK61ywKsr/lMDSY6jsXIqKyhvpF2N48vXT7fHVMHu03o/LWY6UM6SI9TpAEouQxOnR470KcwxxRo8x9+mz4sk/8BDIUUYRkJJ/R+1ZX6v/mv5/ya3o3t0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MZzPxRb8; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1716734210; c=relaxed/simple;
+	bh=DOdvX18WYBWsOQAtHta70enOpLOzOHqiPjqMT6soojY=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=aJ3w6yTucK7+H21lZn0wndNNTS9zN17Ju69mP3IWx94jPp94Ig6NqGTuKXRqxGixYhVK+TkrVhqUXXBzhcNZf/F+PI4zfa0JNbsIOifcC174OroMOljt5kbjaAVOuCLhRoll48TRXMIE559Cj9kWImykBojWwwtHMYHUXawjnUk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mCy2HZp9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MZzPxRb8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DA5C7C4AF07;
-	Sun, 26 May 2024 11:48:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mCy2HZp9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1DE8FC2BD10;
+	Sun, 26 May 2024 14:36:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1716724107;
-	bh=WQ+HPlElvkl/Ez2zfyiK7lLhLsIU5yGlsyVlZUVUFZI=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=MZzPxRb8dqldpZ7iSPRwsStVXDHjS4IOXVZESYGMZEfw3tOKUoDpIIxXxWZHJQsnV
-	 H3EZ31JigddWX+knGTP3FyH4CJTi6IYImsb2FpTe+nqLFvJpvlzaek+s1gMo9/EVXK
-	 Jvogz3UFnV/xXfDZN7jBMamzp2Zarb9NQzue1EA5yWf8vbve6KyonmpLk1GG7elrvh
-	 QgQw1J3j5ft5wtRonFjAh60DLr0WOPqmgyYnV3dh9NlX/dMvJWS9EtQOGUfiqTPQu2
-	 R0xaS0P/lWmGJ2mh4w/lMQety24ts24TQHZURR4bMjYW2Z8WycviNyTHFa2+8a+xVJ
-	 dsU1pQI5amR8w==
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-5238b7d0494so11054499e87.3;
-        Sun, 26 May 2024 04:48:27 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCU/DK0fFwmu9Tuc4DfZwQayonqWxFsSD69SCVGPyt9HJLUKwbWM8u9LBh6w1D9fh9iEc2OiopayLKx7w0y3qCapUzM18hrRRDdCJiw=
-X-Gm-Message-State: AOJu0Yy3dI6U6yt9+CKhoTdQnlqWoGxb38hm5pSHQRUFdAFhEOr1IPWU
-	RqdaEhkS/iapmCcqQKfWpuuOIH4x/HDpSLKgf/QplA7Q1V7yfc2Zn8hMXGlPVGJylUIXQ7IKMrz
-	YRUM/++hv8kOQut5MIZ4L0LYm6rc=
-X-Google-Smtp-Source: AGHT+IFqrZbbUyO9SQxsUIAMPSruF/vc3GGmM4mWVyCtofVpwquQ46OOODDRT9pC2D7nADJ7iZ8vG+XNrOEmxiXJBDk=
-X-Received: by 2002:a05:6512:794:b0:529:46e:b2a5 with SMTP id
- 2adb3069b0e04-52964eac45fmr5474743e87.2.1716724106185; Sun, 26 May 2024
- 04:48:26 -0700 (PDT)
+	s=k20201202; t=1716734209;
+	bh=DOdvX18WYBWsOQAtHta70enOpLOzOHqiPjqMT6soojY=;
+	h=Date:From:To:Subject:From;
+	b=mCy2HZp9i5yxAm7K9Aok1wHiplb+DRiLc+mxL1lG9K7xSTc3eHEk2fDNNnhLegZE+
+	 /sp4tCQADRD72L2uUXLL1GcP8cVd4+hXpH5TsvutVLGE56SnCR8TbTFspX5mh/KcLf
+	 Jn/fqnWyx2gAcdYljG3TZ7nSUUvh0QoAAsDXsiZEyxuhoFio7btV993dudbdzNddBm
+	 B81cDbA0gv+AC1gd3u4oAktKAw8aLnrVZe4LXdVNPjTlWV6i9lq8q9greV5pnoVSZm
+	 Sl9k7dYgCMKbCyZMRZm67NWRJxHV/Nm872ibqsR/ZWLh+SzzxgWBLtUCmBvsfc3GCa
+	 3vYFtWR7LR0JQ==
+Date: Sun, 26 May 2024 22:36:44 +0800
+Message-ID: <c6a0ccb099f02737ac7bc2f055976395@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.05.12 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <29a4df3b9a36eb17a958e92e375e03daf9312fa5.1716583705.git.osandov@fb.com>
- <d032e0b964f163229b684c0ac72b656ec9bf7b48.1716584019.git.osandov@osandov.com>
-In-Reply-To: <d032e0b964f163229b684c0ac72b656ec9bf7b48.1716584019.git.osandov@osandov.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sun, 26 May 2024 12:47:49 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H7X8PuXp-P2vUhz4xbhvTGr4cRyLvwQiTLcmV=LWyBKYw@mail.gmail.com>
-Message-ID: <CAL3q7H7X8PuXp-P2vUhz4xbhvTGr4cRyLvwQiTLcmV=LWyBKYw@mail.gmail.com>
-Subject: Re: [PATCH fstests v2] generic: test Btrfs fsync vs. size-extending
- prealloc write crash
-To: Omar Sandoval <osandov@osandov.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="X4skNeAgU9jo"
+Content-Disposition: inline
 
-On Fri, May 24, 2024 at 9:58=E2=80=AFPM Omar Sandoval <osandov@osandov.com>=
- wrote:
->
-> From: Omar Sandoval <osandov@fb.com>
->
-> This is a regression test for a Btrfs bug, but there's nothing
-> Btrfs-specific about it. Since it's a race, we just try to make the race
-> happen in a loop and pass if it doesn't crash after all of our attempts.
->
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
-> Changes from v1 [1]:
->
-> - Added missing groups and requires.
-> - Simplified $XFS_IO_PROG calls.
-> - Removed -i flag from $XFS_IO_PROG to make race reproduce more
->   reliably.
-> - Removed all of the file creation and dump-tree parsing since the only
->   file on a fresh filesystem is guaranteed to be at the end of a leaf
->   anyways.
-> - Rewrote to be a generic test.
->
-> 1: https://lore.kernel.org/linux-btrfs/297da2b53ce9b697d82d89afd322b2cc0d=
-0f392d.1716492850.git.osandov@osandov.com/
->
->  tests/generic/745     | 44 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/745.out |  2 ++
->  2 files changed, 46 insertions(+)
->  create mode 100755 tests/generic/745
->  create mode 100644 tests/generic/745.out
->
-> diff --git a/tests/generic/745 b/tests/generic/745
-> new file mode 100755
-> index 00000000..925adba9
-> --- /dev/null
-> +++ b/tests/generic/745
 
-Btw, generic/745 already exists in the for-next branch (development is
-based against that branch nowadays).
+--X4skNeAgU9jo
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> @@ -0,0 +1,44 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) Meta Platforms, Inc. and affiliates.
-> +#
-> +# FS QA Test 745
-> +#
-> +# Repeatedly prealloc beyond i_size, set an xattr, direct write into the
-> +# prealloc while extending i_size, then fdatasync. This is a regression =
-test
-> +# for a Btrfs crash.
-> +#
-> +. ./common/preamble
-> +. ./common/attr
-> +_begin_fstest auto quick log preallocrw dangerous
-> +
-> +_supported_fs generic
-> +_require_scratch
-> +_require_attrs
-> +_require_xfs_io_command falloc -k
+Hi all,
 
-Since this is now a generic test and we're using direct IO, also:
+The master branch of the xfstests repository at:
 
-_require_odirect
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-> +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> +       "btrfs: fix crash on racing fsync and size-extending write into p=
-realloc"
+has just been updated to v2024.05.12 version.
 
-Because it's now a generic test, it should be:
+Thanks,
+Zorro
 
-[ "$FSTYP" =3D "btrfs" ] && _fixed_by_kernel_commit ....
+The new head of the master branch is commit:
 
-Otherwise it looks good to me, so with that:
+983797138373 generic: add gc stress test
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+New commits:
 
-Thanks.
+Christoph Hellwig (2):
+      [79ed115c9151] xfs/077: remove _require_meta_uuid
+      [1c19089ca830] generic/095: add to the quick group
 
-> +
-> +# -i slows down xfs_io startup and makes the race much less reliable.
-> +export XFS_IO_PROG=3D"$(echo "$XFS_IO_PROG" | sed 's/ -i\b//')"
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
-> +
-> +blksz=3D$(_get_block_size "$SCRATCH_MNT")
-> +
-> +# On Btrfs, since this is the only file on the filesystem, its metadata =
-is at
-> +# the end of a B-tree leaf. We want an ordered extent completion to add =
-an
-> +# extent item at the end of the leaf while we're logging prealloc extent=
-s
-> +# beyond i_size after an xattr was set.
-> +for ((i =3D 0; i < 5000; i++)); do
-> +       $XFS_IO_PROG -ftd -c "falloc -k 0 $((blksz * 3))" -c "pwrite -q -=
-w 0 $blksz" "$SCRATCH_MNT/file"
-> +       $SETFATTR_PROG -n user.a -v a "$SCRATCH_MNT/file"
-> +       $XFS_IO_PROG -d -c "pwrite -q -w $blksz $blksz" "$SCRATCH_MNT/fil=
-e"
-> +done
-> +
-> +# If it didn't crash, we're good.
-> +
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/745.out b/tests/generic/745.out
-> new file mode 100644
-> index 00000000..fce6b7f5
-> --- /dev/null
-> +++ b/tests/generic/745.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 745
-> +Silence is golden
-> --
-> 2.45.1
->
->
+David Disseldorp (1):
+      [41474afbed5b] tests: _fail on _scratch_mkfs_sized failure
+
+David Sterba (4):
+      [3b598326c532] fstests: move shared/032 to generic directory
+      [eca6509aba8d] fstests: move shared/002 to generic directory
+      [f0ab9e59c7b5] fstests: move shared/298 to generic directory
+      [dbdfd011c8ef] fstests: remove the rest of shared
+
+Hans Holmberg (1):
+      [983797138373] generic: add gc stress test
+
+Zorro Lang (2):
+      [8e8fb3da709e] fstests: fix _require_debugfs and call it properly
+      [abc79d83a9f4] common/tracing: use /sys/kernel/tracing at first
+
+
+Code Diffstat:
+
+ check                                     |   2 +-
+ common/rc                                 |  19 ++++-
+ common/tracing                            |  13 +++-
+ common/xfs                                |  15 ----
+ tests/btrfs/004                           |   3 +-
+ tests/btrfs/007                           |   6 +-
+ tests/btrfs/150                           |   1 +
+ tests/ceph/001                            |   2 +-
+ tests/ext4/021                            |   2 +-
+ tests/ext4/059                            |   2 +-
+ tests/generic/015                         |   3 +-
+ tests/generic/077                         |   2 +-
+ tests/generic/083                         |   3 +-
+ tests/generic/095                         |   2 +-
+ tests/generic/171                         |   2 +-
+ tests/generic/172                         |   2 +-
+ tests/generic/173                         |   2 +-
+ tests/generic/174                         |   2 +-
+ tests/generic/466                         |   2 +-
+ tests/generic/735                         |   2 +-
+ tests/{shared/032 => generic/740}         |   2 +-
+ tests/generic/740.out                     |   2 +
+ tests/{shared/002 => generic/745}         |   2 +-
+ tests/{shared/002.out => generic/745.out} |   2 +-
+ tests/{shared/298 => generic/746}         |   2 +-
+ tests/{shared/298.out => generic/746.out} |   2 +-
+ tests/generic/747                         | 121 ++++++++++++++++++++++++++++++
+ tests/generic/747.out                     |   6 ++
+ tests/shared/032.out                      |   2 -
+ tests/shared/Makefile                     |  24 ------
+ tests/xfs/015                             |   2 +-
+ tests/xfs/057                             |   3 +-
+ tests/xfs/077                             |   1 -
+ tests/xfs/499                             |   7 +-
+ 34 files changed, 181 insertions(+), 84 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--X4skNeAgU9jo
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmZTSMkACgkQlNbPkfr2
+tMzSvA//YWaS7Fv6mGkHrwEifoJNbKeRw6wS6d5aPk0dUxF6M9idHlWac1oU9Sti
+t9dPfzY3gOojuH+pn8xzPgxF6jVBenjaikNGCbe/ADwfmd3Arit2tNXxdAUPlIBw
+2MdiCnMJIr2GChoC5hQYSt1uvjoaZm797k3trguLBk9efoolBSaee6Y/MPssjuqP
+4EE28r5leTggePGoB1fU2wXGZMx4hsOn2o0CAmDfZNwaNi/+8GlrirDa0vor1CX3
+RauPQqdPAc+3R4Ds9r0M8MrIliCFSPtyb7lPUONa3HoSfPasrRvXErwCwuaolDyh
+xLsmpr5gIPI/nkLjW2WKbaoeeWzdOUHQCHR3ydv7SB1ilG3701xWHlhSQvF4a0f/
+CYJBmaDdgvn61pv+iDLyr0LvMMw0Zpk1v/0cHA0VyJEuYvyn52Nt7S63nHQMHzAf
+fHmgwoWTVOLiYNB02K4NDorEZCpezTWNTRLWcSp/ua8qvNokfMllANWuv4dGS+NL
+m1c2nV52lfCgymlpwn6V/VKL/lXAXwLoJvwBm8IdNznZ78Y8e2zgcO8fuZ1sMtLg
+Cdr697whY6hjsbF1ptekljP1cMFMco7Lrsi9gOkM1+3IhpU5TDXyCloBoIJMMfxi
+aj/lixXNAKXtVAFB8/bJO0TomjK2PvpysIsvjPYE6PH+akUo4R0=
+=BkAY
+-----END PGP SIGNATURE-----
+
+--X4skNeAgU9jo--
