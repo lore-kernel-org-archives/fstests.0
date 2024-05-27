@@ -1,163 +1,183 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D59B13C38
-	for <fstests@vger.kernel.org>; Sun, 26 May 2024 14:59:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AD5C426AFA
+	for <fstests@vger.kernel.org>; Mon, 27 May 2024 09:43:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716735569; cv=none; b=sMGDaG4IKUwYPHh3bV/iD7yiorCpA0ZTNQt+bQZQfuSZnAL0JUANEN8PP0jIcgAaNt83wv/rr5cD0tj8cDmRuuEapJTre73BRgM58hTELZpCSd6WGEaqP2oAUdXg7aHLQU69DWoXiOG8bx5OPuKRu6yueWM1mXLj0SJF0NzQlM4=
+	t=1716802997; cv=none; b=hDUr797joYXHXk8FMFqpS5ptA2IXDqOfqt4y6SfVkA/Ieoi1EZ+miRap8dZ6msVOaftE3zbB9KcZ+zf4Bv9P4WWhbsd/lzmymdEl6INL5YN+lMRjWTiBY9Uv8pA1ZBStIRihsmHwFFq+hDk2KbWXFYhfQOzGgBHVdZ570DmvZIs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716735569; c=relaxed/simple;
-	bh=l0C2drrrJkXvSx1g0+AQTfwBa1y9ROffAgfENHX5opw=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=LHh+dr8RdjxYsZnh68WBH6sv6CeOf/bndBKjUeVobTiPMtbhTTli6QM0OrUxG/5MjgBTO2WVCnB9CEa+lVwLj2Z0x0OWIzbSpP6euKg2peiJqMm6CPhVH/jKtUcV2SYcDRSvp4tfQ5u5Lb9xXUI8Z/TiZQLzp8mlEdPMvLSwPBI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c884L9SK; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1716802997; c=relaxed/simple;
+	bh=4TAnsgRU3FqL2CVyRoWPdi38cUzoxU0puszdnE0/8Ng=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=JfFGpPYTCvMqsCfGStldkGq392jOfj9C8lbk3H2IQb74SISc6hDwAfzc3tKPiLSvOjrsPxgdTk2KI5R437rRiuBurhaFEmhOdyWBRy+gOgHnHX6H36kKlSSNAfVto29KqDhwJ1wStZAewMydEBry7zbxWXYv02TJtKY00A8F7pg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=agHRxBwL; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c884L9SK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BFEA3C2BD10;
-	Sun, 26 May 2024 14:59:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1716735569;
-	bh=l0C2drrrJkXvSx1g0+AQTfwBa1y9ROffAgfENHX5opw=;
-	h=Date:From:To:Subject:From;
-	b=c884L9SK2S0XS/wA+P1X/TxrpocPBAjcAEcG/WBswNlHiIE3RViHcpLLTmZGZg+e2
-	 6YOsA8RxDJcK+SOujd97alwQeFWWaj1kBJ9TXATPKDo1tJKC4j5xtbowCuZOl1bf1s
-	 TG/cdQIv0WMbHBiIsS7Q/vyKY9Ok86Bzp0iKsPFWSVPB1NnGNC/WUE/f8ZTY0s1RZL
-	 oqZW9VPP5RvCQl7ktFeaCoYx7kQmxbTP1XIVNCnWkj+PcGH36gmIcslWrpdhBY0Yl9
-	 2q7rkcppn7cpE6/LzPi+GldJzCEsBVI1G5IZAsh3qi2PuCv14N9w4BrdONL3YsBATz
-	 SoSxfmDOntpng==
-Date: Sun, 26 May 2024 22:59:25 +0800
-Message-ID: <e0dfd44590cf51b6b2186caa041bdcca@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.05.26
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="agHRxBwL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1716802994;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=01xQt1pVX53eXZ63Wy8mqsxhl6WWb+Dr6WxWNznAp/Y=;
+	b=agHRxBwL95uduC8PSNN4k+gJHKN/U5ly2nl9OAZhBU2kDKaogvHfOL+Sw2qdrpTFeX6R/x
+	DODEKlQiYR6bOQb/XdnELUdT39CyupFC2kIW81kTyBmmkCzNYFJX9IJdLWYu5XtqVhaQJ+
+	zLubmVvKrQotG/eLrIt8zP6YazRkjus=
+Received: from mail-lf1-f69.google.com (mail-lf1-f69.google.com
+ [209.85.167.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-505--ds-2e9DN_qHbC0VYDNbgA-1; Mon, 27 May 2024 05:43:12 -0400
+X-MC-Unique: -ds-2e9DN_qHbC0VYDNbgA-1
+Received: by mail-lf1-f69.google.com with SMTP id 2adb3069b0e04-5296043d77bso2291631e87.3
+        for <fstests@vger.kernel.org>; Mon, 27 May 2024 02:43:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716802991; x=1717407791;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=01xQt1pVX53eXZ63Wy8mqsxhl6WWb+Dr6WxWNznAp/Y=;
+        b=OXDPYnq6yAJoU2NFISHkSZBYoFIEFxuE0RGSvn3ykbVX/s3Usnlz++4k77RBXQ+1SO
+         xeqpcHmS5jVLogPY27IremxIjT+6GiMI0H8iv31obJDW87WO2ySCUOfGNNG160BiTyAX
+         4gB4UeYGo1l4+UFwdLm571no5htUAQLjOnabSmKYwCtwXsXWTaAw+ajaNbHTzG5Y+dt+
+         rOVh2JWXzVbnvvzIYoHTaynMtyaYW1nTCfWe1SbycT4v6eTfa0QBFZZ+LiLXPG478TdE
+         S3yAKsp1S2/X21ZSz4xX5FG9r1OwHOBcgPUWPDns3rkxSvq4PVWy3RpYvZQHLmNMrfZT
+         IXwA==
+X-Gm-Message-State: AOJu0YyWFzDPjdiUx+TxgRWY1KgaZ4acFxjPmB6OfqJVkx7wrIGG4QJq
+	mA1Y3SnnkGPIFmbz0uXGjveSaK2N8NN62XT/uNljeL8oepIVL0eoVi+4LaB3g5CyYLWvjey31E6
+	7QBMNNff00FpFdCzVLAPz5vI9sVriXDyRL7FuoypTLdp/ILImr065lw==
+X-Received: by 2002:a05:6512:31cb:b0:520:9df8:f245 with SMTP id 2adb3069b0e04-529645e242bmr7086628e87.1.1716802990752;
+        Mon, 27 May 2024 02:43:10 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHCnOgy3AuFG33Flx9qdZtJBuvSL+1Xt7c4UsRxuEMsXwXtDIVjTu+tqu5MCRpdme2hgS0KZw==
+X-Received: by 2002:a05:6512:31cb:b0:520:9df8:f245 with SMTP id 2adb3069b0e04-529645e242bmr7086602e87.1.1716802989968;
+        Mon, 27 May 2024 02:43:09 -0700 (PDT)
+Received: from thinky ([2a02:6bf:fff0:6300:6263:2b90:eac8:9097])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42100ee7edbsm136396605e9.5.2024.05.27.02.43.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 May 2024 02:43:09 -0700 (PDT)
+Date: Mon, 27 May 2024 11:43:06 +0200
+From: Andrey Albershteyn <aalbersh@redhat.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test quota's project ID on special files
+Message-ID: <amb432qfsbrvbtfrs5zeqif7ddbzauktmm5xn7hiszpuftw7qg@7rtsuoqznx5t>
+References: <20240520170004.669254-2-aalbersh@redhat.com>
+ <20240525054252.2h55e2oer65mpy6s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="n65CGqJL8BVu"
-Content-Disposition: inline
-
-
---n65CGqJL8BVu
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20240525054252.2h55e2oer65mpy6s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-Hi all,
+On 2024-05-25 13:42:52, Zorro Lang wrote:
+> On Mon, May 20, 2024 at 07:00:05PM +0200, Andrey Albershteyn wrote:
+> > With addition of FS_IOC_FSSETXATTRAT xfs_quota now can set project
+> > ID on filesystem inodes behind special files. Previously, quota
+> > reporting didn't count inodes of special files created before
+> > project initialization. Only new inodes had project ID set.
+> > 
+> > Signed-off-by: Andrey Albershteyn <aalbersh@redhat.com>
+> > ---
+> > 
+> > Notes:
+> >     This is part of the patchset which introduces
+> >     FS_IOC_FS[GET|SET]XATTRAT:
+> >     https://lore.kernel.org/linux-xfs/20240520164624.665269-2-aalbersh@redhat.com/T/#t
+> >     https://lore.kernel.org/linux-xfs/20240520165200.667150-2-aalbersh@redhat.com/T/#u
+> 
+> So this test fails on old xfsprogs and kernel which doesn't support
+> above feature? Do we need a _require_xxxx helper to skip this test?
+> Or you hope to fail on old kernel to clarify this feature missing?
+> 
+> As this test requires some new patches, better to point out:
+>   _wants_kernel_commit xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxx
+>   _wants_git_commit xfsprogs xxxxxxxxxxxxx xxxxxxxxxxxxxxxxxxxxxxxxx
 
-The for-next branch of the xfstests repository at:
+Sure, thanks, will add it.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> > 
+> >  tests/xfs/608     | 73 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/608.out | 10 +++++++
+> >  2 files changed, 83 insertions(+)
+> >  create mode 100755 tests/xfs/608
+> >  create mode 100644 tests/xfs/608.out
+> > 
+> > diff --git a/tests/xfs/608 b/tests/xfs/608
+> > new file mode 100755
+> > index 000000000000..3573c764c5f4
+> > --- /dev/null
+> > +++ b/tests/xfs/608
+> > @@ -0,0 +1,73 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024 Red Hat.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 608
+> > +#
+> > +# Test that XFS can set quota project ID on special files
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quota
+> > +
+> > +# Override the default cleanup function.
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -r -f $tmp.*
+> > +	rm -f $tmp.proects $tmp.projid
+>                       ^^^^
+>                    projects? (same below)
+> 
+> And won't "rm -f $tmp.*" help to remove $tmp.proects and $tmp.projid ?
+> If it does, we can remove this _cleanup, just use the default one.
+> 
+> > +}
+> > +
+> > +
+> > +# Import common functions.
+> > +. ./common/quota
+> > +. ./common/filter
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs xfs
+> > +_require_scratch
+> > +_require_xfs_quota
+> > +_require_user
+> 
+> Does this patch use "fsgqa" user/group?
+> 
+> > +
+> > +_scratch_mkfs >/dev/null 2>&1
+> > +_qmount_option "pquota"
+> > +_scratch_mount
+> 
+> If there's not special reason, we generally do all _require_xxx checking
+> at first, then mkfs & mount.
+> 
+> > +_require_test_program "af_unix"
+> > +_require_symlinks
+> > +_require_mknod
+> 
+> So you might can move above 3 lines over the _scratch_mkfs, looks like
+> they don't need a SCRATCH_DEV with $FSTYP.
+> 
+> > +
+> > +function create_af_unix () {
+> 
+> We generally don't use "function", but that's fine if you intend that :)
+> 
+> Thanks,
+> Zorro
+> 
 
-has just been updated and tagged as v2024.05.26 release.
+Thanks, will apply all your suggestions above.
 
-Release Notes:
-1) There's not new cases in this release.
-2) All richacl related tests have been removed.
+-- 
+- Andrey
 
-More updates and fixes refer to below. Thanks for all your contributions!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-e46fa3a7dae4 Remove richacl support
-
-New commits:
-
-Anand Jain (1):
-      [692bef09cfad] btrfs/741: add commit ID in _fixed_by_kernel_commit
-
-Carlos Maiolino (1):
-      [e099ba0087d8] check: log kernel version in check.log
-
-Chandan Babu R (1):
-      [86e123019c81] _test_mkfs: Include external log device (if any) when creating fs on TEST_DEV
-
-Chen Hanxiao (1):
-      [be5ec474127b] generic/742: require FIEMAP support
-
-David Sterba (1):
-      [e46fa3a7dae4] Remove richacl support
-
-Filipe Manana (1):
-      [26d69e8df390] generic/733: add commit ID for btrfs
-
-Josef Bacik (5):
-      [e0aca4b09d81] generic/352: require no compression
-      [c99901745c41] generic/027: require no compression
-      [a0e33b4b4731] generic/269: require no compression
-      [73f45a1ff44e] btrfs/{140,141}: verify read-repair test data by md5sum
-      [a42f8a6be29e] fstests: mkfs the scratch device if we have missing profiles
-
-Qu Wenruo (1):
-      [fa81eef946b9] fstests: btrfs/301: handle auto-removed qgroups
-
-
-Code Diffstat:
-
- check                 |   1 +
- common/config         |   2 -
- common/ext4           |   9 ----
- common/rc             |  55 +-------------------
- doc/group-names.txt   |   1 -
- tests/btrfs/011       |   6 +++
- tests/btrfs/140       |  15 +++++-
- tests/btrfs/140.out   |  34 ------------
- tests/btrfs/141       |  16 +++++-
- tests/btrfs/141.out   |  34 ------------
- tests/btrfs/301       |  14 +++--
- tests/generic/027     |   4 ++
- tests/generic/269     |   2 +-
- tests/generic/352     |   4 ++
- tests/generic/362     |  93 ---------------------------------
- tests/generic/362.out |  94 ----------------------------------
- tests/generic/363     |  86 -------------------------------
- tests/generic/363.out | 139 --------------------------------------------------
- tests/generic/364     |  67 ------------------------
- tests/generic/364.out |  39 --------------
- tests/generic/365     |  61 ----------------------
- tests/generic/365.out |   9 ----
- tests/generic/366     |  54 --------------------
- tests/generic/366.out |  11 ----
- tests/generic/367     |  53 -------------------
- tests/generic/367.out |  11 ----
- tests/generic/368     |  53 -------------------
- tests/generic/368.out |   7 ---
- tests/generic/369     |  94 ----------------------------------
- tests/generic/369.out |  24 ---------
- tests/generic/370     |  58 ---------------------
- tests/generic/370.out |  19 -------
- tests/generic/733     |  15 ++++--
- tests/generic/741     |   2 +-
- tests/generic/742     |   1 +
- 35 files changed, 72 insertions(+), 1115 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---n65CGqJL8BVu
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmZTTi4ACgkQlNbPkfr2
-tMz8/Q//SNQd/DI4pdoWJy/YyeQRYKTPvb3wQnHR8rE71Ejmj8n/SywPVfG/8exH
-UJUSgVaLcfODvbcHR7uZZlJSQScCSMJvGoy+XWCwX9l+WHfaIthi5VtkejiKxuBX
-ard61LQyKPeesXUOzlIH9t18DieAg/4PJqjmcJTOOH2dCiDYp4qnzryifrW43Ty7
-84dCC7SsP9DTCWoXy9cPEFmM4gWiO86rYn1JSzOdOUMvLCVJkjbX27dG5OgUAOAA
-snYAc+koZmK1d+6zeKKhL4vIMVpnCiXNkoaXvFR2Re2L9dNOurw+lwezB5tRrOOu
-sHTT99XV1gybHm0zNKAhkjuWI6KH641y+Gxp5Ox8OtGB4loZYl2obGDhrqh4cI0f
-RXPpkYgSyLbTSuIcRrkfQx1Adt9K2vvWcLW8pnZU3/heEQnOP3iJdBX52ZLonlLp
-ed4G17nprwxzF3aA6yfCGTGrEryYhZE0ajuugMAxDjVM4+cM+8CKkljS1oEFEBSi
-EW/dX7n1Wuf0PQFXVzj70xF+fI5yxI5gNJwRXKtHcUC8lIvUjJVufMgoZZ2m7h4K
-fxhUbZomKMhiqe9cMlJ5+CJ4ONkBqNGDg0Vrd77VSgCSc+lSREFWJ1ip090lSJjv
-TKC05+oKyzOk4B8vwnwmmYlhSNjhqUScl9mdtnaIkvxF9V6NjVg=
-=Hg2B
------END PGP SIGNATURE-----
-
---n65CGqJL8BVu--
