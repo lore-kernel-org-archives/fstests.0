@@ -1,82 +1,165 @@
-Received: from mout-p-101.mailbox.org (mout-p-101.mailbox.org [80.241.56.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 909634594A
-	for <fstests@vger.kernel.org>; Tue, 28 May 2024 09:12:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 352AC17332A
+	for <fstests@vger.kernel.org>; Tue, 28 May 2024 17:13:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716887579; cv=none; b=S9uG+E2Ty8fC/jEyf9DMrKhBryMgg8PKNF/d8TTzXUbnzeDf8/beKHLQexZsAnU29LnlJJZNloxKenCoOWrIk3EIvARdFDl+DlyDyGEJqHygpGa792pWvDnhryNLt7brhC0O4vb3ZZw2BCGWQDeJW063WgtdFIT6bPWIPovwsNQ=
+	t=1716916408; cv=none; b=Zcurr9wIu9B/bNv3Lo7mJuPjGRQj8BCCi+VPfXLcD8PDJ4IRy8xN7OvJGC3MrPj3zV8Ciwzuh+UK4axqb6nrtnhCMsVMCxhBUxp6Lu51huBKOhv93cEn9BOpvgIJNuVrQSnsEd/q9SN1X3EM95lRFFGDNnSgPyFghMP/jGWKBWM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716887579; c=relaxed/simple;
-	bh=gk4aEToWV8iii650E/G9VaB/3Hxhag8GMleXPPp4DoI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=l44t+EJ7FnkO5pbMRKh33vD/KDA/RngEC6QsXO7C8x9gmU8wn7TF8qvAO6fG/tefrgPfJvj1VSbZLtf7n2iqoVLNVnbGnq9S/3XFejRTAkSmrDbT7sc1JuMmYjoLcdv8Z6YDxQXjd8z/iEW2jNENdc7rXlPuUrccwAg8yk8F6is=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=WHlJaAMk; arc=none smtp.client-ip=80.241.56.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+	s=arc-20240116; t=1716916408; c=relaxed/simple;
+	bh=XgOWqi4lbUgTFyctQnZSVsnY6zmcJ4oV+Rov5Z+FoWM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pH/aOFpIR/hUboIzZ2emeH0xSv8QPD4zvFWBFHlIZsUQmz7pOoAW3K/FNrKohRiuSdWxzY2/PwyGMcalGK8QtCA3Y8Cr37BVskVoRJntVPgJTaIYq85VAtXQSySvGx7nMti+U0jODRzI8LbEa4gwlJZtoReFfCu6onJCR2raV0M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com; spf=none smtp.mailfrom=osandov.com; dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b=YxD8kwxP; arc=none smtp.client-ip=209.85.210.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=osandov.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="WHlJaAMk"
-Received: from smtp2.mailbox.org (smtp2.mailbox.org [10.196.197.2])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-101.mailbox.org (Postfix) with ESMTPS id 4VpRcc3RRTz9smQ;
-	Tue, 28 May 2024 11:12:48 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
-	s=MBO0001; t=1716887568;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=2UuvJZAQi6kK8eh9oMUcFM7LzKyGH0d0430isgnKuuo=;
-	b=WHlJaAMkM+cldoRQimsMmphck+4IO7FEJr/N6J0k4g+D1Cy071H1QYTF+igFECsGZHV8/6
-	OHOve7QSVJUGSLWXns9HiIsIw2rjJz3/dAT6t4jLr+0sLr2syIPf+dLC6VrHHxNJ4VVhYu
-	Q2HI8NfRG3QMfP2yoe5c/TEGFiQ9sIifKoC236EunHYpvE1jdSGW+WmR6Dj15KRjS93LMi
-	gdRSPoRvbtmrYvB33jdGwzMj76OZVbwqcHAoccvs7FlfAzfhVjGhtxKZST45NW5uVoS/5X
-	lHRiddQ5veK6x8YCy+6mwmCjPXJqK6HwKaGQI3qPxFt0nJT3DBd4YrA5Kph6bg==
-Date: Tue, 28 May 2024 09:12:46 +0000
-From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, ritesh.list@gmail.com, djwong@kernel.org,
-	mcgrof@kernel.org, gost.dev@samsung.com,
-	Pankaj Raghav <p.raghav@samsung.com>
-Subject: Re: [PATCH v3 2/3] generic/436: round up bufsz to nearest filesystem
- blksz
-Message-ID: <20240528091246.jsicflatb6ndsc5g@quentin>
-References: <20240527114834.167521-1-kernel@pankajraghav.com>
- <20240527114834.167521-3-kernel@pankajraghav.com>
- <20240527130111.hyoigq32xaxxpc5x@quentin>
- <20240527132637.3ncfgfpun374ygib@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b="YxD8kwxP"
+Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-6f693fb0ab6so926803b3a.1
+        for <fstests@vger.kernel.org>; Tue, 28 May 2024 10:13:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1716916406; x=1717521206; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Te/gHzQGzfhwCIf4xz4UAwEbLfpB9s5D1T3jB12WoJ4=;
+        b=YxD8kwxPPDE3MZBKCjO9UIIrF+e+becnbsGjVX8g0nW20Xkzx6IgdXs8QLTZ9tffgw
+         w60/Sq8puVXh1FcD66n3DZB8rKKnqqaeKX5hULDs9UcmDJ55VAKUZseDIrnp6d9QUnUO
+         UTpW9F2aa8ndUkwcrw/N5Z/BNAtBAmMcf4+MCwvqExv1xVYxXqooYWkAZrGWxeqfKIsu
+         UhFb+j/nnr2IQeIoRC21cM43Sxz6oVIV1V13F/eNmUe3rJdkOM83xseKiV8G58dTSgnA
+         qF1j82qpSfV38JmdyCp029fl3EcEiBV30wK0becVIrYa7jpgoaMHFX9OESXWzEvkc6FS
+         3aEw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716916406; x=1717521206;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Te/gHzQGzfhwCIf4xz4UAwEbLfpB9s5D1T3jB12WoJ4=;
+        b=uT7M6/jilfKbtKSGeTnTzFV8uqn8SXrjgKby0/aK9/sZ7WWixd+eypHpIN82oycCcg
+         gssIJmztBK16E83t/o3Mhy6A0Ecw6s8mSNOSo5VisnKwUlbhATzyNFOg2tsWUtbbi5Ud
+         u2g1D86ZIlEHpnyy/j9MpI6uAevU2dg21SE/6c12VYnaTOxbCB3ygqIgsgbpm4yiASvc
+         wqiXQlZnMUCZRhmbWj0B0RDPklVXObNS6P90EwBVuKGG4a/17n+57MibFS2neAgnmAKm
+         y+1BJ+Xsw7V7o27sbaBIn1fTcR6tiwbid3sBxfpBzBuLakzVQIucaGuWDOPQ9UOPBR38
+         5ohQ==
+X-Gm-Message-State: AOJu0Yx7Uyf73NNm4cxpymwBe+ksjpVSJN5UusjCyM1qkDuPO4vkMO5/
+	kClteyeOAaIQBoU6ZSvO7xdSB101gZ2vV9ravB1ixaWhA7+8M2YFHTQ3GfuSSlKL+gazEkpw8ho
+	Fho8=
+X-Google-Smtp-Source: AGHT+IHCBJL4Icu4zdbimF8xzYGigz2Nig5SBNJZHPOqVLTANPtaM+bR4ZBqe3QTnopONPomRGT2Ww==
+X-Received: by 2002:a17:902:dace:b0:1f4:b2ce:8dbe with SMTP id d9443c01a7336-1f4b2ce93b3mr43697995ad.9.1716916406284;
+        Tue, 28 May 2024 10:13:26 -0700 (PDT)
+Received: from telecaster.tfbnw.net ([2620:10d:c090:400::5:4121])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f44c9cd6a0sm82447675ad.276.2024.05.28.10.13.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 May 2024 10:13:25 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+To: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org
+Cc: kernel-team@fb.com
+Subject: [PATCH fstests v3] generic: test Btrfs fsync vs. size-extending prealloc write crash
+Date: Tue, 28 May 2024 10:13:14 -0700
+Message-ID: <8c91247dd109bb94e8df36f2812274b5de2a7183.1716916346.git.osandov@osandov.com>
+X-Mailer: git-send-email 2.45.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240527132637.3ncfgfpun374ygib@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
 
-On Mon, May 27, 2024 at 09:26:37PM +0800, Zorro Lang wrote:
-> On Mon, May 27, 2024 at 01:01:11PM +0000, Pankaj Raghav (Samsung) wrote:
-> > On Mon, May 27, 2024 at 01:48:33PM +0200, Pankaj Raghav (Samsung) wrote:
-> > > From: Pankaj Raghav <p.raghav@samsung.com>
-> > > 
-> > > SEEK_HOLE and SEEK_DATA work in filesystem block size granularity. So
-> > > while filling up the buffer for test 13 - 16, round up the bufsz to the
-> > > closest filesystem blksz.
-> > > 
-> > > As we only allowed blocksizes lower than the pagesize, this was never an
-> > > issue and it always aligned. Once we have blocksize > pagesize, this
-> > > assumption will break.
-> > > 
-> > > Fixes the test for LBS configuration.
-> > > 
-> > > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> > > Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> > Looks like I missed the RVB from Darrick [1].
-> > 
-> > @Zorro could you fix it up before you commit?
-> 
-> Sure, if there's not more review points, I'll merge it with this change.
+From: Omar Sandoval <osandov@fb.com>
 
-Sounds good. Thanks!
+This is a regression test for a Btrfs bug, but there's nothing
+Btrfs-specific about it. Since it's a race, we just try to make the race
+happen in a loop and pass if it doesn't crash after all of our attempts.
+
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+Changes from v2 [1]:
+
+- Rebased on for-next.
+- Added _require_odirect.
+- Added FSTYP check to _fixed_by_kernel_commit.
+- Added Filipe's Reviewed-by.
+
+Changes from v1 [2]:
+
+- Added missing groups and requires.
+- Simplified $XFS_IO_PROG calls.
+- Removed -i flag from $XFS_IO_PROG to make race reproduce more
+  reliably.
+- Removed all of the file creation and dump-tree parsing since the only
+  file on a fresh filesystem is guaranteed to be at the end of a leaf
+  anyways.
+- Rewrote to be a generic test.
+
+1: https://lore.kernel.org/linux-btrfs/d032e0b964f163229b684c0ac72b656ec9bf7b48.1716584019.git.osandov@osandov.com/
+2: https://lore.kernel.org/linux-btrfs/297da2b53ce9b697d82d89afd322b2cc0d0f392d.1716492850.git.osandov@osandov.com/
+
+ tests/generic/748     | 45 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/748.out |  2 ++
+ 2 files changed, 47 insertions(+)
+ create mode 100755 tests/generic/748
+ create mode 100644 tests/generic/748.out
+
+diff --git a/tests/generic/748 b/tests/generic/748
+new file mode 100755
+index 00000000..2ec33694
+--- /dev/null
++++ b/tests/generic/748
+@@ -0,0 +1,45 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# FS QA Test 748
++#
++# Repeatedly prealloc beyond i_size, set an xattr, direct write into the
++# prealloc while extending i_size, then fdatasync. This is a regression test
++# for a Btrfs crash.
++#
++. ./common/preamble
++. ./common/attr
++_begin_fstest auto quick log preallocrw dangerous
++
++_supported_fs generic
++_require_scratch
++_require_attrs
++_require_odirect
++_require_xfs_io_command falloc -k
++[ "$FSTYP" = btrfs ] && _fixed_by_kernel_commit XXXXXXXXXXXX \
++	"btrfs: fix crash on racing fsync and size-extending write into prealloc"
++
++# -i slows down xfs_io startup and makes the race much less reliable.
++export XFS_IO_PROG="$(echo "$XFS_IO_PROG" | sed 's/ -i\b//')"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++blksz=$(_get_block_size "$SCRATCH_MNT")
++
++# On Btrfs, since this is the only file on the filesystem, its metadata is at
++# the end of a B-tree leaf. We want an ordered extent completion to add an
++# extent item at the end of the leaf while we're logging prealloc extents
++# beyond i_size after an xattr was set.
++for ((i = 0; i < 5000; i++)); do
++	$XFS_IO_PROG -ftd -c "falloc -k 0 $((blksz * 3))" -c "pwrite -q -w 0 $blksz" "$SCRATCH_MNT/file"
++	$SETFATTR_PROG -n user.a -v a "$SCRATCH_MNT/file"
++	$XFS_IO_PROG -d -c "pwrite -q -w $blksz $blksz" "$SCRATCH_MNT/file"
++done
++
++# If it didn't crash, we're good.
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/748.out b/tests/generic/748.out
+new file mode 100644
+index 00000000..dc050a96
+--- /dev/null
++++ b/tests/generic/748.out
+@@ -0,0 +1,2 @@
++QA output created by 748
++Silence is golden
+-- 
+2.45.1
+
