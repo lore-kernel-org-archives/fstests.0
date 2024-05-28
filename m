@@ -1,100 +1,128 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13FEC170820
-	for <fstests@vger.kernel.org>; Tue, 28 May 2024 17:24:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 899A513DDAC;
+	Tue, 28 May 2024 22:18:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716917055; cv=none; b=q9HASwn11/k4Sk5wGgJ/kziO4RgDG1xCktgve1O/ZZ0//dYVzEjb0FWIgmP3mU9jJm+NmyK2if+szkAyh/sLdV7PH6IPVHPu1Sn0wlmIp6XqsUU+o17kF5JWwovesyikuQPlgjPDvYPOAwJ/IRHMANfQcmh1t7ZJU/O8MW14zOY=
+	t=1716934687; cv=none; b=epHq+aKb1p6ZeMHG7NONhoXVpvISUVjYUPoLxYmtcJaXLtLZO9HJ3v9Hn1KBh+MDAo+IYJB2Mco/5KF4fB7MuZg75odo+N2ii5LipaGLW7b0hUZmvh87p/Iza1z+JqiUXsUwuZyQuU9K2a0xaJL4M2x9Mp9Sh+sLvGvSgjRrweg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716917055; c=relaxed/simple;
-	bh=s/PO+zPQrBVJU44eI8Wd69/XIh0qb8qT2DXF1mPyW40=;
+	s=arc-20240116; t=1716934687; c=relaxed/simple;
+	bh=aYqfC/oav3Dxx6nj+EL0nvP4OEdvuUFeY3OLYMBdOrQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gUuHELgQNQzUcqMUXg1PcUp4yx94ILK2ZEV+LdrqQs0EN7BHdeQuJ7D5YeO0q8fIC7Fgwr99YlktPvwgnkBzmDdSY5ezhOdTWW4oKTWmYYfR6UMCWA9NNvEjiJ5Ooi2Fnm+odNcAw2h42ScZym5NTBoFeCRTLzqhRQVIJkfE2oo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com; spf=none smtp.mailfrom=osandov.com; dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b=BHn3oYID; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=osandov.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=osandov.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=E7cBLcO+HCAqPwhqngogWfo0CfBXAyAxJ2dKyvFD6rbZk5cpotcP01q2fIKJ6v1iSyTtBOZOHT+nIaCeNzRS7cVWQ3NqXRuFqLRbbKFRApLD3tKho5t9czg+dle1m/Bp9MZqiT5wyQf8HPxdvceeliu5kOsSaC/xQlc0gE8Pzac=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=AHnOiUSk; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=osandov-com.20230601.gappssmtp.com header.i=@osandov-com.20230601.gappssmtp.com header.b="BHn3oYID"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-1f449f09476so84675ad.1
-        for <fstests@vger.kernel.org>; Tue, 28 May 2024 10:24:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=osandov-com.20230601.gappssmtp.com; s=20230601; t=1716917053; x=1717521853; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=CZjqJQ/Mb7o64C5tkt8/Op/QX1fV/25kjWf0uv6TYNw=;
-        b=BHn3oYIDrd05WMy5d6cIUTDpBrcriLpW03pGsvOl3ZPK8xBnHTUp0UiweZiR7d5Ryu
-         M7Xl/Fx5kQ5U9RvJ/8yup91wG/9vyy4KpfEIY6wK21cZ3h8vhq1kkNlVFDMLzrXd7tDC
-         TxZQhaQUKs61pLFzERsy7HftGHMc079PB2iTAdFBzXi+Egx4eavJZc5grriQbqOJATyx
-         rONKoX6jugWzWtVAInPcgKDJ9/XdluxAfc3o0hh/3OW3tdGc8pF3FI9VIIjBlXE16OM9
-         5qgSS3LXXnu16H62zfHfh6LTjFc7wH6RWTEw0LV+NKNySEwDZvYdVHmUyQ1ihMHWPFt0
-         YNRQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716917053; x=1717521853;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=CZjqJQ/Mb7o64C5tkt8/Op/QX1fV/25kjWf0uv6TYNw=;
-        b=ZNu58mWtLltf28nCa/dQdOluxNagNvfExCRqRuoVGOHO/l3lvyUbo0ESr80Ky/RqMT
-         0hE8eBeJv/nakiEu8mPCORtwKMeZ9/ZRJ3/THWPs2c5mHyeGAVKPZC15Z96IsYKXurdM
-         9Z9vduDcKlrdSrslcvIRJMpj1cto05PT1+przGFL8bkDjCKYsK20/8U4DIblvyuyiV4N
-         9ly8Ys3gWbJahVy4DYwxp/lsr8LTe7ULZ5SJ9nV7ahst9h3vIbIv7BkjPbGQ2DLmrV1d
-         s8puEWP+wLGdkSGbXsLeksv3JkeoZYDV6qcXj9ql7JaC0xXego4trqz8EltYr0r36Zav
-         9w+w==
-X-Gm-Message-State: AOJu0YwDGR2E45ElLrouzBd97v96tR4Kgnmpu+mKgq4DB6gQCWQcQcVp
-	yp4AkdY3ALdAQz76WcqENFFxWzKmR64ZG3aARwZEL41U6XxQJCUCGonG8+c4GtA=
-X-Google-Smtp-Source: AGHT+IGm/4zE9ucOze0cttuV/3FeHI4wbEtq8NQ5UCQN9s/mpX3oTHooKqYx1emrgqk09Us6AG7IRw==
-X-Received: by 2002:a17:903:41c6:b0:1eb:6cfe:7423 with SMTP id d9443c01a7336-1f4481794e1mr186893675ad.19.1716917053351;
-        Tue, 28 May 2024 10:24:13 -0700 (PDT)
-Received: from telecaster.dhcp.thefacebook.com ([2620:10d:c090:400::5:4121])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f4d6fe4775sm12252195ad.257.2024.05.28.10.24.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 May 2024 10:24:12 -0700 (PDT)
-Date: Tue, 28 May 2024 10:24:11 -0700
-From: Omar Sandoval <osandov@osandov.com>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	kernel-team@fb.com
-Subject: Re: [PATCH fstests v3] generic: test Btrfs fsync vs. size-extending
- prealloc write crash
-Message-ID: <ZlYTO9FNeYjsFTr6@telecaster.dhcp.thefacebook.com>
-References: <8c91247dd109bb94e8df36f2812274b5de2a7183.1716916346.git.osandov@osandov.com>
- <CAL3q7H5z_eYpx8e-J7xPzZMqCxv2xwq9H7ga=8EZdLk7gnT-jQ@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="AHnOiUSk"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=vZOElQpuiaEqJ+AG1PBLgmWzbdI73uxou6h0r1JT0ks=; b=AHnOiUSkWSU4HKBy7vrDX/EvGv
+	YkyxVRxAWfTW/nfZVF8/dVFazNj9PVaPddeFpEbtqXITNSGOzk9wSnPXnIlY6UwPdOlx8/GyErJ0A
+	HecYU1rwk+MhPS1BebegwFDIbsdXvVmh4qeClzqWi0P5uYnFnkxYYTxkTr1I78yd2fRsgTBYMLF7S
+	1yDnc/Vi5QCSl5peVNT0s6t/xtwQQ6MmWzK5kBNYvM+XiiTYvxOE2/TFcASrph1rRENoFTm4j2RL1
+	6mF38fCR8CeG9e0RZoXfhAWmN6NwtxNpBQA0NGxedQvUCmdFbKqU1LLjg7objCQ8Hye8PNkD1NY7u
+	0Dgycd8Q==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sC58t-00000002B1c-3x2y;
+	Tue, 28 May 2024 22:18:03 +0000
+Date: Tue, 28 May 2024 15:18:03 -0700
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>, da.gomez@samsung.com
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	willy@infradead.org, p.raghav@samsung.com, hare@suse.de,
+	john.g.garry@oracle.com, linux-xfs@vger.kernel.org,
+	patches@lists.linux.dev
+Subject: Re: [RFC] fstests: add mmap page boundary tests
+Message-ID: <ZlZYG7-9-3NR4tdv@bombadil.infradead.org>
+References: <20240415081054.1782715-1-mcgrof@kernel.org>
+ <20240415155825.GC11948@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H5z_eYpx8e-J7xPzZMqCxv2xwq9H7ga=8EZdLk7gnT-jQ@mail.gmail.com>
+In-Reply-To: <20240415155825.GC11948@frogsfrogsfrogs>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On Tue, May 28, 2024 at 06:21:23PM +0100, Filipe Manana wrote:
-> On Tue, May 28, 2024 at 6:13 PM Omar Sandoval <osandov@osandov.com> wrote:
-> >
-> > From: Omar Sandoval <osandov@fb.com>
-> >
-> > This is a regression test for a Btrfs bug, but there's nothing
-> > Btrfs-specific about it. Since it's a race, we just try to make the race
-> > happen in a loop and pass if it doesn't crash after all of our attempts.
-> >
-> > Signed-off-by: Omar Sandoval <osandov@fb.com>
+On Mon, Apr 15, 2024 at 08:58:25AM -0700, Darrick J. Wong wrote:
+> On Mon, Apr 15, 2024 at 01:10:54AM -0700, Luis Chamberlain wrote:
+> > +round_up_to_page_boundary()
+> > +{
+> > +	local n=$1
+> > +	local page_size=$(_get_page_size)
+> > +
+> > +	echo $(( (n + page_size - 1) & ~(page_size - 1) ))
 > 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> 
-> > ---
-> > Changes from v2 [1]:
-> >
-> > - Rebased on for-next.
-> > - Added _require_odirect.
-> > - Added FSTYP check to _fixed_by_kernel_commit.
-> > - Added Filipe's Reviewed-by.
-> 
-> It's missing actually, so I replied with it :)
-> 
-> Thanks.
+> Does iomap put a large folio into the pagecache that crosses EOF
 
-Oops, I missed a git command somewhere :) thanks!
+When minorder is used care had to be taken to ensure the EOF is properly
+respected.  Refer to the patch titled "filemap: cap PTE range to be
+created to allowed zero fill in folio_map_range()", with that, we fix
+that case to respect the EOF. But since minorder is used the folio is
+there.
+
+> > +mread()
+> > +{
+> > +	local file=$1
+> > +	local map_len=$2
+> > +	local offset=$3
+> > +	local length=$4
+> > +
+> > +	# Some callers expect xfs_io to crash with SIGBUS due to the mread,
+> > +	# causing the shell to print "Bus error" to stderr.  To allow this
+> > +	# message to be redirected, execute xfs_io in a new shell instance.
+> > +	# However, for this to work reliably, we also need to prevent the new
+> > +	# shell instance from optimizing out the fork and directly exec'ing
+> > +	# xfs_io.  The easiest way to do that is to append 'true' to the
+> > +	# commands, so that xfs_io is no longer the last command the shell sees.
+> > +	bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $file \
+> > +		-c 'mmap -r 0 $map_len' \
+> > +		-c 'mread $offset $length'; true"
+> 
+> Please hoist the mread() function with generic/574 to common; your copy
+> is out of date with the original.
+
+Sure thing! Shall we add _mwrite to common/rc too while at it or do we
+wait to get a user for that?
+
+> > +	# A couple of mmap() tests:
+> > +	#
+> > +	# We are allowed to mmap() up to the boundary of the page size of a
+> > +	# data object, but there a few rules to follow we must check for:
+> > +	#
+> > +	# a) zero-fill test for the data: POSIX says we should zero fill any
+> > +	#    partial page after the end of the object. Verify zero-fill.
+> > +	# b) do not write this bogus data to disk: on Linux, if we write data
+> > +	#    to a partially filled page, it will stay in the page cache even
+> > +	#    after the file is closed and unmapped even if it never reaches the
+> > +	#    file. Subsequent mappings *may* see the modified content, but it
+> > +	#    also can get other data. Since the data read after the actual
+> 
+> What does "other data" mean?
+
+That depends on the filesystem implementation, it just means we don't
+provide a consistent behaviour or enforce a strategy for all filesystems.
+
+> > +	#    object data can vary we just verify the filesize does not change.
+> > +	#    This is not true for tmpfs.
+> 
+> Er... is this file size change a bug?
+
+There is no filesize bug, the comment about tmpfs always ensuring seeing
+the actual data since, well, there its kind of write-through. Since we
+share the same filemap_map_pages() I'd expect the rest should behave the
+same with tmpfs, but since I didn't test that the test skips it for now.
+
+We'll test it, with all the patch "filemap: cap PTE range to be             
+created to allowed zero fill in folio_map_range()" on tmpfs, and see if
+we can just enable this test there too. Might as well as we're driving
+by and sprinkling large folios there too.
+
+  Luis
