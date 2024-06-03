@@ -1,106 +1,71 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C91913E883;
-	Tue, 28 May 2024 22:58:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FF13135A5A;
+	Mon,  3 Jun 2024 20:11:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716937114; cv=none; b=QTxKFvtqoYa9x8n+Uf87NoUqUOwLEZ7ed0UvC0cmfQN3mabPEFhh7PkBpwVXo6jDsBYu+BwDAG3w3+VvXmeNSvcdfPH/NJuALYlLhvrXqN4vtrANftpLaq2xxY6axwYUuv71CuJxeRV5Cz7MNI5g2eVwlHVmt7+dO7Ig7CjFiVg=
+	t=1717445515; cv=none; b=rBaYGNbekYlMrp1uT7X99AvSsA6kSZAz/U2JwgoTRtNLm8qk0I+uW7qz7sVqrCBuedu0DZVU31C98DvgVw71SV9BrC+BtCfTCKycIB8qZONZ7DeNR8fVs5+RG6vD90c40xdrW4KY60tgHe9vwjz2opK5tUyYBPqsbyA6MomCY/A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716937114; c=relaxed/simple;
-	bh=/mRakvpmO/pRhLpTx6MV8+Lfo6YDYZ2R1zmXM5ZX7AM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Qk+72avzkCzpH1zxY60ltG2NCo+j1NKVQi23UXpzbqxJrN6kFGrh/nJgn0/12L1xXKdTXQf0+BdctjPsWP5c1/bfOGeu/b1N3wy9AAzy/Ggxy/F82Z2H+tNkU0aOL2xvAFd52BbkNlZb80br9xsl+daPZVo6zd3bSX4qzKKtJns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=OvZynLnc; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1717445515; c=relaxed/simple;
+	bh=fN7UYs3jvoT/+jWsVxJ8+U0W4qAFCA/gZBoRN3mPtxE=;
+	h=Date:Subject:From:To:Cc:Message-ID:MIME-Version:Content-Type; b=QL7yRj0bkI9eeyBQB8sPoWB5CSsceTs8EUP9fcG3MIJ85XwMlAbjDPx+x0t9lMdIIYyxtjhAVLSqSzJ5eUe061yJ/loborY08OxbNHxKuoSNYfNghz0rHF5QidwAIUfbkVi8t83Ip+UYT5gK2PwRSQCVUHSxauypMYILk8xmSzk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Yf60uLi3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="OvZynLnc"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=bW2TjyT/Ytf/0wT7lSjDyMyqeXrZTTm63r54kD0Yl8c=; b=OvZynLnchxaco6BaSURLwCQf9I
-	qE2RxRCGxeiVbd6af0v7HT6vOSaXjebaeqiA3Dwokmgk2HlFsxZqHDHkzS8xbXpEqPaVBIRVNoEEZ
-	PE8O75ixoWeTDB52eAN7yTvWQsiIeCDbsW5Va92wtGCsj8fqAogh0DyzSJgdGKfNtsQYWwPOvuDIf
-	FQd04lFTa+56lBHfxq0EWRGKNvwtrY2tufnBO6l/JhWn7o8Pf3UjiuRLmyTxteU+nh1CLDCca4IOK
-	c9CIcsztY9HVB3oRdj7wJCgfMRZ9HoiG29B4uMs6UU0zlA/JtVqpa/3414na07egeQoKrhjXlIPr6
-	xrNMXgxA==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sC5m1-00000002Gul-2mFx;
-	Tue, 28 May 2024 22:58:29 +0000
-Date: Tue, 28 May 2024 15:58:29 -0700
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, kdevops@lists.linux.dev,
-	linux-xfs@vger.kernel.org, linux-mm@kvack.org,
-	linux-fsdevel@vger.kernel.org, willy@infradead.org,
-	david@redhat.com, linmiaohe@huawei.com, muchun.song@linux.dev,
-	osalvador@suse.de
-Subject: Re: [PATCH] fstests: add fsstress + compaction test
-Message-ID: <ZlZhlQ1ES-mPqaif@bombadil.infradead.org>
-References: <20240418001356.95857-1-mcgrof@kernel.org>
- <20240420140241.wez2x3zoirzlmat6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Yf60uLi3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B266C2BD10;
+	Mon,  3 Jun 2024 20:11:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1717445515;
+	bh=fN7UYs3jvoT/+jWsVxJ8+U0W4qAFCA/gZBoRN3mPtxE=;
+	h=Date:Subject:From:To:Cc:From;
+	b=Yf60uLi3+tNdkZxZE/xDivcZ1VrliGG62HJSHojGtpTOxUQD92Z5d5NwrG6ZWpdjf
+	 mHs/Y47EKzq/EEsLQpwFsvdTGuCAXR0nuK23LgR33nooDJ9x8cArtUh2SW1D5rEj+8
+	 YjYxm9P7dLGgIIArpmjzxN8t7PeZYLwVRaVQUBsK0lWc1Tc4K2JdNukXoe5kp2SyFf
+	 lf8UwvbbytHkzaesRGH98WJOgc/NVHRsmnALtHD2l14vsSXd/XRJDGp2rBk8MI/xWZ
+	 9HUqLpYB/Ts5dHDPJ2j7sHpZh4N1WUvy6YM3Wj0VmObP5U3M8tiKSkE4hkfiK/iUPW
+	 iiGqpXqPQ13Gw==
+Date: Mon, 03 Jun 2024 13:11:54 -0700
+Subject: [PATCHSET 1/3] fstests: random fixes for v2024.05.26
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: djwong@kernel.org, zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, guan@eryu.me
+Message-ID: <171744525112.1531941.9108432191411440408.stgit@frogsfrogsfrogs>
+User-Agent: StGit/0.19
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240420140241.wez2x3zoirzlmat6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-On Sat, Apr 20, 2024 at 10:02:41PM +0800, Zorro Lang wrote:
-> On Wed, Apr 17, 2024 at 05:13:56PM -0700, Luis Chamberlain wrote:
-> > +_require_compaction()
-> 
-> I'm not sure if we should name it as "_require_vm_compaction", does linux
-> have other "compaction" or only memory compaction?
+Hi all,
 
-I'll color bike shed with "memory compaction" although I am not aware of
-other compaction types. However making it clear helps.
+Here's the usual odd fixes for fstests.  Most of these are cleanups and
+bug fixes that have been aging in my djwong-wtf branch forever.
 
-> > +++ b/tests/generic/744
-> > @@ -0,0 +1,56 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2024 Luis Chamberlain.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 744
-> > +#
-> > +# fsstress + compaction test
-> 
-> fsstress + memory compaction ?
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-Sure.
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
 
-> Looks like this case is copied from g/476, just add memory_compaction
-> test. That makes sense to me from the test side.
+--D
 
-It's a generic fsstress + compaction, right.
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
 
-> you just found. Looks like you're reporting a bug, and provide a test
-> case to fstests@ by the way.
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
 
-This case is hard to reproduce, and so instead of waiting for compaction
-to trigger we force it now.
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
+---
+Commits in this patchset:
+ * generic/747: redirect mkfs stderr to seqres.full
+---
+ tests/generic/747 |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Anyway, I think there's not objection on
-> this test itself, right? And is this test for someone known bug or not?
-
-This reproduces a known kernel bug for which we have a fix now merged,
-at the time this test was written it was not even merged on v6.9-rc4.
-The fix was merged on v6.9-rc6.
-
-I can now add this to the test:
-
-_fixed_by_git_commit kernel d99e3140a4d3 \                                       
-        "mm: turn folio_test_hugetlb into a PageType"
-
-However I also ran into some *other* issues even after that patch was
-applied. Now that v6.10-rc1 is out I will retest to clarify the
-situation and see if new issues are still lingering with this test.
-
-  Luis
