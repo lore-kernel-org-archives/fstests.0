@@ -1,65 +1,268 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB17A136986;
-	Tue,  4 Jun 2024 05:09:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E77CA145A1D;
+	Tue,  4 Jun 2024 12:14:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717477752; cv=none; b=GRo1CcMMVGqwOq6QC4k1W7pmOUBtUXnt7QWC3x8PMlxaxKqhF+M/pEsFy+lnktp4FdP8c7MEaetmC0LbnBjYv45jcQeFkglyOX7u3egJgItvg0js/YBlwrAtL7HPrFaHsw2EvUD1++QM9sExh4PIsGW7J3vWtlgAbfy1OV8eV1c=
+	t=1717503297; cv=none; b=P84sEyJBrzaEvwmH7VkOcK9acULkFzT1qCQ8wfOme9GoPRYbsbKT/7wuOiuNsBzisjVsOwDzAz+PZbm3rLzZC0ASLZEzUanNijJOlpm0jrdbxzVH5evZAfSctQIEzy7dF30BX88QcC7r9H0X3dsbIb49EtAYYGrEASDfoil9kGE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717477752; c=relaxed/simple;
-	bh=TjIBME276weQmygj2RR68afhsFt7ayiQDjbfvJDN+sw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=O+1i2RLa8DFWgj7SqfRMIFahSxI/mj2zaddw6BQkgfKNnXhS4yiGtP3Xa9ofuWgWgQdDvrOL8z0pMr0Nd2ezEL/k6lw1wkfR9o5T9u6GkFjZJlsdcMcXJmhHzT6gIJxh06j/EWJXDEnHv1M2MFnGjkrNWYVAHSJcGpaBAHJruTw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=3MZ2sFfJ; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1717503297; c=relaxed/simple;
+	bh=NDa3qKkgeT9yyEdKxOR8b3wfQH7rPaSUaZzzxfmibQM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=G/HVHKyfH4Y/iRYXallfbw+5QckcqvMyXfUsc1OmG6Is4gkLwHZsaIbNwJKMufv9wNYsglscO4VemzsbOYEfzh1OaupD7tO8ROUacOagBW+rJ/JWv9LX0eAzzS7rjzUlUv8yy5y9/HDcFexPU32Ythu9DJa29U+J8LCPajLmw/I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JCUsGU+l; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="3MZ2sFfJ"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=y1lZtO0jq0bp0JgHqrx2QCl572I9AnYtUdJNzGUaxRE=; b=3MZ2sFfJO+YAxJPmtHwk0lYz9R
-	uFKxhgP0/LFxAn3F0Bs0c8zv1b5RfZjVmeVJ7kLoN9HQx1LQwZ95QCmLYHW4yTyQKzQfIUv1eH/fq
-	3ZGk64VdO5e1nUaaVuyiDOPA8LPpNJjyPblqWH647M/kdf73QuCnkzDIiRxqEVgjK/avEb01e86Qw
-	bYjjhzjYMg9pQyP4gxSLZEHvA+yIAbU8H6nlxm68LPvUSXLFKthq6D8dO9K45OtDI/u/aa0iyi+Ds
-	5HT0scFI65FCoEGkMM6pOQECFXFQ7NgZgSJlRvaWL8ezNS6IhGm8yOphM0kiEW/qUKJQXqK8ENOhK
-	f/Dhjx9g==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sEMQ2-00000001Dy3-1vdL;
-	Tue, 04 Jun 2024 05:09:10 +0000
-Date: Mon, 3 Jun 2024 22:09:10 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	guan@eryu.me
-Subject: Re: [PATCHSET 3/3] xfsprogs: scale shards on ssds
-Message-ID: <Zl6hdo1ZXQwg2aM0@infradead.org>
-References: <171744525781.1532193.10780995744079593607.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JCUsGU+l"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8CA6FC2BBFC;
+	Tue,  4 Jun 2024 12:14:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1717503296;
+	bh=NDa3qKkgeT9yyEdKxOR8b3wfQH7rPaSUaZzzxfmibQM=;
+	h=From:To:Cc:Subject:Date:From;
+	b=JCUsGU+lk7fMeOrtEafN17y8bD/cI4SpkINs6kxiZmxybUiFJScslwxb1WWgp1Trq
+	 ItcvtOTNRZ/eXQy5SAb9ds9nCaAwngS9nC0uyN7dRHLm8gPvYF1mEyMxhH9jbVHxqp
+	 ilEdQE7xqllm8fQGwZtQ2Lfv2lsCQbzJ0ze7Dth/xHlPhvGkRJlflbMjRlEDY3q3FR
+	 ITDUtjcbHRzMyvuiEb1qTF7x+2Gnhf5wPdMCuFofPv1jWKJiRp5AaDxUKWRSUBqBjp
+	 8wOVmGmCROSDiET+f9gdg7oV7oviNMumbDe8pK3NxeUEtCuoa7M96xfve0WnI6J7gi
+	 g4xuH9/naZUMA==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: fix raid-stripe-tree tests with non-experimental btrfs-progs build
+Date: Tue,  4 Jun 2024 13:14:48 +0100
+Message-ID: <95d9d97299aa1149da63566d57ef4ee673127cec.1717503211.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <171744525781.1532193.10780995744079593607.stgit@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
 
-On Mon, Jun 03, 2024 at 01:12:05PM -0700, Darrick J. Wong wrote:
-> This patchset adds a different computation for AG count and log size
-> that is based entirely on a desired level of concurrency.  If we detect
-> storage that is non-rotational (or the sysadmin provides a CLI option),
-> then we will try to match the AG count to the CPU count to minimize AGF
-> contention and make the log large enough to minimize grant head
-> contention.
+From: Filipe Manana <fdmanana@suse.com>
 
-Do you have any performance numbers for this?
+When running the raid-stripe-tree tests with a btrfs-progs version that
+was not configured with the experimental features, the tests fail because
+they expect the dump tree commands to output the stored and calculated
+checksums lines, which are enabled only for experimental builds.
 
-Because SSDs still have a limited number of write streams, and doing
-more parallel writes just increases the work that the 'blender' has
-to do for them.  Typical number of internal write streams for not
-crazy expensive SSDs would be at most 8.
+Also, these lines exists only starting with btrfs-progs v5.17 (more
+specifically since commit 1bb6fb896dfc ("btrfs-progs: btrfstune:
+experimental, new option to switch csums")).
+
+The tests fail like this on non-experimental btrfs-progs build:
+
+   $ ./check btrfs/304
+   FSTYP         -- btrfs
+   PLATFORM      -- Linux/x86_64 debian0 6.9.0-btrfs-next-160+ #1 SMP PREEMPT_DYNAMIC Tue May 28 12:00:03 WEST 2024
+   MKFS_OPTIONS  -- /dev/sdc
+   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+
+   btrfs/304 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad)
+       --- tests/btrfs/304.out	2024-01-25 11:15:33.420769484 +0000
+       +++ /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad	2024-06-04 12:55:04.289903124 +0100
+       @@ -8,8 +8,6 @@
+        raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+        leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+        leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+       -checksum stored <CHECKSUM>
+       -checksum calced <CHECKSUM>
+        fs uuid <UUID>
+        chunk uuid <UUID>
+      ...
+      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/304.out /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad'  to see the entire diff)
+   Ran: btrfs/304
+   Failures: btrfs/304
+   Failed 1 of 1 tests
+
+So update _filter_stripe_tree() to remove the checksum lines, since we
+don't care about them, and change the golden output of the tests to not
+expect those lines. This way the tests work with both experimental and
+non-experimental btrfs-progs builds, as well as btrfs-progs versions below
+v5.17.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ common/filter.btrfs | 4 ++--
+ tests/btrfs/304.out | 6 ------
+ tests/btrfs/305.out | 6 ------
+ tests/btrfs/306.out | 6 ------
+ tests/btrfs/307.out | 6 ------
+ tests/btrfs/308.out | 6 ------
+ 6 files changed, 2 insertions(+), 32 deletions(-)
+
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 9ef96761..5a944aeb 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -132,8 +132,8 @@ _filter_stripe_tree()
+ 	_filter_trailing_whitespace | _filter_btrfs_version |\
+ 	sed -E -e "s/leaf [0-9]+ items [0-9]+ free space [0-9]+ generation [0-9]+ owner RAID_STRIPE_TREE/leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE/" \
+ 		-e "s/leaf [0-9]+ flags 0x1\(WRITTEN\) backref revision 1/leaf XXXXXXXXX flags 0x1\(WRITTEN\) backref revision 1/" \
+-		-e "s/checksum stored [0-9a-f]+/checksum stored <CHECKSUM>/"  \
+-		-e "s/checksum calced [0-9a-f]+/checksum calced <CHECKSUM>/"  \
++		-e "/checksum stored [0-9a-f]+/d" \
++		-e "/checksum calced [0-9a-f]+/d" \
+ 		-e "s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<UUID>/" \
+ 		-e "s/item ([0-9]+) key \([0-9]+ RAID_STRIPE ([0-9]+)\) itemoff [0-9]+ itemsize ([0-9]+)/item \1 key \(XXXXXX RAID_STRIPE \2\) itemoff XXXXX itemsize \3/" \
+ 		-e "s/stripe ([0-9]+) devid ([0-9]+) physical [0-9]+/stripe \1 devid \2 physical XXXXXXXXX/" \
+diff --git a/tests/btrfs/304.out b/tests/btrfs/304.out
+index 39f56f32..e5e383e7 100644
+--- a/tests/btrfs/304.out
++++ b/tests/btrfs/304.out
+@@ -8,8 +8,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+@@ -26,8 +24,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+@@ -45,8 +41,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+diff --git a/tests/btrfs/305.out b/tests/btrfs/305.out
+index 7090626c..90eeb634 100644
+--- a/tests/btrfs/305.out
++++ b/tests/btrfs/305.out
+@@ -10,8 +10,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 24
+@@ -36,8 +34,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
+@@ -61,8 +57,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
+diff --git a/tests/btrfs/306.out b/tests/btrfs/306.out
+index 25065674..efe7f903 100644
+--- a/tests/btrfs/306.out
++++ b/tests/btrfs/306.out
+@@ -10,8 +10,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+@@ -33,8 +31,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+@@ -58,8 +54,6 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+diff --git a/tests/btrfs/307.out b/tests/btrfs/307.out
+index 2815d17d..13ce8fcb 100644
+--- a/tests/btrfs/307.out
++++ b/tests/btrfs/307.out
+@@ -8,8 +8,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+@@ -29,8 +27,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
+@@ -48,8 +44,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+diff --git a/tests/btrfs/308.out b/tests/btrfs/308.out
+index 23b31dd3..21a623c1 100644
+--- a/tests/btrfs/308.out
++++ b/tests/btrfs/308.out
+@@ -12,8 +12,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
+@@ -46,8 +44,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+@@ -77,8 +73,6 @@ d48858312a922db7eb86377f638dbc9f  SCRATCH_MNT/foo
+ raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
+ leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
+ leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
+-checksum stored <CHECKSUM>
+-checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+ 	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+-- 
+2.43.0
 
