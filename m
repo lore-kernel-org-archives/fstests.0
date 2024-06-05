@@ -1,86 +1,40 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD334143C49;
-	Tue,  4 Jun 2024 15:27:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B0AE5C82;
+	Wed,  5 Jun 2024 00:56:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717514881; cv=none; b=OjzXHbk7G4nMW6Bec+IEdVIRD3aPeLdZI1jmRKgT7LrU9yG6acdvQ1978jMcWjzC8AsMPdqXEvLfCoQkf+TQkZShwamqze6d1QhuF03Xf5OvHOv3mzhR5IyXu/2d+Y4L0+BavTTCaAZzrJy68eKMhfiFlvqtUn0xiaHRh+Pfiu4=
+	t=1717548997; cv=none; b=gb/M79v1BXnzXtLOXPCxHRhr3zqD/7FUcHFE0ycucHS9rOQngphrdRindAnFrSsqk3gT9l6wuH2SL1Rp5+dtMb/BdfLEGXG8XdbGcds+ffM1ToIqsUgSbvq6imCDMKuVM3ms0Ta5gaxa4PDWLukk3RMd6zQICQZMqGoRXUPy1kw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717514881; c=relaxed/simple;
-	bh=7InPF3dhmXGJBJvYqqQdc55DRAfBmvll4gL/tQKL3io=;
+	s=arc-20240116; t=1717548997; c=relaxed/simple;
+	bh=EkcGDI/d9g2ErPQ1MFV2GRCO179w2cJcVv2BfY9mjDY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Wm4lBYrW1QXy2WZollRUTW9FrsGK8sHnWhT2H7mC1AIl/yPRCLneBbGAcqZ2N3tNZG8jSY+XAniiu/WdEU1AtEO4Btfc4HQ754VVUWxXCc5ko6NWer0fXYb9DVhYYd4W0oiIHOQr+Q9L23LMmT7VxdhdCgKMNcv9UX96eTqrhso=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=GbJS1Z6R; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=gyGemsSQ; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=zczugT9m; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=WYC4IgMz; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=MXPMgmOmImuCBpPMAXHjgFJat4ZY2GmTHkEphd8y7aun0mqo+IIrWalYBoqkaf3N63VvmriDwp2iEZxUg36jskmOkLzChhHD+qL9+E1EdAcQfMoXTdwelt2MMTQJy8+F+MEyVAUHC4l/GmiXiV3R1/UwwyLJKB6NKoXbqRC+pdo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M2GQcK1C; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="GbJS1Z6R";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="gyGemsSQ";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="zczugT9m";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="WYC4IgMz"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id EED3D1F7FE;
-	Tue,  4 Jun 2024 15:27:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1717514878;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=xPysgDGGnrs/I15i7JwpcikL92nmUShWXX6b4akW3GY=;
-	b=GbJS1Z6RZt2A4fQfsnbd00Pb6Azl5E8jdjxq//miTNgXBDe92xND8igIjNcLAc4Rhv9DQc
-	mtWOBSRVbLJ8m55VoSMGYWe5irHR3Eb5slmF/Bk8Cl6Lz0FvTC9czEGg8YfUpCGDCgLCHh
-	Qskcc0Y8EeIwx490LeAHkVTmWO/aw0Y=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1717514878;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=xPysgDGGnrs/I15i7JwpcikL92nmUShWXX6b4akW3GY=;
-	b=gyGemsSQQvucHDNXGS7TJbUcSbFalFib2evD2nBQw3TC8C39Cw8HD9dEXZncrgm91xb2Ap
-	qun87sr6JXwABzDw==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1717514877;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=xPysgDGGnrs/I15i7JwpcikL92nmUShWXX6b4akW3GY=;
-	b=zczugT9mcNLDbgGyIb5AoH4zVR89vBv1f0USwf6sRamqJWNsPMbDQYTPbLgbz+91of5Vux
-	W5A2OvpfSbCrrDGXY+Q0PHLOp96NxNi3onfqa0JGgUwmCNptL+HZhIYIK4f4LJ1Jp3VPeu
-	mfs33xLYZV9ScZqkDYp/9w1I6i7S0Fc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1717514877;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=xPysgDGGnrs/I15i7JwpcikL92nmUShWXX6b4akW3GY=;
-	b=WYC4IgMz6II6R4Q3O4oYp2UW+RGqoQqFLWutzYnmYURgM9z3uejgQJH6WDARTmcsS6uMbb
-	vLpyo7TF86ED6uBw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D20EF13A93;
-	Tue,  4 Jun 2024 15:27:57 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id w5PMMn0yX2b/JAAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Tue, 04 Jun 2024 15:27:57 +0000
-Date: Tue, 4 Jun 2024 17:27:56 +0200
-From: David Sterba <dsterba@suse.cz>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] btrfs: fix raid-stripe-tree tests with non-experimental
- btrfs-progs build
-Message-ID: <20240604152756.GF12376@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <95d9d97299aa1149da63566d57ef4ee673127cec.1717503211.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M2GQcK1C"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1585CC2BBFC;
+	Wed,  5 Jun 2024 00:56:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1717548997;
+	bh=EkcGDI/d9g2ErPQ1MFV2GRCO179w2cJcVv2BfY9mjDY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=M2GQcK1Ce+djp1Ucswz9kl2tARZVwRy//9xLfDi9XP3c/CSdyvpC6jtBc4yyVlyFP
+	 7beDyRA0/g4nI7QwWQIAt9fFBlaFn4IbrpLz/lM3qrRfXJ9VG5JsGr6glCC2xNcGqW
+	 yP0ecn5b5QgSqVuEDV1so6fHfJ4m9RamKioksmiNUtwQzRCQrdnle+6PfdoJM87jTK
+	 fh1t2xCXZj7qkwlt4ZTV3rx/mcJVHGQLUX7G9M1CaEdvYzqAbFs6GqhUvLgyoRtuMm
+	 7/miDz5j/j4N+xz1mmhGwvcwt3YCtXDg+LXMT0MX3aDDsa3hfB+TF1orN29wRrx2ET
+	 E1n4sxCgeeoNA==
+Date: Tue, 4 Jun 2024 17:56:36 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	guan@eryu.me
+Subject: Re: [PATCHSET 3/3] xfsprogs: scale shards on ssds
+Message-ID: <20240605005636.GI52987@frogsfrogsfrogs>
+References: <171744525781.1532193.10780995744079593607.stgit@frogsfrogsfrogs>
+ <Zl6hdo1ZXQwg2aM0@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -89,80 +43,35 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <95d9d97299aa1149da63566d57ef4ee673127cec.1717503211.git.fdmanana@suse.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Spam-Level: 
-X-Spamd-Result: default: False [-4.00 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:replyto,suse.com:email,imap1.dmz-prg2.suse.org:helo];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCPT_COUNT_THREE(0.00)[4]
-X-Spam-Score: -4.00
-X-Spam-Flag: NO
+In-Reply-To: <Zl6hdo1ZXQwg2aM0@infradead.org>
 
-On Tue, Jun 04, 2024 at 01:14:48PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, Jun 03, 2024 at 10:09:10PM -0700, Christoph Hellwig wrote:
+> On Mon, Jun 03, 2024 at 01:12:05PM -0700, Darrick J. Wong wrote:
+> > This patchset adds a different computation for AG count and log size
+> > that is based entirely on a desired level of concurrency.  If we detect
+> > storage that is non-rotational (or the sysadmin provides a CLI option),
+> > then we will try to match the AG count to the CPU count to minimize AGF
+> > contention and make the log large enough to minimize grant head
+> > contention.
 > 
-> When running the raid-stripe-tree tests with a btrfs-progs version that
-> was not configured with the experimental features, the tests fail because
-> they expect the dump tree commands to output the stored and calculated
-> checksums lines, which are enabled only for experimental builds.
+> Do you have any performance numbers for this?
 > 
-> Also, these lines exists only starting with btrfs-progs v5.17 (more
-> specifically since commit 1bb6fb896dfc ("btrfs-progs: btrfstune:
-> experimental, new option to switch csums")).
-> 
-> The tests fail like this on non-experimental btrfs-progs build:
-> 
->    $ ./check btrfs/304
->    FSTYP         -- btrfs
->    PLATFORM      -- Linux/x86_64 debian0 6.9.0-btrfs-next-160+ #1 SMP PREEMPT_DYNAMIC Tue May 28 12:00:03 WEST 2024
->    MKFS_OPTIONS  -- /dev/sdc
->    MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
->    btrfs/304 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad)
->        --- tests/btrfs/304.out	2024-01-25 11:15:33.420769484 +0000
->        +++ /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad	2024-06-04 12:55:04.289903124 +0100
->        @@ -8,8 +8,6 @@
->         raid stripe tree key (RAID_STRIPE_TREE ROOT_ITEM 0)
->         leaf XXXXXXXXX items X free space XXXXX generation X owner RAID_STRIPE_TREE
->         leaf XXXXXXXXX flags 0x1(WRITTEN) backref revision 1
->        -checksum stored <CHECKSUM>
->        -checksum calced <CHECKSUM>
->         fs uuid <UUID>
->         chunk uuid <UUID>
->       ...
->       (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/304.out /home/fdmanana/git/hub/xfstests/results//btrfs/304.out.bad'  to see the entire diff)
->    Ran: btrfs/304
->    Failures: btrfs/304
->    Failed 1 of 1 tests
-> 
-> So update _filter_stripe_tree() to remove the checksum lines, since we
-> don't care about them, and change the golden output of the tests to not
-> expect those lines. This way the tests work with both experimental and
-> non-experimental btrfs-progs builds, as well as btrfs-progs versions below
-> v5.17.
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> Because SSDs still have a limited number of write streams, and doing
+> more parallel writes just increases the work that the 'blender' has
+> to do for them.  Typical number of internal write streams for not
+> crazy expensive SSDs would be at most 8.
 
-Reviewed-by: David Sterba <dsterba@suse.com>
+Not much other than the AG[IF] and log grant heads becoming less hot.
+That pushes the bottlenecks to the storage device, which indeed is about
+8 per device.  More if you can raid0 them.
 
-In version 6.9 of btrfs-progs the messages will be printed only with
-increased verbosity so we'll have same output for normal and
-experimental build but it ideed needs to be removed from the golden
-output.
+*Fortunately* for metadata workloads the logging code is decent about
+deduplicating repeated updates, so unless you're doing something truly
+nasty like synchronous direct writes to a directory tree with parent
+pointers that is being modified heavily, it takes some effort to
+overload the ssd.
+
+(Or a crappy ssd, I guess.  Maybe I'll pull out the 860 QVO and see how
+it does.)
+
+--D
