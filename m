@@ -1,40 +1,41 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B0AE5C82;
-	Wed,  5 Jun 2024 00:56:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B06C624
+	for <fstests@vger.kernel.org>; Wed,  5 Jun 2024 04:27:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717548997; cv=none; b=gb/M79v1BXnzXtLOXPCxHRhr3zqD/7FUcHFE0ycucHS9rOQngphrdRindAnFrSsqk3gT9l6wuH2SL1Rp5+dtMb/BdfLEGXG8XdbGcds+ffM1ToIqsUgSbvq6imCDMKuVM3ms0Ta5gaxa4PDWLukk3RMd6zQICQZMqGoRXUPy1kw=
+	t=1717561661; cv=none; b=Cic52v9nWM/QSVCEUYKcjIyBBujcHLu8XkaIL+kbJE4F3ypugMWo2nLRJOdDtHDjv6iTvicXU0MxCibC4HZZZnRBXay2Z+RHwpXhCeI/wRJYADY7uCMnih1RK2EycTEwcEX0uaGgXi5biBGP60ugxCs6BqPI5o/qBb4pYlTchqY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717548997; c=relaxed/simple;
-	bh=EkcGDI/d9g2ErPQ1MFV2GRCO179w2cJcVv2BfY9mjDY=;
+	s=arc-20240116; t=1717561661; c=relaxed/simple;
+	bh=2kSwN8P0HTDmqeXWyB5Su8OU4C5RBchqwGqrvJHLw0Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MXPMgmOmImuCBpPMAXHjgFJat4ZY2GmTHkEphd8y7aun0mqo+IIrWalYBoqkaf3N63VvmriDwp2iEZxUg36jskmOkLzChhHD+qL9+E1EdAcQfMoXTdwelt2MMTQJy8+F+MEyVAUHC4l/GmiXiV3R1/UwwyLJKB6NKoXbqRC+pdo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=M2GQcK1C; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=j+lmgSTff70N6hDepiGhyDZZfosbNqdbZX6EGr+UAH+peYgvdDlc6733fcsq1OuhUQ/7FqrRjXLBudqIDv1NNl+1VyfWJx4AntwHlezMVdqCCNSIhrFb90Wi+DQo8ga9mgZjk252hFWPrZ4WEchlpf5JCQSYMBAboAkhswxOzRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=okjpsD9O; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="M2GQcK1C"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1585CC2BBFC;
-	Wed,  5 Jun 2024 00:56:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717548997;
-	bh=EkcGDI/d9g2ErPQ1MFV2GRCO179w2cJcVv2BfY9mjDY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=M2GQcK1Ce+djp1Ucswz9kl2tARZVwRy//9xLfDi9XP3c/CSdyvpC6jtBc4yyVlyFP
-	 7beDyRA0/g4nI7QwWQIAt9fFBlaFn4IbrpLz/lM3qrRfXJ9VG5JsGr6glCC2xNcGqW
-	 yP0ecn5b5QgSqVuEDV1so6fHfJ4m9RamKioksmiNUtwQzRCQrdnle+6PfdoJM87jTK
-	 fh1t2xCXZj7qkwlt4ZTV3rx/mcJVHGQLUX7G9M1CaEdvYzqAbFs6GqhUvLgyoRtuMm
-	 7/miDz5j/j4N+xz1mmhGwvcwt3YCtXDg+LXMT0MX3aDDsa3hfB+TF1orN29wRrx2ET
-	 E1n4sxCgeeoNA==
-Date: Tue, 4 Jun 2024 17:56:36 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	guan@eryu.me
-Subject: Re: [PATCHSET 3/3] xfsprogs: scale shards on ssds
-Message-ID: <20240605005636.GI52987@frogsfrogsfrogs>
-References: <171744525781.1532193.10780995744079593607.stgit@frogsfrogsfrogs>
- <Zl6hdo1ZXQwg2aM0@infradead.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="okjpsD9O"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
+	MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=k2uJjf9TbBvrTMcPmWs/4lb8ITERvRIqq5OUEwZAKcI=; b=okjpsD9OYLrveBL+nhLln9ZfLn
+	LeTBv2RNpnrr9mNDoFVWJTZ8/sv/S3W9Bv3CS1yIf2WUnxgBzd6+Px+Zsi7GLnlJolr/0xN6xAdRf
+	ec4P8sB+jVJTyj4ZCzyW4b8SlZO7hMIyfbM+rUrlz4YZsuvqFAZbVeNaQpbZW91iKGoNm1PWI2PvN
+	mtpVquVa5adNAjY/S95U03vOkHwkJkGFwiY99PX4tKdfLQbuOOXo+Q42awQjVzD1EKHiO5GpV9xps
+	U2H+IgLv+qhKmjPFJha0lE7aXMUxTZ9AEnsOatZwfMdq0u3C/PsaYbUTOiFztWQRj7PzMMjRBUmue
+	C6f1fMXQ==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sEiFP-00000004biQ-3Ap1;
+	Wed, 05 Jun 2024 04:27:39 +0000
+Date: Tue, 4 Jun 2024 21:27:39 -0700
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: fix _require_debugfs and call it properly
+Message-ID: <Zl_pO3nHTDWABxrd@bombadil.infradead.org>
+References: <20240429060906.465135-1-zlang@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,35 +44,42 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Zl6hdo1ZXQwg2aM0@infradead.org>
+In-Reply-To: <20240429060906.465135-1-zlang@kernel.org>
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
-On Mon, Jun 03, 2024 at 10:09:10PM -0700, Christoph Hellwig wrote:
-> On Mon, Jun 03, 2024 at 01:12:05PM -0700, Darrick J. Wong wrote:
-> > This patchset adds a different computation for AG count and log size
-> > that is based entirely on a desired level of concurrency.  If we detect
-> > storage that is non-rotational (or the sysadmin provides a CLI option),
-> > then we will try to match the AG count to the CPU count to minimize AGF
-> > contention and make the log large enough to minimize grant head
-> > contention.
+On Mon, Apr 29, 2024 at 02:09:06PM +0800, Zorro Lang wrote:
+> The old _require_debugfs helper doesn't work now, fix it to check
+> a system supports debugfs. And then call this helper in cases which
+> need $DEBUGFS_MNT.
 > 
-> Do you have any performance numbers for this?
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> ---
+>  common/rc       | 10 ++++++++--
+>  tests/btrfs/150 |  1 +
+>  tests/ceph/001  |  2 +-
+>  tests/xfs/499   |  1 +
+>  4 files changed, 11 insertions(+), 3 deletions(-)
 > 
-> Because SSDs still have a limited number of write streams, and doing
-> more parallel writes just increases the work that the 'blender' has
-> to do for them.  Typical number of internal write streams for not
-> crazy expensive SSDs would be at most 8.
+> diff --git a/common/rc b/common/rc
+> index 56f1afb6..6f0bdf60 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2978,8 +2978,14 @@ _require_sparse_files()
+>  
+>  _require_debugfs()
+>  {
+> -    #boot_params always present in debugfs
+> -    [ -d "$DEBUGFS_MNT/boot_params" ] || _notrun "Debugfs not mounted"
+> +	local type
+> +
+> +	if [ -d "$DEBUGFS_MNT" ];then
+> +		type=$(findmnt -rncv -T $DEBUGFS_MNT -S debugfs -o FSTYPE)
 
-Not much other than the AG[IF] and log grant heads becoming less hot.
-That pushes the bottlenecks to the storage device, which indeed is about
-8 per device.  More if you can raid0 them.
+With:
 
-*Fortunately* for metadata workloads the logging code is decent about
-deduplicating repeated updates, so unless you're doing something truly
-nasty like synchronous direct writes to a directory tree with parent
-pointers that is being modified heavily, it takes some effort to
-overload the ssd.
+-S debugfs
 
-(Or a crappy ssd, I guess.  Maybe I'll pull out the 860 QVO and see how
-it does.)
+On debian this returns nothing. Removing that fixes it on debian. I'll
+send patch.
 
---D
+  Luis
