@@ -1,42 +1,39 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59D2B40849
-	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 16:25:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 633CA38FA0;
+	Tue, 11 Jun 2024 16:37:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718123127; cv=none; b=f0nVFOg3mddBRbv4uYUdfbpSqhyxcWATDju/HSt0e9IEmQ+Udz1Pp2EKnmr2kjV/5WYKjXZHgK3X3Qc3xaIYSJey9dGiODp61wQ/NBBgCUlSDhyyo3TK6DpOtjKGGeRh9vB0EcVcT9x+fhBBRF1Bfr4ndGDfU8cOUGzHjH5p8M4=
+	t=1718123822; cv=none; b=SHpC4Mkd6wzBq6o6n8jfYx4EJktB6/t6OAi/c6InvYaft4O/EeB6zYFlbYNHakp0Nix51vxrtf3LqHsmIMOODXImDxahF6ptPz+lnNB2Wst7/EdR7ST4m9ZueDu6kQhcGSLEEhqCEfVBQ3Ntcv9sFUPaws2OI0G51cWvXyy9JxU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718123127; c=relaxed/simple;
-	bh=yJ79jtN2XcURLEoZ+e71pOr3UJxRNep/DVOjb/IL7MM=;
+	s=arc-20240116; t=1718123822; c=relaxed/simple;
+	bh=tS4mBtev0mmLy3lUhLhA6wMYT89/wSilamRsW7TK4Z0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Wnv8p9FrFAU9RrUDlIiIusSpuM2iumksb0sOkYff/njT76e2rQL7khpITLAczqPjxQRNQ/nhHEP8XP6xHd0JaL7DHW2wxADFmuM9GPGsMB1YuYuNopl0G3gp1R9wAsWgerdVK+sjR7yKN+UKsTrcyMNWoBPYDGPY42wwZ6qKe2k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=skMIug7L; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=RRbGUTkvNVidzaXYjuk9fvugH4zF5V9FhbD4QbehNxszmIQ+Q+dUGbfdgpJn0OlngsSN5kTjh8rb9LQd+kuVZw3ZPzWwAhWyLqhRuKAQcpf33sV9V4sdW7F6WPiATVcnzPbahwx8+afEPYyRPCYPnoQsKTVfwoG06LMvoSp2Q34=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezPZlvOe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="skMIug7L"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=zMswqgAXcMu+xCKVA8ZqIpunFqLamxAUtGlva44bgRk=; b=skMIug7LbSFC7Ey25YkMRsf9zT
-	HMl291jaXvY1iK3QLaBPCOoaslhkLPq6jzldx+LF54G/jDlfpjuxMidV+pUJ7X+9XEknwpNZusx6d
-	C3jBlkyuMHEKqgJ3hCOO7AcWMvfo7v+l0DnWIQYTWLvQmi5cFnzR/lcU2KIe6gLE1+Xq38MD9sGgt
-	WimDG33OPrybTsRG3EkZGXKt85Y+oMUuaIc/ULKtBEWzXQscEKakMcJ0Xh3PzZV5z6ig6k6G0IUKZ
-	TohYI55ET+Ya7Fmj3qdPLcao/Kpcn5Oxj/VdPEgqbdcAs3nr3Tnbate7j9ihgKGp+P32BzKWtdHH8
-	PDf43Pgw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sH4JJ-00000009UvM-3dPo;
-	Tue, 11 Jun 2024 16:25:25 +0000
-Date: Tue, 11 Jun 2024 09:25:25 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org
-Subject: Re: can we pull in git as a dependency for xfstests?
-Message-ID: <Zmh6dRpmWvOF0p9T@infradead.org>
-References: <ZmfjlWGk04r_R5j6@infradead.org>
- <20240611142405.GD52977@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezPZlvOe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC531C2BD10;
+	Tue, 11 Jun 2024 16:37:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718123821;
+	bh=tS4mBtev0mmLy3lUhLhA6wMYT89/wSilamRsW7TK4Z0=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ezPZlvOewo90DgaMjlztZ0+/CgkFjfShTR0LnPfo5OFC0WKhYjURa2R0FpcHEwGYl
+	 Q9nQPvzxUIctA0sO65kcW6zp0zCnzNcaMGYYs7cnNzxDL+OeuWFlXcZPscT66JeFX5
+	 vk4CqJ2lpWnkcinNuMlME8kVPLEmrsi9kNN1TloYo0LS2QdzeCx6IAXdopI3iaI4nd
+	 lxWGwo22KhHY8d0bWb9Z3zpUbYQxyZnSAvx9GQDVzFKLiI6bVi6cBnRPRxohQmVbn1
+	 PErb78tadZbVB1WwQqMAZ0wSwCPpaD9T9/w8quRh9BqBbxdRw8oVJKIqLxeO3RrHLX
+	 UetDog6RgOvSw==
+Date: Tue, 11 Jun 2024 09:37:01 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
+	linux-block@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: Flaky test: generic/085
+Message-ID: <20240611163701.GK52977@frogsfrogsfrogs>
+References: <20240611085210.GA1838544@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,19 +42,55 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240611142405.GD52977@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20240611085210.GA1838544@mit.edu>
 
-On Tue, Jun 11, 2024 at 07:24:05AM -0700, Darrick J. Wong wrote:
-> > -	diff -Naur $source_dir $target_dir
-> > +	git diff --no-index $source_dir $target_dir
+On Tue, Jun 11, 2024 at 09:52:10AM +0100, Theodore Ts'o wrote:
+> Hi, I've recently found a flaky test, generic/085 on 6.10-rc2 and
+> fs-next.  It's failing on both ext4 and xfs, and it reproduces more
+> easiy with the dax config:
 > 
-> How about
+> xfs/4k: 20 tests, 1 failures, 137 seconds
+>   Flaky: generic/085:  5% (1/20)
+> xfs/dax: 20 tests, 11 failures, 71 seconds
+>   Flaky: generic/085: 55% (11/20)
+> ext4/4k: 20 tests, 111 seconds
+> ext4/dax: 20 tests, 8 failures, 69 seconds
+>   Flaky: generic/085: 40% (8/20)
+> Totals: 80 tests, 0 skipped, 20 failures, 0 errors, 388s
 > 
-> 	(cd $source_dir ; find . -type f -print0 | xargs -0 md5sum) | \
-> 		(cd $target_dir ; md5sum -c --quiet)
+> The failure is caused by a WARN_ON in fs_bdev_thaw() in fs/super.c:
 > 
-> since 073.out doesn't contain any diff output?
+> static int fs_bdev_thaw(struct block_device *bdev)
+> {
+> 	...
+> 	sb = get_bdev_super(bdev);
+> 	if (WARN_ON_ONCE(!sb))
+> 		return -EINVAL;
+> 
+> 
+> The generic/085 test which exercises races between the fs
+> freeze/unfeeze and mount/umount code paths, so this appears to be
+> either a VFS-level or block device layer bug.  Modulo the warning, it
+> looks relatively harmless, so I'll just exclude generic/085 from my
+> test appliance, at least for now.  Hopefully someone will have a
+> chance to take a look at it?
 
-That works fine as well for me.
+I think this can happen if fs_bdev_thaw races with unmount?
 
+Let's say that the _umount $lvdev in the second loop in generic/085
+starts the unmount process, which clears SB_ACTIVE from the super_block.
+Then the first loop tries to freeze the bdev (and fails), and
+immediately tries to thaw the bdev.  The thaw code calls fs_bdev_thaw
+because the unmount process is still running & so the fs is still
+holding the bdev.  But get_bdev_super sees that SB_ACTIVE has been
+cleared from the super_block so it returns NULL, which trips the
+warning.
+
+If that's correct, then I think the WARN_ON_ONCE should go away.
+
+--D
+
+> Thanks,
+> 
+> 					- Ted
+> 
