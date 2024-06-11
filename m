@@ -1,153 +1,92 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D940D1CD39
-	for <fstests@vger.kernel.org>; Sun,  9 Jun 2024 15:02:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8527F16F8E9;
+	Tue, 11 Jun 2024 03:02:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717945320; cv=none; b=VEin+ycPugmCY8j14Yhqkokm9Ft7U4c3oY2Z4oMSp1VBj5EIDV7e/63Fijqg6n+7uqt02DLoeSqHWcO9e5qMW7M+bLz4MBAEC+YbwLr2fwFVJD+D1Tcu5/mdZk9/GSlw5cxFOy1hgTuEk7IVTeqeVFLxzRkwvpYYNtP+bLBtcNE=
+	t=1718074928; cv=none; b=lSszpcUw6DQ/NoXCMkmlormpLtdzDkPishOGd/8FLPYQX8lmrepD+rs/WnvZnuBug28B0/NOH6dVStthLUId0KVUqxACk8x6LY9Y87WP6y5CX9ZQ4Bf9X/aka476bxf1WXmVfRanCRwJaLYyxfzTtDybcBpN9Z+xiG57bc0Jt5s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717945320; c=relaxed/simple;
-	bh=pWrfuxVTXTX8uV3x1WwcbtQM9IEumHy2fNViLiO7k40=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=mnCxpg1ojB2/KJ3K+fqSNGvnDYBO5+5BF30v9j0i4moz8+Sk0liKoWk8ckwAxA1rFlW7+pqV5L4QVGAWV36NhYXQSoWlyGJxNc50UhaM1g+0cjdqsee0WiACdE5WF7FBqKTYUso7//DHBASD8+XMjoWr7wHFsULzJ33hD3DZG4U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NJiRhCMF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1718074928; c=relaxed/simple;
+	bh=vrXcT+ygfo3v0hnWVSCWdT/lMLn3DQKVimBc32psqlQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Kk3kIMSdqIooBlVuN9g1IcfsduepUiyNWI/hoWt70dkAwmy/bvBbgV9SnefhQuC+bPcKGpG7+YXpKgBl3jtslYSM4D1A8N1Sj+Tli8JbaexoRRsiaczJgzVI1xA+YO0uZ1JON9I4tYLoGxFYx56YPorcxgp2ZOniZIxVhqAZBhE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=1nxKK6ma; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NJiRhCMF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C324DC2BD10;
-	Sun,  9 Jun 2024 15:01:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717945320;
-	bh=pWrfuxVTXTX8uV3x1WwcbtQM9IEumHy2fNViLiO7k40=;
-	h=Date:From:To:Subject:From;
-	b=NJiRhCMFEOMw6gKC0VpA1vSUdFLVzqKYxq3NnrHnBQCX2JxVAgpNqNIOlEszsZtqW
-	 Yn6+8s8/6C4ec7/a4GrbBNcYSB77u5fF3tnB3gcaQDNYf2z/lF0qTeadBp1Zc+Si6g
-	 cXCMjsHthP0m8W1vXGTBrJwBASADSKAhj2Czjaj7ZKS/Hysqo733uRBvg9Be5NgEM7
-	 +8EwshSVBxLpzwaRpvaVC7rb/S9qdQ7HKWdsRkoB2/ZBkcIsrr2F3cCJzU9+kwOY6d
-	 dsUId5MThJwD1uFFGUfDE8kSfMhK3EhcA+EhYxmpE25KicQ5X54LM+i7NsHmglb0NA
-	 +0Yz0wYHjt00Q==
-Date: Sun, 09 Jun 2024 23:01:57 +0800
-Message-ID: <96c1c387ae5f64a59f4205dd3999b407@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.06.09
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="1nxKK6ma"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:
+	Reply-To:Content-Type:Content-ID:Content-Description;
+	bh=wq48ve+ETB2Mn5jcdAIJQV5YnUUyrMAbtjA78ekOIig=; b=1nxKK6manx1sElDBoPJ7VtBtTY
+	bUl6Pc/MH1Qn6kwApk0hinVfqNSWdsKqIzlEM2p3EQzLx3+mdr64EEK3kTORBMs/wLbe+JwHSlqPw
+	7K2R0BYtlhBN1yrZm01DqMGfYW6gCs1I1Fp83HBuwL+ZKzyFBQzugRo5+bmGx4EEbPZcuCYDis51/
+	9NV7/SzoPtC++6KbL6T+xSZGXzIepu+cBx9E+VVrXDlLfs68ICpUjBBHggFw1nHVOMMvb6MRv/Pb2
+	bOLDveyc4g0PU3iWVttzZCynRA+DjXsCMNyBXzUf2J568Zh2aFYS/YqXR82J2UPRKGdpiaIY7LZ6k
+	3e2inVsA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sGrls-00000007DDM-2LZP;
+	Tue, 11 Jun 2024 03:02:04 +0000
+From: Luis Chamberlain <mcgrof@kernel.org>
+To: patches@lists.linux.dev,
+	fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org,
+	linux-mm@kvack.org,
+	linux-fsdevel@vger.kernel.org,
+	akpm@linux-foundation.org,
+	ziy@nvidia.com,
+	vbabka@suse.cz,
+	seanjc@google.com,
+	willy@infradead.org,
+	david@redhat.com,
+	hughd@google.com,
+	linmiaohe@huawei.com,
+	muchun.song@linux.dev,
+	osalvador@suse.de,
+	p.raghav@samsung.com,
+	da.gomez@samsung.com,
+	hare@suse.de,
+	john.g.garry@oracle.com,
+	mcgrof@kernel.org
+Subject: [PATCH 4/5] _require_debugfs(): simplify and fix for debian
+Date: Mon, 10 Jun 2024 20:02:01 -0700
+Message-ID: <20240611030203.1719072-5-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.44.0
+In-Reply-To: <20240611030203.1719072-1-mcgrof@kernel.org>
+References: <20240611030203.1719072-1-mcgrof@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="1SWqpbZaeGgE"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 
+Using findmnt -S debugfs arguments does not really output anything on
+debian, and is not needed, fix that.
 
---1SWqpbZaeGgE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Fixes: 8e8fb3da709e ("fstests: fix _require_debugfs and call it properly")
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Hi all,
+diff --git a/common/rc b/common/rc
+index 18ad25662d5c..30beef4e5c02 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3025,7 +3025,7 @@ _require_debugfs()
+ 	local type
+ 
+ 	if [ -d "$DEBUGFS_MNT" ];then
+-		type=$(findmnt -rncv -T $DEBUGFS_MNT -S debugfs -o FSTYPE)
++		type=$(findmnt -rncv -T $DEBUGFS_MNT -o FSTYPE)
+ 		[ "$type" = "debugfs" ] && return 0
+ 	fi
+ 
+-- 
+2.43.0
 
-The for-next branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2024.06.09 release.
-
-Release Notes:
-1) There's 1 new test case -- generic/748. It covers a known btrfs bug.
-2) More fixes for "large block size" testing, thanks Pankaj! Welcome to try
-   fstests on 64k or other large block size.
-3) More updates and fixes for btrfs and fuzzy testing.
-
-More details refer to below, thanks for all these contributions!
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-83598d2f839d generic: test Btrfs fsync vs. size-extending prealloc write crash
-
-New commits:
-
-Darrick J. Wong (4):
-      [ab6a3b1a0283] generic/747: redirect mkfs stderr to seqres.full
-      [1a9ca7d53339] fuzzy: mask off a few more inode fields from the fuzz tests
-      [d67b0d11106d] fuzzy: allow FUZZ_REWRITE_DURATION to control fsstress runtime when fuzzing
-      [2da0c88e3481] fuzzy: test other dquot ids
-
-Filipe Manana (2):
-      [f50e6a3a7138] btrfs: fix raid-stripe-tree tests with non-experimental btrfs-progs build
-      [887f00615ac4] btrfs/280: run defrag after creating file to get expected extent layout
-
-Luis Henriques (SUSE) (1):
-      [84de2df901bb] generic/077: ignore errors occurred while accessing the filler files
-
-Omar Sandoval (1):
-      [83598d2f839d] generic: test Btrfs fsync vs. size-extending prealloc write crash
-
-Pankaj Raghav (3):
-      [4fee7f2934ff] xfs/161: adapt the test case for 64k FS blocksize
-      [edbea26d4c96] generic/436: round up bufsz to nearest filesystem blksz
-      [97989c9839dd] xfs/008: use block size instead of the pagesize
-
-
-Code Diffstat:
-
- check                  | 12 ++++++++++++
- common/filter.btrfs    |  4 ++--
- common/fuzzy           | 27 ++++++++++++++++++++++++---
- common/populate        | 14 ++++++++++++++
- src/seek_sanity_test.c |  8 ++++----
- tests/btrfs/280        | 10 +++++++++-
- tests/btrfs/304.out    |  6 ------
- tests/btrfs/305.out    |  6 ------
- tests/btrfs/306.out    |  6 ------
- tests/btrfs/307.out    |  6 ------
- tests/btrfs/308.out    |  6 ------
- tests/generic/077      |  8 ++++----
- tests/generic/747      |  2 +-
- tests/generic/748      | 45 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/748.out  |  2 ++
- tests/xfs/008          | 20 +++++++++-----------
- tests/xfs/008.out      |  8 ++++----
- tests/xfs/161          | 16 ++++++++++++----
- tests/xfs/425          | 10 +++++++---
- tests/xfs/426          | 10 +++++++---
- tests/xfs/427          | 10 +++++++---
- tests/xfs/428          | 10 +++++++---
- tests/xfs/429          | 10 +++++++---
- tests/xfs/430          | 10 +++++++---
- tests/xfs/487          | 10 +++++++---
- tests/xfs/488          | 10 +++++++---
- tests/xfs/489          | 10 +++++++---
- tests/xfs/779          | 10 +++++++---
- tests/xfs/780          | 10 +++++++---
- tests/xfs/781          | 10 +++++++---
- 30 files changed, 226 insertions(+), 100 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---1SWqpbZaeGgE
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmZlw8AACgkQlNbPkfr2
-tMyA6RAAph6HIAs8Ug8PSUHZekLsejsARaQIvT1rxLbucwZjmivndz1eJ3wTqtBd
-vK5wuC4D8nAzOuN3XICedse2IYIuJY99+4DClpMBRhb/O6uY7LgCPEZ921nBYarj
-vewFvz/KEB9zGx5Y1gGRwCkNPSrBIOolQZZpwsXhEXXoji+SzUEr7fwdZv99y8lb
-QnElYoJNN4yNxgPMyBVX1q3kYNU50IDSRd51FGW3VGyk2Yrj69wFJ9qNvxX3ew3b
-q0vXpcKiwafa0c/EyGwmgDzktZO246meGy1jkiy5+sYVh1l4xCEOzNyNj79x7O4a
-gIv2TdvLQGBcNviRuJHVnhFpjXj+t09zHdjQ+50Mt8QzbQAoy+DnmVMx4nuV3hn+
-7bImO/CtHxS9caj4EH9lHOrt3eGK1EZaLakqPlyfVk46qILQsRE/YpGAhzEmVuho
-0hDWZINzqB2tTmGP7NrZWtuVtORszN4L4mU3tRccObzKxEZ31wGn825Qw2amsHJw
-cYUJN/ERaKCIGX2ycdCCWBLVnSV0jB0mwMCW9WTivFLKKje+rff7S+wZ+lDTIXnA
-Yvun5UBQ90JrsS199kIDziuTJegSwMPVbPb0fW6aJww6+hDd9WYwgDFFnpQtXTts
-GB+c3iqo0Aa5HoIOGfYXKbuPtOgzfQIt8ZF5pApcr0xvC5x7VIY=
-=0KSM
------END PGP SIGNATURE-----
-
---1SWqpbZaeGgE--
