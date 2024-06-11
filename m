@@ -1,83 +1,78 @@
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E1F1174EEB
-	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 08:52:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65C19176252
+	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 08:59:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718095958; cv=none; b=BipUeFLoGj4gDacEQyi9IHq4U2uIL+vR0pcu1zSx64sKT1tmpJbHmIInzvAv15cTgxx2M2yIKM5J4wlcxQiLVffKirsN7fRVCoT5nEEfgWofYvtp4G4Z0f4TdKNztuum17vPIjO+0V+ce0XY0EX2K9kC3yMN8gF2XUYWpszYdBQ=
+	t=1718096347; cv=none; b=ZAIi+xtLKCPZMvL6NsXPE4r22EixUUpTHCHqzijTv0uMBIqSLjRMBgZBPYrHmuL00CSQNO479RBlBINT2aTvDdRAOYJp5c8C1/ZkQqdRLs0PByOeEc3p9Q4It2m7RkjLwo5jmECL7eP2xkocI8DoCOXsJFmelVj9DKehnjB/SSM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718095958; c=relaxed/simple;
-	bh=e1jKfrVJvNRUjZ1G7GMXs/Auo65RBO7a6yZMmElGgzo=;
-	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=H12jXHQOlUhfL3IhZxuU/cGIsD9RZCEbojXCyUOHuczfu+b93ICe/ID1oSDQWuk9xVxvgwVHcfIP8fL/zfUY6THI5QpWMqQ01DUVPOKKOWUNCrfYuDrVQsbcqX7FrOvN4wbwuXghZ6Z1Mad1vlFnaVfO4KDvc7H7VG3R5PdwKBw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=nkumsAtJ; arc=none smtp.client-ip=18.9.28.11
+	s=arc-20240116; t=1718096347; c=relaxed/simple;
+	bh=Er2jEdwHjFW6zZ6kleAXr7Ln/5d6gzUVGS80eHdlNj0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=hE6qG4gvWopE3I//uB+qQjY0ofIL9DkH75rquhnSb9W+lA5cav+22ZVkUrTo9T0CeIjLxkWol8PjVE2EDF+Wo1/RJoTs0lJvH8f24scEeF0Oba6BBPa+bIsfd4Kiwzc6jwUIkzmqzJf/gGI/jPyJtIGkHbDfvtR+MCEhPOkCxc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=XPZtjc3q; arc=none smtp.client-ip=18.9.28.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="nkumsAtJ"
-Received: from macsyma.thunk.org (unn-37-19-197-199.datapacket.com [37.19.197.199] (may be forged))
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="XPZtjc3q"
+Received: from cwcc.thunk.org (pool-173-48-115-193.bstnma.fios.verizon.net [173.48.115.193])
 	(authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45B8qFri013014
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45B8x0DC015386
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 11 Jun 2024 04:52:23 -0400
+	Tue, 11 Jun 2024 04:59:01 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1718095944; bh=SeRNdQn2ssqgKAus6AWOugRGaJLxS3fn0v7E7U0Lyaw=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=nkumsAtJuXUyjG1S4kNF4T71+CDE1Sg/+yCCOV7PWS+Z4p0BcabCql9o97LZtT7nw
-	 yns/TZjLhbFNIwaR1wC7P6pkKC6AzJqJEsEjpOIlKMBX4vokEsqdSuNGuZBvCgi5Ll
-	 15gRYpAICP/GYnW+07M6y9t79Jr0vmHhCi2nJV04+V+1e0IFqogn42h6LJI/LiiXkt
-	 T9qH4fnJV1jTsJwVTrYmsU8q5ItIDDMvKRci09fq1IBlM3KGCNCAG3s8hf60qYphuT
-	 FxDFxtsBnN73ColJVKZfIgiplQ6oQJuzZHqw3njI+1sHOcBTSD4mFRFaN1BTvgd3gk
-	 fGLIm5pt1mmHA==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 67DBA341669; Tue, 11 Jun 2024 10:52:10 +0200 (CEST)
-Date: Tue, 11 Jun 2024 09:52:10 +0100
+	t=1718096341; bh=wp9mhALZCOtu/W3V0bZVnoZM6s5NCxrt16gw/S1s6nw=;
+	h=From:Subject:Date:Message-ID:MIME-Version;
+	b=XPZtjc3qnEshUAHxziIWntEdy1VWjFuyjxGeaS6drLvuc/DTG73ChQV+klIz3ELDU
+	 NYp7nSrkDtlKGZGgHodl6M0pAokojdMm/+OjW7mdNonwWtK4pV+ydFSpVv5d0nZzxf
+	 3w/6+7P/2S6TStmVHqlLjr2UXSN54mAKDa778mQ25vgK7VNrznFK1cwO8mUDYzYtuC
+	 LRN40ngk3MuYvwe/o+OneqqCwEpe8s/2t/7Qk7k3N2WXR14+9ARY+X+pmxzqBhbv48
+	 oOX9qOp+oimAo1hJqwSKME1alA6h3CvAyIvZTrQo4HQzvheDqxtcN8m3Kb2kF1wNVq
+	 ceUvL5beBdCig==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id 2052415C0579; Tue, 11 Jun 2024 04:59:00 -0400 (EDT)
 From: "Theodore Ts'o" <tytso@mit.edu>
-To: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
-        linux-block@vger.kernel.org, fstests@vger.kernel.org
-Subject: Flaky test: generic/085
-Message-ID: <20240611085210.GA1838544@mit.edu>
+To: fstests@vger.kernel.org
+Cc: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 1/2] ext4/045: skip test if the block size is 1k
+Date: Tue, 11 Jun 2024 04:58:52 -0400
+Message-ID: <20240611085853.200102-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 
-Hi, I've recently found a flaky test, generic/085 on 6.10-rc2 and
-fs-next.  It's failing on both ext4 and xfs, and it reproduces more
-easiy with the dax config:
+If the file system is 1k, this test will fail because with dir_index
+enabled, the directory tree will get too deep, and the kernel will
+return ENOSPC and log the EXT4-fs warning "Directory (ino: NNN) index
+full, reach max htree level: 2".  So if the blocksize is less than 2k,
+_notrun this test.
 
-xfs/4k: 20 tests, 1 failures, 137 seconds
-  Flaky: generic/085:  5% (1/20)
-xfs/dax: 20 tests, 11 failures, 71 seconds
-  Flaky: generic/085: 55% (11/20)
-ext4/4k: 20 tests, 111 seconds
-ext4/dax: 20 tests, 8 failures, 69 seconds
-  Flaky: generic/085: 40% (8/20)
-Totals: 80 tests, 0 skipped, 20 failures, 0 errors, 388s
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/ext4/045 | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-The failure is caused by a WARN_ON in fs_bdev_thaw() in fs/super.c:
+diff --git a/tests/ext4/045 b/tests/ext4/045
+index 4f0ad4aa7..5ae7a45b5 100755
+--- a/tests/ext4/045
++++ b/tests/ext4/045
+@@ -44,6 +44,10 @@ workout()
+ 
+        _scratch_mkfs "-O extent,dir_nlink,dir_index -I 256" >> $seqres.full 2>&1
+        _scratch_mount
++       blocksize=$(_get_block_size $SCRATCH_MNT)
++       if [ "$blocksize" -lt 2048 ]; then
++	   _notrun "blocksize $blocksize, too small"
++       fi
+ 
+        # create directories
+        mkdir -p $3 2> /dev/null
+-- 
+2.43.0
 
-static int fs_bdev_thaw(struct block_device *bdev)
-{
-	...
-	sb = get_bdev_super(bdev);
-	if (WARN_ON_ONCE(!sb))
-		return -EINVAL;
-
-
-The generic/085 test which exercises races between the fs
-freeze/unfeeze and mount/umount code paths, so this appears to be
-either a VFS-level or block device layer bug.  Modulo the warning, it
-looks relatively harmless, so I'll just exclude generic/085 from my
-test appliance, at least for now.  Hopefully someone will have a
-chance to take a look at it?
-
-Thanks,
-
-					- Ted
