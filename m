@@ -1,81 +1,80 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25657176AA7
-	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 08:59:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCCBA17DE1C
+	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 14:24:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718096349; cv=none; b=H5CVgd487SMdlXM1dxGPFyj9aIvL+msKxcWYiJw+fmNPVDt6N564eWZQ19YwRVMnUlcc2cATgRwgNqs6nQoyzrXJVqWeSDnHgtrrW2Gb5/193M+QtIOrEKypDxDvByZNAkBfZtoAiWDsiVEnLggXHFLtOc+WrX7ycUKGiWdyUHk=
+	t=1718115845; cv=none; b=cnaIdCyReyPpTDdis9rtDPp5abIpwQkMWh9+2xEAvQnFsf6rQcC2r5s0HlFQAUJvlHuVxWPeVHLpT67fCiFYxrHBPE4S7xZoWg6+a9uGB48SrHKzApgYdK1i4V6H0FXFNr5Aycji0FZAGLVuKHQPYff+RJ4wLbnibdLGmVF/Hkw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718096349; c=relaxed/simple;
-	bh=8Z49mIZ9qVHJxCRu6GuXPAAQBps/B3PJdd7iD4gneno=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=F00oDNFgtZVv3QTnKt6Oyu5WOLJoTv+o0b8QSu/c0FxsNxn46HpA5S/x0l+eTz8GqSKgcpLb43RB0Pd7kn/rpbisCHDyswgdVaGzeNXUcEW7Ml8rGu6w1ychtgjeb51HKwA5HRDRFt0ZLjWGlaTUDhACPtFj3iqNguY7UqP4Ax0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=YHwSAgQv; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1718115845; c=relaxed/simple;
+	bh=ot72NZLy1N9AIy1vyjNg61JiC7qo2WphpBb6wMgCKIM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=BE5ytVU9Zp/odMygkj0GYotb2kM9TjA/xVHjTcdKuE+A47hyDcGh+ZTaj78IRD6UKIT2au37n+6TWsP70BbW/0tf9FBjrYutC0pcF8jcQxlf1htmkWaG3gvdziOKHdzRmovOYQBg1MjjaoZdvLQOS9Jid7FhDp6FZdO2opxKMh0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lhV48mSr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="YHwSAgQv"
-Received: from cwcc.thunk.org (pool-173-48-115-193.bstnma.fios.verizon.net [173.48.115.193])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45B8x2pE015404
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 11 Jun 2024 04:59:03 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1718096344; bh=FONV8FfQW1ELUNBxG2j7Ysw8xwLoKJR4wsAOwwoZ+gM=;
-	h=From:Subject:Date:Message-ID:MIME-Version;
-	b=YHwSAgQvhbtyQ0t1lWmPR3TdC3FXG9LHn0QmXYkbewcm6/Mh8AyCaKzl+W3wIn71q
-	 /O83GC+kZsiakbY9jc63wz/s62GQiIYeCSZ/v9jDHfYXYhu3npXq4Jf1xRN8k8K5u+
-	 RCcRJ4tqCFVubsirA1qbVxhHePUTT3jOAi+TfpCQRdb06ef6kFFcgeEsjRQzmpW88g
-	 x3hxqNEVaQZJ354IEWIBT6iLnM5kypDR8l7xKINAUsRNhSkc+ocGbMQB8Yb8DPQuRk
-	 ChrnPiGMsBSL3WRde63fwJVYayoboEoFZ46bMXECGf9if/op0Rnbk+/Q4fZelGnKSH
-	 osgvg9KO6P7Ow==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id DB76F15C0579; Tue, 11 Jun 2024 04:59:02 -0400 (EDT)
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: fstests@vger.kernel.org
-Cc: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 2/2] generic/455: skip the test if the file system doesn't support journaling
-Date: Tue, 11 Jun 2024 04:58:53 -0400
-Message-ID: <20240611085853.200102-2-tytso@mit.edu>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240611085853.200102-1-tytso@mit.edu>
-References: <20240611085853.200102-1-tytso@mit.edu>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lhV48mSr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5283C4AF1C;
+	Tue, 11 Jun 2024 14:24:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718115845;
+	bh=ot72NZLy1N9AIy1vyjNg61JiC7qo2WphpBb6wMgCKIM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=lhV48mSryXdmfCQJQBadX1qL2UV56rL2VKFaJkrSi5j39yMEZlkkZqCKAfxeO1xGh
+	 7qgrG+NQoT48mZ50JQsXiUJhxF+xViBzeAsCLL1GSE7+BMe/JC2uVzSPVKsuwY9L/Z
+	 vV/IWd2US2mPt/XPoSdn1tDDlgH4ZWVIF1O2sKa6K08HLd29YyIIAJda7kXjXHq7of
+	 HfxBp9H0y4ul9b8Ll8OrGv8QwyoS1U7xCoIa56y95SjhXNnmxJUSo4GPEEuGIKh+KY
+	 JzwJDREPl5keK23rcCTYG//FRzeY+1tQtrhWa1jVpshChREZ6wZlbhWvMFdnMZDkLW
+	 QQTU2xT4GkxNg==
+Date: Tue, 11 Jun 2024 07:24:05 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: can we pull in git as a dependency for xfstests?
+Message-ID: <20240611142405.GD52977@frogsfrogsfrogs>
+References: <ZmfjlWGk04r_R5j6@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZmfjlWGk04r_R5j6@infradead.org>
 
-This test uses dm-log-writes to test power fail scenarios, so it won't
-work if the file system doesn't support metadata journaling.
+On Mon, Jun 10, 2024 at 10:41:41PM -0700, Christoph Hellwig wrote:
+> xfs/073 has been failing for me for a while on most of my test setups
+> with:
+> 
+> diff: memory exhausted
+> 
+> from the recursive diff.  Switching to the significantly more memory
+> efficient implementation in git diff as in the patch below fixes this.
+> 
+> Would it be ok to pull in diff (including a supported check)?
+> 
+> diff --git a/tests/xfs/073 b/tests/xfs/073
+> index c7616b9e9..85d8ae8d0 100755
+> --- a/tests/xfs/073
+> +++ b/tests/xfs/073
+> @@ -76,7 +76,7 @@ _verify_copy()
+>  	fi
+>  
+>  	echo comparing new image files to old
+> -	diff -Naur $source_dir $target_dir
+> +	git diff --no-index $source_dir $target_dir
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/generic/455 | 7 +++++++
- 1 file changed, 7 insertions(+)
+How about
 
-diff --git a/tests/generic/455 b/tests/generic/455
-index da803de08..75437b90d 100755
---- a/tests/generic/455
-+++ b/tests/generic/455
-@@ -65,6 +65,13 @@ _log_writes_init $DMTHIN_VOL_DEV
- 
- _log_writes_mkfs >> $seqres.full 2>&1
- 
-+# This test requires metadata journaling since it simulates a power failure
-+msg=$(_has_metadata_journaling "$LOGWRITES_DMDEV")
-+if [ -n "$msg" ]; then
-+    _log_writes_remove
-+    _notrun "$msg"
-+fi
-+
- # Log writes emulates discard support, turn it on for maximum crying.
- _log_writes_mount -o discard
- 
--- 
-2.43.0
+	(cd $source_dir ; find . -type f -print0 | xargs -0 md5sum) | \
+		(cd $target_dir ; md5sum -c --quiet)
 
+since 073.out doesn't contain any diff output?
+
+--D
+
+>  
+>  	echo comparing new image directories to old
+>  	find $source_dir | _filter_path $source_dir > $tmp.manifest1
+> 
