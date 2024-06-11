@@ -1,39 +1,46 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 633CA38FA0;
-	Tue, 11 Jun 2024 16:37:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4F391CFA9
+	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 16:41:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718123822; cv=none; b=SHpC4Mkd6wzBq6o6n8jfYx4EJktB6/t6OAi/c6InvYaft4O/EeB6zYFlbYNHakp0Nix51vxrtf3LqHsmIMOODXImDxahF6ptPz+lnNB2Wst7/EdR7ST4m9ZueDu6kQhcGSLEEhqCEfVBQ3Ntcv9sFUPaws2OI0G51cWvXyy9JxU=
+	t=1718124069; cv=none; b=b2HWAmgFeYGMdVQUPzHRHtO2+sjK00HD+S7rGy39s1lB1ElowL7bcIsZODXDkNWq4Uxn/4OGo1hQb6OZjLIj3E81A7j5vOb5n2LK4fMbXX9Rbabb4UBe7U3Gh0mSNMd1UO0EK8FGaPjyaWGYfQPicTosqH2aFf9wHkDgYT1JT4Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718123822; c=relaxed/simple;
-	bh=tS4mBtev0mmLy3lUhLhA6wMYT89/wSilamRsW7TK4Z0=;
+	s=arc-20240116; t=1718124069; c=relaxed/simple;
+	bh=uMKlyQCUI6mgN3dAAjbXUow6YAasXn+xBjE81ZXmDKE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=RRbGUTkvNVidzaXYjuk9fvugH4zF5V9FhbD4QbehNxszmIQ+Q+dUGbfdgpJn0OlngsSN5kTjh8rb9LQd+kuVZw3ZPzWwAhWyLqhRuKAQcpf33sV9V4sdW7F6WPiATVcnzPbahwx8+afEPYyRPCYPnoQsKTVfwoG06LMvoSp2Q34=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezPZlvOe; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ck5VmPG2Z/bouxuvUpUtdvgkqlhTquXZZKLXrvNH49/dyki7jDaxsYJVyaSw0r0Tck3sqz4mKKHyWjnw1LPHCG3t5U6Dnfu7/g+Wb1IinB9mhc/bsWmNRlGMxUenKwkD+G7IZ7QKPO0p8DLjKMTJ3J27e/ihc6j0hkEZN+oKyb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=dnvXPMdf; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezPZlvOe"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC531C2BD10;
-	Tue, 11 Jun 2024 16:37:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718123821;
-	bh=tS4mBtev0mmLy3lUhLhA6wMYT89/wSilamRsW7TK4Z0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ezPZlvOewo90DgaMjlztZ0+/CgkFjfShTR0LnPfo5OFC0WKhYjURa2R0FpcHEwGYl
-	 Q9nQPvzxUIctA0sO65kcW6zp0zCnzNcaMGYYs7cnNzxDL+OeuWFlXcZPscT66JeFX5
-	 vk4CqJ2lpWnkcinNuMlME8kVPLEmrsi9kNN1TloYo0LS2QdzeCx6IAXdopI3iaI4nd
-	 lxWGwo22KhHY8d0bWb9Z3zpUbYQxyZnSAvx9GQDVzFKLiI6bVi6cBnRPRxohQmVbn1
-	 PErb78tadZbVB1WwQqMAZ0wSwCPpaD9T9/w8quRh9BqBbxdRw8oVJKIqLxeO3RrHLX
-	 UetDog6RgOvSw==
-Date: Tue, 11 Jun 2024 09:37:01 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
-	linux-block@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: Flaky test: generic/085
-Message-ID: <20240611163701.GK52977@frogsfrogsfrogs>
-References: <20240611085210.GA1838544@mit.edu>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="dnvXPMdf"
+Received: from macsyma.thunk.org ([84.247.119.26])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45BGepar014643
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 11 Jun 2024 12:40:53 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1718124053; bh=CqJMSmn7i8fymmD5JidzQkMppDaBku7ESVvfrHQ2k9c=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=dnvXPMdfhCxSJmgehKEeRGuaVNlh+Sg9gQLRZkuc1AGp5T85Fw4/m884Fc1LULZxZ
+	 pt9F1/k0jVPagc8oYPiXycFXY6F9N3w/zKwM6VVDIXLl4qnwWuYwfDOjpi2nuYYHv8
+	 JRIDk7UlhQtd8GG0638Ya1CqS/Qxrx+f4JTdhGbK7YvIHLkonmyyLhV2otrWkSpqwt
+	 +NILRt7E3CokeoIz/o0RdboQ3LLaiXLZUBmpAQvXpP/0DyYBy2oMny6Udvi15+R5vM
+	 G09BPFeiDS8NTAsKg3CKB1MAXGI0FFKgmtlW3t2BQOSehsKqhK3qgSq8R9NHrgKiCO
+	 IJmn9bobIAYsw==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 2066B341669; Tue, 11 Jun 2024 18:40:49 +0200 (CEST)
+Date: Tue, 11 Jun 2024 17:40:49 +0100
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 1/2] ext4/045: skip test if the block size is 1k
+Message-ID: <20240611164049.GG4182@mit.edu>
+References: <20240611085853.200102-1-tytso@mit.edu>
+ <20240611142754.GF52977@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -42,55 +49,26 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240611085210.GA1838544@mit.edu>
+In-Reply-To: <20240611142754.GF52977@frogsfrogsfrogs>
 
-On Tue, Jun 11, 2024 at 09:52:10AM +0100, Theodore Ts'o wrote:
-> Hi, I've recently found a flaky test, generic/085 on 6.10-rc2 and
-> fs-next.  It's failing on both ext4 and xfs, and it reproduces more
-> easiy with the dax config:
+On Tue, Jun 11, 2024 at 07:27:54AM -0700, Darrick J. Wong wrote:
+> On Tue, Jun 11, 2024 at 04:58:52AM -0400, Theodore Ts'o wrote:
+> > If the file system is 1k, this test will fail because with dir_index
+> > enabled, the directory tree will get too deep, and the kernel will
+> > return ENOSPC and log the EXT4-fs warning "Directory (ino: NNN) index
+> > full, reach max htree level: 2".  So if the blocksize is less than 2k,
+> > _notrun this test.
 > 
-> xfs/4k: 20 tests, 1 failures, 137 seconds
->   Flaky: generic/085:  5% (1/20)
-> xfs/dax: 20 tests, 11 failures, 71 seconds
->   Flaky: generic/085: 55% (11/20)
-> ext4/4k: 20 tests, 111 seconds
-> ext4/dax: 20 tests, 8 failures, 69 seconds
->   Flaky: generic/085: 40% (8/20)
-> Totals: 80 tests, 0 skipped, 20 failures, 0 errors, 388s
-> 
-> The failure is caused by a WARN_ON in fs_bdev_thaw() in fs/super.c:
-> 
-> static int fs_bdev_thaw(struct block_device *bdev)
-> {
-> 	...
-> 	sb = get_bdev_super(bdev);
-> 	if (WARN_ON_ONCE(!sb))
-> 		return -EINVAL;
-> 
-> 
-> The generic/085 test which exercises races between the fs
-> freeze/unfeeze and mount/umount code paths, so this appears to be
-> either a VFS-level or block device layer bug.  Modulo the warning, it
-> looks relatively harmless, so I'll just exclude generic/085 from my
-> test appliance, at least for now.  Hopefully someone will have a
-> chance to take a look at it?
+> Didn't ext4 recently gain support for 3-level htrees?
 
-I think this can happen if fs_bdev_thaw races with unmount?
+Ext4 has support for a while, but it's an optional feature which is
+not enabled by default.  I suppose we could try to set the feature,
+and skip the test if the kernel doesn't support it.  (Or decide that
+no one cares about RHEL7, and just YOLO, since who else still cares
+about kernels older than 4.13?  :-)
 
-Let's say that the _umount $lvdev in the second loop in generic/085
-starts the unmount process, which clears SB_ACTIVE from the super_block.
-Then the first loop tries to freeze the bdev (and fails), and
-immediately tries to thaw the bdev.  The thaw code calls fs_bdev_thaw
-because the unmount process is still running & so the fs is still
-holding the bdev.  But get_bdev_super sees that SB_ACTIVE has been
-cleared from the super_block so it returns NULL, which trips the
-warning.
+I'm just not sure whether it's worth the extra complexity to do it,
+but for those people who care about code coverage statistics, it would
+help a tiny amount....
 
-If that's correct, then I think the WARN_ON_ONCE should go away.
-
---D
-
-> Thanks,
-> 
-> 					- Ted
-> 
+						- Ted
