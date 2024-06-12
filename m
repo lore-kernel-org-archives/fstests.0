@@ -1,66 +1,91 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B76118EAB
-	for <fstests@vger.kernel.org>; Tue, 11 Jun 2024 22:27:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B36C171C4;
+	Wed, 12 Jun 2024 03:53:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718144836; cv=none; b=kn/RaNHv9szlmYV2gafPeaZFyLwPtFRjgKrCpnhDQf/rsG835QMBgCmIW1BHr7F8HIcoc2Nf1DQb8JuEXp1G94MDMQgPQZnrnq3X1WmhVY3FonenFd7vxtVs7QlwaXnCRluSYbMAmWweK5xaPnoA7gtf0ojHE3bLjlgS07emnxU=
+	t=1718164439; cv=none; b=gOqVoF/2UXUdWKSFuay7bAkDAXAiV3jd25wtyfLImnnRtRjsj+Oo1UB21pD6nOpuywcY8EAx9hz4jS+6nbzhnYA7Icpl+0pW++HLprodEUXeAn8QijI2L9WoM5atC20aNptyArsKkxNp1xiDMcFOBMjBH6S3jcj+lt5wOcrkeMs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718144836; c=relaxed/simple;
-	bh=5xhaItbTf2MNVEwHseKzP3sHJGX2cxTcbQvyZr0lpkg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lBgGSaNMBOQ9zDn6vLx60CT4QMeGsOD9Fsctl0Mhvm5j7LNY4D+q55IFmhta6/KYV5A4AZw5CkzbibOWQwJZvlHBONrFdOqhVBl8rhQzyw9TUb4Qesypl4Arsc0eVPM4Z8qy5H1WB/lGaKChYM2K601IjKpmyeZsfHJmH4QhHFs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=gLmzCNde; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1718164439; c=relaxed/simple;
+	bh=Gm3l44/yk0jha05XNf0EnDiNhjAQDV0ZE4m01kVK26I=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZwdhYfgNLWfNIHW6mBPsMoLP6Vvp+6Huf/rYI0Bmt6GBN2dX5IDIh8GHYTdd77OtZC9GNJZNnSS2k53pGLuBw0e48boFxnJBpbyFWH1gDxgGNgxhnGMBFBsyL+a4rQljboICDksbgthZhF71/+yrOdex90nJJhcA7OyM9Hp22+8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=duwwjL3P; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="gLmzCNde"
-Received: from macsyma.thunk.org ([84.247.119.26])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45BMQoCS005799
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 11 Jun 2024 18:27:05 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1718144826; bh=G5YC68zjEOJAtM6LT60/15mS82kWCmX9dgDdpu/sd64=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=gLmzCNdeRx0p/w3ZU54BZcFqfuYb/9TRGL1HqhOQZhTFACnY/eEShOblisHdoErhl
-	 ewxXiWHSYCoeqfljJigXnlADQ+C/+wgVMUv6i22GP0AYaZVF0TiME6nF8MaOdu//TL
-	 KsKgnZjnkg9A5sZkTC7jQU7ZpoZwxI9BjIHHTbY+2lntISPcPj7OPe4sdD5kKnQMZm
-	 4iWvBZ9aJBqVJ35xlXVmmRaMTwcAX058twYqyXNdI2N35lcdFW9zp5uBTHRkOCthq7
-	 GihKnIZHk1CQs6+u+wDKXufFbt+Qck3dqduI8dOA8eGq7HoIimZKacjVS2ax1rnSTk
-	 veVWg7HbOOAaQ==
-Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 44AAD34160E; Wed, 12 Jun 2024 00:26:46 +0200 (CEST)
-Date: Tue, 11 Jun 2024 23:26:46 +0100
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/455: skip the test if the file system
- doesn't support journaling
-Message-ID: <20240611222646.GA1906022@mit.edu>
-References: <20240611085853.200102-1-tytso@mit.edu>
- <20240611085853.200102-2-tytso@mit.edu>
- <20240611142701.GE52977@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="duwwjL3P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C5EFBC32786;
+	Wed, 12 Jun 2024 03:53:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718164438;
+	bh=Gm3l44/yk0jha05XNf0EnDiNhjAQDV0ZE4m01kVK26I=;
+	h=From:To:Cc:Subject:Date:From;
+	b=duwwjL3PiZR1pAsDccJKuWA47s5+sGdZPrDfXN12fmHi8KfYrgWjqVl6Tga7nm/h1
+	 AtVFlIcg6DOQkH1biyKB5ov2rZ7uy8MGmyVoc1PPNKMgmPgG3CXSBztgCWivVAorS/
+	 halpIlcrbqhcPcnCOoVbeZprws3FpqQ4pd+gHJuQZoPM8cCvx4cMi1QhwacNUFp2B0
+	 YFtOuVgoX2uLFdq0PPHdtB9cRQoql/kh83fdZSJcyHmWvSoquXCFOJSnbVhhKST/HL
+	 /sjJvXivW5oyqOaooiNatweIDlvLR8tQOKbO01Rs6dlLRlqlrjrvI0futycFB7R0wo
+	 rHJqpCXq2JVYw==
+From: Eric Biggers <ebiggers@kernel.org>
+To: fstests@vger.kernel.org
+Cc: fsverity@lists.linux.dev
+Subject: [xfstests PATCH] generic/574: test corruption at more offsets
+Date: Tue, 11 Jun 2024 20:53:34 -0700
+Message-ID: <20240612035334.134434-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240611142701.GE52977@frogsfrogsfrogs>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jun 11, 2024 at 07:27:01AM -0700, Darrick J. Wong wrote:
-> 
-> _require_metadata_journaling $LOGWRITES_DMDEV ?
-> 
-> afaict the _cleanup() function will call _log_writes_cleanup ->
-> _log_writes_remove for you.
+From: Eric Biggers <ebiggers@google.com>
 
-Good point, I had forgotten that rely on the _cleanup handling.  I'll
-fix that in the next version of these patches.
+Expand generic/574 to test for corruption in more different parts of the
+file to try to exercise any hashing optimizations that might be used.
 
-						- Ted
+There is no existing bug that this finds.  This is just to prevent
+future bugs, considering optimizations along the lines of
+https://lore.kernel.org/fsverity/20240611034822.36603-7-ebiggers@kernel.org/
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/574 | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/tests/generic/574 b/tests/generic/574
+index cb42baaa..72440d49 100755
+--- a/tests/generic/574
++++ b/tests/generic/574
+@@ -194,10 +194,25 @@ test_block_size()
+ 	corruption_test $block_size 131072 0 5
+ 	corruption_test $block_size 131072 4091 5
+ 	corruption_test $block_size 131072 65536 65536
+ 	corruption_test $block_size 131072 131067 5
+ 
++	# Test corrupting a block in files of length 1..4 blocks, and test
++	# corrupting each block of a 4-block file.  This ensures that all code
++	# paths that might exist due to multi-block hashing optimizations the
++	# fsverity implementation may use get covered, assuming no more than 4
++	# blocks are hashed at once.  E.g., consider an fsverity implementation
++	# that verifies sets of blocks but has a bug when given a single block,
++	# or that has a bug that makes it not verify all the blocks of each set.
++	local i
++	for i in $(seq 1 4); do
++		corruption_test $block_size $((i*block_size)) $((block_size/2)) 5
++	done
++	for i in $(seq 0 3); do
++		corruption_test $block_size $((4*block_size)) $((i*block_size)) 5
++	done
++
+ 	corrupt_eof_block_test $block_size 130999 72
+ 
+ 	# Merkle tree corruption.
+ 	corruption_test $block_size 200000 100 10 true
+ 
+
+base-commit: e46fa3a7dae4a65fd80128bf381dba4fd5036ebb
+-- 
+2.45.2
+
