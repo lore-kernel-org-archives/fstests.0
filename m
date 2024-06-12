@@ -1,49 +1,44 @@
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4881438DD8
-	for <fstests@vger.kernel.org>; Wed, 12 Jun 2024 14:52:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 402B71DFF0
+	for <fstests@vger.kernel.org>; Wed, 12 Jun 2024 16:29:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718203975; cv=none; b=h0+e1qVoM/J3RW3GBUouBRc1BafUFtwd9BSYTIId0Ib99CCOKx9oE3C3CK10rJo7XMLMFm169aHo2dxwXiAbNrKPfRLz8V7dEgMLrxCY70d5KtxTk1cyg4oc7Cu3ToKFcD2Y7QSd+woknjL/3KaZKSo+77/x863GilCY3fqMqkg=
+	t=1718209799; cv=none; b=XGEUP42mKx/eUce9RgnJl+WDgu2N5O3/zpVjmK5kRb8KPH/RUextdos5G1PUjsYTVNz2TIyJ4yQrr9QB/DcBX5u6IBkqQ9L7Lrhy3Gavn1Zwvxuhc4rmIFRCU4q+6UfCkXxgSSAX94iHjj0zMbmBiTN9g68aV/mhRivQy3sqs+A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718203975; c=relaxed/simple;
-	bh=63uDnaLNPzf7zYzjBBak3Mlpdy0J42gOZiMjhyZQs3k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oVyDpdGdUDcxLknP7FHFCNpFBJMnYEECecf5I8piesKm8SzHIOzp6WMlhFbbY1xcqzdX+fVuTNSsXGJyV1Dwz73++sDqmerJjG21PU8GcZzR9SmDNdvfBJnn39nhdGq2wsRUlYbaIR+iYEW6cqoBI1NagrVg4MV+hFLG63UguvU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=PPcurIWF; arc=none smtp.client-ip=18.9.28.11
+	s=arc-20240116; t=1718209799; c=relaxed/simple;
+	bh=NPjrOI1u6ZwklqagzTtS2IYTxQHmvtjZ9iUd+Nesbsc=;
+	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=d3Zm7jQDvvDTC/mrfExEvQHnPkoeS8DNSXkKrJv8AxPoSa+oNYGnj3fkAsHqw/1Pl3qDiLDA+7J9ktW9vE8fA4cs3XHO19GWLn4yyVh5UQB0ei/249f5m9rWsJf55QRwgs9wXqI+szdErh+DLY7owrwQ+nMF5gBoKwRS812sHJc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=UyCEx/Jf; arc=none smtp.client-ip=18.9.28.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="PPcurIWF"
-Received: from macsyma.thunk.org (unn-37-19-197-214.datapacket.com [37.19.197.214] (may be forged))
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="UyCEx/Jf"
+Received: from macsyma.thunk.org ([204.93.149.36])
 	(authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45CEqWtO008694
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45CGTnap031394
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 12 Jun 2024 10:52:35 -0400
+	Wed, 12 Jun 2024 12:29:52 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1718203956; bh=Ad/lS1KWrRm2Xarx3jCuFG9NWf2VJ632aU+pWHVzie4=;
+	t=1718209793; bh=Rn3WxPi+HKsTVNrDA9NAdBm1/yD+/Z7Mjn3olzC9d8s=;
 	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=PPcurIWFchb2ph0NOrKu1dfvAgQTefNT5cBb0QiCyd2Fz4Ngk03gVLv9R670Z10Py
-	 7InoHeMYTRZ7Ij9b40IUne+q7d1kq1UJk4OOF1ai8LYJ9r74bLaeywrar44/dv+bjL
-	 TE2Rh8bAqm3iOCtcKy2VfqB44oWHh9VTM1LR95Ew6j9KLbOY3dXkaLOwTqzhfoAAZv
-	 JaHTl1BaeDrRHnhRxWj/g4s5SIWXvG+j70tXlaRo67TVvWk815iTHTBrpCo51IG2bs
-	 SiHoOuLOYzLd1Z9dZcOqQmMRBCnkZKOlEbpQtbJ3+R/zDwB8YJvgkmiq8/L6rt3bHR
-	 SMZG9OHY76C6w==
+	b=UyCEx/JfydQlsRguZiYq6dVHQXfQdp8oab81xywQDQmjlc2XXzOc6JNIB1KbSJUSo
+	 LqxV9AXSqDPnhoYLO3fNHfKAXIo0MI/UWRJi9tK+Yo+w3XuWvbeUgUWXj+2Tpfxbqm
+	 z0j2XB/r6vciuI+ccAhX/YfMh3MytVZnUZ8c0qEHSc0tgGLTMhixVC6i6OHB+7Vpnn
+	 R3c4pbru68yp7NCtqlgzkfj/QL4J9rXquLLH3I6S97VeNrdT/I0Mi1WBINdHZKCSbq
+	 zpXOm0omOyvDLVc8HaCb7GuTPNZpswuGZx7NDp3apvGEKZuT+B0aKcUObeoPxYf4hf
+	 hj5qjdzbJsNPg==
 Received: by macsyma.thunk.org (Postfix, from userid 15806)
-	id 7124034167F; Wed, 12 Jun 2024 16:47:16 +0200 (CEST)
-Date: Wed, 12 Jun 2024 15:47:16 +0100
+	id CF8F934167F; Wed, 12 Jun 2024 18:29:48 +0200 (CEST)
+Date: Wed, 12 Jun 2024 17:29:48 +0100
 From: "Theodore Ts'o" <tytso@mit.edu>
-To: Christian Brauner <brauner@kernel.org>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-        Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
-        linux-block@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: Flaky test: generic/085
-Message-ID: <20240612144716.GB1906022@mit.edu>
-References: <20240611085210.GA1838544@mit.edu>
- <20240611163701.GK52977@frogsfrogsfrogs>
- <20240612-abdrehen-popkultur-80006c9e4c8d@brauner>
+To: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
+        fstests@vger.kernel.org
+Subject: Flaky test: generic:269 (EBUSY on umount)
+Message-ID: <20240612162948.GA2093190@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -52,38 +47,97 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240612-abdrehen-popkultur-80006c9e4c8d@brauner>
 
-On Wed, Jun 12, 2024 at 01:25:07PM +0200, Christian Brauner wrote:
-> I've been trying to reproduce this with pmem yesterday and wasn't able to.
-> 
-> What's the kernel config and test config that's used?
->
+I've been trying to clear various failing or flaky tests, and in that
+context I've been finding that generic/269 is failing with a
+probability of ~5% on a wide variety of test scenarios on ext4, xfs,
+btrfs, and f2fs on 6.10-rc2 and on fs-next.  (See below for the
+details; the failure probability ranges from 1% to 10% depending on
+the test config.)
 
-The kernel config can be found here:
+What generic/269 does is to run fsstress and ENOSPC hitters in
+parallel, and checks to make sure the file system is consistent at the
+end of the tests.  Failure is caused by the umount of the file system
+failing with EBUSY.  I've tried adding a sync and a "sync -f
+$SCRATCH_MNT" before the attempted _scratch_umount, and that doesn't
+seem to change the failure.
 
-https://github.com/tytso/xfstests-bld/blob/master/kernel-build/kernel-configs/config-6.1
+However, on a failure, if you sleep for 10 seconds, and then retry the
+unmount, this seems to make the proble go away.  This is despite the
+fact that we do wait for the fstress process to exit --- I vaguely
+recall that there is some kind of RCU failure which means that the
+umount will not reliably succeed under some circumstances.  Do we
+think this is the right fix?
 
-Drop it into .config in the build directory of any kernel sources
-newer than 6.1, and then run "make olddefconfig".  This is all
-automated in the install-kconfig script which I use:
+(Note: when I tried shortening the sleep 10 to sleep 1, the problem
+came back; so this seems like a real hack.   Thoughts?)
 
-https://github.com/tytso/xfstests-bld/blob/master/kernel-build/install-kconfig
+Thanks,
 
-The VM has 4 CPU's, and 26GiB of memory, and kernel is booted with the
-boot command line options "memmap=4G!9G memmap=9G!14G", which sets up
-fake /dev/pmem0 and /dev/pmem1 devices backed by RAM.  This is my poor
-engineer's way of testing DAX without needing to get access to
-expensive VM's with pmem.  :-)
+     	      	   	      	     - Ted
 
-I'm assuming this is a timing-dependant bug which is easiest to
-trigger on fast devices, so a ramdisk might also work.  FWIW, I also
-can see failures relatively frequently using the ext4/nojournal
-configuration on a SSD-backed cloud block device (GCE's Persistent
-Disk SSD product).
+diff --git a/tests/generic/269 b/tests/generic/269
+index 29f453735..dad02abf3
+--- a/tests/generic/269
++++ b/tests/generic/269
+@@ -51,9 +51,12 @@ if ! _workout; then
+ fi
+ 
+ if ! _scratch_unmount; then
++    sleep 10
++    if ! _scratch_unmount ; then
+ 	echo "failed to umount"
+ 	status=1
+ 	exit
++    fi
+ fi
+ status=0
+ exit
 
-As a result, if you grab my xfstests-bld repo from github, and then
-run "qemu-xfstests -c ext4/nojournal C 20 generic/085" it should
-also reproduce.  See the Documentation/kvm-quickstart.md for more details.
 
-						- Ted
+ext4/4k: 50 tests, 2 failures, 1339 seconds
+  Flaky: generic/269:  4% (2/50)
+ext4/1k: 50 tests, 5 failures, 1224 seconds
+  Flaky: generic/269: 10% (5/50)
+ext4/ext3: 50 tests, 1477 seconds
+ext4/encrypt: 50 tests, 2 failures, 1253 seconds
+  Flaky: generic/269:  4% (2/50)
+ext4/nojournal: 50 tests, 1 failures, 1503 seconds
+  Flaky: generic/269:  2% (1/50)
+ext4/ext3conv: 50 tests, 4 failures, 1294 seconds
+  Flaky: generic/269:  8% (4/50)
+ext4/adv: 50 tests, 2 failures, 1263 seconds
+  Flaky: generic/269:  4% (2/50)
+ext4/dioread_nolock: 50 tests, 3 failures, 1327 seconds
+  Flaky: generic/269:  6% (3/50)
+ext4/data_journal: 50 tests, 1 failures, 1317 seconds
+  Flaky: generic/269:  2% (1/50)
+ext4/bigalloc_4k: 50 tests, 2 failures, 1193 seconds
+  Flaky: generic/269:  4% (2/50)
+ext4/bigalloc_1k: 50 tests, 1259 seconds
+ext4/dax: 50 tests, 5 failures, 1136 seconds
+  Flaky: generic/269: 10% (5/50)
+xfs/4k: 50 tests, 3 failures, 1211 seconds
+  Flaky: generic/269:  6% (3/50)
+xfs/1k: 50 tests, 1219 seconds
+xfs/v4: 50 tests, 4 failures, 1206 seconds
+  Flaky: generic/269:  8% (4/50)
+xfs/adv: 50 tests, 1 failures, 1206 seconds
+  Flaky: generic/269:  2% (1/50)
+xfs/quota: 50 tests, 2 failures, 1460 seconds
+  Flaky: generic/269:  4% (2/50)
+xfs/quota_1k: 50 tests, 1449 seconds
+xfs/dirblock_8k: 50 tests, 1 failures, 1351 seconds
+  Flaky: generic/269:  2% (1/50)
+xfs/realtime: 50 tests, 1286 seconds
+xfs/realtime_28k_logdev: 50 tests, 1234 seconds
+xfs/realtime_logdev: 50 tests, 1259 seconds
+xfs/logdev: 50 tests, 3 failures, 1390 seconds
+  Flaky: generic/269:  6% (3/50)
+xfs/dax: 50 tests, 1125 seconds
+btrfs/default: 50 tests, 1573 seconds
+f2fs/default: 50 tests, 1471 seconds
+f2fs/encrypt: 50 tests, 1 failures, 1424 seconds
+  Flaky: generic/269:  2% (1/50)
+Totals: 1350 tests, 0 skipped, 42 failures, 0 errors, 35449s
+
