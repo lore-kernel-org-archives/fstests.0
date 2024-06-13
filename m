@@ -1,149 +1,220 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ABE7B433D8;
-	Wed, 12 Jun 2024 19:41:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F394140E22;
+	Thu, 13 Jun 2024 09:55:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718221297; cv=none; b=Vdjo1VHrkavLWYCouwWC//OaMgZMCScprYk65xAsA5U0VXwQnvBVlA/qihzxZJeJ2xAqkshYivzdAaaNEbhLI7JN++cRdDYUKOK3t8l7QjzSX8XUO4dz0CVaP7mBN97eTdDr5g6shvWVL4bPCS9xnc9ICjW5BtAPn+xWI9DPxlU=
+	t=1718272542; cv=none; b=fKX60B7m6jB/U1xYJLrvw3qvYkfsJnQXLQOFjIilJDNHMbVO1Q/hPmSvxzSUtI9+AUpP8VTpZHoNJ8d4/aYDnyaKXXl2ext6akw3AJmPHueDHEtIOLQAkIpmXWSubvNWoBBvIiHZc2KTb0lDT7+stJhJKtIbIyOneAeQy1rqKK8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718221297; c=relaxed/simple;
-	bh=eYAfv2IaeIPk7YgUpGrCp904JmVahjLKMWGGq1Z2nPM=;
+	s=arc-20240116; t=1718272542; c=relaxed/simple;
+	bh=XmS+lF9Ds2ss/fP43EzxkHbFuhkOym3rDSSC14WaCpw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UmrN+Wb6PcwEo7ucuEoCgIs7I5eaE86vU6uCQeJ3oUO3X5JHgkGGO0Pkw5tjJ17fF2kECG0NsJkdas1jjvP7SE8o7vx7yX3t1iJZ6xRR19cvQSlJZ6sJmA0q0wm6sWCf7nyhMC+RuuFsdvoPbmWihg7olIR4F6k/7mjajfNa9vg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ld1DIZUH; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=GayyhwC6fmTSzP25e6kh5Y0ORw1SJWxlpMtvfpYLrfTJPUDD7K1XxSusy+sEePrq0eq9846z7nICmIfChBh7rvORsHlaySjit6/JCzahrZvPsuqCT7tjbyt6n7lyT19xc9OTuigpAr3hMEZOreWZeMXtpDyQLhG7hRrXwoamQJM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eqmuBfJy; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ld1DIZUH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 34579C116B1;
-	Wed, 12 Jun 2024 19:41:37 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eqmuBfJy"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4425EC3277B;
+	Thu, 13 Jun 2024 09:55:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718221297;
-	bh=eYAfv2IaeIPk7YgUpGrCp904JmVahjLKMWGGq1Z2nPM=;
+	s=k20201202; t=1718272541;
+	bh=XmS+lF9Ds2ss/fP43EzxkHbFuhkOym3rDSSC14WaCpw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ld1DIZUHmUQWoJdWOJRcMipafbO1TzvzzpOFkKcDxwGXTkFb3g1/9q88+FN5kr6o1
-	 1GjJnMG/0ao13otOpez8evQhmmP2FZU3wXdhrlfys0RW+vb72ckXo9y1SmBMfaJ4mh
-	 PsIvBN72o+riOUHjpwCjafLji2zFMs3M6CNr3SU5EltImyRuTtQ1uIm3jpuL4Whiyy
-	 lAv5RPrY82ZVg52rbVs9fMME7QUL2kDkkS7O/FlWdYVMFkBHTBN1Efv4uqkAp00Aqr
-	 qnRIIxymHIdVbk733S2PQwAYXSPjv1d4LvDHg9OS3o5J0aDpitZalpVmzc7l+qqq2B
-	 RWeeUS8e+0TKA==
-Date: Wed, 12 Jun 2024 12:41:36 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
-	fstests@vger.kernel.org
-Subject: Re: Flaky test: generic:269 (EBUSY on umount)
-Message-ID: <20240612194136.GA2764780@frogsfrogsfrogs>
-References: <20240612162948.GA2093190@mit.edu>
+	b=eqmuBfJyQ4ulCxseiCrrkDyL3guNZ29qhM/nw9/qf902UeGvp+PzW/70QDUWHtXB/
+	 eJxK8BCW7uu/3vi4UosB69ghoU196sWwfaIhsQUQ4i/dE0eBjibdHnvPENskMtJ2CU
+	 O9SNGkbCeMfKv3fxMQjwjjk1K5FbafqpZamVKJmn5QEwffu8s8t/qs6fvQH4Afow9d
+	 TtxMeemVo9PifqenT0pJhdS4SJzfeQltd5M6J8OXETwPxlHvF66QDaWpiI+R0wI8BS
+	 YGdEjjUp+cdgZ20w4CJEzd8yFlYS64KParP7UdMaFzuJWG8BAjITTqYHSKVU9hNHAE
+	 ugTk/SRH+Zm5A==
+Date: Thu, 13 Jun 2024 11:55:37 +0200
+From: Christian Brauner <brauner@kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>, "Darrick J. Wong" <djwong@kernel.org>
+Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>, 
+	linux-block@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: Flaky test: generic/085
+Message-ID: <20240613-lackmantel-einsehen-90f0d727358d@brauner>
+References: <20240611085210.GA1838544@mit.edu>
+ <20240611163701.GK52977@frogsfrogsfrogs>
+ <20240612-abdrehen-popkultur-80006c9e4c8d@brauner>
+ <20240612144716.GB1906022@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed; boundary="zhjf4qywshxgjish"
 Content-Disposition: inline
-In-Reply-To: <20240612162948.GA2093190@mit.edu>
+In-Reply-To: <20240612144716.GB1906022@mit.edu>
 
-On Wed, Jun 12, 2024 at 05:29:48PM +0100, Theodore Ts'o wrote:
-> I've been trying to clear various failing or flaky tests, and in that
-> context I've been finding that generic/269 is failing with a
-> probability of ~5% on a wide variety of test scenarios on ext4, xfs,
-> btrfs, and f2fs on 6.10-rc2 and on fs-next.  (See below for the
-> details; the failure probability ranges from 1% to 10% depending on
-> the test config.)
-> 
-> What generic/269 does is to run fsstress and ENOSPC hitters in
-> parallel, and checks to make sure the file system is consistent at the
-> end of the tests.  Failure is caused by the umount of the file system
-> failing with EBUSY.  I've tried adding a sync and a "sync -f
-> $SCRATCH_MNT" before the attempted _scratch_umount, and that doesn't
-> seem to change the failure.
-> 
-> However, on a failure, if you sleep for 10 seconds, and then retry the
-> unmount, this seems to make the proble go away.  This is despite the
-> fact that we do wait for the fstress process to exit --- I vaguely
-> recall that there is some kind of RCU failure which means that the
-> umount will not reliably succeed under some circumstances.  Do we
-> think this is the right fix?
-> 
-> (Note: when I tried shortening the sleep 10 to sleep 1, the problem
-> came back; so this seems like a real hack.   Thoughts?)
 
-I don't see this problem; if you apply this to fstests to turn off
-io_uring:
-https://lore.kernel.org/fstests/169335095953.3534600.16325849760213190849.stgit@frogsfrogsfrogs/#r
+--zhjf4qywshxgjish
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 
-do the problems go away?
+On Wed, Jun 12, 2024 at 03:47:16PM GMT, Theodore Ts'o wrote:
+> On Wed, Jun 12, 2024 at 01:25:07PM +0200, Christian Brauner wrote:
+> > I've been trying to reproduce this with pmem yesterday and wasn't able to.
+> > 
+> > What's the kernel config and test config that's used?
+> >
+> 
+> The kernel config can be found here:
+> 
+> https://github.com/tytso/xfstests-bld/blob/master/kernel-build/kernel-configs/config-6.1
+> 
+> Drop it into .config in the build directory of any kernel sources
+> newer than 6.1, and then run "make olddefconfig".  This is all
+> automated in the install-kconfig script which I use:
+> 
+> https://github.com/tytso/xfstests-bld/blob/master/kernel-build/install-kconfig
+> 
+> The VM has 4 CPU's, and 26GiB of memory, and kernel is booted with the
+> boot command line options "memmap=4G!9G memmap=9G!14G", which sets up
+> fake /dev/pmem0 and /dev/pmem1 devices backed by RAM.  This is my poor
+> engineer's way of testing DAX without needing to get access to
+> expensive VM's with pmem.  :-)
+> 
+> I'm assuming this is a timing-dependant bug which is easiest to
+> trigger on fast devices, so a ramdisk might also work.  FWIW, I also
+> can see failures relatively frequently using the ext4/nojournal
+> configuration on a SSD-backed cloud block device (GCE's Persistent
+> Disk SSD product).
+> 
+> As a result, if you grab my xfstests-bld repo from github, and then
+> run "qemu-xfstests -c ext4/nojournal C 20 generic/085" it should
+> also reproduce.  See the Documentation/kvm-quickstart.md for more details.
 
---D
+Thanks, Ted! Ok, I think I figured it out.
 
-> Thanks,
-> 
->      	      	   	      	     - Ted
-> 
-> diff --git a/tests/generic/269 b/tests/generic/269
-> index 29f453735..dad02abf3
-> --- a/tests/generic/269
-> +++ b/tests/generic/269
-> @@ -51,9 +51,12 @@ if ! _workout; then
->  fi
->  
->  if ! _scratch_unmount; then
-> +    sleep 10
-> +    if ! _scratch_unmount ; then
->  	echo "failed to umount"
->  	status=1
->  	exit
-> +    fi
->  fi
->  status=0
->  exit
-> 
-> 
-> ext4/4k: 50 tests, 2 failures, 1339 seconds
->   Flaky: generic/269:  4% (2/50)
-> ext4/1k: 50 tests, 5 failures, 1224 seconds
->   Flaky: generic/269: 10% (5/50)
-> ext4/ext3: 50 tests, 1477 seconds
-> ext4/encrypt: 50 tests, 2 failures, 1253 seconds
->   Flaky: generic/269:  4% (2/50)
-> ext4/nojournal: 50 tests, 1 failures, 1503 seconds
->   Flaky: generic/269:  2% (1/50)
-> ext4/ext3conv: 50 tests, 4 failures, 1294 seconds
->   Flaky: generic/269:  8% (4/50)
-> ext4/adv: 50 tests, 2 failures, 1263 seconds
->   Flaky: generic/269:  4% (2/50)
-> ext4/dioread_nolock: 50 tests, 3 failures, 1327 seconds
->   Flaky: generic/269:  6% (3/50)
-> ext4/data_journal: 50 tests, 1 failures, 1317 seconds
->   Flaky: generic/269:  2% (1/50)
-> ext4/bigalloc_4k: 50 tests, 2 failures, 1193 seconds
->   Flaky: generic/269:  4% (2/50)
-> ext4/bigalloc_1k: 50 tests, 1259 seconds
-> ext4/dax: 50 tests, 5 failures, 1136 seconds
->   Flaky: generic/269: 10% (5/50)
-> xfs/4k: 50 tests, 3 failures, 1211 seconds
->   Flaky: generic/269:  6% (3/50)
-> xfs/1k: 50 tests, 1219 seconds
-> xfs/v4: 50 tests, 4 failures, 1206 seconds
->   Flaky: generic/269:  8% (4/50)
-> xfs/adv: 50 tests, 1 failures, 1206 seconds
->   Flaky: generic/269:  2% (1/50)
-> xfs/quota: 50 tests, 2 failures, 1460 seconds
->   Flaky: generic/269:  4% (2/50)
-> xfs/quota_1k: 50 tests, 1449 seconds
-> xfs/dirblock_8k: 50 tests, 1 failures, 1351 seconds
->   Flaky: generic/269:  2% (1/50)
-> xfs/realtime: 50 tests, 1286 seconds
-> xfs/realtime_28k_logdev: 50 tests, 1234 seconds
-> xfs/realtime_logdev: 50 tests, 1259 seconds
-> xfs/logdev: 50 tests, 3 failures, 1390 seconds
->   Flaky: generic/269:  6% (3/50)
-> xfs/dax: 50 tests, 1125 seconds
-> btrfs/default: 50 tests, 1573 seconds
-> f2fs/default: 50 tests, 1471 seconds
-> f2fs/encrypt: 50 tests, 1 failures, 1424 seconds
->   Flaky: generic/269:  2% (1/50)
-> Totals: 1350 tests, 0 skipped, 42 failures, 0 errors, 35449s
-> 
-> 
+P1
+dm_resume()
+-> bdev_freeze()
+   mutex_lock(&bdev->bd_fsfreeze_mutex);
+   atomic_inc_return(&bdev->bd_fsfreeze_count); // == 1
+   mutex_unlock(&bdev->bd_fsfreeze_mutex);
+
+P2						P3
+setup_bdev_super()
+bdev_file_open_by_dev();
+atomic_read(&bdev->bd_fsfreeze_count); // != 0
+
+						bdev_thaw()
+						mutex_lock(&bdev->bd_fsfreeze_mutex);
+						atomic_dec_return(&bdev->bd_fsfreeze_count); // == 0
+						mutex_unlock(&bdev->bd_fsfreeze_mutex);
+						bd_holder_lock();
+						// grab passive reference on sb via sb->s_count
+						bd_holder_unlock();
+						// Sleep to be woken when superblock ready or dead
+bdev_fput()
+bd_holder_lock()
+// yield bdev
+bd_holder_unlock()
+
+deactivate_locked_super()
+// notify that superblock is dead
+
+						// get woken and see that superblock is dead; fail
+
+In words this basically means that P1 calls dm_suspend() which calls
+into bdev_freeze() before the block device has been claimed by the
+filesystem. This brings bdev->bd_fsfreeze_count to 1 and no call into
+fs_bdev_freeze() is required.
+
+Now P2 tries to mount that frozen block device. It claims it and checks
+bdev->bd_fsfreeze_count. As it's elevated it aborts mounting holding
+sb->s_umount all the time ofc.
+
+In the meantime P3 calls dm_resume() it sees that the block device is
+already claimed by a filesystem and calls into fs_bdev_thaw().
+
+It takes a passive reference and realizes that the filesystem isn't
+ready yet. So P3 puts itself to sleep to wait for the filesystem to
+become ready.
+
+P2 puts the last active reference to the filesystem and marks it as
+dying.
+
+Now P3 gets woken, sees that the filesystem is dying and
+get_bdev_super() fails.
+
+So Darrick is correct about the fix but the reasoning is a bit
+different. :)
+
+Patch appended and on #vfs.fixes.
+
+--zhjf4qywshxgjish
+Content-Type: text/x-diff; charset=utf-8
+Content-Disposition: attachment;
+	filename="0001-fs-don-t-misleadingly-warn-during-thaw-operations.patch"
+
+From 35224b919d6778ca5dd11f76659ae849594bd2bf Mon Sep 17 00:00:00 2001
+From: Christian Brauner <brauner@kernel.org>
+Date: Thu, 13 Jun 2024 11:38:14 +0200
+Subject: [PATCH] fs: don't misleadingly warn during thaw operations
+
+The block device may have been frozen before it was claimed by a
+filesystem. Concurrently another process might try to mount that
+frozen block device and has temporarily claimed the block device for
+that purpose causing a concurrent fs_bdev_thaw() to end up here. The
+mounter is already about to abort mounting because they still saw an
+elevanted bdev->bd_fsfreeze_count so get_bdev_super() will return
+NULL in that case.
+
+For example, P1 calls dm_suspend() which calls into bdev_freeze() before
+the block device has been claimed by the filesystem. This brings
+bdev->bd_fsfreeze_count to 1 and no call into fs_bdev_freeze() is
+required.
+
+Now P2 tries to mount that frozen block device. It claims it and checks
+bdev->bd_fsfreeze_count. As it's elevated it aborts mounting.
+
+In the meantime P3 calls dm_resume() it sees that the block device is
+already claimed by a filesystem and calls into fs_bdev_thaw().
+
+It takes a passive reference and realizes that the filesystem isn't
+ready yet. So P3 puts itself to sleep to wait for the filesystem to
+become ready.
+
+P2 puts the last active reference to the filesystem and marks it as
+dying. Now P3 gets woken, sees that the filesystem is dying and
+get_bdev_super() fails.
+
+Fixes: 49ef8832fb1a ("bdev: implement freeze and thaw holder operations")
+Cc: <stable@vger.kernel.org>
+Reported-by: Theodore Ts'o <tytso@mit.edu>
+Link: https://lore.kernel.org/r/20240611085210.GA1838544@mit.edu
+Signed-off-by: Christian Brauner <brauner@kernel.org>
+---
+ fs/super.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/fs/super.c b/fs/super.c
+index b72f1d288e95..095ba793e10c 100644
+--- a/fs/super.c
++++ b/fs/super.c
+@@ -1502,8 +1502,17 @@ static int fs_bdev_thaw(struct block_device *bdev)
+ 
+ 	lockdep_assert_held(&bdev->bd_fsfreeze_mutex);
+ 
++	/*
++	 * The block device may have been frozen before it was claimed by a
++	 * filesystem. Concurrently another process might try to mount that
++	 * frozen block device and has temporarily claimed the block device for
++	 * that purpose causing a concurrent fs_bdev_thaw() to end up here. The
++	 * mounter is already about to abort mounting because they still saw an
++	 * elevanted bdev->bd_fsfreeze_count so get_bdev_super() will return
++	 * NULL in that case.
++	 */
+ 	sb = get_bdev_super(bdev);
+-	if (WARN_ON_ONCE(!sb))
++	if (!sb)
+ 		return -EINVAL;
+ 
+ 	if (sb->s_op->thaw_super)
+-- 
+2.43.0
+
+
+--zhjf4qywshxgjish--
