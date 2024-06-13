@@ -1,48 +1,49 @@
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCBD614B091
-	for <fstests@vger.kernel.org>; Thu, 13 Jun 2024 22:18:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A848F14B941
+	for <fstests@vger.kernel.org>; Thu, 13 Jun 2024 22:18:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718317114; cv=none; b=rkNWWh9spyDG+IIU0sBnhYl8ToRI1+0lV9urEE5UUIWBpcqbjXndhBbizMX4z3vTqs6g+4dOsfunjhdXTwZVSMbE3x0ZaWz9ajrRvLUYbc7zyrh3oWdsTrH/Mm4sE7UItuOoRfgnGzgLE2C5vZDa2foy8niEfdM2FO+zDNeBsCE=
+	t=1718317115; cv=none; b=Y3tl3rIOsze2R0d026U/72kH630gCR9ns4zJkUB+PgEun4KRjmsRpplapL85G8wF7IJaMFYVvnMKITmWJATpmaAZICMl9sslfw3NHvfNTNdjNV1kwsX3VWHLHOFEgA7gO6JSN/k+kl8GByIuDsUlYiTGH9Y8XeGQqnnvBW1lPB8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718317114; c=relaxed/simple;
-	bh=CssM57cUhLIsxQmArXR8ImI0sIHlvaAqlupSra9Xp2s=;
+	s=arc-20240116; t=1718317115; c=relaxed/simple;
+	bh=33AldXDpmVe32yhuUuAdtOOCmd+INFN4OtrEwKQ2rD8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HdizXYpX1+CeCN0XFiV91M+T92mc1huebuPTv6JR5GMe/Pr1aVOE9T1HJbYCyzl8xqWw2V5Mh06cjp2OF+jS4Fg5GAK6dyd9IYx2Af/DehRMm/68YOrSpcVl83I0ldSue6KaGMYaZ4k46AD3y0bA3isWUjKMi5ltfLap6vNvBqc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=bD4VJB6q; arc=none smtp.client-ip=18.9.28.11
+	 MIME-Version; b=RE+1b9KEieL2LJnZD5TFGCNIwOcYq+lpzqqOSzES+Tf8Jw1cCWa+W0hUZipAHXmhzdHcWWsCCVI0V4zDQz+cnajo5Y3E7nkn50E72BP/Zh+Leuo8b9MxNjGt3anRh51yjzMETTT6MzPs6B0MDyCNRZmtt1BwrQKl1htQHBjEkgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=FME7tX0h; arc=none smtp.client-ip=18.9.28.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="bD4VJB6q"
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="FME7tX0h"
 Received: from cwcc.thunk.org (pool-173-48-115-193.bstnma.fios.verizon.net [173.48.115.193])
 	(authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45DMIQIO008360
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45DMISUl008375
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 13 Jun 2024 18:18:27 -0400
+	Thu, 13 Jun 2024 18:18:29 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1718317108; bh=clq9l63/IeD7KNqYI85evXaOeOupvwaMZGAqKpr1ipo=;
+	t=1718317110; bh=FCYCBWIypQYLonDFM0fuxlBKHs7fK2m/V8Ut9mlF7vY=;
 	h=From:Subject:Date:Message-ID:MIME-Version;
-	b=bD4VJB6qmRCw/ZFtzeFNu6BuEVebbs6Q5VPrOCwKC1zSD25BM64GVdWrLVqKmN1DC
-	 LJgnjABwlGikuk/ddIiJ/+i/2ZyLRn4gmcy4fHwSpgjtAFSyOJW0lw+V2gCyckzKfc
-	 pIT0PX1c7GM4vZbKC6IQptYZOVQRV1JorMA1jfBwxkYoizuFnuVbibNtAwTszXjxQq
-	 BEgR85nv6Yxi+NApAQ+AR6KksZ0GYYRr+qJkxXWaESDT/aYjw1r1aUkBRVr/Q0LAh0
-	 LWaHShsiRlbBP7N6K4PUUxso+l2xkOrxvWt2XIUzhcdp6rnw6inY1reXd6G/7qXOex
-	 TGYDEcQUUaRtQ==
+	b=FME7tX0hUKpmiAjvlTNAVyVKitOdxqitG1WIzW2v76qt6bM/TYvGkRwng4fTdzRkx
+	 c4p03QxkNiAtWNkZTpkZmKBsG3vFf7kExyXDdpoWev9LnegHztLdit6lXz/8FKhE+u
+	 f7spu7vw0gFPFH1nz96lahlImNLVZl8z8I766l1v8129A9INxpS0JKbcOUorfXw7n6
+	 JAeGeXixlL1TzfI+7xk9A3JNX9sQyYt92cwWw0hGfbhl0quH0CumT9JLTXxJsqB1Z+
+	 hz3kl5pEkSOUHfHTZd4FhW1eqa4fK3p66phNrWDYH6H5oC7GwjfEK/x5s5WMc2IDac
+	 4Mle0dlqotrig==
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 8F84515C0579; Thu, 13 Jun 2024 18:18:26 -0400 (EDT)
+	id C4B1915C0579; Thu, 13 Jun 2024 18:18:28 -0400 (EDT)
 From: "Theodore Ts'o" <tytso@mit.edu>
 To: fstests@vger.kernel.org
 Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
         "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH 1/2] generic/269, generic/475: disable io_uring to prevent umount EBUSY flakes
-Date: Thu, 13 Jun 2024 18:18:09 -0400
-Message-ID: <20240613221810.803463-1-tytso@mit.edu>
+Subject: [PATCH 2/2] generic: new test which tests for an io_uring bug that causes umounts to fail
+Date: Thu, 13 Jun 2024 18:18:10 -0400
+Message-ID: <20240613221810.803463-2-tytso@mit.edu>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240613215639.GE1906022@mit.edu>
+In-Reply-To: <20240613221810.803463-1-tytso@mit.edu>
 References: <20240613215639.GE1906022@mit.edu>
+ <20240613221810.803463-1-tytso@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,53 +52,93 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-There is an I/O uring bug which can hold on to file references after
-the userspace program exits.  This is causing tests which run fsstress
-and then try to unmount the file system to fail in a flaky fashion.
-Since the point of these tests is not to test io_uring, and io_uring
-has remained buggy since August 2023, let's fix the problem by
-disabling io_uring in fsstress for these tests.
-
-We can add a new test which specifically (and reliably) tests for this
-io_uring bug.
-
-See the link below for more details.
+Test for an I/O uring bug which holds on to a file reference after the
+userspace program exits.
 
 Link: https://lore.kernel.org/fstests/20230831151837.qexyqjgvrllqaz26@zlang-mailbox/
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/generic/269 | 3 +++
- tests/generic/475 | 3 +++
- 2 files changed, 6 insertions(+)
+ tests/generic/750     | 61 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/750.out |  2 ++
+ 2 files changed, 63 insertions(+)
+ create mode 100755 tests/generic/750
+ create mode 100644 tests/generic/750.out
 
-diff --git a/tests/generic/269 b/tests/generic/269
-index 29f453735..9be7ea9aa 100755
---- a/tests/generic/269
-+++ b/tests/generic/269
-@@ -13,6 +13,9 @@ _begin_fstest auto rw prealloc ioctl enospc stress
- . ./common/filter
- # Disable all sync operations to get higher load
- FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
-+# io_uring is buggy and causes "fsstress; umount" EBUSY test flakes
-+FSSTRESS_AVOID="$FSSTRESS_AVOID -f uring_read=0 -f uring_write=0"
+diff --git a/tests/generic/750 b/tests/generic/750
+new file mode 100755
+index 000000000..b45df86b5
+--- /dev/null
++++ b/tests/generic/750
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2006 Silicon Graphics, Inc.  All Rights Reserved.
++#
++# FSQA Test No. 750
++#
++# Run fsstress ; umount to check for EBUSY errors when io_uring is enabled
++# For more information see:
++#    https://lore.kernel.org/fstests/20230831151837.qexyqjgvrllqaz26@zlang-mailbox/
++#
++#
++. ./common/preamble
++_begin_fstest auto rw io_uring stress
 +
- _workout()
- {
- 	echo ""
-diff --git a/tests/generic/475 b/tests/generic/475
-index abd6e89a1..3e9200771 100755
---- a/tests/generic/475
-+++ b/tests/generic/475
-@@ -45,6 +45,9 @@ _require_metadata_journaling $SCRATCH_DEV
- _dmerror_init
- _dmerror_mount
- 
-+# io_uring is buggy and causes "fsstress; umount" EBUSY test flakes
-+FSSTRESS_AVOID="$FSSTRESS_AVOID -f uring_read=0 -f uring_write=0"
++# Import common functions.
++. ./common/filter
++# Disable all sync operations to get higher load
++FSSTRESS_AVOID="$FSSTRESS_AVOID -ffsync=0 -fsync=0 -ffdatasync=0"
 +
- while _soak_loop_running $((50 * TIME_FACTOR)); do
- 	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p $((LOAD_FACTOR * 4)) >> $seqres.full &) \
- 		> /dev/null 2>&1
++_workout()
++{
++	num_iterations=30
++	out=$SCRATCH_MNT/fsstress.$$
++	args=`_scale_fsstress_args -p128 -n1000 -f setattr=1 $FSSTRESS_AVOID -d $out`
++	for ((i=0; i < num_iterations; i++))
++	do
++	    $FSSTRESS_PROG $args &>> $seqres.full &
++	    pid=$!
++	    sleep 1
++	    kill $pid >> $seqres.full 2>&1
++	    wait $pid
++	    if ! _scratch_unmount; then
++		echo "failed to umount"
++		status=1
++		exit
++	    fi
++	    _scratch_mount
++	done
++}
++
++# real QA test starts here
++_supported_fs generic
++_require_scratch
++_require_io_uring
++
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount
++
++if ! _workout; then
++	_scratch_unmount 2>/dev/null
++	exit
++fi
++
++if ! _scratch_unmount; then
++	echo "failed to umount"
++	status=1
++	exit
++fi
++status=0
++echo "Silence is golden"
++exit
+diff --git a/tests/generic/750.out b/tests/generic/750.out
+new file mode 100644
+index 000000000..bd79507b6
+--- /dev/null
++++ b/tests/generic/750.out
+@@ -0,0 +1,2 @@
++QA output created by 750
++Silence is golden
 -- 
 2.43.0
 
