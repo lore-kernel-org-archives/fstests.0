@@ -1,55 +1,55 @@
 Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EECD3EA7B
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 924C81448D7
 	for <fstests@vger.kernel.org>; Fri, 14 Jun 2024 06:17:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718345857; cv=none; b=prdhHLpHMc/kt3yDZAUYn78BJ90/oL+9mMK8mksL7fbXPRo7dn+wnhEMe0Z+g4GaFt1yp+HXeKGb7KGwmN6uNQh5IXST0FWmVYK1tbdyBSQSnVN02MRAGxZNotSLaHw1oJj+DM7fA4G195IMfJbH0dYg/P7ftT6ZuOofdxfejE0=
+	t=1718345857; cv=none; b=T513seh1CJNul2H56QPuGy6NM0d+XPi1PlWjzRCqUjdqt5Siua0UdBJFscJTUHLWKjmE91eflf4KJ9l9+avBa9yX4qT1A5VYY0+IqC/FABe4AVahavJANLBfZKYOU0si8Z+6RGQ91e7zxNu0NtxUIPkCWvizcE1lG706E9K7gQs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1718345857; c=relaxed/simple;
-	bh=VaYqxus4qenVQf8KtNY8nvqclpqZurah5H/tEVxzrs8=;
+	bh=oFG37xGsX3MdCgmBJjmNiJUJ9Y7OK01SvQ3tDUxbKMQ=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:Content-Type:
-	 MIME-Version:References; b=s1JotjciGk37KVnfs75wq9rPI2h9OvRthzdqupmL9T90IM5dXNeRbMI3fK/Bxc4/zNKk5MgNKRp/bGQo6QR4SpEs5xTHvlFSx0O0xwn6XcnSp1TbdT3AGLjk6it7DtmD79Sbn7CdBtRfDCaqdGFheZ+7jEo/S2l+8geFwye3lII=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=CbwKQDMC; arc=none smtp.client-ip=210.118.77.12
+	 MIME-Version:References; b=bOBlfgXyb40Iq7eeHiA4wd+Vw4Cc7HDyBGA9VgtL3MFNZQgYQqeK6OtjQ0CPh1/VP3CPfdeh29ahTzmhJUPnfpDIWHU/bMgM/VboX7vWPnLzJ+DRzuuxxfEJOgXEPAT7AOKswHj4uJkreVm4Detf1jqf0VgkogykN+2B3beObSc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=QTpE79Fb; arc=none smtp.client-ip=210.118.77.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="CbwKQDMC"
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="QTpE79Fb"
 Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
-	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240614061728euoutp02a5a79f6c779e0975a799d239d8efcb8e~YynHjLlvd0937309373euoutp02C
-	for <fstests@vger.kernel.org>; Fri, 14 Jun 2024 06:17:28 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240614061728euoutp02a5a79f6c779e0975a799d239d8efcb8e~YynHjLlvd0937309373euoutp02C
+	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240614061727euoutp02d4d5323d92c972cbe788300a86d6a69b~YynGq2_ax0937309373euoutp02B
+	for <fstests@vger.kernel.org>; Fri, 14 Jun 2024 06:17:27 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240614061727euoutp02d4d5323d92c972cbe788300a86d6a69b~YynGq2_ax0937309373euoutp02B
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1718345848;
-	bh=8NCSmTrJSc/f5hHik1YO9vtEi1Khb42+C4ewEPTSeUA=;
+	s=mail20170921; t=1718345847;
+	bh=oFG37xGsX3MdCgmBJjmNiJUJ9Y7OK01SvQ3tDUxbKMQ=;
 	h=From:To:CC:Subject:Date:In-Reply-To:References:From;
-	b=CbwKQDMC1hnAFRNkDP89ZFPYNoO2DCb6hFtRuo7v8fgqHauFX9azT/6FamYXTFvdx
-	 OujhnVXSY/ySezHSk898ncmLujLKhEpaDR38uu2+3dXYjUXs08RQPYxIardDkHoMWH
-	 6QMffa5kKUc65oRvkXGbIATbKVf7o0CsznTUcGo4=
-Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+	b=QTpE79FbrNyHzEqoml/CyWF07giuy15EZvNv0du06g1cAxE2Eps7d5P4bZLbhP+3j
+	 2BGnOVxmsWdHR6v2wUhTo5W+MzZ/rQ/veaDxPREtHMxYSb/k4/x/5Bqp690Qlg8UTV
+	 2CkVxpihPNCYOIpFhkwN783PKCrlO6KfOKKlbmDg=
+Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
 	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20240614061728eucas1p181ce12fbc0ec7e69b17adf6b8c58714e~YynHbZ12V1171511715eucas1p11;
-	Fri, 14 Jun 2024 06:17:28 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-	eusmges2new.samsung.com (EUCPMTA) with SMTP id 8E.E9.09875.870EB666; Fri, 14
-	Jun 2024 07:17:28 +0100 (BST)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-	20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5~YynG5Dpjg0342203422eucas1p1P;
+	20240614061727eucas1p138ba276a7179b6e2c2508ce57b1c5c5b~YynGibQiW1174711747eucas1p1o;
 	Fri, 14 Jun 2024 06:17:27 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-	eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-	20240614061727eusmtrp1386a63311e93d6893779b3233180ee20~YynG4Qei21655316553eusmtrp1V;
-	Fri, 14 Jun 2024 06:17:27 +0000 (GMT)
-X-AuditID: cbfec7f4-11bff70000002693-6d-666be0789753
-Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
-	eusmgms2.samsung.com (EUCPMTA) with SMTP id AD.C5.09010.770EB666; Fri, 14
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+	eusmges3new.samsung.com (EUCPMTA) with SMTP id 73.74.09620.770EB666; Fri, 14
 	Jun 2024 07:17:27 +0100 (BST)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7~YynGKfp8c0868308683eucas1p2i;
+	Fri, 14 Jun 2024 06:17:26 +0000 (GMT)
+Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
+	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240614061726eusmtrp22df7355631636591df48114241c40da4~YynGKAtyh1924819248eusmtrp2g;
+	Fri, 14 Jun 2024 06:17:26 +0000 (GMT)
+X-AuditID: cbfec7f5-d31ff70000002594-3e-666be07712ac
+Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
+	eusmgms1.samsung.com (EUCPMTA) with SMTP id 85.B7.08810.670EB666; Fri, 14
+	Jun 2024 07:17:26 +0100 (BST)
 Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
 	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
-	20240614061727eusmtip114710655ae39f6f57c388534907ba608~YynGv_NMG2137921379eusmtip1Y;
-	Fri, 14 Jun 2024 06:17:27 +0000 (GMT)
+	20240614061726eusmtip1ce6d9b3afd468b9504403658f0ae89ce~YynF-JzKB1662616626eusmtip1c;
+	Fri, 14 Jun 2024 06:17:26 +0000 (GMT)
 Received: from CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348) by
 	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348) with Microsoft SMTP
 	Server (TLS) id 15.0.1497.2; Fri, 14 Jun 2024 07:17:26 +0100
@@ -61,11 +61,12 @@ To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 CC: Pankaj Raghav <p.raghav@samsung.com>, "mcgrof@kernel.org"
 	<mcgrof@kernel.org>, "hughd@google.com" <hughd@google.com>, Daniel Gomez
 	<da.gomez@samsung.com>
-Subject: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
-Thread-Topic: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
-Thread-Index: AQHaviKG7LBDn2pSnkKBi8GAx++1Pw==
-Date: Fri, 14 Jun 2024 06:17:25 +0000
-Message-ID: <20240614061722.1080-5-da.gomez@samsung.com>
+Subject: [PATCH 2/5] common/config: fix RECREATE_TEST_DEV initialization
+Thread-Topic: [PATCH 2/5] common/config: fix RECREATE_TEST_DEV
+	initialization
+Thread-Index: AQHaviKG/M0IxN7t8E2aYXs9AVkdHg==
+Date: Fri, 14 Jun 2024 06:17:24 +0000
+Message-ID: <20240614061722.1080-3-da.gomez@samsung.com>
 In-Reply-To: <20240614061722.1080-1-da.gomez@samsung.com>
 Accept-Language: en-US, en-GB
 Content-Language: en-US
@@ -81,67 +82,70 @@ List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpmleLIzCtJLcpLzFFi42LZduznOd2KB9lpBi++cFicbtnLbvH0Ux+L
-	xY0JTxkdmD0WbCr12LSqk83j8ya5AOYoLpuU1JzMstQifbsErox1MyYxF7SxVny5cIy5gXEu
-	SxcjB4eEgInExancXYxcHEICKxgl3uw8xw7hfGGU2L/3EAuE85lR4siUaWxdjJxgHW9O/IGq
-	Ws4ocb5lNjtc1fUd56BazjBK7Oi+xgjhrGSU2PN+KRNIP5uApsS+k5vYQWwRAXOJ2R2T2UCK
-	mAUWMkp8W/iMFSQhLOAs0byziQmiyEPiT+MXqAY9ifcbZzGCnM4ioCqxalYGSJhXwEJi26IG
-	RhCbU8BSYt2uNrAxjAKyEo9W/gJrZRYQl7j1ZD4TxA+CEotm72GGsMUk/u16CPWbjsTZ608Y
-	IWwDia1L97FA2IoSHcduskHM0ZO4MXUKlK0tsWzha2aIGwQlTs58Ava9hMB0TolbB6dBLXCR
-	ePL8CNRQYYlXx7ewQ9gyEqcn97BMYNSeheS+WUh2zEKyYxaSHQsYWVYxiqeWFuempxYb5aWW
-	6xUn5haX5qXrJefnbmIEppPT/45/2cG4/NVHvUOMTByMhxglOJiVRHhnLcxKE+JNSaysSi3K
-	jy8qzUktPsQozcGiJM6rmiKfKiSQnliSmp2aWpBaBJNl4uCUamDaEa7fYWVgsvYM08Zzn295
-	hnKlP5x4X9zA7KvD7d+ZHwzV5cvWXZ31dWvjDB0Bhn+/p0gKpDAeKzu0fQGvNeP0ytt/rMNc
-	k94fCHxu4cQqd//U9YeX70x7wl6yZXPB/ltOvjv+uvU5yNavn/Nmr83/+xvCaxRNdgtF9Fk0
-	mX5mSQx4Wtk1RzWr5PO0B3svzqpVfG2caVHuIPVTrOdzCZPM1ukh2TesJ/5dm1zJHPbyzJzK
-	yKrseQtbff/tln8xTSPniuwRn2fTNiz/XrGJ2Sf3yctjdlfMi9u4gnW5fq8XPtD5dMXjp11v
-	z93/8emF7j1pi39JG3YtfP/rSN/SD/Zauz83veNNO1wWlLj/cjIfpxJLcUaioRZzUXEiACu2
-	NeWWAwAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrLIsWRmVeSWpSXmKPExsVy+t/xu7rlD7LTDKZ9UrI43bKX3eLppz4W
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmphleLIzCtJLcpLzFFi42LZduzned3yB9lpBjNOsVucbtnLbvH0Ux+L
+	xY0JTxkdmD0WbCr12LSqk83j8ya5AOYoLpuU1JzMstQifbsEroxz5/8xF8xnr3i6dBpTA+Ns
+	ti5GTg4JAROJnSe7WboYuTiEBFYwSpxYPIMRwvnCKLH9wnomCOczo8Til+8YYVpar6yBSixn
+	lGifNo0FrurpvK2sEM4ZRokd3deghq1klNjzfikTSD+bgKbEvpOb2EFsEQFzidkdk9lAipgF
+	FjJKfFv4jBUkISzgIfFy/xNGiCJ/ia3tG1ggbD2JMy0fwGwWAVWJHRdngtXzClhI9O5+DbaA
+	U8BSYt2uNrA4o4CsxKOVv8CWMQuIS9x6Mp8J4glBiUWz9zBD2GIS/3Y9hIaHjsTZ60+gHjWQ
+	2Lp0HwuErSjRcewmG8QcPYkbU6dA2doSyxa+Zoa4QVDi5Mwn4LCQEJjNKbHmQy9QEQeQ4yIx
+	Z4ksxBxhiVfHt7BD2DIS/3fOZ5rAqD0LyXmzkKyYhWTFLCQrFjCyrGIUTy0tzk1PLTbOSy3X
+	K07MLS7NS9dLzs/dxAhMKKf/Hf+6g3HFq496hxiZOBgPMUpwMCuJ8M5amJUmxJuSWFmVWpQf
+	X1Sak1p8iFGag0VJnFc1RT5VSCA9sSQ1OzW1ILUIJsvEwSnVwGQtZ6aY03CA4b37/3kqInrL
+	L0sEW7drzVpSv3t/vPRTlT1yQtxXa8Uidt/gvzXRk39XlX0T/+O/2x2WqIUyq6hvqpP3U9EU
+	PtL053SFjLrBAm/Hfymvbduvfk94Hmvkc9RfbPY8tYwzPz0DN507Eq8S0HiuUOPpNo/j3iwt
+	C67lmot/+Z+gZrusqsXFNtr7cX7nioMSL844Ve/VWKP3Vdx+zb0HlitPO/rHmopnnzC9IGBc
+	dkd2+u71ko9mTz59P/WZa96VuTe+/cszmvxG/uebbbafk09LPNoUPbXjZbNcTndNrHil84bb
+	juazO7IL9m3Sv5X7j+XgSYcWXdtGy3lnPv3dWnm1k0siY1eQnhJLcUaioRZzUXEiAFdc7K6X
+	AwAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrHIsWRmVeSWpSXmKPExsVy+t/xu7plD7LTDI481bU43bKX3eLppz4W
 	ixsTnjI6MHss2FTqsWlVJ5vH501yAcxRejZF+aUlqQoZ+cUltkrRhhZGeoaWFnpGJpZ6hsbm
-	sVZGpkr6djYpqTmZZalF+nYJehnrZkxiLmhjrfhy4RhzA+Ncli5GTg4JAROJNyf+sHcxcnEI
-	CSxllOjdNI0ZIiEjsfHLVVYIW1jiz7UuNoiij4wSW488YoVwzjBKnF07A2yUkMBKRom7cyJB
-	bDYBTYl9Jzexg9giAuYSszsmg3UzCyxklPi28BnYWGEBZ4nmnU1MEEUeEn8av0A16Em83ziL
-	sYuRg4NFQFVi1awMkDCvgIXEtkUNYGEhIPvYPj2QMKeApcS6XW1gExkFZCUerfwFNoVZQFzi
-	1pP5TBAPCEgs2XMe6jFRiZeP/0E9piNx9voTRgjbQGLr0n3QUFGU6Dh2kw1ijp7EjalToGxt
-	iWULXzNDnCMocXLmE5YJjNKzkKybhaRlFpKWWUhaFjCyrGIUSS0tzk3PLTbSK07MLS7NS9dL
-	zs/dxAhMB9uO/dyyg3Hlq496hxiZOBgPMUpwMCuJ8M5amJUmxJuSWFmVWpQfX1Sak1p8iNEU
-	GEITmaVEk/OBCSmvJN7QzMDU0MTM0sDU0sxYSZzXs6AjUUggPbEkNTs1tSC1CKaPiYNTqoGJ
-	0cNnrneJ6icxXSuVN6UProna+LHKLVn5f+a6wJPPM3ZHh/lfeLadaztj2IKI23+z/3FP2mkW
-	88XZTefAdgHGcK9m8f6yx1JhUQ6hzwVP/98/5fPEyRkTmO69VAw6dDrx+OzCwxNldhYf6e7P
-	2/5VRO5TJr966+ZbfaXTJjzKa9Z/6ze5xK+A/dOzP09cuM8vj1HtXvDeV/VXd/GTi7NOcPYt
-	W8TyOOYrZ//23F3mdvUd7BIp3ir8Zw8+mB1a8svjyRe3h4/092QyM0ULuZkpHOyTYds+pzBM
-	Su/p1PPhebG5V3cELd8e9Dw86qjMFaWXRTOvlCjHy0mLtX/R+swpJ31WoGn6Vs7WD/GxDPFK
-	LMUZiYZazEXFiQAPyyAekAMAAA==
-X-CMS-MailID: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+	sVZGpkr6djYpqTmZZalF+nYJehnnzv9jLpjPXvF06TSmBsbZbF2MnBwSAiYSrVfWMHUxcnEI
+	CSxllFj47AIrREJGYuOXq1C2sMSfa11sEEUfGSVaL2xkhHDOMEqcXTuDBaRKSGAlo8TdOZEg
+	NpuApsS+k5vYQWwRAXOJ2R2TwbqZBRYySnxb+AxsrLCAh8TL/U8YIYp8JY5NfscMYetJnGn5
+	ADaURUBVYsfFmWD1vAIWEr27XwPdygG0zELi2D49kDCngKXEul1tYCWMArISj1b+AtvLLCAu
+	cevJfCaIDwQkluw5zwxhi0q8fPwP6jMdibPXIU6QEDCQ2Lp0HwuErSjRcewmG8QcPYkbU6dA
+	2doSyxa+ZoY4R1Di5MwnLBMYpWchWTcLScssJC2zkLQsYGRZxSiSWlqcm55bbKhXnJhbXJqX
+	rpecn7uJEZgQth37uXkH47xXH/UOMTJxMB5ilOBgVhLhnbUwK02INyWxsiq1KD++qDQntfgQ
+	oykwiCYyS4km5wNTUl5JvKGZgamhiZmlgamlmbGSOK9nQUeikEB6YklqdmpqQWoRTB8TB6dU
+	A9Pm7U8PX7pRxreruOWQw4kpW/OE7UqTE08sKnVrFZdTMlVrk/Db07Iz7MHy12en+86Z2VNY
+	usHzmbz/Uo+7Jh86Sg8s704pSP+5ifvSpqw7Z0+ECcy9nuV9ef+y84IHZgcmvYi+OkMk7Lri
+	Oa0NKraxYfP0D2xYcp53ho9nY8CXW5VXWq4febtA7vnTZtkVvPPrmfaVP1n0Ne2zvRyXh0uJ
+	nFFS/bSCHYeYy1eW505X0Muxrdx/4sCl3spsJ/92l2tP99xXZVx1vmKCrFpV2KndhrstYruC
+	BVYwxJl++nNaZ07zXzeHbaFBOwwqQ5NSp7aU1yyotq/+Irfo1NWAXTNUJv46Gv9Jf3vTWXE+
+	TxMlluKMREMt5qLiRACeAdhMkQMAAA==
+X-CMS-MailID: 20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7
 X-Msg-Generator: CA
-X-RootMTR: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+X-RootMTR: 20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7
 X-EPHeader: CA
 CMS-TYPE: 201P
-X-CMS-RootMailID: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+X-CMS-RootMailID: 20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7
 References: <20240614061722.1080-1-da.gomez@samsung.com>
-	<CGME20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5@eucas1p1.samsung.com>
+	<CGME20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7@eucas1p2.samsung.com>
 
-Make sure tmpfs scratch device inherits the extra tmpfs mount options
-variable (TMPFS_MOUNT_OPTIONS).
+Do not allow the overwriting of the RECREATE_TEST_DEV variable. When
+this variable is enabled, common/rc -> common/config will reset it
+to false after the test device recreation process. This allows for
+differentiation in mount options for SCRATCH and TEST.
 
 Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
 ---
- common/rc | 2 +-
+ common/config | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index 7f995b0fa..a42792c37 100644
---- a/common/rc
-+++ b/common/rc
-@@ -224,7 +224,7 @@ _test_options()
- # hosted on $SCRATCH_DEV, so can't use external scratch devices).
- _common_dev_mount_options()
- {
--	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $*
-+	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $*
- }
+diff --git a/common/config b/common/config
+index a1cd14de6..43b32b93d 100644
+--- a/common/config
++++ b/common/config
+@@ -94,7 +94,7 @@ export PWD=3D`pwd`
+ export MALLOCLIB=3D${MALLOCLIB:=3D/usr/lib/libefence.a}
+ export LOCAL_CONFIGURE_OPTIONS=3D${LOCAL_CONFIGURE_OPTIONS:=3D--enable-rea=
+dline=3Dyes}
 =20
- _scratch_mount_options()
+-export RECREATE_TEST_DEV=3Dfalse
++export RECREATE_TEST_DEV=3D${RECREATE_TEST_DEV:=3Dfalse}
+=20
+ # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+ set_mkfs_prog_path_with_opts()
 --=20
 2.43.0
