@@ -1,43 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF9AB3219F
-	for <fstests@vger.kernel.org>; Fri, 14 Jun 2024 15:55:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DC53179BC
+	for <fstests@vger.kernel.org>; Fri, 14 Jun 2024 18:28:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718380557; cv=none; b=ud3I0fAvv0Qu25uI+X/Tq0sPTpVIXAdIvABA15IDFQFLPekQtlvr6jcRz3ECGY7geHeWn4QxuGCLKW9/rOt85WbvLot2x57M4PKhUO/61JviHCbk16rhg9FTRCcQnnjninpOrYjQs0trrgcoFZjiQcnv5sT3jmS4k6kq0vg65ck=
+	t=1718389697; cv=none; b=S8S9TsabqTPnGE6VwCBWFNAha6gJwQgWGwFqEl2WoNQ0y7aTp24bF/xE1UKq/wPcLSffkoxqAYeIsI1lWdZAqIK/Mala0yqn6INAkVV/1bGsB+vQmDowJiAMr3TpS12dKcXDFd1E+nFebAsYLrKTg6+6mA+TzWQv4MoLo+KpiCQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718380557; c=relaxed/simple;
-	bh=Cln/CxZKa6cTQG+AqV02w6cMjf7JLD7d3OwvH9hwQtk=;
+	s=arc-20240116; t=1718389697; c=relaxed/simple;
+	bh=n0nzYbuEKsP5CR5izx9tmUeBzNZs6Dv9llNLoXFas/o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uIi+Rpyaq4XdVoPDHht2FMhZNsOOXeuaH7g4x+a03b9YsZ+nd2atSBUk1/psju8wWJCPmyiB0sEGuXhM9AR6cbriQlyhdJW75ExdZ4ffoHrPgBGw2HgtsoWaG1pbIhsHut6ech/JWr0uaaLVQ9A2nHz5eQtot721SNORAO9OkNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZR8MjJZE; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=R2c2lYS/tJ7MEZf0pNokWitnVoj+R1CcFFqg8x9zBly6vv4ayOlMHAYxTku3KVpQvmuRdQGgA0ufBjq+s9zjMMt53qIhHnvkNyfNL6YmisDCLTAFxjJLzXx15DstbAwANu/d3lATtrj2TxsKfrmVpBPzjDsr/Iyanm9W1M8QXJw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=TqXSAAeH; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZR8MjJZE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 712C8C2BD10;
-	Fri, 14 Jun 2024 15:55:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718380556;
-	bh=Cln/CxZKa6cTQG+AqV02w6cMjf7JLD7d3OwvH9hwQtk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ZR8MjJZEomXchbDj5PJ1BL2j6h4viuov5+oy4dv3xBueIVjbCfYMxwu9dzlROfV4B
-	 98vFx3N6wByIxkQZ8ZULWNDLdAHUdxvfdPqXmqIZVhGwotmE3lpDDshxnLh3flIReB
-	 tSJ/3BnqcgPTj9Z0qK98SviweOk1z9Nby+F8xWnTyZwhZ/iv+3/CpcC5KBcvfDfIgu
-	 I+4nxsnJU0pDm0o7f0pq8C2B9kMeQmoz50yMzHdhM7ZznwyFS/VMUEGgQyTnQVa3OR
-	 OXMsTto8fmRfB+IG5AEwmZxhHWQp1r5knod1ipz0ygBEe2puK30bztMi0596xNFAta
-	 Qz9KsJa5aaMgw==
-Date: Fri, 14 Jun 2024 08:55:55 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Daniel Gomez <da.gomez@samsung.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Pankaj Raghav <p.raghav@samsung.com>,
-	"mcgrof@kernel.org" <mcgrof@kernel.org>,
-	"hughd@google.com" <hughd@google.com>
-Subject: Re: [PATCH 5/5] common/rc: print scratch and test mount options
-Message-ID: <20240614155555.GE6110@frogsfrogsfrogs>
-References: <20240614061722.1080-1-da.gomez@samsung.com>
- <CGME20240614061728eucas1p2d7488fbbd2887c5d60d2bd1e3fd48580@eucas1p2.samsung.com>
- <20240614061722.1080-6-da.gomez@samsung.com>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="TqXSAAeH"
+Received: from macsyma.thunk.org ([84.247.112.25])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 45EIS5YI006182
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 14 Jun 2024 14:28:07 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1718389688; bh=UBuv+ACn7yY6Imbu4MZetpHQlIo5F19TevPQHO1PRME=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=TqXSAAeHFlrvMmoGgZH7vuDT4FIZLDOG5CjnIarT1J/2KgJ33AoaKNyF9aTPSjsdg
+	 z2pZApE6L/0/Noj6HkpsOoe6TxwHQP3VfYckNz7JsKPCDQ03IVG+P1Pv3/ErLF62mx
+	 IrO6Q9nPNfEilnUPnisqpWJqQKdHtynPXxBeEUO0Twjs9yRJgughiqswvrbVvSDxYx
+	 AKv1wza3b/pFX+AG6GkTBmdIJmEbeutduj+Y/Cr55hF9Bp/LF1F37yXOTD0AYtHIM5
+	 w0pwSNvMsEA5wLvPG5Eqx27g4uzw8iC65XTZGFUzSiouj9cWEoAr60X3aXLanMqzYN
+	 O3iIlVmFuv6kg==
+Received: by macsyma.thunk.org (Postfix, from userid 15806)
+	id 4C9A7340F4A; Fri, 14 Jun 2024 20:27:59 +0200 (CEST)
+Date: Fri, 14 Jun 2024 19:27:59 +0100
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>,
+        fstests@vger.kernel.org
+Subject: Re: Flaky test: generic:269 (EBUSY on umount)
+Message-ID: <20240614182759.GF1906022@mit.edu>
+References: <20240612162948.GA2093190@mit.edu>
+ <20240612194136.GA2764780@frogsfrogsfrogs>
+ <20240613215639.GE1906022@mit.edu>
+ <20240614041618.GA6147@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,98 +52,37 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240614061722.1080-6-da.gomez@samsung.com>
+In-Reply-To: <20240614041618.GA6147@frogsfrogsfrogs>
 
-On Fri, Jun 14, 2024 at 06:17:26AM +0000, Daniel Gomez wrote:
-> Mount options for a SCRATCH device might not be the same in the TEST
-> device if RECREATE_TEST_DEV is not enabled. So, print mount options for
-> each device to clarify this.
+On Thu, Jun 13, 2024 at 09:16:18PM -0700, Darrick J. Wong wrote:
 > 
-> Add mount and mkfs info for TEST devices so we get the same information
-> being printed for both devices.
-> 
-> Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
-> ---
->  check     |  4 ++++
->  common/rc | 20 ++++++++++++++++++--
->  2 files changed, 22 insertions(+), 2 deletions(-)
-> 
-> diff --git a/check b/check
-> index 723a52e30..e02d28b39 100755
-> --- a/check
-> +++ b/check
-> @@ -807,7 +807,11 @@ function run_section()
->  	# print out our test configuration
->  	echo "FSTYP         -- `_full_fstyp_details`"
->  	echo "PLATFORM      -- `_full_platform_details`"
-> +	echo "TEST device:"
-> +	echo "MKFS_OPTIONS  -- `_test_mkfs_options`"
-> +	echo "MOUNT_OPTIONS -- `_test_mount_options`"
->  	if [ ! -z "$SCRATCH_DEV" ]; then
-> +	  echo "SCRATCH device:"
->  	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
->  	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
+> Amusingly enough, I still have that patch (and generic/1220) in my
+> fstests branch, and I haven't seen this problem happen on g/1220 in
+> quite a while.
 
-Now there are two lines that start with "MKFS_OPTIONS"; will this break
-anyone's parsing scripts?  Or should these be prefixed:
+Remind me what your fstests git repo is again?
 
-echo "TEST_MKFS_OPTIONS -- `_test_mkfs_options`"
-...
-echo "SCRATCH_MKFS_OPTIONS -- `_scratch_mkfs_options`"
+The generic/750 test in my patch 2/2 that I sent out reproduces the
+problem super-reliably, so long as fsstress actually issues the
+io_uring reads and writes.  So if you have your patch applied which
+suppresses io_uring from fstress by default, you might need to modify
+the patch series to force the io_uring, at which point it quite nicely
+demonstrates the fsstress ; umount problem.  (It sometimes requires
+more rounds of fsstress ; umounts before it repro's on the xfs/4k, but
+it repro's really nicely on ext4/4k).
 
-?
+xfs/4k:
+  generic/750  Failed   3s
+  generic/750  Failed   1s
+  generic/750  Failed   33s
+  generic/750  Failed   1s
+  generic/750  Pass     33s
+ext4/4k:
+  generic/750  Failed   3s
+  generic/750  Failed   2s
+  generic/750  Failed   7s
+  generic/750  Failed   2s
+  generic/750  Failed   7s
 
-Also should these four variables be captured explicitly by the reports
-that are generated by common/report ?
-
---D
-
->  	fi
-> diff --git a/common/rc b/common/rc
-> index a42792c37..b351a82eb 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -235,6 +235,17 @@ _scratch_mount_options()
->  					$SCRATCH_DEV $SCRATCH_MNT
->  }
->  
-> +_test_mount_options()
-> +{
-> +	_test_options mount
-> +
-> +	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
-> +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> +	else
-> +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> +	fi
-> +}
-> +
->  _supports_filetype()
->  {
->  	local dir=$1
-> @@ -456,8 +467,7 @@ _test_mount()
->          return $?
->      fi
->  
-> -    _test_options mount
-> -    _mount -t $FSTYP$FUSE_SUBTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> +    _mount -t $FSTYP$FUSE_SUBTYP `_test_mount_options $*`
->      mount_ret=$?
->      [ $mount_ret -ne 0 ] && return $mount_ret
->      _idmapped_mount $TEST_DEV $TEST_DIR
-> @@ -571,6 +581,12 @@ _metadump_dev() {
->  	esac
->  }
->  
-> +_test_mkfs_options()
-> +{
-> +	_test_options mkfs
-> +	echo $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
-> +}
-> +
->  _test_mkfs()
->  {
->      case $FSTYP in
-> -- 
-> 2.43.0
-> 
+							- Ted
+							
