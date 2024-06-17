@@ -1,133 +1,117 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB45B1361;
-	Sat, 15 Jun 2024 00:29:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4BB5F19BC6
+	for <fstests@vger.kernel.org>; Mon, 17 Jun 2024 06:57:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718411382; cv=none; b=EYAX0yd0KfC94YdXyeJfaNhISXMbDXktWRCDBDSmeq/Hp0YCuHsgEfX8YEvNDiqIIuLNfRlUMQpK52SwZCbzeLXlN6TGM6+qLhiS8tXoikdKWfozFzqBBqySSHym7jPSotgSKwniCFspyeBENfxXuQ2As8C5mdkLFyy9RKb4FY4=
+	t=1718607461; cv=none; b=jRv60yK9hTtd7OUAFeS8SAayTaOBfKTlxkG1ZWoHMbGs5ZPUu8+UB7oGcN5rIh2kvQfRzZV43y+bwhbCqPbbhBH2xXZGDur3dX8BE/e4XVM3N3/UpV4xm/7sTowi+cFg00Ck/FvmRZ7BN4+yln3iE4xHnUaRpk3wA0+UQZUnUP0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718411382; c=relaxed/simple;
-	bh=vtz42luEAJn0VhLOUkv2/QP5NNZipfjnEVBsxy/fZy0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ueDgwav9MN9ObFoh28PiD097ywH7hFdfrrli9xfwdOEXsJ0mvNbAI3FmcslFeV+m3oQNY4K7lVvoVsmjsnT/3N37yeaScLAbw6MDPKVVC0zSRtDQsbLilfUIssmX3k95G4R4FkIPwRPgAr+vRuXnzCgSc1TXbKq1/ivUzzcePkQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=bixN2wSh; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1718607461; c=relaxed/simple;
+	bh=66QCBEwGbPTu1DwAnY57XC0jId4K7blwERNX5QCbjRc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PzJCONwEvKseD++oPi/OcvkNnR9aC1dSBx4arW7vHDJtJ7IKlDA+6XwJyYZrIRU65ex/cEfabo7UAH7Aa6xBztjULLu4dEoO6Ju5oH/HhBfoLNRHyxbgThvOcvhGo5Do/0czeQSTrdIGbM5rcCSindTKsJmxSmkhKJ5uuLUD4zc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ANvvhvlF; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="bixN2wSh"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=KMlKjNaY/F8QL3qECnT8EKms3WZs5CznUIuEAKsL0wI=; b=bixN2wShYjRMBjSUYnaQovwNZk
-	EEqsZMmtJGDJBNqorl/0WokkuKb8uhDH+ctYRXT2Cxc2cx32L98paVDX2qpolK0cPMIPcz6Ilpymb
-	KD6FYBQFvNwNhpsl5fdtdvw1CKziq78+ykStUytje7gPA2Xqm5WQvPA8HfCTUt8tQ5bnrO1QpJ4TV
-	JHCU1kWSzBgrxKujcf2nydpnuTEy6geOcIr7UynmlkCtTQ4gfJ+zz6gI5vRvYpGsVSFY1wZCySEfr
-	GDb4cToeKC+23QpY9TGiqK85ZZNvJkLf7bxx6XIoelh7dIJvmEVtqbq/4uSF/zM/i2F4OJ3hFe81g
-	sluCwWBw==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sIHIV-00000004KkG-3N4C;
-	Sat, 15 Jun 2024 00:29:35 +0000
-From: Luis Chamberlain <mcgrof@kernel.org>
-To: patches@lists.linux.dev,
-	fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	linux-mm@kvack.org,
-	linux-fsdevel@vger.kernel.org,
-	akpm@linux-foundation.org,
-	ziy@nvidia.com,
-	vbabka@suse.cz,
-	seanjc@google.com,
-	willy@infradead.org,
-	david@redhat.com,
-	hughd@google.com,
-	linmiaohe@huawei.com,
-	muchun.song@linux.dev,
-	osalvador@suse.de,
-	p.raghav@samsung.com,
-	da.gomez@samsung.com,
-	hare@suse.de,
-	john.g.garry@oracle.com,
-	mcgrof@kernel.org
-Subject: [PATCH v2 0/5] fstests: add some new LBS inspired tests
-Date: Fri, 14 Jun 2024 17:29:29 -0700
-Message-ID: <20240615002935.1033031-1-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.44.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ANvvhvlF"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1718607458;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SkYd4EhqSoI2kOxwbCLVvGjfrUcupn5ukAcK3hkhies=;
+	b=ANvvhvlFubHEpZ7NoG5AAZXm0542g6NlbwRvmK+UdzLUGOwGMn2Y7/YpZe1eRxoOnrfkng
+	SXrPAHFeXkdkVoqlFmA77kTtXeLMGbPgEqVF0xpZB0i0zp+R1eCLKoWq6YymoaGxfe6mpd
+	axxHpzeoFBe2Mgj+V4IPUKtbbeWVfaE=
+Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
+ [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-80-3hHwKvlCN9m54i9TqVfSHw-1; Mon, 17 Jun 2024 02:57:37 -0400
+X-MC-Unique: 3hHwKvlCN9m54i9TqVfSHw-1
+Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-7043008f4beso4020342b3a.2
+        for <fstests@vger.kernel.org>; Sun, 16 Jun 2024 23:57:37 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718607456; x=1719212256;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=SkYd4EhqSoI2kOxwbCLVvGjfrUcupn5ukAcK3hkhies=;
+        b=acWXwowEf6f6Dc5u4Pil98sxRfVf3bS3HgXGqqUsnWoDcpPpnwUpMa6PFK5r3QiXr/
+         VMPEQ7roRpGUFctKaI+06WoIL0cA7afR6d12I8BIQYQxtyt/C1yE2xSTRUxbFvxhPP1E
+         dqNkqNgxYiPM6XkpOCO2vwZBkqZ5n9THGqMPaSA9mtdQC6bV6jEO6n6anc5RCkKGl7MS
+         R60SK7RmWodiJ2YQ3H5yF65JJ3prsUVmxRCYeA7n23K8wxFZVMYEc7Y/dhZW3mDJykmu
+         69HMduumPYgrcI7c9nW6WiQsLk10dy3dKY2Ld+5oUBLs7tUA5CpO5bOzV2EDpbOJ6QWm
+         /6ow==
+X-Gm-Message-State: AOJu0YxDInXTEWMbUUibN7EoTQjbt9fMroZvI/U8uuLhEkHe/mmsTBDc
+	XExdmD5G2/LPmzBMkz244khLazApi4DnOy4Vs+SLnBeddEzfTBE81AHY85TTOzhFOsDAHHBpuq2
+	7LXh/gEJQKDh16EiAUHEqIsr/rJV2y6XdRQh8snA65dCsvZYnxsp104A=
+X-Received: by 2002:aa7:8c0f:0:b0:705:b0aa:a6bf with SMTP id d2e1a72fcca58-705d710501bmr11274896b3a.2.1718607455967;
+        Sun, 16 Jun 2024 23:57:35 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE+hOgKsD7WQjrpKrcW/UIjRI29YgjCP39XapNYxupr2wRI6DvBCJFb+rVj0fqNhJQ030oPIw==
+X-Received: by 2002:aa7:8c0f:0:b0:705:b0aa:a6bf with SMTP id d2e1a72fcca58-705d710501bmr11274887b3a.2.1718607455492;
+        Sun, 16 Jun 2024 23:57:35 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-6fee2d36b96sm5198597a12.74.2024.06.16.23.57.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 16 Jun 2024 23:57:35 -0700 (PDT)
+Date: Mon, 17 Jun 2024 14:57:31 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Daniel Gomez <da.gomez@samsung.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Pankaj Raghav <p.raghav@samsung.com>,
+	"mcgrof@kernel.org" <mcgrof@kernel.org>,
+	"hughd@google.com" <hughd@google.com>
+Subject: Re: [PATCH 2/5] common/config: fix RECREATE_TEST_DEV initialization
+Message-ID: <20240617065731.mb3xiefs5svm6nmk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240614061722.1080-1-da.gomez@samsung.com>
+ <CGME20240614061726eucas1p2da9aac47102bf2a5c590c0d07f04bed7@eucas1p2.samsung.com>
+ <20240614061722.1080-3-da.gomez@samsung.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240614061722.1080-3-da.gomez@samsung.com>
 
-While working on LBS we've come accross some existing issues, some of them deal
-existing kernels without LBS, while the only new corner case specific to LBS is
-the xarray bug Willy fixed to help with truncation to larger order folios and
-races with writeback.                                                                                                                                                                         
-                                                                                                                                                                                              
-This adds 3 new tests to help reproduce these issues right away. One test
-reproduces an otherwise extremely difficult to reproduce deadlock, we have one
-patch fix already merged to help with that deadlock, however the test also
-also gives us more homework todo, as more deadlocks are still possible with that
-test even on v6.10-rc2.
+On Fri, Jun 14, 2024 at 06:17:24AM +0000, Daniel Gomez wrote:
+> Do not allow the overwriting of the RECREATE_TEST_DEV variable. When
+> this variable is enabled, common/rc -> common/config will reset it
+> to false after the test device recreation process. This allows for
+> differentiation in mount options for SCRATCH and TEST.
+> 
+> Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
+> ---
+>  common/config | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/config b/common/config
+> index a1cd14de6..43b32b93d 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -94,7 +94,7 @@ export PWD=`pwd`
+>  export MALLOCLIB=${MALLOCLIB:=/usr/lib/libefence.a}
+>  export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+>  
+> -export RECREATE_TEST_DEV=false
+> +export RECREATE_TEST_DEV=${RECREATE_TEST_DEV:=false}
 
-The 3 tests are:
+Oh, that makes sense. Looks like the RECREATE_TEST_DEV doesn't work
+long time. I'm wondering why we didn't notice that in 87f90a2dae7a4a
+("common/rc: Enable _test_mkfs to force a mkfs on a xfs filesystem")
 
-1) mmap():
+Anyway,
 
-The mmap page boundary test let's us discover that a patch on the LBS series
-fixes the mmap page boundary restriction when huge pages are enabled on tmpfs
-with a 4k base page size system (x86). This is a corner case POSIX semantic
-issue, so likley not critical to most users.
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-2) fsstress + compaction
-
-The fsstress + compaction test reproduces a really difficult to reproduce hang
-which is possible without some recent fixes. However the test reveals there is
-yet more work is left to do to fix all posssible deadlocks. To be clear these
-issues are reproducible without LBS, on a plain 4k block size XFS filesystem.
-
-3) stress truncation + writeback                                                                                                                                                                                              
-The stress truncation + writeback test is the only test in this series specific
-to LBS, but likely will be useful later for other future uses in the kernel.
-
-Changes on this v2:
-
-- Few cleanups suggested
-- Renamed routines as suggested
-- Used helpers for proc vmstat as suggested
-- Made the mmap() test continue so we can just count the number of failures
-  of the test
-- Made the fio test ignore out of space issues, we care to just blast
-  the page cache, and detect write errors or crashes. This test now goes also
-  tested with tmpfs.
-- Minor commit log enhancements
-
-Luis Chamberlain (5):
-  common: move mread() to generic helper _mread()
-  fstests: add mmap page boundary tests
-  fstests: add fsstress + compaction test
-  _require_debugfs(): simplify and fix for debian
-  fstests: add stress truncation + writeback test
-
- common/rc             |  54 ++++++++-
- tests/generic/574     |  36 +-----
- tests/generic/749     | 256 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/749.out |   2 +
- tests/generic/750     |  63 +++++++++++
- tests/generic/750.out |   2 +
- tests/generic/751     | 170 ++++++++++++++++++++++++++++
- tests/generic/751.out |   2 +
- 8 files changed, 552 insertions(+), 33 deletions(-)
- create mode 100755 tests/generic/749
- create mode 100644 tests/generic/749.out
- create mode 100755 tests/generic/750
- create mode 100644 tests/generic/750.out
- create mode 100755 tests/generic/751
- create mode 100644 tests/generic/751.out
-
--- 
-2.43.0
+>  
+>  # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+>  set_mkfs_prog_path_with_opts()
+> -- 
+> 2.43.0
+> 
 
