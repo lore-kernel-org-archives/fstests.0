@@ -1,110 +1,83 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2771B18754D
-	for <fstests@vger.kernel.org>; Mon, 17 Jun 2024 07:41:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1DBF1369A8;
+	Mon, 17 Jun 2024 16:52:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718610095; cv=none; b=Pfwu5iONa3BzX6H+oXYNCtpO/28KXDUwxtUYOgppxjsSnOO7/JvVUaWO35RMx5+HTxGX7/53JFJ1LRXY7l63h+H/dIGXc9zTtSDpd6ZZUSwQBFH50Tp8rlb7tYf0o685mBiisJK/RcgYbX0RhBzXHcmGZ8xMsiQP8KMp7T02+uU=
+	t=1718643141; cv=none; b=Cignf2IRMLYn5oxVT7YRgA+TV4irRNo4PkkmR7tL0WGJsPWpV63B/wf50UK8+fN1mGTfxkIbZbfF+I8wTKX5zw8q+6uq8S9Btce1zgQR0yCWKFIvgLWfdH9/zDywXRsxfJgmhfnN/B6sMPpnNHKymkJ/z46MVtd3pcyPjoHMY5s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718610095; c=relaxed/simple;
-	bh=2WqRCQN/Gc5PTUFO2ytJm4eCG9Y+V+l0zuLlL6XqDd4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ft5xjAkVEjmyK33s30JM1EfOaRA+hAfCpfrT+q7bPNrzy1LQmORr2S0thLDkRTOU8QcY7Yuu9JYGnAhbNPO4a5pUke5aPX4EaZgAk8n8+eFfi5zDQtg+34U7OFum0JqowTrW+7A89ku/S+NmrzBv4LasOqw7SYHdxP+xckPbFI0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DuYhGxPe; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1718643141; c=relaxed/simple;
+	bh=JElrMA/RGAnyYmZy9NcpLBTJthgBG4jOKijrblNqkBU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OB9WRlPPlImG56m+33jHZl/iEOU17sgySn+1DrDjEUIJVMRArI1uRlRJVMY+rJtiRS9b4wrrxr8o8MITiOhsHpUpw8TiMwpEdJ6QA2hnC2RT9dUNCKImtPfhI5IG5dCup4BTCsVH7Y44Dbmz29Txdt6SwXbHHXQQmokIAqmmKls=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nIcWe5Bp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DuYhGxPe"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1718610091;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=+BPazPVGCsIYs0Q0ovpES0Nh8yo2XXdqlMfHBTnRxig=;
-	b=DuYhGxPetzlZGAklYOIaZm5lyrweWAFLPE6awStYveZ6Byi8QpRx9VdCFd227C3siyfqwg
-	ruMWiH/fTwAZcLI1mPDXmDR7oaejg81FvpMPe89APnjLSNBW07O87ZceAvL4pGbMOXOBxc
-	rYjcwxTXfmTGDF+SLSSDD19jsc7Jifk=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-669-qJh-Hk0-N96Xf5QmyhX65Q-1; Mon, 17 Jun 2024 03:41:30 -0400
-X-MC-Unique: qJh-Hk0-N96Xf5QmyhX65Q-1
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7060136ed89so1056644b3a.3
-        for <fstests@vger.kernel.org>; Mon, 17 Jun 2024 00:41:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718610089; x=1719214889;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+BPazPVGCsIYs0Q0ovpES0Nh8yo2XXdqlMfHBTnRxig=;
-        b=Y7iN9ISgymaKQFMbKNxAeSaeZtCa0Dn3GrnV1borZd2qS9gnf3lphp6VxWKLR0lViT
-         fvHpeQUTwrPzjgeIgkM/DC78sLq+XZ3qh5Dlo8eO6hr4bqsGNjOqksmUkel6mrQ6+Vvm
-         22fZHsj76C71MXQM6DxDqiw12FAJTNUH2x4hHeEc3EvNAJA4YQPcw/MneqYoWokUS2hy
-         pJIRmenpoGnIQdne52hmud0j9Bcq8VDoW/V+WNf8XDD8hkVgUAu3mZDqPkGk1gXpiYa7
-         qhPpe7PEVdAiPr0lr3dOjqZLDW50YLEZCFiQWjgWNiRykUXfGZ1M1tH1K5HSP+w15QSH
-         +5/Q==
-X-Gm-Message-State: AOJu0Yw3I2KL6CqXb09NH+fzO+XkBF+zZvwiLTYPGTtlDqvcohZYpch+
-	qyKaW5uslUgdYJeMLSMnWTGsO6zK7h59lbN4zJKcdQmr8NOcewyyKf/BaxuPUhM+dH6hFHnDCXp
-	EJ+62JAzCVqurNpyQ9T2w/7Y6ndTrZJTBVZDm+xICa8TRjTfcPtetihYGuGybf+uFTg==
-X-Received: by 2002:aa7:9e87:0:b0:705:983e:fc15 with SMTP id d2e1a72fcca58-705d71470d0mr9296314b3a.10.1718610088879;
-        Mon, 17 Jun 2024 00:41:28 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGjM8HZqFRuTmafu618e9tift1yGxZWkqct9b/Z9lojHsbb5Ic7W27gjG5VV4UXZJa62n52+Q==
-X-Received: by 2002:aa7:9e87:0:b0:705:983e:fc15 with SMTP id d2e1a72fcca58-705d71470d0mr9296300b3a.10.1718610088301;
-        Mon, 17 Jun 2024 00:41:28 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-705ccb3bf00sm6878063b3a.135.2024.06.17.00.41.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Jun 2024 00:41:28 -0700 (PDT)
-Date: Mon, 17 Jun 2024 15:41:25 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH -v2 2/2] generic/455: skip the test if the file system
- doesn't support journaling
-Message-ID: <20240617074125.ehitiydhlspkuxe5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240611222659.256476-1-tytso@mit.edu>
- <20240611222659.256476-2-tytso@mit.edu>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nIcWe5Bp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6296C2BD10;
+	Mon, 17 Jun 2024 16:52:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718643140;
+	bh=JElrMA/RGAnyYmZy9NcpLBTJthgBG4jOKijrblNqkBU=;
+	h=From:To:Cc:Subject:Date:From;
+	b=nIcWe5Bp0wK8+UngmvOlcJaFjXBHLJCDLaft/KA56EOIN9iJjOwFCm06/tku1SZJ7
+	 YshzzZhCL1zlJGIZ3k4qUBS4+mBbhngWfeACFzsjy0pWfxhXaBhQ7am/0FfFaB152/
+	 G3xdz+kOH1Ut3XSRlBlRxUHNQNSVuReAqc15jyoZT+Q7ewvZjweck3IXxkVSgUikZg
+	 u7ym065y6TJh7Gf1fnxexfTUwDrTx6xbnSRiGJmyDPrMRXXw6nl9RrNCD2OMf9JxQF
+	 ErPyQMikcNuT6cs/Ct7FLPsltNXH+323RN1iukgQ7xA021NUcw3hCJm55qrv9gt3Nd
+	 EPlZ/DVxWxV/Q==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] generic/74[3,8]: add git commit ID for the fixes
+Date: Mon, 17 Jun 2024 17:52:14 +0100
+Message-ID: <85c32250ac781bf925d1f26b0c6933dace05b3d1.1718643112.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240611222659.256476-2-tytso@mit.edu>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jun 11, 2024 at 06:26:59PM -0400, Theodore Ts'o wrote:
-> This test uses dm-log-writes to test power fail scenarios, so it won't
-> work if the file system doesn't support metadata journaling.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
->  tests/generic/455 | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/tests/generic/455 b/tests/generic/455
-> index da803de08..6dce8a659 100755
-> --- a/tests/generic/455
-> +++ b/tests/generic/455
-> @@ -65,6 +65,9 @@ _log_writes_init $DMTHIN_VOL_DEV
->  
->  _log_writes_mkfs >> $seqres.full 2>&1
->  
-> +# This test requires metadata journaling since it simulates a power failure
-> +_require_metadata_journaling "$LOGWRITES_DMDEV"
+From: Filipe Manana <fdmanana@suse.com>
 
-Good to me, Thanks!
+The corresponding fixes landed in kernels 6.10-rc1 and 6.10-rc3, so update
+the tests to point the commit IDs.
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/743 | 2 +-
+ tests/generic/748 | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-> +
->  # Log writes emulates discard support, turn it on for maximum crying.
->  _log_writes_mount -o discard
->  
-> -- 
-> 2.43.0
-> 
-> 
+diff --git a/tests/generic/743 b/tests/generic/743
+index ad37d32f..769ce706 100755
+--- a/tests/generic/743
++++ b/tests/generic/743
+@@ -23,7 +23,7 @@ _cleanup()
+ # Import common functions.
+ . ./common/dmerror
+ 
+-_fixed_by_kernel_commit XXXXXXXXXXXX \
++_fixed_by_kernel_commit 631426ba1d45 \
+ 	"mm/madvise: make MADV_POPULATE_(READ|WRITE) handle VM_FAULT_RETRY properly"
+ 
+ # real QA test starts here
+diff --git a/tests/generic/748 b/tests/generic/748
+index 71b74166..428d4a33 100755
+--- a/tests/generic/748
++++ b/tests/generic/748
+@@ -17,7 +17,7 @@ _require_scratch
+ _require_attrs
+ _require_odirect
+ _require_xfs_io_command falloc -k
+-[ "$FSTYP" = btrfs ] && _fixed_by_kernel_commit XXXXXXXXXXXX \
++[ "$FSTYP" = btrfs ] && _fixed_by_kernel_commit 9d274c19a71b \
+ 	"btrfs: fix crash on racing fsync and size-extending write into prealloc"
+ 
+ # -i slows down xfs_io startup and makes the race much less reliable.
+-- 
+2.43.0
 
