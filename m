@@ -1,43 +1,73 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C288D1B151D;
-	Thu, 20 Jun 2024 16:55:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 505A61B29D5
+	for <fstests@vger.kernel.org>; Thu, 20 Jun 2024 18:58:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718902527; cv=none; b=NvJVl8Kn3zYDRJH0CE0d3dB+BLo19j27+V5pmFWWt/o0UjJe+ubetk2ubBhPhuRNGmdwLI7LQAYGWrMLCJ4QfLRRULZw1zYcikjBK4qBpt544cp/gBVCxHCLgAocnzo1vsyrTGXxnS4eozDUmiHFMgsucIdYX3SrrE1KfLqjBww=
+	t=1718909941; cv=none; b=W+ceD84VCc00c8ZCvLuNk3cvBC/kNaPqDUAaG9oKC2xP9uMKa/XFRuFwjDPmMuFc+2FOt8SJbu7PZOnS4HJszDJg/r405q8dHSJTVe51GPTngiVnVIHPu8mqI3ypiGOKJsTAPnLSUFkoAOHG7Jep5EgDpTqHz4r4yU2KG7iq6k0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718902527; c=relaxed/simple;
-	bh=6G++sZcuPiHoj4fnI8UmWmkWrq3ow1/7dxb6rPQSdlk=;
+	s=arc-20240116; t=1718909941; c=relaxed/simple;
+	bh=qbk7oYZyc1nJBU2j1vFktpd4NnvyyvOmTJcKBouuD5w=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rdQgw8srcvwe6YZn4J5J81VtcZ7f6mmILTTrRTme6VnQ9FGrJkFgF6LU6JyNBLt5UnUaFiFJUDJxOAZpHsFRCynUNPFu8LODZqELWvBpidUkZc73yiHEIgRtX7vaG/lAcfVquUEU3xtFxEfSC1l7j30v54Qfnsb2qkprgHcxFFY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=r0L9EDTw; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=PsjiTixDCtD9xhmkhVfyPqDvmyRn94C+sdWB7papofGCElxQRuxJhx6VT6PjK+MeBDnyhfO/No8OZbbM6uA5LzJl7GR0QQhuRDtQNe9wDd8NvtZdx+pURi2JGpgvoJPTBPvf7oTWHB1fG9WJqhHw1YzZgi9hkkOaPiKMZstbo+I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QNFedg79; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="r0L9EDTw"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 578F5C2BD10;
-	Thu, 20 Jun 2024 16:55:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718902527;
-	bh=6G++sZcuPiHoj4fnI8UmWmkWrq3ow1/7dxb6rPQSdlk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=r0L9EDTwoiYMknRNb3UzGaizFAaq1P+jDVtx+8gTjcG7Wr8VDKpt1OmKO4eseysuL
-	 PUpfighxwMY8bq7t/Aa6d1NbkSAyxAROlmwvAXJiw14z5O62PDebnYsAQb7Om5SO4J
-	 CVNZI+SxXb2mkwH4FiRx/03bhf/XcicBYHUknLQV7SBaUfIqi1k/lt2OcaGmNUQv25
-	 7HPPGIWX/7mCmPi7qUkON0oFzdp1ulBV5h+Mzl+tx6HJ8pBS99J/wSYAK943BZmVj8
-	 MRaaeB4Gl8EkMvH2QVzsKSP8iKZY6VXmFFaKnCcNOv6N2+86+c+QBRBYqqrds7zal7
-	 yFjoh8yzaXi9g==
-Date: Thu, 20 Jun 2024 09:55:26 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, guan@eryu.me,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 03/10] generic/710: repurpose this for exchangerange vs.
- quota testing
-Message-ID: <20240620165526.GW103034@frogsfrogsfrogs>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QNFedg79"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1718909938;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=jH/1STGevSI3JAsnqyhpNLSvcx5qg0QdYjDNlIqmlUw=;
+	b=QNFedg79lacgtjRAvPmY6plbl4R7v7U/a6+Bc4v52hxgsHXt824u2chMGvDey4PJcftyte
+	4vuP7F/d1alBT99Bn4oiTE/kcn0MEown1eeoRlRwHJTc3diZWZN6VmhnocAqE5McUHqqm6
+	G7ULFeClJRYzLtJWsVzGmOQYsbHX/VE=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-546-eSN0ahjcPbGoQaNUEkp1fQ-1; Thu, 20 Jun 2024 14:58:57 -0400
+X-MC-Unique: eSN0ahjcPbGoQaNUEkp1fQ-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-6e4d1605a03so1525013a12.3
+        for <fstests@vger.kernel.org>; Thu, 20 Jun 2024 11:58:56 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718909936; x=1719514736;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jH/1STGevSI3JAsnqyhpNLSvcx5qg0QdYjDNlIqmlUw=;
+        b=p0KeWvGWqyTU9EtAiGmkFvn6zBRUQQ25o1rVdXUIxN+TdJc5GFXOlTQshHAixMdAKU
+         TC0eM0ces1+q3fyM2rdAtL8l0R3+ZnH+irODn1iKs5Y4rdPgyZv4Tf64kqzP34jWVXb7
+         3+kEcDWhSih4MncWtAJl7PXyCaHMEs98w6BNuW18BbhzVKjq+QJH0KI7qLK0J3rR0vvp
+         ddl3qS5wFaV4jti8iw10nUeFbciMAdK6gYzXxHyAWHHp4zVn/p1Ao6GDA7nBoVbJLeNg
+         zh8IBylo3S9mP7/uDbYonHqENgtu3dkWh8VyfCu47KbpLr7HuDltlhEAbhvCdx828iHl
+         5dqg==
+X-Forwarded-Encrypted: i=1; AJvYcCVOBr86KXUBF3XH2tKQqlAdqlbXZhgNebfmnVEglNU6QbVfJvbRrbMKEHUVOnGI2zxQZluRbFPZlSL5kHB4Y0tlbTj+/KbIng==
+X-Gm-Message-State: AOJu0YzBtzAvFUnBqTV9bDHKWsJtQ1qTuMo8Ukg/oEIzfft+X2mHzbw3
+	CI3AkR3jkJRN3TqfKAJAgp7mRo6eIyk6Os1tf+WI9gohbGHcFqLn/FRnkzES4uS9r2WFFBpVMRD
+	Dzx07K5FK3YQnIZwV/6nLrwqEMXIShW2Ypkl17rUg9zUMKTFSfBlLTmY=
+X-Received: by 2002:a17:902:f546:b0:1f9:ae6d:5697 with SMTP id d9443c01a7336-1f9ae6d5ac1mr60547285ad.35.1718909935823;
+        Thu, 20 Jun 2024 11:58:55 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGUqsYkzeltcUKvcT+Qbx8lhqtSk0mACAOpJV3i8spyZLxlcSTnj4E2BeSlbL9PEJfMkQRRkw==
+X-Received: by 2002:a17:902:f546:b0:1f9:ae6d:5697 with SMTP id d9443c01a7336-1f9ae6d5ac1mr60547085ad.35.1718909935351;
+        Thu, 20 Jun 2024 11:58:55 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f855f5c039sm140841785ad.306.2024.06.20.11.58.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Jun 2024 11:58:55 -0700 (PDT)
+Date: Fri, 21 Jun 2024 02:58:51 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
+	guan@eryu.me, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 04/10] generic/717: remove obsolete check
+Message-ID: <20240620185851.nchu3nlllehnqvmk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <171867145284.793463.16426642605476089750.stgit@frogsfrogsfrogs>
- <171867145344.793463.2045134533110555641.stgit@frogsfrogsfrogs>
- <ZnJ15ZG1nWsCkxiG@infradead.org>
- <20240619172318.GR103034@frogsfrogsfrogs>
+ <171867145359.793463.11533521582429286273.stgit@frogsfrogsfrogs>
+ <ZnJ2Ehz8PIcQ5m6R@infradead.org>
+ <20240619163148.GN103034@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,42 +76,35 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240619172318.GR103034@frogsfrogsfrogs>
+In-Reply-To: <20240619163148.GN103034@frogsfrogsfrogs>
 
-On Wed, Jun 19, 2024 at 10:23:18AM -0700, Darrick J. Wong wrote:
-> On Tue, Jun 18, 2024 at 11:08:37PM -0700, Christoph Hellwig wrote:
-> > On Mon, Jun 17, 2024 at 05:47:32PM -0700, Darrick J. Wong wrote:
+On Wed, Jun 19, 2024 at 09:31:48AM -0700, Darrick J. Wong wrote:
+> On Tue, Jun 18, 2024 at 11:09:22PM -0700, Christoph Hellwig wrote:
+> > On Mon, Jun 17, 2024 at 05:47:48PM -0700, Darrick J. Wong wrote:
 > > > From: Darrick J. Wong <djwong@kernel.org>
 > > > 
-> > > The exchange-range implementation is now completely separate from the
-> > > old swapext ioctl.  We're deprecating the old swapext ioctl, so let's
-> > > move this test to use exchangerange.
+> > > The latest draft of the EXCHANGERANGE ioctl has dropped the flag that
+> > > enforced that the two files being operated upon were exactly the same
+> > > length as was specified in the ioctl parameters.  Remove this check
+> > > since it's now defunct.
 > > 
-> > Do we really want to lost the swapext test coverage?  Even if it is
-> > deprecated, it will be with us for a long time.  My vote for copy and
-> > pasting this into a new test for exchrange.
+> > The last draft is what got merged into 6.10-rc as far as I can tell,
+> > so maybe update the commit message for that?
 > 
-> Yeah, you're right that we should retain this test for the old swapext
-> ioctl.  I'll fork the test into two -- one for swapext, another for
-> exchangerange.
+> "The final version of the EXCHANGERANGE ioctl..."
 
-...except that the swapext ioctl doesn't support swapping forks if quota
-is enabled and any of the user/group/project ids are different:
+Will change "The latest draft" to "The final version" when I merge it.
 
+Thanks,
+Zorro
 
-	/* User/group/project quota ids must match if quotas are enforced. */
-	if (XFS_IS_QUOTA_ON(ip->i_mount) &&
-	    (!uid_eq(VFS_I(ip)->i_uid, VFS_I(tip)->i_uid) ||
-	     !gid_eq(VFS_I(ip)->i_gid, VFS_I(tip)->i_gid) ||
-	     ip->i_projid != tip->i_projid))
-		return -EINVAL;
+> 
+> > Otherwise looks good:
+> > 
+> > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> 
+> Thanks!
+> 
+> --D
+> 
 
-I'll amend the commit message:
-
-"There's no point in maintaining this test for the legacy swapext code
-because it returns EINVAL if any quota is enabled and the two files have
-different user/group/project ids.  Originally I had forward ported the
-old swapext ioctl to use commitrange as its backend, but that will be
-dropped in favor of porting xfs_fsr to use commitrange directly."
-
---D
