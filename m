@@ -1,42 +1,45 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BF45155C8A;
-	Wed, 19 Jun 2024 17:28:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC01622EED;
+	Thu, 20 Jun 2024 04:24:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718818135; cv=none; b=sJkd/8FKa15h9IyizMbcvLymreqHbDKCnPBqArtGGHBDTay+/0+ZF/ZvagiPwr8a0oE1cp6XRgcNvRnDyZjrN3BmfgVEe40yGIUXD3Q3EDTaYAWw0/T7Obf9s7/dWXenBKyHSqba2K0JArvWpjO5TOn0a79LOcO9uDs0waRlIyc=
+	t=1718857450; cv=none; b=WTrAGSb5043cj75pz3zNytRS9UgL0+Xflv74kkPKsV4eXxzdYgosGASUZsVMFIrvRm/IgyXMh3/KKqISi4fJC5uE9PKU6/dH5eQDM94kK1J3ktWQVcJ+8WXy2AB+aYWiMKCvS514QDpMMeoKLtMBNnO+Y5tS0UQFP+kZ/GI1oqs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718818135; c=relaxed/simple;
-	bh=mF8oKVP9YSu/Fo6MsKaEcsZfPJJRy5dXoz2nF63BwnI=;
+	s=arc-20240116; t=1718857450; c=relaxed/simple;
+	bh=f2DFG6vZJ60Ax7go0aaPBpe1Khb11/hAyDxSM/4OXNY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NY1Ma1i7weg+HxWXQtmPgzDd2CL93rtEXmTDpGGlGJ5siw1rYG0DvrY0kJ66njcaoBUmMXlbNh3YsPjgXRihUUVFSd+g67a9ikaJjNZiv814LnVf3fTKepHVVL2kkM23C9sTyOyZiiHJQLWIw3B7TWlNHGDoRPSbUt6Zxc5qD4I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IHdscgCl; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=oXMk1UFPJoZ2pU2oXe8V/UB0/SxOsX2TFUtJyqAMdnA2I+ssz9HIWTjFPH7M4bPlol2r46+ZNutBlOctjayWiW8nKW+ubcwd7Ghrc6eObi0BVMXMzdFugsVzHTGq++t9m5KLt2ZbDPqOAKA5Cg957KI8F79LS2omTqlILr1FfyU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=d1hOptpS; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IHdscgCl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0BC96C2BBFC;
-	Wed, 19 Jun 2024 17:28:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718818135;
-	bh=mF8oKVP9YSu/Fo6MsKaEcsZfPJJRy5dXoz2nF63BwnI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=IHdscgClPwN+Vf4b5oHps+hP5riB+n7GrmL4oAOUCfHkO9lNiWv0p2cSZxAL7XuYg
-	 lJl7+ihuatnPutsfXKSGAvtT/gRTYo0psg8oYdwo9qup7j+Nkbcx2sEHavM9OsyZ66
-	 tyIEaHLHBJaJhvSafBzBHfz7ZDUTal0Fd64CEKdihb09WScXV0N26UzjCcS6It3aOp
-	 3KypRCtMnE3bIgLJUJi25FBK2YjQB3JYDU2qGXzHerhXNMb8iCpsLjXOOxsaOavq/C
-	 i6o0QDznVxUzrsQRGPi0eWIGwmgEtY2DZUbc/BIIUQfzVSWIiq2/IfAcuU+6GR5F4X
-	 zBl3FENq4qqfg==
-Date: Wed, 19 Jun 2024 10:28:54 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, Allison Henderson <allison.henderson@oracle.com>,
-	Catherine Hoang <catherine.hoang@oracle.com>,
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="d1hOptpS"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=BxwRK6GeIQ3hYlngKOYsJinxxdBWzFWXM0LA77NIGjE=; b=d1hOptpSckiM61rrpP6Ks92nWb
+	UKiBHPeBk0QavI6BazJU+8isFybm4iQVkceYZ8PR8482kib9MkmnT8fNR3nYEGeXD6YM5de8kbr1J
+	tkxpMtOS53PGoVCJv/xdatORt33LWP2yTaUil5tE7Gc+e4zJin8SL0l3fMsM9p6v8eKkC2Oib6/jl
+	hAOOw1PbA060Ka8CCtfbpuPeR+NjLr0iuKhZgK2xQVrYM0Bbo6FMInglcMYVw7IGcrTF0FTGDhyJu
+	+Rt0OO7DS3Rjt8NwGS8ZxO73PnrZYhKwdjIUoVo/LGfghtsJpxduuU7+aEQ6+g3i0kOXitcXRos8e
+	0tcFrj3Q==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sK9LD-00000003ZPk-11nv;
+	Thu, 20 Jun 2024 04:24:07 +0000
+Date: Wed, 19 Jun 2024 21:24:07 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, zlang@redhat.com,
 	fstests@vger.kernel.org, guan@eryu.me, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 08/11] common: add helpers for parent pointer tests
-Message-ID: <20240619172854.GS103034@frogsfrogsfrogs>
-References: <171867145793.793846.15869014995794244448.stgit@frogsfrogsfrogs>
- <171867145930.793846.17850395645232280136.stgit@frogsfrogsfrogs>
- <ZnJ38HnvfHRbZR-s@infradead.org>
+Subject: Re: [PATCH 1/1] xfs: test scaling of the mkfs concurrency options
+Message-ID: <ZnOu537W5S9Ic6dK@infradead.org>
+References: <171867144916.793370.13284581064185044269.stgit@frogsfrogsfrogs>
+ <171867144932.793370.9007901197841846249.stgit@frogsfrogsfrogs>
+ <ZnJ5mfiqfnur5lFc@infradead.org>
+ <20240619162808.GL103034@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,20 +48,14 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZnJ38HnvfHRbZR-s@infradead.org>
+In-Reply-To: <20240619162808.GL103034@frogsfrogsfrogs>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Jun 18, 2024 at 11:17:20PM -0700, Christoph Hellwig wrote:
-> > +++ b/common/parent
+On Wed, Jun 19, 2024 at 09:28:08AM -0700, Darrick J. Wong wrote:
+> Weird failure case?  If we don't have an output file to link, fstests
+> spits out:
 > 
-> Should the file and functions have an xfs_ prefix as it's all about
-> xfs parent pointers, which won't be portable to other file systems?
+> 1842.lba268433408: could not setup output file
 
-> Or maybe just merge it into common/xfs?
+Not pretty, but not as weird as I expected it from a quick glance.
 
-I've been trying not to add to the clutter in common/xfs -- except for
-the three parent pointers tests, nobody else needs those helpers.  I
-don't want to make every xfs fstest parse that stuff.
-
-I'll prefix the pptr helpers though.
-
---D
