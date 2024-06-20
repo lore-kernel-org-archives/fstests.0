@@ -1,81 +1,91 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3B671AD3F0;
-	Thu, 20 Jun 2024 12:48:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FE401B0120;
+	Thu, 20 Jun 2024 15:23:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718887732; cv=none; b=dPl56KeWrFGCyNtBnjhJqbydDiJrrNS4o3nxCUoTMUvMVgZxCLJ912oX1+7Am2scLtXXhzk3JuUqF+LS3wFrKcSclY6ZkbH5LcyVStwN7dtKkBAPQSwcLNqIBpZTbbcEmG6ATUxsEP/3W3ZuEJhK/rz+JkjFl9XP3Vs/2vtnThs=
+	t=1718896988; cv=none; b=ar+s2NvWqWtBXxFrh9JXHWp3ZDur7vccKEeljY0yjA8S/cYDFow91THCmjjCGABsIG9MQEP+DK0L3cHMo5wbhWJclHD512SYOO/6w/9SawUy20xhMVVoDeY/UYkilr42Nzr1ytsg5bhA/+0zGnGqZbGbjHXT6fzOGlzVZANJpPw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718887732; c=relaxed/simple;
-	bh=Znz1/WticofOJ4kp6T68erovnD49x4LoIDe/CILNMak=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=l1PDpo9sc/ZBveT4PXALm/lKJ/mjy0i1n7CzqVdNk+rZPWMunUq4lZRVqibhTfUHspE8vpZ16jt9D25Q79RH/p8wdasfY9ZtwVj3V3+mzhE7hN9Tujqeme5XOYFhubD8wDExGDk+elrCtesBnQ0behylWL3p5DJsZ9Y6qxgNIhU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=yEXhsE0M; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1718896988; c=relaxed/simple;
+	bh=713UnYvca8N+2HdeEUO+m7CICnb8uLx0hJlWox5RUhs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=UXCfRDBIlq1zfG8km3iG0xaUMaWPub1GRuTZ6UwfAPvPqQ4xkiI4sjVaz1vGJtAMUHy7lRRqeDOubo5isqa+BFhA98E+V1own9MfmoYW/wgwE5cDJQytT9oq6Z9STLJiqkKEAOE5diCPzHIz7du60JGr1YNTgi3t4kALPhBXsjE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aChOhXn+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="yEXhsE0M"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=TmzJIS8IzqHs61XSR7pFF8ecgSFjDgMf1Y8mHznNTek=; b=yEXhsE0M/SlUsDBd+YEgQjGNWL
-	z/2KWQQUi9thZQsFQXRvw9cNRJEYIhMCsufeZQqp32AAv+BFU3+Sj966hjfi08QgXDCJ4kU10AaAX
-	RKAZ/hFs02v0tdE3yWWIdpDw7UET9wWLMZJsZ/g6V4KcN/2Vnryx0tYQadoaW6K3Imq3g7olt5MI1
-	Rge5Kwxk8btBqkPVAoo0NLIA8atZm601Ts88plWdMQvgr5yEKrm8v4sVi3F+3hLWrj+RB9nF9ijZr
-	/4c6ShQgja8ZgnH+vJPI/8DAJl3qLcZYAPN0j+OLa2ouO5qpeMJ3wCOGDjW4PQyWKPbWIgQvvW07I
-	a+ugOWLg==;
-Received: from 2a02-8389-2341-5b80-1453-b431-46b2-cdf7.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:1453:b431:46b2:cdf7] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sKHDc-00000005034-0eog;
-	Thu, 20 Jun 2024 12:48:48 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: djwong@kernel.org,
-	zlang@kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] xfs/073: avoid large recurise diff
-Date: Thu, 20 Jun 2024 14:48:44 +0200
-Message-ID: <20240620124844.558637-1-hch@lst.de>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aChOhXn+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8BA74C32786;
+	Thu, 20 Jun 2024 15:23:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718896987;
+	bh=713UnYvca8N+2HdeEUO+m7CICnb8uLx0hJlWox5RUhs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=aChOhXn+RhOtj24I/4za/LE0soQ2iwB+WxS7w/XkEbZZNabXx69G3/YPr0RmlSk4G
+	 zHv1PwRLXn1VKGNBmYIjH7421tY+sGUbhCVu0ZS9cblq3w8gNPBHOax5K7SvCfBcWM
+	 LrygPRjX+uwoNsWHt8iV+FdrnBy+RDxbIOQg5F6MS16WddnDsKN0QoU7CYulHzcxyP
+	 tqgfX0rfsHgf/V+cACjpB9FYnzoWYXMeblHJm6W0AlrzCW3JICNrPfJiJTs4iI1xqk
+	 6cyFgzyELI1Tvuu0Fw4o6uG5J1hDfheffR1Bm6WPbcTp2ygyXaqM1pAh+ab+y+98Zf
+	 xvxxF/Wz4viPg==
+Date: Thu, 20 Jun 2024 08:23:06 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/073: avoid large recurise diff
+Message-ID: <20240620152306.GV103034@frogsfrogsfrogs>
+References: <20240620124844.558637-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240620124844.558637-1-hch@lst.de>
 
-xfs/073 has been failing for me for a while on most of my test setups
-with:
+On Thu, Jun 20, 2024 at 02:48:44PM +0200, Christoph Hellwig wrote:
+> xfs/073 has been failing for me for a while on most of my test setups
+> with:
+> 
+> diff: memory exhausted
+> 
+> from the large recursive diff it does.  Replace that with a pipe using
+> md5sum to reduce the memory usage.
+> 
+> Based on a snipplet from Darrick Wong.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-diff: memory exhausted
+LGTM
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-from the large recursive diff it does.  Replace that with a pipe using
-md5sum to reduce the memory usage.
+> ---
+>  tests/xfs/073 | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/073 b/tests/xfs/073
+> index c7616b9e9..0f96fdb09 100755
+> --- a/tests/xfs/073
+> +++ b/tests/xfs/073
+> @@ -76,7 +76,8 @@ _verify_copy()
+>  	fi
+>  
+>  	echo comparing new image files to old
+> -	diff -Naur $source_dir $target_dir
+> +	(cd $source_dir; find . -type f -print0 | xargs -0 md5sum) | \
+> +	(cd $target_dir ; md5sum -c --quiet)
 
-Based on a snipplet from Darrick Wong.
+Dumb nit: shellcheck   ^^ tells me these semicolons should be a '&&' so
+that the find/md5sum won't run if the cd fails, but the incorrect file
+list and whatever error messages cd coughs up will be enough to fail the
+test anyway.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/073 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+--D
 
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index c7616b9e9..0f96fdb09 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -76,7 +76,8 @@ _verify_copy()
- 	fi
- 
- 	echo comparing new image files to old
--	diff -Naur $source_dir $target_dir
-+	(cd $source_dir; find . -type f -print0 | xargs -0 md5sum) | \
-+	(cd $target_dir ; md5sum -c --quiet)
- 
- 	echo comparing new image directories to old
- 	find $source_dir | _filter_path $source_dir > $tmp.manifest1
--- 
-2.43.0
-
+>  
+>  	echo comparing new image directories to old
+>  	find $source_dir | _filter_path $source_dir > $tmp.manifest1
+> -- 
+> 2.43.0
+> 
+> 
