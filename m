@@ -1,42 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4488364AB;
-	Fri, 21 Jun 2024 16:20:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FC49156227;
+	Fri, 21 Jun 2024 16:36:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718986856; cv=none; b=HH9D+M3ClDWgHcTB8EQxWsYQ6ZmIP6AtaqMG6wbRyn7qz9bzoFVmKUc+nPo+sGlnggQIv/1xTt+6MhIvc5X319puVM8HSRUX1x+Pqn669MsDI2Mhm2SG1EhS4dlHncNWLdO7640hhJIeSMzgTdA55e0Z3Pj7LoOo+r82/JUdc4c=
+	t=1718987768; cv=none; b=niz1gfQEMNn0xp508Q4gqf3MwctqzRrD4FmnhkHv0AwQatE66U6w/UmK0WIaJ/hIuU48Q37kapzIQJpitR7xWdcFTWVzjirs8iwANm+TmbrgZFxLxmrZM20GUhozZCE89wtBo910C1eJgR6awMuzExLKo2EiH5nVS9RT8PPgNXs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718986856; c=relaxed/simple;
-	bh=RpD2VZrSv7AsfIRL7CEr6zvYm/zKg6S2eqMZiqHiSrY=;
+	s=arc-20240116; t=1718987768; c=relaxed/simple;
+	bh=rMw0lXR+0qFw57y0kRCi9QHfXwdq/RCbQ9Ljz3ZOGNQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Bvvvv9oODY4Q9bSTR/IecRvNnK1PDuQe+WVG4W+X7+AO7lsgvirwYF39TJb2NOnB/9glDyIflJ2KFIaHNtyAYo6ZrkW+IGBtCOeYRK0VeSeaTfMwytYPR8Urs07NAFwg9IC27Y+vAGyb2VaAealwsldyR5W3F2+Efrk0OwR3wLY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=au+5m4nH; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=EC28LB7akkjz8iD8eN6+RfX4szgTLXOdRXPuh7OsEggXmKdmJkz0kMDKqATGGI2urWJriybZmGDsFAHlAgLEsoCokwcPPuosrAwlom55nMavs6kPmfUPpn1QAMrjILBa2Fn4mEKlSmVDDkuU692mHB6xvk3HLq2+kjuCbmeZYyQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Dxv6jnXe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="au+5m4nH"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B3ACC2BBFC;
-	Fri, 21 Jun 2024 16:20:56 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Dxv6jnXe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 61483C2BBFC;
+	Fri, 21 Jun 2024 16:36:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718986856;
-	bh=RpD2VZrSv7AsfIRL7CEr6zvYm/zKg6S2eqMZiqHiSrY=;
+	s=k20201202; t=1718987768;
+	bh=rMw0lXR+0qFw57y0kRCi9QHfXwdq/RCbQ9Ljz3ZOGNQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=au+5m4nHUSRR9xgWgH+A3NLe+ykat69i4tkQuv12bcEbO9Y6a56WrsuvJYuJjA9Gh
-	 yxu2x1LSnta62svKL9t2/18eh6Rr0daeQvFsAxXuF4/OdhszdYi/2B9kkt4lGerLMh
-	 k1RwNH4fA3Sk1reFjwrwCEhLtN5WDSSpsYHWv1puU++PfimDcQ+ZzsRyD+hBb7o/Mi
-	 /Z8Zqp2vR5glEaQXauIRTYkqKNLQSC0PVBry7+dJdi1JI5r9gBxUqSttW+Vuirpapa
-	 zDMwJn5KO2zbSFIzlG0fs4f7OuMoQhKcrqcbzTKawYy+F9v+ntk9bCCKfwAfGWprcW
-	 eWJ2Jr3x46YkQ==
-Date: Fri, 21 Jun 2024 09:20:55 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, dchinner@redhat.com, linux-xfs@vger.kernel.org,
+	b=Dxv6jnXeaDEirXvPRL2aeqM/sjUx6iD7YGHNZ/gP/m3xgaI2sOduzNoSC7gm+l1bm
+	 4FabIvmBz0P+/at4e0p8/EpJ/Z1mAQfc5M3n9dmrnFeeHeXp1u5/bMngO4YbbgZ97n
+	 MiYyDBSykYEVN1PJTzXQvQDfDcOCCyASMQXd69GwM0sBNsVwVyE2ci1xzMOwtNwEK7
+	 NCdhLj3r25KjPjix9Y8pTxM2dp3mY+2YZ8ppetxKOaqr73nSnljElBp6zQt/3uXSeJ
+	 aoT9A2aXJiXtlJWt+Yi6wHdCMWOr/Gq+rP9q1Dp1tD3kK/N7/flH/FJU/IEwXL2UE0
+	 z8LlTaN16CgDw==
+Date: Sat, 22 Jun 2024 00:36:03 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: Baokun Li <libaokun1@huawei.com>
+Cc: Theodore Ts'o <tytso@mit.edu>,
+	Ext4 Developers List <linux-ext4@vger.kernel.org>,
+	linux-fstests@mit.edu,
+	=?utf-8?B?5p2o5LqM5Z2k?= <yangerkun@huawei.com>,
 	fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/011: support byte-based grant heads are stored in
- bytes now
-Message-ID: <20240621162055.GC3058325@frogsfrogsfrogs>
-References: <20240620072309.533010-1-hch@lst.de>
- <20240620195606.GH103034@frogsfrogsfrogs>
- <20240621062903.GA16866@lst.de>
+Subject: Re: [PATCH] ext4/059: disable block_validity checks when mounting a
+ corrupted file system
+Message-ID: <20240621163603.mid7acwta2tnbhqk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20230823145621.3680601-1-tytso@mit.edu>
+ <45251246-e24b-4ace-9b45-2efad65e8eb5@huawei.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,27 +47,57 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240621062903.GA16866@lst.de>
+In-Reply-To: <45251246-e24b-4ace-9b45-2efad65e8eb5@huawei.com>
 
-On Fri, Jun 21, 2024 at 08:29:03AM +0200, Christoph Hellwig wrote:
-> On Thu, Jun 20, 2024 at 12:56:06PM -0700, Darrick J. Wong wrote:
-> > > +	# The grant heads record reservations in bytes.  For complex reasons
-> > > +	# beyond the scope fo this test, these aren't going to be exactly zero
-> > 
-> >                            of
-> > 
-> > Why aren't they going to be exactly zero?
+On Thu, Jun 13, 2024 at 10:09:44AM +0800, Baokun Li wrote:
+> Hi Zorro,
 > 
-> Given that frozen file systems always have a dirty log to force
-> recovery after a crash we also have space granted to it.
+> Could you pick up this patch?
+> This test case has been failing in the mainline for a while now.
 
-Might as well say that in the comment, then.
+Sorry I just noticed this patch, looks like it was not sent to fstests@.
+Sure, I'll merge it, thanks for CC me :)
 
-"The grant heads record log reservations in bytes.  Frozen filesystems
-always have a dirty log to force recovery, so the grant heads won't be
-exactly zero..."
+Thanks,
+Zorro
 
-With something like that
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-
---D
+> 
+> Thanks,
+> Baokun
+> 
+> On 2023/8/23 22:56, Theodore Ts'o wrote:
+> > Kernels with the commit "ext4: add correct group descriptors and
+> > reserved GDT blocks to system zone" will refuse to mount the corrupted
+> > file system constructed by this test.  So in order to perform the
+> > test, we need to disable the block_validity checks.
+> > 
+> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> 
+> Looks good to me, thanks for the patch!
+> 
+> Reviewed-and-tested-by: Baokun Li <libaokun1@huawei.com>
+> 
+> > ---
+> >   tests/ext4/059 | 5 +++++
+> >   1 file changed, 5 insertions(+)
+> > 
+> > diff --git a/tests/ext4/059 b/tests/ext4/059
+> > index 4230bde92..e4af77f1e 100755
+> > --- a/tests/ext4/059
+> > +++ b/tests/ext4/059
+> > @@ -31,6 +31,11 @@ $DEBUGFS_PROG -w -R "set_super_value s_reserved_gdt_blocks 100" $SCRATCH_DEV \
+> >   $DEBUGFS_PROG -R "show_super_stats -h" $SCRATCH_DEV 2>/dev/null | \
+> >   	grep "Reserved GDT blocks"
+> > +# Kernels with the commit "ext4: add correct group descriptors and
+> > +# reserved GDT blocks to system zone" will refuse to mount the file
+> > +# system due to block_validity checks; so disable block_validity.
+> > +MOUNT_OPTIONS="$MOUNT_OPTIONS -o noblock_validity"
+> > +
+> >   _scratch_mount
+> >   # Expect no crash from this resize operation
+> 
+> 
+> -- 
+> With Best Regards,
+> Baokun Li
+> 
