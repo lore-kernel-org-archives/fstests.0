@@ -1,86 +1,106 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E095C40856;
-	Fri, 21 Jun 2024 17:53:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DD72A5F;
+	Sat, 22 Jun 2024 02:51:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.189
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718992404; cv=none; b=mOheDRzKv/CncKpXXjQe9Z/jekMKN6jUkiSGqpVcnFP6bqz2TIq5N4y8/SHTYQZ9qRn4D3mZeWjoAhfLlwFOQK1dy29xUPbecfcHs0gFuYjvUzPhQzdIRunOLUEPWSb1kNIY50mj/ys2dMX850x+mCGtvvzi5/5gUSF0jCih45Q=
+	t=1719024708; cv=none; b=gsxRpmA3LnYp1IYjyHoI5+H4iqbivyfWMAULKssP5R0HZ91ybIh2fN0NXTUvxbKZ3w2hSM+tiFGPwUt3g/uW6tmqk/bBHCP5fAg9nwcygUYJ+ec5na4bXdLKBg3+SsOxM92acL4Le1odZXDXQURwpXivOm9o3Pq7LgqUOmunbX8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718992404; c=relaxed/simple;
-	bh=0fGlCA/L0UocJTiDr0ISItSBNPn3E+Z087jZs97He8g=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rab1P/LXNKsnH6c0/ZDrODo4LHes5qN15juNfUmeXnK/TXHjFOclz9NjooBDmuVbrnfR3J5/Om8LCWceCS1y1Awbvrk6qsoEdF2pvqqE0vux2tkGV5Q7gt8OeIUfYC3lagQQ/EdU/kJ521GNZpOVfZbknIrSQRF6nYZ+QgQfBRM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Jkb1wEQ6; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Jkb1wEQ6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AAE89C2BBFC;
-	Fri, 21 Jun 2024 17:53:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718992403;
-	bh=0fGlCA/L0UocJTiDr0ISItSBNPn3E+Z087jZs97He8g=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Jkb1wEQ61B0c3GubeazrwvvsIzC2WK9TEbkXHyAtLgbGWz4I7/RM1VBpfn7deQ+qN
-	 CWzI+NranqLb63CETrOFCX/XBxebRdHBK2JTNhux0jnZ9EDk9D2e9q/DvVy44dMqy1
-	 JwO92wd5ZD+QjcRk3qfuQpcl0GEn+ayO73G0btd6Z9BksmSaJ4AmYpulViEAPM7Z9U
-	 NfoUPfHt9b5cpCFPOsqI7bSeVJx5b9tjwt0s/VqZvYPVx2b7xj+KytvaHAgtvuqkur
-	 c2RoJLglJEoBqP+q+PhyFXAJafGaF2st4BpYmhamZAe+KqTb0mTwH+W3h/yusbuvmG
-	 Sn+O1J/REUnzA==
-Date: Fri, 21 Jun 2024 10:53:23 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCHBOMB] fstests: catch us up to 6.10
-Message-ID: <20240621175323.GH3058325@frogsfrogsfrogs>
-References: <20240620205017.GC103020@frogsfrogsfrogs>
- <20240621172034.qemkrzrpxif37tot@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	s=arc-20240116; t=1719024708; c=relaxed/simple;
+	bh=VQRBXI6E9DYD8sibQAHjyrNS2yNK/khO13SKwhLUhj8=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=kR0dy/jX0Dxhlbh/tCM3BhPKQFPcpotnEMqRQACtzROkjBjUvdZlH/X1jnNlCOnps5seotaoVdu4QfyLYNmh4NVVl3AWiYnPDPv/CWke29mvXg6M50Wzg54KL1KgQs+Do5vv705IcYiNVZw9+HJ9f8/fWkrifTUmUwrR0vhhyHY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.189
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+Received: from mail.maildlp.com (unknown [172.19.88.105])
+	by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4W5dS71ps8zPrbf;
+	Sat, 22 Jun 2024 10:28:07 +0800 (CST)
+Received: from dggpeml100021.china.huawei.com (unknown [7.185.36.148])
+	by mail.maildlp.com (Postfix) with ESMTPS id E6C9E1402C8;
+	Sat, 22 Jun 2024 10:31:42 +0800 (CST)
+Received: from [10.174.177.174] (10.174.177.174) by
+ dggpeml100021.china.huawei.com (7.185.36.148) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Sat, 22 Jun 2024 10:31:42 +0800
+Message-ID: <c26c4704-4f41-477d-a613-ec388536ea72@huawei.com>
+Date: Sat, 22 Jun 2024 10:31:42 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240621172034.qemkrzrpxif37tot@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] ext4/059: disable block_validity checks when mounting a
+ corrupted file system
+To: Zorro Lang <zlang@kernel.org>
+CC: Theodore Ts'o <tytso@mit.edu>, Ext4 Developers List
+	<linux-ext4@vger.kernel.org>, <fstests@vger.kernel.org>,
+	<yangerkun@huawei.com>, Baokun Li <libaokun1@huawei.com>
+References: <20230823145621.3680601-1-tytso@mit.edu>
+ <45251246-e24b-4ace-9b45-2efad65e8eb5@huawei.com>
+ <20240621163603.mid7acwta2tnbhqk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Baokun Li <libaokun1@huawei.com>
+In-Reply-To: <20240621163603.mid7acwta2tnbhqk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
+ dggpeml100021.china.huawei.com (7.185.36.148)
 
-On Sat, Jun 22, 2024 at 01:20:34AM +0800, Zorro Lang wrote:
-> On Thu, Jun 20, 2024 at 01:50:17PM -0700, Darrick J. Wong wrote:
-> > Hi everyone,
-> > 
-> > This patchbomb are all the fixes that xfs needs to bring fstests up to
-> > date with what's in 6.10-rc.  Except for these two patches:
-> > 
-> > [PATCHSET v30.7 2/6] fstests: atomic file updates
-> > [PATCH 03/11] generic/709,710: rework these for exchangerange vs.
-> > [PATCH 04/11] generic/711,xfs/537: actually fork these tests for
-> > 
-> > everything else in here is fully reviewed and ready for PRs.
-> 
-> Thanks for big updates!
-> 
-> This patchset is big, I've merged and pushed all these patches to
-> fstests' 'patches-in-queue' branch, feel free to check that.
-> 
-> I need more time to give them more tests, will try to release fstests
-> at this weekend or middle of next week.
+On 2024/6/22 0:36, Zorro Lang wrote:
+> On Thu, Jun 13, 2024 at 10:09:44AM +0800, Baokun Li wrote:
+>> Hi Zorro,
+>>
+>> Could you pick up this patch?
+>> This test case has been failing in the mainline for a while now.
+> Sorry I just noticed this patch, looks like it was not sent to fstests@.
+> Sure, I'll merge it, thanks for CC me :)
 
-<nod> The patch "src/fiexchange.h: update XFS_IOC_EXCHANGE_RANGE
-definitions" is going to need another update if Chandan pulls in[1]
-before 6.10 closes:
+Thanks for merging it!
 
-[1] https://lore.kernel.org/linux-xfs/171892459317.3192151.14305994848485102437.stgit@frogsfrogsfrogs/
+Seeing your reply I just noticed that the address of the fstests mail
+list was misspelled.
 
-But I'll let that go upstream before I make the change to fstests.
+Cheers,
+Baokun
 
---D
-
+>
 > Thanks,
 > Zorro
-> 
-> > 
-> > --D
-> > 
-> 
-> 
+>
+>> Thanks,
+>> Baokun
+>>
+>> On 2023/8/23 22:56, Theodore Ts'o wrote:
+>>> Kernels with the commit "ext4: add correct group descriptors and
+>>> reserved GDT blocks to system zone" will refuse to mount the corrupted
+>>> file system constructed by this test.  So in order to perform the
+>>> test, we need to disable the block_validity checks.
+>>>
+>>> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+>> Looks good to me, thanks for the patch!
+>>
+>> Reviewed-and-tested-by: Baokun Li <libaokun1@huawei.com>
+>>
+>>> ---
+>>>    tests/ext4/059 | 5 +++++
+>>>    1 file changed, 5 insertions(+)
+>>>
+>>> diff --git a/tests/ext4/059 b/tests/ext4/059
+>>> index 4230bde92..e4af77f1e 100755
+>>> --- a/tests/ext4/059
+>>> +++ b/tests/ext4/059
+>>> @@ -31,6 +31,11 @@ $DEBUGFS_PROG -w -R "set_super_value s_reserved_gdt_blocks 100" $SCRATCH_DEV \
+>>>    $DEBUGFS_PROG -R "show_super_stats -h" $SCRATCH_DEV 2>/dev/null | \
+>>>    	grep "Reserved GDT blocks"
+>>> +# Kernels with the commit "ext4: add correct group descriptors and
+>>> +# reserved GDT blocks to system zone" will refuse to mount the file
+>>> +# system due to block_validity checks; so disable block_validity.
+>>> +MOUNT_OPTIONS="$MOUNT_OPTIONS -o noblock_validity"
+>>> +
+>>>    _scratch_mount
+>>>    # Expect no crash from this resize operation
+>>>
