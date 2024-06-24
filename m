@@ -1,505 +1,137 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C652146003
-	for <fstests@vger.kernel.org>; Sun, 23 Jun 2024 13:03:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3B754A31;
+	Mon, 24 Jun 2024 02:17:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719147793; cv=none; b=iAkdjyOMdw0lBjHXO/n+EfwxwaWqniMU8AQqM72kcVjkG/jc0CaTI2Bok7eb89RfD7x/GDyqSFyjuFLQFB6zyIk47dv4uqzXv5s43YLswZVjOZHJtZDC58v2KdIct/OAVOyzaixz/F8J7VT4dJz91o6D65ayNyzvdRfmcWEefzw=
+	t=1719195463; cv=none; b=fGRB6nXrRaIbafLp6vm1w4bGWbCsLZHXnmfLLWpMp7wdHbSepgmVYNcxzfc2j59YpjMnbIBCI1JvEXlxGxogNg6QICbLqniu4iFs9oFQkC14vHG/U9zuGE9Z91LkHlArgHF1XnLCVWEKP56/NJsykYwq7rMSSvmgSXG3mr0ShZg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719147793; c=relaxed/simple;
-	bh=4++v4HEk6e/WeEFDaJcCCqbW8dP4Szrm1d51vgrGxM4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZUCSdCpDXLeSNIewiRfSKcmwsI7Gy8EDe+llz4QHYtHb9BnW4BGfPoaTtWlLRTZs75hqkpybr6tVGuGuu5izbJera9FPd75KiFVSFG0x8TCW9ekjZ8nqW9iGV9svK/NNjig6RXSJQFbPlExSuCc/XV7dJWEglIuIKRWq60Ra6Nk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=dcblfxCv; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1719195463; c=relaxed/simple;
+	bh=cNWdPm9/LN+wkX29ZgOl2cW7n59b9xax14Dp/kwHNJc=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=KYkIPjPqIDNNy86HgWZJi+3Ws+G4/zExyepcwdIum/Q4/WAZLap91MLebYcMCT0ifShtY9pCv3hgTDkV7wJ8LoIt45Gjxk2pB86hber+rLEOGvJFlmmOfBQE10ljgRnLaanYZ2t/CZsnMX9MuX+0rtXIF4kYsJ7wnh6Uc0dCFNg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=B4fKRgHJ; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=UTSiuJx3; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=B4fKRgHJ; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=UTSiuJx3; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="dcblfxCv"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1719147790;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="B4fKRgHJ";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="UTSiuJx3";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="B4fKRgHJ";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="UTSiuJx3"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id E1B9E1F799;
+	Mon, 24 Jun 2024 02:17:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1719195459; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=OkGfeTc2GNP5SzhiS10auyUivc5f5wZgqAPMPPb3Dxs=;
-	b=dcblfxCvidgAEFEr3hLSpRQKYNr82EogeTlROvi/Uw3RF3W8bTCumogrpREH2P0Dnd1Pfh
-	r63z7XI+wfewKJxiGIeNsV/7XIMY9mshzhie2zVFWIxNEjSGaIWYJURrXI3p3Cvg/Fm8k4
-	4SWpCW4pkEe3HNIWbuu3PlKsfwZ+2Ok=
-Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
- [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-179-itQldKyMNWakSByJoGORLw-1; Sun, 23 Jun 2024 09:03:08 -0400
-X-MC-Unique: itQldKyMNWakSByJoGORLw-1
-Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-70667c46701so1351885b3a.3
-        for <fstests@vger.kernel.org>; Sun, 23 Jun 2024 06:03:08 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719147787; x=1719752587;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OkGfeTc2GNP5SzhiS10auyUivc5f5wZgqAPMPPb3Dxs=;
-        b=UzfE+ywbQ5J7XqWovX94J8ZblC2ka0JPdMzVOWVp8CJpUq7jkycjVjgS41NgOowyBM
-         nl/zKSVqDoiTjtVr2Xq5gG8mWnrhyzORpDT/vRUUdHxQFRoAZA3PsJYoxsppzK1Sgx6E
-         kioTiijy51khDYUFGGz1eOdnkScE56j7VJ8XfBAfZKjBIOn+6ngvzsdy3btDYyyA/pF6
-         94rw+kx8ee2cOIuzU5S0cYhUNOb/XbPGH+FjzBjiUiWGrbldAoTDkAxXO6oJ7hawS+8X
-         3rIL053W/pBhyjTEFMD7f/B5lkVUqBldVHakL/c80VdALQw/Ml6rUYcqYmF2P/DyBKaa
-         N/kw==
-X-Forwarded-Encrypted: i=1; AJvYcCXHnT3NofDL2KcdERdhU0EaH5BF4Wrz0QwShP4tDcSACji1GYZBbKHJX/aQDjAb4GsRfiYf3lubDNjkeAU7ZXmFbIuC1ikzDg==
-X-Gm-Message-State: AOJu0YwT7jSV/5yp8M2tUexf4VneDn+k38YDf3aK4cWYQ4U5oZlhi6o/
-	/2Pz0B/MbJRPaTnAHPMuPFTXKspzH1sIh4MShVR6ye/2U9kkRZkyOsedQmLJI8YRziDJ9P2EOSt
-	wDlOEuR+ntMe/jasqU/mVtBJfy1QE23ahG/AK/YojkJv4Mfs7gSCIQcM=
-X-Received: by 2002:aa7:98c3:0:b0:705:c0a1:61c9 with SMTP id d2e1a72fcca58-7066e52a6bamr2422473b3a.9.1719147786719;
-        Sun, 23 Jun 2024 06:03:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHtIC6oezlR23WxlMKwCdUR6QFWuss73xN1RWRn2RuZpNm84CJueDIm2bMkBqgiyUU5wzaHKA==
-X-Received: by 2002:aa7:98c3:0:b0:705:c0a1:61c9 with SMTP id d2e1a72fcca58-7066e52a6bamr2422429b3a.9.1719147786090;
-        Sun, 23 Jun 2024 06:03:06 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7067b4d5a82sm855302b3a.68.2024.06.23.06.03.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 Jun 2024 06:03:05 -0700 (PDT)
-Date: Sun, 23 Jun 2024 21:03:01 +0800
-From: Zorro Lang <zlang@redhat.com>
+	bh=ubKnjLUKFsQWSrYoMTiiZmS6hrdM1mxAquGcseSW0Bw=;
+	b=B4fKRgHJYM/57Uj4LVCUh+DQUapc6+TLooG17i8ufOTaiS2RxSnBvi0oJ/fNObYi/dBYK7
+	QMow33ksx/JWU14IORAWbYxUe9bIvzTReqUTFO8pAtCnnPmUtG8GZ58iKR7amd61CF2B5+
+	UK05lfo6lbekyHpqXbt66v/pNtByg78=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1719195459;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ubKnjLUKFsQWSrYoMTiiZmS6hrdM1mxAquGcseSW0Bw=;
+	b=UTSiuJx38Ts905Pbi+DC0gA4FuPbVBrxpCELBx8SFk0YCfGf2sfIMMAV9qpl1QD5UYLre3
+	mvvEHjOuJNAZ6PDg==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1719195459; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ubKnjLUKFsQWSrYoMTiiZmS6hrdM1mxAquGcseSW0Bw=;
+	b=B4fKRgHJYM/57Uj4LVCUh+DQUapc6+TLooG17i8ufOTaiS2RxSnBvi0oJ/fNObYi/dBYK7
+	QMow33ksx/JWU14IORAWbYxUe9bIvzTReqUTFO8pAtCnnPmUtG8GZ58iKR7amd61CF2B5+
+	UK05lfo6lbekyHpqXbt66v/pNtByg78=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1719195459;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ubKnjLUKFsQWSrYoMTiiZmS6hrdM1mxAquGcseSW0Bw=;
+	b=UTSiuJx38Ts905Pbi+DC0gA4FuPbVBrxpCELBx8SFk0YCfGf2sfIMMAV9qpl1QD5UYLre3
+	mvvEHjOuJNAZ6PDg==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id A6BD713797;
+	Mon, 24 Jun 2024 02:17:37 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id LXWHFUHXeGZoJAAAD6G6ig
+	(envelope-from <ddiss@suse.de>); Mon, 24 Jun 2024 02:17:37 +0000
+Date: Mon, 24 Jun 2024 12:17:30 +1000
+From: David Disseldorp <ddiss@suse.de>
 To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>,
-	Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: new EOF fragmentation tests
-Message-ID: <20240623130301.s2r2fv5qjaspmcxi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240623053900.857695-1-hch@lst.de>
- <20240623053900.857695-2-hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org, "Theodore Ts'o"
+ <tytso@mit.edu>, linux-ext4@vger.kernel.org
+Subject: Re: mostly remove _supported_fs
+Message-ID: <20240624121730.4d35b58a.ddiss@suse.de>
+In-Reply-To: <20240623121103.974270-1-hch@lst.de>
+References: <20240623121103.974270-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240623053900.857695-2-hch@lst.de>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Spam-Score: -3.30
+X-Spam-Level: 
+X-Spam-Flag: NO
+X-Spamd-Result: default: False [-3.30 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-0.984];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_DN_SOME(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_FIVE(0.00)[5];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email]
 
-On Sun, Jun 23, 2024 at 07:38:53AM +0200, Christoph Hellwig wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Sun, 23 Jun 2024 14:10:29 +0200, Christoph Hellwig wrote:
+
+> Hi Zorro,
 > 
-> These tests create substantial file fragmentation as a result of
-> application actions that defeat post-EOF preallocation
-> optimisations. They are intended to replicate known vectors for
-> these problems, and provide a check that the fragmentation levels
-> have been controlled. The mitigations we make may not completely
-> remove fragmentation (e.g. they may demonstrate speculative delalloc
-> related extent size growth) so the checks don't assume we'll end up
-> with perfect layouts and hence check for an exceptable level of
-> fragmentation rather than none.
+> this series improves generic/740 and then mostly removes _supported_fs
+> as it's largely not needed.
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> [move to different test number, update to current xfstest APIs]
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/1500     | 59 ++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1500.out |  9 ++++++
->  tests/xfs/1501     | 61 ++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1501.out |  9 ++++++
->  tests/xfs/1502     | 61 ++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1502.out |  9 ++++++
->  tests/xfs/1503     | 70 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1503.out | 33 ++++++++++++++++++++++
->  8 files changed, 311 insertions(+)
->  create mode 100755 tests/xfs/1500
->  create mode 100644 tests/xfs/1500.out
->  create mode 100755 tests/xfs/1501
->  create mode 100644 tests/xfs/1501.out
->  create mode 100755 tests/xfs/1502
->  create mode 100644 tests/xfs/1502.out
->  create mode 100755 tests/xfs/1503
->  create mode 100644 tests/xfs/1503.out
-> 
-> diff --git a/tests/xfs/1500 b/tests/xfs/1500
-> new file mode 100755
-> index 000000000..222e90d6c
-> --- /dev/null
-> +++ b/tests/xfs/1500
-> @@ -0,0 +1,59 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-                   ^^^^
-Should I keep "2019" or change it to 2024, or no matter :)
+> The exceptions are the negative matches, which should probably be
+> replaced with a new _exclude_fs helper, and the test/ext4 directly
+> which is also run by magic for ext2 and ext3.  I'm not entirely sure
+> what to do about it, but removing this magic and just adding small
+> wrappers for ext2 and ext3 to run the ext4 tests would seem like
+> the best idea to me.
 
-> +#
-> +# FS QA Test xfs/500
-> +#
-> +# Post-EOF preallocation defeat test for O_SYNC buffered I/O.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick prealloc rw
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
+This whole series looks good to me:
+Reviewed-by: David Disseldorp <ddiss@suse.de>
 
-Wrong order:) ">>$seqres.full 2>&1"
-
-
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using synchronous buffered writes. Aim is to
-> +# interleave allocations to fragment the files. Synchronous writes defeat the
-> +# open/write/close heuristics in xfs_file_release() that prevent EOF block
-> +# removal, so this should fragment badly. Typical problematic behaviour shows
-> +# per-file extent counts of >900 (almost worse case) whilst fixed behaviour
-> +# typically shows extent counts in the low 20s.
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +
-> +write_sync_file()
-> +{
-> +	idx=$1
-> +
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -s -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_sync_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-
-If a case has background process, better to do kill&wait in _cleanup,
-for unexpected Ctrl^C when fstests is running. e.g.
-
-_cleanup{}
-{
-	# try to kill all background processes
-	wait
-	cd /
-	rm -r -f $tmp.*
-}
-
-I'm not sure if there's a good to way to do "kill all background
-processes" in this case, or if it's necessary. But a "wait" might
-be worth, to avoid the "Device Busy" error. Any thoughts?
-
-Thanks,
-Zorro
-
-
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-40
-> +	_within_tolerance "file.$n extent count" $count 21 19 -v
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1500.out b/tests/xfs/1500.out
-> new file mode 100644
-> index 000000000..414df87ed
-> --- /dev/null
-> +++ b/tests/xfs/1500.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 1500
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/1501 b/tests/xfs/1501
-> new file mode 100755
-> index 000000000..beae49bff
-> --- /dev/null
-> +++ b/tests/xfs/1501
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/501
-> +#
-> +# Post-EOF preallocation defeat test for buffered I/O with extent size hints.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick prealloc rw
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using buffered writes with extent size hints.
-> +# Aim is to interleave allocations to fragment the files. Writes w/ extent size
-> +# hints set defeat the open/write/close heuristics in xfs_file_release() that
-> +# prevent EOF block removal, so this should fragment badly. Typical problematic
-> +# behaviour shows per-file extent counts of 1000 (worst case!) whilst
-> +# fixed behaviour should show very few extents (almost best case).
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +extent_size=16m
-> +
-> +write_extsz_file()
-> +{
-> +	idx=$1
-> +
-> +	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_extsz_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-10
-> +	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1501.out b/tests/xfs/1501.out
-> new file mode 100644
-> index 000000000..a266ef74b
-> --- /dev/null
-> +++ b/tests/xfs/1501.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 1501
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/1502 b/tests/xfs/1502
-> new file mode 100755
-> index 000000000..9d303ced7
-> --- /dev/null
-> +++ b/tests/xfs/1502
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/502
-> +#
-> +# Post-EOF preallocation defeat test for direct I/O with extent size hints.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick prealloc rw
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using O_DIRECT writes w/ extent size hints.
-> +# Aim is to interleave allocations to fragment the files. O_DIRECT writes defeat
-> +# the open/write/close heuristics in xfs_file_release() that prevent EOF block
-> +# removal, so this should fragment badly. Typical problematic behaviour shows
-> +# per-file extent counts of ~1000 (worst case) whilst fixed behaviour typically
-> +# shows extent counts in the low single digits (almost best case)
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +extent_size=16m
-> +
-> +write_direct_file()
-> +{
-> +	idx=$1
-> +
-> +	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -d -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_direct_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-10
-> +	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1502.out b/tests/xfs/1502.out
-> new file mode 100644
-> index 000000000..82c8760a3
-> --- /dev/null
-> +++ b/tests/xfs/1502.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 1502
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/1503 b/tests/xfs/1503
-> new file mode 100755
-> index 000000000..41f4035ad
-> --- /dev/null
-> +++ b/tests/xfs/1503
-> @@ -0,0 +1,70 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/503
-> +#
-> +# Post-EOF preallocation defeat test with O_SYNC buffered I/O that repeatedly
-> +# closes and reopens the files.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto prealloc rw
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using synchronous buffered writes that
-> +# repeatedly close and reopen the fails. Aim is to interleave allocations to
-> +# fragment the files. Assuming we've fixed the synchronous write defeat, we can
-> +# still trigger the same issue with a open/read/close on O_RDONLY files. We
-> +# should not be triggering EOF preallocation removal on files we don't have
-> +# permission to write, so until this is fixed it should fragment badly.  Typical
-> +# problematic behaviour shows per-file extent counts of 50-350 whilst fixed
-> +# behaviour typically demonstrates post-eof speculative delalloc growth in
-> +# extent size (~6 extents for 50MB file).
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=32
-> +wsize=4096
-> +wcnt=1000
-> +
-> +write_file()
-> +{
-> +	idx=$1
-> +
-> +	$XFS_IO_PROG -f -s -c "pwrite -b 64k 0 50m" $workfile.$idx
-> +}
-> +
-> +read_file()
-> +{
-> +	idx=$1
-> +
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -r -c "pread 0 28" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workdir/file*
-> +for ((n=0; n<$((nfiles)); n++)); do
-> +	write_file $n > /dev/null 2>&1 &
-> +	read_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-40
-> +	_within_tolerance "file.$n extent count" $count 6 5 10 -v
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1503.out b/tests/xfs/1503.out
-> new file mode 100644
-> index 000000000..1780b16df
-> --- /dev/null
-> +++ b/tests/xfs/1503.out
-> @@ -0,0 +1,33 @@
-> +QA output created by 1503
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> +file.8 extent count is in range
-> +file.9 extent count is in range
-> +file.10 extent count is in range
-> +file.11 extent count is in range
-> +file.12 extent count is in range
-> +file.13 extent count is in range
-> +file.14 extent count is in range
-> +file.15 extent count is in range
-> +file.16 extent count is in range
-> +file.17 extent count is in range
-> +file.18 extent count is in range
-> +file.19 extent count is in range
-> +file.20 extent count is in range
-> +file.21 extent count is in range
-> +file.22 extent count is in range
-> +file.23 extent count is in range
-> +file.24 extent count is in range
-> +file.25 extent count is in range
-> +file.26 extent count is in range
-> +file.27 extent count is in range
-> +file.28 extent count is in range
-> +file.29 extent count is in range
-> +file.30 extent count is in range
-> +file.31 extent count is in range
-> -- 
-> 2.43.0
-> 
-> 
-
+There are many double-empty-lines following the patch 8/8 removals
+(btrfs/014, btrfs/031, btrfs/192, btrfs/196, generic/004, etc.) but they
+could be cleaned up on merge. Also, "# Modify as appropriate." would
+make a good addition to your removal regex.
