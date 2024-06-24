@@ -1,174 +1,173 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61A6419DF61
-	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 16:24:35 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C3161428F1
+	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 16:47:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719246275; cv=none; b=dUYp93M/NMBuGZZpNv2oX01l+oCk5z+AeXviSEf293hYZevX3a2m6imE4xFaFt7CAmHWNSJg6H3vgJXRyambhXXFn6bccN3rwenainABWmrM07Vnh0LOt3Yw9G5SUi2fVq2Jqhlk21e9tY++4slYzri3789rpURxUhVMZG64SU4=
+	t=1719247636; cv=none; b=QDXyyGijzu00mRs+NL0pNr088SkgC55tQ43OWorNnVbl/lq/QsK8OvvOu7hP4371sfL716+3L6PiTT23x7v6m3mh+CKsUcXxnIh0kMT5qY45FHJf7oDeH5DbyC8u7oAzwV5T6VIj6kL6UyKnWLsV99u/fZXEYpYKHIHn6QULrPs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719246275; c=relaxed/simple;
-	bh=FoNqkRsZ/O+96MQLzWzIR5fc8+8CrPpQvflRPCURPhA=;
+	s=arc-20240116; t=1719247636; c=relaxed/simple;
+	bh=gG7eP+BWelIwvq3dlu8NKn313UTsNfmw89w9Nn3O1Jc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XJGmkicjmDwd/ZugG3Z3989PYjTu4PAe+ilL+m5ZE6tfdwKuaG5nDCBy0GWXokn5CcyH0pRrsMfGRjY9usLBz0ja0qHBxypwOxY1mpVlhtw6bMPWn6A8ghW+hU1oz6Avy2f2LRei8GxeSRLUwD6eWnRynZCbInq7/MkJdboZY1k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=psX5NZrl; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Lv8U9/3Ll8Vu5om3oIeHCE9fLZfy5F2HUr6tTbfkOQmqJkz2Ndvib/81f9rPBGXYnw+PhfkXF0qOXzsb7zyV5yLOZuE2cKKS91NHOlMsSKAMVCaQHX3hcPgxIffUypbHrKEjFZxBLvE2quZ6JQYaw2qF1/gberyHbxsF5BPTuQI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RLfqFXNn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="psX5NZrl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D903FC2BBFC;
-	Mon, 24 Jun 2024 16:24:34 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RLfqFXNn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A06EFC2BBFC;
+	Mon, 24 Jun 2024 16:47:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719246274;
-	bh=FoNqkRsZ/O+96MQLzWzIR5fc8+8CrPpQvflRPCURPhA=;
+	s=k20201202; t=1719247635;
+	bh=gG7eP+BWelIwvq3dlu8NKn313UTsNfmw89w9Nn3O1Jc=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=psX5NZrlueW49MqGUTUpdMVQoAVmn/Zpxk/1Esg8wgk2O5j82M63tOOr2V6ippdbG
-	 SKVHXNlIyXNhFeatjpeE+4HSQ3PbBM2UYkd8wwiL81y6C3wwMzoiJCERFHoxM+OEYe
-	 Yxa6CybfAlaLC7RL+ZmQQ4N3SP3S0uzSYjDcQUejQOwwhfRbdtFrICGh+cSsJT5WuX
-	 LJH2j4fOsvFz4jcoWVUjWqsQA+Tg2ZHt5q38EnsCY1VEswQ/zVfLh9UEa7O6bbfzIV
-	 dtSyDpYsecB+VxmlFgnczOPNwb2+3UcoRgsWasYvWJ5XIereXdV0+Itmt9+I8Mpxwc
-	 jVo+ahmHxNaQg==
-Date: Mon, 24 Jun 2024 09:24:34 -0700
+	b=RLfqFXNn2/1MKWHWNrshetiXYEdzC5u+604d+xNbbmGpSLJQiqStYOgrna6hj2Wan
+	 jXBto/lfmwCMQDFPGISWNn9/1+omy9ssM8N5Ebttqs0Cdy8WbEOFla80kbz6GmFXg/
+	 hLCTWWUuJoX5hAJx/FGgiuUAOGb6hRbOyRJP9uVAPVakMVzjF5A3HO98SuBKf+oucE
+	 lTkqDBijcq1FaY39CfMVqRG3GdbkzGc65DpMdQd5I8Hy2Fw6c/h59HCSBu4e6Gd9CB
+	 /HtyORg+PwqZyimxvvflc7l5bsL5ErQs7UZjJJ+3hYmNB74gr5o5G59WB7xLKLH2id
+	 tOWkzYlXUXy7g==
+Date: Mon, 24 Jun 2024 09:47:15 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Daniel Gomez <da.gomez@samsung.com>
 Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
 	Pankaj Raghav <p.raghav@samsung.com>,
 	"mcgrof@kernel.org" <mcgrof@kernel.org>,
 	"hughd@google.com" <hughd@google.com>
-Subject: Re: [PATCH 5/5] common/rc: print scratch and test mount options
-Message-ID: <20240624162434.GH103020@frogsfrogsfrogs>
+Subject: Re: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
+Message-ID: <20240624164715.GI103020@frogsfrogsfrogs>
 References: <20240614061722.1080-1-da.gomez@samsung.com>
- <CGME20240614061728eucas1p2d7488fbbd2887c5d60d2bd1e3fd48580@eucas1p2.samsung.com>
- <20240614061722.1080-6-da.gomez@samsung.com>
- <20240614155555.GE6110@frogsfrogsfrogs>
- <xxx2zqe7wyw7negkjjhgrhnykdw247jguaaykjdm2j2rpfwkcv@26mxj7pbpkae>
+ <CGME20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5@eucas1p1.samsung.com>
+ <20240614061722.1080-5-da.gomez@samsung.com>
+ <20240614154728.GC6110@frogsfrogsfrogs>
+ <jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <xxx2zqe7wyw7negkjjhgrhnykdw247jguaaykjdm2j2rpfwkcv@26mxj7pbpkae>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
 
-On Mon, Jun 24, 2024 at 02:02:33PM +0000, Daniel Gomez wrote:
-> On Fri, Jun 14, 2024 at 08:55:55AM GMT, Darrick J. Wong wrote:
-> > On Fri, Jun 14, 2024 at 06:17:26AM +0000, Daniel Gomez wrote:
-> > > Mount options for a SCRATCH device might not be the same in the TEST
-> > > device if RECREATE_TEST_DEV is not enabled. So, print mount options for
-> > > each device to clarify this.
-> > > 
-> > > Add mount and mkfs info for TEST devices so we get the same information
-> > > being printed for both devices.
+On Mon, Jun 24, 2024 at 01:50:33PM +0000, Daniel Gomez wrote:
+> On Fri, Jun 14, 2024 at 08:47:28AM GMT, Darrick J. Wong wrote:
+> > On Fri, Jun 14, 2024 at 06:17:25AM +0000, Daniel Gomez wrote:
+> > > Make sure tmpfs scratch device inherits the extra tmpfs mount options
+> > > variable (TMPFS_MOUNT_OPTIONS).
 > > > 
 > > > Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
 > > > ---
-> > >  check     |  4 ++++
-> > >  common/rc | 20 ++++++++++++++++++--
-> > >  2 files changed, 22 insertions(+), 2 deletions(-)
+> > >  common/rc | 2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
 > > > 
-> > > diff --git a/check b/check
-> > > index 723a52e30..e02d28b39 100755
-> > > --- a/check
-> > > +++ b/check
-> > > @@ -807,7 +807,11 @@ function run_section()
-> > >  	# print out our test configuration
-> > >  	echo "FSTYP         -- `_full_fstyp_details`"
-> > >  	echo "PLATFORM      -- `_full_platform_details`"
-> > > +	echo "TEST device:"
-> > > +	echo "MKFS_OPTIONS  -- `_test_mkfs_options`"
-> > > +	echo "MOUNT_OPTIONS -- `_test_mount_options`"
-> > >  	if [ ! -z "$SCRATCH_DEV" ]; then
-> > > +	  echo "SCRATCH device:"
-> > >  	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
-> > >  	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
+> > > diff --git a/common/rc b/common/rc
+> > > index 7f995b0fa..a42792c37 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -224,7 +224,7 @@ _test_options()
+> > >  # hosted on $SCRATCH_DEV, so can't use external scratch devices).
+> > >  _common_dev_mount_options()
+> > >  {
+> > > -	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $*
+> > > +	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $*
 > > 
-> > Now there are two lines that start with "MKFS_OPTIONS"; will this break
-> > anyone's parsing scripts?  Or should these be prefixed:
-> > 
-> > echo "TEST_MKFS_OPTIONS -- `_test_mkfs_options`"
-> > ...
-> > echo "SCRATCH_MKFS_OPTIONS -- `_scratch_mkfs_options`"
-> > 
-> > ?
+> > Why is it necessary to include tmpfs mount options for all fs types?
+> > XFS does not accept tmpfs mount options.
 > 
-> This looks like my initial version, but I prefer the 'sub-menu style' because
-> we did not have these variables before. However, I think it makes sense to
-> introduce them so we can differentiate between them. 
+> You are right. We should not do this.
+> 
+> However, _scratch_mount_options() calls _common_dev_mount_options() ignoring the
+> specific mount options based on fstyp.
 
-The trouble is, if your parsing script were doing something like
-splitting on "-- " then the "TEST device:" string would not split
-properly and you'd have to add context retention of some sort to know
-which "MKFS_OPTIONS" this was for.  Better just to namespace the new
-lines from the start.  I guess for compatibility's sake then we'd have
-to have:
+Ah, _mount_opts only gets run for configuration files.
 
-TEST_MKFS_OPTIONS -- -o foo=bar
-MKFS_OPTIONS      -- -o foo=baz
+> specific mount options based on fstyp. Replacing it with _common_mount_opts()
+> makes this work. In addition, _common_dev_mount_options() function description
+> says 'Used for mounting non-scratch devices with the safe set of scratch mount
+> options'. So, why is it used to mount scratch devices?
 
-in the output, along with a comment somewhere in the source that the
-non-prefixed scratch mkfs options is that way for hyst[eo]rical output
-parsing reasons.
+I think the comment isn't very good.  Six of the seven callers:
+
+common/dmdelay|23| _mount -t $FSTYP `_common_dev_mount_options` $SCRATCH_OPTIONS \
+common/dmdust|19| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+common/dmerror|94| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+common/dmlogwrites|107| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+common/dmthin|226| echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $DMTHIN_VOL_DEV $SCRATCH_MNT
+common/rc|272| echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+
+appear to use this to mount the scratch filesystem from devices that are
+not the regular scratch device.  The one exception is this one:
+
+common/overlay|32| _mount -t overlay $diropts `_common_dev_mount_options $*`
+
+which AFAICT seem to mount arbitrary overlayfs instances with some of
+the mount options.
+
+> This fixes the issue:
+> 
+> diff --git a/common/rc b/common/rc
+> index 51827119c..627dbaaaa 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -231,8 +231,8 @@ _scratch_mount_options()
+>  {
+>         _scratch_options mount
+> 
+> -       echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+> -                                       $SCRATCH_DEV $SCRATCH_MNT
+> +       echo `_common_mount_opts` $SCRATCH_OPTIONS \
+> +                                       $SCRATCH_DEV $SCRATCH_MNT $*
+>  }
+> 
+> > 
+> > For that matter, why is TMPFS_MOUNT_OPTIONS necessary at all?  Shouldn't
+> > that simply be "MOUNT_OPTIONS=<stuff> FSTYP=tmpfs ./check" ?
+> 
+> TMPFS_MOUNT_OPTIONS is used to specify mount options in each section of the
+> configuration file. For example, the following snippet is part of my conf file:
+> 
+> ```
+> [tmpfs_noswap_huge_always]
+> TMPFS_MOUNT_OPTIONS="-o noswap,huge=always"
+> 
+> [tmpfs_noswap_huge_within_size]
+> TMPFS_MOUNT_OPTIONS="-o noswap,huge=within_size"
+> ```
+> 
+> Then I run -s option to switch between profiles, e.g., 'check -s
+> tmpfs_noswap_huge_within_size -R xunit -g auto'.
+> 
+> I’m not sure if this addresses your question. Please let me know if I
+> misunderstood.
+
+Ahah, this is one of those parts of fstests that differ depending on
+whether you use configuration files (you do) or not (I don't).  AFAICT,
+get_next_config has this slightly odd (to me) behavior where if a config
+section doesn't explicitly set MOUNT_OPTIONS, it will reuse
+MOUNT_OPTIONS from a previous section if FSTYP hasn't changed.  You
+instead want to change the mount between sections
+
+So I /think/ the correct thing to do here is
+
+[tmpfs_noswap_huge_always]
+MOUNT_OPTIONS="-o noswap,huge=always"
+
+[tmpfs_noswap_huge_within_size]
+MOUNT_OPTIONS="-o noswap,huge=within_size"
+
+Though I'm not exactly an expert on these things.
 
 --D
 
-> I guess introducing this change would break anyone's parsing scripts regardless?
-> However, I do think is necessary to specify the mount differences.
-> > 
-> > Also should these four variables be captured explicitly by the reports
-> > that are generated by common/report ?
-> 
-> I guess the report only includes the scratch mount options. I will update it to
-> include the new specific test and scratch mount/mkfs options.
 > 
 > > 
 > > --D
 > > 
-> > >  	fi
-> > > diff --git a/common/rc b/common/rc
-> > > index a42792c37..b351a82eb 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -235,6 +235,17 @@ _scratch_mount_options()
-> > >  					$SCRATCH_DEV $SCRATCH_MNT
 > > >  }
 > > >  
-> > > +_test_mount_options()
-> > > +{
-> > > +	_test_options mount
-> > > +
-> > > +	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
-> > > +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> > > +	else
-> > > +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> > > +	fi
-> > > +}
-> > > +
-> > >  _supports_filetype()
-> > >  {
-> > >  	local dir=$1
-> > > @@ -456,8 +467,7 @@ _test_mount()
-> > >          return $?
-> > >      fi
-> > >  
-> > > -    _test_options mount
-> > > -    _mount -t $FSTYP$FUSE_SUBTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
-> > > +    _mount -t $FSTYP$FUSE_SUBTYP `_test_mount_options $*`
-> > >      mount_ret=$?
-> > >      [ $mount_ret -ne 0 ] && return $mount_ret
-> > >      _idmapped_mount $TEST_DEV $TEST_DIR
-> > > @@ -571,6 +581,12 @@ _metadump_dev() {
-> > >  	esac
-> > >  }
-> > >  
-> > > +_test_mkfs_options()
-> > > +{
-> > > +	_test_options mkfs
-> > > +	echo $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
-> > > +}
-> > > +
-> > >  _test_mkfs()
-> > >  {
-> > >      case $FSTYP in
+> > >  _scratch_mount_options()
 > > > -- 
 > > > 2.43.0
 > > > 
