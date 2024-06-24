@@ -1,226 +1,271 @@
-Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
+Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E93F91BC2A
-	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:47:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 238CC45010
+	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:57:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719262031; cv=none; b=oOIEmBdI4wplnwR9vsI1HZLo8cgnKT9mucwBWHoc5rEsBwiijnDbzcVB5rOraToJlPExIEgPTZLb+ys49C1HhZTD30zlqXgxaY1h1ssrXH2T6LdiP6JRGBdDnSVPYRp3c5pa+5Sxb6Gj5nr4R5SQHN5UPwXNMoYSBMTrT2Pu/Jc=
+	t=1719262649; cv=none; b=CQ0yrFF0NWWbHRRDbZoVk3GJouUNCA0Aaf/zHs1fBXqJA2ns/8velGUVjcnHb83EQuwTeVePCbqWsW6GQuP1azxW/rVFZhDWlvKDevf1BLIt2ODEs6QbbJLE3FbF43O3EdkqGS8NATFnzEgIDgxhdlh1YooahHTCqI66/4Ebcq0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719262031; c=relaxed/simple;
-	bh=8PW9bxqQhjiHhpoDf0eGXgKgUs6UioUV2mkUFutHGy0=;
+	s=arc-20240116; t=1719262649; c=relaxed/simple;
+	bh=eyJHg5F5d7R6NTyPlNbQGpe+CbNjcywIQuk85WYaVAQ=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:Content-Type:
-	 MIME-Version:References; b=c03xkQ3CNjyIv+k51JDrIDKOc8skrDGqjIav5/F9Q4SR9uFO5StO7ljx70aED7Pr2Obi8io8U1LMXs3SCoMTz79uG/p1PtXwXc3CFGC+MXcx9vOKn1MNlBK0JKQvf+WJ9DZRdhLY16aYdQ7ljgGEkfWjRsiyvlC8Upc6CG2Vr0o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=NYedwmdm; arc=none smtp.client-ip=210.118.77.12
+	 MIME-Version:References; b=KofOQ8PyiUkwC/HnzahaagTgE1Kff+r7KMxiZJfuUy5F+3k7g1Vd2eVcUhfscgyaDQ2edYdckZZtE/uaysdHy3lyJ1arIxaHwSt9B8yvqDWLylqot4G2LIGWyLo/gIRLbWc8Gj7sriiv7j4YcnA/yPkdvGCxhdaZiTg+90w/F08=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=ZQIO3fcf; arc=none smtp.client-ip=210.118.77.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="NYedwmdm"
-Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
-	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240624204705euoutp02d149f80e458dd833755597132b17543c~cC7QeT5lt2350223502euoutp02C
-	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:47:05 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240624204705euoutp02d149f80e458dd833755597132b17543c~cC7QeT5lt2350223502euoutp02C
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="ZQIO3fcf"
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20240624205724euoutp012601f4739a0580fd9f8e7c82da504a2b~cDEQ_vi7g0507105071euoutp011
+	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:57:24 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20240624205724euoutp012601f4739a0580fd9f8e7c82da504a2b~cDEQ_vi7g0507105071euoutp011
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1719262026;
-	bh=8PW9bxqQhjiHhpoDf0eGXgKgUs6UioUV2mkUFutHGy0=;
+	s=mail20170921; t=1719262645;
+	bh=nKUoMfDZNUs2w67iKjpbB8oEwRHYSzWXhXPnhZ+dv24=;
 	h=From:To:CC:Subject:Date:In-Reply-To:References:From;
-	b=NYedwmdmNJYMMYV5XPiWwFkLWHtydxqZPXJitekKvWtD5fKOwJXbADI0UfUm9RX8Q
-	 Z6qGFsn93L/+IS2JjMyAbUoNvfLkLpql0MSCu2bfQLcyujm3G1PByOnUhERBcgRpga
-	 AFWz8CFNG23w8DBYiFQplmTrWcgMURRX7onHF53s=
-Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTP id
-	20240624204705eucas1p28f03ef19a060ea52682e552bbb3ae708~cC7PwxAmK2357723577eucas1p2c;
-	Mon, 24 Jun 2024 20:47:05 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-	eusmges3new.samsung.com (EUCPMTA) with SMTP id 74.B2.09620.94BD9766; Mon, 24
-	Jun 2024 21:47:05 +0100 (BST)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+	b=ZQIO3fcfMnYtEVZ/BVP8xOFH4QS5Jm07eTUCsO2xXDs1tucPO8nrquv6Zc6ZaShsp
+	 MLvBQO8YJEp7uuCrmuO2aVVUcaycTZ9+eCZQs7iWHcq2Jp6xpG+asWJbMaWciSsmC4
+	 +Prb4f2BmMB+mXkXCZoNaxLekNSqgYEP5PjefElk=
+Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
+	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
+	20240624205724eucas1p182e8733d35ea202b35d9ad2529b800bc~cDEQs-D6p2039920399eucas1p1h;
+	Mon, 24 Jun 2024 20:57:24 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+	eusmges1new.samsung.com (EUCPMTA) with SMTP id 0D.5B.09624.4BDD9766; Mon, 24
+	Jun 2024 21:57:24 +0100 (BST)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
 	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-	20240624204704eucas1p1a3d5e748377807810de780b4d8870e43~cC7PDZhM71824518245eucas1p1c;
-	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
-Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
-	eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-	20240624204704eusmtrp1ca684ae7130d6c661c7ffefb4d0bf96c~cC7PC57Sv2494424944eusmtrp1R;
-	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
-X-AuditID: cbfec7f5-d1bff70000002594-f0-6679db499602
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-	eusmgms1.samsung.com (EUCPMTA) with SMTP id CF.D3.08810.84BD9766; Mon, 24
-	Jun 2024 21:47:04 +0100 (BST)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20240624204704eusmtip2f74c2aedc5b79423ab83746c1d61aca5~cC7O2Fahc0917809178eusmtip2P;
-	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
+	20240624205723eucas1p1af4c65861a148a1dd76e553fb494c11c~cDEPgDuMc1072610726eucas1p1_;
+	Mon, 24 Jun 2024 20:57:23 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240624205723eusmtrp2b38808b43ececb5ad839ce757535620c~cDEPflczr1964519645eusmtrp2W;
+	Mon, 24 Jun 2024 20:57:23 +0000 (GMT)
+X-AuditID: cbfec7f2-bfbff70000002598-14-6679ddb4620a
+Received: from eusmtip1.samsung.com ( [203.254.199.221]) by
+	eusmgms2.samsung.com (EUCPMTA) with SMTP id 5A.D0.09010.3BDD9766; Mon, 24
+	Jun 2024 21:57:23 +0100 (BST)
+Received: from CAMSVWEXC01.scsc.local (unknown [106.1.227.71]) by
+	eusmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20240624205723eusmtip17192ae66bd702073d169990654b2caa3~cDEPPByJR1202012020eusmtip1O;
+	Mon, 24 Jun 2024 20:57:23 +0000 (GMT)
 Received: from CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) by
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348) with Microsoft SMTP
-	Server (TLS) id 15.0.1497.2; Mon, 24 Jun 2024 21:47:03 +0100
+	CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) with Microsoft SMTP
+	Server (TLS) id 15.0.1497.2; Mon, 24 Jun 2024 21:57:22 +0100
 Received: from CAMSVWEXC01.scsc.local ([::1]) by CAMSVWEXC01.scsc.local
 	([fe80::7d73:5123:34e0:4f73%13]) with mapi id 15.00.1497.012; Mon, 24 Jun
-	2024 21:47:03 +0100
+	2024 21:57:22 +0100
 From: Daniel Gomez <da.gomez@samsung.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 CC: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, Pankaj Raghav
 	<p.raghav@samsung.com>, "mcgrof@kernel.org" <mcgrof@kernel.org>,
 	"hughd@google.com" <hughd@google.com>
-Subject: Re: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
-Thread-Topic: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
-Thread-Index: AQHaviKG7LBDn2pSnkKBi8GAx++1P7HHV0gAgA+WmoCAADFrgIAAQvwA
-Date: Mon, 24 Jun 2024 20:47:03 +0000
-Message-ID: <l6fsxiedcwxpmjsaotcqkev4pbe3jlvhmtth3wetiaew63kpwm@ga2h3bqupi7j>
-In-Reply-To: <20240624164715.GI103020@frogsfrogsfrogs>
+Subject: Re: [PATCH 5/5] common/rc: print scratch and test mount options
+Thread-Topic: [PATCH 5/5] common/rc: print scratch and test mount options
+Thread-Index: AQHaviKGDA6KUdYWlUyy/G+RuOXD4LHHWaWAgA+XnQCAACe0AIAATDWA
+Date: Mon, 24 Jun 2024 20:57:21 +0000
+Message-ID: <gjz244x6sscng7gywkm46ynpsub6lrm45wi7ykfwd56mzafja6@4aamywtggevd>
+In-Reply-To: <20240624162434.GH103020@frogsfrogsfrogs>
 Accept-Language: en-US, en-GB
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 x-ms-exchange-messagesentrepresentingtype: 1
 x-ms-exchange-transport-fromentityheader: Hosted
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <2B8AB27BF8D11A44B710229D23D24E36@scsc.local>
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <0E3CFC5F312A4E42B3021421EE8970B5@scsc.local>
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprIKsWRmVeSWpSXmKPExsWy7djPc7qetyvTDDq3sVhcfsJncbplL7vF
-	0099LBY3JjxldGDxWLCp1GPTqk42j8+b5AKYo7hsUlJzMstSi/TtErgyvl4/ylJwyari9pZF
-	7A2MEyy7GDk5JARMJNqmvmbsYuTiEBJYwSixesJkVgjnC6PErhsn2SGcz4wS83Y9ZIdpaXnT
-	wAyRWM4ocaZlNlgCrOpmlwOEfYZR4s98L4iilYwST/9PYANJsAloSuw7uQmsQQTIPvLtGhNI
-	EbPARkaJS/PegRUJC7hLzHr7BKrIQ+JP4xco203i6Nb5jCA2i4CqROPlCSwgNq+Ar8TSY89Z
-	QWxOATOJLT8+M4PYjAKyEo9W/gLrZRYQl7j1ZD4TxAuCEotm72GGsMUk/u16yAZh60icvf6E
-	EcI2kNi6dB8LhK0s8aX9OFANB9AcTYn1u/QhRlpKLP/xnRXCVpSY0g0JIV6g8SdnPmEB+UtC
-	YD2nxPS5S6Dmu0hMn/oT6gZhiVfHt7BPYNSZheS8WQgrZiFZMQvJillIVixgZF3FKJ5aWpyb
-	nlpsnJdarlecmFtcmpeul5yfu4kRmGpO/zv+dQfjilcf9Q4xMnEwHmKU4GBWEuGdXl+WJsSb
-	klhZlVqUH19UmpNafIhRmoNFSZxXNUU+VUggPbEkNTs1tSC1CCbLxMEp1cBUHzjnufPhrvfO
-	Bw64/5n6WLTwx5YbzCpv1lzQrpkUY5xxQrn1Te1H9k+Mfx5Z/fnekSH6TMzKsju43SRgZ6jD
-	xOVn5+uXRk3YWla8faNc2P9vJ9w/paYt2L/+z+MNydt45L2Wh0fOMog5JX4tdt+005bZPAdW
-	+nisEonqmt57sVh2+6qPLQ9LLCrKt2nvN+ky/7fl/7v3E2vnFAW1Cf6MYMxc+NtNaJKLY8DT
-	x6Exvnx9TCu3x6730WmqrvkcpzW970JPn2XHZhb3dVsXWpcyvL72Ia+Z3/TKd9abQYoe9ofv
-	cD8xUVopUZ52mCsp4JVappKvZkwYm9OW7df2beSpakt6fuL/ltidtx4GiGopsRRnJBpqMRcV
-	JwIAHXjF3qQDAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprFKsWRmVeSWpSXmKPExsVy+t/xe7oetyvTDE7PE7W4/ITP4nTLXnaL
-	p5/6WCxuTHjK6MDisWBTqcemVZ1sHp83yQUwR+nZFOWXlqQqZOQXl9gqRRtaGOkZWlroGZlY
-	6hkam8daGZkq6dvZpKTmZJalFunbJehlfL1+lKXgklXF7S2L2BsYJ1h2MXJySAiYSLS8aWDu
-	YuTiEBJYyiixe95NJoiEjMTGL1dZIWxhiT/XuthAbCGBj4wS/57rQzScYZS4ce0OC4SzklFi
-	/65XjCBVbAKaEvtObmIHsUWA7CPfrjGBFDELbGSUuDTvHdgoYQF3iVlvn0AVeUj8afwCZbtJ
-	HN06H2wQi4CqROPlCSwgNq+Ar8TSY89ZIbZdZZJ4u/gvM0iCU8BMYsuPz2A2o4CsxKOVv8AG
-	MQuIS9x6Mh/qHwGJJXvOM0PYohIvH/+D+k1H4uz1J4wQtoHE1qX7WCBsZYkv7ceBDuUAmqMp
-	sX6XPsRIS4nlP76zQtiKElO6H7JD3CYocXLmE5YJjDKzkGyehdA9C0n3LCTds5B0L2BkXcUo
-	klpanJueW2yoV5yYW1yal66XnJ+7iRGYSLYd+7l5B+O8Vx/1DjEycTAeYpTgYFYS4Z1eX5Ym
-	xJuSWFmVWpQfX1Sak1p8iNEUGHQTmaVEk/OBqSyvJN7QzMDU0MTM0sDU0sxYSZzXs6AjUUgg
-	PbEkNTs1tSC1CKaPiYNTqoEp4u/S/GOhQovlbifnXLv15HBFV0FC49Xl096ar2vnfzG/YNbU
-	51zxG/gmqDyLV1sQ+angVfGj321M9TwHbfpPRe27oCxk/7v/6Pwsn/WTxFsUNfujbz19JrIp
-	5E/fn7Yd0zInfVr39G/uL+WVckuL1Z/HdwhdvaAYKneoIu+I0aNEo1i2uNqtc3TDLvwsP3y2
-	w1teKCGJzfi+Effu0Hq5WRozTz3o2Kn6P+x9o0gNQ7nrxTNeLbu0vAwSl2faPw1w/3LY/7ij
-	q9X//LcTnySdr+Xa2xbJvfrwgmx5neBYN5Yc3s0ZTfN5+W9YCIoLfdyqX254bNenbSKCFQxM
-	/6PFA/53v+IQubIzRuRZR4USS3FGoqEWc1FxIgAhKcgUrQMAAA==
-X-CMS-MailID: 20240624204704eucas1p1a3d5e748377807810de780b4d8870e43
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprMKsWRmVeSWpSXmKPExsWy7djP87pb7lamGRyYIm9x+QmfxemWvewW
+	Tz/1sVjcmPCU0YHFY8GmUo9NqzrZPD5vkgtgjuKySUnNySxLLdK3S+DKeN+1nr1gh3rF9I57
+	LA2Mj2W7GDk5JARMJP6s3crexcjFISSwglFi8+HrbBDOF0aJ3XcXM0E4nxklbnRNYYZpaf1+
+	hQUisZxRYu/lJWxwVf9PXmeFcM4wShxadZYZwlnJKHHzwiQmkH42AU2JfSc3sYPYIkD2kW/X
+	wJYwC2xklLg07x0bSEJYwENi2puTjBBFnhLLW7axQthuEsd+bQdrZhFQlfi2einYUbwCvhI7
+	FjwDirNzcAqYSXwvBokyCshKPFr5C6yaWUBc4taT+UwQLwhKLJq9B+odMYl/ux6yQdg6Emev
+	P2GEsA0kti7dxwJhK0t8aT/OBjFHR2LB7k9QtqXEnGV3oGxtiWULX0NdIyhxcuYTcBBJCKzm
+	lOi9uAJqmYtE38TpUAuEJV4d38I+gVFnFpL7ZiHZMQvJjllIdsxCsmMBI+sqRvHU0uLc9NRi
+	w7zUcr3ixNzi0rx0veT83E2MwHRz+t/xTzsY5776qHeIkYmD8RCjBAezkgjv9PqyNCHelMTK
+	qtSi/Pii0pzU4kOM0hwsSuK8qinyqUIC6YklqdmpqQWpRTBZJg5OqQam0iMPPBp/nCiIakk2
+	+1rO8fd8UZXD6epNO+XddXo+Xv7N4aQUebCIo3nC4qoHLNmHJYOON2xceXna56reB9sb/vL9
+	tXttfbR38Uc59m/uk/SFz84OmLXtkyHXwmTOmuNetjfvnFFK7+nM6hT7e8W8/UR0l0beoV3/
+	4lrEl6U7vG1ZpLS34eznxS91/EVOWVh8OCtxpC5N+do0aYUDVlNdbtQ2da+I/9Ak8jjTyG5S
+	jLL96lNXY06EJfhmeBcZ182+rPtQW+ZTvq62nvVT8UVuWzfPMpkQ6nRXpNxgq7aq/4+lMZkK
+	pzoFclpl3tQZ5oXPWdhvq/2Nb+2JzoXe4pdfC3JLPWf+Nv8rh6JTtYgSS3FGoqEWc1FxIgCp
+	+ZqCpgMAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprFKsWRmVeSWpSXmKPExsVy+t/xu7qb71amGey8yWdx+QmfxemWvewW
+	Tz/1sVjcmPCU0YHFY8GmUo9NqzrZPD5vkgtgjtKzKcovLUlVyMgvLrFVija0MNIztLTQMzKx
+	1DM0No+1MjJV0rezSUnNySxLLdK3S9DLeN+1nr1gh3rF9I57LA2Mj2W7GDk5JARMJFq/X2Hp
+	YuTiEBJYyijx+99qZoiEjMTGL1dZIWxhiT/Xutggij4ySnxe3gvVcYZRYsuOLVCZlYwSfadf
+	M4K0sAloSuw7uYkdxBYBso98u8YEUsQssJFR4tK8d2wgCWEBD4lpb04yQhR5Sixv2cYKYbtJ
+	HPu1HayZRUBV4tvqpWA38Qr4SuxY8AwsLiRwlUni9QKuLkZ2Dk4BM4nvxSBRRgFZiUcrf4FV
+	MAuIS9x6Mp8J4gMBiSV7zkN9Jirx8vE/qM90JM5ef8IIYRtIbF26jwXCVpb40n6cDWKOjsSC
+	3Z+gbEuJOcvuQNnaEssWvoa6TFDi5MwnLBMYZWYhWT0LSfssJO2zkLTPQtK+gJF1FaNIamlx
+	bnpusZFecWJucWleul5yfu4mRmAi2Xbs55YdjCtffdQ7xMjEwXiIUYKDWUmEd3p9WZoQb0pi
+	ZVVqUX58UWlOavEhRlNgyE1klhJNzgemsrySeEMzA1NDEzNLA1NLM2MlcV7Pgo5EIYH0xJLU
+	7NTUgtQimD4mDk6pBqb48kSenHmmlv2NL2989q2fsMw1dOm3IqUnG27wlde+CqvhP7lql5/8
+	uVajCx6Ki56JpQuZcTqWyBWuuju5xjxSmG9xjVbyop1f/kl+ayyeHXNGXMYj5r/1fu33ulL2
+	KQxzuX9yLF52Yo+G5cku+3ka06fn6S7rnbvzgXRiUFah1r+ZK4JS1lYpNMzacVgmQIT16rY4
+	PtP7hs69V3vnW+zJ/7hQbqbShmW196dVdgb0d7223nhvgWVU39r1FZu3PC//Fa8wr8d8juO9
+	o33yr7U7F3bZGB9YvervtOdTD2lmhsbca9J9fjOyxFvlZitrb++ct9dmmp5msQjvfvKqTUf0
+	Ylb4n81rN1y4uK74q6oSS3FGoqEWc1FxIgAilYL/rQMAAA==
+X-CMS-MailID: 20240624205723eucas1p1af4c65861a148a1dd76e553fb494c11c
 X-Msg-Generator: CA
-X-RootMTR: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+X-RootMTR: 20240614061728eucas1p2d7488fbbd2887c5d60d2bd1e3fd48580
 X-EPHeader: CA
 CMS-TYPE: 201P
-X-CMS-RootMailID: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+X-CMS-RootMailID: 20240614061728eucas1p2d7488fbbd2887c5d60d2bd1e3fd48580
 References: <20240614061722.1080-1-da.gomez@samsung.com>
-	<CGME20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5@eucas1p1.samsung.com>
-	<20240614061722.1080-5-da.gomez@samsung.com>
-	<20240614154728.GC6110@frogsfrogsfrogs>
-	<jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
-	<20240624164715.GI103020@frogsfrogsfrogs>
+	<CGME20240614061728eucas1p2d7488fbbd2887c5d60d2bd1e3fd48580@eucas1p2.samsung.com>
+	<20240614061722.1080-6-da.gomez@samsung.com>
+	<20240614155555.GE6110@frogsfrogsfrogs>
+	<xxx2zqe7wyw7negkjjhgrhnykdw247jguaaykjdm2j2rpfwkcv@26mxj7pbpkae>
+	<20240624162434.GH103020@frogsfrogsfrogs>
 
-T24gTW9uLCBKdW4gMjQsIDIwMjQgYXQgMDk6NDc6MTVBTSBHTVQsIERhcnJpY2sgSi4gV29uZyB3
-cm90ZToNCj4gT24gTW9uLCBKdW4gMjQsIDIwMjQgYXQgMDE6NTA6MzNQTSArMDAwMCwgRGFuaWVs
-IEdvbWV6IHdyb3RlOg0KPiA+IE9uIEZyaSwgSnVuIDE0LCAyMDI0IGF0IDA4OjQ3OjI4QU0gR01U
-LCBEYXJyaWNrIEouIFdvbmcgd3JvdGU6DQo+ID4gPiBPbiBGcmksIEp1biAxNCwgMjAyNCBhdCAw
-NjoxNzoyNUFNICswMDAwLCBEYW5pZWwgR29tZXogd3JvdGU6DQo+ID4gPiA+IE1ha2Ugc3VyZSB0
-bXBmcyBzY3JhdGNoIGRldmljZSBpbmhlcml0cyB0aGUgZXh0cmEgdG1wZnMgbW91bnQgb3B0aW9u
-cw0KPiA+ID4gPiB2YXJpYWJsZSAoVE1QRlNfTU9VTlRfT1BUSU9OUykuDQo+ID4gPiA+IA0KPiA+
-ID4gPiBTaWduZWQtb2ZmLWJ5OiBEYW5pZWwgR29tZXogPGRhLmdvbWV6QHNhbXN1bmcuY29tPg0K
-PiA+ID4gPiAtLS0NCj4gPiA+ID4gIGNvbW1vbi9yYyB8IDIgKy0NCj4gPiA+ID4gIDEgZmlsZSBj
-aGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiA+ID4gPiANCj4gPiA+ID4g
-ZGlmZiAtLWdpdCBhL2NvbW1vbi9yYyBiL2NvbW1vbi9yYw0KPiA+ID4gPiBpbmRleCA3Zjk5NWIw
-ZmEuLmE0Mjc5MmMzNyAxMDA2NDQNCj4gPiA+ID4gLS0tIGEvY29tbW9uL3JjDQo+ID4gPiA+ICsr
-KyBiL2NvbW1vbi9yYw0KPiA+ID4gPiBAQCAtMjI0LDcgKzIyNCw3IEBAIF90ZXN0X29wdGlvbnMo
-KQ0KPiA+ID4gPiAgIyBob3N0ZWQgb24gJFNDUkFUQ0hfREVWLCBzbyBjYW4ndCB1c2UgZXh0ZXJu
-YWwgc2NyYXRjaCBkZXZpY2VzKS4NCj4gPiA+ID4gIF9jb21tb25fZGV2X21vdW50X29wdGlvbnMo
-KQ0KPiA+ID4gPiAgew0KPiA+ID4gPiAtCWVjaG8gJE1PVU5UX09QVElPTlMgJFNFTElOVVhfTU9V
-TlRfT1BUSU9OUyAkKg0KPiA+ID4gPiArCWVjaG8gJE1PVU5UX09QVElPTlMgJFNFTElOVVhfTU9V
-TlRfT1BUSU9OUyAkVE1QRlNfTU9VTlRfT1BUSU9OUyAkKg0KPiA+ID4gDQo+ID4gPiBXaHkgaXMg
-aXQgbmVjZXNzYXJ5IHRvIGluY2x1ZGUgdG1wZnMgbW91bnQgb3B0aW9ucyBmb3IgYWxsIGZzIHR5
-cGVzPw0KPiA+ID4gWEZTIGRvZXMgbm90IGFjY2VwdCB0bXBmcyBtb3VudCBvcHRpb25zLg0KPiA+
-IA0KPiA+IFlvdSBhcmUgcmlnaHQuIFdlIHNob3VsZCBub3QgZG8gdGhpcy4NCj4gPiANCj4gPiBI
-b3dldmVyLCBfc2NyYXRjaF9tb3VudF9vcHRpb25zKCkgY2FsbHMgX2NvbW1vbl9kZXZfbW91bnRf
-b3B0aW9ucygpIGlnbm9yaW5nIHRoZQ0KPiA+IHNwZWNpZmljIG1vdW50IG9wdGlvbnMgYmFzZWQg
-b24gZnN0eXAuDQo+IA0KPiBBaCwgX21vdW50X29wdHMgb25seSBnZXRzIHJ1biBmb3IgY29uZmln
-dXJhdGlvbiBmaWxlcy4NCg0KRXZlbiBpZiB5b3UgYXJlIHJ1bm5pbmcgY29uZmlndXJhdGlvbiBm
-aWxlcywgX21vdW50X29wdHMoKSAtPg0KX2NvbW1vbl9tb3VudF9vcHRzKCkgaXMgbm90IHJ1biBm
-b3Igc2NyYXRjaCBtb3VudCBvcHRpb25zLg0KDQo+IA0KPiA+IHNwZWNpZmljIG1vdW50IG9wdGlv
-bnMgYmFzZWQgb24gZnN0eXAuIFJlcGxhY2luZyBpdCB3aXRoIF9jb21tb25fbW91bnRfb3B0cygp
-DQo+ID4gbWFrZXMgdGhpcyB3b3JrLiBJbiBhZGRpdGlvbiwgX2NvbW1vbl9kZXZfbW91bnRfb3B0
-aW9ucygpIGZ1bmN0aW9uIGRlc2NyaXB0aW9uDQo+ID4gc2F5cyAnVXNlZCBmb3IgbW91bnRpbmcg
-bm9uLXNjcmF0Y2ggZGV2aWNlcyB3aXRoIHRoZSBzYWZlIHNldCBvZiBzY3JhdGNoIG1vdW50DQo+
-ID4gb3B0aW9ucycuIFNvLCB3aHkgaXMgaXQgdXNlZCB0byBtb3VudCBzY3JhdGNoIGRldmljZXM/
-DQo+IA0KPiBJIHRoaW5rIHRoZSBjb21tZW50IGlzbid0IHZlcnkgZ29vZC4gIFNpeCBvZiB0aGUg
-c2V2ZW4gY2FsbGVyczoNCj4gDQo+IGNvbW1vbi9kbWRlbGF5fDIzfCBfbW91bnQgLXQgJEZTVFlQ
-IGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gY29tbW9u
-L2RtZHVzdHwxOXwgX21vdW50IC10ICRGU1RZUCBgX2NvbW1vbl9kZXZfbW91bnRfb3B0aW9ucyAk
-KmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IGNvbW1vbi9kbWVycm9yfDk0fCBfbW91bnQgLXQgJEZT
-VFlQIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQqYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4g
-Y29tbW9uL2RtbG9nd3JpdGVzfDEwN3wgX21vdW50IC10ICRGU1RZUCBgX2NvbW1vbl9kZXZfbW91
-bnRfb3B0aW9ucyAkKmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IGNvbW1vbi9kbXRoaW58MjI2fCBl
-Y2hvIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQqYCAkU0NSQVRDSF9PUFRJT05TICRETVRI
-SU5fVk9MX0RFViAkU0NSQVRDSF9NTlQNCj4gY29tbW9uL3JjfDI3MnwgZWNobyBgX2NvbW1vbl9k
-ZXZfbW91bnRfb3B0aW9ucyAkKmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IA0KPiBhcHBlYXIgdG8g
-dXNlIHRoaXMgdG8gbW91bnQgdGhlIHNjcmF0Y2ggZmlsZXN5c3RlbSBmcm9tIGRldmljZXMgdGhh
-dCBhcmUNCj4gbm90IHRoZSByZWd1bGFyIHNjcmF0Y2ggZGV2aWNlLiAgVGhlIG9uZSBleGNlcHRp
-b24gaXMgdGhpcyBvbmU6DQo+IA0KPiBjb21tb24vb3ZlcmxheXwzMnwgX21vdW50IC10IG92ZXJs
-YXkgJGRpcm9wdHMgYF9jb21tb25fZGV2X21vdW50X29wdGlvbnMgJCpgDQo+IA0KPiB3aGljaCBB
-RkFJQ1Qgc2VlbSB0byBtb3VudCBhcmJpdHJhcnkgb3ZlcmxheWZzIGluc3RhbmNlcyB3aXRoIHNv
-bWUgb2YNCj4gdGhlIG1vdW50IG9wdGlvbnMuDQoNClRoYW5rcyBmb3IgY2xhcmlmeWluZy4gSSBn
-dWVzcyB0aGUgcXVlc3Rpb24gaXMgaWYgaXQncyBva2F5IHRvIGRvDQp0aGUgcmVwbGFjZW1lbnQg
-c3VnZ2VzdGVkIChfY29tbW9uX21vdW50X29wdHMoKSkgY29uc2lkZXJpbmcgdGhlDQpjdXJyZW50
-IF9zY3JhdGNoX21vdW50X29wdGlvbnMoKSBjYWxsZXJzLg0KDQo+IA0KPiA+IFRoaXMgZml4ZXMg
-dGhlIGlzc3VlOg0KPiA+IA0KPiA+IGRpZmYgLS1naXQgYS9jb21tb24vcmMgYi9jb21tb24vcmMN
-Cj4gPiBpbmRleCA1MTgyNzExOWMuLjYyN2RiYWFhYSAxMDA2NDQNCj4gPiAtLS0gYS9jb21tb24v
-cmMNCj4gPiArKysgYi9jb21tb24vcmMNCj4gPiBAQCAtMjMxLDggKzIzMSw4IEBAIF9zY3JhdGNo
-X21vdW50X29wdGlvbnMoKQ0KPiA+ICB7DQo+ID4gICAgICAgICBfc2NyYXRjaF9vcHRpb25zIG1v
-dW50DQo+ID4gDQo+ID4gLSAgICAgICBlY2hvIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQq
-YCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgJFNDUkFUQ0hfREVWICRTQ1JBVENIX01OVA0KPiA+ICsgICAgICAgZWNobyBgX2Nv
-bW1vbl9tb3VudF9vcHRzYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gPiArICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgJFNDUkFUQ0hfREVWICRTQ1JBVENIX01OVCAkKg0KPiA+
-ICB9DQo+ID4gDQo+ID4gPiANCj4gPiA+IEZvciB0aGF0IG1hdHRlciwgd2h5IGlzIFRNUEZTX01P
-VU5UX09QVElPTlMgbmVjZXNzYXJ5IGF0IGFsbD8gIFNob3VsZG4ndA0KPiA+ID4gdGhhdCBzaW1w
-bHkgYmUgIk1PVU5UX09QVElPTlM9PHN0dWZmPiBGU1RZUD10bXBmcyAuL2NoZWNrIiA/DQo+ID4g
-DQo+ID4gVE1QRlNfTU9VTlRfT1BUSU9OUyBpcyB1c2VkIHRvIHNwZWNpZnkgbW91bnQgb3B0aW9u
-cyBpbiBlYWNoIHNlY3Rpb24gb2YgdGhlDQo+ID4gY29uZmlndXJhdGlvbiBmaWxlLiBGb3IgZXhh
-bXBsZSwgdGhlIGZvbGxvd2luZyBzbmlwcGV0IGlzIHBhcnQgb2YgbXkgY29uZiBmaWxlOg0KPiA+
-IA0KPiA+IGBgYA0KPiA+IFt0bXBmc19ub3N3YXBfaHVnZV9hbHdheXNdDQo+ID4gVE1QRlNfTU9V
-TlRfT1BUSU9OUz0iLW8gbm9zd2FwLGh1Z2U9YWx3YXlzIg0KPiA+IA0KPiA+IFt0bXBmc19ub3N3
-YXBfaHVnZV93aXRoaW5fc2l6ZV0NCj4gPiBUTVBGU19NT1VOVF9PUFRJT05TPSItbyBub3N3YXAs
-aHVnZT13aXRoaW5fc2l6ZSINCj4gPiBgYGANCj4gPiANCj4gPiBUaGVuIEkgcnVuIC1zIG9wdGlv
-biB0byBzd2l0Y2ggYmV0d2VlbiBwcm9maWxlcywgZS5nLiwgJ2NoZWNrIC1zDQo+ID4gdG1wZnNf
-bm9zd2FwX2h1Z2Vfd2l0aGluX3NpemUgLVIgeHVuaXQgLWcgYXV0bycuDQo+ID4gDQo+ID4gSeKA
-mW0gbm90IHN1cmUgaWYgdGhpcyBhZGRyZXNzZXMgeW91ciBxdWVzdGlvbi4gUGxlYXNlIGxldCBt
-ZSBrbm93IGlmIEkNCj4gPiBtaXN1bmRlcnN0b29kLg0KPiANCj4gQWhhaCwgdGhpcyBpcyBvbmUg
-b2YgdGhvc2UgcGFydHMgb2YgZnN0ZXN0cyB0aGF0IGRpZmZlciBkZXBlbmRpbmcgb24NCj4gd2hl
-dGhlciB5b3UgdXNlIGNvbmZpZ3VyYXRpb24gZmlsZXMgKHlvdSBkbykgb3Igbm90IChJIGRvbid0
-KS4gIEFGQUlDVCwNCj4gZ2V0X25leHRfY29uZmlnIGhhcyB0aGlzIHNsaWdodGx5IG9kZCAodG8g
-bWUpIGJlaGF2aW9yIHdoZXJlIGlmIGEgY29uZmlnDQo+IHNlY3Rpb24gZG9lc24ndCBleHBsaWNp
-dGx5IHNldCBNT1VOVF9PUFRJT05TLCBpdCB3aWxsIHJldXNlDQo+IE1PVU5UX09QVElPTlMgZnJv
-bSBhIHByZXZpb3VzIHNlY3Rpb24gaWYgRlNUWVAgaGFzbid0IGNoYW5nZWQuICBZb3UNCj4gaW5z
-dGVhZCB3YW50IHRvIGNoYW5nZSB0aGUgbW91bnQgYmV0d2VlbiBzZWN0aW9ucw0KPiANCj4gU28g
-SSAvdGhpbmsvIHRoZSBjb3JyZWN0IHRoaW5nIHRvIGRvIGhlcmUgaXMNCj4gDQo+IFt0bXBmc19u
-b3N3YXBfaHVnZV9hbHdheXNdDQo+IE1PVU5UX09QVElPTlM9Ii1vIG5vc3dhcCxodWdlPWFsd2F5
-cyINCj4gDQo+IFt0bXBmc19ub3N3YXBfaHVnZV93aXRoaW5fc2l6ZV0NCj4gTU9VTlRfT1BUSU9O
-Uz0iLW8gbm9zd2FwLGh1Z2U9d2l0aGluX3NpemUiDQo+IA0KPiBUaG91Z2ggSSdtIG5vdCBleGFj
-dGx5IGFuIGV4cGVydCBvbiB0aGVzZSB0aGluZ3MuDQoNCkkgZm9yZ290IHRvIG1lbnRpb25lZCBl
-YXJsaWVyLCBUTVBGU19NT1VOVF9PUFRJT05TIGlzIHVzZWQgdG8gZXh0ZW5kIGEgZGVmYXVsdA0K
-dG1wZnMgbW91bnQgY29tbW9uIG9wdGlvbiAoaW4gX2NvbW1vbl9tb3VudF9vcHRzKCkpOg0KDQoJ
-dG1wZnMpDQoJCSMgV2UgbmVlZCB0byBzcGVjaWZ5IHRoZSBzaXplIGF0IG1vdW50LCB1c2UgMUcg
-YnkgZGVmYXVsdA0KCQllY2hvICItbyBzaXplPTFHICRUTVBGU19NT1VOVF9PUFRJT05TIg0KCQk7
-Ow0KDQpJIGd1ZXNzIHVzaW5nIE1PVU5UX09QVElPTlMgd291bGQgb3ZlcndyaXRlIHRoZSBkZWZh
-dWx0IGFuZCByZXF1aXJlZCBzaXplIG9wdGlvbg0KZm9yIHRoZSB0ZXN0cyB0byBydW4uIE90aGVy
-IGZzIGFkZCB0aGVpciBvd24gZGVmYXVsdHMgYXMgd2VsbC4NCg0KPiANCj4gLS1EDQo+IA0KPiA+
-IA0KPiA+ID4gDQo+ID4gPiAtLUQNCj4gPiA+IA0KPiA+ID4gPiAgfQ0KPiA+ID4gPiAgDQo+ID4g
-PiA+ICBfc2NyYXRjaF9tb3VudF9vcHRpb25zKCkNCj4gPiA+ID4gLS0gDQo+ID4gPiA+IDIuNDMu
-MA0KPiA+ID4gPiA=
+On Mon, Jun 24, 2024 at 09:24:34AM GMT, Darrick J. Wong wrote:
+> On Mon, Jun 24, 2024 at 02:02:33PM +0000, Daniel Gomez wrote:
+> > On Fri, Jun 14, 2024 at 08:55:55AM GMT, Darrick J. Wong wrote:
+> > > On Fri, Jun 14, 2024 at 06:17:26AM +0000, Daniel Gomez wrote:
+> > > > Mount options for a SCRATCH device might not be the same in the TES=
+T
+> > > > device if RECREATE_TEST_DEV is not enabled. So, print mount options=
+ for
+> > > > each device to clarify this.
+> > > >=20
+> > > > Add mount and mkfs info for TEST devices so we get the same informa=
+tion
+> > > > being printed for both devices.
+> > > >=20
+> > > > Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
+> > > > ---
+> > > >  check     |  4 ++++
+> > > >  common/rc | 20 ++++++++++++++++++--
+> > > >  2 files changed, 22 insertions(+), 2 deletions(-)
+> > > >=20
+> > > > diff --git a/check b/check
+> > > > index 723a52e30..e02d28b39 100755
+> > > > --- a/check
+> > > > +++ b/check
+> > > > @@ -807,7 +807,11 @@ function run_section()
+> > > >  	# print out our test configuration
+> > > >  	echo "FSTYP         -- `_full_fstyp_details`"
+> > > >  	echo "PLATFORM      -- `_full_platform_details`"
+> > > > +	echo "TEST device:"
+> > > > +	echo "MKFS_OPTIONS  -- `_test_mkfs_options`"
+> > > > +	echo "MOUNT_OPTIONS -- `_test_mount_options`"
+> > > >  	if [ ! -z "$SCRATCH_DEV" ]; then
+> > > > +	  echo "SCRATCH device:"
+> > > >  	  echo "MKFS_OPTIONS  -- `_scratch_mkfs_options`"
+> > > >  	  echo "MOUNT_OPTIONS -- `_scratch_mount_options`"
+> > >=20
+> > > Now there are two lines that start with "MKFS_OPTIONS"; will this bre=
+ak
+> > > anyone's parsing scripts?  Or should these be prefixed:
+> > >=20
+> > > echo "TEST_MKFS_OPTIONS -- `_test_mkfs_options`"
+> > > ...
+> > > echo "SCRATCH_MKFS_OPTIONS -- `_scratch_mkfs_options`"
+> > >=20
+> > > ?
+> >=20
+> > This looks like my initial version, but I prefer the 'sub-menu style' b=
+ecause
+> > we did not have these variables before. However, I think it makes sense=
+ to
+> > introduce them so we can differentiate between them.=20
+>=20
+> The trouble is, if your parsing script were doing something like
+> splitting on "-- " then the "TEST device:" string would not split
+> properly and you'd have to add context retention of some sort to know
+> which "MKFS_OPTIONS" this was for.  Better just to namespace the new
+> lines from the start.  I guess for compatibility's sake then we'd have
+> to have:
+>=20
+> TEST_MKFS_OPTIONS -- -o foo=3Dbar
+> MKFS_OPTIONS      -- -o foo=3Dbaz
+>=20
+> in the output, along with a comment somewhere in the source that the
+> non-prefixed scratch mkfs options is that way for hyst[eo]rical output
+> parsing reasons.
+
+We are also reporting as MOUNT_OPTIONS the scratch mount options. But
+$MOUNT_OPTIONS are just the 'common' options, a subset of the scratch mount
+options.
+
+But I agree with only adding information for TEST device.
+
+>=20
+> --D
+>=20
+> > I guess introducing this change would break anyone's parsing scripts re=
+gardless?
+> > However, I do think is necessary to specify the mount differences.
+> > >=20
+> > > Also should these four variables be captured explicitly by the report=
+s
+> > > that are generated by common/report ?
+> >=20
+> > I guess the report only includes the scratch mount options. I will upda=
+te it to
+> > include the new specific test and scratch mount/mkfs options.
+> >=20
+> > >=20
+> > > --D
+> > >=20
+> > > >  	fi
+> > > > diff --git a/common/rc b/common/rc
+> > > > index a42792c37..b351a82eb 100644
+> > > > --- a/common/rc
+> > > > +++ b/common/rc
+> > > > @@ -235,6 +235,17 @@ _scratch_mount_options()
+> > > >  					$SCRATCH_DEV $SCRATCH_MNT
+> > > >  }
+> > > > =20
+> > > > +_test_mount_options()
+> > > > +{
+> > > > +	_test_options mount
+> > > > +
+> > > > +	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" !=3D "$FSTYP" ]; then
+> > > > +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $T=
+MPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> > > > +	else
+> > > > +		echo $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $*=
+ $TEST_DEV $TEST_DIR
+> > > > +	fi
+> > > > +}
+> > > > +
+> > > >  _supports_filetype()
+> > > >  {
+> > > >  	local dir=3D$1
+> > > > @@ -456,8 +467,7 @@ _test_mount()
+> > > >          return $?
+> > > >      fi
+> > > > =20
+> > > > -    _test_options mount
+> > > > -    _mount -t $FSTYP$FUSE_SUBTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS=
+ $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> > > > +    _mount -t $FSTYP$FUSE_SUBTYP `_test_mount_options $*`
+> > > >      mount_ret=3D$?
+> > > >      [ $mount_ret -ne 0 ] && return $mount_ret
+> > > >      _idmapped_mount $TEST_DEV $TEST_DIR
+> > > > @@ -571,6 +581,12 @@ _metadump_dev() {
+> > > >  	esac
+> > > >  }
+> > > > =20
+> > > > +_test_mkfs_options()
+> > > > +{
+> > > > +	_test_options mkfs
+> > > > +	echo $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
+> > > > +}
+> > > > +
+> > > >  _test_mkfs()
+> > > >  {
+> > > >      case $FSTYP in
+> > > > --=20
+> > > > 2.43.0
+> > > > =
