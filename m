@@ -1,173 +1,226 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C3161428F1
-	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 16:47:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E93F91BC2A
+	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:47:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719247636; cv=none; b=QDXyyGijzu00mRs+NL0pNr088SkgC55tQ43OWorNnVbl/lq/QsK8OvvOu7hP4371sfL716+3L6PiTT23x7v6m3mh+CKsUcXxnIh0kMT5qY45FHJf7oDeH5DbyC8u7oAzwV5T6VIj6kL6UyKnWLsV99u/fZXEYpYKHIHn6QULrPs=
+	t=1719262031; cv=none; b=oOIEmBdI4wplnwR9vsI1HZLo8cgnKT9mucwBWHoc5rEsBwiijnDbzcVB5rOraToJlPExIEgPTZLb+ys49C1HhZTD30zlqXgxaY1h1ssrXH2T6LdiP6JRGBdDnSVPYRp3c5pa+5Sxb6Gj5nr4R5SQHN5UPwXNMoYSBMTrT2Pu/Jc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719247636; c=relaxed/simple;
-	bh=gG7eP+BWelIwvq3dlu8NKn313UTsNfmw89w9Nn3O1Jc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Lv8U9/3Ll8Vu5om3oIeHCE9fLZfy5F2HUr6tTbfkOQmqJkz2Ndvib/81f9rPBGXYnw+PhfkXF0qOXzsb7zyV5yLOZuE2cKKS91NHOlMsSKAMVCaQHX3hcPgxIffUypbHrKEjFZxBLvE2quZ6JQYaw2qF1/gberyHbxsF5BPTuQI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RLfqFXNn; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1719262031; c=relaxed/simple;
+	bh=8PW9bxqQhjiHhpoDf0eGXgKgUs6UioUV2mkUFutHGy0=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:Content-Type:
+	 MIME-Version:References; b=c03xkQ3CNjyIv+k51JDrIDKOc8skrDGqjIav5/F9Q4SR9uFO5StO7ljx70aED7Pr2Obi8io8U1LMXs3SCoMTz79uG/p1PtXwXc3CFGC+MXcx9vOKn1MNlBK0JKQvf+WJ9DZRdhLY16aYdQ7ljgGEkfWjRsiyvlC8Upc6CG2Vr0o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=NYedwmdm; arc=none smtp.client-ip=210.118.77.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RLfqFXNn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A06EFC2BBFC;
-	Mon, 24 Jun 2024 16:47:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719247635;
-	bh=gG7eP+BWelIwvq3dlu8NKn313UTsNfmw89w9Nn3O1Jc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=RLfqFXNn2/1MKWHWNrshetiXYEdzC5u+604d+xNbbmGpSLJQiqStYOgrna6hj2Wan
-	 jXBto/lfmwCMQDFPGISWNn9/1+omy9ssM8N5Ebttqs0Cdy8WbEOFla80kbz6GmFXg/
-	 hLCTWWUuJoX5hAJx/FGgiuUAOGb6hRbOyRJP9uVAPVakMVzjF5A3HO98SuBKf+oucE
-	 lTkqDBijcq1FaY39CfMVqRG3GdbkzGc65DpMdQd5I8Hy2Fw6c/h59HCSBu4e6Gd9CB
-	 /HtyORg+PwqZyimxvvflc7l5bsL5ErQs7UZjJJ+3hYmNB74gr5o5G59WB7xLKLH2id
-	 tOWkzYlXUXy7g==
-Date: Mon, 24 Jun 2024 09:47:15 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Daniel Gomez <da.gomez@samsung.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Pankaj Raghav <p.raghav@samsung.com>,
-	"mcgrof@kernel.org" <mcgrof@kernel.org>,
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="NYedwmdm"
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+	by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20240624204705euoutp02d149f80e458dd833755597132b17543c~cC7QeT5lt2350223502euoutp02C
+	for <fstests@vger.kernel.org>; Mon, 24 Jun 2024 20:47:05 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20240624204705euoutp02d149f80e458dd833755597132b17543c~cC7QeT5lt2350223502euoutp02C
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1719262026;
+	bh=8PW9bxqQhjiHhpoDf0eGXgKgUs6UioUV2mkUFutHGy0=;
+	h=From:To:CC:Subject:Date:In-Reply-To:References:From;
+	b=NYedwmdmNJYMMYV5XPiWwFkLWHtydxqZPXJitekKvWtD5fKOwJXbADI0UfUm9RX8Q
+	 Z6qGFsn93L/+IS2JjMyAbUoNvfLkLpql0MSCu2bfQLcyujm3G1PByOnUhERBcgRpga
+	 AFWz8CFNG23w8DBYiFQplmTrWcgMURRX7onHF53s=
+Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
+	eucas1p2.samsung.com (KnoxPortal) with ESMTP id
+	20240624204705eucas1p28f03ef19a060ea52682e552bbb3ae708~cC7PwxAmK2357723577eucas1p2c;
+	Mon, 24 Jun 2024 20:47:05 +0000 (GMT)
+Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
+	eusmges3new.samsung.com (EUCPMTA) with SMTP id 74.B2.09620.94BD9766; Mon, 24
+	Jun 2024 21:47:05 +0100 (BST)
+Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
+	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+	20240624204704eucas1p1a3d5e748377807810de780b4d8870e43~cC7PDZhM71824518245eucas1p1c;
+	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
+Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
+	eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
+	20240624204704eusmtrp1ca684ae7130d6c661c7ffefb4d0bf96c~cC7PC57Sv2494424944eusmtrp1R;
+	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
+X-AuditID: cbfec7f5-d1bff70000002594-f0-6679db499602
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+	eusmgms1.samsung.com (EUCPMTA) with SMTP id CF.D3.08810.84BD9766; Mon, 24
+	Jun 2024 21:47:04 +0100 (BST)
+Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
+	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+	20240624204704eusmtip2f74c2aedc5b79423ab83746c1d61aca5~cC7O2Fahc0917809178eusmtip2P;
+	Mon, 24 Jun 2024 20:47:04 +0000 (GMT)
+Received: from CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) by
+	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348) with Microsoft SMTP
+	Server (TLS) id 15.0.1497.2; Mon, 24 Jun 2024 21:47:03 +0100
+Received: from CAMSVWEXC01.scsc.local ([::1]) by CAMSVWEXC01.scsc.local
+	([fe80::7d73:5123:34e0:4f73%13]) with mapi id 15.00.1497.012; Mon, 24 Jun
+	2024 21:47:03 +0100
+From: Daniel Gomez <da.gomez@samsung.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+CC: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, Pankaj Raghav
+	<p.raghav@samsung.com>, "mcgrof@kernel.org" <mcgrof@kernel.org>,
 	"hughd@google.com" <hughd@google.com>
 Subject: Re: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
-Message-ID: <20240624164715.GI103020@frogsfrogsfrogs>
-References: <20240614061722.1080-1-da.gomez@samsung.com>
- <CGME20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5@eucas1p1.samsung.com>
- <20240614061722.1080-5-da.gomez@samsung.com>
- <20240614154728.GC6110@frogsfrogsfrogs>
- <jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
+Thread-Topic: [PATCH 4/5] common/rc: fix scratch mount options for tmpfs
+Thread-Index: AQHaviKG7LBDn2pSnkKBi8GAx++1P7HHV0gAgA+WmoCAADFrgIAAQvwA
+Date: Mon, 24 Jun 2024 20:47:03 +0000
+Message-ID: <l6fsxiedcwxpmjsaotcqkev4pbe3jlvhmtth3wetiaew63kpwm@ga2h3bqupi7j>
+In-Reply-To: <20240624164715.GI103020@frogsfrogsfrogs>
+Accept-Language: en-US, en-GB
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-messagesentrepresentingtype: 1
+x-ms-exchange-transport-fromentityheader: Hosted
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <2B8AB27BF8D11A44B710229D23D24E36@scsc.local>
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprIKsWRmVeSWpSXmKPExsWy7djPc7qetyvTDDq3sVhcfsJncbplL7vF
+	0099LBY3JjxldGDxWLCp1GPTqk42j8+b5AKYo7hsUlJzMstSi/TtErgyvl4/ylJwyari9pZF
+	7A2MEyy7GDk5JARMJNqmvmbsYuTiEBJYwSixesJkVgjnC6PErhsn2SGcz4wS83Y9ZIdpaXnT
+	wAyRWM4ocaZlNlgCrOpmlwOEfYZR4s98L4iilYwST/9PYANJsAloSuw7uQmsQQTIPvLtGhNI
+	EbPARkaJS/PegRUJC7hLzHr7BKrIQ+JP4xco203i6Nb5jCA2i4CqROPlCSwgNq+Ar8TSY89Z
+	QWxOATOJLT8+M4PYjAKyEo9W/gLrZRYQl7j1ZD4TxAuCEotm72GGsMUk/u16yAZh60icvf6E
+	EcI2kNi6dB8LhK0s8aX9OFANB9AcTYn1u/QhRlpKLP/xnRXCVpSY0g0JIV6g8SdnPmEB+UtC
+	YD2nxPS5S6Dmu0hMn/oT6gZhiVfHt7BPYNSZheS8WQgrZiFZMQvJillIVixgZF3FKJ5aWpyb
+	nlpsnJdarlecmFtcmpeul5yfu4kRmGpO/zv+dQfjilcf9Q4xMnEwHmKU4GBWEuGdXl+WJsSb
+	klhZlVqUH19UmpNafIhRmoNFSZxXNUU+VUggPbEkNTs1tSC1CCbLxMEp1cBUHzjnufPhrvfO
+	Bw64/5n6WLTwx5YbzCpv1lzQrpkUY5xxQrn1Te1H9k+Mfx5Z/fnekSH6TMzKsju43SRgZ6jD
+	xOVn5+uXRk3YWla8faNc2P9vJ9w/paYt2L/+z+MNydt45L2Wh0fOMog5JX4tdt+005bZPAdW
+	+nisEonqmt57sVh2+6qPLQ9LLCrKt2nvN+ky/7fl/7v3E2vnFAW1Cf6MYMxc+NtNaJKLY8DT
+	x6Exvnx9TCu3x6730WmqrvkcpzW970JPn2XHZhb3dVsXWpcyvL72Ia+Z3/TKd9abQYoe9ofv
+	cD8xUVopUZ52mCsp4JVappKvZkwYm9OW7df2beSpakt6fuL/ltidtx4GiGopsRRnJBpqMRcV
+	JwIAHXjF3qQDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprFKsWRmVeSWpSXmKPExsVy+t/xe7oetyvTDE7PE7W4/ITP4nTLXnaL
+	p5/6WCxuTHjK6MDisWBTqcemVZ1sHp83yQUwR+nZFOWXlqQqZOQXl9gqRRtaGOkZWlroGZlY
+	6hkam8daGZkq6dvZpKTmZJalFunbJehlfL1+lKXgklXF7S2L2BsYJ1h2MXJySAiYSLS8aWDu
+	YuTiEBJYyiixe95NJoiEjMTGL1dZIWxhiT/XuthAbCGBj4wS/57rQzScYZS4ce0OC4SzklFi
+	/65XjCBVbAKaEvtObmIHsUWA7CPfrjGBFDELbGSUuDTvHdgoYQF3iVlvn0AVeUj8afwCZbtJ
+	HN06H2wQi4CqROPlCSwgNq+Ar8TSY89ZIbZdZZJ4u/gvM0iCU8BMYsuPz2A2o4CsxKOVv8AG
+	MQuIS9x6Mh/qHwGJJXvOM0PYohIvH/+D+k1H4uz1J4wQtoHE1qX7WCBsZYkv7ceBDuUAmqMp
+	sX6XPsRIS4nlP76zQtiKElO6H7JD3CYocXLmE5YJjDKzkGyehdA9C0n3LCTds5B0L2BkXcUo
+	klpanJueW2yoV5yYW1yal66XnJ+7iRGYSLYd+7l5B+O8Vx/1DjEycTAeYpTgYFYS4Z1eX5Ym
+	xJuSWFmVWpQfX1Sak1p8iNEUGHQTmaVEk/OBqSyvJN7QzMDU0MTM0sDU0sxYSZzXs6AjUUgg
+	PbEkNTs1tSC1CKaPiYNTqoEp4u/S/GOhQovlbifnXLv15HBFV0FC49Xl096ar2vnfzG/YNbU
+	51zxG/gmqDyLV1sQ+angVfGj321M9TwHbfpPRe27oCxk/7v/6Pwsn/WTxFsUNfujbz19JrIp
+	5E/fn7Yd0zInfVr39G/uL+WVckuL1Z/HdwhdvaAYKneoIu+I0aNEo1i2uNqtc3TDLvwsP3y2
+	w1teKCGJzfi+Effu0Hq5WRozTz3o2Kn6P+x9o0gNQ7nrxTNeLbu0vAwSl2faPw1w/3LY/7ij
+	q9X//LcTnySdr+Xa2xbJvfrwgmx5neBYN5Yc3s0ZTfN5+W9YCIoLfdyqX254bNenbSKCFQxM
+	/6PFA/53v+IQubIzRuRZR4USS3FGoqEWc1FxIgAhKcgUrQMAAA==
+X-CMS-MailID: 20240624204704eucas1p1a3d5e748377807810de780b4d8870e43
+X-Msg-Generator: CA
+X-RootMTR: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5
+References: <20240614061722.1080-1-da.gomez@samsung.com>
+	<CGME20240614061727eucas1p19ba98d45511f9226f1c5cf1752b419b5@eucas1p1.samsung.com>
+	<20240614061722.1080-5-da.gomez@samsung.com>
+	<20240614154728.GC6110@frogsfrogsfrogs>
+	<jnyfwimjjfi56fqbfb4lvrauzinkgokdsftxa4k4o5o7eomokm@ghgk5vt46rcz>
+	<20240624164715.GI103020@frogsfrogsfrogs>
 
-On Mon, Jun 24, 2024 at 01:50:33PM +0000, Daniel Gomez wrote:
-> On Fri, Jun 14, 2024 at 08:47:28AM GMT, Darrick J. Wong wrote:
-> > On Fri, Jun 14, 2024 at 06:17:25AM +0000, Daniel Gomez wrote:
-> > > Make sure tmpfs scratch device inherits the extra tmpfs mount options
-> > > variable (TMPFS_MOUNT_OPTIONS).
-> > > 
-> > > Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
-> > > ---
-> > >  common/rc | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index 7f995b0fa..a42792c37 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -224,7 +224,7 @@ _test_options()
-> > >  # hosted on $SCRATCH_DEV, so can't use external scratch devices).
-> > >  _common_dev_mount_options()
-> > >  {
-> > > -	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $*
-> > > +	echo $MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS $TMPFS_MOUNT_OPTIONS $*
-> > 
-> > Why is it necessary to include tmpfs mount options for all fs types?
-> > XFS does not accept tmpfs mount options.
-> 
-> You are right. We should not do this.
-> 
-> However, _scratch_mount_options() calls _common_dev_mount_options() ignoring the
-> specific mount options based on fstyp.
-
-Ah, _mount_opts only gets run for configuration files.
-
-> specific mount options based on fstyp. Replacing it with _common_mount_opts()
-> makes this work. In addition, _common_dev_mount_options() function description
-> says 'Used for mounting non-scratch devices with the safe set of scratch mount
-> options'. So, why is it used to mount scratch devices?
-
-I think the comment isn't very good.  Six of the seven callers:
-
-common/dmdelay|23| _mount -t $FSTYP `_common_dev_mount_options` $SCRATCH_OPTIONS \
-common/dmdust|19| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-common/dmerror|94| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-common/dmlogwrites|107| _mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-common/dmthin|226| echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS $DMTHIN_VOL_DEV $SCRATCH_MNT
-common/rc|272| echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-
-appear to use this to mount the scratch filesystem from devices that are
-not the regular scratch device.  The one exception is this one:
-
-common/overlay|32| _mount -t overlay $diropts `_common_dev_mount_options $*`
-
-which AFAICT seem to mount arbitrary overlayfs instances with some of
-the mount options.
-
-> This fixes the issue:
-> 
-> diff --git a/common/rc b/common/rc
-> index 51827119c..627dbaaaa 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -231,8 +231,8 @@ _scratch_mount_options()
->  {
->         _scratch_options mount
-> 
-> -       echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-> -                                       $SCRATCH_DEV $SCRATCH_MNT
-> +       echo `_common_mount_opts` $SCRATCH_OPTIONS \
-> +                                       $SCRATCH_DEV $SCRATCH_MNT $*
->  }
-> 
-> > 
-> > For that matter, why is TMPFS_MOUNT_OPTIONS necessary at all?  Shouldn't
-> > that simply be "MOUNT_OPTIONS=<stuff> FSTYP=tmpfs ./check" ?
-> 
-> TMPFS_MOUNT_OPTIONS is used to specify mount options in each section of the
-> configuration file. For example, the following snippet is part of my conf file:
-> 
-> ```
-> [tmpfs_noswap_huge_always]
-> TMPFS_MOUNT_OPTIONS="-o noswap,huge=always"
-> 
-> [tmpfs_noswap_huge_within_size]
-> TMPFS_MOUNT_OPTIONS="-o noswap,huge=within_size"
-> ```
-> 
-> Then I run -s option to switch between profiles, e.g., 'check -s
-> tmpfs_noswap_huge_within_size -R xunit -g auto'.
-> 
-> I’m not sure if this addresses your question. Please let me know if I
-> misunderstood.
-
-Ahah, this is one of those parts of fstests that differ depending on
-whether you use configuration files (you do) or not (I don't).  AFAICT,
-get_next_config has this slightly odd (to me) behavior where if a config
-section doesn't explicitly set MOUNT_OPTIONS, it will reuse
-MOUNT_OPTIONS from a previous section if FSTYP hasn't changed.  You
-instead want to change the mount between sections
-
-So I /think/ the correct thing to do here is
-
-[tmpfs_noswap_huge_always]
-MOUNT_OPTIONS="-o noswap,huge=always"
-
-[tmpfs_noswap_huge_within_size]
-MOUNT_OPTIONS="-o noswap,huge=within_size"
-
-Though I'm not exactly an expert on these things.
-
---D
-
-> 
-> > 
-> > --D
-> > 
-> > >  }
-> > >  
-> > >  _scratch_mount_options()
-> > > -- 
-> > > 2.43.0
-> > > 
+T24gTW9uLCBKdW4gMjQsIDIwMjQgYXQgMDk6NDc6MTVBTSBHTVQsIERhcnJpY2sgSi4gV29uZyB3
+cm90ZToNCj4gT24gTW9uLCBKdW4gMjQsIDIwMjQgYXQgMDE6NTA6MzNQTSArMDAwMCwgRGFuaWVs
+IEdvbWV6IHdyb3RlOg0KPiA+IE9uIEZyaSwgSnVuIDE0LCAyMDI0IGF0IDA4OjQ3OjI4QU0gR01U
+LCBEYXJyaWNrIEouIFdvbmcgd3JvdGU6DQo+ID4gPiBPbiBGcmksIEp1biAxNCwgMjAyNCBhdCAw
+NjoxNzoyNUFNICswMDAwLCBEYW5pZWwgR29tZXogd3JvdGU6DQo+ID4gPiA+IE1ha2Ugc3VyZSB0
+bXBmcyBzY3JhdGNoIGRldmljZSBpbmhlcml0cyB0aGUgZXh0cmEgdG1wZnMgbW91bnQgb3B0aW9u
+cw0KPiA+ID4gPiB2YXJpYWJsZSAoVE1QRlNfTU9VTlRfT1BUSU9OUykuDQo+ID4gPiA+IA0KPiA+
+ID4gPiBTaWduZWQtb2ZmLWJ5OiBEYW5pZWwgR29tZXogPGRhLmdvbWV6QHNhbXN1bmcuY29tPg0K
+PiA+ID4gPiAtLS0NCj4gPiA+ID4gIGNvbW1vbi9yYyB8IDIgKy0NCj4gPiA+ID4gIDEgZmlsZSBj
+aGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQ0KPiA+ID4gPiANCj4gPiA+ID4g
+ZGlmZiAtLWdpdCBhL2NvbW1vbi9yYyBiL2NvbW1vbi9yYw0KPiA+ID4gPiBpbmRleCA3Zjk5NWIw
+ZmEuLmE0Mjc5MmMzNyAxMDA2NDQNCj4gPiA+ID4gLS0tIGEvY29tbW9uL3JjDQo+ID4gPiA+ICsr
+KyBiL2NvbW1vbi9yYw0KPiA+ID4gPiBAQCAtMjI0LDcgKzIyNCw3IEBAIF90ZXN0X29wdGlvbnMo
+KQ0KPiA+ID4gPiAgIyBob3N0ZWQgb24gJFNDUkFUQ0hfREVWLCBzbyBjYW4ndCB1c2UgZXh0ZXJu
+YWwgc2NyYXRjaCBkZXZpY2VzKS4NCj4gPiA+ID4gIF9jb21tb25fZGV2X21vdW50X29wdGlvbnMo
+KQ0KPiA+ID4gPiAgew0KPiA+ID4gPiAtCWVjaG8gJE1PVU5UX09QVElPTlMgJFNFTElOVVhfTU9V
+TlRfT1BUSU9OUyAkKg0KPiA+ID4gPiArCWVjaG8gJE1PVU5UX09QVElPTlMgJFNFTElOVVhfTU9V
+TlRfT1BUSU9OUyAkVE1QRlNfTU9VTlRfT1BUSU9OUyAkKg0KPiA+ID4gDQo+ID4gPiBXaHkgaXMg
+aXQgbmVjZXNzYXJ5IHRvIGluY2x1ZGUgdG1wZnMgbW91bnQgb3B0aW9ucyBmb3IgYWxsIGZzIHR5
+cGVzPw0KPiA+ID4gWEZTIGRvZXMgbm90IGFjY2VwdCB0bXBmcyBtb3VudCBvcHRpb25zLg0KPiA+
+IA0KPiA+IFlvdSBhcmUgcmlnaHQuIFdlIHNob3VsZCBub3QgZG8gdGhpcy4NCj4gPiANCj4gPiBI
+b3dldmVyLCBfc2NyYXRjaF9tb3VudF9vcHRpb25zKCkgY2FsbHMgX2NvbW1vbl9kZXZfbW91bnRf
+b3B0aW9ucygpIGlnbm9yaW5nIHRoZQ0KPiA+IHNwZWNpZmljIG1vdW50IG9wdGlvbnMgYmFzZWQg
+b24gZnN0eXAuDQo+IA0KPiBBaCwgX21vdW50X29wdHMgb25seSBnZXRzIHJ1biBmb3IgY29uZmln
+dXJhdGlvbiBmaWxlcy4NCg0KRXZlbiBpZiB5b3UgYXJlIHJ1bm5pbmcgY29uZmlndXJhdGlvbiBm
+aWxlcywgX21vdW50X29wdHMoKSAtPg0KX2NvbW1vbl9tb3VudF9vcHRzKCkgaXMgbm90IHJ1biBm
+b3Igc2NyYXRjaCBtb3VudCBvcHRpb25zLg0KDQo+IA0KPiA+IHNwZWNpZmljIG1vdW50IG9wdGlv
+bnMgYmFzZWQgb24gZnN0eXAuIFJlcGxhY2luZyBpdCB3aXRoIF9jb21tb25fbW91bnRfb3B0cygp
+DQo+ID4gbWFrZXMgdGhpcyB3b3JrLiBJbiBhZGRpdGlvbiwgX2NvbW1vbl9kZXZfbW91bnRfb3B0
+aW9ucygpIGZ1bmN0aW9uIGRlc2NyaXB0aW9uDQo+ID4gc2F5cyAnVXNlZCBmb3IgbW91bnRpbmcg
+bm9uLXNjcmF0Y2ggZGV2aWNlcyB3aXRoIHRoZSBzYWZlIHNldCBvZiBzY3JhdGNoIG1vdW50DQo+
+ID4gb3B0aW9ucycuIFNvLCB3aHkgaXMgaXQgdXNlZCB0byBtb3VudCBzY3JhdGNoIGRldmljZXM/
+DQo+IA0KPiBJIHRoaW5rIHRoZSBjb21tZW50IGlzbid0IHZlcnkgZ29vZC4gIFNpeCBvZiB0aGUg
+c2V2ZW4gY2FsbGVyczoNCj4gDQo+IGNvbW1vbi9kbWRlbGF5fDIzfCBfbW91bnQgLXQgJEZTVFlQ
+IGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gY29tbW9u
+L2RtZHVzdHwxOXwgX21vdW50IC10ICRGU1RZUCBgX2NvbW1vbl9kZXZfbW91bnRfb3B0aW9ucyAk
+KmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IGNvbW1vbi9kbWVycm9yfDk0fCBfbW91bnQgLXQgJEZT
+VFlQIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQqYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4g
+Y29tbW9uL2RtbG9nd3JpdGVzfDEwN3wgX21vdW50IC10ICRGU1RZUCBgX2NvbW1vbl9kZXZfbW91
+bnRfb3B0aW9ucyAkKmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IGNvbW1vbi9kbXRoaW58MjI2fCBl
+Y2hvIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQqYCAkU0NSQVRDSF9PUFRJT05TICRETVRI
+SU5fVk9MX0RFViAkU0NSQVRDSF9NTlQNCj4gY29tbW9uL3JjfDI3MnwgZWNobyBgX2NvbW1vbl9k
+ZXZfbW91bnRfb3B0aW9ucyAkKmAgJFNDUkFUQ0hfT1BUSU9OUyBcDQo+IA0KPiBhcHBlYXIgdG8g
+dXNlIHRoaXMgdG8gbW91bnQgdGhlIHNjcmF0Y2ggZmlsZXN5c3RlbSBmcm9tIGRldmljZXMgdGhh
+dCBhcmUNCj4gbm90IHRoZSByZWd1bGFyIHNjcmF0Y2ggZGV2aWNlLiAgVGhlIG9uZSBleGNlcHRp
+b24gaXMgdGhpcyBvbmU6DQo+IA0KPiBjb21tb24vb3ZlcmxheXwzMnwgX21vdW50IC10IG92ZXJs
+YXkgJGRpcm9wdHMgYF9jb21tb25fZGV2X21vdW50X29wdGlvbnMgJCpgDQo+IA0KPiB3aGljaCBB
+RkFJQ1Qgc2VlbSB0byBtb3VudCBhcmJpdHJhcnkgb3ZlcmxheWZzIGluc3RhbmNlcyB3aXRoIHNv
+bWUgb2YNCj4gdGhlIG1vdW50IG9wdGlvbnMuDQoNClRoYW5rcyBmb3IgY2xhcmlmeWluZy4gSSBn
+dWVzcyB0aGUgcXVlc3Rpb24gaXMgaWYgaXQncyBva2F5IHRvIGRvDQp0aGUgcmVwbGFjZW1lbnQg
+c3VnZ2VzdGVkIChfY29tbW9uX21vdW50X29wdHMoKSkgY29uc2lkZXJpbmcgdGhlDQpjdXJyZW50
+IF9zY3JhdGNoX21vdW50X29wdGlvbnMoKSBjYWxsZXJzLg0KDQo+IA0KPiA+IFRoaXMgZml4ZXMg
+dGhlIGlzc3VlOg0KPiA+IA0KPiA+IGRpZmYgLS1naXQgYS9jb21tb24vcmMgYi9jb21tb24vcmMN
+Cj4gPiBpbmRleCA1MTgyNzExOWMuLjYyN2RiYWFhYSAxMDA2NDQNCj4gPiAtLS0gYS9jb21tb24v
+cmMNCj4gPiArKysgYi9jb21tb24vcmMNCj4gPiBAQCAtMjMxLDggKzIzMSw4IEBAIF9zY3JhdGNo
+X21vdW50X29wdGlvbnMoKQ0KPiA+ICB7DQo+ID4gICAgICAgICBfc2NyYXRjaF9vcHRpb25zIG1v
+dW50DQo+ID4gDQo+ID4gLSAgICAgICBlY2hvIGBfY29tbW9uX2Rldl9tb3VudF9vcHRpb25zICQq
+YCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgJFNDUkFUQ0hfREVWICRTQ1JBVENIX01OVA0KPiA+ICsgICAgICAgZWNobyBgX2Nv
+bW1vbl9tb3VudF9vcHRzYCAkU0NSQVRDSF9PUFRJT05TIFwNCj4gPiArICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgJFNDUkFUQ0hfREVWICRTQ1JBVENIX01OVCAkKg0KPiA+
+ICB9DQo+ID4gDQo+ID4gPiANCj4gPiA+IEZvciB0aGF0IG1hdHRlciwgd2h5IGlzIFRNUEZTX01P
+VU5UX09QVElPTlMgbmVjZXNzYXJ5IGF0IGFsbD8gIFNob3VsZG4ndA0KPiA+ID4gdGhhdCBzaW1w
+bHkgYmUgIk1PVU5UX09QVElPTlM9PHN0dWZmPiBGU1RZUD10bXBmcyAuL2NoZWNrIiA/DQo+ID4g
+DQo+ID4gVE1QRlNfTU9VTlRfT1BUSU9OUyBpcyB1c2VkIHRvIHNwZWNpZnkgbW91bnQgb3B0aW9u
+cyBpbiBlYWNoIHNlY3Rpb24gb2YgdGhlDQo+ID4gY29uZmlndXJhdGlvbiBmaWxlLiBGb3IgZXhh
+bXBsZSwgdGhlIGZvbGxvd2luZyBzbmlwcGV0IGlzIHBhcnQgb2YgbXkgY29uZiBmaWxlOg0KPiA+
+IA0KPiA+IGBgYA0KPiA+IFt0bXBmc19ub3N3YXBfaHVnZV9hbHdheXNdDQo+ID4gVE1QRlNfTU9V
+TlRfT1BUSU9OUz0iLW8gbm9zd2FwLGh1Z2U9YWx3YXlzIg0KPiA+IA0KPiA+IFt0bXBmc19ub3N3
+YXBfaHVnZV93aXRoaW5fc2l6ZV0NCj4gPiBUTVBGU19NT1VOVF9PUFRJT05TPSItbyBub3N3YXAs
+aHVnZT13aXRoaW5fc2l6ZSINCj4gPiBgYGANCj4gPiANCj4gPiBUaGVuIEkgcnVuIC1zIG9wdGlv
+biB0byBzd2l0Y2ggYmV0d2VlbiBwcm9maWxlcywgZS5nLiwgJ2NoZWNrIC1zDQo+ID4gdG1wZnNf
+bm9zd2FwX2h1Z2Vfd2l0aGluX3NpemUgLVIgeHVuaXQgLWcgYXV0bycuDQo+ID4gDQo+ID4gSeKA
+mW0gbm90IHN1cmUgaWYgdGhpcyBhZGRyZXNzZXMgeW91ciBxdWVzdGlvbi4gUGxlYXNlIGxldCBt
+ZSBrbm93IGlmIEkNCj4gPiBtaXN1bmRlcnN0b29kLg0KPiANCj4gQWhhaCwgdGhpcyBpcyBvbmUg
+b2YgdGhvc2UgcGFydHMgb2YgZnN0ZXN0cyB0aGF0IGRpZmZlciBkZXBlbmRpbmcgb24NCj4gd2hl
+dGhlciB5b3UgdXNlIGNvbmZpZ3VyYXRpb24gZmlsZXMgKHlvdSBkbykgb3Igbm90IChJIGRvbid0
+KS4gIEFGQUlDVCwNCj4gZ2V0X25leHRfY29uZmlnIGhhcyB0aGlzIHNsaWdodGx5IG9kZCAodG8g
+bWUpIGJlaGF2aW9yIHdoZXJlIGlmIGEgY29uZmlnDQo+IHNlY3Rpb24gZG9lc24ndCBleHBsaWNp
+dGx5IHNldCBNT1VOVF9PUFRJT05TLCBpdCB3aWxsIHJldXNlDQo+IE1PVU5UX09QVElPTlMgZnJv
+bSBhIHByZXZpb3VzIHNlY3Rpb24gaWYgRlNUWVAgaGFzbid0IGNoYW5nZWQuICBZb3UNCj4gaW5z
+dGVhZCB3YW50IHRvIGNoYW5nZSB0aGUgbW91bnQgYmV0d2VlbiBzZWN0aW9ucw0KPiANCj4gU28g
+SSAvdGhpbmsvIHRoZSBjb3JyZWN0IHRoaW5nIHRvIGRvIGhlcmUgaXMNCj4gDQo+IFt0bXBmc19u
+b3N3YXBfaHVnZV9hbHdheXNdDQo+IE1PVU5UX09QVElPTlM9Ii1vIG5vc3dhcCxodWdlPWFsd2F5
+cyINCj4gDQo+IFt0bXBmc19ub3N3YXBfaHVnZV93aXRoaW5fc2l6ZV0NCj4gTU9VTlRfT1BUSU9O
+Uz0iLW8gbm9zd2FwLGh1Z2U9d2l0aGluX3NpemUiDQo+IA0KPiBUaG91Z2ggSSdtIG5vdCBleGFj
+dGx5IGFuIGV4cGVydCBvbiB0aGVzZSB0aGluZ3MuDQoNCkkgZm9yZ290IHRvIG1lbnRpb25lZCBl
+YXJsaWVyLCBUTVBGU19NT1VOVF9PUFRJT05TIGlzIHVzZWQgdG8gZXh0ZW5kIGEgZGVmYXVsdA0K
+dG1wZnMgbW91bnQgY29tbW9uIG9wdGlvbiAoaW4gX2NvbW1vbl9tb3VudF9vcHRzKCkpOg0KDQoJ
+dG1wZnMpDQoJCSMgV2UgbmVlZCB0byBzcGVjaWZ5IHRoZSBzaXplIGF0IG1vdW50LCB1c2UgMUcg
+YnkgZGVmYXVsdA0KCQllY2hvICItbyBzaXplPTFHICRUTVBGU19NT1VOVF9PUFRJT05TIg0KCQk7
+Ow0KDQpJIGd1ZXNzIHVzaW5nIE1PVU5UX09QVElPTlMgd291bGQgb3ZlcndyaXRlIHRoZSBkZWZh
+dWx0IGFuZCByZXF1aXJlZCBzaXplIG9wdGlvbg0KZm9yIHRoZSB0ZXN0cyB0byBydW4uIE90aGVy
+IGZzIGFkZCB0aGVpciBvd24gZGVmYXVsdHMgYXMgd2VsbC4NCg0KPiANCj4gLS1EDQo+IA0KPiA+
+IA0KPiA+ID4gDQo+ID4gPiAtLUQNCj4gPiA+IA0KPiA+ID4gPiAgfQ0KPiA+ID4gPiAgDQo+ID4g
+PiA+ICBfc2NyYXRjaF9tb3VudF9vcHRpb25zKCkNCj4gPiA+ID4gLS0gDQo+ID4gPiA+IDIuNDMu
+MA0KPiA+ID4gPiA=
