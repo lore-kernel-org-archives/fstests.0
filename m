@@ -1,359 +1,350 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 771CA2262B;
-	Sat, 29 Jun 2024 10:51:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A6DDDF42;
+	Mon,  1 Jul 2024 08:01:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719658276; cv=none; b=C95rHJfXdTZ0R2gzEY18p+3w72SEMziPFoLCTKyA4pO1lnE0J/Iz2KHcv/AfhqMPl+U7PX84QZnq/uh8b05SxrWy9DQaFfmEYIfxTmmzwEQb+FQ7rtiwMsJVhIt38LdMmzAyPaugx2HLS2CXoQHlFZugLOsmWG6rCbMCWVd55CQ=
+	t=1719820881; cv=none; b=jnIlTuZhQDqZT9MEe4vaYK57AM+/3+U9cjmNq08xkySupc61Pbi0k525tDhpVyGuf7PYSyFFNexIPdkOAmtXNpYXyp1MaQ/V0xF/JyqLFFmVsesDej+p4nzkxkwDuWd9VlQ+lhp+1c92Tj1Vj+6yhuqQ4Lziy5Auw0fsT+YVcV0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719658276; c=relaxed/simple;
-	bh=p/wmaTJoHs1BsEu/GBT6r7pZpb4RPxYcmbCyuVf0yh0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nWU4PXFMZxdo5xFw25g5lKwzz1TFcDPvmmKIlWWRPlBCBSAbj7lZdw5a4QUVaQGgvnKdxub4Tb4Xx2VyUbb4c/l2+eiDPqngKOLt4vpcc3s6bgcNrzni+9D1v4/WTJAvagEdDhhbS/3L8WjgIAl60vyRbOP7Yv2vjEYAp1yqJQk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pcLhw2Zp; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pcLhw2Zp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EE47CC2BBFC;
-	Sat, 29 Jun 2024 10:51:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719658276;
-	bh=p/wmaTJoHs1BsEu/GBT6r7pZpb4RPxYcmbCyuVf0yh0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=pcLhw2Zp+tnz8g/Wzpm5/ee0ytcOQUw4b5ianw08GyVIfIEj3LBZx9Vh6IencN7pr
-	 Jf0Gkemol1Igsr8/6f+MAr0xM0YI8Z4AEyhj50H3c9Er1/LdEgedw5BiSSj3obaxPr
-	 mb+MwG7oWM7yQgHCNm7NeefZ03UktCDzCnf6SMsahGK0FZxyB8QnIbrAd2yCL2u722
-	 EgjEu3RKqdfZZjqxUljzDQ1vnBP0/9R6RzG+WOMFSnOjPhbsLvkbIV6hSfiyAsGPJg
-	 kzJ2lw4q4rOvhTb0bDGhHI9qtusPQlO8nfSPulR+JTMAbanvIlTwHeBHY56vg061SO
-	 RbVdlA1PRLyGw==
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a689ad8d1f6so169833066b.2;
-        Sat, 29 Jun 2024 03:51:15 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUbSF68uRPs7rgVRYwpI+i4glM7HjL+zvKWJ1qf5N6zE1UWJRycax2QpHB6LERxdO4Wm/Kp8ynPLoUDFPCnP6fRZwQVyeDO3g==
-X-Gm-Message-State: AOJu0YxB3DZsoBo0/91Kuw02akfUOfGQab4fH9ky1GJowfM42OUpc0sd
-	YzdiOy+j/eHGcVhk438k7fZy1cEuBUiZRADhpnWp1JsalY811n8gn+NxwAbag+JTaOZ0Mu+NrDS
-	PMCxVLpXIMh/lbZzBBUnQIZeBRXU=
-X-Google-Smtp-Source: AGHT+IE5bQwYvjUrn5DqjWhfe4Il/+jrCI/KyytOiGuDV3SutRFI86QfNgXVyT2mAEOUEs16DT8ggA5j/BO8jo5HLZo=
-X-Received: by 2002:a17:907:6088:b0:a6f:b5ff:a6fd with SMTP id
- a640c23a62f3a-a75142d87e6mr63016266b.12.1719658274526; Sat, 29 Jun 2024
- 03:51:14 -0700 (PDT)
+	s=arc-20240116; t=1719820881; c=relaxed/simple;
+	bh=5h0fcntknDju7NDT4EVa6FfTx3PQZMhzcVkXe0wVIfQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mNSuecyeEL4u7Crlsq54qQsiYfgZbXsQKbLgQhmTpVN3w6Xh3B/1TULpZIYj7VoS+p6Ld8Jj+xw4EMRTrtwZNBlp1jwfujf1dpvRD8Z6Y5+dQmb6oqvAHRGjSD2TMt562rCESkvZiGKbLfmpUmQq1k3IhpaWprBYw0xwNWGFV+U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.218.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-a72585032f1so296851366b.3;
+        Mon, 01 Jul 2024 01:01:19 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719820878; x=1720425678;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=USM3vxUNNrRsAPiK2DpGZeOBw77DH43wgOeDeD8fyDc=;
+        b=sllEg1i43rL+BNxe1S45WKeXIWj2RhPbtFYns7DPct6E7IDRlX0f5bdHV5tDQ0lqkE
+         qjAXazzHW1bzNXRqOmbYgWG2yOQa0bmQ/To1x6QaTwWugxNkbTAz1pVNG0Uswd/HXYid
+         DYfLnb+4nMNLs8hqbA4fYFkb1p89HoeP+GKfOXblw3w91ndOxOFToF4a9STZG89S+ZX7
+         M5XiFSS9MJWQayYZeBh0vq0+7seq9mpiUudY6tt8IHRoDGJTT2A+80nDqNlcwSLrdVb+
+         TaDg7Afzv7ntf2cZnxcopOCIohuy49Mq4DOKTbMTljlBocdeg2U+O1K3vNa1xGZDEH4+
+         X9fw==
+X-Forwarded-Encrypted: i=1; AJvYcCV6U2or4gMpOiZXVI2DMT7ljSSGmPeAMxBN8ESr5/0244D5+aM7WeloSaqp3OOaA3hq979hpxMPt0oelK2C63sWgYDbya55Sw==
+X-Gm-Message-State: AOJu0YxzLLK/5mulvBunhYV7l63s8qk+uEolCIcP1IbRSJHSAdhr6QBB
+	gC6QX0YagZUcx1tlHW4Avyjp4aXkxj81IN5N3nRCt4yrjI2Dc4ajCoMdgw==
+X-Google-Smtp-Source: AGHT+IFR/MeXEWxyRH+/BOnpYUWXxq9s9CoW1IAwm2gooNP46Ec0TaIPIeHuFAGTh804vdEShJ7lEA==
+X-Received: by 2002:a17:907:7d89:b0:a6f:50ae:e0a with SMTP id a640c23a62f3a-a751443876cmr382099266b.37.1719820877349;
+        Mon, 01 Jul 2024 01:01:17 -0700 (PDT)
+Received: from nuc.fritz.box (p200300f6f72f3200fa633ffffe02074c.dip0.t-ipconnect.de. [2003:f6:f72f:3200:fa63:3fff:fe02:74c])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a72aaf1b569sm306597066b.1.2024.07.01.01.01.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 01 Jul 2024 01:01:16 -0700 (PDT)
+From: Johannes Thumshirn <jth@kernel.org>
+To: linux-btrfs@vger.kernel.org
+Cc: Anand Jain <anand.jain@oracle.com>,
+	Zorro Lang <zlang@redhat.com>,
+	fstests@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH v2] btrfs: update golden output of RST test cases
+Date: Mon,  1 Jul 2024 10:01:09 +0200
+Message-ID: <20240701080109.20673-1-jth@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240627094722.24192-1-jth@kernel.org>
-In-Reply-To: <20240627094722.24192-1-jth@kernel.org>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sat, 29 Jun 2024 11:50:37 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5coRxND9EwUkzOyLSp2cLKWirbEueiuATegytfBChRaQ@mail.gmail.com>
-Message-ID: <CAL3q7H5coRxND9EwUkzOyLSp2cLKWirbEueiuATegytfBChRaQ@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: update golden output of RST test cases
-To: Johannes Thumshirn <jth@kernel.org>
-Cc: linux-btrfs@vger.kernel.org, Anand Jain <anand.jain@oracle.com>, 
-	Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
-	Johannes Thumshirn <johannes.thumshirn@wdc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Jun 27, 2024 at 10:47=E2=80=AFAM Johannes Thumshirn <jth@kernel.org=
-> wrote:
->
-> From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
->
-> Update the golden output of the RAID stripe tree test cases after the
-> on-disk format and print format changes.
+From: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
-Better to mention here that the on-disk format changes happened:
+Starting with kernel patch "btrfs: remove raid-stripe-tree
+encoding field from stripe_extent" and btrfs-progs commit
+7c549b5f7cc0 ("btrfs-progs: remove raid stripe encoding"), the on-disk
+format of the raid stripe tree got changed.
 
-1) For btrfs-progs 6.9.1, with commit 7c549b5f7cc0 ("btrfs-progs:
-remove raid stripe encoding";
+As the feature is still experimental and not to be used in production, it
+is OK to do a on-disk format change.
 
-2) For the kernel, with the patch "btrfs: remove raid-stripe-tree
-encoding field from stripe_extent", which is not yet in Linus' tree;
+Update the golden output of the RAID stripe tree test cases after the
+on-disk format and print format changes.
 
-And that we don't need to ensure compatibility with different
-btrfs-progs and kernel versions because it's an experimental feature,
-subject to changes until stabilized.
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+---
 
-Other than that it looks good, it makes the tests pass with the
-for-next btrfs kernel branch and btrfs-progs 6.9.1+.
+Changes to v1:
+- Mention the kernel and btrfs-progs changes mandating this change.
 
-Thanks.
 
->
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->  tests/btrfs/304.out |  9 +++------
->  tests/btrfs/305.out | 24 ++++++++----------------
->  tests/btrfs/306.out | 18 ++++++------------
->  tests/btrfs/307.out | 15 +++++----------
->  tests/btrfs/308.out | 39 +++++++++++++--------------------------
->  5 files changed, 35 insertions(+), 70 deletions(-)
->
-> diff --git a/tests/btrfs/304.out b/tests/btrfs/304.out
-> index 39f56f32274d..97ec27455b01 100644
-> --- a/tests/btrfs/304.out
-> +++ b/tests/btrfs/304.out
-> @@ -12,8 +12,7 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
->  total bytes XXXXXXXX
->  bytes used XXXXXX
-> @@ -30,8 +29,7 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> @@ -49,8 +47,7 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> diff --git a/tests/btrfs/305.out b/tests/btrfs/305.out
-> index 7090626c3036..02642c904b1e 100644
-> --- a/tests/btrfs/305.out
-> +++ b/tests/btrfs/305.out
-> @@ -14,14 +14,11 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->                         stripe 0 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
->  bytes used XXXXXX
-> @@ -40,12 +37,10 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 1 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> @@ -65,16 +60,13 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 3 physical XXXXXXXXX
->                         stripe 1 devid 4 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> diff --git a/tests/btrfs/306.out b/tests/btrfs/306.out
-> index 25065674c77b..954567db7623 100644
-> --- a/tests/btrfs/306.out
-> +++ b/tests/btrfs/306.out
-> @@ -14,11 +14,9 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
->                         stripe 0 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
->  bytes used XXXXXX
-> @@ -37,12 +35,10 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> @@ -62,12 +58,10 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
->                         stripe 0 devid 3 physical XXXXXXXXX
->                         stripe 1 devid 4 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> diff --git a/tests/btrfs/307.out b/tests/btrfs/307.out
-> index 2815d17d7f03..e2f1d3d84a68 100644
-> --- a/tests/btrfs/307.out
-> +++ b/tests/btrfs/307.out
-> @@ -12,11 +12,9 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->                         stripe 0 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
->  bytes used XXXXXX
-> @@ -33,8 +31,7 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 0 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> @@ -52,12 +49,10 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
->                         stripe 0 devid 3 physical XXXXXXXXX
->                         stripe 1 devid 4 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> diff --git a/tests/btrfs/308.out b/tests/btrfs/308.out
-> index 23b31dd32959..75e010d54252 100644
-> --- a/tests/btrfs/308.out
-> +++ b/tests/btrfs/308.out
-> @@ -16,20 +16,15 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
->                         stripe 0 devid 2 physical XXXXXXXXX
-> -       item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
-> -       item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
-> -                       encoding: RAID0
-> +       item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 16
->                         stripe 0 devid 1 physical XXXXXXXXX
->  total bytes XXXXXXXX
->  bytes used XXXXXX
-> @@ -50,16 +45,13 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-> -                       encoding: RAID1
-> +       item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> @@ -81,24 +73,19 @@ checksum stored <CHECKSUM>
->  checksum calced <CHECKSUM>
->  fs uuid <UUID>
->  chunk uuid <UUID>
-> -       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
->                         stripe 0 devid 3 physical XXXXXXXXX
->                         stripe 1 devid 4 physical XXXXXXXXX
-> -       item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
-> -       item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
-> -                       encoding: RAID10
-> +       item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
->                         stripe 0 devid 1 physical XXXXXXXXX
->                         stripe 1 devid 2 physical XXXXXXXXX
->  total bytes XXXXXXXX
-> --
-> 2.43.0
->
->
+ tests/btrfs/304.out |  9 +++------
+ tests/btrfs/305.out | 24 ++++++++----------------
+ tests/btrfs/306.out | 18 ++++++------------
+ tests/btrfs/307.out | 15 +++++----------
+ tests/btrfs/308.out | 39 +++++++++++++--------------------------
+ 5 files changed, 35 insertions(+), 70 deletions(-)
+
+diff --git a/tests/btrfs/304.out b/tests/btrfs/304.out
+index 39f56f32274d..97ec27455b01 100644
+--- a/tests/btrfs/304.out
++++ b/tests/btrfs/304.out
+@@ -12,8 +12,7 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ total bytes XXXXXXXX
+ bytes used XXXXXX
+@@ -30,8 +29,7 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+@@ -49,8 +47,7 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 0 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+diff --git a/tests/btrfs/305.out b/tests/btrfs/305.out
+index 7090626c3036..02642c904b1e 100644
+--- a/tests/btrfs/305.out
++++ b/tests/btrfs/305.out
+@@ -14,14 +14,11 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+ bytes used XXXXXX
+@@ -40,12 +37,10 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 1 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+@@ -65,16 +60,13 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 0 key (XXXXXX RAID_STRIPE 61440) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 2 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 3 physical XXXXXXXXX
+ 			stripe 1 devid 4 physical XXXXXXXXX
+ total bytes XXXXXXXX
+diff --git a/tests/btrfs/306.out b/tests/btrfs/306.out
+index 25065674c77b..954567db7623 100644
+--- a/tests/btrfs/306.out
++++ b/tests/btrfs/306.out
+@@ -14,11 +14,9 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+ bytes used XXXXXX
+@@ -37,12 +35,10 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+@@ -62,12 +58,10 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 1 key (XXXXXX RAID_STRIPE 4096) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 3 physical XXXXXXXXX
+ 			stripe 1 devid 4 physical XXXXXXXXX
+ total bytes XXXXXXXX
+diff --git a/tests/btrfs/307.out b/tests/btrfs/307.out
+index 2815d17d7f03..e2f1d3d84a68 100644
+--- a/tests/btrfs/307.out
++++ b/tests/btrfs/307.out
+@@ -12,11 +12,9 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+ bytes used XXXXXX
+@@ -33,8 +31,7 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 0 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+@@ -52,12 +49,10 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 0 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 1 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 3 physical XXXXXXXXX
+ 			stripe 1 devid 4 physical XXXXXXXXX
+ total bytes XXXXXXXX
+diff --git a/tests/btrfs/308.out b/tests/btrfs/308.out
+index 23b31dd32959..75e010d54252 100644
+--- a/tests/btrfs/308.out
++++ b/tests/btrfs/308.out
+@@ -16,20 +16,15 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 2 physical XXXXXXXXX
+-	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+-	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 24
+-			encoding: RAID0
++	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 16
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ total bytes XXXXXXXX
+ bytes used XXXXXX
+@@ -50,16 +45,13 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 1 key (XXXXXX RAID_STRIPE 131072) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
+-			encoding: RAID1
++	item 2 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+@@ -81,24 +73,19 @@ checksum stored <CHECKSUM>
+ checksum calced <CHECKSUM>
+ fs uuid <UUID>
+ chunk uuid <UUID>
+-	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 0 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 1 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 2 key (XXXXXX RAID_STRIPE 65536) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 3 physical XXXXXXXXX
+ 			stripe 1 devid 4 physical XXXXXXXXX
+-	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 3 key (XXXXXX RAID_STRIPE 32768) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+-	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 40
+-			encoding: RAID10
++	item 4 key (XXXXXX RAID_STRIPE 8192) itemoff XXXXX itemsize 32
+ 			stripe 0 devid 1 physical XXXXXXXXX
+ 			stripe 1 devid 2 physical XXXXXXXXX
+ total bytes XXXXXXXX
+-- 
+2.43.0
+
