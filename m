@@ -1,41 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CDD684A2B
-	for <fstests@vger.kernel.org>; Mon,  1 Jul 2024 22:36:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AAB981849C4;
+	Wed,  3 Jul 2024 21:36:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719873389; cv=none; b=AQzyLoCTpEn+H4QtIk05CBDWw3vpvV30jrOBER7mnVuGeNnJrWvtUos3iu43uvjpubSD+OzCCax4efAuyQYmV34LC/grxuQSaZvVrE0L5qujad9PhAigBNOuIKr6ghPcXlPGnCOdsOloq72VmP+wBZyDq6WhEUAnTkU10YAH2Hg=
+	t=1720042566; cv=none; b=AztroaTb3n1pRrdxcD8RdqWjSgt1OeAj8VT48l27EF+DkvLmkAGWjoZVikWOlbgy9iXfMLjl+AhDZmRF3vhJ5NswpRKEd3/ToxSv8T/CwidQnzYuNvDmH9F7PByYfWtZyciWZn8hDm4ZmH3VnhVbJERc5OBT9ixkbBb4UfH/1+U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719873389; c=relaxed/simple;
-	bh=7Q8pSltz6bbuuAdlvzoTcmbdstNWbPdljb3xLqGj+Us=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Z7rA44x0KyqzUKrm62CQf0V0fZ2YrCyjQQsWaHkSYC+qLL4tRniJIrQuD9wXyWT/lWKkUBIg9ogPrsmdGHPQzvw7qZGUXhtpFfQwhog+sB8bB9DL9ckNTlejJK757woWzL/0DYLYmRSXfEGzt1VMmR5yqCjN2MkCPykwEkKzGDE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D4lx6fCn; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1720042566; c=relaxed/simple;
+	bh=QuAoKBvjbxFmlEMeejkzt4/NH2ow5lYD6Q7HLlZhIL0=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=NqkvHANxze906kjr1QoXummx4m2rKe4EpIVjuNnMOkzbaim10GBWPhhoRsugOAn0xPu3slAsYZcnNjEFdWZ+ziMssTd2SCw++lJ2q6qxAp8SCfR0LQVJ7QlXQpNhjrqgPosEmKpmf1P/hCg+8ZFpKgrc6u1v+cn1dkXcBYhPYn0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qA2e95kD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D4lx6fCn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4824C116B1;
-	Mon,  1 Jul 2024 22:36:28 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qA2e95kD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3E4C3C2BD10;
+	Wed,  3 Jul 2024 21:36:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719873388;
-	bh=7Q8pSltz6bbuuAdlvzoTcmbdstNWbPdljb3xLqGj+Us=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=D4lx6fCnJk+Sn0S5TX9DoxkLTdrI5eypc1ow4iv6zU5rpGKX82h3JiwRvMADdoPLy
-	 JYzNxEnmFMpc+oY/DriYrFFXPpKmLq7aX8xotCi7Sh2grmn/a23tHrxxtbuVV3lJ6v
-	 lDFEmEy6Za55GWFbSt9HOe9L9slXvm77rT0H3aKgbqHpEAycbCo2ppmO/4YvutnfWI
-	 Cfw1rOpyVk07Xbx3w6AtLHiIg8lrq9BU1o08zNMINbKBKa98VEfUbT1dCig6ETiGig
-	 qSx3UcjQrFRalFkf0T1a49NCalmLPQZBhy4csVB8gY7Vz8A0Pt5gQ5jE2REJ6UU4RJ
-	 QNVnIgdTokWnw==
-Date: Mon, 1 Jul 2024 15:36:28 -0700
+	s=k20201202; t=1720042566;
+	bh=QuAoKBvjbxFmlEMeejkzt4/NH2ow5lYD6Q7HLlZhIL0=;
+	h=Date:From:To:Cc:Subject:From;
+	b=qA2e95kDbFR2zewO5JBITD78m90V9hP4Ilf8xu4THn9irp8pFUCa+EuBSIlzeUL1q
+	 P9quD+xgcSqe3vK0B+DWYquv6oYSsSFgZwar1Tprvv053zyYro9L9ik76c/PyLzfqX
+	 sPLzxjK4DLMun3RiPbHSdiGziowsUmMd9WKgJLwrYo5Aa221tfpIcXVYhD4YHXWqVT
+	 SCIjYdKtx5JH/0DflnwoFsE0NA6Ey0zetoarTWiF//PJ2ULDsWNSP0slaFsHuc87xi
+	 BFyw3OGe+qR30RiYCBCx0QPWydyaeCOwYsvHbcjrWoorHrcAmvR+5Tj1FBjBNL5mN5
+	 X1boAoBDNOIbg==
+Date: Wed, 3 Jul 2024 14:36:05 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: da.gomez@samsung.com
-Cc: fstests@vger.kernel.org, Zorro Lang <zlang@redhat.com>,
-	mcgrof@kernel.org, gost.dev@samsung.com,
-	Samsung Samsung <Daniel Gomez d+samsung@kruces.com>
-Subject: Re: [PATCH v2 2/5] common/rc: add recreation support for tmpfs
-Message-ID: <20240701223628.GJ103020@frogsfrogsfrogs>
-References: <20240630-common-fixes-v2-0-16d26fb1dee0@samsung.com>
- <20240630-common-fixes-v2-2-16d26fb1dee0@samsung.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+Subject: [PATCH] xfs/444: fix agfl reset warning detection for small log
+ buffers
+Message-ID: <20240703213605.GK103020@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,48 +41,62 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240630-common-fixes-v2-2-16d26fb1dee0@samsung.com>
 
-On Sun, Jun 30, 2024 at 11:52:41PM +0200, Daniel Gomez via B4 Relay wrote:
-> From: Daniel Gomez <da.gomez@samsung.com>
-> 
-> Add support for test device recreation (RECREATE_TEST_DEV=true) for
-> tmpfs.
-> 
-> Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
-> ---
->  common/rc | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index 163041fea..51827119c 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -604,6 +604,9 @@ _test_mkfs()
->      pvfs2)
->  	# do nothing for pvfs2
->  	;;
-> +	tmpfs)
+From: Darrick J. Wong <djwong@kernel.org>
 
-Indentation problem here.
+Collectively, the ten subtests in xfs/444 can generate a lot of kernel
+log data.  If the amount of log data is enough to overflow the kernel
+log buffers, the AGFL reset warning generated by fix_start and fix_wrap
+might have been overwritten by subsequent log data.  Fix this by
+checking for the reset warning after each test and only complaining if
+at the end if we have /never/ seen the warning.
 
-> +	# do nothing for tmpfs
+Found by running on a kernel configured with CONFIG_LOG_BUF_SHIFT=14
+(16K).  This happened to be a Raspberry Pi, but in principle this can
+happen to anyone.  I'd never noticed this before because x86 helpfully
+sets it to 17 (128K) by default.
 
-If we're recreating the test filesystem, shouldn't that unmount and
-remount for tmpfs?  Or at least rm -rf everything underneath it?  That's
-generally the effect of _test_mkfs for disk filesystems.
+Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+---
+ tests/xfs/444 |   14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
 
-(That said, I'm much less familiar with non-disk filesystems...)
-
---D
-
-> +	;;
->      udf)
->          $MKFS_UDF_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
->  	;;
-> 
-> -- 
-> 2.43.0
-> 
-> 
-> 
+diff --git a/tests/xfs/444 b/tests/xfs/444
+index db7418c55d..cf78a9a1f0 100755
+--- a/tests/xfs/444
++++ b/tests/xfs/444
+@@ -58,6 +58,10 @@ dump_ag0() {
+ 	_scratch_xfs_db -c 'sb 0' -c 'p' -c 'agf 0' -c 'p' -c 'agfl 0' -c 'p'
+ }
+ 
++# Did we get the kernel warning too?
++warn_str='WARNING: Reset corrupted AGFL'
++saw_agfl_reset_warning=0
++
+ runtest() {
+ 	cmd="$1"
+ 
+@@ -208,6 +212,8 @@ ENDL
+ 	echo "FS REMOUNT" >> $seqres.full
+ 	dump_ag0 > $tmp.remount 2> /dev/null
+ 	diff -u $tmp.repair $tmp.remount >> $seqres.full
++
++	_check_dmesg_for "${warn_str}" && ((saw_agfl_reset_warning++))
+ }
+ 
+ runtest fix_end
+@@ -221,9 +227,11 @@ runtest bad_start
+ runtest no_move
+ runtest simple_move
+ 
+-# Did we get the kernel warning too?
+-warn_str='WARNING: Reset corrupted AGFL'
+-_check_dmesg_for "${warn_str}" || echo "Missing dmesg string \"${warn_str}\"."
++# We must see the AGFL reset warning at least once.  Collectively, the subtests
++# can generate enough kernel log data to overflow the buffer, so we check for
++# the warning after each subtest and summarize the output here.
++((saw_agfl_reset_warning > 0)) || \
++	echo "Missing dmesg string \"${warn_str}\"."
+ 
+ # Now run the regular dmesg check, filtering out the agfl warning
+ filter_agfl_reset_printk() {
