@@ -1,43 +1,60 @@
-Received: from imap4.hz.codethink.co.uk (imap4.hz.codethink.co.uk [188.40.203.114])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A18082C60
-	for <fstests@vger.kernel.org>; Wed, 10 Jul 2024 08:12:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=188.40.203.114
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75FAE16DEDA;
+	Wed, 10 Jul 2024 23:43:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720599180; cv=none; b=TQYzFG53PEpjxrKyrGZ2EoXms10bF+BcsmU0xoKgDPNYxMx4FXhExa4O8AR1+QgqrC+t3F4ianx+sqYPpNf7ZsVkgTctcwlwAyRxgQuoeAav9RwFTPpQqiHBQw3VVcA+mzv5FicUNg11FIQEtApPvV5jwz2voCtWJKGMW/fyVfU=
+	t=1720654984; cv=none; b=ty1L5M75IAekrFa04v6LSPSBFeknBvteVFS/JRYVfFf/5VnS1mNiWU7nRR4PzdhtQQgSg0JWSvJVPTwU3EXLTHvjF1+QSpineU4+cmn/FGzePjOEOuQIvFIxlDjnhyPkS3SpUrD1xrdHpAfPN+n/J1qmve2/vidiUtZiqmN9FCc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720599180; c=relaxed/simple;
-	bh=3fQH2F+Tfu8r8+NB2/bwnzHxj0L3ZKqcohIUXkYSqEc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=YXsi68vNKst+hcpAA5tjEtcGWDXGuXhCss5AagsSv2OwnLIaxktMTluLJ6D7COkeryy9mh4HiX6ecsXKu08H0SEPLBtn0+G6rEcE4LzN4TaLTPKY3AnFCXTFcZjbA90wmEFHKks03RuHwwxmb7GeT7sj/+45A98TwbNmTHTZq4E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk; spf=pass smtp.mailfrom=codethink.co.uk; dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b=GrauCOaE; arc=none smtp.client-ip=188.40.203.114
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=codethink.co.uk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codethink.co.uk
+	s=arc-20240116; t=1720654984; c=relaxed/simple;
+	bh=ie3ucnhyVwls/Qm5ooMM2s6d46s8a/rJKU1dw6qeZp8=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=PgwaYsyyzI9BPhC7pu/5nY15r3ymmtH7HJG8JdwLMhjOqhMyRFI6ET/8MGglkOCC/LyqYAUWaIXbeewNaEMbth5uBu/OTc5o8h0aC874fJ4oXbSGEoAPvmaI+cNw48NIZ7ACnqAiiUxrlxPwl1erDx5fscm35Z18Kdr4AWAx1nE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Gxdgmzfn; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=Gxdgmzfn; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codethink.co.uk header.i=@codethink.co.uk header.b="GrauCOaE"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=codethink.co.uk; s=imap4-20230908; h=Sender:Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Reply-To:Content-Type:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:
-	List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=RKSSvXpclb8GYV1IOzCxk174COjsmC/eqjNqPR1ltbo=; b=GrauCOaEWejXnwzrGQ9s08qGCq
-	C4dmd8SRhsGTVCkNeBD2O6y2pRTPLd3HfYe7c8tSV/3VL7oMg1ER9O83h/48VMnTvg9XpSFrhvtU6
-	bMYRqL+nbiS/3210u4aNI9ANR19PY2VHvgefwphvE3ydrQICoKyBQ6e+X8wBzh15qN7TsQ+T+iHgd
-	o59LCctoKDzhiUwhpkGTGvUlT3lerndPWm3Dk5yQHnGsx5MwLW3rVDUuGy6y4JjXYdgzKeTUis1SS
-	59dnt86HkETLmAsyzdpIEZMYJyWh81j7EXZO+8T2g3DvgCpURnd6eWO5ZTC82gAb8g9GIUgyOKZ2Q
-	yRigNXvw==;
-Received: from [167.98.27.226] (helo=ct-lt-02676.office.codethink.co.uk)
-	by imap4.hz.codethink.co.uk with esmtpsa  (Exim 4.94.2 #2 (Debian))
-	id 1sRRqv-004FMf-Rg; Wed, 10 Jul 2024 08:35:01 +0100
-From: Neill Whillans <neill.whillans@codethink.co.uk>
-To: fstests@vger.kernel.org,
-	zlang@kernel.org
-Cc: Neill Whillans <neill.whillans@codethink.co.uk>
-Subject: [PATCH] Support for 'hostname' usage when the short name option (-s) is not available
-Date: Wed, 10 Jul 2024 08:34:00 +0100
-Message-ID: <20240710073400.3112068-1-neill.whillans@codethink.co.uk>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Gxdgmzfn";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="Gxdgmzfn"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 97EF321B52;
+	Wed, 10 Jul 2024 23:43:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1720654980; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=fUUiTTSz9TsfeVxDrRo7Iof7cQnz3KXULloL7ONmgH4=;
+	b=GxdgmzfnxwaOoF4jDfneXzpPbFQRBrxV7kX/iBxTQhWwJho5FtF/yQHfbPSCwCLhCIYPci
+	oLLe8O9Jgxl4GIhx6pBvxKU470fIM3v3DOJzpMmuYTokpEurotgbmf0jLPiERsR4KBf9HD
+	phUMIaKU8sjb5lEGEE3Omsiq0Mul0mA=
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1720654980; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=fUUiTTSz9TsfeVxDrRo7Iof7cQnz3KXULloL7ONmgH4=;
+	b=GxdgmzfnxwaOoF4jDfneXzpPbFQRBrxV7kX/iBxTQhWwJho5FtF/yQHfbPSCwCLhCIYPci
+	oLLe8O9Jgxl4GIhx6pBvxKU470fIM3v3DOJzpMmuYTokpEurotgbmf0jLPiERsR4KBf9HD
+	phUMIaKU8sjb5lEGEE3Omsiq0Mul0mA=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 6C732137D2;
+	Wed, 10 Jul 2024 23:42:59 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id iz01CYMcj2bCUAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Wed, 10 Jul 2024 23:42:59 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/029: add fixes for the kernel behavior change
+Date: Thu, 11 Jul 2024 09:12:55 +0930
+Message-ID: <6e7ee8ec1731b5d3d44f511b075fa2edb0b38661.1720654947.git.wqu@suse.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,193 +62,60 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Sender: neill.whillans@codethink.co.uk
+X-Spamd-Result: default: False [-2.27 / 50.00];
+	BAYES_HAM(-2.47)[97.61%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	RCPT_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	ARC_NA(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCVD_TLS_ALL(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email]
+X-Spam-Flag: NO
+X-Spam-Score: -2.27
+X-Spam-Level: 
 
-There could be systems where the only 'hostname' options available are
---help and --version, for example, when 'hostname' is provided by
-coreutils. This can result in output that corrupts the expected test
-output, leading to a test failure.
+Since fstests commit 866948e00073 ("btrfs/029: change the cross vfsmount
+reflink test"), the test case will fail for older kernels (e.g. 5.14
+kernels from SLE).
 
-This commit modifies all instances of 'hostname -s' usage, to check if
-the short name option is available, and if not, use only 'hostname'.
+The failure is a false alert, but it would still take some time to
+figure it out.
+So add the fixes tag to make it more clear that it's a kernel behavior
+change.
 
-Signed-off-by: Neill Whillans <neill.whillans@codethink.co.uk>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- common/config  |  8 +++++++-
- common/gcov    |  8 +++++++-
- common/rc      |  9 ++++++++-
- crash/xfscrash | 13 ++++++++++---
- tools/auto-qa  |  8 +++++++-
- tools/db-walk  |  7 ++++++-
- tools/fs-walk  |  7 ++++++-
- tools/interop  |  7 ++++++-
- 8 files changed, 57 insertions(+), 10 deletions(-)
+ tests/btrfs/029 | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/common/config b/common/config
-index a1cd14de..9728a884 100644
---- a/common/config
-+++ b/common/config
-@@ -48,7 +48,13 @@ export LC_ALL=C
+diff --git a/tests/btrfs/029 b/tests/btrfs/029
+index 9b56cc73f818..16d9dc2fcc19 100755
+--- a/tests/btrfs/029
++++ b/tests/btrfs/029
+@@ -23,6 +23,11 @@ _begin_fstest auto quick clone
  
- PATH=".:$PATH"
+ _supported_fs btrfs
  
--export HOST=`hostname -s`
-+# If 'hostname -s' option not available, use 'hostname'
-+if ! hostname -s > /dev/null 2>&1; then
-+	export HOST=`hostname`
-+else
-+	export HOST=`hostname -s`
-+fi
++_fixed_by_kernel_commit ae460f058e9f \
++	"btrfs: remove the cross file system checks from remap"
++_fixed_by_kernel_commit 9f5710bbfd30 \
++	"fs: allow cross-vfsmount reflink/dedupe"
 +
- test `uname -s` = "Linux" || _fatal "fstests only supports Linux"
- 
- export MODULAR=0               # using XFS as a module or not
-diff --git a/common/gcov b/common/gcov
-index b7e3ed5a..3e75d765 100644
---- a/common/gcov
-+++ b/common/gcov
-@@ -45,9 +45,15 @@ _gcov_generate_report() {
- 	# Generate a detailed HTML report from the summary
- 	local gcov_start_time="$(date --date="${fstests_start_time:-now}")"
- 	local genhtml=()
-+  # If 'hostname -s' option not available, use 'hostname'
-+  if ! hostname -s > /dev/null 2>&1; then
-+	  export HOST=`hostname`
-+  else
-+	  export HOST=`hostname -s`
-+  fi
- 	if command -v genhtml > /dev/null; then
- 		genhtml+=(genhtml -o "${output_dir}/" "${output_dir}/gcov.report")
--		genhtml+=(--title "fstests on $(hostname -s) @ ${gcov_start_time}" --legend)
-+		genhtml+=(--title "fstests on ${HOST} @ ${gcov_start_time}" --legend)
- 	fi
- 
- 	# Try to convert the HTML report summary as text for easier grepping if
-diff --git a/common/rc b/common/rc
-index 163041fe..34203c78 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3453,8 +3453,15 @@ _full_fstyp_details()
- 
- _full_platform_details()
- {
-+	# If 'hostname -s' option not available, use 'hostname'
-+	if ! hostname -s > /dev/null 2>&1; then
-+		export HOST=`hostname`
-+	else
-+		export HOST=`hostname -s`
-+	fi
-+
-      local os=`uname -s`
--     local host=`hostname -s`
-+     local host=${HOST}
-      local kernel=`uname -rv`
-      local platform=`uname -m`
-      echo "$os/$platform $host $kernel"
-diff --git a/crash/xfscrash b/crash/xfscrash
-index 579b724d..cc88c6fc 100755
---- a/crash/xfscrash
-+++ b/crash/xfscrash
-@@ -22,8 +22,15 @@ AWK_PROG=gawk
- # clear FS if >= this percent full at start of run. 100 is a good
- # number - only used on corrupt test so far
- FULL_LIMIT=80
--  
--case `hostname -s`
-+
-+# If 'hostname -s' option not available, use 'hostname'
-+if ! hostname -s > /dev/null 2>&1; then
-+	export HOST=`hostname`
-+else
-+	export HOST=`hostname -s`
-+fi
-+
-+case ${HOST}
- in
-     leesa)
-         # mount test partition here
-@@ -54,7 +61,7 @@ in
-         STRESS_RANDOM=360
- 	;;
-     *)
--        echo "!!! no configuration data for host `hostname -s`"
-+        echo "!!! no configuration data for host ${HOST}"
-         exit 1
-         ;;
- esac
-diff --git a/tools/auto-qa b/tools/auto-qa
-index 1beb2835..431c1435 100755
---- a/tools/auto-qa
-+++ b/tools/auto-qa
-@@ -59,7 +59,13 @@ _get_kernel_version()
- # this should be constant
- 
- ROOT="$HOME/qa"
--HOST=`hostname -s`
-+# If 'hostname -s' option not available, use 'hostname'
-+if ! hostname -s > /dev/null 2>&1; then
-+	export HOST=`hostname`
-+else
-+	export HOST=`hostname -s`
-+fi
-+
- if [ ! -z "$CVSROOT" ]; then
-     export WORKAREA="$ROOT/xfs-cmds"
- else
-diff --git a/tools/db-walk b/tools/db-walk
-index e0992055..cb6fdc52 100755
---- a/tools/db-walk
-+++ b/tools/db-walk
-@@ -162,7 +162,12 @@ $device=shift @ARGV;
- die "can't read $device\n" unless (-r $device);
- die "$device is not a block device\n" unless (-b _);
- 
--chomp($HOST = `hostname -s`);
-+# If 'hostname -s' option not available, use 'hostname'
-+if(system('hostname -s > /dev/null 2>&1')){
-+	chomp($HOST = `hostname`);
-+} else {
-+	chomp($HOST = `hostname -s`);
-+}
- 
- print "*** db-walk host $HOST device $device\n";
- 
-diff --git a/tools/fs-walk b/tools/fs-walk
-index 918e1ad6..4ff713a4 100755
---- a/tools/fs-walk
-+++ b/tools/fs-walk
-@@ -56,7 +56,12 @@ $dir=shift @ARGV;
- die "can't read $dir\n" unless (-r $dir);
- die "$dir is not a directory\n" unless (-d _);
- 
--chomp($HOST = `hostname -s`);
-+# If 'hostname -s' option not available, use 'hostname'
-+if(system('hostname -s > /dev/null 2>&1')){
-+	chomp($HOST = `hostname`);
-+} else {
-+	chomp($HOST = `hostname -s`);
-+}
- 
- print "*** fs-walk host $HOST dir $dir\n";
- 
-diff --git a/tools/interop b/tools/interop
-index dc1652c2..db73dfba 100755
---- a/tools/interop
-+++ b/tools/interop
-@@ -63,7 +63,12 @@ sub mount($)
-     run("mount -t xfs $ops $SCRATCH_DEV $SCRATCH_MNT");
- }
- 
--chomp($HOST=`hostname -s`);
-+# If 'hostname -s' option not available, use 'hostname'
-+if(system('hostname -s > /dev/null 2>&1')){
-+	chomp($HOST = `hostname`);
-+} else {
-+	chomp($HOST = `hostname -s`);
-+}
- 
- die "usage: $ARGV0 <operation> [parameters]\n" unless (scalar(@ARGV));
- print "*** $HOST: Interop started\n";
+ _require_test
+ _require_scratch
+ _require_cp_reflink
 -- 
-2.43.0
+2.45.2
 
