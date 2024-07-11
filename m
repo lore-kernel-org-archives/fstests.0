@@ -1,150 +1,97 @@
-Received: from m15.mail.163.com (m15.mail.163.com [45.254.50.220])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 213888801
-	for <fstests@vger.kernel.org>; Thu, 11 Jul 2024 01:59:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.50.220
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5838913A406;
+	Thu, 11 Jul 2024 07:18:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720663154; cv=none; b=j9bKuhtiAK7E8tFjzp7iZMYGgArCou7Cr9YyV8aBMeC+QqW1pPLbydNQy/M3v+CiusnuEHk5l3d0bO5yxTjp0RWvU6kDXMTmgUTjQWFx0TiQ09BR7o7Emr09e20xyszGok4v7MqBs8cLFTmZZaXRSVpklnMLDAOhp/Fiv3CCuZ4=
+	t=1720682291; cv=none; b=h4WYAeI2b5TULiM6TZdhEoCbbTRrfF1f3vnkLVAYNxxlqTpk+ybMoZ29JU5j5SGXFpDWoeyVhqlTJuAhv1CXieZ7Rf7ROI5XTgaTbI9GlpY9K9jpftTDvalbdKHpfvSeyF8CpRd9daoEH6/fpbuo7VnvxdA1xg+0tw++r2eZrz4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720663154; c=relaxed/simple;
-	bh=rWedrg8RFLPX73RGXYv7bt5RLDNoNl7OiqJuZN4cXRY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FxuH/wsQp/iCAidQ3XzkQ3HomTrUKLNeYylUCHDhTcJyxNene/Zy3IbJZgPmSfJ6wKYfAqawpxWWgJSifM26HQ49UGVbxbYbz6rrDFWmUNMEhyCsG+CiUIlnkomIxWeuno1PNYcgUdYcdqAEyXgqPcCy8hcRzkNmWoUiAUixMUY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com; spf=pass smtp.mailfrom=163.com; dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b=HrBVrSRz; arc=none smtp.client-ip=45.254.50.220
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=163.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=163.com
+	s=arc-20240116; t=1720682291; c=relaxed/simple;
+	bh=Kubu7iLQr57nLBjUBPT4riwgm3m1g6y0MJo1CpU5kCA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=MoqiXslUke/3UvDhEmLzTQ+tSM0kuagcpEelPQ+lUzXFomXPtxlPAgddaALH7A036nfHSNo53VpzH7r3nCb6E/S4HZhkWXgzQXpSiBqxRfZorVdNsfdDdTy0lVkInUId3alJkJup927a2vztEEsggP8RmOM/NyELJ8iq+G2NuKU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=olYkCL1o; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=163.com header.i=@163.com header.b="HrBVrSRz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-	s=s110527; h=From:Subject:Date:Message-ID:MIME-Version; bh=3QjC9
-	9BDsdH9j721fOWrsY/qGoRYqUeRxVEjLTCFcy0=; b=HrBVrSRzRNiHJjsE2Ach6
-	rOvQtA28snkuWRffFDya1KhZwamrxjVGpjj0tXeysR+r1oUPLqO2Mc2sprCUyIVS
-	+QOK9HKvL2ocqWy5KWdNsSi7ig5g6WKXo1sdRuicNYpva3Lf4j717kgvw8bRpWDU
-	xFWLPfkV+AEa7visWiUgEQ=
-Received: from chi-book.. (unknown [111.48.69.245])
-	by gzga-smtp-mta-g0-5 (Coremail) with SMTP id _____wD3369XPI9mT0CsCQ--.52550S2;
-	Thu, 11 Jul 2024 09:58:48 +0800 (CST)
-From: Chi Zhiling <chizhiling@163.com>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org,
-	Chi Zhiling <chizhiling@kylinos.cn>
-Subject: [PATCH] t_stripealign: add stripe alignment check for all extents
-Date: Thu, 11 Jul 2024 09:58:12 +0800
-Message-ID: <20240711015812.95489-1-chizhiling@163.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="olYkCL1o"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C7D01C116B1;
+	Thu, 11 Jul 2024 07:18:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1720682290;
+	bh=Kubu7iLQr57nLBjUBPT4riwgm3m1g6y0MJo1CpU5kCA=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=olYkCL1oQV4t20a45Q3N3WeWUK9SPgjLrsv/EgY4GZkW3medrNJtjI/2mza104nNj
+	 SjJeIJ30HZqdQGEIuKjSJQUBjIB8bpJWc9PmvXxGiwDD9MYjBIWQC51BS/d7iGkVpA
+	 nP9UOWyhy5Eu19AEtqJnP8DX/05NuYnH8pdnHAskRC/rTNnFaeOzGaLm3827wPR44D
+	 Wt0408QjrdBjLRmOxVc8WObeTCLLvc3D4v3oDMbHKOT1NInIkk2yh2KheWmEx2/gXx
+	 zg/FbBoH/bgC458jS+C8tWLnacapeTzM9egkEIlSJLC7iIsnDacsFbq+ZjZDL55UuY
+	 1QK8pBJCOgteA==
+Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-a77c7d3e8bcso71003066b.1;
+        Thu, 11 Jul 2024 00:18:10 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCV1gTGWxWg6cUzTGseoZPHCpv+y+/y1j8boi8U99YVjc/oElp/KiHj+guSyhBEzl3JHCLXzAzjSb/GYANIKNb1xMpgKefjDCg==
+X-Gm-Message-State: AOJu0YxRVzR4muLSeT/A7LRDepZa93osgoKZYWySZGnn2hYU/I60dqrR
+	jkDdKZxAgtDJ+xlxWxTL9Pq3H6QIr3I5SjV5MZTKssNcpg4+J/E/zQw0ECqsLMeCyGaebfLCO95
+	YcEpu6ZG9kYMlzO2HLTDM1x4X+os=
+X-Google-Smtp-Source: AGHT+IHEU6nwwQQY2cO2tFLwgipi0QR2Oy4//qYYLlw/DdKKpibSU8gHv+SGMWxZO33hWkWoAn+6uy1Igb/VbUvR1W8=
+X-Received: by 2002:a17:906:7951:b0:a77:c080:11fa with SMTP id
+ a640c23a62f3a-a780b88350emr663554166b.48.1720682289364; Thu, 11 Jul 2024
+ 00:18:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:_____wD3369XPI9mT0CsCQ--.52550S2
-X-Coremail-Antispam: 1Uf129KBjvJXoW7ArWkZF4Dtr4rXr1DAFW8JFb_yoW5JF47pr
-	4fu3Z0grs5W3yIgF1ay3s8JFnxW34kWF1UCFW7WF1jyFZaq3yfGrnFkryFgr1DGrWkXa4Y
-	vFZavFyUGasrJaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07UDDGrUUUUU=
-X-CM-SenderInfo: hfkl6xxlol0wi6rwjhhfrp/xtbBLxEZnWXAlTJ1fQACsy
+References: <6e7ee8ec1731b5d3d44f511b075fa2edb0b38661.1720654947.git.wqu@suse.com>
+In-Reply-To: <6e7ee8ec1731b5d3d44f511b075fa2edb0b38661.1720654947.git.wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Thu, 11 Jul 2024 08:17:32 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7NoUN8bPGis-A6VO7t4+YRVEykcGfBM+DoAkHU=bYPAA@mail.gmail.com>
+Message-ID: <CAL3q7H7NoUN8bPGis-A6VO7t4+YRVEykcGfBM+DoAkHU=bYPAA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs/029: add fixes for the kernel behavior change
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Chi Zhiling <chizhiling@kylinos.cn>
+On Thu, Jul 11, 2024 at 12:48=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> Since fstests commit 866948e00073 ("btrfs/029: change the cross vfsmount
+> reflink test"), the test case will fail for older kernels (e.g. 5.14
+> kernels from SLE).
+>
+> The failure is a false alert, but it would still take some time to
+> figure it out.
+> So add the fixes tag to make it more clear that it's a kernel behavior
+> change.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-When testing generic/223, if the file occupies multiple extents,
-the t_stripealign only checks the first extent. Therefore, this
-patch adds a check for all extents
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Chi Zhiling <chizhiling@kylinos.cn>
----
- src/t_stripealign.c | 28 ++++++++++++++++++++++++----
- 1 file changed, 24 insertions(+), 4 deletions(-)
+Looks good, thanks.
 
-diff --git a/src/t_stripealign.c b/src/t_stripealign.c
-index 00a5a3d1..87c2c4e8 100644
---- a/src/t_stripealign.c
-+++ b/src/t_stripealign.c
-@@ -1,7 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0+
- /*
-  * t_stripealign.c
-- * Print whether the file start block is stripe-aligned.
-+ * Print whether the file start block of all extents is stripe-aligned.
-  * Copyright (c) 2010 Eric Sandeen <sandeen@sandeen.net>
-  */
- #include <unistd.h>
-@@ -13,6 +13,7 @@
- #include <sys/ioctl.h>
- #include <linux/fiemap.h>
- #include <linux/fs.h>
-+#include <sys/stat.h>
- 
- #ifndef FIEMAP_EXTENT_SHARED
- # define FIEMAP_EXTENT_SHARED	0x00002000
-@@ -32,13 +33,16 @@
- int main(int argc, char ** argv)
- {
- 	struct statfs		sb;
-+	struct stat		st;
- 	struct fiemap		*fie;
- 	struct fiemap_extent	*fe;
- 	int			fd;
- 	int			ret;
- 	int			sunit = 0;	/* in blocks */
-+	int			fsize;
- 	char			*filename;
- 	unsigned long long	block;
-+	unsigned long long	offset = 0;
- 
-         if (argc < 3) {
-                 printf("Usage: %s <filename> <sunit in blocks>\n", argv[0]);
-@@ -61,13 +65,25 @@ int main(int argc, char ** argv)
- 		return 1;
- 	}
- 
-+	/* Read file size */
-+	ret = fstat(fd, &st);
-+	if (ret) {
-+		perror(filename);
-+		close(fd);
-+		return 1;
-+	}
-+	fsize = st.st_size;
-+
- 	fie = calloc(1, sizeof(struct fiemap) + sizeof(struct fiemap_extent));
- 	if (!fie) {
- 		close(fd);
- 		perror("malloc");
- 		return 1;
- 	}
--	fie->fm_length = 1;
-+
-+next_extent:
-+	fie->fm_start = offset;
-+	fie->fm_length = fsize - offset;
- 	fie->fm_flags = FIEMAP_FLAG_SYNC;
- 	fie->fm_extent_count = 1;
- 
-@@ -86,6 +102,7 @@ int main(int argc, char ** argv)
- 			return 1;
- 		}
- 		block = bmap;
-+		offset += fsize;
- 		goto check;
- 	}
- 
-@@ -105,11 +122,14 @@ int main(int argc, char ** argv)
- 	}
- 
- 	block = fie->fm_extents[0].fe_physical / sb.f_bsize;
-+	offset += fie->fm_extents[0].fe_length;
- check:
- 	if (block % sunit) {
--		printf("%s: Start block %llu not multiple of sunit %u\n",
--			filename, block, sunit);
-+		printf("%s: Start block %llu (offset %llu) not multiple of sunit %u\n",
-+			filename, block, offset, sunit);
- 		return 1;
-+	} else if (offset < fsize) {
-+		goto next_extent;
- 	} else
- 		printf("%s: well-aligned\n", filename);
- 	free(fie);
--- 
-2.43.0
-
+> ---
+>  tests/btrfs/029 | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/tests/btrfs/029 b/tests/btrfs/029
+> index 9b56cc73f818..16d9dc2fcc19 100755
+> --- a/tests/btrfs/029
+> +++ b/tests/btrfs/029
+> @@ -23,6 +23,11 @@ _begin_fstest auto quick clone
+>
+>  _supported_fs btrfs
+>
+> +_fixed_by_kernel_commit ae460f058e9f \
+> +       "btrfs: remove the cross file system checks from remap"
+> +_fixed_by_kernel_commit 9f5710bbfd30 \
+> +       "fs: allow cross-vfsmount reflink/dedupe"
+> +
+>  _require_test
+>  _require_scratch
+>  _require_cp_reflink
+> --
+> 2.45.2
+>
+>
