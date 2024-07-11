@@ -1,97 +1,133 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5838913A406;
-	Thu, 11 Jul 2024 07:18:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A24A11494B9;
+	Thu, 11 Jul 2024 11:41:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.187
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720682291; cv=none; b=h4WYAeI2b5TULiM6TZdhEoCbbTRrfF1f3vnkLVAYNxxlqTpk+ybMoZ29JU5j5SGXFpDWoeyVhqlTJuAhv1CXieZ7Rf7ROI5XTgaTbI9GlpY9K9jpftTDvalbdKHpfvSeyF8CpRd9daoEH6/fpbuo7VnvxdA1xg+0tw++r2eZrz4=
+	t=1720698073; cv=none; b=mXpcRW4r/+x3TSSYctwRus7ktbozeNy3KhTRlY+dL9c2k9QYbMOBfDirRe6d4rI4wCNrOZkpsiPFNVlGHJ4zxiYeVQeTA7wYp9/OlHM96Qx0x7ye8IM8MNTrd3M7NCp7EHBleleL6394mDguktJ47i8Mx7X2nBX/FzpPxaIitoQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720682291; c=relaxed/simple;
-	bh=Kubu7iLQr57nLBjUBPT4riwgm3m1g6y0MJo1CpU5kCA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MoqiXslUke/3UvDhEmLzTQ+tSM0kuagcpEelPQ+lUzXFomXPtxlPAgddaALH7A036nfHSNo53VpzH7r3nCb6E/S4HZhkWXgzQXpSiBqxRfZorVdNsfdDdTy0lVkInUId3alJkJup927a2vztEEsggP8RmOM/NyELJ8iq+G2NuKU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=olYkCL1o; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="olYkCL1o"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C7D01C116B1;
-	Thu, 11 Jul 2024 07:18:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1720682290;
-	bh=Kubu7iLQr57nLBjUBPT4riwgm3m1g6y0MJo1CpU5kCA=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=olYkCL1oQV4t20a45Q3N3WeWUK9SPgjLrsv/EgY4GZkW3medrNJtjI/2mza104nNj
-	 SjJeIJ30HZqdQGEIuKjSJQUBjIB8bpJWc9PmvXxGiwDD9MYjBIWQC51BS/d7iGkVpA
-	 nP9UOWyhy5Eu19AEtqJnP8DX/05NuYnH8pdnHAskRC/rTNnFaeOzGaLm3827wPR44D
-	 Wt0408QjrdBjLRmOxVc8WObeTCLLvc3D4v3oDMbHKOT1NInIkk2yh2KheWmEx2/gXx
-	 zg/FbBoH/bgC458jS+C8tWLnacapeTzM9egkEIlSJLC7iIsnDacsFbq+ZjZDL55UuY
-	 1QK8pBJCOgteA==
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-a77c7d3e8bcso71003066b.1;
-        Thu, 11 Jul 2024 00:18:10 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCV1gTGWxWg6cUzTGseoZPHCpv+y+/y1j8boi8U99YVjc/oElp/KiHj+guSyhBEzl3JHCLXzAzjSb/GYANIKNb1xMpgKefjDCg==
-X-Gm-Message-State: AOJu0YxRVzR4muLSeT/A7LRDepZa93osgoKZYWySZGnn2hYU/I60dqrR
-	jkDdKZxAgtDJ+xlxWxTL9Pq3H6QIr3I5SjV5MZTKssNcpg4+J/E/zQw0ECqsLMeCyGaebfLCO95
-	YcEpu6ZG9kYMlzO2HLTDM1x4X+os=
-X-Google-Smtp-Source: AGHT+IHEU6nwwQQY2cO2tFLwgipi0QR2Oy4//qYYLlw/DdKKpibSU8gHv+SGMWxZO33hWkWoAn+6uy1Igb/VbUvR1W8=
-X-Received: by 2002:a17:906:7951:b0:a77:c080:11fa with SMTP id
- a640c23a62f3a-a780b88350emr663554166b.48.1720682289364; Thu, 11 Jul 2024
- 00:18:09 -0700 (PDT)
+	s=arc-20240116; t=1720698073; c=relaxed/simple;
+	bh=Ua/nLDs+KP1dLarJx6TLx34B/y1nRj1lVYVsmctE1WM=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hqkfacLLUm33DfojF8wnPnIjlIVTZzZ1BahD6uoTrO56fTO67lWr6B5raU184lJDONaq5D2VgP4FwE3KdOrJILQNisYdWQg6poz6o1nFk+um0VGTM6tLYpyZFDgbYUk7FsbsGhg5CjZzy3cU28KJD8Bi8ymusdI/u8TSDxidJws=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.187
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
+Received: from mail.maildlp.com (unknown [172.19.88.105])
+	by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4WKXk22hMHzxVwc;
+	Thu, 11 Jul 2024 19:36:26 +0800 (CST)
+Received: from kwepemi500009.china.huawei.com (unknown [7.221.188.199])
+	by mail.maildlp.com (Postfix) with ESMTPS id AB96C140123;
+	Thu, 11 Jul 2024 19:41:02 +0800 (CST)
+Received: from localhost (10.175.127.227) by kwepemi500009.china.huawei.com
+ (7.221.188.199) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.39; Thu, 11 Jul
+ 2024 19:41:02 +0800
+Date: Thu, 11 Jul 2024 19:52:07 +0800
+From: Long Li <leo.lilong@huawei.com>
+To: Dave Chinner <david@fromorbit.com>, Luis Chamberlain <mcgrof@kernel.org>
+CC: <kdevops@lists.linux.dev>, <linux-xfs@vger.kernel.org>,
+	<fstests@vger.kernel.org>, <zlang@redhat.com>
+Subject: Re: [PATCH kdevops] xfs: add xfs/242 as failing on xfs_reflink_2k
+Message-ID: <20240711115207.GA3638@ceph-admin>
+References: <20240416235108.3391394-1-mcgrof@kernel.org>
+ <Zh9UkHEesvrpSQ7J@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <6e7ee8ec1731b5d3d44f511b075fa2edb0b38661.1720654947.git.wqu@suse.com>
-In-Reply-To: <6e7ee8ec1731b5d3d44f511b075fa2edb0b38661.1720654947.git.wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 11 Jul 2024 08:17:32 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H7NoUN8bPGis-A6VO7t4+YRVEykcGfBM+DoAkHU=bYPAA@mail.gmail.com>
-Message-ID: <CAL3q7H7NoUN8bPGis-A6VO7t4+YRVEykcGfBM+DoAkHU=bYPAA@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/029: add fixes for the kernel behavior change
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+In-Reply-To: <Zh9UkHEesvrpSQ7J@dread.disaster.area>
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ kwepemi500009.china.huawei.com (7.221.188.199)
 
-On Thu, Jul 11, 2024 at 12:48=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> Since fstests commit 866948e00073 ("btrfs/029: change the cross vfsmount
-> reflink test"), the test case will fail for older kernels (e.g. 5.14
-> kernels from SLE).
->
-> The failure is a false alert, but it would still take some time to
-> figure it out.
-> So add the fixes tag to make it more clear that it's a kernel behavior
-> change.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+On Wed, Apr 17, 2024 at 02:48:16PM +1000, Dave Chinner wrote:
+> On Tue, Apr 16, 2024 at 04:51:08PM -0700, Luis Chamberlain wrote:
+> > This test is rather simple, and somehow we managed to capture a
+> > non-crash failure. The test was added to fstests via fstests commit
+> > 0c95fadc35c8e450 ("expand 252 with more corner case tests") which
+> > essentially does this:
+> > 
+> > +       $XFS_IO_PROG $xfs_io_opt -f -c "truncate $block_size" \
+> > +               -c "pwrite 0 $block_size" $sync_cmd \
+> > +               -c "$zero_cmd 128 128" \
+> > +               -c "$map_cmd -v" $testfile | $filter_cmd
+> > 
+> > The map_cmd in this case is: 'bmap -p'. So the test does:
+> > 
+> > a) truncates data to the block size
+> > b) sync
+> > c) zero-fills the the blocksize
+> > 
+> > The xfs_io bmap displays the block mapping for the current open file.
+> > Since our failed delta is:
+> > 
+> > -0: [0..7]: data
+> > +0: [0..7]: unwritten
+> 
+> That's most likely a _filter_bmap() issue, not a kernel code bug.
+> 
+> i.e. 'bmap -vp' output looks like:
+> 
+> EXT: FILE-OFFSET      BLOCK-RANGE            AG AG-OFFSET          TOTAL FLAGS
+>    0: [0..231]:        2076367680..2076367911 18 (6251328..6251559)   232 000000
+> 
+> and _filter_bmap has two separate regex matches against different
+> fields that both trigger "unwritten" output. The first check is
+> against field 5 which is actually the AG-OFFSET in this output, not
+> field 7 which is the FLAGS field.
+> 
+> Hence if the ag offset matches '/0[01][01][01][01]/' the filter will
+> emit 'unwritten' regardless of what the flags say it actually is.
+> 
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+I got a similar failure in xfs/242 as follows. It can be easily reproduced
+when I run xfs/242 as a cyclic test. The root cause, as Dave pointed out, 
+is that _filter_bmap first matches the data in column 5, which may be 
+incorrect. On the other hand, _filter_bmap seems to be missing "next" to
+jump out when it matches "data" in the 5th column, otherwise it might
+print the result twice. The issue was introduced by commit 7d5d3f77154e
+("xfs/242: fix _filter_bmap for xfs_io bmap that does rt file properly").
+The failure disappeared when I retest xfs/242 by reverted commit 7d5d3f77154e.
 
-Looks good, thanks.
+The problem is not fixed yet. How about matching the 7th column first
+and then the 5th column in _filter_bmap? because the rtdev file only has
+5 columns in the `bmap -vp` output.
 
-> ---
->  tests/btrfs/029 | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/tests/btrfs/029 b/tests/btrfs/029
-> index 9b56cc73f818..16d9dc2fcc19 100755
-> --- a/tests/btrfs/029
-> +++ b/tests/btrfs/029
-> @@ -23,6 +23,11 @@ _begin_fstest auto quick clone
->
->  _supported_fs btrfs
->
-> +_fixed_by_kernel_commit ae460f058e9f \
-> +       "btrfs: remove the cross file system checks from remap"
-> +_fixed_by_kernel_commit 9f5710bbfd30 \
-> +       "fs: allow cross-vfsmount reflink/dedupe"
-> +
->  _require_test
->  _require_scratch
->  _require_cp_reflink
-> --
-> 2.45.2
->
->
+Best Regards,
+Long Li
+
+----------------------------------------------------------------------------
+
+FSTYP -- xfs (debug)
+PLATFORM -- Linux/aarch64 localhost 6.6.0+ #84 SMP Tue Jul 9 23:35:56 CST 2024
+VMIP -- 192.168.250.78
+MKFS_OPTIONS -- -f -m crc=1,rmapbt=0,reflink=0 /dev/sdb
+MOUNT_OPTIONS -- /dev/sdb /tmp/scratch
+
+xfs/242 1s ... - output mismatch (see /root/xfstests-dev/results//xfs/242.out.bad)
+--- tests/xfs/242.out 2024-06-06 19:08:46.677638130 +0800
++++ /root/xfstests-dev/results//xfs/242.out.bad 2024-07-11 02:24:35.337554580 +0800
+@@ -57,8 +57,7 @@
+1aca77e2188f52a62674fe8a873bdaba
+13. data -> unwritten -> data
+0: [0..127]: data
+-1: [128..511]: unwritten
+-2: [512..639]: data
++1: [128..639]: unwritten
+0bcfc7652751f8fe46381240ccadd9d7
+...
+(Run 'diff -u /root/xfstests-dev/tests/xfs/242.out /root/xfstests-dev/results//xfs/242.out.bad' to see the entire diff)
+Ran: xfs/242
+Failures: xfs/242
+Failed 1 of 1 tests
+
