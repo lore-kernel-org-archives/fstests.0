@@ -1,110 +1,82 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 122C3148300;
-	Fri, 12 Jul 2024 09:54:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EBA21DFD8;
+	Fri, 12 Jul 2024 15:38:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720778072; cv=none; b=FLB/XPboyMMM19R/MK7OOgjsnw3Dts2piEl281aV/ne9MfdDacYjOHHFh4pQcMaVbtLvsJ+2iHDEyA1bn8c8tDLbePIT1X1kd7tCMjipZE3AQDen3HYJGG6FyOK30YCrr8FvCDST4lb1iFwgqAuVEJa4IFLfJ8ylAzWl4qAFhIc=
+	t=1720798695; cv=none; b=lDPU9UJOF1nsoJXNBb24B/D7+h0gGgFPYEpRJZ4jvY9l8Bn3bWTISy965aU2sl+FN4Monb+4zdy/sPygThO/wxA0LaIJSyA56AlyXR5pvzV5DFT7BHcK2aWmslXlXiEfi4zhw/C4O9SWU14E3bzjuGfeHde2VVCJlKO4i5R/qSM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720778072; c=relaxed/simple;
-	bh=fFFj1SKT+oYaqKzsVAs56jEPlc/LDJTvDp5BA2PQrm4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=YyP4ahGXINZ938A6HKrlmpKbqSpEcmaf4Cl6NZha/nMzRPMXpqBdpennhOtOq87vn2HNFsDjr+9qB0RuppcNomok2+AfJshq2aJTcgrsBpkkEso2H3Iv96wrcWJpG44SEVauO24Ezfnwl/SiD2bOqgegdE1CDdRc/Bu3lQ/qiLw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MfG06/AW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1720798695; c=relaxed/simple;
+	bh=1KLkBrxJhU94J1oJ8QlEfQxRuaQbC0LvMrk36vYkIPE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=F0WdwgKFE+4j3HtHmKeDMtRk/oC0bzUmsKOWOPJoCbJjTdJmxTYW7GbZuNGbjWWtoPHKOiPoWJJeCcj0M/4gXUxeLDAbOqgVLUju5IvALO8vI6BKIlynZ7UQwXdnvzs840Yyx5DqcUMnJySgTTYacHWnCkWEHwY2PaE7MdLE32M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=imgo5Lps; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MfG06/AW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D061C32782;
-	Fri, 12 Jul 2024 09:54:30 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="imgo5Lps"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9B34EC32782;
+	Fri, 12 Jul 2024 15:38:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1720778071;
-	bh=fFFj1SKT+oYaqKzsVAs56jEPlc/LDJTvDp5BA2PQrm4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=MfG06/AWnGCB2H7aXrKJwF6yFSJkCTCtrf+FXPusf8ieJ/WvaB+J5cMGRLGsxrOGX
-	 K9pfMa+a2unlXPe5GmRe4s7Q/Uc9wXn4Y19fEseJjSJvQiwQ7i7a6aTJP0yfAUevW5
-	 zswSke2sNlRtYbZPv5Ch8tqptlmNPP1JUZd2KSxx3SDiaikSegPO5DMn8gxOrL0uEZ
-	 AqucLvFOxpe16OouJmffq+w3pHwZnuaZBToJPMl35rU7Zie/6gA2fTKB5v0E6Nkhvf
-	 wIHxXQA6X0ruoJps3Wn4H4Ij/QhQ66GQstYNzUur3YBrww2JS//3cbhMo3CNti2T9F
-	 85VMcTJPXQu7g==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>,
-	Qu Wenruo <wqu@suse.com>
-Subject: [PATCH v2] btrfs: fix _require_btrfs_send_version to detect btrfs-progs support
-Date: Fri, 12 Jul 2024 10:54:24 +0100
-Message-ID: <f1e109784681df64d6d9fc62aa2b1952ce0bccbe.1720777916.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <fbc8f96ec69397ce358e759b9a8df25f3e64c6ce.1720742612.git.fdmanana@suse.com>
-References: <fbc8f96ec69397ce358e759b9a8df25f3e64c6ce.1720742612.git.fdmanana@suse.com>
+	s=k20201202; t=1720798694;
+	bh=1KLkBrxJhU94J1oJ8QlEfQxRuaQbC0LvMrk36vYkIPE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=imgo5LpsjXPYkgPNt9ON6+HSH4xoNd4sMg//+aWWseds00Hjg6Hb6ZI0BJQXf9wSS
+	 kEnFuUxiFkWgDuksvLr2Cq15wwA69wHsD2vGiKSKxDICZJBsF1+a+pok9fIQ1Ps/sn
+	 ngXHXMv+De8m+Ivsuojh+1muDwnTdEw3IT66T3SuCQjdT+vUme9lPuMTLZbLsLCWnW
+	 2C5Wdd6Aj2+RB0t3vVPEEt/GeopTCyF6yRlrWlRg1BUJXtzeEhgDLdEa7ClRZRMwW7
+	 INiYGUIqcYLK8JgoQilr2KZURoEGphUSw4gtmwrU6JqtTnH3kQAc0ADXbMIe58EdCN
+	 7Qg6t38scJGUQ==
+Date: Fri, 12 Jul 2024 08:38:14 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Long Li <leo.lilong@huawei.com>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org,
+	yi.zhang@huawei.com, houtao1@huawei.com, yangerkun@huawei.com
+Subject: Re: [PATCH 1/2] xfs/016: fix test fail when head equal to
+ near_end_min
+Message-ID: <20240712153814.GT612460@frogsfrogsfrogs>
+References: <20240712064716.3385793-1-leo.lilong@huawei.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240712064716.3385793-1-leo.lilong@huawei.com>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Jul 12, 2024 at 02:47:15PM +0800, Long Li wrote:
+> xfs/016 checks for corruption in the log when it wraps. It looks for a log
+> head that is at or above the minimum log size. If the final position of
+> the log head equals near_end_min, the test will fail. Under these
+> conditions, we should let the test continue.
+> 
+> Signed-off-by: Long Li <leo.lilong@huawei.com>
+> ---
+>  tests/xfs/016 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/016 b/tests/xfs/016
+> index 6337bb1f..335a2d61 100755
+> --- a/tests/xfs/016
+> +++ b/tests/xfs/016
+> @@ -239,7 +239,7 @@ while [ $head -lt $near_end_min ]; do
+>  	head=$(_log_head)
+>  done
+>  
+> -[ $head -gt $near_end_min -a $head -lt $log_size_bb ] || \
+> +[ $head -ge $near_end_min -a $head -lt $log_size_bb ] || \
 
-Commit 199d0a992536df3702a0c4843d2a449d54f399c2 ("common/btrfs: introduce
-_require_btrfs_send_version") turned _require_btrfs_send_v2 into a generic
-helper to detect support for any send stream version, however it's only
-working for detecting kernel support, it misses detecting the support from
-btrfs-progs - it always checks only that it supports v2 (the send command
-supports the --compressed-data option).
+Heh, that's quite the coincidence!
 
-Fix that by verifying that btrfs-progs supports the requested version.
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
+--D
 
-V2: Don't use -f /dev/null in the send command, just redirect stdout and
-    stderr to /dev/null.
-    Add Qu's review tag.
-
- common/btrfs | 20 ++++++++++++++++----
- 1 file changed, 16 insertions(+), 4 deletions(-)
-
-diff --git a/common/btrfs b/common/btrfs
-index be5948db..c0be7c08 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -777,17 +777,29 @@ _require_btrfs_corrupt_block()
- _require_btrfs_send_version()
- {
- 	local version=$1
-+	local ret
- 
--	# Check first if btrfs-progs supports the v2 stream.
--	_require_btrfs_command send --compressed-data
--
--	# Now check the kernel support. If send_stream_version does not exists,
-+	# Check the kernel support. If send_stream_version does not exists,
- 	# then it's a kernel that only supports v1.
- 	[ -f /sys/fs/btrfs/features/send_stream_version ] || \
- 		_notrun "kernel does not support send stream $version"
- 
- 	[ $(cat /sys/fs/btrfs/features/send_stream_version) -ge $version ] || \
- 		_notrun "kernel does not support send stream $version"
-+
-+	# Now check that btrfs-progs supports the requested stream version.
-+	_scratch_mkfs &> /dev/null || \
-+		_fail "mkfs failed at _require_btrfs_send_version"
-+	_scratch_mount
-+	$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
-+			 $SCRATCH_MNT/snap &> /dev/null
-+	$BTRFS_UTIL_PROG send --proto $version $SCRATCH_MNT/snap &> /dev/null
-+	ret=$?
-+	_scratch_unmount
-+
-+	if [ $ret -ne 0 ]; then
-+		_notrun "btrfs-progs does not support send stream version $version"
-+	fi
- }
- 
- # Get the bytenr associated to a file extent item at a given file offset.
--- 
-2.43.0
-
+>      _fail "!!! unexpected near end log position $head"
+>  
+>  # Step 4: Try to wrap the log, checking for corruption with each advance.
+> -- 
+> 2.39.2
+> 
+> 
