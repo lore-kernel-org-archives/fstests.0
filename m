@@ -1,94 +1,110 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC4C413D622
-	for <fstests@vger.kernel.org>; Fri, 12 Jul 2024 09:49:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 122C3148300;
+	Fri, 12 Jul 2024 09:54:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720777769; cv=none; b=d6fCqZuuIGvcSFe4F9hE5xZJM+2ReKZJTChvQsrPnBl0slZC8ESfMMJu3etwUh2593tQXr1KYmthBDEhRURmKj3p6F9+Urd+f9oUI5bIUdx/Gcn/jxOEpw29HfDQSMO0RvGcZlVX+1W5y6DQ9hyLsrEg93OOMVhDlNObp99Oan4=
+	t=1720778072; cv=none; b=FLB/XPboyMMM19R/MK7OOgjsnw3Dts2piEl281aV/ne9MfdDacYjOHHFh4pQcMaVbtLvsJ+2iHDEyA1bn8c8tDLbePIT1X1kd7tCMjipZE3AQDen3HYJGG6FyOK30YCrr8FvCDST4lb1iFwgqAuVEJa4IFLfJ8ylAzWl4qAFhIc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720777769; c=relaxed/simple;
-	bh=w8Xrf/IpCVCPhAEoCqORQ5F6W3zNsd/b+U/U5CQploE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Hl3nv67pUd228IwpzH0RYtEua+No5NFMbhnsHDF+y5UGavaelTbZ6Oc3fi31x2bS8X+QAUI1p86sFuU/kX7qBjggC4GBtYITuyPz3MrTzgLWFrOYv+gJZmTj2migAjT9VNdXiuOMnui6uKalE16JzMb+iu0CP5E9hLjPAKzcRUU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=C42uG3cD; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1720778072; c=relaxed/simple;
+	bh=fFFj1SKT+oYaqKzsVAs56jEPlc/LDJTvDp5BA2PQrm4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=YyP4ahGXINZ938A6HKrlmpKbqSpEcmaf4Cl6NZha/nMzRPMXpqBdpennhOtOq87vn2HNFsDjr+9qB0RuppcNomok2+AfJshq2aJTcgrsBpkkEso2H3Iv96wrcWJpG44SEVauO24Ezfnwl/SiD2bOqgegdE1CDdRc/Bu3lQ/qiLw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MfG06/AW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="C42uG3cD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4EC1C32782;
-	Fri, 12 Jul 2024 09:49:27 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MfG06/AW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D061C32782;
+	Fri, 12 Jul 2024 09:54:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1720777769;
-	bh=w8Xrf/IpCVCPhAEoCqORQ5F6W3zNsd/b+U/U5CQploE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=C42uG3cDeZyuc6fN4ujql0tIaDpNlX3nGhTwS/isZLcmRZRhsKiJ7z3s5S5X6ek05
-	 ztJ6/1QVT2NssaPsD9vJhrpdYzWBiVLMkUzA4Bf76Byeks9pKX1qauDyNwIx6opy3z
-	 eBsqvTdDVF0KUO85cFXtSwRG8xyiHwzwt11JnF17iCE3x3zCGtEdm8UjvvcBR5/JcJ
-	 +umRqqkYhilR+ClpZOlJ+8EmNibjnf+g1CSfczcrN2Xrw3q+TbEcX1G6KiscMJiF3t
-	 nLe5rOB6cuMOSD0SS68Zx/miMmrIfBA80xMSBWGI2IKXgzhWpTmzlvBxBlyOqFzmvu
-	 hCCQYEJgauirg==
-Date: Fri, 12 Jul 2024 17:49:24 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: da.gomez@samsung.com
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
-	Zorro Lang <zlang@redhat.com>, mcgrof@kernel.org,
-	gost.dev@samsung.com
-Subject: Re: [PATCH v2 4/5] common/rc: read config section mount options for
- scratch devs
-Message-ID: <20240712093341.ftesijixy2yrjlxx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240630-common-fixes-v2-0-16d26fb1dee0@samsung.com>
- <20240630-common-fixes-v2-4-16d26fb1dee0@samsung.com>
+	s=k20201202; t=1720778071;
+	bh=fFFj1SKT+oYaqKzsVAs56jEPlc/LDJTvDp5BA2PQrm4=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=MfG06/AWnGCB2H7aXrKJwF6yFSJkCTCtrf+FXPusf8ieJ/WvaB+J5cMGRLGsxrOGX
+	 K9pfMa+a2unlXPe5GmRe4s7Q/Uc9wXn4Y19fEseJjSJvQiwQ7i7a6aTJP0yfAUevW5
+	 zswSke2sNlRtYbZPv5Ch8tqptlmNPP1JUZd2KSxx3SDiaikSegPO5DMn8gxOrL0uEZ
+	 AqucLvFOxpe16OouJmffq+w3pHwZnuaZBToJPMl35rU7Zie/6gA2fTKB5v0E6Nkhvf
+	 wIHxXQA6X0ruoJps3Wn4H4Ij/QhQ66GQstYNzUur3YBrww2JS//3cbhMo3CNti2T9F
+	 85VMcTJPXQu7g==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>,
+	Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2] btrfs: fix _require_btrfs_send_version to detect btrfs-progs support
+Date: Fri, 12 Jul 2024 10:54:24 +0100
+Message-ID: <f1e109784681df64d6d9fc62aa2b1952ce0bccbe.1720777916.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <fbc8f96ec69397ce358e759b9a8df25f3e64c6ce.1720742612.git.fdmanana@suse.com>
+References: <fbc8f96ec69397ce358e759b9a8df25f3e64c6ce.1720742612.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240630-common-fixes-v2-4-16d26fb1dee0@samsung.com>
+Content-Transfer-Encoding: 8bit
 
-On Sun, Jun 30, 2024 at 11:52:43PM +0200, Daniel Gomez via B4 Relay wrote:
-> From: Daniel Gomez <da.gomez@samsung.com>
-> 
-> MOUNT_OPTIONS for scratch devices do not have specific fs mount options
-> values (such as TMPFS_MOUNT_OPTIONS) from the config section. So, allow
-> the scratch mount options to inherit section config values by reading
-> them from _common_mount_opts().
-> 
-> Move $* to the end so scratch device can be umount/mount. Otherwise, we
-> end up with multiple mounts in the same scratch directory.
-> 
-> Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
-> ---
->  common/rc | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 51827119c..627dbaaaa 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -231,8 +231,8 @@ _scratch_mount_options()
->  {
->  	_scratch_options mount
->  
-> -	echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-> -					$SCRATCH_DEV $SCRATCH_MNT
-> +	echo `_common_mount_opts` $SCRATCH_OPTIONS \
-> +					$SCRATCH_DEV $SCRATCH_MNT $*
+From: Filipe Manana <fdmanana@suse.com>
 
-Oh, you want to get the "specific fs mount options". But sorry this
-change brings in many regression failures, e.g. generic/219, generic/691,
-generc/381, generic/382 ... fail (on ext4 and so on).
+Commit 199d0a992536df3702a0c4843d2a449d54f399c2 ("common/btrfs: introduce
+_require_btrfs_send_version") turned _require_btrfs_send_v2 into a generic
+helper to detect support for any send stream version, however it's only
+working for detecting kernel support, it misses detecting the support from
+btrfs-progs - it always checks only that it supports v2 (the send command
+supports the --compressed-data option).
 
-Thanks,
-Zorro
+Fix that by verifying that btrfs-progs supports the requested version.
 
->  }
->  
->  _supports_filetype()
-> 
-> -- 
-> 2.43.0
-> 
-> 
-> 
+Reviewed-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+
+V2: Don't use -f /dev/null in the send command, just redirect stdout and
+    stderr to /dev/null.
+    Add Qu's review tag.
+
+ common/btrfs | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/common/btrfs b/common/btrfs
+index be5948db..c0be7c08 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -777,17 +777,29 @@ _require_btrfs_corrupt_block()
+ _require_btrfs_send_version()
+ {
+ 	local version=$1
++	local ret
+ 
+-	# Check first if btrfs-progs supports the v2 stream.
+-	_require_btrfs_command send --compressed-data
+-
+-	# Now check the kernel support. If send_stream_version does not exists,
++	# Check the kernel support. If send_stream_version does not exists,
+ 	# then it's a kernel that only supports v1.
+ 	[ -f /sys/fs/btrfs/features/send_stream_version ] || \
+ 		_notrun "kernel does not support send stream $version"
+ 
+ 	[ $(cat /sys/fs/btrfs/features/send_stream_version) -ge $version ] || \
+ 		_notrun "kernel does not support send stream $version"
++
++	# Now check that btrfs-progs supports the requested stream version.
++	_scratch_mkfs &> /dev/null || \
++		_fail "mkfs failed at _require_btrfs_send_version"
++	_scratch_mount
++	$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++			 $SCRATCH_MNT/snap &> /dev/null
++	$BTRFS_UTIL_PROG send --proto $version $SCRATCH_MNT/snap &> /dev/null
++	ret=$?
++	_scratch_unmount
++
++	if [ $ret -ne 0 ]; then
++		_notrun "btrfs-progs does not support send stream version $version"
++	fi
+ }
+ 
+ # Get the bytenr associated to a file extent item at a given file offset.
+-- 
+2.43.0
+
