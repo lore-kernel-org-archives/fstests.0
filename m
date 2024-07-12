@@ -1,118 +1,126 @@
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5B5439B;
-	Fri, 12 Jul 2024 06:49:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.255
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1350616DC3B
+	for <fstests@vger.kernel.org>; Fri, 12 Jul 2024 09:26:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720766991; cv=none; b=hSyqnSWUcGu++lt5GyqgY+SvvDTwcrW4om20jBgp8kGqP28YhCPyatmnAU9suT8KYslCqEcJy49ZzKQQ2O8VLW5JKGp/hz3f5RYUeqqOEJijNwKNrbqI6EJQ17ch/zeqo2YdTUefgnmQERz0AC72iM3B+uuRgvydy5djnHIJQ6c=
+	t=1720776392; cv=none; b=WLHQ+gQAN9Uxy1U43mavr4Zjqv/Ar1qu5QGen+06wDdG10fYFxO7TjpQBteLZVBgCEI1USX//BMgD0PWwF0nbv6XrkNX9Ie7Adwk/Qhk5Rn70BYROC+rplqD+bsOT8tr2PZVaGUyhvOjMO1C0wWuV1JX1U337GZUFRpGqBJiJ54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720766991; c=relaxed/simple;
-	bh=7V0zt1PDnCfLkBjQINrJ5mzZqGDGZlY9aJuodrfp9yQ=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=B3wDO9adIrgZEIev2dHPTZJgKIn9PdeVD8yjxQZzcwpIVsQHqmwp7h2Wg19z/R5UEc7WwI/JuIl+uewNiNgAeQ3dHHMiB+CGJjtrurPFvYZgj7cIl6gMe57KwxkYRefj2biO3zZZE9mzLSees47kcaVmAjR1rS0TGn8JrvPxILo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.255
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.163.174])
-	by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4WL2CL0g4nz1T5yn;
-	Fri, 12 Jul 2024 14:45:02 +0800 (CST)
-Received: from kwepemi500009.china.huawei.com (unknown [7.221.188.199])
-	by mail.maildlp.com (Postfix) with ESMTPS id 0DE00140361;
-	Fri, 12 Jul 2024 14:49:47 +0800 (CST)
-Received: from localhost.localdomain (10.175.104.67) by
- kwepemi500009.china.huawei.com (7.221.188.199) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.39; Fri, 12 Jul 2024 14:49:46 +0800
-From: Long Li <leo.lilong@huawei.com>
-To: <zlang@redhat.com>, <djwong@kernel.org>
-CC: <linux-xfs@vger.kernel.org>, <fstests@vger.kernel.org>,
-	<yi.zhang@huawei.com>, <houtao1@huawei.com>, <leo.lilong@huawei.com>,
-	<yangerkun@huawei.com>
-Subject: [PATCH 2/2] xfs/242: fix test failure due to incorrect filtering in _filter_bmap
-Date: Fri, 12 Jul 2024 14:47:16 +0800
-Message-ID: <20240712064716.3385793-2-leo.lilong@huawei.com>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20240712064716.3385793-1-leo.lilong@huawei.com>
-References: <20240712064716.3385793-1-leo.lilong@huawei.com>
+	s=arc-20240116; t=1720776392; c=relaxed/simple;
+	bh=35WkcMjK2xOFy1uzNShcubhWcKG3F6XnMsljZYYCqig=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=dUp3gVYbH4LdzV877Lw4Xebtqh8RFoE4e995ApzJ6uM7LRfw8GnHHvHUeO48WOwENZ1mdaRjuLb4wt0no4lZIQl2XIwSy0FlVGXspHRKDfFsClMDmo1wYFpdguoYsKwHvdMDIuPNtzCM8mJffDoyd2OP6rsoGxQ6yXIvwjdoQns=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KhS3q1id; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KhS3q1id"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1720776389;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NvQCVOYv4dYVR0fdwwPxrnAbudsdeCOAappF4eD08RQ=;
+	b=KhS3q1iduQOz5fpolCGAgj1u9JENepyRExHR4YA8PtF5E3pPF5OLBt5VqAXYOeBp9aY0yy
+	PW8KQPhBEdj8QYmr0CIyhmwuIm5t/WMB/U1yY08dnY6XVDSsUYP/q+lWSMHZe25hbninAS
+	QXx+nzpkursjyrWuSY0CTHlagvtZXtU=
+Received: from mail-vk1-f198.google.com (mail-vk1-f198.google.com
+ [209.85.221.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-556-5SGE89DMNNqyYflCyDXpdw-1; Fri, 12 Jul 2024 05:26:28 -0400
+X-MC-Unique: 5SGE89DMNNqyYflCyDXpdw-1
+Received: by mail-vk1-f198.google.com with SMTP id 71dfb90a1353d-4f2faaa4dd3so621054e0c.3
+        for <fstests@vger.kernel.org>; Fri, 12 Jul 2024 02:26:28 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1720776388; x=1721381188;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=NvQCVOYv4dYVR0fdwwPxrnAbudsdeCOAappF4eD08RQ=;
+        b=bn5e/CW5Cs98lipg9XWe5IJ6kQcJmuKl421C4Zqkg4xnc5hZT09juPJBSr9C9cwQ1m
+         BdZScfXIweMBjXflpUFPFNWXCt+mHBQQKQwPH186SqnEnLkI1RkwueKdh05Xdgnrb0SD
+         8mMNTY0n2aRAdYcY4gUoX+MPmMSDVO4yw/EE6ipruKZnl/YIyIHGC4Z5ycTpzpGZLpQI
+         gkw+1e8hk+Y9AYhNfz0jJ+e/0iSVn+UstGo6GVV8cvYrntLqv6d+vD+ygLXNtgJW/EhR
+         Iwq+tJQTQ5ii9oXQl0DFDRo9ixUESjmLO9DlI7ltzZ9P1quY+dAfSlhHSxq0+CSv0iAo
+         a1Cg==
+X-Gm-Message-State: AOJu0Yw6wY9fzWlAwkr1lJoL0U8TQ+OheNFbf0FAUAYGcBDTS5suWSGF
+	FlzEXIvix2/UvN1az5Ul/1jSawJsM3W4Oe7LuvQxfArS3Ws8bcTYEjpkBE/ISfgADgxK+WYch81
+	sMU9OZqz6qCHp4ewz46iv1WAD3whjf1t4swf7RZ2EFWRrpLze2QvPLzVoLkZ6UgTogN59d54yYY
+	/Ctk1hzBVBudtHOgLzJfJCzIusab8Rng==
+X-Received: by 2002:a05:6102:94c:b0:48f:c031:3fa9 with SMTP id ada2fe7eead31-49032187c6emr12874155137.12.1720776387732;
+        Fri, 12 Jul 2024 02:26:27 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF4CmMWus0dk+UzsfljC4q/GAd8odD1dH/cD417ekW/1YTt0ws5nUKLVs63EQ9jiINUcAiLYHkAH27k7MYdsJ0=
+X-Received: by 2002:a05:6102:94c:b0:48f:c031:3fa9 with SMTP id
+ ada2fe7eead31-49032187c6emr12874144137.12.1720776387420; Fri, 12 Jul 2024
+ 02:26:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: dggems703-chm.china.huawei.com (10.3.19.180) To
- kwepemi500009.china.huawei.com (7.221.188.199)
+References: <20240630-common-fixes-v2-0-16d26fb1dee0@samsung.com> <20240630-common-fixes-v2-4-16d26fb1dee0@samsung.com>
+In-Reply-To: <20240630-common-fixes-v2-4-16d26fb1dee0@samsung.com>
+From: Zirong Lang <zlang@redhat.com>
+Date: Fri, 12 Jul 2024 17:26:16 +0800
+Message-ID: <CAN=2_HLOiaOmDud7SoFN3UtRXFvnbJVS-vaETEhKKaqF7=0xBA@mail.gmail.com>
+Subject: Re: [PATCH v2 4/5] common/rc: read config section mount options for
+ scratch devs
+To: da.gomez@samsung.com
+Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>, mcgrof@kernel.org, 
+	gost.dev@samsung.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I got a failure in xfs/242 as follows, it can be easily reproduced
-when I run xfs/242 as a cyclic test.
+On Mon, Jul 1, 2024 at 10:52=E2=80=AFPM Daniel Gomez via B4 Relay
+<devnull+da.gomez.samsung.com@kernel.org> wrote:
+>
+> From: Daniel Gomez <da.gomez@samsung.com>
+>
+> MOUNT_OPTIONS for scratch devices do not have specific fs mount options
+> values (such as TMPFS_MOUNT_OPTIONS) from the config section. So, allow
+> the scratch mount options to inherit section config values by reading
+> them from _common_mount_opts().
+>
+> Move $* to the end so scratch device can be umount/mount. Otherwise, we
+> end up with multiple mounts in the same scratch directory.
+>
+> Signed-off-by: Daniel Gomez <da.gomez@samsung.com>
+> ---
+>  common/rc | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index 51827119c..627dbaaaa 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -231,8 +231,8 @@ _scratch_mount_options()
+>  {
+>         _scratch_options mount
+>
+> -       echo `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
+> -                                       $SCRATCH_DEV $SCRATCH_MNT
+> +       echo `_common_mount_opts` $SCRATCH_OPTIONS \
+> +                                       $SCRATCH_DEV $SCRATCH_MNT $*
 
-  13. data -> unwritten -> data
-  0: [0..127]: data
-  -1: [128..511]: unwritten
-  -2: [512..639]: data
-  +1: [128..639]: unwritten
+Why change the _common_dev_mount_options to _common_mount_opts? They're tot=
+ally
+different two functions. And this change will cause many test cases fail.
 
-The root cause, as Dave pointed out in previous email [1], is that
-_filter_bmap may incorrectly match the AG-OFFSET in column 5 for datadev
-files. On the other hand, _filter_bmap missing a "next" to jump out when
-it matches "data" in the 5th column, otherwise it might print the result
-twice. The issue was introduced by commit 7d5d3f77154e ("xfs/242: fix
-_filter_bmap for xfs_io bmap that does rt file properly"). The failure
-disappeared when I retest xfs/242 by reverted commit 7d5d3f77154e.
+Thanks,
+Zorro
 
-Fix it by matching the 7th column first and then the 5th column in
-_filter_bmap, because the rtdev file only has 5 columns in the `bmap -vp`
-output.
 
-[1] https://lore.kernel.org/all/Zh9UkHEesvrpSQ7J@dread.disaster.area/
-Signed-off-by: Long Li <leo.lilong@huawei.com>
----
- common/punch | 14 +++++++++-----
- 1 file changed, 9 insertions(+), 5 deletions(-)
-
-diff --git a/common/punch b/common/punch
-index 9e730404..43ccab69 100644
---- a/common/punch
-+++ b/common/punch
-@@ -188,7 +188,10 @@ _filter_hole_fiemap()
- 	_coalesce_extents
- }
- 
--# Column 7 for datadev files and column 5 for rtdev files
-+# Column 7 for datadev files and column 5 for rtdev files, To prevent the
-+# 5th column in datadev files from being potentially matched incorrectly,
-+# we need to match Column 7 for datadev files first, because the rtdev
-+# file only has 5 columns in the `bmap -vp` output.
- #     10000 Unwritten preallocated extent
- #     01000 Doesn't begin on stripe unit
- #     00100 Doesn't end   on stripe unit
-@@ -201,18 +204,19 @@ _filter_bmap()
- 			print $1, $2, $3;
- 			next;
- 		}
--		$5 ~ /1[01][01][01][01]/ {
-+		$7 ~ /1[01][01][01][01]/ {
- 			print $1, $2, "unwritten";
- 			next;
- 		}
--		$5 ~ /0[01][01][01][01]/ {
-+		$7 ~ /0[01][01][01][01]/ {
- 			print $1, $2, "data"
-+			next;
- 		}
--		$7 ~ /1[01][01][01][01]/ {
-+		$5 ~ /1[01][01][01][01]/ {
- 			print $1, $2, "unwritten";
- 			next;
- 		}
--		$7 ~ /0[01][01][01][01]/ {
-+		$5 ~ /0[01][01][01][01]/ {
- 			print $1, $2, "data"
- 		}' |
- 	_coalesce_extents
--- 
-2.39.2
+>
+>  }
+>
+>  _supports_filetype()
+>
+> --
+> 2.43.0
+>
+>
+>
 
