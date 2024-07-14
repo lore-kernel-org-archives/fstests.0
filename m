@@ -1,367 +1,264 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89A1AD2F0
-	for <fstests@vger.kernel.org>; Sun, 14 Jul 2024 03:46:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E20F481AB
+	for <fstests@vger.kernel.org>; Sun, 14 Jul 2024 13:44:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720928796; cv=none; b=HEjCINLGb6ZHkmjxsdwY4odxaVpn7aUBjkEIFSK/kCe+kigA7PXiNJ6aue8jAvv7pe1KfZovbjflX0ABOk4yoZPtBc9EkG32A0AvP3/t46S45yoYM0vO3spYONkW0Dug8rdZOsZjWz/0AYDfVJR8tZFpYAMr7mKyFMQyxq8/fDI=
+	t=1720964642; cv=none; b=kzOqa3DHFTr/gHdeX9GOtZxftoBPROvePGg0WZzfl82MPx8yvCa9j8EXwTo/ZwR7rS+wdg9or+7LU2c+f7/oFAYqIYLAr3NjYPaBWnGn16QCs5tnV8LMa+ijfinQNFwlaaJAbzLoGJ3qTC0tQEtTXNS4n2g7eYIatKFP3aomqek=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720928796; c=relaxed/simple;
-	bh=lueZb2IvTdg5PSZ5WwBI/cCNp57TVK/ntWRBwsIbjAM=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=Y3EfGjVh6bLnCPH7WTbZ9A/9b9d/l+YbZVvzQI4i1lL9ks+P0CJGV3f1JLeaGM0TjPjwUw5uYx/+KPRAxQEtIBDlKM4Kn+hHmP+R5D9QPwSrvHJXtYS88YG81ZhC+mNxbQBdTMnDMrLZu4esWq/T2by5+BItP4LwI2cFHuyfODY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ExbuVDQ4; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1720964642; c=relaxed/simple;
+	bh=0n+rmrJc17WzVtC77NdII2po7YagtfcAG5cJjysRIqo=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=AXwW5psuR5Zo256JVfmclixcSDMPZ7QBP4anEpXTP8jNAsTMuVlSHKF4vFB5HeX+CLjqtuiIKXTlNzhNodIuzSt1lnMlCt8LHFMpNCpuzuVjulWxqQvMTq/gWa9NsXRr2Yn0QevEsCabNohaUW7GD5XEhU5sgHSO+bdCKnxwb9s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HteY13XK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ExbuVDQ4"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1720928792;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=ENlOMcFe7et1GqUYUGbLy3DOsLPScip6IITwPy45jS4=;
-	b=ExbuVDQ4ukTVNY0VgG+SxJnWfHmKa3hYuGTV5S/8VHKUzwQJtxUYBUWnx55vRfk1fRDJIF
-	G9xAJ5oyTPPFCxy06RaYse5IKc/7HXehypoX92GvuVr+2r2i2aOxOBHeNm6Vaospra2ibQ
-	9oCBPNZ5ZJobG4mLZJEK9e51+2KBFTs=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-622-wgRvCO1nPRyIFzQ1Gh7Oyw-1; Sat, 13 Jul 2024 23:46:30 -0400
-X-MC-Unique: wgRvCO1nPRyIFzQ1Gh7Oyw-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-70b45a51792so3450164b3a.2
-        for <fstests@vger.kernel.org>; Sat, 13 Jul 2024 20:46:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720928789; x=1721533589;
-        h=content-transfer-encoding:content-disposition:mime-version
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ENlOMcFe7et1GqUYUGbLy3DOsLPScip6IITwPy45jS4=;
-        b=RUsKzfJELoeJkzZY9023K5AqHfv8h/VY3SN6ww8bg7HmdUBHzN5V1xG+HsTPGDZ8IF
-         7hfFaICPQSEd/5+Eq8jiE7AFDw4btDAT8SQhkv8g7Z4GDbQgJ4OgCENnpZF+G5zOg0jG
-         6IQ1HeAaLlk6NcG/nL2p98B6ATgS8XlIVWI3rwT9fHOeWEzqGQBnX6mBuv2iDbfVLW6x
-         7IPAf7fYtIxn48tf6oZslhByrBOykWsnrIpSFdwz1pZW0i0VfvKu9U/QC3qiY32HZbrV
-         zuA0Ehe2zrReqBDfLsE9vWMi7+3a8O2pGlQwzQ3dgxmNrxKOMxznj4xr/gHNRLB2S7sC
-         QjCA==
-X-Gm-Message-State: AOJu0Yx7gXMIemDEAx+H8uKVEFXgaFy5JwiYKLflNbYd4cGfrJ1867QR
-	4fP1SaUIlR0HJe0JlI+14qdb4qdwJ8L1vTUneLr/XPuyxFNs+n9eID0vW++r1DdBkJYHoSPrrV8
-	HsGJdDSY4cCj98DrC7lefBLNJ6W8uZgHBL49ZYOrX9oYNiGBXouk7XcyZegO4rWodKw==
-X-Received: by 2002:a05:6a00:1387:b0:705:a600:31da with SMTP id d2e1a72fcca58-70b435f628bmr19321755b3a.23.1720928788925;
-        Sat, 13 Jul 2024 20:46:28 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEWrDEXvdsI3T3iaw9kdiXvGyRHmULsrS5JugN4VnEUA11Xz4dvH7l/2pvsh1weqb8mCO/GTQ==
-X-Received: by 2002:a05:6a00:1387:b0:705:a600:31da with SMTP id d2e1a72fcca58-70b435f628bmr19321740b3a.23.1720928788317;
-        Sat, 13 Jul 2024 20:46:28 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7ebb54acsm1921122b3a.45.2024.07.13.20.46.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 13 Jul 2024 20:46:27 -0700 (PDT)
-Date: Sun, 14 Jul 2024 11:46:24 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: linux-ext4@vger.kernel.org
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
-	Daniel Gomez <da.gomez@samsung.com>
-Subject: [Bug report]: fstests g/388 crash on ext4, BUG: kernel NULL pointer
- dereference, address: 0000000000000000
-Message-ID: <20240714034624.qz3l7f52pi6m27yx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HteY13XK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48812C116B1;
+	Sun, 14 Jul 2024 13:44:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1720964641;
+	bh=0n+rmrJc17WzVtC77NdII2po7YagtfcAG5cJjysRIqo=;
+	h=Date:From:To:Subject:From;
+	b=HteY13XKyMCd1OH70khmY3JMq1KX4WtkVB1L62iVbfjpC70HfNM/wPEDX5k18wy6m
+	 ft1QmFcnUBX04RwHJXmy/TeoV9XteaIYB1a+YvXqkmEe5hVTWDz0z18wEEU2vc7mWV
+	 Qah6X83gfuRC4xgkd7zac3xiYGzgM64lGNjRUtcGW/3B3Ect9mkxpR6IR2Pt/u+7ia
+	 NmrGpMOguw9ygz9pcjIB6GJBZXjUdSX4nDtJ/VzTQHD4dFYpAOLqLIenI8Gx+CGHvb
+	 JbmqWKFksGZ+k+xX2VGfmgNzeA5SBvkQf55IFlnkaoDpcay6qB8ZjVsJtG4Yx7HYM0
+	 m+erxqZMVtHqg==
+Date: Sun, 14 Jul 2024 21:43:58 +0800
+Message-ID: <e46082b73512ef6fd3fd4c5dbfd9a33a@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.06.27 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Q3LbyD7VJCmJ"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
 
-Hi,
 
-A weird kernel panic on ext4 happened when I tried to test a
-fstests patchset:
-https://lore.kernel.org/fstests/20240712093341.ftesijixy2yrjlxx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#med4b8d2fe14ef627519d84474b4cd1a25d386f75
+--Q3LbyD7VJCmJ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-its 4nd one:
-https://lore.kernel.org/fstests/20240712093341.ftesijixy2yrjlxx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#m5627037d617e9bc41b12bb7cc3f54fe4fb238dc6
-brings in lots of test failures, that might be a test bug.
+Hi all,
 
-But besides that, an ext4 kernel panic was triggered with this
-patchset (I can't reproduce it without this patchset). Looks like
-an error was triggered by another error, so I decided to report out.
+The master branch of the xfstests repository at:
 
-With this patchset, the generic/388 rarely(~1%) hit below panic[1], the
-.full output as [0]. I'm not sure if it's a hidden ext4 bug, so send
-to ext4 list to get a review.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2024.06.27 version.
 
 Thanks,
 Zorro
 
+The new head of the master branch is commit:
 
-[0]
-Creating filesystem with 3932160 4k blocks and 983040 inodes
-Filesystem UUID: b9690547-c193-4a82-b0df-4682bd621d3f
-Superblock backups stored on blocks: 
-	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+98611b1acce4 generic: test creating and removing symlink xattrs
 
-Allocating group tables:   0/120␈␈␈␈␈␈␈       ␈␈␈␈␈␈␈done                            
-Writing inode tables:   0/120␈␈␈␈␈␈␈       ␈␈␈␈␈␈␈done                            
-Creating journal (16384 blocks): done
-Writing superblocks and filesystem accounting information:   0/120␈␈␈␈␈␈␈       ␈␈␈␈␈␈␈done
+New commits:
 
-seed = 1721442161
-seed = 1721536124
-seed = 1721158986
-seed = 1720946557
-seed = 1721227174
-seed = 1721752477
-seed = 1721267087
-seed = 1721329675
-seed = 1721263635
-seed = 1721309164
-seed = 1721144436
-seed = 1721492144
-seed = 1721512519
-seed = 1720725632
-cycle mount failed
+Allison Henderson (4):
+      [74a53fa09d08] common: add helpers for parent pointer tests
+      [dd4f7838ed6e] xfs: add parent pointer test
+      [fc10d1eff51f] xfs: add multi link parent pointer test
+      [5ef34fa33bbd] xfs: add parent pointer inject test
 
-[1]
-[35310.777927] run fstests generic/388 at 2024-07-13 21:12:06
-[35312.098738] EXT4-fs (sda2): mounted filesystem 6fedaf97-5fe1-4d3d-868d-5ad4900db404 r/w with ordered data mode. Quota mode: none.
-[35312.124292] EXT4-fs (sda2): shut down requested (1)
-[35312.129211] Aborting journal on device sda2-8.
-[35312.147925] EXT4-fs (sda2): unmounting filesystem 6fedaf97-5fe1-4d3d-868d-5ad4900db404.
-[35312.486599] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35312.524885] EXT4-fs (sda2): shut down requested (2)
-[35312.529803] Aborting journal on device sda2-8.
-[35313.280289] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35313.353971] EXT4-fs (sda2): recovery complete
-[35313.359705] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35315.399337] EXT4-fs (sda2): shut down requested (2)
-[35315.404250] Aborting journal on device sda2-8.
-[35316.683330] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35316.764573] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35316.771480] EXT4-fs (sda2): write access will be enabled during recovery
-[35317.049655] EXT4-fs (sda2): recovery complete
-[35317.055129] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35317.080533] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35317.165130] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35319.203680] EXT4-fs (sda2): shut down requested (2)
-[35319.208606] Aborting journal on device sda2-8.
-[35320.521093] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35320.603849] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35320.611211] EXT4-fs (sda2): write access will be enabled during recovery
-[35320.993602] EXT4-fs (sda2): recovery complete
-[35320.999013] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35321.025053] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35321.119319] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35323.157897] EXT4-fs (sda2): shut down requested (2)
-[35323.162810] Aborting journal on device sda2-8.
-[35324.496257] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35324.575773] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35324.582695] EXT4-fs (sda2): write access will be enabled during recovery
-[35324.717245] EXT4-fs (sda2): recovery complete
-[35324.723102] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35324.748295] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35324.817159] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35324.855518] EXT4-fs (sda2): shut down requested (2)
-[35324.860423] Aborting journal on device sda2-8.
-[35324.867025] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=393645
-[35324.867280] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=786642
-[35324.868330] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=131526
-[35324.868593] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=131938
-[35324.878133] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=394150
-[35324.883455] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=786642
-[35324.916255] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=786642
-[35325.610405] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35325.662638] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35325.669550] EXT4-fs (sda2): write access will be enabled during recovery
-[35325.687756] EXT4-fs (sda2): recovery complete
-[35325.694064] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35325.719752] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35325.770603] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35326.809758] EXT4-fs (sda2): shut down requested (2)
-[35326.814670] Aborting journal on device sda2-8.
-[35327.823794] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35328.283170] EXT4-fs (sda2): 1 orphan inode deleted
-[35328.288002] EXT4-fs (sda2): recovery complete
-[35328.294197] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35329.333283] EXT4-fs (sda2): shut down requested (2)
-[35329.338200] Aborting journal on device sda2-8.
-[35330.341614] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35330.912577] EXT4-fs (sda2): 1 truncate cleaned up
-[35330.917347] EXT4-fs (sda2): recovery complete
-[35330.923052] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35331.962748] EXT4-fs (sda2): shut down requested (2)
-[35331.967667] Aborting journal on device sda2-8.
-[35333.031590] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35333.147943] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35333.154863] EXT4-fs (sda2): write access will be enabled during recovery
-[35333.577648] EXT4-fs (sda2): recovery complete
-[35333.583083] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35333.611173] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35333.706016] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35333.803908] EXT4-fs warning (device sda2): ext4_convert_unwritten_extents_endio:3720: Inode (132935) finished: extent logical block 733, len 66; IO logical block 758, len 26
-[35335.746179] EXT4-fs (sda2): shut down requested (2)
-[35335.751095] Aborting journal on device sda2-8.
-[35337.014618] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35337.098961] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35337.106293] EXT4-fs (sda2): write access will be enabled during recovery
-[35337.361488] EXT4-fs (sda2): recovery complete
-[35337.366906] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35337.392378] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35337.472254] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35338.512258] EXT4-fs (sda2): shut down requested (2)
-[35338.517251] Aborting journal on device sda2-8.
-[35339.596659] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35339.660376] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35339.667282] EXT4-fs (sda2): write access will be enabled during recovery
-[35340.055893] EXT4-fs (sda2): recovery complete
-[35340.061309] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35340.086643] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35340.180932] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35341.220716] EXT4-fs (sda2): shut down requested (2)
-[35341.225633] Aborting journal on device sda2-8.
-[35342.243570] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35342.672960] EXT4-fs (sda2): recovery complete
-[35342.678447] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35343.300000] EXT4-fs warning (device sda2): ext4_convert_unwritten_extents_endio:3720: Inode (133749) finished: extent logical block 144, len 101; IO logical block 175, len 31
-[35343.717912] EXT4-fs (sda2): shut down requested (2)
-[35343.722824] Aborting journal on device sda2-8.
-[35344.767987] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35344.876771] EXT4-fs (sda2): INFO: recovery required on readonly filesystem
-[35344.883673] EXT4-fs (sda2): write access will be enabled during recovery
-[35345.260916] EXT4-fs (sda2): recovery complete
-[35345.266320] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 ro with ordered data mode. Quota mode: none.
-[35345.291510] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35345.383234] EXT4-fs (sda2): mounted filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2 r/w with ordered data mode. Quota mode: none.
-[35345.422241] EXT4-fs (sda2): shut down requested (2)
-[35345.427163] Aborting journal on device sda2-8.
-[35345.431675] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=394420
-[35345.431678] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=264308
-[35345.433372] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=789092
-[35345.434998] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=263942
-[35345.435030] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=263942
-[35345.435048] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=263942
-[35345.436064] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=133331
-[35345.436251] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=264675
-[35345.437159] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=264710
-[35345.437251] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=133579
-[35345.437281] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=133579
-[35345.437301] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=133579
-[35345.438368] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=263983
-[35345.439129] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=263949
-[35345.439894] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=131950
-[35345.441211] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=264682
-[35345.442818] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=132288
-[35345.443412] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=132494
-[35345.443556] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=132490
-[35345.444855] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=395376
-[35345.446132] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=132705
-[35345.446580] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=395370
-[35345.449679] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=394044
-[35345.450739] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=788856
-[35345.450766] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=788856
-[35345.452532] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=786827
-[35345.454651] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=788873
-[35345.655294] SELinux: inode_doinit_use_xattr:  getxattr returned 5 for dev=sda2 ino=395839
-[35346.176336] EXT4-fs (sda2): unmounting filesystem 23005ea9-4b8d-4f4d-a3d8-9eb88399cde2.
-[35346.243173] BUG: kernel NULL pointer dereference, address: 0000000000000000
-[35346.250140] #PF: supervisor instruction fetch in kernel mode
-[35346.255799] #PF: error_code(0x0010) - not-present page
-[35346.260938] PGD 1140f35067 P4D 0 
-[35346.264267] Oops: Oops: 0010 [#1] PREEMPT SMP KASAN NOPTI
-[35346.269665] CPU: 11 PID: 379238 Comm: mount Kdump: loaded Not tainted 6.10.0-rc7+ #1
-[35346.277405] Hardware name: Dell Inc. PowerEdge R750/0PJ80M, BIOS 1.5.4 12/17/2021
-[35346.284883] RIP: 0010:0x0
-[35346.287512] Code: Unable to access opcode bytes at 0xffffffffffffffd6.
-[35346.294035] RSP: 0018:ffa000002e0ef6c8 EFLAGS: 00010246
-[35346.299260] RAX: 0000000000000000 RBX: ff110015601db830 RCX: ffffffff81fa6fea
-[35346.306393] RDX: 1ffffffff0888c6f RSI: ffd400004f2556c0 RDI: ff110015601dba70
-[35346.313527] RBP: ffd400004f2556c0 R08: 0000000000000000 R09: fffa7c0009e4aad8
-[35346.320661] R10: ffd400004f2556c7 R11: 0000000000000000 R12: 0000000000000060
-[35346.327792] R13: ff11001323c64a50 R14: 0000000000000000 R15: 0000000000000000
-[35346.334925] FS:  00007fd5de6e6800(0000) GS:ff11002032400000(0000) knlGS:0000000000000000
-[35346.343011] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[35346.348758] CR2: ffffffffffffffd6 CR3: 0000001320da6001 CR4: 0000000000771ef0
-[35346.355890] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[35346.363023] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-[35346.370156] PKRU: 55555554
-[35346.372867] Call Trace:
-[35346.375319]  <TASK>
-[35346.377426]  ? __die+0x20/0x70
-[35346.380493]  ? page_fault_oops+0x116/0x230
-[35346.384602]  ? __pfx_page_fault_oops+0x10/0x10
-[35346.389048]  ? _raw_spin_unlock+0x29/0x50
-[35346.393072]  ? rcu_is_watching+0x11/0xb0
-[35346.397006]  ? exc_page_fault+0x59/0xe0
-[35346.400854]  ? asm_exc_page_fault+0x22/0x30
-[35346.405049]  ? folio_mark_dirty+0x2a/0xf0
-[35346.409072]  __ext4_block_zero_page_range+0x50c/0x7b0 [ext4]
-[35346.414809]  ext4_truncate+0xcd3/0x1210 [ext4]
-[35346.419312]  ? ext4_process_orphan+0xe3/0x3a0 [ext4]
-[35346.424349]  ? __pfx_ext4_truncate+0x10/0x10 [ext4]
-[35346.429288]  ? __pfx_down_write+0x10/0x10
-[35346.433301]  ? ext4_inode_is_fast_symlink+0x125/0x2f0 [ext4]
-[35346.439021]  ext4_process_orphan+0x132/0x3a0 [ext4]
-[35346.443961]  ext4_orphan_cleanup+0x611/0xeb0 [ext4]
-[35346.448904]  ? __pfx_ext4_orphan_cleanup+0x10/0x10 [ext4]
-[35346.454359]  ? is_module_address+0x34/0x70
-[35346.458464]  __ext4_fill_super+0x2824/0x46e0 [ext4]
-[35346.463412]  ? __pfx___ext4_fill_super+0x10/0x10 [ext4]
-[35346.468695]  ? __kmalloc_large_node+0x10c/0x1c0
-[35346.473237]  ? rcu_is_watching+0x11/0xb0
-[35346.477165]  ext4_fill_super+0x22a/0x7c0 [ext4]
-[35346.481758]  get_tree_bdev+0x304/0x560
-[35346.485515]  ? __pfx_ext4_fill_super+0x10/0x10 [ext4]
-[35346.490622]  ? __pfx_get_tree_bdev+0x10/0x10
-[35346.494895]  ? security_sb_eat_lsm_opts+0x44/0x80
-[35346.499611]  vfs_get_tree+0x87/0x350
-[35346.503198]  do_new_mount+0x2a0/0x5f0
-[35346.506863]  ? __pfx_do_new_mount+0x10/0x10
-[35346.511049]  ? security_capable+0x53/0xa0
-[35346.515064]  path_mount+0x2d5/0x1520
-[35346.518644]  ? __pfx_path_mount+0x10/0x10
-[35346.522653]  ? user_path_at_empty+0x45/0x60
-[35346.526843]  __x64_sys_mount+0x1fe/0x270
-[35346.530775]  ? __pfx___x64_sys_mount+0x10/0x10
-[35346.535222]  do_syscall_64+0x8c/0x180
-[35346.538894]  ? __pfx_map_id_up+0x10/0x10
-[35346.542821]  ? __pfx_do_mkdirat+0x10/0x10
-[35346.546834]  ? ktime_get_coarse_real_ts64+0x130/0x170
-[35346.551890]  ? from_kgid_munged+0x84/0x110
-[35346.555996]  ? rcu_is_watching+0x11/0xb0
-[35346.559920]  ? lockdep_hardirqs_on_prepare+0x179/0x400
-[35346.565061]  ? do_syscall_64+0x98/0x180
-[35346.568899]  ? lockdep_hardirqs_on+0x78/0x100
-[35346.573259]  ? do_syscall_64+0x98/0x180
-[35346.577099]  ? clear_bhb_loop+0x45/0xa0
-[35346.580938]  ? clear_bhb_loop+0x45/0xa0
-[35346.584776]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[35346.589829] RIP: 0033:0x7fd5de50f03e
-[35346.593407] Code: 48 8b 0d e5 ad 0e 00 f7 d8 64 89 01 48 83 c8 ff c3 66 2e 0f 1f 84 00 00 00 00 00 90 f3 0f 1e fa 49 89 ca b8 a5 00 00 00 0f 05 <48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d b2 ad 0e 00 f7 d8 64 89 01 48
-[35346.612155] RSP: 002b:00007ffc6fe2ccc8 EFLAGS: 00000246 ORIG_RAX: 00000000000000a5
-[35346.619720] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007fd5de50f03e
-[35346.626853] RDX: 000055e41568f630 RSI: 000055e41568f6b0 RDI: 000055e41568f690
-[35346.633984] RBP: 000055e41568f400 R08: 000055e41568f650 R09: 00007ffc6fe2b9f0
-[35346.641118] R10: 0000000000000000 R11: 0000000000000246 R12: 0000000000000000
-[35346.648251] R13: 000055e41568f630 R14: 000055e41568f690 R15: 000055e41568f400
-[35346.655388]  </TASK>
-[35346.657583] Modules linked in: ext4 mbcache jbd2 intel_rapl_msr intel_rapl_common intel_uncore_frequency intel_uncore_frequency_common i10nm_edac nfit x86_pkg_temp_thermal intel_powerclamp rfkill mlx5_ib coretemp dax_hmem cxl_acpi kvm_intel ib_uverbs mgag200 acpi_power_meter cxl_core iTCO_wdt i2c_algo_bit macsec mei_me dell_smbios iTCO_vendor_support drm_shmem_helper ipmi_ssif sunrpc dcdbas kvm rapl intel_cstate intel_uncore intel_th_gth wmi_bmof dell_wmi_descriptor einj pcspkr ib_core isst_if_mbox_pci drm_kms_helper isst_if_mmio mei intel_th_pci i2c_i801 isst_if_common ipmi_si i2c_smbus intel_vsec intel_pch_thermal acpi_ipmi intel_th ipmi_devintf ipmi_msghandler drm fuse xfs libcrc32c sd_mod t10_pi sg mlx5_core mlxfw crct10dif_pclmul crc32_pclmul crc32c_intel ahci tls libahci ghash_clmulni_intel psample dimlib megaraid_sas tg3 libata pci_hyperv_intf wmi
-[35346.733230] CR2: 0000000000000000
-[35346.736548] ---[ end trace 0000000000000000 ]---
-[35346.807404] RIP: 0010:0x0
-[35346.810031] Code: Unable to access opcode bytes at 0xffffffffffffffd6.
-[35346.816557] RSP: 0018:ffa000002e0ef6c8 EFLAGS: 00010246
-[35346.821784] RAX: 0000000000000000 RBX: ff110015601db830 RCX: ffffffff81fa6fea
-[35346.828915] RDX: 1ffffffff0888c6f RSI: ffd400004f2556c0 RDI: ff110015601dba70
-[35346.836049] RBP: ffd400004f2556c0 R08: 0000000000000000 R09: fffa7c0009e4aad8
-[35346.843182] R10: ffd400004f2556c7 R11: 0000000000000000 R12: 0000000000000060
-[35346.850314] R13: ff11001323c64a50 R14: 0000000000000000 R15: 0000000000000000
-[35346.857447] FS:  00007fd5de6e6800(0000) GS:ff11002032400000(0000) knlGS:0000000000000000
-[35346.865532] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[35346.871277] CR2: ffffffffffffffd6 CR3: 0000001320da6001 CR4: 0000000000771ef0
-[35346.878410] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[35346.885543] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-[35346.892675] PKRU: 55555554
-[35346.895390] note: mount[379238] exited with irqs disabled
-[35347.014675] EXT4-fs (sda3): unmounting filesystem bfceea3a-021b-46b0-944b-87e2d6693f83.
+Christoph Hellwig (1):
+      [9cca19c674a9] xfs/073: avoid large recursive diff
 
+Darrick J. Wong (23):
+      [d4e72b9e6e26] xfs: test scaling of the mkfs concurrency options
+      [eb5cfb9bf04b] misc: split swapext and exchangerange
+      [5cb01028c5d1] misc: change xfs_io -c swapext to exchangerange
+      [2a539c72f7be] generic/709,710: rework these for exchangerange vs. quota testing
+      [6776f47285b6] generic/711,xfs/537: actually fork these tests for exchange-range
+      [fd6fb29d5728] generic/717: remove obsolete check
+      [7d8534eb0437] ltp/{fsstress,fsx}: make the exchangerange naming consistent
+      [0cfc17fe8d93] misc: flip HAVE_XFS_IOC_EXCHANGE_RANGE logic
+      [b7c517b40aca] src/fiexchange.h: update XFS_IOC_EXCHANGE_RANGE definitions
+      [e64ad1abb65e] xfs/122: fix for exchrange conversion
+      [b94a18010007] xfs/206: screen out exchange-range from golden output
+      [dd994f4c4827] exchangerange: make sure that we don't swap unwritten extents unless they're part of a rt extent
+      [037594c3d866] generic: test recovery of extended attribute updates
+      [84a7286768a3] xfs/206: filter out the parent= status from mkfs
+      [2c3a1636ddf3] xfs/122: update for parent pointers
+      [0c02207d61af] populate: create hardlinks for parent pointers
+      [92a3b5ebc812] xfs/021: adapt golden output files for parent pointers
+      [d9facbf8267b] xfs/{018,191,288}: disable parent pointers for these tests
+      [82b5fc7c780b] xfs/306: fix formatting failures with parent pointers
+      [60d7c25ed522] common/fuzzy: stress directory tree modifications with the dirtree tester
+      [4de8fd7860a2] scrub: test correction of directory tree corruptions
+      [bb8ff3588cd3] xfs/122: update for vectored scrub
+      [98611b1acce4] generic: test creating and removing symlink xattrs
+
+Dave Chinner (1):
+      [3bf963a6c609] xfs/348: partially revert dbcc549317 ("xfs/348: golden output is not correct")
+
+Eric Biggers (1):
+      [8f5ce6b34fc6] generic/574: test corruption at more offsets
+
+Filipe Manana (1):
+      [c378a48b6bc4] generic/74[3,8]: add git commit ID for the fixes
+
+Luis Chamberlain (5):
+      [f32d4090203c] common: move mread() to generic helper _mread()
+      [e4a6b119e522] fstests: add mmap page boundary tests
+      [de4ae1ab2e94] fstests: add fsstress + compaction test
+      [bc7387246018] _require_debugfs(): simplify and fix for debian
+      [872977cfdeb4] fstests: add stress truncation + writeback test
+
+Theodore Ts'o (3):
+      [0d4d97d9dca2] ext4/059: disable block_validity checks when mounting a corrupted file system
+      [0ae5d5d77ab1] ext4/045: use the large_dir feature to fix test failures with a 1k block size
+      [3a789af2b1e8] generic/455: skip the test if the file system doesn't support journaling
+
+
+Code Diffstat:
+
+ common/parent                          |  209 +++++++
+ common/populate                        |   42 ++
+ common/rc                              |   65 ++-
+ common/xfs                             |   30 +-
+ configure.ac                           |    2 +-
+ doc/group-names.txt                    |    1 +
+ include/builddefs.in                   |    2 +-
+ ltp/Makefile                           |    4 +-
+ ltp/fsstress.c                         |   34 +-
+ ltp/fsx.c                              |   43 +-
+ m4/package_xfslibs.m4                  |   15 +-
+ src/Makefile                           |    4 +-
+ src/fiexchange.h                       |   86 +--
+ src/global.h                           |   12 +-
+ src/popdir.pl                          |   11 +
+ src/vfs/Makefile                       |    4 +-
+ src/xfsfind.c                          |    1 -
+ tests/ext4/045                         |    3 +-
+ tests/ext4/059                         |    5 +
+ tests/generic/455                      |    3 +
+ tests/generic/574                      |   51 +-
+ tests/generic/709                      |   12 +-
+ tests/generic/710                      |   14 +-
+ tests/generic/710.out                  |    2 +-
+ tests/generic/711                      |    4 +-
+ tests/generic/712                      |   10 +-
+ tests/generic/713                      |   42 +-
+ tests/generic/713.out                  |   38 +-
+ tests/generic/714                      |   40 +-
+ tests/generic/714.out                  |   34 +-
+ tests/generic/715                      |   26 +-
+ tests/generic/715.out                  |   14 +-
+ tests/generic/716                      |    4 +-
+ tests/generic/717                      |   39 +-
+ tests/generic/717.out                  |   32 +-
+ tests/generic/718                      |   12 +-
+ tests/generic/718.out                  |    2 +-
+ tests/generic/719                      |    4 +-
+ tests/generic/720                      |   10 +-
+ tests/generic/721                      |    2 +-
+ tests/generic/722                      |    8 +-
+ tests/generic/723                      |   12 +-
+ tests/generic/724                      |   10 +-
+ tests/generic/725                      |    4 +-
+ tests/generic/726                      |    4 +-
+ tests/generic/727                      |    4 +-
+ tests/generic/743                      |    2 +-
+ tests/generic/748                      |    2 +-
+ tests/generic/749                      |  256 ++++++++
+ tests/generic/749.out                  |    2 +
+ tests/generic/750                      |   63 ++
+ tests/generic/750.out                  |    2 +
+ tests/generic/751                      |  170 ++++++
+ tests/generic/751.out                  |    2 +
+ tests/generic/752                      |   45 ++
+ tests/generic/752.out                  |    2 +
+ tests/generic/753                      |   93 +++
+ tests/generic/753.out                  |    2 +
+ tests/generic/754                      |   58 ++
+ tests/generic/754.out                  |    2 +
+ tests/xfs/018                          |    4 +
+ tests/xfs/021                          |   15 +-
+ tests/xfs/021.cfg                      |    1 +
+ tests/xfs/{021.out => 021.out.default} |    0
+ tests/xfs/021.out.parent               |   64 ++
+ tests/xfs/073                          |    3 +-
+ tests/xfs/122.out                      |   12 +-
+ tests/xfs/191                          |    3 +
+ tests/xfs/206                          |    2 +
+ tests/xfs/288                          |    4 +
+ tests/xfs/300                          |    2 +-
+ tests/xfs/306                          |    9 +-
+ tests/xfs/348.out                      |    2 +-
+ tests/xfs/443                          |    4 +-
+ tests/xfs/614                          |   55 ++
+ tests/xfs/614.cfg                      |    4 +
+ tests/xfs/614.out.lba1024              |  177 ++++++
+ tests/xfs/614.out.lba2048              |  177 ++++++
+ tests/xfs/614.out.lba4096              |  177 ++++++
+ tests/xfs/614.out.lba512               |  177 ++++++
+ tests/xfs/615                          |   89 +++
+ tests/xfs/615.out                      |   13 +
+ tests/xfs/616                          |   73 +++
+ tests/xfs/616.out                      |    2 +
+ tests/xfs/617                          |  232 ++++++++
+ tests/xfs/617.out                      |    2 +
+ tests/xfs/618                          |  116 ++++
+ tests/xfs/618.out                      |   69 +++
+ tests/xfs/619                          |   69 +++
+ tests/xfs/619.out                      | 1002 ++++++++++++++++++++++++++++++++
+ tests/xfs/620                          |   85 +++
+ tests/xfs/620.out                      |   14 +
+ tests/xfs/621                          |   38 ++
+ tests/xfs/621.out                      |    2 +
+ tests/xfs/622                          |   38 ++
+ tests/xfs/622.out                      |    2 +
+ tests/xfs/623                          |  122 ++++
+ tests/xfs/623.out                      |   19 +
+ tests/xfs/624                          |  133 +++++
+ tests/xfs/624.out                      |   25 +
+ tests/xfs/625                          |  121 ++++
+ tests/xfs/625.out                      |   21 +
+ tests/xfs/626                          |  157 +++++
+ tests/xfs/626.out                      |   32 +
+ tests/xfs/627                          |  146 +++++
+ tests/xfs/627.out                      |   30 +
+ tests/xfs/628                          |   78 +++
+ tests/xfs/628.out                      |    2 +
+ tests/xfs/789                          |    4 +-
+ tests/xfs/790                          |   10 +-
+ tests/xfs/790.out                      |    2 +-
+ tests/xfs/791                          |   10 +-
+ tests/xfs/791.out                      |    2 +-
+ tests/xfs/792                          |    4 +-
+ tests/xfs/795                          |    2 +-
+ 115 files changed, 4974 insertions(+), 395 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--Q3LbyD7VJCmJ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmaT1aIACgkQlNbPkfr2
+tMw9xRAAtq9CLG9Y765OAcqUUYHwB9ddw5PNIUpIKq36bX+b/b03YvNL/+xZFpT8
+27y32y8FUuCuwgelV6NWlI/O0WjEuag1GSWyV1OFHRXfaVLadJ68HXzMR0OXL52R
+A2JGtUHDF0j0LBe2p1Kf/BuZoJpo1VQXqrRPXvigbGUk6P6o4PwiS4Zkt+LC47Fy
+jU44UoX2FtC03uoFTtY0Ah5tKZbbtAIB3/+akRAmD6wVxzU+lvPfPGeUNjsGAlJz
+x8tWJzfOeJcnNKFjcmW2hW7+nCXj0jOToYDhL5jRP+q7EtjyZpQ34UKkcwtysO0I
+68x8i5ZZiIiS6GnYQ2MH3GQpkvaLEbYzMSHW/+K+qEMMnIRDyFfcVAvikuyFprfi
+g6SbpMtdeNfOuBgY/Gw9DnNktElXSv/rndK7il9SvOjCUckaiBLhp7l/BobuSwZZ
+HjxWYmCSYCh/f4P57rckQIgrcXWlQyGURMWd4ip7EWy5iJRLZaDTb37oli+C1Tt/
+q8ATp5AZmOTjn9gd4kuxBdlgJK/CEKe0qQHU+UFbnO2wcazfg0Ntu+MJN2SLHSsX
+4roKoopH08VcTU3OlfkggA1+1iwp3+PV0OLhpSahYUkiqJEhkIECyfmCqNX5afoq
+O0fO+2CBJ3+jySuiUvDe8+EmK0rbHz2VdgF7nYhD4S2vYxLpRgo=
+=uAmj
+-----END PGP SIGNATURE-----
+
+--Q3LbyD7VJCmJ--
