@@ -1,52 +1,45 @@
 Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8E4A18C335
-	for <fstests@vger.kernel.org>; Mon, 15 Jul 2024 14:24:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB5123AC0D
+	for <fstests@vger.kernel.org>; Mon, 15 Jul 2024 15:45:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721053460; cv=none; b=pH2aCKnDVrP+3VMMqpJNl5n4fag3FRw19nPbNK2Zgtp1GQUHxPRhZG+159DpfJOphWGqw0C7I5cbfqDSF/sux3jq/26qTyMG93I71iWAjcTIDoF6+G1BloY9aUT0J7bKbC5zev0S57A7LlaqE9iUdJ5rKIi/13tSYVFdsW1OGzI=
+	t=1721058304; cv=none; b=mVnMmyog5Ku2ftHAOt3Ga2A1l1GhWlgopRReTD0tcdhQzE3satB/RtikifxwkBUc3OusDI57MdbR03YYyS5RKuRZs5F7YnuMFuNh/Cw+Y2S5YiQ6uun746UbmU9769ZSKHcY8B5hdYJTZd5sj8+9FhyNyXEel1a6cR0OAX9oBTk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721053460; c=relaxed/simple;
-	bh=jadYoQb1W14XSd8A0IG5OahW5gEfDZGyZgN5UaQB+nI=;
+	s=arc-20240116; t=1721058304; c=relaxed/simple;
+	bh=uVVg83koxuTxHlI3Gdhe1hiSmyIb0BA6rMMNz58SzUg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=o2O4e1f3+TShctrc38L5a9xyQhIc7WuJHsGO3AVNW9AUA19BsP+78/GYFvXZzsb5oTGRXMpNrFY1TtRdDR9vvv0N9nGNL+OvT1JJMmNV/6pNodw9eOyOWsaC9MUzaZmHCqZ82q+eySxgNaiw1Qiy4rBvqnTHsOvA4w0oWrGonJM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=RFl2Es5K; arc=none smtp.client-ip=18.9.28.11
+	 Content-Type:Content-Disposition:In-Reply-To; b=mzDHfT5aWEh61MGu8GWq28DzZeusjIlITXXK4DhJkvvGnM7rQ7bdTdEKBMcFagFj6hOvOWXrzSqDzJbMs5ioZdavMLB0wbBysOGx/pg82qyWBoCm+0o9MhxP9BGqPVeyBlWBs6CwjVOIn0/apv/P5f6Y3mX+mqTdH7ITLbLuM3U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=iZjNRjFQ; arc=none smtp.client-ip=18.9.28.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="RFl2Es5K"
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="iZjNRjFQ"
 Received: from cwcc.thunk.org (pool-173-48-102-108.bstnma.fios.verizon.net [173.48.102.108])
 	(authenticated bits=0)
         (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46FEO3jw011524
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46FFiset025922
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 15 Jul 2024 10:24:04 -0400
+	Mon, 15 Jul 2024 11:44:55 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1721053445; bh=x2y58X4Q4lxVklgROmX+Ft/OSyd8eboDgbw63MzF9mQ=;
+	t=1721058295; bh=yg69a71FCtqvIx9A58CR3L87MajB4AtbfPtI+CUam6w=;
 	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=RFl2Es5KsEVuHo7NnTJ2ijZGKO0jvqfso0IrLETH0oPVAIJvI5Po8jAP2dVqeRUUy
-	 90NnSPW8adhMduzSIN6sTfoMCfZD/uktnajnwcKqlm91vzZzso3Nx0H+fU75tRm6x/
-	 /JTQbnilWk/utDoWkH4vhwEV8MckpuH6c7DtjdcbNvAVIkrx+uaxh6xOPcz/yBQ8PD
-	 cnfYzU3nRDfUcbiW1z7dytNAghIlNJTJyEhGKRIYy8dCuIeNXUcGBe7BV2m+UDCPNL
-	 qcvRibLYaLYxfoxbvE3enAt0RWcxPvEFsJN26BqcI4R0+EE9maXoXN7cCfLCYgaYx9
-	 MueaXtB5o4vwA==
+	b=iZjNRjFQ3BCmy20i4/lQcxETtKKWk6zlUpqf+He65TQ6mgp2F7t8gs4sNurzPe7oc
+	 hoBsRNgEVwFiN4T3Nsc0CtyU+piYl7+pVEZP7hIiWGch6bEzYKANbFEeH6ZV67fBQJ
+	 t6cu4ob2LGs+FcL0DKsWaWGJ3SRy3t/uSEfINKiRlsbPScqasGVSvTV9ERo0u0YexT
+	 r5mKEmGei42SIoFv8l6P13HjnUmaGiwYEAE6cTB+COGo9O7KL2fatS7v2uLbcVGdVR
+	 J/oaqthgZ5j8PdoBNy7KQQMxAjbNvW67kuwTY8D53bMiUGQh/PfxfRFuBH54VfFGcf
+	 IXTaoZIMELdoA==
 Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 68DA715C029B; Mon, 15 Jul 2024 10:24:03 -0400 (EDT)
-Date: Mon, 15 Jul 2024 10:24:03 -0400
+	id 496ED15C029B; Mon, 15 Jul 2024 11:44:54 -0400 (EDT)
+Date: Mon, 15 Jul 2024 11:44:54 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-To: Daniel Gomez <da.gomez@samsung.com>
-Cc: Zorro Lang <zlang@redhat.com>,
-        "linux-ext4@vger.kernel.org" <linux-ext4@vger.kernel.org>,
-        "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-        "Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [Bug report]: fstests g/388 crash on ext4, BUG: kernel NULL
- pointer dereference, address: 0000000000000000
-Message-ID: <20240715142403.GA70013@mit.edu>
-References: <20240714034624.qz3l7f52pi6m27yx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CGME20240715042825eucas1p2f409955112396d2777f3f2a5ef3764c8@eucas1p2.samsung.com>
- <20240715042803.GM10452@mit.edu>
- <ejaxnieh5h6bfeocb7gwtonirthjvpgoveqvmfnb5ebqk33uxs@4lvgdocvt55c>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.07.14
+Message-ID: <20240715154454.GB70013@mit.edu>
+References: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -55,48 +48,64 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ejaxnieh5h6bfeocb7gwtonirthjvpgoveqvmfnb5ebqk33uxs@4lvgdocvt55c>
+In-Reply-To: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
 
-On Mon, Jul 15, 2024 at 08:01:54AM +0000, Daniel Gomez wrote:
-> 
-> My guess is that '-o acl,user_xattr' [1] options are now included in
-> the scratch device and they were not before. This is what patch 4
-> fixes. f2fs, tmpfs, reiserfs, gfs2 and ext* will be affected as well
-> with their respective default mount options.
+On Sun, Jul 14, 2024 at 10:00:37PM +0800, Zorro Lang wrote:
+> 2. Most of cases have removed '_supported_fs' line. From now on, if you don't
+>    need a specific white or black fs list for a case, don't need _supported_fs
+>    line.
 
-At least for ext4, acl and user_xattr are enabled by default:
+A side effect of this change was that it triggered a failure in my GCE
+test-appliance's regression test suite.  That's because one of the
+things the regression tests run is: 
 
-% kvm-xfstests shell
-...
-root@kvm-xfstests:~# mount -t ext4 /dev/vdc /vdc
-[   11.207917] EXT4-fs (vdc): recovery complete
-[   11.209103] EXT4-fs (vdc): mounted filesystem 881ec32f-72a0-4b10-9a3f-a68c68f31f40 r/w with ordered data mode. Quota mode: none.
-root@kvm-xfstests:~# cat /proc/fs/ext4/vdc/options 
-...
-user_xattr
-acl
-...
-root@kvm-xfstests:~# 
+	gce-xfstests -c ext4/4k,btrfs/4k btrfs/001 generic/001 generic/002
 
-> [1] From _common_mount_opts(). Snippet:
-> 
-> 	ext2|ext3|ext4|ext4dev)
-> 		# acls & xattrs aren't turned on by default on ext$FOO
-> 		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-> 		;;
+and previously, when testing the ext4/4k configuration, btrfs/001
+would be skipped due to its "_supported_fs btrfs" line.  Now, the test
+is actually run, and it fails (unsurprisingly).
 
-Yeah, that hasn't been true for a while....
+I'm going to work around this in my test appliance, so I'm not asking
+that the change be reverted, but I thought I would point out that this
+does result in a behavioural change in some corner cases.
 
-commit ea6633369458992241599c9d9ebadffaeddec164
-Author: Eric Sandeen <sandeen@redhat.com>
-Date:   Wed Feb 23 17:51:51 2011 -0500
+       	    		       	       	      - Ted
 
-    ext4: enable acls and user_xattr by default
+commit 71b003b9ad0a0f0e4bf91619702addd0bb552f7d
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Mon Jul 15 11:34:30 2024 -0400
+
+    test-appliance: exclude tests that are not supported for the file system type
     
-    There's no good reason to require the extra step of providing
-    a mount option for acl or user_xattr once the feature is configured
-    on; no other filesystem that I know of requires this.
+    This is needed due to upstream xfstests commit f2c179ef055d ("remove
+    spurious _supported_fs calls").
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
-So we probably remove that bit from _common_mount_opts.  :-)
-
-    	       	      	       	    			 - Ted
+diff --git a/test-appliance/files/root/runtests.sh b/test-appliance/files/root/runtests.sh
+index f59305b0..817d51f2 100755
+--- a/test-appliance/files/root/runtests.sh
++++ b/test-appliance/files/root/runtests.sh
+@@ -386,6 +386,14 @@ do
+ 	    AEX="$AEX -E /tmp/exclude-tests"
+ 	fi
+ 	if test ! -f "$RESULT_BASE/tests-to-run" ; then
++	    case "$BASE_FSTYPE" in
++		ext2|ext3|ext4)
++		    tests_regexp="ext4"
++		    ;;
++		*)
++		    tests_regexp="$BASE_FSTYPE"
++	    esac
++	    tests_regexp="^($tests_regexp|shared|generic|perf|selftest)"
+ 	    bash ./check -n $FSTESTSET >& /tmp/tests-to-run.debug
+ 	    ret="$?"
+ 	    echo "Exit status $ret" >> /tmp/tests-to-run.debug
+@@ -396,6 +404,7 @@ do
+ 	    fi
+ 	    bash ./check -n $FSTESTSET 2> /dev/null | \
+ 		sed -e '1,/^$/d' -e '/^$/d' | \
++		grep -E "$tests_regexp" | \
+ 		sort > "$RESULT_BASE/tests-to-run"
+ 	    nr_tests=$(wc -l < "$RESULT_BASE/tests-to-run")
+ 	    if test "$nr_tests" -ne 1
