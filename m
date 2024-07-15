@@ -1,103 +1,143 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D28DA28FC
-	for <fstests@vger.kernel.org>; Mon, 15 Jul 2024 04:28:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4C9A49647;
+	Mon, 15 Jul 2024 05:38:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721017715; cv=none; b=p/SGNOddF3rdLkRv9+1i33MS4ZNycaxjIMIV0uZn5h1acYIeOMFKNbGpuyHf1jl0vbjMZSWa3rEJgbpNMtM7kVueg2VQVf+NAUM0oP8MiWHG/oAB/sC4rQUr45PHIupsWFTUnm1OieTn1Hm/NxwPkhdYyYUuE8zqqjpoHXqG8h4=
+	t=1721021926; cv=none; b=f4X3LHUmHn5mPZH/eMja2QSx1mVZdLI1K57nCet+PEEjLESuorpOCoG75Ndm3Vh4W7AlUILM5/FJPoE9skxCSla3RMfhOQwqTwib2RrPp/akuyJAsEK4iGbmwqCfI6lXMf0F2feFy6OCTPFmRMyUEvA/Xoc7NW5abaCKT9l7g9g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721017715; c=relaxed/simple;
-	bh=RBSx72or8ZjyW0t1RDNwbn3UIgNtPoYJO5knun5rgII=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eSaY1kqmlhHkXvUPlS89vXh5+vwg5+Lq+Zwntq9NCvLj5KutnkijzuxZFKL3Uae/17EBjF+5E26B24IZxWiv76h3QaLaT5KX5+8i2c0f6udP9qJr2HbbL4UY/lMW1XLkcLa5O8uDgoAEE15BUNArV7QzimY4FuT4vr5L7F1OTg8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=DohJ5drz; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1721021926; c=relaxed/simple;
+	bh=DaSY8pRAYgFX5VlGPKris31cJSpr3ct1pHdwAGX+zP0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GBGusGmDdFM/ui7MF7by3gXuDxVQtAhqT9zApOeNNpuDdQ5+I3aE73o65qTvSkwgm6HQHVxT2wX7z3ksRjsY03YIbiBbksf//EtsZLATBBKtvnYbJbam8mE/Y6LLsKa5prsAl1v2YAEIXA1lg22Gd2QX2Rc99QwqYb31/eFKt7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=yBnlfEhQ; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="DohJ5drz"
-Received: from cwcc.thunk.org (pool-173-48-102-108.bstnma.fios.verizon.net [173.48.102.108])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46F4S3ti023464
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 15 Jul 2024 00:28:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1721017685; bh=gjLMGIRjiRJ0hh63/qYMVnFng9tQJrk+QqvCddh5BBQ=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=DohJ5drzsSLeFLFsRJlHrrruPWvI3pcdk1gnkKDfwsJamocxnJn28D6Ljtn9AhT0s
-	 5v91gNOro6JPh5qestHKfILpMMNLeYqO0aVABzfE/OW553ALhOzOp5C6QZrMlNcyU/
-	 aZzv34VdFbdWAILr4zxiQdEdn/LqzNkhMFAkfh6Y2nMHPRUaUi/zaHi1z2mI3AomQr
-	 D3gsKtGHxw0vey8hsHJ7ordFJiJLPgfexw7E+U7NJV605XFQTWxhpViOvvCCtnUqhv
-	 H1TMs+GVSh/6hhBfy0mHghKMEfbVKttFuHYt3UjqkfNLNXcRELhFw1D8QZou7/fT2I
-	 uGfHNYks5sFYA==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 2A7AA15C029B; Mon, 15 Jul 2024 00:28:03 -0400 (EDT)
-Date: Mon, 15 Jul 2024 00:28:03 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Zorro Lang <zlang@redhat.com>
-Cc: linux-ext4@vger.kernel.org, fstests@vger.kernel.org,
-        "Darrick J. Wong" <djwong@kernel.org>,
-        Daniel Gomez <da.gomez@samsung.com>
-Subject: Re: [Bug report]: fstests g/388 crash on ext4, BUG: kernel NULL
- pointer dereference, address: 0000000000000000
-Message-ID: <20240715042803.GM10452@mit.edu>
-References: <20240714034624.qz3l7f52pi6m27yx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="yBnlfEhQ"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=a/Mh5+PyO58paEDIrJqrB3rMLYPEBwSr48lrx2MpNsc=; b=yBnlfEhQHcNDYRXDBl1YP4rtd8
+	9TSJHcV+aSFCOUQyKR3UFKPd21sLf6B7I82oenjI4QhVmqxBVIuswT2kRS44Q67Rdl0HRkYUdCd8M
+	FV3HUgKhE//s3+H/zv+uib5vqjCO4z0IxDY6YtD5+rW7PoIi5OCD9tG/W5fcFVgt18WWD/3+/PQbZ
+	YFM+gPJX/+1gYn7XQ9pTcFwat6eyQkNGZe/JaKyuFjlycD2czFDJ2yNYlaRSE8te+sZfysVC+6Xuv
+	JOu8ZYY/U1Bc3aUp49kvK9BB1lAIvV2x5+TKYgLxuP6reu7WkdTydfc/LsF94ijtHyzoZN9sJYJjc
+	P0GX92ww==;
+Received: from 2a02-8389-2341-5b80-e5f3-ff26-c02d-471d.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:e5f3:ff26:c02d:471d] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sTEQ5-00000005wJj-1awT;
+	Mon, 15 Jul 2024 05:38:41 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] xfs: add a few more tests to the repair group
+Date: Mon, 15 Jul 2024 07:38:37 +0200
+Message-ID: <20240715053837.577532-1-hch@lst.de>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240714034624.qz3l7f52pi6m27yx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Sun, Jul 14, 2024 at 11:46:24AM +0800, Zorro Lang wrote:
-> 
-> A weird kernel panic on ext4 happened when I tried to test a
-> fstests patchset:
-> https://lore.kernel.org/fstests/20240712093341.ftesijixy2yrjlxx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#med4b8d2fe14ef627519d84474b4cd1a25d386f75
+Add a bunch of tests that test repair for the RT subvolume to the repair
+group.
 
-I'm confused; this patch set:
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/xfs/337 | 2 +-
+ tests/xfs/338 | 2 +-
+ tests/xfs/339 | 2 +-
+ tests/xfs/340 | 2 +-
+ tests/xfs/341 | 2 +-
+ tests/xfs/342 | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
 
-Daniel Gomez (5):
-      common/config: fix RECREATE_TEST_DEV initialization
-      common/rc: add recreation support for tmpfs
-      common/config: enable section parsing when recreation
-      common/rc: read config section mount options for scratch devs
-      common/rc: print test mount options
+diff --git a/tests/xfs/337 b/tests/xfs/337
+index ca232c1c5..2ba508044 100755
+--- a/tests/xfs/337
++++ b/tests/xfs/337
+@@ -7,7 +7,7 @@
+ # Corrupt the realtime rmapbt and see how the kernel and xfs_repair deal.
+ #
+ . ./common/preamble
+-_begin_fstest fuzzers rmap realtime prealloc
++_begin_fstest fuzzers rmap realtime prealloc repair
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/338 b/tests/xfs/338
+index 1bdec2bfa..9648c9df4 100755
+--- a/tests/xfs/338
++++ b/tests/xfs/338
+@@ -7,7 +7,7 @@
+ # Set rrmapino to zero on an rtrmap fs and see if repair fixes it.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap realtime
++_begin_fstest auto quick rmap realtime repair
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/339 b/tests/xfs/339
+index 90faac784..4dabe43ff 100755
+--- a/tests/xfs/339
++++ b/tests/xfs/339
+@@ -7,7 +7,7 @@
+ # Link rrmapino into the rootdir on an rtrmap fs and see if repair fixes it.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap realtime
++_begin_fstest auto quick rmap realtime repair
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/340 b/tests/xfs/340
+index 58c4176a6..248d3233c 100755
+--- a/tests/xfs/340
++++ b/tests/xfs/340
+@@ -7,7 +7,7 @@
+ # Set rrmapino to another inode on an rtrmap fs and see if repair fixes it.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap realtime
++_begin_fstest auto quick rmap realtime repair
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/341 b/tests/xfs/341
+index 424deb3eb..6e25549b2 100755
+--- a/tests/xfs/341
++++ b/tests/xfs/341
+@@ -7,7 +7,7 @@
+ # Cross-link file block into rtrmapbt and see if repair fixes it.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap realtime prealloc
++_begin_fstest auto quick rmap realtime prealloc repair
+ 
+ # Import common functions.
+ . ./common/filter
+diff --git a/tests/xfs/342 b/tests/xfs/342
+index 9360ddbe7..5c0e916db 100755
+--- a/tests/xfs/342
++++ b/tests/xfs/342
+@@ -7,7 +7,7 @@
+ # Cross-link rtrmapbt block into a file and see if repair fixes it.
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rmap realtime prealloc
++_begin_fstest auto quick rmap realtime prealloc repair
+ 
+ # Import common functions.
+ . ./common/filter
+-- 
+2.43.0
 
-seems to be mostly about how xfstest config section handling
-especially for tmpfs.  Is this realy the right patch set?  If so, I'm
-guessing that the reproducer would be very specific to the xfstests
-config.
-
-My {kvm,gce}-xfstest setup doesn't use the config sections at
-all, but instead uses shell script fragments, since it predates config
-sections by three years --- and I need something that works well with
-sharding separate configs to run on separate cloud VM's.
-
-So I'm not sure I'm going to be able to reprduce this easily using my
-test setup.  Can you translate the stack trace to source file names /
-line numbers?  Maybe that will give me a hint what's going on:
-
-> [35346.372867] Call Trace:
-> [35346.375319]  <TASK>
-> [35346.377426]  ? __die+0x20/0x70
-> [35346.380493]  ? page_fault_oops+0x116/0x230
-> [35346.384602]  ? __pfx_page_fault_oops+0x10/0x10
-> [35346.389048]  ? _raw_spin_unlock+0x29/0x50
-> [35346.393072]  ? rcu_is_watching+0x11/0xb0
-> [35346.397006]  ? exc_page_fault+0x59/0xe0
-> [35346.400854]  ? asm_exc_page_fault+0x22/0x30
-> [35346.405049]  ? folio_mark_dirty+0x2a/0xf0
-> [35346.409072]  __ext4_block_zero_page_range+0x50c/0x7b0 [ext4]
-> [35346.414809]  ext4_truncate+0xcd3/0x1210 [ext4]
-
-Getting line numbers for these two functions would be especially
-helpful.
-
-Thanks,
-
-					- Ted
