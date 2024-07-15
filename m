@@ -1,45 +1,40 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB5123AC0D
-	for <fstests@vger.kernel.org>; Mon, 15 Jul 2024 15:45:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05D31179BD;
+	Mon, 15 Jul 2024 18:48:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721058304; cv=none; b=mVnMmyog5Ku2ftHAOt3Ga2A1l1GhWlgopRReTD0tcdhQzE3satB/RtikifxwkBUc3OusDI57MdbR03YYyS5RKuRZs5F7YnuMFuNh/Cw+Y2S5YiQ6uun746UbmU9769ZSKHcY8B5hdYJTZd5sj8+9FhyNyXEel1a6cR0OAX9oBTk=
+	t=1721069320; cv=none; b=uuBSh8JcFz+fPMwa/fV+2HM6zbI36jRFtNdG+WKxQUWHfY8jLEGf41xFp93e5k5QrlZvStKivHp/mCyMHtMloYyAzdQYvmFtl3g/bCEZju+YDeYZ4aKd8wRpPv0Ji6b9uvAk0AUckAEB7LAf83amZQhlr4zfQbeNUeIIsatfZ6U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721058304; c=relaxed/simple;
-	bh=uVVg83koxuTxHlI3Gdhe1hiSmyIb0BA6rMMNz58SzUg=;
+	s=arc-20240116; t=1721069320; c=relaxed/simple;
+	bh=DmiV82DJq84Mh4eXI44o4i5PQyBASTHgGBRzKbPa+GQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mzDHfT5aWEh61MGu8GWq28DzZeusjIlITXXK4DhJkvvGnM7rQ7bdTdEKBMcFagFj6hOvOWXrzSqDzJbMs5ioZdavMLB0wbBysOGx/pg82qyWBoCm+0o9MhxP9BGqPVeyBlWBs6CwjVOIn0/apv/P5f6Y3mX+mqTdH7ITLbLuM3U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=iZjNRjFQ; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	 Content-Type:Content-Disposition:In-Reply-To; b=CkQmLS+hs9Iv+iunzad5Vs9QqYsXstJUS6eXtffZxYiLNeYo5u/SwRwdAUhj2msFPR4AiVUqAXFrgmSfMaSQsp59RV2JaT2Bp0R/M83avA9ZFJPY4sg9PWCwSL4PyNXEOS870+KW5pg4NK4fE4t77kS4EQ2Ap0yaKA+KV+mvgEg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DpiSN8dJ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="iZjNRjFQ"
-Received: from cwcc.thunk.org (pool-173-48-102-108.bstnma.fios.verizon.net [173.48.102.108])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46FFiset025922
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 15 Jul 2024 11:44:55 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1721058295; bh=yg69a71FCtqvIx9A58CR3L87MajB4AtbfPtI+CUam6w=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=iZjNRjFQ3BCmy20i4/lQcxETtKKWk6zlUpqf+He65TQ6mgp2F7t8gs4sNurzPe7oc
-	 hoBsRNgEVwFiN4T3Nsc0CtyU+piYl7+pVEZP7hIiWGch6bEzYKANbFEeH6ZV67fBQJ
-	 t6cu4ob2LGs+FcL0DKsWaWGJ3SRy3t/uSEfINKiRlsbPScqasGVSvTV9ERo0u0YexT
-	 r5mKEmGei42SIoFv8l6P13HjnUmaGiwYEAE6cTB+COGo9O7KL2fatS7v2uLbcVGdVR
-	 J/oaqthgZ5j8PdoBNy7KQQMxAjbNvW67kuwTY8D53bMiUGQh/PfxfRFuBH54VfFGcf
-	 IXTaoZIMELdoA==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 496ED15C029B; Mon, 15 Jul 2024 11:44:54 -0400 (EDT)
-Date: Mon, 15 Jul 2024 11:44:54 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.07.14
-Message-ID: <20240715154454.GB70013@mit.edu>
-References: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DpiSN8dJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D177AC32782;
+	Mon, 15 Jul 2024 18:48:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721069319;
+	bh=DmiV82DJq84Mh4eXI44o4i5PQyBASTHgGBRzKbPa+GQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=DpiSN8dJDyksqMGO3oV/9Sr9Mfumv9/DCy2yvppZgXflOxd4GyULmqo3dw4eGPlyy
+	 jNuNq5dspnHvV0CFU4FNObqnwE45j3g6joKHfWoT3X+iD5CPvUjPXtI0CDUnKMylyB
+	 GRBOe+RLdR+jMDO4fZjDLl60HaZftYb2LnivIdEIhym3/vNAitDzkyDyCf8PQcLwm3
+	 gltxM4e/0TsSfXRTIYHDwC+yn5p5u3q7GDpzmnN67RcduMGdVa7o/wPd8ao5OC6ny1
+	 VHzbTTR6FBrWs2ySJr+zWsStJvObz1FXaeAZp6xz5hf36M48haTuxAU0zvieUjqbiL
+	 JFqfsGallaYAA==
+Date: Mon, 15 Jul 2024 11:48:39 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, dchinner@redhat.com, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v2] xfs/011: support byte-based grant heads are stored in
+ bytes now
+Message-ID: <20240715184839.GN103020@frogsfrogsfrogs>
+References: <20240715062522.593299-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -48,64 +43,145 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
+In-Reply-To: <20240715062522.593299-1-hch@lst.de>
 
-On Sun, Jul 14, 2024 at 10:00:37PM +0800, Zorro Lang wrote:
-> 2. Most of cases have removed '_supported_fs' line. From now on, if you don't
->    need a specific white or black fs list for a case, don't need _supported_fs
->    line.
+On Mon, Jul 15, 2024 at 08:24:53AM +0200, Christoph Hellwig wrote:
+> New kernels where reservation grant track the actual reservation space
+> consumed in bytes instead of LSNs in cycle/block tuples export different
+> sysfs files for this information.
+> 
+> Adapt the test to detect which version is exported, and simply check
+> for a near-zero reservation space consumption for the byte based version.
+> 
+> Based on work from Dave Chinner.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-A side effect of this change was that it triggered a failure in my GCE
-test-appliance's regression test suite.  That's because one of the
-things the regression tests run is: 
+Seems fine to me
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
-	gce-xfstests -c ext4/4k,btrfs/4k btrfs/001 generic/001 generic/002
+--D
 
-and previously, when testing the ext4/4k configuration, btrfs/001
-would be skipped due to its "_supported_fs btrfs" line.  Now, the test
-is actually run, and it fails (unsurprisingly).
-
-I'm going to work around this in my test appliance, so I'm not asking
-that the change be reverted, but I thought I would point out that this
-does result in a behavioural change in some corner cases.
-
-       	    		       	       	      - Ted
-
-commit 71b003b9ad0a0f0e4bf91619702addd0bb552f7d
-Author: Theodore Ts'o <tytso@mit.edu>
-Date:   Mon Jul 15 11:34:30 2024 -0400
-
-    test-appliance: exclude tests that are not supported for the file system type
-    
-    This is needed due to upstream xfstests commit f2c179ef055d ("remove
-    spurious _supported_fs calls").
-    
-    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-
-diff --git a/test-appliance/files/root/runtests.sh b/test-appliance/files/root/runtests.sh
-index f59305b0..817d51f2 100755
---- a/test-appliance/files/root/runtests.sh
-+++ b/test-appliance/files/root/runtests.sh
-@@ -386,6 +386,14 @@ do
- 	    AEX="$AEX -E /tmp/exclude-tests"
- 	fi
- 	if test ! -f "$RESULT_BASE/tests-to-run" ; then
-+	    case "$BASE_FSTYPE" in
-+		ext2|ext3|ext4)
-+		    tests_regexp="ext4"
-+		    ;;
-+		*)
-+		    tests_regexp="$BASE_FSTYPE"
-+	    esac
-+	    tests_regexp="^($tests_regexp|shared|generic|perf|selftest)"
- 	    bash ./check -n $FSTESTSET >& /tmp/tests-to-run.debug
- 	    ret="$?"
- 	    echo "Exit status $ret" >> /tmp/tests-to-run.debug
-@@ -396,6 +404,7 @@ do
- 	    fi
- 	    bash ./check -n $FSTESTSET 2> /dev/null | \
- 		sed -e '1,/^$/d' -e '/^$/d' | \
-+		grep -E "$tests_regexp" | \
- 		sort > "$RESULT_BASE/tests-to-run"
- 	    nr_tests=$(wc -l < "$RESULT_BASE/tests-to-run")
- 	    if test "$nr_tests" -ne 1
+> ---
+> 
+> Changes since v1:
+>  - rebased to latests xfstests for-next
+>  - improve a comment based on a mail from Dave Chinner
+> 
+>  tests/xfs/011 | 77 ++++++++++++++++++++++++++++++++++++---------------
+>  1 file changed, 54 insertions(+), 23 deletions(-)
+> 
+> diff --git a/tests/xfs/011 b/tests/xfs/011
+> index f9303d594..df967f098 100755
+> --- a/tests/xfs/011
+> +++ b/tests/xfs/011
+> @@ -11,7 +11,15 @@
+>  . ./common/preamble
+>  _begin_fstest auto freeze log metadata quick
+>  
+> -# Import common functions.
+> +_require_scratch
+> +_require_freeze
+> +_require_xfs_sysfs $(_short_dev $TEST_DEV)/log
+> +_require_command "$KILLALL_PROG" killall
+> +
+> +. ./common/filter
+> +
+> +devname=`_short_dev $SCRATCH_DEV`
+> +attrprefix="/sys/fs/xfs/$devname/log"
+>  
+>  # Override the default cleanup function.
+>  _cleanup()
+> @@ -24,27 +32,40 @@ _cleanup()
+>  	rm -f $tmp.*
+>  }
+>  
+> -# Use the information exported by XFS to sysfs to determine whether the log has
+> -# active reservations after a filesystem freeze.
+> -_check_scratch_log_state()
+> +#
+> +# The grant heads record reservations in bytes.
+> +#
+> +# The value is not exactly zero for complex reason.  In short: we must always
+> +# have space for at least one minimum sized log write between ailp->ail_head_lsn
+> +# and log->l_tail_lsn, and that is what is showing up in the grant head
+> +# reservation values.  We don't need to explicitly reserve it for the first
+> +# iclog write after mount, but we always end up with it being present after the
+> +# first checkpoint commits and the AIL returns the checkpoint's unused space
+> +# back to the grant head.
+> +#
+> +# Hence just check the value is between 0 and the maximum iclog size (256kB).
+> +#
+> +_check_scratch_log_state_new()
+>  {
+> -	devname=`_short_dev $SCRATCH_DEV`
+> -	attrpath="/sys/fs/xfs/$devname/log"
+> -
+> -	# freeze the fs to ensure data is synced and the log is flushed. this
+> -	# means no outstanding transactions, and thus no outstanding log
+> -	# reservations, should exist
+> -	xfs_freeze -f $SCRATCH_MNT
+> +	for attr in "reserve_grant_head_bytes" "write_grant_head_bytes"; do
+> +		space=`cat $attrprefix/$attr`
+> +		_within_tolerance $space 1024 0 $((256 * 1024))
+> +	done
+> +}
+>  
+> -	# the log head is exported in basic blocks and the log grant heads in
+> -	# bytes. convert the log head to bytes for precise comparison
+> -	log_head_cycle=`awk -F : '{ print $1 }' $attrpath/log_head_lsn`
+> -	log_head_bytes=`awk -F : '{ print $2 }' $attrpath/log_head_lsn`
+> +#
+> +# The log head is exported in basic blocks and the log grant heads in bytes.
+> +# Convert the log head to bytes for precise comparison.
+> +#
+> +_check_scratch_log_state_old()
+> +{
+> +	log_head_cycle=`awk -F : '{ print $1 }' $attrprefix/log_head_lsn`
+> +	log_head_bytes=`awk -F : '{ print $2 }' $attrprefix/log_head_lsn`
+>  	log_head_bytes=$((log_head_bytes * 512))
+>  
+>  	for attr in "reserve_grant_head" "write_grant_head"; do
+> -		cycle=`cat $attrpath/$attr | awk -F : '{ print $1 }'`
+> -		bytes=`cat $attrpath/$attr | awk -F : '{ print $2 }'`
+> +		cycle=`cat $attrprefix/$attr | awk -F : '{ print $1 }'`
+> +		bytes=`cat $attrprefix/$attr | awk -F : '{ print $2 }'`
+>  
+>  		if [ $cycle != $log_head_cycle ] ||
+>  		   [ $bytes != $log_head_bytes ]
+> @@ -54,15 +75,25 @@ _check_scratch_log_state()
+>  				"possible leak detected."
+>  		fi
+>  	done
+> -
+> -	xfs_freeze -u $SCRATCH_MNT
+>  }
+>  
+> +# Use the information exported by XFS to sysfs to determine whether the log has
+> +# active reservations after a filesystem freeze.
+> +_check_scratch_log_state()
+> +{
+> +	# freeze the fs to ensure data is synced and the log is flushed. this
+> +	# means no outstanding transactions, and thus no outstanding log
+> +	# reservations, should exist
+> +	xfs_freeze -f $SCRATCH_MNT
+> +
+> +	if [ -f "${attrprefix}/reserve_grant_head_bytes" ]; then
+> +	    _check_scratch_log_state_new
+> +	else
+> +	    _check_scratch_log_state_old
+> +	fi
+>  
+> -_require_scratch
+> -_require_freeze
+> -_require_xfs_sysfs $(_short_dev $TEST_DEV)/log
+> -_require_command "$KILLALL_PROG" killall
+> +	xfs_freeze -u $SCRATCH_MNT
+> +}
+>  
+>  echo "Silence is golden."
+>  
+> -- 
+> 2.43.0
+> 
+> 
