@@ -1,203 +1,214 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB6E2198A2A;
-	Tue, 16 Jul 2024 10:14:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D33913D630
+	for <fstests@vger.kernel.org>; Tue, 16 Jul 2024 10:57:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721124896; cv=none; b=pWq7uvPb6jAsCPEGXfKQb5s2VXqV2MMpu0DCevgErPGEwwlU5sXm3aVs4ibxXN/GP/xPrlqEN2BL4HAsKp26CQfL5TLO/qMcISUPz/XJPR+lrcJqb5VZVjmTkaGt6AbRjUradrrCLF7j6OLaxgAZ4GVbK9PSYRNwuw0wA95pTH4=
+	t=1721127440; cv=none; b=rHrg3yR45Ph2OOWtFFeoGGed12qwFiilqWlMoYUQwa4eptdUzPUJNIQg3+DgcpyfozsNCM8U0BgzyY6Y31XTWyLx29wjnrZcUMuNhZCRNTzgN2mdiLPNah+R0TRKa1yDlc/aMfC81kEKM5nxZrvuxY2wUNPfcrd2j3J0WGyxpr0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721124896; c=relaxed/simple;
-	bh=nDqqj1+aCw1jnXe71wusn42aF3zZYCxbvthxWf3ko2w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=t0qvSuVawb7lMxdNaG6KLe5faEfwsVH/Fal/TNN6KHEQePZct5/GdL+4xbm15r4r8PlLCSQpSw+/LfFWcgQx2RZfVFxA87gLcE3yWx/ffh25X+iQ1aTYbFfxbR48o7+b4nx+9gbpWcgT5mBfHJGlb6SWhoE6sXJ2OX/lpU1+1oI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X4RP/Y0P; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1721127440; c=relaxed/simple;
+	bh=ormxAHnNvqA41nhrhg7ymlrZZyonc+2NcGpbtP+aDwc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KlaNcZkT6e+1qftJH8naPC4K6oieD51BTk6n8s4k6OsZ2dHnLcwxjnC+AQKGcvKagi5GsTme7RsFQVXGoMNul0gH1ycWlF7fQ4JB5KYb9AJ8lI4zlyrJX0fCethzkfIMqu/hVbpY/PMqmqAY316kJhGE8cjPoUMjMwpBH1VHyOU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=af8x4t6L; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X4RP/Y0P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A8565C116B1;
-	Tue, 16 Jul 2024 10:14:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1721124895;
-	bh=nDqqj1+aCw1jnXe71wusn42aF3zZYCxbvthxWf3ko2w=;
-	h=From:To:Cc:Subject:Date:From;
-	b=X4RP/Y0PlQQAwhWTYXUO144H1JUZQJZTfXG6u33dmkvQ8QmgQLORcuEU0BgoFYjr+
-	 B2KeAFZ42KbEULh3YyIg2umRfEsx6bdol9bAitGlN6AETRDC/e+ILnIh8CkW1v/W2Y
-	 g9F+CSqPgtZ063x0bYGoZQcVOMEpNbCbgbvqcwNbyeEjF7e1tWuBwHBpKiKvWkFKYi
-	 pDcgUUetgmhgaGH0MHNMMelVkA+gvlpsbHKIbgyiGbhO/+GOS8Arn8gnS0GAHxQuQp
-	 UwdfxEOJwsKboZXVGqXWn8ziaLWIpYwy7tytaGtbXiwkINQONtrdE57U4arsg8Lr5z
-	 /cItje6DzK78g==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs: test a compressed send stream scenario that triggered a read corruption
-Date: Tue, 16 Jul 2024 11:14:45 +0100
-Message-ID: <330b0c61a77f01bd2aa57e9b500145178a2d751a.1721124764.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="af8x4t6L"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1721127437;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=raemaiTUCyRxXG1VBkxVqQkGRFYq9XkfN2TA9fNwoNU=;
+	b=af8x4t6LP3Pw16ax5pm+jp1+EhS/GO9hkg9dhk+eLx+AVpYWqKpmeLgdwpHIRuJmxQdZtH
+	x5x9O8eCKPmGTPVEo5hb7pNRXvZkdmveK68ll6ojXin+poV0KGDZ/TyALhQcQwUk0VP4TB
+	5A1j+e8/gPGUuMSmCe5WngogVE0n/WE=
+Received: from mail-oo1-f72.google.com (mail-oo1-f72.google.com
+ [209.85.161.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-300-zy1vLsZLPjudbsPPVt-2xg-1; Tue, 16 Jul 2024 06:57:16 -0400
+X-MC-Unique: zy1vLsZLPjudbsPPVt-2xg-1
+Received: by mail-oo1-f72.google.com with SMTP id 006d021491bc7-5c20b05a0ccso4431227eaf.2
+        for <fstests@vger.kernel.org>; Tue, 16 Jul 2024 03:57:16 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1721127435; x=1721732235;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=raemaiTUCyRxXG1VBkxVqQkGRFYq9XkfN2TA9fNwoNU=;
+        b=KAzdx0MFUb/xDjOSQAMIbuPMI8PuALVMBXCAUzhJNH50kEE6HE6Lk27XKCFwcNFPPF
+         +Ne+sbgF2YwZEtv5FHCHb2uR8nTYFtStGdmiHCi1Fa1fZj23yPS+b9CVICyRegXrq/3k
+         eNOGTYYfKbxNXjlL7oWBO6qYvTIlIksoh5TgNyBHOXZXKM1mU8NZ1kE4bHMAAHBXIbiv
+         y8YSqJeWo9kNvsHH7gUsh1ykKZjpo/LsnBf+LV3nsnBnzghVhMLKEH3TQa9Tmq0hHPa7
+         0XjEXlpHYY+Jq9NemSzBrVMTl7TstnDDB74yQoBaTzX+2HdMLRNIBGbqdb2EApZHDLti
+         YR/w==
+X-Gm-Message-State: AOJu0Yyd1bnJaS33ChjZJ+frEoblOq+xm1O6ccjxjRYpy2GKZJhyWT80
+	LigIubsx463vZ6FHlP2uZGFAV71Cx8FxjzVnq1IckaQUol3nY72eqgpVlhwsO0z2hsZH7pyyger
+	Il8am/6RMK397FAZyk3liM94rSDr+aqYZ4OuogM0d4rVgS+lMxzZOl8c=
+X-Received: by 2002:a05:6870:c0cd:b0:24f:d3ce:fe92 with SMTP id 586e51a60fabf-260bddd9806mr1316320fac.14.1721127435324;
+        Tue, 16 Jul 2024 03:57:15 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHsJVDjOCdhNRGycZDg7G5srEqPmDKsBFYfbqBLibXZOhN5bzhMBqN1QJ64eUJJxilT1/3pkQ==
+X-Received: by 2002:a05:6870:c0cd:b0:24f:d3ce:fe92 with SMTP id 586e51a60fabf-260bddd9806mr1316312fac.14.1721127434939;
+        Tue, 16 Jul 2024 03:57:14 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-78e3485dcc7sm4699874a12.39.2024.07.16.03.57.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 16 Jul 2024 03:57:14 -0700 (PDT)
+Date: Tue, 16 Jul 2024 18:57:10 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, Jaegeuk Kim <jaegeuk@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: Re: [PATCH] f2fs: test for race condition in between atomic_write
+ and gc
+Message-ID: <20240716105710.v76icnjhqmvjmgsd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240625030416.3553498-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240625030416.3553498-1-chao@kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Jun 25, 2024 at 11:04:16AM +0800, Chao Yu wrote:
+> Test that we will simulate sqlite atomic write logic w/ below steps:
+> 1. create a regular file, and initialize it w/ 0xff data
+> 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+> 3. write transaction data
+> 4. trigger foreground GC to migrate data block of the file
+> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+> 6. check consistency of transaction w/ in-memory and on-disk data
+> This is a regression test to check handling of race condition in
+> between atomic_write and GC.
 
-Test a scenario of a compressed send stream that triggered a bug in the
-extent map merging code introduced in the merge window for 6.11.
+Hi Chao,
 
-The commit that introduced the bug is on its way to Linus' tree and its
-subject is:
+Sorry for the late reviewing. As this's a regression test, so which onne
+kernel commit fix this known issue, please specify it by:
 
-   "btrfs: introduce new members for extent_map"
+_fixed_by_kernel_commit $commit_id $commit_subject
 
-The corresponding fix was submitted to the btrfs mailing list, with the
-subject:
+> 
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Cc: Daeho Jeong <daehojeong@google.com>
+> Signed-off-by: Chao Yu <chao@kernel.org>
+> ---
+>  tests/f2fs/003     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/003.out | 11 +++++++++
+>  2 files changed, 72 insertions(+)
+>  create mode 100755 tests/f2fs/003
+>  create mode 100644 tests/f2fs/003.out
+> 
+> diff --git a/tests/f2fs/003 b/tests/f2fs/003
+> new file mode 100755
+> index 00000000..d8311c4c
+> --- /dev/null
+> +++ b/tests/f2fs/003
+> @@ -0,0 +1,61 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/003
+> +#
+> +# Test that we will simulate sqlite atomic write logic w/ below steps:
+> +# 1. create a regular file, and initialize it w/ 0xff data
+> +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+> +# 3. write transaction data
+> +# 4. trigger foreground GC to migrate data block of the file
+> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+> +# 6. check consistency of transaction w/ in-memory and on-disk data
+> +# This is a regression test to check handling of race condition in
+> +# between atomic_write and GC.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +. ./common/filter
+> +
+> +_supported_fs f2fs
+    ^^^^^
+This line is not necessary now.
 
-  "btrfs: fix corrupt read due to bad offset of a compressed extent map"
+> +_require_scratch
+> +_require_xfs_io_command "pwrite"
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/312     | 115 ++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/312.out |   7 +++
- 2 files changed, 122 insertions(+)
- create mode 100755 tests/btrfs/312
- create mode 100644 tests/btrfs/312.out
+pwrite is a basic command of xfs_io, so I think this line is not necessary.
 
-diff --git a/tests/btrfs/312 b/tests/btrfs/312
-new file mode 100755
-index 00000000..ebecadc6
---- /dev/null
-+++ b/tests/btrfs/312
-@@ -0,0 +1,115 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 312
-+#
-+# Test a scenario of a compressed send stream that triggered a bug in the extent
-+# map merging code introduced in the merge window for 6.11.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick send compress
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -fr $tmp.*
-+	rm -fr $send_files_dir
-+}
-+
-+. ./common/filter
-+
-+_require_btrfs_send_version 2
-+_require_test
-+_require_scratch
-+
-+_fixed_by_kernel_commit XXXXXXXXXXXX \
-+	"btrfs: fix corrupt read due to bad offset of a compressed extent map"
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+first_stream="$send_files_dir/1.send"
-+second_stream="$send_files_dir/2.send"
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "first mkfs failed"
-+_scratch_mount -o compress
-+
-+# Create a compressed extent for the range [108K, 144K[. Since it's a
-+# non-aligned start offset, the first 3K of the extent are filled with zeroes.
-+# The i_size is set to 141K.
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 111K 30K" $SCRATCH_MNT/foo >> $seqres.full
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 >> $seqres.full
-+
-+# Overwrite a part of the extent we created before.
-+# This will make the send stream include an encoded write (compressed) for the
-+# file range [120K, 128K[.
-+$XFS_IO_PROG -c "pwrite -S 0xcd 120K 8K" $SCRATCH_MNT/foo >> $seqres.full
-+
-+# Now do write after those extents and leaving a hole in between.
-+# This results in expanding the last block of the extent we first created, that
-+# is, in filling with zeroes the file range [141K, 144K[ (3072 bytes), which
-+# belongs to the block in the range [140K, 144K[.
-+#
-+# When the destination filesystem receives from the send stream a write for that
-+# range ([140K, 144K[) it does a btrfs_get_extent() call to find the extent map
-+# containing the offset 140K. There's no loaded extent map covering that range
-+# so it will lookg at the subvolume tree to find a file extent item covering the
-+# range and then finds the file extent item covering the range [108K, 144K[ which
-+# corresponds to the first extent written to the file, before snapshoting.
-+#
-+# Note that at this point in time the destination filesystem processed an encoded
-+# write for the range [120K, 128K[, which created a compressed extent map for
-+# that range and a corresponding ordered extent, which has not yet completed when
-+# it received the write command for the [140K, 144K[ range, so the corresponding
-+# file extent item is not yet in the subvolume tree - that only happens when the
-+# ordered extent completes, at btrfs_finish_one_ordered().
-+#
-+# So having found a file extent item for the range [108K, 144K[ where 140K falls
-+# into, it tries to add a compressed extent map for that range to the inode's
-+# extent map tree with a call to btrfs_add_extent_mapping() done at
-+# btrfs_get_extent(). That finds there's a loaded overlapping extent map for the
-+# range [120K, 128K[ (the extent from the previous encoded write) and then calls
-+# into merge_extent_mapping().
-+#
-+# The merging ended adjusting the extent map we attempted to insert, covering
-+# the range [108K, 144K[, to cover instead the range [128K, 144K[ (length 16K)
-+# instead, since there's an existing extent map for the range [120K, 128K[ and
-+# we are looking for a range starting at 140K (and ending at 144K). However it
-+# didn't adjust the extent map's offset from 0 to 20K, resulting in future reads
-+# reading the incorrect range from the underlying extent (108K to 124K, 16K of
-+# length, instead of the 128K to 144K range).
-+#
-+# Note that for the incorrect extent map, and therefore read corruption, to
-+# happen, we depend on specific timings - the ordered extent for the encoded
-+# write for the range [120K, 128K[ must not complete before the destination
-+# of the send stream receives the write command for the range [140K, 144K[.
-+#
-+$XFS_IO_PROG -c "pwrite -S 0xef 160K 4K" $SCRATCH_MNT/foo >> $seqres.full
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 >> $seqres.full
-+
-+echo "Checksums in the original filesystem:"
-+echo "$(md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch)"
-+echo "$(md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch)"
-+
-+$BTRFS_UTIL_PROG send --compressed-data -q -f $first_stream $SCRATCH_MNT/snap1
-+$BTRFS_UTIL_PROG send --compressed-data -q -f $second_stream \
-+		 -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2
-+
-+_scratch_unmount
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "second mkfs failed"
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -q -f $first_stream $SCRATCH_MNT
-+$BTRFS_UTIL_PROG receive -q -f $second_stream $SCRATCH_MNT
-+
-+echo "Checksums in the new filesystem:"
-+echo "$(md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch)"
-+echo "$(md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch)"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/312.out b/tests/btrfs/312.out
-new file mode 100644
-index 00000000..75f1f4cc
---- /dev/null
-+++ b/tests/btrfs/312.out
-@@ -0,0 +1,7 @@
-+QA output created by 312
-+Checksums in the original filesystem:
-+e3ba4a9cbb38d921adc30d7e795d6626  SCRATCH_MNT/snap1/foo
-+4de09f7184f63aa64b481f3031138920  SCRATCH_MNT/snap2/foo
-+Checksums in the new filesystem:
-+e3ba4a9cbb38d921adc30d7e795d6626  SCRATCH_MNT/snap1/foo
-+4de09f7184f63aa64b481f3031138920  SCRATCH_MNT/snap2/foo
--- 
-2.43.0
+> +_require_xfs_io_command "fpunch"
+> +
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +dbfile=$SCRATCH_MNT/dbfile
+> +foo=$SCRATCH_MNT/foo
+> +bar=$SCRATCH_MNT/bar
+> +
+> +$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
+> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
+> +sync
+> +
+> +# start atomic_write on dbfile & write data to dbfile
+> +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
+
+As there's a background process, shouldn't we do kill and wait in _cleanup
+to make sure unmount won't hit EBUSY?
+
+> +$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
+> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
+> +
+> +# persist all dirty data
+> +sync
+> +echo 3 > /proc/sys/vm/drop_caches
+> +
+> +# trigger foreground GC to migrate data block of atomic_file
+> +$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
+> +
+> +# wait for atomic_write commit completion
+> +sleep 5
+> +# print in-memory data
+> +od -x $dbfile
+> +echo 3 > /proc/sys/vm/drop_caches
+> +# print on-disk data
+> +od -x $dbfile
+
+There's a common helper named "_hexdump" in common/rc, can that be used?
+
+> +
+> +_scratch_unmount
+
+The SCRATCH_DEV will be unmounted at the end of the test, don't need to
+do this manually if it's not a necessary test step.
+
+Thanks,
+Zorro
+
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+> new file mode 100644
+> index 00000000..d6c8a637
+> --- /dev/null
+> +++ b/tests/f2fs/003.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 003
+> +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+> +*
+> +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+> +*
+> +2000000
+> +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+> +*
+> +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+> +*
+> +2000000
+> -- 
+> 2.40.1
+> 
 
