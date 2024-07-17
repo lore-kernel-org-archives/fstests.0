@@ -1,74 +1,72 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAA1617F362
-	for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 15:20:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17881181B8D
+	for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 15:21:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721229627; cv=none; b=TzT/svr7KERXogGk2Yz0xZ3ueHgjlRMHZ7rVbXqDaUARdE0OLcKV3Pmk3p1RVBZdbpfQpr1rZ/SLwbshKDACbRd/lIv9EXWeymJ69NYvETThU+3aElKK5Yv9AfK+sR54kRJP1mXsRCIQAW8aFI3NbSqWKlmokyGrtrrUk+1DwLc=
+	t=1721229713; cv=none; b=UpuUMKRw/PlaoZeixd7u2xQ9vj0lNkUU5v5dydhZSGjgMorzEOWXDD0mP5FkFrx/RuwYDIY1VdVCiS7qsi5EwoQ5c5WfFBO/1HzJwr3/7FaW5ROAjVBkh63nrGFKoxVFpghnQ5KYJ1nPJiSiFqIx3wy3ieatiZgfjXtEmWIWyUs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721229627; c=relaxed/simple;
-	bh=ztoI86M0tRnE3cOjANvgFIOAgwM6TsoQyRacx/Nrch4=;
+	s=arc-20240116; t=1721229713; c=relaxed/simple;
+	bh=gV8vBL1c9bYkNKacBpFknaPkaVfQN4gsmXp5zyBDj/M=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Udd8aQR+e8OLo3kGwTk1DlCARrQdldsO/CV+rk5qIxSDMKY10JfrZP4sq+XVHXf1tsrBvfnj/Loqd7dCPSnTWYZzPqdrHz27fkuRIv1oL5OzCLIsKBVgFbyffamuiJR7vBtdupXY5DD/rzdejzSU6KUKtPHek/rD8CT3WcqSbWE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=akDaEPQ7; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=gNXFou1WJ5P53WpAe6phTjIVm2XZ5iJXu/kcrV8Y5Lf6+z3aMt+clRGskPrCV2GP8ajUvjdxV7rrwil/TP6XMfTbDH/VjJ9zM5B9WL5rUDGfMoSALf4R84KFwFe4o8OWO5q1jovgA/XcTN4h8J9F0QiZgknTzY/zZcuKP2j+EFQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MDwW53Qb; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="akDaEPQ7"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MDwW53Qb"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1721229623;
+	s=mimecast20190719; t=1721229710;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=lSrxkKH5oX3hAbxIHU7zSBxDFHpf2cFpqd3Al4ItjBs=;
-	b=akDaEPQ79eklm9MiNqVbS6XoboKvx26YpFL8R402U37/TjngZg0iAtZpF4yF1PkifLs1SP
-	OCgKc/bceWpdjR1PpIjRtlp7OYKon8QVDu0ksD99g7ZWwhqPfNoTNsXvvdX6CJXE2/vdaw
-	Lmu3hyyxU0JniUzTxNj16uUnS6PmASY=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=6iMKfnGWJQrqlZ4fKl1+DjEcsKK+hF0UigdkecxagA4=;
+	b=MDwW53QbGsze0lGD7IkBe4BkxNCKK/kQdX2dSXrDd0c3Hqjuio6tkeFfuzo7ThaA8piRk+
+	JfTuzEvna/YG6qyWvU56NunUsQ3kgLVJFVpG4ijWzW0dg8M2oXtvxQUJZ1si/RWrabb59n
+	wDlE9ITXhdBbjj8RynLS0HnOlm+xSTE=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-605-VCdEUKvCP0qEcAhohc5-1w-1; Wed, 17 Jul 2024 11:20:22 -0400
-X-MC-Unique: VCdEUKvCP0qEcAhohc5-1w-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-767c010fe18so5094878a12.2
-        for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 08:20:22 -0700 (PDT)
+ us-mta-568--A5K5sMrN0OBxHAmc4--hw-1; Wed, 17 Jul 2024 11:21:49 -0400
+X-MC-Unique: -A5K5sMrN0OBxHAmc4--hw-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1fb269ff96bso42346155ad.1
+        for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 08:21:49 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721229621; x=1721834421;
+        d=1e100.net; s=20230601; t=1721229708; x=1721834508;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=lSrxkKH5oX3hAbxIHU7zSBxDFHpf2cFpqd3Al4ItjBs=;
-        b=xAIjrKSOWqddGxt1aHDlXZFpekH1iHndTrUMp3oAUiNCToelaAi/mUy3ijwbLvzr46
-         SLR2/4g2TU8dySxYQHOItoDpXi/MmgfNOXlqNfh+n5LyMQIzIx9HuAsf8/pDQsHbEIDH
-         QpUJL27Oee/PyfM99F+LXlH9MLuPqABsomakEtOmbcaOVdPaI9zufD+iD01UcjLldAyt
-         2xiEi/3R3o3dVuZo1e+g/dEDHr6/JM04J9kGZnNEjsYRqAnT8JcK7PN6kxvxuMOf7Os0
-         cwbASsYxw6Bf8/TZqxe9Q8UjKerZT/SNvxYtxHJCx0t0sND9r5hW5eUDC7Hqwz3CJcQ2
-         zpHA==
-X-Gm-Message-State: AOJu0Ywu4gCOael2NAxcaqAL7HRxNO5SWLa8QN31Fe2yHQ9+gkudO/Fr
-	fiE1bIgprBQE/bIlvJYo5EYtYZyJ1FmgRfDh10IFOgu/PF9iZqdogXOM1x8otISRNAxPw5wU+Sf
-	6cB7Wbqy7UlXBAbU3uX18FnxNEv8uA3c1im6N4AqMDlrr/ksFBDwSDWM=
-X-Received: by 2002:a05:6a20:c997:b0:1c0:e652:1b2f with SMTP id adf61e73a8af0-1c3fdd18396mr1988292637.33.1721229621172;
-        Wed, 17 Jul 2024 08:20:21 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG4/ki/F3RVX1SgOVKSHoLyh6+jjbGSAxasEiuoavCPRCvKSas4A+ciKv15wZTqxvuPZFITTQ==
-X-Received: by 2002:a05:6a20:c997:b0:1c0:e652:1b2f with SMTP id adf61e73a8af0-1c3fdd18396mr1988269637.33.1721229620770;
-        Wed, 17 Jul 2024 08:20:20 -0700 (PDT)
+        bh=6iMKfnGWJQrqlZ4fKl1+DjEcsKK+hF0UigdkecxagA4=;
+        b=ARxE4PdLqDX1JIGN5G2kIIEbydWOaAsKuWm77GukXnadsKFK03CngXsmcRHzqfey2+
+         jbH8i7IAzLJafZt1vMwc9CRRM2gtWPWDXm0y/TEu1+MWGLfXuIcfqOGGh8schV5uTNoi
+         ZwKwgwDNvtfbIhybswAugNK8uov1ktqoL1Cf4Zr9b5xgvyIoM1W4KJswU71VFHwuTf33
+         xwsRH7LAdm4qD1eJqtI7LOW/GQ/sX2y3xzcCbpvVhN/oAdxwLL9r7bXjNbyYSufXj6ZK
+         lhn8u/8kaiIIEJuMunKPzEbPRxoNmjSfuPw67Vxs0iRcFLp3Q0BoM8Tg+JyUs2BphkxY
+         XF/g==
+X-Forwarded-Encrypted: i=1; AJvYcCXjYJyBwdL/sIShejRzK/HFOwDyguzLk8Z1Cf6/tzqBYWjx0oYunIWSKzM4l3lMvaRVMRQETQl0M082WhwaAjLn1kJaU8yoRg==
+X-Gm-Message-State: AOJu0YwqdR2X3STuYpsDlLIwet6WzGU5sD214KVU8SXym3F0c6YLN2/a
+	Z6PR1zYFmV2aryhYeNObywJ1/efjgeKZP+vZszWuhAx78jJvHX902yU6XbpqIQpJ3tbEhdFsrzQ
+	jQQiCJYDwovTkoG1tm07DPHmSzwhGM0At8iEzsP8LPYt3nsmoe3+/pJs=
+X-Received: by 2002:a17:902:ea10:b0:1fb:5c1:2681 with SMTP id d9443c01a7336-1fc4e13f270mr18161435ad.21.1721229708324;
+        Wed, 17 Jul 2024 08:21:48 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGOfDY24x5qcTWp45WDUUdC0sp6SCvabQm/v3y/wfUXYj16XlMX79llmXI5Zp1EFF2HhJaapQ==
+X-Received: by 2002:a17:902:ea10:b0:1fb:5c1:2681 with SMTP id d9443c01a7336-1fc4e13f270mr18161305ad.21.1721229707988;
+        Wed, 17 Jul 2024 08:21:47 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7ec7dfddsm8221024b3a.101.2024.07.17.08.20.19
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1fc0bb70060sm78257905ad.58.2024.07.17.08.21.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 17 Jul 2024 08:20:20 -0700 (PDT)
-Date: Wed, 17 Jul 2024 23:20:17 +0800
+        Wed, 17 Jul 2024 08:21:47 -0700 (PDT)
+Date: Wed, 17 Jul 2024 23:21:44 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org,
-	"linux-f2fs-devel@lists.sourceforge.net" <linux-f2fs-devel@lists.sourceforge.net>,
-	Jaegeuk Kim <jaegeuk@kernel.org>,
-	Daeho Jeong <daehojeong@google.com>
-Subject: Re: [PATCH] f2fs: test for race condition in between atomic_write
- and gc
-Message-ID: <20240717152017.5i6z4nmjst26ak7f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240625030416.3553498-1-chao@kernel.org>
- <20240716105710.v76icnjhqmvjmgsd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <fba75c06-b0d9-4e92-b673-9c11314744c1@kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.07.14
+Message-ID: <20240717152144.ieynbbdohmb7f2yw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
+ <20240715154454.GB70013@mit.edu>
+ <20240715195026.5c4qvx2thoeessqu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20240716201347.GA2166460@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -77,166 +75,27 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <fba75c06-b0d9-4e92-b673-9c11314744c1@kernel.org>
+In-Reply-To: <20240716201347.GA2166460@mit.edu>
 
-On Wed, Jul 17, 2024 at 10:12:16AM +0800, Chao Yu wrote:
-> On 2024/7/16 18:57, Zorro Lang wrote:
-> > On Tue, Jun 25, 2024 at 11:04:16AM +0800, Chao Yu wrote:
-> > > Test that we will simulate sqlite atomic write logic w/ below steps:
-> > > 1. create a regular file, and initialize it w/ 0xff data
-> > > 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
-> > > 3. write transaction data
-> > > 4. trigger foreground GC to migrate data block of the file
-> > > 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> > > 6. check consistency of transaction w/ in-memory and on-disk data
-> > > This is a regression test to check handling of race condition in
-> > > between atomic_write and GC.
+On Tue, Jul 16, 2024 at 04:13:47PM -0400, Theodore Ts'o wrote:
+> On Tue, Jul 16, 2024 at 03:50:26AM +0800, Zorro Lang wrote:
 > > 
-> > Hi Chao,
-> > 
-> > Sorry for the late reviewing. As this's a regression test, so which onne
-> > kernel commit fix this known issue, please specify it by:
-> > 
-> > _fixed_by_kernel_commit $commit_id $commit_subject
+> > Sorry about this trouble to you. Sure, this's a behavioural change, and it's
+> > been talked several times. Generally, even with this change, fstests only run
+> > tests/generic and tests/$FSTYP cases by default. So it won't run tests/btrfs
+> > cases if FSTYP=ext4. But with this change a fs has chance to force to try
+> > another fs' case by specify the case name particularly (if the tester thinks
+> > it's good to him).
 > 
-> Hi Zorro,
-> 
-> Since the fixed patch has not been merged yet, so what about adding this line
-> after merging the fix?
+> Yeah, it's not a big deal, and I saw the discusion, and I didn't
+> realize that it would cause the regression test failure for my test
+> runner.  It was relatively easy for my to work around it, but I
+> thought it would be useful mention it in case it would take anyone
+> else by surprise.
 
-Oh, sure, but generally they'd like to use "xxxxxxxxxxxx" to be the $commit_id
-(as a reminder) if there's not an assured id number. Then replace the "xxxxxx...."
-with the right id number after the patch merged. But it depends on you, just
-don't forget that :)
-
-Thanks,
-Zorro
+Sure, you're right, thanks for this reminder!
 
 > 
-> > 
-> > > 
-> > > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> > > Cc: Daeho Jeong <daehojeong@google.com>
-> > > Signed-off-by: Chao Yu <chao@kernel.org>
-> > > ---
-> > >   tests/f2fs/003     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/f2fs/003.out | 11 +++++++++
-> > >   2 files changed, 72 insertions(+)
-> > >   create mode 100755 tests/f2fs/003
-> > >   create mode 100644 tests/f2fs/003.out
-> > > 
-> > > diff --git a/tests/f2fs/003 b/tests/f2fs/003
-> > > new file mode 100755
-> > > index 00000000..d8311c4c
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/003
-> > > @@ -0,0 +1,61 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Oppo.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. f2fs/003
-> > > +#
-> > > +# Test that we will simulate sqlite atomic write logic w/ below steps:
-> > > +# 1. create a regular file, and initialize it w/ 0xff data
-> > > +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
-> > > +# 3. write transaction data
-> > > +# 4. trigger foreground GC to migrate data block of the file
-> > > +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-> > > +# 6. check consistency of transaction w/ in-memory and on-disk data
-> > > +# This is a regression test to check handling of race condition in
-> > > +# between atomic_write and GC.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> > > +
-> > > +. ./common/filter
-> > > +
-> > > +_supported_fs f2fs
-> >      ^^^^^
-> > This line is not necessary now.
-> > 
-> > > +_require_scratch
-> > > +_require_xfs_io_command "pwrite"
-> > 
-> > pwrite is a basic command of xfs_io, so I think this line is not necessary.
-> > 
-> > > +_require_xfs_io_command "fpunch"
-> > > +
-> > > +_scratch_mkfs >> $seqres.full
-> > > +_scratch_mount >> $seqres.full
-> > > +
-> > > +dbfile=$SCRATCH_MNT/dbfile
-> > > +foo=$SCRATCH_MNT/foo
-> > > +bar=$SCRATCH_MNT/bar
-> > > +
-> > > +$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
-> > > +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
-> > > +sync
-> > > +
-> > > +# start atomic_write on dbfile & write data to dbfile
-> > > +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
-> > 
-> > As there's a background process, shouldn't we do kill and wait in _cleanup
-> > to make sure unmount won't hit EBUSY?
-> > 
-> > > +$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
-> > > +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
-> > > +
-> > > +# persist all dirty data
-> > > +sync
-> > > +echo 3 > /proc/sys/vm/drop_caches
-> > > +
-> > > +# trigger foreground GC to migrate data block of atomic_file
-> > > +$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
-> > > +
-> > > +# wait for atomic_write commit completion
-> > > +sleep 5
-> > > +# print in-memory data
-> > > +od -x $dbfile
-> > > +echo 3 > /proc/sys/vm/drop_caches
-> > > +# print on-disk data
-> > > +od -x $dbfile
-> > 
-> > There's a common helper named "_hexdump" in common/rc, can that be used?
-> > 
-> > > +
-> > > +_scratch_unmount
-> > 
-> > The SCRATCH_DEV will be unmounted at the end of the test, don't need to
-> > do this manually if it's not a necessary test step.
-> 
-> Let me update this patch according to your comments, thanks.
-> 
-> Thanks,
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
-> > > new file mode 100644
-> > > index 00000000..d6c8a637
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/003.out
-> > > @@ -0,0 +1,11 @@
-> > > +QA output created by 003
-> > > +0000000 0000 0000 0000 0000 0000 0000 0000 0000
-> > > +*
-> > > +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
-> > > +*
-> > > +2000000
-> > > +0000000 0000 0000 0000 0000 0000 0000 0000 0000
-> > > +*
-> > > +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
-> > > +*
-> > > +2000000
-> > > -- 
-> > > 2.40.1
-> > > 
-> > 
+> 					- Ted
 > 
 
