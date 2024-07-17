@@ -1,70 +1,201 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF16F41C7F
-	for <fstests@vger.kernel.org>; Tue, 16 Jul 2024 20:14:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7926E4685
+	for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 02:12:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721160851; cv=none; b=RYzdjBQ9QUXICpYK/01C84iHrzvvUyNqS4X5FzjOmtaErIiw7XJ5Npe7HOr/K4oS8BNZL0ELTvN8g13MtFYn5r8W9RyUSmlxXYszYJsTuOqEUzIs4+s3fukKUbZ/+CdI1PfzB4s1GWriR6hZGoyz80Ee1PS9LkWjNSsHms91VPc=
+	t=1721182341; cv=none; b=si8POPRZMznXrilpvcU1Hvjp66dbtPaQ4OtPIZBSxNXBtYSaj9VwB/GydVOohvt/3hSjUp2MfL+38dSGODBPsoOAbAyL5navIvO3xi0HA2da2bRFCEOHwKSlT7JSfcDcoY59+sOH2wZyKz5hPFq3tP9724HA5Avo6cPSeyG+U2A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721160851; c=relaxed/simple;
-	bh=lAmFlwfC/V9Uh3BfhfR0lhhaVzCh7B3O8bClYr94C/0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uqPK09RgyuU4IaVBTo1m6W+f5cgdRw9NQc5nUl+iCGGaYVHRl8TODP+lojXVm2QWC6S4Dd2sM7hmfzCEqwrMubX5a+MLMSVyVLxUEsSLQgI5j7joM9sHJ3kA2OOORKSqQK/vUSYEqd0712Q/pRwVQ7nlHf4WN9QJjm34ORePgbI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=DmvwV3ZF; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1721182341; c=relaxed/simple;
+	bh=r18DYM9L0j/fdMY2uog1UdcMmZiz6cjxEKC8Pnyj0xI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=XmMU+s8ZSjiZvEYrMLZXxChnkecmW9xV+v0z3kPhB/YrhHh/dSZv6yWEZyIGnV+55IL6OHAuI2pExFJSJYxLzrXqJV+O6fidZKxovBAi535x83fIWQFZYDMFBDDFrCYulzc0ruUQVDrUeOe/o7yCkhAnmphaCOG96FK/bi2OfRQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UbHbIYx2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="DmvwV3ZF"
-Received: from cwcc.thunk.org (pool-173-48-102-108.bstnma.fios.verizon.net [173.48.102.108])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46GKDlld027464
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 16 Jul 2024 16:13:49 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1721160829; bh=DNJCN7wXeP3DhUEOEPQO30cH2wWIlzYuMUz2GsgaLug=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=DmvwV3ZFBqJLeYPrnSHYP7bAGe9WUll3ITgLFqac30LMHoRsPz8nfzgf84NWUMj32
-	 52G/YoK5QSW0vCtJbJrMkmsKy6mNgnrkjur4xR806OP00RhhXuOVaJuZpn94OF3bdG
-	 QQ6KZ8LKm6ZptXwlRRauMLu4oQ7YSfee6dXdJmGnPio1PLFclRwMIg+le8sztUnt87
-	 RJjr/ms7KgLMUWM1pLc3ZC95+CYpvXEhRfQ6OzE3E/70m17JlU6nqyg3m5q0l9IvdQ
-	 jzqfAuX7IWVsuX7nzAIEKJRnPrAJ7gDmoatu/jhx6gOU9gidKU69Rm/SakwW0xg9f4
-	 rkQhLoHvzMqpw==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id DA7B015C029B; Tue, 16 Jul 2024 16:13:47 -0400 (EDT)
-Date: Tue, 16 Jul 2024 16:13:47 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2024.07.14
-Message-ID: <20240716201347.GA2166460@mit.edu>
-References: <64ec6187145dfd111f22f1ae151ae538@kernel.org>
- <20240715154454.GB70013@mit.edu>
- <20240715195026.5c4qvx2thoeessqu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UbHbIYx2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D5826C116B1;
+	Wed, 17 Jul 2024 02:12:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721182341;
+	bh=r18DYM9L0j/fdMY2uog1UdcMmZiz6cjxEKC8Pnyj0xI=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=UbHbIYx2l0scUaNJxuzM21ymvFnJp1ApE7FNyOtDWhdz214AyCv0eBIFroP7SufHQ
+	 TqmxFNGmoN0Bsc6jDf2QbDoqYXXExmXnYtNWqID+m7y92O01kweFSiqlu2+y2dd3aF
+	 y70RC29GBhprgKANYu4tm6z0yn8SPw3L871nib57UlYh+C1gcquA5k9is+5gtpVjS5
+	 yOBQ/HVIpHQIYIv0cUQhIHbKbl1HdIeiBEE7mu41XOMhoYn7oL4AogRWL5J+0BbqwG
+	 X4FPWhGik9CWxUFCWWwDaUxQ1q7zPopkhRja1VbMmlk70Ge/q2eOhEyydHW8GEdvfg
+	 SJTls0cluoNiw==
+Message-ID: <fba75c06-b0d9-4e92-b673-9c11314744c1@kernel.org>
+Date: Wed, 17 Jul 2024 10:12:16 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240715195026.5c4qvx2thoeessqu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] f2fs: test for race condition in between atomic_write and
+ gc
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org,
+ "linux-f2fs-devel@lists.sourceforge.net"
+ <linux-f2fs-devel@lists.sourceforge.net>, Jaegeuk Kim <jaegeuk@kernel.org>,
+ Daeho Jeong <daehojeong@google.com>
+References: <20240625030416.3553498-1-chao@kernel.org>
+ <20240716105710.v76icnjhqmvjmgsd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20240716105710.v76icnjhqmvjmgsd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Tue, Jul 16, 2024 at 03:50:26AM +0800, Zorro Lang wrote:
+On 2024/7/16 18:57, Zorro Lang wrote:
+> On Tue, Jun 25, 2024 at 11:04:16AM +0800, Chao Yu wrote:
+>> Test that we will simulate sqlite atomic write logic w/ below steps:
+>> 1. create a regular file, and initialize it w/ 0xff data
+>> 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+>> 3. write transaction data
+>> 4. trigger foreground GC to migrate data block of the file
+>> 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+>> 6. check consistency of transaction w/ in-memory and on-disk data
+>> This is a regression test to check handling of race condition in
+>> between atomic_write and GC.
 > 
-> Sorry about this trouble to you. Sure, this's a behavioural change, and it's
-> been talked several times. Generally, even with this change, fstests only run
-> tests/generic and tests/$FSTYP cases by default. So it won't run tests/btrfs
-> cases if FSTYP=ext4. But with this change a fs has chance to force to try
-> another fs' case by specify the case name particularly (if the tester thinks
-> it's good to him).
+> Hi Chao,
+> 
+> Sorry for the late reviewing. As this's a regression test, so which onne
+> kernel commit fix this known issue, please specify it by:
+> 
+> _fixed_by_kernel_commit $commit_id $commit_subject
 
-Yeah, it's not a big deal, and I saw the discusion, and I didn't
-realize that it would cause the regression test failure for my test
-runner.  It was relatively easy for my to work around it, but I
-thought it would be useful mention it in case it would take anyone
-else by surprise.
+Hi Zorro,
 
-					- Ted
+Since the fixed patch has not been merged yet, so what about adding this line
+after merging the fix?
+
+> 
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Cc: Daeho Jeong <daehojeong@google.com>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>>   tests/f2fs/003     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/f2fs/003.out | 11 +++++++++
+>>   2 files changed, 72 insertions(+)
+>>   create mode 100755 tests/f2fs/003
+>>   create mode 100644 tests/f2fs/003.out
+>>
+>> diff --git a/tests/f2fs/003 b/tests/f2fs/003
+>> new file mode 100755
+>> index 00000000..d8311c4c
+>> --- /dev/null
+>> +++ b/tests/f2fs/003
+>> @@ -0,0 +1,61 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/003
+>> +#
+>> +# Test that we will simulate sqlite atomic write logic w/ below steps:
+>> +# 1. create a regular file, and initialize it w/ 0xff data
+>> +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+>> +# 3. write transaction data
+>> +# 4. trigger foreground GC to migrate data block of the file
+>> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+>> +# 6. check consistency of transaction w/ in-memory and on-disk data
+>> +# This is a regression test to check handling of race condition in
+>> +# between atomic_write and GC.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +. ./common/filter
+>> +
+>> +_supported_fs f2fs
+>      ^^^^^
+> This line is not necessary now.
+> 
+>> +_require_scratch
+>> +_require_xfs_io_command "pwrite"
+> 
+> pwrite is a basic command of xfs_io, so I think this line is not necessary.
+> 
+>> +_require_xfs_io_command "fpunch"
+>> +
+>> +_scratch_mkfs >> $seqres.full
+>> +_scratch_mount >> $seqres.full
+>> +
+>> +dbfile=$SCRATCH_MNT/dbfile
+>> +foo=$SCRATCH_MNT/foo
+>> +bar=$SCRATCH_MNT/bar
+>> +
+>> +$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
+>> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
+>> +sync
+>> +
+>> +# start atomic_write on dbfile & write data to dbfile
+>> +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
+> 
+> As there's a background process, shouldn't we do kill and wait in _cleanup
+> to make sure unmount won't hit EBUSY?
+> 
+>> +$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
+>> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
+>> +
+>> +# persist all dirty data
+>> +sync
+>> +echo 3 > /proc/sys/vm/drop_caches
+>> +
+>> +# trigger foreground GC to migrate data block of atomic_file
+>> +$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
+>> +
+>> +# wait for atomic_write commit completion
+>> +sleep 5
+>> +# print in-memory data
+>> +od -x $dbfile
+>> +echo 3 > /proc/sys/vm/drop_caches
+>> +# print on-disk data
+>> +od -x $dbfile
+> 
+> There's a common helper named "_hexdump" in common/rc, can that be used?
+> 
+>> +
+>> +_scratch_unmount
+> 
+> The SCRATCH_DEV will be unmounted at the end of the test, don't need to
+> do this manually if it's not a necessary test step.
+
+Let me update this patch according to your comments, thanks.
+
+Thanks,
+
+> 
+> Thanks,
+> Zorro
+> 
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+>> new file mode 100644
+>> index 00000000..d6c8a637
+>> --- /dev/null
+>> +++ b/tests/f2fs/003.out
+>> @@ -0,0 +1,11 @@
+>> +QA output created by 003
+>> +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+>> +*
+>> +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+>> +*
+>> +2000000
+>> +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+>> +*
+>> +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+>> +*
+>> +2000000
+>> -- 
+>> 2.40.1
+>>
+> 
