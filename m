@@ -1,215 +1,242 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFD7117F4E1;
-	Wed, 17 Jul 2024 11:25:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAA1617F362
+	for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 15:20:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721215549; cv=none; b=CYn5akbO9URH/EkGNlktIOsk4yIS//8RsS7K6RRXdHg+KIgKTeDTR8ZPPVIV/VUHWAO1gGbR87yKH66o901VVOmzWKOjh3512++DD1m3lp/8Xz98FkXOAO3i0da2cMf02rYK2E/gjfRHJLzkeAUUCMNbJzSmD37tsE7WVgl0gNk=
+	t=1721229627; cv=none; b=TzT/svr7KERXogGk2Yz0xZ3ueHgjlRMHZ7rVbXqDaUARdE0OLcKV3Pmk3p1RVBZdbpfQpr1rZ/SLwbshKDACbRd/lIv9EXWeymJ69NYvETThU+3aElKK5Yv9AfK+sR54kRJP1mXsRCIQAW8aFI3NbSqWKlmokyGrtrrUk+1DwLc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721215549; c=relaxed/simple;
-	bh=oE3GfBLij17gha9xA7cisteW8Cp27yVeeSWPwlGl5G4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tiqK0Al9nXsDUL6+JvE+oxssKXidXlQgrFZii+jdbsWNkabQE6uNNoEbtmVSzasl6LxW6q4z9shLO/j59K70hmJjye1eu+hB/YfzQCpj9PFVjgK1fz63WHlZ1TWUP00aR5NiCtNq+SKRn5QSuOTXbgNoMXD5Lih4D1zvBb9kp5M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pHABhL6y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1721229627; c=relaxed/simple;
+	bh=ztoI86M0tRnE3cOjANvgFIOAgwM6TsoQyRacx/Nrch4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Udd8aQR+e8OLo3kGwTk1DlCARrQdldsO/CV+rk5qIxSDMKY10JfrZP4sq+XVHXf1tsrBvfnj/Loqd7dCPSnTWYZzPqdrHz27fkuRIv1oL5OzCLIsKBVgFbyffamuiJR7vBtdupXY5DD/rzdejzSU6KUKtPHek/rD8CT3WcqSbWE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=akDaEPQ7; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pHABhL6y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CD20C32782;
-	Wed, 17 Jul 2024 11:25:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1721215548;
-	bh=oE3GfBLij17gha9xA7cisteW8Cp27yVeeSWPwlGl5G4=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=pHABhL6yK7lTWrMMNvMEl3uOwUw3YyTIFfUzqPm7dE4ldqO41sFt3cvxZBx4YxrGT
-	 QcSbeB717zDDjo89hbOyNm9ZOQ433XPkSB67Hl8cC8klFLLFpMFJDnxAX0wBYtL0DW
-	 T/lkkYBIwSTHgJk8Xxg4TQAHZ4pRLxMbUBJPLapYaN/meatd6eDpanSsghxwcDPsVm
-	 +cm6Rx/zsDIvW/2G6CmR3OIN9iQUIOQVj5kGCiWhLKOHw1LaaywBAw+t/LqqP43sTT
-	 qyCPR13PAF61Ggs4CNocRRXcjQHEf+nSh8n2yasYaul6yeoLlbcBl4Lsl41pNXyTCp
-	 AjuxGsnmkP/6Q==
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-52ea929ea56so12562038e87.0;
-        Wed, 17 Jul 2024 04:25:48 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVaCgo8nf7aoxvD8G1R35D2vzrdIb1QKo/pYxklHAxBi2v4Y7FrxaU6wg3DZ2fCI3wIUtPpQGF95z8C3J549m17ZYmaKRoAVQ==
-X-Gm-Message-State: AOJu0Yy/K0Mxs3xtMm61R4UsBTpsD6oTZSsxutz2DDczJT0TjXZvrqgA
-	UQ87adT9fr0vOgO/p/8lNLEoVkQj8FY8Q+pE/1To9ajiAQocwFC7M5a6a/VLuDz33ZxxpmeByCi
-	BiiKTB7iml5bL1SEAWqczeggnlRk=
-X-Google-Smtp-Source: AGHT+IHnZlAEVsGDXnabq4GdqDJeh3nsbiErBDjOVDe7QzZh99dg25ACF56j5eknyo8TPgiB7K0gpZI/4GeqaaaUAoE=
-X-Received: by 2002:a05:6512:1081:b0:52e:9904:71e with SMTP id
- 2adb3069b0e04-52ee53d7623mr1247386e87.28.1721215546741; Wed, 17 Jul 2024
- 04:25:46 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="akDaEPQ7"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1721229623;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=lSrxkKH5oX3hAbxIHU7zSBxDFHpf2cFpqd3Al4ItjBs=;
+	b=akDaEPQ79eklm9MiNqVbS6XoboKvx26YpFL8R402U37/TjngZg0iAtZpF4yF1PkifLs1SP
+	OCgKc/bceWpdjR1PpIjRtlp7OYKon8QVDu0ksD99g7ZWwhqPfNoTNsXvvdX6CJXE2/vdaw
+	Lmu3hyyxU0JniUzTxNj16uUnS6PmASY=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-605-VCdEUKvCP0qEcAhohc5-1w-1; Wed, 17 Jul 2024 11:20:22 -0400
+X-MC-Unique: VCdEUKvCP0qEcAhohc5-1w-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-767c010fe18so5094878a12.2
+        for <fstests@vger.kernel.org>; Wed, 17 Jul 2024 08:20:22 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1721229621; x=1721834421;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lSrxkKH5oX3hAbxIHU7zSBxDFHpf2cFpqd3Al4ItjBs=;
+        b=xAIjrKSOWqddGxt1aHDlXZFpekH1iHndTrUMp3oAUiNCToelaAi/mUy3ijwbLvzr46
+         SLR2/4g2TU8dySxYQHOItoDpXi/MmgfNOXlqNfh+n5LyMQIzIx9HuAsf8/pDQsHbEIDH
+         QpUJL27Oee/PyfM99F+LXlH9MLuPqABsomakEtOmbcaOVdPaI9zufD+iD01UcjLldAyt
+         2xiEi/3R3o3dVuZo1e+g/dEDHr6/JM04J9kGZnNEjsYRqAnT8JcK7PN6kxvxuMOf7Os0
+         cwbASsYxw6Bf8/TZqxe9Q8UjKerZT/SNvxYtxHJCx0t0sND9r5hW5eUDC7Hqwz3CJcQ2
+         zpHA==
+X-Gm-Message-State: AOJu0Ywu4gCOael2NAxcaqAL7HRxNO5SWLa8QN31Fe2yHQ9+gkudO/Fr
+	fiE1bIgprBQE/bIlvJYo5EYtYZyJ1FmgRfDh10IFOgu/PF9iZqdogXOM1x8otISRNAxPw5wU+Sf
+	6cB7Wbqy7UlXBAbU3uX18FnxNEv8uA3c1im6N4AqMDlrr/ksFBDwSDWM=
+X-Received: by 2002:a05:6a20:c997:b0:1c0:e652:1b2f with SMTP id adf61e73a8af0-1c3fdd18396mr1988292637.33.1721229621172;
+        Wed, 17 Jul 2024 08:20:21 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG4/ki/F3RVX1SgOVKSHoLyh6+jjbGSAxasEiuoavCPRCvKSas4A+ciKv15wZTqxvuPZFITTQ==
+X-Received: by 2002:a05:6a20:c997:b0:1c0:e652:1b2f with SMTP id adf61e73a8af0-1c3fdd18396mr1988269637.33.1721229620770;
+        Wed, 17 Jul 2024 08:20:20 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7ec7dfddsm8221024b3a.101.2024.07.17.08.20.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 17 Jul 2024 08:20:20 -0700 (PDT)
+Date: Wed, 17 Jul 2024 23:20:17 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org,
+	"linux-f2fs-devel@lists.sourceforge.net" <linux-f2fs-devel@lists.sourceforge.net>,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: Re: [PATCH] f2fs: test for race condition in between atomic_write
+ and gc
+Message-ID: <20240717152017.5i6z4nmjst26ak7f@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240625030416.3553498-1-chao@kernel.org>
+ <20240716105710.v76icnjhqmvjmgsd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <fba75c06-b0d9-4e92-b673-9c11314744c1@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240717072700.93025-1-wqu@suse.com>
-In-Reply-To: <20240717072700.93025-1-wqu@suse.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Wed, 17 Jul 2024 12:25:09 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4W-QHnckrsO_ZLFUCqE3n9KEYCaj0EXmuUP2LseeHQiA@mail.gmail.com>
-Message-ID: <CAL3q7H4W-QHnckrsO_ZLFUCqE3n9KEYCaj0EXmuUP2LseeHQiA@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/012: fix a false alert due to socket/pipe files
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <fba75c06-b0d9-4e92-b673-9c11314744c1@kernel.org>
 
-On Wed, Jul 17, 2024 at 8:27=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
->
-> [BUG]
-> On my Archlinux VM, the test btrfs/012 always fail with the following
-> output diff:
->
->      QA output created by 012
->     +File /etc/pacman.d/gnupg/S.dirmngr is a socket while file /mnt/scrat=
-ch/etc/pacman.d/gnupg/S.dirmngr is a socket
->     +File /etc/pacman.d/gnupg/S.gpg-agent is a socket while file /mnt/scr=
-atch/etc/pacman.d/gnupg/S.gpg-agent is a socket
->     +File /etc/pacman.d/gnupg/S.gpg-agent.browser is a socket while file =
-/mnt/scratch/etc/pacman.d/gnupg/S.gpg-agent.browser is a socket
->     +File /etc/pacman.d/gnupg/S.gpg-agent.extra is a socket while file /m=
-nt/scratch/etc/pacman.d/gnupg/S.gpg-agent.extra is a socket
->     +File /etc/pacman.d/gnupg/S.gpg-agent.ssh is a socket while file /mnt=
-/scratch/etc/pacman.d/gnupg/S.gpg-agent.ssh is a socket
->     +File /etc/pacman.d/gnupg/S.keyboxd is a socket while file /mnt/scrat=
-ch/etc/pacman.d/gnupg/S.keyboxd is a socket
->     ...
->
-> [CAUSE]
-> It's a false alerts.
->
-> When diff hits two files which are not directory/softlink/regular files
-> (aka, socket/pipe/char/block files), they are all treated as
-> non-comparable.
-> In that case, diff would just do the above message.
->
-> And with Archlinux, pacman (the package manager) maintains its gpg
-> directory inside "/etc/pacman.d/gnupg", and the test case uses
-> "/etc" as the source directory to populate the target ext4 fs.
->
-> And the socket files inside "/etc/pacman.d/gnupg" is causing the false
-> alerts.
->
-> [FIX]
-> - Use fsstress to populate the fs
->   That covers all kind of operations, including creating special files.
->   And fsstress is very reproducible, with the seed saved to the full
->   log, it's much easier to reproduce than using the distro dependent
->   "/etc/" directory.
->
-> - Use fssum to save the digest and later verify the contents
->   It does not only verify the contents but also other things like
->   timestamps/xattrs/uid/gid/mode/etc.
->   And it's more comprehensive than the content oriented diff tool.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/btrfs/012     | 29 +++++++++++++++++------------
->  tests/btrfs/012.out |  6 ++++++
->  2 files changed, 23 insertions(+), 12 deletions(-)
->
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index a96efeff..d172d93f 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -23,13 +23,13 @@ _require_scratch_nocheck
->  _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
->  _require_command "$MKFS_EXT4_PROG" mkfs.ext4
->  _require_command "$E2FSCK_PROG" e2fsck
-> +_require_fssum
->  # ext4 does not support zoned block device
->  _require_non_zoned_device "${SCRATCH_DEV}"
->  _require_loop
->  _require_extra_fs ext4
->
-> -SOURCE_DIR=3D/etc
-> -BASENAME=3D$(basename $SOURCE_DIR)
-> +BASENAME=3D"stressdir"
->  BLOCK_SIZE=3D`_get_block_size $TEST_DIR`
->
->  # Create & populate an ext4 filesystem
-> @@ -38,17 +38,21 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seq=
-res.full 2>&1 || \
->  # Manual mount so we don't use -t btrfs or selinux context
->  mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
->
-> -_require_fs_space $SCRATCH_MNT $(du -s $SOURCE_DIR | ${AWK_PROG} '{print=
- $1}')
-> +echo "populating the initial ext fs:" >> $seqres.full
-> +mkdir "$SCRATCH_MNT/$BASENAME"
-> +$FSSTRESS_PROG -w -d "$SCRATCH_MNT/$BASENAME" -n 20 -p 500 >> $seqres.fu=
-ll
->
-> -$TIMEOUT_PROG 10 cp -aRP $SOURCE_DIR $SCRATCH_MNT
-> +# Create the checksum to verify later.
-> +$FSSUM_PROG -A -f -w $tmp.original "$SCRATCH_MNT/$BASENAME"
->  _scratch_unmount
->
->  # Convert it to btrfs, mount it, verify the data
->  $BTRFS_CONVERT_PROG $SCRATCH_DEV >> $seqres.full 2>&1 || \
->         _fail "btrfs-convert failed"
->  _try_scratch_mount || _fail "Could not mount new btrfs fs"
-> -# (Ignore the symlinks which may be broken/nonexistent)
-> -diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/$BASENAME/ 2>&1
-> +
-> +echo "Checking converted btrfs against the original one:"
-> +$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/$BASENAME
->
->  # Old ext4 image file should exist & be consistent
->  $E2FSCK_PROG -fn $SCRATCH_MNT/ext2_saved/image >> $seqres.full 2>&1 || \
-> @@ -58,13 +62,14 @@ $E2FSCK_PROG -fn $SCRATCH_MNT/ext2_saved/image >> $se=
-qres.full 2>&1 || \
->  mkdir -p $SCRATCH_MNT/mnt
->  mount -o loop $SCRATCH_MNT/ext2_saved/image $SCRATCH_MNT/mnt || \
->         _fail "could not loop mount saved ext4 image"
-> -# Ignore the symlinks which may be broken/nonexistent
-> -diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/mnt/$BASENAME/ 2>&1
-> +
-> +echo "Checking saved ext2 image against the original one:"
-> +$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/mnt/$BASENAME
->  umount $SCRATCH_MNT/mnt
->
-> -# Now put some fresh data on the btrfs fs
-> +echo "genereating new data on the converted btrfs" >> $seqres.full
+On Wed, Jul 17, 2024 at 10:12:16AM +0800, Chao Yu wrote:
+> On 2024/7/16 18:57, Zorro Lang wrote:
+> > On Tue, Jun 25, 2024 at 11:04:16AM +0800, Chao Yu wrote:
+> > > Test that we will simulate sqlite atomic write logic w/ below steps:
+> > > 1. create a regular file, and initialize it w/ 0xff data
+> > > 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+> > > 3. write transaction data
+> > > 4. trigger foreground GC to migrate data block of the file
+> > > 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+> > > 6. check consistency of transaction w/ in-memory and on-disk data
+> > > This is a regression test to check handling of race condition in
+> > > between atomic_write and GC.
+> > 
+> > Hi Chao,
+> > 
+> > Sorry for the late reviewing. As this's a regression test, so which onne
+> > kernel commit fix this known issue, please specify it by:
+> > 
+> > _fixed_by_kernel_commit $commit_id $commit_subject
+> 
+> Hi Zorro,
+> 
+> Since the fixed patch has not been merged yet, so what about adding this line
+> after merging the fix?
 
-Typo:  genereating -> generating
+Oh, sure, but generally they'd like to use "xxxxxxxxxxxx" to be the $commit_id
+(as a reminder) if there's not an assured id number. Then replace the "xxxxxx...."
+with the right id number after the patch merged. But it depends on you, just
+don't forget that :)
 
-With that fixed:
+Thanks,
+Zorro
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> 
+> > 
+> > > 
+> > > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> > > Cc: Daeho Jeong <daehojeong@google.com>
+> > > Signed-off-by: Chao Yu <chao@kernel.org>
+> > > ---
+> > >   tests/f2fs/003     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
+> > >   tests/f2fs/003.out | 11 +++++++++
+> > >   2 files changed, 72 insertions(+)
+> > >   create mode 100755 tests/f2fs/003
+> > >   create mode 100644 tests/f2fs/003.out
+> > > 
+> > > diff --git a/tests/f2fs/003 b/tests/f2fs/003
+> > > new file mode 100755
+> > > index 00000000..d8311c4c
+> > > --- /dev/null
+> > > +++ b/tests/f2fs/003
+> > > @@ -0,0 +1,61 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. f2fs/003
+> > > +#
+> > > +# Test that we will simulate sqlite atomic write logic w/ below steps:
+> > > +# 1. create a regular file, and initialize it w/ 0xff data
+> > > +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+> > > +# 3. write transaction data
+> > > +# 4. trigger foreground GC to migrate data block of the file
+> > > +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+> > > +# 6. check consistency of transaction w/ in-memory and on-disk data
+> > > +# This is a regression test to check handling of race condition in
+> > > +# between atomic_write and GC.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick
+> > > +
+> > > +. ./common/filter
+> > > +
+> > > +_supported_fs f2fs
+> >      ^^^^^
+> > This line is not necessary now.
+> > 
+> > > +_require_scratch
+> > > +_require_xfs_io_command "pwrite"
+> > 
+> > pwrite is a basic command of xfs_io, so I think this line is not necessary.
+> > 
+> > > +_require_xfs_io_command "fpunch"
+> > > +
+> > > +_scratch_mkfs >> $seqres.full
+> > > +_scratch_mount >> $seqres.full
+> > > +
+> > > +dbfile=$SCRATCH_MNT/dbfile
+> > > +foo=$SCRATCH_MNT/foo
+> > > +bar=$SCRATCH_MNT/bar
+> > > +
+> > > +$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
+> > > +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
+> > > +sync
+> > > +
+> > > +# start atomic_write on dbfile & write data to dbfile
+> > > +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
+> > 
+> > As there's a background process, shouldn't we do kill and wait in _cleanup
+> > to make sure unmount won't hit EBUSY?
+> > 
+> > > +$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
+> > > +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
+> > > +
+> > > +# persist all dirty data
+> > > +sync
+> > > +echo 3 > /proc/sys/vm/drop_caches
+> > > +
+> > > +# trigger foreground GC to migrate data block of atomic_file
+> > > +$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
+> > > +
+> > > +# wait for atomic_write commit completion
+> > > +sleep 5
+> > > +# print in-memory data
+> > > +od -x $dbfile
+> > > +echo 3 > /proc/sys/vm/drop_caches
+> > > +# print on-disk data
+> > > +od -x $dbfile
+> > 
+> > There's a common helper named "_hexdump" in common/rc, can that be used?
+> > 
+> > > +
+> > > +_scratch_unmount
+> > 
+> > The SCRATCH_DEV will be unmounted at the end of the test, don't need to
+> > do this manually if it's not a necessary test step.
+> 
+> Let me update this patch according to your comments, thanks.
+> 
+> Thanks,
+> 
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > +
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+> > > new file mode 100644
+> > > index 00000000..d6c8a637
+> > > --- /dev/null
+> > > +++ b/tests/f2fs/003.out
+> > > @@ -0,0 +1,11 @@
+> > > +QA output created by 003
+> > > +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+> > > +*
+> > > +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+> > > +*
+> > > +2000000
+> > > +0000000 0000 0000 0000 0000 0000 0000 0000 0000
+> > > +*
+> > > +0400000 ffff ffff ffff ffff ffff ffff ffff ffff
+> > > +*
+> > > +2000000
+> > > -- 
+> > > 2.40.1
+> > > 
+> > 
+> 
 
-Thanks.
-
->  mkdir -p $SCRATCH_MNT/new
-> -$TIMEOUT_PROG 10 cp -aRP $SOURCE_DIR $SCRATCH_MNT/new
-> +$FSSTRESS_PROG -w -d "$SCRATCH_MNT/new" -n 20 -p 500 >> $seqres.full
->
->  _scratch_unmount
->
-> @@ -78,8 +83,8 @@ $E2FSCK_PROG -fn $SCRATCH_DEV >> $seqres.full 2>&1 || \
->
->  # Mount the un-converted ext4 device & check the contents
->  mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
-> -# (Ignore the symlinks which may be broken/nonexistent)
-> -diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/$BASENAME/ 2>&1
-> +echo "Checking rolled back ext2 against the original one:"
-> +$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/$BASENAME
->
->  _scratch_unmount
->
-> diff --git a/tests/btrfs/012.out b/tests/btrfs/012.out
-> index 7aa5ae94..8ea81fad 100644
-> --- a/tests/btrfs/012.out
-> +++ b/tests/btrfs/012.out
-> @@ -1 +1,7 @@
->  QA output created by 012
-> +Checking converted btrfs against the original one:
-> +OK
-> +Checking saved ext2 image against the original one:
-> +OK
-> +Checking rolled back ext2 against the original one:
-> +OK
-> --
-> 2.45.2
->
->
