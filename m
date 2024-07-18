@@ -1,229 +1,97 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5BA333CC4;
-	Wed, 17 Jul 2024 22:55:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A5132E859;
+	Thu, 18 Jul 2024 16:11:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721256917; cv=none; b=IF7bjHUv6HAQi2ovsiNiz+14/649v6Sa80rsFgaH3HEeeU/O0uIgA4QszGh6z5mW8G846TK7lMhpKWeOZZGqlderQYUkGHtxbXyMN3PUJNfHpf0i27kQEsEGd4C6ftP1zavS10Ci4WyRi8OdEtlJCDoUonzFkGuv93ZNES5HmDo=
+	t=1721319095; cv=none; b=YaFVjUwVi5MR1HtTJ4BzziXWLw/ZYIiI+uqfyWzUlo5n1U6i3hF9pYqTNCITILbNp34YX4GjTxIUehsdKiUrqH9ZBMMiMySXTZ2wXs/sU7C73ayrhg8QdqbuQuS4hTInqT31SWT3RN5kVekvnnK/pfO6Vz3p4QItyNWkI9CpvRs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721256917; c=relaxed/simple;
-	bh=xJ7AtrcBou7kcHAwTBHYSKyu6/ylsoNEh9BO//fDGwk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EzZX80CdwzpUQlRkTgl5+allSLrqpeL8HYef4fNaCtU2/4/L30DbBGlsLZJjGskKBcGtOApfPHcStdr6MKApnZVug57WMeeIE/gLt6e4fPTOBNDqOU6Nw/sObf/Am6idlE2tVnAvrbj/W0QW8U821Sx5fsuAQl2fdczVLmvqpyw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=uvaNE9iA; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=uvaNE9iA; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1721319095; c=relaxed/simple;
+	bh=ERw8AaqucXQ7roB1jdSUMbhAPPgKqkJzkJQHsW/J45I=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ioQYTcK3HlH+jnWvtehmMDYtRJnPS7C3KVxEGdR6Z78ZAR8oSKNdk8ZJRe3F4sVqN/tQhmcPj1673BPhpMh3/kV+9YkSylceAlmhwfT8kAGQN+8+6sBEU7aK2oMWHzhvZ12hYbC2/NIQdfFAuMe1q5Rx5zEhOIYqGgc9AFB2ibo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hBaJrx57; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="uvaNE9iA";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="uvaNE9iA"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 148A321A35;
-	Wed, 17 Jul 2024 22:55:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1721256909; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=VRCm0oKggHnJVH4KyAuwUVcxmal7BdO4nfQABXka5YY=;
-	b=uvaNE9iAeB9NZODt6KDWVzYP3jtr1meSIeE0c9EXIbCw5JH8/J4l5TOlajgntzhQY33Bp3
-	EvzRavP3yf2yoFko9yMKnKl+SPUkW+PFQ0v1DcpgPOSx44MnDYyunHS37cr4vAsEEAmdAQ
-	WJShNpuzT/T+bpU7T8Poso5paTTLmaU=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1721256909; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=VRCm0oKggHnJVH4KyAuwUVcxmal7BdO4nfQABXka5YY=;
-	b=uvaNE9iAeB9NZODt6KDWVzYP3jtr1meSIeE0c9EXIbCw5JH8/J4l5TOlajgntzhQY33Bp3
-	EvzRavP3yf2yoFko9yMKnKl+SPUkW+PFQ0v1DcpgPOSx44MnDYyunHS37cr4vAsEEAmdAQ
-	WJShNpuzT/T+bpU7T8Poso5paTTLmaU=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 976D41368F;
-	Wed, 17 Jul 2024 22:55:07 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id GfP6E8tLmGaGDwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Wed, 17 Jul 2024 22:55:07 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH v2] fstests: btrfs/012: fix a false alert due to socket/pipe files
-Date: Thu, 18 Jul 2024 08:24:49 +0930
-Message-ID: <20240717225449.6535-1-wqu@suse.com>
-X-Mailer: git-send-email 2.45.2
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hBaJrx57"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B1A72C4AF09;
+	Thu, 18 Jul 2024 16:11:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721319094;
+	bh=ERw8AaqucXQ7roB1jdSUMbhAPPgKqkJzkJQHsW/J45I=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=hBaJrx57ZM0rvuK83CpRgap8hn0axR45mBRUV2rbViQsOh5YNYL0qFveV3TKDzdhV
+	 RGRX28a1qHPwev4MFthxaBYWvMuhKExzINkxv7b7fKoQc+c54pEDbhRCILmo7i2TZC
+	 pPpvO8oN6uvN7UvcbDEtjAJ7L+yqQ0DpMmsYfD42z8ZM+bwgEADyEhIJZ/pS+bjJ1f
+	 VQWoRvR8hT49ocjwqLlhHUFKM0AHdFygL/R1a5UB1TQlJ4LQ8G3SstMgnvqEkUNq7P
+	 QuFQmpXTQm/zTeJS+6I3MXwNYDjQUI2a1XOb+cmKwodcaGQi/nfi796dE+XD+Ws9hW
+	 tse5DoqBiyPGQ==
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-52e98087e32so582814e87.2;
+        Thu, 18 Jul 2024 09:11:34 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUWj+kfnx8/I9Yv3w7xnYZgrJRYFvi25+/dsGsTM3jpL0Te6+CZkb/RDKBhckoEyTmn0u6S0o/qHgZ5Db3IJ4VA4ZPm6Vxku61dkpCgIelj49pLZA9GF4ChlnpZYInyJjPSqqgj
+X-Gm-Message-State: AOJu0YzPKuIoq5XP/CruzqQkcPZFX+J3VH5ZBx09h0TvqbZ1h9Jh3cyo
+	mBcwQwlhAH9iQS0lURQqRy9p5TAjJwj7PBsj1T+0WTLhn0ofRu7hitDA8d0FKw3+mRzUfFY0SI3
+	HXRsCFUtrSI976aGdPVvGN5MPE2w=
+X-Google-Smtp-Source: AGHT+IG+jfyuvmYKotuYHm4Ir0AOHbtapNW6a2hum+NEiwK61L7piKcGuETbAgNKGgwv3XSpoEoZ8A147yIij326Ur0=
+X-Received: by 2002:a05:6512:3b20:b0:52e:9ebe:7318 with SMTP id
+ 2adb3069b0e04-52ee54270c4mr4081729e87.43.1721319093018; Thu, 18 Jul 2024
+ 09:11:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Flag: NO
-X-Spam-Score: 1.20
-X-Spamd-Result: default: False [1.20 / 50.00];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCPT_COUNT_THREE(0.00)[3];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_EQ_ENVFROM(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Level: *
+References: <20240718155754.15499-1-dsterba@suse.com>
+In-Reply-To: <20240718155754.15499-1-dsterba@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Thu, 18 Jul 2024 17:10:54 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4c8dMqE=Ms=T-kytXX6ZY+m2f7qM4OhLSkS1rfnOQn=w@mail.gmail.com>
+Message-ID: <CAL3q7H4c8dMqE=Ms=T-kytXX6ZY+m2f7qM4OhLSkS1rfnOQn=w@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/220: remove integrity checker bits
+To: David Sterba <dsterba@suse.com>
+Cc: linux-fsdevel@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	fstests <fstests@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-[BUG]
-On my Archlinux VM, the test btrfs/012 always fail with the following
-output diff:
+On Thu, Jul 18, 2024 at 5:00=E2=80=AFPM David Sterba <dsterba@suse.com> wro=
+te:
+>
+> We've deleted the integrity checker code in 6.8, no point testing it.
+>
+> Signed-off-by: David Sterba <dsterba@suse.com>
 
-     QA output created by 012
-    +File /etc/pacman.d/gnupg/S.dirmngr is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.dirmngr is a socket
-    +File /etc/pacman.d/gnupg/S.gpg-agent is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.gpg-agent is a socket
-    +File /etc/pacman.d/gnupg/S.gpg-agent.browser is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.gpg-agent.browser is a socket
-    +File /etc/pacman.d/gnupg/S.gpg-agent.extra is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.gpg-agent.extra is a socket
-    +File /etc/pacman.d/gnupg/S.gpg-agent.ssh is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.gpg-agent.ssh is a socket
-    +File /etc/pacman.d/gnupg/S.keyboxd is a socket while file /mnt/scratch/etc/pacman.d/gnupg/S.keyboxd is a socket
-    ...
-
-[CAUSE]
-It's a false alerts.
-
-When diff hits two files which are not directory/softlink/regular files
-(aka, socket/pipe/char/block files), they are all treated as
-non-comparable.
-In that case, diff would just do the above message.
-
-And with Archlinux, pacman (the package manager) maintains its gpg
-directory inside "/etc/pacman.d/gnupg", and the test case uses
-"/etc" as the source directory to populate the target ext4 fs.
-
-And the socket files inside "/etc/pacman.d/gnupg" is causing the false
-alerts.
-
-[FIX]
-- Use fsstress to populate the fs
-  That covers all kind of operations, including creating special files.
-  And fsstress is very reproducible, with the seed saved to the full
-  log, it's much easier to reproduce than using the distro dependent
-  "/etc/" directory.
-
-- Use fssum to save the digest and later verify the contents
-  It does not only verify the contents but also other things like
-  timestamps/xattrs/uid/gid/mode/etc.
-  And it's more comprehensive than the content oriented diff tool.
+I think you wanted to CC the fstests list and not linux-fsdevel, so I
+just CC'ed it.
 
 Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changlog:
-v2:
-- Fix a typo in the full log output
----
- tests/btrfs/012     | 29 +++++++++++++++++------------
- tests/btrfs/012.out |  6 ++++++
- 2 files changed, 23 insertions(+), 12 deletions(-)
 
-diff --git a/tests/btrfs/012 b/tests/btrfs/012
-index a96efeff..b23e039f 100755
---- a/tests/btrfs/012
-+++ b/tests/btrfs/012
-@@ -23,13 +23,13 @@ _require_scratch_nocheck
- _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
- _require_command "$MKFS_EXT4_PROG" mkfs.ext4
- _require_command "$E2FSCK_PROG" e2fsck
-+_require_fssum
- # ext4 does not support zoned block device
- _require_non_zoned_device "${SCRATCH_DEV}"
- _require_loop
- _require_extra_fs ext4
- 
--SOURCE_DIR=/etc
--BASENAME=$(basename $SOURCE_DIR)
-+BASENAME="stressdir"
- BLOCK_SIZE=`_get_block_size $TEST_DIR`
- 
- # Create & populate an ext4 filesystem
-@@ -38,17 +38,21 @@ $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
- # Manual mount so we don't use -t btrfs or selinux context
- mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
- 
--_require_fs_space $SCRATCH_MNT $(du -s $SOURCE_DIR | ${AWK_PROG} '{print $1}')
-+echo "populating the initial ext fs:" >> $seqres.full
-+mkdir "$SCRATCH_MNT/$BASENAME"
-+$FSSTRESS_PROG -w -d "$SCRATCH_MNT/$BASENAME" -n 20 -p 500 >> $seqres.full
- 
--$TIMEOUT_PROG 10 cp -aRP $SOURCE_DIR $SCRATCH_MNT
-+# Create the checksum to verify later.
-+$FSSUM_PROG -A -f -w $tmp.original "$SCRATCH_MNT/$BASENAME"
- _scratch_unmount
- 
- # Convert it to btrfs, mount it, verify the data
- $BTRFS_CONVERT_PROG $SCRATCH_DEV >> $seqres.full 2>&1 || \
- 	_fail "btrfs-convert failed"
- _try_scratch_mount || _fail "Could not mount new btrfs fs"
--# (Ignore the symlinks which may be broken/nonexistent)
--diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/$BASENAME/ 2>&1
-+
-+echo "Checking converted btrfs against the original one:"
-+$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/$BASENAME
- 
- # Old ext4 image file should exist & be consistent
- $E2FSCK_PROG -fn $SCRATCH_MNT/ext2_saved/image >> $seqres.full 2>&1 || \
-@@ -58,13 +62,14 @@ $E2FSCK_PROG -fn $SCRATCH_MNT/ext2_saved/image >> $seqres.full 2>&1 || \
- mkdir -p $SCRATCH_MNT/mnt
- mount -o loop $SCRATCH_MNT/ext2_saved/image $SCRATCH_MNT/mnt || \
- 	_fail "could not loop mount saved ext4 image"
--# Ignore the symlinks which may be broken/nonexistent
--diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/mnt/$BASENAME/ 2>&1
-+
-+echo "Checking saved ext2 image against the original one:"
-+$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/mnt/$BASENAME
- umount $SCRATCH_MNT/mnt
- 
--# Now put some fresh data on the btrfs fs
-+echo "Generating new data on the converted btrfs" >> $seqres.full
- mkdir -p $SCRATCH_MNT/new 
--$TIMEOUT_PROG 10 cp -aRP $SOURCE_DIR $SCRATCH_MNT/new
-+$FSSTRESS_PROG -w -d "$SCRATCH_MNT/new" -n 20 -p 500 >> $seqres.full
- 
- _scratch_unmount
- 
-@@ -78,8 +83,8 @@ $E2FSCK_PROG -fn $SCRATCH_DEV >> $seqres.full 2>&1 || \
- 
- # Mount the un-converted ext4 device & check the contents
- mount -t ext4 $SCRATCH_DEV $SCRATCH_MNT
--# (Ignore the symlinks which may be broken/nonexistent)
--diff --no-dereference -r $SOURCE_DIR $SCRATCH_MNT/$BASENAME/ 2>&1
-+echo "Checking rolled back ext2 against the original one:"
-+$FSSUM_PROG -r $tmp.original $SCRATCH_MNT/$BASENAME
- 
- _scratch_unmount
- 
-diff --git a/tests/btrfs/012.out b/tests/btrfs/012.out
-index 7aa5ae94..8ea81fad 100644
---- a/tests/btrfs/012.out
-+++ b/tests/btrfs/012.out
-@@ -1 +1,7 @@
- QA output created by 012
-+Checking converted btrfs against the original one:
-+OK
-+Checking saved ext2 image against the original one:
-+OK
-+Checking rolled back ext2 against the original one:
-+OK
--- 
-2.45.2
-
+> ---
+>  tests/btrfs/220 | 5 -----
+>  1 file changed, 5 deletions(-)
+>
+> diff --git a/tests/btrfs/220 b/tests/btrfs/220
+> index b98d4149dfd270..59d72a972fdd16 100755
+> --- a/tests/btrfs/220
+> +++ b/tests/btrfs/220
+> @@ -192,11 +192,6 @@ test_subvol()
+>  # These options are enable at kernel compile time, so no bother if they =
+fail
+>  test_optional_kernel_features()
+>  {
+> -       # Test options that are enabled by kernel config, and so can fail=
+ safely
+> -       test_optional_mount_opts "check_int" "check_int"
+> -       test_optional_mount_opts "check_int_data" "check_int_data"
+> -       test_optional_mount_opts "check_int_print_mask=3D123" "check_int_=
+print_mask=3D123"
+> -
+>         test_should_fail "fragment=3Dinvalid"
+>         test_optional_mount_opts "fragment=3Dall" "fragment=3Ddata,fragme=
+nt=3Dmetadata"
+>         test_optional_mount_opts "fragment=3Ddata" "fragment=3Ddata"
+> --
+> 2.45.0
+>
+>
