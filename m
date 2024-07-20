@@ -1,30 +1,30 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9908ADF60
-	for <fstests@vger.kernel.org>; Sat, 20 Jul 2024 07:43:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D383E1803D
+	for <fstests@vger.kernel.org>; Sat, 20 Jul 2024 07:45:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721461403; cv=none; b=a/zY+AsQcxGvg74/AvrtCvwAUXJ1KOQ+slg+GhG0Pa1t5S58Td/zP5QuIfOLcNZWHm6DorwabXpP6UydLSuXdnBvA59RfBGmfdenPsN4OmknimH0A0pRb35EPPs6x801ljuoG2V96QYza0J+FjtLafNWOPClDesJcqYc+NHIhC4=
+	t=1721461550; cv=none; b=VJpSlfYiZZmUcMwIBUEFRge3HUzlLJ9fpLhkq3sX4qLYjvE6QCzlj9Jca4jzkZe9ae7iCbjSxrUVIomkXHCfdnOVhn3TE5g5FFu8zIK5SEspyZMscqsuzo4HVqn+aVake0eonqUindmpggqmhux7eIo9cizxgm7KIN2boiJNwqk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721461403; c=relaxed/simple;
-	bh=SXN+gBJcErBmdJHeulGYWX8/O+1JBPPNS2SRTZEpCgI=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=XHl0NPYorvxaOSjm7+Rp3j2lFXYvhOaJMlymocScjggljXd4QHVE3DuLXxSkrVcUk4L+ajPUUmJR90HQMqtxeDKuQ2i8bELfjcskp/cg6Kv1n9Dd+5mRyYZ8PRngx5oXcj/3JMHI42H8/SHe9PaiZXBB3bpfXefYjG3xvkJ9UWo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cPLgDzP1; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1721461550; c=relaxed/simple;
+	bh=dCyD68OyC/gKP1RXCzAdoiPNMWoVuTKpjEPYoboihqk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=b9PdHtkPmv2XFBLGsH4NqgSCSA/jpntqj2jaAR0R8kJj6OzrBBQ+OtPQMiKvzmIjD3ee924/ABVwrQwkQGvVwsTWVn9hIjdHa3Y01mvTRK5La1GO7T7Isj07CbgAjkVDAXdGc6DjLD7IgkN1aIJHMISUTzOuPg37SM4puTzrEM8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=R75o2qib; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cPLgDzP1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8DFAAC2BD10;
-	Sat, 20 Jul 2024 07:43:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="R75o2qib"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D466BC2BD10;
+	Sat, 20 Jul 2024 07:45:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1721461403;
-	bh=SXN+gBJcErBmdJHeulGYWX8/O+1JBPPNS2SRTZEpCgI=;
+	s=k20201202; t=1721461550;
+	bh=dCyD68OyC/gKP1RXCzAdoiPNMWoVuTKpjEPYoboihqk=;
 	h=From:To:Cc:Subject:Date:From;
-	b=cPLgDzP1xDCVd2Wy/UdRsW7Xlq3BYU/Y/CALW15l82YVagp2mEqc/c6O/WIWwEmNO
-	 99kQvhnIii771O/efwiWgrk9riv788Xx34eV1HFQkUKzkYezn7DbBg/6eg1DtQE+8q
-	 28g/M3m9bPT7VhxDmqwumezttGi1BCU0xWCMOHwJw8wGpS7EK7u5cZ3AsaabwdOMbS
-	 jrelTeBtv6X20V4tjTiEbnFITpn+G2iTrIi9YQB0xr/bt8n9wLY+qEWgXwpwHFUhWO
-	 6+5MU5wHmBGGtonVqRbbNQEtbWlSUJmuLEsv8MYmmLnqdVDzahCj0pvNsSMAQBF8Yp
-	 K7Gf7ItFaRy3Q==
+	b=R75o2qibEPvmIH7ju9BCmTzUqerYB8T5URb4lNIfCVfGepQ+fKVOQNwTBTD6XNRTe
+	 7VrPXWssg+/tK6+4zmeYOM5o+wjORKr1cX284PJdC/rFXdciSKoD8IFls7qszVIEHA
+	 fGoMu7OjCXqv0FsPn5bJE6/JeVLKklySr2ZR07Y5RgEfh7FxzoxrDkxmosnJhlafT4
+	 Ck7TVIycsi2ISID2MJf38U0cth04yRHV+Ip4xayGlzsBGZUjEnhLSF+TqsYBu4Pls1
+	 762HEbr+3lnRPlFS7vhbw7QSkJDp6dgdKxRnbuIoyHJ7fpiPGH801M04/bUf8VRqfV
+	 eAvYlTzf0XK7A==
 From: Chao Yu <chao@kernel.org>
 To: Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org,
@@ -32,9 +32,9 @@ Cc: fstests@vger.kernel.org,
 	Chao Yu <chao@kernel.org>,
 	Jaegeuk Kim <jaegeuk@kernel.org>,
 	Daeho Jeong <daehojeong@google.com>
-Subject: [PATCH v2] f2fs: test for race condition in between atomic_write and gc
-Date: Sat, 20 Jul 2024 15:43:16 +0800
-Message-Id: <20240720074316.3302470-1-chao@kernel.org>
+Subject: [PATCH v2] f2fs: test for race condition in between atomic_write and dio
+Date: Sat, 20 Jul 2024 15:45:40 +0800
+Message-Id: <20240720074540.3303154-1-chao@kernel.org>
 X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -48,11 +48,10 @@ Test that we will simulate sqlite atomic write logic w/ below steps:
 1. create a regular file, and initialize it w/ 0xff data
 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
 3. write transaction data
-4. trigger foreground GC to migrate data block of the file
-5. commit and end the transaction
-6. check consistency of transaction
+4. trigger direct read/write IO to check whether it fails or not
+5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
 This is a regression test to check handling of race condition in
-between atomic_write and GC.
+between atomic_write and direct IO.
 
 Cc: Jaegeuk Kim <jaegeuk@kernel.org>
 Cc: Daeho Jeong <daehojeong@google.com>
@@ -62,33 +61,33 @@ v2:
 - add kill&wait in _clean() to avoid umount failure
 - some cleanups
 - use exported helpler
- tests/f2fs/003     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/003.out | 11 ++++++++
- 2 files changed, 76 insertions(+)
- create mode 100755 tests/f2fs/003
- create mode 100644 tests/f2fs/003.out
+ tests/f2fs/004     | 48 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/004.out |  3 +++
+ 2 files changed, 51 insertions(+)
+ create mode 100755 tests/f2fs/004
+ create mode 100644 tests/f2fs/004.out
 
-diff --git a/tests/f2fs/003 b/tests/f2fs/003
+diff --git a/tests/f2fs/004 b/tests/f2fs/004
 new file mode 100755
-index 00000000..c30e874a
+index 00000000..d71e99ea
 --- /dev/null
-+++ b/tests/f2fs/003
-@@ -0,0 +1,65 @@
++++ b/tests/f2fs/004
+@@ -0,0 +1,48 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2024 Oppo.  All Rights Reserved.
 +#
-+# FS QA Test No. f2fs/003
++# FS QA Test No. f2fs/004
 +#
-+# Test that we will simulate sqlite atomic write logic w/ below steps:
++# Test that we will simulate race case in between sqlite atomic write
++# and direct IO w/ below steps:
 +# 1. create a regular file, and initialize it w/ 0xff data
 +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
 +# 3. write transaction data
-+# 4. trigger foreground GC to migrate data block of the file
++# 4. trigger direct read/write IO to check whether it fails or not
 +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
-+# 6. check consistency of transaction w/ in-memory and on-disk data
 +# This is a regression test to check handling of race condition in
-+# between atomic_write and GC.
++# between atomic_write and direct IO.
 +#
 +. ./common/preamble
 +_begin_fstest auto quick
@@ -102,60 +101,35 @@ index 00000000..c30e874a
 +}
 +
 +_require_scratch
-+_require_xfs_io_command "fpunch"
-+
++_require_odirect
 +_scratch_mkfs >> $seqres.full
 +_scratch_mount >> $seqres.full
 +
 +dbfile=$SCRATCH_MNT/dbfile
-+foo=$SCRATCH_MNT/foo
-+bar=$SCRATCH_MNT/bar
-+
-+$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
-+$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
-+sync
 +
 +# start atomic_write on dbfile & write data to dbfile
++touch $dbfile
 +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
 +atomic_write_pid=$!
 +
-+$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
-+$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
-+
-+# persist all dirty data
-+sync
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+# trigger foreground GC to migrate data block of atomic_file
-+$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
++# simulate concurrent direct read/write IO
++$XFS_IO_PROG -d -c "pread 0 128k" $dbfile
++$XFS_IO_PROG -d -c "pwrite 0 128k" $dbfile
 +
 +# wait for atomic_write commit completion
 +sleep 5
-+# print in-memory data
-+_hexdump $dbfile
-+echo 3 > /proc/sys/vm/drop_caches
-+# print on-disk data
-+_hexdump $dbfile
 +
 +status=0
 +exit
-diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+diff --git a/tests/f2fs/004.out b/tests/f2fs/004.out
 new file mode 100644
-index 00000000..64698d84
+index 00000000..3af79541
 --- /dev/null
-+++ b/tests/f2fs/003.out
-@@ -0,0 +1,11 @@
-+QA output created by 003
-+000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
-+*
-+020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
-+*
-+080000
-+000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
-+*
-+020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
-+*
-+080000
++++ b/tests/f2fs/004.out
+@@ -0,0 +1,3 @@
++QA output created by 004
++pread: Operation not supported
++pwrite: Operation not supported
 -- 
 2.40.1
 
