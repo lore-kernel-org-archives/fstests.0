@@ -1,36 +1,41 @@
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF3E9101E4
-	for <fstests@vger.kernel.org>; Sat, 20 Jul 2024 07:16:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.188
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9908ADF60
+	for <fstests@vger.kernel.org>; Sat, 20 Jul 2024 07:43:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721459783; cv=none; b=khEOGayXRMxFcpzqWECihozVm37tORzRTUgSiPQw3BltiNA9WO05+9GZ/vryzBX1DJ9xwqiXoYBbw6R/Mq6ryGyyLyGIRcnfOkQINJLpOUaGDtoxPgQeJ/kieC/suVrUiHuPI/nHPOaHnix8saUFG7at8Z5HOiVXeUO4jm5wm2Q=
+	t=1721461403; cv=none; b=a/zY+AsQcxGvg74/AvrtCvwAUXJ1KOQ+slg+GhG0Pa1t5S58Td/zP5QuIfOLcNZWHm6DorwabXpP6UydLSuXdnBvA59RfBGmfdenPsN4OmknimH0A0pRb35EPPs6x801ljuoG2V96QYza0J+FjtLafNWOPClDesJcqYc+NHIhC4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721459783; c=relaxed/simple;
-	bh=g9j6CRNvr7KG8D+t49NjKParqsbudVCfSMx8O6pdrQU=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=hHY5NKqNyHdGaYRbzu6vglhf+c7Me2Y5ScmY9fk7VTWO2oGcwGFQA7rj8Wd0HDocktccxYxzqN9H+9IyPw9zB/gWbpGrWc+DQ0rww5dy1XZ++Z/tDal9n2vRXyJH6dlVdMMniEcSNI2XbVof5HC+c/bvEM5IIl3yDx7trs70k88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.188
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.88.194])
-	by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4WQyTY1q4dzdj6f;
-	Sat, 20 Jul 2024 15:14:25 +0800 (CST)
-Received: from kwepemf100006.china.huawei.com (unknown [7.202.181.220])
-	by mail.maildlp.com (Postfix) with ESMTPS id 5D5891401E9;
-	Sat, 20 Jul 2024 15:16:10 +0800 (CST)
-Received: from localhost.localdomain (10.175.104.67) by
- kwepemf100006.china.huawei.com (7.202.181.220) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Sat, 20 Jul 2024 15:16:09 +0800
-From: Yang Erkun <yangerkun@huawei.com>
-To: <zlang@kernel.org>
-CC: <fstests@vger.kernel.org>, <linux-mm@kvack.org>, <hughd@google.com>,
-	<akpm@linux-foundation.org>, <yoyang@redhat.com>, <yangerkun@huawei.com>
-Subject: [PATCH] generic/732: don't run it on tmpfs
-Date: Sat, 20 Jul 2024 15:13:23 +0800
-Message-ID: <20240720071323.2893437-1-yangerkun@huawei.com>
-X-Mailer: git-send-email 2.39.2
+	s=arc-20240116; t=1721461403; c=relaxed/simple;
+	bh=SXN+gBJcErBmdJHeulGYWX8/O+1JBPPNS2SRTZEpCgI=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=XHl0NPYorvxaOSjm7+Rp3j2lFXYvhOaJMlymocScjggljXd4QHVE3DuLXxSkrVcUk4L+ajPUUmJR90HQMqtxeDKuQ2i8bELfjcskp/cg6Kv1n9Dd+5mRyYZ8PRngx5oXcj/3JMHI42H8/SHe9PaiZXBB3bpfXefYjG3xvkJ9UWo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cPLgDzP1; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cPLgDzP1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8DFAAC2BD10;
+	Sat, 20 Jul 2024 07:43:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721461403;
+	bh=SXN+gBJcErBmdJHeulGYWX8/O+1JBPPNS2SRTZEpCgI=;
+	h=From:To:Cc:Subject:Date:From;
+	b=cPLgDzP1xDCVd2Wy/UdRsW7Xlq3BYU/Y/CALW15l82YVagp2mEqc/c6O/WIWwEmNO
+	 99kQvhnIii771O/efwiWgrk9riv788Xx34eV1HFQkUKzkYezn7DbBg/6eg1DtQE+8q
+	 28g/M3m9bPT7VhxDmqwumezttGi1BCU0xWCMOHwJw8wGpS7EK7u5cZ3AsaabwdOMbS
+	 jrelTeBtv6X20V4tjTiEbnFITpn+G2iTrIi9YQB0xr/bt8n9wLY+qEWgXwpwHFUhWO
+	 6+5MU5wHmBGGtonVqRbbNQEtbWlSUJmuLEsv8MYmmLnqdVDzahCj0pvNsSMAQBF8Yp
+	 K7Gf7ItFaRy3Q==
+From: Chao Yu <chao@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: [PATCH v2] f2fs: test for race condition in between atomic_write and gc
+Date: Sat, 20 Jul 2024 15:43:16 +0800
+Message-Id: <20240720074316.3302470-1-chao@kernel.org>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,31 +43,119 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
- kwepemf100006.china.huawei.com (7.202.181.220)
 
-Like what 4fd042e0465c("generic/732: don't run it on NFS") say, the same
-options for tmpfs won't share the same backend. Skip it for tmpfs.
+Test that we will simulate sqlite atomic write logic w/ below steps:
+1. create a regular file, and initialize it w/ 0xff data
+2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+3. write transaction data
+4. trigger foreground GC to migrate data block of the file
+5. commit and end the transaction
+6. check consistency of transaction
+This is a regression test to check handling of race condition in
+between atomic_write and GC.
 
-Signed-off-by: Yang Erkun <yangerkun@huawei.com>
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Daeho Jeong <daehojeong@google.com>
+Signed-off-by: Chao Yu <chao@kernel.org>
 ---
- tests/generic/732 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+v2:
+- add kill&wait in _clean() to avoid umount failure
+- some cleanups
+- use exported helpler
+ tests/f2fs/003     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/003.out | 11 ++++++++
+ 2 files changed, 76 insertions(+)
+ create mode 100755 tests/f2fs/003
+ create mode 100644 tests/f2fs/003.out
 
-diff --git a/tests/generic/732 b/tests/generic/732
-index 7a40f49b..2b83f216 100755
---- a/tests/generic/732
-+++ b/tests/generic/732
-@@ -22,7 +22,7 @@ _cleanup()
- }
- 
- # real QA test starts here
--_supported_fs ^nfs ^overlay
-+_supported_fs ^nfs ^overlay ^tmpfs
- 
- _require_test
- _require_scratch
+diff --git a/tests/f2fs/003 b/tests/f2fs/003
+new file mode 100755
+index 00000000..c30e874a
+--- /dev/null
++++ b/tests/f2fs/003
+@@ -0,0 +1,65 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2024 Oppo.  All Rights Reserved.
++#
++# FS QA Test No. f2fs/003
++#
++# Test that we will simulate sqlite atomic write logic w/ below steps:
++# 1. create a regular file, and initialize it w/ 0xff data
++# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
++# 3. write transaction data
++# 4. trigger foreground GC to migrate data block of the file
++# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
++# 6. check consistency of transaction w/ in-memory and on-disk data
++# This is a regression test to check handling of race condition in
++# between atomic_write and GC.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++. ./common/filter
++
++_cleanup()
++{
++	kill -9 $atomic_write_pid > /dev/null 2>&1
++	wait > /dev/null 2>&1
++}
++
++_require_scratch
++_require_xfs_io_command "fpunch"
++
++_scratch_mkfs >> $seqres.full
++_scratch_mount >> $seqres.full
++
++dbfile=$SCRATCH_MNT/dbfile
++foo=$SCRATCH_MNT/foo
++bar=$SCRATCH_MNT/bar
++
++$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
++$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
++sync
++
++# start atomic_write on dbfile & write data to dbfile
++$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
++atomic_write_pid=$!
++
++$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
++$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
++
++# persist all dirty data
++sync
++echo 3 > /proc/sys/vm/drop_caches
++
++# trigger foreground GC to migrate data block of atomic_file
++$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
++
++# wait for atomic_write commit completion
++sleep 5
++# print in-memory data
++_hexdump $dbfile
++echo 3 > /proc/sys/vm/drop_caches
++# print on-disk data
++_hexdump $dbfile
++
++status=0
++exit
+diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+new file mode 100644
+index 00000000..64698d84
+--- /dev/null
++++ b/tests/f2fs/003.out
+@@ -0,0 +1,11 @@
++QA output created by 003
++000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
++*
++080000
++000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
++*
++020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
++*
++080000
 -- 
-2.39.2
+2.40.1
 
