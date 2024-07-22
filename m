@@ -1,101 +1,157 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0712B147C80;
-	Sat, 20 Jul 2024 17:27:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D5EE17BC9;
+	Mon, 22 Jul 2024 09:00:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721496448; cv=none; b=mTEXXFvuD7lZO9S8lkjRU4Lzc5Po+8gUchU8MKoZ382vruP3PEcRzBhd4kKBAUYpLFg008hyHcbCX7dCQkdRuMYoPLLeKVVPtJJ6mDLM/ibWUDckCiwPas73l65+/FXy31FSQL277RN2CXZQekAYWGxXCEmwMR0hDRfYaxouTK4=
+	t=1721638818; cv=none; b=gmqFLmvqvDIu8zflLAxxmluWLabA+4c0AgqhPiObN8+4Pu5ix7mFerwk4mDuVaZX1B3UkNYTj1gDBDt31Pc+PMTHykoS0Vg8EW1gIrOwoWB2/dTsUq5CuPXkFowj5HoP+dzT+Ex5Sz+Gk4vlrMJwi6NP6Ho9PXBiX7dxJC8rhLI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721496448; c=relaxed/simple;
-	bh=UTJTDTaY+qnqubzTCRfxofaQ3C7yFMD+fihOtl72oSY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Td8Htp2X5cGLC0OAwqVjqHfs905QEwg/nocNV0oCAQQ0mDmyJe824clhjQ/cyfLiUMLIAsZs7F8KMuo0Qw2qFiIBg0f0WFzYrPMycIT+A5xFICm0tinXuSUTteF7dgyIkevNCzWWD9Dh15HniJSlmVvJUudSMcHO+9MBMPskDDg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ptJaJ1d1; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1721638818; c=relaxed/simple;
+	bh=JLcAuyPiDSx30GwijESCvZoCYSsXqen8tvQhGfPrm7c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OORxaEjQA/zKu2+Ays/lHUaPZnkx4r15aLSINZYeZKCEgYRpZ6AiHtMM2ZwXDPvr4XOhqTr11jETf6+A9XrTQ7DGiOhp0s3tCwPexJY+vxAKkcYGqUzccuVRydFg0089AjMzdiRxtZUGWut/xGGjB+dUISXYb0w862Uz4y2b5bA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=ZerB9KeA; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=Dz9WzWKj; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=EO+BcFlt; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=kq0XYAPn; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ptJaJ1d1"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC359C4AF09;
-	Sat, 20 Jul 2024 17:27:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1721496447;
-	bh=UTJTDTaY+qnqubzTCRfxofaQ3C7yFMD+fihOtl72oSY=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=ptJaJ1d1OBSxvNAk3kdqNa7OThSg2NQIFMwJq92asDC59lMZSROiLrtiIm6blivNM
-	 +X88gNfYS+EK+G/l6JkIqzW3CIuVcdraFKpvz6Bt4Ss1VzjxioVi2JG888qt37h56G
-	 GY4slK6OnGvx9Z8TgNAn3mU31hCkjmn1jexSWRUXCNKm2eo38knv1s9CCGMVL5ovS7
-	 Mj29Nrw9WWVjwEmK2GTMSSCNBjYQeHY/IuVmEWKL5QOanu4boT7C0xzoKPa/npKH80
-	 dNz0w0sVlMGIDDir4WF4Zr3m/NeK0Ipg74Bqc0jhIfrO6RUmTVtqJK8iBcXA+jhl4Z
-	 yWRFyRyQHFdcQ==
-Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-a77e7a6cfa7so302954566b.1;
-        Sat, 20 Jul 2024 10:27:27 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCXaL8m+nSIv45LdWtj6+jLZjkQANvkodIKOjqvN0FUe90t9LzVw7cCh67VE1ne3vZxsaM7g/Gtg7EmM9LUjKYZUABg0YNLrgk+pMFVq+wPhJlZzpr4xqRaLlZ9qe2s1PW4C4PgA
-X-Gm-Message-State: AOJu0Yxdtt+SBhUVBH3nR2cZB8nqZ/taUJ7QkRS2o8fXPounYS02qJw7
-	K0TIz58PBRu0gIHl/XrKf2ruyteifjg7ThiPCZDNYiflE1WicrIdnnIw90Qt7bRfUy4GD833/jK
-	QWOBfMicZKiTTkfCh+y3tgXfAlbk=
-X-Google-Smtp-Source: AGHT+IEfX4vbO7ZsYz7RPnPZl97yq+vWxd0um0lpMgys0EZt9R5flB9TwEyRmSHmLaRcjtfJ+paLO00KOA+4GdDEjP4=
-X-Received: by 2002:a17:906:448f:b0:a77:cdaa:88ab with SMTP id
- a640c23a62f3a-a7a01119884mr741609766b.15.1721496446233; Sat, 20 Jul 2024
- 10:27:26 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="ZerB9KeA";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="Dz9WzWKj";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="EO+BcFlt";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="kq0XYAPn"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id BB88E1FB57;
+	Mon, 22 Jul 2024 09:00:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1721638814; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DJB5XV0FFOvBs4JvmakQ5Jf3QQ6Nlki0oGRThRpQx04=;
+	b=ZerB9KeAoC/Qb6ux5YuIWdkGVTGZ0eNBykK9nNkxOan4r4dZ6YcS012m1g91qpbfJR1p6l
+	35vKs/jJZwNnXkKYAUASi3lg0QflYQRTQxpUQNr43WSmdQ3IkP7J81DFd3ZaDKjzGvlOUr
+	5WSGhoLR/lc6xib3O31gRqXZTmq8AQk=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1721638814;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DJB5XV0FFOvBs4JvmakQ5Jf3QQ6Nlki0oGRThRpQx04=;
+	b=Dz9WzWKj4/yPCQUOjpYkL8hs+ulr1qns8Z434ZHFkJGRRoBha4gvt8eLvUDODX/fpwvYND
+	T9u9baF40+454cAA==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=EO+BcFlt;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=kq0XYAPn
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1721638812; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DJB5XV0FFOvBs4JvmakQ5Jf3QQ6Nlki0oGRThRpQx04=;
+	b=EO+BcFltopxN5MEedbkTKXtfdPWF2jvEATCLj5+tozALURZIQTBcMPrtVeLyt5uroMBjLs
+	0cYEO2HgX9flK++3wTBgpNlm/pyLJKzs0ASZ5JEsoDfVeUcbCIzBM66Tik49qEH3rfJFbd
+	oWjdomn/u68xQlkGmbk/n3IgF+pU2WM=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1721638812;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DJB5XV0FFOvBs4JvmakQ5Jf3QQ6Nlki0oGRThRpQx04=;
+	b=kq0XYAPn5xIieWgtgglBQPLp8GIOShK4lUhS1c+IgrCExk9iKk2qA3mi88koLszv8U7P8I
+	z0iih/bIIPaW2PBw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id AD4E2136A9;
+	Mon, 22 Jul 2024 09:00:12 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id Lx9FKpwfnmbpZAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Mon, 22 Jul 2024 09:00:12 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 29ED1A08BD; Mon, 22 Jul 2024 11:00:12 +0200 (CEST)
+Date: Mon, 22 Jul 2024 11:00:12 +0200
+From: Jan Kara <jack@suse.cz>
+To: Petr Vorel <pvorel@suse.cz>
+Cc: ltp@lists.linux.it, linux-block@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
+	Jan Kara <jack@suse.cz>, David Sterba <dsterba@suse.com>,
+	Filipe Manana <fdmanana@suse.com>,
+	Amir Goldstein <amir73il@gmail.com>, Cyril Hrubis <chrubis@suse.cz>,
+	Andrea Cervesato <andrea.cervesato@suse.com>,
+	Avinesh Kumar <akumar@suse.de>
+Subject: Re: [RFC] Slow down of LTP tests aiodio_sparse.c and dio_sparse.c in
+ kernel 6.6
+Message-ID: <20240722090012.mlvkaenuxar2x3vr@quack3>
+References: <20240719174325.GA775414@pevik>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240720083538.2999155-1-yangerkun@huawei.com>
-In-Reply-To: <20240720083538.2999155-1-yangerkun@huawei.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sat, 20 Jul 2024 18:26:49 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5AivAMSWk3FmmsrSqbeLfqMw_hr05b_Rdzk7hnnrsWiA@mail.gmail.com>
-Message-ID: <CAL3q7H5AivAMSWk3FmmsrSqbeLfqMw_hr05b_Rdzk7hnnrsWiA@mail.gmail.com>
-Subject: Re: [PATCH] generic/736: don't run it on tmpfs
-To: Yang Erkun <yangerkun@huawei.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-mm@kvack.org, 
-	hughd@google.com, akpm@linux-foundation.org, 
-	linux-btrfs <linux-btrfs@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240719174325.GA775414@pevik>
+X-Spam-Score: -3.81
+X-Rspamd-Action: no action
+X-Spam-Level: 
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Rspamd-Queue-Id: BB88E1FB57
+X-Spamd-Result: default: False [-3.81 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RCVD_COUNT_THREE(0.00)[3];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	RCPT_COUNT_TWELVE(0.00)[14];
+	MIME_TRACE(0.00)[0:+];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	RCVD_TLS_LAST(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	MISSING_XM_UA(0.00)[];
+	FREEMAIL_CC(0.00)[lists.linux.it,vger.kernel.org,kernel.dk,suse.cz,suse.com,gmail.com,suse.de];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.cz:dkim]
+X-Spam-Flag: NO
 
-On Sat, Jul 20, 2024 at 9:38=E2=80=AFAM Yang Erkun <yangerkun@huawei.com> w=
-rote:
->
-> We use offset_readdir for tmpfs, and every we call rename, the offset
-> for the parent dir will increase by 1. So for tmpfs we will always
-> fail since the infinite readdir.
+Hi!
 
-Having an infinite readdir sounds like a bug, or at least an
-inconvenience and surprising for users.
-We had that problem in btrfs which affected users/applications, see:
+On Fri 19-07-24 19:43:25, Petr Vorel wrote:
+> LTP AIO DIO tests aiodio_sparse.c [1] and dio_sparse.c [2] (using [3])
+> slowed down on kernel 6.6 on Btrfs and XFS, when run with default
+> parameters. These tests create 100 MB sparse file and write zeros (using
+> libaio or O_DIRECT) while 16 other processes reads the buffer and check
+> only zero is there.
 
-https://lore.kernel.org/linux-btrfs/2c8c55ec-04c6-e0dc-9c5c-8c7924778c35@la=
-ndley.net/
+So the performance of this test is irrelevant because combining buffered
+reads with direct IO writes was always in "better don't do it" territory.
+Definitely not if you care about perfomance.
 
-which was surprising for them since every other filesystem they
-used/tested didn't have that problem.
-Why not fix tmpfs?
+> Runtime of this particular setup (i.e. 100 MB file) on Btrfs and XFS on the
+> same system slowed down 9x (6.5: ~1 min 6.6: ~9 min). Ext4 is not affected.
+> (Non default parameter creates much smaller file, thus the change is not that
+> obvious).
 
-Thanks.
+But still it's kind of curious what caused the 9x slow down. So I'd be
+curious to know the result of the bisection :). Thanks for report!
 
->
-> Signed-off-by: Yang Erkun <yangerkun@huawei.com>
-> ---
->  tests/generic/736 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/tests/generic/736 b/tests/generic/736
-> index d2432a82..9fafa8df 100755
-> --- a/tests/generic/736
-> +++ b/tests/generic/736
-> @@ -18,7 +18,7 @@ _cleanup()
->         rm -fr $target_dir
->  }
->
-> -_supported_fs generic
-> +_supported_fs generic ^tmpfs
->  _require_test
->  _require_test_program readdir-while-renames
->
-> --
-> 2.39.2
->
->
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
