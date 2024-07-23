@@ -1,46 +1,30 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E88C1647
-	for <fstests@vger.kernel.org>; Tue, 23 Jul 2024 03:50:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EBD2208A0;
+	Tue, 23 Jul 2024 13:39:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721706632; cv=none; b=pTypKBPeKHBj9D7S3ntc0zynNNpKXysjjKyRjsAWqPi8YaC/d22Mjm/iYZIAWfwkby7Xd7u+10acWSZAjLfktFP0iPPGM8IAE4QpVxKpy29tgTZcbRwGbhCfypHynl/5PgTAgO+i1WKfd1oRSsqTez3mU/LKfMz/uk+szDxbSiY=
+	t=1721741958; cv=none; b=MTYbGRhBCC13pwO3BlPVBMNFswLgrMC6YiAlLazbIzDd4Sj7BZzvyS8Hnc/LyJuNe4H0NHaWmRWIrdDI39tMnyuqblNXI0UhBW7rLmbv1yca5bHfpHqUj72LoBg2NnWN63NWjpw7XRMOa7H4r9N4LrL4621yYp+qcsO1441fvrE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721706632; c=relaxed/simple;
-	bh=VL+antW8I5iiercs/9/FXba3cPA2BzESZqTAC/vV92o=;
+	s=arc-20240116; t=1721741958; c=relaxed/simple;
+	bh=R7nMFRX8BYwxqiuPvKKAQqLY9/4YpEQoFaUxlpxUrXA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=F4ht/0LkojYgMaAHTvfvseHtwDZvKCoJhSQeFsBJQ7XNHwgBspo1TbecKPMSJAyB0sW2u29K//xONvMQowgLASTYdHOjVuup1ntLr9yX91B9PnZpi9+OU2d9RR+koApYeOUZq85w29ORyk1pC0HL2FpP6ssfmscfFUWT/E1LhMA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=F/QkXuDB; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="F/QkXuDB"
-Received: from cwcc.thunk.org (pool-173-48-115-17.bstnma.fios.verizon.net [173.48.115.17])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 46N3oHZO018818
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 22 Jul 2024 23:50:18 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1721706619; bh=7/wgPEIdjHjNGqUp1ggxMxPVaWpfsNlSZfq2UMcBUFs=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=F/QkXuDBCFqCo8pnF59EQJ92Obp+l+FzJFzZwo2pUiOnOoVqeKrDdluHmrVDF5jnn
-	 iws0QXqWp88+JAOThp1JrKtH5oU9mBVKcgUWacMWQgHh+MSAllgLNKoZX+KmxuIEjt
-	 RYXB7KIhUkOAFodWrkAczy0aQciL4TjU91a5tSFKgCLlNGyoAAKr92Ztp1OgvyZ5uc
-	 YzAzq4NmI8EFVohjduM9TJeYBzX3Fw3E+HPZhPUS9wO8Dr9Lg1mR6/zgWp3x8nFZoA
-	 RkxAAIZFigXXV2Dhz//U0YYv84hRzSwJN+YqAnGyzGH4tr1tVdX8jvHqCVtvuwm+iL
-	 Nh5hiUJV5NLZQ==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id DF2CA15C0300; Mon, 22 Jul 2024 23:50:16 -0400 (EDT)
-Date: Mon, 22 Jul 2024 23:50:16 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=sqtdSQv8nwh00TujKFJ0AE4G8WjwAkp+KxAnZdtHjmFl7OK/7cJApE+AlvirkqhTccItiSp5cQaiZnn7UjlInKJjOJfh9i5z3Oj0U5ecWrP106vo1yaSoktww1LcJEd+IfGCMNPTaT+xhYQW2kdT8/+smZuyOnw8jw0VmBQipbY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 0673668AA6; Tue, 23 Jul 2024 15:39:05 +0200 (CEST)
+Date: Tue, 23 Jul 2024 15:39:04 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
 Subject: Re: RFC: don't fail tests when mkfs options collide
-Message-ID: <20240723035016.GB3222663@mit.edu>
-References: <20240723000042.240981-1-hch@lst.de>
+Message-ID: <20240723133904.GA20005@lst.de>
+References: <20240723000042.240981-1-hch@lst.de> <20240723035016.GB3222663@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,38 +33,31 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240723000042.240981-1-hch@lst.de>
+In-Reply-To: <20240723035016.GB3222663@mit.edu>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Mon, Jul 22, 2024 at 05:00:31PM -0700, Christoph Hellwig wrote:
-> Hi all,
+On Mon, Jul 22, 2024 at 11:50:16PM -0400, Theodore Ts'o wrote:
+> Yeah, it's a bit of a mess.  It's not been an issue for ext4 because
+> mkfs.ext4 allows options specified later in the command-line to
+> override earlier ones.
+
+At least in my case it's not really by overriding.  E.g. if I force
+an allocation group (or block group in extN terms) to a specific size
+and then want a log that is larger than that, changing the AG size
+is generally a bad idea, and a clear warning to the user is simply the
+better interface.
+
+> There's a third possibility, which is sometimes the test might
+> explicitly want the mkfs options to be merged together.  For example,
+> in the ext4/4k configuration we have "-b 4096", while the ext4/1k
+> confiuration option we might have "-b 1024".  And we might want to
+> have that *combined* with a test which is enabling fscrypt feature, so
+> we can test fscrypt with a 4k block size, as well as fsvrypt with a 1k
+> blocksize.
 > 
-> I've been running some tests with forced large log sizes, and forced
-> sector sizes, and get a fair amount of failures because these options
-> collide with options forced by the tests themselves.  The series here was
-> my attempt to fix this by not failing the tests in this case but _notrun
-> them and print the options that caused them to fail.
+> That being said, that doesn't always make sense, and sometimes the
+> combination doesn't make any sense.
 
-Yeah, it's a bit of a mess.  It's not been an issue for ext4 because
-mkfs.ext4 allows options specified later in the command-line to
-override earlier ones.
+Merging the options is what we're currently doing, and it works ok
+most of the time.  The question is what to do when it doesn't.
 
-> So what could we do instead?  We might distinguish better between tests
-> that just want to create a scratch file system with $MKFS_OPTIONS from
-> the xfstests config, and those (file system specific ones) that want
-> to force very specific file system configurations.  How do we get
-> there?
-
-There's a third possibility, which is sometimes the test might
-explicitly want the mkfs options to be merged together.  For example,
-in the ext4/4k configuration we have "-b 4096", while the ext4/1k
-confiuration option we might have "-b 1024".  And we might want to
-have that *combined* with a test which is enabling fscrypt feature, so
-we can test fscrypt with a 4k block size, as well as fsvrypt with a 1k
-blocksize.
-
-That being said, that doesn't always make sense, and sometimes the
-combination doesn't make any sense.
-
-It's not clear what the best solution should be.
-
-     	       	    	     - Ted
