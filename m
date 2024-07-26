@@ -1,70 +1,70 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9A6311C83
-	for <fstests@vger.kernel.org>; Fri, 26 Jul 2024 17:17:25 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C21D417B4E8
+	for <fstests@vger.kernel.org>; Fri, 26 Jul 2024 17:58:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722014247; cv=none; b=RMrwseov6cAFyqfPj9TqhTMiEAwajDr1XnDLCOTpV+apMomcaSw+hOt+IDSZTRKJp6Dgid6v+Szfj+gJdlT4Zbwd/fn/iMtk7EsjOf7ThBpIEHSz0qIYsAFdffAl+61Klm32NRap51iFDcK24WUX1tF+tDgfcTpH0yIA39Eq5/I=
+	t=1722016729; cv=none; b=maheRBurFGwRaVTMOswvve8HP1eO7RTmkw4x1jkUxuaQRBRkmwh2sl79A0bWhQLq8HT17k1lcVNU08oPBoIopTskp9/mz3F3bo+FwguQUH4oZSGcqqr7m3aGjuVnkiho6yubYREwBZCiIxNZieWPF1uge/ZkRuMxG67SSl1l414=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722014247; c=relaxed/simple;
-	bh=GEwKHBVtx1N26/ujHSceefTYpD0QGzCg6xKzapPXe84=;
+	s=arc-20240116; t=1722016729; c=relaxed/simple;
+	bh=YJVQUrpE17HtAxtCeUh6iRvTM71l5erc23Fs2u4Y4ec=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ou/kGTROpn6lisSpN1ZCrTyeuJfoOuK5XNOAXfD1ejb1Wk4WQktEIw5FzwjnNJ3uQvkS4Q/OsG5KXJk08wbcEdf6IgHSMD1+zqd5jSA/k00sDk8+NqB0V/PU6qmXOtFCllqVPe5UMtCL4WsnUnlDn5uT+zciVtrPf6om1pyZV1A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WJnbOIMK; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=Rl+G6j+YffcTKSnihKaS2QTCiN8ofPSQItgwPf82NpT7ZY3FL6pbPMEMpnWeoOjI5c0j5pSSRZQt4P+JDARPMXvAN/N9E00WhEKEluXAnNPJqBuPXfiENR0hN+/cM8ay+AbESafnnVp0ZV2smvSkrfFx5yuEwCpmJQuQhDgBd3Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=USAOhhXo; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WJnbOIMK"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="USAOhhXo"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1722014244;
+	s=mimecast20190719; t=1722016726;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=pw3IWU7w6zZsJSaAnBwaTqswOfBwnb8wRbLaVBbbqJ4=;
-	b=WJnbOIMKhg0YdKP7hLyCXFlN+bZEp6Ow5sI43Gf+nWS38MRl3/sl1FuROfewOnRvhEwZ0d
-	D4fvZJd/8QEgp3eVeUQqJfGPg29CIuHzT+MQhQEcBZ5TUtk2jceGsNE1Q6KPPvYu6VVJsa
-	3fHp5lc16Z8/NsacoHxD1SVM1FtYwew=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=ZK8dmHDmQTQOQzfhtKeNpCh5hlW331TlAOjBRWzVr/Q=;
+	b=USAOhhXo8qrTT+RQomJTBmNJpkJRlrf9zD9DD3xCYTQfngSia646uCAz3uY35E3Munt1e0
+	k9mm11C1XgP0zfBevDNO/CXmuJ4fwQjUDoRANi+mNUUgUxwvXvEEmMW6De86qrGBKUuWEA
+	D/Ov+aeXYzLbVfCXhrmR5vpBQaVBqnQ=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-507-0bbouu4kO_Ww_HQIdKNhkg-1; Fri, 26 Jul 2024 13:17:23 -0400
-X-MC-Unique: 0bbouu4kO_Ww_HQIdKNhkg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-1fc58790766so8350085ad.3
-        for <fstests@vger.kernel.org>; Fri, 26 Jul 2024 10:17:22 -0700 (PDT)
+ us-mta-581-7tJUZtQgOE6Kj3tkZYslhw-1; Fri, 26 Jul 2024 13:58:43 -0400
+X-MC-Unique: 7tJUZtQgOE6Kj3tkZYslhw-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-79d95667cfaso1209872a12.2
+        for <fstests@vger.kernel.org>; Fri, 26 Jul 2024 10:58:42 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722014242; x=1722619042;
+        d=1e100.net; s=20230601; t=1722016722; x=1722621522;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pw3IWU7w6zZsJSaAnBwaTqswOfBwnb8wRbLaVBbbqJ4=;
-        b=Aw6PMaZChme53UeCueklINFn8KmFXNVlnOX/qhiqMsDuNI/wp3H3xoc8KXiUVNyaZV
-         BPuIVL6I7aRJb9VVuh4YrRY/rsAPAgKhDdOtpeDGUd/fd8/tF3KL0INaVdqY1b7SzJ96
-         JW6UIFZbrbQPwkpeDj8GBF4LvkEH/8Cx5EG4k3F0gGPqTEyC9B0StbBeLWLs0BOeT4Oh
-         1lKGMp2+1bGYVfWWqxKQsr4LVsaz37Xa7ySLm7W8jqEoROPDIbfigKXYrNEU0pvikreL
-         FiUqHwV8Yih37MMf54OKl0MKa+IUZIb67aiW++deI/noNjeZ7UFWQlwRySJb3RniiDTe
-         Ctrg==
-X-Forwarded-Encrypted: i=1; AJvYcCWvqhbkG9R2AmhvJB+QWeBWmueLCCkaKlMHyT4RJem+ZPvy1UrXNhW95f94FgcmnZi+kLJQSBbNQzd9b2RKaNVUTFhhqLOlVQ==
-X-Gm-Message-State: AOJu0YyV55L5qA0Pvzkjqa0xxujZ/C17+3AeG+7JFuCujAXiyaSu/dYi
-	RHewUgQ4oHxkKCL3KWd3Osfs6GqxdvLVIai5gbGsZ8x4W0DlUmgDc0VoHHmY+o1GLOV2UKGYRr7
-	iEe2tG8mvmykmGTZp/MnkIFxJmEAQip6DKKdRKy97omrqSDMmQhg9TtA=
-X-Received: by 2002:a17:902:fd08:b0:1fd:6d6d:68e7 with SMTP id d9443c01a7336-1ff048b07b9mr3275355ad.43.1722014242118;
-        Fri, 26 Jul 2024 10:17:22 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHV8kswWkxc0kwXS2BsEOM7JImFw8sfMaRuWDfDSbqVn5HjOy4+vI6im3jP6KzTizpAG6n23g==
-X-Received: by 2002:a17:902:fd08:b0:1fd:6d6d:68e7 with SMTP id d9443c01a7336-1ff048b07b9mr3275145ad.43.1722014241786;
-        Fri, 26 Jul 2024 10:17:21 -0700 (PDT)
+        bh=ZK8dmHDmQTQOQzfhtKeNpCh5hlW331TlAOjBRWzVr/Q=;
+        b=b97/wEDzUtUFnAEE4iFrImbk7KsRuxsneF294ugW/GB1lalYla4nuoMPtm+Og1WdXS
+         FrCgv1t9mVDwuT2nhdCyBd6B1uQ7EhfYi/Y1hkJZA26NU1EknRtVZ3uIRECRsR4swaGW
+         /QJ9KUSsbwqruUqDN/JdhBF0blIJ8GAOxKB+yXwrWjvUqqeHQ9YwFfC+57h2CHHaBzIY
+         DCtFDcrSXOFhFtkZHh+7FZYpMEs/B1BEtdSItzorjzGget67fDFRtchILhMi8G4hHi/d
+         MEwcY69PXV/ZEBvytD+QxQjy1mppmKwTie9EiTHWLQZtbvKR/hfQicHQ5OXI5qShAss/
+         DKeQ==
+X-Gm-Message-State: AOJu0Yx+p2ITdKy235b6eo7kwdSru6Sobn8RMeCPxOazG9SSIsznc8yK
+	97c9urp4ueWjjXxIcmNrF0i2ctm8Q9b6l4bvMhx+gFOkLyVwByZYT+ZSAaAw9H+F3zOCz8qHjg0
+	qylVCb1hLlHbEs/EA3m5X/HwlEIy6LRmJh/vHqSL6N3azYyilS+pvtHc=
+X-Received: by 2002:a17:902:e810:b0:1fd:6ca9:4c0 with SMTP id d9443c01a7336-1ff04811278mr4676085ad.18.1722016721891;
+        Fri, 26 Jul 2024 10:58:41 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGLDV7hr7wbBEG8HihXsAFw93P3HrDQrJcyqfGbtLhHH4L4n/8TMTXI10rLF3UsOqdClp/XzQ==
+X-Received: by 2002:a17:902:e810:b0:1fd:6ca9:4c0 with SMTP id d9443c01a7336-1ff04811278mr4675845ad.18.1722016721464;
+        Fri, 26 Jul 2024 10:58:41 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1fed7d22742sm35370225ad.107.2024.07.26.10.17.20
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1fed7c7fbd6sm35813315ad.62.2024.07.26.10.58.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Jul 2024 10:17:21 -0700 (PDT)
-Date: Sat, 27 Jul 2024 01:17:18 +0800
+        Fri, 26 Jul 2024 10:58:41 -0700 (PDT)
+Date: Sat, 27 Jul 2024 01:58:37 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Ma Xinjian <maxj.fnst@fujitsu.com>, fstests@vger.kernel.org,
-	xfs <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] generic/754: fix _fixed_by tags
-Message-ID: <20240726171718.46mida3edxf5dm55@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240726165107.GR103020@frogsfrogsfrogs>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: test page fault during direct IO write with
+ O_APPEND
+Message-ID: <20240726175837.jtq4df4u7rol3qac@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <652ec55049e94a59f66f4112fb8707629db3001d.1722008942.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,43 +73,207 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240726165107.GR103020@frogsfrogsfrogs>
+In-Reply-To: <652ec55049e94a59f66f4112fb8707629db3001d.1722008942.git.fdmanana@suse.com>
 
-On Fri, Jul 26, 2024 at 09:51:07AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Fri, Jul 26, 2024 at 04:55:46PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> This test requires an xfs_repair patch, so note that in the test.  Also
-> update the kernel git hash since we now have one.
+> Test that doing a direct IO append write to a file when the input buffer
+> was not yet faulted in, does not result in an incorrect file size.
 > 
-> Reported-by: maxj.fnst@fujitsu.com
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> This exercises a bug on btrfs reported by users and which is fixed by
+> the following kernel patch:
+> 
+>    "btrfs: fix corruption after buffer fault in during direct IO append write"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
->  tests/generic/754 |    7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
+>  .gitignore                 |   1 +
+>  src/Makefile               |   2 +-
+>  src/dio-append-buf-fault.c | 131 +++++++++++++++++++++++++++++++++++++
+>  tests/generic/362          |  28 ++++++++
+>  tests/generic/362.out      |   2 +
+>  5 files changed, 163 insertions(+), 1 deletion(-)
+>  create mode 100644 src/dio-append-buf-fault.c
+>  create mode 100755 tests/generic/362
+>  create mode 100644 tests/generic/362.out
 > 
-> diff --git a/tests/generic/754 b/tests/generic/754
-> index f73d1ed611..7afda609f5 100755
-> --- a/tests/generic/754
-> +++ b/tests/generic/754
-> @@ -13,9 +13,12 @@ _begin_fstest auto
+> diff --git a/.gitignore b/.gitignore
+> index b5f15162..97c7e001 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -72,6 +72,7 @@ tags
+>  /src/deduperace
+>  /src/detached_mounts_propagation
+>  /src/devzero
+> +/src/dio-append-buf-fault
+>  /src/dio-buf-fault
+>  /src/dio-interleaved
+>  /src/dio-invalidate-cache
+> diff --git a/src/Makefile b/src/Makefile
+> index 99796137..559209be 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -20,7 +20,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+>  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+>  	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
+> -	readdir-while-renames
+> +	readdir-while-renames dio-append-buf-fault
 >  
->  _require_scratch
->  
-> -test $FSTYP = "xfs" && \
-> -	_fixed_by_git_commit kernel XXXXXXXXXXXXX \
-> +if [ $FSTYP = "xfs" ]; then
-> +	_fixed_by_git_commit kernel 38de567906d95 \
->  			"xfs: allow symlinks with short remote targets"
-> +	_fixed_by_git_commit xfsprogs XXXXXXXXXXXXX \
-> +			"xfs_repair: small remote symlinks are ok"
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/dio-append-buf-fault.c b/src/dio-append-buf-fault.c
+> new file mode 100644
+> index 00000000..f4be4845
+> --- /dev/null
+> +++ b/src/dio-append-buf-fault.c
+> @@ -0,0 +1,131 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2024 SUSE Linux Products GmbH.  All Rights Reserved.
+> + */
+> +
+> +/*
+> + * Test a direct IO write in append mode with a buffer that was not faulted in
+> + * (or just partially) before the write.
+> + */
+> +
+> +/* Get the O_DIRECT definition. */
+> +#ifndef _GNU_SOURCE
+> +#define _GNU_SOURCE
+> +#endif
+> +
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <unistd.h>
+> +#include <stdint.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <string.h>
+> +#include <sys/mman.h>
+> +#include <sys/stat.h>
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	struct stat stbuf;
+> +	int fd;
+> +	long pagesize;
+> +	void *buf;
+> +	ssize_t ret;
+> +
+> +	if (argc != 2) {
+> +		fprintf(stderr, "Use: %s <file path>\n", argv[0]);
+> +		return 1;
+> +	}
+> +
+> +	/*
+> +	 * First try an append write against an empty file of a buffer with a
+> +	 * size matching the page size. The buffer is not faulted in before
+> +	 * attempting the write.
+> +	 */
+> +
+> +	fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT | O_APPEND, 0666);
+> +	if (fd == -1) {
+> +		perror("Failed to open/create file");
+> +		return 2;
+> +	}
+> +
+> +	pagesize = sysconf(_SC_PAGE_SIZE);
+> +	if (pagesize == -1) {
+> +		perror("Failed to get page size");
+> +		return 3;
+> +	}
+> +
+> +	buf = mmap(NULL, pagesize, PROT_READ | PROT_WRITE,
+> +		   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+> +	if (buf == MAP_FAILED) {
+> +		perror("Failed to allocate first buffer");
+> +		return 4;
+> +	}
+> +
+> +	ret = write(fd, buf, pagesize);
+> +	if (ret < 0) {
+> +		perror("First write failed");
+> +		return 5;
+> +	}
+> +
+> +	ret = fstat(fd, &stbuf);
+> +	if (ret < 0) {
+> +		perror("First stat failed");
+> +		return 6;
+> +	}
+> +
+> +	if (stbuf.st_size != pagesize) {
+> +		fprintf(stderr,
+> +			"Wrong file size after first write, got %jd expected %ld\n",
+> +			(intmax_t)stbuf.st_size, pagesize);
+> +		return 7;
+> +	}
+> +
+> +	munmap(buf, pagesize);
+> +	close(fd);
+> +
+> +	/*
+> +	 * Now try an append write against an empty file of a buffer with a
+> +	 * size matching twice the page size. Only the first page of the buffer
+> +	 * is faulted in before attempting the write, so that the second page
+> +	 * should be faulted in during the write.
+> +	 */
+> +	fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT | O_APPEND, 0666);
+> +	if (fd == -1) {
+> +		perror("Failed to open/create file");
+> +		return 8;
+> +	}
+> +
+> +	buf = mmap(NULL, pagesize * 2, PROT_READ | PROT_WRITE,
+> +		   MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+> +	if (buf == MAP_FAILED) {
+> +		perror("Failed to allocate second buffer");
+> +		return 9;
+> +	}
+> +
+> +	/* Fault in first page of the buffer before the write. */
+> +	memset(buf, 0, 1);
+> +
+> +	ret = write(fd, buf, pagesize * 2);
+> +	if (ret < 0) {
+> +		perror("Second write failed");
 
-Thanks for this update.
+Hi Filipe,
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+This patch looks good to me, just a question about this part. Is it possible
+to get (0 < ret < pagesize * 2) at here? Is so, should we report fail too?
 
-> +fi
->  
->  _scratch_mkfs >> $seqres.full
->  _scratch_mount >> $seqres.full
-> 
+> +		return 10;
+> +	}
+> +
+> +	ret = fstat(fd, &stbuf);
+> +	if (ret < 0) {
+> +		perror("Second stat failed");
+> +		return 11;
+> +	}
+> +
+> +	if (stbuf.st_size != pagesize * 2) {
+> +		fprintf(stderr,
+> +			"Wrong file size after second write, got %jd expected %ld\n",
+> +			(intmax_t)stbuf.st_size, pagesize * 2);
+
+Does this try to check the stbuf.st_size isn't equal to the write(2) return
+value? Or checks stbuf.st_size != pagesize * 2, when the return value is
+good (equal to pagesize * 2) ?
+
+Thanks,
+Zorro
+
+> +		return 12;
+> +	}
+> +
+> +	munmap(buf, pagesize * 2);
+> +	close(fd);
+> +
+> +	return 0;
+> +}
+
+[snip]
 
