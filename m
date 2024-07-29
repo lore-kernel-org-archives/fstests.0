@@ -1,31 +1,31 @@
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FC55187860
-	for <fstests@vger.kernel.org>; Mon, 29 Jul 2024 14:28:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.188
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D80B81527AC
+	for <fstests@vger.kernel.org>; Mon, 29 Jul 2024 14:30:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.189
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722263314; cv=none; b=WtOIQDELGx44pbGBtPq9MuDiCPX00BNzvveZuWsXtqYtLIIKacMnJH6cu/jHC3WB4rajaDnoB7gSy+ITuLhQARJjD42JVh++zbPl3KpqFBsvDHLcMLwiTEe4gK6GEfQj/wNAyLhWSaSYq68d6SsdJg6b+ktWag8OnPANuMpKoGc=
+	t=1722263407; cv=none; b=cDJ68XLXtD06gV9kYW4v4Q6QD6ncoLi+q/J7y94lfyq9It7fKk4QOh8v7ndKSm6j2WsoE/e7KmPz0YW/txIPGUSP5djKap3ZMIO4kS1XBMXej8DnKPZpCtqF6sJ0XpHOtq3Y0r7k64D5lDpIWWw++Wn+267BEKldhLOBx5+dwlA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722263314; c=relaxed/simple;
-	bh=UxsgXu2x4oVsIakYNvh/rkKJ0Fnwg5nIKJvsoNlC8cA=;
+	s=arc-20240116; t=1722263407; c=relaxed/simple;
+	bh=DfhO68V4ehVKGQH8WnnXPatpF6NeUGqZywXZpqtfRcM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=a1dXxf0zKo6i1yZH+pboxOpSUV73Fde+l1nmdlJjXox6mGES67Weh/TpoGuhX3Ph9Jf05aPSL7HuT4NVXsNG96k/mm7dqvRRat0a/B8Ksvp7Lf1lICZoK5lGrmtn37KdMzIp81KzcMLsqSi7YrH/tPZOXFvijY1Dk7CSG9hnxbM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.188
+	 In-Reply-To:Content-Type; b=EX1Csa46MNmzWBwskq3L1MLw9GiEIwfyXyaIOYnNHBr+94k+pr2yk9sfYn0irxsmp0X3rc/t51k55JziGwVF5eOAu7o+T/H4ErXzDmPbL5Q8TXvF5P0xNfUzEuRRQCE1nel7Nr+tQmsvgOOjMulU/e6lQoci6aohjtyMUfg/JuE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.189
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.163.252])
-	by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4WXgg75HDCznbr0;
-	Mon, 29 Jul 2024 22:27:31 +0800 (CST)
+Received: from mail.maildlp.com (unknown [172.19.163.48])
+	by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4WXgd61FtPzPtKM;
+	Mon, 29 Jul 2024 22:25:46 +0800 (CST)
 Received: from kwepemf100006.china.huawei.com (unknown [7.202.181.220])
-	by mail.maildlp.com (Postfix) with ESMTPS id 5EFE41800A2;
-	Mon, 29 Jul 2024 22:28:28 +0800 (CST)
+	by mail.maildlp.com (Postfix) with ESMTPS id 1AF26180064;
+	Mon, 29 Jul 2024 22:30:03 +0800 (CST)
 Received: from [10.174.177.210] (10.174.177.210) by
  kwepemf100006.china.huawei.com (7.202.181.220) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Mon, 29 Jul 2024 22:28:27 +0800
-Message-ID: <b2096645-6b24-70c2-aea0-361fc5984d5e@huawei.com>
-Date: Mon, 29 Jul 2024 22:28:26 +0800
+ 15.2.1544.11; Mon, 29 Jul 2024 22:30:02 +0800
+Message-ID: <b24149f5-584a-86fb-0922-2413391f58d8@huawei.com>
+Date: Mon, 29 Jul 2024 22:30:01 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,37 +45,46 @@ References: <20240729084715.1736839-1-yangerkun@huawei.com>
  <20240729084715.1736839-2-yangerkun@huawei.com>
  <ZqekPERYzP93HacM@infradead.org>
  <D332E074-6760-4EC1-B3C6-437C1C52229C@oracle.com>
+ <4E63C821-3231-4939-980C-D2F904138518@oracle.com>
 From: yangerkun <yangerkun@huawei.com>
-In-Reply-To: <D332E074-6760-4EC1-B3C6-437C1C52229C@oracle.com>
+In-Reply-To: <4E63C821-3231-4939-980C-D2F904138518@oracle.com>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
  kwepemf100006.china.huawei.com (7.202.181.220)
 
 
 
-在 2024/7/29 22:21, Chuck Lever III 写道:
+在 2024/7/29 22:24, Chuck Lever III 写道:
 > 
 > 
->> On Jul 29, 2024, at 10:16 AM, Christoph Hellwig <hch@infradead.org> wrote:
+>> On Jul 29, 2024, at 10:21 AM, Chuck Lever III <chuck.lever@oracle.com> wrote:
 >>
->> Looks good:
 >>
->> Reviewed-by: Christoph Hellwig <hch@lst.de>
 >>
+>>> On Jul 29, 2024, at 10:16 AM, Christoph Hellwig <hch@infradead.org> wrote:
+>>>
+>>> Looks good:
+>>>
+>>> Reviewed-by: Christoph Hellwig <hch@lst.de>
+>>>
+>>
+>> I would prefer this test continue to run on tmpfs.
+>>
+>> tmpfs is broken, and needs to be fixed. If the generic/732
+>> failure is an issue, then add it to the expunge list --
+>> it found a real bug, that, once fixed, we don't want to
+>> reappear.
 > 
-> I would prefer this test continue to run on tmpfs.
+> Never mind.
 > 
-> tmpfs is broken, and needs to be fixed. If the generic/732
-> failure is an issue, then add it to the expunge list --
-> it found a real bug, that, once fixed, we don't want to
-> reappear.
+> Christoph, you deleted the context for this, and the
+> Subject: was one character different than the one for
+> generic/736. Even properly dosed on caffeine I missed
+> that.
 
-The reason why I thinks it should not run for tmpfs is that the same 
-mount options won't share the same sb. I prefer it's a expected behavior...
+Aha, got it.
 
-
-> 
 > 
 > --
 > Chuck Lever
