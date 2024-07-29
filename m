@@ -1,77 +1,48 @@
-Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88A4015533F;
-	Mon, 29 Jul 2024 14:26:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.189
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E03C155382;
+	Mon, 29 Jul 2024 14:27:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722263209; cv=none; b=Gru/xrl5v+5h5f4QpTMAw5LQqY0aboM5idAxTUlVKDaV5y5CHwwRIHX6i95mOvGlXk/6r/n0OEUiyeKCwVJLJrAi7whuTDNUWblC728IaH1133Ef9PQR4cWWB9e//FLw7VKJQ5ZAV38YIHicZ8VV6q+4g64sjuBWXKta/puCU58=
+	t=1722263237; cv=none; b=CzNsLdTh1sVRDqfQYEKrhJrIGVtOoFK9zDHxqlYunn9L1qu4Q5w3oqm4RfFIQyVDQ0UGuQWJfGeEl7FkuQogNYWXaLXyQniIIAE9xWAMUI434c9uuvl8XYFq6lig7SR0yHMPtWM/8/RGYuN2+cjkIhM2cMOlZoXt6l46BXl02Cs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722263209; c=relaxed/simple;
-	bh=Zjebs/s3gr+IkMh+R0WwcrOXD7xjkUF3lR211kKExgM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=iooR8T68H1y15VBAW9LgnXfHzuddw+09vWBT4cT1Hm5cFbis5Q6GWQZsX4JsQ7zSOMKACvHC0qUCMvz0Yfid2YevwiJAlnM/z1DmuceXGSNS9VT2Ilbcf42jHN0tRAkXUbcRf0ONyw4bVbFzD+2JJqf+EVhgWBhP48qwzzKanoA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.189
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.162.254])
-	by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4WXgYF0qrzzPtKM;
-	Mon, 29 Jul 2024 22:22:25 +0800 (CST)
-Received: from kwepemf100006.china.huawei.com (unknown [7.202.181.220])
-	by mail.maildlp.com (Postfix) with ESMTPS id 0A9D2180100;
-	Mon, 29 Jul 2024 22:26:42 +0800 (CST)
-Received: from [10.174.177.210] (10.174.177.210) by
- kwepemf100006.china.huawei.com (7.202.181.220) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.11; Mon, 29 Jul 2024 22:26:41 +0800
-Message-ID: <1a8ac690-e48a-324c-a006-42fcf29d52be@huawei.com>
-Date: Mon, 29 Jul 2024 22:26:40 +0800
+	s=arc-20240116; t=1722263237; c=relaxed/simple;
+	bh=F5zQH4vukkVnbsCzOW+qqmN7RCwJ8bdVBNj5kk31YdY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=S8n5c+ZeXLgONRivHmRA0BCdadGbCJXXvU4Rm7Fx5eE7tdMSMq/rQZBXQWQQ8w/z6A3aMd3RpA4zDCL1WVvCZnMqri6O6ZhHqGBHQ9AY+E3+skG01ihxgO7plYqnFew4dwIu1KlvoYEG8CDvIlKeTXGEmFVlroACpbOolnFFo5A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 9E99D68D07; Mon, 29 Jul 2024 16:17:31 +0200 (CEST)
+Date: Mon, 29 Jul 2024 16:17:31 +0200
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+	"Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/4] common: _notrun if _scratch_mkfs_xfs failed
+Message-ID: <20240729141731.GA28016@lst.de>
+References: <20240723000042.240981-1-hch@lst.de> <20240723000042.240981-3-hch@lst.de> <20240728145408.mu2hmmqmzxb2amrd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.1
-Subject: Re: [PATCH] generic/736: don't run it on tmpfs
-To: Christoph Hellwig <hch@infradead.org>
-CC: Filipe Manana <fdmanana@kernel.org>, <chuck.lever@oracle.com>,
-	<zlang@kernel.org>, <fstests@vger.kernel.org>, <linux-mm@kvack.org>,
-	<hughd@google.com>, <akpm@linux-foundation.org>, linux-btrfs
-	<linux-btrfs@vger.kernel.org>
-References: <20240720083538.2999155-1-yangerkun@huawei.com>
- <CAL3q7H5AivAMSWk3FmmsrSqbeLfqMw_hr05b_Rdzk7hnnrsWiA@mail.gmail.com>
- <4188b7b5-3576-9e5f-6297-794558d7a01e@huawei.com>
- <9514fd55-4f83-8e43-bdf7-925396ab5e48@huawei.com>
- <ZqelcfdBQzc93w80@infradead.org>
-From: yangerkun <yangerkun@huawei.com>
-In-Reply-To: <ZqelcfdBQzc93w80@infradead.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
- kwepemf100006.china.huawei.com (7.202.181.220)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240728145408.mu2hmmqmzxb2amrd@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
+On Sun, Jul 28, 2024 at 10:54:08PM +0800, Zorro Lang wrote:
+> But this line blocks the merging process. I can't find "_scratch_xfs_force_no_metadir"
+> in xfs/178, and even the whole xfstests. Could you help to rebase this patchset on
+> offical xfstests for-next branch, then send it again? This patch is too big, It's hard
+> for me to merge it manually ( I'm glad to know if there's an easy way to deal with this
+> conflict manually :)
 
+Sorry, I've been working off Darrick's queue to include the rt
+improvements once again.  I'll rebase it to your latest tree.
 
-在 2024/7/29 22:21, Christoph Hellwig 写道:
-> On Mon, Jul 29, 2024 at 09:53:52PM +0800, yangerkun wrote:
->> But after commit a2e459555c5f("shmem: stable directory offsets"),
->> simple_offset_rename will just add the new dentry to the maple tree of
->> &SHMEM_I(inode)->dir_offsets->mt with the key always inc by 1(since
->> simple_offset_add we will find free entry start with octx->newx_offset, so
->> the entry freed in simple_offset_remove won't be found). And the same case
->> upper will be break since we loop too many times(we can fall into infinite
->> readdir without this break).
->>
->> I prefer this is really a bug, and for the way to fix it, I think we can
->> just use the same logic what 9b378f6ad48cf("btrfs: fix infinite directory
->> reads") has did, introduce a last_index when we open the dir, and then
->> readdir will not return the entry which index greater than the last index.
->>
->> Looking forward to your comments!
-> 
-> I agree to all of the above.
-> 
-
-Thanks, I will try to write a patch for this!
