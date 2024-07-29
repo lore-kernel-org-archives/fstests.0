@@ -1,380 +1,192 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F23F253804
-	for <fstests@vger.kernel.org>; Sun, 28 Jul 2024 16:59:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACA1AD535
+	for <fstests@vger.kernel.org>; Mon, 29 Jul 2024 01:10:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722185959; cv=none; b=jEn18o4KhWpcLr2VTVnOv58X3X/8EI7qHtTl8xSNfnfaY9UBjHDbc9XaXxSB6p24kRPys9t/LRkqTSeZ2fmKA1O813X/il5HE/9jShZWFIvSKW6FAOBrQt79ER4jrtGPpK4zU1dLYF/xicO4+to9nmfPLMz/fvD4yLQr5KNFCm0=
+	t=1722215427; cv=none; b=jZNhlcuASm9acKvgAJSNcwVBgY23EMjBCvBJsBkJYWTdMdcI6eg13hGMmNDqZhkok4Q3P7lw7+Ibu+aB6lJZozpo2zhELGK6G4nbyb2fTFkAZ5BR1wmkT6Tgc6iaiXA9h0dxeF0kgoq3FGCTEOFPHwrXT5FVuTKKbOwMk+tt9UQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722185959; c=relaxed/simple;
-	bh=qXKZe3lQsys/+qi3gaxfEe0t4jKYt4q8GdU3CNpKVlg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qLNY/vUFiJtzl9DZDtYwwv71Zc4POqd9kuG5+e0HfURRGgRmMtF2KLF3dJSb6GZRAjP48LuW3Ms0NuYD8rzEqTMFQCb5S0nPrYRAZJEZQnSq2tYu+5EzGZVMUBRYbURJyaAipeUCD0+0x028ZFTHG2zVxkBG1DHvA2ZVn0h8ff0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YU08GbB1; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1722215427; c=relaxed/simple;
+	bh=rsdtn6n+gSqoqURluDSAQfnmhx9Esq3YqTSrLvnxxS0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=QJAmB/stT0HGJwF7jxUsP9RWVX7c9fNV2SYsWaiG+9BjB59kxDNQgEUscKHXggWvwZqj3SCn/51Rx0Pd2zRSqEmpE1QzqLKESVX30ZGFimZNKZ/fI3uXal6ARj9CNbrBS7RF9P6DwSEECigoiC/RKuIkZsi+zEg6/N2HaaBGOt4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PcAEzclw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YU08GbB1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1722185955;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=lafCHz868fe6t2GFpP05jKEYOyAXgezCDQAPdUXjp+0=;
-	b=YU08GbB11kLvQeCNJQgIuFN2yq+IbVBrAXS8Hhg+09JPyaAbfgCbjEwfs+XzEzYXlp7HSG
-	SRVyUu3cckM2gi+hfBp5R3vqwiUFg5QZY5KIAFZy1go3buB3DYS230YJ2q6ZFtkJq8rVLK
-	f3UpWHUmXy2LvQ/YOrNKUT7dkFOXpqg=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-218-1x66_BsuOn2DkjfKqXjCVg-1; Sun, 28 Jul 2024 12:59:11 -0400
-X-MC-Unique: 1x66_BsuOn2DkjfKqXjCVg-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-70d1a747ee6so2908556b3a.2
-        for <fstests@vger.kernel.org>; Sun, 28 Jul 2024 09:59:11 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722185950; x=1722790750;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lafCHz868fe6t2GFpP05jKEYOyAXgezCDQAPdUXjp+0=;
-        b=R9FrvdqZ5VZRaC//7/LLmxAjDyJ1p1ADqPvMIW15HNExUG2oX4gfk2UNTT1XRNsHe5
-         UKB1raog5mwwgL2XRR1CpBzbXeozTrU0AGONjHJqP/IXQHfQdpS5I7xWFDKAQnZbJWgP
-         5d4dvMsgIJ//wendR5sTX3GKBVXTFK75Tk2SYXm7VcDQsOI4a+lfg3VgwM0lcWd+h5Lp
-         YSk50yVXDzYwjeaIDFyVPzPn+O0WbKBjYfYYxLiaRHh1EAUjHYo6ZwK0lwDDVRfITcjN
-         i3f6zIC2dw1X3donF0fSt6rnTyxcvLz7c2WYamm+bFH8lkQnlOcp7yqkZc0dQR4mK+ID
-         zokQ==
-X-Gm-Message-State: AOJu0YzNdIm7qYVhbhPM2o9L/l6PC3ntw5q5cHMnl+9AUroKK2Bet3Xd
-	1gBUiY9X4iSXWFmGhL5H/mOOn/lgB8akgrZ++I5WkF9qbAnWQsr8BNTG2jTH60kXb92PZ/sr7Og
-	yL64uEXI7DhB++YUwvNk0CUd1Rzed9p/+pYWq2i1Cof4M+sa2aSugFeA=
-X-Received: by 2002:a05:6a21:1583:b0:1c1:e75a:5504 with SMTP id adf61e73a8af0-1c4a129fe7dmr8192867637.15.1722185950067;
-        Sun, 28 Jul 2024 09:59:10 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEakVDS1R/JFzyx/FCoewhj+fR869AdsNMMf/ajPf40U5aHEi+qkNh+vFihldURytFp+cVJUQ==
-X-Received: by 2002:a05:6a21:1583:b0:1c1:e75a:5504 with SMTP id adf61e73a8af0-1c4a129fe7dmr8192843637.15.1722185949615;
-        Sun, 28 Jul 2024 09:59:09 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7a9fa5a0e2dsm4983416a12.85.2024.07.28.09.59.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Jul 2024 09:59:09 -0700 (PDT)
-Date: Mon, 29 Jul 2024 00:59:05 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH v2] generic: test page fault during direct IO write with
- O_APPEND
-Message-ID: <20240728165905.f2jofq7o55uo6ywa@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <652ec55049e94a59f66f4112fb8707629db3001d.1722008942.git.fdmanana@suse.com>
- <6c52fe9ce75354a931afdc6d2f7fb638c7f06b00.1722079321.git.fdmanana@suse.com>
- <20240728142842.iquah6ckxj7rfmvy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <CAL3q7H4bo=1ZMQohRrAH+9B-M_gpdzXc7wYqXESpYWgwb77v6g@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PcAEzclw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 724E8C116B1;
+	Mon, 29 Jul 2024 01:10:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1722215427;
+	bh=rsdtn6n+gSqoqURluDSAQfnmhx9Esq3YqTSrLvnxxS0=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=PcAEzclworL6t1rf2+6Vdh2fxdjvg8rsB039fWwZni8pI9ILiDnIkndobfEcXgvy6
+	 3teP7kohR+eNr0LWFT3ZXE4+0hDR987Nzp9jH6VJzQueTRDt/bzhr6xj3A6IJHV3fZ
+	 Ja5+Y3v4yD0cH2LM23njc5T/zNlLfv2SSJjx+kOn9tGFfvf5R331WHKLl0BmxGOF5l
+	 Al5FhCEo0cu8hFRrZDntdfSNFLE1D7NvKa/jEfAVfgra+MtnPgDbnP+QAHd3HmSkX3
+	 2XslSuIuqjiqW1EKKYPc2Pb3ZC1JlBom6KMDLsztqxt2c50v5YBj/JOubSYKBr19+G
+	 poRecwvLaa1XA==
+Message-ID: <17f4eedc-f51a-4c1e-8386-71a1af6acec0@kernel.org>
+Date: Mon, 29 Jul 2024 09:10:23 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H4bo=1ZMQohRrAH+9B-M_gpdzXc7wYqXESpYWgwb77v6g@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] f2fs: test for race condition in between atomic_write
+ and gc
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+ Jaegeuk Kim <jaegeuk@kernel.org>, Daeho Jeong <daehojeong@google.com>
+References: <20240720074316.3302470-1-chao@kernel.org>
+ <20240726154941.lzpunsvd53lnieoz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20240726154941.lzpunsvd53lnieoz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Sun, Jul 28, 2024 at 04:14:42PM +0100, Filipe Manana wrote:
-> On Sun, Jul 28, 2024 at 3:28 PM Zorro Lang <zlang@redhat.com> wrote:
-> >
-> > On Sat, Jul 27, 2024 at 12:28:16PM +0100, fdmanana@kernel.org wrote:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test that doing a direct IO append write to a file when the input buffer
-> > > was not yet faulted in, does not result in an incorrect file size.
-> > >
-> > > This exercises a bug on btrfs reported by users and which is fixed by
-> > > the following kernel patch:
-> > >
-> > >    "btrfs: fix corruption after buffer fault in during direct IO append write"
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >
-> > > V2: Deal with partial writes by looping and writing any remaining data.
-> > >     Don't exit when the first test fails, instead let the second test
-> > >     run as well.
-> >
-> > With this change I got two error lines this time [1]. Last time (V1) I
-> > only got "Wrong file size after first write, got 8192 expected 4096".
+On 2024/7/26 23:49, Zorro Lang wrote:
+> On Sat, Jul 20, 2024 at 03:43:16PM +0800, Chao Yu wrote:
+>> Test that we will simulate sqlite atomic write logic w/ below steps:
+>> 1. create a regular file, and initialize it w/ 0xff data
+>> 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+>> 3. write transaction data
+>> 4. trigger foreground GC to migrate data block of the file
+>> 5. commit and end the transaction
+>> 6. check consistency of transaction
+>> This is a regression test to check handling of race condition in
+>> between atomic_write and GC.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Cc: Daeho Jeong <daehojeong@google.com>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v2:
+>> - add kill&wait in _clean() to avoid umount failure
+>> - some cleanups
+>> - use exported helpler
+>>   tests/f2fs/003     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/f2fs/003.out | 11 ++++++++
+>>   2 files changed, 76 insertions(+)
+>>   create mode 100755 tests/f2fs/003
+>>   create mode 100644 tests/f2fs/003.out
+>>
+>> diff --git a/tests/f2fs/003 b/tests/f2fs/003
+>> new file mode 100755
+>> index 00000000..c30e874a
+>> --- /dev/null
+>> +++ b/tests/f2fs/003
+>> @@ -0,0 +1,65 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/003
+>> +#
+>> +# Test that we will simulate sqlite atomic write logic w/ below steps:
+>> +# 1. create a regular file, and initialize it w/ 0xff data
+>> +# 2. start transaction (via F2FS_IOC_START_ATOMIC_WRITE) on it
+>> +# 3. write transaction data
+>> +# 4. trigger foreground GC to migrate data block of the file
+>> +# 5. commit and end the transaction (via F2FS_IOC_COMMIT_ATOMIC_WRITE)
+>> +# 6. check consistency of transaction w/ in-memory and on-disk data
+>> +# This is a regression test to check handling of race condition in
+>> +# between atomic_write and GC.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +. ./common/filter
+>> +
+>> +_cleanup()
+>> +{
+>> +	kill -9 $atomic_write_pid > /dev/null 2>&1
+>> +	wait > /dev/null 2>&1
 > 
-> Yes, it's expected.
-> As the changelog for v2 says, now the second test is run even if the
-> first one failed.
+> This version looks good to me, just this place, we need to keep the default
+> _cleanup steps.
+> 
+>          cd /
+>          rm -r -f $tmp.*
+> 
+> I'll do this change when I merge this patch.
+> 
+> (And please don't forget to update the _fixed_by_xxxxx information later.)
 
-Thanks, I'd like to merge this patch:
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+No problem.
 
 > 
-> > Does this mean this v2 change help this case to be better?
-> 
-> I prefer it like that.
-> It's common in fstests to let all steps of a test run if possible
-> (i.e. we don't exit, call _fail, or anything equivalent, everywhere
-> unless the test can't proceed anymore).
-> 
-> >
-> > Thanks,
-> > Zorro
-> >
-> > [1]
-> > [root@dell-per750-41 xfstests]# ./check -s default generic/362
-> > SECTION       -- default
-> > FSTYP         -- btrfs
-> > PLATFORM      -- Linux/x86_64 dell-xx-xxxxxx 6.10.0-0.rc7.20240712git43db1e03c086.62.fc41.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Jul 12 22:31:14 UTC 2024
-> > MKFS_OPTIONS  -- /dev/sda6
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda6 /mnt/scratch
-> >
-> > generic/362 0s ... - output mismatch (see /root/git/xfstests/results//default/generic/362.out.bad)
-> >     --- tests/generic/362.out   2024-07-28 22:22:06.098982182 +0800
-> >     +++ /root/git/xfstests/results//default/generic/362.out.bad 2024-07-28 22:23:16.622577397 +0800
-> >     @@ -1,2 +1,4 @@
-> >      QA output created by 362
-> >     +Wrong file size after first write, got 8192 expected 4096
-> >     +Wrong file size after second write, got 12288 expected 8192
-> >      Silence is golden
-> >
-> >
-> > >
-> > >  .gitignore                 |   1 +
-> > >  src/Makefile               |   2 +-
-> > >  src/dio-append-buf-fault.c | 145 +++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/362          |  28 +++++++
-> > >  tests/generic/362.out      |   2 +
-> > >  5 files changed, 177 insertions(+), 1 deletion(-)
-> > >  create mode 100644 src/dio-append-buf-fault.c
-> > >  create mode 100755 tests/generic/362
-> > >  create mode 100644 tests/generic/362.out
-> > >
-> > > diff --git a/.gitignore b/.gitignore
-> > > index b5f15162..97c7e001 100644
-> > > --- a/.gitignore
-> > > +++ b/.gitignore
-> > > @@ -72,6 +72,7 @@ tags
-> > >  /src/deduperace
-> > >  /src/detached_mounts_propagation
-> > >  /src/devzero
-> > > +/src/dio-append-buf-fault
-> > >  /src/dio-buf-fault
-> > >  /src/dio-interleaved
-> > >  /src/dio-invalidate-cache
-> > > diff --git a/src/Makefile b/src/Makefile
-> > > index 99796137..559209be 100644
-> > > --- a/src/Makefile
-> > > +++ b/src/Makefile
-> > > @@ -20,7 +20,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
-> > >       t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
-> > >       t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
-> > >       t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
-> > > -     readdir-while-renames
-> > > +     readdir-while-renames dio-append-buf-fault
-> > >
-> > >  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> > >       preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> > > diff --git a/src/dio-append-buf-fault.c b/src/dio-append-buf-fault.c
-> > > new file mode 100644
-> > > index 00000000..72c23265
-> > > --- /dev/null
-> > > +++ b/src/dio-append-buf-fault.c
-> > > @@ -0,0 +1,145 @@
-> > > +// SPDX-License-Identifier: GPL-2.0
-> > > +/*
-> > > + * Copyright (c) 2024 SUSE Linux Products GmbH.  All Rights Reserved.
-> > > + */
-> > > +
-> > > +/*
-> > > + * Test a direct IO write in append mode with a buffer that was not faulted in
-> > > + * (or just partially) before the write.
-> > > + */
-> > > +
-> > > +/* Get the O_DIRECT definition. */
-> > > +#ifndef _GNU_SOURCE
-> > > +#define _GNU_SOURCE
-> > > +#endif
-> > > +
-> > > +#include <stdio.h>
-> > > +#include <stdlib.h>
-> > > +#include <unistd.h>
-> > > +#include <stdint.h>
-> > > +#include <fcntl.h>
-> > > +#include <errno.h>
-> > > +#include <string.h>
-> > > +#include <sys/mman.h>
-> > > +#include <sys/stat.h>
-> > > +
-> > > +static ssize_t do_write(int fd, const void *buf, size_t count)
-> > > +{
-> > > +        while (count > 0) {
-> > > +             ssize_t ret;
-> > > +
-> > > +             ret = write(fd, buf, count);
-> > > +             if (ret < 0) {
-> > > +                     if (errno == EINTR)
-> > > +                             continue;
-> > > +                     return ret;
-> > > +             }
-> > > +             count -= ret;
-> > > +             buf += ret;
-> > > +     }
-> > > +     return 0;
-> > > +}
-> > > +
-> > > +int main(int argc, char *argv[])
-> > > +{
-> > > +     struct stat stbuf;
-> > > +     int fd;
-> > > +     long pagesize;
-> > > +     void *buf;
-> > > +     ssize_t ret;
-> > > +
-> > > +     if (argc != 2) {
-> > > +             fprintf(stderr, "Use: %s <file path>\n", argv[0]);
-> > > +             return 1;
-> > > +     }
-> > > +
-> > > +     /*
-> > > +      * First try an append write against an empty file of a buffer with a
-> > > +      * size matching the page size. The buffer is not faulted in before
-> > > +      * attempting the write.
-> > > +      */
-> > > +
-> > > +     fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT | O_APPEND, 0666);
-> > > +     if (fd == -1) {
-> > > +             perror("Failed to open/create file");
-> > > +             return 2;
-> > > +     }
-> > > +
-> > > +     pagesize = sysconf(_SC_PAGE_SIZE);
-> > > +     if (pagesize == -1) {
-> > > +             perror("Failed to get page size");
-> > > +             return 3;
-> > > +     }
-> > > +
-> > > +     buf = mmap(NULL, pagesize, PROT_READ | PROT_WRITE,
-> > > +                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-> > > +     if (buf == MAP_FAILED) {
-> > > +             perror("Failed to allocate first buffer");
-> > > +             return 4;
-> > > +     }
-> > > +
-> > > +     ret = do_write(fd, buf, pagesize);
-> > > +     if (ret < 0) {
-> > > +             perror("First write failed");
-> > > +             return 5;
-> > > +     }
-> > > +
-> > > +     ret = fstat(fd, &stbuf);
-> > > +     if (ret < 0) {
-> > > +             perror("First stat failed");
-> > > +             return 6;
-> > > +     }
-> > > +
-> > > +     /* Don't exit on failure so that we run the second test below too. */
-> > > +     if (stbuf.st_size != pagesize)
-> > > +             fprintf(stderr,
-> > > +                     "Wrong file size after first write, got %jd expected %ld\n",
-> > > +                     (intmax_t)stbuf.st_size, pagesize);
-> > > +
-> > > +     munmap(buf, pagesize);
-> > > +     close(fd);
-> > > +
-> > > +     /*
-> > > +      * Now try an append write against an empty file of a buffer with a
-> > > +      * size matching twice the page size. Only the first page of the buffer
-> > > +      * is faulted in before attempting the write, so that the second page
-> > > +      * should be faulted in during the write.
-> > > +      */
-> > > +     fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT | O_APPEND, 0666);
-> > > +     if (fd == -1) {
-> > > +             perror("Failed to open/create file");
-> > > +             return 7;
-> > > +     }
-> > > +
-> > > +     buf = mmap(NULL, pagesize * 2, PROT_READ | PROT_WRITE,
-> > > +                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-> > > +     if (buf == MAP_FAILED) {
-> > > +             perror("Failed to allocate second buffer");
-> > > +             return 8;
-> > > +     }
-> > > +
-> > > +     /* Fault in first page of the buffer before the write. */
-> > > +     memset(buf, 0, 1);
-> > > +
-> > > +     ret = do_write(fd, buf, pagesize * 2);
-> > > +     if (ret < 0) {
-> > > +             perror("Second write failed");
-> > > +             return 9;
-> > > +     }
-> > > +
-> > > +     ret = fstat(fd, &stbuf);
-> > > +     if (ret < 0) {
-> > > +             perror("Second stat failed");
-> > > +             return 10;
-> > > +     }
-> > > +
-> > > +     if (stbuf.st_size != pagesize * 2)
-> > > +             fprintf(stderr,
-> > > +                     "Wrong file size after second write, got %jd expected %ld\n",
-> > > +                     (intmax_t)stbuf.st_size, pagesize * 2);
-> > > +
-> > > +     munmap(buf, pagesize * 2);
-> > > +     close(fd);
-> > > +
-> > > +     return 0;
-> > > +}
-> > > diff --git a/tests/generic/362 b/tests/generic/362
-> > > new file mode 100755
-> > > index 00000000..2c127347
-> > > --- /dev/null
-> > > +++ b/tests/generic/362
-> > > @@ -0,0 +1,28 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-> > > +#
-> > > +# FS QA Test 362
-> > > +#
-> > > +# Test that doing a direct IO append write to a file when the input buffer was
-> > > +# not yet faulted in, does not result in an incorrect file size.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> > > +
-> > > +_require_test
-> > > +_require_odirect
-> > > +_require_test_program dio-append-buf-fault
-> > > +
-> > > +[ $FSTYP == "btrfs" ] && \
-> > > +     _fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > +     "btrfs: fix corruption after buffer fault in during direct IO append write"
-> > > +
-> > > +# On error the test program writes messages to stderr, causing a golden output
-> > > +# mismatch and making the test fail.
-> > > +$here/src/dio-append-buf-fault $TEST_DIR/dio-append-buf-fault
-> > > +
-> > > +# success, all done
-> > > +echo "Silence is golden"
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/362.out b/tests/generic/362.out
-> > > new file mode 100644
-> > > index 00000000..0ff40905
-> > > --- /dev/null
-> > > +++ b/tests/generic/362.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 362
-> > > +Silence is golden
-> > > --
-> > > 2.43.0
-> > >
-> > >
-> >
-> 
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+Thank you for the review. :)
+
+Thanks,
+
+> 
+> Thanks,
+> Zorro
+> 
+>> +}
+>> +
+>> +_require_scratch
+>> +_require_xfs_io_command "fpunch"
+>> +
+>> +_scratch_mkfs >> $seqres.full
+>> +_scratch_mount >> $seqres.full
+>> +
+>> +dbfile=$SCRATCH_MNT/dbfile
+>> +foo=$SCRATCH_MNT/foo
+>> +bar=$SCRATCH_MNT/bar
+>> +
+>> +$XFS_IO_PROG -c "pwrite 0 512k -S 0xff" -c "fsync" -f $dbfile >> $seqres.full
+>> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $foo >> $seqres.full
+>> +sync
+>> +
+>> +# start atomic_write on dbfile & write data to dbfile
+>> +$F2FS_IO_PROG write 1 0 32 zero atomic_commit $dbfile 3000 >> $seqres.full &
+>> +atomic_write_pid=$!
+>> +
+>> +$XFS_IO_PROG -c "fpunch 0 2m" $foo >> $seqres.full
+>> +$XFS_IO_PROG -c "pwrite 0 2m" -c "fsync" -f $bar >> $seqres.full
+>> +
+>> +# persist all dirty data
+>> +sync
+>> +echo 3 > /proc/sys/vm/drop_caches
+>> +
+>> +# trigger foreground GC to migrate data block of atomic_file
+>> +$F2FS_IO_PROG gc 1 $SCRATCH_MNT > /dev/null 2>&1
+>> +
+>> +# wait for atomic_write commit completion
+>> +sleep 5
+>> +# print in-memory data
+>> +_hexdump $dbfile
+>> +echo 3 > /proc/sys/vm/drop_caches
+>> +# print on-disk data
+>> +_hexdump $dbfile
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/003.out b/tests/f2fs/003.out
+>> new file mode 100644
+>> index 00000000..64698d84
+>> --- /dev/null
+>> +++ b/tests/f2fs/003.out
+>> @@ -0,0 +1,11 @@
+>> +QA output created by 003
+>> +000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+>> +*
+>> +020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
+>> +*
+>> +080000
+>> +000000 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  >................<
+>> +*
+>> +020000 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff  >................<
+>> +*
+>> +080000
+>> -- 
+>> 2.40.1
+>>
+> 
