@@ -1,215 +1,131 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D3BD1BC06E;
-	Wed, 31 Jul 2024 16:00:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7916F1A76C2;
+	Wed, 31 Jul 2024 16:20:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722441604; cv=none; b=ANDK/C2PU8YkHoSYa5tocYPMvRtNLksthhO00lAcW5tyYXmDV5v7MM/BPmaufRHdJcAZgoWuNd8BCZJ2stsC/u37U71qA7P3ZK9M470mUxvRNvV9S95Y/HMW74zXNsMIQQUKQzNfVtnq8ntmltHA+1rgG4mcCOT/mN2zPh8sO98=
+	t=1722442861; cv=none; b=Ot5ELDhCPses5duYz639risLrog2acIkJ1AuLdoJgbqr4Os5T3ZnH/LW9Ub6QscdJgRzzG0xXtCG2K6g6YUjbImd8PYeCQdrTAIOUAJOkRJ9p8oIezlu41tEtG1v7hNEZbqQ553Awf6PFpCMe3kpZWcqSsov4AUgcOeLrEGJReo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722441604; c=relaxed/simple;
-	bh=KLDzWvl4kXbvgiATWESpNg9iSwQfphlBf8F8PNY4ges=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=SaoGXwbVAn6hWaZfz+Xw6x237DxA20XPuTjiMDtqchsrbtMyaydA3krqpVp2VkE8nue88cAgxPwVqlCHQyUSMfWRVDamenYdc4q0+/NlWX1Q1uRQjh429+O3GuuKIgs0kXkALUjfBsdNUSPvhRDOtSsZKmnlflg9ccVHRpHZEHA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vOoh+SGx; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1722442861; c=relaxed/simple;
+	bh=dX83oh2HuGEJQOagJRx9SFgH9vsmSDpDwNKi0FR9gZQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MRv6gXvIGu4a4qsdSsAjzZXPz2ptZoJrFPMOkdzjHD4PNMaPrFjKoP9US1kXjDfM1my89+9woNuvTO2S+ri/sm1K+06WAutsUY5WXBU1E0NoJgCQ23RRKkcMbjpQknvOBCEnkrPJEU00J25VfBH05SUfKNhEwKaO9jdIF6MBQAY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=qSi5+k3m; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=vbzM2IlH; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=qSi5+k3m; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=vbzM2IlH; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vOoh+SGx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A46A4C4AF09;
-	Wed, 31 Jul 2024 16:00:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1722441603;
-	bh=KLDzWvl4kXbvgiATWESpNg9iSwQfphlBf8F8PNY4ges=;
-	h=From:To:Cc:Subject:Date:From;
-	b=vOoh+SGxfoB2Y4bjGhrHytcZPil+wA0s06KnYohmz7XnRxYPyAOhNrDJgv8vfqG0M
-	 LwIHx4yABoqHcp20MDTVerHdmFOeV7efLfdUm6OANhmL96wV+HrbesDb4uxBev2Bmu
-	 7yL1xCt4mbb+YYV+MO8/Et/L3dOmlPjU+YZ/12Dqmfcbd02lHM1r0Osr52XVlhxzMP
-	 uAwbRj/LqfD5MEmG/G0riSnfrtKtkvryP5MWvILYG8LnQum1bgEIPW/ea7IH2TMS6c
-	 yVRmTNMdq3zsP4o/RQcqYmGAEEBWlZP/Gms9joYTObrogbfl81VI/5DY8Vr8wEMIiF
-	 RtfC5scWHgB9A==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="qSi5+k3m";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vbzM2IlH";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="qSi5+k3m";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="vbzM2IlH"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id B68271F82D;
+	Wed, 31 Jul 2024 16:20:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1722442857;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=D9xFRjOegNiyUwD/F199FtWdIHUYh+LBaK2tIipgSv0=;
+	b=qSi5+k3mMOmIuLVMSL+bvwdDG23pZMSyztHq40oJqOGXxeT918X5CPb4yq5WrlTErZ1JEq
+	3SaV3NAPwrrbcS6Vp3DOdbRDQTLIY+bB22PKwNygCf1QipHkSqm755LTejLQuTdrm61YS8
+	GoqgzI2k62XNXt/sHQBXjZ8RkKFdi/I=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1722442857;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=D9xFRjOegNiyUwD/F199FtWdIHUYh+LBaK2tIipgSv0=;
+	b=vbzM2IlHH/FfxcHnRqo1FiN+cYURFcvigTxxMRZVhs6AF1wut4pCG5cuxFNp9/Ii/GYGsF
+	jR9WzZZovFocc8CA==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1722442857;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=D9xFRjOegNiyUwD/F199FtWdIHUYh+LBaK2tIipgSv0=;
+	b=qSi5+k3mMOmIuLVMSL+bvwdDG23pZMSyztHq40oJqOGXxeT918X5CPb4yq5WrlTErZ1JEq
+	3SaV3NAPwrrbcS6Vp3DOdbRDQTLIY+bB22PKwNygCf1QipHkSqm755LTejLQuTdrm61YS8
+	GoqgzI2k62XNXt/sHQBXjZ8RkKFdi/I=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1722442857;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=D9xFRjOegNiyUwD/F199FtWdIHUYh+LBaK2tIipgSv0=;
+	b=vbzM2IlHH/FfxcHnRqo1FiN+cYURFcvigTxxMRZVhs6AF1wut4pCG5cuxFNp9/Ii/GYGsF
+	jR9WzZZovFocc8CA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9BDC51368F;
+	Wed, 31 Jul 2024 16:20:57 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id ETO4JWlkqmZNFwAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Wed, 31 Jul 2024 16:20:57 +0000
+Date: Wed, 31 Jul 2024 18:20:52 +0200
+From: David Sterba <dsterba@suse.cz>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] fstests: remove unnecessary stdout/stderr redirection for run_check calls
-Date: Wed, 31 Jul 2024 16:59:58 +0100
-Message-ID: <742c2d98a000e324106a9f5bd3498f2985bb2706.1722441541.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.43.0
+Subject: Re: [PATCH] generic/019: redirect fsstress output to log file instead
+Message-ID: <20240731162052.GS17473@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <0fdc35fdbc53f739fce1cb46ede8af97829aea11.1722441479.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0fdc35fdbc53f739fce1cb46ede8af97829aea11.1722441479.git.fdmanana@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Level: 
+X-Spamd-Result: default: False [-3.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_TLS_ALL(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:replyto,imap1.dmz-prg2.suse.org:helo,suse.com:email];
+	FROM_HAS_DN(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	RCPT_COUNT_THREE(0.00)[4]
+X-Spam-Flag: NO
+X-Spam-Score: -3.80
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Jul 31, 2024 at 04:59:24PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Currently we are redirecting stdout and stderr of fsstress to /dev/null.
+> In case we have a test failure, it's useful to know the seed that
+> fsstress was using because it might be helpful to run it again with that
+> same seed in the hope of being able to reproduce the failure.
+> 
+> So redirect stdout/stderr to the log file $seqres.full instead, so
+> that we'll see a line like this after running the test:
+> 
+>     seed = 1722389488
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-It's pointless, and confusing, to have calls to run_check redirect the
-stdout and/or stderr, because run_check already redirects it:
-
-   $ cat common/rc
-   (...)
-   run_check()
-   {
-       echo "# $@" >> $seqres.full 2>&1
-       "$@" >> $seqres.full 2>&1 || _fail "failed: '$@'"
-   }
-   (...)
-
-So remove those redirections.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/004   | 4 ++--
- tests/btrfs/030   | 4 ++--
- tests/btrfs/038   | 6 +++---
- tests/btrfs/039   | 4 ++--
- tests/btrfs/040   | 4 ++--
- tests/btrfs/057   | 6 ++----
- tests/btrfs/284   | 2 +-
- tests/generic/482 | 2 +-
- 8 files changed, 15 insertions(+), 17 deletions(-)
-
-diff --git a/tests/btrfs/004 b/tests/btrfs/004
-index e89697d2..5a2ce993 100755
---- a/tests/btrfs/004
-+++ b/tests/btrfs/004
-@@ -165,7 +165,7 @@ workout()
- 	_btrfs subvolume snapshot $SCRATCH_MNT \
- 		$SCRATCH_MNT/$snap_name
- 
--	run_check _scratch_unmount >/dev/null 2>&1
-+	run_check _scratch_unmount
- 	_scratch_mount "-o compress=lzo"
- 
- 	# make some noise but ensure we're not touching existing data
-@@ -179,7 +179,7 @@ workout()
- 	# now make more files to get a higher tree
- 	run_check $FSSTRESS_PROG -d $clean_dir -w -p $procs -n 2000 \
- 		$FSSTRESS_AVOID
--	run_check _scratch_unmount >/dev/null 2>&1
-+	run_check _scratch_unmount
- 	_scratch_mount "-o atime"
- 
- 	if [ $do_bg_noise -ne 0 ]; then
-diff --git a/tests/btrfs/030 b/tests/btrfs/030
-index bedbb728..0c84000a 100755
---- a/tests/btrfs/030
-+++ b/tests/btrfs/030
-@@ -150,10 +150,10 @@ _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
- _btrfs receive -f $tmp/1.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
- _btrfs receive -f $tmp/2.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-diff --git a/tests/btrfs/038 b/tests/btrfs/038
-index bdef4f41..1e6defa9 100755
---- a/tests/btrfs/038
-+++ b/tests/btrfs/038
-@@ -76,13 +76,13 @@ _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
- _btrfs receive -f $tmp/1.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
- _btrfs receive -f $tmp/clones.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/clones.fssum $SCRATCH_MNT/clones_snap 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/clones.fssum $SCRATCH_MNT/clones_snap
- 
- _btrfs receive -f $tmp/2.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-diff --git a/tests/btrfs/039 b/tests/btrfs/039
-index e7cea325..2306ffe0 100755
---- a/tests/btrfs/039
-+++ b/tests/btrfs/039
-@@ -91,10 +91,10 @@ _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
- _btrfs receive -f $tmp/1.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
- _btrfs receive -f $tmp/2.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-diff --git a/tests/btrfs/040 b/tests/btrfs/040
-index 5d346be3..4fc4db44 100755
---- a/tests/btrfs/040
-+++ b/tests/btrfs/040
-@@ -84,10 +84,10 @@ _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
- 
- _btrfs receive -f $tmp/1.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/1.fssum $SCRATCH_MNT/mysnap1
- 
- _btrfs receive -f $tmp/2.snap $SCRATCH_MNT
--run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2 2>> $seqres.full
-+run_check $FSSUM_PROG -r $tmp/2.fssum $SCRATCH_MNT/mysnap2
- 
- _scratch_unmount
- _check_btrfs_filesystem $SCRATCH_DEV
-diff --git a/tests/btrfs/057 b/tests/btrfs/057
-index 07e60557..6c399946 100755
---- a/tests/btrfs/057
-+++ b/tests/btrfs/057
-@@ -19,14 +19,12 @@ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount
- 
- # -w ensures that the only ops are ones which cause write I/O
--run_check $FSSTRESS_PROG -d $SCRATCH_MNT -w -p 5 -n 1000 \
--		$FSSTRESS_AVOID >&/dev/null
-+run_check $FSSTRESS_PROG -d $SCRATCH_MNT -w -p 5 -n 1000 $FSSTRESS_AVOID
- 
- _btrfs subvolume snapshot $SCRATCH_MNT \
- 	$SCRATCH_MNT/snap1
- 
--run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w -p 5 -n 1000 \
--       $FSSTRESS_AVOID >&/dev/null
-+run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w -p 5 -n 1000 $FSSTRESS_AVOID
- 
- _btrfs quota enable $SCRATCH_MNT
- _btrfs quota rescan -w $SCRATCH_MNT
-diff --git a/tests/btrfs/284 b/tests/btrfs/284
-index 19ffbbe6..6c554f32 100755
---- a/tests/btrfs/284
-+++ b/tests/btrfs/284
-@@ -50,7 +50,7 @@ run_send_test()
- 	# Use a single process so that in case of failure it's easier to
- 	# reproduce by using the same seed (logged in $seqres.full).
- 	run_check $FSSTRESS_PROG -d $SCRATCH_MNT -p 1 -n $((LOAD_FACTOR * 200)) \
--		  -w $FSSTRESS_AVOID -x "$snapshot_cmd" >> $seqres.full
-+		  -w $FSSTRESS_AVOID -x "$snapshot_cmd"
- 
- 	$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
- 			 >> $seqres.full
-diff --git a/tests/generic/482 b/tests/generic/482
-index 04026c4c..54fee07d 100755
---- a/tests/generic/482
-+++ b/tests/generic/482
-@@ -77,7 +77,7 @@ _log_writes_mkfs >> $seqres.full 2>&1
- _log_writes_mark mkfs
- 
- _log_writes_mount
--run_check $FSSTRESS_PROG $fsstress_args > /dev/null 2>&1
-+run_check $FSSTRESS_PROG $fsstress_args
- _log_writes_unmount
- 
- _log_writes_remove
--- 
-2.43.0
-
+Reviewed-by: David Sterba <dsterba@suse.com>
