@@ -1,135 +1,106 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from esa3.hc1455-7.c3s2.iphmx.com (esa3.hc1455-7.c3s2.iphmx.com [207.54.90.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F5431DA21;
-	Thu,  8 Aug 2024 15:57:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 006FD34CC4;
+	Fri,  9 Aug 2024 08:17:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=207.54.90.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723132662; cv=none; b=oyElMhyr2mIXyEGYwZNcueMiqQztNtzLUjRiNW0Fgpz6X2oTbcQ6f5tcU0upc0WYo05Tc1eZBaNl7oS3EKAMmzh3jVVtYMQdwtLSR/iqcrzwwiZpd8glXr8ysZJ9OcExYtPlHWNnbhnr9Znl0rKU0HPkGgdhOubT4UdHnU3AxKM=
+	t=1723191468; cv=none; b=dteRVjCBSkMm8MH8hXsmgNOl+flESj5iFMfNF2/tqguP+jzdWow3tdXdx8zOOywloAT/kJIqI/Xv8mkXTqN/aezesJ4enpu1DOlOy9J2Z+4BlUADLxHAkUIsdq/l4xUtiOYyMQmtn9yC+s6L2+qPh662h1R3txvu32RfUtYwG6U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723132662; c=relaxed/simple;
-	bh=dENPFtvYpI9KEX73fXHEvciE5I+O/EGmaiSv4XCtJTc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Q9urUZHWKggh1yK2q2gCmoy1+i9dzrLCaMmnCMxMXxFTd1qPB0E20U1OZhne/5am6Nrrs5GujrWCiIn16dcR60J6pE7BVnNOpVqA+xFCxiaUWUe6w1+FJWh9KaR++h/h2pROuSQtlAWgaWKCphK3lQH/N0rwu3DIlJxA6Uhl3vg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FaO6E5lJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1723191468; c=relaxed/simple;
+	bh=9KGDamRzHnjrZWkM43z+S0wM2ZJsWXRFDwQSs2KOVRk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=R0ro276i2cz5/PhDU+hOitMD6rV8ytO//4U62QS+WI21QXKr5VCa9itzKNL5ZvEG5jN9Mbl+qK2qNVRP04PGUuwT0GKf3toQ87J2eP1ex9FsLrlcy9FvJxllDJvOxZ812ZJnM0lsFeIff0eLwZRps+P/d3JG+lvM3XNg20lK4yk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=AlghoGdo; arc=none smtp.client-ip=207.54.90.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FaO6E5lJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D81E7C32782;
-	Thu,  8 Aug 2024 15:57:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1723132662;
-	bh=dENPFtvYpI9KEX73fXHEvciE5I+O/EGmaiSv4XCtJTc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=FaO6E5lJV+Y8xlAV3tEmT6rpJ1RT2Xr+A9QCQ12O533HjXVU9FWgRiBcjh8WAk3qX
-	 DicBPsOlA5CBHoYRwmMwtwpjPxCpgMc5ZlT0DHf9ZCj9dK4axGB+k9Uo6yWQDlLrSr
-	 hSeKmArJ0ZAtTNVtEp39fCazGT+SfFPRGsqyc+cJJU/cArmdAp9umSxbNByBwBtfhU
-	 uuschmZxqqG1a0EG18TTgsv1NvibkGPhP8wdcgWu1OebVO8POQJy8K/bR+UnbypQVA
-	 F57Uo/7aUaw5E1VcsF57llCBhxhvp3dVHS8wuO74f2ChKlEoisJDvDwE1jF5lktayS
-	 vG2h+0kMkzFnA==
-Date: Thu, 8 Aug 2024 08:57:41 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: "Xinjian Ma (Fujitsu)" <maxj.fnst@fujitsu.com>
-Cc: Zorro Lang <zlang@redhat.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
-Subject: Re: [PATCH] [PATCH] xfs/348: add _fixed_by tag
-Message-ID: <20240808155741.GA6047@frogsfrogsfrogs>
-References: <20240730075653.3473323-1-maxj.fnst@fujitsu.com>
- <20240730144751.GB6337@frogsfrogsfrogs>
- <20240806131903.h7ym2ktrzqjcqlzj@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240806161430.GA623922@frogsfrogsfrogs>
- <TY3PR01MB12071F457962A3AD2B50C878BE8B92@TY3PR01MB12071.jpnprd01.prod.outlook.com>
+	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="AlghoGdo"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
+  t=1723191465; x=1754727465;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=9KGDamRzHnjrZWkM43z+S0wM2ZJsWXRFDwQSs2KOVRk=;
+  b=AlghoGdoGDgUYyKeAm4+5jSKF47zLYqT5YBLvDFvJsWdu6BG90Sh3dIe
+   BOjMaiX20MMZMHCJ6ziRzJaLO4S1Of5cLPvNmpSMaHll0c1nAkG4XWf5O
+   QuNina0g4bwjp8pB7/k7U9S+uamDKiHivvYn3/b3m5sNszlh2lvlpIHr4
+   l6aiwvC+RyAYEm92exF621jcP9kjfeXIGwXAMz5/Nzs6rlZm7eJ1SVhB4
+   G+MdzLw/cEeoDAoZKXvYO4qgdV2vcfJaD5Bzlxh24Gii6Zp1tjTBLD+tP
+   h5NWtKn/3rZ/h4TYx/O2ndfBV05gCtzCi+L76SkXaQEQOdRAGrMPyRjwB
+   Q==;
+X-CSE-ConnectionGUID: fVz+ttUiStm06Eqh8RVEiQ==
+X-CSE-MsgGUID: NJV7HAPpSPuJigLRKomqDA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11158"; a="170264944"
+X-IronPort-AV: E=Sophos;i="6.09,275,1716217200"; 
+   d="scan'208";a="170264944"
+Received: from unknown (HELO yto-r1.gw.nic.fujitsu.com) ([218.44.52.217])
+  by esa3.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Aug 2024 17:16:34 +0900
+Received: from yto-m3.gw.nic.fujitsu.com (yto-nat-yto-m3.gw.nic.fujitsu.com [192.168.83.66])
+	by yto-r1.gw.nic.fujitsu.com (Postfix) with ESMTP id B3B7952842;
+	Fri,  9 Aug 2024 17:16:30 +0900 (JST)
+Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
+	by yto-m3.gw.nic.fujitsu.com (Postfix) with ESMTP id 00A2AE99A;
+	Fri,  9 Aug 2024 17:16:30 +0900 (JST)
+Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
+	by kws-ab4.gw.nic.fujitsu.com (Postfix) with ESMTP id 7E929228938;
+	Fri,  9 Aug 2024 17:16:29 +0900 (JST)
+Received: from localhost.localdomain (unknown [10.167.226.182])
+	by edo.cn.fujitsu.com (Postfix) with ESMTP id 95E821A0002;
+	Fri,  9 Aug 2024 16:16:28 +0800 (CST)
+From: Ma Xinjian <maxj.fnst@fujitsu.com>
+To: zlang@redhat.com,
+	djwong@kernel.org
+Cc: fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org,
+	Ma Xinjian <maxj.fnst@fujitsu.com>
+Subject: [PATCH v2] xfs/348: add helper tags
+Date: Fri,  9 Aug 2024 16:17:22 +0800
+Message-ID: <20240809081722.795446-1-maxj.fnst@fujitsu.com>
+X-Mailer: git-send-email 2.42.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <TY3PR01MB12071F457962A3AD2B50C878BE8B92@TY3PR01MB12071.jpnprd01.prod.outlook.com>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28584.006
+X-TM-AS-User-Approved-Sender: Yes
+X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28584.006
+X-TMASE-Result: 10--7.717000-10.000000
+X-TMASE-MatchedRID: /+von0vPuFE5rof3b4z0VKzGfgakLdja1QQ6Jx/fflaMJxigKCCiS78F
+	Hrw7frluf146W0iUu2u9alSWGuOKxvoLRFtw/0CmjoyKzEmtrEd4SsGg2DQOYkxqTmWcX8+mNzn
+	xs0sNGFwPNxz2EvpSILtwqADTAhklr78SC5iivxwURSScn+QSXmMVPzx/r2cb+gtHj7OwNO33FL
+	eZXNZS4DjAdLIal4R6Pl8tQVP2PrkLkPhtQrPM8F2avgFHt3X2ky4PFHziZORI8esYkYuw3w==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 
-On Thu, Aug 08, 2024 at 08:39:10AM +0000, Xinjian Ma (Fujitsu) wrote:
-> > On Tue, Aug 06, 2024 at 09:19:03PM +0800, Zorro Lang wrote:
-> > > On Tue, Jul 30, 2024 at 07:47:51AM -0700, Darrick J. Wong wrote:
-> > > > On Tue, Jul 30, 2024 at 03:56:53PM +0800, Ma Xinjian wrote:
-> > > > > This test requires a kernel patch since 3bf963a6c6 ("xfs/348:
-> > > > > partially revert dbcc549317"), so note that in the test.
-> > > > >
-> > > > > Signed-off-by: Ma Xinjian <maxj.fnst@fujitsu.com>
-> > > > > ---
-> > > > >  tests/xfs/348 | 3 +++
-> > > > >  1 file changed, 3 insertions(+)
-> > > > >
-> > > > > diff --git a/tests/xfs/348 b/tests/xfs/348 index
-> > > > > 3502605c..e4bc1328 100755
-> > > > > --- a/tests/xfs/348
-> > > > > +++ b/tests/xfs/348
-> > > > > @@ -12,6 +12,9 @@
-> > > > >  . ./common/preamble
-> > > > >  _begin_fstest auto quick fuzzers repair
-> > > > >
-> > > > > +_fixed_by_git_commit kernel 38de567906d95 \
-> > > > > +	"xfs: allow symlinks with short remote targets"
-> > > >
-> > > > Considering that 38de567906d95 is itself a fix for 1eb70f54c445f, do
-> > > > we want a _broken_by_git_commit to warn people not to apply 1eb70
-> > > > without also applying 38de5?
-> > >
-> > > We already have _wants_xxxx_commit and _fixed_by_xxxx_commit, for now,
-> > > I don't think we need a new one. Maybe:
-> > >
-> > >   _fixed_by_kernel_commit 38de567906d95 ..............
-> > >   _wants_kernel_commit 1eb70f54c445f .............
-> > >
-> > > make sense? And use some comments to explain why 1eb70 is wanted?
-> > 
-> > Oh!  I didn't realize we had _wants_kernel_commit.  Yeah, that's fine.
-> 
-> 
-> Hi Darrick
-> 
-> Sorry, I still don't quite understand your intention.
-> Considering that 38de567906d95 is a fix for 1eb70f54c445f, I think the current xfs/348 test should have the following 3 situations:
-> 1. Neither 1eb70f54c445f nor 38de567906d95 are applied in the kernel: xfs/348 passes
-> 2. Only 1eb70f54c445f is applied in the kernel without 38de567906d95: xfs/348 fails
-> 3. Both 1eb70f54c445f and 1eb70f54c445f are applied in the kernel: xfs/348 passes
-> The situation of " Only 38de567906d95 is applied in the kernel without 1eb70f54c445f " should not exist.
-> 
-> Since only the second case fails, I think it's sufficient to just point out that 38de567906d95 might be missing using "_fixed_by_kernel_commit ".
-> If my understanding is wrong, feel free to correct me, thank you very much.
+This test requires a kernel patch since 3bf963a6c6 ("xfs/348: partially revert
+dbcc549317"), so note that in the test.
 
-1eb70f54c445f was a bugfix for a null pointer dereference due to
-insufficient validation, so we really /do/ want to nudge kernel
-distributors to add it (and 38de567906d95) to their kernels if they
-don't have either.
+Signed-off-by: Ma Xinjian <maxj.fnst@fujitsu.com>
+---
+ tests/xfs/348 | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-But I see your point that xfs/348 will pass without either applied, so
-that's not much of a nudge.  In the end, I'd rather this went in with
-annotations for both commits, but if Zorro decides that only noting
-38de567906d95 is ok, then I'll go along with that too.
+diff --git a/tests/xfs/348 b/tests/xfs/348
+index 3502605c..00b81dbd 100755
+--- a/tests/xfs/348
++++ b/tests/xfs/348
+@@ -12,6 +12,13 @@
+ . ./common/preamble
+ _begin_fstest auto quick fuzzers repair
+ 
++_fixed_by_git_commit kernel 38de567906d95 \
++	"xfs: allow symlinks with short remote targets"
++
++# 1eb70f54c445f fixed null pointer failures due to insufficient validation
++_wants_kernel_commit kernel 1eb70f54c445f \
++	"xfs: validate inode fork size against fork format"
++
+ # Import common functions.
+ . ./common/filter
+ . ./common/repair
+-- 
+2.42.0
 
---D
-
-> Best regards
-> Ma
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Zorro
-> > >
-> > > >
-> > > > --D
-> > > >
-> > > > > +
-> > > > >  # Import common functions.
-> > > > >  . ./common/filter
-> > > > >  . ./common/repair
-> > > > > --
-> > > > > 2.42.0
-> > > > >
-> > > > >
-> > > >
-> > >
-> > >
