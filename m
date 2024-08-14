@@ -1,53 +1,59 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5460D10953;
-	Wed, 14 Aug 2024 03:43:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2743F365;
+	Wed, 14 Aug 2024 04:52:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723607012; cv=none; b=mR+3qizZluNDImIq93BpUtf3eLr9IKz9DiAGveuty3g4jL9pBFBqn2yQQxcaS2c/oZDVH+xpoQbsGch0Gq8lnzMajeb1RqtWR8caa60B2tgVpaTeuEaquXU76nEiWRYzkdUioyF+bBYXjXTZXfLbbQMtMWeKu1QyFBeb7/tWSH0=
+	t=1723611156; cv=none; b=TTThf8D2TPAT+Fjomve5xAJHD6xYfO6rlCL+m975z73eBjUizMJNcR+60jUR4WtGRLF4VZJ/AA6N68FA7xA9x61zVXvwqhL2sP8X6DOEkqjFrWLS+KnOZCikxCx+1XcUERTjxlnSQrsSHdiMe3sH1ykQ7foYuv+FBvGMXJzMIrU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723607012; c=relaxed/simple;
-	bh=WeP2TXMxno/ZnN34UY2VSHewTSzuziJk6CkTlR/O3O8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HL66lsvwKiSGNO0TO9Fxc1mWJfp8+kfhGeIPtiznSwoknw6mIJEFctibOxCu1JCQt+3tzdgEpjgT+Bd3KoFyIpNuYJCyDDWjyseeGEl0drgVf+rflZR9d+Q4jX4K950hp8nmb/Q2KJFPeyYCHLTsavDGFcDAM2+gGCRA2sxzYC0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+	s=arc-20240116; t=1723611156; c=relaxed/simple;
+	bh=/0pt+nXMS5xLTRbiC8M+LNVYsggXXcTezJjYD4VZODI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Hsc/omhL+lY5fwOYAbM8lJE0k1A+IwUf0B0Aiz+wEYKRfiToOjP4Scvi/KD+lqU5EZjfOUalCX2WXqSLQcS1kDNoXPgeSUP83n3cMyRS8gFRD2pAnKl23OL58pdiD7mwt/BcdV7QFMsO/G1GtZ6gUG1ytJUOePAUgUMdKOhjbBI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Fnxr2ARu; arc=none smtp.client-ip=198.137.202.133
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 9D662227A88; Wed, 14 Aug 2024 05:43:25 +0200 (CEST)
-Date: Wed, 14 Aug 2024 05:43:25 +0200
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Fnxr2ARu"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=/0pt+nXMS5xLTRbiC8M+LNVYsggXXcTezJjYD4VZODI=; b=Fnxr2ARuUvyYiUkSkE56CCk2KK
+	yWihar5w6LIqS+kwY0gcvOEf6exPspW68Qrpw5jz43LjuBqgoD3Y7KsOCHM6rZoOm/DfJ10dGSIz4
+	6i5aZdIMeynuAESjuhoj2leEPf6BzTzI+3oQynN8L3gTuDeHJHLc9Tg0yF9FD9pu0CZ07dqFVnOaI
+	i242lSgUnbV4HWXMs4eZk7kMoe/NU8eWmaIftJl+V5nrOcYddiQVczX53KxVb1/eI+JCfVy9fjfmP
+	4VPHR5r6Mr6x4GKbN2Pjhv//U3e80W2XhHz2LOKnC/VaTfNOxCucUfittZno4TsVRRt09nJ7MvsD4
+	l6fiHOGA==;
+Received: from 2a02-8389-2341-5b80-fd16-64b9-63e2-2d30.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:fd16:64b9:63e2:2d30] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1se5zu-00000005jKD-1dEa;
+	Wed, 14 Aug 2024 04:52:34 +0000
 From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/5] add a new min_dio_alignment helper
-Message-ID: <20240814034325.GA29861@lst.de>
-References: <20240813073527.81072-1-hch@lst.de> <20240813073527.81072-3-hch@lst.de> <20240813144004.GD6047@frogsfrogsfrogs>
+To: Zorro Lang <zlang@kernel.org>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+	fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: improve minalign handling v2
+Date: Wed, 14 Aug 2024 06:52:09 +0200
+Message-ID: <20240814045232.21189-1-hch@lst.de>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240813144004.GD6047@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Aug 13, 2024 at 07:40:04AM -0700, Darrick J. Wong wrote:
-> > +	/*
-> > +	 * No support for STATX_DIOALIGN and not a block device:
-> > +	 * default to PAGE_SIZE.
-> 
-> Should we try DIOINFO here as a second to last gasp?
+Hi all,
 
-I implemented this last night, but have second thoughts now:
+this series improves how xfstests detects minimum direct I/O alignment
+by adding a C utility that checks the kernel provided value in statx
+before falling back to the existing strategy.
 
-DIOINFO is only implemented for XFS, which both implemented
-STATX_DIOALIGN from the start, and where the block size hack works
-and is equivalent to the DIOINFO output.  So I don't think this
-buys us anything but costs an extra syscall per invocation.
-
-So I plan to drop this again before submission.
-
+Changes since v1:
+ - add a comment about the namespace swizzling in statx.h
+ - spell a function name correctly
+ - update .gitignore
