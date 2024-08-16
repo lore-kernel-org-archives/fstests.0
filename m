@@ -1,72 +1,71 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E1131A01BF
-	for <fstests@vger.kernel.org>; Fri, 16 Aug 2024 11:42:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83EA813CF86
+	for <fstests@vger.kernel.org>; Fri, 16 Aug 2024 12:56:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723808576; cv=none; b=q1u+U50ERGLhHobsBO+4niN7mIb5y0AjFaGQAWvPTdT+2R547lMOpV3WfWVZrFrIojDeteoLpRhJbfRcOl8ZQSQeQW+MBciu5fvzmGlbZCKfA0sdaQ0+kungUJNCoJojUUAmxfPCcFQL5y1eOtuoHQygRMtg+i6wHfkj7FCDj3M=
+	t=1723812968; cv=none; b=vE4EXW7n+bVmmDktnKKjI+kRKfFmaHKtvUCtV2lykaZqXpmLd7RG5LNqcwsD9h68DUhFyy/Z1UG7z97Zh0eY8dQZQzQwdirDkSEQ+Rs9Dh5Yj+1THAOzHkhaPcEkN/iMNCyXb3hK4ZO37BEpoZL6Se/jUNGtU7MVQj6NfGgZCoE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723808576; c=relaxed/simple;
-	bh=2mVTsqxNSKcFUF22bN7u9NeuSTPq+ny+GLfwgME3W/g=;
+	s=arc-20240116; t=1723812968; c=relaxed/simple;
+	bh=VQTi3TNqwWn161CVg6P5GMzZWWbNkUT7vFwTIJ1l09M=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZIx8FuMcfledXqg1amG9ut0luCmRzoo6Bznzd/1A4FEqoRr8b8Lf+UMCFoFfvZVftiZzZteuUaJtvZXbMFhkTIIeT+a/+KCKIYx3Tin1NZV++VOtO4u5QKeHkMpKsmh2SelFSSdiSgsTG9bmzjMXwicbmcV+3dTgs5J6EGf+FsE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h1i2+3NN; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=QfcN9mZNw+Zg05N80SpO2TRd4ZivrNspE/XHkElGwZ0G/o4UkYjtaL8Gp8XdqmJGZPVVdXVUp3hjTJMuM/vKQxk5QJjBq0Fn6PUXeLd/98JI4d1ns7lUzfqHTP/nJCv1SCIM+mgaVh1V30PfpO/vObXM3a1OXuAGvBQ9EJEJogs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LrQnCd6X; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h1i2+3NN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LrQnCd6X"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1723808573;
+	s=mimecast20190719; t=1723812964;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=59r0sawk1GsuglTZhsCX1OUeGQomXixjBhl57tHpsFo=;
-	b=h1i2+3NNDjGZcFERiAbM4Y6o6ZnV1et5se58Q2VhFzoeg4XahDvrHPd+O1WfIeQIie3RCf
-	tIN8ywpRyNOBlaL/9iYQ95EOpw4JXpoujmMfDT9yh0v6Vjurn/wugRDPIAr8adKdoT2DU/
-	K7sV8VMWF5oRphedUUII0OedJUTJpSU=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=Hx4kADNFpWzPmEqoY10EizQF72Ojbwj/HlT/y8nD2sU=;
+	b=LrQnCd6X/OgRCVLYsgvIBMmPnZLvItCQ0VYG0bHlxmUtCbzM5XTR3zIz0RThFV1L4uLFnR
+	puq92qSA5Q0uzHsGwq1IYJ5MLuJ04bEWLOTtbbuOxrFYoWxAw9UoDAnyzdC/WjMPHhOpuJ
+	q4xiR9LYhcDat870PCkSiiPcDYmfFVo=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-649-PbE8rv_lPF2PBhJOQPnkBw-1; Fri, 16 Aug 2024 07:42:50 -0400
-X-MC-Unique: PbE8rv_lPF2PBhJOQPnkBw-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-70d1df50db2so1442527b3a.0
-        for <fstests@vger.kernel.org>; Fri, 16 Aug 2024 04:42:50 -0700 (PDT)
+ us-mta-522-qgTdV5JDOmiszcATvqKo9Q-1; Fri, 16 Aug 2024 08:56:02 -0400
+X-MC-Unique: qgTdV5JDOmiszcATvqKo9Q-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-201f89c6a42so10257315ad.1
+        for <fstests@vger.kernel.org>; Fri, 16 Aug 2024 05:56:02 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723808570; x=1724413370;
+        d=1e100.net; s=20230601; t=1723812962; x=1724417762;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=59r0sawk1GsuglTZhsCX1OUeGQomXixjBhl57tHpsFo=;
-        b=GY11PdtDtSt4WdfaUdaiVDfMvzfh5E/YCxtpYRWylWtZQ7CoQHL7tyC7aK0A1YduDo
-         laj+R5nf8QFSZk+Wdb6SeaMYwqOwI2eAm9iIovFjoGsogd+Bzi28Xu1AiivMmBzd8Ga6
-         urTRZ7oYa91CmPRYPcP2XpjDxfWNGFMXXdmgpV3WaB0YPSFT39zecXRKq7NWt2JFaVEr
-         TT3xhR6P3IUCnIoCMEceNo5stV+3/p/2O+qX9V+0pc/B3DNazr0C3xWzqpL3BNkXZFZB
-         dDkXp0iJ3m3klCal+KolN5/KlYPz9ozCWNLwh+icDHfyYjvYKYGN+ZKZWBxh9uyHjSET
-         u3eg==
-X-Forwarded-Encrypted: i=1; AJvYcCXszKKNGUuoZ6urXPGnopwIiVMbz2naQ9MZDtTTnqBqMEmdSuUJVs09hRPM6TTRHBaRxy6DDETpjXxpSASZHb936StGig3aGQ==
-X-Gm-Message-State: AOJu0YzB/CYUXXM7eSfkfPS2djwJSTXUiEwoaJYRcGtvgHtbQ6EwSZ+m
-	tfIymRJJT13EFRIg6jBAI4yZJLO5vRrwvBAafZJjsMGfzgJxZWT4awqGCC/7/Cop07PduE/xfTM
-	BHSK5QBt2Rd6plv1fqOhv24vU04VqxFll+KjLduCvnJyKFH4U66mgGc0=
-X-Received: by 2002:a05:6a00:2e29:b0:708:41c4:8849 with SMTP id d2e1a72fcca58-713c666c435mr3505015b3a.9.1723808569393;
-        Fri, 16 Aug 2024 04:42:49 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEqMKUdSBtB+QUYrQ4lrRa7GmaVwYM1LO/AF82w524Y9KAd3uWV+nbBAxcFBZDZT/E8WXh3+Q==
-X-Received: by 2002:a05:6a00:2e29:b0:708:41c4:8849 with SMTP id d2e1a72fcca58-713c666c435mr3504967b3a.9.1723808568779;
-        Fri, 16 Aug 2024 04:42:48 -0700 (PDT)
+        bh=Hx4kADNFpWzPmEqoY10EizQF72Ojbwj/HlT/y8nD2sU=;
+        b=fe15T+0HjFbAm4c4nhbH/LQ6XPdkcfxWF0BS5kLONGJbgytblfvGjkiImG91wDAfBy
+         CbMWh+r0Gyrl+1o+evqHrbFN2OYBQjld8fnQeaEpeGyERcKbN9oSgykwgEW44e/fx9lc
+         ZE5sE0Kwvcp3HPRb7cWnhe05lsu0619oJVCB7b8vUJJW3f6hgBgbTPwfgXpumBYBiHhL
+         ukBVy8Si9eCnTI66VBPtMl6IKZw5ErNjbJ10ie9IBJGu1ayhm7HX19nFgC78ECW04LMD
+         X3Kdlr0jxUS9ikI7IQGgEiNQRbd+R3PBzTu8+VWsZdrlIJCUNyNAJOejWsG3Rg1mzXWr
+         oU2Q==
+X-Gm-Message-State: AOJu0Yz8zGa+rX4LS6fKXoSP0s80+E3ISvRzPqfXLoOQjJw2XvmJGT/B
+	hFmPjvy7FaRus1dSpqeg7Fp+MlD4MahyW15smyJgDWc9SfIHLjuh6arLb81oU+B4NEZAUb39k+a
+	C6ykSdKKn6iorSoZkCYMnD4/rgrZmLy8ms6Gyuu4T3omxqHQjHGQwrfA=
+X-Received: by 2002:a17:903:32d1:b0:1fc:57b7:995c with SMTP id d9443c01a7336-20203e47f2fmr30247715ad.7.1723812961724;
+        Fri, 16 Aug 2024 05:56:01 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGTugN4/5Umd8M3bK1ZSdFqkslcu6HCM8ql5XHhRWIw5ZVD1CwDn9NHp1/5y313wwsYTqtyeQ==
+X-Received: by 2002:a17:903:32d1:b0:1fc:57b7:995c with SMTP id d9443c01a7336-20203e47f2fmr30247335ad.7.1723812961037;
+        Fri, 16 Aug 2024 05:56:01 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7c6b6357b67sm2800873a12.72.2024.08.16.04.42.47
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-201f038a779sm25061475ad.188.2024.08.16.05.55.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Aug 2024 04:42:48 -0700 (PDT)
-Date: Fri, 16 Aug 2024 19:42:45 +0800
+        Fri, 16 Aug 2024 05:56:00 -0700 (PDT)
+Date: Fri, 16 Aug 2024 20:55:57 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
-	fstests@vger.kernel.org, fdmanana@kernel.org
-Subject: Re: [PATCH] btrfs: test send clones extents with unaligned end
- offset ending at i_size
-Message-ID: <20240816114245.mgugfp66skww72nu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <177f429d65afb5cc99a7f950779ba15b130cd581.1723470203.git.fdmanana@suse.com>
- <ffe34979-75bf-4cb4-ac66-d21bdc85578c@oracle.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH fstests] generic/755: test that inode's ctime is updated
+ on unlink
+Message-ID: <20240816125557.yu7664riqf4gvckl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240813-master-v1-1-862678cc4000@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,34 +74,167 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ffe34979-75bf-4cb4-ac66-d21bdc85578c@oracle.com>
+In-Reply-To: <20240813-master-v1-1-862678cc4000@kernel.org>
 
-On Fri, Aug 16, 2024 at 06:58:37PM +0800, Anand Jain wrote:
-> On 12/8/24 9:51 pm, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> > 
-> > Test that a send operation will issue a clone operation for a shared
-> > extent of a file if the extent ends at the i_size of the file and the
-> > i_size is not sector size aligned.
-> > 
-> > This verifies an improvement to the btrfs send feature implemented by
-> > the following kernel patch:
-> > 
-> >    "btrfs: send: allow cloning non-aligned extent if it ends at i_size"
-> > 
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> 
-> 
-> Reviewed-by: Anand Jain <anand.jain@oracle.com>
-> 
-> Zorro,
-> 
-> Could you please add this to the patches in queue? Since this is the only
-> patch pending, I will not be sending a PR this week
+On Tue, Aug 13, 2024 at 02:21:08PM -0400, Jeff Layton wrote:
 
-Sure, thanks Anand :)
+Hi Jeff :)
 
+Any description about this case test for?
+
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
+> ---
+> HCH suggested I roll a fstest for this problem that I found in btrfs the
+> other day. In principle, we probably could expand this to other dir
+> operations and to check the parent timestamps, but having to do all that
+> in C is a pain.  I didn't see a good way to use xfs_io for this,
+> however.
+
+Is there a kernel commit or patch link about the bug which you found?
+
+> ---
+>  src/Makefile          |  2 +-
+>  src/unlink-ctime.c    | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/755     | 26 ++++++++++++++++++++++++++
+>  tests/generic/755.out |  2 ++
+>  4 files changed, 79 insertions(+), 1 deletion(-)
 > 
-> Thx, Anand
+> diff --git a/src/Makefile b/src/Makefile
+> index 9979613711c9..c71fa41e4668 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -34,7 +34,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+>  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+> -	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault
+> +	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault unlink-ctime
+
+The .gitignore need updating too.
+
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> diff --git a/src/unlink-ctime.c b/src/unlink-ctime.c
+> new file mode 100644
+> index 000000000000..7661e340eaba
+> --- /dev/null
+> +++ b/src/unlink-ctime.c
+> @@ -0,0 +1,50 @@
+> +#define _GNU_SOURCE 1
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <unistd.h>
+> +#include <errno.h>
+> +#include <sys/stat.h>
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int fd, ret;
+> +	struct statx before, after;
+> +
+> +	if (argc < 2) {
+> +		fprintf(stderr, "Must specify filename!\n");
+> +		return 1;
+> +	}
+> +
+> +	fd = open(argv[1], O_RDWR|O_CREAT, 0600);
+> +	if (fd < 0) {
+> +		perror("open");
+> +		return 1;
+> +	}
+> +
+> +	ret = statx(fd, "", AT_EMPTY_PATH, STATX_CTIME, &before);
+> +	if (ret) {
+> +		perror("statx");
+> +		return 1;
+> +	}
+> +
+> +	sleep(1);
+> +
+> +	ret = unlink(argv[1]);
+> +	if (ret) {
+> +		perror("unlink");
+> +		return 1;
+> +	}
+> +
+> +	ret = statx(fd, "", AT_EMPTY_PATH, STATX_CTIME, &after);
+
+So you need to keep the "fd" after unlink. If so, there might not be a
+way through xfs_io to do that.
+
+> +	if (ret) {
+> +		perror("statx");
+> +		return 1;
+> +	}
+> +
+> +	if (before.stx_ctime.tv_nsec == after.stx_ctime.tv_nsec &&
+> +	    before.stx_ctime.tv_sec == after.stx_ctime.tv_sec) {
+> +		printf("No change to ctime after unlink!\n");
+> +		return 1;
+> +	}
+> +	return 0;
+> +}
+> diff --git a/tests/generic/755 b/tests/generic/755
+> new file mode 100755
+> index 000000000000..500c51f99630
+> --- /dev/null
+> +++ b/tests/generic/755
+> @@ -0,0 +1,26 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024, Jeff Layton <jlayton@kernel.org>
+> +#
+> +# FS QA Test No. 755
+> +#
+> +# Create a file, stat it and then unlink it. Does the ctime of the
+> +# target inode change?
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+                             ^^^^^^
+                             unlink
+
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +. ./common/dmerror
+
+Why dmerror and filter are needed? If not necessary, remove these
+3 lines.
+
+Others looks good to me.
+
+Thanks,
+Zorro
+
+> +
+> +_require_test
+> +_require_test_program unlink-ctime
+> +
+> +testfile="$TEST_DIR/unlink-ctime.$$"
+> +
+> +$here/src/unlink-ctime $testfile
+> +
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/generic/755.out b/tests/generic/755.out
+> new file mode 100644
+> index 000000000000..7c9ea51cd298
+> --- /dev/null
+> +++ b/tests/generic/755.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 755
+> +Silence is golden
+> 
+> ---
+> base-commit: f5ada754d5838d29fd270257003d0d123a9d1cd2
+> change-id: 20240813-master-e3b46de630bd
+> 
+> Best regards,
+> -- 
+> Jeff Layton <jlayton@kernel.org>
+> 
 > 
 
