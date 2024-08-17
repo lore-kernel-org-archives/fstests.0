@@ -1,288 +1,69 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from dggsgout12.his.huawei.com (dggsgout12.his.huawei.com [45.249.212.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FE7154774
-	for <fstests@vger.kernel.org>; Sat, 17 Aug 2024 05:53:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AF5E81ACA
+	for <fstests@vger.kernel.org>; Sat, 17 Aug 2024 06:24:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723873993; cv=none; b=WG3+iD8WDfQTVse9ex0hxKcS4g5lI3ubSQ+kO5abJhlimoZ2RBSz5QvI4e46QoTyJFS8TAcIMKB6jFeWHe/DLapPDKF+F5qxa6TWZQZrQ2RAVc59mYjB6aRnY4FrV0xB2P2We99UfbkFtTUpxZ/up6taEDk48kvh5tQdT8nsjhM=
+	t=1723875874; cv=none; b=oBq8eWucWjIvERgERAHbqCjUwADZ2lnJaxBevErsergK7UqLQPWIAG7ftRajPbR1k+vixuj9HVvIiyhvgjQlF7jB/NNjnygwFs1w8QDBCqN36Vf5ccAuRoDHMcUXbdSqCE/ogdlEEZfHszz/wfGopv+k0mB8fBIAGBcT0h5gwgE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723873993; c=relaxed/simple;
-	bh=ucpncKES4KJw14hD8IfM5Zh+hz3zkHF2ESwrVlipdVA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=G3tNuBCq+gV+CD8JRF+R2yMJom/Exck+e1V4EgNWqS7CgD418qt6EtjtR3mgqMJZxuZEIYhpWezYpPyBJQnunOLfffkFWg70Q2duWqjEtVpKbG5A8f8foV6mfm9QabEk6pCCK0e14Y4Hd74nG1jMfEbVDIMyPaJu7bYjb1xS+ww=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M/5K/yp6; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M/5K/yp6"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1723873989;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=qEAXMzXw+X+bVqWar3Yh4pHMhyMCyR0F3kFCLJ3f/CI=;
-	b=M/5K/yp6zpv1H70ewRl83olew7pB8BEQi1gvpGLxfbUOnHR17e5YWPE67216P/tycFP5LV
-	uhRTK+sPBeplOH9OALPBp1Zb0q+idNRUXZs1YfwLufmXE/H59Qknvf7YOzS6bqpqPFGedu
-	cFRQ6Tw9mA01KaF0zi8v1/wfvqlsE0M=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-349-GjtWm4EkMPq4A-aCYjdjng-1; Sat, 17 Aug 2024 01:53:07 -0400
-X-MC-Unique: GjtWm4EkMPq4A-aCYjdjng-1
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-7a30753fe30so2226215a12.3
-        for <fstests@vger.kernel.org>; Fri, 16 Aug 2024 22:53:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723873986; x=1724478786;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=qEAXMzXw+X+bVqWar3Yh4pHMhyMCyR0F3kFCLJ3f/CI=;
-        b=ck67xp0wvOO7zJPXkS9kymXvn6TBSiCnPCCJmm+sca91ak7rqH+Kye9sM1WSbMR7rj
-         o2UEI6rPDzCOtrFaePYF7uQHYHTZ2y2PA/+qW/kemavG04J0qcBMtdP+edJHZ9zDsjyN
-         hQkDv18vJaqF7HOzTqoAWXLtVRSjjp94x2OlrTiuEM7an+2+d86LX1KdobaasJBiP/Mz
-         mt3xWCbBVNtlCVgRHPBVxN7VrbhTzSJ2c8UhZsP0jLP2PUm3QQryFf98SQiJawffyzli
-         9N+lFrNoWE1TkHk7WFJQXG4NOOpe7ZS1XsGbDU9bF2FbWJoHMzaCR5msJ9PZQ/ciY1u5
-         TtcQ==
-X-Gm-Message-State: AOJu0YwjbzmN9PEX6FfbpVMgv40ImmRMLlcYB9ZfIOKgzb7cbAGgt9Ao
-	RVf4lTdNYrIhmQfg97sYRQU3QZLdu7niZjIY9lUmNtB4de+3DEujb4aZeo3XP2EJamhVVRre/vB
-	Amc7Dsng5NbQDNN3pV2zf6StF0J4mrbPgN7ryIpjl9vQh6cUxgTkK5hJ5dvLMCJo3Xg==
-X-Received: by 2002:a17:902:cec1:b0:201:ef87:9535 with SMTP id d9443c01a7336-20203e4c9c5mr60765385ad.3.1723873986524;
-        Fri, 16 Aug 2024 22:53:06 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFGuk3QzJCQcRlqzVWBZVy+LeAY9P0SxB7zFNl7Ztatybb0uNMFCyCw+wg/pN8dVnNZd8v3Bw==
-X-Received: by 2002:a17:902:cec1:b0:201:ef87:9535 with SMTP id d9443c01a7336-20203e4c9c5mr60765195ad.3.1723873985801;
-        Fri, 16 Aug 2024 22:53:05 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-201f037aeadsm33509125ad.138.2024.08.16.22.53.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Aug 2024 22:53:05 -0700 (PDT)
-Date: Sat, 17 Aug 2024 13:53:01 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	linux-fsdevel@vger.kernel.org,
-	Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH fstests] generic/755: test that inode's ctime is updated
- on unlink
-Message-ID: <20240817055301.nisxjdvue6lasois@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240813-master-v1-1-862678cc4000@kernel.org>
- <20240816125557.yu7664riqf4gvckl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <0fc76e7d49e8523d00f54fd5b50f24f040e7cf70.camel@kernel.org>
+	s=arc-20240116; t=1723875874; c=relaxed/simple;
+	bh=Zpt4ITDdSdn4R98fBK9PmnvBdlznJigvphL9GlUZkoA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=A2Upip5B9DYgzMvJfdXHURWLdVbptV2z7E6DjP9K/GwbDEiP0dGQtv7yXy6b+/0sVvduOLUzWG0zYZMlJJqqLaeNprBQA+tNqpuojrPLovbwIwWnZrFgHDTEaE4V4UeoMticXWcaxZGC6SukZknejKIiULCc7aZHLO7zxI8uG8E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
+Received: from mail.maildlp.com (unknown [172.19.163.235])
+	by dggsgout12.his.huawei.com (SkyGuard) with ESMTP id 4Wm82k1kRZz4f3jHc
+	for <fstests@vger.kernel.org>; Sat, 17 Aug 2024 14:24:14 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.128])
+	by mail.maildlp.com (Postfix) with ESMTP id 2BD371A0568
+	for <fstests@vger.kernel.org>; Sat, 17 Aug 2024 14:24:28 +0800 (CST)
+Received: from [10.174.177.210] (unknown [10.174.177.210])
+	by APP4 (Coremail) with SMTP id gCh0CgBXfoQaQsBmELywBw--.34433S3;
+	Sat, 17 Aug 2024 14:24:28 +0800 (CST)
+Message-ID: <ed1a16d0-cc1e-005a-e0a2-9c08cb71caee@huaweicloud.com>
+Date: Sat, 17 Aug 2024 14:24:26 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <0fc76e7d49e8523d00f54fd5b50f24f040e7cf70.camel@kernel.org>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.1
+Subject: Re: [PATCH v2 1/2] generic/732: remove unused code
+To: zlang@kernel.org
+Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@infradead.org>
+References: <20240729084715.1736839-1-yangerkun@huawei.com>
+ <ZqekL92fZP9cxe2h@infradead.org>
+From: yangerkun <yangerkun@huaweicloud.com>
+In-Reply-To: <ZqekL92fZP9cxe2h@infradead.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:gCh0CgBXfoQaQsBmELywBw--.34433S3
+X-Coremail-Antispam: 1UD129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73
+	VFW2AGmfu7bjvjm3AaLaJ3UjIYCTnIWjp_UUU5_7kC6x804xWl14x267AKxVWUJVW8JwAF
+	c2x0x2IEx4CE42xK8VAvwI8IcIk0rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII
+	0Yj41l84x0c7CEw4AK67xGY2AK021l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xv
+	wVC0I7IYx2IY6xkF7I0E14v26r4j6F4UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjc
+	xK6I8E87Iv6xkF7I0E14v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVAC
+	Y4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJV
+	W8JwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lc7I2V7IY0VAS07AlzVAYIcxG
+	8wCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r
+	1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jrv_JF1lIxkGc2Ij
+	64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr
+	0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF
+	0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x07UE-erUUUUU=
+X-CM-SenderInfo: 51dqwvhunx0q5kxd4v5lfo033gof0z/
 
-On Fri, Aug 16, 2024 at 08:58:28AM -0400, Jeff Layton wrote:
-> On Fri, 2024-08-16 at 20:55 +0800, Zorro Lang wrote:
-> > On Tue, Aug 13, 2024 at 02:21:08PM -0400, Jeff Layton wrote:
-> > 
-> > Hi Jeff :)
-> > 
-> > Any description about this case test for?
-> > 
+Hi,
+
+Ping for this patchset.
+
+在 2024/7/29 22:16, Christoph Hellwig 写道:
+> Looks good:
 > 
-> Yes. I should have put that info in the commit. Can you add it if the
-> patch otherwise looks OK?
-> 
->     https://lore.kernel.org/linux-btrfs/20240812-btrfs-unlink-v1-1-ee5c2ef538eb@kernel.org/
-
-Hi Jeff,
-
-I saw this patch has gotten 3 RVBs, it's going to be in btrfs tree.
-I think it's good enough. BTW, you can add "_fixed_by_kernel_commit"
-to the test case, see below tests/generic/755 ...
-
-By reading above link, I think this issue doesn't need a C program (to
-reproduce), it can be done in bash script. e.g.
-
-# touch file
-# link file linkfile
-# ctime1=$(stat -c %Z file)
-# sleep 2
-# ctime2=$(stat -c %Z file)
-# if [ "$ctime1" == "$ctime2" ];then ....
-
-Does that make sense to you?
-
-> 
-> Thanks,
-> 
-> > > Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> > > ---
-> > > HCH suggested I roll a fstest for this problem that I found in btrfs the
-> > > other day. In principle, we probably could expand this to other dir
-> > > operations and to check the parent timestamps, but having to do all that
-> > > in C is a pain.  I didn't see a good way to use xfs_io for this,
-> > > however.
-> > 
-> > Is there a kernel commit or patch link about the bug which you found?
-> > 
-> > > ---
-> > >  src/Makefile          |  2 +-
-> > >  src/unlink-ctime.c    | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/755     | 26 ++++++++++++++++++++++++++
-> > >  tests/generic/755.out |  2 ++
-> > >  4 files changed, 79 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/src/Makefile b/src/Makefile
-> > > index 9979613711c9..c71fa41e4668 100644
-> > > --- a/src/Makefile
-> > > +++ b/src/Makefile
-> > > @@ -34,7 +34,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> > >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
-> > >  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
-> > >  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
-> > > -	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault
-> > > +	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault unlink-ctime
-> > 
-> > The .gitignore need updating too.
-
-[need changing]
-
-> > 
-> > >  
-> > >  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
-> > >  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> > > diff --git a/src/unlink-ctime.c b/src/unlink-ctime.c
-> > > new file mode 100644
-> > > index 000000000000..7661e340eaba
-> > > --- /dev/null
-> > > +++ b/src/unlink-ctime.c
-> > > @@ -0,0 +1,50 @@
-> > > +#define _GNU_SOURCE 1
-> > > +#include <stdio.h>
-> > > +#include <fcntl.h>
-> > > +#include <unistd.h>
-> > > +#include <errno.h>
-> > > +#include <sys/stat.h>
-> > > +
-> > > +int main(int argc, char **argv)
-> > > +{
-> > > +	int fd, ret;
-> > > +	struct statx before, after;
-> > > +
-> > > +	if (argc < 2) {
-> > > +		fprintf(stderr, "Must specify filename!\n");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	fd = open(argv[1], O_RDWR|O_CREAT, 0600);
-> > > +	if (fd < 0) {
-> > > +		perror("open");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	ret = statx(fd, "", AT_EMPTY_PATH, STATX_CTIME, &before);
-> > > +	if (ret) {
-> > > +		perror("statx");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	sleep(1);
-> > > +
-> > > +	ret = unlink(argv[1]);
-> > > +	if (ret) {
-> > > +		perror("unlink");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	ret = statx(fd, "", AT_EMPTY_PATH, STATX_CTIME, &after);
-> > 
-> > So you need to keep the "fd" after unlink. If so, there might not be a
-> > way through xfs_io to do that.
-> > 
-> > > +	if (ret) {
-> > > +		perror("statx");
-> > > +		return 1;
-> > > +	}
-> > > +
-> > > +	if (before.stx_ctime.tv_nsec == after.stx_ctime.tv_nsec &&
-> > > +	    before.stx_ctime.tv_sec == after.stx_ctime.tv_sec) {
-> > > +		printf("No change to ctime after unlink!\n");
-> > > +		return 1;
-> > > +	}
-> > > +	return 0;
-> > > +}
-> > > diff --git a/tests/generic/755 b/tests/generic/755
-> > > new file mode 100755
-> > > index 000000000000..500c51f99630
-> > > --- /dev/null
-> > > +++ b/tests/generic/755
-> > > @@ -0,0 +1,26 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024, Jeff Layton <jlayton@kernel.org>
-> > > +#
-> > > +# FS QA Test No. 755
-> > > +#
-> > > +# Create a file, stat it and then unlink it. Does the ctime of the
-> > > +# target inode change?
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> >                              ^^^^^^
-> >                              unlink
-
-[need changing]
-
-> > 
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +. ./common/dmerror
-> > 
-> > Why dmerror and filter are needed? If not necessary, remove these
-> > 3 lines.
-
-[need changing]
-
-> > 
-> > Others looks good to me.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > +
-> > > +_require_test
-> > > +_require_test_program unlink-ctime
-
-  _fixed_by_kernel_commit XXXXXXXXXXXX btrfs: update target inode's ctime on unlink
-
-> > > +
-> > > +testfile="$TEST_DIR/unlink-ctime.$$"
-> > > +
-> > > +$here/src/unlink-ctime $testfile
-> > > +
-> > > +echo Silence is golden
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/755.out b/tests/generic/755.out
-> > > new file mode 100644
-> > > index 000000000000..7c9ea51cd298
-> > > --- /dev/null
-> > > +++ b/tests/generic/755.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 755
-> > > +Silence is golden
-> > > 
-> > > ---
-> > > base-commit: f5ada754d5838d29fd270257003d0d123a9d1cd2
-> > > change-id: 20240813-master-e3b46de630bd
-> > > 
-> > > Best regards,
-> > > -- 
-> > > Jeff Layton <jlayton@kernel.org>
-> > > 
-> > > 
-> > 
-> 
-> -- 
-> Jeff Layton <jlayton@kernel.org>
-> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
 
