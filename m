@@ -1,40 +1,71 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6ECB41D1300;
-	Wed, 21 Aug 2024 17:14:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 121C71D131A
+	for <fstests@vger.kernel.org>; Wed, 21 Aug 2024 18:47:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724260490; cv=none; b=ib14F435nonZtz8b7fEyDxu3klrbLAzDue3/VTn9G9UxtidF6ujQh5hVTL1SRE5TRq3qwhz9cCp5+e4kZSJ0A3fc3ldjmZscKdQVgBYFAJLPTMjbKsTg7/5gzXpRl1YLKx0YUW6jP9R6Ms2uEyOA1Pi22A8nGcJv+3Vh0pzZQPQ=
+	t=1724266022; cv=none; b=KFxbCTOhdjalPpBUQUgYvyaIjj1T9hT9ck1GtSy4EpjrdD44D+SXENTElw5SjIwLBX13ACOFHwFIBZuyWunkKPLIv15h32yrFGg8oWWAdVnWKpl+c5D44mOpQ4YT3mT6k51JdGXROWHLdEvNj2NCwUL5pI/IQKY4E/LoSf6qWHU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724260490; c=relaxed/simple;
-	bh=F7gJUGJbRrNIAaoIUSkr3EzLCBWgke/byq041wjSEJY=;
+	s=arc-20240116; t=1724266022; c=relaxed/simple;
+	bh=W9Hyq6Il41NvtHVMGjlZLIU+xP8f0gf2RcjpKVRqm80=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LbqK9EzKM2vMbb3BNC6blfKvOQwHd4FLoi4oMNKNNeHPfbs6tAiBKOuMD4wRkL5Y65KgNFq2lMcLJDJY/J3gjS42gkJseevw3w4IuuftPSkZQawYW9E12w7ms1bBGnjmiYDcDF6CivpEG0O0MA9xZit83b1EmeybZiFNEsXjhe4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U8t7Mbyg; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Itq2/dLCP8JyoPoyhLeB/hXIp/1qzOaEbHZ3Re925APIXN7SQOccxA2WpWZLlznYRnxrHRv8bYcpLK4NeJ0mO/mxlMJkE+/Qa6/KcEkMngKYGgi6kf79dFu6lyV1eTX4TCU9gXMDk7myp96NqMQUAwXU+bM/FPDpt7cgu8EQh+0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Q0zLGIgs; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U8t7Mbyg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 012F1C32781;
-	Wed, 21 Aug 2024 17:14:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1724260490;
-	bh=F7gJUGJbRrNIAaoIUSkr3EzLCBWgke/byq041wjSEJY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=U8t7MbygiaUxZiqWtkPPTMU4z0e8XRyed/BJR+wnO4d/59syEse6ixIre85o3dnZn
-	 TU1ksR18mwHB1UGTPVUMdAywAEHNou1rpSdtJzCtrZQt0yIJjUiZJ335j+PaUtdqC3
-	 fUgaUO+VgoPtW4yyG/JTj5m376+HG8RPVfWLp2O7yI0s8HxrL9atwENb+Vgsiuag58
-	 lciOTfnhfHWKaXEX/tpVisMcA+PGdo0UoRiUaYzA3XdkDgABIMA0rozvbStnauI1gJ
-	 Sh41B+MAr0IqS0X7ZY3GgHMyEBIO+SzFLORy1BMJ7YKunlhiv5VB6+sYw/NR2ywm6o
-	 pqoVDwRb+SP5Q==
-Date: Wed, 21 Aug 2024 10:14:49 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: liuhuan01@kylinos.cn
-Cc: dchinner@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: use FICLONE/FICLONERANGE/FIDEDUPERANGE for test
- cases
-Message-ID: <20240821171449.GJ6047@frogsfrogsfrogs>
-References: <20240809150455.GV6051@frogsfrogsfrogs>
- <20240817065027.14459-1-liuhuan01@kylinos.cn>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Q0zLGIgs"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1724266019;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=t3HwX0urRRVamqrd2OG6BEVxWEdfk5MbvAIpPHwQ/pM=;
+	b=Q0zLGIgsAilvYgClj4e10o/ypExBsTSwr5jAUmasDkKVs+oLl9tmhHQg0tXBjX+KdPz50h
+	NweZ/IM3uS4327xz1N7JM3JtNECOwrlemFOUIPes0ucVip/BPr3QGaDzFm0FHcuPX2Lpkn
+	0oMMmTWph3Yrac/dgH3s7XGRkMgz/NM=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-375-BR5rVmSKMpqmhcDwa7SJHA-1; Wed, 21 Aug 2024 14:46:58 -0400
+X-MC-Unique: BR5rVmSKMpqmhcDwa7SJHA-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-713ca4e7af3so6602226b3a.1
+        for <fstests@vger.kernel.org>; Wed, 21 Aug 2024 11:46:58 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1724266017; x=1724870817;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=t3HwX0urRRVamqrd2OG6BEVxWEdfk5MbvAIpPHwQ/pM=;
+        b=DmeKCV/6JDzAF3LsNkfOT6MlRavq9RnXGxsEtvA7SHtWVfGDh9HUhL70lNOSOFrXvM
+         GeZ7YJEVIip8QRAnldTJC0hSQxbxw1zOtDaX4mAGRg2293/Y5MXvnWyGZGDxCBclMtyb
+         fY74lEiMdU72XBOJJwff2no1cKO9d+quo/MfwyH5ffFt8ijjVWbxv2oWJiD6UPP7va8n
+         vZTK/hAmeLPzVXWO91Oan99w3lEnQJtNSVDRb0zMWt6yzzaHTPZsCaT2WnfvOqQmcqgU
+         ziuJY93YuE5Nq52MknWdhNlywvNCkWP6eGZvR9aw4tHQ/GfpFDrebuENbY4nPYG+aNlW
+         EoXA==
+X-Gm-Message-State: AOJu0YzOmIYDM07JUs9lomN4VLUsinh5KijPn1x2H4l/HB49XBxR2sP1
+	2vKv8onUsO2vI9EL55Cgu4Mkx/6wh+1FWKqd9HmEfwMQZ+Ffr1mZJzj1qUKNzJ4XjOlHPbcCA/Q
+	7I6tAs4IJ4PNPQoQEsajMky+EGEAGWgAGT1WsEtp6T21+aaSKKigqbwo=
+X-Received: by 2002:a05:6a00:4b10:b0:714:2069:d90e with SMTP id d2e1a72fcca58-7142354ccd6mr3761372b3a.26.1724266017411;
+        Wed, 21 Aug 2024 11:46:57 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHTVQbwYr3xDyB+2yy0tUVPKts85eVqVshKQfM1kr1bAaaAiv7Zipo+038I6s5nWX1sKWBFyA==
+X-Received: by 2002:a05:6a00:4b10:b0:714:2069:d90e with SMTP id d2e1a72fcca58-7142354ccd6mr3761345b3a.26.1724266016909;
+        Wed, 21 Aug 2024 11:46:56 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-714209bf529sm1958615b3a.160.2024.08.21.11.46.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Aug 2024 11:46:56 -0700 (PDT)
+Date: Thu, 22 Aug 2024 02:46:53 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	linux-fsdevel@vger.kernel.org,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH fstests v2] generic/755: test that inode's ctime is
+ updated on unlink
+Message-ID: <20240821184653.dbwzyp2tiblsmkzw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240820-master-v2-1-41703dddcc32@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,305 +74,104 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240817065027.14459-1-liuhuan01@kylinos.cn>
+In-Reply-To: <20240820-master-v2-1-41703dddcc32@kernel.org>
 
-On Sat, Aug 17, 2024 at 02:50:27PM +0800, liuhuan01@kylinos.cn wrote:
-> From: liuh <liuhuan01@kylinos.cn>
+On Tue, Aug 20, 2024 at 03:48:25PM -0400, Jeff Layton wrote:
+> I recently found and fixed a bug in btrfs where it wasn't updating the
+> citme on the target inode when unlinking [1]. Add a fstest for this.
 > 
-> With the patch "xfs_io: use FICLONE/FICLONERANGE/FIDEDUPERANGE for reflink/dedupe IO commands", and modify relevant test cases.
+> [1]: https://lore.kernel.org/linux-btrfs/20240812-btrfs-unlink-v1-1-ee5c2ef538eb@kernel.org/
 > 
-> Signed-off-by: liuh <liuhuan01@kylinos.cn>
+> Signed-off-by: Jeff Layton <jlayton@kernel.org>
 > ---
->  common/reflink        |  2 +-
->  tests/generic/122.out |  2 +-
->  tests/generic/136.out |  2 +-
->  tests/generic/157.out | 18 +++++++++---------
->  tests/generic/158.out | 20 ++++++++++----------
->  tests/generic/303.out |  8 ++++----
->  tests/generic/304.out | 14 +++++++-------
->  tests/generic/493.out |  4 ++--
->  tests/generic/516.out |  2 +-
->  tests/generic/518.out |  2 +-
->  tests/xfs/319.out     |  2 +-
->  tests/xfs/321.out     |  2 +-
->  tests/xfs/322.out     |  2 +-
->  tests/xfs/323.out     |  2 +-
->  14 files changed, 41 insertions(+), 41 deletions(-)
+> HCH suggested I roll a fstest for this problem that I found in btrfs the
+> other day. This just creates a file and a hardlink to it, statx's it and
+> then unlinks the hardlink and statx's it again. The ctimes are then
+> compared.
+> ---
+> Changes in v2:
+> - Turn it into a shell script.
+> - Link to v1: https://lore.kernel.org/r/20240813-master-v1-1-862678cc4000@kernel.org
+> ---
+>  tests/generic/755     | 38 ++++++++++++++++++++++++++++++++++++++
+>  tests/generic/755.out |  2 ++
+>  2 files changed, 40 insertions(+)
 > 
-> diff --git a/common/reflink b/common/reflink
-> index 22adc444..21df20e2 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -261,7 +261,7 @@ _dedupe_range() {
->  # Unify xfs_io dedupe ioctl error message prefix
->  _filter_dedupe_error()
->  {
-> -	sed -e 's/^dedupe:/XFS_IOC_FILE_EXTENT_SAME:/g'
-> +	sed -e 's/^dedupe:/FIDEDUPERANGE:/g'
+> diff --git a/tests/generic/755 b/tests/generic/755
+> new file mode 100755
+> index 000000000000..68da3b20073f
+> --- /dev/null
+> +++ b/tests/generic/755
+> @@ -0,0 +1,38 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024, Jeff Layton <jlayton@kernel.org>
+> +#
+> +# FS QA Test No. 755
+> +#
+> +# Create a file, stat it and then unlink it. Does the ctime of the
+> +# target inode change?
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_require_test
+> +_require_test_program unlink-ctime
+                         ^^^^
+This V2 shouldn't require this program, it's cause this case _notrun directly.
+The 3bc2ac2f8f0b ("btrfs: update target inode's ctime on unlink") has been merged,
 
-Hmm, don't you have to squash both "dedupe:" and
-"XFS_IOC_FILE_EXTENT_SAME:" to "FIDEDUPERANGE:" here?  Or else you break
-the intermediate xfs_io versions that emit "XFS_IOC_FILE_EXTENT_SAME:"?
+I'll remove this "_require_test_program" line, and add:
+[ "$FSTYP = btrfs"] && _fixed_by_kernel_commit 3bc2ac2f8f0b \
+	"btrfs: update target inode's ctime on unlink"
 
-And apply the same filtering for the clone and clonerange ioctls?
+when I merge this patch. Others looks good to me.
 
-(Or just leave the error message prefixes in xfs_io the way they are!)
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
---D
+Thanks,
+Zorro
 
->  }
->  
->  # Create a file of interleaved unwritten and reflinked blocks
-> diff --git a/tests/generic/122.out b/tests/generic/122.out
-> index 4459985c..f243d153 100644
-> --- a/tests/generic/122.out
-> +++ b/tests/generic/122.out
-> @@ -4,7 +4,7 @@ Create the original files
->  5e3501f97fd2669babfcbd3e1972e833  TEST_DIR/test-122/file2
->  Files 1-2 do not match (intentional)
->  (Fail to) dedupe the middle blocks together
-> -XFS_IOC_FILE_EXTENT_SAME: Extents did not match.
-> +FIDEDUPERANGE: Extents did not match.
->  Compare sections
->  35ac8d7917305c385c30f3d82c30a8f6  TEST_DIR/test-122/file1
->  5e3501f97fd2669babfcbd3e1972e833  TEST_DIR/test-122/file2
-> diff --git a/tests/generic/136.out b/tests/generic/136.out
-> index 508953f6..eee44f07 100644
-> --- a/tests/generic/136.out
-> +++ b/tests/generic/136.out
-> @@ -7,7 +7,7 @@ c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file2
->  Dedupe the last blocks together
->  1->2
->  1->3
-> -XFS_IOC_FILE_EXTENT_SAME: Extents did not match.
-> +FIDEDUPERANGE: Extents did not match.
->  c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file1
->  c4fd505be25a0c91bcca9f502b9a8156  TEST_DIR/test-136/file2
->  07ac67bf7f271195442509e79cde4cee  TEST_DIR/test-136/file3
-> diff --git a/tests/generic/157.out b/tests/generic/157.out
-> index d4f64b44..0ef12f80 100644
-> --- a/tests/generic/157.out
-> +++ b/tests/generic/157.out
-> @@ -2,23 +2,23 @@ QA output created by 157
->  Format and mount
->  Create the original files
->  Try cross-device reflink
-> -XFS_IOC_CLONE_RANGE: Invalid cross-device link
-> +FICLONERANGE: Invalid cross-device link
->  Try unaligned reflink
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try overlapping reflink
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try reflink past EOF
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try to reflink a dir
-> -XFS_IOC_CLONE_RANGE: Is a directory
-> +FICLONERANGE: Is a directory
->  Try to reflink a device
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try to reflink to a dir
->  TEST_DIR/test-157/dir1: Is a directory
->  Try to reflink to a device
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try to reflink to a fifo
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Try to reflink an append-only file
-> -XFS_IOC_CLONE_RANGE: Bad file descriptor
-> +FICLONERANGE: Bad file descriptor
->  Reflink two files
-> diff --git a/tests/generic/158.out b/tests/generic/158.out
-> index 8df9d9a5..2b304820 100644
-> --- a/tests/generic/158.out
-> +++ b/tests/generic/158.out
-> @@ -2,26 +2,26 @@ QA output created by 158
->  Format and mount
->  Create the original files
->  Try cross-device dedupe
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid cross-device link
-> +FIDEDUPERANGE: Invalid cross-device link
->  Try unaligned dedupe
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try overlapping dedupe
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try dedupe from past EOF
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try dedupe to past EOF, destination offset beyond EOF
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try dedupe to past EOF, destination offset behind EOF
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try to dedupe a dir
-> -XFS_IOC_FILE_EXTENT_SAME: Is a directory
-> +FIDEDUPERANGE: Is a directory
->  Try to dedupe a device
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try to dedupe to a dir
->  TEST_DIR/test-158/dir1: Is a directory
->  Try to dedupe to a device
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try to dedupe to a fifo
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Try to dedupe an append-only file
->  Dedupe two files
-> diff --git a/tests/generic/303.out b/tests/generic/303.out
-> index 39a88038..256ef66f 100644
-> --- a/tests/generic/303.out
-> +++ b/tests/generic/303.out
-> @@ -4,14 +4,14 @@ Create the original files
->  Reflink large single byte file
->  Reflink large empty file
->  Reflink past maximum file size in dest file (should fail)
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Reflink high offset to low offset
->  Reflink past source file EOF (should fail)
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Reflink max size at nonzero offset (should fail)
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Reflink with huge off/len (should fail)
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  Check file creation
->  file3
->  7ffffffffffffffe:  61  a
-> diff --git a/tests/generic/304.out b/tests/generic/304.out
-> index a979099b..d43dd70c 100644
-> --- a/tests/generic/304.out
-> +++ b/tests/generic/304.out
-> @@ -2,19 +2,19 @@ QA output created by 304
->  Format and mount
->  Create the original files
->  Dedupe large single byte file
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe large empty file
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe past maximum file size in dest file (should fail)
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe high offset to low offset
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe past source file EOF (should fail)
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe max size at nonzero offset (should fail)
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Dedupe with huge off/len (should fail)
-> -XFS_IOC_FILE_EXTENT_SAME: Invalid argument
-> +FIDEDUPERANGE: Invalid argument
->  Check file creation
->  file3
->  7ffffffffffffffe:  61  a
-> diff --git a/tests/generic/493.out b/tests/generic/493.out
-> index d3426ee6..8bb71d3b 100644
-> --- a/tests/generic/493.out
-> +++ b/tests/generic/493.out
-> @@ -2,6 +2,6 @@ QA output created by 493
->  Format and mount
->  Initialize file
->  Try to dedupe
-> -XFS_IOC_FILE_EXTENT_SAME: Text file busy
-> -XFS_IOC_FILE_EXTENT_SAME: Text file busy
-> +FIDEDUPERANGE: Text file busy
-> +FIDEDUPERANGE: Text file busy
->  Tear it down
-> diff --git a/tests/generic/516.out b/tests/generic/516.out
-> index 90308c49..53611b3b 100644
-> --- a/tests/generic/516.out
-> +++ b/tests/generic/516.out
-> @@ -4,7 +4,7 @@ Create the original files
->  39578c21e2cb9f6049b1cf7fc7be12a6  TEST_DIR/test-516/file2
->  Files 1-2 do not match (intentional)
->  (partial) dedupe the middle blocks together
-> -XFS_IOC_FILE_EXTENT_SAME: Extents did not match.
-> +FIDEDUPERANGE: Extents did not match.
->  Compare sections
->  35ac8d7917305c385c30f3d82c30a8f6  TEST_DIR/test-516/file1
->  39578c21e2cb9f6049b1cf7fc7be12a6  TEST_DIR/test-516/file2
-> diff --git a/tests/generic/518.out b/tests/generic/518.out
-> index 726c2073..57ae9155 100644
-> --- a/tests/generic/518.out
-> +++ b/tests/generic/518.out
-> @@ -3,7 +3,7 @@ wrote 262244/262244 bytes at offset 0
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->  wrote 1048576/1048576 bytes at offset 0
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> -XFS_IOC_CLONE_RANGE: Invalid argument
-> +FICLONERANGE: Invalid argument
->  File content after failed reflink:
->  0000000 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5 b5
->  *
-> diff --git a/tests/xfs/319.out b/tests/xfs/319.out
-> index 160f5fd2..25f1ed2e 100644
-> --- a/tests/xfs/319.out
-> +++ b/tests/xfs/319.out
-> @@ -7,7 +7,7 @@ Check files
->  4155b81ac6d45c0182fa2bc03960f230  SCRATCH_MNT/file3
->  Inject error
->  Try to reflink
-> -XFS_IOC_CLONE_RANGE: Input/output error
-> +FICLONERANGE: Input/output error
->  FS should be shut down, touch will fail
->  touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
->  Remount to replay log
-> diff --git a/tests/xfs/321.out b/tests/xfs/321.out
-> index c0abd52b..59fd7b7b 100644
-> --- a/tests/xfs/321.out
-> +++ b/tests/xfs/321.out
-> @@ -6,7 +6,7 @@ Check files
->  b5cfa9d6c8febd618f91ac2843d50a1c  SCRATCH_MNT/file3
->  Inject error
->  Try to reflink
-> -XFS_IOC_CLONE_RANGE: Input/output error
-> +FICLONERANGE: Input/output error
->  FS should be shut down, touch will fail
->  touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
->  Remount to replay log
-> diff --git a/tests/xfs/322.out b/tests/xfs/322.out
-> index b3fba5d0..695dd48b 100644
-> --- a/tests/xfs/322.out
-> +++ b/tests/xfs/322.out
-> @@ -6,7 +6,7 @@ Check files
->  b5cfa9d6c8febd618f91ac2843d50a1c  SCRATCH_MNT/file3
->  Inject error
->  Try to reflink
-> -XFS_IOC_CLONE_RANGE: Input/output error
-> +FICLONERANGE: Input/output error
->  FS should be shut down, touch will fail
->  touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
->  Remount to replay log
-> diff --git a/tests/xfs/323.out b/tests/xfs/323.out
-> index 99b9688c..f7f36c05 100644
-> --- a/tests/xfs/323.out
-> +++ b/tests/xfs/323.out
-> @@ -6,7 +6,7 @@ Check files
->  4155b81ac6d45c0182fa2bc03960f230  SCRATCH_MNT/file3
->  Inject error
->  Try to reflink
-> -XFS_IOC_CLONE_RANGE: Input/output error
-> +FICLONERANGE: Input/output error
->  FS should be shut down, touch will fail
->  touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
->  Remount to replay log
+> +
+> +testfile="$TEST_DIR/unlink-ctime1.$$"
+> +testlink="$TEST_DIR/unlink-ctime2.$$"
+> +
+> +rm -f $testfile $testlink
+> +touch $testfile
+> +ln $testfile $testlink
+> +
+> +time1=$(stat -c "%Z" $testfile)
+> +
+> +sleep 2
+> +unlink $testlink
+> +
+> +time2=$(stat -c "%Z" $testfile)
+> +
+> +unlink $testfile
+> +
+> +if [ $time1 -eq $time2 ]; then
+> +	echo "Target's ctime did not change after unlink!"
+> +fi
+> +
+> +echo Silence is golden
+> +status=0
+> +exit
+> diff --git a/tests/generic/755.out b/tests/generic/755.out
+> new file mode 100644
+> index 000000000000..7c9ea51cd298
+> --- /dev/null
+> +++ b/tests/generic/755.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 755
+> +Silence is golden
+> 
+> ---
+> base-commit: f5ada754d5838d29fd270257003d0d123a9d1cd2
+> change-id: 20240813-master-e3b46de630bd
+> 
+> Best regards,
 > -- 
-> 2.43.0
+> Jeff Layton <jlayton@kernel.org>
 > 
 > 
+
