@@ -1,56 +1,109 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B49913AA2D;
-	Thu, 22 Aug 2024 06:32:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B85C176AA5
+	for <fstests@vger.kernel.org>; Thu, 22 Aug 2024 14:43:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724308332; cv=none; b=enpf2BZdQCNkWqIgdoeCAnA8iz6SAyU1IEROGByLa/zEP1Ih/p1DUlS1zqHyt/4JN298mL3aslcU2yUwZwszSVy6RnhkIU4WNNkvh5OwHu5OkxdAm3R+EmO1LJgtE8EfaAxlP9xM+YMUcNhMBvFFj602w8YFmWuOmcsNd2II0Lo=
+	t=1724337812; cv=none; b=acc4pX87qoyE9MDQYPOYuf68xw/mZXlpbr/C7sSkWzsheyUdMzNZoQkXEntIsE7NFMX/FJcQS+Jge7sClqEDBDD9XmM+0b+kG5U1C2Lleaokxm+WwTNi3CNBpD8ibksPs7F8vGfp77iayVAGzWQWm5snPekGP/uaW0Y5507Gxec=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724308332; c=relaxed/simple;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Uqjy4n+CbsVChFz+aYNXRIe0cDKnW6b5H4NMHcGUymKilrcz6qrqS5hDdbiPrtXONrgGsDuWZSHWyBOAuS1m3sBAHqt+3nR0MDIODRs8Yg6mzZ0Is4ont2qkCZcgggICgfiNVhkWXF8M84nBwqBtqbpkdfVlGf3v+AgqXbjYjqw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=HVlmnkF4; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1724337812; c=relaxed/simple;
+	bh=CnskYCyzEZqOP6saLcifTRlLp+k961zQ/ECKT1nG6fA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=jv6b5zVVvCVpJ0TatoRdIOzJ6m911CP3j5/+RVbcCTrCD7PAmEMRkr4sAkaRFu6+ytBQNOMNTKiY0EgAtXNgMVLg8MVzREtrFWP70wooHhchzULJ+2GeCzjDWNWHbGOiPWEUdQR/C3aFqjK2j0vch0KuPSDYhLLnabzQbZsIO54=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=d61EXk2W; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="HVlmnkF4"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=HVlmnkF4oWi5wrEFQxciXrXwta
-	jBQiV8B/0NPYTq0VuxBSp4A1sGVvt5/vRsP75pNMNZShmRRE4YiD1SYe1J/MTw7JASHwoTJ0CiUcb
-	LXidqV0k9B3xmsyIoT6DiZ//Pz0F3f8IBLrHZB98On6IDqevhYNMqryIXZhPIKYqbO35ZT7YwDoOW
-	nQmmydj0W0f2UoQrKBgO0BUCxQ0kD/u+fU3AgwVbhZbrQqXuSmdJQFT6bysc7viymJ1GwsZVeTi9U
-	fNumg6soSulfa7XNkz5IAr1HJzEEGnGvCf/vkhx4qfZwBxC5VQznoVNM6SlVxhqatkb2urkNO6xKA
-	zBO5QX+g==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
-	id 1sh1Mg-0000000BcGV-3LbR;
-	Thu, 22 Aug 2024 06:32:10 +0000
-Date: Wed, 21 Aug 2024 23:32:10 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, kjell.m.randa@gmail.com,
-	xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs: add a test for v1 inodes with nonzero nlink and
- onlink fields
-Message-ID: <Zsbbajk9ENJ4YI_j@infradead.org>
-References: <20240812224009.GD6051@frogsfrogsfrogs>
- <20240822050540.GP865349@frogsfrogsfrogs>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="d61EXk2W"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1724337809;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=OU4n9rOOEq1xDdw7y5sS73yDKdKzZct4WLyBIkmSXng=;
+	b=d61EXk2WvcCCBQEC0D9l+OOTyPqWHauG7Xx3HCNcS5Awrp93UbWH27F+VVEJTj3y9qYTFz
+	+mPUdCqdbLlOUHcjnwuVxzmjM+Eil2ksKodzAbtgFUX1r8aLLxK4A3ggdwZtPKiit9G/3K
+	84yn37KV34lwNcQToJIUL/0LDDp8hxc=
+Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-610-utNSIiw1NNaHLzwfZgZpVQ-1; Thu,
+ 22 Aug 2024 10:43:27 -0400
+X-MC-Unique: utNSIiw1NNaHLzwfZgZpVQ-1
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id C28311955F42;
+	Thu, 22 Aug 2024 14:43:25 +0000 (UTC)
+Received: from bfoster.redhat.com (unknown [10.22.33.147])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 76A0A19560A3;
+	Thu, 22 Aug 2024 14:43:24 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org,
+	djwong@kernel.org,
+	josef@toxicpanda.com,
+	david@fromorbit.com
+Subject: [PATCH 0/3] fstests/fsx: test coverage for eof zeroing
+Date: Thu, 22 Aug 2024 10:44:19 -0400
+Message-ID: <20240822144422.188462-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240822050540.GP865349@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-Looks good:
+Hi all,
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+One of the questions that came up on the last round of review on dealing
+with the iomap zeroing problem [1] was having some proper test coverage.
+When looking back at some of my custom tests, I realized some relied on
+delay injection hacks, and otherwise felt like a random collection of
+command sequences and whatnot that were probably somewhat duplicative.
+
+Rather than adding fstests that continuously add random sequences of
+xfs_io commands to try and test for zeroing problems, I started playing
+around with fsx and came up with this series. In a nutshell, this does
+intentional post-eof writes (to the eof page, via mapped writes) for
+operations that are otherwise expected to perform partial page zeroing.
+This allows the existing post-eof and unexpected data checks in fsx to
+detect problems as normal. In my initial tests, this reproduces both the
+truncate (already fixed) and write extension problems related to iomap
+zero range fairly quickly on XFS.
+
+It also produces zeroing issues on other non-iomap filesystems (ext4,
+btrfs, bcachefs), which I suspect is something that probably needs to be
+fixed on a per-fs basis. To test fsx itself, this so far seems to run
+reliably longer term on XFS with the corresponding iomap zero range fix
+in place.
+
+Patch 1 is refactoring prep, patch 2 enables the eof data write
+mechanism, and patch 3 adds a new fstests test to use it. The test
+currently only supports XFS due to the aforementioned issues, but the
+idea is to remove the restriction as other fs' are fixed. Thoughts,
+reviews, flames appreciated.
+
+Brian
+
+[1] https://lore.kernel.org/linux-fsdevel/20240718130212.23905-1-bfoster@redhat.com/
+
+Brian Foster (3):
+  fsx: factor out a file size update helper
+  fsx: support eof page pollution for eof zeroing test coverage
+  generic: test to run fsx eof pollution
+
+ ltp/fsx.c             | 129 +++++++++++++++++++++++++++++++-----------
+ tests/generic/362     |  27 +++++++++
+ tests/generic/362.out |   2 +
+ 3 files changed, 126 insertions(+), 32 deletions(-)
+ create mode 100755 tests/generic/362
+ create mode 100644 tests/generic/362.out
+
+-- 
+2.45.0
 
