@@ -1,136 +1,217 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E5BA1CB329
-	for <fstests@vger.kernel.org>; Thu, 22 Aug 2024 14:43:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1591E13AA2E;
+	Thu, 22 Aug 2024 20:50:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724337820; cv=none; b=qsMnVHQ2ppHSY2D2kAcqWOFI3c/zD54TF1oYuATJN8Bgg5Wo/TKXimiZ4aFQgumjjZuS3Wm+R8gD+hfE1qlv3VK9oWXEjIhF4ypapFoJAmfanHxjpO1o9dneczD4bYln90HL5F1fNViEb/eOQJFxPkUgzkJL7MS6FiRGH4CIpFE=
+	t=1724359821; cv=none; b=iLWh9wzQnu78gwOWTenHF2d2fUrOuurtQ3577Q8QOgDry4Mbpb/8m7i0fr2JtMoZl/7pVQbGuPd/QUZFgMXvQKowfv7Bra55Cnh/cWsUZcfqHc9hFANvX9ZfrDGkk8uHNZM+JoJYYASocH7nMeBX9tUlo547sF39S8wogj2syU8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724337820; c=relaxed/simple;
-	bh=FftC8yrDvfKyuw+GZLzhvVQCslSCx/QDL1aumqfuSsY=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=KDI9KYymfCn9K+xYYS5zFNqVYCCjnGgQCXiU8ifcFhfEsYXxbt+zPyy4ysl9KQtb1Lgn7FPt0RecUw1ac+8Umqc7lJcHbePJx47IRT3/ALy3BBp19cvOhXurOKqZz4SykRGAi8eaEEolRBtGLd2UzjA5o3x31pWNM+cfHKB8H5A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=A/wDss3E; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1724359821; c=relaxed/simple;
+	bh=gNl21Odq/uU9DDM+7OEsIHOMbNBGRzBhpFTgyc6Md60=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TNHAnuPktItFfBCDDH0muWlURmw13oq/ABL44gpqeiNnk72ehRrrXgQJBqTIWvzd5r1mmbBiPOPgmpRL2LwC4USKT3qiTao51jOWAKQ3zOI/EFTyfD9Uy2WvLpqrnpMSDCH3QVbWg+Bus6ngE7+nD8z+j/EnHFqgTp6WWvWLjr0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rm6zMV6g; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="A/wDss3E"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1724337817;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=NXUOaSYbloBnEGOc1GKqP3FXkNSxnzybAUTrHdXBTgA=;
-	b=A/wDss3EWYGXZWiLXjkA0ekwmBbZp/rwZhaPiZMrXwzjNymXWl1Rk9Q07URSg3yzQpgCfx
-	bmLzFMbPlQZSNWZ6ym9BGCra85GnizLvZ+3pCR7zmOPmTQI0gri9h6i/6gV+Xa+9X2Wk/4
-	boEx65h9yJFYsjP8WWC4XkXoLVKPHQo=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-310-th0zuANuMtafB62YoBSsCA-1; Thu,
- 22 Aug 2024 10:43:31 -0400
-X-MC-Unique: th0zuANuMtafB62YoBSsCA-1
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 0714F1956080;
-	Thu, 22 Aug 2024 14:43:30 +0000 (UTC)
-Received: from bfoster.redhat.com (unknown [10.22.33.147])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id CA68D19560A3;
-	Thu, 22 Aug 2024 14:43:28 +0000 (UTC)
-From: Brian Foster <bfoster@redhat.com>
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	djwong@kernel.org,
-	josef@toxicpanda.com,
-	david@fromorbit.com
-Subject: [PATCH 3/3] generic: test to run fsx eof pollution
-Date: Thu, 22 Aug 2024 10:44:22 -0400
-Message-ID: <20240822144422.188462-4-bfoster@redhat.com>
-In-Reply-To: <20240822144422.188462-1-bfoster@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rm6zMV6g"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 81CD7C32782;
+	Thu, 22 Aug 2024 20:50:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1724359820;
+	bh=gNl21Odq/uU9DDM+7OEsIHOMbNBGRzBhpFTgyc6Md60=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=rm6zMV6gLzW0/L6tJ6g7YrvyCIayFTuJtQ/DfbZQBKP4xw+cGRouzwDR2ONT2X2Qq
+	 5YDTfvB/tlGVMsMD3+VteuuYbGJFEyZ9H/l2Cmh5utmSNTG2D8t19x4hK9x063L+Yl
+	 i88vtLTk1PVmUHGroGE+LY8hUGdDcQH/BQqtEJBSr/2lWXir0Oz7NBzqyNOB+bg4IW
+	 HbCrVGyA4A2Yc2ZELMh4B1QSFLW+4NCzcDmOrt6ApEckJI/FFT0LUS7+j7O5CkkyyD
+	 3TqFqbgAUcKjwyODi9YBEpQJkHj1IO5l3A3RPdf3V5pckHeiLRCKEbXk0L1QaM3qdz
+	 jDSRVfBUSEmEA==
+Date: Thu, 22 Aug 2024 13:50:19 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	josef@toxicpanda.com, david@fromorbit.com
+Subject: Re: [PATCH 1/3] fsx: factor out a file size update helper
+Message-ID: <20240822205019.GV865349@frogsfrogsfrogs>
 References: <20240822144422.188462-1-bfoster@redhat.com>
+ <20240822144422.188462-2-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240822144422.188462-2-bfoster@redhat.com>
 
-Filesystem regressions related to partial page zeroing can go
-unnoticed for a decent amount of time. A recent example is the issue
-of iomap zero range not handling dirty pagecache over unwritten
-extents, which leads to wrong behavior on certain file extending
-operations (i.e. truncate, write extension, etc.).
+On Thu, Aug 22, 2024 at 10:44:20AM -0400, Brian Foster wrote:
+> In preparation for support for eof page pollution, factor out a file
+> size update helper. This updates the internally tracked file size
+> based on the upcoming operation and zeroes the appropriate range in
+> the good buffer for extending operations.
+> 
+> Note that a handful of callers currently make these updates after
+> performing the associated operation. Order is not important to
+> current behavior, but it will be for a follow on patch, so make
+> those calls a bit earlier as well.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
+>  ltp/fsx.c | 57 +++++++++++++++++++++++++------------------------------
+>  1 file changed, 26 insertions(+), 31 deletions(-)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 2dc59b06..1389c51d 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -983,6 +983,17 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
+>  	}
+>  }
+>  
+> +/*
+> + * Helper to update the tracked file size. If the offset begins beyond current
+> + * EOF, zero the range from EOF to offset in the good buffer.
+> + */
+> +void
+> +update_file_size(unsigned offset, unsigned size)
+> +{
+> +	if (offset > file_size)
+> +		memset(good_buf + file_size, '\0', offset - file_size);
+> +	file_size = offset + size;
+> +}
+>  
+>  void
+>  dowrite(unsigned offset, unsigned size)
+> @@ -1003,10 +1014,8 @@ dowrite(unsigned offset, unsigned size)
+>  	log4(OP_WRITE, offset, size, FL_NONE);
+>  
+>  	gendata(original_buf, good_buf, offset, size);
+> -	if (file_size < offset + size) {
+> -		if (file_size < offset)
+> -			memset(good_buf + file_size, '\0', offset - file_size);
+> -		file_size = offset + size;
+> +	if (offset + size > file_size) {
+> +		update_file_size(offset, size);
+>  		if (lite) {
+>  			warn("Lite file size bug in fsx!");
+>  			report_failure(149);
+> @@ -1070,10 +1079,8 @@ domapwrite(unsigned offset, unsigned size)
+>  	log4(OP_MAPWRITE, offset, size, FL_NONE);
+>  
+>  	gendata(original_buf, good_buf, offset, size);
+> -	if (file_size < offset + size) {
+> -		if (file_size < offset)
+> -			memset(good_buf + file_size, '\0', offset - file_size);
+> -		file_size = offset + size;
+> +	if (offset + size > file_size) {
+> +		update_file_size(offset, size);
+>  		if (lite) {
+>  			warn("Lite file size bug in fsx!");
+>  			report_failure(200);
+> @@ -1136,9 +1143,7 @@ dotruncate(unsigned size)
+>  
+>  	log4(OP_TRUNCATE, 0, size, FL_NONE);
+>  
+> -	if (size > file_size)
+> -		memset(good_buf + file_size, '\0', size - file_size);
+> -	file_size = size;
+> +	update_file_size(size, 0);
+>  
+>  	if (testcalls <= simulatedopcount)
+>  		return;
+> @@ -1247,6 +1252,9 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+>  	log4(OP_ZERO_RANGE, offset, length,
+>  	     keep_size ? FL_KEEP_SIZE : FL_NONE);
+>  
+> +	if (end_offset > file_size)
+> +		update_file_size(offset, length);
+> +
+>  	if (testcalls <= simulatedopcount)
+>  		return;
 
-fsx does occasionally uncover these sorts of problems, but failures
-can be rare and/or require longer running tests outside what is
-typically run via full fstests regression runs. fsx now supports a
-mode that injects post-eof data in order to explicitly test partial
-eof zeroing behavior. This uncovers certain problems more quickly
-and applies coverage more broadly across size changing operations.
+Don't we only want to do the goodbuf zeroing if we don't bail out due to
+the (testcalls <= simulatedopcount) logic?  Same question for
+do_clone_range and do_copy_range.
 
-Add a new test that runs an fsx instance (modeled after generic/127)
-with eof pollution mode enabled. While the test is generic, it is
-currently limited to XFS as that is currently the only known major
-fs that does enough zeroing to satisfy the strict semantics expected
-by fsx. The long term goal is to uncover and fix issues so more
-filesystems can enable this test.
+/me reads the second patch but doesn't quite get it. :/
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
- tests/generic/362     | 27 +++++++++++++++++++++++++++
- tests/generic/362.out |  2 ++
- 2 files changed, 29 insertions(+)
- create mode 100755 tests/generic/362
- create mode 100644 tests/generic/362.out
+Are you doing this to mirror what the kernel does?  A comment here to
+explain why we're doing this differently would help me.
 
-diff --git a/tests/generic/362 b/tests/generic/362
-new file mode 100755
-index 00000000..30870cd0
---- /dev/null
-+++ b/tests/generic/362
-@@ -0,0 +1,27 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FSQA Test No. 362
-+#
-+# Run fsx with EOF pollution enabled. This provides test coverage for partial
-+# EOF page/block zeroing for operations that change file size.
-+#
-+
-+. ./common/preamble
-+_begin_fstest rw auto
-+
-+FSX_FILE_SIZE=262144
-+# on failure, replace -q with -d to see post-eof writes in the dump output
-+FSX_ARGS="-q -l $FSX_FILE_SIZE -e 1 -N 100000"
-+
-+_require_test
-+
-+# currently only xfs performs enough zeroing to satisfy fsx
-+_supported_fs xfs
-+
-+ltp/fsx $FSX_ARGS $FSX_AVOID $TEST_DIR/fsx.$seq > $tmp.output 2>&1
-+cat $tmp.output
-+
-+status=0
-+exit
-diff --git a/tests/generic/362.out b/tests/generic/362.out
-new file mode 100644
-index 00000000..7af6b96a
---- /dev/null
-+++ b/tests/generic/362.out
-@@ -0,0 +1,2 @@
-+QA output created by 362
-+All 100000 operations completed A-OK!
--- 
-2.45.0
+--D
 
+>  
+> @@ -1263,17 +1271,6 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+>  	}
+>  
+>  	memset(good_buf + offset, '\0', length);
+> -
+> -	if (!keep_size && end_offset > file_size) {
+> -		/*
+> -		 * If there's a gap between the old file size and the offset of
+> -		 * the zero range operation, fill the gap with zeroes.
+> -		 */
+> -		if (offset > file_size)
+> -			memset(good_buf + file_size, '\0', offset - file_size);
+> -
+> -		file_size = end_offset;
+> -	}
+>  }
+>  
+>  #else
+> @@ -1538,6 +1535,9 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+>  
+>  	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
+>  
+> +	if (dest + length > file_size)
+> +		update_file_size(dest, length);
+> +
+>  	if (testcalls <= simulatedopcount)
+>  		return;
+>  
+> @@ -1556,10 +1556,6 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+>  	}
+>  
+>  	memcpy(good_buf + dest, good_buf + offset, length);
+> -	if (dest > file_size)
+> -		memset(good_buf + file_size, '\0', dest - file_size);
+> -	if (dest + length > file_size)
+> -		file_size = dest + length;
+>  }
+>  
+>  #else
+> @@ -1756,6 +1752,9 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+>  
+>  	log5(OP_COPY_RANGE, offset, length, dest, FL_NONE);
+>  
+> +	if (dest + length > file_size)
+> +		update_file_size(dest, length);
+> +
+>  	if (testcalls <= simulatedopcount)
+>  		return;
+>  
+> @@ -1792,10 +1791,6 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+>  	}
+>  
+>  	memcpy(good_buf + dest, good_buf + offset, length);
+> -	if (dest > file_size)
+> -		memset(good_buf + file_size, '\0', dest - file_size);
+> -	if (dest + length > file_size)
+> -		file_size = dest + length;
+>  }
+>  
+>  #else
+> @@ -1846,7 +1841,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
+>  
+>  	if (end_offset > file_size) {
+>  		memset(good_buf + file_size, '\0', end_offset - file_size);
+> -		file_size = end_offset;
+> +		update_file_size(offset, length);
+>  	}
+>  
+>  	if (testcalls <= simulatedopcount)
+> -- 
+> 2.45.0
+> 
+> 
