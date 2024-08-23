@@ -1,158 +1,106 @@
-Received: from fanzine2.igalia.com (fanzine.igalia.com [178.60.130.6])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FFD91922C7
-	for <fstests@vger.kernel.org>; Fri, 23 Aug 2024 17:35:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.60.130.6
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8841A1BAEF3
+	for <fstests@vger.kernel.org>; Fri, 23 Aug 2024 20:31:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724434517; cv=none; b=FTAz95O295YPJ6n8q+YxqB7yK+ir2HfWaMLFVmiA5NfgRSmorQdHEYC12r2mwR2QuuXpXaPQ8mFscVPiYJ9zr1gaWDX8sMamy5j8hs4b79Qevj2Q7QOUUqI0wAYMb+uXmS6qMWHyORbmfD89gyJg7APINDAxHUZmK/u1LtnKl70=
+	t=1724445106; cv=none; b=saLDDOqt5Ai+wzNR/BerrFaC50pnWkUoQqKW+5VXBkXnxgjDMyjLLiELMVW1toCgmp6vVnDUaPGldPprUujDWAO6SPZzRrJfs+NTJQEQbIqWhJnv+SqFI8LxnQ0DFSqgYRNqMdD+WYWgarGLnUUzqzBfiw8cksH+CWvsaoNJWqQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724434517; c=relaxed/simple;
-	bh=f9vjBrX8x8BYeiD/1Q0cwLy7Vp2AOO2gHvMdSUyYpxk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DQ8h/RLomV+UUTGU1HdtlpDMPT1AVvrgpAGNrXLfEMAwe8asPimUuYpG0e2NzBB2vRxC3sZTGVF5lv+xwvN5P3GDNZlaP3sVCwXDCpfaKlEQh93RstLenf13+YGHrDogJtknBNay6rSAXW79F/KKTO04ruUUH2m3WpJ6NgzZj1U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=fs6uSw5N; arc=none smtp.client-ip=178.60.130.6
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=igalia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
+	s=arc-20240116; t=1724445106; c=relaxed/simple;
+	bh=7UGIoSG4+2JV64amm8AvPMtAJhZOKygM8S1WefUXL0A=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fxpDiT96lamwNAjeHUOWgaXfc+/n/NsSJioR2LRJLqzZlA06z23kV1EqMLcj0iZhMZXd/mZ6k2Z/26zO9rvLMwku7v61kQYh6VV7lgmg4leHuag7r4W7vBSHTJU62FLH72yNqzOvE/mVx1d3YfSjraVTmpuVTxBmpH/e2BIu1ls=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bS/xditC; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="fs6uSw5N"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-	s=20170329; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:From:
-	References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender:Reply-To:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=qCyo7+pcaCxDVeslea2MKlyZkCkPvjzNQp5hjdJWdGo=; b=fs6uSw5NF4j8YHJDmqq9bvlbm+
-	mVSV3ghWkUuA1iReUqfTnRkSY/mWHZxije+KNe+KGyLzZT2xMfAPVPXb540Odu1pshCTNk7Kv0oga
-	xgQrxHeik23FHzUOnBuSidFlUSmIHFSlBU7FNiVQwPPRG8E0NPYdHXi63/T4xDtdjk5tJQCN8b413
-	zaoXyVgG/aNFEWqLbQ1gyc4ecZiqLDtiA8vx3a0SGCvL3mpgVSXVsEh4qfgNnzQ5fXHmBAmO02b/Z
-	IxH7YcpDJj8OfHfQyWOhM/wBYyvweWlfsyPFELLmvkuGnZVPR1NJ/2X3nLXxJ9XHV3ckbHciO/fZd
-	SIu7Ig4Q==;
-Received: from [179.118.186.198] (helo=[192.168.15.100])
-	by fanzine2.igalia.com with esmtpsa 
-	(Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_128_GCM:128) (Exim)
-	id 1shYBu-0048aH-Bt; Fri, 23 Aug 2024 19:35:14 +0200
-Message-ID: <eafb2664-d2e1-4924-a23d-e536f0246f1f@igalia.com>
-Date: Fri, 23 Aug 2024 14:35:10 -0300
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bS/xditC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1724445103;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=21iDdFJvFfrpgK6XNXo0EuYKR1kO6/cL30Vkc5zhtms=;
+	b=bS/xditCcdTqrYUg9Sk6GKLTYzSu4R1ZNnDKqP0Ivh6Tjl7a90VLcsb3LcEVc7F2iR8ITN
+	Y5YytvJuXgnpJIxmSPmjcDM/mokpGn/CoUP+HN4VXpHqllLH+mUt5zirjGNmdnL8dz7B49
+	tWP06IT/OkrGzsMHBBKNtj8NPsHO/cA=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-605-b_Ytt6S2NYuytbScewI2Ow-1; Fri, 23 Aug 2024 16:31:40 -0400
+X-MC-Unique: b_Ytt6S2NYuytbScewI2Ow-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1fc6db23c74so23293435ad.0
+        for <fstests@vger.kernel.org>; Fri, 23 Aug 2024 13:31:39 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1724445099; x=1725049899;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=21iDdFJvFfrpgK6XNXo0EuYKR1kO6/cL30Vkc5zhtms=;
+        b=uf54xFjAoI/cpknQ2BLATchof5I17Mwz2CJVQxs2jtBYYyuSn8PNn0yo/dFmL/7YB6
+         r3eS9QrGz9d7+BjQHiwLGlixeXp6JbxLlEpQXosAOfKlJhzsgdJaEyIO/npcdGWyyD5Y
+         5vqrC0b280Jq6cpgcCbTiDd85eWDQfxPVnxSoIG7/SFk3OcNFvUsppZJO2+9vyiKQ6w3
+         vbWUQ6kBZ0UNXG7sIZ5u6eAlUCbgjusSxQnI4FGleyUIDf2+bd9QZdN/VKpNqeS4Fh5U
+         iqYUq9uqvkRT7Wa3NaTsAT2X1/HSILeQlprfnaP/kQYwRt9H199P5Bu/+36SxrhDydTX
+         ma6A==
+X-Forwarded-Encrypted: i=1; AJvYcCUDxahQq/IUgLqJRmZG0nlylFcXq2s34AymGXnrzIyB9pmALCVTQYau0JK/QIr2qH6YeEDhFJrg@vger.kernel.org
+X-Gm-Message-State: AOJu0YyUlxH8fmZetRzgeb1kybILXERpREdk/z6l4S/bVlQf0DsJW07U
+	uAf5qfHK+hXrxNc84aV/ManoeKO/6KDaWrDemYuGi9Uiyc1OPt9pOYQj2aTbPl9/aJvII6NCozt
+	zykQDl/6Xm9dvqh4JvT1inN5HMBMVDmefpwLmsnWheK1MEEbFBWJlyTW2NUqFgMubeA==
+X-Received: by 2002:a17:902:e5cd:b0:1ff:4d66:d7bb with SMTP id d9443c01a7336-2039e4aa96fmr40138235ad.36.1724445098881;
+        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFb/GXehxfpPSqKtD9S9ZraTTlz5nqmc4n6I9CSKD+dSt49nT+v+Q6dISNA4Xsvfp69qXCHqg==
+X-Received: by 2002:a17:902:e5cd:b0:1ff:4d66:d7bb with SMTP id d9443c01a7336-2039e4aa96fmr40137935ad.36.1724445098333;
+        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-203855e1854sm32421825ad.178.2024.08.23.13.31.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
+Date: Sat, 24 Aug 2024 04:31:34 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/615: add to the quick group
+Message-ID: <20240823203134.euzlj5puxjuz4634@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240821044743.603691-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] common/casefold: Support for tmpfs casefold test
-To: fstests@vger.kernel.org
-Cc: Zorro Lang <zlang@kernel.org>, kernel-dev@igalia.com, krisman@kernel.org
-References: <20240823173008.280917-1-andrealmeid@igalia.com>
-Content-Language: en-US
-From: =?UTF-8?Q?Andr=C3=A9_Almeida?= <andrealmeid@igalia.com>
-In-Reply-To: <20240823173008.280917-1-andrealmeid@igalia.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240821044743.603691-1-hch@lst.de>
 
-Em 23/08/2024 14:30, André Almeida escreveu:
-> Test casefold support for tmpfs.
+On Wed, Aug 21, 2024 at 06:47:43AM +0200, Christoph Hellwig wrote:
+> This is a simple and very quick test, add it to the quick group.
 > 
-
-The kernel side implementation can be find here: 
-https://lore.kernel.org/linux-fsdevel/20240823173332.281211-1-andrealmeid@igalia.com/
-
-> Signed-off-by: André Almeida <andrealmeid@igalia.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->   common/casefold   | 11 +++++++++++
->   common/rc         |  3 +++
->   tests/generic/556 | 23 +++++++++++++++++------
->   3 files changed, 31 insertions(+), 6 deletions(-)
+
+Good to me,
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/generic/615 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/common/casefold b/common/casefold
-> index d9126f4c..8a646ae6 100644
-> --- a/common/casefold
-> +++ b/common/casefold
-> @@ -12,6 +12,9 @@ _has_casefold_kernel_support()
->   	f2fs)
->   		test -f '/sys/fs/f2fs/features/casefold'
->   		;;
-> +	tmpfs)
-> +		test -f '/sys/fs/tmpfs/features/casefold'
-> +		;;
->   	*)
->   		# defaults to unsupported
->   		false
-> @@ -52,6 +55,10 @@ _scratch_mkfs_casefold()
->   	f2fs)
->   		_scratch_mkfs -C utf8 $*
->   		;;
-> +	tmpfs)
-> +		# there's no mkfs for tmpfs, so we just mount it
-> +		mount -t tmpfs -o casefold=utf8-12.1.0 tmpfs $SCRATCH_MNT
-> +		;;
->   	*)
->   		_notrun "Don't know how to mkfs with casefold support on $FSTYP"
->   		;;
-> @@ -67,6 +74,10 @@ _scratch_mkfs_casefold_strict()
->   	f2fs)
->   		_scratch_mkfs -C utf8:strict
->   		;;
-> +	tmpfs)
-> +		# there's no mkfs for tmpfs, so we just mount it
-> +		mount -t tmpfs -o casefold=utf8-12.1.0,strict_encoding tmpfs $SCRATCH_MNT
-> +		;;
->   	*)
->   		_notrun "Don't know how to mkfs with casefold-strict support on $FSTYP"
->   		;;
-> diff --git a/common/rc b/common/rc
-> index afc33bbc..e2f4e4eb 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -374,6 +374,9 @@ _scratch_unmount()
->   	btrfs)
->   		$UMOUNT_PROG $SCRATCH_MNT
->   		;;
-> +	tmpfs)
-> +		$UMOUNT_PROG $SCRATCH_MNT
-> +		;;
->   	*)
->   		$UMOUNT_PROG $SCRATCH_DEV
->   		;;
-> diff --git a/tests/generic/556 b/tests/generic/556
-> index 51d2d482..cbc0146b 100755
-> --- a/tests/generic/556
-> +++ b/tests/generic/556
-> @@ -485,11 +485,20 @@ test_strict_mode_invalid_filename()
->   
->   _scratch_mkfs_casefold >>$seqres.full 2>&1
->   
-> -_scratch_mount
-> -
-> -_check_dmesg_for \
-> -	"\(${sdev}\): Using encoding defined by superblock: utf8" || \
-> -	_fail "Could not mount with encoding: utf8"
-> +# casefold tmpfs was already mounted in the mkfs step
-> +if [ "$FSTYP" != "tmpfs" ]; then
-> +	_scratch_mount
-> +fi
-> +
-> +if [ "$FSTYP" == "tmpfs" ]; then
-> +	_check_dmesg_for \
-> +		"tmpfs: Using encoding provided by mount options: utf8" || \
-> +		_fail "Could not mount with encoding: utf8"
-> +else
-> +	_check_dmesg_for \
-> +		"\(${sdev}\): Using encoding defined by superblock: utf8" || \
-> +		_fail "Could not mount with encoding: utf8"
-> +fi
->   
->   test_casefold_flag_basic
->   test_casefold_lookup
-> @@ -517,7 +526,9 @@ _check_scratch_fs
->   
->   # Test Strict Mode
->   _scratch_mkfs_casefold_strict >>$seqres.full 2>&1
-> -_scratch_mount
-> +if [ "$FSTYP" != "tmpfs" ]; then
-> +	_scratch_mount
-> +fi
->   
->   test_strict_mode_invalid_filename
->   
+> diff --git a/tests/generic/615 b/tests/generic/615
+> index 71cdb9ac8..66dd1aa08 100755
+> --- a/tests/generic/615
+> +++ b/tests/generic/615
+> @@ -9,7 +9,7 @@
+>  # zero while writeback is in progress.
+>  #
+>  . ./common/preamble
+> -_begin_fstest auto rw
+> +_begin_fstest auto quick rw
+>  
+>  # Import common functions.
+>  . ./common/filter
+> -- 
+> 2.43.0
+> 
+> 
+
