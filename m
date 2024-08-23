@@ -1,106 +1,193 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8841A1BAEF3
-	for <fstests@vger.kernel.org>; Fri, 23 Aug 2024 20:31:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7246E5695;
+	Fri, 23 Aug 2024 23:02:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724445106; cv=none; b=saLDDOqt5Ai+wzNR/BerrFaC50pnWkUoQqKW+5VXBkXnxgjDMyjLLiELMVW1toCgmp6vVnDUaPGldPprUujDWAO6SPZzRrJfs+NTJQEQbIqWhJnv+SqFI8LxnQ0DFSqgYRNqMdD+WYWgarGLnUUzqzBfiw8cksH+CWvsaoNJWqQ=
+	t=1724454138; cv=none; b=nmDs3rRmqrSfDmpzc77V3EAmpr/AjukPy6idJQHOza9G8DepL1pRlK29fygU0GBiEMrrkfzKTKQLcW2RCS0RvM+nlunm7meFWClCOu1hIYaQ0IYqoWuFUgMgdpnWCWHMhnV0gnoOSnO9hybfEPV4KVbIgPjuA5cJMRXu+V3PDFI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724445106; c=relaxed/simple;
-	bh=7UGIoSG4+2JV64amm8AvPMtAJhZOKygM8S1WefUXL0A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fxpDiT96lamwNAjeHUOWgaXfc+/n/NsSJioR2LRJLqzZlA06z23kV1EqMLcj0iZhMZXd/mZ6k2Z/26zO9rvLMwku7v61kQYh6VV7lgmg4leHuag7r4W7vBSHTJU62FLH72yNqzOvE/mVx1d3YfSjraVTmpuVTxBmpH/e2BIu1ls=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bS/xditC; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1724454138; c=relaxed/simple;
+	bh=YBIswP1wr3CI6OKRGG+VpRgzNCammQSE0PfqXiMRIkI=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=gq5RoiT2WHwCLdipVTLsMk5VL8exxmRDAzYot+rqJSGbwuhCo+2lisfslHXH9kReIZXdvUUGQ/AISQMOOAXtdLCJCb2xmYEbzmOZ5DE/r0l0sTJ7N9wwuf+ZcXrbzzCDILhBltEFo2LiEVS63+YAPfQAlBf4spcOU7JzbyEQ4yg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=km/HYtJL; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=BzZaYrLS; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bS/xditC"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1724445103;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=21iDdFJvFfrpgK6XNXo0EuYKR1kO6/cL30Vkc5zhtms=;
-	b=bS/xditCcdTqrYUg9Sk6GKLTYzSu4R1ZNnDKqP0Ivh6Tjl7a90VLcsb3LcEVc7F2iR8ITN
-	Y5YytvJuXgnpJIxmSPmjcDM/mokpGn/CoUP+HN4VXpHqllLH+mUt5zirjGNmdnL8dz7B49
-	tWP06IT/OkrGzsMHBBKNtj8NPsHO/cA=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-605-b_Ytt6S2NYuytbScewI2Ow-1; Fri, 23 Aug 2024 16:31:40 -0400
-X-MC-Unique: b_Ytt6S2NYuytbScewI2Ow-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-1fc6db23c74so23293435ad.0
-        for <fstests@vger.kernel.org>; Fri, 23 Aug 2024 13:31:39 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724445099; x=1725049899;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=21iDdFJvFfrpgK6XNXo0EuYKR1kO6/cL30Vkc5zhtms=;
-        b=uf54xFjAoI/cpknQ2BLATchof5I17Mwz2CJVQxs2jtBYYyuSn8PNn0yo/dFmL/7YB6
-         r3eS9QrGz9d7+BjQHiwLGlixeXp6JbxLlEpQXosAOfKlJhzsgdJaEyIO/npcdGWyyD5Y
-         5vqrC0b280Jq6cpgcCbTiDd85eWDQfxPVnxSoIG7/SFk3OcNFvUsppZJO2+9vyiKQ6w3
-         vbWUQ6kBZ0UNXG7sIZ5u6eAlUCbgjusSxQnI4FGleyUIDf2+bd9QZdN/VKpNqeS4Fh5U
-         iqYUq9uqvkRT7Wa3NaTsAT2X1/HSILeQlprfnaP/kQYwRt9H199P5Bu/+36SxrhDydTX
-         ma6A==
-X-Forwarded-Encrypted: i=1; AJvYcCUDxahQq/IUgLqJRmZG0nlylFcXq2s34AymGXnrzIyB9pmALCVTQYau0JK/QIr2qH6YeEDhFJrg@vger.kernel.org
-X-Gm-Message-State: AOJu0YyUlxH8fmZetRzgeb1kybILXERpREdk/z6l4S/bVlQf0DsJW07U
-	uAf5qfHK+hXrxNc84aV/ManoeKO/6KDaWrDemYuGi9Uiyc1OPt9pOYQj2aTbPl9/aJvII6NCozt
-	zykQDl/6Xm9dvqh4JvT1inN5HMBMVDmefpwLmsnWheK1MEEbFBWJlyTW2NUqFgMubeA==
-X-Received: by 2002:a17:902:e5cd:b0:1ff:4d66:d7bb with SMTP id d9443c01a7336-2039e4aa96fmr40138235ad.36.1724445098881;
-        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFb/GXehxfpPSqKtD9S9ZraTTlz5nqmc4n6I9CSKD+dSt49nT+v+Q6dISNA4Xsvfp69qXCHqg==
-X-Received: by 2002:a17:902:e5cd:b0:1ff:4d66:d7bb with SMTP id d9443c01a7336-2039e4aa96fmr40137935ad.36.1724445098333;
-        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-203855e1854sm32421825ad.178.2024.08.23.13.31.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Aug 2024 13:31:38 -0700 (PDT)
-Date: Sat, 24 Aug 2024 04:31:34 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/615: add to the quick group
-Message-ID: <20240823203134.euzlj5puxjuz4634@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240821044743.603691-1-hch@lst.de>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="km/HYtJL";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="BzZaYrLS"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 1C0B6225E4;
+	Fri, 23 Aug 2024 23:02:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1724454133; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=OZWEoTV/eQAm24TDQV0lqdDKuZH2y4GN305qwdozOGE=;
+	b=km/HYtJLdQ/a7yvOrJ9k1euZaCvFPMQCOtENuf/vNnhwT+Z2RIxXx879mdZ7qgvXaMhFzN
+	IrzBYak+sTIxE41ZClhiTMry21sHkbXEFCZUdMpTa1NkOnFMnPuGSbVewuavb7tyvMwwds
+	VvCuZJ8mtsx8XzaHz/n4Eu2hk0vhFB4=
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.com header.s=susede1 header.b=BzZaYrLS
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1724454132; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=OZWEoTV/eQAm24TDQV0lqdDKuZH2y4GN305qwdozOGE=;
+	b=BzZaYrLSUoV+iYLD346R1Tdv0M6Lih/ndYNINWv5Jhe/DSM1lLkeTy52wrOY4aJN7iCUoq
+	n8l65u+HD+cE7HwgHzG0+9E+HSK/2BUWnZQRiJ6wqw6eC2Vz4AUGjSHI0znrY9ktagxxlQ
+	TG3ze2eyvoDCWVHJJNgxJSx3AYt0G4I=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 210081333E;
+	Fri, 23 Aug 2024 23:02:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id QwFwNfIUyWYyBAAAD6G6ig
+	(envelope-from <wqu@suse.com>); Fri, 23 Aug 2024 23:02:10 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] fstests: btrfs/125: do not use raid5 for metadata
+Date: Sat, 24 Aug 2024 08:31:45 +0930
+Message-ID: <b39ba0c9a496b0ceaa940f4b1e3faf94a4256baf.1724454084.git.wqu@suse.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240821044743.603691-1-hch@lst.de>
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Queue-Id: 1C0B6225E4
+X-Spam-Level: 
+X-Spamd-Result: default: False [-5.01 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	DWL_DNSWL_MED(-2.00)[suse.com:dkim];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns,suse.com:email,suse.com:dkim,suse.com:mid];
+	RCPT_COUNT_TWO(0.00)[2];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_TLS_ALL(0.00)[];
+	TO_DN_NONE(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.com:+]
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Score: -5.01
+X-Spam-Flag: NO
 
-On Wed, Aug 21, 2024 at 06:47:43AM +0200, Christoph Hellwig wrote:
-> This is a simple and very quick test, add it to the quick group.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
+[BUG]
+There are several bug reports of btrfs/125 failure recently, either
+causing balance failure (-EIO), or even kernel crash.
 
-Good to me,
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+The balance failure looks like this:
 
->  tests/generic/615 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/615 b/tests/generic/615
-> index 71cdb9ac8..66dd1aa08 100755
-> --- a/tests/generic/615
-> +++ b/tests/generic/615
-> @@ -9,7 +9,7 @@
->  # zero while writeback is in progress.
->  #
->  . ./common/preamble
-> -_begin_fstest auto rw
-> +_begin_fstest auto quick rw
->  
->  # Import common functions.
->  . ./common/filter
-> -- 
-> 2.43.0
-> 
-> 
+     Mount normal and balance
+    +ERROR: error during balancing '/mnt/scratch': Input/output error
+    +There may be more info in syslog - try dmesg | tail
+    +md5sum: /mnt/scratch/tf2: Input/output error
+
+[CAUSE]
+There are several different factors involved.
+
+1. RMW mix the old and new metadata, causing unrepairable corruption
+   E.g. with the following layout:
+
+   data 1   |<- Stale metadata ->| (from the out-of-date device)
+   data 2   |     Unused         |
+   parity   |PPPPPPPPPPPPPPPPPPPP|
+
+   In above case, although metadata on data 1 is out-of-date, we can
+   still rebuild the correct data from parity and data 2.
+
+   But if we have new metadata writes into the data 2 stripe, an RMW
+   will screw up the whole situation:
+
+   data 1   |<- Stale metadata ->| (from the out-of-date device)
+   data 2   |<-  New metadata  ->|
+   parity   |XXXXXXXXXXXXXXXXXXXX|
+
+   The RMW will use the stale metadata and new metadata to calculate new
+   parity.
+   The resulted new parity will no longer be able to recover the old
+   data 1.
+
+   This is a known bug, thus our documentation is already recommending
+   to avoid RAID56 for metadata usage.
+
+   > Metadata
+   >    Do not use raid5 nor raid6 for metadata. Use raid1 or raid1c3
+   >    respectively.
+
+   Furthermore this is very hard to fix, unlike data we can fetch the
+   data csum and verify during RMW, we can not do that during RMW.
+
+   At the timing of RMW, we're holding the rbio lock for the full
+   stripe.
+   If the extent tree search requires a read-recover, it will generate
+   another rbio, which may cover the same full stripe we're working on,
+   leading to a deadlock.
+
+   Furthermore the current RAID56 repair code is all based on veritical
+   sectors, but metadata can cross several horizontal sectors.
+   This will require multiple combinations to repair a metadata.
+
+2. Crash caused by double freeing a bio
+   By chance if the above RMW corrupted csum tree, then during
+   btrfs_submit_chunk() we will hit an error path that leads to double
+   freeing of a bio, leading to crash when hitting the race window.
+
+   Thankfully the patch has been sent to the mailing list.
+
+[WORKAROUND]
+Since it's very hard to fix the RAID56 metadata problem without a
+deadlock or a huge code rework, for now just use RAID1 for the metadata
+of this particular test case.
+
+There may be a chance to fix the situation by properly marking the
+missing-then-reappear device as out-of-date, so no direct read from that
+device.
+
+But that will also be a huge new feature, not something can be done
+immediately.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/125 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/125 b/tests/btrfs/125
+index 31379d81ef73..c8c0dd422f72 100755
+--- a/tests/btrfs/125
++++ b/tests/btrfs/125
+@@ -70,7 +70,7 @@ count=$(($max_fs_sz / 1000000))
+ echo >> $seqres.full
+ echo "max_fs_sz=$max_fs_sz count=$count" >> $seqres.full
+ echo "-----Initialize -----" >> $seqres.full
+-_scratch_pool_mkfs "-mraid5 -draid5" >> $seqres.full 2>&1
++_scratch_pool_mkfs "-mraid1 -draid5" >> $seqres.full 2>&1
+ _scratch_mount >> $seqres.full 2>&1
+ dd if=/dev/zero of="$SCRATCH_MNT"/tf1 bs=$bs count=1 \
+ 					>>$seqres.full 2>&1
+-- 
+2.46.0
 
