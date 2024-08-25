@@ -1,254 +1,228 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2871EEB5;
-	Sat, 24 Aug 2024 10:30:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BACB429CEF
+	for <fstests@vger.kernel.org>; Sun, 25 Aug 2024 13:11:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724495460; cv=none; b=FSeXcg4a4el6hZ4hhaDSvPg4+L4AVukCkotA/Eqra0nXT7SOUm4OfAAQNQK06epvzlMNTpeGw7gJ6jGHBKpuPGWrcFeaxTFWYa8oXpCYYhnPc0tTN8wl7wccxF5v9GqB8fKxo4ixPX9RwDKSgs54rMCTurVoNLJl1MX9APDaf+A=
+	t=1724591503; cv=none; b=nNM1IKzPYPi941nVJ1jc57blAqNYem9HJOtaCgqLWYsfZiqcNzrMTTxREV0Vg4ajcSM7mYLMm3J2hmGzO7UFDW4tKjFHyyJ+LCqYStMHr932HaH6J+ERNhRzFlf5iy2ndDfzgr6NEHAOx0HoYHzLr3VLv/LbP6JVIDS3B5VtkrE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724495460; c=relaxed/simple;
-	bh=i1KDoprvcrdWkgHYZt/QV7oULE4Y7kgX9hRPfLuTaCw=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=fgHEL5EwR4SVCzLO3WOAi27JJ+Y/amzC//Ld1eHxvOOZKvQ/EDN1RQXyRmDi/iF7fY/7CUk/WkHwrQa1LR443DBs0wjHaQ8Mu9iI1Hy9omJnpwNlSezr+9h+I8LCfwH7W4WdgusZWgZQs0YBYaCTSpVunoVt4oKFRFuvrATK1xw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=N/heGgVO; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=N/heGgVO; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1724591503; c=relaxed/simple;
+	bh=gzrS1mJI1/tstkwVe12kRFrOtLiFJqeg/wZiTEwJqJg=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=ZAt68KG5LiNJBsYhTFyYdWVJOffMIr847EW4Olq7J5vGaUxfSOH4QDoaR9tO3q7JHWgCmGjb/7J3CZ/O+v+s+QmBzD0RyXtOP8WsyfmtjktDbGRS9ItfyR4A9O9ztis/7DAa35Too89Z3R0nESvmSmsrhYZDuBOh+QvHB7QtF6A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=p+b+Akcd; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="N/heGgVO";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="N/heGgVO"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 1CF7921A28;
-	Sat, 24 Aug 2024 10:30:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1724495455; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=j2bd8iPMHYa9YUXjjYIiYm/B5x012eqsUuLjfxUwMl8=;
-	b=N/heGgVOPzqUgnxGviAKwV56IFWc4GTFy3igxsdc26mMcr5+10XopNLgsKcnRQa2jPDvgy
-	RrjVduyy+RbWwgGtRrkfIB0Hc7b1BR2F9stte7B0RnxT340cQpvrTae4gX4mbHXwT/ZTpk
-	g5CenVtNqAF8W4N9IqzyN+tf1NHP7hY=
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1724495455; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=j2bd8iPMHYa9YUXjjYIiYm/B5x012eqsUuLjfxUwMl8=;
-	b=N/heGgVOPzqUgnxGviAKwV56IFWc4GTFy3igxsdc26mMcr5+10XopNLgsKcnRQa2jPDvgy
-	RrjVduyy+RbWwgGtRrkfIB0Hc7b1BR2F9stte7B0RnxT340cQpvrTae4gX4mbHXwT/ZTpk
-	g5CenVtNqAF8W4N9IqzyN+tf1NHP7hY=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 0E07113A1F;
-	Sat, 24 Aug 2024 10:30:53 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id a3CNL122yWYHLgAAD6G6ig
-	(envelope-from <wqu@suse.com>); Sat, 24 Aug 2024 10:30:53 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH v2] fstests: btrfs: a new test case to verify a use-after-free bug
-Date: Sat, 24 Aug 2024 20:00:21 +0930
-Message-ID: <20240824103021.264856-1-wqu@suse.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="p+b+Akcd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1085DC32782;
+	Sun, 25 Aug 2024 13:11:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1724591503;
+	bh=gzrS1mJI1/tstkwVe12kRFrOtLiFJqeg/wZiTEwJqJg=;
+	h=Date:From:To:Subject:From;
+	b=p+b+AkcdOqF6Yqju4Mtnjms6FWUfZ25+z1y9U0NCOv12wvzOPt/8nfmDwZuNyNTMk
+	 voezwR70zLaPyVGo2KbY89bgM6OAYOQ7tMbQGFTPHO9gZHoJSHQVzqwmEHGr/aqAeY
+	 OGZoj8+mnxFB2zbb+oRttHmQRDZZh5DmOnhln5sM2OLlbTxf6c/prznLYEZGgAccZb
+	 /x4NT8INmjrVoNT7Qs94uAe3rKH4pFMjqjGzkA3qGsHsdLgPc29nZjkTXGPcY+TEq5
+	 CX7yyv4so2G+wLhErs27QfrDiYvAvu8fbC5ziGt3wk6TMtQ/nlbXaY0cBHI1d3XGkO
+	 /X5OA2WbVbapg==
+Date: Sun, 25 Aug 2024 21:11:40 +0800
+Message-ID: <338a89763b1c987bda43ccb92d0f2811@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.08.11 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Level: 
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	RCPT_COUNT_TWO(0.00)[2];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.com:mid];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	TO_DN_NONE(0.00)[];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Score: -2.80
-X-Spam-Flag: NO
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="4B7ETsp1ogxs"
+Content-Disposition: inline
 
-[BUG]
-There is a use-after-free bug triggered very randomly by btrfs/125.
 
-If KASAN is enabled it can be triggered on certain setup.
-Or it can lead to crash.
+--4B7ETsp1ogxs
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-[CAUSE]
-The test case btrfs/125 is using RAID5 for metadata, which has a known
-RMW problem if the there is some corruption on-disk.
+Hi all,
 
-RMW will use the corrupted contents to generate a new parity, losing the
-final chance to rebuild the contents.
+The master branch of the xfstests repository at:
 
-This is specific to metadata, as for data we have extra data checksum,
-but the metadata has extra problems like possible deadlock due to the
-extra metadata read/recovery needed to search the extent tree.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-And we know this problem for a while but without a better solution other
-than avoid using RAID56 for metadata:
+has just been updated to v2024.08.11 version.
 
->   Metadata
->       Do not use raid5 nor raid6 for metadata. Use raid1 or raid1c3
->       respectively.
+Thanks,
+Zorro
 
-Combined with the above csum tree corruption, since RAID5 is stripe
-based, btrfs needs to split its read bios according to stripe boundary.
-And after a split, do a csum tree lookup for the expected csum.
+The new head of the master branch is commit:
 
-But if that csum lookup failed, in the error path btrfs doesn't handle
-the split bios properly and lead to double freeing of the original bio
-(the one containing the bio vectors).
+d9423fec7293 xfs/516: use _scratch_mkfs_xfs
 
-[NEW TEST CASE]
-Unlike the original btrfs/125, which is very random and picky to
-reproduce, introduce a new test case to verify the specific behavior by:
+New commits:
 
-- Create a btrfs with enough csum leaves
-  To bump the csum tree level, use the minimal nodesize possible (4K).
-  Writing 32M data which needs at least 8 leaves for data checksum
+Boris Burkov (1):
+      [7e21e6a40c2a] btrfs: add test for btrfstune squota enable/disable
 
-- Find the last csum tree leave and corrupt it
+Christoph Hellwig (6):
+      [f30ec93e2dba] add more tests to the growfs group
+      [6bff79ece871] xfs/233: don't require rmap
+      [8b8f3868f30f] common: _notrun if _scratch_mkfs_sized failed
+      [98624c9a2cc1] common: _notrun if _scratch_mkfs_xfs failed
+      [e8b62c703c93] xfs/432: use _scratch_mkfs_xfs
+      [d9423fec7293] xfs/516: use _scratch_mkfs_xfs
 
-- Read the data many times until we trigger the bug or exit gracefully
-  With an x86_64 VM (which is never able to trigger btrfs/125 failure)
-  with KASAN enabled, it can trigger the KASAN report in just 4
-  iterations (the default iteration number is 32).
+Darrick J. Wong (2):
+      [ce857227fb0a] xfs: remove all traces of xfs_check
+      [518896a7b483] xfs: test online repair when xfiles consists of THPs
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Changelog:
-v2:
-- Fix the wrong commit hash
-  The proper fix is not yet merged, the old hash is a place holder
-  copied from another test case but forgot to remove.
+Filipe Manana (5):
+      [bd6eec9ad858] generic: test page fault during direct IO write with O_APPEND
+      [bc6988106a32] generic/019: redirect fsstress output to log file instead
+      [4e9a16bd7dd1] fstests: remove unnecessary stdout/stderr redirection for run_check calls
+      [72bac4e8a42e] btrfs/312: add git commit ID
+      [84ac13724ed5] btrfs/287: wait for subvolume deletion to complete
 
-- Minor wording update
+Yang Erkun (2):
+      [52a36bfba58b] generic/732: remove unused code
+      [50da3fd9f044] generic/732: don't run it on tmpfs
 
-- Add to "dangerous" group
----
- tests/btrfs/319     | 84 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/319.out |  2 ++
- 2 files changed, 86 insertions(+)
- create mode 100755 tests/btrfs/319
- create mode 100644 tests/btrfs/319.out
 
-diff --git a/tests/btrfs/319 b/tests/btrfs/319
-new file mode 100755
-index 00000000..4be2b50b
---- /dev/null
-+++ b/tests/btrfs/319
-@@ -0,0 +1,84 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 319
-+#
-+# Make sure data csum lookup failure will not lead to double bio freeing
-+#
-+. ./common/preamble
-+_begin_fstest auto quick dangerous
-+
-+_require_scratch
-+_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"btrfs: fix a use-after-free bug when hitting errors inside btrfs_submit_chunk()"
-+
-+# The final fs will have a corrupted csum tree, which will never pass fsck
-+_require_scratch_nocheck
-+_require_scratch_dev_pool 2
-+
-+# Use RAID0 for data to get bio splitted according to stripe boundary.
-+# This is required to trigger the bug.
-+_check_btrfs_raid_type raid0
-+
-+# This test goes 4K sectorsize and 4K nodesize, so that we easily create
-+# higher level of csum tree.
-+_require_btrfs_support_sectorsize 4096
-+
-+# The bug itself has a race window, run this many times to ensure triggering.
-+# On an x86_64 VM with KASAN enabled, normally it is triggered before the 10th run.
-+runtime=32
-+
-+_scratch_pool_mkfs "-d raid0 -m single -n 4k -s 4k" >> $seqres.full 2>&1
-+# This test requires data checksum to trigger the bug.
-+_scratch_mount -o datasum,datacow
-+
-+# For the smallest csum size (CRC32C) it's 4 bytes per 4K, writing 32M data
-+# will need 32K data checksum at minimal, which is at least 8 leaves.
-+_pwrite_byte 0xef 0 32m "$SCRATCH_MNT/foobar" > /dev/null
-+sync
-+_scratch_unmount
-+
-+# Search for the last leaf of the csum tree, that will be the target to destroy.
-+$BTRFS_UTIL_PROG inspect dump-tree -t csum $SCRATCH_DEV >> $seqres.full
-+target_bytenr=$($BTRFS_UTIL_PROG inspect dump-tree -t csum $SCRATCH_DEV | grep "leaf.*flags" | sort | tail -n1 | cut -f2 -d\ )
-+
-+if [ -z "$target_bytenr" ]; then
-+	_fail "unable to locate the last csum tree leave"
-+fi
-+
-+echo "bytenr of csum tree leave to corrupt: $target_bytenr" >> $seqres.full
-+
-+# Corrupt that csum tree block.
-+physical=$(_btrfs_get_physical "$target_bytenr" 1)
-+dev=$(_btrfs_get_device_path "$target_bytenr" 1)
-+
-+echo "physical bytenr: $physical" >> $seqres.full
-+echo "physical device: $dev" >> $seqres.full
-+
-+_pwrite_byte 0x00 "$physical" 4 "$dev" > /dev/null
-+
-+for (( i = 0; i < $runtime; i++ )); do
-+	echo "=== run $i/$runtime ===" >> $seqres.full
-+	_scratch_mount -o ro
-+	# Since the data is on RAID0, read bios will be split at the stripe
-+	# (64K sized) boundary. If csum lookup failed due to corrupted csum
-+	# tree, there is a race window that can lead to double bio freeing
-+	# (triggering KASAN at least).
-+	cat "$SCRATCH_MNT/foobar" &> /dev/null
-+	_scratch_unmount
-+
-+	# Manually check the dmesg for "BUG", and do not call _check_dmesg()
-+	# as it will clear 'check_dmesg' file and skips the final check after
-+	# the test.
-+	# For now just focus on the "BUG:" line from KASAN.
-+	if _check_dmesg_for "BUG" ; then
-+		_fail "Critical error(s) found in dmesg"
-+	fi
-+done
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/319.out b/tests/btrfs/319.out
-new file mode 100644
-index 00000000..d40c929a
---- /dev/null
-+++ b/tests/btrfs/319.out
-@@ -0,0 +1,2 @@
-+QA output created by 319
-+Silence is golden
--- 
-2.46.0
+Code Diffstat:
 
+ .gitignore                 |   1 +
+ README                     |   6 +-
+ common/attr                |   4 +-
+ common/filestreams         |   2 +-
+ common/fuzzy               |  11 ----
+ common/log                 |   4 +-
+ common/rc                  |  11 ++--
+ common/xfs                 |  97 +++++++-----------------------
+ crash/xfscrash             |  18 ------
+ src/Makefile               |   2 +-
+ src/dio-append-buf-fault.c | 145 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/004            |   4 +-
+ tests/btrfs/030            |   4 +-
+ tests/btrfs/038            |   6 +-
+ tests/btrfs/039            |   4 +-
+ tests/btrfs/040            |   4 +-
+ tests/btrfs/057            |   6 +-
+ tests/btrfs/284            |   2 +-
+ tests/btrfs/287            |  21 +++++++
+ tests/btrfs/312            |   2 +-
+ tests/btrfs/332            |  66 +++++++++++++++++++++
+ tests/btrfs/332.out        |   2 +
+ tests/generic/019          |   2 +-
+ tests/generic/083          |   3 +-
+ tests/generic/362          |  28 +++++++++
+ tests/generic/362.out      |   2 +
+ tests/generic/482          |   2 +-
+ tests/generic/732          |  10 ++--
+ tests/xfs/002              |   2 +-
+ tests/xfs/004              |   2 +-
+ tests/xfs/005              |   2 +-
+ tests/xfs/009              |   2 +-
+ tests/xfs/017              |   9 ++-
+ tests/xfs/019              |   3 +-
+ tests/xfs/021              |   3 +-
+ tests/xfs/022              |   2 +-
+ tests/xfs/023              |   2 +-
+ tests/xfs/024              |   2 +-
+ tests/xfs/025              |   2 +-
+ tests/xfs/026              |   2 +-
+ tests/xfs/027              |   2 +-
+ tests/xfs/028              |   2 +-
+ tests/xfs/030              |   2 +-
+ tests/xfs/034              |   3 +-
+ tests/xfs/035              |   2 +-
+ tests/xfs/036              |   2 +-
+ tests/xfs/037              |   2 +-
+ tests/xfs/038              |   2 +-
+ tests/xfs/039              |   2 +-
+ tests/xfs/041              |   2 +-
+ tests/xfs/042              |   2 +-
+ tests/xfs/043              |   2 +-
+ tests/xfs/044              |   2 +-
+ tests/xfs/045              |   2 +-
+ tests/xfs/046              |   2 +-
+ tests/xfs/047              |   2 +-
+ tests/xfs/055              |   2 +-
+ tests/xfs/056              |   2 +-
+ tests/xfs/059              |   2 +-
+ tests/xfs/060              |   2 +-
+ tests/xfs/061              |   2 +-
+ tests/xfs/063              |   2 +-
+ tests/xfs/064              |   2 +-
+ tests/xfs/066              |   2 +-
+ tests/xfs/068              |   2 +-
+ tests/xfs/070              |   1 -
+ tests/xfs/072              |   2 +-
+ tests/xfs/077              |   2 +-
+ tests/xfs/090              |   2 +-
+ tests/xfs/094              |   2 +-
+ tests/xfs/103              |   2 +-
+ tests/xfs/114              |   2 +-
+ tests/xfs/121              |   3 +-
+ tests/xfs/127              |   2 +-
+ tests/xfs/153              |   2 +-
+ tests/xfs/168              |   4 +-
+ tests/xfs/178              |   6 +-
+ tests/xfs/181              |   3 +-
+ tests/xfs/183              |   3 +-
+ tests/xfs/202              |   3 +-
+ tests/xfs/233              |   5 +-
+ tests/xfs/244              |   4 +-
+ tests/xfs/266              |   2 +-
+ tests/xfs/267              |   2 +-
+ tests/xfs/268              |   2 +-
+ tests/xfs/281              |   2 +-
+ tests/xfs/282              |   2 +-
+ tests/xfs/283              |   2 +-
+ tests/xfs/287              |   3 +-
+ tests/xfs/291              |   3 +-
+ tests/xfs/296              |   2 +-
+ tests/xfs/300              |   3 +-
+ tests/xfs/301              |   2 +-
+ tests/xfs/302              |   2 +-
+ tests/xfs/306              |   3 +-
+ tests/xfs/307              |   6 --
+ tests/xfs/307.out          |   3 -
+ tests/xfs/308              |   3 -
+ tests/xfs/308.out          |   1 -
+ tests/xfs/310              |   2 -
+ tests/xfs/432              |   2 +-
+ tests/xfs/445              |   3 +-
+ tests/xfs/448              |   1 -
+ tests/xfs/516              |   6 +-
+ tests/xfs/520              |   2 +-
+ tests/xfs/596              |   1 -
+ tests/xfs/801              |  76 ++++++++++++++++++++++++
+ tests/xfs/801.out          |   2 +
+ 108 files changed, 478 insertions(+), 261 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--4B7ETsp1ogxs
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmbLLWsACgkQlNbPkfr2
+tMzmpg/9EerLqzxwJu75VUGEOsc2s/dt8DO+TuqOd8J9ogHy3E0QJjOCzFCVf0i6
+UbGo1plCnIzsdlYzA0riH4A7j9alKuTEGguOAgpJ1CzzvH1mY7umKWVY5ApzOeO7
+4/vaxJyRE3J/AZi7Z0GI3QCaVHsQiTa9DOUEzlZiyFECoz3GaibS8kBH+St1Y49+
+iynhruK+H99i5VHKI+JPcWtvSj4pnay9Ci7gXhK4L14UXeDTDpAEaelt3ZAyAYAv
+WOfnVvNi3xVT21aspGa/4ZawVQgC7oFrRcTW5cGq2aQJOCeyX6J+plcbZy5bEpX3
+jLXmclaXt2a4ctkqhDQYyvwcdqI+UFkpRZHnKVUBjKt90LD5BNyPUk9zvTY5yS0G
+FSkmQNmAq0mr3z6lU1CiWT5GtfNaQTlv25LC/fYQlRqXa6MezQIhDcaq/4Hdp447
+B5lJZnBGU2Fa4xwBLWP9lUpqSYMfYcf+0qdjUcZ8dzdqNAcD3f7d85yUpnnnRwXG
+rdYTq4hw6T3f6tpV54xYMmoMgvvlGvrxHCRt5dCGhPVtNwefLnEbfOetg0r65pTk
+85TYHBjilP/mRs3Nm/CvFD3mxse4/HPfUBaqgSJEEU0/tmUSQX6/i+voO9n7xhAQ
+En3uhV3WfmPYa1Y8R8dBbwJBT8NSxiBfoCSP/lbYkGsdQ8ynqAI=
+=BrlQ
+-----END PGP SIGNATURE-----
+
+--4B7ETsp1ogxs--
