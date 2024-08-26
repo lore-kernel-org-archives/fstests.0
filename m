@@ -1,55 +1,63 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6156189B9B
-	for <fstests@vger.kernel.org>; Mon, 26 Aug 2024 14:06:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65BAE3CF5E
+	for <fstests@vger.kernel.org>; Mon, 26 Aug 2024 14:46:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724681204; cv=none; b=VdbMm6x24LjJ1O6RhRiCGZoZbUyfsE5qxD2A1WHpgG4pobpjx/l+i19NHM33ApE4SX//xz9RnYo0ktTyTPZVKK9PLyF2CcZq+ndLfK96bUE3Jf1JvDqLGESXBLlL+nuHLrxmjXm0HXE66reZzij4Hssh7Ylt99lKKB+8qexCPo8=
+	t=1724683610; cv=none; b=swnHviGSp10jRJkRrqJlgpdpQtZiBrUJaVF2WNfBW4GvVPiTrSwSE9P87+nVa5XhC/pER4byL+UYqfIGMfbr+FDs0ZOaiUlmiavjhmVCSv6hZOi866Pn67idBPM+Wk55Vl4fe9dEpIlg/PxpDcpqoRmJG7vhxVelFNbDmqXLb8s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724681204; c=relaxed/simple;
-	bh=S7KCAcZlTHlL6IZZSjByJR01Jx+dNJZkM+l8CLKATAE=;
+	s=arc-20240116; t=1724683610; c=relaxed/simple;
+	bh=PTRRo3dzvxOaNSFDJFiuouiSsXgmh8iKTeY86UaaLzA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Lh03dvmsNcZ5mRMmkSZm7DHVZJ1iPjvwyh10QbCR+ev/um6FbhmAa2/+u3Kvmr5FTvN/lMdk/OftTxoUF7B/gTf6IDEHrAuI7eRocMXLcvCKwtSjXUSpPuIQ+L4UzCyvSwJMolb5hwZBTbpjzqiE+Xg9MBmbJcKzaxRTifO5igw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h0rLkxi3; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=o8OQ9geX699ACeUr9J2L2f/HKZrSDjqn5vi5Bl4DxDi3yhCatDObgCTk5TmWcakPvub+SixyGmfDTxhErgfO+2hTqFmbayNc+vVmiHIrgpVwpsDKyc2QpDo4878N6G4ZYkeARFRysuo3EkVvGCv959R5BlJLhsQ5fx0j3z6LnIk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=BNW4h0rG; arc=none smtp.client-ip=209.85.222.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h0rLkxi3"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1724681201;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5aRd4rFr7LIWlAGKgwuEmrevSyr0KYJo9n8hiZeDPiE=;
-	b=h0rLkxi3+APCQnxFGDW5vCI0vXrdLBRSg6CZKw9HpAm7RG9/uTnz6a7EzIscQXqxixhyEU
-	legOoT+DRE045A1fnXhoMizoQ/8ov8TqmIlVOri4+r6PTNccDd5sx2phC7DQ4BVKONvpCj
-	S2gqPMS90CorsfzYwpJYIpqXKul0OVM=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-629-zzB28F-uMz-UGhx8cDGzjw-1; Mon,
- 26 Aug 2024 10:06:38 -0400
-X-MC-Unique: zzB28F-uMz-UGhx8cDGzjw-1
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id C983E18BEFE1;
-	Mon, 26 Aug 2024 14:06:35 +0000 (UTC)
-Received: from bfoster (unknown [10.22.32.22])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id B96851955F40;
-	Mon, 26 Aug 2024 14:06:34 +0000 (UTC)
-Date: Mon, 26 Aug 2024 10:07:31 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	josef@toxicpanda.com, david@fromorbit.com
-Subject: Re: [PATCH 3/3] generic: test to run fsx eof pollution
-Message-ID: <ZsyMI-yNdZkoQt9g@bfoster>
-References: <20240822144422.188462-1-bfoster@redhat.com>
- <20240822144422.188462-4-bfoster@redhat.com>
- <20240822205430.GX865349@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="BNW4h0rG"
+Received: by mail-qk1-f169.google.com with SMTP id af79cd13be357-7a1df0a9281so273675985a.1
+        for <fstests@vger.kernel.org>; Mon, 26 Aug 2024 07:46:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1724683608; x=1725288408; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=60roTMKnLbimtxG7vYaCnFjaEybHDOPOa/gCDo0rA3E=;
+        b=BNW4h0rGd/bRTcmM//rHce5moOp3kqq6aj/cEDAruQ838jPkgKs6OrmcR4sNK2Kzvy
+         rPNDfBw37RF5HeRB64VehjMmG05nX/154JpiylBux/nIh4SQzFMl4e3Qqo32GxeW3Dfm
+         Bh+Atbj0IeKBTx8zCZWc6oUFmwjmjTUKI6pS6lNsaMtXLNrlJGDZfGnxmjHqsUsy6z3f
+         6n6zIJMQDDNkBBN+CPU+4h1ID4s20t0VCjosNoVz6VhBK/bEyvVGBL3rNhNA+ZLTeJlL
+         J22VZHr7Fg4M+9B2Lbbj3gURYun32oVntcV2C17HSfvqmfy/rF2ZsMw9WhQv6P5aO4cW
+         DWLA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1724683608; x=1725288408;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=60roTMKnLbimtxG7vYaCnFjaEybHDOPOa/gCDo0rA3E=;
+        b=Fn8FKnSsG2/vsEbILtFHNCicyCsZJxQ1eGHDz2Y8gaU4Rsv2J70D6w6CBI+4mIOcGr
+         wi38dWE5ql8P8zD59mmAmFfoC8Ud/2UVVgMWW5yaGS//izOK03xu0Wpxx5qihEDdv7P0
+         1jUl3L68ip3F0ng2mV3ZBFmH8Yj4+Zmk/YadzemHhFJuY32yGbR3pEeGYZ7K+lVZF2tq
+         /U9wY04S9Bn2OFMOa4g6wWFXpC3aNZQ0/SaOsuZd6c3H7Nr3qI6X4ImYjSQRFsTp3bGk
+         qIr05gSwfeCZcPx/uI3VTm98aO+AeXct8u28Q6+fTqHm0iFHdhyUB752yFIlKEX9Og8H
+         C2Lw==
+X-Gm-Message-State: AOJu0YxWChbyHbF3dLZyivDbrP3yDI1A7UyTR2hHyZIACkV62Wcu0MUw
+	d3JCECKbdeOBCSN2LYZUFeUi3SsG9Rcpiv7cpzayvGkWSGFeQf+CqFwtbGp6QzU=
+X-Google-Smtp-Source: AGHT+IGMYjCw+APmqru5dS4wTd9OzfykuTBi4S2Ig6gWIxrjbdQ0apShQOaiLdv3zAy46uekrtWwLg==
+X-Received: by 2002:a05:620a:408f:b0:79e:ff64:39c4 with SMTP id af79cd13be357-7a6896d0f8bmr1285736085a.6.1724683608231;
+        Mon, 26 Aug 2024 07:46:48 -0700 (PDT)
+Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id af79cd13be357-7a67f34233csm459903485a.35.2024.08.26.07.46.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 Aug 2024 07:46:47 -0700 (PDT)
+Date: Mon, 26 Aug 2024 10:46:46 -0400
+From: Josef Bacik <josef@toxicpanda.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs/319: add git commit ID
+Message-ID: <20240826144646.GE2393039@perftesting>
+References: <fbcd0be9cf4a58086074157ea8ddd3a85eab6650.1724674946.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -58,120 +66,18 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240822205430.GX865349@frogsfrogsfrogs>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+In-Reply-To: <fbcd0be9cf4a58086074157ea8ddd3a85eab6650.1724674946.git.fdmanana@suse.com>
 
-On Thu, Aug 22, 2024 at 01:54:30PM -0700, Darrick J. Wong wrote:
-> On Thu, Aug 22, 2024 at 10:44:22AM -0400, Brian Foster wrote:
-> > Filesystem regressions related to partial page zeroing can go
-> > unnoticed for a decent amount of time. A recent example is the issue
-> > of iomap zero range not handling dirty pagecache over unwritten
-> > extents, which leads to wrong behavior on certain file extending
-> > operations (i.e. truncate, write extension, etc.).
-> > 
-> > fsx does occasionally uncover these sorts of problems, but failures
-> > can be rare and/or require longer running tests outside what is
-> > typically run via full fstests regression runs. fsx now supports a
-> > mode that injects post-eof data in order to explicitly test partial
-> > eof zeroing behavior. This uncovers certain problems more quickly
-> > and applies coverage more broadly across size changing operations.
-> > 
-> > Add a new test that runs an fsx instance (modeled after generic/127)
-> > with eof pollution mode enabled. While the test is generic, it is
-> > currently limited to XFS as that is currently the only known major
-> > fs that does enough zeroing to satisfy the strict semantics expected
-> > by fsx. The long term goal is to uncover and fix issues so more
-> > filesystems can enable this test.
-> > 
-> > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > ---
-> >  tests/generic/362     | 27 +++++++++++++++++++++++++++
-> >  tests/generic/362.out |  2 ++
-> >  2 files changed, 29 insertions(+)
-> >  create mode 100755 tests/generic/362
-> >  create mode 100644 tests/generic/362.out
-> > 
-> > diff --git a/tests/generic/362 b/tests/generic/362
-> > new file mode 100755
-> > index 00000000..30870cd0
-> > --- /dev/null
-> > +++ b/tests/generic/362
-> > @@ -0,0 +1,27 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FSQA Test No. 362
-> > +#
-> > +# Run fsx with EOF pollution enabled. This provides test coverage for partial
-> > +# EOF page/block zeroing for operations that change file size.
-> > +#
-> > +
-> > +. ./common/preamble
-> > +_begin_fstest rw auto
-> > +
-> > +FSX_FILE_SIZE=262144
-> > +# on failure, replace -q with -d to see post-eof writes in the dump output
-> > +FSX_ARGS="-q -l $FSX_FILE_SIZE -e 1 -N 100000"
-> > +
-> > +_require_test
-> > +
-> > +# currently only xfs performs enough zeroing to satisfy fsx
-> > +_supported_fs xfs
+On Mon, Aug 26, 2024 at 01:22:57PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Should get rid of this. ;)
+> The kernel patch was merged into Linus' tree, so update the 'xxxxxxxxxxxx'
+> stub with the respective git commit ID.
 > 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Agreed. But just to be clear, I was planning to leave this in for now so
-we don't have to go and fix the various other filesystem issues
-(assuming various maintainers agree) as a gate to fixing iomap zeroing
-and having decent test coverage. I'm planning to look into the other
-failures once I get through the iomap revalidation thing to avoid the
-flush on XFS.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
-> > +ltp/fsx $FSX_ARGS $FSX_AVOID $TEST_DIR/fsx.$seq > $tmp.output 2>&1
-> 
-> I wonder, is there a reason not to use run_fsx from common/rc?
-> 
+Thanks,
 
-At first glance the only thing that stands out to me is run_fsx
-hardcodes the file to $TEST_DIR/junk instead of using and leaving around
-a test-specific file. I find that ever so slightly annoying, but not
-enough to hardcode the fsx command in the test, so I'll make that
-change.
-
-My initial hope was to be able to just turn on the eof pollution thing
-by default and rely on existing fstests to (which I've confirmed do)
-detect the iomap zeroing problems, but the other non-iomap fs failures
-mean we can't do that without being disruptive and hence the need for
-the custom fstest. If we can get to the point of completely removing the
-_supported_fs check above, then perhaps we could also revisit changing
-the fsx default and removing this test.
-
-> Otherwise this looks ok to me.
-> 
-
-Thanks for the comments.
-
-Brian
-
-> --D
-> 
-> > +cat $tmp.output
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/362.out b/tests/generic/362.out
-> > new file mode 100644
-> > index 00000000..7af6b96a
-> > --- /dev/null
-> > +++ b/tests/generic/362.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 362
-> > +All 100000 operations completed A-OK!
-> > -- 
-> > 2.45.0
-> > 
-> > 
-> 
-
+Josef
