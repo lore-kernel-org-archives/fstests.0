@@ -1,313 +1,161 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 506E4198856
-	for <fstests@vger.kernel.org>; Mon, 26 Aug 2024 17:09:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C56219D088;
+	Mon, 26 Aug 2024 22:16:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724692194; cv=none; b=OiYS5JzvtjwmuBFl8Gernt7CP/wjCxt+BZHVGtHeliFeDPapEWNk/uNOK3U/wHj/yPzGzirnfz4x54FpjSjzNJ8O8aSRneyuIR6ae7glXaKNdaZloNTuDVlg+CPwQyqsaml6JsEcP8E5CGX/Tea7YZqIUtxEtAKs9biRLUzz34g=
+	t=1724710570; cv=none; b=sAgibM6PoHbTEQKGOwxiMAS+FaarcqqK9wQdbd+AdypnK32Ur6ab7TaCRtQwGyMmXjnNpXrHroOAO9/MsctqCBzAayKkPnf3M6ekogpN/aBBFmj1JpjWaJb+i0ePMmGpYjFEmrjdQwc1CmW0dCln+yE+xHGS7ukmSDN8kQ7Iqw4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724692194; c=relaxed/simple;
-	bh=4NJomvd1FkhRbF4teAxibD4t/8nSE3hcw3k3aFsC67U=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PI0xmjClbR9HWuaMGrvHEqagJ2lT/3dNVfrwxSrNN/8u9SlQ2JtrN7DpIwWYy2Bicz+XBYdy6iSpK5+EkcoPsAujDJnqEA0QQT7TZt2kqccV1r2bYUAZWH2wNIeD7dxck18gjKaLxLXyurVq7nrgqZBQaXKyaD9ANtX9HwHaPe8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YN8aoRHk; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1724710570; c=relaxed/simple;
+	bh=9XvTM4wMA78+6qINfD1s2G4S1dwvqzuLP2uiJYp3ZKM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=irutMFjRTuoYgHXd2sadALkVXYukNj9XlOAB2ELSzyYXdzh4j8PXk2IKhyL3Z6fJsEYWKnABBDM3Q5C1QcSSkMclv0Fg/sacEiBIctmjqv1DKyBFIrhlEfli4yna5yLXGbfjlesuVts6+sICuJmrPdc86KgclJ1np1wEZuAnLAc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=DXsIRRoC; arc=none smtp.client-ip=212.227.15.15
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YN8aoRHk"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1724692191;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0qn6hxlwrF0+8H5tQBVuv5gyNycLc//aQmQBBA/uTuw=;
-	b=YN8aoRHkUcYTI12woCbDTsVw6ZwADICF5rbIckBcaIu2cuf+E5S7lKjdagZoHgigBRRRxb
-	XTK5rTL17isNwN4VX7PyfM4FE3KqlkJpAPDpeSHQASWRWHdiJ/piHrDMa/asNxY2zH3VU+
-	1xkVUXUw371y9MhT/MO0i6QVLjeSCWw=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-524-UYkY999fOs22UI4dRFIZFg-1; Mon,
- 26 Aug 2024 13:09:47 -0400
-X-MC-Unique: UYkY999fOs22UI4dRFIZFg-1
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 78BED1955F43;
-	Mon, 26 Aug 2024 17:09:45 +0000 (UTC)
-Received: from bfoster (unknown [10.22.32.22])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3C2131956053;
-	Mon, 26 Aug 2024 17:09:44 +0000 (UTC)
-Date: Mon, 26 Aug 2024 13:10:40 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
-	josef@toxicpanda.com, david@fromorbit.com
-Subject: Re: [PATCH 1/3] fsx: factor out a file size update helper
-Message-ID: <Zsy3EEr8_gjGofaI@bfoster>
-References: <20240822144422.188462-1-bfoster@redhat.com>
- <20240822144422.188462-2-bfoster@redhat.com>
- <20240822205019.GV865349@frogsfrogsfrogs>
- <ZsyLShYLojBLPNiC@bfoster>
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="DXsIRRoC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1724710556; x=1725315356; i=quwenruo.btrfs@gmx.com;
+	bh=g1MkF2A8UY0lY8N2xcqW1C4UynF1W8GTPh761UUE8z4=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=DXsIRRoC/AT58vr67l5eI5kLapdIFc6qFjOgEogw6Pgc1RfOYplC1a9k2U8T70RP
+	 j5AAh8JBvbjPldlxMKbNmzrAeMhZZXJ/g7Ptju25iYfRRgACe8/gn+bfSX7HU0N7Q
+	 WSUKDZVOv7FEhEfJJkIQy83zUFdb8aBo0rsOCjXzTI0A8ZIMXgccZ98FwDukuHC6Y
+	 m1P8X2hSVywthVZu/nWcI8t3pE6Gza+0n6MptIfh1xiCohuDBkyTC/hFiktHb4pn2
+	 PDh4lBzkULo4doDyl7oCTOGlQT+mX0aeeI+D9Z7StXY6Ukmw1gcIdFHOXkhuEaBRI
+	 NOQ8Cc+uo9lodnJPoQ==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx004
+ [212.227.17.184]) with ESMTPSA (Nemesis) id 1N0X8o-1ruz3g1RYq-00viVN; Tue, 27
+ Aug 2024 00:15:56 +0200
+Message-ID: <e8a39bc8-7efd-421e-8315-b4a5c977d942@gmx.com>
+Date: Tue, 27 Aug 2024 07:45:53 +0930
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZsyLShYLojBLPNiC@bfoster>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] fstests: btrfs: a new test case to verify a
+ use-after-free bug
+To: Filipe Manana <fdmanana@kernel.org>, Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+References: <20240824103021.264856-1-wqu@suse.com>
+ <CAL3q7H7Hmqr_bn7b7G6aSKK1vWq4EhW=tuWZRPWZGv-MJtbMTQ@mail.gmail.com>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
+ pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
+ BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
+ XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
+ jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
+ LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
+ mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
+ CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
+ tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
+ INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
+ DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
+ iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
+In-Reply-To: <CAL3q7H7Hmqr_bn7b7G6aSKK1vWq4EhW=tuWZRPWZGv-MJtbMTQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:OXtvyuu50mNvbHv5ruo2wFrcPK4QFnbSdBRwu/LEIdsiG0HFg8B
+ WiOUU8kBvZ1lph1g7XoA5dYlnobn0QvhsnD7v/UMMWXLTMyZFKjOc/Srz5GL9jw6wJChF6v
+ xH37LBimFgcOKj2PyJuytV9SlDY76LptNQi2QmJ5EUhz67GRoysEQaezeiBsp9KbV6ur/VW
+ VIO1GPQRYlYfE2j8/mhew==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:rK/koKkZaIU=;7UEUPZlrRHJzKPcmFkziJcauH5h
+ Qt72qe66yOLAh1pQfm1snVnb16l8tcD3+utPDL7taemESaIE4jLZ8dCEiuEFdHN2SRznbDv/f
+ BhtTLpJ9SOuEcG9Xfq1F3ysO+EkeHzRxU3OHvJMj8m/BM/YTYJtWPjdj4yE6JeoKe+1P4tnkB
+ GAO9iqUQ82uoPJmqjX2XEPDwNed03U60aCav8LxdY7E6K7Jk9JSk3u22s0T6jCbJEuiZq+e/L
+ WXNvq7JwWuXr/BYRcAxqjDiW2TzR682Pc3paYHOaxTW0C9PH45zlH0/PEb7nXqjp694UyfsvZ
+ oTw1f2AxwAY06DJRgxOY63oW2FEVTsHh/Vp3S1+K5BC3Pq+rjtqKWj4l6i6Ov9FcYZSkN6+vr
+ 9QaHfckUAXAlHKW8xC4P26KyiIvODkMKyvnereK5UHeBEUEcme53nXTuQ2kXuv7njBWBhrSo8
+ DSKnUvwcRTP9mh069HvEyAvVvKBw3VvcHjbPN/OvCuBKzcO8mHQu6n+PwPdKqU/AgsBqU1/Cw
+ nhaO47ZPgz2rzoP0xrcLhsu9b1z2HxnCXqU6BjzWg81y3Ab3Tk9Tr7U3cauRZJy6v5Bn0ASj4
+ MSt1yVtp52/ZYoWgDR7JANFYKawXZSddj86ehb/LMrKimlQhmnMfF+rlkVNw6sD4jPPYV+Fwj
+ V8o432R3RbPQbTx+8+MC3mtMWqjQQ9Xual53jGWN5v++GAzh0mJo7ENTcFjdABw+Nwb/wD++4
+ MD2TdweZpi1eC+PPP/109Dw4uYA49tvDovwE72ONBiMY6saQkZnUn0e/PXTBRo4JqH8vW8cRW
+ gM1DK4wqHh10iuUPdjOdYFZw==
 
-On Mon, Aug 26, 2024 at 10:03:54AM -0400, Brian Foster wrote:
-> On Thu, Aug 22, 2024 at 01:50:19PM -0700, Darrick J. Wong wrote:
-> > On Thu, Aug 22, 2024 at 10:44:20AM -0400, Brian Foster wrote:
-> > > In preparation for support for eof page pollution, factor out a file
-> > > size update helper. This updates the internally tracked file size
-> > > based on the upcoming operation and zeroes the appropriate range in
-> > > the good buffer for extending operations.
-> > > 
-> > > Note that a handful of callers currently make these updates after
-> > > performing the associated operation. Order is not important to
-> > > current behavior, but it will be for a follow on patch, so make
-> > > those calls a bit earlier as well.
-> > > 
-> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > > ---
-> > >  ltp/fsx.c | 57 +++++++++++++++++++++++++------------------------------
-> > >  1 file changed, 26 insertions(+), 31 deletions(-)
-> > > 
-> > > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > > index 2dc59b06..1389c51d 100644
-> > > --- a/ltp/fsx.c
-> > > +++ b/ltp/fsx.c
-> > > @@ -983,6 +983,17 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
-> > >  	}
-> > >  }
-> > >  
-> > > +/*
-> > > + * Helper to update the tracked file size. If the offset begins beyond current
-> > > + * EOF, zero the range from EOF to offset in the good buffer.
-> > > + */
-> > > +void
-> > > +update_file_size(unsigned offset, unsigned size)
-> > > +{
-> > > +	if (offset > file_size)
-> > > +		memset(good_buf + file_size, '\0', offset - file_size);
-> > > +	file_size = offset + size;
-> > > +}
-> > >  
-> > >  void
-> > >  dowrite(unsigned offset, unsigned size)
-> > > @@ -1003,10 +1014,8 @@ dowrite(unsigned offset, unsigned size)
-> > >  	log4(OP_WRITE, offset, size, FL_NONE);
-> > >  
-> > >  	gendata(original_buf, good_buf, offset, size);
-> > > -	if (file_size < offset + size) {
-> > > -		if (file_size < offset)
-> > > -			memset(good_buf + file_size, '\0', offset - file_size);
-> > > -		file_size = offset + size;
-> > > +	if (offset + size > file_size) {
-> > > +		update_file_size(offset, size);
-> > >  		if (lite) {
-> > >  			warn("Lite file size bug in fsx!");
-> > >  			report_failure(149);
-> > > @@ -1070,10 +1079,8 @@ domapwrite(unsigned offset, unsigned size)
-> > >  	log4(OP_MAPWRITE, offset, size, FL_NONE);
-> > >  
-> > >  	gendata(original_buf, good_buf, offset, size);
-> > > -	if (file_size < offset + size) {
-> > > -		if (file_size < offset)
-> > > -			memset(good_buf + file_size, '\0', offset - file_size);
-> > > -		file_size = offset + size;
-> > > +	if (offset + size > file_size) {
-> > > +		update_file_size(offset, size);
-> > >  		if (lite) {
-> > >  			warn("Lite file size bug in fsx!");
-> > >  			report_failure(200);
-> > > @@ -1136,9 +1143,7 @@ dotruncate(unsigned size)
-> > >  
-> > >  	log4(OP_TRUNCATE, 0, size, FL_NONE);
-> > >  
-> > > -	if (size > file_size)
-> > > -		memset(good_buf + file_size, '\0', size - file_size);
-> > > -	file_size = size;
-> > > +	update_file_size(size, 0);
-> > >  
-> > >  	if (testcalls <= simulatedopcount)
-> > >  		return;
-> > > @@ -1247,6 +1252,9 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
-> > >  	log4(OP_ZERO_RANGE, offset, length,
-> > >  	     keep_size ? FL_KEEP_SIZE : FL_NONE);
-> > >  
-> > > +	if (end_offset > file_size)
-> > > +		update_file_size(offset, length);
-> > > +
-> > >  	if (testcalls <= simulatedopcount)
-> > >  		return;
-> > 
-> > Don't we only want to do the goodbuf zeroing if we don't bail out due to
-> > the (testcalls <= simulatedopcount) logic?  Same question for
-> > do_clone_range and do_copy_range.
-> > 
-> 
-> Hm, good question. It's quite possible I busted something there. For
-> some reason I was thinking this would all be a no-op for that mode but I
-> hadn't quite thought it through (or tested it).
-> 
-> It looks like this is for the -b "beginning operation number" support,
-> so you can start a test from somewhere beyond operation 0 of a given
-> seed/sequence. As such it appears to make changes to incore state and
-> then write the goodbuf out to the file and truncate it as a final step
-> before proper operation begins.
-> 
-> Looking at how some of the current operations are handled, I think the
-> size-related goodbuf zeroing is Ok because we'd expect that part of the
-> file to remain zeroed, after a truncate up, etc., for example. In fact,
-> I'm wondering if the current zero range behavior is technically wrong
-> because if a zero range were to extend the file during simulation, we
-> don't actually update the in-core state as expected. This might actually
-> be worth factoring out into a bug fix patch with proper explanation.
-> 
-> WRT the eof pollution behavior during simulation, I'm kind of on the
-> fence. It's arguably wrong because we're not running the kernel
-> operations and so there's nothing to verify, but OTOH perhaps we should
-> be doing the zeroing associated with size changes in-core that should
-> wipe out the eof pollution. Then again, nothing really verifies this and
-> if something fails, we end up writing that data out to the test file.
-> None of that is really the purpose of this mechanism, so I'm leaning
-> towards calling it wrong and making the following tweaks:
-> 
 
-Err.. I think you can disregard most of this reasoning. I got my wires
-crossed between zeroing behavior and pollute_eofpage().
-pollute_eofpage() updates the file only, so just blows up in simulation
-mode and is clearly wrong. :) That makes things more simple, though I
-think the plan below to disable it is the same...
 
-Brian
+=E5=9C=A8 2024/8/26 21:44, Filipe Manana =E5=86=99=E9=81=93:
+[...]
+>> +       # Manually check the dmesg for "BUG", and do not call _check_dm=
+esg()
+>> +       # as it will clear 'check_dmesg' file and skips the final check=
+ after
+>> +       # the test.
+>> +       # For now just focus on the "BUG:" line from KASAN.
+>> +       if _check_dmesg_for "BUG" ; then
+>> +               _fail "Critical error(s) found in dmesg"
+>> +       fi
+>
+> Why do the check manually? The check script calls _check_dmesg when a
+> test finishes and if it finds 'BUG:' there, it will make the test
+> fail.
+> So there's no need to do the unmount and call _check_dmesg_for.
 
-> 1. Split out another bug fix patch to do size related updates (including
-> zeroing) consistently during simulation.
-> 
-> 2. Update pollute_eofpage() in the next patch to skip out when testcalls
-> <= simulatedopcount (with some commenting).
-> 
-> Let me know if you think any of that doesn't make sense.
-> 
-> > /me reads the second patch but doesn't quite get it. :/
-> > 
-> 
-> The zeroing tests I was using were basically manual test sequences to do
-> things like this:
-> 
-> 	xfs_io -fc "truncate 2k" -c "falloc -k 0 4k" ... -c "mwrite 0 4k" \
-> 		-c "truncate 8k" <file>
-> 
-> ... which itentionally writes beyond EOF before a truncate up operation
-> to test whether the zero range in the truncate path DTRT with a dirty
-> folio over an unwritten block. In a nutshell, I'm just trying to
-> genericize that sort of test a bit more by doing similar post-eof
-> mwrites opportunistically in fsx in operations that should be expected
-> to do similar zeroing in-kernel.
-> 
-> I.e., replace the "truncate 8k" above with any size extending operation
-> that starts beyond EOF such that we should expect the range from
-> 2k-<endofpage> to be zeroed. Does that explain things better?
-> 
-> > Are you doing this to mirror what the kernel does?  A comment here to
-> > explain why we're doing this differently would help me.
-> > 
-> 
-> Yeah, sort of... it's more like writing a canary value to a small range
-> of the file but rather than expecting it to remain unmodified, we expect
-> it to be zeroed by the upcoming operation. Therefore we don't write the
-> garbage data to goodbuf, because goodbuf should contain zeroes and we
-> want to detect a data mismatch on subsequent reads if the kernel didn't
-> do the expected zeroing.
-> 
-> Brian
-> 
-> > --D
-> > 
-> > >  
-> > > @@ -1263,17 +1271,6 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
-> > >  	}
-> > >  
-> > >  	memset(good_buf + offset, '\0', length);
-> > > -
-> > > -	if (!keep_size && end_offset > file_size) {
-> > > -		/*
-> > > -		 * If there's a gap between the old file size and the offset of
-> > > -		 * the zero range operation, fill the gap with zeroes.
-> > > -		 */
-> > > -		if (offset > file_size)
-> > > -			memset(good_buf + file_size, '\0', offset - file_size);
-> > > -
-> > > -		file_size = end_offset;
-> > > -	}
-> > >  }
-> > >  
-> > >  #else
-> > > @@ -1538,6 +1535,9 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
-> > >  
-> > >  	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
-> > >  
-> > > +	if (dest + length > file_size)
-> > > +		update_file_size(dest, length);
-> > > +
-> > >  	if (testcalls <= simulatedopcount)
-> > >  		return;
-> > >  
-> > > @@ -1556,10 +1556,6 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
-> > >  	}
-> > >  
-> > >  	memcpy(good_buf + dest, good_buf + offset, length);
-> > > -	if (dest > file_size)
-> > > -		memset(good_buf + file_size, '\0', dest - file_size);
-> > > -	if (dest + length > file_size)
-> > > -		file_size = dest + length;
-> > >  }
-> > >  
-> > >  #else
-> > > @@ -1756,6 +1752,9 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
-> > >  
-> > >  	log5(OP_COPY_RANGE, offset, length, dest, FL_NONE);
-> > >  
-> > > +	if (dest + length > file_size)
-> > > +		update_file_size(dest, length);
-> > > +
-> > >  	if (testcalls <= simulatedopcount)
-> > >  		return;
-> > >  
-> > > @@ -1792,10 +1791,6 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
-> > >  	}
-> > >  
-> > >  	memcpy(good_buf + dest, good_buf + offset, length);
-> > > -	if (dest > file_size)
-> > > -		memset(good_buf + file_size, '\0', dest - file_size);
-> > > -	if (dest + length > file_size)
-> > > -		file_size = dest + length;
-> > >  }
-> > >  
-> > >  #else
-> > > @@ -1846,7 +1841,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
-> > >  
-> > >  	if (end_offset > file_size) {
-> > >  		memset(good_buf + file_size, '\0', end_offset - file_size);
-> > > -		file_size = end_offset;
-> > > +		update_file_size(offset, length);
-> > >  	}
-> > >  
-> > >  	if (testcalls <= simulatedopcount)
-> > > -- 
-> > > 2.45.0
-> > > 
-> > > 
-> > 
-> 
-> 
+The main reasons are:
 
+1. Fail the test as soon as possible
+    Mostly to let the dmesg to contain only the failed iteration.
+    I found it especially useful to stop immediately to inspect the
+    dmesg, during the verification of my fix.
+
+    This doesn't make too much difference for routine QA runs, but in the
+    future if some regression happened and one (maybe myself) is going to
+    investigate the failure, this early exit will make life much easier.
+
+2. To avoid too small dmesg buffer
+    Since each iteration will trigger some error message due to the
+    corrupted tree blocks, combined with the 32 runs, I'm not that
+    confident all dmesg buffer size can save all the dmesg.
+
+Hopes this explains the reasons well.
+
+Thanks,
+Qu
+>
+> Thanks.
+>
+>> +done
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/319.out b/tests/btrfs/319.out
+>> new file mode 100644
+>> index 00000000..d40c929a
+>> --- /dev/null
+>> +++ b/tests/btrfs/319.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 319
+>> +Silence is golden
+>> --
+>> 2.46.0
+>>
+>>
+>
