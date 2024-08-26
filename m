@@ -1,161 +1,293 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 306261E492
-	for <fstests@vger.kernel.org>; Sun, 25 Aug 2024 13:26:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4716377F0B;
+	Mon, 26 Aug 2024 12:15:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724592367; cv=none; b=vFyK63Icbw1PkDkOe1cvhbapAoLC6HFY3Hv8gQSotGhsyfY7OdkCsjNaWO++SUT0L2Bh1N4P7bJ8NY+r/tfI334cJ4Ik5WwEjDrxgF4OIi6Kcc2R1e7/wtxsypgcRMnZBj4Cf7iA8FZBIiCUcX3V9nSsPA7URjqqsHBB37M8nQc=
+	t=1724674533; cv=none; b=TR00DMiRdiWAh3+vbW1fWPbc6KlLlXO7BBCK9UElYRKatsttvsz7vRL4LS5HpvtxQeMT8AhHQ69cBX0gbUYsLWfbiJDsGvou/QZ656AOmvpDLNP1UGsEE/AudmNVAxevn5Eu6tiCxMnFMZ59GC9U/1oxn7PvJA0V+FTIBeIQgnY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724592367; c=relaxed/simple;
-	bh=vUd+HegS7YZe5Mxgr68NUh5Y8M/eORK6v4JDKK/uv5M=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=na+cvZgKB6Oc/m4T/ofWL+v/btmNnS4Yq7KPQNbBqzWJ1KbKjIWC49BrFw5xaafLPxmkwyz4WSG4/sNim7OyamCpvevCmzYf7NAjzmpBPMJJeXSopjPjEVn8aoJzJ8LySDIGNzQCuBz5+U/yoB9ir4Yb6lbW51EYbiGJqgcxICE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Dcxcna6n; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1724674533; c=relaxed/simple;
+	bh=WCxBUeMzkgQnoO3Ph/wAY9cNfq/IRxDOE2ahkWKhQ4o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Wj6pHToETvStkrDQJQXdAgLEVhwpg8MN6ow/oFRCi7h1pfezRmmNELlnElDd9tme9hvAtoOT8EfeZH8P938G+QMwKZfJcMpq+1QJvZDE5Of85ZP+KaK+V9xlkXP3QQNL0awhVa89Pz7l4RBfOk5c7lMXDqj68C1UWOQ5t/kmGcs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qC050nGU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Dcxcna6n"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E352C32782;
-	Sun, 25 Aug 2024 13:26:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qC050nGU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC90DC568CD;
+	Mon, 26 Aug 2024 12:15:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1724592366;
-	bh=vUd+HegS7YZe5Mxgr68NUh5Y8M/eORK6v4JDKK/uv5M=;
-	h=Date:From:To:Subject:From;
-	b=Dcxcna6nePGwo0IprhtHqFrXgjbEorhaM8E7ZjEN9qDL+hhlyvdRomWxkewC2/0gl
-	 AGMxhl7avdU/bgXFYDr6Z0zhjg6L5rOL670fj6wZ6mz5wF80qjZpaGKtQFcPXwnsad
-	 afPMy9RZb4hZnJY0332kvXZ1VgxJI/r5bqYwnd/sv35aWnXI2QmKpMKSYr/+o+qp1l
-	 vy7cotf3/GAryW9n3iBbEBEowf9Qt2/o+DwUfdx9oGUBm2ATX8l2xRBIjXOSpDk27X
-	 Nr5fARLs+FmzPefRv1Lz4B3/BrGSsduBx9RfruySau8fHyk6+ENQUJOg+kkS4Dwjea
-	 df7ji9gL6Bk0Q==
-Date: Sun, 25 Aug 2024 21:26:03 +0800
-Message-ID: <33252d05e104ddda106d576c6dd72ed9@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.08.25
+	s=k20201202; t=1724674532;
+	bh=WCxBUeMzkgQnoO3Ph/wAY9cNfq/IRxDOE2ahkWKhQ4o=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=qC050nGUJh7CBu5TgTZb8WAnD3Q2ZJKwts4N9mXa4tMPkF1zmahv9QMFG11dwX41E
+	 On/q6xpVykwukiqcW2bIO/grT1A6q5zJnQh+G5vhwhyCH2CqYNXk8CrIzEzfwP301g
+	 VPqX7kmuKsX+ZlnV+SmmE1Fn5gsCAoX6YCBK75KyKhM5IYdu2qr08HVwd0zfdME5Dr
+	 5Ggq3JFf3MUVccRDQF1n3eQZOD6RMZSD7JAfGjANMiHJo5VrEirJBGDNrHBBC5IIpl
+	 VnL7uFvHJabb5mPbWeuetxDDjhCL8MCkl45YcrfFzlerjWTuxOSWcIloaHt8+ZkzFJ
+	 RsfYOX8waG1pw==
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-5a108354819so5392611a12.0;
+        Mon, 26 Aug 2024 05:15:32 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUqsWWk1cd6cQfjn2SRdMcDy8ePYt/8BxXZYBBlXlWBR4QXdVSc7+BAtmoKj2J9LHVET+8uD6No@vger.kernel.org
+X-Gm-Message-State: AOJu0YxSEYN1+DvLlliT8+wfmNH1sNQainawaTA+T5X7FwGu30havsb9
+	aNqBbOPsLqviIFE4agB5bCvUMGfjO133DO3JLnjr2vIWADA/h1XtA2+xZr2T8qj4rec1BAirv6a
+	Z4HEo4+IgMEdLNIuTpI9iOWKiEQY=
+X-Google-Smtp-Source: AGHT+IEnq7Xc76B95OSQtLExiA9eZf57tWCqEaLoXdhHp2f1IeQ/co6ZoJZ63nX2OQM0tOhC2be6BNqiLaWuwWfQTQs=
+X-Received: by 2002:a17:907:9816:b0:a7a:83f8:cfd5 with SMTP id
+ a640c23a62f3a-a86a52b6592mr638212266b.18.1724674531399; Mon, 26 Aug 2024
+ 05:15:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="k8lIGax9oHrp"
-Content-Disposition: inline
+References: <20240824103021.264856-1-wqu@suse.com>
+In-Reply-To: <20240824103021.264856-1-wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 26 Aug 2024 13:14:54 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H7Hmqr_bn7b7G6aSKK1vWq4EhW=tuWZRPWZGv-MJtbMTQ@mail.gmail.com>
+Message-ID: <CAL3q7H7Hmqr_bn7b7G6aSKK1vWq4EhW=tuWZRPWZGv-MJtbMTQ@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs: a new test case to verify a
+ use-after-free bug
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Sat, Aug 24, 2024 at 11:31=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> [BUG]
+> There is a use-after-free bug triggered very randomly by btrfs/125.
+>
+> If KASAN is enabled it can be triggered on certain setup.
+> Or it can lead to crash.
+>
+> [CAUSE]
+> The test case btrfs/125 is using RAID5 for metadata, which has a known
+> RMW problem if the there is some corruption on-disk.
+>
+> RMW will use the corrupted contents to generate a new parity, losing the
+> final chance to rebuild the contents.
+>
+> This is specific to metadata, as for data we have extra data checksum,
+> but the metadata has extra problems like possible deadlock due to the
+> extra metadata read/recovery needed to search the extent tree.
+>
+> And we know this problem for a while but without a better solution other
+> than avoid using RAID56 for metadata:
+>
+> >   Metadata
+> >       Do not use raid5 nor raid6 for metadata. Use raid1 or raid1c3
+> >       respectively.
+>
+> Combined with the above csum tree corruption, since RAID5 is stripe
+> based, btrfs needs to split its read bios according to stripe boundary.
+> And after a split, do a csum tree lookup for the expected csum.
 
---k8lIGax9oHrp
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This is way too much unrelated stuff.
+The problem may have been triggered sporadically by btrfs/125, but
+there's no need to go into details on raid5 problems in btrfs.
+Even because the use-after-free bug can be triggered without raid5,
+just using raid0 like in the test case introduced by this patch.
 
-Hi all,
+>
+> But if that csum lookup failed, in the error path btrfs doesn't handle
+> the split bios properly and lead to double freeing of the original bio
+> (the one containing the bio vectors).
+>
+> [NEW TEST CASE]
+> Unlike the original btrfs/125, which is very random and picky to
+> reproduce, introduce a new test case to verify the specific behavior by:
+>
+> - Create a btrfs with enough csum leaves
+>   To bump the csum tree level, use the minimal nodesize possible (4K).
+>   Writing 32M data which needs at least 8 leaves for data checksum
+>
+> - Find the last csum tree leave and corrupt it
+>
+> - Read the data many times until we trigger the bug or exit gracefully
+>   With an x86_64 VM (which is never able to trigger btrfs/125 failure)
+>   with KASAN enabled, it can trigger the KASAN report in just 4
+>   iterations (the default iteration number is 32).
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Changelog:
+> v2:
+> - Fix the wrong commit hash
+>   The proper fix is not yet merged, the old hash is a place holder
+>   copied from another test case but forgot to remove.
+>
+> - Minor wording update
+>
+> - Add to "dangerous" group
+> ---
+>  tests/btrfs/319     | 84 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/319.out |  2 ++
+>  2 files changed, 86 insertions(+)
+>  create mode 100755 tests/btrfs/319
+>  create mode 100644 tests/btrfs/319.out
+>
+> diff --git a/tests/btrfs/319 b/tests/btrfs/319
+> new file mode 100755
+> index 00000000..4be2b50b
+> --- /dev/null
+> +++ b/tests/btrfs/319
 
-The for-next branch of the xfstests repository at:
+There's already a btrfs/319 test case in for-next btw. This needs to
+be renumbered.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> @@ -0,0 +1,84 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 319
+> +#
+> +# Make sure data csum lookup failure will not lead to double bio freeing
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick dangerous
 
-has just been updated and tagged as v2024.08.25 release.
+Missing the "raid" group.
 
-Release Notes:
-1) There're 3 new test cases -- b/319, g/755 and x/608. They're all regression
-   test cases. Failed on old kernel, but won't cause crash or hang.
-2) A new program src/min_dio_alignment helps to the minimum DIO alignment
-   by using statx stx_dio_offset_align field.
-3) Fix a small tmpfs test regression.
+> +
+> +_require_scratch
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: fix a use-after-free bug when hitting errors inside btrfs=
+_submit_chunk()"
+> +
+> +# The final fs will have a corrupted csum tree, which will never pass fs=
+ck
+> +_require_scratch_nocheck
+> +_require_scratch_dev_pool 2
+> +
+> +# Use RAID0 for data to get bio splitted according to stripe boundary.
+> +# This is required to trigger the bug.
+> +_check_btrfs_raid_type raid0
+> +
+> +# This test goes 4K sectorsize and 4K nodesize, so that we easily create
+> +# higher level of csum tree.
+> +_require_btrfs_support_sectorsize 4096
+> +
+> +# The bug itself has a race window, run this many times to ensure trigge=
+ring.
+> +# On an x86_64 VM with KASAN enabled, normally it is triggered before th=
+e 10th run.
+> +runtime=3D32
 
-More updates and fixes refer to below, thanks for all your contributions!
+This is a confusing name because it actually means iterations in the
+for loop below, and not a time duration.
+I would suggest renaming it to "iterations" for example, or just get
+rid of it since it's only used in the for loop's condition.
 
-Thanks,
-Zorro
+> +
+> +_scratch_pool_mkfs "-d raid0 -m single -n 4k -s 4k" >> $seqres.full 2>&1
+> +# This test requires data checksum to trigger the bug.
+> +_scratch_mount -o datasum,datacow
+> +
+> +# For the smallest csum size (CRC32C) it's 4 bytes per 4K, writing 32M d=
+ata
+> +# will need 32K data checksum at minimal, which is at least 8 leaves.
+> +_pwrite_byte 0xef 0 32m "$SCRATCH_MNT/foobar" > /dev/null
+> +sync
 
-The new head of the for-next branch is commit:
+What's this sync for?
+We just do a unmount right after it, which makes it pointless and confusing=
+.
 
-b14652801e2e generic/615: add to the quick group
+> +_scratch_unmount
+> +
+> +# Search for the last leaf of the csum tree, that will be the target to =
+destroy.
+> +$BTRFS_UTIL_PROG inspect dump-tree -t csum $SCRATCH_DEV >> $seqres.full
 
-New commits ([N]ew, [U]pdate):
+Please use the full command name: inspect -> inspect-internal
 
-André Almeida (1):
-[U]      [5381898ebaef] common/config: Correctly ignore {TEST|SCRATCH}_DEV for tmpfs
+> +target_bytenr=3D$($BTRFS_UTIL_PROG inspect dump-tree -t csum $SCRATCH_DE=
+V | grep "leaf.*flags" | sort | tail -n1 | cut -f2 -d\ )
 
-Christoph Hellwig (6):
-[U]      [873e36c9c3cc] statx.h: update to latest kernel UAPI
-[N]      [0e5f196d0a6a] add a new min_dio_alignment helper
-[U]      [4a571eaae784] xfs/424: don't use _min_dio_alignment
-[U]      [515e61fdc791] generic: don't use _min_dio_alignment without a device argument
-[U]      [ee799a0cf1d4] replace _min_dio_alignment with calls to src/min_dio_alignment
-[U]      [b14652801e2e] generic/615: add to the quick group
+Same here.
 
-Darrick J. Wong (1):
-[N]      [d77a99817574] xfs: add a test for v1 inodes with nonzero nlink and onlink fields
+Also, missing at the top a:
 
-Filipe Manana (1):
-[N]      [e4030c9b6b00] btrfs: test send clones extents with unaligned end offset ending at i_size
+_require_btrfs_command inspect-internal dump-tree
 
-Jeff Layton (1):
-[N]      [a49385587950] generic/755: test that inode's ctime is updated on unlink
+Also we're passing the symbolic name "csum" to -t, which not all
+versions of btrfs-progs support.
+The support was added in btrfs-progs 4.5 (commit
+69874af7b81519e40db9d92efa6beebee4220c63).
 
-Ma Xinjian (1):
-[U]      [1a7f5bbcdd51] xfs/348: add helper tags
+> +
+> +if [ -z "$target_bytenr" ]; then
+> +       _fail "unable to locate the last csum tree leave"
 
+leave -> leaf
 
-Code Diffstat:
+> +fi
+> +
+> +echo "bytenr of csum tree leave to corrupt: $target_bytenr" >> $seqres.f=
+ull
 
- .gitignore              |  1 +
- common/config           |  4 +--
- common/rc               | 15 ----------
- src/Makefile            |  2 +-
- src/min_dio_alignment.c | 66 ++++++++++++++++++++++++++++++++++++++++
- src/statx.h             | 38 +++++++++++++++++++----
- tests/btrfs/319         | 80 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/319.out     | 16 ++++++++++
- tests/generic/091       |  2 +-
- tests/generic/095       |  7 +++--
- tests/generic/114       |  2 +-
- tests/generic/240       |  2 +-
- tests/generic/252       |  2 +-
- tests/generic/263       |  2 +-
- tests/generic/329       |  2 +-
- tests/generic/330       |  2 +-
- tests/generic/450       |  2 +-
- tests/generic/465       |  2 +-
- tests/generic/521       |  2 +-
- tests/generic/538       |  2 +-
- tests/generic/551       |  2 +-
- tests/generic/591       |  2 +-
- tests/generic/615       |  2 +-
- tests/generic/617       |  2 +-
- tests/generic/755       | 39 ++++++++++++++++++++++++
- tests/generic/755.out   |  2 ++
- tests/xfs/194           | 11 +++----
- tests/xfs/201           | 47 +++++++++++++++--------------
- tests/xfs/237           |  2 +-
- tests/xfs/239           |  2 +-
- tests/xfs/348           |  7 +++++
- tests/xfs/424           |  2 +-
- tests/xfs/556           |  2 +-
- tests/xfs/608           | 39 ++++++++++++++++++++++++
- tests/xfs/608.out       |  7 +++++
- 35 files changed, 345 insertions(+), 74 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
+leave -> leaf
 
---k8lIGax9oHrp
-Content-Type: application/pgp-signature; name="signature.asc"
+> +
+> +# Corrupt that csum tree block.
+> +physical=3D$(_btrfs_get_physical "$target_bytenr" 1)
+> +dev=3D$(_btrfs_get_device_path "$target_bytenr" 1)
+> +
+> +echo "physical bytenr: $physical" >> $seqres.full
+> +echo "physical device: $dev" >> $seqres.full
+> +
+> +_pwrite_byte 0x00 "$physical" 4 "$dev" > /dev/null
+> +
+> +for (( i =3D 0; i < $runtime; i++ )); do
+> +       echo "=3D=3D=3D run $i/$runtime =3D=3D=3D" >> $seqres.full
+> +       _scratch_mount -o ro
+> +       # Since the data is on RAID0, read bios will be split at the stri=
+pe
+> +       # (64K sized) boundary. If csum lookup failed due to corrupted cs=
+um
+> +       # tree, there is a race window that can lead to double bio freein=
+g
+> +       # (triggering KASAN at least).
+> +       cat "$SCRATCH_MNT/foobar" &> /dev/null
+> +       _scratch_unmount
+> +
+> +       # Manually check the dmesg for "BUG", and do not call _check_dmes=
+g()
+> +       # as it will clear 'check_dmesg' file and skips the final check a=
+fter
+> +       # the test.
+> +       # For now just focus on the "BUG:" line from KASAN.
+> +       if _check_dmesg_for "BUG" ; then
+> +               _fail "Critical error(s) found in dmesg"
+> +       fi
 
------BEGIN PGP SIGNATURE-----
+Why do the check manually? The check script calls _check_dmesg when a
+test finishes and if it finds 'BUG:' there, it will make the test
+fail.
+So there's no need to do the unmount and call _check_dmesg_for.
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmbLMM4ACgkQlNbPkfr2
-tMx2DBAAnOnWOivianWQmvJfck906NGS1pPQXyoIaALj6f5K2NhkCGiBYHtifFD7
-asfT6P0oo91JZAZge3sJ9hTlDN0RrzyS+I2kxMmUE9URL5m3cdEWg2BcEMIcC1HH
-ccxGlZNhRZsiY3rv6o/vy5hNgZFKidzllOcAwSzWSu88VBbirndwG35j62NCPZpe
-bUPisji3zVy4BDb61i1KZ8oodBZdCTNwlU8PgwlSck6jfUPSimlfrZkza7ktEGMA
-fFNsasnaqnvWPRZt+so+93TXJpq+T/N13G8b79eLkpel3hQeEX9MODSW6S5NDx0K
-HyDJKZDY5+SO22tB68ByfOkP92CiM/iVFyN0BpaysEpPfRAtFMJM09cJ70WQvIRP
-iR9m3A3DMQ/US1GTAcwo2+CZ75RAI6xNG5QKqQFJeGM56mqusCyjw57JXewD/zpd
-BKy/eketwMn1prB24K5jJ2CEQaBv1nAd4szFoQAMB4l17zTK67byX2blIEKJAdbL
-kX2WEdg+NQ4DmvVTjuWWKdfPtlmdX8iLUcX+76ehrjk5J93D1i21TSPmL1QDIhNa
-+fbKB/aFFGlwLhRDcEEO2oAoECKSh1TpWaJeH0fpdWRMBZZYsTClzwNa+2MNr1KJ
-uHnT29XARBsanyFSAynWSkWocDSkHnYlu9YjFCETEpRzCr45nb4=
-=u1Og
------END PGP SIGNATURE-----
+Thanks.
 
---k8lIGax9oHrp--
+> +done
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/319.out b/tests/btrfs/319.out
+> new file mode 100644
+> index 00000000..d40c929a
+> --- /dev/null
+> +++ b/tests/btrfs/319.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 319
+> +Silence is golden
+> --
+> 2.46.0
+>
+>
