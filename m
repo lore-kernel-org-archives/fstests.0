@@ -1,102 +1,93 @@
-Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F2591898F6
-	for <fstests@vger.kernel.org>; Wed, 28 Aug 2024 14:51:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CDC8A149C53
+	for <fstests@vger.kernel.org>; Wed, 28 Aug 2024 18:14:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724856684; cv=none; b=IByBRuyzdc5lG+f28c11O6jujVeMX6aKJcHbqS+woxtYPo5r1UD7Au/IARLQj5FWLOEO7hRdu6/fG/jimwLhIw/cpyP7THptHg1ugJrn+9ru8vojCEYrRdef2wKY/BBryZ7XhK2cuL7ClUvyBT++JCIWYD3UUKkxGmaOAo0RWQA=
+	t=1724868881; cv=none; b=rQOawYg9sypwcelaf0+LutpB5ICw7s6hBeQCJQhse2oW7dwk5rMZWExusVMV3ZmF6D+R9bNGg7djjT7Ni/YaZiiqoN0rVFefzokDIigE4U937UDhLFU31GZymha3hB6QUsOvYvrmOupA/Dy9lY6CpCbUQ1kCF4/dLmgIyoMo/6c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724856684; c=relaxed/simple;
-	bh=rbYF9EQE6+2l/S8qLuOSkRSe2U+4urx63JdRyvn3Tq8=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=Q34njC8vCsPKjUzjVtVoMShZFsSjh8FlTLFg5C4xW73QGzdEPFJMbsvH/whgBHGA1UQ/nVdkrYkAwyEM7/WRVhbdwN7UeX2VOH1UHD81+TASrS0PC1qPj3HQZrSVg5578RM/TTUX9i1zWkfoPt/ixeiaBCnvo2ToQ6RX/3J/sSQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=sOcWWwTu; arc=none smtp.client-ip=209.85.166.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1724868881; c=relaxed/simple;
+	bh=dCpgtWqxPDrrTQ2PCkorVmKKJSIljMGz1nChm/bJdu4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Ft+gscEKotH/8Zm1/qJ0qIokqFUInwuDpXHXFcGB8NwSYLWBbhZvGRcJvpqcDRC+wHh3TI6l9A4yZT07VxvrJbufx4ATYxZI3TNGXUwaF74drDbm65slh7CG/I6cTX4BZ3CGoYFpIaEJm/JE5DvEgwHi6FM/3FFlepzI1ajsRUU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JwUlbT/v; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="sOcWWwTu"
-Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-82784c8bca5so216238739f.0
-        for <fstests@vger.kernel.org>; Wed, 28 Aug 2024 07:51:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1724856682; x=1725461482; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=PkBMJ6J7tx70rz6zmOA31ER4Q+skEgbVfFZ8HyWSogA=;
-        b=sOcWWwTu66gx9nBISRms8YlVMHBwqLYqwrIRtkz0p/fFg5TIgNSLV/E6qlazZZvkFJ
-         3g9UrAaQKqqghTbx/pTGcy+TGSCgBTXDgnxSXTvr69SgDljLZk2nvDdDhsar5BAl62xO
-         OsPvhhMxmf5NFnK2nhMXKaPAy8QIvOXalqGaL74PmW/fctcQIZ8b2AgHzVWlZz1CrSG8
-         I+msLL8ImwLNcgbNn2QcQQFZe/CNjPp3qL83xPpIIyOrP4xJvM2sq99Bk16+ppxbg1Us
-         /S3hW7LKOylLzrwEOdGO0YpT+RIL1UmJqDiyTHTqIQAtkvypv1a5mNJsrePCtwH2Tujr
-         9GTA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724856682; x=1725461482;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=PkBMJ6J7tx70rz6zmOA31ER4Q+skEgbVfFZ8HyWSogA=;
-        b=t2iJbjz8YknpO5MVOp7VLrSr+ompncFV9oraypxzc5h/APmrCd3mJKQ4NRbI6h1mZT
-         uvoA84lo2eItnivxNeBIavnLrO9y5cP1+9qd/9RbDaFfGJxBW99K900NsrdAmIWYUC4r
-         rjvQ2BM/klWVmApHkzj6bU9UKjixvpKVYGWccCAa7p4lDbd7NhrJotpZsWUnaKkWhWN0
-         NpjklpK3JYMh69g8W1zCu5mgGWQvuc/lPykk917junrGjvJ/QThiSvWR+DrPiTl6xChJ
-         xJbyT77bA4ClYNAzB/1y76z31EBzq7TmmazfoGF1HSnSpivWAYXO6Tdb6MhYRzl+ev+4
-         URzw==
-X-Forwarded-Encrypted: i=1; AJvYcCXejQvopODNiMMC7UalJDZMO38TtX3NyCijVQVL+RXg9PSm57HEWUCdZVe3EmvfaJDljWuQgSc6@vger.kernel.org
-X-Gm-Message-State: AOJu0YzmMELVDvTquVcXAvS0LvhDleehaU/+7YchxaN9iqEGvnyCIaQA
-	nH6k5lnd7vtPdpLrnB9xRV15Y8aHOUgH9FvXAC7iO65XXsLm/6kgVDUOIrD3MXOPYuP6dE5SsrK
-	c
-X-Google-Smtp-Source: AGHT+IGH/sM51D0GQjar03mWbJeEot9AqwANMQY365pltcRA1L8eRTcfI+pPccqJjQxvsPbCCa2OWg==
-X-Received: by 2002:a05:6602:341a:b0:7eb:7f2e:5b3a with SMTP id ca18e2360f4ac-827873116d3mr2276078039f.2.1724856682153;
-        Wed, 28 Aug 2024 07:51:22 -0700 (PDT)
-Received: from [127.0.0.1] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4ce70f84e20sm3092887173.84.2024.08.28.07.51.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Aug 2024 07:51:21 -0700 (PDT)
-From: Jens Axboe <axboe@kernel.dk>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, 
- linux-block <linux-block@vger.kernel.org>, linux-scsi@vger.kernel.org, 
- "Martin K. Petersen" <martin.petersen@oracle.com>, 
- fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, 
- John Garry <john.g.garry@oracle.com>
-In-Reply-To: <20240827175340.GB1977952@frogsfrogsfrogs>
-References: <20240827175340.GB1977952@frogsfrogsfrogs>
-Subject: Re: [PATCH] block: fix detection of unsupported WRITE SAME in
- blkdev_issue_write_zeroes
-Message-Id: <172485668128.410120.18023172929961192707.b4-ty@kernel.dk>
-Date: Wed, 28 Aug 2024 08:51:21 -0600
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JwUlbT/v"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1724868878;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=e6JKSconfC+2wgnKdBFMcjcFwJ+SubtzD+n1gupZ0UI=;
+	b=JwUlbT/vBSZSxDJiEaFFWWEkTY2JrGSfshjkxMvfmtA8zEMMq91oU6/vdKMXvOiIm4s43T
+	KhJf2qj3buBY81Yuz0MIwWsBO5neGBqg8smVsYPKz7fMAMVkXepGXqKiv3T6qwSyw5WVZm
+	Os3d1np4jv97oilzkCRpkB8AfVvhLxw=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-626-e1ZobT1aO-2olXFmSOPXYw-1; Wed,
+ 28 Aug 2024 14:14:37 -0400
+X-MC-Unique: e1ZobT1aO-2olXFmSOPXYw-1
+Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 94BB21955D4E;
+	Wed, 28 Aug 2024 18:14:34 +0000 (UTC)
+Received: from bfoster.redhat.com (unknown [10.22.16.95])
+	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 6A99219560A3;
+	Wed, 28 Aug 2024 18:14:33 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org,
+	djwong@kernel.org,
+	josef@toxicpanda.com,
+	david@fromorbit.com
+Subject: [PATCH v2 0/4] fstests/fsx: test coverage for eof zeroing
+Date: Wed, 28 Aug 2024 14:15:30 -0400
+Message-ID: <20240828181534.41054-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.1
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
+Hi all,
 
-On Tue, 27 Aug 2024 10:53:40 -0700, Darrick J. Wong wrote:
-> On error, blkdev_issue_write_zeroes used to recheck the block device's
-> WRITE SAME queue limits after submitting WRITE SAME bios.  As stated in
-> the comment, the purpose of this was to collapse all IO errors to
-> EOPNOTSUPP if the effect of issuing bios was that WRITE SAME got turned
-> off in the queue limits.  Therefore, it does not make sense to reuse the
-> zeroes limit that was read earlier in the function because we only care
-> about the queue limit *now*, not what it was at the start of the
-> function.
-> 
-> [...]
+Here's v2 of the patches for improved test coverage (via fsx) for EOF
+related zeroing. The most notable change is that the discussion on v1
+uncovered that some of the existing fsx behavior was wrong wrt to
+simulated ops, so patch 1 is factored out as a standalone bug fix to
+address that.
 
-Applied, thanks!
+Brian
 
-[1/1] block: fix detection of unsupported WRITE SAME in blkdev_issue_write_zeroes
-      (no commit info)
+v2:
+- Factored out patch 1 to fix simulation mode.
+- Use MAP_FAILED, don't inject data for simulated ops.
+- Rebase to latest master and renumber test.
+- Use run_fsx and -S 0 by default (timestamp seed).
+v1: https://lore.kernel.org/fstests/20240822144422.188462-1-bfoster@redhat.com/
 
-Best regards,
+Brian Foster (4):
+  fsx: don't skip file size and buf updates on simulated ops
+  fsx: factor out a file size update helper
+  fsx: support eof page pollution for eof zeroing test coverage
+  generic: test to run fsx eof pollution
+
+ ltp/fsx.c             | 134 ++++++++++++++++++++++++++++++++----------
+ tests/generic/363     |  23 ++++++++
+ tests/generic/363.out |   2 +
+ 3 files changed, 127 insertions(+), 32 deletions(-)
+ create mode 100755 tests/generic/363
+ create mode 100644 tests/generic/363.out
+
 -- 
-Jens Axboe
-
-
+2.45.0
 
