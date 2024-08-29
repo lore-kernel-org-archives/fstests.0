@@ -1,40 +1,56 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 023EA1C2BD;
-	Thu, 29 Aug 2024 01:37:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE7F21AE05A
+	for <fstests@vger.kernel.org>; Thu, 29 Aug 2024 14:56:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724895423; cv=none; b=MXh/6yIOFWGbN2N4qgzlZLG1U6D0rK5UepIbRWmj9bwhCXQ1VrzKN4MPdqSEd/3+RZ96LxSrPrB1xzA3dpGj20LL41XaL3qM9ZqxwUToKoCSWlezDRQX3FKdpIK+7GCJGz8onX88zbkJpbIZ+P35pZLX4naETqN7XTCmru7EVrg=
+	t=1724943366; cv=none; b=IqPIucM95cojdDz4S18eZJHGIQh2PCqxiUSBcI4P4NM1F1Fx2xL5+GaFysF62eorNlaDzfosID5cb0cEKoM3avi3znrCcL4MdHG8NN3A0ggkP6Rl/d3s83MbT+xmyUkvjyNREmjkeNnVwOHvcQdc3qAFKA8BvAhrqrt/QWOydWk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724895423; c=relaxed/simple;
-	bh=PTGnsmunYnDgG8KW45HibCbCUBkY5Cs6937TPjjgD1M=;
+	s=arc-20240116; t=1724943366; c=relaxed/simple;
+	bh=Vhp8lZQTRGE9+DtwT83uuAvqZx8qYIWjx2zvk/125GE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oeSIztPygwuFZPFd8oaUPThbpdcGW5ZdPX0pe3tCOFNEiSg2lGkCrGKICITYPfyU9lHxAPjKbIuhurQixs+tRbWfcJa0vExWj6k+cLeaYSgocO0XkAW8MzasfZuHjDJTk9zaypfSVrX7ut+SbKamkgH5T6qIx0/WGNAHxSq7Lew=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lEbFUnnm; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=FtR8tmFeBcbAZwDBvQyLDgOAuGRCJauSl5qKsEszc2IDpApTWdI0EinTDTZi5OI5TeHLZ36p+mdhjFgyM1wq+0qnVOL/sYaKpiacXXpvZTh8qRZNr1aZ4ePC6Npjri4G7jb43jG6TeQdc6Zv1r9F4wdYpS0OSQ0VyTXn8TfTHDI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MmAqPIDw; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lEbFUnnm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6A42FC4CEC0;
-	Thu, 29 Aug 2024 01:37:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1724895422;
-	bh=PTGnsmunYnDgG8KW45HibCbCUBkY5Cs6937TPjjgD1M=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=lEbFUnnmDlaBvh53yiIQmBuTXkGqGAeGL8ivX72qlpSWPy38Giih+aXHPqlS5eR2M
-	 pAVQuQZLokSKEcQSEsCWpmojBQckXPOVLHVm6AweP7OdiPB+24JbVCIynGFuDE1C4N
-	 AG2470y33h+Nj/68B46nuWul2pt1co8+gh6X8Wn5YLKdL6o57LjPCdEslyRWodigXL
-	 JK7USPGUv6ecbfszhdvcKmoxUS87Tz2Fo9a9BnwjLlY2kGeiuUTER5MUhkwddjN01V
-	 BmYfJfF91OXoxPwRKzwODH/rFWbpChEsD9JRrUUUTKjdij/d/nHTeyksOHv5EN0M23
-	 YgwztQzvWXPSQ==
-Date: Wed, 28 Aug 2024 18:37:01 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Brian Foster <bfoster@redhat.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MmAqPIDw"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1724943363;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=9cRloZXT1BxmTHsCQe9fbhVyjA60k3chwho7sJ4uFjE=;
+	b=MmAqPIDwDitNDsTr4nQfTZJLp7h/eyW28+o2UQ0UHwgdPnlYY8aCyjUZYD8yq0CtCUFgDs
+	xNx+DEVZbH6BCxOj8BpXogcU8PUb/v7RtVTDmThuMQOPpQ9ClMNYhskE4rAQ9m6Sj498lF
+	DAd1Nd9m3V/XJDO1RWG3Mht79xyysDI=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-266-_fRGoTwrNrGIUZG25HdfDw-1; Thu,
+ 29 Aug 2024 10:56:02 -0400
+X-MC-Unique: _fRGoTwrNrGIUZG25HdfDw-1
+Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 77F601954B03;
+	Thu, 29 Aug 2024 14:55:50 +0000 (UTC)
+Received: from bfoster (unknown [10.22.16.95])
+	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 32C0419560AD;
+	Thu, 29 Aug 2024 14:55:49 +0000 (UTC)
+Date: Thu, 29 Aug 2024 10:56:49 -0400
+From: Brian Foster <bfoster@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
 	josef@toxicpanda.com, david@fromorbit.com
-Subject: Re: [PATCH v2 4/4] generic: test to run fsx eof pollution
-Message-ID: <20240829013701.GI6224@frogsfrogsfrogs>
+Subject: Re: [PATCH v2 1/4] fsx: don't skip file size and buf updates on
+ simulated ops
+Message-ID: <ZtCMMSaA-yEw73lX@bfoster>
 References: <20240828181534.41054-1-bfoster@redhat.com>
- <20240828181534.41054-5-bfoster@redhat.com>
+ <20240828181534.41054-2-bfoster@redhat.com>
+ <20240829012716.GF6224@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,81 +59,159 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240828181534.41054-5-bfoster@redhat.com>
+In-Reply-To: <20240829012716.GF6224@frogsfrogsfrogs>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
-On Wed, Aug 28, 2024 at 02:15:34PM -0400, Brian Foster wrote:
-> Filesystem regressions related to partial page zeroing can go
-> unnoticed for a decent amount of time. A recent example is the issue
-> of iomap zero range not handling dirty pagecache over unwritten
-> extents, which leads to wrong behavior on certain file extending
-> operations (i.e. truncate, write extension, etc.).
+On Wed, Aug 28, 2024 at 06:27:16PM -0700, Darrick J. Wong wrote:
+> On Wed, Aug 28, 2024 at 02:15:31PM -0400, Brian Foster wrote:
+> > fsx supports the ability to skip through a certain number of
+> > operations of a given command sequence before beginning full
+> > operation. The way this works is by tracking the operation count,
+> > simulating minimal side effects of skipped operations in-memory, and
+> > then finally writing out the in-memory state to the target file when
+> > full operation begins.
+> > 
+> > Several fallocate() related operations don't correctly track
+> > in-memory state when simulated, however. For example, consider an
+> > ops file with the following two operations:
+> > 
+> >   zero_range 0x0 0x1000 0x0
+> >   read 0x0 0x1000 0x0
+> > 
+> > ... and an fsx run like so:
+> > 
+> >   fsx -d -b 2 --replay-ops=<opsfile> <file>
+> > 
+> > This simulates the zero_range operation, but fails to track the file
+> > extension that occurs as a side effect such that the subsequent read
+> > doesn't occur as expected:
+> > 
+> >   Will begin at operation 2
+> >   skipping zero size read
+> > 
+> > The read is skipped in this case because the file size is zero.  The
+> > proper behavior, and what is consistent with other size changing
+> > operations, is to make the appropriate in-core changes before
+> > checking whether an operation is simulated so the end result of
+> > those changes can be reflected on-disk for eventual non-simulated
+> > operations. This results in expected behavior with the same ops file
+> > and test command:
+> > 
+> >   Will begin at operation 2
+> >   2 read  0x0 thru        0xfff   (0x1000 bytes)
+> > 
+> > Update zero, copy and clone range to do the file size and EOF change
+> > related zeroing before checking against the simulated ops count.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
 > 
-> fsx does occasionally uncover these sorts of problems, but failures
-> can be rare and/or require longer running tests outside what is
-> typically run via full fstests regression runs. fsx now supports a
-> mode that injects post-eof data in order to explicitly test partial
-> eof zeroing behavior. This uncovers certain problems more quickly
-> and applies coverage more broadly across size changing operations.
+> Oh wow, I really got that wrong. :(
 > 
-> Add a new test that runs an fsx instance (modeled after generic/127)
-> with eof pollution mode enabled. While the test is generic, it is
-> currently limited to XFS as that is currently the only known major
-> fs that does enough zeroing to satisfy the strict semantics expected
-> by fsx. The long term goal is to uncover and fix issues so more
-> filesystems can enable this test.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
 
-Looks good!
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Eh, so did I. ;) That the code was mostly right was pretty much just
+luck. Thanks for the thoughtful reviews.
 
---D
+Brian
 
-> ---
->  tests/generic/363     | 23 +++++++++++++++++++++++
->  tests/generic/363.out |  2 ++
->  2 files changed, 25 insertions(+)
->  create mode 100755 tests/generic/363
->  create mode 100644 tests/generic/363.out
+> Well, thank you for uncovering that error;
+> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 > 
-> diff --git a/tests/generic/363 b/tests/generic/363
-> new file mode 100755
-> index 00000000..477c111c
-> --- /dev/null
-> +++ b/tests/generic/363
-> @@ -0,0 +1,23 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FSQA Test No. 363
-> +#
-> +# Run fsx with EOF pollution enabled. This provides test coverage for partial
-> +# EOF page/block zeroing for operations that change file size.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest rw auto
-> +
-> +_require_test
-> +
-> +# currently only xfs performs enough zeroing to satisfy fsx
-> +_supported_fs xfs
-> +
-> +# on failure, replace -q with -d to see post-eof writes in the dump output
-> +run_fsx "-q -S 0 -e 1 -N 100000"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/363.out b/tests/generic/363.out
-> new file mode 100644
-> index 00000000..3d219cd0
-> --- /dev/null
-> +++ b/tests/generic/363.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 363
-> +fsx -q -S 0 -e 1 -N 100000
-> -- 
-> 2.45.0
+> --D
 > 
 > 
+> > ---
+> >  ltp/fsx.c | 40 +++++++++++++++++++++-------------------
+> >  1 file changed, 21 insertions(+), 19 deletions(-)
+> > 
+> > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > index 2dc59b06..c5727cff 100644
+> > --- a/ltp/fsx.c
+> > +++ b/ltp/fsx.c
+> > @@ -1247,6 +1247,17 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+> >  	log4(OP_ZERO_RANGE, offset, length,
+> >  	     keep_size ? FL_KEEP_SIZE : FL_NONE);
+> >  
+> > +	if (!keep_size && end_offset > file_size) {
+> > +		/*
+> > +		 * If there's a gap between the old file size and the offset of
+> > +		 * the zero range operation, fill the gap with zeroes.
+> > +		 */
+> > +		if (offset > file_size)
+> > +			memset(good_buf + file_size, '\0', offset - file_size);
+> > +
+> > +		file_size = end_offset;
+> > +	}
+> > +
+> >  	if (testcalls <= simulatedopcount)
+> >  		return;
+> >  
+> > @@ -1263,17 +1274,6 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
+> >  	}
+> >  
+> >  	memset(good_buf + offset, '\0', length);
+> > -
+> > -	if (!keep_size && end_offset > file_size) {
+> > -		/*
+> > -		 * If there's a gap between the old file size and the offset of
+> > -		 * the zero range operation, fill the gap with zeroes.
+> > -		 */
+> > -		if (offset > file_size)
+> > -			memset(good_buf + file_size, '\0', offset - file_size);
+> > -
+> > -		file_size = end_offset;
+> > -	}
+> >  }
+> >  
+> >  #else
+> > @@ -1538,6 +1538,11 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> >  
+> >  	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
+> >  
+> > +	if (dest > file_size)
+> > +		memset(good_buf + file_size, '\0', dest - file_size);
+> > +	if (dest + length > file_size)
+> > +		file_size = dest + length;
+> > +
+> >  	if (testcalls <= simulatedopcount)
+> >  		return;
+> >  
+> > @@ -1556,10 +1561,6 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> >  	}
+> >  
+> >  	memcpy(good_buf + dest, good_buf + offset, length);
+> > -	if (dest > file_size)
+> > -		memset(good_buf + file_size, '\0', dest - file_size);
+> > -	if (dest + length > file_size)
+> > -		file_size = dest + length;
+> >  }
+> >  
+> >  #else
+> > @@ -1756,6 +1757,11 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+> >  
+> >  	log5(OP_COPY_RANGE, offset, length, dest, FL_NONE);
+> >  
+> > +	if (dest > file_size)
+> > +		memset(good_buf + file_size, '\0', dest - file_size);
+> > +	if (dest + length > file_size)
+> > +		file_size = dest + length;
+> > +
+> >  	if (testcalls <= simulatedopcount)
+> >  		return;
+> >  
+> > @@ -1792,10 +1798,6 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+> >  	}
+> >  
+> >  	memcpy(good_buf + dest, good_buf + offset, length);
+> > -	if (dest > file_size)
+> > -		memset(good_buf + file_size, '\0', dest - file_size);
+> > -	if (dest + length > file_size)
+> > -		file_size = dest + length;
+> >  }
+> >  
+> >  #else
+> > -- 
+> > 2.45.0
+> > 
+> > 
+> 
+
