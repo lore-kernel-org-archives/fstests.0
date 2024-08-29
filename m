@@ -1,40 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5E9E200CB;
-	Thu, 29 Aug 2024 01:28:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 216B2199A2;
+	Thu, 29 Aug 2024 01:35:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724894909; cv=none; b=jP0SXIsB+qbIHTukoR9G21jyPUmcybNKxUOHer0et/4RSgqW+1emHbB3wUZQIiYJf09ZSc7eqFslyuiFngty9R+vL9sZn85Rpdzy+EwgSVTQUT54ayjnI4wBGuPpZbNU0lAJ0hZYw+XV9ZyA6U6tL2gFO0d1L74Va5DHmIqc/Fk=
+	t=1724895360; cv=none; b=jC6Me1epYrqa5VDM2uEQ9KOwg93WpOgd+udLhbvvSqgGZlX0R6CWHP9+Sn83YMFgaSfr+YlZ1xuHDhPH4h1VHEGcs2gXK1Xvt3xDer2NpdhjKHzzL6PtSyuzqWVQyd2IsvzlhdomBHjX+C2WYL7maGri9TAjerhAceN6All86AI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724894909; c=relaxed/simple;
-	bh=Wwrx16h43MXsDIho3z5TqiAaAfY7Y3GZXEfYOgVQyeQ=;
+	s=arc-20240116; t=1724895360; c=relaxed/simple;
+	bh=xj0vIUYcIHse1KyKQBkoULz6Fib+jrY47j904SvMQcQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gCuxWoD8rHfKYkb53fPbhA20zMXqzJ+5yOKyDuYqe6pfXjmIG8gLdoZu6QkIPSeaRRXXNVGWLcgmCgTozNW4HZFcNfCHaWSN1gx0uaPMMx4b54RH9Cq94izhO4X2JkpNo+huqzJcwkq9gVeEUZKzHwnGDZIpDCNPsEKlzFL6MYA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ta65Zd9p; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=WZqN7XJ8IcqLn4f6d9kMwg7I7A2KvJzj6WLhbINGkL0BZWhFbszGtIV9ALm2c2vI7VbzAkaqfqmz9Xf/XCFr1ytpTR6Ol0nlyMME0E3mMHUQAkiKLGmcrkGLsRP06eMK9iv4JPNRqijKqsFmY+pnxFdX9tqvGp90ZURkfT97Dh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SoUWojpm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ta65Zd9p"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A69EC4CEC0;
-	Thu, 29 Aug 2024 01:28:29 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SoUWojpm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A28F1C4CEC0;
+	Thu, 29 Aug 2024 01:35:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1724894909;
-	bh=Wwrx16h43MXsDIho3z5TqiAaAfY7Y3GZXEfYOgVQyeQ=;
+	s=k20201202; t=1724895359;
+	bh=xj0vIUYcIHse1KyKQBkoULz6Fib+jrY47j904SvMQcQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Ta65Zd9pt+eySdspd7SK1P8YNxhCVGy07hwYoNd+6VOhMw9ppPSNXgv4YHtAMdKLj
-	 Jjl+JGdtPMBOgEUnuethWq3Sn/i5JAbDUNQGE8Dlx6rWoFFpzUNdXTCqQ7DzpUOJIl
-	 bDhKRlO0BnEOFJ7bN7fdy//K+wGP665tyvsA1rUgTX3EGRf3Ubv1WBkqH/MOE35mKx
-	 S3hTZ/LdqEwxcI3Fpji0lZ7qfZlL0e9sTrlSK+Lw4J63N6jpqocyVC6aY/TJy7Nni3
-	 V7gBsdRx6TfEU3gXg5uAa8xss0iXt5f1+K80WoeHttoy+s3IyUjz4BSD3KT+x+Puvc
-	 xQ/y6ka9uf7sg==
-Date: Wed, 28 Aug 2024 18:28:28 -0700
+	b=SoUWojpmUpyvGZeytj2nZYcvJJmk79/AMgHpyUk7DW630uOILwxR6fhIdsntvgSyj
+	 flMEfX8HQDtl8K22NwoFzfWJv241AmwGz9m0eqoUxSqqyJbBinzB3kdZRoCKfWz3cg
+	 L2N38AxwABVsrhwAlWhwJ7JxfUb3WoGDsLAIQkD/+uWSvbmezGr70xzoYt6u8A+2il
+	 szCWfsbMB16E9ozxPiOAkwMaDtIkaUYzoFUN+HtOpVQtkPfPvX8XN5/E/grdzj4p4h
+	 xrxPcWV9qveXeS5KJQoC2M07SCiST7cbAhAiE6j6BHaOQaauMUvNZ7hQYOlqBr5ZQW
+	 XMHFH/y8GQthA==
+Date: Wed, 28 Aug 2024 18:35:59 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Brian Foster <bfoster@redhat.com>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
 	josef@toxicpanda.com, david@fromorbit.com
-Subject: Re: [PATCH v2 2/4] fsx: factor out a file size update helper
-Message-ID: <20240829012828.GG6224@frogsfrogsfrogs>
+Subject: Re: [PATCH v2 3/4] fsx: support eof page pollution for eof zeroing
+ test coverage
+Message-ID: <20240829013559.GH6224@frogsfrogsfrogs>
 References: <20240828181534.41054-1-bfoster@redhat.com>
- <20240828181534.41054-3-bfoster@redhat.com>
+ <20240828181534.41054-4-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,136 +44,203 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240828181534.41054-3-bfoster@redhat.com>
+In-Reply-To: <20240828181534.41054-4-bfoster@redhat.com>
 
-On Wed, Aug 28, 2024 at 02:15:32PM -0400, Brian Foster wrote:
-> In preparation for support for eof page pollution, factor out a file
-> size update helper. This updates the internally tracked file size
-> based on the upcoming operation and zeroes the appropriate range in
-> the good buffer for extending operations.
+On Wed, Aug 28, 2024 at 02:15:33PM -0400, Brian Foster wrote:
+> File ranges that are newly exposed via size changing operations are
+> expected to return zeroes until written to. This behavior tends to
+> be difficult to regression test as failures can be racy and
+> transient. fsx is probably the best tool for this type of test
+> coverage, but uncovering issues can require running for a
+> significantly longer period of time than is typically invoked
+> through fstests tests. As a result, these types of regressions tend
+> to go unnoticed for an unfortunate amount of time.
+> 
+> To facilitate uncovering these problems more quickly, implement an
+> eof pollution mode in fsx that opportunistically injects post-eof
+> data prior to operations that change file size. Since data injection
+> occurs immediately before the size changing operation, it can be
+> used to detect problems in partial eof page/block zeroing associated
+> with each relevant operation.
+> 
+> The implementation takes advantage of the fact that mapped writes
+> can place data beyond eof so long as the page starts within eof. The
+> main reason for the isolated per-operation approach (vs. something
+> like allowing mapped writes to write beyond eof, for example) is to
+> accommodate the fact that writeback zeroes post-eof data on the eof
+> page. The current approach is therefore not necessarily guaranteed
+> to detect all problems, but provides more generic and broad test
+> coverage than the alternative of testing explicit command sequences
+> and doesn't require significant changes to how fsx works. If this
+> proves useful long term, further enhancements can be considered that
+> might facilitate the presence of post-eof data across operations.
+> 
+> Enable the feature with the -e command line option. It is disabled
+> by default because zeroing behavior is inconsistent across
+> filesystems. This can also be revisited in the future if zeroing
+> behavior is refined for the major filesystems that rely on fstests
+> for regression testing.
 > 
 > Signed-off-by: Brian Foster <bfoster@redhat.com>
 
-Looks like a straightforward hoist now.
+I wonder what insanity this is going to shake loose, so thanks for doing
+putting this in a stressor program. :)
+
 Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
 
 > ---
->  ltp/fsx.c | 49 +++++++++++++++++++++----------------------------
->  1 file changed, 21 insertions(+), 28 deletions(-)
+>  ltp/fsx.c | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 77 insertions(+), 2 deletions(-)
 > 
 > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index c5727cff..4a9be0e1 100644
+> index 4a9be0e1..1ba1bf65 100644
 > --- a/ltp/fsx.c
 > +++ b/ltp/fsx.c
-> @@ -983,6 +983,17 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
+> @@ -178,6 +178,7 @@ int	dedupe_range_calls = 1;		/* -B flag disables */
+>  int	copy_range_calls = 1;		/* -E flag disables */
+>  int	exchange_range_calls = 1;	/* -0 flag disables */
+>  int	integrity = 0;			/* -i flag */
+> +int	pollute_eof = 0;		/* -e flag */
+>  int	fsxgoodfd = 0;
+>  int	o_direct;			/* -Z */
+>  int	aio = 0;
+> @@ -983,6 +984,63 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
 >  	}
 >  }
 >  
 > +/*
-> + * Helper to update the tracked file size. If the offset begins beyond current
-> + * EOF, zero the range from EOF to offset in the good buffer.
+> + * Pollute the EOF page with data beyond EOF prior to size change operations.
+> + * This provides additional test coverage for partial EOF block/page zeroing.
+> + * If the upcoming operation does not correctly zero, incorrect file data will
+> + * be detected.
 > + */
 > +void
-> +update_file_size(unsigned offset, unsigned size)
+> +pollute_eofpage(unsigned int maxoff)
 > +{
-> +	if (offset > file_size)
-> +		memset(good_buf + file_size, '\0', offset - file_size);
-> +	file_size = offset + size;
+> +	unsigned offset = file_size;
+> +	unsigned pg_offset;
+> +	unsigned write_size;
+> +	char    *p;
+> +
+> +	/*
+> +	 * Nothing to do if pollution disabled or we're simulating. Simulation
+> +	 * only tracks file size updates and skips syscalls, so we don't want to
+> +	 * inject file data that won't be zeroed.
+> +	 */
+> +	if (!pollute_eof || testcalls <= simulatedopcount)
+> +		return;
+> +
+> +	/* write up to specified max or the end of the eof page */
+> +	pg_offset = offset & mmap_mask;
+> +	write_size = MIN(PAGE_SIZE - pg_offset, maxoff - offset);
+> +
+> +	if (!pg_offset)
+> +		return;
+> +
+> +	if (!quiet &&
+> +	    ((progressinterval && testcalls % progressinterval == 0) ||
+> +	    (debug &&
+> +	     (monitorstart == -1 ||
+> +	     (offset + write_size > monitorstart &&
+> +	      (monitorend == -1 || offset <= monitorend)))))) {
+> +		prt("%lld pollute_eof\t0x%x thru\t0x%x\t(0x%x bytes)\n",
+> +			testcalls, offset, offset + write_size - 1, write_size);
+> +	}
+> +
+> +	if ((p = (char *)mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE,
+> +			      MAP_FILE | MAP_SHARED, fd,
+> +			      (off_t)(offset - pg_offset))) == MAP_FAILED) {
+> +		prterr("pollute_eofpage: mmap");
+> +		return;
+> +	}
+> +
+> +	/*
+> +	 * Write to a range just past EOF of the test file. Do not update the
+> +	 * good buffer because the upcoming operation is expected to zero this
+> +	 * range of the file.
+> +	 */
+> +	gendata(original_buf, p, pg_offset, write_size);
+> +
+> +	if (munmap(p, PAGE_SIZE) != 0)
+> +		prterr("pollute_eofpage: munmap");
 > +}
->  
+> +
+>  /*
+>   * Helper to update the tracked file size. If the offset begins beyond current
+>   * EOF, zero the range from EOF to offset in the good buffer.
+> @@ -990,8 +1048,10 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
 >  void
->  dowrite(unsigned offset, unsigned size)
-> @@ -1003,10 +1014,8 @@ dowrite(unsigned offset, unsigned size)
->  	log4(OP_WRITE, offset, size, FL_NONE);
+>  update_file_size(unsigned offset, unsigned size)
+>  {
+> -	if (offset > file_size)
+> +	if (offset > file_size) {
+> +		pollute_eofpage(offset + size);
+>  		memset(good_buf + file_size, '\0', offset - file_size);
+> +	}
+>  	file_size = offset + size;
+>  }
 >  
->  	gendata(original_buf, good_buf, offset, size);
-> -	if (file_size < offset + size) {
-> -		if (file_size < offset)
-> -			memset(good_buf + file_size, '\0', offset - file_size);
-> -		file_size = offset + size;
-> +	if (offset + size > file_size) {
-> +		update_file_size(offset, size);
->  		if (lite) {
->  			warn("Lite file size bug in fsx!");
->  			report_failure(149);
-> @@ -1070,10 +1079,8 @@ domapwrite(unsigned offset, unsigned size)
->  	log4(OP_MAPWRITE, offset, size, FL_NONE);
->  
->  	gendata(original_buf, good_buf, offset, size);
-> -	if (file_size < offset + size) {
-> -		if (file_size < offset)
-> -			memset(good_buf + file_size, '\0', offset - file_size);
-> -		file_size = offset + size;
-> +	if (offset + size > file_size) {
-> +		update_file_size(offset, size);
->  		if (lite) {
->  			warn("Lite file size bug in fsx!");
->  			report_failure(200);
-> @@ -1136,9 +1143,7 @@ dotruncate(unsigned size)
+> @@ -1143,6 +1203,9 @@ dotruncate(unsigned size)
 >  
 >  	log4(OP_TRUNCATE, 0, size, FL_NONE);
 >  
-> -	if (size > file_size)
-> -		memset(good_buf + file_size, '\0', size - file_size);
-> -	file_size = size;
-> +	update_file_size(size, 0);
+> +	/* pollute the current EOF before a truncate down */
+> +	if (size < file_size)
+> +		pollute_eofpage(maxfilelen);
+>  	update_file_size(size, 0);
 >  
+>  	if (testcalls <= simulatedopcount)
+> @@ -1305,6 +1368,9 @@ do_collapse_range(unsigned offset, unsigned length)
+>  
+>  	log4(OP_COLLAPSE_RANGE, offset, length, FL_NONE);
+>  
+> +	/* pollute current eof before collapse truncates down */
+> +	pollute_eofpage(maxfilelen);
+> +
 >  	if (testcalls <= simulatedopcount)
 >  		return;
-> @@ -1247,16 +1252,8 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
->  	log4(OP_ZERO_RANGE, offset, length,
->  	     keep_size ? FL_KEEP_SIZE : FL_NONE);
 >  
-> -	if (!keep_size && end_offset > file_size) {
-> -		/*
-> -		 * If there's a gap between the old file size and the offset of
-> -		 * the zero range operation, fill the gap with zeroes.
-> -		 */
-> -		if (offset > file_size)
-> -			memset(good_buf + file_size, '\0', offset - file_size);
-> -
-> -		file_size = end_offset;
-> -	}
-> +	if (!keep_size && end_offset > file_size)
-> +		update_file_size(offset, length);
+> @@ -1356,6 +1422,9 @@ do_insert_range(unsigned offset, unsigned length)
 >  
+>  	log4(OP_INSERT_RANGE, offset, length, FL_NONE);
+>  
+> +	/* pollute current eof before insert truncates up */
+> +	pollute_eofpage(maxfilelen);
+> +
 >  	if (testcalls <= simulatedopcount)
 >  		return;
-> @@ -1538,10 +1535,8 @@ do_clone_range(unsigned offset, unsigned length, unsigned dest)
 >  
->  	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
+> @@ -2385,6 +2454,7 @@ usage(void)
+>  	-b opnum: beginning operation number (default 1)\n\
+>  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+>  	-d: debug output for all operations\n\
+> +	-e: pollute post-eof on size changes (default 0)\n\
+>  	-f: flush and invalidate cache after I/O\n\
+>  	-g X: write character X instead of random generated data\n\
+>  	-i logdev: do integrity testing, logdev is the dm log writes device\n\
+> @@ -2783,7 +2853,7 @@ main(int argc, char **argv)
+>  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
 >  
-> -	if (dest > file_size)
-> -		memset(good_buf + file_size, '\0', dest - file_size);
->  	if (dest + length > file_size)
-> -		file_size = dest + length;
-> +		update_file_size(dest, length);
->  
->  	if (testcalls <= simulatedopcount)
->  		return;
-> @@ -1757,10 +1752,8 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
->  
->  	log5(OP_COPY_RANGE, offset, length, dest, FL_NONE);
->  
-> -	if (dest > file_size)
-> -		memset(good_buf + file_size, '\0', dest - file_size);
->  	if (dest + length > file_size)
-> -		file_size = dest + length;
-> +		update_file_size(dest, length);
->  
->  	if (testcalls <= simulatedopcount)
->  		return;
-> @@ -1848,7 +1841,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
->  
->  	if (end_offset > file_size) {
->  		memset(good_buf + file_size, '\0', end_offset - file_size);
-> -		file_size = end_offset;
-> +		update_file_size(offset, length);
->  	}
->  
->  	if (testcalls <= simulatedopcount)
+>  	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>  				 longopts, NULL)) != EOF)
+>  		switch (ch) {
+>  		case 'b':
+> @@ -2805,6 +2875,11 @@ main(int argc, char **argv)
+>  		case 'd':
+>  			debug = 1;
+>  			break;
+> +		case 'e':
+> +			pollute_eof = getnum(optarg, &endp);
+> +			if (pollute_eof < 0 || pollute_eof > 1)
+> +				usage();
+> +			break;
+>  		case 'f':
+>  			flush = 1;
+>  			break;
 > -- 
 > 2.45.0
 > 
