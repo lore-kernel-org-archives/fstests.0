@@ -1,71 +1,70 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 488BB19CC29
-	for <fstests@vger.kernel.org>; Mon,  2 Sep 2024 20:02:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AE791A4E99
+	for <fstests@vger.kernel.org>; Mon,  2 Sep 2024 20:05:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725307329; cv=none; b=R8KkooVaLJvkE2lX7LcFA11DMHq9LyfZdH5XyrQ+c5WsxtQe/t3h+a0hB6hNnhqe4Sgc6jio88gIa5LVHCRB4wp2+IJfkrJ5RkTSIMzvA9FNTbdSEF7uWkQDsn6Q01JtpuJyIT9gdqh46kggTzOlyu/+8H3l8bsK2VQbN5oPdyw=
+	t=1725307542; cv=none; b=pdU4LSsM24Jl/UKwTtw1M1GecRP8/bxjA4dFdcRtRulB1eUNiNMoTNagIkXA4HfnMgMWCHxEOb5H6d+ioqnqh52LmdMgHyR6iJ4ApDccYoAGfyoHaDZpnc2vPtM7n9XQQSt7tTJ9BMoxSftYhg7A/QdDGHSddj8rDctccLIv9ow=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725307329; c=relaxed/simple;
-	bh=B8l9vK94wsr/7yzQLlIvuwVTuaWU1bZ5ob7a2hMyZxk=;
+	s=arc-20240116; t=1725307542; c=relaxed/simple;
+	bh=65EoHY6M8fT+cDAZnuURKKXPwRIRRERpYyz5F2xrp3Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jl46iVnx2Ql4qxfRvsCen0ieA3mOccb2avgdWq6DVec8TRsDKgC9Va3lruaMO5LuL2h6CMKkaAGRdWBOQx8g2I6X6XBH1GoHfK1zjY8zzUa37Q7cS6ZkmciR1gZBNIUO3iPxvdi9B3a2255b9UDIEqSC6NDZdXRx0Y4qzVEmuDE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hasNVoS9; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=rWjR7J5iCbyGOfC37kd7vtFxAM6ajyhmSvTpAOmQ10QX9ifB8iQ17KNlWKOTxcYJPA+0ngzkEk/tmKc4AKsslRR1lF19tBgYFqPmFWdbC548e49j6jafzNHLfI7RMqH+vH0N2NeSVo0rkbz/KrJ8oJDowg2ESepvUWJx4SrsNGg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=fMX3hQ85; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hasNVoS9"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fMX3hQ85"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1725307326;
+	s=mimecast20190719; t=1725307538;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=SktQhWwnMk38o7Gp9igxhv0oK7DU7a4P/ff81aiY+2s=;
-	b=hasNVoS9TGiyLWSWZnOtlMdwTkLl1Ou06TFnuC8EeGOwvEuBH89cMOAVzvPHPsv0uertVq
-	zOLdNuwoLnCMBURrO3ImWmwKnGfZcKnX1JZSD2fVl9H7mJEjhlq+dNS0zL666D+LoCRFxO
-	7AZ1M9ZfjxWhrZ1UN7sJ/FiSAG0867M=
+	bh=zdnZZn8OmtVGHQANRCcG3h4gbTYm46JDAbnL9tQ6Las=;
+	b=fMX3hQ85uH7HB5lSZmOUP69eKLismrI7d3yXOzjkd3fYVZaTNY5/9nrV4f+5qmfV/goxiD
+	URaKC2FdEi/5Jwgwhfhd7QDbsk8w1GF95sBmbf9+uZY8Lo7ieJNJZdJpE0Pw3YNY1XVqmj
+	6GBSNSefk+2o7mmWCp9v2mILs0djmc4=
 Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
  [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-322-bsx8PytSN061ArXZpYF9Ng-1; Mon, 02 Sep 2024 16:02:04 -0400
-X-MC-Unique: bsx8PytSN061ArXZpYF9Ng-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7b696999c65so3855279a12.3
-        for <fstests@vger.kernel.org>; Mon, 02 Sep 2024 13:02:04 -0700 (PDT)
+ us-mta-187-r2SZWMYmObycrv40_yjOkQ-1; Mon, 02 Sep 2024 16:05:37 -0400
+X-MC-Unique: r2SZWMYmObycrv40_yjOkQ-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7cd854e1869so3507248a12.2
+        for <fstests@vger.kernel.org>; Mon, 02 Sep 2024 13:05:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725307323; x=1725912123;
+        d=1e100.net; s=20230601; t=1725307536; x=1725912336;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SktQhWwnMk38o7Gp9igxhv0oK7DU7a4P/ff81aiY+2s=;
-        b=uPPRsGHQCqGiLmZ1Rkf4FYk7PeAFYoDMTbLaKahSVQAtDhJiVnNJ3xmZ9JEHZRvDqr
-         8RRcqV1WwOVc/e9hwlvOimJokATAZmhht2FvrZ4WBKdP9bmkhrQXhlaZK/O3sghGkgab
-         dXez2PhytqL6jLuu8TENYmXBvUijU0LnBIjDB0cU+akoVr1VyvDglHj2FQ9c4yC417Yv
-         i74ztq6+fF6n44sgzgQoym1AqNNHIN8JiI5YXK+5eYpKkozCe/OW4pfu97WRl0jDmDv/
-         xAtPxwBFNvp5y23gr5xnQuzAmSY0wW8NlrtHs1qpjZQgmgO01mSqLGAhx3cABy2oj8vp
-         Mbng==
-X-Forwarded-Encrypted: i=1; AJvYcCXksWbQpQgbRXqTwhUfj6g0sNRHa9coQE0nn17FhkOT4KeHAbqfK5+0YhQZOyFHvrJ2VNyVdf1X@vger.kernel.org
-X-Gm-Message-State: AOJu0YyTuKKZnkWSTWYy8TrCeP4zlsQVsbztYHAzw9Jp3l5khU3kHKly
-	Wwct7KxpV0cMeujHFcYCZ+hgLSydHo6fIyaVkrMeEBBcNoFrLezd7d3HOSJoKSTVPsZ8VDl5pQb
-	bOP0EFLoCRGD8WiDQsy/ngGXGe6lqDUiaAAZGjGLymP8CQI3dxp2bu4o=
-X-Received: by 2002:a17:903:2289:b0:205:5fb6:2aba with SMTP id d9443c01a7336-2055fc571cbmr52123365ad.30.1725307323428;
-        Mon, 02 Sep 2024 13:02:03 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEUMIBi3bozBzSkdveoyiMPH/9gW+EXFvJ9TAl8H7qfB/am6vTf1jFFxEGh2vDSznwdXYwG/w==
-X-Received: by 2002:a17:903:2289:b0:205:5fb6:2aba with SMTP id d9443c01a7336-2055fc571cbmr52122865ad.30.1725307322764;
-        Mon, 02 Sep 2024 13:02:02 -0700 (PDT)
+        bh=zdnZZn8OmtVGHQANRCcG3h4gbTYm46JDAbnL9tQ6Las=;
+        b=drXawPNKByAoTSvALTXBg52Z2zKQMMJueRPBnkiiTkxmBvVsNYH5Di3gGknGWADJYt
+         E8DafjOPmefMGPWY+pPuXgX9Wd72ome25VDSJhZ5L7trF91J4ad7rZIUhuvfG55Q5GEW
+         Xe9wnAVYZ9Ziy8X0rfTS7gISjDP7PGMQhum3A5Cmp0zlBhs5iwvElLW8cefzOeJC43kv
+         35M9mGBYjBRPh5YVNjXo4enTRgaXqnRTVPOTmuLJ4aWtrYm5KZjpHSk8oEsNss5ywYJF
+         84sJ+sTo20ScHxyR+KoeTSGQfEJ9oz1JxwNu/z51MCLfiItz1ZowaTLJVPyXBCjRXDDk
+         FG1w==
+X-Gm-Message-State: AOJu0YzU7pvp9wLqiURafO28Itea9+fnVounjGXZacQ6dVfrRn1AXkWn
+	00tSQv+LJ0zFOCWT8psmTVWGvBBg9A8lbKxRUIstg93Y6wi8MMMOKYVZ5hzdxOPh4y06A25PjNh
+	OCSFvpOnG+QrpFd8Ruw/2BMIWGNBv6WbRM/LUqsWwi59BjNMp3powEXs=
+X-Received: by 2002:a17:902:da8b:b0:1fc:6b8b:4918 with SMTP id d9443c01a7336-2054c249eabmr89623495ad.41.1725307536722;
+        Mon, 02 Sep 2024 13:05:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGE1hwuCAytS5BkE/btE6UQBX3WApVBDL8QAA3lb/hVqCTsBdHjaKLFxbNMFNQWDrw6xuaEGQ==
+X-Received: by 2002:a17:902:da8b:b0:1fc:6b8b:4918 with SMTP id d9443c01a7336-2054c249eabmr89623105ad.41.1725307536106;
+        Mon, 02 Sep 2024 13:05:36 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2056912c543sm25008785ad.247.2024.09.02.13.02.01
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20563c5707csm26212485ad.139.2024.09.02.13.05.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Sep 2024 13:02:02 -0700 (PDT)
-Date: Tue, 3 Sep 2024 04:01:59 +0800
+        Mon, 02 Sep 2024 13:05:35 -0700 (PDT)
+Date: Tue, 3 Sep 2024 04:05:31 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Christian Brauner <brauner@kernel.org>,
-	Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] overlay: deprecate test t_truncate_self
-Message-ID: <20240902200159.vtfgnh4zdsnvdyd7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240830194546.860173-1-amir73il@gmail.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: Re: [PATCH] f2fs/003: add missing _fixed_by_kernel_commit line
+Message-ID: <20240902200531.p2ulurifnyy7g4y7@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240902101844.4042983-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,153 +73,40 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240830194546.860173-1-amir73il@gmail.com>
+In-Reply-To: <20240902101844.4042983-1-chao@kernel.org>
 
-On Fri, Aug 30, 2024 at 09:45:46PM +0200, Amir Goldstein wrote:
-> Since kernel commit 2a010c412853 ("fs: don't block i_writecount during
-> exec"), truncating an executable file while it is being executed is
-> allowed. Therefore, the test t_truncate_self now fails, so remove it.
+On Mon, Sep 02, 2024 at 06:18:44PM +0800, Chao Yu wrote:
+> The bug related to this regression testcase has been fixed by commit
+> b40a2b003709 ("f2fs: use meta inode for GC of atomic file"), let's
+> add missing _fixed_by_kernel_commit line for this testcase.
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Cc: Daeho Jeong <daehojeong@google.com>
+> Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
-> 
-> Zorro,
-> 
-> This is a fix for a test regression since v6.11-rc1.
-> My fix is to deprecate the test, because the change of behavior is
-> desired (at least until a non test user complains).
 
+Thanks for the update.
 
-Makes sense to me,
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
+>  tests/f2fs/003 | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> Thanks,
-> Amir.
-> 
->  .gitignore            |  1 -
->  src/Makefile          |  2 +-
->  src/t_truncate_self.c | 26 --------------------------
->  tests/overlay/013     | 41 -----------------------------------------
->  tests/overlay/013.out |  2 --
->  5 files changed, 1 insertion(+), 71 deletions(-)
->  delete mode 100644 src/t_truncate_self.c
->  delete mode 100755 tests/overlay/013
->  delete mode 100644 tests/overlay/013.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index 36083e9d..94f6b564 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -171,7 +171,6 @@ tags
->  /src/t_snapshot_deleted_subvolume
->  /src/t_stripealign
->  /src/t_truncate_cmtime
-> -/src/t_truncate_self
->  /src/test-nextquota
->  /src/testx
->  /src/trunc
-> diff --git a/src/Makefile b/src/Makefile
-> index b3da59a0..52299b4c 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -13,7 +13,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	godown resvtest writemod writev_on_pagefault makeextents itrash rename \
->  	multi_open_unlink unwritten_sync genhashnames t_holes \
->  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
-> -	holetest t_truncate_self af_unix t_mmap_stale_pmd \
-> +	holetest af_unix t_mmap_stale_pmd \
->  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
->  	t_ofd_locks t_mmap_collision mmap-write-concurrent \
-> diff --git a/src/t_truncate_self.c b/src/t_truncate_self.c
-> deleted file mode 100644
-> index a11f7d5a..00000000
-> --- a/src/t_truncate_self.c
-> +++ /dev/null
-> @@ -1,26 +0,0 @@
-> -#include <stdio.h>
-> -#include <string.h>
-> -#include <errno.h>
-> -#include <unistd.h>
-> -#include <libgen.h>
-> -
-> -int main(int argc, char *argv[])
-> -{
-> -	const char *progname = basename(argv[0]);
-> -	int ret;
-> -
-> -	ret = truncate(argv[0], 4096);
-> -	if (ret != -1) {
-> -		if (argc == 2 && strcmp(argv[1], "--may-succeed") == 0)
-> -			return 0;
-> -		fprintf(stderr, "truncate(%s) should have failed\n",
-> -			progname);
-> -		return 1;
-> -	}
-> -	if (errno != ETXTBSY) {
-> -		perror(progname);
-> -		return 1;
-> -	}
-> -
-> -	return 0;
-> -}
-> diff --git a/tests/overlay/013 b/tests/overlay/013
-> deleted file mode 100755
-> index 73c72c30..00000000
-> --- a/tests/overlay/013
-> +++ /dev/null
-> @@ -1,41 +0,0 @@
-> -#! /bin/bash
-> -# SPDX-License-Identifier: GPL-2.0
-> -# Copyright (c) 2016 Red Hat Inc.  All Rights Reserved.
-> -#
-> -# FS QA Test 013
-> -#
-> -# Test truncate running executable binaries from lower and upper dirs.
-> -# truncate(2) should return ETXTBSY, not other errno nor segfault
-> -#
-> -# Commit 03bea6040932 ("ovl: get_write_access() in truncate") fixed this issue.
-> -. ./common/preamble
-> -_begin_fstest auto quick copyup
-> -
-> -# Import common functions.
-> -. ./common/filter
-> -
-> -_require_scratch
-> -_require_test_program "t_truncate_self"
-> -
-> -# remove all files from previous runs
-> -_scratch_mkfs
-> -
-> -# copy test program to lower and upper dir
-> -lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> -upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> -mkdir -p $lowerdir
-> -mkdir -p $upperdir
-> -cp $here/src/t_truncate_self $lowerdir/test_lower
-> -cp $here/src/t_truncate_self $upperdir/test_upper
-> -
-> -_scratch_mount
-> -
-> -# run test program from lower and upper dir
-> -# test programs truncate themselfs, all should fail with ETXTBSY
-> -$SCRATCH_MNT/test_lower --may-succeed
-> -$SCRATCH_MNT/test_upper
-> -
-> -# success, all done
-> -echo "Silence is golden"
-> -status=0
-> -exit
-> diff --git a/tests/overlay/013.out b/tests/overlay/013.out
-> deleted file mode 100644
-> index 3e66423b..00000000
-> --- a/tests/overlay/013.out
-> +++ /dev/null
-> @@ -1,2 +0,0 @@
-> -QA output created by 013
-> -Silence is golden
+> diff --git a/tests/f2fs/003 b/tests/f2fs/003
+> index 62821ed7..fbb08a3e 100755
+> --- a/tests/f2fs/003
+> +++ b/tests/f2fs/003
+> @@ -25,6 +25,9 @@ _cleanup()
+>  	rm -r -f $tmp.*
+>  }
+>  
+> +_fixed_by_kernel_commit b40a2b003709 \
+> +	"f2fs: use meta inode for GC of atomic file"
+> +
+>  _require_scratch
+>  _require_xfs_io_command "fpunch"
+>  
 > -- 
-> 2.34.1
+> 2.40.1
 > 
 
