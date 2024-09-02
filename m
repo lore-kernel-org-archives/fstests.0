@@ -1,175 +1,154 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout-p-201.mailbox.org (mout-p-201.mailbox.org [80.241.56.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9124413B59B
-	for <fstests@vger.kernel.org>; Mon,  2 Sep 2024 11:32:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04E1D1AB6D0;
+	Mon,  2 Sep 2024 16:46:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725276769; cv=none; b=LNn2+ssEjkAM8kWWkJnPuzdXzrJQPUL10CBNkAE3yWZShuc8lDxLpMA7RZmMQBpQEZBxWy9t5MGdfBbIh6WTQAJW1hEpz94WzGJgNMuw9B5O4kdiCZKHNZW/Ml5ZbEs3ApqhJNV7YH7K+xGiIzSoYA2aY9Sty4p0l70Rmf7+Oko=
+	t=1725295601; cv=none; b=ArYdKjRtG8Gc+BPizAjm7yZ6NpG4Q8xRLsk9owLXRmCZPnZewPC+/fgDqUtRkgXtjDWfizDtQEzm5daAbGCibcx4raSbal6ROrMPXSgGon0Cd7TVeDV1zCF6kFTxaU5w7EZ6Xr7e4hFLe94ZD2JWLbPDAeHyEZr/GXvsGbtZ6EM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725276769; c=relaxed/simple;
-	bh=EaCx9uD7lLBoyO3gvZoujmruCtOjW8d0mUOQCiUGTNo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=pbvYEN7688Z9hu8RHirFQQHz0n9wRvwX/eWxgE/4zTsqQoGMRfyyFulBQ6MzY1LNJuRrRYKswJD0+zn1W625BqfboujNMdT1acITg2p5lL46D2p8jr/5j6/9YFTEAnjwF10wosAm9s5me9FoHGfbWQNLCOLdcee64P3KUyBRcK0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=shopee.com; spf=pass smtp.mailfrom=shopee.com; dkim=pass (2048-bit key) header.d=shopee.com header.i=@shopee.com header.b=IZnPKT4K; arc=none smtp.client-ip=209.85.210.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=shopee.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=shopee.com
+	s=arc-20240116; t=1725295601; c=relaxed/simple;
+	bh=2JEtkyYBzbNUNWYD6K3reCmf/PfliNsGWxt62ICcuOU=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=VcdnAuD9ZWoiPALu6yGmuctzK3/nU0UWigeP5xHSdK4nk+1g7+cVpcKe/VWdnbltmHVRethqlbu0axhtUZk1/YNl05xcfY7xnVP5S0SmNcEw2eiufxvJ2GtBgunx51dd7ySxdw+wnwlx3pOZ0MNpXX+9ptRfN0OafYHhBjP9ToI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cyphar.com; spf=pass smtp.mailfrom=cyphar.com; dkim=pass (2048-bit key) header.d=cyphar.com header.i=@cyphar.com header.b=oPQnB+hq; arc=none smtp.client-ip=80.241.56.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cyphar.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cyphar.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=shopee.com header.i=@shopee.com header.b="IZnPKT4K"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7142a30e3bdso3704940b3a.0
-        for <fstests@vger.kernel.org>; Mon, 02 Sep 2024 04:32:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=shopee.com; s=shopee.com; t=1725276766; x=1725881566; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to:subject
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=k3T+qEmHOcCq1xQ+zRsNTSDREegBrH4STnJvq2MDDf0=;
-        b=IZnPKT4KGFUJRhas1kioF8R1UhsnVhFkksoN/SiqjhTVKS6sxMbhAFi8tRf2DYKJDT
-         eV8FzVOAQidrlI5gaSB0HTtJgnFO25Z49w4Lmk3riPdALM5wpGQMiIpRx+O+iXkhqcrj
-         RR9ywqACGa+/8ZexKXUtyv7pXPLXdJLOns/f5snvYZOQSHOOdo2HJjvsr3mApz7jKzFZ
-         CLMjk8sw0/Y07MbLL45EAiS649J3TbmmMphXOP+cnmf6Mw4FsrXV6DXhQcJ047aJGpsV
-         0KFXEN57l5jFKSoGtW48dy4dQ+H2aIqUVjfllol9d5WmnUs7ydxuQZ1WdGz3Xz23LjK5
-         Y5+A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725276766; x=1725881566;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to:subject
-         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=k3T+qEmHOcCq1xQ+zRsNTSDREegBrH4STnJvq2MDDf0=;
-        b=u50t0tdclXS+Sv4YAQKKnJdzi2t5X8s/vVArnSFM1EID3euA7gsWrNH3ei026wgM2U
-         Lw4yQIRBgh/Dt0/LSEDEtkPDW4x8CdwtKo/OwP4MVoF/oUbwy79nynuPe7JpPmdJ8TSu
-         8oRzLPUHhJF2yQZcz1DoGNM/aSjLPs+M/Ivd5YAdNZJx8PCkfzR4dHjVV6N1634LBCIW
-         H/dEt3HFIJbdr1/Moh+x6GV4IS1qxPR/nex/VWGWThLXRKVFNDygY5J1zmwQ5hBR8p83
-         aP5gCJs54Y0+YpHODkP8BogOqA9Nm15mlPlV0hnnk0C9swdaqwDDx3/kYbzF40Vx/olh
-         K3yw==
-X-Forwarded-Encrypted: i=1; AJvYcCXzyMB/vkCnkckZSkM4PvHYmnCFyGh0mC13j3swRwIzR26LVuS5pmFCZF+mqgnkOQUz5lzjZFRo@vger.kernel.org
-X-Gm-Message-State: AOJu0YwvV+weU5unvF6ORB8TD8E4YouMr8LSOiZ89iZp/ZH2oRjVAx7Y
-	V6mV4YYNZR7buy1xlQO92g/M1m9Vjlu/KbRSZSAk3qKAYkMxal/1NwDgUyy/gqY=
-X-Google-Smtp-Source: AGHT+IEKBR7dteQbq1hh6J1kq7GDsyXK0XN7F9BJXJnN31Mk4hReTi+nlhaf0SDOblRrJ5aRyaTS8w==
-X-Received: by 2002:a05:6a21:1690:b0:1ca:ccfc:edc8 with SMTP id adf61e73a8af0-1ccee8874a3mr14856504637.22.1725276765428;
-        Mon, 02 Sep 2024 04:32:45 -0700 (PDT)
-Received: from [10.54.24.59] (static-ip-148-99-134-202.rev.dyxnet.com. [202.134.99.148])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-715e5576a37sm6688723b3a.29.2024.09.02.04.32.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 02 Sep 2024 04:32:44 -0700 (PDT)
-Message-ID: <dcf1c5c7-d5b0-41f4-9191-2876b80165ae@shopee.com>
-Date: Mon, 2 Sep 2024 19:32:38 +0800
+	dkim=pass (2048-bit key) header.d=cyphar.com header.i=@cyphar.com header.b="oPQnB+hq"
+Received: from smtp2.mailbox.org (smtp2.mailbox.org [10.196.197.2])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-201.mailbox.org (Postfix) with ESMTPS id 4WyF5L1kQqz9tqL;
+	Mon,  2 Sep 2024 18:46:30 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cyphar.com; s=MBO0001;
+	t=1725295590;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DYW8e2RAgi5MkOkqfurv6e1luZxwkEFySGMNtg8Nzlo=;
+	b=oPQnB+hqa7XH5g9+gr6LNTU20LJqEkqpeyTK30MGGwRdEzKbVOpOAmNhhxrqJbO/UyXT2P
+	GDQSz1ZtpmPJAQSbpR6gsfBGdGnenHUxjxCTIMn+dkByq8f8I2iITdoR6L8oJn9ReDYrij
+	jg5HW040NxkE3/t5/p68SIPlJ8arf5Iut5uoBZnho3NCut3SZvYZ/xs6ZqqDQ30KuCPqAV
+	cZsRtiHdPXMFu5dkGfuqT4Hp4mzYM+sAOadY2yHJLjB0kwllmri5HCSwioall5AH+LIlzq
+	pcGEsJFvlFRgcSNiInvFTo1VZhXZ9C1A+dTjE7xTLKVW8xEgxtsj53YyVPf10w==
+From: Aleksa Sarai <cyphar@cyphar.com>
+To: fstests@vger.kernel.org,
+	Alexander Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>,
+	Jan Kara <jack@suse.cz>,
+	Chuck Lever <chuck.lever@oracle.com>,
+	Jeff Layton <jlayton@kernel.org>,
+	Amir Goldstein <amir73il@gmail.com>,
+	Alexander Aring <alex.aring@gmail.com>,
+	Peter Zijlstra <peterz@infradead.org>,
+	Ingo Molnar <mingo@redhat.com>,
+	Arnaldo Carvalho de Melo <acme@kernel.org>,
+	Namhyung Kim <namhyung@kernel.org>,
+	Mark Rutland <mark.rutland@arm.com>,
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+	Jiri Olsa <jolsa@kernel.org>,
+	Ian Rogers <irogers@google.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	"Liang, Kan" <kan.liang@linux.intel.com>
+Cc: Aleksa Sarai <cyphar@cyphar.com>,
+	Christoph Hellwig <hch@infradead.org>,
+	Josef Bacik <josef@toxicpanda.com>,
+	linux-fsdevel@vger.kernel.org,
+	linux-nfs@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-api@vger.kernel.org,
+	linux-perf-users@vger.kernel.org
+Subject: [PATCH xfstests v2 1/2] statx: update headers to include newer statx fields
+Date: Tue,  3 Sep 2024 02:45:53 +1000
+Message-ID: <20240902164554.928371-1-cyphar@cyphar.com>
+In-Reply-To: <20240828-exportfs-u64-mount-id-v3-0-10c2c4c16708@cyphar.com>
+References: <20240828-exportfs-u64-mount-id-v3-0-10c2c4c16708@cyphar.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] ovl: don't set the superblock's errseq_t manually
-To: "Darrick J. Wong" <djwong@kernel.org>, Amir Goldstein <amir73il@gmail.com>
-Cc: Jeff Layton <jlayton@kernel.org>, Theodore Tso <tytso@mit.edu>,
- miklos@szeredi.hu, linux-unionfs@vger.kernel.org,
- linux-fsdevel <linux-fsdevel@vger.kernel.org>,
- Ext4 <linux-ext4@vger.kernel.org>, fstests <fstests@vger.kernel.org>
-References: <CAOQ4uxi4B8JHYHF=yn6OrRZCdkoPUj3-+PuZTZy6iJR7RNWcbA@mail.gmail.com>
- <20240730042008.395716-1-haifeng.xu@shopee.com>
- <CAOQ4uxhs==_-EM+VyJRRCX_NPmYybPDBW2v7cXz33Qt2RMaPnQ@mail.gmail.com>
- <20240830152648.GE6216@frogsfrogsfrogs>
-From: Haifeng Xu <haifeng.xu@shopee.com>
-In-Reply-To: <20240830152648.GE6216@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
+These come from Linux v6.11-rc5.
 
+Signed-off-by: Aleksa Sarai <cyphar@cyphar.com>
+---
+ src/open_by_handle.c |  4 +++-
+ src/statx.h          | 22 ++++++++++++++++++++--
+ 2 files changed, 23 insertions(+), 3 deletions(-)
 
-On 2024/8/30 23:26, Darrick J. Wong wrote:
-> On Fri, Aug 30, 2024 at 03:27:35PM +0200, Amir Goldstein wrote:
->> On Tue, Jul 30, 2024 at 6:20 AM Haifeng Xu <haifeng.xu@shopee.com> wrote:
->>>
->>> Since commit 5679897eb104 ("vfs: make sync_filesystem return errors from
->>> ->sync_fs"), the return value from sync_fs callback can be seen in
->>> sync_filesystem(). Thus the errseq_set opreation can be removed here.
->>>
->>> Depends-on: commit 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
->>> Signed-off-by: Haifeng Xu <haifeng.xu@shopee.com>
->>> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
->>> ---
->>> Changes since v1:
->>> - Add Depends-on and Reviewed-by tags.
->>> ---
->>>  fs/overlayfs/super.c | 10 ++--------
->>>  1 file changed, 2 insertions(+), 8 deletions(-)
->>>
->>> diff --git a/fs/overlayfs/super.c b/fs/overlayfs/super.c
->>> index 06a231970cb5..fe511192f83c 100644
->>> --- a/fs/overlayfs/super.c
->>> +++ b/fs/overlayfs/super.c
->>> @@ -202,15 +202,9 @@ static int ovl_sync_fs(struct super_block *sb, int wait)
->>>         int ret;
->>>
->>>         ret = ovl_sync_status(ofs);
->>> -       /*
->>> -        * We have to always set the err, because the return value isn't
->>> -        * checked in syncfs, and instead indirectly return an error via
->>> -        * the sb's writeback errseq, which VFS inspects after this call.
->>> -        */
->>> -       if (ret < 0) {
->>> -               errseq_set(&sb->s_wb_err, -EIO);
->>> +
->>> +       if (ret < 0)
->>>                 return -EIO;
->>> -       }
->>>
->>>         if (!ret)
->>>                 return ret;
->>> --
->>> 2.25.1
->>>
->>
->> FYI, this change is queued in overlayfs-next.
->>
->> However, I went to see if overlayfs has test coverage for this and it does not.
->>
->> The test coverage added by Darrick to the mentioned vfs commit is test xfs/546,
->> so it does not run on other fs, although it is quite generic.
->>
->> I fixed this test so it could run on overlayfs (like this):
->> # This command is complicated a bit because in the case of overlayfs the
->> # syncfs fd needs to be opened before shutdown and it is different from the
->> # shutdown fd, so we cannot use the _scratch_shutdown() helper.
->> # Filter out xfs_io output of active fds.
->> $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
->> ' -c close -c syncfs $SCRATCH_MNT | \
->>         grep -vF '[00'
->>
->> and it passes on both xfs and overlayfs (over xfs), but if I try to
->> make it "generic"
->> it fails on ext4, which explicitly allows syncfs after shutdown:
->>
->>         if (unlikely(ext4_forced_shutdown(sb)))
->>                 return 0;
->>
->> Ted, Darrick,
->>
->> Do you have any insight as to why this ext4 behavior differs from xfs
->> or another idea how to exercise the syncfs error in a generic test?
->>
->> I could fork an overlay/* test from the xfs/* test and require that
->> underlying fs is xfs, but that would be ugly.
->>
->> Any ideas?
-> 
-> That should be:
-> 
-> 	if (unlikely(ext4_forced_shutdown(sb)))
-> 		return -EIO;
-> 
-> no?  The fs is dead and cannot persist anything, so we should fling that
-> back to the calling program.
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index 0f74ed08b1f0..d9c802ca9bd1 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -82,12 +82,14 @@ Examples:
+ #include <string.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+-#include <sys/stat.h>
+ #include <sys/types.h>
+ #include <errno.h>
+ #include <linux/limits.h>
+ #include <libgen.h>
+ 
++#include <sys/stat.h>
++#include "statx.h"
++
+ #define MAXFILES 1024
+ 
+ struct handle {
+diff --git a/src/statx.h b/src/statx.h
+index 3f239d791dfe..935cb2ed415e 100644
+--- a/src/statx.h
++++ b/src/statx.h
+@@ -102,7 +102,7 @@ struct statx {
+ 	__u64	stx_ino;	/* Inode number */
+ 	__u64	stx_size;	/* File size */
+ 	__u64	stx_blocks;	/* Number of 512-byte blocks allocated */
+-	__u64	__spare1[1];
++	__u64	stx_attributes_mask; /* Mask to show what's supported in stx_attributes */
+ 	/* 0x40 */
+ 	struct statx_timestamp	stx_atime;	/* Last access time */
+ 	struct statx_timestamp	stx_btime;	/* File creation time */
+@@ -114,7 +114,18 @@ struct statx {
+ 	__u32	stx_dev_major;	/* ID of device containing file [uncond] */
+ 	__u32	stx_dev_minor;
+ 	/* 0x90 */
+-	__u64	__spare2[14];	/* Spare space for future expansion */
++	__u64	stx_mnt_id;
++	__u32	stx_dio_mem_align;	/* Memory buffer alignment for direct I/O */
++	__u32	stx_dio_offset_align;	/* File offset alignment for direct I/O */
++	/* 0xa0 */
++	__u64	stx_subvol;	/* Subvolume identifier */
++	__u32	stx_atomic_write_unit_min;	/* Min atomic write unit in bytes */
++	__u32	stx_atomic_write_unit_max;	/* Max atomic write unit in bytes */
++	/* 0xb0 */
++	__u32   stx_atomic_write_segments_max;	/* Max atomic write segment count */
++	__u32   __spare1[1];
++	/* 0xb8 */
++	__u64	__spare3[9];	/* Spare space for future expansion */
+ 	/* 0x100 */
+ };
+ 
+@@ -139,6 +150,13 @@ struct statx {
+ #define STATX_BLOCKS		0x00000400U	/* Want/got stx_blocks */
+ #define STATX_BASIC_STATS	0x000007ffU	/* The stuff in the normal stat struct */
+ #define STATX_BTIME		0x00000800U	/* Want/got stx_btime */
++#define STATX_MNT_ID		0x00001000U	/* Got stx_mnt_id */
++#define STATX_DIOALIGN		0x00002000U	/* Want/got direct I/O alignment info */
++#define STATX_MNT_ID_UNIQUE	0x00004000U	/* Want/got extended stx_mount_id */
++#define STATX_SUBVOL		0x00008000U	/* Want/got stx_subvol */
++#define STATX_WRITE_ATOMIC	0x00010000U	/* Want/got atomic_write_* fields */
++
++#define STATX__RESERVED		0x80000000U	/* Reserved for future struct statx expansion */
+ #define STATX_ALL		0x00000fffU	/* All currently supported flags */
+ 
+ /*
+-- 
+2.46.0
 
-yes. sync_filesystem() write outs and wait upon all dirty data. If the superblock is shutdown,
-writeback can't make any progress and there is no guarantees are made on how many dirty data
-have been written out. So I think it's reasonable to tell users about this error.
-
-> 
-> --D
-> 
->> Thanks,
->> Amir.
->>
