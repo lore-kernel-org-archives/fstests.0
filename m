@@ -1,223 +1,120 @@
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
+Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com [209.85.221.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4696B1CB527;
-	Tue,  3 Sep 2024 06:41:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A0481D61A6;
+	Tue,  3 Sep 2024 06:49:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725345702; cv=none; b=fz48T//OnLpZNSDMFES5v4yVPpTl2iNR+drGI2hISWy9jGj4ZZqz+2sV0Zfp7Py+WVZ1ikjqFHmfq01YDwkUbjvoIEaWWRqHGkKlZF3OvMrcL4a0b4xt9aUvLd7EuckuL09FzEUOYgZyl1oBpn2Dtt/hFqLug3qdwkYBX5kO01k=
+	t=1725346186; cv=none; b=ei1GrxWUwlOSQiYaUbNvqUY3VNo4g7XrUGiZ4Se8Yt+m96wcmtPKgP0IDCiZBDFIB9pH5kHwyW0dTF4ifPWDpyUMhxWtaFrblrNKaZ+H//bEtvByfmBIGpdNAAoUF5cxiid/6keZ1hl3Umw7TiZMJVZDRAlAdQod1NMcXZGnW/w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725345702; c=relaxed/simple;
-	bh=ewjk9A7KEMGjrdYsBEaMJBrlGopYWN8WEd6OWtX+/oo=;
+	s=arc-20240116; t=1725346186; c=relaxed/simple;
+	bh=r6cxBevIDpBm4tvmRIUZoK81w/uMXlM7aBkxassD7EQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=SvwCmfN5oi2dQRidIqPQbdW7htNywIviQYNuwreZ8TaPqZHcmC70WxByZa4/zYN1ydIB+KMnxum9I8SynjJz3xD5XTMr/eo7QzxkH8oEfxHLTax3UJKLz/wd8NF8nsRcl/SDkD4jICrU38qz9DjtghyHAAiGD24EM8mRsEl3hE0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eCvIQ5JA; arc=none smtp.client-ip=209.85.222.178
+	 To:Cc:Content-Type; b=EAjdqM7MD+PeHiHQFBrqlSZgNDGLW5rddA8u4SxkFU66gzTBrpK1nKSMnrfj6opYjKGLh3AGovYu/ZOs1OcSPH+u/tN6EKZxOsEqliqFZcSw6sIctk50YUWdJTZCT6bXmLOmIHRZEzVEdSiG3GhCLgOD9fCGS78oSqIqD6qpaOQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RS62UGoE; arc=none smtp.client-ip=209.85.221.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eCvIQ5JA"
-Received: by mail-qk1-f178.google.com with SMTP id af79cd13be357-7a8197d82a9so208520485a.0;
-        Mon, 02 Sep 2024 23:41:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RS62UGoE"
+Received: by mail-vk1-f174.google.com with SMTP id 71dfb90a1353d-4fcfcdcb4acso1653348e0c.0;
+        Mon, 02 Sep 2024 23:49:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1725345700; x=1725950500; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1725346183; x=1725950983; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OrE1TRHyEqe0Y5+yeSUrcJk3BYLMQghS3ufUodHvvx4=;
-        b=eCvIQ5JAfXJEloCkkTs3dS06/KhyyUU8cX1GjJr8XW0ok61bvatMZ6Uy8NB1pwolav
-         +molo4HdZjDJVNWkN4LV0t7AHKUzWJ/9vxe7ENR27LHx0OXVHLtIGN+T8Rj9pq9IUXAP
-         9gvs7GFpOa4QFJVYb2Kj9e5V9/9fkIk8asrpt5g/U1qqPqTCJANIrPSO4hRiEDndDG8k
-         zJJHIf2evgPURA1+pGZ3Mue/e615VzDgIe3FzdswgjFzxjLHp2hvhqnUPLi4gAxZxxnr
-         GZbfCRMbAna3hS/RN06ZcXuVtWosYixKRDspmvOYsFElDy8Un9/HGQCS+EloMHDzmk6E
-         WuoA==
+        bh=jABLFheZ43ik7Qd1Q4D+4/nbyOp1VA6ToPIDpMFWTe4=;
+        b=RS62UGoESXHAsx3qPHUiNKLecfMdiEuuJaJqm2FfETCK3bgAEgVNwRnLt82fKBPGQQ
+         PSGjc+dPojRCmo5T4MiBSTSMTgMjraN1L2kcwLHQBzYhhEkh3bYR93r0G8baRFBbU1uW
+         TZw3GeVFKsz+CYNFmqK1oqTYM8nwSLNios1/ujE1g1tRuPPa7ZPpEGeXao8AmfpFZSwQ
+         t10vrrNhQ0K/32phY8G3dzjV/Rq9SymADJqfQQo675jsifJsZPP0iwFRGarFT8qety2g
+         1rfrzXg1FPC49ytnoh4qmwxGO0bNgGaxcNmVxPCqCZz6U4AIvIOpQAOF5L+LiIRM0fiO
+         +aVw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725345700; x=1725950500;
+        d=1e100.net; s=20230601; t=1725346183; x=1725950983;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=OrE1TRHyEqe0Y5+yeSUrcJk3BYLMQghS3ufUodHvvx4=;
-        b=lkfLBSgkdsziom/b7vXqv0PKm7XbeFJe9L6q9TUzy2cpIxVGFDbr77gqfrNKM5+a7/
-         Fbca4bnIQ4YhbblV1gAv6fAXvGWS+ykmytHJX6FJ2KVDZEXyRRwZRdTwnRjjRhGOaUWx
-         ZIMkYpIPpk618x9BjdayX+dMXMWQDeIBgnPQff+HDY4mQh2lyV7OnmaHhK5n/SwJTg9Q
-         PzyE7DnYyLuRm/IibFu7gyWZXsLL8Y/db4xfCeljMckbObDxV23S7mygnRYHVzRo+l7D
-         RbNAFMhnup2ZTCEeZqSZQsZWQ5PCF8ReNuAXKtOCossozyrAvSmx/3T8E6eEpOlUFAgW
-         hG8w==
-X-Forwarded-Encrypted: i=1; AJvYcCW39JFZy9C7SDq7jeQQpxvIIaerptRJVkyAljzw2Hddz1q4U7+adDpG0rz4wD1SLp9Ekaig2dfj@vger.kernel.org, AJvYcCXyVWwP6wI5lFzYLmftcqsXQPXwnMvJ74a5lPir95FCQfdzJaD4nebd8CcEOpQzqX/VIdrQxqC4U9+HZocs/w==@vger.kernel.org
-X-Gm-Message-State: AOJu0YyVgxBag7vh/LJs5MrJSIY1T8lCH3/RYInvF3/rQ93xKu2a8TsU
-	44eaHmo+ftqKAmdtI1droPQRGUNI0f4jPpRLr2+2Zbx9Q47SFqGtM7MLzpQZeMqTnHeL1lWg7Ig
-	NB/uEu65gL3A1Y/0TRxR5f5ZW/U8Vxs8S9M4=
-X-Google-Smtp-Source: AGHT+IFvD7Zrk/xWw9n6VCo21m99N399Gvlb1dYyK4lTAHefrXHIZhByy5bySaWjjsDs2lGerkdEsiFTCggyI8qbNRU=
-X-Received: by 2002:a05:620a:4481:b0:7a7:dd0f:649d with SMTP id
- af79cd13be357-7a97bd2a6e6mr125757085a.57.1725345699923; Mon, 02 Sep 2024
- 23:41:39 -0700 (PDT)
+        bh=jABLFheZ43ik7Qd1Q4D+4/nbyOp1VA6ToPIDpMFWTe4=;
+        b=BG5c88LD7uT7Uqn9CmDgpd+wN9+SR0fCaRX8skGElMjFLtCQPDpUGM8Vb8zaSOpxy4
+         8VU2gH68o+NEehU5Pq2zgDYaiC6LEM4Si82d05W9IfDUp6iQXO7tRdFuGuoMm98LL+Zr
+         55MuROBzlOaDAez+KhWdsnYHRnvfKJ9facaqEhx+Fdrfed7RcA19TfQqmdaAFPSOLgl0
+         sf6ie6chC4EcKWoonjcCc04sOIvoR54bVjwHK5TBBU/BVY/RUrIfQp07o0MC+0dyajsp
+         FiWbLbM+BRH5RvWdYnvjHIS/zAVqkY+4zY5FaaJlOCwOK/mO5y8IHkG68C2G5PwxZmkg
+         jk6w==
+X-Forwarded-Encrypted: i=1; AJvYcCUrVXxannH5La292SOcEwpbLgmu8CEYqEQP+xZgNRjES+iuSQJStwHCE1vmQTTbw9kq0UyYN7gw8rvtYEYY/YFKGg==@vger.kernel.org, AJvYcCV7tOHn/AOqJ28V+iBfZRq4ZYhrdfUh+xoCnjv5rygVy6lZv+A9FP8VOe87DQ3oLRx+4ANB6wXOpiKB@vger.kernel.org, AJvYcCW2BI1oCo2dw5CgGlfJhK8cxFDCibAKETTAkZCmRMbUd5Q2nec+Gz7zNUAbLtJCMbMOaimLkvYuMJc4sE26@vger.kernel.org, AJvYcCX4Nhds8cLH7OI88xDzy344ONyIOYeorwdquw1aBawt3fPIKLD7s/CeqW/cF2VBP0jzFQ43PwcsGBc=@vger.kernel.org, AJvYcCXSINubhNmrRtqt86LZjygV+Xwby77PZBugR3LWZ7O3Lgdklf0JFIpvBHHg7G9m5S9FHUXfhxe5CxoF6wQZhA==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwrrbhU1PzVuRoJSpFz6JQSm+/xOAIE1rcE7bgX1Yu3x73/HT5B
+	p4m0PNUl4Y63JZ43jsbvLubV3Pq389uYPzqkkpvohICeaIHw97UDosNmUOABWtdciSwGgLR6fSv
+	gjWq5w97eA06R9HHg6DFRjDWlEvM=
+X-Google-Smtp-Source: AGHT+IEjSi1Nhm40ZmIKTSGp1qO/Ql+telosUq7bdIzgliWrGKdPuR061Ro5l4hZctY1PB+wjGgyCzdZ7coDdylCNvM=
+X-Received: by 2002:a05:6122:2218:b0:4fd:762:8649 with SMTP id
+ 71dfb90a1353d-500de453969mr1158684e0c.12.1725346183294; Mon, 02 Sep 2024
+ 23:49:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240830180844.857283-1-amir73il@gmail.com> <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240828-exportfs-u64-mount-id-v3-0-10c2c4c16708@cyphar.com> <20240902164554.928371-1-cyphar@cyphar.com>
+In-Reply-To: <20240902164554.928371-1-cyphar@cyphar.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 3 Sep 2024 08:41:28 +0200
-Message-ID: <CAOQ4uxifYDgCmKEUQrbZWwL8JxmRnmPK3dGtVpMhq2cgGQ_etg@mail.gmail.com>
-Subject: Re: [PATCH] overlay: create a variant to syncfs error test xfs/546
-To: Zorro Lang <zlang@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
-	fstests@vger.kernel.org
+Date: Tue, 3 Sep 2024 08:49:32 +0200
+Message-ID: <CAOQ4uxhw+WMUQtaBZ1v863p-DGLbkip7p59_DM54BB=DCjJ-Gg@mail.gmail.com>
+Subject: Re: [PATCH xfstests v2 1/2] statx: update headers to include newer
+ statx fields
+To: Aleksa Sarai <cyphar@cyphar.com>
+Cc: fstests@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Chuck Lever <chuck.lever@oracle.com>, 
+	Jeff Layton <jlayton@kernel.org>, Alexander Aring <alex.aring@gmail.com>, 
+	Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, 
+	Arnaldo Carvalho de Melo <acme@kernel.org>, Namhyung Kim <namhyung@kernel.org>, 
+	Mark Rutland <mark.rutland@arm.com>, 
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Jiri Olsa <jolsa@kernel.org>, 
+	Ian Rogers <irogers@google.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	"Liang, Kan" <kan.liang@linux.intel.com>, Christoph Hellwig <hch@infradead.org>, 
+	Josef Bacik <josef@toxicpanda.com>, linux-fsdevel@vger.kernel.org, 
+	linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-api@vger.kernel.org, linux-perf-users@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 3, 2024 at 6:21=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
+On Mon, Sep 2, 2024 at 6:46=E2=80=AFPM Aleksa Sarai <cyphar@cyphar.com> wro=
+te:
 >
-> On Fri, Aug 30, 2024 at 08:08:44PM +0200, Amir Goldstein wrote:
-> > Test overlayfs over xfs with and without "volatile" mount option.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >
-> > Zorro,
-> >
-> > I was going to make a generic test from xfs/546, so that overlayfs coul=
-d
-> > also run it, but then I realized that ext4 does not behave as xfs in
-> > that case (it returns success on syncfs post shutdown).
-> >
-> > Unless and until this behavior is made a standard, I made an overlayfs
-> > specialized test instead, which checks for underlying fs xfs.
-> > While at it, I also added test coverage for the "volatile" mount option=
-s
-> > that is expected to return succuss in that case regardles of the
-> > behavior of the underlying fs.
-> >
-> > Thanks,
-> > Amir.
-> >
-> >  tests/overlay/087     | 62 +++++++++++++++++++++++++++++++++++++++++++
-> >  tests/overlay/087.out |  4 +++
-> >  2 files changed, 66 insertions(+)
-> >  create mode 100755 tests/overlay/087
-> >  create mode 100644 tests/overlay/087.out
-> >
-> > diff --git a/tests/overlay/087 b/tests/overlay/087
-> > new file mode 100755
-> > index 00000000..a5afb0d5
-> > --- /dev/null
-> > +++ b/tests/overlay/087
-> > @@ -0,0 +1,62 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
-> > +# Copyright (c) 2024 CTERA Networks.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 087
-> > +#
-> > +# This is a variant of test xfs/546 for overlayfs
-> > +# with and without the "volatile" mount option.
-> > +# It only works over xfs underlying fs.
-> > +#
-> > +# Regression test for kernel commits:
-> > +#
-> > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_f=
-s")
-> > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
-> > +#
-> > +# During a code inspection, I noticed that sync_filesystem ignores the=
- return
-> > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in tur=
-n is used
-> > +# by the syncfs(2) syscall to persist filesystem changes to disk.  Thi=
-s means
-> > +# that syncfs(2) does not capture internal filesystem errors that are =
-neither
-> > +# visible from the block device (e.g. media error) nor recorded in s_w=
-b_err.
-> > +# XFS historically returned 0 from ->sync_fs even if there were log fa=
-ilures,
-> > +# so that had to be corrected as well.
-> > +#
-> > +# The kernel commits above fix this problem, so this test tries to tri=
-gger the
-> > +# bug by using the shutdown ioctl on a clean, freshly mounted filesyst=
-em in the
-> > +# hope that the EIO generated as a result of the filesystem being shut=
- down is
-> > +# only visible via ->sync_fs.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick mount shutdown
-> > +
-> > +
-> > +# Modify as appropriate.
-> > +_require_xfs_io_command syncfs
-> > +_require_scratch_nocheck
-> > +_require_scratch_shutdown
-> > +
-> > +[ "$OVL_BASE_FSTYP" =3D=3D "xfs" ] || \
-> > +     _notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs=
- after shutdown"
-> > +
-> > +# Reuse the fs formatted when we checked for the shutdown ioctl, and d=
-on't
-> > +# bother checking the filesystem afterwards since we never wrote anyth=
-ing.
-> > +echo "=3D=3D=3D syncfs after shutdown"
-> > +_scratch_mount
-> > +# This command is complicated a bit because in the case of overlayfs t=
-he
-> > +# syncfs fd needs to be opened before shutdown and it is different fro=
-m the
-> > +# shutdown fd, so we cannot use the _scratch_shutdown() helper.
-> > +# Filter out xfs_io output of active fds.
-> > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f =
-' -c close -c syncfs $SCRATCH_MNT | \
-> > +     grep -vF '[00'
-> > +
-> > +# Now repeat the same test with a volatile overlayfs mount and expect =
-no error
-> > +_scratch_unmount
-> > +echo "=3D=3D=3D syncfs after shutdown (volatile)"
-> > +_scratch_mount -o volatile
-> > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f =
-' -c close -c syncfs $SCRATCH_MNT | \
-> > +     grep -vF '[00'
+> These come from Linux v6.11-rc5.
 >
-> Oh, the test steps are much different from xfs/546. If we move x/546 to g=
-eneric/,
-> can overlay reproduce this bug by that?
-
-Yes and no.
-
-For overlayfs to support this as a generic test, the helper
-_scratch_shutdown_handle must be used and the shutdown+syncfs
-command must be complicated to something like this:
-
-$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
-' -c close -c syncfs $SCRATCH_MNT | \
-       grep -vF '[00'
-
-This is because overlayfs itself does not support the shutdown ioctl.
-If the test is moved to generic as it is we get an error when running
-overlayfs:
-
-    XFS_IOC_GOINGDOWN: Inappropriate ioctl for device
-
-because _require_scratch_shutdown is "supported" by overlayfs
-but only when the _scratch_shutdown helpers are used.
-
-If the test is to be moved as is, it will need to opt-out of overlayfs
-explicitly.
-
-> If not, I think we can have this overlay
-> specific test case at first, and "move x/546 to generic" can be another j=
-ob.
+> Signed-off-by: Aleksa Sarai <cyphar@cyphar.com>
+> ---
+>  src/open_by_handle.c |  4 +++-
+>  src/statx.h          | 22 ++++++++++++++++++++--
+>  2 files changed, 23 insertions(+), 3 deletions(-)
 >
 
-The reason I posted the overlayfs test is because for a while I noticed
-that we do not have test coverage for "volatile" mount option
-and adding this test coverage to this test was a very low hanging fruit.
-So I would like to keep the overlayfs test regardless of the decision
-about moving x/546 to generic.
+This patch conflicts with commit
+873e36c9 - statx.h: update to latest kernel UAPI
+already in for-next branch (this is the branch to base patches on)
+
+> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+> index 0f74ed08b1f0..d9c802ca9bd1 100644
+> --- a/src/open_by_handle.c
+> +++ b/src/open_by_handle.c
+> @@ -82,12 +82,14 @@ Examples:
+>  #include <string.h>
+>  #include <fcntl.h>
+>  #include <unistd.h>
+> -#include <sys/stat.h>
+>  #include <sys/types.h>
+>  #include <errno.h>
+>  #include <linux/limits.h>
+>  #include <libgen.h>
+>
+> +#include <sys/stat.h>
+> +#include "statx.h"
+> +
+
+So probably best to squash this one liner into the 2nd patch.
+I guess Zorro can do it on commit if needed.
 
 Thanks,
 Amir.
