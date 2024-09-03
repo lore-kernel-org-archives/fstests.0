@@ -1,344 +1,223 @@
-Received: from mout-p-103.mailbox.org (mout-p-103.mailbox.org [80.241.56.161])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CCCAE1CB527;
-	Tue,  3 Sep 2024 06:41:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.161
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4696B1CB527;
+	Tue,  3 Sep 2024 06:41:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725345693; cv=none; b=tqqSuK428WmOIKe0APkuY1wjADbI9oojG02jOlFfeGVwcgrhr4zikBEmebpG3Ty46Fd+AHhp0t7KPSVh5uulSorEl6Xx//SFsrcboU5DBAY1NxlxkXrIKoibRMoT/x8GfT7nB5dtNIr9FGdNEJ4sJhhc8pNCBFJLvWYcmyUwMoY=
+	t=1725345702; cv=none; b=fz48T//OnLpZNSDMFES5v4yVPpTl2iNR+drGI2hISWy9jGj4ZZqz+2sV0Zfp7Py+WVZ1ikjqFHmfq01YDwkUbjvoIEaWWRqHGkKlZF3OvMrcL4a0b4xt9aUvLd7EuckuL09FzEUOYgZyl1oBpn2Dtt/hFqLug3qdwkYBX5kO01k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725345693; c=relaxed/simple;
-	bh=10uLDIUCBY4fIvQsKOq30PPSUayb76NqE8dmAGfNE9U=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QRH8FFSCqR/BLPoxrDyYWI44LDj8LoKX7+v2D1zmdFdGuanD9sz1F9zF5UWiMIF3agMQQLHnM2RNF/6IvYha3+3NFFawW+f8TajCqbbVpf7OFLD3YSc3XEs8SN0g0dMIrJUMQhLLN/zWe/1OtTlq8xIAJv9T6vuhY45Cq/nI7w8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cyphar.com; spf=pass smtp.mailfrom=cyphar.com; dkim=pass (2048-bit key) header.d=cyphar.com header.i=@cyphar.com header.b=vUrE0kaZ; arc=none smtp.client-ip=80.241.56.161
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=cyphar.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cyphar.com
+	s=arc-20240116; t=1725345702; c=relaxed/simple;
+	bh=ewjk9A7KEMGjrdYsBEaMJBrlGopYWN8WEd6OWtX+/oo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=SvwCmfN5oi2dQRidIqPQbdW7htNywIviQYNuwreZ8TaPqZHcmC70WxByZa4/zYN1ydIB+KMnxum9I8SynjJz3xD5XTMr/eo7QzxkH8oEfxHLTax3UJKLz/wd8NF8nsRcl/SDkD4jICrU38qz9DjtghyHAAiGD24EM8mRsEl3hE0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eCvIQ5JA; arc=none smtp.client-ip=209.85.222.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=cyphar.com header.i=@cyphar.com header.b="vUrE0kaZ"
-Received: from smtp2.mailbox.org (smtp2.mailbox.org [10.196.197.2])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-103.mailbox.org (Postfix) with ESMTPS id 4Wybck5KDpz9sWv;
-	Tue,  3 Sep 2024 08:41:26 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cyphar.com; s=MBO0001;
-	t=1725345686;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0iV/a/l2V2hPvNhsAZ5+2KTyT/o+KSN/NrQZZQqanbw=;
-	b=vUrE0kaZkd3MoQKoPWXQltRS6ijYNAluYWfYABJL/5eaLhgOCWO8vLIXwwqgqieh/+GBHF
-	LNPPn68NbCmDf+PFt1HTDYPsubBWX5LOTDbPaiP8s0xCIdVeiB4GPgH9+693Dzfp5CEkBq
-	v4maHHp2rm4gDhyPRq8BpO971gUVM2aVUYJQiV7bsVquK7xATXqJCR13MWhTWTDfpbNKBt
-	XKE8rpqetJOpmKXZ1XwZphKdlSw7QFrUmX4otyvJq+2V8R8nDCanPNes5Z0vcgvVWU5rFF
-	ARQSkl4SVa5d58EbwYVmpt2MB1yEbwrs6xwKfTc5hg+nhS01RRQhgF3GyO5spw==
-Date: Tue, 3 Sep 2024 16:41:08 +1000
-From: Aleksa Sarai <cyphar@cyphar.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests@vger.kernel.org, Alexander Viro <viro@zeniv.linux.org.uk>, 
-	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Chuck Lever <chuck.lever@oracle.com>, 
-	Jeff Layton <jlayton@kernel.org>, Alexander Aring <alex.aring@gmail.com>, 
-	Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, 
-	Arnaldo Carvalho de Melo <acme@kernel.org>, Namhyung Kim <namhyung@kernel.org>, 
-	Mark Rutland <mark.rutland@arm.com>, Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
-	Jiri Olsa <jolsa@kernel.org>, Ian Rogers <irogers@google.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, "Liang, Kan" <kan.liang@linux.intel.com>, 
-	Christoph Hellwig <hch@infradead.org>, Josef Bacik <josef@toxicpanda.com>, 
-	linux-fsdevel@vger.kernel.org, linux-nfs@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-api@vger.kernel.org, linux-perf-users@vger.kernel.org
-Subject: Re: [PATCH xfstests v2 2/2] open_by_handle: add tests for u64 mount
- ID
-Message-ID: <20240903.044647-some.sprint.silent.snacks-jdKnAVp7XuBZ@cyphar.com>
-References: <20240828-exportfs-u64-mount-id-v3-0-10c2c4c16708@cyphar.com>
- <20240902164554.928371-1-cyphar@cyphar.com>
- <20240902164554.928371-2-cyphar@cyphar.com>
- <CAOQ4uxgS6DvsbUsEoM1Vr2wcd_7Bj=xFXMAy4z9PphTu+G6RaQ@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eCvIQ5JA"
+Received: by mail-qk1-f178.google.com with SMTP id af79cd13be357-7a8197d82a9so208520485a.0;
+        Mon, 02 Sep 2024 23:41:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1725345700; x=1725950500; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=OrE1TRHyEqe0Y5+yeSUrcJk3BYLMQghS3ufUodHvvx4=;
+        b=eCvIQ5JAfXJEloCkkTs3dS06/KhyyUU8cX1GjJr8XW0ok61bvatMZ6Uy8NB1pwolav
+         +molo4HdZjDJVNWkN4LV0t7AHKUzWJ/9vxe7ENR27LHx0OXVHLtIGN+T8Rj9pq9IUXAP
+         9gvs7GFpOa4QFJVYb2Kj9e5V9/9fkIk8asrpt5g/U1qqPqTCJANIrPSO4hRiEDndDG8k
+         zJJHIf2evgPURA1+pGZ3Mue/e615VzDgIe3FzdswgjFzxjLHp2hvhqnUPLi4gAxZxxnr
+         GZbfCRMbAna3hS/RN06ZcXuVtWosYixKRDspmvOYsFElDy8Un9/HGQCS+EloMHDzmk6E
+         WuoA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725345700; x=1725950500;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=OrE1TRHyEqe0Y5+yeSUrcJk3BYLMQghS3ufUodHvvx4=;
+        b=lkfLBSgkdsziom/b7vXqv0PKm7XbeFJe9L6q9TUzy2cpIxVGFDbr77gqfrNKM5+a7/
+         Fbca4bnIQ4YhbblV1gAv6fAXvGWS+ykmytHJX6FJ2KVDZEXyRRwZRdTwnRjjRhGOaUWx
+         ZIMkYpIPpk618x9BjdayX+dMXMWQDeIBgnPQff+HDY4mQh2lyV7OnmaHhK5n/SwJTg9Q
+         PzyE7DnYyLuRm/IibFu7gyWZXsLL8Y/db4xfCeljMckbObDxV23S7mygnRYHVzRo+l7D
+         RbNAFMhnup2ZTCEeZqSZQsZWQ5PCF8ReNuAXKtOCossozyrAvSmx/3T8E6eEpOlUFAgW
+         hG8w==
+X-Forwarded-Encrypted: i=1; AJvYcCW39JFZy9C7SDq7jeQQpxvIIaerptRJVkyAljzw2Hddz1q4U7+adDpG0rz4wD1SLp9Ekaig2dfj@vger.kernel.org, AJvYcCXyVWwP6wI5lFzYLmftcqsXQPXwnMvJ74a5lPir95FCQfdzJaD4nebd8CcEOpQzqX/VIdrQxqC4U9+HZocs/w==@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVgxBag7vh/LJs5MrJSIY1T8lCH3/RYInvF3/rQ93xKu2a8TsU
+	44eaHmo+ftqKAmdtI1droPQRGUNI0f4jPpRLr2+2Zbx9Q47SFqGtM7MLzpQZeMqTnHeL1lWg7Ig
+	NB/uEu65gL3A1Y/0TRxR5f5ZW/U8Vxs8S9M4=
+X-Google-Smtp-Source: AGHT+IFvD7Zrk/xWw9n6VCo21m99N399Gvlb1dYyK4lTAHefrXHIZhByy5bySaWjjsDs2lGerkdEsiFTCggyI8qbNRU=
+X-Received: by 2002:a05:620a:4481:b0:7a7:dd0f:649d with SMTP id
+ af79cd13be357-7a97bd2a6e6mr125757085a.57.1725345699923; Mon, 02 Sep 2024
+ 23:41:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="xkptxxxh47nfrloo"
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgS6DvsbUsEoM1Vr2wcd_7Bj=xFXMAy4z9PphTu+G6RaQ@mail.gmail.com>
-
-
---xkptxxxh47nfrloo
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+References: <20240830180844.857283-1-amir73il@gmail.com> <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 3 Sep 2024 08:41:28 +0200
+Message-ID: <CAOQ4uxifYDgCmKEUQrbZWwL8JxmRnmPK3dGtVpMhq2cgGQ_etg@mail.gmail.com>
+Subject: Re: [PATCH] overlay: create a variant to syncfs error test xfs/546
+To: Zorro Lang <zlang@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, 
+	fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On 2024-09-02, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Mon, Sep 2, 2024 at 6:46=E2=80=AFPM Aleksa Sarai <cyphar@cyphar.com> w=
-rote:
+On Tue, Sep 3, 2024 at 6:21=E2=80=AFAM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Fri, Aug 30, 2024 at 08:08:44PM +0200, Amir Goldstein wrote:
+> > Test overlayfs over xfs with and without "volatile" mount option.
 > >
-> > Now that open_by_handle_at(2) can return u64 mount IDs, do some tests to
-> > make sure they match properly as part of the regular open_by_handle
-> > tests.
-> >
-> > Link: https://lore.kernel.org/all/20240828-exportfs-u64-mount-id-v3-0-1=
-0c2c4c16708@cyphar.com/
-> > Signed-off-by: Aleksa Sarai <cyphar@cyphar.com>
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > > ---
-> > v2:
-> > - Remove -M argument and always do the mount ID tests. [Amir Goldstein]
-> > - Do not error out if the kernel doesn't support STATX_MNT_ID_UNIQUE
-> >   or AT_HANDLE_MNT_ID_UNIQUE. [Amir Goldstein]
-> > - v1: <https://lore.kernel.org/all/20240828103706.2393267-1-cyphar@cyph=
-ar.com/>
->=20
-> Looks good.
->=20
-> You may add:
->=20
-> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
->=20
-> It'd be nice to get a verification that this is indeed tested on the late=
-st
-> upstream and does not regress the tests that run the open_by_handle progr=
-am.
-
-I've tested that the fallback works on mainline and correctly does the
-test on patched kernels (by running open_by_handle directly) but I
-haven't run the suite yet (still getting my mkosi testing setup working
-to run fstests...).
-
-> Thanks,
-> Amir.
->=20
 > >
-> >  src/open_by_handle.c | 128 +++++++++++++++++++++++++++++++++----------
-> >  1 file changed, 99 insertions(+), 29 deletions(-)
+> > Zorro,
 > >
-> > diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> > index d9c802ca9bd1..0ad591da632e 100644
-> > --- a/src/open_by_handle.c
-> > +++ b/src/open_by_handle.c
-> > @@ -86,10 +86,16 @@ Examples:
-> >  #include <errno.h>
-> >  #include <linux/limits.h>
-> >  #include <libgen.h>
-> > +#include <stdint.h>
-> > +#include <stdbool.h>
+> > I was going to make a generic test from xfs/546, so that overlayfs coul=
+d
+> > also run it, but then I realized that ext4 does not behave as xfs in
+> > that case (it returns success on syncfs post shutdown).
 > >
-> >  #include <sys/stat.h>
-> >  #include "statx.h"
+> > Unless and until this behavior is made a standard, I made an overlayfs
+> > specialized test instead, which checks for underlying fs xfs.
+> > While at it, I also added test coverage for the "volatile" mount option=
+s
+> > that is expected to return succuss in that case regardles of the
+> > behavior of the underlying fs.
 > >
-> > +#ifndef AT_HANDLE_MNT_ID_UNIQUE
-> > +#      define AT_HANDLE_MNT_ID_UNIQUE 0x001
-> > +#endif
-> > +
-> >  #define MAXFILES 1024
+> > Thanks,
+> > Amir.
 > >
-> >  struct handle {
-> > @@ -120,6 +126,94 @@ void usage(void)
-> >         exit(EXIT_FAILURE);
-> >  }
+> >  tests/overlay/087     | 62 +++++++++++++++++++++++++++++++++++++++++++
+> >  tests/overlay/087.out |  4 +++
+> >  2 files changed, 66 insertions(+)
+> >  create mode 100755 tests/overlay/087
+> >  create mode 100644 tests/overlay/087.out
 > >
-> > +int do_name_to_handle_at(const char *fname, struct file_handle *fh, in=
-t bufsz)
-> > +{
-> > +       int ret;
-> > +       int mntid_short;
+> > diff --git a/tests/overlay/087 b/tests/overlay/087
+> > new file mode 100755
+> > index 00000000..a5afb0d5
+> > --- /dev/null
+> > +++ b/tests/overlay/087
+> > @@ -0,0 +1,62 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > +# Copyright (c) 2024 CTERA Networks.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 087
+> > +#
+> > +# This is a variant of test xfs/546 for overlayfs
+> > +# with and without the "volatile" mount option.
+> > +# It only works over xfs underlying fs.
+> > +#
+> > +# Regression test for kernel commits:
+> > +#
+> > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_f=
+s")
+> > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
+> > +#
+> > +# During a code inspection, I noticed that sync_filesystem ignores the=
+ return
+> > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in tur=
+n is used
+> > +# by the syncfs(2) syscall to persist filesystem changes to disk.  Thi=
+s means
+> > +# that syncfs(2) does not capture internal filesystem errors that are =
+neither
+> > +# visible from the block device (e.g. media error) nor recorded in s_w=
+b_err.
+> > +# XFS historically returned 0 from ->sync_fs even if there were log fa=
+ilures,
+> > +# so that had to be corrected as well.
+> > +#
+> > +# The kernel commits above fix this problem, so this test tries to tri=
+gger the
+> > +# bug by using the shutdown ioctl on a clean, freshly mounted filesyst=
+em in the
+> > +# hope that the EIO generated as a result of the filesystem being shut=
+ down is
+> > +# only visible via ->sync_fs.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto quick mount shutdown
 > > +
-> > +       static bool skip_mntid_unique;
 > > +
-> > +       uint64_t statx_mntid_short =3D 0, statx_mntid_unique =3D 0;
-> > +       struct statx statxbuf;
+> > +# Modify as appropriate.
+> > +_require_xfs_io_command syncfs
+> > +_require_scratch_nocheck
+> > +_require_scratch_shutdown
 > > +
-> > +       /* Get both the short and unique mount id. */
-> > +       if (statx(AT_FDCWD, fname, 0, STATX_MNT_ID, &statxbuf) < 0) {
-> > +               fprintf(stderr, "%s: statx(STATX_MNT_ID): %m\n", fname);
-> > +               return EXIT_FAILURE;
-> > +       }
-> > +       if (!(statxbuf.stx_mask & STATX_MNT_ID)) {
-> > +               fprintf(stderr, "%s: no STATX_MNT_ID in stx_mask\n", fn=
-ame);
-> > +               return EXIT_FAILURE;
-> > +       }
-> > +       statx_mntid_short =3D statxbuf.stx_mnt_id;
+> > +[ "$OVL_BASE_FSTYP" =3D=3D "xfs" ] || \
+> > +     _notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs=
+ after shutdown"
 > > +
-> > +       if (!skip_mntid_unique) {
-> > +               if (statx(AT_FDCWD, fname, 0, STATX_MNT_ID_UNIQUE, &sta=
-txbuf) < 0) {
-> > +                       fprintf(stderr, "%s: statx(STATX_MNT_ID_UNIQUE)=
-: %m\n", fname);
-> > +                       return EXIT_FAILURE;
-> > +               }
-> > +               /*
-> > +                * STATX_MNT_ID_UNIQUE was added fairly recently in Lin=
-ux 6.8, so if the
-> > +                * kernel doesn't give us a unique mount ID just skip i=
-t.
-> > +                */
-> > +               if ((skip_mntid_unique |=3D !(statxbuf.stx_mask & STATX=
-_MNT_ID_UNIQUE)))
-> > +                       printf("statx(STATX_MNT_ID_UNIQUE) not supporte=
-d by running kernel -- skipping unique mount ID test\n");
-> > +               else
-> > +                       statx_mntid_unique =3D statxbuf.stx_mnt_id;
-> > +       }
+> > +# Reuse the fs formatted when we checked for the shutdown ioctl, and d=
+on't
+> > +# bother checking the filesystem afterwards since we never wrote anyth=
+ing.
+> > +echo "=3D=3D=3D syncfs after shutdown"
+> > +_scratch_mount
+> > +# This command is complicated a bit because in the case of overlayfs t=
+he
+> > +# syncfs fd needs to be opened before shutdown and it is different fro=
+m the
+> > +# shutdown fd, so we cannot use the _scratch_shutdown() helper.
+> > +# Filter out xfs_io output of active fds.
+> > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f =
+' -c close -c syncfs $SCRATCH_MNT | \
+> > +     grep -vF '[00'
 > > +
-> > +       fh->handle_bytes =3D bufsz;
-> > +       ret =3D name_to_handle_at(AT_FDCWD, fname, fh, &mntid_short, 0);
-> > +       if (bufsz < fh->handle_bytes) {
-> > +               /* Query the filesystem required bufsz and the file han=
-dle */
-> > +               if (ret !=3D -1 || errno !=3D EOVERFLOW) {
-> > +                       fprintf(stderr, "%s: unexpected result from nam=
-e_to_handle_at: %d (%m)\n", fname, ret);
-> > +                       return EXIT_FAILURE;
-> > +               }
-> > +               ret =3D name_to_handle_at(AT_FDCWD, fname, fh, &mntid_s=
-hort, 0);
-> > +       }
-> > +       if (ret < 0) {
-> > +               fprintf(stderr, "%s: name_to_handle: %m\n", fname);
-> > +               return EXIT_FAILURE;
-> > +       }
-> > +
-> > +       if (mntid_short !=3D (int) statx_mntid_short) {
-> > +               fprintf(stderr, "%s: name_to_handle_at returned a diffe=
-rent mount ID to STATX_MNT_ID: %u !=3D %lu\n", fname, mntid_short, statx_mn=
-tid_short);
-> > +               return EXIT_FAILURE;
-> > +       }
-> > +
-> > +       if (!skip_mntid_unique && statx_mntid_unique !=3D 0) {
-> > +               struct handle dummy_fh;
-> > +               uint64_t mntid_unique =3D 0;
-> > +
-> > +               /*
-> > +                * Get the unique mount ID. We don't need to get anothe=
-r copy of the
-> > +                * handle so store it in a dummy struct.
-> > +                */
-> > +               dummy_fh.fh.handle_bytes =3D fh->handle_bytes;
-> > +               ret =3D name_to_handle_at(AT_FDCWD, fname, &dummy_fh.fh=
-, (int *) &mntid_unique, AT_HANDLE_MNT_ID_UNIQUE);
-> > +               if (ret < 0) {
-> > +                       if (errno !=3D EINVAL) {
-> > +                               fprintf(stderr, "%s: name_to_handle_at(=
-AT_HANDLE_MNT_ID_UNIQUE): %m\n", fname);
-> > +                               return EXIT_FAILURE;
-> > +                       }
-> > +                       /*
-> > +                        * EINVAL means AT_HANDLE_MNT_ID_UNIQUE is not =
-supported, so skip
-> > +                        * the check in that case.
-> > +                        */
-> > +                       printf("name_to_handle_at(AT_HANDLE_MNT_ID_UNIQ=
-UE) not supported by running kernel -- skipping unique mount ID test\n");
-> > +                       skip_mntid_unique =3D true;
-> > +               } else {
-> > +                       if (mntid_unique !=3D statx_mntid_unique) {
-> > +                               fprintf(stderr, "%s: name_to_handle_at(=
-AT_HANDLE_MNT_ID_UNIQUE) returned a different mount ID to STATX_MNT_ID_UNIQ=
-UE: %lu !=3D %lu\n", fname, mntid_unique, statx_mntid_unique);
-> > +                               return EXIT_FAILURE;
-> > +                       }
-> > +               }
-> > +       }
-> > +
-> > +       return 0;
-> > +}
-> > +
-> >  int main(int argc, char **argv)
-> >  {
-> >         int     i, c;
-> > @@ -132,7 +226,7 @@ int main(int argc, char **argv)
-> >         char    fname2[PATH_MAX];
-> >         char    *test_dir;
-> >         char    *mount_dir;
-> > -       int     mount_fd, mount_id;
-> > +       int     mount_fd;
-> >         char    *infile =3D NULL, *outfile =3D NULL;
-> >         int     in_fd =3D 0, out_fd =3D 0;
-> >         int     numfiles =3D 1;
-> > @@ -307,21 +401,9 @@ int main(int argc, char **argv)
-> >                                 return EXIT_FAILURE;
-> >                         }
-> >                 } else {
-> > -                       handle[i].fh.handle_bytes =3D bufsz;
-> > -                       ret =3D name_to_handle_at(AT_FDCWD, fname, &han=
-dle[i].fh, &mount_id, 0);
-> > -                       if (bufsz < handle[i].fh.handle_bytes) {
-> > -                               /* Query the filesystem required bufsz =
-and the file handle */
-> > -                               if (ret !=3D -1 || errno !=3D EOVERFLOW=
-) {
-> > -                                       fprintf(stderr, "Unexpected res=
-ult from name_to_handle_at(%s)\n", fname);
-> > -                                       return EXIT_FAILURE;
-> > -                               }
-> > -                               ret =3D name_to_handle_at(AT_FDCWD, fna=
-me, &handle[i].fh, &mount_id, 0);
-> > -                       }
-> > -                       if (ret < 0) {
-> > -                               strcat(fname, ": name_to_handle");
-> > -                               perror(fname);
-> > +                       ret =3D do_name_to_handle_at(fname, &handle[i].=
-fh, bufsz);
-> > +                       if (ret < 0)
-> >                                 return EXIT_FAILURE;
-> > -                       }
-> >                 }
-> >                 if (keepopen) {
-> >                         /* Open without close to keep unlinked files ar=
-ound */
-> > @@ -349,21 +431,9 @@ int main(int argc, char **argv)
-> >                                 return EXIT_FAILURE;
-> >                         }
-> >                 } else {
-> > -                       dir_handle.fh.handle_bytes =3D bufsz;
-> > -                       ret =3D name_to_handle_at(AT_FDCWD, test_dir, &=
-dir_handle.fh, &mount_id, 0);
-> > -                       if (bufsz < dir_handle.fh.handle_bytes) {
-> > -                               /* Query the filesystem required bufsz =
-and the file handle */
-> > -                               if (ret !=3D -1 || errno !=3D EOVERFLOW=
-) {
-> > -                                       fprintf(stderr, "Unexpected res=
-ult from name_to_handle_at(%s)\n", dname);
-> > -                                       return EXIT_FAILURE;
-> > -                               }
-> > -                               ret =3D name_to_handle_at(AT_FDCWD, tes=
-t_dir, &dir_handle.fh, &mount_id, 0);
-> > -                       }
-> > -                       if (ret < 0) {
-> > -                               strcat(dname, ": name_to_handle");
-> > -                               perror(dname);
-> > +                       ret =3D do_name_to_handle_at(test_dir, &dir_han=
-dle.fh, bufsz);
-> > +                       if (ret < 0)
-> >                                 return EXIT_FAILURE;
-> > -                       }
-> >                 }
-> >                 if (out_fd) {
-> >                         ret =3D write(out_fd, (char *)&dir_handle, size=
-of(*handle));
-> > --
-> > 2.46.0
-> >
+> > +# Now repeat the same test with a volatile overlayfs mount and expect =
+no error
+> > +_scratch_unmount
+> > +echo "=3D=3D=3D syncfs after shutdown (volatile)"
+> > +_scratch_mount -o volatile
+> > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f =
+' -c close -c syncfs $SCRATCH_MNT | \
+> > +     grep -vF '[00'
+>
+> Oh, the test steps are much different from xfs/546. If we move x/546 to g=
+eneric/,
+> can overlay reproduce this bug by that?
 
---=20
-Aleksa Sarai
-Senior Software Engineer (Containers)
-SUSE Linux GmbH
-<https://www.cyphar.com/>
+Yes and no.
 
---xkptxxxh47nfrloo
-Content-Type: application/pgp-signature; name="signature.asc"
+For overlayfs to support this as a generic test, the helper
+_scratch_shutdown_handle must be used and the shutdown+syncfs
+command must be complicated to something like this:
 
------BEGIN PGP SIGNATURE-----
+$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
+' -c close -c syncfs $SCRATCH_MNT | \
+       grep -vF '[00'
 
-iHUEABYKAB0WIQS2TklVsp+j1GPyqQYol/rSt+lEbwUCZtavhAAKCRAol/rSt+lE
-b1cGAP93SA9vWj5fkqzxNGBM90T1ufd/cRop3nq+mwExBswd7QEA8/SH0WeREpjx
-Yqs+yCk/fqYD0/J7MXo9Z7cc96dWeA8=
-=RoQr
------END PGP SIGNATURE-----
+This is because overlayfs itself does not support the shutdown ioctl.
+If the test is moved to generic as it is we get an error when running
+overlayfs:
 
---xkptxxxh47nfrloo--
+    XFS_IOC_GOINGDOWN: Inappropriate ioctl for device
+
+because _require_scratch_shutdown is "supported" by overlayfs
+but only when the _scratch_shutdown helpers are used.
+
+If the test is to be moved as is, it will need to opt-out of overlayfs
+explicitly.
+
+> If not, I think we can have this overlay
+> specific test case at first, and "move x/546 to generic" can be another j=
+ob.
+>
+
+The reason I posted the overlayfs test is because for a while I noticed
+that we do not have test coverage for "volatile" mount option
+and adding this test coverage to this test was a very low hanging fruit.
+So I would like to keep the overlayfs test regardless of the decision
+about moving x/546 to generic.
+
+Thanks,
+Amir.
