@@ -1,107 +1,164 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B331815746B;
-	Wed,  4 Sep 2024 08:47:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F61E126C01;
+	Wed,  4 Sep 2024 10:37:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725439627; cv=none; b=dgPPcL/2TBq+jA1zfmWN5VKVnqAzzmYo/aug+FREMOa2RKG4ThWEYJiM5ipCX8Mi7OPYn6LwsHjvXI4otbCrccJWiBbN7JSdbHB/bFcPZ1V8smOKpXSo/DaGPeY9l9BZiwcT16yoQWgWwEDJtwWpl+FgCwdQAtXvNDvFIDQ27NY=
+	t=1725446231; cv=none; b=RTFaLgJaXkYzM4aJgJxGoQg5PnEKcUD2WSkQzIswqMOHlsEa3rwa/xeIcR+295nZppo/MPVDXrkGTmV6Yv5w1IoZhLnKw8GJxYdqZOpZYalcA4IvwMHQexZDEFsLUm4F2OpbCRZZ001kXVLQSUEE7kBio/jKb6ifnNja2C1dMpM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725439627; c=relaxed/simple;
-	bh=9eGsQm2a4gwir+w1EgwDbDPLYti+ZLQhfDkxbrw0E9Q=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Buq1OlvrOaHilS7F/CObeV8uQYYu+lwtkl2GE+GPPzmpROuqPx/NWdv2aTlhWsh8SlCHB+2mibR7IFW2HH/HZNbuguNDXx+8Yveiv/R7o8nUPqdnq+UiAJOlJfRLbAcroJo/q5UmMbwpCD506H0Fww9bssTN9rFIgDalpwQOiO4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=UOwYj95M; arc=none smtp.client-ip=209.85.221.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1725446231; c=relaxed/simple;
+	bh=KFsTtEN+XARugQ0gu7a2OXWT8kJ4doETJZCJyP9Jy9g=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=p5mF4xgvm1y5ZeM5lH0hacAIcpLl5foAhIh751nTWsUdAd2pcGhJ8A020RGHJJBifVq24blRxiSZj2JBLUUAbPZK7o7lDc8mgzVI353SNDaWU76ZTlNNwRTG2g06kavqoFrQ/TSJCv5r0xqjeGDm0MRuQKkmjHcjOOEH8aHtSpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=cj/5eqQ+; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=SB4x+eTE; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=cj/5eqQ+; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=SB4x+eTE; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UOwYj95M"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-37747c1d928so402297f8f.1;
-        Wed, 04 Sep 2024 01:47:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1725439624; x=1726044424; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=E9y7HQ5IcfB4zTdOLLj1/YXWbE4SBR+qun23XCtCS/U=;
-        b=UOwYj95MR6il2ozEeHMQRacTQy/XKkb6eCidRbRbRPVrCcdm8OAx/LG6iE2doSDKh6
-         1hTcvz+11FGi6JvW/9KJXIncs2aoS331JFVMvOVZsyUVpRJUJGTWN7ygKubYI7IHaqNX
-         hGHYw1XkBGHP3HYYk1POX3JxCuxFqZiJMCe9aJoBU6QRv2l32qdfZNf7/fePKGRyIx25
-         lmcx+hgwpj4EUpI5Ndwb9Xtc99xT/RZrRNszurb2bexyFpV5O1Ha4aSsVpBqug4gx/Ij
-         bkJK997XLxCI4FQfRKizV+qnHorz+xHR6TPyM97ZWi997lQkW9D87GBnGeyVNViQnqDL
-         dY/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725439624; x=1726044424;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=E9y7HQ5IcfB4zTdOLLj1/YXWbE4SBR+qun23XCtCS/U=;
-        b=cneB5B1vcF9lSWa7Z7VyXS9utXD4p0xagMOieIF7viEKJaUhEElkDkMnvumOmzNpiC
-         B1XCmoFczYpcUMEQlwUy5GAmVPdMBa8uSRunln7V+Hb5FnTgrDrd3mr7z4ggjPchrVLq
-         +AlAuIwnlBRjlgx0yTbh43o+G3DWYK8Y80+RTCP5rJdIxhhkQqAXssD/bfXyWLJz4moM
-         sKZx15BYl/fe5OHa3+9SkCe/+5H2EH8GHCbld53IRz2wt+Ee6xVEl+9RH2cOdBQwzmYf
-         mliLRoR2jQsF8vtIE6h0T98FpCHO9zD7xKm/OiI1UrbdrUHE5HL/64uzbpeBVXWYMoRn
-         w25Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVRSRap400nXorjpxZUDVYvQneBYsU4amduvYqS83NUjeoo0bxuEEvvp/TOvpE5R7aPBiN6lucIzamAZg==@vger.kernel.org, AJvYcCW9EvbhtD8RIP6cFGIgffU1/KGAJ9aDR/q6BgZ7bT5TTN66roIZlUyTlTaj2LaSLekuJopuGsGh@vger.kernel.org
-X-Gm-Message-State: AOJu0YypEFShCJPO0Mt6t3q0bRifC6nPhoEH/5FcAJ6wID6W7SxqhztI
-	8ccABf8oMg/uXyN9Ki/8VzZUGhDU593VpJgfUWszXeifYQ189GFE
-X-Google-Smtp-Source: AGHT+IE97wKzdXMiMN0infJRmn7n68q7SBA3jq7JK6X8HHzs3o2hV3pAnnFo6a4WzUgrMfJ8NqdW9g==
-X-Received: by 2002:adf:e602:0:b0:371:9377:975f with SMTP id ffacd0b85a97d-374bf05d1d8mr8878790f8f.25.1725439623235;
-        Wed, 04 Sep 2024 01:47:03 -0700 (PDT)
-Received: from amir-ThinkPad-T480.arnhem.chello.nl (92-109-99-123.cable.dynamic.v4.ziggo.nl. [92.109.99.123])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42bba7f9f3esm123145695e9.0.2024.09.04.01.47.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Sep 2024 01:47:02 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-To: Theodore Tso <tytso@mit.edu>
-Cc: "Darrick J . Wong" <djwong@kernel.org>,
-	Jan Kara <jack@suse.cz>,
-	Zorro Lang <zlang@kernel.org>,
-	linux-ext4@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: [PATCH] ext4: return error on syncfs after shutdown
-Date: Wed,  4 Sep 2024 10:46:57 +0200
-Message-Id: <20240904084657.1062243-1-amir73il@gmail.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="cj/5eqQ+";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="SB4x+eTE";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="cj/5eqQ+";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="SB4x+eTE"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id A9F8C1FD1A;
+	Wed,  4 Sep 2024 10:37:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1725446227; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=N6f2m65/C+ryUTWxn3jBXvfR5Hc9dn7hOQEdPe0zMjI=;
+	b=cj/5eqQ+EkPFB3EgCWs7cY3HRUsN/ICVURPhWrmI/nvrKnoLa6NuGzKF8l42xISVb/h9ii
+	6Pfk1hZBeAItIXH3LIOFo7ODU3udsQj83/0gC+eojqCycHNlAV5cP3B8WGR+azCOkPRDDD
+	SohUUViCYA0Nu7dl4K4wdfml8+aDa74=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1725446227;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=N6f2m65/C+ryUTWxn3jBXvfR5Hc9dn7hOQEdPe0zMjI=;
+	b=SB4x+eTErcprUZ833oG1hy+P+vNvNPIidc2lz8D79wtLeKueZU5J+9XsKZutu5rB1jL9IF
+	sJz9xszbp5Y2THAQ==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1725446227; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=N6f2m65/C+ryUTWxn3jBXvfR5Hc9dn7hOQEdPe0zMjI=;
+	b=cj/5eqQ+EkPFB3EgCWs7cY3HRUsN/ICVURPhWrmI/nvrKnoLa6NuGzKF8l42xISVb/h9ii
+	6Pfk1hZBeAItIXH3LIOFo7ODU3udsQj83/0gC+eojqCycHNlAV5cP3B8WGR+azCOkPRDDD
+	SohUUViCYA0Nu7dl4K4wdfml8+aDa74=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1725446227;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=N6f2m65/C+ryUTWxn3jBXvfR5Hc9dn7hOQEdPe0zMjI=;
+	b=SB4x+eTErcprUZ833oG1hy+P+vNvNPIidc2lz8D79wtLeKueZU5J+9XsKZutu5rB1jL9IF
+	sJz9xszbp5Y2THAQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9A836139D2;
+	Wed,  4 Sep 2024 10:37:07 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id d1cWJVM42GYHLAAAD6G6ig
+	(envelope-from <jack@suse.cz>); Wed, 04 Sep 2024 10:37:07 +0000
+Received: by quack3.suse.cz (Postfix, from userid 1000)
+	id 49C35A0968; Wed,  4 Sep 2024 12:37:03 +0200 (CEST)
+Date: Wed, 4 Sep 2024 12:37:03 +0200
+From: Jan Kara <jack@suse.cz>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Theodore Tso <tytso@mit.edu>, "Darrick J . Wong" <djwong@kernel.org>,
+	Jan Kara <jack@suse.cz>, Zorro Lang <zlang@kernel.org>,
+	linux-ext4@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] ext4: return error on syncfs after shutdown
+Message-ID: <20240904103703.cwp6jw3vd2cu3szc@quack3>
+References: <20240904084657.1062243-1-amir73il@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240904084657.1062243-1-amir73il@gmail.com>
+X-Spam-Score: -3.80
+X-Spamd-Result: default: False [-3.80 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	MID_RHS_NOT_FQDN(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-0.999];
+	MIME_GOOD(-0.10)[text/plain];
+	FREEMAIL_TO(0.00)[gmail.com];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	RCPT_COUNT_SEVEN(0.00)[7];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	RCVD_COUNT_THREE(0.00)[3];
+	FREEMAIL_ENVRCPT(0.00)[gmail.com];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	TO_DN_SOME(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCVD_TLS_LAST(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email]
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-This is the logic behavior and one that we would like to verify
-using a generic fstest similar to xfs/546.
+On Wed 04-09-24 10:46:57, Amir Goldstein wrote:
+> This is the logic behavior and one that we would like to verify
+> using a generic fstest similar to xfs/546.
+> 
+> Link: https://lore.kernel.org/fstests/20240830152648.GE6216@frogsfrogsfrogs/
+> Suggested-by: Darrick J. Wong <djwong@kernel.org>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
-Link: https://lore.kernel.org/fstests/20240830152648.GE6216@frogsfrogsfrogs/
-Suggested-by: Darrick J. Wong <djwong@kernel.org>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+Yeah, makes sense to me. Feel free to add:
 
-Ted,
+Reviewed-by: Jan Kara <jack@suse.cz>
 
-Please see the discussion about moving test xfs/546 to generic.
+								Honza
 
-WDYT?
-
-Thanks,
-Amir.
-
- fs/ext4/super.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index e72145c4ae5a..b9cf18819e11 100644
---- a/fs/ext4/super.c
-+++ b/fs/ext4/super.c
-@@ -6279,7 +6279,7 @@ static int ext4_sync_fs(struct super_block *sb, int wait)
- 	struct ext4_sb_info *sbi = EXT4_SB(sb);
- 
- 	if (unlikely(ext4_forced_shutdown(sb)))
--		return 0;
-+		return -EIO;
- 
- 	trace_ext4_sync_fs(sb, wait);
- 	flush_workqueue(sbi->rsv_conversion_wq);
+> ---
+> 
+> Ted,
+> 
+> Please see the discussion about moving test xfs/546 to generic.
+> 
+> WDYT?
+> 
+> Thanks,
+> Amir.
+> 
+>  fs/ext4/super.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/fs/ext4/super.c b/fs/ext4/super.c
+> index e72145c4ae5a..b9cf18819e11 100644
+> --- a/fs/ext4/super.c
+> +++ b/fs/ext4/super.c
+> @@ -6279,7 +6279,7 @@ static int ext4_sync_fs(struct super_block *sb, int wait)
+>  	struct ext4_sb_info *sbi = EXT4_SB(sb);
+>  
+>  	if (unlikely(ext4_forced_shutdown(sb)))
+> -		return 0;
+> +		return -EIO;
+>  
+>  	trace_ext4_sync_fs(sb, wait);
+>  	flush_workqueue(sbi->rsv_conversion_wq);
+> -- 
+> 2.34.1
+> 
 -- 
-2.34.1
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
