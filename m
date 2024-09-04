@@ -1,424 +1,235 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 506391CDFA3;
-	Tue,  3 Sep 2024 12:43:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725367417; cv=fail; b=aTQnOA3EI4jo6tpKFbv6ilnaGVVikw/HSa/rYBzR+fE8vPJvPqXe5oh1b+oB59gKB/eI03L/vLx3sGNBB0emIxsWTwlbgOaUqL7/XnA77U6+o07mtDUAFEB20y7s/5JYz7tmoFbvs9oKDSMm8GPBORQUlylCcE02WrWhvQdSX2A=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725367417; c=relaxed/simple;
-	bh=CpR7As/oysFBn1IeMYaFYJqqFxgmOy1bgV/XFcyVSwo=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=DOHJE8umVk1pgUi3NLB9S9q1HLQmVmL04YhNM0+XsCu+SGYRnrpYwy/aq1GrHtfsysKc35IayLVi+rUB/Aqrf+LiGQSTGLZDCbwnaOe2eRIwX7sirhiS8XHevNOrIsrRKRj7ZXvgHlO7ODRpYvp50TtJR1YYlGX9z46/f05NvOE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=ZDXfBAi2; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=aWtvt0Gf; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A564310A12
+	for <fstests@vger.kernel.org>; Wed,  4 Sep 2024 02:58:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1725418730; cv=none; b=W/Ifk7Y6ixtFm++r++qiFwvFD7TR4AeV5nqxhFy/iAcE2eworNTvLSxA0QeHVzK+OE4kFsdULshO4Fksb3h2x0m9ok6Q4uGC43hYVLryeZTHT/5lc4t2koe3jnduKL8RpxmH9CRYqGi79Asj8PFpjvNBg2gA8D6kwmk1K3Feywc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1725418730; c=relaxed/simple;
+	bh=AN3TAe/ckSYX3B/kStTwMufkgYhcRZ+GzVajfZDGNxc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=h/+GI22Rg4bxNlSfYuZbNSQZhTm5l9VLKwE0/w8Yi9OKa/cUvyMw44kmV2m03Hb/Dw0engwE+87Xzq/fqkQ9xDvV173qVEe67/tRbREEXDAmn0MWkvk5aOI0KZ1lUbXn8GzCoRgQzBatwycSr1tjCZ2S4n5AQmTSpBwEo2/N9N0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AqRSZDBU; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="ZDXfBAi2";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="aWtvt0Gf"
-Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4837fTZI008139;
-	Tue, 3 Sep 2024 12:43:30 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=
-	message-id:date:subject:to:cc:references:from:in-reply-to
-	:content-type:content-transfer-encoding:mime-version; s=
-	corp-2023-11-20; bh=MpwldNn6YrpZTQOQ6ynQB+GmC0nf2xLZin7RxlxrDRc=; b=
-	ZDXfBAi2wOMnYgZxeo66iktL34wLzOlXUyCD7TM6Ge/6eYNcdd5NI72UwHrZc5Jm
-	sJmk3pKJDYwRABRp6LNiEXeKLMYChFHPkr2t1H9k3l/qvZBQBoa3GhCrpdJSAG7n
-	lgnj8UQmJT4Ma/wVhOkuDX12uff7lN0RULyWfHXJpTot867MnvWML3p3RNTNNbI5
-	j8vYv6Ctw/QVB6X+AYFcgQggxRZoOvnAp70bDNVLi+1Fxq57XmiUZgaR46tKO/kJ
-	zLQPXJrdHLXmAjR4ipvyksX8hjS/YMzp3QPPdUGayGq0IRMRSzgOHPAeyDNdxDyN
-	sF5Abr5TN8BirUisTPqcbg==
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 41duyj0t2k-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 03 Sep 2024 12:43:29 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 483AehD9018516;
-	Tue, 3 Sep 2024 12:43:27 GMT
-Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2169.outbound.protection.outlook.com [104.47.56.169])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 41bsmencpm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Tue, 03 Sep 2024 12:43:27 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=P7KhWk27CdfiMBbXF7rHSi6mDB8xGvq2Kb/54L+ix7Hyow8Iyf8qZ1WDtuTo4KmKI0AzxgWsVXIyFgVAjQZuCZCiz3ugj8W5I9Np4kXRjBF4UtDPk4fxnURsotvb3kNG5E7QkPC+OV+uqkl9XUIO9zW4XwoKr2W4XGi0RvlpzoYEThahxROd3KqW1woHJ20geCJ+n933UJaJsV1JepVjMgkQB6Ux7tzRwa+fzovu95rKjts/gvsVLo/0lgCbyp+IMXpheEO+Jl7kjH1nFNddRQDTRJuJ9wNLdRbFW/8gfJSjVtjo8NTnaz9521PrwoK7RyAoRoxA1TY6I1beqS6YMg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=MpwldNn6YrpZTQOQ6ynQB+GmC0nf2xLZin7RxlxrDRc=;
- b=yX0/U2jY60QXi3gdUBBd72Q61AUdF1MXK+IDDl4uFpOAB2nEhTCTwn9io9X0eWOAtgI37RlProa9XSSRDlomBn3BUcpJR01QlmqsFHEY1twmcrfRmvXRI4/ma6l1HkxPEVGKDGYKJu38M7z42rNvMJMA6kk5F6zABJwEwL7Me4VLFKCTI5EAFobPf+WSQbeImvJW1lk1kQFe8oCrwZ8GMHdGq6sybrYNGyUckr43Ko1aRj92RVpK08zWYlx9m8MAw6o8k0D2VsnXH+oNOgSFcsI1a3TpVCTkMiL9yQabNSPm2vV3PNqV1a8adkqwlZx7vPt4Uf0cpJmtxmG66bRnAA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=MpwldNn6YrpZTQOQ6ynQB+GmC0nf2xLZin7RxlxrDRc=;
- b=aWtvt0GfDOaKo76WoQEht4d0z3ANqzFI+gRz/jnHipktIm5FKheGAZK4KKrHIqX6cgCso587gXfIZ+e5RBBoPJb/em+f8YitDZoFJjpCcI54XqI9AQLlTBFqPziTocgH3ON12Iy9LjIVkzF6mCIu/iyx3QMiOStAp9USq98f9qg=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by CY8PR10MB6443.namprd10.prod.outlook.com (2603:10b6:930:61::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7939.13; Tue, 3 Sep
- 2024 12:42:57 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%4]) with mapi id 15.20.7918.024; Tue, 3 Sep 2024
- 12:42:57 +0000
-Message-ID: <99345f2f-250a-4717-863c-d61d573b08cb@oracle.com>
-Date: Tue, 3 Sep 2024 20:42:52 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: test concurrent direct IO writes and fsync using
- same fd
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <fa20c58b1a711d9da9899b895a5237f8737163af.1724972803.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <fa20c58b1a711d9da9899b895a5237f8737163af.1724972803.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SG2PR02CA0025.apcprd02.prod.outlook.com
- (2603:1096:3:18::13) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AqRSZDBU"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1725418727;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=976+1Bdlh8YgW83JbcHZ4IcQ843ryczUpppiuQ/ioa0=;
+	b=AqRSZDBUjr4RvwyqwScSuXYLn55JhW/OtABe/7eqssggDJmFRqyEyPWU6QuoS3Q4s38/zf
+	6HhJEKdcEgZlyy5dVMn38hsVbx5IFaIRcJbnxUinwXUanVbwtotvIoy1Z88Ar2f+PaNoKO
+	P1km3V1wnvj4RYSpeDM0m8F4i2jp+JU=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-516-PgDb2dN0PTmU-3NeWONAJQ-1; Tue, 03 Sep 2024 22:58:46 -0400
+X-MC-Unique: PgDb2dN0PTmU-3NeWONAJQ-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7d4f9e1a1a0so919957a12.1
+        for <fstests@vger.kernel.org>; Tue, 03 Sep 2024 19:58:46 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725418725; x=1726023525;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=976+1Bdlh8YgW83JbcHZ4IcQ843ryczUpppiuQ/ioa0=;
+        b=l/jO1wrHKrVI9zP2QULJqmOS7uscDC3fGPnY7wSdOX2mKqF/PMjMyuUIoRYDvSEBpV
+         4Dy+c9xc8MpMnH39vIAcrXTGSDeiIkISWXxG9UJ2+f5MqaGzMX9apS+X3LgLbavUDeP7
+         jqFl9S4ZqVdHRK/gEjHPdJxUUZ1eSdHiqc1dLWhBklWy2CsDLSOBSjotXidkiCrCKDfi
+         aqPEqd+bdSJiEVyg7NNFMboVimkiSnRvcy3MsO/J+04U1A/7fnakVm1kD8WamZUq/HtI
+         rl9tpoIMQu0Z9o2Kq9WX4giDiHEovIh5Lj+VZWuP7yZqrq9k/6ukZja6YCvM8qz0X6Fn
+         HNZw==
+X-Forwarded-Encrypted: i=1; AJvYcCUFxEbB306+w575935kXXb9WSdiT03WrzrWLqkIov4aWOXTOv6YLOwMhViKwhMk+6Wp53L2RFkw@vger.kernel.org
+X-Gm-Message-State: AOJu0Yww5OPgj8uvv/AJmfXICrIxyEzk4KD2uuP8ELFl02seIxfFYxDq
+	AuS0E1lqe2CwADl5NPONlavcvrWuqygXPA+5pQQPfWgE5tm8VNzcK8IclL9eYTdEFXtRBiQQo0f
+	gwg5nSp0CRJ6FsHlpBFqAtFi/2iy9ZEx/3yhpHcMNmNK6x3ueZ1Pe8Go=
+X-Received: by 2002:a17:902:f70f:b0:205:84a4:bf6b with SMTP id d9443c01a7336-20584a4bfc3mr96425755ad.17.1725418725186;
+        Tue, 03 Sep 2024 19:58:45 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFsrhg5ufW0kVfzTl5CCnyWtN/tW0PsVRPbESNI2YUYceYfTeYbqGmj5dKvl9wdcXY/fpOqkg==
+X-Received: by 2002:a17:902:f70f:b0:205:84a4:bf6b with SMTP id d9443c01a7336-20584a4bfc3mr96425485ad.17.1725418724481;
+        Tue, 03 Sep 2024 19:58:44 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-206aea574dbsm4585725ad.214.2024.09.03.19.58.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Sep 2024 19:58:44 -0700 (PDT)
+Date: Wed, 4 Sep 2024 10:58:40 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] overlay: create a variant to syncfs error test xfs/546
+Message-ID: <20240904025840.obxcbe22bud6ga2i@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240830180844.857283-1-amir73il@gmail.com>
+ <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxifYDgCmKEUQrbZWwL8JxmRnmPK3dGtVpMhq2cgGQ_etg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CY8PR10MB6443:EE_
-X-MS-Office365-Filtering-Correlation-Id: f504ab5d-c157-4a3c-c1b3-08dccc15eff4
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?TWdNZFBJbW9YNktLUzdMSVFhaHR4NHFndUI2WUlDdEgxZnFNY0RWME45N1Fj?=
- =?utf-8?B?M0E1VGp0QWxQUlIybmNJQzlyandMRlpXR1llbzJSUVMyME9ZcUhXbnlEQ0lT?=
- =?utf-8?B?RFJoUlBhVlgvenZ4azBsb0YxSnVWanVEWmNjMWpQM2NHTGd1RExJM0ZpVUpr?=
- =?utf-8?B?dmxKU2JLRy9qUXJFdlNZeXlNOWxuTndwU1FCd2x0QmJYUHZwbGJMN042ZDBS?=
- =?utf-8?B?RnBYNDZnQ0JoYXBCK04ybkRaNDdWUCtWVWw2OGVwV3VWSFZUbW5aNTljZ2Z6?=
- =?utf-8?B?MEJiRW1HRWt4YlFxVHJSMkNCSlhraUlTeU9RdWZnQjdBUHZiM0orSnFGRDFz?=
- =?utf-8?B?ZGZ0eUJWa3dQQUNuZkY2eXl0c3RxZS80K0RXY2NnRCtOTlp2WkpneU9WWFpE?=
- =?utf-8?B?Z3Zhc3BhM3hjS3Vkc2ltMXJYS3BUUVB5V2xkd1ZBT212a1NHejNXVnJsZWYx?=
- =?utf-8?B?UERWQmE4a3JPZkVnbmg1dW4weUgyWGlucEpWSCtKTEV6NEJROXBEUkpNZmNo?=
- =?utf-8?B?L202WEpUMSsrSlRqZU03MXhyOXBTQWlGRnJyYWthc2MwTTFaRGpUMGdlRmpH?=
- =?utf-8?B?SXdWOVFJRlprYWpvMGdLZHd2cWk5bnNxcWt4dzJ2T01EY3BuYjdOMThMRGVU?=
- =?utf-8?B?Wm53Tm0vQmZOcVZhVHBRNlY3RXM4R2t3QXF6cmtvVmw3ZUxmdGhnZEJFa2VE?=
- =?utf-8?B?c0lxbXJVdmwybWFVNk8wU0lvWVFZaVpQSWFxTkhBN3BHUWNnNzdHUi9VT09H?=
- =?utf-8?B?b1FRblhobnRPaW9DVUNCeGMzak5wMjRZOWNmU1o3cWxHZVFiZm9BR0JMWmFp?=
- =?utf-8?B?eTE1UHhzL2I4WS8zVDVyd2JET1JCVWVlcmllMjFPeU9NQncrZlpLb0NrY2NC?=
- =?utf-8?B?c2hvOEFPRHJLQWcvTlMvbEtTdy9vK1JWZ29Ha1hseE1sbzlvWkRLNlFZaHVo?=
- =?utf-8?B?VTN6czNNOHlqaXh1NkhRNlhjdHBTYXhZUWZqTTJqcEgxTzBhZHp6eVlnemFX?=
- =?utf-8?B?RTNXTjJEdHJjMXVtK045TnI3VDMvOHE2TGdUUEpjOC9ubnhYYzhDZ2hrUkxN?=
- =?utf-8?B?QW5XWkFoZW5QdThMVW1tSUNQanY1VjQ2cTViNVQwNFZwdzd6RGhLWUFzYjha?=
- =?utf-8?B?Z0tKcGdLazJsWlExTWJGZjlGZGVjWDlMY0plRlBFLzYxQjFxbEZubUp6bWhI?=
- =?utf-8?B?Z3dBd3ZydlpjcCtXNlJxVlllMVhDQkRLbmY3M1MxUXR3UE9TNngvVXVJMHRS?=
- =?utf-8?B?ZFVBeG9YTVNVWi9KRWRVMUJHN244ZG1aRnd4Y3h4MnRKSHlMZDZTZS91K0Yx?=
- =?utf-8?B?SVhTc0ZZMFh6QWRVMTBWdEFTNGFRM1dkL1BwU1JZNm5vQmV6eTVCMEF6VEtY?=
- =?utf-8?B?d00zQW10aWYrSDhKQnViNXpMV0o1YWFaVkVSYk0xSGNvckZJTjh4Ni9xVWM5?=
- =?utf-8?B?Y242UWV1UXdpaEpXOURyWkFPYzdpd2RnY1dCUFRlYmQ4djA5SFUrSjZReHRk?=
- =?utf-8?B?bjVERWZrMUwvWWJyZnVJVExYVGJiWmVUaWRwcThTMnBqYlhUSld1aDlYQWh4?=
- =?utf-8?B?WGZPZUZja2UxbHZ2ZEI2Q096dlFQOG9PSWhic2t1VUpQRDZrYnd1bFJPakpG?=
- =?utf-8?B?TVN0L1o2cjVvelRaSnBndk1lZVg5UUxKeXZHTGx0RzY0RmFPRVF3SEhIUFhp?=
- =?utf-8?B?anVYaExJckk4UjgwWC9seXlnTnZseldsRkZMZWlXUFR4cnNrbGE3R1dmY1pR?=
- =?utf-8?B?d01TdWhLV3VXb2lwU0RHbi9TNjV3ejlMUUZRbzdQemsxdlRuQThEQU5MMnY4?=
- =?utf-8?B?aDZUb2hIV2lpd3lvaGVYZz09?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?RnVKZlZQaHhhMDgwL0JiOU1WcmkxMjY1YUFyMERQWHA3OHdEZ2M5b2ZXL2Zs?=
- =?utf-8?B?YU4vSXVXajJIbG1TcFN4TkxvR0tQK0VQYjZidW1ISTdZTXhzcWp2bEpuZkVu?=
- =?utf-8?B?MWExRkRzNjJXN0I5MDBvQVpPTVgzbUgyNUFVR1A5dHNIZVlVajM3Yk5oZUl4?=
- =?utf-8?B?ZmxFUmRSYjNxdGxSQW5EOWE1NzdQcC85QkdTcTBCY29HcFZCTW9HemJhY29P?=
- =?utf-8?B?ZlBPcGU4b1U3Wno2Wmx6MEcrdE1CbkZ6LzJXMWdWNkw1Y3VzZFBmK1RTcTBG?=
- =?utf-8?B?NDVob2xORjdHc1lHYmhwTnRzSEJSSWt3YXBzSkZPUFhFaWVlN1Z0Y2dGTFR3?=
- =?utf-8?B?SW50RzNNVG13V3BzSEZ2OGRpMEdHWERMaFpiNnRsMDZCZkV4dTBEbks0Ynk0?=
- =?utf-8?B?QTdTbXJ3RitjSkJIVWg1TnB4T0FTRC9IZ1RraFkyZjNaRXFiTDNWZWFtYnFY?=
- =?utf-8?B?NUp3Y0RTSFRjMndKRU81Y3p6cytIemh3R244eUFTZU1zaHJ0U1Zra1ZGVU0z?=
- =?utf-8?B?bDRsMXgrc0N6Y3d3ckZNajlnb2FFTEVmb2g3ZHpaTHVVLy9IWmhjTUFwaXhE?=
- =?utf-8?B?TkZ4MGU0M2pROCthTnZLd3crcXdTY2kwZmFZMG1XMDNhWjBUWXdKMkFoRWc4?=
- =?utf-8?B?VXZaeHo5YlhBRWZzUXVJSkgyNmZKeTZIdFRnZVhSVDRsbGx3M2lUeGZETGFp?=
- =?utf-8?B?SE1aTk9lbnRQQURLaVpVL1VqZ3pvemxZVzdYc3Z6L0V6VG1MTEdHSXZSU3NE?=
- =?utf-8?B?K3o2bk9MRzM1RzZDeHhkMjB3ZmE0S0QzYVJHSmNVNTlRSG5ONk1FYWd3UUMz?=
- =?utf-8?B?OEErZEVmQ3ZpY3ZzV0FzbGpQNWZtMWQwSnBsdWlzNVZRZjk0UWU4NFVkSGg5?=
- =?utf-8?B?TEJSU1hOU0ZTdXJzTm5EazJZeWZlcDBpUmZocWVjVXhLaDBUZ0U1WExvd2RR?=
- =?utf-8?B?RjIweUJWdXVPcW5nQUk5b0h2QjM4bCs4ZlgwWHlrNDVIa1FEU2ZDYXpldlNB?=
- =?utf-8?B?YUZ4M1h1d1RUU3pGaVFoMjZIMzYyRTA4VnhtUGNadVBZR28rL2hYSFNRTFcr?=
- =?utf-8?B?YUtQb211MS9zdUpXYzd6QlpHcDJMUStDdGc5UnhSMnQzMVlIUXFIa3Z2aGJm?=
- =?utf-8?B?c3FpRWNlMHBxQXYrSHN0SnZVaHZDMmV5dnJGdUhXeEZySlJwYW9Ga0FDRmJh?=
- =?utf-8?B?VEh0Zi9JVWJNNVN0bUJoam9pNXdVNFE5TnBzeHA5TmsvR1VLblpxRUYyTDUv?=
- =?utf-8?B?WW1ySFVFUVR3OTAzN1V5K2ZTMzlwUmJjMFc0TmJibmk0OXRkL2NyRyt2Skw4?=
- =?utf-8?B?VmlqOEtxWk16Tm9nbEMweVBSWDVDOW5pcXhDNW5sSGQ1eks4RGRNYzR4Mkdy?=
- =?utf-8?B?RkJ1dlhPUWdHMTBjMTl2R25Dc0hDc1ErcTBhWUZzcmFTQzZoeHNzMHpIMFdt?=
- =?utf-8?B?dlBaeERTczJmV3orUDVwRm5zTmlXd0tCUDRQbXh3andwQXJlUXNHMUJ5Y3lm?=
- =?utf-8?B?d0JISGVNNHBaczBhRk80N3c1dkJVZENZMU03NDJ0aGxMRnBMNW4rdTB2V1RE?=
- =?utf-8?B?NVRLWEh0czJTS1kzenpvYy9sa0hNbVpPaGNidkpXbDUrL2J1T2x6bmtIaDUy?=
- =?utf-8?B?bjNxSnJycUllRTl5Ylo3TW1oN3Y0bHdNdGp6NVFTeGJ4K0F3SjAva2ZWVGZI?=
- =?utf-8?B?MzFibWQ2TXRSUTYySzFpZW5sUVpPMmJxR09rcUZXMzJ2b05pRkMrNXl1VEt6?=
- =?utf-8?B?ZS9xYU9XMXJob3hucFgxaEwzaTA3NHZIWVJXYjA3bEg3THl6L3NSUlIrSkg0?=
- =?utf-8?B?R2duZytoTmNsOFBlVHcwY1dXbzU1MlNBWEk2UDRaZnJXeW9BbWVjL29hckhj?=
- =?utf-8?B?YmNSMHowakk0MmJxazdkOTFkbUhVQ2dya0hXTnJIbFU0bHl1Wk1IMUNNRFVx?=
- =?utf-8?B?Uy9OZmRtN2E1KzJWUkZyV2kzcEszc0lCZ3h3aE45UkZ5RHA0SVlGVXhLcm5w?=
- =?utf-8?B?OGp1d2pJRnFSeHJDTFNTUTYzbXBadFA0T0FQN0tnbGNEM0cvTlFHeTg3TUdC?=
- =?utf-8?B?c0Nmd1JsRU5mSVNLb2lGZG15SGUxZDNiVkRHY3FXSEJvSHBGTmYxdXFXZnJa?=
- =?utf-8?Q?x3ABmpnZB6fzXw/Eqi1K02fT7?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	6Td80OojcJUo8CqX/j98mnmML4aeZI15I56FdwEN33byb5Y5ErN0rkTL8g5y7vOSnfJ37eyz41CQP5wpXUZPkGBm2DhHAhEF36Gvp0HM83FweuqiF98OmhVaiM+36IgjX6fLSRgFMYo0gxfXzobv/K2i/zDgUQZ4GgrKu8w0xgY1OK6HPxVFbPKMfYOD77sdvtlIWfii0q8plqwAT+68JQXTfbXpmaSaKdZpktfdrZi8VWbknZ8JKI6QmnU9wJ/DFT5lPolvDXn2o1Pd+izd+LfvWaaCsgdNVHhNlHSLjDxMVIJyQ0yyq7kRWym/iYGYijDLcHla2sCGF+5K8ZBlEqz6uq3EQ8Bc2xVlvaPszQnjMAnR2RYnHtoobXwwYQxwp2tue/dDYw7noxmZ+/Jtj32xLlsf5EclP00deq8/lnpVHfIRH24BsmHQCy47G9RY3R9cwLn12GD+Go5Y7H0tXFvJfljom8d9n4Zz8TDb88Y8ZnKl1v2cRBkZVCH1ZhrTpGfasmSuMNGZAEUA9ECmsYI0ISl1qi+4Qla5/6O8hWODhRq21qmBE0VAItC0ATReCWLAKG/utJfQc+Jtb+f30dSmvqxXs9UD2emJV4d6h+g=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: f504ab5d-c157-4a3c-c1b3-08dccc15eff4
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Sep 2024 12:42:57.5686
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: jAFnwUyJ3xaNSntpIQdbsFXxNNOfZQ9qi9vXWrHImJQNbDlSiZecK5/R3o85paLMN2/HO1+lIbo38oeDvBjIJA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY8PR10MB6443
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-02_06,2024-09-03_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 bulkscore=0 mlxscore=0
- mlxlogscore=999 suspectscore=0 malwarescore=0 adultscore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2407110000
- definitions=main-2409030103
-X-Proofpoint-GUID: mtXMmOkM8uR7MALtzQjzgT_YBon1vPg1
-X-Proofpoint-ORIG-GUID: mtXMmOkM8uR7MALtzQjzgT_YBon1vPg1
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxifYDgCmKEUQrbZWwL8JxmRnmPK3dGtVpMhq2cgGQ_etg@mail.gmail.com>
 
-On 30/8/24 7:10 am, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Sep 03, 2024 at 08:41:28AM +0200, Amir Goldstein wrote:
+> On Tue, Sep 3, 2024 at 6:21 AM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Fri, Aug 30, 2024 at 08:08:44PM +0200, Amir Goldstein wrote:
+> > > Test overlayfs over xfs with and without "volatile" mount option.
+> > >
+> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > ---
+> > >
+> > > Zorro,
+> > >
+> > > I was going to make a generic test from xfs/546, so that overlayfs could
+> > > also run it, but then I realized that ext4 does not behave as xfs in
+> > > that case (it returns success on syncfs post shutdown).
+> > >
+> > > Unless and until this behavior is made a standard, I made an overlayfs
+> > > specialized test instead, which checks for underlying fs xfs.
+> > > While at it, I also added test coverage for the "volatile" mount options
+> > > that is expected to return succuss in that case regardles of the
+> > > behavior of the underlying fs.
+> > >
+> > > Thanks,
+> > > Amir.
+> > >
+> > >  tests/overlay/087     | 62 +++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/overlay/087.out |  4 +++
+> > >  2 files changed, 66 insertions(+)
+> > >  create mode 100755 tests/overlay/087
+> > >  create mode 100644 tests/overlay/087.out
+> > >
+> > > diff --git a/tests/overlay/087 b/tests/overlay/087
+> > > new file mode 100755
+> > > index 00000000..a5afb0d5
+> > > --- /dev/null
+> > > +++ b/tests/overlay/087
+> > > @@ -0,0 +1,62 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > > +# Copyright (c) 2024 CTERA Networks.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 087
+> > > +#
+> > > +# This is a variant of test xfs/546 for overlayfs
+> > > +# with and without the "volatile" mount option.
+> > > +# It only works over xfs underlying fs.
+> > > +#
+> > > +# Regression test for kernel commits:
+> > > +#
+> > > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
+> > > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
+> > > +#
+> > > +# During a code inspection, I noticed that sync_filesystem ignores the return
+> > > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in turn is used
+> > > +# by the syncfs(2) syscall to persist filesystem changes to disk.  This means
+> > > +# that syncfs(2) does not capture internal filesystem errors that are neither
+> > > +# visible from the block device (e.g. media error) nor recorded in s_wb_err.
+> > > +# XFS historically returned 0 from ->sync_fs even if there were log failures,
+> > > +# so that had to be corrected as well.
+> > > +#
+> > > +# The kernel commits above fix this problem, so this test tries to trigger the
+> > > +# bug by using the shutdown ioctl on a clean, freshly mounted filesystem in the
+> > > +# hope that the EIO generated as a result of the filesystem being shut down is
+> > > +# only visible via ->sync_fs.
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick mount shutdown
+> > > +
+> > > +
+> > > +# Modify as appropriate.
+> > > +_require_xfs_io_command syncfs
+> > > +_require_scratch_nocheck
+> > > +_require_scratch_shutdown
+> > > +
+> > > +[ "$OVL_BASE_FSTYP" == "xfs" ] || \
+> > > +     _notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs after shutdown"
+> > > +
+> > > +# Reuse the fs formatted when we checked for the shutdown ioctl, and don't
+> > > +# bother checking the filesystem afterwards since we never wrote anything.
+> > > +echo "=== syncfs after shutdown"
+> > > +_scratch_mount
+> > > +# This command is complicated a bit because in the case of overlayfs the
+> > > +# syncfs fd needs to be opened before shutdown and it is different from the
+> > > +# shutdown fd, so we cannot use the _scratch_shutdown() helper.
+> > > +# Filter out xfs_io output of active fds.
+> > > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > > +     grep -vF '[00'
+> > > +
+> > > +# Now repeat the same test with a volatile overlayfs mount and expect no error
+> > > +_scratch_unmount
+> > > +echo "=== syncfs after shutdown (volatile)"
+> > > +_scratch_mount -o volatile
+> > > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > > +     grep -vF '[00'
+> >
+> > Oh, the test steps are much different from xfs/546. If we move x/546 to generic/,
+> > can overlay reproduce this bug by that?
 > 
-> Test that a program that has 2 threads using the same file descriptor and
-> concurrently doing direct IO writes and fsync doesn't trigger any crash
-> or deadlock.
+> Yes and no.
 > 
-> This is motivated by a bug found in btrfs fixed by the following patch:
+> For overlayfs to support this as a generic test, the helper
+> _scratch_shutdown_handle must be used and the shutdown+syncfs
+> command must be complicated to something like this:
 > 
->    "btrfs: fix race between direct IO write and fsync when using same fd"
+> $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
+> ' -c close -c syncfs $SCRATCH_MNT | \
+>        grep -vF '[00'
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
-
------------------------------
-FSTYP         -- btrfs
-PLATFORM      -- Linux/aarch64 dev2 6.11.0-rc5+ #7 SMP PREEMPT_DYNAMIC 
-Mon Sep  2 18:46:19 +08 2024
-MKFS_OPTIONS  -- /dev/loop1
-MOUNT_OPTIONS -- /dev/loop1 /mnt/scratch
-
-generic/363 10s ... umount: /mnt/test: target is busy.
-_check_btrfs_filesystem: filesystem on /dev/loop0 is inconsistent
-(see /Volumes/work/ws/fstests/results//generic/363.full for details)
-Trying to repair broken TEST_DEV file system
-_check_dmesg: something found in dmesg (see 
-/Volumes/work/ws/fstests/results//generic/363.dmesg)
------------------------------
-
-
-I managed to reproduce it in two iterations.
-
-For now, the test case is fine as it is without the require_debug part,
-since it doesn’t always reproduce every time even with it.
-
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-
-Thanks, Anand
-
-
-
->   .gitignore                    |   1 +
->   src/Makefile                  |   2 +-
->   src/dio-write-fsync-same-fd.c | 106 ++++++++++++++++++++++++++++++++++
->   tests/generic/363             |  30 ++++++++++
->   tests/generic/363.out         |   2 +
->   5 files changed, 140 insertions(+), 1 deletion(-)
->   create mode 100644 src/dio-write-fsync-same-fd.c
->   create mode 100755 tests/generic/363
->   create mode 100644 tests/generic/363.out
+> This is because overlayfs itself does not support the shutdown ioctl.
+> If the test is moved to generic as it is we get an error when running
+> overlayfs:
 > 
-> diff --git a/.gitignore b/.gitignore
-> index 36083e9d..57519263 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -76,6 +76,7 @@ tags
->   /src/dio-buf-fault
->   /src/dio-interleaved
->   /src/dio-invalidate-cache
-> +/src/dio-write-fsync-same-fd
->   /src/dirhash_collide
->   /src/dirperf
->   /src/dirstress
-> diff --git a/src/Makefile b/src/Makefile
-> index b3da59a0..b9ad6b5f 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -20,7 +20,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->   	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
->   	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
->   	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
-> -	readdir-while-renames dio-append-buf-fault
-> +	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd
->   
->   LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->   	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/dio-write-fsync-same-fd.c b/src/dio-write-fsync-same-fd.c
-> new file mode 100644
-> index 00000000..79472a9e
-> --- /dev/null
-> +++ b/src/dio-write-fsync-same-fd.c
-> @@ -0,0 +1,106 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Copyright (c) 2024 SUSE Linux Products GmbH.  All Rights Reserved.
-> + */
-> +
-> +/*
-> + * Test two threads working with the same file descriptor, one doing direct IO
-> + * writes into the file and the other just doing fsync calls. We want to verify
-> + * that there are no crashes or deadlocks.
-> + *
-> + * This program never finishes, it starts two infinite loops to write and fsync
-> + * the file. It's meant to be called with the 'timeout' program from coreutils.
-> + */
-> +
-> +/* Get the O_DIRECT definition. */
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE
-> +#endif
-> +
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <unistd.h>
-> +#include <stdint.h>
-> +#include <fcntl.h>
-> +#include <errno.h>
-> +#include <string.h>
-> +#include <pthread.h>
-> +
-> +static int fd;
-> +
-> +static ssize_t do_write(int fd, const void *buf, size_t count, off_t offset)
-> +{
-> +        while (count > 0) {
-> +		ssize_t ret;
-> +
-> +		ret = pwrite(fd, buf, count, offset);
-> +		if (ret < 0) {
-> +			if (errno == EINTR)
-> +				continue;
-> +			return ret;
-> +		}
-> +		count -= ret;
-> +		buf += ret;
-> +	}
-> +	return 0;
-> +}
-> +
-> +static void *fsync_loop(void *arg)
-> +{
-> +	while (1) {
-> +		int ret;
-> +
-> +		ret = fsync(fd);
-> +		if (ret != 0) {
-> +			perror("Fsync failed");
-> +			exit(6);
-> +		}
-> +	}
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	long pagesize;
-> +	void *write_buf;
-> +	pthread_t fsyncer;
-> +	int ret;
-> +
-> +	if (argc != 2) {
-> +		fprintf(stderr, "Use: %s <file path>\n", argv[0]);
-> +		return 1;
-> +	}
-> +
-> +	fd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC | O_DIRECT, 0666);
-> +	if (fd == -1) {
-> +		perror("Failed to open/create file");
-> +		return 1;
-> +	}
-> +
-> +	pagesize = sysconf(_SC_PAGE_SIZE);
-> +	if (pagesize == -1) {
-> +		perror("Failed to get page size");
-> +		return 2;
-> +	}
-> +
-> +	ret = posix_memalign(&write_buf, pagesize, pagesize);
-> +	if (ret) {
-> +		perror("Failed to allocate buffer");
-> +		return 3;
-> +	}
-> +
-> +	ret = pthread_create(&fsyncer, NULL, fsync_loop, NULL);
-> +	if (ret != 0) {
-> +		fprintf(stderr, "Failed to create writer thread: %d\n", ret);
-> +		return 4;
-> +	}
-> +
-> +	while (1) {
-> +		ret = do_write(fd, write_buf, pagesize, 0);
-> +		if (ret != 0) {
-> +			perror("Write failed");
-> +			exit(5);
-> +		}
-> +	}
-> +
-> +	return 0;
-> +}
-> diff --git a/tests/generic/363 b/tests/generic/363
-> new file mode 100755
-> index 00000000..21159e24
-> --- /dev/null
-> +++ b/tests/generic/363
-> @@ -0,0 +1,30 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 363
-> +#
-> +# Test that a program that has 2 threads using the same file descriptor and
-> +# concurrently doing direct IO writes and fsync doesn't trigger any crash or
-> +# deadlock.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +_require_test
-> +_require_odirect
-> +_require_test_program dio-write-fsync-same-fd
-> +_require_command "$TIMEOUT_PROG" timeout
-> +
-> +[ $FSTYP == "btrfs" ] && \
-> +	_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: fix race between direct IO write and fsync when using same fd"
-> +
-> +# On error the test program writes messages to stderr, causing a golden output
-> +# mismatch and making the test fail.
-> +$TIMEOUT_PROG 10s $here/src/dio-write-fsync-same-fd $TEST_DIR/dio-write-fsync-same-fd
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/363.out b/tests/generic/363.out
-> new file mode 100644
-> index 00000000..d03d2dc2
-> --- /dev/null
-> +++ b/tests/generic/363.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 363
-> +Silence is golden
+>     XFS_IOC_GOINGDOWN: Inappropriate ioctl for device
+> 
+> because _require_scratch_shutdown is "supported" by overlayfs
+> but only when the _scratch_shutdown helpers are used.
+
+Yeah, I know this.
+
+> 
+> If the test is to be moved as is, it will need to opt-out of overlayfs
+> explicitly.
+
+I mean you have a "-o volatile" option test, that's an overlayfs specific
+mount option. If you need that test, that's an overlay specific test, that
+part can be an overlay specific test case. If not, we can use a generic
+case (from xfs/546) to cover overlay and other fs.
+
+BTW, we actually we have a common _scratch_shutdown helper, I'm wondering
+if it works for this test? Likes:
+
+  _scratch_shutdown -f
+  $XFS_IO_PROG -c syncfs $SCRATCH_MNT
+
+Can this work?
+
+Thanks,
+Zorro
+
+> 
+> > If not, I think we can have this overlay
+> > specific test case at first, and "move x/546 to generic" can be another job.
+> >
+> 
+> The reason I posted the overlayfs test is because for a while I noticed
+> that we do not have test coverage for "volatile" mount option
+> and adding this test coverage to this test was a very low hanging fruit.
+> So I would like to keep the overlayfs test regardless of the decision
+> about moving x/546 to generic.
+> 
+> Thanks,
+> Amir.
+> 
 
