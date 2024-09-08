@@ -1,144 +1,152 @@
-Received: from fout2-smtp.messagingengine.com (fout2-smtp.messagingengine.com [103.168.172.145])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 595E315C131
-	for <fstests@vger.kernel.org>; Sat,  7 Sep 2024 15:54:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.145
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75A94EACD
+	for <fstests@vger.kernel.org>; Sun,  8 Sep 2024 14:31:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725724482; cv=none; b=hsPzMpj6TMDu8AkMlf4HrItvkFbFiRE5GLhTL6XZu0PIeQh2gw54RhSs8skuF38tOqTey3ui45mL83ySUtGPYtiaz+wWCWFPp40h12MjmGQJW7sBWftkgvNuuEAYUUXnUMnczzung7SFMxfFG1441OkKF+MTNS2SQbBwd5RyK9M=
+	t=1725805918; cv=none; b=TK2PjGAofnWnTEudg8hJ0bmcLRdoaYjc/C0fE6t9O1kGAgck96ctO6K2dbF+7yRQoi8RXGeCtXuW24QUjgqf9pfxtDY+JZ0FMDhicEixgZ+GU+bh60cHyytvkEaX/HCTLEKLXjbMnrbrIyH8YVnl0XxxXB0GbC2X0Z+UQr61F4s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725724482; c=relaxed/simple;
-	bh=pZiHeesyIqRKchwYQlpCTTK+UUl2nRLWRSn3BnntGzI=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=IzU9q7FxX6Qn4e8FUV/lYMT2HRCVMwDk7ZO60BjEvaaLWGp9+7eiAx8ZnyAoMAG/o7bbBFgffPWrNG/OQfzqegVDkXAWtpxPo3wPgMxIhxYZENI+vgeum8LmmkEecJZ4w5ocly3ekNCiTgDKjx/o//Ved6j9am6dIsPiZMdZIgs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alyssa.is; spf=pass smtp.mailfrom=alyssa.is; dkim=pass (2048-bit key) header.d=alyssa.is header.i=@alyssa.is header.b=VcwaWNlz; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=cEf4uQqx; arc=none smtp.client-ip=103.168.172.145
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alyssa.is
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alyssa.is
+	s=arc-20240116; t=1725805918; c=relaxed/simple;
+	bh=2Jj3fnYrsfV1mSbZOI1JwosoZRzQ0RBBtKdaowKIsB8=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=Lwuk2Vjb4itMDv4FSbsfha6MZqc1XEaT5PKsVW4C8CBMhP/k0KE6dRjy1i0lq6hPHvOWExhBL3VO59OTR4xYI/JIWZ3p/fggnID+zdgTXiRwt0v3gFGW/AfkT6mmBhN5hSlNlqbwIpuVeMrePAJTuD3xboTMPvc3oezA3V3piuM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=raWgIBet; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=alyssa.is header.i=@alyssa.is header.b="VcwaWNlz";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="cEf4uQqx"
-Received: from phl-compute-08.internal (phl-compute-08.phl.internal [10.202.2.48])
-	by mailfout.phl.internal (Postfix) with ESMTP id 549371380176
-	for <fstests@vger.kernel.org>; Sat,  7 Sep 2024 11:54:38 -0400 (EDT)
-Received: from phl-mailfrontend-01 ([10.202.2.162])
-  by phl-compute-08.internal (MEProxy); Sat, 07 Sep 2024 11:54:38 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alyssa.is; h=cc
-	:content-transfer-encoding:content-type:date:date:from:from
-	:in-reply-to:message-id:mime-version:reply-to:subject:subject:to
-	:to; s=fm3; t=1725724478; x=1725810878; bh=3oK4gVTh1MKTi5GYOiqYT
-	q9WbxT57fjLibIzrJY0QmE=; b=VcwaWNlzAM02wpWwesiw0zqimtMlpC9rdYlEf
-	efhq1fZwB7qf02d0cwQOZ3pc0sMKIBDg/lozMTEZNAyYi4CtSPOUOeuWfseSYWtA
-	eGMQ4pXnFIRfF/VDTnd89BUEc9oe2WUEpCDQ0VH35f8uIvZsIUEwqh24ney9YoVs
-	2cYfyCm3FoYRNduRtP/XHQyUdQZESZPXEVwfPQSjrI0gc7byQcPaV8i9+Tyj2ZbR
-	1QFvCYdYhb6R3x6j357dIZpegl3+10OOMgufUGtTxaKicieF9pRv1O18ScczwfbP
-	ErRrjiEXoBxaSRhkck2v73IAO0y0Ky5xf7MRSN1huXJOgu+VQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:content-transfer-encoding:content-type
-	:date:date:feedback-id:feedback-id:from:from:in-reply-to
-	:message-id:mime-version:reply-to:subject:subject:to:to
-	:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-	fm1; t=1725724478; x=1725810878; bh=3oK4gVTh1MKTi5GYOiqYTq9WbxT5
-	7fjLibIzrJY0QmE=; b=cEf4uQqxXq8IY3HFKMvG/Knte10LAAcMq3Ib8hc0ziWO
-	7E65SLLLKJC8IqmIWNIK9glvEEeFHlkjPI3BjA1htkQ9HJA7IUfE8D9t/LLmgkQd
-	7uI4z2w5PYJ1G8evsq/+cBeoJvk2BkkoV8rkGyx5jQWvv5NpssOgKfZIFsmh1Zz4
-	o6g3gXVolXvNQkXFMBSIRSqNHzhIr1OALy1dFbh2wlwcpgAmbM4cSnuky2wL9Juu
-	01spaMgGI5+otCZbXDQKn97sdPrRTecZB8PJonTaHbvO5ECPoPF2TU5EWwVtHTvb
-	AJEx8NwqDOxMqgFYUuN1zavbBYHAVxD9MkNCq9I5Pg==
-X-ME-Sender: <xms:PnfcZjTPZZYJogGyGwKSfYBuNZA9810eh3v_pVtFPMAbZ90g7sG45g>
-    <xme:PnfcZkwNaOUTgLlj1-_oGM7CSdiMR5ZeBemT0gIkNzK7o8IU3Dtz83GlAWZw8_miW
-    dqvhLDT3viLHV9jiA>
-X-ME-Received: <xmr:PnfcZo1JsErynzYxFCbBNQ19QE-C85yBsu10gcjK0h43yphrtAP0rt4AAyjoC4cCp3eP7G7tA_iLz7M70UEj0njpB1g>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeftddrudeifedgleejucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
-    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucenucfjughrpefhvffuff
-    fkofgggfestdekredtredttdenucfhrhhomheptehlhihsshgrucftohhsshcuoehhihes
-    rghlhihsshgrrdhisheqnecuggftrfgrthhtvghrnhepleejtdeiffegveejuedvkeevie
-    etkefgleeuleehfeduleekueejffeikeeggfeinecuffhomhgrihhnpehgihhthhhusgdr
-    tghomhenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    hhihesrghlhihsshgrrdhishdpnhgspghrtghpthhtohepuddpmhhouggvpehsmhhtphho
-    uhhtpdhrtghpthhtohepfhhsthgvshhtshesvhhgvghrrdhkvghrnhgvlhdrohhrgh
-X-ME-Proxy: <xmx:PnfcZjBrA4jqRJczOnjNLSJvVy3sOPvNEs8EPANXGb6cTIBeDSgnMw>
-    <xmx:PnfcZsiHRagKnx8WlmkO2NAZYmveEX6CbEpm_5TxzkQqdR2VE5JhjQ>
-    <xmx:PnfcZnoc3zpEEda5Mf28Fohst6EK3qGX3z1iTL5kg8qMbPIWep4bxA>
-    <xmx:PnfcZnhNqgOGUMnc150EioUiPWKLnxsB6AIPgQ3kXd4jKksM8JCCMg>
-    <xmx:PnfcZoasShFUThezQWuHJaIGameGxt3fscJh98kceJeqxOskuDsfsrKl>
-Feedback-ID: i12284293:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA for
- <fstests@vger.kernel.org>; Sat, 7 Sep 2024 11:54:37 -0400 (EDT)
-Received: by sf.qyliss.net (Postfix, from userid 1000)
-	id A139681798E0; Sat, 07 Sep 2024 17:54:35 +0200 (CEST)
-From: Alyssa Ross <hi@alyssa.is>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="raWgIBet"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 53837C4CEC3;
+	Sun,  8 Sep 2024 14:31:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1725805917;
+	bh=2Jj3fnYrsfV1mSbZOI1JwosoZRzQ0RBBtKdaowKIsB8=;
+	h=Date:From:To:Subject:From;
+	b=raWgIBetg8bvh5FI1nnyBbelsxikqstw43sh7dL71Nq6BFniym3PiVx1nElm73HM4
+	 02kARHOLKksEomhQEiJQALzpJfdjP5yod1Mw0ogpggUW9ImtKWi1ze6NSyLBRzc9k6
+	 IwdaH/GyVvlLAg1yYTas9EMReGHotJONy+HsYs4Ip90fB4Gf0pJtr+4Y0PK/3wVSjd
+	 SEo4nfCq+sDI9noKB0JMQwCkGIsgFDm/ke6jyX82ajxSwnQHtAHxqrbWNchae+8wki
+	 d2rQVgQ5kPaXIaOhdwAGXWDXx4VQ6sUd1+5Puf0jS/8Nf6SOoehouopgQelrElL74t
+	 ZDMuoz1+tqOnQ==
+Date: Sun, 08 Sep 2024 22:31:54 +0800
+Message-ID: <5129914522d6c2722a877ed68ab65059@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [RFC PATCH] generic: test negative timespecs are accurate
-Date: Sat,  7 Sep 2024 17:45:28 +0200
-Message-ID: <20240907154527.604864-2-hi@alyssa.is>
-X-Mailer: git-send-email 2.45.2
+Subject: [ANNOUNCE] fstests: merge v2024.08.25 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vJjpZdnioHlm"
+Content-Disposition: inline
 
-Link: https://github.com/koverstreet/bcachefs/issues/743
-Signed-off-by: Alyssa Ross <hi@alyssa.is>
----
-This is an adapted version of generic/258, but it tests that the stored 
-timestamp is accurate to the second, rather than just testing the 
-timestamp remains negative.  I created a new test rather than just
-making 258 more precise, because I understand that there may be
-filesystems that don't store timestamps that accurately by design.
-As an example, I've heard that FAT only has 2 second precision, so this
-patch is an RFC because I'm not sure how I should write a _require
-function (if at all) that restricts the test to filesystems that are
-expected to be able to do this.
 
- tests/generic/363     | 26 ++++++++++++++++++++++++++
- tests/generic/363.out |  2 ++
- 2 files changed, 28 insertions(+)
- create mode 100755 tests/generic/363
- create mode 100644 tests/generic/363.out
+--vJjpZdnioHlm
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/tests/generic/363 b/tests/generic/363
-new file mode 100755
-index 00000000..50459d01
---- /dev/null
-+++ b/tests/generic/363
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2011 Red Hat, Inc.  All Rights Reserved.
-+# Copyright (c) 2024 Alyssa Ross.  All Rights Reserved.
-+#
-+# FS QA Test 363
-+#
-+# Test timestamps prior to epoch with nanosecond components are
-+# accurate to the second.
-+# bcachefs was slightly off.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick bigtime
-+
-+_require_test
-+_require_negative_timestamps
-+
-+TESTFILE=$TEST_DIR/timestamp-test.txt
-+
-+# Create a file with a timestamp prior to the epoch
-+touch -d "1969-07-20T03:55:59.750000000+0100" $TESTFILE
-+stat -c %X $TESTFILE
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/363.out b/tests/generic/363.out
-new file mode 100644
-index 00000000..052bacfd
---- /dev/null
-+++ b/tests/generic/363.out
-@@ -0,0 +1,2 @@
-+QA output created by 363
-+-14245441
--- 
-2.45.2
+Hi all,
 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2024.08.25 version.
+
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+b14652801e2e generic/615: add to the quick group
+
+New commits:
+
+André Almeida (1):
+      [5381898ebaef] common/config: Correctly ignore {TEST|SCRATCH}_DEV for tmpfs
+
+Christoph Hellwig (6):
+      [873e36c9c3cc] statx.h: update to latest kernel UAPI
+      [0e5f196d0a6a] add a new min_dio_alignment helper
+      [4a571eaae784] xfs/424: don't use _min_dio_alignment
+      [515e61fdc791] generic: don't use _min_dio_alignment without a device argument
+      [ee799a0cf1d4] replace _min_dio_alignment with calls to src/min_dio_alignment
+      [b14652801e2e] generic/615: add to the quick group
+
+Darrick J. Wong (1):
+      [d77a99817574] xfs: add a test for v1 inodes with nonzero nlink and onlink fields
+
+Filipe Manana (1):
+      [e4030c9b6b00] btrfs: test send clones extents with unaligned end offset ending at i_size
+
+Jeff Layton (1):
+      [a49385587950] generic/755: test that inode's ctime is updated on unlink
+
+Ma Xinjian (1):
+      [1a7f5bbcdd51] xfs/348: add helper tags
+
+
+Code Diffstat:
+
+ .gitignore              |  1 +
+ common/config           |  4 +--
+ common/rc               | 15 ----------
+ src/Makefile            |  2 +-
+ src/min_dio_alignment.c | 66 ++++++++++++++++++++++++++++++++++++++++
+ src/statx.h             | 38 +++++++++++++++++++----
+ tests/btrfs/319         | 80 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/319.out     | 16 ++++++++++
+ tests/generic/091       |  2 +-
+ tests/generic/095       |  7 +++--
+ tests/generic/114       |  2 +-
+ tests/generic/240       |  2 +-
+ tests/generic/252       |  2 +-
+ tests/generic/263       |  2 +-
+ tests/generic/329       |  2 +-
+ tests/generic/330       |  2 +-
+ tests/generic/450       |  2 +-
+ tests/generic/465       |  2 +-
+ tests/generic/521       |  2 +-
+ tests/generic/538       |  2 +-
+ tests/generic/551       |  2 +-
+ tests/generic/591       |  2 +-
+ tests/generic/615       |  2 +-
+ tests/generic/617       |  2 +-
+ tests/generic/755       | 39 ++++++++++++++++++++++++
+ tests/generic/755.out   |  2 ++
+ tests/xfs/194           | 11 +++----
+ tests/xfs/201           | 47 +++++++++++++++--------------
+ tests/xfs/237           |  2 +-
+ tests/xfs/239           |  2 +-
+ tests/xfs/348           |  7 +++++
+ tests/xfs/424           |  2 +-
+ tests/xfs/556           |  2 +-
+ tests/xfs/608           | 39 ++++++++++++++++++++++++
+ tests/xfs/608.out       |  7 +++++
+ 35 files changed, 345 insertions(+), 74 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--vJjpZdnioHlm
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmbdtTMACgkQlNbPkfr2
+tMwEyBAAxjJ2iessxYwu621nd6Q9hie33h6hBD3AdpnBTYY8BWZaNTX2gFYvsQ0e
+tx/nbBeoxQmzQ2NQAXLR1/vnPzcbUiBYXH1w1lhpeasuRnuDHGpr0sbQgxlQ9jS/
+KQB/EiBCxGR4rBIKjPqsaTd8d83Xex1RLDAk3hBO3m9r2GQl7834N5hroeZEDtOe
+0Ysplo8w0bzQCeKVgZS+sH6FH6xytqAe1DVZXJu84XR7iAYRysy930RGBfnOl15e
+dHzzqfFicqOrXrjTiymivLG/RTwRB5FkIj2egE3CV4afy9rYBvsUZRekbfwohjy4
+G7lQmOp0NbO/+egcM6mD+VHRvoonbofYdMaZ/C4lXYu8o6frY5BDW4Z/Et9nAJeh
+eoIK7ppFGZ8Lp9pDKB8NNvbE9+r+MUaQ5HCjHGjfDS1JJFJjrqc9Lv+E8BTS77NS
+7oqkw6VUuwoFfCWo9p8uC6plIReuE3AWhy32VMoTUfji6p3brgAdpeYD4rrIYwvg
+8BlaeSOunNMyoJ0tRG7oTTJxw/UhJpZEA+sGW+i5TIX5EEIFwZ2U+hzP7VgDR2Y4
+6m5+askfHzOb8A4IJOk6LvokFJG/fPEfzz99efFYYurOFA5kT0i4s8mFMCHYTqkU
+5ZXIjvjV9QCUKKJw66NFxjnJmzLmsNPLY5S6fUKqrFaIK+yZTsk=
+=H3wl
+-----END PGP SIGNATURE-----
+
+--vJjpZdnioHlm--
