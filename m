@@ -1,188 +1,164 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AD23156243
-	for <fstests@vger.kernel.org>; Sun,  8 Sep 2024 14:50:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E7751B140A
+	for <fstests@vger.kernel.org>; Mon,  9 Sep 2024 08:01:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725807061; cv=none; b=Gz9/b5AQRdv3zBN9/svyYT7iOm33q80UW1upVPUKN8GQxaxj0rMpnKsnkPBGrlyANtjtoENwW1ZKNaoA5JE+81kwc6ILSB/3RENkT/V+Vb3sp2DR6R2atm33QKU7L4bQ0vQP+nJeHLbjO4+MJjtUd6fqrjYFdyi3RSiNWeMpEIQ=
+	t=1725868902; cv=none; b=p+56OZ/tZ3NeZHQGf8Z1W06P/oAaqa9q3uGi+zy1r7DpJJfAWXsAE3Aypa+5lAr9g5eaullYi0gO+wWrUahghbvN4a1MBb7HkyVWDVP8zcU4sxsbKbhs3c0lgFLne/8VqxfZqdXMRFY8zs2BnoYgRiAQgn2+suu4gaOOCMRdilM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725807061; c=relaxed/simple;
-	bh=bEigyyk3fUL2OXWbaymh7zs5XvmqwrDi1/7z+AS+3rM=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=XNGthI7yZiG1r5igWc8Nc0xqExp1vPZfrhGAiGruE+YXCtOgysgYDW/h1akrRrpnmvO+t8bIInpTjstrnKXSkfdwmMtub7gW6zEY3AnSsz3P0YUpMWL6ooIz+WvzuiV1mqdlbqLGuwiJFeqohTFtiPsnlz5tTK56V/Srt/HtfGE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZXKIrL4z; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1725868902; c=relaxed/simple;
+	bh=49KNpt/o7JI16q0Cdy0zhr3Zs/67PGiSVEM+e3ibCkw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KYtCj22bKamEcndH5d5WqDXmrbvhktooVbw9HHOq/ak3wrzKWuHu/mWASf3q2R18oy9hxm/W7xUqBawcgNEbtSTCCfruA54Zq8xwvbt3Hu3oJjEHoOBaXe5f5nErEM8Zbi+6DX87tDMD0FYS8CYX5RLMRcDf8G35ecVyQyiKd0I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=eR0jIvYt; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZXKIrL4z"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 031CDC4CEC3;
-	Sun,  8 Sep 2024 14:50:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1725807058;
-	bh=bEigyyk3fUL2OXWbaymh7zs5XvmqwrDi1/7z+AS+3rM=;
-	h=Date:From:To:Subject:From;
-	b=ZXKIrL4zPbnlPlcleKvXjo9H2kfoNX+0wMtPAvByhiCc4SgkCSg8i7TBs9lwpYVna
-	 mpn09uT4lol1HvAJasBGXsGkmdSyzWI8hdDZESmBXCxmPCgrDqIheW6/R8e3svEIF9
-	 2F2z4MJBWrN6h+0fZVL95kJ2oNt0ORcGMQGkPeKj2us0BblnKSjuTz4ncFswoPsQt4
-	 zWEHUch5YCIfW+8qYNsUDYYUxffE0nUpYUd1wfJEB/jbiE4O+Zb9f5M+fs79eFzTp8
-	 rN/peCLin4Un73+fDrabswozFT/XO9RBN40esGxX/7dpUl91TNkXsV4UyghLZwp8Qg
-	 DM9PnRaoaCnWg==
-Date: Sun, 08 Sep 2024 22:50:55 +0800
-Message-ID: <06928d2fd388655d9e8178862357cedd@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.09.08
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="eR0jIvYt"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1725868898;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=AE9pigql2sRaucjKkuFUiX9JzxM4GCn+uAlTXcy1X3g=;
+	b=eR0jIvYtm6f7fIOYsW0/Cf5nppcMugc5TT0vCa/S0UXNGDGorG1/4bhpIjOnOR5EubyLNJ
+	t1XmJc33WSui/ZS4gTt8pgOW+sV0G9UEuEjr/5WHT8A4weEgAtPGWyyZ4pn+vozD3ayZBI
+	52E49nmIOboqFUnDE4PMNv88H3q1Pxs=
+Received: from mail-oa1-f70.google.com (mail-oa1-f70.google.com
+ [209.85.160.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-315-yks_lPg1NzOnrYG3col8eg-1; Mon, 09 Sep 2024 04:01:37 -0400
+X-MC-Unique: yks_lPg1NzOnrYG3col8eg-1
+Received: by mail-oa1-f70.google.com with SMTP id 586e51a60fabf-277f9af7500so3663084fac.0
+        for <fstests@vger.kernel.org>; Mon, 09 Sep 2024 01:01:37 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725868896; x=1726473696;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=AE9pigql2sRaucjKkuFUiX9JzxM4GCn+uAlTXcy1X3g=;
+        b=cozj5sOHWfWZEFCzCASuAmdbBDokaqBifG3AF0hRlMcTpE8GvlXsgKPCLR14y7qRii
+         ycguVOEgUInrRayoKb6bsin0k9qgvJo4+5YxsyJDb4YIfVzwe4aDDTB6ZRokVbP496xm
+         5HyArcNCC+UrFyKMGeKqFxLI27MnIj4+LNRCepLXyZz3a/giINVJR65yU/zdbD6E57jy
+         Zuw2RBmBmBFZVpwW2xgi9fvuqI1YaWt7CTb+R4ZB/nTgklnDQ2LI7b3/6pKahJgg5Sxd
+         uwOojS1A5D0TYt7/UEVGJxlrN0XRWIxIx/kuOLVG3ii+OUiFzwEAWA0lsOL93sOu1kVZ
+         JleA==
+X-Gm-Message-State: AOJu0YxLqPeqEQsLbT1wl6vds8Q6UuUWCPhi1xKQiJ6nptsz/lqk5GS5
+	CKjndQT9S0HKjCVqghjOurC3D2xzaXqkBMP+LXdLaL1eXLIzmdI/0VMaVJ346BBAgoRQLUXWv70
+	fb+kbW4gRS/EUEPoGax5CbM7AQPrZKvoI77bsQGFTCx3t1ce2Y7lmnDRYBkqtPoHOGg==
+X-Received: by 2002:a05:6870:970d:b0:278:3de:c8de with SMTP id 586e51a60fabf-27b9db2fd83mr3502405fac.24.1725868896390;
+        Mon, 09 Sep 2024 01:01:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGMuG6YQ9rt2WbdhbTBJ3YtyzbOsR47y4gXbGQghHbf/tVjBBcNWrQh3TrdpQom3F13LVCoOQ==
+X-Received: by 2002:a05:6870:970d:b0:278:3de:c8de with SMTP id 586e51a60fabf-27b9db2fd83mr3502378fac.24.1725868895993;
+        Mon, 09 Sep 2024 01:01:35 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7d823736324sm2828256a12.18.2024.09.09.01.01.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 09 Sep 2024 01:01:35 -0700 (PDT)
+Date: Mon, 9 Sep 2024 16:01:32 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Alyssa Ross <hi@alyssa.is>
+Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
+Subject: Re: [RFC PATCH] generic: test negative timespecs are accurate
+Message-ID: <20240909080132.4wliimcb2y4bt7u3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240907154527.604864-2-hi@alyssa.is>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="poQGE7lQIX5s"
-Content-Disposition: inline
-
-
---poQGE7lQIX5s
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20240907154527.604864-2-hi@alyssa.is>
 
-Hi all,
+On Sat, Sep 07, 2024 at 05:45:28PM +0200, Alyssa Ross wrote:
+> Link: https://github.com/koverstreet/bcachefs/issues/743
 
-The for-next branch of the xfstests repository at:
+Great, a bcachefs regression test case :)
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Can you add a bit more details in commit log, not only a link.
 
-has just been updated and tagged as v2024.09.08 release.
+> Signed-off-by: Alyssa Ross <hi@alyssa.is>
+> ---
+> This is an adapted version of generic/258, but it tests that the stored 
+> timestamp is accurate to the second, rather than just testing the 
+> timestamp remains negative.  I created a new test rather than just
+> making 258 more precise, because I understand that there may be
+> filesystems that don't store timestamps that accurately by design.
+> As an example, I've heard that FAT only has 2 second precision, so this
+> patch is an RFC because I'm not sure how I should write a _require
+> function (if at all) that restricts the test to filesystems that are
+> expected to be able to do this.
+> 
+>  tests/generic/363     | 26 ++++++++++++++++++++++++++
+>  tests/generic/363.out |  2 ++
 
-Release Notes:
-1) There're 8 new test cases in this release, include btrfs/321, g/363,
-   g/364, x/802 x/803, x/804, x/805 and x/806.
-2) The fsx.c is improved, to support eof page pollution for eof zeroing
-   test coverage. New test case g/363 runs that.
-3) The overlay/013 has been removed.
-4) New tests for xfs_scrub services and xfs properties, refer to x/802~806.
-5) Two regression test cases for btrfs known issues, they're btrfs/321 and
-   g/364.
+The g/363 has been taken, please rebase to latest for-next branch.
+You can use `xfstests/tools/mvtest generic/363 generic/365` to change
+the case number, before rebasing.
 
-More updates and fixes refer to below, thanks for all these contributions!
+>  2 files changed, 28 insertions(+)
+>  create mode 100755 tests/generic/363
+>  create mode 100644 tests/generic/363.out
+> 
+> diff --git a/tests/generic/363 b/tests/generic/363
+> new file mode 100755
+> index 00000000..50459d01
+> --- /dev/null
+> +++ b/tests/generic/363
+> @@ -0,0 +1,26 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2011 Red Hat, Inc.  All Rights Reserved.
+> +# Copyright (c) 2024 Alyssa Ross.  All Rights Reserved.
+> +#
+> +# FS QA Test 363
+> +#
+> +# Test timestamps prior to epoch with nanosecond components are
+> +# accurate to the second.
+> +# bcachefs was slightly off.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick bigtime
+> +
 
-Thanks,
-Zorro
+As this's a bcachefs regression test:
+https://lore.kernel.org/linux-bcachefs/20240907160024.605850-3-hi@alyssa.is/
 
-Thanks,
-Zorro
+So better to mark as:
+if [ "$FSTYP" = "bcachefs" ];then
+	_fixed_by_kernel_commit xxxxxxxxxxxx "bcachefs: Fix negative timespecs"
+fi
+(replace the xxxxxxx if it's merged on mainline linux)
 
-The new head of the for-next branch is commit:
+Others looks good to me, with above changes, I'd like to
 
-f71228e304b2 btrfs/319: make the test work when compression is used
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-New commits ([N]ew, [U]pdate, [D]elete):
+> +_require_test
+> +_require_negative_timestamps
+> +
+> +TESTFILE=$TEST_DIR/timestamp-test.txt
+> +
+> +# Create a file with a timestamp prior to the epoch
+> +touch -d "1969-07-20T03:55:59.750000000+0100" $TESTFILE
+> +stat -c %X $TESTFILE
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/363.out b/tests/generic/363.out
+> new file mode 100644
+> index 00000000..052bacfd
+> --- /dev/null
+> +++ b/tests/generic/363.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 363
+> +-14245441
+> -- 
+> 2.45.2
+> 
+> 
 
-Aleksa Sarai (2):
-[U]      [1e207662b3ce] open_by_handle: verify u32 and u64 mount IDs
-[U]      [6171b03c92a6] generic/756: test name_to_handle_at(AT_HANDLE_MNT_ID_UNIQUE) explicitly
-
-Amir Goldstein (1):
-[D]      [55158bfc9946] overlay: deprecate test t_truncate_self
-
-Brian Foster (4):
-[U]      [bc0c52655c5a] fsx: don't skip file size and buf updates on simulated ops
-[U]      [11dbbdff1737] fsx: factor out a file size update helper
-[U]      [9e2b0f4c9579] fsx: support eof page pollution for eof zeroing test coverage
-[N]      [fea26871799f] generic: test to run fsx eof pollution
-
-Chao Yu (1):
-[U]      [c88734099723] f2fs/003: add missing _fixed_by_kernel_commit line
-
-Chen Hanxiao (1):
-[U]      [0afb586a7e77] generic/362: skip test on NFS mount
-
-Darrick J. Wong (7):
-[U]      [1dbd10d1bbca] generic/453: test confusable name detection with 32-bit unicode codepoints
-[U]      [c63a6fe02353] generic/453: check xfs_scrub detection of confusing job offers
-[N]      [652692a8e475] xfs: test xfs_scrub services
-[U]      [18c331d98c29] xfs/004: fix column extraction code
-[U]      [fff4042b60be] xfs: refactor statfs field extraction
-[U]      [c9b3c1c392fd] common/xfs: FITRIM now supports realtime volumes
-[N]      [87f14ee1f79f] xfs: functional testing for filesystem properties
-
-Filipe Manana (3):
-[U]      [a8d61229a949] btrfs/319: add git commit ID
-[N]      [136c5099d07e] generic: test concurrent direct IO writes and fsync using same fd
-[U]      [f71228e304b2] btrfs/319: make the test work when compression is used
-
-Qu Wenruo (2):
-[U]      [869685f2f308] fstests: btrfs/125: do not use raid5 for metadata
-[N]      [66a2179efbde] fstests: btrfs: test reading data with a corrupted checksum tree leaf
-
-
-Code Diffstat:
-
- .gitignore                    |   2 +-
- common/config                 |   1 +
- common/rc                     |  38 +++++++++
- common/systemd                |  73 +++++++++++++++++
- common/xfs                    |  60 +++++++++++++-
- doc/group-names.txt           |   1 +
- ltp/fsx.c                     | 134 +++++++++++++++++++++++--------
- src/Makefile                  |   4 +-
- src/dio-write-fsync-same-fd.c | 106 +++++++++++++++++++++++++
- src/open_by_handle.c          | 178 ++++++++++++++++++++++++++++++++++--------
- src/t_truncate_self.c         |  26 ------
- tests/btrfs/125               |   2 +-
- tests/btrfs/319               |  21 +++--
- tests/btrfs/319.out           |   4 -
- tests/btrfs/321               |  83 ++++++++++++++++++++
- tests/btrfs/321.out           |   2 +
- tests/f2fs/003                |   3 +
- tests/generic/062             |   4 +
- tests/generic/362             |   2 +
- tests/generic/363             |  23 ++++++
- tests/generic/363.out         |   2 +
- tests/generic/364             |  31 ++++++++
- tests/generic/364.out         |   2 +
- tests/generic/453             | 111 +++++++++++++++++++++++---
- tests/generic/756             |  65 +++++++++++++++
- tests/generic/756.out         |   5 ++
- tests/overlay/013             |  41 ----------
- tests/overlay/013.out         |   2 -
- tests/xfs/004                 |  19 +++--
- tests/xfs/176                 |   4 +-
- tests/xfs/187                 |   6 +-
- tests/xfs/541                 |   6 +-
- tests/xfs/802                 | 140 +++++++++++++++++++++++++++++++++
- tests/xfs/802.out             |   5 ++
- tests/xfs/803                 | 137 ++++++++++++++++++++++++++++++++
- tests/xfs/803.out             |  53 +++++++++++++
- tests/xfs/804                 | 122 +++++++++++++++++++++++++++++
- tests/xfs/804.out             |  46 +++++++++++
- tests/xfs/805                 |  66 ++++++++++++++++
- tests/xfs/805.out             |   9 +++
- tests/xfs/806                 |  63 +++++++++++++++
- tests/xfs/806.out             |   8 ++
- 42 files changed, 1532 insertions(+), 178 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---poQGE7lQIX5s
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmbduagACgkQlNbPkfr2
-tMxrehAApFdyD0tbq1937TI45yGn1QTkNPmnVckgXKmVPPJ0rcDpr0SMslpbENO9
-barH4FFyvCz+bq4ibaKsyBYFkJshU592f1S5E8/+n+Hz4/nQXDMLkiVQivwObcYe
-FaU/eGCnBs/3SD/MsfkBSTAAXkTloIJ7R9kBSXyFr6cpYFaFxYdMd0G3VBgZOsMW
-IvcgDe+M2Di8b5M0aEwo/BUzgUZQsMTgoAfGDUfMerrjTgVEFbN/gU2u0XIgi20M
-gn3qPVpa6g1txPD/Tpgdn4EOkHHvwMmAZVeKwEwNlWw75DG5vjgeGeqdEAWLqqRq
-mDgu+YtVr4+FWTmgRFATbAhRU24LGvpGSOsg+G6SViELq4vbThIwurhqBNaBqB/c
-ZAUdVwvbFGbkVci8KgL+nvE1TyaMmMRblwOuTqbpqSYpffIkDoR34hbIIiA4y6Yb
-rmXV4IeepzTkzolIXwslU1lHzpXXl+IiCwjXRQ/KokuIAvEchJQyuUkN99UyAFMJ
-dFURSYNVl/a2aVEBucnZh8rQD0NkHLwghDOTqU/HMCsR2p4yYPCkGj9hC8Ll5Ovv
-xXLUZs7nPzvxh0hyRgVftLySixhizWESXlT/QWR8q2BlBywUykeeGLXYpSqoGa04
-PByvzqVduEpE2lMDI8TgxwDGXohcz8leceaVPmpo4x1drGdIay4=
-=VvHM
------END PGP SIGNATURE-----
-
---poQGE7lQIX5s--
