@@ -1,186 +1,206 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from fhigh3-smtp.messagingengine.com (fhigh3-smtp.messagingengine.com [103.168.172.154])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79282192B61
-	for <fstests@vger.kernel.org>; Tue, 10 Sep 2024 14:18:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D4981DFD1;
+	Tue, 10 Sep 2024 15:04:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.154
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725977936; cv=none; b=LCRJFG7NZc/6K5WTP2OMdtOtAfa+jLLQJ3lKQTsUe2rHZWnqzLhZw0Ooot4J8Dkqa1jRfDRzFobsrNWUik8wUjFlxpyzjDYgVCTNLecNWg150PpjfhTA1tEhAOi7qdIhArsfvFCo5tukdEwRb5Mprmgr2aGWaYiqx1efEa4S+zY=
+	t=1725980661; cv=none; b=Ili/u7QAbT1b8fe6yjKQUM+/uGIlTu9HBfkHLFo0swmMHJsuQVnfYBoRfhxDyKmAi11tE7eWSAc9ekAa/Wbb2wD009arnEo9/qW40UUw5JlkG0MV8BdL5ZimTsQ5W21YiH82N7hH++Ghun1JpD6m3GMhXwVVKNSD3M64M8QVqsE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725977936; c=relaxed/simple;
-	bh=jiHUyJ6x73YXYkIrcOzQgXfAtScry0+JeJor9h0eoTQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UyLK5hEJqlaAUJhvIfLUZDV085Ts+5QYoNZA1hjcLiX/JgKD2Xf95AoXrIVdKCKYK2AIgYRTOWJKafexMTpvx0N2tZpm1QJuoS7lX5m1doAW9DOZsp1NVGOiQhtTgSqSHHykKf0RKYo6BcUsFDvO5Qv1XQK9Jv+4cJM4Fg4Wr6M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HuyQgDMF; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1725980661; c=relaxed/simple;
+	bh=N7P1T6Kvc4/Yh/5fEfz+gkYqzdjCXV5jPHq9NhdWqbY=;
+	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
+	 MIME-Version:Content-Type; b=bY/3t8HX18tcidSs0n+O+1YKq5yrM3tKs90juuJJ6fGVaNH1LzgugB7mnPW4rtCHIwMcFrM+1wpJNNIgtSc+TN9q09qajmed9Sen7DYfs6uVzP5ew46jpr89k5NEVJg1ChWktZNDg9t1Z9W7KfA328Fco+vVrSJOgFOfl3fRqRo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alyssa.is; spf=pass smtp.mailfrom=alyssa.is; dkim=pass (2048-bit key) header.d=alyssa.is header.i=@alyssa.is header.b=LHNi8WUS; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=hswDu5xG; arc=none smtp.client-ip=103.168.172.154
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alyssa.is
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alyssa.is
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HuyQgDMF"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1725977933;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=TC6kiy0r0pYGURKWrV6KFL2eaR4/p8VaGxZ9KXZi1so=;
-	b=HuyQgDMFEsSqUUx/qEFQgUJK7nac+yM/MkPM2L5G+s/XQcdj0X8Z8TXxuZaE/+Tjx22oog
-	QWMRRuRe6U5fOKLGKWuLienA05viyV/Tv5JAYARKMBPRw/Y7aUZrBWFp9+rAj8Gr6C6IMI
-	JuD7PFyD8fp67QchLN24utiBn1C+n78=
-Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-448-AG-AruinPm25KX2tqnYbww-1; Tue,
- 10 Sep 2024 10:18:50 -0400
-X-MC-Unique: AG-AruinPm25KX2tqnYbww-1
-Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id D99B41955D55;
-	Tue, 10 Sep 2024 14:18:48 +0000 (UTC)
-Received: from bfoster (unknown [10.22.16.69])
-	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id AC13119560A3;
-	Tue, 10 Sep 2024 14:18:47 +0000 (UTC)
-Date: Tue, 10 Sep 2024 10:19:50 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, djwong@kernel.org, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test log recovery for extent frees right after
- growfs
-Message-ID: <ZuBVhszqs-fKmc9X@bfoster>
-References: <20240910043127.3480554-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=alyssa.is header.i=@alyssa.is header.b="LHNi8WUS";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="hswDu5xG"
+Received: from phl-compute-03.internal (phl-compute-03.phl.internal [10.202.2.43])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id 6D2A811401C4;
+	Tue, 10 Sep 2024 11:04:17 -0400 (EDT)
+Received: from phl-mailfrontend-01 ([10.202.2.162])
+  by phl-compute-03.internal (MEProxy); Tue, 10 Sep 2024 11:04:17 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alyssa.is; h=cc
+	:cc:content-type:content-type:date:date:from:from:in-reply-to
+	:in-reply-to:message-id:mime-version:references:reply-to:subject
+	:subject:to:to; s=fm3; t=1725980657; x=1726067057; bh=5JhK7hUypX
+	/GjDaw+3onzCocPeW1IDBBuZSItakM/3E=; b=LHNi8WUSWhYY3EXrw3n1PPLRml
+	gVv+Lvdx70aIPYdFUXMelygywGHJcaNK5Xkto8eXBnyAqENfgmiA6BkXXOGLqzmJ
+	1RowphZzPzDUvXInTCJX06aSusXZZgZh+UZrMMgkraceJNuELVWUmJSyEytifNAQ
+	WiyVGpbUEYXzuDOQb9E67IiIFw6ogO9ftv+z/q+21G4sOlAnhbXMCC84oHlZOswl
+	JSMTmR18lL9tjHC/NXU1vxAWUrJyA38+NgEaH6qb1jd/sM1fGnq7lc4O0jZ0/Atz
+	5uXTvujwuqjS/TKsCvNwRGw0pGUs9hfjGeer+1VzZK7wRsuGu64qavUAiTdg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-type:content-type:date:date
+	:feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+	:message-id:mime-version:references:reply-to:subject:subject:to
+	:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+	fm1; t=1725980657; x=1726067057; bh=5JhK7hUypX/GjDaw+3onzCocPeW1
+	IDBBuZSItakM/3E=; b=hswDu5xGdezvdEUSEFca+3DIvKg86cUOdLHNJV/o5Oiu
+	chw5o5M7pJf4IKi9VoW+xOPfAe6JhemvLte5pwLqBxGv4DDH4kfdjOMmalIiuduP
+	r5SOFR5qNyeCrfWvzoVDd4QGtUFWIMFka7qPH3rAqOE3ogEijdcB26pCHh4SRfWp
+	aD4WlRIIcN84vNjmsNJ+tYtkrmBALVFHiS1fkaCOlQ05c8c0Qtbmu4Y5X7EOcvZQ
+	nF2/Hh5/EXZsFpYOBNRPOy+z70F/hWNNcT7rNSs6jcDGJhDmYqbW7VSS5gG5v1jd
+	d7zJbH+t4msYfBV0im1IfrPIGGS/zhQbjSOoWiHNGg==
+X-ME-Sender: <xms:8V_gZmmWCdGr9NKZj6ytucZMcvA5X7fnz44cQyVFXC6L-uY_N6dszA>
+    <xme:8V_gZt18-Zz1ESt2r9fC8e7wGBYA0Oi_sGtbW_CQFoMP3JimVg43AXvM5pA0Fv9Gg
+    3YZWsBuAYEtku1dXw>
+X-ME-Received: <xmr:8V_gZkoQhbVVFHsDlnPUQX9dSZ5pou0gY8um94k-3wUnSLL6OqP8CICmpTZxn6WuaN0XeZuFSX1RGgZgsRsC1o1aq0I>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeftddrudeiledgjeehucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
+    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnh
+    htshculddquddttddmnecujfgurhephffvvefujghffffkgggtsehgtderredttdejnecu
+    hfhrohhmpeetlhihshhsrgcutfhoshhsuceohhhisegrlhihshhsrgdrihhsqeenucggtf
+    frrghtthgvrhhnpeeiledthfdvjeefhfduueekvedtvdfgleelfeetvdetkeekvefffedt
+    feegfeevffenucffohhmrghinhepghhithhhuhgsrdgtohhmpdhkvghrnhgvlhdrohhrgh
+    enucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehhihes
+    rghlhihsshgrrdhishdpnhgspghrtghpthhtohepfedpmhhouggvpehsmhhtphhouhhtpd
+    hrtghpthhtohepiihlrghnghesrhgvughhrghtrdgtohhmpdhrtghpthhtohepfhhsthgv
+    shhtshesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdgstg
+    grtghhvghfshesvhhgvghrrdhkvghrnhgvlhdrohhrgh
+X-ME-Proxy: <xmx:8V_gZqnXZUtvBP6n2pVY96qoVljZOEooOBMPi7iiVSOQJ4CAncESuQ>
+    <xmx:8V_gZk1tLjRWRk3lM1SAmrh37g08Q8Wy-US7adwWgCKtNGhxE773YA>
+    <xmx:8V_gZhtU2vepQ8i1aUc2ckd7c0gvMcfCMy_kwTe5JquA5RdVcwBHCw>
+    <xmx:8V_gZgWjBxUIk5E3HhQf9-IvMKiJD0xtmDIbkhLVNDqBP3_UIacrkA>
+    <xmx:8V_gZhwC8V-xL0rS7Mr14GUbBRfaxzzwbwxOiDTvVovdwD6jmwj212kX>
+Feedback-ID: i12284293:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
+ 10 Sep 2024 11:04:16 -0400 (EDT)
+Received: by sf.qyliss.net (Postfix, from userid 1000)
+	id 869D0300E8753; Tue, 10 Sep 2024 17:04:14 +0200 (CEST)
+From: Alyssa Ross <hi@alyssa.is>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
+Subject: Re: [RFC PATCH] generic: test negative timespecs are accurate
+In-Reply-To: <20240910135226.hfwk774mdzztqdxv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240907154527.604864-2-hi@alyssa.is>
+ <20240909080132.4wliimcb2y4bt7u3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <8734m7hlnm.fsf@alyssa.is>
+ <20240910135226.hfwk774mdzztqdxv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Date: Tue, 10 Sep 2024 17:04:03 +0200
+Message-ID: <87zfofczz0.fsf@alyssa.is>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240910043127.3480554-1-hch@lst.de>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
+Content-Type: multipart/signed; boundary="=-=-=";
+	micalg=pgp-sha256; protocol="application/pgp-signature"
 
-On Tue, Sep 10, 2024 at 07:31:17AM +0300, Christoph Hellwig wrote:
-> Reproduce a bug where log recovery fails when an unfinised extent free
-> intent is in the same log as the growfs transaction that added the AG.
-> 
+--=-=-=
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-No real issue with the test, but I wonder if we could do something more
-generic. Various XFS shutdown and log recovery issues went undetected
-for a while until we started adding more of the generic stress tests
-currently categorized in the recoveryloop group.
+Zorro Lang <zlang@redhat.com> writes:
 
-So for example, I'm wondering if you took something like generic/388 or
-475 and modified it to start with a smallish fs, grew it in 1GB or
-whatever increments on each loop iteration, and then ran the same
-generic stress/timeout/shutdown/recovery sequence, would that eventually
-reproduce the issue you've fixed? I don't think reproducibility would
-need to be 100% for the test to be useful, fwiw.
+> On Tue, Sep 10, 2024 at 12:02:05PM +0200, Alyssa Ross wrote:
+>> Zorro Lang <zlang@redhat.com> writes:
+>>=20
+>> > On Sat, Sep 07, 2024 at 05:45:28PM +0200, Alyssa Ross wrote:
+>> >> Link: https://github.com/koverstreet/bcachefs/issues/743
+>> >
+>> > Great, a bcachefs regression test case :)
+>> >
+>> > Can you add a bit more details in commit log, not only a link.
+>> >
+>> >> Signed-off-by: Alyssa Ross <hi@alyssa.is>
+>> >> ---
+>> >> This is an adapted version of generic/258, but it tests that the stor=
+ed=20
+>> >> timestamp is accurate to the second, rather than just testing the=20
+>> >> timestamp remains negative.  I created a new test rather than just
+>> >> making 258 more precise, because I understand that there may be
+>> >> filesystems that don't store timestamps that accurately by design.
+>> >> As an example, I've heard that FAT only has 2 second precision, so th=
+is
+>> >> patch is an RFC because I'm not sure how I should write a _require
+>> >> function (if at all) that restricts the test to filesystems that are
+>> >> expected to be able to do this.
+>> >>=20
+>> >>  tests/generic/363     | 26 ++++++++++++++++++++++++++
+>> >>  tests/generic/363.out |  2 ++
+>> >
+>> > The g/363 has been taken, please rebase to latest for-next branch.
+>> > You can use `xfstests/tools/mvtest generic/363 generic/365` to change
+>> > the case number, before rebasing.
+>> >
+>> >>  2 files changed, 28 insertions(+)
+>> >>  create mode 100755 tests/generic/363
+>> >>  create mode 100644 tests/generic/363.out
+>> >>=20
+>> >> diff --git a/tests/generic/363 b/tests/generic/363
+>> >> new file mode 100755
+>> >> index 00000000..50459d01
+>> >> --- /dev/null
+>> >> +++ b/tests/generic/363
+>> >> @@ -0,0 +1,26 @@
+>> >> +#! /bin/bash
+>> >> +# SPDX-License-Identifier: GPL-2.0
+>> >> +# Copyright (c) 2011 Red Hat, Inc.  All Rights Reserved.
+>> >> +# Copyright (c) 2024 Alyssa Ross.  All Rights Reserved.
+>> >> +#
+>> >> +# FS QA Test 363
+>> >> +#
+>> >> +# Test timestamps prior to epoch with nanosecond components are
+>> >> +# accurate to the second.
+>> >> +# bcachefs was slightly off.
+>> >> +#
+>> >> +. ./common/preamble
+>> >> +_begin_fstest auto quick bigtime
+>> >> +
+>> >
+>> > As this's a bcachefs regression test:
+>> > https://lore.kernel.org/linux-bcachefs/20240907160024.605850-3-hi@alys=
+sa.is/
+>> >
+>> > So better to mark as:
+>> > if [ "$FSTYP" =3D "bcachefs" ];then
+>> > 	_fixed_by_kernel_commit xxxxxxxxxxxx "bcachefs: Fix negative timespec=
+s"
+>> > fi
+>> > (replace the xxxxxxx if it's merged on mainline linux)
+>> >
+>> > Others looks good to me, with above changes, I'd like to
+>> >
+>> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+>>=20
+>> Thanks!  So you don't think the test needs to express any extra
+>> requirement that filesystems support to-the-second precision?
+>
+> Oh, does this test needs 1 second precision? I thought you concerned some
+> filesystems cannot be the epoch you set. The _require_negative_timestamps
+> will skip the test from exfat and ceph. It doesn't help the FAT, maybe you
+> want to add vfat to _require_negative_timestamps.
+>
+> I thought you might want to output the stored timestamp (accurate to the
+> second) to reproduce this bug, if not, why you hope to write this new one,
+> not use the g/258 to be the reproducer directly?
 
-Note that I'm assuming we don't have something like that already. I see
-growfs and shutdown tests in tests/xfs/group.list, but nothing in both
-groups and I haven't looked through the individual tests. Just a
-thought.
+I'm sorry, I don't understand the question.  I explained why I created a
+new test in my commentary =E2=80=94 g/258 doesn't require 1 second precisio=
+n,
+and this test does.
 
-Brian
+--=-=-=
+Content-Type: application/pgp-signature; name="signature.asc"
 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/1323     | 61 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/1323.out | 14 +++++++++++
->  2 files changed, 75 insertions(+)
->  create mode 100755 tests/xfs/1323
->  create mode 100644 tests/xfs/1323.out
-> 
-> diff --git a/tests/xfs/1323 b/tests/xfs/1323
-> new file mode 100755
-> index 000000000..a436510b0
-> --- /dev/null
-> +++ b/tests/xfs/1323
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024, Christoph Hellwig
-> +#
-> +# FS QA Test No. 1323
-> +#
-> +# Test that recovering an extfree item residing on a freshly grown AG works.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick growfs
-> +
-> +. ./common/filter
-> +. ./common/inject
-> +
-> +_require_xfs_io_error_injection "free_extent"
-> +
-> +_xfs_force_bdev data $SCRATCH_MNT
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	_scratch_unmount > /dev/null 2>&1
-> +	rm -rf $tmp.*
-> +}
-> +
-> +echo "Format filesystem"
-> +_scratch_mkfs_sized $((128 * 1024 * 1024)) >> $seqres.full
-> +_scratch_mount >> $seqres.full
-> +
-> +echo "Fill file system"
-> +dd if=/dev/zero of=$SCRATCH_MNT/filler1 bs=64k oflag=direct &>/dev/null
-> +sync
-> +dd if=/dev/zero of=$SCRATCH_MNT/filler2 bs=64k oflag=direct &>/dev/null
-> +sync
-> +
-> +echo "Grow file system"
-> +$XFS_GROWFS_PROG $SCRATCH_MNT >>$seqres.full
-> +
-> +echo "Create test files"
-> +dd if=/dev/zero of=$SCRATCH_MNT/test1 bs=8M count=4 oflag=direct | \
-> +	 _filter_dd
-> +dd if=/dev/zero of=$SCRATCH_MNT/test2 bs=8M count=4 oflag=direct | \
-> +	 _filter_dd
-> +
-> +echo "Inject error"
-> +_scratch_inject_error "free_extent"
-> +
-> +echo "Remove test file"
-> +rm $SCRATCH_MNT/test2
-> +
-> +echo "FS should be shut down, touch will fail"
-> +touch $SCRATCH_MNT/test1 2>&1 | _filter_scratch
-> +
-> +echo "Remount to replay log"
-> +_scratch_remount_dump_log >> $seqres.full
-> +
-> +echo "Done"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/1323.out b/tests/xfs/1323.out
-> new file mode 100644
-> index 000000000..1740f9a1f
-> --- /dev/null
-> +++ b/tests/xfs/1323.out
-> @@ -0,0 +1,14 @@
-> +QA output created by 1323
-> +Format filesystem
-> +Fill file system
-> +Grow file system
-> +Create test files
-> +4+0 records in
-> +4+0 records out
-> +4+0 records in
-> +4+0 records out
-> +Inject error
-> +Remove test file
-> +FS should be shut down, touch will fail
-> +Remount to replay log
-> +Done
-> -- 
-> 2.45.2
-> 
-> 
+-----BEGIN PGP SIGNATURE-----
 
+iQIzBAEBCAAdFiEEH9wgcxqlHM/ARR3h+dvtSFmyccAFAmbgX+MACgkQ+dvtSFmy
+ccCd6A/8Dpo8wVyIZ1mB25ZP65YRDd75aGviOaLGXM3RQLP18GIST8s2E2rcQsh/
+t2iUSm0LZryUjJbooNrJwmrvQSfm4PItzdjyJVMf+7Lvts83Jvd7FC+6i81v2SCB
+6uNsYQU/hMXeQ3Hp1cSYiwUjJiOb0/k5/c3OaDAFTCoOua/ZF+RDnGk1SJrem8mY
+wf39Z50wR0CHu1HZosafOk5RZNzzMPGFXxXKxuQCIWPxjNKfeX6JO4odV4Q+3uHZ
+AWm4SxWuWcAZEy5GLz9h1CIH8slFCZ1aNF2sD8NbWfPduMu3pWlERdqXDW97nVzg
+DibVG4EhRkFcZOzK7gsqivnF0m47UrEMDtjRC+z5/TdyKd4UduRYZCn441Q5rmE3
+hez4Liwq1MNSdYHyfOgK5GPR11Tx4ARVkC3QjE/DrjTP/xlxSxPxAQumVmtaYHRE
+Fi7YMp6sMd0TXYh2kGtKCOjb1rzGRGatOkRhndwoggZUxN3WaysdLI9sR45xLFAD
+uuX55uFwnc2x2yhxaGa9jkrUlf5D4TNDlfWmZELunyAcslRCqSAYGJu/FZllukFL
+z0ZGZae4jdBOTUX5CbAKIh959C79hN+krx/VGDZr0mDI0J4ShNxDGkn5aKjOjAXK
+ggonEpNJNL3Xuk5sggNO8OilUBt+2onsGdaaN44NDXFFmhmgZWo=
+=nUBu
+-----END PGP SIGNATURE-----
+--=-=-=--
