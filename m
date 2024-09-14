@@ -1,191 +1,104 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ECB79479
-	for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 04:58:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 103CA1448C7
+	for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 20:18:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726289896; cv=none; b=QNATYPh+uFhbswNvCIWqFif01/aFiPMTFb1XKf9s/XuxXXqwn4+2CSgYxt3Dg12X9TNEOgIYRJcpk3T2RxB5s5dptwsiBT8FN2I4HAObwDXKjP6cu6RJAcQa86WXxDCjMfiyYbAD7KypGRiMTAFJLlnSojHXT7UaEqRKiULIb/0=
+	t=1726345102; cv=none; b=pkAKUL7CXvxUT3QEGn0OVGmiB9WflCiUDV2egpiXfyrW8OkllPqMcD4ro23siHJ0B8R+pc5439Wimk3DJ6G1WNpwne/6cKeQ2EiOg7vlU2t4FiHI0QWKvXDbyGkdnpMFGkt/9Sc+6hf/ebdXdGNGMy0qSzq0FoqWZQoU5N7+a20=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726289896; c=relaxed/simple;
-	bh=ExqbsHYW5CWOyuYZgCevMm5VAMvWKDwA9H1WBjjyLT0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t5SETHHwrdUqJVQkeZIlPMtKuR9ESrWCTXAM0e2AvIUkS+4VaAdCwBXgNXdDfBcwx8dGhPRz8sBQGKYOgKi99tRgBuOE8v5r69PJenuqvKvhwpdr/3thirzwu5gy8TXkWgdY0lcg2XI4ZIxd+sXNMnnTxnxrnL9k/YfTpugO1H8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KL+EOVrL; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1726345102; c=relaxed/simple;
+	bh=iWwWi4b5vPHcLbhHOex5gtk8nOCaGgUh9dPfqiDOvMc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=dnFRxfOfMHBGa1Z4Pi0I2mYi1Zki37+wQbWuOmSYPoXJ9mxrnp+MddnGVFej58tQNYJKK/MGfZcCUl3KicENuJEp6xK48c0DrFbOhEHcGUkEXINoJIYusmdx9mmSkj2m5dUek9vo5E+k4HHFI+w7q6vLH3woUkeom6FlGNa+esA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=F28EG1Nd; arc=none smtp.client-ip=209.85.214.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KL+EOVrL"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1726289893;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=M56LrAmwkApLC8iN+C8xdLKdu0WwTZ3zB5sb1jAVOaM=;
-	b=KL+EOVrLLaj6+vkGPYw3FA4Ojwvw8MdyNjYRn+2LJI8LUONmfpWIvnuEQeMKj3CORRhWlB
-	O4nc4RprjN2jlbYFP3mR2AuCxv3q/Anr36Y0Lz9leSlAQK6JkK03E5Ws+wLJkv8LCd2+y4
-	pG1gL/LfyDw7u5jDblWffn7sN2louUw=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-205-uYJhJ9jtNAOBuhq3yzRP9Q-1; Sat, 14 Sep 2024 00:58:11 -0400
-X-MC-Unique: uYJhJ9jtNAOBuhq3yzRP9Q-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2d8b7c662ccso4060201a91.0
-        for <fstests@vger.kernel.org>; Fri, 13 Sep 2024 21:58:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="F28EG1Nd"
+Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2059204f448so29759275ad.0
+        for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 13:18:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1726345100; x=1726949900; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0wsB9rVxrkFG32FKgt2OKoOWMXwoiqFMyM7bM0Oqyb4=;
+        b=F28EG1Nd5dQ7YelpuoE9/8l+kqm+oDOmTzxi8MRJG+qZPKWhnsFBLiKf4B26rNw/pd
+         E+5hEKbteVPpzlE1TTb97OB0vJa/FQTMsPVQpiGCXcBaEW1NizO0mvFZ/KHypfZKF3/j
+         oQiIgyFn6u5Swn3Bx89aHcpMUje+9ZpFQijS6pIjdH7/CD2VsqJZJ61nLAvDHAmsKPs5
+         KkshUWZnxQHfSk+e+BGXW55CtI8jUxBwvR2nfsVDmM5TgXuRg/IeP81bHW2SVSzCmVys
+         Cn4j1qUuI0W1i06YaJKRduH9T+juepRE6WZGX64hhy7Jw+js33P6/juu55ovepp2WE/N
+         Zs7g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726289890; x=1726894690;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=M56LrAmwkApLC8iN+C8xdLKdu0WwTZ3zB5sb1jAVOaM=;
-        b=DHVMZG0UDULx8mIBXZ0NP2apJ+es1ba5vDtzSHROAvFvaf5TFa8+WIZERl3eTMC/SG
-         LGeCABGdaAcv1WjDeWlx6ZER+F3bqJKjjYI+dCHrrgMQTh5ziaYAeG74wD+ORULt9jpg
-         0ezmy5wKOoesRg8eEVs7iE4WKXemY14033R0PA2OImT/GvzlsFCvGPoy0JObGt2dYH8E
-         ZuyVicEeSrCoxHwKkLL5c2gEXu7oQFi9Sam1lxdUSa4G359BJzlBHU7YNyv672n0CWQ1
-         DuijhuQlOCbU7VyD9C2l2NAsUwT/DaE/Bv5SUxXNPF5qK2NkXONMAwQDHyAJ2JrBioDr
-         qhkw==
-X-Gm-Message-State: AOJu0YwU24DD4mG3aKQLwiRt7Rcup7yiPBVxYil6nSCE57UtL28YEmWj
-	C7Gq3pLQIvPGAx7YLYZNshbVi4UH4r3K6quymVXMBB5+jE0deiS3TVOPisIXXVDnwkca35+j26V
-	FHf36jT9hKSnaRKnhQrwt4Ry7auWMfZviOG4VUlP+dgZIpgZGHd5xYt0=
-X-Received: by 2002:a17:90b:111:b0:2da:d2a2:4a71 with SMTP id 98e67ed59e1d1-2dba0082efamr9188264a91.40.1726289889659;
-        Fri, 13 Sep 2024 21:58:09 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGoyRN8TqnptNO64VjJu3ITC4mxSXMhAKYujRIs0cD01yIivmnevAIV4aorD0PypZCy3lfV0A==
-X-Received: by 2002:a17:90b:111:b0:2da:d2a2:4a71 with SMTP id 98e67ed59e1d1-2dba0082efamr9188235a91.40.1726289888834;
-        Fri, 13 Sep 2024 21:58:08 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2dbcfdc0ac3sm552050a91.53.2024.09.13.21.58.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Sep 2024 21:58:08 -0700 (PDT)
-Date: Sat, 14 Sep 2024 12:58:05 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Alyssa Ross <hi@alyssa.is>
-Cc: fstests@vger.kernel.org, linux-bcachefs@vger.kernel.org
-Subject: Re: [RFC PATCH] generic: test negative timespecs are accurate
-Message-ID: <20240914045805.2htdxbt5bmd2hh6u@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240907154527.604864-2-hi@alyssa.is>
- <20240909080132.4wliimcb2y4bt7u3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <8734m7hlnm.fsf@alyssa.is>
- <20240910135226.hfwk774mdzztqdxv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <87zfofczz0.fsf@alyssa.is>
+        d=1e100.net; s=20230601; t=1726345100; x=1726949900;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=0wsB9rVxrkFG32FKgt2OKoOWMXwoiqFMyM7bM0Oqyb4=;
+        b=jv3Tl/QpoBDq/rdt1ytflm9KmFWExkPcxWlk50lxl75wJ/VKmaUfCrdovu1aKOO0aG
+         nKz7fBhLRJV7R9XcPp+pDl5OtUiDEFxsJppcKOoE5yJUckqJq5Xv7UsozL7Ur93wS5Lz
+         7/s+dzRMux646Cw1Ylu/fMICV8Vr/aFPPdRpi/KDPJ6SijupJt6K8vPxR5qOzeZhYx2Z
+         Apos/nImfZ1fg0Kgmw/5EvED+TNfZvYuDMnpOlEIlDIHgX0YFTOjXcv7MKVGCmrsehpG
+         F2GQRcpf+eel5cr4DTN1CewAjGPTrOaxAezHcM6+GkIACae8ZqVgwnTGCjvOUyAwXrJj
+         V4kA==
+X-Gm-Message-State: AOJu0Yz04yBunU39SzFRMDHdEW82/t5ATPsC2tieP8y1dQhkDv1FWDVc
+	B5/1mCkuCDGqXmfJR7H4cS9aNKriKwbYjcbaIGlgqSnEI8JAG1UJozAc/tGrAQWHXiNdjqb2KHK
+	gBruwk6EL53CaI4nxJvfE2rXHc3Z4sx/onIjo
+X-Google-Smtp-Source: AGHT+IGev6ICJ3XQDQ/B0XSR4sAHfzxqNaFRZtJgrKhhnILCV9Xrjb9ReZNcby+qxqe03DeiS/RjXTQOJAOMWOKpBPA=
+X-Received: by 2002:a17:903:2348:b0:205:810a:18ff with SMTP id
+ d9443c01a7336-2076e45ce87mr163080015ad.54.1726345099873; Sat, 14 Sep 2024
+ 13:18:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <87zfofczz0.fsf@alyssa.is>
+References: <20240801230417.323994-2-mattysweeps@google.com>
+In-Reply-To: <20240801230417.323994-2-mattysweeps@google.com>
+From: Matthew Broomfield <mattysweeps@google.com>
+Date: Sat, 14 Sep 2024 13:18:03 -0700
+Message-ID: <CALEiSPwGymqrBDiQ0sH1Vwmg9uzJ4KBe5tWx+BA_Vv4p0gvj_Q@mail.gmail.com>
+Subject: Re: [PATCH] generic/375: clarify flipping the write bit
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 10, 2024 at 05:04:03PM +0200, Alyssa Ross wrote:
-> Zorro Lang <zlang@redhat.com> writes:
-> 
-> > On Tue, Sep 10, 2024 at 12:02:05PM +0200, Alyssa Ross wrote:
-> >> Zorro Lang <zlang@redhat.com> writes:
-> >> 
-> >> > On Sat, Sep 07, 2024 at 05:45:28PM +0200, Alyssa Ross wrote:
-> >> >> Link: https://github.com/koverstreet/bcachefs/issues/743
-> >> >
-> >> > Great, a bcachefs regression test case :)
-> >> >
-> >> > Can you add a bit more details in commit log, not only a link.
-> >> >
-> >> >> Signed-off-by: Alyssa Ross <hi@alyssa.is>
-> >> >> ---
-> >> >> This is an adapted version of generic/258, but it tests that the stored 
-> >> >> timestamp is accurate to the second, rather than just testing the 
-> >> >> timestamp remains negative.  I created a new test rather than just
-> >> >> making 258 more precise, because I understand that there may be
-> >> >> filesystems that don't store timestamps that accurately by design.
-> >> >> As an example, I've heard that FAT only has 2 second precision, so this
-> >> >> patch is an RFC because I'm not sure how I should write a _require
-> >> >> function (if at all) that restricts the test to filesystems that are
-> >> >> expected to be able to do this.
-> >> >> 
-> >> >>  tests/generic/363     | 26 ++++++++++++++++++++++++++
-> >> >>  tests/generic/363.out |  2 ++
-> >> >
-> >> > The g/363 has been taken, please rebase to latest for-next branch.
-> >> > You can use `xfstests/tools/mvtest generic/363 generic/365` to change
-> >> > the case number, before rebasing.
-> >> >
-> >> >>  2 files changed, 28 insertions(+)
-> >> >>  create mode 100755 tests/generic/363
-> >> >>  create mode 100644 tests/generic/363.out
-> >> >> 
-> >> >> diff --git a/tests/generic/363 b/tests/generic/363
-> >> >> new file mode 100755
-> >> >> index 00000000..50459d01
-> >> >> --- /dev/null
-> >> >> +++ b/tests/generic/363
-> >> >> @@ -0,0 +1,26 @@
-> >> >> +#! /bin/bash
-> >> >> +# SPDX-License-Identifier: GPL-2.0
-> >> >> +# Copyright (c) 2011 Red Hat, Inc.  All Rights Reserved.
-> >> >> +# Copyright (c) 2024 Alyssa Ross.  All Rights Reserved.
-> >> >> +#
-> >> >> +# FS QA Test 363
-> >> >> +#
-> >> >> +# Test timestamps prior to epoch with nanosecond components are
-> >> >> +# accurate to the second.
-> >> >> +# bcachefs was slightly off.
-> >> >> +#
-> >> >> +. ./common/preamble
-> >> >> +_begin_fstest auto quick bigtime
-> >> >> +
-> >> >
-> >> > As this's a bcachefs regression test:
-> >> > https://lore.kernel.org/linux-bcachefs/20240907160024.605850-3-hi@alyssa.is/
-> >> >
-> >> > So better to mark as:
-> >> > if [ "$FSTYP" = "bcachefs" ];then
-> >> > 	_fixed_by_kernel_commit xxxxxxxxxxxx "bcachefs: Fix negative timespecs"
-> >> > fi
-> >> > (replace the xxxxxxx if it's merged on mainline linux)
-> >> >
-> >> > Others looks good to me, with above changes, I'd like to
-> >> >
-> >> > Reviewed-by: Zorro Lang <zlang@redhat.com>
-> >> 
-> >> Thanks!  So you don't think the test needs to express any extra
-> >> requirement that filesystems support to-the-second precision?
-> >
-> > Oh, does this test needs 1 second precision? I thought you concerned some
-> > filesystems cannot be the epoch you set. The _require_negative_timestamps
-> > will skip the test from exfat and ceph. It doesn't help the FAT, maybe you
-> > want to add vfat to _require_negative_timestamps.
-> >
-> > I thought you might want to output the stored timestamp (accurate to the
-> > second) to reproduce this bug, if not, why you hope to write this new one,
-> > not use the g/258 to be the reproducer directly?
-> 
-> I'm sorry, I don't understand the question.  I explained why I created a
-> new test in my commentary — g/258 doesn't require 1 second precision,
-> and this test does.
+On Thu, Aug 1, 2024 at 4:04=E2=80=AFPM Matthew Broomfield
+<mattysweeps@google.com> wrote:
+>
+> When checking if SGID is cleared upon chmod / setfacl the write bit is
+> flipped just to make sure permission changes are happening. This is
+> orthogonal to testing SGID.
+>
+> Added this information to the test description.
+>
+> Signed-off-by: Matthew Broomfield <mattysweeps@google.com>
+> ---
+>  tests/generic/375 | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/tests/generic/375 b/tests/generic/375
+> index eb675144..44670350 100755
+> --- a/tests/generic/375
+> +++ b/tests/generic/375
+> @@ -7,6 +7,9 @@
+>  # Check if SGID is cleared upon chmod / setfacl when the owner is not in=
+ the
+>  # owning group.
+>  #
+> +# The test flips the write bit to easily observe that chmod / setfacl ar=
+e
+> +# successful. This is unrelated to testing SGID.
+> +#
+>  . ./common/preamble
+>  _begin_fstest auto quick acl perms
+>
+> --
+> 2.46.0.rc2.264.g509ed76dc8-goog
+>
 
-Sorry, I mixed several questions together. I mean:
-
-1) Can g/258 reproduce this bug. If not, that means you need the accurate
-"-14245441" output, which might break the test on fs not support to-the-second
-precision, right?
-
-2) If the 1) is yes. Then I think this case doesn't need to care about
-"fs not support to-the-second", as you say you don't have a good way to
-"_require" that.
-
-3) If you agree 2). I think most of filesystems (fstests supports) support
-the to-the-second precision. And the _require_negative_timestamps() helper
-can help to skip this test from some improper filesystems for this test.
-If you concern vfat, you can add it beside the exfat in that helper.
-
-4) If the 1) is right, the fs which doesn't support to-the-second precision
-also can be added into the blacklist of "_supported_fs" now or later, e.g.
-_supported_fs ^cifs.
-
-Hope I explain clearly this time :)
-
-Thanks,
-Zorro
-
+Hello, can someone review if the comment in this patch is accurate?
+Thanks in advance for your time.
