@@ -1,190 +1,214 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB0CB2C80;
-	Thu, 12 Sep 2024 21:35:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B0171CFBC
+	for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 04:40:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726176943; cv=none; b=fASPz/UqV4EOQuswEiqEMcNX+QnEF9esH2Bq/7lm0QM2PSy1xJ+d9ibzpn8zRqBgOos39nuzQzdS3C/j+i0DYfNMQ+h+HYUgSNGte2rF2bcgCM9dS0rKVoQMDFl/DskOnqwL50tSc/R/ILMXGS0iYeOaUzpgXt0S9lN7xIF+Cts=
+	t=1726288817; cv=none; b=gl+lDYyUq86PeCYMlV9ER//848pOet6Cd/JgLA93lJqEhqAkL4IGcAvefRgAxzGAdukYb/9+jDIq/23sJW68zomJZXHOYN/eJWrCktrHXbFJYz8VH7wlmlqA4KBka/u1KJ1EluiIJ1quLDEP8FNDXJiGK0vWIGws7SRvWyXxQ6A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726176943; c=relaxed/simple;
-	bh=hcaSJNOKaKzVUWJ1JNBR0mLmzCxaWhSLXbJ5M+9Cj0g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=u6/SCY3Tf+JAx2bzKg7BYLGNCP773yw/sg5VxJ0G+v+w9cZ1ytapKUu5GJcW8ojh9WXhEuZpfzInm+Awud6ajBcfQt3Rt9SoFN8FgxSCFzb+l4jsKu2HsBW/G3bh+kweoY9DqgHGoDLC39ReUWavHUtDDLf7KPicKKZfdYKWDV0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=nEFxaO32; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1726288817; c=relaxed/simple;
+	bh=dtOH0nLPvAsIoQXUXVWB6ZjWLUttpedWielnp9KUGUs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IornkmN9nXfInaO+7kEpzUyv/0Z9+yNEitM0NR/lMJJ56hqAPamgMpCDPQLEvK6ScoEQ9h3k5exVexyYD2hjhAqu4cI3wA3Z+r0LXz7BjAofA3Z7BLvuwnYCK93ibVPHfKgupODnCmYO8231uVzd3iwCSiOh/4u60AbtERuu1i4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KDT2JWHL; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="nEFxaO32"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1726176934; x=1726781734; i=quwenruo.btrfs@gmx.com;
-	bh=y4tt9c8/CDVs6N61r+jnPAv9En3aRlmm+Lz5g5B5nTc=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=nEFxaO32kjyYsy5O9CNiuTi2Gwb+9ZYVWf7E3VNbH5p9Gl0wuIlMcgtCwO8j6CH0
-	 K7wu+XvtGfNEm6IjnnKZErJuXN0m2zNKk0v8jtDzHunBgf+Kw1Eh2VVZsEB+DBoxZ
-	 /QD/Nn7+E1UK4Or6LcODRSl2krc3vfF65lgLOBmZGF9E9k+AvwJDW358IyQep0uuW
-	 I76nH6dODmCocdHoAM5U79qBMXRYkIRTcTKQQrVkfKH+Vs6fyabxClNUaceeFYUSn
-	 B7ULkXHo5XhBnx+YRlnXEjvGZDPJtKQRKfYuaqptlcLGsLoPEpRPDlcMon+95jZAt
-	 SJOif/2V6pgal5Kdog==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1Mzyuc-1s33kR20n8-00x0hE; Thu, 12
- Sep 2024 23:35:34 +0200
-Message-ID: <992b0055-12a2-47e8-91e2-38fb763cac9e@gmx.com>
-Date: Fri, 13 Sep 2024 07:05:30 +0930
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KDT2JWHL"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1726288813;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=knbmzB1+xLY0hr0zrTvjnrc4RImKzMZ3r6RGNZTWxXo=;
+	b=KDT2JWHLNq7ttKMARBQZewhPbzWPvUXGyHgm+UevXqBLDC78roHA036Q/kcbIuATh1lGNd
+	Gxvc1Fbz9PIXFjZxNbMSu2etxdv4JCDoMeXa0zuiVmrh+hXe5xJbWcb4mW+tXkvQr7+PFL
+	o6lX6GPHuw3TshdWnooxe5ZJ0uyxPbQ=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-362-p-UkhO5KMiSg0jKIkYftyA-1; Sat, 14 Sep 2024 00:40:11 -0400
+X-MC-Unique: p-UkhO5KMiSg0jKIkYftyA-1
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-718db8e61bfso4763197b3a.0
+        for <fstests@vger.kernel.org>; Fri, 13 Sep 2024 21:40:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726288810; x=1726893610;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=knbmzB1+xLY0hr0zrTvjnrc4RImKzMZ3r6RGNZTWxXo=;
+        b=a8Kh4liCeF+1b+slK/hvd/wJSME8AkQ0FIxiqgY2CF04xkKU6ndSOUT7UCzoYzj+Qy
+         +HcNb6ljUY8MK5ihd2poOty0fZj8HFsMYiQmpncFL79KanYSvGby64FCOglvN0k8c2lW
+         tcadeverHzl0UmfJfh+z4Rn1X3HpMDxrGbhUOf6BGE8oQFX7LkPy4q7+WI5FIRBU84C/
+         K5FDyNxpbXnrMxZZFMdqX3wfMbETwWvy2JnJTTSzu4CvVFwmNTnpnl3moUI1r2FZmLtr
+         tw3KBsuHmKJ8p7cDom4dHBF/MR1ahhZAnUOFsevyhijWflQoO54WHx22+0GNwyYU/BSD
+         RENw==
+X-Gm-Message-State: AOJu0Yx+/UZS9rdsUHSdxeDd5d3kluLOAf00aeCRUswOKlpjAUK2fE0l
+	b6Jgd81LufQeW8SCBz98a/lQyujaLU6Q7L3+kvdcTSNFPdETpbMhLeMSaNN8DfJd0+ZjPG3O/gT
+	Nl8Ka8PgrW19q/1jd38oOSoONQUiTM7i7/Tum/0K6XHxR4XXyV5g0anAj8GoTXl9dEg==
+X-Received: by 2002:a05:6a00:218f:b0:70d:2892:402b with SMTP id d2e1a72fcca58-7192608123fmr14733389b3a.7.1726288809689;
+        Fri, 13 Sep 2024 21:40:09 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGLj/8w+OkOlWhEeFf0j36sd8+qdEbj8sOcdiFgTp8PElaNDw5lUsmWUwr8ZINFQck6rZFufg==
+X-Received: by 2002:a05:6a00:218f:b0:70d:2892:402b with SMTP id d2e1a72fcca58-7192608123fmr14733362b3a.7.1726288809210;
+        Fri, 13 Sep 2024 21:40:09 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71944abb69esm346870b3a.67.2024.09.13.21.40.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 13 Sep 2024 21:40:08 -0700 (PDT)
+Date: Sat, 14 Sep 2024 12:40:05 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Srivathsa Dara <srivathsa.d.dara@oracle.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Rajesh Sivaramasubramaniom <rajesh.sivaramasubramaniom@oracle.com>,
+	Junxiao Bi <junxiao.bi@oracle.com>
+Subject: Re: [External] : Re: [PATCH] ext4: Regression test for corruption
+ during on-line resize
+Message-ID: <20240914044005.k2ruita22xevrefy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240911102045.71870-1-srivathsa.d.dara@oracle.com>
+ <20240911125734.44wtifmoyvd74ptq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <DM6PR10MB43477AC7B8B80A38A7155898A0642@DM6PR10MB4347.namprd10.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs/321: make the test work when compression is enabled
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
-References: <21f8d987309ca0699c6bb95666278d02da03ff32.1726145029.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <21f8d987309ca0699c6bb95666278d02da03ff32.1726145029.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:9/2RGrmHj3S14fFzesFqIC/ryfe0dpV3p8UELVfXOAOYyelG5Zl
- APwkIY4mn0Fr1ft6PVbghTkYzfGsXxqCr1I0S9xcm3Dkvehkd1qW4lszxbKWi7kevaYOhiW
- Pfm/zGzH29CQEeOxDNjPdGEfIoWYdqW8CirncuCALUUl2mffivXsyrq/+6w5KM2DsPRN/5c
- cgjXTkMq/x+8C2Y4Oez0w==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:FQQK2XS+Fqc=;WF649X7hn5U5Wl5zhwE+OslECEP
- xw+F3E7tYdpjStdXL+qNVjCDU6wutq35DuCpvnQeEv0RS9TJCBllRw8MO3NIDZI2M0IL/fDcG
- 8yKNpvTAp+PLiggHvrpS0SUXO2xna3kBbSxFeDxKoyXLub6MGhuJiz3ru5fW5L3/VBqh0jUGx
- sI0c+lmmkHTFwrVR+vvBayBwcR1GUJeDZ/wxvRE55lEhh7zCiEoJeEJMjDsm+fMczVjoEhb9F
- v2gDBjTm3Pp4i4lRj3eQg94EAJJy4ZnQqR4twyX7APO1qlf4e9IMvBq2JUb7aMPXbkysRC3LR
- ly5S+Vj3OWxdrYeBiUeWeDsclw1YeAhePAh+JrvbwUoiXi8SsHDgals/DS8tAma7ymiIN211D
- bIoCp+iGMeSODY9CABXbIKlcEsPFJobDcPikfnJKjSTp/CCb5kqnROvEIpp8I2jB5zuebE+sO
- z5FMjf9juhR/K4esTEHvSOk/VK7aXcSo5yXwdrSnS0pYQE2E2ZKeE/v27mpzkEWC9QBsGmtGo
- 6dBGYEgDqO/SOqfage5NlFpbmjCMw4GLUgyI54XHrpWKOjd5/tbR4vn1saa9OmVq37IJuYwRn
- peJVaZDYbUNJGOkljjLh99iGmlry5rhaCgtdoeTgNJ8X1OLsBR0QuSJPVKcPMOfnd9sbaOnUw
- F92AI2nj1aH7Tl5yDz6uIW5hMng5U+njrSc+NHe2HdqeFP6HiOzl1YS30TieNmyzgInkGJ6Go
- FbMdMG/SDh869D5lhA2kDoqMzhRQzEfVIFybcSzuj6csbgcvW28d2JQhUouCePhlhJxuqN3sC
- 6z9ckCTDrxtA4j3lfmhW1JmQ==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DM6PR10MB43477AC7B8B80A38A7155898A0642@DM6PR10MB4347.namprd10.prod.outlook.com>
 
+On Thu, Sep 12, 2024 at 05:53:17AM +0000, Srivathsa Dara wrote:
+> Hi Zorro,
+> 
+> > > Regression test for:
+> > > 	a6b3bfe176e8 ext4: fix corruption during on-line resize
+> > > 
+> > > Signed-off-by: Srivathsa Dara <srivathsa.d.dara@oracle.com>
+> > > ---
+> > >  tests/ext4/060     | 43 +++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/ext4/060.out |  2 ++
+> > >  2 files changed, 45 insertions(+)
+> > >  create mode 100755 tests/ext4/060
+> > >  create mode 100644 tests/ext4/060.out
+> > > 
+> > > diff --git a/tests/ext4/060 b/tests/ext4/060 new file mode 100755 
+> > > index 00000000..440748ea
+> > > --- /dev/null
+> > > +++ b/tests/ext4/060
+> > > @@ -0,0 +1,43 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2024 Oracle.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 060
+> > > +#
+> > > +# This test ensures that kernel avoids FS corruption while online # 
+> > > +resizing an ext4 filesystem with disabled resize_inode feature.
+> > > +#
+> > > +# The commit a6b3bfe176e8 ("ext4: fix corruption during on-line 
+> > > +resize") # stops the corruption.
+> > > +#
+> > > +
+> > > +. ./common/preamble
+> > > +_begin_fstest auto resize quick
+> > > +
+> > > +_supported_fs ext4
+> > > +_fixed_by_kernel_commit a6b3bfe176e8 \
+> > > +	"ext4: fix corruption during on-line resize"
+> > > +
+> > > +_require_command "$RESIZE2FS_PROG" resize2fs _require_command 
+> > > +"$E2FSCK_PROG" e2fsck _require_scratch_size_nocheck $((9* 1024 * 
+> > > +1024))
+> > > +
+> > > +# Initialize an EXT4 filesystem with the resize_inode feature 
+> > > +disabled, # and a size of 128MiB less than 8GiB, i.e., short of 1 
+> > > +block group in # an 8GiB filesystem.
+> > > +
+> > > +dev_size=$((8* 1024 * 1024 * 1024 - 128 * 1024 * 1024)) 
+> > > +MKFS_OPTIONS="-O ^resize_inode $MKFS_OPTIONS" _scratch_mkfs_sized $dev_size \
+> > > +	>>$seqres.full 2>&1
+> > 
+> > Just for sure, is the 8G fs size a necessary requirement to reproduce the bug?
+> > Is it related with the block size (e.g. different blocksize need different fs size for testing)?
+> 
+> Yes, the issue was that, before the fix, while performing an online
+> resize of a filesystem with the resize_inode feature disabled, the
+> kernel would corrupt the first block of the last group in the 0th meta_bg.
+> 
+> If the block size is 1024, each meta_bg has 16 (1024/64) block groups.
+> The last blockgroup of the 0th meta_bg is 15, and the block that gets
+> corrupted is the 122,880th block, which is the first block of the 15th block group.
+> 
+> If the block size is 2048, each meta_bg has 32 (2048/64) block groups.
+> The last blockgroup of the 0th meta_bg is 31, and the block that gets
+> corrupted is the 507,904th block, which is the first block of the 31st block group.
+> 
+> If the block size is 4096, each meta_bg has 64 (4096/64) block groups.
+> The last blockgroup of the 0th meta_bg is 63, and the block that gets
+> corrupted is the 2,064,384th block, which is the first block of the 63rd block group.
+> 
+> The corruption occurred because, when updating backup group descriptors,
+> the kernel failed to check whether the group descriptor being updated belonged
+> to the meta_bg layout or not, leading to an incorrect block being updated.
+> Hence, the corruption.
+> 
+> To reproduce the issue, the initial filesystem's descriptor block must have
+> some available space, and the resize operation should increase the filesystem
+> size enough to cross the meta_bg boundary.
+> 
+> In this case, the initial filesystem size was chosen as 8GiB minus 128MiB,
+> so that its descriptor block has space to accommodate an additional block group.
+> The filesystem is then resized to 9GiB ( 8GiB is the meta_bg boundary).
 
+Actually I hope to check the MKFS_OPTIONS with you, I saw you try to carry on the
+MKFS_OPTIONS, MKFS_OPTIONS="-O ^resize_inode $MKFS_OPTIONS". If
+MKFS_OPTIONS="-b 65536" (or others), can this bug still be reproduced? If not, we
+can drop the old MKFS_OPTIONS, just set MKFS_OPTIONS="-O ^resize_inode". Or we
+can keep it.
 
-=E5=9C=A8 2024/9/12 22:15, fdmanana@kernel.org =E5=86=99=E9=81=93:
-> From: Filipe Manana <fdmanana@suse.com>
->
-> When running btrfs/321 with compression enabled it fails like this:
->
->    $ MOUNT_OPTIONS=3D"-o compress" ./check btrfs/321
->    FSTYP         -- btrfs
->    PLATFORM      -- Linux/x86_64 debian0 6.11.0-rc7-btrfs-next-174+ #1 S=
-MP PREEMPT_DYNAMIC Tue Sep 10 17:11:38 WEST 2024
->    MKFS_OPTIONS  -- /dev/sdc
->    MOUNT_OPTIONS -- -o compress /dev/sdc /home/fdmanana/btrfs-tests/scra=
-tch_1
->
->    btrfs/321 2s ... [failed, exit status 1]- output mismatch (see /home/=
-fdmanana/git/hub/xfstests/results//btrfs/321.out.bad)
->        --- tests/btrfs/321.out	2024-09-12 12:12:11.259272125 +0100
->        +++ /home/fdmanana/git/hub/xfstests/results//btrfs/321.out.bad	20=
-24-09-12 13:18:40.231120012 +0100
->        @@ -1,2 +1,5 @@
->         QA output created by 321
->        -Silence is golden
->        +mount: /home/fdmanana/btrfs-tests/scratch_1: can't read superblo=
-ck on /dev/sdc.
->        +       dmesg(1) may have more information after failed mount sys=
-tem call.
->        +mount -o compress -o ro /dev/sdc /home/fdmanana/btrfs-tests/scra=
-tch_1 failed
->        +(see /home/fdmanana/git/hub/xfstests/results//btrfs/321.full for=
- details)
->        ...
->        (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/321.out=
- /home/fdmanana/git/hub/xfstests/results//btrfs/321.out.bad'  to see the e=
-ntire diff)
->
->    HINT: You _MAY_ be missing kernel fix:
->          10d9d8c3512f btrfs: fix a use-after-free bug when hitting error=
-s inside btrfs_submit_chunk()
->
->    Ran: btrfs/321
->    Failures: btrfs/321
->    Failed 1 of 1 tests
->
-> This is because with compression enabled we get a csum tree that has onl=
-y
-> one leaf, and that leaf is the root of the csum tree. That means that
-> after the test corrupts the leaf, the next mount will fail since an erro=
-r
-> loading the root is critical and makes the mount operation fail.
->
-> Fix this by creating a file with 128M of data instead of 32M, as this
-> guarantees that even if compression is enabled, and even with the maximu=
-m
-> allowed leaf size (64K), we still get a csum tree with multiple leaves,
-> making the test work.
->
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> 
+> > 
+> > > +
+> > > +_scratch_mount
+> > > +
+> > > +# Perform online-resize
+> > > +$RESIZE2FS_PROG $SCRATCH_DEV 9G >> $seqres.full 2>&1
+> > > +
+> > > +$E2FSCK_PROG -fn $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "Filesystem corrupted"
+> > 
+> > Do you want to test online resize or online fsck or both? (Does ext4 support online fsck?)
+> 
+> I want to test only the online resize. No, EXT4 doesn't support online fsck.
+> However, e2fsck with the -fn option reports corruption even if the device
+> is mounted.
 
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-My bad, I forgot compression, which will reduce the csum size.
+As EXT4 doesn't support online fsck, better to unmount before fscking. To avoid other
+interference.
 
 Thanks,
-Qu
-> ---
->   tests/btrfs/321 | 8 +++++---
->   1 file changed, 5 insertions(+), 3 deletions(-)
->
-> diff --git a/tests/btrfs/321 b/tests/btrfs/321
-> index 93935530..c13ccc1e 100755
-> --- a/tests/btrfs/321
-> +++ b/tests/btrfs/321
-> @@ -33,9 +33,11 @@ _scratch_pool_mkfs "-d raid0 -m single -n 4k -s 4k" >=
-> $seqres.full 2>&1
->   # This test requires data checksum to trigger the bug.
->   _scratch_mount -o datasum,datacow
->
-> -# For the smallest csum size (CRC32C) it's 4 bytes per 4K, writing 32M =
-data
-> -# will need 32K data checksum at minimal, which is at least 8 leaves.
-> -_pwrite_byte 0xef 0 32m "$SCRATCH_MNT/foobar" > /dev/null
-> +# For the smallest csum size (CRC32C) it's 4 bytes per 4K, writing 128M=
- of data
-> +# will need 128K data checksum at minimal, which is at least 34 leaves =
-when
-> +# running without compression and a leaf size of 64K. With compression =
-enabled
-> +# and a 64K leaf size, it will be 2 leaves.
-> +_pwrite_byte 0xef 0 128m "$SCRATCH_MNT/foobar" > /dev/null
->   _scratch_unmount
->
->
+Zorro
+
+> 
+> Thanks,
+> Srivathsa
+> 
+> > 
+> > > +
+> > > +echo "Silence is golden"
+> > > +
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/ext4/060.out b/tests/ext4/060.out new file mode 
+> > > 100644 index 00000000..8ffce4de
+> > > --- /dev/null
+> > > +++ b/tests/ext4/060.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 060
+> > > +Silence is golden
+> > > --
+> > > 2.39.3
+> > > 
+> > >
+> 
+
