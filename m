@@ -1,104 +1,93 @@
-Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 103CA1448C7
-	for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 20:18:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F91A15534E;
+	Mon, 16 Sep 2024 12:03:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726345102; cv=none; b=pkAKUL7CXvxUT3QEGn0OVGmiB9WflCiUDV2egpiXfyrW8OkllPqMcD4ro23siHJ0B8R+pc5439Wimk3DJ6G1WNpwne/6cKeQ2EiOg7vlU2t4FiHI0QWKvXDbyGkdnpMFGkt/9Sc+6hf/ebdXdGNGMy0qSzq0FoqWZQoU5N7+a20=
+	t=1726488199; cv=none; b=mC6Hx9sre9zimab3UIMw8mKpPg4hNzDxjJVbeXeZQmsnSISmrRVNZZNU9VlNOyyX/KeH14qX9fXfEJwBMlPwzUL0800I3CbS74OPSaNarmFhTbac5WWy5fmn7W/2696vLtNAP9JGbxA2h2txgqRu6jqkzS7czZpFQvo58jOboWU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726345102; c=relaxed/simple;
-	bh=iWwWi4b5vPHcLbhHOex5gtk8nOCaGgUh9dPfqiDOvMc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dnFRxfOfMHBGa1Z4Pi0I2mYi1Zki37+wQbWuOmSYPoXJ9mxrnp+MddnGVFej58tQNYJKK/MGfZcCUl3KicENuJEp6xK48c0DrFbOhEHcGUkEXINoJIYusmdx9mmSkj2m5dUek9vo5E+k4HHFI+w7q6vLH3woUkeom6FlGNa+esA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=F28EG1Nd; arc=none smtp.client-ip=209.85.214.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
+	s=arc-20240116; t=1726488199; c=relaxed/simple;
+	bh=lbtU0/wv7ulkVjSLGH+HvnFEQu4bO+9oGH33F51dffU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cJXMpph5vU3e8hQTpbkPedjV/d8Y8nA39Dh/XuuqwSAdv+FLOfmW0I9rXGNRYccgFmxO8NRZ2aZYzKUy6WQ9P6ryrn1+OZwyngg8pQ6n3sZkcFnfa941ynjgcDUtftI37Bo476oI2xJwn8SIxlFo/S76iJhyWpQc3tYWO5QYpso=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KRMF8VQ2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="F28EG1Nd"
-Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2059204f448so29759275ad.0
-        for <fstests@vger.kernel.org>; Sat, 14 Sep 2024 13:18:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1726345100; x=1726949900; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0wsB9rVxrkFG32FKgt2OKoOWMXwoiqFMyM7bM0Oqyb4=;
-        b=F28EG1Nd5dQ7YelpuoE9/8l+kqm+oDOmTzxi8MRJG+qZPKWhnsFBLiKf4B26rNw/pd
-         E+5hEKbteVPpzlE1TTb97OB0vJa/FQTMsPVQpiGCXcBaEW1NizO0mvFZ/KHypfZKF3/j
-         oQiIgyFn6u5Swn3Bx89aHcpMUje+9ZpFQijS6pIjdH7/CD2VsqJZJ61nLAvDHAmsKPs5
-         KkshUWZnxQHfSk+e+BGXW55CtI8jUxBwvR2nfsVDmM5TgXuRg/IeP81bHW2SVSzCmVys
-         Cn4j1qUuI0W1i06YaJKRduH9T+juepRE6WZGX64hhy7Jw+js33P6/juu55ovepp2WE/N
-         Zs7g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726345100; x=1726949900;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=0wsB9rVxrkFG32FKgt2OKoOWMXwoiqFMyM7bM0Oqyb4=;
-        b=jv3Tl/QpoBDq/rdt1ytflm9KmFWExkPcxWlk50lxl75wJ/VKmaUfCrdovu1aKOO0aG
-         nKz7fBhLRJV7R9XcPp+pDl5OtUiDEFxsJppcKOoE5yJUckqJq5Xv7UsozL7Ur93wS5Lz
-         7/s+dzRMux646Cw1Ylu/fMICV8Vr/aFPPdRpi/KDPJ6SijupJt6K8vPxR5qOzeZhYx2Z
-         Apos/nImfZ1fg0Kgmw/5EvED+TNfZvYuDMnpOlEIlDIHgX0YFTOjXcv7MKVGCmrsehpG
-         F2GQRcpf+eel5cr4DTN1CewAjGPTrOaxAezHcM6+GkIACae8ZqVgwnTGCjvOUyAwXrJj
-         V4kA==
-X-Gm-Message-State: AOJu0Yz04yBunU39SzFRMDHdEW82/t5ATPsC2tieP8y1dQhkDv1FWDVc
-	B5/1mCkuCDGqXmfJR7H4cS9aNKriKwbYjcbaIGlgqSnEI8JAG1UJozAc/tGrAQWHXiNdjqb2KHK
-	gBruwk6EL53CaI4nxJvfE2rXHc3Z4sx/onIjo
-X-Google-Smtp-Source: AGHT+IGev6ICJ3XQDQ/B0XSR4sAHfzxqNaFRZtJgrKhhnILCV9Xrjb9ReZNcby+qxqe03DeiS/RjXTQOJAOMWOKpBPA=
-X-Received: by 2002:a17:903:2348:b0:205:810a:18ff with SMTP id
- d9443c01a7336-2076e45ce87mr163080015ad.54.1726345099873; Sat, 14 Sep 2024
- 13:18:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KRMF8VQ2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2B647C4CEC4;
+	Mon, 16 Sep 2024 12:03:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1726488199;
+	bh=lbtU0/wv7ulkVjSLGH+HvnFEQu4bO+9oGH33F51dffU=;
+	h=From:To:Cc:Subject:Date:From;
+	b=KRMF8VQ2zbsERi2SeuXELSR/edXsrb4jKbm24EUoNqifA4t1NY1QhhanGpT2n7skw
+	 D9BXJxN3epHfCT11R9DLNLKvCHmuTpHd1fPCaVmIFBu+KdCE0zxDoMTApbSovFuH6O
+	 ulRAazs3PDd2Z7rc1VAFfkfLyRByNW6omo81w0TEMD1ObMmzsgdb2TL2fJEk7/GhZk
+	 x/AQ1YMrL8BoDRPrvnfsLxajAOMJkYr+5JVFTFRVVMZNr8wKzXeiaNjrD1Z1qQSOUH
+	 RKK3RABZKf+3bQjhujpU4UPlfCk0gDaYDavuWnb4Y2be4eph3FpYhJZYiv9fbyyCTy
+	 wY2h7DA3MryBw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: fix min_dio_alignment logic for getting device block size
+Date: Mon, 16 Sep 2024 13:03:12 +0100
+Message-ID: <0d6ec0b588b578b9f9aabef91b8ecdf9950b682a.1726488132.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240801230417.323994-2-mattysweeps@google.com>
-In-Reply-To: <20240801230417.323994-2-mattysweeps@google.com>
-From: Matthew Broomfield <mattysweeps@google.com>
-Date: Sat, 14 Sep 2024 13:18:03 -0700
-Message-ID: <CALEiSPwGymqrBDiQ0sH1Vwmg9uzJ4KBe5tWx+BA_Vv4p0gvj_Q@mail.gmail.com>
-Subject: Re: [PATCH] generic/375: clarify flipping the write bit
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Thu, Aug 1, 2024 at 4:04=E2=80=AFPM Matthew Broomfield
-<mattysweeps@google.com> wrote:
->
-> When checking if SGID is cleared upon chmod / setfacl the write bit is
-> flipped just to make sure permission changes are happening. This is
-> orthogonal to testing SGID.
->
-> Added this information to the test description.
->
-> Signed-off-by: Matthew Broomfield <mattysweeps@google.com>
-> ---
->  tests/generic/375 | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/tests/generic/375 b/tests/generic/375
-> index eb675144..44670350 100755
-> --- a/tests/generic/375
-> +++ b/tests/generic/375
-> @@ -7,6 +7,9 @@
->  # Check if SGID is cleared upon chmod / setfacl when the owner is not in=
- the
->  # owning group.
->  #
-> +# The test flips the write bit to easily observe that chmod / setfacl ar=
-e
-> +# successful. This is unrelated to testing SGID.
-> +#
->  . ./common/preamble
->  _begin_fstest auto quick acl perms
->
-> --
-> 2.46.0.rc2.264.g509ed76dc8-goog
->
+From: Filipe Manana <fdmanana@suse.com>
 
-Hello, can someone review if the comment in this patch is accurate?
-Thanks in advance for your time.
+If we failed to get the dio alignment from statx we try to get the
+device's block size using the BLKSSZGET ioctl, however we failed to
+return it because we don't check if the ioctl succeeded (returned 0).
+Furthermore in case the ioctl returned an error, we end up returning an
+undefined value since the 'logical_block_size' variable ends up not
+being initialized.
+
+This was causing some tests to be skipped on btrfs after commit
+ee799a0cf1d4 ("replace _min_dio_alignment with calls to
+src/min_dio_alignment"), like generic/240 for example:
+
+  $ ./check generic/240
+  FSTYP         -- btrfs
+  PLATFORM      -- Linux/x86_64 debian0 6.11.0-rc7-btrfs-next-174+ #1 SMP PREEMPT_DYNAMIC Tue Sep 10 17:11:38 WEST 2024
+  MKFS_OPTIONS  -- /dev/sdc
+  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+
+  generic/240 1s ... [not run] fs block size must be larger than the device block size.  fs block size: 4096, device block size: 4096
+  Ran: generic/240
+  Not run: generic/240
+  Passed all 1 tests
+
+Where before that commit the test ran.
+
+Fix this by checking that the ioctl succeeded.
+
+Fixes: 0e5f196d0a6a ("add a new min_dio_alignment helper")
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ src/min_dio_alignment.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
+index 131f6023..5a7c7d9f 100644
+--- a/src/min_dio_alignment.c
++++ b/src/min_dio_alignment.c
+@@ -42,7 +42,7 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
+ 		if (dev_fd > 0 &&
+ 		    fstat(dev_fd, &st) == 0 &&
+ 		    S_ISBLK(st.st_mode) &&
+-		    ioctl(dev_fd, BLKSSZGET, &logical_block_size)) {
++		    ioctl(dev_fd, BLKSSZGET, &logical_block_size) == 0) {
+ 			return logical_block_size;
+ 		}
+ 	}
+-- 
+2.43.0
+
