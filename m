@@ -1,87 +1,109 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 840611757D
-	for <fstests@vger.kernel.org>; Mon, 16 Sep 2024 21:18:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 658A3F9DA;
+	Mon, 16 Sep 2024 21:21:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726521493; cv=none; b=tCToUfMoH6D+SIESHvZ84YHiguIEm6YlYAPm9LlsI5KNXvprRF/yTuNw+8+C5PHjXnYku9cfJoC+MeE7Lpx65exwpHN5pXZnDw2S4d+h+ERXYbov/DSf9hWgCEBnpw2mh/UGm6ELiweJAf4Wa4hVQr1M0iEVWHO9izSXq/zubB8=
+	t=1726521703; cv=none; b=sLd6p6x3gGRk0aV8t+BV8940E9dD+Kz4wLaAoFfmbumuCT/yTBAakiPy1C6iQfqsxxVTcqeENcdTUnHNX+V5ABeRPTODpIhnYg4kqjxBWrDDIKDDFd2sP/i2UTCmkR1vKD8pQXll8HQXv0Z4ISn6Cz7GrX1cwhlC7pCcBJ4HDX8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726521493; c=relaxed/simple;
-	bh=1WEuoMDH5sw2/G1fmnHxPmSwt14dWB7etl2HJDOGn0A=;
+	s=arc-20240116; t=1726521703; c=relaxed/simple;
+	bh=rcP4MakEqdLoYp8j1UwE3hEanBGid0pNyLyhOmyWSpU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YV7pq0Kf9MlzD5mLxiMNMNvPBn/QTw7bz3qEDOA6FZALsbY88V5cwZNX4n4sLWoqyvuPGe9GDZ5TON2rOFSz7jmbIDF3XOb76EXOZl78/DVKCMFczPnOVpmsbXHYzAfxLOFkW8/7l9d+Y8g3pV22RxFkhldX5x7wfM9FltBfVKo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GhrABw3Z; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Xr4dZvRnuj1yDY7Fd/VRFCBT5mS8Kz93Nw//VFVQllO8zA5iP+/plBUx1Y9fl21leUGgz6m4hNUqyNYkH9Ew3abKj9oxWRuQemVruAm8HxXmN9MQaD7/F2lHIM/vm41679c3obdk+3G5qyqFlLb3bb9r/T2sIYRfeiP9gg9wu18=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HR7PVE2P; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GhrABw3Z"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F0381C4CEC4;
-	Mon, 16 Sep 2024 21:18:12 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HR7PVE2P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5C44C4CEC4;
+	Mon, 16 Sep 2024 21:21:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1726521493;
-	bh=1WEuoMDH5sw2/G1fmnHxPmSwt14dWB7etl2HJDOGn0A=;
+	s=k20201202; t=1726521702;
+	bh=rcP4MakEqdLoYp8j1UwE3hEanBGid0pNyLyhOmyWSpU=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=GhrABw3Z5gsLOO64cErrRof9cvBAwnY6U9as3N8Fypt3bujrEnIBa3MRF2GcRA8cJ
-	 iZ2u1Ub73IDN9t4LRGM3HIgdAH7i+/mGxsp3evklFZfLO/aYzaaPQkMr4qQH6tPs/a
-	 EIi9+tGUrRO1vm5IptIzwbuNyRiaGtOG0+SIJGFYsKxEdGYkBNG9dBMJNF5uu+gsHR
-	 nNFOARmMnYqE9pZrnc51BLnVmg7RTHFq6FRyEHrFCXUYx/5vstnMvo8yv5ecTMv1KH
-	 4VHc3UMmo53ctuCa/09nSkecunKyZTXIX1TsOmj+3CGW81CS3eTSGPCIb/Of8YtRzc
-	 wEJxqEzfDHEwg==
-Date: Mon, 16 Sep 2024 14:18:12 -0700
+	b=HR7PVE2PKPiUHvNVQM2pn47aV1Dewqx72/dVFBC2vfsIJG0jTAA66ZtfeWGWrivut
+	 bKcRF3BLtOyCHDTW/Xx9jjOk73u6pIVUuQ/iAVsACQ0XrpLLdjfQb1vXHC0GrbRgGN
+	 tw/BNDJ9BbjY53x67elTe3it/sWw8eJbIzrvZ1NEIWFxclf+sz/4eY6zOuhkjzlEoH
+	 vteyPWxQxMzmaYdf4oLjVfYM+Amv355+LJKxw0ft5P0eqJp0lU2DI558BC5wAIAXHf
+	 mU0mdh8EUNCMrog0NUDso286pUt54+EOsqQuHkHofjmwRe6ePiZbnBXRLSrrMZekWM
+	 e7m1ZJDw2zoSQ==
+Date: Mon, 16 Sep 2024 14:21:42 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Matthew Broomfield <mattysweeps@google.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/375: clarify flipping the write bit
-Message-ID: <20240916211812.GA182183@frogsfrogsfrogs>
-References: <20240801230417.323994-2-mattysweeps@google.com>
- <CALEiSPwGymqrBDiQ0sH1Vwmg9uzJ4KBe5tWx+BA_Vv4p0gvj_Q@mail.gmail.com>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] fstests: add missing kernel git commit IDs to some tests
+Message-ID: <20240916212142.GB182183@frogsfrogsfrogs>
+References: <1fe1768c5148fc857ddbba244e607f965a17937b.1726140369.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CALEiSPwGymqrBDiQ0sH1Vwmg9uzJ4KBe5tWx+BA_Vv4p0gvj_Q@mail.gmail.com>
+In-Reply-To: <1fe1768c5148fc857ddbba244e607f965a17937b.1726140369.git.fdmanana@suse.com>
 
-On Sat, Sep 14, 2024 at 01:18:03PM -0700, Matthew Broomfield wrote:
-> On Thu, Aug 1, 2024 at 4:04 PM Matthew Broomfield
-> <mattysweeps@google.com> wrote:
-> >
-> > When checking if SGID is cleared upon chmod / setfacl the write bit is
-> > flipped just to make sure permission changes are happening. This is
-> > orthogonal to testing SGID.
-> >
-> > Added this information to the test description.
-> >
-> > Signed-off-by: Matthew Broomfield <mattysweeps@google.com>
-> > ---
-> >  tests/generic/375 | 3 +++
-> >  1 file changed, 3 insertions(+)
-> >
-> > diff --git a/tests/generic/375 b/tests/generic/375
-> > index eb675144..44670350 100755
-> > --- a/tests/generic/375
-> > +++ b/tests/generic/375
-> > @@ -7,6 +7,9 @@
-> >  # Check if SGID is cleared upon chmod / setfacl when the owner is not in the
-> >  # owning group.
-> >  #
-> > +# The test flips the write bit to easily observe that chmod / setfacl are
-> > +# successful. This is unrelated to testing SGID.
-> > +#
-> >  . ./common/preamble
-> >  _begin_fstest auto quick acl perms
-> >
-> > --
-> > 2.46.0.rc2.264.g509ed76dc8-goog
-> >
+On Thu, Sep 12, 2024 at 12:26:38PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Hello, can someone review if the comment in this patch is accurate?
-> Thanks in advance for your time.
+> Three tests (btrfs/321, generic/364 and xfs/608) refer to kernel patches
+> that are now in Linus' git kernel tree, so update the tests to include
+> the commit IDs.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>  tests/btrfs/321   | 2 +-
+>  tests/generic/364 | 2 +-
+>  tests/xfs/608     | 2 +-
+>  3 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/btrfs/321 b/tests/btrfs/321
+> index e30199da..93935530 100755
+> --- a/tests/btrfs/321
+> +++ b/tests/btrfs/321
+> @@ -22,7 +22,7 @@ _require_btrfs_raid_type raid0
+>  _require_btrfs_support_sectorsize 4096
+>  _require_btrfs_command inspect-internal dump-tree
+>  
+> -_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +_fixed_by_kernel_commit 10d9d8c3512f \
+>  	"btrfs: fix a use-after-free bug when hitting errors inside btrfs_submit_chunk()"
+>  
+>  # The bug itself has a race window, run this many times to ensure triggering.
+> diff --git a/tests/generic/364 b/tests/generic/364
+> index 34029597..968b4754 100755
+> --- a/tests/generic/364
+> +++ b/tests/generic/364
+> @@ -18,7 +18,7 @@ _require_command "$TIMEOUT_PROG" timeout
+>  
+>  # Triggers very frequently with kernel config CONFIG_BTRFS_ASSERT=y.
+>  [ $FSTYP == "btrfs" ] && \
+> -	_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	_fixed_by_kernel_commit cd9253c23aed \
+>  	"btrfs: fix race between direct IO write and fsync when using same fd"
+>  
+>  # On error the test program writes messages to stderr, causing a golden output
+> diff --git a/tests/xfs/608 b/tests/xfs/608
+> index a74c7bf3..7ac40137 100755
+> --- a/tests/xfs/608
+> +++ b/tests/xfs/608
+> @@ -9,7 +9,7 @@
+>  . ./common/preamble
+>  _begin_fstest auto
+>  
+> -_fixed_by_kernel_commit XXXXXXXXXXXX \
+> +_fixed_by_kernel_commit e21fea4ac3cf \
+>  	"xfs: fix di_onlink checking for V1/V2 inodes",
 
-I don't understand this new comment -- "flipping the write bit" is what
-the chmod does, and that's what clears setgid.
+Yep, thank you...
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
 
 --D
+
+>  
+>  _require_scratch_nocheck	# we'll do our own checking
+> -- 
+> 2.43.0
+> 
+> 
