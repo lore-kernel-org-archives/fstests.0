@@ -1,39 +1,42 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A152E17753;
-	Mon, 16 Sep 2024 21:28:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00A64482EF;
+	Tue, 17 Sep 2024 05:20:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726522085; cv=none; b=EbjJMQaxuf6se4Aek90ykDPMfWT2im7SHqMGsbaljLW3jTcfPfQdN30K7cnDa2/ddMluGLdHCuVdTM4ZtlNhQgE9IBGkjZimkNVfwD7ioWb6p7A3rjlNDdN57wP2dxp8Q6+bF3+yZIFRzuyygpikF9qW1KPRmYD80IoAKLxHHkE=
+	t=1726550449; cv=none; b=tEDwFeetKb3TLRva201JkKtsFNLa5YR2hn22tKRkWGHhXgDF3vn8cwDzbb/BFoIcC858L/ZBiGMGeMIU1ha05WB4Na71kYGOMbd+TEZ7u/PxtXIHgKPMCJSvH2cJ0VA9I2Wv6UKRvmH3FpXlg8bdtbXsPQqjnsrsx3IVFvTLyws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726522085; c=relaxed/simple;
-	bh=nH1mM8UwCxqcduN+A4cv92JuTN+2paqVqXUjV6xX1KQ=;
+	s=arc-20240116; t=1726550449; c=relaxed/simple;
+	bh=POmRjhI16tEvwmVBsJJfa86IwaoLWe1lae7yRelAbSA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hJbDnmTDYsj3deuwnJxKe1UN09RgyihxMk/WOOfrGWlfgfwXNcejcXGUG3uVJ2dUALZVZ/OU5a2E2foOx2BmXAZ08nyWLQUjLOKxYBqrOmg3ZMcIoFsG4kMMbYY3dYDDr5+ppRmOX/pNqcifdp953zG3KLjSyxdYuM0jbpOlVEs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=c835jvYj; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=MGd0EVVK6xEY2gwgw1OIbguvZhcCmZ9dTDmy964xA/3t7LzyQAKiLloox45WrwEkoVoNkrg95Yg/YfJk8xjOwL/XYosKvSOjvsWHYDuN0UnMaeAjRHtSkgJMUmN5mvQV8NneOikgdQGSGPI4rqV+xo4nQ6zfOaAWLRk/7HZ/RQw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=rk7Lwrec; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="c835jvYj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38B26C4CEC4;
-	Mon, 16 Sep 2024 21:28:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1726522085;
-	bh=nH1mM8UwCxqcduN+A4cv92JuTN+2paqVqXUjV6xX1KQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=c835jvYjb8LxLjG7QYNavvVeiSNXePN76UAxblbNFbVfN1545X0+12uiuFBXdeTxL
-	 0vxBqFAsLE99RxbKBXZZxOMDPGq+rlaI7U3jHq9+5CQVMh1z6vSh0icZ3awYteYh0T
-	 AP4N5imXtz7IPR6mmaeacpKeLdJezAfgQb1ld3YSA8970pkAI1INE3RH1OXHWR2Dcx
-	 uGgnQYDB1qnzWLV/fyihkCElm9Sa183qhjpmfAg0Wb4d++kLCBc6UP2Q0NP7r5m8+2
-	 2w6xMipCbiAFDBw6oxXSIpvLcF/LH8KAJZ8LAOKwSCX2+g08OFS3uOBosFYW3KPnjZ
-	 1ATg9wtaPxaPA==
-Date: Mon, 16 Sep 2024 14:28:04 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="rk7Lwrec"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=gKc7eNctAPQNgV6aPTpA/drZBkrkMJyFK0gpRH9y/rU=; b=rk7LwrecXZ7VkcnksNosFEjF6F
+	QqQGO1UsRSNxyM1jk3I6SdCdhY0f2Wya+e4woNFKFy6VPDY0AWQHIxsPErlN8v08BekCpzmTMFt/Q
+	M3SatfR5uE29AIEH76xitXcv2ZfGknKoE+5vE6piRUic9D1vBHncLSvx7N2Ad30j+oXRML1kWDecg
+	fOU2KieGxijUIZ92Hi1lWshIaxVx3+76UDbcZQ8alICHUiM6geEb67bJ1FlK4Xq50M5N+rW2LFWj+
+	8ucxl+Meh+DUfMczWDFMNCdkm6HxAxAfFJ98nGgB8/D55v0sv/iRud5UR/+xQKwZ0BMpyc22A8Uwj
+	0f8XwAtA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1sqQdp-00000005OaD-1yMG;
+	Tue, 17 Sep 2024 05:20:45 +0000
+Date: Mon, 16 Sep 2024 22:20:45 -0700
+From: Christoph Hellwig <hch@infradead.org>
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
 Subject: Re: [PATCH] fstests: fix min_dio_alignment logic for getting device
  block size
-Message-ID: <20240916212804.GC182183@frogsfrogsfrogs>
+Message-ID: <ZukRreQ--325baAG@infradead.org>
 References: <0d6ec0b588b578b9f9aabef91b8ecdf9950b682a.1726488132.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -44,62 +47,19 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <0d6ec0b588b578b9f9aabef91b8ecdf9950b682a.1726488132.git.fdmanana@suse.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
 On Mon, Sep 16, 2024 at 01:03:12PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> If we failed to get the dio alignment from statx we try to get the
-> device's block size using the BLKSSZGET ioctl, however we failed to
-> return it because we don't check if the ioctl succeeded (returned 0).
-> Furthermore in case the ioctl returned an error, we end up returning an
-> undefined value since the 'logical_block_size' variable ends up not
-> being initialized.
-> 
-> This was causing some tests to be skipped on btrfs after commit
-> ee799a0cf1d4 ("replace _min_dio_alignment with calls to
-> src/min_dio_alignment"), like generic/240 for example:
-> 
->   $ ./check generic/240
->   FSTYP         -- btrfs
->   PLATFORM      -- Linux/x86_64 debian0 6.11.0-rc7-btrfs-next-174+ #1 SMP PREEMPT_DYNAMIC Tue Sep 10 17:11:38 WEST 2024
->   MKFS_OPTIONS  -- /dev/sdc
->   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
->   generic/240 1s ... [not run] fs block size must be larger than the device block size.  fs block size: 4096, device block size: 4096
->   Ran: generic/240
->   Not run: generic/240
->   Passed all 1 tests
-> 
-> Where before that commit the test ran.
-> 
 > Fix this by checking that the ioctl succeeded.
-> 
-> Fixes: 0e5f196d0a6a ("add a new min_dio_alignment helper")
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Looks good, sorry for missing that during review.
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+The fixes look good:
 
---D
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-> ---
->  src/min_dio_alignment.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
-> index 131f6023..5a7c7d9f 100644
-> --- a/src/min_dio_alignment.c
-> +++ b/src/min_dio_alignment.c
-> @@ -42,7 +42,7 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
->  		if (dev_fd > 0 &&
->  		    fstat(dev_fd, &st) == 0 &&
->  		    S_ISBLK(st.st_mode) &&
-> -		    ioctl(dev_fd, BLKSSZGET, &logical_block_size)) {
-> +		    ioctl(dev_fd, BLKSSZGET, &logical_block_size) == 0) {
->  			return logical_block_size;
->  		}
->  	}
-> -- 
-> 2.43.0
-> 
+What file do you manage to open but fail BLKSSZGET on here?  This smells
+like we have an issue in high level logic.
+
+And btrfs really should implement STATX_DIOALIGN with it's multi-device
+setup that doesn't make the fallback very useful.
+
 > 
