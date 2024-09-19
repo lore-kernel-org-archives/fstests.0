@@ -1,68 +1,70 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E75713AF2
-	for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 12:02:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91FA619E7EF
+	for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 13:52:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726747325; cv=none; b=O0VMIVfI8Ud4hRfKD3qqiTnjJm4YWzQyHLjcBs2UyLAr6yvG3E4la0KZYpiRV/YeZhV95pbBp+8S4HGBdEX4F4SRxmY7jLZk4p3coUOltolwqcJfX1zliC6sCYENMAjLwzDRV2JUzuoisChoNanT08DJH4wbcJ5ddEdh//ulaMU=
+	t=1726753961; cv=none; b=Vo1fEa+gvXSW7U73D53ilg+Z+zLl6xK0WwoWT4R6vF8Xw+Vc5dzsqdDsPlkrhtZn+HcrKIWbSElJQKGgRlF2PF4UTq6x+lzqTaDrdm6Z4kAVZ8h/0DgsKaH4+BBXS0pWEpE29HMjRlTFY1RfK4okqOLFhEQWRMxf6zJW71PDAO8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726747325; c=relaxed/simple;
-	bh=/HHoEKHdOcrMQI5TPn2DJ3BeypKCWLjmv441TafBUSs=;
+	s=arc-20240116; t=1726753961; c=relaxed/simple;
+	bh=NDFfE9ulhCGoU48psNfOIGkfCOEchsyqgdoNaoXi/fc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DxFSrwQx/7BcpX8M84Z/npJ42qPflgaglLNu5b8nvM03JGgY/M0jRPXxh6bbp3U/+RcOsJPscP2p+w+O9UIiGu4u3FRcL/r9KBMlPr9yWQpNTBfcgXYJmH5StYut+6YEy39fARPO9b27CPTd1d2hcI9D1t5WGLy69KhZcqhugjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=T13lPfeM; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=lh90WA+QcS89WrHc9bRyNzfHBQ6xdsNcI7k3YsZnTkzsPQislu2DF5JdBck12zOLsGbfUPEXgBge67W1JGUVt+lM9NLCCFaO7qqv+0Fk3tdKa+UbzhG7tQjftMJCCk4eLa0yZZPtVymnXX4lI/AYpGd46S3dXxriPzAc1IYSS88=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gUM3cJyZ; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="T13lPfeM"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gUM3cJyZ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1726747322;
+	s=mimecast20190719; t=1726753958;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=/C7poWDIll3s8OZ1tWewIyLZAu/DSiBRHt93J84YF9U=;
-	b=T13lPfeMPgLvMCh7qHXSU+OpRepfOtM9qnd6A5vYB+HKXku9yADKjygXR0Gxu3+OiVgWos
-	Wv9rJk5LKDuLx7W4iGPxLjQEFThU740RJAzFXFym5rmcqEqCx/UIJIOo0MdD9yNWR9A1kf
-	+cYXoMGM7T8OEEiycc2tBvE0aQtSxek=
-Received: from mail-il1-f199.google.com (mail-il1-f199.google.com
- [209.85.166.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=3unzzAJvSmtnztsBLm5ryefNZMfxFcR0XbUnhOSCxHc=;
+	b=gUM3cJyZTWnrL6XpMMEehnF5/d/WN5pzTxYnf66YrV8U30fBeDB2OJWcDMkFyKCVdfCHGR
+	VqkQz33XtBJFaXvvI4Oa7iit6xsDzfYmFNBO7hHqzqYfC8r5uw6hPLWHCxvHtI884kMSxb
+	12a4rMoEoB2ztOZvysixPnLeHkB98cg=
+Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
+ [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-656-aEsSJGqoPsiiJ7Gl-OjQpg-1; Thu, 19 Sep 2024 08:02:01 -0400
-X-MC-Unique: aEsSJGqoPsiiJ7Gl-OjQpg-1
-Received: by mail-il1-f199.google.com with SMTP id e9e14a558f8ab-3a08f88aeceso8512205ab.0
-        for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 05:02:01 -0700 (PDT)
+ us-mta-528-tVwOT2LpNP2csueTpAxepw-1; Thu, 19 Sep 2024 09:52:37 -0400
+X-MC-Unique: tVwOT2LpNP2csueTpAxepw-1
+Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-7d65a13582dso1105960a12.3
+        for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 06:52:36 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726747320; x=1727352120;
+        d=1e100.net; s=20230601; t=1726753956; x=1727358756;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=/C7poWDIll3s8OZ1tWewIyLZAu/DSiBRHt93J84YF9U=;
-        b=YxDWzN8JpMc6mfSODUyfj7GRQFtCSDIw5fxBgOvfTDR6CX2I0WwqZvrfFN+ADkE+Ys
-         Lkfu1FT71vIpv/8KAfZFkgUrIWsQ4bNK6+YHNsQZZbAEB/Wg4UMyXj+EBBE2j7xlrD94
-         7krpRZzwgXxZSQVqV1aP8emIRegfrRlxMMPqMyrK+wSb3K9hQu7bFzGIxZLqEgqY95Lv
-         wpSquU1oa/R1kKeHtdSFTUBxnRfJ9AULRYZhu4LiQCuw6ACr5f1VoAFpm2bMslxnDwSA
-         m0B9+vpjRtBZQV3pqIRgzbxcS4ojNz3fHIp/MddSnliGrgr1NV29iY7CRKevT4Olb6Pm
-         kEkg==
-X-Gm-Message-State: AOJu0Yx+kYwQZWQD7YvtHeDIS8Sr2JRLOZiRW4sEzif63J/ZNjG4e11d
-	7b7lGbDVavtcQseqk8N00/pa0rtu9vP2zsdUo1QZldG3YPzAowGk2+53eRg/U4jUw6doUFmWd9y
-	7K1FFZ1aWuCCj8yUWON9XZwq6wcQ6+SEkGnLY4D04PQ6H0siGDoAkKSeDvIaQhdeAjg==
-X-Received: by 2002:a05:6e02:1946:b0:39d:351a:d0a2 with SMTP id e9e14a558f8ab-3a084975f6fmr215270245ab.25.1726747320547;
-        Thu, 19 Sep 2024 05:02:00 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG/qglomCPgA/ng9n2DRPlPK4L47oglNwGhpqNECZEkKTFOA7ApjmWl9upUpzCG0T56cQrRbw==
-X-Received: by 2002:a05:6e02:1946:b0:39d:351a:d0a2 with SMTP id e9e14a558f8ab-3a084975f6fmr215269965ab.25.1726747320176;
-        Thu, 19 Sep 2024 05:02:00 -0700 (PDT)
+        bh=3unzzAJvSmtnztsBLm5ryefNZMfxFcR0XbUnhOSCxHc=;
+        b=gdYCtWw/dEG2LpYhyNQ54TLTMAtITh00UTjYBBiMShW3FDyKDcxIBZCYZKjUCXb6j4
+         Z8I2BxcrjoZWpsyZXvYIYWkBR5DTj6xAikiovjxXO7FADLY4SxhsG3/4ERKJ5tgREjPE
+         cH2QYbhxiUc1eH62xXNG007u0XYaVaYyW90BFIXNuHlgrN8FnDjDxPDwifSx+0CRU2dQ
+         Q7ZRqG5/xfwZ2svyjcp+OlzNf2qnKPhhJoiDKP8d14oSTNcME5oA5jozMNIwGFBJG7ME
+         WjgYPrbn2yFq+I+Oeqcc2bzd7ki2eZua6C9Vu019O2JET+aB+qp/yLJM2PO0u2giZrIl
+         7XxA==
+X-Gm-Message-State: AOJu0YxTI9qO3cFmUvaensGtBgg4YLYhEYKDCH8o9m3ZjpNezM0GJizR
+	Fg0ONy4+JzSHcSvk2giULDAMm0lqk9eSF6QG7fX3LghsXXxHO82RKKrPpI4OUA9Q3zc1UQAB0WS
+	GqmFwxtmKBBkw200ZcnLpF4KsDsZ4H1r1gJEHUaix5BNe0mBJfmd+W7w=
+X-Received: by 2002:a17:902:fc4c:b0:208:b468:db21 with SMTP id d9443c01a7336-208b468de27mr162851195ad.30.1726753955978;
+        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEeVGpauaCxXxAFA/JHs3lAViaZBXOOJBg14DyeczN2LDhPf8YDEDUO5qkH3OU1lcocGRvBdg==
+X-Received: by 2002:a17:902:fc4c:b0:208:b468:db21 with SMTP id d9443c01a7336-208b468de27mr162850795ad.30.1726753955460;
+        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7db498fb73bsm9159444a12.30.2024.09.19.05.01.58
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2079460254dsm80193725ad.114.2024.09.19.06.52.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Sep 2024 05:01:59 -0700 (PDT)
-Date: Thu, 19 Sep 2024 20:01:56 +0800
+        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
+Date: Thu, 19 Sep 2024 21:52:31 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: An Long <lan@suse.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] btrfs/315: update 315.out to adapt mount cmd
-Message-ID: <20240919120156.apamqapyuytpf3ii@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <bb85eb7d443b2da482b6087d8946f0efafa15f87.camel@suse.com>
+To: Srivathsa Dara <srivathsa.d.dara@oracle.com>
+Cc: fstests@vger.kernel.org, rajesh.sivaramasubramaniom@oracle.com,
+	junxiao.bi@oracle.com
+Subject: Re: [PATCH v2] ext4: Regression test for corruption during on-line
+ resize
+Message-ID: <20240919135231.fye7b6sip47s4col@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240917135813.1375520-1-srivathsa.d.dara@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -71,44 +73,91 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <bb85eb7d443b2da482b6087d8946f0efafa15f87.camel@suse.com>
+In-Reply-To: <20240917135813.1375520-1-srivathsa.d.dara@oracle.com>
 
-On Thu, Sep 19, 2024 at 01:07:53AM +0800, An Long wrote:
-> Mount error info changed since util-linux v2.40
-> (91ea38e libmount: report failed syscall name).
-> So add "mount" before "system call failed".
+On Tue, Sep 17, 2024 at 01:58:13PM +0000, Srivathsa Dara wrote:
+> Regression test for:
+> 	a6b3bfe176e8 ext4: fix corruption during on-line resize
 > 
-> Signed-off-by: An Long <lan@suse.com>
+> Signed-off-by: Srivathsa Dara <srivathsa.d.dara@oracle.com>
 > ---
->  tests/btrfs/315.out | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
-> index 3ea7a35a..a19ae8d5 100644
-> --- a/tests/btrfs/315.out
-> +++ b/tests/btrfs/315.out
-> @@ -1,7 +1,7 @@
->  QA output created by 315
->  ---- seed_device_must_fail ----
->  mount: SCRATCH_MNT: WARNING: source write-protected, mounted read-
-> only.
-> -mount: TEST_DIR/315/tempfsid_mnt:  system call failed: File exists.
-> +mount: TEST_DIR/315/tempfsid_mnt: mount system call failed: File
+> v1->v2:
+> - Remove default $MKFS_OPTIONS
+> - Unmount the device before running e2fsck
 
-This change will bring failure to downstream distro. Please refer to
-_filter_error_mount (or other filters you like), add new filter to
-it to help this test passed on old and new util-linux.
+This version is good to me, I'll merge it if no more review points
+from ext4 list.
 
-Thanks,
-Zorro
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-
-> exists.
->  ---- device_add_must_fail ----
->  wrote 9000/9000 bytes at offset 0
->  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> 
+>  tests/ext4/060     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/060.out |  2 ++
+>  2 files changed, 47 insertions(+)
+>  create mode 100755 tests/ext4/060
+>  create mode 100644 tests/ext4/060.out
+> 
+> diff --git a/tests/ext4/060 b/tests/ext4/060
+> new file mode 100755
+> index 00000000..38d1c8f7
+> --- /dev/null
+> +++ b/tests/ext4/060
+> @@ -0,0 +1,45 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 060
+> +#
+> +# This test ensures that kernel avoids FS corruption while online
+> +# resizing an ext4 filesystem with disabled resize_inode feature.
+> +#
+> +# The commit a6b3bfe176e8 ("ext4: fix corruption during on-line resize")
+> +# stops the corruption.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto resize quick
+> +
+> +_supported_fs ext4
+> +_fixed_by_kernel_commit a6b3bfe176e8 \
+> +	"ext4: fix corruption during on-line resize"
+> +
+> +_require_command "$RESIZE2FS_PROG" resize2fs
+> +_require_command "$E2FSCK_PROG" e2fsck
+> +_require_scratch_size_nocheck $((9* 1024 * 1024))
+> +
+> +# Initialize an EXT4 filesystem with the resize_inode feature disabled,
+> +# and a size of 128MiB less than 8GiB, i.e., short of 1 block group in
+> +# an 8GiB filesystem.
+> +
+> +dev_size=$((8* 1024 * 1024 * 1024 - 128 * 1024 * 1024))
+> +MKFS_OPTIONS="-O ^resize_inode" _scratch_mkfs_sized $dev_size \
+> +	>>$seqres.full 2>&1
+> +
+> +_scratch_mount
+> +
+> +# Perform online-resize
+> +$RESIZE2FS_PROG $SCRATCH_DEV 9G >> $seqres.full 2>&1
+> +
+> +_scratch_unmount
+> +
+> +$E2FSCK_PROG -fn $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "Filesystem corrupted"
+> +
+> +echo "Silence is golden"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/ext4/060.out b/tests/ext4/060.out
+> new file mode 100644
+> index 00000000..8ffce4de
+> --- /dev/null
+> +++ b/tests/ext4/060.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 060
+> +Silence is golden
 > -- 
-> 2.43.0
-> 
+> 2.39.3
 > 
 
