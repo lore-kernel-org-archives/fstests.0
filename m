@@ -1,163 +1,278 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91FA619E7EF
-	for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 13:52:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E617919D8BB
+	for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 13:58:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726753961; cv=none; b=Vo1fEa+gvXSW7U73D53ilg+Z+zLl6xK0WwoWT4R6vF8Xw+Vc5dzsqdDsPlkrhtZn+HcrKIWbSElJQKGgRlF2PF4UTq6x+lzqTaDrdm6Z4kAVZ8h/0DgsKaH4+BBXS0pWEpE29HMjRlTFY1RfK4okqOLFhEQWRMxf6zJW71PDAO8=
+	t=1726754302; cv=none; b=t0Ok5BEqrPwPiZiR2FAqPJIWnBMaAgUX+6MYh/3Q6BrOTR91v83p9Vq+9hlHDIcvl/9mgmrgvEhCOEgWd0qjxCOYLyjJT4yiJHZYOIwNatB9jBCtG1WXflUuvUmal7UHvM2PiEgBaLqhxbamd6IMT8QZm3thvX7cEhFrzeA4DaE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726753961; c=relaxed/simple;
-	bh=NDFfE9ulhCGoU48psNfOIGkfCOEchsyqgdoNaoXi/fc=;
+	s=arc-20240116; t=1726754302; c=relaxed/simple;
+	bh=5+U7y3oxwAfbhqVRGmkxI2VALtbRPrDDhWYFudYw0mU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lh90WA+QcS89WrHc9bRyNzfHBQ6xdsNcI7k3YsZnTkzsPQislu2DF5JdBck12zOLsGbfUPEXgBge67W1JGUVt+lM9NLCCFaO7qqv+0Fk3tdKa+UbzhG7tQjftMJCCk4eLa0yZZPtVymnXX4lI/AYpGd46S3dXxriPzAc1IYSS88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=gUM3cJyZ; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=C8zD2UjLAOHKxr0WsJoPpytzrCY6SKBEDR1cIl4achLBY9IwaPCFDvJjgKrKWCCm9aLwT4PurAxbW1KRd1x5wzLT6aqqguuBRmC3cIpSpmY24acc8l6Z0ugq29tBXdhesFaIoxWoBt6X5/MKdjos0Q88zYu8zHkbktXv4Y9J/DU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iB/jlH13; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="gUM3cJyZ"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iB/jlH13"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1726753958;
+	s=mimecast20190719; t=1726754298;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=3unzzAJvSmtnztsBLm5ryefNZMfxFcR0XbUnhOSCxHc=;
-	b=gUM3cJyZTWnrL6XpMMEehnF5/d/WN5pzTxYnf66YrV8U30fBeDB2OJWcDMkFyKCVdfCHGR
-	VqkQz33XtBJFaXvvI4Oa7iit6xsDzfYmFNBO7hHqzqYfC8r5uw6hPLWHCxvHtI884kMSxb
-	12a4rMoEoB2ztOZvysixPnLeHkB98cg=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=c/2MUtsiKyHauds2qqhS4UYk3RhAKaGmJDq2PzewGaI=;
+	b=iB/jlH13HkcwZuYcsl8Kai9UpTzCOr7e+RVgGbgS+O9ncOSKf0uKYKkZzcer2mN0Ja/N80
+	BSFByw71DSHE+9btZQ97RebETexR1+6T10M5b19g6qbCn+5cEcxlQuTCtPr90rqpt63E9Z
+	XfMg+tlKFlfjtO+NclXAqpKceOjD+gk=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-528-tVwOT2LpNP2csueTpAxepw-1; Thu, 19 Sep 2024 09:52:37 -0400
-X-MC-Unique: tVwOT2LpNP2csueTpAxepw-1
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-7d65a13582dso1105960a12.3
-        for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 06:52:36 -0700 (PDT)
+ us-mta-48-3cD5WkQZPymQqU-NGo592w-1; Thu, 19 Sep 2024 09:58:17 -0400
+X-MC-Unique: 3cD5WkQZPymQqU-NGo592w-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-20537e42b7aso14366275ad.2
+        for <fstests@vger.kernel.org>; Thu, 19 Sep 2024 06:58:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726753956; x=1727358756;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3unzzAJvSmtnztsBLm5ryefNZMfxFcR0XbUnhOSCxHc=;
-        b=gdYCtWw/dEG2LpYhyNQ54TLTMAtITh00UTjYBBiMShW3FDyKDcxIBZCYZKjUCXb6j4
-         Z8I2BxcrjoZWpsyZXvYIYWkBR5DTj6xAikiovjxXO7FADLY4SxhsG3/4ERKJ5tgREjPE
-         cH2QYbhxiUc1eH62xXNG007u0XYaVaYyW90BFIXNuHlgrN8FnDjDxPDwifSx+0CRU2dQ
-         Q7ZRqG5/xfwZ2svyjcp+OlzNf2qnKPhhJoiDKP8d14oSTNcME5oA5jozMNIwGFBJG7ME
-         WjgYPrbn2yFq+I+Oeqcc2bzd7ki2eZua6C9Vu019O2JET+aB+qp/yLJM2PO0u2giZrIl
-         7XxA==
-X-Gm-Message-State: AOJu0YxTI9qO3cFmUvaensGtBgg4YLYhEYKDCH8o9m3ZjpNezM0GJizR
-	Fg0ONy4+JzSHcSvk2giULDAMm0lqk9eSF6QG7fX3LghsXXxHO82RKKrPpI4OUA9Q3zc1UQAB0WS
-	GqmFwxtmKBBkw200ZcnLpF4KsDsZ4H1r1gJEHUaix5BNe0mBJfmd+W7w=
-X-Received: by 2002:a17:902:fc4c:b0:208:b468:db21 with SMTP id d9443c01a7336-208b468de27mr162851195ad.30.1726753955978;
-        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEeVGpauaCxXxAFA/JHs3lAViaZBXOOJBg14DyeczN2LDhPf8YDEDUO5qkH3OU1lcocGRvBdg==
-X-Received: by 2002:a17:902:fc4c:b0:208:b468:db21 with SMTP id d9443c01a7336-208b468de27mr162850795ad.30.1726753955460;
-        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1726754296; x=1727359096;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=c/2MUtsiKyHauds2qqhS4UYk3RhAKaGmJDq2PzewGaI=;
+        b=c6jXdG0wl5WI6u4uowMceR7ByNUejjQqVNjFaUrOih2Pocz4Cyfbnsz4OPfn318i8u
+         bBr8zchOo9nNgCFXTYzfHqewUspa4cL43KBCeJ+8DJXxcuCaC/8XJk1BLWmWHrdXdvYj
+         NviL3Un4rOB6jPSht3wsAYt7YaDeveY5IYzmBXmigRwVb8ieWbO0yLJkC77aG0Yi64Az
+         Lpl/vn0W+AA5CnmywUbAArW70015wczbc80jOKfekPCduzlswTkcJHqs4C/761EFg9Y8
+         Hvnc2WRsxYz3qkEEpUT7sD90+rtKo/WGOvjCvdPV0GhDBO/tkh0F8qdL4G3CXT6XSqVE
+         2XBA==
+X-Forwarded-Encrypted: i=1; AJvYcCWf6XmN4WXZE2VNC04D5PKR1TVb5AGbkDJIDvwcyVwsy9u1UfZsLlE3c150EL4t4b6wfDd8xJw8@vger.kernel.org
+X-Gm-Message-State: AOJu0YwpjtLJWbuVwXaFrZb6XUcaYtvmRhBgragAr+/PKbhww5saX/1I
+	NIJ58pF4lIk3VTvzs/0oBwuXgK8qXzyhKkB8fIZk3I82/9BuKbm1In7Pr+OuY9yvQfwXj3bmdOs
+	HVLpdGJF9awvSPL7fb6u5Ek1bEGSpZgYyRVavqG/VAC1a82wiygjsF8k=
+X-Received: by 2002:a17:902:d2ca:b0:206:c2f4:afb7 with SMTP id d9443c01a7336-2076e36db8cmr357695465ad.26.1726754296480;
+        Thu, 19 Sep 2024 06:58:16 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF9dcn3RFdB1lBsuCSr12seiM0TbXN495EpkIABcOP+ECeICu2gSbHZDViogc2ewLqWPwHO5w==
+X-Received: by 2002:a17:902:d2ca:b0:206:c2f4:afb7 with SMTP id d9443c01a7336-2076e36db8cmr357695165ad.26.1726754296078;
+        Thu, 19 Sep 2024 06:58:16 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2079460254dsm80193725ad.114.2024.09.19.06.52.33
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20794730becsm80456675ad.267.2024.09.19.06.58.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Sep 2024 06:52:35 -0700 (PDT)
-Date: Thu, 19 Sep 2024 21:52:31 +0800
+        Thu, 19 Sep 2024 06:58:15 -0700 (PDT)
+Date: Thu, 19 Sep 2024 21:58:10 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Srivathsa Dara <srivathsa.d.dara@oracle.com>
-Cc: fstests@vger.kernel.org, rajesh.sivaramasubramaniom@oracle.com,
-	junxiao.bi@oracle.com
-Subject: Re: [PATCH v2] ext4: Regression test for corruption during on-line
- resize
-Message-ID: <20240919135231.fye7b6sip47s4col@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240917135813.1375520-1-srivathsa.d.dara@oracle.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org,
+	fstests@vger.kernel.org, Theodore Tso <tytso@mit.edu>,
+	"Darrick J. Wong" <djwong@kernel.org>
+Subject: Re: [PATCH] overlay: create a variant to syncfs error test xfs/546
+Message-ID: <20240919135810.givimomj6vgvotzk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240830180844.857283-1-amir73il@gmail.com>
+ <20240903042128.ksqua6ha47iayolq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxifYDgCmKEUQrbZWwL8JxmRnmPK3dGtVpMhq2cgGQ_etg@mail.gmail.com>
+ <20240904025840.obxcbe22bud6ga2i@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxjDcgm9preuBY_5b+bbHpiLzVw+yKNj7KaeWs_1ye1Tqw@mail.gmail.com>
+ <20240904112533.vbzp3nclece2sukg@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAOQ4uxiTKJjgL16tL2iUzxBFAK+bLCsgfGaj3HGKq+nYWFMAnQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20240917135813.1375520-1-srivathsa.d.dara@oracle.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAOQ4uxiTKJjgL16tL2iUzxBFAK+bLCsgfGaj3HGKq+nYWFMAnQ@mail.gmail.com>
 
-On Tue, Sep 17, 2024 at 01:58:13PM +0000, Srivathsa Dara wrote:
-> Regression test for:
-> 	a6b3bfe176e8 ext4: fix corruption during on-line resize
+On Tue, Sep 17, 2024 at 04:37:04PM +0200, Amir Goldstein wrote:
+> On Wed, Sep 4, 2024 at 1:25 PM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Wed, Sep 04, 2024 at 10:23:16AM +0200, Amir Goldstein wrote:
+> > > On Wed, Sep 4, 2024 at 4:58 AM Zorro Lang <zlang@redhat.com> wrote:
+> > > >
+> > > > On Tue, Sep 03, 2024 at 08:41:28AM +0200, Amir Goldstein wrote:
+> > > > > On Tue, Sep 3, 2024 at 6:21 AM Zorro Lang <zlang@redhat.com> wrote:
+> > > > > >
+> > > > > > On Fri, Aug 30, 2024 at 08:08:44PM +0200, Amir Goldstein wrote:
+> > > > > > > Test overlayfs over xfs with and without "volatile" mount option.
+> > > > > > >
+> > > > > > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > > > > > ---
+> > > > > > >
+> > > > > > > Zorro,
+> > > > > > >
+> > > > > > > I was going to make a generic test from xfs/546, so that overlayfs could
+> > > > > > > also run it, but then I realized that ext4 does not behave as xfs in
+> > > > > > > that case (it returns success on syncfs post shutdown).
+> > > > > > >
+> > > > > > > Unless and until this behavior is made a standard, I made an overlayfs
+> > > > > > > specialized test instead, which checks for underlying fs xfs.
+> > > > > > > While at it, I also added test coverage for the "volatile" mount options
+> > > > > > > that is expected to return succuss in that case regardles of the
+> > > > > > > behavior of the underlying fs.
+> > > > > > >
+> > > > > > > Thanks,
+> > > > > > > Amir.
+> > > > > > >
+> > > > > > >  tests/overlay/087     | 62 +++++++++++++++++++++++++++++++++++++++++++
+> > > > > > >  tests/overlay/087.out |  4 +++
+> > > > > > >  2 files changed, 66 insertions(+)
+> > > > > > >  create mode 100755 tests/overlay/087
+> > > > > > >  create mode 100644 tests/overlay/087.out
+> > > > > > >
+> > > > > > > diff --git a/tests/overlay/087 b/tests/overlay/087
+> > > > > > > new file mode 100755
+> > > > > > > index 00000000..a5afb0d5
+> > > > > > > --- /dev/null
+> > > > > > > +++ b/tests/overlay/087
+> > > > > > > @@ -0,0 +1,62 @@
+> > > > > > > +#! /bin/bash
+> > > > > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > > > > +# Copyright (c) 2022 Oracle.  All Rights Reserved.
+> > > > > > > +# Copyright (c) 2024 CTERA Networks.  All Rights Reserved.
+> > > > > > > +#
+> > > > > > > +# FS QA Test No. 087
+> > > > > > > +#
+> > > > > > > +# This is a variant of test xfs/546 for overlayfs
+> > > > > > > +# with and without the "volatile" mount option.
+> > > > > > > +# It only works over xfs underlying fs.
+> > > > > > > +#
+> > > > > > > +# Regression test for kernel commits:
+> > > > > > > +#
+> > > > > > > +# 5679897eb104 ("vfs: make sync_filesystem return errors from ->sync_fs")
+> > > > > > > +# 2d86293c7075 ("xfs: return errors in xfs_fs_sync_fs")
+> > > > > > > +#
+> > > > > > > +# During a code inspection, I noticed that sync_filesystem ignores the return
+> > > > > > > +# value of the ->sync_fs calls that it makes.  sync_filesystem, in turn is used
+> > > > > > > +# by the syncfs(2) syscall to persist filesystem changes to disk.  This means
+> > > > > > > +# that syncfs(2) does not capture internal filesystem errors that are neither
+> > > > > > > +# visible from the block device (e.g. media error) nor recorded in s_wb_err.
+> > > > > > > +# XFS historically returned 0 from ->sync_fs even if there were log failures,
+> > > > > > > +# so that had to be corrected as well.
+> > > > > > > +#
+> > > > > > > +# The kernel commits above fix this problem, so this test tries to trigger the
+> > > > > > > +# bug by using the shutdown ioctl on a clean, freshly mounted filesystem in the
+> > > > > > > +# hope that the EIO generated as a result of the filesystem being shut down is
+> > > > > > > +# only visible via ->sync_fs.
+> > > > > > > +#
+> > > > > > > +. ./common/preamble
+> > > > > > > +_begin_fstest auto quick mount shutdown
+> > > > > > > +
+> > > > > > > +
+> > > > > > > +# Modify as appropriate.
+> > > > > > > +_require_xfs_io_command syncfs
+> > > > > > > +_require_scratch_nocheck
+> > > > > > > +_require_scratch_shutdown
+> > > > > > > +
+> > > > > > > +[ "$OVL_BASE_FSTYP" == "xfs" ] || \
+> > > > > > > +     _notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs after shutdown"
+> > > > > > > +
+> > > > > > > +# Reuse the fs formatted when we checked for the shutdown ioctl, and don't
+> > > > > > > +# bother checking the filesystem afterwards since we never wrote anything.
+> > > > > > > +echo "=== syncfs after shutdown"
+> > > > > > > +_scratch_mount
+> > > > > > > +# This command is complicated a bit because in the case of overlayfs the
+> > > > > > > +# syncfs fd needs to be opened before shutdown and it is different from the
+> > > > > > > +# shutdown fd, so we cannot use the _scratch_shutdown() helper.
+> > > > > > > +# Filter out xfs_io output of active fds.
+> > > > > > > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > > > > > > +     grep -vF '[00'
+> > > > > > > +
+> > > > > > > +# Now repeat the same test with a volatile overlayfs mount and expect no error
+> > > > > > > +_scratch_unmount
+> > > > > > > +echo "=== syncfs after shutdown (volatile)"
+> > > > > > > +_scratch_mount -o volatile
+> > > > > > > +$XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT | \
+> > > > > > > +     grep -vF '[00'
+> > > > > >
+> > > > > > Oh, the test steps are much different from xfs/546. If we move x/546 to generic/,
+> > > > > > can overlay reproduce this bug by that?
+> > > > >
+> > > > > Yes and no.
+> > > > >
+> > > > > For overlayfs to support this as a generic test, the helper
+> > > > > _scratch_shutdown_handle must be used and the shutdown+syncfs
+> > > > > command must be complicated to something like this:
+> > > > >
+> > > > > $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f
+> > > > > ' -c close -c syncfs $SCRATCH_MNT | \
+> > > > >        grep -vF '[00'
+> > > > >
+> > > > > This is because overlayfs itself does not support the shutdown ioctl.
+> > > > > If the test is moved to generic as it is we get an error when running
+> > > > > overlayfs:
+> > > > >
+> > > > >     XFS_IOC_GOINGDOWN: Inappropriate ioctl for device
+> > > > >
+> > > > > because _require_scratch_shutdown is "supported" by overlayfs
+> > > > > but only when the _scratch_shutdown helpers are used.
+> > > >
+> > > > Yeah, I know this.
+> > > >
+> > > > >
+> > > > > If the test is to be moved as is, it will need to opt-out of overlayfs
+> > > > > explicitly.
+> > > >
+> > > > I mean you have a "-o volatile" option test, that's an overlayfs specific
+> > > > mount option. If you need that test, that's an overlay specific test, that
+> > > > part can be an overlay specific test case. If not, we can use a generic
+> > > > case (from xfs/546) to cover overlay and other fs.
+> > >
+> > > I need the -o volatile test regardless of moving xfs/546 to generic.
+> > > That's why I posted this patch.
+> >
+> > OK, let's have two patches, one moves xfs/546 to generic/, the other
+> > is this overlay specific test case.
+> >
 > 
-> Signed-off-by: Srivathsa Dara <srivathsa.d.dara@oracle.com>
-> ---
+> Hi Zorro,
 > 
-> v1->v2:
-> - Remove default $MKFS_OPTIONS
-> - Unmount the device before running e2fsck
+> I thought that you agreed to include the overlay specific test overlay/087,
+> but I still do not see it in for-next.
+> 
+> Did I misunderstand you, or was it accidently left out of for-next?
+> 
+> Regarding moving xfs/546 to generic/, I had sent a patch to ext4 [1],
+> but no comment from Ted yet.
+> 
+> [1] https://lore.kernel.org/linux-ext4/20240904084657.1062243-1-amir73il@gmail.com/
 
-This version is good to me, I'll merge it if no more review points
-from ext4 list.
+If this's accepted by ext4, do you still this notrun?
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+  [ "$OVL_BASE_FSTYP" == "xfs" ] || \                                                                                                    
+	_notrun "base fs $OVL_BASE_FSTYP has unknown behavior with syncfs after shutdown"
+
+And what about other fs (besides xfs and ext4).
+
+Thanks,
+Zorro
 
 > 
->  tests/ext4/060     | 45 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/060.out |  2 ++
->  2 files changed, 47 insertions(+)
->  create mode 100755 tests/ext4/060
->  create mode 100644 tests/ext4/060.out
+> > >
+> > > >
+> > > > BTW, we actually we have a common _scratch_shutdown helper, I'm wondering
+> > > > if it works for this test? Likes:
+> > > >
+> > > >   _scratch_shutdown -f
+> > > >   $XFS_IO_PROG -c syncfs $SCRATCH_MNT
+> > > >
+> > > > Can this work?
+> > >
+> > > Nope, because $XFS_IO_PROG -c syncfs $SCRATCH_MNT
+> > > will fail (EIO) to open the directory after shutdown.
+> > > That's why the dance with -c open -c close is needed.
+> >
+> > Oh, although below line:
+> >   $XFS_IO_PROG -x -c "open $(_scratch_shutdown_handle)" -c 'shutdown -f ' -c close -c syncfs $SCRATCH_MNT
+> >
+> > trys to shudown on $(_scratch_shutdown_handle), then syncfs on $SCRATCH_MNT too.
+> > But the difference is it opens $SCRATCH_MNT before shutdown, so that's what you
+> > need.
 > 
-> diff --git a/tests/ext4/060 b/tests/ext4/060
-> new file mode 100755
-> index 00000000..38d1c8f7
-> --- /dev/null
-> +++ b/tests/ext4/060
-> @@ -0,0 +1,45 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 060
-> +#
-> +# This test ensures that kernel avoids FS corruption while online
-> +# resizing an ext4 filesystem with disabled resize_inode feature.
-> +#
-> +# The commit a6b3bfe176e8 ("ext4: fix corruption during on-line resize")
-> +# stops the corruption.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto resize quick
-> +
-> +_supported_fs ext4
-> +_fixed_by_kernel_commit a6b3bfe176e8 \
-> +	"ext4: fix corruption during on-line resize"
-> +
-> +_require_command "$RESIZE2FS_PROG" resize2fs
-> +_require_command "$E2FSCK_PROG" e2fsck
-> +_require_scratch_size_nocheck $((9* 1024 * 1024))
-> +
-> +# Initialize an EXT4 filesystem with the resize_inode feature disabled,
-> +# and a size of 128MiB less than 8GiB, i.e., short of 1 block group in
-> +# an 8GiB filesystem.
-> +
-> +dev_size=$((8* 1024 * 1024 * 1024 - 128 * 1024 * 1024))
-> +MKFS_OPTIONS="-O ^resize_inode" _scratch_mkfs_sized $dev_size \
-> +	>>$seqres.full 2>&1
-> +
-> +_scratch_mount
-> +
-> +# Perform online-resize
-> +$RESIZE2FS_PROG $SCRATCH_DEV 9G >> $seqres.full 2>&1
-> +
-> +_scratch_unmount
-> +
-> +$E2FSCK_PROG -fn $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "Filesystem corrupted"
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/ext4/060.out b/tests/ext4/060.out
-> new file mode 100644
-> index 00000000..8ffce4de
-> --- /dev/null
-> +++ b/tests/ext4/060.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 060
-> +Silence is golden
-> -- 
-> 2.39.3
+> Correct, this is why the dance with -c open -c close is needed when the test is
+> overlayfs specific and/or generic.
+> 
+> Thanks,
+> Amir.
 > 
 
