@@ -1,73 +1,68 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6804217BED4
-	for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 14:33:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B25379C0
+	for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 14:58:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726842791; cv=none; b=hx3bPUm+Fz+r/qNxpGv8OjCH9e29mh92dWZ0/J2slpIcowocpwZbE0c+VceSfeqM2BdamigLQG1iW+R0KogUj8f2wJfkPwCo4KReKJ9kxNnIjRgKS0h1z0kpb2hRt7FAQ1KYEJUeJovrjMBkIQVzmgntBJHOUJ+VOvwNsGptP9Y=
+	t=1726844329; cv=none; b=gMK50YUKd9x32O171AbxsUCp8If7I90K/joPkQfzcXgV3yJOraXoYVtYWBdCscBp++3Z27NOObUev4IdHV35I9GxOwxiuPxypLf8YHRWkg9848Oq9j3Cxgp+Dim0NI4TAgD+YrhwSR6AXCotEWgKbnPCtlViGRQxUL6Tv2syEFA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726842791; c=relaxed/simple;
-	bh=gnmz5umYLpA7o/lZDwMbK4Xm4PY7Lqdp4gVDqPdWYko=;
+	s=arc-20240116; t=1726844329; c=relaxed/simple;
+	bh=z22SccxQo6c+sJ5cRZzcznInukioCzVtsGrt4+7NOpc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jjNqZKuo7ZKc8embYXcCDgWPM4nKph5bnTzuFlA6kAC/xyL3xjrRfXRcjjVqbMwv47LX04wqopRDFcZ7dCem78kQTFzoJJV0z3rGuUPjGOn9gMKhlZjlOcIECalYMW1exLOgUP9NkQ9/Rxo5fMrSJqdZeInBFB0+GUPYt7bUzTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=frrx6JQU; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=lGWFijbCfnv10FJ4g8qHfG2Jy8a5k9weVKhvyIBYqGCGVvkNqtxhv4VOjq9NTW8Yj6okS4TXQv6nl2Fnd7Q6BOkX5bswVV6NsJn3JrRbgurQbgsAXoCRWwUFTbduG4d0dx7Mjubt29Ew0M4Cext9yThi48e6UDLn74L/xuDcLng=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h6RS2HJ8; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="frrx6JQU"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h6RS2HJ8"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1726842788;
+	s=mimecast20190719; t=1726844326;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=IGFwFrdRXjoa0NWpFoM3WWC1rp72IK/F5wYMdb5S2G8=;
-	b=frrx6JQU2d1+nRzjrahFNHW2Rm5BLC7a4grSOi8J+l7GzLClz0W5MmQyNrnKEBPvHp4hcp
-	s+RjKvCyA/n5Thw4IsIJbsIxSBDAyQUbkAKdtr+UharKej1lS15WN+S4ptA+GGHC57HOOc
-	F+S85uSZ0O62EAPFz/058zzPjd/yoxw=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=zhKQhtBNDHC0jMrtHE94L1tVmdD3hqf8qm4R9eV9Oag=;
+	b=h6RS2HJ871sTPdS1Ce95QwzD1y7iewlIki+qjFwtF1+xV3UDTu0iGonAEQ/8cpmoLBQ0zK
+	lGovSU788n0v1zBeKITV33ZataspNcycU+4OvKfUDuh2zfZQp0B3LAuAys61RUbW6EAamn
+	ZaMAxWOfJLuqCCLfsDD6RmnCsxnHh9I=
+Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
+ [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-561-74ZfFmalNNOdQuaIXJZ60Q-1; Fri, 20 Sep 2024 10:33:07 -0400
-X-MC-Unique: 74ZfFmalNNOdQuaIXJZ60Q-1
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-718f329aefdso2344992b3a.1
-        for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 07:33:06 -0700 (PDT)
+ us-mta-98-tfWGA4iKO9-87WzmwnBQUA-1; Fri, 20 Sep 2024 10:58:45 -0400
+X-MC-Unique: tfWGA4iKO9-87WzmwnBQUA-1
+Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2052a68430fso27732705ad.2
+        for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 07:58:44 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726842786; x=1727447586;
+        d=1e100.net; s=20230601; t=1726844324; x=1727449124;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=IGFwFrdRXjoa0NWpFoM3WWC1rp72IK/F5wYMdb5S2G8=;
-        b=HfYSdXpfzaOQlUbkOYS44sFUEVkJuxj8Swr5Xhjn22liQWjPa0FnTuI+v/u/Ihc0yd
-         duDuIEQRRNwQvUe3kY+eQe6yLFkVHzhieRxGUJFgWDW0o/9EiLkS6AwMitpRbujwwExo
-         Lf/frh1jmr/P5bt+6Et+WxQn/xrljFM2miKh0qWtT4YqSwWgC+/pemtI8rRXZlQzY0Rx
-         1Mqn2VWnDE56fS8ZRmLQLp9EZQdzi5M+qBUzG0799MvktmlQ39GuvAcnD1aIRYoQofjG
-         15bGaKHaIGKiJWWDAE5kKT6tYl7qmRlCwANRs0ZnKizu1lIXLW/Ar4lQw/7r2XtbLwWL
-         1asQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWt9HOPeljRQSzl/sZ8uCZqgt5yiUjYe3slqpadURcQvQfdkxXLVbkAT5GPXVlOz0OYgbQgUnrd@vger.kernel.org
-X-Gm-Message-State: AOJu0YxAURRHJF4uWYUz5+x9KFPYfqAqdGDFr+XpMgg3ztEN3e1SCcwe
-	pJPZqH3Ax2b0sBf6ndJCVa3h3TSsj+ZXO5TpTSj9tfzoB0KXLPDLkamkjJlhT0HXyWqpuu5GPw2
-	TcAZD0w2gdKL7cjsXCH4QQ5L999UytEREObazRP3aWOklIL/Wiemw+WQ=
-X-Received: by 2002:a05:6a21:1690:b0:1cf:6c64:f924 with SMTP id adf61e73a8af0-1d30a9fb5aemr5088224637.38.1726842785935;
-        Fri, 20 Sep 2024 07:33:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEeBk+f293SfOmVAzDgEJIlBRFep8KzqDHB19OXrxUjweA3QZqB7ceRCGt8YF4Kxicj7NOL7g==
-X-Received: by 2002:a05:6a21:1690:b0:1cf:6c64:f924 with SMTP id adf61e73a8af0-1d30a9fb5aemr5088183637.38.1726842785430;
-        Fri, 20 Sep 2024 07:33:05 -0700 (PDT)
+        bh=zhKQhtBNDHC0jMrtHE94L1tVmdD3hqf8qm4R9eV9Oag=;
+        b=kRbfAoARvBwddrPW4oABlUrJepfeHZl9CQsa4/EBWL139Ypls3lOovb+/xcmfvVGaS
+         oBBMWX4HLauUe7XkfML/nrkTsNcb+TVNRGcUUN/n0Szh2r1JQ+CCb1DmXi0cpd6AJ3ED
+         3Lj//OOuu61Oi7FQ4iCOMDdbRV4Cn/Vw5BSDc2Lj407BwqUVRUVTtnz1PU+ybwVVDuZG
+         ji1aGBuQNE0DbyAZqvhmp6aUBem18mtxxASGTtYCfkWSNGc8wJVfxJR7Q1RRYnUTmYUY
+         9NU9WKShQU+qRJtSIav/6TCPrOAM6pTVGMYgmV88+qKCU2axjJ69X6OqJ0xch62GBUpW
+         N47w==
+X-Gm-Message-State: AOJu0YwK4e7Ac6CtveM1j6PSWDmCAAyMJKYzYmBy6uJaBClDJ3E5p5/Q
+	uEDxjhyUz0b9lRRGwdFvk0F0U3kN10aaRtwq6ezl+hwJfSjWo/CcXGhCjHH9wxGSKM9mNazdsLI
+	xaG/zhpInsK2E1FKM9kINpu/rXMiyvuae5pZxr8LgKrjcUXECBSyBy0vjdiSMHpKoGw==
+X-Received: by 2002:a17:902:d2c1:b0:1fc:4940:d3ad with SMTP id d9443c01a7336-208d856abcfmr38706565ad.59.1726844323664;
+        Fri, 20 Sep 2024 07:58:43 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEewzcre0ZxqYNgbUjVDdzpQBi6Q38ykHRRiZgoYpZSnnCQJldf8AAa4pElzOapY7g2EABRzA==
+X-Received: by 2002:a17:902:d2c1:b0:1fc:4940:d3ad with SMTP id d9443c01a7336-208d856abcfmr38706245ad.59.1726844323156;
+        Fri, 20 Sep 2024 07:58:43 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71944b7b636sm9902451b3a.129.2024.09.20.07.33.04
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-207946017b6sm95932135ad.101.2024.09.20.07.58.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 Sep 2024 07:33:05 -0700 (PDT)
-Date: Fri, 20 Sep 2024 22:33:01 +0800
+        Fri, 20 Sep 2024 07:58:42 -0700 (PDT)
+Date: Fri, 20 Sep 2024 22:58:39 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] generic: add a regression test for sub-block fsmap
- queries
-Message-ID: <20240920143301.xbauye2osxxz3zao@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <172669301283.3083764.4996516594612212560.stgit@frogsfrogsfrogs>
- <172669301299.3083764.15063882630075709199.stgit@frogsfrogsfrogs>
- <20240919200703.xyn5tqv5knqzgiq3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20240919201310.GL182218@frogsfrogsfrogs>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH RFC] fsx: support unshare range fallocate mode
+Message-ID: <20240920145839.vphm5uoiptfgnad5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240906185606.136402-1-bfoster@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,188 +71,258 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240919201310.GL182218@frogsfrogsfrogs>
+In-Reply-To: <20240906185606.136402-1-bfoster@redhat.com>
 
-On Thu, Sep 19, 2024 at 01:13:10PM -0700, Darrick J. Wong wrote:
-> On Fri, Sep 20, 2024 at 04:07:03AM +0800, Zorro Lang wrote:
-> > On Wed, Sep 18, 2024 at 01:57:19PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > Zizhi Wo found some bugs in the GETFSMAP implementation if it is fed
-> > > sub-fsblock ranges.  Add a regression test for this.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > > ---
-> > >  tests/generic/1954     |   79 ++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/1954.out |   15 +++++++++
-> > >  2 files changed, 94 insertions(+)
-> > >  create mode 100755 tests/generic/1954
-> > >  create mode 100644 tests/generic/1954.out
-> > > 
-> > > 
-> > > diff --git a/tests/generic/1954 b/tests/generic/1954
-> > > new file mode 100755
-> > > index 0000000000..cfdfaf15e2
-> > > --- /dev/null
-> > > +++ b/tests/generic/1954
-> > > @@ -0,0 +1,79 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Oracle.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 1954
-> > > +#
-> > > +# Regression test for sub-fsblock key handling errors in GETFSMAP.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto rmap fsmap
-> > > +
-> > > +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> > > +	"xfs: Fix the owner setting issue for rmap query in xfs fsmap"
-> > > +_fixed_by_kernel_commit XXXXXXXXXXXX \
-> > > +	"xfs: Fix missing interval for missing_owner in xfs fsmap"
-> > 
-> > These 2 patches have been merged:
-> > 
-> >   68415b349f3f xfs: Fix the owner setting issue for rmap query in xfs fsmap
-> >   ca6448aed4f1 xfs: Fix missing interval for missing_owner in xfs fsmap
-> > 
-> > I'll help to update the commit id when I merge it.
+On Fri, Sep 06, 2024 at 02:56:06PM -0400, Brian Foster wrote:
+> The fallocate unshare mode flag modifies traditional preallocate
+> mode to unshare any shared extents backing the target range. Without
+> the unshare flag, preallocate mode simply assures that blocks are
+> physically allocated, regardless of whether they might be shared.
+> Unshare mode behaves the same as preallocate mode outside of the
+> shared extent case.
 > 
-> Oops, will go fix that.
+> Since unshare is fundamentally a modifier to preallocate mode,
+> enable it via an operation flag. Similar to keep size mode, select
+> it randomly for fallocate operations and track it via a flag and
+> string combination for operation logging and replay.
 > 
-> > > +
-> > > +. ./common/filter
-> > > +
-> > > +_require_xfs_io_command "fsmap"
-> > > +_require_scratch
-> > > +
-> > > +_scratch_mkfs >> $seqres.full
-> > > +_scratch_mount
-> > > +
-> > > +blksz=$(_get_block_size "$SCRATCH_MNT")
-> > > +if ((blksz < 2048)); then
-> > > +	_notrun "test requires at least 4 bblocks per fsblock"
-> > 
-> > What if the device is hard 4k sector size?
+> Unshare is mainly used for filesystems that support reflink, but the
+> operation is equivalent to preallocate mode for non-shared ranges,
+> so enable it by default. Filesystems that do not support the
+> fallocate flag (such as those that might not support reflink) will
+> fail the test operation and disable unshare calls at runtime. Also
+> provide a new command line option to explicitly disable unshare
+> calls.
 > 
-> Doesn't matter, because the bug is in converting GETFSMAP inputs that
-> are a multiple of 512 but not a multiple of $fsblocksize.
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> ---
 > 
-> > > +fi
-> > > +
-> > > +$XFS_IO_PROG -c 'fsmap' $SCRATCH_MNT >> $seqres.full
-> > > +
-> > > +find_freesp() {
-> > > +	$XFS_IO_PROG -c 'fsmap -d' $SCRATCH_MNT | tr '.[]:' '    ' | \
-> > > +		grep 'free space' | awk '{printf("%s:%s\n", $4, $5);}' | \
-> > > +		head -n 1
-> > > +}
-> > > +
-> > > +filter_fsmap() {
-> > > +	_filter_xfs_io_numbers | sed \
-> > > +		-e 's/inode XXXX data XXXX..XXXX/inode data/g' \
-> > > +		-e 's/inode XXXX attr XXXX..XXXX/inode attr/g' \
-> > > +		-e 's/: free space XXXX/: FREE XXXX/g' \
-> > > +		-e 's/: [a-z].*XXXX/: USED XXXX/g'
-> > 
-> > As this's a generic test case, I tried it on btrfs and ext4. btrfs got
-> > _notrun "xfs_io fsmap support is missing", ext4 got failure as:
-> > 
-> >   # diff -u /root/git/xfstests/tests/generic/1954.out /root/git/xfstests/results//default/generic/1954.out.bad
-> >   --- /root/git/xfstests/tests/generic/1954.out   2024-09-20 03:51:02.545504285 +0800
-> >   +++ /root/git/xfstests/results//default/generic/1954.out.bad    2024-09-20 03:58:51.505271227 +0800
-> >   @@ -1,15 +1,11 @@
-> >    QA output created by 1954
-> >    test incorrect setting of high key
-> >   -       XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> >    test missing free space extent
-> >           XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> >    test whatever came before freesp
-> >   -       XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> >    test whatever came after freesp
-> >   -       XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> >    test crossing start of freesp
-> >           XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> >           XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> >    test crossing end of freesp
-> >           XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> >   -       XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
+> Hi all,
 > 
-> Yep, we'll still have to patch ext4 for this.  btrfs doesn't support
-> GETFSMAP.
+> A couple quick notes..
+> 
+> First, this applies on top of the currently pending EOF pollution
+> patches [1] to fsx.
 
-Great, thanks for you clarify the ext4 part. I can merge this patch
-with that commit id change, if you don't want to change it more than
-that. Or feel free to add my RVB in V2.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+The patchset [1] has been merged, thanks for doing that.
 
 > 
-> --D
+> Second, this triggers multiple new test failures in my initial tests
+> that I've not fully diagnosed. I'm not necessarily sure that we want to
+> hold off on added test coverage for that reason, but I'd like to at
+> least be sure this isn't due to this patch doing something blatantly
+> wrong.
 > 
-> > Thanks,
-> > Zorro
-> > 
-> > > +}
-> > > +
-> > > +$XFS_IO_PROG -c 'fsmap -d' $SCRATCH_MNT | filter_fsmap >> $seqres.full
-> > > +
-> > > +freesp="$(find_freesp)"
-> > > +
-> > > +freesp_start="$(echo "$freesp" | cut -d ':' -f 1)"
-> > > +freesp_end="$(echo "$freesp" | cut -d ':' -f 2)"
-> > > +echo "$freesp:$freesp_start:$freesp_end" >> $seqres.full
-> > > +
-> > > +echo "test incorrect setting of high key"
-> > > +$XFS_IO_PROG -c 'fsmap -d 0 3' $SCRATCH_MNT | filter_fsmap
-> > > +
-> > > +echo "test missing free space extent"
-> > > +$XFS_IO_PROG -c "fsmap -d $((freesp_start + 1)) $((freesp_start + 2))" $SCRATCH_MNT | \
-> > > +	filter_fsmap
-> > > +
-> > > +echo "test whatever came before freesp"
-> > > +$XFS_IO_PROG -c "fsmap -d $((freesp_start - 3)) $((freesp_start - 2))" $SCRATCH_MNT | \
-> > > +	filter_fsmap
-> > > +
-> > > +echo "test whatever came after freesp"
-> > > +$XFS_IO_PROG -c "fsmap -d $((freesp_end + 2)) $((freesp_end + 3))" $SCRATCH_MNT | \
-> > > +	filter_fsmap
-> > > +
-> > > +echo "test crossing start of freesp"
-> > > +$XFS_IO_PROG -c "fsmap -d $((freesp_start - 2)) $((freesp_start + 1))" $SCRATCH_MNT | \
-> > > +	filter_fsmap
-> > > +
-> > > +echo "test crossing end of freesp"
-> > > +$XFS_IO_PROG -c "fsmap -d $((freesp_end - 1)) $((freesp_end + 2))" $SCRATCH_MNT | \
-> > > +	filter_fsmap
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/1954.out b/tests/generic/1954.out
-> > > new file mode 100644
-> > > index 0000000000..6baec43511
-> > > --- /dev/null
-> > > +++ b/tests/generic/1954.out
-> > > @@ -0,0 +1,15 @@
-> > > +QA output created by 1954
-> > > +test incorrect setting of high key
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> > > +test missing free space extent
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> > > +test whatever came before freesp
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> > > +test whatever came after freesp
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> > > +test crossing start of freesp
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> > > +test crossing end of freesp
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: FREE XXXX
-> > > +	XXXX: XXXX:XXXX [XXXX..XXXX]: USED XXXX
-> > > 
-> > > 
-> > 
+> That said, this has also uncovered one or two unshare related issues, so
+> I'm posting this slightly prematurely in order to share it and hopefully
+> get some review..
+> 
+> Brian
+> 
+> [1] https://lore.kernel.org/fstests/20240828181534.41054-1-bfoster@redhat.com/
+> 
+>  ltp/fsx.c | 59 ++++++++++++++++++++++++++++++++++++++++++-------------
+>  1 file changed, 45 insertions(+), 14 deletions(-)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 1ba1bf65..003990db 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -45,9 +45,14 @@
+>  
+>  #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
+>  
+> -/* Operation flags */
+> -
+> -enum opflags { FL_NONE = 0, FL_SKIPPED = 1, FL_CLOSE_OPEN = 2, FL_KEEP_SIZE = 4 };
+> +/* Operation flags (bitmask) */
+> +enum opflags {
+> +	FL_NONE = 0,
+> +	FL_SKIPPED = 1,
+> +	FL_CLOSE_OPEN = 2,
+> +	FL_KEEP_SIZE = 4,
+> +	FL_UNSHARE = 8
+> +};
+>  
+>  /*
+>   *	A log entry is an operation and a bunch of arguments.
+> @@ -167,6 +172,7 @@ int	seed = 1;			/* -S flag */
+>  int     mapped_writes = 1;              /* -W flag disables */
+>  int     fallocate_calls = 1;            /* -F flag disables */
+>  int     keep_size_calls = 1;            /* -K flag disables */
+> +int	unshare_calls = 1;		/* -u flag disables */
+>  int     punch_hole_calls = 1;           /* -H flag disables */
+>  int     zero_range_calls = 1;           /* -z flag disables */
+>  int	collapse_range_calls = 1;	/* -C flag disables */
+> @@ -543,6 +549,8 @@ logdump(void)
+>  				fprintf(logopsf, " keep_size");
+>  			if (lp->flags & FL_CLOSE_OPEN)
+>  				fprintf(logopsf, " close_open");
+> +			if (lp->flags & FL_UNSHARE)
+> +				fprintf(logopsf, " unshare");
+>  			if (overlap)
+>  				fprintf(logopsf, " *");
+>  			fprintf(logopsf, "\n");
+> @@ -1879,15 +1887,25 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
+>  #ifdef HAVE_LINUX_FALLOC_H
+>  /* fallocate is basically a no-op unless extending, then a lot like a truncate */
+>  void
+> -do_preallocate(unsigned offset, unsigned length, int keep_size)
+> +do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
+>  {
+>  	unsigned end_offset;
+> +	enum opflags opflags = FL_NONE;
+> +	int mode = 0;
+> +
+> +	if (keep_size) {
+> +		opflags |= FL_KEEP_SIZE;
+> +		mode |= FALLOC_FL_KEEP_SIZE;
+> +	}
+> +	if (unshare) {
+> +		opflags |= FL_UNSHARE;
+> +		mode |= FALLOC_FL_UNSHARE_RANGE;
+
+The FALLOC_FL_UNSHARE_RANGE is not a new flag, but it might be not old enough.
+The first commit about the FALLOC_FL_UNSHARE_RANGE is:
+
+  commit 409332b65d3ed8cfa7a8030f1e9d52f372219642
+  Author: Lukas Czerner <lczerner@redhat.com>
+  Date:   Thu Mar 13 19:07:42 2014 +1100
+
+      fs: Introduce FALLOC_FL_ZERO_RANGE flag for fallocate
+
+So "#ifdef FALLOC_FL_UNSHARE_RANGE" maybe needed.
+
+Thanks,
+Zorro
+
+
+> +	}
+>  
+>          if (length == 0) {
+>                  if (!quiet && testcalls > simulatedopcount)
+>                          prt("skipping zero length fallocate\n");
+> -                log4(OP_FALLOCATE, offset, length, FL_SKIPPED |
+> -		     (keep_size ? FL_KEEP_SIZE : FL_NONE));
+> +                log4(OP_FALLOCATE, offset, length, FL_SKIPPED | opflags);
+>                  return;
+>          }
+>  
+> @@ -1905,8 +1923,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
+>  	 * 	1: extending prealloc
+>  	 * 	2: interior prealloc
+>  	 */
+> -	log4(OP_FALLOCATE, offset, length,
+> -	     keep_size ? FL_KEEP_SIZE : FL_NONE);
+> +	log4(OP_FALLOCATE, offset, length, opflags);
+>  
+>  	if (end_offset > file_size) {
+>  		memset(good_buf + file_size, '\0', end_offset - file_size);
+> @@ -1921,7 +1938,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
+>  		      end_offset <= monitorend)))
+>  		prt("%lld falloc\tfrom 0x%x to 0x%x (0x%x bytes)\n", testcalls,
+>  				offset, offset + length, length);
+> -	if (fallocate(fd, keep_size ? FALLOC_FL_KEEP_SIZE : 0, (loff_t)offset, (loff_t)length) == -1) {
+> +	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
+>  	        prt("fallocate: 0x%x to 0x%x\n", offset, offset + length);
+>  		prterr("do_preallocate: fallocate");
+>  		report_failure(161);
+> @@ -1929,7 +1946,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
+>  }
+>  #else
+>  void
+> -do_preallocate(unsigned offset, unsigned length, int keep_size)
+> +do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
+>  {
+>  	return;
+>  }
+> @@ -2095,6 +2112,8 @@ read_op(struct log_entry *log_entry)
+>  				log_entry->flags |= FL_KEEP_SIZE;
+>  			else if (strcmp(str, "close_open") == 0)
+>  				log_entry->flags |= FL_CLOSE_OPEN;
+> +			else if (strcmp(str, "unshare") == 0)
+> +				log_entry->flags |= FL_UNSHARE;
+>  			else if (strcmp(str, "*") == 0)
+>  				;  /* overlap marker; ignore */
+>  			else
+> @@ -2161,6 +2180,7 @@ test(void)
+>  	unsigned long	rv;
+>  	unsigned long	op;
+>  	int		keep_size = 0;
+> +	int		unshare = 0;
+>  
+>  	if (simulatedopcount > 0 && testcalls == simulatedopcount)
+>  		writefileimage();
+> @@ -2190,6 +2210,7 @@ test(void)
+>  			offset2 = log_entry.args[2];
+>  			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
+>  			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
+> +			unshare = !!(log_entry.flags & FL_UNSHARE);
+>  			goto have_op;
+>  		}
+>  		return 0;
+> @@ -2219,8 +2240,12 @@ test(void)
+>  			size = random() % maxfilelen;
+>  		break;
+>  	case OP_FALLOCATE:
+> -		if (fallocate_calls && size && keep_size_calls)
+> -			keep_size = random() % 2;
+> +		if (fallocate_calls && size) {
+> +			if (keep_size_calls)
+> +				keep_size = random() % 2;
+> +			if (unshare_calls)
+> +				unshare = random() % 2;
+> +		}
+>  		break;
+>  	case OP_ZERO_RANGE:
+>  		if (zero_range_calls && size && keep_size_calls)
+> @@ -2334,7 +2359,7 @@ have_op:
+>  
+>  	case OP_FALLOCATE:
+>  		TRIM_OFF_LEN(offset, size, maxfilelen);
+> -		do_preallocate(offset, size, keep_size);
+> +		do_preallocate(offset, size, keep_size, unshare);
+>  		break;
+>  
+>  	case OP_PUNCH_HOLE:
+> @@ -2469,6 +2494,7 @@ usage(void)
+>  	-r readbdy: 4096 would make reads page aligned (default 1)\n\
+>  	-s style: 1 gives smaller truncates (default 0)\n\
+>  	-t truncbdy: 4096 would make truncates page aligned (default 1)\n\
+> +	-u Do not use unshare range\n\
+>  	-w writebdy: 4096 would make writes page aligned (default 1)\n\
+>  	-x: preallocate file space before starting, XFS only\n\
+>  	-y: synchronize changes to a file\n"
+> @@ -2853,7 +2879,7 @@ main(int argc, char **argv)
+>  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+>  
+>  	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>  				 longopts, NULL)) != EOF)
+>  		switch (ch) {
+>  		case 'b':
+> @@ -2952,6 +2978,9 @@ main(int argc, char **argv)
+>  			if (truncbdy <= 0)
+>  				usage();
+>  			break;
+> +		case 'u':
+> +			unshare_calls = 0;
+> +			break;
+>  		case 'w':
+>  			writebdy = getnum(optarg, &endp);
+>  			if (writebdy <= 0)
+> @@ -3242,6 +3271,8 @@ main(int argc, char **argv)
+>  		fallocate_calls = test_fallocate(0);
+>  	if (keep_size_calls)
+>  		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
+> +	if (unshare_calls)
+> +		unshare_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
+>  	if (punch_hole_calls)
+>  		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
+>  	if (zero_range_calls)
+> -- 
+> 2.45.0
+> 
 > 
 
