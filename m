@@ -1,104 +1,93 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B27718C36
-	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 07:57:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 031F028684
+	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 09:06:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727078237; cv=none; b=X+2FDpq66wUXIrJLvnD/KPvAdSO37rf4+l50Q/VM6HIqt50J7MsnHHUlAdO21zN8VVHONwmW22ApFYedjnqN2MBQjr02KdXnPKJjam1N7JE2riIj9B5Q5kA7AkYyEyeG7tx38OORESM9iB8RJqrJnZ5DtqfEyO3AYqfevQbq1Uk=
+	t=1727082377; cv=none; b=g38FWCX0fV75Pci50/rIKXb8Z8Al8zY6c+YBd3oHM/m2q7FmoLttNI0cqXQi/oxJ/tGSg7xRPNyuP8Af1pwnS5hrOBedPqiFIj2MCR/cVrGDmO+0w/u4LIZGI7LWn2C+njbKakZ1RrEwVwy10ofQHJbOP4pZytcwFRk7Q9apdZQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727078237; c=relaxed/simple;
-	bh=hdJ8meoxuDY9NsYfw8JQThRknsCv1bL+U3BGWtcS2MY=;
-	h=Message-ID:Subject:From:To:Cc:Date:Content-Type:MIME-Version; b=lXCzuTCtbu0lN7Zqhnl/9WJFQzw5RVffQRl/bJR4yVDIDxc3+ozQ9MZRdCnpBwM1EIL+n+uQ9orsnf5MjgNQc6kd1jQw3hBl66mWSviaFYKgwh/DmsWabG5uVKlFhUD/XcMDfJOLH5Mumr9Sui2uVedCx1KFnyli15oHSqm0hv8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=EwBErmVa; arc=none smtp.client-ip=209.85.221.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1727082377; c=relaxed/simple;
+	bh=kAU45L1hZjrfUVWyL3OzJ1rA+4gQ1s8XkbORNjro1ls=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Al5yGFF1ZdprhmQQ3tAitOtVy2sBFucEBP4xnQ2Ef/akIzljf+4TLkd8VJ2OHhSb/VpFevlGYYIkY6Mp9yThvPRvTqZwzko3BDmfGA3db6sq72KM9IqUopGutbO1zFQpJeQugadKeM72DInKoAsir+JtTTF9qI2cdL+8YozIqno=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LMZDaTkg; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="EwBErmVa"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-374c1e5fe79so2870669f8f.1
-        for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 00:57:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LMZDaTkg"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-206bd1c6ccdso38291865ad.3
+        for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 02:06:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1727078233; x=1727683033; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:date:cc:to:from:subject:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=5D2bVNr828NtzaaRmivYA2IOgyh3Yc0tQAK07PC1Pvw=;
-        b=EwBErmVa8cwoJ9eSfSMahN9oFOVSTHEtySXos48wSXtl7oMqUdZhJ2i3VzHIuYOXCv
-         1DXvCQVWfneLt6vtG83cKgryhqCDm2f+aBTi4rLK21HoOeNePxVjfHIMAv6homv8/NzB
-         QOg0CnXNaRlTt18ko1sYAbqPGsHnQeYsVTvMF6M9L2Vhs4wv+mDy1E8f6bzzbdD8x0cD
-         D6Pb/fNue//QAKjbExKLyucGMwomjX3d/hv60482xlcTz8o+vLPsYFoenSWtNJsfBErw
-         +ZhxEUaNHoX/697bqIZ4rqqHEJNdkP037EzIDEUZytfGwr/suEqSiSL/0GBks46Lp73x
-         DIaQ==
+        d=gmail.com; s=20230601; t=1727082375; x=1727687175; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=stiQuxNhweaqS9DOm7RQLXoA/ZNjEijsglCx3kOAUTg=;
+        b=LMZDaTkg0aRi+zJ17bEhiSNHqoNlT4VVS0tGIbsKUR7FvMIKhRl4iNTSBG07McRIjB
+         k+VLKdOhF3CcQ7XEXraHgHjjzrRLH3yBU6nkMRgPH+Hcxu47XvluExFRfGIZYYDI3DJd
+         PfvmntsdOfWiJdvjQYvGyLfqp6UNkWuSH7JVcTQmb/gHE3Uz9nOL/3TrvF+LIgfNpUFU
+         OkQRfGZtJiphC/dqjL1onnOkBZ+X9dRhckgGT9zy3JUkLrctgbcPuQLxKKZ04KTYRLmp
+         ZunO7uu3FPPwAtv6NxP9UIiFz/po+1pjR38HHqs+tPfYQO1e5x2akFJqpCbR73N7s2oo
+         Neyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727078233; x=1727683033;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:date:cc:to:from:subject:message-id:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=5D2bVNr828NtzaaRmivYA2IOgyh3Yc0tQAK07PC1Pvw=;
-        b=WAGlswZzTt3zcZaCiBUzhy6kzgma+GOplKtNES7FQm92H/S6pqs83K2EyUkilpq0jt
-         tt36qGdK7HBmsu0PWY/By+FOUddKpbgtWOu77zmcYKWeb7ZeQgmyigdBs3yiX9lJh/IG
-         b+33ePsYJUsHiOAJhi4gqvysj3o9uR6VB/wD/rVc1dGpV3vQGb1wnWYEFoxriQvS0YnC
-         I3XS/54aDZ0BSuQmfInJOChqNhZ8H5thnZHPJdtw96I7xpBhWriHQLg8wYhh3lWLObTK
-         coqIW5IgZq16x/S8NRN6L/trcmLL83aNZ/EsOuU4AgftKccESkYYgjCLcc4Q7wcb8lUu
-         qKEQ==
-X-Gm-Message-State: AOJu0Yw5zqxbHgiNZSL9Y1+nhD4x8d+oGotKVOckJ9X5O3NJe4zymqXP
-	sOYadmN5b3ZD6Zfr9k/CtSc2X9hmtFjnpD0fVb5QKWZ/cNIcO1PsKhIqosJjRB/bOfiKrmq9UQd
-	/aJ7ukA==
-X-Google-Smtp-Source: AGHT+IH4y6sePkLaNKuJQLzGOhRsZJbIvNskgol16A2jdAilHmwC9LaOpNfUOp1u5653CsrrfJccBw==
-X-Received: by 2002:a5d:6883:0:b0:374:ca92:5e44 with SMTP id ffacd0b85a97d-37a431648eamr5032129f8f.32.1727078232748;
-        Mon, 23 Sep 2024 00:57:12 -0700 (PDT)
-Received: from [10.202.80.134] ([202.127.77.110])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2dd7f8ce902sm6622792a91.35.2024.09.23.00.57.11
+        d=1e100.net; s=20230601; t=1727082375; x=1727687175;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=stiQuxNhweaqS9DOm7RQLXoA/ZNjEijsglCx3kOAUTg=;
+        b=hyLbmgEaTEvdRgJxmnWmodx0cP7adtw/6XJGfmJ8OW7NRpj3btqD/N1zcKbwCspU2I
+         fblCTSx+HdhDrEO+OHNh5gZXnpXNdQNZID3XGt78EgEfoqw9huTRqYRt2wt7xWaIzKGX
+         5KETh9xCbHtoyRCKMXxlhUhb6X410e3GpkvlnFKZEEOo57Vos1vZMd4/ONRkPIb51T3F
+         8EGIBYv0Ta0i/HiHaAHU+hjn1ezZ7GSziLziU5U0wuDbjyQYa0p9jEWDc+tH96OXeM6X
+         dnmqcjPoE6MDU3MIVHYr/+a/WAG+p3mJyPwPXHb/xNiL5/VhDyxkruEWFPNVfwt2quRY
+         idZg==
+X-Gm-Message-State: AOJu0Ywj3+2qbEM6EucH/0HzlYMEX9gt+U6zyFGinh4CJBqxN5Wo1fTm
+	sS0xPgo+Zw2dgGkFNlWb0oYN5mvoj/QGvpY0RImlmN4g8KK8YUtdDkzr4Ir1
+X-Google-Smtp-Source: AGHT+IHYNQbnJMkK5yBtFiZDr+xu/31cgvxmt1Ta3Yxv5M0b07iCTqhMCyS8MRXcwPU5CaFg2xSCPw==
+X-Received: by 2002:a17:903:1249:b0:207:14a3:602c with SMTP id d9443c01a7336-208d8398134mr169998365ad.19.1727082374918;
+        Mon, 23 Sep 2024 02:06:14 -0700 (PDT)
+Received: from alpha.. ([142.171.39.121])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2079473d05dsm129520595ad.287.2024.09.23.02.06.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Sep 2024 00:57:12 -0700 (PDT)
-Message-ID: <29dc7fdf9dd8cfb05ece7d5eb07858529517022f.camel@suse.com>
-Subject: [PATCH v2] btrfs/315: update filter to match mount cmd
-From: An Long <lan@suse.com>
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc: lan@suse.com
-Date: Mon, 23 Sep 2024 15:57:13 +0800
-Autocrypt: addr=lan@suse.com; prefer-encrypt=mutual; keydata=mQENBFvqfKcBCADKdcrLxNKpkBPfxZwVu1Q3ADpyWdnXZfyQOIO+1Z/WSDeXgr70HUhk/zu81WoO5WyXMK3N1dcS4KrOdNOmDp0H4G5hR+BIkgbIJpo4ekYWVdrAMT8oJgX5EgSIeuDdn2ZJ7K0EDLX9M7969gaw2nHWgBzj/ALGFdCE8zYkZAfPrwN80M5Xl+NBvOrTMypW78WOg5NdGd3E4jjgbKreHFdc9/Bmp2XKQKhjClelfM5aThhsM9wljzWdX1frN2AoAomHKuxKJGvZf30eHoXAs/ikHM4cvoUcY/8H8VgJO3mQMYEFWJR6qSbnfdy3T9Ns/Xy5QGj/XmATwhDg3BMBwvEZABEBAAG0FkFuIExvbmcgPGxhbkBzdXNlLmNvbT6JAU4EEwEIADgWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRBmwA3KtD5SBuAwCACDifSf/raZ05H/0l2xAjZo9JFrWib391QLNbDYFi+Nm7nJ3ATse33ibLheOP0hJ07bsZo7uKNio8DIHDZ5CsTMd21ZvvJlNGT+l9BQV/OLRExCTcK9CpLcHoEI3M1niqL42QjVZPkKcjSwbTCa8mySNmIl64K0YTq1HnuWxShTHNlLBBkId9OMEnztgp9Ke4g+SxcU2+058v8ZTnM5wUp6fMsQelsfigJJfRqHbpy6Fap3XIY+1gKuNVIdyKWXovxtwd++fADyZVh/Zh5IKgp/1HyWE9g0MG6TUzJ+LV57jOrIJJbzl39HUp+5mFBI+RSHiJjoBZAQ7diUzT7+ns+0uQENBFvqfKcBCADCPC4telre7E8pAZITzcVsl1BP3PoMAaow4gh1SOO44J34GHJS7CRqpt4YfbPBEVmFZQiJEhb0GL2KH
- qg7J8hO7J9fmpEiCe1Vv+cK8DSxygXXL0fltVkQlgOjFlzYks+tv g58qti7uykoyavLPSu7yuGvDtzIxB3lXwUnvmS0X8MTBFIdK0s4vJOu/2cDIAnYCNdypZ8H44XtYZVDdB9r4E253y35Nd1QDjJFu/8BQxQXK5sReIYl5fRtz+4TzZQPxWt3/j62RmjY5elPEBTd2q4K6reqRuIwDBXjTWjEKylx9yw47nMH7TzIrXpSWLG08+F8Cb9KhUJysBN4tJY1ABEBAAGJATYEGAEIACAWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbDAAKCRBmwA3KtD5SBlJuCACzhZDj5+zuuqYMl07AiV5BqOkGmjghybACLtHjMZDbFOmxnvt7GOfTdf7ug1YguQQI6xIssqzGvXTJVgIfTP38dOSAssrYp78VyFtcAZMiN25GxOOqYlpwhKH1PAr04Ylizz/EZlbfCQ8XCFuTziZ7HwEyjTkvs5XUYJObEhj2Sv9ebhwm3vTZv0VTb8+BpxyQuuGYYakbH94D5Ne5gAC6FaCevXdeqjSCTzV6NZ5seldc3FogQ+TB+riX4G4SA4Nq36Xt4hpAoDoZhh25KsH/9Kq65+eyYKsCnpY+N3f4SAEf5NEODmGF9eKC0K8XcjhXGcpDmnae2tUnjWnjLBXO
-Organization: SUSE QE LSG, QE 2, Beijing
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.50.3 
+        Mon, 23 Sep 2024 02:06:14 -0700 (PDT)
+From: Wu Bo <wubo.oduw@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
+	Wu Bo <bo.wu@vivo.com>,
+	Wu Bo <wubo.oduw@gmail.com>
+Subject: [PATCH] check stx_dio_offset_align to determine if DIO is supported
+Date: Mon, 23 Sep 2024 17:06:07 +0800
+Message-Id: <20240923090607.953579-1-wubo.oduw@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-Mount error info changed since util-linux v2.40
-(91ea38e libmount: report failed syscall name).
-So update _filter_mount_error() to match it.
+According to the statx manual, if stx_dio_offset_align is 0, it
+indicates that Direct I/O (DIO) is not supported on this file.
 
-Signed-off-by: An Long <lan@suse.com>
+Signed-off-by: Wu Bo <wubo.oduw@gmail.com>
 ---
- tests/btrfs/315 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ src/min_dio_alignment.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/btrfs/315 b/tests/btrfs/315
-index 5852afad..5101a9a3 100755
---- a/tests/btrfs/315
-+++ b/tests/btrfs/315
-@@ -39,7 +39,11 @@ _filter_mount_error()
-        # mount: <mnt-point>: fsconfig system call failed: File exists.
-        # dmesg(1) may have more information after failed mount system
-call.
-
--       grep -v dmesg | _filter_test_dir | sed -e
-"s/mount(2)\|fsconfig//g"
-+       # For util-linux v2.4 and later:
-+       # mount: <mountpoint>: mount system call failed: File exists.
-+
-+       grep -v dmesg | _filter_test_dir | sed -e
-"s/mount(2)\|fsconfig//g" | \
-+        sed -E "s/mount( system call failed:)/\1/"
- }
-
- seed_device_must_fail()
---=20
-2.43.0
+diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
+index 131f6023..c50ae8c3 100644
+--- a/src/min_dio_alignment.c
++++ b/src/min_dio_alignment.c
+@@ -28,7 +28,7 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
+ 	fd = open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
+ 	if (fd >= 0 &&
+ 	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0 &&
+-	    (stx.stx_mask & STATX_DIOALIGN))
++	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align)
+ 		return stx.stx_dio_offset_align;
+ 
+ 	/*
+-- 
+2.34.1
 
