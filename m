@@ -1,94 +1,96 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB5491957E4
-	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 11:02:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F077B944E;
+	Mon, 23 Sep 2024 11:29:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727089321; cv=none; b=FToMgTz/wT3hKQSGKLL0BGNpN1/0ln9jXUG5HV0sqVIsnCaAwEbYXzKbcQwsWW/DWzZyDs303c4B+fw+fbhEOxgk7tH8CFJiQxgo6sZt+GQ5a4TQBuEc1jRYIHrPXOFtQQ9mfTtz18jpPNQD14+ZyKUd+f6zC7XapecsUIhMA6I=
+	t=1727091000; cv=none; b=YBMJpT01FKxfEKvm5ZnqnahuP5aqsjwCY2az7AhvyEe2IKBtea+DM4gXuxTPhtfozF3cetHDKMRWcqR6wuGK6cJ48DBpT1oABJhQAom/kDpVEvHyGtUZMFdX4GxB4Nhn9BB4Eor+XwssAYls87A7xMXcTVBjVaJtydjuwohH9Os=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727089321; c=relaxed/simple;
-	bh=zNHD/3P4CeBolKttBIZ+//nSc14eC5QtWsURyrmdbSc=;
+	s=arc-20240116; t=1727091000; c=relaxed/simple;
+	bh=+2zRyFXBiUEtBo6l6Y7PHtroq6VacM4aFb/HGecXMd4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=trLDHTX2rpYXaMDGC10FzeFIiYJepQYNwcQNzoLL5aQjFEXA+yHblpisXXsTuGma9CK753HadpD6na34KUZa3l1mX6radMiHd5A2sbi/SP8exBz8K1tQgUzJqTFnM4ulXq9QbYwrnoWbIJPaR0/yPVKkD88btwWOATwAx+8kpzs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=in/cQZhV; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=rk7JaSShVTfqhrwdxv8KN+VpOCrVs77BtuoyPDH1/gU+/Fk+dyISfBqqyniY4Mv+nvTHiBi9+tyMkmXSxVWR8/2YTu/Yy4VDQerrlwAhAPs+lqYPWE8unwdt7TmHehZQXo0TP7qjgpnSp17/eKo1Rd5soR7xMn+pwv1hubANSZA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PPYILdR5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="in/cQZhV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FA6CC4AF0B
-	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 11:02:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PPYILdR5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D131C4CEC4;
+	Mon, 23 Sep 2024 11:29:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727089321;
-	bh=zNHD/3P4CeBolKttBIZ+//nSc14eC5QtWsURyrmdbSc=;
+	s=k20201202; t=1727090999;
+	bh=+2zRyFXBiUEtBo6l6Y7PHtroq6VacM4aFb/HGecXMd4=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=in/cQZhVeo6GJkljyFPmbVGXVT/CI4xBJoF5bAtre6+/vC9jBjVwwvSFZzptSaIf8
-	 N768M2iu1148+VU9KKnqyhJ/zG1lXzeSLtfCezxNVjsrjO0YYHirYpDp8mGjUdjpUz
-	 tF0Bij0D5zBZfKvO1nMCApHesvGnYMq5nwUxtjW4pIwUe2Mz6VGLe9gY2IGUavWmRY
-	 c3L9d5NA0g+scNYzAEkAreoKYrXan/O8iHJ9dgMGF7yjjpQmKFtC+M6VjMRIHAkRim
-	 NNPmtKq1e1IhASPTL35M/sGeFeZa8bMJjCLuDluEfIB8lsM9XAOwFW6nxjwafK/8QY
-	 XkYolukGd1s5w==
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-535be093a43so4982072e87.3
-        for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 04:02:01 -0700 (PDT)
-X-Gm-Message-State: AOJu0YyD7OmgVCEEtcwrPkiCzBvo1DvQzsr7RsaCiEB/9Vt/gcjkFZLB
-	3Xyt4GyC89uOVFxV3OpKwsDS02d/fiakPYoJ/vIH3AJ9hKzlNVIOFrC87DPSdGWgT2Zg+ipZPGc
-	tNIfHiAv/d+iSYxncCwksf2JXwjM=
-X-Google-Smtp-Source: AGHT+IFY2uvr1CuNuHsx6letRe/y8v1ez1Yv4YI5H4hBk1Mdi1C7I+IwDyNLDrp5Y9rL7PqYPgzncTaJCJnE8+7rSDY=
-X-Received: by 2002:a05:6512:1192:b0:535:6cf6:92f7 with SMTP id
- 2adb3069b0e04-536ac338d1fmr5149343e87.59.1727089319714; Mon, 23 Sep 2024
- 04:01:59 -0700 (PDT)
+	b=PPYILdR5rUcKyqCv2y80S0t4VcCAzapno5l3PmibonN5YJKnQiHDAQoE7Xu6pzH3J
+	 huNxRwth/xhyppAcoUr+R5ViBIOOsQJ1RPv7cIOBdqPtdQoxp+eZgDjonBct7maq2w
+	 iY45mP+nW6wQUPxujdY5pl6sHW7c3WZcVHFJfjYc2CTCWJy66AgFfAN29+Sy8L0bRE
+	 hkJvvS/ifoUmfeVLS0mbs87UM3vRvMvJtz8F/TnGinm415w5794lSebogoCvFZG8bz
+	 fc3sribh4ftKglLrK7ixSuxkRgE4PJ62YdUeAnjjmqrgK0tWZcLT/cK557aOfqerik
+	 S6Ehouwdx695w==
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-5c275491c61so5695411a12.0;
+        Mon, 23 Sep 2024 04:29:59 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCU9MxGSl7Py6V04JdLAnLNRe/8SvAx6t3shp6x8y7Omkx/8gfb9C7d0gubEfYMHdsq3nsF5vSr3TO9+dA==@vger.kernel.org
+X-Gm-Message-State: AOJu0YwtzqQq8/ZrrchVn5QuKwXMDlRd47XS6Hu2bOUlQwoSS4RFM81Y
+	vlatcunei6jKdHq9jAC669SryVF0iETgrnqE0aVlgh0yDI1PhbMul5I2S1B4053Eqv+ZtLSTBqL
+	K8V3R8Bayfbx6SHMcCYAkgJHBD2U=
+X-Google-Smtp-Source: AGHT+IG2ZssLqLg6yjqoSIhM616XwIiG/d6LLcuqt8/XdGWKTi3EaWiuqYha22DnpA01X+5+l2ofDGqctz9ccT6KheI=
+X-Received: by 2002:a17:906:cadc:b0:a8a:9070:a6ed with SMTP id
+ a640c23a62f3a-a90d56bbc86mr1160115266b.31.1727090998005; Mon, 23 Sep 2024
+ 04:29:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240923090607.953579-1-wubo.oduw@gmail.com>
-In-Reply-To: <20240923090607.953579-1-wubo.oduw@gmail.com>
+References: <29dc7fdf9dd8cfb05ece7d5eb07858529517022f.camel@suse.com>
+In-Reply-To: <29dc7fdf9dd8cfb05ece7d5eb07858529517022f.camel@suse.com>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 23 Sep 2024 12:01:22 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4dthnioL3m9ejzp8sNOeaYLZpRxd2ciEi36uuZSxGoLg@mail.gmail.com>
-Message-ID: <CAL3q7H4dthnioL3m9ejzp8sNOeaYLZpRxd2ciEi36uuZSxGoLg@mail.gmail.com>
-Subject: Re: [PATCH] check stx_dio_offset_align to determine if DIO is supported
-To: Wu Bo <wubo.oduw@gmail.com>
-Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
-	Christoph Hellwig <hch@lst.de>, Wu Bo <bo.wu@vivo.com>
+Date: Mon, 23 Sep 2024 12:29:21 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H5cfuc80OsqiNGTcr49MjZYURu2_8pMr+5wD+hw41it+Q@mail.gmail.com>
+Message-ID: <CAL3q7H5cfuc80OsqiNGTcr49MjZYURu2_8pMr+5wD+hw41it+Q@mail.gmail.com>
+Subject: Re: [PATCH v2] btrfs/315: update filter to match mount cmd
+To: An Long <lan@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Sep 23, 2024 at 10:06=E2=80=AFAM Wu Bo <wubo.oduw@gmail.com> wrote:
+On Mon, Sep 23, 2024 at 8:57=E2=80=AFAM An Long <lan@suse.com> wrote:
 >
-> According to the statx manual, if stx_dio_offset_align is 0, it
-> indicates that Direct I/O (DIO) is not supported on this file.
-
-There's already a patch for this:
-
-https://lore.kernel.org/fstests/20240911035333.364961-1-chao@kernel.org/
-
-(but not merged yet)
-
-Thanks.
-
+> Mount error info changed since util-linux v2.40
+> (91ea38e libmount: report failed syscall name).
+> So update _filter_mount_error() to match it.
 >
-> Signed-off-by: Wu Bo <wubo.oduw@gmail.com>
+> Signed-off-by: An Long <lan@suse.com>
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Looks good, thanks.
+
 > ---
->  src/min_dio_alignment.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/btrfs/315 | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 >
-> diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
-> index 131f6023..c50ae8c3 100644
-> --- a/src/min_dio_alignment.c
-> +++ b/src/min_dio_alignment.c
-> @@ -28,7 +28,7 @@ static int min_dio_alignment(const char *mntpnt, const =
-char *devname)
->         fd =3D open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
->         if (fd >=3D 0 &&
->             xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) =
-=3D=3D 0 &&
-> -           (stx.stx_mask & STATX_DIOALIGN))
-> +           (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align)
->                 return stx.stx_dio_offset_align;
+> diff --git a/tests/btrfs/315 b/tests/btrfs/315
+> index 5852afad..5101a9a3 100755
+> --- a/tests/btrfs/315
+> +++ b/tests/btrfs/315
+> @@ -39,7 +39,11 @@ _filter_mount_error()
+>         # mount: <mnt-point>: fsconfig system call failed: File exists.
+>         # dmesg(1) may have more information after failed mount system
+> call.
 >
->         /*
+> -       grep -v dmesg | _filter_test_dir | sed -e
+> "s/mount(2)\|fsconfig//g"
+> +       # For util-linux v2.4 and later:
+> +       # mount: <mountpoint>: mount system call failed: File exists.
+> +
+> +       grep -v dmesg | _filter_test_dir | sed -e
+> "s/mount(2)\|fsconfig//g" | \
+> +        sed -E "s/mount( system call failed:)/\1/"
+>  }
+>
+>  seed_device_must_fail()
 > --
-> 2.34.1
+> 2.43.0
 >
 >
