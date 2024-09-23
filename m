@@ -1,328 +1,183 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B25379C0
-	for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 14:58:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 424F81C3D
+	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 04:46:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726844329; cv=none; b=gMK50YUKd9x32O171AbxsUCp8If7I90K/joPkQfzcXgV3yJOraXoYVtYWBdCscBp++3Z27NOObUev4IdHV35I9GxOwxiuPxypLf8YHRWkg9848Oq9j3Cxgp+Dim0NI4TAgD+YrhwSR6AXCotEWgKbnPCtlViGRQxUL6Tv2syEFA=
+	t=1727066767; cv=none; b=s17PolCGXyr6s1Qb1qhabWR5vSY4o4t93NgQy+btZ63UhTRwfX4u3qezgJbwXt7sYbwah8j2/UCcd29QJppD2taiSSYiguyNfue0ZQBHj/XO3VaRY1ghY4Zn0RQKzMe72nKgJFA1P9K0+R1/8Q4VXT3WBaviQQ1e+z6MhKfuE8w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726844329; c=relaxed/simple;
-	bh=z22SccxQo6c+sJ5cRZzcznInukioCzVtsGrt4+7NOpc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lGWFijbCfnv10FJ4g8qHfG2Jy8a5k9weVKhvyIBYqGCGVvkNqtxhv4VOjq9NTW8Yj6okS4TXQv6nl2Fnd7Q6BOkX5bswVV6NsJn3JrRbgurQbgsAXoCRWwUFTbduG4d0dx7Mjubt29Ew0M4Cext9yThi48e6UDLn74L/xuDcLng=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=h6RS2HJ8; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1727066767; c=relaxed/simple;
+	bh=aBQMri7rKQb8DdXKzL4chctO0k8gOSDQIDd+PSvSrQI=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=d2Ow/XLGB2eXrtnhT0gicMGui3QzO3PUjyX52KAKtel++x37NWrCTxM8oU7Gl732ER6u5yHxVMoVrx4QMzbHye+TldjllBMiKFUgrUwh88PV/Hmm23MIFr1cFcr0NbE1VHiPMovvWfDsoYf7VSuTSvYiTSzdzW8vnoXm51FN0zs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=JoU7dqIm; arc=none smtp.client-ip=209.85.221.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="h6RS2HJ8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1726844326;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=zhKQhtBNDHC0jMrtHE94L1tVmdD3hqf8qm4R9eV9Oag=;
-	b=h6RS2HJ871sTPdS1Ce95QwzD1y7iewlIki+qjFwtF1+xV3UDTu0iGonAEQ/8cpmoLBQ0zK
-	lGovSU788n0v1zBeKITV33ZataspNcycU+4OvKfUDuh2zfZQp0B3LAuAys61RUbW6EAamn
-	ZaMAxWOfJLuqCCLfsDD6RmnCsxnHh9I=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-98-tfWGA4iKO9-87WzmwnBQUA-1; Fri, 20 Sep 2024 10:58:45 -0400
-X-MC-Unique: tfWGA4iKO9-87WzmwnBQUA-1
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-2052a68430fso27732705ad.2
-        for <fstests@vger.kernel.org>; Fri, 20 Sep 2024 07:58:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="JoU7dqIm"
+Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-378f600e090so2154394f8f.3
+        for <fstests@vger.kernel.org>; Sun, 22 Sep 2024 21:46:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1727066760; x=1727671560; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:organization
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=/yuORWz95wqvnmj1slOAQ8mdzgOBU8Vl7ZEB0b2nbGo=;
+        b=JoU7dqIm5Xo0/7CTGIXVNfHDzkmHDR/q9DOT3+l00aYB/SCeFBCsl9KHumU8XY5IN+
+         vfPHnZxmrcGeFXzsF1be8PRSdimg+hWaAOcqzgyOC0k9NQaiqmF4vMxk7mZieZzMImwL
+         aNbVCFIELrs8lprQM9THXXSAahPeuw3OmdTVpgET915IHpY93L5oB7j7r6m9AKCD5PQK
+         dwW/PSYl6s3pI/ePznjpGvmR0U/1B9owDEGK7f2cIBJfFJPzYMXPdtVlvElMWaphXl85
+         Dck2OearJMptoPvwC5OGHkOBGGB2ZT7XOs1Na6Wu6MdG0G5cQQq96YNuiHNmBOvenxXb
+         RzGg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726844324; x=1727449124;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zhKQhtBNDHC0jMrtHE94L1tVmdD3hqf8qm4R9eV9Oag=;
-        b=kRbfAoARvBwddrPW4oABlUrJepfeHZl9CQsa4/EBWL139Ypls3lOovb+/xcmfvVGaS
-         oBBMWX4HLauUe7XkfML/nrkTsNcb+TVNRGcUUN/n0Szh2r1JQ+CCb1DmXi0cpd6AJ3ED
-         3Lj//OOuu61Oi7FQ4iCOMDdbRV4Cn/Vw5BSDc2Lj407BwqUVRUVTtnz1PU+ybwVVDuZG
-         ji1aGBuQNE0DbyAZqvhmp6aUBem18mtxxASGTtYCfkWSNGc8wJVfxJR7Q1RRYnUTmYUY
-         9NU9WKShQU+qRJtSIav/6TCPrOAM6pTVGMYgmV88+qKCU2axjJ69X6OqJ0xch62GBUpW
-         N47w==
-X-Gm-Message-State: AOJu0YwK4e7Ac6CtveM1j6PSWDmCAAyMJKYzYmBy6uJaBClDJ3E5p5/Q
-	uEDxjhyUz0b9lRRGwdFvk0F0U3kN10aaRtwq6ezl+hwJfSjWo/CcXGhCjHH9wxGSKM9mNazdsLI
-	xaG/zhpInsK2E1FKM9kINpu/rXMiyvuae5pZxr8LgKrjcUXECBSyBy0vjdiSMHpKoGw==
-X-Received: by 2002:a17:902:d2c1:b0:1fc:4940:d3ad with SMTP id d9443c01a7336-208d856abcfmr38706565ad.59.1726844323664;
-        Fri, 20 Sep 2024 07:58:43 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEewzcre0ZxqYNgbUjVDdzpQBi6Q38ykHRRiZgoYpZSnnCQJldf8AAa4pElzOapY7g2EABRzA==
-X-Received: by 2002:a17:902:d2c1:b0:1fc:4940:d3ad with SMTP id d9443c01a7336-208d856abcfmr38706245ad.59.1726844323156;
-        Fri, 20 Sep 2024 07:58:43 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-207946017b6sm95932135ad.101.2024.09.20.07.58.41
+        d=1e100.net; s=20230601; t=1727066760; x=1727671560;
+        h=mime-version:user-agent:content-transfer-encoding:organization
+         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=/yuORWz95wqvnmj1slOAQ8mdzgOBU8Vl7ZEB0b2nbGo=;
+        b=LUU8jBSYqJX8zzGuaBH/OCeyxnjVg5+qTTfTGc4TbV69l3mjphRB/jilK8rIXJdtQL
+         m66bUZO7kx5E6Rfat/AHgd6txDpcI9iWB+5raOBS0Yuh1ALueZKP9CviqqNjVj2ZNN2R
+         LSp7Hk4b8cNBk0nVozqE2fIAzn8rPqh27mvhVmA+UeQhgnN6z9hWukX5NoQY/zfEperd
+         T92w/BgMKfdw5lAXyND8jAm2PPpIUgEkGrVHiIVOS2ZWs2NA6PKPqma1LIOOt+TPhkCw
+         6HIaWz2WTB8Lw4ng7bSQsocRHbgykeSZ0JZLJcY73eKNRIoMMTJ0STZu6Xtjz7gFDJeM
+         BmEg==
+X-Gm-Message-State: AOJu0YygIWpdLHYW2/Zdm57c9TNQm3gBMkC+DXmUrL51Kck0R4SgZxFO
+	yGWPvhtu6Zh9kk9NOAo3hxUQGVFFREJFdG4BrNddjmD0VUAtln4KbkeQ4W6DNCs=
+X-Google-Smtp-Source: AGHT+IGe5tfzOElNhCX2mW65nXY4nlxkGchw7kuZ0qh03E5DTn0wqnKAovH3Q59sy9QWKjXoEhldww==
+X-Received: by 2002:a5d:4f0e:0:b0:374:bf97:ba10 with SMTP id ffacd0b85a97d-37a43154b16mr5187451f8f.25.1727066760499;
+        Sun, 22 Sep 2024 21:46:00 -0700 (PDT)
+Received: from [10.202.80.134] ([202.127.77.110])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2dd50c054d8sm7628396a91.0.2024.09.22.21.45.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 Sep 2024 07:58:42 -0700 (PDT)
-Date: Fri, 20 Sep 2024 22:58:39 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH RFC] fsx: support unshare range fallocate mode
-Message-ID: <20240920145839.vphm5uoiptfgnad5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240906185606.136402-1-bfoster@redhat.com>
+        Sun, 22 Sep 2024 21:45:59 -0700 (PDT)
+Message-ID: <380a5687c475baad34771425902eae42e3e3eca4.camel@suse.com>
+Subject: Re: [PATCH] btrfs/315: update 315.out to adapt mount cmd
+From: An Long <lan@suse.com>
+To: Zorro Lang <zlang@redhat.com>, Filipe Manana <fdmanana@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Date: Mon, 23 Sep 2024 12:45:58 +0800
+In-Reply-To: <20240920142819.oczpp5iah5ojsycl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <bb85eb7d443b2da482b6087d8946f0efafa15f87.camel@suse.com>
+	 <20240919120156.apamqapyuytpf3ii@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	 <CAL3q7H7VvysO7S6DxOUwoR-1TWT61NAeHBVcidZca_yiT+q3BQ@mail.gmail.com>
+	 <20240920142819.oczpp5iah5ojsycl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Autocrypt: addr=lan@suse.com; prefer-encrypt=mutual; keydata=mQENBFvqfKcBCADKdcrLxNKpkBPfxZwVu1Q3ADpyWdnXZfyQOIO+1Z/WSDeXgr70HUhk/zu81WoO5WyXMK3N1dcS4KrOdNOmDp0H4G5hR+BIkgbIJpo4ekYWVdrAMT8oJgX5EgSIeuDdn2ZJ7K0EDLX9M7969gaw2nHWgBzj/ALGFdCE8zYkZAfPrwN80M5Xl+NBvOrTMypW78WOg5NdGd3E4jjgbKreHFdc9/Bmp2XKQKhjClelfM5aThhsM9wljzWdX1frN2AoAomHKuxKJGvZf30eHoXAs/ikHM4cvoUcY/8H8VgJO3mQMYEFWJR6qSbnfdy3T9Ns/Xy5QGj/XmATwhDg3BMBwvEZABEBAAG0FkFuIExvbmcgPGxhbkBzdXNlLmNvbT6JAU4EEwEIADgWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRBmwA3KtD5SBuAwCACDifSf/raZ05H/0l2xAjZo9JFrWib391QLNbDYFi+Nm7nJ3ATse33ibLheOP0hJ07bsZo7uKNio8DIHDZ5CsTMd21ZvvJlNGT+l9BQV/OLRExCTcK9CpLcHoEI3M1niqL42QjVZPkKcjSwbTCa8mySNmIl64K0YTq1HnuWxShTHNlLBBkId9OMEnztgp9Ke4g+SxcU2+058v8ZTnM5wUp6fMsQelsfigJJfRqHbpy6Fap3XIY+1gKuNVIdyKWXovxtwd++fADyZVh/Zh5IKgp/1HyWE9g0MG6TUzJ+LV57jOrIJJbzl39HUp+5mFBI+RSHiJjoBZAQ7diUzT7+ns+0uQENBFvqfKcBCADCPC4telre7E8pAZITzcVsl1BP3PoMAaow4gh1SOO44J34GHJS7CRqpt4YfbPBEVmFZQiJEhb0GL2KH
+ qg7J8hO7J9fmpEiCe1Vv+cK8DSxygXXL0fltVkQlgOjFlzYks+tv g58qti7uykoyavLPSu7yuGvDtzIxB3lXwUnvmS0X8MTBFIdK0s4vJOu/2cDIAnYCNdypZ8H44XtYZVDdB9r4E253y35Nd1QDjJFu/8BQxQXK5sReIYl5fRtz+4TzZQPxWt3/j62RmjY5elPEBTd2q4K6reqRuIwDBXjTWjEKylx9yw47nMH7TzIrXpSWLG08+F8Cb9KhUJysBN4tJY1ABEBAAGJATYEGAEIACAWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbDAAKCRBmwA3KtD5SBlJuCACzhZDj5+zuuqYMl07AiV5BqOkGmjghybACLtHjMZDbFOmxnvt7GOfTdf7ug1YguQQI6xIssqzGvXTJVgIfTP38dOSAssrYp78VyFtcAZMiN25GxOOqYlpwhKH1PAr04Ylizz/EZlbfCQ8XCFuTziZ7HwEyjTkvs5XUYJObEhj2Sv9ebhwm3vTZv0VTb8+BpxyQuuGYYakbH94D5Ne5gAC6FaCevXdeqjSCTzV6NZ5seldc3FogQ+TB+riX4G4SA4Nq36Xt4hpAoDoZhh25KsH/9Kq65+eyYKsCnpY+N3f4SAEf5NEODmGF9eKC0K8XcjhXGcpDmnae2tUnjWnjLBXO
+Organization: SUSE QE LSG, QE 2, Beijing
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.50.3 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240906185606.136402-1-bfoster@redhat.com>
 
-On Fri, Sep 06, 2024 at 02:56:06PM -0400, Brian Foster wrote:
-> The fallocate unshare mode flag modifies traditional preallocate
-> mode to unshare any shared extents backing the target range. Without
-> the unshare flag, preallocate mode simply assures that blocks are
-> physically allocated, regardless of whether they might be shared.
-> Unshare mode behaves the same as preallocate mode outside of the
-> shared extent case.
-> 
-> Since unshare is fundamentally a modifier to preallocate mode,
-> enable it via an operation flag. Similar to keep size mode, select
-> it randomly for fallocate operations and track it via a flag and
-> string combination for operation logging and replay.
-> 
-> Unshare is mainly used for filesystems that support reflink, but the
-> operation is equivalent to preallocate mode for non-shared ranges,
-> so enable it by default. Filesystems that do not support the
-> fallocate flag (such as those that might not support reflink) will
-> fail the test operation and disable unshare calls at runtime. Also
-> provide a new command line option to explicitly disable unshare
-> calls.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-> 
-> Hi all,
-> 
-> A couple quick notes..
-> 
-> First, this applies on top of the currently pending EOF pollution
-> patches [1] to fsx.
-
-The patchset [1] has been merged, thanks for doing that.
-
-> 
-> Second, this triggers multiple new test failures in my initial tests
-> that I've not fully diagnosed. I'm not necessarily sure that we want to
-> hold off on added test coverage for that reason, but I'd like to at
-> least be sure this isn't due to this patch doing something blatantly
-> wrong.
-> 
-> That said, this has also uncovered one or two unshare related issues, so
-> I'm posting this slightly prematurely in order to share it and hopefully
-> get some review..
-> 
-> Brian
-> 
-> [1] https://lore.kernel.org/fstests/20240828181534.41054-1-bfoster@redhat.com/
-> 
->  ltp/fsx.c | 59 ++++++++++++++++++++++++++++++++++++++++++-------------
->  1 file changed, 45 insertions(+), 14 deletions(-)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 1ba1bf65..003990db 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -45,9 +45,14 @@
->  
->  #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
->  
-> -/* Operation flags */
-> -
-> -enum opflags { FL_NONE = 0, FL_SKIPPED = 1, FL_CLOSE_OPEN = 2, FL_KEEP_SIZE = 4 };
-> +/* Operation flags (bitmask) */
-> +enum opflags {
-> +	FL_NONE = 0,
-> +	FL_SKIPPED = 1,
-> +	FL_CLOSE_OPEN = 2,
-> +	FL_KEEP_SIZE = 4,
-> +	FL_UNSHARE = 8
-> +};
->  
->  /*
->   *	A log entry is an operation and a bunch of arguments.
-> @@ -167,6 +172,7 @@ int	seed = 1;			/* -S flag */
->  int     mapped_writes = 1;              /* -W flag disables */
->  int     fallocate_calls = 1;            /* -F flag disables */
->  int     keep_size_calls = 1;            /* -K flag disables */
-> +int	unshare_calls = 1;		/* -u flag disables */
->  int     punch_hole_calls = 1;           /* -H flag disables */
->  int     zero_range_calls = 1;           /* -z flag disables */
->  int	collapse_range_calls = 1;	/* -C flag disables */
-> @@ -543,6 +549,8 @@ logdump(void)
->  				fprintf(logopsf, " keep_size");
->  			if (lp->flags & FL_CLOSE_OPEN)
->  				fprintf(logopsf, " close_open");
-> +			if (lp->flags & FL_UNSHARE)
-> +				fprintf(logopsf, " unshare");
->  			if (overlap)
->  				fprintf(logopsf, " *");
->  			fprintf(logopsf, "\n");
-> @@ -1879,15 +1887,25 @@ do_copy_range(unsigned offset, unsigned length, unsigned dest)
->  #ifdef HAVE_LINUX_FALLOC_H
->  /* fallocate is basically a no-op unless extending, then a lot like a truncate */
->  void
-> -do_preallocate(unsigned offset, unsigned length, int keep_size)
-> +do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
->  {
->  	unsigned end_offset;
-> +	enum opflags opflags = FL_NONE;
-> +	int mode = 0;
-> +
-> +	if (keep_size) {
-> +		opflags |= FL_KEEP_SIZE;
-> +		mode |= FALLOC_FL_KEEP_SIZE;
-> +	}
-> +	if (unshare) {
-> +		opflags |= FL_UNSHARE;
-> +		mode |= FALLOC_FL_UNSHARE_RANGE;
-
-The FALLOC_FL_UNSHARE_RANGE is not a new flag, but it might be not old enough.
-The first commit about the FALLOC_FL_UNSHARE_RANGE is:
-
-  commit 409332b65d3ed8cfa7a8030f1e9d52f372219642
-  Author: Lukas Czerner <lczerner@redhat.com>
-  Date:   Thu Mar 13 19:07:42 2014 +1100
-
-      fs: Introduce FALLOC_FL_ZERO_RANGE flag for fallocate
-
-So "#ifdef FALLOC_FL_UNSHARE_RANGE" maybe needed.
-
-Thanks,
-Zorro
+On Fri, 2024-09-20 at 22:28 +0800, Zorro Lang wrote:
+> On Fri, Sep 20, 2024 at 11:12:12AM +0100, Filipe Manana wrote:
+> > On Thu, Sep 19, 2024 at 1:02=E2=80=AFPM Zorro Lang <zlang@redhat.com>
+> > wrote:
+> > >=20
+> > > On Thu, Sep 19, 2024 at 01:07:53AM +0800, An Long wrote:
+> > > > Mount error info changed since util-linux v2.40
+> > > > (91ea38e libmount: report failed syscall name).
+> > > > So add "mount" before "system call failed".
+> > > >=20
+> > > > Signed-off-by: An Long <lan@suse.com>
+> > > > ---
+> > > > =C2=A0tests/btrfs/315.out | 2 +-
+> > > > =C2=A01 file changed, 1 insertion(+), 1 deletion(-)
+> > > >=20
+> > > > diff --git a/tests/btrfs/315.out b/tests/btrfs/315.out
+> > > > index 3ea7a35a..a19ae8d5 100644
+> > > > --- a/tests/btrfs/315.out
+> > > > +++ b/tests/btrfs/315.out
+> > > > @@ -1,7 +1,7 @@
+> > > > =C2=A0QA output created by 315
+> > > > =C2=A0---- seed_device_must_fail ----
+> > > > =C2=A0mount: SCRATCH_MNT: WARNING: source write-protected, mounted
+> > > > read-
+> > > > only.
+> > > > -mount: TEST_DIR/315/tempfsid_mnt:=C2=A0 system call failed: File
+> > > > exists.
+> > > > +mount: TEST_DIR/315/tempfsid_mnt: mount system call failed:
+> > > > File
+> > >=20
+> > > This change will bring failure to downstream distro. Please refer
+> > > to
+> > > _filter_error_mount (or other filters you like), add new filter
+> > > to
+> > > it to help this test passed on old and new util-linux.
+> >=20
+> > Isn't that what I said in my previous reply [1]?
+> >=20
+> > [1]
+> > https://lore.kernel.org/fstests/CAL3q7H7fzCQE0qjZEgeAJ2jvBsJxbYN-S=3DXp=
+WFu5KDoaXgqsZQ@mail.gmail.com/
+>=20
+> Oh, sorry I replied directly due to I thought my old change when
+> I saw this patch.
+>=20
+> =C2=A0 commit e937e23d202173d112cfe7621d8b860f691ce42d
+> =C2=A0 Author: Zorro Lang <zlang@kernel.org>
+> =C2=A0 Date:=C2=A0=C2=A0 Fri May 27 20:11:15 2022 +0800
+>=20
+> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 common/filter: filter out extra mount erro=
+r output
+>=20
+> Sure, you're right, thanks for reviewing :)
+>=20
+> Thanks,
+> Zorro
+>=20
+> >=20
+> > >=20
+> > > Thanks,
+> > > Zorro
+> > >=20
+> > >=20
+> > > > exists.
+> > > > =C2=A0---- device_add_must_fail ----
+> > > > =C2=A0wrote 9000/9000 bytes at offset 0
+> > > > =C2=A0XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > > > --
+> > > > 2.43.0
+> > > >=20
+> > > >=20
+> > >=20
+> > >=20
+> >=20
+>=20
 
 
-> +	}
->  
->          if (length == 0) {
->                  if (!quiet && testcalls > simulatedopcount)
->                          prt("skipping zero length fallocate\n");
-> -                log4(OP_FALLOCATE, offset, length, FL_SKIPPED |
-> -		     (keep_size ? FL_KEEP_SIZE : FL_NONE));
-> +                log4(OP_FALLOCATE, offset, length, FL_SKIPPED | opflags);
->                  return;
->          }
->  
-> @@ -1905,8 +1923,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
->  	 * 	1: extending prealloc
->  	 * 	2: interior prealloc
->  	 */
-> -	log4(OP_FALLOCATE, offset, length,
-> -	     keep_size ? FL_KEEP_SIZE : FL_NONE);
-> +	log4(OP_FALLOCATE, offset, length, opflags);
->  
->  	if (end_offset > file_size) {
->  		memset(good_buf + file_size, '\0', end_offset - file_size);
-> @@ -1921,7 +1938,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
->  		      end_offset <= monitorend)))
->  		prt("%lld falloc\tfrom 0x%x to 0x%x (0x%x bytes)\n", testcalls,
->  				offset, offset + length, length);
-> -	if (fallocate(fd, keep_size ? FALLOC_FL_KEEP_SIZE : 0, (loff_t)offset, (loff_t)length) == -1) {
-> +	if (fallocate(fd, mode, (loff_t)offset, (loff_t)length) == -1) {
->  	        prt("fallocate: 0x%x to 0x%x\n", offset, offset + length);
->  		prterr("do_preallocate: fallocate");
->  		report_failure(161);
-> @@ -1929,7 +1946,7 @@ do_preallocate(unsigned offset, unsigned length, int keep_size)
->  }
->  #else
->  void
-> -do_preallocate(unsigned offset, unsigned length, int keep_size)
-> +do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
->  {
->  	return;
->  }
-> @@ -2095,6 +2112,8 @@ read_op(struct log_entry *log_entry)
->  				log_entry->flags |= FL_KEEP_SIZE;
->  			else if (strcmp(str, "close_open") == 0)
->  				log_entry->flags |= FL_CLOSE_OPEN;
-> +			else if (strcmp(str, "unshare") == 0)
-> +				log_entry->flags |= FL_UNSHARE;
->  			else if (strcmp(str, "*") == 0)
->  				;  /* overlap marker; ignore */
->  			else
-> @@ -2161,6 +2180,7 @@ test(void)
->  	unsigned long	rv;
->  	unsigned long	op;
->  	int		keep_size = 0;
-> +	int		unshare = 0;
->  
->  	if (simulatedopcount > 0 && testcalls == simulatedopcount)
->  		writefileimage();
-> @@ -2190,6 +2210,7 @@ test(void)
->  			offset2 = log_entry.args[2];
->  			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
->  			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
-> +			unshare = !!(log_entry.flags & FL_UNSHARE);
->  			goto have_op;
->  		}
->  		return 0;
-> @@ -2219,8 +2240,12 @@ test(void)
->  			size = random() % maxfilelen;
->  		break;
->  	case OP_FALLOCATE:
-> -		if (fallocate_calls && size && keep_size_calls)
-> -			keep_size = random() % 2;
-> +		if (fallocate_calls && size) {
-> +			if (keep_size_calls)
-> +				keep_size = random() % 2;
-> +			if (unshare_calls)
-> +				unshare = random() % 2;
-> +		}
->  		break;
->  	case OP_ZERO_RANGE:
->  		if (zero_range_calls && size && keep_size_calls)
-> @@ -2334,7 +2359,7 @@ have_op:
->  
->  	case OP_FALLOCATE:
->  		TRIM_OFF_LEN(offset, size, maxfilelen);
-> -		do_preallocate(offset, size, keep_size);
-> +		do_preallocate(offset, size, keep_size, unshare);
->  		break;
->  
->  	case OP_PUNCH_HOLE:
-> @@ -2469,6 +2494,7 @@ usage(void)
->  	-r readbdy: 4096 would make reads page aligned (default 1)\n\
->  	-s style: 1 gives smaller truncates (default 0)\n\
->  	-t truncbdy: 4096 would make truncates page aligned (default 1)\n\
-> +	-u Do not use unshare range\n\
->  	-w writebdy: 4096 would make writes page aligned (default 1)\n\
->  	-x: preallocate file space before starting, XFS only\n\
->  	-y: synchronize changes to a file\n"
-> @@ -2853,7 +2879,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:w:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2952,6 +2978,9 @@ main(int argc, char **argv)
->  			if (truncbdy <= 0)
->  				usage();
->  			break;
-> +		case 'u':
-> +			unshare_calls = 0;
-> +			break;
->  		case 'w':
->  			writebdy = getnum(optarg, &endp);
->  			if (writebdy <= 0)
-> @@ -3242,6 +3271,8 @@ main(int argc, char **argv)
->  		fallocate_calls = test_fallocate(0);
->  	if (keep_size_calls)
->  		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> +	if (unshare_calls)
-> +		unshare_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
->  	if (punch_hole_calls)
->  		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
->  	if (zero_range_calls)
-> -- 
-> 2.45.0
-> 
-> 
+Mount error info changed since util-linux v2.40
+(91ea38e libmount: report failed syscall name).
+So update _filter_mount_error() to match it.
+
+Signed-off-by: An Long <lan@suse.com>
+---
+ tests/btrfs/315 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/315 b/tests/btrfs/315
+index 5852afad..da5d0ce4 100755
+--- a/tests/btrfs/315
++++ b/tests/btrfs/315
+@@ -39,7 +39,8 @@ _filter_mount_error()
+        # mount: <mnt-point>: fsconfig system call failed: File exists.
+        # dmesg(1) may have more information after failed mount system
+call.
+
+-       grep -v dmesg | _filter_test_dir | sed -e
+"s/mount(2)\|fsconfig//g"
++       grep -v dmesg | _filter_test_dir | sed -e
+"s/mount(2)\|fsconfig//g" | \
++        sed -E "s/mount( system call failed:)/\1/"
+ }
+
+ seed_device_must_fail()
+--=20
+2.43.0
 
