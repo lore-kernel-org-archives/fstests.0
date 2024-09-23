@@ -1,93 +1,94 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 031F028684
-	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 09:06:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB5491957E4
+	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 11:02:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727082377; cv=none; b=g38FWCX0fV75Pci50/rIKXb8Z8Al8zY6c+YBd3oHM/m2q7FmoLttNI0cqXQi/oxJ/tGSg7xRPNyuP8Af1pwnS5hrOBedPqiFIj2MCR/cVrGDmO+0w/u4LIZGI7LWn2C+njbKakZ1RrEwVwy10ofQHJbOP4pZytcwFRk7Q9apdZQ=
+	t=1727089321; cv=none; b=FToMgTz/wT3hKQSGKLL0BGNpN1/0ln9jXUG5HV0sqVIsnCaAwEbYXzKbcQwsWW/DWzZyDs303c4B+fw+fbhEOxgk7tH8CFJiQxgo6sZt+GQ5a4TQBuEc1jRYIHrPXOFtQQ9mfTtz18jpPNQD14+ZyKUd+f6zC7XapecsUIhMA6I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727082377; c=relaxed/simple;
-	bh=kAU45L1hZjrfUVWyL3OzJ1rA+4gQ1s8XkbORNjro1ls=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Al5yGFF1ZdprhmQQ3tAitOtVy2sBFucEBP4xnQ2Ef/akIzljf+4TLkd8VJ2OHhSb/VpFevlGYYIkY6Mp9yThvPRvTqZwzko3BDmfGA3db6sq72KM9IqUopGutbO1zFQpJeQugadKeM72DInKoAsir+JtTTF9qI2cdL+8YozIqno=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LMZDaTkg; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1727089321; c=relaxed/simple;
+	bh=zNHD/3P4CeBolKttBIZ+//nSc14eC5QtWsURyrmdbSc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=trLDHTX2rpYXaMDGC10FzeFIiYJepQYNwcQNzoLL5aQjFEXA+yHblpisXXsTuGma9CK753HadpD6na34KUZa3l1mX6radMiHd5A2sbi/SP8exBz8K1tQgUzJqTFnM4ulXq9QbYwrnoWbIJPaR0/yPVKkD88btwWOATwAx+8kpzs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=in/cQZhV; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LMZDaTkg"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-206bd1c6ccdso38291865ad.3
-        for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 02:06:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1727082375; x=1727687175; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=stiQuxNhweaqS9DOm7RQLXoA/ZNjEijsglCx3kOAUTg=;
-        b=LMZDaTkg0aRi+zJ17bEhiSNHqoNlT4VVS0tGIbsKUR7FvMIKhRl4iNTSBG07McRIjB
-         k+VLKdOhF3CcQ7XEXraHgHjjzrRLH3yBU6nkMRgPH+Hcxu47XvluExFRfGIZYYDI3DJd
-         PfvmntsdOfWiJdvjQYvGyLfqp6UNkWuSH7JVcTQmb/gHE3Uz9nOL/3TrvF+LIgfNpUFU
-         OkQRfGZtJiphC/dqjL1onnOkBZ+X9dRhckgGT9zy3JUkLrctgbcPuQLxKKZ04KTYRLmp
-         ZunO7uu3FPPwAtv6NxP9UIiFz/po+1pjR38HHqs+tPfYQO1e5x2akFJqpCbR73N7s2oo
-         Neyg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727082375; x=1727687175;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=stiQuxNhweaqS9DOm7RQLXoA/ZNjEijsglCx3kOAUTg=;
-        b=hyLbmgEaTEvdRgJxmnWmodx0cP7adtw/6XJGfmJ8OW7NRpj3btqD/N1zcKbwCspU2I
-         fblCTSx+HdhDrEO+OHNh5gZXnpXNdQNZID3XGt78EgEfoqw9huTRqYRt2wt7xWaIzKGX
-         5KETh9xCbHtoyRCKMXxlhUhb6X410e3GpkvlnFKZEEOo57Vos1vZMd4/ONRkPIb51T3F
-         8EGIBYv0Ta0i/HiHaAHU+hjn1ezZ7GSziLziU5U0wuDbjyQYa0p9jEWDc+tH96OXeM6X
-         dnmqcjPoE6MDU3MIVHYr/+a/WAG+p3mJyPwPXHb/xNiL5/VhDyxkruEWFPNVfwt2quRY
-         idZg==
-X-Gm-Message-State: AOJu0Ywj3+2qbEM6EucH/0HzlYMEX9gt+U6zyFGinh4CJBqxN5Wo1fTm
-	sS0xPgo+Zw2dgGkFNlWb0oYN5mvoj/QGvpY0RImlmN4g8KK8YUtdDkzr4Ir1
-X-Google-Smtp-Source: AGHT+IHYNQbnJMkK5yBtFiZDr+xu/31cgvxmt1Ta3Yxv5M0b07iCTqhMCyS8MRXcwPU5CaFg2xSCPw==
-X-Received: by 2002:a17:903:1249:b0:207:14a3:602c with SMTP id d9443c01a7336-208d8398134mr169998365ad.19.1727082374918;
-        Mon, 23 Sep 2024 02:06:14 -0700 (PDT)
-Received: from alpha.. ([142.171.39.121])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2079473d05dsm129520595ad.287.2024.09.23.02.06.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Sep 2024 02:06:14 -0700 (PDT)
-From: Wu Bo <wubo.oduw@gmail.com>
-To: fstests@vger.kernel.org
-Cc: Zorro Lang <zlang@kernel.org>,
-	Christoph Hellwig <hch@lst.de>,
-	Wu Bo <bo.wu@vivo.com>,
-	Wu Bo <wubo.oduw@gmail.com>
-Subject: [PATCH] check stx_dio_offset_align to determine if DIO is supported
-Date: Mon, 23 Sep 2024 17:06:07 +0800
-Message-Id: <20240923090607.953579-1-wubo.oduw@gmail.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="in/cQZhV"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FA6CC4AF0B
+	for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 11:02:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727089321;
+	bh=zNHD/3P4CeBolKttBIZ+//nSc14eC5QtWsURyrmdbSc=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=in/cQZhVeo6GJkljyFPmbVGXVT/CI4xBJoF5bAtre6+/vC9jBjVwwvSFZzptSaIf8
+	 N768M2iu1148+VU9KKnqyhJ/zG1lXzeSLtfCezxNVjsrjO0YYHirYpDp8mGjUdjpUz
+	 tF0Bij0D5zBZfKvO1nMCApHesvGnYMq5nwUxtjW4pIwUe2Mz6VGLe9gY2IGUavWmRY
+	 c3L9d5NA0g+scNYzAEkAreoKYrXan/O8iHJ9dgMGF7yjjpQmKFtC+M6VjMRIHAkRim
+	 NNPmtKq1e1IhASPTL35M/sGeFeZa8bMJjCLuDluEfIB8lsM9XAOwFW6nxjwafK/8QY
+	 XkYolukGd1s5w==
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-535be093a43so4982072e87.3
+        for <fstests@vger.kernel.org>; Mon, 23 Sep 2024 04:02:01 -0700 (PDT)
+X-Gm-Message-State: AOJu0YyD7OmgVCEEtcwrPkiCzBvo1DvQzsr7RsaCiEB/9Vt/gcjkFZLB
+	3Xyt4GyC89uOVFxV3OpKwsDS02d/fiakPYoJ/vIH3AJ9hKzlNVIOFrC87DPSdGWgT2Zg+ipZPGc
+	tNIfHiAv/d+iSYxncCwksf2JXwjM=
+X-Google-Smtp-Source: AGHT+IFY2uvr1CuNuHsx6letRe/y8v1ez1Yv4YI5H4hBk1Mdi1C7I+IwDyNLDrp5Y9rL7PqYPgzncTaJCJnE8+7rSDY=
+X-Received: by 2002:a05:6512:1192:b0:535:6cf6:92f7 with SMTP id
+ 2adb3069b0e04-536ac338d1fmr5149343e87.59.1727089319714; Mon, 23 Sep 2024
+ 04:01:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20240923090607.953579-1-wubo.oduw@gmail.com>
+In-Reply-To: <20240923090607.953579-1-wubo.oduw@gmail.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 23 Sep 2024 12:01:22 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4dthnioL3m9ejzp8sNOeaYLZpRxd2ciEi36uuZSxGoLg@mail.gmail.com>
+Message-ID: <CAL3q7H4dthnioL3m9ejzp8sNOeaYLZpRxd2ciEi36uuZSxGoLg@mail.gmail.com>
+Subject: Re: [PATCH] check stx_dio_offset_align to determine if DIO is supported
+To: Wu Bo <wubo.oduw@gmail.com>
+Cc: fstests@vger.kernel.org, Zorro Lang <zlang@kernel.org>, 
+	Christoph Hellwig <hch@lst.de>, Wu Bo <bo.wu@vivo.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-According to the statx manual, if stx_dio_offset_align is 0, it
-indicates that Direct I/O (DIO) is not supported on this file.
+On Mon, Sep 23, 2024 at 10:06=E2=80=AFAM Wu Bo <wubo.oduw@gmail.com> wrote:
+>
+> According to the statx manual, if stx_dio_offset_align is 0, it
+> indicates that Direct I/O (DIO) is not supported on this file.
 
-Signed-off-by: Wu Bo <wubo.oduw@gmail.com>
----
- src/min_dio_alignment.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+There's already a patch for this:
 
-diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
-index 131f6023..c50ae8c3 100644
---- a/src/min_dio_alignment.c
-+++ b/src/min_dio_alignment.c
-@@ -28,7 +28,7 @@ static int min_dio_alignment(const char *mntpnt, const char *devname)
- 	fd = open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
- 	if (fd >= 0 &&
- 	    xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) == 0 &&
--	    (stx.stx_mask & STATX_DIOALIGN))
-+	    (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align)
- 		return stx.stx_dio_offset_align;
- 
- 	/*
--- 
-2.34.1
+https://lore.kernel.org/fstests/20240911035333.364961-1-chao@kernel.org/
 
+(but not merged yet)
+
+Thanks.
+
+>
+> Signed-off-by: Wu Bo <wubo.oduw@gmail.com>
+> ---
+>  src/min_dio_alignment.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
+> index 131f6023..c50ae8c3 100644
+> --- a/src/min_dio_alignment.c
+> +++ b/src/min_dio_alignment.c
+> @@ -28,7 +28,7 @@ static int min_dio_alignment(const char *mntpnt, const =
+char *devname)
+>         fd =3D open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
+>         if (fd >=3D 0 &&
+>             xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &stx) =
+=3D=3D 0 &&
+> -           (stx.stx_mask & STATX_DIOALIGN))
+> +           (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_align)
+>                 return stx.stx_dio_offset_align;
+>
+>         /*
+> --
+> 2.34.1
+>
+>
