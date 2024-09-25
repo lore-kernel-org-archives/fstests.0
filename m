@@ -1,38 +1,70 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1679F1FDD;
-	Tue, 24 Sep 2024 15:03:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD278126C1B
+	for <fstests@vger.kernel.org>; Wed, 25 Sep 2024 11:15:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727190197; cv=none; b=oRQxhJLzWzT8C3D+BAktIfO4csNe7hCy2G1MrpNfJwNL0lPOLD6kVSixTzhHjBoJnVVHPNLgRw4S0aPrQFzPWKyul1wJ3G1gcnJ+Qgvdb9x6BopQ4kmtbk+N9yAh57XfTPnkAYDt76lr32tD5Y6Hem8MBm3FN/V0EHoUwJrsxOs=
+	t=1727262941; cv=none; b=JuBbxVN1lmdimvD+DOmE3ySpYgTbORe0NohOXiEVfd0kiiNc3bRVZBfMeGmoYSHDoEH3gWQJM27UtO7l813Kavzy3Dvk7Vus8veViF/wAFXg895BLDYMRB9dj8/rglqLLGmnu53L3Jma3cxPBsBtvzQdJdPwhEZGXltXAGCjWII=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727190197; c=relaxed/simple;
-	bh=fbHJ9ybr+udNypmoDs5mZsOKlu2XH/zjqlEsEqG6/Fo=;
+	s=arc-20240116; t=1727262941; c=relaxed/simple;
+	bh=TyzMD6cWNRSJJA9W1BVRPPwWWPauxyu2ZNquEMGRqno=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ezH8gBKtb2M5jZ7O2CB0hvj+K8csP2vHyq9Umk05XSwDWuwahBEl8cosVIvK0HTMhI2Y4DEFP7KJCYxSSEDD3jerKrgojsxvA9vUrl1dVCzrloABNNPhDq4rKqBNKp3QNkl5yfuEtvmBm6l51lJ7QaE5rWfmeB1iONpO3lGrCYk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=StFb9FoB; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=oceFnVXgxc3IAokMHdOU2Xy8h+61RISZB0pudVPfll7pKbdHAroxMczqLSHuz9tuF4fzSPKxqmUaeHjK82aqfZDyFNz8/Jr5zNQYUE/qfPvAin/tGXGxflw7VNkdL1HEEoe/Ecq7+zqrMZs+u5HuQVoBSNsvVdIb4mearsmQHM8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hDuvRwVM; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="StFb9FoB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7EB5EC4CEC4;
-	Tue, 24 Sep 2024 15:03:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727190196;
-	bh=fbHJ9ybr+udNypmoDs5mZsOKlu2XH/zjqlEsEqG6/Fo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=StFb9FoBmptK+1KcJ2SC2F1Vgk7VajFIGlL5Dvgs/GGfqWdPnyekOL+4hBb1D+3jW
-	 ZxlztP/4U/QnkljVsWelCRGy5mczDFdd7M2lAXKWGtLCCsmxTVKtPb9gU8xJywBYIV
-	 UYmmCSwMW3RykIRWqG3YldIiB/rNOZnhGwV0hE87VKyvb7ONf6XC7ZQnIgL+A5UV1/
-	 ZPvFu3U1/QHi/6LsE9XlJh1YR34QvQODTn4VDJjFN74lasZnRNAygU+fa52fGj4CLL
-	 LdIM4lKw5ngXSbXtAYZtYOB+yRqNRYDKQOXyw9fVWHayGBHYmGRUI1v/lQ4od+em1L
-	 +Z06WJjfS2KRw==
-Date: Tue, 24 Sep 2024 08:03:15 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hDuvRwVM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1727262938;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=pXRcar87hVLEkI8TfvQHnR01o5Y4Km15BgS8tvGNowg=;
+	b=hDuvRwVM0cgQuh16/suXsiwheeaDXsAHPcQpRVkyd2FyGxzFT/T+E60mj6AmpEcMMECBZ7
+	oDdEfa9z9EGdHdhxDwCT7ZIFhjci5WkZglsAJae25bA8MsN/sVM/9egP54CsIEorGmR/8f
+	3Yv8d6BDcfMhPGmZPoLMGLhKbmbcEuo=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-209-Zms5KzH6Nh2iE5JsuORXoA-1; Wed, 25 Sep 2024 07:15:37 -0400
+X-MC-Unique: Zms5KzH6Nh2iE5JsuORXoA-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2070e327014so57131475ad.1
+        for <fstests@vger.kernel.org>; Wed, 25 Sep 2024 04:15:37 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727262936; x=1727867736;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pXRcar87hVLEkI8TfvQHnR01o5Y4Km15BgS8tvGNowg=;
+        b=t7cGGP68v4ILELKciy7SrXN51/9BWv+6EY3qfgQKfqZuZeQ/nySSUnure7uPhELiF8
+         JnEFsTpRhLaXAp8pyapz/ZHkWXQ5yIVisIEWQGwzE7Azl2yCe78I5kCi6YjeBEGui/UR
+         p2kOr/Z3iLx6B2qbN7JRpOrStO65VDnMFp9dqG0p7KnQGEFUeQR4tQhVLMlOwkatRXg+
+         nkT9c2yzOmOuppIMgzt15AWRBpVQKDcxTF+bt4Uib8OKnTtD8ajMMd9JJkS2HfG8QGkI
+         VYiD3wJhvr2keIwT/4OEsovRrxvcdl9cX9Q25XoWqq3uRxo7t2erPr9xDHFFrz6PB4k/
+         oziw==
+X-Forwarded-Encrypted: i=1; AJvYcCVClrI4MwF7GOX21ATvcDvkc6xbb5fPyRP49FOG5GH7BpnqP/sztzHQgGxHeWCO7qW9nP845mfT@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxdq64h5ZhcWfUdws8ejwXHXy7SFzs16TcFnu0xt3E8i9hLHmp5
+	gjgByFZi9pihq7GnZ9CLWc31bKQOvhsbpuIEBYcBgRDkw39fFU4xIwRONrrOPyTcKHdmXtt7ZhV
+	a+6A5xdxG/zsSQsvtd75ML/jTjwQlF25QJ0l1AKpxJIuz50LGS5596Ac=
+X-Received: by 2002:a17:902:ecc8:b0:206:ac11:f3bb with SMTP id d9443c01a7336-20afc5ee705mr23918965ad.47.1727262936367;
+        Wed, 25 Sep 2024 04:15:36 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGRR5lBFGS2iWO176br9Ok4y6tRKh1xas+W2wsFli95rNISseXzJsdUJy7EKgf1j5BYIiQCkw==
+X-Received: by 2002:a17:902:ecc8:b0:206:ac11:f3bb with SMTP id d9443c01a7336-20afc5ee705mr23918665ad.47.1727262935856;
+        Wed, 25 Sep 2024 04:15:35 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20af16e5478sm23081025ad.1.2024.09.25.04.15.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Sep 2024 04:15:35 -0700 (PDT)
+Date: Wed, 25 Sep 2024 19:15:32 +0800
+From: Zorro Lang <zlang@redhat.com>
 To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Dave Chinner <dchinner@redhat.com>,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>, "Darrick J. Wong" <djwong@kernel.org>,
+	Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
 Subject: Re: [PATCH] xfs: new EOF fragmentation tests
-Message-ID: <20240924150315.GH21853@frogsfrogsfrogs>
+Message-ID: <20240925111532.me7szmoqedt7ta63@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20240924084551.1802795-1-hch@lst.de>
  <20240924084551.1802795-2-hch@lst.de>
 Precedence: bulk
@@ -62,6 +94,9 @@ On Tue, Sep 24, 2024 at 10:45:48AM +0200, Christoph Hellwig wrote:
 > [move to different test number, update to current xfstest APIs]
 > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
+
+This patch looks good to me, just a few nit-picking below...
+
 >  tests/xfs/1500     | 66 +++++++++++++++++++++++++++++++++++++++
 >  tests/xfs/1500.out |  9 ++++++
 >  tests/xfs/1501     | 68 ++++++++++++++++++++++++++++++++++++++++
@@ -91,10 +126,6 @@ On Tue, Sep 24, 2024 at 10:45:48AM +0200, Christoph Hellwig wrote:
 > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
 > +#
 > +# FS QA Test xfs/500
-
-Should be "FS QA Test 1500" or at least not say "xfs/500" given the
-filename.  Same for the other tests.
-
 > +#
 > +# Post-EOF preallocation defeat test for O_SYNC buffered I/O.
 > +#
@@ -110,6 +141,11 @@ filename.  Same for the other tests.
 > +_cleanup()
 > +{
 > +	# try to kill all background processes
+
+I didn't see "kill" below, maybe "wait all background processes done"? Or you'd
+like to use "kill" but forgot? If you don't want to use "kill", please tell me,
+then I'll help to change the comment when I merge it.
+
 > +	wait
 > +	cd /
 > +	rm -r -f $tmp.*
@@ -130,10 +166,6 @@ filename.  Same for the other tests.
 > +workfile=$SCRATCH_MNT/file
 > +nfiles=8
 > +wsize=4096
-
-Shouldn't this be _get_file_block_size instead of hardcoded 4k?
-Same for all the other tests.
-
 > +wcnt=1000
 > +
 > +write_sync_file()
@@ -146,6 +178,14 @@ Same for all the other tests.
 > +}
 > +
 > +rm -f $workfile*
+
+Hmm, "rm -f $XXX*", but looks like the $workdfile doesn't have chance to be
+null :) Maybe rm -f $workfile.* is safer, as all test files are $workfile.$idx
+or $workfile.$n. I can do this change when I merge it.
+
+Thanks,
+Zorro
+
 > +for ((n=0; n<$nfiles; n++)); do
 > +	write_sync_file $n > /dev/null 2>&1 &
 > +done
@@ -286,10 +326,6 @@ Same for all the other tests.
 > +. ./common/filter
 > +
 > +_require_scratch
-
-This one wants _require_odirect in case we ever disable directio for
-some weird xfs config.
-
 > +
 > +_cleanup()
 > +{
@@ -483,3 +519,4 @@ some weird xfs config.
 > 2.45.2
 > 
 > 
+
