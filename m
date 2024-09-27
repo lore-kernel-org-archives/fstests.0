@@ -1,212 +1,209 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22BC61482E2
-	for <fstests@vger.kernel.org>; Fri, 27 Sep 2024 05:42:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E866419FA66;
+	Fri, 27 Sep 2024 10:28:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727415762; cv=none; b=clBg4/0sIOR0iwVoNKNEml8E1xZr0rE048JqCvrySpd61dHNRGpsN64xIFPQZJoX0N9BWrCRzlvSaHxNY9SeTpZ6KB05Mmu9gINhWdLvYxoFLrSrDHrBmbJsFggTQJED+8VUyl1jgXp/Mo0E7JCndDdbkJ1aIZj5Mlz9Nuopaq4=
+	t=1727432912; cv=none; b=V3TdZa0yU4WXqszyMtaic0TP8La+14aNk/PeLahsNLL9ZmmnnLhgSurLt4IkygqnWSYBE68JAHXFZZkvIHOvlcbgjtkGooaZOudPqjOF1jWzfW1RsmdcFLjyL4XsHnI/SAEHys0e3/pDNQiCQkVnhUvhDQMW+YSHDLiwVUmIJqM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727415762; c=relaxed/simple;
-	bh=V1cljLRqLm+0cy7KTR/ihxcd2CvbDDBpNE4ltzU+OKU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HFSLf7qB4IKFBAyPCKLJPBgmXy3334l+k59dXMVhYTYl3mD0xl6AHlEHD/DGqSoxZ5at6ObhKL+0x1MQsMIoSWYX5yGFkXb2FCx7NTQOVJnN/4xQn28Jdyi5lWiyfy8XTT3LeUdIf0aypsiu2RQMvs35EyBjQhiQ4GAmiThG6Aw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=F9SKTunS; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1727432912; c=relaxed/simple;
+	bh=gD8lzGCB0sa2LJA8v4Og6GbbacLab6cvjKxhGKKGSUg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=grMMQX/OwKgPKOW/cu1UaZedm/Fs+9YKLU5YWPEnp/ogp0+HBbndWOCJMBINeUW80mX14OSaFPVPdUIg/YujE58dNFeefvy8494MYjVP8xNRByzYf7K/kMG5eK6sBRCJiCrE4R3Bjqn8h1CMukQc2DmYpFjj3BKy3YSSyktYK80=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=k1M8YmPg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="F9SKTunS"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1727415759;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=oR5z6uJIcKTJ1oQwbZqv/ryn5JzfbDPtxKdcMOPALf4=;
-	b=F9SKTunSY2oTMcXRDp4O5QNjfOwUPAqmn2nvLcwhg9ca0B0bF/Lcj4Pu3oj+l2a1yON8ZO
-	Mjrpl079DdmTg4TYH8D4jq/ixypNDAKcHap6ncs80E5PNch+16k1QfPhMsiqaolSyIYERW
-	z1WecJppgEMjLS6xw38q4EazWh7ncFI=
-Received: from mail-pf1-f198.google.com (mail-pf1-f198.google.com
- [209.85.210.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-630-0EUxkVmFNiGJZaSC93W-9Q-1; Fri, 27 Sep 2024 01:42:37 -0400
-X-MC-Unique: 0EUxkVmFNiGJZaSC93W-9Q-1
-Received: by mail-pf1-f198.google.com with SMTP id d2e1a72fcca58-718dd4aa409so2132125b3a.1
-        for <fstests@vger.kernel.org>; Thu, 26 Sep 2024 22:42:36 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727415756; x=1728020556;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=oR5z6uJIcKTJ1oQwbZqv/ryn5JzfbDPtxKdcMOPALf4=;
-        b=vrbkdv6F7F8fc9YnRWFvH9NN4DRfdAtl9Y7TVHW4pq/DbS/h3XSYTdinoU71x70Hud
-         fSCVm7s5ZMiLyfX7ZuSSaEY8Ox9m0CwmjIXl+NthlkBNvGLCuETpGptTUtmEZcxGjwgt
-         fr8fMQOz0v/ZBsxhK+T0PdqNUw+f4Cx7ygUByYLSckVHgPegNfFrrSjKPcu5YPk0ffau
-         Y9tBs4EXrcaO+LEISEPGc/QUwWfxRppuD2Q3z/t0drygzAGu8g2z8LK4cpey30FjmeOo
-         +ZLXLx06WWQPlxXrLJqIi77/jlO8s9Mnc+qYv/0MvAkWMFYBUQwDonN7Ht77MBz5e7Sz
-         LfxA==
-X-Forwarded-Encrypted: i=1; AJvYcCUitQmWKk0AtOKgiDzGSseFAblkemTIZZcGNQ0/3VQnlzr9gBMC8KYUbO2m1kRskoqhVM5mi84g@vger.kernel.org
-X-Gm-Message-State: AOJu0YyeoYnW916oWe5Ce44H55hEVyTWX847PveaQcC/LIzEjbGJ7RER
-	nf+C9osctl6+SP3+A9Gar7+uSqA/dkp0sy8Klj9TOrfvWArecNk6Bi/8IU0dOtrvNvAOddR4rdy
-	CmxLdHPjwO5ksFV7b4T66+LlbTF8EP0Y1HdkoAnslm8+3nUkdfwRw0Ks=
-X-Received: by 2002:a05:6a21:3489:b0:1cf:38cf:dfb6 with SMTP id adf61e73a8af0-1d4fa3cc8a6mr3431510637.20.1727415755840;
-        Thu, 26 Sep 2024 22:42:35 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHRL1YJvV7p4NM5gBOpIjRcWqUC7Zez19+0ChVTDoordU3C8l2Xj8oTB/z1XVKIY2hLJCJ71g==
-X-Received: by 2002:a05:6a21:3489:b0:1cf:38cf:dfb6 with SMTP id adf61e73a8af0-1d4fa3cc8a6mr3431487637.20.1727415755488;
-        Thu, 26 Sep 2024 22:42:35 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71b264d3c9esm825395b3a.96.2024.09.26.22.42.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Sep 2024 22:42:35 -0700 (PDT)
-Date: Fri, 27 Sep 2024 13:42:31 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Brian Foster <bfoster@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] fsx: add missing fallocate flag ifdefs
-Message-ID: <20240927054231.adwhqd2cyexfu3if@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240926144147.106685-1-bfoster@redhat.com>
- <20240926144147.106685-3-bfoster@redhat.com>
- <20240926145028.GC21840@frogsfrogsfrogs>
- <ZvWD6SsfGJDisYP9@bfoster>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="k1M8YmPg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 696E3C4CEC4;
+	Fri, 27 Sep 2024 10:28:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727432910;
+	bh=gD8lzGCB0sa2LJA8v4Og6GbbacLab6cvjKxhGKKGSUg=;
+	h=From:To:Cc:Subject:Date:From;
+	b=k1M8YmPgeGh9VV1aJ9Uo5u2n4lBdng1zlLnY1AsdkU29BlK7Elw/PCX2UijZz2B3f
+	 9TROQX7LxTa17G5OeHp6pp2V+HOaT8zoc7XWnK/U+YBJYaU7eopD9VH//3WqcLgXsY
+	 c902aAAD1xx9aMLCghidl0XjEQBsmjFwQC5yoH3ym80ofVjzc6VpUV1yqnfScy7Zqc
+	 O/H+AZwXAFVg7aIi3G98HhLivD08FOxsmr/K1Uqz+xgXL7R0vbanQ4Lclu+ivxDGtq
+	 9tQD/SzieFURwOiwXRhC6H52Ily8BeeRAX2+BKjP3mxbU6G9uJF7+VDssRrNr8NdfY
+	 R2PHipmG44Fig==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs: test an incremental send scenario with cloning of unaligned extent
+Date: Fri, 27 Sep 2024 11:28:07 +0100
+Message-ID: <76d94e63cec4cb04cbfbc0dcd0928f1fbdc27bdf.1727432832.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZvWD6SsfGJDisYP9@bfoster>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 26, 2024 at 11:55:21AM -0400, Brian Foster wrote:
-> On Thu, Sep 26, 2024 at 07:50:28AM -0700, Darrick J. Wong wrote:
-> > On Thu, Sep 26, 2024 at 10:41:47AM -0400, Brian Foster wrote:
-> > > The various fallocate flags are mostly ifdef'd for backward
-> > > compatibility with the exception of the associated test_fallocate()
-> > > calls to verify functionality at runtime. I suspect the reason for
-> > > this was to avoid ifdef ugliness around having to clear the runtime
-> > > flag for each operation, but unfortunately this defeats the purpose
-> > > of the ifdef protection everywhere else.
-> > > 
-> > > Factor out the fallocate related test calls into a new helper and
-> > > add the appropriate ifdefs.
-> > > 
-> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > > ---
-> > >  ltp/fsx.c | 59 ++++++++++++++++++++++++++++++++++++++++++-------------
-> > >  1 file changed, 45 insertions(+), 14 deletions(-)
-> > > 
-> > > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > > index 677f8c9f..417743c5 100644
-> > > --- a/ltp/fsx.c
-> > > +++ b/ltp/fsx.c
-> > > @@ -2833,6 +2833,50 @@ __test_fallocate(int mode, const char *mode_str)
-> > >  #endif
-> > >  }
-> > >  
-> > > +void
-> > > +test_fallocate_calls(void)
-> > > +{
-> > > +	if (fallocate_calls)
-> > > +		fallocate_calls = test_fallocate(0);
-> > > +	if (keep_size_calls)
-> > > +		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> > > +
-> > > +#ifdef FALLOC_FL_UNSHARE_RANGE
-> > > +	if (unshare_range_calls)
-> > > +		unshare_range_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
-> > > +#else
-> > > +	unshare_range_calls = 0;
-> > > +#endif
-> > > +
-> > > +#ifdef FALLOC_FL_PUNCH_HOLE
-> > > +	if (punch_hole_calls)
-> > > +		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
-> > > +#else
-> > > +	punch_hole_calls = 0;
-> > > +#endif
-> > > +
-> > > +#ifdef FALLOC_FL_ZERO_RANGE
-> > > +	if (zero_range_calls)
-> > > +		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
-> > > +#else
-> > > +	zero_range_calls = 0;
-> > > +#endif
-> > > +
-> > > +#ifdef FALLOC_FL_COLLAPSE_RANGE
-> > > +	if (collapse_range_calls)
-> > > +		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
-> > > +#else
-> > > +	collapse_range_calls = 0;
-> > > +#endif
-> > 
-> > The concept looks fine, but collapse and zero range have been in the
-> > kernel for a decade now, do we really need to have ifdef tests for them?
-> > 
-> 
-> Probably not.. but why even bother worrying about individual flags? The
-> insert and unshare flags have been around for 9 and 8 years
-> respectively, none of these were fully ifdef'd from the beginning, and
-> I'm not aware of anyone that has actually complained.
-> 
-> I'm not convinced that this patch matters for anybody in practice. I
-> included it just because it was simple enough to include the minimum
-> mechanical fix and I was slightly curious if somebody could come up with
-> a more elegant solution. In the spirit of being practical, maybe the
-> better approach here is to just remove the (at least the falloc flag
-> related) ifdefs entirely? We can always add them back if somebody
-> complains...
+From: Filipe Manana <fdmanana@suse.com>
 
-As this patch is still controversial, I'll merge the other one at first, to
-catch up the release of this week. We can talk this one later, if you still
-hope to have it :)
+Test that doing an incremental send with a file that had its size
+decreased and became the destination for a clone operation of an extent
+with an unaligned end offset that matches the new file size, works
+correctly.
 
-Thanks,
-Zorro
+This tests a bug fixed by the following kernel patch:
 
-> 
-> Brian
-> 
-> > --D
-> > 
-> > > +
-> > > +#ifdef FALLOC_FL_INSERT_RANGE
-> > > +	if (insert_range_calls)
-> > > +		insert_range_calls = test_fallocate(FALLOC_FL_INSERT_RANGE);
-> > > +#else
-> > > +	insert_range_calls = 0;
-> > > +#endif
-> > > +}
-> > > +
-> > >  bool
-> > >  keep_running(void)
-> > >  {
-> > > @@ -3271,20 +3315,7 @@ main(int argc, char **argv)
-> > >  		check_trunc_hack();
-> > >  	}
-> > >  
-> > > -	if (fallocate_calls)
-> > > -		fallocate_calls = test_fallocate(0);
-> > > -	if (keep_size_calls)
-> > > -		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> > > -	if (unshare_range_calls)
-> > > -		unshare_range_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
-> > > -	if (punch_hole_calls)
-> > > -		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
-> > > -	if (zero_range_calls)
-> > > -		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
-> > > -	if (collapse_range_calls)
-> > > -		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
-> > > -	if (insert_range_calls)
-> > > -		insert_range_calls = test_fallocate(FALLOC_FL_INSERT_RANGE);
-> > > +	test_fallocate_calls();
-> > >  	if (clone_range_calls)
-> > >  		clone_range_calls = test_clone_range();
-> > >  	if (dedupe_range_calls)
-> > > -- 
-> > > 2.46.1
-> > > 
-> > > 
-> > 
-> 
-> 
+  "btrfs: send: fix invalid clone operation for file that got its size decreased"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/322     | 108 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/322.out |  24 ++++++++++
+ 2 files changed, 132 insertions(+)
+ create mode 100755 tests/btrfs/322
+ create mode 100644 tests/btrfs/322.out
+
+diff --git a/tests/btrfs/322 b/tests/btrfs/322
+new file mode 100755
+index 00000000..c03f6a4c
+--- /dev/null
++++ b/tests/btrfs/322
+@@ -0,0 +1,108 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 322
++#
++# Test that doing an incremental send with a file that had its size decreased
++# and became the destination for a clone operation of an extent with an
++# unaligned end offset that matches the new file size, works correctly.
++#
++. ./common/preamble
++_begin_fstest auto quick send clone fiemap
++
++_cleanup()
++{
++	cd /
++	rm -fr $tmp.*
++	rm -fr $send_files_dir
++}
++
++. ./common/filter
++. ./common/reflink
++. ./common/punch # for _filter_fiemap_flags
++
++_require_test
++_require_scratch_reflink
++_require_xfs_io_command "fiemap"
++_require_odirect
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: send: fix invalid clone operation for file that got its size decreased"
++
++check_all_extents_shared()
++{
++	local file=$1
++	local fiemap_output
++
++	fiemap_output=$($XFS_IO_PROG -r -c "fiemap -v" $file | _filter_fiemap_flags)
++	echo "$fiemap_output" | grep -qv 'shared'
++	if [ $? -eq 0 ]; then
++		echo -e "Found non-shared extents for file $file:\n"
++		echo "$fiemap_output"
++	fi
++}
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++full_send_stream=$send_files_dir/full_snap.stream
++inc_send_stream=$send_files_dir/inc_snap.stream
++
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "first mkfs failed"
++_scratch_mount
++
++# Create a file with a size of 256K + 5 bytes, having two extents, the first one
++# with a size of 128K and the second one with a size of 128K + 5 bytes.
++last_extent_size=$((128 * 1024 + 5))
++$XFS_IO_PROG -f -d -c "pwrite -S 0xab -b 128K 0 128K" \
++             -c "pwrite -S 0xcd -b $last_extent_size 128K $last_extent_size" \
++             $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Another file which we will later clone foo into, but initially with
++# a larger size than foo.
++$XFS_IO_PROG -f -c "pwrite -b 0xef 0 1M" $SCRATCH_MNT/bar | _filter_xfs_io
++
++echo "Creating snapshot and the full send stream for it..."
++_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1
++$BTRFS_UTIL_PROG send -f $full_send_stream $SCRATCH_MNT/snap1 >> $seqres.full 2>&1
++
++# Now resize bar and clone foo into it.
++$XFS_IO_PROG -c "truncate 0" \
++	     -c "reflink $SCRATCH_MNT/foo" $SCRATCH_MNT/bar | _filter_xfs_io
++
++echo "Creating another snapshot and the incremental send stream for it..."
++_btrfs subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 -f $inc_send_stream \
++		 $SCRATCH_MNT/snap2 >> $seqres.full 2>&1
++
++echo "File digests in the original filesystem:"
++md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch
++md5sum $SCRATCH_MNT/snap1/bar | _filter_scratch
++md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
++md5sum $SCRATCH_MNT/snap2/bar | _filter_scratch
++
++check_all_extents_shared "$SCRATCH_MNT/snap2/bar"
++check_all_extents_shared "$SCRATCH_MNT/snap1/foo"
++
++echo "Creating a new filesystem to receive the send streams..."
++_scratch_unmount
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "second mkfs failed"
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $full_send_stream $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $inc_send_stream $SCRATCH_MNT
++
++echo "File digests in the new filesystem:"
++md5sum $SCRATCH_MNT/snap1/foo | _filter_scratch
++md5sum $SCRATCH_MNT/snap1/bar | _filter_scratch
++md5sum $SCRATCH_MNT/snap2/foo | _filter_scratch
++md5sum $SCRATCH_MNT/snap2/bar | _filter_scratch
++
++check_all_extents_shared "$SCRATCH_MNT/snap2/bar"
++check_all_extents_shared "$SCRATCH_MNT/snap1/foo"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/322.out b/tests/btrfs/322.out
+new file mode 100644
+index 00000000..31e1ee55
+--- /dev/null
++++ b/tests/btrfs/322.out
+@@ -0,0 +1,24 @@
++QA output created by 322
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 131077/131077 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Creating snapshot and the full send stream for it...
++linked 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Creating another snapshot and the incremental send stream for it...
++File digests in the original filesystem:
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap1/foo
++ca539970d4b1fa1f34213ba675007381  SCRATCH_MNT/snap1/bar
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap2/foo
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap2/bar
++Creating a new filesystem to receive the send streams...
++At subvol snap1
++At snapshot snap2
++File digests in the new filesystem:
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap1/foo
++ca539970d4b1fa1f34213ba675007381  SCRATCH_MNT/snap1/bar
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap2/foo
++c3bb068b7e21d3f009581f047be84f44  SCRATCH_MNT/snap2/bar
+-- 
+2.43.0
 
