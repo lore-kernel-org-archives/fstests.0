@@ -1,51 +1,68 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0117413CA81
-	for <fstests@vger.kernel.org>; Fri, 27 Sep 2024 18:32:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CACD12E75
+	for <fstests@vger.kernel.org>; Sat, 28 Sep 2024 08:03:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727461982; cv=none; b=avmhrdX6HmM6Scbxq073yVuniOxRQt4nAlvmEpPKm1V+plJBgJLeDAksqJb/lBaBnoob6L1rjo3rrx3h/aldOZPK+qsMNIcysJLJQF6ng39OpGHTeU7NqlpqbomixAsnziptJbGaOdMiSUPs7jgvudTYvqgxKaJtG+4M0Wg/kn0=
+	t=1727510636; cv=none; b=mGo2sFESPlyxamBNrHIaph9jw3RNSHmO1vUB2dKw5bwBg+y2J9GZZ5fC44oGXGqbWGF/FuU80pFScK6tsXI/gReP4ar79fughykhDT72+u35heE87lsXVHOVGAW+uWyXTbJh+meTc9vGMo78ViFq9VTMHF+2ChTTzhjnaYznf24=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727461982; c=relaxed/simple;
-	bh=FLlS/knzr3hOov59YYLWE9kH245rSIxx5G3u3gWiieA=;
+	s=arc-20240116; t=1727510636; c=relaxed/simple;
+	bh=CupZtwUzHzxf5ze+AqD2d1rvyLBHAhM/0UYSLMD07t8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=o20scF+54B7SwB+oVYPGiMJWamQ9iR1Z5XbfCXFKkCG8m1/tJAI61sX6JTlNo1qJgn8GSngJGOWjaaz+FJ+gs3th4uxiGPCI5nC98lRVSPbHQlhc2J+vTqMpWX7we2rUVzQ6F9pfmNLSNkqIUB0W6FnWH/EZ0HLshCfRbkmLGXk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OEx2Jmbj; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=KcNWMOBD4wBC0l6mzrIs0KNtREl9L8juIzDk/Ah3inc2cQBj8yDMtEfNbjhlDQrb7NSaqnnJS4Ie6XznQstqLZHcBRkeOH/9YUr7hVLrSB24tOiWjUa4VYBe2coToAqA/Kv+PpcdOIgjIziRQGntwuk5TCpXq5lj3Tv1UVRW/NQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WlYRhZ3Z; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OEx2Jmbj"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WlYRhZ3Z"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1727461978;
+	s=mimecast20190719; t=1727510632;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=2fwWy0daRhTuNh3g1LQQtSoyDTHsrpBddnZpkz63Rwc=;
-	b=OEx2JmbjVe6WSgRT0PrNpqNhmtq3VXSPrSzc+TS820JjAdKLDSQt6p8C953OcIJeM764CC
-	GARnfWZr2jZvm0h8Jt4bVNqQDxss/LEUiRvcAT6/nnA2OBKP1J708lIz51oNLy/+OJjsUL
-	iQgFPgExZd+jpdf6UOZsyUSIJnBX7Zs=
-Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-496-XUrb_HSKN5OTpFIRN3DQWA-1; Fri,
- 27 Sep 2024 14:32:55 -0400
-X-MC-Unique: XUrb_HSKN5OTpFIRN3DQWA-1
-Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (unknown [10.30.177.12])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 627501934C5E;
-	Fri, 27 Sep 2024 18:32:54 +0000 (UTC)
-Received: from bfoster (unknown [10.22.32.70])
-	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 366941954B0F;
-	Fri, 27 Sep 2024 18:32:53 +0000 (UTC)
-Date: Fri, 27 Sep 2024 14:34:02 -0400
-From: Brian Foster <bfoster@redhat.com>
+	bh=sgNH/HNBhs3F3moJpFJkvHyCgp764xzjFJrV6/0l1kU=;
+	b=WlYRhZ3Z04iWpk1fgL8W3HZRJ8WP4G9eRKMJbGOY6gK4V9uzZDG09p82dWt3WhnqQx0I0F
+	nsROwgIR/06g6cN9wxhhwqlDpmYU44iMp+1GDXbu7cc10mbHbluDS8naRUfDYaJ0ivwtSn
+	S2lGuTedoaeYJOf+sJvWXdC8Um3+OfE=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-589-ZWjiS-htOJ-QRvwTPXGg5w-1; Sat, 28 Sep 2024 04:03:51 -0400
+X-MC-Unique: ZWjiS-htOJ-QRvwTPXGg5w-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2070e327014so24276455ad.1
+        for <fstests@vger.kernel.org>; Sat, 28 Sep 2024 01:03:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727510630; x=1728115430;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=sgNH/HNBhs3F3moJpFJkvHyCgp764xzjFJrV6/0l1kU=;
+        b=o71p8KIX+rrLe8lH2/KllyUCz7uSy2P4LsoCUNdqI/P7zVnmnMwNB/Gfpx2OvaHjTE
+         atEG/8BrB8ceLoh9Bb6MXevWCnpHNfM2B0gvtvmx/QjMfyIbXjZqeXxTZL5wRVSNkjQt
+         PSNX7fxRo643CFe4dWve8gV1BR3wPu0GAeUzQsmONCTuMCt7CjGQaspmD3YM+908ZPFK
+         +E7JAursByAP1+ZPCttHjA6C93+pUqFf8s8uEvzVgmlqSfjJTK320ZNgea4Pe7kPMOOd
+         pTe9IDtv0CAD4oW8qyz/p0EOmLDdwWt13BLn5wDxu8qg5ULJS0+PTV8rzfbL3Usdx2Ba
+         iOqw==
+X-Forwarded-Encrypted: i=1; AJvYcCWDS7lOXKPVydWSxEcrx4inmI7rk0wmWaeHAK7NneSJ8Jg1PtH+zFM8PCAoxhbwsElPe6Os762s@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy61NdVCZE7zf8osoKqFD8T6IgiuOrSQjEicEA/j3ulMPbcALDx
+	GxsdSOGVS8m8EVofXN9ls+2WTBtlA3oFkP/yi1eRNPtWGbnAKMiSccDm6PDGiJEBlFHD9c5SfiO
+	eXP0RQO/kIXczfDkTO8MR2pU7F3ZR/6kZT/UqQhtMnnaaEVZAfmizAY4=
+X-Received: by 2002:a17:902:d2d0:b0:20b:433c:5833 with SMTP id d9443c01a7336-20b433c5de7mr71567215ad.26.1727510630367;
+        Sat, 28 Sep 2024 01:03:50 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IF+giI1SCEbBbFEgbr/w6CYN1rJUu6JfZP/RluPjMZeqwAinSGC+TG71RwnGAoNH2lzYFOCpA==
+X-Received: by 2002:a17:902:d2d0:b0:20b:433c:5833 with SMTP id d9443c01a7336-20b433c5de7mr71566905ad.26.1727510629860;
+        Sat, 28 Sep 2024 01:03:49 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20b37d5ef69sm23062865ad.6.2024.09.28.01.03.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 28 Sep 2024 01:03:49 -0700 (PDT)
+Date: Sat, 28 Sep 2024 16:03:46 +0800
+From: Zorro Lang <zlang@redhat.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
 Subject: Re: [PATCH 2/2] fsx: add missing fallocate flag ifdefs
-Message-ID: <Zvb6mviA9gVhdPWp@bfoster>
+Message-ID: <20240928080346.zwlds6k2p5qiru6a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20240926144147.106685-1-bfoster@redhat.com>
  <20240926144147.106685-3-bfoster@redhat.com>
  <20240926145028.GC21840@frogsfrogsfrogs>
@@ -59,15 +76,9 @@ List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="gJRmY3uG4ezAzu8j"
-Content-Disposition: inline
-In-Reply-To: <20240927152537.GQ21877@frogsfrogsfrogs>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
-
-
---gJRmY3uG4ezAzu8j
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20240927152537.GQ21877@frogsfrogsfrogs>
 
 On Fri, Sep 27, 2024 at 08:25:37AM -0700, Darrick J. Wong wrote:
 > On Fri, Sep 27, 2024 at 08:07:49AM -0400, Brian Foster wrote:
@@ -179,31 +190,19 @@ On Fri, Sep 27, 2024 at 08:25:37AM -0700, Darrick J. Wong wrote:
 > 
 > Recent complaints on the mailing list have caused me to revise that to
 > 10 years old though (see recent memfd_create fixes). :)
+
+I prefer "10 years", due to most of RHELs support 10 years (or a bit longer:)
+I think some other Enterprice systems are similar.
+
+Thanks,
+Zorro
+
 > 
 > I also remember that a lot of the old crufty ifdef stuff (iirc) was kept
 > around so that fstests would continue to run on old RHELs.  Once in a
 > while our QA folks rebase fstests to latest, but they also tend to patch
 > back in whatever ./configure magic they need for 2.6 era kernels.
 > 
-
-That's kind of what I figured.. even if folks were running on old envs,
-maybe there's enough incompatibility to work through in extreme enough
-cases that customization is required anyways and we just don't hear
-about it upstream.
-
-Anyways, that all seems reasonable to me. Given that it looks like this
-has been broken for the last 8+ years or so, attached is an alternative
-proposal to slightly bend your 10 year rule in this case... ;).
-
-As before, this is not much of a big deal to me either way. Zorro, this
-kind of goes in the opposite direction of your comments to patch 1 where
-I added the missing ifdefs, so I'd defer to you as to whether you want
-to go this route or just leave things as is for the time being. The
-attached patch also removes the ifdefs added in patch 1, so there should
-be no need to edit patch 1 either way. Thanks.
-
-Brian
-
 > --D
 > 
 > > Brian
@@ -261,188 +260,4 @@ Brian
 > > > 
 > > 
 > 
-
---gJRmY3uG4ezAzu8j
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: attachment;
-	filename="0001-fsx-remove-unnecessary-fallocate-flag-ifdefs.patch"
-
-From 710f88a08a978c2c6ae2e9f92a35da08aa45db72 Mon Sep 17 00:00:00 2001
-From: Brian Foster <bfoster@redhat.com>
-Date: Fri, 27 Sep 2024 14:08:50 -0400
-Subject: [PATCH] fsx: remove unnecessary fallocate flag ifdefs
-Content-Type: text/plain
-
-fallocate mode flags are typically ifdef'd when introduced to
-provide some backwards compatibility and minimize disruption for
-users who might not have picked up the latest supporting bits in
-their dev and test environments. As it is, most of these flags have
-been used outside of ifdef protection for runtime functionality
-detection for quite some time, so this apparently hasn't been
-providing much practical benefit.
-
-fallocate runtime functionality detection goes back 8-10 years now
-in some cases, without any known complaints upstream. Therefore,
-clean out some of the older ifdef cruft as a housekeeping exercise.
-This can be undone if it turns out to be problematic for any current
-fstests users.
-
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
- ltp/fsx.c | 77 +++++--------------------------------------------------
- 1 file changed, 7 insertions(+), 70 deletions(-)
-
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 677f8c9f..db8ee914 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1231,7 +1231,6 @@ dotruncate(unsigned size)
- 	}
- }
- 
--#ifdef FALLOC_FL_PUNCH_HOLE
- void
- do_punch_hole(unsigned offset, unsigned length)
- {
-@@ -1280,15 +1279,6 @@ do_punch_hole(unsigned offset, unsigned length)
- 	memset(good_buf + max_offset, '\0', max_len);
- }
- 
--#else
--void
--do_punch_hole(unsigned offset, unsigned length)
--{
--	return;
--}
--#endif
--
--#ifdef FALLOC_FL_ZERO_RANGE
- void
- do_zero_range(unsigned offset, unsigned length, int keep_size)
- {
-@@ -1344,15 +1334,6 @@ do_zero_range(unsigned offset, unsigned length, int keep_size)
- 	memset(good_buf + offset, '\0', length);
- }
- 
--#else
--void
--do_zero_range(unsigned offset, unsigned length, int keep_size)
--{
--	return;
--}
--#endif
--
--#ifdef FALLOC_FL_COLLAPSE_RANGE
- void
- do_collapse_range(unsigned offset, unsigned length)
- {
-@@ -1399,15 +1380,6 @@ do_collapse_range(unsigned offset, unsigned length)
- 	file_size -= length;
- }
- 
--#else
--void
--do_collapse_range(unsigned offset, unsigned length)
--{
--	return;
--}
--#endif
--
--#ifdef FALLOC_FL_INSERT_RANGE
- void
- do_insert_range(unsigned offset, unsigned length)
- {
-@@ -1455,15 +1427,6 @@ do_insert_range(unsigned offset, unsigned length)
- 	file_size += length;
- }
- 
--#else
--void
--do_insert_range(unsigned offset, unsigned length)
--{
--	return;
--}
--#endif
--
--#ifdef XFS_IOC_EXCHANGE_RANGE
- int
- test_exchange_range(void)
- {
-@@ -1546,20 +1509,6 @@ out_free:
- 	free(p);
- }
- 
--#else
--int
--test_exchange_range(void)
--{
--	return 0;
--}
--
--void
--do_exchange_range(unsigned offset, unsigned length, unsigned dest)
--{
--	return;
--}
--#endif
--
- #ifdef FICLONERANGE
- int
- test_clone_range(void)
-@@ -1897,12 +1846,10 @@ do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
- 		opflags |= FL_KEEP_SIZE;
- 		mode |= FALLOC_FL_KEEP_SIZE;
- 	}
--#ifdef FALLOC_FL_UNSHARE_RANGE
- 	if (unshare) {
- 		opflags |= FL_UNSHARE;
- 		mode |= FALLOC_FL_UNSHARE_RANGE;
- 	}
--#endif
- 
-         if (length == 0) {
-                 if (!quiet && testcalls > simulatedopcount)
-@@ -2495,11 +2442,9 @@ usage(void)
- 	-q: quieter operation\n\
- 	-r readbdy: 4096 would make reads page aligned (default 1)\n\
- 	-s style: 1 gives smaller truncates (default 0)\n\
--	-t truncbdy: 4096 would make truncates page aligned (default 1)\n"
--#ifdef FALLOC_FL_UNSHARE_RANGE
--"	-u Do not use unshare range\n"
--#endif
--"	-w writebdy: 4096 would make writes page aligned (default 1)\n\
-+	-t truncbdy: 4096 would make truncates page aligned (default 1)\n\
-+	-u Do not use unshare range\n\
-+	-w writebdy: 4096 would make writes page aligned (default 1)\n\
- 	-x: preallocate file space before starting, XFS only\n\
- 	-y: synchronize changes to a file\n"
- 
-@@ -2513,18 +2458,10 @@ usage(void)
- #ifdef HAVE_LINUX_FALLOC_H
- "	-F: Do not use fallocate (preallocation) calls\n"
- #endif
--#ifdef FALLOC_FL_PUNCH_HOLE
--"	-H: Do not use punch hole calls\n"
--#endif
--#ifdef FALLOC_FL_ZERO_RANGE
--"	-z: Do not use zero range calls\n"
--#endif
--#ifdef FALLOC_FL_COLLAPSE_RANGE
--"	-C: Do not use collapse range calls\n"
--#endif
--#ifdef FALLOC_FL_INSERT_RANGE
--"	-I: Do not use insert range calls\n"
--#endif
-+"	-H: Do not use punch hole calls\n\
-+	-z: Do not use zero range calls\n\
-+	-C: Do not use collapse range calls\n\
-+	-I: Do not use insert range calls\n"
- #ifdef FICLONERANGE
- "	-J: Do not use clone range calls\n"
- #endif
--- 
-2.46.1
-
-
---gJRmY3uG4ezAzu8j--
 
