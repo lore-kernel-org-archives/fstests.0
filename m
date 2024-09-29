@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C28D748A
-	for <fstests@vger.kernel.org>; Sun, 29 Sep 2024 13:30:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B942017BB0C
+	for <fstests@vger.kernel.org>; Sun, 29 Sep 2024 13:37:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727616639; cv=none; b=ATh1U+RUsofuiMBK2OAtiLdkWx/aWtdkdKia22xE1cUGrh722dcq6ZIMMFfuCqYbwAGM5xrugGRpwobRBq8KhwHlRAcnM6TpNwfS5EqyiNyfpW9vzizG26ttWONnaaJ5pUlY8Q55q3oGYZanCSXRIm9JOi4+dmASRQrDxvdwtXw=
+	t=1727617054; cv=none; b=GQHD1f2D6WuD3ZGkTvpmdHHpd7iVQmIXKPmU1ge3KZv2e/tSC874M55wZ+354sPLeyO6au2cvZCZJJa7pZr1YNbDzucV9UV8QQdqAEwX9ZWmBdaiQ+e5FD/8toF+7CxUpABCeBRpC0H+7YqlKg0xRBAHjswHNXFbdi7Nii9eWTY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727616639; c=relaxed/simple;
-	bh=B31dzkxfT515AkAX0379gntMyzendzuPC8XIto8VHew=;
+	s=arc-20240116; t=1727617054; c=relaxed/simple;
+	bh=DHctoUP+bKs/JBfNf4KMaMtmZ+LdkxDuzfjAGLImL0s=;
 	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=XBPADgsb4j/6QrApvro5fJIz7z0b8e5Q4DWwC5FWkYMAzstofgrS4ENQutqI80c+yTmcHo+1xfvdRFmJS5fFEf47qxP1axgjVn93A9sCGj/7ljl3mhtv/Whq7vIi91+om1jGbQR0hnr9XnDD1wfajXQhAqBTXMCKbP470yDO5SA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gVKTon2Q; arc=none smtp.client-ip=10.30.226.201
+	 Content-Disposition; b=Ds2PgdgqhoVuPKZuGQ/W4QM36UfjBTpGrfPv/xxlESUcG6ZfaooDo8Nn3iU/00ni5AO+pIxcsX5SMR7GOh2ihGAFnmRpRhJOBw/lDGlUS20wCrtbH5rEWo6OCn0Kj/5P+LW25kbUVM8+z1F8oocV1Ed6u23tB6/YEoOR+530WDA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=E+aCohnP; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gVKTon2Q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A7FBC4CEC5;
-	Sun, 29 Sep 2024 13:30:38 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="E+aCohnP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1E26C4CEC6;
+	Sun, 29 Sep 2024 13:37:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727616639;
-	bh=B31dzkxfT515AkAX0379gntMyzendzuPC8XIto8VHew=;
+	s=k20201202; t=1727617054;
+	bh=DHctoUP+bKs/JBfNf4KMaMtmZ+LdkxDuzfjAGLImL0s=;
 	h=Date:From:To:Subject:From;
-	b=gVKTon2Q0s06Iy6sb7YAgTjzIkI5lt2DqUWXVY1qKeImUjtJvOXxjTm4tTdOD6nSd
-	 7tNKM5CidKuzSU+x8RJf9+KG7EH5SaQKq7N/Zk8xba9GLioNFgtnfGc1MPzPb6JzTi
-	 KMlu42PHaW0HsvYqqoa4uNyC3AYUM/oyuGazAjxsMc0IRgZhrrGwQ4NS0vN6CGo4Mf
-	 ptWKjaxa5t0uJ23p3SaOUA3lg91Yy5dziCuChBtrQAYYqr6gUEbasCi2a0bSPHI6FH
-	 CN7JgLbflsOKRP57zInafrbkoRSrMVB0SE/wZiwsJz/SdKsT9VpNE+7ZXGrqBvlCZk
-	 7FUG3Q8m6ddpA==
-Date: Sun, 29 Sep 2024 21:30:35 +0800
-Message-ID: <90b79759d05894e49db05b9c4e1055e6@kernel.org>>
+	b=E+aCohnPL6wRivoExL1TeV7PQg7YVAY/RwK2YDpfvwnPzRy1/kP2eUgRyoHsO5qGu
+	 WDGfRaWCOtDu6P+7IcNm/ajZou8aKUhEb4twqKklnBgi5o5oOSnhLBoXUYBK+u0AcT
+	 oY9LxL27h6ycQDUJyPtdnS53Ky4nT193mjQiZEECJVBDZX7bALvDHCA2BZr0kxPOCt
+	 VrmV4mJeDeD+KZtqHTqHeeMtTy36wkF5KPUAraiUWs6GPY8LuuyunsOpsyfEsIa8vq
+	 v9n5FBZ4WrUAJ29LoC3nT3DmlQC6VXyMb3zcEqcLQ0Z8Xq+wFtfDXddV6tQhjYkMaA
+	 MDkVhk1XgYFgA==
+Date: Sun, 29 Sep 2024 21:37:31 +0800
+Message-ID: <f4d2a1fe4625b4f62ab5f8b01f55e12a@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2024.09.08 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.09.29
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,136 +38,107 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="i1Cfnq0OXrjD"
+	protocol="application/pgp-signature"; boundary="pElkqSY9MYPx"
 Content-Disposition: inline
 
 
---i1Cfnq0OXrjD
+--pElkqSY9MYPx
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2024.09.08 version.
+has just been updated and tagged as v2024.09.29 release.
+
+Release Notes:
+1) There're 8 new test cases in this release, include btrfs/322, ext4/060
+   generic/365, xfs/629~632 and overlay/087.
+2) The fsx.c is enhanced, it supports unshare range fallocate mode test. If
+   you hit new failure on fsx test, please think about this change.
+
+More details refer to below, thanks for all these contributions!
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-f71228e304b2 btrfs/319: make the test work when compression is used
+790f4d8444fa xfs: new EOF fragmentation tests
 
-New commits:
-
-Aleksa Sarai (2):
-      [1e207662b3ce] open_by_handle: verify u32 and u64 mount IDs
-      [6171b03c92a6] generic/756: test name_to_handle_at(AT_HANDLE_MNT_ID_UNIQUE) explicitly
+New commits ([N]ew, [U]pdate):
 
 Amir Goldstein (1):
-      [55158bfc9946] overlay: deprecate test t_truncate_self
+[N]      [d6433d8c8402] overlay: create a variant to syncfs error test xfs/546
 
-Brian Foster (4):
-      [bc0c52655c5a] fsx: don't skip file size and buf updates on simulated ops
-      [11dbbdff1737] fsx: factor out a file size update helper
-      [9e2b0f4c9579] fsx: support eof page pollution for eof zeroing test coverage
-      [fea26871799f] generic: test to run fsx eof pollution
+Brian Foster (1):
+[U]      [34ce77ce867d] fsx: support unshare range fallocate mode
 
-Chao Yu (1):
-      [c88734099723] f2fs/003: add missing _fixed_by_kernel_commit line
+Darrick J. Wong (1):
+[N]      [c3140a6b8794] generic: add a regression test for sub-block fsmap queries
 
-Chen Hanxiao (1):
-      [0afb586a7e77] generic/362: skip test on NFS mount
+Dave Chinner (1):
+[N]      [790f4d8444fa] xfs: new EOF fragmentation tests
 
-Darrick J. Wong (7):
-      [1dbd10d1bbca] generic/453: test confusable name detection with 32-bit unicode codepoints
-      [c63a6fe02353] generic/453: check xfs_scrub detection of confusing job offers
-      [652692a8e475] xfs: test xfs_scrub services
-      [18c331d98c29] xfs/004: fix column extraction code
-      [fff4042b60be] xfs: refactor statfs field extraction
-      [c9b3c1c392fd] common/xfs: FITRIM now supports realtime volumes
-      [87f14ee1f79f] xfs: functional testing for filesystem properties
+Filipe Manana (4):
+[U]      [9b41da945b20] fstests: add missing kernel git commit IDs to some tests
+[U]      [185d797c73e1] fstests: fix min_dio_alignment logic for getting device block size
+[U]      [10e6c6772b3d] btrfs/321: make the test work when compression is enabled
+[N]      [d26d32028a78] btrfs: test an incremental send scenario with cloning of unaligned extent
 
-Filipe Manana (3):
-      [a8d61229a949] btrfs/319: add git commit ID
-      [136c5099d07e] generic: test concurrent direct IO writes and fsync using same fd
-      [f71228e304b2] btrfs/319: make the test work when compression is used
-
-Qu Wenruo (2):
-      [869685f2f308] fstests: btrfs/125: do not use raid5 for metadata
-      [66a2179efbde] fstests: btrfs: test reading data with a corrupted checksum tree leaf
+Srivathsa Dara (1):
+[N]      [7ba74c6a3c69] ext4: Regression test for corruption during on-line resize
 
 
 Code Diffstat:
 
- .gitignore                    |   2 +-
- common/config                 |   1 +
- common/rc                     |  38 +++++++++
- common/systemd                |  73 +++++++++++++++++
- common/xfs                    |  60 +++++++++++++-
- doc/group-names.txt           |   1 +
- ltp/fsx.c                     | 134 +++++++++++++++++++++++--------
- src/Makefile                  |   4 +-
- src/dio-write-fsync-same-fd.c | 106 +++++++++++++++++++++++++
- src/open_by_handle.c          | 178 ++++++++++++++++++++++++++++++++++--------
- src/t_truncate_self.c         |  26 ------
- tests/btrfs/125               |   2 +-
- tests/btrfs/319               |  21 +++--
- tests/btrfs/319.out           |   4 -
- tests/btrfs/321               |  83 ++++++++++++++++++++
- tests/btrfs/321.out           |   2 +
- tests/f2fs/003                |   3 +
- tests/generic/062             |   4 +
- tests/generic/362             |   2 +
- tests/generic/363             |  23 ++++++
- tests/generic/363.out         |   2 +
- tests/generic/364             |  31 ++++++++
- tests/generic/364.out         |   2 +
- tests/generic/453             | 111 +++++++++++++++++++++++---
- tests/generic/756             |  65 +++++++++++++++
- tests/generic/756.out         |   5 ++
- tests/overlay/013             |  41 ----------
- tests/overlay/013.out         |   2 -
- tests/xfs/004                 |  19 +++--
- tests/xfs/176                 |   4 +-
- tests/xfs/187                 |   6 +-
- tests/xfs/541                 |   6 +-
- tests/xfs/802                 | 140 +++++++++++++++++++++++++++++++++
- tests/xfs/802.out             |   5 ++
- tests/xfs/803                 | 137 ++++++++++++++++++++++++++++++++
- tests/xfs/803.out             |  53 +++++++++++++
- tests/xfs/804                 | 122 +++++++++++++++++++++++++++++
- tests/xfs/804.out             |  46 +++++++++++
- tests/xfs/805                 |  66 ++++++++++++++++
- tests/xfs/805.out             |   9 +++
- tests/xfs/806                 |  63 +++++++++++++++
- tests/xfs/806.out             |   8 ++
- 42 files changed, 1532 insertions(+), 178 deletions(-)
+ ltp/fsx.c               |  67 ++++++++++++++++++++++-------
+ src/min_dio_alignment.c |   2 +-
+ tests/btrfs/321         |  10 +++--
+ tests/btrfs/322         | 109 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/322.out     |  24 +++++++++++
+ tests/ext4/060          |  45 ++++++++++++++++++++
+ tests/ext4/060.out      |   2 +
+ tests/generic/364       |   2 +-
+ tests/generic/365       |  79 +++++++++++++++++++++++++++++++++++
+ tests/generic/365.out   |  15 +++++++
+ tests/overlay/087       |  62 +++++++++++++++++++++++++++
+ tests/overlay/087.out   |   4 ++
+ tests/xfs/608           |   2 +-
+ tests/xfs/629           |  67 +++++++++++++++++++++++++++++
+ tests/xfs/629.out       |   9 ++++
+ tests/xfs/630           |  70 +++++++++++++++++++++++++++++++
+ tests/xfs/630.out       |   9 ++++
+ tests/xfs/631           |  70 +++++++++++++++++++++++++++++++
+ tests/xfs/631.out       |   9 ++++
+ tests/xfs/632           |  78 ++++++++++++++++++++++++++++++++++
+ tests/xfs/632.out       |  33 +++++++++++++++
+ 21 files changed, 745 insertions(+), 23 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---i1Cfnq0OXrjD
+--pElkqSY9MYPx
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmb5Vl0ACgkQlNbPkfr2
-tMz8Aw/7B5ASoZReUee2z5ATH2avH8pFAEJqFMtzcOhCyka/f/+XVYxJ725/Luju
-yAeGVJz/NfXb3eqbFkvTCTbh/gmmMEvp1ZTcLso2k5jbfFGbk22OOxUyfyDYrtLY
-vyYbSQzsyRb9MYwp8PlEEG02NHNL3x/U4RKEXOLtzB5nqgL6T8drd4k3tnX+91FV
-j8XrnsAeMtBtaHrPXgkg65Xq78+T0dDAhwMtdhIufEeWMc2xBnlBgBlXLAlIecah
-RZ3AOkTb9A2fwj6wgUylxvXMNoABKlAm3njfANfDEhVmN7IvNoN8HvT1ejSu9d1+
-m3rAn0084yPLih/7WvH0ceZ/XcmtL+Q9fvIou1o1BrRAAzxIFU66tAAxr+pApGzF
-dQYnYqeP5BqeMdvrV9b4KhTEN39V0jrZTfMrBCcfT1Ua0cG/nbt1fUr516D4yE98
-8g6nUZfZPnzVtwzBa+EHDNovoYwYnUTH6XCtTt6F+czvQ/00FvT89sO8QP0oqpVg
-gUaDlkOk6o7YMqkmdi4rTPHGN58TP14OUzanVPsBVTHLr9ZktZSbKeZtdMUHrK8+
-s3MtFUbmp1F6WhlyHbGEob5Co9UDh/kWVhZfb4XkUNzfZwNrbmiKV2LTyUX8Fg5k
-Wnv08v+82XzqoV4a2H+oGHEaXyrIYJQyg23oZY4OKKc+dxfqXpo=
-=GrqW
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmb5V/sACgkQlNbPkfr2
+tMzK/Q/8CDOqdyUjCTMuxlOew667m04ugDqpsMv6hb7dYZDhqFgh0WR5GSEwbOSt
+UaCZLmQHGmS44tPvk3X12nIW4Pil1HRUi08Lcw66bof8FkIAzu+u5iQGiraPtNvT
+9wCYqLy5/kCdg9RWM0t71oc0wcXFuHjoQGFM73fSqc60dCYcoyJRivme8b6JwC1C
+tmGToCi2ZktZgbgfFBN9m1DvIpwSxNkMxgnaAJKSUPSSXwRRByyb7TtOhMdJWBA+
+MU7GWU8AcndOSa/QtQneRG8ADgu1yXGkPB0Zaz/BWQK1uerCFwOFbgtB6+utybB0
+bw/DhZ0VkDkmGNIR6rfddECQxtYwA6oxKxN5IN2s1xXM/sUTvotsHbvARCrr7kl4
+q+/IjnMM8XxeGO6BKcS4bKEhwFB4FGJP5QWz2fGoOs22DnWK7Q+8oXfKF5lS9D7k
+c9n/DHc4VA55q608qMbCSViO6bf2rjyaCU1s3NB/uJEMKBO54p/9RCRUqN/caYTT
+GFo7nV6PRPfwj+7yvfnxxzj9ejGpxl1R0g8ZrSK2OjSdbF7/9pQtMDNF/3pxZ1Hy
+kls016eFj3kw2nrIfFXktTvcAMg4hJHv7Ty48K3Y9Dofda8gc9JIw6zLN1zGG/Zi
+2p8//mMyYWnTVryNgK3Qq/vHVZkxjlApfGltVZdkt9RWLG+AOvA=
+=uRQv
 -----END PGP SIGNATURE-----
 
---i1Cfnq0OXrjD--
+--pElkqSY9MYPx--
