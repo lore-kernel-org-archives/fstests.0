@@ -1,263 +1,173 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CACD12E75
-	for <fstests@vger.kernel.org>; Sat, 28 Sep 2024 08:03:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C28D748A
+	for <fstests@vger.kernel.org>; Sun, 29 Sep 2024 13:30:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727510636; cv=none; b=mGo2sFESPlyxamBNrHIaph9jw3RNSHmO1vUB2dKw5bwBg+y2J9GZZ5fC44oGXGqbWGF/FuU80pFScK6tsXI/gReP4ar79fughykhDT72+u35heE87lsXVHOVGAW+uWyXTbJh+meTc9vGMo78ViFq9VTMHF+2ChTTzhjnaYznf24=
+	t=1727616639; cv=none; b=ATh1U+RUsofuiMBK2OAtiLdkWx/aWtdkdKia22xE1cUGrh722dcq6ZIMMFfuCqYbwAGM5xrugGRpwobRBq8KhwHlRAcnM6TpNwfS5EqyiNyfpW9vzizG26ttWONnaaJ5pUlY8Q55q3oGYZanCSXRIm9JOi4+dmASRQrDxvdwtXw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727510636; c=relaxed/simple;
-	bh=CupZtwUzHzxf5ze+AqD2d1rvyLBHAhM/0UYSLMD07t8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KcNWMOBD4wBC0l6mzrIs0KNtREl9L8juIzDk/Ah3inc2cQBj8yDMtEfNbjhlDQrb7NSaqnnJS4Ie6XznQstqLZHcBRkeOH/9YUr7hVLrSB24tOiWjUa4VYBe2coToAqA/Kv+PpcdOIgjIziRQGntwuk5TCpXq5lj3Tv1UVRW/NQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WlYRhZ3Z; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1727616639; c=relaxed/simple;
+	bh=B31dzkxfT515AkAX0379gntMyzendzuPC8XIto8VHew=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=XBPADgsb4j/6QrApvro5fJIz7z0b8e5Q4DWwC5FWkYMAzstofgrS4ENQutqI80c+yTmcHo+1xfvdRFmJS5fFEf47qxP1axgjVn93A9sCGj/7ljl3mhtv/Whq7vIi91+om1jGbQR0hnr9XnDD1wfajXQhAqBTXMCKbP470yDO5SA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gVKTon2Q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WlYRhZ3Z"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1727510632;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=sgNH/HNBhs3F3moJpFJkvHyCgp764xzjFJrV6/0l1kU=;
-	b=WlYRhZ3Z04iWpk1fgL8W3HZRJ8WP4G9eRKMJbGOY6gK4V9uzZDG09p82dWt3WhnqQx0I0F
-	nsROwgIR/06g6cN9wxhhwqlDpmYU44iMp+1GDXbu7cc10mbHbluDS8naRUfDYaJ0ivwtSn
-	S2lGuTedoaeYJOf+sJvWXdC8Um3+OfE=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-589-ZWjiS-htOJ-QRvwTPXGg5w-1; Sat, 28 Sep 2024 04:03:51 -0400
-X-MC-Unique: ZWjiS-htOJ-QRvwTPXGg5w-1
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-2070e327014so24276455ad.1
-        for <fstests@vger.kernel.org>; Sat, 28 Sep 2024 01:03:51 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727510630; x=1728115430;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=sgNH/HNBhs3F3moJpFJkvHyCgp764xzjFJrV6/0l1kU=;
-        b=o71p8KIX+rrLe8lH2/KllyUCz7uSy2P4LsoCUNdqI/P7zVnmnMwNB/Gfpx2OvaHjTE
-         atEG/8BrB8ceLoh9Bb6MXevWCnpHNfM2B0gvtvmx/QjMfyIbXjZqeXxTZL5wRVSNkjQt
-         PSNX7fxRo643CFe4dWve8gV1BR3wPu0GAeUzQsmONCTuMCt7CjGQaspmD3YM+908ZPFK
-         +E7JAursByAP1+ZPCttHjA6C93+pUqFf8s8uEvzVgmlqSfjJTK320ZNgea4Pe7kPMOOd
-         pTe9IDtv0CAD4oW8qyz/p0EOmLDdwWt13BLn5wDxu8qg5ULJS0+PTV8rzfbL3Usdx2Ba
-         iOqw==
-X-Forwarded-Encrypted: i=1; AJvYcCWDS7lOXKPVydWSxEcrx4inmI7rk0wmWaeHAK7NneSJ8Jg1PtH+zFM8PCAoxhbwsElPe6Os762s@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy61NdVCZE7zf8osoKqFD8T6IgiuOrSQjEicEA/j3ulMPbcALDx
-	GxsdSOGVS8m8EVofXN9ls+2WTBtlA3oFkP/yi1eRNPtWGbnAKMiSccDm6PDGiJEBlFHD9c5SfiO
-	eXP0RQO/kIXczfDkTO8MR2pU7F3ZR/6kZT/UqQhtMnnaaEVZAfmizAY4=
-X-Received: by 2002:a17:902:d2d0:b0:20b:433c:5833 with SMTP id d9443c01a7336-20b433c5de7mr71567215ad.26.1727510630367;
-        Sat, 28 Sep 2024 01:03:50 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IF+giI1SCEbBbFEgbr/w6CYN1rJUu6JfZP/RluPjMZeqwAinSGC+TG71RwnGAoNH2lzYFOCpA==
-X-Received: by 2002:a17:902:d2d0:b0:20b:433c:5833 with SMTP id d9443c01a7336-20b433c5de7mr71566905ad.26.1727510629860;
-        Sat, 28 Sep 2024 01:03:49 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20b37d5ef69sm23062865ad.6.2024.09.28.01.03.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 28 Sep 2024 01:03:49 -0700 (PDT)
-Date: Sat, 28 Sep 2024 16:03:46 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] fsx: add missing fallocate flag ifdefs
-Message-ID: <20240928080346.zwlds6k2p5qiru6a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20240926144147.106685-1-bfoster@redhat.com>
- <20240926144147.106685-3-bfoster@redhat.com>
- <20240926145028.GC21840@frogsfrogsfrogs>
- <ZvWD6SsfGJDisYP9@bfoster>
- <20240927054231.adwhqd2cyexfu3if@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZvagFdWEcffZs06i@bfoster>
- <20240927152537.GQ21877@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gVKTon2Q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7A7FBC4CEC5;
+	Sun, 29 Sep 2024 13:30:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727616639;
+	bh=B31dzkxfT515AkAX0379gntMyzendzuPC8XIto8VHew=;
+	h=Date:From:To:Subject:From;
+	b=gVKTon2Q0s06Iy6sb7YAgTjzIkI5lt2DqUWXVY1qKeImUjtJvOXxjTm4tTdOD6nSd
+	 7tNKM5CidKuzSU+x8RJf9+KG7EH5SaQKq7N/Zk8xba9GLioNFgtnfGc1MPzPb6JzTi
+	 KMlu42PHaW0HsvYqqoa4uNyC3AYUM/oyuGazAjxsMc0IRgZhrrGwQ4NS0vN6CGo4Mf
+	 ptWKjaxa5t0uJ23p3SaOUA3lg91Yy5dziCuChBtrQAYYqr6gUEbasCi2a0bSPHI6FH
+	 CN7JgLbflsOKRP57zInafrbkoRSrMVB0SE/wZiwsJz/SdKsT9VpNE+7ZXGrqBvlCZk
+	 7FUG3Q8m6ddpA==
+Date: Sun, 29 Sep 2024 21:30:35 +0800
+Message-ID: <90b79759d05894e49db05b9c4e1055e6@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.09.08 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="i1Cfnq0OXrjD"
+Content-Disposition: inline
+
+
+--i1Cfnq0OXrjD
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240927152537.GQ21877@frogsfrogsfrogs>
 
-On Fri, Sep 27, 2024 at 08:25:37AM -0700, Darrick J. Wong wrote:
-> On Fri, Sep 27, 2024 at 08:07:49AM -0400, Brian Foster wrote:
-> > On Fri, Sep 27, 2024 at 01:42:31PM +0800, Zorro Lang wrote:
-> > > On Thu, Sep 26, 2024 at 11:55:21AM -0400, Brian Foster wrote:
-> > > > On Thu, Sep 26, 2024 at 07:50:28AM -0700, Darrick J. Wong wrote:
-> > > > > On Thu, Sep 26, 2024 at 10:41:47AM -0400, Brian Foster wrote:
-> > > > > > The various fallocate flags are mostly ifdef'd for backward
-> > > > > > compatibility with the exception of the associated test_fallocate()
-> > > > > > calls to verify functionality at runtime. I suspect the reason for
-> > > > > > this was to avoid ifdef ugliness around having to clear the runtime
-> > > > > > flag for each operation, but unfortunately this defeats the purpose
-> > > > > > of the ifdef protection everywhere else.
-> > > > > > 
-> > > > > > Factor out the fallocate related test calls into a new helper and
-> > > > > > add the appropriate ifdefs.
-> > > > > > 
-> > > > > > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > > > > > ---
-> > > > > >  ltp/fsx.c | 59 ++++++++++++++++++++++++++++++++++++++++++-------------
-> > > > > >  1 file changed, 45 insertions(+), 14 deletions(-)
-> > > > > > 
-> > > > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > > > > > index 677f8c9f..417743c5 100644
-> > > > > > --- a/ltp/fsx.c
-> > > > > > +++ b/ltp/fsx.c
-> > > > > > @@ -2833,6 +2833,50 @@ __test_fallocate(int mode, const char *mode_str)
-> > > > > >  #endif
-> > > > > >  }
-> > > > > >  
-> > > > > > +void
-> > > > > > +test_fallocate_calls(void)
-> > > > > > +{
-> > > > > > +	if (fallocate_calls)
-> > > > > > +		fallocate_calls = test_fallocate(0);
-> > > > > > +	if (keep_size_calls)
-> > > > > > +		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> > > > > > +
-> > > > > > +#ifdef FALLOC_FL_UNSHARE_RANGE
-> > > > > > +	if (unshare_range_calls)
-> > > > > > +		unshare_range_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
-> > > > > > +#else
-> > > > > > +	unshare_range_calls = 0;
-> > > > > > +#endif
-> > > > > > +
-> > > > > > +#ifdef FALLOC_FL_PUNCH_HOLE
-> > > > > > +	if (punch_hole_calls)
-> > > > > > +		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
-> > > > > > +#else
-> > > > > > +	punch_hole_calls = 0;
-> > > > > > +#endif
-> > > > > > +
-> > > > > > +#ifdef FALLOC_FL_ZERO_RANGE
-> > > > > > +	if (zero_range_calls)
-> > > > > > +		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
-> > > > > > +#else
-> > > > > > +	zero_range_calls = 0;
-> > > > > > +#endif
-> > > > > > +
-> > > > > > +#ifdef FALLOC_FL_COLLAPSE_RANGE
-> > > > > > +	if (collapse_range_calls)
-> > > > > > +		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
-> > > > > > +#else
-> > > > > > +	collapse_range_calls = 0;
-> > > > > > +#endif
-> > > > > 
-> > > > > The concept looks fine, but collapse and zero range have been in the
-> > > > > kernel for a decade now, do we really need to have ifdef tests for them?
-> > > > > 
-> > > > 
-> > > > Probably not.. but why even bother worrying about individual flags? The
-> > > > insert and unshare flags have been around for 9 and 8 years
-> > > > respectively, none of these were fully ifdef'd from the beginning, and
-> > > > I'm not aware of anyone that has actually complained.
-> > > > 
-> > > > I'm not convinced that this patch matters for anybody in practice. I
-> > > > included it just because it was simple enough to include the minimum
-> > > > mechanical fix and I was slightly curious if somebody could come up with
-> > > > a more elegant solution. In the spirit of being practical, maybe the
-> > > > better approach here is to just remove the (at least the falloc flag
-> > > > related) ifdefs entirely? We can always add them back if somebody
-> > > > complains...
-> > > 
-> > > As this patch is still controversial, I'll merge the other one at first, to
-> > > catch up the release of this week. We can talk this one later, if you still
-> > > hope to have it :)
-> > > 
-> > 
-> > Thanks. In thinking more about it.. my reasoning above was that it seems
-> > like the value of these ifdefs is to avoid disruption when new
-> > functionality is introduced, but at the same time the fstests user base
-> > may not be necessarily all that interested in eternal backwards
-> > compatibility for ancient runtimes, etc. Therefore, I wonder if it's
-> > reasonable to have an (informal) expiration date for when we can clear
-> > out some of this cruft to keep the code cleaner and more maintainable
-> > going forward.
-> > 
-> > So I largely agree with Darrick's point, it's just that personally I'm
-> > less interested in discussion over which fallocate flags to include or
-> > not because to my mind that suggests we might as well just drop the
-> > ifdefs entirely. That said, I'm not all that invested beyond just trying
-> > to be proactive since I happened to be hacking in this area, so if you
-> > guys want to leave things as is, or agree on a subset of flags to ifdef,
-> > just let me know and I'll drop it or send a v2.
-> 
-> Usually I just let Christoph complain and remove the ifdefs, but if I
-> have to use my own rule, it would be that ifdefs and ./configure
-> trickery isn't necessary for any symbol that is at least 5 years old.
-> 
-> Recent complaints on the mailing list have caused me to revise that to
-> 10 years old though (see recent memfd_create fixes). :)
+Hi all,
 
-I prefer "10 years", due to most of RHELs support 10 years (or a bit longer:)
-I think some other Enterprice systems are similar.
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2024.09.08 version.
 
 Thanks,
 Zorro
 
-> 
-> I also remember that a lot of the old crufty ifdef stuff (iirc) was kept
-> around so that fstests would continue to run on old RHELs.  Once in a
-> while our QA folks rebase fstests to latest, but they also tend to patch
-> back in whatever ./configure magic they need for 2.6 era kernels.
-> 
-> --D
-> 
-> > Brian
-> > 
-> > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > Brian
-> > > > 
-> > > > > --D
-> > > > > 
-> > > > > > +
-> > > > > > +#ifdef FALLOC_FL_INSERT_RANGE
-> > > > > > +	if (insert_range_calls)
-> > > > > > +		insert_range_calls = test_fallocate(FALLOC_FL_INSERT_RANGE);
-> > > > > > +#else
-> > > > > > +	insert_range_calls = 0;
-> > > > > > +#endif
-> > > > > > +}
-> > > > > > +
-> > > > > >  bool
-> > > > > >  keep_running(void)
-> > > > > >  {
-> > > > > > @@ -3271,20 +3315,7 @@ main(int argc, char **argv)
-> > > > > >  		check_trunc_hack();
-> > > > > >  	}
-> > > > > >  
-> > > > > > -	if (fallocate_calls)
-> > > > > > -		fallocate_calls = test_fallocate(0);
-> > > > > > -	if (keep_size_calls)
-> > > > > > -		keep_size_calls = test_fallocate(FALLOC_FL_KEEP_SIZE);
-> > > > > > -	if (unshare_range_calls)
-> > > > > > -		unshare_range_calls = test_fallocate(FALLOC_FL_UNSHARE_RANGE);
-> > > > > > -	if (punch_hole_calls)
-> > > > > > -		punch_hole_calls = test_fallocate(FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
-> > > > > > -	if (zero_range_calls)
-> > > > > > -		zero_range_calls = test_fallocate(FALLOC_FL_ZERO_RANGE);
-> > > > > > -	if (collapse_range_calls)
-> > > > > > -		collapse_range_calls = test_fallocate(FALLOC_FL_COLLAPSE_RANGE);
-> > > > > > -	if (insert_range_calls)
-> > > > > > -		insert_range_calls = test_fallocate(FALLOC_FL_INSERT_RANGE);
-> > > > > > +	test_fallocate_calls();
-> > > > > >  	if (clone_range_calls)
-> > > > > >  		clone_range_calls = test_clone_range();
-> > > > > >  	if (dedupe_range_calls)
-> > > > > > -- 
-> > > > > > 2.46.1
-> > > > > > 
-> > > > > > 
-> > > > > 
-> > > > 
-> > > > 
-> > > 
-> > 
-> 
+The new head of the master branch is commit:
 
+f71228e304b2 btrfs/319: make the test work when compression is used
+
+New commits:
+
+Aleksa Sarai (2):
+      [1e207662b3ce] open_by_handle: verify u32 and u64 mount IDs
+      [6171b03c92a6] generic/756: test name_to_handle_at(AT_HANDLE_MNT_ID_UNIQUE) explicitly
+
+Amir Goldstein (1):
+      [55158bfc9946] overlay: deprecate test t_truncate_self
+
+Brian Foster (4):
+      [bc0c52655c5a] fsx: don't skip file size and buf updates on simulated ops
+      [11dbbdff1737] fsx: factor out a file size update helper
+      [9e2b0f4c9579] fsx: support eof page pollution for eof zeroing test coverage
+      [fea26871799f] generic: test to run fsx eof pollution
+
+Chao Yu (1):
+      [c88734099723] f2fs/003: add missing _fixed_by_kernel_commit line
+
+Chen Hanxiao (1):
+      [0afb586a7e77] generic/362: skip test on NFS mount
+
+Darrick J. Wong (7):
+      [1dbd10d1bbca] generic/453: test confusable name detection with 32-bit unicode codepoints
+      [c63a6fe02353] generic/453: check xfs_scrub detection of confusing job offers
+      [652692a8e475] xfs: test xfs_scrub services
+      [18c331d98c29] xfs/004: fix column extraction code
+      [fff4042b60be] xfs: refactor statfs field extraction
+      [c9b3c1c392fd] common/xfs: FITRIM now supports realtime volumes
+      [87f14ee1f79f] xfs: functional testing for filesystem properties
+
+Filipe Manana (3):
+      [a8d61229a949] btrfs/319: add git commit ID
+      [136c5099d07e] generic: test concurrent direct IO writes and fsync using same fd
+      [f71228e304b2] btrfs/319: make the test work when compression is used
+
+Qu Wenruo (2):
+      [869685f2f308] fstests: btrfs/125: do not use raid5 for metadata
+      [66a2179efbde] fstests: btrfs: test reading data with a corrupted checksum tree leaf
+
+
+Code Diffstat:
+
+ .gitignore                    |   2 +-
+ common/config                 |   1 +
+ common/rc                     |  38 +++++++++
+ common/systemd                |  73 +++++++++++++++++
+ common/xfs                    |  60 +++++++++++++-
+ doc/group-names.txt           |   1 +
+ ltp/fsx.c                     | 134 +++++++++++++++++++++++--------
+ src/Makefile                  |   4 +-
+ src/dio-write-fsync-same-fd.c | 106 +++++++++++++++++++++++++
+ src/open_by_handle.c          | 178 ++++++++++++++++++++++++++++++++++--------
+ src/t_truncate_self.c         |  26 ------
+ tests/btrfs/125               |   2 +-
+ tests/btrfs/319               |  21 +++--
+ tests/btrfs/319.out           |   4 -
+ tests/btrfs/321               |  83 ++++++++++++++++++++
+ tests/btrfs/321.out           |   2 +
+ tests/f2fs/003                |   3 +
+ tests/generic/062             |   4 +
+ tests/generic/362             |   2 +
+ tests/generic/363             |  23 ++++++
+ tests/generic/363.out         |   2 +
+ tests/generic/364             |  31 ++++++++
+ tests/generic/364.out         |   2 +
+ tests/generic/453             | 111 +++++++++++++++++++++++---
+ tests/generic/756             |  65 +++++++++++++++
+ tests/generic/756.out         |   5 ++
+ tests/overlay/013             |  41 ----------
+ tests/overlay/013.out         |   2 -
+ tests/xfs/004                 |  19 +++--
+ tests/xfs/176                 |   4 +-
+ tests/xfs/187                 |   6 +-
+ tests/xfs/541                 |   6 +-
+ tests/xfs/802                 | 140 +++++++++++++++++++++++++++++++++
+ tests/xfs/802.out             |   5 ++
+ tests/xfs/803                 | 137 ++++++++++++++++++++++++++++++++
+ tests/xfs/803.out             |  53 +++++++++++++
+ tests/xfs/804                 | 122 +++++++++++++++++++++++++++++
+ tests/xfs/804.out             |  46 +++++++++++
+ tests/xfs/805                 |  66 ++++++++++++++++
+ tests/xfs/805.out             |   9 +++
+ tests/xfs/806                 |  63 +++++++++++++++
+ tests/xfs/806.out             |   8 ++
+ 42 files changed, 1532 insertions(+), 178 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--i1Cfnq0OXrjD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmb5Vl0ACgkQlNbPkfr2
+tMz8Aw/7B5ASoZReUee2z5ATH2avH8pFAEJqFMtzcOhCyka/f/+XVYxJ725/Luju
+yAeGVJz/NfXb3eqbFkvTCTbh/gmmMEvp1ZTcLso2k5jbfFGbk22OOxUyfyDYrtLY
+vyYbSQzsyRb9MYwp8PlEEG02NHNL3x/U4RKEXOLtzB5nqgL6T8drd4k3tnX+91FV
+j8XrnsAeMtBtaHrPXgkg65Xq78+T0dDAhwMtdhIufEeWMc2xBnlBgBlXLAlIecah
+RZ3AOkTb9A2fwj6wgUylxvXMNoABKlAm3njfANfDEhVmN7IvNoN8HvT1ejSu9d1+
+m3rAn0084yPLih/7WvH0ceZ/XcmtL+Q9fvIou1o1BrRAAzxIFU66tAAxr+pApGzF
+dQYnYqeP5BqeMdvrV9b4KhTEN39V0jrZTfMrBCcfT1Ua0cG/nbt1fUr516D4yE98
+8g6nUZfZPnzVtwzBa+EHDNovoYwYnUTH6XCtTt6F+czvQ/00FvT89sO8QP0oqpVg
+gUaDlkOk6o7YMqkmdi4rTPHGN58TP14OUzanVPsBVTHLr9ZktZSbKeZtdMUHrK8+
+s3MtFUbmp1F6WhlyHbGEob5Co9UDh/kWVhZfb4XkUNzfZwNrbmiKV2LTyUX8Fg5k
+Wnv08v+82XzqoV4a2H+oGHEaXyrIYJQyg23oZY4OKKc+dxfqXpo=
+=GrqW
+-----END PGP SIGNATURE-----
+
+--i1Cfnq0OXrjD--
