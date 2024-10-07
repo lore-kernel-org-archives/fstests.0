@@ -1,98 +1,84 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 812591D26E8;
-	Mon,  7 Oct 2024 12:12:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 308D81D223E
+	for <fstests@vger.kernel.org>; Mon,  7 Oct 2024 12:14:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728303135; cv=none; b=e1rH08PZIm5qn1WpG1CCNyFRuFRHzSL1FgsSfdDmo74OOiEQCf86d+BHwMhQPWLP4gxsQ+VmCDrJdbz3tAssuujEDMDQPUnh2C4JzLSR/oCrqX3a6CQH4QY9jB0SkrpsjcMcqD+33PDTPQNSZP7r9LIuQauyHC00RZC4PAQDFHI=
+	t=1728303288; cv=none; b=MMzEh13lRbeG81hkM1tLSzw3Zsjn97YyOLq75LsWwI5wiBedafTM+uhmCXcHpCAoDz75c3sjViAEQY/XFD8pAmPXHubajSKP9Zil6LNHGmMY8ZdU8qk+kyA7yF9fFNQYE9bSCEmtCF6VBZRuze5+wbbWsQmoRdtF5iFMMSm6w0M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728303135; c=relaxed/simple;
-	bh=V6yNriPwJca0vuleHIn5JooXjwd+KTF6OF/rmfP/64k=;
+	s=arc-20240116; t=1728303288; c=relaxed/simple;
+	bh=WwESGIiIGtQuXOpmTVCXNS5pPNT1KSq8VLA6Ob6hRNE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DI0+3mMH129KlP2Mz3yAjm3SWcq0QnFsS01iqdATmPKiiE9au6Hsiwi2GDdj096bCeHNWiECIDxqP+CmgwaO0IpI6POe+m2Cem5G1JVcYcM2jqSh6RwB1iuxpxH21GKJenWtuh+BPrPjoJ3y9VaTFBYH44exzNbBmus+/YEFQqs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F0LVl9pk; arc=none smtp.client-ip=10.30.226.201
+	 To:Cc:Content-Type; b=ubMF4yPBDaPPBzCNwCQvC9vnHgpSN334tF11qE/cQ8gfmLWx4gTO11+o+cotQPn7mWuokT2VQ7sp37V2Em+OopnLTMqrRXXBYcz+SWc2MorC31ADAdentZGQPaiR6cMSoOvTfrgsL/UWvcmTe2Q7lINvt/2HbTdC+FV7M6/o8Rs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JPYZ8FEx; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F0LVl9pk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 15888C4CECF;
-	Mon,  7 Oct 2024 12:12:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JPYZ8FEx"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B58A5C4CEC6
+	for <fstests@vger.kernel.org>; Mon,  7 Oct 2024 12:14:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728303135;
-	bh=V6yNriPwJca0vuleHIn5JooXjwd+KTF6OF/rmfP/64k=;
+	s=k20201202; t=1728303287;
+	bh=WwESGIiIGtQuXOpmTVCXNS5pPNT1KSq8VLA6Ob6hRNE=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=F0LVl9pklLNuN2KWUjHYd6gsPlgPfvMd1DW0ii2YuioKnlRQPWe3o9VMr+owmX5Sw
-	 0A+4gM7PFAtV3hiLsaTsw3r/MrHVSpPyo+Jpfe2LT5qsER2BC/d5RnI2Q3kdlMN/Cp
-	 VdFOORYqIDzEEITkQNDX8lc12H+yIGJC2srcWzCHhC8yy+yvV3OhwATntY392VmCXj
-	 1RT0NEAsJXkTTs7WkbvctYldHozdmJOay8k/dvQ30ZGFLHXA+1/hlvhxVqxJAfOFQM
-	 x9F8moDL6lJWvrBTSzqx8ly2+T1B73ioxp5k1Nj6JA78de1DeeaKElQ6YSQ8InNIso
-	 tZ56igG53Ud7A==
-Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-a994ecf79e7so157777566b.0;
-        Mon, 07 Oct 2024 05:12:15 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUgrwPnMYL7JVy9o5gd7WwUHvoA3OMGfo9TMSN3LtQZP3EL/99cVNWTeaM9S07W0A8QkUBV+Pchq84IKeg=@vger.kernel.org, AJvYcCXfP23u5WN7Zf8pb6iLfNYEwfgwnF5sUtV44I/uPn5a+xIfzV2p/8/a9CnCSE+NbQZ0Akbz1BnI@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx0kLV7XrRxwamgeYlNKZAn0LdDep9J9fT0ucSzR7/zsKyQPjmD
-	UGFrY+N7m+l/kAxWSGGVyl+McZ2VMvkFgEbvP3LOmIRw6OzuYTDfueb7aZR8lrWgsDtGWgzz36x
-	4TQbt4mjjj9+129c/DSUQCvaQToQ=
-X-Google-Smtp-Source: AGHT+IE9DYW9GoqjFT2dlVLrDE64H16Ge4pU6uAWBll7sMmXSRAJH+zzuS6F8NArKK1BuMHwfQrOXNUG1aCTslsoPCU=
-X-Received: by 2002:a17:907:94c3:b0:a86:96f5:fa81 with SMTP id
- a640c23a62f3a-a991bd757admr1513080766b.32.1728303133709; Mon, 07 Oct 2024
- 05:12:13 -0700 (PDT)
+	b=JPYZ8FExl0oeD9iF8MrTmrOq5oY8yV9WiaJTEAlz0xD4GpTp6HwynyiqiKZBW69vX
+	 VJmaLKWk/QB+prCTdIs9UWzjHqm507Cppb56Z9tn1YjNZfj9olK9PWW9+rXq9fcQzM
+	 EtefBbO0AsIixSLpCmhUB8ekqB76X4/AS93l3OtQfeTAKxZTQQ5CQRxaMEAcG8r/Dm
+	 gEcVQVkmCBwGccdJzuy7wGEn42FgWp3YsaoNnhH3fRq5dtVJjTRitjVXZUeXtnpZa/
+	 40iPlnch6u+8vMnkeQJbnkL1hNOS72s0oXh+a4udyNdTKfeOLTe0fu1ntPqDraHt2A
+	 Z0fMQyChYK09g==
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-42f56ad2afaso58267465e9.1
+        for <fstests@vger.kernel.org>; Mon, 07 Oct 2024 05:14:47 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCW6D4fFRJqw49/6tLX0Yc3juCT5icgpc5FCN3GXduGSykc8T9CmLLOF3r1fg9xAVyEqZxmvagRj@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyv7k1qlj3v1VriAn6G4R5PltD5mVgPqcp99Cn1g0wagT7zHB+Z
+	lzFHYvyspUUc1W+nfo1YIzD0NKSNUudxQwYv2QVU5Hp0bHmbIWNbuGakm5yoV6n3Ua1SAWYFWJq
+	44mT+32DR3tfNvKRVg7tlsN7ZLzE=
+X-Google-Smtp-Source: AGHT+IHAQFf90fB8bV2rFCGhjIdwLssAJxndr6s651Xv6G5ETM+OsMMfBJZHE+PGrX/3idCAAHcFmoKwM6r1nHsL1R4=
+X-Received: by 2002:a5d:69ca:0:b0:374:c3e4:d6b1 with SMTP id
+ ffacd0b85a97d-37d0e8dafefmr10174720f8f.44.1728303286350; Mon, 07 Oct 2024
+ 05:14:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <29dc7fdf9dd8cfb05ece7d5eb07858529517022f.camel@suse.com> <20240923133011.cmv63zpd3yg37yw2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20240923133011.cmv63zpd3yg37yw2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240923090607.953579-1-wubo.oduw@gmail.com> <CAL3q7H4dthnioL3m9ejzp8sNOeaYLZpRxd2ciEi36uuZSxGoLg@mail.gmail.com>
+ <20240923134603.cs5u4ea7bnaarnme@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20240923134603.cs5u4ea7bnaarnme@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 7 Oct 2024 13:11:35 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H4f4-3=0OUwYQiFC3hDY=k3SDUsGEJm1S7iro5+pD9yyw@mail.gmail.com>
-Message-ID: <CAL3q7H4f4-3=0OUwYQiFC3hDY=k3SDUsGEJm1S7iro5+pD9yyw@mail.gmail.com>
-Subject: Re: [PATCH v2] btrfs/315: update filter to match mount cmd
+Date: Mon, 7 Oct 2024 13:14:09 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4MVxFMU1LqESrnACc28sHhUaPvy4_FTP0qh4qiEsttSg@mail.gmail.com>
+Message-ID: <CAL3q7H4MVxFMU1LqESrnACc28sHhUaPvy4_FTP0qh4qiEsttSg@mail.gmail.com>
+Subject: Re: [PATCH] check stx_dio_offset_align to determine if DIO is supported
 To: Zorro Lang <zlang@redhat.com>
-Cc: An Long <lan@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: Wu Bo <wubo.oduw@gmail.com>, fstests@vger.kernel.org, 
+	Zorro Lang <zlang@kernel.org>, Christoph Hellwig <hch@lst.de>, Wu Bo <bo.wu@vivo.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Sep 23, 2024 at 2:30=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+On Mon, Sep 23, 2024 at 2:46=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
 :
 >
-> On Mon, Sep 23, 2024 at 03:57:13PM +0800, An Long wrote:
-> > Mount error info changed since util-linux v2.40
-> > (91ea38e libmount: report failed syscall name).
-> > So update _filter_mount_error() to match it.
+> On Mon, Sep 23, 2024 at 12:01:22PM +0100, Filipe Manana wrote:
+> > On Mon, Sep 23, 2024 at 10:06=E2=80=AFAM Wu Bo <wubo.oduw@gmail.com> wr=
+ote:
+> > >
+> > > According to the statx manual, if stx_dio_offset_align is 0, it
+> > > indicates that Direct I/O (DIO) is not supported on this file.
 > >
-> > Signed-off-by: An Long <lan@suse.com>
-> > ---
-> >  tests/btrfs/315 | 6 +++++-
-> >  1 file changed, 5 insertions(+), 1 deletion(-)
+> > There's already a patch for this:
 > >
-> > diff --git a/tests/btrfs/315 b/tests/btrfs/315
-> > index 5852afad..5101a9a3 100755
-> > --- a/tests/btrfs/315
-> > +++ b/tests/btrfs/315
-> > @@ -39,7 +39,11 @@ _filter_mount_error()
-> >         # mount: <mnt-point>: fsconfig system call failed: File exists.
-> >         # dmesg(1) may have more information after failed mount system
-> > call.
+> > https://lore.kernel.org/fstests/20240911035333.364961-1-chao@kernel.org=
+/
 > >
-> > -       grep -v dmesg | _filter_test_dir | sed -e
-> > "s/mount(2)\|fsconfig//g"
-> > +       # For util-linux v2.4 and later:
-> > +       # mount: <mountpoint>: mount system call failed: File exists.
-> > +
-> > +       grep -v dmesg | _filter_test_dir | sed -e
-> > "s/mount(2)\|fsconfig//g" | \
-> > +        sed -E "s/mount( system call failed:)/\1/"
+> > (but not merged yet)
 >
-> Oh, there's a local _filter_mount_error() in btrfs/315. I thought you can
-> change the common helper _filter_error_mount() in common/filter. So maybe
-> you can merge this _filter_mount_error into that common helper in another
-> patch, then other test cases can use it.
+> Thanks Filipe. Yes, this's fixed by Chao Yu. You can check it in
+> "patches-in-queue" branch, it'll be merged to for-next soon (this
+> week I hope).
 
-This patch missed the last update.
-Was the cleanup to use the filter from common/filter required before
-merging this?
+It missed the last update and it's still not in the "patches-in-queue" bran=
+ch.
 
 Thanks.
 
@@ -100,13 +86,34 @@ Thanks.
 > Thanks,
 > Zorro
 >
->
-> >  }
 > >
-> >  seed_device_must_fail()
-> > --
-> > 2.43.0
+> > Thanks.
 > >
+> > >
+> > > Signed-off-by: Wu Bo <wubo.oduw@gmail.com>
+> > > ---
+> > >  src/min_dio_alignment.c | 2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > >
+> > > diff --git a/src/min_dio_alignment.c b/src/min_dio_alignment.c
+> > > index 131f6023..c50ae8c3 100644
+> > > --- a/src/min_dio_alignment.c
+> > > +++ b/src/min_dio_alignment.c
+> > > @@ -28,7 +28,7 @@ static int min_dio_alignment(const char *mntpnt, co=
+nst char *devname)
+> > >         fd =3D open(mntpnt, O_TMPFILE | O_RDWR | O_EXCL, 0600);
+> > >         if (fd >=3D 0 &&
+> > >             xfstests_statx(fd, "", AT_EMPTY_PATH, STATX_DIOALIGN, &st=
+x) =3D=3D 0 &&
+> > > -           (stx.stx_mask & STATX_DIOALIGN))
+> > > +           (stx.stx_mask & STATX_DIOALIGN) && stx.stx_dio_offset_ali=
+gn)
+> > >                 return stx.stx_dio_offset_align;
+> > >
+> > >         /*
+> > > --
+> > > 2.34.1
+> > >
+> > >
 > >
->
 >
