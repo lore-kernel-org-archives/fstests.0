@@ -1,53 +1,85 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7201014AD17
-	for <fstests@vger.kernel.org>; Mon,  7 Oct 2024 13:17:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46D0F18BC19;
+	Mon,  7 Oct 2024 22:54:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728307048; cv=none; b=r3yhV2ZACtWxko2cJ8wf9wEBZlE5B6qVvcmx8n1Fuyg2n3VB6IFpvcOQr5kS3FobWgnJZO+CwcZE0uBQ7G1c/GOPVJz+6zszM4yUQOu8yrkwPx1GiAB4xyqxO8Kdbrz6v2tRtAJvoPTEJ7QRrfZzDVFxUT5qEhArQn7N8e2vE88=
+	t=1728341648; cv=none; b=jXcxokJHAGdnGE13JwgMOsVyJsR6kLHmjxuQUJcySGHARTR4ENKWeZWC9T6z3jZexBKZarJkewE0lgqr9xsCmHv4S1wn/8FwwtoWvJ/gBHe8W+kR9m9ilp509gAe6V+1eSCZUOq+1OLUalbSsCdbjyEYQ8sP+m+oFq1pJJb2W+w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728307048; c=relaxed/simple;
-	bh=3Y3W4TPXz+djIj0GTI/M6VGPryGPktFKGRRJOTojHzA=;
+	s=arc-20240116; t=1728341648; c=relaxed/simple;
+	bh=OPR/oeuYLYneNcWr3CEI9fDuszQ2QBtYST+cZLwRrzw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=A4v6CNdK7c24zTfuV51RWn61ZMcoEYDKEPGnFx9NruCxJnd8SSm3BoArcwuziNCxV0CK+K9IQrVVovZsOtu+Gs5h8dQNysHs89Wja5F7baLgAlrbQ1vA7gbH+LzqG6ZdS0wcGJuIMvWv/0TWPWbCmrQubkq134EWtD0b/ILhQC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=g40bGztj; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=CQiRU8VrNkET1+c4sNQbhEu+7hWxfQwHoYX5Mhp4dHbHhH/tUuzlZqlAv/FzKIPvsDzdOXBqGOWlVJ6IlYMpS/TikIoQ0SP02zbIQNkHHeVzxIJeDNSNEQ7pUQVr6PaLbFcpHdwmR2Efw+Pwk9Ndhun27/W6EItIr8841BOqA7U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=GGbjgupJ; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=HEmjGDkB; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=GGbjgupJ; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=HEmjGDkB; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="g40bGztj"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1728307045;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=TMPsygK1tkvFqK8GhAGgWkT04xvmaArXRcEeKLcN37g=;
-	b=g40bGztj2JZerKvQLeUsDjN6TJ6VY84F39mKQ2kj6cDvQDRjG0NDQaMhphrbX3JT9eGjax
-	oUmqdKk79zd3o8wa6OKnCs0f/+yM/3//gmCN20U1upDTnooJuKqWdOKbV1vtzw7kn7heGt
-	7bxbD4TLs9BJ4l5ioWWwsfK4c3xnvTY=
-Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-137-l-NqEBikP--MOFoSt_ct4g-1; Mon,
- 07 Oct 2024 09:17:20 -0400
-X-MC-Unique: l-NqEBikP--MOFoSt_ct4g-1
-Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="GGbjgupJ";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="HEmjGDkB";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="GGbjgupJ";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="HEmjGDkB"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id F278019560BF;
-	Mon,  7 Oct 2024 13:17:18 +0000 (UTC)
-Received: from bfoster (unknown [10.22.32.133])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E79DA1955F54;
-	Mon,  7 Oct 2024 13:17:17 +0000 (UTC)
-Date: Mon, 7 Oct 2024 09:18:33 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] fsstress: add support for FALLOC_FL_UNSHARE_RANGE
-Message-ID: <ZwPfqadLFFGGcamE@bfoster>
-References: <172780126017.3586479.18209378224774919872.stgit@frogsfrogsfrogs>
- <20241003213714.GH21840@frogsfrogsfrogs>
+	by smtp-out2.suse.de (Postfix) with ESMTPS id D277A1F80F;
+	Mon,  7 Oct 2024 22:53:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1728341638;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rcZAVGEIqtnVqf1ivflEos2FtMzfvnMQBzpNwOaRycs=;
+	b=GGbjgupJwibybKnHgFtrbFTlllukRe7j4/oB7N3CP2u1MezMWT6GjUOhEk0+dKdnr/gK6/
+	U1QBSKQhQEEIL3rPKOykTqO7bsGDob6CI7QwkgytYRHCBasdCuL8k+ny9QifU989nBQ3zd
+	FY8BcPlkAOhT/kgb61HSIcsR9rvrCW0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1728341638;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rcZAVGEIqtnVqf1ivflEos2FtMzfvnMQBzpNwOaRycs=;
+	b=HEmjGDkBBS6UueDuzALocJg2sT8MVoKkwh9bw3doOs6bGHpxeoatbpAKlfuYeCykbHOnf+
+	8VI1anvoN+y7uICQ==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1728341638;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rcZAVGEIqtnVqf1ivflEos2FtMzfvnMQBzpNwOaRycs=;
+	b=GGbjgupJwibybKnHgFtrbFTlllukRe7j4/oB7N3CP2u1MezMWT6GjUOhEk0+dKdnr/gK6/
+	U1QBSKQhQEEIL3rPKOykTqO7bsGDob6CI7QwkgytYRHCBasdCuL8k+ny9QifU989nBQ3zd
+	FY8BcPlkAOhT/kgb61HSIcsR9rvrCW0=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1728341638;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rcZAVGEIqtnVqf1ivflEos2FtMzfvnMQBzpNwOaRycs=;
+	b=HEmjGDkBBS6UueDuzALocJg2sT8MVoKkwh9bw3doOs6bGHpxeoatbpAKlfuYeCykbHOnf+
+	8VI1anvoN+y7uICQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id ABFFF132BD;
+	Mon,  7 Oct 2024 22:53:58 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id CYWWKIZmBGdCDAAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Mon, 07 Oct 2024 22:53:58 +0000
+Date: Tue, 8 Oct 2024 00:53:53 +0200
+From: David Sterba <dsterba@suse.cz>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] btrfs/322: add git commit ID
+Message-ID: <20241007225353.GA2833@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <2126c43fff7fc7b421c3ed692f1eabbf10d8e534.1728302503.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -56,77 +88,39 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241003213714.GH21840@frogsfrogsfrogs>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
+In-Reply-To: <2126c43fff7fc7b421c3ed692f1eabbf10d8e534.1728302503.git.fdmanana@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Score: -4.00
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.20)[-0.985];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_TLS_ALL(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_THREE(0.00)[4];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email];
+	RCVD_COUNT_TWO(0.00)[2];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[]
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-On Thu, Oct 03, 2024 at 02:37:14PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Oct 07, 2024 at 01:02:16PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Teach fsstress to try to unshare file blocks on filesystems, seeing how
-> the recent addition to fsx has uncovered a lot of bugs.
+> The corresponding btrfs kernel patch was merged into Linus' tree and
+> included in kernel 6.12-rc2, so update the test with the commit ID.
 > 
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-LGTM. Thanks for sending this:
-
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-
->  ltp/fsstress.c |   14 ++++++++++++++
->  1 file changed, 14 insertions(+)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index b8d025d3a0..8cd45c7a85 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -139,6 +139,7 @@ typedef enum {
->  	OP_TRUNCATE,
->  	OP_UNLINK,
->  	OP_UNRESVSP,
-> +	OP_UNSHARE,
->  	OP_URING_READ,
->  	OP_URING_WRITE,
->  	OP_WRITE,
-> @@ -246,6 +247,7 @@ void	punch_f(opnum_t, long);
->  void	zero_f(opnum_t, long);
->  void	collapse_f(opnum_t, long);
->  void	insert_f(opnum_t, long);
-> +void	unshare_f(opnum_t, long);
->  void	read_f(opnum_t, long);
->  void	readlink_f(opnum_t, long);
->  void	readv_f(opnum_t, long);
-> @@ -339,6 +341,7 @@ struct opdesc	ops[OP_LAST]	= {
->  	[OP_TRUNCATE]	   = {"truncate",      truncate_f,	2, 1 },
->  	[OP_UNLINK]	   = {"unlink",	       unlink_f,	1, 1 },
->  	[OP_UNRESVSP]	   = {"unresvsp",      unresvsp_f,	1, 1 },
-> +	[OP_UNSHARE]	   = {"unshare",       unshare_f,	1, 1 },
->  	[OP_URING_READ]	   = {"uring_read",    uring_read_f,	-1, 0 },
->  	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	-1, 1 },
->  	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
-> @@ -3767,6 +3770,7 @@ struct print_flags falloc_flags [] = {
->  	{ FALLOC_FL_COLLAPSE_RANGE, "COLLAPSE_RANGE"},
->  	{ FALLOC_FL_ZERO_RANGE, "ZERO_RANGE"},
->  	{ FALLOC_FL_INSERT_RANGE, "INSERT_RANGE"},
-> +	{ FALLOC_FL_UNSHARE_RANGE, "UNSHARE_RANGE"},
->  	{ -1, NULL}
->  };
->  
-> @@ -4469,6 +4473,16 @@ insert_f(opnum_t opno, long r)
->  #endif
->  }
->  
-> +void
-> +unshare_f(opnum_t opno, long r)
-> +{
-> +#ifdef HAVE_LINUX_FALLOC_H
-> +# ifdef FALLOC_FL_UNSHARE_RANGE
-> +	do_fallocate(opno, r, FALLOC_FL_UNSHARE_RANGE);
-> +# endif
-> +#endif
-> +}
-> +
->  void
->  read_f(opnum_t opno, long r)
->  {
-> 
-
+Reviewed-by: David Sterba <dsterba@suse.com>
