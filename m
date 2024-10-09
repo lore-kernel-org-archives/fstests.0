@@ -1,38 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EB345466B;
-	Wed,  9 Oct 2024 14:46:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B244198E96
+	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 14:48:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728485205; cv=none; b=cz+ow7ZXIzQxu/3tQ46So43TCkPBQkk0tOIfL/+18uGFSFSVuknb6aF2q4mvMp0g3coxU6UrU10ArbU5j7ROIpJa0icq+LCGkpbXrRp3L/TSB3gLTYpZmfbqKKGKPZeDxvEpir3EJDxoGhtsMwZE26dUR1ltNJRXD/DyfvX9a/Y=
+	t=1728485298; cv=none; b=pZ0Lud97Jn0yjSoMT2WWqXeh+T0z02QmEveMal+eNC3IO0+AJxu7YEIs+c/zrdLmFwMRfXbB2qnVNposWaIBCLt9vdlYPOdrdDi8vdD1HcRfRfwbt4tRvE6Nt1MfmnIwrtF/x8kYLhdF7Kr2R2ySiH2vGkIRIOGjbex1+66BsLs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728485205; c=relaxed/simple;
-	bh=rZt1BDsL7XH/WgQBqMBRmA5UirvaAbx0lcp3+s2Jg20=;
+	s=arc-20240116; t=1728485298; c=relaxed/simple;
+	bh=3LR7Zw0E37PQqTnDCcR/biviKFFlpjElX5otjcm6Sk4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iY58q/LNgdcUmWkTFQFSLk/JENVqwgj06Msr39dt96SFaxDDTW8PikXuMftmrQmVOq9CRekeurkSSTdPm0+AKheWZlbkYZbRtV9BfGeZ6v7/YRDZ8ZCaFObwnzmGgwL+D71OjNyEifrK4m03ieRo/SaBsD06RS/PcWcmyPSsW+E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PQ0sYz39; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=JeDr9R8Q/HkDxjv3lYD/65bzpM/HDEC0L95BtiaJJeenh8Apu1qJ/GNsFbPQ+klk71ZGho5gv5v1GNcFBQGFW+WHt96YpUR7s6KM85KgvUqW2soLKuNJPt/3JGfRizmZ6tm4uNUiCp9jLGWi9d6FEiDURmeO0uNG1VKEI2OWj0I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Z8tkBumH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PQ0sYz39"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA742C4CEC3;
-	Wed,  9 Oct 2024 14:46:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Z8tkBumH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 412D6C4CEC5;
+	Wed,  9 Oct 2024 14:48:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728485205;
-	bh=rZt1BDsL7XH/WgQBqMBRmA5UirvaAbx0lcp3+s2Jg20=;
+	s=k20201202; t=1728485298;
+	bh=3LR7Zw0E37PQqTnDCcR/biviKFFlpjElX5otjcm6Sk4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=PQ0sYz39EhEsQpXLIPdL81I7Nr1TbHPFSqBQuC8+MqmGrc6UuzlP1s40gxPm2deWD
-	 yiEkad7/obJhbcHtFovfEwjYq52oliN4kXWqvOg2G8uKhAqZGQ4GAQXLYbtsaLHF24
-	 qhJNufFQttCvCNNbTa/FhExlK18ezUowsxOvpw8DyxKxo2mCuBuJmqCzs6jO77WWdE
-	 OEC2wBybTJDKiFvvqRan5wYhgw7bTXZF/d1/Gx61w75iHPSUMz5zWkiH0nEviTwpNN
-	 3dAm8HFk9ljw/+Z8RBjQRT16I3IQzywNiHM3cNXtpqRH14ySCQijAqAT/J0Ocm3O4E
-	 /eYidywDHXfcg==
-Date: Wed, 9 Oct 2024 07:46:44 -0700
+	b=Z8tkBumH+wgHjjCuSic2kdzAJOVzM96haT4lVBFnliO3gklJPFC6y5kZM4HfylCog
+	 jOvGMnMW8JWX5l0oz1/jPI6t+5QD1W8hYC9mgw2QQgRjKOzTsF7aQvY7kF01PoosSP
+	 xG4owgaG1JKbWvG6zFJd7L6UQH7ycgCvFdRgAoiR2CerU/a09fsZIUbbH+8kkcWAHg
+	 ZxCOQ8cvokHyx5WBh+5CHYZhQ2vJH5uJZItRBQvBxq0blY8ZQ9jCbDwwlkCOqpdgyI
+	 LCr4WEkz4VmhDUHStrSOva3Mf/6EIQ4J0C4npfnv//r5OMjaPkuILNlFaCEUsOrABB
+	 BaHph3N3ebowA==
+Date: Wed, 9 Oct 2024 07:48:17 -0700
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: An Long <lan@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] generic/746: install two necessary files
-Message-ID: <20241009144644.GK21840@frogsfrogsfrogs>
-References: <9d7ef6a9de1cdd2bbb6d91a407905254c4784c68.camel@suse.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/694: sync before sampling i_blocks
+Message-ID: <20241009144817.GL21840@frogsfrogsfrogs>
+References: <20241008071209.160188-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -41,41 +41,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <9d7ef6a9de1cdd2bbb6d91a407905254c4784c68.camel@suse.com>
+In-Reply-To: <20241008071209.160188-1-hch@lst.de>
 
-On Wed, Oct 09, 2024 at 04:45:37PM +0800, An Long wrote:
-> parse-dev-tree.awk and parse-extent-tree.awk are used by generic/746.
-> We need to make sure them are installed, otherwise generic/746 will
-> have problems if fstests is installed via "make install".
+On Tue, Oct 08, 2024 at 09:12:09AM +0200, Christoph Hellwig wrote:
+> Without a sync there might still be temporary blocks in i_blocks like
+> indirect block reservations or additional blocks reserved for out of
+> place writes.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->  src/Makefile | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/generic/694 | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/src/Makefile b/src/Makefile
-> index 3097c29e..a0396332 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -38,7 +38,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize
-> preallo_rw_pattern_reader \
-> 
->  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
->               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> -             soak_duration.awk
-> +             soak_duration.awk parse-dev-tree.awk parse-extent-
-> tree.awk
+> diff --git a/tests/generic/694 b/tests/generic/694
+> index 02253ef75..b6bc8a75f 100755
+> --- a/tests/generic/694
+> +++ b/tests/generic/694
+> @@ -37,6 +37,10 @@ if [ $? -ne 0 ]; then
+>  	echo "Could not create 4G test file"
+>  fi
+>  
+> +# make sure indirect block reservations and other temporary block reservations
+> +# are release before sampling i_blocks
 
-^^ I think this is a broken line wrapping here, but otherwise the change
-seems sensible.
+Nit: '...are released before...'
 
-With that fixed,
-Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> +sync
+
+Should this be more targeted since we only care about junk_file's
+i_blocks, not flushing everything in the system. e.g.
+
+sync $junk_file
 
 --D
 
-> 
->  SUBDIRS = log-writes perf
-> 
+> +
+>  iblocks=`stat -c '%b' $junk_file`
+>  
+>  _test_cycle_mount
 > -- 
-> 2.43.0
+> 2.45.2
 > 
 > 
