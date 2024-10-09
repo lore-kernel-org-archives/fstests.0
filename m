@@ -1,129 +1,96 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f50.google.com (mail-wr1-f50.google.com [209.85.221.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65CBE1DF999
-	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 15:13:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EAD81E5729
+	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 15:56:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728486824; cv=none; b=PungsOvN7zHT5RbSxPVFtsr9eqpIthexYijaWzGNhTXbxI7Y4d8uaOFjcsjiZhoK3kvQMBe6g0/lwmQLmVHX0ykcC6oPlWdit3vyZ8LvOQVhAvHN9GgK3Z6JH/KIp5XalLrQrg127npyLDNx30xya/axD4dOeB0bxi6UdwFHGeo=
+	t=1728489377; cv=none; b=sU+b+6rjmKXF/m2oBpfS4ECSAHCvVzAf6/WcqITAASQA6Yb4Is25BznlqyQwGkG8ycA4UnJHykYpU1UGRr2oGDIo/7V9TQ2aYZGTZ8LjbWCWfu0bz8ko/PpPGE5T3Hs0b9E8M3jApoaopPEDW/VpdxwoLYEwqw0yyZFLlDZ2/Qw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728486824; c=relaxed/simple;
-	bh=HGSYIhTq+9Dhgtng1mFELiXoEplslp0WsiRxNZknf1A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uLd5Rn0w+TqGTs+pI/XZ6smGcf1uDH559t+v51hXk6kDrFhX2LfrMQHYV7gHrSCMJiIsm7qhvhWrRdz1qNNImKTDoBRJKpy/YMJa60vQLbLvwNuAK+eZrPWLtOvaBXTf52sGHGEAWg26TX+u2k06XxDIEfj7qWL7ZbAm4v6fyTA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YXB+8RJ9; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1728489377; c=relaxed/simple;
+	bh=O7csKkyAUtW73EmBoE0yxykwnLZJ8NxHoBzPx8rkQxo=;
+	h=Message-ID:Subject:From:To:Cc:Date:Content-Type:MIME-Version; b=Iw95lw7lgPPriI/gf3BtnRQHLn0UuVIfmghprwY+/qhkgRqzdVjHNgpPnyW+FPd4mvHrWDzF0Ou012DSiG70Cs1rXi3ayhou0uC93NOV/e27paXYv5gB2oJhMLeXOiIuVpCAdAtdX5d0n5DlZKFrQrfOCocGee3Ovy9FNYnH8Hk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=e7NvO40G; arc=none smtp.client-ip=209.85.221.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YXB+8RJ9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1728486822;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=c1oIOYnBaK7+WCGWo1vzRwaiwxVi0iBNUdJsU3Hiu90=;
-	b=YXB+8RJ9z0tmi/LGifYabTU9nu1b4a1NK80P3T6+nTWp2bOsKhIe26bF3wXNRrKDnHgMRW
-	Pdx4eCTxhOmxbrlxu8L2SCaJmxbghYvxSnv+0YEOkN6+JTbxr5rs6O02r8vroYk4T0RYEM
-	PoQzuCq/HfFKJKj8PnbmjuX/5I5o80g=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-16-lI2BqmNrOrK-0nt0L5AdNQ-1; Wed,
- 09 Oct 2024 11:13:38 -0400
-X-MC-Unique: lI2BqmNrOrK-0nt0L5AdNQ-1
-Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 58E611955F43;
-	Wed,  9 Oct 2024 15:13:35 +0000 (UTC)
-Received: from bfoster (unknown [10.22.32.133])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3CBAB195607C;
-	Wed,  9 Oct 2024 15:13:34 +0000 (UTC)
-Date: Wed, 9 Oct 2024 11:14:49 -0400
-From: Brian Foster <bfoster@redhat.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: zlang@kernel.org, djwong@kernel.org, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs: test log recovery for extent frees right after
- growfs
-Message-ID: <Zwad6T5Ip5kGtWDL@bfoster>
-References: <20240910043127.3480554-1-hch@lst.de>
- <ZuBVhszqs-fKmc9X@bfoster>
- <20240910151053.GA22643@lst.de>
- <ZuBwKQBMsuV-dp18@bfoster>
- <ZwVdtXUSwEXRpcuQ@bfoster>
- <20241009080451.GA16822@lst.de>
- <ZwZ4oviaUHI4Ed6Z@bfoster>
- <20241009124316.GB21408@lst.de>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="e7NvO40G"
+Received: by mail-wr1-f50.google.com with SMTP id ffacd0b85a97d-37d473c4bb6so169133f8f.3
+        for <fstests@vger.kernel.org>; Wed, 09 Oct 2024 08:56:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1728489373; x=1729094173; darn=vger.kernel.org;
+        h=mime-version:user-agent:content-transfer-encoding:organization
+         :autocrypt:date:cc:to:from:subject:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=xt+wLZV2LxzPNz2lSLFTi3nnfmZ6/6WPzHA17tFzTGg=;
+        b=e7NvO40GZ1Yr89GuVLN3CcSbcDntjoFB7WeSS3mk7chASQAzm8N1GJDHU+sT6uqo14
+         HhEkIoCPSNhWP9A5/0rIWu/uk/zMra2oSEoHDPiE4v3V+ngtS51n7kyfpZqzl2X87+25
+         PHrJfC1HVKy6QEzCbs6LGycM85SQDPu4F3KUAWFr+oUtOxVywweHyiShF1XQn5oAvsJG
+         V3ET/hnoi3L0Wwik0goimoJFBoH3XfnZJtqH8gPzzoIgT0A3EEMFKGX17HmiQZ64UYKt
+         tONq/jd8WR93gp7XOcFkqhUpIO+78BhfnKzk6HOEOWADRhTUqfrBVMMUD1+GPOS4sNSY
+         oilA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728489373; x=1729094173;
+        h=mime-version:user-agent:content-transfer-encoding:organization
+         :autocrypt:date:cc:to:from:subject:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=xt+wLZV2LxzPNz2lSLFTi3nnfmZ6/6WPzHA17tFzTGg=;
+        b=SYXl3E4ndz/iKFo677ilK4sOtfIDj8DO1R4Vf4etasOmIF8wybV+h/afz/ol1mzAPL
+         fZNi2msaBXwbygTbDQuUc/Y1mHcKXQPZAT/c85QmCJKGfMYLfsM7d0bgm9jU3hNP+MfR
+         FVLr+xjuqqCJ/ELKmRTFATw3C3fnX9QlFXic1ozeb8amgtFZ/nx/ZKA0QZOM1hckBzyF
+         O+Ssr8bZ0JwITmJrwHGJvNMZ5IHMRXlTNW3XnqlqcBcyL7nyO3WxdtVLyh4dPspLCWDN
+         yC7cHrTg6YGNvyXctq1QrPiBqZFFgd3ZsM5QlbBq44+a6jxnOQYIygtnk5D8+iYRCq6B
+         +WXQ==
+X-Gm-Message-State: AOJu0YxFcm7qAf4sTffh3OwjbnA9670NITUp41izgYwNnpsGjifU135f
+	K/ZLXmr/CUIpg3zFEhDUJKsrAP41RbqtFBZ1IUb0636c0upynjJT6BIpJ3y/Oj5djab/Qg+n2tl
+	OCOA=
+X-Google-Smtp-Source: AGHT+IFMDPIe8sOlhzOeHJs2mnT/k4d1TUYo6bLXOZKMhjtvVro3twHrsuOMLX9A7Hu6FXaRTQvIqg==
+X-Received: by 2002:adf:f48c:0:b0:37c:cdbf:2cc0 with SMTP id ffacd0b85a97d-37d3ab106ddmr2570843f8f.53.1728489372548;
+        Wed, 09 Oct 2024 08:56:12 -0700 (PDT)
+Received: from [10.202.80.134] ([202.127.77.110])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71df0d693dbsm7943275b3a.180.2024.10.09.08.56.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Oct 2024 08:56:12 -0700 (PDT)
+Message-ID: <878d46618e9851f7a019f675716630f9517f4e02.camel@suse.com>
+Subject: [PATCH v2] generic/746: install two necessary files
+From: An Long <lan@suse.com>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: lan@suse.com
+Date: Wed, 09 Oct 2024 23:56:16 +0800
+Autocrypt: addr=lan@suse.com; prefer-encrypt=mutual; keydata=mQENBFvqfKcBCADKdcrLxNKpkBPfxZwVu1Q3ADpyWdnXZfyQOIO+1Z/WSDeXgr70HUhk/zu81WoO5WyXMK3N1dcS4KrOdNOmDp0H4G5hR+BIkgbIJpo4ekYWVdrAMT8oJgX5EgSIeuDdn2ZJ7K0EDLX9M7969gaw2nHWgBzj/ALGFdCE8zYkZAfPrwN80M5Xl+NBvOrTMypW78WOg5NdGd3E4jjgbKreHFdc9/Bmp2XKQKhjClelfM5aThhsM9wljzWdX1frN2AoAomHKuxKJGvZf30eHoXAs/ikHM4cvoUcY/8H8VgJO3mQMYEFWJR6qSbnfdy3T9Ns/Xy5QGj/XmATwhDg3BMBwvEZABEBAAG0FkFuIExvbmcgPGxhbkBzdXNlLmNvbT6JAU4EEwEIADgWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRBmwA3KtD5SBuAwCACDifSf/raZ05H/0l2xAjZo9JFrWib391QLNbDYFi+Nm7nJ3ATse33ibLheOP0hJ07bsZo7uKNio8DIHDZ5CsTMd21ZvvJlNGT+l9BQV/OLRExCTcK9CpLcHoEI3M1niqL42QjVZPkKcjSwbTCa8mySNmIl64K0YTq1HnuWxShTHNlLBBkId9OMEnztgp9Ke4g+SxcU2+058v8ZTnM5wUp6fMsQelsfigJJfRqHbpy6Fap3XIY+1gKuNVIdyKWXovxtwd++fADyZVh/Zh5IKgp/1HyWE9g0MG6TUzJ+LV57jOrIJJbzl39HUp+5mFBI+RSHiJjoBZAQ7diUzT7+ns+0uQENBFvqfKcBCADCPC4telre7E8pAZITzcVsl1BP3PoMAaow4gh1SOO44J34GHJS7CRqpt4YfbPBEVmFZQiJEhb0GL2KH
+ qg7J8hO7J9fmpEiCe1Vv+cK8DSxygXXL0fltVkQlgOjFlzYks+tv g58qti7uykoyavLPSu7yuGvDtzIxB3lXwUnvmS0X8MTBFIdK0s4vJOu/2cDIAnYCNdypZ8H44XtYZVDdB9r4E253y35Nd1QDjJFu/8BQxQXK5sReIYl5fRtz+4TzZQPxWt3/j62RmjY5elPEBTd2q4K6reqRuIwDBXjTWjEKylx9yw47nMH7TzIrXpSWLG08+F8Cb9KhUJysBN4tJY1ABEBAAGJATYEGAEIACAWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbDAAKCRBmwA3KtD5SBlJuCACzhZDj5+zuuqYMl07AiV5BqOkGmjghybACLtHjMZDbFOmxnvt7GOfTdf7ug1YguQQI6xIssqzGvXTJVgIfTP38dOSAssrYp78VyFtcAZMiN25GxOOqYlpwhKH1PAr04Ylizz/EZlbfCQ8XCFuTziZ7HwEyjTkvs5XUYJObEhj2Sv9ebhwm3vTZv0VTb8+BpxyQuuGYYakbH94D5Ne5gAC6FaCevXdeqjSCTzV6NZ5seldc3FogQ+TB+riX4G4SA4Nq36Xt4hpAoDoZhh25KsH/9Kq65+eyYKsCnpY+N3f4SAEf5NEODmGF9eKC0K8XcjhXGcpDmnae2tUnjWnjLBXO
+Organization: SUSE QE LSG, QE 2, Beijing
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.50.3 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241009124316.GB21408@lst.de>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
 
-On Wed, Oct 09, 2024 at 02:43:16PM +0200, Christoph Hellwig wrote:
-> On Wed, Oct 09, 2024 at 08:35:46AM -0400, Brian Foster wrote:
-> > Ok, so then what happened? :) Are there outstanding patches somewhere to
-> > fix this problem? If so, I can give it a test with this.
-> 
-> Yes, "fix recovery of allocator ops after a growfs" from Sep 30.
-> 
+parse-dev-tree.awk and parse-extent-tree.awk are used by generic/746.
+We need to make sure them are installed, otherwise generic/746 will
+have problems if fstests is installed via "make install".
+---
+ src/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks. This seems to fix the unmountable fs problem, so I'd guess it's
-reproducing something related.
+diff --git a/src/Makefile b/src/Makefile
+index 3097c29e..a0396332 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -38,7 +38,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preal=
+lo_rw_pattern_reader \
 
-The test still fails occasionally with a trans abort and I see some
-bnobt/cntbt corruption messages like the one appended below, but I'll
-leave to you to decide whether this is a regression or preexisting
-problem.
+ EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+              btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+-             soak_duration.awk
++             soak_duration.awk parse-dev-tree.awk parse-extent-tree.awk
 
-I probably won't get through it today, but I'll try to take a closer
-look at the patches soon..
+ SUBDIRS =3D log-writes perf
 
-Brian
-
- ...
- XFS (vdb2): cntbt record corruption in AG 8 detected at xfs_alloc_check_irec+0xfa/0x160 [xfs]!
- XFS (vdb2): start block 0xa block count 0x1f36
- XFS (vdb2): Internal error xfs_trans_cancel at line 872 of file fs/xfs/xfs_trans.c.  Caller xfs_symlink+0x5a6/0xbd0 [xfs]
- CPU: 5 UID: 0 PID: 8625 Comm: fsstress Tainted: G            E      6.12.0-rc2+ #251
- Tainted: [E]=UNSIGNED_MODULE
- Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.16.3-1.fc39 04/01/2014
- Call Trace: 
-  <TASK>
-  dump_stack_lvl+0x8d/0xb0
-  xfs_trans_cancel+0x3ca/0x530 [xfs] 
-  xfs_symlink+0x5a6/0xbd0 [xfs]
-  ? __pfx_xfs_symlink+0x10/0x10 [xfs]
-  ? avc_has_perm+0x77/0x110
-  ? lock_is_held_type+0xcd/0x120
-  ? __pfx_avc_has_perm+0x10/0x10
-  ? avc_has_perm_noaudit+0x3a/0x280
-  ? may_create+0x26a/0x2e0
-  xfs_vn_symlink+0x144/0x390 [xfs]
-  ? __pfx_selinux_inode_permission+0x10/0x10
-  ? __pfx_xfs_vn_symlink+0x10/0x10 [xfs]
-  vfs_symlink+0x33e/0x580 
-  do_symlinkat+0x1cf/0x250
-  ? __pfx_do_symlinkat+0x10/0x10
-  ? getname_flags.part.0+0xae/0x490
-  __x64_sys_symlink+0x71/0x90
-  do_syscall_64+0x93/0x180
-  ? do_syscall_64+0x9f/0x180
-  entry_SYSCALL_64_after_hwframe+0x76/0x7e 
- RIP: 0033:0x7fcb692378eb 
- Code: 8b 0d 49 f5 0c 00 f7 d8 64 89 01 b9 ff ff ff ff eb d3 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 00 f3 0f 1e fa b8 58 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 05 c3 0f 1f 40 00 48 8b 15 11 f5 0c 00 f7 d8
- RSP: 002b:00007ffc547e52e8 EFLAGS: 00000206 ORIG_RAX: 0000000000000058
- RAX: ffffffffffffffda RBX: 000000003804a200 RCX: 00007fcb692378eb
- RDX: 0000000000000000 RSI: 0000000038049200 RDI: 000000003804a200
- RBP: 0000000038049200 R08: 000000003804a440 R09: 00007fcb69307b20
- R10: 0000000000000270 R11: 0000000000000206 R12: 000000003804a200
- R13: 00007ffc547e5450 R14: 0000000078ba5238 R15: 00007fcb6912c6c8
-
+--=20
+2.43.0
 
