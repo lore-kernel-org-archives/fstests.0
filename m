@@ -1,121 +1,75 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 885361E3DE5
-	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 15:57:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9B751DEFCE;
+	Wed,  9 Oct 2024 16:38:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728489438; cv=none; b=gmvftD5nxM4qyQl+xzCjMNEdM+k0llhEZZQ7XJMAEHHoTd8sc+EOO2ayU2hKUMoXUGocmgcO4YNfQOl91sntuJYoyfHqSUThd5E6pCk1I58dS6TrAeo821Jbhy5jwiReq0RmcKyJv7G/Y/AF12ArsZODctLlJOqidlemk9r5G2g=
+	t=1728491881; cv=none; b=PHbOCJnZAI/O67om06ho74R+svbkiagmx6j7kmhZLWjytG0yxEVkwKPgVslu3goGCYpbT2T8sY7G0RcYWlahy20J05IeVOPJj2lnFKD/Jo2X8zhJZ0FkYRUrRF1O/wHWIi8T0bD+PhWFH24e04sqzBXMAJpB1HBvdkasyg1KUsA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728489438; c=relaxed/simple;
-	bh=hXjO4Ng4nPV741mslJ80xb5yHWbLk8sBB60pHqc/scw=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=EzoiCqGDe3nlOuQ5/sNOAIjbTQcFBRLv3ZqUoolY0R5hUogkZdkFjZGgwtO+WlfP+NV4LM8KjIv7iG22lGXTXO+d8IRD4P0XMg0nWZQuRElA2pdRqt/waJDEBK7828V4TXIlK8YYIPctNyezg9ayhaADhJejSPsB+WWWpGGXmhU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=CwY9DfNA; arc=none smtp.client-ip=209.85.208.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1728491881; c=relaxed/simple;
+	bh=NjXrBYIKJI3h+TXV1jZ1SdAD4cZgTQYlT3u4UbmIRSA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=tSBdh6upxhXw8w1ngQaENX9VCFUqCTs23qZV9sQaVePE+vH2gs8yrsI2xVgwOQRk7gpEr5c1FKamBNJvV60L0z7jSEab0d+QsY0f836iRWXv9dqfAE2csSGufWRHF7gfSA+pQgOUA8XA1ZO3Rh3/cQWZ5d8oC8JfOeVTJDj+vLo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iNYkArCa; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="CwY9DfNA"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-2fabd2c4ac0so77924681fa.1
-        for <fstests@vger.kernel.org>; Wed, 09 Oct 2024 08:57:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1728489435; x=1729094235; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=hXjO4Ng4nPV741mslJ80xb5yHWbLk8sBB60pHqc/scw=;
-        b=CwY9DfNAmxKwaAbH0lEBvx4dzeaeEKv0+7HStEn76+47fe+CDwrOMYIq1CfldwE/kC
-         GuiBUUsSbY7eWQpVsxrCUS/JwxiFKW98cOXtbXpM4mnMthA0HsTQToeDZyMNbsacoSki
-         x9PeI24QgGsISTw9f0Q8PSYQT/f+wlFRfn/vz7nMZkxYDXhvhPi4OVcvSxbAAa6z/dcu
-         H+bZ2M1SmQwhfxNlhVAu/kIa6HOoLxJIQVLtcr1pUmck761qHtsxIgKv6E96VJ8G7a8e
-         Ag2kKgSJFqGdemVYS/q2+N8kbVVo2+YCl9srkxKlIJCXmYuMaE4/+lZC+75hUYxU6A/d
-         +pnA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728489435; x=1729094235;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=hXjO4Ng4nPV741mslJ80xb5yHWbLk8sBB60pHqc/scw=;
-        b=U2JknBzImaRUQEVJB522XfzZp71UCy08vmzTnwaIhLc//nyyjBbIA0E4rFD23PZN3p
-         5aakf2QjIy+/BtuyLLnIWBfqZDO/rTLTPnHLn1vscPUGW5mgY9v0XLf96zL1Qi3BaI4l
-         kqjO7GmzJIp3u0Qk6b0ur+xAnEGfbzBZxxbeUfx8b6Y9fOPPZiPRBE9hKmoebUzzREqn
-         ge7vj50SSjBWtoj7aM7uzjhNEjJRcBwT5z5zTqGIOwf2t/KHDwG7JnYslH9haV+nCIE4
-         x3tfBOWjn0WKk26vSCr/MsDymfO6TBOJ34UGJbaotddpnKGP/Ga4SVYmoDYrUPOk2Nat
-         QvyA==
-X-Gm-Message-State: AOJu0Yxb+G8Ed19YSd3Zw9bMJ9IvBguJm3UaXfCoZkQoP1n0bHTR5ktP
-	RnKvJqPW5IJtQhDB8i2/iPSgvmwa92iEJxbPqjKMM+C8s1YU1qs8yyMYQU2DaI4=
-X-Google-Smtp-Source: AGHT+IGXjJcYeckvcavAH4ijm92H0J3akZe0hJ/el/RKL3nkizP1yzl1+xCbwWJebbIfPgJaSZ25vA==
-X-Received: by 2002:a2e:a585:0:b0:2f1:a30c:cd15 with SMTP id 38308e7fff4ca-2fb187f44famr18885711fa.36.1728489434626;
-        Wed, 09 Oct 2024 08:57:14 -0700 (PDT)
-Received: from [10.202.80.134] ([202.127.77.110])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20c1396d995sm72515175ad.230.2024.10.09.08.57.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Oct 2024 08:57:12 -0700 (PDT)
-Message-ID: <8d56f1b4eedbeb8891f83f916c216858b779db00.camel@suse.com>
-Subject: Re: [PATCH] generic/746: install two necessary files
-From: An Long <lan@suse.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iNYkArCa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41475C4CEC3;
+	Wed,  9 Oct 2024 16:38:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728491881;
+	bh=NjXrBYIKJI3h+TXV1jZ1SdAD4cZgTQYlT3u4UbmIRSA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=iNYkArCaDf6FzTW+vdsKEqaMZmy/flVccmKxyi6x5Q98dX1lYRZgqZ6Ot0wl2g60Q
+	 vLwJpVDFHBYZqbMb3eCSpOszi6whwg1xLLaGkRt7ZVptOqn51cBWxZLLKoGCz7/Vy/
+	 RTUQlupSl7uHDThNTU556ag1J3TfXohzhtcW36LSfTnQKwXygLCmAuQwIKiwVHmFXN
+	 oyN22MwUUTSsLGCjOPsQl8fVHTTFqesXO5EGVnfV73Xbs7X/R4hK7DjvfQKBHeBJve
+	 WlySlEycI9lKbc/h8iryk8Yn4fzr2SnFnVGu5PY6C7fUs2th/tSKsTpQJvnDNUKuTK
+	 Xln81rP4FgXcw==
+Date: Wed, 9 Oct 2024 09:38:00 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: An Long <lan@suse.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Date: Wed, 09 Oct 2024 23:57:17 +0800
-In-Reply-To: <20241009144644.GK21840@frogsfrogsfrogs>
-References: <9d7ef6a9de1cdd2bbb6d91a407905254c4784c68.camel@suse.com>
-	 <20241009144644.GK21840@frogsfrogsfrogs>
-Autocrypt: addr=lan@suse.com; prefer-encrypt=mutual; keydata=mQENBFvqfKcBCADKdcrLxNKpkBPfxZwVu1Q3ADpyWdnXZfyQOIO+1Z/WSDeXgr70HUhk/zu81WoO5WyXMK3N1dcS4KrOdNOmDp0H4G5hR+BIkgbIJpo4ekYWVdrAMT8oJgX5EgSIeuDdn2ZJ7K0EDLX9M7969gaw2nHWgBzj/ALGFdCE8zYkZAfPrwN80M5Xl+NBvOrTMypW78WOg5NdGd3E4jjgbKreHFdc9/Bmp2XKQKhjClelfM5aThhsM9wljzWdX1frN2AoAomHKuxKJGvZf30eHoXAs/ikHM4cvoUcY/8H8VgJO3mQMYEFWJR6qSbnfdy3T9Ns/Xy5QGj/XmATwhDg3BMBwvEZABEBAAG0FkFuIExvbmcgPGxhbkBzdXNlLmNvbT6JAU4EEwEIADgWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRBmwA3KtD5SBuAwCACDifSf/raZ05H/0l2xAjZo9JFrWib391QLNbDYFi+Nm7nJ3ATse33ibLheOP0hJ07bsZo7uKNio8DIHDZ5CsTMd21ZvvJlNGT+l9BQV/OLRExCTcK9CpLcHoEI3M1niqL42QjVZPkKcjSwbTCa8mySNmIl64K0YTq1HnuWxShTHNlLBBkId9OMEnztgp9Ke4g+SxcU2+058v8ZTnM5wUp6fMsQelsfigJJfRqHbpy6Fap3XIY+1gKuNVIdyKWXovxtwd++fADyZVh/Zh5IKgp/1HyWE9g0MG6TUzJ+LV57jOrIJJbzl39HUp+5mFBI+RSHiJjoBZAQ7diUzT7+ns+0uQENBFvqfKcBCADCPC4telre7E8pAZITzcVsl1BP3PoMAaow4gh1SOO44J34GHJS7CRqpt4YfbPBEVmFZQiJEhb0GL2KH
- qg7J8hO7J9fmpEiCe1Vv+cK8DSxygXXL0fltVkQlgOjFlzYks+tv g58qti7uykoyavLPSu7yuGvDtzIxB3lXwUnvmS0X8MTBFIdK0s4vJOu/2cDIAnYCNdypZ8H44XtYZVDdB9r4E253y35Nd1QDjJFu/8BQxQXK5sReIYl5fRtz+4TzZQPxWt3/j62RmjY5elPEBTd2q4K6reqRuIwDBXjTWjEKylx9yw47nMH7TzIrXpSWLG08+F8Cb9KhUJysBN4tJY1ABEBAAGJATYEGAEIACAWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbDAAKCRBmwA3KtD5SBlJuCACzhZDj5+zuuqYMl07AiV5BqOkGmjghybACLtHjMZDbFOmxnvt7GOfTdf7ug1YguQQI6xIssqzGvXTJVgIfTP38dOSAssrYp78VyFtcAZMiN25GxOOqYlpwhKH1PAr04Ylizz/EZlbfCQ8XCFuTziZ7HwEyjTkvs5XUYJObEhj2Sv9ebhwm3vTZv0VTb8+BpxyQuuGYYakbH94D5Ne5gAC6FaCevXdeqjSCTzV6NZ5seldc3FogQ+TB+riX4G4SA4Nq36Xt4hpAoDoZhh25KsH/9Kq65+eyYKsCnpY+N3f4SAEf5NEODmGF9eKC0K8XcjhXGcpDmnae2tUnjWnjLBXO
-Organization: SUSE QE LSG, QE 2, Beijing
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.50.3 
+Subject: Re: [PATCH v2] generic/746: install two necessary files
+Message-ID: <20241009163800.GM21840@frogsfrogsfrogs>
+References: <878d46618e9851f7a019f675716630f9517f4e02.camel@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <878d46618e9851f7a019f675716630f9517f4e02.camel@suse.com>
 
-On Wed, 2024-10-09 at 07:46 -0700, Darrick J. Wong wrote:
-> On Wed, Oct 09, 2024 at 04:45:37PM +0800, An Long wrote:
-> > parse-dev-tree.awk and parse-extent-tree.awk are used by
-> > generic/746.
-> > We need to make sure them are installed, otherwise generic/746 will
-> > have problems if fstests is installed via "make install".
-> > ---
-> > =C2=A0src/Makefile | 2 +-
-> > =C2=A01 file changed, 1 insertion(+), 1 deletion(-)
-> >=20
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 3097c29e..a0396332 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -38,7 +38,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize
-> > preallo_rw_pattern_reader \
-> >=20
-> > =C2=A0EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread=
-.sh
-> > \
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 soak_duration.awk
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 soak_duration.awk parse-dev-tree.awk parse-extent-
-> > tree.awk
->=20
-> ^^ I think this is a broken line wrapping here, but otherwise the
-> change
-> seems sensible.
->=20
-> With that fixed,
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-Thanks your comments! I've sent a v2 patch without wrapping.
->=20
-> --D
->=20
-> >=20
-> > =C2=A0SUBDIRS =3D log-writes perf
-> >=20
-> > --=20
-> > 2.43.0
-> >=20
-> >=20
+On Wed, Oct 09, 2024 at 11:56:16PM +0800, An Long wrote:
+> parse-dev-tree.awk and parse-extent-tree.awk are used by generic/746.
+> We need to make sure them are installed, otherwise generic/746 will
+> have problems if fstests is installed via "make install".
+> ---
 
+Needs a SoB tag.
+
+--D
+
+>  src/Makefile | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/src/Makefile b/src/Makefile
+> index 3097c29e..a0396332 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -38,7 +38,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> 
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> -             soak_duration.awk
+> +             soak_duration.awk parse-dev-tree.awk parse-extent-tree.awk
+> 
+>  SUBDIRS = log-writes perf
+> 
+> -- 
+> 2.43.0
+> 
+> 
