@@ -1,189 +1,98 @@
-Received: from mail-lj1-f172.google.com (mail-lj1-f172.google.com [209.85.208.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDA6018C91A
-	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 09:28:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AEF111E4AE
+	for <fstests@vger.kernel.org>; Wed,  9 Oct 2024 12:34:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728466109; cv=none; b=oy3naA7rMy3psH+mujP/r0RpBEaak1rdaZa1PD9Yi1xkV8y7geVSjgfSF2eCRT+l1SK9/PUl+8H2rAlhWSa5FlJBTv9EPA7sG+mGI+8eNCHwOI4kXqRcKNgJtqd2CMKPUI1qew4kMpOs5QZF42KXRyvvfy5Dhp+jLBKT3QedFIo=
+	t=1728477279; cv=none; b=k8xuykXKzxaZGNM/yDfpCQTabAWOvF573+w3ErjQh/RV9ZyMJlJiaHjP6zhuFutuL3kFUmQVNQGuilpn4sEw6Ev0AtSvdZ16w2nZkMadoi66GOwZbQ69uzFtSjWJTyxjeN08A0hOsENYf/5C8Jd+8avVvwOxO9lZgIFq/b0qvp8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728466109; c=relaxed/simple;
-	bh=/Xb7WtlFkg2nkhNUkPc5fsXZZJQYk0/rbC+gfbX1oao=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:References:
-	 In-Reply-To:Content-Type; b=mOSh+1kLpxAW8NvJh82jz5kh5A1wSmThUTWRFsm8jWtQQB981OLyRmKGspLd6c7A32lneNieolkhItGDlhn/aCA9Yxl565aoFxbJGjpr2LaU3nDsw2car/cY/Lolcho9mVEIUDrmejnlIo5Cl5wi3ESZMoHbe5iMQ0vsKfgLLM4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Aa7pkk48; arc=none smtp.client-ip=209.85.208.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1728477279; c=relaxed/simple;
+	bh=xfd/6XvU46jNX3C91IYJrSPhT1V7DrSJ/+oX8J9vMZk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=JeRtpEcz2KPaVFkXUMCEKRyUfxodDdAHdt7O466rddFJh9Z5bhHA9bgdA05ZQxAuTOpEpbAOw8XvZD70uJBNYPb2Bg+5t+iadL/Ncq4oo1L0Js9hEEoD1diGessbfFWaIki1XLlozFqTbZ+mTyFEv3ncoZkIWbXo3XWtoszn0cI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M1H1txZP; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Aa7pkk48"
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2fad784e304so78879101fa.2
-        for <fstests@vger.kernel.org>; Wed, 09 Oct 2024 02:28:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1728466105; x=1729070905; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:to:from:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=EIGd9D72WaDkO+/Jsgr4eDErDlcHM9fU4v/1OvYN8lY=;
-        b=Aa7pkk487CahBVX77sEn/PZna9QOKZQtc7ompSPLEG/2hOkHsnYi6Y72rHh6kYlpKo
-         67MamYuui44UiOFTdw3j0hC8RC8EbJfs0MN9SS/T7WQGxGS+Nw+3Q8ZYNzd463BNkO5x
-         jgIXsEM2z5XATIh0kdZr6RtbCt4H/S7mpfpVlRC1prsY9xaAzfdnKbl/qNTQljlKZ/UA
-         87ogQp+rfuDZFBC9NFBcZTXt/vEERrr/I/vpXs9YC/0PGCxeiIK4SP54F/lXHUinV84N
-         S34fpgtFz2joLE9zHLivVuWsaffD/Ej28f3zVXR/8ChCcZhfYe50dRUUdhpDsfZtDw6y
-         /0rQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728466105; x=1729070905;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:to:from:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EIGd9D72WaDkO+/Jsgr4eDErDlcHM9fU4v/1OvYN8lY=;
-        b=icG2NcY7tIk16Qw+X+R6gqOsugU0aOtW3yd3EwI11dDX/xif4LbzbhNKPPTxfbTMsA
-         zlhM2t8aengduwUyyUXbC/oW5MlPn1LZrUsTqzbWVftsUT4tcobRRMYgi2gqkgfQ9IiJ
-         i1fpRLqkZBOMfjdLc7Q3tjK/KczrMrqW8f4IhKvVFj9duYySq/J0mQuoMg7JO62rHwM3
-         /3BpHlFkI2N5pL3osL/aLSUTwU/vtQew8tH3DR7nPGw+FDatRAa7bQ6VmRnbQTqp3HdO
-         m63SzTV0IzMWD+S48BcrrJZqfD+76RFTihdQvfkgk8DazgHJg7IU8/5/5RQRgZp2i/DO
-         8VHw==
-X-Forwarded-Encrypted: i=1; AJvYcCUPUiZ1Y9CiHT3QGVDS1Et/PUTaEWcZTnP4eaW/Zr8ptfFlJ3QNlpWFGQjZoK1+es/q0ZgWSDnB@vger.kernel.org
-X-Gm-Message-State: AOJu0YyI6FJJSuOyeitEHPY+7MPqaPOmzHx8hNCG/0zY2x/D2JcOl5Je
-	1JceHAl5BCkBdsMPdh83FRRjvR8Fy6VLWCkqSJygnc4JjQPCXWOq4Q/Uxcs01VCRkecBSm6sEvG
-	o
-X-Google-Smtp-Source: AGHT+IEh7xvXDf1oCWV4ojfgRfVt9p5TN1KHxC8tUor0NNKLlusU5S+v40/42UnjmMGAyXK2QI4uAQ==
-X-Received: by 2002:a2e:be2c:0:b0:2f7:a759:72a7 with SMTP id 38308e7fff4ca-2fb1873820emr13321731fa.22.1728466104532;
-        Wed, 09 Oct 2024 02:28:24 -0700 (PDT)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2e2a5ca9a48sm1140355a91.51.2024.10.09.02.28.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 09 Oct 2024 02:28:23 -0700 (PDT)
-Message-ID: <4b176046-f0f2-4b76-ae03-08c6394baa9a@suse.com>
-Date: Wed, 9 Oct 2024 19:58:19 +1030
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M1H1txZP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1728477276;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=NuzskDKWqVKq45sao37XE/sxqtCD9Hn+6SlLq9Sq8pU=;
+	b=M1H1txZPF/+0v6y/hda/mLrJiQPE8zlBpjj0lqCF5xELJKFeZndWfLyFiVJxHoGeKfY/BK
+	wKlP0aRGQmKPnyEDrs9sa7ff+KJL/0RHw5K0ca5jez3c/urvS6O8Nnc2Jp5wqICgGHPTQA
+	ySo4SuCQsowXHvT47EMfUD1dcLVuZks=
+Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-80-rxRUi-I3NFGZhTTalrJ_mQ-1; Wed,
+ 09 Oct 2024 08:34:33 -0400
+X-MC-Unique: rxRUi-I3NFGZhTTalrJ_mQ-1
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 03A1819560A2;
+	Wed,  9 Oct 2024 12:34:32 +0000 (UTC)
+Received: from bfoster (unknown [10.22.32.133])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id E5DC019560A2;
+	Wed,  9 Oct 2024 12:34:30 +0000 (UTC)
+Date: Wed, 9 Oct 2024 08:35:46 -0400
+From: Brian Foster <bfoster@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, djwong@kernel.org, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs: test log recovery for extent frees right after
+ growfs
+Message-ID: <ZwZ4oviaUHI4Ed6Z@bfoster>
+References: <20240910043127.3480554-1-hch@lst.de>
+ <ZuBVhszqs-fKmc9X@bfoster>
+ <20240910151053.GA22643@lst.de>
+ <ZuBwKQBMsuV-dp18@bfoster>
+ <ZwVdtXUSwEXRpcuQ@bfoster>
+ <20241009080451.GA16822@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: generic/563: use fs blocksize to do the writes
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
- Zorro Lang <zlang@kernel.org>
-References: <20240929235038.24497-1-wqu@suse.com>
-Content-Language: en-US
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJVBQkNOgemAAoJEMI9kfOh
- Jf6oapEH/3r/xcalNXMvyRODoprkDraOPbCnULLPNwwp4wLP0/nKXvAlhvRbDpyx1+Ht/3gW
- p+Klw+S9zBQemxu+6v5nX8zny8l7Q6nAM5InkLaD7U5OLRgJ0O1MNr/UTODIEVx3uzD2X6MR
- ECMigQxu9c3XKSELXVjTJYgRrEo8o2qb7xoInk4mlleji2rRrqBh1rS0pEexImWphJi+Xgp3
- dxRGHsNGEbJ5+9yK9Nc5r67EYG4bwm+06yVT8aQS58ZI22C/UeJpPwcsYrdABcisd7dddj4Q
- RhWiO4Iy5MTGUD7PdfIkQ40iRcQzVEL1BeidP8v8C4LVGmk4vD1wF6xTjQRKfXHOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJjTSJuBQkNOge/AAoJEMI9kfOhJf6o
- rq8H/3LJmWxL6KO2y/BgOMYDZaFWE3TtdrlIEG8YIDJzIYbNIyQ4lw61RR+0P4APKstsu5VJ
- 9E3WR7vfxSiOmHCRIWPi32xwbkD5TwaA5m2uVg6xjb5wbdHm+OhdSBcw/fsg19aHQpsmh1/Q
- bjzGi56yfTxxt9R2WmFIxe6MIDzLlNw3JG42/ark2LOXywqFRnOHgFqxygoMKEG7OcGy5wJM
- AavA+Abj+6XoedYTwOKkwq+RX2hvXElLZbhYlE+npB1WsFYn1wJ22lHoZsuJCLba5lehI+//
- ShSsZT5Tlfgi92e9P7y+I/OzMvnBezAll+p/Ly2YczznKM5tV0gboCWeusM=
-In-Reply-To: <20240929235038.24497-1-wqu@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241009080451.GA16822@lst.de>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Hi Zorro,
+On Wed, Oct 09, 2024 at 10:04:51AM +0200, Christoph Hellwig wrote:
+> On Tue, Oct 08, 2024 at 12:28:37PM -0400, Brian Foster wrote:
+> > FWIW, here's a quick hack at such a test. This is essentially a copy of
+> > xfs/104, tweaked to remove some of the output noise and whatnot, and
+> > hacked in some bits from generic/388 to do a shutdown and mount cycle
+> > per iteration.
+> > 
+> > I'm not sure if this reproduces your original problem, but this blows up
+> > pretty quickly on 6.12.0-rc2. I see a stream of warnings that start like
+> > this (buffer readahead path via log recovery):
+> > 
+> > [ 2807.764283] XFS (vdb2): xfs_buf_map_verify: daddr 0x3e803 out of range, EOFS 0x3e800
+> > [ 2807.768094] ------------[ cut here ]------------
+> > [ 2807.770629] WARNING: CPU: 0 PID: 28386 at fs/xfs/xfs_buf.c:553 xfs_buf_get_map+0x184e/0x2670 [xfs]
+> > 
+> > ... and then end up with an unrecoverable/unmountable fs. From the title
+> > it sounds like this may be a different issue though.. hm?
+> 
+> That's at least the same initial message I hit.
+> 
+> 
 
-Mind to merge this fix?
+Ok, so then what happened? :) Are there outstanding patches somewhere to
+fix this problem? If so, I can give it a test with this.
 
-It got 2 reviews and at least one verification on 64K page systems.
+I'm also trying to figure out if the stress level of this particular
+test should be turned up a notch or three, but I can't really dig into
+that until this initial variant is passing reliably.
 
-Thanks,
-Qu
-
-在 2024/9/30 09:20, Qu Wenruo 写道:
-> [FALSE ALERTS]
-> If the system has a page size larger than 4K, and the fs block size
-> matches the page size, test case generic/563 will fail:
-> 
->      --- tests/generic/563.out	2024-04-25 18:13:45.178550333 +0930
->      +++ /home/adam/xfstests-dev/results//generic/563.out.bad	2024-09-30 09:09:16.155312379 +0930
->      @@ -3,7 +3,8 @@
->       read is in range
->       write is in range
->       write -> read/write
->      -read is in range
->      +read has value of 8388608
->      +read is NOT in range -33792 .. 33792
->       write is in range
->      ...
-> 
-> Both Ext4 and btrfs fail with 64K block size and 64K page size
-> 
-> [CAUSE]
-> The test case writes the 8MiB file using the default block size xfs_io
-> pwrite, which is 4KiB.
-> 
-> Since the fs block size is 64K, such 4KiB write is unaligned inside a
-> block, causing the fs to read out the full page.
-> 
-> Thus the pwrite will cause the fs to read out every page, resulting the
-> above 8MiB+ read value.
-> 
-> [FIX]
-> Fix the test case by using the fs block size to avoid such unaligned
-> buffered write.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->   tests/generic/563 | 10 ++++++----
->   1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/tests/generic/563 b/tests/generic/563
-> index 0a8129a6..e8db8acf 100755
-> --- a/tests/generic/563
-> +++ b/tests/generic/563
-> @@ -94,6 +94,8 @@ sminor=$((0x`stat -L -c %T $LOOP_DEV`))
->   _mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
->   _mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
->   
-> +blksize=$(_get_block_size "$SCRATCH_MNT")
-> +
->   drop_io_cgroup=
->   grep -q -w io $cgdir/cgroup.subtree_control || drop_io_cgroup=1
->   
-> @@ -103,7 +105,7 @@ echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
->   echo "read/write"
->   reset
->   switch_cg $cgdir/$seq-cg
-> -$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" -c fsync \
-> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blksize 0 $iosize" -c fsync \
->   	$SCRATCH_MNT/file >> $seqres.full 2>&1
->   switch_cg $cgdir
->   $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
-> @@ -114,9 +116,9 @@ check_cg $cgdir/$seq-cg $iosize $iosize 5% 5%
->   echo "write -> read/write"
->   reset
->   switch_cg $cgdir/$seq-cg
-> -$XFS_IO_PROG -c "pwrite 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> +$XFS_IO_PROG -c "pwrite -b $blksize 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
->   switch_cg $cgdir/$seq-cg-2
-> -$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
-> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blksize 0 $iosize" $SCRATCH_MNT/file \
->   	>> $seqres.full 2>&1
->   switch_cg $cgdir
->   $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
-> @@ -134,7 +136,7 @@ reset
->   switch_cg $cgdir/$seq-cg
->   $XFS_IO_PROG -c "pread 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
->   switch_cg $cgdir/$seq-cg-2
-> -$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
-> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite -b $blksize 0 $iosize" $SCRATCH_MNT/file \
->   	>> $seqres.full 2>&1
->   switch_cg $cgdir
->   $XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+Brian
 
