@@ -1,119 +1,109 @@
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 629101925A2
-	for <fstests@vger.kernel.org>; Thu, 10 Oct 2024 03:46:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB39D2AEFC
+	for <fstests@vger.kernel.org>; Thu, 10 Oct 2024 06:13:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728532013; cv=none; b=twYAgvauFHzcd2m/ZxLh6KfuzyjGxZuWCt6VWuoGU9/mfG5hVTmMqdMxsnHdG+I0IFypy8Hrqc8JHYkig7kW+5Kf8Wq9fDuybnQl/LNoQsUwhAhlWZkvSNwwAnSCpnDIZnCZD59XmYZQpDoJYf5j7MHDKKmKSfTaG2AToJnmrKc=
+	t=1728540799; cv=none; b=Y/A2tU7C3JWwOpPEymnAwqd6l9p2dClp58XLeU+Dtkdg+8zei+Zqddd98sUfWNDP2ESeykXdcQFFsqZLl7Oq/Pk7w0GSXzMRM2LUqyvaHDzw5Op71vgsM9DdPu4cbe5EVKfecMx8gipCjsCRH/qyft0o7fRn7qldUQFGOI+hTc0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728532013; c=relaxed/simple;
-	bh=sPUjoxRMY+wUajUpCb4vMW+kK7OUObVAeyy1X54iY0g=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=bztPrAqDEVJK7XS8+DWeIt7K0tloQtnvvogZR2JO1ol7fLya3KHTzK5mkwM8vFB/LvjV0d4gDfNDIPsk0ZzEgGvuQWhp6NKAPTFfGX5tS6GYi34kNGXhirD1C85KCwMf+fEm3a/Q+HTAPfG8V4zMM20tA2Z+DmRI6nJOZe44GoA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=C/iPWe0V; arc=none smtp.client-ip=209.85.221.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1728540799; c=relaxed/simple;
+	bh=kdN71VX1KmwiFusgSPdE9mvWQy+wzpae2/ob0JYb/+4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eA17frHwQLhi99K5Bzp2hvsvJEyfHf/AVjyuWPVaTLvXq5KkEgKV0yBzFD9ZIbpcOwoSQ1K4U3bLC8bnVu6ouN7lgI9pnw54y7jS9h8E4mEJ6uFOIJkZOm/L0pRAvZhKYgKC9hnHpCN5yFsynnk9CGkzWzyBHCDQNIjDhj0LSNU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VLsFbtba; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="C/iPWe0V"
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-37d4ac91d97so174572f8f.2
-        for <fstests@vger.kernel.org>; Wed, 09 Oct 2024 20:46:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1728532010; x=1729136810; darn=vger.kernel.org;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=sPUjoxRMY+wUajUpCb4vMW+kK7OUObVAeyy1X54iY0g=;
-        b=C/iPWe0Vr/oM8HA+wp0GMqi5CzJd+G0TimHrPXMPvgbJT6fueV8dGVX4jO9uVk8k06
-         RYrYsbph+U72Qw9OujuCcec2n1JXyhcfi9nxmCH5KTa7gBhS1MEfzuYxwhqAo0cFpra4
-         bnBYlQbWZeh/SHCfYK8YfuG80rr8GjeggiwaWQlpCvZ7RePhMC5LjTkVCQbqwCGDJIVj
-         6ySDfVIkd8MARsoK9wpEk8BPnPvcsveNRkTWFkEgSpJxa3BqUA7CIsQFbmDzP3pWCUdw
-         k6e5nH90k2g8bY6XYa3OGyrVvdXvrjgMnnp1Y40BVK6D9ukWFT1rNgPMiMPn3DqwmOub
-         h6mg==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VLsFbtba"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1728540796;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=BBQ/eukrCcX8vYI9lUS12CbKcIf5iCoKyIR4iaPneok=;
+	b=VLsFbtba9cEXMDcIXQ38yDTcPrItV0u5iqpgNQUy3KV0UVSIMb0DRsrBo2PWIsB7RuBaZP
+	FZ+YF4nyuJpDqNfZElSDovUdFTsv1/RM7ptKV2wedhFkT3jL6+tjxbz6FIZdqlzQE5UYR9
+	F1PGT/ZFPqfKWukgyaY4K/XyVMomWxU=
+Received: from mail-ot1-f69.google.com (mail-ot1-f69.google.com
+ [209.85.210.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-349-qDLDVBS_Ni-8kNr_ybuerA-1; Thu, 10 Oct 2024 02:13:14 -0400
+X-MC-Unique: qDLDVBS_Ni-8kNr_ybuerA-1
+Received: by mail-ot1-f69.google.com with SMTP id 46e09a7af769-717d286349bso13909a34.0
+        for <fstests@vger.kernel.org>; Wed, 09 Oct 2024 23:13:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728532010; x=1729136810;
-        h=mime-version:user-agent:content-transfer-encoding:organization
-         :autocrypt:references:in-reply-to:date:cc:to:from:subject:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=sPUjoxRMY+wUajUpCb4vMW+kK7OUObVAeyy1X54iY0g=;
-        b=sJlqpxA5kQbZg3EYJpVteWoTErX1wx2Hlw8UzXHX5RgtL7qzy18BsHD/xLt2d6C8+j
-         +d3sbJdRB5DOK0+UULtoeMbK/O4eKP1n8aZtuXHOBeXa+A3AIxlBV5uWmcwdU7wt7fJ4
-         ttQUGCUSPc8kTfy5mHvrRplp9IY1swtZ87CcXZBX57v7YmE2AVG3T06V+ZJ+jx1rtS2Q
-         V8ILmJeF8M/a0foF4Kb5hBJxXT5rErqHjHHl9LnkOL02o9EJ3zIrA8Mr7m9WX/TedclH
-         jOUlAHiVf1uV4+4gwMCtHk4FQs/mPrKZZBJ3p6ooEPgglJHDrYT2L/1cbPPznGeUAtyH
-         e1cg==
-X-Gm-Message-State: AOJu0YyoTH/QUpwLuY4NrboNjHYEFS7mI+Mlb9WJzvvKWC8b26lGfvAk
-	iSrP90cDemPca+HSkPtObFZXZ4VtOeSRpD0/Co/HMueuFH/N7dnygnpRNJUTuiQ=
-X-Google-Smtp-Source: AGHT+IENBOsDHKaaEzHXI5ohB5APwv5P/GLZBD9ojUDZ/dsKqkYOvk2w7w//8ImK5MhLQAt9UlhthA==
-X-Received: by 2002:a05:6000:1a4f:b0:37d:397a:5a05 with SMTP id ffacd0b85a97d-37d3ab1c11bmr3422772f8f.54.1728532009674;
-        Wed, 09 Oct 2024 20:46:49 -0700 (PDT)
-Received: from [10.202.112.42] ([202.127.77.110])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71e2ab10398sm171854b3a.218.2024.10.09.20.46.47
+        d=1e100.net; s=20230601; t=1728540793; x=1729145593;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BBQ/eukrCcX8vYI9lUS12CbKcIf5iCoKyIR4iaPneok=;
+        b=XxXwH3ENqNxpjz56sMwfnXS9i+OdnhwQg50kksIRYUwEo84klxFqH/Xm9eqCS7Fwew
+         D1uGPF4dV6WgLSbwEa6DfnXMf8zLrJOji9u3WPFMMoUSNyWJ7E8AVttCUP81Jz+d5cWF
+         XNC0pqizcsVkO6lcMs4fO06Y/pKGYr7AGR4yM4KGeRdC2Ktl8cxhN3kibikYDMR6q9W3
+         clBeT0tlMgaUjdPekUi5Nc9sryTayOHw0wMkCSUTFahzj/TmjVAxuSXtQGVVGvAHbHm+
+         quNbnt5/zdmVEubwEmBKiIeqsrpf348pIXEsEhsgO7NjOBf4A6Hp/L7RbtsDJW5p57zt
+         uLKw==
+X-Gm-Message-State: AOJu0YwyhyLoFHcEzNo0PeAyeUd595vM10mcUI1WIn8pEqJ0c071jc8G
+	Cxiao80rENWYDE3HNHohzWSbBc88MgZYWI5upgBPeiUzCu4CSjzyXr0fTlcTalmqI310mXFmUKP
+	o3glgEddpnU2YA/E19RWch2nctrKs6FNBNfo6dS4TuMc35EcrYxkGu2s=
+X-Received: by 2002:a05:6830:3c8a:b0:710:fd8e:172c with SMTP id 46e09a7af769-716a41d7b24mr5464535a34.14.1728540793469;
+        Wed, 09 Oct 2024 23:13:13 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFjDrHkSgCeLsRe60sOoMeiN/ZUK2i1FNDVykHYGuFE0rRTMFjt9Qb0CWBO70ykJrx3QegJ0A==
+X-Received: by 2002:a05:6830:3c8a:b0:710:fd8e:172c with SMTP id 46e09a7af769-716a41d7b24mr5464522a34.14.1728540793181;
+        Wed, 09 Oct 2024 23:13:13 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71e2aa0c8b6sm388525b3a.92.2024.10.09.23.13.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Oct 2024 20:46:49 -0700 (PDT)
-Message-ID: <facac6fce8974ec31e8bfd0fd9d9484652fc858a.camel@suse.com>
-Subject: Re: [PATCH v2] generic/746: install two necessary files
-From: An Long <lan@suse.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Date: Thu, 10 Oct 2024 11:46:54 +0800
-In-Reply-To: <20241009163800.GM21840@frogsfrogsfrogs>
-References: <878d46618e9851f7a019f675716630f9517f4e02.camel@suse.com>
-	 <20241009163800.GM21840@frogsfrogsfrogs>
-Autocrypt: addr=lan@suse.com; prefer-encrypt=mutual; keydata=mQENBFvqfKcBCADKdcrLxNKpkBPfxZwVu1Q3ADpyWdnXZfyQOIO+1Z/WSDeXgr70HUhk/zu81WoO5WyXMK3N1dcS4KrOdNOmDp0H4G5hR+BIkgbIJpo4ekYWVdrAMT8oJgX5EgSIeuDdn2ZJ7K0EDLX9M7969gaw2nHWgBzj/ALGFdCE8zYkZAfPrwN80M5Xl+NBvOrTMypW78WOg5NdGd3E4jjgbKreHFdc9/Bmp2XKQKhjClelfM5aThhsM9wljzWdX1frN2AoAomHKuxKJGvZf30eHoXAs/ikHM4cvoUcY/8H8VgJO3mQMYEFWJR6qSbnfdy3T9Ns/Xy5QGj/XmATwhDg3BMBwvEZABEBAAG0FkFuIExvbmcgPGxhbkBzdXNlLmNvbT6JAU4EEwEIADgWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbAwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRBmwA3KtD5SBuAwCACDifSf/raZ05H/0l2xAjZo9JFrWib391QLNbDYFi+Nm7nJ3ATse33ibLheOP0hJ07bsZo7uKNio8DIHDZ5CsTMd21ZvvJlNGT+l9BQV/OLRExCTcK9CpLcHoEI3M1niqL42QjVZPkKcjSwbTCa8mySNmIl64K0YTq1HnuWxShTHNlLBBkId9OMEnztgp9Ke4g+SxcU2+058v8ZTnM5wUp6fMsQelsfigJJfRqHbpy6Fap3XIY+1gKuNVIdyKWXovxtwd++fADyZVh/Zh5IKgp/1HyWE9g0MG6TUzJ+LV57jOrIJJbzl39HUp+5mFBI+RSHiJjoBZAQ7diUzT7+ns+0uQENBFvqfKcBCADCPC4telre7E8pAZITzcVsl1BP3PoMAaow4gh1SOO44J34GHJS7CRqpt4YfbPBEVmFZQiJEhb0GL2KH
- qg7J8hO7J9fmpEiCe1Vv+cK8DSxygXXL0fltVkQlgOjFlzYks+tv g58qti7uykoyavLPSu7yuGvDtzIxB3lXwUnvmS0X8MTBFIdK0s4vJOu/2cDIAnYCNdypZ8H44XtYZVDdB9r4E253y35Nd1QDjJFu/8BQxQXK5sReIYl5fRtz+4TzZQPxWt3/j62RmjY5elPEBTd2q4K6reqRuIwDBXjTWjEKylx9yw47nMH7TzIrXpSWLG08+F8Cb9KhUJysBN4tJY1ABEBAAGJATYEGAEIACAWIQSGtWkd+xUNZVZsuhNmwA3KtD5SBgUCW+p8pwIbDAAKCRBmwA3KtD5SBlJuCACzhZDj5+zuuqYMl07AiV5BqOkGmjghybACLtHjMZDbFOmxnvt7GOfTdf7ug1YguQQI6xIssqzGvXTJVgIfTP38dOSAssrYp78VyFtcAZMiN25GxOOqYlpwhKH1PAr04Ylizz/EZlbfCQ8XCFuTziZ7HwEyjTkvs5XUYJObEhj2Sv9ebhwm3vTZv0VTb8+BpxyQuuGYYakbH94D5Ne5gAC6FaCevXdeqjSCTzV6NZ5seldc3FogQ+TB+riX4G4SA4Nq36Xt4hpAoDoZhh25KsH/9Kq65+eyYKsCnpY+N3f4SAEf5NEODmGF9eKC0K8XcjhXGcpDmnae2tUnjWnjLBXO
-Organization: SUSE QE LSG, QE 2, Beijing
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.50.3 
+        Wed, 09 Oct 2024 23:13:12 -0700 (PDT)
+Date: Thu, 10 Oct 2024 14:13:09 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: An Long <lan@suse.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v3] generic/746: install two necessary files
+Message-ID: <20241010061309.7ezjkwdrfdgzthue@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <aaf23db45854222bbcfa470b25812e42a2ab9eda.camel@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aaf23db45854222bbcfa470b25812e42a2ab9eda.camel@suse.com>
 
-On Wed, 2024-10-09 at 09:38 -0700, Darrick J. Wong wrote:
-> On Wed, Oct 09, 2024 at 11:56:16PM +0800, An Long wrote:
-> > parse-dev-tree.awk and parse-extent-tree.awk are used by
-> > generic/746.
-> > We need to make sure them are installed, otherwise generic/746 will
-> > have problems if fstests is installed via "make install".
-> > ---
->=20
-> Needs a SoB tag.
-Added. I used -S instead of -s. Sorry for mistake.
->=20
-> --D
->=20
-> > =C2=A0src/Makefile | 2 +-
-> > =C2=A01 file changed, 1 insertion(+), 1 deletion(-)
-> >=20
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 3097c29e..a0396332 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -38,7 +38,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize
-> > preallo_rw_pattern_reader \
-> >=20
-> > =C2=A0EXTRA_EXECS =3D dmerror fill2attr fill2fs fill2fs_check scaleread=
-.sh
-> > \
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0 btrfs_crc32c_forged_name.py popdir.pl popattr.py \
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 soak_duration.awk
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0 soak_duration.awk parse-dev-tree.awk parse-extent-
-> > tree.awk
-> >=20
-> > =C2=A0SUBDIRS =3D log-writes perf
-> >=20
-> > --=20
-> > 2.43.0
-> >=20
-> >=20
+On Thu, Oct 10, 2024 at 11:40:20AM +0800, An Long wrote:
+> parse-dev-tree.awk and parse-extent-tree.awk are used by generic/746.
+> We need to make sure them are installed, otherwise generic/746 will
+> have problems if fstests is installed via "make install".
+> 
+> Signed-off-by: An Long <lan@suse.com>
+> ---
 
---=20
-An Long <lan@suse.com>
-SUSE QE LSG, QE 2, Beijing
+Thanks for fixing it, most of people run fstests directly after building,
+we need to take care the install list too.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  src/Makefile | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/src/Makefile b/src/Makefile
+> index 3097c29e..a0396332 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -38,7 +38,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> 
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>               btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> -             soak_duration.awk
+> +             soak_duration.awk parse-dev-tree.awk parse-extent-tree.awk
+> 
+>  SUBDIRS = log-writes perf
+> 
+> -- 
+> 2.43.0
+> 
+> 
+
