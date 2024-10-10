@@ -1,88 +1,146 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E05E41CCB41;
-	Thu, 10 Oct 2024 15:53:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EAC71E47B2;
+	Thu, 10 Oct 2024 21:01:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728575598; cv=none; b=AibCiyFyShU1l1iMoPj/fdvuH3/chl9HYm5xq7OCwl553lZBZtOJwt4nG6E3KGQ7R22L4HRCJQ7ZPdu4UOUzO9SfmDKd6Gg5MfZkpx89YqIJV+3aqkRlp9IizB4VVjo9tgR4I4xTQ7zYmpRLkQLSOAIrIrK+g24RnRJBmzcLbVs=
+	t=1728594074; cv=none; b=EUsYh1OdSvrLTvVtvsqHlIGkpoaAwEyHoY0htwnrpYMkPWqzQj0pJoh2oCYSj0AJbsHQOTC+p3U5hA8LRrC0/KY6bwIzaDoxuBrlfI5WrbYiaM33Xw7rY83YgqgUUYUzpQJMb3rwRnnP9i8Wow0tJP97WZNkRygryAS+q+8PlC0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728575598; c=relaxed/simple;
-	bh=6Xk/hm2b3OcgM8FvDvwtDE3O6L8y5egTkuO+hbgD3PQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ncbw9tqG81lTXg0UDACQWxsBeydwwJumFVX03exMPhL/cVpHDjPfP0MLEqcB+z0Ap3poH+0UKSgvl76Ho/+tlJcz2Hda9PQC9/YWZKHJf33M8Z+ZSrwY8HeJYOBLfuYZ5psZXYpYMF/8E4rCs1c3CxIQQwqjvBq4lqxLujqjlZI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dK5LbDOt; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728594074; c=relaxed/simple;
+	bh=uZQMggaIxy8CCnDm5xdWoPaUigRQhT/5wH01RD5xGFs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HQxz+Q5LFdAyh018sqQk203knoWClcsplWlaS+kiUgTJ7L+KcxEgc55VJu7St7vTa7BoQf+75JYutOxRgUXAi2VseguL7m3S7htg0/ugHe1BvPd8+BHxqcA9dJeJ6mydWFwGBs1prmgbr/7tlibXVFVu19i+cjpDaapoX/r/ZRU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0UYojw4t; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=z3JjpXWV; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0UYojw4t; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=z3JjpXWV; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dK5LbDOt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C5C5CC4CECE;
-	Thu, 10 Oct 2024 15:53:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728575597;
-	bh=6Xk/hm2b3OcgM8FvDvwtDE3O6L8y5egTkuO+hbgD3PQ=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=dK5LbDOtKSW5h6MQ76eN5Vuk3D1a9R8nBPA2XycT2Py5OoqJS1xDykoVzWS/xkfIT
-	 bXSNXTeA95yiGq1Hwa+EyadJE+Q7fCw8Ygf50nriwWeyuhICM3zwRwhIwnq7Cmd65E
-	 G8ofgipfyl7BgcxPo/Lb+uSq02tEC5N4i3s4tvFaPI0C0ygGSZcDsK7th532dnth7r
-	 k1Hc+zVvr4ER1j4AaiP6HHAYxrXqC1dx9cMJYljU1MZFIIDyM0ayo52jtf2DQuqsks
-	 fzLktPEmEaYySV3Agw5a+0cCZFkSASKPhlIhQ0jLo2xz1HvXcAp9hEt2hrceJ1KexZ
-	 HCYW2m/ZirLww==
-Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-a9952ea05c5so179656366b.2;
-        Thu, 10 Oct 2024 08:53:17 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVLrXtePPAKtWve55alJJvu8bXno6e3wdqtMNKIsAj35ySgo7Y+NCQ+AZRkr6OavxRCNWBrSaluLEDfmQ==@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDQ+o3ZV5PmCT6X2QTri/+wRGhHXv4gTXi12CCln7jS4H3dLM3
-	P9d4ubfrkvn/49r2AAsq5s0RPgY2JP8E+EtPQo4v8X7dNBpbgkmDdqHTx7CgGVU6zcfYoQA0THZ
-	Iv1aIzVeJt8yFcRQwFUsdSt3dxsI=
-X-Google-Smtp-Source: AGHT+IFf/nqyi+Om+lNXUSNPkl701Xi2GlZ3y/GPTfuobO43nxzsfmXZ2r/YuqCIh5Tu82pRA79CbIN7vyLr5Mhk1k0=
-X-Received: by 2002:a17:907:970e:b0:a99:4ccc:9018 with SMTP id
- a640c23a62f3a-a998d334ac8mr683440366b.59.1728575596399; Thu, 10 Oct 2024
- 08:53:16 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0UYojw4t";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="z3JjpXWV";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0UYojw4t";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="z3JjpXWV"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 9F3A31FE32;
+	Thu, 10 Oct 2024 21:01:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1728594070;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
+	b=0UYojw4tppuc02A5CPbA1p/HFgkUxbdbCzMwaSXA6CTKA1oWOBZJrFJJ7I3BIi+VjvGeuO
+	QWkPp5HZF+APOSNfUTfzKvI/lkTfPdlzuXCfKBDXYYxlcTd201XV9vIeY9WIENBnAT3DBM
+	wr+LaXnik9zUS7+LtSiedi+O0GU+TUc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1728594070;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
+	b=z3JjpXWV8caeTQy0xJangrDXtGItAHIjhIx1t2KxzGrEOikYvprn5+lksBmAAhWA/l8HFC
+	smKtc7xcvwfPKLDA==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=0UYojw4t;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=z3JjpXWV
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1728594070;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
+	b=0UYojw4tppuc02A5CPbA1p/HFgkUxbdbCzMwaSXA6CTKA1oWOBZJrFJJ7I3BIi+VjvGeuO
+	QWkPp5HZF+APOSNfUTfzKvI/lkTfPdlzuXCfKBDXYYxlcTd201XV9vIeY9WIENBnAT3DBM
+	wr+LaXnik9zUS7+LtSiedi+O0GU+TUc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1728594070;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
+	b=z3JjpXWV8caeTQy0xJangrDXtGItAHIjhIx1t2KxzGrEOikYvprn5+lksBmAAhWA/l8HFC
+	smKtc7xcvwfPKLDA==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 70F741370C;
+	Thu, 10 Oct 2024 21:01:10 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id XIOwGpZACGc0XAAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Thu, 10 Oct 2024 21:01:10 +0000
+Date: Thu, 10 Oct 2024 23:01:04 +0200
+From: David Sterba <dsterba@suse.cz>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>, Boris Burkov <boris@bur.io>,
+	Qu Wenruo <wqu@suse.com>
+Subject: Re: [PATCH v2] btrfs: update some tests to be able to run with
+ btrfs-progs v6.11
+Message-ID: <20241010210104.GV1609@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <7914963e2c04a864edc45d7510de515c59b4fc95.1727882758.git.fdmanana@suse.com>
+ <e75725e3d3c50922892ca07cd2b0965340c228be.1728300476.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241010153630.1225162-1-maharmstone@fb.com>
-In-Reply-To: <20241010153630.1225162-1-maharmstone@fb.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Thu, 10 Oct 2024 16:52:39 +0100
-X-Gmail-Original-Message-ID: <CAL3q7H5f=EfNXryU37zxNHe8=wp6z2rXD5CTwMB9vszbLnVU5A@mail.gmail.com>
-Message-ID: <CAL3q7H5f=EfNXryU37zxNHe8=wp6z2rXD5CTwMB9vszbLnVU5A@mail.gmail.com>
-Subject: Re: [PATCH] btrfs/318: add _require_loop
-To: Mark Harmstone <maharmstone@fb.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e75725e3d3c50922892ca07cd2b0965340c228be.1728300476.git.fdmanana@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Rspamd-Queue-Id: 9F3A31FE32
+X-Spam-Score: -4.21
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-4.21 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:replyto,suse.cz:dkim];
+	ARC_NA(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCPT_COUNT_FIVE(0.00)[6]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-On Thu, Oct 10, 2024 at 4:46=E2=80=AFPM Mark Harmstone <maharmstone@fb.com>=
- wrote:
->
-> btrfs/318 uses loopback devices, but was missing a call to _require_loop
-> to print the correct message if CONFIG_LOOP is not set.
->
-> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Looks good, thanks.
-
-> ---
->  tests/btrfs/318 | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/tests/btrfs/318 b/tests/btrfs/318
-> index 79977276..df5a4a07 100755
-> --- a/tests/btrfs/318
-> +++ b/tests/btrfs/318
-> @@ -18,6 +18,7 @@ _fixed_by_kernel_commit 9f7eb8405dcb \
->  _require_test
->  _require_command "$PARTED_PROG" parted
->  _require_batched_discard "$TEST_DIR"
-> +_require_loop
->
->  _cleanup() {
->         cd /
-> --
-> 2.44.2
->
->
+On Mon, Oct 07, 2024 at 12:32:50PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> In btrfs-progs v6.11 the output of the "filesystem show" command changed
+> so that it no longers prints blank lines. This happened with commit
+> 4331bfb011bd ("btrfs-progs: fi show: remove stray newline in filesystem
+> show").
+> 
+> We have some tests that expect the blank lines in their golden output,
+> and therefore they fail with btrfs-progs v6.11.
+> 
+> So update the filter _filter_btrfs_filesystem_show to remove blank lines
+> and change the golden output of the tests to not expect the blank lines,
+> making the tests work with btrfs-progs v6.11 and older versions.
+> 
+> Reviewed-by: Boris Burkov <boris@bur.io>
+> Reviewed-by: Qu Wenruo <wqu@suse.com>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Reviewed-by: David Sterba <dsterba@suse.com>
