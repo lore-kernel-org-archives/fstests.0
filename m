@@ -1,89 +1,37 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EAC71E47B2;
-	Thu, 10 Oct 2024 21:01:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D71E198A0C;
+	Fri, 11 Oct 2024 00:24:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728594074; cv=none; b=EUsYh1OdSvrLTvVtvsqHlIGkpoaAwEyHoY0htwnrpYMkPWqzQj0pJoh2oCYSj0AJbsHQOTC+p3U5hA8LRrC0/KY6bwIzaDoxuBrlfI5WrbYiaM33Xw7rY83YgqgUUYUzpQJMb3rwRnnP9i8Wow0tJP97WZNkRygryAS+q+8PlC0=
+	t=1728606243; cv=none; b=YJhPgksOf0cSNH1nFew+i8vOPgYZW40y3ubivdGwOhhg7wVMjpAcN9R0pGx9riw0R+JnfunJMcPEwgzc1pmJu1+xBq7JsETlg7lo8frynohZQC+aHWW9UXfSnT4laLDsYbe5MbxxONeNtaheMUK3HB97bgGizuLa3w4RL0USGSg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728594074; c=relaxed/simple;
-	bh=uZQMggaIxy8CCnDm5xdWoPaUigRQhT/5wH01RD5xGFs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HQxz+Q5LFdAyh018sqQk203knoWClcsplWlaS+kiUgTJ7L+KcxEgc55VJu7St7vTa7BoQf+75JYutOxRgUXAi2VseguL7m3S7htg0/ugHe1BvPd8+BHxqcA9dJeJ6mydWFwGBs1prmgbr/7tlibXVFVu19i+cjpDaapoX/r/ZRU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0UYojw4t; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=z3JjpXWV; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=0UYojw4t; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=z3JjpXWV; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1728606243; c=relaxed/simple;
+	bh=DELmYecsq1E9KWWDDj9O7O0jbF4sqTL0kvNA5fibT+c=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=kD+1JSzbceeEGKGv9f4xCN3XXT62NztPZbA5c+xAeNqs0zWnyhvR1QaJySQ/7h4BCAc8sdrBIyAhXtemHKYpEIfIMWqVbttGJOUmlbrLhjnFejv5wAq0wrhFdB/1BwURFmPK4dscye0H0h/kOzabeg+YK8nz/hjMNItwoAGVuPU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HFW+WI1s; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0UYojw4t";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="z3JjpXWV";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="0UYojw4t";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="z3JjpXWV"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 9F3A31FE32;
-	Thu, 10 Oct 2024 21:01:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1728594070;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
-	b=0UYojw4tppuc02A5CPbA1p/HFgkUxbdbCzMwaSXA6CTKA1oWOBZJrFJJ7I3BIi+VjvGeuO
-	QWkPp5HZF+APOSNfUTfzKvI/lkTfPdlzuXCfKBDXYYxlcTd201XV9vIeY9WIENBnAT3DBM
-	wr+LaXnik9zUS7+LtSiedi+O0GU+TUc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1728594070;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
-	b=z3JjpXWV8caeTQy0xJangrDXtGItAHIjhIx1t2KxzGrEOikYvprn5+lksBmAAhWA/l8HFC
-	smKtc7xcvwfPKLDA==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=0UYojw4t;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=z3JjpXWV
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1728594070;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
-	b=0UYojw4tppuc02A5CPbA1p/HFgkUxbdbCzMwaSXA6CTKA1oWOBZJrFJJ7I3BIi+VjvGeuO
-	QWkPp5HZF+APOSNfUTfzKvI/lkTfPdlzuXCfKBDXYYxlcTd201XV9vIeY9WIENBnAT3DBM
-	wr+LaXnik9zUS7+LtSiedi+O0GU+TUc=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1728594070;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5Z4FGYfr4d2bPEU1XlM517eMKG6WFV8nzzl6AI/lvoQ=;
-	b=z3JjpXWV8caeTQy0xJangrDXtGItAHIjhIx1t2KxzGrEOikYvprn5+lksBmAAhWA/l8HFC
-	smKtc7xcvwfPKLDA==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 70F741370C;
-	Thu, 10 Oct 2024 21:01:10 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id XIOwGpZACGc0XAAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Thu, 10 Oct 2024 21:01:10 +0000
-Date: Thu, 10 Oct 2024 23:01:04 +0200
-From: David Sterba <dsterba@suse.cz>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>, Boris Burkov <boris@bur.io>,
-	Qu Wenruo <wqu@suse.com>
-Subject: Re: [PATCH v2] btrfs: update some tests to be able to run with
- btrfs-progs v6.11
-Message-ID: <20241010210104.GV1609@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <7914963e2c04a864edc45d7510de515c59b4fc95.1727882758.git.fdmanana@suse.com>
- <e75725e3d3c50922892ca07cd2b0965340c228be.1728300476.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HFW+WI1s"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A0A3C4CEC5;
+	Fri, 11 Oct 2024 00:24:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728606243;
+	bh=DELmYecsq1E9KWWDDj9O7O0jbF4sqTL0kvNA5fibT+c=;
+	h=Date:From:To:Cc:Subject:From;
+	b=HFW+WI1sp28+gXi6j6csp6ppm/2gSdpguUZuLWLLbptaiOBAW6zMByge2sGfw0UrY
+	 PHOEyqnyaC45OfA5XxcoIV9VFRzS17OdXUN9adun56k/zQHzvqDkZapg3sSj2qnZDN
+	 VipQZgZDumhOPbhU0VPSl4OmaTZO+U8aM8lcS62G01bVFoQlUbM7HeEU2d4tfDqrw+
+	 VRHpHyEGXZ7RhA/UbPE67yakxydnXfZkdLgjcmgbQsSTDHQ1RcVcs6tXAEhn3CrFwP
+	 +vjTmjh0HwjpQlxZ81a7d19pTVNuVU3Ya2eWjefhXiXMBbZFlTVSDBkJ6RE5hBJW4V
+	 JNVbP7lFa1+hg==
+Date: Thu, 10 Oct 2024 17:24:02 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Carlos Maiolino <cem@kernel.org>, Christoph Hellwig <hch@infradead.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: [PATCHBOMB 6.13] xfs: metadata directories and realtime groups
+Message-ID: <20241011002402.GB21877@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -92,55 +40,77 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e75725e3d3c50922892ca07cd2b0965340c228be.1728300476.git.fdmanana@suse.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Rspamd-Queue-Id: 9F3A31FE32
-X-Spam-Score: -4.21
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:replyto,suse.cz:dkim];
-	ARC_NA(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCPT_COUNT_FIVE(0.00)[6]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
-X-Spam-Level: 
 
-On Mon, Oct 07, 2024 at 12:32:50PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> In btrfs-progs v6.11 the output of the "filesystem show" command changed
-> so that it no longers prints blank lines. This happened with commit
-> 4331bfb011bd ("btrfs-progs: fi show: remove stray newline in filesystem
-> show").
-> 
-> We have some tests that expect the blank lines in their golden output,
-> and therefore they fail with btrfs-progs v6.11.
-> 
-> So update the filter _filter_btrfs_filesystem_show to remove blank lines
-> and change the golden output of the tests to not expect the blank lines,
-> making the tests work with btrfs-progs v6.11 and older versions.
-> 
-> Reviewed-by: Boris Burkov <boris@bur.io>
-> Reviewed-by: Qu Wenruo <wqu@suse.com>
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-Reviewed-by: David Sterba <dsterba@suse.com>
+Hi everyone,
+
+Christoph and I have been working on getting the long-delayed metadata
+directory tree patchset into mergeable shape, and I think we're now
+satisfied that we've gotten the code to where we want it for 6.13.
+This time around we've included a ton of cleanups and refactorings that
+Dave requested during the 6.12 cycle.
+
+The metadata directory tree sets us up for much more flexible metadata
+within an XFS filesystem.  Instead of rooting inodes in the superblock
+which has very limited space, we instead create a directory tree that
+can contain arbitrary numbers of metadata files.
+
+Having done that, we can now shard the realtime volume into multiple
+allocation groups, much as we do with AGs for the data device.  However,
+the realtime volume has a fun twist -- each rtgroup gets its own space
+metadata files, and for that we need a metadata directory tree.
+Note that we also implement busy free(d) extent tracking, which means
+that we can do discards asynchronously.
+
+Metadata directory trees and realtime groups also enable us to complete
+the realtime modernization project, which will add reverse mapping
+btrees, reflink, quota support, and zoned storage support for rt
+volumes.
+
+Finally, quota inodes now live in the metadata directory tree, which is
+a pretty simple conversion.  However, we added yet another new feature,
+which is that xfs will now remember the quota accounting and enforcement
+state across unmounts.  You can still tweak them via mount options, but
+not specifying any is no longer interpreted the same as 'noquota'.
+Quotas for the realtime are now supported.
+
+I'm only sending the kernel patches to the list for now, but please have
+a look at the git tree links for xfsprogs and fstests changes.
+
+https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/tag/?h=metadir_2024-10-10
+https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfsprogs-dev.git/tag/?h=metadir_2024-10-10
+https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/tag/?h=metadir-quotas_2024-10-10
+
+This is a list of the kernel patches that remain unreviewed:
+
+[PATCHSET v5.0 3/9] xfs: metadata inode directory trees
+  [PATCH 01/28] xfs: constify the xfs_sb predicates
+  [PATCH 02/28] xfs: constify the xfs_inode predicates
+  [PATCH 04/28] xfs: undefine the sb_bad_features2 when metadir is
+[PATCHSET v5.0 4/9] xfs: create incore rt allocation groups
+  [PATCH 08/21] xfs: add a xfs_qm_unmount_rt helper
+  [PATCH 09/21] xfs: factor out a xfs_growfs_rt_alloc_blocks helper
+  [PATCH 10/21] xfs: cleanup xfs_getfsmap_rtdev_rtbitmap
+  [PATCH 11/21] xfs: split xfs_trim_rtdev_extents
+[PATCHSET v5.0 5/9] xfs: preparation for realtime allocation groups
+  [PATCH 1/2] xfs: fix rt device offset calculations for FITRIM
+[PATCHSET v5.0 6/9] xfs: shard the realtime section
+  [PATCH 15/36] xfs: store rtgroup information with a bmap intent
+  [PATCH 27/36] xfs: create helpers to deal with rounding xfs_fileoff_t
+  [PATCH 28/36] xfs: create helpers to deal with rounding xfs_filblks_t
+  [PATCH 29/36] xfs: make xfs_rtblock_t a segmented address like
+  [PATCH 32/36] xfs: fix minor bug in xfs_verify_agbno
+  [PATCH 33/36] xfs: move the min and max group block numbers to
+  [PATCH 34/36] xfs: port the perag discard code to handle generic
+  [PATCH 35/36] xfs: implement busy extent tracking for rtgroups
+  [PATCH 36/36] xfs: use rtgroup busy extent list for FITRIM
+[PATCHSET v5.0 8/9] xfs: enable quota for realtime volumes
+  [PATCH 1/6] xfs: fix chown with rt quota
+  [PATCH 2/6] xfs: advertise realtime quota support in the xqm stat
+  [PATCH 3/6] xfs: report realtime block quota limits on realtime
+  [PATCH 4/6] xfs: create quota preallocation watermarks for realtime
+  [PATCH 5/6] xfs: reserve quota for realtime files correctly
+  [PATCH 6/6] xfs: enable realtime quota again
+
+None of the userspace and fstests patches have been reviewed.
+
+--D
