@@ -1,84 +1,74 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11B2638DF9;
-	Fri, 11 Oct 2024 18:19:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E86BFC8FE
+	for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 01:14:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728670762; cv=none; b=n7ymQLH31Y7ph4Edej4PlB/OvSuSSwCQml6WK4jqqui9+5xHCWORlm4KiuIjPSCkBw9EcE+mLz62xDYHscysf6NUv8jePGZOy+IHa+ybkzNd7brxERQQf9gMko0e6tOgXtEvqYy/vuHy8rqT0D4AXNUqkORXNPqaPG4SonBbmA4=
+	t=1728695670; cv=none; b=DiHwg/c0BuQXcoGRTk2KOo8gocUQ1vI3wScbHjvbN6m9U4bL+wkKaCAhyxkuYOPLiwe/2YV065yxfBSf8z719YR5ttduSohdtjADK8ab+3ZZuoSDDFbLZ4fiJ2HQpK4kHm3AnywD37Mal92MH/YjUfmyaSM7x60DhmJffO+1qu0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728670762; c=relaxed/simple;
-	bh=rasa6/SvZ4L4zkORf4p4Ln99RF1ZEJ7z1Z8/hhVND7I=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BXIOfFJkMX6IRYR5nH5xFoU5vfYdZ/RHAFp4O9GHj7ZaI0+RkTZjg8SxCap99Q9+6jlOKYgWy8cUqHhQaAoIEKHfVsePLcbyyOkvHCtn/coV/KfRZHciFl7bXF1Nbjw3Ot0abvLJGhdK8NwVlfLQRRJz2Y5eMsYRwcwdDGPwO4U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LPT3br+S; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728695670; c=relaxed/simple;
+	bh=k4D5x4KbEGce1yIU0y1WdlxGh1G84wK2Xz30+tWn5OE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=gR425QYJOZ0fNv0DDrWhRVrTrq4HNzCHsALHjGFVNVcJYcFdGVkcPHMSPF1J4Tee821Svi2dAhnGme/Xokoi0zNB/lXie4Uu4CUo3xvph0zKHAaDJw9NxgHcCAwNnPBk+BGKpGSGhBQdATtOONeZuH5KwOijjhczMhNH7EISW5s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FLnA0TSt; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LPT3br+S"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FCC8C4CEC3;
-	Fri, 11 Oct 2024 18:19:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FLnA0TSt"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B308EC4CEC3;
+	Sat, 12 Oct 2024 01:14:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728670761;
-	bh=rasa6/SvZ4L4zkORf4p4Ln99RF1ZEJ7z1Z8/hhVND7I=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=LPT3br+SYTWiYgh46FZnUPEYJ2UExs/zucAjG7DiqYts0rbVAR+3h9y3tMtSe6swQ
-	 VwOhyj0gUsjCDcKwJhBHwLz3fpB65hDtbR4VC9yrA9wbAJVU4IHanDSsDMCOFG1n8t
-	 dlKl2858mY0RsqJSukDovQsqljJiwbJ0OkSORpmEk7JkUoacayFInKKytsGwR8msS3
-	 rVKEh6EhwIcOIeqkp+PKwf7UebfbLgBVZWps9+WrQ5iY0lmriIjiryma66vxMzwWzE
-	 f8qa9SooA+ApQKaM9yOSQk6XdJp48HgkxctxZFXgMGCLokdeUC7htG96kP5A8hcGa+
-	 1ThsNFh1JcQPA==
-Date: Fri, 11 Oct 2024 11:19:20 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
+	s=k20201202; t=1728695669;
+	bh=k4D5x4KbEGce1yIU0y1WdlxGh1G84wK2Xz30+tWn5OE=;
+	h=From:To:Cc:Subject:Date:From;
+	b=FLnA0TStGvO2/bt4qkew1Pi3HWgV/AExdP0PjMk7Cdd3qYvCJQCaaka/hLw+sT63e
+	 w69ZfgyQWbxp+21rqSEFgeZedoYjdgnzgOpTW7xHiVqM4kBY1MJ+oTMdNwHPrFhmuv
+	 TKD9Sh12B89RN3tgqhdxKqTOXJgGOBiyg0Z6Ox3T/O7ApUtOa6Reqj2Cuohp/j6QbR
+	 dyZbr0nZV7tW3o6DKo3W06UzKFVGeEGoGKZRDhZRHlQNlrAnhDwXLuXegA871lDQyT
+	 +Vi33gBj8rMZTFjD39ttyfYCYyw+jpE9cvfztWIKJ294U+bnlswekeX6qYgVMyMwOr
+	 KJLmqdOQjk8Gw==
+From: Chao Yu <chao@kernel.org>
 To: Zorro Lang <zlang@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/122: add tests for commitrange structures
-Message-ID: <20241011181920.GO21840@frogsfrogsfrogs>
-References: <172780126017.3586479.18209378224774919872.stgit@frogsfrogsfrogs>
- <172780126049.3586479.7813790327650448381.stgit@frogsfrogsfrogs>
- <ZvzeDhbIUPEHCP2D@infradead.org>
- <20241002224700.GG21853@frogsfrogsfrogs>
- <20241011062858.p5tewpiewwgzpzbo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Cc: fstests@vger.kernel.org,
+	linux-f2fs-devel@lists.sourceforge.net,
+	Chao Yu <chao@kernel.org>,
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	Daeho Jeong <daehojeong@google.com>
+Subject: [PATCH] f2fs/004: add missing _fixed_by_kernel_commit line
+Date: Sat, 12 Oct 2024 09:14:19 +0800
+Message-Id: <20241012011419.4066147-1-chao@kernel.org>
+X-Mailer: git-send-email 2.40.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241011062858.p5tewpiewwgzpzbo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Transfer-Encoding: 8bit
 
-On Fri, Oct 11, 2024 at 02:28:58PM +0800, Zorro Lang wrote:
-> On Wed, Oct 02, 2024 at 03:47:00PM -0700, Darrick J. Wong wrote:
-> > On Tue, Oct 01, 2024 at 10:45:50PM -0700, Christoph Hellwig wrote:
-> > > On Tue, Oct 01, 2024 at 09:49:27AM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > 
-> > > > Update this test to check the ioctl structure for XFS_IOC_COMMIT_RANGE.
-> > > 
-> > > Meh.  Can we please not add more to xfs/122, as that's alway just
-> > > a pain?  We can just static_assert the size in xfsprogs (or the
-> > > xfstests code using it) instead of this mess.
-> > 
-> > Oh right, we had a plan to autotranslate the xfs/122 stuff to
-> > xfs_ondisk.h didn't we... I'll put that back on my list.
-> 
-> Hi Darrick,
-> 
-> Do you want to have this patch at first, or just wait for your
-> next version which does the "autotranslate"?
+The bug related to this regression testcase has been fixed by commit
+b2c160f4f3cf ("f2fs: atomic: fix to forbid dio in atomic_file"), let's
+add missing _fixed_by_kernel_commit line for this testcase.
 
-Let's drop this for now, machine-converting xfs/122 to xfs_ondisk.h
-wasn't as hard as I thought it might be.  Would you be ok with merging
-the fiexchange.h patch and the fsstress funshare patch this week?
+Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Daeho Jeong <daehojeong@google.com>
+Signed-off-by: Chao Yu <chao@kernel.org>
+---
+ tests/f2fs/004 | 3 +++
+ 1 file changed, 3 insertions(+)
 
---D
+diff --git a/tests/f2fs/004 b/tests/f2fs/004
+index dd1ed5c1..e08cee11 100755
+--- a/tests/f2fs/004
++++ b/tests/f2fs/004
+@@ -25,6 +25,9 @@ _cleanup()
+ 	rm -r -f $tmp.*
+ }
+ 
++_fixed_by_kernel_commit b2c160f4f3cf \
++	"f2fs: atomic: fix to forbid dio in atomic_file"
++
+ _require_scratch
+ _require_odirect
+ _scratch_mkfs >> $seqres.full
+-- 
+2.40.1
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> 
-> 
