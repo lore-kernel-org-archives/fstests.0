@@ -1,133 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87A1E1509B4
-	for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 10:15:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6A9C1E481
+	for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 14:06:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728728110; cv=none; b=ow1jEZy6gzOvfCtHVjYgai8y5sZSuYDInJuwdUpKvCwXNLPU3YJAlKKF6B366MjHLJJ2As2N4wSZgQqbu7PM+sarsbjOE9iIBs31ae7VV21vfRGLsc3PvGVLuWJDIwoK6pgCluYWsm1rhRZ/MVc7iwJnQFItqO1MqZvv18ak5zA=
+	t=1728741963; cv=none; b=athyNp7XxgJ4KHGlqIB4PZxSVE2lZvhDrHmGZ5EpRZbPqwDqGnDv2pF5RTIN0ecO+7PQhXC/o3NePMMNdoLwJVv3mu6bZxTVCdqC2/tMZJshGa2lbJ+16hGx9jLI21y6B49ROKI0F0kD6/nTHJUhnuHOYty3108m7myz9e1sZqE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728728110; c=relaxed/simple;
-	bh=OdH4TBBkFTCEwViZ350PE+nPM3XleI6+E0e5t7R/34g=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=GhEGrtHjmTnkKgLLMnSLn+FlAkFkfPa7fCUbOLUujD9NrNIQpipD29uvS4bFdIZ+ffqhb6Z/psCjHiafkpyOM3CUmxPEm1yFcVJ/qDBdC5M8fDy4e25n57GI1pdxQxunFnmpZAZTwW35kBhc/YlNrdzQfqA0FtMGunuNfudZc68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vl8I4Bq5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728741963; c=relaxed/simple;
+	bh=NBksyTOGWe4Nt8KqI4uApjQlOLOGrnw160iwZF/dcKg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FLvTimAq33LreNW2K/MWTyCfDjBfANWLtw/MpxuwiI7RNdYfTmmVmaw3Zm4zdvSCrul0MUDtv34z7VAABrlcEysTQ4r/CPjCLaIaipARuwEjePtncDZFLWkw6HtT+KnT68p+l/LlwipvHy43zYnCl3JsORtIgdMVA7RR/LcsYvQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WtmiAYLD; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vl8I4Bq5"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AB425C4CEC6;
-	Sat, 12 Oct 2024 10:15:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728728110;
-	bh=OdH4TBBkFTCEwViZ350PE+nPM3XleI6+E0e5t7R/34g=;
-	h=From:To:Cc:Subject:Date:From;
-	b=Vl8I4Bq59AlmRmq43BJsY5HjQa/0hbbAFkAIW9fImqm+VtBwFj6ErqkoeFEZWNpmI
-	 7jlL9OaSLd2JpgYjNsRseJRc72HkE+lZqgab+/n4jWDk0o7uaH+PXtcY1L0LAHLeqq
-	 r47DLy7FGWaOjbP+0Be+VjpzLi8o4neH0oGxr0eD4rxgzkCs9O8wgKvdSXAKG1ZmJ3
-	 XYvoflqStZEniEdgFxm60aHIwxLgVbaXQbnRDQeQgu21k19PlLFQJlDQ7DC6oTyWoC
-	 bIqgwH5sZkg893nZJCx3s0drHxCrvcERGWbpsKN+BkO+74BwtSz2oJyEJUXET/UNqg
-	 +FUduMyuN/Y5g==
-From: Chao Yu <chao@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>,
-	Qi Han <hanqi@vivo.com>
-Subject: [PATCH] f2fs/005: add testcase to check checkpoint disabling functionality
-Date: Sat, 12 Oct 2024 18:15:01 +0800
-Message-Id: <20241012101501.377899-1-chao@kernel.org>
-X-Mailer: git-send-email 2.40.1
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WtmiAYLD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1728741960;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=waFDwgPr4QcJIxhWov0AkVYaGHbJ4W1aOqTw0mnlcSk=;
+	b=WtmiAYLDfNxWExtJC8kyXILtqmYP0Pa6zf5EI9IUvBcISyG2jDceMUCJ82rLFb3eZF5SUi
+	0QYVHFiNbCwUFoPm5yiBC1x2kqv3D7jkW2O0XkbrYarYJf55uN3awzBXhZwWTVwL8txXBE
+	rNh7zcFZT78sdAhENuUezqoAnL21k80=
+Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
+ [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-140-Vfar0zc-NhmmchUR84PQ7A-1; Sat, 12 Oct 2024 10:05:59 -0400
+X-MC-Unique: Vfar0zc-NhmmchUR84PQ7A-1
+Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-71e576a28c7so241220b3a.2
+        for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 07:05:58 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728741958; x=1729346758;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=waFDwgPr4QcJIxhWov0AkVYaGHbJ4W1aOqTw0mnlcSk=;
+        b=u2gUfJTfTSr89J25sUCTqgK1eMvgiBhzW1xzHYVgu5DycdGdqcwuEyB4tad2LGXaSD
+         +Uquvo330WX823lpaB9SQCjwneVq+RRtf25wJLwJgjtL99j261h/7NFKU4Xs0tM84wT9
+         ELhcj+gquI2tot4ej4U4BtqX2fzAcbG5CevX+j0PfXamSKrL7q+qiJ07rKjm5jZ0MV9i
+         pl85NnUyfWIP+ADfriS+nOPvIk5RdhpHXx9N7yGYqpC9O1tXMgx6ujAYGrqFLwue1d2m
+         B6odQC4Bi3mZ3Xi+G5yRLxk4Vq2Q4NhCv75cIKUldTF8upnnGd/OfljiFZ8OduWrNTqW
+         OcDQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXN3k9aWyajdhW9tDBupiwd0zUH6Tp3JgPINcHNKWHJo2c5FEi2PZ/2rErdQrI3xywTukt6qILl@vger.kernel.org
+X-Gm-Message-State: AOJu0YxpLAlHF1AUs0sN/cXZWa05bxeQMJJtsGogdXmpqF9yp0H8tsTK
+	3ispai9yfQPZGgLTiIsjMrYU2T7jkPr4Zb0PVwUTUe4uyd3odtn5CP6MlBmUCZwNnM7ivB+NyIE
+	0LuiprraEMr5ymfU9XHg4uiI931mmQ2vFFuv8QH2Pw7Qb0vIP25RZdwuGpt/tY2APwA==
+X-Received: by 2002:a05:6a00:1252:b0:71e:659:f2dd with SMTP id d2e1a72fcca58-71e37f4edf2mr9636649b3a.20.1728741957682;
+        Sat, 12 Oct 2024 07:05:57 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHOcIar4YRVXK9mEh/hhK+NDFYUIxYOnGopKwwWU/UhwCmi5Oxf/aZxhd++QLkTL7P5kcpEfg==
+X-Received: by 2002:a05:6a00:1252:b0:71e:659:f2dd with SMTP id d2e1a72fcca58-71e37f4edf2mr9636615b3a.20.1728741957349;
+        Sat, 12 Oct 2024 07:05:57 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71e2aa937cesm4163289b3a.132.2024.10.12.07.05.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 12 Oct 2024 07:05:56 -0700 (PDT)
+Date: Sat, 12 Oct 2024 22:05:53 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 2/2] xfs/122: add tests for commitrange structures
+Message-ID: <20241012140553.hpgvmjfajdfdjtgh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <172780126017.3586479.18209378224774919872.stgit@frogsfrogsfrogs>
+ <172780126049.3586479.7813790327650448381.stgit@frogsfrogsfrogs>
+ <ZvzeDhbIUPEHCP2D@infradead.org>
+ <20241002224700.GG21853@frogsfrogsfrogs>
+ <20241011062858.p5tewpiewwgzpzbo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241011181920.GO21840@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241011181920.GO21840@frogsfrogsfrogs>
 
-This patch introduce a regression test to check whether f2fs handles
-dirty inode correctly when checkpoint is disabled in a corner case,
-it may hang umount before the bug is fixed.
+On Fri, Oct 11, 2024 at 11:19:20AM -0700, Darrick J. Wong wrote:
+> On Fri, Oct 11, 2024 at 02:28:58PM +0800, Zorro Lang wrote:
+> > On Wed, Oct 02, 2024 at 03:47:00PM -0700, Darrick J. Wong wrote:
+> > > On Tue, Oct 01, 2024 at 10:45:50PM -0700, Christoph Hellwig wrote:
+> > > > On Tue, Oct 01, 2024 at 09:49:27AM -0700, Darrick J. Wong wrote:
+> > > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > > 
+> > > > > Update this test to check the ioctl structure for XFS_IOC_COMMIT_RANGE.
+> > > > 
+> > > > Meh.  Can we please not add more to xfs/122, as that's alway just
+> > > > a pain?  We can just static_assert the size in xfsprogs (or the
+> > > > xfstests code using it) instead of this mess.
+> > > 
+> > > Oh right, we had a plan to autotranslate the xfs/122 stuff to
+> > > xfs_ondisk.h didn't we... I'll put that back on my list.
+> > 
+> > Hi Darrick,
+> > 
+> > Do you want to have this patch at first, or just wait for your
+> > next version which does the "autotranslate"?
+> 
+> Let's drop this for now, machine-converting xfs/122 to xfs_ondisk.h
+> wasn't as hard as I thought it might be.  Would you be ok with merging
+> the fiexchange.h patch and the fsstress funshare patch this week?
 
-Cc: Qi Han <hanqi@vivo.com>
-Signed-off-by: Chao Yu <chao@kernel.org>
----
- tests/f2fs/005     | 59 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/005.out |  1 +
- 2 files changed, 60 insertions(+)
- create mode 100755 tests/f2fs/005
- create mode 100644 tests/f2fs/005.out
+Sure, if you hope so :)
 
-diff --git a/tests/f2fs/005 b/tests/f2fs/005
-new file mode 100755
-index 00000000..4faf1bb9
---- /dev/null
-+++ b/tests/f2fs/005
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oppo.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/005
-+#
-+# This is a regression test to check whether f2fs handles dirty
-+# inode correctly when checkpoint is disabled, it may hang umount
-+# before the bug is fixed.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	rm -f $img
-+	rmdir $mnt
-+	_scratch_unmount >> $seqres.full
-+	cd /
-+	rm -r -f $tmp.*
-+}
-+
-+_require_scratch
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount >> $seqres.full
-+
-+img=$SCRATCH_MNT/f2fs.img
-+mnt=$SCRATCH_MNT/f2fs.mnt
-+testfile=$mnt/testfile
-+tmpfile=$mnt/tmpfile
-+tmpdir=$mnt/tmpdir
-+
-+mkdir $mnt
-+dd if=/dev/zero of=$img bs=1M count=50 2>/dev/null
-+$MKFS_F2FS_PROG -f $img >/dev/null 2>&1
-+sync
-+
-+# use mode=lfs to let f2fs always triggers OPU
-+mount -t $FSTYP -o loop,mode=lfs,checkpoint=disable:10%,noinline_dentry $img $mnt
-+
-+dd if=/dev/zero of=$testfile bs=1M count=5 2>/dev/null
-+mkdir $tmpdir
-+touch $tmpfile
-+sync
-+
-+# it dirties tmpdir inode by updating ctime,
-+# but it doesn't moving the inode to gdirty_list.
-+mv $tmpfile $tmpdir
-+
-+# it runs out of free segment
-+dd if=/dev/zero of=$testfile bs=1M count=5 conv=notrunc conv=fsync 2>/dev/null
-+
-+mount -o remount,checkpoint=enable $mnt
-+
-+# it may hang umount if tmpdir is still dirty during evict()
-+umount $mnt
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/005.out b/tests/f2fs/005.out
-new file mode 100644
-index 00000000..caa3c880
---- /dev/null
-+++ b/tests/f2fs/005.out
-@@ -0,0 +1 @@
-+QA output created by 005
--- 
-2.40.1
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > --D
+> > > 
+> > 
+> > 
+> 
 
