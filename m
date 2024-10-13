@@ -1,122 +1,159 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6A9C1E481
-	for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 14:06:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34D7F12CDBA
+	for <fstests@vger.kernel.org>; Sun, 13 Oct 2024 16:53:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728741963; cv=none; b=athyNp7XxgJ4KHGlqIB4PZxSVE2lZvhDrHmGZ5EpRZbPqwDqGnDv2pF5RTIN0ecO+7PQhXC/o3NePMMNdoLwJVv3mu6bZxTVCdqC2/tMZJshGa2lbJ+16hGx9jLI21y6B49ROKI0F0kD6/nTHJUhnuHOYty3108m7myz9e1sZqE=
+	t=1728838412; cv=none; b=WlxAvxbSOJDRo85Phi8IkAVsaGBnrzIdtgxdzFpKTyRgwZWJoNTN86x+9m5V5A2piWdZXp8jvXtvXMLUGWSduHAPisijf3Ceqp/ofeDYdcUn4BWJF8SAUHsNP9c10BeEThxttQWLVdsUada6WRK3inpTIt8/LgYD3/yrUP+mi0c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728741963; c=relaxed/simple;
-	bh=NBksyTOGWe4Nt8KqI4uApjQlOLOGrnw160iwZF/dcKg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FLvTimAq33LreNW2K/MWTyCfDjBfANWLtw/MpxuwiI7RNdYfTmmVmaw3Zm4zdvSCrul0MUDtv34z7VAABrlcEysTQ4r/CPjCLaIaipARuwEjePtncDZFLWkw6HtT+KnT68p+l/LlwipvHy43zYnCl3JsORtIgdMVA7RR/LcsYvQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WtmiAYLD; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1728838412; c=relaxed/simple;
+	bh=vHfSLtRYG1Dk+PniY+eIkZrYz01p1u+KhkM3UgNAh40=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=LWSZU4JFmEKmRZgScX2xuPatNJBXx038pfrbuLi2VA1F0VjHLnaKahUWMd7hvqEuIuH98k1y49lWLz76MNtJyy9duazdeB0KJDNTHshTgLmNUQqW0w68D/cWapPRCgBYNje7MtiTaKTVQhgi1FZe/o9tdTjGyLHA2B5yKABBxLI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fp8pJuCr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WtmiAYLD"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1728741960;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=waFDwgPr4QcJIxhWov0AkVYaGHbJ4W1aOqTw0mnlcSk=;
-	b=WtmiAYLDfNxWExtJC8kyXILtqmYP0Pa6zf5EI9IUvBcISyG2jDceMUCJ82rLFb3eZF5SUi
-	0QYVHFiNbCwUFoPm5yiBC1x2kqv3D7jkW2O0XkbrYarYJf55uN3awzBXhZwWTVwL8txXBE
-	rNh7zcFZT78sdAhENuUezqoAnL21k80=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-140-Vfar0zc-NhmmchUR84PQ7A-1; Sat, 12 Oct 2024 10:05:59 -0400
-X-MC-Unique: Vfar0zc-NhmmchUR84PQ7A-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-71e576a28c7so241220b3a.2
-        for <fstests@vger.kernel.org>; Sat, 12 Oct 2024 07:05:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728741958; x=1729346758;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=waFDwgPr4QcJIxhWov0AkVYaGHbJ4W1aOqTw0mnlcSk=;
-        b=u2gUfJTfTSr89J25sUCTqgK1eMvgiBhzW1xzHYVgu5DycdGdqcwuEyB4tad2LGXaSD
-         +Uquvo330WX823lpaB9SQCjwneVq+RRtf25wJLwJgjtL99j261h/7NFKU4Xs0tM84wT9
-         ELhcj+gquI2tot4ej4U4BtqX2fzAcbG5CevX+j0PfXamSKrL7q+qiJ07rKjm5jZ0MV9i
-         pl85NnUyfWIP+ADfriS+nOPvIk5RdhpHXx9N7yGYqpC9O1tXMgx6ujAYGrqFLwue1d2m
-         B6odQC4Bi3mZ3Xi+G5yRLxk4Vq2Q4NhCv75cIKUldTF8upnnGd/OfljiFZ8OduWrNTqW
-         OcDQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXN3k9aWyajdhW9tDBupiwd0zUH6Tp3JgPINcHNKWHJo2c5FEi2PZ/2rErdQrI3xywTukt6qILl@vger.kernel.org
-X-Gm-Message-State: AOJu0YxpLAlHF1AUs0sN/cXZWa05bxeQMJJtsGogdXmpqF9yp0H8tsTK
-	3ispai9yfQPZGgLTiIsjMrYU2T7jkPr4Zb0PVwUTUe4uyd3odtn5CP6MlBmUCZwNnM7ivB+NyIE
-	0LuiprraEMr5ymfU9XHg4uiI931mmQ2vFFuv8QH2Pw7Qb0vIP25RZdwuGpt/tY2APwA==
-X-Received: by 2002:a05:6a00:1252:b0:71e:659:f2dd with SMTP id d2e1a72fcca58-71e37f4edf2mr9636649b3a.20.1728741957682;
-        Sat, 12 Oct 2024 07:05:57 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHOcIar4YRVXK9mEh/hhK+NDFYUIxYOnGopKwwWU/UhwCmi5Oxf/aZxhd++QLkTL7P5kcpEfg==
-X-Received: by 2002:a05:6a00:1252:b0:71e:659:f2dd with SMTP id d2e1a72fcca58-71e37f4edf2mr9636615b3a.20.1728741957349;
-        Sat, 12 Oct 2024 07:05:57 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71e2aa937cesm4163289b3a.132.2024.10.12.07.05.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 12 Oct 2024 07:05:56 -0700 (PDT)
-Date: Sat, 12 Oct 2024 22:05:53 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/122: add tests for commitrange structures
-Message-ID: <20241012140553.hpgvmjfajdfdjtgh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <172780126017.3586479.18209378224774919872.stgit@frogsfrogsfrogs>
- <172780126049.3586479.7813790327650448381.stgit@frogsfrogsfrogs>
- <ZvzeDhbIUPEHCP2D@infradead.org>
- <20241002224700.GG21853@frogsfrogsfrogs>
- <20241011062858.p5tewpiewwgzpzbo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20241011181920.GO21840@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fp8pJuCr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 27A83C4CEC5;
+	Sun, 13 Oct 2024 16:53:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728838410;
+	bh=vHfSLtRYG1Dk+PniY+eIkZrYz01p1u+KhkM3UgNAh40=;
+	h=Date:From:To:Subject:From;
+	b=fp8pJuCrtmnGFRr6ELhCiPJ5NfqtMOzkk075GYNaFtu2x/bY9dWlHZcxxqavq1Bk5
+	 17/xdYbJx0SZXy5x8vvgOjvRPW4CxeHem5w+gmQ2T29VaEeXqJa2h6M9mXEFynM2g7
+	 VbOn58ta7NeqPTp3ZJ4JNbpp/Hee82R85nQOoSTcBYcsjDLjgq3ajfDiqpqY7JBQLZ
+	 0wMKd8KHNK0pmiRKEo3TBvAFwso8mfaC6ALGVHd1rwtu44DRaQqnQ+EtzrrNKQK5h1
+	 NV89BgW8VjNnOPMKwP8lkOlcBTWQZTYpScSfTC82j971+XAcM6LmnwfK9GvKZ5w8It
+	 yM/4tOa4YJ0ww==
+Date: Mon, 14 Oct 2024 00:53:27 +0800
+Message-ID: <a9295329d0ee7f8e0e64980ac4fc18ff@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.10.14
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="3CEQ8qcI3E3p"
+Content-Disposition: inline
+
+
+--3CEQ8qcI3E3p
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241011181920.GO21840@frogsfrogsfrogs>
 
-On Fri, Oct 11, 2024 at 11:19:20AM -0700, Darrick J. Wong wrote:
-> On Fri, Oct 11, 2024 at 02:28:58PM +0800, Zorro Lang wrote:
-> > On Wed, Oct 02, 2024 at 03:47:00PM -0700, Darrick J. Wong wrote:
-> > > On Tue, Oct 01, 2024 at 10:45:50PM -0700, Christoph Hellwig wrote:
-> > > > On Tue, Oct 01, 2024 at 09:49:27AM -0700, Darrick J. Wong wrote:
-> > > > > From: Darrick J. Wong <djwong@kernel.org>
-> > > > > 
-> > > > > Update this test to check the ioctl structure for XFS_IOC_COMMIT_RANGE.
-> > > > 
-> > > > Meh.  Can we please not add more to xfs/122, as that's alway just
-> > > > a pain?  We can just static_assert the size in xfsprogs (or the
-> > > > xfstests code using it) instead of this mess.
-> > > 
-> > > Oh right, we had a plan to autotranslate the xfs/122 stuff to
-> > > xfs_ondisk.h didn't we... I'll put that back on my list.
-> > 
-> > Hi Darrick,
-> > 
-> > Do you want to have this patch at first, or just wait for your
-> > next version which does the "autotranslate"?
-> 
-> Let's drop this for now, machine-converting xfs/122 to xfs_ondisk.h
-> wasn't as hard as I thought it might be.  Would you be ok with merging
-> the fiexchange.h patch and the fsstress funshare patch this week?
+Hi all,
 
-Sure, if you hope so :)
+The for-next branch of the xfstests repository at:
 
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > 
-> > 
-> 
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
+has just been updated and tagged as v2024.10.14 release.
+
+Release Notes:
+1) There's not new test case in this relase.
+2) The fsstress.c supports FALLOC_FL_UNSHARE_RANGE after fsx supported it.
+3) Fix some bugs in common/ and src/ .
+4) Improve some btrfs, xfs and generic test cases.
+
+More details refer to below, thanks for all these contributions.
+
+Thanks,
+Zorro
+
+The new head of the for-next branch is commit:
+
+891f4995ab07 src/fiexchange.h: add the start-commit/commit-range ioctls
+
+New commits:
+
+An Long (2):
+      [e0c84186bfda] src/Makefile: install two necessary files
+      [37f61a8fd323] btrfs/315: update filter to match mount cmd
+
+Chao Yu (1):
+      [4c9c08ec05c6] src/min_dio_alignment: don't return invalid dio_offset_align
+
+Christoph Hellwig (1):
+      [74777e97c56b] generic/694: sync before sampling i_blocks
+
+Daniel Gomez (1):
+      [dd0eeae9ead0] common/config: fix RECREATE_TEST_DEV initialization
+
+Darrick J. Wong (3):
+      [cf838edbaec7] common/populate: fix bash syntax error in _fill_fs
+      [ff07e0a32936] fsstress: add support for FALLOC_FL_UNSHARE_RANGE
+      [891f4995ab07] src/fiexchange.h: add the start-commit/commit-range ioctls
+
+Filipe Manana (2):
+      [b37aa9c8b0f9] btrfs: update some tests to be able to run with btrfs-progs v6.11
+      [8babf87596c8] btrfs/322: add git commit ID
+
+Hans Holmberg (2):
+      [0ffcda29e8a0] common: make rt_ops local in _try_scratch_mkfs_sized
+      [2f7e1b8a6f09] xfs/157,xfs/547,xfs/548: switch to using _scratch_mkfs_sized
+
+Mark Harmstone (2):
+      [c9a2881aa6f8] common/fail_make_request: fix error message
+      [f4b00fafa4ef] btrfs/318: add _require_loop
+
+Qu Wenruo (1):
+      [034e56559337] fstests: generic/563: use fs blocksize to do the writes
+
+
+Code Diffstat:
+
+ common/config            |  2 +-
+ common/fail_make_request |  2 +-
+ common/filter.btrfs      |  5 ++++-
+ common/populate          |  2 +-
+ common/rc                |  1 +
+ ltp/fsstress.c           | 14 ++++++++++++++
+ m4/package_xfslibs.m4    |  2 ++
+ src/Makefile             |  2 +-
+ src/fiexchange.h         | 26 ++++++++++++++++++++++++++
+ src/global.h             |  4 ++++
+ src/min_dio_alignment.c  |  2 +-
+ tests/btrfs/006.out      |  2 --
+ tests/btrfs/100.out      |  2 --
+ tests/btrfs/101.out      |  2 --
+ tests/btrfs/218.out      |  1 -
+ tests/btrfs/254.out      |  1 -
+ tests/btrfs/315          |  7 ++++++-
+ tests/btrfs/318          |  1 +
+ tests/btrfs/322          |  2 +-
+ tests/generic/563        | 10 ++++++----
+ tests/generic/694        |  4 ++++
+ tests/xfs/157            | 12 ++++++++----
+ tests/xfs/547            |  4 +++-
+ tests/xfs/548            |  2 +-
+ 24 files changed, 86 insertions(+), 26 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--3CEQ8qcI3E3p
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmcL+t8ACgkQlNbPkfr2
+tMzNXg//Q+O95yb345h8Z8+Dm+SSr7SBsVznEYG1+tut6yBDB8tLo2y2qx+NO8JR
+PpTTKZvvltwA68mBRcbG6NV2loHZWJSXOAeQHAX4VG6PqZrRmdHyj5wuC0YGZBY8
+PzfXYZKRDRbqvvrRzlzB7A9QGNLAqFdWUJOVqoqAdOa28mNsARKsThjGevLpYXi/
++8iGtwiMzifmELxvUmeruZJqOGM85Tp1rk11EXDmPh3ItHoJVzUhk5iQr5W3vu/W
+7DxKC44sb1LCnwsSTTXR3eyN04VVs5fajMbKc//aYWVz6nfJ/FNdvDgSykGFNBWY
+YjvFiML8IOPs0+WDMm/k37Ukvh72l/6oE5oMF+V2QZj+6vhzv/pCTEIYTJ26cF3O
+RhGJ55JJxWsFWnKbdUF/oLdEht63k0RqkCxULp5EII93LkhxDQX9hvQV56I6abnX
+7in3+otdhpSafhzfBFTZKbCuS+JigIUe2kvRWSc3dM8n0n8+OfKiHKpc2Mrz9tIe
+/UfKaMUHRAkICwKJ33kZ5UoQdxJkc5zNT7H/ZnILuuEiaxtPb220sOD7PRPED6Cg
+P6F6CjmVD9pPLrLW8Dd5LjB74taYhjZ8eXwFdpbesWrJccGT1/g0wgrzc94I0lB0
+kxORIMcW0RA+JILWZxuC85RnAwQyo3va6vzOYWvk9qaleuTMySs=
+=Lnxr
+-----END PGP SIGNATURE-----
+
+--3CEQ8qcI3E3p--
