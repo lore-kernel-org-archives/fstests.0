@@ -1,42 +1,75 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2BE014A092;
-	Mon, 14 Oct 2024 07:50:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D36BE1AAE37
+	for <fstests@vger.kernel.org>; Mon, 14 Oct 2024 14:14:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728892216; cv=none; b=oAI7v5YLrH1QLn10OZHkWt2/wlLQQWNhNg8xfMk0m5lLK/AVfJ/e3bqaI/bPztCsh55pld0ZysVUrjtHbY2FDshBJr27opk8dIAzPXWFLexJLsUwzklsbrxFP9ZUlyC33d8q7/SEmQcmIVNq1dconRcY1lBSnqCUmVoxQu3vdPs=
+	t=1728915262; cv=none; b=lk6irTmaljAU2LUQ9U6e3YY48SlHaHG/wTPCJzVDr7DnvbB4CDc36gjYpb8VLILbGhkbjlFJ6Q3O1zZsQw0TTn90y19IjEkktzpTguzBUyF9yRQMu1G4YxH9R2HgHg3k2dTYr7CsTZC2ZszWYHOIzA3dlgeSxIBflpdILQC8d2g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728892216; c=relaxed/simple;
-	bh=8ft23zLBPyfjIIXt7heqSn40/bAraUUJJSrSWnFtRQc=;
+	s=arc-20240116; t=1728915262; c=relaxed/simple;
+	bh=p1uWY716fhmZBfPVnp/WYc1UWmzhDrhhqnmrtPA7o1Q=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=niZMoWp31S1Mc2rDr3wfnE3R3IFTZMVWiMWSHE8xdgiyy2WZrhHWXmgGotXGODeDIDav2kjfo7Okr0Fhx0nOV8v001nB0LO7sqxFBWJat+sKIdxenhdA+omd0D28gHL3DKgw0/GPcDVKqrFwn2C45OxybGEVKFe90umXVD9o6JY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=qu5BE14M; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=nFbiB39bpNILmpucG/x56UdA9BAqhxdb2ZTcdAKi/fBN04ccBNFn2jT3+hOoHpMZ7z+0OlUvyeNyToUtQzsREuBdV0tYYqMQRXrEIai+FbLimFBLC9xN6JcN/Ye/y8mDsu+r1JAx/7n6lIdIkl/1vl/4w6u/YFfr4gW1Lh16uB4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=S5u8F1p5; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="qu5BE14M"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=8ft23zLBPyfjIIXt7heqSn40/bAraUUJJSrSWnFtRQc=; b=qu5BE14MgM8bbW9/QmHwT5J0D6
-	fdzZUofwlobtSae51xmUKD0Y+dLBiO7s1qbFRAUji2/yD0MlqbXQh2dmmzoqvqA71IZViJ8Ra/Mry
-	+byVP82kXpX1fVEVWh1PoOSZH6I86AOWciL0aZGm0nPHIRmHl3qmxqiAsN+JwD0fqdpu5UEAI7z4y
-	fFJpA4prGpiJkWnjjc/Oc+2+8EoupdsmsTcLeHXHi38MwrE5cqANfKvd6JZ0o8xnW0NXKOR5CYOK1
-	YXaW1mCGu0b5TffcNDirT4PRNswwhD6lJ45b14YoIyK1IcKavAt+llKSUM6akNBQ5zr7/zfij0Go9
-	HeuUTBdQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1t0FqI-000000048fU-2Tim;
-	Mon, 14 Oct 2024 07:50:14 +0000
-Date: Mon, 14 Oct 2024 00:50:14 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Carlos Maiolino <cem@kernel.org>, linux-xfs@vger.kernel.org,
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="S5u8F1p5"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1728915259;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6gbvnHPHmaOqJLz1nj9wAvViCC9PDyYSP+xt85t+Frk=;
+	b=S5u8F1p5wNSRjx2Y2Ij14PciXDZmV+FUGnBtUG0XaIhi8EzHcvxTzcwQJpyaiIbhu1YcmI
+	lCOqlccBchqlyth/iPmrK8D84VHfTiIyT/HAWRv0fKFlESFaDhJLzqUKVZpXNYE83mK+PX
+	7nSaNljcED+0OUW4HQnTEV8J6Xy98dY=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-626-d5_dfbR8N7mNFS-x3CoBnQ-1; Mon, 14 Oct 2024 10:14:18 -0400
+X-MC-Unique: d5_dfbR8N7mNFS-x3CoBnQ-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-204e310e050so56650625ad.0
+        for <fstests@vger.kernel.org>; Mon, 14 Oct 2024 07:14:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728915257; x=1729520057;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6gbvnHPHmaOqJLz1nj9wAvViCC9PDyYSP+xt85t+Frk=;
+        b=MZe+FBO8ceS18tm5l5uqisgriQPDujWS4l+OKSFg0K6UGRk2+fw8/SEZsoz8y3iCcj
+         qldb4njVdwPf4JpMrq+F9uCtMaO8Gb1vd+2ATfuCWcTHEuv3wZWYfRcEAOMjQtZPhsly
+         l6Mz+Jxp4JLeznBwdtfM8P6XnpbE++G9xjw93oeADgFT+9KZFkzH/aebvUpE2m7uexKG
+         e9Xvq2e/ekpc+TPzpYfDF3sp6ZI96+60PJgzkBqCsZIkdBctdTV/7GL9TcN4mTgYzEQ2
+         YkJ/ooF7EhfSQ2Qx8Fv2p7NoYoXxj00uRhY/Q3Sf7BHPWW0oTDKnIlKpzdFWGf7ylvRz
+         a9jA==
+X-Forwarded-Encrypted: i=1; AJvYcCXHNu0+AxO2mwD8sPmlSFihyO8KGmaCnbA/lYKwwrYswadOVUxQZX81G2Khngd7+XpLtukDhxsK@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx8z3ZmQlws9JPKg9dh4dtDJpVnHauzufz/uEn21FJYfS7TFLQA
+	Q7Pczd5X1JwQ2S4HfFhuSfirn2vPBZ+beZIwPFmYxn+zngt+Q8OV4NQdWpZ1eZ9rHWWm0TMLVK8
+	Rt4cHqu3cfe5Zsyj9XgyjPMJVk5QlV0k6AZZKDjvIV5OQxlXz7SxBG98=
+X-Received: by 2002:a17:903:2344:b0:20c:5cdd:a9e with SMTP id d9443c01a7336-20ca147e9damr146247565ad.28.1728915257152;
+        Mon, 14 Oct 2024 07:14:17 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGG6sDbAcTmZ325ycjPkXMURRGc2o3NVlrK/e6e3Jryp8immaR8i2iQOjILaCrnYlQS1vrYCA==
+X-Received: by 2002:a17:903:2344:b0:20c:5cdd:a9e with SMTP id d9443c01a7336-20ca147e9damr146247205ad.28.1728915256682;
+        Mon, 14 Oct 2024 07:14:16 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20c8c0e75absm66923005ad.164.2024.10.14.07.14.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Oct 2024 07:14:16 -0700 (PDT)
+Date: Mon, 14 Oct 2024 22:14:12 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+	Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
 	fstests@vger.kernel.org
-Subject: Re: [PATCHBOMB 6.13] xfs: metadata directories and realtime groups
-Message-ID: <ZwzNNnbHhlCi8REx@infradead.org>
-References: <20241011002402.GB21877@frogsfrogsfrogs>
+Subject: Re: [PATCH] xfs: new EOF fragmentation tests
+Message-ID: <20241014141412.vfiv62euxavhyyyq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20240924084551.1802795-1-hch@lst.de>
+ <20240924084551.1802795-2-hch@lst.de>
+ <20241001145944.GE21840@frogsfrogsfrogs>
+ <20241013174936.og4m2yopfh26ygwm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241014060725.GA20751@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,12 +78,193 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241011002402.GB21877@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20241014060725.GA20751@lst.de>
 
-On Thu, Oct 10, 2024 at 05:24:02PM -0700, Darrick J. Wong wrote:
-> I'm only sending the kernel patches to the list for now, but please have
-> a look at the git tree links for xfsprogs and fstests changes.
+On Mon, Oct 14, 2024 at 08:07:25AM +0200, Christoph Hellwig wrote:
+> On Mon, Oct 14, 2024 at 01:49:36AM +0800, Zorro Lang wrote:
+> > Thanks for reworking this patch, it's been merged into fstests, named
+> > xfs/629~632. But now these 4 cases always fail on upstream xfs, e.g
+> > (diff output) [1][2][3][4]. Could you help to take a look at the
+> > failure which Darick metioned above too :)
+> 
+> What do you mean with upstream xfs?  Any kernel before the eofblocks
+> fixes will obviously fail.  Always_cow will also always fail and I'll
+> send a patch for that.  Any other configuration you've seen?
 
-As far as I can you've also sent out xfsprogs and xfstests patches :)
+Sorry, I've lost old test results. From my current test results, the x/629
+and x/632 fails [1][2] on pmem device (xfs) with linux v6.12-rc2+
+(HEAD=cfea70e835b9180029257d8b772c9e99c3305a9a). The .full output as [3],
+the .out.bad output as [4][5]. Besides that, I hit x/629 failed on a loop
+device on s390x once (as [6]) with same v6.12-rc2+ kernel.
+
+Thanks,
+Zorro
+
+[1]
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 hpe-dl360gen11-01 6.12.0-rc2+ #1 SMP PREEMPT_DYNAMIC Sun Oct 13 15:36:13 EDT 2024
+MKFS_OPTIONS  -- -f -f -b size=4096 -m crc=1,finobt=1,rmapbt=0,reflink=0,inobtcount=1,bigtime=1 /dev/pmem0
+MOUNT_OPTIONS -- -o dax=always -o context=system_u:object_r:root_t:s0 /dev/pmem0 /mnt/fstests/SCRATCH_DIR
+
+xfs/629       - output mismatch (see /var/lib/xfstests/results//xfs/629.out.bad)
+    --- tests/xfs/629.out	2024-10-13 16:02:57.113908110 -0400
+    +++ /var/lib/xfstests/results//xfs/629.out.bad	2024-10-14 01:52:24.553081084 -0400
+    @@ -1,9 +1,17 @@
+     QA output created by 629
+    -file.0 extent count is in range
+    -file.1 extent count is in range
+    -file.2 extent count is in range
+    -file.3 extent count is in range
+    -file.4 extent count is in range
+    -file.5 extent count is in range
+    ...
+    (Run 'diff -u /var/lib/xfstests/tests/xfs/629.out /var/lib/xfstests/results//xfs/629.out.bad'  to see the entire diff)
+Ran: xfs/629
+Failures: xfs/629
+Failed 1 of 1 tests
+
+[2]
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 hpe-dl360gen11-01 6.12.0-rc2+ #1 SMP PREEMPT_DYNAMIC Sun Oct 13 15:36:13 EDT 2024
+MKFS_OPTIONS  -- -f -f -b size=4096 -m crc=1,finobt=1,rmapbt=0,reflink=0,inobtcount=1,bigtime=1 /dev/pmem0
+MOUNT_OPTIONS -- -o dax=always -o context=system_u:object_r:root_t:s0 /dev/pmem0 /mnt/fstests/SCRATCH_DIR
+
+xfs/632       - output mismatch (see /var/lib/xfstests/results//xfs/632.out.bad)
+    --- tests/xfs/632.out	2024-10-13 16:02:57.166908766 -0400
+    +++ /var/lib/xfstests/results//xfs/632.out.bad	2024-10-14 01:55:32.671284956 -0400
+    @@ -1,33 +1,65 @@
+     QA output created by 632
+    -file.0 extent count is in range
+    -file.1 extent count is in range
+    -file.2 extent count is in range
+    -file.3 extent count is in range
+    -file.4 extent count is in range
+    -file.5 extent count is in range
+    ...
+    (Run 'diff -u /var/lib/xfstests/tests/xfs/632.out /var/lib/xfstests/results//xfs/632.out.bad'  to see the entire diff)
+Ran: xfs/632
+Failures: xfs/632
+Failed 1 of 1 tests
+
+[3]
+meta-data=/dev/pmem0             isize=512    agcount=4, agsize=655360 blks
+         =                       sectsz=4096  attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=0    bigtime=1 inobtcount=1 nrext64=1
+         =                       exchange=0  
+data     =                       bsize=4096   blocks=2621440, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1, parent=0
+log      =internal log           bsize=4096   blocks=300954, version=2
+         =                       sectsz=4096  sunit=1 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+[4]
+QA output created by 629
+file.0 extent count has value of 520
+file.0 extent count is NOT in range 2 .. 40
+file.1 extent count has value of 627
+file.1 extent count is NOT in range 2 .. 40
+file.2 extent count has value of 776
+file.2 extent count is NOT in range 2 .. 40
+file.3 extent count has value of 725
+file.3 extent count is NOT in range 2 .. 40
+file.4 extent count has value of 672
+file.4 extent count is NOT in range 2 .. 40
+file.5 extent count has value of 709
+file.5 extent count is NOT in range 2 .. 40
+file.6 extent count has value of 660
+file.6 extent count is NOT in range 2 .. 40
+file.7 extent count has value of 703
+file.7 extent count is NOT in range 2 .. 40
+
+[5]
+QA output created by 632
+file.0 extent count has value of 762
+file.0 extent count is NOT in range 1 .. 16
+file.1 extent count has value of 800
+file.1 extent count is NOT in range 1 .. 16
+file.2 extent count has value of 800
+file.2 extent count is NOT in range 1 .. 16
+file.3 extent count has value of 794
+file.3 extent count is NOT in range 1 .. 16
+file.4 extent count has value of 800
+file.4 extent count is NOT in range 1 .. 16
+file.5 extent count has value of 787
+file.5 extent count is NOT in range 1 .. 16
+file.6 extent count has value of 788
+file.6 extent count is NOT in range 1 .. 16
+file.7 extent count has value of 800
+file.7 extent count is NOT in range 1 .. 16
+file.8 extent count has value of 799
+file.8 extent count is NOT in range 1 .. 16
+file.9 extent count has value of 800
+file.9 extent count is NOT in range 1 .. 16
+file.10 extent count has value of 793
+file.10 extent count is NOT in range 1 .. 16
+file.11 extent count has value of 800
+file.11 extent count is NOT in range 1 .. 16
+file.12 extent count has value of 800
+file.12 extent count is NOT in range 1 .. 16
+file.13 extent count has value of 800
+file.13 extent count is NOT in range 1 .. 16
+file.14 extent count has value of 800
+file.14 extent count is NOT in range 1 .. 16
+file.15 extent count has value of 800
+file.15 extent count is NOT in range 1 .. 16
+file.16 extent count has value of 800
+file.16 extent count is NOT in range 1 .. 16
+file.17 extent count has value of 800
+file.17 extent count is NOT in range 1 .. 16
+file.18 extent count has value of 800
+file.18 extent count is NOT in range 1 .. 16
+file.19 extent count has value of 797
+file.19 extent count is NOT in range 1 .. 16
+file.20 extent count has value of 782
+file.20 extent count is NOT in range 1 .. 16
+file.21 extent count has value of 800
+file.21 extent count is NOT in range 1 .. 16
+file.22 extent count has value of 800
+file.22 extent count is NOT in range 1 .. 16
+file.23 extent count has value of 800
+file.23 extent count is NOT in range 1 .. 16
+file.24 extent count has value of 792
+file.24 extent count is NOT in range 1 .. 16
+file.25 extent count has value of 777
+file.25 extent count is NOT in range 1 .. 16
+file.26 extent count has value of 799
+file.26 extent count is NOT in range 1 .. 16
+file.27 extent count has value of 800
+file.27 extent count is NOT in range 1 .. 16
+file.28 extent count has value of 793
+file.28 extent count is NOT in range 1 .. 16
+file.29 extent count has value of 800
+file.29 extent count is NOT in range 1 .. 16
+file.30 extent count has value of 797
+file.30 extent count is NOT in range 1 .. 16
+
+
+[6]
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/s390x s390x-kvm-003 6.12.0-rc2+ #1 SMP Sun Oct 13 15:47:15 EDT 2024
+MKFS_OPTIONS  -- -f -m crc=1,finobt=1,reflink=1,rmapbt=1,bigtime=1,inobtcount=1 -b size=1024 /dev/loop1
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /mnt/fstests/SCRATCH_DIR
+
+xfs/629       - output mismatch (see /var/lib/xfstests/results//xfs/629.out.bad)
+    --- tests/xfs/629.out	2024-10-13 15:56:03.564908748 -0400
+    +++ /var/lib/xfstests/results//xfs/629.out.bad	2024-10-13 18:45:54.344510502 -0400
+    @@ -1,9 +1,16 @@
+     QA output created by 629
+    -file.0 extent count is in range
+    -file.1 extent count is in range
+    -file.2 extent count is in range
+    -file.3 extent count is in range
+    -file.4 extent count is in range
+    -file.5 extent count is in range
+    ...
+    (Run 'diff -u /var/lib/xfstests/tests/xfs/629.out /var/lib/xfstests/results//xfs/629.out.bad'  to see the entire diff)
+Ran: xfs/629
+Failures: xfs/629
+Failed 1 of 1 tests
+> 
 
