@@ -1,48 +1,166 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from mx0b-00082601.pphosted.com (mx0b-00082601.pphosted.com [67.231.153.30])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B430638DE9;
-	Tue, 15 Oct 2024 03:39:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE28F1DD0CA
+	for <fstests@vger.kernel.org>; Tue, 15 Oct 2024 15:40:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.153.30
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728963570; cv=none; b=P9TZtp43BcuXJMTlHpmPVF8RNu9hww/tg6Dptv5SL3A09c+SX42bNmgF11xZ9HWeCT5QdUsQnH0jmbA4+L/Mx7UjYJv/R1Ay9FEWV8Zay39+mfZSM+00RjTzb6CS4DndI1rG4T33KynMwjxfJpQTcUcZnfdfSr29urSQSjXQMak=
+	t=1729006820; cv=none; b=oX30IUOTgiFIEMQNPd05q2Ig16yyqZK1yzSYKmEQMIRQL33iOIyLkTu6RcCwcGCzsxfbukazquN10LaowA0Yec+mR7sS1oZ9a2TVoHayo57HF3VeytWE9hTZWvqM+IZh1O8+nkPxL4LiVYi1ZDvlbd6xqUxz9Dsxo01uHFlokIQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728963570; c=relaxed/simple;
-	bh=eZvEyZ5jVyn4switoDz7DVocaz1Nx8UTN5/eDVA4pFk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VYHRH7gn64LNszHY845WymgIIp1BaMkXpr0qzmCbENG2W9mT11zeUkMBQupOzeWYuy6tcWpr5a3FCQoY6dNz/TsIcbU/pb3q+KZiO1iZ3O/5qeLkwyiTGW/Yvo6vFgDWmmPYv4rR2qHbgcJuHME2GN93tM3okqVrci+KBz/zwXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id DF3FD227AA8; Tue, 15 Oct 2024 05:39:23 +0200 (CEST)
-Date: Tue, 15 Oct 2024 05:39:23 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, Christoph Hellwig <hch@lst.de>,
-	Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs: new EOF fragmentation tests
-Message-ID: <20241015033923.GA15971@lst.de>
-References: <20240924084551.1802795-1-hch@lst.de> <20240924084551.1802795-2-hch@lst.de> <20241001145944.GE21840@frogsfrogsfrogs> <20241013174936.og4m2yopfh26ygwm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <20241014060725.GA20751@lst.de> <20241014152428.GQ21840@frogsfrogsfrogs> <20241014174650.wms62e3ogzilcnn5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	s=arc-20240116; t=1729006820; c=relaxed/simple;
+	bh=FIAo2FZnf+jMUWY1k7tNvETVogNml5yD+U8nYEnwKW0=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Hm9je3sus5DitttmBschy8TmHnAXi2lRaMN67x348WVfYqcktVd9roBON371tgDepAswA3vKzd5gYHXds0Pt2X7QR7z7D0J53LUrpNwEwgJ5iPxvKhpEuLsQdYSseDPsxTo/925JoCIu+V2N3jdXYvXoxgFs4Kz+VDnRWsvzT5Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fb.com; spf=pass smtp.mailfrom=meta.com; dkim=pass (1024-bit key) header.d=fb.com header.i=@fb.com header.b=ptDULMFY; arc=none smtp.client-ip=67.231.153.30
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fb.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=meta.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=fb.com header.i=@fb.com header.b="ptDULMFY"
+Received: from pps.filterd (m0109331.ppops.net [127.0.0.1])
+	by mx0a-00082601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49FFbbL1017859
+	for <fstests@vger.kernel.org>; Tue, 15 Oct 2024 08:40:17 -0700
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=facebook; bh=gxKGweHK8S1gipBA8mthXkn
+	uQQgOKNqCgLyIDgW2Nl8=; b=ptDULMFY5DIIdDRsV8pKehGDlDXyR4px1vZO0VI
+	5/ql3JRPx/1AzK7X1m9U66udnyCBzYceyoIQVEcI2WtaBo3JBEhb2lsu4+FewcDG
+	sVgR3VaslbaCwiJxFO+hReAd4bfmqNkWDEsNVKlMcnjrOvv+anu+urf4DmYzR6mN
+	8Jbg=
+Received: from mail.thefacebook.com ([163.114.134.16])
+	by mx0a-00082601.pphosted.com (PPS) with ESMTPS id 428c4swb6d-12
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Tue, 15 Oct 2024 08:40:17 -0700 (PDT)
+Received: from twshared16035.07.ash9.facebook.com (2620:10d:c085:108::4) by
+ mail.thefacebook.com (2620:10d:c08b:78::2ac9) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.2.1544.11; Tue, 15 Oct 2024 15:40:16 +0000
+Received: by devbig276.nha1.facebook.com (Postfix, from userid 660015)
+	id DB5EA7CAA648; Tue, 15 Oct 2024 16:40:05 +0100 (BST)
+From: Mark Harmstone <maharmstone@fb.com>
+To: <fstests@vger.kernel.org>, <linux-btrfs@vger.kernel.org>
+CC: Mark Harmstone <maharmstone@fb.com>
+Subject: [PATCH] generic: add test for missing btrfs csums in log when doing async on subpage vol
+Date: Tue, 15 Oct 2024 16:39:34 +0100
+Message-ID: <20241015153957.2099812-1-maharmstone@fb.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241014174650.wms62e3ogzilcnn5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: quoted-printable
+X-FB-Internal: Safe
+Content-Type: text/plain
+X-Proofpoint-GUID: 6NZydVB1i3JZPiZRuZtkn3kwI56hpqfM
+X-Proofpoint-ORIG-GUID: 6NZydVB1i3JZPiZRuZtkn3kwI56hpqfM
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
+ definitions=2024-10-05_03,2024-10-04_01,2024-09-30_01
 
-On Tue, Oct 15, 2024 at 01:46:50AM +0800, Zorro Lang wrote:
-> >From the output we can see the sector size is 4096.
-> The mount option is "-o dax=always/inode/never", no more, without external
-> log device, no rtdev.
+Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
+race could mean that csums weren't getting written to the log tree,
+leading to corruption when it was replayed.
 
-Hmm.  Given how unreliable these tests are maybe we should just drop
-them given that they are trying to verify optimal expected behavior and
-not just correctness.  Maybe Dave who originally wrote them can chime
-in.
+The patches to detect log this tree corruption are in btrfs-progs 6.11.
+
+Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+---
+This is a genericized version of the test I originally proposed as
+btrfs/333.
+
+ tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/757.out |  2 ++
+ 2 files changed, 73 insertions(+)
+ create mode 100755 tests/generic/757
+ create mode 100644 tests/generic/757.out
+
+diff --git a/tests/generic/757 b/tests/generic/757
+new file mode 100755
+index 00000000..6ad3d01e
+--- /dev/null
++++ b/tests/generic/757
+@@ -0,0 +1,71 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# FS QA Test 757
++#
++# Test async dio with fsync to test a btrfs bug where a race meant that =
+csums
++# weren't getting written to the log tree, causing corruptions on remoun=
+t.
++# This can be seen on subpage FSes on Linux 6.4.
++#
++. ./common/preamble
++_begin_fstest auto quick metadata log recoveryloop
++
++_fixed_by_kernel_commit e917ff56c8e7 \
++	"btrfs: determine synchronous writers from bio or writeback control"
++
++fio_config=3D$tmp.fio
++
++. ./common/dmlogwrites
++
++_require_scratch
++_require_log_writes
++
++cat >$fio_config <<EOF
++[global]
++iodepth=3D128
++direct=3D1
++ioengine=3Dlibaio
++rw=3Drandwrite
++runtime=3D1s
++[job0]
++rw=3Drandwrite
++filename=3D$SCRATCH_MNT/file
++size=3D1g
++fdatasync=3D1
++EOF
++
++_require_fio $fio_config
++
++cat $fio_config >> $seqres.full
++
++_log_writes_init $SCRATCH_DEV
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mark mkfs
++
++_log_writes_mount
++
++$FIO_PROG $fio_config > /dev/null 2>&1
++_log_writes_unmount
++
++_log_writes_remove
++
++prev=3D$(_log_writes_mark_to_entry_number mkfs)
++[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++cur=3D$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
++
++	_check_scratch_fs
++
++	prev=3D$cur
++	cur=3D$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=3D0
++exit
+diff --git a/tests/generic/757.out b/tests/generic/757.out
+new file mode 100644
+index 00000000..dfbc8094
+--- /dev/null
++++ b/tests/generic/757.out
+@@ -0,0 +1,2 @@
++QA output created by 757
++Silence is golden
+--=20
+2.44.2
 
