@@ -1,198 +1,48 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 201236AB8
-	for <fstests@vger.kernel.org>; Tue, 15 Oct 2024 02:51:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B430638DE9;
+	Tue, 15 Oct 2024 03:39:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728960692; cv=none; b=PJhF9J6+KW5yCiTWmpTugWDFZLOpoAGpnobAo5Omt2ZJaXvg0iKLgS30l0oZEVo34rzOaaY8wa9RgustzcZPbDpE7NUKj7wCKrara8eTFZvxQjl3NggISnnsE8+MFMcnWreVtR0ioAlkCK4A57zBWK8Fd9CnM67jtlbNfxR75CY=
+	t=1728963570; cv=none; b=P9TZtp43BcuXJMTlHpmPVF8RNu9hww/tg6Dptv5SL3A09c+SX42bNmgF11xZ9HWeCT5QdUsQnH0jmbA4+L/Mx7UjYJv/R1Ay9FEWV8Zay39+mfZSM+00RjTzb6CS4DndI1rG4T33KynMwjxfJpQTcUcZnfdfSr29urSQSjXQMak=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728960692; c=relaxed/simple;
-	bh=Y05EfT0ASAjNhTImYRlNb+wZ7uQbgocCROAhY9S4ZAU=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=YR6SadNA55cEzAk6667dFw1Z0govst9BAyBiwTbHdM5lWW+JWpXFdm3E+uv5Djukn7mnMA6OSIEmbd8XMujWOqE/6n5LLvRHeoungoCfwch7d/8aBDtM4YE+MFrh+UR1e70VR9V4b3TXTHvwsgn3Ua5KFGHmPI09L9iz0wrdFUg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KWKKJK7v; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KWKKJK7v"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5F8F1C4CED0;
-	Tue, 15 Oct 2024 02:51:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728960691;
-	bh=Y05EfT0ASAjNhTImYRlNb+wZ7uQbgocCROAhY9S4ZAU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=KWKKJK7vFQn9sRsbVTHVJFDV0KhaqMyDA65XyYsIdE6xEcXx7KE3wklyotJ7CET06
-	 6bIvhp+iaxew4tV+3FuQnvzI2Cz82mURHKCzMd2su6As/Davr92etlVH8Xe9uLxCjG
-	 6lhQ+Ts+YgrJmNCUhLj/8lgcZJR8p7ShTrnXW0VqRTQRrLlNN0BOPhGzGQV1Dt3km1
-	 aS8BfKruyBeHgn8c0JDh/3YJY7T/QLWs8r3kgice8P/2ImNvHZLDr4IuWgB5V8PTey
-	 jhomZNcd/L+UrZWWjPGOxrkDdyRAKrNi+q3HpurZl6wM3p50ASaWu12Ud/75XG+KW5
-	 ++/itwbhoM0Mg==
-From: Chao Yu <chao@kernel.org>
+	s=arc-20240116; t=1728963570; c=relaxed/simple;
+	bh=eZvEyZ5jVyn4switoDz7DVocaz1Nx8UTN5/eDVA4pFk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=VYHRH7gn64LNszHY845WymgIIp1BaMkXpr0qzmCbENG2W9mT11zeUkMBQupOzeWYuy6tcWpr5a3FCQoY6dNz/TsIcbU/pb3q+KZiO1iZ3O/5qeLkwyiTGW/Yvo6vFgDWmmPYv4rR2qHbgcJuHME2GN93tM3okqVrci+KBz/zwXM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id DF3FD227AA8; Tue, 15 Oct 2024 05:39:23 +0200 (CEST)
+Date: Tue, 15 Oct 2024 05:39:23 +0200
+From: Christoph Hellwig <hch@lst.de>
 To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org,
-	linux-f2fs-devel@lists.sourceforge.net,
-	Chao Yu <chao@kernel.org>,
-	Jaegeuk Kim <jaegeuk@kernel.org>,
-	Qi Han <hanqi@vivo.com>
-Subject: [PATCH 2/2] f2fs/007: add testcase to check consistency of compressed inode metadata
-Date: Tue, 15 Oct 2024 10:51:06 +0800
-Message-Id: <20241015025106.3203676-2-chao@kernel.org>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20241015025106.3203676-1-chao@kernel.org>
-References: <20241015025106.3203676-1-chao@kernel.org>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, Christoph Hellwig <hch@lst.de>,
+	Dave Chinner <dchinner@redhat.com>, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs: new EOF fragmentation tests
+Message-ID: <20241015033923.GA15971@lst.de>
+References: <20240924084551.1802795-1-hch@lst.de> <20240924084551.1802795-2-hch@lst.de> <20241001145944.GE21840@frogsfrogsfrogs> <20241013174936.og4m2yopfh26ygwm@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com> <20241014060725.GA20751@lst.de> <20241014152428.GQ21840@frogsfrogsfrogs> <20241014174650.wms62e3ogzilcnn5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241014174650.wms62e3ogzilcnn5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-metadata of compressed inode should always be consistent after file
-compression, reservation, releasement and decompression, let's add
-a testcase to check it.
+On Tue, Oct 15, 2024 at 01:46:50AM +0800, Zorro Lang wrote:
+> >From the output we can see the sector size is 4096.
+> The mount option is "-o dax=always/inode/never", no more, without external
+> log device, no rtdev.
 
-Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: Qi Han <hanqi@vivo.com>
-Signed-off-by: Chao Yu <chao@kernel.org>
----
- tests/f2fs/007     | 116 +++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/007.out |   4 ++
- 2 files changed, 120 insertions(+)
- create mode 100755 tests/f2fs/007
- create mode 100644 tests/f2fs/007.out
-
-diff --git a/tests/f2fs/007 b/tests/f2fs/007
-new file mode 100755
-index 00000000..274be806
---- /dev/null
-+++ b/tests/f2fs/007
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Oppo.  All Rights Reserved.
-+#
-+# FS QA Test No. f2fs/007
-+#
-+# This is a regression test to check whether compressed metadata
-+# can become inconsistent after file compression, reservation
-+# releasement, and decompression.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f tmp.*
-+}
-+
-+testfile_prefix=$SCRATCH_MNT/testfile
-+fio_config=$tmp.fio
-+
-+cat >$fio_config <<EOF
-+[write_compressed_data_30]
-+name=mytest
-+ioengine=psync
-+rw=write
-+direct=0
-+bs=1M
-+filesize=1M
-+numjobs=1
-+filename=/mnt/scratch_f2fs/testfile30
-+buffer_compress_percentage=30
-+
-+[write_compressed_data_60]
-+name=mytest
-+ioengine=psync
-+rw=write
-+direct=0
-+bs=1M
-+filesize=1M
-+numjobs=1
-+filename=/mnt/scratch_f2fs/testfile60
-+buffer_compress_percentage=60
-+
-+[write_compressed_data_90]
-+name=mytest
-+ioengine=psync
-+rw=write
-+direct=0
-+bs=1M
-+filesize=1M
-+numjobs=1
-+filename=/mnt/scratch_f2fs/testfile90
-+buffer_compress_percentage=90
-+EOF
-+
-+_require_fio $fio_config
-+_require_scratch
-+_scratch_mkfs "-f -O extra_attr,compression" >> $seqres.full
-+_scratch_mount "-o compress_mode=user,compress_extension=*" >> $seqres.full
-+
-+echo -e "Run fio to initialize file w/ specified compress ratio" >> $seqres.full
-+cat $fio_config >> $seqres.full
-+$FIO_PROG $fio_config >> $seqres.full
-+_scratch_unmount
-+
-+for i in 30 60 90; do
-+	testfile=$testfile_prefix$i
-+
-+	_scratch_mount "-o compress_mode=user" >> $seqres.full
-+	f2fs_io compress $testfile >> $seqres.full
-+	cblocks=`f2fs_io get_cblocks $testfile`
-+	echo "compression ratio is: "$cblocks" / 256"
-+
-+	_scratch_unmount
-+
-+	# 1. check after compression
-+	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
-+	if [ $? -ne 0 ]; then
-+		_fail "filesystem becomes corrupted after compress"
-+	fi
-+
-+	_scratch_mount >> $seqres.full
-+	f2fs_io release_cblocks $testfile >> $seqres.full
-+	_scratch_unmount
-+
-+	# 2. check after releasement
-+	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
-+	if [ $? -ne 0 ]; then
-+		_fail "filesystem becomes corrupted after release_cblocks"
-+	fi
-+
-+	_scratch_mount >> $seqres.full
-+	f2fs_io reserve_cblocks $testfile >> $seqres.full
-+	_scratch_unmount
-+
-+	# 3. check after rservation
-+	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
-+	if [ $? -ne 0 ]; then
-+		_fail "filesystem becomes corrupted after reserve_cblocks"
-+	fi
-+
-+	_scratch_mount "-o compress_mode=user" >> $seqres.full
-+	f2fs_io decompress $testfile >> $seqres.full
-+	_scratch_unmount
-+
-+	# 4. check after decompression
-+	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
-+	if [ $? -ne 0 ]; then
-+		_fail "filesystem becomes corrupted after decompress"
-+	fi
-+done
-+
-+status=0
-+exit
-diff --git a/tests/f2fs/007.out b/tests/f2fs/007.out
-new file mode 100644
-index 00000000..2ea71c18
---- /dev/null
-+++ b/tests/f2fs/007.out
-@@ -0,0 +1,4 @@
-+QA output created by 007
-+compression ratio is: 64 / 256
-+compression ratio is: 128 / 256
-+compression ratio is: 192 / 256
--- 
-2.40.1
+Hmm.  Given how unreliable these tests are maybe we should just drop
+them given that they are trying to verify optimal expected behavior and
+not just correctness.  Maybe Dave who originally wrote them can chime
+in.
 
