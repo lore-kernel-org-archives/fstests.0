@@ -1,203 +1,196 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE8B118B47A;
-	Wed, 16 Oct 2024 04:25:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 433B31C07EA;
+	Wed, 16 Oct 2024 11:10:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729052724; cv=none; b=mEWk8tSma5NTr8Et7ocCCBwCf+MjNhCDDlcaPf0xumEX9/1E34K6Yg6AafIIWtzRghcliN+Wyy7E4C7RzawzcQ5eqQ2JgkuKFn+Z+suCOTVv0E9P3CxpgTshY78SSbupFxraylOgGZcrwueZgoF19ua5ZAtEAqaw3U/Exupxugk=
+	t=1729077025; cv=none; b=FshOAPfVjrIizaJEWnyop/urkKpdu8X0z/MqKkYa2ATzYVEQopOrFXDaBWsVNGHjMcSHAFtEE5TxBaSqqBJoxSUmo+zlJvvh8rnkrLfkfJ2TpWDcYU9e/OHJBucarDJAJ2IEHZKvV65cErZmwbrlN/p+jhKuXQQERaANMc0ns8k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729052724; c=relaxed/simple;
-	bh=uqvk/tRj+S6ibTglXMsQluv2gY7fdie13fTs0LCIjOk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=CGYOe8BY/o3RkPDPFTC2RS1108Z40CV/ymbUg4J+gKjNoI9XBw3ZioYTXGNnlxb8V3XHQK/rC3UdGp339QovKlMqweBw3Mgxv7rgMYuL74dM0Qb28UPkyzuxs7GxdmPT3i15NnmnBnVr6TdWNJaOXYxFAf0QN6Ice5s2hDxeEr8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=c9T99MWz; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1729077025; c=relaxed/simple;
+	bh=O2cuOoIXjcfjaimiMrzckaCV2XXDjo9KLgsWqT+luQw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=YZdKB0CBoG58j+T8KBnFFJN9VD1tjHLkz3DlzNG2f5JD6lwW/8B65PPaTOK63tPpps33k0N+Icf3Apk2pjTJyUKnCW1m/zPGzws2yUfR6ZsOt9BzXQxkY/IM7zz7kmzk2rWRwyUiFPx5jpo1WY39HvxeaJ3bBOCMV+iav/xZMi4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BV9kZYCw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="c9T99MWz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1729052713; x=1729657513; i=quwenruo.btrfs@gmx.com;
-	bh=x8kEetWCVFd7YmYiLs+qXShY70fxVgqv2o+yrzHNepo=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=c9T99MWzphlYUOI17AMFd0qSJlBVBT8ZLJ8aSsyjA8L79wfYn7hQ4YrqgJt0Q8Kb
-	 nGns3Okwm52OFQr2nyZIeLVQhgfcG4MI6xeOY+b24a61uwksxEwCvEhrnbhYD1WVs
-	 d5XnBQEjKsHQ4QiEzvxm14OtWr6SQr3JJznVvhw38JI9fmn8lE4WjD6L+Jb/5fIHi
-	 L/B4QZAiCJujaIZcN0MUNQMinAZ39xV+wjcZbmZ7q8HSLh7PvSNtBAKeuvf0+l4R3
-	 6gUmWP0Ic7Feo9S7t2uT31mlMpZwxrD49A5gcWEPnkwL3heiC1IXmEy+sZc9SF3Go
-	 H2a69afI3ozoCiKQJA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1M1po0-1syjjc3voW-002FTa; Wed, 16
- Oct 2024 06:25:13 +0200
-Message-ID: <7773a237-9c97-42c4-8548-913faa24654b@gmx.com>
-Date: Wed, 16 Oct 2024 14:55:09 +1030
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BV9kZYCw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DEA0FC4CEC5;
+	Wed, 16 Oct 2024 11:10:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1729077024;
+	bh=O2cuOoIXjcfjaimiMrzckaCV2XXDjo9KLgsWqT+luQw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=BV9kZYCwBmZj/r3vEMdQemadan0oXxTxSgMElJNEUAHkat32Y56asTulL6oOgjetN
+	 Wy6ZSy+Jl7VVUUtqx1FrvkALrRkk1waScmUp9l6ZsY0ROnwMUkKx7NHWjQmR4g8t2X
+	 4vhAaq+3n83qA0bmubzPO3wTx1PhgG2dD0hzkIPFAiCNq3xoFzrMHHaEdDu3Xj7gu7
+	 4bU5GtZbjY6Mi2VfxYWNHpkYqevWg4b9phlWG9ypCM2rw9XwNh4UGfGo9NTmIv4D9X
+	 cCijjxJgr7/swQrUoedcT9jxlbe58M/HeEiN0N3pKtbeLlbkVSl+Axh7e7K1qgnpgP
+	 Ud0xLaVfLIZhA==
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-539f1292a9bso4375137e87.2;
+        Wed, 16 Oct 2024 04:10:24 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWPKyyOUF2MOa2gGlloHPQee+OPzK/CMS6/CxLiBoCTEPt18mCQgaBt3VDegpcphq+JADh4v/G32zRqxw==@vger.kernel.org
+X-Gm-Message-State: AOJu0Yys282glspFyyc19lx4jgtH0t6Gle4hTql8N68mVEXoI2ziC95p
+	vpTlF08+bN7OdY+gbxVS/PU2hUGK8u9L+EM3wAUB8CqzjDx11D6xUBFjbAhkj5bd3A7Ze3imKhf
+	nkSn6f5IGVr19aGMpwOiffbmESfs=
+X-Google-Smtp-Source: AGHT+IEi1BAJJ1+jZyt4SL/39rY0gpC0lnJ3Kgns6uXEBXlkaK2vToY4EH/gLeBfx8nCr7OnJNfZsFz2084/ronfIA8=
+X-Received: by 2002:a05:6512:4506:b0:52c:fd46:bf07 with SMTP id
+ 2adb3069b0e04-53a0704058dmr1066359e87.49.1729077023193; Wed, 16 Oct 2024
+ 04:10:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] btrfs: add test for cleaner thread under seed-sprout
-To: Boris Burkov <boris@bur.io>, linux-btrfs@vger.kernel.org,
- kernel-team@fb.com, fstests@vger.kernel.org
-References: <9925ac0001b867a523a8c9c838536b50c2b19348.1729034727.git.boris@bur.io>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00iVQUJDToH
- pgAKCRDCPZHzoSX+qNKACACkjDLzCvcFuDlgqCiS4ajHAo6twGra3uGgY2klo3S4JespWifr
- BLPPak74oOShqNZ8yWzB1Bkz1u93Ifx3c3H0r2vLWrImoP5eQdymVqMWmDAq+sV1Koyt8gXQ
- XPD2jQCrfR9nUuV1F3Z4Lgo+6I5LjuXBVEayFdz/VYK63+YLEAlSowCF72Lkz06TmaI0XMyj
- jgRNGM2MRgfxbprCcsgUypaDfmhY2nrhIzPUICURfp9t/65+/PLlV4nYs+DtSwPyNjkPX72+
- LdyIdY+BqS8cZbPG5spCyJIlZonADojLDYQq4QnufARU51zyVjzTXMg5gAttDZwTH+8LbNI4
- mm2YzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCY00ibgUJDToHvwAK
- CRDCPZHzoSX+qK6vB/9yyZlsS+ijtsvwYDjGA2WhVhN07Xa5SBBvGCAycyGGzSMkOJcOtUUf
- tD+ADyrLbLuVSfRN1ke738UojphwkSFj4t9scG5A+U8GgOZtrlYOsY2+cG3R5vjoXUgXMP37
- INfWh0KbJodf0G48xouesn08cbfUdlphSMXujCA8y5TcNyRuNv2q5Nizl8sKhUZzh4BascoK
- DChBuznBsucCTAGrwPgG4/ul6HnWE8DipMKvkV9ob1xJS2W4WJRPp6QdVrBWJ9cCdtpR6GbL
- iQi22uZXoSPv/0oUrGU+U5X4IvdnvT+8viPzszL5wXswJZfqfy8tmHM85yjObVdIG6AlnrrD
-In-Reply-To: <9925ac0001b867a523a8c9c838536b50c2b19348.1729034727.git.boris@bur.io>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+References: <20241015153957.2099812-1-maharmstone@fb.com>
+In-Reply-To: <20241015153957.2099812-1-maharmstone@fb.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 16 Oct 2024 12:09:46 +0100
+X-Gmail-Original-Message-ID: <CAL3q7H4wLLTLi_sfKEQB8qsQ6G7VxWBfK_4FwSi4qL5Z3bkycQ@mail.gmail.com>
+Message-ID: <CAL3q7H4wLLTLi_sfKEQB8qsQ6G7VxWBfK_4FwSi4qL5Z3bkycQ@mail.gmail.com>
+Subject: Re: [PATCH] generic: add test for missing btrfs csums in log when
+ doing async on subpage vol
+To: Mark Harmstone <maharmstone@fb.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:aTA+qoTWGgWZANXFSxiLVW46RdraH08/48LVCHGYT4LvYyY6Yay
- Y9ZUV0GZd7t0WeG9jtFrXCw1H318lcwn8PNRY7NDQeJJ1zE+NHdItC4Vqz7Wv7BC+xEDktF
- 1IAcb4fbJQifNw5wm31qzB/8dKptbBfcSWRm1E3EWX882m78lJ1UGNMF2+wpZM5pWrafRF3
- eiVXOj+GANly0zHlE3o+Q==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:+x67Jnb4MUk=;36XTp45IfnpeRjpKKdJADacZORY
- JB46FDT6wd0SMN1Tz5bIv+/TdqB7hUsP07vrbMsln74NZucFN820ajuGTeKkPIUmo/oNlMTW6
- 9fkA9vvtuKXFFzhHNT9WMW3bKonwtN9DRxWk8i4PhNEnfKT/6LNbm1H+StV3MF1cKAuz7Zmrx
- XRjvQ8n8gqOfrieG9hbnF9+re9xSoxrhocwyl6irfNuycJudewmk49wrVEjSRHd7LICuxqOvP
- HCSScUn/KFLDIN9Vd3c8rgVCw3U/0jsOSX8KEPI9mN5a9TO9nzu6jQuvPssSDOtVeOkvAmn+u
- E5yLprvPq8roafbm0MU+Uh3do7K84EN05XhiEAQlS8GWTxurjbBDZF9aI/QAWohOyjdax9Epx
- cB5SplNtrqtp6AHqucaYggrGrbXP8pNK0W7EYzqPbuTv7qm1lT0ykOCqgD0ziCon+LjuVaFRu
- WdF4SPOLHujd3ZBDGyTcJ7eMaVZlqZjvYjn0rMJT9AvlG8AZmUn5T//UnU6ltQuQQZfXeKn48
- HLA3V7vmMnewSC/SyZ+pX2OrfrDGG4d+kIA8McHNwFtQwoOTCKtqxKbWAgG2+LqT39XBFv8H+
- nrWIlUo/v/2kvjxeRpjCvoxY+M8Tkki/uV1bR3XLO6Mtt/86cWXIEno53ALXB/eqrLWab/K1A
- EAx9jL9fwVhEQyzvB9pgU5q4fPraUF+u8nNXqFSs05rNljOKZt0vk+ZCVjw1jn40ASJsw9BGF
- mq+eRCrragyZn19zVb0i0fCN8S+UNhV7UJgppgoPMeptvw+2pS4hTHGBe6FANglf5JjCBTGne
- GuzsqXSD6O3/kgjQ+eUP6KJw==
 
+On Tue, Oct 15, 2024 at 4:42=E2=80=AFPM Mark Harmstone <maharmstone@fb.com>=
+ wrote:
+>
+> Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
+> race could mean that csums weren't getting written to the log tree,
+> leading to corruption when it was replayed.
+>
+> The patches to detect log this tree corruption are in btrfs-progs 6.11.
 
+This shouldn't be needed right?
+Because after log replay the csums are missing and 'btrfs check'
+detects (IIRC) missing csums for extents referred by file extent items
+in a subvolume tree - if it doesn't then it should be improved.
 
-=E5=9C=A8 2024/10/16 09:57, Boris Burkov =E5=86=99=E9=81=93:
-> We have a longstanding bug that creating a seed sprout fs with the
-> ro->rw transition done with
 >
-> mount -o remount,rw $mnt
->
-> instead of
->
-> umount $mnt
-> mount $sprout_dev $mnt
->
-> results in an fs without BTRFS_FS_OPEN set, which fails to ever run the
-> critical btrfs cleaner thread.
->
-> This test reproduces that bug and detects it by creating and deleting a
-> subvolume, then triggering the cleaner thread. The expected behavior is
-> for the cleaner thread to delete the stale subvolume and for the list to
-> show no entries. Without the fix, we see a DELETED entry for the subvol.
->
-> Signed-off-by: Boris Burkov <boris@bur.io>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-Thanks,
-Qu
-
+> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
 > ---
-> Changelog:
-> v2:
-> - update to real copyright info
-> - add extra rw->ro transition checks
-> - remove unnecessary _require_test
-> ---
->   tests/btrfs/323     | 49 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/323.out |  2 ++
->   2 files changed, 51 insertions(+)
->   create mode 100755 tests/btrfs/323
->   create mode 100644 tests/btrfs/323.out
+> This is a genericized version of the test I originally proposed as
+> btrfs/333.
 >
-> diff --git a/tests/btrfs/323 b/tests/btrfs/323
+>  tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/757.out |  2 ++
+>  2 files changed, 73 insertions(+)
+>  create mode 100755 tests/generic/757
+>  create mode 100644 tests/generic/757.out
+>
+> diff --git a/tests/generic/757 b/tests/generic/757
 > new file mode 100755
-> index 000000000..ca57b1a1e
+> index 00000000..6ad3d01e
 > --- /dev/null
-> +++ b/tests/btrfs/323
-> @@ -0,0 +1,49 @@
+> +++ b/tests/generic/757
+> @@ -0,0 +1,71 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
 > +#
-> +# FS QA Test 323
+> +# FS QA Test 757
 > +#
-> +# Test that remounted seed/sprout device FS is fully functional. For ex=
-ample, that it can purge stale subvolumes.
+> +# Test async dio with fsync to test a btrfs bug where a race meant that =
+csums
+> +# weren't getting written to the log tree, causing corruptions on remoun=
+t.
+> +# This can be seen on subpage FSes on Linux 6.4.
 > +#
 > +. ./common/preamble
-> +_begin_fstest auto quick seed remount
+> +_begin_fstest auto quick metadata log recoveryloop
 > +
-> +. ./common/filter
-> +_require_command "$BTRFS_TUNE_PROG" btrfstune
-> +_require_scratch_dev_pool 2
+> +_fixed_by_kernel_commit e917ff56c8e7 \
+> +       "btrfs: determine synchronous writers from bio or writeback contr=
+ol"
+
+For generic tests what we do is:
+
+[ $FSTYP =3D=3D "btrfs" ] && _fixed_by_kernel_commit .....
+
+As long as the failure has not been observed and fixed on other filesystems=
+.
+In case one day a regression happens in another fs, we just add a
+corresponding line using the same logic.
+
+Otherwise if the test one days fails on another fs and fstests
+suggests that that commit is missing, it would be odd.
+
+Everything else looks good, so with that fixed (maybe Zorro can change
+that when picking the patch):
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Thanks.
+
+
 > +
-> +_fixed_by_kernel_commit XXXXXXXX \
-> +	"btrfs: do not clear read-only when adding sprout device"
+> +fio_config=3D$tmp.fio
 > +
-> +_scratch_dev_pool_get 2
-> +dev_seed=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $1}')
-> +dev_sprout=3D$(echo $SCRATCH_DEV_POOL | $AWK_PROG '{print $2}')
+> +. ./common/dmlogwrites
 > +
-> +# create a read-only fs based off a read-only seed device
-> +_mkfs_dev $dev_seed
-> +$BTRFS_TUNE_PROG -S 1 $dev_seed
-> +_mount $dev_seed $SCRATCH_MNT >>$seqres.full 2>&1
-> +_btrfs device add -f $dev_sprout $SCRATCH_MNT >>$seqres.full
+> +_require_scratch
+> +_require_log_writes
 > +
-> +# switch ro to rw, checking that it was ro before and rw after
-> +findmnt -n -O rw $SCRATCH_MNT
-> +_mount -o remount,rw $SCRATCH_MNT
-> +findmnt -n -O ro $SCRATCH_MNT
+> +cat >$fio_config <<EOF
+> +[global]
+> +iodepth=3D128
+> +direct=3D1
+> +ioengine=3Dlibaio
+> +rw=3Drandwrite
+> +runtime=3D1s
+> +[job0]
+> +rw=3Drandwrite
+> +filename=3D$SCRATCH_MNT/file
+> +size=3D1g
+> +fdatasync=3D1
+> +EOF
 > +
-> +# do stuff in the seed/sprout fs
-> +_btrfs subvolume create $SCRATCH_MNT/subv
-> +_btrfs subvolume delete $SCRATCH_MNT/subv
+> +_require_fio $fio_config
 > +
-> +# trigger cleaner thread without remounting
-> +_btrfs filesystem sync $SCRATCH_MNT
+> +cat $fio_config >> $seqres.full
 > +
-> +# expect no deleted subvolumes remaining
-> +$BTRFS_UTIL_PROG subvolume list -d $SCRATCH_MNT
+> +_log_writes_init $SCRATCH_DEV
+> +_log_writes_mkfs >> $seqres.full 2>&1
+> +_log_writes_mark mkfs
 > +
-> +_scratch_dev_pool_put
+> +_log_writes_mount
+> +
+> +$FIO_PROG $fio_config > /dev/null 2>&1
+> +_log_writes_unmount
+> +
+> +_log_writes_remove
+> +
+> +prev=3D$(_log_writes_mark_to_entry_number mkfs)
+> +[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
+> +cur=3D$(_log_writes_find_next_fua $prev)
+> +[ -z "$cur" ] && _fail "failed to locate next FUA write"
+> +
+> +while [ ! -z "$cur" ]; do
+> +       _log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
+> +
+> +       _check_scratch_fs
+> +
+> +       prev=3D$cur
+> +       cur=3D$(_log_writes_find_next_fua $(($cur + 1)))
+> +       [ -z "$cur" ] && break
+> +done
+> +
+> +echo "Silence is golden"
 > +
 > +# success, all done
-> +echo "Silence is golden"
 > +status=3D0
 > +exit
-> diff --git a/tests/btrfs/323.out b/tests/btrfs/323.out
+> diff --git a/tests/generic/757.out b/tests/generic/757.out
 > new file mode 100644
-> index 000000000..5dba9b5f0
+> index 00000000..dfbc8094
 > --- /dev/null
-> +++ b/tests/btrfs/323.out
+> +++ b/tests/generic/757.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 323
+> +QA output created by 757
 > +Silence is golden
-
+> --
+> 2.44.2
+>
+>
