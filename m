@@ -1,43 +1,45 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from mout-p-202.mailbox.org (mout-p-202.mailbox.org [80.241.56.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6A0521E3C1
-	for <fstests@vger.kernel.org>; Thu, 17 Oct 2024 05:18:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39CB21D47BD;
+	Thu, 17 Oct 2024 09:32:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729142303; cv=none; b=iF40ATuQSPnXTQwBT/tPoeyaITWDImWwnnAXAP+zBN9wnArqt72tC0qk2RxvaE3cE1VkulSRS1VUbFQUZ1XU7BaSP3GyPmHhsN2wb8h/fcM121U3JfSUaYxTxwxVk/WHnT5hibrBgypn9PGOTH93GD9vknnR0wOeahrI3hESuVM=
+	t=1729157564; cv=none; b=sPowj+4fGpYndI4QL+sWimqldIG6+myWYmXFmUsOTi4duPuh6HRbPWxd0UwM6Z5yaMke1NJ8oMMJ1JKs/2mhMaZLa/ry/YNg240WpszwDnND8QP8/mDctgW4pndhRUTFT/V+VVhAs2qTQzx8fU7jysMVBArtvZ2qdYrXlpRatR4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729142303; c=relaxed/simple;
-	bh=qH5K5VZdbBkl/3KF8/roHKcsJHrbOfV8fjLUA8S/gps=;
-	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=Y5aHDqQgwIqtHCxF3D/PmmIrseJfGEsPyTo8RIPj7SSJBIU8G1iIn5kJFAtDwtNsukJ8gfMbg6PSYADy0xh9aWugeYTI6iSftLD+4+Pzv0ThwB9fjbgxkHkVliTF2Z5h+GrAS6LWQtRc+wMdOdIDgKCUl8A73sqCVzTETaCrZXI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=Jmkb1pi8; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	s=arc-20240116; t=1729157564; c=relaxed/simple;
+	bh=kAIrMwThJccsts8ge5Rghfsp7yNrWi4TXlxtRvtQnK0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nSMrX8ABdZR74qrw9CUiEI/NBXYUTmk59P5N6kAWbe76hbWhtvjPeRu7ZeH9lZovCEKIrv0fU5SC1bP1Pb0OqgUruqQFo7qyHtNQXbH8tHWbfPqwIXGkfuMxuWe9GW8Nlsk2bp0BmxbuCtcIWShbOd/p9oOne/mbByhneB1eHLs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=acJbvGlQ; arc=none smtp.client-ip=80.241.56.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="Jmkb1pi8"
-Received: from cwcc.thunk.org (pool-173-48-118-108.bstnma.fios.verizon.net [173.48.118.108])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 49H5IFNW006426
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 17 Oct 2024 01:18:16 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1729142297; bh=7KMlPHoJ0a6Hbnzq/npi6q3EyuB5a3mM3KyLP9OsRRE=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=Jmkb1pi8xLBxzhuyZjJYKaOkwAuVSD3MSIt49x9Ksklcuy3/Km9yW1clvo0D3ffSk
-	 yxVSkU3chtuz50f0cYfc7+c1QfjD+29at0hYs+MlouQWszlkADqxPXUZpYR0Rosia/
-	 UE710YDOCFDVII718aNQfOOX2Q/Q1ZvfYQv0ErVHDPU5q1HoHeYeMmA6aNUWqo68/m
-	 fYXhaR03/mgatfHno2HF2cZ14a7bhYOldqWNPV60s6FBXo2wp0JLMrIgHzvLlJVzA1
-	 UwlnpL7uFjptNuYOsSyux0+PCyaPxtONoTYpQl3cUtKrpDKfS5dsLy48bJnfasZEv4
-	 RXPoMOLtSqhOQ==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id C810015C02DB; Thu, 17 Oct 2024 01:18:15 -0400 (EDT)
-Date: Thu, 17 Oct 2024 01:18:15 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>
-Subject: New {kvm,gce}-xfstests appliance released
-Message-ID: <20241017051815.GA3232770@mit.edu>
+	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="acJbvGlQ"
+Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-202.mailbox.org (Postfix) with ESMTPS id 4XTjKy2K3Mz9tTZ;
+	Thu, 17 Oct 2024 11:32:38 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
+	s=MBO0001; t=1729157558;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=i+txMzFuhagbsogYxWyZvhDRSQj6uVKUwrwWhY2kSds=;
+	b=acJbvGlQzeh+zFSBpb57Hk9hsK6/L6BlYpf9k8Ye6ApDkDkN30pXmM6762VmgyBRAeSMap
+	HCl/PPpOXAlQN8A1IplAbdnrsHXXl5pnzJlqq/XbvJ+d71yy0PF2HOoj/PB42eOtK3whAJ
+	Hsc0Hvf+16yelJYo4qx35pMTe6pKKNMMwq0k/HN2Fk4m5iJhS/87uvI+xbN+DGiyyJCOw2
+	zlbmUR3KZ4pBEfOEsu9C71X8m9qSqB0FnE8rJoLuuFn425tLIoeV2hTOmqB9F585tqwRTA
+	pm3mLgNbnpdNMtVlM14ygQ6fg4lbELLWGAIe5U31X2Jal7HteLlxN1SnfFPgJA==
+Date: Thu, 17 Oct 2024 15:02:27 +0530
+From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCHSET 1/2] fstests: fix fstests for 64k fsblock size
+Message-ID: <jettfsxkievb5prsh36rg5k4nzdcymtyns5wuwjnm5qwqnbgai@tubebxpinjvw>
+References: <172912045589.2583984.11028192955246574508.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,81 +48,19 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <172912045589.2583984.11028192955246574508.stgit@frogsfrogsfrogs>
+X-Rspamd-Queue-Id: 4XTjKy2K3Mz9tTZ
 
-I've pushed out a new version of the test-appliance used by
-kvm-xfstest and gce-xfstests.  The kvm-xfstests appliances can be
-found here:
+On Wed, Oct 16, 2024 at 04:15:05PM -0700, Darrick J. Wong wrote:
+> Hi all,
+> 
+> Various patches to fstests to make 64k fsblock filesystems mostly pass.
 
-     https://kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests
+Thanks for resending xfs/161.
 
-The gce-xfstests images can be found in the xfstests-cloud project in
-Google Compute Engine with the image name
-xfstests-{amd64,arm64}-202410151341.  Most people who request their
-gce-xfstests image from the xfstests-cloud project will get the latest
-version automatically.
+> I haven't gone back through the remaining failures (mostly quota tests)
+> to figure out why they fail.
+I am on it. I will send the patches soon.
 
-A new feature added since the last released appliance (a while ago),
-the Lightweight Test Manager (ltm) will resume a VM after it crashes
-or after it hangs, and will mark the test as being in state "error"
-(as opposed "failed").
-
-In addition, if $2 USD for 24 VM hours (2.5 hours of wall clock time
-if run in parallel using ltm) when testing of all 12 of the ext4 file
-system configurations with "gce-xfstests -c ext4/all -g auto" is too
-rich for your blood, a new feature I've added to gce-xfstests is the
-optional use of GCE preemptible instances.  This will reduce the cost
-by 60-91% (depending on your geography and VM type), with the tradeoff
-that if the capacity of GCE zone you are using gets too busy by
-customers willing to pay full price (for example, during Black Friday
-and the Christmas shopping season more generally), the test VM will
-get aborted.  The ltm test manager will automatically attempt to
-restart the test VM (after a capped expoential backoff) and the
-xfstest will resume where it was preempted once low-cost cloud capcity
-becomes available again.
-
-The arm64 kvm-xfstests test appliance can also be used on MacOS, using
-the qemu built from MacPorts.  So for those people who want to run a
-quick test on their Macbook Air while on an airplane flight, without
-paying the double-virtualization penalty, this is now a possibility.  :-)
-
-
-BTW, I'm currently running:
-
-    gce-xfstests ltm -c ext4/all,xfs/all,btrfs/all,f2fs/all -g auto --repo https://kernel.googlesource.com/pub/scm/linux/kernel/git/next/linux-next --watch fs-next
-
-which runs daily test runs of the fs-next branch.  I've also started
-experimenting with:
-
-   gce-xfstests ltm -c ext4/all,xfs/all -g auto --repo stable-rc.git --watch linux-6.6.y
-   gce-xfstests ltm -c ext4/all,xfs/all -g auto --repo stable-rc.git --watch linux-6.1.y
-   etc.
-
-My plan is to try to make the daily reports available via e-mail to
-interested parties.  Let me know if this would interest you.
-
-
-For detailed information of the version of components used in the test
-appliance, please see:
-
-     https://kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/README
-
-Documentation and more information is available at:
-
-     https://thunk.org/gce-xfstests
-     https://github.com/tytso/xfstests-bld/blob/master/Documentation/00-index.md
-
-Cheers,
-
-					- Ted
-
-
-
-
-
-
-
-
-
-
-
-
+--
+Pankaj
