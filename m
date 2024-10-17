@@ -1,54 +1,54 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFECB1DDC19
-	for <fstests@vger.kernel.org>; Thu, 17 Oct 2024 16:32:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7F0B1DDC19
+	for <fstests@vger.kernel.org>; Thu, 17 Oct 2024 16:32:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729182773; cv=none; b=FZ7GIcT6wdO/vOgjkq3xmguV4GhjnqDs6N/rg7/TBVjUQ+dvz9dgcMvmOilw3fkr+fY3PzMZhPB7DavqIZokkWRA9Gai5e+eiV3hITml5UIGtWcMPzk0GWvTaAP/tbSWgm3gKUgDVOKaXo/sHfuh5y1tueNbDs0QUM99YbAVhus=
+	t=1729182777; cv=none; b=DE1KuBnuwjma4uGjfVUTksxdXwZOz4qxqm0zenVgUKWriH6hsXgQp9WlCk+eZCBuMZfTWtdq78YI/7iw5IIeBYcv3IaolLuoTiaLhGTv4NoYyx14Lq6V2KhyHvqRWnyG+P4gaKM7XKIaqBz2dH3EbPOpBMIGf4YqVkNrNpkBQys=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729182773; c=relaxed/simple;
-	bh=jYHwJe0yd9T1A47IDTMrdIkcR+w65rlFwHvbdtmdtMU=;
+	s=arc-20240116; t=1729182777; c=relaxed/simple;
+	bh=1uthL2X16MDKcgfP406POG6hnZTb+/bSPvm5R5jHx4w=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=lTNTlt02jatp2sKtLdjWTt339ZYDHCqTGNJfERS+Ik5h072fAqq5jfgCmyq8xYYNpYlEF9SSRqR1sdhqFBVa3XL3cwCVyFHKGp7TUavvhaCFTFuRIVphojCCTRtNTy3iHq563Hspp5gzw//Ou103KFzC+HMDwGRgGuQi67uvzKg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Fi9iCezy; arc=none smtp.client-ip=170.10.133.124
+	 MIME-Version:Content-Type; b=PyF4Q4DGpUHbXc1wiWpT4WDcPz70+YlgvotB1R1enyxgx3de9PcVLkKj4H2c2VmiGnBlbFhtQwVtYd0LVhlhmDvnoIsSD6rtCy9EljHxmvbnieYw1e/waEhMV2pDrf/rw2aG1Ye/o05r6YbF2RnSkaiIKiO4GyLJLxFAugicgjE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JsskNEpj; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Fi9iCezy"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JsskNEpj"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1729182769;
+	s=mimecast20190719; t=1729182774;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=TT9WUt3VRF/NUREwAqbRR4URsjIK6lhGygqtbmUDZaM=;
-	b=Fi9iCezy33fCLeQLA5EdmH4xyUmdYiMlziH8SyUk9fNJulkEwEit/yORm71nOzAvGcSdLr
-	Mqf2H72qhiAf3zArZJCWE0+BhxCWz6UicpvoMrREmOTfjwWTYIiDjgn5IY078/t+cw5XAH
-	3wZqpH+ITHddNC9w1BQguz75h7RiH4Q=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+	bh=FwvRWpOvOJ1+Qpzdu1lpVgCFVVD1tuMmBHf2tF8Zd4U=;
+	b=JsskNEpjYyCpPixqxn5JN4LRJFKDWzYzXUXyN2O/fS5kRCastRSYJ/R1ZvzIxB4IDSBg7M
+	SxPhQ+LbmV60UHhZ64bTTqUBSDoLtdZ8mzFsQjL0PD27wURoxAY5xGec57jeMGhKPDbaoU
+	JGbuKTONjDGc6yWYRO/uAR18Mo9H7PI=
+Received: from mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com
  (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
  relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-152-HF0XJExvMs2bDneg0NcNaw-1; Thu,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-578-ppFoJskROJSeFZgPKmLaFg-1; Thu,
  17 Oct 2024 12:32:48 -0400
-X-MC-Unique: HF0XJExvMs2bDneg0NcNaw-1
+X-MC-Unique: ppFoJskROJSeFZgPKmLaFg-1
 Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id DA08519560B8;
-	Thu, 17 Oct 2024 16:32:45 +0000 (UTC)
+	by mx-prod-mc-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 4ACAA195609D;
+	Thu, 17 Oct 2024 16:32:47 +0000 (UTC)
 Received: from bfoster.redhat.com (unknown [10.22.64.30])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id EBE44195607C;
-	Thu, 17 Oct 2024 16:32:44 +0000 (UTC)
+	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 2BCDF1956086;
+	Thu, 17 Oct 2024 16:32:46 +0000 (UTC)
 From: Brian Foster <bfoster@redhat.com>
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org,
 	djwong@kernel.org,
 	hch@lst.de
-Subject: [PATCH 1/2] xfs: online grow vs. log recovery stress test
-Date: Thu, 17 Oct 2024 12:34:04 -0400
-Message-ID: <20241017163405.173062-2-bfoster@redhat.com>
+Subject: [PATCH 2/2] xfs: online grow vs. log recovery stress test (realtime version)
+Date: Thu, 17 Oct 2024 12:34:05 -0400
+Message-ID: <20241017163405.173062-3-bfoster@redhat.com>
 In-Reply-To: <20241017163405.173062-1-bfoster@redhat.com>
 References: <20241017163405.173062-1-bfoster@redhat.com>
 Precedence: bulk
@@ -61,33 +61,31 @@ Content-Type: text/plain
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
 
-fstests includes decent functional tests for online growfs and
-shrink, and decent stress tests for crash and log recovery, but no
-combination of the two. This test combines bits from a typical
-growfs stress test like xfs/104 with crash recovery cycles from a
-test like generic/388. As a result, this reproduces at least a
-couple recently fixed issues related to log recovery of online
-growfs operations.
+This is fundamentally the same as the previous growfs vs. log
+recovery test, with tweaks to support growing the XFS realtime
+volume on such configurations. Changes include using the appropriate
+mkfs params, growfs params, and enabling realtime inheritance on the
+scratch fs.
 
 Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
- tests/xfs/609     | 69 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/609.out |  7 +++++
- 2 files changed, 76 insertions(+)
- create mode 100755 tests/xfs/609
- create mode 100644 tests/xfs/609.out
+ tests/xfs/610     | 71 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/610.out |  7 +++++
+ 2 files changed, 78 insertions(+)
+ create mode 100755 tests/xfs/610
+ create mode 100644 tests/xfs/610.out
 
-diff --git a/tests/xfs/609 b/tests/xfs/609
+diff --git a/tests/xfs/610 b/tests/xfs/610
 new file mode 100755
-index 00000000..796f4357
+index 00000000..95ae31be
 --- /dev/null
-+++ b/tests/xfs/609
-@@ -0,0 +1,69 @@
++++ b/tests/xfs/610
+@@ -0,0 +1,71 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test No. 609
++# FS QA Test No. 610
 +#
 +# Test XFS online growfs log recovery.
 +#
@@ -108,6 +106,7 @@ index 00000000..796f4357
 +}
 +
 +_require_scratch
++_require_realtime
 +
 +_scratch_mkfs_xfs | tee -a $seqres.full | _filter_mkfs 2>$tmp.mkfs
 +. $tmp.mkfs	# extract blocksize and data size for scratch device
@@ -118,11 +117,12 @@ index 00000000..796f4357
 +nags=4
 +size=`expr 125 \* 1048576`	# 120 megabytes initially
 +sizeb=`expr $size / $dbsize`	# in data blocks
-+logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
++logblks=$(_scratch_find_xfs_min_logblocks -rsize=${size} -dagcount=${nags})
 +
-+_scratch_mkfs_xfs -lsize=${logblks}b -dsize=${size} -dagcount=${nags} \
++_scratch_mkfs_xfs -lsize=${logblks}b -rsize=${size} -dagcount=${nags} \
 +	>> $seqres.full
 +_scratch_mount
++_xfs_force_bdev realtime $SCRATCH_MNT &> /dev/null
 +
 +# Grow the filesystem in random sized chunks while stressing and performing
 +# shutdown and recovery. The randomization is intended to create a mix of sub-ag
@@ -134,7 +134,7 @@ index 00000000..796f4357
 +	size=`expr $size + $incsize`
 +	sizeb=`expr $size / $dbsize`	# in data blocks
 +	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
-+	xfs_growfs -D ${sizeb} $SCRATCH_MNT >> $seqres.full
++	xfs_growfs -R ${sizeb} $SCRATCH_MNT >> $seqres.full
 +
 +	sleep $((RANDOM % 3))
 +	_scratch_shutdown
@@ -152,13 +152,13 @@ index 00000000..796f4357
 +
 +status=0
 +exit
-diff --git a/tests/xfs/609.out b/tests/xfs/609.out
+diff --git a/tests/xfs/610.out b/tests/xfs/610.out
 new file mode 100644
-index 00000000..1853cc65
+index 00000000..42a6d3ce
 --- /dev/null
-+++ b/tests/xfs/609.out
++++ b/tests/xfs/610.out
 @@ -0,0 +1,7 @@
-+QA output created by 609
++QA output created by 610
 +meta-data=DDEV isize=XXX agcount=N, agsize=XXX blks
 +data     = bsize=XXX blocks=XXX, imaxpct=PCT
 +         = sunit=XXX swidth=XXX, unwritten=X
