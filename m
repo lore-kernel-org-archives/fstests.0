@@ -1,170 +1,126 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7A17170A3E;
-	Wed, 16 Oct 2024 23:15:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6A0521E3C1
+	for <fstests@vger.kernel.org>; Thu, 17 Oct 2024 05:18:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729120548; cv=none; b=oannaDxXrEK6CQj0q/IkSAjPLpR9GccawdVDg3srVSGNxKnjV4NyZeU5uNvEa3rc5jM5GqY7E1turJY0TweRWnmigKq34TlxwKizV3qvr/OFSmIvjcpgR+e8eLUnEm6kriF8iuJnp0Isrgt7DajiSRz6V7XZrn1LCR8z/+EklS4=
+	t=1729142303; cv=none; b=iF40ATuQSPnXTQwBT/tPoeyaITWDImWwnnAXAP+zBN9wnArqt72tC0qk2RxvaE3cE1VkulSRS1VUbFQUZ1XU7BaSP3GyPmHhsN2wb8h/fcM121U3JfSUaYxTxwxVk/WHnT5hibrBgypn9PGOTH93GD9vknnR0wOeahrI3hESuVM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729120548; c=relaxed/simple;
-	bh=w4KBjhXZLW/PU4izi8hvR3UnDb5r9l8+EJc9Z55cz24=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=th2QuyQmo7Sku5hWYY1qi+5STqxNcvRRpVdvmX6HYUK89IR655+hNtyFbjzoCGOo0dIVVdWuNu5x0gZNzY3qe+pQHzhldJK+42Lxt2fPX3cF5hFnJZB2b5CTK6QZzn77LwJcnnV6CIrF3tID6Wk7EVJzHDiNduJ9KWmO24O82Jo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BLQGNcs2; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1729142303; c=relaxed/simple;
+	bh=qH5K5VZdbBkl/3KF8/roHKcsJHrbOfV8fjLUA8S/gps=;
+	h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=Y5aHDqQgwIqtHCxF3D/PmmIrseJfGEsPyTo8RIPj7SSJBIU8G1iIn5kJFAtDwtNsukJ8gfMbg6PSYADy0xh9aWugeYTI6iSftLD+4+Pzv0ThwB9fjbgxkHkVliTF2Z5h+GrAS6LWQtRc+wMdOdIDgKCUl8A73sqCVzTETaCrZXI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=Jmkb1pi8; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BLQGNcs2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92BA8C4CEC5;
-	Wed, 16 Oct 2024 23:15:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729120548;
-	bh=w4KBjhXZLW/PU4izi8hvR3UnDb5r9l8+EJc9Z55cz24=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=BLQGNcs2MUofKPS03r2PaLGyzrdd3dIuFw2a8D7oIfbkczZboiek6D3cLmxUuEtCC
-	 84cymshwwk9bE4djylq4HrmC0W9r0+Dgr+w409yrtuJC3TjH12D+EkOc3w+zmFT1Xf
-	 addv0nMW+4MbtjUIQ14pPozIcAel6U8jsO/PZcVFJ1qN5TDyX9RunclRLaBKRousdU
-	 QLCQzBmXjWJAeHA6hSP2WjHmD1WtxPzhVqcMaQFIyGR8I03vUAchiGzMJAtLGkwZTq
-	 LSD0qsB8sGn0sEoUFMTbVljLX7BNHkAzvxtoZRZn9AsigGiATqBPVKlM8bBybihjiL
-	 xXG+BJnhHs/qQ==
-Date: Wed, 16 Oct 2024 16:15:48 -0700
-Subject: [PATCH 1/1] misc: amend unicode confusing name tests to check for
- hidden tag characters
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Message-ID: <172912045911.2584109.3860719636262870391.stgit@frogsfrogsfrogs>
-In-Reply-To: <172912045895.2584109.2643798036760972085.stgit@frogsfrogsfrogs>
-References: <172912045895.2584109.2643798036760972085.stgit@frogsfrogsfrogs>
-User-Agent: StGit/0.19
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="Jmkb1pi8"
+Received: from cwcc.thunk.org (pool-173-48-118-108.bstnma.fios.verizon.net [173.48.118.108])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 49H5IFNW006426
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 17 Oct 2024 01:18:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1729142297; bh=7KMlPHoJ0a6Hbnzq/npi6q3EyuB5a3mM3KyLP9OsRRE=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=Jmkb1pi8xLBxzhuyZjJYKaOkwAuVSD3MSIt49x9Ksklcuy3/Km9yW1clvo0D3ffSk
+	 yxVSkU3chtuz50f0cYfc7+c1QfjD+29at0hYs+MlouQWszlkADqxPXUZpYR0Rosia/
+	 UE710YDOCFDVII718aNQfOOX2Q/Q1ZvfYQv0ErVHDPU5q1HoHeYeMmA6aNUWqo68/m
+	 fYXhaR03/mgatfHno2HF2cZ14a7bhYOldqWNPV60s6FBXo2wp0JLMrIgHzvLlJVzA1
+	 UwlnpL7uFjptNuYOsSyux0+PCyaPxtONoTYpQl3cUtKrpDKfS5dsLy48bJnfasZEv4
+	 RXPoMOLtSqhOQ==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id C810015C02DB; Thu, 17 Oct 2024 01:18:15 -0400 (EDT)
+Date: Thu, 17 Oct 2024 01:18:15 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>
+Subject: New {kvm,gce}-xfstests appliance released
+Message-ID: <20241017051815.GA3232770@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-From: Darrick J. Wong <djwong@kernel.org>
+I've pushed out a new version of the test-appliance used by
+kvm-xfstest and gce-xfstests.  The kvm-xfstests appliances can be
+found here:
 
-The Unicode consortium has twice defined (and later deprecated) special
-"tag" codepoints.  These tag codepoints are not supposed to be rendered
-(i.e. they're invisible) but you can certainly encode them in
-directories and labels to try to confuse users.
+     https://kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests
 
-xfs_scrub already knows how complain about these tag characters because
-libicu can detect both their presence and their use in confusing name
-attacks, so add this as an explicit regression test.
+The gce-xfstests images can be found in the xfstests-cloud project in
+Google Compute Engine with the image name
+xfstests-{amd64,arm64}-202410151341.  Most people who request their
+gce-xfstests image from the xfstests-cloud project will get the latest
+version automatically.
 
-Link: https://embracethered.com/blog/posts/2024/hiding-and-finding-text-with-unicode-tags/
-Link: https://arstechnica.com/security/2024/10/ai-chatbots-can-read-and-write-invisible-text-creating-an-ideal-covert-channel/
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/generic/453 |    8 ++++++++
- tests/generic/454 |   29 +++++++++++++++++++----------
- tests/xfs/504     |    3 +++
- 3 files changed, 30 insertions(+), 10 deletions(-)
+A new feature added since the last released appliance (a while ago),
+the Lightweight Test Manager (ltm) will resume a VM after it crashes
+or after it hangs, and will mark the test as being in state "error"
+(as opposed "failed").
+
+In addition, if $2 USD for 24 VM hours (2.5 hours of wall clock time
+if run in parallel using ltm) when testing of all 12 of the ext4 file
+system configurations with "gce-xfstests -c ext4/all -g auto" is too
+rich for your blood, a new feature I've added to gce-xfstests is the
+optional use of GCE preemptible instances.  This will reduce the cost
+by 60-91% (depending on your geography and VM type), with the tradeoff
+that if the capacity of GCE zone you are using gets too busy by
+customers willing to pay full price (for example, during Black Friday
+and the Christmas shopping season more generally), the test VM will
+get aborted.  The ltm test manager will automatically attempt to
+restart the test VM (after a capped expoential backoff) and the
+xfstest will resume where it was preempted once low-cost cloud capcity
+becomes available again.
+
+The arm64 kvm-xfstests test appliance can also be used on MacOS, using
+the qemu built from MacPorts.  So for those people who want to run a
+quick test on their Macbook Air while on an airplane flight, without
+paying the double-virtualization penalty, this is now a possibility.  :-)
 
 
-diff --git a/tests/generic/453 b/tests/generic/453
-index 855243a860b9ba..b7e686f37100da 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -199,6 +199,10 @@ setf "job offer\xdc\x82pdf" "syriac sublinear full stop"
- setf "job offer\xea\x93\xb8pdf" "lisu letter tone mya ti"
- setf "job offer.pdf" "actual period"
- 
-+# encoding hidden tag characters in filenames to create confusing names
-+setf "llamapirate\xf3\xa0\x80\x81\xf3\xa0\x81\x94\xf3\xa0\x81\xa8\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb3\xf3\xa0\x81\xa1\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x81\xb3\xf3\xa0\x80\xa0\xf3\xa0\x81\xa6\xf3\xa0\x81\xaf\xf3\xa0\x81\xb2\xf3\xa0\x80\xa0\xf3\xa0\x81\x93\xf3\xa0\x81\xa5\xf3\xa0\x81\xa1\xf3\xa0\x81\xb4\xf3\xa0\x81\xb4\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb7\xf3\xa0\x81\xa5\xf3\xa0\x81\xb2\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\x95\xf3\xa0\x81\x93\xf3\xa0\x81\x84\xf3\xa0\x80\xa0\xf3\xa0\x80\xb1\xf3\xa0\x80\xb2\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x81\xbf"
-+setf "llamapirate"
-+
- ls -laR $testdir >> $seqres.full
- 
- echo "Test files"
-@@ -269,6 +273,9 @@ testf "job offer\xdc\x82pdf" "syriac sublinear full stop"
- testf "job offer\xea\x93\xb8pdf" "lisu letter tone mya ti"
- testf "job offer.pdf" "actual period"
- 
-+testf "llamapirate\xf3\xa0\x80\x81\xf3\xa0\x81\x94\xf3\xa0\x81\xa8\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb3\xf3\xa0\x81\xa1\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x81\xb3\xf3\xa0\x80\xa0\xf3\xa0\x81\xa6\xf3\xa0\x81\xaf\xf3\xa0\x81\xb2\xf3\xa0\x80\xa0\xf3\xa0\x81\x93\xf3\xa0\x81\xa5\xf3\xa0\x81\xa1\xf3\xa0\x81\xb4\xf3\xa0\x81\xb4\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb7\xf3\xa0\x81\xa5\xf3\xa0\x81\xb2\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\x95\xf3\xa0\x81\x93\xf3\xa0\x81\x84\xf3\xa0\x80\xa0\xf3\xa0\x80\xb1\xf3\xa0\x80\xb2\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x81\xbf"
-+testf "llamapirate"
-+
- echo "Uniqueness of inodes?"
- stat -c '%i' "${testdir}/"* | sort | uniq -c | while read nr inum; do
- 	if [ "${nr}" -gt 1 ]; then
-@@ -303,6 +310,7 @@ if _check_xfs_scrub_does_unicode "$SCRATCH_MNT" "$SCRATCH_DEV"; then
- 		grep -q "job offer.xea.x93.xb8pdf" $tmp.scrub || echo "No complaints about lisu letter tone mya ti?"
- 		grep -q "job offer.*could be confused with" $tmp.scrub || echo "No complaints about confusing job offers?"
- 		grep -q "job offer.xe2.x80.xa4.xe2.x80.x8dpdf" $tmp.scrub || echo "No complaints about one dot leader with invisible space?"
-+		grep -q "llamapirate" $tmp.scrub || echo "No complaints about hidden llm instructions in filenames?"
- 	fi
- 
- 	echo "Actual xfs_scrub output:" >> $seqres.full
-diff --git a/tests/generic/454 b/tests/generic/454
-index 3c9b39d059532d..2cc2d81ce4cc77 100755
---- a/tests/generic/454
-+++ b/tests/generic/454
-@@ -120,6 +120,10 @@ setf "zerojoin_moo\xe2\x80\x8ccow.txt" "zero width joiners"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
- 
-+# encoding hidden tag characters in attrnames to create confusing xattrs
-+setf "llamapirate\xf3\xa0\x80\x81\xf3\xa0\x81\x94\xf3\xa0\x81\xa8\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb3\xf3\xa0\x81\xa1\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x81\xb3\xf3\xa0\x80\xa0\xf3\xa0\x81\xa6\xf3\xa0\x81\xaf\xf3\xa0\x81\xb2\xf3\xa0\x80\xa0\xf3\xa0\x81\x93\xf3\xa0\x81\xa5\xf3\xa0\x81\xa1\xf3\xa0\x81\xb4\xf3\xa0\x81\xb4\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb7\xf3\xa0\x81\xa5\xf3\xa0\x81\xb2\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\x95\xf3\xa0\x81\x93\xf3\xa0\x81\x84\xf3\xa0\x80\xa0\xf3\xa0\x80\xb1\xf3\xa0\x80\xb2\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x81\xbf"
-+setf "llamapirate"
-+
- _getfattr --absolute-names -d "${testfile}" >> $seqres.full
- 
- echo "Test files"
-@@ -167,6 +171,9 @@ testf "zerojoin_moo\xe2\x80\x8ccow.txt" "zero width joiners"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
- 
-+testf "llamapirate\xf3\xa0\x80\x81\xf3\xa0\x81\x94\xf3\xa0\x81\xa8\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb3\xf3\xa0\x81\xa1\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x81\xb3\xf3\xa0\x80\xa0\xf3\xa0\x81\xa6\xf3\xa0\x81\xaf\xf3\xa0\x81\xb2\xf3\xa0\x80\xa0\xf3\xa0\x81\x93\xf3\xa0\x81\xa5\xf3\xa0\x81\xa1\xf3\xa0\x81\xb4\xf3\xa0\x81\xb4\xf3\xa0\x81\xac\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\xb7\xf3\xa0\x81\xa5\xf3\xa0\x81\xb2\xf3\xa0\x81\xa5\xf3\xa0\x80\xa0\xf3\xa0\x81\x95\xf3\xa0\x81\x93\xf3\xa0\x81\x84\xf3\xa0\x80\xa0\xf3\xa0\x80\xb1\xf3\xa0\x80\xb2\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x80\xb0\xf3\xa0\x81\xbf"
-+testf "llamapirate"
-+
- echo "Uniqueness of keys?"
- crazy_keys="$(_getfattr --absolute-names -d "${testfile}" | grep -E -c '(french_|chinese_|greek_|arabic_|urk)')"
- expected_keys=11
-@@ -175,16 +182,18 @@ test "${crazy_keys}" -ne "${expected_keys}" && echo "Expected ${expected_keys} k
- echo "Test XFS online scrub, if applicable"
- 
- if _check_xfs_scrub_does_unicode "$SCRATCH_MNT" "$SCRATCH_DEV"; then
--	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
--	echo "${output}" | grep -q "french_" || echo "No complaints about french e accent?"
--	echo "${output}" | grep -q "greek_" || echo "No complaints about greek letter mess?"
--	echo "${output}" | grep -q "arabic_" || echo "No complaints about arabic expanded string?"
--	echo "${output}" | grep -q "mixed_" || echo "No complaints about mixed script confusables?"
--	echo "${output}" | grep -q "hyphens_" || echo "No complaints about hyphenation confusables?"
--	echo "${output}" | grep -q "dz_digraph_" || echo "No complaints about single script confusables?"
--	echo "${output}" | grep -q "inadequate_" || echo "No complaints about inadequate rendering confusables?"
--	echo "${output}" | grep -q "prohibition_" || echo "No complaints about prohibited sequence confusables?"
--	echo "${output}" | grep -q "zerojoin_" || echo "No complaints about zero-width join confusables?"
-+	LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub > $tmp.scrub
-+
-+	grep -q "french_" $tmp.scrub || echo "No complaints about french e accent?"
-+	grep -q "greek_" $tmp.scrub || echo "No complaints about greek letter mess?"
-+	grep -q "arabic_" $tmp.scrub || echo "No complaints about arabic expanded string?"
-+	grep -q "mixed_" $tmp.scrub || echo "No complaints about mixed script confusables?"
-+	grep -q "hyphens_" $tmp.scrub || echo "No complaints about hyphenation confusables?"
-+	grep -q "dz_digraph_" $tmp.scrub || echo "No complaints about single script confusables?"
-+	grep -q "inadequate_" $tmp.scrub || echo "No complaints about inadequate rendering confusables?"
-+	grep -q "prohibition_" $tmp.scrub || echo "No complaints about prohibited sequence confusables?"
-+	grep -q "zerojoin_" $tmp.scrub || echo "No complaints about zero-width join confusables?"
-+	grep -q "llamapirate" $tmp.scrub || echo "No complaints about hidden llm instructions in filenames?"
- 	echo "Actual xfs_scrub output:" >> $seqres.full
- 	echo "${output}" >> $seqres.full
- fi
-diff --git a/tests/xfs/504 b/tests/xfs/504
-index 6000923bf7bb87..a9d99cd1217203 100755
---- a/tests/xfs/504
-+++ b/tests/xfs/504
-@@ -128,6 +128,9 @@ testlabel "\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.fs"
- testlabel ".\xe2\x80\x8d"
- testlabel "..\xe2\x80\x8d"
- 
-+# encoding hidden tag characters in fslabels to create confusing names
-+testlabel "llmpir8\xf3\xa0\x81\x94"
-+
- # Did scrub choke on anything?
- if [ "$want_scrub" = "yes" ]; then
- 	grep -q "^Warning.*gnp.txt.*suspicious text direction" $tmp.scrub || \
+BTW, I'm currently running:
+
+    gce-xfstests ltm -c ext4/all,xfs/all,btrfs/all,f2fs/all -g auto --repo https://kernel.googlesource.com/pub/scm/linux/kernel/git/next/linux-next --watch fs-next
+
+which runs daily test runs of the fs-next branch.  I've also started
+experimenting with:
+
+   gce-xfstests ltm -c ext4/all,xfs/all -g auto --repo stable-rc.git --watch linux-6.6.y
+   gce-xfstests ltm -c ext4/all,xfs/all -g auto --repo stable-rc.git --watch linux-6.1.y
+   etc.
+
+My plan is to try to make the daily reports available via e-mail to
+interested parties.  Let me know if this would interest you.
+
+
+For detailed information of the version of components used in the test
+appliance, please see:
+
+     https://kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/README
+
+Documentation and more information is available at:
+
+     https://thunk.org/gce-xfstests
+     https://github.com/tytso/xfstests-bld/blob/master/Documentation/00-index.md
+
+Cheers,
+
+					- Ted
+
+
+
+
+
+
+
+
+
+
+
 
