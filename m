@@ -1,43 +1,29 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12CC71E529;
-	Tue, 22 Oct 2024 05:48:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A402D1E495;
+	Tue, 22 Oct 2024 05:52:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729576109; cv=none; b=ushBRlSj7NSf1isFdGBxMq5geGH+01AaMPVxhPHEvETYPaFjlId44mywXu9cJB+Th2yyPrXoR8tC74Ug7ukk6EJcwFd04BH+qRrUqSFVSG5uRV4qlMsS68CrZDhfEkkJcte77pTXdibysVohUSf2t/sCr4rMEyR9c1TQhPtUw0Q=
+	t=1729576341; cv=none; b=OPxTjEpoC8dDG7v9SNW08rKdK7dKNd3RgMBR4jT0Zi3oITI9ernZp4NrCbFh17mB+G+PK6Zc2yNG5Pj0+kPgsR33AfT37gpvOTF5LvXW8cNuoZ+t6UbzvYZnWGe7pNN0aym/v2tRbkSLcUKyKHs1bgrX29CeW4fL4w6Aidc2NfM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729576109; c=relaxed/simple;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
+	s=arc-20240116; t=1729576341; c=relaxed/simple;
+	bh=A3oB3JzmuvqBX87swbO8OJKXhCsMhCJ5kD3CthhbZvQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=hOr0Y8LcCIGUs5ATYif7RhTkBsLC4p+JteLaBhC5ib1yIRl7ufi09ByXDuZWhMGwttehPz8O2VKbYMQOebBUkUCMFF6eKmPfLWxnQDKB3gQn2hOIS61+X5OAIjmuKygNMHeHNhmO0iVH9DNPyPkJ2SG5uNdzq5hKefsIxlIUdhA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=a9Ddi4Ub; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="a9Ddi4Ub"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=a9Ddi4UbgB3YxoWn6t0V25L5ND
-	NAQCxGJZ5f+J/4HdTRaR4tChCHfEqygyuJOHWfvqaW8fACXW8Z9pE08grEBW7zNNbViuE/8uYh0Mi
-	0tXacQfMABNNZ4OXyFJWlKPJgIDBDs7dUj88TBfAzltkKBfI5thUQLf7+lidJRF4iLqc1NgXnEnQW
-	TTanUoboh9cf4+P9lzLkLNWZFim7IhTkcdPnbpZQopkqLdf290FG/gi7xnw5Om17JSt2RR8e6jJAC
-	Jc9d7S29jzeOBMNGCC3mtlUM1tAtjeurJtfUgqsUT4W6rycyHRbMJHFtyVDb1ZcNlOp0bmzquOC/H
-	XaAHTs2Q==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1t37kp-00000009iEu-2tUk;
-	Tue, 22 Oct 2024 05:48:27 +0000
-Date: Mon, 21 Oct 2024 22:48:27 -0700
-From: Christoph Hellwig <hch@infradead.org>
+	 Content-Type:Content-Disposition:In-Reply-To; b=TevK1Rf6Ei0S9+h+RmwHh+3lUGywjX286rJWYG94aIE4wW2ukiAYNH8E3VeGpmffUzSRSAUJlOf9cUU6FefAdTPE3kbsc2/bjBymWg6liWemlHGBz1no6tS8Qy0c9r4KqR4qeOmyxyTxLV+E2ziatCBfWffB43AP519Vgq4QE+E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 177A0227AA8; Tue, 22 Oct 2024 07:52:09 +0200 (CEST)
+Date: Tue, 22 Oct 2024 07:52:08 +0200
+From: Christoph Hellwig <hch@lst.de>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 1/1] misc: amend unicode confusing name tests to check
- for hidden tag characters
-Message-ID: <Zxc8q7Cgad-LfLoQ@infradead.org>
-References: <172912045895.2584109.2643798036760972085.stgit@frogsfrogsfrogs>
- <172912045911.2584109.3860719636262870391.stgit@frogsfrogsfrogs>
+Cc: Brian Foster <bfoster@redhat.com>, Christoph Hellwig <hch@lst.de>,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 0/2] fstests/xfs: a couple growfs log recovery tests
+Message-ID: <20241022055208.GA10163@lst.de>
+References: <20241017163405.173062-1-bfoster@redhat.com> <20241018050909.GA19831@lst.de> <ZxJGknETDaJg9to5@bfoster> <20241021164150.GG2578692@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,10 +32,19 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <172912045911.2584109.3860719636262870391.stgit@frogsfrogsfrogs>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20241021164150.GG2578692@frogsfrogsfrogs>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-Looks good:
+On Mon, Oct 21, 2024 at 09:41:50AM -0700, Darrick J. Wong wrote:
+> Perplexingly, I tried this out on the test fleet last night and got zero
+> failures except for torvalds TOT.
+> 
+> Oh, I don't have any recoveryloop VMs that also have rt enabled, maybe
+> that's why 610 didn't pop anywhere.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Note that your trees already contain the fixes for AGs and RTGs, so
+they are not expected to fail.  To Linus' tree fail is expected for
+AGs, and we'd need an older version of your rtgroup branch to fail
+for RTGs.
 
+As far as I can tell the result is expected.
