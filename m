@@ -1,40 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72A0214B953
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 08:16:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84FD41547FD
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 08:16:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729671372; cv=none; b=gshXlnEI3+tGEx/ul7W/W0B8z/IVp3+3Mzt1MnYn3OsoF3755Eo8N59eLrQVNi7KLlBVobB/tdSuTWBU84pHoxLaMKhTxE9mpTHLMejBDipomrhfLYzSfQZsB2xMyu9cWrKs1PBIVBFaVt7JGb4QoBIAyLV79Ftj2BBaFEtY3Z4=
+	t=1729671374; cv=none; b=Gce4YXF9XZzemRy4rdKE0dUNCBGXl/8szgKQSua+PvCFwuCJkKPqZqohEk6WGkwZx3D80viReoZnUPOFUAUWp2d3mzz+d+divDKeyL1xJV8SCjct2GwJB6p2Ve07DxiAD7oKpxATDpL3ghgOq6HEExO1WzscuKMchdaF/HH7UuE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729671372; c=relaxed/simple;
-	bh=KH/gWcSQ5ANQNjmXmGKqkINjKdTgHSCalEu+VVxzM4U=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=QXEYxnDQiqPtxFTaDKsUolSvx2sR01EsFjj3pbLyX6qlfmo64ahl13faGiOMEeNtCUP5PytrvEAgj453RGnAZ4s3D5IS/KI2MCEHx0TBU2SdRXJ4hf4t2LvevsY2qkD1CK5b8LJewcFjKNcRTLAOYue6bT7xjkZR/nlp6DRXAF8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eJBPCmuf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1729671374; c=relaxed/simple;
+	bh=ny96yE+u0tbc540OPl+68cxi48B5XhGbATbld3m9Zf0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=lZX08Uesndg2v1GfXzJap8DNTakypX8nsaed7TsuJWDwmOtnIP+vrH6vQec1gNsmlyZFz0oz67nl6nnkHx1j513z6T5KGiAhFv87bbI2uL2sDdGoFDB32boCzq7If9hxP3kV6tq+le0aBvc9TWwfBVeIAhZez40K7+v0TVlCFto=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aO68x6pu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eJBPCmuf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8BC91C4CEC6;
-	Wed, 23 Oct 2024 08:16:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aO68x6pu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 749DBC4CECD;
+	Wed, 23 Oct 2024 08:16:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729671372;
-	bh=KH/gWcSQ5ANQNjmXmGKqkINjKdTgHSCalEu+VVxzM4U=;
-	h=From:To:Cc:Subject:Date:From;
-	b=eJBPCmufUaeUA2pqPon5iP/uBjut/5s5logH6swRmeABCtLh+2XNyR0kmB+tTMK4B
-	 a2hij41IONX97f5t1YyI6A2/ajXMV5sNDZ/UVxkNmiU33IRBm/F+Sd6lhXSNx0b37R
-	 e51lTXe9zebFAkt1W6amt8GgQje95Ndbg4Zv0NLjg8W79pwbAbhXCwojYfuaokqnCX
-	 i/L5QUg152mBhdsgmjHXz0GSRvHR8IX+N96Xp2tWHwRGAaOZUr0QGae/lDYEXEUr5v
-	 dT/+5KyOAr0isPrsbfXtirFa1Z0gopD8u5iBTSthmCF8cY6SudLjL/O40m/wnYHTFj
-	 N20hTvUV2Wrqg==
+	s=k20201202; t=1729671374;
+	bh=ny96yE+u0tbc540OPl+68cxi48B5XhGbATbld3m9Zf0=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=aO68x6puPuyvAX9fExYgnnr6gVbl2DVv/nNC+5LVHw2aStd4sbDJTF0KNG74H8xmG
+	 CmM/TcCTc1t7sOEVjNnvKnpSwkpYb+gbPT8t9EGfuTsQQQavPKBFa6+4exFZ79WW1+
+	 GJf53si/dnz9lAMfl/hI9oKr7LJX5prZn2GSJPyq03/UJJmrSVgzun5kFDXqVb4C1g
+	 4J4XW6pnGPLU/TUe48t9S1udOLJbykh7oI5tpdnekA1Iy/NeKn44DLNqeB9dVSYRzm
+	 rnmFbt3mEPOXOKnxZVfv4Yg48cO8wPhwS84OUIhlTUTGax1zLuGwyjKVcWKqDpoXz1
+	 k5y9NybdiSNxw==
 From: Chao Yu <chao@kernel.org>
 To: Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org,
 	linux-f2fs-devel@lists.sourceforge.net,
 	Chao Yu <chao@kernel.org>,
-	Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: [PATCH v2 1/2] f2fs/006: add testcase to check out-of-space case
-Date: Wed, 23 Oct 2024 16:16:01 +0800
-Message-Id: <20241023081602.3806579-1-chao@kernel.org>
+	Jaegeuk Kim <jaegeuk@kernel.org>,
+	Qi Han <hanqi@vivo.com>
+Subject: [PATCH v2 2/2] f2fs/007: add testcase to check consistency of compressed inode metadata
+Date: Wed, 23 Oct 2024 16:16:02 +0800
+Message-Id: <20241023081602.3806579-2-chao@kernel.org>
 X-Mailer: git-send-email 2.40.1
+In-Reply-To: <20241023081602.3806579-1-chao@kernel.org>
+References: <20241023081602.3806579-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -43,84 +47,156 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This is a regression test to check whether f2fs handles dirty
-data correctly when checkpoint is disabled, if lfs mode is on,
-it will trigger OPU for all overwritten data, this will cost
-free segments, so f2fs must account overwritten data as OPU
-data when calculating free space, otherwise, it may run out
-of free segments in f2fs' allocation function, resulting in
-panic.
+metadata of compressed inode should always be consistent after file
+compression, reservation, releasement and decompression, let's add
+a testcase to check it.
 
 Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+Cc: Qi Han <hanqi@vivo.com>
 Signed-off-by: Chao Yu <chao@kernel.org>
 ---
 v2:
 - add _fixed_by_kernel_commit()
-- use _scratch_mkfs_sized() rather than formating size-specified
-loop device
 - code cleanup
- tests/f2fs/006     | 38 ++++++++++++++++++++++++++++++++++++++
- tests/f2fs/006.out |  6 ++++++
- 2 files changed, 44 insertions(+)
- create mode 100755 tests/f2fs/006
- create mode 100644 tests/f2fs/006.out
+- add error handling for _scratch_mkfs()
+ tests/f2fs/007     | 116 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/007.out |   4 ++
+ 2 files changed, 120 insertions(+)
+ create mode 100755 tests/f2fs/007
+ create mode 100644 tests/f2fs/007.out
 
-diff --git a/tests/f2fs/006 b/tests/f2fs/006
+diff --git a/tests/f2fs/007 b/tests/f2fs/007
 new file mode 100755
-index 00000000..63d00018
+index 00000000..8979c21c
 --- /dev/null
-+++ b/tests/f2fs/006
-@@ -0,0 +1,38 @@
++++ b/tests/f2fs/007
+@@ -0,0 +1,116 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2024 Oppo.  All Rights Reserved.
 +#
-+# FS QA Test No. f2fs/006
++# FS QA Test No. f2fs/007
 +#
-+# This is a regression test to check whether f2fs handles dirty
-+# data correctly when checkpoint is disabled, if lfs mode is on,
-+# it will trigger OPU for all overwritten data, this will cost
-+# free segments, so f2fs must account overwritten data as OPU
-+# data when calculating free space, otherwise, it may run out
-+# of free segments in f2fs' allocation function, resulting in
-+# panic.
++# This is a regression test to check whether compressed metadata
++# can become inconsistent after file compression, reservation
++# releasement, and decompression.
 +#
 +. ./common/preamble
-+_begin_fstest auto quick
++_begin_fstest auto quick rw compress
 +
 +_fixed_by_kernel_commit xxxxxxxxxxxx \
-+	"f2fs: fix to account dirty data in __get_secs_required()"
++        "f2fs: compress: fix inconsistent update of i_blocks in release_compress_blocks and reserve_compress_blocks"
 +
-+testfile=$SCRATCH_MNT/testfile
++testfile_prefix=$SCRATCH_MNT/testfile
++fio_config=$tmp.fio
++
++cat >$fio_config <<EOF
++[write_compressed_data_30]
++name=mytest
++ioengine=psync
++rw=write
++direct=0
++bs=1M
++filesize=1M
++numjobs=1
++filename=${testfile_prefix}30
++buffer_compress_percentage=30
++
++[write_compressed_data_60]
++name=mytest
++ioengine=psync
++rw=write
++direct=0
++bs=1M
++filesize=1M
++numjobs=1
++filename=${testfile_prefix}60
++buffer_compress_percentage=60
++
++[write_compressed_data_90]
++name=mytest
++ioengine=psync
++rw=write
++direct=0
++bs=1M
++filesize=1M
++numjobs=1
++filename=${testfile_prefix}90
++buffer_compress_percentage=90
++EOF
 +
 +_require_scratch
-+_scratch_mkfs_sized $((1024*1024*100)) >> $seqres.full
++_require_fio $fio_config
++_scratch_mkfs "-f -O extra_attr,compression" >> $seqres.full || _fail "mkfs failed"
++_scratch_mount "-o compress_mode=user,compress_extension=*" >> $seqres.full
 +
-+# use mode=lfs to let f2fs always triggers OPU
-+_scratch_mount -o mode=lfs,checkpoint=disable:10%,noinline_dentry >> $seqres.full
++echo -e "Run fio to initialize file w/ specified compress ratio" >> $seqres.full
++cat $fio_config >> $seqres.full
++$FIO_PROG $fio_config >> $seqres.full
++_scratch_unmount
 +
-+dd if=/dev/zero of=$testfile bs=1M count=50 2>/dev/null
++# force to repaire if filesystem is corrupted
++export FSCK_OPTIONS="-f $FSCK_OPTIONS"
 +
-+# it may run out of free space of f2fs and hang kernel
-+dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
-+dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
++for i in 30 60 90; do
++	testfile=$testfile_prefix$i
 +
-+_scratch_remount checkpoint=enable
++	_scratch_mount "-o compress_mode=user" >> $seqres.full
++	$F2FS_IO_PROG compress $testfile >> $seqres.full
++	cblocks=`$F2FS_IO_PROG get_cblocks $testfile`
++	echo "compression ratio is: "$cblocks" / 256"
++
++	_scratch_unmount
++
++	# 1. check after compression
++	_check_scratch_fs
++	if [ $? -ne 0 ]; then
++		_fail "filesystem becomes corrupted after compress"
++	fi
++
++	_scratch_mount >> $seqres.full
++	$F2FS_IO_PROG release_cblocks $testfile >> $seqres.full
++	_scratch_unmount
++
++	# 2. check after releasement
++	_check_scratch_fs
++	if [ $? -ne 0 ]; then
++		_fail "filesystem becomes corrupted after release_cblocks"
++	fi
++
++	_scratch_mount >> $seqres.full
++	$F2FS_IO_PROG reserve_cblocks $testfile >> $seqres.full
++	_scratch_unmount
++
++	# 3. check after rservation
++	_check_scratch_fs
++	if [ $? -ne 0 ]; then
++		_fail "filesystem becomes corrupted after reserve_cblocks"
++	fi
++
++	_scratch_mount "-o compress_mode=user" >> $seqres.full
++	$F2FS_IO_PROG decompress $testfile >> $seqres.full
++	_scratch_unmount
++
++	# 4. check after decompression
++	_check_scratch_fs
++	if [ $? -ne 0 ]; then
++		_fail "filesystem becomes corrupted after decompress"
++	fi
++done
 +
 +status=0
 +exit
-diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
+diff --git a/tests/f2fs/007.out b/tests/f2fs/007.out
 new file mode 100644
-index 00000000..0d7b3910
+index 00000000..2ea71c18
 --- /dev/null
-+++ b/tests/f2fs/006.out
-@@ -0,0 +1,6 @@
-+QA output created by 006
-+50+0 records in
-+50+0 records out
-+dd: error writing '/mnt/scratch_f2fs/testfile': No space left on device
-+3+0 records in
-+2+0 records out
++++ b/tests/f2fs/007.out
+@@ -0,0 +1,4 @@
++QA output created by 007
++compression ratio is: 64 / 256
++compression ratio is: 128 / 256
++compression ratio is: 192 / 256
 -- 
 2.40.1
 
