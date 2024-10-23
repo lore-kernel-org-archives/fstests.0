@@ -1,68 +1,68 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB396139E
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:43:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C246261FE9
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:53:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729655035; cv=none; b=a4n4JcVnu+PH0giYacJ8m1NYAGQJCaIvJtZFIuRiVTddfTAJloisJkk5ELOM1G3LxF4LT/2gFUNmAQ9cE9JJEOPLuIzXdtvjgXAyEtSzjUauKpHzz6pZyj6xGxKgZ/xuZb2zJdbsYroxZJH608V6zPcdVzxZiBNanej+FHzjqK0=
+	t=1729655591; cv=none; b=EfVPd/AwesPAd7015F6xDDNSamhLkw6QDWoIWh4cU0kYPOKEsEex2W8XlJvgbttKiTuLZ5Tey9oY7qOfydvSHRehr5Klo2DNNxmFZzsWxjFgFpChITNYkBpOw+4KD10aI+VIo22jBJvUIEq+oO6jZHCEgtrqxt+R8eI08KPoJQk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729655035; c=relaxed/simple;
-	bh=DrE3zMbY3opiAj9ivPnvoOqc2TUr6yZG1KasdCBlo0s=;
+	s=arc-20240116; t=1729655591; c=relaxed/simple;
+	bh=x9Q9P1jcFOedVLmQygOV3TsI9HAfkG7xnhoSSc4vbw8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MDxbzShCpXhOMT+hIiZ3akm2jiC1oJLwUtd6wBIwdTXEzvTeDUqeoC6iKHCa9oHAXpWNQvQYG3fBf3Ys78Lm0xK1Bpd/dLs1TKmc2/SqGvy48SRrLjRPwkLtcLFG+5N9kk4S5RZsfa86fOhQusCWhSG1CIVS5fGY1jyuOqXc1j8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hjQ577U3; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ti2LQ2lLnHvaRIgdFUt4DzcfMy75thZe/cdvONA9KNzGHg9Ld3MA3nA9Xl0KorFboi3imL+mRQ8eA9vRvCtuJJcqqgrgtV8JIup+BVobF04IwZ77yIwe/JbN01MOQnwKS67Uxde39zzXPDOxlMJHSq5bkU7oCgQwkoDvzVjRjNw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Mi4KGDZA; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hjQ577U3"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Mi4KGDZA"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1729655032;
+	s=mimecast20190719; t=1729655588;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=ME4uxj2W+3TiF+0aUeXVAmiey9MLKGe2zI+5+yF4Xm4=;
-	b=hjQ577U3GImKDJMZlPR852PHsbEi4eJVv8pmjQXL+QhUBxAlx7p1oS21Vt508hMnuvjYKK
-	IxU5XwO1jVq/UTbYLTEpA1tF7Q9Xsx+rAglPGsp5rE1MCvBhbJGVwvo93AIDHXMzJ7Lbry
-	V0TbcatQWmgW2HYBR6oxFLU+feTrl7Q=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=qtNT+qtypMH7i1sLJxi3tnaKJ//hw1RtU8th0A1zkI4=;
+	b=Mi4KGDZAcOCz4xlj5nPzb+mt64y2LR2wDT2asz/wlG8F+cPIezQlFVdFwmVo6/7zMvegMT
+	aCeMEyo8itKNfbLlpgoPNFZ67vpJTUrk0q6zY9z+k6cMUywM4bGyT1kSx6s6Ky8KDoC6tg
+	siImZRcNKkhVwVQv8qnPzARpFHNNv+8=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-424-7IsahSXMMzKvttf8M0xwQg-1; Tue, 22 Oct 2024 23:43:51 -0400
-X-MC-Unique: 7IsahSXMMzKvttf8M0xwQg-1
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-20c8a637b77so73610445ad.2
-        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:43:51 -0700 (PDT)
+ us-mta-445-rN4jt2tUND68YIvIvHyz6A-1; Tue, 22 Oct 2024 23:53:06 -0400
+X-MC-Unique: rN4jt2tUND68YIvIvHyz6A-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7eb0a32fc5aso1187876a12.2
+        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:53:06 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729655030; x=1730259830;
+        d=1e100.net; s=20230601; t=1729655586; x=1730260386;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ME4uxj2W+3TiF+0aUeXVAmiey9MLKGe2zI+5+yF4Xm4=;
-        b=Kv9BIP6mJUF/GUGKP/Qp5Fmuk7ojoVfYiBujNrHfrSbqPC1yz71UvZE0jXIv4zHXDw
-         udgTRh7Ue5RFv2Bqq0B0unPeJatKB4Zr88QAzkZ8sxN3txDoiuLwSOY6GWCatwuTSd7r
-         5IEzU8v2ZEO3e39eCfapoB4va2QDisDVpIVTiexotNRGduS/wsW9HCWOZjsY4u7tq+FD
-         nJf/ejx3NBUkexPr9QQMf/Ajgom394otFZFYWDZQtCX3obkThjWXzJuCjOFXKpm9a5aM
-         H9Fvoa0CtfZe1VXrgA0s29Ff90V+Y3FP4aiXlQbUnhUKaDL75MzspN0cwor77akIxsVn
-         ShSA==
-X-Gm-Message-State: AOJu0Yz2uQCpvIxEmfyEIgzE6PQYuLDrBTm95E7wkC+AYjins3kR1H+o
-	//L9103kyzWSZ0mbMma0LC0qWw9APkcwZ29LXlSI4M363c72TdhSVrtui1DrgHdo2feDStv1zgq
-	RzsRaMnI/SLnkSswxoQA7jLFM4RjNsobNWAKp5xn6FSzjrrcZ5Mpb3XFPfnT/4RjwSw==
-X-Received: by 2002:a17:903:41d1:b0:20c:d2e4:dc33 with SMTP id d9443c01a7336-20fa9e48cddmr20814935ad.14.1729655029988;
-        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFjuE82hLa9YB2wuraSz0dFx2/t/wwDKsvEpjOHgAcIuT7pfPrDgbEPo9gYPU8yuFWITRXnqg==
-X-Received: by 2002:a17:903:41d1:b0:20c:d2e4:dc33 with SMTP id d9443c01a7336-20fa9e48cddmr20814745ad.14.1729655029689;
-        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
+        bh=qtNT+qtypMH7i1sLJxi3tnaKJ//hw1RtU8th0A1zkI4=;
+        b=fLZczl06giAoSe4CV8Jsc9Bz6iPE4XcL4Fv5N06D7SXXooWQzd9A4XJYE2UKtoRnTO
+         +0mNTfpIT5YVQn16ArtzTBY9h/PfMG9iAgBc1hXTUR7yCWRbraI+1tw6W0kNh9PFOQI+
+         /GThofbprP3enZOZg4jlz62kT5ZW2lhRp8oLXir+jaJyIDGDlAuEFQcuMW1nFthrwR6f
+         zFXAb9nRiyNLrR1hFXFxhl9qYiXyYo5Gvm4WBb859jbazEWOf/XD1zWixeCKLcJAORMx
+         FxpgjRFCPhGo7QRklD5VYnNnWujWWAt9UoMG1iLLdo5wVJTS/N2hJDHwqcKDri9H2VJV
+         a+vQ==
+X-Gm-Message-State: AOJu0YzMxRUvaOoHc4n6irkZ1AcBGY0C+6B15mkviUhwjDT50oHYLHuv
+	qzS9JKBAznMAMkaCJFA6b5QOj3XUObtFThCqOUNTuNQdvLPzlp2ODYCOMbqKN2ze2ivCMi+pYxm
+	aMvGxry6fvy1c2O4EjB0BCYpdd9hhASi6KoRJ2igZqJd+34p51M0B1t8=
+X-Received: by 2002:a05:6a21:6b0b:b0:1d8:a13d:723d with SMTP id adf61e73a8af0-1d978bae5d1mr1389717637.31.1729655585709;
+        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGE8iOLDtC5/BgrSqF0DGt/0TECa+ChMUGy75/TPv20YxMYrrxzzOzmlrGY6e1AYX8+52iDxQ==
+X-Received: by 2002:a05:6a21:6b0b:b0:1d8:a13d:723d with SMTP id adf61e73a8af0-1d978bae5d1mr1389701637.31.1729655585313;
+        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f0de25bsm49522795ad.231.2024.10.22.20.43.47
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71ec13355casm5428779b3a.59.2024.10.22.20.53.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
-Date: Wed, 23 Oct 2024 11:43:45 +0800
+        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
+Date: Wed, 23 Oct 2024 11:53:01 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Mark Harmstone <maharmstone@fb.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Subject: Re: [PATCH] generic: add test for missing btrfs csums in log when
  doing async on subpage vol
-Message-ID: <20241023034345.nxrd4y7hvv2ncp7e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20241023035301.due7yoel6muwvmec@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20241015153957.2099812-1-maharmstone@fb.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -83,6 +83,10 @@ On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
 > 
 > Signed-off-by: Mark Harmstone <maharmstone@fb.com>
 > ---
+
+Sorry, more review points below. I can help to change these if you say "yes"
+to all :)
+
 > This is a genericized version of the test I originally proposed as
 > btrfs/333.
 > 
@@ -109,6 +113,9 @@ On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
 > +#
 > +. ./common/preamble
 > +_begin_fstest auto quick metadata log recoveryloop
+                                                      ^^^
+                                                      aio
+
 > +
 > +_fixed_by_kernel_commit e917ff56c8e7 \
 > +	"btrfs: determine synchronous writers from bio or writeback control"
@@ -125,6 +132,9 @@ On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
 > +iodepth=128
 > +direct=1
 > +ioengine=libaio
+
+_require_aiodio ?
+
 > +rw=randwrite
 > +runtime=1s
 > +[job0]
@@ -143,26 +153,16 @@ On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
 > +_log_writes_mark mkfs
 > +
 > +_log_writes_mount
+> +
+> +$FIO_PROG $fio_config > /dev/null 2>&1
 
-For dmlogwrites test, we generally calls _log_writes_cleanup in _cleanup, to
-recover the SCRATCH_DEV anyway, even if this test is killed at the middle of
-its testing phase, to avoid later tests failed.
+Don't you care the output of fio running anymore? Maybe use > $seqres.full ?
 
-I'll add below code in this case, when I merge it. If there's not objection
-from you.
-
-_cleanup()
-{
-	cd /
-	_log_writes_cleanup
-	rm -f $tmp.*
-}
+And just make sure, do you want to ignore failures of fio, as you do "2>&1"?
 
 Thanks,
 Zorro
 
-> +
-> +$FIO_PROG $fio_config > /dev/null 2>&1
 > +_log_writes_unmount
 > +
 > +_log_writes_remove
