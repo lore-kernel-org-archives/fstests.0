@@ -1,179 +1,171 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F4905A7B8
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:27:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD1AC4B5AE
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:31:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729654078; cv=none; b=D1BIDVd2GC5IE1GARPY1RSbFb4wvO3BtZNUurb/5CFp2KFlwsyhH+4n803ZJEbN5F8/GoqXEjBZywi364rdQ/4yn44IlpvwEbdzvUTFn6hlrUqkmsMXViCege2LJxBiu8l2charpslay6mJBzcLdyPnE69iE1RMOxOEWx6g+k7U=
+	t=1729654285; cv=none; b=RUOh2gEqvaKa+Lbx1u3a1UB0yo8Xps0xpOB+dD6yCCOhclAJPw4C3Fbtq9iAAS2HLEDhkOMmyX6FgbIz2MdWEaKjFDuMhliNpC4BnjIILuemvrGSUizLGASXV/a3FlpmLJwyoOPxhYj90hJuzZ9rGgtHPIlkOjqabpB7EaeS2L8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729654078; c=relaxed/simple;
-	bh=FVNEUeJZTBZp+VQNGgY0hojOs1npYOxyXS6RLQ00QqU=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=ddc4kUOACJz+dTMiw3sPOuhcm4qI0maRlTSBSew7DI85ghn/oq2EeaxZnM+QG3m9WgkvCb9UJZQxVzkbx4aua0jHcC/YdS5ue88Suz2rM6k8xLliO4olYOvg/6sRpy7zxFtgOku26LZ3CivNl4EF7xLvNDqE4IV08QHgZhVQYxE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hwxwXNYq; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1729654285; c=relaxed/simple;
+	bh=lHuye/yPAGri6KcQCAc/7/ijs0MtfvV9833216vQGM4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fR1C3ZdP6VUjrQnQwpe8L8cfeweN1olNepKPrlkPAL+pjyFLOZCxDn4pvknQvKcRnssHTnAxh+kF+iJKkxInQqMaN/zGCh1l+LCaEXfGju1gtuOPHqbscvNerpN46uxSXulngTuIGsqMkJg9D3oQJL9LGXKTLXOK9RnCIS62SLQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JtIfgfJB; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hwxwXNYq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3F2AC4CEC3;
-	Wed, 23 Oct 2024 03:27:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729654078;
-	bh=FVNEUeJZTBZp+VQNGgY0hojOs1npYOxyXS6RLQ00QqU=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=hwxwXNYqCOUkuRi0mgDEyn/3hv6AskvyP+PXfN3TJkLgh4J2Itxy57duDogFAUuqW
-	 6CTaOlykmJrNyLdZYDfrAJ0mzfxZGTv97tJGwzrRGsZD+Fbml5fGQVBTzrpTzpUgZL
-	 lr6Ulv7UOkxV+D2oBJEzRjaaZgcFECNF5h7H/D7pqCJrQG+osYP8T94sKZsOCqYgT8
-	 tetERVCP/lp4WDg05/KaFB8BDdk1kaycW5drVb3NEu6b8lEPlmvU3Fipx8DZDlOi7v
-	 t9JlrZ+P1u2E+nvJq8Dq0cv8fyXJ3J4vWMHha3VP/yjOrKZTRTbnuNS0t/PujvQnBC
-	 TNkWXoPH+ywbQ==
-Message-ID: <419435a0-b4f0-43f7-bac9-2fb5dabb42f2@kernel.org>
-Date: Wed, 23 Oct 2024 11:27:54 +0800
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JtIfgfJB"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1729654283;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Ka79D+23BHXwETkT3vETyW64wVeFQaKZYsxP/xCDBqw=;
+	b=JtIfgfJBuyc48KpA9AbMzW9yWQ5qJMIltPhfGkzJqkyAM1uiaJFfxEiHUCmXAaUx3FI00N
+	1Lv5lkB520YSoHF3iuMF++EkZtgZyzrq87vO3Gafb+BGOF6GSDamsU75b3qW5KjhC+MFdA
+	bdoYn9g7SbyWJUaMB6JgQ5JJp0blOZo=
+Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
+ [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-550-lAF3zWW2P_ifHo3ejb24jQ-1; Tue, 22 Oct 2024 23:31:21 -0400
+X-MC-Unique: lAF3zWW2P_ifHo3ejb24jQ-1
+Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-7ea69eeb659so5569957a12.0
+        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:31:20 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729654280; x=1730259080;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Ka79D+23BHXwETkT3vETyW64wVeFQaKZYsxP/xCDBqw=;
+        b=cqWTYx+PZNRvuNLHQJs47WF4PbTDaJLvT3MvZFS+lctyhX89oSIfpWVn+O6XnYkPAR
+         tKntOCfTLqYSVZl+d2q4Y2CSOQRabGBoy5/UA/ciY+2KHElIi6Xl4tYAoS7NTUuVmYGc
+         yV+BEsGS8R4c744jbI3qfPQ394BwsP+Jq5zD4dbIpudbziGzTqEqrAZwh6Z5wTyv0Z53
+         J6CgjSVLhtNyI21S7jQV2zo7EUPEWVulLBZ+YanZV3MW/ftM7QAEvXk01TFVe29tMTAd
+         SBK6oIF75/qJq9yv2WJx0bFXxy9OmoxlOMnr/WLbeZX4REuBRApKlYKbMlyzLpeVrs19
+         kHiQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXGqpgWFOfHHozmEaZ+ngAjkF60LNkBvGLAng5ft59qgYcw/ordzUCmtHgSSjGGehwC4VONOczq@vger.kernel.org
+X-Gm-Message-State: AOJu0YxZwABmfU3jn6CYLxDpNMDEE1AFc8Kz0mQieo3/fuF8iPooOJ0e
+	i2vGUc9NN1rurBr15Jdssntd4IxCvDGxtL7uJDWvvLAwVHbts60ovf3ERojddLDmF2ViQyEMc9E
+	Vx6vIpSC0keZJ0z/X0bMS84POnz+lR5R71eROn7e4vWSYWFYy+ngYBik=
+X-Received: by 2002:a05:6a21:1349:b0:1d9:1d2d:b656 with SMTP id adf61e73a8af0-1d978b14d28mr1399627637.15.1729654279964;
+        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGAOnJFG4Zct7QQbpZQmGSEafL9Fwiw+aJRF8apyJj467MpF47ejIg3d0wy8B8eROpbs8IXiQ==
+X-Received: by 2002:a05:6a21:1349:b0:1d9:1d2d:b656 with SMTP id adf61e73a8af0-1d978b14d28mr1399613637.15.1729654279343;
+        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f108d71sm49313845ad.304.2024.10.22.20.31.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
+Date: Wed, 23 Oct 2024 11:31:14 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Mark Harmstone <maharmstone@meta.com>
+Cc: Filipe Manana <fdmanana@kernel.org>,
+	"zlang@kernel.org" <zlang@kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+Subject: Re: [PATCH] generic: add test for missing btrfs csums in log when
+ doing async on subpage vol
+Message-ID: <20241023033114.m6ulorsbv6rq2puo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241015153957.2099812-1-maharmstone@fb.com>
+ <CAL3q7H4wLLTLi_sfKEQB8qsQ6G7VxWBfK_4FwSi4qL5Z3bkycQ@mail.gmail.com>
+ <d94875db-0bed-4077-a2e7-915e7358c1db@meta.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org,
- linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH 1/2] f2fs/006: add testcase to check out-of-space case
-To: Zorro Lang <zlang@redhat.com>
-References: <20241015025106.3203676-1-chao@kernel.org>
- <20241023023744.nvnuavzus26gjdj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <6ffdf1df-e4a3-4799-81d4-22f206beb720@kernel.org>
- <20241023031707.povvhtilr66bv2vi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-In-Reply-To: <20241023031707.povvhtilr66bv2vi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <d94875db-0bed-4077-a2e7-915e7358c1db@meta.com>
 
-On 2024/10/23 11:17, Zorro Lang wrote:
-> On Wed, Oct 23, 2024 at 10:53:09AM +0800, Chao Yu wrote:
->> On 2024/10/23 10:37, Zorro Lang wrote:
->>> On Tue, Oct 15, 2024 at 10:51:05AM +0800, Chao Yu wrote:
->>>> This is a regression test to check whether f2fs handles dirty
->>>> data correctly when checkpoint is disabled, if lfs mode is on,
->>>> it will trigger OPU for all overwritten data, this will cost
->>>> free segments, so f2fs must account overwritten data as OPU
->>>> data when calculating free space, otherwise, it may run out
->>>> of free segments in f2fs' allocation function, resulting in
->>>> panic.
->>>>
->>>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
->>>> Signed-off-by: Chao Yu <chao@kernel.org>
->>>> ---
->>>>    tests/f2fs/006     | 52 ++++++++++++++++++++++++++++++++++++++++++++++
->>>>    tests/f2fs/006.out |  6 ++++++
->>>>    2 files changed, 58 insertions(+)
->>>>    create mode 100755 tests/f2fs/006
->>>>    create mode 100644 tests/f2fs/006.out
->>>>
->>>> diff --git a/tests/f2fs/006 b/tests/f2fs/006
->>>> new file mode 100755
->>>> index 00000000..b359ef8f
->>>> --- /dev/null
->>>> +++ b/tests/f2fs/006
->>>> @@ -0,0 +1,52 @@
->>>> +#! /bin/bash
->>>> +# SPDX-License-Identifier: GPL-2.0
->>>> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
->>>> +#
->>>> +# FS QA Test No. f2fs/006
->>>> +#
->>>> +# This is a regression test to check whether f2fs handles dirty
->>>> +# data correctly when checkpoint is disabled, if lfs mode is on,
->>>> +# it will trigger OPU for all overwritten data, this will cost
->>>> +# free segments, so f2fs must account overwritten data as OPU
->>>> +# data when calculating free space, otherwise, it may run out
->>>> +# of free segments in f2fs' allocation function, resulting in
->>>> +# panic.
->>>> +#
->>>> +. ./common/preamble
->>>> +_begin_fstest auto quick
->>>> +
->>>> +_cleanup()
->>>> +{
->>>> +	rm -f $img
->>>> +	_scratch_unmount >> $seqres.full
->>>> +	cd /
->>>> +	rm -r -f $tmp.*
->>>> +}
->>>> +
->>>> +_require_scratch
->>>> +_scratch_mkfs >> $seqres.full
->>>> +_scratch_mount >> $seqres.full
->>>> +
->>>> +img=$SCRATCH_MNT/f2fs.img
->>>> +mnt=$SCRATCH_MNT/f2fs.mnt
->>>> +testfile=$mnt/testfile
->>>> +
->>>> +mkdir $mnt
->>>> +dd if=/dev/zero of=$img bs=1M count=100 2>/dev/null
->>>> +$MKFS_F2FS_PROG -f $img >/dev/null 2>&1
->>>> +sync
->>>> +
->>>> +# use mode=lfs to let f2fs always triggers OPU
->>>> +mount -t $FSTYP -o loop,mode=lfs,checkpoint=disable:10%,noinline_dentry $img $mnt
->>>
->>> Hi Chao,
->>>
->>> Is the loop device necessary? What if use SCRATCH_DEV and SCRATCH_MNT directly?
->>
->> Hi Zorro,
->>
->> It uses loop device to limit image size, so that we can speed
->> up padding steps of the test since it depends on ENOSPC state.
->>
->> Or maybe we can mkfs.f2fs $SCRATCH_DEV w/ specified sector size?
->> Any suggestion?
+On Fri, Oct 18, 2024 at 05:36:26PM +0000, Mark Harmstone wrote:
+> On 16/10/24 12:09, Filipe Manana wrote:
+> > > 
+> > On Tue, Oct 15, 2024 at 4:42 PM Mark Harmstone <maharmstone@fb.com> wrote:
+> >>
+> >> Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
+> >> race could mean that csums weren't getting written to the log tree,
+> >> leading to corruption when it was replayed.
+> >>
+> >> The patches to detect log this tree corruption are in btrfs-progs 6.11.
+> > 
+> > This shouldn't be needed right?
+> > Because after log replay the csums are missing and 'btrfs check'
+> > detects (IIRC) missing csums for extents referred by file extent items
+> > in a subvolume tree - if it doesn't then it should be improved.
 > 
-> Can scratch_mkfs_sized() help? I saw it supports f2fs.
+> Yes, but we're not mounting it in the tests between the log_writes 
+> calls, so the log isn't getting replayed. The patches to btrfs check 
+> make it so that it identifies filesystems that would get corrupted as 
+> soon as they're next mounted.
+> 
+> > 
+> >>
+> >> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+> >> ---
+> >> This is a genericized version of the test I originally proposed as
+> >> btrfs/333.
+> >>
+> >>   tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
+> >>   tests/generic/757.out |  2 ++
+> >>   2 files changed, 73 insertions(+)
+> >>   create mode 100755 tests/generic/757
+> >>   create mode 100644 tests/generic/757.out
+> >>
+> >> diff --git a/tests/generic/757 b/tests/generic/757
+> >> new file mode 100755
+> >> index 00000000..6ad3d01e
+> >> --- /dev/null
+> >> +++ b/tests/generic/757
+> >> @@ -0,0 +1,71 @@
+> >> +#! /bin/bash
+> >> +# SPDX-License-Identifier: GPL-2.0
+> >> +#
+> >> +# FS QA Test 757
+> >> +#
+> >> +# Test async dio with fsync to test a btrfs bug where a race meant that csums
+> >> +# weren't getting written to the log tree, causing corruptions on remount.
+> >> +# This can be seen on subpage FSes on Linux 6.4.
+> >> +#
+> >> +. ./common/preamble
+> >> +_begin_fstest auto quick metadata log recoveryloop
+> >> +
+> >> +_fixed_by_kernel_commit e917ff56c8e7 \
+> >> +       "btrfs: determine synchronous writers from bio or writeback control"
+> > 
+> > For generic tests what we do is:
+> > 
+> > [ $FSTYP == "btrfs" ] && _fixed_by_kernel_commit .....
+> > 
+> > As long as the failure has not been observed and fixed on other filesystems.
+> > In case one day a regression happens in another fs, we just add a
+> > corresponding line using the same logic.
+> > 
+> > Otherwise if the test one days fails on another fs and fstests
+> > suggests that that commit is missing, it would be odd.
+> > 
+> > Everything else looks good, so with that fixed (maybe Zorro can change
+> > that when picking the patch):
+> > 
+> > Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> > 
+> > Thanks.
+> > 
+> 
+> Thanks Filipe. Zorro, let me know if you're happy making this change, or 
+> otherwise I'll resubmit.
 
-Yes, let me update this patch, thanks.
+I can help to change that when I merge it. Thanks you and Filipe.
 
 Thanks,
+Zorro
 
 > 
-> Thanks,
-> Zorro
+> Mark
 > 
->>
->> Thanks,
->>
->>>
->>> Thanks,
->>> Zorro
->>>
->>>> +
->>>> +dd if=/dev/zero of=$testfile bs=1M count=50 2>/dev/null
->>>> +
->>>> +# it may run out of free space of f2fs and hang kernel
->>>> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
->>>> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
->>>> +
->>>> +mount -o remount,checkpoint=enable $mnt
->>>> +umount $mnt
->>>> +
->>>> +status=0
->>>> +exit
->>>> diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
->>>> new file mode 100644
->>>> index 00000000..a2c7ba48
->>>> --- /dev/null
->>>> +++ b/tests/f2fs/006.out
->>>> @@ -0,0 +1,6 @@
->>>> +QA output created by 006
->>>> +50+0 records in
->>>> +50+0 records out
->>>> +dd: error writing '/mnt/scratch_f2fs/f2fs.mnt/testfile': No space left on device
->>>> +3+0 records in
->>>> +2+0 records out
->>>> -- 
->>>> 2.40.1
->>>>
->>>
->>
 > 
 
