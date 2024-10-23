@@ -1,174 +1,176 @@
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 342811BD01D
-	for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 21:08:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32C47487A7
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 02:37:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729631342; cv=none; b=uyEEGSniBduLj4RPNMQQCUKXOm48IIYv6zEarIcEo1cFLzfbnY2vRTTbAaTFKVIivcN877SzhRh7vCjBqGeNUykx60CIdU0tiuIaYurx4Uz7zunsfNWoHO9vUGHzrnqAj62KF0/4IXkOj7QRSojeVXEgsaVDFHXhj/y9umqy5r4=
+	t=1729651074; cv=none; b=AbsvodYALox6IO1BGNVwvHG8bSHDuoE2OOkXHsQrVPnaWmWfTTp6dXXb3k/AV5Q6vdDQ/PSrIShJT/FnfwCMAA9iVym3fBkebEYVKlmw36JUpfhcGXe/b6GxP0Ku4RXsm9qDoykrvhOGmG5yCUprs49uPRZ1F3Qibh66dV0Ra4U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729631342; c=relaxed/simple;
-	bh=MtVqIS2QbrxYA8FDlOgo6uWJuXUYu0gvlgtBlH4dr6M=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=XyeqSE/7F3WZWOeHL5He0AoQ83c9PhB/IZXnZl7QCzKb8bdihkZN6r2iA1UTJVolPFTCkgMlCjO6ywWtinFhg2NllqBDzEICFVx/7FNg9uJ74IAc55nohF+tPKP8wl3/QNUP4ySvaFF3Xl1jdsnomsTWUcA0fJtTySx8/0GqMKc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=GVgcO6yF; arc=none smtp.client-ip=209.85.221.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1729651074; c=relaxed/simple;
+	bh=8u+X1pM+AnUareZYK1zopcfQKW2ZsrJYrVhF1ZK/Qu0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CopMry+XJdfApCbfWLMnTfM4SEptqsihN8Op7DIGFT2/0KulkCFl9UIWp1L6ITI15iq55bIc/VoXRA2eEObT8zEx5YlsfqT7Z6U3CokaTfaBUquJ+lIzSnpzNhi+k6/isytrJhZ68mDwCqi8XGXe605wGmfDRGitVRTc8v0mqjw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YxOaKJnj; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="GVgcO6yF"
-Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-37d43a9bc03so4249929f8f.2
-        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 14:08:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1729631338; x=1730236138; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=W/kL7Mjpko1fOCPD2ZaGdCaVKt/L/g60HuhmNf7NGpY=;
-        b=GVgcO6yFT3FOQKZMLMwPBjlXr8fnpQWnn2I9c6MXXG2IxaWPC+gCa8t7r2QWlCcq61
-         xfvzM7iU8ozNi/ksnxHUOSFJFpTMo2a/F1vJtxbkEjwHXCCzjA2CQnnjuV9OKHs5XmH5
-         Lg1PHh1bkawZ/fo4Bvhy12WxwQ/3aLsPfD9be0siVNWLwkWIRrqRo6qsP/VEDs/JUaTe
-         rhYTdAxNa3jn4W6/JxY0FFHvobT/+7MLlllLMdZOcOMcwC4SqZhkim1EBUb/4vNoCCwn
-         Z2Wc419Ot4NG9fumWPLPpVdAJxtozq7yOdh9cE+FOtgIdoTtNbXhtCOF5dRWo7EuDCMR
-         l1Hg==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YxOaKJnj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1729651072;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=HMyxQC4PiUMFEM2SCPgl/rqbsfz60eDAxA3ZwDK2x48=;
+	b=YxOaKJnjwp4TivYalJMxNv0KGbDPTI9/cemsiIn3RyVVB//TjcMX7+hkcbDKZhIcVoJQ9K
+	PRqQWScQWShQfV+D5m4a84FIjSAUyrNrCNWeT4PG/BVwoep36LimZA9UNeT4phsejSiFQm
+	1doGVXpAuNXsXEL+0vWEoQGITdZDO8w=
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
+ [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-613-EQBvD_F8No-ovyKmCOQ8fw-1; Tue, 22 Oct 2024 22:37:50 -0400
+X-MC-Unique: EQBvD_F8No-ovyKmCOQ8fw-1
+Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7ea7e2910c9so5028776a12.2
+        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 19:37:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729631338; x=1730236138;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=W/kL7Mjpko1fOCPD2ZaGdCaVKt/L/g60HuhmNf7NGpY=;
-        b=QjBphorjmmbKO/hiQoY6tvqnj6xiIAC3bwzuTWBKCRcukk7Q5PO9ZKM1b2vmYMwBeG
-         7VmajEzbDulONTPXuE4O3y+STJQU5bSK7N5KYvVqtZDHajhHeD9+aP3uBRuxgtuMW6M6
-         VtMltUmEom8VqtCrmlGcqphRyZjEvEEDLETXKQreP7PkoERarAMAXr7yLaV5keYmONTv
-         OQ4IaN0YzPgRCK+N45Z1LvDsSsaaQ0rJednKjBFejcLnV5KBSxpEMe3euAoYFdfTUHmH
-         hwZZjPXeuI8cv+3UrWFaqOXpZclgKjA5UsJ9ch8Rr+pfZv9OslAsu7ZUeDAwN6PKQ7jG
-         1n5w==
-X-Forwarded-Encrypted: i=1; AJvYcCWZhrpOHD1SaznjHfvhJ+Pk2rZOMrk37orIsS/yhNLeCWUVv1S++k2ys4L1qUvILptM75FHbT+c@vger.kernel.org
-X-Gm-Message-State: AOJu0YzpnxTcNkhpXyYISEQds1P+2P0LJ+6CmgU66xBvi0L+E7rcF81w
-	3bm9ppNAslUb3mI1S4WUEc5JgOKUMwcGO62tNDaRl8B/UZfPmY33smWEkjzFD4c=
-X-Google-Smtp-Source: AGHT+IEGuznmtZoDbnmUv5NZ5s0QKaHFy0WD+fiiZYcKukzGTynCYwMHXPCuFaqe2PsULOwBSOvLMw==
-X-Received: by 2002:a5d:5747:0:b0:374:ba23:4b3f with SMTP id ffacd0b85a97d-37efceee7camr168880f8f.9.1729631338069;
-        Tue, 22 Oct 2024 14:08:58 -0700 (PDT)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2e5ad3677b2sm6680927a91.20.2024.10.22.14.08.56
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 22 Oct 2024 14:08:57 -0700 (PDT)
-Message-ID: <47f6b493-3eac-4c00-9ce0-5b24a5776867@suse.com>
-Date: Wed, 23 Oct 2024 07:38:53 +1030
+        d=1e100.net; s=20230601; t=1729651069; x=1730255869;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HMyxQC4PiUMFEM2SCPgl/rqbsfz60eDAxA3ZwDK2x48=;
+        b=Rtfq1ReKnajI6ziYQb9WWRFW0InBMrzzmiBu6FQwvSHIPRdLiBRt041Chg/ySm8HM9
+         V7qXYdZLGea+g1TNNMQkuthhgvCDTmbNZkLBcm/jQop0xcVyygzncutO/wWV+mdOjd4V
+         C1mKVt4bqKD4fF3wxNH6kLEq7AivVTbFYIFC1FuXaWl6ff64mTYRfabIphRVbe4hrnev
+         V/5acQ6jTj+vtdc9b1Ac8zJvtbtRsjxhoG2z07vxAJvp/E7oFyKQVDd93RDyjlBpYWa+
+         Mb14A/l8XmaYuBQmWdbr8HjQQXyRTTHYRsKyS2pV2j9OybtE3gtSZkOfzQxrtMZOaEOQ
+         fpAQ==
+X-Gm-Message-State: AOJu0YyPToeESvyGYmiqiw2ClU76ntlKWb5KBNmwMguDYXjZeS4VE+Uq
+	aFAb+pUIPE/cfeHp7697wJHWqzxZIJhARdI+/jTWGhnkepBjX9+NR1GZ1AwsrjUBELOzv/o5BJP
+	vBMM94q8Qk23liF/bPcf9wgrUeim2qS7S046V2qXlnkC4I/RoaL30SJK9oYr8VkPZxw==
+X-Received: by 2002:a05:6a21:3414:b0:1d9:11d0:1214 with SMTP id adf61e73a8af0-1d978ad59fdmr1454006637.1.1729651068972;
+        Tue, 22 Oct 2024 19:37:48 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHWdRDqvMToqLfw5Irv/0qSGvhfnUU9U2RLhMRTuUG8XqtShRz3ifBOR0NkHjH/wVntXXwLdg==
+X-Received: by 2002:a05:6a21:3414:b0:1d9:11d0:1214 with SMTP id adf61e73a8af0-1d978ad59fdmr1453988637.1.1729651068537;
+        Tue, 22 Oct 2024 19:37:48 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71ec1313926sm5370452b3a.4.2024.10.22.19.37.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 22 Oct 2024 19:37:48 -0700 (PDT)
+Date: Wed, 23 Oct 2024 10:37:44 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+	Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH 1/2] f2fs/006: add testcase to check out-of-space case
+Message-ID: <20241023023744.nvnuavzus26gjdj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241015025106.3203676-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: btrfs/002: fix the OOM caused by too large block
- size
-To: Anand Jain <anand.jain@oracle.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org
-References: <20241012071824.124468-1-wqu@suse.com>
- <8f1a88d5-3199-473f-881b-1844c4f1cfe2@oracle.com>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <8f1a88d5-3199-473f-881b-1844c4f1cfe2@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241015025106.3203676-1-chao@kernel.org>
 
+On Tue, Oct 15, 2024 at 10:51:05AM +0800, Chao Yu wrote:
+> This is a regression test to check whether f2fs handles dirty
+> data correctly when checkpoint is disabled, if lfs mode is on,
+> it will trigger OPU for all overwritten data, this will cost
+> free segments, so f2fs must account overwritten data as OPU
+> data when calculating free space, otherwise, it may run out
+> of free segments in f2fs' allocation function, resulting in
+> panic.
+> 
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Signed-off-by: Chao Yu <chao@kernel.org>
+> ---
+>  tests/f2fs/006     | 52 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/006.out |  6 ++++++
+>  2 files changed, 58 insertions(+)
+>  create mode 100755 tests/f2fs/006
+>  create mode 100644 tests/f2fs/006.out
+> 
+> diff --git a/tests/f2fs/006 b/tests/f2fs/006
+> new file mode 100755
+> index 00000000..b359ef8f
+> --- /dev/null
+> +++ b/tests/f2fs/006
+> @@ -0,0 +1,52 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/006
+> +#
+> +# This is a regression test to check whether f2fs handles dirty
+> +# data correctly when checkpoint is disabled, if lfs mode is on,
+> +# it will trigger OPU for all overwritten data, this will cost
+> +# free segments, so f2fs must account overwritten data as OPU
+> +# data when calculating free space, otherwise, it may run out
+> +# of free segments in f2fs' allocation function, resulting in
+> +# panic.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_cleanup()
+> +{
+> +	rm -f $img
+> +	_scratch_unmount >> $seqres.full
+> +	cd /
+> +	rm -r -f $tmp.*
+> +}
+> +
+> +_require_scratch
+> +_scratch_mkfs >> $seqres.full
+> +_scratch_mount >> $seqres.full
+> +
+> +img=$SCRATCH_MNT/f2fs.img
+> +mnt=$SCRATCH_MNT/f2fs.mnt
+> +testfile=$mnt/testfile
+> +
+> +mkdir $mnt
+> +dd if=/dev/zero of=$img bs=1M count=100 2>/dev/null
+> +$MKFS_F2FS_PROG -f $img >/dev/null 2>&1
+> +sync
+> +
+> +# use mode=lfs to let f2fs always triggers OPU
+> +mount -t $FSTYP -o loop,mode=lfs,checkpoint=disable:10%,noinline_dentry $img $mnt
 
+Hi Chao,
 
-在 2024/10/22 21:54, Anand Jain 写道:
-> 
-> looks good.
-> Nits:
-> 
->> For 64K sector size, the BLKS is 512, and BLKS is 128 (one 64K sector).
->                                              ^^ NBLKS
-> 
->> $FALLOC is the correct value of 64K (10K rounded up to 64K).
->>
-> 
-> Not sure what you meant here. More below.
-
-I just mean the old $FALLOC value is 64K, which is correct.
-
-I didn't see anything confusing here, I was explaining each variable 
-involved.
-
-> 
-> 
->> diff --git a/tests/btrfs/002 b/tests/btrfs/002
->> index f223cc60..0c231b89 100755
->> --- a/tests/btrfs/002
->> +++ b/tests/btrfs/002
->> @@ -70,19 +70,14 @@ _read_modify_write()
->>   _fill_blk()
->>   {
->>       local FSIZE
->> -    local BLKS
->> -    local NBLK
->> -    local FALLOC
->> -    local WS
->> +    local NEWSIZE
->>       for i in `find /$1 -type f`
->>       do
->>           FSIZE=`stat -t $i | cut -d" " -f2`
->> -        BLKS=`stat -c "%B" $i`
->> -        NBLK=`stat -c "%b" $i`
->> -        FALLOC=$(($BLKS * $NBLK))
->> -        WS=$(($FALLOC - $FSIZE))
->> -        _ddt of=$i oseek=$FSIZE obs=$WS count=1 status=noxfer 2>/dev/ 
->> null &
-> 
-> 
->> +        NEWSIZE=$(( ($FSIZE + $blksize -1 ) / $blksize * $blksize ))
-> 
-> 
-> Please add extra ( ) otherwise it is very confusing.
-> 
->     NEWSIZE=$(( (($FSIZE + $blksize -1 ) / $blksize) * $blksize ))
-
-I didn't see how it's confusing.
-
-It's the very basic round down, and I didn't see any kernel code doing 
-extra () just for round down.
+Is the loop device necessary? What if use SCRATCH_DEV and SCRATCH_MNT directly?
 
 Thanks,
-Qu
+Zorro
+
+> +
+> +dd if=/dev/zero of=$testfile bs=1M count=50 2>/dev/null
+> +
+> +# it may run out of free space of f2fs and hang kernel
+> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
+> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
+> +
+> +mount -o remount,checkpoint=enable $mnt
+> +umount $mnt
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
+> new file mode 100644
+> index 00000000..a2c7ba48
+> --- /dev/null
+> +++ b/tests/f2fs/006.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 006
+> +50+0 records in
+> +50+0 records out
+> +dd: error writing '/mnt/scratch_f2fs/f2fs.mnt/testfile': No space left on device
+> +3+0 records in
+> +2+0 records out
+> -- 
+> 2.40.1
 > 
-> 
-> 
->> +
->> +        $XFS_IO_PROG -c "pwrite -i /dev/urandom $FSIZE $(( $NEWSIZE - 
->> $FSIZE ))" $i > /dev/null &
-> 
-> 
-> 
-> Reviewed-by: Anand Jain <anand.jain@oracle.com>
-> 
-> 
-> Thanks, Anand
 
