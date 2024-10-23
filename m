@@ -1,171 +1,202 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD1AC4B5AE
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:31:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB396139E
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:43:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729654285; cv=none; b=RUOh2gEqvaKa+Lbx1u3a1UB0yo8Xps0xpOB+dD6yCCOhclAJPw4C3Fbtq9iAAS2HLEDhkOMmyX6FgbIz2MdWEaKjFDuMhliNpC4BnjIILuemvrGSUizLGASXV/a3FlpmLJwyoOPxhYj90hJuzZ9rGgtHPIlkOjqabpB7EaeS2L8=
+	t=1729655035; cv=none; b=a4n4JcVnu+PH0giYacJ8m1NYAGQJCaIvJtZFIuRiVTddfTAJloisJkk5ELOM1G3LxF4LT/2gFUNmAQ9cE9JJEOPLuIzXdtvjgXAyEtSzjUauKpHzz6pZyj6xGxKgZ/xuZb2zJdbsYroxZJH608V6zPcdVzxZiBNanej+FHzjqK0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729654285; c=relaxed/simple;
-	bh=lHuye/yPAGri6KcQCAc/7/ijs0MtfvV9833216vQGM4=;
+	s=arc-20240116; t=1729655035; c=relaxed/simple;
+	bh=DrE3zMbY3opiAj9ivPnvoOqc2TUr6yZG1KasdCBlo0s=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fR1C3ZdP6VUjrQnQwpe8L8cfeweN1olNepKPrlkPAL+pjyFLOZCxDn4pvknQvKcRnssHTnAxh+kF+iJKkxInQqMaN/zGCh1l+LCaEXfGju1gtuOPHqbscvNerpN46uxSXulngTuIGsqMkJg9D3oQJL9LGXKTLXOK9RnCIS62SLQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JtIfgfJB; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=MDxbzShCpXhOMT+hIiZ3akm2jiC1oJLwUtd6wBIwdTXEzvTeDUqeoC6iKHCa9oHAXpWNQvQYG3fBf3Ys78Lm0xK1Bpd/dLs1TKmc2/SqGvy48SRrLjRPwkLtcLFG+5N9kk4S5RZsfa86fOhQusCWhSG1CIVS5fGY1jyuOqXc1j8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=hjQ577U3; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JtIfgfJB"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="hjQ577U3"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1729654283;
+	s=mimecast20190719; t=1729655032;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Ka79D+23BHXwETkT3vETyW64wVeFQaKZYsxP/xCDBqw=;
-	b=JtIfgfJBuyc48KpA9AbMzW9yWQ5qJMIltPhfGkzJqkyAM1uiaJFfxEiHUCmXAaUx3FI00N
-	1Lv5lkB520YSoHF3iuMF++EkZtgZyzrq87vO3Gafb+BGOF6GSDamsU75b3qW5KjhC+MFdA
-	bdoYn9g7SbyWJUaMB6JgQ5JJp0blOZo=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=ME4uxj2W+3TiF+0aUeXVAmiey9MLKGe2zI+5+yF4Xm4=;
+	b=hjQ577U3GImKDJMZlPR852PHsbEi4eJVv8pmjQXL+QhUBxAlx7p1oS21Vt508hMnuvjYKK
+	IxU5XwO1jVq/UTbYLTEpA1tF7Q9Xsx+rAglPGsp5rE1MCvBhbJGVwvo93AIDHXMzJ7Lbry
+	V0TbcatQWmgW2HYBR6oxFLU+feTrl7Q=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-550-lAF3zWW2P_ifHo3ejb24jQ-1; Tue, 22 Oct 2024 23:31:21 -0400
-X-MC-Unique: lAF3zWW2P_ifHo3ejb24jQ-1
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-7ea69eeb659so5569957a12.0
-        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:31:20 -0700 (PDT)
+ us-mta-424-7IsahSXMMzKvttf8M0xwQg-1; Tue, 22 Oct 2024 23:43:51 -0400
+X-MC-Unique: 7IsahSXMMzKvttf8M0xwQg-1
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-20c8a637b77so73610445ad.2
+        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:43:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729654280; x=1730259080;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ka79D+23BHXwETkT3vETyW64wVeFQaKZYsxP/xCDBqw=;
-        b=cqWTYx+PZNRvuNLHQJs47WF4PbTDaJLvT3MvZFS+lctyhX89oSIfpWVn+O6XnYkPAR
-         tKntOCfTLqYSVZl+d2q4Y2CSOQRabGBoy5/UA/ciY+2KHElIi6Xl4tYAoS7NTUuVmYGc
-         yV+BEsGS8R4c744jbI3qfPQ394BwsP+Jq5zD4dbIpudbziGzTqEqrAZwh6Z5wTyv0Z53
-         J6CgjSVLhtNyI21S7jQV2zo7EUPEWVulLBZ+YanZV3MW/ftM7QAEvXk01TFVe29tMTAd
-         SBK6oIF75/qJq9yv2WJx0bFXxy9OmoxlOMnr/WLbeZX4REuBRApKlYKbMlyzLpeVrs19
-         kHiQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXGqpgWFOfHHozmEaZ+ngAjkF60LNkBvGLAng5ft59qgYcw/ordzUCmtHgSSjGGehwC4VONOczq@vger.kernel.org
-X-Gm-Message-State: AOJu0YxZwABmfU3jn6CYLxDpNMDEE1AFc8Kz0mQieo3/fuF8iPooOJ0e
-	i2vGUc9NN1rurBr15Jdssntd4IxCvDGxtL7uJDWvvLAwVHbts60ovf3ERojddLDmF2ViQyEMc9E
-	Vx6vIpSC0keZJ0z/X0bMS84POnz+lR5R71eROn7e4vWSYWFYy+ngYBik=
-X-Received: by 2002:a05:6a21:1349:b0:1d9:1d2d:b656 with SMTP id adf61e73a8af0-1d978b14d28mr1399627637.15.1729654279964;
-        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGAOnJFG4Zct7QQbpZQmGSEafL9Fwiw+aJRF8apyJj467MpF47ejIg3d0wy8B8eROpbs8IXiQ==
-X-Received: by 2002:a05:6a21:1349:b0:1d9:1d2d:b656 with SMTP id adf61e73a8af0-1d978b14d28mr1399613637.15.1729654279343;
-        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1729655030; x=1730259830;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ME4uxj2W+3TiF+0aUeXVAmiey9MLKGe2zI+5+yF4Xm4=;
+        b=Kv9BIP6mJUF/GUGKP/Qp5Fmuk7ojoVfYiBujNrHfrSbqPC1yz71UvZE0jXIv4zHXDw
+         udgTRh7Ue5RFv2Bqq0B0unPeJatKB4Zr88QAzkZ8sxN3txDoiuLwSOY6GWCatwuTSd7r
+         5IEzU8v2ZEO3e39eCfapoB4va2QDisDVpIVTiexotNRGduS/wsW9HCWOZjsY4u7tq+FD
+         nJf/ejx3NBUkexPr9QQMf/Ajgom394otFZFYWDZQtCX3obkThjWXzJuCjOFXKpm9a5aM
+         H9Fvoa0CtfZe1VXrgA0s29Ff90V+Y3FP4aiXlQbUnhUKaDL75MzspN0cwor77akIxsVn
+         ShSA==
+X-Gm-Message-State: AOJu0Yz2uQCpvIxEmfyEIgzE6PQYuLDrBTm95E7wkC+AYjins3kR1H+o
+	//L9103kyzWSZ0mbMma0LC0qWw9APkcwZ29LXlSI4M363c72TdhSVrtui1DrgHdo2feDStv1zgq
+	RzsRaMnI/SLnkSswxoQA7jLFM4RjNsobNWAKp5xn6FSzjrrcZ5Mpb3XFPfnT/4RjwSw==
+X-Received: by 2002:a17:903:41d1:b0:20c:d2e4:dc33 with SMTP id d9443c01a7336-20fa9e48cddmr20814935ad.14.1729655029988;
+        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFjuE82hLa9YB2wuraSz0dFx2/t/wwDKsvEpjOHgAcIuT7pfPrDgbEPo9gYPU8yuFWITRXnqg==
+X-Received: by 2002:a17:903:41d1:b0:20c:d2e4:dc33 with SMTP id d9443c01a7336-20fa9e48cddmr20814745ad.14.1729655029689;
+        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f108d71sm49313845ad.304.2024.10.22.20.31.17
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f0de25bsm49522795ad.231.2024.10.22.20.43.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Oct 2024 20:31:19 -0700 (PDT)
-Date: Wed, 23 Oct 2024 11:31:14 +0800
+        Tue, 22 Oct 2024 20:43:49 -0700 (PDT)
+Date: Wed, 23 Oct 2024 11:43:45 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Mark Harmstone <maharmstone@meta.com>
-Cc: Filipe Manana <fdmanana@kernel.org>,
-	"zlang@kernel.org" <zlang@kernel.org>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	"linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Mark Harmstone <maharmstone@fb.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 Subject: Re: [PATCH] generic: add test for missing btrfs csums in log when
  doing async on subpage vol
-Message-ID: <20241023033114.m6ulorsbv6rq2puo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20241023034345.nxrd4y7hvv2ncp7e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20241015153957.2099812-1-maharmstone@fb.com>
- <CAL3q7H4wLLTLi_sfKEQB8qsQ6G7VxWBfK_4FwSi4qL5Z3bkycQ@mail.gmail.com>
- <d94875db-0bed-4077-a2e7-915e7358c1db@meta.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <d94875db-0bed-4077-a2e7-915e7358c1db@meta.com>
+In-Reply-To: <20241015153957.2099812-1-maharmstone@fb.com>
 
-On Fri, Oct 18, 2024 at 05:36:26PM +0000, Mark Harmstone wrote:
-> On 16/10/24 12:09, Filipe Manana wrote:
-> > > 
-> > On Tue, Oct 15, 2024 at 4:42 PM Mark Harmstone <maharmstone@fb.com> wrote:
-> >>
-> >> Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
-> >> race could mean that csums weren't getting written to the log tree,
-> >> leading to corruption when it was replayed.
-> >>
-> >> The patches to detect log this tree corruption are in btrfs-progs 6.11.
-> > 
-> > This shouldn't be needed right?
-> > Because after log replay the csums are missing and 'btrfs check'
-> > detects (IIRC) missing csums for extents referred by file extent items
-> > in a subvolume tree - if it doesn't then it should be improved.
+On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
+> Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
+> race could mean that csums weren't getting written to the log tree,
+> leading to corruption when it was replayed.
 > 
-> Yes, but we're not mounting it in the tests between the log_writes 
-> calls, so the log isn't getting replayed. The patches to btrfs check 
-> make it so that it identifies filesystems that would get corrupted as 
-> soon as they're next mounted.
+> The patches to detect log this tree corruption are in btrfs-progs 6.11.
 > 
-> > 
-> >>
-> >> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
-> >> ---
-> >> This is a genericized version of the test I originally proposed as
-> >> btrfs/333.
-> >>
-> >>   tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
-> >>   tests/generic/757.out |  2 ++
-> >>   2 files changed, 73 insertions(+)
-> >>   create mode 100755 tests/generic/757
-> >>   create mode 100644 tests/generic/757.out
-> >>
-> >> diff --git a/tests/generic/757 b/tests/generic/757
-> >> new file mode 100755
-> >> index 00000000..6ad3d01e
-> >> --- /dev/null
-> >> +++ b/tests/generic/757
-> >> @@ -0,0 +1,71 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +#
-> >> +# FS QA Test 757
-> >> +#
-> >> +# Test async dio with fsync to test a btrfs bug where a race meant that csums
-> >> +# weren't getting written to the log tree, causing corruptions on remount.
-> >> +# This can be seen on subpage FSes on Linux 6.4.
-> >> +#
-> >> +. ./common/preamble
-> >> +_begin_fstest auto quick metadata log recoveryloop
-> >> +
-> >> +_fixed_by_kernel_commit e917ff56c8e7 \
-> >> +       "btrfs: determine synchronous writers from bio or writeback control"
-> > 
-> > For generic tests what we do is:
-> > 
-> > [ $FSTYP == "btrfs" ] && _fixed_by_kernel_commit .....
-> > 
-> > As long as the failure has not been observed and fixed on other filesystems.
-> > In case one day a regression happens in another fs, we just add a
-> > corresponding line using the same logic.
-> > 
-> > Otherwise if the test one days fails on another fs and fstests
-> > suggests that that commit is missing, it would be odd.
-> > 
-> > Everything else looks good, so with that fixed (maybe Zorro can change
-> > that when picking the patch):
-> > 
-> > Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> > 
-> > Thanks.
-> > 
+> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+> ---
+> This is a genericized version of the test I originally proposed as
+> btrfs/333.
 > 
-> Thanks Filipe. Zorro, let me know if you're happy making this change, or 
-> otherwise I'll resubmit.
+>  tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/757.out |  2 ++
+>  2 files changed, 73 insertions(+)
+>  create mode 100755 tests/generic/757
+>  create mode 100644 tests/generic/757.out
+> 
+> diff --git a/tests/generic/757 b/tests/generic/757
+> new file mode 100755
+> index 00000000..6ad3d01e
+> --- /dev/null
+> +++ b/tests/generic/757
+> @@ -0,0 +1,71 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +#
+> +# FS QA Test 757
+> +#
+> +# Test async dio with fsync to test a btrfs bug where a race meant that csums
+> +# weren't getting written to the log tree, causing corruptions on remount.
+> +# This can be seen on subpage FSes on Linux 6.4.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick metadata log recoveryloop
+> +
+> +_fixed_by_kernel_commit e917ff56c8e7 \
+> +	"btrfs: determine synchronous writers from bio or writeback control"
+> +
+> +fio_config=$tmp.fio
+> +
+> +. ./common/dmlogwrites
+> +
+> +_require_scratch
+> +_require_log_writes
+> +
+> +cat >$fio_config <<EOF
+> +[global]
+> +iodepth=128
+> +direct=1
+> +ioengine=libaio
+> +rw=randwrite
+> +runtime=1s
+> +[job0]
+> +rw=randwrite
+> +filename=$SCRATCH_MNT/file
+> +size=1g
+> +fdatasync=1
+> +EOF
+> +
+> +_require_fio $fio_config
+> +
+> +cat $fio_config >> $seqres.full
+> +
+> +_log_writes_init $SCRATCH_DEV
+> +_log_writes_mkfs >> $seqres.full 2>&1
+> +_log_writes_mark mkfs
+> +
+> +_log_writes_mount
 
-I can help to change that when I merge it. Thanks you and Filipe.
+For dmlogwrites test, we generally calls _log_writes_cleanup in _cleanup, to
+recover the SCRATCH_DEV anyway, even if this test is killed at the middle of
+its testing phase, to avoid later tests failed.
+
+I'll add below code in this case, when I merge it. If there's not objection
+from you.
+
+_cleanup()
+{
+	cd /
+	_log_writes_cleanup
+	rm -f $tmp.*
+}
 
 Thanks,
 Zorro
 
-> 
-> Mark
+> +
+> +$FIO_PROG $fio_config > /dev/null 2>&1
+> +_log_writes_unmount
+> +
+> +_log_writes_remove
+> +
+> +prev=$(_log_writes_mark_to_entry_number mkfs)
+> +[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
+> +cur=$(_log_writes_find_next_fua $prev)
+> +[ -z "$cur" ] && _fail "failed to locate next FUA write"
+> +
+> +while [ ! -z "$cur" ]; do
+> +	_log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
+> +
+> +	_check_scratch_fs
+> +
+> +	prev=$cur
+> +	cur=$(_log_writes_find_next_fua $(($cur + 1)))
+> +	[ -z "$cur" ] && break
+> +done
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/757.out b/tests/generic/757.out
+> new file mode 100644
+> index 00000000..dfbc8094
+> --- /dev/null
+> +++ b/tests/generic/757.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 757
+> +Silence is golden
+> -- 
+> 2.44.2
 > 
 > 
 
