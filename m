@@ -1,202 +1,187 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C246261FE9
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 03:53:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33A751384BF
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 04:12:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729655591; cv=none; b=EfVPd/AwesPAd7015F6xDDNSamhLkw6QDWoIWh4cU0kYPOKEsEex2W8XlJvgbttKiTuLZ5Tey9oY7qOfydvSHRehr5Klo2DNNxmFZzsWxjFgFpChITNYkBpOw+4KD10aI+VIo22jBJvUIEq+oO6jZHCEgtrqxt+R8eI08KPoJQk=
+	t=1729656761; cv=none; b=BS6rTYeFQ5yRGoABEWW75QaqMFTyk2mmdXFtK/qkZidQSiLOlIxmxoabyiEOEJKrk66pEk3fqv3o03dkuA1ZHDLzuGfdZ3qbz0o2V7se1Ryhsl0uiBw6ESzIBGdwkwgQn4SC3Pwp9I3waOE6/2K6JA5Cgma8VPfN075dfg2wOS0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729655591; c=relaxed/simple;
-	bh=x9Q9P1jcFOedVLmQygOV3TsI9HAfkG7xnhoSSc4vbw8=;
+	s=arc-20240116; t=1729656761; c=relaxed/simple;
+	bh=ly+gAL6FWqxVw1uhSK12MfSlG2GA1IdyXowrlEudL9M=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ti2LQ2lLnHvaRIgdFUt4DzcfMy75thZe/cdvONA9KNzGHg9Ld3MA3nA9Xl0KorFboi3imL+mRQ8eA9vRvCtuJJcqqgrgtV8JIup+BVobF04IwZ77yIwe/JbN01MOQnwKS67Uxde39zzXPDOxlMJHSq5bkU7oCgQwkoDvzVjRjNw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Mi4KGDZA; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZHXZpFFedMEJ7nQO4sxEq0nPlGy6CG9o0d1ExAj2G2Z6PVsuh75adh2OP9Yl8FOdj7FkF8XJsuTXDuoufyLw/4Vz5wjEnQftZA84yrHerdREeYxV1FtNe/fgeJYlHwEgT4yvX+gU+yfVV1V78uoWuYyknuOynxkuN4nK6H/ZAaU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M2zHKCVV; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Mi4KGDZA"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M2zHKCVV"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1729655588;
+	s=mimecast20190719; t=1729656758;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=qtNT+qtypMH7i1sLJxi3tnaKJ//hw1RtU8th0A1zkI4=;
-	b=Mi4KGDZAcOCz4xlj5nPzb+mt64y2LR2wDT2asz/wlG8F+cPIezQlFVdFwmVo6/7zMvegMT
-	aCeMEyo8itKNfbLlpgoPNFZ67vpJTUrk0q6zY9z+k6cMUywM4bGyT1kSx6s6Ky8KDoC6tg
-	siImZRcNKkhVwVQv8qnPzARpFHNNv+8=
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com
- [209.85.215.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=+37vG64ySEsAwS8ZgQPLClCj9m5wCkSNkm3JVrJz12Y=;
+	b=M2zHKCVVW6seaCIXb+HGSHGqVSGTOMHciKnWXtYkUwr7JSmE5kUT2Kag5Bdypof4gdr4T+
+	IUylS5qh/7beUS5XtmFEoajnXl9yagpXcEm2bH+LD0pmF0p5QKiL30s46jsw6nsxOORV/c
+	2b9E+ox5iLfHrjAbCNCh0MJPDppQXTE=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-445-rN4jt2tUND68YIvIvHyz6A-1; Tue, 22 Oct 2024 23:53:06 -0400
-X-MC-Unique: rN4jt2tUND68YIvIvHyz6A-1
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-7eb0a32fc5aso1187876a12.2
-        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 20:53:06 -0700 (PDT)
+ us-mta-599-BKYz9H55P2iXFxCFZwikoQ-1; Wed, 23 Oct 2024 00:12:35 -0400
+X-MC-Unique: BKYz9H55P2iXFxCFZwikoQ-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2e3d74e5962so7675445a91.0
+        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 21:12:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729655586; x=1730260386;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=qtNT+qtypMH7i1sLJxi3tnaKJ//hw1RtU8th0A1zkI4=;
-        b=fLZczl06giAoSe4CV8Jsc9Bz6iPE4XcL4Fv5N06D7SXXooWQzd9A4XJYE2UKtoRnTO
-         +0mNTfpIT5YVQn16ArtzTBY9h/PfMG9iAgBc1hXTUR7yCWRbraI+1tw6W0kNh9PFOQI+
-         /GThofbprP3enZOZg4jlz62kT5ZW2lhRp8oLXir+jaJyIDGDlAuEFQcuMW1nFthrwR6f
-         zFXAb9nRiyNLrR1hFXFxhl9qYiXyYo5Gvm4WBb859jbazEWOf/XD1zWixeCKLcJAORMx
-         FxpgjRFCPhGo7QRklD5VYnNnWujWWAt9UoMG1iLLdo5wVJTS/N2hJDHwqcKDri9H2VJV
-         a+vQ==
-X-Gm-Message-State: AOJu0YzMxRUvaOoHc4n6irkZ1AcBGY0C+6B15mkviUhwjDT50oHYLHuv
-	qzS9JKBAznMAMkaCJFA6b5QOj3XUObtFThCqOUNTuNQdvLPzlp2ODYCOMbqKN2ze2ivCMi+pYxm
-	aMvGxry6fvy1c2O4EjB0BCYpdd9hhASi6KoRJ2igZqJd+34p51M0B1t8=
-X-Received: by 2002:a05:6a21:6b0b:b0:1d8:a13d:723d with SMTP id adf61e73a8af0-1d978bae5d1mr1389717637.31.1729655585709;
-        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGE8iOLDtC5/BgrSqF0DGt/0TECa+ChMUGy75/TPv20YxMYrrxzzOzmlrGY6e1AYX8+52iDxQ==
-X-Received: by 2002:a05:6a21:6b0b:b0:1d8:a13d:723d with SMTP id adf61e73a8af0-1d978bae5d1mr1389701637.31.1729655585313;
-        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1729656754; x=1730261554;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+37vG64ySEsAwS8ZgQPLClCj9m5wCkSNkm3JVrJz12Y=;
+        b=T0rmZhlMMiAcqso/47Diq2tiRzw4vsyhiZkV1eOrDpNJO70OAAMDTTqDpBCu5SyMn7
+         NXtzP2l51NKqKwvysf7eRY23RI8jmyGydQdZhuLLuSA5oy+q2mauBjE45xkwh4HtihiW
+         M1G2a6W0z4+aPhywROlZLYD4AIgvqt19oj+jWvH0AE1AnmcISw2NYrVQRwIf+RSA/1n9
+         SZ/sUBPySr3uQWHNtZp4AJG6Dn75LYz7nyFg9DpAvajo3JptvIMLiU/tkPEbfKpelnQX
+         BY5aYJ/gfrc+aEvm1OfmtwasnwbM3uA5sJf1j0ynb2ShK40/RgfYewEbnYTEJrxtqC6D
+         tbeQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUNeINCn+/WKGb7Tl5hhk3V+H5mPQCo9OpnIQD0xBQw5SUg1hRy4ys9IgrFxJmSK721cpo25p+b@vger.kernel.org
+X-Gm-Message-State: AOJu0YwvmDejITutmgvyTHVdS0blhQcONUuJWiCsXhdmmYHO3kDpsfmP
+	SBj+rrzjvU7iBMW13p/md0HIXsIZzVU/RP2s2+0enJU4+VQKpTQSprRev3RikvFYy1ah1hadnDB
+	eg8v6Z+COrNAoiKdra5j2v/rpL7iYSdr6MxKmAueSUSXNLN5vmYsARyo=
+X-Received: by 2002:a17:90a:de8e:b0:2e2:bd68:b8d8 with SMTP id 98e67ed59e1d1-2e76b5b59a9mr1498294a91.8.1729656754486;
+        Tue, 22 Oct 2024 21:12:34 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFnHxPU6fpRamKmjky29NIoWmZ5rFzNRJcaN1vCYWtFkjg8Vtc28xndO+DadjjYyyVSmx4fRQ==
+X-Received: by 2002:a17:90a:de8e:b0:2e2:bd68:b8d8 with SMTP id 98e67ed59e1d1-2e76b5b59a9mr1498276a91.8.1729656754152;
+        Tue, 22 Oct 2024 21:12:34 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-71ec13355casm5428779b3a.59.2024.10.22.20.53.03
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2e76df29cd5sm296434a91.1.2024.10.22.21.12.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Oct 2024 20:53:05 -0700 (PDT)
-Date: Wed, 23 Oct 2024 11:53:01 +0800
+        Tue, 22 Oct 2024 21:12:33 -0700 (PDT)
+Date: Wed, 23 Oct 2024 12:12:28 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Mark Harmstone <maharmstone@fb.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] generic: add test for missing btrfs csums in log when
- doing async on subpage vol
-Message-ID: <20241023035301.due7yoel6muwvmec@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241015153957.2099812-1-maharmstone@fb.com>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: Qu Wenruo <quwenruo.btrfs@gmx.com>, Qu Wenruo <wqu@suse.com>,
+	linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+	Long An <lan@suse.com>
+Subject: Re: [PATCH] btrfs/012: fix false alerts when SELinux is enabled
+Message-ID: <20241023041228.d3rkmmci5vnw5ict@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <5538c72ca7c1bf2eb0ff3dbaa73903869ba47e95.1729209889.git.wqu@suse.com>
+ <96e09109-1b9c-4f15-a07d-26501ed891a3@oracle.com>
+ <8f1acfa5-37f9-4deb-af9e-d2f7576e0c26@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20241015153957.2099812-1-maharmstone@fb.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <8f1acfa5-37f9-4deb-af9e-d2f7576e0c26@gmx.com>
 
-On Tue, Oct 15, 2024 at 04:39:34PM +0100, Mark Harmstone wrote:
-> Adds a test for a bug we encountered on Linux 6.4 on aarch64, where a
-> race could mean that csums weren't getting written to the log tree,
-> leading to corruption when it was replayed.
+On Tue, Oct 22, 2024 at 01:12:15PM +1030, Qu Wenruo wrote:
 > 
-> The patches to detect log this tree corruption are in btrfs-progs 6.11.
 > 
-> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
-> ---
-
-Sorry, more review points below. I can help to change these if you say "yes"
-to all :)
-
-> This is a genericized version of the test I originally proposed as
-> btrfs/333.
+> 在 2024/10/19 08:45, Anand Jain 写道:
+> > On 18/10/24 08:04, Qu Wenruo wrote:
+> > > [FALSE FAILURE]
+> > > If SELinux is enabled, the test btrfs/012 will fail due to metadata
+> > > mismatch:
+> > > 
+> > > FSTYP         -- btrfs
+> > > PLATFORM      -- Linux/x86_64 localhost 6.4.0-150600.23.25-default #1
+> > > SMP PREEMPT_DYNAMIC Tue Oct  1 10:54:01 UTC 2024 (ea7c56d)
+> > > MKFS_OPTIONS  -- /dev/loop1
+> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/loop1 /
+> > > mnt/scratch
+> > > 
+> > > btrfs/012       - output mismatch (see /home/adam/xfstests-dev/
+> > > results//btrfs/012.out.bad)
+> > >      --- tests/btrfs/012.out    2024-10-18 10:15:29.132894338 +1030
+> > >      +++ /home/adam/xfstests-dev/results//btrfs/012.out.bad
+> > > 2024-10-18 10:25:51.834819708 +1030
+> > >      @@ -1,6 +1,1390 @@
+> > >       QA output created by 012
+> > >       Checking converted btrfs against the original one:
+> > >      -OK
+> > >      +metadata mismatch in /p0/d2/f4
+> > >      +metadata mismatch in /p0/d2/f5
+> > >      +metadata and data mismatch in /p0/d2/
+> > >      +metadata and data mismatch in /p0/
+> > >      ...
+> > > 
+> > > [CAUSE]
+> > > All the mismatch happens in the metadata, to be more especific, it's the
+> > > security xattrs.
+> > > 
+> > > Although btrfs-convert properly convert all xattrs including the
+> > > security ones, at mount time we will get new SELinux labels, causing the
+> > > mismatch between the converted and original fs.
+> > > 
+> > > [FIX]
+> > > Override SELINUX_MOUNT_OPTIONS so that we will not touch the security
+> > > xattrs, and that should fix the false alert.
+> > > 
+> > > Reported-by: Long An <lan@suse.com>
+> > > Link: https://bugzilla.suse.com/show_bug.cgi?id=1231524
+> > > Signed-off-by: Qu Wenruo <wqu@suse.com>
+> > > ---
+> > >   tests/btrfs/012 | 5 +++++
+> > >   1 file changed, 5 insertions(+)
+> > > 
+> > > diff --git a/tests/btrfs/012 b/tests/btrfs/012
+> > > index b23e039f4c9f..5811b3b339cb 100755
+> > > --- a/tests/btrfs/012
+> > > +++ b/tests/btrfs/012
+> > > @@ -32,6 +32,11 @@ _require_extra_fs ext4
+> > >   BASENAME="stressdir"
+> > >   BLOCK_SIZE=`_get_block_size $TEST_DIR`
+> > > +# Override the SELinux mount options, or it will lead to unexpected
+> > > +# different security.selinux between the original and converted fs,
+> > > +# causing false metadata mismatch during fssum.
+> > > +export SELINUX_MOUNT_OPTIONS=""
+> > > +
+> > 
+> > SELINUX_MOUNT_OPTIONS is set only when SELinux is enabled on the system,
+> > so disabling SELinux will suffice.
 > 
->  tests/generic/757     | 71 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/757.out |  2 ++
->  2 files changed, 73 insertions(+)
->  create mode 100755 tests/generic/757
->  create mode 100644 tests/generic/757.out
+> Are you suggesting to disable SELinux just to pass the test case?
 > 
-> diff --git a/tests/generic/757 b/tests/generic/757
-> new file mode 100755
-> index 00000000..6ad3d01e
-> --- /dev/null
-> +++ b/tests/generic/757
-> @@ -0,0 +1,71 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test 757
-> +#
-> +# Test async dio with fsync to test a btrfs bug where a race meant that csums
-> +# weren't getting written to the log tree, causing corruptions on remount.
-> +# This can be seen on subpage FSes on Linux 6.4.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick metadata log recoveryloop
-                                                      ^^^
-                                                      aio
+> Then it doesn't sound correct to me at all.
+> 
+> It should be the test case to adapt to all kinds of systems, not the
+> other way.
 
-> +
-> +_fixed_by_kernel_commit e917ff56c8e7 \
-> +	"btrfs: determine synchronous writers from bio or writeback control"
-> +
-> +fio_config=$tmp.fio
-> +
-> +. ./common/dmlogwrites
-> +
-> +_require_scratch
-> +_require_log_writes
-> +
-> +cat >$fio_config <<EOF
-> +[global]
-> +iodepth=128
-> +direct=1
-> +ioengine=libaio
-
-_require_aiodio ?
-
-> +rw=randwrite
-> +runtime=1s
-> +[job0]
-> +rw=randwrite
-> +filename=$SCRATCH_MNT/file
-> +size=1g
-> +fdatasync=1
-> +EOF
-> +
-> +_require_fio $fio_config
-> +
-> +cat $fio_config >> $seqres.full
-> +
-> +_log_writes_init $SCRATCH_DEV
-> +_log_writes_mkfs >> $seqres.full 2>&1
-> +_log_writes_mark mkfs
-> +
-> +_log_writes_mount
-> +
-> +$FIO_PROG $fio_config > /dev/null 2>&1
-
-Don't you care the output of fio running anymore? Maybe use > $seqres.full ?
-
-And just make sure, do you want to ignore failures of fio, as you do "2>&1"?
+Hi Anand, I think Qu is right, it's not worth disable the whole SELinux
+(at the beginning of fstests running), just for a single test case.
+I just hope to make sure btrfs forks agree this's a failure which should
+be fixed in test side, but not change the selinux config for btrfs-progs.
+If you're sure about it, I'll merge this patch :)
 
 Thanks,
 Zorro
 
-> +_log_writes_unmount
-> +
-> +_log_writes_remove
-> +
-> +prev=$(_log_writes_mark_to_entry_number mkfs)
-> +[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
-> +cur=$(_log_writes_find_next_fua $prev)
-> +[ -z "$cur" ] && _fail "failed to locate next FUA write"
-> +
-> +while [ ! -z "$cur" ]; do
-> +	_log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
-> +
-> +	_check_scratch_fs
-> +
-> +	prev=$cur
-> +	cur=$(_log_writes_find_next_fua $(($cur + 1)))
-> +	[ -z "$cur" ] && break
-> +done
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/757.out b/tests/generic/757.out
-> new file mode 100644
-> index 00000000..dfbc8094
-> --- /dev/null
-> +++ b/tests/generic/757.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 757
-> +Silence is golden
-> -- 
-> 2.44.2
+> 
+> Thanks,
+> Qu
+> 
+> > 
+> > -------
+> > fstests/common/config:
+> > if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
+> >          : ${SELINUX_MOUNT_OPTIONS:="-o context=$(stat -c %C /)"}
+> >          export SELINUX_MOUNT_OPTIONS
+> > fi
+> > ----------
+> > 
+> > Thanks, Anand
+> > 
+> > >   # Create & populate an ext4 filesystem
+> > >   $MKFS_EXT4_PROG -F -b $BLOCK_SIZE $SCRATCH_DEV > $seqres.full 2>&1 || \
+> > >       _notrun "Could not create ext4 filesystem"
+> > 
+> > 
 > 
 > 
 
