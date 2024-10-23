@@ -1,121 +1,284 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF9BB4C3D0
-	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 04:23:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0D687487BE
+	for <fstests@vger.kernel.org>; Wed, 23 Oct 2024 07:18:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729657402; cv=none; b=WTEuFUgwoF6w99bKXmMOsY0WYU4ggw0R7tYDZrq7Xey3PnKqpKLTrCruFJ+Afoko1hVvnwa9kwXK4kSeQZbqlS4L++s1h6x7rfISAbSt1rExJdOIzu7ibF2oQ3Kgz+Eck7vFah6ceVVmjQFRp/HW/x8/jVCo3wJKbwRdABd7+HA=
+	t=1729667906; cv=none; b=EVLQNvI00H4gpDgoJjc92urqUTMdrtYFz2aUEElI4KOc3WygyEf+rOrmVf4jSnevIxL1MTaCRhL2IBQEVxkE3484jWf5xDA01AQqMGr4X7x7/AkYmf2lIfosaWaKsbWfkTgtTf6P+kMRkUyMJA6jhJwpCMDh28zn1liVmpBcPEs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729657402; c=relaxed/simple;
-	bh=L7+k1i8489tEGmKRN1ucBqp+4YMw4Bn0UzMNOhDXvDc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mOICe3ttbEMWdqdzEtOlS+MPk8dj6X2y5p9tSmnwWTH3umO1wOEqHMPbu38LU8PZMPuY3YiYyMVMi0+6E4TFoFYtS0aoJMQ038kPZgUBuD2pbHF6PdnoktpAORToLimNgbL3WruIue4CLNbovpBSpvCvESasJWIsdqfHgRtMAUg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QcttSHgI; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1729667906; c=relaxed/simple;
+	bh=HZEpojZgfXGKFnv44xgyxZ4cy2+RhSZbW2dyEUNmQCA=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=XoDGzOu9ykXC9TuH8CNGSAOPe2/jWLmG4BXXEO9WBHCWWzC1VZkPhQe2OQg+V85u8um5av1jcBi/paLGXjwj1YMC9scRCRiGYkQGR5YRQzVftUnr7Zuu3vVnoU/9MHGwstYAOo9jGYcczauK87DoDPSx720MTkAD5SwvGBbqqaw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=b/2hnwda; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QcttSHgI"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1729657399;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OAkL5yCM6y7BDQ8CUK/gyfO8rGWWndsll5pUTO1Bpes=;
-	b=QcttSHgIWLsqL0Vy/RhGI+22SEoaxc9/BUYKlPbFBdvCOk1JCiQxXAIkVwjXqsAWCgkIoq
-	sUtjG2vT148QMzU3QLARwwlrPdyJPiflsw+/LdKlUSTS8I0RqSkDc9RpZmnTni6GopmPk7
-	HS//4QsqoW16gL2WDX5xozTqxeblO5U=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-586-fPw4k9c1Nvq5Xtc7d9Wn4g-1; Wed, 23 Oct 2024 00:23:17 -0400
-X-MC-Unique: fPw4k9c1Nvq5Xtc7d9Wn4g-1
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-20b6144cc2aso4806645ad.0
-        for <fstests@vger.kernel.org>; Tue, 22 Oct 2024 21:23:16 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729657396; x=1730262196;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=OAkL5yCM6y7BDQ8CUK/gyfO8rGWWndsll5pUTO1Bpes=;
-        b=hw2YaODypFfSgLg4Dz9b8/UTuWtOsRaLXe/ivaGLqkg41Vq/qceBWVVziNZRGhK+F1
-         Hw7jE89isgk/osu5rHOHwdxHQUFGc4ooEPxVEfvl6XOqR+K7z7Tfhr/iMntDoEne5zO1
-         9FBApd8NpWf+SuSrlPKyefwZWhkbFRIxLaIJ9RZYwiiKQM9LBxvTXDDwub5+g8NUP1rO
-         nwj2dyF/lv3OhiVC0ypKNZVZO1ZmqcYkMELX6IIvX8c98n5l+MahRZNDvevNqLeGPpI7
-         5mhl3ImX2Ql+0Scew3NedHZ4MzCJx4OKa6/CCou61Y3VzCq9SlcvROSGi5CQWL9eDiSu
-         B5Xg==
-X-Forwarded-Encrypted: i=1; AJvYcCUe/V35Hgm2Y4wJ7QyCjwdHDr4BrpoyV68k2ISiFcGcvLbkZmjdyA0oISC8voOwxJ3I6+DiYG62@vger.kernel.org
-X-Gm-Message-State: AOJu0YwaO5/ayKJc/USeW3qsQAtC2L7uMwC9sGr8HXwdNM+xQG7sylKZ
-	6Us0Sv7KoiCPTSpFDnWmlnq6NlByW4cgbY8PmxI7QaprGDDJL9nbLm/sI4alLpcXpy+GD5UA4C5
-	7eBbdTonVf3tyxA0ezPzlRJPwbO62T6VOeL556jYTbmB6mWosiiRk1Sc0uhBhSiScVg==
-X-Received: by 2002:a17:903:244a:b0:205:8763:6c2d with SMTP id d9443c01a7336-20fa9ea22f1mr23794665ad.9.1729657395808;
-        Tue, 22 Oct 2024 21:23:15 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IELkvnuc5PEhORNlgKURJl356pveYdM9/yfbKLimVQqNTxshnMQsUlXSHpgff8BM9YUmtbQeg==
-X-Received: by 2002:a17:903:244a:b0:205:8763:6c2d with SMTP id d9443c01a7336-20fa9ea22f1mr23794445ad.9.1729657395390;
-        Tue, 22 Oct 2024 21:23:15 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f0bcc3csm49931555ad.158.2024.10.22.21.23.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Oct 2024 21:23:15 -0700 (PDT)
-Date: Wed, 23 Oct 2024 12:23:11 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/161: adapt the test case for LBS filesystem
-Message-ID: <20241023042311.apfuq73crvlblxoe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <172912045589.2583984.11028192955246574508.stgit@frogsfrogsfrogs>
- <172912045624.2583984.16971966548333767345.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="b/2hnwda"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 352E1C4CEC6;
+	Wed, 23 Oct 2024 07:18:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1729667905;
+	bh=HZEpojZgfXGKFnv44xgyxZ4cy2+RhSZbW2dyEUNmQCA=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=b/2hnwdap2fSTu7TG+GXmjG9vu4lCnKz7oqQP59t8ZsU4Zwp2t9oL8IkN+zwMB8XC
+	 FyIvpJdKXnp0rdb9Eur6pgIz8tnj8F3nRa2/N4RYxb4bwlu8hyZqYCWQjJSpjEnLGy
+	 NMmFbBH7ZD67w7bEt6MGmCZ/oxZNuNKaUOry1B85+EHbEMZLoh0/T/nv6s4v6zE2HJ
+	 o8htg3M8CdbOqIo4Zz4dyMpr6jP6a8EGY70uNN8oKUR9eDd0FG3sQJT9n6NfyWxRHK
+	 13XhxMXLMnsyu4ViuU17ZcbR0wDHurljFUMMv15sQz1XHFZ4MHFDcHSsbD03bGJX43
+	 7W7bh+Y+t/E/g==
+Message-ID: <56b6a57d-c0db-4a6e-a7a9-e5d1a7396b83@kernel.org>
+Date: Wed, 23 Oct 2024 15:18:21 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <172912045624.2583984.16971966548333767345.stgit@frogsfrogsfrogs>
+User-Agent: Mozilla Thunderbird
+Cc: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>,
+ Qi Han <hanqi@vivo.com>
+Subject: Re: [PATCH 2/2] f2fs/007: add testcase to check consistency of
+ compressed inode metadata
+To: Zorro Lang <zlang@redhat.com>
+References: <20241015025106.3203676-1-chao@kernel.org>
+ <20241015025106.3203676-2-chao@kernel.org>
+ <20241023030746.5e53w26p5qtfbpod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20241023030746.5e53w26p5qtfbpod@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Wed, Oct 16, 2024 at 04:15:32PM -0700, Darrick J. Wong wrote:
-> From: Pankaj Raghav <p.raghav@samsung.com>
+On 2024/10/23 11:07, Zorro Lang wrote:
+> On Tue, Oct 15, 2024 at 10:51:06AM +0800, Chao Yu wrote:
+>> metadata of compressed inode should always be consistent after file
+>> compression, reservation, releasement and decompression, let's add
+>> a testcase to check it.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Cc: Qi Han <hanqi@vivo.com>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>>   tests/f2fs/007     | 116 +++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/f2fs/007.out |   4 ++
+>>   2 files changed, 120 insertions(+)
+>>   create mode 100755 tests/f2fs/007
+>>   create mode 100644 tests/f2fs/007.out
+>>
+>> diff --git a/tests/f2fs/007 b/tests/f2fs/007
+>> new file mode 100755
+>> index 00000000..274be806
+>> --- /dev/null
+>> +++ b/tests/f2fs/007
+>> @@ -0,0 +1,116 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/007
+>> +#
+>> +# This is a regression test to check whether compressed metadata
 > 
-> This test fails for >= 64k filesystem block size on a 4k PAGE_SIZE
-> system(see LBS efforts[1]). Adapt the blksz so that we create more than
-> one block for the testcase.
+> Hi Chao,
 > 
-> Cap the blksz to be at least 64k to retain the same behaviour as before
-> for smaller filesystem blocksizes.
+> Thanks for the new f2fs test cases.
 > 
-> [1] LBS effort: https://lore.kernel.org/lkml/20230915183848.1018717-1-kernel@pankajraghav.com/
+> If there's a known fix for this regression, please mark it by:
 > 
-> Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> ---
->  tests/xfs/161 |    6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
-> 
-> diff --git a/tests/xfs/161 b/tests/xfs/161
-> index 002ee7d800dcf1..948121c0569484 100755
-> --- a/tests/xfs/161
-> +++ b/tests/xfs/161
-> @@ -37,7 +37,11 @@ _scratch_xfs_db -c 'version' -c 'sb 0' -c 'p' >> $seqres.full
->  _scratch_mount >> $seqres.full
->  
->  
-> -blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> +min_blksz=65536
-> +file_blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> +blksz=$(( 2 * $file_blksz))
-> +
-> +blksz=$(( blksz > min_blksz ? blksz : min_blksz ))
+> _fixed_by_kernel_commit .....
 
-Just to be curious, is there any machine with pagesize bigger than 65536 :)
+Zorro,
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Yes, but not been merged yet, so let me add as below and replace
+commit_id after upstreaming the fix.
 
->  # Write more than one block to exceed the soft block quota limit via
->  # xfs_quota.
->  filesz=$(( 2 * $blksz))
+_fixed_by_kernel_commit xxxxxxxxxxxx \
+         "f2fs: compress: fix inconsistent update of i_blocks in release_compress_blocks and reserve_compress_blocks"
+
+Thanks for all comments below, will fix all.
+
+Thanks,
+
+> 
+>> +# can become inconsistent after file compression, reservation
+>> +# releasement, and decompression.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>                              ^^^^
+>                              rw compress ?
+> 
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -r -f tmp.*
+>> +}
+> 
+> This's same with default _cleanup, so it can be removed.
+> 
+>> +
+>> +testfile_prefix=$SCRATCH_MNT/testfile
+>> +fio_config=$tmp.fio
+>> +
+>> +cat >$fio_config <<EOF
+>> +[write_compressed_data_30]
+>> +name=mytest
+>> +ioengine=psync
+>> +rw=write
+>> +direct=0
+>> +bs=1M
+>> +filesize=1M
+>> +numjobs=1
+>> +filename=/mnt/scratch_f2fs/testfile30
+>              ^^^^^^^^^^
+> 
+> $SCRATCH_MNT or ${testfile_prefix}30 ?
+> 
+>> +buffer_compress_percentage=30
+>> +
+>> +[write_compressed_data_60]
+>> +name=mytest
+>> +ioengine=psync
+>> +rw=write
+>> +direct=0
+>> +bs=1M
+>> +filesize=1M
+>> +numjobs=1
+>> +filename=/mnt/scratch_f2fs/testfile60
+> 
+> Same as above.
+> 
+>> +buffer_compress_percentage=60
+>> +
+>> +[write_compressed_data_90]
+>> +name=mytest
+>> +ioengine=psync
+>> +rw=write
+>> +direct=0
+>> +bs=1M
+>> +filesize=1M
+>> +numjobs=1
+>> +filename=/mnt/scratch_f2fs/testfile90
+> 
+> Same as above
+> 
+>> +buffer_compress_percentage=90
+>> +EOF
+>> +
+>> +_require_fio $fio_config
+>> +_require_scratch
+> 
+> I'd like to call _require_scratch at the beginning, especially you use
+> SCRATCH_* things in $fio_config. You can refer to generic/095.
+> 
+>> +_scratch_mkfs "-f -O extra_attr,compression" >> $seqres.full
+> 
+> Can you make sure this mkfs never fail? Maybe:
+>      || _fail "...."
+> 
+>> +_scratch_mount "-o compress_mode=user,compress_extension=*" >> $seqres.full
+>> +
+>> +echo -e "Run fio to initialize file w/ specified compress ratio" >> $seqres.full
+>> +cat $fio_config >> $seqres.full
+>> +$FIO_PROG $fio_config >> $seqres.full
+>> +_scratch_unmount
+>> +
+>> +for i in 30 60 90; do
+>> +	testfile=$testfile_prefix$i
+>> +
+>> +	_scratch_mount "-o compress_mode=user" >> $seqres.full
+>> +	f2fs_io compress $testfile >> $seqres.full
+>          ^^^^^^^
+> $F2FS_IO_PROG
+> 
+>> +	cblocks=`f2fs_io get_cblocks $testfile`
+>                   ^^^^^^^
+> $F2FS_IO_PROG
+> 
+>> +	echo "compression ratio is: "$cblocks" / 256"
+>> +
+>> +	_scratch_unmount
+>> +
+>> +	# 1. check after compression
+>> +	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
+> 
+> _check_scratch_fs ?
+> 
+> If f2fs needs some custom operations, please change the _check_scratch_fs
+> or _check_generic_filesystem.
+> 
+>> +	if [ $? -ne 0 ]; then
+>> +		_fail "filesystem becomes corrupted after compress"
+>> +	fi
+>> +
+>> +	_scratch_mount >> $seqres.full
+>> +	f2fs_io release_cblocks $testfile >> $seqres.full
+> 
+> $F2FS_IO_PROG
+> 
+>> +	_scratch_unmount
+>> +
+>> +	# 2. check after releasement
+>> +	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
+> 
+> _check_scratch_fs
+> 
+>> +	if [ $? -ne 0 ]; then
+>> +		_fail "filesystem becomes corrupted after release_cblocks"
+>> +	fi
+>> +
+>> +	_scratch_mount >> $seqres.full
+>> +	f2fs_io reserve_cblocks $testfile >> $seqres.full
+> 
+> $F2FS_IO_PROG
+> 
+>> +	_scratch_unmount
+>> +
+>> +	# 3. check after rservation
+>> +	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
+> 
+> _check_scratch_fs
+> 
+>> +	if [ $? -ne 0 ]; then
+>> +		_fail "filesystem becomes corrupted after reserve_cblocks"
+>> +	fi
+>> +
+>> +	_scratch_mount "-o compress_mode=user" >> $seqres.full
+>> +	f2fs_io decompress $testfile >> $seqres.full
+> 
+> $F2FS_IO_PROG
+> 
+>> +	_scratch_unmount
+>> +
+>> +	# 4. check after decompression
+>> +	fsck -t $FSTYP -f $SCRATCH_DEV >> $seqres.full
+> 
+> _check_scratch_fs
+> 
+> Thanks,
+> Zorro
+> 
+>> +	if [ $? -ne 0 ]; then
+>> +		_fail "filesystem becomes corrupted after decompress"
+>> +	fi
+>> +done
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/007.out b/tests/f2fs/007.out
+>> new file mode 100644
+>> index 00000000..2ea71c18
+>> --- /dev/null
+>> +++ b/tests/f2fs/007.out
+>> @@ -0,0 +1,4 @@
+>> +QA output created by 007
+>> +compression ratio is: 64 / 256
+>> +compression ratio is: 128 / 256
+>> +compression ratio is: 192 / 256
+>> -- 
+>> 2.40.1
+>>
 > 
 
