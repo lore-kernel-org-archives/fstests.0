@@ -1,239 +1,103 @@
-Received: from mout-p-201.mailbox.org (mout-p-201.mailbox.org [80.241.56.171])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC31C1CF2B6;
-	Thu, 24 Oct 2024 11:23:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 025871B392A
+	for <fstests@vger.kernel.org>; Thu, 24 Oct 2024 13:20:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729769013; cv=none; b=Odbnx97yd9tEY9tCXYOEWbVPorRMgMC+ACNXM2MtnvypKhc3Aslpm7uZHD7u/kNCHpSPHI9gUZ3sghwq2jLBDtXozSBT9p+9LyA9qdk2cCAL7y2lD/fQz1d7eVFdrL6qaLrtOb+133Ryydk9+OYtCQ3gjPTfV8brLJslxcK5Kls=
+	t=1729776014; cv=none; b=nSCoM2poGk/n1+mPJe9faHA1JM/zbKNYWpATLu9NJSUdjt0+c9ibMpVI+/6yPnEJs2jBEfiD3n73iHDcKYaEp/8XYn7UBwQB888KZidKFoXSFHfHMRj4/xSiJyURHy/Z6FCUG+OFooFdmULV1CSyk1e8Lpoj5mS8WDbVw9pXwjw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729769013; c=relaxed/simple;
-	bh=xjd0JkQl3cIa14sr08/ee2QTdXosFQBZjMFlrS9uD8s=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=NBRlWrLJnOW2tukxo0BvkhsY6rhvb1xOMFANb4j/lpQ8Ww2AENc+0e8iup/ZJ3Ajwycc+5f9lb091uTiTC8bnlgWIwhqUC4JTub8521Et1NJed+tuGudwD3Unj4TpnuTPpTtbgxPh5Zt4fJiXawtnN6eaI5M1do8Y7pw9g6ta4k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=pankajraghav.com; arc=none smtp.client-ip=80.241.56.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
-Received: from smtp2.mailbox.org (smtp2.mailbox.org [10.196.197.2])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-201.mailbox.org (Postfix) with ESMTPS id 4XZ3Sb1F5Zz9smB;
-	Thu, 24 Oct 2024 13:23:27 +0200 (CEST)
-From: Pankaj Raghav <p.raghav@samsung.com>
-To: fstests@vger.kernel.org,
-	zlang@redhat.com
-Cc: linux-xfs@vger.kernel.org,
-	gost.dev@samsung.com,
-	mcgrof@kernel.org,
-	p.raghav@samsung.com,
-	kernel@pankajraghav.com,
-	david@fromorbit.com,
-	djwong@kernel.org
-Subject: [PATCH 2/2] generic: increase file size to match CoW delayed allocation for XFS 64k bs
-Date: Thu, 24 Oct 2024 13:23:11 +0200
-Message-ID: <20241024112311.615360-3-p.raghav@samsung.com>
-In-Reply-To: <20241024112311.615360-1-p.raghav@samsung.com>
-References: <20241024112311.615360-1-p.raghav@samsung.com>
+	s=arc-20240116; t=1729776014; c=relaxed/simple;
+	bh=R2INtfzSnpxZhUbY/N7iGAAfGhG/ByhdP2AB7v8J2+w=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FScRncaRjAqDiI4YxUaP51R9wWfQB4Er2dUAiWp2enVB9yS23womIv0+AYFZ8n1fiOB9tIP2chsgzvR0P+IPXptWosnj6xtQZRy+9T+HEj3VLpJkCB7pAtbjhy3TKv+jD28XZywKDuau1qtn9dmd59FfYFF6hLhIB+7V0DxJymg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=RiI211BT; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RiI211BT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1729776012;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=8iJ7W3nz4WvfyoieNtKm3ENtdAmy3aJMmF0WG4f6orY=;
+	b=RiI211BTU07V3MaLStoIApAFKsfGYzAji3sRPapWs7SCCvgvdkOUYvEByIL6fkBDd9xplh
+	ZymZNdzuxuVZbmLJwju2v3NG8emLivcbT4VUtmC4a16xejCkKz1ZKTp5cspJVmCcCvOTd4
+	yZ5S9MvD8IhbPugMhac/gUynV/iMuVo=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-624-2rd0OyglOFCUg8MGI0ynEQ-1; Thu, 24 Oct 2024 09:20:10 -0400
+X-MC-Unique: 2rd0OyglOFCUg8MGI0ynEQ-1
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2e76eabc7ddso1076908a91.3
+        for <fstests@vger.kernel.org>; Thu, 24 Oct 2024 06:20:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729776009; x=1730380809;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8iJ7W3nz4WvfyoieNtKm3ENtdAmy3aJMmF0WG4f6orY=;
+        b=ONnpA5uUsSAO1aOPNFxkgtDoVE7fMHxqw3jlLtAHG8LOgodi3VprJRv0jl7ZPmkfMx
+         JsqzaOiQK0n4sXYNnRCYpDyWz1/99Og5qLqbA1ltSWCSzmXmt2oF/QfpRz+ELDsJzr06
+         vWvMOlHDiwSvWYr7N1R+6q6evrf0KZI02jbkT+FTOTpCsxvShck66s5iamsDPZZUjwJB
+         2qqu3chxDY03stLoVDvLc2h7W8qSYiWQNqMnlscPiK0NAKzEEiE6/bsSEwFNktAu+WVN
+         1Jm3ijnSjNx+VZ1ZflbcvrgKMYqj8AgnquCfShkEwB34H+pTfQZjZ+0FtkQS1mhzulBt
+         8pDA==
+X-Forwarded-Encrypted: i=1; AJvYcCXvKp6vly3nb6sodpZNqcvLq/OZFMXwlXqvQrRgwisnmSKV+agp4GqrUvK2YnRpzBhR18qgDorS@vger.kernel.org
+X-Gm-Message-State: AOJu0YzxiEWwQhe3nE5Cb1PQNp8J/KD5NhsTHYO2y2pcNjPkBR/tOmS1
+	I8Jmt1r4PKNCvbUHrFe1H4WZdJhTdgIAGB18piKhiBGssOl9jDWXALq/kYjtIoeUKXLRYBeIxeU
+	PuQ6qIPc7B382h1/CIKITQxxX2Zl8hqIvR/pEPOZxZizPVOsw+xomOCM=
+X-Received: by 2002:a17:902:d50d:b0:20b:b238:9d02 with SMTP id d9443c01a7336-20fa9e62d13mr82149805ad.33.1729776009488;
+        Thu, 24 Oct 2024 06:20:09 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFvW9z1JTtlbfYBN395xVJAQWFiwEBT3KCPZwAslFGgJ/BgpM1/xnrVvqALn9Te4Tviz7UGdQ==
+X-Received: by 2002:a17:902:d50d:b0:20b:b238:9d02 with SMTP id d9443c01a7336-20fa9e62d13mr82149535ad.33.1729776009099;
+        Thu, 24 Oct 2024 06:20:09 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20e7f0de428sm72571315ad.230.2024.10.24.06.20.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Oct 2024 06:20:08 -0700 (PDT)
+Date: Thu, 24 Oct 2024 21:20:03 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-btrfs@vger.kernel.org,
+	zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] btrfs: avoid deadlock when reading a partial uptodate
+ folio
+Message-ID: <20241024132003.64sxshdq4qh6fnwu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <62bf73ada7be2888d45a787c2b6fd252103a5d25.1729725088.git.wqu@suse.com>
+ <ZxnXtI_6HCwvCvLT@infradead.org>
+ <d373ef6a-956e-4319-ad2c-36f67a887a58@suse.com>
+ <ZxnaqgJrYFjGxPEn@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZxnaqgJrYFjGxPEn@infradead.org>
 
-generic/305,326,328 have been failing for 32k and 64k blocksizes.
+On Wed, Oct 23, 2024 at 10:27:06PM -0700, Christoph Hellwig wrote:
+> On Thu, Oct 24, 2024 at 03:54:54PM +1030, Qu Wenruo wrote:
+> > And generic/095 has a much higher chance to trigger it than the minimal one.
+> > The minimal one is only easier to debug and faster to finish one run.
+> > 
+> > Do I still need to add the minimal one to fstests?
+> 
+> If I have bug with a well known isolated reproducer I love
+> having it in xfstests.  I don't know if everyone agrees, though.
 
-We do the following in the test 305 and 326 (highlighting only the part
-that is related to failure):
+generic/095 isn't a specific test case for a known issue, it's a common test case.
+If you want to have a reproducer for a particular bug, feel free add it to xfstests,
+mark _fixed_by_xxxx and describe more details about that bug in the test case.
+If one day we update g/095, it might not cover the bug you need. Then a specific
+regression test case will help.
 
-- create a 1M test-1/file1
-- reflink test-1/file2 and test-1/file3 based on test-1/file1
-- Overwrite first half of test-1/file2 to do a CoW operation
-- Expect the size of the test-1 dir to be 3M
+Thanks,
+Zorro
 
-The test is failing for 32k and 64k blocksizes as the number of blocks
-(direct + delayed) is higher than number of blocks allocated for
-blocksizes < 32k in XFS, resulting in size of test-1 to be more than 3M.
-Though generic/328 has a different IO pattern, the reason for failure is
-the same.
-
-This is the failure output :
-    --- tests/generic/305.out   2024-06-05 11:52:27.430262812 +0000
-    +++ /root/results//64k_4ks/generic/305.out.bad      2024-10-23 10:56:57.643986870 +0000
-    @@ -11,7 +11,7 @@
-     CoW one of the files
-     root 0 0 0
-     nobody 0 0 0
-    -fsgqa 3072 0 0
-    +fsgqa 4608 0 0
-     Remount the FS to see if accounting changes
-     root 0 0 0
-
-In these tests, XFS is doing a delayed allocation of
-XFS_DEFAULT_COWEXTSIZE_HINT(32). Increase the size of the file so that
-the CoW write(sz/2) matches the maximum size of the delayed allocation
-for the max blocksize of 64k. This will ensure that all parts of the
-delayed extents are converted to real extents for all blocksizes.
-
-Even though this is not the most complete solution to fix these tests,
-the objective of these tests are to test quota and not the effect of delayed
-allocations.
-
-Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
----
- tests/generic/305     |  2 +-
- tests/generic/305.out | 12 ++++++------
- tests/generic/326     |  2 +-
- tests/generic/326.out | 12 ++++++------
- tests/generic/328     |  2 +-
- tests/generic/328.out | 16 +++++++++-------
- 6 files changed, 24 insertions(+), 22 deletions(-)
-
-diff --git a/tests/generic/305 b/tests/generic/305
-index c89bd821..6ccbb3d0 100755
---- a/tests/generic/305
-+++ b/tests/generic/305
-@@ -32,7 +32,7 @@ quotaon $SCRATCH_MNT 2> /dev/null
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
--sz=1048576
-+sz=4194304
- echo "Create the original files"
- $XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-diff --git a/tests/generic/305.out b/tests/generic/305.out
-index fbd4e241..1c348d1e 100644
---- a/tests/generic/305.out
-+++ b/tests/generic/305.out
-@@ -1,22 +1,22 @@
- QA output created by 305
- Format and mount
- Create the original files
--root 3072 0 0
-+root 12288 0 0
- nobody 0 0 0
- fsgqa 0 0 0
- Change file ownership
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- CoW one of the files
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- Remount the FS to see if accounting changes
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- Chown one of the files
- root 0 0 0
--nobody 1024 0 0
--fsgqa 2048 0 0
-+nobody 4096 0 0
-+fsgqa 8192 0 0
-diff --git a/tests/generic/326 b/tests/generic/326
-index 1783fbf2..321e7dc6 100755
---- a/tests/generic/326
-+++ b/tests/generic/326
-@@ -33,7 +33,7 @@ quotaon $SCRATCH_MNT 2> /dev/null
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
--sz=1048576
-+sz=4194304
- echo "Create the original files"
- $XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-diff --git a/tests/generic/326.out b/tests/generic/326.out
-index de7f20b5..4ccb3250 100644
---- a/tests/generic/326.out
-+++ b/tests/generic/326.out
-@@ -1,22 +1,22 @@
- QA output created by 326
- Format and mount
- Create the original files
--root 3072 0 0
-+root 12288 0 0
- nobody 0 0 0
- fsgqa 0 0 0
- Change file ownership
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- CoW one of the files
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- Remount the FS to see if accounting changes
- root 0 0 0
- nobody 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- Chown one of the files
- root 0 0 0
--nobody 1024 0 0
--fsgqa 2048 0 0
-+nobody 4096 0 0
-+fsgqa 8192 0 0
-diff --git a/tests/generic/328 b/tests/generic/328
-index 0c8e1986..25e1f2a0 100755
---- a/tests/generic/328
-+++ b/tests/generic/328
-@@ -32,7 +32,7 @@ quotaon $SCRATCH_MNT 2> /dev/null
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
--sz=1048576
-+sz=4194304
- echo "Create the original files"
- $XFS_IO_PROG -f -c "pwrite -S 0x61 -b $sz 0 $sz" $testdir/file1 >> $seqres.full
- chown $qa_user $testdir/file1
-diff --git a/tests/generic/328.out b/tests/generic/328.out
-index b7fe9f8c..0167637e 100644
---- a/tests/generic/328.out
-+++ b/tests/generic/328.out
-@@ -2,24 +2,26 @@ QA output created by 328
- Format and mount
- Create the original files
- root 0 0 0
--fsgqa 3072 0 0
-+fsgqa 12288 0 0
- Set hard quota to prevent rewrite
- root 0 0 0
--fsgqa 3072 0 1024
-+fsgqa 12288 0 1024
- Try to dio write the whole file
- pwrite: Disk quota exceeded
- root 0 0 0
--fsgqa 3072 0 1024
-+fsgqa 12288 0 1024
- Try to write the whole file
- pwrite: Disk quota exceeded
- root 0 0 0
--fsgqa 3072 0 1024
-+fsgqa 12288 0 1024
- Set hard quota to allow rewrite
- root 0 0 0
--fsgqa 3072 0 8192
-+fsgqa 12288 0 8192
- Try to dio write the whole file
-+pwrite: Disk quota exceeded
- root 0 0 0
--fsgqa 3072 0 8192
-+fsgqa 12288 0 8192
- Try to write the whole file
-+pwrite: Disk quota exceeded
- root 0 0 0
--fsgqa 3072 0 8192
-+fsgqa 12288 0 8192
--- 
-2.44.1
+> 
+> 
 
