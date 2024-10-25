@@ -1,142 +1,133 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+Received: from mout-p-201.mailbox.org (mout-p-201.mailbox.org [80.241.56.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7AE0189F5E;
-	Thu, 24 Oct 2024 20:25:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83D2F1E89C;
+	Fri, 25 Oct 2024 01:12:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729801518; cv=none; b=RJJJubKC7dJloHF28uVYTOSSkIXE8TFlicZSzGweOd08QfBy2lCP87PFgSt+3VZ4/IiYIgyEBYUDGNyJ5BN4eODB+RP7ngr/1uu4IG62Qp3820IPfZO8y/EQIzrMk5R9a15Uhluw9Ds/e4RtBYZXgg2gTfnpt3pzay9ZjSIpT10=
+	t=1729818761; cv=none; b=Efb1koYYiSWWxUw61WAg5z0xgUHafwUimwJYbjU3HZD0n3EYqjbzNaLgXIhzhy5WurzqKRZBANF/j2n02PPYJh1pwazjnQSBFyeyGqPBWaXoffiZCxfTTCJlvme3/DYRaVGjXElFPjLl3HEnyRCP5KIAdVp4yLcpJbb+nZjwN0Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729801518; c=relaxed/simple;
-	bh=La21tBVjLa1/xxZFgH8ZzqJFmzWy1Hln3A0pQrcqvgY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ECuoyXxDGtTH1nA3F7X27USsjFS3vRPwxMWXDjF4NrrsgmP8MhhqfxWiYK7LDtIiLX9QWc66y2UpIAgGyBZOMWys+ZYazttNb62HSgUXqogG1fwqMFQ3ZDPJJ9fhmhkxxT0tcszGOpSXnWF6jnCzWldNqfZaF+zNqTVdUdr7EB4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=th087d+A; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1729818761; c=relaxed/simple;
+	bh=PHxfFpqObkrrSBamze6sZWU16lKkQrT5urkAlZLAiog=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=DoWtPRk3is84w8aq1nfmq8ZueHmUNwFLJtCdO/lHmMoA9P0PUmyT4kwyarmsGG/bbGso9GIfdm4X7QYXutSm0UXIZ/uGn+I8W/unwvol8xktF0p00YVnuI589JVajK8g/ZSE7lMe30TDPYVrH5Azm7IG8DL7KuWR/r+hAoLGUaA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=w6ly9JN3; arc=none smtp.client-ip=80.241.56.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="th087d+A"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1729801502; x=1730406302; i=quwenruo.btrfs@gmx.com;
-	bh=/NglWPGw0mNcKaztItWa7SEYWxOn0yAq0XOHdKj1BKg=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=th087d+AjUHM08wGjdfQ1eN2Zo2nHc8UqUxzbiSKiNyWy8VhjzWqKQN/av/JMxGZ
-	 FJbH+DEw6cweSQvKBiJElfan2p2I6a5glGIzz6QzFaZgarvoL1uN+qrYTN6jLaMRV
-	 6Q8ZctWaInYUx47TRpybm7CzljFAdZYcBmkQFaICtxlN+MrvPx7aOjlg3vRf93hmK
-	 MXn2WSpnMlOs090MH8/uvk0K9n61aXYk/i820C/IDMUcfpYI35fW60SLldOLFU98K
-	 yeb9KUiOrIqeetHmHjHSJbH9RCCjvA+IZBVwd0Q3jP9Vm/O+tk5xx//n5bQNJEvWT
-	 CFAFZz42eNT4I29UJw==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1Mel81-1teV4K3XTJ-00jqMt; Thu, 24
- Oct 2024 22:25:02 +0200
-Message-ID: <b9f57b0a-3b31-4b66-b975-eb974323cec7@gmx.com>
-Date: Fri, 25 Oct 2024 06:54:57 +1030
+	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="w6ly9JN3"
+Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mout-p-201.mailbox.org (Postfix) with ESMTPS id 4XZPs94ttLz9sdB;
+	Fri, 25 Oct 2024 03:12:29 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
+	s=MBO0001; t=1729818749;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rWq8HddAxnbOButkoMRlw3wmi3/AUyLd9/aAwivCFzE=;
+	b=w6ly9JN3wXQqZ/74KIXYwBlwzaxWnhSV8AA28sFZ5obOcwjYsUefajEGjgUSTueJVwQEop
+	ZF70fPSCQvj9bYxBtEvn6CLC75YUpF+fdtkFBG3cqQ6aMRSRtX2J0g3RexGTWToFChs3ni
+	/k5quLIh1egJVDpsSQuIGGbV2HMvYxaxmTmdQeGUgNNHdv4AMXuorHMYVf5xXpNtOJbMgU
+	W1XEg1dOHS5FoxwuLN+TorLv5y9sQRxp/wuQhr5Z0ZL7XuldW42zkx8fZKQt+o5NAcnrKs
+	ql+xT8ntyNNCioRO4U2742j7KFPZ5APRRRee3UnwbIBipKOnDC06XuEKhhNI+A==
+Date: Fri, 25 Oct 2024 06:42:20 +0530
+From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Pankaj Raghav <p.raghav@samsung.com>, fstests@vger.kernel.org, 
+	zlang@redhat.com, linux-xfs@vger.kernel.org, gost.dev@samsung.com, 
+	mcgrof@kernel.org, david@fromorbit.com
+Subject: Re: Re: [PATCH 1/2] generic/219: use filesystem blocksize while
+ calculating the file size
+Message-ID: <tkkmsrqrevdsjxybiheukav2tfqucb6hz2tstl2ritzsv3s5aw@gqjkppt7zie7>
+References: <20241024112311.615360-1-p.raghav@samsung.com>
+ <20241024112311.615360-2-p.raghav@samsung.com>
+ <20241024181910.GG2386201@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] btrfs: avoid deadlock when reading a partial uptodate
- folio
-To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
-Cc: Christoph Hellwig <hch@infradead.org>, linux-btrfs@vger.kernel.org,
- zlang@kernel.org, fstests@vger.kernel.org
-References: <62bf73ada7be2888d45a787c2b6fd252103a5d25.1729725088.git.wqu@suse.com>
- <ZxnXtI_6HCwvCvLT@infradead.org>
- <d373ef6a-956e-4319-ad2c-36f67a887a58@suse.com>
- <ZxnaqgJrYFjGxPEn@infradead.org>
- <20241024132003.64sxshdq4qh6fnwu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20241024132003.64sxshdq4qh6fnwu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:SBb6uUvEg4WKOC0uOv5b0+mu86DT3ndwy+WoIcStTf1iFR2XgoI
- +gLy6IztqS/FkCr/W+QheeCNqBqshwJ3DUDv3r2ERUGB+gq1KJfivxZEGEawT2IiPWHD2FA
- GnYZjbRF/5a4InVTka34+PEauQtZTuR4fRcGcQwrNqLV8h3gUXd34cF2P16Ry7c+Wo1TEpl
- N5o5x2Vnn9DFS8IrE0sYg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:tXDqCRYyDro=;rbVId/IrEYSIRZdp/3rtn4UKs6b
- 0EU5OWKuYstRb9WIGSKaVV4oKhML3KE6VMxVZBlr1upIVptbcIYGiSyZsyE4ij5wCqqV1d3QR
- u+HvevRgRliWoO1lIQjRa/srbQ2NrMw8HXvODngCqP/VGLMo/hH/+4t6cuj02RpkN5rDVFSXi
- DMl1L30ud/2c4loCcytQFaIl91v4HKJ67sI1VgtAW88qg2/lF5MXeRZolzkJhno/mpoZYjEoT
- Ju2tcZELyYHsAA7Fs592Uxf0MfC06FxmjNM0eZLdydenQJlt6Jn2qCR2DFhmKX/4iu2d2grwr
- DAU+t6PwTm7t1Pjqki49Oi0DN49GKlHXj2LjcB+3b380eCAi1U1eCoKPx9W8Q6DP3ulboR1Ya
- 41YgQ+7W6lNOCcO3cyIWnFNPlnTF9d/9Xgr75i4HmfgSL9JZTraaet7qngTIxKBa+i+bGbriK
- vU4J5sfgJvT5o/oJJFBvCPtpJ5vVoFWYbFGRW03t0a9V8stZBYgEDCc/dviiSgAtccfbz3alm
- R4/+p7NwzJMMYsdJJ0JqqCkk1IeEwL4ZEzCjMm7f0e+bcisbD8MzeEuQMXeChreXaceK9Xk7z
- sKME9dPE7aSjEs4ZBRK0fsme5W4YRwA0WvMI1BloYrAsRd3bJd1p+LdxPM0UnP689Nj76Tk7c
- 828CYQkogZ5u9B0IV9t3zpLFXE1JwbR8t/sCRoIoXwEx7+kosJRVZE/rqYCDv4vwFN5zRBIb4
- jIzgJO4S7op9zEg2vYtCGyaBgJJaKJvBuzUkqrecbaDq5kez3ffQ0m3XLlucaTadun/wBkj1z
- CItZIDjKJBrYrQZtXBRSQdPQ==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241024181910.GG2386201@frogsfrogsfrogs>
+X-Rspamd-Queue-Id: 4XZPs94ttLz9sdB
 
+On Thu, Oct 24, 2024 at 11:19:10AM -0700, Darrick J. Wong wrote:
+> On Thu, Oct 24, 2024 at 01:23:10PM +0200, Pankaj Raghav wrote:
+> > generic/219 was failing for XFS with 32k and 64k blocksize. Even though
+> > we do only 48k IO, XFS will allocate blocks rounded to the nearest
+> > blocksize.
+> > 
+> > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
+> > ---
+> >  tests/generic/219 | 18 +++++++++++++++---
+> >  1 file changed, 15 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/tests/generic/219 b/tests/generic/219
+> > index 940b902e..d72aa745 100755
+> > --- a/tests/generic/219
+> > +++ b/tests/generic/219
+> > @@ -49,12 +49,24 @@ check_usage()
+> >  	fi
+> >  }
+> >  
+> > +_round_up_to_fs_blksz()
+> > +{
+> > +	local n=$1
+> > +	local bs=$(_get_file_block_size "$SCRATCH_MNT")
+> > +	local bs_kb=$(( bs >> 10 ))
+> > +
+> > +	echo $(( (n + bs_kb - 1) & ~(bs_kb - 1) ))
+> 
+> Nit: you can divide here, right?
 
+No. I think you are talking about DIV_ROUND_UP(). We are doing a
+round_up operation here.
 
-=E5=9C=A8 2024/10/24 23:50, Zorro Lang =E5=86=99=E9=81=93:
-> On Wed, Oct 23, 2024 at 10:27:06PM -0700, Christoph Hellwig wrote:
->> On Thu, Oct 24, 2024 at 03:54:54PM +1030, Qu Wenruo wrote:
->>> And generic/095 has a much higher chance to trigger it than the minima=
-l one.
->>> The minimal one is only easier to debug and faster to finish one run.
->>>
->>> Do I still need to add the minimal one to fstests?
->>
->> If I have bug with a well known isolated reproducer I love
->> having it in xfstests.  I don't know if everyone agrees, though.
->
-> generic/095 isn't a specific test case for a known issue, it's a common =
-test case.
-> If you want to have a reproducer for a particular bug, feel free add it =
-to xfstests,
-> mark _fixed_by_xxxx and describe more details about that bug in the test=
- case.
-> If one day we update g/095, it might not cover the bug you need. Then a =
-specific
-> regression test case will help.
+We should get 64k as sz for bs 32k and 64k.
 
-Thanks for the advice, this answers the uncertainty pretty well.
+round_up(48k, 32k/64k) = 64k
 
-I'll add a dedicated generic test case for it.
+> 
+> 	echo $(( (n + bs_kb - 1) / bs_kb ))
+> 
+> The rest seems fine.
+> 
+> --D
+> 
+> > +}
+> > +
+> >  test_accounting()
+> >  {
+> > -	echo "### some controlled buffered, direct and mmapd IO (type=$type)"
+> > -	echo "--- initiating parallel IO..." >>$seqres.full
+> >  	# Small ios here because ext3 will account for indirect blocks too ...
+> >  	# 48k will fit w/o indirect for 4k blocks (default blocksize)
+> > +	io_sz=$(_round_up_to_fs_blksz 48)
+> > +	sz=$(( io_sz * 3 ))
+> > +
+> > +	echo "### some controlled buffered, direct and mmapd IO (type=$type)"
+> > +	echo "--- initiating parallel IO..." >>$seqres.full
+> >  	$XFS_IO_PROG -c 'pwrite 0 48k' -c 'fsync' \
+> >  					$SCRATCH_MNT/buffer >>$seqres.full 2>&1 &
+> >  	$XFS_IO_PROG -c 'pwrite 0 48k' -d \
+> > @@ -73,7 +85,7 @@ test_accounting()
+> >  	else
+> >  		id=$qa_group
+> >  	fi
+> > -	repquota -$type $SCRATCH_MNT | grep "^$id" | check_usage 144 3
+> > +	repquota -$type $SCRATCH_MNT | grep "^$id" | check_usage $sz 3
+> >  }
+> >  
+> >  
+> > -- 
+> > 2.44.1
+> > 
+> > 
 
-Thanks,
-Qu
->
-> Thanks,
-> Zorro
->
->>
->>
->
->
-
+-- 
+Pankaj Raghav
