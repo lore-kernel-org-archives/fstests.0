@@ -1,50 +1,72 @@
-Received: from mout-p-201.mailbox.org (mout-p-201.mailbox.org [80.241.56.171])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83D2F1E89C;
-	Fri, 25 Oct 2024 01:12:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A03318BB8C
+	for <fstests@vger.kernel.org>; Fri, 25 Oct 2024 02:57:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729818761; cv=none; b=Efb1koYYiSWWxUw61WAg5z0xgUHafwUimwJYbjU3HZD0n3EYqjbzNaLgXIhzhy5WurzqKRZBANF/j2n02PPYJh1pwazjnQSBFyeyGqPBWaXoffiZCxfTTCJlvme3/DYRaVGjXElFPjLl3HEnyRCP5KIAdVp4yLcpJbb+nZjwN0Y=
+	t=1729825023; cv=none; b=G7Ff14yvrti7bGkWx5eZmZeIA2r5VXAB+bhT33nsJ47zmTfYYzWqfIgCUcTIEwiOBM2mC6Vf6u8zRuFbwad4nxhGahGyP44EUQ1xmSKQFVOPM+uIfT6oJ5OsSZkxIKYYwClnmEGaoHu6+92KfCzfikpAOosLV6O44uHcntV8q1M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729818761; c=relaxed/simple;
-	bh=PHxfFpqObkrrSBamze6sZWU16lKkQrT5urkAlZLAiog=;
+	s=arc-20240116; t=1729825023; c=relaxed/simple;
+	bh=QkACfeFBx+I3qySlFSUTlZ/njQy6u+B98pXhxXYVm/o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DoWtPRk3is84w8aq1nfmq8ZueHmUNwFLJtCdO/lHmMoA9P0PUmyT4kwyarmsGG/bbGso9GIfdm4X7QYXutSm0UXIZ/uGn+I8W/unwvol8xktF0p00YVnuI589JVajK8g/ZSE7lMe30TDPYVrH5Azm7IG8DL7KuWR/r+hAoLGUaA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com; spf=pass smtp.mailfrom=pankajraghav.com; dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b=w6ly9JN3; arc=none smtp.client-ip=80.241.56.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=pankajraghav.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pankajraghav.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=Y5p6PK5/OoRHvkx4oCaXC67ywf36jOfpsiZpdv+YB1mFDDqnwYo5lGE9qdj/Im3/Zm5r5Nfy4hBNlDSmSafFxklbZo753GswPXVcuFgJMmJ4EogkYlXuPq48az+YOx/FKwV2P2pyO5ulWt6r+8rt96uA1bJhc96aT8RlxbetgWs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=EIh3KcDu; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pankajraghav.com header.i=@pankajraghav.com header.b="w6ly9JN3"
-Received: from smtp102.mailbox.org (smtp102.mailbox.org [IPv6:2001:67c:2050:b231:465::102])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-201.mailbox.org (Postfix) with ESMTPS id 4XZPs94ttLz9sdB;
-	Fri, 25 Oct 2024 03:12:29 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=pankajraghav.com;
-	s=MBO0001; t=1729818749;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="EIh3KcDu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1729825020;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=rWq8HddAxnbOButkoMRlw3wmi3/AUyLd9/aAwivCFzE=;
-	b=w6ly9JN3wXQqZ/74KIXYwBlwzaxWnhSV8AA28sFZ5obOcwjYsUefajEGjgUSTueJVwQEop
-	ZF70fPSCQvj9bYxBtEvn6CLC75YUpF+fdtkFBG3cqQ6aMRSRtX2J0g3RexGTWToFChs3ni
-	/k5quLIh1egJVDpsSQuIGGbV2HMvYxaxmTmdQeGUgNNHdv4AMXuorHMYVf5xXpNtOJbMgU
-	W1XEg1dOHS5FoxwuLN+TorLv5y9sQRxp/wuQhr5Z0ZL7XuldW42zkx8fZKQt+o5NAcnrKs
-	ql+xT8ntyNNCioRO4U2742j7KFPZ5APRRRee3UnwbIBipKOnDC06XuEKhhNI+A==
-Date: Fri, 25 Oct 2024 06:42:20 +0530
-From: "Pankaj Raghav (Samsung)" <kernel@pankajraghav.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Pankaj Raghav <p.raghav@samsung.com>, fstests@vger.kernel.org, 
-	zlang@redhat.com, linux-xfs@vger.kernel.org, gost.dev@samsung.com, 
-	mcgrof@kernel.org, david@fromorbit.com
-Subject: Re: Re: [PATCH 1/2] generic/219: use filesystem blocksize while
- calculating the file size
-Message-ID: <tkkmsrqrevdsjxybiheukav2tfqucb6hz2tstl2ritzsv3s5aw@gqjkppt7zie7>
-References: <20241024112311.615360-1-p.raghav@samsung.com>
- <20241024112311.615360-2-p.raghav@samsung.com>
- <20241024181910.GG2386201@frogsfrogsfrogs>
+	bh=8UHff/EyTmoZg0kmavC/tExlcMWqKizkzXldFqApwD0=;
+	b=EIh3KcDufY+caj7LDNPYtijdGcWc+a4drXetjpc25WyxJ2dYi0edABBj1jAsLZTTDDgYyW
+	tlqaTHDd9ITeiOis58s4zURekrEHryNedZQ0sr+zHCU0u065vwHL2I7ZrOyFMzDFssR6Jf
+	HCcfvAb2OVGV4T9r1iVQNGr/hdmH/Sk=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-382-5XERBpmWNQaZcFaUMpd1Ow-1; Thu, 24 Oct 2024 22:56:58 -0400
+X-MC-Unique: 5XERBpmWNQaZcFaUMpd1Ow-1
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2e2eb765285so1783240a91.1
+        for <fstests@vger.kernel.org>; Thu, 24 Oct 2024 19:56:58 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729825018; x=1730429818;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8UHff/EyTmoZg0kmavC/tExlcMWqKizkzXldFqApwD0=;
+        b=itVQ+5femMHX8xD8pfPGxP3wgWCzJUCAZkt62906uv2IVumhKojnYp59il+Ije5Wkh
+         oI1FgL3imK/A7pIFXoTvb92fhLsJJ5C0kaHE6jP2sffbsvo29JWQOjmO9ASJmhTKbL0U
+         Pe4kYkXZxEcPnhUe5uzsLCUZggiCLo/2b7Qc4I5Tov25d0l3ErOhU3FJMpqxYpLp9JRL
+         VO28O6VcDLkhki9JjUADZjBqAwE53pNITiJg08s6fsiKUT9oo1Y4YKLIpLHQu547QUzM
+         tjw6PM76rou5gbM3D0jOTZJTSXuaHlxQ9JlpUh+oWHhE82E6yfFwosP8eo0RY5Ir9TN6
+         ctug==
+X-Gm-Message-State: AOJu0YwMPDo2sEndiZv/ZtK2+aDPT9sDTPh5x6vTTh8e47VoymD/SXxN
+	89B16dhoP7MdFY+NtrbW43wQIrlkKKnhiSvL/fZQlgGbgqtaX1LTcaMGV8F4tSWMXzy+msF5Fr0
+	3OxPBpXDkSKzXgqMjzkfSxQBwdy5GA3fAY2cLPRp/KXzwXiWmK+VzCyw=
+X-Received: by 2002:a17:90b:390c:b0:2e2:b204:90c8 with SMTP id 98e67ed59e1d1-2e76b704a80mr9052714a91.34.1729825017821;
+        Thu, 24 Oct 2024 19:56:57 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHPY7d8j4Tzb3Ou4jwwXiPijsWHHk7FnEJVWhatTWexAqRlAmd59sltTz+ydRVnn6fKczQ7GA==
+X-Received: by 2002:a17:90b:390c:b0:2e2:b204:90c8 with SMTP id 98e67ed59e1d1-2e76b704a80mr9052696a91.34.1729825017464;
+        Thu, 24 Oct 2024 19:56:57 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2e77e59d826sm2256453a91.52.2024.10.24.19.56.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Oct 2024 19:56:57 -0700 (PDT)
+Date: Fri, 25 Oct 2024 10:56:51 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Nirjhar Roy <nirjhar@linux.ibm.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH 1/2] common/xfs,xfs/207: Adding a common helper function
+ to check xflag bits on a given file
+Message-ID: <20241025025651.okneano7d324nl4e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1729624806.git.nirjhar@linux.ibm.com>
+ <6ba7f682af7e0bc99a8baeccc0d7aa4e5062a433.1729624806.git.nirjhar@linux.ibm.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -53,81 +75,110 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241024181910.GG2386201@frogsfrogsfrogs>
-X-Rspamd-Queue-Id: 4XZPs94ttLz9sdB
+In-Reply-To: <6ba7f682af7e0bc99a8baeccc0d7aa4e5062a433.1729624806.git.nirjhar@linux.ibm.com>
 
-On Thu, Oct 24, 2024 at 11:19:10AM -0700, Darrick J. Wong wrote:
-> On Thu, Oct 24, 2024 at 01:23:10PM +0200, Pankaj Raghav wrote:
-> > generic/219 was failing for XFS with 32k and 64k blocksize. Even though
-> > we do only 48k IO, XFS will allocate blocks rounded to the nearest
-> > blocksize.
-> > 
-> > Signed-off-by: Pankaj Raghav <p.raghav@samsung.com>
-> > ---
-> >  tests/generic/219 | 18 +++++++++++++++---
-> >  1 file changed, 15 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/tests/generic/219 b/tests/generic/219
-> > index 940b902e..d72aa745 100755
-> > --- a/tests/generic/219
-> > +++ b/tests/generic/219
-> > @@ -49,12 +49,24 @@ check_usage()
-> >  	fi
-> >  }
-> >  
-> > +_round_up_to_fs_blksz()
-> > +{
-> > +	local n=$1
-> > +	local bs=$(_get_file_block_size "$SCRATCH_MNT")
-> > +	local bs_kb=$(( bs >> 10 ))
-> > +
-> > +	echo $(( (n + bs_kb - 1) & ~(bs_kb - 1) ))
+On Wed, Oct 23, 2024 at 12:56:19AM +0530, Nirjhar Roy wrote:
+> This patch defines a common helper function to test whether any of
+> fsxattr xflags field is set or not. We will use this helper in the next
+> patch for checking extsize (e) flag.
 > 
-> Nit: you can divide here, right?
-
-No. I think you are talking about DIV_ROUND_UP(). We are doing a
-round_up operation here.
-
-We should get 64k as sz for bs 32k and 64k.
-
-round_up(48k, 32k/64k) = 64k
-
+> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+> Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+> Signed-off-by: Nirjhar Roy <nirjhar@linux.ibm.com>
+> ---
+>  common/xfs    |  9 +++++++++
+>  tests/xfs/207 | 14 +++-----------
+>  2 files changed, 12 insertions(+), 11 deletions(-)
 > 
-> 	echo $(( (n + bs_kb - 1) / bs_kb ))
-> 
-> The rest seems fine.
-> 
-> --D
-> 
-> > +}
-> > +
-> >  test_accounting()
-> >  {
-> > -	echo "### some controlled buffered, direct and mmapd IO (type=$type)"
-> > -	echo "--- initiating parallel IO..." >>$seqres.full
-> >  	# Small ios here because ext3 will account for indirect blocks too ...
-> >  	# 48k will fit w/o indirect for 4k blocks (default blocksize)
-> > +	io_sz=$(_round_up_to_fs_blksz 48)
-> > +	sz=$(( io_sz * 3 ))
-> > +
-> > +	echo "### some controlled buffered, direct and mmapd IO (type=$type)"
-> > +	echo "--- initiating parallel IO..." >>$seqres.full
-> >  	$XFS_IO_PROG -c 'pwrite 0 48k' -c 'fsync' \
-> >  					$SCRATCH_MNT/buffer >>$seqres.full 2>&1 &
-> >  	$XFS_IO_PROG -c 'pwrite 0 48k' -d \
-> > @@ -73,7 +85,7 @@ test_accounting()
-> >  	else
-> >  		id=$qa_group
-> >  	fi
-> > -	repquota -$type $SCRATCH_MNT | grep "^$id" | check_usage 144 3
-> > +	repquota -$type $SCRATCH_MNT | grep "^$id" | check_usage $sz 3
-> >  }
-> >  
-> >  
-> > -- 
-> > 2.44.1
-> > 
-> > 
+> diff --git a/common/xfs b/common/xfs
+> index 62e3100e..7340ccbf 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -13,6 +13,15 @@ __generate_xfs_report_vars() {
+>  	REPORT_ENV_LIST_OPT+=("TEST_XFS_REPAIR_REBUILD" "TEST_XFS_SCRUB_REBUILD")
+>  }
+>  
+> +# Check whether a fsxattr xflags character field is set on a given file.
 
--- 
-Pankaj Raghav
+Better to explain the arguments, e.g.
+
+# Check whether a fsxattr xflags character ($2) field is set on a given file ($1).
+
+> +# e.g. fsxattr.xflags = 0x0 [--------------C-]
+> +# Returns 0 if passed flag character is set, otherwise returns 1
+> +_test_xfs_xflags_field()
+> +{
+> +    $XFS_IO_PROG -c "stat" "$1" | grep "fsxattr.xflags" | grep -q "\[.*$2.*\]" \
+> +        && return 0 || return 1
+
+That's too complex. Those "return" aren't needed as Darrick metioned. About
+that two "grep", how about combine them, e.g.
+
+_test_xfs_xflags_field()
+{
+	grep -q "fsxattr.xflags.*\[.*$2.*\]" <($XFS_IO_PROG -c "stat" "$1")
+}
+
+
+
+> +}
+> +
+>  _setup_large_xfs_fs()
+>  {
+>  	fs_size=$1
+> diff --git a/tests/xfs/207 b/tests/xfs/207
+> index bbe21307..adb925df 100755
+> --- a/tests/xfs/207
+> +++ b/tests/xfs/207
+> @@ -15,21 +15,13 @@ _begin_fstest auto quick clone fiemap
+>  # Import common functions.
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/xfs
+
+Is this really necessary? Will this test fail without this line?
+The common/$FSTYP file is imported automatically, if it's not, that a bug.
+
+Thanks,
+Zorro
+
+>  
+>  _require_scratch_reflink
+>  _require_cp_reflink
+>  _require_xfs_io_command "fiemap"
+>  _require_xfs_io_command "cowextsize"
+>  
+> -# Takes the fsxattr.xflags line,
+> -# i.e. fsxattr.xflags = 0x0 [--------------C-]
+> -# and tests whether a flag character is set
+> -test_xflag()
+> -{
+> -    local flg=$1
+> -    grep -q "\[.*${flg}.*\]" && echo "$flg flag set" || echo "$flg flag unset"
+> -}
+> -
+>  echo "Format and mount"
+>  _scratch_mkfs > $seqres.full 2>&1
+>  _scratch_mount >> $seqres.full 2>&1
+> @@ -65,14 +57,14 @@ echo "Set cowextsize and check flag"
+>  $XFS_IO_PROG -c "cowextsize 1048576" $testdir/file3 | _filter_scratch
+>  _scratch_cycle_mount
+>  
+> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
+> +_test_xfs_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
+>  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
+>  
+>  echo "Unset cowextsize and check flag"
+>  $XFS_IO_PROG -c "cowextsize 0" $testdir/file3 | _filter_scratch
+>  _scratch_cycle_mount
+>  
+> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
+> +_test_xfs_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
+>  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
+>  
+>  status=0
+> -- 
+> 2.43.5
+> 
+> 
+
