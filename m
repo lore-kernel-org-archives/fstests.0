@@ -1,114 +1,151 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 887DA8494;
-	Sat, 26 Oct 2024 20:12:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 224CD1CD2C
+	for <fstests@vger.kernel.org>; Sun, 27 Oct 2024 17:05:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729973558; cv=none; b=LHeEZQW5zMVuaXXh5evrg0BSlJE2wqd4iFKebawk9UTP42V+QPaaB8gp5edC1NRNuHNmQAHp/LsDvaV8hjw1vl1/NlKUOkC/MjEOrrPcOgpPHPhwBTG2hto4tUAfGotiN62n9heFOwH/PJA4vvrgNex+jLke1gLGbsfNtCpDqlw=
+	t=1730048759; cv=none; b=no841vQsOfcHx59HHYNHhpPFKWcmhzK7lgTuV1IG7Sg4zPS1ueY//pCLGGsuEK7cEQCNSt2tZEAj1UWlk8MngT5ciDOBsOj7U1tUW8oCebRLjtb4Uvw7jtKODCoj/i6/kuzeDnzkFPeS9kMD5yz3vKGyfF290mGbA5txvWqz2xQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729973558; c=relaxed/simple;
-	bh=8JJ3WuQ7zBqgQWERCkgZi39Z7iknVCN5isYAoyhvvMk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Fc+LfiQ7/75Y7C2hCQxwEs9V4i9Shx2Rrl49UHG5edsScbGZcawoMRVUsonSVPRm/8Rfk9D5hnkkdWMvPwYJSXCgMRIPqva8rJrOcv8Os5EXUpagyOxlzyIytDk8krrQJtyRWTHV2FV7N+F9InhMM2BC1bRy3vJeZONVlg5ya90=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=msfV8YoF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1730048759; c=relaxed/simple;
+	bh=UwhE23ZsAdk2yS+gGts3tFXhkglNlKsl8GE4YrnwisY=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=J7A1YrPOzhhNa1oQtO/QlOWl+08vumRiOJLnqtKlQk34aJPGXMuhgvenlJ0ugYucGXKjEfAxTOGhaR0F5KPgYX628puhQ9UzhisZjGYdsuuxMIGsH3p8GEAV4F2Mms3LESh5GlJZc/cpzB0DKG+i+eo8gf5rGqnPcmLAcUOUzAI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YNCPxh5P; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="msfV8YoF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B85AC4CEC6;
-	Sat, 26 Oct 2024 20:12:37 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YNCPxh5P"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F4DBC4CEC3;
+	Sun, 27 Oct 2024 17:05:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729973558;
-	bh=8JJ3WuQ7zBqgQWERCkgZi39Z7iknVCN5isYAoyhvvMk=;
-	h=From:To:Cc:Subject:Date:From;
-	b=msfV8YoFaUlWjOTsVvKkQ0Nwk1XW5q0oRc5L1hohU7VDoEiSjmX0JztldAWDwgDHI
-	 sOUZzXV9gq2Mx7XBc8uf7twIllYqyB8YiRib1tnqjbnFRx07CauTI+4OtOD1cBbbJ5
-	 S0C+1R+1C6nmhx5IC+YX5gA8/a86XWx4l+cJwwYW9eg3UJXrGPHXQ3//cq9XsveH/V
-	 VDEtV4VC16FBuWt/57qZU4SfQPOPszU7AcxzyeRKx1SKyAQj+SA7DfJ9ESe4ZVeDbM
-	 Vt0elri0fOeVd9l5dp/e0uquN8NQe0p+dPaKsatflCJ3ZOWGVmKD8kGuGT+bbihAIv
-	 3ec4CPKtCs8mQ==
+	s=k20201202; t=1730048758;
+	bh=UwhE23ZsAdk2yS+gGts3tFXhkglNlKsl8GE4YrnwisY=;
+	h=Date:From:To:Subject:From;
+	b=YNCPxh5PMSYgCwGi/aWn8jYNHqt82cmNYygOa5PoBw0dPaWErKYxvTY/K6Cayo2pL
+	 ZOTy5YYFeL4vF73/57NZotpPngEDrevZLzyBYKSBDgOX4Q5JrxxbqOTFqcIXW5fVK6
+	 cbOZ7HDXayGqsaN+zL7G2hQE4bnSNtSAak6sAa06R+hlOoWhaQJ+ts/5gkL1SLvOLG
+	 gGSVLDoru2MDQTQTSz7YXiWMg7WfNHXSMWMxeUQTyiRiTl/z5yUk8ofMFm0uMjQ4As
+	 /bkncOOLWlX4b9yV4KQOTeuaaq9gHqzJe8skkVPoP9XT5zhD77wlW3AYtO3gU8VP9V
+	 7LQ/7LzYV9K4w==
+Date: Mon, 28 Oct 2024 01:05:55 +0800
+Message-ID: <1f4b48e1e9349e3a890858395ed24068@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
-Subject: [PATCH] xfs: notrun if kernel xfs not supports ascii-ci feature
-Date: Sun, 27 Oct 2024 04:12:34 +0800
-Message-ID: <20241026201234.77387-1-zlang@kernel.org>
-X-Mailer: git-send-email 2.45.2
+Subject: [ANNOUNCE] fstests: merge v2024.10.14 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="dBa6enpZe4r2"
+Content-Disposition: inline
 
-As the ascii-ci feature is deprecated, if linux build without the
-CONFIG_XFS_SUPPORT_ASCII_CI, mount xfs with "-n version=ci" will
-get EINVAL. So let's notrun if it's not supported by kernel.
 
-Signed-off-by: Zorro Lang <zlang@kernel.org>
----
- common/xfs    | 10 ++++++++++
- tests/xfs/188 |  1 +
- tests/xfs/597 |  1 +
- tests/xfs/598 |  1 +
- 4 files changed, 13 insertions(+)
+--dBa6enpZe4r2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/common/xfs b/common/xfs
-index 62e3100ee..cbcf4ee0b 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -1181,6 +1181,16 @@ _require_xfs_mkfs_ciname()
- 		|| _notrun "need case-insensitive naming support in mkfs.xfs"
- }
- 
-+# this test requires the xfs kernel support ascii-ci feature
-+#
-+_require_xfs_ciname()
-+{
-+	_try_scratch_mkfs_xfs -n version=ci >/dev/null 2>&1
-+	_try_scratch_mount >/dev/null 2>&1 \
-+		|| _notrun "XFS doesn't support ascii-ci feature"
-+	_scratch_unmount
-+}
-+
- # this test requires mkfs.xfs have configuration file support
- _require_xfs_mkfs_cfgfile()
- {
-diff --git a/tests/xfs/188 b/tests/xfs/188
-index a72bf15d6..98cdfd501 100755
---- a/tests/xfs/188
-+++ b/tests/xfs/188
-@@ -31,6 +31,7 @@ _cleanup()
- 
- _require_scratch
- _require_xfs_mkfs_ciname
-+_require_xfs_ciname
- 
- _scratch_mkfs -n version=ci >/dev/null 2>&1
- _scratch_mount
-diff --git a/tests/xfs/597 b/tests/xfs/597
-index d3bf91a99..2bf361080 100755
---- a/tests/xfs/597
-+++ b/tests/xfs/597
-@@ -20,6 +20,7 @@ _fixed_by_kernel_commit 9dceccc5822f \
- 
- _require_scratch
- _require_xfs_mkfs_ciname
-+_require_xfs_ciname
- 
- _scratch_mkfs -n version=ci > $seqres.full
- _scratch_mount
-diff --git a/tests/xfs/598 b/tests/xfs/598
-index 54f50cd60..20a80fcb6 100755
---- a/tests/xfs/598
-+++ b/tests/xfs/598
-@@ -27,6 +27,7 @@ _fixed_by_kernel_commit 9dceccc5822f \
- _require_test
- _require_scratch
- _require_xfs_mkfs_ciname
-+_require_xfs_ciname
- 
- _scratch_mkfs -n version=ci > $seqres.full
- _scratch_mount
--- 
-2.45.2
+Hi all,
 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated to v2024.10.14 version.
+
+Thanks,
+Zorro
+
+The new head of the master branch is commit:
+
+891f4995ab07 src/fiexchange.h: add the start-commit/commit-range ioctls
+
+New commits:
+
+An Long (2):
+      [e0c84186bfda] src/Makefile: install two necessary files
+      [37f61a8fd323] btrfs/315: update filter to match mount cmd
+
+Chao Yu (1):
+      [4c9c08ec05c6] src/min_dio_alignment: don't return invalid dio_offset_align
+
+Christoph Hellwig (1):
+      [74777e97c56b] generic/694: sync before sampling i_blocks
+
+Daniel Gomez (1):
+      [dd0eeae9ead0] common/config: fix RECREATE_TEST_DEV initialization
+
+Darrick J. Wong (3):
+      [cf838edbaec7] common/populate: fix bash syntax error in _fill_fs
+      [ff07e0a32936] fsstress: add support for FALLOC_FL_UNSHARE_RANGE
+      [891f4995ab07] src/fiexchange.h: add the start-commit/commit-range ioctls
+
+Filipe Manana (2):
+      [b37aa9c8b0f9] btrfs: update some tests to be able to run with btrfs-progs v6.11
+      [8babf87596c8] btrfs/322: add git commit ID
+
+Hans Holmberg (2):
+      [0ffcda29e8a0] common: make rt_ops local in _try_scratch_mkfs_sized
+      [2f7e1b8a6f09] xfs/157,xfs/547,xfs/548: switch to using _scratch_mkfs_sized
+
+Mark Harmstone (2):
+      [c9a2881aa6f8] common/fail_make_request: fix error message
+      [f4b00fafa4ef] btrfs/318: add _require_loop
+
+Qu Wenruo (1):
+      [034e56559337] fstests: generic/563: use fs blocksize to do the writes
+
+
+Code Diffstat:
+
+ common/config            |  2 +-
+ common/fail_make_request |  2 +-
+ common/filter.btrfs      |  5 ++++-
+ common/populate          |  2 +-
+ common/rc                |  1 +
+ ltp/fsstress.c           | 14 ++++++++++++++
+ m4/package_xfslibs.m4    |  2 ++
+ src/Makefile             |  2 +-
+ src/fiexchange.h         | 26 ++++++++++++++++++++++++++
+ src/global.h             |  4 ++++
+ src/min_dio_alignment.c  |  2 +-
+ tests/btrfs/006.out      |  2 --
+ tests/btrfs/100.out      |  2 --
+ tests/btrfs/101.out      |  2 --
+ tests/btrfs/218.out      |  1 -
+ tests/btrfs/254.out      |  1 -
+ tests/btrfs/315          |  7 ++++++-
+ tests/btrfs/318          |  1 +
+ tests/btrfs/322          |  2 +-
+ tests/generic/563        | 10 ++++++----
+ tests/generic/694        |  4 ++++
+ tests/xfs/157            | 12 ++++++++----
+ tests/xfs/547            |  4 +++-
+ tests/xfs/548            |  2 +-
+ 24 files changed, 86 insertions(+), 26 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--dBa6enpZe4r2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmcectIACgkQlNbPkfr2
+tMyMPxAAoMU6/9LC87Ud4Yjj2rK80tEzPXukQ2ClnX454b1W/dWB6s5t/NzL/e5U
+evTsNUHSXw+J2xAa1l0p+UiCq1Mj7VSFwd1jUmacCWMNY9NYOyFNS38AmLfqImYY
+c+rdNO0Gx4L8Quv8o4+UVk4H3T6qDjl4BAdvyBDeIJYo8UmfVdtW4L4de1ondMfb
++wUadEawGfvEd9wYTCbojBJOHVzxm5VSkwe+M9VMH/77pIe9b9YWRZbHxiYje+4/
+xOvL9UEMgzHqOqBJ8CHLxyPyiD4WgAv6RwcDmQD89CQq90oXdg7AA+8rJ7NVAZjw
+9QeLhoKbOfbUsudIi4VZUrQ5D3hUaZWzKnEjtg04zBAHiOFmr5oIBjJUPDIXobfx
+DFwE3FQ1Sa1S/8ZqkapeC5IeZXf5EZIOKZxejyW3a0n1rG+bxFXv6sL6zN2d0iaY
+Yfswe+CefnYw5Xxv3NJup05zjriT1E88LLt2Afvs6tQ4LrjhjcGoCka8qx/zlell
+zVZ5rkH4oA15IWrmvyzOAp5xnyI8v4HLidulSLOxL1yXQKqDZZReHUqh8b2CVi7h
+KpMevCvIR92ym5lRTI3Ch5MvTlgWlth85Nfgb5YkeeuEFvEGQIf6aL3aA8UuDYPs
+tI6gGV0KXyAprK68G0jz11TdzV2BIHQ/HqjsTCFjnPTKNfYyZjw=
+=7pp3
+-----END PGP SIGNATURE-----
+
+--dBa6enpZe4r2--
