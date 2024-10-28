@@ -1,414 +1,327 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BF191E48A
-	for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 13:12:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C24A71D2B1B
+	for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 13:41:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730121170; cv=none; b=DzHP6ThrFBC70FvZ6I3bgzjMcwVAgZyEGhbWlg+nt1u1vqc74u+le4hQkRMrFbHc3uAkHN2xRyeUb1TGf6G6nUqfimT4fqNRO8/IaS81Tc6hiSpkplkO45Fa5iv719V1skP2pbBpNVCEg3GbMtkbecoRXKWilNfM85rYUou7llY=
+	t=1730122920; cv=none; b=dxR2pRKraFWEyF1TakaIgSmWcEBvkkrhS8PIpqo5Ec7gQCmAWiZSPz+sIzY3Cl6tehr6OqGzO3pNmZRv6t3FgCH9bDfx059GhYpBn+TiZ4Z4Pk/7hAaHDXjp2vVr4RYtAzHUgPEyleqOdVc+edSUReTCykjqwU/FZJgtuc1Qb4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730121170; c=relaxed/simple;
-	bh=PVcU07qNXqqmE1rAY/ijTmWLXl6xI1ShtLQcgmKPjR8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=jqa4xTIZ7YcKBli0wz052qhFWedfgRN4W8e1jZCEV33eJNnTw2ZEscN4J/Je0xq/eYbhq04+9gbdLdXfBEZX0SZX0VhBtjPj4skQe91gH1wMreAjsH/tWftmayGdSdjX8vN6yBYEP0GAP1qW3bxBjqgNTwrBmmnhLU0pehEFrv4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=KzcSj7MY; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1730122920; c=relaxed/simple;
+	bh=fK0/CgWkrjil4GHTSIMQrdDRe6EycU9rjKioZJUE/+g=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=TKMcM5eXjlOHpbFkPUW+sZqLkieOPBQq7xWC89M7JXHItfZ6D7xyB7lI0pM3KEqiBTY3Bv/mJz8mERb3xgCikE2pjnz7MTN9UQKsQcduf7MCLQOXDYJ4V0RE8JsAqcXL97/ktntayxI9uPR21cVoPzbN5ZrUvD4xk7ZoW4gRTqg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NkJLv2EB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="KzcSj7MY"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730121165;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=OG6L0HHmYXCXXbcsZcV7jlgYKEqfbnBuVDrHhwhiyeI=;
-	b=KzcSj7MYYC0DkxU/wqlAAW5MEjMi9rTnVjd/gyXgk+JeOPK1QMRbW6ICXNNmtyMo/I2o9l
-	HhnAWD0Q/uQXL5gYbuGQUnv8OkEp+Rvjnimca/spFbXRy1/129NpS9XTyy0LJFTfH1uyRs
-	RhJyd5oqiNLo/J4xSxaNyt50IwHf0sw=
-Received: from mail-pf1-f200.google.com (mail-pf1-f200.google.com
- [209.85.210.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-394-dKmtSoB3MzGEdP8_DITr_Q-1; Mon, 28 Oct 2024 09:12:44 -0400
-X-MC-Unique: dKmtSoB3MzGEdP8_DITr_Q-1
-Received: by mail-pf1-f200.google.com with SMTP id d2e1a72fcca58-71e51a31988so6120972b3a.1
-        for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 06:12:44 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730121163; x=1730725963;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=OG6L0HHmYXCXXbcsZcV7jlgYKEqfbnBuVDrHhwhiyeI=;
-        b=tyCn/vOkuETfrWEM3iSK50CYs+BeyT9Ty5tRPlBbW8XkFMpu8fE8YYkLXOBTP+j6NM
-         23ds3X7k6vAjHfkduRBoG3FVykWs+yqPbC2UNj+tH6mWnBDHR95IQ7tRYdrze1FTz6yN
-         FMLu5ZKYRHw/pgTBgQF0wrRZ9g/iW1CqxSArjBtQfQWw0RfghQU7miqgGuza7PTEm8zq
-         D9duqt2HgFzzKN+NYAPBi0qM6+KVxMb09jslP6RsVs+sBjNkATOmbAPcrDzZN3SQg/T+
-         J/auHZnvHcw0QSb+Rivzr9qK1McWoDvUOWee4K4VNQ+CtIIk/hP6u04kLzNPLc2i40nK
-         gHYA==
-X-Gm-Message-State: AOJu0YypAxdiROtpJ2CtV3jbNccaDhfZnVIjkVTDwsLHCKwPXgPg4Rk1
-	Clr6od6lRVAyXhtezKYObALX3Fzi76BIQQkJLOUIr321Y0A8ivLFRMJR4cEPE02t9YQ8/TBfSrH
-	f6jFZ34HP52oVpkRqBYFZtTWOsLye0NRhTK/IvVSNsq2R95i9qLh8/3Dqi2ad2lGayA==
-X-Received: by 2002:a05:6a00:4fc3:b0:71e:410:4764 with SMTP id d2e1a72fcca58-72062f83b02mr13223388b3a.8.1730121162927;
-        Mon, 28 Oct 2024 06:12:42 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG81o9K3QfigAYSj/5m3ZN6iYeFrkcxG7PhZ158eWLEnV0cCrWOFyz2XkstVzJ8ZXRj7kdqhA==
-X-Received: by 2002:a05:6a00:4fc3:b0:71e:410:4764 with SMTP id d2e1a72fcca58-72062f83b02mr13223341b3a.8.1730121162391;
-        Mon, 28 Oct 2024 06:12:42 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72057a0d025sm5663110b3a.101.2024.10.28.06.12.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Oct 2024 06:12:42 -0700 (PDT)
-Date: Mon, 28 Oct 2024 21:12:38 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Jaegeuk Kim <jaegeuk@kernel.org>
-Subject: Re: [PATCH v2 1/2] f2fs/006: add testcase to check out-of-space case
-Message-ID: <20241028131238.qvd7el4cz44edjut@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241023081602.3806579-1-chao@kernel.org>
- <20241025034413.5s6ecilfgqcoeudt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <53cb9bde-d845-49d6-858e-147b0870fbbf@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NkJLv2EB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 002CFC4CEC3;
+	Mon, 28 Oct 2024 13:41:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1730122919;
+	bh=fK0/CgWkrjil4GHTSIMQrdDRe6EycU9rjKioZJUE/+g=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=NkJLv2EBManNebdPxvHBH80BynN41DR8gM+G3bFEOMYaGFoFi/m+fqeekHWorTEPs
+	 YzW+8z4wN9bk6DLBFMI+V1nD4H8iKOi+hs2cZHon3RPqUTY5TG4Ld7OTfT+FeRfcuR
+	 4xW2uwwZrNBOa2gwksj0Gn7sZznGENrnHWCcigL8IY7aLQrzfiofWfpilrj4OUQyT2
+	 UOwHVFhSHkwc0peC7ZcPT7qD3Tl+GCcpnnSe0+CBhZ/bTC6759wuY/6BISmCF4cOcY
+	 MbvtoznmpaQi+jdTsHN8AIveT8ePI9bzgXT0ANcyaY8xsBF0p7jf2xDUlTW246hBiU
+	 ZbsWRu9rRRb3g==
+Message-ID: <01f36c89-2ef6-4c87-8d88-9b91447e563b@kernel.org>
+Date: Mon, 28 Oct 2024 21:41:55 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <53cb9bde-d845-49d6-858e-147b0870fbbf@kernel.org>
+User-Agent: Mozilla Thunderbird
+Cc: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH v2 1/2] f2fs/006: add testcase to check out-of-space case
+To: Zorro Lang <zlang@redhat.com>
+References: <20241023081602.3806579-1-chao@kernel.org>
+ <20241025034413.5s6ecilfgqcoeudt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <53cb9bde-d845-49d6-858e-147b0870fbbf@kernel.org>
+ <20241028131238.qvd7el4cz44edjut@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20241028131238.qvd7el4cz44edjut@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: base64
 
-On Mon, Oct 28, 2024 at 05:47:06PM +0800, Chao Yu wrote:
-> On 2024/10/25 11:44, Zorro Lang wrote:
-> > On Wed, Oct 23, 2024 at 04:16:01PM +0800, Chao Yu wrote:
-> > > This is a regression test to check whether f2fs handles dirty
-> > > data correctly when checkpoint is disabled, if lfs mode is on,
-> > > it will trigger OPU for all overwritten data, this will cost
-> > > free segments, so f2fs must account overwritten data as OPU
-> > > data when calculating free space, otherwise, it may run out
-> > > of free segments in f2fs' allocation function, resulting in
-> > > panic.
-> > >=20
-> > > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> > > Signed-off-by: Chao Yu <chao@kernel.org>
-> > > ---
-> > > v2:
-> > > - add _fixed_by_kernel_commit()
-> > > - use _scratch_mkfs_sized() rather than formating size-specified
-> > > loop device
-> > > - code cleanup
-> > >   tests/f2fs/006     | 38 ++++++++++++++++++++++++++++++++++++++
-> > >   tests/f2fs/006.out |  6 ++++++
-> > >   2 files changed, 44 insertions(+)
-> > >   create mode 100755 tests/f2fs/006
-> > >   create mode 100644 tests/f2fs/006.out
-> > >=20
-> > > diff --git a/tests/f2fs/006 b/tests/f2fs/006
-> > > new file mode 100755
-> > > index 00000000..63d00018
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/006
-> > > @@ -0,0 +1,38 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Oppo.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. f2fs/006
-> > > +#
-> > > +# This is a regression test to check whether f2fs handles dirty
-> > > +# data correctly when checkpoint is disabled, if lfs mode is on,
-> > > +# it will trigger OPU for all overwritten data, this will cost
-> > > +# free segments, so f2fs must account overwritten data as OPU
-> > > +# data when calculating free space, otherwise, it may run out
-> > > +# of free segments in f2fs' allocation function, resulting in
-> > > +# panic.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick
-> > > +
-> > > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> > > +	"f2fs: fix to account dirty data in __get_secs_required()"
-> > > +
-> > > +testfile=3D$SCRATCH_MNT/testfile
-> > > +
-> > > +_require_scratch
-> > > +_scratch_mkfs_sized $((1024*1024*100)) >> $seqres.full
-> > > +
-> > > +# use mode=3Dlfs to let f2fs always triggers OPU
-> > > +_scratch_mount -o mode=3Dlfs,checkpoint=3Ddisable:10%,noinline_dentr=
-y >> $seqres.full
-> > > +
-> > > +dd if=3D/dev/zero of=3D$testfile bs=3D1M count=3D50 2>/dev/null
-> > > +
-> > > +# it may run out of free space of f2fs and hang kernel
-> > > +dd if=3D/dev/zero of=3D$testfile bs=3D1M count=3D50 conv=3Dnotrunc c=
-onv=3Dfsync
-> > > +dd if=3D/dev/zero of=3D$testfile bs=3D1M count=3D50 conv=3Dnotrunc c=
-onv=3Dfsync
-> >=20
-> > What kind of failure should be printed at here if test on unfixed kerne=
-l?
->=20
-> It will panic kernel w/o fix, can you please check dmesg?
-
-The dmesg as below [2]. But it hit EIO [1], rather than ENOSPC, and didn't =
-hang.
-If it's the same issue, or another issue, I think we can explain it in abov=
-e comment.
-
-Thanks,
-Zorro
-
-
-[1]
-# diff -u /root/git/xfstests/tests/f2fs/006.out /root/git/xfstests/results/=
-/default/f2fs/006.out.bad
---- /root/git/xfstests/tests/f2fs/006.out       2024-10-28 20:51:08.3810204=
-24 +0800
-+++ /root/git/xfstests/results//default/f2fs/006.out.bad        2024-10-28 =
-20:54:33.252246497 +0800
-@@ -1,6 +1,6 @@
- QA output created by 006
- 50+0 records in
- 50+0 records out
--dd: error writing '/mnt/scratch_f2fs/testfile': No space left on device
--3+0 records in
--2+0 records out
-+dd: fsync failed for '/mnt/scratch/testfile': Input/output error
-+50+0 records in
-+50+0 records out
-
-[2]
-[3370744.465936] run fstests f2fs/006 at 2024-10-28 20:54:27
-[3370746.308401] F2FS-fs (sda6): Adjust unusable cap for checkpoint=3Ddisab=
-le =3D 1530 / 10%
-[3370746.318664] F2FS-fs (sda6): Found nat_bits in checkpoint
-[3370746.341354] F2FS-fs (sda6): Start checkpoint disabled!
-[3370746.347782] F2FS-fs (sda6): Mounted with checkpoint version =3D 355eea=
-66
-[3370747.846817] F2FS-fs (sda6): Stopped filesystem due to reason: 7
-[3370747.853002] ------------[ cut here ]------------
-[3370747.857826] WARNING: CPU: 1 PID: 791405 at fs/f2fs/segment.c:2748 new_=
-curseg+0xc7e/0x1ef0 [f2fs]
-[3370747.866938] Modules linked in: f2fs crc32_generic lz4hc_compress lz4_c=
-ompress dm_thin_pool dm_persistent_data dm_bio_prison dm_log_writes xfs mlx=
-5_ib ib_uverbs macsec ib_core nft_fib_inet nft_fib_ipv4 nft_fib_ipv6 nft_fi=
-b intel_rapl_msr intel_rapl_common nft_reject_inet nf_reject_ipv4 nf_reject=
-_ipv6 intel_uncore_frequency nft_reject intel_uncore_frequency_common i10nm=
-_edac skx_edac_common nft_ct nfit x86_pkg_temp_thermal intel_powerclamp nft=
-_chain_nat nf_nat coretemp rfkill nf_conntrack nf_defrag_ipv6 kvm_intel nf_=
-defrag_ipv4 snd_pcsp mlx5_core dax_hmem snd_pcm kvm ip_set cxl_acpi snd_tim=
-er spi_nor dell_pc iTCO_wdt rapl cxl_core intel_pmc_bxt snd dell_smbios acp=
-i_power_meter iTCO_vendor_support mtd mlxfw ipmi_ssif intel_cstate platform=
-_profile nf_tables dcdbas nd_pmem isst_if_mmio isst_if_mbox_pci psample dax=
-_pmem nd_btt intel_uncore dell_wmi_descriptor wmi_bmof einj soundcore tls m=
-ei_me tg3 intel_th_gth spi_intel_pci i2c_i801 isst_if_common pci_hyperv_int=
-f mei spi_intel intel_th_pci i2c_smbus intel_pch_thermal
-[3370747.867283]  ipmi_si intel_th intel_vsec acpi_ipmi ipmi_devintf ipmi_m=
-sghandler fuse loop nfnetlink zram crct10dif_pclmul crc32_pclmul crc32c_int=
-el polyval_clmulni polyval_generic ghash_clmulni_intel sha512_ssse3 nd_e820=
- sha256_ssse3 libnvdimm sha1_ssse3 megaraid_sas mgag200 i2c_algo_bit wmi [l=
-ast unloaded: scsi_debug]
-[3370747.985397] CPU: 1 UID: 0 PID: 791405 Comm: dd Tainted: G        W    =
-     -------  ---  6.11.0-0.rc6.49.fc42.x86_64+debug #1
-[3370747.996895] Tainted: [W]=3DWARN
-[3370748.000067] Hardware name: Dell Inc. PowerEdge R750/0PJ80M, BIOS 1.5.4=
- 12/17/2021
-[3370748.007747] RIP: 0010:new_curseg+0xc7e/0x1ef0 [f2fs]
-[3370748.012949] Code: 8e 38 0b 00 00 3b ab d8 11 00 00 0f 82 b3 f8 ff ff 4=
-8 8b 7c 24 28 e8 f1 26 5b f0 ba 07 00 00 00 31 f6 48 89 df e8 42 6b f7 ff <=
-0f> 0b be 08 00 00 00 48 8d bb 20 01 00 00 e8 3f db d1 ed f0 80 8b
-[3370748.031898] RSP: 0018:ffa00000365cea90 EFLAGS: 00010296
-[3370748.037323] RAX: 0000000000000000 RBX: ff1100110a61c000 RCX: 000000000=
-0000000
-[3370748.044656] RDX: 0000000000000033 RSI: ffffffffb2c56fe0 RDI: fff3fc000=
-6cb9d23
-[3370748.051989] RBP: 000000000000002a R08: 0000000000000001 R09: fff3fc000=
-6cb9ce8
-[3370748.059319] R10: ffa00000365ce747 R11: 0000000000000000 R12: 000000000=
-0000001
-[3370748.066652] R13: ff110009482c4178 R14: ff11001096338e00 R15: ffe21c022=
-14c3a3b
-[3370748.073984] FS:  00007f9d7a3d4740(0000) GS:ff11002031000000(0000) knlG=
-S:0000000000000000
-[3370748.082269] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[3370748.088211] CR2: 000056272e350c08 CR3: 0000001100088002 CR4: 000000000=
-0771ef0
-[3370748.095546] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 000000000=
-0000000
-[3370748.102906] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 000000000=
-0000400
-[3370748.110236] PKRU: 55555554
-[3370748.113149] Call Trace:
-[3370748.115800]  <TASK>
-[3370748.118106]  ? __warn.cold+0x5b/0x1af
-[3370748.121975]  ? new_curseg+0xc7e/0x1ef0 [f2fs]
-[3370748.126575]  ? report_bug+0x1fc/0x3d0
-[3370748.130449]  ? handle_bug+0x3c/0x80
-[3370748.134141]  ? exc_invalid_op+0x17/0x40
-[3370748.138181]  ? asm_exc_invalid_op+0x1a/0x20
-[3370748.142591]  ? new_curseg+0xc7e/0x1ef0 [f2fs]
-[3370748.147200]  ? update_segment_mtime+0x144/0x4c0 [f2fs]
-[3370748.152591]  f2fs_allocate_data_block+0xbc9/0x4070 [f2fs]
-[3370748.158244]  ? mark_lock+0xf5/0x16d0
-[3370748.162021]  ? __pfx___lock_acquire+0x10/0x10
-[3370748.166603]  ? __pfx_f2fs_allocate_data_block+0x10/0x10 [f2fs]
-[3370748.172676]  ? __pfx___get_segment_type+0x10/0x10 [f2fs]
-[3370748.178231]  ? folio_memcg_unlock+0x61/0x120
-[3370748.182707]  ? local_clock_noinstr+0xd/0x100
-[3370748.187191]  do_write_page+0x156/0xdf0 [f2fs]
-[3370748.191789]  ? __pfx___update_extent_cache+0x10/0x10 [f2fs]
-[3370748.197596]  ? mark_held_locks+0x94/0xe0
-[3370748.201727]  ? __pfx_do_write_page+0x10/0x10 [f2fs]
-[3370748.206865]  ? __folio_start_writeback+0x266/0x870
-[3370748.211873]  f2fs_outplace_write_data+0x198/0x310 [f2fs]
-[3370748.217419]  ? __pfx_f2fs_outplace_write_data+0x10/0x10 [f2fs]
-[3370748.223503]  f2fs_do_write_data_page+0xaf9/0x1120 [f2fs]
-[3370748.229175]  ? __pfx_f2fs_do_write_data_page+0x10/0x10 [f2fs]
-[3370748.235176]  ? __pfx___lock_acquire+0x10/0x10
-[3370748.239748]  f2fs_write_single_data_page+0xf9f/0x16e0 [f2fs]
-[3370748.245674]  ? __pfx_f2fs_write_single_data_page+0x10/0x10 [f2fs]
-[3370748.252007]  ? local_clock_noinstr+0xd/0x100
-[3370748.256482]  ? folio_clear_dirty_for_io+0x20b/0x5b0
-[3370748.261567]  ? local_clock_noinstr+0xd/0x100
-[3370748.266081]  f2fs_write_cache_pages+0xa46/0x1ec0 [f2fs]
-[3370748.271573]  ? __pfx_f2fs_write_cache_pages+0x10/0x10 [f2fs]
-[3370748.277486]  ? __pfx___lock_acquire+0x10/0x10
-[3370748.282051]  ? mark_lock+0xf5/0x16d0
-[3370748.285869]  ? f2fs_write_data_pages+0x844/0xc00 [f2fs]
-[3370748.291352]  ? rcu_is_watching+0x12/0xc0
-[3370748.295482]  ? trace_contention_end+0xd4/0x110
-[3370748.300190]  f2fs_write_data_pages+0x85d/0xc00 [f2fs]
-[3370748.305491]  ? __pfx_f2fs_write_data_pages+0x10/0x10 [f2fs]
-[3370748.311293]  ? __pfx___lock_acquire+0x10/0x10
-[3370748.315889]  do_writepages+0x176/0x780
-[3370748.319860]  ? __pfx_do_writepages+0x10/0x10
-[3370748.324329]  ? filemap_fdatawrite_wbc+0xd3/0x180
-[3370748.329162]  ? do_raw_spin_unlock+0x58/0x1f0
-[3370748.333641]  ? _raw_spin_unlock+0x2d/0x50
-[3370748.337859]  ? wbc_attach_and_unlock_inode+0x3da/0x7d0
-[3370748.343204]  filemap_fdatawrite_wbc+0x113/0x180
-[3370748.347939]  __filemap_fdatawrite_range+0xaf/0xf0
-[3370748.352855]  ? __pfx___filemap_fdatawrite_range+0x10/0x10
-[3370748.358515]  ? __pfx_lock_release+0x10/0x10
-[3370748.362909]  file_write_and_wait_range+0x9b/0x110
-[3370748.367819]  f2fs_do_sync_file+0x27b/0x1ab0 [f2fs]
-[3370748.372882]  ? __pfx_f2fs_do_sync_file+0x10/0x10 [f2fs]
-[3370748.378348]  ? __pfx_vfs_read+0x10/0x10
-[3370748.382452]  ? __mark_inode_dirty+0x6ef/0x9d0
-[3370748.387018]  ? ksys_read+0xfb/0x1d0
-[3370748.390715]  ? vfs_fsync_range+0x11b/0x220
-[3370748.395024]  __x64_sys_fsync+0x59/0xa0
-[3370748.398980]  do_syscall_64+0x97/0x190
-[3370748.402861]  ? __pfx_ksys_read+0x10/0x10
-[3370748.406995]  ? lockdep_hardirqs_on_prepare+0x171/0x400
-[3370748.412336]  ? do_syscall_64+0xa3/0x190
-[3370748.416380]  ? lockdep_hardirqs_on+0x7c/0x100
-[3370748.420941]  ? do_syscall_64+0xa3/0x190
-[3370748.424981]  ? lockdep_hardirqs_on_prepare+0x171/0x400
-[3370748.430324]  ? do_syscall_64+0xa3/0x190
-[3370748.434364]  ? lockdep_hardirqs_on+0x7c/0x100
-[3370748.438924]  ? do_syscall_64+0xa3/0x190
-[3370748.442969]  ? do_syscall_64+0xa3/0x190
-[3370748.447009]  ? lockdep_hardirqs_on_prepare+0x171/0x400
-[3370748.452349]  ? do_syscall_64+0xa3/0x190
-[3370748.456394]  ? lockdep_hardirqs_on+0x7c/0x100
-[3370748.460953]  ? do_syscall_64+0xa3/0x190
-[3370748.464994]  ? do_syscall_64+0xa3/0x190
-[3370748.469039]  ? lockdep_hardirqs_on_prepare+0x171/0x400
-[3370748.474380]  ? do_syscall_64+0xa3/0x190
-[3370748.478427]  ? lockdep_hardirqs_on+0x7c/0x100
-[3370748.483043]  ? clear_bhb_loop+0x25/0x80
-[3370748.487082]  ? clear_bhb_loop+0x25/0x80
-[3370748.491127]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
-[3370748.496383] RIP: 0033:0x7f9d7a4c11a4
-[3370748.500187] Code: 00 00 0f 1f 40 00 f3 0f 1e fa 48 8b 3d 9d 5c 10 00 e=
-9 10 73 f1 ff f3 0f 1e fa 80 3d c5 5e 10 00 00 74 13 b8 4a 00 00 00 0f 05 <=
-48> 3d 00 f0 ff ff 77 3c c3 0f 1f 00 55 4
-8 89 e5 48 83 ec 10 89 7d
-[3370748.519133] RSP: 002b:00007fff6c1e62c8 EFLAGS: 00000202 ORIG_RAX: 0000=
-00000000004a
-[3370748.526905] RAX: ffffffffffffffda RBX: 0000000000000000 RCX: 00007f9d7=
-a4c11a4
-[3370748.534239] RDX: 0000000000000032 RSI: 0000000000000000 RDI: 000000000=
-0000001
-[3370748.541568] RBP: 00007fff6c1e6320 R08: 0000000000000000 R09: 00007f9d7=
-a60c380
-[3370748.548932] R10: 0000000000000022 R11: 0000000000000202 R12: 00007f9d7=
-a3d46c8
-[3370748.556268] R13: 0000000000000000 R14: 0000000000000000 R15: 000000000=
-0000032
-[3370748.563625]  </TASK>
-[3370748.566016] irq event stamp: 342211
-[3370748.569711] hardirqs last  enabled at (342221): [<ffffffffaf41b9f6>] c=
-onsole_unlock+0x236/0x2c0
-[3370748.578611] hardirqs last disabled at (342230): [<ffffffffaf41b9db>] c=
-onsole_unlock+0x21b/0x2c0
-[3370748.587504] softirqs last  enabled at (342178): [<ffffffffaf247c3b>] _=
-_irq_exit_rcu+0xbb/0x1c0
-[3370748.596307] softirqs last disabled at (342157): [<ffffffffaf247c3b>] _=
-_irq_exit_rcu+0xbb/0x1c0
-[3370748.605115] ---[ end trace 0000000000000000 ]---
-[3370748.792483] F2FS-fs (sda6): Adjust unusable cap for checkpoint=3Ddisab=
-le =3D 1530 / 10%
-[3370750.194429] F2FS-fs (sda6): Disable nat_bits due to incorrect cp_ver (=
-4137321793606052454, 18446744073709551615)
-[3370750.259391] F2FS-fs (sda6): Mounted with checkpoint version =3D 355eea=
-67
-
-
->=20
-> > I got:
-> >=20
-> > # diff -u /root/git/xfstests/tests/f2fs/006.out /root/git/xfstests/resu=
-lts//default/f2fs/006.out.bad|less
-> > --- /root/git/xfstests/tests/f2fs/006.out       2024-10-25 11:33:54.693=
-883281 +0800
-> > +++ /root/git/xfstests/results//default/f2fs/006.out.bad        2024-10=
--25 11:34:55.907252401 +0800
-> > @@ -1,6 +1,6 @@
-> >   QA output created by 006
-> >   50+0 records in
-> >   50+0 records out
-> > -dd: error writing '/mnt/scratch_f2fs/testfile': No space left on device
-> > -3+0 records in
-> > -2+0 records out
-> > +dd: fsync failed for '/mnt/scratch/testfile': Input/output error
-> > +50+0 records in
-> > +50+0 records out
-> >=20
-> > Does that mean the bug is reproduced?
-> > >> +
-> > > +_scratch_remount checkpoint=3Denable
-> > > +
-> > > +status=3D0
-> > > +exit
-> > > diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
-> > > new file mode 100644
-> > > index 00000000..0d7b3910
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/006.out
-> > > @@ -0,0 +1,6 @@
-> > > +QA output created by 006
-> > > +50+0 records in
-> > > +50+0 records out
-> > > +dd: error writing '/mnt/scratch_f2fs/testfile': No space left on dev=
-ice
-> >=20
-> > The "/mnt/scratch_f2fs" should be SCRATCH_MNT, please use _filter_scrat=
-ch()
-> > by importing common/filter.
->=20
-> Correct, let me fix this.
->=20
-> Thanks,
->=20
-> >=20
-> > > +3+0 records in
-> > > +2+0 records out
-> > > --=20
-> > > 2.40.1
-> > >=20
-> >=20
->=20
+T24gMjAyNC8xMC8yOCAyMToxMiwgWm9ycm8gTGFuZyB3cm90ZToNCj4gT24gTW9uLCBPY3Qg
+MjgsIDIwMjQgYXQgMDU6NDc6MDZQTSArMDgwMCwgQ2hhbyBZdSB3cm90ZToNCj4+IE9uIDIw
+MjQvMTAvMjUgMTE6NDQsIFpvcnJvIExhbmcgd3JvdGU6DQo+Pj4gT24gV2VkLCBPY3QgMjMs
+IDIwMjQgYXQgMDQ6MTY6MDFQTSArMDgwMCwgQ2hhbyBZdSB3cm90ZToNCj4+Pj4gVGhpcyBp
+cyBhIHJlZ3Jlc3Npb24gdGVzdCB0byBjaGVjayB3aGV0aGVyIGYyZnMgaGFuZGxlcyBkaXJ0
+eQ0KPj4+PiBkYXRhIGNvcnJlY3RseSB3aGVuIGNoZWNrcG9pbnQgaXMgZGlzYWJsZWQsIGlm
+IGxmcyBtb2RlIGlzIG9uLA0KPj4+PiBpdCB3aWxsIHRyaWdnZXIgT1BVIGZvciBhbGwgb3Zl
+cndyaXR0ZW4gZGF0YSwgdGhpcyB3aWxsIGNvc3QNCj4+Pj4gZnJlZSBzZWdtZW50cywgc28g
+ZjJmcyBtdXN0IGFjY291bnQgb3ZlcndyaXR0ZW4gZGF0YSBhcyBPUFUNCj4+Pj4gZGF0YSB3
+aGVuIGNhbGN1bGF0aW5nIGZyZWUgc3BhY2UsIG90aGVyd2lzZSwgaXQgbWF5IHJ1biBvdXQN
+Cj4+Pj4gb2YgZnJlZSBzZWdtZW50cyBpbiBmMmZzJyBhbGxvY2F0aW9uIGZ1bmN0aW9uLCBy
+ZXN1bHRpbmcgaW4NCj4+Pj4gcGFuaWMuDQo+Pj4+DQo+Pj4+IENjOiBKYWVnZXVrIEtpbSA8
+amFlZ2V1a0BrZXJuZWwub3JnPg0KPj4+PiBTaWduZWQtb2ZmLWJ5OiBDaGFvIFl1IDxjaGFv
+QGtlcm5lbC5vcmc+DQo+Pj4+IC0tLQ0KPj4+PiB2MjoNCj4+Pj4gLSBhZGQgX2ZpeGVkX2J5
+X2tlcm5lbF9jb21taXQoKQ0KPj4+PiAtIHVzZSBfc2NyYXRjaF9ta2ZzX3NpemVkKCkgcmF0
+aGVyIHRoYW4gZm9ybWF0aW5nIHNpemUtc3BlY2lmaWVkDQo+Pj4+IGxvb3AgZGV2aWNlDQo+
+Pj4+IC0gY29kZSBjbGVhbnVwDQo+Pj4+ICAgIHRlc3RzL2YyZnMvMDA2ICAgICB8IDM4ICsr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+Pj4+ICAgIHRlc3RzL2Yy
+ZnMvMDA2Lm91dCB8ICA2ICsrKysrKw0KPj4+PiAgICAyIGZpbGVzIGNoYW5nZWQsIDQ0IGlu
+c2VydGlvbnMoKykNCj4+Pj4gICAgY3JlYXRlIG1vZGUgMTAwNzU1IHRlc3RzL2YyZnMvMDA2
+DQo+Pj4+ICAgIGNyZWF0ZSBtb2RlIDEwMDY0NCB0ZXN0cy9mMmZzLzAwNi5vdXQNCj4+Pj4N
+Cj4+Pj4gZGlmZiAtLWdpdCBhL3Rlc3RzL2YyZnMvMDA2IGIvdGVzdHMvZjJmcy8wMDYNCj4+
+Pj4gbmV3IGZpbGUgbW9kZSAxMDA3NTUNCj4+Pj4gaW5kZXggMDAwMDAwMDAuLjYzZDAwMDE4
+DQo+Pj4+IC0tLSAvZGV2L251bGwNCj4+Pj4gKysrIGIvdGVzdHMvZjJmcy8wMDYNCj4+Pj4g
+QEAgLTAsMCArMSwzOCBAQA0KPj4+PiArIyEgL2Jpbi9iYXNoDQo+Pj4+ICsjIFNQRFgtTGlj
+ZW5zZS1JZGVudGlmaWVyOiBHUEwtMi4wDQo+Pj4+ICsjIENvcHlyaWdodCAoYykgMjAyNCBP
+cHBvLiAgQWxsIFJpZ2h0cyBSZXNlcnZlZC4NCj4+Pj4gKyMNCj4+Pj4gKyMgRlMgUUEgVGVz
+dCBOby4gZjJmcy8wMDYNCj4+Pj4gKyMNCj4+Pj4gKyMgVGhpcyBpcyBhIHJlZ3Jlc3Npb24g
+dGVzdCB0byBjaGVjayB3aGV0aGVyIGYyZnMgaGFuZGxlcyBkaXJ0eQ0KPj4+PiArIyBkYXRh
+IGNvcnJlY3RseSB3aGVuIGNoZWNrcG9pbnQgaXMgZGlzYWJsZWQsIGlmIGxmcyBtb2RlIGlz
+IG9uLA0KPj4+PiArIyBpdCB3aWxsIHRyaWdnZXIgT1BVIGZvciBhbGwgb3ZlcndyaXR0ZW4g
+ZGF0YSwgdGhpcyB3aWxsIGNvc3QNCj4+Pj4gKyMgZnJlZSBzZWdtZW50cywgc28gZjJmcyBt
+dXN0IGFjY291bnQgb3ZlcndyaXR0ZW4gZGF0YSBhcyBPUFUNCj4+Pj4gKyMgZGF0YSB3aGVu
+IGNhbGN1bGF0aW5nIGZyZWUgc3BhY2UsIG90aGVyd2lzZSwgaXQgbWF5IHJ1biBvdXQNCj4+
+Pj4gKyMgb2YgZnJlZSBzZWdtZW50cyBpbiBmMmZzJyBhbGxvY2F0aW9uIGZ1bmN0aW9uLCBy
+ZXN1bHRpbmcgaW4NCj4+Pj4gKyMgcGFuaWMuDQo+Pj4+ICsjDQo+Pj4+ICsuIC4vY29tbW9u
+L3ByZWFtYmxlDQo+Pj4+ICtfYmVnaW5fZnN0ZXN0IGF1dG8gcXVpY2sNCj4+Pj4gKw0KPj4+
+PiArX2ZpeGVkX2J5X2tlcm5lbF9jb21taXQgeHh4eHh4eHh4eHh4IFwNCj4+Pj4gKwkiZjJm
+czogZml4IHRvIGFjY291bnQgZGlydHkgZGF0YSBpbiBfX2dldF9zZWNzX3JlcXVpcmVkKCki
+DQo+Pj4+ICsNCj4+Pj4gK3Rlc3RmaWxlPSRTQ1JBVENIX01OVC90ZXN0ZmlsZQ0KPj4+PiAr
+DQo+Pj4+ICtfcmVxdWlyZV9zY3JhdGNoDQo+Pj4+ICtfc2NyYXRjaF9ta2ZzX3NpemVkICQo
+KDEwMjQqMTAyNCoxMDApKSA+PiAkc2VxcmVzLmZ1bGwNCj4+Pj4gKw0KPj4+PiArIyB1c2Ug
+bW9kZT1sZnMgdG8gbGV0IGYyZnMgYWx3YXlzIHRyaWdnZXJzIE9QVQ0KPj4+PiArX3NjcmF0
+Y2hfbW91bnQgLW8gbW9kZT1sZnMsY2hlY2twb2ludD1kaXNhYmxlOjEwJSxub2lubGluZV9k
+ZW50cnkgPj4gJHNlcXJlcy5mdWxsDQo+Pj4+ICsNCj4+Pj4gK2RkIGlmPS9kZXYvemVybyBv
+Zj0kdGVzdGZpbGUgYnM9MU0gY291bnQ9NTAgMj4vZGV2L251bGwNCj4+Pj4gKw0KPj4+PiAr
+IyBpdCBtYXkgcnVuIG91dCBvZiBmcmVlIHNwYWNlIG9mIGYyZnMgYW5kIGhhbmcga2VybmVs
+DQo+Pj4+ICtkZCBpZj0vZGV2L3plcm8gb2Y9JHRlc3RmaWxlIGJzPTFNIGNvdW50PTUwIGNv
+bnY9bm90cnVuYyBjb252PWZzeW5jDQo+Pj4+ICtkZCBpZj0vZGV2L3plcm8gb2Y9JHRlc3Rm
+aWxlIGJzPTFNIGNvdW50PTUwIGNvbnY9bm90cnVuYyBjb252PWZzeW5jDQo+Pj4NCj4+PiBX
+aGF0IGtpbmQgb2YgZmFpbHVyZSBzaG91bGQgYmUgcHJpbnRlZCBhdCBoZXJlIGlmIHRlc3Qg
+b24gdW5maXhlZCBrZXJuZWw/DQo+Pg0KPj4gSXQgd2lsbCBwYW5pYyBrZXJuZWwgdy9vIGZp
+eCwgY2FuIHlvdSBwbGVhc2UgY2hlY2sgZG1lc2c/DQo+IA0KPiBUaGUgZG1lc2cgYXMgYmVs
+b3cgWzJdLiBCdXQgaXQgaGl0IEVJTyBbMV0sIHJhdGhlciB0aGFuIEVOT1NQQywgYW5kIGRp
+ZG4ndCBoYW5nLg0KPiBJZiBpdCdzIHRoZSBzYW1lIGlzc3VlLCBvciBhbm90aGVyIGlzc3Vl
+LCBJIHRoaW5rIHdlIGNhbiBleHBsYWluIGl0IGluIGFib3ZlIGNvbW1lbnQuDQoNCkl0J3Mg
+dGhlIHNhbWUgaXNzdWUsIGxldCBtZSBleHBsYWluIG1vcmUgYWJvdXQgdGhpcy4NCg0KWW91
+IHdpbGwgZW5jb3VudGVyIGtlcm5lbCBoYW5nIGFmdGVyIHlvdSBlbmFibGUgQ09ORklHX0Yy
+RlNfQ0hFQ0tfRlMgY29uZmlnLg0KDQpUaGFua3MsDQoNCj4gDQo+IFRoYW5rcywNCj4gWm9y
+cm8NCj4gDQo+IA0KPiBbMV0NCj4gIyBkaWZmIC11IC9yb290L2dpdC94ZnN0ZXN0cy90ZXN0
+cy9mMmZzLzAwNi5vdXQgL3Jvb3QvZ2l0L3hmc3Rlc3RzL3Jlc3VsdHMvL2RlZmF1bHQvZjJm
+cy8wMDYub3V0LmJhZA0KPiAtLS0gL3Jvb3QvZ2l0L3hmc3Rlc3RzL3Rlc3RzL2YyZnMvMDA2
+Lm91dCAgICAgICAyMDI0LTEwLTI4IDIwOjUxOjA4LjM4MTAyMDQyNCArMDgwMA0KPiArKysg
+L3Jvb3QvZ2l0L3hmc3Rlc3RzL3Jlc3VsdHMvL2RlZmF1bHQvZjJmcy8wMDYub3V0LmJhZCAg
+ICAgICAgMjAyNC0xMC0yOCAyMDo1NDozMy4yNTIyNDY0OTcgKzA4MDANCj4gQEAgLTEsNiAr
+MSw2IEBADQo+ICAgUUEgb3V0cHV0IGNyZWF0ZWQgYnkgMDA2DQo+ICAgNTArMCByZWNvcmRz
+IGluDQo+ICAgNTArMCByZWNvcmRzIG91dA0KPiAtZGQ6IGVycm9yIHdyaXRpbmcgJy9tbnQv
+c2NyYXRjaF9mMmZzL3Rlc3RmaWxlJzogTm8gc3BhY2UgbGVmdCBvbiBkZXZpY2UNCj4gLTMr
+MCByZWNvcmRzIGluDQo+IC0yKzAgcmVjb3JkcyBvdXQNCj4gK2RkOiBmc3luYyBmYWlsZWQg
+Zm9yICcvbW50L3NjcmF0Y2gvdGVzdGZpbGUnOiBJbnB1dC9vdXRwdXQgZXJyb3INCj4gKzUw
+KzAgcmVjb3JkcyBpbg0KPiArNTArMCByZWNvcmRzIG91dA0KPiANCj4gWzJdDQo+IFszMzcw
+NzQ0LjQ2NTkzNl0gcnVuIGZzdGVzdHMgZjJmcy8wMDYgYXQgMjAyNC0xMC0yOCAyMDo1NDoy
+Nw0KPiBbMzM3MDc0Ni4zMDg0MDFdIEYyRlMtZnMgKHNkYTYpOiBBZGp1c3QgdW51c2FibGUg
+Y2FwIGZvciBjaGVja3BvaW50PWRpc2FibGUgPSAxNTMwIC8gMTAlDQo+IFszMzcwNzQ2LjMx
+ODY2NF0gRjJGUy1mcyAoc2RhNik6IEZvdW5kIG5hdF9iaXRzIGluIGNoZWNrcG9pbnQNCj4g
+WzMzNzA3NDYuMzQxMzU0XSBGMkZTLWZzIChzZGE2KTogU3RhcnQgY2hlY2twb2ludCBkaXNh
+YmxlZCENCj4gWzMzNzA3NDYuMzQ3NzgyXSBGMkZTLWZzIChzZGE2KTogTW91bnRlZCB3aXRo
+IGNoZWNrcG9pbnQgdmVyc2lvbiA9IDM1NWVlYTY2DQo+IFszMzcwNzQ3Ljg0NjgxN10gRjJG
+Uy1mcyAoc2RhNik6IFN0b3BwZWQgZmlsZXN5c3RlbSBkdWUgdG8gcmVhc29uOiA3DQo+IFsz
+MzcwNzQ3Ljg1MzAwMl0gLS0tLS0tLS0tLS0tWyBjdXQgaGVyZSBdLS0tLS0tLS0tLS0tDQo+
+IFszMzcwNzQ3Ljg1NzgyNl0gV0FSTklORzogQ1BVOiAxIFBJRDogNzkxNDA1IGF0IGZzL2Yy
+ZnMvc2VnbWVudC5jOjI3NDggbmV3X2N1cnNlZysweGM3ZS8weDFlZjAgW2YyZnNdDQo+IFsz
+MzcwNzQ3Ljg2NjkzOF0gTW9kdWxlcyBsaW5rZWQgaW46IGYyZnMgY3JjMzJfZ2VuZXJpYyBs
+ejRoY19jb21wcmVzcyBsejRfY29tcHJlc3MgZG1fdGhpbl9wb29sIGRtX3BlcnNpc3RlbnRf
+ZGF0YSBkbV9iaW9fcHJpc29uIGRtX2xvZ193cml0ZXMgeGZzIG1seDVfaWIgaWJfdXZlcmJz
+IG1hY3NlYyBpYl9jb3JlIG5mdF9maWJfaW5ldCBuZnRfZmliX2lwdjQgbmZ0X2ZpYl9pcHY2
+IG5mdF9maWIgaW50ZWxfcmFwbF9tc3IgaW50ZWxfcmFwbF9jb21tb24gbmZ0X3JlamVjdF9p
+bmV0IG5mX3JlamVjdF9pcHY0IG5mX3JlamVjdF9pcHY2IGludGVsX3VuY29yZV9mcmVxdWVu
+Y3kgbmZ0X3JlamVjdCBpbnRlbF91bmNvcmVfZnJlcXVlbmN5X2NvbW1vbiBpMTBubV9lZGFj
+IHNreF9lZGFjX2NvbW1vbiBuZnRfY3QgbmZpdCB4ODZfcGtnX3RlbXBfdGhlcm1hbCBpbnRl
+bF9wb3dlcmNsYW1wIG5mdF9jaGFpbl9uYXQgbmZfbmF0IGNvcmV0ZW1wIHJma2lsbCBuZl9j
+b25udHJhY2sgbmZfZGVmcmFnX2lwdjYga3ZtX2ludGVsIG5mX2RlZnJhZ19pcHY0IHNuZF9w
+Y3NwIG1seDVfY29yZSBkYXhfaG1lbSBzbmRfcGNtIGt2bSBpcF9zZXQgY3hsX2FjcGkgc25k
+X3RpbWVyIHNwaV9ub3IgZGVsbF9wYyBpVENPX3dkdCByYXBsIGN4bF9jb3JlIGludGVsX3Bt
+Y19ieHQgc25kIGRlbGxfc21iaW9zIGFjcGlfcG93ZXJfbWV0ZXIgaVRDT192ZW5kb3Jfc3Vw
+cG9ydCBtdGQgbWx4ZncgaXBtaV9zc2lmIGludGVsX2NzdGF0ZSBwbGF0Zm9ybV9wcm9maWxl
+IG5mX3RhYmxlcyBkY2RiYXMgbmRfcG1lbSBpc3N0X2lmX21taW8gaXNzdF9pZl9tYm94X3Bj
+aSBwc2FtcGxlIGRheF9wbWVtIG5kX2J0dCBpbnRlbF91bmNvcmUgZGVsbF93bWlfZGVzY3Jp
+cHRvciB3bWlfYm1vZiBlaW5qIHNvdW5kY29yZSB0bHMgbWVpX21lIHRnMyBpbnRlbF90aF9n
+dGggc3BpX2ludGVsX3BjaSBpMmNfaTgwMSBpc3N0X2lmX2NvbW1vbiBwY2lfaHlwZXJ2X2lu
+dGYgbWVpIHNwaV9pbnRlbCBpbnRlbF90aF9wY2kgaTJjX3NtYnVzIGludGVsX3BjaF90aGVy
+bWFsDQo+IFszMzcwNzQ3Ljg2NzI4M10gIGlwbWlfc2kgaW50ZWxfdGggaW50ZWxfdnNlYyBh
+Y3BpX2lwbWkgaXBtaV9kZXZpbnRmIGlwbWlfbXNnaGFuZGxlciBmdXNlIGxvb3AgbmZuZXRs
+aW5rIHpyYW0gY3JjdDEwZGlmX3BjbG11bCBjcmMzMl9wY2xtdWwgY3JjMzJjX2ludGVsIHBv
+bHl2YWxfY2xtdWxuaSBwb2x5dmFsX2dlbmVyaWMgZ2hhc2hfY2xtdWxuaV9pbnRlbCBzaGE1
+MTJfc3NzZTMgbmRfZTgyMCBzaGEyNTZfc3NzZTMgbGlibnZkaW1tIHNoYTFfc3NzZTMgbWVn
+YXJhaWRfc2FzIG1nYWcyMDAgaTJjX2FsZ29fYml0IHdtaSBbbGFzdCB1bmxvYWRlZDogc2Nz
+aV9kZWJ1Z10NCj4gWzMzNzA3NDcuOTg1Mzk3XSBDUFU6IDEgVUlEOiAwIFBJRDogNzkxNDA1
+IENvbW06IGRkIFRhaW50ZWQ6IEcgICAgICAgIFcgICAgICAgICAtLS0tLS0tICAtLS0gIDYu
+MTEuMC0wLnJjNi40OS5mYzQyLng4Nl82NCtkZWJ1ZyAjMQ0KPiBbMzM3MDc0Ny45OTY4OTVd
+IFRhaW50ZWQ6IFtXXT1XQVJODQo+IFszMzcwNzQ4LjAwMDA2N10gSGFyZHdhcmUgbmFtZTog
+RGVsbCBJbmMuIFBvd2VyRWRnZSBSNzUwLzBQSjgwTSwgQklPUyAxLjUuNCAxMi8xNy8yMDIx
+DQo+IFszMzcwNzQ4LjAwNzc0N10gUklQOiAwMDEwOm5ld19jdXJzZWcrMHhjN2UvMHgxZWYw
+IFtmMmZzXQ0KPiBbMzM3MDc0OC4wMTI5NDldIENvZGU6IDhlIDM4IDBiIDAwIDAwIDNiIGFi
+IGQ4IDExIDAwIDAwIDBmIDgyIGIzIGY4IGZmIGZmIDQ4IDhiIDdjIDI0IDI4IGU4IGYxIDI2
+IDViIGYwIGJhIDA3IDAwIDAwIDAwIDMxIGY2IDQ4IDg5IGRmIGU4IDQyIDZiIGY3IGZmIDww
+Zj4gMGIgYmUgMDggMDAgMDAgMDAgNDggOGQgYmIgMjAgMDEgMDAgMDAgZTggM2YgZGIgZDEg
+ZWQgZjAgODAgOGINCj4gWzMzNzA3NDguMDMxODk4XSBSU1A6IDAwMTg6ZmZhMDAwMDAzNjVj
+ZWE5MCBFRkxBR1M6IDAwMDEwMjk2DQo+IFszMzcwNzQ4LjAzNzMyM10gUkFYOiAwMDAwMDAw
+MDAwMDAwMDAwIFJCWDogZmYxMTAwMTEwYTYxYzAwMCBSQ1g6IDAwMDAwMDAwMDAwMDAwMDAN
+Cj4gWzMzNzA3NDguMDQ0NjU2XSBSRFg6IDAwMDAwMDAwMDAwMDAwMzMgUlNJOiBmZmZmZmZm
+ZmIyYzU2ZmUwIFJESTogZmZmM2ZjMDAwNmNiOWQyMw0KPiBbMzM3MDc0OC4wNTE5ODldIFJC
+UDogMDAwMDAwMDAwMDAwMDAyYSBSMDg6IDAwMDAwMDAwMDAwMDAwMDEgUjA5OiBmZmYzZmMw
+MDA2Y2I5Y2U4DQo+IFszMzcwNzQ4LjA1OTMxOV0gUjEwOiBmZmEwMDAwMDM2NWNlNzQ3IFIx
+MTogMDAwMDAwMDAwMDAwMDAwMCBSMTI6IDAwMDAwMDAwMDAwMDAwMDENCj4gWzMzNzA3NDgu
+MDY2NjUyXSBSMTM6IGZmMTEwMDA5NDgyYzQxNzggUjE0OiBmZjExMDAxMDk2MzM4ZTAwIFIx
+NTogZmZlMjFjMDIyMTRjM2EzYg0KPiBbMzM3MDc0OC4wNzM5ODRdIEZTOiAgMDAwMDdmOWQ3
+YTNkNDc0MCgwMDAwKSBHUzpmZjExMDAyMDMxMDAwMDAwKDAwMDApIGtubEdTOjAwMDAwMDAw
+MDAwMDAwMDANCj4gWzMzNzA3NDguMDgyMjY5XSBDUzogIDAwMTAgRFM6IDAwMDAgRVM6IDAw
+MDAgQ1IwOiAwMDAwMDAwMDgwMDUwMDMzDQo+IFszMzcwNzQ4LjA4ODIxMV0gQ1IyOiAwMDAw
+NTYyNzJlMzUwYzA4IENSMzogMDAwMDAwMTEwMDA4ODAwMiBDUjQ6IDAwMDAwMDAwMDA3NzFl
+ZjANCj4gWzMzNzA3NDguMDk1NTQ2XSBEUjA6IDAwMDAwMDAwMDAwMDAwMDAgRFIxOiAwMDAw
+MDAwMDAwMDAwMDAwIERSMjogMDAwMDAwMDAwMDAwMDAwMA0KPiBbMzM3MDc0OC4xMDI5MDZd
+IERSMzogMDAwMDAwMDAwMDAwMDAwMCBEUjY6IDAwMDAwMDAwZmZmZTBmZjAgRFI3OiAwMDAw
+MDAwMDAwMDAwNDAwDQo+IFszMzcwNzQ4LjExMDIzNl0gUEtSVTogNTU1NTU1NTQNCj4gWzMz
+NzA3NDguMTEzMTQ5XSBDYWxsIFRyYWNlOg0KPiBbMzM3MDc0OC4xMTU4MDBdICA8VEFTSz4N
+Cj4gWzMzNzA3NDguMTE4MTA2XSAgPyBfX3dhcm4uY29sZCsweDViLzB4MWFmDQo+IFszMzcw
+NzQ4LjEyMTk3NV0gID8gbmV3X2N1cnNlZysweGM3ZS8weDFlZjAgW2YyZnNdDQo+IFszMzcw
+NzQ4LjEyNjU3NV0gID8gcmVwb3J0X2J1ZysweDFmYy8weDNkMA0KPiBbMzM3MDc0OC4xMzA0
+NDldICA/IGhhbmRsZV9idWcrMHgzYy8weDgwDQo+IFszMzcwNzQ4LjEzNDE0MV0gID8gZXhj
+X2ludmFsaWRfb3ArMHgxNy8weDQwDQo+IFszMzcwNzQ4LjEzODE4MV0gID8gYXNtX2V4Y19p
+bnZhbGlkX29wKzB4MWEvMHgyMA0KPiBbMzM3MDc0OC4xNDI1OTFdICA/IG5ld19jdXJzZWcr
+MHhjN2UvMHgxZWYwIFtmMmZzXQ0KPiBbMzM3MDc0OC4xNDcyMDBdICA/IHVwZGF0ZV9zZWdt
+ZW50X210aW1lKzB4MTQ0LzB4NGMwIFtmMmZzXQ0KPiBbMzM3MDc0OC4xNTI1OTFdICBmMmZz
+X2FsbG9jYXRlX2RhdGFfYmxvY2srMHhiYzkvMHg0MDcwIFtmMmZzXQ0KPiBbMzM3MDc0OC4x
+NTgyNDRdICA/IG1hcmtfbG9jaysweGY1LzB4MTZkMA0KPiBbMzM3MDc0OC4xNjIwMjFdICA/
+IF9fcGZ4X19fbG9ja19hY3F1aXJlKzB4MTAvMHgxMA0KPiBbMzM3MDc0OC4xNjY2MDNdICA/
+IF9fcGZ4X2YyZnNfYWxsb2NhdGVfZGF0YV9ibG9jaysweDEwLzB4MTAgW2YyZnNdDQo+IFsz
+MzcwNzQ4LjE3MjY3Nl0gID8gX19wZnhfX19nZXRfc2VnbWVudF90eXBlKzB4MTAvMHgxMCBb
+ZjJmc10NCj4gWzMzNzA3NDguMTc4MjMxXSAgPyBmb2xpb19tZW1jZ191bmxvY2srMHg2MS8w
+eDEyMA0KPiBbMzM3MDc0OC4xODI3MDddICA/IGxvY2FsX2Nsb2NrX25vaW5zdHIrMHhkLzB4
+MTAwDQo+IFszMzcwNzQ4LjE4NzE5MV0gIGRvX3dyaXRlX3BhZ2UrMHgxNTYvMHhkZjAgW2Yy
+ZnNdDQo+IFszMzcwNzQ4LjE5MTc4OV0gID8gX19wZnhfX191cGRhdGVfZXh0ZW50X2NhY2hl
+KzB4MTAvMHgxMCBbZjJmc10NCj4gWzMzNzA3NDguMTk3NTk2XSAgPyBtYXJrX2hlbGRfbG9j
+a3MrMHg5NC8weGUwDQo+IFszMzcwNzQ4LjIwMTcyN10gID8gX19wZnhfZG9fd3JpdGVfcGFn
+ZSsweDEwLzB4MTAgW2YyZnNdDQo+IFszMzcwNzQ4LjIwNjg2NV0gID8gX19mb2xpb19zdGFy
+dF93cml0ZWJhY2srMHgyNjYvMHg4NzANCj4gWzMzNzA3NDguMjExODczXSAgZjJmc19vdXRw
+bGFjZV93cml0ZV9kYXRhKzB4MTk4LzB4MzEwIFtmMmZzXQ0KPiBbMzM3MDc0OC4yMTc0MTld
+ICA/IF9fcGZ4X2YyZnNfb3V0cGxhY2Vfd3JpdGVfZGF0YSsweDEwLzB4MTAgW2YyZnNdDQo+
+IFszMzcwNzQ4LjIyMzUwM10gIGYyZnNfZG9fd3JpdGVfZGF0YV9wYWdlKzB4YWY5LzB4MTEy
+MCBbZjJmc10NCj4gWzMzNzA3NDguMjI5MTc1XSAgPyBfX3BmeF9mMmZzX2RvX3dyaXRlX2Rh
+dGFfcGFnZSsweDEwLzB4MTAgW2YyZnNdDQo+IFszMzcwNzQ4LjIzNTE3Nl0gID8gX19wZnhf
+X19sb2NrX2FjcXVpcmUrMHgxMC8weDEwDQo+IFszMzcwNzQ4LjIzOTc0OF0gIGYyZnNfd3Jp
+dGVfc2luZ2xlX2RhdGFfcGFnZSsweGY5Zi8weDE2ZTAgW2YyZnNdDQo+IFszMzcwNzQ4LjI0
+NTY3NF0gID8gX19wZnhfZjJmc193cml0ZV9zaW5nbGVfZGF0YV9wYWdlKzB4MTAvMHgxMCBb
+ZjJmc10NCj4gWzMzNzA3NDguMjUyMDA3XSAgPyBsb2NhbF9jbG9ja19ub2luc3RyKzB4ZC8w
+eDEwMA0KPiBbMzM3MDc0OC4yNTY0ODJdICA/IGZvbGlvX2NsZWFyX2RpcnR5X2Zvcl9pbysw
+eDIwYi8weDViMA0KPiBbMzM3MDc0OC4yNjE1NjddICA/IGxvY2FsX2Nsb2NrX25vaW5zdHIr
+MHhkLzB4MTAwDQo+IFszMzcwNzQ4LjI2NjA4MV0gIGYyZnNfd3JpdGVfY2FjaGVfcGFnZXMr
+MHhhNDYvMHgxZWMwIFtmMmZzXQ0KPiBbMzM3MDc0OC4yNzE1NzNdICA/IF9fcGZ4X2YyZnNf
+d3JpdGVfY2FjaGVfcGFnZXMrMHgxMC8weDEwIFtmMmZzXQ0KPiBbMzM3MDc0OC4yNzc0ODZd
+ICA/IF9fcGZ4X19fbG9ja19hY3F1aXJlKzB4MTAvMHgxMA0KPiBbMzM3MDc0OC4yODIwNTFd
+ICA/IG1hcmtfbG9jaysweGY1LzB4MTZkMA0KPiBbMzM3MDc0OC4yODU4NjldICA/IGYyZnNf
+d3JpdGVfZGF0YV9wYWdlcysweDg0NC8weGMwMCBbZjJmc10NCj4gWzMzNzA3NDguMjkxMzUy
+XSAgPyByY3VfaXNfd2F0Y2hpbmcrMHgxMi8weGMwDQo+IFszMzcwNzQ4LjI5NTQ4Ml0gID8g
+dHJhY2VfY29udGVudGlvbl9lbmQrMHhkNC8weDExMA0KPiBbMzM3MDc0OC4zMDAxOTBdICBm
+MmZzX3dyaXRlX2RhdGFfcGFnZXMrMHg4NWQvMHhjMDAgW2YyZnNdDQo+IFszMzcwNzQ4LjMw
+NTQ5MV0gID8gX19wZnhfZjJmc193cml0ZV9kYXRhX3BhZ2VzKzB4MTAvMHgxMCBbZjJmc10N
+Cj4gWzMzNzA3NDguMzExMjkzXSAgPyBfX3BmeF9fX2xvY2tfYWNxdWlyZSsweDEwLzB4MTAN
+Cj4gWzMzNzA3NDguMzE1ODg5XSAgZG9fd3JpdGVwYWdlcysweDE3Ni8weDc4MA0KPiBbMzM3
+MDc0OC4zMTk4NjBdICA/IF9fcGZ4X2RvX3dyaXRlcGFnZXMrMHgxMC8weDEwDQo+IFszMzcw
+NzQ4LjMyNDMyOV0gID8gZmlsZW1hcF9mZGF0YXdyaXRlX3diYysweGQzLzB4MTgwDQo+IFsz
+MzcwNzQ4LjMyOTE2Ml0gID8gZG9fcmF3X3NwaW5fdW5sb2NrKzB4NTgvMHgxZjANCj4gWzMz
+NzA3NDguMzMzNjQxXSAgPyBfcmF3X3NwaW5fdW5sb2NrKzB4MmQvMHg1MA0KPiBbMzM3MDc0
+OC4zMzc4NTldICA/IHdiY19hdHRhY2hfYW5kX3VubG9ja19pbm9kZSsweDNkYS8weDdkMA0K
+PiBbMzM3MDc0OC4zNDMyMDRdICBmaWxlbWFwX2ZkYXRhd3JpdGVfd2JjKzB4MTEzLzB4MTgw
+DQo+IFszMzcwNzQ4LjM0NzkzOV0gIF9fZmlsZW1hcF9mZGF0YXdyaXRlX3JhbmdlKzB4YWYv
+MHhmMA0KPiBbMzM3MDc0OC4zNTI4NTVdICA/IF9fcGZ4X19fZmlsZW1hcF9mZGF0YXdyaXRl
+X3JhbmdlKzB4MTAvMHgxMA0KPiBbMzM3MDc0OC4zNTg1MTVdICA/IF9fcGZ4X2xvY2tfcmVs
+ZWFzZSsweDEwLzB4MTANCj4gWzMzNzA3NDguMzYyOTA5XSAgZmlsZV93cml0ZV9hbmRfd2Fp
+dF9yYW5nZSsweDliLzB4MTEwDQo+IFszMzcwNzQ4LjM2NzgxOV0gIGYyZnNfZG9fc3luY19m
+aWxlKzB4MjdiLzB4MWFiMCBbZjJmc10NCj4gWzMzNzA3NDguMzcyODgyXSAgPyBfX3BmeF9m
+MmZzX2RvX3N5bmNfZmlsZSsweDEwLzB4MTAgW2YyZnNdDQo+IFszMzcwNzQ4LjM3ODM0OF0g
+ID8gX19wZnhfdmZzX3JlYWQrMHgxMC8weDEwDQo+IFszMzcwNzQ4LjM4MjQ1Ml0gID8gX19t
+YXJrX2lub2RlX2RpcnR5KzB4NmVmLzB4OWQwDQo+IFszMzcwNzQ4LjM4NzAxOF0gID8ga3N5
+c19yZWFkKzB4ZmIvMHgxZDANCj4gWzMzNzA3NDguMzkwNzE1XSAgPyB2ZnNfZnN5bmNfcmFu
+Z2UrMHgxMWIvMHgyMjANCj4gWzMzNzA3NDguMzk1MDI0XSAgX194NjRfc3lzX2ZzeW5jKzB4
+NTkvMHhhMA0KPiBbMzM3MDc0OC4zOTg5ODBdICBkb19zeXNjYWxsXzY0KzB4OTcvMHgxOTAN
+Cj4gWzMzNzA3NDguNDAyODYxXSAgPyBfX3BmeF9rc3lzX3JlYWQrMHgxMC8weDEwDQo+IFsz
+MzcwNzQ4LjQwNjk5NV0gID8gbG9ja2RlcF9oYXJkaXJxc19vbl9wcmVwYXJlKzB4MTcxLzB4
+NDAwDQo+IFszMzcwNzQ4LjQxMjMzNl0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+
+IFszMzcwNzQ4LjQxNjM4MF0gID8gbG9ja2RlcF9oYXJkaXJxc19vbisweDdjLzB4MTAwDQo+
+IFszMzcwNzQ4LjQyMDk0MV0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcw
+NzQ4LjQyNDk4MV0gID8gbG9ja2RlcF9oYXJkaXJxc19vbl9wcmVwYXJlKzB4MTcxLzB4NDAw
+DQo+IFszMzcwNzQ4LjQzMDMyNF0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFsz
+MzcwNzQ4LjQzNDM2NF0gID8gbG9ja2RlcF9oYXJkaXJxc19vbisweDdjLzB4MTAwDQo+IFsz
+MzcwNzQ4LjQzODkyNF0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4
+LjQ0Mjk2OV0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4LjQ0NzAw
+OV0gID8gbG9ja2RlcF9oYXJkaXJxc19vbl9wcmVwYXJlKzB4MTcxLzB4NDAwDQo+IFszMzcw
+NzQ4LjQ1MjM0OV0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4LjQ1
+NjM5NF0gID8gbG9ja2RlcF9oYXJkaXJxc19vbisweDdjLzB4MTAwDQo+IFszMzcwNzQ4LjQ2
+MDk1M10gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4LjQ2NDk5NF0g
+ID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4LjQ2OTAzOV0gID8gbG9j
+a2RlcF9oYXJkaXJxc19vbl9wcmVwYXJlKzB4MTcxLzB4NDAwDQo+IFszMzcwNzQ4LjQ3NDM4
+MF0gID8gZG9fc3lzY2FsbF82NCsweGEzLzB4MTkwDQo+IFszMzcwNzQ4LjQ3ODQyN10gID8g
+bG9ja2RlcF9oYXJkaXJxc19vbisweDdjLzB4MTAwDQo+IFszMzcwNzQ4LjQ4MzA0M10gID8g
+Y2xlYXJfYmhiX2xvb3ArMHgyNS8weDgwDQo+IFszMzcwNzQ4LjQ4NzA4Ml0gID8gY2xlYXJf
+YmhiX2xvb3ArMHgyNS8weDgwDQo+IFszMzcwNzQ4LjQ5MTEyN10gIGVudHJ5X1NZU0NBTExf
+NjRfYWZ0ZXJfaHdmcmFtZSsweDc2LzB4N2UNCj4gWzMzNzA3NDguNDk2MzgzXSBSSVA6IDAw
+MzM6MHg3ZjlkN2E0YzExYTQNCj4gWzMzNzA3NDguNTAwMTg3XSBDb2RlOiAwMCAwMCAwZiAx
+ZiA0MCAwMCBmMyAwZiAxZSBmYSA0OCA4YiAzZCA5ZCA1YyAxMCAwMCBlOSAxMCA3MyBmMSBm
+ZiBmMyAwZiAxZSBmYSA4MCAzZCBjNSA1ZSAxMCAwMCAwMCA3NCAxMyBiOCA0YSAwMCAwMCAw
+MCAwZiAwNSA8NDg+IDNkIDAwIGYwIGZmIGZmIDc3IDNjIGMzIDBmIDFmIDAwIDU1IDQNCj4g
+OCA4OSBlNSA0OCA4MyBlYyAxMCA4OSA3ZA0KPiBbMzM3MDc0OC41MTkxMzNdIFJTUDogMDAy
+YjowMDAwN2ZmZjZjMWU2MmM4IEVGTEFHUzogMDAwMDAyMDIgT1JJR19SQVg6IDAwMDAwMDAw
+MDAwMDAwNGENCj4gWzMzNzA3NDguNTI2OTA1XSBSQVg6IGZmZmZmZmZmZmZmZmZmZGEgUkJY
+OiAwMDAwMDAwMDAwMDAwMDAwIFJDWDogMDAwMDdmOWQ3YTRjMTFhNA0KPiBbMzM3MDc0OC41
+MzQyMzldIFJEWDogMDAwMDAwMDAwMDAwMDAzMiBSU0k6IDAwMDAwMDAwMDAwMDAwMDAgUkRJ
+OiAwMDAwMDAwMDAwMDAwMDAxDQo+IFszMzcwNzQ4LjU0MTU2OF0gUkJQOiAwMDAwN2ZmZjZj
+MWU2MzIwIFIwODogMDAwMDAwMDAwMDAwMDAwMCBSMDk6IDAwMDA3ZjlkN2E2MGMzODANCj4g
+WzMzNzA3NDguNTQ4OTMyXSBSMTA6IDAwMDAwMDAwMDAwMDAwMjIgUjExOiAwMDAwMDAwMDAw
+MDAwMjAyIFIxMjogMDAwMDdmOWQ3YTNkNDZjOA0KPiBbMzM3MDc0OC41NTYyNjhdIFIxMzog
+MDAwMDAwMDAwMDAwMDAwMCBSMTQ6IDAwMDAwMDAwMDAwMDAwMDAgUjE1OiAwMDAwMDAwMDAw
+MDAwMDMyDQo+IFszMzcwNzQ4LjU2MzYyNV0gIDwvVEFTSz4NCj4gWzMzNzA3NDguNTY2MDE2
+XSBpcnEgZXZlbnQgc3RhbXA6IDM0MjIxMQ0KPiBbMzM3MDc0OC41Njk3MTFdIGhhcmRpcnFz
+IGxhc3QgIGVuYWJsZWQgYXQgKDM0MjIyMSk6IFs8ZmZmZmZmZmZhZjQxYjlmNj5dIGNvbnNv
+bGVfdW5sb2NrKzB4MjM2LzB4MmMwDQo+IFszMzcwNzQ4LjU3ODYxMV0gaGFyZGlycXMgbGFz
+dCBkaXNhYmxlZCBhdCAoMzQyMjMwKTogWzxmZmZmZmZmZmFmNDFiOWRiPl0gY29uc29sZV91
+bmxvY2srMHgyMWIvMHgyYzANCj4gWzMzNzA3NDguNTg3NTA0XSBzb2Z0aXJxcyBsYXN0ICBl
+bmFibGVkIGF0ICgzNDIxNzgpOiBbPGZmZmZmZmZmYWYyNDdjM2I+XSBfX2lycV9leGl0X3Jj
+dSsweGJiLzB4MWMwDQo+IFszMzcwNzQ4LjU5NjMwN10gc29mdGlycXMgbGFzdCBkaXNhYmxl
+ZCBhdCAoMzQyMTU3KTogWzxmZmZmZmZmZmFmMjQ3YzNiPl0gX19pcnFfZXhpdF9yY3UrMHhi
+Yi8weDFjMA0KPiBbMzM3MDc0OC42MDUxMTVdIC0tLVsgZW5kIHRyYWNlIDAwMDAwMDAwMDAw
+MDAwMDAgXS0tLQ0KPiBbMzM3MDc0OC43OTI0ODNdIEYyRlMtZnMgKHNkYTYpOiBBZGp1c3Qg
+dW51c2FibGUgY2FwIGZvciBjaGVja3BvaW50PWRpc2FibGUgPSAxNTMwIC8gMTAlDQo+IFsz
+MzcwNzUwLjE5NDQyOV0gRjJGUy1mcyAoc2RhNik6IERpc2FibGUgbmF0X2JpdHMgZHVlIHRv
+IGluY29ycmVjdCBjcF92ZXIgKDQxMzczMjE3OTM2MDYwNTI0NTQsIDE4NDQ2NzQ0MDczNzA5
+NTUxNjE1KQ0KPiBbMzM3MDc1MC4yNTkzOTFdIEYyRlMtZnMgKHNkYTYpOiBNb3VudGVkIHdp
+dGggY2hlY2twb2ludCB2ZXJzaW9uID0gMzU1ZWVhNjcNCj4gDQo+IA0KPj4NCj4+PiBJIGdv
+dDoNCj4+Pg0KPj4+ICMgZGlmZiAtdSAvcm9vdC9naXQveGZzdGVzdHMvdGVzdHMvZjJmcy8w
+MDYub3V0IC9yb290L2dpdC94ZnN0ZXN0cy9yZXN1bHRzLy9kZWZhdWx0L2YyZnMvMDA2Lm91
+dC5iYWR8bGVzcw0KPj4+IC0tLSAvcm9vdC9naXQveGZzdGVzdHMvdGVzdHMvZjJmcy8wMDYu
+b3V0ICAgICAgIDIwMjQtMTAtMjUgMTE6MzM6NTQuNjkzODgzMjgxICswODAwDQo+Pj4gKysr
+IC9yb290L2dpdC94ZnN0ZXN0cy9yZXN1bHRzLy9kZWZhdWx0L2YyZnMvMDA2Lm91dC5iYWQg
+ICAgICAgIDIwMjQtMTAtMjUgMTE6MzQ6NTUuOTA3MjUyNDAxICswODAwDQo+Pj4gQEAgLTEs
+NiArMSw2IEBADQo+Pj4gICAgUUEgb3V0cHV0IGNyZWF0ZWQgYnkgMDA2DQo+Pj4gICAgNTAr
+MCByZWNvcmRzIGluDQo+Pj4gICAgNTArMCByZWNvcmRzIG91dA0KPj4+IC1kZDogZXJyb3Ig
+d3JpdGluZyAnL21udC9zY3JhdGNoX2YyZnMvdGVzdGZpbGUnOiBObyBzcGFjZSBsZWZ0IG9u
+IGRldmljZQ0KPj4+IC0zKzAgcmVjb3JkcyBpbg0KPj4+IC0yKzAgcmVjb3JkcyBvdXQNCj4+
+PiArZGQ6IGZzeW5jIGZhaWxlZCBmb3IgJy9tbnQvc2NyYXRjaC90ZXN0ZmlsZSc6IElucHV0
+L291dHB1dCBlcnJvcg0KPj4+ICs1MCswIHJlY29yZHMgaW4NCj4+PiArNTArMCByZWNvcmRz
+IG91dA0KPj4+DQo+Pj4gRG9lcyB0aGF0IG1lYW4gdGhlIGJ1ZyBpcyByZXByb2R1Y2VkPw0K
+Pj4+Pj4gKw0KPj4+PiArX3NjcmF0Y2hfcmVtb3VudCBjaGVja3BvaW50PWVuYWJsZQ0KPj4+
+PiArDQo+Pj4+ICtzdGF0dXM9MA0KPj4+PiArZXhpdA0KPj4+PiBkaWZmIC0tZ2l0IGEvdGVz
+dHMvZjJmcy8wMDYub3V0IGIvdGVzdHMvZjJmcy8wMDYub3V0DQo+Pj4+IG5ldyBmaWxlIG1v
+ZGUgMTAwNjQ0DQo+Pj4+IGluZGV4IDAwMDAwMDAwLi4wZDdiMzkxMA0KPj4+PiAtLS0gL2Rl
+di9udWxsDQo+Pj4+ICsrKyBiL3Rlc3RzL2YyZnMvMDA2Lm91dA0KPj4+PiBAQCAtMCwwICsx
+LDYgQEANCj4+Pj4gK1FBIG91dHB1dCBjcmVhdGVkIGJ5IDAwNg0KPj4+PiArNTArMCByZWNv
+cmRzIGluDQo+Pj4+ICs1MCswIHJlY29yZHMgb3V0DQo+Pj4+ICtkZDogZXJyb3Igd3JpdGlu
+ZyAnL21udC9zY3JhdGNoX2YyZnMvdGVzdGZpbGUnOiBObyBzcGFjZSBsZWZ0IG9uIGRldmlj
+ZQ0KPj4+DQo+Pj4gVGhlICIvbW50L3NjcmF0Y2hfZjJmcyIgc2hvdWxkIGJlIFNDUkFUQ0hf
+TU5ULCBwbGVhc2UgdXNlIF9maWx0ZXJfc2NyYXRjaCgpDQo+Pj4gYnkgaW1wb3J0aW5nIGNv
+bW1vbi9maWx0ZXIuDQo+Pg0KPj4gQ29ycmVjdCwgbGV0IG1lIGZpeCB0aGlzLg0KPj4NCj4+
+IFRoYW5rcywNCj4+DQo+Pj4NCj4+Pj4gKzMrMCByZWNvcmRzIGluDQo+Pj4+ICsyKzAgcmVj
+b3JkcyBvdXQNCj4+Pj4gLS0gDQo+Pj4+IDIuNDAuMQ0KPj4+Pg0KPj4+DQo+Pg0KPiANCg0K
 
