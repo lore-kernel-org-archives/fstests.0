@@ -1,37 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1B352107;
-	Tue, 29 Oct 2024 17:21:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B88C82107;
+	Tue, 29 Oct 2024 17:24:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730222500; cv=none; b=GP9OUB/8j/HN+CNFbTLBM7nmbWa9QbaO3wLrOq5kifZCSQWCcOs3sIAG1MnJU24II4rImfRmvv2tB92c2B/XfBbCYFJ6r8cVzuszqJbfDR3wdiglHMOA/5DJ8XFiOqbCJ5rK0XW/Gkso7IkKUeIDBiuyr2l61tubJaOTyQp5Afs=
+	t=1730222663; cv=none; b=iZQeFNioZ1i5pYqymG7dtyBoRco4qyxli7b7T4/zuKaTmB0M/4P2mEjK0yjsY/AGwFJBJt4ioukea5hzV+gJNyCZSFf7YtxEA7dDEH6FqvmYeanTQhdkKRHBpux6LDxUu7vcPG8ZTvrkDxxKlhFkkDvBk0zNnNcsisksUdn3HeQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730222500; c=relaxed/simple;
-	bh=XTsCuCplk8PIiGawEiuyFeCluFtEuir9Fx9kgnKvV2w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qVn3XuYs2iUdL9xhsmDMK/LlA9tm4m5YFQT/ov84SYKSbBi4hC7efVTlE/vJddHxecQgNqUAeTdLbjuvLvuOW2pXVGD8rMBskGpEJJUk8ZW9WLsDIYjPBPz6m+7ctdqU4G8uXE5Oe3BmCANUL4xwHOlNpL3u8D/I6R8i7PRGrM4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=APVPAV/e; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1730222663; c=relaxed/simple;
+	bh=8XkZ/GtBZytV0VIqI7F+ZxWjeCXtpGciY5xt45vcjlE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jt3+FwPBASAOYGbVfSn3jKOxxR+59mbbvWDiQUfHpJ8g9pZYSWUNSfRRtWWdCR4ALd9Uar1XVjq9/+umkN2U53JT0xwfAw58tXpUdXafhvb0tOfYn5a6wzYxIRM1X5acr5pMX05rhDZzYcxX21gTd2PfjlyJGp62FN0wqD14Sfc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=RRlImA1d; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="APVPAV/e"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 896F2C4CEE4;
-	Tue, 29 Oct 2024 17:21:35 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="RRlImA1d"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FE1FC4CECD;
+	Tue, 29 Oct 2024 17:24:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1730222499;
-	bh=XTsCuCplk8PIiGawEiuyFeCluFtEuir9Fx9kgnKvV2w=;
+	s=k20201202; t=1730222663;
+	bh=8XkZ/GtBZytV0VIqI7F+ZxWjeCXtpGciY5xt45vcjlE=;
 	h=From:To:Cc:Subject:Date:From;
-	b=APVPAV/e3k797qj8d2etCxQbBUK393zA4FwMXXjDNb8n0Qa4zOu6RqAy02TSZ5ZMD
-	 moC6Jjw5NPsOFuQUHQ3q9XO8TzzkGZwVLnA8nhlq38SQknRj3Zf3tCF0TbQZRYn0wc
-	 JtC7XvEsl2Ou6Ts2oZp7Pn+xvNjx9OmFKr9ra9Wv//T38PRyjEnNzmdwdX0bLRdjZO
-	 S19KkIoPp39A5tOVXjlfyMvzzfuu3XOcmKmYd7C9YMuR1ZerdI+lOuMBHFH1RZTK7K
-	 m/wLXl5FqQL3i5WD5+4xCEHrCE3riBIC469DhdAxilf8mBAkVr98jQZVICtL+/H156
-	 SCv+QUmwlEKKA==
+	b=RRlImA1d/aYLwG8CYfuu4jbolisBcBn785U/XnfE5v5t/EA69TdPYhC2e9E0WThEt
+	 TVt0xxOXwQFui5qt9T5fwD/PVFmKMaAEa4QISnqzKdss2TU6wW7cyXntm92IC3UDP/
+	 UVPjJHbmXw9mqMIWWBt4A3Haj293bqIayTtB1WiqimHmfBFrVUlTQb0JuT9VtBluBi
+	 QWiS404V8UYQr+Zdig8/gmUG7GPD08WugX1YU5xQ/RFTOCmC5mzkOkMtGdH2wsi0QF
+	 CtjZZj/hcVEo9jU9EejN4RDVlC8H0pB4PF/x6MlXoPfUDnTQehMfMyPQmyircGrDHR
+	 7ILU5tzq6zBbw==
 From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] btrfs/287: make the test work when compression is enabled
-Date: Tue, 29 Oct 2024 17:21:28 +0000
-Message-ID: <9991dab5ca241c17f531f49dab5dbaa6e9146c45.1730220754.git.fdmanana@suse.com>
+Subject: [PATCH] btrfs: add a test for defrag of contiguous file extents
+Date: Tue, 29 Oct 2024 17:23:41 +0000
+Message-ID: <e592bcc458f5c2ec41930975003702a667c92a8e.1730220751.git.fdmanana@suse.com>
 X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -43,95 +43,135 @@ Content-Transfer-Encoding: 8bit
 
 From: Filipe Manana <fdmanana@suse.com>
 
-When running btrfs/287 with compression enabled (mount options), the test
-fails because it expects to find 4M extents, however compression limits
-the maximum size of extents to 128K, breaking the tests' expectations.
+Test that defrag merges adjacent extents that are contiguous.
+This exercises a regression fixed by a patchset for the kernel that is
+comprissed of the following patches:
 
-Example:
-
-  $ MOUNT_OPTIONS="-o compress" ./check btrfs/287
-  FSTYP         -- btrfs
-  PLATFORM      -- Linux/x86_64 debian0 6.12.0-rc4-btrfs-next-177+ #1 SMP PREEMPT_DYNAMIC Thu Oct 24 17:14:37 WEST 2024
-  MKFS_OPTIONS  -- /dev/sdc
-  MOUNT_OPTIONS -- -o compress /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-
-  btrfs/287 2s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad)
-      --- tests/btrfs/287.out	2024-10-19 18:21:30.451644840 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad	2024-10-29 16:31:20.926612583 +0000
-      @@ -25,22 +25,14 @@
-       resolve first extent with ignore offset option:
-       inode 257 offset 16777216 root 5
-       inode 257 offset 8388608 root 5
-      -inode 257 offset 2097152 root 5
-       resolve first extent +1M offset:
-      -inode 257 offset 17825792 root 5
-      -inode 257 offset 9437184 root 5
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/287.out /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad'  to see the entire diff)
-
-  HINT: You _MAY_ be missing kernel fix:
-        0cad8f14d70c btrfs: fix backref walking not returning all inode refs
-
-  Ran: btrfs/287
-  Failures: btrfs/287
-  Failed 1 of 1 tests
-
-Fix this by creating the two 4M extents with fallocate, so that the test
-works regardless of compression being enabled or not.
+  btrfs: fix extent map merging not happening for adjacent extents
+  btrfs: fix defrag not merging contiguous extents due to merged extent maps
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/287     | 10 +++++-----
- tests/btrfs/287.out |  4 ----
- 2 files changed, 5 insertions(+), 9 deletions(-)
+ tests/btrfs/325     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/325.out | 22 +++++++++++++
+ 2 files changed, 102 insertions(+)
+ create mode 100755 tests/btrfs/325
+ create mode 100644 tests/btrfs/325.out
 
-diff --git a/tests/btrfs/287 b/tests/btrfs/287
-index e88f4e0a..a51b31ed 100755
---- a/tests/btrfs/287
-+++ b/tests/btrfs/287
-@@ -7,13 +7,14 @@
- # Test btrfs' logical to inode ioctls (v1 and v2).
- #
- . ./common/preamble
--_begin_fstest auto quick snapshot clone punch logical_resolve
-+_begin_fstest auto quick snapshot clone prealloc punch logical_resolve
- 
- . ./common/filter.btrfs
- . ./common/reflink
- 
- _require_btrfs_scratch_logical_resolve_v2
- _require_scratch_reflink
+diff --git a/tests/btrfs/325 b/tests/btrfs/325
+new file mode 100755
+index 00000000..0b1ab3c2
+--- /dev/null
++++ b/tests/btrfs/325
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 325
++#
++# Test that defrag merges adjacent extents that are contiguous.
++#
++. ./common/preamble
++_begin_fstest auto quick preallocrw defrag
++
++. ./common/filter
++
++_require_scratch
++_require_btrfs_command inspect-internal dump-tree
 +_require_xfs_io_command "falloc"
- _require_xfs_io_command "fpunch"
- 
- # This is a test case to test the logical to ino ioctl in general but it also
-@@ -42,10 +43,9 @@ _scratch_mount
- #
- # 1) One 4M extent covering the file range [0, 4M)
- # 2) Another 4M extent covering the file range [4M, 8M)
--$XFS_IO_PROG -f -c "pwrite -S 0xab -b 4M 0 4M" \
--	     -c "fsync" \
--	     -c "pwrite -S 0xcd -b 4M 4M 8M" \
--	     -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
-+$XFS_IO_PROG -f -c "falloc 0 4M" \
-+                -c "falloc 4M 4M" \
-+                $SCRATCH_MNT/foo
- 
- echo "resolve first extent:"
- first_extent_bytenr=$(_btrfs_get_file_extent_item_bytenr "$SCRATCH_MNT/foo" 0)
-diff --git a/tests/btrfs/287.out b/tests/btrfs/287.out
-index 4814594f..48541f7e 100644
---- a/tests/btrfs/287.out
-+++ b/tests/btrfs/287.out
-@@ -1,8 +1,4 @@
- QA output created by 287
--wrote 4194304/4194304 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 8388608/8388608 bytes at offset 4194304
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- resolve first extent:
- inode 257 offset 0 root 5
- resolve second extent:
++
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix extent map merging not happening for adjacent extents"
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"btrfs: fix defrag not merging contiguous extents due to merged extent maps"
++
++count_file_extent_items()
++{
++	# We count file extent extent items through dump-tree instead of using
++	# fiemap because fiemap merges adjacent extent items when they are
++	# contiguous.
++	# We unmount because all metadata must be ondisk for dump-tree to see
++	# it and work correctly.
++	_scratch_unmount
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV | \
++		grep EXTENT_DATA | wc -l
++	_scratch_mount
++}
++
++_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount
++
++# Create a file with a size of 256K and 4 written extents of 64K each.
++# We fallocate to guarantee exact extent size, even if compression mount
++# option is give, and write to them because defrag skips prealloc extents.
++$XFS_IO_PROG -f -c "falloc 0 64K" \
++	     -c "pwrite -S 0xab 0 64K" \
++	     -c "falloc 64K 64K" \
++	     -c "pwrite -S 0xcd 64K 64K" \
++	     -c "falloc 128K 64K" \
++	     -c "pwrite -S 0xef 128K 64K" \
++	     -c "falloc 192K 64K" \
++	     -c "pwrite -S 0x73 192K 64K" \
++	     $SCRATCH_MNT/foo | _filter_xfs_io
++
++echo -n "Initial number of file extent items: "
++count_file_extent_items
++
++# Read the whole file in order to load extent maps and merge them.
++cat $SCRATCH_MNT/foo > /dev/null
++
++# Now defragment with a threshold of 128K. After this we expect to get a file
++# with 1 file extent item - the treshold is 128K but since all the extents are
++# contiguous, they should be merged into a single one of 256K.
++$BTRFS_UTIL_PROG filesystem defragment -t 128K $SCRATCH_MNT/foo
++echo -n "Number of file extent items after defrag with 128K treshold: "
++count_file_extent_items
++
++# Read the whole file in order to load extent maps and merge them.
++cat $SCRATCH_MNT/foo > /dev/null
++
++# Now defragment with a threshold of 256K. After this we expect to get a file
++# with only 1 file extent item.
++$BTRFS_UTIL_PROG filesystem defragment -t 256K $SCRATCH_MNT/foo
++echo -n "Number of file extent items after defrag with 256K treshold: "
++count_file_extent_items
++
++# Check that the file has the expected data, that defrag didn't cause any data
++# loss or corruption.
++echo "File data after defrag:"
++_hexdump $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/btrfs/325.out b/tests/btrfs/325.out
+new file mode 100644
+index 00000000..96053925
+--- /dev/null
++++ b/tests/btrfs/325.out
+@@ -0,0 +1,22 @@
++QA output created by 325
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 65536
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 131072
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 196608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Initial number of file extent items: 4
++Number of file extent items after defrag with 128K treshold: 1
++Number of file extent items after defrag with 256K treshold: 1
++File data after defrag:
++000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
++*
++010000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
++*
++020000 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef  >................<
++*
++030000 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73  >ssssssssssssssss<
++*
++040000
 -- 
 2.45.2
 
