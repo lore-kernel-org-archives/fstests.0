@@ -1,247 +1,158 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFCAE1DF243
-	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 06:21:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06F061F4283
+	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 07:46:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730182884; cv=none; b=iXP27bzv1FUmKpvwN4m4n7s3ZGXmEM7WtXv9LApt9PSF8PnHu7fvK3mMh74P7Yp7JP2EAOyjyboSnPiJ70FW+n8yuxANn0+ZgC8pIx9qr57fZkcaVB15hWZUY46lJBVuNxoMcSiNbUJaQSMh/jSQhUEIZUon5lG6CNB4kMbColM=
+	t=1730187988; cv=none; b=lGXNejoXfqx7HzQR4hljt8/nFi5uB+Qtbf/SGKMI/ynwKIbsd8O6mNsgR2kI7whXiw6u+iiDYqowfBkbLajTc+bcnoOuW0hpDMbtTIc3If8bPQGO37u/V9QANHh6dxO86AfWhSxVqKPd1XZcrQjsNJ9xl3CG+hSithslnAQDSdw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730182884; c=relaxed/simple;
-	bh=VbvjgEJbCalCTU8pd5Vy05H252j/lrSO1xEEIjqTdqA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UtKjG4vak6diomuAJjKC7wflXum9pW3sQA2HiKwT/8tThuJ5hKZILvf1S4EnOJJg29zZRZ8uHKrfu07YcpiMHnCWkHEWYujkTLWzs9xeOTCVOB/lra78YcbvHS8dTi7Yq6tJfOAe/ZxWmMvYNzDmEICpSNUknFPAQEIyjjTc1ws=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=W9S0yjpM; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1730187988; c=relaxed/simple;
+	bh=zQtVqG+vUkM4/CWYayjQrQhLYYn7E++L0ZgAR1wc8pI=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=dbUkiMMmeq6PNGQnPrfD16XJgbuHPwjlLW2xBSR7DXeOHcJ5URksTHSTSaqtnRze2xnWebA3xuIqy+r3sDKTz1dG9RwtrUXi5F/kYZmTrHidk1Yh2RnbPYTbGuBNrcaY6v4AOFAZQYgLxgDaF4c3EzK+kCJJbD3W6cKywItVeOM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=J0xeCrrQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W9S0yjpM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730182879;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JC+/Hyis0NruJXfhxP3v+aJI15wvdh+lyb4kuIHhQHc=;
-	b=W9S0yjpMImyZtsG9zRhzAy2TiympKtaITRSl+o6ByJ/szsfQXL8oFw1+nwGLQpsAZmP/Q9
-	TovPNI9O/a7H3BMXcpwT0zwV/IyKFavBig0+i5AOWWrPB0DMVWfQ3w+CX3iceAtm6iuFKj
-	CR5yTTDZTanGPveTxJYI4Bc+FI6s/t8=
-Received: from mail-pg1-f200.google.com (mail-pg1-f200.google.com
- [209.85.215.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-66-nlBpxDK6M2agxQdESQjw5Q-1; Tue, 29 Oct 2024 02:21:09 -0400
-X-MC-Unique: nlBpxDK6M2agxQdESQjw5Q-1
-Received: by mail-pg1-f200.google.com with SMTP id 41be03b00d2f7-7edb8c3e743so2741934a12.1
-        for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 23:21:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730182869; x=1730787669;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JC+/Hyis0NruJXfhxP3v+aJI15wvdh+lyb4kuIHhQHc=;
-        b=KMnRI9Qc/VHnNPPGTP5cVD15RwWNNVVhx9KtakQHlfpW0VLdrl190I6WVeYBsaqC89
-         PPb6sslxFI9RxIS9LVRNat+CccpOjOcJjaSCXspKhv2ZKoX41uWqwZ0fqSlLeeDLIwiF
-         oWJ7wcZsLy6VueJmCNsinDWhfDWSoLg6+HH4FhMQpe+VJiWxvLLZCtPKlcjhpeI59CIT
-         8UHhNWB7Mko0y5H+dSWWb+g+ejKaWOalvND8HWvYsQfbjD+DbADLz3c0lVUiFLKSjq7t
-         FRlWoHS8Ec39HUzl39TMuI05pmnNhJSERNDQroFA9GfCrQA3R9kVeIgldRvz0/ftv9cC
-         WFVg==
-X-Gm-Message-State: AOJu0YzG90x2w3yTcqwdl7qB7BeM7eVBCLndSDOYW64dBKdqGO1DSh7l
-	964tWSNQqdWX/tR4YHZWelp3x3ycqysASaWYx5drIXB8w7R7K6zKGLse87OhB1fp44nhW83HsXc
-	VCoQdhB5z+c9lrOHvZ6kZ93tCHcZphWUJgp02XAWCTwNDm41FP89Rp40=
-X-Received: by 2002:a17:903:234a:b0:20c:c88b:511b with SMTP id d9443c01a7336-210c6c1e203mr127142225ad.33.1730182868732;
-        Mon, 28 Oct 2024 23:21:08 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFDjTVDysZhBC3z/0cZTbwGxQluA+Z70HP5A1biA2A8SZNiGZDDCRKglVArmxNafj7LW3ZY0Q==
-X-Received: by 2002:a17:903:234a:b0:20c:c88b:511b with SMTP id d9443c01a7336-210c6c1e203mr127142085ad.33.1730182868410;
-        Mon, 28 Oct 2024 23:21:08 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-210bbf6d3ffsm59787725ad.73.2024.10.28.23.21.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Oct 2024 23:21:08 -0700 (PDT)
-Date: Tue, 29 Oct 2024 14:21:04 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-	Jaegeuk Kim <jaegeuk@kernel.org>, Qi Han <hanqi@vivo.com>
-Subject: Re: [PATCH v3 2/2] f2fs/007: add testcase to check consistency of
- compressed inode metadata
-Message-ID: <20241029062104.pepwqv4w4scvgiy4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241028141800.1788356-1-chao@kernel.org>
- <20241028141800.1788356-2-chao@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="J0xeCrrQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F8D6C4CECD;
+	Tue, 29 Oct 2024 07:46:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1730187987;
+	bh=zQtVqG+vUkM4/CWYayjQrQhLYYn7E++L0ZgAR1wc8pI=;
+	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
+	b=J0xeCrrQvz6Dj2/Nhp4X+yLfZTg9a6VYXCezOTrJJmtUCdAuQi0LzEv0sSlfAajR4
+	 07BJ3joQwDFkdgzBv8H0jf45Z/5E68mD93dJnMIBEPeAVVjHz3BlcELtDacUD5zYvn
+	 aQ79su9k94TXdWQ5yF3nRfkt4BtuEYfqI6PxJgvyeKNCjb0bh50yjh+cLly7GCTE7j
+	 Q8h7PrA8GhRlXF4eU9M2ZIBLX5Qpmsytn4OhLNc2tCD/U5TipAVI2YDpT3OncMFZAd
+	 5LVAGYoVeleVSBjGehb8yHBketzRlaERdU9axr6gQE1nVssBFUY0DBqSwIivyCqQkd
+	 0pKhjcJyZ+qkA==
+Message-ID: <324c9b1a-ca86-43a4-8c3a-990199c714bc@kernel.org>
+Date: Tue, 29 Oct 2024 15:46:21 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241028141800.1788356-2-chao@kernel.org>
+User-Agent: Mozilla Thunderbird
+Cc: Chao Yu <chao@kernel.org>, fstests@vger.kernel.org,
+ linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH v3 1/2] f2fs/006: add testcase to check out-of-space case
+To: Zorro Lang <zlang@redhat.com>
+References: <20241028141800.1788356-1-chao@kernel.org>
+ <20241029060919.gxyywjp3gykaqnuc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Language: en-US
+From: Chao Yu <chao@kernel.org>
+In-Reply-To: <20241029060919.gxyywjp3gykaqnuc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Mon, Oct 28, 2024 at 10:18:00PM +0800, Chao Yu wrote:
-> metadata of compressed inode should always be consistent after file
-> compression, reservation, releasement and decompression, let's add
-> a testcase to check it.
+On 2024/10/29 14:09, Zorro Lang wrote:
+> On Mon, Oct 28, 2024 at 10:17:59PM +0800, Chao Yu wrote:
+>> This is a regression test to check whether f2fs handles dirty
+>> data correctly when checkpoint is disabled, if lfs mode is on,
+>> it will trigger OPU for all overwritten data, this will cost
+>> free segments, so f2fs must account overwritten data as OPU
+>> data when calculating free space, otherwise, it may run out
+>> of free segments in f2fs' allocation function. If kernel config
+>> CONFIG_F2FS_CHECK_FS is on, it will cause system panic, otherwise,
+>> dd may encounter I/O error.
+>>
+>> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+>> Signed-off-by: Chao Yu <chao@kernel.org>
+>> ---
+>> v3:
+>> - explain more about behavior on kernel w/ different config
+>> - use _filter_scratch to filter $SCRATCH_MNT
+>>   tests/f2fs/006     | 42 ++++++++++++++++++++++++++++++++++++++++++
+>>   tests/f2fs/006.out |  6 ++++++
+>>   2 files changed, 48 insertions(+)
+>>   create mode 100755 tests/f2fs/006
+>>   create mode 100644 tests/f2fs/006.out
+>>
+>> diff --git a/tests/f2fs/006 b/tests/f2fs/006
+>> new file mode 100755
+>> index 00000000..f9560b2b
+>> --- /dev/null
+>> +++ b/tests/f2fs/006
+>> @@ -0,0 +1,42 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. f2fs/006
+>> +#
+>> +# This is a regression test to check whether f2fs handles dirty
+>> +# data correctly when checkpoint is disabled, if lfs mode is on,
+>> +# it will trigger OPU for all overwritten data, this will cost
+>> +# free segments, so f2fs must account overwritten data as OPU
+>> +# data when calculating free space, otherwise, it may run out
+>> +# of free segments in f2fs' allocation function. If kernel config
+>> +# CONFIG_F2FS_CHECK_FS is on, it will cause system panic, otherwise,
+>> +# dd may encounter I/O error.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick
+>> +
+>> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> +	"f2fs: fix to account dirty data in __get_secs_required()"
+>> +
+>> +# Import common functions.
+>> +. ./common/filter
+>> +
+>> +_require_scratch
+>> +_scratch_mkfs_sized $((1024*1024*100)) >> $seqres.full
+>> +
+>> +# use mode=lfs to let f2fs always triggers OPU
+>> +_scratch_mount -o mode=lfs,checkpoint=disable:10%,noinline_dentry >> $seqres.full
+>> +
+>> +testfile=$SCRATCH_MNT/testfile
+>> +
+>> +dd if=/dev/zero of=$testfile bs=1M count=50 2>/dev/null
+>> +
+>> +# it may run out of free space of f2fs and hang kernel
+>> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
+>> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync 2>&1 | _filter_scratch
+>> +
+>> +_scratch_remount checkpoint=enable
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
+>> new file mode 100644
+>> index 00000000..2dc9efda
+>> --- /dev/null
+>> +++ b/tests/f2fs/006.out
+>> @@ -0,0 +1,6 @@
+>> +QA output created by 006
+>> +50+0 records in
+>> +50+0 records out
+>> +dd: error writing 'SCRATCH_MNT/testfile': No space left on device
+>> +3+0 records in
+>> +2+0 records out
 > 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> Cc: Qi Han <hanqi@vivo.com>
-> Signed-off-by: Chao Yu <chao@kernel.org>
-> ---
-> v3:
-> - move _require_scratch before use of $SCRATCH_MNT
-> - output message before _check_scratch_fs
->  tests/f2fs/007     | 108 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/007.out |  16 +++++++
->  2 files changed, 124 insertions(+)
->  create mode 100755 tests/f2fs/007
->  create mode 100644 tests/f2fs/007.out
+> Hi Chao,
 > 
-> diff --git a/tests/f2fs/007 b/tests/f2fs/007
-> new file mode 100755
-> index 00000000..805d88fa
-> --- /dev/null
-> +++ b/tests/f2fs/007
-> @@ -0,0 +1,108 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/007
-> +#
-> +# This is a regression test to check whether compressed metadata
-> +# can become inconsistent after file compression, reservation
-> +# releasement, and decompression.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick rw compress
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +        "f2fs: compress: fix inconsistent update of i_blocks in release_compress_blocks and reserve_compress_blocks"
-> +
-> +_require_scratch
-> +testfile_prefix=$SCRATCH_MNT/testfile
-> +fio_config=$tmp.fio
-> +
-> +cat >$fio_config <<EOF
-> +[write_compressed_data_30]
-> +name=mytest
-> +ioengine=psync
-> +rw=write
-> +direct=0
-> +bs=1M
-> +filesize=1M
-> +numjobs=1
-> +filename=${testfile_prefix}30
-> +buffer_compress_percentage=30
-> +
-> +[write_compressed_data_60]
-> +name=mytest
-> +ioengine=psync
-> +rw=write
-> +direct=0
-> +bs=1M
-> +filesize=1M
-> +numjobs=1
-> +filename=${testfile_prefix}60
-> +buffer_compress_percentage=60
-> +
-> +[write_compressed_data_90]
-> +name=mytest
-> +ioengine=psync
-> +rw=write
-> +direct=0
-> +bs=1M
-> +filesize=1M
-> +numjobs=1
-> +filename=${testfile_prefix}90
-> +buffer_compress_percentage=90
-> +EOF
-> +
-> +_require_fio $fio_config
-> +_scratch_mkfs "-f -O extra_attr,compression" >> $seqres.full || _fail "mkfs failed"
-> +_scratch_mount "-o compress_mode=user,compress_extension=*" >> $seqres.full
-> +
-> +echo -e "Run fio to initialize file w/ specified compress ratio" >> $seqres.full
-> +cat $fio_config >> $seqres.full
-> +$FIO_PROG $fio_config >> $seqres.full
-> +_scratch_unmount
-> +
-> +# force to repaire if filesystem is corrupted
+> One more question about this patch.
+> 
+> I'm wondering can this output always be matched? If the test doesn't care the dd output,
+> you can filter out them, to avoid it break golden image. Especially the second one, can
+> you be sure it always "3 in and 2 out" before returning ENOSPC?
 
-              repair
+Zorro,
 
-> +export FSCK_OPTIONS="-f $FSCK_OPTIONS"
+I got your concern, how about using _check_dmesg to catch the kernel
+bug instead? since once the bug was triggered, f2fs will call BUG_ON
+or WARN_ON optionally anyway.
 
-JFYI, if f2f2 always hope to force to repair, you can think about changing the _fsck_opts()
-in common/config.
+Thanks,
 
-Others look good to me, I'll help to fix above typo when I merge it. Thanks for you patch.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-> +
-> +for i in 30 60 90; do
-> +	testfile=$testfile_prefix$i
-> +
-> +	_scratch_mount "-o compress_mode=user" >> $seqres.full
-> +	$F2FS_IO_PROG compress $testfile >> $seqres.full
-> +	cblocks=`$F2FS_IO_PROG get_cblocks $testfile`
-> +	echo "compression ratio is: "$cblocks" / 256"
-> +
-> +	_scratch_unmount
-> +
-> +	# 1. check after compression
-> +	echo "check fs after compress"
-> +	_check_scratch_fs
-> +
-> +	_scratch_mount >> $seqres.full
-> +	$F2FS_IO_PROG release_cblocks $testfile >> $seqres.full
-> +	_scratch_unmount
-> +
-> +	# 2. check after releasement
-> +	echo "check fs after release_cblocks"
-> +	_check_scratch_fs
-> +
-> +	_scratch_mount >> $seqres.full
-> +	$F2FS_IO_PROG reserve_cblocks $testfile >> $seqres.full
-> +	_scratch_unmount
-> +
-> +	# 3. check after rservation
-> +	echo "check fs after reserve_cblocks"
-> +	_check_scratch_fs
-> +
-> +	_scratch_mount "-o compress_mode=user" >> $seqres.full
-> +	$F2FS_IO_PROG decompress $testfile >> $seqres.full
-> +	_scratch_unmount
-> +
-> +	# 4. check after decompression
-> +	echo "check fs after decompress"
-> +	_check_scratch_fs
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/007.out b/tests/f2fs/007.out
-> new file mode 100644
-> index 00000000..a4b76300
-> --- /dev/null
-> +++ b/tests/f2fs/007.out
-> @@ -0,0 +1,16 @@
-> +QA output created by 007
-> +compression ratio is: 64 / 256
-> +check fs after compress
-> +check fs after release_cblocks
-> +check fs after reserve_cblocks
-> +check fs after decompress
-> +compression ratio is: 128 / 256
-> +check fs after compress
-> +check fs after release_cblocks
-> +check fs after reserve_cblocks
-> +check fs after decompress
-> +compression ratio is: 192 / 256
-> +check fs after compress
-> +check fs after release_cblocks
-> +check fs after reserve_cblocks
-> +check fs after decompress
-> -- 
-> 2.40.1
+> 
+> Thanks,
+> Zorro
+> 
+>> -- 
+>> 2.40.1
+>>
 > 
 
