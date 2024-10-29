@@ -1,70 +1,70 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 875647464
-	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 05:56:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9DB617C96
+	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 06:01:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730181410; cv=none; b=c+04YPHcxLq2hMWxVdvqF3siFYstQ+6c9Jtu5LXvxgfMJakk6TGEpWTNI5e8PPKRpMav4Q4OrMOHG8WouF44vlGcmhHkc0qsm5lEHZEznANfBOTjmWoWY02DXCQAqQhuRGkfBRyMLWQ7FidAikjQT/YBwcjDuhtB5fpvYF1kLGE=
+	t=1730181705; cv=none; b=ZGdtHMtHNzPK+f+d9MI5BAwQQlia/UnoZW0/O93/PZT3K304/zPSMId4Yvj/gXpqnJwQvVHMhDW1CQLvdmAqzmdWSpCGWFzX6/9Ov56Ivxi4P7zhXLvSKenmQ4arFXznEtRK0rcB1ID/5HHJ/X/DGvrmsYA3UvS5Pp7fTuF/EFc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730181410; c=relaxed/simple;
-	bh=YiG2mDa6lG6CzYkACr+kxjRuEZMgivigYn22ZPouyhE=;
+	s=arc-20240116; t=1730181705; c=relaxed/simple;
+	bh=2HNhxHiaeTOH3PNYSbWRlX1Q+NRZSSAWDwCdODbQ0N0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JbFBbEFqr+a4r4b0rtFKdjvdqOM/gqX0AAUlvW5Akx4CoT9fMeBIAXdzTst9WkcNSe/8sGAbo9bl8y1FsWtwAtze1bxpn9sqbUDgGjzlj9IYDms+l5nAY9DHlnTnBpoASDP4Yxm7J61EoJEbeAN8R/mTFKWWgZY3UjzJfpWW0H8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YWf6/dth; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=h2d1r5b8YnMiqEeBq8WIhP/5qtV3YJLOHrVgXlltv5TyUK0WLi+/7HmPuKldhK1dJ5vEx3vvC+xnaMDKXSJhZ/PU8pegquPv8TWkE5h18xh3/Fy/qlYgWml2e0qVhF2OpXkHkfIP0fxvt2CpXcQgJgqx6Lpo67RbqoGqCtN0/Co=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=goJRWkq/; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YWf6/dth"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="goJRWkq/"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730181406;
+	s=mimecast20190719; t=1730181701;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=9JimEgNyg/QcjYbmrAbgjGEPCU6tyoQRskON0uAxULg=;
-	b=YWf6/dthn5tKmL7ktxlKpUoysCo04YXBxB4XnQ8gKvHrrStE1+M+EYlqZKjtWiNDMNOqQV
-	j9U/uXrm39klT4KtCYa5IYo+QXadUCyzRJOIT5GJEn3O5I2opOkoggMEFukhh91CBgMhi6
-	hjCGkOyZQ/Fy6zp14yaxeyzenvWuOhI=
-Received: from mail-pg1-f197.google.com (mail-pg1-f197.google.com
- [209.85.215.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=afQOoDJ7N3SKirkDmCB9Dck3TWY2wnsLXd8EeJ4bwDs=;
+	b=goJRWkq/3s+6zAATBy7G/n3KFMn68MU/BsQ15Zo03uE/ruHDim3AS/2qAtBZkjYgCgNYXW
+	XykkUnAE7WnLHlVE4982HLqtJMWdBdk+6SLoucfawGBy5ljrRTvZG95qeRiM4/f8c8rIKp
+	Q/TP/z+PlemaPKNWYSpPCpO+dpo5pWU=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-460-wFjK7jcgNQ2rDugIyJiXUg-1; Tue, 29 Oct 2024 01:56:44 -0400
-X-MC-Unique: wFjK7jcgNQ2rDugIyJiXUg-1
-Received: by mail-pg1-f197.google.com with SMTP id 41be03b00d2f7-7e6cc094c2fso4355030a12.1
-        for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 22:56:44 -0700 (PDT)
+ us-mta-336-z85leuRAOd6eF2JBDLd7KA-1; Tue, 29 Oct 2024 02:01:40 -0400
+X-MC-Unique: z85leuRAOd6eF2JBDLd7KA-1
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2e2bb354e91so5073901a91.2
+        for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 23:01:40 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730181404; x=1730786204;
+        d=1e100.net; s=20230601; t=1730181699; x=1730786499;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=9JimEgNyg/QcjYbmrAbgjGEPCU6tyoQRskON0uAxULg=;
-        b=fS/dm6/+z3Js2RNQobXrp6q8kbNqObAMrSn1e0midkm5XWtEDA8WYkNUSUIfRqvl1W
-         v1678QzDWCTKo3HCf5pR6Rjhxdj7+JdOjwxBHoc3ShJgzOFYL0Mq0u7Wz+7rtJibNKRj
-         DflXKlTDpOy/ywuY6TCjNFS+Pg0IVeb0YCaFr11/XZTqa0GJ2l15h8rChXwmrpf50ipY
-         qXVj9pXGqDyFEqzPJDqZcQhTGly7c6yToLCa8xnE7MZdjWRfqDc9dHHnA/LI75nXhXbt
-         Q4GoP0JXxkSnSSiGlG/WfkSVZ3d6B+PqDVqIDg5mc9Xi8jl7BXXcuawBPKQE8RooDYlP
-         to5g==
-X-Forwarded-Encrypted: i=1; AJvYcCWHcd1GClK9ANMIyKXa/ZTi9O6FRJhnGQRxLG8BBKMNzYfjYeGAx/dwoYFx07AnQIng7nhStG+p@vger.kernel.org
-X-Gm-Message-State: AOJu0YzwUJDqErqGRhwbbfEp5NEwuJmkHmyiRBkcKMMypJZwsLjDMovq
-	yi9vwe7hBONsn8hCNyLOAHK9kKCUnL+13YE0Ta/i75ub4A3JHGcQadKPwuRtmfPH7Os7G9Yghl5
-	Mn6BydiTcoSxaIfS7G/gj/7qwzjYt+l5wemISRWg3NG7uUzUrSJ0HVFA=
-X-Received: by 2002:a17:902:e751:b0:20b:db4:d913 with SMTP id d9443c01a7336-210ed3f11demr15943575ad.11.1730181403558;
-        Mon, 28 Oct 2024 22:56:43 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGLA7IAPR7iPmKWHmcqN3S4BagHq+bCwV+3g5vQyIfof5gqgg9aNjHESyIaX6dhRM+rPWHfeA==
-X-Received: by 2002:a17:902:e751:b0:20b:db4:d913 with SMTP id d9443c01a7336-210ed3f11demr15943325ad.11.1730181403180;
-        Mon, 28 Oct 2024 22:56:43 -0700 (PDT)
+        bh=afQOoDJ7N3SKirkDmCB9Dck3TWY2wnsLXd8EeJ4bwDs=;
+        b=vZozqihl0nV/oBVi3Ao1LDidg3HQNghrPFZPz2ZA0jziqEf2DEcAQKFayIpJlpo8oT
+         A4ozU1yiqlUnzC/BYP0i0wjDkua1dF3t381sL4hzQNWB5+y974EgLrFtTAbPYIK71tnW
+         gGKOcGNW+w7wms/3ej42DNGOymr48nId8jhWFRhqkpmAvEdeUJsyaXUi8mOlgYIFbS8A
+         WldFiw7INmKB6REDGPy84uw5zJC31ZG+sBrwgGasrw55Gfab0aNTMdDMa97xDM6jvBKJ
+         P7VwC2pieI1vqihRfe+rGcDHq7Mjr2v2JpvLpNm8fFiEjRSYiJUqllUWqxiWZrl1OX7k
+         NreA==
+X-Gm-Message-State: AOJu0YzfNwkLDm+P7+R4+U8gqZ7cyBAEaCtBdyOtDpHmrcFNGVCcZTBV
+	CJqXOWwYnOT+GHX5GHNmZTeKiQ/vo9o/RsGvTcGBXDCH3xhtT4y8mXUHg3ruokqlJXLEX/G0nLE
+	9W6rP97bvYzRfrGH/8OFiKQvT14Z1Y9V0Bkvu9FwfiHb/cJVfLnG7AjBD895AnNQpZg==
+X-Received: by 2002:a05:6a20:c707:b0:1cf:2862:beca with SMTP id adf61e73a8af0-1d9a842cf55mr15174366637.13.1730181699143;
+        Mon, 28 Oct 2024 23:01:39 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHT/RaPPWGXzVGTz8uaTr5OcTky+S4jQ0Mm8SEsOTGrLL8EvLwGLnPV2wIcbB/D8qD34c63MA==
+X-Received: by 2002:a05:6a20:c707:b0:1cf:2862:beca with SMTP id adf61e73a8af0-1d9a842cf55mr15174339637.13.1730181698556;
+        Mon, 28 Oct 2024 23:01:38 -0700 (PDT)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-210bbf441dbsm59842985ad.34.2024.10.28.22.56.41
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72057a0cb06sm6701897b3a.115.2024.10.28.23.01.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Oct 2024 22:56:42 -0700 (PDT)
-Date: Tue, 29 Oct 2024 13:56:39 +0800
+        Mon, 28 Oct 2024 23:01:38 -0700 (PDT)
+Date: Tue, 29 Oct 2024 14:01:34 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH v2] fstests: generic/366: add a new test case to verify
- if certain fio load will hang the filesystem
-Message-ID: <20241029055639.hskowarhtrowgiwe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241028233525.30973-1-wqu@suse.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+	Qi Han <hanqi@vivo.com>
+Subject: Re: [PATCH v2] f2fs/005: add testcase to check checkpoint disabling
+ functionality
+Message-ID: <20241029060134.wkqprpmnju2k77yl@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241028141700.1786745-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -73,220 +73,95 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241028233525.30973-1-wqu@suse.com>
+In-Reply-To: <20241028141700.1786745-1-chao@kernel.org>
 
-On Tue, Oct 29, 2024 at 10:05:25AM +1030, Qu Wenruo wrote:
-> [BUG]
-> During the development to make btrfs pass generic/563 (which needs to
-> make btrfs to support partial folios), generic/095 causes hangs
-> during tests.
+On Mon, Oct 28, 2024 at 10:17:00PM +0800, Chao Yu wrote:
+> This patch introduce a regression test to check whether f2fs handles
+> dirty inode correctly when checkpoint is disabled in a corner case,
+> it may hang umount before the bug is fixed.
 > 
-> The call trace for the hanging process looks like this:
-> 
->   __switch_to+0xf8/0x168
->   __schedule+0x328/0x8a8
->   schedule+0x54/0x140
->   io_schedule+0x44/0x68
->   folio_wait_bit_common+0x198/0x3f8
->   __folio_lock+0x24/0x40
->   extent_write_cache_pages+0x2e0/0x4c0 [btrfs]
->   btrfs_writepages+0x94/0x158 [btrfs]
->   do_writepages+0x74/0x190
->   filemap_fdatawrite_wbc+0x88/0xc8
->   __filemap_fdatawrite_range+0x6c/0xa8
->   filemap_fdatawrite_range+0x1c/0x30
->   btrfs_start_ordered_extent+0x264/0x2e0 [btrfs]
->   btrfs_lock_and_flush_ordered_range+0x8c/0x160 [btrfs]
->   __get_extent_map+0xa0/0x220 [btrfs]
->   btrfs_do_readpage+0x1bc/0x5d8 [btrfs]
->   btrfs_read_folio+0x50/0xa0 [btrfs]
->   filemap_read_folio+0x54/0x110
->   filemap_update_page+0x2e0/0x3b8
->   filemap_get_pages+0x228/0x4d8
->   filemap_read+0x11c/0x3b8
->   btrfs_file_read_iter+0x74/0x90 [btrfs]
->   new_sync_read+0xd0/0x1d0
->   vfs_read+0x1a0/0x1f0
-> 
-> [CAUSE]
-> The root cause is a btrfs specific behavior that during a folio read, we
-> can trigger writeback of the same folio, which will try to lock the same
-> folio already locked by the read process.
-> 
-> The fix is already sent to the mailing list:
-> https://lore.kernel.org/linux-btrfs/62bf73ada7be2888d45a787c2b6fd252103a5d25.1729725088.git.wqu@suse.com/
-> 
-> This problem can only happen if all the following conditions are met:
-> 
-> - The sector size of btrfs is smaller than page size
->   To have partial uptodate folios.
-> 
-> - Btrfs won't read the full folio if buffered write is block aligned
->   This is done by the not yet merged patch:
->   https://lore.kernel.org/linux-btrfs/ac2639ec4e9ac176d33e95ef7ecf008fa6be5461.1727833878.git.wqu@suse.com/
-> 
-> [TEST CASE]
-> During the debugging of that generic/095 hang, I extracted a minimal
-> reproducer which is much smaller and faster, although it still requires
-> several runs to trigger a hang.
-> 
-> The test case will run the fio workload 32 times by default, which is
-> more than enough to trigger the hang.
-> 
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> Cc: Qi Han <hanqi@vivo.com>
+> Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
-> Changelog:
 > v2:
-> - Fix the duplicated _fixed_by_kernel_commit line
-> - Fix a typo in the commit message
-> - Update the comments to show the workload and how it hangs btrfs
-> ---
->  tests/generic/366     | 106 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/366.out |   2 +
->  2 files changed, 108 insertions(+)
->  create mode 100755 tests/generic/366
->  create mode 100644 tests/generic/366.out
+> - add _fixed_by_kernel_commit()
+> - use _scratch_mkfs_sized() rather than formating size-specified
+
+This test looks good to me, if no more review points from f2fs list, I'll
+merge it.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+> loop device
+> - code cleanup
+>  tests/f2fs/005     | 47 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/005.out |  2 ++
+>  2 files changed, 49 insertions(+)
+>  create mode 100755 tests/f2fs/005
+>  create mode 100644 tests/f2fs/005.out
 > 
-> diff --git a/tests/generic/366 b/tests/generic/366
+> diff --git a/tests/f2fs/005 b/tests/f2fs/005
 > new file mode 100755
-> index 00000000..9d31c1c8
+> index 00000000..a817d51a
 > --- /dev/null
-> +++ b/tests/generic/366
-> @@ -0,0 +1,106 @@
+> +++ b/tests/f2fs/005
+> @@ -0,0 +1,47 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
 > +#
-> +# FS QA Test 366
+> +# FS QA Test No. f2fs/005
 > +#
-> +# Test if mixed direct read, direct write and buffered write on the same file will
-> +# hang the filesystem.
-> +#
-> +# This is exposed by an incoming btrfs feature, which allows a folio to be
-> +# partial uptodate if the buffered write range is block aligned but not yet
-> +# full folio aligned.
-> +#
-> +# Such behavior makes btrfs to hang reliably under generic/095.
-> +# This is the extracted minimal reproducer for 4k block size and 64K page size.
+> +# This is a regression test to check whether f2fs handles dirty
+> +# inode correctly when checkpoint is disabled, it may hang umount
+> +# before the bug is fixed.
 > +#
 > +. ./common/preamble
 > +_begin_fstest auto quick
-                            ^^
-                            rw
-
-I think we can keep the "rw" group as g/095 does.
-
-> +
-> +. ./common/filter
-> +
-> +_require_scratch
-> +_require_odirect
-> +_require_aio
 > +
 > +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: avoid deadlock when reading a partial uptodate folio"
+> +	"f2fs: fix f2fs_bug_on when uninstalling filesystem call f2fs_evict_inode."
 > +
-> +iterations=$((32 * LOAD_FACTOR))
+> +_require_scratch
+> +_scratch_mkfs_sized $((1024*1024*50)) >> $seqres.full
 > +
-> +fio_config=$tmp.fio
-> +fio_out=$tmp.fio.out
-> +blksz=`$here/src/min_dio_alignment $SCRATCH_MNT $SCRATCH_DEV`
-> +cat >$fio_config <<EOF
-> +[global]
-> +bs=8k
-> +iodepth=1
-> +randrepeat=1
-> +size=256k
-> +directory=$SCRATCH_MNT
-> +numjobs=1
-> +[job1]
-> +ioengine=sync
-> +bs=512
-> +direct=1
-> +rw=randread
-> +filename=file1
-> +[job2]
-> +ioengine=libaio
-> +rw=randwrite
-> +direct=1
-> +filename=file1
-> +[job3]
-> +ioengine=posixaio
-> +rw=randwrite
-> +filename=file1
-> +EOF
-> +_require_fio $fio_config
+> +# use mode=lfs to let f2fs always triggers OPU
+> +_scratch_mount -o mode=lfs,checkpoint=disable:10%,noinline_dentry >> $seqres.full
 > +
-> +for (( i = 0; i < $iterations; i++)); do
-> +	_scratch_mkfs >>$seqres.full 2>&1
-> +	_scratch_mount
-> +	# There's a known EIO failure to report collisions between directio and buffered
-> +	# writes to userspace, refer to upstream linux 5a9d929d6e13. So ignore EIO error
-> +	# at here.
-> +	#
-> +	# And for btrfs if sector size < page size, if we have a partial
-> +	# uptodate folio caused by a buffered write, e.g:
-> +	#
-> +	#    0          16K         32K          48K         64K
-> +	#    |                                   |///////////|
-> +	#					     \- sector Uptodate|Dirty
-> +	#
-> +	# Then writeback happens and finished, but btrfs' ordered extent not
-> +	# yet finished.
-> +	# In that case, the folio can be released from the page cache (since
-> +	# the folio is not under IO/lock).
-> +	#
-> +	# Then new buffered writes into the folio happened, re-dirty the folio:
-> +	#   0          16K         32K          48K         64K
-> +	#   |//////////|                        |///////////|
-> +	#      \- sector Uptodate|Dirty              \- No sector flags
-> +	#                                               extent map PINNED
-> +	#                                               OE still here
-> +	#
-> +	# Now read is triggered on that folio.
-> +	# Btrfs will need to wait for any existing ordered extents in the folio range,
-> +	# that wait will also trigger writeback if the folio is dirty.
-> +	# That writeback will happen for range [48K, 64K), but since the whole folio
-> +	# is locked for read, writeback will also try to lock the same folio, causing
-> +	# a deadlock.
-> +	$FIO_PROG $fio_config --ignore_error=,EIO --output=$fio_out
-
-Looks like this test doesn't mix DIO and buffered IO, so this EIO ignoring might not be
-needed.
-
-> +	# umount before checking dmesg in case umount triggers any WARNING or Oops
-> +	_scratch_unmount
+> +testfile=$SCRATCH_MNT/testfile
+> +tmpfile=$SCRATCH_MNT/tmpfile
+> +tmpdir=$SCRATCH_MNT/tmpdir
 > +
-> +	_check_dmesg _filter_aiodio_dmesg
-
-This test removed mmap test part, so this dmesg filter might not be needed either ?
-If so, don't need to import above "./common/filter" either.
-
-Others looks good to me.
-
-Thanks,
-Zorro
-
+> +dd if=/dev/zero of=$testfile bs=1M count=5 2>/dev/null
+> +mkdir $tmpdir
+> +touch $tmpfile
+> +sync
 > +
-> +	echo "=== fio $i/$iterations ===" >> $seqres.full
-> +	cat $fio_out >> $seqres.full
-> +done
+> +# it dirties tmpdir inode by updating ctime,
+> +# but it doesn't moving the inode to gdirty_list.
+> +mv $tmpfile $tmpdir
+> +
+> +# it runs out of free segment
+> +dd if=/dev/zero of=$testfile bs=1M count=5 conv=notrunc conv=fsync 2>/dev/null
+> +
+> +_scratch_mount -o remount,checkpoint=enable
+> +
+> +# it may hang umount if tmpdir is still dirty during evict()
+> +_scratch_unmount
 > +
 > +echo "Silence is golden"
 > +
-> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/366.out b/tests/generic/366.out
+> diff --git a/tests/f2fs/005.out b/tests/f2fs/005.out
 > new file mode 100644
-> index 00000000..1fe90e06
+> index 00000000..a5027f12
 > --- /dev/null
-> +++ b/tests/generic/366.out
+> +++ b/tests/f2fs/005.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 366
+> +QA output created by 005
 > +Silence is golden
 > -- 
-> 2.46.0
-> 
+> 2.40.1
 > 
 
