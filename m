@@ -1,191 +1,174 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC33017C96;
-	Tue, 29 Oct 2024 06:04:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 792D9201027
+	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 06:09:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730181843; cv=none; b=bjX56l4E2+Q/mwc9LmOcojUm3iSrm87+zN3bh6x4nCryN24eqy0UsKfmjbG1WpGqRF3D/XK4K5NQmXY0OWHOTvi2qELi2HhEB7UF8ysY1G5RP8+4/YCjjQyHmcT7Oux8QmFLnrk+9+UCX3QCRlSlEIWEk/tp+I3fpfSvodHlHWM=
+	t=1730182169; cv=none; b=oQfsdLofLClbwGi4+2MAOr9glqRxr6bhFHE9HJLTuZzCxGNV69gLNZB4FHcvLrEyQs/hVmdMD2kbAnn/+WeNZ1G1ZX1F6cqPA0yZwNZY4jsrzotHI/+1KCfXUfxG4uY7O/ngldOHu2nTAesIYGj0jyT3mF151PDYeYNumv1cqBI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730181843; c=relaxed/simple;
-	bh=/WbhDooRn6B7Mmh/Sq403i2rtU2+i0tGNo6BKRgAV/o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MoIJI8gknqTIPoAvgfjZx+aDo2f60psT5xuwgvgLhBAlMM10dgB3rtYWpnh0V0HjeDEsou0/EmtQ8b6SewaWsJBWoJrz8K/bI1mCxnzjG6hjU5xHuOP2L+mvwaQ03KRtABGZmcSf9i0Er0RqrVEedeDIuwx3qR/Wlrgc3SQE7KA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=GLzN+i3e; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1730182169; c=relaxed/simple;
+	bh=RMz7U5nHC8tfjihqLNBPzoenKuZBLFndpyxeWjbCz6s=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=kgw94IW4SlWnFPllVMxLIdTmvYtelXLMN0nNDohc/WUXGhboRU1dCAGnx1eOymhj8a8w0202JtKwqcwc2tAvX1RBSuQIWgIq19LinIBNZYsboHVO4bFcoc+pWy38dE/Hbg2HIKJDNt5RC0STL+SYiJPi0tmNJbd1TgOumK0veK0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MnmAkESy; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="GLzN+i3e"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1730181836; x=1730786636; i=quwenruo.btrfs@gmx.com;
-	bh=FSmQaQEaip4BCjwcKPb6Rbi6Sasls+girsN+YI38tao=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=GLzN+i3emhs6AnxNyD3f+Sz9bDP63y00OhdJBwehGCRefrQlbyvr2zylv7lba7kh
-	 lbjQPq0nHoVZDuJ3ZkTapiFa0lRlsOiFYxAeU4Y7MF/rPLThNOOUVmwa7zea9XuV3
-	 qHkyxp5Jlcx8ZB59uVT9rjvoB8Z1rFlCb6Ib46394DDwk8paWIBv8RPfOK4DCQ76B
-	 hGZZacT0BqzrZtW6JxR8CGSHbQiazRayXE2vs1cN53WKnqPrd/q+Zotqj/NYGx/SN
-	 Ozs/pb7hTBx6Sv4GV2ejyVNZw7Ap1T/ZSS9rtaLQPzC/eqQhQ78t0HucoXGF0oV89
-	 q/WhX6FUIbluRPXU7A==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MZktj-1tKfl62o35-00NAYA; Tue, 29
- Oct 2024 07:03:56 +0100
-Message-ID: <b78d9fe5-f9c9-4235-b748-78153ef28f20@gmx.com>
-Date: Tue, 29 Oct 2024 16:33:52 +1030
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MnmAkESy"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1730182166;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=Wayk9Uaz9R4LPhk6DPxYh53zbwDTJRdC1Q80mX7VWuE=;
+	b=MnmAkESy31cHhUEuK2IsIh2uKyT6NG+u806lgkVU3IV2lX8zR58foBtd9Lmampo8nrKNPU
+	plHnjYsTTdUfISqa/+U+Wq4tb8mSNDNC/UZD1GFEvHq80vc8QhYjhuNmsZ1QLGAM7A3VbI
+	U3UtdgLGIwbU6ggM/WNM0qRd0E4aopw=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-589-18Ooo3BcP0SsgQvclEKl-Q-1; Tue, 29 Oct 2024 02:09:24 -0400
+X-MC-Unique: 18Ooo3BcP0SsgQvclEKl-Q-1
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-20c8b23167fso47974395ad.2
+        for <fstests@vger.kernel.org>; Mon, 28 Oct 2024 23:09:24 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730182163; x=1730786963;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Wayk9Uaz9R4LPhk6DPxYh53zbwDTJRdC1Q80mX7VWuE=;
+        b=aMaajuxqZNU0BBSpSs5IKA8m0FBAAJ828Ohm44GhJ51RHGM98RSg6IdlP36FWOZkiY
+         5BNqgoWzKW/5aEQ//as5+t+819Ul8Kt+DwgHvdz/FK517GZYGqiuut1JNJSP8SE93Qea
+         52lH25VWi+2Lq22C0/IQPs96moiEJgdf4HeP/Sam0a9k+yVWfL/hOHUQhHjquHsaUZt4
+         6l7anVJeoKVCWv7zGygOcZMf6DN9zoTD+CoVUu90JAAIrjm58AcoPT9R/xH+mGge/FDv
+         N10Rgn5bK9ouO00xWrBlqLOIfD/IrXWaOY7i+0fdzqntX2iyod9MYVUlH8+hXkLA3SqH
+         6Fuw==
+X-Gm-Message-State: AOJu0YzdaAj867ztKVtYWdTbJLgn7hTPSzEpcUciJ2klw2MBlRnTx60P
+	6IPES4yCUWg1H1VsJfHtO6pAotIMwOwOEh/HQCKnxxP7RBK6cdhsOJnLXzNBBjUVDj9ABzKoqVV
+	GGA7E7YM81goyC0kWgixGqJFoq1iQRVUhe8FAgIs/l4yTnQYC7FWOPt4=
+X-Received: by 2002:a17:903:2287:b0:20d:284c:8d54 with SMTP id d9443c01a7336-210c6c1f299mr167698925ad.34.1730182163541;
+        Mon, 28 Oct 2024 23:09:23 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IG3FutxUB3sGN6kqlmFHFBtNNulPOXFb+Y/zWBfzmZD+BgSgN4ehflCGx7ewzqa4rw4Rrrkhg==
+X-Received: by 2002:a17:903:2287:b0:20d:284c:8d54 with SMTP id d9443c01a7336-210c6c1f299mr167698715ad.34.1730182163200;
+        Mon, 28 Oct 2024 23:09:23 -0700 (PDT)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-210bc0492f8sm59652885ad.256.2024.10.28.23.09.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Oct 2024 23:09:22 -0700 (PDT)
+Date: Tue, 29 Oct 2024 14:09:19 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+	Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: [PATCH v3 1/2] f2fs/006: add testcase to check out-of-space case
+Message-ID: <20241029060919.gxyywjp3gykaqnuc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241028141800.1788356-1-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] fstests: generic/366: add a new test case to verify if
- certain fio load will hang the filesystem
-To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20241028233525.30973-1-wqu@suse.com>
- <20241029055639.hskowarhtrowgiwe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20241029055639.hskowarhtrowgiwe@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:cqTCF4Ma84r/sPufqsSpuS09TcbyoU0EAYJCWI0yxUcOcnI/Hbs
- lDsKV/Ik40JZNKe/ddiDx1o2jfzDbMf7K3xH8SMNykL5ALzdL4AVAXPOpwKESTEZKf3SoyQ
- 1Wzf+ToxryR7rhsgBOlpvRefjKR0RZd+awCHrcVuBtAhVFdYN+rEPgaN2yKEylZcCFl1nVq
- qIxK+ZZlkFIHDtkSbvIsA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:oSXCL4Lmc6A=;9HfI2Fu0v41j3mdD+HHLmRNdj6u
- zB+Cgtq0qstpRpBF2aXYvDpJw4unbKEuAfu26texoEFMAxTz/ifkBx9VQx7oa8EeDjCyVJ17j
- HTvwug9G6KBRnWRGEsL8Xb6xoRowU/Q6m1KCCmUguu5druwKFsvIS7QftjEICczPjE4IrdMI2
- QbGIPuI5l6UI5vNMetx5XTqhfub9qZhWVxG4lkLNhWqnHbyxF4ETEwVWDvI7FTc31yv1DgYnn
- rOQ8WqFvjk9NPBWdb36qbWI7wz3nHBrDdIQqtzU8HKcfNNdV1FGONWL7nTzmXCqJUZaGgIz6S
- P0lJlR9AyPafpGnYO5XPWIqvK8oPygGR5wC7oYq841i3/SNUNQKmvPwCyFcSjJpp9uTmrbAkk
- x+7fZU+KHv3b6yt2xN6Me0GWxTtW3yvOXaPPY4sMSPqPRLdEbeUlQ3ZQTtEBQ9OCUW9kggBVG
- dK/JwC6HB3iouAFxNTlyCLL44JA5e0wjXbO8j+SF5bdGyldFWLIGoR1BZ4XENhFgcLRHOC6cK
- dCKJIUJV/EcnYAYjalmEPOJiLMi9f6o5GpxudSYxjI/+Ftx5JHmfXm0EoRbYGORTAILqo1CPn
- ACwo9iytgJN8K5Idee76jeKfBMBqyok96UV4fq0nBB1OpJG3m9Cb3qCOy/tVosgVr4q02IaB4
- GqqQOqKQmKzpYSs+8geDHlhlmjCDVZDCwQ8uGtkVr2nnTp/LkTLq1XEY7BaqRIO5eQFRbSuu1
- 26WjVej0kmDQUqMHvhS638GWdEWRh3suoMkuwfnyhtorwFdbD0IRWqeLZZXrlVTwtDHIGYv1O
- b4rLlKEXm20bMfKEZYlLNKAg==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241028141800.1788356-1-chao@kernel.org>
 
+On Mon, Oct 28, 2024 at 10:17:59PM +0800, Chao Yu wrote:
+> This is a regression test to check whether f2fs handles dirty
+> data correctly when checkpoint is disabled, if lfs mode is on,
+> it will trigger OPU for all overwritten data, this will cost
+> free segments, so f2fs must account overwritten data as OPU
+> data when calculating free space, otherwise, it may run out
+> of free segments in f2fs' allocation function. If kernel config
+> CONFIG_F2FS_CHECK_FS is on, it will cause system panic, otherwise,
+> dd may encounter I/O error.
+> 
+> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Signed-off-by: Chao Yu <chao@kernel.org>
+> ---
+> v3:
+> - explain more about behavior on kernel w/ different config
+> - use _filter_scratch to filter $SCRATCH_MNT
+>  tests/f2fs/006     | 42 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/f2fs/006.out |  6 ++++++
+>  2 files changed, 48 insertions(+)
+>  create mode 100755 tests/f2fs/006
+>  create mode 100644 tests/f2fs/006.out
+> 
+> diff --git a/tests/f2fs/006 b/tests/f2fs/006
+> new file mode 100755
+> index 00000000..f9560b2b
+> --- /dev/null
+> +++ b/tests/f2fs/006
+> @@ -0,0 +1,42 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
+> +#
+> +# FS QA Test No. f2fs/006
+> +#
+> +# This is a regression test to check whether f2fs handles dirty
+> +# data correctly when checkpoint is disabled, if lfs mode is on,
+> +# it will trigger OPU for all overwritten data, this will cost
+> +# free segments, so f2fs must account overwritten data as OPU
+> +# data when calculating free space, otherwise, it may run out
+> +# of free segments in f2fs' allocation function. If kernel config
+> +# CONFIG_F2FS_CHECK_FS is on, it will cause system panic, otherwise,
+> +# dd may encounter I/O error.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +	"f2fs: fix to account dirty data in __get_secs_required()"
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +_require_scratch
+> +_scratch_mkfs_sized $((1024*1024*100)) >> $seqres.full
+> +
+> +# use mode=lfs to let f2fs always triggers OPU
+> +_scratch_mount -o mode=lfs,checkpoint=disable:10%,noinline_dentry >> $seqres.full
+> +
+> +testfile=$SCRATCH_MNT/testfile
+> +
+> +dd if=/dev/zero of=$testfile bs=1M count=50 2>/dev/null
+> +
+> +# it may run out of free space of f2fs and hang kernel
+> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync
+> +dd if=/dev/zero of=$testfile bs=1M count=50 conv=notrunc conv=fsync 2>&1 | _filter_scratch
+> +
+> +_scratch_remount checkpoint=enable
+> +
+> +status=0
+> +exit
+> diff --git a/tests/f2fs/006.out b/tests/f2fs/006.out
+> new file mode 100644
+> index 00000000..2dc9efda
+> --- /dev/null
+> +++ b/tests/f2fs/006.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 006
+> +50+0 records in
+> +50+0 records out
+> +dd: error writing 'SCRATCH_MNT/testfile': No space left on device
+> +3+0 records in
+> +2+0 records out
 
+Hi Chao,
 
-=E5=9C=A8 2024/10/29 16:26, Zorro Lang =E5=86=99=E9=81=93:
-> On Tue, Oct 29, 2024 at 10:05:25AM +1030, Qu Wenruo wrote:
-[...]
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->                              ^^
->                              rw
->
-> I think we can keep the "rw" group as g/095 does.
+One more question about this patch.
 
-If that's the only missing part, mind to add that rw group when merging?
-
-The remaining two points may not need modification, explained inlined.
-
->> +	# Now read is triggered on that folio.
->> +	# Btrfs will need to wait for any existing ordered extents in the fol=
-io range,
->> +	# that wait will also trigger writeback if the folio is dirty.
->> +	# That writeback will happen for range [48K, 64K), but since the whol=
-e folio
->> +	# is locked for read, writeback will also try to lock the same folio,=
- causing
->> +	# a deadlock.
->> +	$FIO_PROG $fio_config --ignore_error=3D,EIO --output=3D$fio_out
->
-> Looks like this test doesn't mix DIO and buffered IO, so this EIO ignori=
-ng might not be
-> needed.
-
-I'm not sure about the EIO part, but at least job2 and job3 are all
-doing writes, one is buffered and the other is direct.
-So it's still mixing both.
-
->
->> +	# umount before checking dmesg in case umount triggers any WARNING or=
- Oops
->> +	_scratch_unmount
->> +
->> +	_check_dmesg _filter_aiodio_dmesg
->
-> This test removed mmap test part, so this dmesg filter might not be need=
-ed either ?
-> If so, don't need to import above "./common/filter" either.
-
-Since it's still mixing buffered and direct IO, I can hit the aiodio
-error message just like this:
-
-[91619.077752] BTRFS warning (device dm-2): read-write for sector size
-4096 with page size 65536 is experimental
-[91619.086204] BTRFS info (device dm-2): checking UUID tree
-[91619.473510] Page cache invalidation failure on direct I/O.  Possible
-data corruption due to collision with buffered I/O!
-
-So I'm afraid we need the filter too.
+I'm wondering can this output always be matched? If the test doesn't care the dd output,
+you can filter out them, to avoid it break golden image. Especially the second one, can
+you be sure it always "3 in and 2 out" before returning ENOSPC?
 
 Thanks,
-Qu
+Zorro
 
->
-> Others looks good to me.
->
-> Thanks,
-> Zorro
->
->> +
->> +	echo "=3D=3D=3D fio $i/$iterations =3D=3D=3D" >> $seqres.full
->> +	cat $fio_out >> $seqres.full
->> +done
->> +
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/generic/366.out b/tests/generic/366.out
->> new file mode 100644
->> index 00000000..1fe90e06
->> --- /dev/null
->> +++ b/tests/generic/366.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 366
->> +Silence is golden
->> --
->> 2.46.0
->>
->>
->
->
+> -- 
+> 2.40.1
+> 
 
