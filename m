@@ -1,177 +1,137 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE9DC1D9A40
-	for <fstests@vger.kernel.org>; Tue, 29 Oct 2024 17:20:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1B352107;
+	Tue, 29 Oct 2024 17:21:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730222417; cv=none; b=HFopXqbTHKY5VZcHlG6tU/l0MYq5Gtq4phu1Ew3qtKIgv9+eAwbfPoDbDaVjFv0OUoL8joWAz5VfibwAaJeW+W+/RvUp8cT87ezyDrDBDeCPEGh5k8OanHcasA24rQSwHdJDex5fLgwoac/GAQSZNIyWyIrFG8n2RJg5VKODyBE=
+	t=1730222500; cv=none; b=GP9OUB/8j/HN+CNFbTLBM7nmbWa9QbaO3wLrOq5kifZCSQWCcOs3sIAG1MnJU24II4rImfRmvv2tB92c2B/XfBbCYFJ6r8cVzuszqJbfDR3wdiglHMOA/5DJ8XFiOqbCJ5rK0XW/Gkso7IkKUeIDBiuyr2l61tubJaOTyQp5Afs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730222417; c=relaxed/simple;
-	bh=MhM4jNEY10NhLsvtWiwQiLrPBwZR6BXeIgnAMZSMldU=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=H3yIroLEYiHfX1VupKffxiWJqthBRHAfpEWOeZFpEDcB0phharTAIS66JyByZEtW21MzMuKj9mFrxqWfCW62IX02tdSdzC9vwiTOlTw23omvp9Mks/HML1xSIqN2/85jtx5xLR8LuDU7e+TLoG3c9BlGwLuo3CU11hUyKXAdj88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=iRlk3BqY; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1730222500; c=relaxed/simple;
+	bh=XTsCuCplk8PIiGawEiuyFeCluFtEuir9Fx9kgnKvV2w=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qVn3XuYs2iUdL9xhsmDMK/LlA9tm4m5YFQT/ov84SYKSbBi4hC7efVTlE/vJddHxecQgNqUAeTdLbjuvLvuOW2pXVGD8rMBskGpEJJUk8ZW9WLsDIYjPBPz6m+7ctdqU4G8uXE5Oe3BmCANUL4xwHOlNpL3u8D/I6R8i7PRGrM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=APVPAV/e; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iRlk3BqY"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730222414;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Ul8t6nvjw38ibUMng0kK20LcFallp5MsvWYL/2GCqjM=;
-	b=iRlk3BqYmo3Xs+Wa6fD8tGcPzhpRcKeYK9DVmwpVbBzswnLW/xBjfMDXpNT+hfuA3fQxsF
-	J0yHcLGpCW8TcQs6NtKnqw06vZc6+mUhmXhgmlNJWY+hROMY9iSIa5vAT1w0w9ADCYGg6H
-	9V+hL9DU1wirdDN/It97ipteSww9CKk=
-Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-554-rNnI2Aa8M52oQTxzBnVdGw-1; Tue,
- 29 Oct 2024 13:20:11 -0400
-X-MC-Unique: rNnI2Aa8M52oQTxzBnVdGw-1
-Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 49A891955E70;
-	Tue, 29 Oct 2024 17:20:10 +0000 (UTC)
-Received: from bfoster.redhat.com (unknown [10.22.80.135])
-	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 50C2219560AA;
-	Tue, 29 Oct 2024 17:20:09 +0000 (UTC)
-From: Brian Foster <bfoster@redhat.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="APVPAV/e"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 896F2C4CEE4;
+	Tue, 29 Oct 2024 17:21:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1730222499;
+	bh=XTsCuCplk8PIiGawEiuyFeCluFtEuir9Fx9kgnKvV2w=;
+	h=From:To:Cc:Subject:Date:From;
+	b=APVPAV/e3k797qj8d2etCxQbBUK393zA4FwMXXjDNb8n0Qa4zOu6RqAy02TSZ5ZMD
+	 moC6Jjw5NPsOFuQUHQ3q9XO8TzzkGZwVLnA8nhlq38SQknRj3Zf3tCF0TbQZRYn0wc
+	 JtC7XvEsl2Ou6Ts2oZp7Pn+xvNjx9OmFKr9ra9Wv//T38PRyjEnNzmdwdX0bLRdjZO
+	 S19KkIoPp39A5tOVXjlfyMvzzfuu3XOcmKmYd7C9YMuR1ZerdI+lOuMBHFH1RZTK7K
+	 m/wLXl5FqQL3i5WD5+4xCEHrCE3riBIC469DhdAxilf8mBAkVr98jQZVICtL+/H156
+	 SCv+QUmwlEKKA==
+From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org,
-	djwong@kernel.org,
-	hch@lst.de
-Subject: [PATCH v2 2/2] xfs: online grow vs. log recovery stress test (realtime version)
-Date: Tue, 29 Oct 2024 13:21:35 -0400
-Message-ID: <20241029172135.329428-3-bfoster@redhat.com>
-In-Reply-To: <20241029172135.329428-1-bfoster@redhat.com>
-References: <20241029172135.329428-1-bfoster@redhat.com>
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] btrfs/287: make the test work when compression is enabled
+Date: Tue, 29 Oct 2024 17:21:28 +0000
+Message-ID: <9991dab5ca241c17f531f49dab5dbaa6e9146c45.1730220754.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
-This is fundamentally the same as the previous growfs vs. log
-recovery test, with tweaks to support growing the XFS realtime
-volume on such configurations. Changes include using the appropriate
-mkfs params, growfs params, and enabling realtime inheritance on the
-scratch fs.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
+When running btrfs/287 with compression enabled (mount options), the test
+fails because it expects to find 4M extents, however compression limits
+the maximum size of extents to 128K, breaking the tests' expectations.
+
+Example:
+
+  $ MOUNT_OPTIONS="-o compress" ./check btrfs/287
+  FSTYP         -- btrfs
+  PLATFORM      -- Linux/x86_64 debian0 6.12.0-rc4-btrfs-next-177+ #1 SMP PREEMPT_DYNAMIC Thu Oct 24 17:14:37 WEST 2024
+  MKFS_OPTIONS  -- /dev/sdc
+  MOUNT_OPTIONS -- -o compress /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+
+  btrfs/287 2s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad)
+      --- tests/btrfs/287.out	2024-10-19 18:21:30.451644840 +0100
+      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad	2024-10-29 16:31:20.926612583 +0000
+      @@ -25,22 +25,14 @@
+       resolve first extent with ignore offset option:
+       inode 257 offset 16777216 root 5
+       inode 257 offset 8388608 root 5
+      -inode 257 offset 2097152 root 5
+       resolve first extent +1M offset:
+      -inode 257 offset 17825792 root 5
+      -inode 257 offset 9437184 root 5
+      ...
+      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/287.out /home/fdmanana/git/hub/xfstests/results//btrfs/287.out.bad'  to see the entire diff)
+
+  HINT: You _MAY_ be missing kernel fix:
+        0cad8f14d70c btrfs: fix backref walking not returning all inode refs
+
+  Ran: btrfs/287
+  Failures: btrfs/287
+  Failed 1 of 1 tests
+
+Fix this by creating the two 4M extents with fallocate, so that the test
+works regardless of compression being enabled or not.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/xfs/610     | 83 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/610.out |  2 ++
- 2 files changed, 85 insertions(+)
- create mode 100755 tests/xfs/610
- create mode 100644 tests/xfs/610.out
+ tests/btrfs/287     | 10 +++++-----
+ tests/btrfs/287.out |  4 ----
+ 2 files changed, 5 insertions(+), 9 deletions(-)
 
-diff --git a/tests/xfs/610 b/tests/xfs/610
-new file mode 100755
-index 00000000..6d3a526f
---- /dev/null
-+++ b/tests/xfs/610
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 610
-+#
-+# Test XFS online growfs log recovery.
-+#
-+. ./common/preamble
-+_begin_fstest auto growfs stress shutdown log recoveryloop
-+
-+# Import common functions.
-+. ./common/filter
-+
-+_stress_scratch()
-+{
-+	procs=4
-+	nops=999999
-+	# -w ensures that the only ops are ones which cause write I/O
-+	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-+	    -n $nops $FSSTRESS_AVOID`
-+	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-+}
-+
-+_require_scratch
-+_require_realtime
-+_require_command "$XFS_GROWFS_PROG" xfs_growfs
-+_require_command "$KILLALL_PROG" killall
-+
-+_cleanup()
-+{
-+	$KILLALL_ALL fsstress > /dev/null 2>&1
-+	wait
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+. $tmp.mkfs	# extract blocksize and data size for scratch device
-+
-+endsize=`expr 550 \* 1048576`	# stop after growing this big
-+[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-+
-+nags=4
-+size=`expr 125 \* 1048576`	# 120 megabytes initially
-+sizeb=`expr $size / $dbsize`	# in data blocks
-+logblks=$(_scratch_find_xfs_min_logblocks -rsize=${size} -dagcount=${nags})
-+
-+_scratch_mkfs_xfs -lsize=${logblks}b -rsize=${size} -dagcount=${nags} \
-+	>> $seqres.full || _fail "mkfs failed"
-+_scratch_mount
-+_xfs_force_bdev realtime $SCRATCH_MNT &> /dev/null
-+
-+# Grow the filesystem in random sized chunks while stressing and performing
-+# shutdown and recovery. The randomization is intended to create a mix of sub-ag
-+# and multi-ag grows.
-+while [ $size -le $endsize ]; do
-+	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
-+	_stress_scratch
-+	incsize=$((RANDOM % 40 * 1048576))
-+	size=`expr $size + $incsize`
-+	sizeb=`expr $size / $dbsize`	# in data blocks
-+	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
-+	$XFS_GROWFS_PROG -R ${sizeb} $SCRATCH_MNT >> $seqres.full
-+
-+	sleep $((RANDOM % 3))
-+	_scratch_shutdown
-+	ps -e | grep fsstress > /dev/null 2>&1
-+	while [ $? -eq 0 ]; do
-+		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+		wait > /dev/null 2>&1
-+		ps -e | grep fsstress > /dev/null 2>&1
-+	done
-+	_scratch_cycle_mount || _fail "cycle mount failed"
-+done > /dev/null 2>&1
-+wait	# stop for any remaining stress processes
-+
-+_scratch_unmount
-+
-+echo Silence is golden.
-+
-+status=0
-+exit
-diff --git a/tests/xfs/610.out b/tests/xfs/610.out
-new file mode 100644
-index 00000000..c42a1cf8
---- /dev/null
-+++ b/tests/xfs/610.out
-@@ -0,0 +1,2 @@
-+QA output created by 610
-+Silence is golden.
+diff --git a/tests/btrfs/287 b/tests/btrfs/287
+index e88f4e0a..a51b31ed 100755
+--- a/tests/btrfs/287
++++ b/tests/btrfs/287
+@@ -7,13 +7,14 @@
+ # Test btrfs' logical to inode ioctls (v1 and v2).
+ #
+ . ./common/preamble
+-_begin_fstest auto quick snapshot clone punch logical_resolve
++_begin_fstest auto quick snapshot clone prealloc punch logical_resolve
+ 
+ . ./common/filter.btrfs
+ . ./common/reflink
+ 
+ _require_btrfs_scratch_logical_resolve_v2
+ _require_scratch_reflink
++_require_xfs_io_command "falloc"
+ _require_xfs_io_command "fpunch"
+ 
+ # This is a test case to test the logical to ino ioctl in general but it also
+@@ -42,10 +43,9 @@ _scratch_mount
+ #
+ # 1) One 4M extent covering the file range [0, 4M)
+ # 2) Another 4M extent covering the file range [4M, 8M)
+-$XFS_IO_PROG -f -c "pwrite -S 0xab -b 4M 0 4M" \
+-	     -c "fsync" \
+-	     -c "pwrite -S 0xcd -b 4M 4M 8M" \
+-	     -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
++$XFS_IO_PROG -f -c "falloc 0 4M" \
++                -c "falloc 4M 4M" \
++                $SCRATCH_MNT/foo
+ 
+ echo "resolve first extent:"
+ first_extent_bytenr=$(_btrfs_get_file_extent_item_bytenr "$SCRATCH_MNT/foo" 0)
+diff --git a/tests/btrfs/287.out b/tests/btrfs/287.out
+index 4814594f..48541f7e 100644
+--- a/tests/btrfs/287.out
++++ b/tests/btrfs/287.out
+@@ -1,8 +1,4 @@
+ QA output created by 287
+-wrote 4194304/4194304 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 8388608/8388608 bytes at offset 4194304
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ resolve first extent:
+ inode 257 offset 0 root 5
+ resolve second extent:
 -- 
-2.46.2
+2.45.2
 
