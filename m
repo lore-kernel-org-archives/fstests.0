@@ -1,85 +1,85 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28EB53FBA7;
-	Wed, 30 Oct 2024 00:49:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C512D383A2;
+	Wed, 30 Oct 2024 01:01:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730249345; cv=fail; b=Bme0ghZFIiBsQ2VWdaoC9HQYjFuOp3NsZbVRnfZgcOWsm7NMb3v/32Fz4nXjmwftPv5YUb8uxLE3YXRQh+K/4UD/sGVvxqxnajMD+jDd5hXu5WCoIxqaC2/K2PIgN3mXOmsNvcSGSKfq7zin5pBsF2AmRHcV2NOKVE9T3EoOQ9U=
+	t=1730250103; cv=fail; b=E/IAGOHEYQ/h2dIobJjrpId9kA0XlpXroNHL2biuZ5+3K1OD6hiILSQrj/pUprXFPHLavBt+7N+1bIDeWr8Xxo1/F26gWxQDMVitHKq1VEZva8mDq0mossCc+GgRQsSywqtJq1fh4/H6MlSHMSu7/6JlAiBNwP9fSeMTCAe2QYw=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730249345; c=relaxed/simple;
-	bh=VQmQyIun+55Bp7uvedKf0emfhB3USHBk7ObKE7Uq8tM=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=tAmn59subq4G0LGHnuCNvSodXUUAdelaL6KlbmYz+kNYMB71la9WAgl91UNhyq9jWWd4bdAPHy9tSpi2izcsRwTsqyMfHP9yGV0f1Mn6ccow/Mx+iXs+X4RCpHi2SXm1Ewa9oqF9YAXRUzf0qBQGnKUEtI4CpZrZfoo+YNld7+c=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=bs21doJR; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=nBYIUD6S; arc=fail smtp.client-ip=205.220.177.32
+	s=arc-20240116; t=1730250103; c=relaxed/simple;
+	bh=ArxP35KMhWpJbSUv6IFUtryr0hp6XZyq5z3NBhmveSU=;
+	h=Message-ID:Date:Subject:From:To:Cc:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=qhJkGdNODtbG6SNcF14NaqXaU8LMRDbP4Qsh+miFJXqmBMRuj591y/bqL87tDwV+Kx9YpdvE/wvqblqKNYdwaxvO6/guXUrO7mmKaoMJIAbkKrtfwXbJ3JC2eGorbVODXkFqdJgIPbPWpoXv//XKM0nkvI8tWM6Xt/OoVyO3dB0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=PzIV8ALm; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=XaOC3NdP; arc=fail smtp.client-ip=205.220.165.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="bs21doJR";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="nBYIUD6S"
-Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49TGfZi0028572;
-	Wed, 30 Oct 2024 00:48:58 GMT
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="PzIV8ALm";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="XaOC3NdP"
+Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49TGffnY003785;
+	Wed, 30 Oct 2024 01:01:36 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=sXL3A4Pf3UavwPH2FlLq2kReVHy1PWxG1J4VPaZoM9w=; b=
-	bs21doJRkxoUsvLKkNNAjOW17rEconLxjCpWvCyybaq4HbfxmO/L+mpVsDE10CL/
-	DdC996ap960PwQ5ifODfh5gZZYNcYYmcT0NbkTYGEHs3epxoxPQmplJUV3Ix5MTT
-	S54V+DDxpDVZNDR6LyeALmnMvNVF67p15HD6iRzSeDbZWyYb+Gvk2ISYFzRUXyXD
-	0IMfSV4Ijr+4GXaR0RZhl0vi3Ff0aBcoWarhzr3r7SbGJKbmV1O1dXAYx74IGkyh
-	Arq61U8GzSM8p0G1OvEQ7zbxHpf8CL7J00YIjREYnz3UdqQr+ZVR6PF8+vxsTZHR
-	WQIKbPgVofVsWYORLWOELw==
-Received: from phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta03.appoci.oracle.com [138.1.37.129])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 42grdqetbf-1
+	corp-2023-11-20; bh=Wn253kuSlIT+Sj+N3yyCZEopIRSN0QWdX8yZh8yVrjo=; b=
+	PzIV8ALm/RlMKkSPXyko77mV50ZNA8QPq7DPfCAEfDrLwYXgTq++vVxOAnG8uOrE
+	KirAYkqsoIaxJjqcJgT4TOBdRSRsObj9xWIRwr7kV2YR9HgvO2c9gVXZ5Cck5WFo
+	fDANKpRTtKZs3x/+5Scw6slBUOxmy4cvC9qPy49NUNFIq8bVwqaULaw7AjK5FD3b
+	j1HLjASShuZfMiUQWZD70oJR0e2eRShmcNpwrfNfk2e4sjUqePVnlu6IZVlb2lHz
+	wi7fkUiY7TuPPe6MiiWP/bdGl4m556aVbgvEdhQUICkC9CqXk45u2G3JV1jN1LVW
+	f59VDWxf7Vsn+vu7kNKJTg==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 42grgwetf0-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 30 Oct 2024 00:48:57 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 49U0fK8e004210;
-	Wed, 30 Oct 2024 00:48:56 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2177.outbound.protection.outlook.com [104.47.59.177])
-	by phxpaimrmta03.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 42jb2v203w-1
+	Wed, 30 Oct 2024 01:01:35 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 49TMTJXx010127;
+	Wed, 30 Oct 2024 01:01:35 GMT
+Received: from nam10-dm6-obe.outbound.protection.outlook.com (mail-dm6nam10lp2048.outbound.protection.outlook.com [104.47.58.48])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 42hn8xnfpj-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 30 Oct 2024 00:48:56 +0000
+	Wed, 30 Oct 2024 01:01:34 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=VCShOJYC5LX867dKPWC5VIRs9VpAkjJjnKqJwSikpuXMEss0/I3GZn4CU42rRvcTl+KSexMVgxKx4yFyZQmEoJAdgtc1kVMt2QurGyoiikjw90faDnpp8S6nLi/hj4vOp4i0aO/265h5z6mhE5yfhYCzTkmSOmqz2bQOSR59NMczNuEmym6HOqLGhsUlCBSZUJkTX1WLbf0lqGFXSJxEZcGWx8hjfYtGdDMLIBSxy9BP7lxRVW1KfRXzvIPfe/q8giC6GDtZ9/BwVP37eZrWFR1Afk96nFT5CTaINSZsw4Xh4Ke1UpBLLlv9/UseIzpiEi6MyRAYCXhUrTqdWxOisA==
+ b=QRLdtpugKk1C4lAhkw19+a6FA2fY/1Z4GUxl39jyzTP5jDLCnTWMDsIoQOPtG1KHlJmGXM6xXBd7W4DfGdCrmHYPRHf6R5Jep6r5CgAPv3PFuLtKt8eEjY2CHptdkw13H9YEheaYMHblFGvZx22Uqt81fZT3sF6baz7JoqfSk3vNswUOk651u96deGMzWxjEyQuntRBn8Tdz5AvlJUPHlT2X3OxSDXCIJ657OHPRRy1Nc2LNv9Zfijox0v7ZUaK0UWLe6pOpXnAtmZYXpJR7VN04iyP9ZFMGLIcMhpOrLf0DjTLLPCO6mPjA5L78IL+ZhGJQCOUB1WIBrUommiEhYA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=sXL3A4Pf3UavwPH2FlLq2kReVHy1PWxG1J4VPaZoM9w=;
- b=RkqRIyad8PjP0ek+M3n2OAPFxA0qsA7A2tX15dGHqtbrBePx+ekdFwtsGDh7WDq62ZkMaduYUzaufWf68W3tnLDlUFUvGkYJ2SFjwwnYGBWd/Jic4oOsLZBPwsY1h5fBcZN7fIatXixsx19VF4fkdFzCeC3R8yArBinSSd//cYdTDb2r+WlTK1WcF0T0fG0VyNhYVyDizbftSIgyBVnJr9fOdNM+yepwfNjYMvdlfEVc+36ruPdOpqMhOcmnbq+0YEymVFc4u/ff2H6peZw7Is7fuR7h5x9JC/Aq6uB7fw+9siOrWph3ARoMCxAJCNHjSrhAseHCzuQsdasTZKXBWA==
+ bh=Wn253kuSlIT+Sj+N3yyCZEopIRSN0QWdX8yZh8yVrjo=;
+ b=maw98n9Zoh4YEKIVx/aY1CMKsBtgorypz6e0yiN0qbKbsJKm3i3XFeQ8X12+imjviskcsWjsLVtDkt1dX1Bl6t5riTScMebeGrKDASCMjzjXI7EcJuq0siJPZKPnMVflXMfMvQsykzmD35twSlyd9MlBwf9oDAdZK8B3K/8WLyHl71yRHpBAoShR5zV+WnAVWBN8IPTuHzpvlQIF6hSLvOkLqoAZJgxQ6YcQL1IGniXvZl+B/ZNAFyhf54UG4hokGjKb9wHTvboMoPT2w7OfiLUjV5PY8VOk3LzZiox/2U6UrMHdM4B4pCFHG7+wKFXi6qIqjv87fOaOPBRy3JUALA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sXL3A4Pf3UavwPH2FlLq2kReVHy1PWxG1J4VPaZoM9w=;
- b=nBYIUD6SsCqLDW2UXomkM8LXzk5o7NkZH/G0FfJ1/tjEhXJE5Dmsp9RmFcSQjhOh4ZaKqyZ39qynCbW9Dtapt1D+ketD9KF/pAiFUB6JS43FpTyzfxwjLhE+ehTU/LD4Piw8maVfHnNOJk6EOS7dmH+bkrk3I7PUbdTF4ROMw+M=
+ bh=Wn253kuSlIT+Sj+N3yyCZEopIRSN0QWdX8yZh8yVrjo=;
+ b=XaOC3NdPbZf9eZCoEEjOup1hFu8mohASAvNqsv49a03IYQ+cgPz4xw6NBdDboplallgWV2xb12kNl1SCnC3PMFpG9K8+ol7DcXdhvTQHprJct3EYeWSQTE7KEgXykyb7Zsx4uxLBdtzkyshHjSjkbMlq3iY3uA2COUxiLXa2+6I=
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by SJ0PR10MB4480.namprd10.prod.outlook.com (2603:10b6:a03:2d7::10) with
+ by BLAPR10MB4851.namprd10.prod.outlook.com (2603:10b6:208:332::12) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8093.32; Wed, 30 Oct
- 2024 00:48:49 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8114.20; Wed, 30 Oct
+ 2024 01:01:31 +0000
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8114.015; Wed, 30 Oct 2024
- 00:48:49 +0000
-Message-ID: <a88924e1-4ff0-4cca-9d28-cd23f7a67b58@oracle.com>
-Date: Wed, 30 Oct 2024 08:48:44 +0800
+ 01:01:31 +0000
+Message-ID: <793076f2-c1f2-453e-a17f-2cf4dce2fcc6@oracle.com>
+Date: Wed, 30 Oct 2024 09:01:27 +0800
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH] btrfs: add a test for defrag of contiguous file extents
+From: Anand Jain <anand.jain@oracle.com>
 To: fdmanana@kernel.org, fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 References: <e592bcc458f5c2ec41930975003702a667c92a8e.1730220751.git.fdmanana@suse.com>
+ <a88924e1-4ff0-4cca-9d28-cd23f7a67b58@oracle.com>
 Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <e592bcc458f5c2ec41930975003702a667c92a8e.1730220751.git.fdmanana@suse.com>
+In-Reply-To: <a88924e1-4ff0-4cca-9d28-cd23f7a67b58@oracle.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI1PR02CA0024.apcprd02.prod.outlook.com
- (2603:1096:4:1f4::12) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SG2PR04CA0168.apcprd04.prod.outlook.com (2603:1096:4::30)
+ To PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -87,252 +87,312 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|SJ0PR10MB4480:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7846efae-ff98-4f9d-3baa-08dcf87c9dd9
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|BLAPR10MB4851:EE_
+X-MS-Office365-Filtering-Correlation-Id: 413eb338-706d-47d5-26ed-08dcf87e6472
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?NFJDT3ZIMU5IYjdITWYzd2hRWjJvT0R0a2sxcFh0cWs3KzdRNzgvRk1JRVp5?=
- =?utf-8?B?YURISlp6YVJEeHVVZFR4cmQ0Y2NGdVZkOGszUytNRmJHcGZyeldweENCd1RB?=
- =?utf-8?B?SHlPajFDQ0x6OEFEb2wzcEN6M2xKRnFLcWlhc0VvWm5zdjgwTWFjZUI3NHNN?=
- =?utf-8?B?UzdTS3BGenlOWTZxcnA2SCs0bVVTVXlqcmV3NWp3STcvRVVMcEpVbEdFTHR3?=
- =?utf-8?B?SkVtMmU3dVFCSzEwdjRvMWRUSzZSRFhWYU9sTVhlZ2Fyak9nT0MyalVUYUo2?=
- =?utf-8?B?L3V2Q1F1dy9nT2F5dlZkV1UxbmFZSjVqSy9KVExBTXErS0FVTUF6YnVPZHcx?=
- =?utf-8?B?L0FjOFF3a2pNZVcyN2E4bENsVnJaT1JNTDMxRDdmaXd6SXVqblRjelBXRWk1?=
- =?utf-8?B?R05nTXFCZUVnakdLOXljbEs0MTBiZkxhR1BWdGFQQnZPejlrNzhrUEsxY29M?=
- =?utf-8?B?QkFRMlJpZVpqMHFsYmRHSVlBenMweU9RejF6SVgrdDFwcHdZU1ZpSkpCd3Fa?=
- =?utf-8?B?d3Y1TXZzRkRnU2VSeUtXZUR4ZzlObWgxQUxPU09kZ3ZjbEVXRmcrQlF6d0I2?=
- =?utf-8?B?T3IyQmYwMCtheG5NV09uUVdRVTAyOUJ1bXNtVGpIVDd1YndpZ1dlUG5XWjdq?=
- =?utf-8?B?M0VZMzNCVk1OL2pXMjk4S0s5TUFrMmpkbFlsNVc4STRRUlJ2eHQ5OXh2MlND?=
- =?utf-8?B?NmZvNVY2MFNwYm5qZlg4UjZwdEl0YVdjb0M0UUdjU3FqY3h1cmRaTGp5SzYv?=
- =?utf-8?B?akxKbkI0VFdkaW9GSVFBZVQyazFjeEJOcXhRNnVKR0VHVVlNem9ydWpYdXZW?=
- =?utf-8?B?NzF5WTE4R3hqMmpxSjJROW0xL0ZoSTlQeXVDU01odzlUcEVwOHJSUkYrZVZR?=
- =?utf-8?B?WXdHdnpUQ1VMMExuK2xGY0doejZLRzRLTVRCWDhza29zM3BUYzJJSHV6K2ZO?=
- =?utf-8?B?Q2lPTm1qUXdzWmcxVEZ5NDlMaVBsQXNWbHMrUVU3TnlscnF1KytKVENCcVpj?=
- =?utf-8?B?dWlJTmFnQnRBdEdvcy80L3doblhTclFJK0diRXA4THJGYTU3aXc2M2pSNDNr?=
- =?utf-8?B?cFlDZ05SV3lySXhVUGlCZEsrVDBFTEF0MXB4eTZaVmVlbUZMNDhQL1pibUFt?=
- =?utf-8?B?eFBWUUlocmlhS1FFRk5ZMGcrMU51Q0tPWWxXcitUb3NpWnRVeFN6R3pEem5E?=
- =?utf-8?B?c1RiZlZNMUhmUURQNGt5Y3NwVlRQMmUzcUhPQ0ZZQWx2M3IzU0NUa2srQVUr?=
- =?utf-8?B?Z3VYeUx5cEg0ZlNQczhtVGhsNEowNTVEMHltU1ZlZlZRVS9STVFGY1BLWXVK?=
- =?utf-8?B?TUhxRFlyWjhyMkUxZ1grU1BNMi9XUTZDRjFSdi9mQldFbTRFTzJNTVY0Sk9x?=
- =?utf-8?B?djdYMnhrNXhMUkhJbkpOaXlUYkhOc0FodFFsaXNnL2NUb3ZvWWhvUmhCMUhI?=
- =?utf-8?B?cytxSVVkWUZrSHVmOWx6WG9YVWNtOHVocGZpbEZFV2VIUW5xUkNFTTJZaFRZ?=
- =?utf-8?B?RFZBdVdUa2NOOEE5Z0JiUHQ2KzVjNW9IQm0xZTlwRnpmWEFtQ0IxWTltSERK?=
- =?utf-8?B?NWllb3pRRzdmd2VZamlZRlJYMVJYVFRSRzdhellRQzBPb3c0ZmtJbHpCYnRu?=
- =?utf-8?B?S0MvaExFOXJJR0JBclVYbmx5VkN0MVp4a3ljcW9ieEd3NXA2aUNHM01hRUxv?=
- =?utf-8?B?aGZzcjc0QWgyOVFUNkxDbXFUWi9ZbHhDRE9uditzenFXbFc5eWErT1FSNUw1?=
- =?utf-8?Q?hgxI3ROBl7ZxZNKFE5wTABgvjP/8dOnp+DBCtpt?=
+	=?utf-8?B?b0RlaU0wNnYwRXk4a3ZhMVpLU3Q1RFl1aVJlR0NwWm9ST0FzVnhLbnlWU0Na?=
+ =?utf-8?B?RlFZME1ZRENXN2QwSHlNQ3NEYUwvZDZGeE04YUlGWDZybEZoM2REeENYdzQ5?=
+ =?utf-8?B?ajRDcnc3U1Vod0VlR0l1bnFsSlE5bDdQSGtQaE9EU3FPajJ4ekM0b1FqZkY4?=
+ =?utf-8?B?VUVmVy9QQ1c3M1J6TjI2eWdpR3dyNjBsNkVPd3dxZVY2NUtRUm5uZllBRWJW?=
+ =?utf-8?B?b0hpditlYjJDNjVFVHlRS1lPMUhmMEFZTFlzMzFNdm9YQTRSUEV3TVRHOXo5?=
+ =?utf-8?B?a2JFOFluaUtjSGJBY1ZmZlpNQ3diRVUveGNnRXdKbVF2dy9LeldidWNYM0R5?=
+ =?utf-8?B?ZkIrWmVnbHF0TTNXZW0xY3ppTWFzWDNMb0VhcHMrc1NZaTlwWGlWRGRZZTAr?=
+ =?utf-8?B?T0hrbnArbFZzd281UmtkejA1K21YNGdTQmdnbEl5bEtZWFl4WU1MQzRBa1NE?=
+ =?utf-8?B?eC9HN2hhVTNUaWp0VVk1dkJZalVIOXhYdVYzc1NWYWplMmw4LzJnN1pjSTl3?=
+ =?utf-8?B?ZGxkNUQ5TWxVWjZ4M3FyVEc5b0Z5Sk9lRmpVdWxHb3ZUUGprQ3NwUkFZYSs4?=
+ =?utf-8?B?OUdaSFZLNjNob2FaWDIxY25SVVhmSFZUbHpjeEJxNklEZWczNjE3QmFIU3Jy?=
+ =?utf-8?B?MkhxT3pLT0RpVWdreUluUGpvcTZEZDFoRGZBZ1RldUkrREZUS2xMKzUrUlV6?=
+ =?utf-8?B?VWFPV2xxSDVaVlc5NU9tZjl2ai93LzZBMUZ2VEQyWlZ2RHJGckNRNThlSWZZ?=
+ =?utf-8?B?a29oUkZ0ckJETUhUaFBZa0RmZ2Y5d2Q1a3dBNG03RkZNR2lUOFBzaFJIOFNm?=
+ =?utf-8?B?WkwrZk5kMWJYK0phWFlGMDhKYldrLzdFNVducDh3a1lVakNvbzJldFRYM3B6?=
+ =?utf-8?B?RGZpR1pLRlZqZEkxd1oxdytQZWtmaFQ1aXBFd3haOVRPcVovcGNVd3l2b00w?=
+ =?utf-8?B?RXNqRkd3WFpueHJvekF4ZFpTZmlXVnBRcW9QcEcxT0RnU01FNzBQaytTTzJY?=
+ =?utf-8?B?ejA4bDNQTVhhSjJ3K0wyZXhtUitxMGFpbDBWUzNKbHVMTTVOeGNFT2JrSUUr?=
+ =?utf-8?B?VDJHbldUTUU2cjR6U0FPcEw0MnRrYlJpU3dVMUJqNU1FVzU4YXdkWDZ5ZVZO?=
+ =?utf-8?B?N2ZtUGVERE52TjdpcHVQZnZIWTNzYjZaazZNWHkvRmJIRUM2WiswWTlsZXFj?=
+ =?utf-8?B?YTZBWGM1eFlEREdWMVZkUEh3NU5Hbk40enlkRW5wWUYyZTMvNGI1ano5MEpM?=
+ =?utf-8?B?cEFuTGxqTFNYWXlSUFkrYmc2cTlkS2dSeWsxSFhORG4xeDVpdW5DVDhxT1dV?=
+ =?utf-8?B?UFduQUtjVUlRVmFHOFhOZmhJTFZFSE8yUjRwYWJDYzVUL3M4REwvNmNDNjll?=
+ =?utf-8?B?Mlhyakw1VjlNZGg4Q3JsT3YyY003dW5QWmFDbjhmZEc1Q3k3eDZ0MW5lU3pG?=
+ =?utf-8?B?SWxhN0ZPZit0V3NUenJGS2pHSDVCeSt2eGlYY0l2TGlxSlRhVEpwZ2ZGOTI2?=
+ =?utf-8?B?V0R0cmFTeFpiU2dnczVSRWphVlFpK0w3emhrNUNPRWVKb1M0SjJrc0Y1ekFZ?=
+ =?utf-8?B?MytWVDNWVDVsNDJuSUtNZmhuYmF5ZVZYc3Y1RFNqYm1xMy94NWRsclduUzhQ?=
+ =?utf-8?B?eEdJWG1uVEZDZXpwNVFndUN1RFJXQUlQMy9pVUN2VVFwbzczR2ZNamtsOG1Z?=
+ =?utf-8?B?ekI0VzBacFM5RnJvbWg4Y3RlU3RDMkl2aWZLZHcrM3JUenA3SnpYVmFFelox?=
+ =?utf-8?Q?D2ucli1auO+usTYfz+zT8XaAE1MbO/V3GD3PlET?=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?aXpPT1VQNEVXTXB2akVoYk9rZXVlNmFiT2JxdVhhbnVWUTdGMnNxdG5lMG5o?=
- =?utf-8?B?WHorUncwNjRmOHVMc09rMktoWG83RVJzSUw5cWFETHo1YWtEOFJFNk5IVmVx?=
- =?utf-8?B?TXNlUHZBbStpcnk0bHdCbjVCMlVIOHd1a2V2VHVteWVZZVh5SlBKSVZaU3VT?=
- =?utf-8?B?VEVRN055NnlGYXQwM1BNZG51NXBkQ3ZmOU9Sa3QxYklCcWpqYnBGd24xeFhI?=
- =?utf-8?B?YTRrb3daTmUvcVNoRXQ1NkVxZDd0dXBCZ0QvUHlKRjhQVVRwSlVOOTJjcWN3?=
- =?utf-8?B?OEswYXYrZFVjdGFOb0pYNVVUMmlzcElQWmZwbW02ZVVyUW1md3hzUWZ3QXhX?=
- =?utf-8?B?amI1dUJnUVJETzRqTGM5ZG1WTjE1YjdvSWZkQXRZNE1GTVFWcVJ1VHpCSlFL?=
- =?utf-8?B?WDZYOGpNMnRTb1E0UmkzUFVWaWJ6NVZuNUVZOVVIWVZtYjg0OGdPKzlVeFFW?=
- =?utf-8?B?ZjF3T0lUeUJ6Z2dQZUxZTlQ4VVk3dnhxWlo1MWdyTG1rSnRUMFZpMG9PekRG?=
- =?utf-8?B?MFc0S0dGUlVlUW9HV1ZUeHJDbHY0THFYTW5XdXR3YXNiVWN6M2Y5eDFkV0ZY?=
- =?utf-8?B?RlB0eDBpQzdpMmhUK1RlK3cxcUlhQTFXQ0Z6bDUwQ1VtWDFWTHBHNEFGQUw3?=
- =?utf-8?B?YTFzaW50UVRrNnNLUWF3ZzlCRmIyRjF3eTJxOXVMOGNiK2F5UldPVlZxbThi?=
- =?utf-8?B?QUJaczVnc3VtcDlUZS83V1hJaC9zOUhGNkhNWTR0V0F4R0E5T01wenFBVnJ1?=
- =?utf-8?B?RHNuWTFVYmMxZFVZeklWZ1BWaGV6TGVKeTU3RnBCVFJhcVdRVlR1WllRL3VL?=
- =?utf-8?B?eWpxeEpoeTFXQXdYVzE2ZU9kcGUwUmxmeVY1a3AvSGdGaUl3MGpxZVQ3Znoz?=
- =?utf-8?B?L2lDUWk3RGN6UitHS3JJQU9WNnMrWGlTWlBvOEV6TzNwRFJVanJnR3hZcUUv?=
- =?utf-8?B?bVR5RUtzVDVDUFQwamlabkoxWExyeU5RQ05mcWsyd1NIWTBLS1lXQ3liN3M2?=
- =?utf-8?B?Y0FWc1VFblBvekNUQml2eDRvdE9EckxqMEJKUWh3UGwwaGpMSjdlZXI2WGlF?=
- =?utf-8?B?bUdrSFMrakhvZlFyZDdtaEVsQXVJRjRZRmlTSkZUSnVLVlp2WDlSR1lQbTBS?=
- =?utf-8?B?bk9UYUhLUzRNU2pOMUJtYVg4UmwwaE5oMFZsMGhiSmordWEwN2dqS1BLeERD?=
- =?utf-8?B?a1E0THQ3Z09hSHB0RHQzQ3lCTmpzZGIyVzBmbjdnRzlhbFBxS2c4cE9YZGcx?=
- =?utf-8?B?UFdYaEhNVlJ3V0lScDZqQW9TNEplVWUvNU9kMW52TUM3c0pTeG5iQWRBRmJT?=
- =?utf-8?B?TEJKc1E5Qk1OcTRDZU5xQmlmSFZFZmxoYXhWYm1DMmZwRm9URG5Gb0t3VFhJ?=
- =?utf-8?B?ZUozQlJyMW44Q3JlaUJWVUxkY25nc3BDdHZyNldVeG9keWJXeTMxQ1daWkhv?=
- =?utf-8?B?ZFlKalVzR3BMd0VnUm9WRXZNYlRSUE4zMGZTSkhLazR5QTliSkt1VEVUbHNK?=
- =?utf-8?B?cVNxTVBaWVFsS1hyNTd2azRWdEhDbzhZUFhnZURJWjdMUi9kbWhRNSs2ZGVD?=
- =?utf-8?B?NjUySUlFWHF4TEJOdFFhamRYL0F4Wjd5WDlkOUtiaXBaeW9qUU9VSWFqMW1P?=
- =?utf-8?B?R2dVRUFZZ0dPeS9ZYjl5SmYyS1Y4Uys3QWJBQnBLSGwxQlVzVVV6Vy9tZDFL?=
- =?utf-8?B?dFYzaXJNWnplbm10SlNSUVlPTDF0NjZWaXhvY1BlSEdBY21zYjFyYStJOEh3?=
- =?utf-8?B?S1h6cnBCSXRxMkRPL2VlWDFGVGJDZzZCZUNoUEo3Rm5ZeTFLUWs4M1ZhVkRT?=
- =?utf-8?B?STgvSWpFVEwxTXZ1aC9QNVo3WkI1b2VuU0FSRGhSZnpvRFZhUkFkdlgxVmdH?=
- =?utf-8?B?Y2M2MTJhaFdnQmZMZThyWXRwaUpmbFlFOGdtY05aWnFVdHhGZlNJNmVYcE9I?=
- =?utf-8?B?VWl4QUxLVFZobnEzNTNzVTFERXdxdDBCdVlsQVFhL08zVzk3YXNKWTRkWE4x?=
- =?utf-8?B?Q2RiSHhkWURabW9kcmhWL1FPSjVRQVZWS2pIekpHNE5wRjhudFpoTHFCaWww?=
- =?utf-8?B?UmxRU25DbGFwTzV4Y25OZDQ2QkVOQ2lYK2UxMGxVSDV1QWtjcUY0cFBYTWhD?=
- =?utf-8?Q?JIYqsfao9afpn6S4OSTP9Ml/s?=
+	=?utf-8?B?OThFS0FyYUdxMTRRdjhiOGVmcGo2Q1Zza2VORHVHd3JWeTJOTFVTSERGMVZo?=
+ =?utf-8?B?SlcvUGtxS2NtUS9yNUZpRDRZQytseDFPT3RlUVdnODRLdXZtblVDeThoVmF2?=
+ =?utf-8?B?TWkvWDJpK0lzeXRkdElMZGM2ZW1iMUR0d1hha2RRR1VneFJDU3lTdk5iRWNV?=
+ =?utf-8?B?LzA4MytSY0l6NStqR1I1eXNxaVo1dVRWRCtzUkE5czZWdjBXRW1tSklOUG4y?=
+ =?utf-8?B?VzVxMmc2WXpiQmRCYTEvbFY0V1hYM21HeEdscGVJRHpHMU16bTBoUndxb3pn?=
+ =?utf-8?B?MzJDUHhXeS8velhIemJUSUhPOXd2T24rMGVkRGdYZVo3dVJmT1l2TjhYa3RY?=
+ =?utf-8?B?U216ckVsRE9Lc0h2NlV0S3R2eVNCa1pyM0x0Znp4T3A4eldZMkRiNTJybG9G?=
+ =?utf-8?B?VEhSQXRCUUVqZWdVeDlPbGlWRlRGMEg4a3R1ZE9LTWZxYkE3S1U5ZWtKR1Y2?=
+ =?utf-8?B?L0tSWEU2ZUg3VXcweGluWDdHbXJIYTlWZ3pvdW1hcUlBNVM4UGRWTThUNjFO?=
+ =?utf-8?B?S1MvRThFV2NreTBoaUVaQWViMldJWXpyK09WMjdTblA5RVdPM040L3p5UEhz?=
+ =?utf-8?B?eENKdE9tVXJseisxdWwreWRTakJZV25aZlgxQ0FCaGdaWjIxQXhzdGRXaUhm?=
+ =?utf-8?B?QzRLMGtZVHpGZHFsclRnMkFSNEoxMU9IV3lDdmdtTkVvZ3JwL2dmVExncmVI?=
+ =?utf-8?B?MEdBcjM5UG5zN0wzemNwOXJVWXhRZjVMOHZZdzlaMkx2OWZQQlpiZnRPYjFs?=
+ =?utf-8?B?UXNaT1prUUlQRTVhWjBxUDhvREtSTVJlZXd5L1ErVmpid2dqUGhtV3pjL1FH?=
+ =?utf-8?B?Rk1zVzlSRXFNR29NQUdFdUtVSU1MSlhrd29WNk1FSFk4WWYvR2czaGhubEFh?=
+ =?utf-8?B?aXJhUFl6NGlQYVFLRWh2WUk5WTFycDhYeElXYnliUjhoOUdmQVErbUxmSXdZ?=
+ =?utf-8?B?a1NvQ1JhVEovZllGOEhUMlU4cmZxT3c5VHF1a1oybUpvdkxldDV5Y3A4ZW1G?=
+ =?utf-8?B?UTNaVXRJdjBycmhTWnZHMVBXSUVud21KcXJFUk1ib0dEaUNNeU1uMHgzK2wr?=
+ =?utf-8?B?dkIzaHVWUXlOT1VveDI0UGdPUU9IbXozNS9qcXBLSUJTVmlScitMUVc0cVFG?=
+ =?utf-8?B?QjdVTHZQMjc1Vnkvb0gzYVlvcmdZTXZOYXlsQk40aWNnUmF4c04vNnZyVEVw?=
+ =?utf-8?B?a3hFTEJuN2RQL1RIaHlPeWE4ZVAxVHd4L1ZpMkJmYXQ2V1dZeU9Wcy9DdjMw?=
+ =?utf-8?B?OW4xclN0N2QxdDFpM3B0ZU9vKzNqZHFZRHhrS2hjWnJlWXVXNmNMdk9CRHV3?=
+ =?utf-8?B?Q0g0Z3A5NXJUSS84NGJtYnhoRGNJaEpuTjRTSlEwVHh5OUNTak1ramZZTUxX?=
+ =?utf-8?B?MHFhcG9hN2Z1OUtCbitGd0ZXYnpPVUc5YlhpVmllbHhOYk5zRGtUQmhOa0FT?=
+ =?utf-8?B?aEJMVWFWWW4wSUM4YTdEazhhWExndUdsWFNFeFpDcjY0MmFGY1l0eWJtTnVq?=
+ =?utf-8?B?cmF1WmFFN05rbGRwWlhSMDlhb2RtYnJBOXFOSGF3RzJxSFIyVjlnNElGWHZu?=
+ =?utf-8?B?OTdqbE84Z2NmVjV0Y2Z5eW1lN09RRkdmOW94MERnVlNvRDdhNlNYWGhPSXc2?=
+ =?utf-8?B?a1ptSFZGU29IdVlnTm5iZ3IzbGtZZFBoQ0lJcDFzUGVMczk5MGlYcHFMaDdS?=
+ =?utf-8?B?THo1WmVZcFArd1BEaDVUdTI0T2hDSUg5MHZYdkJ0L2NGaVhTYUZQOWt4czdE?=
+ =?utf-8?B?bTAzeG5qdDl3SW5ueERDT2x1RlJSb0xCOXNybGZvcWFMKzV0aGQ1YkZjRXJ6?=
+ =?utf-8?B?S0VtZnZoV0h0ZSsybFdMRFhZZHBtbW9kbUNIaDliY3JBZVlBNVhsMzJwYXR4?=
+ =?utf-8?B?RW5pc28xa1M2ZzBCcUE0dkx5NUZFbmttb05TWTRuOUJyWDUxaHROdEdHTExZ?=
+ =?utf-8?B?UGdXYk5XakJOMURZMjVrMU1UcHlxMHNCd3I2ZnpadFZ2c1VOR0NhNDFWZ0pk?=
+ =?utf-8?B?NnlTbUxXWVBSeHlxeWFNcXVUWHpDMmtKWGhNcExlcUpLT3hmdG85RW9NNzJ5?=
+ =?utf-8?B?cWxzRG16Nm1wcnVldWlzQ29QTkJHUHFwaTFRRzF2MXNWOFVQOTJpOG9EVVl6?=
+ =?utf-8?Q?S/vluzv2bZVvsiMb2Fb/K9EtO?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	79nxdMizCkEexh27/xx6D/5ehZmUVv/56LKg++7PB0Li5eIRaIdv9pKCMsGCNTS5X/N9dG9gC0f2BxtXypqo+NqG3ePxRv+cte8KUUpz+HwGvES2r/SM78HkDR0FDnF3/j4ch1+O6EUKKIQdZUe/3Km1FRRHgses2qbn2iVri7Zrtc6vonDzfxrtvnR7GlNa0OxvgFsd9A1TSyQywG6P4ZUPJ+XqM3K6YjQ0Gy1pnrC8mek2uEPzP2gTLucAx8vqfMMmAAq1iU0PfDuyoyYnPhcams5z88cq2GCk4rfbX3e+yjtnIovxzd2CRSsJv+P2NqHTC9BQT2IfTCPkCWqJNLiq9djGgWYToyuC67JsisUaJw+0rDVLNmLnsp8lMqHySMno2muIo8er+6/FNGcFwV18japa7cWZBjR/pHjHgOAT+JzgQ5B2BDdK74SbgYkO2trjOxg5Lw21ZAdOtbh8bf2XDUIURT8SiXRkDwYSADBNPDthM1UFZAVLqvbpubjhhoC2ZQAt/daTyhUYxG7RYn3lTMig1l6RVXYrBbGooTO7YIwjJ8iCTL35AsyycgQydK2UO52zn94lC93NCMq7oRKd2zSAPsoywO9itwK80lc=
+	aGYx/YPnUakOCbbuw25VrAzzBY4gFPbzxOB3kRb1DzYwtXYvpq6rIr5X6b3+DFJO/bFwBO2Lm+RcjjMKhPeomwlFoR7GbLB2mGfiQ+PBcIrw5e91+SRYo5s9fvOFm1xHkZSKtTEt/BI6w/ow4X3raFQ32UEcuMpbBHcTHpZFjsLPbZ+8hSqe3D0h0Ukqb9ypPs8zczUyn9sdB0ODcqHk8KRcphhFThsZws8bf8+rAT7k2faG5p0p/aYfw2yFtHak++qLM1RILM3JpxK/LfVfu1qJ4C3IsIEZfZ72mY7wpQKCD3UXYe8MKQUJz1UJ4JX2u/R4EYMDF+n/Y2EeGcDJAqpHAirEKrMA4JJnU8DoTg0wrHmXHF4WepGRT6lVHR5Tp5Cssmixdac96xTzmw8BuwWCen0KbZlIdxUc3TCSS1uMPf3h0IcX/To+6R9F3NbwU7attXPnn4srOZ7108+wJA5LBW0TM1QJHFuZ5O/mSz/NzlkTwHQDoPYqJoE+h3JkhxHYegknvTalFke7GrVl+m63vqUWv5U2Y4EF/kSNmfNhE42ZJgQnum0UGaDYmzuUbIi0dNmI2g3XxzXbCsMPMMf2qn81dAK0WkRiXsc3wIM=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7846efae-ff98-4f9d-3baa-08dcf87c9dd9
+X-MS-Exchange-CrossTenant-Network-Message-Id: 413eb338-706d-47d5-26ed-08dcf87e6472
 X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Oct 2024 00:48:49.0465
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Oct 2024 01:01:31.7672
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: PMjTnwqsTU5UUK5irmooEa1IFMb/43fLtWxdQZ2dp/Nc/15PHIplO4nvztCRlS1hSrozkbG7dE2X2io0hh1R7w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR10MB4480
+X-MS-Exchange-CrossTenant-UserPrincipalName: 8vFaOvPz/9oyd7CeGzKPUrC4XblQBRltiNii73BzdHFDfbKpRFGKnXk/pjPMxhkXXDowVDKVuZRw7jU9fLO45A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR10MB4851
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
  definitions=2024-10-29_20,2024-10-29_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 suspectscore=0 bulkscore=0
- adultscore=0 phishscore=0 malwarescore=0 mlxlogscore=999 mlxscore=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 mlxscore=0 spamscore=0
+ phishscore=0 suspectscore=0 malwarescore=0 adultscore=0 bulkscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2409260000
- definitions=main-2410300005
-X-Proofpoint-GUID: Tj4MzpvEIXgmvcJbXR8A6k6pEi8LyxQL
-X-Proofpoint-ORIG-GUID: Tj4MzpvEIXgmvcJbXR8A6k6pEi8LyxQL
+ definitions=main-2410300006
+X-Proofpoint-ORIG-GUID: rMakCIiBFolLtN2ANDTnQ9WywJNZ9ehT
+X-Proofpoint-GUID: rMakCIiBFolLtN2ANDTnQ9WywJNZ9ehT
 
-On 30/10/24 01:23, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+
+
+On 30/10/24 08:48, Anand Jain wrote:
+> On 30/10/24 01:23, fdmanana@kernel.org wrote:
+>> From: Filipe Manana <fdmanana@suse.com>
+>>
+>> Test that defrag merges adjacent extents that are contiguous.
+>> This exercises a regression fixed by a patchset for the kernel that is
+>> comprissed of the following patches:
+>>
+>>    btrfs: fix extent map merging not happening for adjacent extents
+>>    btrfs: fix defrag not merging contiguous extents due to merged 
+>> extent maps
+>>
+>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>> ---
+>>   tests/btrfs/325     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+>>   tests/btrfs/325.out | 22 +++++++++++++
+>>   2 files changed, 102 insertions(+)
+>>   create mode 100755 tests/btrfs/325
+>>   create mode 100644 tests/btrfs/325.out
+>>
+>> diff --git a/tests/btrfs/325 b/tests/btrfs/325
+>> new file mode 100755
+>> index 00000000..0b1ab3c2
+>> --- /dev/null
+>> +++ b/tests/btrfs/325
+>> @@ -0,0 +1,80 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+>> +#
+>> +# FS QA Test 325
+>> +#
+>> +# Test that defrag merges adjacent extents that are contiguous.
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick preallocrw defrag
+>> +
+>> +. ./common/filter
+>> +
+>> +_require_scratch
+>> +_require_btrfs_command inspect-internal dump-tree
+>> +_require_xfs_io_command "falloc"
+>> +
+>> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> +    "btrfs: fix extent map merging not happening for adjacent extents"
+>> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+>> +    "btrfs: fix defrag not merging contiguous extents due to merged 
+>> extent maps"
+>> +
+>> +count_file_extent_items()
+>> +{
+>> +    # We count file extent extent items through dump-tree instead of 
+>> using
+>> +    # fiemap because fiemap merges adjacent extent items when they are
+>> +    # contiguous.
+>> +    # We unmount because all metadata must be ondisk for dump-tree to 
+>> see
+>> +    # it and work correctly.
+>> +    _scratch_unmount
+>> +    $BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV | \
+>> +        grep EXTENT_DATA | wc -l
+>> +    _scratch_mount
+>> +}
+>> +
+>> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+>> +_scratch_mount
+>> +
+>> +# Create a file with a size of 256K and 4 written extents of 64K each.
+>> +# We fallocate to guarantee exact extent size, even if compression mount
+>> +# option is give, and write to them because defrag skips prealloc 
+>> extents.
+
+
+>> +$XFS_IO_PROG -f -c "falloc 0 64K" \
+>> +         -c "pwrite -S 0xab 0 64K" \
+>> +         -c "falloc 64K 64K" \
+>> +         -c "pwrite -S 0xcd 64K 64K" \
+>> +         -c "falloc 128K 64K" \
+>> +         -c "pwrite -S 0xef 128K 64K" \
+>> +         -c "falloc 192K 64K" \
+>> +         -c "pwrite -S 0x73 192K 64K" \
+>> +         $SCRATCH_MNT/foo | _filter_xfs_io
+>> +
+
+With the fix applied, this test case fails when the compress option is used.
+
+--------------
+FSTYP         -- btrfs
+PLATFORM      -- Linux/aarch64 dev2 6.12.0-rc4+ #36 SMP PREEMPT_DYNAMIC 
+Tue Oct 29 00:25:40 +08 2024
+MKFS_OPTIONS  -- /dev/sdb
+MOUNT_OPTIONS -- -o compress -o context=system_u:object_r:root_t:s0 
+/dev/sdb /mnt/scratch
+
+btrfs/325 1s ... - output mismatch (see 
+/Volumes/work/ws/fstests/results//btrfs/325.out.bad)
+     --- tests/btrfs/325.out	2024-10-30 08:07:48.507531048 +0800
+     +++ /Volumes/work/ws/fstests/results//btrfs/325.out.bad	2024-10-30 
+08:57:35.097186024 +0800
+     @@ -8,8 +8,8 @@
+      wrote 65536/65536 bytes at offset 196608
+      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+      Initial number of file extent items: 4
+     -Number of file extent items after defrag with 128K treshold: 1
+     -Number of file extent items after defrag with 256K treshold: 1
+     +Number of file extent items after defrag with 128K treshold: 2
+     +Number of file extent items after defrag with 256K treshold: 2
+     ...
+     (Run 'diff -u /Volumes/work/ws/fstests/tests/btrfs/325.out 
+/Volumes/work/ws/fstests/results//btrfs/325.out.bad'  to see the entire 
+diff)
+--------------
+
+One approach is to use random data, ensuring that compression remains
+ineffective.
+
+
+>> +echo -n "Initial number of file extent items: "
+>> +count_file_extent_items
+>> +
+>> +# Read the whole file in order to load extent maps and merge them.
+>> +cat $SCRATCH_MNT/foo > /dev/null
+>> +
+>> +# Now defragment with a threshold of 128K. After this we expect to 
+>> get a file
 > 
-> Test that defrag merges adjacent extents that are contiguous.
-> This exercises a regression fixed by a patchset for the kernel that is
-> comprissed of the following patches:
+>> +# with 1 file extent item - the treshold is 128K but since all the 
+>> extents are
 > 
->    btrfs: fix extent map merging not happening for adjacent extents
->    btrfs: fix defrag not merging contiguous extents due to merged extent maps
+>> +# contiguous, they should be merged into a single one of 256K.
+>> +$BTRFS_UTIL_PROG filesystem defragment -t 128K $SCRATCH_MNT/foo
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->   tests/btrfs/325     | 80 +++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/325.out | 22 +++++++++++++
->   2 files changed, 102 insertions(+)
->   create mode 100755 tests/btrfs/325
->   create mode 100644 tests/btrfs/325.out
+>> +echo -n "Number of file extent items after defrag with 128K treshold: "
 > 
-> diff --git a/tests/btrfs/325 b/tests/btrfs/325
-> new file mode 100755
-> index 00000000..0b1ab3c2
-> --- /dev/null
-> +++ b/tests/btrfs/325
-> @@ -0,0 +1,80 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 325
-> +#
-> +# Test that defrag merges adjacent extents that are contiguous.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto quick preallocrw defrag
-> +
-> +. ./common/filter
-> +
-> +_require_scratch
-> +_require_btrfs_command inspect-internal dump-tree
-> +_require_xfs_io_command "falloc"
-> +
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: fix extent map merging not happening for adjacent extents"
-> +_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +	"btrfs: fix defrag not merging contiguous extents due to merged extent maps"
-> +
-> +count_file_extent_items()
-> +{
-> +	# We count file extent extent items through dump-tree instead of using
-> +	# fiemap because fiemap merges adjacent extent items when they are
-> +	# contiguous.
-> +	# We unmount because all metadata must be ondisk for dump-tree to see
-> +	# it and work correctly.
-> +	_scratch_unmount
-> +	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 5 $SCRATCH_DEV | \
-> +		grep EXTENT_DATA | wc -l
-> +	_scratch_mount
-> +}
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
-> +
-> +# Create a file with a size of 256K and 4 written extents of 64K each.
-> +# We fallocate to guarantee exact extent size, even if compression mount
-> +# option is give, and write to them because defrag skips prealloc extents.
-> +$XFS_IO_PROG -f -c "falloc 0 64K" \
-> +	     -c "pwrite -S 0xab 0 64K" \
-> +	     -c "falloc 64K 64K" \
-> +	     -c "pwrite -S 0xcd 64K 64K" \
-> +	     -c "falloc 128K 64K" \
-> +	     -c "pwrite -S 0xef 128K 64K" \
-> +	     -c "falloc 192K 64K" \
-> +	     -c "pwrite -S 0x73 192K 64K" \
-> +	     $SCRATCH_MNT/foo | _filter_xfs_io
-> +
-> +echo -n "Initial number of file extent items: "
-> +count_file_extent_items
-> +
-> +# Read the whole file in order to load extent maps and merge them.
-> +cat $SCRATCH_MNT/foo > /dev/null
-> +
-> +# Now defragment with a threshold of 128K. After this we expect to get a file
+> Nit: s/treshold/threshold/g
+> 
+>> +count_file_extent_items
+>> +
+>> +# Read the whole file in order to load extent maps and merge them.
+>> +cat $SCRATCH_MNT/foo > /dev/null
+>> +
+>> +# Now defragment with a threshold of 256K. After this we expect to 
+>> get a file
+>> +# with only 1 file extent item.
+>> +$BTRFS_UTIL_PROG filesystem defragment -t 256K $SCRATCH_MNT/foo
+>> +echo -n "Number of file extent items after defrag with 256K treshold: "
+>> +count_file_extent_items
+>> +
+>> +# Check that the file has the expected data, that defrag didn't cause 
+>> any data
+>> +# loss or corruption.
+>> +echo "File data after defrag:"
+>> +_hexdump $SCRATCH_MNT/foo
+>> +
+> 
+> Nice.
+> 
+> Nit: This can be a generic test-case.
+> 
 
-> +# with 1 file extent item - the treshold is 128K but since all the extents are
+> Reviewed-by: Anand Jain <anand.jain@oracle.com>
 
-> +# contiguous, they should be merged into a single one of 256K.
-> +$BTRFS_UTIL_PROG filesystem defragment -t 128K $SCRATCH_MNT/foo
+Please ignore the rb for now.
 
-> +echo -n "Number of file extent items after defrag with 128K treshold: "
-
-Nit: s/treshold/threshold/g
-
-> +count_file_extent_items
-> +
-> +# Read the whole file in order to load extent maps and merge them.
-> +cat $SCRATCH_MNT/foo > /dev/null
-> +
-> +# Now defragment with a threshold of 256K. After this we expect to get a file
-> +# with only 1 file extent item.
-> +$BTRFS_UTIL_PROG filesystem defragment -t 256K $SCRATCH_MNT/foo
-> +echo -n "Number of file extent items after defrag with 256K treshold: "
-> +count_file_extent_items
-> +
-> +# Check that the file has the expected data, that defrag didn't cause any data
-> +# loss or corruption.
-> +echo "File data after defrag:"
-> +_hexdump $SCRATCH_MNT/foo
-> +
-
-Nice.
-
-Nit: This can be a generic test-case.
-
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-
-Thx, Anand
+Thanks, Anand
 
 
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/325.out b/tests/btrfs/325.out
-> new file mode 100644
-> index 00000000..96053925
-> --- /dev/null
-> +++ b/tests/btrfs/325.out
-> @@ -0,0 +1,22 @@
-> +QA output created by 325
-> +wrote 65536/65536 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 65536/65536 bytes at offset 65536
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 65536/65536 bytes at offset 131072
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +wrote 65536/65536 bytes at offset 196608
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +Initial number of file extent items: 4
-> +Number of file extent items after defrag with 128K treshold: 1
-> +Number of file extent items after defrag with 256K treshold: 1
-> +File data after defrag:
-> +000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  >................<
-> +*
-> +010000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
-> +*
-> +020000 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef  >................<
-> +*
-> +030000 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73  >ssssssssssssssss<
-> +*
-> +040000
+> 
+> Thx, Anand
+> 
+> 
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/325.out b/tests/btrfs/325.out
+>> new file mode 100644
+>> index 00000000..96053925
+>> --- /dev/null
+>> +++ b/tests/btrfs/325.out
+>> @@ -0,0 +1,22 @@
+>> +QA output created by 325
+>> +wrote 65536/65536 bytes at offset 0
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +wrote 65536/65536 bytes at offset 65536
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +wrote 65536/65536 bytes at offset 131072
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +wrote 65536/65536 bytes at offset 196608
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +Initial number of file extent items: 4
+>> +Number of file extent items after defrag with 128K treshold: 1
+>> +Number of file extent items after defrag with 256K treshold: 1
+>> +File data after defrag:
+>> +000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab  
+>> >................<
+>> +*
+>> +010000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  
+>> >................<
+>> +*
+>> +020000 ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef ef  
+>> >................<
+>> +*
+>> +030000 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73 73  
+>> >ssssssssssssssss<
+>> +*
+>> +040000
+> 
 
