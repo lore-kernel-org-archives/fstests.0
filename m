@@ -1,71 +1,55 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3F3F1D0DF6
-	for <fstests@vger.kernel.org>; Wed, 30 Oct 2024 19:55:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9FB0156231
+	for <fstests@vger.kernel.org>; Thu, 31 Oct 2024 13:17:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730318106; cv=none; b=k78tVhODQv/KNEcPQ/zxTHMHf1Jy8ZFuQ6WmHGuIYtbHM+NhjeFeon4mAy1l+qxx3BcRzZED1vT478AMW9Is2TOFbgR6955xsC/sqn0PUZBk7e3rXJ/3xKtp72pOaQ7Ir9Qa4HM/va8xoBDINJEgoC5Bn+FNICLkaAfT3UAWVeg=
+	t=1730380651; cv=none; b=YiMwRtk/zbdAr9F7U2DBoBEHiyJV6QnaCA6nvZooQXNKMt9Yfvh/dWdMQpk8rhWfTYq6hylkmMRfvROepNukL8m1fPfg2Q9Ja2zyQ9kryKSIRkdqqIyuTYiW+A79DpHz05ZPNHH7gQQYwUF9oeVH46MOC3x+q1SBSR55pxxWjtI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730318106; c=relaxed/simple;
-	bh=m7J9JY2zz6CQLpO/ntprYmGGrlIZkOJyqbsZDk6TgS4=;
+	s=arc-20240116; t=1730380651; c=relaxed/simple;
+	bh=nomR4va9pEGP47j7Wrwnpg4L+IsWrzsWGgULbjPWq4w=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aVaUCXq/OJQfLJHeb+MZFrSlC2R6M/o3OgZaHekRignBD1EDg0ykq3yHZPbzzy8EoiVgY14h/PDDni5BkLIY3IFgDaey7C/v6yUhiShqEdIKQKwXjkDomxeryipzM2k9jbUtDUKt4Tx0DUCDdbm92K/DHgGfz3kT9/HaBWY2KhY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=R3htKGh0; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=iFX7RTOTVmpOOziVBYXUEN+B5KEAdxN8ZXyvG69CL0CDaE1p5Bcy1dgvl7jsMZaXwahRExKp4U3z1M36rOUGTGLr4xobYKNWJA34R51OvDMDjWVKzWi+L2M6Ijd+x8Ih55b4TRKGMhM5Xun5eUqqsBUsS3i29sC1+QML8Msvhuc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M2OuwFCu; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="R3htKGh0"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M2OuwFCu"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730318102;
+	s=mimecast20190719; t=1730380647;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=Y3gqgBE9ZPkNjFxKMw809O0Rl742yuHJUHDk40jz3dg=;
-	b=R3htKGh0AknMAGUVvIkOZrl1qFWvG9GB6UOG/RgmIknzu8YxHmDr7KPK8tA6N0ZY8PXUEJ
-	N+m3ipuGeQDVgnzFWrgEYGeLQwNAXCD2vm31kCFy+szv/FJz6SX/Rp6OMLz20YUz0QNWvD
-	1+r4qIvQYtQDzmnjEeuZAsgQNMoMZyw=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-394-YeLchDDtN4SY2wcFttpVpg-1; Wed, 30 Oct 2024 15:55:01 -0400
-X-MC-Unique: YeLchDDtN4SY2wcFttpVpg-1
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2e2c3338a9dso194841a91.0
-        for <fstests@vger.kernel.org>; Wed, 30 Oct 2024 12:55:01 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730318100; x=1730922900;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Y3gqgBE9ZPkNjFxKMw809O0Rl742yuHJUHDk40jz3dg=;
-        b=o7fNMyYkBPghKFDoMi8NwazOgHKPjkiml6JYM60z0vZhRtrGZyXGF7mStzpDA38oaa
-         MeLH1G7M5waYaN+6P+XPnrCO725B3kXJq7GhxxTxCYaNjMbvxG3i155cpuELOadFrrE2
-         RM6AdoB6ljDy1zQW224csdkJBvYbfobxSM4KwnxVdc/VxqHPLHeEO9GTphKv1/k8tsoj
-         Ee+DAzxaPQMwUvMurWquFSeTZUOVR0k8kkYpKhVUYVb7ZWjHTuQ/Ci+3bRxiCvbhCx/F
-         +LhTBUG/cGHnsO8rOE5EHYZtw2cqVgmJm5aCK4SqjMNk+peo+kOa4zm1WK2HQvwsFFqK
-         6Mhg==
-X-Gm-Message-State: AOJu0YxWsMGlhyB5wdwXalW7M6VQoiNGESjtbfzOAiCxFQNOv8BN6KJR
-	fdJThQzmkhXajDkDTXlFKkqIOICtOC0ggnnxcsbP4ccfbZn0Wfs2Uy36DSzR7S3ROqQPcHfIqzD
-	CIDmGMcwJLzCPt9VQcGGOpKfGP6ttXLH8QBF1kazI2eLHWUY+ieg9goU=
-X-Received: by 2002:a17:90b:5447:b0:2e7:6bde:93ad with SMTP id 98e67ed59e1d1-2e93c14fcf3mr828429a91.11.1730318100279;
-        Wed, 30 Oct 2024 12:55:00 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFFqKvSJSiOeLLL2SDn4VyQgoZmyV8LjkMBQiy+qxSlfyWZZP0AoaMMa+VE3/z45C+JHQVXDA==
-X-Received: by 2002:a17:90b:5447:b0:2e7:6bde:93ad with SMTP id 98e67ed59e1d1-2e93c14fcf3mr828406a91.11.1730318099962;
-        Wed, 30 Oct 2024 12:54:59 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2e92fa57cc3sm2274397a91.32.2024.10.30.12.54.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Oct 2024 12:54:59 -0700 (PDT)
-Date: Thu, 31 Oct 2024 03:54:56 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Brian Foster <bfoster@redhat.com>
+	bh=gaD2Glx1o7hZMT28NWgxhDk50/4ZX6Ex68QpBafqvJE=;
+	b=M2OuwFCuvjXwz+8uCjjnzVjnwDcabuDXwf2DlwMUAvE8+XPpeBT7MDscRTxAWqwnpdmlji
+	yAHjmHcNmwgr93u+/A18CEvPCtz1hcna0atn2PoBolzK3bd/VnbYCHaZ45ukAqqXDlASMl
+	ra+H/TZSnaG6oLJ5BED2HBjlLiclISg=
+Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-265-H3MVXOBJNEmoXwW3gJQx-w-1; Thu,
+ 31 Oct 2024 09:17:26 -0400
+X-MC-Unique: H3MVXOBJNEmoXwW3gJQx-w-1
+Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 158091955DD1;
+	Thu, 31 Oct 2024 13:17:25 +0000 (UTC)
+Received: from bfoster (unknown [10.22.80.135])
+	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 08D4A1956054;
+	Thu, 31 Oct 2024 13:17:23 +0000 (UTC)
+Date: Thu, 31 Oct 2024 09:18:50 -0400
+From: Brian Foster <bfoster@redhat.com>
+To: Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, djwong@kernel.org,
 	hch@lst.de
-Subject: Re: [PATCH v2 2/2] xfs: online grow vs. log recovery stress test
- (realtime version)
-Message-ID: <20241030195456.3busw2tbqqzinkm4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v2 1/2] xfs: online grow vs. log recovery stress test
+Message-ID: <ZyODupQLyRFlep0W@bfoster>
 References: <20241029172135.329428-1-bfoster@redhat.com>
- <20241029172135.329428-3-bfoster@redhat.com>
+ <20241029172135.329428-2-bfoster@redhat.com>
+ <20241030194133.vrtci4c5ozex6thv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -74,152 +58,208 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241029172135.329428-3-bfoster@redhat.com>
+In-Reply-To: <20241030194133.vrtci4c5ozex6thv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
-On Tue, Oct 29, 2024 at 01:21:35PM -0400, Brian Foster wrote:
-> This is fundamentally the same as the previous growfs vs. log
-> recovery test, with tweaks to support growing the XFS realtime
-> volume on such configurations. Changes include using the appropriate
-> mkfs params, growfs params, and enabling realtime inheritance on the
-> scratch fs.
+On Thu, Oct 31, 2024 at 03:41:33AM +0800, Zorro Lang wrote:
+> On Tue, Oct 29, 2024 at 01:21:34PM -0400, Brian Foster wrote:
+> > fstests includes decent functional tests for online growfs and
+> > shrink, and decent stress tests for crash and log recovery, but no
+> > combination of the two. This test combines bits from a typical
+> > growfs stress test like xfs/104 with crash recovery cycles from a
+> > test like generic/388. As a result, this reproduces at least a
+> > couple recently fixed issues related to log recovery of online
+> > growfs operations.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> >  tests/xfs/609     | 81 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/609.out |  2 ++
+> >  2 files changed, 83 insertions(+)
+> >  create mode 100755 tests/xfs/609
+> >  create mode 100644 tests/xfs/609.out
+> > 
+> > diff --git a/tests/xfs/609 b/tests/xfs/609
+> > new file mode 100755
+> > index 00000000..4df966f7
+> > --- /dev/null
+> > +++ b/tests/xfs/609
+> > @@ -0,0 +1,81 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 609
+> > +#
+> > +# Test XFS online growfs log recovery.
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest auto growfs stress shutdown log recoveryloop
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +_stress_scratch()
+> > +{
+> > +	procs=4
+> > +	nops=999999
+> > +	# -w ensures that the only ops are ones which cause write I/O
+> > +	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
+> > +	    -n $nops $FSSTRESS_AVOID`
+> > +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
+> > +}
+> > +
+> > +_require_scratch
+> > +_require_command "$XFS_GROWFS_PROG" xfs_growfs
+> > +_require_command "$KILLALL_PROG" killall
+> > +
+> > +_cleanup()
+> > +{
+> > +	$KILLALL_ALL fsstress > /dev/null 2>&1
+> > +	wait
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+> > +. $tmp.mkfs	# extract blocksize and data size for scratch device
+> > +
+> > +endsize=`expr 550 \* 1048576`	# stop after growing this big
+> > +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
+> > +
+> > +nags=4
+> > +size=`expr 125 \* 1048576`	# 120 megabytes initially
+> > +sizeb=`expr $size / $dbsize`	# in data blocks
+> > +logblks=$(_scratch_find_xfs_min_logblocks -dsize=${size} -dagcount=${nags})
+> > +
+> > +_scratch_mkfs_xfs -lsize=${logblks}b -dsize=${size} -dagcount=${nags} \
+> > +	>> $seqres.full || _fail "mkfs failed"
 > 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-
-
-
->  tests/xfs/610     | 83 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/610.out |  2 ++
->  2 files changed, 85 insertions(+)
->  create mode 100755 tests/xfs/610
->  create mode 100644 tests/xfs/610.out
 > 
-> diff --git a/tests/xfs/610 b/tests/xfs/610
-> new file mode 100755
-> index 00000000..6d3a526f
-> --- /dev/null
-> +++ b/tests/xfs/610
-> @@ -0,0 +1,83 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 610
-> +#
-> +# Test XFS online growfs log recovery.
-> +#
-> +. ./common/preamble
-> +_begin_fstest auto growfs stress shutdown log recoveryloop
-> +
-> +# Import common functions.
-> +. ./common/filter
-> +
-> +_stress_scratch()
-> +{
-> +	procs=4
-> +	nops=999999
-> +	# -w ensures that the only ops are ones which cause write I/O
-> +	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-> +	    -n $nops $FSSTRESS_AVOID`
-> +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-> +}
-> +
-> +_require_scratch
-> +_require_realtime
-> +_require_command "$XFS_GROWFS_PROG" xfs_growfs
-> +_require_command "$KILLALL_PROG" killall
-> +
-> +_cleanup()
-> +{
-> +	$KILLALL_ALL fsstress > /dev/null 2>&1
-> +	wait
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> +. $tmp.mkfs	# extract blocksize and data size for scratch device
-> +
-> +endsize=`expr 550 \* 1048576`	# stop after growing this big
-> +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-> +
-> +nags=4
-> +size=`expr 125 \* 1048576`	# 120 megabytes initially
-> +sizeb=`expr $size / $dbsize`	# in data blocks
-> +logblks=$(_scratch_find_xfs_min_logblocks -rsize=${size} -dagcount=${nags})
-> +
-> +_scratch_mkfs_xfs -lsize=${logblks}b -rsize=${size} -dagcount=${nags} \
-> +	>> $seqres.full || _fail "mkfs failed"
-
-Ahah, not sure why this case didn't hit the failure of xfs/609, do you think
-we should filter out the mkfs warning too?
-
-SECTION       -- default
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/x86_64 dell-per750-41 6.12.0-0.rc5.44.fc42.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Oct 28 14:12:55 UTC 2024
-MKFS_OPTIONS  -- -f -rrtdev=/dev/mapper/testvg-rtdev /dev/sda6
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 -ortdev=/dev/mapper/testvg-rtdev /dev/sda6 /mnt/scratch
-
-xfs/610        39s
-Ran: xfs/610
-Passed all 1 tests
-
-> +_scratch_mount
-> +_xfs_force_bdev realtime $SCRATCH_MNT &> /dev/null
-> +
-> +# Grow the filesystem in random sized chunks while stressing and performing
-> +# shutdown and recovery. The randomization is intended to create a mix of sub-ag
-> +# and multi-ag grows.
-> +while [ $size -le $endsize ]; do
-> +	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
-> +	_stress_scratch
-> +	incsize=$((RANDOM % 40 * 1048576))
-> +	size=`expr $size + $incsize`
-> +	sizeb=`expr $size / $dbsize`	# in data blocks
-> +	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
-> +	$XFS_GROWFS_PROG -R ${sizeb} $SCRATCH_MNT >> $seqres.full
-> +
-> +	sleep $((RANDOM % 3))
-> +	_scratch_shutdown
-> +	ps -e | grep fsstress > /dev/null 2>&1
-> +	while [ $? -eq 0 ]; do
-> +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> +		wait > /dev/null 2>&1
-> +		ps -e | grep fsstress > /dev/null 2>&1
-> +	done
-> +	_scratch_cycle_mount || _fail "cycle mount failed"
-
-_scratch_cycle_mount does _fail if it fails, I'll help to remove the "|| _fail ..."
-
-> +done > /dev/null 2>&1
-> +wait	# stop for any remaining stress processes
-> +
-> +_scratch_unmount
-
-If this ^^ isn't a necessary step of bug reproduce, then we don't need to do this
-manually, each test case does that at the end. I can help to remove it when I
-merge this patch.
-
-Others looks good to me,
-
-Reviewed-by: Zorro Lang <zlang@redaht.com>
-
-
-> +
-> +echo Silence is golden.
-> +
-> +status=0
-> +exit
-> diff --git a/tests/xfs/610.out b/tests/xfs/610.out
-> new file mode 100644
-> index 00000000..c42a1cf8
-> --- /dev/null
-> +++ b/tests/xfs/610.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 610
-> +Silence is golden.
-> -- 
-> 2.46.2
+> This test fails on my testing machine, as [1], due to above mkfs.xfs print
+> a warning:
 > 
+> "mkfs.xfs: small data volume, ignoring data volume stripe unit 128 and stripe width 256"
+> 
+> My test device is scripted, if without the specific mkfs options, it got:
+>   # mkfs.xfs -f $SCRATCH_DEV
+>   meta-data=/dev/sda6              isize=512    agcount=25, agsize=1064176 blks
+>            =                       sectsz=512   attr=2, projid32bit=1
+>            =                       crc=1        finobt=1, sparse=1, rmapbt=1
+>            =                       reflink=1    bigtime=1 inobtcount=1 nrext64=1
+>            =                       exchange=0  
+>   data     =                       bsize=4096   blocks=26604400, imaxpct=25
+>            =                       sunit=16     swidth=32 blks
+>   naming   =version 2              bsize=4096   ascii-ci=0, ftype=1, parent=0
+>   log      =internal log           bsize=4096   blocks=179552, version=2
+>            =                       sectsz=512   sunit=16 blks, lazy-count=1
+>   realtime =none                   extsz=4096   blocks=0, rtextents=0
+> 
+> But if with the specific mkfs options, it got:
+> 
+>   # /usr/sbin/mkfs.xfs  -f   -lsize=3075b -dsize=131072000 -dagcount=4 $SCRATCH_DEV
+>   mkfs.xfs: small data volume, ignoring data volume stripe unit 128 and stripe width 256
+>   meta-data=/dev/sda6              isize=512    agcount=4, agsize=8000 blks
+>            =                       sectsz=512   attr=2, projid32bit=1
+>            =                       crc=1        finobt=1, sparse=1, rmapbt=1
+>            =                       reflink=1    bigtime=1 inobtcount=1 nrext64=1
+>            =                       exchange=0  
+>   data     =                       bsize=4096   blocks=32000, imaxpct=25
+>            =                       sunit=0      swidth=0 blks
+>   naming   =version 2              bsize=4096   ascii-ci=0, ftype=1, parent=0
+>   log      =internal log           bsize=4096   blocks=3075, version=2
+>            =                       sectsz=512   sunit=0 blks, lazy-count=1
+>   realtime =none                   extsz=4096   blocks=0, rtextents=0
+> 
+> Hi Brian, if you think "ignoreing volume stripe" doesn't affect the test, we can
+> filter out the stderr with "2>&1". I can help to change that when I merge.
+> 
+
+Hmm.. I don't think it should affect things. We could probably make the
+scratch fs a bit bigger, but the idea is to leave enough room so it can
+be grown a number of times. Any idea if using a particular min size fs
+makes that warning go away?
+
+Either way I don't think the custom stripe unit/width should make much
+of a difference for a grow vs. log recovery test, so I'm fine with
+filtering that out if that's easiest.
+
+Brian
+
+> Others looks good to me, with above confirmation:
+> 
+> Reviewed-by: Zorro Lang <zlang@redhat.com>
+> 
+> Thanks,
+> Zorro
+> 
+> [1]
+> SECTION       -- default
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 dell-per750-41 6.11.0-0.rc6.49.fc42.x86_64+debug #1 SMP PREEMPT_DYNAMIC Mon Sep  2 02:18:15 UTC 2024
+> MKFS_OPTIONS  -- -f /dev/sda6
+> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda6 /mnt/scratch
+> 
+> xfs/609       [failed, exit status 1]_check_dmesg: something found in dmesg (see /root/git/xfstests/results//default/xfs/609.dmesg)
+> - output mismatch (see /root/git/xfstests/results//default/xfs/609.out.bad)
+>     --- tests/xfs/609.out       2024-10-30 16:29:52.250176790 +0800
+>     +++ /root/git/xfstests/results//default/xfs/609.out.bad     2024-10-30 16:31:01.759590117 +0800
+>     @@ -1,2 +1,2 @@
+>      QA output created by 609
+>     -Silence is golden.
+>     +mkfs.xfs: small data volume, ignoring data volume stripe unit 128 and stripe width 256
+>     ...
+>     (Run 'diff -u /root/git/xfstests/tests/xfs/609.out /root/git/xfstests/results//default/xfs/609.out.bad'  to see the entire diff)
+> xfs/610       [not run] External volumes not in use, skipped this test
+> Ran: xfs/609 xfs/610
+> Not run: xfs/610
+> Failures: xfs/609
+> Failed 1 of 2 tests
+> 
+> 
+> > +_scratch_mount
+> > +
+> > +# Grow the filesystem in random sized chunks while stressing and performing
+> > +# shutdown and recovery. The randomization is intended to create a mix of sub-ag
+> > +# and multi-ag grows.
+> > +while [ $size -le $endsize ]; do
+> > +	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
+> > +	_stress_scratch
+> > +	incsize=$((RANDOM % 40 * 1048576))
+> > +	size=`expr $size + $incsize`
+> > +	sizeb=`expr $size / $dbsize`	# in data blocks
+> > +	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
+> > +	$XFS_GROWFS_PROG -D ${sizeb} $SCRATCH_MNT >> $seqres.full
+> > +
+> > +	sleep $((RANDOM % 3))
+> > +	_scratch_shutdown
+> > +	ps -e | grep fsstress > /dev/null 2>&1
+> > +	while [ $? -eq 0 ]; do
+> > +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> > +		wait > /dev/null 2>&1
+> > +		ps -e | grep fsstress > /dev/null 2>&1
+> > +	done
+> > +	_scratch_cycle_mount || _fail "cycle mount failed"
+> > +done > /dev/null 2>&1
+> > +wait	# stop for any remaining stress processes
+> > +
+> > +_scratch_unmount
+> > +
+> > +echo Silence is golden.
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/609.out b/tests/xfs/609.out
+> > new file mode 100644
+> > index 00000000..8be27d3a
+> > --- /dev/null
+> > +++ b/tests/xfs/609.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 609
+> > +Silence is golden.
+> > -- 
+> > 2.46.2
+> > 
+> > 
 > 
 
