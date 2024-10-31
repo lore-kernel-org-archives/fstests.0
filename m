@@ -1,229 +1,125 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E0FB1953A2;
-	Thu, 31 Oct 2024 16:35:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFF7D347C7;
+	Thu, 31 Oct 2024 19:35:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730392525; cv=none; b=L+g3Bql1pZpYEIWyBqD0BLb2Kal3dmAuHw6+K7KA/pG3mpcvBHjt2TedLfXYqB5VEurQ4RRtVvO1z584gih8f+wHFl+p6v5hzvh7veyNXjJz41oWcGBIkj+ETqZjbC4WcPObzO6fEG0nMTBtZhto+vFVi0+jXvZkZrUQ9Bh0QEg=
+	t=1730403355; cv=none; b=c63yO2l+wmGu1CCh+mk4qGopBLISmmhf3EpsvrNuhAKOAypAxqd+vxHFIPb3woxEVKWk5MFbjuG9wM9UUFCz2pGTsBhX+SewIZ80+sy0qQcMOZbt36+OCPQnFD4ohZ7SIfTkOXUH0S6JbYhLLsHjJdoi00ciSDAlB4oquGifkOk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730392525; c=relaxed/simple;
-	bh=9ICWSgF86KEzkURGgzatd13QF03GaXq/xs2m0N2bDGY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OSLpAHAaqDce020bQGxgIvBkKakL4xxWe9MQpBEIKfH3TK3aQQ5izhCo/WbyVfUBm7otc9ipHDw81UTeZJzjKnC+YVVOI66VsaTrY5eOLqzh8Y0dWh4HK30T05sK220bLMlh75Emv/GxHd/+4QQdFbO1wvvpMMYT6XY2swRp+UA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=r8N3j1/5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1730403355; c=relaxed/simple;
+	bh=3jIF5En1Q97Q4cjqBHX/ztJEx4TUApIJqSoCZcobDBI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=p+UOZd4q/Nv91/ZHzKYa1dVKklJ+pCe32xJHFPyCz+INuinwii8ufoNSrNELXc9R+orzdOEp7NhLt0yWHe5eNSH35bc4Ma7xzdN8nxFGA9e1+FmigP/umG8W/Rq1pKjlgzkSR+/WBvKq5iUFbDfRSJqY3LvNU4alj8RcK/MonDM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KHdFXYKC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="r8N3j1/5"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A8581C4E68E;
-	Thu, 31 Oct 2024 16:35:24 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KHdFXYKC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 78B1EC4CEC3;
+	Thu, 31 Oct 2024 19:35:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1730392524;
-	bh=9ICWSgF86KEzkURGgzatd13QF03GaXq/xs2m0N2bDGY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=r8N3j1/5LQ6ZqK/duru4TS1IC4/x4VecTKswTch+fRASN33/fO8vx4yduJUZYqiq1
-	 ODAnBJyn/kZBLgePkfM57jl4pO6midcrVBhmW+ycvmFTVfw7xVtVJSlm6Gu55taoIr
-	 Nf/QKnKXkyBdZfuVAoaFn8iesagJ8mf73uWRr76brmtTrAY5A56Zb0jw+6rVuZ0TML
-	 Mdn2CG6oaA7IVfzk3TjBhGVZVihIOPUQ0aF+uVLHsA1cQTsKifiSeLfrtDGPUkCXnO
-	 uCn4V9sDA6cQhB9G6HxVmJ1sZ5EcgmmyyU4gEBr8OCtCJo3aVnJ4YFUE/+GNVxkBfS
-	 6UZfRg5mXmATQ==
-Date: Thu, 31 Oct 2024 09:35:24 -0700
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Brian Foster <bfoster@redhat.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org, hch@lst.de
-Subject: Re: [PATCH v2 2/2] xfs: online grow vs. log recovery stress test
- (realtime version)
-Message-ID: <20241031163524.GY2386201@frogsfrogsfrogs>
-References: <20241029172135.329428-1-bfoster@redhat.com>
- <20241029172135.329428-3-bfoster@redhat.com>
- <20241030195456.3busw2tbqqzinkm4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ZyOEMYid4ybKu3_E@bfoster>
+	s=k20201202; t=1730403355;
+	bh=3jIF5En1Q97Q4cjqBHX/ztJEx4TUApIJqSoCZcobDBI=;
+	h=From:To:Cc:Subject:Date:From;
+	b=KHdFXYKCvPhaflgFjOUaMTRw7Rla8JxzteE/Pwe3uLtZyu31vyyUF2TfL78lve259
+	 650aV+mo3qh0dgOaI4b9JfhisMzHITalxxN5l+dQLzxQJwgAvg/5dDqb0tVWzkuzJ3
+	 KwNgOGBy1/K1nruShm2CEkLpXqn6zFjLOwqL73nJszRViaxmpaL8KpsX5fT9ZPcIEW
+	 tWbvWsyPYEpkRAenMA0TGHSuab7ReuuMj/sFu7SBnvgfdPcMaU8kb3IoUgStJ/PZVW
+	 inUD7jjj86QUmhm+Cvf0OwBg/tGEuXE4cvW2uP4AldlzNeXOdu9V0LE08/CkAHIn0H
+	 +bplHYZK/nSlA==
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
+Subject: [PATCH] xfs/157: mkfs does not need a specific fssize
+Date: Fri,  1 Nov 2024 03:35:52 +0800
+Message-ID: <20241031193552.1171855-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZyOEMYid4ybKu3_E@bfoster>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Oct 31, 2024 at 09:20:49AM -0400, Brian Foster wrote:
-> On Thu, Oct 31, 2024 at 03:54:56AM +0800, Zorro Lang wrote:
-> > On Tue, Oct 29, 2024 at 01:21:35PM -0400, Brian Foster wrote:
-> > > This is fundamentally the same as the previous growfs vs. log
-> > > recovery test, with tweaks to support growing the XFS realtime
-> > > volume on such configurations. Changes include using the appropriate
-> > > mkfs params, growfs params, and enabling realtime inheritance on the
-> > > scratch fs.
-> > > 
-> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > > ---
-> > 
-> > 
-> > 
-> > >  tests/xfs/610     | 83 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/xfs/610.out |  2 ++
-> > >  2 files changed, 85 insertions(+)
-> > >  create mode 100755 tests/xfs/610
-> > >  create mode 100644 tests/xfs/610.out
-> > > 
-> > > diff --git a/tests/xfs/610 b/tests/xfs/610
-> > > new file mode 100755
-> > > index 00000000..6d3a526f
-> > > --- /dev/null
-> > > +++ b/tests/xfs/610
-> > > @@ -0,0 +1,83 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 610
-> > > +#
-> > > +# Test XFS online growfs log recovery.
-> > > +#
-> > > +. ./common/preamble
-> > > +_begin_fstest auto growfs stress shutdown log recoveryloop
-> > > +
-> > > +# Import common functions.
-> > > +. ./common/filter
-> > > +
-> > > +_stress_scratch()
-> > > +{
-> > > +	procs=4
-> > > +	nops=999999
-> > > +	# -w ensures that the only ops are ones which cause write I/O
-> > > +	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -w -p $procs \
-> > > +	    -n $nops $FSSTRESS_AVOID`
-> > > +	$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full 2>&1 &
-> > > +}
-> > > +
-> > > +_require_scratch
-> > > +_require_realtime
-> > > +_require_command "$XFS_GROWFS_PROG" xfs_growfs
-> > > +_require_command "$KILLALL_PROG" killall
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	$KILLALL_ALL fsstress > /dev/null 2>&1
-> > > +	wait
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +_scratch_mkfs_xfs | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > > +. $tmp.mkfs	# extract blocksize and data size for scratch device
-> > > +
-> > > +endsize=`expr 550 \* 1048576`	# stop after growing this big
-> > > +[ `expr $endsize / $dbsize` -lt $dblocks ] || _notrun "Scratch device too small"
-> > > +
-> > > +nags=4
-> > > +size=`expr 125 \* 1048576`	# 120 megabytes initially
-> > > +sizeb=`expr $size / $dbsize`	# in data blocks
-> > > +logblks=$(_scratch_find_xfs_min_logblocks -rsize=${size} -dagcount=${nags})
-> > > +
-> > > +_scratch_mkfs_xfs -lsize=${logblks}b -rsize=${size} -dagcount=${nags} \
-> > > +	>> $seqres.full || _fail "mkfs failed"
-> > 
-> > Ahah, not sure why this case didn't hit the failure of xfs/609, do you think
-> > we should filter out the mkfs warning too?
+The xfs/157 doesn't need to do a "sized" mkfs, the image file is
+500MiB, don't need to do _scratch_mkfs_sized with a 500MiB fssize
+argument, a general _scratch_mkfs is good enough.
 
-It won't-- the warning you got with 609 was about ignoring stripe
-geometry on a small data volume.  This mkfs invocation creates a
-filesystem with a normal size data volume and a small rt volume, and
-mkfs doesn't complain about small rt volumes.
+Besides that, if we do:
 
---D
+  MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size
 
-> My experience with this test is that it didn't reproduce any problems on
-> current master, but Darrick had originally customized it from xfs/609
-> and found it useful to identify some issues in outstanding development
-> work around rt.
-> 
-> I've been trying to keep the two tests consistent outside of enabling
-> the appropriate rt bits, so I'd suggest we apply the same changes here
-> as for 609 around the mkfs thing (whichever way that goes).
-> 
-> > SECTION       -- default
-> > FSTYP         -- xfs (non-debug)
-> > PLATFORM      -- Linux/x86_64 dell-per750-41 6.12.0-0.rc5.44.fc42.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Oct 28 14:12:55 UTC 2024
-> > MKFS_OPTIONS  -- -f -rrtdev=/dev/mapper/testvg-rtdev /dev/sda6
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 -ortdev=/dev/mapper/testvg-rtdev /dev/sda6 /mnt/scratch
-> > 
-> > xfs/610        39s
-> > Ran: xfs/610
-> > Passed all 1 tests
-> > 
-> > > +_scratch_mount
-> > > +_xfs_force_bdev realtime $SCRATCH_MNT &> /dev/null
-> > > +
-> > > +# Grow the filesystem in random sized chunks while stressing and performing
-> > > +# shutdown and recovery. The randomization is intended to create a mix of sub-ag
-> > > +# and multi-ag grows.
-> > > +while [ $size -le $endsize ]; do
-> > > +	echo "*** stressing a ${sizeb} block filesystem" >> $seqres.full
-> > > +	_stress_scratch
-> > > +	incsize=$((RANDOM % 40 * 1048576))
-> > > +	size=`expr $size + $incsize`
-> > > +	sizeb=`expr $size / $dbsize`	# in data blocks
-> > > +	echo "*** growing to a ${sizeb} block filesystem" >> $seqres.full
-> > > +	$XFS_GROWFS_PROG -R ${sizeb} $SCRATCH_MNT >> $seqres.full
-> > > +
-> > > +	sleep $((RANDOM % 3))
-> > > +	_scratch_shutdown
-> > > +	ps -e | grep fsstress > /dev/null 2>&1
-> > > +	while [ $? -eq 0 ]; do
-> > > +		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-> > > +		wait > /dev/null 2>&1
-> > > +		ps -e | grep fsstress > /dev/null 2>&1
-> > > +	done
-> > > +	_scratch_cycle_mount || _fail "cycle mount failed"
-> > 
-> > _scratch_cycle_mount does _fail if it fails, I'll help to remove the "|| _fail ..."
-> > 
-> 
-> Ok.
-> 
-> > > +done > /dev/null 2>&1
-> > > +wait	# stop for any remaining stress processes
-> > > +
-> > > +_scratch_unmount
-> > 
-> > If this ^^ isn't a necessary step of bug reproduce, then we don't need to do this
-> > manually, each test case does that at the end. I can help to remove it when I
-> > merge this patch.
-> > 
-> 
-> Hm I don't think so. That might also just be copy/paste leftover. Feel
-> free to drop it.
-> 
-> > Others looks good to me,
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redaht.com>
-> > 
-> 
-> Thanks!
-> 
-> Brian
-> 
-> > 
-> > > +
-> > > +echo Silence is golden.
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/xfs/610.out b/tests/xfs/610.out
-> > > new file mode 100644
-> > > index 00000000..c42a1cf8
-> > > --- /dev/null
-> > > +++ b/tests/xfs/610.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 610
-> > > +Silence is golden.
-> > > -- 
-> > > 2.46.2
-> > > 
-> > > 
-> > 
-> 
-> 
+the _scratch_mkfs_sized trys to keep the $fs_size, when mkfs fails
+with incompatible $MKFS_OPTIONS options, likes this:
+
+  ** mkfs failed with extra mkfs options added to "-L oldlabel -m rmapbt=1" by test 157 **
+  ** attempting to mkfs using only test 157 options: -d size=524288000 -b size=4096 **
+
+But if we do:
+
+  _scratch_mkfs -L oldlabel
+
+the _scratch_mkfs trys to keep the "-L oldlabel", when mkfs fails
+with incompatible $MKFS_OPTIONS options, likes this:
+
+  ** mkfs failed with extra mkfs options added to "-m rmapbt=1" by test 157 **
+  ** attempting to mkfs using only test 157 options: -L oldlabel **
+
+that's actually what we need.
+
+Signed-off-by: Zorro Lang <zlang@kernel.org>
+---
+
+This test started to fail since 2f7e1b8a6f09 ("xfs/157,xfs/547,xfs/548: switch to
+using _scratch_mkfs_sized") was merged.
+
+  FSTYP         -- xfs (non-debug)
+  PLATFORM      -- Linux/x86_64
+  MKFS_OPTIONS  -- -f -m rmapbt=1 /dev/sda3
+  MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
+
+  xfs/157 7s ... - output mismatch (see /root/git/xfstests/results//xfs/157.out.bad)
+      --- tests/xfs/157.out       2024-11-01 01:05:03.664543576 +0800
+      +++ /root/git/xfstests/results//xfs/157.out.bad     2024-11-01 02:56:47.994007900 +0800
+      @@ -6,10 +6,10 @@
+       label = "oldlabel"
+       label = "newlabel"
+       S3: Check that setting with rtdev works
+      -label = "oldlabel"
+      +label = ""
+       label = "newlabel"
+       S4: Check that setting with rtdev + logdev works
+      ...
+      (Run 'diff -u /root/git/xfstests/tests/xfs/157.out /root/git/xfstests/results//xfs/157.out.bad'  to see the entire diff)
+  Ran: xfs/157
+  Failures: xfs/157
+  Failed 1 of 1 tests
+
+Before that change, the _scratch_mkfs can drop "rmapbt=1" option from $MKFS_OPTIONS,
+only keep the "-L label" option. That's why this test never failed before.
+
+Now it fails on xfs, if MKFS_OPTIONS contains "-m rmapbt=1", the reason as I
+explained above.
+
+Thanks,
+Zorro
+
+ tests/xfs/157 | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/tests/xfs/157 b/tests/xfs/157
+index 9b5badbae..459c6de7c 100755
+--- a/tests/xfs/157
++++ b/tests/xfs/157
+@@ -66,8 +66,7 @@ scenario() {
+ }
+ 
+ check_label() {
+-	MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
+-		>> $seqres.full
++	_scratch_mkfs -L oldlabel >> $seqres.full 2>&1
+ 	_scratch_xfs_db -c label
+ 	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+ 	_scratch_xfs_db -c label
+-- 
+2.45.2
+
