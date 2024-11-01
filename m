@@ -1,286 +1,170 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46BEB1D9A57;
-	Fri,  1 Nov 2024 20:38:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8068D1E5718;
+	Fri,  1 Nov 2024 21:49:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730493535; cv=none; b=uEZz+sJoEI4kaFg0t7+w3E47I90bEFZ+5X/FPrVsVWPXguCKNUM6M2jpkjSc9lzC1rIlIr9U7VgPqY8nuvXi2hB/zRRpjId7WB+eVKVFgDtBPr2Ir7G+Oryp7dL8yuIjDmNHIbu3flugYEzPHVZmsQ4pIn78JuUBP+CvvmBjv6Q=
+	t=1730497767; cv=none; b=ZJYxylb0er/5LTKCTFyzqNiowc+C8mgUiS5oOLyvLyGXY0dWqegf3rqMnWTft+dXytrRtGfhCESKUJhGLLSwXVkI1QiKZgf4wpzatHUynTxS1iOl44IdNAeUJEtnuj9AykamJzig2jTUW3f6vIkahX1Mi/gYhtHbUecm9rKOekM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730493535; c=relaxed/simple;
-	bh=LbeAvpeGzEEdswwvXXAai6DT38hHZtkxpIBvXkTaxPA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=PDw6yhSA1SuTqZ2yumHJtRoRWeayjbqcROzijJZKNJrx10KSeu/J9hfiD6AzU7KxPC/PMKdqOw949R35rs70BGlni19k50ySz52YLh2XqUynd5PA3hnip5f44X6mpBJFAiduEoMRzAuSgVlHsTFAGX935VyuYzsxbbx/V+refok=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=Zl+JxrD6; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1730497767; c=relaxed/simple;
+	bh=gwDTACfE4vZ3t2HT0azgqvbCv5QVaoIa6ZpWNSBvOSw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qDLE/Yh6UdsrM2CXnbkIEGGjN2LT4ripO0qlVYET+vHNgLmPVajRGm6zYT+/MLPVugJxlNxJP/j1s687ZHUPTs5mXEnszOrQFy8F8mW7HTKMEjA4WdLbecvTUl1yJk2gfYnfUYSd6HLdVYyGC9wqPknag7QHxdpYW9EwzzoesHw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EOt7L5mq; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="Zl+JxrD6"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1730493528; x=1731098328; i=quwenruo.btrfs@gmx.com;
-	bh=0s+L56v4O0dWA+Gqog3uIkOy4Q0RwHasootLmorD4EY=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=Zl+JxrD6ReQn9c3ihNizqs5/7DFugNNW6mglXJnLVLBWj3mX756E1ST8Yiz4hqdz
-	 JctTEpYvaHIJycwIi+cAPvZZITHrQKG+dgHmTN9OZhPbPzQJKap/Q/LlPL7zNJ1UE
-	 PI/MeetdbtcEkY3yk5pJpQsj4xUw6oUNNG7iAztNYCi/F2nDPhOWuZihirvaMFW2x
-	 mNlmwesjoDjlzNSrnZGzmW54CSHTvUX518EmncPl5IJoiE5W8pPCuXgXMKFZ1yxbi
-	 xBFMI8L7arXH7dILPi+t0dA1yNE3JDnQekOyVgapDdg85nai+i+ogH09xYdIgZ4H3
-	 uBfUVxnNqMOZJhWSWw==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1Mr9G2-1tbJ1l1a4s-00bMZX; Fri, 01
- Nov 2024 21:38:47 +0100
-Message-ID: <867b68d9-d873-4416-8d6d-be56bfc11542@gmx.com>
-Date: Sat, 2 Nov 2024 07:08:44 +1030
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EOt7L5mq"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED5F4C4CECD;
+	Fri,  1 Nov 2024 21:49:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1730497767;
+	bh=gwDTACfE4vZ3t2HT0azgqvbCv5QVaoIa6ZpWNSBvOSw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=EOt7L5mqw6QvAT0TJurwG0OmGuSmUbFB+aJWV7O18+xqEN+3THrMbC4GpeW4JmVHl
+	 zqK9Lwv5KQ+S65+ec4yIyEeMkqSYG8P56ze0JuyVj2jc8SMp1Q1PmGvG3n4qYnqS3S
+	 V7MgB4qfiSh0+HaaXnNeVhjD8Bf5cicG4flo09gG+aRYUZ6/d5kYlLG5R5KACenCFQ
+	 XvNW+C0eg1Aaa/so+zH3WoMlpVXoVMZk5Mg2OHYLuCrsg3fPdV0mn0hmXxyeJ7DihW
+	 EN2AhjCIi4IdnCXeszSgroAQQc/U2c/M+8Y608hjp0NAYUi7tLbqj1hjvXq0sejo8J
+	 9ku3EOiYBeHMA==
+Date: Fri, 1 Nov 2024 14:49:26 -0700
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs/157: mkfs does not need a specific fssize
+Message-ID: <20241101214926.GW2578692@frogsfrogsfrogs>
+References: <20241031193552.1171855-1-zlang@kernel.org>
+ <20241031220821.GA2386201@frogsfrogsfrogs>
+ <20241101054810.cu6zsjrxgfzdrnia@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] btrfs: a new test case to verify mount behavior with
- background remounting
-To: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-References: <20241101102956.174733-1-wqu@suse.com>
- <20241101125517.kb7akqvi5tae3wor@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20241101125517.kb7akqvi5tae3wor@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:ejI492eA6ZsXQ5Tnl87ug+sj4hY+OLtXdGpgb+VCTsw0kHwQCSE
- uT2vBFxwkusLtzsbshbmtpbJA1+H21Oc3XNlgLVlKi8sAZ5BMYRVWKbx6/M42shRI5Re/qS
- BbBo3SNJHAjVTkVbwoHaE2VsranbB4i6SSaWKtksiGg8KGE5H/0sIt190q62D4sLCCDyXM5
- uRmQGtZ/BcLb8QOilrsYg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:a7J+HiQk5LE=;jJ6rjKta62Bq7hilQa82uSZZxoY
- EDMV2qAuKlr9b8ZH8OsXSVXekB6ScWVJptXbtNiUyOCi9w1NdLUzRpa1DgNphd0a8W/znuszF
- 79/8ILH8+2e2OxoyeRDsHrkd4821w15uYenOUIaSyTiaWNhjNn271L6y/+Pp3AvHa0Z4IXhMB
- j+DyTzG6i0J9hprq8n1zYX0zbbvQDXbERQFM9dLRtT7hF0xxX1LHvsu+2JQ44auEBM2xC2R9k
- sbrL3+1gxWGfm+p6hJAnMNP9+V0M8braxDTO0kLex6fcBqANGh94CoZJ7QtBzjaFUHS4PQ+l4
- vie+cqXO/QoOCdAcqc95rfHf8ha1/tZzgb0zDC8TT81EGbyz7mSc9tXVO93B9oSlx9IoGe9Ew
- s+k7h0qhKxkDqH4cENyaoc5b7jBtF/y5jqFmBsyeCpohgBrY3WQqhCQ70qTRmWXx+rmQkJ7Xz
- APU8y8Mf9bEEqP0OG2iw1OrGjSxfMbQZt+Qnpx/xXPaqb7b4jAbsTa4e4tAoA2MfvCjNF0+ht
- eajlV2pkHWZ4xvdbPdqRbGbtJp50/RKclQWw+SA2stM2Zxi1rUO03g38gVJKwuyaJq4fzC01A
- YIzU02qmBGQ2yIKuUYXRG6atICt0h/X20VSxGD6wOrj3eMMRLa/POGp2Img0gO/L1P3SBOe9S
- cr+w/djzuy4hqNP5n7XwuU7OnrHA0FAJ0Ug+FAVaywSfBLjVC2bg07XsmTBiPqqDuG/y4pOe/
- LfozsFY5UB94Tfw16BQmbJOWkImXKiYS9e5MybAHW/QquOwkanWoDvTeA4wJdv1mA2y7XJ5OY
- MQScMHbUhtdKSsYfHoNwEKrg==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241101054810.cu6zsjrxgfzdrnia@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
+On Fri, Nov 01, 2024 at 01:48:10PM +0800, Zorro Lang wrote:
+> On Thu, Oct 31, 2024 at 03:08:21PM -0700, Darrick J. Wong wrote:
+> > On Fri, Nov 01, 2024 at 03:35:52AM +0800, Zorro Lang wrote:
+> > > The xfs/157 doesn't need to do a "sized" mkfs, the image file is
+> > > 500MiB, don't need to do _scratch_mkfs_sized with a 500MiB fssize
+> > > argument, a general _scratch_mkfs is good enough.
+> > > 
+> > > Besides that, if we do:
+> > > 
+> > >   MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size
+> > > 
+> > > the _scratch_mkfs_sized trys to keep the $fs_size, when mkfs fails
+> > > with incompatible $MKFS_OPTIONS options, likes this:
+> > > 
+> > >   ** mkfs failed with extra mkfs options added to "-L oldlabel -m rmapbt=1" by test 157 **
+> > >   ** attempting to mkfs using only test 157 options: -d size=524288000 -b size=4096 **
+> > > 
+> > > But if we do:
+> > > 
+> > >   _scratch_mkfs -L oldlabel
+> > > 
+> > > the _scratch_mkfs trys to keep the "-L oldlabel", when mkfs fails
+> > > with incompatible $MKFS_OPTIONS options, likes this:
+> > > 
+> > >   ** mkfs failed with extra mkfs options added to "-m rmapbt=1" by test 157 **
+> > >   ** attempting to mkfs using only test 157 options: -L oldlabel **
+> > > 
+> > > that's actually what we need.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > > ---
+> > > 
+> > > This test started to fail since 2f7e1b8a6f09 ("xfs/157,xfs/547,xfs/548: switch to
+> > > using _scratch_mkfs_sized") was merged.
+> > > 
+> > >   FSTYP         -- xfs (non-debug)
+> > >   PLATFORM      -- Linux/x86_64
+> > >   MKFS_OPTIONS  -- -f -m rmapbt=1 /dev/sda3
+> > >   MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
+> > > 
+> > >   xfs/157 7s ... - output mismatch (see /root/git/xfstests/results//xfs/157.out.bad)
+> > >       --- tests/xfs/157.out       2024-11-01 01:05:03.664543576 +0800
+> > >       +++ /root/git/xfstests/results//xfs/157.out.bad     2024-11-01 02:56:47.994007900 +0800
+> > >       @@ -6,10 +6,10 @@
+> > >        label = "oldlabel"
+> > >        label = "newlabel"
+> > >        S3: Check that setting with rtdev works
+> > >       -label = "oldlabel"
+> > >       +label = ""
+> > >        label = "newlabel"
+> > >        S4: Check that setting with rtdev + logdev works
+> > >       ...
+> > >       (Run 'diff -u /root/git/xfstests/tests/xfs/157.out /root/git/xfstests/results//xfs/157.out.bad'  to see the entire diff)
+> > >   Ran: xfs/157
+> > >   Failures: xfs/157
+> > >   Failed 1 of 1 tests
+> > > 
+> > > Before that change, the _scratch_mkfs can drop "rmapbt=1" option from $MKFS_OPTIONS,
+> > > only keep the "-L label" option. That's why this test never failed before.
+> > > 
+> > > Now it fails on xfs, if MKFS_OPTIONS contains "-m rmapbt=1", the reason as I
+> > > explained above.
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > >  tests/xfs/157 | 3 +--
+> > >  1 file changed, 1 insertion(+), 2 deletions(-)
+> > > 
+> > > diff --git a/tests/xfs/157 b/tests/xfs/157
+> > > index 9b5badbae..459c6de7c 100755
+> > > --- a/tests/xfs/157
+> > > +++ b/tests/xfs/157
+> > > @@ -66,8 +66,7 @@ scenario() {
+> > >  }
+> > >  
+> > >  check_label() {
+> > > -	MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
+> > > -		>> $seqres.full
+> > > +	_scratch_mkfs -L oldlabel >> $seqres.full 2>&1
+> > 
+> > Hans Holmberg discovered that this mkfs fails if the SCRATCH_RTDEV is
+> > very large and SCRATCH_DEV is set to the 500M fake_datafile because the
+> > rtbitmap is larger than the datadev.
+> > 
+> > I wonder if there's a way to pass the -L argument through in the
+> > "attempting to mkfs using only" case?
+> 
+> As I know mkfs.xfs can disable rmapbt automatically if "-r rtdevt=xxx" is
+> used.
 
+That's not going to last forever, rmap support is coming for realtime,
+hopefully for 6.14.
 
-=E5=9C=A8 2024/11/1 23:25, Zorro Lang =E5=86=99=E9=81=93:
-[...]
->> +_cleanup()
->> +{
->> +	cd /
->
-> rm -r -f $tmp.*
+> How about unset the MKFS_OPTIONS for this test? As it already tests rtdev
+> and logdev by itself. Or call _notrun if MKFS_OPTIONS has "rmapbt=1"?
 
-The test doesn't utilize any temporary file AFAIK.
+That will exclude quite a few configurations.  Also, how many people
+actually turn on rmapbt explicitly now?
 
->
->> +	kill "$remount_pid" "$mount_pid" &> /dev/null
->
-> With below "unset" (see below), we can:
->
-> [ -n "$mount_pid" ] && kill $mount_pid
-> [ -n "$remount_pid" ] && kill $remount_pid
+> Any better idea?
 
-If both pids unset, kill will do nothing but shows its usage.
-In that case since we re-direct both stderr and stdout, it will not
-cause anything wrong.
+I'm afraid not.  Maybe I should restructure the test to force the rt
+device to be 500MB even when we're not using the fake rtdev?
 
->
->> +	wait &> /dev/null
->
-> Just curious, what can cause "wait" command print something?
+--D
 
-"wait" can output errors for invalid options or the pid is not a child one=
-.
-
-But without any option it doesn't seem to output any error message.
-
->
->> +	$UMOUNT_PROG "$subv1_mount" &> /dev/null
->> +	$UMOUNT_PROG "$subv2_mount" &> /dev/null
->> +	rm -rf -- "$subv1_mount" &> /dev/null
->> +	rm -rf -- "$subv2_mount" &> /dev/null
->
-> rm "-f" prints nothing, so
->
-> rm -rf -- "$subv1_mount" "$subv2_mount"
-
-Nope. it can output error like -EBUSY if any of the mount point is still
-being mounted.
-
-Thus to be extra safe I prefer to do all the redirection in the cleanup
-function.
-
-As I have hit problems inside the cleanup function too many times,
-mostly because the previous version is lacking the signal handling for
-each workload.
-
->
->> +}
->> +
->> +# For the extra mount points
->> +_require_test
->> +_require_scratch
->> +
->> +_scratch_mkfs >> $seqres.full 2>&1
->> +_scratch_mount
->> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 >> $seqres.full
->> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 >> $seqres.full
->
-> Hmm... I wondering what'll happen, if remove these two lines then run th=
-is test
-> on other filesystems :)
-
-Not sure about other filesystems, but do other filesystems allows
-different RO/RW flags for the same fs?
-
->
->> +_scratch_unmount
->> +
->> +subv1_mount=3D"$TEST_DIR/subvol1_mount"
->> +subv2_mount=3D"$TEST_DIR/subvol2_mount"
->
-> Better to try to remove them at first. We can't make sure these names ne=
-ver
-> be existed in $TEST_DIR.
->
->> +mkdir -p "$subv1_mount"
->> +mkdir -p "$subv2_mount"
->> +_mount "$SCRATCH_DEV" "$subv1_mount" -o subvol=3Dsubvol1
->> +
->> +# Subv1 remount workload, mount the subv1 and switching it between
->> +# RO and RW.
->> +remount_workload()
->> +{
->> +	trap "wait; exit" SIGTERM
->> +	while true; do
->> +		_mount -o remount,ro "$subv1_mount"
->> +		_mount -o remount,rw "$subv1_mount"
->> +	done
->> +}
->> +
->> +remount_workload &
->> +remount_pid=3D$!
->> +
->> +# Subv2 rw mount workload
->> +# For unpatched kernel, this will fail with -EBUSY.
->> +#
->> +# To maintain the per-subvolume RO/RW mount, if the existing btrfs is
->> +# mounted RO, unpatched btrfs will retry with its RO flag reverted,
->> +# then reconfigure the fs to RW.
->> +#
->> +# But such retry has no super block lock hold, thus if another remount
->> +# process has already remounted the fs RW, the attempt will fail and
->> +# return -EBUSY.
->> +#
->> +# Patched kernel will allow the superblock and mount point RO flags
->> +# to differ, and then hold the s_umount to reconfigure the super block
->> +# to RW, preventing any possible race.
->> +mount_workload()
->> +{
->> +	trap "wait; exit" SIGTERM
->> +	while true; do
->> +		_mount "$SCRATCH_DEV" "$subv2_mount"
->> +		$UMOUNT_PROG "$subv2_mount"
->> +	done
->> +}
->> +
->> +mount_workload &
->> +mount_pid=3D$!
->> +
->> +sleep $(( 10 * $TIME_FACTOR ))
->> +
->> +kill "$remount_pid" "$mount_pid"
->> +wait
->
-> unset remount_pid mount_pid
->
-> to avoid later kill (in _cleanup) kill other processes.
-
-IIRC the child pid won't be reused until the parent process exits.
-
->
->> +
->> +# subv1 is always mounted, thus the umount should not fail.
->> +$UMOUNT_PROG "$subv1_mount"
->> +$UMOUNT_PROG "$subv2_mount" &> /dev/null
->> +
->> +rm -rf -- "$subv1_mount" "$subv2_mount"
->
-> Do this in _cleanup (as above), so this line can be removed if it's not =
-a
-> necessary test step of this case.
-
-This is an extra safety check, to make sure the unmount is properly done.
-
-And that's why here we do not re-direct the output, unlike cleanup.
-
-As I have already hit cases where the rm returned EBUSY error due to
-races with the children processes not handling signal correctly.
-
-Thanks,
-Qu
->
-> Others look good to me.
->
 > Thanks,
 > Zorro
->
->> +
->> +
->> +echo "Silence is golden"
->> +
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/325.out b/tests/btrfs/325.out
->> new file mode 100644
->> index 00000000..cf13795c
->> --- /dev/null
->> +++ b/tests/btrfs/325.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 325
->> +Silence is golden
->> --
->> 2.46.0
->>
->>
->
->
-
+> 
+> > 
+> > --D
+> > 
+> > >  	_scratch_xfs_db -c label
+> > >  	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+> > >  	_scratch_xfs_db -c label
+> > > -- 
+> > > 2.45.2
+> > > 
+> > > 
+> > 
+> 
