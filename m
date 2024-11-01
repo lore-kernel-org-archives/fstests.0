@@ -1,188 +1,239 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86D3D36B
-	for <fstests@vger.kernel.org>; Fri,  1 Nov 2024 05:48:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0097E4087C;
+	Fri,  1 Nov 2024 08:59:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730440101; cv=none; b=gG985o7KJI4N1hEOIeEvuD370jEspqNJQF6IquO+eVtg3BZEeyuuPPevGnfH9TbMt8Yap30fdQNcOcrMh9MVYyHR/5F4c2AWoCRJPEvb7HcpVyGxBD9BhuF1CmaTkFbwoBvo1Wua+NXFKhsvmySnLUuePxk9GFUoeHhR1PHwMu0=
+	t=1730451553; cv=none; b=aHl2sNsgUmeBhpqDsDTHdN1SMYt9YFL08MbJPQnRxLow7cg6jjj3u6mZ4kdm+CmILRvPRclL76eGcVmnvgVno0giLl91hSFfuS036b15jN3r7fADihZu/kqWgqckUI0SWrRlGS5HkRLQs4hEbQFftYWqHlbqLw7bptXbj+7/JR0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730440101; c=relaxed/simple;
-	bh=l4Jf412+kHWCxyNzTYcMaXRBT+VkrgaDC4jQy7sq84A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=K6JNh95m6kYVMZPpJZo3dbjOtCiw3EzRLRLRcteB48XEEvl4uWTJPE+tm9dS/zL+h+ZpHUnM6w3dM2LXobXAuWpyT4eT6u236oIVDiN7cuuJzF7XIKk3M1oQcQGuFLLYjkdkIf8XVZ1fvGED0AGjdYIJornQwBHOIz5Kd4yGfx0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AyLs3c3j; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1730451553; c=relaxed/simple;
+	bh=H+5V0XY3aMrrKPNq8QFPPGwjf6XQduVmsMfl2J3R5dQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=uBpWqQkNbMYaJnOwSQ7Ua/lopkgA7odc6r12oD03cNM7HpjnXXPAGHRKbuFuo/gU++4oAXZ86y2g2Y6xBJmv6kGnhv6AVtB4y+k9vb9CYE2Pbfa3Lb6ivL4eH895v44VkezmNgzKkZzat2r9lkto7DaIee+H9tHsGEmn9m5jwXU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=l1TuU1qr; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AyLs3c3j"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730440097;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=sr70nr/cEn3VuMWhSDNCFFANoox2dWav/Nn0mL42AK8=;
-	b=AyLs3c3jGtFdXmNWftERvIbJnV46YyEm2xZdfrXsjieDWeCXb6DlP6DBYxpD2jtf1lxnWQ
-	/H9xiqXfh8VAN2BfsyL8AO+Kj4b9ANDeWgE0cxZSYd4ZyQ6fxUry+oNJfd1oChDc8E1k/s
-	HXyjMZF3HKN4CR43J0txzgmU1CVWhVs=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-360-AckHJxFqPCSihfcrcN-rCA-1; Fri, 01 Nov 2024 01:48:15 -0400
-X-MC-Unique: AckHJxFqPCSihfcrcN-rCA-1
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2e2dcea0f03so2049502a91.1
-        for <fstests@vger.kernel.org>; Thu, 31 Oct 2024 22:48:15 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730440095; x=1731044895;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=sr70nr/cEn3VuMWhSDNCFFANoox2dWav/Nn0mL42AK8=;
-        b=M0Szug/erV3/Z2hjy3OBoJC3LU5Ltaof4mgsgkeD4xDSUDRh3Fum5jQhK1pkDUaWl5
-         ftxK+GlCnGaQGus6HK/ctGmIKS9rJh1lKtQOHv1hOmuEnl6aDE6dZds2Sb6MW/2kK2+3
-         gqMN97dsR1V7S19utkNiRowX1tVDHdG9/iBWkC8fypg6zP78mCTHrr7EVmbeDxq+zOEh
-         6CHRSX8m2YExD0XYbCAv9ynbbl7TgQy87WKiHmqTvWAqJNBiN9QKNGAL+HgAH8RkhpJW
-         98L6VOL/d5eD/e5FcUelTdyS1LRGjgA9pkqS0Ks4CFzlHHU8T8zIFl1JswZtb9AzxZOK
-         H4FA==
-X-Forwarded-Encrypted: i=1; AJvYcCVenfLbMe/jO9POISfstf8B6yemMSGFm8V+NJ7437JWrQGznSdcQ/AE4Zd7pqapF4o2SmyWSUnB@vger.kernel.org
-X-Gm-Message-State: AOJu0YzTE0s41bUz7MURdF3jGHQZgTmZzyDAmu5hTe9cxfo7P8mV0qAR
-	YdIAGjTpPGVjfeXz+ZxhHaQUl+ijUIoBZFrJoo3NqQ9RixWtZ8pUoCirdh7SB6y4GmA4z06tDpz
-	4Se5qKaWTRZW/iUISSpyd0nlm5/2s1lw7Soc0cBVqIMkMKyl+nWBOdtI=
-X-Received: by 2002:a17:90a:4e0a:b0:2e2:c6b9:fd4a with SMTP id 98e67ed59e1d1-2e8f1072087mr24713598a91.18.1730440094732;
-        Thu, 31 Oct 2024 22:48:14 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEVJByF/lHIUmW9LhohJRCmWJ7MdBrnnXXkyT+x8dAuHMjL5WnsJqPnnxgJj9Nug9z3toThvA==
-X-Received: by 2002:a17:90a:4e0a:b0:2e2:c6b9:fd4a with SMTP id 98e67ed59e1d1-2e8f1072087mr24713581a91.18.1730440094171;
-        Thu, 31 Oct 2024 22:48:14 -0700 (PDT)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-211056eedcdsm16533855ad.45.2024.10.31.22.48.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Oct 2024 22:48:13 -0700 (PDT)
-Date: Fri, 1 Nov 2024 13:48:10 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH] xfs/157: mkfs does not need a specific fssize
-Message-ID: <20241101054810.cu6zsjrxgfzdrnia@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241031193552.1171855-1-zlang@kernel.org>
- <20241031220821.GA2386201@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="l1TuU1qr"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7D786C4CECD;
+	Fri,  1 Nov 2024 08:59:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1730451552;
+	bh=H+5V0XY3aMrrKPNq8QFPPGwjf6XQduVmsMfl2J3R5dQ=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=l1TuU1qr+1RlfeFx2pCXcMMFXFZjg+LuD0LGIxxivJ4ARlXieQ9KiWbxuKTcHhISs
+	 X+vQg1AWLspS0T+osLsGpPrJtxGZtEl1C+bRqgCf1MqRAp1aM4iKizQUOlxZRllIqm
+	 LVydl9kLJI6ByQZ8jq4wrqlomty6SoLvlbBOZQtzPMYv2QhtGdb8Y7lmI6wcyz0pVz
+	 T4ylFH4aUTFRmnrPVWSPb1wPChWapr9tDUGDPqpr4AvGgAgVEaPwY0tRemYrCm7Us1
+	 QAUuW6huaFQ+mf6/wAGUfIdd24t5b6q+Nq9HkBe52jNCk8IUa5A1zqJZAq6WX/eo7E
+	 zO2FFPYMs3exw==
+Received: by mail-ej1-f51.google.com with SMTP id a640c23a62f3a-a99f629a7aaso282342266b.1;
+        Fri, 01 Nov 2024 01:59:12 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCXmp29rPAnWznv690mK8eQAux5C3JcaFbcfy7rFUpf1BXdPyVOjAe8Xmm7Zjch5k/OsWgQRmKgy@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx4VDHAfanagAkNMSo0yd0m6nY/DUzV2oRy86pi/n4eJB3ncDjD
+	9dYfg8jXUQKao/J9o9INNJXBR72/G0QF67u7aIfK/nx2IUoSn7qbU9KDMYzs3nw4RpGT0iQFQWd
+	Q9uTfh4IWPTX52xO3S7o68Qjm/M4=
+X-Google-Smtp-Source: AGHT+IHJ1oUHtoPVuaY6EmoXI7hOT3mUWXQBECr0xCxhJkaCQ4G+Q3Uls+9g58GCpzcZysvwjtcCQtXPs6aZ9bfJSEc=
+X-Received: by 2002:a17:907:3f9f:b0:a99:ee26:f416 with SMTP id
+ a640c23a62f3a-a9e653323f2mr252531766b.14.1730451551007; Fri, 01 Nov 2024
+ 01:59:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241031220821.GA2386201@frogsfrogsfrogs>
+References: <20241101050743.113687-1-wqu@suse.com>
+In-Reply-To: <20241101050743.113687-1-wqu@suse.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Fri, 1 Nov 2024 08:58:34 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H5rxudiGOee=7cVqX9vjiVsigkxmbV4hBL97Goy8pFVeA@mail.gmail.com>
+Message-ID: <CAL3q7H5rxudiGOee=7cVqX9vjiVsigkxmbV4hBL97Goy8pFVeA@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: a new test case to verify mount behavior with
+ background remounting
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 31, 2024 at 03:08:21PM -0700, Darrick J. Wong wrote:
-> On Fri, Nov 01, 2024 at 03:35:52AM +0800, Zorro Lang wrote:
-> > The xfs/157 doesn't need to do a "sized" mkfs, the image file is
-> > 500MiB, don't need to do _scratch_mkfs_sized with a 500MiB fssize
-> > argument, a general _scratch_mkfs is good enough.
-> > 
-> > Besides that, if we do:
-> > 
-> >   MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size
-> > 
-> > the _scratch_mkfs_sized trys to keep the $fs_size, when mkfs fails
-> > with incompatible $MKFS_OPTIONS options, likes this:
-> > 
-> >   ** mkfs failed with extra mkfs options added to "-L oldlabel -m rmapbt=1" by test 157 **
-> >   ** attempting to mkfs using only test 157 options: -d size=524288000 -b size=4096 **
-> > 
-> > But if we do:
-> > 
-> >   _scratch_mkfs -L oldlabel
-> > 
-> > the _scratch_mkfs trys to keep the "-L oldlabel", when mkfs fails
-> > with incompatible $MKFS_OPTIONS options, likes this:
-> > 
-> >   ** mkfs failed with extra mkfs options added to "-m rmapbt=1" by test 157 **
-> >   ** attempting to mkfs using only test 157 options: -L oldlabel **
-> > 
-> > that's actually what we need.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > ---
-> > 
-> > This test started to fail since 2f7e1b8a6f09 ("xfs/157,xfs/547,xfs/548: switch to
-> > using _scratch_mkfs_sized") was merged.
-> > 
-> >   FSTYP         -- xfs (non-debug)
-> >   PLATFORM      -- Linux/x86_64
-> >   MKFS_OPTIONS  -- -f -m rmapbt=1 /dev/sda3
-> >   MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
-> > 
-> >   xfs/157 7s ... - output mismatch (see /root/git/xfstests/results//xfs/157.out.bad)
-> >       --- tests/xfs/157.out       2024-11-01 01:05:03.664543576 +0800
-> >       +++ /root/git/xfstests/results//xfs/157.out.bad     2024-11-01 02:56:47.994007900 +0800
-> >       @@ -6,10 +6,10 @@
-> >        label = "oldlabel"
-> >        label = "newlabel"
-> >        S3: Check that setting with rtdev works
-> >       -label = "oldlabel"
-> >       +label = ""
-> >        label = "newlabel"
-> >        S4: Check that setting with rtdev + logdev works
-> >       ...
-> >       (Run 'diff -u /root/git/xfstests/tests/xfs/157.out /root/git/xfstests/results//xfs/157.out.bad'  to see the entire diff)
-> >   Ran: xfs/157
-> >   Failures: xfs/157
-> >   Failed 1 of 1 tests
-> > 
-> > Before that change, the _scratch_mkfs can drop "rmapbt=1" option from $MKFS_OPTIONS,
-> > only keep the "-L label" option. That's why this test never failed before.
-> > 
-> > Now it fails on xfs, if MKFS_OPTIONS contains "-m rmapbt=1", the reason as I
-> > explained above.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >  tests/xfs/157 | 3 +--
-> >  1 file changed, 1 insertion(+), 2 deletions(-)
-> > 
-> > diff --git a/tests/xfs/157 b/tests/xfs/157
-> > index 9b5badbae..459c6de7c 100755
-> > --- a/tests/xfs/157
-> > +++ b/tests/xfs/157
-> > @@ -66,8 +66,7 @@ scenario() {
-> >  }
-> >  
-> >  check_label() {
-> > -	MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
-> > -		>> $seqres.full
-> > +	_scratch_mkfs -L oldlabel >> $seqres.full 2>&1
-> 
-> Hans Holmberg discovered that this mkfs fails if the SCRATCH_RTDEV is
-> very large and SCRATCH_DEV is set to the 500M fake_datafile because the
-> rtbitmap is larger than the datadev.
-> 
-> I wonder if there's a way to pass the -L argument through in the
-> "attempting to mkfs using only" case?
+On Fri, Nov 1, 2024 at 5:08=E2=80=AFAM Qu Wenruo <wqu@suse.com> wrote:
+>
+> [BUG]
+> When there is a process in the background remounting a btrfs, switching
+> between RO/RW, then another process try to mount another subvolume of
+> the same btrfs read-only, we can hit a race causing the RW mount to fail
+> with -EBUSY:
+>
+> [CAUSE]
+> During the btrfs mount, to support mounting different subvolumes with
+> different RO/RW flags, we have a small hack during the mount:
+>
+>   Retry with matching RO flags if the initial mount fail with -EBUSY.
+>
+> The problem is, during that retry we do not hold any super block lock
+> (s_umount), this meanings there can be a remount process changing the RO
+> flags of the original fs super block.
+>
+> If so, we can have an EBUSY error during retry.
+> And this time we treat any failure as an error, without any retry and
+> cause the above EBUSY mount failure.
+>
+> [FIX]
+> The fix is already sent to the mailing list.
+> The fix is to allow btrfs to have different RO flag between super block
+> and mount point during mount, and if the RO flag mismatch, reconfigure
+> the fs to RW with s_umount hold, so that there will be no race.
+>
+> [TEST CASE]
+> The test case will create two processes:
+>
+> - Remounting an existing subvolume mount point
+>   Switching between RO and RW
+>
+> - Mounting another subvolume RW
+>   After a successful mount, unmount and retry.
+>
+> This is enough to trigger the -EBUSY error in less than 5 seconds.
+> To be extra safe, the test case will run for 10 seconds at least, and
+> follow TIME_FACTOR for extra loads.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/325     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/325.out |  2 ++
+>  2 files changed, 82 insertions(+)
+>  create mode 100755 tests/btrfs/325
+>  create mode 100644 tests/btrfs/325.out
+>
+> diff --git a/tests/btrfs/325 b/tests/btrfs/325
+> new file mode 100755
+> index 00000000..d0713b39
+> --- /dev/null
+> +++ b/tests/btrfs/325
+> @@ -0,0 +1,80 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 325
+> +#
+> +# Test that mounting a subvolume read-write will success, with another
+> +# subvolume being remounted RO/RW at background
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick mount remount
+> +
+> +_fixed_by_kernel_commit xxxxxxxxxxxx \
+> +       "btrfs: fix mount failure due to remount races"
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       umount "$subv1_mount" &> /dev/null
+> +       umount "$subv2_mount" &> /dev/null
 
-As I know mkfs.xfs can disable rmapbt automatically if "-r rtdevt=xxx" is
-used.
+$UMOUNT_PROG
 
-How about unset the MKFS_OPTIONS for this test? As it already tests rtdev
-and logdev by itself. Or call _notrun if MKFS_OPTIONS has "rmapbt=1"?
+> +       rm -rf -- "$subv1_mount" &> /dev/null
+> +       rm -rf -- "$subv2_mount" &> /dev/null
+> +}
+> +
+> +# For the extra mount points
+> +_require_test
+> +_require_scratch
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 >> $seqres.full
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 >> $seqres.full
+> +_scratch_unmount
+> +
+> +subv1_mount=3D"$TEST_DIR/subvol1_mount"
+> +subv2_mount=3D"$TEST_DIR/subvol2_mount"
+> +mkdir -p "$subv1_mount"
+> +mkdir -p "$subv2_mount"
+> +
+> +# Subv1 remount workload, mount the subv1 and switching it between
+> +# RO and RW.
+> +_mount "$SCRATCH_DEV" "$subv1_mount" -o subvol=3Dsubvol1
+> +while _mount -o remount,ro "$subv1_mount"; do
+> +       mount -o remount,rw "$subv1_mount"
 
-Any better idea?
+_mount here too.
 
-Thanks,
-Zorro
+> +done &
+> +subv1_pid=3D$!
+> +
+> +# Subv2 rw mount workload
+> +# For unpatched kernel, this will fail with -EBUSY.
+> +#
+> +# To maintain the per-subvolume RO/RW mount, if the existing btrfs is
+> +# mounted RO, unpatched btrfs will retry with its RO flag reverted,
+> +# then reconfigure the fs to RW.
+> +#
+> +# But such retry has no super blocl lock hold, thus if another remount
 
-> 
-> --D
-> 
-> >  	_scratch_xfs_db -c label
-> >  	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
-> >  	_scratch_xfs_db -c label
-> > -- 
-> > 2.45.2
-> > 
-> > 
-> 
+blocl -> block
 
+> +# process has already remounted the fs RW, the attempt will fail and
+> +# return -EBUSY.
+> +#
+> +# Patched kernel will allow the superblock and mount point RO flags
+> +# to differ, and then hold the s_umount to reconfigure the superblock
+> +# to RW, preventing any possible race.
+> +while _mount "$SCRATCH_DEV" "$subv2_mount "-o subvol=3Dsubvol2; do
+> +       umount "$subv2_mount";
+
+$UMOUNT_PROG
+
+> +done &
+> +subv2_pid=3D$!
+
+We should have the _cleanup function kill and wait for $subv1_pid and
+$subv2_pid in case the test is interrupted, something like:
+
+kill $subv1_pid $subv2_pid &> /dev/null
+wait $subv1_pid $subv2_pid &> /dev/null
+
+> +
+> +sleep $(( 10 * $TIME_FACTOR ))
+> +
+> +kill $subv1_pid
+> +kill $subv2_pid
+
+Add a 'wait' here, to make sure the umounts below don't fail in case
+the subvolumes are mounted.
+
+> +umount "$subv1_mount" &> /dev/null
+> +umount "$subv2_mount" &> /dev/null
+
+$UMOUNT_PROG
+
+> +rm -rf -- "$subv1_mount" &> /dev/null
+> +rm -rf -- "$subv2_mount" &> /dev/null
+
+
+Also, why these "&> /dev/null" redirections?
+If we have the 'wait', the umounts should succeed and the rm -fr
+shouldn't fail - in fact it's useful to test that they don't fail,
+that the umounts were successful in case the subvolumes were mounted.
+
+Thanks.
+
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/325.out b/tests/btrfs/325.out
+> new file mode 100644
+> index 00000000..cf13795c
+> --- /dev/null
+> +++ b/tests/btrfs/325.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 325
+> +Silence is golden
+> --
+> 2.46.0
+>
+>
