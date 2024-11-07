@@ -1,148 +1,248 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D53119596F;
-	Thu,  7 Nov 2024 07:43:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D59901D7E42
+	for <fstests@vger.kernel.org>; Thu,  7 Nov 2024 10:10:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730965422; cv=none; b=s7kXbPvj54fXNvYINrp1EqPkuMPWrvjF48P95JGkXscNwquS04rzBA8mHkMDSOrSohWOcVJ+EbBEH5RG4vKKcAyO+puS14HLyP4mExYzDQmh4+dxru6e7wVfUrtBMeAQ9452gfn8t7935IuAqNm8PZMgTX8L1xHkusv9dKs6aBQ=
+	t=1730974223; cv=none; b=RLRkqGdc7McqPWI6gFcrNOnbCFznwWZEPhJLAZNnEWiJ28JqyRovtt2s5B0W97BWxcFpgQ5tEmIiwJLeLw5rrEceWqgdzPzMdifXaQirnGrRPOZt7I2FJWEj6b+vkm3kzUtAR4o2igdLkQsOYp7nHSyhnhogYmpUv4JRZg7T+g0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730965422; c=relaxed/simple;
-	bh=vFd2X+d0ImmK8Up7uTYKk62dU9fVNPJEmqfehz0cixk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fd3jQgTcwQl/S7ECU0oEYVGxKzRgc513WxmZSv5LML9i9Ry2bujgPqDxIvufrHrVv/ZrwbOnuHzBohSd2WLAXETHfaY7wjMHIQFJp3wTl40n6gF8kHaS69x8hjeOjSYrdLEteW+V7BhWvR9x1+8e+K0162oTeiN5Iyd61pQjmVk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=DyWfqr6W; arc=none smtp.client-ip=212.227.15.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1730974223; c=relaxed/simple;
+	bh=E2v8HUJmMnQ3KoryqbVKwv86XxW3c6YN4H9DWh5+KdQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ooaIcqgYV09IsVwb/bgY+mrgiy3o3Hx8X01Yhpa/rZTbI+gEh8DT4OqO63UKoCtFK7y9X5w5Gzuk19H9HRuRyslhqfai8Ve3IWuW9atfNMIKopfc3VFu84613Tb3eXr/JlsnKFpdonjAhvoSbh5NV+4zJgdm1nFG5Gwx7JuEkSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=QGMlSyWu; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="DyWfqr6W"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1730965410; x=1731570210; i=quwenruo.btrfs@gmx.com;
-	bh=7KiL5mobqPuW3Uj8daUd+bOjgYFyZsb4cSFettbWVz0=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=DyWfqr6WI/qvXvK+XoaPxX5Vi4rtYZRl4wGEKLvXIWoErleb9CYPPq6ERdqIMpMQ
-	 k/zYAtHnZ9o8+qG0C5pqG0xv0KFqXx81Jd1bg4UpwQN/o4z0A8Hk7u2YGiPKiiuwm
-	 FpUylbNuTUKEbixfn2rDUst/yEfRuHIlAfAQ0d/n53+t8BUIeNTsFXa2F/bvMKWLk
-	 nAEwkIWVtknH35XTwSWkqkl3spnYWwwe2w/TnbGPXlJxx/72Mavl3J70J4sz0+dSP
-	 aKtoBKRDWbw9+TD7P1exmZx0qtGOOTwTz9kVciECpED+MNl75hYV1sVKFymFO3Y4h
-	 xuc8OjG3CoRciuUnmg==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx004
- [212.227.17.184]) with ESMTPSA (Nemesis) id 1MOiHl-1tSPTa1wZ5-00QnI9; Thu, 07
- Nov 2024 08:43:29 +0100
-Message-ID: <3f16a547-4f75-483f-87b1-ca30819001b6@gmx.com>
-Date: Thu, 7 Nov 2024 18:13:25 +1030
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="QGMlSyWu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1730974220;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=DcV+qywenHHV4LbOZpbC6C/hOfYr5Tnqe6Cbi5gbgmE=;
+	b=QGMlSyWuQeOGrlm0L3bfoYsYgOP3lKhN7MCGT+uFA81rjQMVVp/bGuzrTlPWNKqDKj5Rgf
+	9n6dkv5uw7u3b3ub9RypNjOhOFpfs56qtOlMNqYdk7Saqxik7pNy626unqmvU/CGpPpA+d
+	4a8X/3K3RrzrmIwGk+zbE2HB1ju6iTw=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-597-Qw8Q6SPWP2WDSjtmY2GvoQ-1; Thu, 07 Nov 2024 05:10:17 -0500
+X-MC-Unique: Qw8Q6SPWP2WDSjtmY2GvoQ-1
+X-Mimecast-MFC-AGG-ID: Qw8Q6SPWP2WDSjtmY2GvoQ
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-71e71425193so873536b3a.1
+        for <fstests@vger.kernel.org>; Thu, 07 Nov 2024 02:10:17 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730974216; x=1731579016;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DcV+qywenHHV4LbOZpbC6C/hOfYr5Tnqe6Cbi5gbgmE=;
+        b=nXKgRifpxLmB9/MXWEPGqnb0teECSFtlolWC8K2ffHuq0QlAVX7vip7uijT4aavWv4
+         wipBs+3yVVRccIkdz0dInCgA59l/x0+mSujg1/pPcmymRvLuP3KWmr0ehZ28Xpep14UP
+         l3uagUOroTbD46bzNLV7qgDCBHNDtEjkP5EiKOEAJKTzBopw29VkVw2tH9dX+lRHsLfR
+         ZX7yZ98eSPmXVyW1FUKHU/4U8cyq8ABoFhQ74TBH5c4ld4w26cnTdMolyO32//b0XXyZ
+         S0UmMbdfVHWJI4fdag0UelJBlj534HxDg0g02tKh6kc2kxe/u1XPIxkx2MI7p/u+7PwT
+         D3Dw==
+X-Forwarded-Encrypted: i=1; AJvYcCU5uGkqsLpoHwb2oCoz7Mn90IDq3zbXzgHveH1OcaJRXJW6asfkJBLigACYURzdHwlQb7apdNFV@vger.kernel.org
+X-Gm-Message-State: AOJu0YyRzJ+/geYVvBPDb0FHE90mpxHdsfWVC+y8Tc8GZB9ZGONVJatf
+	GdBGzb6ZthPLyDqvxN/tOW7LKFjB4iTM3/UXPBWKqYoUgkTC9lelQPv4UwBoRLq18H293EbdiyI
+	yqd4rpf24pZPqSJvwU0OKi5qHNFZ+9FwEeC4kadJQ1ReE1b14cz+kisY=
+X-Received: by 2002:a05:6a00:cc4:b0:71e:79a8:1d84 with SMTP id d2e1a72fcca58-72062eccf33mr57756127b3a.3.1730974216357;
+        Thu, 07 Nov 2024 02:10:16 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IH4SW01H6wVjw5NR4JDr23twdKCB1U+6WTICOyNV25vQZ1KqBgeaj6Frs67xQKFLKH8RmAHlA==
+X-Received: by 2002:a05:6a00:cc4:b0:71e:79a8:1d84 with SMTP id d2e1a72fcca58-72062eccf33mr57756095b3a.3.1730974215917;
+        Thu, 07 Nov 2024 02:10:15 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72407a571besm1098488b3a.194.2024.11.07.02.10.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 07 Nov 2024 02:10:15 -0800 (PST)
+Date: Thu, 7 Nov 2024 18:10:11 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>,
+	"Darrick J. Wong" <djwong@kernel.org>,
+	Christoph Hellwig <hch@infradead.org>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs/157: mkfs does not need a specific fssize
+Message-ID: <20241107101011.2j5tel7zucn3rbbf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241031220821.GA2386201@frogsfrogsfrogs>
+ <20241101054810.cu6zsjrxgfzdrnia@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241101214926.GW2578692@frogsfrogsfrogs>
+ <Zyh8yP-FJUHKt2fK@infradead.org>
+ <20241104130437.mutcy5mqzcqrbqf2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241104233426.GW21840@frogsfrogsfrogs>
+ <ZynB+0hF1Bo6p0Df@dread.disaster.area>
+ <Zyozgri3aa5DoAEN@infradead.org>
+ <20241105154712.GJ2386201@frogsfrogsfrogs>
+ <ZyxS0k6UWaHpooAo@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] btrfs: a new test case to verify mount behavior with
- background remounting
-To: Anand Jain <anand.jain@oracle.com>, Zorro Lang <zlang@redhat.com>,
- Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
- Filipe Manana <fdmanana@suse.com>
-References: <20241106054328.19842-1-wqu@suse.com>
- <20241106093503.3gaon45f44b3r6sv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <1b96c1a2-c0f6-4c05-89a3-709c547d3e0f@oracle.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <1b96c1a2-c0f6-4c05-89a3-709c547d3e0f@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:lG/CUanxLWN7eo/F81ag3M0PrcimuHkAoEzGX9NG5egkD330mIC
- SzDyhwfpUqGOXU+jndbEycksV8Fq93poKV0psGDJ/PPHF5aaBI/eahFILAyjgEeQO9fpqgA
- Z1PS2V+NqCvhvQeZaqq6Cye2nq6iUj0mNKdlOfM5GnRCsVujl2ongg6HviqQdD15yEq6c4p
- 1qCnzUy0ZVjDy1FiLn56g==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:+7rA/9DdAf4=;a3tqqeJAEBAsTIhjs1tAlia9+to
- GLg7Gfsd3QHFN0xvREoQGpW8Hzx51d92d2nf7RkmA5YugFCLdFnsHw2G47UyqwLs8zWPwtEVb
- dERgUtOq0WCxukzTwnshF38dj9qH/JN3a2hJM1pkqZEZyG2vfoFRtNz6Qfxy85pK8/f/8/8XT
- xMyuFh+RlibfAU0nZYI+H1lUVyTSlVFfU8kO119kyhZYn8KZEuFyv24JlaNNhC6B6jy9OrjC2
- vO0F+L5xSrK+j+BKMAc/T8+drehO9qeaFY/4U362qDk8Rofj8+UZX05Nc8B70UOl4faBeHO1V
- ivoZ2vjWINXwpdI8QDTIOqR/nF4kqc0Xt7jP3VSTDkrqMwNCFlUvbWCo4Q60ol7uOh27XkjWh
- GBwRi1ijb5+KNAQWj1K8xVxfJ00qKAhfT9l8GZ9rGb1x+I/VNb5ArcAIGY/bKTIoidauQH8OG
- epWwBVaDCy+XtolLSb62CW2DpFj+URoKwZ8CuqlWZLr0S2TSQ1X1z2lFavKtvaQsXfDHvfRKL
- PLB+58FnkyRae/U8MbEUV2p7P6++puDo4UL5MDa+gwmNXSX9WXOs/F2SFNH3NsPEL7VJf7Kb/
- MSzOLBpPSlWkbHdNmqg/KN1ZBgiFIiR2NyTIv4i4uNoLOWWBLlYEgt+Y0/fhIoGC2bVX7DCtZ
- AwtRVXPe4Id/QZHoBSS1a0Khr0A+Xcv1w1eFcBKB36EjFDi+2ZPJp4MJ8nGrSYsXZI2IVb3PE
- ke9lLiBVYP2JWh8jNu51zIcybhJz/bR7Ru3tf574o6HNxzEME+wAqTUvEkcZWQA/2q5uOkfDx
- t6B5JRE+rwLOK4rQ25kqYqY05EbpHs8HtIds6IHgUs6oASyvvz3LL580dav7yYSPbOK9t9222
- ADjEEMmHDhsMIMZeuhNk/PmGvf82cwIkfE6eULf2cC/SG0ErEkCS8wCy/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <ZyxS0k6UWaHpooAo@dread.disaster.area>
 
+On Thu, Nov 07, 2024 at 04:40:34PM +1100, Dave Chinner wrote:
+> On Tue, Nov 05, 2024 at 07:47:12AM -0800, Darrick J. Wong wrote:
+> > On Tue, Nov 05, 2024 at 07:02:26AM -0800, Christoph Hellwig wrote:
+> > > On Tue, Nov 05, 2024 at 05:58:03PM +1100, Dave Chinner wrote:
+> > > > When the two conflict, _scratch_mkfs drops the global MKFS_OPTIONS
+> > > > and uses only the local parameters so the filesystem is set up with
+> > > > the configuration the test expects.
+> > > > 
+> > > > In this case, MKFS_OPTIONS="-m rmapbt=1" which conflicts with the
+> > > > local RTDEV/USE_EXTERNAL test setup. Because the test icurrently
+> > > > overloads the global MKFS_OPTIONS with local test options, the local
+> > > > test parameters are dropped along with the global paramters when
+> > > > there is a conflict. Hence the mkfs_scratch call fails to set the
+> > > > filesystem up the way the test expects.
+> > > 
+> > > But the rmapbt can be default on, in which case it does not get
+> > > removed.  And then without the _sized we'll run into the problem that
+> > > Hans' patches fixed once again.
+> > 
+> > Well we /could/ make _scratch_mkfs_sized pass options through to the
+> > underlying _scratch_mkfs.
+> 
+> That seems like the right thing to do to me.
 
-
-=E5=9C=A8 2024/11/7 17:47, Anand Jain =E5=86=99=E9=81=93:
->
->
->
->>> +# Subv2 may have already been unmounted, so here we ignore all output=
-.
->>> +# This may hide some errors like -EBUSY, but the next rm line would
->>> +# detect any still mounted subvolume so we're still safe.
->>> +$UMOUNT_PROG "$subv2_mount" &> /dev/null
->>> +
->>> +# If above unmount, especially subv2 is not properly unmounted,
->>> +# the rm should fail with some error message
->>> +rm -r -- "$subv1_mount" "$subv2_mount"
->
-> nit:
-> Nice, if unmounting $subvol2_mount fails, rm will fail as well.
-> To capture the unmount error why not redirect its output
-> to the test case=E2=80=99s full log:
->  =C2=A0unmount $subvol2_mount >> $seqres.full.
-
-Because if $subvol2_mount is already unmounted (e.g. the interruption
-happens after the umount funished), then above command will cause stderr
-to pollute the golden output.
-
-So at least we need to redirect both stderr and stdout, e.g.
-
-   umount $subvol2_mount >> $seqres.full 2>&1
-
-I'm fine with newer change, although that can always be done when
-debugging, and with the initial test (and all the failures I have hit),
-it should be good enough for now, until we got some new regression.
+OK, thanks for all of these suggestions, how about below (draft) change[1].
+If it's good to all of you, I'll send another patch.
 
 Thanks,
-Qu
+Zorro
 
-> If you're fine with it, Zorro can consider to change this
-> during the merge. Nevertheless, the code looks good.
->
->  =C2=A0 Reviewed-by: Anand Jain <anand.jain@oracle.com>
->
-> Thx, Anand
->
+diff --git a/common/rc b/common/rc
+index 2af26f23f..673f056fb 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1027,7 +1027,9 @@ _small_fs_size_mb()
+ _try_scratch_mkfs_sized()
+ {
+        local fssize=$1
+-       local blocksize=$2
++       shift
++       local blocksize=$1
++       shift
+        local def_blksz
+        local blocksize_opt
+        local rt_ops
+@@ -1091,10 +1093,10 @@ _try_scratch_mkfs_sized()
+                # don't override MKFS_OPTIONS that set a block size.
+                echo $MKFS_OPTIONS |grep -E -q "b\s*size="
+                if [ $? -eq 0 ]; then
+-                       _try_scratch_mkfs_xfs -d size=$fssize $rt_ops
++                       _try_scratch_mkfs_xfs -d size=$fssize $rt_ops $@
+                else
+                        _try_scratch_mkfs_xfs -d size=$fssize $rt_ops \
+-                               -b size=$blocksize
++                               -b size=$blocksize $@
+                fi
+                ;;
+        ext2|ext3|ext4)
+@@ -1105,7 +1107,7 @@ _try_scratch_mkfs_sized()
+                                _notrun "Could not make scratch logdev"
+                        MKFS_OPTIONS="$MKFS_OPTIONS -J device=$SCRATCH_LOGDEV"
+                fi
+-               ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++               ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+                ;;
+        gfs2)
+                # mkfs.gfs2 doesn't automatically shrink journal files on small
+@@ -1120,13 +1122,13 @@ _try_scratch_mkfs_sized()
+                        (( journal_size >= min_journal_size )) || journal_size=$min_journal_size
+                        MKFS_OPTIONS="-J $journal_size $MKFS_OPTIONS"
+                fi
+-               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $SCRATCH_DEV $blocks
++               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $@ $SCRATCH_DEV $blocks
+                ;;
+        ocfs2)
+-               yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++               yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+                ;;
+        udf)
+-               $MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++               $MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+                ;;
+        btrfs)
+                local mixed_opt=
+@@ -1134,33 +1136,33 @@ _try_scratch_mkfs_sized()
+                # the device is not zoned. Ref: btrfs-progs: btrfs_min_dev_size()
+                (( fssize < $((256 * 1024 * 1024)) )) &&
+                        ! _scratch_btrfs_is_zoned && mixed_opt='--mixed'
+-               $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
++               $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $@ $SCRATCH_DEV
+                ;;
+        jfs)
+-               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
++               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS $@ $SCRATCH_DEV $blocks
+                ;;
+        reiserfs)
+-               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+                ;;
+        reiser4)
+                # mkfs.resier4 requires size in KB as input for creating filesystem
+-               $MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
++               $MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $@ $SCRATCH_DEV \
+                                   `expr $fssize / 1024`
+                ;;
+        f2fs)
+                # mkfs.f2fs requires # of sectors as an input for the size
+                local sector_size=`blockdev --getss $SCRATCH_DEV`
+-               $MKFS_F2FS_PROG $MKFS_OPTIONS $SCRATCH_DEV `expr $fssize / $sector_size`
++               $MKFS_F2FS_PROG $MKFS_OPTIONS $@ $SCRATCH_DEV `expr $fssize / $sector_size`
+                ;;
+        tmpfs)
+                local free_mem=`_free_memory_bytes`
+                if [ "$free_mem" -lt "$fssize" ] ; then
+                   _notrun "Not enough memory ($free_mem) for tmpfs with $fssize bytes"
+                fi
+-               export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
++               export MOUNT_OPTIONS="-o size=$fssize $@ $TMPFS_MOUNT_OPTIONS"
+                ;;
+        bcachefs)
+-               $MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt $SCRATCH_DEV
++               $MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt $@ $SCRATCH_DEV
+                ;;
+        *)
+                _notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+@@ -1170,7 +1172,7 @@ _try_scratch_mkfs_sized()
+ 
+ _scratch_mkfs_sized()
+ {
+-       _try_scratch_mkfs_sized $* || _notrun "_scratch_mkfs_sized failed with ($*)"
++       _try_scratch_mkfs_sized "$@" || _notrun "_scratch_mkfs_sized failed with ($@)"
+ }
+ 
+ # Emulate an N-data-disk stripe w/ various stripe units
+diff --git a/tests/xfs/157 b/tests/xfs/157
+index 9b5badbae..f8f102d78 100755
+--- a/tests/xfs/157
++++ b/tests/xfs/157
+@@ -66,8 +66,7 @@ scenario() {
+ }
+ 
+ check_label() {
+-       MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
+-               >> $seqres.full
++       _scratch_mkfs_sized "$fs_size" "" "-L oldlabel" >> $seqres.full 2>&1
+        _scratch_xfs_db -c label
+        _scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+        _scratch_xfs_db -c label
+
+
+
+
+> 
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
