@@ -1,147 +1,197 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fanzine2.igalia.com (fanzine.igalia.com [178.60.130.6])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3FEC13B58F;
-	Sat,  9 Nov 2024 16:19:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 502C5194AFB
+	for <fstests@vger.kernel.org>; Sat,  9 Nov 2024 23:46:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.60.130.6
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731169170; cv=none; b=MdTYCs8xwxBeXR1D67WlcUIDluMmXVWM3sGf9Ohh++yAV47XgkMSwl/AMcAf/a+qPq1TpWWT0WXL93fEuM7YxTbF2frf2TPJ8YNKQhmrpupJMzr0Cg/gktFhDhr9Udm4QzI1OLAUNavRs+6JUlJJboG1/tttwY9AfPXymplOF00=
+	t=1731195994; cv=none; b=QeXSM9z1p0yeX6apl0ik/gmrcBeNaIDnaMgoXm0qvVh/Djy387MA6jacfS+e/0YPK0IPOp5YmZ5WPzl3IYBQQuSHIhvkBSSVdHx3LwU4OrkxNCt5xMATr87faYnAIyIJkq2+0T4r6B9mS1av2yoZyaNYPGWpYSwC00wcRVEfgcw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731169170; c=relaxed/simple;
-	bh=OmQbHN8SUBS17RgtQKYC9IfdEKn5BJlFxbGXB4lrFPg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KjA9XIR8786A8h8QhRCaQTRwJTmAYK3svBuUFSZx3iMB/++zDft0NLeUbbD8SV9/3pE4mZz5ycgjavqdn03PQAzfts5WroTmR3CuInkOE03xIGV+QAJGd/tbtBe4cG9BvQ9OsR2WIuXUptzfdgAraKErvnYxawN6Ibrn1gt8hB0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OmR0jT/f; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731195994; c=relaxed/simple;
+	bh=2UsTpVvo5Wb+xXXnvNTA/k++hZ1qlI1HjQ29UfZT9RU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=F0FUaE7kKLhASYWZgwZO9R/50Bl9XrXpkzM9/igecwbUMSKphfI7eKAa9AUfRkIu8OMC+WkEVvlSR67TXGvKJC9HnBhn9cojd4zWUeakXptWkaSdxiXPVcWU2B9Pbc27WUnpWUv9py+u++LXM76G15pBRel21WH3YR7sLnw9CS8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=d3k2OTkw; arc=none smtp.client-ip=178.60.130.6
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OmR0jT/f"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 774EEC4CECE;
-	Sat,  9 Nov 2024 16:19:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731169169;
-	bh=OmQbHN8SUBS17RgtQKYC9IfdEKn5BJlFxbGXB4lrFPg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=OmR0jT/fKNLpcKg2upR8exOTxnIadEFEcPZHBFSEYgGESP9LmH3an9JAJrJmXVyNI
-	 lTD/tT/2O+wMayUI+9LOJZrvtOODTRdedD/asleWI4Mb6eDwtkbgGMNi4hz5StjZJR
-	 TwAavgBKKZ9Dn0s7PXHN1WveqJpUzvdE1fXtfcpeqLeO8lNMDaB1P8gccI+Su0pbjD
-	 U6ZKKtA3oZde90d6i/bXY9fAXZb2TPy/2IovZsq57iySl5PUnVSiodSg0KWBp90oCk
-	 7vHNkihWG3BOCS5V1z4GSLDsI23eovKuohVjNlCp+AAHdBlCO6rclC5IYmQHGgIoy9
-	 UGDJ7oooOq5FA==
-Date: Sat, 9 Nov 2024 08:19:28 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zizhi Wo <wozizhi@huawei.com>, linux-xfs@vger.kernel.org,
-	Carlos Maiolino <cem@kernel.org>, fstests <fstests@vger.kernel.org>
-Subject: Re: [PATCH] xfs/273: check thoroughness of the fsmappings
-Message-ID: <20241109161928.GA9462@frogsfrogsfrogs>
-References: <20241108173907.GB168069@frogsfrogsfrogs>
- <20241108174146.GA168062@frogsfrogsfrogs>
- <20241109144516.irgjz2zllkpkqsqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="d3k2OTkw"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
+	s=20170329; h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:
+	Date:Subject:Cc:To:From:Sender:Reply-To:Content-ID:Content-Description:
+	Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:
+	In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=2wwB1wZIYtoeBYXguuKzmk7bVKw6Ndd2zQbCiKPOq4A=; b=d3k2OTkwUZ7Dc/5ypDFHe5FL/6
+	hp7WYyVZ+rtDY9st3N3kFpaFyDN+GrhOX64u+47CUWqGcPwqI2RQ4QU+3gsW7x7+fhXECzNgpOm8V
+	V3r2thoGVmdJoRJ2poEzbbHgqk1HmNWteMaq83wtEEEdQ/khjag4impNxWlbR3b9Boc0dCm/5jJdn
+	dx37gN8D0Hrr7h2rAjES7ga01SYcyciVyIm/Hz7rEj1JvFZI8U0PFSAFYcmabm2xHrhPXM1gge+sG
+	vPnirehJNd4aRvqUv6XeGOsQyYfOiwFRLslV53Tcah5S0UKaUm0obsYKztYXjR6Qw/WGdYRC7hHcA
+	KNL8dvtQ==;
+Received: from [177.172.124.78] (helo=localhost.localdomain)
+	by fanzine2.igalia.com with esmtpsa 
+	(Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
+	id 1t9v9v-004s9x-H1; Sun, 10 Nov 2024 00:46:27 +0100
+From: =?UTF-8?q?Andr=C3=A9=20Almeida?= <andrealmeid@igalia.com>
+To: fstests@vger.kernel.org
+Cc: Zorro Lang <zlang@kernel.org>,
+	kernel-dev@igalia.com,
+	Miklos Szeredi <mszeredi@redhat.com>,
+	Eryu Guan <guaneryu@gmail.com>,
+	krisman@kernel.org,
+	"Darrick J . Wong" <djwong@kernel.org>,
+	=?UTF-8?q?Andr=C3=A9=20Almeida?= <andrealmeid@igalia.com>
+Subject: [PATCH v3] common/casefold: Support for tmpfs casefold test
+Date: Sat,  9 Nov 2024 20:46:18 -0300
+Message-ID: <20241109234618.29262-1-andrealmeid@igalia.com>
+X-Mailer: git-send-email 2.47.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241109144516.irgjz2zllkpkqsqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Sat, Nov 09, 2024 at 10:45:16PM +0800, Zorro Lang wrote:
-> On Fri, Nov 08, 2024 at 09:41:46AM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
-> > 
-> > Enhance this test to make sure that there are no gaps in the fsmap
-> > records, and (especially) that they we report all the way to the end of
-> > the device.
-> > 
-> > Signed-off-by: Darrick J. Wong <djwong@kernel.org>
-> > ---
-> >  tests/xfs/273 |   47 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 47 insertions(+)
-> > 
-> > diff --git a/tests/xfs/273 b/tests/xfs/273
-> > index d7fb80c4033429..ecfe5e7760a092 100755
-> > --- a/tests/xfs/273
-> > +++ b/tests/xfs/273
-> > @@ -24,6 +24,8 @@ _require_scratch
-> >  _require_populate_commands
-> >  _require_xfs_io_command "fsmap"
-> >  
-> > +_fixed_by_git_commit kernel XXXXXXXXXXXXXX "xfs: fix off-by-one error in fsmap's end_daddr usage"
-> 
-> The _fixed_by_kernel_commit can replace the "_fixed_by_git_commit kernel".
+Test casefold support for tmpfs.
 
-<nod>
+Signed-off-by: André Almeida <andrealmeid@igalia.com>
+---
+ common/casefold   | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc         |  3 +++
+ tests/generic/556 | 12 ++++++++----
+ 3 files changed, 57 insertions(+), 4 deletions(-)
 
-> > +
-> >  rm -f "$seqres.full"
-> >  
-> >  echo "Format and mount"
-> > @@ -37,6 +39,51 @@ cat $TEST_DIR/a $TEST_DIR/b >> $seqres.full
-> >  
-> >  diff -uw $TEST_DIR/a $TEST_DIR/b
-> >  
-> > +# Do we have mappings for every sector on the device?
-> > +ddev_fsblocks=$(_xfs_statfs_field "$SCRATCH_MNT" geom.datablocks)
-> > +rtdev_fsblocks=$(_xfs_statfs_field "$SCRATCH_MNT" geom.rtblocks)
-> > +fsblock_bytes=$(_xfs_statfs_field "$SCRATCH_MNT" geom.bsize)
-> > +
-> > +ddev_daddrs=$((ddev_fsblocks * fsblock_bytes / 512))
-> > +rtdev_daddrs=$((rtdev_fsblocks * fsblock_bytes / 512))
-> > +
-> > +ddev_devno=$(stat -c '%t:%T' $SCRATCH_DEV)
-> > +if [ "$USE_EXTERNAL" = "yes" ] && [ -n "$SCRATCH_RTDEV" ]; then
-> > +	rtdev_devno=$(stat -c '%t:%T' $SCRATCH_RTDEV)
-> > +fi
-> > +
-> > +$XFS_IO_PROG -c 'fsmap -m -n 65536' $SCRATCH_MNT | awk -F ',' \
-> > +	-v data_devno=$ddev_devno \
-> > +	-v rt_devno=$rtdev_devno \
-> > +	-v data_daddrs=$ddev_daddrs \
-> > +	-v rt_daddrs=$rtdev_daddrs \
-> > +'BEGIN {
-> > +	next_daddr[data_devno] = 0;
-> > +	next_daddr[rt_devno] = 0;
-> > +}
-> > +{
-> > +	if ($1 == "EXT")
-> > +		next
-> > +	devno = sprintf("%x:%x", $2, $3);
-> > +	if (devno != data_devno && devno != rt_devno)
-> > +		next
-> > +
-> > +	if (next_daddr[devno] < $4)
-> > +		printf("%sh: expected daddr %d, saw \"%s\"\n", devno,
-> > +				next_daddr[devno], $0);
-> > +		next = $5 + 1;
-> 
-> Ahaha, awk expert Darrick :) I tried this patch, but got below error when
-> I tried this patch:
-> 
->   +awk: cmd. line:15:             next = $5 + 1;
->   +awk: cmd. line:15:                  ^ syntax error
+diff --git a/common/casefold b/common/casefold
+index d9126f4c..2aae5e5e 100644
+--- a/common/casefold
++++ b/common/casefold
+@@ -12,6 +12,9 @@ _has_casefold_kernel_support()
+ 	f2fs)
+ 		test -f '/sys/fs/f2fs/features/casefold'
+ 		;;
++	tmpfs)
++		test -f '/sys/fs/tmpfs/features/casefold'
++		;;
+ 	*)
+ 		# defaults to unsupported
+ 		false
+@@ -52,6 +55,9 @@ _scratch_mkfs_casefold()
+ 	f2fs)
+ 		_scratch_mkfs -C utf8 $*
+ 		;;
++	tmpfs)
++		# there's no mkfs for tmpfs, just return
++		;;
+ 	*)
+ 		_notrun "Don't know how to mkfs with casefold support on $FSTYP"
+ 		;;
+@@ -67,12 +73,52 @@ _scratch_mkfs_casefold_strict()
+ 	f2fs)
+ 		_scratch_mkfs -C utf8:strict
+ 		;;
++	tmpfs)
++		# there's no mkfs for tmpfs, just return
++		;;
+ 	*)
+ 		_notrun "Don't know how to mkfs with casefold-strict support on $FSTYP"
+ 		;;
+ 	esac
+ }
+ 
++_scratch_mount_casefold()
++{
++	case $FSTYP in
++	ext4)
++		_scratch_mount
++		;;
++	f2fs)
++		_scratch_mount
++		;;
++	tmpfs)
++		mount -t tmpfs -o casefold tmpfs $SCRATCH_MNT
++		;;
++	*)
++		_notrun "Don't know how to mount with casefold support on $FSTYP"
++		;;
++	esac
++}
++
++_scratch_mount_casefold_strict()
++{
++	case $FSTYP in
++	ext4)
++		_scratch_mount
++		;;
++	f2fs)
++		_scratch_mount
++		;;
++	tmpfs)
++		mount -t tmpfs -o casefold,strict_encoding tmpfs $SCRATCH_MNT
++		;;
++	*)
++		_notrun "Don't know how to mount with casefold support on $FSTYP"
++		;;
++	esac
++}
++
++
+ # To get the exact disk name, we need some method that does a
+ # getdents() on the parent directory, such that we don't get
+ # normalized/casefolded results.  'Find' works ok.
+diff --git a/common/rc b/common/rc
+index 2af26f23..2ee46e51 100644
+--- a/common/rc
++++ b/common/rc
+@@ -374,6 +374,9 @@ _scratch_unmount()
+ 	btrfs)
+ 		$UMOUNT_PROG $SCRATCH_MNT
+ 		;;
++	tmpfs)
++		$UMOUNT_PROG $SCRATCH_MNT
++		;;
+ 	*)
+ 		$UMOUNT_PROG $SCRATCH_DEV
+ 		;;
+diff --git a/tests/generic/556 b/tests/generic/556
+index 51d2d482..d3396ae3 100755
+--- a/tests/generic/556
++++ b/tests/generic/556
+@@ -18,7 +18,11 @@ _require_symlinks
+ _require_check_dmesg
+ _require_attrs
+ 
+-sdev=$(_short_dev ${SCRATCH_DEV})
++if [ "$FSTYP" == "tmpfs" ]; then
++	sdev="tmpfs"
++else
++	sdev="\($(_short_dev ${SCRATCH_DEV})\)"
++fi
+ 
+ filename1="file.txt"
+ filename2="FILE.TXT"
+@@ -485,10 +489,10 @@ test_strict_mode_invalid_filename()
+ 
+ _scratch_mkfs_casefold >>$seqres.full 2>&1
+ 
+-_scratch_mount
++_scratch_mount_casefold
+ 
+ _check_dmesg_for \
+-	"\(${sdev}\): Using encoding defined by superblock: utf8" || \
++	"(${sdev}): Using encoding" || \
+ 	_fail "Could not mount with encoding: utf8"
+ 
+ test_casefold_flag_basic
+@@ -517,7 +521,7 @@ _check_scratch_fs
+ 
+ # Test Strict Mode
+ _scratch_mkfs_casefold_strict >>$seqres.full 2>&1
+-_scratch_mount
++_scratch_mount_casefold_strict
+ 
+ test_strict_mode_invalid_filename
+ 
+-- 
+2.47.0
 
-Aha, I forgot to commit the change renaming next to n before sending. :(
-
---D
-
-> Thanks,
-> Zorro
-> 
-> > +		if (next > next_daddr[devno])
-> > +		       next_daddr[devno] = next;
-> > +}
-> > +END {
-> > +	if (data_daddrs != next_daddr[data_devno])
-> > +		printf("%sh: fsmap stops at %d, expected %d\n",
-> > +				data_devno, next_daddr[data_devno], data_daddrs);
-> > +	if (rt_devno != "" && rt_daddrs != next_daddr[rt_devno])
-> > +		printf("%sh: fsmap stops at %d, expected %d\n",
-> > +				rt_devno, next_daddr[rt_devno], rt_daddrs);
-> > +}'
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > 
-> 
