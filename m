@@ -1,151 +1,110 @@
-Received: from relay8-d.mail.gandi.net (relay8-d.mail.gandi.net [217.70.183.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 133FF155327
-	for <fstests@vger.kernel.org>; Mon, 11 Nov 2024 18:46:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFB3E1482F2
+	for <fstests@vger.kernel.org>; Mon, 11 Nov 2024 19:45:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731350794; cv=none; b=ZSNKix7zXqew5gaeP7E2mS92Op+wAjzCN1fTulvYi3HNmLH04TvTaLo7f2LD/p6hJSPlmJ9QtOpS6X3V6iMDPw4SLst9H+p1IwxFC/k7uwEeL7Ct9EKB3PNSkCsx7ain+oPwx02lyCdyA2K1FXGsbBwl668SDxTHVgOoBSW+Twk=
+	t=1731354330; cv=none; b=ZT42OmXH5/v7nuizMus644BQzOl0KJctvPD0NSUOyY8Av6+UFkpxYKvcmpgZLEKXaOmFt7RroFBwJ3AWGRY8qUV9vPCfP7qlavZqysfD+7HyuVC6mgg8Hp0BwVupi0xlVagSOeAA29J72cSfEZiQmuqqT+neSVFTCFEu1SB/ZzQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731350794; c=relaxed/simple;
-	bh=ZYkEW6GYtq3je9vZ2gnsmq0XML41gQejNkPtotx092k=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=NIIhhVFptxGYQ3TPndULV/07NuLTKOGxCv43bcrqIO5qR+hhc5RdEuQb3cDHAiHjzKHO+v85BP210abG6U6NGJcmDdyjyLMyCrSwfhKPNxPvNyHuYqZFsOSb4njK7AXU3u8jdwBcOnRP6rHA5+6WhGuY5uMjiISYgQB6Vnz304s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=krisman.be; spf=pass smtp.mailfrom=krisman.be; dkim=pass (2048-bit key) header.d=krisman.be header.i=@krisman.be header.b=V59ghRrG; arc=none smtp.client-ip=217.70.183.201
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=krisman.be
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=krisman.be
+	s=arc-20240116; t=1731354330; c=relaxed/simple;
+	bh=fVIwmPSEyggbFyf3YoqDBAG/ttDebsnDiuaZIkJVWks=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jmJRccIOS1aAkDkI4BGCsJ93t8AqrC+NXm0cGnIOyIgI2MbnjbgEkqt5hZ7LMTmps7IE30UqzUz4b1L+pASxCIOIDDaqcndmkFX0G4+RfT3cLUV+SNLDQ2eH5EUKaJHzknx5hhCUizUHY+H+ScWQjf/DFbOEQ5T7/75w9as8TR0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Sm+75VVC; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=krisman.be header.i=@krisman.be header.b="V59ghRrG"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 7999E1BF203;
-	Mon, 11 Nov 2024 18:46:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=krisman.be; s=gm1;
-	t=1731350791;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Sm+75VVC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1731354327;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=noh60YmAYEQuBTrUuxbKQVkn574CX3VL+aDy7svr4Ns=;
-	b=V59ghRrGQuGk5Ksu9aj/P1Qamj3+zv2KxA+Yj0TQKWGGpCC4/BYSV643C1YjTCL1WGQxeW
-	lxAuWTQVKWhqajiwoheL6cJKyHma8GYB+1Kc0bMAhdN/t55vW2Tu+GdA0rDYdfe9r4aDA2
-	tDMISH5Ckcn08XSPTOHOiY4M4GVwN0m1AXxsP+DSJ1dx5ZttEgvHzsSF0gtZzYaMTynsVT
-	jhXda0toEOefdITbucbRyxJTK9LSxqODWyqd+w45jXNtbgDbHbPfTx9SxLdQs8FgaduXUq
-	M664qlAB/RsBroSCCjsytp+ztpIlgmsE1JcA4UYc1dqDb+2hXoi5xPcNYnLFuA==
-From: Gabriel Krisman Bertazi <gabriel@krisman.be>
-To: =?utf-8?Q?Andr=C3=A9?= Almeida <andrealmeid@igalia.com>
-Cc: fstests@vger.kernel.org,  Zorro Lang <zlang@kernel.org>,
-  kernel-dev@igalia.com,  Miklos Szeredi <mszeredi@redhat.com>,  Eryu Guan
- <guaneryu@gmail.com>,  "Darrick J . Wong" <djwong@kernel.org>
-Subject: Re: [PATCH v3] common/casefold: Support for tmpfs casefold test
-In-Reply-To: <20241109234618.29262-1-andrealmeid@igalia.com>
- (=?utf-8?Q?=22Andr=C3=A9?=
-	Almeida"'s message of "Sat, 9 Nov 2024 20:46:18 -0300")
-References: <20241109234618.29262-1-andrealmeid@igalia.com>
-Date: Mon, 11 Nov 2024 13:46:28 -0500
-Message-ID: <87o72lwquz.fsf@mailhost.krisman.be>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+	bh=KqLw0TSAVME91KT/AGX/wbm5nqSWrShInFV5Vs47FMQ=;
+	b=Sm+75VVCjsaGQae28aVBULUiOPQj5r4maCbgvadJfwThTqCX9ZcBy33IfJ/1pZ/yM2fHWc
+	h3y3NRlSaodthhU1OgV7WPTbJ5NlqbP1jE8t/ktBb1iFCDnLb2cMYLnRSst6/uS6wrC+7L
+	fb1CEJe1cydusQhHJbmvSumxu3pFOqE=
+Received: from mail-pf1-f199.google.com (mail-pf1-f199.google.com
+ [209.85.210.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-563-Fq2z0RLiMZCVbZg6zjecFA-1; Mon, 11 Nov 2024 14:45:26 -0500
+X-MC-Unique: Fq2z0RLiMZCVbZg6zjecFA-1
+X-Mimecast-MFC-AGG-ID: Fq2z0RLiMZCVbZg6zjecFA
+Received: by mail-pf1-f199.google.com with SMTP id d2e1a72fcca58-71e65e09f8bso5252577b3a.2
+        for <fstests@vger.kernel.org>; Mon, 11 Nov 2024 11:45:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731354324; x=1731959124;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KqLw0TSAVME91KT/AGX/wbm5nqSWrShInFV5Vs47FMQ=;
+        b=hRGD/0snmIGep7gtJ+Yjr3s0f+GMf/+4Mgj/S0j/UMHOr8laEsbVCvdM0N3HD6AtM/
+         bHTo7TNN8F/L/aQi1D5CdglmgP7qWzX3sLWsI80JcsNcb3/TyGBRxfA0OPnoxsdrAQlw
+         mpilPyfH/k0y1LOmLnhRS3r7c+TMXzlCVWz/WFRJ9OO4Z3+WwIZZ9Oa5k4RXPtAS8Ihr
+         FYM1E9ffSRe6182KuI1d6Ce/nayeS8KTJqOl4HYrw7xCVQC0XbkDgD74ipNTNh+ZTf86
+         zno/L2QgSgaQrsU32dQJzn6vuld8nEWGZ/+mE0yRXDml+FyQ9ZDGklG4KTqQkzlGAY4c
+         oFjA==
+X-Forwarded-Encrypted: i=1; AJvYcCUCvy8Uf/rPhObsqNde1OdBEAkV2zuCjDM5ADlQ5KKmTheTE23l9LiabwO/3hYfqTbwUkEs6FRU@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw9UJDWHCEXJEvTBrA/9mx808h159GLgq6p5CirVawkgYvUhP9J
+	M+eTTnzd6UG2pDBibZY1OqgWHg5zgownRZrQjV/0hpNcsR1UyE3d0dt90EBPn69F2Ncbnk5/cz0
+	4MgBUVOAv9DtlEduJX3DKa51DJDED9Qfm4PILDsPp3Lhb3Yp0qF0BLs4=
+X-Received: by 2002:a05:6a00:3cca:b0:71e:7ab6:8ea6 with SMTP id d2e1a72fcca58-72413384ebbmr17526345b3a.25.1731354324220;
+        Mon, 11 Nov 2024 11:45:24 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGCewOlB11baezzNOtqcqMmLjJAQuXf7s20SaqBym9VA1VaSckalXwtsvHt9UtOnDk0qPAdOw==
+X-Received: by 2002:a05:6a00:3cca:b0:71e:7ab6:8ea6 with SMTP id d2e1a72fcca58-72413384ebbmr17526328b3a.25.1731354323886;
+        Mon, 11 Nov 2024 11:45:23 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724078a7ec7sm9507541b3a.55.2024.11.11.11.45.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Nov 2024 11:45:23 -0800 (PST)
+Date: Tue, 12 Nov 2024 03:45:20 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Johannes Thumshirn <jth@kernel.org>
+Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: Re: [PATCH] fstests: check for ext3 support in btrfs/136
+Message-ID: <20241111194520.qxilxxu5nf5lenjy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <4c41adf81241f5d23b5a10251564b1630cabc500.1731327765.git.jth@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-GND-Sasl: gabriel@krisman.be
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4c41adf81241f5d23b5a10251564b1630cabc500.1731327765.git.jth@kernel.org>
 
-Andr=C3=A9 Almeida <andrealmeid@igalia.com> writes:
-
-> Test casefold support for tmpfs.
->
-> Signed-off-by: Andr=C3=A9 Almeida <andrealmeid@igalia.com>
+On Mon, Nov 11, 2024 at 01:24:53PM +0100, Johannes Thumshirn wrote:
+> Test-case btrfs/136 requires ext3 support, so check for ext3 using
+> _require_extra_fs.
+> 
+> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 > ---
->  common/casefold   | 46 ++++++++++++++++++++++++++++++++++++++++++++++
->  common/rc         |  3 +++
->  tests/generic/556 | 12 ++++++++----
->  3 files changed, 57 insertions(+), 4 deletions(-)
->
-> diff --git a/common/casefold b/common/casefold
-> index d9126f4c..2aae5e5e 100644
-> --- a/common/casefold
-> +++ b/common/casefold
-> @@ -12,6 +12,9 @@ _has_casefold_kernel_support()
->  	f2fs)
->  		test -f '/sys/fs/f2fs/features/casefold'
->  		;;
-> +	tmpfs)
-> +		test -f '/sys/fs/tmpfs/features/casefold'
-> +		;;
->  	*)
->  		# defaults to unsupported
->  		false
-> @@ -52,6 +55,9 @@ _scratch_mkfs_casefold()
->  	f2fs)
->  		_scratch_mkfs -C utf8 $*
->  		;;
-> +	tmpfs)
-> +		# there's no mkfs for tmpfs, just return
-> +		;;
->  	*)
->  		_notrun "Don't know how to mkfs with casefold support on $FSTYP"
->  		;;
-> @@ -67,12 +73,52 @@ _scratch_mkfs_casefold_strict()
->  	f2fs)
->  		_scratch_mkfs -C utf8:strict
->  		;;
-> +	tmpfs)
-> +		# there's no mkfs for tmpfs, just return
-> +		;;
->  	*)
->  		_notrun "Don't know how to mkfs with casefold-strict support on $FSTYP"
->  		;;
->  	esac
->  }
->=20=20
-> +_scratch_mount_casefold()
-> +{
-> +	case $FSTYP in
-> +	ext4)
-> +		_scratch_mount
-> +		;;
-> +	f2fs)
-> +		_scratch_mount
-> +		;;
-> +	tmpfs)
-> +		mount -t tmpfs -o casefold tmpfs $SCRATCH_MNT
-> +		;;
-> +	*)
-> +		_notrun "Don't know how to mount with casefold support on $FSTYP"
-> +		;;
-> +	esac
-> +}
 
+Makes sense to me,
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/btrfs/136 | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/tests/btrfs/136 b/tests/btrfs/136
+> index 9b5b3331119f..2a5280fb9bd1 100755
+> --- a/tests/btrfs/136
+> +++ b/tests/btrfs/136
+> @@ -20,6 +20,8 @@ _require_scratch_nocheck
+>  # ext4 does not support zoned block device
+>  _require_non_zoned_device "${SCRATCH_DEV}"
+>  
+> +_require_extra_fs ext3
 > +
-> +_scratch_mount_casefold_strict()
-> +{
-> +	case $FSTYP in
-> +	ext4)
-> +		_scratch_mount
-> +		;;
-> +	f2fs)
-> +		_scratch_mount
-> +		;;
-> +	tmpfs)
-> +		mount -t tmpfs -o casefold,strict_encoding tmpfs $SCRATCH_MNT
-> +		;;
-> +	*)
-> +		_notrun "Don't know how to mount with casefold support on $FSTYP"
-> +		;;
-> +	esac
-> +}
-> +
+>  _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
+>  _require_command "$MKFS_EXT4_PROG" mkfs.ext4
+>  _require_command "$E2FSCK_PROG" e2fsck
+> -- 
+> 2.43.0
+> 
 
-Now, I noticed there is some infrastructure to provide mount options
-through _scratch_mount_options that would be a better fit for this
-instead of the custom handlers I previously suggested.
-
-Either way, the test looks good to me:
-
-Reviewed-by: Gabriel Krisman Bertazi <gabriel@krisman.be>
-
---=20
-Gabriel Krisman Bertazi
