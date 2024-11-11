@@ -1,79 +1,82 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 672B216A930;
-	Mon, 11 Nov 2024 08:52:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 850EF158DC8;
+	Mon, 11 Nov 2024 12:25:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731315132; cv=none; b=u80ZW13/F1eLJc/LyrEzBrHu0Jc1wiuOdO08P4qMKIeFq1Sj2W1eCf1ppy4l9zNGWpbFUnarIgGHhY5EV8YHwcIqf9aR2Na+FpHaSiiFlpmM8gdvpesn1MYJAY1VF4+11p3sZpH1t+I7lcpEVlmkAXU8BHCAKblGe9inCp3Pcu0=
+	t=1731327916; cv=none; b=sPrHjIvLHDF3o95Djc4VckD/OhW01NDo6PHQUUc2GGXqwZp26JuciqN1yO/vRRqxm+1HMx5tFfWMjDDwTzxQbgx9lCpEWGka5EffwlYDJopmN8JAYKzsZTHi7HcdB5JvkDHSGn5vey8B1DPAz9TFqaOqzoxWZOcoJxxWSHTIzBs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731315132; c=relaxed/simple;
-	bh=oE70LvyPHTDoCPA/I9zQ1cQFKLRDfcjfwSpcP91s2gE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uIpj81EiLb9BZkZFOLj2iQ+b7N9IBThHhfeOrv9jajGVy1C0loEocAD4dXxdFQPMQIOnKwzadK0WIjg1Ymqrvhl1Ubw/XQwrCNnmXYKrI1y6c3wiUTiTQXMxvJ8Pa36mgDmsQFb7V73zb6kHnOuM/LR85JubyoGRLqfZUZ+LwK8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iIHqUfSt; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iIHqUfSt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2BC8EC4CED4;
-	Mon, 11 Nov 2024 08:52:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731315132;
-	bh=oE70LvyPHTDoCPA/I9zQ1cQFKLRDfcjfwSpcP91s2gE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=iIHqUfStn5kznNiwYjxx7ffPyEpIrUJG9+I3XgiEOzTrHljkcZ4g7IKQzYpLoeU2J
-	 ma3cWEynJ9/iZ3TLl/pGc2Ny4CujSyO9vHwiy1f4XZ6c/AohS0V2EenmXlx0XRks0A
-	 fHrCNghvbkxDGbr+nKAv2zBB+ncf0I24otDeOi9GKZcjCBSsClZTWO3q20hg4tuULn
-	 /3nB5peen2pQSxpj44TM51Ih+TwdizeJ1JddaJGJrL75C86oKRe9vOa+Zgk+TJDZ1a
-	 1rkrtV+Wg8L3WVizyBS9DGNhjfR08yqaDarX8BcuRc9TDmjdewLNQzTWzwlujqexh8
-	 NF820q5pD8CMA==
-Date: Mon, 11 Nov 2024 09:52:07 +0100
-From: Christian Brauner <brauner@kernel.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Linux Filesystem Development List <linux-fsdevel@vger.kernel.org>, 
-	fstests@vger.kernel.org, stable@vger.kernel.org, Leah Rumancik <leah.rumancik@gmail.com>, 
-	"Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: generic/645 failing on ext4, xfs (probably others) on all LTS
- kernels
-Message-ID: <20241111-tragik-busfahren-483825df1c00@brauner>
-References: <20241110180533.GA200429@mit.edu>
+	s=arc-20240116; t=1731327916; c=relaxed/simple;
+	bh=pjMCxF+r7GiramXhsZnsxS0Xm6/kcL5W3PfkGy+vijM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Utf7F56gZ8cuZJXooc6LA/9l7Cm6AyJMxr0s3lzYJ8pBqWVLGGhR3CR+hVBFqDDl604iRiY0Xs+qrRLDDxYF/nbRV111rsu2dlrvkTU/ekGG3vbiNDvOixYiJwBNqNV9Grg7j+ELf0SAN2+qDGGTAaQS1raRAOprI7h1V9TsvcI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4315eeb2601so56356175e9.2;
+        Mon, 11 Nov 2024 04:25:14 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731327913; x=1731932713;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rrMv3jbYMdm+kZZS2RzhWWLxY0Ijq1dt8GodbAv2kN0=;
+        b=jC5xTnugYjTt4/YVtrMdGqqHpMJ/HV/H28R2jNtcBn8ZRTA4hS+D8qbXIxkYE3Xd7x
+         yYtKJqNTzeFcY6+BhKg4XsfOJcQZGxM54WQzt7poY91Gr3pFTc+9kolksJ0eu2gy+q04
+         NoWPzvQunevFkWNFsaRdvol33woeTrcvq4y5G7cE4bPuc/0yDxn3zHtB8O/Tf98N/sI7
+         qbhbhGGAmpFBhzdRKmt0j2xXcm7qOZzQKTV+4IPu+c0IksjIj6bXYtP2KuokU1kGLARm
+         cYkxERRa69dfIh8CmKBsArN/0nCh/w75v7PtRTB2Eu1/aqoOB+I3zA1wmRitHLNl1POw
+         uHUQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUzoNhKoNOua7zD0ShqBEPe/dlLOBvfEKq/svwlCi0uHNp6pSCv4GVrxW4uj0+kNdh02yA9ffbkMxw4Sw==@vger.kernel.org
+X-Gm-Message-State: AOJu0YzlF+jDlqffEQdr6Uvm4jM2dZo3sz3FNbDPfeXjDmThInQjsnaW
+	EgoI7HrBkCDRHZ/gCDEb2XVKBNu57CFMUy18WIfOLKB3lMIQ/ynjQ3HTew==
+X-Google-Smtp-Source: AGHT+IFQWfGFzz1imMd//hAq/AEnpaKNFfaIE0lRACfmekW8j7qPDsgLIjl3JSfRz2rCY+qZXiYC3w==
+X-Received: by 2002:a05:600d:3:b0:432:bb4d:cd77 with SMTP id 5b1f17b1804b1-432bb4dcea1mr117324365e9.19.1731327912698;
+        Mon, 11 Nov 2024 04:25:12 -0800 (PST)
+Received: from nuc.fritz.box (p200300f6f71fdb00fa633ffffe02074c.dip0.t-ipconnect.de. [2003:f6:f71f:db00:fa63:3fff:fe02:74c])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-432b05e5871sm174761015e9.37.2024.11.11.04.25.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Nov 2024 04:25:12 -0800 (PST)
+From: Johannes Thumshirn <jth@kernel.org>
+To: Zorro Lang <zlang@redhat.com>,
+	Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org,
+	Johannes Thumshirn <jth@kernel.org>,
+	Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: [PATCH] fstests: check for ext3 support in btrfs/136
+Date: Mon, 11 Nov 2024 13:24:53 +0100
+Message-ID: <4c41adf81241f5d23b5a10251564b1630cabc500.1731327765.git.jth@kernel.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20241110180533.GA200429@mit.edu>
+Content-Transfer-Encoding: 8bit
 
-On Sun, Nov 10, 2024 at 01:05:33PM -0500, Theodore Ts'o wrote:
-> The test generic/645 is failing on (at least) 6.6, 6.1, 5.15 LTS
-> kernels.
-> 
-> This fix is apparently commit dacfd001eaf2 ("fs/mnt_idmapping.c:
-> Return -EINVAL when no map is written"), but in order to take this
-> patch, it looks like we need to backport the 4 patch series
-> "mnt_idmapping: decouple from namespaces"[1] (and possibly others; I
-> haven't tried yet).
-> 
-> [1] https://lore.kernel.org/all/20231122-vfs-mnt_idmap-v1-0-dae4abdde5bd@kernel.org/
-> 
-> This looks fairly involved so the questions I have are:
-> 
-> (1) Should we request this patch series plus commit dacfd001eaf2 into
-> the stable kernels --- or should I just add a versioned excludes[2]
-> and just skip generic/645 from all kernels older than Linux 6.9 if we
-> think it's too involved and/or risky to backport these id mapping
-> changes?
-> 
-> (2) How much do we care that generic/645 is failing on LTS kernels?
-> Are user/applications going to notice or care?
+Test-case btrfs/136 requires ext3 support, so check for ext3 using
+_require_extra_fs.
 
-No userspace used an empty idmapping and it was unclear whether the
-behavior would be well-specified so the patch changed that quite some
-time ago.
+Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
+---
+ tests/btrfs/136 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Backporting this to older LTS kernels isn't difficult. We just need
-custom patches for the LTS kernels but they should all be very simple.
+diff --git a/tests/btrfs/136 b/tests/btrfs/136
+index 9b5b3331119f..2a5280fb9bd1 100755
+--- a/tests/btrfs/136
++++ b/tests/btrfs/136
+@@ -20,6 +20,8 @@ _require_scratch_nocheck
+ # ext4 does not support zoned block device
+ _require_non_zoned_device "${SCRATCH_DEV}"
+ 
++_require_extra_fs ext3
++
+ _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
+ _require_command "$MKFS_EXT4_PROG" mkfs.ext4
+ _require_command "$E2FSCK_PROG" e2fsck
+-- 
+2.43.0
 
-Alternatively, you can just ignore the test on older kernels.
