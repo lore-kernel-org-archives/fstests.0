@@ -1,218 +1,231 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B60931F7577;
-	Thu, 14 Nov 2024 09:56:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731578201; cv=fail; b=bXGWL6ebReDaEFXmOVNRnYUZX3FD7Dd6LiCckFJiC6qrseuOpurjVcwuJ+OcQEPWuSs9e/AvB0rFQn3ik2mx0o+MZVmv5QNhGqWYzTruuQ6XoN0g4cmrF9jQFwJmryOtGMOB0DliTBVqDdFWiF+45RaBgvpuiknr49gMu+Nrpg8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731578201; c=relaxed/simple;
-	bh=EISaw3K4pjXyrMCbRxIohpbcWIUNC8Er6grUyAgN/WQ=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=K2BHkZJhTZNgLyVbXTgaVDQKYhErYAW6QnUW9F5JGxj5/tZXz+SLNx70N5SI3GOLXu9385PKodBsRAvvzthSHSFcN5LePvJcTuoddBycFi1MT0n6erqfbaXTJFk4/RRD0eiTUPqmIi8O3vHa++iZIysB2jmoqpcyvvhmX+5GfSE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=n5LUhp7z; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=Axx4c8vw; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 822751B9835;
+	Thu, 14 Nov 2024 23:43:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1731627782; cv=none; b=DKh256LtQxTg4BIzD5SRsjT47Vkpupc5OWKgBvTNsdw68q+I45Adcks3tHfmDEZ2CzG1G8jSheto5RBIl7uv3WyO3IyLuunG7VDXl5wnnJExBIOgFEX+RkAzdKiEPpM2PMLjythXJKx40144r/XiSVP2jsd22uCGEb66HTXLZCc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1731627782; c=relaxed/simple;
+	bh=cDhDLt4EhtO3QoQ88yOeJvigwyX1hfOvLdrcwss1c8Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FM2uwoOB3hegS7mJOASZOwdtKdw1xG8nlYvge9dq/95mTga0LX9xV0iVTRBq+remy2SoXZZGos+WTJUG7MwQdezOSF+Zps3OOwvucX3fmRh02Rivsb73V9fd9XIBR5vqn7Q6dW07VWq9MxSEP/10/F4dBg90kerVgVgRPmmdiYo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YOAG//Ey; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="n5LUhp7z";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="Axx4c8vw"
-Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AE1gV9M002606;
-	Thu, 14 Nov 2024 09:56:34 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=K+7EqGvQ2K+9z0XPkDmnMAptcLYxTxfJ33Xz0sNY37c=; b=
-	n5LUhp7zQqxr/BD+PdbPKxn2OO5oy6cUBiaspmCImZGU/b8nMCdsb34LwaQPByuz
-	CgjuyJUVs0Ctm1zMTguaYadPSsp60kKNHWER0BlbSZZtzVVot0I/gsnaVkKjFtWo
-	w0u60gNouvytvRhl4GS+ekufO9WoZM6WP4W9X3G0/iUBTf9dOWWcMZW6ODc9I39Z
-	LOBRsnIArrqjJAekmNI1R30/NOG9WsT+mbBcBtZkPhXSN8QTnn8GSQe087t7PKUh
-	l0Nkv2fFjGwNa0JE+7ARjXj/JpVRJbJ9hFJ9RRmxBdwBXilEJD6AHez/LhB9MT46
-	Zg3TicdFZnd1FOEgg+1gcg==
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 42vsp4jguu-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 14 Nov 2024 09:56:34 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 4AE9dqoP005695;
-	Thu, 14 Nov 2024 09:56:28 GMT
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2177.outbound.protection.outlook.com [104.47.57.177])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 42sx6axaxb-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Thu, 14 Nov 2024 09:56:28 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=HkxjspJ2RKS0iVD4nKTjhMom6NsGg5qmcmwOHNtVZyr9/wtc33D2YugimtKZ7xG6NXYjCcRiKCOb+Q4/FqTsAmQGUwI/qHbe2QYBnkxLwPdW6mBFCjeyl7On/bh6E71zsqORebGbI0NNlUBqYuA3n2D77FyC4AOrEkhv1yt7uVKCQ0V4hx63M0wSHuwtvm5UsRHPjeqTffaXlRL07LY6gQC3I3ZIHetW5UyIflIlRAcyW3m4EMOLZvrW047D5+S1+Mqz1FVU85mxi0q/WkOljmFpJb++tl1nCRpCLmxKUQFc6sLuB9x8nqMDEIq499/i8uEZ1vTxzt2vdg6TLY28dA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=K+7EqGvQ2K+9z0XPkDmnMAptcLYxTxfJ33Xz0sNY37c=;
- b=rd8ng4uJCU42VjVxN6WiBigrDO/K8HGIAVV5hg9I1XDhBjlF5vEOaJDuu3t1rB0zrZ/2cpi2YwFpm9m8DmMidjaX+1+WmJTa3KsPeRuzOGSYDry+BEOeNJaavUzHrlieI9dHw4DRWpTbI3HVqC5NmR0hHsX2tvQatziSddO2DRF2S8GbUH+v07a/oiszbXLPOEsZP9vjgKbfPY9dLxlewTy68PpxcLJ1BEtK9iLLn007x4Xekku/PDIA1oAysJLV9Pqsc4wX3+TbEBmjdsfRVSFJGQ8PAKIpvHYU2Ut98PMRfyAeIpXNwItHnHkDO64JqflU71Hs373w7IILjVlB1w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=K+7EqGvQ2K+9z0XPkDmnMAptcLYxTxfJ33Xz0sNY37c=;
- b=Axx4c8vwE34OavHhTjSkhq44MqmW3Xn4Bx4fiSxpYCQMltBg+bJt97H1s1MxSj6v+2aJB1SBN8IeRGO6H2ejUF4fi4WqgYmbFckjT0ybVPhbck3ny/yNHRdRRwCnJXVINWjXW93WMVaJZ4ccJ46j2lmjM0m0Kwv36Yt49tb3gV0=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by SJ0PR10MB6431.namprd10.prod.outlook.com (2603:10b6:a03:486::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8137.29; Thu, 14 Nov
- 2024 09:56:26 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%4]) with mapi id 15.20.8158.017; Thu, 14 Nov 2024
- 09:56:26 +0000
-Message-ID: <fdedcc89-6fae-4f2c-b1a5-6d5abf9a7cdc@oracle.com>
-Date: Thu, 14 Nov 2024 17:56:21 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: check for ext3 support in btrfs/136
-To: Johannes Thumshirn <jth@kernel.org>, Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        Johannes Thumshirn <johannes.thumshirn@wdc.com>
-References: <4c41adf81241f5d23b5a10251564b1630cabc500.1731327765.git.jth@kernel.org>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <4c41adf81241f5d23b5a10251564b1630cabc500.1731327765.git.jth@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI1PR02CA0044.apcprd02.prod.outlook.com
- (2603:1096:4:1f6::6) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YOAG//Ey"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CCF40C4CECD;
+	Thu, 14 Nov 2024 23:43:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1731627781;
+	bh=cDhDLt4EhtO3QoQ88yOeJvigwyX1hfOvLdrcwss1c8Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=YOAG//EymfxbPmX7liR88w/IpLMdj5hGa98ChVf+Vjdaojp69dm/tlDPMewZt3MYA
+	 ewIK59h6+PCiqmYD8FyqjiR7kPiflrVq4+wp8JUPkbOFYnIol6yq4+leFrgsPe+6Q3
+	 ccZlfkPz3VS9O62AKosBva1gppB0TmBFMgQDh0omdO19Tdq/f88yO0UGMFi5QFIvS/
+	 ZEPQMDPKLFoel+SI94OCa1V4IVMzf2FbcBnVn9KY4tBKXDS0yAqm5Bt2z0WJmpBVdQ
+	 sZsrO6eTBV3wsxw6OIyW4qHv1SjX6FmHnrD5uXNYsIaHO8LoXCYaUhnIXDPMBFDclD
+	 DZe2oJfkbKySw==
+Date: Thu, 14 Nov 2024 15:43:01 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>,
+	Christoph Hellwig <hch@infradead.org>,
+	Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH] xfs/157: mkfs does not need a specific fssize
+Message-ID: <20241114234301.GB9425@frogsfrogsfrogs>
+References: <20241101054810.cu6zsjrxgfzdrnia@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241101214926.GW2578692@frogsfrogsfrogs>
+ <Zyh8yP-FJUHKt2fK@infradead.org>
+ <20241104130437.mutcy5mqzcqrbqf2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241104233426.GW21840@frogsfrogsfrogs>
+ <ZynB+0hF1Bo6p0Df@dread.disaster.area>
+ <Zyozgri3aa5DoAEN@infradead.org>
+ <20241105154712.GJ2386201@frogsfrogsfrogs>
+ <ZyxS0k6UWaHpooAo@dread.disaster.area>
+ <20241107101011.2j5tel7zucn3rbbf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|SJ0PR10MB6431:EE_
-X-MS-Office365-Filtering-Correlation-Id: a9ff3b5b-f3bb-4c31-13bc-08dd04929aa5
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014|10070799003;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?bTYwbGVOREY3NVdocDdXOXRaZTc1U2Nub1BZOUdmaUFNdWkwYWhpRS9CSnRS?=
- =?utf-8?B?MG5xaE1mc3hYdWdUUkNJc2lZRXNIMkM4R0toTk9ObWh5QXBiMFNOdDhIR1p0?=
- =?utf-8?B?ZEZJb1dUSjVkdUt3MlFObVhNdXA4M0U4N0g0UjVmc0ZWMWY4Q3JEOTd6WDlu?=
- =?utf-8?B?SnN6YWJ5aGdxRjcwOEgvOEJMVzVrenJKYmhsb0RZVTljME44MURZMDlqQ0R0?=
- =?utf-8?B?S3FBZGFnY2lwaExOckd0dmlDUTZYYTRPK1ZRdlNBUUxUWVdidWVYN0dxbjcx?=
- =?utf-8?B?dEtDNUJPT0dqRmZyQTlKamRDL1pNSmRvcW1EVnlEanl5MVJkTjNtTGVqNzZt?=
- =?utf-8?B?UTZKNjNic3ZzZGtTcnkrcHFNTm9TNC9FUEJOa25jcXFSYUJDTHVMb0RNNnBQ?=
- =?utf-8?B?YklHL1NnYlU2a3pnRENsUE1QOHlnMzU1VmpnZklrQUZ2MERMNkw1OXRIdkZQ?=
- =?utf-8?B?MXAvYzlUUk5SL2k0S2JCcndhb0dIRWxvQUZEOWtQaHQrWXdJaUhscTk3NjF0?=
- =?utf-8?B?ZWNGWHBORkJqeUYrR1hHUzZnWGh0dDIvQ2xHTEhjc0RXSjZZOWhMbTN4OFZS?=
- =?utf-8?B?QXNJeW85UHhEeTY1aE9Zcm5tNWVGY1VmWk9WbzVIL2Fhb2pCbGpjN0JtVEhH?=
- =?utf-8?B?NWd4YkJhTm1FTWE0WUlhd1I0Zk1QcENqS3d1L2cwemUrM1ZnclRGRjBBdHVv?=
- =?utf-8?B?Z1JOa0F4Qlc4MlhDeFpPVU5yOHhBdVZqVEJSb3hzZndJaGRQNVA0Z1d2Ylpz?=
- =?utf-8?B?cCtoMDNCczFiT3V6b0ZxQjJFZ3VpNy9tdVEvSHpIUlpwSndMaGVlOHhWZ2Nn?=
- =?utf-8?B?VmZTdEs5RzNMckFtcjVyc2RVU2FIODIweXhVU3l2Z3BKeUJYeUttckp5L3JW?=
- =?utf-8?B?SllmQ0FRditBQ0VMRnVzU0pPNVlJbWt0WlFmMXY1cmZidS9UazBCbGwydGhh?=
- =?utf-8?B?cnlsNFhRYnFkYUliVFY4RUtZVkhZU21CUm00c1pDcjg1SExMOFIzWm9vRE5r?=
- =?utf-8?B?RmFEbG42dmphNW56alh2SzhvNU4xZWlDV0VOdlovVllRQkJ6Kyt2MzlOenhq?=
- =?utf-8?B?WS91cjJBeDYxem5zQUpNWmZ2LzRCdTRLbzlZVVI2QTZvRkU1VzdTdzdGZTNP?=
- =?utf-8?B?MWFsYk0yc1RWTlpZOGV0VDR2NVlBRml1NTF1K1M1c3BLRWFtOVZNcjJ5TXlv?=
- =?utf-8?B?SXZURS9MZkdRRmFISGVSN2luVm9uOTZkNW92ZU5SNVFyUy8vdk1GdjQ4NTZu?=
- =?utf-8?B?QjhWaHlaamhhVSt1eDRaaFZSYUplWnFiYUJpRXZ2NjdwcVRTeStDS0xtN3pL?=
- =?utf-8?B?MDhDOXBFaVlFZFdJS2syRkxWcXJHdzI5NXpJVVZlUG5rODJiWnBxMFJnRVlx?=
- =?utf-8?B?N2FhVFYwRXE4SUhTNFBTLzVYU1dGNXA4RWYyK282dFZVdjM5TFU0QzR3TC9E?=
- =?utf-8?B?NWVlT0I3NTBmMlJCKzg1S0NyUXBsMmR5M1k4bFA4RlBTZkFUdHh3Z2ExbVdJ?=
- =?utf-8?B?ZFhCMkJjakpMMzJqRk9CcTFiOFNVUnFYZS9veWJoaGl1L0NoNTk5eVM2ZGJi?=
- =?utf-8?B?eFVFSmtMTkZpSGlqZkx2NXVaZzFFRVd4bzlBSEx3QnhEdDNmaVo5dUxSSXBC?=
- =?utf-8?B?emttVmVER1dYSVcva0tjRHp2S2ZFeUNHL3luZzJRUGZmTzRVcUw0bkJ0aDFt?=
- =?utf-8?B?NEZCdERaSkZ0N0RZOUN3T3lWZkF2TU9VWUVrL2tiTjY1UFNyMDRVaTRkYXRL?=
- =?utf-8?Q?YVu5RdkohRPNoUHPHA=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(10070799003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?NkMyWjltRFBLT2FENm0reG1PMXBTd0VzVmJCREtudlE0ZndXOFFhUEU0ZkpK?=
- =?utf-8?B?ZUlSK2RsWUxnVnVVakozWVpuQjdjTEZnVUVURzJhYVhzbjBGcCtoQWlvMHVK?=
- =?utf-8?B?blp6TXVMY1JlR3EwYnZYS3FlMWlZVzU4ZHBYLzducWdzKzcvcHZsOUFZWklp?=
- =?utf-8?B?dDExZDJ6eVV3ZjZXSGN1Z1U0T0dMV1NlZU9ZTkp3WkVXb3BBbEJDbTFJMWdw?=
- =?utf-8?B?cThLb0RDSEZ3MzdIV0twd0RlQUVrbTJid1UrblpyaXBXaVB0emVlT0MrZkhY?=
- =?utf-8?B?Z3V4dGZBc0YvN1ZPSXZZQm50Zk9oRlQ1emJOQUtUR3Q0TXg1NTZoOXFlOWJB?=
- =?utf-8?B?WkFwTmxCVElJRzVhc2JNZFptSmV1ak4rUUhFUEtvRUtOV1ViempHc1Z2R3Rr?=
- =?utf-8?B?MStlMlpGSGk1a0xsUHQ4RkpIbk14b0srdWRObzRiNFlXOVZCZE50NksyYWVa?=
- =?utf-8?B?ai9DMy93aXV3b3NzZ3IyaUR3U3RZOHBaUzZNdjdlNjZEbXpzN245SXoxcFh0?=
- =?utf-8?B?aWpNRkhIcW1aMGg2WVVxVXdhT2dha0hmY2pGcWk2MzdrQVBZOGJ5QmRhT2tS?=
- =?utf-8?B?MHRQRElrakdrZnBVcHRacFFUWmp5SXpCbUZvYjBBMVZjMEVjZ1ViODJieC9o?=
- =?utf-8?B?K1AyS285M2VaaS94TmpkYXVsaGFSdE5wUTFycGdqd3pxZDRlcElTbEVWSG9T?=
- =?utf-8?B?Q0FxbDkrL1B3K3doWUU0WjcwdWJMNmJaNXVDV01rbkNXVGZsbXhNRTdIQ1FP?=
- =?utf-8?B?RFFLTzZLTXpPREVtbnE5bU1YZm5idmVhaFB5VHZ1ajY1bHRtUlNFWmUzNVNR?=
- =?utf-8?B?UW5oVFFnZzNXY2ZYdXI4cUxtV1BKVGVKT1FpSS9LZFQ4U09FSnJ3OW03czdX?=
- =?utf-8?B?M0ZJbnNLaUptQlRhQ1I5MTZDd1F0T0pZUXhpTUdvV3NpMytoZGNGR2ZmUkNP?=
- =?utf-8?B?MVZhaThPL3RVdHg5TUpmQUMvTU5GaU5pcmtVaC8vYkVNSTA0U1NPLzg3YmNJ?=
- =?utf-8?B?Vkg4aDhXWDRrY2NXaFZDWGtrZG5UdnF4M0FvU1dXUkh5L1hoWlNvRkxSVDVZ?=
- =?utf-8?B?cGo3ZW9vaXVmWnpxdnNqU1UzMFd0Ty8vRlB0eXI4YW03elpjZzQ4S0VkM3VD?=
- =?utf-8?B?VDBwNjU4TkdlMlNDSTA2SDh4d0syR3BtRUlrS1ZZRDZTbWdCM2pmOGxCQXpq?=
- =?utf-8?B?QVlWYldvSlFFb0xnVE9TbGhGMkZ4ZHBJN0x0WGJ5UjN1UHUzN3ZpYTFCODRm?=
- =?utf-8?B?aTRabU4zeHVJR0ROZVcwUStwNllRK3NmSG9NUWlyVVVuRVh0cHVzcG03Vmp0?=
- =?utf-8?B?MkN0bnJUOGJ5SDFnNU1qTFQ5NHp4WUpOdW5OOXJtM3N6cktPWlNDYjVFb2lI?=
- =?utf-8?B?Yk80L1ZzMmI1Y1IxbndZaGhxTE1zS2NFU201OXpLWDFlQ3o5cEpRSEtIaXVR?=
- =?utf-8?B?c1I1MXdqMHFFRmNmMUdmYVpCVUNTc1F5c2Q2U2hkWUxIeExyQ1pCTE9vSG1D?=
- =?utf-8?B?ejRYazhCNnVuSUZjWFhYUTVMNUozdWRIY2JEMTdOOWpmNFQ4QnU5RFE0eHN0?=
- =?utf-8?B?VEpLUUVwUy9aZy9YZTZqU3FwS013Uy9YRzk0eFA3NVBqUkMzQkRadnhXVmxa?=
- =?utf-8?B?ZWZFZjFMS0VKaFpTclNkMG5xR2JpZm82aGZLWmQrcGNJMmh4bTVLU2pPV25Z?=
- =?utf-8?B?U21SMnF3dDltRll1MXFTcTJESkljckw2NlFESFRPV2NyWGxTRmF1emxrVlBN?=
- =?utf-8?B?ZmZKako1VWxaWjNIRUZhNVdGNTJpbCsvbzBvSXQ0RTM2emhvdnFJemx4VlM4?=
- =?utf-8?B?eUVFWGxFeUNqK0ZXNldLeVFweUJRcEovZ3dFZVJsMzVHR3pCclZxRml1M1BC?=
- =?utf-8?B?MStJZUtFQ2E1VnV3U3diY0p3ZWYwSnovaTVtTk9Va3puUEtobVNWRlltS0Vn?=
- =?utf-8?B?OW1YMFY3eXI5OTVnbnB5RG5qMERKMTEwRW1oUk8xelBDaStYZXJ2bHNUbTJ0?=
- =?utf-8?B?Vjd5VlZUR1NNUFB4UVZ0MjExeXFvaCsrMjVKaTlIMlZ0L2I5TGhEeVZDM2ta?=
- =?utf-8?B?UzhqaFRiSHZCVERwYTRkR2d1bDhNRHR5eDluSUFobklQemtTT245eDM5b2dI?=
- =?utf-8?B?Y21mcTlCaEFZdGRQWlgzVmVrV1RWdVo1TnQxMjV5bW5EbUYrNHBLdHliOUkr?=
- =?utf-8?Q?BByfdmRYeN2B9+NqB2+xcUk=3D?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	9yaA/YEO/1TQcSMo2lruiBuTg5xXYy2L7v1g8AIlIIJNVC/IsTCzKWPrs5UFqW/YEmhoseRhXbNX5pS6TnMuo+lB2B4WXNttpHmKoW62FJn/29o5L1qEE9ouXMoCWjF8H0ruxXDFYkXrYDF//vp7z7/lY0f9FjVQwPRK8kph+lI1fpw0zPcSQFcx/9oHuH1E9dxW5h/N0jf5nUazUEbf+a2igAe0quiSpK2ewhiVNkNZPCP3XYJZiEeudVZawJjVbJ/1ijeCc9BdhlvOopv1kDWiXMRYvrjNd1X33syvPkBTvOJY7N4Fz6AHa7Gy2Cach/lR218fTtoH56brLV13hKRwFHBTn3C2DWUgHe1fwKVtUiVcwGXwCjdpYswtKXVMm27pQnEzKl7/Axqd24tjuhH8di1qQQnsBPktkGkS4zCBYvbj4qtJkSWsfVzJfCrDBkrL553zH2GoV3j0JK5IqSu26CUYAo1j25ufHu/1WJ+g9eH6qyBC2Wrfo8UmHPNLy1X3XSfdSl/GGIXDmoA3vyAMtc39mfhHqUGbrx3G8v6n74zizaEy+ClIJgXCm/BUHgHQWcO9e5qZ+keAcKsWZj9cfPFqRqSNcrad3zW8prc=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a9ff3b5b-f3bb-4c31-13bc-08dd04929aa5
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Nov 2024 09:56:26.6041
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 1XvjGqJwuNFRcEX7RKodo2rK5ABJMw5GztjtmdeM82G+I8vDQO1XIhHmXBdaZc6w2noIobc/2dW4wMvJf3VM0g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR10MB6431
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-11-14_03,2024-11-13_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- spamscore=0 adultscore=0 mlxlogscore=999 mlxscore=0 bulkscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2409260000 definitions=main-2411140076
-X-Proofpoint-ORIG-GUID: UxmxglsUGM-VbQJuGSiHVQCfJ7Sul0Ar
-X-Proofpoint-GUID: UxmxglsUGM-VbQJuGSiHVQCfJ7Sul0Ar
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241107101011.2j5tel7zucn3rbbf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-
-
-
-On 11/11/24 20:24, Johannes Thumshirn wrote:
-> Test-case btrfs/136 requires ext3 support, so check for ext3 using
-> _require_extra_fs.
+On Thu, Nov 07, 2024 at 06:10:11PM +0800, Zorro Lang wrote:
+> On Thu, Nov 07, 2024 at 04:40:34PM +1100, Dave Chinner wrote:
+> > On Tue, Nov 05, 2024 at 07:47:12AM -0800, Darrick J. Wong wrote:
+> > > On Tue, Nov 05, 2024 at 07:02:26AM -0800, Christoph Hellwig wrote:
+> > > > On Tue, Nov 05, 2024 at 05:58:03PM +1100, Dave Chinner wrote:
+> > > > > When the two conflict, _scratch_mkfs drops the global MKFS_OPTIONS
+> > > > > and uses only the local parameters so the filesystem is set up with
+> > > > > the configuration the test expects.
+> > > > > 
+> > > > > In this case, MKFS_OPTIONS="-m rmapbt=1" which conflicts with the
+> > > > > local RTDEV/USE_EXTERNAL test setup. Because the test icurrently
+> > > > > overloads the global MKFS_OPTIONS with local test options, the local
+> > > > > test parameters are dropped along with the global paramters when
+> > > > > there is a conflict. Hence the mkfs_scratch call fails to set the
+> > > > > filesystem up the way the test expects.
+> > > > 
+> > > > But the rmapbt can be default on, in which case it does not get
+> > > > removed.  And then without the _sized we'll run into the problem that
+> > > > Hans' patches fixed once again.
+> > > 
+> > > Well we /could/ make _scratch_mkfs_sized pass options through to the
+> > > underlying _scratch_mkfs.
+> > 
+> > That seems like the right thing to do to me.
 > 
-> Signed-off-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
-> ---
->   tests/btrfs/136 | 2 ++
->   1 file changed, 2 insertions(+)
+> OK, thanks for all of these suggestions, how about below (draft) change[1].
+> If it's good to all of you, I'll send another patch.
 > 
-> diff --git a/tests/btrfs/136 b/tests/btrfs/136
-> index 9b5b3331119f..2a5280fb9bd1 100755
-> --- a/tests/btrfs/136
-> +++ b/tests/btrfs/136
-> @@ -20,6 +20,8 @@ _require_scratch_nocheck
->   # ext4 does not support zoned block device
->   _require_non_zoned_device "${SCRATCH_DEV}"
->   
-> +_require_extra_fs ext3
-> +
->   _require_command "$BTRFS_CONVERT_PROG" btrfs-convert
->   _require_command "$MKFS_EXT4_PROG" mkfs.ext4
->   _require_command "$E2FSCK_PROG" e2fsck
+> Thanks,
+> Zorro
+> 
+> diff --git a/common/rc b/common/rc
+> index 2af26f23f..673f056fb 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1027,7 +1027,9 @@ _small_fs_size_mb()
+>  _try_scratch_mkfs_sized()
+>  {
+>         local fssize=$1
+> -       local blocksize=$2
+> +       shift
+> +       local blocksize=$1
+> +       shift
+>         local def_blksz
+>         local blocksize_opt
+>         local rt_ops
+> @@ -1091,10 +1093,10 @@ _try_scratch_mkfs_sized()
+>                 # don't override MKFS_OPTIONS that set a block size.
+>                 echo $MKFS_OPTIONS |grep -E -q "b\s*size="
+>                 if [ $? -eq 0 ]; then
+> -                       _try_scratch_mkfs_xfs -d size=$fssize $rt_ops
+> +                       _try_scratch_mkfs_xfs -d size=$fssize $rt_ops $@
+>                 else
+>                         _try_scratch_mkfs_xfs -d size=$fssize $rt_ops \
+> -                               -b size=$blocksize
+> +                               -b size=$blocksize $@
 
+I've finally had some time to integrate this into my test setup; I'll
+try this out tonight.
+
+Note: According to shellcheck, if you use $@, you should enclose it in
+double quotes.
+
+                       _try_scratch_mkfs_xfs -d size=$fssize $rt_ops \
+                               -b size=$blocksize
+                               -b size=$blocksize "$@"
+--D
+
+
+>                 fi
+>                 ;;
+>         ext2|ext3|ext4)
+> @@ -1105,7 +1107,7 @@ _try_scratch_mkfs_sized()
+>                                 _notrun "Could not make scratch logdev"
+>                         MKFS_OPTIONS="$MKFS_OPTIONS -J device=$SCRATCH_LOGDEV"
+>                 fi
+> -               ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> +               ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         gfs2)
+>                 # mkfs.gfs2 doesn't automatically shrink journal files on small
+> @@ -1120,13 +1122,13 @@ _try_scratch_mkfs_sized()
+>                         (( journal_size >= min_journal_size )) || journal_size=$min_journal_size
+>                         MKFS_OPTIONS="-J $journal_size $MKFS_OPTIONS"
+>                 fi
+> -               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $SCRATCH_DEV $blocks
+> +               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -O -b $blocksize $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         ocfs2)
+> -               yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> +               yes | ${MKFS_PROG} -t $FSTYP -F $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         udf)
+> -               $MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> +               $MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         btrfs)
+>                 local mixed_opt=
+> @@ -1134,33 +1136,33 @@ _try_scratch_mkfs_sized()
+>                 # the device is not zoned. Ref: btrfs-progs: btrfs_min_dev_size()
+>                 (( fssize < $((256 * 1024 * 1024)) )) &&
+>                         ! _scratch_btrfs_is_zoned && mixed_opt='--mixed'
+> -               $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
+> +               $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $@ $SCRATCH_DEV
+>                 ;;
+>         jfs)
+> -               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
+> +               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         reiserfs)
+> -               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> +               ${MKFS_PROG} -t $FSTYP $MKFS_OPTIONS -b $blocksize $@ $SCRATCH_DEV $blocks
+>                 ;;
+>         reiser4)
+>                 # mkfs.resier4 requires size in KB as input for creating filesystem
+> -               $MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
+> +               $MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $@ $SCRATCH_DEV \
+>                                    `expr $fssize / 1024`
+>                 ;;
+>         f2fs)
+>                 # mkfs.f2fs requires # of sectors as an input for the size
+>                 local sector_size=`blockdev --getss $SCRATCH_DEV`
+> -               $MKFS_F2FS_PROG $MKFS_OPTIONS $SCRATCH_DEV `expr $fssize / $sector_size`
+> +               $MKFS_F2FS_PROG $MKFS_OPTIONS $@ $SCRATCH_DEV `expr $fssize / $sector_size`
+>                 ;;
+>         tmpfs)
+>                 local free_mem=`_free_memory_bytes`
+>                 if [ "$free_mem" -lt "$fssize" ] ; then
+>                    _notrun "Not enough memory ($free_mem) for tmpfs with $fssize bytes"
+>                 fi
+> -               export MOUNT_OPTIONS="-o size=$fssize $TMPFS_MOUNT_OPTIONS"
+> +               export MOUNT_OPTIONS="-o size=$fssize $@ $TMPFS_MOUNT_OPTIONS"
+>                 ;;
+>         bcachefs)
+> -               $MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt $SCRATCH_DEV
+> +               $MKFS_BCACHEFS_PROG $MKFS_OPTIONS --fs_size=$fssize $blocksize_opt $@ $SCRATCH_DEV
+>                 ;;
+>         *)
+>                 _notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+> @@ -1170,7 +1172,7 @@ _try_scratch_mkfs_sized()
+>  
+>  _scratch_mkfs_sized()
+>  {
+> -       _try_scratch_mkfs_sized $* || _notrun "_scratch_mkfs_sized failed with ($*)"
+> +       _try_scratch_mkfs_sized "$@" || _notrun "_scratch_mkfs_sized failed with ($@)"
+>  }
+>  
+>  # Emulate an N-data-disk stripe w/ various stripe units
+> diff --git a/tests/xfs/157 b/tests/xfs/157
+> index 9b5badbae..f8f102d78 100755
+> --- a/tests/xfs/157
+> +++ b/tests/xfs/157
+> @@ -66,8 +66,7 @@ scenario() {
+>  }
+>  
+>  check_label() {
+> -       MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
+> -               >> $seqres.full
+> +       _scratch_mkfs_sized "$fs_size" "" "-L oldlabel" >> $seqres.full 2>&1
+>         _scratch_xfs_db -c label
+>         _scratch_xfs_admin -L newlabel "$@" >> $seqres.full
+>         _scratch_xfs_db -c label
+> 
+> 
+> 
+> 
+> > 
+> > -Dave.
+> > -- 
+> > Dave Chinner
+> > david@fromorbit.com
+> > 
+> 
+> 
