@@ -1,135 +1,117 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08D7713AA3E;
-	Fri, 15 Nov 2024 16:45:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7B721E4A6;
+	Fri, 15 Nov 2024 16:48:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731689150; cv=none; b=MphXg1+ympTE6grIm8EvyiG+CP6u5Ts499VZ0dLeurKVX16aBZbXzIailM29kY6ioaC6QSiBq076K8KhsCMULsNmz8J9OTihRof42SDrxVrygfoxYCxpe1V+SOBfiopxwrx8B90X4Pnjhw9xM45IZBI6/vPsaHQwSreMDoWKSUc=
+	t=1731689326; cv=none; b=Y3Q5wjkxi8bx7O6aniRKX1+rFYiY7jZCtpsVB7NhlLXRx2cW/NSRJ9GeonXO1A/z2jl69Wa9Qn6rtmfLDuvnmMzzjwSPL8zWSk7sfnEgaCdvrXkB9rawpNNCVN91zKEDi4DDFcYsm/sjOvmEoeT2DQ50t5dnGu5rUyJ+OArIisU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731689150; c=relaxed/simple;
-	bh=e50cVx2A1nY7atCYkybhbwvEmsBPVxbZ0bVfDZ473Eo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZRt89tFEStcZyEqlNqK74oAFDf2ZSzGoB90SKbudVL0X2VD+1Oy/htRkiy3UJG7hMhWxPjvS+ZqYy2yIyp2DZBX37kVDPxKlf+UkeIEE4ZXGc4bMCX5ya0u3YB8gq+RCVB9L6sfWkwddBP9XNWXfyFuXwTrGXKPR1ZzDL4UNikA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vs0OLyJk; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731689326; c=relaxed/simple;
+	bh=kKGtfMwcba2Qcdey5QPWB7nF+4OGsRzJEgSd4xvkj+0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=rcWOXtDIMmyqLFeh2yD34QMXoQJmi6Z0TVYK9CPyZbVu9N3EE75RSg3HmLSB87F8jB6ueuy3dUstFaQzbCjhkNAFZPjueaz0VPCNfIQS7vm4Z4ubTxuRG8CW3ESySxupMdiG2TjZWJ7kNEbV8ZxeLVEZ94ASqFATslQdm2fX79Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XTO7aGXe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vs0OLyJk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72B05C4CECF;
-	Fri, 15 Nov 2024 16:45:49 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XTO7aGXe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3F754C4CECF;
+	Fri, 15 Nov 2024 16:48:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731689149;
-	bh=e50cVx2A1nY7atCYkybhbwvEmsBPVxbZ0bVfDZ473Eo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Vs0OLyJkL3VnxERlBWiHfrvY7y6BfHg6UWNhFOq9mAJW0ycc1/2rqEFNmGJVNWYvE
-	 4SYE0kM9dN7s51b3oj+ztBuiYGXojHZXMRzKmVu5p3wYCKyLTLZwul5RIOpGMnyQt3
-	 S9SJRjww0HXH4k7Z/PbsntgTDRhMrdHg2lK5iKlRQwfg47P2ZpN2PVMYh4Yhs/Dq4u
-	 bE/c5CZIAHyxC7JMnex31BPzo/T6Zi1T6oebN6hi5XZyedtnyZpMbjn5wzJ1e3dKgF
-	 rJ/aiWujkjwuBemRqoq/qmVR6dNtbDW8igEaoS+UZVZ3UPuAMEk5DryQet/FXilRWd
-	 fof7KpmKQMVxw==
-Date: Fri, 15 Nov 2024 08:45:48 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Nirjhar Roy <nirjhar@linux.ibm.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, zlang@kernel.org
-Subject: Re: [PATCH v2 1/2] common/rc,xfs/207: Adding a common helper
- function to check xflag bits on a given file
-Message-ID: <20241115164548.GE9425@frogsfrogsfrogs>
-References: <cover.1731597226.git.nirjhar@linux.ibm.com>
- <9a955f34cab443d3ed0fc07c17886d5e8a11ad80.1731597226.git.nirjhar@linux.ibm.com>
+	s=k20201202; t=1731689326;
+	bh=kKGtfMwcba2Qcdey5QPWB7nF+4OGsRzJEgSd4xvkj+0=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=XTO7aGXe3Y7L3VmxQl+fmQcjP5U39biYXukP/iwUI7LEVB2VufqQWrz3WFPlzv1ne
+	 rTZnO4gfnFBoSEghpmp6Fz9vSHL2+LYZbbAcaDOwnAeHAOE0inMMu2uDV72l3zCVeM
+	 UGQ28uA5bazWQUsynw+awsXx7hQNPW70A0+qBLui4mvhOW2V2g84u3R56R+Taem9oY
+	 P8xLC/4ZhLyDi6H/4lXJHGsF+UBUdZ+COfbV2kDhjJ8beR/O4Bu9gWn7sQW6jv++jD
+	 GycCM/btSxbQrrAujB4bGMGDLrAgso15DksV5BMTLmcdHBSJIQozYcYFRkGA4fsXHD
+	 GtkZZtuYSBYZQ==
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-5c96b2a10e1so3388412a12.2;
+        Fri, 15 Nov 2024 08:48:46 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCVVwgugo1VCwhtjM6Hxae9kJBQYNKa8uK9Q6op5AtPtV6AQKwDP6hzwFnzfYiNTAXEuKkWyTDAo/HDZbg==@vger.kernel.org
+X-Gm-Message-State: AOJu0YxPaBL/bfxFi3xocErlkUCZJjv+jiS6AVVQKJfrMeh/gbs5s60+
+	IroupXj1iYG/dgPZHwSBxe9NxT95PkMPO6v7rvkxGuDmZYIIphorqoLytOan0nLJN/sycT69JDR
+	hYE0obL71/rR221VChRxGXZEEiyY=
+X-Google-Smtp-Source: AGHT+IG2M1gtRGUI7dACjXN5Ox1oR2U6UDXdIcX9c2rbsI/xG2W5/AfmLByTXXr1OhpfHx1R6kFiYyecMaBxbDhpYks=
+X-Received: by 2002:a17:906:c150:b0:a9e:6712:c27 with SMTP id
+ a640c23a62f3a-aa483556529mr254190966b.49.1731689324855; Fri, 15 Nov 2024
+ 08:48:44 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <9a955f34cab443d3ed0fc07c17886d5e8a11ad80.1731597226.git.nirjhar@linux.ibm.com>
+References: <cover.1731683116.git.anand.jain@oracle.com> <7af8f80173fab5408da86f5b3393e787659a81d6.1731683116.git.anand.jain@oracle.com>
+In-Reply-To: <7af8f80173fab5408da86f5b3393e787659a81d6.1731683116.git.anand.jain@oracle.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Fri, 15 Nov 2024 16:48:07 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H6tuucypvk=vjWtJGnyZa59XEcS-x3hd-XoAYWPLkK3nQ@mail.gmail.com>
+Message-ID: <CAL3q7H6tuucypvk=vjWtJGnyZa59XEcS-x3hd-XoAYWPLkK3nQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] fstests: move fs-module reload to earlier in the
+ run_section function
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Nov 15, 2024 at 09:45:58AM +0530, Nirjhar Roy wrote:
-> This patch defines a common helper function to test whether any of
-> fsxattr xflags field is set or not. We will use this helper in the next
-> patch for checking extsize (e) flag.
-> 
-> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-> Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-> Signed-off-by: Nirjhar Roy <nirjhar@linux.ibm.com>
+On Fri, Nov 15, 2024 at 3:22=E2=80=AFPM Anand Jain <anand.jain@oracle.com> =
+wrote:
+>
+> Reload the module before each test, instead of later in run_section.
+
+Why?
+The change log should give a justification for the change.
+It's just stating what the code changes are doing but without any reasoning=
+.
+
+Thanks.
+
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  common/rc     |  7 +++++++
->  tests/xfs/207 | 13 ++-----------
->  2 files changed, 9 insertions(+), 11 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 2af26f23..fc18fc94 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -41,6 +41,13 @@ _md5_checksum()
->  	md5sum $1 | cut -d ' ' -f1
->  }
->  
-> +# Check whether a fsxattr xflags character ($2) field is set on a given file ($1).
-> +# e.g, fsxattr.xflags =  0x80000800 [----------e-----X]
-> +_test_fsx_xflags_field()
-
-How about we call this "_test_fsxattr_xflag" instead?
-
-fsx is already something else in fstests.
-
-> +{
-> +    grep -q "fsxattr.xflags.*\[.*$2.*\]" <($XFS_IO_PROG -c "stat" "$1")
-> +}
-
-Not sure why this lost the xfs_io | grep -q structure.  The return value
-of the whole expression will always be the return value of the last
-command in the pipeline.
-
-(Correct?  I hate bash...)
-
---D
-
+>  check | 18 +++++++++---------
+>  1 file changed, 9 insertions(+), 9 deletions(-)
+>
+> diff --git a/check b/check
+> index 9222cd7e4f81..d8ee73f48c77 100755
+> --- a/check
+> +++ b/check
+> @@ -935,6 +935,15 @@ function run_section()
+>                         continue
+>                 fi
+>
+> +               # Reload the module after each test to check for leaks or
+> +               # other problems.
+> +               if [ -n "${TEST_FS_MODULE_RELOAD}" ]; then
+> +                       _test_unmount 2> /dev/null
+> +                       _scratch_unmount 2> /dev/null
+> +                       modprobe -r fs-$FSTYP
+> +                       modprobe fs-$FSTYP
+> +               fi
 > +
->  # Write a byte into a range of a file
->  _pwrite_byte() {
->  	local pattern="$1"
-> diff --git a/tests/xfs/207 b/tests/xfs/207
-> index bbe21307..4f6826f3 100755
-> --- a/tests/xfs/207
-> +++ b/tests/xfs/207
-> @@ -21,15 +21,6 @@ _require_cp_reflink
->  _require_xfs_io_command "fiemap"
->  _require_xfs_io_command "cowextsize"
->  
-> -# Takes the fsxattr.xflags line,
-> -# i.e. fsxattr.xflags = 0x0 [--------------C-]
-> -# and tests whether a flag character is set
-> -test_xflag()
-> -{
-> -    local flg=$1
-> -    grep -q "\[.*${flg}.*\]" && echo "$flg flag set" || echo "$flg flag unset"
-> -}
+>                 # record that we really tried to run this test.
+>                 if ((!${#loop_status[*]})); then
+>                         try+=3D("$seqnum")
+> @@ -1033,15 +1042,6 @@ function run_section()
+>                         done
+>                 fi
+>
+> -               # Reload the module after each test to check for leaks or
+> -               # other problems.
+> -               if [ -n "${TEST_FS_MODULE_RELOAD}" ]; then
+> -                       _test_unmount 2> /dev/null
+> -                       _scratch_unmount 2> /dev/null
+> -                       modprobe -r fs-$FSTYP
+> -                       modprobe fs-$FSTYP
+> -               fi
 > -
->  echo "Format and mount"
->  _scratch_mkfs > $seqres.full 2>&1
->  _scratch_mount >> $seqres.full 2>&1
-> @@ -65,14 +56,14 @@ echo "Set cowextsize and check flag"
->  $XFS_IO_PROG -c "cowextsize 1048576" $testdir/file3 | _filter_scratch
->  _scratch_cycle_mount
->  
-> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
-> +_test_fsx_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
->  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
->  
->  echo "Unset cowextsize and check flag"
->  $XFS_IO_PROG -c "cowextsize 0" $testdir/file3 | _filter_scratch
->  _scratch_cycle_mount
->  
-> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
-> +_test_fsx_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
->  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
->  
->  status=0
-> -- 
-> 2.43.5
-> 
-> 
+>                 # Scan for memory leaks after every test so that associat=
+ing
+>                 # a leak to a particular test will be as accurate as poss=
+ible.
+>                 _check_kmemleak || tc_status=3D"fail"
+> --
+> 2.46.1
+>
+>
