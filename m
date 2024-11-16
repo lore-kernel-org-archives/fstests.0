@@ -1,176 +1,80 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12887136338;
-	Fri, 15 Nov 2024 19:22:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E80C919306F;
+	Sat, 16 Nov 2024 19:08:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731698541; cv=none; b=N22bTra76/qHLIXkQHCYW8DCT6AIjaiZYda4WlLqvSjaMKCZoPVCqiqFF52AyG8kBoQhGd+EGY2XyNOzcxt63tB3DFq2kQUqPhe48zeR6ViMHUatixjyVyk8NGLrILL0UE/UDypwp0qEQujqkvgGjQtj6bokhDqqBoL3k6nsoIo=
+	t=1731784084; cv=none; b=mVsWZ0wJlnNI0Oa0qtUDRmkFaaDD4QoT3emoRTDJixylr72dvJBCmZWLa23DLMpuS//kSNJXKcNQZDpvNuvdldXYAL0WZWvC68yIPP0IdzZXjD5x/axucVi8ulkgqcEtEqBhK9R8loV3QL/wtRqbJXAHYrd4S/VlaCike6yg+qA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731698541; c=relaxed/simple;
-	bh=6G/b9hH9hi6Fz4dpX+tA6gPVNzXiRv5ymi0Gbz/TQV8=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=q+IBvtT49jsFeLzTymOZNKRI5YZBU39gKaEBE0zadiFdNNdckvnGbxYmG6ID7aiTEPiqZy2+FIbEdXrDoc0TIampQShcLiMskWdYDM/hic9QQ7clFtddIiHhEOudL4GZiiRQ5f1T4B3AQ+gMmUZKwkEU3HGeXNNPgXJB0qFxV/I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lyzmC4z5; arc=none smtp.client-ip=209.85.210.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1731784084; c=relaxed/simple;
+	bh=w3rJ00GC+6ol5by0IWnf4bDDfDamd7ILQOdlYKQu4Vk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=k/vaMQeN4WVTPXKtjuOmouU7KsLvU3BNzKY5Xk6ol9/tKSx9053HoABmiDA7lYU1dPRgGNPH9Sx/VJPGdG0MjWD3Ghhg2RCaUZZe44bP1pmkJQly9GBaEEPnDRe97Ssa+NKzZrdVw7FHuEEXLcAxi91OkTlYbxJFwtitxkV9X44=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZVC+WmyQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lyzmC4z5"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-71e681bc315so1609932b3a.0;
-        Fri, 15 Nov 2024 11:22:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1731698538; x=1732303338; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=PWCWCSqM5EiVesBVWTWxOKB4YwhvqjcwiSWzB2JNFOA=;
-        b=lyzmC4z5WJifvCwsQzLrfypXjqA7UE8Ea1gTAzpcGl4JpKPOEGDBzuBP4bkh7LalD2
-         Y6uFbg9qDyrFkqH5XnQnLAgjDV/xq6/ypvrnifXp9N9TdlguqG4rwKQ86i2nmlGMM+6r
-         SINkjyLY0CadGMmPo0COMpd2HyeC/5eLgMKp33X5R728ETAemyv4ahUCp4Bij2dvEPVu
-         1BjGiEsTON+TAmrSjDOSrptViRUsBxAjKfcD3+PG7YAyc4bLlYNanbef/RxMJ8U/GiJz
-         ZeSDiOo5LzSGQz3lmOW/7Ur8tjJMXY8iOcndqGkui4rA3oeU3AmDoI0KFKY+pR8+XbiM
-         J3Ng==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731698538; x=1732303338;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PWCWCSqM5EiVesBVWTWxOKB4YwhvqjcwiSWzB2JNFOA=;
-        b=dFrDiM8CTpIQsKVe2aqcShTyFTV9s5HaITe6rd+5r5O1jy0uVK2b2qk5kjtgiT1ydA
-         RMcZsVWieLjME8cH6yUOta+2rgxKXa9osW4IDly3tuF6q/OdHhm5fX/BnlvJklX77yF7
-         tMwqQC5H2f+kX9XgsSb2MdNhX9q6TqQAfvGPoKlX3ZY9IhV/EehwwW0B2cdVIXZ5ynSJ
-         dc/IrjSDZy7Q2VgvjwHwHY4fRVJGDjG6hh7FZ0VFG4APm0RFVyrFSOURElLp6vjCy7KX
-         ZkMgS84mqqsn3nOCI1fYIFpd2u68s6H2DnJGEpGJUntfeg0ncpfMyds1q9DtOWf+aWRX
-         qZow==
-X-Forwarded-Encrypted: i=1; AJvYcCUD1Cr9t/LLe7EC3siZxZbqGf1zJzYskI8fctxljsR1efucxHo0KZGzBHCjF08A81meJEsZ8lyDAwP2@vger.kernel.org, AJvYcCXKX3JjZWwt4Mz+sYJDZgSFzo2442aJsw8wx+OX4db/XhGebjQoeQ1yZPMTwtcxOQ6BWIe4vc+XT/+M@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywy3m1NU8uJes90LcjEktzSKVWhALK1rlrtbS7jmjseYASlzXKV
-	eB3tzCkyiaWl5pEJ49qaPt1D7vAGSuEG9qts/kOfi4JyxtA9LOuT
-X-Google-Smtp-Source: AGHT+IHnYbp70vCjXAE1/wnpw+SRyg6rXoRi90BrRWmaSGz9zPISzMXiE28u63WSEsug06GyD4LFVg==
-X-Received: by 2002:a05:6a00:179e:b0:724:6c21:f0c with SMTP id d2e1a72fcca58-72475fbc463mr7267823b3a.4.1731698538247;
-        Fri, 15 Nov 2024 11:22:18 -0800 (PST)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724771c0ba2sm1775081b3a.128.2024.11.15.11.22.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Nov 2024 11:22:17 -0800 (PST)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Darrick J. Wong" <djwong@kernel.org>, Nirjhar Roy <nirjhar@linux.ibm.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, zlang@kernel.org
-Subject: Re: [PATCH v2 1/2] common/rc,xfs/207: Adding a common helper function to check xflag bits on a given file
-In-Reply-To: <20241115164548.GE9425@frogsfrogsfrogs>
-Date: Sat, 16 Nov 2024 00:36:26 +0530
-Message-ID: <87r07cco5p.fsf@gmail.com>
-References: <cover.1731597226.git.nirjhar@linux.ibm.com> <9a955f34cab443d3ed0fc07c17886d5e8a11ad80.1731597226.git.nirjhar@linux.ibm.com> <20241115164548.GE9425@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZVC+WmyQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AEE80C4CEC3;
+	Sat, 16 Nov 2024 19:08:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1731784083;
+	bh=w3rJ00GC+6ol5by0IWnf4bDDfDamd7ILQOdlYKQu4Vk=;
+	h=From:To:Cc:Subject:Date:From;
+	b=ZVC+WmyQeuodc9/WYTLXBlu1lBL8U9fhZVKvCJ8M3UVeKSSWqB1lBmZcv53i7m/l4
+	 r7oU4cOPLn/M7ViX1mfue3ljaUtExv0eWRjDsByjQIhS/4thSnDhLq0qdp/uH0yxYm
+	 7TjqksdYreZ3W6Q2r183wSN70P3pTQXuB0eAY/ySiX+kUHchgfUB0KiZvhWHOxx6Sm
+	 4jX3yAQP7EjQmdNUxkrY8Gi6DA262oqSRleRJuHCSau3KckGHdLaHDxdMYPGMp0vu6
+	 xA6sjkpFVbDYF+1OzJDSGcFc/b/gt+mhBIqoaGxvzm2gYdBlUoMZEqKuJIKxQ1BlcI
+	 IzoFIQBONxO0Q==
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
+Subject: [PATCH 0/2] fstests: fix test issue of xfs/157
+Date: Sun, 17 Nov 2024 03:07:58 +0800
+Message-ID: <20241116190800.1870975-1-zlang@kernel.org>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-"Darrick J. Wong" <djwong@kernel.org> writes:
+xfs/157 started to fail since 2f7e1b8a6f09 ("xfs/157,xfs/547,xfs/548: switch to
+using _scratch_mkfs_sized") was merged.
 
-> On Fri, Nov 15, 2024 at 09:45:58AM +0530, Nirjhar Roy wrote:
->> This patch defines a common helper function to test whether any of
->> fsxattr xflags field is set or not. We will use this helper in the next
->> patch for checking extsize (e) flag.
->> 
->> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
->> Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
->> Signed-off-by: Nirjhar Roy <nirjhar@linux.ibm.com>
->> ---
->>  common/rc     |  7 +++++++
->>  tests/xfs/207 | 13 ++-----------
->>  2 files changed, 9 insertions(+), 11 deletions(-)
->> 
->> diff --git a/common/rc b/common/rc
->> index 2af26f23..fc18fc94 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -41,6 +41,13 @@ _md5_checksum()
->>  	md5sum $1 | cut -d ' ' -f1
->>  }
->>  
->> +# Check whether a fsxattr xflags character ($2) field is set on a given file ($1).
->> +# e.g, fsxattr.xflags =  0x80000800 [----------e-----X]
->> +_test_fsx_xflags_field()
->
-> How about we call this "_test_fsxattr_xflag" instead?
->
-> fsx is already something else in fstests.
->
->> +{
->> +    grep -q "fsxattr.xflags.*\[.*$2.*\]" <($XFS_IO_PROG -c "stat" "$1")
->> +}
->
-> Not sure why this lost the xfs_io | grep -q structure.  The return value
-> of the whole expression will always be the return value of the last
-> command in the pipeline.
->
+  FSTYP         -- xfs (non-debug)
+  PLATFORM      -- Linux/x86_64
+  MKFS_OPTIONS  -- -f -m rmapbt=1 /dev/sda3
+  MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda3 /mnt/scratch
 
-I guess it was suggested here [1]
+  xfs/157 7s ... - output mismatch (see /root/git/xfstests/results//xfs/157.out.bad)
+      --- tests/xfs/157.out       2024-11-01 01:05:03.664543576 +0800  
+      +++ /root/git/xfstests/results//xfs/157.out.bad     2024-11-01 02:56:47.994007900 +0800
+      @@ -6,10 +6,10 @@
+       label = "oldlabel"
+       label = "newlabel"
+       S3: Check that setting with rtdev works
+      -label = "oldlabel"
+      +label = ""
+       label = "newlabel"
+       S4: Check that setting with rtdev + logdev works
+      ...
+      (Run 'diff -u /root/git/xfstests/tests/xfs/157.out /root/git/xfstests/results//xfs/157.out.bad'  to see the entire diff)
+  Ran: xfs/157
+  Failures: xfs/157
+  Failed 1 of 1 tests
 
-[1]: https://lore.kernel.org/all/20241025025651.okneano7d324nl4e@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/
+Before that change, the _scratch_mkfs can drop "rmapbt=1" option from $MKFS_OPTIONS,
+only keep the "-L label" option. That's why this test never failed before. To fix
+this failure, this patchset does:
 
-root-> grep -q "hello" <(echo "hello world"); echo $?
-0
+The [PATCH 1/2] helps _scratch_mkfs_sized to support extra argument, then the
+extra argument can be sent to _scratch_mkfs, which will try to "protect"
+the extra argument from being dropped.
 
-The cmd is not using the unnamed pipes ("|") any more. It's spawning the
-process () which does echo "hello world" and creating a named pipe or
-say temporary FD <() which is being read by grep now. So we still will
-have the correct return value. Slightly inefficitent compared to unnamed
-pipes though I agree. 
+The [PATCH 2/2] invokes the new _scratch_mkfs_sized in xfs/157 to fix the
+test failure of it.
 
-> (Correct?  I hate bash...)
->
-
-root-> ls -la <(echo "hello world");
-lr-x------ 1 root root 64 Nov 16 00:42 /dev/fd/63 -> 'pipe:[74211850]'
-
-Did I make you hate it more? ;) 
-
-
--ritesh
-
-> --D
->
->> +
->>  # Write a byte into a range of a file
->>  _pwrite_byte() {
->>  	local pattern="$1"
->> diff --git a/tests/xfs/207 b/tests/xfs/207
->> index bbe21307..4f6826f3 100755
->> --- a/tests/xfs/207
->> +++ b/tests/xfs/207
->> @@ -21,15 +21,6 @@ _require_cp_reflink
->>  _require_xfs_io_command "fiemap"
->>  _require_xfs_io_command "cowextsize"
->>  
->> -# Takes the fsxattr.xflags line,
->> -# i.e. fsxattr.xflags = 0x0 [--------------C-]
->> -# and tests whether a flag character is set
->> -test_xflag()
->> -{
->> -    local flg=$1
->> -    grep -q "\[.*${flg}.*\]" && echo "$flg flag set" || echo "$flg flag unset"
->> -}
->> -
->>  echo "Format and mount"
->>  _scratch_mkfs > $seqres.full 2>&1
->>  _scratch_mount >> $seqres.full 2>&1
->> @@ -65,14 +56,14 @@ echo "Set cowextsize and check flag"
->>  $XFS_IO_PROG -c "cowextsize 1048576" $testdir/file3 | _filter_scratch
->>  _scratch_cycle_mount
->>  
->> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
->> +_test_fsx_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
->>  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
->>  
->>  echo "Unset cowextsize and check flag"
->>  $XFS_IO_PROG -c "cowextsize 0" $testdir/file3 | _filter_scratch
->>  _scratch_cycle_mount
->>  
->> -$XFS_IO_PROG -c "stat" $testdir/file3 | grep 'fsxattr.xflags' | test_xflag "C"
->> +_test_fsx_xflags_field "$testdir/file3" "C" && echo "C flag set" || echo "C flag unset"
->>  $XFS_IO_PROG -c "cowextsize" $testdir/file3 | _filter_scratch
->>  
->>  status=0
->> -- 
->> 2.43.5
->> 
->> 
+Thanks,
+Zorro
