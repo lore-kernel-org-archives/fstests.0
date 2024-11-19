@@ -1,85 +1,86 @@
 Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B66A1527B4;
-	Tue, 19 Nov 2024 06:13:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49AC21CCB4E;
+	Tue, 19 Nov 2024 14:55:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731996805; cv=none; b=TmyqEa6+2QzONmFCTy4Ae1LEAEBISbWyYRSXtTwqIZ9e16NerppljAx+A0aqTQX39oGfYeE0Rmtw+S9Zm73PHqS0bDMnpbb7XjEDhSt0X4wyOOGo+WMiyZY4g7muY/0f65GlV6rCh+SFL2JGr7TJ0jDjaolKxBK/LrzeOsD5czs=
+	t=1732028113; cv=none; b=ISOESXttDAP1YXcdbXoJwvt0fWMyuTpzYH500ZnAGGzNo9lN6m5HaKeNYu9pL5Kh7iLxdSd96SDqQYf3+WjRDpvLb7YNSkvlL9LHVPs4X3pmDZqSxkfUzR1jZ3w8GnVSoq27tu/JZrpWydRymAuev4O0RNmdiXldBKDYKz1ZZCg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731996805; c=relaxed/simple;
-	bh=dX+14lpY6ThHnkkAApMBKzYLSGOJR1QcEMZeZfarRc4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cY/xE7z8xZz2G2aXYGflpcpsbNVpEpBYgygAEjZwatU7bVcsBkZ6xQwlLsmJ3qRsOJAF3pJUDtJwUy72e1CXMuli4vWFEnNJm04ZRGPT386u2SSd537OnsMqzQV8bV/DcEJEgGDgmEemB/hij984PB4v5HqmxVFzs7x1A9RilVg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=HFrUV56A; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+	s=arc-20240116; t=1732028113; c=relaxed/simple;
+	bh=Ha9mamDiAebG8G1Z5HxfKpUeIZq2AndQo0glDDXbNwg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pVuMW/+GLsR7UgwxAHfXOnuCUv4C0QhsbcX2E2z2jT58DfzZ/fA9Jm7iHlrbGPLC6Of2xyMpMXqbKPKgZxrWINqMqxISXMxUfcsWju5IGpZ88mrAQqSP+l55x0c0Opo05GB7O4Nvs5Mitiu0p87vEAgsakRsAol+zs9MXKVuaR8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=4cY430Tf; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="HFrUV56A"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="4cY430Tf"
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=+8+b/D8sexm2rRahcyGmLCAhK6dhnCOC3ns9q+QYJEU=; b=HFrUV56Ac9ueFZsCD3+KmeEYwd
-	Js9PWiFzVS19KknYmkSA/Bh8WFR2UU+EKJBqmLfA0dfF9Xtry6dM8LMVBcs4mYSiItwcr2LbIz6fu
-	hasdgR8vgPWW5APyVcWVBjR45nu9MW047EgY0yuv0qUJiX/mzSmu6nfuhcbpY0fsLwViJQNm07g5N
-	kHT8cpNVqJp0BbZXdMOdlmv0jVHmyzjvr1r8+cDuoKF+ORJQ6FCmEvMDa+rBL1YNTXMlSBvF4SfId
-	doigzWCcGOWNEPsgwtHX/kdbmThDl7z2KKLHwW7AdPsJwpzhp6YJNlqDad1ydE5qLLzpZ/13qa1nM
-	R/nEBtHw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tDHUJ-0000000BVNK-21BE;
-	Tue, 19 Nov 2024 06:13:23 +0000
-Date: Mon, 18 Nov 2024 22:13:23 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: Dave Chinner <david@fromorbit.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 09/12] generic/251: constrain runtime via time/load/soak
- factors
-Message-ID: <Zzwsgzu81kiv5JPB@infradead.org>
-References: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs>
- <173197064562.904310.6083759089693476713.stgit@frogsfrogsfrogs>
- <ZzvtoVID2ASv4IM2@dread.disaster.area>
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=5MQLMfE4ZyfZPhUI3ONUFEi2YQtwtFvPgkgKYZ+XEwE=; b=4cY430Tflcht5sIXlCT8Wuhv8p
+	Z/5TmkHmiy2OomNNROk79JKKE/aXby22UaS7Jr4bUq8ilq4fnJoKqaFNieaK4VBDb7NAbIJZBAP0T
+	Tz823ph+SrUTw9RUTqz/pmenv/9GDSrB8JDiS1/YrNteruaaj2UVsASXDTeyhuWeeY7Oum2Y9NqMs
+	U4G891ysq4QpYgSb4H93+8WqUv+7Bb0Fkv03ZYlKdmSVbW7+LXeyREjIX1owKI6JY+39frTOAYCmy
+	fdh0rHhHbAeMrlaIwPyjCT4HYbuga3nEpDtJbGniZbP5LjdsDBbNwfFEhkTz3v3G3k9mIyKpepTRI
+	rsUIdncA==;
+Received: from 2a02-8389-2341-5b80-1731-a089-d2b1-3edf.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:1731:a089:d2b1:3edf] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
+	id 1tDPdG-0000000CkPc-1xhb;
+	Tue, 19 Nov 2024 14:55:10 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCH] xfs/229: call on the test directory
+Date: Tue, 19 Nov 2024 15:55:07 +0100
+Message-ID: <20241119145507.1240249-1-hch@lst.de>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZzvtoVID2ASv4IM2@dread.disaster.area>
+Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Tue, Nov 19, 2024 at 12:45:05PM +1100, Dave Chinner wrote:
-> Question for you: Does your $here directory contain a .git subdir?
-> 
-> One of the causes of long runtime for me has been that $here might
-> only contain 30MB of files, but the .git subdir balloons to several
-> hundred MB over time, resulting is really long runtimes because it's
-> copying GBs of data from the .git subdir.
+xfs/229 operates on a directory that is forced to the data volume, but
+it calls _require_fs_space on $TEST_DIR which might point to the RT
+device when -d rtinherit is set.
 
-Or the results/ directory when run in a persistent test VM like the
-one for quick runs on my laptop.  I currently need to persistently
-purge that for just this test.
+Call _require_fs_space on $TDIR after it is create to check for the
+space actually used by the test.
 
-> 
-> I have this patch in my tree:
-> 
-> --- a/tests/generic/251
-> +++ b/tests/generic/251
-> @@ -175,9 +175,12 @@ nproc=20
->  # Copy $here to the scratch fs and make coipes of the replica.  The fstests
->  # output (and hence $seqres.full) could be in $here, so we need to snapshot
->  # $here before computing file checksums.
-> +#
-> +# $here/* as the files to copy so we avoid any .git directory that might be
-> +# much, much larger than the rest of the fstests source tree we are copying.
->  content=$SCRATCH_MNT/orig
->  mkdir -p $content
-> -cp -axT $here/ $content/
-> +cp -ax $here/* $content/
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/xfs/229 | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Maybe we just need a way to generate more predictable file system
-content?
+diff --git a/tests/xfs/229 b/tests/xfs/229
+index 9dae0f6496e9..3ac1f9401a1a 100755
+--- a/tests/xfs/229
++++ b/tests/xfs/229
+@@ -24,7 +24,6 @@ _cleanup()
+ # Import common functions.
+ 
+ _require_test
+-_require_fs_space $TEST_DIR 3200000
+ 
+ TDIR="${TEST_DIR}/t_holes"
+ NFILES="10"
+@@ -39,6 +38,9 @@ mkdir ${TDIR}
+ # that will affect other tests.
+ _xfs_force_bdev data $TDIR
+ 
++# check for free space on the data volume even if rthinherit is set
++_require_fs_space $TDIR 3200000
++
+ # Set the test directory extsize
+ $XFS_IO_PROG -c "extsize ${EXTSIZE}" ${TDIR}
+ 
+-- 
+2.45.2
 
