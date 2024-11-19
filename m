@@ -1,43 +1,38 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9CC701D14FB;
-	Tue, 19 Nov 2024 15:45:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D2BB1CF7DB;
+	Tue, 19 Nov 2024 15:47:49 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732031121; cv=none; b=gT0r7dlcdS47pay5qq7Jd7fCvV4wEBKvOyQ4DlVvOaH+ZuIN06vvMnD8TE2RnV//vv8atGeXzJJ94tykokasFenG17yyKmHTtav4HOhLybYzYNFjMWt7ECNrBWHq5ACeAl+cxxJQ32IauvC/8gZusKoReXIvlvwTpjPRlW+LCkg=
+	t=1732031269; cv=none; b=dlKaL14XHw2NcWN3tCvCz3s5Oy87tpScwbmYUj0WHpFSAqEt5O/qGKMHBrrBqVadQ5OzhGG0+XXHLioxo8L0zO9gwPYgQHbUVC9Tbs3myEnsLLJsrn17zjEjXNJ+anUFN5KSR3i1s98DcY3jP5rYFW5P95zzue1MsFsw34sDD1Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732031121; c=relaxed/simple;
-	bh=mgVaw/gaBpEwRQJg7OQipi80mdgppv5nbX6a4IWxIOw=;
+	s=arc-20240116; t=1732031269; c=relaxed/simple;
+	bh=tHngLvgGPb7+MhUpbKHsHZOGq0UQE8h6fPVDbv2Vxvo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kctg17+ZNgcxhAepCVJFxh4wh2yYYJod9xVTwSl8lCJ5rUOagxJZWxzJrpK8NjbBA/FClRvTMEyOcDd3iX+oz67Og+7fVjZ3xJ+elnuz5MQKYoT/3/yB2rb8f71Z/8Xn+Cr27Ne3aPeB6ABWc59A1dRPA/eBqPGSlOGaA99pU+o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pUjOAVbi; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=hRL4amps8Jtya0VTlyf/kqVX4BuI7nc4f++g4G33PAW5d6hufV4rZVW9O3nUhQu+6KqhAsIE9mehzD6rTG97/c8U4w9f3XXfki3La1WAvAXE3xk1wJawdQ2gBxPRSIOFYRtsZOslG5ZfNAPK1tHB1Zk2qpYGdJB88WY/gMQ8DGU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Z4EjkAbb; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pUjOAVbi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0AD27C4CED2;
-	Tue, 19 Nov 2024 15:45:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Z4EjkAbb"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EF55BC4CECF;
+	Tue, 19 Nov 2024 15:47:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1732031121;
-	bh=mgVaw/gaBpEwRQJg7OQipi80mdgppv5nbX6a4IWxIOw=;
+	s=k20201202; t=1732031269;
+	bh=tHngLvgGPb7+MhUpbKHsHZOGq0UQE8h6fPVDbv2Vxvo=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=pUjOAVbi5v3vlF5TVcJpEg63HpKxbVrW1ByFJsz5swQ4mOf9QbCzNvQ5Dep5pj7zd
-	 y5A5kU+i+CY12D7V5rYcIkmJmy2E1af+Ak6eXwJFMem/Z5RngRho3ZINvfAyhX4CYW
-	 SpPkosJO8w6IZ9HNbS4b20svOafhDIvvRYlJh4WX0dMogt5olByPoKBaefKz5OEIdj
-	 Kx+PGU1pI8I5qREvGsZ+xucRAKLLZADqef/iQ7nO/SpaqcEZWbBQqbFBnGi+LGit9f
-	 QYw7bvn0QzkJEjRxRZApbmBdeSu/Y8TPZYstAjyhz212F2IfSNWe3Wf3UYSCGYhzoz
-	 ysR4uDkjSjzqg==
-Date: Tue, 19 Nov 2024 07:45:20 -0800
+	b=Z4EjkAbbe7BvDBZmIjPHoFLCk5GklHDOiW6QSYY/smQTl68IIgdyzOYodu3W4AeeW
+	 vHppCEA8ja9mCJdl0FwzenT1kWunj9xqODEPDC2mNRTnkYzhWm2cYliL2wRyF/Unz2
+	 gaPL1IJjps0bV9W8LBfUSw99BfdkAPKQbHq2gLOXSVh8V2iKxXF5n4alKfbjGgznPn
+	 SqaLNMTHLIV48d92ZyvjM2hB34sZ2DjcPhZkKSXpRkO2golHrfr0iUv/uBmf3GeXLg
+	 KnO6QzwJashaH+K4DOguyj2nzG6pUF0rYlLSa8ws8DcnjlxuQ5Faa2tsr9kU9SbYU7
+	 v0coBEqpx4SeQ==
+Date: Tue, 19 Nov 2024 07:47:48 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Dave Chinner <david@fromorbit.com>, zlang@redhat.com,
-	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH 09/12] generic/251: constrain runtime via time/load/soak
- factors
-Message-ID: <20241119154520.GM9425@frogsfrogsfrogs>
-References: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs>
- <173197064562.904310.6083759089693476713.stgit@frogsfrogsfrogs>
- <ZzvtoVID2ASv4IM2@dread.disaster.area>
- <Zzwsgzu81kiv5JPB@infradead.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] xfs/229: call on the test directory
+Message-ID: <20241119154748.GN9425@frogsfrogsfrogs>
+References: <20241119145507.1240249-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,42 +41,51 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Zzwsgzu81kiv5JPB@infradead.org>
+In-Reply-To: <20241119145507.1240249-1-hch@lst.de>
 
-On Mon, Nov 18, 2024 at 10:13:23PM -0800, Christoph Hellwig wrote:
-> On Tue, Nov 19, 2024 at 12:45:05PM +1100, Dave Chinner wrote:
-> > Question for you: Does your $here directory contain a .git subdir?
-> > 
-> > One of the causes of long runtime for me has been that $here might
-> > only contain 30MB of files, but the .git subdir balloons to several
-> > hundred MB over time, resulting is really long runtimes because it's
-> > copying GBs of data from the .git subdir.
+On Tue, Nov 19, 2024 at 03:55:07PM +0100, Christoph Hellwig wrote:
+> xfs/229 operates on a directory that is forced to the data volume, but
+> it calls _require_fs_space on $TEST_DIR which might point to the RT
+> device when -d rtinherit is set.
 > 
-> Or the results/ directory when run in a persistent test VM like the
-> one for quick runs on my laptop.  I currently need to persistently
-> purge that for just this test.
+> Call _require_fs_space on $TDIR after it is create to check for the
+> space actually used by the test.
 > 
-> > 
-> > I have this patch in my tree:
-> > 
-> > --- a/tests/generic/251
-> > +++ b/tests/generic/251
-> > @@ -175,9 +175,12 @@ nproc=20
-> >  # Copy $here to the scratch fs and make coipes of the replica.  The fstests
-> >  # output (and hence $seqres.full) could be in $here, so we need to snapshot
-> >  # $here before computing file checksums.
-> > +#
-> > +# $here/* as the files to copy so we avoid any .git directory that might be
-> > +# much, much larger than the rest of the fstests source tree we are copying.
-> >  content=$SCRATCH_MNT/orig
-> >  mkdir -p $content
-> > -cp -axT $here/ $content/
-> > +cp -ax $here/* $content/
-> 
-> Maybe we just need a way to generate more predictable file system
-> content?
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-How about running fsstress for ~50000ops or so, to generate some test
-files and directory tree?
+Whoops, I missed that when I put in _xfs_force_bdev :(
+
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
 --D
+
+> ---
+>  tests/xfs/229 | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/229 b/tests/xfs/229
+> index 9dae0f6496e9..3ac1f9401a1a 100755
+> --- a/tests/xfs/229
+> +++ b/tests/xfs/229
+> @@ -24,7 +24,6 @@ _cleanup()
+>  # Import common functions.
+>  
+>  _require_test
+> -_require_fs_space $TEST_DIR 3200000
+>  
+>  TDIR="${TEST_DIR}/t_holes"
+>  NFILES="10"
+> @@ -39,6 +38,9 @@ mkdir ${TDIR}
+>  # that will affect other tests.
+>  _xfs_force_bdev data $TDIR
+>  
+> +# check for free space on the data volume even if rthinherit is set
+> +_require_fs_space $TDIR 3200000
+> +
+>  # Set the test directory extsize
+>  $XFS_IO_PROG -c "extsize ${EXTSIZE}" ${TDIR}
+>  
+> -- 
+> 2.45.2
+> 
+> 
