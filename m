@@ -1,105 +1,130 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90DF61E8825;
-	Mon, 18 Nov 2024 23:04:31 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8305CA93D;
+	Tue, 19 Nov 2024 00:18:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731971071; cv=none; b=D+JIvBZkRuUUpW8JDv9DCMqfDV6sY8wj98ZcQFMEHvxTw6aMpSgUbQeUKjNDi0RVtK5luHhATZ7CoQ3S3D+mYh1Aa9KtrdRca3zQsraWj15VnG6GNrOeR4pR5KB2oiZt9BApdm20WuwFWaDAgmupptRyCvCbJ4bgYNDor7oLLBM=
+	t=1731975515; cv=none; b=cNaQekFwzXRcgEFEMzO17UwKJQQy+Toh77c+wIdhzkRTSxadC4g26XkFX3MMc4vHaQ+GG2Q3+dU3Os4OGU/Mj2slvTyw7Di+90rCv/HFmmMQcmEWCmJc90kAPW2VZbvFcol98ydkm29ndGPbkdGZyZpiNxp8n8khS/j7ZxFJoUI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731971071; c=relaxed/simple;
-	bh=xDBnKYtPKRwk7HgznItCGQUs7M1arUlp40YnOffzAiQ=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=d4ak4veZ1E/lXI/e88e3WOQgt7d40HD6efcKPOPq9GtBrsCHo4F/IqqXGmFF95SfJuVBI8glo0bo4sNHf0N4e8vkc9U5YNjV5GTewpIfe47Y+hTwMonrnPFdPekbme/iGQD9X769tTADp65UrrW4wpxOBpBk6N7cU+aFWJln3TM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mv0X0pLI; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731975515; c=relaxed/simple;
+	bh=XHHxZ0ucKPRvt22e6LaWbIRj0y8yT+1SIPYfhR+W/u8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=s5a7UhEUrl6dTVGUkIM0/JshW+en+bpX87qL+vEg9YAqnpWguM4ARxU6duyQasDoHD1PkRkbvy/bqOPd7Vi6Tv9KO4k8BloGNNTG9U6GWfJ2/EOLxHwog2vSFf4vYM4YHh96EuvjYs/CgdBWa8MVbwst9B/Nn4zfiad6r2G9j+c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BbH+GZWP; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mv0X0pLI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 690B8C4CECC;
-	Mon, 18 Nov 2024 23:04:31 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BbH+GZWP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2178FC4CECC;
+	Tue, 19 Nov 2024 00:18:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731971071;
-	bh=xDBnKYtPKRwk7HgznItCGQUs7M1arUlp40YnOffzAiQ=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=mv0X0pLIbsh4rzRlBf/qbwYNhFzCAXJcRyibneJLWDZHfq0GrmG8NeGceR1HII3Vo
-	 UE/pmwNvaoDtQzbBF8p2wPUPFfX3aubt0BUWtJZ3RuHVYMHyi15CPErH63Uxo1ULTD
-	 VjZaWIf1/Ty0mMt4FAyV11OODraNjW9cpprDVLmmRF20FO1ukT1rPK8f6bzgJI9WZR
-	 1I8P6M2/1pvLSJOaw+N7YCHYSKKe2dNBobHBmio6cwN2RQk9Q06pd6IZuuKZyDNBbS
-	 Jvkhca6B5CHrgK7sjwQdswmpIV7ajtB6+otwf00VtWAva/vwpCvWEJv01TWBFL9knZ
-	 bNZY/TohzE+lQ==
-Date: Mon, 18 Nov 2024 15:04:31 -0800
-Subject: [PATCH 12/12] xfs/157: fix test failures when MKFS_OPTIONS has -L
- options
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
- fstests@vger.kernel.org
-Message-ID: <173197064609.904310.7896567442225446738.stgit@frogsfrogsfrogs>
-In-Reply-To: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs>
-References: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs>
+	s=k20201202; t=1731975515;
+	bh=XHHxZ0ucKPRvt22e6LaWbIRj0y8yT+1SIPYfhR+W/u8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=BbH+GZWPvBUOijBslXFUzoeEpLqMkOJSzBOmpCNw+9PWAtmJ7S/HVyIUXG4ByHwG5
+	 Pn6R1yXc3LiM/LWvocwa6qK8190lyO3ezERVnGNnAUDs51nKtu5Eye8Me1GVXqSOtR
+	 Y6KHEd5XIfVX7nO0AsJXc21l0mpgqXSiBkhRxA+Fh0aTdldu9awcaxIeVNS1eKJ9Bz
+	 D3t1Kfg2/auWXpqGdVdUyy5euTuCEQyaCDc7PuaGGHqOunUtpBrq9GPrCZ8i+iVzno
+	 Dwg1RtNGhtfsPpL+MY6L9XBxudMYdp+Il0s63Shb0wgDdOwXzkaZUyGzMo1ZlQ1VT3
+	 hpUrB+ykucaOw==
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-53d9ff92b14so443232e87.1;
+        Mon, 18 Nov 2024 16:18:35 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWVV6NxapOCXns+NtMbAVItvG9GGNPQXBml3978I1UPInie/KS2Z4ST9NLexHAnEUiisj1083vXa9SoOcI=@vger.kernel.org, AJvYcCWbgMJ6j9g5y/1ciObYcIBnqJIOGT+btrOA5JUduxBWkic0aVhGWx4c8LBSaF4nccFHrJ47jbfd@vger.kernel.org, AJvYcCXk7HerdXWTYtWDTBGSK87fHelVoktV6ySHT6Ng3jJm4GXJyEm49lKvJdW+dudXhVyFV2uCBg/NiXF9@vger.kernel.org
+X-Gm-Message-State: AOJu0YxodJFX8VPKCKkpQ/ktznFEOTZAM/WGlSZys29R2+r7YSc1qXqk
+	+HeNa6j2O/XGdf1iRnopSxKhp/TlRoO/PLOkgXwuQ4C2bsUSKYN59qa9Vmp2Ol2whWx2+MegjOs
+	kL5wZaL5JwdZr/71eX4CHOTem0Tc=
+X-Google-Smtp-Source: AGHT+IHfNe9nu0WjKacJS2H+bOdIVqrZgrRuaVvkgqtQeCJmQs1PxMlLs5F9y2GLvfCGbA7PaT7wsl77anldHnofmxk=
+X-Received: by 2002:a05:6512:3a88:b0:52f:d0f0:e37e with SMTP id
+ 2adb3069b0e04-53dab3b17eemr6068236e87.42.1731975513384; Mon, 18 Nov 2024
+ 16:18:33 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs> <173197064501.904310.1505759730439532159.stgit@frogsfrogsfrogs>
+In-Reply-To: <173197064501.904310.1505759730439532159.stgit@frogsfrogsfrogs>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 19 Nov 2024 00:17:56 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H5KjvXsXzt4n0XP1FTUt=A5cKom7p+dGD6GG-iL7CyDXQ@mail.gmail.com>
+Message-ID: <CAL3q7H5KjvXsXzt4n0XP1FTUt=A5cKom7p+dGD6GG-iL7CyDXQ@mail.gmail.com>
+Subject: Re: [PATCH 05/12] generic/562: handle ENOSPC while cloning gracefully
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, 
+	linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Mon, Nov 18, 2024 at 11:03=E2=80=AFPM Darrick J. Wong <djwong@kernel.org=
+> wrote:
+>
+> From: Darrick J. Wong <djwong@kernel.org>
+>
+> This test creates a couple of patterned files on a tiny filesystem,
+> fragments the free space, clones one patterned file to the other, and
+> checks that the entire file was cloned.
+>
+> However, this test doesn't work on a 64k fsblock filesystem because
+> we've used up all the free space reservation for the rmapbt, and that
+> causes the FICLONE to error out with ENOSPC partway through.  Hence we
+> need to detect the ENOSPC and _notrun the test.
+>
+> That said, it turns out that XFS has been silently dropping error codes
+> if we managed to make some progress cloning extents.  That's ok if the
+> operation has REMAP_FILE_CAN_SHORTEN like copy_file_range does, but
+> FICLONE/FICLONERANGE do not permit partial results, so the dropped error
+> codes is actually an error.
+>
+> Therefore, this testcase now becomes a regression test for the patch to
+> fix that.
+>
+> Signed-off-by: Darrick J. Wong <djwong@kernel.org>
+> ---
+>  tests/generic/562 |   10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+>
+>
+> diff --git a/tests/generic/562 b/tests/generic/562
+> index 91360c4154a6a2..62899945003513 100755
+> --- a/tests/generic/562
+> +++ b/tests/generic/562
+> @@ -15,6 +15,9 @@ _begin_fstest auto clone punch
+>  . ./common/filter
+>  . ./common/reflink
+>
+> +test "$FSTYP" =3D "xfs" && \
+> +       _fixed_by_kernel_commit XXXXXXXXXX "xfs: don't drop errno values =
+when we fail to ficlone the entire range"
+> +
+>  _require_scratch_reflink
+>  _require_test_program "punch-alternating"
+>  _require_xfs_io_command "fpunch"
+> @@ -48,8 +51,11 @@ while true; do
+>  done
+>
+>  # Now clone file bar into file foo. This is supposed to succeed and not =
+fail
+> -# with ENOSPC for example.
+> -_reflink $SCRATCH_MNT/bar $SCRATCH_MNT/foo >>$seqres.full
+> +# with ENOSPC for example.  However, XFS will sometimes run out of space=
+.
+> +_reflink $SCRATCH_MNT/bar $SCRATCH_MNT/foo >>$seqres.full 2> $tmp.err
+> +cat $tmp.err
+> +grep -q 'No space left on device' $tmp.err && \
+> +       _notrun "ran out of space while cloning"
 
-Zorro reports that this test fails if the test runner set an -L (label)
-option in MKFS_OPTIONS.  Fix the test to work around this with a bunch
-of horrid sed filtering magic.  It's probably not *critical* to make
-this test test work with random labels, but it'd be nice not to lose
-them.
+This defeats the original purpose of the test, which was to verify
+btrfs didn't fail with -ENOSPC (or any other error).
 
-Cc: <fstests@vger.kernel.org> # v2024.10.14
-Fixes: 2f7e1b8a6f09b6 ("xfs/157,xfs/547,xfs/548: switch to using _scratch_mkfs_sized")
-Signed-off-by: Darrick J. Wong <djwong@kernel.org>
----
- tests/xfs/157 |   29 +++++++++++++++++++++++++++--
- 1 file changed, 27 insertions(+), 2 deletions(-)
+If XFS has an ENOSPC issue in some cases, and it's not fixable, why
+not make it _notrun only if it's XFS that is being tested?
+
+Thanks.
 
 
-diff --git a/tests/xfs/157 b/tests/xfs/157
-index e102a5a10abe4b..0c21786e389695 100755
---- a/tests/xfs/157
-+++ b/tests/xfs/157
-@@ -65,9 +65,34 @@ scenario() {
- 	SCRATCH_RTDEV=$orig_rtdev
- }
- 
-+extract_mkfs_label() {
-+	set -- $MKFS_OPTIONS
-+	local in_l
-+
-+	for arg in "$@"; do
-+		if [ "$in_l" = "1" ]; then
-+			echo "$arg"
-+			return 0
-+		elif [ "$arg" = "-L" ]; then
-+			in_l=1
-+		fi
-+	done
-+	return 1
-+}
-+
- check_label() {
--	_scratch_mkfs_sized "$fs_size" "" -L oldlabel >> $seqres.full 2>&1
--	_scratch_xfs_db -c label
-+	local existing_label
-+	local filter
-+
-+	# Handle -L somelabel being set in MKFS_OPTIONS
-+	if existing_label="$(extract_mkfs_label)"; then
-+		filter=(sed -e "s|$existing_label|oldlabel|g")
-+		_scratch_mkfs_sized $fs_size >> $seqres.full
-+	else
-+		filter=(cat)
-+		_scratch_mkfs_sized "$fs_size" "" -L oldlabel >> $seqres.full 2>&1
-+	fi
-+	_scratch_xfs_db -c label | "${filter[@]}"
- 	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
- 	_scratch_xfs_db -c label
- 	_scratch_xfs_repair -n &>> $seqres.full || echo "Check failed?"
-
+>
+>  # Unmount and mount the filesystem again to verify the operation was dur=
+ably
+>  # persisted.
+>
+>
