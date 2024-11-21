@@ -1,42 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 403CF17333A;
-	Thu, 21 Nov 2024 15:52:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBB2755C29;
+	Thu, 21 Nov 2024 16:04:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732204322; cv=none; b=AzqOIzKg8JBvKL48ynFscz2+H1Fy7PrpN7DMMZSpV9AKqcbPJZsiIw66R4iZh+Cix5IAA1shmrKNI/zAbE0azcELPw5cIkbv8zGp57oGhmk+Hy9+Ah9dGGfg1rpqknbElYfkhwgZxRJi9hnCbV8btot/f6h6xQ/NyWPg0YgL3so=
+	t=1732205056; cv=none; b=ZnYex4Nwy6Bqziwl6dfSUr4x9aaSy2nqyToZ/HRY0XkvU9IxiwjLHiUBx5OVRTxauTKEYNl74hHko0AE0k8kGZm+xk1e/6nbS7gMhF+zO0Ea7//E9+xtHQJzoUjE9mGvRxlCBz9NoMtORwwZoPO5TdlHfgILJCmyKotjmwpM5VU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732204322; c=relaxed/simple;
-	bh=TiXvXG7lIoFy+EoAE4P+PK0MuH1doboxw/kNlbcxhVU=;
+	s=arc-20240116; t=1732205056; c=relaxed/simple;
+	bh=HJSzPSfUfKS7kLce85ECaVvJhuq9GxRRF3FYyUFhh7U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Z4wsZlSTJ0enH8o6xjJLhdEFbYLcAygMTjdiQmWzABilSAZYB/AgcKTrLyUNukp2n0AZsgKwBiXaB++AWbCuzPxwRSH71EWkJlvDvVHouQJSahacwTN/iSUahMzogK//RkvK4QAb1ZPKu78i+9qn4mNa5Kf1P8OOWhsrDbg6UOo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O53wXV9F; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=d8DggztE/2H/HzPsN62TIB7vXqswKp4XMuTVw6vc+Vl1y0w999jI4+seI6BOLxnXxLfPZadKY/zhCHA0fATKDNXQgiu5Km7n6F3XQI2dZ/1h+T5FfGvCoicCHEhuFuIaIcIjD6WwWhidBCY1dvIrxV7KPkvT9nXjLdXJfnRP9zk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Y2SDwF+s; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O53wXV9F"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1E83C4CECC;
-	Thu, 21 Nov 2024 15:52:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Y2SDwF+s"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 52C7DC4CECC;
+	Thu, 21 Nov 2024 16:04:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1732204321;
-	bh=TiXvXG7lIoFy+EoAE4P+PK0MuH1doboxw/kNlbcxhVU=;
+	s=k20201202; t=1732205056;
+	bh=HJSzPSfUfKS7kLce85ECaVvJhuq9GxRRF3FYyUFhh7U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=O53wXV9F54NaeYUQZjgJaGxGvpakFlhHNfMaVl79E3xSaofxZ/g8jBM8GUATG5Zlj
-	 Iik4H9P5bO/nwniejyaXTlrOcfn8myJeQGoHbFIWWyGsOYWJkXH177JnfLAcBD/VHB
-	 U9/5hUVw+yvZtx5zV0wDV+nVxqheK/Y8tcZ2JSm4HUZqur+nCQeWDu6LXdETC5EIQZ
-	 dnVjc2pqiXBcjxmUUOQ4Z83ghjCHU6AH58QjPxAjs571Q0EJx+qc5+fWi7yBWttl/h
-	 fvLbvcyRBJyvVSDdUhkECFkgd32WAetSjLceA3P2ZY0Bk98uQkjAe+pzdYUHeBBulf
-	 5H6SNmow1DQFQ==
-Date: Thu, 21 Nov 2024 07:52:01 -0800
+	b=Y2SDwF+sbd7or2qlwtYuJ9RcA1HzTLeGx1uB6Ca0j17B96l46zoRBvpwF3Rrqgyz/
+	 lmD0sRqbzO9cmb0DsWi1F4RL/J8+BKxNCCC2W6X7PY2DOVNGVjDsfHaK4MOy7dxLMG
+	 cMtgTdS+PO+Kb2xsslmsEvPiA5TWnFzkShTFz/qOMDD0KlsFToAvDLPGXkULQt2EAw
+	 tPRauliV3s3+omrsLathFEb2fNsvEP8Qkt310evYL/OeOi6zgl4n4DmXUTz7QjH7Ws
+	 3hvHMMVNA/l+TonaKqHE/+yhvOrqq5lQwid5l0XLTbHfSnm7pj7Y21wJOWngAPyve0
+	 ZpDUf5N9YRVcA==
+Date: Thu, 21 Nov 2024 08:04:15 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 2/2] xfs/157: do not drop necessary mkfs options
-Message-ID: <20241121155201.GS9425@frogsfrogsfrogs>
-References: <20241116190800.1870975-1-zlang@kernel.org>
- <20241116190800.1870975-3-zlang@kernel.org>
- <20241118222614.GK9425@frogsfrogsfrogs>
- <20241121093537.ae74gwbzl53yvsn2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@redhat.com>,
+	linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 01/12] generic/757: fix various bugs in this test
+Message-ID: <20241121160415.GT9425@frogsfrogsfrogs>
+References: <173197064408.904310.6784273927814845381.stgit@frogsfrogsfrogs>
+ <173197064441.904310.18406008193922603782.stgit@frogsfrogsfrogs>
+ <20241121095624.ecpo67lxtrqqdkyh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241121100555.GA4176@lst.de>
+ <Zz8nWa1xGm7c2FHt@bfoster>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,89 +46,68 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241121093537.ae74gwbzl53yvsn2@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <Zz8nWa1xGm7c2FHt@bfoster>
 
-On Thu, Nov 21, 2024 at 05:35:37PM +0800, Zorro Lang wrote:
-> On Mon, Nov 18, 2024 at 02:26:14PM -0800, Darrick J. Wong wrote:
-> > On Sun, Nov 17, 2024 at 03:08:00AM +0800, Zorro Lang wrote:
-> > > To give the test option "-L oldlabel" to _scratch_mkfs_sized, xfs/157
-> > > does:
+On Thu, Nov 21, 2024 at 07:28:09AM -0500, Brian Foster wrote:
+> On Thu, Nov 21, 2024 at 11:05:55AM +0100, Christoph Hellwig wrote:
+> > On Thu, Nov 21, 2024 at 05:56:24PM +0800, Zorro Lang wrote:
+> > > I didn't merge this patch last week, due to we were still talking
+> > > about the "discards" things:
 > > > 
-> > >   MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size
+> > > https://lore.kernel.org/fstests/20241115182821.s3pt4wmkueyjggx3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#u
 > > > 
-> > > but the _scratch_mkfs_sized trys to keep the $fs_size, when mkfs
-> > > fails with incompatible $MKFS_OPTIONS options, likes this:
-> > > 
-> > >   ** mkfs failed with extra mkfs options added to "-L oldlabel -m rmapbt=1" by test 157 **
-> > >   ** attempting to mkfs using only test 157 options: -d size=524288000 -b size=4096 **
-> > > 
-> > > but the "-L oldlabel" is necessary, we shouldn't drop it. To avoid
-> > > that, we give the "-L oldlabel" to _scratch_mkfs_sized through
-> > > function parameters, not through global MKFS_OPTIONS.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > ---
-> > >  tests/xfs/157 | 3 +--
-> > >  1 file changed, 1 insertion(+), 2 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/157 b/tests/xfs/157
-> > > index 9b5badbae..f8f102d78 100755
-> > > --- a/tests/xfs/157
-> > > +++ b/tests/xfs/157
-> > > @@ -66,8 +66,7 @@ scenario() {
-> > >  }
-> > >  
-> > >  check_label() {
-> > > -	MKFS_OPTIONS="-L oldlabel $MKFS_OPTIONS" _scratch_mkfs_sized $fs_size \
-> > > -		>> $seqres.full
-> > > +	_scratch_mkfs_sized "$fs_size" "" "-L oldlabel" >> $seqres.full 2>&1
+> > > Do you think we need to do a force discards at here, or change the
+> > > SCRATCH_DEV to dmthin to support discards?
 > > 
-> > Don't quote the "-L" and "oldlabel" within the same string unless you
-> > want them passed as a single string to _scratch_mkfs.  Right now that
-> > works because although you have _scratch_mkfs_sized using "$@"
-> 
-> I use "$@" just for _scratch_mkfs_sized can give an empty argument to
-> _try_scratch_mkfs_sized to be its second argument.
-> 
-> how about:
-> _scratch_mkfs_sized "$fs_size" "" -L oldlabel
-> 
-> > (doublequote-dollarsign-atsign-doublequote) to pass its arguments intact
-> > to _scratch_mkfs, it turns out that _scratch_mkfs just brazely passes $*
-> > (with no quoting) to the actual MKFS_PROG which results in any space in
-> > any single argument being treated as an argument separator and the
-> > string is broken into multiple arguments.
+> > FYI, I'm seeing regular failures with generic/757 when using Darrick's
+> > not yet merged RT rmap support, but only with that.
 > > 
-> > This is why you *can't* do _scratch_mkfs -L "moo cow".
+> > But the whole discard thing leaves me really confused, and the commit
+> > log in the patch references by the above link doesn't clear that up
+> > either.
 > > 
-> > This is also part of why everyone hates bash.
+> > Why does dmlogwrites require discard for XFS (and apprently XFS only)?
+> > Note that discard is not required and often does not zero data.  So
+> > if we need data to be zeroed we need to do that explicitly, and
+> > preferably in a way that is obvious.
+> > 
 > 
-> Hmm... do you need to change the $* of _scratch_mkfs to $@ too?
+> IIRC it was to accommodate the test program, which presumably used
+> discard for efficiency reasons because it did a lot of context switching
+> to different point-in-time variations of the fs. If the discard didn't
+> actually zero the range (depending on the underlying test dev), then at
+> least on XFS, we'd see odd recovery issues and whatnot from the fs going
+> forward/back in time.
 
-Yeah, that's something that needs to be done treewide.  The trouble is,
-I bet there's other tests out there that have come to rely on the bad
-splitting behavior and do things like
+Yes, that's my recollection too -- performing a logwrite replay of an
+old mark means that you can end up with blocks with the correct fs uuid
+but an LSN that's higher than anything in the log.  Recovery will then
+skip the block replay, which is not correct.
 
-_scratch_fubar "-x 555"
+I suppose we could fix log recovery to treat incoming block LSNs that
+are higher than the log head as if there were no block contents at all.
+OTOH going backwards in time isn't usually a concern...right?
 
-becoming
+> Therefore the reason for using dm-thin was that it was an easy way to
+> provide predictable behavior to the test program, where discards punch
+> out blocks that subsequently return zeroes.
 
-execve("foobar", "-x" "555");
+Yep.  The test needs to reset the block device to a zeroed state.
+Discards get us there quickly, but only if discard_zeroes_data==1.
+Hence bolting dm-thinp (where this is guaranteed) onto the logwrites
+tests.
 
-and will break if we try to fix it now.
+> I don't recall all the specifics, but I thought part of the reason for
+> using discard over explicit zeroing was the latter made the test
+> impractically slow. I could be misremembering, but if you want to change
+> it I'd suggest to at least verify runtimes on some of the preexisting
+> logwrites tests as well.
+
+Not sure -- I think BLKZEROOUT will cause allocations and real disk
+writes if we're not careful.
 
 --D
 
-> > 
-> > --D
-> > 
-> > >  	_scratch_xfs_db -c label
-> > >  	_scratch_xfs_admin -L newlabel "$@" >> $seqres.full
-> > >  	_scratch_xfs_db -c label
-> > > -- 
-> > > 2.45.2
-> > > 
-> > > 
-> > 
+> Brian
 > 
 > 
