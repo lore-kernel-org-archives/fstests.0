@@ -1,44 +1,88 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 615CA14286;
-	Tue, 26 Nov 2024 06:28:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0E1911187;
+	Tue, 26 Nov 2024 16:13:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732602489; cv=none; b=O62JUJrS07FgulYBRUgDGVu+9fCUkWWauE/u3SpUXgVBB15YvhX7AwgpmDiMXhLVhjMxE4IL3kem2Sii3PRzWJMVHi3DNJDnUw/QrsU0P4MCPBAzaKFTQd44tUuIviSLClYxE4pKuA6AoEz3++KxE/PLy24INFweHMhZiyjoORI=
+	t=1732637612; cv=none; b=I8w+8s9rSO3Gb2AT9L0+L3DvElf5ZB9M1gvUDYN/+QaAn7wpENxdW456ezNJlPGUeZAdo5Dkzxx+21yxZH1tO39OGd68wiayFzo45TU8ezRr7JcfMuDN8csgRwJeY+/6lcHwCBObIJEa2BGnIpfQGYAMIqM2C0r/3A7ok/IjVtY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732602489; c=relaxed/simple;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
+	s=arc-20240116; t=1732637612; c=relaxed/simple;
+	bh=v6OAqnoDPSt07ROZ47jgRFk2b4k7RTATIakPJwN1X+c=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UDtk/jL85q2pr1ZQUtFBwE02mZ7Um1eqJlwsl2bmjDucpLmUNS08rrYTEPTv0Drbeqoq+t1s7YTxgteLJPF9WPAlrtNeFz6XSyKxLVPoPh0tQxKmz2SCwj9k+VaEIkUXwYV2WcjQPM4mpTk2sLKIl2jS3XeCOCDZbo32qsmZnJw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=3GMJiE3n; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=MCmsn0HdKN4wTa+ztzCoH+EOSYIUQqWtXfDWo4rXoYiIg73eZ5S6xZZ1eWNWjI5+34FVVl+576YsHkJA9RvXSgmZThvKFooQryjDRKQhoBx/ELJjU2EEk2PSsveZUliJlGgut+qJzGCQ2hwVoDLZJwbxQ0tyj5yVgPwFWgmbMqY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=MNd9zla1; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=/seIqjdu; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=j8ACsEI/; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=6RvAzkd7; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="3GMJiE3n"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=3GMJiE3nZDI/lpmM5NdTYfjmuo
-	UM6nWM9uA8GnnsFGRCJXBFS7WEidNZ5zWiuxjZL457e/hMMvhg6ea0pTEqnUs/OdPKVEO400H/K6+
-	MopN74SoZGoa2XFzafQKvby+uZn4fjbX1bZysoBTqPgNKFWUChJ2QucslZJ/qw/FXPzFsiHSroolN
-	hWdF6ig5lz7B7ciW1RsYzmdhGRrAx94oitcZCQnqoOXpOj5HlaWBcPF+9h0WRR08LAcVXeRb/EzCj
-	2jS5t7BLr42yJYvZ7WosgDOa8lY/G8AOVkbwtwSsH+e+iZnvB4AUhuEPClgVA8+n3pYToTtfruS6b
-	weCl8cIg==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1tFp3Q-00000009kU7-0AUy;
-	Tue, 26 Nov 2024 06:28:08 +0000
-Date: Mon, 25 Nov 2024 22:28:08 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: Nirjhar Roy <nirjhar@linux.ibm.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [PATCH v4 3/3] generic: Addition of new tests for extsize hints
-Message-ID: <Z0VqeLeYbLX-uCeK@infradead.org>
-References: <cover.1732599868.git.nirjhar@linux.ibm.com>
- <4b3bc104222cba372115d6e249da555f7fbe528b.1732599868.git.nirjhar@linux.ibm.com>
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="MNd9zla1";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="/seIqjdu";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="j8ACsEI/";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="6RvAzkd7"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id D781921164;
+	Tue, 26 Nov 2024 16:13:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1732637609;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1kg2P4Ndcd4ut2GqD5y34q+x31PuPSI7imrsLMbiwBQ=;
+	b=MNd9zla10vOR1IjCZulYhHaK0P0uUIf2s7fArKYNfvSsarFSa9lg17AWivv94Y2NqXdil4
+	vm47pdfIvNuspLeIndmPqdwuL48WRnIMrHqNcvF7vre0R5jnIt6/ZfqWCu2iKwgo34q/Lz
+	QMTbpjvPcsZk/oJa719wv6XnVQtgGzY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1732637609;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1kg2P4Ndcd4ut2GqD5y34q+x31PuPSI7imrsLMbiwBQ=;
+	b=/seIqjdu0L+SQkS4kPLy5abiIJQ++GdbBaKto51ULXWOlKdQW/YQ6REYmKKOlOw5sRqBeV
+	pEjZCMoCbGqq0sDw==
+Authentication-Results: smtp-out1.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1732637608;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1kg2P4Ndcd4ut2GqD5y34q+x31PuPSI7imrsLMbiwBQ=;
+	b=j8ACsEI/h0X8616WH9Is8Sjh9b9g9b0CckEmC/qSg4JrdU1qoaRe5telNMeCsL6xtjeNNQ
+	ftrxmUsj/U/y5hco7OK2hBiDBannTHgA5sLA/FX+St0cuPemTE3tfyFvb69buoNgliGRFg
+	QLKYSbW/OqZaUBAdm1Od2mkSSTSid54=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1732637608;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=1kg2P4Ndcd4ut2GqD5y34q+x31PuPSI7imrsLMbiwBQ=;
+	b=6RvAzkd7RgZpCT8Z8wQkiRilr8VlQzyltgbtWXLmE4qcQ43iCaXhcocz6YqaoA/addeuG7
+	/bMQ0WTlTkB92UAw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id BCAFF139AA;
+	Tue, 26 Nov 2024 16:13:28 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id WUPWLajzRWcoHQAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Tue, 26 Nov 2024 16:13:28 +0000
+Date: Tue, 26 Nov 2024 17:13:23 +0100
+From: David Sterba <dsterba@suse.cz>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Zorro Lang <zlang@redhat.com>, Qu Wenruo <wqu@suse.com>,
+	linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH v2] btrfs: a new test case to verify mount behavior with
+ background remounting
+Message-ID: <20241126161323.GK31418@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20241101102956.174733-1-wqu@suse.com>
+ <20241101125517.kb7akqvi5tae3wor@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <867b68d9-d873-4416-8d6d-be56bfc11542@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -47,10 +91,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <4b3bc104222cba372115d6e249da555f7fbe528b.1732599868.git.nirjhar@linux.ibm.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <867b68d9-d873-4416-8d6d-be56bfc11542@gmx.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	ARC_NA(0.00)[];
+	FREEMAIL_TO(0.00)[gmx.com];
+	FREEMAIL_ENVRCPT(0.00)[gmx.com];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCPT_COUNT_FIVE(0.00)[5]
+X-Spam-Score: -4.00
+X-Spam-Flag: NO
 
-Looks good:
+On Sat, Nov 02, 2024 at 07:08:44AM +1030, Qu Wenruo wrote:
+> >> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol1 >> $seqres.full
+> >> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/subvol2 >> $seqres.full
+> >
+> > Hmm... I wondering what'll happen, if remove these two lines then run this test
+> > on other filesystems :)
+> 
+> Not sure about other filesystems, but do other filesystems allows
+> different RO/RW flags for the same fs?
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-
+The subvolumes utilize the bind mount, so other filesystems can do that
+as well but this will also do the synchronization inside VFS, while the
+subvolume mount is called internally.
