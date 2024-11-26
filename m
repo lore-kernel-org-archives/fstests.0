@@ -1,71 +1,81 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB162DDA8;
-	Tue, 26 Nov 2024 01:24:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8684BBA27;
+	Tue, 26 Nov 2024 01:26:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732584283; cv=none; b=Q7jgTkEwJYzjh1VR5w/PfxCDHzLgMcH6UxDARaa17GqKU5uzW+bQylfyowqqM75IbLPbS+fOiXNrmblMiXx714EYPuNRxV9mxN4PwrDIvE72/Brfj/rZQpDD4junw1QN4QkUFd8kFCNMA6OPNElCQrpR6CuVb9roNek0k9IsLUQ=
+	t=1732584377; cv=none; b=J5CbqF3JSKhC4ipJRFZLIqYz95juAuAHhBJzYL51ZaRlqamwKYSSOtLHiHcAoFGA2ghYHhb4n8sNms25n4zE0Yt8yDDLZykqjo34AyDGCWfxA/Jn/Kzrx5Ky5xZP++APxMjkpxkrym+djfRdJu6hzSepeZoLoAgwteb9rpP0n4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732584283; c=relaxed/simple;
-	bh=2G1Nfh9p/id1mM/S/o+W/pEL7/5+lwMas6aaETT186o=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=MKFc+zAFou++2N0+29/4Im3dKf2w7e2S2JQ7HdlwM+cJrlw1en87uWwIDc+ETzXNKC3l8C6qmHHMyoOEDnctSvCbO0qwhiY2wY2qavA+BfxiJJbqYTgmWjvPMlzaXY8l74RYrk7Ksitt5GeKr+Z5dH/8ydq0g/vjG5kAEVLpOkc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZTY2qtt6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1732584377; c=relaxed/simple;
+	bh=t6DG86LUR1IQfx1LU8BNTb6RkpBJgke+WARl0WWiVpc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=n4gsgcodMD+2RdEb8iqaolP4IkyJ0IUkGFGYVR7W2L46EUJiKk8w9FuvSeogM4j038ogaVf5aKQLkMMEZ+aWgegCX+y5v3ABu0AgTj3PFZ5XZQGBwKWtMXER8RI9jvLLI1UdmaGspDgfU4aLZk+hVeym0aDdtDddX3s5o6NBLzg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bRLH2TpW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZTY2qtt6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7EF3CC4CECE;
-	Tue, 26 Nov 2024 01:24:43 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bRLH2TpW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6383EC4CECF;
+	Tue, 26 Nov 2024 01:26:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1732584283;
-	bh=2G1Nfh9p/id1mM/S/o+W/pEL7/5+lwMas6aaETT186o=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=ZTY2qtt6xtLWlIjGcFnXNo4BgeypQ0JRZePCb/FokAUtd8W2wqEHQYN2j4VEFDUH7
-	 nIGQHNRi+V593eWDZR/DZHhJfwvbCJ3Oumk4kuIdF4PjybOQtRiw/4Rfp4ywNR7U6c
-	 2upnH3TJ6+hlLPOhg9g5bP8bBK5qHSBtwYPwrRDAnODp0IUBhnb+KSmeDdLThDq7ET
-	 +g7W11AsO1krd5rG3Va1Hw5v0vrT1DKhOl6J05dYNh2xhJoAapvr8hqQvpKh9AFvp/
-	 rbzqPrKtmWFgO6VNGsMOWN7T+sELwglt0rrqrmCOhW2G6PXMkZ7/U9cz1/C3GYnAMM
-	 855zy1o64pvhw==
-Date: Mon, 25 Nov 2024 17:24:43 -0800
-Subject: [PATCH 16/16] xfs/122: add tests for commitrange structures
+	s=k20201202; t=1732584377;
+	bh=t6DG86LUR1IQfx1LU8BNTb6RkpBJgke+WARl0WWiVpc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=bRLH2TpWFHQJRWABiy0W6LknNZ+5NUsVJujXAnAqUI3HR9dUOsZuW18G+qWFbjors
+	 KEz47DsuFQQxqrQeY2oBgeK4tWuRJ07eRuMfuZPB+XZUYD0J36sKEYl0HCBXJesg/W
+	 yEjOui15Q6wR3LEFj+8ghUKT6d6nZ+7TYXsLbOPOQS8RR/myOcHeaW5jMGIkboqvcl
+	 gh1s90iSMxf8TKfE4vJt4vxzrqKIxGcvnqjzZsaJE7j9DTqpQtvQ+vrb/KmTxHTsZG
+	 hQ0NvGloydOR/36S+Jimo+Cyi0ti96LIkvEW+nuHKBE/5YEzZW2VDcj1QEP3iS4xMw
+	 8yIorac6T0c3Q==
+Date: Mon, 25 Nov 2024 17:26:16 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: djwong@kernel.org, zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Message-ID: <173258395315.4031902.9082361530245352300.stgit@frogsfrogsfrogs>
-In-Reply-To: <173258395050.4031902.8257740212723106524.stgit@frogsfrogsfrogs>
-References: <173258395050.4031902.8257740212723106524.stgit@frogsfrogsfrogs>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org,
+	Filipe Manana <fdmanana@kernel.org>
+Subject: Re: [PATCH 09/17] generic/562: handle ENOSPC while cloning gracefully
+Message-ID: <20241126012616.GD9425@frogsfrogsfrogs>
+References: <173229419991.358248.8516467437316874374.stgit@frogsfrogsfrogs>
+ <173229420148.358248.4652252209849197144.stgit@frogsfrogsfrogs>
+ <Z0QHw2IGqnTsNcqb@infradead.org>
+ <20241125051639.GG9438@frogsfrogsfrogs>
+ <Z0QJHXSg-neZvqPE@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Z0QJHXSg-neZvqPE@infradead.org>
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Sun, Nov 24, 2024 at 09:20:29PM -0800, Christoph Hellwig wrote:
+> On Sun, Nov 24, 2024 at 09:16:39PM -0800, Darrick J. Wong wrote:
+> > On Sun, Nov 24, 2024 at 09:14:43PM -0800, Christoph Hellwig wrote:
+> > > On Fri, Nov 22, 2024 at 08:52:48AM -0800, Darrick J. Wong wrote:
+> > > > +# with ENOSPC for example.  However, XFS will sometimes run out of space.
+> > > > +_reflink $SCRATCH_MNT/bar $SCRATCH_MNT/foo >>$seqres.full 2> $tmp.err
+> > > > +cat $tmp.err
+> > > > +test "$FSTYP" = "xfs" && grep -q 'No space left on device' $tmp.err && \
+> > > > +	_notrun "ran out of space while cloning"
+> > > 
+> > > Should this simply be unconditional instead of depend on XFS?
+> > 
+> > Felipe said no:
+> > https://lore.kernel.org/fstests/CAL3q7H5KjvXsXzt4n0XP1FTUt=A5cKom7p+dGD6GG-iL7CyDXQ@mail.gmail.com/
+> 
+> Hmm.   Being able to totally fill the fs without ENOSPC seems odd.
+> Maybe we need to figure out a way to scale down the size for the generic
+> test and have a separate one for the XFS ENOSPC case?  Not a huge fan
+> of that, but the current version also seems odd.
 
-Update this test to check the ioctl structure for XFS_IOC_COMMIT_RANGE,
-which was added in 6.12.  This will be the last ever addition to
-xfs/122, because in 6.13 we moved the ondisk structure checks to libxfs
-after which we'll be able to _notrun this test on newer codebases.
+Yeah, I definitely need to write a fstest that can trip this bug on
+smaller fsblock filesystems.  In the meantime, this one should not fail
+just because xfs runs out of space before the point where this test
+would have thought that would happen; and then xfs_io spews an error
+message into the golden output.
 
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/122.out |    1 +
- 1 file changed, 1 insertion(+)
+Though if this is really a test that computes when *btrfs* would run out
+of space and drives towards that point just to see if ENOSPC does /not/
+come out of the kernel, then maybe this belongs in tests/btrfs/ ?
 
-
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index 60d8294551b1c8..4dc7d7d0a3602b 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -76,6 +76,7 @@ sizeof(struct xfs_bulk_ireq) = 64
- sizeof(struct xfs_bulkstat) = 192
- sizeof(struct xfs_bulkstat_req) = 64
- sizeof(struct xfs_clone_args) = 32
-+sizeof(struct xfs_commit_range) = 88
- sizeof(struct xfs_cud_log_format) = 16
- sizeof(struct xfs_cui_log_format) = 16
- sizeof(struct xfs_da3_blkinfo) = 56
-
+--D
