@@ -1,79 +1,79 @@
-Received: from mail-pg1-f170.google.com (mail-pg1-f170.google.com [209.85.215.170])
+Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com [209.85.210.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD99F13C661
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D79813C9D9
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683252; cv=none; b=IsnSE8jBJsw3Y0/0mxwlD0Yxymnmb0lWzxIJgOOFkIMV+pq0VM21mKOclHjRaYNl6O8qk5GcgyU9izA4m8n4m8vd1oB9QZ0Gk8gjIr+pMl8xKLRROQFlzgUoTUnO7zZi3VYNTE0xniePcrWhY0dOahEJzSAVE6Rc3D125KVSKjw=
+	t=1732683252; cv=none; b=AJHJI0UQhXE1fIQ/1g741dvNR9aOCGdILwEgVSQqcOT6zlRLndnNg8lNBvxnAlaZaiIRVQM5zMbCdnr8f7GqxM6N2l+Ch8vLTdxpmEz5CgvVsc1Y4OXeOO+mVz9OR6J/mCHlUKDuaT4kppr1lgMYslpTFgoFY0dfeKvawVvjIMQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1732683252; c=relaxed/simple;
-	bh=31+wezODfv0pTVCSdQQRtcm73s3T0h84iczEtGnaCc4=;
+	bh=KTI25EQFWJbOCEvtnqjR61YxGCSAt5F7+1DCcN5IaH8=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=NUV8N7WWYxEpWURGxCEgq7UKUK24ruzQxUFdPm7xvO0Lt+/gOBUNV+5nOyV6Q425kaFD4oNlz3IXjOkTXexq2bZqCFvcYU6dVPqqv8p4+5OvyoR6ImyCYwLo4YR/yRKc6ZWfFkKt2utuTQZLCMWiR9MGpJS+oHUjRLIMK///AA0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=J++egDDh; arc=none smtp.client-ip=209.85.215.170
+	 MIME-Version; b=G8CHMtw48DCG6lWP8Y8LqI3Rz5txRHGdunlrPP1Tibr9t3D98yrH4Pgzgsa+TE1t/udXoS0D7yypHKt0Aes54yyHeBTocGlXf6FLNjkNL6rkzdvgw2Z/959XBCHJ94lDdnITYDd98ubY/ObtWEdaeuNjnIFyfLlrQ6z7BU6KykE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=t2m2hSyf; arc=none smtp.client-ip=209.85.210.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="J++egDDh"
-Received: by mail-pg1-f170.google.com with SMTP id 41be03b00d2f7-7ee7e87f6e4so5249936a12.2
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:10 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="t2m2hSyf"
+Received: by mail-ot1-f43.google.com with SMTP id 46e09a7af769-71d4e043dd9so1442711a34.1
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683250; x=1733288050; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Wy4IS/iZefcF4rH2xy70XIUO1t1F2MTEdWON+Bkp0Yw=;
-        b=J++egDDh/LbVtsYy1Rmb4rSgL9TN8IBLW2mjYRytMTXKU7Vgs0gooib0P+PKRu/hOg
-         BOKPyrkJR272bsyS5p4uSkYtcyU8aOfOml5NWaWlXP4IOaKzKaE3Lml/u0IDjwA66zmN
-         sdwMpROquby+g6SRmKMpqw/UivV3q60PRYv/rUbHnzneJ/2gdhoLMwhkk729aoq9NYmn
-         JMHFVggLnQ6REmFLs86+zPJIFotu9zzsCulYdP26+zjzazFI6UNbFxC2PdseJuL1/Qdt
-         uuTWRRypdisqCPz1ngFSWLWLJ+4eaDMvNMvyzl9eTN42FS0TxSIqkyYnYnx708mbOZiY
-         Wchg==
+        bh=LRi8p2vG65siHZi4g0d6yn8UFaizrYqtdSaScXwCU00=;
+        b=t2m2hSyf5oX4DuIC4uoEUA2H2PlqJnofR54mUYQLGziHqiTzshHkaoW2k8h1Ffzj68
+         9jzsVyYTblcrex/9ooJIDIJCMHFY2NGK+i5o1EmatzN0jRJPpqyZptp8FeUlp+GTEcu1
+         T4BX1R5fqqW7wqmuLmlDSHc1s+UuvKUauAzlctXFrrnFHvFtl58bByzGcyCjTAJx9DfU
+         3BrUbuNtC2KBmlNVSfzI0IePz9tW1LimUekz1bB6YrENLN85N4a2G59/tXJ03xm4yD3e
+         Zs3UdrDVqOU00otvjWKGT6wspwXuOuN9CiVM0vJZPsd/7EuX/OGsjX5QG6pxER1UV5uU
+         XGaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1732683250; x=1733288050;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Wy4IS/iZefcF4rH2xy70XIUO1t1F2MTEdWON+Bkp0Yw=;
-        b=VpHjL/ETbykHPKjXJshWe1ecpoDyEPwsSsWoOxxIsjOFr/pAe0EKNcmw/oJjvzd38W
-         qBVuWlNR59Hx0TRQo9U8lRxSZZVYI+t7mFSUJrJmqelfbhRRLHtfwCNWq1iAiz3T5+12
-         sGlmoRcHEwPRXcjvuHKPMW7dlQmeEVBa238oJmPRAjdGfln1J0mqGGFVAKIjz7a9RSFe
-         1pWL1g0pW6PpBnjVD3iBccKWfj16mi9FFvNm+5F4mRYzos0xlznR1eAc26LuRJ7qpm7J
-         upqQje4vFTId69QeNNqXD5qczyVHosMbHwTJNXA+big+0xTxU2YiTlPP0C5l3G9d5wFC
-         e51g==
-X-Gm-Message-State: AOJu0Yx9+012wHpISxxpGNeINXx2xgJniAp7cq+ByC8Ns8aWm0roG+ZR
-	9FOoEfoSM4QV50OZ4PkFfIMenVF3m4vIiY9cHvdyO5j3qPXlKHJiyB1XIwfxwDg5fjlPGU27p86
-	V
-X-Gm-Gg: ASbGnctu8dw0RA2IB4m+gzXqvgovtBAAh0phlnXjViycMwgby+584f0DrQdYvTbShF7
-	9wLR2DLYcNI+cWHE6/kB4rK5YQfvykRq1E3av8aqnYTuQcnbGvBLkAZ8o5Msdx3YkrBasOsl1o+
-	CLhvZoZV/Sifb+l8kvB7cwmLaRoe7rabveEN2+Qunwgh6NTdpjPiixZT1ckuSjTsJStJA2Vf4B4
-	Z0YWLir52BLunU7DlaUuk1CWCtO8PI7Xv9x8OLd2wkbqeV7AtIh874ayeaVleTaUhTij1p8x9aE
-	itgVOgPTKRaukkPUAPCjOfSh
-X-Google-Smtp-Source: AGHT+IFf1BmplZBCtZWk7NMOSgQxXOix6eRIKl2JgaCvqQWYOWG0d8UcN/ndsGxkAdLAcBIOYodroQ==
-X-Received: by 2002:a05:6a20:9f96:b0:1e0:da90:5f33 with SMTP id adf61e73a8af0-1e0e0b2352dmr2489293637.25.1732683250010;
+        bh=LRi8p2vG65siHZi4g0d6yn8UFaizrYqtdSaScXwCU00=;
+        b=YZOw3U4Y3SSN4EH3H7vRmTWkTbJAHGJ79OvYjYfrlVTzs5k/jnaVOgDSy/duJZa3tx
+         b2y8px/pcnus0dSFabVAVfliZXc+kIcjJRt9nBcYe8SVjnzAkOMeHkGGeHcJZTtl6mFl
+         9mz39pNGkypEbB2DdIQQUkeG1cE2onIAQL3g4PhYV3aD6etf7CP3BegcrQ2D3QwNi6/Q
+         hIkFQBefL8qQcmngkgdLZSaLxGOYDHDk3FZpEqxevjxA8YYUzkizRozkRW03R62fbC+4
+         KwGhKMPL2xJLOv4mdIP+w8jOgSssPogPxtBQZPGQJg2fOCuCLvxRjfHVkeIOQR/4AHoS
+         RyMw==
+X-Gm-Message-State: AOJu0YzktxUYLOoAUMnLmhGsU7ioOTnzTHAlhBQvFNpJcvdLzqV/eyJg
+	X3GRiSTk5tFnUa9d/W3/HFc1O3Sb8/yzjf2mik5LpYVolvzD0UjUtM4Hu3lvy+jhARp0X+91D9t
+	F
+X-Gm-Gg: ASbGncs2XawFa/f8LF0C7HOz0IBB++BdDz8BY+XgMbSk8YHT2rRWK3Embp2D7LKo4oQ
+	0c0wtELVps7VFyk2bHo1FnBMTHMOobqmNbdDJzYb35lkEHBFUr6R8MxcbGDUGAk5NMwK9GAG7g5
+	b6XNoLqXAJ1f3JXhZgSln+a0E/I7d3xvSkl5nqV++pvq/lxxEyKvgygJw6chwU0WtkH9SZ79iXO
+	UniW7Q8JcDtshQKImJwMkS7hC3L3sw95LDUBvkcvLxo3G2uZ/3nTxXsP9SjFdI+M7eiWr9pydgC
+	+JkeMI6dy7tWPqFLNPy/S/Kb
+X-Google-Smtp-Source: AGHT+IHhD9ISIaquTIAqsav7Fd8jdTNsmdsLbq+UjAadfDWoX2SFPG5njJGcAqE2wEggp8CTXWnusA==
+X-Received: by 2002:a05:6830:4113:b0:718:1163:ef8f with SMTP id 46e09a7af769-71d65c7e396mr1462173a34.2.1732683250425;
         Tue, 26 Nov 2024 20:54:10 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724de531247sm9566243b3a.104.2024.11.26.20.54.08
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7fbcc3e09acsm8171837a12.67.2024.11.26.20.54.07
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Tue, 26 Nov 2024 20:54:09 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZVU-2lxT
+	id 1tGA3x-00000003ZUS-0GJQ
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQfY-3L2o
+	id 1tGA3x-0000000FQeE-0kBl
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 26/40] generic/310: cleanup killing background processes
-Date: Wed, 27 Nov 2024 15:51:56 +1100
-Message-ID: <20241127045403.3665299-27-david@fromorbit.com>
+Subject: [PATCH 10/40] fstests: fix DM device creation/removal vs udev races
+Date: Wed, 27 Nov 2024 15:51:40 +1100
+Message-ID: <20241127045403.3665299-11-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,73 +87,103 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Use the trick we used with fsstress of copying the binary to a test
-specific name so that we can simply use pkill to reliably kill the
-background processes this test runs. Also use SIGPIPE to avoid
-bash from throwing out "Killed" errors.
+When there is load on the system, newly created DM devices don't
+seem to be created consistently. When a new device is created,
+it is supposed to be created as /dev/dm-X, and then a udev rule
+creates the symlink from /dev/mapper/<dev name> to /dev/dm-X.
+
+Unfortunately, a lot of the tests that use dynamically created dm
+devices (dmerror, dmflakey) are not being created with this device
+node structure. This is resulting in getting the wrong short device
+name for the block device and hence we can't find the filesystem
+sysfs attribute directory for the filesystem on that block device.
+
+For example, with added debug to check what device name was being
+passed around and resolved:
+
+eneric/489       - output mismatch (see /mnt/xfs/runner-10/results/xfs/generic/489.out.bad)
+    --- tests/generic/489.out   2022-12-21 15:53:25.503043574 +1100
+    +++ /mnt/xfs/runner-10/results/xfs/generic/489.out.bad      2024-10-24 10:27:29.767196340 +1100
+    @@ -1,4 +1,10 @@
+     QA output created by 489
+    +./common/rc: line 4955: /sys/fs/xfs/flakey-test.489/error/fail_at_unmount: No such file or directory
+    +dev: /dev/mapper/flakey-test.489
+    +resolved dev: /dev/mapper/flakey-test.489
+    +brw-rw----. 1 root disk 251, 5 Oct 24 10:27 /dev/mapper/flakey-test.489
+    +./common/rc: line 4955: /sys/fs/xfs/flakey-test.489/error/metadata/EIO/max_retries: No such file or directory
+    +./common/rc: line 4955: /sys/fs/xfs/flakey-test.489/error/metadata/EIO/retry_timeout_seconds: No such file or directory
+    ...
+    (Run 'diff -u /home/dave/src/xfstests-dev/tests/generic/489.out /mnt/xfs/runner-10/results/xfs/generic/489.out.bad'  to see the entire diff)
+
+Here we see that the block device node is actually at
+/dev/mapper/flakey-test.489, not a link to a /dev/dm-X device node.
+
+This implies that the udev rule to create the /dev/dm-X node and
+the symlink to it at /dev/mapper/flakey-test.489 has not run, and
+something else created the device node.
+
+That looks like a bug in _dmsetup_create(). It creates the new DM
+device, then runs 'dmsetup mknodes', then waits for udev to settle.
+This means the mknodes command - which makes sure the dm device
+nodes exist - is racing with udev to create the device nodes. They
+don't use the same rules to create nodes, so we end up with this
+broken situation.
+
+'dmsetup mknodes' is considered legacy functionality, intended for
+systems that have no udev capability. For systems that have udev
+enabled (i.e. all modern distros), mknodes should not be run because
+it creates a different device node structure to what udev creates
+and can race with udev as we see here.
+
+Fix it by removing the 'dmsetup mknodes' as it is unnecessary to
+create the correct device node layout the rest of the system is
+expecting to see.
+
+Additionally,_dmsetup_remove() calls 'dmsetup mknodes' and that can
+also race with udev and cause issues. Hence we need to remove that
+call from the remove operation as well.
+
+Further, 'dmsetup remove' is also subject to races with udev which
+results in device remove failing.  This problem is documented in the
+dmsetup man page and suggests the use of the "--retry" option. This
+means dmsetup will retry several times over a few seconds before
+failing the removal.
+
+This reduces the remove failure rate substantially,
+but it can still occasionally fail when the system is under heavy
+load and udev processing is very slow. This is fixable, but requires
+fstests udev infrastructure changes as it requires udevadm
+functionality that is relatively new. Hence that will be done as
+a separate fix.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/310 | 21 +++++++++------------
- 1 file changed, 9 insertions(+), 12 deletions(-)
+ common/rc | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/310 b/tests/generic/310
-index 1ab81dd2e..52babfdc8 100755
---- a/tests/generic/310
-+++ b/tests/generic/310
-@@ -29,11 +29,8 @@ _begin_fstest auto
- # Override the default cleanup function.
- _cleanup()
+diff --git a/common/rc b/common/rc
+index 391370fd5..a601e2c80 100644
+--- a/common/rc
++++ b/common/rc
+@@ -5162,8 +5162,8 @@ _require_label_get_max()
+ _dmsetup_remove()
  {
--	if [ -n "$readdir_pid" ]; then
--		pkill --parent "$readdir_pid" t_readdir > /dev/null 2>&1
--		kill -9 $readdir_pid > /dev/null 2>&1
--		wait
--	fi
-+	pkill -9 $seq.t_readdir > /dev/null 2>&1
-+	wait
- 	rm -rf $TEST_DIR/tmp
- 	rm -f $tmp.*
+ 	$UDEV_SETTLE_PROG >/dev/null 2>&1
+-	$DMSETUP_PROG remove "$@" >>$seqres.full 2>&1
+-	$DMSETUP_PROG mknodes >/dev/null 2>&1
++	$DMSETUP_PROG remove --retry "$@" >>$seqres.full 2>&1
++	$UDEV_SETTLE_PROG >/dev/null 2>&1
  }
-@@ -74,6 +71,8 @@ check_kernel_bug()
  
- RUN_TIME=$((30 * $TIME_FACTOR))
+ _dmsetup_create()
+@@ -5174,7 +5174,6 @@ _dmsetup_create()
+ 	# device open won't also fail.
+ 	$UDEV_SETTLE_PROG >/dev/null 2>&1
+ 	$DMSETUP_PROG create "$@" >>$seqres.full 2>&1 || return 1
+-	$DMSETUP_PROG mknodes >/dev/null 2>&1
+ 	$UDEV_SETTLE_PROG >/dev/null 2>&1
+ }
  
-+cp $here/src/t_readdir_1 $TEST_DIR/$seq.t_readdir_1
-+cp $here/src/t_readdir_2 $TEST_DIR/$seq.t_readdir_2
- SEQ_DIR=$TEST_DIR/$seq
- mkdir -p $SEQ_DIR
- for n in {1..4096}; do
-@@ -82,12 +81,11 @@ done
- 
- _test_read()
- {
--	$here/src/t_readdir_1 $SEQ_DIR > /dev/null 2>&1 &
--	readdir_pid=$!
-+	 $TEST_DIR/$seq.t_readdir_1 $SEQ_DIR > /dev/null 2>&1 &
- 	sleep $RUN_TIME
--	kill $readdir_pid
--	unset readdir_pid
-+	pkill -PIPE $seq.t_readdir_1
- 	wait
-+
- 	check_kernel_bug
- 	if [ $? -ne 0 ]; then
- 		_fatal "kernel bug detected, check dmesg for more infomation."
-@@ -96,11 +94,10 @@ _test_read()
- 
- _test_lseek()
- {
--	$here/src/t_readdir_2 $SEQ_DIR > /dev/null 2>&1 &
-+	$TEST_DIR/$seq.t_readdir_2 $SEQ_DIR > /dev/null 2>&1 &
- 	readdir_pid=$!
- 	sleep $RUN_TIME
--	kill $readdir_pid
--	unset readdir_pid
-+	pkill -PIPE $seq.t_readdir_2
- 	wait
- 
- 	check_kernel_bug
 -- 
 2.45.2
 
