@@ -1,79 +1,79 @@
-Received: from mail-pf1-f177.google.com (mail-pf1-f177.google.com [209.85.210.177])
+Received: from mail-pg1-f180.google.com (mail-pg1-f180.google.com [209.85.215.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD07CA41
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 05:00:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 261AEA41
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 05:00:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683609; cv=none; b=rMmrbjLsk7oo+irghosnRE3xX2T0b31mS2zPX1VEfuOLMbVkVj+yZ7/5R3DZPWsUA/+sP/Zb8Jz0vULGtIVsLgyzaOm5FbWdHjvsjz+XesSgrizmwZNWPJDhZT3TemIjIyP0t+giWBPoBguvZHJoVVbUYGdNccbko35t7WU+m0I=
+	t=1732683612; cv=none; b=sJbdTePC8DyB80wZWIEAWNjx/ck9krnc64iM/N5ZfDUpaLAXo4+wsazNb1nNQrpQsw8OS9HIiXH4Wm/A4541VEFrG9Vw46fgGaKeKrNVQKevZhuClrEvWtyjSpDJJ1OSuffEjHpc4c9OUaM5cjnFB3WqYfSVmqiI34VsfS7568M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683609; c=relaxed/simple;
-	bh=CI0DrwHIyVlhkcpoQcWRGebczictsjs6l8H2+NTpZu4=;
+	s=arc-20240116; t=1732683612; c=relaxed/simple;
+	bh=lRFeb6yMAsD9VkPpbgKeBOkdSn5In1X0XHihMeFqH+s=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=JwWfE9QPLGuTH+hnWXeqiq5Q1TXKDaLRwNVYUTJCgz24K7qmJPWzYHERVNZYRWUeDRFx7Ja4ImiXC3ApMEfJns7/HnRzfonhrsbnqhmG9eu4d5h9AR7U/jlJRqPCpYj6I2oPR2aH+VgfdPoxZQ8V1Ups5R+YeiHYmgyXO85ELas=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=QnOIhYHi; arc=none smtp.client-ip=209.85.210.177
+	 MIME-Version; b=jlvKUr0V0/tnc+sgVDDqkVca3oOqyAVN0x+dyD9ifGplp4dJcW22UHw5bC3bXZP23yIPlE+Z/EHEXP7Kr0PLg8rY7bpmCMNU5ZHQfLUzT1Ei24QnvSA1eeCx9h5WNpXnz/IX+jGbpMSS475fULCE5vI/eB2au0V6YCcxKQehOfg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=WHdejhpR; arc=none smtp.client-ip=209.85.215.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="QnOIhYHi"
-Received: by mail-pf1-f177.google.com with SMTP id d2e1a72fcca58-724e113c821so4320830b3a.3
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 21:00:07 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="WHdejhpR"
+Received: by mail-pg1-f180.google.com with SMTP id 41be03b00d2f7-7f71f2b1370so5071435a12.1
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 21:00:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683607; x=1733288407; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683610; x=1733288410; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=X4a3uqPBCa2xrPbVntVwBhqxfG2Z9aj8jm2PszE2m6k=;
-        b=QnOIhYHiGwtoOBXKjElyCreuBgac30tFwHPDJreYnUoAfmvFERdYBCNFgPGlRYBxcx
-         pPh2Jdh5VULYxrvfBdhw39xwT9CK2tl97M5Nm+Nf+tcBsp71o6w2F1dHIFKUWz4NKCQh
-         l1zjZSvpT/Qsnupyh6W6A07OeCcoX+JRn27r9QLAzA2R4N70VGjnix3Mwi08BPQmFD32
-         rjO8rVmTFjkucugKG72ogRouhCL3MzIVrjj+T/pCVjf02qVBW4Owj8jvYICVdCBX5Ddc
-         KKTJSWc1FgEoRofkEgA7aJzx5Y145SabH4ArR4PWKnUapq4IWcWE5/cv5M3B9fvj+5yI
-         ShAg==
+        bh=lsQlWwV60sL+2ry2al+hCZ3ERzMnFh7RVOrbXT0yeSY=;
+        b=WHdejhpR6Nc7aRp2y8ksmJ9d6104mj68rZ0mVZmpIBzjohh7q4oqsDIHQCYKHKlVd9
+         SdRe0LoVNrad3/3AiGQBrlHP1My9Tzpnqfm9CTxvwVYjqmnHk+S/mhaF7F5vM0rdXuV7
+         U9cHPAaRtrIXEAvnf/G5bMIuw/CpLLAiSv5ga/iDioCzXrwK+eLNFL7+RZqYZOiu2W9n
+         kFZXl1LTQXxsGnDVuxywkZXkmtRdpp9ngqNAoQ2CW8RLKZsUG94VTEwS0I8zxhBQNtqN
+         2YwMXmDVGlQobP02ansRS5qwSUbpyl4pj5/sySStQJFicFfMwAfzVl+VxiBQQZLjKjMo
+         Zfvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732683607; x=1733288407;
+        d=1e100.net; s=20230601; t=1732683610; x=1733288410;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=X4a3uqPBCa2xrPbVntVwBhqxfG2Z9aj8jm2PszE2m6k=;
-        b=v4ZJonich2Q2DVsgHm0xRMgDtyQHwQxuaYv4a5K39I5itnVZnP/sOFD6+oyntb6AI4
-         5fFrhdgPiyIBurD/YYKJp/2EP8ks25uR2vktl4LleEsLHkxrUmObgxiDQTUxF3GpWyla
-         pjwpmax4sIiZRQxcYbJJ5o4BeoocvitDSqGmOJ5nFYfn0r5IANK+9OyGeyESm0FeInuB
-         grfF9pVjlHSmMWNs3Vu5RZLRIdPOJz/oPMnv/u6x0zrZb1Xu+mKj/IcG6cl86HjBjwtd
-         qIEFdmZ6lTI27FazdfJC2/uP5QY6eQnHXpIH920FmsKb6nXL+uubPKm2/TrjZBkQjih7
-         o6aw==
-X-Gm-Message-State: AOJu0YxHKzytgrUZmbASUEkcvlF6FQ45QJjraqQkyD1WBI6vcFp1XkCU
-	8b5UgGTW7MLCqH7yvNR0v56fSdG5dCubBu5+IM5YmvEQzj5GV98gLH9s8Qcc+FftfLEIIQFs0Ex
-	S
-X-Gm-Gg: ASbGncsDbwxBMIkbIOMPvm/m+BIASgwnuEg2E2VrCiEAf9AY9Zcu8uPeVqp0l5b7c4U
-	PfTxBkuu/CjOYZBA0Y2rudCNs8qRLlu0UDYupXru+t/ZYQGZgxi50zG+uqzbZ/oRTKQySpZjzE9
-	IbF/73tg/C1C+/kEA5mdPWzGnUNnUf/3bcd9/yu/HxpU895sfpOeP8w9w/0du3o/qyXHedp7o7A
-	3ovl589W4/WgCTH+sNzNL0JiwZ/PYk7XTZH2IFPQmx5SvGoi4iZ+Wuyv/1faknczq6d7sNigCEw
-	NIq3Hf5JKCjIrg==
-X-Google-Smtp-Source: AGHT+IH61l7pqSnePrBRLSCSfkrTKAsodVXTTOhg7029WtMcADO0E2pcGJIDXakmn4BIr2zuKv4LAg==
-X-Received: by 2002:a05:6a00:230a:b0:724:f8d4:2b6e with SMTP id d2e1a72fcca58-72530012e07mr2462730b3a.4.1732683607099;
-        Tue, 26 Nov 2024 21:00:07 -0800 (PST)
+        bh=lsQlWwV60sL+2ry2al+hCZ3ERzMnFh7RVOrbXT0yeSY=;
+        b=oRTaxQNiJDldSgInH6ZfnPRJ2MFTp+yv7kMZdHc8JQLMZeDbJiuMdK5CWiGRKZ63l1
+         22nK7A655POSNtbPfSH10APKCDEp1Q1cpndJ1FU13TggohrpJmwFS0dCbquZyTKM2+4Y
+         Bggv41LDLOMMmR5/CuOldSiTZE+pfca9xMZzxWTkO8/qj3SY+dGgGWaHoP8t6jWMdMNx
+         6Wp97NmEwP9buEvLdUBRtXbfxuqSHjEgh47EKLIH9cDFymgsduuQo52Vr0CyTvSj0y5w
+         O7nE24pXBFsjsLsb3QhTV5cPPwe37psg4l6qj7Q1MPaCexcnpOQQOhkRGBMG0AWgtL3o
+         fZ0g==
+X-Gm-Message-State: AOJu0YwvdK0wsvP12oRwND+x4v4Pr0VU50YkEwIwng4zoCNpXTL1FFfD
+	PndGMVIg6Lnsmh4lgRw2NeqMWE3hnz2GQeiB0rqMNZFfOcw5sJDHtn/c0ucobuYNivDoUFxXo/u
+	m
+X-Gm-Gg: ASbGncvVnlAo3vrBBYahTq0XUZyyrhnvc/5noVo1B1+k7NVzVx9epQ+opB2I9jQM3yN
+	WOrzSPlM6TCAOa847OLYb+h3u1YOt2gSORTvzYjZWCGcN+W9CWJgP7OvsOeQXgzSpbZLzR+fF5u
+	o8t4351zUjs32V/img4Dvy2n26RX8Qa74V1/h1Dor9SuwGSrqe1KChQtn0T45e0OchnkHsRLI4I
+	UN/pUa79+yC0xUX54NgXkXzaI2ez08t672DWRMUB/HSl8etWj2DNTvkNKGCm8J76YdMZtpCMMjR
+	Ttcy+XqZv135tQ==
+X-Google-Smtp-Source: AGHT+IHTPhccw4nb+Qbgk5kxZD1BfVCJeE0nTSlyjzeFxXjqM8731GkPzdr3XI15bXfGJPm6TlWrTA==
+X-Received: by 2002:a05:6a21:3989:b0:1db:a33e:2c6 with SMTP id adf61e73a8af0-1e0e0b206dfmr3689969637.18.1732683610511;
+        Tue, 26 Nov 2024 21:00:10 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724e2393129sm9023370b3a.176.2024.11.26.21.00.06
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724de573d37sm9277655b3a.174.2024.11.26.21.00.10
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Nov 2024 21:00:06 -0800 (PST)
+        Tue, 26 Nov 2024 21:00:10 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZVD-2CWP
+	id 1tGA3x-00000003ZVt-3cK8
 	for fstests@vger.kernel.org;
-	Wed, 27 Nov 2024 15:54:05 +1100
+	Wed, 27 Nov 2024 15:54:06 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQfE-2mnJ
+	id 1tGA3x-0000000FQg2-4ArB
 	for fstests@vger.kernel.org;
-	Wed, 27 Nov 2024 15:54:05 +1100
+	Wed, 27 Nov 2024 15:54:06 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 22/40] quota: system project quota files need to be shared
-Date: Wed, 27 Nov 2024 15:51:52 +1100
-Message-ID: <20241127045403.3665299-23-david@fromorbit.com>
+Subject: [PATCH 32/40] fstests: clean up termination of various tests
+Date: Wed, 27 Nov 2024 15:52:02 +1100
+Message-ID: <20241127045403.3665299-33-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,133 +87,134 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Tests that treat them as exclusively owned end up tripping over
-other tests that do the same. Fix this by using append and filter
-techniques to update the files, then using different project quota
-ids for each test.
+Accumulated minor fixes to improve reliablity of the termination
+of various tests when interrupted.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/quota      | 35 +++++++----------------------------
- tests/generic/603 |  8 +++++---
- tests/generic/691 |  6 ++++--
- 3 files changed, 16 insertions(+), 33 deletions(-)
+ tests/generic/084 | 12 +++++++++---
+ tests/generic/464 | 10 +++++-----
+ tests/generic/650 |  8 ++++----
+ tests/xfs/013     |  1 +
+ tests/xfs/558     |  1 +
+ 5 files changed, 20 insertions(+), 12 deletions(-)
 
-diff --git a/common/quota b/common/quota
-index e87489192..8135b7c04 100644
---- a/common/quota
-+++ b/common/quota
-@@ -274,7 +274,7 @@ _choose_prid()
+diff --git a/tests/generic/084 b/tests/generic/084
+index 137ba23cf..fe758f118 100755
+--- a/tests/generic/084
++++ b/tests/generic/084
+@@ -12,6 +12,15 @@
+ . ./common/preamble
+ _begin_fstest auto metadata quick
  
- _qmount()
- {
--    _scratch_unmount >/dev/null 2>&1
-+    _scratch_unmount
-     _try_scratch_mount || _fail "qmount failed"
-     # xfs doesn't need these setups and quotacheck even fails on xfs
-     # redirect the output to $seqres.full for debug purpose and ignore results
-@@ -432,39 +432,18 @@ _create_project_quota()
- 	mkdir $prjdir
- 	chmod ugo+rwx $prjdir
++_cleanup()
++{
++	[ -n "$link_pids" ] && kill $link_pids
++	[ -n "$open_pid" ] && kill $open_pid
++	wait
++	cd /
++	rm -f $tmp.*
++}
++
+ # Import common functions.
+ . ./common/filter
  
--	if [ -f /etc/projects -a ! -f $tmp.projects.bk ];then
--		cat /etc/projects > $tmp.projects.bk
--		echo >/etc/projects
--	fi
--	if [ -f /etc/projid -a ! -f $tmp.projid.bk ];then
--		cat /etc/projid > $tmp.projid.bk
--		echo >/etc/projid
--	fi
+@@ -57,9 +66,6 @@ done &
+ sleep 5
+ kill $! >/dev/null 2>&1
+ 
+-kill $open_pid $link_pids >/dev/null 2>&1
+-wait $open_pid $link_pids
 -
--	cat >>/etc/projects <<EOF
--$id:$prjdir
--EOF
--	cat >>/etc/projid <<EOF
--$name:$id
--EOF
-+	echo "$id:$prjdir" >> /etc/project
-+	echo "$name:$id" >> /etc/projid
- 	$XFS_IO_PROG -r -c "chproj $id" -c "chattr +P" $prjdir
- }
+ # all done, no oops/hang expected, _check_filesystems checks SCRATCH_DEV after test
+ status=0
+ exit
+diff --git a/tests/generic/464 b/tests/generic/464
+index f114208f9..ebf475094 100755
+--- a/tests/generic/464
++++ b/tests/generic/464
+@@ -66,22 +66,22 @@ _scratch_mount
+ # for each operation and runs for $LOOP_TIME seconds, and check filesystem
+ # consistency after each iteration
+ for i in `seq 1 $LOOP_CNT`; do
+-	rm -f $stop
++	touch $stop
+ 	for j in `seq 1 $PROC_CNT`; do
+-		while [ ! -e $stop ]; do
++		while [ -e $stop ]; do
+ 			do_write
+ 		done &
  
- # If you've called _create_project_quota, then use this function in _cleanup
- _restore_project_quota()
- {
--	if [ -f $tmp.projects.bk ];then
--		cat $tmp.projects.bk > /etc/projects && \
--			rm -f $tmp.projects.bk
--	else
--		rm -f /etc/projects
--	fi
--	if [ -f $tmp.projid.bk ];then
--		cat $tmp.projid.bk > /etc/projid && \
--			rm -f $tmp.projid.bk
--	else
--		rm -f /etc/projid
--	fi
-+	local id=$1
-+
-+	sed -i "/^$id:/d" /etc/project
-+	sed -i "/:$id$/d" /etc/projid
- }
+-		while [ ! -e $stop ]; do
++		while [ -e $stop ]; do
+ 			do_append
+ 		done &
  
- # make sure this script returns success
-diff --git a/tests/generic/603 b/tests/generic/603
-index 32dcaeb94..a84695831 100755
---- a/tests/generic/603
-+++ b/tests/generic/603
-@@ -10,10 +10,12 @@
- . ./common/preamble
- _begin_fstest auto quick quota
+-		while [ ! -e $stop ]; do
++		while [ -e $stop ]; do
+ 			do_writeback
+ 		done &
+ 	done
+ 	sleep $LOOP_TIME
+-	touch $stop
++	rm -f $stop
+ 	wait
  
-+projid=$seq
-+
- # Override the default cleanup function.
- _cleanup()
- {
--	_restore_project_quota
-+	_restore_project_quota $projid
- 	cd /
- 	rm -f $tmp.*
- }
-@@ -122,8 +124,8 @@ _require_prjquota $SCRATCH_DEV
- BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
- rm -rf $SCRATCH_MNT/t
- mkdir $SCRATCH_MNT/t
--$XFS_IO_PROG -r -c "chproj 100" -c "chattr +P" $SCRATCH_MNT/t
--_create_project_quota $SCRATCH_MNT/t 100 $qa_user
-+$XFS_IO_PROG -r -c "chproj $projid" -c "chattr +P" $SCRATCH_MNT/t
-+_create_project_quota $SCRATCH_MNT/t $projid $qa_user
+ 	_scratch_unmount
+diff --git a/tests/generic/650 b/tests/generic/650
+index 36a23e48d..60f86fdf5 100755
+--- a/tests/generic/650
++++ b/tests/generic/650
+@@ -52,8 +52,6 @@ nr_hotplug_cpus="${#hotplug_cpus[@]}"
+ test "$nr_hotplug_cpus" -gt 0 || _notrun "CPU hotplugging not supported"
  
- echo "### Set up different grace timers to each type of quota"
- UBGRACE=12
-diff --git a/tests/generic/691 b/tests/generic/691
-index 25ce92bc4..f33d6edf1 100755
---- a/tests/generic/691
-+++ b/tests/generic/691
-@@ -16,10 +16,12 @@
- . ./common/preamble
- _begin_fstest auto quota
+ stress_dir="$TEST_DIR/$seq"
+-rm -r -f "$stress_dir"
+-mkdir -p "$stress_dir"
  
-+projid=$seq
-+
- # Override the default cleanup function.
- _cleanup()
- {
--	_restore_project_quota
-+	_restore_project_quota $projid
- 	cd /
- 	rm -r -f $tmp.*
- }
-@@ -65,7 +67,7 @@ exercise()
- 	fi
- 	_qmount
- 	if [ "$type" = "P" ];then
--		_create_project_quota $SCRATCH_MNT/t 100 $qa_user
-+		_create_project_quota $SCRATCH_MNT/t $projid $qa_user
- 		file=$SCRATCH_MNT/t/testfile
- 	fi
+ echo "Silence is golden."
  
+@@ -79,12 +77,14 @@ fsstress_args+=(--duration="$((SOAK_DURATION / 10))")
+ nr_ops=$((2500 * TIME_FACTOR))
+ fsstress_args+=(-n $nr_ops)
+ for ((i = 0; i < 10; i++)); do
+-	_run_fsstress_bg -w "${fsstress_args[@]}"
+-	_wait_for_fsstress
++	rm -rf "$stress_dir"
++	mkdir -p "$stress_dir"
++	_run_fsstress "${fsstress_args[@]}"
+ 	_test_cycle_mount
+ done
+ 
+ rm -f $sentinel_file
++wait
+ 
+ # success, all done
+ status=0
+diff --git a/tests/xfs/013 b/tests/xfs/013
+index 5a92ef084..fd011445d 100755
+--- a/tests/xfs/013
++++ b/tests/xfs/013
+@@ -120,6 +120,7 @@ _kill_fsstress
+ # clean out the competing fsstress allocations, then everything else
+ rm -rf $SCRATCH_MNT/fsstress
+ rm -rf $SCRATCH_MNT/dir*
++wait
+ 
+ _scratch_unmount
+ 
+diff --git a/tests/xfs/558 b/tests/xfs/558
+index ba137ae8d..c594d8ccd 100755
+--- a/tests/xfs/558
++++ b/tests/xfs/558
+@@ -193,6 +193,7 @@ wait_for_errortag &
+ $XFS_IO_PROG -c "pwrite -S 0x56 $((2 * blksz)) $((2 * blksz))" \
+ 	-c 'fsync' $SCRATCH_MNT/file >> $seqres.full
+ rm -f $sentryfile
++wait
+ 
+ cat "$tracefile" >> $seqres.full
+ grep -q iomap_invalid "$tracefile"
 -- 
 2.45.2
 
