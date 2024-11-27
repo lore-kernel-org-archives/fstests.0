@@ -1,79 +1,79 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 726174689
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFF2F4689
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683577; cv=none; b=AQFj2MwUULmuYYZvE5h0LXSC2H/JJBwlrDzd63ag6m8pLSbJkThnLgftLfkp51DG3FlQPGCSX5S8AXTdgKMpPedCMZ8tmJsot8X5c532jvqb1/ZwVjUjhOZuj4tKjB9hvNl0lkjVHDyYWgX3IlkToTWCqrmF4gXIoKeKhgHAcco=
+	t=1732683581; cv=none; b=VT0NTOy9wY0kNv9SXMbA7/SqmBZ1+QfExdKzV1RLj6b1KgklpqoqG+oFFJ2fRZ6KidRqmHinl3vNZ5NzWr8C/FcZbqrDbrj/KmAfJOQ7/4cTs/QvuF/rc9hiIB55K9nPRgw0Ukz+c39JFk8rKyzpRz8OFXdHiWBLz7hcCts80fc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683577; c=relaxed/simple;
-	bh=Fjhq6mjr43d7UOVg7y101Ya4UzJYpqQYQcOcS4bzXTA=;
+	s=arc-20240116; t=1732683581; c=relaxed/simple;
+	bh=OvqZjkLmidtiPpSC3NXJZPas+XM2soqZGPX6TekKEhY=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=f20ZUNXOJ5M6Yxu7qOgJvnRT8jvQFZGhsRAcAiBH0H3fknZWtCJYxm29HXmVomDrl5YzjrIVY3fepBHXh2P98C73UN1m1t+1S528OQjprHhO8k5g5/czj40gi++2Gmesc1m32/EuVHlBG8KTpbwmUxe0pV0RHZLFopBEbVUtV5Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=hnCrVSiz; arc=none smtp.client-ip=209.85.210.179
+	 MIME-Version; b=HneA/4y7EsB/CEelKl/jdZcty43zG6WNpcb/zjdkqXT3otPZD97S6Nu7mnizU/cSHwXKcgIDmoyoqj15C6w4l6K4DUAeIh9yqjhNGiBG7fWzx9QuTaiKdc4cciGTVQxI9KW5Hgp9z8QkyFPZ2SZzgrzqgGyT26VVzExY86oj20Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=NdsplSDy; arc=none smtp.client-ip=209.85.214.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="hnCrVSiz"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7251ce598adso1348740b3a.0
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:36 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="NdsplSDy"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-21210fe8775so3558845ad.1
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683576; x=1733288376; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683579; x=1733288379; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=uO17thinb1mTZm6rxzipVuysiU7uoslnytn3CIiThlc=;
-        b=hnCrVSizlQcG708cEDqbCK82l8ICxZgci7LhgTWQsWmDgEyL2oo9ruHWU94bSqpYNx
-         HdSxJ+9rb7QCwsK39I07pEvTSDKfniRMuw6VHHhGX/sKrX0xXjJmiXlG/SnrjFNBJrRD
-         b22DoEltgA5KtUsnErlnYMlKzrmHqexhkw/z9QPplavgrU3Sf2ZZ1iFyl8PZDFR3BKJi
-         h9ZHY5UVQc0X/MOZqbdRUQcvw6LctytqiCaVQslPFGylcib5qCybabz+SRIMhvcfjTJq
-         /tRQSDLgap6wVge43bNTEKjq1/b5JFgyX4zQg5scMUudcody6K+X064DOqLgKLPRC2Wu
-         XRjg==
+        bh=uLyvRmpA/T9GK7gzdKLhJ6NSQ3rODHP4ylzcE+r6rVY=;
+        b=NdsplSDyjO1/rmZBJoQzCPnDbP4AdLxgAVkI0DONw0/CLNybOKVWxFpT0yXPPUzSO4
+         8ZUr4J1tvaE57mUOu+cZPbQSjqGXj3VX2OEoBCZtkOi5k5PGdNlOa0ACOlAstdAMcQgF
+         9jq0nJtuT6NlVlj0Fhcn+8WbXHiPzYlzJhDG6JLoF1WEwOjYQ6oBAJ1VK1wbuvtE/M9w
+         GPVzA3Azx9AOEiFyNjXT7ogt8GQP3UI5MLB+q8k0ksAXK1zcTwzwyMCntcg5bTLpwbo8
+         t++VXjjBwTmIILYZbn6TquXvlwBMQ2+gF6Uq+0ZOjTPjaZDvyqAjEK85+in4BXYFzBnU
+         I58w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732683576; x=1733288376;
+        d=1e100.net; s=20230601; t=1732683579; x=1733288379;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=uO17thinb1mTZm6rxzipVuysiU7uoslnytn3CIiThlc=;
-        b=X3enH9nQKOTmkDrA2bhmwJL61FLWv3rGbejfcKmLossHWPGkDBw19oMlZcYj4rWdUL
-         L2rUqRj34GFxWVPrMnxucbHquT52cNX+KgFT3EBD7DHTKUUp2P6nnzJMG6EFqcAJA2wP
-         8YFx2KLshlFo9TEwA3wRZN/TrYW/aJdrqkSpEcFdbvzdNYbkhclirRnpuh/WpJpI3Txt
-         2SxkGrHdUbhsRtPp9BAUCqeLpDAcZLhooVsOjStgqJKhYA5Y0r2EvyjvKZXN/T+ErSoK
-         8TJyBW+RmlY4ZcQCtXshlp/n60RewKkfanMvzUh1yd/Y+y2oVYPabNiHC/mUlU4x8c8Y
-         aBRQ==
-X-Gm-Message-State: AOJu0YzRUp7c2uyX8h/lGn1bLvmqoZO0cjxInT7v6fRr+YqYBSm9U8sR
-	DNi+23dSCgWV/vc+yS5PXmJS3mpfJFrkK3lvRMbDML/aL4jGcOyfIHLnMaToLOEZSwiYQdQcUZL
-	j
-X-Gm-Gg: ASbGncuL3esrG2JeNVjr3PkIdHFGLRAUYYMzVf5gURoIzCdqF2fzqkLIHWwYeIu4EIy
-	zo41IQB5WorvweIpYW6d/LM4KCaa3aXVkSwv4GLqjcFMLpiLmrVSHg3h1+KbF/5SdgwzutRS2Sx
-	NIKOUu41sPT0QeY1ipB5V1jsIjOXRm1JApUileKrh/ZZnJh+xJGtRSqj7B24xHqozJNwx7zgzII
-	tlGJWxf4jl6/3X3xoqFNClFtZ9yffX7zijokIuZf9C2ag4897Ykjh7zXZmJF0ZxS+QVxv4VfsoE
-	dR1Mm378KohFRQ==
-X-Google-Smtp-Source: AGHT+IHISm+u1rLHkVYllNeUVbS2doPfFz0eYVsyxK7bJ03yoKM3mafAtGVFzcyuZs0KSZ2+B8wcTA==
-X-Received: by 2002:a05:6a00:2351:b0:724:67dd:2615 with SMTP id d2e1a72fcca58-7253015446amr2597043b3a.22.1732683575860;
-        Tue, 26 Nov 2024 20:59:35 -0800 (PST)
+        bh=uLyvRmpA/T9GK7gzdKLhJ6NSQ3rODHP4ylzcE+r6rVY=;
+        b=OyKlKLVpyKy4oZsJOGrq4bsL+r9FdPOvcfL2wEN2NyUHyX69VgQaAPRMkEntJtD8fX
+         RKOCSLpKfLf5h7hfNorCkHmNsk/ESW7xaEBcNgIiOzCsx+kuum5XkvvOo4NmjD8DX+fV
+         bzkrjhOt3lWP7AqSFPFph8JLrp0KT3WnhxYudfKxElHCJDQXkKGvjM9BEjHDBjUFwfYJ
+         FLV+XHTmKEJ3hSqVFToRpYmjzVAosbp4CDQpKcHDY5LtHg8Q28DjtPOxx6ppCLSI8aEy
+         Jf7HUFMuSsyqPK1BT4e6Qpf7Jp45jrFsbJw6eE7pX4g7rMsn7AZtiZnCt0AXLqGQRVcd
+         2kyA==
+X-Gm-Message-State: AOJu0Yyk/5ww7eCUAs2vaJ59jUDb9PKZHUpUkUeB6cjeWhtqiQqTljO2
+	lybtfoBAswdDWmBOD3fCglGC+49KVHtwpoOJ4q2/GRmtMgctgVpPpf7SprRx5hXeay4yvqRkqPF
+	C
+X-Gm-Gg: ASbGnctZGjWJYuP8GrqKYgLX9fOxg0o7fYBHyMsbwSAbVCbXeZZKwm3btIxHv71GKhy
+	YUzqoOJJn+R26Rtko5S5QrKhsPNu2k+IR8nvJ9ObyTa+We3YNyt7JC672BVoIooWciwQPlSVOuy
+	KKdGGLjqv8qxiabT2y+HI8nMZpCpUpOJjcRicNLK4GgRO4nAemKCxFdzKV/N9UED2yrBVJEqjqd
+	1dYMeVnm1vo3M7g0FEnKfYlhMZQkf5+MM71y8Lck5IL1jCFBqrMia1smea2mMz6OPlndnyLnAjQ
+	DbKBAEsLLKk/NA==
+X-Google-Smtp-Source: AGHT+IG/yq2VIBM2mbfk4EW9oRuDg8P0JCv2biZTycv1L6SwqH7jlxqjod7SFiRXjErIzswEiCbQPQ==
+X-Received: by 2002:a17:902:fc85:b0:212:38d7:78ea with SMTP id d9443c01a7336-21500fc4fe7mr30388405ad.25.1732683579247;
+        Tue, 26 Nov 2024 20:59:39 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724de531308sm9290309b3a.110.2024.11.26.20.59.35
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2129dc13239sm93367515ad.177.2024.11.26.20.59.38
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Nov 2024 20:59:35 -0800 (PST)
+        Tue, 26 Nov 2024 20:59:38 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZVf-3BOz
+	id 1tGA3x-00000003ZUP-02zd
 	for fstests@vger.kernel.org;
-	Wed, 27 Nov 2024 15:54:06 +1100
+	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQfn-3lTV
+	id 1tGA3x-0000000FQe8-0Xk8
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 29/40] generic/085: general cleanup for reliability and debugging
-Date: Wed, 27 Nov 2024 15:51:59 +1100
-Message-ID: <20241127045403.3665299-30-david@fromorbit.com>
+Subject: [PATCH 09/40] fstests: per-test dmdelay instances
+Date: Wed, 27 Nov 2024 15:51:39 +1100
+Message-ID: <20241127045403.3665299-10-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,73 +87,71 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-This test was quite unreliable during development of the parallel
-check runner. It redirects all errors to /dev/null, so there was no
-way to debug it when it failed.
-
-Use common mount/unmount helpers, redirect errors to $seqres.full,
-make sure the cleanup code is always run at test exit and only
-attempt to kill processes if they are still running during cleanup.
+We can't run two tests that use dmdelay at the same time because
+the device name is the same. hence they interfere with each other.
+Give dmdelay devices their own per-test names to avoid this
+problem.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/085 | 21 ++++++++++++---------
- 1 file changed, 12 insertions(+), 9 deletions(-)
+ common/dmdelay | 20 +++++++++++---------
+ 1 file changed, 11 insertions(+), 9 deletions(-)
 
-diff --git a/tests/generic/085 b/tests/generic/085
-index 8fbcdce2e..7671a36ab 100755
---- a/tests/generic/085
-+++ b/tests/generic/085
-@@ -16,18 +16,20 @@ _begin_fstest auto freeze mount
- # Override the default cleanup function.
- _cleanup()
+diff --git a/common/dmdelay b/common/dmdelay
+index 66cac1a70..1c4fca6e9 100644
+--- a/common/dmdelay
++++ b/common/dmdelay
+@@ -7,13 +7,15 @@
+ DELAY_NONE=0
+ DELAY_READ=1
+ 
++export DELAY_NAME="delay-test.$seq"
++
+ _init_delay()
  {
-+	cleanup_dmdev
- 	cd /
- 	rm -f $tmp.*
--	cleanup_dmdev
+ 	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
+-	DELAY_DEV=/dev/mapper/delay-test
++	DELAY_DEV=/dev/mapper/$DELAY_NAME
+ 	DELAY_TABLE="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 0"
+ 	DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 10000 $SCRATCH_DEV 0 0"
+-	_dmsetup_create delay-test --table "$DELAY_TABLE" || \
++	_dmsetup_create $DELAY_NAME --table "$DELAY_TABLE" || \
+ 		_fatal "failed to create delay device"
  }
  
- cleanup_dmdev()
+@@ -33,9 +35,9 @@ _cleanup_delay()
  {
-+	if [ -n "$pid" ]; then
-+		kill -9 $pid 2>> $seqres.full
-+		wait $pid 2>> $seqres.full
-+	fi
- 	# in case it's still suspended and/or mounted
--	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
--	[ -n "$pid" ] && kill -9 $pid 2>/dev/null
--	wait $pid
--	_unmount $lvdev >/dev/null 2>&1
-+	$DMSETUP_PROG resume $lvdev >> $seqres.full 2>&1
-+	_unmount -q $SCRATCH_MNT
- 	_dmsetup_remove $node
+ 	# If dmsetup load fails then we need to make sure to do resume here
+ 	# otherwise the umount will hang
+-	$DMSETUP_PROG resume delay-test > /dev/null 2>&1
++	$DMSETUP_PROG resume $DELAY_NAME > /dev/null 2>&1
+ 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+-	_dmsetup_remove delay-test
++	_dmsetup_remove $DELAY_NAME
  }
  
-@@ -64,18 +66,19 @@ setup_dmdev
- # important, as long as they're racing with each other. So just throw away the
- # outputs and ignore the results.
- for ((i=0; i<100; i++)); do
--	$DMSETUP_PROG suspend $lvdev >/dev/null 2>&1
--	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
-+	$DMSETUP_PROG suspend $lvdev >> $seqres.full 2>&1
-+	$DMSETUP_PROG resume $lvdev >> $seqres.full 2>&1
- done &
- pid=$!
- for ((i=0; i<100; i++)); do
--	_mount $lvdev $SCRATCH_MNT >/dev/null 2>&1
--	_unmount $lvdev >/dev/null 2>&1
-+	_mount $lvdev $SCRATCH_MNT >> $seqres.full 2>&1
-+	_unmount $lvdev >> $seqres.full 2>&1
- done &
- pid="$pid $!"
+ # _load_delay_table <table> [lockfs]
+@@ -52,15 +54,15 @@ _load_delay_table()
  
- wait $pid
- unset pid
+ 	# run a suspend/resume cycle to avoid excessive resume delays once a
+ 	# delay is introduced below
+-	$DMSETUP_PROG suspend $suspend_opt delay-test
+-	$DMSETUP_PROG resume $suspend_opt delay-test
++	$DMSETUP_PROG suspend $suspend_opt $DELAY_NAME
++	$DMSETUP_PROG resume $suspend_opt $DELAY_NAME
  
-+cleanup_dmdev
- status=0
- exit
+-	$DMSETUP_PROG suspend $suspend_opt delay-test
++	$DMSETUP_PROG suspend $suspend_opt $DELAY_NAME
+ 	[ $? -ne 0 ] && _fatal "failed to suspend delay-test"
+ 
+-	$DMSETUP_PROG load delay-test --table "$table"
++	$DMSETUP_PROG load $DELAY_NAME --table "$table"
+ 	[ $? -ne 0 ] && _fatal "failed to load table into delay-test"
+ 
+-	$DMSETUP_PROG resume delay-test
++	$DMSETUP_PROG resume $DELAY_NAME
+ 	[ $? -ne 0 ] && _fatal  "failed to resume delay-test"
+ }
 -- 
 2.45.2
 
