@@ -1,79 +1,79 @@
-Received: from mail-pf1-f178.google.com (mail-pf1-f178.google.com [209.85.210.178])
+Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD38513CFB8
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FEC213D518
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683256; cv=none; b=XsInbbnSMDS2MUaWtrhRB8EZy38gOVHOB13o9JCpJAHOjWf+AKh229WLx7a/abZVDuQzqaT8fbtIfAdU729RBvdEpDCzfrzK9t+8d1+yUjxwcUxl4DYdwLjfhvTI5gmu/yTqsUsJdcpvicx95npiVuYjF7zt37d0XZb4gjR4dow=
+	t=1732683257; cv=none; b=XRSKdLPtVID33Ontk8Zo7Wtv3y38nzGUJQkfZsmyIBg/OjpyzKFicgJE7fdogrGz1DwaUt3q0KJBgbIErY6G0Rixg6H28tbwK8aI0L8LBCqvoT9YoLR+SQFsAcwCxgmFymGHADGUEgZbgIKADxswMWdfKEN2/Pm+WLtZlrAW4ds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683256; c=relaxed/simple;
-	bh=DckRhDjs/2NlGG0N/9oDI0PIKIbmlqkGm72E4rgqk+A=;
+	s=arc-20240116; t=1732683257; c=relaxed/simple;
+	bh=MinR9SLx2+HYuNc5PpG33kxYhJF+oCkH9ld9ubI3juY=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=O3g7w8U2HbbfnCMakswo7zjVvxZifJCvK0GlPHMQXM6T0/h+yp1Pvapc39h4KShhzlt+Ka9uUXfzwBXZWT21Ry+VWxD6fw4YnX8kpSu0nqRfzni0PCOfHObr8zn0LbfbVIU5iUekKADe/Y3LFjjjlFFObwl6hxLkhXvCxWRY0f8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=HGIUYgaA; arc=none smtp.client-ip=209.85.210.178
+	 MIME-Version; b=gu2y/n2xytO8KB2GSboeHXkb/OyQoDPZ2Kh3AZq9CGOj836cFvZaiEV/A5sJoJp8+n6KvHO0wXFYk4uk+BNrbNAH5DVb67Iey1JikKcsLtWal40+D+hSzHzzF7JKYIDEDhlFMErXo6cfUHH6ODvJqSmCGym/SY5Tu0t93w5y3kQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=Nc6v0qAt; arc=none smtp.client-ip=209.85.210.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="HGIUYgaA"
-Received: by mail-pf1-f178.google.com with SMTP id d2e1a72fcca58-7251abe0e69so2061795b3a.0
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:13 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Nc6v0qAt"
+Received: by mail-ot1-f52.google.com with SMTP id 46e09a7af769-71d5fddef37so555438a34.0
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683253; x=1733288053; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=zDaNBLQxO7qhw0bLUuzh2sc8g1eQoqDd2mupKYSqaRA=;
-        b=HGIUYgaA0Cuc681qJXetzgQBjfKNpw4z7Y2GR8UirOAbdSoA2HiOn3TDe/fJH5HscP
-         H97h2yjYvnh6mY6V8l1XKvWVuToy2k+E2tvcYdRVHzPF1aqnK6+WRBuJlQ4I7B/MWnE5
-         FcyThx3qYsANOuTmyBvD5G6LrPMCyEuFd6h9vjrmUtJIZARisN/+0ucu8G/6g7MO7STn
-         N/5wI/hHv1YjGl+2iLLtwSG4hlVwS2CVBfao/xMzcPXjWVeiVnubk5D9XV7eyCO7CvaZ
-         KIPQoeSdxlpWGhtMf/YaDFZsfkuVYuIPwCXom6Fpf66R7Bk/3ZfDIvAHP3EV4jjvVqnT
-         +8pw==
+        bh=LlYOOQi3LBzeiPZZz70g4V5HovvqpPLZ362Jl1DFWzA=;
+        b=Nc6v0qAtnwupNV8Jmy/Qio7KvFrJ9zU6uEbNk1PB+S/qc5q5itTC+h5D3vpAoHamLr
+         0KA61n0c2WpccqQFaJCgsqIwk5uTrRYYXY/2yycRL7fY6O4mkhG8dirhnMpULz6xYoHk
+         07RpotB/tshUv1uXNFiD0vP5xFTgnUjOO35s9PrTHjX2X3P7qkVrMklYrnxSX06exZfn
+         VBQw927YFxzZxV3iLb+/y9VY/SE5yBvY0zGsQkVUsAi71LtMVWd3qxPzTMvbpdgsqOM6
+         oChLMGTRtWCscmDZ3a4ywUcn0wOiYuHd+N3uxOJW5mcKkxkoFq1Ww+Reaz2eWhGteLrZ
+         csEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1732683253; x=1733288053;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=zDaNBLQxO7qhw0bLUuzh2sc8g1eQoqDd2mupKYSqaRA=;
-        b=YSOkjqX5HI5nVRCLqdkr55XRCcKae4mrjCZ7/KFTi4xyB6oYGTMkvHpRbLyI3oS0Nv
-         OWKy1KB0yuasaFbIONQPxjlSOO48pzuwwARDxRF20PfWXIEba4AH7KlpYfzaoGzlbXcQ
-         BbUbSSUch1HRcT5YDekTYVw92VQYUSyr4FCPOYYWoYLniduM0nQjcktI0jwKdudNfeET
-         ohAZRaJhiNgQ2hlt5vJxMxlhkeJKQKh7KKJ3Jot0Y/d4bAkT7p9JehK+Q6haMeyll6UR
-         dQgMdz9t91tkPo4P9T3Pr+aCDP70wXEMbB4lsMBWC8cvPgb9L2dRka938poSXJt4Zy3l
-         dLSQ==
-X-Gm-Message-State: AOJu0YywqCxudRhqdvr/EvvuaSQJKdhlyR7TdW/OipQfEbLBlvk4kX3I
-	+wytSLR3bR7vUSUsrqWjZhpNwGrOelgdAfle2TGiW3UHPfcSnlEfdI/u6TwQh+Pj9WyFkY9pDpY
-	t
-X-Gm-Gg: ASbGncvVuHCWxlVPUtwgSx7jjmOeNjNMnWKj3q8zhYlPb7Al9tLpCHA93sTz4v24Sqj
-	LQO6AX6AWrl3kkGYYXWSrtiMslujs/VV834iJaCN23eeGC8NnOSl2iB3kd4d4jlddhMHJVfuEui
-	lZAAoUSepoPRt0KyOlvH3Rof4Q9eybZJB9GHBDBZ58lZLwuJyaUYZyzPztdDUkQU4NAuUuoUxDp
-	GeO63Oa76yhfPKm3OLrQxSkpliek71RCObZJedGiVVT9pnYRGT8FWA5w23DZmRanu7uVEIUZK0r
-	Hb5XYh6TXO6VfsEe45ZpAPcv
-X-Google-Smtp-Source: AGHT+IHl6iCsdSp21v6TIR1lb6+xVSDtImCQO5ZbsMK9mAo0hEIsSCOnGklKaJiCPw32oAACMYHxIg==
-X-Received: by 2002:a05:6a21:3987:b0:1d9:1a77:3875 with SMTP id adf61e73a8af0-1e0e0b7e159mr2692651637.42.1732683252669;
-        Tue, 26 Nov 2024 20:54:12 -0800 (PST)
+        bh=LlYOOQi3LBzeiPZZz70g4V5HovvqpPLZ362Jl1DFWzA=;
+        b=ZjgNz2kRmM0XPlj/Gr8AjTAeOSwUKRS3JK7AtWhsKvEc+Gvef1G5Uvy079Um/oX0CY
+         hkfyN62L949P1ih21BdQ2BD7nI4Pn+v2WvmI2pz3spMYr9goF/OHFeJYZYeCA7spCAD1
+         4oHNLMmlUimCdsNuyj4iCihcxFVDINzOvGY05GQXiBbdORc1LLRsAswpTlMKASNwfinZ
+         9GwjEmnKRFayb7jTBFdGNo/XsGEKIua0Oel9aUp2iOHf0EAG3FpxJsFrg1Hg+bK+Gt9b
+         sroyu5YQ5LmEu1a85m83q//DlqthW6dGB675KlbWJGVOV0WqbmmVqaICOdvFHNu7eDO4
+         7L5Q==
+X-Gm-Message-State: AOJu0YwKvtUPCOjSUJU32rXKENWMkvRBVAXjoINn9+LnleAQfIlEBOBc
+	q0npPlAUoFL8q5mhVpuXtWIm3VB+qAlcqQpJ608i8nxuuCGu789G0l7atvk8B7jzuAYGnHrp4aE
+	4
+X-Gm-Gg: ASbGnct0yAv398SYlXdRRGOfyTbCq4Hzrb2ZQlPnqAWD5klYwhVmNEIgrjuoxr/kXFj
+	NRZZnvIri3x2YHaUDXTyw/PHpmGVDt3DcQM5fT3GVY8GChTcD6YJCCUW2zh7bVdgVjtAjl/lgPR
+	/iPyroDv/WEBGanjOozO1aO0JJkZyZpKrB58jQ7HC91wwqCKDlPIahNE/jebMXxyLOFcd9Z+YYS
+	XQ4RQK5ri9lQeEfik9lKM6MtD139NYmNusueCaYAUKVnKd2cwrhoCugNPb+urq9mnZ4oDuWqaxj
+	ao7tk1S+Hg27kVf1+GiwUStF
+X-Google-Smtp-Source: AGHT+IG1VK/YeKeN3dki9kcangs0uLLuFK9EZZwV0ON0DC/DH67II8w3fEwP3hMPMiqViJz1fEZ3fg==
+X-Received: by 2002:a05:6830:2655:b0:71d:572f:66c3 with SMTP id 46e09a7af769-71d65d0983dmr1598233a34.30.1732683253167;
+        Tue, 26 Nov 2024 20:54:13 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724de45725dsm9255356b3a.16.2024.11.26.20.54.07
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7fbcbfc3e26sm8297600a12.9.2024.11.26.20.54.07
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Tue, 26 Nov 2024 20:54:10 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZUe-0u3L
+	id 1tGA3x-00000003ZUa-0gEs
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQeT-1Kgp
+	id 1tGA3x-0000000FQeO-19Mf
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 13/40] fstests: clean up loop device instantiation
-Date: Wed, 27 Nov 2024 15:51:43 +1100
-Message-ID: <20241127045403.3665299-14-david@fromorbit.com>
+Subject: [PATCH 12/40] fstests: clean up mount and unmount operations
+Date: Wed, 27 Nov 2024 15:51:42 +1100
+Message-ID: <20241127045403.3665299-13-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,1314 +87,1421 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Lots of tests do there own special thing with loop devices rather
-than using _create_loop_device() and _destroy_loop_device(). This
-oftens means they do not clean up after themselves properly,
-leaving stale loop devices around that result in unmountable test or
-scratch devices. This is common when tests are killed by user
-interrupt.
+The way tests run unmount is, at times, completely random.
+Sometimes they call the correct _scratch_unmount function, sometimes
+they open code it with a direct call to UMOUNT_PROG <dir>, sometimes
+they run umount directly.
 
-Even the tests that do use _destroy_loop_device and try to clean up
-often do it incorrectly, leading to spurious error messages.
+This makes it really hard to instrument unmount operations when
+trying to work out why transient, unpredictable failures like
+this occur randomly during a test run:
 
-Some tests try to use dynamic instantiation via "mount -o loop",
-but then don't clean up in the correct order or hack around to find
-the loop device that was instantiated because the test needs to know
-the instantiated device name
+umount: /mnt/xfs/runner-17/test: target is busy.
 
-Clean this up by converting all the tests to use
-_create_loop_device() and _destroy_loop_device(). In all the tests,
-use the variable "loop_dev" for the device consistently. In
-_destroy_loop_device(), test that a device name has been passed
-so that we don't try to clean up the same device twice (e.g. once
-before test exit and again from the _cleanup() function). When we
-destroy a loop device, unset the variable used to hold the loop
-device name so that we don't try to destroy it twice.
+Sometimes it happens on a test device mount, sometimes a scratch
+device mount.  Sometimes it happens to a test specific dm or loop
+device mount. But without instrumenting every single unmount call in
+every test, it's impossible to capture these failures easily.
 
-This results in much more reliable cleanup and clean exit from
-fstests when killed by the user.
+Solve this problem by introducing the _unmount() wrapper. It is
+simply a call to UMOUNT_PROG <dir>, but it provides a single point
+were -every- unmount operation funnels through.
+
+We already have a _mount wrapper for this reason. However, in trying
+to work out why mounts were failing (because unmounts were failing),
+I discovered that that_mount() is used inconsistently as well.
+
+Sort this all out by adding and _unmount() wrapper to go with
+_mount() and use them everywhere consistently.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/metadump   | 32 ++++++++++++--------------------
- tests/generic/067 | 11 ++++++++---
- tests/generic/361 |  6 +++++-
- tests/generic/563 | 14 +++++++++-----
- tests/generic/564 | 12 ++++++------
- tests/generic/590 |  9 ++++++---
- tests/generic/744 |  4 ++--
- tests/generic/746 |  6 +++++-
- tests/xfs/014     |  7 +++++--
- tests/xfs/049     | 35 +++++++++++++++++++++--------------
- tests/xfs/073     | 24 +++++++++++++-----------
- tests/xfs/074     | 21 ++++++++++++---------
- tests/xfs/078     | 16 +++++++++-------
- tests/xfs/148     | 23 ++++++++++++++---------
- tests/xfs/149     |  4 ++++
- tests/xfs/216     | 15 ++++++++++-----
- tests/xfs/217     | 22 ++++++++++++++++------
- tests/xfs/250     | 14 +++++++++-----
- tests/xfs/259     | 13 ++++++++-----
- tests/xfs/513     | 44 ++++++++++++++++++++------------------------
- tests/xfs/521     |  8 ++++++--
- tests/xfs/528     | 10 +++++++---
- tests/xfs/530     | 11 ++++++-----
- tests/xfs/606     | 12 ++++++++----
- tests/xfs/613     | 40 ++++++++++++++--------------------------
- tests/xfs/613.out |  1 -
- 26 files changed, 235 insertions(+), 179 deletions(-)
+ common/btrfs       |  4 ++--
+ common/dmdelay     |  4 ++--
+ common/dmdust      |  4 ++--
+ common/dmerror     |  4 ++--
+ common/dmflakey    |  4 ++--
+ common/dmhugedisk  |  2 +-
+ common/dmlogwrites |  4 ++--
+ common/dmthin      |  4 ++--
+ common/overlay     | 10 +++++-----
+ common/populate    |  8 ++++----
+ common/rc          | 42 +++++++++++++++++++++++++-----------------
+ tests/generic/042  |  4 ++--
+ tests/generic/050  |  3 ++-
+ tests/generic/067  |  6 +++---
+ tests/generic/081  |  2 +-
+ tests/generic/085  |  6 +++---
+ tests/generic/108  |  2 +-
+ tests/generic/171  |  2 +-
+ tests/generic/172  |  2 +-
+ tests/generic/173  |  2 +-
+ tests/generic/174  |  2 +-
+ tests/generic/306  |  2 +-
+ tests/generic/332  |  2 +-
+ tests/generic/361  |  2 +-
+ tests/generic/373  |  2 +-
+ tests/generic/374  |  2 +-
+ tests/generic/395  |  2 +-
+ tests/generic/459  |  2 +-
+ tests/generic/563  | 10 +++++-----
+ tests/generic/604  |  2 +-
+ tests/generic/631  |  2 +-
+ tests/generic/648  |  6 +++---
+ tests/generic/698  |  4 ++--
+ tests/generic/699  |  8 ++++----
+ tests/generic/704  |  2 +-
+ tests/generic/717  |  2 +-
+ tests/generic/730  |  2 +-
+ tests/generic/731  |  2 +-
+ tests/generic/732  |  4 ++--
+ tests/generic/741  |  2 +-
+ tests/generic/744  |  6 +++---
+ tests/generic/746  |  8 ++++----
+ tests/xfs/014      |  6 +++---
+ tests/xfs/073      | 20 ++++++++++----------
+ tests/xfs/074      |  2 +-
+ tests/xfs/078      |  6 +++---
+ tests/xfs/148      |  6 +++---
+ tests/xfs/149      |  4 ++--
+ tests/xfs/186      |  4 ++--
+ tests/xfs/216      | 10 ++++++++--
+ tests/xfs/217      |  4 ++--
+ tests/xfs/250      |  7 ++++---
+ tests/xfs/289      |  4 ++--
+ tests/xfs/507      |  2 +-
+ tests/xfs/513      |  4 ++--
+ tests/xfs/544      |  2 +-
+ tests/xfs/606      |  2 +-
+ tests/xfs/613      |  4 ++--
+ 58 files changed, 149 insertions(+), 133 deletions(-)
 
-diff --git a/common/metadump b/common/metadump
-index 3373edfe9..bc3038e3b 100644
---- a/common/metadump
-+++ b/common/metadump
-@@ -24,17 +24,9 @@ _xfs_cleanup_verify_metadump()
- 
- 	test -n "$XFS_METADUMP_FILE" && rm -f "$XFS_METADUMP_FILE"
- 
--	if [ -n "$XFS_METADUMP_IMG" ]; then
--		losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev; do
--			losetup -d "$ldev"
--		done
--
--		# Don't call rm directly with a globbed argument here to avoid
--		# issues issues with variable expansions.
--		for img in "$XFS_METADUMP_IMG"*; do
--			test -e "$img" && rm -f "$img"
--		done
--	fi
-+	[ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
-+	[ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
-+	rm -f $data_img $log_img
+diff --git a/common/btrfs b/common/btrfs
+index 95a9c8e6c..4a2c9886e 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -352,7 +352,7 @@ _btrfs_stress_subvolume()
+ 	while [ ! -e $stop_file ]; do
+ 		$BTRFS_UTIL_PROG subvolume create $btrfs_mnt/$subvol_name
+ 		$MOUNT_PROG -o subvol=$subvol_name $btrfs_dev $subvol_mnt
+-		$UMOUNT_PROG $subvol_mnt
++		_unmount $subvol_mnt
+ 		$BTRFS_UTIL_PROG subvolume delete $btrfs_mnt/$subvol_name
+ 	done
+ }
+@@ -368,7 +368,7 @@ _btrfs_kill_stress_subvolume_pid()
+ 	# Ignore if process already died.
+ 	wait $subvol_pid &> /dev/null
+ 	rm -f $stop_file
+-	$UMOUNT_PROG $subvol_mnt &> /dev/null
++	_unmount $subvol_mnt &> /dev/null
  }
  
- # Can xfs_metadump snapshot the fs metadata to a v1 metadump file?
-@@ -122,25 +114,25 @@ _xfs_verify_metadump_v2()
- 		_scratch_xfs_mdrestore $metadump_file
+ # stress btrfs by running scrub in a loop
+diff --git a/common/dmdelay b/common/dmdelay
+index 1c4fca6e9..848afb993 100644
+--- a/common/dmdelay
++++ b/common/dmdelay
+@@ -28,7 +28,7 @@ _mount_delay()
  
- 	# Create loopdev for data device so we can mount the fs
--	data_loop=$(_create_loop_device $data_img)
-+	md_data_loop_dev=$(_create_loop_device $data_img)
- 
- 	# Create loopdev for log device if we recovered anything
--	test -s "$log_img" && log_loop=$(_create_loop_device $log_img)
-+	test -s "$log_img" && md_log_loop_dev=$(_create_loop_device $log_img)
- 
- 	# Mount fs, run an extra test, fsck, and unmount
--	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _scratch_mount
-+	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _scratch_mount
- 	if [ -n "$extra_test" ]; then
--		SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop $extra_test
-+		SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev $extra_test
- 	fi
--	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _check_xfs_scratch_fs
--	SCRATCH_DEV=$data_loop _scratch_unmount
-+	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _check_xfs_scratch_fs
-+	_unmount $md_data_loop_dev
- 
- 	# Tear down what we created
--	if [ -b "$log_loop" ]; then
--		_destroy_loop_device $log_loop
-+	if [ -b "$md_log_loop_dev" ]; then
-+		_destroy_loop_device $md_log_loop_dev
- 		rm -f $log_img
- 	fi
--	_destroy_loop_device $data_loop
-+	_destroy_loop_device $md_data_loop_dev
- 	rm -f $data_img
+ _unmount_delay()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
  }
  
+ _cleanup_delay()
+@@ -36,7 +36,7 @@ _cleanup_delay()
+ 	# If dmsetup load fails then we need to make sure to do resume here
+ 	# otherwise the umount will hang
+ 	$DMSETUP_PROG resume $DELAY_NAME > /dev/null 2>&1
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_dmsetup_remove $DELAY_NAME
+ }
+ 
+diff --git a/common/dmdust b/common/dmdust
+index 37bb865c8..55bbc84db 100644
+--- a/common/dmdust
++++ b/common/dmdust
+@@ -24,7 +24,7 @@ _mount_dust()
+ 
+ _unmount_dust()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ }
+ 
+ _cleanup_dust()
+@@ -32,6 +32,6 @@ _cleanup_dust()
+ 	# If dmsetup load fails then we need to make sure to do resume here
+ 	# otherwise the umount will hang
+ 	$DMSETUP_PROG resume $DUST_NAME > /dev/null 2>&1
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_dmsetup_remove $DUST_NAME
+ }
+diff --git a/common/dmerror b/common/dmerror
+index 97796b38e..309129c03 100644
+--- a/common/dmerror
++++ b/common/dmerror
+@@ -101,7 +101,7 @@ _dmerror_mount()
+ 
+ _dmerror_unmount()
+ {
+-	umount $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ }
+ 
+ _dmerror_cleanup()
+@@ -110,7 +110,7 @@ _dmerror_cleanup()
+ 	test -n "$NON_ERROR_RTDEV" && $DMSETUP_PROG resume $DMERROR_RTNAME &>/dev/null
+ 	$DMSETUP_PROG resume $DMERROR_NAME > /dev/null 2>&1
+ 
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 
+ 	test -n "$NON_ERROR_LOGDEV" && _dmsetup_remove $DMERROR_LOGNAME
+ 	test -n "$NON_ERROR_RTDEV" && _dmsetup_remove $DMERROR_RTNAME
+diff --git a/common/dmflakey b/common/dmflakey
+index 75a0a67c8..7368a3e5b 100644
+--- a/common/dmflakey
++++ b/common/dmflakey
+@@ -71,7 +71,7 @@ _mount_flakey()
+ 
+ _unmount_flakey()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ }
+ 
+ _cleanup_flakey()
+@@ -82,7 +82,7 @@ _cleanup_flakey()
+ 	test -n "$NON_FLAKEY_RTDEV" && $DMSETUP_PROG resume $FLAKEY_RTNAME &> /dev/null
+ 	$DMSETUP_PROG resume flakey-test > /dev/null 2>&1
+ 
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 
+ 	_dmsetup_remove $FLAKEY_NAME
+ 	test -n "$NON_FLAKEY_LOGDEV" && _dmsetup_remove $FLAKEY_LOGNAME
+diff --git a/common/dmhugedisk b/common/dmhugedisk
+index 0757e1908..2d23f436c 100644
+--- a/common/dmhugedisk
++++ b/common/dmhugedisk
+@@ -42,7 +42,7 @@ _dmhugedisk_init()
+ 
+ _dmhugedisk_cleanup()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_dmsetup_remove $DMHUGE_TEST
+ 	_dmsetup_remove $DMHUGE_TEST_ZERO
+ }
+diff --git a/common/dmlogwrites b/common/dmlogwrites
+index c1c85de9d..a27e1966a 100644
+--- a/common/dmlogwrites
++++ b/common/dmlogwrites
+@@ -110,7 +110,7 @@ _log_writes_mount()
+ 
+ _log_writes_unmount()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ }
+ 
+ # _log_writes_replay_log <mark>
+@@ -141,7 +141,7 @@ _log_writes_remove()
+ 
+ _log_writes_cleanup()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_log_writes_remove
+ }
+ 
+diff --git a/common/dmthin b/common/dmthin
+index f2c00f5a7..453e43a04 100644
+--- a/common/dmthin
++++ b/common/dmthin
+@@ -23,7 +23,7 @@ DMTHIN_VOL_DEV="/dev/mapper/$DMTHIN_VOL_NAME"
+ 
+ _dmthin_cleanup()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_dmsetup_remove $DMTHIN_VOL_NAME
+ 	_dmsetup_remove $DMTHIN_POOL_NAME
+ 	_dmsetup_remove $DMTHIN_META_NAME
+@@ -32,7 +32,7 @@ _dmthin_cleanup()
+ 
+ _dmthin_check_fs()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
+ 	_check_scratch_fs $DMTHIN_VOL_DEV
+ }
+ 
+diff --git a/common/overlay b/common/overlay
+index faa9339a6..01b6622f5 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -142,18 +142,18 @@ _overlay_base_unmount()
+ 
+ 	[ -n "$dev" -a -n "$mnt" ] || return 0
+ 
+-	$UMOUNT_PROG $mnt
++	_unmount $mnt
+ }
+ 
+ _overlay_test_unmount()
+ {
+-	$UMOUNT_PROG $TEST_DIR
++	_unmount $TEST_DIR
+ 	_overlay_base_unmount "$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR"
+ }
+ 
+ _overlay_scratch_unmount()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ 	_overlay_base_unmount "$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT"
+ }
+ 
+@@ -342,7 +342,7 @@ _overlay_check_scratch_dirs()
+ 
+ 	# Need to umount overlay for scratch dir check
+ 	local ovl_mounted=`_is_dir_mountpoint $SCRATCH_MNT`
+-	[ -z "$ovl_mounted" ] || $UMOUNT_PROG $SCRATCH_MNT
++	[ -z "$ovl_mounted" ] || _unmount $SCRATCH_MNT
+ 
+ 	# Check dirs with extra overlay options
+ 	_overlay_check_dirs $lowerdir $upperdir $workdir $*
+@@ -387,7 +387,7 @@ _overlay_check_fs()
+ 	else
+ 		# Check and umount overlay for dir check
+ 		ovl_mounted=`_is_dir_mountpoint $ovl_mnt`
+-		[ -z "$ovl_mounted" ] || $UMOUNT_PROG $ovl_mnt
++		[ -z "$ovl_mounted" ] || _unmount $ovl_mnt
+ 	fi
+ 
+ 	_overlay_check_dirs $base_mnt/$OVL_LOWER $base_mnt/$OVL_UPPER \
+diff --git a/common/populate b/common/populate
+index 88c8ba2b3..4cf9c0691 100644
+--- a/common/populate
++++ b/common/populate
+@@ -517,7 +517,7 @@ _scratch_xfs_populate() {
+ 	__populate_fragment_file "${SCRATCH_MNT}/RTRMAPBT"
+ 	__populate_fragment_file "${SCRATCH_MNT}/REFCOUNTBT"
+ 
+-	umount "${SCRATCH_MNT}"
++	_scratch_unmount
+ }
+ 
+ # Populate an ext4 on the scratch device with (we hope) all known
+@@ -619,7 +619,7 @@ _scratch_ext4_populate() {
+ 	# Make sure we get all the fragmentation we asked for
+ 	__populate_fragment_file "${SCRATCH_MNT}/S_IFREG.FMT_ETREE"
+ 
+-	umount "${SCRATCH_MNT}"
++	_scratch_unmount
+ }
+ 
+ # Find the inode number of a file
+@@ -772,7 +772,7 @@ _scratch_xfs_populate_check() {
+ 	dblksz="$(_xfs_get_dir_blocksize "$SCRATCH_MNT")"
+ 	leaf_lblk="$((32 * 1073741824 / blksz))"
+ 	node_lblk="$((64 * 1073741824 / blksz))"
+-	umount "${SCRATCH_MNT}"
++	_scratch_unmount
+ 
+ 	__populate_check_xfs_dformat "${extents_file}" "extents"
+ 	__populate_check_xfs_dformat "${btree_file}" "btree"
+@@ -885,7 +885,7 @@ _scratch_ext4_populate_check() {
+ 	extents_slink="$(__populate_find_inode "${SCRATCH_MNT}/S_IFLNK.FMT_EXTENTS")"
+ 	local_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_LOCAL")"
+ 	block_attr="$(__populate_find_inode "${SCRATCH_MNT}/ATTR.FMT_BLOCK")"
+-	umount "${SCRATCH_MNT}"
++	_scratch_unmount
+ 
+ 	__populate_check_ext4_dformat "${extents_file}" "extents"
+ 	__populate_check_ext4_dformat "${etree_file}" "etree"
+diff --git a/common/rc b/common/rc
+index 6f939e3b5..3f35da7fe 100644
+--- a/common/rc
++++ b/common/rc
+@@ -301,7 +301,7 @@ _put_mount()
+ 	local last_mnt=`echo $MOUNTED_POINT_STACK | awk '{print $1}'`
+ 
+ 	if [ -n "$last_mnt" ]; then
+-		$UMOUNT_PROG $last_mnt
++		_unmount $last_mnt
+ 	fi
+ 	MOUNTED_POINT_STACK=`echo $MOUNTED_POINT_STACK | cut -d\  -f2-`
+ }
+@@ -310,7 +310,7 @@ _put_mount()
+ _clear_mount_stack()
+ {
+ 	if [ -n "$MOUNTED_POINT_STACK" ]; then
+-		$UMOUNT_PROG $MOUNTED_POINT_STACK
++		_unmount -R $MOUNTED_POINT_STACK
+ 	fi
+ 	MOUNTED_POINT_STACK=""
+ }
+@@ -448,6 +448,14 @@ _scratch_mount_idmapped()
+ 	fi
+ }
+ 
++# Unmount the filesystem based on the directory or device passed.
++_unmount()
++{
++	local args="$*"
++
++	$UMOUNT_PROG $args >> $seqres.full 2>&1
++}
++
+ _scratch_unmount()
+ {
+ 	case "$FSTYP" in
+@@ -455,20 +463,20 @@ _scratch_unmount()
+ 		_overlay_scratch_unmount
+ 		;;
+ 	btrfs)
+-		$UMOUNT_PROG $SCRATCH_MNT
++		_unmount $SCRATCH_MNT
+ 		;;
+ 	tmpfs)
+-		$UMOUNT_PROG $SCRATCH_MNT
++		_unmount $SCRATCH_MNT
+ 		;;
+ 	*)
+-		$UMOUNT_PROG $SCRATCH_DEV
++		_unmount $SCRATCH_DEV
+ 		;;
+ 	esac
+ }
+ 
+ _scratch_umount_idmapped()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT
++	_unmount $SCRATCH_MNT
+ }
+ 
+ _scratch_remount()
+@@ -492,7 +500,7 @@ _scratch_cycle_mount()
+         ;;
+     overlay)
+         if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+-            $UMOUNT_PROG $SCRATCH_MNT
++            _unmount $SCRATCH_MNT
+             unmounted=true
+         fi
+         ;;
+@@ -540,9 +548,9 @@ _move_mount()
+ 
+ 	# Replace $mnt with $tmp. Use a temporary bind-mount because
+ 	# mount --move will fail with certain mount propagation layouts.
+-	$UMOUNT_PROG $mnt || _fail "Failed to unmount $mnt"
++	_unmount $mnt || _fail "Failed to unmount $mnt"
+ 	_mount --bind $tmp $mnt || _fail "Failed to bind-mount $tmp to $mnt"
+-	$UMOUNT_PROG $tmp || _fail "Failed to unmount $tmp"
++	_unmount $tmp || _fail "Failed to unmount $tmp"
+ 	rmdir $tmp
+ }
+ 
+@@ -608,7 +616,7 @@ _test_unmount()
+ 	if [ "$FSTYP" == "overlay" ]; then
+ 		_overlay_test_unmount
+ 	else
+-		$UMOUNT_PROG $TEST_DEV
++		_unmount $TEST_DEV
+ 	fi
+ }
+ 
+@@ -622,7 +630,7 @@ _test_cycle_mount()
+         ;;
+     overlay)
+         if [ "$OVL_BASE_FSTYP" = tmpfs ]; then
+-            $UMOUNT_PROG $TEST_DIR
++            _unmount $TEST_DIR
+             unmounted=true
+         fi
+         ;;
+@@ -1376,7 +1384,7 @@ _repair_scratch_fs()
+ 			_scratch_xfs_repair -L 2>&1
+ 			echo "log zap returns $?"
+ 		else
+-			umount "$SCRATCH_MNT"
++			_unmount "$SCRATCH_MNT"
+ 		fi
+ 		_scratch_xfs_repair "$@" 2>&1
+ 		res=$?
+@@ -1408,7 +1416,7 @@ _repair_scratch_fs()
+ 		# Fall through to repair base fs
+ 		dev=$OVL_BASE_SCRATCH_DEV
+ 		fstyp=$OVL_BASE_FSTYP
+-		$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT
++		_unmount $OVL_BASE_SCRATCH_MNT
+ 	fi
+ 	# Let's hope fsck -y suffices...
+ 	fsck -t $fstyp -y $dev 2>&1
+@@ -1441,7 +1449,7 @@ _repair_test_fs()
+ 				_test_xfs_repair -L >>$tmp.repair 2>&1
+ 				echo "log zap returns $?" >> $tmp.repair
+ 			else
+-				umount "$TEST_DEV"
++				_unmount "$TEST_DEV"
+ 			fi
+ 			_test_xfs_repair "$@" >>$tmp.repair 2>&1
+ 			res=$?
+@@ -2222,7 +2230,7 @@ _require_logdev()
+         _notrun "This test requires USE_EXTERNAL to be enabled"
+ 
+     # ensure its not mounted
+-    $UMOUNT_PROG $SCRATCH_LOGDEV 2>/dev/null
++    _unmount $SCRATCH_LOGDEV 2>/dev/null
+ }
+ 
+ # This test requires that an external log device is not in use
+@@ -3309,7 +3317,7 @@ _umount_or_remount_ro()
+     local mountpoint=`_is_dev_mounted $device`
+ 
+     if [ $USE_REMOUNT -eq 0 ]; then
+-        $UMOUNT_PROG $device
++	_unmount $device
+     else
+         _remount $device ro
+     fi
+@@ -3826,7 +3834,7 @@ _require_scratch_dev_pool()
+ 			_notrun "$i is part of TEST_DEV, this test requires unique disks"
+ 		fi
+ 		if _mount | grep -q $i; then
+-			if ! $UMOUNT_PROG $i; then
++			if ! _unmount $i; then
+ 		            echo "failed to unmount $i - aborting"
+ 		            exit 1
+ 		        fi
+diff --git a/tests/generic/042 b/tests/generic/042
+index fd0ef705a..ced145dde 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -44,7 +44,7 @@ _crashtest()
+ 		_filter_xfs_io
+ 	$here/src/godown -f $mnt
+ 
+-	$UMOUNT_PROG $mnt
++	_unmount $mnt
+ 	_mount $img $mnt
+ 
+ 	# We should /never/ see 0xCD in the file, because we wrote that pattern
+@@ -54,7 +54,7 @@ _crashtest()
+ 		_hexdump $file
+ 	fi
+ 
+-	$UMOUNT_PROG $mnt
++	_unmount $mnt
+ }
+ 
+ # Modify as appropriate.
+diff --git a/tests/generic/050 b/tests/generic/050
+index ca02d3092..8e9456db2 100755
+--- a/tests/generic/050
++++ b/tests/generic/050
+@@ -87,8 +87,9 @@ blockdev --setro $SCRATCH_DEV
+ echo "mounting filesystem that needs recovery on a read-only device:"
+ _try_scratch_mount 2>&1 | _filter_ro_mount | _filter_scratch
+ 
++# expects an error, so open code the unmount
+ echo "unmounting read-only filesystem"
+-_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
++$UMOUNT_PROG $SCRATCH_DEV 2>&1 | _filter_scratch | _filter_ending_dot
+ 
+ #
+ # This is the way out if the underlying device really is read-only.
 diff --git a/tests/generic/067 b/tests/generic/067
-index ccb1e3fbb..b45ae834f 100755
+index b561b7bc5..ccb1e3fbb 100755
 --- a/tests/generic/067
 +++ b/tests/generic/067
-@@ -37,13 +37,18 @@ mount_nonexistent_mnt()
- 	$MOUNT_PROG $SCRATCH_DEV $TEST_DIR/nosuchdir >>$seqres.full 2>&1
+@@ -66,7 +66,7 @@ umount_symlink_device()
+ 	rm -f $symlink
+ 	echo "# umount symlink to device, which is not mounted" >>$seqres.full
+ 	ln -s $SCRATCH_DEV $symlink
+-	$UMOUNT_PROG $symlink >>$seqres.full 2>&1
++	_unmount $symlink >>$seqres.full 2>&1
  }
  
--# fs driver should be able to handle mounting a free loop device gracefully
--# xfs ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-+# fs driver should be able to handle mounting a free loop device gracefully xfs
-+# ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-+#
-+# Using 'losetup -f' like this is racy. We might end up mounting a real loop dev
-+# here, so unmount $SCRATCH_MNT (not the loop dev we might not own!) and ignore
-+# any error it might return.
- mount_free_loopdev()
- {
- 	echo "# mount a free loop device" >>$seqres.full
- 	loopdev=`losetup -f`
--	$MOUNT_PROG -t $FSTYP $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-+	_mount $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-+	_unmount $SCRATCH_MNT >> /dev/null 2>&1
+ # umount a path name that is 256 bytes long, this should fail gracefully,
+@@ -78,7 +78,7 @@ umount_toolong_name()
+ 	_scratch_mount 2>&1 | tee -a $seqres.full
+ 
+ 	echo "# umount a too-long name" >>$seqres.full
+-	$UMOUNT_PROG $longname >>$seqres.full 2>&1
++	_unmount $longname >>$seqres.full 2>&1
+ 	_scratch_unmount 2>&1 | tee -a $seqres.full
  }
  
- # mount with wrong fs type specified.
-diff --git a/tests/generic/361 b/tests/generic/361
-index 7273dd056..e2b798436 100755
---- a/tests/generic/361
-+++ b/tests/generic/361
-@@ -17,7 +17,7 @@ _begin_fstest auto quick
- _cleanup()
- {
- 	_unmount $fs_mnt
--	_destroy_loop_device $loop_dev
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
- 	cd /
- 	rm -f $tmp.*
+@@ -93,7 +93,7 @@ lazy_umount_symlink()
+ 	rm -f $symlink
+ 	ln -s $SCRATCH_MNT/testdir $symlink
+ 
+-	$UMOUNT_PROG -l $symlink >>$seqres.full 2>&1
++	_unmount -l $symlink >>$seqres.full 2>&1
+ 	# _scratch_unmount should not be blocked
+ 	_scratch_unmount 2>&1 | tee -a $seqres.full
  }
-@@ -54,6 +54,10 @@ $XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
- # remount should not hang
- $MOUNT_PROG -o remount,ro $fs_mnt >>$seqres.full 2>&1
+diff --git a/tests/generic/081 b/tests/generic/081
+index 468c87ac9..df17ab6c1 100755
+--- a/tests/generic/081
++++ b/tests/generic/081
+@@ -32,7 +32,7 @@ _cleanup()
+ 	# other tests to fail.
+ 	while test -e /dev/mapper/$vgname-$snapname || \
+ 	      test -e /dev/mapper/$vgname-$lvname; do
+-		$UMOUNT_PROG $mnt >> $seqres.full 2>&1
++		_unmount $mnt >> $seqres.full 2>&1
+ 		$LVM_PROG lvremove -f $vgname/$snapname >>$seqres.full 2>&1
+ 		$LVM_PROG lvremove -f $vgname/$lvname >>$seqres.full 2>&1
+ 		$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+diff --git a/tests/generic/085 b/tests/generic/085
+index cfe6112d6..8fbcdce2e 100755
+--- a/tests/generic/085
++++ b/tests/generic/085
+@@ -27,7 +27,7 @@ cleanup_dmdev()
+ 	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
+ 	[ -n "$pid" ] && kill -9 $pid 2>/dev/null
+ 	wait $pid
+-	$UMOUNT_PROG $lvdev >/dev/null 2>&1
++	_unmount $lvdev >/dev/null 2>&1
+ 	_dmsetup_remove $node
+ }
  
-+_unmount $fs_mnt
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
- # success, all done
- echo "Silence is golden"
- status=0
-diff --git a/tests/generic/563 b/tests/generic/563
-index f0d2f404c..34d21170c 100755
---- a/tests/generic/563
-+++ b/tests/generic/563
-@@ -87,12 +87,12 @@ reset()
+@@ -69,8 +69,8 @@ for ((i=0; i<100; i++)); do
+ done &
+ pid=$!
+ for ((i=0; i<100; i++)); do
+-	$MOUNT_PROG $lvdev $SCRATCH_MNT >/dev/null 2>&1
+-	$UMOUNT_PROG $lvdev >/dev/null 2>&1
++	_mount $lvdev $SCRATCH_MNT >/dev/null 2>&1
++	_unmount $lvdev >/dev/null 2>&1
+ done &
+ pid="$pid $!"
  
- # cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
- # that out.
--LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
--smajor=$((0x`stat -L -c %t $LOOP_DEV`))
--sminor=$((0x`stat -L -c %T $LOOP_DEV`))
-+loop_dev=$(_create_loop_device $SCRATCH_DEV)
-+smajor=$((0x`stat -L -c %t $loop_dev`))
-+sminor=$((0x`stat -L -c %T $loop_dev`))
- 
--_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
--_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
-+_mkfs_dev $loop_dev >> $seqres.full 2>&1
-+_mount $loop_dev $SCRATCH_MNT || _fail "mount failed"
- 
- blksize=$(_get_block_size "$SCRATCH_MNT")
- 
-@@ -147,6 +147,10 @@ if [ "$drop_io_cgroup" = 1 ]; then
- 	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
- fi
- 
-+_unmount $SCRATCH_MNT
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/generic/564 b/tests/generic/564
-index 647472d78..b66b72496 100755
---- a/tests/generic/564
-+++ b/tests/generic/564
-@@ -19,7 +19,7 @@ _cleanup()
+diff --git a/tests/generic/108 b/tests/generic/108
+index da13715f2..2709472f6 100755
+--- a/tests/generic/108
++++ b/tests/generic/108
+@@ -18,7 +18,7 @@ _cleanup()
  {
  	cd /
- 	rm -rf $tmp.*
--	[ -z "$loopdev" ] || _destroy_loop_device $loopdev
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
- }
+ 	echo running > /sys/block/`_short_dev $SCSI_DEBUG_DEV`/device/state
+-	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
++	_unmount $SCRATCH_MNT >>$seqres.full 2>&1
+ 	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
+ 	$LVM_PROG pvremove -f $SCRATCH_DEV $SCSI_DEBUG_DEV >>$seqres.full 2>&1
+ 	$UDEV_SETTLE_PROG
+diff --git a/tests/generic/171 b/tests/generic/171
+index 5c8504d26..8726ee61d 100755
+--- a/tests/generic/171
++++ b/tests/generic/171
+@@ -36,7 +36,7 @@ mkdir $testdir
+ echo "Reformat with appropriate size"
+ blksz="$(_get_block_size $testdir)"
+ nr_blks=10240
+-umount $SCRATCH_MNT
++_scratch_unmount
+ sz_bytes=$((nr_blks * 8 * blksz))
+ if [ $sz_bytes -lt $((32 * 1048576)) ]; then
+ 	sz_bytes=$((32 * 1048576))
+diff --git a/tests/generic/172 b/tests/generic/172
+index 17f817805..b67e817b6 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -35,7 +35,7 @@ mkdir $testdir
  
- # Import common functions.
-@@ -72,11 +72,11 @@ $XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
- echo
- echo source/destination as blkdev returns EINVAL
- $XFS_IO_PROG -f -c "truncate 128k" $testdir/img >> $seqres.full 2>&1
--loopdev=`_create_loop_device $testdir/img`
--$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loopdev
--$XFS_IO_PROG -f -c "copy_range -l 32k $loopdev" $testdir/copy
--_destroy_loop_device $loopdev
--loopdev=
-+loop_dev=`_create_loop_device $testdir/img`
-+$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loop_dev
-+$XFS_IO_PROG -f -c "copy_range -l 32k $loop_dev" $testdir/copy
-+_destroy_loop_device $loop_dev
-+unset loop_dev
+ echo "Reformat with appropriate size"
+ blksz="$(_get_block_size $testdir)"
+-umount $SCRATCH_MNT
++_scratch_unmount
  
- echo
- echo source/destination as chardev returns EINVAL
-diff --git a/tests/generic/590 b/tests/generic/590
-index 2b7ccfb53..2eefa2c62 100755
---- a/tests/generic/590
-+++ b/tests/generic/590
-@@ -15,9 +15,10 @@ _begin_fstest auto prealloc preallocrw
+ file_size=$((768 * 1024 * 1024))
+ fs_size=$((1024 * 1024 * 1024))
+diff --git a/tests/generic/173 b/tests/generic/173
+index d7ac7b15d..a19ff8070 100755
+--- a/tests/generic/173
++++ b/tests/generic/173
+@@ -36,7 +36,7 @@ mkdir $testdir
+ echo "Reformat with appropriate size"
+ blksz="$(_get_block_size $testdir)"
+ nr_blks=10240
+-umount $SCRATCH_MNT
++_scratch_unmount
+ sz_bytes=$((nr_blks * 8 * blksz))
+ if [ $sz_bytes -lt $((32 * 1048576)) ]; then
+ 	sz_bytes=$((32 * 1048576))
+diff --git a/tests/generic/174 b/tests/generic/174
+index c7c62001d..32343d911 100755
+--- a/tests/generic/174
++++ b/tests/generic/174
+@@ -37,7 +37,7 @@ mkdir $testdir
+ echo "Reformat with appropriate size"
+ blksz="$(_get_block_size $testdir)"
+ nr_blks=10240
+-umount $SCRATCH_MNT
++_scratch_unmount
+ sz_bytes=$((nr_blks * 8 * blksz))
+ if [ $sz_bytes -lt $((32 * 1048576)) ]; then
+ 	sz_bytes=$((32 * 1048576))
+diff --git a/tests/generic/306 b/tests/generic/306
+index a6ea654b6..8e118472d 100755
+--- a/tests/generic/306
++++ b/tests/generic/306
+@@ -12,7 +12,7 @@ _begin_fstest auto quick rw
  # Override the default cleanup function.
  _cleanup()
  {
-+	_scratch_unmount
-+	[ -n $loop_dev ] && _destroy_loop_device $loop_dev
- 	cd /
- 	rm -f $tmp.*
--	test -n "$loop" && _destroy_loop_device "$loop"
- 	rm -f "$TEST_DIR/$seq"
+-    umount $BINDFILE
++    _unmount $BINDFILE
+     cd /
+     rm -f $tmp.*
  }
+diff --git a/tests/generic/332 b/tests/generic/332
+index cb15e77bd..fef4eabb8 100755
+--- a/tests/generic/332
++++ b/tests/generic/332
+@@ -61,7 +61,7 @@ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
  
-@@ -56,9 +57,9 @@ if [[ $FSTYP = xfs ]]; then
- 		loopsz="$((filesz + (1 << 26)))"
- 		_require_fs_space "$TEST_DIR" $((loopsz / 1024))
- 		$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
--		loop="$(_create_loop_device "$TEST_DIR/$seq")"
-+		loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
- 		USE_EXTERNAL=yes
--		SCRATCH_RTDEV="$loop"
-+		SCRATCH_RTDEV="$loop_dev"
- 		disabled_features=()
+ echo "Check for damage"
+-umount $SCRATCH_MNT
++_scratch_unmount
+ _repair_scratch_fs >> $seqres.full
  
- 		# disable reflink if not supported by realtime devices
-@@ -114,6 +115,8 @@ $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
- # We need to do this before the loop device gets torn down.
- _scratch_unmount
- _check_scratch_fs
-+_destroy_loop_device $loop_dev
-+unset loop_dev
- 
- echo "Silence is golden"
- status=0
-diff --git a/tests/generic/744 b/tests/generic/744
-index df8f6ae9b..cda10e0f6 100755
---- a/tests/generic/744
-+++ b/tests/generic/744
-@@ -17,8 +17,8 @@ _cleanup()
- 
- 	_unmount $mnt2 &> /dev/null
- 	_unmount $mnt1 &> /dev/null
--	[ -b "$loop_dev2" ] && losetup -d $loop_dev2
--	[ -b "$loop_dev1" ] && losetup -d $loop_dev1
-+	[ -b "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-+	[ -b "$loop_dev1" ] && _destroy_loop_device $loop_dev1
- 	[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
- }
- 
-diff --git a/tests/generic/746 b/tests/generic/746
-index 671910606..ba8ed25e8 100755
---- a/tests/generic/746
-+++ b/tests/generic/746
-@@ -39,7 +39,7 @@ esac
+ # success, all done
+diff --git a/tests/generic/361 b/tests/generic/361
+index c56157391..7273dd056 100755
+--- a/tests/generic/361
++++ b/tests/generic/361
+@@ -16,7 +16,7 @@ _begin_fstest auto quick
+ # Override the default cleanup function.
  _cleanup()
  {
- 	_unmount $loop_mnt &> /dev/null
--	_destroy_loop_device $loop_dev
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
- 	if [ $status -eq 0 ]; then
- 		rm -rf $tmp
- 		rm $img_file
-@@ -223,5 +223,9 @@ while read line; do
- done < $fiemap_after
- echo "done."
+-	$UMOUNT_PROG $fs_mnt
++	_unmount $fs_mnt
+ 	_destroy_loop_device $loop_dev
+ 	cd /
+ 	rm -f $tmp.*
+diff --git a/tests/generic/373 b/tests/generic/373
+index 3bd46963a..e6334398f 100755
+--- a/tests/generic/373
++++ b/tests/generic/373
+@@ -60,7 +60,7 @@ md5sum $testdir/file | _filter_scratch
+ md5sum $othertestdir/otherfile | filter_otherdir
  
-+_unmount $loop_mnt
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
+ echo "Unmount otherdir"
+-$UMOUNT_PROG $otherdir
++_unmount $otherdir
+ rm -rf $otherdir
+ 
+ # success, all done
+diff --git a/tests/generic/374 b/tests/generic/374
+index acb23d172..e56521aa0 100755
+--- a/tests/generic/374
++++ b/tests/generic/374
+@@ -59,7 +59,7 @@ echo "Check output"
+ md5sum $testdir/file $othertestdir/otherfile | filter_md5
+ 
+ echo "Unmount otherdir"
+-$UMOUNT_PROG $otherdir
++_unmount $otherdir
+ rm -rf $otherdir
+ 
+ # success, all done
+diff --git a/tests/generic/395 b/tests/generic/395
+index 45787fff0..f9c331adb 100755
+--- a/tests/generic/395
++++ b/tests/generic/395
+@@ -75,7 +75,7 @@ mount --bind $SCRATCH_MNT $SCRATCH_MNT/ro_bind_mnt
+ mount -o remount,ro,bind $SCRATCH_MNT/ro_bind_mnt
+ _set_encpolicy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
+ _get_encpolicy $SCRATCH_MNT/ro_bind_mnt/ro_dir |& _filter_scratch
+-umount $SCRATCH_MNT/ro_bind_mnt
++_unmount $SCRATCH_MNT/ro_bind_mnt
+ 
+ # success, all done
  status=0
- exit
-diff --git a/tests/xfs/014 b/tests/xfs/014
-index f638e4b16..39ea40e2a 100755
---- a/tests/xfs/014
-+++ b/tests/xfs/014
-@@ -23,6 +23,7 @@ _cleanup()
+diff --git a/tests/generic/459 b/tests/generic/459
+index 98177f6b5..daccc80ce 100755
+--- a/tests/generic/459
++++ b/tests/generic/459
+@@ -28,7 +28,7 @@ _cleanup()
+ 	xfs_freeze -u $SCRATCH_MNT 2>/dev/null
+ 	cd /
+ 	rm -f $tmp.*
+-	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
++	_unmount $SCRATCH_MNT >>$seqres.full 2>&1
+ 	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
+ 	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
+ 	$UDEV_SETTLE_PROG
+diff --git a/tests/generic/563 b/tests/generic/563
+index e8db8acf0..f0d2f404c 100755
+--- a/tests/generic/563
++++ b/tests/generic/563
+@@ -16,13 +16,13 @@ _begin_fstest auto quick
+ # Override the default cleanup function.
+ _cleanup()
+ {
++	echo $$ > $cgdir/cgroup.procs
++	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
++	_unmount $SCRATCH_MNT > /dev/null 2>&1
++	_destroy_loop_device $LOOP_DEV > /dev/null 2>&1
+ 	cd /
+ 	rm -f $tmp.*
+ 
+-	echo $$ > $cgdir/cgroup.procs
+-	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
+-	umount $SCRATCH_MNT > /dev/null 2>&1
+-	_destroy_loop_device $LOOP_DEV > /dev/null 2>&1
+ }
+ 
+ # Import common functions.
+@@ -80,7 +80,7 @@ reset()
+ 	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
+ 	$XFS_IO_PROG -fc "pwrite 0 $iosize" $SCRATCH_MNT/file \
+ 		>> $seqres.full 2>&1
+-	umount $SCRATCH_MNT || _fail "umount failed"
++	_unmount $SCRATCH_MNT || _fail "umount failed"
+ 	_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+ 	stat $SCRATCH_MNT/file > /dev/null
+ }
+diff --git a/tests/generic/604 b/tests/generic/604
+index c2e03c2ea..744d34565 100755
+--- a/tests/generic/604
++++ b/tests/generic/604
+@@ -26,7 +26,7 @@ done
+ # mount the base fs.  Delay the mount attempt by a small amount in the hope
+ # that the mount() call will try to lock s_umount /after/ umount has already
+ # taken it.
+-$UMOUNT_PROG $SCRATCH_MNT &
++_unmount $SCRATCH_MNT &
+ sleep 0.01s ; _scratch_mount
+ wait
+ 
+diff --git a/tests/generic/631 b/tests/generic/631
+index c7c95e560..642d47863 100755
+--- a/tests/generic/631
++++ b/tests/generic/631
+@@ -84,7 +84,7 @@ worker() {
+ 		touch $mergedir/etc/access.conf
+ 		mv $mergedir/etc/access.conf $mergedir/etc/access.conf.bak
+ 		touch $mergedir/etc/access.conf
+-		umount $mergedir
++		_unmount $mergedir
+ 	done
+ 	rm -f $SCRATCH_MNT/workers/$tag
+ }
+diff --git a/tests/generic/648 b/tests/generic/648
+index e4c9990e1..7473c9d33 100755
+--- a/tests/generic/648
++++ b/tests/generic/648
+@@ -18,7 +18,7 @@ _cleanup()
+ {
+ 	_kill_fsstress
+ 	if [ -n "$loopmnt" ]; then
+-		$UMOUNT_PROG $loopmnt 2>/dev/null
++		_unmount $loopmnt 2>/dev/null
+ 		rm -r -f $loopmnt
+ 	fi
+ 	_dmerror_unmount
+@@ -102,7 +102,7 @@ while _soak_loop_running $((25 * TIME_FACTOR)); do
+ 
+ 	# Mount again to replay log after loading working table, so we have a
+ 	# consistent fs after test.
+-	$UMOUNT_PROG $loopmnt
++	_unmount $loopmnt
+ 	is_unmounted=1
+ 	# We must unmount dmerror at here, or whole later testing will crash.
+ 	# So try to umount enough times, before we have no choice.
+@@ -128,7 +128,7 @@ done
+ # Make sure the fs image file is ok
+ if [ -f "$loopimg" ]; then
+ 	if _mount $loopimg $loopmnt -o loop; then
+-		$UMOUNT_PROG $loopmnt &> /dev/null
++		_unmount $loopmnt &> /dev/null
+ 	else
+ 		_metadump_dev $DMERROR_DEV $seqres.scratch.final.md
+ 		echo "final scratch mount failed"
+diff --git a/tests/generic/698 b/tests/generic/698
+index 28928b2fb..0029df90f 100755
+--- a/tests/generic/698
++++ b/tests/generic/698
+@@ -17,8 +17,8 @@ _begin_fstest auto quick perms attr idmapped mount
+ _cleanup()
  {
  	cd /
- 	_unmount $LOOP_MNT 2>/dev/null
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+-	$UMOUNT_PROG $SCRATCH_MNT/target-mnt 2>/dev/null
+-	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
++	_unmount $SCRATCH_MNT/target-mnt 2>/dev/null
++	_unmount $SCRATCH_MNT 2>/dev/null
+ 	rm -r -f $tmp.*
+ }
+ 
+diff --git a/tests/generic/699 b/tests/generic/699
+index 677307538..3079a861d 100755
+--- a/tests/generic/699
++++ b/tests/generic/699
+@@ -15,9 +15,9 @@ _begin_fstest auto quick perms attr idmapped mount
+ _cleanup()
+ {
+ 	cd /
+-	$UMOUNT_PROG $SCRATCH_MNT/target-mnt
+-	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
+-	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
++	_unmount $SCRATCH_MNT/target-mnt
++	_unmount $SCRATCH_MNT/ovl-merge 2>/dev/null
++	_unmount $SCRATCH_MNT 2>/dev/null
+ 	rm -r -f $tmp.*
+ }
+ 
+@@ -113,7 +113,7 @@ setup_overlayfs_idmapped_lower_metacopy_on()
+ 
+ reset_overlayfs()
+ {
+-	$UMOUNT_PROG $SCRATCH_MNT/ovl-merge 2>/dev/null
++	_unmount $SCRATCH_MNT/ovl-merge 2>/dev/null
+ 	rm -rf $upper $work $merge
+ }
+ 
+diff --git a/tests/generic/704 b/tests/generic/704
+index f39d47066..f452f9e9c 100755
+--- a/tests/generic/704
++++ b/tests/generic/704
+@@ -14,7 +14,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -r -f $tmp.*
+-	[ -d "$SCSI_DEBUG_MNT" ] && $UMOUNT_PROG $SCSI_DEBUG_MNT 2>/dev/null
++	[ -d "$SCSI_DEBUG_MNT" ] && _unmount $SCSI_DEBUG_MNT 2>/dev/null
+ 	_put_scsi_debug_dev
+ }
+ 
+diff --git a/tests/generic/717 b/tests/generic/717
+index 4378e964a..2ecd2888d 100755
+--- a/tests/generic/717
++++ b/tests/generic/717
+@@ -85,7 +85,7 @@ mkdir -p $SCRATCH_MNT/xyz
+ mount --bind $dir $SCRATCH_MNT/xyz --bind
+ _pwrite_byte 0x60 0 $((blksz * (nrblks + 2))) $dir/c >> $seqres.full
+ $XFS_IO_PROG -c "exchangerange $SCRATCH_MNT/xyz/c" $dir/a
+-umount $SCRATCH_MNT/xyz
++_unmount $SCRATCH_MNT/xyz
+ 
+ echo Swapping a file with itself
+ $XFS_IO_PROG -c "exchangerange $dir/a" $dir/a
+diff --git a/tests/generic/730 b/tests/generic/730
+index 062314ea0..6251980e3 100755
+--- a/tests/generic/730
++++ b/tests/generic/730
+@@ -12,7 +12,7 @@ _begin_fstest auto quick
+ _cleanup()
+ {
+ 	cd /
+-	$UMOUNT_PROG $SCSI_DEBUG_MNT >>$seqres.full 2>&1
++	_unmount $SCSI_DEBUG_MNT >>$seqres.full 2>&1
+ 	_put_scsi_debug_dev
+ 	rm -f $tmp.*
+ }
+diff --git a/tests/generic/731 b/tests/generic/731
+index cd39e8b09..4ac5e1a3e 100755
+--- a/tests/generic/731
++++ b/tests/generic/731
+@@ -13,7 +13,7 @@ _begin_fstest auto quick
+ _cleanup()
+ {
+ 	cd /
+-	$UMOUNT_PROG $SCSI_DEBUG_MNT >>$seqres.full 2>&1
++	_unmount $SCSI_DEBUG_MNT >>$seqres.full 2>&1
+ 	_put_scsi_debug_dev
+ 	rm -f $tmp.*
+ }
+diff --git a/tests/generic/732 b/tests/generic/732
+index d08028c23..e907a009f 100755
+--- a/tests/generic/732
++++ b/tests/generic/732
+@@ -15,8 +15,8 @@ _begin_fstest auto quick rename
+ # Override the default cleanup function.
+ _cleanup()
+ {
+-	$UMOUNT_PROG $testdir1 2>/dev/null
+-	$UMOUNT_PROG $testdir2 2>/dev/null
++	_unmount $testdir1 2>/dev/null
++	_unmount $testdir2 2>/dev/null
+ 	cd /
+ 	rm -r -f $tmp.*
+ }
+diff --git a/tests/generic/741 b/tests/generic/741
+index 4b480b5a1..cac7045eb 100755
+--- a/tests/generic/741
++++ b/tests/generic/741
+@@ -13,7 +13,7 @@ _begin_fstest auto quick volume tempfsid
+ # Override the default cleanup function.
+ _cleanup()
+ {
+-	umount $extra_mnt &> /dev/null
++	_unmount $extra_mnt &> /dev/null
+ 	rm -rf $extra_mnt
+ 	_unmount_flakey
+ 	_cleanup_flakey
+diff --git a/tests/generic/744 b/tests/generic/744
+index a31d8d7a4..df8f6ae9b 100755
+--- a/tests/generic/744
++++ b/tests/generic/744
+@@ -15,8 +15,8 @@ _cleanup()
+ 	cd /
+ 	rm -r -f $tmp.*
+ 
+-	$UMOUNT_PROG $mnt2 &> /dev/null
+-	$UMOUNT_PROG $mnt1 &> /dev/null
++	_unmount $mnt2 &> /dev/null
++	_unmount $mnt1 &> /dev/null
+ 	[ -b "$loop_dev2" ] && losetup -d $loop_dev2
+ 	[ -b "$loop_dev1" ] && losetup -d $loop_dev1
+ 	[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
+@@ -42,7 +42,7 @@ clone_filesystem()
+ 
+ 	_mount $dev1 $mnt1
+ 	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' $mnt1/foo >> $seqres.full
+-	$UMOUNT_PROG $mnt1
++	_unmount $mnt1
+ 
+ 	# device dump of $dev1 to $dev2
+ 	dd if=$dev1 of=$dev2 conv=fsync status=none || _fail "dd failed: $?"
+diff --git a/tests/generic/746 b/tests/generic/746
+index 5734f254d..671910606 100755
+--- a/tests/generic/746
++++ b/tests/generic/746
+@@ -38,7 +38,7 @@ esac
+ # Override the default cleanup function.
+ _cleanup()
+ {
+-	$UMOUNT_PROG $loop_dev &> /dev/null
++	_unmount $loop_mnt &> /dev/null
+ 	_destroy_loop_device $loop_dev
+ 	if [ $status -eq 0 ]; then
+ 		rm -rf $tmp
+@@ -53,7 +53,7 @@ get_holes()
+ 	# in-core state that will perturb the free space map on umount.  Stick
+ 	# to established convention which requires the filesystem to be
+ 	# unmounted while we probe the underlying file.
+-	$UMOUNT_PROG $loop_mnt
++	_unmount $loop_mnt
+ 
+ 	# FIEMAP only works on regular files, so call it on the backing file
+ 	# and not the loop device like everything else
+@@ -66,7 +66,7 @@ get_free_sectors()
+ {
+ 	case $FSTYP in
+ 	ext4)
+-	$UMOUNT_PROG $loop_mnt
++	_unmount $loop_mnt
+ 	$DUMPE2FS_PROG $loop_dev  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
+ 		tr ',' '\n' | $SED_PROG 's/^ //' | \
+ 		$AWK_PROG -v spb=$sectors_per_block 'BEGIN{FS="-"};
+@@ -80,7 +80,7 @@ get_free_sectors()
+ 	xfs)
+ 	agsize=`$XFS_INFO_PROG $loop_mnt | $SED_PROG -n 's/.*agsize=\(.*\) blks.*/\1/p'`
+ 	# Convert free space (agno, block, length) to (start sector, end sector)
+-	$UMOUNT_PROG $loop_mnt
++	_unmount $loop_mnt
+ 	$XFS_DB_PROG -r -c "freesp -d" $loop_dev | $SED_PROG '/^.*from/,$d'| \
+ 		 $AWK_PROG -v spb=$sectors_per_block -v agsize=$agsize \
+ 		'{ print spb * ($1 * agsize + $2), spb * ($1 * agsize + $2 + $3) - 1 }'
+diff --git a/tests/xfs/014 b/tests/xfs/014
+index 098f64186..f638e4b16 100755
+--- a/tests/xfs/014
++++ b/tests/xfs/014
+@@ -22,7 +22,7 @@ _begin_fstest auto enospc quick quota prealloc
+ _cleanup()
+ {
+ 	cd /
+-	umount $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
  	_scratch_unmount 2>/dev/null
  	rm -f $tmp.*
  }
-@@ -166,19 +167,21 @@ LOOP_FILE=$SCRATCH_MNT/$seq.fs
- LOOP_MNT=$SCRATCH_MNT/$seq.mnt
- 
+@@ -168,13 +168,13 @@ LOOP_MNT=$SCRATCH_MNT/$seq.mnt
  $MKFS_XFS_PROG -d "file=1,name=$LOOP_FILE,size=10g" >> $seqres.full 2>&1
-+loop_dev=$(_create_loop_device $LOOP_FILE)
  
  mkdir -p $LOOP_MNT
--_mount -o uquota,gquota $LOOP_FILE $LOOP_MNT || \
-+_mount -o uquota,gquota $loop_dev $LOOP_MNT || \
+-mount -t xfs -o loop,uquota,gquota $LOOP_FILE $LOOP_MNT || \
++_mount -o uquota,gquota $LOOP_FILE $LOOP_MNT || \
  	_fail "Failed to mount loop fs."
  
  _test_enospc $LOOP_MNT
  _test_edquot $LOOP_MNT
  
- _unmount $LOOP_MNT
-+_destroy_loop_device $loop_dev
-+unset loop_dev
+-umount $LOOP_MNT
++_unmount $LOOP_MNT
  
  echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
  
- _scratch_unmount
--
- status=0
- exit
-diff --git a/tests/xfs/049 b/tests/xfs/049
-index 4163a144f..cdcddf764 100755
---- a/tests/xfs/049
-+++ b/tests/xfs/049
-@@ -12,16 +12,17 @@ _begin_fstest rw auto quick
- # Override the default cleanup function.
- _cleanup()
- {
--    cd /
--    umount $SCRATCH_MNT/test2 > /dev/null 2>&1
--    umount $SCRATCH_MNT/test > /dev/null 2>&1
--    rm -f $tmp.*
-+	cd /
-+	_unmount $SCRATCH_MNT/test2 > /dev/null 2>&1
-+	_unmount $SCRATCH_MNT/test > /dev/null 2>&1
-+	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-+	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-+	rm -f $tmp.*
- 
--    if [ -w $seqres.full ]
--    then
--        echo "--- mounts at end (after cleanup)" >> $seqres.full
--        mount >> $seqres.full
--    fi
-+	if [ -w $seqres.full ]; then
-+		echo "--- mounts at end (after cleanup)" >> $seqres.full
-+		mount >> $seqres.full
-+	fi
- }
- 
- # Import common functions.
-@@ -64,7 +65,8 @@ mkdir $SCRATCH_MNT/test $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-     || _fail "!!! failed to make mount points"
- 
- _log "Mount xfs via loop"
--mount -t xfs -o loop $SCRATCH_MNT/test.xfs $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-+loop_dev1=$(_create_loop_device $SCRATCH_MNT/test.xfs)
-+_mount $loop_dev1 $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-     || _fail "!!! failed to loop mount xfs"
- 
- _log "stress"
-@@ -80,11 +82,12 @@ dd if=/dev/zero of=$SCRATCH_MNT/test/test.ext2 bs=1024 count=10240 >> $seqres.fu
-     || _fail "!!! create file failed"
- 
- _log "Create ext2 fs in file on looped xfs"
--echo y | mkfs -t ext2 $SCRATCH_MNT/test/test.ext2 >> $seqres.full 2>&1 \
-+loop_dev2=$(_create_loop_device $SCRATCH_MNT/test/test.ext2)
-+echo y | mkfs -t ext2 $loop_dev2 >> $seqres.full 2>&1 \
-     || _fail "!!! failed to mkfs ext2 on xfs"
- 
- _log "Mount ext2 on xfs via loop"
--mount -t ext2 -o loop $SCRATCH_MNT/test/test.ext2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-+_mount $loop_dev2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-     || _fail "!!! failed to loop mount xfs"
- 
- _log "stress ext2 on xfs via loop"
-@@ -96,12 +99,16 @@ rm -rf $SCRATCH_MNT/test/* >> $seqres.full 2>&1 \
-     || _fail "!!! clean failed"
- 
- _log "umount ext2 on xfs"
--umount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-+_unmount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-     || _fail "!!! umount ext2 failed"
-+_destroy_loop_device $loop_dev2
-+unset loop_dev2
- 
- _log "umount xfs"
--umount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-+_unmount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-     || _fail "!!! umount xfs failed"
-+_destroy_loop_device $loop_dev1
-+unset loop_dev1
- 
- echo "--- mounts at end (before cleanup)" >> $seqres.full
- mount >> $seqres.full
 diff --git a/tests/xfs/073 b/tests/xfs/073
-index e4b17c5e7..2274079ef 100755
+index 28f1fad08..e4b17c5e7 100755
 --- a/tests/xfs/073
 +++ b/tests/xfs/073
-@@ -23,6 +23,8 @@ _cleanup()
+@@ -21,9 +21,9 @@ _cleanup()
+ {
+ 	cd /
  	_scratch_unmount 2>/dev/null
- 	_unmount $imgs.loop 2>/dev/null
- 	_unmount $imgs.source_dir 2>/dev/null
-+	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-+	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
+-	umount $imgs.loop 2>/dev/null
++	_unmount $imgs.loop 2>/dev/null
++	_unmount $imgs.source_dir 2>/dev/null
  	[ -d $imgs.loop ] && rmdir $imgs.loop
+-	umount $imgs.source_dir 2>/dev/null
  	[ -d $imgs.source_dir ] && rm -rf $imgs.source_dir
  	rm -f $imgs.* $tmp.* /var/tmp/xfs_copy.log.*
-@@ -65,10 +67,11 @@ _verify_copy()
+ }
+@@ -65,10 +65,10 @@ _verify_copy()
  	rmdir $target_dir 2>/dev/null
  	mkdir $target_dir
  
--	_mount -t xfs -o loop $target $target_dir 2>/dev/null
-+	loop_dev1=$(_create_loop_device $target)
-+	_mount $loop_dev1 $target_dir 2>/dev/null
+-	mount -t xfs -o loop $target $target_dir 2>/dev/null
++	_mount -t xfs -o loop $target $target_dir 2>/dev/null
  	if [ $? -ne 0 ]; then
  		echo retrying mount with nouuid option >>$seqres.full
--		_mount -t xfs -o loop -o nouuid $target $target_dir
-+		_mount -o nouuid $loop_dev1 $target_dir
+-		mount -t xfs -o loop -o nouuid $target $target_dir
++		_mount -t xfs -o loop -o nouuid $target $target_dir
  		if [ $? -ne 0 ]; then
  			echo mount failed - evil!
  			return
-@@ -100,6 +103,8 @@ _verify_copy()
+@@ -87,19 +87,19 @@ _verify_copy()
+ 
+ 	echo comparing new image geometry to old
+ 	$XFS_INFO_PROG $source_dir \
+-		| _filter_copy $source $source_dir '/dev/loop.' '#' \
++		| _filter_copy $source $source_dir '/dev/loop[0-9]\+' '#' \
+ 		| tr -s ' ' \
+ 		> $tmp.geometry1
+ 	$XFS_INFO_PROG $target_dir \
+-		| _filter_copy $target $target_dir '/dev/loop.' '#' \
++		| _filter_copy $target $target_dir '/dev/loop[0-9]\+' '#' \
+ 		| tr -s ' ' \
+ 		> $tmp.geometry2
+ 	[ -s $tmp.geometry1 ] || echo no geometry output
+ 	diff -u $tmp.geometry1 $tmp.geometry2
+ 
  	echo unmounting and removing new image
- 	_unmount $source_dir
- 	_unmount $target_dir > /dev/null 2>&1
-+	_destroy_loop_device $loop_dev1
-+	unset loop_dev1
+-	umount $source_dir
+-	umount $target_dir > /dev/null 2>&1
++	_unmount $source_dir
++	_unmount $target_dir > /dev/null 2>&1
  	rm -f $target
  }
  
-@@ -134,18 +139,15 @@ ${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
+@@ -134,10 +134,10 @@ ${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
  rmdir $imgs.source_dir 2>/dev/null
  mkdir $imgs.source_dir
  
--_mount -t xfs -o loop $imgs.source $imgs.source_dir
--loop2=`mount | grep $imgs.source | grep -o -e 'loop=.*[^),]' | grep -o -e '/.*$'`
-+loop_dev2=$(_create_loop_device $imgs.source)
-+_mount $loop_dev2 $imgs.source_dir
+-mount -t xfs -o loop $imgs.source $imgs.source_dir
++_mount -t xfs -o loop $imgs.source $imgs.source_dir
+ loop2=`mount | grep $imgs.source | grep -o -e 'loop=.*[^),]' | grep -o -e '/.*$'`
  cp -a $here $imgs.source_dir
--_mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
--$XFS_COPY_PROG $imgs.source $imgs.image | _filter_copy '#' $imgs.image '#' '#'
-+_mount -o remount,ro $loop_dev2 $imgs.source_dir
-+$XFS_COPY_PROG $loop_dev2 $imgs.image 2> /dev/null | _filter_copy '#' $imgs.image '#' '#'
+-mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
++_mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
+ $XFS_COPY_PROG $imgs.source $imgs.image | _filter_copy '#' $imgs.image '#' '#'
  _verify_copy $imgs.image $imgs.source $imgs.source_dir
  
--# HACK WARNING:
--#
--# We're done with the nested loop mount, now we have to clean
--# up the pieces that mount is incapable of doing.
--losetup -d $loop2 > /dev/null 2>&1
-+_destroy_loop_device $loop_dev2
-+unset loop_dev2
- 
- echo
- echo === copying scratch device to multiple targets
 diff --git a/tests/xfs/074 b/tests/xfs/074
-index 6a03c8111..5df864fad 100755
+index 278f0ade6..6a03c8111 100755
 --- a/tests/xfs/074
 +++ b/tests/xfs/074
-@@ -26,7 +26,7 @@ _begin_fstest quick auto prealloc rw
- _cleanup()
- {
- 	cd /
--	_destroy_loop_device $LOOP_DEV
-+	[ -n "$loop_dev" ] &&_destroy_loop_device $loop_dev
- 	rm -f $tmp.* $LOOP_FILE
- }
- 
-@@ -45,10 +45,10 @@ LOOP_FILE=$TEST_DIR/$seq.img
- LOOP_MNT=$TEST_DIR/$seq.mnt
- mkdir -p $LOOP_MNT
- $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
--LOOP_DEV=`_create_loop_device $LOOP_FILE`
-+loop_dev=`_create_loop_device $LOOP_FILE`
- 
--_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
--_mount $LOOP_DEV $LOOP_MNT
-+_mkfs_dev -d size=260g,agcount=2 $loop_dev
-+_mount $loop_dev $LOOP_MNT
- 
- BLOCK_SIZE=$(_get_file_block_size $LOOP_MNT)
- 
-@@ -59,11 +59,11 @@ $XFS_IO_PROG -ft \
- 	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
+@@ -72,7 +72,7 @@ $XFS_IO_PROG -ft \
+ 	-c "falloc 1023m 2g" \
  	$LOOP_MNT/foo >> $seqres.full
  
 -umount $LOOP_MNT
--_check_xfs_filesystem $LOOP_DEV none none
 +_unmount $LOOP_MNT
-+_check_xfs_filesystem $loop_dev none none
- 
--_mkfs_dev -f $LOOP_DEV
--_mount $LOOP_DEV $LOOP_MNT
-+_mkfs_dev -f $loop_dev
-+_mount $loop_dev $LOOP_MNT
- 
- # check we trim both ends of the extent approproiately; this will fail
- # on 1k block size filesystems without the correct fixes in place.
-@@ -73,7 +73,10 @@ $XFS_IO_PROG -ft \
- 	$LOOP_MNT/foo >> $seqres.full
- 
- _unmount $LOOP_MNT
--_check_xfs_filesystem $LOOP_DEV none none
-+_check_xfs_filesystem $loop_dev none none
-+
-+_destroy_loop_device $loop_dev
-+unset loop_dev
+ _check_xfs_filesystem $LOOP_DEV none none
  
  # success, all done
- echo "Silence is golden"
 diff --git a/tests/xfs/078 b/tests/xfs/078
-index 6b325e05f..0d3c2eb23 100755
+index 834c99a00..6b325e05f 100755
 --- a/tests/xfs/078
 +++ b/tests/xfs/078
-@@ -17,7 +17,7 @@ _cleanup()
+@@ -16,7 +16,7 @@ _cleanup()
+ {
  	cd /
  	rm -f $tmp.*
- 	_unmount $LOOP_MNT 2>/dev/null
--	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev 2>/dev/null
+-	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
+ 	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
  	# try to keep the image file if test fails
  	[ $status -eq 0 ] && rm -f $LOOP_IMG
- 	rmdir $LOOP_MNT
-@@ -55,7 +55,7 @@ _grow_loop()
- 	agsize=$5
- 
- 	$XFS_IO_PROG -f -c "truncate $original" $LOOP_IMG
--	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-+	loop_dev=`_create_loop_device $LOOP_IMG`
- 
- 	dparam=""
- 	if [ -n "$agsize" ]; then
-@@ -67,15 +67,15 @@ _grow_loop()
- 	echo
- 
- 	echo "*** mkfs loop file (size=$original)"
--	$MKFS_XFS_PROG -b size=$bsize $dparam $LOOP_DEV | \
-+	$MKFS_XFS_PROG -b size=$bsize $dparam $loop_dev | \
- 		_filter_mkfs 2>/dev/null
- 
- 	echo "*** extend loop file"
--	_destroy_loop_device $LOOP_DEV
-+	_destroy_loop_device $loop_dev
+@@ -75,13 +75,13 @@ _grow_loop()
  	$XFS_IO_PROG -c "pwrite $new_size $bsize" $LOOP_IMG | _filter_io
--	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-+	loop_dev=`_create_loop_device $LOOP_IMG`
+ 	LOOP_DEV=`_create_loop_device $LOOP_IMG`
  	echo "*** mount loop filesystem"
--	_mount -t xfs $LOOP_DEV $LOOP_MNT
-+	_mount $loop_dev $LOOP_MNT
+-	$MOUNT_PROG -t xfs $LOOP_DEV $LOOP_MNT
++	_mount -t xfs $LOOP_DEV $LOOP_MNT
  
  	echo "*** grow loop filesystem"
  	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
-@@ -87,9 +87,11 @@ _grow_loop()
+ 
+ 	echo "*** unmount"
+-	$UMOUNT_PROG -d $LOOP_MNT && LOOP_DEV=
++	_unmount $LOOP_MNT
+ 
+ 	# Large grows takes forever to check..
  	if [ "$check" -gt "0" ]
- 	then
- 		echo "*** check"
--		_check_xfs_filesystem $LOOP_IMG none none
-+		_check_xfs_filesystem $loop_dev none none
- 	fi
- 
-+	_destroy_loop_device $loop_dev
-+	unset loop_dev
- 	rm -f $LOOP_IMG
- }
- 
 diff --git a/tests/xfs/148 b/tests/xfs/148
-index c42c9b119..4d2f7a808 100755
+index 9e6798f99..c42c9b119 100755
 --- a/tests/xfs/148
 +++ b/tests/xfs/148
-@@ -15,7 +15,7 @@ _cleanup()
- {
- 	cd /
- 	_unmount $mntpt > /dev/null 2>&1
--	_destroy_loop_device $loopdev > /dev/null 2>&1
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
- 	rm -r -f $tmp.*
- }
- 
-@@ -48,12 +48,12 @@ rm -f $imgfile $imgfile.old
- # even when security xattrs are present so we are always doing name matches on
- # lookup and not name hash compares as leaf/node forms will do.
- $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
--loopdev=$(_create_loop_device $imgfile)
--MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
-+loop_dev=$(_create_loop_device $imgfile)
-+MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loop_dev >> $seqres.full
- 
- # Mount image file
- mkdir -p $mntpt
--_mount $loopdev $mntpt
-+_mount $loop_dev $mntpt
- 
- echo "creating entries" >> $seqres.full
- 
-@@ -91,7 +91,8 @@ cat $tmp.log | _filter_test_dir
- 
- # Corrupt the entries
- _unmount $mntpt
--_destroy_loop_device $loopdev
-+_destroy_loop_device $loop_dev
-+unset loop_dev
- cp $imgfile $imgfile.old
- sed -b \
- 	-e "s/$nullstr/too_many\x00beans/g" \
-@@ -99,8 +100,9 @@ sed -b \
- 	-i $imgfile
- test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
- 	_fail "sed failed to change the image file?"
--loopdev=$(_create_loop_device $imgfile)
--_mount $loopdev $mntpt
-+
-+loop_dev=$(_create_loop_device $imgfile)
-+_mount $loop_dev $mntpt
- 
- # Try to access the corrupt metadata
- echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
-@@ -111,7 +113,7 @@ cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
- echo "does scrub complain?" >> $seqres.full
- 
- # Does scrub complain about this?
--if _supports_xfs_scrub $mntpt $loopdev; then
-+if _supports_xfs_scrub $mntpt $loop_dev; then
- 	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
- 	res=$?
- 	test $((res & 1)) -eq 0 && \
-@@ -122,11 +124,14 @@ echo "does repair complain?" >> $seqres.full
- 
- # Does repair complain about this?
- _unmount $mntpt
--$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
-+$XFS_REPAIR_PROG -n $loop_dev >> $seqres.full 2>&1
- res=$?
- test $res -eq 1 || \
- 	echo "repair failed to report corruption ($res)"
- 
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/xfs/149 b/tests/xfs/149
-index f2187109b..9a96f82ed 100755
---- a/tests/xfs/149
-+++ b/tests/xfs/149
-@@ -84,6 +84,10 @@ $XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
- echo "=== xfs_growfs - check device node ==="
- $XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
- 
-+_unmount $mntdir
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/xfs/216 b/tests/xfs/216
-index 6b8b2eb22..091c11d08 100755
---- a/tests/xfs/216
-+++ b/tests/xfs/216
-@@ -15,6 +15,7 @@ _begin_fstest log metadata auto quick
+@@ -14,7 +14,7 @@ _begin_fstest auto quick fuzzers
  _cleanup()
  {
- 	_unmount $LOOP_MNT > /dev/null 2>&1
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
  	cd /
- 	rm -f $tmp.*
+-	$UMOUNT_PROG $mntpt > /dev/null 2>&1
++	_unmount $mntpt > /dev/null 2>&1
+ 	_destroy_loop_device $loopdev > /dev/null 2>&1
+ 	rm -r -f $tmp.*
  }
-@@ -24,7 +25,7 @@ _scratch_mkfs_xfs >/dev/null 2>&1
- _scratch_mount
+@@ -90,7 +90,7 @@ cat $tmp.log >> $seqres.full
+ cat $tmp.log | _filter_test_dir
  
- _require_loop
--LOOP_DEV=$SCRATCH_MNT/test_fs
-+LOOP_IMG=$SCRATCH_MNT/test_fs
- LOOP_MNT=$SCRATCH_MNT/test_fs_dir
+ # Corrupt the entries
+-$UMOUNT_PROG $mntpt
++_unmount $mntpt
+ _destroy_loop_device $loopdev
+ cp $imgfile $imgfile.old
+ sed -b \
+@@ -121,7 +121,7 @@ fi
+ echo "does repair complain?" >> $seqres.full
  
- loop_mkfs_opts=
-@@ -55,22 +56,26 @@ _do_mkfs()
- 	for i in $*; do
- 		echo -n "fssize=${i}g "
- 		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
--			-d name=$LOOP_DEV,size=${i}g $loop_mkfs_opts |grep log
--		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-+			-d size=${i}g $loop_mkfs_opts $loop_dev |grep log
-+		_mount $loop_dev $LOOP_MNT
- 		echo "test write" > $LOOP_MNT/test
- 		_unmount $LOOP_MNT > /dev/null 2>&1
- 	done
+ # Does repair complain about this?
+-$UMOUNT_PROG $mntpt
++_unmount $mntpt
+ $XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
+ res=$?
+ test $res -eq 1 || \
+diff --git a/tests/xfs/149 b/tests/xfs/149
+index f1b2405e7..f2187109b 100755
+--- a/tests/xfs/149
++++ b/tests/xfs/149
+@@ -22,7 +22,7 @@ loop_symlink=$TEST_DIR/loop_symlink.$$
+ # Override the default cleanup function.
+ _cleanup()
+ {
+-    $UMOUNT_PROG $mntdir
++    _unmount $mntdir
+     [ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+     rmdir $mntdir
+     rm -f $loop_symlink
+@@ -73,7 +73,7 @@ echo "=== xfs_growfs - check device symlink ==="
+ $XFS_GROWFS_PROG -D 12288 $loop_symlink > /dev/null
+ 
+ echo "=== unmount ==="
+-$UMOUNT_PROG $mntdir || _fail "!!! failed to unmount"
++_unmount $mntdir || _fail "!!! failed to unmount"
+ 
+ echo "=== mount device symlink ==="
+ $MOUNT_PROG $loop_symlink $mntdir || _fail "!!! failed to loopback mount"
+diff --git a/tests/xfs/186 b/tests/xfs/186
+index 88f02585e..6f82e0cda 100755
+--- a/tests/xfs/186
++++ b/tests/xfs/186
+@@ -87,7 +87,7 @@ _do_eas()
+ 		_create_eas $2 $3
+ 	fi
+ 	echo ""
+-	cd /; $UMOUNT_PROG $SCRATCH_MNT
++	cd /; _unmount $SCRATCH_MNT
+ 	_print_inode
  }
- # make large holey file
--$XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
-+$XFS_IO_PROG -f -c "truncate 256g" $LOOP_IMG
  
--choose_golden_output $0 $LOOP_DEV
-+choose_golden_output $0 $LOOP_IMG
+@@ -99,7 +99,7 @@ _do_dirents()
+ 	echo ""
+ 	_scratch_mount
+ 	_create_dirents $1 $2
+-	cd /; $UMOUNT_PROG $SCRATCH_MNT
++	cd /; _unmount $SCRATCH_MNT
+ 	_print_inode
+ }
  
- #make loopback mount dir
- mkdir $LOOP_MNT
- 
-+loop_dev=$(_create_loop_device $LOOP_IMG)
-+
- # walk over standard sizes (up to 256GB)
- _do_mkfs 1 2 4 8 16 32 64 128 256
- 
-+_destroy_loop_device $loop_dev
-+unset loop_dev
- status=0
- exit
-diff --git a/tests/xfs/217 b/tests/xfs/217
-index b2eb34490..dae6ce55f 100755
---- a/tests/xfs/217
-+++ b/tests/xfs/217
-@@ -12,6 +12,12 @@ _begin_fstest log metadata auto
+diff --git a/tests/xfs/216 b/tests/xfs/216
+index 680239b4e..6b8b2eb22 100755
+--- a/tests/xfs/216
++++ b/tests/xfs/216
+@@ -12,6 +12,12 @@ _begin_fstest log metadata auto quick
  # Import common functions.
  . ./common/filter
  
 +_cleanup()
 +{
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
++	_unmount $LOOP_MNT > /dev/null 2>&1
 +	cd /
 +	rm -f $tmp.*
 +}
  
  _require_scratch
  _scratch_mkfs_xfs >/dev/null 2>&1
-@@ -20,7 +26,7 @@ _scratch_mount
- _require_fs_space $SCRATCH_MNT 2202000
- 
- _require_loop
--LOOP_DEV=$SCRATCH_MNT/test_fs
-+LOOP_IMG=$SCRATCH_MNT/test_fs
- LOOP_MNT=$SCRATCH_MNT/test_fs_dir
- 
- _do_mkfs()
-@@ -28,28 +34,30 @@ _do_mkfs()
- 	for i in $*; do
+@@ -50,9 +56,9 @@ _do_mkfs()
  		echo -n "fssize=${i}g "
  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
--			-d name=$LOOP_DEV,size=${i}g |grep log
--		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-+			-d size=${i}g $loop_dev |grep log
-+		_mount $loop_dev $LOOP_MNT
+ 			-d name=$LOOP_DEV,size=${i}g $loop_mkfs_opts |grep log
+-		mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
++		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
  		echo "test write" > $LOOP_MNT/test
- 		_unmount $LOOP_MNT > /dev/null 2>&1
- 
- 		# punch out the previous blocks so that we keep the amount of
- 		# disk space the test requires down to a minimum.
--		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_DEV
-+		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_IMG
+-		umount $LOOP_MNT > /dev/null 2>&1
++		_unmount $LOOP_MNT > /dev/null 2>&1
  	done
  }
  # make large holey file
--$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_DEV
-+$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_IMG
+diff --git a/tests/xfs/217 b/tests/xfs/217
+index 41caaf738..b2eb34490 100755
+--- a/tests/xfs/217
++++ b/tests/xfs/217
+@@ -29,9 +29,9 @@ _do_mkfs()
+ 		echo -n "fssize=${i}g "
+ 		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
+ 			-d name=$LOOP_DEV,size=${i}g |grep log
+-		mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
++		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
+ 		echo "test write" > $LOOP_MNT/test
+-		umount $LOOP_MNT > /dev/null 2>&1
++		_unmount $LOOP_MNT > /dev/null 2>&1
  
- #make loopback mount dir
- mkdir $LOOP_MNT
- 
- # test if large logs are supported
--$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_DEV,size=10g > /dev/null 2>&1
-+$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_IMG,size=10g > /dev/null 2>&1
- if [ $? -ne 0 ]; then
- 	_notrun "large log sizes not supported by mkfs"
- fi
- 
-+loop_dev=$(_create_loop_device $LOOP_IMG)
-+
- #
- # walk over "new" sizes supported by recent xfsprogs.
- # Note that the last test is for 16TB-1GB as 32bit platforms only support
-@@ -57,5 +65,7 @@ fi
- #
- _do_mkfs 512 1024 2048 4096 8192 16383
- 
-+_destroy_loop_device $loop_dev
-+unset loop_dev
- status=0
- exit
+ 		# punch out the previous blocks so that we keep the amount of
+ 		# disk space the test requires down to a minimum.
 diff --git a/tests/xfs/250 b/tests/xfs/250
-index 4e3473ebc..2554e1e91 100755
+index f8846be6e..4e3473ebc 100755
 --- a/tests/xfs/250
 +++ b/tests/xfs/250
-@@ -14,7 +14,8 @@ _cleanup()
- {
- 	cd /
- 	_unmount $LOOP_MNT 2>/dev/null
--	rm -f $LOOP_DEV
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-+	rm -f $LOOP_IMG
- 	rmdir $LOOP_MNT
- 	rm -f $tmp.*
- }
-@@ -26,7 +27,7 @@ _require_test
- _require_loop
- _require_xfs_io_command "falloc"
- 
--LOOP_DEV=$TEST_DIR/$seq.fs
-+LOOP_IMG=$TEST_DIR/$seq.fs
- LOOP_MNT=$TEST_DIR/$seq.mnt
- 
- _filter_io()
-@@ -45,7 +46,7 @@ _test_loop()
- 	agsize=$2
- 	fsize=$3
- 
--	dparam="file,name=$LOOP_DEV,size=$size"
-+	dparam="file,name=$LOOP_IMG,size=$size"
- 	if [ -n "$agsize" ]; then
- 		dparam="$dparam,agsize=$agsize"
- 	fi
-@@ -55,7 +56,8 @@ _test_loop()
- 		| _filter_mkfs 2>/dev/null
- 
- 	echo "*** mount loop filesystem"
--	_mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
-+	loop_dev=$(_create_loop_device $LOOP_IMG)
-+	mount $loop_dev $LOOP_MNT
- 
- 	echo "*** preallocate large file"
- 	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
-@@ -64,7 +66,9 @@ _test_loop()
- 	_unmount $LOOP_MNT > /dev/null 2>&1
- 
- 	echo "*** check loop filesystem"
--	 _check_xfs_filesystem $LOOP_DEV none none
-+	_check_xfs_filesystem $loop_dev none none
-+	_destroy_loop_device $loop_dev
-+	unset loop_dev
- }
- 
- _test_loop 50g 16m 40G
-diff --git a/tests/xfs/259 b/tests/xfs/259
-index 0c8d6eb56..c2d26381a 100755
---- a/tests/xfs/259
-+++ b/tests/xfs/259
-@@ -12,7 +12,10 @@ _begin_fstest auto quick
- # Override the default cleanup function.
+@@ -13,9 +13,10 @@ _begin_fstest auto quick rw prealloc metadata
  _cleanup()
  {
--    rm -f "$testfile"
-+	[ -n "$loop_dev" ] && _destroy_loop_device $testfile
-+	rm -f "$testfile"
-+	cd /
+ 	cd /
+-	umount $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
+ 	rm -f $LOOP_DEV
+ 	rmdir $LOOP_MNT
 +	rm -f $tmp.*
  }
  
  # Import common functions.
-@@ -45,13 +48,13 @@ for del in $sizes_to_check; do
- 		rm -f "$testfile"
- 		dd if=/dev/zero "of=$testfile" bs=1 count=0 seek=$ddseek \
- 			>/dev/null 2>&1 || echo "dd failed"
--		lofile=$(losetup -f)
--		losetup $lofile "$testfile"
--		$MKFS_XFS_PROG -l size=32m -b size=$bs $lofile |  _filter_mkfs \
-+		loop_dev=$(_create_loop_device $testfile)
-+		$MKFS_XFS_PROG -l size=32m -b size=$bs $loop_dev |  _filter_mkfs \
- 			>/dev/null 2> $tmp.mkfs || echo "mkfs failed!"
- 		. $tmp.mkfs
- 		sync
--		losetup -d $lofile
-+		_destroy_loop_device $loop_dev
-+		unset loop_dev
- 	done
- done
+@@ -54,13 +55,13 @@ _test_loop()
+ 		| _filter_mkfs 2>/dev/null
  
-diff --git a/tests/xfs/513 b/tests/xfs/513
-index 5895e6e2d..0c0edc75e 100755
---- a/tests/xfs/513
-+++ b/tests/xfs/513
-@@ -15,12 +15,8 @@ _cleanup()
- 	cd /
- 	rm -f $tmp.*
- 	_unmount $LOOP_MNT 2>/dev/null
--	if [ -n "$LOOP_DEV" ];then
--		_destroy_loop_device $LOOP_DEV 2>/dev/null
--	fi
--	if [ -n "$LOOP_SPARE_DEV" ];then
--		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
--	fi
-+	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
-+	[ -n $loop_spare_dev ] &&_destroy_loop_device $loop_spare_dev
- 	rm -f $LOOP_IMG
- 	rm -f $LOOP_SPARE_IMG
- 	rmdir $LOOP_MNT
-@@ -42,11 +38,11 @@ LOOP_MNT=$TEST_DIR/$seq.mnt
+ 	echo "*** mount loop filesystem"
+-	mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
++	_mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
  
- echo "** create loop device"
- $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
--LOOP_DEV=`_create_loop_device $LOOP_IMG`
-+loop_dev=`_create_loop_device $LOOP_IMG`
+ 	echo "*** preallocate large file"
+ 	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
  
- echo "** create loop log device"
- $XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
--LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-+loop_spare_dev=`_create_loop_device $LOOP_SPARE_IMG`
+ 	echo "*** unmount loop filesystem"
+-	umount $LOOP_MNT > /dev/null 2>&1
++	_unmount $LOOP_MNT > /dev/null 2>&1
  
- echo "** create loop mount point"
- rmdir $LOOP_MNT 2>/dev/null
-@@ -55,8 +51,8 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
- filter_loop()
- {
- 	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
--	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
--	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-+	    -e "s,\B$loop_dev,LOOP_DEV,g" \
-+	    -e "s,\B$loop_spare_dev,LOOP_SPARE_DEV,g"
- }
- 
- filter_xfs_opt()
-@@ -69,22 +65,22 @@ MKFS_OPTIONS=""
- do_mkfs()
- {
- 	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
--	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-+	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
- 	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
--		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-+		_fail "Fails on _mkfs_dev $* $loop_dev"
- 	fi
- 	. $tmp.mkfs
- }
- 
- is_dev_mounted()
- {
--	findmnt --source $LOOP_DEV >/dev/null
-+	findmnt --source $loop_dev >/dev/null
- 	return $?
- }
- 
- get_mount_info()
- {
--	findmnt --source $LOOP_DEV -o OPTIONS -n
-+	findmnt --source $loop_dev -o OPTIONS -n
- }
- 
- force_unmount()
-@@ -103,29 +99,29 @@ _do_test()
- 	local info
- 
- 	# mount test
--	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-+	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
- 	rc=$?
- 	if [ $rc -eq 0 ];then
- 		if [ "${mounted}" = "fail" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expect mount to fail, but it succeeded"
- 			return 1
- 		fi
- 		is_dev_mounted
- 		if [ $? -ne 0 ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: fs not mounted even mount return 0"
- 			return 1
- 		fi
- 	else
- 		if [ "${mounted}" = "pass" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expect mount to succeed, but it failed"
- 			return 1
- 		fi
- 		is_dev_mounted
- 		if [ $? -eq 0 ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: fs is mounted even mount return non-zero"
- 			return 1
- 		fi
-@@ -141,13 +137,13 @@ _do_test()
- 	rc=$?
- 	if [ $rc -eq 0 ];then
- 		if [ "$found" != "true" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
- 			return 1
- 		fi
- 	else
- 		if [ "$found" != "false" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: did not expect to find \"$key\" in \"$info\""
- 			return 1
- 		fi
-@@ -253,9 +249,9 @@ do_test "-o logbsize=512k" fail
- # Test logdev
- do_mkfs
- do_test "" pass "logdev" "false"
--do_test "-o logdev=$LOOP_SPARE_DEV" fail
--do_mkfs -l logdev=$LOOP_SPARE_DEV
--do_test "-o logdev=$LOOP_SPARE_DEV" pass "logdev=$LOOP_SPARE_DEV" "true"
-+do_test "-o logdev=$loop_spare_dev" fail
-+do_mkfs -l logdev=$loop_spare_dev
-+do_test "-o logdev=$loop_spare_dev" pass "logdev=$loop_spare_dev" "true"
- do_test "" fail
- 
- # Test noalign
-diff --git a/tests/xfs/521 b/tests/xfs/521
-index 13982c440..c92c621a2 100755
---- a/tests/xfs/521
-+++ b/tests/xfs/521
-@@ -21,7 +21,7 @@ _cleanup()
- {
- 	cd /
- 	_scratch_unmount >> $seqres.full 2>&1
--	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-+	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
- 	rm -f $tmp.* $TEST_DIR/$seq.rtvol
- }
- 
-@@ -35,7 +35,7 @@ _require_no_large_scratch_dev
- 
- echo "Create fake rt volume"
- truncate -s 400m $TEST_DIR/$seq.rtvol
--rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-+rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
- 
- echo "Format and mount 100m rt volume"
- export USE_EXTERNAL=yes
-@@ -69,6 +69,10 @@ cp -p $testdir/original $testdir/copy3
- echo "Check filesystem"
- _check_scratch_fs
- 
-+_scratch_unmount
-+_destroy_loop_device $rt_loop_dev
-+unset rt_loop_dev
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/xfs/528 b/tests/xfs/528
-index 6ca9a2370..a1efbbd27 100755
---- a/tests/xfs/528
-+++ b/tests/xfs/528
-@@ -15,7 +15,7 @@ _cleanup()
- {
- 	cd /
- 	_scratch_unmount >> $seqres.full 2>&1
--	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-+	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
- 	rm -f $tmp.* $TEST_DIR/$seq.rtvol
- }
- 
-@@ -155,11 +155,11 @@ test_ops() {
- 
- echo "Create fake rt volume"
- $XFS_IO_PROG -f -c "truncate 400m" $TEST_DIR/$seq.rtvol
--rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-+rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
- 
- echo "Make sure synth rt volume works"
- export USE_EXTERNAL=yes
--export SCRATCH_RTDEV=$rtdev
-+export SCRATCH_RTDEV=$rt_loop_dev
- _scratch_mkfs > $seqres.full
- _try_scratch_mount || \
- 	_notrun "Could not mount with synthetic rt volume"
-@@ -170,6 +170,10 @@ test_ops 262144
- # not a power of two
- test_ops 327680
- 
-+_scratch_unmount
-+_destroy_loop_device $rt_loop_dev
-+unset rt_loop_dev
-+
- # success, all done
- status=0
- exit
-diff --git a/tests/xfs/530 b/tests/xfs/530
-index 8a182bd6a..d0d0e2665 100755
---- a/tests/xfs/530
-+++ b/tests/xfs/530
-@@ -15,7 +15,7 @@ _cleanup()
- {
- 	cd /
- 	_scratch_unmount >> $seqres.full 2>&1
--	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-+	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
- 	rm -f $tmp.* $TEST_DIR/$seq.rtvol
- }
- 
-@@ -52,12 +52,12 @@ fi
- 
- rtdevsz=$((nr_bits * rtextsz))
- truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
--rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-+rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
- 
- echo "Format and mount rt volume"
- 
- export USE_EXTERNAL=yes
--export SCRATCH_RTDEV=$rtdev
-+export SCRATCH_RTDEV=$rt_loop_dev
- _scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
- 	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
- _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
-@@ -116,8 +116,9 @@ done
- echo "Check filesystem"
- _check_scratch_fs
- 
--losetup -d $rtdev
--rm -f $TEST_DIR/$seq.rtvol
-+_scratch_unmount
-+_destroy_loop_device $rt_loop_dev
-+unset rt_loop_dev
- 
- # success, all done
- status=0
-diff --git a/tests/xfs/606 b/tests/xfs/606
-index f958bddd8..b537ea145 100755
---- a/tests/xfs/606
-+++ b/tests/xfs/606
-@@ -13,10 +13,8 @@ _begin_fstest auto quick growfs
- 
+ 	echo "*** check loop filesystem"
+ 	 _check_xfs_filesystem $LOOP_DEV none none
+diff --git a/tests/xfs/289 b/tests/xfs/289
+index cf0f2883c..d234f212d 100755
+--- a/tests/xfs/289
++++ b/tests/xfs/289
+@@ -13,8 +13,8 @@ _begin_fstest growfs auto quick
+ # Override the default cleanup function.
  _cleanup()
  {
--	local dev
- 	_unmount $LOOP_MNT 2>/dev/null
--	dev=$(losetup -j testfile | cut -d: -f1)
--	losetup -d $dev 2>/dev/null
-+	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
- 	rm -rf $LOOP_IMG $LOOP_MNT
+-    $UMOUNT_PROG $tmpdir
+-    $UMOUNT_PROG $tmpbind
++    _unmount $tmpdir
++    _unmount $tmpbind
+     rmdir $tmpdir
+     rm -f $tmpsymlink
+     rmdir $tmpbind
+diff --git a/tests/xfs/507 b/tests/xfs/507
+index 75c183c07..52d9b94b4 100755
+--- a/tests/xfs/507
++++ b/tests/xfs/507
+@@ -22,7 +22,7 @@ _register_cleanup "_cleanup" BUS
+ _cleanup()
+ {
+ 	cd /
+-	test -n "$loop_mount" && $UMOUNT_PROG $loop_mount > /dev/null 2>&1
++	test -n "$loop_mount" && _unmount $loop_mount > /dev/null 2>&1
+ 	test -n "$loop_dev" && _destroy_loop_device $loop_dev
+ 	rm -rf $tmp.*
+ }
+diff --git a/tests/xfs/513 b/tests/xfs/513
+index 5585a9c8e..5895e6e2d 100755
+--- a/tests/xfs/513
++++ b/tests/xfs/513
+@@ -14,7 +14,7 @@ _cleanup()
+ {
  	cd /
  	rm -f $tmp.*
-@@ -40,7 +38,9 @@ $MKFS_XFS_PROG -f $LOOP_IMG >$seqres.full
- # Extend by just 8K, expected to start with the last full-size AG ends of
- # above 1G block device.
- $XFS_IO_PROG -f -c "truncate 1073750016" $LOOP_IMG
--_mount -oloop $LOOP_IMG $LOOP_MNT
-+
-+loop_dev=$(_create_loop_device $LOOP_IMG)
-+_mount $loop_dev $LOOP_MNT
- # A known bug shows "XFS_IOC_FSGROWFSDATA xfsctl failed: No space left on
- # device" at here, refer to _fixed_by_kernel_commit above
- $XFS_GROWFS_PROG $LOOP_MNT >$seqres.full
-@@ -48,6 +48,10 @@ if [ $? -ne 0 ];then
- 	echo "xfs_growfs fails!"
- fi
- 
-+_unmount $LOOP_MNT
-+_destroy_loop_device $loop_dev
-+unset loop_dev
-+
- echo "Silence is golden"
- # success, all done
- status=0
-diff --git a/tests/xfs/613 b/tests/xfs/613
-index 6ba3d87bf..b87cae91e 100755
---- a/tests/xfs/613
-+++ b/tests/xfs/613
-@@ -15,14 +15,8 @@ _cleanup()
- 	cd /
- 	rm -f $tmp.*
- 	_unmount $LOOP_MNT 2>/dev/null
--	if [ -n "$LOOP_DEV" ];then
--		_destroy_loop_device $LOOP_DEV 2>/dev/null
--	fi
--	if [ -n "$LOOP_SPARE_DEV" ];then
--		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
--	fi
-+	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
- 	rm -f $LOOP_IMG
--	rm -f $LOOP_SPARE_IMG
- 	rmdir $LOOP_MNT
- }
- 
-@@ -38,16 +32,11 @@ _require_loop
- _require_xfs_io_command "falloc"
- 
- LOOP_IMG=$TEST_DIR/$seq.dev
--LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
- LOOP_MNT=$TEST_DIR/$seq.mnt
- 
- echo "** create loop device"
- $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
--LOOP_DEV=`_create_loop_device $LOOP_IMG`
--
--echo "** create loop log device"
--$XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
--LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-+loop_dev=`_create_loop_device $LOOP_IMG`
- 
- echo "** create loop mount point"
- rmdir $LOOP_MNT 2>/dev/null
-@@ -56,8 +45,7 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
- filter_loop()
- {
- 	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
--	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
--	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-+	    -e "s,\B$loop_dev,LOOP_DEV,g"
- }
- 
- filter_xfs_opt()
-@@ -70,22 +58,22 @@ MKFS_OPTIONS=""
- do_mkfs()
- {
- 	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
--	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-+	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
- 	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
--		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-+		_fail "Fails on _mkfs_dev $* $loop_dev"
+-	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
+ 	if [ -n "$LOOP_DEV" ];then
+ 		_destroy_loop_device $LOOP_DEV 2>/dev/null
  	fi
- 	. $tmp.mkfs
- }
- 
- is_dev_mounted()
- {
--	findmnt --source $LOOP_DEV >/dev/null
-+	findmnt --source $loop_dev >/dev/null
- 	return $?
- }
- 
- get_mount_info()
- {
--	findmnt --source $LOOP_DEV -o OPTIONS -n
-+	findmnt --source $loop_dev -o OPTIONS -n
- }
+@@ -89,7 +89,7 @@ get_mount_info()
  
  force_unmount()
-@@ -104,29 +92,29 @@ _do_test()
- 	local info
+ {
+-	$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
++	_unmount $LOOP_MNT >/dev/null 2>&1
+ }
  
- 	# mount test
--	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-+	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
- 	rc=$?
- 	if [ $rc -eq 0 ];then
- 		if [ "${mounted}" = "fail" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expect mount to fail, but it succeeded"
- 			return 1
- 		fi
- 		is_dev_mounted
- 		if [ $? -ne 0 ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: fs not mounted even mount return 0"
- 			return 1
- 		fi
- 	else
- 		if [ "${mounted}" = "pass" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expect mount to succeed, but it failed"
- 			return 1
- 		fi
- 		is_dev_mounted
- 		if [ $? -eq 0 ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: fs is mounted even mount return non-zero"
- 			return 1
- 		fi
-@@ -142,13 +130,13 @@ _do_test()
- 	rc=$?
- 	if [ $rc -eq 0 ];then
- 		if [ "$found" != "true" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
- 			return 1
- 		fi
- 	else
- 		if [ "$found" != "false" ];then
--			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-+			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
- 			echo "ERROR: did not expect to find \"$key\" in \"$info\""
- 			return 1
- 		fi
-diff --git a/tests/xfs/613.out b/tests/xfs/613.out
-index 1624617ee..2a693c53c 100644
---- a/tests/xfs/613.out
-+++ b/tests/xfs/613.out
-@@ -1,6 +1,5 @@
- QA output created by 613
- ** create loop device
--** create loop log device
- ** create loop mount point
- ** start xfs mount testing ...
- FORMAT: -m crc=0
+ # _do_test <mount options> <should be mounted?> [<key string> <key should be found?>]
+diff --git a/tests/xfs/544 b/tests/xfs/544
+index bd694453d..b7eef51c7 100755
+--- a/tests/xfs/544
++++ b/tests/xfs/544
+@@ -15,7 +15,7 @@ _cleanup()
+ 	_cleanup_dump
+ 	cd /
+ 	rm -r -f $tmp.*
+-	$UMOUNT_PROG $TEST_DIR/dest.$seq 2> /dev/null
++	_unmount $TEST_DIR/dest.$seq 2> /dev/null
+ 	rmdir $TEST_DIR/src.$seq 2> /dev/null
+ 	rmdir $TEST_DIR/dest.$seq 2> /dev/null
+ }
+diff --git a/tests/xfs/606 b/tests/xfs/606
+index 02de601d6..f958bddd8 100755
+--- a/tests/xfs/606
++++ b/tests/xfs/606
+@@ -14,7 +14,7 @@ _begin_fstest auto quick growfs
+ _cleanup()
+ {
+ 	local dev
+-	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
+ 	dev=$(losetup -j testfile | cut -d: -f1)
+ 	losetup -d $dev 2>/dev/null
+ 	rm -rf $LOOP_IMG $LOOP_MNT
+diff --git a/tests/xfs/613 b/tests/xfs/613
+index 1947afec7..6ba3d87bf 100755
+--- a/tests/xfs/613
++++ b/tests/xfs/613
+@@ -14,7 +14,7 @@ _cleanup()
+ {
+ 	cd /
+ 	rm -f $tmp.*
+-	$UMOUNT_PROG $LOOP_MNT 2>/dev/null
++	_unmount $LOOP_MNT 2>/dev/null
+ 	if [ -n "$LOOP_DEV" ];then
+ 		_destroy_loop_device $LOOP_DEV 2>/dev/null
+ 	fi
+@@ -90,7 +90,7 @@ get_mount_info()
+ 
+ force_unmount()
+ {
+-	$UMOUNT_PROG $LOOP_MNT >/dev/null 2>&1
++	_unmount $LOOP_MNT >/dev/null 2>&1
+ }
+ 
+ # _do_test <mount options> <should be mounted?> [<key string> <key should be found?>]
 -- 
 2.45.2
 
