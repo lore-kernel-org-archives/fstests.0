@@ -1,79 +1,79 @@
-Received: from mail-pf1-f170.google.com (mail-pf1-f170.google.com [209.85.210.170])
+Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9127D4689
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A9C04689
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683588; cv=none; b=k/yxzN3/sjIzB9BwLA+jZk1jJEtm6vjqS/RctANW0KjizUxUlHWIwdeD8yhMkou1P34Xflw3bmbHpD8n3pNJKsEpE+ZyOBltrnCe+BB+ftt0qzO2qxyyFB8ZityMf9pS2wlZMpm5MSx9V8lGqV3CK7SiovjFQRpL8THLtmtnOd8=
+	t=1732683592; cv=none; b=ozonsjQn5TwF5LhtG4wN9fGI5fUrnd8P0NxWfdAXEJQCU3McgKUjye6J5PfoJ+FM7Nwr0kwCpj/zAzRc5XMUu6N4wXLZnyq7iAfQyv+lPERAq5R75ITw7lnkqKCKUGFhEEHkEzu3Nu1hM7+w9H7Km9/iQscUqiCcEt5Hjuo5I7s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683588; c=relaxed/simple;
-	bh=6lk5SvdJgCvc3NF57facjOsN22xR1dJpxk4y/YrBOxk=;
+	s=arc-20240116; t=1732683592; c=relaxed/simple;
+	bh=dZpRjShA9rqZbr/Qn2hmDvT9o3P6Kf0mQjwcs3oAvAw=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=bJhP51MRGINKwsmoGCt3KugnhjZcwXWAfeYQxghu8/Yuzmae7VE3FhnJ0h3B/xOjQCUptuPfB/TWXcTzN3e+E8VORV7UMtOrp628Gt3YJ2Xic4iE9ambNvL/zYQoXP1XUy0/x0LIv1NN9P4vrL6ZI0GyfKfx76e1dNcV+8S5XhQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=qRRERs8w; arc=none smtp.client-ip=209.85.210.170
+	 MIME-Version; b=MdIdVP552yxXrxMMPBjnPZPc3lir8wlxpNhW0BgUycIWiirm3jrvfNFoTeBvkvi/o7PxpoYA/RLVVb5YIReOjqGlZqUimnSe1vTFOG6duT7BVrBsvSHvReUIApFRDQr/mmPKkwcJ4yUk8qXP4vL96aiaQoZBBmpPCScvkH2D9go=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=P3vOc5ja; arc=none smtp.client-ip=209.85.210.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="qRRERs8w"
-Received: by mail-pf1-f170.google.com with SMTP id d2e1a72fcca58-724f41d520cso2532108b3a.1
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:46 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="P3vOc5ja"
+Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-7252fba4de1so481911b3a.0
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683586; x=1733288386; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683590; x=1733288390; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=fCIfwS9+Qu4/GAAoXb9FEN4Ou9bsUTltYBHizoDa+q0=;
-        b=qRRERs8wChjyOyUB5JZKZcAq7LlLjIXKAjitwBf9M6LWeXghGDNXAnu4xFUIDfTQnh
-         mQc8xwJ7ZAWB5YOCtbeUz4iz/JGxpKjWj7pyLFaIoR1ZSIOfVea/lKWB1qq9LqqMSvDs
-         WkYt3t73Om2BsdwM1qTYsOqQOXQf2y/3LwipeqRAFPrcohI6VqjfsR2f8jq9plKiFwIq
-         cC1RjLmPdYlGrCzFK1c/vVqmDtAUVC8ogT3G9y28RCtHEypm07VrW1R3uPUBclLhlNuR
-         KB1n7emiBTW+j3yLAXWayOr2bBHFBKj1evCZ6A1BXrdX9FUXbZhPcmtsFf8e8Epo6J24
-         4WbA==
+        bh=zFhRJWPQzdgziYv2CJ1bBXezQi8XM59/tAhVcqaDgdE=;
+        b=P3vOc5ja2OKALtgGu4s6wnE2O92aktfEmpGoZGDl31QVPWnOEmTWnxFCuZCyBYAa+g
+         IvM/oGIRDdjno1tlgTSi4HJDx/KLkfP2a7Uuke4w9Lqct+LVE8wzP5ujunrxSpKkjaOG
+         YCHLTZ0CU7IY4iA5UF11ej9aAjXrbFsmZJxwHndvLQReo40a6uQJaqEkxKjM7EyVJCs+
+         eZNxV2utMRe0IcRQk6193Is2jK1ViPUwcJpideTJP713viB2Rpx4K9xGqKnVXbqSKNmF
+         uwPKiUcWDbOaKpqBO/txJUp51Xr4okOw4LSLotcmayxvfS9dC7t88vE1nddPrGv1Ymt8
+         LjxA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732683586; x=1733288386;
+        d=1e100.net; s=20230601; t=1732683590; x=1733288390;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=fCIfwS9+Qu4/GAAoXb9FEN4Ou9bsUTltYBHizoDa+q0=;
-        b=QQiTZ++rmirBZ8n28jC6jgYI0RXxRiboWZum4rvwBWpIg9vcJNA7mf6qz9prsbWjf5
-         UxtBhxIe/C6BUbqKsV8o+6PLSr+cFSsgB63fvjxpm68amy7nKy40aMrKIw3azCHgOlV2
-         vz5a0y9vrCeNrW8G1bXQZOqlcDRXa4+6GjiClbkgkRkktQl1tztj/EwEvsq2egunROMu
-         QYfH0gbzpmPQE5394LQaU/duz4/DEQMUxm5ylux2ZiSQcXozv6Pv1Xw7OdPF1061dZ+A
-         cvedj+SCxsI9pACWqVvyoMWTfz3KrrnNWLpgtCCh9rhfx/JikHuG09SZo0VEYfzLAxDO
-         2ylA==
-X-Gm-Message-State: AOJu0YxHY2R06oVqcxcFaCPawGhq8FHTr/sx2AwH1AYOQHlYc5SraOl/
-	84aVXVAzfSNNc1Fj0sD7n1bMHgNlipNemocFIWoS/mm86YC0w0YxZQ/4ME3sHxRiJ2JBmRcTxqx
-	S
-X-Gm-Gg: ASbGnct4s+QeqUKa3w7PVsieWtWTLPJTORNmi+M1EIgHyz8XpRjTtVgY+cyATyDy4O5
-	2ab5UaK8NGQ6XmryB02q3YFJTCv2GuleC6mXGBBW5hmu95zm8x5CG9k/s/FP0yuGmh9l4V8mo6M
-	HAiO04XlLCYXZ/USEnazB9ZY0LlRKQZxsYXWmj9Alne/2SpbvLrX+kuHuDE1dnwB+TIU+CvYOul
-	BOoPie/SGgU99xq5DX+IjcVzX8CWY/9t+63nHoG4LmR7EAYMNFU0YEUjIRWIZn2D7X22v6ZRU3c
-	imLlx5v+fp0RpA==
-X-Google-Smtp-Source: AGHT+IHZvCYw6iMt327qi8ZlZpAYTHWFGkeoUYiRUK+eb9WYpClqu3oJyOPI0e42WFqw2kHaj5Tnpw==
-X-Received: by 2002:a05:6a00:3c8c:b0:71e:5d1d:1aa7 with SMTP id d2e1a72fcca58-7253011eef9mr2525036b3a.17.1732683585767;
-        Tue, 26 Nov 2024 20:59:45 -0800 (PST)
+        bh=zFhRJWPQzdgziYv2CJ1bBXezQi8XM59/tAhVcqaDgdE=;
+        b=EGHzJxiqQg1nHxIrZiavxqgNlMeA3oHaZ2bWWBgI2yHr8N8R1oIvGuWMzkK1kodsO/
+         QUATUB9qxK4ZFsO1LlkvvPfChJEZkd5O+Xx6iiG36bAcz34m93Afmdj+3NXKPiM3/t2q
+         byqmoMi3gNrLHcrn2BCMAOKCsuqQRcMfR+OEJ3WnWYoc0rVxSvv+2Y62pyR3NAJ3oxOC
+         EfjM6wompKLbwkC+Gv12MUeieUQgQ6R/PY4JE+gl1o++0Umb6CJRo+Gfj9t6d/KsDHmD
+         RlUW053knaQAYBk5gf2wIjijhSLpr/UEoAcbswT3/1RKNjyzYkC+AUnBWsfpzz9b0IeZ
+         5GKg==
+X-Gm-Message-State: AOJu0YyqZBXRrZioRiGFFNpNbrB7jibv08eA1vHA0vm+/Qxg+XdRXuuG
+	R5Vyxo8mqRdKRjVDvTfxoaBQe6/MPK5yjDuer98blNKepYNiTvv+Rtpfj3nlhakHAxAl58AJyIs
+	T
+X-Gm-Gg: ASbGncsV1M2RgHjTeZF8eAaVy+3EKk+I0hrz/e3N9RpqONXQh/5pX8KKD+OwFEn63d0
+	DJPv5nBMOfF8bWqp2DiadRCB2cjj0jK7oZ6QmA7o9xRtoGuafi8XTNjG5kG/3UrfA7Lj9KzLHXy
+	nt0Ji2O0SAsxe66xCIAUFdcl7128CRvhFjJ/AdVfgiiUyUGkXRXlL6q1tPY3tX4WO9WtAIukGO3
+	o/prbE0tnMh3kLdgcrsSVca9+j96qbRcCKbLQOvkk1TEgQI6u0s0o6qGLH2V6/aJ9bxrAo3BR/m
+	prab8nZmfQtR9Q==
+X-Google-Smtp-Source: AGHT+IG16g1MBsQaPlUmXvXe7cT86nNIZT3CKlwcZI+DAw4ge4AV2lJLQPuRwHrTbSXREpiAC/TWQQ==
+X-Received: by 2002:a05:6a00:22d6:b0:71e:4296:2e with SMTP id d2e1a72fcca58-72530034bb8mr2037605b3a.11.1732683589723;
+        Tue, 26 Nov 2024 20:59:49 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724ead1e79asm8303978b3a.41.2024.11.26.20.59.45
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-724de55862esm9345505b3a.155.2024.11.26.20.59.48
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Nov 2024 20:59:45 -0800 (PST)
+        Tue, 26 Nov 2024 20:59:49 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZVC-2851
+	id 1tGA3x-00000003ZVR-2hBd
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQf8-2czh
+	id 1tGA3x-0000000FQfT-3CD4
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 21/40] generic/127: reduce runtime
-Date: Wed, 27 Nov 2024 15:51:51 +1100
-Message-ID: <20241127045403.3665299-22-david@fromorbit.com>
+Subject: [PATCH 25/40] fstests: scale some tests for high CPU count sanity
+Date: Wed, 27 Nov 2024 15:51:55 +1100
+Message-ID: <20241127045403.3665299-26-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,154 +87,225 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-...
-generic/127 684
-...
+Several tests use lots of processes to stress the filesystem. many
+of them haven't really considered what this means for running the
+test on high CPU machines (e.g. >32p) and the potential contention
+and performance issues this might trigger.
 
-This takes a long time to run because it runs 6 individual
-invocations of fsx sequentially. Make them run concurrently
-as they can operate on separate files.
+Some of these tests simply need to increase the size of the journal.
+Some need to run on filesystems with high inherent concurrency (e.g.
+larger AG count). Some need more efficient/faster file creation. And
+so on.
 
-...
-generic/127 168
-...
+This commit is a collection of those sorts of changes to improve
+runtimes on high CPU count machines.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/127     | 67 ++++++++++++++++++++++++++-----------------
- tests/generic/127.out |  6 ----
- 2 files changed, 41 insertions(+), 32 deletions(-)
+ src/aio-dio-regress/aio-last-ref-held-by-io.c | 5 ++++-
+ tests/generic/251                             | 5 ++++-
+ tests/generic/323                             | 7 +++++--
+ tests/generic/530                             | 2 +-
+ tests/generic/531                             | 8 +++++++-
+ tests/xfs/013                                 | 4 ++--
+ tests/xfs/076                                 | 6 +++---
+ tests/xfs/176                                 | 6 +++---
+ tests/xfs/297                                 | 4 +++-
+ tests/xfs/501                                 | 2 +-
+ tests/xfs/502                                 | 2 +-
+ 11 files changed, 34 insertions(+), 17 deletions(-)
 
-diff --git a/tests/generic/127 b/tests/generic/127
-index c8984f273..985c99cfb 100755
---- a/tests/generic/127
-+++ b/tests/generic/127
-@@ -16,7 +16,10 @@ _begin_fstest rw auto
- # Override the default cleanup function.
- _cleanup()
- {
--    rm -f $tmp.output
-+	[ -n "$fsx_pids" ] && kill $fsx_pids 2> /dev/null
-+	wait
-+	cd /
-+	rm -f $tmp.*
+diff --git a/src/aio-dio-regress/aio-last-ref-held-by-io.c b/src/aio-dio-regress/aio-last-ref-held-by-io.c
+index a70f2a9b7..7106e30a9 100644
+--- a/src/aio-dio-regress/aio-last-ref-held-by-io.c
++++ b/src/aio-dio-regress/aio-last-ref-held-by-io.c
+@@ -85,11 +85,14 @@ aio_test_thread(void *data)
+ 	/*
+ 	 * Problems have been easier to trigger when spreading the
+ 	 * workload over the available CPUs.
++	 *
++	 * If CPU hotplug is active, this can randomly fail so dump the error
++	 * to stderror so it can be filtered out easily by the caller.
+ 	 */
+ 	CPU_ZERO(&cpuset);
+ 	CPU_SET(mycpu, &cpuset);
+ 	if (sched_setaffinity(mytid, sizeof(cpuset), &cpuset)) {
+-		printf("FAILED to set thread %d to run on cpu %ld\n",
++		fprintf(stderr, "FAILED to set thread %d to run on cpu %ld\n",
+ 		       mytid, mycpu);
+ 	}
+ 
+diff --git a/tests/generic/251 b/tests/generic/251
+index b432fb119..98986469e 100755
+--- a/tests/generic/251
++++ b/tests/generic/251
+@@ -175,9 +175,12 @@ nproc=20
+ # Copy $here to the scratch fs and make coipes of the replica.  The fstests
+ # output (and hence $seqres.full) could be in $here, so we need to snapshot
+ # $here before computing file checksums.
++#
++# $here/* as the files to copy so we avoid any .git directory that might be
++# much, much larger than the rest of the fstests source tree we are copying.
+ content=$SCRATCH_MNT/orig
+ mkdir -p $content
+-cp -axT $here/ $content/
++cp -ax $here/* $content/
+ 
+ mkdir -p $tmp
+ 
+diff --git a/tests/generic/323 b/tests/generic/323
+index 457253fee..2dde04d06 100755
+--- a/tests/generic/323
++++ b/tests/generic/323
+@@ -23,12 +23,15 @@ _require_aiodio aio-last-ref-held-by-io
+ testfile=$TEST_DIR/aio-testfile
+ $XFS_IO_PROG -ftc "pwrite 0 10m" $testfile | _filter_xfs_io
+ 
+-$AIO_TEST 0 100 $testfile
++# This can emit cpu affinity setting failures that aren't considered test
++# failures but cause golden image failures. Redirect the test output to
++# $seqres.full so that it is captured but doesn't directly cause test failures.
++$AIO_TEST 0 100 $testfile 2>> $seqres.full
+ if [ $? -ne 0 ]; then
+ 	exit $status
+ fi
+ 
+-$AIO_TEST 1 100 $testfile
++$AIO_TEST 1 100 $testfile 2>> $seqres.full
+ if [ $? -ne 0 ]; then
+ 	exit $status
+ fi
+diff --git a/tests/generic/530 b/tests/generic/530
+index 2e47c3e0c..18256b870 100755
+--- a/tests/generic/530
++++ b/tests/generic/530
+@@ -22,7 +22,7 @@ _require_scratch_shutdown
+ _require_metadata_journaling
+ _require_test_program "t_open_tmpfiles"
+ 
+-_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
+ _scratch_mount
+ 
+ # Set ULIMIT_NOFILE to min(file-max / 2, 50000 files per LOAD_FACTOR)
+diff --git a/tests/generic/531 b/tests/generic/531
+index 0e3564fd4..ed6c3f911 100755
+--- a/tests/generic/531
++++ b/tests/generic/531
+@@ -21,7 +21,13 @@ _require_scratch
+ _require_xfs_io_command "-T"
+ _require_test_program "t_open_tmpfiles"
+ 
+-_scratch_mkfs >> $seqres.full 2>&1
++# On high CPU count machines, this runs a -lot- of create and unlink
++# concurrency. Set the filesytsem up to handle this.
++if [ $FSTYP = "xfs" ]; then
++	_scratch_mkfs "-d agcount=32" >> $seqres.full 2>&1
++else
++	_scratch_mkfs >> $seqres.full 2>&1
++fi
+ _scratch_mount
+ 
+ # Try to load up all the CPUs, two threads per CPU.
+diff --git a/tests/xfs/013 b/tests/xfs/013
+index fd3d8c64c..5a92ef084 100755
+--- a/tests/xfs/013
++++ b/tests/xfs/013
+@@ -28,7 +28,7 @@ _create()
+ 	mkdir -p $dir
+ 	for i in $(seq 0 $count)
+ 	do
+-		touch $dir/$i 2>&1 | filter_enospc
++		echo -n > $dir/$i 2>&1 | filter_enospc
+ 	done
  }
  
- # Import common functions.
-@@ -27,7 +30,6 @@ FSX_ARGS="-q -l $FSX_FILE_SIZE -o 65536 -S 191110531 -N 100000"
- 
- _fsx_lite_nommap()
- {
--    echo "=== FSX Light Mode, No Memory Mapping ==="
-     dd if=/dev/zero of=$TEST_DIR/fsx_lite_nommap bs=${FSX_FILE_SIZE} count=1 > /dev/null 2>&1
-     if ! ltp/fsx $FSX_ARGS -L -R -W $FSX_AVOID $TEST_DIR/fsx_lite_nommap > $tmp.output 2>&1
-     then
-@@ -41,7 +43,6 @@ _fsx_lite_nommap()
- 
- _fsx_lite_mmap()
- {
--    echo "=== FSX Light Mode, Memory Mapping ==="
-     dd if=/dev/zero of=$TEST_DIR/fsx_lite_mmap bs=${FSX_FILE_SIZE} count=1 > /dev/null 2>&1
-     if ! ltp/fsx $FSX_ARGS -L $FSX_AVOID $TEST_DIR/fsx_lite_mmap > $tmp.output 2>&1
-     then
-@@ -55,42 +56,56 @@ _fsx_lite_mmap()
- 
- _fsx_std_nommap()
- {
--    echo "=== FSX Standard Mode, No Memory Mapping ==="
--    if ! ltp/fsx $FSX_ARGS -R -W $FSX_AVOID $TEST_DIR/fsx_std_nommap > $tmp.output 2>&1
--    then
--        echo "ltp/fsx $FSX_ARGS -R -W fsx_std_nommap"
--        cat $tmp.output
--        return 1
--    fi
--    cat $tmp.output
--    return 0
-+	local fname="$TEST_DIR/$1"
-+
-+	if ! ltp/fsx $FSX_ARGS -R -W $FSX_AVOID $fname > $tmp.output 2>&1
-+	then
-+		echo "ltp/fsx $FSX_ARGS -R -W fsx_std_nommap"
-+		cat $tmp.output
-+		return 1
-+	fi
-+	cat $tmp.output
-+	return 0
+@@ -42,7 +42,7 @@ _rand_replace()
+ 	do
+ 		file=$((RANDOM % count))
+ 		rm -f $dir/$file
+-		touch $dir/$file 2>&1 | filter_enospc
++		echo -n > $dir/$file 2>&1 | filter_enospc
+ 	done
  }
  
- _fsx_std_mmap()
- {
--    echo "=== FSX Standard Mode, Memory Mapping ==="
--    if ! ltp/fsx $FSX_ARGS $FSX_AVOID $TEST_DIR/fsx_std_mmap > $tmp.output 2>&1
--    then
--    	echo "ltp/fsx $FSX_ARGS fsx_std_mmap"
-+	local fname="$TEST_DIR/$1"
-+
-+	if ! ltp/fsx $FSX_ARGS $FSX_AVOID $fname > $tmp.output 2>&1
-+	then
-+		echo "ltp/fsx $FSX_ARGS fsx_std_mmap"
-+		cat $tmp.output
-+		return 1
-+	fi
- 	cat $tmp.output
--	return 1
--    fi
--    cat $tmp.output
--    return 0
-+	return 0
+diff --git a/tests/xfs/076 b/tests/xfs/076
+index 840617ccb..e315a067c 100755
+--- a/tests/xfs/076
++++ b/tests/xfs/076
+@@ -47,10 +47,10 @@ _alloc_inodes()
+ 	dir=$1
+ 
+ 	i=0
+-	while [ true ]; do
+-		touch $dir/$i 2>> $seqres.full || break
++	( while [ true ]; do
++		echo -n > $dir/$i || break
+ 		i=$((i + 1))
+-	done
++	done ) >> $seqres.full 2>&1
  }
  
- _require_test
  
--_fsx_lite_nommap || exit
--_fsx_lite_mmap || exit
-+_fsx_lite_nommap &
-+fsx_pids=$!
+diff --git a/tests/xfs/176 b/tests/xfs/176
+index 8e5951ec1..1aa8cde38 100755
+--- a/tests/xfs/176
++++ b/tests/xfs/176
+@@ -68,10 +68,10 @@ _alloc_inodes()
+ 	dir=$1
  
--_fsx_std_nommap || exit
--_fsx_std_mmap || exit
-+_fsx_lite_mmap &
-+fsx_pids="$! $fsx_pids"
-+
-+_fsx_std_nommap fsx_std_nommap &
-+fsx_pids="$! $fsx_pids"
-+
-+_fsx_std_mmap fsx_std_mmap &
-+fsx_pids="$! $fsx_pids"
+ 	i=0
+-	while [ true ]; do
+-		echo -n > $dir/$i >> $seqres.full 2>&1 || break
++	( while [ true ]; do
++		echo -n > $dir/$i || break
+ 		i=$((i + 1))
+-	done
++	done ) >> $seqres.full 2>&1
+ }
  
- #flush cache after write
- FSX_ARGS="-f $FSX_ARGS"
--_fsx_std_nommap || exit
--_fsx_std_mmap || exit
-+_fsx_std_nommap fsx_std_nommap_flush &
-+fsx_pids="$! $fsx_pids"
-+
-+_fsx_std_mmap fsx_std_mmap_flush &
-+fsx_pids="$! $fsx_pids"
-+
-+wait $fsx_pids
-+unset fsx_pids
+ # Find a sparse inode cluster after logend_agno/logend_agino.
+diff --git a/tests/xfs/297 b/tests/xfs/297
+index f9cd2ff12..af6af601a 100755
+--- a/tests/xfs/297
++++ b/tests/xfs/297
+@@ -34,7 +34,9 @@ _scratch_mount
+ STRESS_DIR="$SCRATCH_MNT/testdir"
+ mkdir -p $STRESS_DIR
  
- status=0
- _cleanup
-diff --git a/tests/generic/127.out b/tests/generic/127.out
-index 9459dc897..99fb0fddc 100644
---- a/tests/generic/127.out
-+++ b/tests/generic/127.out
-@@ -1,13 +1,7 @@
- QA output created by 127
--=== FSX Light Mode, No Memory Mapping ===
- All 100000 operations completed A-OK!
--=== FSX Light Mode, Memory Mapping ===
- All 100000 operations completed A-OK!
--=== FSX Standard Mode, No Memory Mapping ===
- All 100000 operations completed A-OK!
--=== FSX Standard Mode, Memory Mapping ===
- All 100000 operations completed A-OK!
--=== FSX Standard Mode, No Memory Mapping ===
- All 100000 operations completed A-OK!
--=== FSX Standard Mode, Memory Mapping ===
- All 100000 operations completed A-OK!
+-_run_fsstress_bg -d $STRESS_DIR -n 1000 -p 1000 $FSSTRESS_AVOID
++# turn off sync as this can lead to near deadlock conditions due to every
++# fsstress process lockstepping against freeze on large CPU count machines
++_run_fsstress_bg -d $STRESS_DIR -f sync=0 -n 1000 -p 1000 $FSSTRESS_AVOID
+ 
+ # Freeze/unfreeze file system randomly
+ echo "Start freeze/unfreeze randomly" | tee -a $seqres.full
+diff --git a/tests/xfs/501 b/tests/xfs/501
+index 1da4cbf92..678c51b52 100755
+--- a/tests/xfs/501
++++ b/tests/xfs/501
+@@ -33,7 +33,7 @@ _require_xfs_sysfs debug/log_recovery_delay
+ _require_scratch
+ _require_test_program "t_open_tmpfiles"
+ 
+-_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
+ _scratch_mount
+ 
+ # Set ULIMIT_NOFILE to min(file-max / 2, 30000 files per LOAD_FACTOR)
+diff --git a/tests/xfs/502 b/tests/xfs/502
+index 52b8e95a2..10b0017f6 100755
+--- a/tests/xfs/502
++++ b/tests/xfs/502
+@@ -23,7 +23,7 @@ _require_xfs_io_error_injection "iunlink_fallback"
+ _require_scratch
+ _require_test_program "t_open_tmpfiles"
+ 
+-_scratch_mkfs | _filter_mkfs 2> $tmp.mkfs > /dev/null
++_scratch_mkfs "-l size=256m" | _filter_mkfs 2> $tmp.mkfs > /dev/null
+ cat $tmp.mkfs >> $seqres.full
+ . $tmp.mkfs
+ 
 -- 
 2.45.2
 
