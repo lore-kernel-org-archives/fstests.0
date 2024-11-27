@@ -1,79 +1,79 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFF2F4689
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DE014689
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:59:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683581; cv=none; b=VT0NTOy9wY0kNv9SXMbA7/SqmBZ1+QfExdKzV1RLj6b1KgklpqoqG+oFFJ2fRZ6KidRqmHinl3vNZ5NzWr8C/FcZbqrDbrj/KmAfJOQ7/4cTs/QvuF/rc9hiIB55K9nPRgw0Ukz+c39JFk8rKyzpRz8OFXdHiWBLz7hcCts80fc=
+	t=1732683584; cv=none; b=KOLyf9syifDVuI2xSFRdr8cXjZcT1l7p+CLfeE09OyLlHru7fX15VdGQJ4/vWrSjxAdh8vSApsFHoLLQn6JxKDYSrh2zWvjNEOqdFgOieZT2EDqU2IJ3fqdH2xeP7OS0hwcjlUQpgWsKGpr/HVHWMDEW2P0kQC8hagbiUvd7qGw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683581; c=relaxed/simple;
-	bh=OvqZjkLmidtiPpSC3NXJZPas+XM2soqZGPX6TekKEhY=;
+	s=arc-20240116; t=1732683584; c=relaxed/simple;
+	bh=CPKSGUSlagvlJWWk6OHPlBfiuqm09EOoBhJFYr6A7R0=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HneA/4y7EsB/CEelKl/jdZcty43zG6WNpcb/zjdkqXT3otPZD97S6Nu7mnizU/cSHwXKcgIDmoyoqj15C6w4l6K4DUAeIh9yqjhNGiBG7fWzx9QuTaiKdc4cciGTVQxI9KW5Hgp9z8QkyFPZ2SZzgrzqgGyT26VVzExY86oj20Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=NdsplSDy; arc=none smtp.client-ip=209.85.214.175
+	 MIME-Version; b=ZyKlii9JFXHtAGLWPK5fYolPxGL70kHa+hgUtJsVSsqJnDX7rjBLkuGgjH9vlbn5Y3vEgJUlZ1eTGnO0GsCru2sz2kdfjctQrlzDdz1moHPZ1NvGZpv4v5BTR1Tio1LmLiDKd8b8QP52SvChb+9CisBKyzn3NhSLlmADbGjKyCA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=f9bmTtMA; arc=none smtp.client-ip=209.85.214.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="NdsplSDy"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-21210fe8775so3558845ad.1
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:39 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="f9bmTtMA"
+Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-21285c1b196so59644945ad.3
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:59:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683579; x=1733288379; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683583; x=1733288383; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=uLyvRmpA/T9GK7gzdKLhJ6NSQ3rODHP4ylzcE+r6rVY=;
-        b=NdsplSDyjO1/rmZBJoQzCPnDbP4AdLxgAVkI0DONw0/CLNybOKVWxFpT0yXPPUzSO4
-         8ZUr4J1tvaE57mUOu+cZPbQSjqGXj3VX2OEoBCZtkOi5k5PGdNlOa0ACOlAstdAMcQgF
-         9jq0nJtuT6NlVlj0Fhcn+8WbXHiPzYlzJhDG6JLoF1WEwOjYQ6oBAJ1VK1wbuvtE/M9w
-         GPVzA3Azx9AOEiFyNjXT7ogt8GQP3UI5MLB+q8k0ksAXK1zcTwzwyMCntcg5bTLpwbo8
-         t++VXjjBwTmIILYZbn6TquXvlwBMQ2+gF6Uq+0ZOjTPjaZDvyqAjEK85+in4BXYFzBnU
-         I58w==
+        bh=gH7lGQprZZCi6rCoGBTP87RrIO42NQIhzQJNGcRSjN8=;
+        b=f9bmTtMAonJaf55k4a0NNVaddoAyREhf/7Bfsc0HBugS/RWc9UjET8uLZdrgc1MC61
+         B9Vzqik0rnO42dp6viLiOLHj+N9YzyoD+QEZ2dhgb1DohGIzKQkTQMxLN6VHX5Q5EpaY
+         mCZcF6uEzKOfExZtjQ/lQYjwiUuDxtaj25kEhtqJdNKWFhbASx6KU/Hl5ApNtlAIZ1Hf
+         HGCYNOE9Ii4oN5TGx14ZVrKHtQDcD0LxSeiqFTUK0uOkB6Objnr6cwws4fnbyjHK0tg3
+         XZGMsZaQOVY7fCWzUuM5Lx2vzxv9VqjMYLHWs1D52+rJvLM96ddvAfrGO1WKtmsJgSsK
+         NVSA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732683579; x=1733288379;
+        d=1e100.net; s=20230601; t=1732683583; x=1733288383;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=uLyvRmpA/T9GK7gzdKLhJ6NSQ3rODHP4ylzcE+r6rVY=;
-        b=OyKlKLVpyKy4oZsJOGrq4bsL+r9FdPOvcfL2wEN2NyUHyX69VgQaAPRMkEntJtD8fX
-         RKOCSLpKfLf5h7hfNorCkHmNsk/ESW7xaEBcNgIiOzCsx+kuum5XkvvOo4NmjD8DX+fV
-         bzkrjhOt3lWP7AqSFPFph8JLrp0KT3WnhxYudfKxElHCJDQXkKGvjM9BEjHDBjUFwfYJ
-         FLV+XHTmKEJ3hSqVFToRpYmjzVAosbp4CDQpKcHDY5LtHg8Q28DjtPOxx6ppCLSI8aEy
-         Jf7HUFMuSsyqPK1BT4e6Qpf7Jp45jrFsbJw6eE7pX4g7rMsn7AZtiZnCt0AXLqGQRVcd
-         2kyA==
-X-Gm-Message-State: AOJu0Yyk/5ww7eCUAs2vaJ59jUDb9PKZHUpUkUeB6cjeWhtqiQqTljO2
-	lybtfoBAswdDWmBOD3fCglGC+49KVHtwpoOJ4q2/GRmtMgctgVpPpf7SprRx5hXeay4yvqRkqPF
-	C
-X-Gm-Gg: ASbGnctZGjWJYuP8GrqKYgLX9fOxg0o7fYBHyMsbwSAbVCbXeZZKwm3btIxHv71GKhy
-	YUzqoOJJn+R26Rtko5S5QrKhsPNu2k+IR8nvJ9ObyTa+We3YNyt7JC672BVoIooWciwQPlSVOuy
-	KKdGGLjqv8qxiabT2y+HI8nMZpCpUpOJjcRicNLK4GgRO4nAemKCxFdzKV/N9UED2yrBVJEqjqd
-	1dYMeVnm1vo3M7g0FEnKfYlhMZQkf5+MM71y8Lck5IL1jCFBqrMia1smea2mMz6OPlndnyLnAjQ
-	DbKBAEsLLKk/NA==
-X-Google-Smtp-Source: AGHT+IG/yq2VIBM2mbfk4EW9oRuDg8P0JCv2biZTycv1L6SwqH7jlxqjod7SFiRXjErIzswEiCbQPQ==
-X-Received: by 2002:a17:902:fc85:b0:212:38d7:78ea with SMTP id d9443c01a7336-21500fc4fe7mr30388405ad.25.1732683579247;
-        Tue, 26 Nov 2024 20:59:39 -0800 (PST)
+        bh=gH7lGQprZZCi6rCoGBTP87RrIO42NQIhzQJNGcRSjN8=;
+        b=tT/9lPK7hCpcp9nsc/7L484PkTbmel4aOGBe/UWng9mmf+HmfkbWaq7g40oMPHeltD
+         6S2PX4Ks8IQfPTYRO5xsxGhsyP0RLlMYU1J6eatwotlEnfSYj3S3pp2GHthx/Gv50Jxs
+         WjhNPdvcBVJTCa2QSWwlOnUA+zagkxGDfa61LH7NqT8Jp4mAaHYH5LxOIDHed91ykE8r
+         V2179wN4HUfgnLV7lylUYAgHI3Rm/6M88NEG6fR8tc46vMXmTwZSKOVjuTEeFD4rd23w
+         OZ20otL8ebqD8jsxKikr6uC5rQHZMWEkfVstpDJBq2k0lIwU4za7ecEG3XbTPMCOnWoR
+         1ScQ==
+X-Gm-Message-State: AOJu0Yxyvd9ZQ5Uz5PuO72R86lKwISt8P24LfwYW702ZpjcIjyePmzeq
+	aXLj0r8BdxfnaToh7DkDr+aprzaqPNDyKKeIiSAoBqYnPdkjj+54d+Tyf3mMFE09TCyA2mpP/K0
+	u
+X-Gm-Gg: ASbGncvi057IEqfu2palUFrNGtYpkRRViTT80oSok0i9Jwmcewd+2i1DTJ7n2nFGQoJ
+	2Q7OY9r1s9YWC1cCsSTtPLLB61ARSfTGQ0DR22q2K8qpRzXamDlLxbbToq55Gld0DQZrCWV+zIw
+	i8oHZEqfKYyWwig6whAf+lueELpPGq5+88qORssWQBcFzz8sC+rxvkkQ3uRgRarZrxS+agpwqYn
+	6v69654bwuQElbiczVXifjuiXtsQiZysWoO4Xr7gsOSSYMOujPi8BCB7Kfn45DfQHLUVu5dUqsw
+	IOiDGxiR+8XnnQ==
+X-Google-Smtp-Source: AGHT+IFzHTL6K/w1zAWBZ2j07TY4HMli8FSYVftG0EE2IhTZ3tohIQUJTT8WdlW5YHaa+wGOB3+lDw==
+X-Received: by 2002:a17:903:22c1:b0:20c:d469:ba95 with SMTP id d9443c01a7336-2150109b400mr19530605ad.16.1732683582661;
+        Tue, 26 Nov 2024 20:59:42 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2129dc13239sm93367515ad.177.2024.11.26.20.59.38
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2129dba3625sm94091085ad.95.2024.11.26.20.59.42
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Nov 2024 20:59:38 -0800 (PST)
+        Tue, 26 Nov 2024 20:59:42 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3x-00000003ZUP-02zd
+	id 1tGA3x-00000003ZVY-2uNg
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQe8-0Xk8
+	id 1tGA3x-0000000FQfc-3TKg
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 09/40] fstests: per-test dmdelay instances
-Date: Wed, 27 Nov 2024 15:51:39 +1100
-Message-ID: <20241127045403.3665299-10-david@fromorbit.com>
+Subject: [PATCH 27/40] filter: handle mount errors from CONFIG_BLK_DEV_WRITE_MOUNTED=y
+Date: Wed, 27 Nov 2024 15:51:57 +1100
+Message-ID: <20241127045403.3665299-28-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,71 +87,67 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-We can't run two tests that use dmdelay at the same time because
-the device name is the same. hence they interfere with each other.
-Give dmdelay devices their own per-test names to avoid this
-problem.
+Kernels post 6.x may have CONFIG_BLK_DEV_WRITE_MOUNTED=y which
+prevents mount from opening the block device on a mounted
+filesystem. This results in an error such as:
+
+mount: <dev>: Can't open blockdev
+
+which is not the error that callers of _filter_error_mount() are
+looking for. It is, however, a direct result of the test trying
+to mount an alreayd mounted filesystem, so it is reflecting the same
+error case. Hence this mismatch in errors should not fail the test.
+
+Catch this mount error and convert it to the expected
+"already mounted" error for the tests that exercise this behaviour.
+
+There is also a minor test change here to push mount failure
+information to $seqres.full in the cases where mount errors occur.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/dmdelay | 20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
+ common/filter | 8 +++++++-
+ tests/xfs/154 | 1 +
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/common/dmdelay b/common/dmdelay
-index 66cac1a70..1c4fca6e9 100644
---- a/common/dmdelay
-+++ b/common/dmdelay
-@@ -7,13 +7,15 @@
- DELAY_NONE=0
- DELAY_READ=1
- 
-+export DELAY_NAME="delay-test.$seq"
-+
- _init_delay()
+diff --git a/common/filter b/common/filter
+index 36d51bd95..6a509d8b5 100644
+--- a/common/filter
++++ b/common/filter
+@@ -430,6 +430,10 @@ _filter_ro_mount() {
+ # v2.38 and later:
+ # dmesg(1) may have more information after failed mount mount system call
+ #
++# Kernels post 6.x may have CONFIG_BLK_DEV_WRITE_MOUNTED=y which prevents mount
++# from opening the block device on a mounted filesytsem:
++# mount: <dev>: Can't open blockdev
++#
+ # This is also true for ESTALE error. So let's remove all the changing parts
+ # and keep the 'prior to v2.21' format:
+ # mount: Structure needs cleaning
+@@ -437,7 +441,9 @@ _filter_ro_mount() {
+ _filter_error_mount()
  {
- 	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
--	DELAY_DEV=/dev/mapper/delay-test
-+	DELAY_DEV=/dev/mapper/$DELAY_NAME
- 	DELAY_TABLE="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 0"
- 	DELAY_TABLE_RDELAY="0 $BLK_DEV_SIZE delay $SCRATCH_DEV 0 10000 $SCRATCH_DEV 0 0"
--	_dmsetup_create delay-test --table "$DELAY_TABLE" || \
-+	_dmsetup_create $DELAY_NAME --table "$DELAY_TABLE" || \
- 		_fatal "failed to create delay device"
+ 	grep -v "dmesg(1) may have more information after failed mount" | \
+-		sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
++		sed -e "s/mount:\(.*failed:\)/mount:/" \
++		    -e "s/mount: SCRATCH_DEV: Can't open blockdev/mount: TEST_DIR\/extra_mnt: SCRATCH_DEV already mounted or mount point busy/" |\
++		    _filter_ending_dot
  }
  
-@@ -33,9 +35,9 @@ _cleanup_delay()
- {
- 	# If dmsetup load fails then we need to make sure to do resume here
- 	# otherwise the umount will hang
--	$DMSETUP_PROG resume delay-test > /dev/null 2>&1
-+	$DMSETUP_PROG resume $DELAY_NAME > /dev/null 2>&1
- 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
--	_dmsetup_remove delay-test
-+	_dmsetup_remove $DELAY_NAME
- }
- 
- # _load_delay_table <table> [lockfs]
-@@ -52,15 +54,15 @@ _load_delay_table()
- 
- 	# run a suspend/resume cycle to avoid excessive resume delays once a
- 	# delay is introduced below
--	$DMSETUP_PROG suspend $suspend_opt delay-test
--	$DMSETUP_PROG resume $suspend_opt delay-test
-+	$DMSETUP_PROG suspend $suspend_opt $DELAY_NAME
-+	$DMSETUP_PROG resume $suspend_opt $DELAY_NAME
- 
--	$DMSETUP_PROG suspend $suspend_opt delay-test
-+	$DMSETUP_PROG suspend $suspend_opt $DELAY_NAME
- 	[ $? -ne 0 ] && _fatal "failed to suspend delay-test"
- 
--	$DMSETUP_PROG load delay-test --table "$table"
-+	$DMSETUP_PROG load $DELAY_NAME --table "$table"
- 	[ $? -ne 0 ] && _fatal "failed to load table into delay-test"
- 
--	$DMSETUP_PROG resume delay-test
-+	$DMSETUP_PROG resume $DELAY_NAME
- 	[ $? -ne 0 ] && _fatal  "failed to resume delay-test"
- }
+ # Similar to _filter_error_mount, filter a busy mount output.
+diff --git a/tests/xfs/154 b/tests/xfs/154
+index e8494bbd6..674d06784 100755
+--- a/tests/xfs/154
++++ b/tests/xfs/154
+@@ -46,6 +46,7 @@ test $? -eq 137 || echo "repair should have been killed??"
+ _check_scratch_xfs_features NEEDSREPAIR
+ _try_scratch_mount &> $tmp.mount
+ res=$?
++cat $tmp.mount >> $seqres.full
+ _filter_error_mount < $tmp.mount
+ if [ $res -eq 0 ]; then
+ 	echo "Should not be able to mount after needsrepair crash"
 -- 
 2.45.2
 
