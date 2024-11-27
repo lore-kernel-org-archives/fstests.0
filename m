@@ -1,79 +1,79 @@
-Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 17D33C8CE
-	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B29281AD7
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732683250; cv=none; b=tLqcKyhAivuhUZzXMplD7Wn5JcuX056wfGY9jR5wDUS7UUhCq6/r6yw7CLU4EgoxVi97UoApR7elqFiFtc7980u54aviglZMgOBgKjfx93v7azAPGDvRy9TlN2CHGVN18HzoBNMffnmp8utqbqONubHUvIS8zVRD0XlAqrQvJC8=
+	t=1732683251; cv=none; b=T22dJglajpssmpFQl08trhtZ8lurGY0C//efFd2tNEVDGm7yXAvz8d3ZZ04D1aNL3mDfzWzYPTOQv9BlxXm1lrA+9cM5a7vCajU2B+wrq+n4/g1gVrDC6mUZVnDQTXePc8U9C65+vAYBDXKXsdZ+iJ+MWH3LKvSqfqmAaupSxd8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732683250; c=relaxed/simple;
-	bh=u0NqGrPHkPBh+ThIyO+QOucAWEOv1QaSJg+9iHHoqx4=;
+	s=arc-20240116; t=1732683251; c=relaxed/simple;
+	bh=aYEaPH2/GPxJy5HfbWhE8f1jypLQ/lAIGmOi545jRaA=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WYKwPVMtxnO2wZ5eVLeNY0LlAC/EJvj7ZpRilsoCUMxnShLgMdNAjKjRFIv22VygiOdwqVuiya09Q+hSyYa0SWXMFmOS6bU9yysN7aqj1Ch+lISOzxCazg6Sur5Uj1mg9kTGlGeG9h8GB48KONY8ibVHz+loHVFdR4sn1NWM0Gc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=JbG8/czU; arc=none smtp.client-ip=209.85.214.169
+	 MIME-Version; b=pjzGgw9kePSUwxqkpJ1loEg4HXc5VlcQHsdDfJW10nu+/GA2fPXVMF9wmf7saraqYOoSqJsQVbzMdLa/9rfzmq2sZkLAqbdcFwodO+pyZraxuF1R7RtW2z3u/2LGSCB5zXJAgxSCHLvCGANfMZwMIglSlqhaDC+lyrO4ZjorCAk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=xwiqWxph; arc=none smtp.client-ip=209.85.216.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="JbG8/czU"
-Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-212348d391cso60994215ad.2
-        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:08 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="xwiqWxph"
+Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-2ea8b039ddcso5031366a91.0
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683248; x=1733288048; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683249; x=1733288049; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=lhc88UwVJco40pqZl8KwTK/wY0FP5frjRRPeEfugaGk=;
-        b=JbG8/czU3528VzRNnHGgqU+kIOXw4PXPKH4/Gz/W/1QPzSROan9X4+UlnaE030U4fS
-         5tJZ0d2756TkkXsNvbHF8teNLkfI8ZBi2eo/7NEpj9OZ7IbCFr7xRerE23TcGmt+19Qh
-         VprH5DDSbuc2McZc3+MfnN/epGfmuw7mZ01/ypRZlV65ryUVxiRaL7guy8ua2LhpGpEl
-         f52MpD7PnG3bSKdFWyOjMmhJbmRvb4D0KMUAHLwEPUENYywLgEXcOuvnOJ44+hpyHmZE
-         tmZ1Bw4beysSToaI/6flmvH7k3GmU5xwdeFp0Ck2oupwGWEEzRh8jGgNJ2SbmTDQBoZ5
-         78Xg==
+        bh=XeZOo8eRbqCOh+Mr/WJaGp44XzlkeOAdFufROtEXAM0=;
+        b=xwiqWxphkVRxvnwxsPqr/mL0I7Aw1fhD70ClbhBdLi0R0NmGQvQS1fM/3PnK3+ABIu
+         txJpgG4yPS0JwipiVIE0GmEQLjqxCSNYazSRUit3vg3X3UHsGWaq2UyoMyDBgU1sOmQ3
+         /ddtgmYHK4C45m/U7NP7ANXxCZt5hEPG5LopId44vrFuV2YArRCF97+iXXeAZ7o5BXgs
+         8VF+0bee50D6+sly0cfVBNssJZWb5PB7j394LoB79fM6WFOjOYl0zsDJW2ZDgEkcm2ak
+         x/ELuBc10o7uf9E8J4mqTZeetaW1hKZiV87U1tefs+4/vEmv1p0RF7xiVbIueww1XvzU
+         8iUQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732683248; x=1733288048;
+        d=1e100.net; s=20230601; t=1732683249; x=1733288049;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=lhc88UwVJco40pqZl8KwTK/wY0FP5frjRRPeEfugaGk=;
-        b=X7Emb7YPQIXj7LqjAoU9rsCOR0+paxdcypP6/1/I/2w9E8OdgZXTJxX6koPD4vXE5B
-         6EfRFajCqXm6mBjNGkllhO/vc56+SO744Aex6leeq8f+M3/wiIgr8OSJjv+HRDLOZIoP
-         adDYCB7FOOKIcBvslb1ubvy/C9vHhPb7jrHSKnX4ud5Iw0f1iKDruIJqF61srWASHIB1
-         w/Icm2mhJOEk1X3gf937s2kxHCQHorEIPgZic4bQ3FGOzo6s45yyXEfyp4eg+2rmwxf+
-         uND0UXRIJQmIAXf0fMzu680+WVHqXjfis08GNljTeSOZzODxjbvLrgtwF8lfRuCJA4mp
-         wFRg==
-X-Gm-Message-State: AOJu0YweLoigyd7WSl4zbN9JikzSGfaJwBrmla+nGzMiMMEGJ2jO3g89
-	JHmH5oAhZKNOI7iO5J7f1+wTnHah9AafaL30fKTXv3i4paIcVbmORPxaJASzSj3128VgjFL7AYl
-	S
-X-Gm-Gg: ASbGncs9KAyYiXvCLXyv8ckkFMX+hvrilJRTvT/JGoHhJufL/Xk3EU/S+iUy4eD0UHS
-	YTwkV6a8ZHp+XqquM0qmcawJXjhCZCLesb7vpAx62DjyL5Oa8IcvY881y/wkZ3w4dVIEJ1WdVhm
-	mj5UyL6th2NEwSkB86tRM86XvlMRBIvhZ8w3gsuDAImnrF/8s++2xeZnezwaXytKtndUz7+fxcz
-	bKygPnFakBLgwt1U34y/LWbTN38N9R/+GvbZYSHR8FGvLAPyrX+7r07bMg3XaIfm82m5PQ6M3/V
-	GggoDzzgluIews86nYMGS7cN
-X-Google-Smtp-Source: AGHT+IHr+iG8VSF6Eabj3RGdNyJ0qE6ZeiC5x4JFP3IIwPQgWLBtKyCg9BAWxOeXYxhfe0uqRbbFcg==
-X-Received: by 2002:a17:902:d48c:b0:20c:5404:ed69 with SMTP id d9443c01a7336-21501a43fc5mr22428335ad.31.1732683248405;
+        bh=XeZOo8eRbqCOh+Mr/WJaGp44XzlkeOAdFufROtEXAM0=;
+        b=QPDMFkYnrLudkk7fFcX4LdY8yz6fp/84tNSFzW3Yqsybpl5Esel/ZmOtXW+Rgt34rh
+         VpxekAkdmqrYlJ0V3mhuf+xolzsKt1YUWGYQsZQuYIr1VRTU59m915w6XzaHYATx3umf
+         FLX1aoLI5ByA/ANVKUOR4SKMmz75YHGXWpz5CNcvh0CDM0JwHsaEaqusgl3GJwsIlMvT
+         IiThIXMDs7S7npd6vTfPZGjYCrfC8A+Pgvl4tU9y8QlGqOND+puVl3ITE/sHVo/0jcZU
+         lgAZ1nAqHEZNpYuVMLrxChEQYMULpVv/jpnKrxkZt1HQ9Yl3l7zq5EBaOo9wVjowQHRc
+         mEZw==
+X-Gm-Message-State: AOJu0YxRD62Nh0JqhiANdDQNURv54XaEjA86gkkwuGjSlN7gLq9Y6MCz
+	ZtaBr2Xp9w2WsJBdvoB5wFw4sZFG5bUNbBX4qDFjEaG1Ld51rDDs+SFcxW3oL4yu7w0AUv/a1z+
+	i
+X-Gm-Gg: ASbGncv1tukTpAVfyZzlnp6LlFv/jG6J7Ky+BkJX7uzb1PFQ8mCG+lqmN+WXcMh+MuU
+	P/muKirnaRjTUiQpwulaRn8eSIlyja2gpWkOqrH2pmcxJy9ncAGW3TopJfJQG5Z7tvIh+sCp/ra
+	Thw6pypQb/wRwce2ChjNIXkZnYVocKsGcXAPKfSK+Pmohj5IUhVAbPB9UpqXZphyY3YcTpKCxgu
+	rxS0ZoC2X8Nt2jk0f2YwoNaL6eEBbJ5W7miO/y0JwK34ubM3LkxZ6ruTDJRQSUmpOMqnbXMkAx7
+	unjto18HuGfvkjH5Ic4InX8A
+X-Google-Smtp-Source: AGHT+IGeoxkeF/7zq8x8mJdCpZOJwzug8hm3ywWmjopnYR1+shseKw0uBoZzoZx6XLpwAe9sc2j/Fw==
+X-Received: by 2002:a17:90b:1fcd:b0:2ea:3f34:f1a0 with SMTP id 98e67ed59e1d1-2ee095bfef5mr2463280a91.30.1732683248788;
         Tue, 26 Nov 2024 20:54:08 -0800 (PST)
 Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2129dbfeb4esm93849625ad.164.2024.11.26.20.54.07
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ee0fa9951csm490165a91.34.2024.11.26.20.54.07
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Tue, 26 Nov 2024 20:54:07 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tGA3w-00000003ZUG-3sbo
+	id 1tGA3w-00000003ZUC-3jBF
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tGA3x-0000000FQdz-0ArY
+	id 1tGA3x-0000000FQdu-00ld
 	for fstests@vger.kernel.org;
 	Wed, 27 Nov 2024 15:54:05 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 07/40] fstests: per-test dmthin instances
-Date: Wed, 27 Nov 2024 15:51:37 +1100
-Message-ID: <20241127045403.3665299-8-david@fromorbit.com>
+Subject: [PATCH 06/40] fstests: per-test dmhuge instances
+Date: Wed, 27 Nov 2024 15:51:36 +1100
+Message-ID: <20241127045403.3665299-7-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
@@ -87,41 +87,78 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-We can't run two tests that use dmthin at the same time because
+We can't run two tests that use dmhuge at the same time because
 the device name is the same. hence they interfere with each other.
-Give dmthin devices their own per-test names to avoid this
+Give dmhuge devices their own per-test names to avoid this
 problem.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/dmthin | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ common/dmhugedisk | 19 +++++++++++--------
+ tests/generic/620 |  1 +
+ 2 files changed, 12 insertions(+), 8 deletions(-)
 
-diff --git a/common/dmthin b/common/dmthin
-index 7107d5080..f2c00f5a7 100644
---- a/common/dmthin
-+++ b/common/dmthin
-@@ -9,16 +9,16 @@
- # from a single scratch device
+diff --git a/common/dmhugedisk b/common/dmhugedisk
+index 502f02437..0757e1908 100644
+--- a/common/dmhugedisk
++++ b/common/dmhugedisk
+@@ -4,6 +4,9 @@
+ #
+ # Routines for creating huge (fake) disks
  
- # Backing data dev
--DMTHIN_DATA_NAME="thin-data"
-+DMTHIN_DATA_NAME="thin-data.$seq"
- DMTHIN_DATA_DEV="/dev/mapper/$DMTHIN_DATA_NAME"
- # Backing metadata dev
--DMTHIN_META_NAME="thin-meta"
-+DMTHIN_META_NAME="thin-meta.$seq"
- DMTHIN_META_DEV="/dev/mapper/$DMTHIN_META_NAME"
- # Backing pool dev (combination of above)
--DMTHIN_POOL_NAME="thin-provision-pool"
-+DMTHIN_POOL_NAME="thin-provision-pool.$seq"
- DMTHIN_POOL_DEV="/dev/mapper/$DMTHIN_POOL_NAME"
- # Thin volume
--DMTHIN_VOL_NAME="thin-vol"
-+DMTHIN_VOL_NAME="thin-vol.$seq"
- DMTHIN_VOL_DEV="/dev/mapper/$DMTHIN_VOL_NAME"
++export DMHUGE_TEST="huge-test.$seq"
++export DMHUGE_TEST_ZERO="huge-test-zero.$seq"
++
+ _require_dmhugedisk()
+ {
+ 	_require_dm_target zero
+@@ -20,26 +23,26 @@ _dmhugedisk_init()
+ 		chunk_size=512
+ 	fi
  
- _dmthin_cleanup()
+-	_dmsetup_remove huge-test
+-	_dmsetup_remove huge-test-zero
++	_dmsetup_remove $DMHUGE_TEST
++	_dmsetup_remove $DMHUGE_TEST_ZERO
+ 
+ 	local blk_dev_size=$1
+ 
+-	DMHUGEDISK_ZERO='/dev/mapper/huge-test-zero'
+-	DMHUGEDISK_DEV='/dev/mapper/huge-test'
++	DMHUGEDISK_ZERO="/dev/mapper/$DMHUGE_TEST_ZERO"
++	DMHUGEDISK_DEV="/dev/mapper/$DMHUGE_TEST"
+ 
+ 	DMHUGEDISK_ZERO_TABLE="0 $blk_dev_size zero"
+ 	DMHUGEDISK_DEV_TABLE="0 $blk_dev_size snapshot $DMHUGEDISK_ZERO $SCRATCH_DEV N $chunk_size"
+ 
+-	_dmsetup_create huge-test-zero --table "$DMHUGEDISK_ZERO_TABLE" || \
++	_dmsetup_create $DMHUGE_TEST_ZERO --table "$DMHUGEDISK_ZERO_TABLE" || \
+ 		_fatal "failed to create dm huge zero device"
+-	_dmsetup_create huge-test --table "$DMHUGEDISK_DEV_TABLE" || \
++	_dmsetup_create $DMHUGE_TEST --table "$DMHUGEDISK_DEV_TABLE" || \
+ 		_fatal "failed to create dm huge device"
+ }
+ 
+ _dmhugedisk_cleanup()
+ {
+ 	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
+-	_dmsetup_remove huge-test
+-	_dmsetup_remove huge-test-zero
++	_dmsetup_remove $DMHUGE_TEST
++	_dmsetup_remove $DMHUGE_TEST_ZERO
+ }
+diff --git a/tests/generic/620 b/tests/generic/620
+index bf97328d1..3f1ce45a5 100755
+--- a/tests/generic/620
++++ b/tests/generic/620
+@@ -47,6 +47,7 @@ testfile=$SCRATCH_MNT/testfile-$seq
+ 
+ $XFS_IO_PROG -fc "pwrite -S 0xaa 0 1m" -c "fsync" $testfile | _filter_xfs_io
+ 
++_dmhugedisk_cleanup
+ # success, all done
+ status=0
+ exit
 -- 
 2.45.2
 
