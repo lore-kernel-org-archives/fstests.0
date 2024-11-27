@@ -1,75 +1,82 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f182.google.com (mail-pg1-f182.google.com [209.85.215.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A3EEE1946B;
-	Wed, 27 Nov 2024 04:29:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D31759450
+	for <fstests@vger.kernel.org>; Wed, 27 Nov 2024 04:54:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732681742; cv=none; b=spebLV6on+tjb52SlvATD5s8IsjjNz0gW7w/dlPScIqva3Drh/KKKY7TM7GU1lUBcItYKFbqV8R+qONEjLANIIjE6ytnFBjpy+sIlHDSSoylivcPfBv6nXdmyy1KbptBfdHbnBh0TNZBDM9dH8WXz9dqmOKxOAnJn75bPl4AVro=
+	t=1732683250; cv=none; b=Jkdj1gkRCe9Le0p7GtI3Hj17RfVoEkguEO1h6uBJ+DlJ9heT2kF4ohPNr49kJgpJ7cggFhUGp4nQGccJe2NtodUC25AmQWX7ZiORjRyJyy7ajOaAOCZ84ah/iIu91kG8CDDMpgLkvzLeWBttIY/1f9oS2qTp0R7RhHUgSZRVw4c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732681742; c=relaxed/simple;
-	bh=zH+PYlOdq8bcYGzyNN/Ln9Z/WnvXcvgkzChe5svZpJ8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WG+kQZuwuafkmCjBETJspn7ibIJmnZV9QO+Ktb1Wf5att4Buiw2wUQGu8xfuiAyNnj5E9GsblYLVSzO4DHiIZoWvbKnPaV9j6hbChHTBOiHUPRFwKS7uBiSINeOxDh/pCQ3FeCMGAISzFatlR91+BFXPS/YYvSFbh1idTBOW9GY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=ZNcCDN40; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1732683250; c=relaxed/simple;
+	bh=X7p3I2aHwuiVgGyGN04fkwzDteLgOvI9SR2LOGUklWw=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=AOWXo76UbRI6YkkCsyXC1ZdrLpHdtEai55waSsn8s6HSpzrdxe1I8g1nTo1akiKaUXp2Ugu9fohUerPiZVET1E7jO+3vYxZDEa8K/BlOYY31EspWzj6bgnUjVCqvNEtC1710Osi4yXlt2XyLxdD1/3YMQtrGEB1IPxjlsORq2sI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=oaOFi2eF; arc=none smtp.client-ip=209.85.215.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="ZNcCDN40"
-Received: from pps.filterd (m0353725.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AR1h9Gl010586;
-	Wed, 27 Nov 2024 04:28:57 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=pp1; bh=pZfhMKryS4H4Yta8H
-	gHbHaz6s0sC8cEmtXxw/av1EbU=; b=ZNcCDN4024CdoDvFawgSjn6prQNtlo16h
-	MOvddyAs5q2fRp3tMw95QY7+zrBl95zW59U0sFJR4Kk22pq8iAwwXLaPvXqagGW2
-	OyqZsSCY03MRzD2VUNaF2D7fovE/fk7Xb9KonEJNY7XMl1CO73cP4cHweR749XOe
-	7OWww8RMkSlDg4UiUtDVcEhGm9rVGw6shUIiUmvCGuHQjatRcMfcOYZHeCkqIqZe
-	jhXyfMEHdPiba/5Jp/g4s6VV+9p9MAp9G7k0Vf2hGq+tnDHJ0B8G+Y8CaQ3ZF5Tk
-	zkAP5rm+BTjMEBavB2LCVLsavYpAo6KRAa7XvY6KT+cVImdnVZgJA==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43386k1bnq-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 27 Nov 2024 04:28:57 +0000 (GMT)
-Received: from m0353725.ppops.net (m0353725.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 4AR4NXDC022322;
-	Wed, 27 Nov 2024 04:28:56 GMT
-Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43386k1bnn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 27 Nov 2024 04:28:56 +0000 (GMT)
-Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 4AR33cEn024887;
-	Wed, 27 Nov 2024 04:28:56 GMT
-Received: from smtprelay07.fra02v.mail.ibm.com ([9.218.2.229])
-	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 433tvkj2wm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 27 Nov 2024 04:28:56 +0000
-Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
-	by smtprelay07.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 4AR4Sq0M65405398
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 27 Nov 2024 04:28:52 GMT
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 525D22004B;
-	Wed, 27 Nov 2024 04:28:52 +0000 (GMT)
-Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id C4C1120043;
-	Wed, 27 Nov 2024 04:28:50 +0000 (GMT)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com.com (unknown [9.39.20.219])
-	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Wed, 27 Nov 2024 04:28:50 +0000 (GMT)
-From: Nirjhar Roy <nirjhar@linux.ibm.com>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="oaOFi2eF"
+Received: by mail-pg1-f182.google.com with SMTP id 41be03b00d2f7-7ae3d7222d4so5212956a12.3
+        for <fstests@vger.kernel.org>; Tue, 26 Nov 2024 20:54:08 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732683248; x=1733288048; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nw/JbaFyOQ36Z7Twm3eM/DwgLcrXScvc9zCjUac6R2c=;
+        b=oaOFi2eF5GQkYqa08nokNsrlvgloBAWpTGhB+3cZE9A6+ffFt5yGH3B3VmomN2pWwC
+         bZMI9jhlEbEjRRO9LcxHOGW1zDb9T7kzgfQPTG0AhBJjH4X5FAz/bFrOpcfb/cCZxv9K
+         /CTWBIHcYygfwMdsSXUMUektuBTSXdDj7A3J8D2GP1lxKbkgQcQaWoTTXs0ICY8N1XeO
+         ANJbRUvfc++vwrBfhMWQJ1Qv7OD/crBRdIe6LufZWCXaddRjUm6Xc5q+0OKPrGo3mnRT
+         fWIOzrFEFsLx6A04xXGl/t7zySXU0EqmJU0bqW8AXrh8c/9Y6+7jeYBco/6XvsriRose
+         AtoA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732683248; x=1733288048;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=nw/JbaFyOQ36Z7Twm3eM/DwgLcrXScvc9zCjUac6R2c=;
+        b=O0fe1KlJimYLCUBWhHFX6WQkqE5QKNzXaViopRmdCEbRZB5IJvRd3qSNE9PTLxyRXe
+         VsD88cDhKbxuTVjQOLfnPg8GqmaEvZyw13wt7Ml9uTwg7ZLOp90cdd4ghwTUxoupRCzE
+         aPRUa7ld+xSc6tAZiXK6tgotuO5uAMYEY8f5/LAIV4zFkIXtzWacuFVPG7nTA1u3ivD/
+         eBm7jQ7WrR+YROaJUsIIbFfs0pgTO/QjB2UZSpU+IZC6PFn2RPwEW9ErsguvQs7ohJ5O
+         cgcltBtT+5Vg1yFwIsoayvi99B+HAMWQBARL6Xpbs2jeW0OLJMID+VPlWHBdy1v4cgpZ
+         bt2A==
+X-Gm-Message-State: AOJu0YwMm5vHAlyjuWf3NIjpp2ABmpKAusLIcexc9j4wkYen3aNq/8cp
+	MVLuphX1w9vI+wqwIAa9iD3qDU9HxecqZUFcglo9emvXRZd33EzZV0GNTaPjBprD6ITghTfMtDo
+	Y
+X-Gm-Gg: ASbGncsNWrwZodW25z35KKy63rrja4XQyzbORagjQJaB/++iNG8Zwq2EVynk4tbO1Hw
+	Iw+l+RD3gwNZ7CxYApHKS8sLneXyrefJnMn2WC9NPL94FNdlqC/cX0BcSmflYvLMLH+V/bFyAOt
+	nAKA8HOpyslpb5otxBOGjh0eP0YKYdK8gWmOoEekYT4RUybZNpGJQsGdEV34O5jrwZavKDa2R5M
+	BS1ox8bqwi5Da9btiBUMVv+AIx0+0InLKhl9s10PgT0P4BeQ8n23meYUDyFZnUy796003mArSWO
+	8kMpqV29iZs64aeDwUJXVkU3
+X-Google-Smtp-Source: AGHT+IGTWw4FbN1JQuEGO2BNM0MwBbNFtkZ3/1hkvId9VARq7AOL6GfW8lWdJmuaixBntrLnPh/xGw==
+X-Received: by 2002:a05:6a21:4610:b0:1db:e5ac:3d5b with SMTP id adf61e73a8af0-1e0e0b8cc45mr2570924637.39.1732683248024;
+        Tue, 26 Nov 2024 20:54:08 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2129dc2024asm93523495ad.224.2024.11.26.20.54.07
+        for <fstests@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Nov 2024 20:54:07 -0800 (PST)
+Received: from [192.168.253.23] (helo=devoid.disaster.area)
+	by dread.disaster.area with esmtp (Exim 4.98)
+	(envelope-from <dave@fromorbit.com>)
+	id 1tGA3w-00000003ZTs-2k3w
+	for fstests@vger.kernel.org;
+	Wed, 27 Nov 2024 15:54:04 +1100
+Received: from dave by devoid.disaster.area with local (Exim 4.98)
+	(envelope-from <dave@devoid.disaster.area>)
+	id 1tGA3w-0000000FQdW-3GQv
+	for fstests@vger.kernel.org;
+	Wed, 27 Nov 2024 15:54:04 +1100
+From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-        ritesh.list@gmail.com, ojaswin@linux.ibm.com, djwong@kernel.org,
-        zlang@kernel.org, nirjhar@linux.ibm.com
-Subject: [PATCH v5 3/3] generic: Addition of new tests for extsize hints
-Date: Wed, 27 Nov 2024 09:58:01 +0530
-Message-ID: <f631f38a8b95dc6caee01015b8b24599f15b6c9b.1732681064.git.nirjhar@linux.ibm.com>
-X-Mailer: git-send-email 2.43.5
-In-Reply-To: <cover.1732681064.git.nirjhar@linux.ibm.com>
-References: <cover.1732681064.git.nirjhar@linux.ibm.com>
+Subject: [PATCH 01/40] xfs/448: get rid of assert-on-failure
+Date: Wed, 27 Nov 2024 15:51:31 +1100
+Message-ID: <20241127045403.3665299-2-david@fromorbit.com>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20241127045403.3665299-1-david@fromorbit.com>
+References: <20241127045403.3665299-1-david@fromorbit.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -77,252 +84,44 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: ieqHzQBQTjRopkF8enM2EBdGyeO0IR4W
-X-Proofpoint-GUID: JG0MoEt_-WIAxVubX7Q4PGJbnXc0PimG
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 malwarescore=0
- mlxlogscore=999 spamscore=0 suspectscore=0 phishscore=0 clxscore=1015
- mlxscore=0 lowpriorityscore=0 impostorscore=0 adultscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2411270035
 
-This commit adds new tests that checks the behaviour of xfs/ext4
-filesystems when extsize hint is set on file with inode size as 0,
-non-empty files with allocated and delalloc extents and so on.
-Although currently this test is placed under tests/generic, it
-only runs on xfs and there is an ongoing patch series[1] to
-enable extsize hints for ext4 as well.
+From: Dave Chinner <dchinner@redhat.com>
 
-[1] https://lore.kernel.org/linux-ext4/cover.1726034272.git.ojaswin@linux.ibm.com/
+The bug this problem exercises has been fixed for quite some time,
+but the test does not run on XFS debug kernels that have fatal
+asserts enable. There is no reason for this now that the test does
+not assert fail on most kernels regularly tested, so kill the
+check and enable the test to run on all XFS configs.
 
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Suggested-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
-Signed-off-by: Nirjhar Roy <nirjhar@linux.ibm.com>
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/367     | 174 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/367.out |  26 +++++++
- 2 files changed, 200 insertions(+)
- create mode 100755 tests/generic/367
- create mode 100644 tests/generic/367.out
+ tests/xfs/448 | 6 ------
+ 1 file changed, 6 deletions(-)
 
-diff --git a/tests/generic/367 b/tests/generic/367
-new file mode 100755
-index 00000000..7cf90695
---- /dev/null
-+++ b/tests/generic/367
-@@ -0,0 +1,174 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2024 Nirjhar Roy (nirjhar@linux.ibm.com).  All Rights Reserved.
-+#
-+# FS QA Test 367
-+#
-+# This test verifies that extent allocation hint setting works correctly on
-+# files with no extents allocated and non-empty files which are truncated.
-+# It also checks that the  extent hints setting fails with non-empty file
-+# i.e, with any file with allocated extents or delayed allocation. We also
-+# check if the extsize value and the xflag bit actually got reflected after
-+# setting/re-setting the extsize value.
-+
-+. ./common/config
-+. ./common/filter
-+. ./common/preamble
-+
-+_begin_fstest ioctl quick
-+
-+_fixed_by_kernel_commit 2a492ff66673 \
-+	"xfs: Check for delayed allocations before setting extsize"
-+
-+_require_scratch_extsize
-+
-+FILE_DATA_SIZE=1M
-+
-+get_default_extsize()
-+{
-+    if [ -z $1 ] || [ ! -d $1 ]; then
-+        echo "Missing mount point argument for get_default_extsize"
-+        exit 1
-+    fi
-+    $XFS_IO_PROG -c "extsize" "$1" | sed 's/^\[\([0-9]\+\)\].*/\1/'
-+}
-+
-+filter_extsz()
-+{
-+    sed "s/\[$1\]/\[EXTSIZE\]/g"
-+}
-+
-+setup()
-+{
-+    _scratch_mkfs >> "$seqres.full"  2>&1
-+    _scratch_mount >> "$seqres.full" 2>&1
-+    BLKSZ=`_get_block_size $SCRATCH_MNT`
-+    DEFAULT_EXTSIZE=`get_default_extsize $SCRATCH_MNT`
-+    EXTSIZE=$(( BLKSZ*2 ))
-+    # Make sure the new extsize is not the same as the default
-+    # extsize so that we can observe it changing
-+    [[ "$DEFAULT_EXTSIZE" -eq "$EXTSIZE" ]] && EXTSIZE=$(( BLKSZ*4 ))
-+}
-+
-+read_file_extsize()
-+{
-+    $XFS_IO_PROG -c "extsize" $1 | _filter_scratch | filter_extsz $2
-+}
-+
-+check_extsz_and_xflag()
-+{
-+    local filename=$1
-+    local extsize=$2
-+    read_file_extsize $filename $extsize
-+    _test_fsxattr_xflag $filename "extsize" && echo "e flag set" || \
-+	    echo "e flag unset"
-+}
-+
-+check_extsz_xflag_across_remount()
-+{
-+    local filename=$1
-+    local extsize=$2
-+    _scratch_cycle_mount
-+    check_extsz_and_xflag $filename $extsize
-+}
-+
-+# Extsize flag should be cleared when extsize is reset, so this function
-+# checks that this behavior is followed.
-+reset_extsz_and_recheck_extsz_xflag()
-+{
-+    local filename=$1
-+    echo "Re-setting extsize hint to 0"
-+    $XFS_IO_PROG -c "extsize 0" $filename
-+    check_extsz_xflag_across_remount $filename "0"
-+}
-+
-+check_extsz_xflag_before_and_after_reset()
-+{
-+    local filename=$1
-+    local extsize=$2
-+    check_extsz_xflag_across_remount $filename $extsize
-+    reset_extsz_and_recheck_extsz_xflag $filename
-+}
-+
-+test_empty_file()
-+{
-+    echo "TEST: Set extsize on empty file"
-+    local filename=$1
-+    $XFS_IO_PROG \
-+        -c "open -f $filename" \
-+        -c "extsize $EXTSIZE" \
-+
-+    check_extsz_xflag_before_and_after_reset $filename $EXTSIZE
-+    echo
-+}
-+
-+test_data_delayed()
-+{
-+    echo "TEST: Set extsize on non-empty file with delayed allocation"
-+    local filename=$1
-+    $XFS_IO_PROG \
-+        -c "open -f $filename" \
-+        -c "pwrite -q  0 $FILE_DATA_SIZE" \
-+        -c "extsize $EXTSIZE" | _filter_scratch
-+
-+    echo "test for default extsize setting if any"
-+    read_file_extsize $filename $DEFAULT_EXTSIZE
-+    echo
-+}
-+
-+test_data_allocated()
-+{
-+    echo "TEST: Set extsize on non-empty file with allocated extents"
-+    local filename=$1
-+    $XFS_IO_PROG \
-+        -c "open -f $filename" \
-+        -c "pwrite -qW  0 $FILE_DATA_SIZE" \
-+        -c "extsize $EXTSIZE" | _filter_scratch
-+
-+    echo "test for default extsize setting if any"
-+    read_file_extsize $filename $DEFAULT_EXTSIZE
-+    echo
-+}
-+
-+test_truncate_allocated()
-+{
-+    echo "TEST: Set extsize after truncating a file with allocated extents"
-+    local filename=$1
-+    $XFS_IO_PROG \
-+        -c "open -f $filename" \
-+        -c "pwrite -qW  0 $FILE_DATA_SIZE" \
-+        -c "truncate 0" \
-+        -c "extsize $EXTSIZE" \
-+
-+    check_extsz_xflag_across_remount $filename $EXTSIZE
-+    echo
-+}
-+
-+test_truncate_delayed()
-+{
-+    echo "TEST: Set extsize after truncating a file with delayed allocation"
-+    local filename=$1
-+    $XFS_IO_PROG \
-+        -c "open -f $filename" \
-+        -c "pwrite -q  0 $FILE_DATA_SIZE" \
-+        -c "truncate 0" \
-+        -c "extsize $EXTSIZE" \
-+
-+    check_extsz_xflag_across_remount $filename $EXTSIZE
-+    echo
-+}
-+
-+setup
-+echo -e "EXTSIZE = $EXTSIZE DEFAULT_EXTSIZE = $DEFAULT_EXTSIZE \
-+	BLOCKSIZE = $BLKSZ\n" >> "$seqres.full"
-+
-+NEW_FILE_NAME_PREFIX=$SCRATCH_MNT/new-file-
-+
-+test_empty_file "$NEW_FILE_NAME_PREFIX"00
-+test_data_delayed "$NEW_FILE_NAME_PREFIX"01
-+test_data_allocated "$NEW_FILE_NAME_PREFIX"02
-+test_truncate_allocated "$NEW_FILE_NAME_PREFIX"03
-+test_truncate_delayed "$NEW_FILE_NAME_PREFIX"04
-+
-+status=0
-+exit
-diff --git a/tests/generic/367.out b/tests/generic/367.out
-new file mode 100644
-index 00000000..f94e8545
---- /dev/null
-+++ b/tests/generic/367.out
-@@ -0,0 +1,26 @@
-+QA output created by 367
-+TEST: Set extsize on empty file
-+[EXTSIZE] SCRATCH_MNT/new-file-00
-+e flag set
-+Re-setting extsize hint to 0
-+[EXTSIZE] SCRATCH_MNT/new-file-00
-+e flag unset
-+
-+TEST: Set extsize on non-empty file with delayed allocation
-+xfs_io: FS_IOC_FSSETXATTR SCRATCH_MNT/new-file-01: Invalid argument
-+test for default extsize setting if any
-+[EXTSIZE] SCRATCH_MNT/new-file-01
-+
-+TEST: Set extsize on non-empty file with allocated extents
-+xfs_io: FS_IOC_FSSETXATTR SCRATCH_MNT/new-file-02: Invalid argument
-+test for default extsize setting if any
-+[EXTSIZE] SCRATCH_MNT/new-file-02
-+
-+TEST: Set extsize after truncating a file with allocated extents
-+[EXTSIZE] SCRATCH_MNT/new-file-03
-+e flag set
-+
-+TEST: Set extsize after truncating a file with delayed allocation
-+[EXTSIZE] SCRATCH_MNT/new-file-04
-+e flag set
-+
+diff --git a/tests/xfs/448 b/tests/xfs/448
+index fbd1af383..032c94d39 100755
+--- a/tests/xfs/448
++++ b/tests/xfs/448
+@@ -13,10 +13,6 @@
+ # up the directory tree by running xfs_scrub will crash the
+ # kernel in __xfs_dir3_data_check.
+ #
+-# Notice:
+-# we should have non fatal asserts configured, because assert
+-# failures triggered by the intentional corrupt would crash system.
+-#
+ . ./common/preamble
+ _begin_fstest auto quick fuzzers
+ 
+@@ -26,8 +22,6 @@ _begin_fstest auto quick fuzzers
+ 
+ _require_scratch_nocheck
+ _require_xfs_io_command "scrub"
+-# Corrupt XFS on purpose, and skip if assert failures would crash system.
+-_require_no_xfs_bug_on_assert
+ 
+ rm -f "$seqres.full"
+ 
 -- 
-2.43.5
+2.45.2
 
