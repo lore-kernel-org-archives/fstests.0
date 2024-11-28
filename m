@@ -1,86 +1,75 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1414B19EEB4;
-	Thu, 28 Nov 2024 13:14:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61D351A7AD0
+	for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 13:27:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732799647; cv=none; b=rC2cUZ9E+EbzRpIUlzYSDjypI9xaA4zeU8eOTFvB/9PS31VyG/0Y9AjR6dYY88fq2qildA6lhrP459ioLXeqcsI3iy67F6CzIEZj3ZFnmjUC7BqmQo+6K5uODESmumgbNZpO0nHBn1bQUs759WcueaoPYzwNNwPbWvD8RdtgtnA=
+	t=1732800475; cv=none; b=fvj88Qz1Ml905qe1hUv7Zc4b2FZnNGy9YqXQAwTYhki9c7iBCdC41/afo1zsk/iuq3heqOKSzXJ30HBHMPFbXQdWKWKxjRGdj4rQDRtp1nMPM6Cegf8me5YOmsDVT9YU3PFpwyCLQGX+0ncNdaDi+Yj4oZCnmsrsc97Z4ay/XLo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732799647; c=relaxed/simple;
-	bh=Rz1Qg2X8UnDaLDOZGQs95vUG/d4IbZhxX8cRQHIK5hA=;
+	s=arc-20240116; t=1732800475; c=relaxed/simple;
+	bh=0s+yPItt2IrnjpQXbpel93eG29xJ3JXukb8NY6yCfIM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SvytdAk+dyg6pqjsZtNTNs85NVZ6fybU5cDBaJ0MMVkwNVJn20BOQpYpyO+MPOGYg0nCxWPSDzjhx4zu193HLr/zcbp5AdYrNRSeAdsHj+QCUgmDFKNa156eHnCF/+QzpMbTm+gs08tFyTLxODh5J0kEiGdChZCI0/KbpU+MzmY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=tS8eBNpL; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=mgf110mQ; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=tS8eBNpL; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=mgf110mQ; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=cuijnrQJOxYEr5IQG1Cw/tn+i3eDuGSMkR4/l6993XnKCMJw5n+W5/86AkGy8d5jXwxSVdBmOS9//hfko1yflSf13358XFYKzZlNQCwzs0Rlkn486aqvfuuMWCxrtXegcJFgfVjQn1vgL8MVzDM1j1hJadCOfhPxWzLkdjz412g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YHnk/0Z/; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="tS8eBNpL";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="mgf110mQ";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="tS8eBNpL";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="mgf110mQ"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id F417D1F44F;
-	Thu, 28 Nov 2024 13:14:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1732799644;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YHnk/0Z/"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1732800471;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=hXncd2gcmOzdxbWvBZejdLk86kCrNQ0yrsA8I3klF6U=;
-	b=tS8eBNpLXQAQ7d1GoF6hwQfAD3N/aVtrYYitnMhK+dECpQEknprCwHO4Hp0rU+qdjGzYyX
-	dWHQEtoxZynsB/EtJDc9XaKCD/1XyARRErdkdGyWIBg03QBFXIldyEapQ7ihbrHwkvDOP5
-	1j7ova3Sw1bIf77mYJaQApibi5uCnIs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1732799644;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hXncd2gcmOzdxbWvBZejdLk86kCrNQ0yrsA8I3klF6U=;
-	b=mgf110mQiu+zLe0hQPyIgCjtfnRW5lIUZH68opNaPhhVNGNMLqzdH4ZQfP+dlm+ZEi0oN8
-	/CoP7eYPtCpeQJBQ==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=tS8eBNpL;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=mgf110mQ
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1732799644;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hXncd2gcmOzdxbWvBZejdLk86kCrNQ0yrsA8I3klF6U=;
-	b=tS8eBNpLXQAQ7d1GoF6hwQfAD3N/aVtrYYitnMhK+dECpQEknprCwHO4Hp0rU+qdjGzYyX
-	dWHQEtoxZynsB/EtJDc9XaKCD/1XyARRErdkdGyWIBg03QBFXIldyEapQ7ihbrHwkvDOP5
-	1j7ova3Sw1bIf77mYJaQApibi5uCnIs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1732799644;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hXncd2gcmOzdxbWvBZejdLk86kCrNQ0yrsA8I3klF6U=;
-	b=mgf110mQiu+zLe0hQPyIgCjtfnRW5lIUZH68opNaPhhVNGNMLqzdH4ZQfP+dlm+ZEi0oN8
-	/CoP7eYPtCpeQJBQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D882213690;
-	Thu, 28 Nov 2024 13:14:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id tC2eNJtsSGfleAAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Thu, 28 Nov 2024 13:14:03 +0000
-Date: Thu, 28 Nov 2024 14:14:02 +0100
-From: David Sterba <dsterba@suse.cz>
+	bh=/iTZ4q6mzizq8FBezBiN/RuDqSjRE18Wk055DMNaJqk=;
+	b=YHnk/0Z/g4lXvRvVd0GsCT21AJSkNDLUtY1v7KQ+GkaguGTFeGBaDkQ6YqPS7yU8oPPLkD
+	2QDG3BxtpdsgjalqwwmzU1ePc6gFBIYb1wo+0Vv86US/GIKIC6BNCh/hqlBUVvQrr/Itx2
+	0q+a9mZdESH0AVfhkJYGfZWi6M55e/Q=
+Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
+ [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-283-DomJPNGXPxOJY7mditYQcw-1; Thu, 28 Nov 2024 08:27:50 -0500
+X-MC-Unique: DomJPNGXPxOJY7mditYQcw-1
+X-Mimecast-MFC-AGG-ID: DomJPNGXPxOJY7mditYQcw
+Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7251424982fso919278b3a.0
+        for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 05:27:50 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732800469; x=1733405269;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/iTZ4q6mzizq8FBezBiN/RuDqSjRE18Wk055DMNaJqk=;
+        b=Lt+tHzicwhkQjgxiZZqCpnyx4pGRH/5sBcJvTqd1yiPFWFvp1rgUCpRsezlQ5zm/A6
+         zLomAWY/WUAsyTJotKv2jTcEPyWbQ0wOOT6QYgnO0vsvqyFf1n+fz8m7/K9jsZJ9neNF
+         Yk60BE8ogYwN3/Op2ROVkDfOF+TUnd5ZTIX7uRi2sz3Nriqvzhf94i0KdjaIZN79JHJQ
+         cTNoeH0d3qbarql9stE7VAgN6jEv5UuTGkjZ02r0DXI2tUibz9ijlfNi/X591hR3x/Kj
+         l9lxIRKy++aSPQ3TiVkeeZ0IekfMZ1UXPzUQdxcdZKBoA3u6t5Ws8lc59K3OWFePDa0R
+         kYsg==
+X-Gm-Message-State: AOJu0YzZmfTKfNaUtrzBzHD9BR7vXv8T6jg8btavum5gCJkXi+e5J1Ru
+	OYceY26+dctrRwVywJkABY48aDYG7sthL/04e3Wi3leCXAIXZCPvjofCb7czlNG+DpOD6vx4Prk
+	LgnOXD2yNBWkpioa/KjzkOFAsDd9GjDgl72515mMekk71DoXfn+Ctf/Gh5Mgnvfe9GQ==
+X-Gm-Gg: ASbGnctg10aZ3t9aGD5z8rtuPih55I1KpMNOVAZzpADn2j3b6LUVu++0hwcwdUZI2tm
+	EABQfB2LTMEYPIrHB55uKcUOUrJumxjVOcZv1+6/l+k/IEDhgEjBZI2dtdKvP/dPVIRZu5ywoch
+	CEvR/uFA1YjJApPAcKwuYmLAnzs9Yw7UVigulkvNVeuPASsrU3PJviPNypbYejPXbpuHAqJzsCm
+	2PVG4+KE1wgAHnafK2PbE0j4ZnlGXuhc4B2BM3MURJWgokcoKeHaaFkePPpZN9zV+0P4eY4GbZ5
+	La8VyfBwZ4yRBJw=
+X-Received: by 2002:aa7:88c3:0:b0:724:5815:62c1 with SMTP id d2e1a72fcca58-72530133103mr10355858b3a.19.1732800469032;
+        Thu, 28 Nov 2024 05:27:49 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEvxPzHHwe3CTbSVYUKhipTOHl9LrWX8JcWHdp6FLY3nKR68fErJvX10PPr4XgWQ3xD6wEocg==
+X-Received: by 2002:aa7:88c3:0:b0:724:5815:62c1 with SMTP id d2e1a72fcca58-72530133103mr10355835b3a.19.1732800468655;
+        Thu, 28 Nov 2024 05:27:48 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-725417fbab6sm1528891b3a.106.2024.11.28.05.27.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Nov 2024 05:27:48 -0800 (PST)
+Date: Thu, 28 Nov 2024 21:27:44 +0800
+From: Zorro Lang <zlang@redhat.com>
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
 Subject: Re: [PATCH] btrfs/028: kill lingering processes when test is
  interrupted
-Message-ID: <20241128131402.GR31418@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
+Message-ID: <20241128132744.n4mryf5cw2bqojuy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <7a257c21d2efe2706bac1f2fac8f7faff1d0423f.1732796051.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -91,40 +80,6 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <7a257c21d2efe2706bac1f2fac8f7faff1d0423f.1732796051.git.fdmanana@suse.com>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Rspamd-Queue-Id: F417D1F44F
-X-Spam-Score: -4.21
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_SOME(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	RCVD_COUNT_TWO(0.00)[2];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCPT_COUNT_THREE(0.00)[4];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[twin.jikos.cz:mid,suse.cz:replyto,suse.cz:dkim,suse.com:email,imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
-X-Spam-Level: 
 
 On Thu, Nov 28, 2024 at 12:14:56PM +0000, fdmanana@kernel.org wrote:
 > From: Filipe Manana <fdmanana@suse.com>
@@ -138,5 +93,42 @@ On Thu, Nov 28, 2024 at 12:14:56PM +0000, fdmanana@kernel.org wrote:
 > waits for them to exit.
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
 
-Reviewed-by: David Sterba <dsterba@suse.com>
+Good to me, I think I can help to unset balance_pid and fsstress_pid
+if these processes have been killed before doing _cleanup.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+>  tests/btrfs/028 | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
+> 
+> diff --git a/tests/btrfs/028 b/tests/btrfs/028
+> index f64fc831..4ef83423 100755
+> --- a/tests/btrfs/028
+> +++ b/tests/btrfs/028
+> @@ -13,6 +13,19 @@
+>  . ./common/preamble
+>  _begin_fstest auto qgroup balance
+>  
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -r -f $tmp.*
+> +	if [ ! -z "$balance_pid" ]; then
+> +		_btrfs_kill_stress_balance_pid $balance_pid
+> +	fi
+> +	if [ ! -z "$fsstress_pid" ]; then
+> +		kill $fsstress_pid &> /dev/null
+> +		wait $fsstress_pid &> /dev/null
+> +	fi
+> +}
+> +
+>  . ./common/filter
+>  
+>  _require_scratch
+> -- 
+> 2.45.2
+> 
+> 
+
