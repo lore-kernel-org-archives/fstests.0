@@ -1,75 +1,73 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61D351A7AD0
-	for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 13:27:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFAAA12C7FD
+	for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 20:30:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732800475; cv=none; b=fvj88Qz1Ml905qe1hUv7Zc4b2FZnNGy9YqXQAwTYhki9c7iBCdC41/afo1zsk/iuq3heqOKSzXJ30HBHMPFbXQdWKWKxjRGdj4rQDRtp1nMPM6Cegf8me5YOmsDVT9YU3PFpwyCLQGX+0ncNdaDi+Yj4oZCnmsrsc97Z4ay/XLo=
+	t=1732825839; cv=none; b=PUpzo/8XNtx6Rm/nGSChjRPxI1mC/W9FSQQ5QjVksYE8Pvv6mXtLOA2H7/oc/fvrZjkabhbpwZxLF5lltJocHX+rO8nmVOjeO50tfd9UFe8zpQ+R8a73eJblddiqRZufh2L3z/lSj9hd40yzJH56EJ90C+grf2MwPtRvlyPCIdQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732800475; c=relaxed/simple;
-	bh=0s+yPItt2IrnjpQXbpel93eG29xJ3JXukb8NY6yCfIM=;
+	s=arc-20240116; t=1732825839; c=relaxed/simple;
+	bh=n12ow44lAhdzVwbinu9sZUxhMtOzVoooRBaYpIhnPlk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cuijnrQJOxYEr5IQG1Cw/tn+i3eDuGSMkR4/l6993XnKCMJw5n+W5/86AkGy8d5jXwxSVdBmOS9//hfko1yflSf13358XFYKzZlNQCwzs0Rlkn486aqvfuuMWCxrtXegcJFgfVjQn1vgL8MVzDM1j1hJadCOfhPxWzLkdjz412g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YHnk/0Z/; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=qt9iiW2JHQaSvKYFRLuUookl+SN8VpKHTzCO+EJxXf1AgCI+4QCsSF4PE70Owlp8k+bwxtzn6uG66s1seE5WVvGU6c/KkW5IXhafMqAQ0cbJrZXZof8iDO/zlNModWV7FpACHOUmGM0RTmUF4eemTjNAPGsqq433/SVZ10utaZo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=M5bBp7Q7; arc=none smtp.client-ip=209.85.210.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YHnk/0Z/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1732800471;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=/iTZ4q6mzizq8FBezBiN/RuDqSjRE18Wk055DMNaJqk=;
-	b=YHnk/0Z/g4lXvRvVd0GsCT21AJSkNDLUtY1v7KQ+GkaguGTFeGBaDkQ6YqPS7yU8oPPLkD
-	2QDG3BxtpdsgjalqwwmzU1ePc6gFBIYb1wo+0Vv86US/GIKIC6BNCh/hqlBUVvQrr/Itx2
-	0q+a9mZdESH0AVfhkJYGfZWi6M55e/Q=
-Received: from mail-pf1-f197.google.com (mail-pf1-f197.google.com
- [209.85.210.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-283-DomJPNGXPxOJY7mditYQcw-1; Thu, 28 Nov 2024 08:27:50 -0500
-X-MC-Unique: DomJPNGXPxOJY7mditYQcw-1
-X-Mimecast-MFC-AGG-ID: DomJPNGXPxOJY7mditYQcw
-Received: by mail-pf1-f197.google.com with SMTP id d2e1a72fcca58-7251424982fso919278b3a.0
-        for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 05:27:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="M5bBp7Q7"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-724d8422f37so1019332b3a.2
+        for <fstests@vger.kernel.org>; Thu, 28 Nov 2024 12:30:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1732825836; x=1733430636; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=VeqR/EGgcmggqo0Vk/FFbAdn8P5erKXJ4ShxgvlxqnQ=;
+        b=M5bBp7Q7QdQfTpEO4am06nsZKAlRC/8wuSvkuWVWtumWQYKJkRIa7pJTtWCtfqV4B2
+         R1Tcxs7vCEMFMnbsTLKy8YDGKhi0/rnVjxqJ1pGdMDAMQvwObwpXXBJK6HpDDQ4KnzEO
+         itRcifXZ0y4fKv5oz+HaDJ4EUZk5Y/CjcEqn/m0LrqyoaNn0Kymw9nqODEyqTTWoZVZZ
+         sDtys3zUdP/r5ntKc1oiwSn4ip4wOKgZWEd/pQwPaEkFFDVQSUoA1ZLsSt7EPhGDBUPR
+         dLRPDVpTqDU0c+c8xopYgyk/7KAMvoEhW7dTaD0faOW7MhxaUN+6N4a5IDElJEL5FJ9v
+         76Ow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732800469; x=1733405269;
+        d=1e100.net; s=20230601; t=1732825836; x=1733430636;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=/iTZ4q6mzizq8FBezBiN/RuDqSjRE18Wk055DMNaJqk=;
-        b=Lt+tHzicwhkQjgxiZZqCpnyx4pGRH/5sBcJvTqd1yiPFWFvp1rgUCpRsezlQ5zm/A6
-         zLomAWY/WUAsyTJotKv2jTcEPyWbQ0wOOT6QYgnO0vsvqyFf1n+fz8m7/K9jsZJ9neNF
-         Yk60BE8ogYwN3/Op2ROVkDfOF+TUnd5ZTIX7uRi2sz3Nriqvzhf94i0KdjaIZN79JHJQ
-         cTNoeH0d3qbarql9stE7VAgN6jEv5UuTGkjZ02r0DXI2tUibz9ijlfNi/X591hR3x/Kj
-         l9lxIRKy++aSPQ3TiVkeeZ0IekfMZ1UXPzUQdxcdZKBoA3u6t5Ws8lc59K3OWFePDa0R
-         kYsg==
-X-Gm-Message-State: AOJu0YzZmfTKfNaUtrzBzHD9BR7vXv8T6jg8btavum5gCJkXi+e5J1Ru
-	OYceY26+dctrRwVywJkABY48aDYG7sthL/04e3Wi3leCXAIXZCPvjofCb7czlNG+DpOD6vx4Prk
-	LgnOXD2yNBWkpioa/KjzkOFAsDd9GjDgl72515mMekk71DoXfn+Ctf/Gh5Mgnvfe9GQ==
-X-Gm-Gg: ASbGnctg10aZ3t9aGD5z8rtuPih55I1KpMNOVAZzpADn2j3b6LUVu++0hwcwdUZI2tm
-	EABQfB2LTMEYPIrHB55uKcUOUrJumxjVOcZv1+6/l+k/IEDhgEjBZI2dtdKvP/dPVIRZu5ywoch
-	CEvR/uFA1YjJApPAcKwuYmLAnzs9Yw7UVigulkvNVeuPASsrU3PJviPNypbYejPXbpuHAqJzsCm
-	2PVG4+KE1wgAHnafK2PbE0j4ZnlGXuhc4B2BM3MURJWgokcoKeHaaFkePPpZN9zV+0P4eY4GbZ5
-	La8VyfBwZ4yRBJw=
-X-Received: by 2002:aa7:88c3:0:b0:724:5815:62c1 with SMTP id d2e1a72fcca58-72530133103mr10355858b3a.19.1732800469032;
-        Thu, 28 Nov 2024 05:27:49 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEvxPzHHwe3CTbSVYUKhipTOHl9LrWX8JcWHdp6FLY3nKR68fErJvX10PPr4XgWQ3xD6wEocg==
-X-Received: by 2002:aa7:88c3:0:b0:724:5815:62c1 with SMTP id d2e1a72fcca58-72530133103mr10355835b3a.19.1732800468655;
-        Thu, 28 Nov 2024 05:27:48 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-725417fbab6sm1528891b3a.106.2024.11.28.05.27.47
+        bh=VeqR/EGgcmggqo0Vk/FFbAdn8P5erKXJ4ShxgvlxqnQ=;
+        b=jTnknMXEH3bLioMRSW9N8D1zRKML5Dqxn4r0q8exsZBRlnM5Sk/Ozgzo8HwoVQyw/Z
+         N1UACQV1TThvtTy1J/YyLH2NrRK6GPWiCRt0Xrxksn0w55HSFjgnl07uxDVfbxmxBAKD
+         wJ/DqRX6JOwp2Bb+XbChgksWcwDtKPu5JZXqMQZY5QVe0i2ZuJvbymSc+2Uxwq5KiKec
+         nw07B9+3fH3DJixCK8cX5YbtONKhiLbquRYHnuvtBQ0C3i8HZTvZXTjpFyvGdGLT4ELs
+         6mCE5jFNnOExCSID7GCAhN7gpVrr2LL4TUu7VDLiH6iO6iCSAM17446sIZCftuuPfei6
+         ILnQ==
+X-Gm-Message-State: AOJu0Yyo6iSyKEY+Tx36j4OyLmJZxurlb/OPap7fh1cffRrqHrzcSFOr
+	7/LSiVh+57CtyFsVV6I8XWQOyTWRHzY916uYwgRg/iIN0mgaoZJklqqCTUT9FhgM8rvLnILhKcd
+	r
+X-Gm-Gg: ASbGncsxyl7pP8SZ0W43p3fOKaznIml6Att81JlyvqN593uS/6T7LLQwCeAY62Ckva6
+	x02U+UhMDiQE0q0wCTzr+/kuSazrcUpUoCT6DN5heEZZt69/EbsXrvnhLYi3zOtDhryWAllsHvw
+	Rm/Py/csUQXZOjyHD8SqO8KegEpU4kzn82vHJ8oENmu/b3MRG3LM4hzO/rghXMa5HtsFP910Ph7
+	JlDl6U0OSHiwccHxTZJNe6bOqaNZpgxnfRWe1pNVY68VaTBHH73mly8+87HO/AYXrylVPADn9UN
+	3670AWr+SJeRCceV+Swedq0s4w==
+X-Google-Smtp-Source: AGHT+IHf0lh3Zz9vS1fG6JvnEgHP58GxgDTAEaTNsbygD81Rtr0PcONJWpLLt8vh3mtJrKR4EmGqtg==
+X-Received: by 2002:a17:902:c945:b0:20c:f0dd:c408 with SMTP id d9443c01a7336-2150109b04bmr76782725ad.20.1732825835934;
+        Thu, 28 Nov 2024 12:30:35 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-215219d0909sm17589955ad.278.2024.11.28.12.30.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Nov 2024 05:27:48 -0800 (PST)
-Date: Thu, 28 Nov 2024 21:27:44 +0800
-From: Zorro Lang <zlang@redhat.com>
+        Thu, 28 Nov 2024 12:30:35 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tGl9j-00000004F9K-2ms9;
+	Fri, 29 Nov 2024 07:30:31 +1100
+Date: Fri, 29 Nov 2024 07:30:31 +1100
+From: Dave Chinner <david@fromorbit.com>
 To: fdmanana@kernel.org
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
 	Filipe Manana <fdmanana@suse.com>
 Subject: Re: [PATCH] btrfs/028: kill lingering processes when test is
  interrupted
-Message-ID: <20241128132744.n4mryf5cw2bqojuy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <Z0jS5zmObJTEWYTY@dread.disaster.area>
 References: <7a257c21d2efe2706bac1f2fac8f7faff1d0423f.1732796051.git.fdmanana@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -94,15 +92,22 @@ On Thu, Nov 28, 2024 at 12:14:56PM +0000, fdmanana@kernel.org wrote:
 > 
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
-
-Good to me, I think I can help to unset balance_pid and fsstress_pid
-if these processes have been killed before doing _cleanup.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
 >  tests/btrfs/028 | 13 +++++++++++++
 >  1 file changed, 13 insertions(+)
-> 
+
+IIRC there are several btrfs tests that run fsstress that need
+similar fixes. I fixed this problem for fsstress across the entire
+fstests code base in this patch I recently sent:
+
+https://lore.kernel.org/fstests/20241127045403.3665299-3-david@fromorbit.com/
+
+Avoiding needing to repeated rebase that work by having people
+randomly fixing one-off instances like this is why I'd like those
+large "fix everything" patches reviewed and merged sooner rather
+than later...
+
+Regardless,
+
 > diff --git a/tests/btrfs/028 b/tests/btrfs/028
 > index f64fc831..4ef83423 100755
 > --- a/tests/btrfs/028
@@ -116,6 +121,9 @@ Reviewed-by: Zorro Lang <zlang@redhat.com>
 > +	cd /
 > +	rm -r -f $tmp.*
 > +	if [ ! -z "$balance_pid" ]; then
+
+"! -z <var>" is the same as "-n <var>"
+
 > +		_btrfs_kill_stress_balance_pid $balance_pid
 > +	fi
 > +	if [ ! -z "$fsstress_pid" ]; then
@@ -123,12 +131,13 @@ Reviewed-by: Zorro Lang <zlang@redhat.com>
 > +		wait $fsstress_pid &> /dev/null
 > +	fi
 > +}
-> +
->  . ./common/filter
->  
->  _require_scratch
-> -- 
-> 2.45.2
-> 
-> 
 
+This really wants the balance_pid and fsstress_pid variables to be
+unset after they are killed in normal execution so we don't try to
+kill and wait for them a second time on exit.
+
+-Dave.
+
+-- 
+Dave Chinner
+david@fromorbit.com
