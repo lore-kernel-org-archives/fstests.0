@@ -1,1410 +1,159 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A950A147C79
-	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 12:50:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AF6F1D04A9
+	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 13:38:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733057434; cv=none; b=fHezoMQ8PaPtrJQVkNVB+QXTeGjLWVWhkZX0nO7tISxmbDSnTaEkoG/4HuiAPYdkKh05rfYXSeGqC1PeBiPJXsLSwtSXAo/3W4r0yNMTtFxF62Op95bAjfIbYq0u53nzbrxGSgpaoJiSI5UUvUXQKu2W3yZY+ONT3Op6/SibrqI=
+	t=1733060287; cv=none; b=sGvgjA7lX/5EejCDsD4jsUAMSn+yIN3LQC1hvP5ge93xSAB/qT1T6U/3XU/7JZbCnaeSqdXHAlvetbHtnh6djXKS1/Z9JblgcC/8TNJsfA+W7pl9/MiiYqe/IUa/AAy8T+E6c/myXRlUBbUnhkcKsT8gtWXXOGIjiQBXnt3aqL8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733057434; c=relaxed/simple;
-	bh=gGYL8gf7jdE+Lnw+wmIxoFERYAD20sNCJWRz18VRmVA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nAL6saqoNVtImyypRrPmFhkC5ob/5W1yVqMGH8ecK/9YPG2hs1J2hmy4GtPyQ2/chW4aOqUizAp02raUE/SPTs6O8//g0eitSVBM4n7wXQqi78u6LD7yd6e83woWL/HTSV64dIXa7qmQGzuec1AeDBsbRsP/9D8gKc2vDPBX/cg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WK0LGE30; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1733060287; c=relaxed/simple;
+	bh=xFovV559JE4A6V0r4uFKELrwgNa2iLenwS2qddZxfBg=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=uac45YmPeNd7VHk16jPLU4TwoYw0c8MZ6bwrzpq9cTP3jccQtpvFD7o7Fng/WeIWaxRUmVKdo38/3X61fmMsdaVO7SpKuMXxTNc+sLyRltH2Xnxb+jguOewRENWLDa+ULXBkhmUIBh/SuWjmqtxNz1IeustLiYTSC9GdF3dASts=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eXlIb4FP; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WK0LGE30"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1733057429;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=fzbKIEoyHsUwCp4oEWSoF6RUs9pOosqh3KZ9b6vYey4=;
-	b=WK0LGE30Z8OggjuFE7oN7EISo/K4xPxlqLjgLMsLKGtLbYW9LIrii872uWvmxv2Xb8JUZO
-	PVRBosrhZe1zuh1YdVHgrqpWJ01gaBvtj+yY9+8rAnczpLNnMRTqh63nZrpO+kzwPHYB8X
-	+kfjleuy9L8ZSnIYPrHH07fdS4xNY8g=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-253-ReLNqarANoWLCjuz9HOxKQ-1; Sun, 01 Dec 2024 07:50:28 -0500
-X-MC-Unique: ReLNqarANoWLCjuz9HOxKQ-1
-X-Mimecast-MFC-AGG-ID: ReLNqarANoWLCjuz9HOxKQ
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2ee3c572485so3689391a91.2
-        for <fstests@vger.kernel.org>; Sun, 01 Dec 2024 04:50:27 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733057427; x=1733662227;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fzbKIEoyHsUwCp4oEWSoF6RUs9pOosqh3KZ9b6vYey4=;
-        b=bThKm0zjoLLH0IQqk95D0Uj3dTgOTCmKGzd0X1ZRtPqy/M+3eRwIHfNdhFpYomQPTG
-         PmY9De/KMopsK7melOlG8k28yhILgctCg6MQu69mJ2SHQ7b1o5KAyqzq+pbhbjbdRYeh
-         sOt2UenFAQKSCBEVHy6ZO6P3qOweUI4EzQvN4UzirvzkhAX2bk1WC1hLczCElf6uVTgp
-         VCG4CmS87HU1zfj5yldj84CXjysTqb3gqjzp5VbaKiLLeU8a7IOkKMCOygoGm4SpqXjK
-         XN96zKZYqUIqxozfrWNIs4WmnVzl30lrvYnOZ6vs0rI8dZmBytiICCDDkeIBIuLeqik2
-         lwFA==
-X-Gm-Message-State: AOJu0YwG/23ZErATuCOjlBNGSEHleRSSLS2J+YenOUNTCrd1RVrF818e
-	qcSa51xEh7wmP0epiPhPT87ax03W3/En02vXRy3s5ZoeTmA9FPcEhh7bJSLDjkWjmfa5/yu6/pT
-	gz5BvczwhXAO8qT08ws+xG+KnR2hhme1n++ukySi4UEBfUBpHxh+uAu3tpjU2NPr58Q==
-X-Gm-Gg: ASbGnctbHHzE5UHuCg8pP/kuTnMx7YpgZKTbrRvYJbNamUcZb5d0kn75EMD0G3P+uXX
-	XYvpiwVQB9z9nuIFpdfDwV19tCc1hxxDq0EHf0QhCGn0zboXNcmDYqZPZ0iM+3fuzUKedbuBruS
-	UkEdRvlFxr7ne6d8s6YZp3ZwBRnschBXVcQH8grSuo0iwYHdT2jqqhLd7QTyt8zbdyUVXd3j6Z1
-	2S7UI9AYFNEsmjpdph2vqkVJOWK1h2FojaLeNZn1vy12ZQBrKfx4qk/ESe4Eal06qceBaObnW42
-	2fz5nPyYGQumDH0=
-X-Received: by 2002:a17:90b:1b4b:b0:2ee:96e3:d834 with SMTP id 98e67ed59e1d1-2ee96e3d91fmr4519984a91.34.1733057426368;
-        Sun, 01 Dec 2024 04:50:26 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHjBwV6rOwnhGmNx83DBXv6F49fTvYs3veRpOp/WgUJi017VyjMVXEZTd6h49A9PIVpON0GUA==
-X-Received: by 2002:a17:90b:1b4b:b0:2ee:96e3:d834 with SMTP id 98e67ed59e1d1-2ee96e3d91fmr4519938a91.34.1733057425666;
-        Sun, 01 Dec 2024 04:50:25 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ee7e468428sm2602318a91.31.2024.12.01.04.50.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Dec 2024 04:50:24 -0800 (PST)
-Date: Sun, 1 Dec 2024 20:50:20 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 13/40] fstests: clean up loop device instantiation
-Message-ID: <20241201125020.qqo24olu4rwh3rqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241127045403.3665299-1-david@fromorbit.com>
- <20241127045403.3665299-14-david@fromorbit.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eXlIb4FP"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4C04C4CECF;
+	Sun,  1 Dec 2024 13:38:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1733060287;
+	bh=xFovV559JE4A6V0r4uFKELrwgNa2iLenwS2qddZxfBg=;
+	h=Date:From:To:Subject:From;
+	b=eXlIb4FPR8srGrmYAvhNQTjwZ+b8Vl866iTVMFQ5i1ucgCPGHri+lSSnNsd6yuuC8
+	 HDQjHnbygAWN3610hD64b9/BMPadz0ZZPX0lmtX+HvgEIR+HnGdT1Pfpec0717yaSi
+	 ywlfGDhyiVFgm9gG8gGSDJ8t+InLGtZdrtMgBxGdYepTZ7OsNVrGU7lM5ATvPRcnMJ
+	 i5q5AMRwYT+C1ykiBo9frh23DIDAXXGbqEemXXLc984SYXvKozMPpvrwy9n+S88zSG
+	 gqvBACxlBFdvvZjpRKarbOU5BURF52AlK+LVWT/i41wyr7Xgragavy00NiWVkanw5w
+	 BMZ71fAfRZO4g==
+Date: Sun, 01 Dec 2024 21:38:03 +0800
+Message-ID: <08c64977b30bd55f30f5a366c81851e5@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: merge v2024.11.17 onto master branch
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="E0ry1u5P8bo2"
+Content-Disposition: inline
+
+
+--E0ry1u5P8bo2
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241127045403.3665299-14-david@fromorbit.com>
 
-On Wed, Nov 27, 2024 at 03:51:43PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> Lots of tests do there own special thing with loop devices rather
-> than using _create_loop_device() and _destroy_loop_device(). This
-> oftens means they do not clean up after themselves properly,
-> leaving stale loop devices around that result in unmountable test or
-> scratch devices. This is common when tests are killed by user
-> interrupt.
-> 
-> Even the tests that do use _destroy_loop_device and try to clean up
-> often do it incorrectly, leading to spurious error messages.
-> 
-> Some tests try to use dynamic instantiation via "mount -o loop",
-> but then don't clean up in the correct order or hack around to find
-> the loop device that was instantiated because the test needs to know
-> the instantiated device name
-> 
-> Clean this up by converting all the tests to use
-> _create_loop_device() and _destroy_loop_device(). In all the tests,
-> use the variable "loop_dev" for the device consistently. In
-> _destroy_loop_device(), test that a device name has been passed
-> so that we don't try to clean up the same device twice (e.g. once
-> before test exit and again from the _cleanup() function). When we
-> destroy a loop device, unset the variable used to hold the loop
-> device name so that we don't try to destroy it twice.
-> 
-> This results in much more reliable cleanup and clean exit from
-> fstests when killed by the user.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  common/metadump   | 32 ++++++++++++--------------------
->  tests/generic/067 | 11 ++++++++---
->  tests/generic/361 |  6 +++++-
->  tests/generic/563 | 14 +++++++++-----
->  tests/generic/564 | 12 ++++++------
->  tests/generic/590 |  9 ++++++---
->  tests/generic/744 |  4 ++--
->  tests/generic/746 |  6 +++++-
->  tests/xfs/014     |  7 +++++--
->  tests/xfs/049     | 35 +++++++++++++++++++++--------------
->  tests/xfs/073     | 24 +++++++++++++-----------
->  tests/xfs/074     | 21 ++++++++++++---------
->  tests/xfs/078     | 16 +++++++++-------
->  tests/xfs/148     | 23 ++++++++++++++---------
->  tests/xfs/149     |  4 ++++
->  tests/xfs/216     | 15 ++++++++++-----
->  tests/xfs/217     | 22 ++++++++++++++++------
->  tests/xfs/250     | 14 +++++++++-----
->  tests/xfs/259     | 13 ++++++++-----
->  tests/xfs/513     | 44 ++++++++++++++++++++------------------------
->  tests/xfs/521     |  8 ++++++--
->  tests/xfs/528     | 10 +++++++---
->  tests/xfs/530     | 11 ++++++-----
->  tests/xfs/606     | 12 ++++++++----
->  tests/xfs/613     | 40 ++++++++++++++--------------------------
->  tests/xfs/613.out |  1 -
->  26 files changed, 235 insertions(+), 179 deletions(-)
-> 
-> diff --git a/common/metadump b/common/metadump
-> index 3373edfe9..bc3038e3b 100644
-> --- a/common/metadump
-> +++ b/common/metadump
-> @@ -24,17 +24,9 @@ _xfs_cleanup_verify_metadump()
->  
->  	test -n "$XFS_METADUMP_FILE" && rm -f "$XFS_METADUMP_FILE"
->  
-> -	if [ -n "$XFS_METADUMP_IMG" ]; then
-> -		losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev; do
-> -			losetup -d "$ldev"
-> -		done
-> -
-> -		# Don't call rm directly with a globbed argument here to avoid
-> -		# issues issues with variable expansions.
-> -		for img in "$XFS_METADUMP_IMG"*; do
-> -			test -e "$img" && rm -f "$img"
-> -		done
-> -	fi
-> +	[ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
-> +	[ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
-> +	rm -f $data_img $log_img
->  }
->  
->  # Can xfs_metadump snapshot the fs metadata to a v1 metadump file?
-> @@ -122,25 +114,25 @@ _xfs_verify_metadump_v2()
->  		_scratch_xfs_mdrestore $metadump_file
->  
->  	# Create loopdev for data device so we can mount the fs
-> -	data_loop=$(_create_loop_device $data_img)
-> +	md_data_loop_dev=$(_create_loop_device $data_img)
->  
->  	# Create loopdev for log device if we recovered anything
-> -	test -s "$log_img" && log_loop=$(_create_loop_device $log_img)
-> +	test -s "$log_img" && md_log_loop_dev=$(_create_loop_device $log_img)
->  
->  	# Mount fs, run an extra test, fsck, and unmount
-> -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _scratch_mount
-> +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _scratch_mount
->  	if [ -n "$extra_test" ]; then
-> -		SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop $extra_test
-> +		SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev $extra_test
->  	fi
-> -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _check_xfs_scratch_fs
-> -	SCRATCH_DEV=$data_loop _scratch_unmount
-> +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _check_xfs_scratch_fs
-> +	_unmount $md_data_loop_dev
->  
->  	# Tear down what we created
-> -	if [ -b "$log_loop" ]; then
-> -		_destroy_loop_device $log_loop
-> +	if [ -b "$md_log_loop_dev" ]; then
-> +		_destroy_loop_device $md_log_loop_dev
->  		rm -f $log_img
->  	fi
-> -	_destroy_loop_device $data_loop
-> +	_destroy_loop_device $md_data_loop_dev
->  	rm -f $data_img
->  }
->  
-> diff --git a/tests/generic/067 b/tests/generic/067
-> index ccb1e3fbb..b45ae834f 100755
-> --- a/tests/generic/067
-> +++ b/tests/generic/067
-> @@ -37,13 +37,18 @@ mount_nonexistent_mnt()
->  	$MOUNT_PROG $SCRATCH_DEV $TEST_DIR/nosuchdir >>$seqres.full 2>&1
->  }
->  
-> -# fs driver should be able to handle mounting a free loop device gracefully
-> -# xfs ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-> +# fs driver should be able to handle mounting a free loop device gracefully xfs
-> +# ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-> +#
-> +# Using 'losetup -f' like this is racy. We might end up mounting a real loop dev
-> +# here, so unmount $SCRATCH_MNT (not the loop dev we might not own!) and ignore
-> +# any error it might return.
->  mount_free_loopdev()
->  {
->  	echo "# mount a free loop device" >>$seqres.full
->  	loopdev=`losetup -f`
-> -	$MOUNT_PROG -t $FSTYP $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-> +	_mount $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-> +	_unmount $SCRATCH_MNT >> /dev/null 2>&1
->  }
->  
->  # mount with wrong fs type specified.
-> diff --git a/tests/generic/361 b/tests/generic/361
-> index 7273dd056..e2b798436 100755
-> --- a/tests/generic/361
-> +++ b/tests/generic/361
-> @@ -17,7 +17,7 @@ _begin_fstest auto quick
->  _cleanup()
->  {
->  	_unmount $fs_mnt
-> -	_destroy_loop_device $loop_dev
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	cd /
->  	rm -f $tmp.*
->  }
-> @@ -54,6 +54,10 @@ $XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
->  # remount should not hang
->  $MOUNT_PROG -o remount,ro $fs_mnt >>$seqres.full 2>&1
->  
-> +_unmount $fs_mnt
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  # success, all done
->  echo "Silence is golden"
->  status=0
-> diff --git a/tests/generic/563 b/tests/generic/563
-> index f0d2f404c..34d21170c 100755
-> --- a/tests/generic/563
-> +++ b/tests/generic/563
-> @@ -87,12 +87,12 @@ reset()
->  
->  # cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
->  # that out.
-> -LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
-> -smajor=$((0x`stat -L -c %t $LOOP_DEV`))
-> -sminor=$((0x`stat -L -c %T $LOOP_DEV`))
-> +loop_dev=$(_create_loop_device $SCRATCH_DEV)
+Hi all,
 
-This test case isn't be changed entirely, there're still some LOOP_DEV, e.g.
+The master branch of the xfstests repository at:
 
-  _destroy_loop_device $LOOP_DEV > /dev/null 2>&1
-  ...
-  _mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-I'll change them to loop_dev.
+has just been updated to v2024.11.17 version.
 
 Thanks,
 Zorro
 
-> +smajor=$((0x`stat -L -c %t $loop_dev`))
-> +sminor=$((0x`stat -L -c %T $loop_dev`))
->  
-> -_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
-> -_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
-> +_mkfs_dev $loop_dev >> $seqres.full 2>&1
-> +_mount $loop_dev $SCRATCH_MNT || _fail "mount failed"
->  
->  blksize=$(_get_block_size "$SCRATCH_MNT")
->  
-> @@ -147,6 +147,10 @@ if [ "$drop_io_cgroup" = 1 ]; then
->  	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
->  fi
->  
-> +_unmount $SCRATCH_MNT
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/generic/564 b/tests/generic/564
-> index 647472d78..b66b72496 100755
-> --- a/tests/generic/564
-> +++ b/tests/generic/564
-> @@ -19,7 +19,7 @@ _cleanup()
->  {
->  	cd /
->  	rm -rf $tmp.*
-> -	[ -z "$loopdev" ] || _destroy_loop_device $loopdev
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  }
->  
->  # Import common functions.
-> @@ -72,11 +72,11 @@ $XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
->  echo
->  echo source/destination as blkdev returns EINVAL
->  $XFS_IO_PROG -f -c "truncate 128k" $testdir/img >> $seqres.full 2>&1
-> -loopdev=`_create_loop_device $testdir/img`
-> -$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loopdev
-> -$XFS_IO_PROG -f -c "copy_range -l 32k $loopdev" $testdir/copy
-> -_destroy_loop_device $loopdev
-> -loopdev=
-> +loop_dev=`_create_loop_device $testdir/img`
-> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loop_dev
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $loop_dev" $testdir/copy
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  
->  echo
->  echo source/destination as chardev returns EINVAL
-> diff --git a/tests/generic/590 b/tests/generic/590
-> index 2b7ccfb53..2eefa2c62 100755
-> --- a/tests/generic/590
-> +++ b/tests/generic/590
-> @@ -15,9 +15,10 @@ _begin_fstest auto prealloc preallocrw
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> +	_scratch_unmount
-> +	[ -n $loop_dev ] && _destroy_loop_device $loop_dev
->  	cd /
->  	rm -f $tmp.*
-> -	test -n "$loop" && _destroy_loop_device "$loop"
->  	rm -f "$TEST_DIR/$seq"
->  }
->  
-> @@ -56,9 +57,9 @@ if [[ $FSTYP = xfs ]]; then
->  		loopsz="$((filesz + (1 << 26)))"
->  		_require_fs_space "$TEST_DIR" $((loopsz / 1024))
->  		$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
-> -		loop="$(_create_loop_device "$TEST_DIR/$seq")"
-> +		loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
->  		USE_EXTERNAL=yes
-> -		SCRATCH_RTDEV="$loop"
-> +		SCRATCH_RTDEV="$loop_dev"
->  		disabled_features=()
->  
->  		# disable reflink if not supported by realtime devices
-> @@ -114,6 +115,8 @@ $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
->  # We need to do this before the loop device gets torn down.
->  _scratch_unmount
->  _check_scratch_fs
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  
->  echo "Silence is golden"
->  status=0
-> diff --git a/tests/generic/744 b/tests/generic/744
-> index df8f6ae9b..cda10e0f6 100755
-> --- a/tests/generic/744
-> +++ b/tests/generic/744
-> @@ -17,8 +17,8 @@ _cleanup()
->  
->  	_unmount $mnt2 &> /dev/null
->  	_unmount $mnt1 &> /dev/null
-> -	[ -b "$loop_dev2" ] && losetup -d $loop_dev2
-> -	[ -b "$loop_dev1" ] && losetup -d $loop_dev1
-> +	[ -b "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-> +	[ -b "$loop_dev1" ] && _destroy_loop_device $loop_dev1
->  	[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
->  }
->  
-> diff --git a/tests/generic/746 b/tests/generic/746
-> index 671910606..ba8ed25e8 100755
-> --- a/tests/generic/746
-> +++ b/tests/generic/746
-> @@ -39,7 +39,7 @@ esac
->  _cleanup()
->  {
->  	_unmount $loop_mnt &> /dev/null
-> -	_destroy_loop_device $loop_dev
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	if [ $status -eq 0 ]; then
->  		rm -rf $tmp
->  		rm $img_file
-> @@ -223,5 +223,9 @@ while read line; do
->  done < $fiemap_after
->  echo "done."
->  
-> +_unmount $loop_mnt
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  status=0
->  exit
-> diff --git a/tests/xfs/014 b/tests/xfs/014
-> index f638e4b16..39ea40e2a 100755
-> --- a/tests/xfs/014
-> +++ b/tests/xfs/014
-> @@ -23,6 +23,7 @@ _cleanup()
->  {
->  	cd /
->  	_unmount $LOOP_MNT 2>/dev/null
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	_scratch_unmount 2>/dev/null
->  	rm -f $tmp.*
->  }
-> @@ -166,19 +167,21 @@ LOOP_FILE=$SCRATCH_MNT/$seq.fs
->  LOOP_MNT=$SCRATCH_MNT/$seq.mnt
->  
->  $MKFS_XFS_PROG -d "file=1,name=$LOOP_FILE,size=10g" >> $seqres.full 2>&1
-> +loop_dev=$(_create_loop_device $LOOP_FILE)
->  
->  mkdir -p $LOOP_MNT
-> -_mount -o uquota,gquota $LOOP_FILE $LOOP_MNT || \
-> +_mount -o uquota,gquota $loop_dev $LOOP_MNT || \
->  	_fail "Failed to mount loop fs."
->  
->  _test_enospc $LOOP_MNT
->  _test_edquot $LOOP_MNT
->  
->  _unmount $LOOP_MNT
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  
->  echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
->  
->  _scratch_unmount
-> -
->  status=0
->  exit
-> diff --git a/tests/xfs/049 b/tests/xfs/049
-> index 4163a144f..cdcddf764 100755
-> --- a/tests/xfs/049
-> +++ b/tests/xfs/049
-> @@ -12,16 +12,17 @@ _begin_fstest rw auto quick
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -    cd /
-> -    umount $SCRATCH_MNT/test2 > /dev/null 2>&1
-> -    umount $SCRATCH_MNT/test > /dev/null 2>&1
-> -    rm -f $tmp.*
-> +	cd /
-> +	_unmount $SCRATCH_MNT/test2 > /dev/null 2>&1
-> +	_unmount $SCRATCH_MNT/test > /dev/null 2>&1
-> +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-> +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-> +	rm -f $tmp.*
->  
-> -    if [ -w $seqres.full ]
-> -    then
-> -        echo "--- mounts at end (after cleanup)" >> $seqres.full
-> -        mount >> $seqres.full
-> -    fi
-> +	if [ -w $seqres.full ]; then
-> +		echo "--- mounts at end (after cleanup)" >> $seqres.full
-> +		mount >> $seqres.full
-> +	fi
->  }
->  
->  # Import common functions.
-> @@ -64,7 +65,8 @@ mkdir $SCRATCH_MNT/test $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
->      || _fail "!!! failed to make mount points"
->  
->  _log "Mount xfs via loop"
-> -mount -t xfs -o loop $SCRATCH_MNT/test.xfs $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> +loop_dev1=$(_create_loop_device $SCRATCH_MNT/test.xfs)
-> +_mount $loop_dev1 $SCRATCH_MNT/test >> $seqres.full 2>&1 \
->      || _fail "!!! failed to loop mount xfs"
->  
->  _log "stress"
-> @@ -80,11 +82,12 @@ dd if=/dev/zero of=$SCRATCH_MNT/test/test.ext2 bs=1024 count=10240 >> $seqres.fu
->      || _fail "!!! create file failed"
->  
->  _log "Create ext2 fs in file on looped xfs"
-> -echo y | mkfs -t ext2 $SCRATCH_MNT/test/test.ext2 >> $seqres.full 2>&1 \
-> +loop_dev2=$(_create_loop_device $SCRATCH_MNT/test/test.ext2)
-> +echo y | mkfs -t ext2 $loop_dev2 >> $seqres.full 2>&1 \
->      || _fail "!!! failed to mkfs ext2 on xfs"
->  
->  _log "Mount ext2 on xfs via loop"
-> -mount -t ext2 -o loop $SCRATCH_MNT/test/test.ext2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> +_mount $loop_dev2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
->      || _fail "!!! failed to loop mount xfs"
->  
->  _log "stress ext2 on xfs via loop"
-> @@ -96,12 +99,16 @@ rm -rf $SCRATCH_MNT/test/* >> $seqres.full 2>&1 \
->      || _fail "!!! clean failed"
->  
->  _log "umount ext2 on xfs"
-> -umount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> +_unmount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
->      || _fail "!!! umount ext2 failed"
-> +_destroy_loop_device $loop_dev2
-> +unset loop_dev2
->  
->  _log "umount xfs"
-> -umount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> +_unmount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
->      || _fail "!!! umount xfs failed"
-> +_destroy_loop_device $loop_dev1
-> +unset loop_dev1
->  
->  echo "--- mounts at end (before cleanup)" >> $seqres.full
->  mount >> $seqres.full
-> diff --git a/tests/xfs/073 b/tests/xfs/073
-> index e4b17c5e7..2274079ef 100755
-> --- a/tests/xfs/073
-> +++ b/tests/xfs/073
-> @@ -23,6 +23,8 @@ _cleanup()
->  	_scratch_unmount 2>/dev/null
->  	_unmount $imgs.loop 2>/dev/null
->  	_unmount $imgs.source_dir 2>/dev/null
-> +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-> +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
->  	[ -d $imgs.loop ] && rmdir $imgs.loop
->  	[ -d $imgs.source_dir ] && rm -rf $imgs.source_dir
->  	rm -f $imgs.* $tmp.* /var/tmp/xfs_copy.log.*
-> @@ -65,10 +67,11 @@ _verify_copy()
->  	rmdir $target_dir 2>/dev/null
->  	mkdir $target_dir
->  
-> -	_mount -t xfs -o loop $target $target_dir 2>/dev/null
-> +	loop_dev1=$(_create_loop_device $target)
-> +	_mount $loop_dev1 $target_dir 2>/dev/null
->  	if [ $? -ne 0 ]; then
->  		echo retrying mount with nouuid option >>$seqres.full
-> -		_mount -t xfs -o loop -o nouuid $target $target_dir
-> +		_mount -o nouuid $loop_dev1 $target_dir
->  		if [ $? -ne 0 ]; then
->  			echo mount failed - evil!
->  			return
-> @@ -100,6 +103,8 @@ _verify_copy()
->  	echo unmounting and removing new image
->  	_unmount $source_dir
->  	_unmount $target_dir > /dev/null 2>&1
-> +	_destroy_loop_device $loop_dev1
-> +	unset loop_dev1
->  	rm -f $target
->  }
->  
-> @@ -134,18 +139,15 @@ ${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
->  rmdir $imgs.source_dir 2>/dev/null
->  mkdir $imgs.source_dir
->  
-> -_mount -t xfs -o loop $imgs.source $imgs.source_dir
-> -loop2=`mount | grep $imgs.source | grep -o -e 'loop=.*[^),]' | grep -o -e '/.*$'`
-> +loop_dev2=$(_create_loop_device $imgs.source)
-> +_mount $loop_dev2 $imgs.source_dir
->  cp -a $here $imgs.source_dir
-> -_mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
-> -$XFS_COPY_PROG $imgs.source $imgs.image | _filter_copy '#' $imgs.image '#' '#'
-> +_mount -o remount,ro $loop_dev2 $imgs.source_dir
-> +$XFS_COPY_PROG $loop_dev2 $imgs.image 2> /dev/null | _filter_copy '#' $imgs.image '#' '#'
->  _verify_copy $imgs.image $imgs.source $imgs.source_dir
->  
-> -# HACK WARNING:
-> -#
-> -# We're done with the nested loop mount, now we have to clean
-> -# up the pieces that mount is incapable of doing.
-> -losetup -d $loop2 > /dev/null 2>&1
-> +_destroy_loop_device $loop_dev2
-> +unset loop_dev2
->  
->  echo
->  echo === copying scratch device to multiple targets
-> diff --git a/tests/xfs/074 b/tests/xfs/074
-> index 6a03c8111..5df864fad 100755
-> --- a/tests/xfs/074
-> +++ b/tests/xfs/074
-> @@ -26,7 +26,7 @@ _begin_fstest quick auto prealloc rw
->  _cleanup()
->  {
->  	cd /
-> -	_destroy_loop_device $LOOP_DEV
-> +	[ -n "$loop_dev" ] &&_destroy_loop_device $loop_dev
->  	rm -f $tmp.* $LOOP_FILE
->  }
->  
-> @@ -45,10 +45,10 @@ LOOP_FILE=$TEST_DIR/$seq.img
->  LOOP_MNT=$TEST_DIR/$seq.mnt
->  mkdir -p $LOOP_MNT
->  $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
-> -LOOP_DEV=`_create_loop_device $LOOP_FILE`
-> +loop_dev=`_create_loop_device $LOOP_FILE`
->  
-> -_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
-> -_mount $LOOP_DEV $LOOP_MNT
-> +_mkfs_dev -d size=260g,agcount=2 $loop_dev
-> +_mount $loop_dev $LOOP_MNT
->  
->  BLOCK_SIZE=$(_get_file_block_size $LOOP_MNT)
->  
-> @@ -59,11 +59,11 @@ $XFS_IO_PROG -ft \
->  	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
->  	$LOOP_MNT/foo >> $seqres.full
->  
-> -umount $LOOP_MNT
-> -_check_xfs_filesystem $LOOP_DEV none none
-> +_unmount $LOOP_MNT
-> +_check_xfs_filesystem $loop_dev none none
->  
-> -_mkfs_dev -f $LOOP_DEV
-> -_mount $LOOP_DEV $LOOP_MNT
-> +_mkfs_dev -f $loop_dev
-> +_mount $loop_dev $LOOP_MNT
->  
->  # check we trim both ends of the extent approproiately; this will fail
->  # on 1k block size filesystems without the correct fixes in place.
-> @@ -73,7 +73,10 @@ $XFS_IO_PROG -ft \
->  	$LOOP_MNT/foo >> $seqres.full
->  
->  _unmount $LOOP_MNT
-> -_check_xfs_filesystem $LOOP_DEV none none
-> +_check_xfs_filesystem $loop_dev none none
-> +
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  
->  # success, all done
->  echo "Silence is golden"
-> diff --git a/tests/xfs/078 b/tests/xfs/078
-> index 6b325e05f..0d3c2eb23 100755
-> --- a/tests/xfs/078
-> +++ b/tests/xfs/078
-> @@ -17,7 +17,7 @@ _cleanup()
->  	cd /
->  	rm -f $tmp.*
->  	_unmount $LOOP_MNT 2>/dev/null
-> -	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev 2>/dev/null
->  	# try to keep the image file if test fails
->  	[ $status -eq 0 ] && rm -f $LOOP_IMG
->  	rmdir $LOOP_MNT
-> @@ -55,7 +55,7 @@ _grow_loop()
->  	agsize=$5
->  
->  	$XFS_IO_PROG -f -c "truncate $original" $LOOP_IMG
-> -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> +	loop_dev=`_create_loop_device $LOOP_IMG`
->  
->  	dparam=""
->  	if [ -n "$agsize" ]; then
-> @@ -67,15 +67,15 @@ _grow_loop()
->  	echo
->  
->  	echo "*** mkfs loop file (size=$original)"
-> -	$MKFS_XFS_PROG -b size=$bsize $dparam $LOOP_DEV | \
-> +	$MKFS_XFS_PROG -b size=$bsize $dparam $loop_dev | \
->  		_filter_mkfs 2>/dev/null
->  
->  	echo "*** extend loop file"
-> -	_destroy_loop_device $LOOP_DEV
-> +	_destroy_loop_device $loop_dev
->  	$XFS_IO_PROG -c "pwrite $new_size $bsize" $LOOP_IMG | _filter_io
-> -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> +	loop_dev=`_create_loop_device $LOOP_IMG`
->  	echo "*** mount loop filesystem"
-> -	_mount -t xfs $LOOP_DEV $LOOP_MNT
-> +	_mount $loop_dev $LOOP_MNT
->  
->  	echo "*** grow loop filesystem"
->  	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
-> @@ -87,9 +87,11 @@ _grow_loop()
->  	if [ "$check" -gt "0" ]
->  	then
->  		echo "*** check"
-> -		_check_xfs_filesystem $LOOP_IMG none none
-> +		_check_xfs_filesystem $loop_dev none none
->  	fi
->  
-> +	_destroy_loop_device $loop_dev
-> +	unset loop_dev
->  	rm -f $LOOP_IMG
->  }
->  
-> diff --git a/tests/xfs/148 b/tests/xfs/148
-> index c42c9b119..4d2f7a808 100755
-> --- a/tests/xfs/148
-> +++ b/tests/xfs/148
-> @@ -15,7 +15,7 @@ _cleanup()
->  {
->  	cd /
->  	_unmount $mntpt > /dev/null 2>&1
-> -	_destroy_loop_device $loopdev > /dev/null 2>&1
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	rm -r -f $tmp.*
->  }
->  
-> @@ -48,12 +48,12 @@ rm -f $imgfile $imgfile.old
->  # even when security xattrs are present so we are always doing name matches on
->  # lookup and not name hash compares as leaf/node forms will do.
->  $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
-> -loopdev=$(_create_loop_device $imgfile)
-> -MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
-> +loop_dev=$(_create_loop_device $imgfile)
-> +MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loop_dev >> $seqres.full
->  
->  # Mount image file
->  mkdir -p $mntpt
-> -_mount $loopdev $mntpt
-> +_mount $loop_dev $mntpt
->  
->  echo "creating entries" >> $seqres.full
->  
-> @@ -91,7 +91,8 @@ cat $tmp.log | _filter_test_dir
->  
->  # Corrupt the entries
->  _unmount $mntpt
-> -_destroy_loop_device $loopdev
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  cp $imgfile $imgfile.old
->  sed -b \
->  	-e "s/$nullstr/too_many\x00beans/g" \
-> @@ -99,8 +100,9 @@ sed -b \
->  	-i $imgfile
->  test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
->  	_fail "sed failed to change the image file?"
-> -loopdev=$(_create_loop_device $imgfile)
-> -_mount $loopdev $mntpt
-> +
-> +loop_dev=$(_create_loop_device $imgfile)
-> +_mount $loop_dev $mntpt
->  
->  # Try to access the corrupt metadata
->  echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
-> @@ -111,7 +113,7 @@ cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
->  echo "does scrub complain?" >> $seqres.full
->  
->  # Does scrub complain about this?
-> -if _supports_xfs_scrub $mntpt $loopdev; then
-> +if _supports_xfs_scrub $mntpt $loop_dev; then
->  	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
->  	res=$?
->  	test $((res & 1)) -eq 0 && \
-> @@ -122,11 +124,14 @@ echo "does repair complain?" >> $seqres.full
->  
->  # Does repair complain about this?
->  _unmount $mntpt
-> -$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
-> +$XFS_REPAIR_PROG -n $loop_dev >> $seqres.full 2>&1
->  res=$?
->  test $res -eq 1 || \
->  	echo "repair failed to report corruption ($res)"
->  
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/xfs/149 b/tests/xfs/149
-> index f2187109b..9a96f82ed 100755
-> --- a/tests/xfs/149
-> +++ b/tests/xfs/149
-> @@ -84,6 +84,10 @@ $XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
->  echo "=== xfs_growfs - check device node ==="
->  $XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
->  
-> +_unmount $mntdir
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/xfs/216 b/tests/xfs/216
-> index 6b8b2eb22..091c11d08 100755
-> --- a/tests/xfs/216
-> +++ b/tests/xfs/216
-> @@ -15,6 +15,7 @@ _begin_fstest log metadata auto quick
->  _cleanup()
->  {
->  	_unmount $LOOP_MNT > /dev/null 2>&1
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	cd /
->  	rm -f $tmp.*
->  }
-> @@ -24,7 +25,7 @@ _scratch_mkfs_xfs >/dev/null 2>&1
->  _scratch_mount
->  
->  _require_loop
-> -LOOP_DEV=$SCRATCH_MNT/test_fs
-> +LOOP_IMG=$SCRATCH_MNT/test_fs
->  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
->  
->  loop_mkfs_opts=
-> @@ -55,22 +56,26 @@ _do_mkfs()
->  	for i in $*; do
->  		echo -n "fssize=${i}g "
->  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> -			-d name=$LOOP_DEV,size=${i}g $loop_mkfs_opts |grep log
-> -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-> +			-d size=${i}g $loop_mkfs_opts $loop_dev |grep log
-> +		_mount $loop_dev $LOOP_MNT
->  		echo "test write" > $LOOP_MNT/test
->  		_unmount $LOOP_MNT > /dev/null 2>&1
->  	done
->  }
->  # make large holey file
-> -$XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
-> +$XFS_IO_PROG -f -c "truncate 256g" $LOOP_IMG
->  
-> -choose_golden_output $0 $LOOP_DEV
-> +choose_golden_output $0 $LOOP_IMG
->  
->  #make loopback mount dir
->  mkdir $LOOP_MNT
->  
-> +loop_dev=$(_create_loop_device $LOOP_IMG)
-> +
->  # walk over standard sizes (up to 256GB)
->  _do_mkfs 1 2 4 8 16 32 64 128 256
->  
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  status=0
->  exit
-> diff --git a/tests/xfs/217 b/tests/xfs/217
-> index b2eb34490..dae6ce55f 100755
-> --- a/tests/xfs/217
-> +++ b/tests/xfs/217
-> @@ -12,6 +12,12 @@ _begin_fstest log metadata auto
->  # Import common functions.
->  . ./common/filter
->  
-> +_cleanup()
-> +{
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +	cd /
-> +	rm -f $tmp.*
-> +}
->  
->  _require_scratch
->  _scratch_mkfs_xfs >/dev/null 2>&1
-> @@ -20,7 +26,7 @@ _scratch_mount
->  _require_fs_space $SCRATCH_MNT 2202000
->  
->  _require_loop
-> -LOOP_DEV=$SCRATCH_MNT/test_fs
-> +LOOP_IMG=$SCRATCH_MNT/test_fs
->  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
->  
->  _do_mkfs()
-> @@ -28,28 +34,30 @@ _do_mkfs()
->  	for i in $*; do
->  		echo -n "fssize=${i}g "
->  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> -			-d name=$LOOP_DEV,size=${i}g |grep log
-> -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-> +			-d size=${i}g $loop_dev |grep log
-> +		_mount $loop_dev $LOOP_MNT
->  		echo "test write" > $LOOP_MNT/test
->  		_unmount $LOOP_MNT > /dev/null 2>&1
->  
->  		# punch out the previous blocks so that we keep the amount of
->  		# disk space the test requires down to a minimum.
-> -		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_DEV
-> +		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_IMG
->  	done
->  }
->  # make large holey file
-> -$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_DEV
-> +$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_IMG
->  
->  #make loopback mount dir
->  mkdir $LOOP_MNT
->  
->  # test if large logs are supported
-> -$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_DEV,size=10g > /dev/null 2>&1
-> +$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_IMG,size=10g > /dev/null 2>&1
->  if [ $? -ne 0 ]; then
->  	_notrun "large log sizes not supported by mkfs"
->  fi
->  
-> +loop_dev=$(_create_loop_device $LOOP_IMG)
-> +
->  #
->  # walk over "new" sizes supported by recent xfsprogs.
->  # Note that the last test is for 16TB-1GB as 32bit platforms only support
-> @@ -57,5 +65,7 @@ fi
->  #
->  _do_mkfs 512 1024 2048 4096 8192 16383
->  
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
->  status=0
->  exit
-> diff --git a/tests/xfs/250 b/tests/xfs/250
-> index 4e3473ebc..2554e1e91 100755
-> --- a/tests/xfs/250
-> +++ b/tests/xfs/250
-> @@ -14,7 +14,8 @@ _cleanup()
->  {
->  	cd /
->  	_unmount $LOOP_MNT 2>/dev/null
-> -	rm -f $LOOP_DEV
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> +	rm -f $LOOP_IMG
->  	rmdir $LOOP_MNT
->  	rm -f $tmp.*
->  }
-> @@ -26,7 +27,7 @@ _require_test
->  _require_loop
->  _require_xfs_io_command "falloc"
->  
-> -LOOP_DEV=$TEST_DIR/$seq.fs
-> +LOOP_IMG=$TEST_DIR/$seq.fs
->  LOOP_MNT=$TEST_DIR/$seq.mnt
->  
->  _filter_io()
-> @@ -45,7 +46,7 @@ _test_loop()
->  	agsize=$2
->  	fsize=$3
->  
-> -	dparam="file,name=$LOOP_DEV,size=$size"
-> +	dparam="file,name=$LOOP_IMG,size=$size"
->  	if [ -n "$agsize" ]; then
->  		dparam="$dparam,agsize=$agsize"
->  	fi
-> @@ -55,7 +56,8 @@ _test_loop()
->  		| _filter_mkfs 2>/dev/null
->  
->  	echo "*** mount loop filesystem"
-> -	_mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
-> +	loop_dev=$(_create_loop_device $LOOP_IMG)
-> +	mount $loop_dev $LOOP_MNT
->  
->  	echo "*** preallocate large file"
->  	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
-> @@ -64,7 +66,9 @@ _test_loop()
->  	_unmount $LOOP_MNT > /dev/null 2>&1
->  
->  	echo "*** check loop filesystem"
-> -	 _check_xfs_filesystem $LOOP_DEV none none
-> +	_check_xfs_filesystem $loop_dev none none
-> +	_destroy_loop_device $loop_dev
-> +	unset loop_dev
->  }
->  
->  _test_loop 50g 16m 40G
-> diff --git a/tests/xfs/259 b/tests/xfs/259
-> index 0c8d6eb56..c2d26381a 100755
-> --- a/tests/xfs/259
-> +++ b/tests/xfs/259
-> @@ -12,7 +12,10 @@ _begin_fstest auto quick
->  # Override the default cleanup function.
->  _cleanup()
->  {
-> -    rm -f "$testfile"
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $testfile
-> +	rm -f "$testfile"
-> +	cd /
-> +	rm -f $tmp.*
->  }
->  
->  # Import common functions.
-> @@ -45,13 +48,13 @@ for del in $sizes_to_check; do
->  		rm -f "$testfile"
->  		dd if=/dev/zero "of=$testfile" bs=1 count=0 seek=$ddseek \
->  			>/dev/null 2>&1 || echo "dd failed"
-> -		lofile=$(losetup -f)
-> -		losetup $lofile "$testfile"
-> -		$MKFS_XFS_PROG -l size=32m -b size=$bs $lofile |  _filter_mkfs \
-> +		loop_dev=$(_create_loop_device $testfile)
-> +		$MKFS_XFS_PROG -l size=32m -b size=$bs $loop_dev |  _filter_mkfs \
->  			>/dev/null 2> $tmp.mkfs || echo "mkfs failed!"
->  		. $tmp.mkfs
->  		sync
-> -		losetup -d $lofile
-> +		_destroy_loop_device $loop_dev
-> +		unset loop_dev
->  	done
->  done
->  
-> diff --git a/tests/xfs/513 b/tests/xfs/513
-> index 5895e6e2d..0c0edc75e 100755
-> --- a/tests/xfs/513
-> +++ b/tests/xfs/513
-> @@ -15,12 +15,8 @@ _cleanup()
->  	cd /
->  	rm -f $tmp.*
->  	_unmount $LOOP_MNT 2>/dev/null
-> -	if [ -n "$LOOP_DEV" ];then
-> -		_destroy_loop_device $LOOP_DEV 2>/dev/null
-> -	fi
-> -	if [ -n "$LOOP_SPARE_DEV" ];then
-> -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-> -	fi
-> +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
-> +	[ -n $loop_spare_dev ] &&_destroy_loop_device $loop_spare_dev
->  	rm -f $LOOP_IMG
->  	rm -f $LOOP_SPARE_IMG
->  	rmdir $LOOP_MNT
-> @@ -42,11 +38,11 @@ LOOP_MNT=$TEST_DIR/$seq.mnt
->  
->  echo "** create loop device"
->  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
-> -LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> +loop_dev=`_create_loop_device $LOOP_IMG`
->  
->  echo "** create loop log device"
->  $XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
-> -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-> +loop_spare_dev=`_create_loop_device $LOOP_SPARE_IMG`
->  
->  echo "** create loop mount point"
->  rmdir $LOOP_MNT 2>/dev/null
-> @@ -55,8 +51,8 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
->  filter_loop()
->  {
->  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
-> -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
-> -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-> +	    -e "s,\B$loop_dev,LOOP_DEV,g" \
-> +	    -e "s,\B$loop_spare_dev,LOOP_SPARE_DEV,g"
->  }
->  
->  filter_xfs_opt()
-> @@ -69,22 +65,22 @@ MKFS_OPTIONS=""
->  do_mkfs()
->  {
->  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
-> -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
->  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-> -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-> +		_fail "Fails on _mkfs_dev $* $loop_dev"
->  	fi
->  	. $tmp.mkfs
->  }
->  
->  is_dev_mounted()
->  {
-> -	findmnt --source $LOOP_DEV >/dev/null
-> +	findmnt --source $loop_dev >/dev/null
->  	return $?
->  }
->  
->  get_mount_info()
->  {
-> -	findmnt --source $LOOP_DEV -o OPTIONS -n
-> +	findmnt --source $loop_dev -o OPTIONS -n
->  }
->  
->  force_unmount()
-> @@ -103,29 +99,29 @@ _do_test()
->  	local info
->  
->  	# mount test
-> -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-> +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
->  	rc=$?
->  	if [ $rc -eq 0 ];then
->  		if [ "${mounted}" = "fail" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expect mount to fail, but it succeeded"
->  			return 1
->  		fi
->  		is_dev_mounted
->  		if [ $? -ne 0 ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: fs not mounted even mount return 0"
->  			return 1
->  		fi
->  	else
->  		if [ "${mounted}" = "pass" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expect mount to succeed, but it failed"
->  			return 1
->  		fi
->  		is_dev_mounted
->  		if [ $? -eq 0 ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: fs is mounted even mount return non-zero"
->  			return 1
->  		fi
-> @@ -141,13 +137,13 @@ _do_test()
->  	rc=$?
->  	if [ $rc -eq 0 ];then
->  		if [ "$found" != "true" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
->  			return 1
->  		fi
->  	else
->  		if [ "$found" != "false" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
->  			return 1
->  		fi
-> @@ -253,9 +249,9 @@ do_test "-o logbsize=512k" fail
->  # Test logdev
->  do_mkfs
->  do_test "" pass "logdev" "false"
-> -do_test "-o logdev=$LOOP_SPARE_DEV" fail
-> -do_mkfs -l logdev=$LOOP_SPARE_DEV
-> -do_test "-o logdev=$LOOP_SPARE_DEV" pass "logdev=$LOOP_SPARE_DEV" "true"
-> +do_test "-o logdev=$loop_spare_dev" fail
-> +do_mkfs -l logdev=$loop_spare_dev
-> +do_test "-o logdev=$loop_spare_dev" pass "logdev=$loop_spare_dev" "true"
->  do_test "" fail
->  
->  # Test noalign
-> diff --git a/tests/xfs/521 b/tests/xfs/521
-> index 13982c440..c92c621a2 100755
-> --- a/tests/xfs/521
-> +++ b/tests/xfs/521
-> @@ -21,7 +21,7 @@ _cleanup()
->  {
->  	cd /
->  	_scratch_unmount >> $seqres.full 2>&1
-> -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
->  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
->  }
->  
-> @@ -35,7 +35,7 @@ _require_no_large_scratch_dev
->  
->  echo "Create fake rt volume"
->  truncate -s 400m $TEST_DIR/$seq.rtvol
-> -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
->  
->  echo "Format and mount 100m rt volume"
->  export USE_EXTERNAL=yes
-> @@ -69,6 +69,10 @@ cp -p $testdir/original $testdir/copy3
->  echo "Check filesystem"
->  _check_scratch_fs
->  
-> +_scratch_unmount
-> +_destroy_loop_device $rt_loop_dev
-> +unset rt_loop_dev
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/xfs/528 b/tests/xfs/528
-> index 6ca9a2370..a1efbbd27 100755
-> --- a/tests/xfs/528
-> +++ b/tests/xfs/528
-> @@ -15,7 +15,7 @@ _cleanup()
->  {
->  	cd /
->  	_scratch_unmount >> $seqres.full 2>&1
-> -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
->  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
->  }
->  
-> @@ -155,11 +155,11 @@ test_ops() {
->  
->  echo "Create fake rt volume"
->  $XFS_IO_PROG -f -c "truncate 400m" $TEST_DIR/$seq.rtvol
-> -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
->  
->  echo "Make sure synth rt volume works"
->  export USE_EXTERNAL=yes
-> -export SCRATCH_RTDEV=$rtdev
-> +export SCRATCH_RTDEV=$rt_loop_dev
->  _scratch_mkfs > $seqres.full
->  _try_scratch_mount || \
->  	_notrun "Could not mount with synthetic rt volume"
-> @@ -170,6 +170,10 @@ test_ops 262144
->  # not a power of two
->  test_ops 327680
->  
-> +_scratch_unmount
-> +_destroy_loop_device $rt_loop_dev
-> +unset rt_loop_dev
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/xfs/530 b/tests/xfs/530
-> index 8a182bd6a..d0d0e2665 100755
-> --- a/tests/xfs/530
-> +++ b/tests/xfs/530
-> @@ -15,7 +15,7 @@ _cleanup()
->  {
->  	cd /
->  	_scratch_unmount >> $seqres.full 2>&1
-> -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
->  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
->  }
->  
-> @@ -52,12 +52,12 @@ fi
->  
->  rtdevsz=$((nr_bits * rtextsz))
->  truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
-> -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
->  
->  echo "Format and mount rt volume"
->  
->  export USE_EXTERNAL=yes
-> -export SCRATCH_RTDEV=$rtdev
-> +export SCRATCH_RTDEV=$rt_loop_dev
->  _scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
->  	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
->  _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
-> @@ -116,8 +116,9 @@ done
->  echo "Check filesystem"
->  _check_scratch_fs
->  
-> -losetup -d $rtdev
-> -rm -f $TEST_DIR/$seq.rtvol
-> +_scratch_unmount
-> +_destroy_loop_device $rt_loop_dev
-> +unset rt_loop_dev
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/606 b/tests/xfs/606
-> index f958bddd8..b537ea145 100755
-> --- a/tests/xfs/606
-> +++ b/tests/xfs/606
-> @@ -13,10 +13,8 @@ _begin_fstest auto quick growfs
->  
->  _cleanup()
->  {
-> -	local dev
->  	_unmount $LOOP_MNT 2>/dev/null
-> -	dev=$(losetup -j testfile | cut -d: -f1)
-> -	losetup -d $dev 2>/dev/null
-> +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
->  	rm -rf $LOOP_IMG $LOOP_MNT
->  	cd /
->  	rm -f $tmp.*
-> @@ -40,7 +38,9 @@ $MKFS_XFS_PROG -f $LOOP_IMG >$seqres.full
->  # Extend by just 8K, expected to start with the last full-size AG ends of
->  # above 1G block device.
->  $XFS_IO_PROG -f -c "truncate 1073750016" $LOOP_IMG
-> -_mount -oloop $LOOP_IMG $LOOP_MNT
-> +
-> +loop_dev=$(_create_loop_device $LOOP_IMG)
-> +_mount $loop_dev $LOOP_MNT
->  # A known bug shows "XFS_IOC_FSGROWFSDATA xfsctl failed: No space left on
->  # device" at here, refer to _fixed_by_kernel_commit above
->  $XFS_GROWFS_PROG $LOOP_MNT >$seqres.full
-> @@ -48,6 +48,10 @@ if [ $? -ne 0 ];then
->  	echo "xfs_growfs fails!"
->  fi
->  
-> +_unmount $LOOP_MNT
-> +_destroy_loop_device $loop_dev
-> +unset loop_dev
-> +
->  echo "Silence is golden"
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/613 b/tests/xfs/613
-> index 6ba3d87bf..b87cae91e 100755
-> --- a/tests/xfs/613
-> +++ b/tests/xfs/613
-> @@ -15,14 +15,8 @@ _cleanup()
->  	cd /
->  	rm -f $tmp.*
->  	_unmount $LOOP_MNT 2>/dev/null
-> -	if [ -n "$LOOP_DEV" ];then
-> -		_destroy_loop_device $LOOP_DEV 2>/dev/null
-> -	fi
-> -	if [ -n "$LOOP_SPARE_DEV" ];then
-> -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-> -	fi
-> +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
->  	rm -f $LOOP_IMG
-> -	rm -f $LOOP_SPARE_IMG
->  	rmdir $LOOP_MNT
->  }
->  
-> @@ -38,16 +32,11 @@ _require_loop
->  _require_xfs_io_command "falloc"
->  
->  LOOP_IMG=$TEST_DIR/$seq.dev
-> -LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
->  LOOP_MNT=$TEST_DIR/$seq.mnt
->  
->  echo "** create loop device"
->  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
-> -LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> -
-> -echo "** create loop log device"
-> -$XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
-> -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-> +loop_dev=`_create_loop_device $LOOP_IMG`
->  
->  echo "** create loop mount point"
->  rmdir $LOOP_MNT 2>/dev/null
-> @@ -56,8 +45,7 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
->  filter_loop()
->  {
->  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
-> -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
-> -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-> +	    -e "s,\B$loop_dev,LOOP_DEV,g"
->  }
->  
->  filter_xfs_opt()
-> @@ -70,22 +58,22 @@ MKFS_OPTIONS=""
->  do_mkfs()
->  {
->  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
-> -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
->  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-> -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-> +		_fail "Fails on _mkfs_dev $* $loop_dev"
->  	fi
->  	. $tmp.mkfs
->  }
->  
->  is_dev_mounted()
->  {
-> -	findmnt --source $LOOP_DEV >/dev/null
-> +	findmnt --source $loop_dev >/dev/null
->  	return $?
->  }
->  
->  get_mount_info()
->  {
-> -	findmnt --source $LOOP_DEV -o OPTIONS -n
-> +	findmnt --source $loop_dev -o OPTIONS -n
->  }
->  
->  force_unmount()
-> @@ -104,29 +92,29 @@ _do_test()
->  	local info
->  
->  	# mount test
-> -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-> +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
->  	rc=$?
->  	if [ $rc -eq 0 ];then
->  		if [ "${mounted}" = "fail" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expect mount to fail, but it succeeded"
->  			return 1
->  		fi
->  		is_dev_mounted
->  		if [ $? -ne 0 ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: fs not mounted even mount return 0"
->  			return 1
->  		fi
->  	else
->  		if [ "${mounted}" = "pass" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expect mount to succeed, but it failed"
->  			return 1
->  		fi
->  		is_dev_mounted
->  		if [ $? -eq 0 ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: fs is mounted even mount return non-zero"
->  			return 1
->  		fi
-> @@ -142,13 +130,13 @@ _do_test()
->  	rc=$?
->  	if [ $rc -eq 0 ];then
->  		if [ "$found" != "true" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
->  			return 1
->  		fi
->  	else
->  		if [ "$found" != "false" ];then
-> -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
->  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
->  			return 1
->  		fi
-> diff --git a/tests/xfs/613.out b/tests/xfs/613.out
-> index 1624617ee..2a693c53c 100644
-> --- a/tests/xfs/613.out
-> +++ b/tests/xfs/613.out
-> @@ -1,6 +1,5 @@
->  QA output created by 613
->  ** create loop device
-> -** create loop log device
->  ** create loop mount point
->  ** start xfs mount testing ...
->  FORMAT: -m crc=0
-> -- 
-> 2.45.2
-> 
-> 
+The new head of the master branch is commit:
 
+88be6071da67 xfs/185: don't fail when rtfile is larger than rblocks
+
+New commits:
+
+Alexander Mikhalitsyn (1):
+      [cdbcb808ecc1] ext4/032: add a new testcase in online resize tests
+
+André Almeida (1):
+      [c3a28053dc09] common/casefold: Support for tmpfs casefold test
+
+Brian Foster (2):
+      [2fe95b92d6da] xfs: online grow vs. log recovery stress test
+      [083bb0ea9473] xfs: online grow vs. log recovery stress test (realtime version)
+
+Chao Yu (3):
+      [5089b050a672] f2fs/005: add testcase to check checkpoint disabling functionality
+      [23ebca50151d] f2fs/006: add testcase to check out-of-space case
+      [7838e3082b15] f2fs/007: add testcase to check consistency of compressed inode metadata
+
+Darrick J. Wong (2):
+      [47aa187fb226] xfs/273: check thoroughness of the mappings
+      [88be6071da67] xfs/185: don't fail when rtfile is larger than rblocks
+
+Filipe Manana (2):
+      [d9228b41b30f] btrfs/287: make the test work when compression is enabled
+      [1e990ee9aaa0] btrfs: add a test for defrag of contiguous file extents
+
+Johannes Thumshirn (1):
+      [e2affc453cf5] btrfs/136: check for ext3 support
+
+Qu Wenruo (3):
+      [4c1629ae3a3a] generic: new test case to verify if certain fio load will hang the filesystem
+      [81477600d363] btrfs: a new test case to verify mount behavior with background remounting
+      [3fc00cd4ab98] btrfs/321: make the filter to handle older btrfs-progs
+
+Zorro Lang (1):
+      [66434a1cb731] xfs: notrun if kernel xfs not supports ascii-ci feature
+
+
+Code Diffstat:
+
+ common/casefold       |  46 +++++++++++++++++++++
+ common/rc             |   3 ++
+ common/xfs            |  10 +++++
+ tests/btrfs/136       |   2 +
+ tests/btrfs/287       |  10 ++---
+ tests/btrfs/287.out   |   4 --
+ tests/btrfs/321       |   2 +-
+ tests/btrfs/325       |  83 ++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/325.out   |  22 ++++++++++
+ tests/btrfs/326       | 107 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/326.out   |   2 +
+ tests/ext4/032        |   6 +++
+ tests/ext4/032.out    |  18 +++++++++
+ tests/f2fs/005        |  47 ++++++++++++++++++++++
+ tests/f2fs/005.out    |   2 +
+ tests/f2fs/006        |  42 ++++++++++++++++++++
+ tests/f2fs/006.out    |   2 +
+ tests/f2fs/007        | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/f2fs/007.out    |  16 ++++++++
+ tests/generic/366     | 106 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/366.out |   2 +
+ tests/generic/556     |  12 ++++--
+ tests/xfs/185         |   6 ++-
+ tests/xfs/188         |   1 +
+ tests/xfs/273         |  47 ++++++++++++++++++++++
+ tests/xfs/597         |   1 +
+ tests/xfs/598         |   1 +
+ tests/xfs/609         |  79 ++++++++++++++++++++++++++++++++++++
+ tests/xfs/609.out     |   2 +
+ tests/xfs/610         |  81 +++++++++++++++++++++++++++++++++++++
+ tests/xfs/610.out     |   2 +
+ 31 files changed, 856 insertions(+), 16 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--E0ry1u5P8bo2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmdMZpIACgkQlNbPkfr2
+tMwu5xAAsBpbq57w0teeGD+79VpZna8PxJ8/awytFBonRJa2s4Zielv4YSZ0KBeU
+2tg42ON+kdxWIv1qpg+kaoWqTEdA6uzIkQTuG1nenrGvagpY6FhSG2aQB6gBZv6o
+pmcpPCSanQkXpdAIcI9mtu9xCKvrA9L60tRYuJ0IZc4b9Yo1g4ZsdH+5lN73TUlp
+J9kSGJY4jUz9a01WRdI0j/6ZUUd33QfTEmq+f1ka45/9y6rjSFAHKluxsWOpkCXQ
+zCxMGQ5IVtebpPWgkGsg2WRPGgfT9fumB3K8TvZHHqZSZFFZLUygepvaNb+5PA44
+d16gbPSZgFVOytX5LQw7todS7Di3TuijPo6p7gIUH+k2Lhed7mkZxjQAMr109ASG
+lTJHbSLKx+K3Deg3k3rMohPNYHKcl+I838w1ZO/soIPA/3Yih3iCkWSn/YlIbgMq
+KkXQt5BesFt9rBp8VBqHZUlss+FshkF+Dz3Il0WhROz8yHaF0qXlQEqhWT6I75il
+axJ3sE0K9KZEeU8zh7VAIowWYM16BCLOwhCvCA1fdXRHkHDT8I8um7PIus2dI1Y+
+tG1Ze5jBYA9n77YcEJeyolAdA2NJn80+JRcvL6CPdeGqPfN/NYdYitrvUe3F/yjg
+3mVcHDWC7p9LQD6zbpy50Ab9xmwCckHTN7ob3Y65KcqLREDIMQU=
+=CrJe
+-----END PGP SIGNATURE-----
+
+--E0ry1u5P8bo2--
