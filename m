@@ -1,73 +1,73 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFBBE18B47B
-	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 12:31:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A950A147C79
+	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 12:50:30 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733056298; cv=none; b=ZPJvGS6F0Po7TWpzNC7yMGFT5mlls3E3UJxD+lu7MhGELHSoolNoAQsil9JVwfYaN5y2B9m4iGK0ckeO3bvYEYg7kiOl/CXtthAE7XwJzzE4lFWz7DWqky5zyO/nuqvS8Jo4XaTiLUEHk2Mo/cNiuheJCmOOstcz1uOLAAShn+8=
+	t=1733057434; cv=none; b=fHezoMQ8PaPtrJQVkNVB+QXTeGjLWVWhkZX0nO7tISxmbDSnTaEkoG/4HuiAPYdkKh05rfYXSeGqC1PeBiPJXsLSwtSXAo/3W4r0yNMTtFxF62Op95bAjfIbYq0u53nzbrxGSgpaoJiSI5UUvUXQKu2W3yZY+ONT3Op6/SibrqI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733056298; c=relaxed/simple;
-	bh=CQwC5aK93O/KTexvxNkvJQcxFtuK/uupwjUCURjqZIs=;
+	s=arc-20240116; t=1733057434; c=relaxed/simple;
+	bh=gGYL8gf7jdE+Lnw+wmIxoFERYAD20sNCJWRz18VRmVA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pBAsMtCJymw8/gDo1QqTrP8S3DUMWSuCcpRsljqaLM3qyTVHml647RduleYpPHt7VYimn4QDCWOg6Z2JYPYnH1aWkaYII4NKQyhmFfkvgiQwkb7tm2ygToRG4rWw0wura+nraeu6KTOnjxWyRl2mOc1qFwdaqEGuMfkdrJtSMjk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=CCSOM/bp; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=nAL6saqoNVtImyypRrPmFhkC5ob/5W1yVqMGH8ecK/9YPG2hs1J2hmy4GtPyQ2/chW4aOqUizAp02raUE/SPTs6O8//g0eitSVBM4n7wXQqi78u6LD7yd6e83woWL/HTSV64dIXa7qmQGzuec1AeDBsbRsP/9D8gKc2vDPBX/cg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WK0LGE30; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CCSOM/bp"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WK0LGE30"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1733056293;
+	s=mimecast20190719; t=1733057429;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=pFZ6jK6PRSfCj75oz2e01Xw5jZgoOhpAFDvcDfT+W0w=;
-	b=CCSOM/bp0hCIY9CBOAG94P4cgjYPKwCmqtjpYOlooiLo1mu6PWkNq4BxZooXqJkttiwsNv
-	YGcUB565cd7xQraFIx6wnOcZm5qBsM8VBbXE+35au7bw9bF9VNls5+WUEiw2bcxVQYT5BI
-	jLYxX6eMfOA2XMPpUTP6+TQlYdu3R/A=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=fzbKIEoyHsUwCp4oEWSoF6RUs9pOosqh3KZ9b6vYey4=;
+	b=WK0LGE30Z8OggjuFE7oN7EISo/K4xPxlqLjgLMsLKGtLbYW9LIrii872uWvmxv2Xb8JUZO
+	PVRBosrhZe1zuh1YdVHgrqpWJ01gaBvtj+yY9+8rAnczpLNnMRTqh63nZrpO+kzwPHYB8X
+	+kfjleuy9L8ZSnIYPrHH07fdS4xNY8g=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-665-WiS7Vk7yNCenfc-zlivTFQ-1; Sun, 01 Dec 2024 07:31:32 -0500
-X-MC-Unique: WiS7Vk7yNCenfc-zlivTFQ-1
-X-Mimecast-MFC-AGG-ID: WiS7Vk7yNCenfc-zlivTFQ
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-21544fd8434so20401765ad.0
-        for <fstests@vger.kernel.org>; Sun, 01 Dec 2024 04:31:31 -0800 (PST)
+ us-mta-253-ReLNqarANoWLCjuz9HOxKQ-1; Sun, 01 Dec 2024 07:50:28 -0500
+X-MC-Unique: ReLNqarANoWLCjuz9HOxKQ-1
+X-Mimecast-MFC-AGG-ID: ReLNqarANoWLCjuz9HOxKQ
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2ee3c572485so3689391a91.2
+        for <fstests@vger.kernel.org>; Sun, 01 Dec 2024 04:50:27 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733056291; x=1733661091;
+        d=1e100.net; s=20230601; t=1733057427; x=1733662227;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=pFZ6jK6PRSfCj75oz2e01Xw5jZgoOhpAFDvcDfT+W0w=;
-        b=s46BVxilN8X9hhcJvGX4FMq2A8QgXMLeUJkwjXk/J/Nm1ZuGk+NV0iweFkbaPmj1BX
-         XyzB80XTFj/8SgUmXBSVVWfz3Ihy7L4vK0jJp9ZkB0prqwZ7fzhSsX6vrYV8tlSgIp0g
-         MNZuI5+nlcYxGkxHf15Xpjc4pw+8qA8VgVqgjHEdm9hv5x6pP6oap5kTQembbe3urET4
-         /5arZVmKcRHPemb3T/GwDsomdibLhL4VP306CSy4Sk2RevvXtypWwgDyi8JsMDgS3Tip
-         r8vZvjrpTtnXMZwIvEuRXEsK1Xa3sHzUCd7bvVmyXJCKNPMFz8n4pF6rNnHKvy4yKcvL
-         J/tg==
-X-Gm-Message-State: AOJu0YzwiqkKuXZkvUk49sEPcSUKvZulyaes7DNmCtrRO6xw8B9M5RD3
-	q6cUc7+/qZuzNFsBkBEFz/Q6KpUKqmhKgaNDlmYFl5j+4S2gzAq5xzWZN+YM8sKv8PQgRXKQrFU
-	TzIN65ZOVZGN68Bwjm8UgBcpNGm/VOd6lWCFEf4/A6LT8/+dFDAT+uSA=
-X-Gm-Gg: ASbGncsZ4icYj6W/uMt55E4wvxmsQ9dFlPtBd+UqvjJy5uu7zyk2kapOolFwQ3QLaAd
-	abSmjraAbq2NJ84quFcewbQ08VwUS5/j9d0wachicG5i09oR39UfSK7o16DnI+q4e0zs7KOsbGV
-	lsi1vyQL827GLfZm8w/TeHXkX519xAyh5/29+0IXZyvwouuB685Y4e+kc92tqwuToljLQceyDu0
-	uYh37snffDeW4VcC40EhMkU14sf+t+TvbyMilM2E58fLGgDru3Gx7EjnqECMvLTETGeUjRhgF9S
-	dKeOzxHEozu2ZXo=
-X-Received: by 2002:a17:902:cec4:b0:20b:7388:f74 with SMTP id d9443c01a7336-21501083aa9mr289303325ad.12.1733056290450;
-        Sun, 01 Dec 2024 04:31:30 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGBvKSWyWlWv5z0jk/An/d8mMi5AA2O55/bV2k1DUZAltkmVvzVZWBJNUY2qSYVLogiS+W7gw==
-X-Received: by 2002:a17:902:cec4:b0:20b:7388:f74 with SMTP id d9443c01a7336-21501083aa9mr289302555ad.12.1733056289636;
-        Sun, 01 Dec 2024 04:31:29 -0800 (PST)
+        bh=fzbKIEoyHsUwCp4oEWSoF6RUs9pOosqh3KZ9b6vYey4=;
+        b=bThKm0zjoLLH0IQqk95D0Uj3dTgOTCmKGzd0X1ZRtPqy/M+3eRwIHfNdhFpYomQPTG
+         PmY9De/KMopsK7melOlG8k28yhILgctCg6MQu69mJ2SHQ7b1o5KAyqzq+pbhbjbdRYeh
+         sOt2UenFAQKSCBEVHy6ZO6P3qOweUI4EzQvN4UzirvzkhAX2bk1WC1hLczCElf6uVTgp
+         VCG4CmS87HU1zfj5yldj84CXjysTqb3gqjzp5VbaKiLLeU8a7IOkKMCOygoGm4SpqXjK
+         XN96zKZYqUIqxozfrWNIs4WmnVzl30lrvYnOZ6vs0rI8dZmBytiICCDDkeIBIuLeqik2
+         lwFA==
+X-Gm-Message-State: AOJu0YwG/23ZErATuCOjlBNGSEHleRSSLS2J+YenOUNTCrd1RVrF818e
+	qcSa51xEh7wmP0epiPhPT87ax03W3/En02vXRy3s5ZoeTmA9FPcEhh7bJSLDjkWjmfa5/yu6/pT
+	gz5BvczwhXAO8qT08ws+xG+KnR2hhme1n++ukySi4UEBfUBpHxh+uAu3tpjU2NPr58Q==
+X-Gm-Gg: ASbGnctbHHzE5UHuCg8pP/kuTnMx7YpgZKTbrRvYJbNamUcZb5d0kn75EMD0G3P+uXX
+	XYvpiwVQB9z9nuIFpdfDwV19tCc1hxxDq0EHf0QhCGn0zboXNcmDYqZPZ0iM+3fuzUKedbuBruS
+	UkEdRvlFxr7ne6d8s6YZp3ZwBRnschBXVcQH8grSuo0iwYHdT2jqqhLd7QTyt8zbdyUVXd3j6Z1
+	2S7UI9AYFNEsmjpdph2vqkVJOWK1h2FojaLeNZn1vy12ZQBrKfx4qk/ESe4Eal06qceBaObnW42
+	2fz5nPyYGQumDH0=
+X-Received: by 2002:a17:90b:1b4b:b0:2ee:96e3:d834 with SMTP id 98e67ed59e1d1-2ee96e3d91fmr4519984a91.34.1733057426368;
+        Sun, 01 Dec 2024 04:50:26 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHjBwV6rOwnhGmNx83DBXv6F49fTvYs3veRpOp/WgUJi017VyjMVXEZTd6h49A9PIVpON0GUA==
+X-Received: by 2002:a17:90b:1b4b:b0:2ee:96e3:d834 with SMTP id 98e67ed59e1d1-2ee96e3d91fmr4519938a91.34.1733057425666;
+        Sun, 01 Dec 2024 04:50:25 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-725417fbf52sm6532319b3a.119.2024.12.01.04.31.28
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ee7e468428sm2602318a91.31.2024.12.01.04.50.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Dec 2024 04:31:29 -0800 (PST)
-Date: Sun, 1 Dec 2024 20:31:25 +0800
+        Sun, 01 Dec 2024 04:50:24 -0800 (PST)
+Date: Sun, 1 Dec 2024 20:50:20 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 Subject: Re: [PATCH 13/40] fstests: clean up loop device instantiation
-Message-ID: <20241201123125.ej3ser6he3kap6q6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20241201125020.qqo24olu4rwh3rqz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
  <20241127045403.3665299-14-david@fromorbit.com>
 Precedence: bulk
@@ -262,6 +262,18 @@ On Wed, Nov 27, 2024 at 03:51:43PM +1100, Dave Chinner wrote:
 > -smajor=$((0x`stat -L -c %t $LOOP_DEV`))
 > -sminor=$((0x`stat -L -c %T $LOOP_DEV`))
 > +loop_dev=$(_create_loop_device $SCRATCH_DEV)
+
+This test case isn't be changed entirely, there're still some LOOP_DEV, e.g.
+
+  _destroy_loop_device $LOOP_DEV > /dev/null 2>&1
+  ...
+  _mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+
+I'll change them to loop_dev.
+
+Thanks,
+Zorro
+
 > +smajor=$((0x`stat -L -c %t $loop_dev`))
 > +sminor=$((0x`stat -L -c %T $loop_dev`))
 >  
@@ -323,13 +335,6 @@ On Wed, Nov 27, 2024 at 03:51:43PM +1100, Dave Chinner wrote:
 >  {
 > +	_scratch_unmount
 > +	[ -n $loop_dev ] && _destroy_loop_device $loop_dev
-
-The $loop_dev need quotation marks, or the _destroy_loop_device always be run.
-Same issue on xfs/513 and xfs/613. I'll add "..." to them.
-
-Thanks,
-Zorro
-
 >  	cd /
 >  	rm -f $tmp.*
 > -	test -n "$loop" && _destroy_loop_device "$loop"
