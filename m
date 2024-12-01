@@ -1,171 +1,157 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6A721D1F40
-	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 13:55:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 503A5376F1
+	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 21:37:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733061340; cv=none; b=EmV0Vqj000YbPs0fV103UKD+7N6soofb6IfhApe/c1sUYOtn4ged6RFQ/FC3SfV3bJlFOWSp5BLcBr20Of8u5Jb1lCvUrpuRFlQtGwXSNP/b8N5CYHp1nftmG0txw5NiG8RXpGZF9U5X9NcMhlLG1p60UcQlEN8Wq/xcUlpbtsY=
+	t=1733089045; cv=none; b=aLw+bCUEif1gfhPjrmzYrqWMk+GvUEQJpWmeMtZbzvrRWG2BVy/oL30oEZ3PGbVGp8pXu7Wc6LYALWTeScJiC638yk9k58L57p3xN1K+udmGNSNwn99yRu93EeFMgkxnE6zgOWDfDiUxSSz9cYfazi63LVuf8Vg4/x1mXFLMVBA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733061340; c=relaxed/simple;
-	bh=MD+7enNgee783UwJ4ezJ9e79Q/GwUWHU5H2wGhZT6N8=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=Kn4K96/0irORyqpj8VVSWol01n34tQDJZyDH4k4Qq7YDen4u2ZlK7SWiZVEYPMWvKqQgCQTH3WiClx/8xHJymJO8ed+9Fn8wga8OC/zqr5hMcrNmAjdRk3kysFu7JV7yDqtOcnqUqTUJmAXgrF6vWPpOFMjBP8DYJd7TWs1a3v0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Urep+MVf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1733089045; c=relaxed/simple;
+	bh=c8HHEtjAfP+Y35A/FJFGCckUUCfDZDjNeHr0YilCGMg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qyX0GEdGGTTCyyyFocW8EdD9d0eLFgUfqGz14Oddank2uTByaGWd86tUcGy8HAD3VXKT2Q6nia/LaKmTyaAFy/4y6xq9P3YvQA1QwtMGLCZucjlbiYkSInBFW/tr0SdsOPGkKUAuOCIQs23UgV7ko6KKKFYjI4jQPHk09a5vxwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=fgZU2d6n; arc=none smtp.client-ip=209.85.214.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Urep+MVf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4533BC4CECF;
-	Sun,  1 Dec 2024 13:55:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1733061340;
-	bh=MD+7enNgee783UwJ4ezJ9e79Q/GwUWHU5H2wGhZT6N8=;
-	h=Date:From:To:Subject:From;
-	b=Urep+MVfUSUU6LqHAQtqbFdzEnmjNLqD9VzhjVNt38TnsVBOuSOsWSaxscnv7iz7x
-	 ttm0qImTZ/mhLRanmTPgoQEaxqA06Jht1RV1uSCcx9YWgKY5pn83P8fnVkzcRTn8HZ
-	 Y8rA5KMR+zIKR9ZERQLJQW4XF40NC8ysF1yRlEKnwf1VhjnDhmakNCBdepyTRU7bOH
-	 grJF1DFz1SDr19fLmtmtWJ4nmdmkRZ0xSwl+7uhKoeIbRAMPC7GU47aT/jnerjEsX9
-	 xc6DYjZXdWta6l2e3OZOi5xFruV/0k469qLeQWLYQ9wblNM4Ql4DRqJdsvfpxFjtmE
-	 cFEWqo4vItiog==
-Date: Sun, 01 Dec 2024 21:55:35 +0800
-Message-ID: <45db57f80bac6fe94dd7c4a1eb62ce94@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.12.01
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="fgZU2d6n"
+Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2155157c58cso11032565ad.0
+        for <fstests@vger.kernel.org>; Sun, 01 Dec 2024 13:37:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1733089042; x=1733693842; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=ejmOEQhfWwi07g2KAyv6Em+v/JV5XPr6MBMAglRSOzI=;
+        b=fgZU2d6n2tzaayr67obm4myA8NVxOS4pPtJb0e2QTrN1RgMyLhYgplafd+xWUboztt
+         CXYazZkKJn+iYOw3zadcspD3T7b1mYCiDwjXYED5BE1aMSSKXclKux8UcAPG+91a30gW
+         lQ3J8A8+LSls1mxxka4Xk4Azn9IAGJdNtH1LUobBVaRTlura2N20KMQ2QByUvceBWza0
+         mGbtL3icMl4jYmYPGxrSpOhdwPXw0NBnNd2wv09UG6EjNwbdBzjHyHd+wdZ0xNqPe9yk
+         fBt2DMK2hY8ovA4u6wd6ZCkay9A8nStBPqlXtOIh/mOjbqYDpYl74zYX+wqg5IfzrUm6
+         toqw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733089042; x=1733693842;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ejmOEQhfWwi07g2KAyv6Em+v/JV5XPr6MBMAglRSOzI=;
+        b=NhFhbLk+g95TcPiXEfF648zCl57B8SGiD9Lwy3PJy/a0A7sGnwtFJcYiXF3DrnpF9y
+         ZDnSMpiFDxJQIrq37en5P03zEtycxdQrww8I9VpFks8M7BMwmKYvmcmgI4xdM51vr72L
+         4PvnU/i3LhSk/hhLKUrKBj/2tB79gaktIWWaIY3TvqVewwKvUwp2wMYtFnAcuBSpf4YU
+         nzVCUNY8SOpzuZnaIZKczwv83u272DdX+pX8OL1R4OFgCgp4NbI6TLBmTe8PzPhQOr3v
+         LVSU+Mt4diUmHPQRc1hG3P9SBcOaV17nR8yot/7isT4oTDL2WfkaiadGTKklDlYRO3tW
+         54sg==
+X-Gm-Message-State: AOJu0YzStBrxXFRFOat3AzwKBrkTp9jStc5KLAEXD/wPogtb/B4Ijg3G
+	lYko+UaJSrW0tlabSY+qdASiZ4vXdN7bQ+xOQPl6uTu/i15cbjoeEbXPUrUJyZI=
+X-Gm-Gg: ASbGncuHdLZ8X/2yvVDuPHY2LG0u6zeh6FFmkUzehmv89WUNY6wwy71GaoLCvXHAEf5
+	IDFzGn2Wly65fnTzWC9sssreJwGzU0PVu6xlZB52KASVX5FEcraXz9ppVwwi79Ixy00YX2wzKi0
+	VpuQtgI2rnZbAjuYaMp9rdzX4yPs76nh8TEoyPysMZ3Du3U3ZGaVYg+GFOFPOVWyHeip3cWB59h
+	PqRNB4GeiBqgITmak1MdcN/7eKFyKfEizC3oF4W5v6QPhoNalKTIi92uvRh3hMfFDr7QNPlqszG
+	fhUkU1CR5NygkeNWEMI1ZOO1Vg==
+X-Google-Smtp-Source: AGHT+IG89LpUuPtqNybqxfI8wgkpfkp8+w168jl1N7y4zfDU2glg/zfZls8uuB3cQ96zsfcUZwqkPA==
+X-Received: by 2002:a17:902:d483:b0:215:4662:db7a with SMTP id d9443c01a7336-2154662dd3dmr131618385ad.54.1733089042500;
+        Sun, 01 Dec 2024 13:37:22 -0800 (PST)
+Received: from dread.disaster.area (pa49-180-121-96.pa.nsw.optusnet.com.au. [49.180.121.96])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-215218f452csm63524435ad.48.2024.12.01.13.37.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 01 Dec 2024 13:37:21 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tHrcz-00000005TRc-431p;
+	Mon, 02 Dec 2024 08:37:17 +1100
+Date: Mon, 2 Dec 2024 08:37:17 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 30/40] fstests: don't use directory stacks
+Message-ID: <Z0zXDWD_Oa7qbB7u@dread.disaster.area>
+References: <20241127045403.3665299-1-david@fromorbit.com>
+ <20241127045403.3665299-31-david@fromorbit.com>
+ <20241201121046.qdgyjhuaovupjadw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="WacYjfUZt71M"
-Content-Disposition: inline
-
-
---WacYjfUZt71M
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20241201121046.qdgyjhuaovupjadw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-Hi all,
+On Sun, Dec 01, 2024 at 08:10:46PM +0800, Zorro Lang wrote:
+> On Wed, Nov 27, 2024 at 03:52:00PM +1100, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > Using bash directory stacking (pushd, popd, etc) seems to be
+> > somewhat unreliable. I've been seeing occasional random failures
+> > from both pushd and popd commands that cause the test to fail, and
+> > there does not appear to be any reason for the failures occurring.
+> > 
+> > Rather than wasting time chasing ghosts, just get rid of the
+> > directory stacking altogether.
+> > 
+> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > ---
+> >  tests/generic/099 |  8 +++-----
+> >  tests/generic/109 |  5 +----
+> >  tests/generic/135 | 24 +++++++++++-------------
+> >  tests/generic/707 |  7 ++++---
+> >  4 files changed, 19 insertions(+), 25 deletions(-)
+> > 
+> > diff --git a/tests/generic/099 b/tests/generic/099
+> > index c7d5932b6..980fd38f3 100755
+> > --- a/tests/generic/099
+> > +++ b/tests/generic/099
+> > @@ -253,15 +253,13 @@ echo ""
+> >  echo "=== Recursive change ACL ==="
+> >  rm -fr root
+> >  mkdir root
+> > -pushd root >/dev/null
+> >  # create an arbitrary little tree
+> > -for i in 1 2 3 4 5 6 7 8 9 0
+> > -do
+> > +( cd root ; for i in 1 2 3 4 5 6 7 8 9 0; do
+> >  	mkdir -p a/$i
+> >  	mkdir -p b/c$i/$i
+> >  	touch a/$i/mumble
+> > -done
+> > -popd >/dev/null
+> > +done )
+> > +
+> >  chown -R 12345:54321 root
+> >  echo "Change #1..."
+> >  _runas -u 12345 -g 54321 -- chacl -r u::rwx,g::-w-,o::--x root
+> > diff --git a/tests/generic/109 b/tests/generic/109
+> > index 2b0b438cf..894e07167 100755
+> > --- a/tests/generic/109
+> > +++ b/tests/generic/109
+> > @@ -54,10 +54,7 @@ _scratch_mount >> $seqres.full 2>&1
+> >  # Test different directory sizes to test various directory formats
+> >  for f in 1 2 3 4 5 8 12 18 27 40 60 90 135 202 303 454 681 1020 1530 2295; do
+> >  	mkdir $SCRATCH_MNT/dir$f
+> > -	pushd $SCRATCH_MNT/dir$f >/dev/null
+> > -	filldir $f
+> > -	renamedir
+> > -	popd >/dev/null
+> > +	( cd $SCRATCH_MNT/dir$f ; filldir $f ; renamedir )
+> >  done
+> >  
+> >  status=0
+> > diff --git a/tests/generic/135 b/tests/generic/135
+> > index 30c52af72..cb9407fdf 100755
+> > --- a/tests/generic/135
+> > +++ b/tests/generic/135
+> > @@ -21,30 +21,28 @@ _scratch_mount
+> >  cd $SCRATCH_MNT
+>    ^^^^^^^^^^^^^^^
+> 
+> Below "_scratch_cycle_mount" fails, due to above line. I'll remove it.
 
-The for-next branch of the xfstests repository at:
+I've updated my local tree with this fix and the others that you've
+noticed. Thanks!
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+-Dave.
 
-has just been updated and tagged as v2024.12.01 release.
-
-Release Notes:
-1) There're 2 new test cases, include generic/367 and btrfs/327.
-2) Lots of bug fixes in this release, more details refer to below.
-
-Thanks for all these contributions!
-
-I'll try to merge a big patchset from Dave Chinner in next release (except there
-are big issues). It changes so many things, later merging will cause more and
-more conflicts.
-
-  https://lore.kernel.org/fstests/20241129042216.u2f2sl5pc553gxqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#m331c898ccf49c2d557e45a1a27bf80a43123bf14
-
-I provide a temporary branch "for-dave-check-parallel" for testing this
-patchset, I've fixed some conflicts and small issues on that branch. Feel
-free to give it a test from your side, to avoid this change break your
-regular testing later :)
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-8467552f09e1 btrfs/327: add a test case to verify inline extent data read
-
-New commits:
-
-Anand Jain (1):
-      [4906a5ab94ee] fstests: fix blksize_t printf format warnings across architectures
-
-Christoph Hellwig (1):
-      [c8114d98186a] xfs/229: call on the test directory
-
-Darrick J. Wong (15):
-      [92aad87ec067] generic/757: fix various bugs in this test
-      [e21e278065bf] generic/757: convert to thinp
-      [fa95cde52dcd] xfs/113: fix failure to corrupt the entire directory
-      [27ce2a47a773] xfs/508: fix test for 64k blocksize
-      [67e01fc52bbc] common/rc: capture dmesg when oom kills happen
-      [93a8e88d0f6e] generic/562: handle ENOSPC while cloning gracefully
-      [38257f559615] xfs/163: skip test if we can't shrink due to enospc issues
-      [d9352ed5e24a] xfs/009: allow logically contiguous preallocations
-      [2d6e7681acff] generic/251: use sentinel files to kill the fstrim loop
-      [dbdbe1ec8591] generic/251: constrain runtime via time/load/soak factors
-      [f06e93a4b1af] generic/251: don't copy the fsstress source code
-      [f4ac46a85121] generic/366: fix directio requirements checking
-      [d78afe6b6f0c] generic/454: actually set attr value for llamapirate subtest
-      [ab1ece9ee32d] xfs/122: add tests for commitrange structures
-      [0c01033c834f] generic/459: prevent collisions between test VMs backed by a shared disk pool
-
-Filipe Manana (1):
-      [09d86a113f0a] btrfs/028: kill lingering processes when test is interrupted
-
-Nirjhar Roy (3):
-      [e715441790b8] common/rc,xfs/207: Add a common helper function to check xflag bits
-      [5c42ec5b9fd3] common/rc: Add a new _require_scratch_extsize helper function
-      [a9c233162ef3] generic: Addition of new tests for extsize hints
-
-Qu Wenruo (1):
-      [8467552f09e1] btrfs/327: add a test case to verify inline extent data read
-
-Zorro Lang (2):
-      [98a76c6c51da] common/rc: _scratch_mkfs_sized supports extra arguments
-      [d6596effc4df] xfs/157: do not drop necessary mkfs options
-
-
-Code Diffstat:
-
- common/rc               |  59 +++++++++++-----
- src/attr_replace_test.c |   2 +-
- src/seek_sanity_test.c  |   2 +-
- tests/btrfs/028         |  14 ++++
- tests/btrfs/327         |  56 ++++++++++++++++
- tests/btrfs/327.out     |   2 +
- tests/generic/251       |  42 ++++++------
- tests/generic/366       |   2 +-
- tests/generic/367       | 174 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/367.out   |  26 ++++++++
- tests/generic/454       |   8 +--
- tests/generic/459       |  15 +++--
- tests/generic/562       |  10 ++-
- tests/generic/757       |  26 ++++++--
- tests/xfs/009           |  29 +++++++-
- tests/xfs/113           |  33 +++++++--
- tests/xfs/122.out       |   1 +
- tests/xfs/157           |   3 +-
- tests/xfs/163           |   9 ++-
- tests/xfs/207           |  15 ++---
- tests/xfs/229           |   4 +-
- tests/xfs/508           |   4 +-
- 22 files changed, 456 insertions(+), 80 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---WacYjfUZt71M
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmdMarAACgkQlNbPkfr2
-tMzZHxAAi+Qj0pnX2vOTPBqCyrHVR+GUdQa410pBfLXeJl0a4/NBK6NWZ0tM7hWK
-/91zqkKDS8Js9COWJUAE5XQ1Rp9b1D3xH184bmYO9YwAeULFxMKNQI1MVtHuDriM
-jlbljXmxZt9XXSK77qimTR7OoYjY4UKBM2kk0W3emP9/7Q1jyted7VDVqUzBVXlh
-i/8vYx9fA4BcZtkn+Iml1nrRsIxcDk8IaKUdYBlKOscKHDgYIFOU7tAN12Cm51so
-zrLIpIzyXdZCFE2rXm7KPrbzPeK/iIb5xTNB9SOyBxS9dVEYeP5US5QXHG0Z1O9/
-tTv7+1OlcWFwWqdlQB74B4so3YRzQCEmrQcgMSHBH719A+jJuHuGFT02QsRWOUJB
-ztxiqnDk6d4sCOaDRoqGnL39gePNq0oo3gdeKNImEoYBgfOIyfF00kPzXbP5baSz
-ltWWOzNSgjMpg2B7xBw0K+33/tCv9ncUP4ZZ1cobF2ndvPMxE9un8Sc03zeyKku3
-Q3sbVsJLM4C1qn4r8cSaBOH3RZLBgUZtsiVLWW9e9ujnZIeQQwvU37/R6uzUj6nh
-6AzymH58Z0z1vD8jb2DdHkCzOrVFVyTreGyOW6w1118x3pRaQCW5LXNFuVGgbuKs
-vgVcSs/WXkwDq0dglFd2jYiFaVhogHKMYBRgIsggT3xyty23PRQ=
-=mb2i
------END PGP SIGNATURE-----
-
---WacYjfUZt71M--
+-- 
+Dave Chinner
+david@fromorbit.com
