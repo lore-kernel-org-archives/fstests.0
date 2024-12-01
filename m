@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7AF6F1D04A9
-	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 13:38:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6A721D1F40
+	for <fstests@vger.kernel.org>; Sun,  1 Dec 2024 13:55:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733060287; cv=none; b=sGvgjA7lX/5EejCDsD4jsUAMSn+yIN3LQC1hvP5ge93xSAB/qT1T6U/3XU/7JZbCnaeSqdXHAlvetbHtnh6djXKS1/Z9JblgcC/8TNJsfA+W7pl9/MiiYqe/IUa/AAy8T+E6c/myXRlUBbUnhkcKsT8gtWXXOGIjiQBXnt3aqL8=
+	t=1733061340; cv=none; b=EmV0Vqj000YbPs0fV103UKD+7N6soofb6IfhApe/c1sUYOtn4ged6RFQ/FC3SfV3bJlFOWSp5BLcBr20Of8u5Jb1lCvUrpuRFlQtGwXSNP/b8N5CYHp1nftmG0txw5NiG8RXpGZF9U5X9NcMhlLG1p60UcQlEN8Wq/xcUlpbtsY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733060287; c=relaxed/simple;
-	bh=xFovV559JE4A6V0r4uFKELrwgNa2iLenwS2qddZxfBg=;
+	s=arc-20240116; t=1733061340; c=relaxed/simple;
+	bh=MD+7enNgee783UwJ4ezJ9e79Q/GwUWHU5H2wGhZT6N8=;
 	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=uac45YmPeNd7VHk16jPLU4TwoYw0c8MZ6bwrzpq9cTP3jccQtpvFD7o7Fng/WeIWaxRUmVKdo38/3X61fmMsdaVO7SpKuMXxTNc+sLyRltH2Xnxb+jguOewRENWLDa+ULXBkhmUIBh/SuWjmqtxNz1IeustLiYTSC9GdF3dASts=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eXlIb4FP; arc=none smtp.client-ip=10.30.226.201
+	 Content-Disposition; b=Kn4K96/0irORyqpj8VVSWol01n34tQDJZyDH4k4Qq7YDen4u2ZlK7SWiZVEYPMWvKqQgCQTH3WiClx/8xHJymJO8ed+9Fn8wga8OC/zqr5hMcrNmAjdRk3kysFu7JV7yDqtOcnqUqTUJmAXgrF6vWPpOFMjBP8DYJd7TWs1a3v0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Urep+MVf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eXlIb4FP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4C04C4CECF;
-	Sun,  1 Dec 2024 13:38:06 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Urep+MVf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4533BC4CECF;
+	Sun,  1 Dec 2024 13:55:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1733060287;
-	bh=xFovV559JE4A6V0r4uFKELrwgNa2iLenwS2qddZxfBg=;
+	s=k20201202; t=1733061340;
+	bh=MD+7enNgee783UwJ4ezJ9e79Q/GwUWHU5H2wGhZT6N8=;
 	h=Date:From:To:Subject:From;
-	b=eXlIb4FPR8srGrmYAvhNQTjwZ+b8Vl866iTVMFQ5i1ucgCPGHri+lSSnNsd6yuuC8
-	 HDQjHnbygAWN3610hD64b9/BMPadz0ZZPX0lmtX+HvgEIR+HnGdT1Pfpec0717yaSi
-	 ywlfGDhyiVFgm9gG8gGSDJ8t+InLGtZdrtMgBxGdYepTZ7OsNVrGU7lM5ATvPRcnMJ
-	 i5q5AMRwYT+C1ykiBo9frh23DIDAXXGbqEemXXLc984SYXvKozMPpvrwy9n+S88zSG
-	 gqvBACxlBFdvvZjpRKarbOU5BURF52AlK+LVWT/i41wyr7Xgragavy00NiWVkanw5w
-	 BMZ71fAfRZO4g==
-Date: Sun, 01 Dec 2024 21:38:03 +0800
-Message-ID: <08c64977b30bd55f30f5a366c81851e5@kernel.org>>
+	b=Urep+MVfUSUU6LqHAQtqbFdzEnmjNLqD9VzhjVNt38TnsVBOuSOsWSaxscnv7iz7x
+	 ttm0qImTZ/mhLRanmTPgoQEaxqA06Jht1RV1uSCcx9YWgKY5pn83P8fnVkzcRTn8HZ
+	 Y8rA5KMR+zIKR9ZERQLJQW4XF40NC8ysF1yRlEKnwf1VhjnDhmakNCBdepyTRU7bOH
+	 grJF1DFz1SDr19fLmtmtWJ4nmdmkRZ0xSwl+7uhKoeIbRAMPC7GU47aT/jnerjEsX9
+	 xc6DYjZXdWta6l2e3OZOi5xFruV/0k469qLeQWLYQ9wblNM4Ql4DRqJdsvfpxFjtmE
+	 cFEWqo4vItiog==
+Date: Sun, 01 Dec 2024 21:55:35 +0800
+Message-ID: <45db57f80bac6fe94dd7c4a1eb62ce94@kernel.org>>
 From: Zorro Lang <zlang@kernel.org>
 To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: merge v2024.11.17 onto master branch
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.12.01
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -38,122 +38,134 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="E0ry1u5P8bo2"
+	protocol="application/pgp-signature"; boundary="WacYjfUZt71M"
 Content-Disposition: inline
 
 
---E0ry1u5P8bo2
+--WacYjfUZt71M
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 Hi all,
 
-The master branch of the xfstests repository at:
+The for-next branch of the xfstests repository at:
 
 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-has just been updated to v2024.11.17 version.
+has just been updated and tagged as v2024.12.01 release.
+
+Release Notes:
+1) There're 2 new test cases, include generic/367 and btrfs/327.
+2) Lots of bug fixes in this release, more details refer to below.
+
+Thanks for all these contributions!
+
+I'll try to merge a big patchset from Dave Chinner in next release (except there
+are big issues). It changes so many things, later merging will cause more and
+more conflicts.
+
+  https://lore.kernel.org/fstests/20241129042216.u2f2sl5pc553gxqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#m331c898ccf49c2d557e45a1a27bf80a43123bf14
+
+I provide a temporary branch "for-dave-check-parallel" for testing this
+patchset, I've fixed some conflicts and small issues on that branch. Feel
+free to give it a test from your side, to avoid this change break your
+regular testing later :)
 
 Thanks,
 Zorro
 
-The new head of the master branch is commit:
+The new head of the for-next branch is commit:
 
-88be6071da67 xfs/185: don't fail when rtfile is larger than rblocks
+8467552f09e1 btrfs/327: add a test case to verify inline extent data read
 
 New commits:
 
-Alexander Mikhalitsyn (1):
-      [cdbcb808ecc1] ext4/032: add a new testcase in online resize tests
+Anand Jain (1):
+      [4906a5ab94ee] fstests: fix blksize_t printf format warnings across architectures
 
-André Almeida (1):
-      [c3a28053dc09] common/casefold: Support for tmpfs casefold test
+Christoph Hellwig (1):
+      [c8114d98186a] xfs/229: call on the test directory
 
-Brian Foster (2):
-      [2fe95b92d6da] xfs: online grow vs. log recovery stress test
-      [083bb0ea9473] xfs: online grow vs. log recovery stress test (realtime version)
+Darrick J. Wong (15):
+      [92aad87ec067] generic/757: fix various bugs in this test
+      [e21e278065bf] generic/757: convert to thinp
+      [fa95cde52dcd] xfs/113: fix failure to corrupt the entire directory
+      [27ce2a47a773] xfs/508: fix test for 64k blocksize
+      [67e01fc52bbc] common/rc: capture dmesg when oom kills happen
+      [93a8e88d0f6e] generic/562: handle ENOSPC while cloning gracefully
+      [38257f559615] xfs/163: skip test if we can't shrink due to enospc issues
+      [d9352ed5e24a] xfs/009: allow logically contiguous preallocations
+      [2d6e7681acff] generic/251: use sentinel files to kill the fstrim loop
+      [dbdbe1ec8591] generic/251: constrain runtime via time/load/soak factors
+      [f06e93a4b1af] generic/251: don't copy the fsstress source code
+      [f4ac46a85121] generic/366: fix directio requirements checking
+      [d78afe6b6f0c] generic/454: actually set attr value for llamapirate subtest
+      [ab1ece9ee32d] xfs/122: add tests for commitrange structures
+      [0c01033c834f] generic/459: prevent collisions between test VMs backed by a shared disk pool
 
-Chao Yu (3):
-      [5089b050a672] f2fs/005: add testcase to check checkpoint disabling functionality
-      [23ebca50151d] f2fs/006: add testcase to check out-of-space case
-      [7838e3082b15] f2fs/007: add testcase to check consistency of compressed inode metadata
+Filipe Manana (1):
+      [09d86a113f0a] btrfs/028: kill lingering processes when test is interrupted
 
-Darrick J. Wong (2):
-      [47aa187fb226] xfs/273: check thoroughness of the mappings
-      [88be6071da67] xfs/185: don't fail when rtfile is larger than rblocks
+Nirjhar Roy (3):
+      [e715441790b8] common/rc,xfs/207: Add a common helper function to check xflag bits
+      [5c42ec5b9fd3] common/rc: Add a new _require_scratch_extsize helper function
+      [a9c233162ef3] generic: Addition of new tests for extsize hints
 
-Filipe Manana (2):
-      [d9228b41b30f] btrfs/287: make the test work when compression is enabled
-      [1e990ee9aaa0] btrfs: add a test for defrag of contiguous file extents
+Qu Wenruo (1):
+      [8467552f09e1] btrfs/327: add a test case to verify inline extent data read
 
-Johannes Thumshirn (1):
-      [e2affc453cf5] btrfs/136: check for ext3 support
-
-Qu Wenruo (3):
-      [4c1629ae3a3a] generic: new test case to verify if certain fio load will hang the filesystem
-      [81477600d363] btrfs: a new test case to verify mount behavior with background remounting
-      [3fc00cd4ab98] btrfs/321: make the filter to handle older btrfs-progs
-
-Zorro Lang (1):
-      [66434a1cb731] xfs: notrun if kernel xfs not supports ascii-ci feature
+Zorro Lang (2):
+      [98a76c6c51da] common/rc: _scratch_mkfs_sized supports extra arguments
+      [d6596effc4df] xfs/157: do not drop necessary mkfs options
 
 
 Code Diffstat:
 
- common/casefold       |  46 +++++++++++++++++++++
- common/rc             |   3 ++
- common/xfs            |  10 +++++
- tests/btrfs/136       |   2 +
- tests/btrfs/287       |  10 ++---
- tests/btrfs/287.out   |   4 --
- tests/btrfs/321       |   2 +-
- tests/btrfs/325       |  83 ++++++++++++++++++++++++++++++++++++++
- tests/btrfs/325.out   |  22 ++++++++++
- tests/btrfs/326       | 107 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/326.out   |   2 +
- tests/ext4/032        |   6 +++
- tests/ext4/032.out    |  18 +++++++++
- tests/f2fs/005        |  47 ++++++++++++++++++++++
- tests/f2fs/005.out    |   2 +
- tests/f2fs/006        |  42 ++++++++++++++++++++
- tests/f2fs/006.out    |   2 +
- tests/f2fs/007        | 108 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/f2fs/007.out    |  16 ++++++++
- tests/generic/366     | 106 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/366.out |   2 +
- tests/generic/556     |  12 ++++--
- tests/xfs/185         |   6 ++-
- tests/xfs/188         |   1 +
- tests/xfs/273         |  47 ++++++++++++++++++++++
- tests/xfs/597         |   1 +
- tests/xfs/598         |   1 +
- tests/xfs/609         |  79 ++++++++++++++++++++++++++++++++++++
- tests/xfs/609.out     |   2 +
- tests/xfs/610         |  81 +++++++++++++++++++++++++++++++++++++
- tests/xfs/610.out     |   2 +
- 31 files changed, 856 insertions(+), 16 deletions(-)
+ common/rc               |  59 +++++++++++-----
+ src/attr_replace_test.c |   2 +-
+ src/seek_sanity_test.c  |   2 +-
+ tests/btrfs/028         |  14 ++++
+ tests/btrfs/327         |  56 ++++++++++++++++
+ tests/btrfs/327.out     |   2 +
+ tests/generic/251       |  42 ++++++------
+ tests/generic/366       |   2 +-
+ tests/generic/367       | 174 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/367.out   |  26 ++++++++
+ tests/generic/454       |   8 +--
+ tests/generic/459       |  15 +++--
+ tests/generic/562       |  10 ++-
+ tests/generic/757       |  26 ++++++--
+ tests/xfs/009           |  29 +++++++-
+ tests/xfs/113           |  33 +++++++--
+ tests/xfs/122.out       |   1 +
+ tests/xfs/157           |   3 +-
+ tests/xfs/163           |   9 ++-
+ tests/xfs/207           |  15 ++---
+ tests/xfs/229           |   4 +-
+ tests/xfs/508           |   4 +-
+ 22 files changed, 456 insertions(+), 80 deletions(-)
 --
 Zorro Lang
 zlang@kernel.org
 
---E0ry1u5P8bo2
+--WacYjfUZt71M
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmdMZpIACgkQlNbPkfr2
-tMwu5xAAsBpbq57w0teeGD+79VpZna8PxJ8/awytFBonRJa2s4Zielv4YSZ0KBeU
-2tg42ON+kdxWIv1qpg+kaoWqTEdA6uzIkQTuG1nenrGvagpY6FhSG2aQB6gBZv6o
-pmcpPCSanQkXpdAIcI9mtu9xCKvrA9L60tRYuJ0IZc4b9Yo1g4ZsdH+5lN73TUlp
-J9kSGJY4jUz9a01WRdI0j/6ZUUd33QfTEmq+f1ka45/9y6rjSFAHKluxsWOpkCXQ
-zCxMGQ5IVtebpPWgkGsg2WRPGgfT9fumB3K8TvZHHqZSZFFZLUygepvaNb+5PA44
-d16gbPSZgFVOytX5LQw7todS7Di3TuijPo6p7gIUH+k2Lhed7mkZxjQAMr109ASG
-lTJHbSLKx+K3Deg3k3rMohPNYHKcl+I838w1ZO/soIPA/3Yih3iCkWSn/YlIbgMq
-KkXQt5BesFt9rBp8VBqHZUlss+FshkF+Dz3Il0WhROz8yHaF0qXlQEqhWT6I75il
-axJ3sE0K9KZEeU8zh7VAIowWYM16BCLOwhCvCA1fdXRHkHDT8I8um7PIus2dI1Y+
-tG1Ze5jBYA9n77YcEJeyolAdA2NJn80+JRcvL6CPdeGqPfN/NYdYitrvUe3F/yjg
-3mVcHDWC7p9LQD6zbpy50Ab9xmwCckHTN7ob3Y65KcqLREDIMQU=
-=CrJe
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmdMarAACgkQlNbPkfr2
+tMzZHxAAi+Qj0pnX2vOTPBqCyrHVR+GUdQa410pBfLXeJl0a4/NBK6NWZ0tM7hWK
+/91zqkKDS8Js9COWJUAE5XQ1Rp9b1D3xH184bmYO9YwAeULFxMKNQI1MVtHuDriM
+jlbljXmxZt9XXSK77qimTR7OoYjY4UKBM2kk0W3emP9/7Q1jyted7VDVqUzBVXlh
+i/8vYx9fA4BcZtkn+Iml1nrRsIxcDk8IaKUdYBlKOscKHDgYIFOU7tAN12Cm51so
+zrLIpIzyXdZCFE2rXm7KPrbzPeK/iIb5xTNB9SOyBxS9dVEYeP5US5QXHG0Z1O9/
+tTv7+1OlcWFwWqdlQB74B4so3YRzQCEmrQcgMSHBH719A+jJuHuGFT02QsRWOUJB
+ztxiqnDk6d4sCOaDRoqGnL39gePNq0oo3gdeKNImEoYBgfOIyfF00kPzXbP5baSz
+ltWWOzNSgjMpg2B7xBw0K+33/tCv9ncUP4ZZ1cobF2ndvPMxE9un8Sc03zeyKku3
+Q3sbVsJLM4C1qn4r8cSaBOH3RZLBgUZtsiVLWW9e9ujnZIeQQwvU37/R6uzUj6nh
+6AzymH58Z0z1vD8jb2DdHkCzOrVFVyTreGyOW6w1118x3pRaQCW5LXNFuVGgbuKs
+vgVcSs/WXkwDq0dglFd2jYiFaVhogHKMYBRgIsggT3xyty23PRQ=
+=mb2i
 -----END PGP SIGNATURE-----
 
---E0ry1u5P8bo2--
+--WacYjfUZt71M--
