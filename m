@@ -1,201 +1,153 @@
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 913041B2186
-	for <fstests@vger.kernel.org>; Thu,  5 Dec 2024 07:41:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FF002163A8
+	for <fstests@vger.kernel.org>; Thu,  5 Dec 2024 10:06:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733384489; cv=none; b=AaF9DmD/iDDLUABKE2m/HbroVhxpZYyYwx0lvDIGDzSm6k5/ACuWa6a0bBe57VXXvG6Lf511Irxr3aJR5ND7uFn5FlPmDwBbG3f+MT3Ly9rywW7psl/q/lBSgHGAatNOxOerVhyEZg8WpII6y97DWusN9U2yEkzKQakyL/TDL9o=
+	t=1733393170; cv=none; b=pnDOf5rBjCTXQA1cCbchlgGINjVkMvmLhvLGfufy7YPo32JWOFTaUGF2hswcF1XfU1CcQQ68oj6VumhVPNEIGvaJoMKiEfudFNxOlnFvU3ucy8MN98PQo7WxwcOiC49U3lUOli/c697e7AcXt2OBbaKQoMf53iPsEBNT4U3STvY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733384489; c=relaxed/simple;
-	bh=DthMQoZKMTxvajq4Ylkmt9T/7bmSPBTFu2U1KbLcL5s=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
-	 Content-Type:References; b=Q0oKYT8+i4R9ly//67K013NwFIkMU8EoR59SX8fB0BPrxbgFqjuU/cmOQnDiYnVGmfMyIIl9bUHVFELPUeHuI6cpKt3d+bYzO8wifKcUnq4TF4ik+PlwE5ikRTbQq3J1bx1IvLDWiKDSuaN1w/29VXrCtjF/+ffOI5i+j199hPI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=TAxaQW8q; arc=none smtp.client-ip=210.118.77.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1733393170; c=relaxed/simple;
+	bh=3Vg3OSf6aRJHMRvcYmh+/NPsWaawQe5od+aaxSAnyg4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=iGNtKz4X8tC9iqEXTYwMXZlBsC/SayINLjltMKdSAyIhwr3efAdue/rG9CpZexzei+deHIsbFFRxsSR/bnHY8GENjsVxmRetMYpaYBmfoirUYleojPOW9feaLwMBWcE36tkITuK/Jy9+MruKHaAw95GTReSpcnpL6uPdMLqdnEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DOWJa0Zj; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="TAxaQW8q"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20241205074124euoutp01237d91c229d9bc879fb421dc084566c2~OOAFPwPh30412904129euoutp01Z
-	for <fstests@vger.kernel.org>; Thu,  5 Dec 2024 07:41:24 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20241205074124euoutp01237d91c229d9bc879fb421dc084566c2~OOAFPwPh30412904129euoutp01Z
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1733384484;
-	bh=9l5w3NB9miD8q0CXwkdquu/s2ItmY+DCoaSmhTGHlRw=;
-	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-	b=TAxaQW8qjKXYpfB1rTUdDzaWLmIBLfyaHdQaPQC00aTAWRnrmfJ1c2u3pB1H5qkO6
-	 sObyH8EWHJsgZmqA9JN7gablr8yBdM4Yo09qbuALStNTcag7+vk1tnqZG+p1nixpE1
-	 FWtao9pOPUdzdsDI41V8xr3l6fK4jBLOlR0sH3Kg=
-Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20241205074124eucas1p1c64d530f22215c16940745bdc80628f2~OOAFA6AjE1385513855eucas1p1z;
-	Thu,  5 Dec 2024 07:41:24 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-	eusmges1new.samsung.com (EUCPMTA) with SMTP id 1F.41.20821.42951576; Thu,  5
-	Dec 2024 07:41:24 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-	eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-	20241205074124eucas1p1bbe274574d58be803dd2b85244e91406~OOAEwfPN43090030900eucas1p1E;
-	Thu,  5 Dec 2024 07:41:24 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20241205074124eusmtrp28114dc3f61b27dd015973135a1a742bb~OOAEv80-K0429304293eusmtrp2I;
-	Thu,  5 Dec 2024 07:41:24 +0000 (GMT)
-X-AuditID: cbfec7f2-b09c370000005155-ce-67515924a24a
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-	eusmgms2.samsung.com (EUCPMTA) with SMTP id 99.60.19654.42951576; Thu,  5
-	Dec 2024 07:41:24 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20241205074124eusmtip21009833e885a3b01394641dd540705ff~OOAEjFrV70488604886eusmtip2_;
-	Thu,  5 Dec 2024 07:41:24 +0000 (GMT)
-Received: from [106.110.32.87] (106.110.32.87) by CAMSVWEXC02.scsc.local
-	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-	Thu, 5 Dec 2024 07:41:23 +0000
-Message-ID: <95e41652-65c9-4fd7-9cc4-344b90b006b6@samsung.com>
-Date: Thu, 5 Dec 2024 08:41:22 +0100
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DOWJa0Zj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1733393167;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=6Aaesvd5ZrbgVZCPFAwwFllsiZjmrFVYPfF7S7GHMxM=;
+	b=DOWJa0ZjkoiJmEHg7PXKPn9I3NIwFgP4kIx074vcH63KqbHNEusZ4SMMpd28SGcuLrdEMc
+	d3EVLVAIS4+nlk+SxdQmC566iCgVSw2xzG+kwR4C7kjaG84vbwWxlkTzMNr8VxwhVVXy7h
+	X4VNal+5N9dYLmeny+Byfi/Tf5ar9PI=
+Received: from mail-oo1-f70.google.com (mail-oo1-f70.google.com
+ [209.85.161.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-57-w5iY1wmLPYeu7G9LRVsqYA-1; Thu, 05 Dec 2024 05:06:06 -0500
+X-MC-Unique: w5iY1wmLPYeu7G9LRVsqYA-1
+X-Mimecast-MFC-AGG-ID: w5iY1wmLPYeu7G9LRVsqYA
+Received: by mail-oo1-f70.google.com with SMTP id 006d021491bc7-5f20ac940a0so637017eaf.1
+        for <fstests@vger.kernel.org>; Thu, 05 Dec 2024 02:06:06 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733393166; x=1733997966;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6Aaesvd5ZrbgVZCPFAwwFllsiZjmrFVYPfF7S7GHMxM=;
+        b=wg2AZVE9lm4kWZk2pIwWa65gr8QPFUNH0SGxxkKBfJkHMgirgH5iURbZkUPf1FowSj
+         6sou9NMEAQQ6GZp16Yji0HephX/Tw4KY9AqIIiirw8qeUYr7g50EPfBXVMn+Rq96TzXd
+         yFTQOZ53UWK7fLNbLQaTiUc8j1xsHjN9fO9o+Z/jE2dfzvR0v8ydd1nRRsRgj725cwm6
+         avQj+Ab0cqbW18CWMPoB9I6Zp4lNYs5Lo16zPuJ1tMzekhRGB+FLhgPZGJGBcHq6tR7B
+         P4yD/B/lyg8JJVBochsaA+5oSGC+hdffSDR7poHciDQLp1bwS7ZYmDkCc4u8JXPLnDGq
+         EtJw==
+X-Gm-Message-State: AOJu0Yy4htfeu2Sl4Ed4gjF+bLMsAJrHMUM/2KMz9D8qIVU0XlWXRIg8
+	W6gBU+PtGfAv6MOCWe5lEVCq44ziAXPONWpktwUYzbD3YcVhKhSJ7BYWrAZW/lUXDYuEXrYN0J/
+	9/o7nxDm8k939rflEjQVBa8X0KVZdyMRodTTGVSI0sgT6Usu6eNy1wAM9oPuLJ4RRlA==
+X-Gm-Gg: ASbGncvNkoXs9I60n86LeezMdf9gYSKo2LAb0m3aBEcq8pSnhNkR2wVk7WrLT+OC/Il
+	C8Bj8LPloNCZ1s3JeZUW3ZE+jHSg2bX8QhoTPgGy/f8HbL+WEc9jDJjkWS3nBPRU+d4srhSZz9k
+	zIas1JMiYzLhahRtDbslB2zewD0TurGYxZN59iUIWCWWr6AcMq+40y7fyOIz5iAgUbfGSpy9VEz
+	19pjyzIdT9fJd4b31UoYQrrLBOfkYfsQ5u9HElbPZ1vXIl1KK+ATPXHOiacH/00C4D8o52CB7sJ
+	lUg4QfSaUeB+bew=
+X-Received: by 2002:a17:902:ec89:b0:215:aee1:7e36 with SMTP id d9443c01a7336-215d003ed61mr94442185ad.21.1733392631353;
+        Thu, 05 Dec 2024 01:57:11 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IG9fRZw9pSQUx/xiBPtnsD7qaYKESTTZiOAJOhjxdLJ/QVtVg+xeW2SFR258YmgQAD7UPhe1w==
+X-Received: by 2002:a17:902:ec89:b0:215:aee1:7e36 with SMTP id d9443c01a7336-215d003ed61mr94442055ad.21.1733392631039;
+        Thu, 05 Dec 2024 01:57:11 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-215f8e3fab0sm9132685ad.21.2024.12.05.01.57.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Dec 2024 01:57:10 -0800 (PST)
+Date: Thu, 5 Dec 2024 17:57:06 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 02/40] fstests: cleanup fsstress process management
+Message-ID: <20241205095706.sdpijy2n23fy7rhv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241127045403.3665299-1-david@fromorbit.com>
+ <20241127045403.3665299-3-david@fromorbit.com>
+ <20241204175715.56pvxgzeb243yodz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <Z1EvGBRTcBa4yEEc@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] common/config: use modprobe -w when supported
-Content-Language: en-GB
-To: Luis Chamberlain <mcgrof@kernel.org>, <patches@lists.linux.dev>,
-	<fstests@vger.kernel.org>
-CC: <linux-fsdevel@vger.kernel.org>, <gost.dev@samsung.com>,
-	<sandeen@redhat.com>
-From: Daniel Gomez <da.gomez@samsung.com>
-In-Reply-To: <20241205002624.3420504-1-mcgrof@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format="flowed"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA02Se0iTURjGOd/3bfscrY6z8O2Co6VFUVOhdHZZd1r0RxdLqaRaedo0tbE1
-	a5ExNJOki6lhjVIDy7S0tdaycGazvLTKLkqiWURJIq3I2coKrflp+d/vvM/znvd9Doelxcd5
-	k9iElH1El6JKkvKFjL2+/+mc4M3r1WEDLVK564hDIK92NDHytpwuJH/Z+ALJC2xLl/CU1vJj
-	fGX3zXNI+aWmla/0WIPWMVuEC+NJUkIq0YUqdgg1tvzvfO2zoAPv0h0CEzJNzEZ+LOC50PnC
-	irKRkBXjKwiyCh3IJ4hxH4IWD8UJHgTuq8d4Ix2WJx0CTihF0HvyCf+fq+H9GZo7VCE4Xlv8
-	18ayIqwAV43I183gYChqc9E+FmF/aDr3gfHxBCyBt+1nBT4OwMvgddZRysc0DoT0vrKhyePx
-	Dii1fKS5ejRk5H8ZWpWPZ0JNk3Wo1w9HweXSbL5vLI3nQ0Hjas4ugdvu8zQXYCqcPV3GcJwG
-	j2ztQykBd7PwfjBz2LQCPG0ZAo4DoKfBNsxTYPBOEcWxGkoqzcMXaaG6w8zzzQW8AE4+TuLK
-	S6G+7xLDlcdCm9ufW2cs5NoL6BwUYh71EOZRgc3/A5hHBShGTDkKJAZ9sprow1PIfplelaw3
-	pKhlu/YmW9HfD+MaaOitQhd6vsqciGKREwFLS8eLjDHr1WJRvMp4kOj2btcZkojeiSazjDRQ
-	FBIvIWKsVu0jewjREt2ISrF+k0zUyoTbwdsen7jXLrBkmvA0D5NaHW2we08XHIWtPLd3w1dT
-	ZovmlXKZ83Pi2/KcbzCjLpJ3x6nI++1orYhbVGt3QQjrvbb4e6L29S+F/IZZMyekZ8xybQmp
-	WJ2n1VTuDKUSqbLnYfzOiz3p6jpZ56H6/Ngb+ZHdG+OEFzaFeeGn/7Mxxltp542FedMiRJML
-	eTEW4dXm2irvL8N+mduZOyViXLXN+KNi7fwPD4t2fyKo1zLzY6gsV1Iyu2Oeve5+S1cxItKs
-	GJ5VQoU3303TgLA2upC57jp12NUYR0n6u/otlam5VsPgD8XU4mbT9E2ta1ZFUVE1b9ITYh+Q
-	TCmj16jCZ9E6veoPrVwHE58DAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrKIsWRmVeSWpSXmKPExsVy+t/xe7oqkYHpBocP81qcbtnLbrFn70kW
-	ixsTnjJaXD5xidFi+hZHB1aPTas62TxebJ7J6PF+31U2j8+b5AJYovRsivJLS1IVMvKLS2yV
-	og0tjPQMLS30jEws9QyNzWOtjEyV9O1sUlJzMstSi/TtEvQytkz5zlZwQa7iYdNe9gbGBsku
-	Rk4OCQETiQ1nb7N3MXJxCAksZZRY2rGGBSIhI7Hxy1VWCFtY4s+1LjaIoo+MEvfv/2eGcHYw
-	Smx6+gaog4ODV8BO4vQ+XpAGFgEVifk3TjOD2LwCghInZz4BGyoqIC9x/9YMdhBbWMBJ4k57
-	GxOIzSwgLtH0ZSXYMhGBBInlG54zQ8SDJZqnvGeE2NXDKDF1znOwQWwCmhL7Tm4CG8QpYCmx
-	bDnIdSANFhKL3xxkh7DlJba/ncMM8YGixIyJK6E+q5X4/PcZ4wRG0VlI7puF5I5ZSEbNQjJq
-	ASPLKkaR1NLi3PTcYiO94sTc4tK8dL3k/NxNjMD43Hbs55YdjCtffdQ7xMjEwXiIUYKDWUmE
-	tzIsMF2INyWxsiq1KD++qDQntfgQoykwkCYyS4km5wMTRF5JvKGZgamhiZmlgamlmbGSOC/b
-	lfNpQgLpiSWp2ampBalFMH1MHJxSDUwdLxk23nzss9eqtDD7i6XxZ+kiofMlFrbygZaW4Rur
-	5r3Ya8vwZ2Vpqbi26c6wrima1tvPzdefd81hj47Sp8rbyus/He5adOpsSefdWOdamecGq/ND
-	DH82M2foLsrgO3G0YWu94vKQP22vXmpulsyJ+7t2zuLwyc9YZGfZTvRLm5nfpuvrNKV7vu20
-	kEC144z3gt74KT4xLIgTfl8SxMDcbv8oki1pypz9WudPXrTOXry0Oerkvb9Swft0QgLfdDzI
-	T3EsZxB9mt+8ZynPrvy13zxF8xWPVH1xyHb9nflH/E/HB/HrSQJ+CgwtH/nbO0u4leST3wV2
-	lR3vd/d+/YuFVVNWkld3mnPFub4eJZbijERDLeai4kQAtcJbhFgDAAA=
-X-CMS-MailID: 20241205074124eucas1p1bbe274574d58be803dd2b85244e91406
-X-Msg-Generator: CA
-X-RootMTR: 20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680
-References: <CGME20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680@eucas1p1.samsung.com>
-	<20241205002624.3420504-1-mcgrof@kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Z1EvGBRTcBa4yEEc@dread.disaster.area>
 
-On 12/5/2024 1:26 AM, Luis Chamberlain wrote:
-> We had added support for open coding a patient module remover long
-> ago on fstests through commit d405c21d40aa1 ("common/module: add patient
-> module rmmod support") to fix many flaky tests. This assumed we'd end up
-> with modprobe -p -t <msec-timeout> but in the end kmod upstream just
-
-I can't find modprobe -p and/or -t arguments in the manual. What do they 
-mean?
-
-Well, I'm now seeing this "patient" support:
-https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=d405c21d40aa1f0ca846dd144a1a7731e55679b2
-
-but i can't find the module remover support in kmod.
-
-
-Nit. I find useful using the long argument instead of the short one 
-(e.g. --wait instead of -w). as it's usually self-descriptive. But I 
-guess we don't have that long option for -p and -t?
-
-
-Daniel
-
-> used modprobe -w <msec-timeout> through the respective kmod commit
-> 2b98ed888614 ("modprobe: Add --wait").
+On Thu, Dec 05, 2024 at 03:42:00PM +1100, Dave Chinner wrote:
+> On Thu, Dec 05, 2024 at 01:57:15AM +0800, Zorro Lang wrote:
+> > On Wed, Nov 27, 2024 at 03:51:32PM +1100, Dave Chinner wrote:
+> > > +# Common execution handling for fsstress invocation.
+> > > +#
+> > > +# We need per-test fsstress binaries because of the way fsstress forks and
+> > > +# tests run it in the background and/or nest it. Trying to kill fsstress
+> > > +# tasks is unreliable because killing parent fsstress task does not guarantee
+> > > +# that the children get killed. Hence the historic use of killall for stopping
+> > > +# execution.
+> > > +#
+> > > +# However, we can't just kill all fsstress binaries as multiple tests might be
+> > > +# running fsstress at the same time. Hence copy the fsstress binary to a test
+> > > +# specific binary on the test device and use pkill to select that only that
+> > > +# task name to kill.
+> > > +#
+> > > +# If tasks want to start fsstress themselves (e.g. under a different uid) then
+> > > +# they can set up _FSSTRESS_BIN and record _FSSTRESS_PID themselves. Then if the
+> > > +# test is killed then it will get cleaned up automatically.
+> > > +
+> > > +_FSSTRESS_BIN="$seq.fsstress"
+> > > +_FSSTRESS_PROG="$TEST_DIR/$seq.fsstress"
+> > 
+> > Hi Dave,
+> > 
+> > I'm wondering if the "$seq.fsstress" can be unique name? For example, if generic/561,
+> > xfs/561, btrfs/561, ext4/561 run fsstress in parallel, won't they have same
+> > "561.fsstress", then "pkill -PIPE $_FSSTRESS_BIN" kills all these cases' fsstress
+> > processes?
 > 
-> Take advantage of the upstream patient module remover support added
-> since June 2022, so many distributions should already have support for
-> this now.
+> Yeah, it's not entirely unique, but it was "good enough" to solve
+> the problem and move on to the next one. It should be easy enough to
+
+Sure, it's good to move on to the next one, due to it doesn't bring
+in regression for original testing way. We can improve this part
+later.
+
+> change; the reason I used $seq was because it is short, and the
+> pkill man page says:
 > 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
+> NOTES
+>        The  process  name  used  for  matching is limited to the 15
+>        characters present in the output of /proc/<pid>/stat.
 > 
-> Eric, I saw you mentioning on IRC you didn't understand *why*
-> the patient module remover was added. Even though I thought the
-> commit log explained it, let me summarize again: fix tons of
-> flaky tests which assume module removal is being done correctly.
-> It is not and fixing this is a module specific issue like with
-> scsi_debug as documented in the commit log bugzilla references.
-> So any sane test suite thing relying on module removal should use
-> something like modprobe -w <timeout-in-ms>.
+> It turns out that this 15 character limit doesn't appear to exist
+> anymore.  I just checked that file on a 6.10.7 kernel, and it
+> appears that there are full process names in there. pgrep (at least)
+> matches on process names longer than 15 character, so I suspect that
+> the man page is simply out of date here.
 > 
->    Luis
+> Hence we might be able to use something longer and more unique along
+> with 'pkill -x' to match the full name. i.e. this is a solvable
+> problem, but not critical to the effective working of concurrent
+> test running.
+
+Good to know that, thanks! So we can use "xfs-561-fsstress" or
+"$$-$seq-fsstress" or something better idea you have :)
+
+Thanks,
+Zorro
+
 > 
->   common/config | 12 ++++++------
->   1 file changed, 6 insertions(+), 6 deletions(-)
+> -Dave.
 > 
-> diff --git a/common/config b/common/config
-> index fcff0660b05a..d899129fd5f1 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -264,7 +264,7 @@ export UDEV_SETTLE_PROG
->   # Set MODPROBE_PATIENT_RM_TIMEOUT_SECONDS to "forever" if you want the patient
->   # modprobe removal to run forever trying to remove a module.
->   MODPROBE_REMOVE_PATIENT=""
-> -modprobe --help >& /dev/null && modprobe --help 2>&1 | grep -q -1 "remove-patiently"
-> +modprobe --help >& /dev/null && modprobe --help 2>&1 | grep -q -1 "wait TIMEOUT_MSEC"
->   if [[ $? -ne 0 ]]; then
->   	if [[ -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
->   		# We will open code our own implementation of patient module
-> @@ -276,19 +276,19 @@ else
->   	if [[ ! -z "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" ]]; then
->   		if [[ "$MODPROBE_PATIENT_RM_TIMEOUT_SECONDS" != "forever" ]]; then
->   			MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
-> -			MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
-> +			MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-w $MODPROBE_PATIENT_RM_TIMEOUT_MS"
->   		fi
->   	else
->   		# We export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS here for parity
-> -		# with environments without support for modprobe -p, but we
-> +		# with environments without support for modprobe -w, but we
->   		# only really need it exported right now for environments which
-> -		# don't have support for modprobe -p to implement our own
-> +		# don't have support for modprobe -w to implement our own
->   		# patient module removal support within fstests.
->   		export MODPROBE_PATIENT_RM_TIMEOUT_SECONDS="50"
->   		MODPROBE_PATIENT_RM_TIMEOUT_MS="$((MODPROBE_PATIENT_RM_TIMEOUT_SECONDS * 1000))"
-> -		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-t $MODPROBE_PATIENT_RM_TIMEOUT_MS"
-> +		MODPROBE_RM_PATIENT_TIMEOUT_ARGS="-w $MODPROBE_PATIENT_RM_TIMEOUT_MS"
->   	fi
-> -	MODPROBE_REMOVE_PATIENT="modprobe -p $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
-> +	MODPROBE_REMOVE_PATIENT="modprobe $MODPROBE_RM_PATIENT_TIMEOUT_ARGS"
->   fi
->   export MODPROBE_REMOVE_PATIENT
->   
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
