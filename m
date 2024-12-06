@@ -1,60 +1,79 @@
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
+Received: from fout-b2-smtp.messagingengine.com (fout-b2-smtp.messagingengine.com [202.12.124.145])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85A1118E050
-	for <fstests@vger.kernel.org>; Fri,  6 Dec 2024 09:00:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.118.77.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C561206270;
+	Fri,  6 Dec 2024 16:38:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.145
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733475641; cv=none; b=iaTTbtCU0UWKsWzgwOlB9YHDn1j07Ix/0h4MKF2o1KqlxQLwH9ZE3+6JRHdrC4uednUNcbST3wdB0sum1aXV3Yka7IIcbNeZoW0o+g8iy2JKycffrPCZY6qCXyMWs9CJLUIwCpPVX+w9vChtbtxw6XAinn6WsxZjbDmrMsbvVSA=
+	t=1733503096; cv=none; b=ktJJuk8h0CTdlxGIL4PDQGLJNzKeV5q9tOFuXWqC6Zd6obYmUkM8F1lvkz8ByZA8dR1XkMI1mYR0O2Ts+bLcBTDjLX9zjY10QZO9FxIjNRQm92WLt1BtON0f6HwulwzhNx+yauNMRZtZAGYo5T4xN6zphH4qgHzGLWDGbrt35B4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733475641; c=relaxed/simple;
-	bh=h/jMTotFuxnM0D2p4HTTUDkXP73GNC6bPT53ah0AYjw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:From:In-Reply-To:
-	 Content-Type:References; b=g/py7l2+L9XtNS60HP3kFj86B7gL2rEQLtTEDj1R8OBZ6Ey216XIh7ypsakJl4wW48nWYdIy5TGte4zpNwmWZSbsA12Z+jr++gDvodfqStAeDb8l6ewnDtudHiyYL3Z/+PxWEzWu9L5ifwKUpq9qLGKwQcdQuiY6W/BiS8jHDCg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=HzaaIgkj; arc=none smtp.client-ip=210.118.77.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1733503096; c=relaxed/simple;
+	bh=FGnfniOj0Y6FgSXqJOpFrfLoZU988Gf5jVo3rNrTFME=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=gLRGHDRTU9FN2t+Mtqg1bgM/FFwIQLTWDLL7T4EOqRwhDuFkStE2xVptJcMSdS4F0ndjU7lY8xhThV+gTszegAZ7iAw5Ugm9T590bN1ANy+rSvajiyafugzk8UsMNGpFwJktmp/7KdNIhsc6FNyp6M1QRSI3TaneyYEOw0tVi2c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=hG3rXntJ; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=f7lF8o7Y; arc=none smtp.client-ip=202.12.124.145
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="HzaaIgkj"
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-	by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20241206090032euoutp0184d9442a715a77230826c7dc2aae7b86~OiucoMZ4h2014020140euoutp01H
-	for <fstests@vger.kernel.org>; Fri,  6 Dec 2024 09:00:31 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20241206090032euoutp0184d9442a715a77230826c7dc2aae7b86~OiucoMZ4h2014020140euoutp01H
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1733475632;
-	bh=HA8XSRBC3z58+YB/XdZO/a+P0mv6PxJbXV4aXju2atk=;
-	h=Date:Subject:To:CC:From:In-Reply-To:References:From;
-	b=HzaaIgkj8DxvSOsBOr1D0l2Q4ywGmOthLXeFo+BkuectJRpyuYQfyOLGU4xjy8+jd
-	 atNE8VndF1GymNOaFxV7q/sR3QUhao3aIMCggPpYR2YcyjYcu8Qr6uGEwG7SF2I5pd
-	 H6YyqlufyGrXgKkKPMO8DqSzpStSWrRomSVaylOI=
-Received: from eusmges1new.samsung.com (unknown [203.254.199.242]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTP id
-	20241206090031eucas1p2a813c3ed1fbd02894040d67b8fa20946~OiucdsgKq2802828028eucas1p2d;
-	Fri,  6 Dec 2024 09:00:31 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-	eusmges1new.samsung.com (EUCPMTA) with SMTP id DD.C6.20821.F2DB2576; Fri,  6
-	Dec 2024 09:00:31 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-	eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-	20241206090031eucas1p23196c2e72cd04cc3e53021f485935520~OiucM5pDV1630416304eucas1p2-;
-	Fri,  6 Dec 2024 09:00:31 +0000 (GMT)
-Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
-	eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20241206090031eusmtrp2d7fe022f7cddcbf13f0f62aa2f9df49f~OiucMWp5Y1198711987eusmtrp2b;
-	Fri,  6 Dec 2024 09:00:31 +0000 (GMT)
-X-AuditID: cbfec7f2-b09c370000005155-73-6752bd2fccfa
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-	eusmgms1.samsung.com (EUCPMTA) with SMTP id 5D.0B.19920.F2DB2576; Fri,  6
-	Dec 2024 09:00:31 +0000 (GMT)
-Received: from CAMSVWEXC02.scsc.local (unknown [106.1.227.72]) by
-	eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20241206090031eusmtip286041ac4a65551e20b09044aafb68f28~OiucEIvHF3075630756eusmtip2q;
-	Fri,  6 Dec 2024 09:00:31 +0000 (GMT)
-Received: from [106.110.32.87] (106.110.32.87) by CAMSVWEXC02.scsc.local
-	(2002:6a01:e348::6a01:e348) with Microsoft SMTP Server (TLS) id 15.0.1497.2;
-	Fri, 6 Dec 2024 09:00:30 +0000
-Message-ID: <795962d3-0bab-47d0-9254-df0e98e3a314@samsung.com>
-Date: Fri, 6 Dec 2024 10:00:30 +0100
+	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="hG3rXntJ";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="f7lF8o7Y"
+Received: from phl-compute-12.internal (phl-compute-12.phl.internal [10.202.2.52])
+	by mailfout.stl.internal (Postfix) with ESMTP id 8BA241140170;
+	Fri,  6 Dec 2024 11:38:13 -0500 (EST)
+Received: from phl-mailfrontend-02 ([10.202.2.163])
+  by phl-compute-12.internal (MEProxy); Fri, 06 Dec 2024 11:38:13 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1733503093;
+	 x=1733589493; bh=L8wQMVN3CA3vlvWokkwFyOCJdtQgbTsN9Yv6oOD1qYM=; b=
+	hG3rXntJBtqBKgg4TozOVwX4UpjLKyB0Ca8AouOX4bt92JGdtvT3YzIy3IBMBF1n
+	2g81pdUWxTiISDTD5K7Lw+Xh/THRvv7SHJ5mZMAOHJq5iyF+sYt1O9ctITYYCgnL
+	5idi9GscfbI9TUUL7fdXL9EDgpgzRZcZmWqFiiwiarP4w63wTzhR1yCtkME5ie/Y
+	jwlX+9bakoqW6G6bTatiegNJcD6jTjkeGUjWsTdV5ZhfDaTpNvC6VLE5TDfG2jxK
+	gp9ovGtAHuJDsOxKBVRY7Z5VgCiqA86B7L3eblIlBGv1mLaawV5lf2EbjPpQGYQF
+	1zx+ikK7RHvsaAeTUJ1F6A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1733503093; x=
+	1733589493; bh=L8wQMVN3CA3vlvWokkwFyOCJdtQgbTsN9Yv6oOD1qYM=; b=f
+	7lF8o7YgyRYwTz0ik1pkkH1xZ3kNQBw2Jhi3HuZE6OUj5/mj1YCpjUh+PyUU5b22
+	RPZr4gxVx3dqTGgvGBIzn0zJ/WZyrUvRuzOZzLfpb15wxEYObRAh7FBwtWEeJASA
+	Cpfzg5J9dmZuJcXdVVIy4i8EiyFsKS6jGHSziKVcKbnqGOKtfhU/sKPlxP9SkNkZ
+	FJy/SMCMf1vNlnR7ffsbSNXKmXHEOpQClggA7BAAlB91xqFPz+EQ2siSs4X64qHD
+	2Znx/asFSbiX2yyDNZeyvyLNRZ2GFgVsT074azxoI+vjZfYqQGbJR7qZCF3zxGhu
+	9zMXXbDmQqFaREKmqtpXg==
+X-ME-Sender: <xms:dChTZxkHZ4ihIXc5SH4x4Y8hErc8McgY9o5QMWEEaNFg_xBkoqn7bQ>
+    <xme:dChTZ82XQCUveY0CoFsgHNeGEuZhGUKfq6GKGjPzPWZsU9b9AhJNQ4P2VRim21K1v
+    XnO_5PrIsxkKKf708A>
+X-ME-Received: <xmr:dChTZ3ooP5ONhbl1-CPrfXjvUriKmo7IrccQ_sgwV0i4R_kkjp9vACq5jF_QUHTux_zWl3yIb-HZACo8zR1E00ZW5fw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefuddrieelgdeltdcutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdpuffr
+    tefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecunecujfgurhepkfffgggfuf
+    fvvehfhfgjtgfgsehtjeertddtvdejnecuhfhrohhmpefgrhhitgcuufgrnhguvggvnhcu
+    oehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtqeenucggtffrrghtthgvrhhnpeevie
+    ekueetfeeujedtheeffedvgeffiedvjeejleffhfeggeejuedtjeeulefhvdenucevlhhu
+    shhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehsrghnuggvvghnse
+    hsrghnuggvvghnrdhnvghtpdhnsggprhgtphhtthhopeeipdhmohguvgepshhmthhpohhu
+    thdprhgtphhtthhopehmtghgrhhofheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepsh
+    grnhguvggvnhesrhgvughhrghtrdgtohhmpdhrtghpthhtohepphgrthgthhgvsheslhhi
+    shhtshdrlhhinhhugidruggvvhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkh
+    gvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqfhhsuggvvhgvlhesvhhgvghr
+    rdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehgohhsthdruggvvhesshgrmhhsuhhngh
+    drtghomh
+X-ME-Proxy: <xmx:dChTZxlEndGndargkCiuTg7DTO6T2C4ZytgVwKwetfW_v8Utjo6b-A>
+    <xmx:dChTZ_04dDziGaCloDBl_23OqyAfGsRfDdKW4gZhirHScTx7iKfRig>
+    <xmx:dChTZwsu0pjhKauVJvOu84_UOHOF5ulPvQH6rix0kYr0ZwW9WGL7xw>
+    <xmx:dChTZzUOnVXmI5-VwaBlYdj5I584KmICgIrA5nCMioktssP_BJi5QA>
+    <xmx:dShTZ5pk-LLEhfDHvA65njFCtlSyAbOsE2_Q8bzYI5BrFtEHo-aSSHi8>
+Feedback-ID: i2b59495a:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 6 Dec 2024 11:38:12 -0500 (EST)
+Message-ID: <14e3c1fd-4c16-4676-8f66-81558febc4dd@sandeen.net>
+Date: Fri, 6 Dec 2024 10:38:11 -0600
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -63,89 +82,65 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH] common/config: use modprobe -w when supported
-Content-Language: en-GB
-To: Luis Chamberlain <mcgrof@kernel.org>
-CC: <patches@lists.linux.dev>, <fstests@vger.kernel.org>,
-	<linux-fsdevel@vger.kernel.org>, <gost.dev@samsung.com>,
-	<sandeen@redhat.com>
-From: Daniel Gomez <da.gomez@samsung.com>
-In-Reply-To: <Z1Ing_noobsMJCRS@bombadil.infradead.org>
-Content-Type: text/plain; charset="UTF-8"; format="flowed"
+To: Luis Chamberlain <mcgrof@kernel.org>, Eric Sandeen <sandeen@redhat.com>
+Cc: patches@lists.linux.dev, fstests@vger.kernel.org,
+ linux-fsdevel@vger.kernel.org, gost.dev@samsung.com
+References: <20241205002624.3420504-1-mcgrof@kernel.org>
+ <0272e083-8915-407a-9d7f-0c1a253c32d7@redhat.com>
+ <Z1IuphUjdnnRUWCg@bombadil.infradead.org>
+Content-Language: en-US
+From: Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <Z1IuphUjdnnRUWCg@bombadil.infradead.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CAMSVWEXC01.scsc.local (2002:6a01:e347::6a01:e347) To
-	CAMSVWEXC02.scsc.local (2002:6a01:e348::6a01:e348)
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFuphleLIzCtJLcpLzFFi42LZduznOV39vUHpBj+/6lmcbtnLbrFn70kW
-	ixsTnjJaXD5xidFi+hZHB1aPTas62TxebJ7J6PF+31U2j8+b5AJYorhsUlJzMstSi/TtErgy
-	dn3YwVKwnqviUONNpgbGiRxdjJwcEgImEj1PX7GC2EICKxglNt337mLkArK/MEr8erGcGcL5
-	zCix6OM7VpiOW89WMUJ0LGeUmPu1Bq7oTuM5FghnB6PE+ravYFW8AnYSH2/vBbNZBFQk7k+a
-	wAIRF5Q4OfMJmC0qIC9x/9YMdhBbWMBJ4k57GxOIzSwgLtH0ZSXYZhEBDYl9E3qh4t2MEms3
-	CYDYbAKaEvtObgLr5RQwk3i2fhHQLg6gGiuJ6Sc8IcrlJba/ncMM8YCixIyJK1kg7FqJU1tu
-	MYHcLCHwgkPizd1GqC9dJD4+fssOYQtLvDq+BcqWkfi/cz4ThJ0usWTdLKhBBRJ7bs9iBdkr
-	IWAt0XcmByLsKHHsy1IWiDCfxI23ghDn8ElM2jadeQKj6iykgJiF5OFZCA/MQvLAAkaWVYzi
-	qaXFuempxYZ5qeV6xYm5xaV56XrJ+bmbGIEJ5vS/4592MM599VHvECMTB+MhRgkOZiUR3sqw
-	wHQh3pTEyqrUovz4otKc1OJDjNIcLErivKop8qlCAumJJanZqakFqUUwWSYOTqkGJv8TC6rU
-	DFfPuz//eRLT0RX1RzUYLrdktJfu27Uq/+fn1exrpnJzb+ObYCy2as96AePXonYStbsTNrqt
-	tlrFM/UWy7IXPtwHciT0bQ5GnlP5zFu6M3Ree5ns8p/NJaX2BnHdffsmPZnG+My4Ku9M7rwn
-	T12LTPM+t6g7P3sSuWrxpt/LaraE8O1W+N4zWf/9jWXHtDaKX8ys+bPnLu+1cob9uZu2Vs88
-	y7Px2mGjaJeCGZl/DQN4eM6JK/8NEUqPqPSKn3xU8lhsW9tBDZ/bYoxC/fNS5k3buLrz7h+3
-	9BsMMz9ceffn3OqFRy9Ntpb/V+WnP/XMyVLr7bIpDPsdT288fqL3n2u9VpviDqbrxg1KLMUZ
-	iYZazEXFiQD87yxnnwMAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrOIsWRmVeSWpSXmKPExsVy+t/xe7r6e4PSDaYul7M43bKX3WLP3pMs
-	FjcmPGW0uHziEqPF9C2ODqwem1Z1snm82DyT0eP9vqtsHp83yQWwROnZFOWXlqQqZOQXl9gq
-	RRtaGOkZWlroGZlY6hkam8daGZkq6dvZpKTmZJalFunbJehl7Pqwg6VgPVfFocabTA2MEzm6
-	GDk5JARMJG49W8XYxcjFISSwlFHi0OLzzBAJGYmNX66yQtjCEn+udbFBFH1klPgx+xMLhLOD
-	UeL9gTOMIFW8AnYSH2/vBbNZBFQk7k+awAIRF5Q4OfMJmC0qIC9x/9YMdhBbWMBJ4k57GxOI
-	zSwgLtH0ZSXYNhEBDYl9E3qZQBYwC3QyShy8PQlq9VtGiXVvjoJVsQloSuw7uQlsEqeAmcSz
-	9YsYISZZSCx+c5AdwpaX2P52DtQ/ihIzJq5kgbBrJT7/fcY4gVF0FpIDZyE5ZBaSUbOQjFrA
-	yLKKUSS1tDg3PbfYUK84Mbe4NC9dLzk/dxMjMEa3Hfu5eQfjvFcf9Q4xMnEwHmKU4GBWEuGt
-	DAtMF+JNSaysSi3Kjy8qzUktPsRoCgylicxSosn5wCSRVxJvaGZgamhiZmlgamlmrCTO63b5
-	fJqQQHpiSWp2ampBahFMHxMHp1QD05ZFUVffcye9miUc3/Tzv8+yCQ+mdLectJZ+syzwdpBN
-	v/guW977XhKuUdPiWK2U5G/fi1I/GfBguSQraz1fhfC9uUyvNz+4VdzX4R0lVlAYzlsl/dk5
-	sm/LhF+rTG7aypR4h0tzf6ryyrzzaVJwreEsVj3u2GPFF120lgl2HM48FfnZcmtydjF3tEMJ
-	56oNxkqPtbf9z3259MS5iJOWZh77A88Y+NhmJM0tkltc0CAZ+UIpk6cpbkuisRSv3sI5B/M2
-	CnpeOLvk7hFzvvsTBZrXZbrXOzj9mHT1dEvE/+avkf9tpm5iVV27c6MdG5PLyrPsTKwX2FX+
-	GD0WuvVq2bwFB/iWiG06K7pX/nmOEktxRqKhFnNRcSIASM5pMVoDAAA=
-X-CMS-MailID: 20241206090031eucas1p23196c2e72cd04cc3e53021f485935520
-X-Msg-Generator: CA
-X-RootMTR: 20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680
-References: <CGME20241205002632eucas1p1550f6c9513d111b21cb22cacb09ed680@eucas1p1.samsung.com>
-	<20241205002624.3420504-1-mcgrof@kernel.org>
-	<95e41652-65c9-4fd7-9cc4-344b90b006b6@samsung.com>
-	<Z1Ing_noobsMJCRS@bombadil.infradead.org>
 
-On 12/5/2024 11:21 PM, Luis Chamberlain wrote:
-> On Thu, Dec 05, 2024 at 08:41:22AM +0100, Daniel Gomez wrote:
->> On 12/5/2024 1:26 AM, Luis Chamberlain wrote:
->>> We had added support for open coding a patient module remover long
->>> ago on fstests through commit d405c21d40aa1 ("common/module: add patient
->>> module rmmod support") to fix many flaky tests. This assumed we'd end up
->>> with modprobe -p -t <msec-timeout> but in the end kmod upstream just
+On 12/5/24 4:52 PM, Luis Chamberlain wrote:
+> On Wed, Dec 04, 2024 at 10:35:45PM -0600, Eric Sandeen wrote:
+>> but that probably has more to do with the test not realizing
+>> /before it starts/ that the module cannot be removed and it
+>> should not even try.
+> 
+> Right.
+> 
+>> Darrick fixed that with:
 >>
->> I can't find modprobe -p and/or -t arguments in the manual. What do they
->> mean?
+>> [PATCH 2/2] xfs/43[4-6]: implement impatient module reloading
 > 
-> I had proposed -p to mean patient module remover with a default timeout
-> set, -t to override. In the end this went upstream instead over a lot of
-> dialog with just -w <timeout>.
+> Looks good to me.
 > 
->> but i can't find the module remover support in kmod.
->>
->>
->> Nit. I find useful using the long argument instead of the short one (e.g.
->> --wait instead of -w). as it's usually self-descriptive. But I guess we
->> don't have that long option for -p and -t?
+>> but it's starting to feel like a bit of a complex house of cards
+>> by now. We might need a more robust framework for determining whether
+>> a module is removable /at all/ before we decide to wait patiently
+>> for a thing that cannot ever happen?
 > 
-> It was one or the other that went upstream, we implemented this on
-> fstests upstream as an open coded solution while we wanted for this
-> meachanism to be agreed upon and merged. I just forgot to come back to
-> this after -w was merged and decided upon.
+> I think the above is a good example of knowing userspace and knowing
+> that userspace may be doing something else and we're ok to fail.
+> Essentially, module removal is non-deterministic due to how finicky
+> and easy it is to bump the refcnt for arbitrary reasons which are
+> subsystem specific. The URLs in the commit log I added provide good
+> examples of this. It is up to each subsystem to ensure a proper
+> quiesce makes sense to ensure userspace won't do something stupid
+> later.
+> 
+> If one can control the test environment to quiesce first, then it
+> makes sense to patiently remove the module. Otherwise the optional
+> impatient removal makes sense.
 
-Thanks for clarifying.
+Not to belabor the point too much, but my gut feeling is there are
+cases where "quiescing" is not the issue at all - if the module is
+in use on the system somewhere outside of xfstests, no amount of
+quiescing or waiting will make it removable. Essentially, xfstests
+needs to figure out if it is the sole owner/user of a module before
+it tries to do any sort of waiting for removal, IMHO.
 
+I haven't had the time to think through it much, just my spidey-
+sense tingling when looking at the xfs/43[4-6] problem and feeling
+like there's probably a better/cleaner/more explicit solution for
+some of this.
 
+Thanks,
+-Eric
+
+>   Luis
 > 
->    Luis
 
