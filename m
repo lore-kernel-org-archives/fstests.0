@@ -1,77 +1,78 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B856417E0
-	for <fstests@vger.kernel.org>; Sat,  7 Dec 2024 18:59:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1CF429422
+	for <fstests@vger.kernel.org>; Sat,  7 Dec 2024 19:51:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733597991; cv=none; b=LQjxK4lu8uM+8GVsGYlA4n58Y56UCQRsoQWnxX3rwf2JRkKdGnbQuCaOtqq5vQTHx05M1Tr1qNXj8rLWuK6+pfs/44SO94KCtukqKQOwU5uT1/EEpnWfiQ7W7xe+rxuBsGIQjYDTEQcAaL7CDbPfMvwhPhY1MCnjvGY9N0pnBUQ=
+	t=1733601074; cv=none; b=RZLJ/Sr3zUuxWO8w1yVPhFFRWdNV5FaE8sq6TXIBkS68BHnwLz6SbUA2MoS5lJSgCZHqavHJQ/MAXv44Cp6GglCJbgeNWqw5bSALSGrICAvIrbThuS58XWP+UUgCTH0GgW5BKUPgqbeDhzAq0pfSps1BCTGwstFq8tg3sNWzfeM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733597991; c=relaxed/simple;
-	bh=Dq/9QQD3FJFsR4TPh/fgymgMttzSJp0JKX4cC41/E8I=;
+	s=arc-20240116; t=1733601074; c=relaxed/simple;
+	bh=eD00qAaNy+XTdObdGqHC9+ynQFao8xb9j9q5dVtk7ps=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iNmYq/jzOTpO7BGsWBc8jXY/EBrSwf7g3oAvMa5nMBB2IbUySf7J1AWstVAzCwVQhnf6fz+F7iF4PcqKKzkmUMx45g3UQhTiyMoESQgYblhH7a5tyn5sXQsRInjpavugh5uARy7BNhj87Zj/8aPD8ionvuuXelf9aRO+k81USFY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WYVCyLui; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=VD44r8ls08+Eg1jJc7nsrF+vAxUUYSlSAsLeCIlz/yaCOoUl/bV/pB8WNkCVpBDn7XPz1FmcqpCcrzcqLubVTytb3u9NwN9FNhp60pMQvcqjJJ/xoUgKx29WWk8VNlx2WiYMwt3mF6IgpUp4ho1dklTKbIITf1HzpCB1Y86sNXo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=c7uCJRj1; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WYVCyLui"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="c7uCJRj1"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1733597986;
+	s=mimecast20190719; t=1733601069;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=oxdm1Tm4cFKFhGJZzqwOItH1TwSzZfo2+Hwt5MLJlVE=;
-	b=WYVCyLui6yfTsEQAAnaGRili9pqBxHRdcKlc/Ux6SdQvlzTWNNtrNl9EtNy81JCOEki0Zz
-	qEY9MOSFiLht6gpQtQXRbnvaor5G0wQ6AdDZvqb1lutODP+pRzJ2vuzrvToGKIt2WshKSP
-	/eNX3GJew1YycQFurW4DBqonTkG+tAA=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=qiiPfaJO7284JBcqDgs7zXHv+xbIhnSOHtr5gYynNes=;
+	b=c7uCJRj1JRvh6zIISu7NYU3uq7I7M61abUkxhmo2XFaMXzsZsT0DlaQd9qKbWt3TdxRtmv
+	ZsniMI97zX1fRxSQZP7mVzKCKFeG1k4QIaNVBXOGZpunoIxeQamNr/8xqUz+flxKnyKvfz
+	Zaxh/KxAFLTqkWxjomfqVpryOzBJX1E=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-534-mUvwBZ0lPw2jVTzF3LGLAg-1; Sat, 07 Dec 2024 13:59:45 -0500
-X-MC-Unique: mUvwBZ0lPw2jVTzF3LGLAg-1
-X-Mimecast-MFC-AGG-ID: mUvwBZ0lPw2jVTzF3LGLAg
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-216311faa51so4191195ad.0
-        for <fstests@vger.kernel.org>; Sat, 07 Dec 2024 10:59:44 -0800 (PST)
+ us-mta-663-eGmZuaULPMKvzk3DEQ2vrQ-1; Sat, 07 Dec 2024 14:51:07 -0500
+X-MC-Unique: eGmZuaULPMKvzk3DEQ2vrQ-1
+X-Mimecast-MFC-AGG-ID: eGmZuaULPMKvzk3DEQ2vrQ
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2ef7fbd99a6so817128a91.1
+        for <fstests@vger.kernel.org>; Sat, 07 Dec 2024 11:51:07 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733597984; x=1734202784;
+        d=1e100.net; s=20230601; t=1733601066; x=1734205866;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=oxdm1Tm4cFKFhGJZzqwOItH1TwSzZfo2+Hwt5MLJlVE=;
-        b=ehT041cNeZ/hTVRUPtQSJPOtU4tKO3OjXYnXxG8J9ERT2Ey07kKA1JZgzAxqH0HDX1
-         9jZxiebU+qWoiP7jw5d59gteZ11zwJKjIBIsE5+2Ag74d8TlFhkJfXnRqFyWTnK91B54
-         aVsdkglbP9L1zX5WFfiAOBzXH2ggj8Jp9Y7W0nlIpgv4wniAWsGHyXFIwR7Shjt8p3hC
-         uoxfjOAPZwDzAaDMGTrIb5EbG31RSIUgVJRCvFFY0BArJn+mlhcTX241BO98NCHpxmEU
-         pfRa9KblKkm9kLlMPnYrwD1KD0YOecHysPF5alg8Vt91XsQAVpred1mdE4ceUajkSfvv
-         xbbg==
-X-Gm-Message-State: AOJu0YyFxn5Kc0LP0bm4jOq3WSYDrVhRG5gOVukPSzWL9+/mLIo8CjDw
-	8MlAEg1JX/nKYVNxgrNih6ZbEOEZ2DCPVjf3Uzi62cj3IB2KO3QWKQ2GL35+BR98gOeEttPgU6S
-	8MGgj6uW675Ik1JNQrA1DySIAgOor39Srg03qWcovo/TqBCatTRyh01I=
-X-Gm-Gg: ASbGncsAWjXIDx2J1VT+DtBoiJ18eZr7mljS4vxxZSprHUsLgITRt+r2DfN9G4sI2yH
-	l8bJGC0LaATHD5UkkpJsos0JxNZmoLzX/v08FdEoeYhaqsR37+1VlaBFGP7VW3+eBBJsDQFje+D
-	LAlMDALvoWkC+o5tGcBYOcr8KI+S6F8Q1aXErP1z6R5/lnEFrCjB9PqDIL6g+0BNWfuWOi026mf
-	10MN6j5QhsZjQTf83Qi23vM5pETkxfF9t+xvRm0YezCeplYNi9JbdVQESuXxaVbjBuuD1nPeXb7
-	fc/8TpL3DFwaUpQ=
-X-Received: by 2002:a17:903:2b06:b0:215:7287:67bb with SMTP id d9443c01a7336-21610771268mr122867125ad.0.1733597983372;
-        Sat, 07 Dec 2024 10:59:43 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHe8x7A2HY07nltMm9gxmo5gjXsfL4x5Xgt8/yWulzJCipL0KbOJ6mvDCqBSnDhNJK6/TQI2A==
-X-Received: by 2002:a17:903:2b06:b0:215:7287:67bb with SMTP id d9443c01a7336-21610771268mr122866745ad.0.1733597982581;
-        Sat, 07 Dec 2024 10:59:42 -0800 (PST)
+        bh=qiiPfaJO7284JBcqDgs7zXHv+xbIhnSOHtr5gYynNes=;
+        b=SlXYhKjBQCsFEtJFpGRRkunK9i1wYuEucipX4mDc7ynte33rjenKnIUO2hoOpQBRO8
+         Yu0vpCLsC3xpStnoZaUHz5CpIfIW0PAmCGxE2nV7FYUVP2siNukyYLhz13hP3knTXOnv
+         9Y2QwN7hlZp899oKxJIEaOMb12DsHKeeSC+rlIluZOxDoBLG5f61Z+dKrBF+7VoY1T5U
+         WUrwWu+oBJsA4SeCKh+yOD9lFdKlciluwJ/WPRhbT1XRlJ5nFklxDSiZELazOEb7ENVF
+         SsbxT59bCNfTznNAD+MXv8K82VMHGnWnMAqCVpvC9Y3zGRCT9updZW+JE7GO24Zaphol
+         /+Vg==
+X-Gm-Message-State: AOJu0Yz4AhxwYEZEKzpSkRcdrdlYtIWuNhyE5N0kgRy54Gr9DI0AL/Je
+	YebAdnAv7AueGGpMxgZFX5XMWncJChaLydoTrd03Jx81OSDG+7XZcnXSo6VOyE8VyTiLlrv7SXv
+	gXsqcdEyUaErlmpMIsfMzE1El3rRWNO65mL7Qb3PB1ivFAuOPAw+sCEY=
+X-Gm-Gg: ASbGnctvNg26UFPd8bn+IdZsP73+rlVHN0VEtAn7nwpGXmddw2c/9hVsHej6D+a9StW
+	p/MIX8PdGAz/+orOEOr7U+bDsa5Zb5M82A9w3rBi2cbnfu3HoYXEDOv54bu6ALYaKNTYxL7DaEa
+	0aXFzz8q3c4jbSGQbLnxyMx+ZBU9L90UMT6vCtVcAF/dWjX75bdfuf8esxy0IR2xxT4vptQ/BSR
+	NlQwu/BNl8Loh3lvQI+T9bTB7rcihOjA3+DijRy3sDYzLTJOiuqtbUtGmkQ1qqG9g3iM0PJWrpb
+	JbGC766SqZDxs58=
+X-Received: by 2002:a17:90b:5204:b0:2ee:d371:3227 with SMTP id 98e67ed59e1d1-2ef6a6bdc2amr12736574a91.17.1733601066001;
+        Sat, 07 Dec 2024 11:51:06 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFJ60YQJnzy/M624GVcYIxKKn2whoyabPnOOzETdBVaAHtDE+o6me0HKEOMa4PUbKdG+0BfSg==
+X-Received: by 2002:a17:90b:5204:b0:2ee:d371:3227 with SMTP id 98e67ed59e1d1-2ef6a6bdc2amr12736534a91.17.1733601065136;
+        Sat, 07 Dec 2024 11:51:05 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2162381c6basm21605475ad.121.2024.12.07.10.59.40
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7fd3a637c41sm1417410a12.78.2024.12.07.11.51.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 Dec 2024 10:59:42 -0800 (PST)
-Date: Sun, 8 Dec 2024 02:59:38 +0800
+        Sat, 07 Dec 2024 11:51:04 -0800 (PST)
+Date: Sun, 8 Dec 2024 03:51:01 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Dave Chinner <david@fromorbit.com>,
 	"Darrick J. Wong" <djwong@kernel.org>
 Cc: fstests@vger.kernel.org
 Subject: Re: [PATCH 13/40] fstests: clean up loop device instantiation
-Message-ID: <20241207185938.63egaijv27disvty@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Message-ID: <20241207195101.hfg3m4pgghoo7ebv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20241127045403.3665299-1-david@fromorbit.com>
  <20241127045403.3665299-14-david@fromorbit.com>
  <20241207124457.fhovbrzsbtzrgsvh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241207185938.63egaijv27disvty@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,1371 +81,1418 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241207124457.fhovbrzsbtzrgsvh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20241207185938.63egaijv27disvty@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Sat, Dec 07, 2024 at 08:44:57PM +0800, Zorro Lang wrote:
-> On Wed, Nov 27, 2024 at 03:51:43PM +1100, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
+On Sun, Dec 08, 2024 at 02:59:38AM +0800, Zorro Lang wrote:
+> On Sat, Dec 07, 2024 at 08:44:57PM +0800, Zorro Lang wrote:
+> > On Wed, Nov 27, 2024 at 03:51:43PM +1100, Dave Chinner wrote:
+> > > From: Dave Chinner <dchinner@redhat.com>
+> > > 
+> > > Lots of tests do there own special thing with loop devices rather
+> > > than using _create_loop_device() and _destroy_loop_device(). This
+> > > oftens means they do not clean up after themselves properly,
+> > > leaving stale loop devices around that result in unmountable test or
+> > > scratch devices. This is common when tests are killed by user
+> > > interrupt.
+> > > 
+> > > Even the tests that do use _destroy_loop_device and try to clean up
+> > > often do it incorrectly, leading to spurious error messages.
+> > > 
+> > > Some tests try to use dynamic instantiation via "mount -o loop",
+> > > but then don't clean up in the correct order or hack around to find
+> > > the loop device that was instantiated because the test needs to know
+> > > the instantiated device name
+> > > 
+> > > Clean this up by converting all the tests to use
+> > > _create_loop_device() and _destroy_loop_device(). In all the tests,
+> > > use the variable "loop_dev" for the device consistently. In
+> > > _destroy_loop_device(), test that a device name has been passed
+> > > so that we don't try to clean up the same device twice (e.g. once
+> > > before test exit and again from the _cleanup() function). When we
+> > > destroy a loop device, unset the variable used to hold the loop
+> > > device name so that we don't try to destroy it twice.
+> > > 
+> > > This results in much more reliable cleanup and clean exit from
+> > > fstests when killed by the user.
+> > > 
+> > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > > ---
+> > >  common/metadump   | 32 ++++++++++++--------------------
+> > >  tests/generic/067 | 11 ++++++++---
+> > >  tests/generic/361 |  6 +++++-
+> > >  tests/generic/563 | 14 +++++++++-----
+> > >  tests/generic/564 | 12 ++++++------
+> > >  tests/generic/590 |  9 ++++++---
+> > >  tests/generic/744 |  4 ++--
+> > >  tests/generic/746 |  6 +++++-
+> > >  tests/xfs/014     |  7 +++++--
+> > >  tests/xfs/049     | 35 +++++++++++++++++++++--------------
+> > >  tests/xfs/073     | 24 +++++++++++++-----------
+> > >  tests/xfs/074     | 21 ++++++++++++---------
+> > >  tests/xfs/078     | 16 +++++++++-------
+> > >  tests/xfs/148     | 23 ++++++++++++++---------
+> > >  tests/xfs/149     |  4 ++++
+> > >  tests/xfs/216     | 15 ++++++++++-----
+> > >  tests/xfs/217     | 22 ++++++++++++++++------
+> > >  tests/xfs/250     | 14 +++++++++-----
+> > >  tests/xfs/259     | 13 ++++++++-----
+> > >  tests/xfs/513     | 44 ++++++++++++++++++++------------------------
+> > >  tests/xfs/521     |  8 ++++++--
+> > >  tests/xfs/528     | 10 +++++++---
+> > >  tests/xfs/530     | 11 ++++++-----
+> > >  tests/xfs/606     | 12 ++++++++----
+> > >  tests/xfs/613     | 40 ++++++++++++++--------------------------
+> > >  tests/xfs/613.out |  1 -
+> > >  26 files changed, 235 insertions(+), 179 deletions(-)
+> > > 
+> > > diff --git a/common/metadump b/common/metadump
+> > > index 3373edfe9..bc3038e3b 100644
+> > > --- a/common/metadump
+> > > +++ b/common/metadump
+> > > @@ -24,17 +24,9 @@ _xfs_cleanup_verify_metadump()
+> > >  
+> > >  	test -n "$XFS_METADUMP_FILE" && rm -f "$XFS_METADUMP_FILE"
+> > >  
+> > > -	if [ -n "$XFS_METADUMP_IMG" ]; then
+> > > -		losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev; do
+> > > -			losetup -d "$ldev"
+> > > -		done
+> > > -
+> > > -		# Don't call rm directly with a globbed argument here to avoid
+> > > -		# issues issues with variable expansions.
+> > > -		for img in "$XFS_METADUMP_IMG"*; do
+> > > -			test -e "$img" && rm -f "$img"
+> > > -		done
+> > > -	fi
+> > > +	[ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
+> > > +	[ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
 > > 
-> > Lots of tests do there own special thing with loop devices rather
-> > than using _create_loop_device() and _destroy_loop_device(). This
-> > oftens means they do not clean up after themselves properly,
-> > leaving stale loop devices around that result in unmountable test or
-> > scratch devices. This is common when tests are killed by user
-> > interrupt.
+> > As Darrick reported that he always hit below error:
 > > 
-> > Even the tests that do use _destroy_loop_device and try to clean up
-> > often do it incorrectly, leading to spurious error messages.
+> >   losetup: /dev/loop0: detach failed: No such device or address
+> >   Cannot destroy loop device /dev/loop0
 > > 
-> > Some tests try to use dynamic instantiation via "mount -o loop",
-> > but then don't clean up in the correct order or hack around to find
-> > the loop device that was instantiated because the test needs to know
-> > the instantiated device name
+> > I'm wondering we should use [ -b ] not [ -n ] at here? Or output the stderr
+> > to /dev/null directly. Due to... (see below)
 > > 
-> > Clean this up by converting all the tests to use
-> > _create_loop_device() and _destroy_loop_device(). In all the tests,
-> > use the variable "loop_dev" for the device consistently. In
-> > _destroy_loop_device(), test that a device name has been passed
-> > so that we don't try to clean up the same device twice (e.g. once
-> > before test exit and again from the _cleanup() function). When we
-> > destroy a loop device, unset the variable used to hold the loop
-> > device name so that we don't try to destroy it twice.
-> > 
-> > This results in much more reliable cleanup and clean exit from
-> > fstests when killed by the user.
-> > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  common/metadump   | 32 ++++++++++++--------------------
-> >  tests/generic/067 | 11 ++++++++---
-> >  tests/generic/361 |  6 +++++-
-> >  tests/generic/563 | 14 +++++++++-----
-> >  tests/generic/564 | 12 ++++++------
-> >  tests/generic/590 |  9 ++++++---
-> >  tests/generic/744 |  4 ++--
-> >  tests/generic/746 |  6 +++++-
-> >  tests/xfs/014     |  7 +++++--
-> >  tests/xfs/049     | 35 +++++++++++++++++++++--------------
-> >  tests/xfs/073     | 24 +++++++++++++-----------
-> >  tests/xfs/074     | 21 ++++++++++++---------
-> >  tests/xfs/078     | 16 +++++++++-------
-> >  tests/xfs/148     | 23 ++++++++++++++---------
-> >  tests/xfs/149     |  4 ++++
-> >  tests/xfs/216     | 15 ++++++++++-----
-> >  tests/xfs/217     | 22 ++++++++++++++++------
-> >  tests/xfs/250     | 14 +++++++++-----
-> >  tests/xfs/259     | 13 ++++++++-----
-> >  tests/xfs/513     | 44 ++++++++++++++++++++------------------------
-> >  tests/xfs/521     |  8 ++++++--
-> >  tests/xfs/528     | 10 +++++++---
-> >  tests/xfs/530     | 11 ++++++-----
-> >  tests/xfs/606     | 12 ++++++++----
-> >  tests/xfs/613     | 40 ++++++++++++++--------------------------
-> >  tests/xfs/613.out |  1 -
-> >  26 files changed, 235 insertions(+), 179 deletions(-)
-> > 
-> > diff --git a/common/metadump b/common/metadump
-> > index 3373edfe9..bc3038e3b 100644
-> > --- a/common/metadump
-> > +++ b/common/metadump
-> > @@ -24,17 +24,9 @@ _xfs_cleanup_verify_metadump()
-> >  
-> >  	test -n "$XFS_METADUMP_FILE" && rm -f "$XFS_METADUMP_FILE"
-> >  
-> > -	if [ -n "$XFS_METADUMP_IMG" ]; then
-> > -		losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev; do
-> > -			losetup -d "$ldev"
-> > -		done
-> > -
-> > -		# Don't call rm directly with a globbed argument here to avoid
-> > -		# issues issues with variable expansions.
-> > -		for img in "$XFS_METADUMP_IMG"*; do
-> > -			test -e "$img" && rm -f "$img"
-> > -		done
-> > -	fi
-> > +	[ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
-> > +	[ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
+> > > +	rm -f $data_img $log_img
+>                 ^^^^^^   ^^^^^^
+> Besides above problems, this line doesn't work either, due to the "data_img"
+> and "log_img" are local variables in other functions. Even they're not local, 
+> think these variable names are too common to be global variable in common helper.
 > 
-> As Darrick reported that he always hit below error:
-> 
->   losetup: /dev/loop0: detach failed: No such device or address
->   Cannot destroy loop device /dev/loop0
-> 
-> I'm wondering we should use [ -b ] not [ -n ] at here? Or output the stderr
-> to /dev/null directly. Due to... (see below)
-> 
-> > +	rm -f $data_img $log_img
-                ^^^^^^   ^^^^^^
-Besides above problems, this line doesn't work either, due to the "data_img"
-and "log_img" are local variables in other functions. Even they're not local, 
-think these variable names are too common to be global variable in common helper.
-
-I'll try to change part of above new code back to old code as below [1]. Hope
-it can help the test work as usual, then we can merge this patch and move
-on. And we can improve this part in later patch.
-
-Thanks,
-Zorro
-
-[1]
--       [ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
--       [ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
--       rm -f $data_img $log_img
-+       if [ -n "$XFS_METADUMP_IMG" ]; then
-+               [ -b "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
-+               [ -b "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
-+               for img in "$XFS_METADUMP_IMG"*; do
-+                       test -e "$img" && rm -f "$img"
-+               done
-+       fi
-
-> >  }
-> >  
-> >  # Can xfs_metadump snapshot the fs metadata to a v1 metadump file?
-> > @@ -122,25 +114,25 @@ _xfs_verify_metadump_v2()
-> >  		_scratch_xfs_mdrestore $metadump_file
-> >  
-> >  	# Create loopdev for data device so we can mount the fs
-> > -	data_loop=$(_create_loop_device $data_img)
-> > +	md_data_loop_dev=$(_create_loop_device $data_img)
-> >  
-> >  	# Create loopdev for log device if we recovered anything
-> > -	test -s "$log_img" && log_loop=$(_create_loop_device $log_img)
-> > +	test -s "$log_img" && md_log_loop_dev=$(_create_loop_device $log_img)
-> >  
-> >  	# Mount fs, run an extra test, fsck, and unmount
-> > -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _scratch_mount
-> > +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _scratch_mount
-> >  	if [ -n "$extra_test" ]; then
-> > -		SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop $extra_test
-> > +		SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev $extra_test
-> >  	fi
-> > -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _check_xfs_scratch_fs
-> > -	SCRATCH_DEV=$data_loop _scratch_unmount
-> > +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _check_xfs_scratch_fs
-> > +	_unmount $md_data_loop_dev
-> 
-> We umount loop devices we created above at here, and ...
-> 
-> >  
-> >  	# Tear down what we created
-> > -	if [ -b "$log_loop" ]; then
-> > -		_destroy_loop_device $log_loop
-> > +	if [ -b "$md_log_loop_dev" ]; then
-> > +		_destroy_loop_device $md_log_loop_dev
-> >  		rm -f $log_img
-> >  	fi
-> > -	_destroy_loop_device $data_loop
-> > +	_destroy_loop_device $md_data_loop_dev
-> 
-> we even has destroied them at here.
-> 
-> So that _xfs_cleanup_verify_metadump function hit "detach failed: No such
-> device or address", due to those loop devices might have been released,
-> but the variables are not unset.
-> 
-> I didn't give it a test, just did a code review. As Darrick uses this part mostly,
-> could you please check what I said above?
+> I'll try to change part of above new code back to old code as below [1]. Hope
+> it can help the test work as usual, then we can merge this patch and move
+> on. And we can improve this part in later patch.
 > 
 > Thanks,
 > Zorro
 > 
-> >  	rm -f $data_img
-> >  }
-> >  
-> > diff --git a/tests/generic/067 b/tests/generic/067
-> > index ccb1e3fbb..b45ae834f 100755
-> > --- a/tests/generic/067
-> > +++ b/tests/generic/067
-> > @@ -37,13 +37,18 @@ mount_nonexistent_mnt()
-> >  	$MOUNT_PROG $SCRATCH_DEV $TEST_DIR/nosuchdir >>$seqres.full 2>&1
-> >  }
-> >  
-> > -# fs driver should be able to handle mounting a free loop device gracefully
-> > -# xfs ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-> > +# fs driver should be able to handle mounting a free loop device gracefully xfs
-> > +# ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
-> > +#
-> > +# Using 'losetup -f' like this is racy. We might end up mounting a real loop dev
-> > +# here, so unmount $SCRATCH_MNT (not the loop dev we might not own!) and ignore
-> > +# any error it might return.
-> >  mount_free_loopdev()
-> >  {
-> >  	echo "# mount a free loop device" >>$seqres.full
-> >  	loopdev=`losetup -f`
-> > -	$MOUNT_PROG -t $FSTYP $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-> > +	_mount $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
-> > +	_unmount $SCRATCH_MNT >> /dev/null 2>&1
-> >  }
-> >  
-> >  # mount with wrong fs type specified.
-> > diff --git a/tests/generic/361 b/tests/generic/361
-> > index 7273dd056..e2b798436 100755
-> > --- a/tests/generic/361
-> > +++ b/tests/generic/361
-> > @@ -17,7 +17,7 @@ _begin_fstest auto quick
-> >  _cleanup()
-> >  {
-> >  	_unmount $fs_mnt
-> > -	_destroy_loop_device $loop_dev
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	cd /
-> >  	rm -f $tmp.*
-> >  }
-> > @@ -54,6 +54,10 @@ $XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
-> >  # remount should not hang
-> >  $MOUNT_PROG -o remount,ro $fs_mnt >>$seqres.full 2>&1
-> >  
-> > +_unmount $fs_mnt
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  # success, all done
-> >  echo "Silence is golden"
-> >  status=0
-> > diff --git a/tests/generic/563 b/tests/generic/563
-> > index f0d2f404c..34d21170c 100755
-> > --- a/tests/generic/563
-> > +++ b/tests/generic/563
-> > @@ -87,12 +87,12 @@ reset()
-> >  
-> >  # cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
-> >  # that out.
-> > -LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
-> > -smajor=$((0x`stat -L -c %t $LOOP_DEV`))
-> > -sminor=$((0x`stat -L -c %T $LOOP_DEV`))
-> > +loop_dev=$(_create_loop_device $SCRATCH_DEV)
-> > +smajor=$((0x`stat -L -c %t $loop_dev`))
-> > +sminor=$((0x`stat -L -c %T $loop_dev`))
-> >  
-> > -_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
-> > -_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
-> > +_mkfs_dev $loop_dev >> $seqres.full 2>&1
-> > +_mount $loop_dev $SCRATCH_MNT || _fail "mount failed"
-> >  
-> >  blksize=$(_get_block_size "$SCRATCH_MNT")
-> >  
-> > @@ -147,6 +147,10 @@ if [ "$drop_io_cgroup" = 1 ]; then
-> >  	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
-> >  fi
-> >  
-> > +_unmount $SCRATCH_MNT
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > diff --git a/tests/generic/564 b/tests/generic/564
-> > index 647472d78..b66b72496 100755
-> > --- a/tests/generic/564
-> > +++ b/tests/generic/564
-> > @@ -19,7 +19,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	rm -rf $tmp.*
-> > -	[ -z "$loopdev" ] || _destroy_loop_device $loopdev
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  }
-> >  
-> >  # Import common functions.
-> > @@ -72,11 +72,11 @@ $XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
-> >  echo
-> >  echo source/destination as blkdev returns EINVAL
-> >  $XFS_IO_PROG -f -c "truncate 128k" $testdir/img >> $seqres.full 2>&1
-> > -loopdev=`_create_loop_device $testdir/img`
-> > -$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loopdev
-> > -$XFS_IO_PROG -f -c "copy_range -l 32k $loopdev" $testdir/copy
-> > -_destroy_loop_device $loopdev
-> > -loopdev=
-> > +loop_dev=`_create_loop_device $testdir/img`
-> > +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loop_dev
-> > +$XFS_IO_PROG -f -c "copy_range -l 32k $loop_dev" $testdir/copy
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  
-> >  echo
-> >  echo source/destination as chardev returns EINVAL
-> > diff --git a/tests/generic/590 b/tests/generic/590
-> > index 2b7ccfb53..2eefa2c62 100755
-> > --- a/tests/generic/590
-> > +++ b/tests/generic/590
-> > @@ -15,9 +15,10 @@ _begin_fstest auto prealloc preallocrw
-> >  # Override the default cleanup function.
-> >  _cleanup()
-> >  {
-> > +	_scratch_unmount
-> > +	[ -n $loop_dev ] && _destroy_loop_device $loop_dev
-> >  	cd /
-> >  	rm -f $tmp.*
-> > -	test -n "$loop" && _destroy_loop_device "$loop"
-> >  	rm -f "$TEST_DIR/$seq"
-> >  }
-> >  
-> > @@ -56,9 +57,9 @@ if [[ $FSTYP = xfs ]]; then
-> >  		loopsz="$((filesz + (1 << 26)))"
-> >  		_require_fs_space "$TEST_DIR" $((loopsz / 1024))
-> >  		$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
-> > -		loop="$(_create_loop_device "$TEST_DIR/$seq")"
-> > +		loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
-> >  		USE_EXTERNAL=yes
-> > -		SCRATCH_RTDEV="$loop"
-> > +		SCRATCH_RTDEV="$loop_dev"
-> >  		disabled_features=()
-> >  
-> >  		# disable reflink if not supported by realtime devices
-> > @@ -114,6 +115,8 @@ $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
-> >  # We need to do this before the loop device gets torn down.
-> >  _scratch_unmount
-> >  _check_scratch_fs
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  
-> >  echo "Silence is golden"
-> >  status=0
-> > diff --git a/tests/generic/744 b/tests/generic/744
-> > index df8f6ae9b..cda10e0f6 100755
-> > --- a/tests/generic/744
-> > +++ b/tests/generic/744
-> > @@ -17,8 +17,8 @@ _cleanup()
-> >  
-> >  	_unmount $mnt2 &> /dev/null
-> >  	_unmount $mnt1 &> /dev/null
-> > -	[ -b "$loop_dev2" ] && losetup -d $loop_dev2
-> > -	[ -b "$loop_dev1" ] && losetup -d $loop_dev1
-> > +	[ -b "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-> > +	[ -b "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-> >  	[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
-> >  }
-> >  
-> > diff --git a/tests/generic/746 b/tests/generic/746
-> > index 671910606..ba8ed25e8 100755
-> > --- a/tests/generic/746
-> > +++ b/tests/generic/746
-> > @@ -39,7 +39,7 @@ esac
-> >  _cleanup()
-> >  {
-> >  	_unmount $loop_mnt &> /dev/null
-> > -	_destroy_loop_device $loop_dev
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	if [ $status -eq 0 ]; then
-> >  		rm -rf $tmp
-> >  		rm $img_file
-> > @@ -223,5 +223,9 @@ while read line; do
-> >  done < $fiemap_after
-> >  echo "done."
-> >  
-> > +_unmount $loop_mnt
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/014 b/tests/xfs/014
-> > index f638e4b16..39ea40e2a 100755
-> > --- a/tests/xfs/014
-> > +++ b/tests/xfs/014
-> > @@ -23,6 +23,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	_scratch_unmount 2>/dev/null
-> >  	rm -f $tmp.*
-> >  }
-> > @@ -166,19 +167,21 @@ LOOP_FILE=$SCRATCH_MNT/$seq.fs
-> >  LOOP_MNT=$SCRATCH_MNT/$seq.mnt
-> >  
-> >  $MKFS_XFS_PROG -d "file=1,name=$LOOP_FILE,size=10g" >> $seqres.full 2>&1
-> > +loop_dev=$(_create_loop_device $LOOP_FILE)
-> >  
-> >  mkdir -p $LOOP_MNT
-> > -_mount -o uquota,gquota $LOOP_FILE $LOOP_MNT || \
-> > +_mount -o uquota,gquota $loop_dev $LOOP_MNT || \
-> >  	_fail "Failed to mount loop fs."
-> >  
-> >  _test_enospc $LOOP_MNT
-> >  _test_edquot $LOOP_MNT
-> >  
-> >  _unmount $LOOP_MNT
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  
-> >  echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
-> >  
-> >  _scratch_unmount
-> > -
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/049 b/tests/xfs/049
-> > index 4163a144f..cdcddf764 100755
-> > --- a/tests/xfs/049
-> > +++ b/tests/xfs/049
-> > @@ -12,16 +12,17 @@ _begin_fstest rw auto quick
-> >  # Override the default cleanup function.
-> >  _cleanup()
-> >  {
-> > -    cd /
-> > -    umount $SCRATCH_MNT/test2 > /dev/null 2>&1
-> > -    umount $SCRATCH_MNT/test > /dev/null 2>&1
-> > -    rm -f $tmp.*
-> > +	cd /
-> > +	_unmount $SCRATCH_MNT/test2 > /dev/null 2>&1
-> > +	_unmount $SCRATCH_MNT/test > /dev/null 2>&1
-> > +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-> > +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-> > +	rm -f $tmp.*
-> >  
-> > -    if [ -w $seqres.full ]
-> > -    then
-> > -        echo "--- mounts at end (after cleanup)" >> $seqres.full
-> > -        mount >> $seqres.full
-> > -    fi
-> > +	if [ -w $seqres.full ]; then
-> > +		echo "--- mounts at end (after cleanup)" >> $seqres.full
-> > +		mount >> $seqres.full
-> > +	fi
-> >  }
-> >  
-> >  # Import common functions.
-> > @@ -64,7 +65,8 @@ mkdir $SCRATCH_MNT/test $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> >      || _fail "!!! failed to make mount points"
-> >  
-> >  _log "Mount xfs via loop"
-> > -mount -t xfs -o loop $SCRATCH_MNT/test.xfs $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> > +loop_dev1=$(_create_loop_device $SCRATCH_MNT/test.xfs)
-> > +_mount $loop_dev1 $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> >      || _fail "!!! failed to loop mount xfs"
-> >  
-> >  _log "stress"
-> > @@ -80,11 +82,12 @@ dd if=/dev/zero of=$SCRATCH_MNT/test/test.ext2 bs=1024 count=10240 >> $seqres.fu
-> >      || _fail "!!! create file failed"
-> >  
-> >  _log "Create ext2 fs in file on looped xfs"
-> > -echo y | mkfs -t ext2 $SCRATCH_MNT/test/test.ext2 >> $seqres.full 2>&1 \
-> > +loop_dev2=$(_create_loop_device $SCRATCH_MNT/test/test.ext2)
-> > +echo y | mkfs -t ext2 $loop_dev2 >> $seqres.full 2>&1 \
-> >      || _fail "!!! failed to mkfs ext2 on xfs"
-> >  
-> >  _log "Mount ext2 on xfs via loop"
-> > -mount -t ext2 -o loop $SCRATCH_MNT/test/test.ext2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> > +_mount $loop_dev2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> >      || _fail "!!! failed to loop mount xfs"
-> >  
-> >  _log "stress ext2 on xfs via loop"
-> > @@ -96,12 +99,16 @@ rm -rf $SCRATCH_MNT/test/* >> $seqres.full 2>&1 \
-> >      || _fail "!!! clean failed"
-> >  
-> >  _log "umount ext2 on xfs"
-> > -umount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> > +_unmount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
-> >      || _fail "!!! umount ext2 failed"
-> > +_destroy_loop_device $loop_dev2
-> > +unset loop_dev2
-> >  
-> >  _log "umount xfs"
-> > -umount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> > +_unmount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
-> >      || _fail "!!! umount xfs failed"
-> > +_destroy_loop_device $loop_dev1
-> > +unset loop_dev1
-> >  
-> >  echo "--- mounts at end (before cleanup)" >> $seqres.full
-> >  mount >> $seqres.full
-> > diff --git a/tests/xfs/073 b/tests/xfs/073
-> > index e4b17c5e7..2274079ef 100755
-> > --- a/tests/xfs/073
-> > +++ b/tests/xfs/073
-> > @@ -23,6 +23,8 @@ _cleanup()
-> >  	_scratch_unmount 2>/dev/null
-> >  	_unmount $imgs.loop 2>/dev/null
-> >  	_unmount $imgs.source_dir 2>/dev/null
-> > +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
-> > +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
-> >  	[ -d $imgs.loop ] && rmdir $imgs.loop
-> >  	[ -d $imgs.source_dir ] && rm -rf $imgs.source_dir
-> >  	rm -f $imgs.* $tmp.* /var/tmp/xfs_copy.log.*
-> > @@ -65,10 +67,11 @@ _verify_copy()
-> >  	rmdir $target_dir 2>/dev/null
-> >  	mkdir $target_dir
-> >  
-> > -	_mount -t xfs -o loop $target $target_dir 2>/dev/null
-> > +	loop_dev1=$(_create_loop_device $target)
-> > +	_mount $loop_dev1 $target_dir 2>/dev/null
-> >  	if [ $? -ne 0 ]; then
-> >  		echo retrying mount with nouuid option >>$seqres.full
-> > -		_mount -t xfs -o loop -o nouuid $target $target_dir
-> > +		_mount -o nouuid $loop_dev1 $target_dir
-> >  		if [ $? -ne 0 ]; then
-> >  			echo mount failed - evil!
-> >  			return
-> > @@ -100,6 +103,8 @@ _verify_copy()
-> >  	echo unmounting and removing new image
-> >  	_unmount $source_dir
-> >  	_unmount $target_dir > /dev/null 2>&1
-> > +	_destroy_loop_device $loop_dev1
-> > +	unset loop_dev1
-> >  	rm -f $target
-> >  }
-> >  
-> > @@ -134,18 +139,15 @@ ${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
-> >  rmdir $imgs.source_dir 2>/dev/null
-> >  mkdir $imgs.source_dir
-> >  
-> > -_mount -t xfs -o loop $imgs.source $imgs.source_dir
-> > -loop2=`mount | grep $imgs.source | grep -o -e 'loop=.*[^),]' | grep -o -e '/.*$'`
-> > +loop_dev2=$(_create_loop_device $imgs.source)
-> > +_mount $loop_dev2 $imgs.source_dir
-> >  cp -a $here $imgs.source_dir
-> > -_mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
-> > -$XFS_COPY_PROG $imgs.source $imgs.image | _filter_copy '#' $imgs.image '#' '#'
-> > +_mount -o remount,ro $loop_dev2 $imgs.source_dir
-> > +$XFS_COPY_PROG $loop_dev2 $imgs.image 2> /dev/null | _filter_copy '#' $imgs.image '#' '#'
-> >  _verify_copy $imgs.image $imgs.source $imgs.source_dir
-> >  
-> > -# HACK WARNING:
-> > -#
-> > -# We're done with the nested loop mount, now we have to clean
-> > -# up the pieces that mount is incapable of doing.
-> > -losetup -d $loop2 > /dev/null 2>&1
-> > +_destroy_loop_device $loop_dev2
-> > +unset loop_dev2
-> >  
-> >  echo
-> >  echo === copying scratch device to multiple targets
-> > diff --git a/tests/xfs/074 b/tests/xfs/074
-> > index 6a03c8111..5df864fad 100755
-> > --- a/tests/xfs/074
-> > +++ b/tests/xfs/074
-> > @@ -26,7 +26,7 @@ _begin_fstest quick auto prealloc rw
-> >  _cleanup()
-> >  {
-> >  	cd /
-> > -	_destroy_loop_device $LOOP_DEV
-> > +	[ -n "$loop_dev" ] &&_destroy_loop_device $loop_dev
-> >  	rm -f $tmp.* $LOOP_FILE
-> >  }
-> >  
-> > @@ -45,10 +45,10 @@ LOOP_FILE=$TEST_DIR/$seq.img
-> >  LOOP_MNT=$TEST_DIR/$seq.mnt
-> >  mkdir -p $LOOP_MNT
-> >  $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
-> > -LOOP_DEV=`_create_loop_device $LOOP_FILE`
-> > +loop_dev=`_create_loop_device $LOOP_FILE`
-> >  
-> > -_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
-> > -_mount $LOOP_DEV $LOOP_MNT
-> > +_mkfs_dev -d size=260g,agcount=2 $loop_dev
-> > +_mount $loop_dev $LOOP_MNT
-> >  
-> >  BLOCK_SIZE=$(_get_file_block_size $LOOP_MNT)
-> >  
-> > @@ -59,11 +59,11 @@ $XFS_IO_PROG -ft \
-> >  	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
-> >  	$LOOP_MNT/foo >> $seqres.full
-> >  
-> > -umount $LOOP_MNT
-> > -_check_xfs_filesystem $LOOP_DEV none none
-> > +_unmount $LOOP_MNT
-> > +_check_xfs_filesystem $loop_dev none none
-> >  
-> > -_mkfs_dev -f $LOOP_DEV
-> > -_mount $LOOP_DEV $LOOP_MNT
-> > +_mkfs_dev -f $loop_dev
-> > +_mount $loop_dev $LOOP_MNT
-> >  
-> >  # check we trim both ends of the extent approproiately; this will fail
-> >  # on 1k block size filesystems without the correct fixes in place.
-> > @@ -73,7 +73,10 @@ $XFS_IO_PROG -ft \
-> >  	$LOOP_MNT/foo >> $seqres.full
-> >  
-> >  _unmount $LOOP_MNT
-> > -_check_xfs_filesystem $LOOP_DEV none none
-> > +_check_xfs_filesystem $loop_dev none none
-> > +
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  
-> >  # success, all done
-> >  echo "Silence is golden"
-> > diff --git a/tests/xfs/078 b/tests/xfs/078
-> > index 6b325e05f..0d3c2eb23 100755
-> > --- a/tests/xfs/078
-> > +++ b/tests/xfs/078
-> > @@ -17,7 +17,7 @@ _cleanup()
-> >  	cd /
-> >  	rm -f $tmp.*
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > -	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev 2>/dev/null
-> >  	# try to keep the image file if test fails
-> >  	[ $status -eq 0 ] && rm -f $LOOP_IMG
-> >  	rmdir $LOOP_MNT
-> > @@ -55,7 +55,7 @@ _grow_loop()
-> >  	agsize=$5
-> >  
-> >  	$XFS_IO_PROG -f -c "truncate $original" $LOOP_IMG
-> > -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> > +	loop_dev=`_create_loop_device $LOOP_IMG`
-> >  
-> >  	dparam=""
-> >  	if [ -n "$agsize" ]; then
-> > @@ -67,15 +67,15 @@ _grow_loop()
-> >  	echo
-> >  
-> >  	echo "*** mkfs loop file (size=$original)"
-> > -	$MKFS_XFS_PROG -b size=$bsize $dparam $LOOP_DEV | \
-> > +	$MKFS_XFS_PROG -b size=$bsize $dparam $loop_dev | \
-> >  		_filter_mkfs 2>/dev/null
-> >  
-> >  	echo "*** extend loop file"
-> > -	_destroy_loop_device $LOOP_DEV
-> > +	_destroy_loop_device $loop_dev
-> >  	$XFS_IO_PROG -c "pwrite $new_size $bsize" $LOOP_IMG | _filter_io
-> > -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> > +	loop_dev=`_create_loop_device $LOOP_IMG`
-> >  	echo "*** mount loop filesystem"
-> > -	_mount -t xfs $LOOP_DEV $LOOP_MNT
-> > +	_mount $loop_dev $LOOP_MNT
-> >  
-> >  	echo "*** grow loop filesystem"
-> >  	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
-> > @@ -87,9 +87,11 @@ _grow_loop()
-> >  	if [ "$check" -gt "0" ]
-> >  	then
-> >  		echo "*** check"
-> > -		_check_xfs_filesystem $LOOP_IMG none none
-> > +		_check_xfs_filesystem $loop_dev none none
-> >  	fi
-> >  
-> > +	_destroy_loop_device $loop_dev
-> > +	unset loop_dev
-> >  	rm -f $LOOP_IMG
-> >  }
-> >  
-> > diff --git a/tests/xfs/148 b/tests/xfs/148
-> > index c42c9b119..4d2f7a808 100755
-> > --- a/tests/xfs/148
-> > +++ b/tests/xfs/148
-> > @@ -15,7 +15,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_unmount $mntpt > /dev/null 2>&1
-> > -	_destroy_loop_device $loopdev > /dev/null 2>&1
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	rm -r -f $tmp.*
-> >  }
-> >  
-> > @@ -48,12 +48,12 @@ rm -f $imgfile $imgfile.old
-> >  # even when security xattrs are present so we are always doing name matches on
-> >  # lookup and not name hash compares as leaf/node forms will do.
-> >  $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
-> > -loopdev=$(_create_loop_device $imgfile)
-> > -MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
-> > +loop_dev=$(_create_loop_device $imgfile)
-> > +MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loop_dev >> $seqres.full
-> >  
-> >  # Mount image file
-> >  mkdir -p $mntpt
-> > -_mount $loopdev $mntpt
-> > +_mount $loop_dev $mntpt
-> >  
-> >  echo "creating entries" >> $seqres.full
-> >  
-> > @@ -91,7 +91,8 @@ cat $tmp.log | _filter_test_dir
-> >  
-> >  # Corrupt the entries
-> >  _unmount $mntpt
-> > -_destroy_loop_device $loopdev
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  cp $imgfile $imgfile.old
-> >  sed -b \
-> >  	-e "s/$nullstr/too_many\x00beans/g" \
-> > @@ -99,8 +100,9 @@ sed -b \
-> >  	-i $imgfile
-> >  test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
-> >  	_fail "sed failed to change the image file?"
-> > -loopdev=$(_create_loop_device $imgfile)
-> > -_mount $loopdev $mntpt
-> > +
-> > +loop_dev=$(_create_loop_device $imgfile)
-> > +_mount $loop_dev $mntpt
-> >  
-> >  # Try to access the corrupt metadata
-> >  echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
-> > @@ -111,7 +113,7 @@ cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
-> >  echo "does scrub complain?" >> $seqres.full
-> >  
-> >  # Does scrub complain about this?
-> > -if _supports_xfs_scrub $mntpt $loopdev; then
-> > +if _supports_xfs_scrub $mntpt $loop_dev; then
-> >  	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
-> >  	res=$?
-> >  	test $((res & 1)) -eq 0 && \
-> > @@ -122,11 +124,14 @@ echo "does repair complain?" >> $seqres.full
-> >  
-> >  # Does repair complain about this?
-> >  _unmount $mntpt
-> > -$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
-> > +$XFS_REPAIR_PROG -n $loop_dev >> $seqres.full 2>&1
-> >  res=$?
-> >  test $res -eq 1 || \
-> >  	echo "repair failed to report corruption ($res)"
-> >  
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/149 b/tests/xfs/149
-> > index f2187109b..9a96f82ed 100755
-> > --- a/tests/xfs/149
-> > +++ b/tests/xfs/149
-> > @@ -84,6 +84,10 @@ $XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
-> >  echo "=== xfs_growfs - check device node ==="
-> >  $XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
-> >  
-> > +_unmount $mntdir
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/216 b/tests/xfs/216
-> > index 6b8b2eb22..091c11d08 100755
-> > --- a/tests/xfs/216
-> > +++ b/tests/xfs/216
-> > @@ -15,6 +15,7 @@ _begin_fstest log metadata auto quick
-> >  _cleanup()
-> >  {
-> >  	_unmount $LOOP_MNT > /dev/null 2>&1
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	cd /
-> >  	rm -f $tmp.*
-> >  }
-> > @@ -24,7 +25,7 @@ _scratch_mkfs_xfs >/dev/null 2>&1
-> >  _scratch_mount
-> >  
-> >  _require_loop
-> > -LOOP_DEV=$SCRATCH_MNT/test_fs
-> > +LOOP_IMG=$SCRATCH_MNT/test_fs
-> >  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
-> >  
-> >  loop_mkfs_opts=
-> > @@ -55,22 +56,26 @@ _do_mkfs()
-> >  	for i in $*; do
-> >  		echo -n "fssize=${i}g "
-> >  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> > -			-d name=$LOOP_DEV,size=${i}g $loop_mkfs_opts |grep log
-> > -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-> > +			-d size=${i}g $loop_mkfs_opts $loop_dev |grep log
-> > +		_mount $loop_dev $LOOP_MNT
-> >  		echo "test write" > $LOOP_MNT/test
-> >  		_unmount $LOOP_MNT > /dev/null 2>&1
-> >  	done
-> >  }
-> >  # make large holey file
-> > -$XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
-> > +$XFS_IO_PROG -f -c "truncate 256g" $LOOP_IMG
-> >  
-> > -choose_golden_output $0 $LOOP_DEV
-> > +choose_golden_output $0 $LOOP_IMG
-> >  
-> >  #make loopback mount dir
-> >  mkdir $LOOP_MNT
-> >  
-> > +loop_dev=$(_create_loop_device $LOOP_IMG)
-> > +
-> >  # walk over standard sizes (up to 256GB)
-> >  _do_mkfs 1 2 4 8 16 32 64 128 256
-> >  
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/217 b/tests/xfs/217
-> > index b2eb34490..dae6ce55f 100755
-> > --- a/tests/xfs/217
-> > +++ b/tests/xfs/217
-> > @@ -12,6 +12,12 @@ _begin_fstest log metadata auto
-> >  # Import common functions.
-> >  . ./common/filter
-> >  
-> > +_cleanup()
-> > +{
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> >  
-> >  _require_scratch
-> >  _scratch_mkfs_xfs >/dev/null 2>&1
-> > @@ -20,7 +26,7 @@ _scratch_mount
-> >  _require_fs_space $SCRATCH_MNT 2202000
-> >  
-> >  _require_loop
-> > -LOOP_DEV=$SCRATCH_MNT/test_fs
-> > +LOOP_IMG=$SCRATCH_MNT/test_fs
-> >  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
-> >  
-> >  _do_mkfs()
-> > @@ -28,28 +34,30 @@ _do_mkfs()
-> >  	for i in $*; do
-> >  		echo -n "fssize=${i}g "
-> >  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
-> > -			-d name=$LOOP_DEV,size=${i}g |grep log
-> > -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
-> > +			-d size=${i}g $loop_dev |grep log
-> > +		_mount $loop_dev $LOOP_MNT
-> >  		echo "test write" > $LOOP_MNT/test
-> >  		_unmount $LOOP_MNT > /dev/null 2>&1
-> >  
-> >  		# punch out the previous blocks so that we keep the amount of
-> >  		# disk space the test requires down to a minimum.
-> > -		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_DEV
-> > +		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_IMG
-> >  	done
-> >  }
-> >  # make large holey file
-> > -$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_DEV
-> > +$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_IMG
-> >  
-> >  #make loopback mount dir
-> >  mkdir $LOOP_MNT
-> >  
-> >  # test if large logs are supported
-> > -$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_DEV,size=10g > /dev/null 2>&1
-> > +$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_IMG,size=10g > /dev/null 2>&1
-> >  if [ $? -ne 0 ]; then
-> >  	_notrun "large log sizes not supported by mkfs"
-> >  fi
-> >  
-> > +loop_dev=$(_create_loop_device $LOOP_IMG)
-> > +
-> >  #
-> >  # walk over "new" sizes supported by recent xfsprogs.
-> >  # Note that the last test is for 16TB-1GB as 32bit platforms only support
-> > @@ -57,5 +65,7 @@ fi
-> >  #
-> >  _do_mkfs 512 1024 2048 4096 8192 16383
-> >  
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/250 b/tests/xfs/250
-> > index 4e3473ebc..2554e1e91 100755
-> > --- a/tests/xfs/250
-> > +++ b/tests/xfs/250
-> > @@ -14,7 +14,8 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > -	rm -f $LOOP_DEV
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> > +	rm -f $LOOP_IMG
-> >  	rmdir $LOOP_MNT
-> >  	rm -f $tmp.*
-> >  }
-> > @@ -26,7 +27,7 @@ _require_test
-> >  _require_loop
-> >  _require_xfs_io_command "falloc"
-> >  
-> > -LOOP_DEV=$TEST_DIR/$seq.fs
-> > +LOOP_IMG=$TEST_DIR/$seq.fs
-> >  LOOP_MNT=$TEST_DIR/$seq.mnt
-> >  
-> >  _filter_io()
-> > @@ -45,7 +46,7 @@ _test_loop()
-> >  	agsize=$2
-> >  	fsize=$3
-> >  
-> > -	dparam="file,name=$LOOP_DEV,size=$size"
-> > +	dparam="file,name=$LOOP_IMG,size=$size"
-> >  	if [ -n "$agsize" ]; then
-> >  		dparam="$dparam,agsize=$agsize"
-> >  	fi
-> > @@ -55,7 +56,8 @@ _test_loop()
-> >  		| _filter_mkfs 2>/dev/null
-> >  
-> >  	echo "*** mount loop filesystem"
-> > -	_mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
-> > +	loop_dev=$(_create_loop_device $LOOP_IMG)
-> > +	mount $loop_dev $LOOP_MNT
-> >  
-> >  	echo "*** preallocate large file"
-> >  	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
-> > @@ -64,7 +66,9 @@ _test_loop()
-> >  	_unmount $LOOP_MNT > /dev/null 2>&1
-> >  
-> >  	echo "*** check loop filesystem"
-> > -	 _check_xfs_filesystem $LOOP_DEV none none
-> > +	_check_xfs_filesystem $loop_dev none none
-> > +	_destroy_loop_device $loop_dev
-> > +	unset loop_dev
-> >  }
-> >  
-> >  _test_loop 50g 16m 40G
-> > diff --git a/tests/xfs/259 b/tests/xfs/259
-> > index 0c8d6eb56..c2d26381a 100755
-> > --- a/tests/xfs/259
-> > +++ b/tests/xfs/259
-> > @@ -12,7 +12,10 @@ _begin_fstest auto quick
-> >  # Override the default cleanup function.
-> >  _cleanup()
-> >  {
-> > -    rm -f "$testfile"
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $testfile
-> > +	rm -f "$testfile"
-> > +	cd /
-> > +	rm -f $tmp.*
-> >  }
-> >  
-> >  # Import common functions.
-> > @@ -45,13 +48,13 @@ for del in $sizes_to_check; do
-> >  		rm -f "$testfile"
-> >  		dd if=/dev/zero "of=$testfile" bs=1 count=0 seek=$ddseek \
-> >  			>/dev/null 2>&1 || echo "dd failed"
-> > -		lofile=$(losetup -f)
-> > -		losetup $lofile "$testfile"
-> > -		$MKFS_XFS_PROG -l size=32m -b size=$bs $lofile |  _filter_mkfs \
-> > +		loop_dev=$(_create_loop_device $testfile)
-> > +		$MKFS_XFS_PROG -l size=32m -b size=$bs $loop_dev |  _filter_mkfs \
-> >  			>/dev/null 2> $tmp.mkfs || echo "mkfs failed!"
-> >  		. $tmp.mkfs
-> >  		sync
-> > -		losetup -d $lofile
-> > +		_destroy_loop_device $loop_dev
-> > +		unset loop_dev
-> >  	done
-> >  done
-> >  
-> > diff --git a/tests/xfs/513 b/tests/xfs/513
-> > index 5895e6e2d..0c0edc75e 100755
-> > --- a/tests/xfs/513
-> > +++ b/tests/xfs/513
-> > @@ -15,12 +15,8 @@ _cleanup()
-> >  	cd /
-> >  	rm -f $tmp.*
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > -	if [ -n "$LOOP_DEV" ];then
-> > -		_destroy_loop_device $LOOP_DEV 2>/dev/null
-> > -	fi
-> > -	if [ -n "$LOOP_SPARE_DEV" ];then
-> > -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-> > -	fi
-> > +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
-> > +	[ -n $loop_spare_dev ] &&_destroy_loop_device $loop_spare_dev
-> >  	rm -f $LOOP_IMG
-> >  	rm -f $LOOP_SPARE_IMG
-> >  	rmdir $LOOP_MNT
-> > @@ -42,11 +38,11 @@ LOOP_MNT=$TEST_DIR/$seq.mnt
-> >  
-> >  echo "** create loop device"
-> >  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
-> > -LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> > +loop_dev=`_create_loop_device $LOOP_IMG`
-> >  
-> >  echo "** create loop log device"
-> >  $XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
-> > -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-> > +loop_spare_dev=`_create_loop_device $LOOP_SPARE_IMG`
-> >  
-> >  echo "** create loop mount point"
-> >  rmdir $LOOP_MNT 2>/dev/null
-> > @@ -55,8 +51,8 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
-> >  filter_loop()
-> >  {
-> >  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
-> > -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
-> > -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-> > +	    -e "s,\B$loop_dev,LOOP_DEV,g" \
-> > +	    -e "s,\B$loop_spare_dev,LOOP_SPARE_DEV,g"
-> >  }
-> >  
-> >  filter_xfs_opt()
-> > @@ -69,22 +65,22 @@ MKFS_OPTIONS=""
-> >  do_mkfs()
-> >  {
-> >  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
-> > -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> > +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> >  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-> > -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-> > +		_fail "Fails on _mkfs_dev $* $loop_dev"
-> >  	fi
-> >  	. $tmp.mkfs
-> >  }
-> >  
-> >  is_dev_mounted()
-> >  {
-> > -	findmnt --source $LOOP_DEV >/dev/null
-> > +	findmnt --source $loop_dev >/dev/null
-> >  	return $?
-> >  }
-> >  
-> >  get_mount_info()
-> >  {
-> > -	findmnt --source $LOOP_DEV -o OPTIONS -n
-> > +	findmnt --source $loop_dev -o OPTIONS -n
-> >  }
-> >  
-> >  force_unmount()
-> > @@ -103,29 +99,29 @@ _do_test()
-> >  	local info
-> >  
-> >  	# mount test
-> > -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-> > +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
-> >  	rc=$?
-> >  	if [ $rc -eq 0 ];then
-> >  		if [ "${mounted}" = "fail" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expect mount to fail, but it succeeded"
-> >  			return 1
-> >  		fi
-> >  		is_dev_mounted
-> >  		if [ $? -ne 0 ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: fs not mounted even mount return 0"
-> >  			return 1
-> >  		fi
-> >  	else
-> >  		if [ "${mounted}" = "pass" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expect mount to succeed, but it failed"
-> >  			return 1
-> >  		fi
-> >  		is_dev_mounted
-> >  		if [ $? -eq 0 ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: fs is mounted even mount return non-zero"
-> >  			return 1
-> >  		fi
-> > @@ -141,13 +137,13 @@ _do_test()
-> >  	rc=$?
-> >  	if [ $rc -eq 0 ];then
-> >  		if [ "$found" != "true" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
-> >  			return 1
-> >  		fi
-> >  	else
-> >  		if [ "$found" != "false" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
-> >  			return 1
-> >  		fi
-> > @@ -253,9 +249,9 @@ do_test "-o logbsize=512k" fail
-> >  # Test logdev
-> >  do_mkfs
-> >  do_test "" pass "logdev" "false"
-> > -do_test "-o logdev=$LOOP_SPARE_DEV" fail
-> > -do_mkfs -l logdev=$LOOP_SPARE_DEV
-> > -do_test "-o logdev=$LOOP_SPARE_DEV" pass "logdev=$LOOP_SPARE_DEV" "true"
-> > +do_test "-o logdev=$loop_spare_dev" fail
-> > +do_mkfs -l logdev=$loop_spare_dev
-> > +do_test "-o logdev=$loop_spare_dev" pass "logdev=$loop_spare_dev" "true"
-> >  do_test "" fail
-> >  
-> >  # Test noalign
-> > diff --git a/tests/xfs/521 b/tests/xfs/521
-> > index 13982c440..c92c621a2 100755
-> > --- a/tests/xfs/521
-> > +++ b/tests/xfs/521
-> > @@ -21,7 +21,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_scratch_unmount >> $seqres.full 2>&1
-> > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
-> >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
-> >  }
-> >  
-> > @@ -35,7 +35,7 @@ _require_no_large_scratch_dev
-> >  
-> >  echo "Create fake rt volume"
-> >  truncate -s 400m $TEST_DIR/$seq.rtvol
-> > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> >  
-> >  echo "Format and mount 100m rt volume"
-> >  export USE_EXTERNAL=yes
-> > @@ -69,6 +69,10 @@ cp -p $testdir/original $testdir/copy3
-> >  echo "Check filesystem"
-> >  _check_scratch_fs
-> >  
-> > +_scratch_unmount
-> > +_destroy_loop_device $rt_loop_dev
-> > +unset rt_loop_dev
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/528 b/tests/xfs/528
-> > index 6ca9a2370..a1efbbd27 100755
-> > --- a/tests/xfs/528
-> > +++ b/tests/xfs/528
-> > @@ -15,7 +15,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_scratch_unmount >> $seqres.full 2>&1
-> > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
-> >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
-> >  }
-> >  
-> > @@ -155,11 +155,11 @@ test_ops() {
-> >  
-> >  echo "Create fake rt volume"
-> >  $XFS_IO_PROG -f -c "truncate 400m" $TEST_DIR/$seq.rtvol
-> > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> >  
-> >  echo "Make sure synth rt volume works"
-> >  export USE_EXTERNAL=yes
-> > -export SCRATCH_RTDEV=$rtdev
-> > +export SCRATCH_RTDEV=$rt_loop_dev
-> >  _scratch_mkfs > $seqres.full
-> >  _try_scratch_mount || \
-> >  	_notrun "Could not mount with synthetic rt volume"
-> > @@ -170,6 +170,10 @@ test_ops 262144
-> >  # not a power of two
-> >  test_ops 327680
-> >  
-> > +_scratch_unmount
-> > +_destroy_loop_device $rt_loop_dev
-> > +unset rt_loop_dev
-> > +
-> >  # success, all done
-> >  status=0
-> >  exit
-> > diff --git a/tests/xfs/530 b/tests/xfs/530
-> > index 8a182bd6a..d0d0e2665 100755
-> > --- a/tests/xfs/530
-> > +++ b/tests/xfs/530
-> > @@ -15,7 +15,7 @@ _cleanup()
-> >  {
-> >  	cd /
-> >  	_scratch_unmount >> $seqres.full 2>&1
-> > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
-> > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
-> >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
-> >  }
-> >  
-> > @@ -52,12 +52,12 @@ fi
-> >  
-> >  rtdevsz=$((nr_bits * rtextsz))
-> >  truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
-> > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
-> >  
-> >  echo "Format and mount rt volume"
-> >  
-> >  export USE_EXTERNAL=yes
-> > -export SCRATCH_RTDEV=$rtdev
-> > +export SCRATCH_RTDEV=$rt_loop_dev
-> >  _scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
-> >  	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
-> >  _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
-> > @@ -116,8 +116,9 @@ done
-> >  echo "Check filesystem"
-> >  _check_scratch_fs
-> >  
-> > -losetup -d $rtdev
-> > -rm -f $TEST_DIR/$seq.rtvol
-> > +_scratch_unmount
-> > +_destroy_loop_device $rt_loop_dev
-> > +unset rt_loop_dev
-> >  
-> >  # success, all done
-> >  status=0
-> > diff --git a/tests/xfs/606 b/tests/xfs/606
-> > index f958bddd8..b537ea145 100755
-> > --- a/tests/xfs/606
-> > +++ b/tests/xfs/606
-> > @@ -13,10 +13,8 @@ _begin_fstest auto quick growfs
-> >  
-> >  _cleanup()
-> >  {
-> > -	local dev
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > -	dev=$(losetup -j testfile | cut -d: -f1)
-> > -	losetup -d $dev 2>/dev/null
-> > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
-> >  	rm -rf $LOOP_IMG $LOOP_MNT
-> >  	cd /
-> >  	rm -f $tmp.*
-> > @@ -40,7 +38,9 @@ $MKFS_XFS_PROG -f $LOOP_IMG >$seqres.full
-> >  # Extend by just 8K, expected to start with the last full-size AG ends of
-> >  # above 1G block device.
-> >  $XFS_IO_PROG -f -c "truncate 1073750016" $LOOP_IMG
-> > -_mount -oloop $LOOP_IMG $LOOP_MNT
-> > +
-> > +loop_dev=$(_create_loop_device $LOOP_IMG)
-> > +_mount $loop_dev $LOOP_MNT
-> >  # A known bug shows "XFS_IOC_FSGROWFSDATA xfsctl failed: No space left on
-> >  # device" at here, refer to _fixed_by_kernel_commit above
-> >  $XFS_GROWFS_PROG $LOOP_MNT >$seqres.full
-> > @@ -48,6 +48,10 @@ if [ $? -ne 0 ];then
-> >  	echo "xfs_growfs fails!"
-> >  fi
-> >  
-> > +_unmount $LOOP_MNT
-> > +_destroy_loop_device $loop_dev
-> > +unset loop_dev
-> > +
-> >  echo "Silence is golden"
-> >  # success, all done
-> >  status=0
-> > diff --git a/tests/xfs/613 b/tests/xfs/613
-> > index 6ba3d87bf..b87cae91e 100755
-> > --- a/tests/xfs/613
-> > +++ b/tests/xfs/613
-> > @@ -15,14 +15,8 @@ _cleanup()
-> >  	cd /
-> >  	rm -f $tmp.*
-> >  	_unmount $LOOP_MNT 2>/dev/null
-> > -	if [ -n "$LOOP_DEV" ];then
-> > -		_destroy_loop_device $LOOP_DEV 2>/dev/null
-> > -	fi
-> > -	if [ -n "$LOOP_SPARE_DEV" ];then
-> > -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
-> > -	fi
-> > +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
-> >  	rm -f $LOOP_IMG
-> > -	rm -f $LOOP_SPARE_IMG
-> >  	rmdir $LOOP_MNT
-> >  }
-> >  
-> > @@ -38,16 +32,11 @@ _require_loop
-> >  _require_xfs_io_command "falloc"
-> >  
-> >  LOOP_IMG=$TEST_DIR/$seq.dev
-> > -LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
-> >  LOOP_MNT=$TEST_DIR/$seq.mnt
-> >  
-> >  echo "** create loop device"
-> >  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
-> > -LOOP_DEV=`_create_loop_device $LOOP_IMG`
-> > -
-> > -echo "** create loop log device"
-> > -$XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
-> > -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
-> > +loop_dev=`_create_loop_device $LOOP_IMG`
-> >  
-> >  echo "** create loop mount point"
-> >  rmdir $LOOP_MNT 2>/dev/null
-> > @@ -56,8 +45,7 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
-> >  filter_loop()
-> >  {
-> >  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
-> > -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
-> > -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
-> > +	    -e "s,\B$loop_dev,LOOP_DEV,g"
-> >  }
-> >  
-> >  filter_xfs_opt()
-> > @@ -70,22 +58,22 @@ MKFS_OPTIONS=""
-> >  do_mkfs()
-> >  {
-> >  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
-> > -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> > +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-> >  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
-> > -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
-> > +		_fail "Fails on _mkfs_dev $* $loop_dev"
-> >  	fi
-> >  	. $tmp.mkfs
-> >  }
-> >  
-> >  is_dev_mounted()
-> >  {
-> > -	findmnt --source $LOOP_DEV >/dev/null
-> > +	findmnt --source $loop_dev >/dev/null
-> >  	return $?
-> >  }
-> >  
-> >  get_mount_info()
-> >  {
-> > -	findmnt --source $LOOP_DEV -o OPTIONS -n
-> > +	findmnt --source $loop_dev -o OPTIONS -n
-> >  }
-> >  
-> >  force_unmount()
-> > @@ -104,29 +92,29 @@ _do_test()
-> >  	local info
-> >  
-> >  	# mount test
-> > -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
-> > +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
-> >  	rc=$?
-> >  	if [ $rc -eq 0 ];then
-> >  		if [ "${mounted}" = "fail" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expect mount to fail, but it succeeded"
-> >  			return 1
-> >  		fi
-> >  		is_dev_mounted
-> >  		if [ $? -ne 0 ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: fs not mounted even mount return 0"
-> >  			return 1
-> >  		fi
-> >  	else
-> >  		if [ "${mounted}" = "pass" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expect mount to succeed, but it failed"
-> >  			return 1
-> >  		fi
-> >  		is_dev_mounted
-> >  		if [ $? -eq 0 ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: fs is mounted even mount return non-zero"
-> >  			return 1
-> >  		fi
-> > @@ -142,13 +130,13 @@ _do_test()
-> >  	rc=$?
-> >  	if [ $rc -eq 0 ];then
-> >  		if [ "$found" != "true" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
-> >  			return 1
-> >  		fi
-> >  	else
-> >  		if [ "$found" != "false" ];then
-> > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
-> > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
-> >  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
-> >  			return 1
-> >  		fi
-> > diff --git a/tests/xfs/613.out b/tests/xfs/613.out
-> > index 1624617ee..2a693c53c 100644
-> > --- a/tests/xfs/613.out
-> > +++ b/tests/xfs/613.out
-> > @@ -1,6 +1,5 @@
-> >  QA output created by 613
-> >  ** create loop device
-> > -** create loop log device
-> >  ** create loop mount point
-> >  ** start xfs mount testing ...
-> >  FORMAT: -m crc=0
-> > -- 
-> > 2.45.2
+> [1]
+> -       [ -n "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
+> -       [ -n "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
+> -       rm -f $data_img $log_img
+> +       if [ -n "$XFS_METADUMP_IMG" ]; then
+> +               [ -b "$md_data_loop_dev" ] && _destroy_loop_device $md_data_loop_dev
+> +               [ -b "$md_log_loop_dev" ] && _destroy_loop_device $md_log_loop_dev
+
+Finally I can reproduce the issue which Darrick metioned, it needs a new xfsprogs
+feature which hasn't been merged. Then I found The [ -b ] only solves half of the
+problem, due to even the /dev/loop0 is deteched, the /dev/loop0 is still there, and
+[ -b /dev/loop0 ] return true.
+
+To solve this problem totally, I think there're 3 ways:
+1) Check if a loop device is really detected, likes the old code did:
+     "losetup -n -a -O BACK-FILE,NAME | grep "^$XFS_METADUMP_IMG" | while read backing ldev"
+2) unset md_data_loop_dev and md_log_loop_dev properly, after _xfs_verify_metadump_v2()
+   deteches them. Something likes this:
+  @@ -134,9 +134,11 @@ _xfs_verify_metadump_v2()
+        # Tear down what we created
+        if [ -b "$md_log_loop_dev" ]; then
+                _destroy_loop_device $md_log_loop_dev
++               unset md_log_loop_dev
+                rm -f $log_img
+        fi
+        _destroy_loop_device $md_data_loop_dev
++       unset md_data_loop_dev
+        rm -f $data_img
+
+3) Ignore all outputs of _destroy_loop_device, e.g.
+  _destroy_loop_device $md_data_loop_dev >/dev/null 2>&1
+  _destroy_loop_device $md_log_loop_dev >/dev/null 2>&1
+
+The 1st and 3rd methods can avoid this failure totally. But the 2nd one looks
+smoother, and the xfs/129 test passed with it. I'm just not sure if I missed
+something else :)
+
+  # ./check -s default xfs/129
+  SECTION       -- default
+  FSTYP         -- xfs (non-debug)
+  PLATFORM      -- Linux/x86_64 dell-per750-41 6.12.0-0.rc7.58.fc42.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Nov 11 15:23:45 UTC 2024
+  MKFS_OPTIONS  -- -f /dev/sda6
+  MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda6 /mnt/scratch
+
+  xfs/129 9s ...  14s
+  Ran: xfs/129
+  Passed all 1 tests
+
+If you all agree, I can change this part as the 2nd way when I merge it.
+
+Thanks,
+Zorro
+
+> +               for img in "$XFS_METADUMP_IMG"*; do
+> +                       test -e "$img" && rm -f "$img"
+> +               done
+> +       fi
+> 
+> > >  }
+> > >  
+> > >  # Can xfs_metadump snapshot the fs metadata to a v1 metadump file?
+> > > @@ -122,25 +114,25 @@ _xfs_verify_metadump_v2()
+> > >  		_scratch_xfs_mdrestore $metadump_file
+> > >  
+> > >  	# Create loopdev for data device so we can mount the fs
+> > > -	data_loop=$(_create_loop_device $data_img)
+> > > +	md_data_loop_dev=$(_create_loop_device $data_img)
+> > >  
+> > >  	# Create loopdev for log device if we recovered anything
+> > > -	test -s "$log_img" && log_loop=$(_create_loop_device $log_img)
+> > > +	test -s "$log_img" && md_log_loop_dev=$(_create_loop_device $log_img)
+> > >  
+> > >  	# Mount fs, run an extra test, fsck, and unmount
+> > > -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _scratch_mount
+> > > +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _scratch_mount
+> > >  	if [ -n "$extra_test" ]; then
+> > > -		SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop $extra_test
+> > > +		SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev $extra_test
+> > >  	fi
+> > > -	SCRATCH_DEV=$data_loop SCRATCH_LOGDEV=$log_loop _check_xfs_scratch_fs
+> > > -	SCRATCH_DEV=$data_loop _scratch_unmount
+> > > +	SCRATCH_DEV=$md_data_loop_dev SCRATCH_LOGDEV=$md_log_loop_dev _check_xfs_scratch_fs
+> > > +	_unmount $md_data_loop_dev
 > > 
+> > We umount loop devices we created above at here, and ...
 > > 
+> > >  
+> > >  	# Tear down what we created
+> > > -	if [ -b "$log_loop" ]; then
+> > > -		_destroy_loop_device $log_loop
+> > > +	if [ -b "$md_log_loop_dev" ]; then
+> > > +		_destroy_loop_device $md_log_loop_dev
+> > >  		rm -f $log_img
+> > >  	fi
+> > > -	_destroy_loop_device $data_loop
+> > > +	_destroy_loop_device $md_data_loop_dev
+> > 
+> > we even has destroied them at here.
+> > 
+> > So that _xfs_cleanup_verify_metadump function hit "detach failed: No such
+> > device or address", due to those loop devices might have been released,
+> > but the variables are not unset.
+> > 
+> > I didn't give it a test, just did a code review. As Darrick uses this part mostly,
+> > could you please check what I said above?
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > >  	rm -f $data_img
+> > >  }
+> > >  
+> > > diff --git a/tests/generic/067 b/tests/generic/067
+> > > index ccb1e3fbb..b45ae834f 100755
+> > > --- a/tests/generic/067
+> > > +++ b/tests/generic/067
+> > > @@ -37,13 +37,18 @@ mount_nonexistent_mnt()
+> > >  	$MOUNT_PROG $SCRATCH_DEV $TEST_DIR/nosuchdir >>$seqres.full 2>&1
+> > >  }
+> > >  
+> > > -# fs driver should be able to handle mounting a free loop device gracefully
+> > > -# xfs ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
+> > > +# fs driver should be able to handle mounting a free loop device gracefully xfs
+> > > +# ever hung, "ec53d1d xfs: don't block on buffer read errors" fixed it
+> > > +#
+> > > +# Using 'losetup -f' like this is racy. We might end up mounting a real loop dev
+> > > +# here, so unmount $SCRATCH_MNT (not the loop dev we might not own!) and ignore
+> > > +# any error it might return.
+> > >  mount_free_loopdev()
+> > >  {
+> > >  	echo "# mount a free loop device" >>$seqres.full
+> > >  	loopdev=`losetup -f`
+> > > -	$MOUNT_PROG -t $FSTYP $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
+> > > +	_mount $loopdev $SCRATCH_MNT >>$seqres.full 2>&1
+> > > +	_unmount $SCRATCH_MNT >> /dev/null 2>&1
+> > >  }
+> > >  
+> > >  # mount with wrong fs type specified.
+> > > diff --git a/tests/generic/361 b/tests/generic/361
+> > > index 7273dd056..e2b798436 100755
+> > > --- a/tests/generic/361
+> > > +++ b/tests/generic/361
+> > > @@ -17,7 +17,7 @@ _begin_fstest auto quick
+> > >  _cleanup()
+> > >  {
+> > >  	_unmount $fs_mnt
+> > > -	_destroy_loop_device $loop_dev
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > >  }
+> > > @@ -54,6 +54,10 @@ $XFS_IO_PROG -fc "pwrite 0 520m" $fs_mnt/testfile >>$seqres.full 2>&1
+> > >  # remount should not hang
+> > >  $MOUNT_PROG -o remount,ro $fs_mnt >>$seqres.full 2>&1
+> > >  
+> > > +_unmount $fs_mnt
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  # success, all done
+> > >  echo "Silence is golden"
+> > >  status=0
+> > > diff --git a/tests/generic/563 b/tests/generic/563
+> > > index f0d2f404c..34d21170c 100755
+> > > --- a/tests/generic/563
+> > > +++ b/tests/generic/563
+> > > @@ -87,12 +87,12 @@ reset()
+> > >  
+> > >  # cgroup I/O accounting doesn't work on partitions. Use a loop device to rule
+> > >  # that out.
+> > > -LOOP_DEV=$(_create_loop_device $SCRATCH_DEV)
+> > > -smajor=$((0x`stat -L -c %t $LOOP_DEV`))
+> > > -sminor=$((0x`stat -L -c %T $LOOP_DEV`))
+> > > +loop_dev=$(_create_loop_device $SCRATCH_DEV)
+> > > +smajor=$((0x`stat -L -c %t $loop_dev`))
+> > > +sminor=$((0x`stat -L -c %T $loop_dev`))
+> > >  
+> > > -_mkfs_dev $LOOP_DEV >> $seqres.full 2>&1
+> > > -_mount $LOOP_DEV $SCRATCH_MNT || _fail "mount failed"
+> > > +_mkfs_dev $loop_dev >> $seqres.full 2>&1
+> > > +_mount $loop_dev $SCRATCH_MNT || _fail "mount failed"
+> > >  
+> > >  blksize=$(_get_block_size "$SCRATCH_MNT")
+> > >  
+> > > @@ -147,6 +147,10 @@ if [ "$drop_io_cgroup" = 1 ]; then
+> > >  	echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+> > >  fi
+> > >  
+> > > +_unmount $SCRATCH_MNT
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  # success, all done
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/generic/564 b/tests/generic/564
+> > > index 647472d78..b66b72496 100755
+> > > --- a/tests/generic/564
+> > > +++ b/tests/generic/564
+> > > @@ -19,7 +19,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	rm -rf $tmp.*
+> > > -	[ -z "$loopdev" ] || _destroy_loop_device $loopdev
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  }
+> > >  
+> > >  # Import common functions.
+> > > @@ -72,11 +72,11 @@ $XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
+> > >  echo
+> > >  echo source/destination as blkdev returns EINVAL
+> > >  $XFS_IO_PROG -f -c "truncate 128k" $testdir/img >> $seqres.full 2>&1
+> > > -loopdev=`_create_loop_device $testdir/img`
+> > > -$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loopdev
+> > > -$XFS_IO_PROG -f -c "copy_range -l 32k $loopdev" $testdir/copy
+> > > -_destroy_loop_device $loopdev
+> > > -loopdev=
+> > > +loop_dev=`_create_loop_device $testdir/img`
+> > > +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $loop_dev
+> > > +$XFS_IO_PROG -f -c "copy_range -l 32k $loop_dev" $testdir/copy
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  
+> > >  echo
+> > >  echo source/destination as chardev returns EINVAL
+> > > diff --git a/tests/generic/590 b/tests/generic/590
+> > > index 2b7ccfb53..2eefa2c62 100755
+> > > --- a/tests/generic/590
+> > > +++ b/tests/generic/590
+> > > @@ -15,9 +15,10 @@ _begin_fstest auto prealloc preallocrw
+> > >  # Override the default cleanup function.
+> > >  _cleanup()
+> > >  {
+> > > +	_scratch_unmount
+> > > +	[ -n $loop_dev ] && _destroy_loop_device $loop_dev
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > > -	test -n "$loop" && _destroy_loop_device "$loop"
+> > >  	rm -f "$TEST_DIR/$seq"
+> > >  }
+> > >  
+> > > @@ -56,9 +57,9 @@ if [[ $FSTYP = xfs ]]; then
+> > >  		loopsz="$((filesz + (1 << 26)))"
+> > >  		_require_fs_space "$TEST_DIR" $((loopsz / 1024))
+> > >  		$XFS_IO_PROG -c "truncate $loopsz" -f "$TEST_DIR/$seq"
+> > > -		loop="$(_create_loop_device "$TEST_DIR/$seq")"
+> > > +		loop_dev="$(_create_loop_device "$TEST_DIR/$seq")"
+> > >  		USE_EXTERNAL=yes
+> > > -		SCRATCH_RTDEV="$loop"
+> > > +		SCRATCH_RTDEV="$loop_dev"
+> > >  		disabled_features=()
+> > >  
+> > >  		# disable reflink if not supported by realtime devices
+> > > @@ -114,6 +115,8 @@ $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
+> > >  # We need to do this before the loop device gets torn down.
+> > >  _scratch_unmount
+> > >  _check_scratch_fs
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  
+> > >  echo "Silence is golden"
+> > >  status=0
+> > > diff --git a/tests/generic/744 b/tests/generic/744
+> > > index df8f6ae9b..cda10e0f6 100755
+> > > --- a/tests/generic/744
+> > > +++ b/tests/generic/744
+> > > @@ -17,8 +17,8 @@ _cleanup()
+> > >  
+> > >  	_unmount $mnt2 &> /dev/null
+> > >  	_unmount $mnt1 &> /dev/null
+> > > -	[ -b "$loop_dev2" ] && losetup -d $loop_dev2
+> > > -	[ -b "$loop_dev1" ] && losetup -d $loop_dev1
+> > > +	[ -b "$loop_dev2" ] && _destroy_loop_device $loop_dev2
+> > > +	[ -b "$loop_dev1" ] && _destroy_loop_device $loop_dev1
+> > >  	[ -n "$seq" ] && rm -rf $TEST_DIR/$seq
+> > >  }
+> > >  
+> > > diff --git a/tests/generic/746 b/tests/generic/746
+> > > index 671910606..ba8ed25e8 100755
+> > > --- a/tests/generic/746
+> > > +++ b/tests/generic/746
+> > > @@ -39,7 +39,7 @@ esac
+> > >  _cleanup()
+> > >  {
+> > >  	_unmount $loop_mnt &> /dev/null
+> > > -	_destroy_loop_device $loop_dev
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	if [ $status -eq 0 ]; then
+> > >  		rm -rf $tmp
+> > >  		rm $img_file
+> > > @@ -223,5 +223,9 @@ while read line; do
+> > >  done < $fiemap_after
+> > >  echo "done."
+> > >  
+> > > +_unmount $loop_mnt
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/014 b/tests/xfs/014
+> > > index f638e4b16..39ea40e2a 100755
+> > > --- a/tests/xfs/014
+> > > +++ b/tests/xfs/014
+> > > @@ -23,6 +23,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	_scratch_unmount 2>/dev/null
+> > >  	rm -f $tmp.*
+> > >  }
+> > > @@ -166,19 +167,21 @@ LOOP_FILE=$SCRATCH_MNT/$seq.fs
+> > >  LOOP_MNT=$SCRATCH_MNT/$seq.mnt
+> > >  
+> > >  $MKFS_XFS_PROG -d "file=1,name=$LOOP_FILE,size=10g" >> $seqres.full 2>&1
+> > > +loop_dev=$(_create_loop_device $LOOP_FILE)
+> > >  
+> > >  mkdir -p $LOOP_MNT
+> > > -_mount -o uquota,gquota $LOOP_FILE $LOOP_MNT || \
+> > > +_mount -o uquota,gquota $loop_dev $LOOP_MNT || \
+> > >  	_fail "Failed to mount loop fs."
+> > >  
+> > >  _test_enospc $LOOP_MNT
+> > >  _test_edquot $LOOP_MNT
+> > >  
+> > >  _unmount $LOOP_MNT
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  
+> > >  echo $orig_sp_time > /proc/sys/fs/xfs/speculative_prealloc_lifetime
+> > >  
+> > >  _scratch_unmount
+> > > -
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/049 b/tests/xfs/049
+> > > index 4163a144f..cdcddf764 100755
+> > > --- a/tests/xfs/049
+> > > +++ b/tests/xfs/049
+> > > @@ -12,16 +12,17 @@ _begin_fstest rw auto quick
+> > >  # Override the default cleanup function.
+> > >  _cleanup()
+> > >  {
+> > > -    cd /
+> > > -    umount $SCRATCH_MNT/test2 > /dev/null 2>&1
+> > > -    umount $SCRATCH_MNT/test > /dev/null 2>&1
+> > > -    rm -f $tmp.*
+> > > +	cd /
+> > > +	_unmount $SCRATCH_MNT/test2 > /dev/null 2>&1
+> > > +	_unmount $SCRATCH_MNT/test > /dev/null 2>&1
+> > > +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
+> > > +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
+> > > +	rm -f $tmp.*
+> > >  
+> > > -    if [ -w $seqres.full ]
+> > > -    then
+> > > -        echo "--- mounts at end (after cleanup)" >> $seqres.full
+> > > -        mount >> $seqres.full
+> > > -    fi
+> > > +	if [ -w $seqres.full ]; then
+> > > +		echo "--- mounts at end (after cleanup)" >> $seqres.full
+> > > +		mount >> $seqres.full
+> > > +	fi
+> > >  }
+> > >  
+> > >  # Import common functions.
+> > > @@ -64,7 +65,8 @@ mkdir $SCRATCH_MNT/test $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> > >      || _fail "!!! failed to make mount points"
+> > >  
+> > >  _log "Mount xfs via loop"
+> > > -mount -t xfs -o loop $SCRATCH_MNT/test.xfs $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+> > > +loop_dev1=$(_create_loop_device $SCRATCH_MNT/test.xfs)
+> > > +_mount $loop_dev1 $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+> > >      || _fail "!!! failed to loop mount xfs"
+> > >  
+> > >  _log "stress"
+> > > @@ -80,11 +82,12 @@ dd if=/dev/zero of=$SCRATCH_MNT/test/test.ext2 bs=1024 count=10240 >> $seqres.fu
+> > >      || _fail "!!! create file failed"
+> > >  
+> > >  _log "Create ext2 fs in file on looped xfs"
+> > > -echo y | mkfs -t ext2 $SCRATCH_MNT/test/test.ext2 >> $seqres.full 2>&1 \
+> > > +loop_dev2=$(_create_loop_device $SCRATCH_MNT/test/test.ext2)
+> > > +echo y | mkfs -t ext2 $loop_dev2 >> $seqres.full 2>&1 \
+> > >      || _fail "!!! failed to mkfs ext2 on xfs"
+> > >  
+> > >  _log "Mount ext2 on xfs via loop"
+> > > -mount -t ext2 -o loop $SCRATCH_MNT/test/test.ext2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> > > +_mount $loop_dev2 $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> > >      || _fail "!!! failed to loop mount xfs"
+> > >  
+> > >  _log "stress ext2 on xfs via loop"
+> > > @@ -96,12 +99,16 @@ rm -rf $SCRATCH_MNT/test/* >> $seqres.full 2>&1 \
+> > >      || _fail "!!! clean failed"
+> > >  
+> > >  _log "umount ext2 on xfs"
+> > > -umount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> > > +_unmount $SCRATCH_MNT/test2 >> $seqres.full 2>&1 \
+> > >      || _fail "!!! umount ext2 failed"
+> > > +_destroy_loop_device $loop_dev2
+> > > +unset loop_dev2
+> > >  
+> > >  _log "umount xfs"
+> > > -umount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+> > > +_unmount $SCRATCH_MNT/test >> $seqres.full 2>&1 \
+> > >      || _fail "!!! umount xfs failed"
+> > > +_destroy_loop_device $loop_dev1
+> > > +unset loop_dev1
+> > >  
+> > >  echo "--- mounts at end (before cleanup)" >> $seqres.full
+> > >  mount >> $seqres.full
+> > > diff --git a/tests/xfs/073 b/tests/xfs/073
+> > > index e4b17c5e7..2274079ef 100755
+> > > --- a/tests/xfs/073
+> > > +++ b/tests/xfs/073
+> > > @@ -23,6 +23,8 @@ _cleanup()
+> > >  	_scratch_unmount 2>/dev/null
+> > >  	_unmount $imgs.loop 2>/dev/null
+> > >  	_unmount $imgs.source_dir 2>/dev/null
+> > > +	[ -n "$loop_dev1" ] && _destroy_loop_device $loop_dev1
+> > > +	[ -n "$loop_dev2" ] && _destroy_loop_device $loop_dev2
+> > >  	[ -d $imgs.loop ] && rmdir $imgs.loop
+> > >  	[ -d $imgs.source_dir ] && rm -rf $imgs.source_dir
+> > >  	rm -f $imgs.* $tmp.* /var/tmp/xfs_copy.log.*
+> > > @@ -65,10 +67,11 @@ _verify_copy()
+> > >  	rmdir $target_dir 2>/dev/null
+> > >  	mkdir $target_dir
+> > >  
+> > > -	_mount -t xfs -o loop $target $target_dir 2>/dev/null
+> > > +	loop_dev1=$(_create_loop_device $target)
+> > > +	_mount $loop_dev1 $target_dir 2>/dev/null
+> > >  	if [ $? -ne 0 ]; then
+> > >  		echo retrying mount with nouuid option >>$seqres.full
+> > > -		_mount -t xfs -o loop -o nouuid $target $target_dir
+> > > +		_mount -o nouuid $loop_dev1 $target_dir
+> > >  		if [ $? -ne 0 ]; then
+> > >  			echo mount failed - evil!
+> > >  			return
+> > > @@ -100,6 +103,8 @@ _verify_copy()
+> > >  	echo unmounting and removing new image
+> > >  	_unmount $source_dir
+> > >  	_unmount $target_dir > /dev/null 2>&1
+> > > +	_destroy_loop_device $loop_dev1
+> > > +	unset loop_dev1
+> > >  	rm -f $target
+> > >  }
+> > >  
+> > > @@ -134,18 +139,15 @@ ${MKFS_XFS_PROG} -dfile,name=$imgs.source,size=100g \
+> > >  rmdir $imgs.source_dir 2>/dev/null
+> > >  mkdir $imgs.source_dir
+> > >  
+> > > -_mount -t xfs -o loop $imgs.source $imgs.source_dir
+> > > -loop2=`mount | grep $imgs.source | grep -o -e 'loop=.*[^),]' | grep -o -e '/.*$'`
+> > > +loop_dev2=$(_create_loop_device $imgs.source)
+> > > +_mount $loop_dev2 $imgs.source_dir
+> > >  cp -a $here $imgs.source_dir
+> > > -_mount -t xfs -o remount,ro $imgs.source $imgs.source_dir
+> > > -$XFS_COPY_PROG $imgs.source $imgs.image | _filter_copy '#' $imgs.image '#' '#'
+> > > +_mount -o remount,ro $loop_dev2 $imgs.source_dir
+> > > +$XFS_COPY_PROG $loop_dev2 $imgs.image 2> /dev/null | _filter_copy '#' $imgs.image '#' '#'
+> > >  _verify_copy $imgs.image $imgs.source $imgs.source_dir
+> > >  
+> > > -# HACK WARNING:
+> > > -#
+> > > -# We're done with the nested loop mount, now we have to clean
+> > > -# up the pieces that mount is incapable of doing.
+> > > -losetup -d $loop2 > /dev/null 2>&1
+> > > +_destroy_loop_device $loop_dev2
+> > > +unset loop_dev2
+> > >  
+> > >  echo
+> > >  echo === copying scratch device to multiple targets
+> > > diff --git a/tests/xfs/074 b/tests/xfs/074
+> > > index 6a03c8111..5df864fad 100755
+> > > --- a/tests/xfs/074
+> > > +++ b/tests/xfs/074
+> > > @@ -26,7 +26,7 @@ _begin_fstest quick auto prealloc rw
+> > >  _cleanup()
+> > >  {
+> > >  	cd /
+> > > -	_destroy_loop_device $LOOP_DEV
+> > > +	[ -n "$loop_dev" ] &&_destroy_loop_device $loop_dev
+> > >  	rm -f $tmp.* $LOOP_FILE
+> > >  }
+> > >  
+> > > @@ -45,10 +45,10 @@ LOOP_FILE=$TEST_DIR/$seq.img
+> > >  LOOP_MNT=$TEST_DIR/$seq.mnt
+> > >  mkdir -p $LOOP_MNT
+> > >  $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
+> > > -LOOP_DEV=`_create_loop_device $LOOP_FILE`
+> > > +loop_dev=`_create_loop_device $LOOP_FILE`
+> > >  
+> > > -_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
+> > > -_mount $LOOP_DEV $LOOP_MNT
+> > > +_mkfs_dev -d size=260g,agcount=2 $loop_dev
+> > > +_mount $loop_dev $LOOP_MNT
+> > >  
+> > >  BLOCK_SIZE=$(_get_file_block_size $LOOP_MNT)
+> > >  
+> > > @@ -59,11 +59,11 @@ $XFS_IO_PROG -ft \
+> > >  	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
+> > >  	$LOOP_MNT/foo >> $seqres.full
+> > >  
+> > > -umount $LOOP_MNT
+> > > -_check_xfs_filesystem $LOOP_DEV none none
+> > > +_unmount $LOOP_MNT
+> > > +_check_xfs_filesystem $loop_dev none none
+> > >  
+> > > -_mkfs_dev -f $LOOP_DEV
+> > > -_mount $LOOP_DEV $LOOP_MNT
+> > > +_mkfs_dev -f $loop_dev
+> > > +_mount $loop_dev $LOOP_MNT
+> > >  
+> > >  # check we trim both ends of the extent approproiately; this will fail
+> > >  # on 1k block size filesystems without the correct fixes in place.
+> > > @@ -73,7 +73,10 @@ $XFS_IO_PROG -ft \
+> > >  	$LOOP_MNT/foo >> $seqres.full
+> > >  
+> > >  _unmount $LOOP_MNT
+> > > -_check_xfs_filesystem $LOOP_DEV none none
+> > > +_check_xfs_filesystem $loop_dev none none
+> > > +
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  
+> > >  # success, all done
+> > >  echo "Silence is golden"
+> > > diff --git a/tests/xfs/078 b/tests/xfs/078
+> > > index 6b325e05f..0d3c2eb23 100755
+> > > --- a/tests/xfs/078
+> > > +++ b/tests/xfs/078
+> > > @@ -17,7 +17,7 @@ _cleanup()
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > -	[ -n "$LOOP_DEV" ] && _destroy_loop_device $LOOP_DEV 2>/dev/null
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev 2>/dev/null
+> > >  	# try to keep the image file if test fails
+> > >  	[ $status -eq 0 ] && rm -f $LOOP_IMG
+> > >  	rmdir $LOOP_MNT
+> > > @@ -55,7 +55,7 @@ _grow_loop()
+> > >  	agsize=$5
+> > >  
+> > >  	$XFS_IO_PROG -f -c "truncate $original" $LOOP_IMG
+> > > -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> > > +	loop_dev=`_create_loop_device $LOOP_IMG`
+> > >  
+> > >  	dparam=""
+> > >  	if [ -n "$agsize" ]; then
+> > > @@ -67,15 +67,15 @@ _grow_loop()
+> > >  	echo
+> > >  
+> > >  	echo "*** mkfs loop file (size=$original)"
+> > > -	$MKFS_XFS_PROG -b size=$bsize $dparam $LOOP_DEV | \
+> > > +	$MKFS_XFS_PROG -b size=$bsize $dparam $loop_dev | \
+> > >  		_filter_mkfs 2>/dev/null
+> > >  
+> > >  	echo "*** extend loop file"
+> > > -	_destroy_loop_device $LOOP_DEV
+> > > +	_destroy_loop_device $loop_dev
+> > >  	$XFS_IO_PROG -c "pwrite $new_size $bsize" $LOOP_IMG | _filter_io
+> > > -	LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> > > +	loop_dev=`_create_loop_device $LOOP_IMG`
+> > >  	echo "*** mount loop filesystem"
+> > > -	_mount -t xfs $LOOP_DEV $LOOP_MNT
+> > > +	_mount $loop_dev $LOOP_MNT
+> > >  
+> > >  	echo "*** grow loop filesystem"
+> > >  	$XFS_GROWFS_PROG $LOOP_MNT 2>&1 |  _filter_growfs 2>&1
+> > > @@ -87,9 +87,11 @@ _grow_loop()
+> > >  	if [ "$check" -gt "0" ]
+> > >  	then
+> > >  		echo "*** check"
+> > > -		_check_xfs_filesystem $LOOP_IMG none none
+> > > +		_check_xfs_filesystem $loop_dev none none
+> > >  	fi
+> > >  
+> > > +	_destroy_loop_device $loop_dev
+> > > +	unset loop_dev
+> > >  	rm -f $LOOP_IMG
+> > >  }
+> > >  
+> > > diff --git a/tests/xfs/148 b/tests/xfs/148
+> > > index c42c9b119..4d2f7a808 100755
+> > > --- a/tests/xfs/148
+> > > +++ b/tests/xfs/148
+> > > @@ -15,7 +15,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_unmount $mntpt > /dev/null 2>&1
+> > > -	_destroy_loop_device $loopdev > /dev/null 2>&1
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	rm -r -f $tmp.*
+> > >  }
+> > >  
+> > > @@ -48,12 +48,12 @@ rm -f $imgfile $imgfile.old
+> > >  # even when security xattrs are present so we are always doing name matches on
+> > >  # lookup and not name hash compares as leaf/node forms will do.
+> > >  $XFS_IO_PROG -f -c 'truncate 40m' $imgfile
+> > > -loopdev=$(_create_loop_device $imgfile)
+> > > -MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loopdev >> $seqres.full
+> > > +loop_dev=$(_create_loop_device $imgfile)
+> > > +MKFS_OPTIONS="-m crc=0 -i size=512" _mkfs_dev $loop_dev >> $seqres.full
+> > >  
+> > >  # Mount image file
+> > >  mkdir -p $mntpt
+> > > -_mount $loopdev $mntpt
+> > > +_mount $loop_dev $mntpt
+> > >  
+> > >  echo "creating entries" >> $seqres.full
+> > >  
+> > > @@ -91,7 +91,8 @@ cat $tmp.log | _filter_test_dir
+> > >  
+> > >  # Corrupt the entries
+> > >  _unmount $mntpt
+> > > -_destroy_loop_device $loopdev
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  cp $imgfile $imgfile.old
+> > >  sed -b \
+> > >  	-e "s/$nullstr/too_many\x00beans/g" \
+> > > @@ -99,8 +100,9 @@ sed -b \
+> > >  	-i $imgfile
+> > >  test "$(md5sum < $imgfile)" != "$(md5sum < $imgfile.old)" ||
+> > >  	_fail "sed failed to change the image file?"
+> > > -loopdev=$(_create_loop_device $imgfile)
+> > > -_mount $loopdev $mntpt
+> > > +
+> > > +loop_dev=$(_create_loop_device $imgfile)
+> > > +_mount $loop_dev $mntpt
+> > >  
+> > >  # Try to access the corrupt metadata
+> > >  echo "++ ACCESSING BAD METADATA" | tee -a $seqres.full
+> > > @@ -111,7 +113,7 @@ cat $tmp.log | _filter_test_dir | sed -e '/Could not list/d'
+> > >  echo "does scrub complain?" >> $seqres.full
+> > >  
+> > >  # Does scrub complain about this?
+> > > -if _supports_xfs_scrub $mntpt $loopdev; then
+> > > +if _supports_xfs_scrub $mntpt $loop_dev; then
+> > >  	$XFS_SCRUB_PROG -n $mntpt >> $seqres.full 2>&1
+> > >  	res=$?
+> > >  	test $((res & 1)) -eq 0 && \
+> > > @@ -122,11 +124,14 @@ echo "does repair complain?" >> $seqres.full
+> > >  
+> > >  # Does repair complain about this?
+> > >  _unmount $mntpt
+> > > -$XFS_REPAIR_PROG -n $loopdev >> $seqres.full 2>&1
+> > > +$XFS_REPAIR_PROG -n $loop_dev >> $seqres.full 2>&1
+> > >  res=$?
+> > >  test $res -eq 1 || \
+> > >  	echo "repair failed to report corruption ($res)"
+> > >  
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  # success, all done
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/149 b/tests/xfs/149
+> > > index f2187109b..9a96f82ed 100755
+> > > --- a/tests/xfs/149
+> > > +++ b/tests/xfs/149
+> > > @@ -84,6 +84,10 @@ $XFS_GROWFS_PROG -D 16384 $loop_symlink > /dev/null
+> > >  echo "=== xfs_growfs - check device node ==="
+> > >  $XFS_GROWFS_PROG -D 20480 $loop_dev > /dev/null
+> > >  
+> > > +_unmount $mntdir
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  # success, all done
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/216 b/tests/xfs/216
+> > > index 6b8b2eb22..091c11d08 100755
+> > > --- a/tests/xfs/216
+> > > +++ b/tests/xfs/216
+> > > @@ -15,6 +15,7 @@ _begin_fstest log metadata auto quick
+> > >  _cleanup()
+> > >  {
+> > >  	_unmount $LOOP_MNT > /dev/null 2>&1
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > >  }
+> > > @@ -24,7 +25,7 @@ _scratch_mkfs_xfs >/dev/null 2>&1
+> > >  _scratch_mount
+> > >  
+> > >  _require_loop
+> > > -LOOP_DEV=$SCRATCH_MNT/test_fs
+> > > +LOOP_IMG=$SCRATCH_MNT/test_fs
+> > >  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
+> > >  
+> > >  loop_mkfs_opts=
+> > > @@ -55,22 +56,26 @@ _do_mkfs()
+> > >  	for i in $*; do
+> > >  		echo -n "fssize=${i}g "
+> > >  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
+> > > -			-d name=$LOOP_DEV,size=${i}g $loop_mkfs_opts |grep log
+> > > -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
+> > > +			-d size=${i}g $loop_mkfs_opts $loop_dev |grep log
+> > > +		_mount $loop_dev $LOOP_MNT
+> > >  		echo "test write" > $LOOP_MNT/test
+> > >  		_unmount $LOOP_MNT > /dev/null 2>&1
+> > >  	done
+> > >  }
+> > >  # make large holey file
+> > > -$XFS_IO_PROG -f -c "truncate 256g" $LOOP_DEV
+> > > +$XFS_IO_PROG -f -c "truncate 256g" $LOOP_IMG
+> > >  
+> > > -choose_golden_output $0 $LOOP_DEV
+> > > +choose_golden_output $0 $LOOP_IMG
+> > >  
+> > >  #make loopback mount dir
+> > >  mkdir $LOOP_MNT
+> > >  
+> > > +loop_dev=$(_create_loop_device $LOOP_IMG)
+> > > +
+> > >  # walk over standard sizes (up to 256GB)
+> > >  _do_mkfs 1 2 4 8 16 32 64 128 256
+> > >  
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/217 b/tests/xfs/217
+> > > index b2eb34490..dae6ce55f 100755
+> > > --- a/tests/xfs/217
+> > > +++ b/tests/xfs/217
+> > > @@ -12,6 +12,12 @@ _begin_fstest log metadata auto
+> > >  # Import common functions.
+> > >  . ./common/filter
+> > >  
+> > > +_cleanup()
+> > > +{
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > >  
+> > >  _require_scratch
+> > >  _scratch_mkfs_xfs >/dev/null 2>&1
+> > > @@ -20,7 +26,7 @@ _scratch_mount
+> > >  _require_fs_space $SCRATCH_MNT 2202000
+> > >  
+> > >  _require_loop
+> > > -LOOP_DEV=$SCRATCH_MNT/test_fs
+> > > +LOOP_IMG=$SCRATCH_MNT/test_fs
+> > >  LOOP_MNT=$SCRATCH_MNT/test_fs_dir
+> > >  
+> > >  _do_mkfs()
+> > > @@ -28,28 +34,30 @@ _do_mkfs()
+> > >  	for i in $*; do
+> > >  		echo -n "fssize=${i}g "
+> > >  		$MKFS_XFS_PROG -f -b size=4096 -l version=2 \
+> > > -			-d name=$LOOP_DEV,size=${i}g |grep log
+> > > -		_mount -o loop -t xfs $LOOP_DEV $LOOP_MNT
+> > > +			-d size=${i}g $loop_dev |grep log
+> > > +		_mount $loop_dev $LOOP_MNT
+> > >  		echo "test write" > $LOOP_MNT/test
+> > >  		_unmount $LOOP_MNT > /dev/null 2>&1
+> > >  
+> > >  		# punch out the previous blocks so that we keep the amount of
+> > >  		# disk space the test requires down to a minimum.
+> > > -		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_DEV
+> > > +		$XFS_IO_PROG -f -c "unresvsp 0 16383g" $LOOP_IMG
+> > >  	done
+> > >  }
+> > >  # make large holey file
+> > > -$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_DEV
+> > > +$XFS_IO_PROG -f -c "truncate 16383g" $LOOP_IMG
+> > >  
+> > >  #make loopback mount dir
+> > >  mkdir $LOOP_MNT
+> > >  
+> > >  # test if large logs are supported
+> > > -$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_DEV,size=10g > /dev/null 2>&1
+> > > +$MKFS_XFS_PROG -f -l size=256m -d name=$LOOP_IMG,size=10g > /dev/null 2>&1
+> > >  if [ $? -ne 0 ]; then
+> > >  	_notrun "large log sizes not supported by mkfs"
+> > >  fi
+> > >  
+> > > +loop_dev=$(_create_loop_device $LOOP_IMG)
+> > > +
+> > >  #
+> > >  # walk over "new" sizes supported by recent xfsprogs.
+> > >  # Note that the last test is for 16TB-1GB as 32bit platforms only support
+> > > @@ -57,5 +65,7 @@ fi
+> > >  #
+> > >  _do_mkfs 512 1024 2048 4096 8192 16383
+> > >  
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/250 b/tests/xfs/250
+> > > index 4e3473ebc..2554e1e91 100755
+> > > --- a/tests/xfs/250
+> > > +++ b/tests/xfs/250
+> > > @@ -14,7 +14,8 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > -	rm -f $LOOP_DEV
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > > +	rm -f $LOOP_IMG
+> > >  	rmdir $LOOP_MNT
+> > >  	rm -f $tmp.*
+> > >  }
+> > > @@ -26,7 +27,7 @@ _require_test
+> > >  _require_loop
+> > >  _require_xfs_io_command "falloc"
+> > >  
+> > > -LOOP_DEV=$TEST_DIR/$seq.fs
+> > > +LOOP_IMG=$TEST_DIR/$seq.fs
+> > >  LOOP_MNT=$TEST_DIR/$seq.mnt
+> > >  
+> > >  _filter_io()
+> > > @@ -45,7 +46,7 @@ _test_loop()
+> > >  	agsize=$2
+> > >  	fsize=$3
+> > >  
+> > > -	dparam="file,name=$LOOP_DEV,size=$size"
+> > > +	dparam="file,name=$LOOP_IMG,size=$size"
+> > >  	if [ -n "$agsize" ]; then
+> > >  		dparam="$dparam,agsize=$agsize"
+> > >  	fi
+> > > @@ -55,7 +56,8 @@ _test_loop()
+> > >  		| _filter_mkfs 2>/dev/null
+> > >  
+> > >  	echo "*** mount loop filesystem"
+> > > -	_mount -t xfs -o loop $LOOP_DEV $LOOP_MNT
+> > > +	loop_dev=$(_create_loop_device $LOOP_IMG)
+> > > +	mount $loop_dev $LOOP_MNT
+> > >  
+> > >  	echo "*** preallocate large file"
+> > >  	$XFS_IO_PROG -f -c "resvsp 0 $fsize" $LOOP_MNT/foo | _filter_io
+> > > @@ -64,7 +66,9 @@ _test_loop()
+> > >  	_unmount $LOOP_MNT > /dev/null 2>&1
+> > >  
+> > >  	echo "*** check loop filesystem"
+> > > -	 _check_xfs_filesystem $LOOP_DEV none none
+> > > +	_check_xfs_filesystem $loop_dev none none
+> > > +	_destroy_loop_device $loop_dev
+> > > +	unset loop_dev
+> > >  }
+> > >  
+> > >  _test_loop 50g 16m 40G
+> > > diff --git a/tests/xfs/259 b/tests/xfs/259
+> > > index 0c8d6eb56..c2d26381a 100755
+> > > --- a/tests/xfs/259
+> > > +++ b/tests/xfs/259
+> > > @@ -12,7 +12,10 @@ _begin_fstest auto quick
+> > >  # Override the default cleanup function.
+> > >  _cleanup()
+> > >  {
+> > > -    rm -f "$testfile"
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $testfile
+> > > +	rm -f "$testfile"
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > >  }
+> > >  
+> > >  # Import common functions.
+> > > @@ -45,13 +48,13 @@ for del in $sizes_to_check; do
+> > >  		rm -f "$testfile"
+> > >  		dd if=/dev/zero "of=$testfile" bs=1 count=0 seek=$ddseek \
+> > >  			>/dev/null 2>&1 || echo "dd failed"
+> > > -		lofile=$(losetup -f)
+> > > -		losetup $lofile "$testfile"
+> > > -		$MKFS_XFS_PROG -l size=32m -b size=$bs $lofile |  _filter_mkfs \
+> > > +		loop_dev=$(_create_loop_device $testfile)
+> > > +		$MKFS_XFS_PROG -l size=32m -b size=$bs $loop_dev |  _filter_mkfs \
+> > >  			>/dev/null 2> $tmp.mkfs || echo "mkfs failed!"
+> > >  		. $tmp.mkfs
+> > >  		sync
+> > > -		losetup -d $lofile
+> > > +		_destroy_loop_device $loop_dev
+> > > +		unset loop_dev
+> > >  	done
+> > >  done
+> > >  
+> > > diff --git a/tests/xfs/513 b/tests/xfs/513
+> > > index 5895e6e2d..0c0edc75e 100755
+> > > --- a/tests/xfs/513
+> > > +++ b/tests/xfs/513
+> > > @@ -15,12 +15,8 @@ _cleanup()
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > -	if [ -n "$LOOP_DEV" ];then
+> > > -		_destroy_loop_device $LOOP_DEV 2>/dev/null
+> > > -	fi
+> > > -	if [ -n "$LOOP_SPARE_DEV" ];then
+> > > -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
+> > > -	fi
+> > > +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
+> > > +	[ -n $loop_spare_dev ] &&_destroy_loop_device $loop_spare_dev
+> > >  	rm -f $LOOP_IMG
+> > >  	rm -f $LOOP_SPARE_IMG
+> > >  	rmdir $LOOP_MNT
+> > > @@ -42,11 +38,11 @@ LOOP_MNT=$TEST_DIR/$seq.mnt
+> > >  
+> > >  echo "** create loop device"
+> > >  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
+> > > -LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> > > +loop_dev=`_create_loop_device $LOOP_IMG`
+> > >  
+> > >  echo "** create loop log device"
+> > >  $XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
+> > > -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+> > > +loop_spare_dev=`_create_loop_device $LOOP_SPARE_IMG`
+> > >  
+> > >  echo "** create loop mount point"
+> > >  rmdir $LOOP_MNT 2>/dev/null
+> > > @@ -55,8 +51,8 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
+> > >  filter_loop()
+> > >  {
+> > >  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
+> > > -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
+> > > -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
+> > > +	    -e "s,\B$loop_dev,LOOP_DEV,g" \
+> > > +	    -e "s,\B$loop_spare_dev,LOOP_SPARE_DEV,g"
+> > >  }
+> > >  
+> > >  filter_xfs_opt()
+> > > @@ -69,22 +65,22 @@ MKFS_OPTIONS=""
+> > >  do_mkfs()
+> > >  {
+> > >  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
+> > > -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
+> > > +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
+> > >  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+> > > -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
+> > > +		_fail "Fails on _mkfs_dev $* $loop_dev"
+> > >  	fi
+> > >  	. $tmp.mkfs
+> > >  }
+> > >  
+> > >  is_dev_mounted()
+> > >  {
+> > > -	findmnt --source $LOOP_DEV >/dev/null
+> > > +	findmnt --source $loop_dev >/dev/null
+> > >  	return $?
+> > >  }
+> > >  
+> > >  get_mount_info()
+> > >  {
+> > > -	findmnt --source $LOOP_DEV -o OPTIONS -n
+> > > +	findmnt --source $loop_dev -o OPTIONS -n
+> > >  }
+> > >  
+> > >  force_unmount()
+> > > @@ -103,29 +99,29 @@ _do_test()
+> > >  	local info
+> > >  
+> > >  	# mount test
+> > > -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
+> > > +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
+> > >  	rc=$?
+> > >  	if [ $rc -eq 0 ];then
+> > >  		if [ "${mounted}" = "fail" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expect mount to fail, but it succeeded"
+> > >  			return 1
+> > >  		fi
+> > >  		is_dev_mounted
+> > >  		if [ $? -ne 0 ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: fs not mounted even mount return 0"
+> > >  			return 1
+> > >  		fi
+> > >  	else
+> > >  		if [ "${mounted}" = "pass" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expect mount to succeed, but it failed"
+> > >  			return 1
+> > >  		fi
+> > >  		is_dev_mounted
+> > >  		if [ $? -eq 0 ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: fs is mounted even mount return non-zero"
+> > >  			return 1
+> > >  		fi
+> > > @@ -141,13 +137,13 @@ _do_test()
+> > >  	rc=$?
+> > >  	if [ $rc -eq 0 ];then
+> > >  		if [ "$found" != "true" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
+> > >  			return 1
+> > >  		fi
+> > >  	else
+> > >  		if [ "$found" != "false" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
+> > >  			return 1
+> > >  		fi
+> > > @@ -253,9 +249,9 @@ do_test "-o logbsize=512k" fail
+> > >  # Test logdev
+> > >  do_mkfs
+> > >  do_test "" pass "logdev" "false"
+> > > -do_test "-o logdev=$LOOP_SPARE_DEV" fail
+> > > -do_mkfs -l logdev=$LOOP_SPARE_DEV
+> > > -do_test "-o logdev=$LOOP_SPARE_DEV" pass "logdev=$LOOP_SPARE_DEV" "true"
+> > > +do_test "-o logdev=$loop_spare_dev" fail
+> > > +do_mkfs -l logdev=$loop_spare_dev
+> > > +do_test "-o logdev=$loop_spare_dev" pass "logdev=$loop_spare_dev" "true"
+> > >  do_test "" fail
+> > >  
+> > >  # Test noalign
+> > > diff --git a/tests/xfs/521 b/tests/xfs/521
+> > > index 13982c440..c92c621a2 100755
+> > > --- a/tests/xfs/521
+> > > +++ b/tests/xfs/521
+> > > @@ -21,7 +21,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_scratch_unmount >> $seqres.full 2>&1
+> > > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
+> > > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
+> > >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
+> > >  }
+> > >  
+> > > @@ -35,7 +35,7 @@ _require_no_large_scratch_dev
+> > >  
+> > >  echo "Create fake rt volume"
+> > >  truncate -s 400m $TEST_DIR/$seq.rtvol
+> > > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > >  
+> > >  echo "Format and mount 100m rt volume"
+> > >  export USE_EXTERNAL=yes
+> > > @@ -69,6 +69,10 @@ cp -p $testdir/original $testdir/copy3
+> > >  echo "Check filesystem"
+> > >  _check_scratch_fs
+> > >  
+> > > +_scratch_unmount
+> > > +_destroy_loop_device $rt_loop_dev
+> > > +unset rt_loop_dev
+> > > +
+> > >  # success, all done
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/528 b/tests/xfs/528
+> > > index 6ca9a2370..a1efbbd27 100755
+> > > --- a/tests/xfs/528
+> > > +++ b/tests/xfs/528
+> > > @@ -15,7 +15,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_scratch_unmount >> $seqres.full 2>&1
+> > > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
+> > > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
+> > >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
+> > >  }
+> > >  
+> > > @@ -155,11 +155,11 @@ test_ops() {
+> > >  
+> > >  echo "Create fake rt volume"
+> > >  $XFS_IO_PROG -f -c "truncate 400m" $TEST_DIR/$seq.rtvol
+> > > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > >  
+> > >  echo "Make sure synth rt volume works"
+> > >  export USE_EXTERNAL=yes
+> > > -export SCRATCH_RTDEV=$rtdev
+> > > +export SCRATCH_RTDEV=$rt_loop_dev
+> > >  _scratch_mkfs > $seqres.full
+> > >  _try_scratch_mount || \
+> > >  	_notrun "Could not mount with synthetic rt volume"
+> > > @@ -170,6 +170,10 @@ test_ops 262144
+> > >  # not a power of two
+> > >  test_ops 327680
+> > >  
+> > > +_scratch_unmount
+> > > +_destroy_loop_device $rt_loop_dev
+> > > +unset rt_loop_dev
+> > > +
+> > >  # success, all done
+> > >  status=0
+> > >  exit
+> > > diff --git a/tests/xfs/530 b/tests/xfs/530
+> > > index 8a182bd6a..d0d0e2665 100755
+> > > --- a/tests/xfs/530
+> > > +++ b/tests/xfs/530
+> > > @@ -15,7 +15,7 @@ _cleanup()
+> > >  {
+> > >  	cd /
+> > >  	_scratch_unmount >> $seqres.full 2>&1
+> > > -	test -e "$rtdev" && losetup -d $rtdev >> $seqres.full 2>&1
+> > > +	[ -n "$rt_loop_dev" ] && _destroy_loop_device $rt_loop_dev
+> > >  	rm -f $tmp.* $TEST_DIR/$seq.rtvol
+> > >  }
+> > >  
+> > > @@ -52,12 +52,12 @@ fi
+> > >  
+> > >  rtdevsz=$((nr_bits * rtextsz))
+> > >  truncate -s $rtdevsz $TEST_DIR/$seq.rtvol
+> > > -rtdev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > > +rt_loop_dev=$(_create_loop_device $TEST_DIR/$seq.rtvol)
+> > >  
+> > >  echo "Format and mount rt volume"
+> > >  
+> > >  export USE_EXTERNAL=yes
+> > > -export SCRATCH_RTDEV=$rtdev
+> > > +export SCRATCH_RTDEV=$rt_loop_dev
+> > >  _scratch_mkfs -d size=$((1024 * 1024 * 1024)) \
+> > >  	      -r size=${rtextsz},extsize=${rtextsz} >> $seqres.full
+> > >  _try_scratch_mount || _notrun "Couldn't mount fs with synthetic rt volume"
+> > > @@ -116,8 +116,9 @@ done
+> > >  echo "Check filesystem"
+> > >  _check_scratch_fs
+> > >  
+> > > -losetup -d $rtdev
+> > > -rm -f $TEST_DIR/$seq.rtvol
+> > > +_scratch_unmount
+> > > +_destroy_loop_device $rt_loop_dev
+> > > +unset rt_loop_dev
+> > >  
+> > >  # success, all done
+> > >  status=0
+> > > diff --git a/tests/xfs/606 b/tests/xfs/606
+> > > index f958bddd8..b537ea145 100755
+> > > --- a/tests/xfs/606
+> > > +++ b/tests/xfs/606
+> > > @@ -13,10 +13,8 @@ _begin_fstest auto quick growfs
+> > >  
+> > >  _cleanup()
+> > >  {
+> > > -	local dev
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > -	dev=$(losetup -j testfile | cut -d: -f1)
+> > > -	losetup -d $dev 2>/dev/null
+> > > +	[ -n "$loop_dev" ] && _destroy_loop_device $loop_dev
+> > >  	rm -rf $LOOP_IMG $LOOP_MNT
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > > @@ -40,7 +38,9 @@ $MKFS_XFS_PROG -f $LOOP_IMG >$seqres.full
+> > >  # Extend by just 8K, expected to start with the last full-size AG ends of
+> > >  # above 1G block device.
+> > >  $XFS_IO_PROG -f -c "truncate 1073750016" $LOOP_IMG
+> > > -_mount -oloop $LOOP_IMG $LOOP_MNT
+> > > +
+> > > +loop_dev=$(_create_loop_device $LOOP_IMG)
+> > > +_mount $loop_dev $LOOP_MNT
+> > >  # A known bug shows "XFS_IOC_FSGROWFSDATA xfsctl failed: No space left on
+> > >  # device" at here, refer to _fixed_by_kernel_commit above
+> > >  $XFS_GROWFS_PROG $LOOP_MNT >$seqres.full
+> > > @@ -48,6 +48,10 @@ if [ $? -ne 0 ];then
+> > >  	echo "xfs_growfs fails!"
+> > >  fi
+> > >  
+> > > +_unmount $LOOP_MNT
+> > > +_destroy_loop_device $loop_dev
+> > > +unset loop_dev
+> > > +
+> > >  echo "Silence is golden"
+> > >  # success, all done
+> > >  status=0
+> > > diff --git a/tests/xfs/613 b/tests/xfs/613
+> > > index 6ba3d87bf..b87cae91e 100755
+> > > --- a/tests/xfs/613
+> > > +++ b/tests/xfs/613
+> > > @@ -15,14 +15,8 @@ _cleanup()
+> > >  	cd /
+> > >  	rm -f $tmp.*
+> > >  	_unmount $LOOP_MNT 2>/dev/null
+> > > -	if [ -n "$LOOP_DEV" ];then
+> > > -		_destroy_loop_device $LOOP_DEV 2>/dev/null
+> > > -	fi
+> > > -	if [ -n "$LOOP_SPARE_DEV" ];then
+> > > -		_destroy_loop_device $LOOP_SPARE_DEV 2>/dev/null
+> > > -	fi
+> > > +	[ -n $loop_dev ] &&_destroy_loop_device $loop_dev
+> > >  	rm -f $LOOP_IMG
+> > > -	rm -f $LOOP_SPARE_IMG
+> > >  	rmdir $LOOP_MNT
+> > >  }
+> > >  
+> > > @@ -38,16 +32,11 @@ _require_loop
+> > >  _require_xfs_io_command "falloc"
+> > >  
+> > >  LOOP_IMG=$TEST_DIR/$seq.dev
+> > > -LOOP_SPARE_IMG=$TEST_DIR/$seq.logdev
+> > >  LOOP_MNT=$TEST_DIR/$seq.mnt
+> > >  
+> > >  echo "** create loop device"
+> > >  $XFS_IO_PROG -f -c "truncate 32g" $LOOP_IMG
+> > > -LOOP_DEV=`_create_loop_device $LOOP_IMG`
+> > > -
+> > > -echo "** create loop log device"
+> > > -$XFS_IO_PROG -f -c "truncate 1g" $LOOP_SPARE_IMG
+> > > -LOOP_SPARE_DEV=`_create_loop_device $LOOP_SPARE_IMG`
+> > > +loop_dev=`_create_loop_device $LOOP_IMG`
+> > >  
+> > >  echo "** create loop mount point"
+> > >  rmdir $LOOP_MNT 2>/dev/null
+> > > @@ -56,8 +45,7 @@ mkdir -p $LOOP_MNT || _fail "cannot create loopback mount point"
+> > >  filter_loop()
+> > >  {
+> > >  	sed -e "s,\B$LOOP_MNT,LOOP_MNT,g" \
+> > > -	    -e "s,\B$LOOP_DEV,LOOP_DEV,g" \
+> > > -	    -e "s,\B$LOOP_SPARE_DEV,LOOP_SPARE_DEV,g"
+> > > +	    -e "s,\B$loop_dev,LOOP_DEV,g"
+> > >  }
+> > >  
+> > >  filter_xfs_opt()
+> > > @@ -70,22 +58,22 @@ MKFS_OPTIONS=""
+> > >  do_mkfs()
+> > >  {
+> > >  	echo "FORMAT: $@" | filter_loop | tee -a $seqres.full
+> > > -	$MKFS_XFS_PROG -f $* $LOOP_DEV | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
+> > > +	$MKFS_XFS_PROG -f $* $loop_dev | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
+> > >  	if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+> > > -		_fail "Fails on _mkfs_dev $* $LOOP_DEV"
+> > > +		_fail "Fails on _mkfs_dev $* $loop_dev"
+> > >  	fi
+> > >  	. $tmp.mkfs
+> > >  }
+> > >  
+> > >  is_dev_mounted()
+> > >  {
+> > > -	findmnt --source $LOOP_DEV >/dev/null
+> > > +	findmnt --source $loop_dev >/dev/null
+> > >  	return $?
+> > >  }
+> > >  
+> > >  get_mount_info()
+> > >  {
+> > > -	findmnt --source $LOOP_DEV -o OPTIONS -n
+> > > +	findmnt --source $loop_dev -o OPTIONS -n
+> > >  }
+> > >  
+> > >  force_unmount()
+> > > @@ -104,29 +92,29 @@ _do_test()
+> > >  	local info
+> > >  
+> > >  	# mount test
+> > > -	_mount $LOOP_DEV $LOOP_MNT $opts 2>>$seqres.full
+> > > +	_mount $loop_dev $LOOP_MNT $opts 2>>$seqres.full
+> > >  	rc=$?
+> > >  	if [ $rc -eq 0 ];then
+> > >  		if [ "${mounted}" = "fail" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expect mount to fail, but it succeeded"
+> > >  			return 1
+> > >  		fi
+> > >  		is_dev_mounted
+> > >  		if [ $? -ne 0 ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: fs not mounted even mount return 0"
+> > >  			return 1
+> > >  		fi
+> > >  	else
+> > >  		if [ "${mounted}" = "pass" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expect mount to succeed, but it failed"
+> > >  			return 1
+> > >  		fi
+> > >  		is_dev_mounted
+> > >  		if [ $? -eq 0 ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: fs is mounted even mount return non-zero"
+> > >  			return 1
+> > >  		fi
+> > > @@ -142,13 +130,13 @@ _do_test()
+> > >  	rc=$?
+> > >  	if [ $rc -eq 0 ];then
+> > >  		if [ "$found" != "true" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: expected to find \"$key\" in mount info \"$info\""
+> > >  			return 1
+> > >  		fi
+> > >  	else
+> > >  		if [ "$found" != "false" ];then
+> > > -			echo "[FAILED]: mount $LOOP_DEV $LOOP_MNT $opts"
+> > > +			echo "[FAILED]: mount $loop_dev $LOOP_MNT $opts"
+> > >  			echo "ERROR: did not expect to find \"$key\" in \"$info\""
+> > >  			return 1
+> > >  		fi
+> > > diff --git a/tests/xfs/613.out b/tests/xfs/613.out
+> > > index 1624617ee..2a693c53c 100644
+> > > --- a/tests/xfs/613.out
+> > > +++ b/tests/xfs/613.out
+> > > @@ -1,6 +1,5 @@
+> > >  QA output created by 613
+> > >  ** create loop device
+> > > -** create loop log device
+> > >  ** create loop mount point
+> > >  ** start xfs mount testing ...
+> > >  FORMAT: -m crc=0
+> > > -- 
+> > > 2.45.2
+> > > 
+> > > 
 
