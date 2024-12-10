@@ -1,46 +1,55 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 825391B6D08
-	for <fstests@vger.kernel.org>; Tue, 10 Dec 2024 13:00:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 137B878F44
+	for <fstests@vger.kernel.org>; Tue, 10 Dec 2024 13:13:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733835655; cv=none; b=OJdaGMyFdPZcUAX+0qqsXO8SMJ2DQgM2/g6wK4kjkW6qhZYSZp4unuv7CwubmfOCAyoWr12XkDtNnLCwjqsPRgcd+uzsLyBVhgtqQyvO1FCViUbpFH04vj//iqsARM7N5DhBZK0G07H5ZZooJgUWglvbMydfCqnkxGesisiqjnQ=
+	t=1733836412; cv=none; b=Yki/Dsw/RjqshmCU5hgZsqLXJb6dCNRYfhMlR8sT9ZRVcT9APPO+axb6eWxX+8WhofILRW833IgWIqEdv4dvkc6X49iso4XhPGeScFyLSVQ61LHMeb+mtODqnD6wWnS1Y+zzB3+GDADmxoc3OqQ4JycrfHFk/DiWF8ufPzAjhJg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733835655; c=relaxed/simple;
-	bh=uBUbcgnLax/TXHUTyY7I7MvxNn4KyXa755W8StzgjS0=;
+	s=arc-20240116; t=1733836412; c=relaxed/simple;
+	bh=eNudwZIOhp5UTkp15VtjWBMJ32YbnaqZEMTYObFNEpo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=erCYeQncJc0XfJ05UBRUAvOOzSa5RPo3oQG0jkc1/v1SjSPcXoj+gBjsfEoAVuA+RuLTWf1QCa/Q08JORq8ae2qxZG74+Ccg4lvnTKynLum3rHEjC8fjXeNR5qYEuf5fNMw2ySvsWf3tqzoIy4pKstYRMYQMwcpbeCUMLYGseQw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=GqmFIYnt; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	 Content-Type:Content-Disposition:In-Reply-To; b=PSwn83JkBiRFT4Ivsvjry9yTioOHwGivTmzmDB7cCnX6SwRrtRJVd05AaQHKM/OOKBX9yDFfMWWqxmxPYsfw0UGS0Y626IOwr/kPyIbQevqluoPXoi1d2VJUZ5IuR5iqfJAcoRyqo/ZggjlJm6kdDBmbs3m3xKbnrrfS5+HLKZk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MjQpTGYa; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="GqmFIYnt"
-Received: from cwcc.thunk.org (pool-173-48-102-3.bstnma.fios.verizon.net [173.48.102.3])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 4BAD0XSM027840
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 10 Dec 2024 08:00:34 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1733835635; bh=DHUmL1lsFJiVd97upOLWdbOsV6YNVAKHpoQhEyaESdg=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=GqmFIYnteg1gx7XCN28TwEIsKVKkfnGq1G0uRE1rTjL2jXMnbgjd+XA7FGDX7iPHj
-	 omGF7hJpjgvNYOw9QxIO1JlzYynCTvrnXi0zVIBXeN6mFCbhxNyBPzdi1O2gW+iyhG
-	 27QSMNk6qTQi8FXz/wRHp9DKYSR1tPeK8uZUwKbR13E2pvBenVi+gt8j4GrCWBxkmc
-	 ar8e8G2/NVl0buRy2dCaZbj9Il/9iXqhCnUPcnq1fQaAQZjBIVC4yASJw0Qhcd3D7j
-	 RNCCUDTV9dkJMdlB7nzh88gNRqBXB4RafnZmOt56Df9WJWsYckS/QhwYSV08k2pM4M
-	 8S7aERKmQ8d3g==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 2AEC515C6796; Tue, 10 Dec 2024 08:00:33 -0500 (EST)
-Date: Tue, 10 Dec 2024 08:00:33 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MjQpTGYa"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1733836409;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WD/Ab3dOG4KyeeZcYiAMWWJNGYnEmp5W/qh/uoSkm1E=;
+	b=MjQpTGYapKPjOOX2feQ0YMzqmiMo7P+iJ0CNDuIAabZW7gpv/Tm0sO+m86BMeeVlLW5Ux+
+	1+q9xTSKqyWgX4RdK2evqYSAehVkpVH5ZuusVXQTMXC9QadAKzu6NJD29OqgbBrgZCXdqb
+	UmwjtIl6NLHtG+uRuwZmprSfxxMEDRQ=
+Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-344-qvToNrIjPBOM8KeZ9kk-hg-1; Tue,
+ 10 Dec 2024 08:13:26 -0500
+X-MC-Unique: qvToNrIjPBOM8KeZ9kk-hg-1
+X-Mimecast-MFC-AGG-ID: qvToNrIjPBOM8KeZ9kk-hg
+Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 20319195608A;
+	Tue, 10 Dec 2024 13:13:25 +0000 (UTC)
+Received: from bfoster (unknown [10.22.90.12])
+	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2B32F195605A;
+	Tue, 10 Dec 2024 13:13:23 +0000 (UTC)
+Date: Tue, 10 Dec 2024 08:15:10 -0500
+From: Brian Foster <bfoster@redhat.com>
 To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Brian Foster <bfoster@redhat.com>,
-        fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: remove _supported_fs
-Message-ID: <20241210130033.GA1839653@mit.edu>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 1/4] generic/363: remove _supported_fs xfs
+Message-ID: <Z1g-3jUKnObTqjWj@bfoster>
 References: <20241210065900.1235379-1-hch@lst.de>
+ <20241210065900.1235379-2-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,36 +58,45 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241210065900.1235379-1-hch@lst.de>
+In-Reply-To: <20241210065900.1235379-2-hch@lst.de>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
-On Tue, Dec 10, 2024 at 07:58:24AM +0100, Christoph Hellwig wrote:
-> this series removes the remaining _supported_fs calls and replaces them
-> with a new _exclude_fs call.
+On Tue, Dec 10, 2024 at 07:58:25AM +0100, Christoph Hellwig wrote:
+> Run this test for all file systems.  Just because they are broken doesn't
+> mean that zeroing should not be tested.
 > 
-> The first patch removes a _supported_fs for a relatively new test from
-> Brian that fails on other file systems.  We should still run it so that
-> people have a chance to fix the corruption, so I think this make sense.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/363 | 3 ---
+>  1 file changed, 3 deletions(-)
 > 
-> Then the ext4 directory is split so that the shared extN tests have their
-> own directory, and then it finally does the switch over now that now many
-> _supported_fs calls are left.
+> diff --git a/tests/generic/363 b/tests/generic/363
+> index 477c111ccb60..74226a458427 100755
+> --- a/tests/generic/363
+> +++ b/tests/generic/363
+> @@ -13,9 +13,6 @@ _begin_fstest rw auto
+>  
+>  _require_test
+>  
+> -# currently only xfs performs enough zeroing to satisfy fsx
+> -_supported_fs xfs
+> -
 
-Hmm, instead of doing this (would require hard-coding support for ext2
-and ext3 file systems needing to use ext-common), why not just have
-special-case code which causes ext2 and ext3 file systems to include
-the ext4 group, and then we'll have _exclude_fs declaractions as
-needed for ext2 and ext3?
+IIRC pretty much every fs except for xfs failed this test when I wrote
+it, so I didn't want to drop it on folks until I had a chance to look
+into it. I had pending ext4 fixes which appear to have now been merged,
+so on a quick test of -rc2 this now passes on ext4.
 
-After all, ext3 has been removed except for the very oldest LTS
-kernels (and I dount anyone is actually testing ext3 using xfstests
-these days), and ext2 is not used by most distributions (they use
-CONFIG_EXT4_USE_EXT2) and the reason why we've kept it around is that
-it's a realtively simple file system that still uses the more modern,
-non-legacy vfs/mm interfaces.
+I haven't got to the others, but if it's particularly disruptive for
+anybody I suppose it could still be excluded easy enough:
 
-So it might not be worth it to move a bunch of tests and creating a
-new (somewhat ugly) group, ext4-common, IMO.
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-Cheers,
+>  # on failure, replace -q with -d to see post-eof writes in the dump output
+>  run_fsx "-q -S 0 -e 1 -N 100000"
+>  
+> -- 
+> 2.45.2
+> 
+> 
 
-						- Ted
