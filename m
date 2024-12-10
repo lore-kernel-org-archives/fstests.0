@@ -1,218 +1,163 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E93A414E2CC;
-	Mon,  9 Dec 2024 19:35:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733772927; cv=fail; b=rX6/iRBwM26ltHoAsHFxAFbVSOhNALRYfK3ISb3pbwmnWuWaSF18gxGMB2Km+Q2Q6FBsVp4OcsYE7B60jLoUaeCvM9XXn4ixpxDovvTkJNYbKKNcuDfdCYyVpStAfXvQ55FLKZAiYTDkXbHPatfw7qJ7q9QT962VFdXZl58HmO0=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733772927; c=relaxed/simple;
-	bh=bKHzTCnxNDo0QuUWQWVXjs4Wnh9wHqkmLRwY3Ny/0UU=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=kCLQgGrPEhCESdHh4HPZpwVBIfvn+niKPMuNnkt3YHrnH1cJoApW3o789tVzo08xIpnJVR7fJmpEIXQBJoMkkQbBVOKOjqpEOsjLmTdHQqE1qebsh6ac0FXpieyfCAddgfsj25dj3yTPbZn96SExT/soKiUbycEEN+sx3XH6CRE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=m9Sg3prO; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=vc0A98u9; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE5D822612
+	for <fstests@vger.kernel.org>; Tue, 10 Dec 2024 00:55:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1733792131; cv=none; b=IZyR0L242YRrLDh1mseAp/tD3lQz0EAm1UZVBOMvB9q5bA+gwwrQaNHGuAPMheS2M9im+AfMVwPA1GyeH7vkHJM/HFcizBUFdHoFYw0ffukAMQeExc/3Q0KiNwU9eYzzybOZZuPu+X/5MQJy6qd2zR7ViuaitPLxCuSsgPt/wpY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1733792131; c=relaxed/simple;
+	bh=cJBo/GFpwBb+Pyb2eYFgDOOtRbG6prdhQkpj8fpfU64=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TLu9wJwXQd5aA1zW+E1ihXFZgO1vA+o8geQL/2rWP61b+TOXHe7mxCjCVq+P6ZQk5eTfsjLmPeTdlySxenUJiRNpkoj5eIHPwAuaYQ4liWn6FudjrIIV2i+rfmFWdTaUOjW4EJYfrQMoWTXXbYVphkVSyFMSJ/7PH/RS6TqcCik=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=ldk7F3y6; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="m9Sg3prO";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="vc0A98u9"
-Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B9IBnAs027062;
-	Mon, 9 Dec 2024 19:35:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=d8TU2IsecQ1SI18Jff2BMZzItIWLLxBK+P8Gq+1Fno8=; b=
-	m9Sg3prO2qd0530FJ4XCrTeOzWjHTmiUTGVsPQsvR2gLil7s7ENwWW0EhFTj/ei2
-	E4uVazJ2WA6WNjp+7UCMoGrOpTcklvomJfygExTRUjwSwv7Ho7rLE/ZHMe6Lzw1m
-	zwN24iCPrPPgkFd4fmezA2ntaf2GongrKruBBIvHmyc/kSwbCEMO/cxFkNpK+AEQ
-	ulpnf5+84Di9aYwUAdCKZEHg/gcKUzl+gzGpBs7Fbz1qv7wqi/D3TXg4jzUOhnLL
-	rEwS5nqbE8vvYyAMlFXVeAqPxtXJbdrGJrbme3EzH5+q0Ny5BY4vVUpDb5GpFA2g
-	Q2uMWuAaelxYXA/S4tXu8w==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 43ccy04455-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 09 Dec 2024 19:35:18 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 4B9JQ0Vu020583;
-	Mon, 9 Dec 2024 19:35:17 GMT
-Received: from nam04-mw2-obe.outbound.protection.outlook.com (mail-mw2nam04lp2170.outbound.protection.outlook.com [104.47.73.170])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 43cct7be17-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 09 Dec 2024 19:35:17 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=QESeI7D8Ryrt7TtaO6CAka5MU7yiG+x9zkEljgBejemhrbGazua4N1BhuDPdyu9bFKbCy+a6ipwslKGL3akAsQTTuWsshEE0xV6u7TMQT7GXE9aAUsLj06coizLNMm4fgNbWT1HYTHjV4o5UQGM63E9enSPS0FOR+Ih41sMncfnHm4/74G04IYlKoLmW/MddkG7DH0cAyCOLulN6GxEzfg14k1xil0YGdvIUpIxyIORK9zEpHhY82YBFdEUrTGu5HVWXpA3LOdENPFm0iajGpNptufQxnf4lFLfcDktBuhJpOM/y/4CQL7koai749G8EB25oMErYGW1QKZPHLel51A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=d8TU2IsecQ1SI18Jff2BMZzItIWLLxBK+P8Gq+1Fno8=;
- b=j4tGIt1kgzDQkxMyVg2ARCFwtJMsfeB1e36/207rtK7oS4xEClMBaf2WfuIoomsSqQ3lNOlmCCrCYxmrfB51rDdUQldCuRKcoHAfeVPXNaz9UTvbc+9HHbtipaaxa/Eq3iAdm3VaJzUHNFjccpZ+y0oFcQtTU4fkDI6Zbi+l3k/RlZDuyQddOconZRgSr8590kH4N3PAQd85VrKQAilzQvhSoNRTrv7x/afoq1WYkrjt/r7xsXyJDYh85WzBPt34nA1jsGGylPLOTFTYsr2QrFjnhGn3yVRlFmgpjGyZtY5ysvtjXNlf1DLcOIy2C5mmcCjJp7Txiion/WrwRzZacQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="ldk7F3y6"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-216634dd574so7810385ad.2
+        for <fstests@vger.kernel.org>; Mon, 09 Dec 2024 16:55:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=d8TU2IsecQ1SI18Jff2BMZzItIWLLxBK+P8Gq+1Fno8=;
- b=vc0A98u9AFVK7PHVDNfdUIZ2+ObtQiJS5h5ZmmQCwFp3V6wQhjd2Gps14OPf8Hz3bJ7ShhdSAl2n6A16hxPuBqint9SXH73qI+rU5UpLAKYE5NjrjxnGkc+V6FztQWGWa5JmkJyhg8pAcDKKan+txUPKA8E/qm1BMT/nlidL3cI=
-Received: from BN0PR10MB5128.namprd10.prod.outlook.com (2603:10b6:408:117::24)
- by MW5PR10MB5761.namprd10.prod.outlook.com (2603:10b6:303:19a::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8230.11; Mon, 9 Dec
- 2024 19:35:09 +0000
-Received: from BN0PR10MB5128.namprd10.prod.outlook.com
- ([fe80::743a:3154:40da:cf90]) by BN0PR10MB5128.namprd10.prod.outlook.com
- ([fe80::743a:3154:40da:cf90%7]) with mapi id 15.20.8230.016; Mon, 9 Dec 2024
- 19:35:08 +0000
-Message-ID: <abc5b280-7d18-4438-851f-e333dd3e8361@oracle.com>
-Date: Mon, 9 Dec 2024 14:35:07 -0500
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: disable generic duperemove tests for NFS and
- others
-To: Christoph Hellwig <hch@infradead.org>
-Cc: cel@kernel.org, Zorro Lang <zlang@redhat.com>,
-        linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
-References: <20241208180718.930987-1-cel@kernel.org>
- <Z1b1d3AXTxNhunYj@infradead.org>
- <6dc5c09f-e1a2-4296-93d7-b2cda471a73f@oracle.com>
- <Z1cHpXAS0S8R6_g4@infradead.org>
-Content-Language: en-US
-From: Chuck Lever <chuck.lever@oracle.com>
-In-Reply-To: <Z1cHpXAS0S8R6_g4@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: CH0PR03CA0255.namprd03.prod.outlook.com
- (2603:10b6:610:e5::20) To BN0PR10MB5128.namprd10.prod.outlook.com
- (2603:10b6:408:117::24)
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1733792129; x=1734396929; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=Awfl4bC2xy2M/1Ke4i9mI0+EXuYTlUTybWGykmiKDwY=;
+        b=ldk7F3y6jVs/BukMi/jzZvl2VFVJARz9MQ/bszvOmxj+j/bszKOAOMa6s2Z6HVtJm0
+         IaJMOVYZf1pX8HgVfrXuwKSIa+Q8xouTtX+yXfw5eNaEw4gnfBgckVDafgRV11MHvyZg
+         keIngk14r7ITnlScJa/BG3eJ5Sy9mtuUe4ynXVJB8ujxh813jUe66Rt+rkkMVdsqJDQ2
+         mg8wkJ9mXL6aOmGG5ezPYU0Uovj/fF098Ld+13dBisQQCnJxy5e2/HPSHfT9HxieVC6Q
+         qR32OAX/tYKgP4N4eLuAt2mo6EDbFWcyFQV0rRYTJfhFil/94b9jrnrfoPBVYcEZRDfR
+         EXAg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733792129; x=1734396929;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Awfl4bC2xy2M/1Ke4i9mI0+EXuYTlUTybWGykmiKDwY=;
+        b=WODH8m3pivDpEFt7JlF3EbhkHB8cmfWJPbyJuOWnV2r/wVleO0KOHUM7tHSZwq6sdo
+         g1kN0QfpLGXo1dYtMPh9C334x8lE/bYEM2areW9UCO4YujNg3dLJ5x2XygaVIN2gJTTm
+         kTSKuH+eL8yr31x9oTCQAnVL9S0x8SuRJvdhbOeZWNIJebj8cIBiTyihJRpmiHnbCKTr
+         GYohBcpeSbQkf/Z1BC2z7MH1tqmdaPkYatubTYxVB2BarHPnMR+tHL8/GLdEHsGPQMT8
+         amHo8NuDgtOrSG7kvZU2NXkQ97BvP7r+geUJpSWAP8JZlaGojnfaqywqcZe0VxLW14V1
+         9hnQ==
+X-Forwarded-Encrypted: i=1; AJvYcCU7Od/EFgbgiOsrb0tYxhtPg1TXgCReB44tY06fp7U59GAnYyCbV3MVK2fHLxmedhEOv4vPDrDl@vger.kernel.org
+X-Gm-Message-State: AOJu0YzW/DnORFnmgSP5eexNn6d6DRKVjfU3LNwkj/omk3zLJG3nWK9P
+	f9/eEiEBQPuPBk9OOhA+LRPvepHDs+6473NpqafsX2Ular8GBOP3AJyOD3slQtQ=
+X-Gm-Gg: ASbGncvvYpdFqxVU//x5vCROPZ2N45xJnwyCAizVsI7EhRTJPqcdCht7clUpkf9RLzL
+	yVjUymJyMHuIV+hoTtoSSAueG98eLRw/BpinVZm2PP1c/EPp7jlgDC7FwtkB1BWXF17BWEpriGM
+	G/nUoe4p4MKyIVpTrsPRWodsmTnl4v6oE2YxxwmvHGtjGmQUfsPJsh9dLlApIyZLCokN7zl7B/P
+	eiVL3bhZlxXHhOhkSLOzR1dCzBj90C/0/BdW1d+veGMRvDzZJ01qFErD98yrs2+MoocTMt0FLTx
+	N/BtzGHY5g5AxfykvR/8cbbqftk=
+X-Google-Smtp-Source: AGHT+IGqnljlmWkCwyeuT5IRVnvY1dyzpvO9FeJb3CeODJslSbPfz2qD3NIIQBBce0MIrogdYAxA1w==
+X-Received: by 2002:a17:902:d48b:b0:215:97a3:5ec5 with SMTP id d9443c01a7336-21669fc2252mr46853565ad.22.1733792129135;
+        Mon, 09 Dec 2024 16:55:29 -0800 (PST)
+Received: from dread.disaster.area (pa49-195-9-235.pa.nsw.optusnet.com.au. [49.195.9.235])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-216316d8086sm43178745ad.223.2024.12.09.16.55.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 09 Dec 2024 16:55:28 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tKoX7-00000008mmk-3Dr8;
+	Tue, 10 Dec 2024 11:55:25 +1100
+Date: Tue, 10 Dec 2024 11:55:25 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [RFC PATCH 00/40] fstests: concurrent test execution
+Message-ID: <Z1eRfYIBuZETB8rI@dread.disaster.area>
+References: <20241127045403.3665299-1-david@fromorbit.com>
+ <20241129042216.u2f2sl5pc553gxqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241207000917.GA7824@frogsfrogsfrogs>
+ <Z1TiAdDQSrebz3Y8@dread.disaster.area>
+ <20241208061520.nfdwfajwyyw2xfdi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BN0PR10MB5128:EE_|MW5PR10MB5761:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9b01671b-02a2-4c50-21c8-08dd18889733
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|376014|366016;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?bDZxQ3JsbVJQMFdWQUFNQnpCaDd3SWxLVlpqTG8wd3BtMEh3ak1hWlUxdEd2?=
- =?utf-8?B?TWZkSEoxcWtRN2kyRzU2K2VhWm5NRm9ucmdMYmtwNktQaTMyTzQ5aUlaMkNs?=
- =?utf-8?B?eGhRQjgrN2NKcE41MjhBeitGOGNnenZHVW1uTjQ1Z2ZqcjlxaHQ1TThlM1I4?=
- =?utf-8?B?dElMaCtic251c2x6dERGa0ljbXRwQUh5V2tadmNlbENDaTA0UE1KUFpBN3Zo?=
- =?utf-8?B?NUthZEpIRm9sQW9TNTcyZ0JIelNFZVUwTkdyVjdDQ2RkcFprV0Fqdkt6ZzN4?=
- =?utf-8?B?ZVRkN2ZQUUhhTnpieWFVdFVRb3VpZ0FIM0hYS0NoUEtrczVEZkdld2pNQkNs?=
- =?utf-8?B?QytLWUdvUjJKbERPOVdORFgzQ2hzQW13YTFDbkVlSGxrdGJqRklHN2VxRTk1?=
- =?utf-8?B?dW82OVR1OC8vb1hVN1J2WDllUFdLeHczNUdHWkJOU2k2V2ltOWR6cmFrUisz?=
- =?utf-8?B?Z2FPUlJkQkh0VEduZnJIQ0RIT0NxdGNOMk5lWjRtM3JxS053WVRDNThFWUY3?=
- =?utf-8?B?SlNJeXFKMTdGNzJrOWlVVXpMeGdoRVlmSExYcXZSSmRXYXROMVB1K1k5MkdM?=
- =?utf-8?B?aTdnNWUydjFCNHZXL2o0WnBvOUUvU2tFdno0RS9sd0l6Q3BqWDVwZzJwV01S?=
- =?utf-8?B?WlhFVVRGRjZ0TDk4VmtPbTB3ekZzbHhPWDk3Y2xxdjl2eGwwdWt6WWtOSDFL?=
- =?utf-8?B?RUdweGhWMXF2WHZCbUNTZ2J5T09Sc2JVM3dmc3RhcHM3M1VEVTZybmFYNTNL?=
- =?utf-8?B?ZzRxMy82bHJ5K0xGZlB5WEhRRG1ZZWhFejJtRDFuYXEwZHVaN0R5cmNybWpn?=
- =?utf-8?B?UlRYKzNWcDZlRHFONUJDZEpjWDNjTERsQVBnc3liOWtWaW8yWko3OWtRU3Fk?=
- =?utf-8?B?dXF4U28yR1JHcDlNdXhNcUcvZlNaNXZFa2M2WDZJOEZaVHd5YnZJVTBOT1Vl?=
- =?utf-8?B?ajd0SW9OVkdabEcxNXhrWHZaMEh6TUVULzQwaldvQWE2YWM1RWx6WW81OFlJ?=
- =?utf-8?B?Vi90aXpXK0dhNmx5ZVFYMmhhd2NNRGJLcTZkNU55aTJRYStJUCt1aXdab3Jq?=
- =?utf-8?B?QTlrSXNNaS9Md0RFdmxmWWNWTjdReG13UnoyN05oVTI4MjBRVnRpaGVoR0J2?=
- =?utf-8?B?dDZabVBaUXdUM2FoYkVENHJMYi9TN3hOY3JXYjU1anpnL3JUNTJmTmdnSmVx?=
- =?utf-8?B?NUppZUZBdWtMWlJTOFdQdGNqMXpWVWpUWG5YMzdsN04wVW53d1ZhNmJ0OVhU?=
- =?utf-8?B?RHR0OHIrMkNDeEI4dSsxNW5wdnBzTVpuWnFFNnUwWU9KelRCcjB1MmphT0NJ?=
- =?utf-8?B?aFhjaUpvRjZZTmVPNmZDVnF5T0ZZUFhReURXc1VQVWxnWHFZeS8xWnpMSi8x?=
- =?utf-8?B?WUo3eWR2THkxUnBPQ040TnVudklMUXBhV2Q1cWVQN0pnUExKZW1aVlB4NnJR?=
- =?utf-8?B?MUNZT1k2OEU0cUtoUG1GTWIzTXVDMjJ6VE9nUWVwc1ZCTk56RWlBRE1rUUxp?=
- =?utf-8?B?OTM3OXZrbVJPQytCeXFpc3VvdnhrekF0Uks1d0pZK2JmNE05SGx3c1p3Yys2?=
- =?utf-8?B?dXBzODVGYUlMY1lNTFpSamJFdDl6dVBFbUd6eng4VFJHV1IrakNVR2Zsdjcz?=
- =?utf-8?B?RGVkZXZyck9tblZ0L3RKckhSTTZWb0crRW5NTk8rN0dDNHlFSldsTVRoa2RU?=
- =?utf-8?B?aXpiVjdrcjk2R3FkdzRhaVNDSjZLejdZQ0pwT0FndWpid0hJMEFEa3JEd1lE?=
- =?utf-8?B?TVlkc3BGTHJVSi9BOWhBcDZuNzFSblZZZ0ZXWWxtN1lOK2hINE9QY1M2d1cy?=
- =?utf-8?Q?aM6S+BpQc8icMh0cN4w/UUVyB41Etl9K+Tzd4=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN0PR10MB5128.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?eWtrN0Y1Mkc4bkpORjFrenVmSjJzb3RjTWdDTDJ1SEZMRDYvQXJzYm04WUpy?=
- =?utf-8?B?UkgyMWRUelgvTTdFMmo5K1JRV2JzcDdPZFZjK01vUHJ0QW1naW9iLzV6QjRG?=
- =?utf-8?B?Q0Nwako3NGphZGNscUFOQmdxcTZZdzJFOHBVMkhTcGlTRFFJUkhqbzQrTWhw?=
- =?utf-8?B?cWM3QUtLUmtKTUlxM3draG80VnlHUHBqQjkzL0JldnBzU3JaQ2Y2c1dENCt1?=
- =?utf-8?B?NUJMemZUSHV3d0llZzlaeXM3QmQ4dlVPdlE3eTBQZ0tsSUdTY1BZb3R0aUla?=
- =?utf-8?B?RmJjVnhPQ05QSVQ1Zm10cTV3UWFTeDZlM3VGTWh0VlFZZEFkdUZiSVpwZGVB?=
- =?utf-8?B?akQ4aXltTlVkMGQrc3A4YTNpUEhzanlyRWphY2taNVFQTis1ek9NaUI5ZnB0?=
- =?utf-8?B?R3BRVUNhckdNTjkvUHdDelFZSHd1M2JXc3J0VkZUZ1hYbU1hWUlxRmhUQXJH?=
- =?utf-8?B?bXNSUnU1ZGg4d2hiYWVpbmcvb2lkTzAxeDBCaXRhbE9zU2ppZUdSUSttdGRE?=
- =?utf-8?B?cmd1VFBoemFIU2toM1ZHMG1hOTlrdVZ1T0F2RXJmdkRrbnZvUGZNaENGUXQ3?=
- =?utf-8?B?VFg5elVvVFFENjBrL3NDbmliRHJWa3FnL2xyOXdDajEzY0k3ZElxckszNWRt?=
- =?utf-8?B?ZFlvSUdBMTluS3NGUjhmRmxodTZSK3VmTy96aWU1dHpmTHJBZ2h5ZXAwUE40?=
- =?utf-8?B?L1ZTSTZMbVl4VnJ4a2M2cXN4QWlCRDRkbnp6aUdJZWlnTGs2aXVlam9PNlgr?=
- =?utf-8?B?M0hiMkw1RUxGdzVtbU9ReUtpWG5YWVNUNURYa0s2Z3FSeEhKNXkzdGd6Ullp?=
- =?utf-8?B?RmViWEMvOEFhOXRweFhPeUhBT2t1SjlaeG9vZmI1NTBkdG9mZno2K0hUSzkr?=
- =?utf-8?B?Q1dodmVPRG1FQ25LcXZwVGdiaGthWjR5VFp3Nkg3blFvMFE2ZW01bGlBaDda?=
- =?utf-8?B?d3FCVWN4eW5ublduVHFCSEFGdkdKczgzanQvMGtUcXBMVitXRTFMQmIyN2xE?=
- =?utf-8?B?dENpSFpEWWZVRTh3YStqWG1kbGxuRjRYYVlydTMvL3RXd042NDlpTXVvVjZ4?=
- =?utf-8?B?b1JiajJUN0M3Tjc4VlNySjFYek9GV0sxc3ZmUUhVaEhjVXRtVGdmMUVUSGp5?=
- =?utf-8?B?WjlyZFhtdHQyMjFBOU5lS1dtWjRsd0JPamV1UDlsTFJERE1NMFJZb1hYaTk0?=
- =?utf-8?B?b1dWSlhTdTRaUDY0aHN3aENiUWJUdjZma1hDOHZUdDBjSERKUkFpWWlWWHc3?=
- =?utf-8?B?eDMyTmJabEdwdGw2ME9LKytFaE1IZ2lyeThDVElBMVpOTkN6SXhjUW1mQlJw?=
- =?utf-8?B?OWkxNUJtcHFGSm9vbkFCWkdnUE03Sk5PRmJ5eUEwY05keUFPUnAxOHJ6L243?=
- =?utf-8?B?Sy9kN09VNWwySmlPRFNIRnl2UG9lTVIrSkY4WDc3MWJ3YThiWGZoSVUyTUVU?=
- =?utf-8?B?bmhLTVVwb2hSMTkzUnN1Ynp1emd1TmJmRjFEZXB3M2RjN244U0kyL2dCdXFS?=
- =?utf-8?B?dGw1S3ZhK0lleTRKemVCZEdJM0VpejJWL3gvYjR6RlExcEdkRjBxN3RsV29V?=
- =?utf-8?B?RlloSUx5cGNxMTRUWTRveVZkdS84WVF5QmducU9jdldhQXg3ZzZLYUxaZktW?=
- =?utf-8?B?bVRVZ3ZlVGlQQktmOEdCSkJZUCt2VnNZKzBQSnZ2Q0NYL29oTEg1MXFqRUhp?=
- =?utf-8?B?Yk1vVk5GRyt6QmUxN1NGdnpUc2NlUjI5NGMzT2ozYXk1MU5qM3B3ajZnaG5t?=
- =?utf-8?B?QUxQamJPSTVlaHg1blNYY3crczRvbDhlT0lyZmZJL0owWmxNWVo2YlJFV1Q0?=
- =?utf-8?B?dVZGTVRkbW96OG5xRWRseWNRVVEyL25DTGdxZDJNbWlaZjlBaFVLdWtxWjk5?=
- =?utf-8?B?elV1T0k0UFc3cW1aYXBYV1drVmt5dHVFMkZWZmhIWDhXZ2Fudm9OdmlvRXVR?=
- =?utf-8?B?WmVrMDFkWTZDVFpIeHpYK2QxRG9OTEx1Yy9WNkhuZVM5YkdKZXZwalFHQUFq?=
- =?utf-8?B?Mi9ZR2pWRGtvZlA5OGZYcWcrYk80ZVFPM2lrZmJ0V0N6Tm5jeWM4YVcvTzBB?=
- =?utf-8?B?YkErWWl4SW9kMmtPa2JUdTJVL3Z0Z0tuRW5HNWR4MUdXVjB3blZHZDlZZ3po?=
- =?utf-8?B?d05GamNTNTN1VFB4OXJWZXB4RDNNQUdodTlOM3Vha2w5cGEyNEFIQzNsNWFu?=
- =?utf-8?B?Y3c9PQ==?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	eoe07oJHQkPD87ScZladU25ntkGlXD5UOd5MrxuoOYjd5O0Al6AoM0qUZtvNQhRoDxgCjzCsxCrj1vrRl4SO5H/etccMu1UN4lhw3E35Clb07ZoqFT1V+zjfXcbdHPg2ytKlkoDlgtl3//2Dp16VxhAtezOu4VGBUvc9y8lFMgYOoHYD5cI6GeIptxlZletLVAZfmWfk2UUSPxAEnQmcdriSbHpKV4vxs/q0bte6ZVTG2xZa0qlSTmiUiMoHqOg5tN3mIryuJKkKeBH7rG9ub655WWEyOtE8Z0X77/UezIbmrwQcM23Q5q9MV0g58mKN9ZyhHcQBpZ9n3nuU54jtsxM4Corwtt6adf1OCLMWeTGVIBdYeBX1uePJjL5RBU3ifsuJ1G+5QFqvgOa4jeXV2FEImO5mLOehdPfNy3HE9PHKErEn1aCMAP4ukEObFJez4fj9i7bvMz9nS1I3/THSUYc4tCm4+S9lyzFHEle+pWQ432N6vGp0PWag1Xa7W90IJALNtotnOc105p0DJTNCUeQXlIMhw0La4wGp/IjWuVK7tZHhDXzON0L1EJbMsOpHiurXVcXJgDmZHRbLrKtpvQiJs+/hUJycJFke279oP/w=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9b01671b-02a2-4c50-21c8-08dd18889733
-X-MS-Exchange-CrossTenant-AuthSource: BN0PR10MB5128.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Dec 2024 19:35:08.9210
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Y5/v82rYLRPJ6TfgNiwcdQDw533TJ1TlB8kb00O5bdNVRayMYAnJySPidjkyjLHH4FF8PQUBJuj0r91ZerF34g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW5PR10MB5761
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2024-12-09_16,2024-12-09_04,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 malwarescore=0 adultscore=0
- phishscore=0 suspectscore=0 spamscore=0 mlxlogscore=999 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2411120000
- definitions=main-2412090152
-X-Proofpoint-GUID: p7hnHNXZArLvJE8bOhcwzSKGImGB2H0e
-X-Proofpoint-ORIG-GUID: p7hnHNXZArLvJE8bOhcwzSKGImGB2H0e
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241208061520.nfdwfajwyyw2xfdi@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On 12/9/24 10:07 AM, Christoph Hellwig wrote:
-> On Mon, Dec 09, 2024 at 10:00:58AM -0500, Chuck Lever wrote:
->> 2. How to disable this test on filesystems (like NFS) where duperemove
->> is not supported or where the test is not meaningful. The current check
->> for the presence of the duperemove executable is IMO inadequate.
+On Sun, Dec 08, 2024 at 02:15:20PM +0800, Zorro Lang wrote:
+> On Sun, Dec 08, 2024 at 11:02:09AM +1100, Dave Chinner wrote:
+> > On Fri, Dec 06, 2024 at 04:09:17PM -0800, Darrick J. Wong wrote:
+> > > On Fri, Nov 29, 2024 at 12:22:16PM +0800, Zorro Lang wrote:
+> > > > On Wed, Nov 27, 2024 at 03:51:30PM +1100, Dave Chinner wrote:
+> > > > > Hi folks,
+> > > > > 
+> > > > > This patchset introduces the ability to run fstests concurrently
+> > > > > instead of serially as the current check script does. A git branch
+> > > > > containing this patchset can be pulled from here:
+> > > > > 
+> > > > > https://git.kernel.org/pub/scm/linux/kernel/git/dgc/xfstests-dev.git check-parallel
+> > > > 
+> > > > Hi Dave,
+> > > > 
+> > > > I've merged your "check-parallel" branch, and rebase on fstests'
+> > > > patches-in-queue branch (which is nearly the next release). I just
+> > > > pushed a new branch "for-dave-check-parallel" which fixed all
+> > > > conflicts. It'll be "next next" release, feel free to update base
+> > > > on that. I'll test that branch too :)
+> > > 
+> > > I ran this through my test infrastructure at zorro's request.  I saw a
+> > > bunch of loop dev errors trickle out:
+> > > 
+> > > --- xfs/129.out
+> > > +++ xfs/129.out.bad
+> > > @@ -2,3 +2,6 @@
+> > >  Create the original file blocks
+> > >  Reflink every other block
+> > >  Create metadump file, restore it and check restored fs
+> > > +losetup: /dev/loop0: detach failed: No such device or address
+> > > +Cannot destroy loop device /dev/loop0
+> > > +(see /var/tmp/fstests/xfs/129.full for details)
+> > 
+> > Almost certainly I missed the conversion of names in
+> > _xfs_verify_metadump_v1() from "data_loop" to "md_data_loop_dev"
+> > and such. common/metadump is liley missing "unset md_data_loop_dev"
+> > after destroying the loop devices, too.
+> > 
+> > Not sure why that isn't triggering on my setup, trivial to fix. I'll
+> > sort it out and fold it back into the original loopdev cleanup
+> > patch in the set.
+> > 
+> > > and I noticed the runtimes for running serially went way up.
+> > 
+> > Not seeing that here; I don't think any of the changes I've made
+> > should affect the runtime of a normal check test pass; the tests
+> > should take the same time to run or run faster after this patchset,
+> > even serially...
 > 
-> I've not looked at dupremove, but the name suggested it's de-duplicating
-> and thus needs a working FIDEDUPERANGE ioctl.  So the test should check
-> for that using the _require_test_dedupe / _require_scratch_dedupe
-> helpers. generic/{559,560,561} do that, so something either in these
-> helpers is probably broken given that NFS rejects remap_file_range
-> with REMAP_FILE_DEDUP, although a bit of tracing would be useful if
-> there actually is something broken in NFS or the VFS.
+> Hi Dave,
+> 
+> I replied several emails for this issue:
+> 
+> https://lore.kernel.org/fstests/20241207195101.hfg3m4pgghoo7ebv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#mb1da5dddd053dcd5ed8ec15c45ce8e3fa55c2d38
+> 
+> I've tried to fix this and all other small issues on "for-dave-check-parallel"
+> branch:
+> 
+>   # git clone -b for-dave-check-parallel git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> Could you take a look at it? Currently my test passed on this branch. As
+> my original plan, I'd like to merge for-dave-check-parallel branch onto
+> for-next and push in this week.
 
-It doesn't appear to be an NFS problem; duperemove is not even issuing
-the ioctl as a toe-test to see if it will work.
+If it fixes the reported failure, then I'm fine with that.
 
-I opened https://github.com/markfasheh/duperemove/issues/363
+Unfortunately, the machine I've been developing this code on has now
+been dead for a week and a half (main board failure), and the vendor
+doesn't seem to care about the "NBD on-site" warranty SLA...
 
+I have no idea when it'll be fixed, so if what you've done works for
+everyone else right now, I'll clean up the remaining things I
+noticed when I've got the machine back up and running and can test
+this stuff again...
 
+-Dave.
 -- 
-Chuck Lever
+Dave Chinner
+david@fromorbit.com
