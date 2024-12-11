@@ -1,207 +1,100 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2CD7139CFF;
-	Wed, 11 Dec 2024 15:09:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEC0024632C
+	for <fstests@vger.kernel.org>; Wed, 11 Dec 2024 17:44:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733929786; cv=none; b=phP6Yx7EjfKv3R2KVBih3vL7ZKgtwhmYy8tw0wn2be3QhWizN55TeP/kJrJ7dJXXaUKPGNQE02bwtKCENUMFO72ob7qiFIOUiqkJOI0LLkds/Qnz3BnxjVYgqrjVmeWnjyAufdRk40mj6YBISFviB9+TgaPzE3hY2VRbrg3tx+4=
+	t=1733939083; cv=none; b=jd5To7ps9kGG26jGMj3oeJb8gvQxXST5bT5lP+DN3cFGZT6jwAAMQaC7izskbCu6ILFwZVhtnKTLG/5tLh7JjYovvWobVw319DNLEbAJv/LREjGH9nf7ZF+Xq8uMgc0xjVkKGTfRd0ODKWDfbUC7KBNx335mlMg7ZYz3gM2nSKI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733929786; c=relaxed/simple;
-	bh=kjA2mG+uXwOrZUDMpDD9AqWD7pS5Z2Fe8+gMPd5t6nM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kR0tCFHIh1vbT67IfMQz8njWifqW58AFMlecWZX3kFnw1zlnLuXMg22UCTB9G9yCpzYtSl1GDjWlbw7jVnsVVCyOi2YueO2/cIEA+EUX/1lQzTFjHE77fQyYMxO4XTsQJRrSai0rQnKuMalj/YxOqjHKzlgt00PK93sKp1+O7KE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lNLLy4ta; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1733939083; c=relaxed/simple;
+	bh=HnnCSO4hdUJZAlP9sqMLeT4e8wlU3dRIVs1T4FcpB94=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ccv5wgsBjcZOtfxG80cR+v4bMgsfsUfKEm8191jBsILKLG8Q1cbx/wxyVjwRxkVuhHMOVTpXzkQTKcYKB6lU1GYfMOxeT+jvVSuUR8rUtpLXZigmrjQdWUG6h6w6WttglcTyI4ZXA22yTls2QrAa1tzeyzu25qjtItmn4KYz4c0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Adf33iue; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lNLLy4ta"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F16EC4CED2;
-	Wed, 11 Dec 2024 15:09:44 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Adf33iue"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6D3DBC4CED2;
+	Wed, 11 Dec 2024 17:44:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1733929786;
-	bh=kjA2mG+uXwOrZUDMpDD9AqWD7pS5Z2Fe8+gMPd5t6nM=;
-	h=From:To:Cc:Subject:Date:From;
-	b=lNLLy4ta1PpkibHZp0v7+9OoEV3bjsRhyl8PFBqQWl3yo8svb0xNx+lKiRBErlJMU
-	 krxixTpswC9BeC19u+RC9e7O6qiHV1yeQF/i+f6tuIazTD83EX51KWhQ53zCh17FFZ
-	 PCTRWneTQwQqsr+NEF8IaEChAAqEgDNIrBzhWLoHWVugaUV77ThEWJRbpv2y7yiIDh
-	 xeU+RXCwmT5JT99JIckT+4MNyw0b8XYYSZ884ILZqO6ylAcnvowuH6qaaxXKfagTBp
-	 HElBSrHn2bx+CJr06JiKXrcVnPwikAXLu69ipAkCiPycuUHqB9zBIQ+EnJmrVYjgFx
-	 mp28q/JPNKogA==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic: test swap activation on file that used to have clones
-Date: Wed, 11 Dec 2024 15:09:40 +0000
-Message-ID: <dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
+	s=k20201202; t=1733939082;
+	bh=HnnCSO4hdUJZAlP9sqMLeT4e8wlU3dRIVs1T4FcpB94=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Adf33iueslxMwugLapoJzDFOq7G2qIURb9rUUN3fWx1HPVGDWgL8AgRRKe+wCSdGo
+	 VAdMriExFPZ0E4jakCwsoQa9JDvLnagSoPKDrt9rfZIF2SYCRES9JdvcfwUeDRO9y0
+	 chS4IxQCJ4YrvvCfvTFWHmMDhwqfcilEtEefEUkJI7oYUrMlAZSMKnzObOgThMmz+n
+	 FFNaIHGF7q/WzVnSrL1jvIBxwVR8dzA6afH952DgQgn+Oq6Eu/boBGoPhI2y3Mdqtr
+	 u+2pI+e7kV2c1vPdo2FDx7YvJ8Y8Kl/i1r19dqFpjfGdCzHKqppF6sIxdVp2J1eG5j
+	 dsxiXOHdOECsw==
+Date: Wed, 11 Dec 2024 09:44:41 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] common: cleanup scratch_mkfs_sized
+Message-ID: <20241211174441.GF6698@frogsfrogsfrogs>
+References: <20241210065435.1234629-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241210065435.1234629-1-hch@lst.de>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Tue, Dec 10, 2024 at 07:54:35AM +0100, Christoph Hellwig wrote:
+> Move the XFS RT specific code into the file system type switch
+> statement.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Test that we are able to activate a swap file on a file that used to have
-its extents shared multiple times.
+Looks good to me,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-This exercises a bug on btrfs' extent sharedness detection during swap
-file activation, which is fixed by the following patch:
+--D
 
-  "btrfs: fix swap file activation failure due to extents that used to be shared"
-
-The test also fails sporadically on xfs and the bug was already reported
-to the xfs mailing list:
-
-   https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/generic/368     | 101 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/368.out |  25 +++++++++++
- 2 files changed, 126 insertions(+)
- create mode 100755 tests/generic/368
- create mode 100644 tests/generic/368.out
-
-diff --git a/tests/generic/368 b/tests/generic/368
-new file mode 100755
-index 00000000..b2bf2d2c
---- /dev/null
-+++ b/tests/generic/368
-@@ -0,0 +1,101 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 368
-+#
-+# Test that we are able to create and activate a swap file on a file that used
-+# to have its extents shared multiple times.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick clone swap
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -r -f $tmp.*
-+	test -n "$swap_file" && swapoff $swap_file &> /dev/null
-+}
-+
-+. ./common/reflink
-+
-+[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
-+    "btrfs: fix swap file activation failure due to extents that used to be shared"
-+
-+_require_scratch_swapfile
-+_require_scratch_reflink
-+_require_cp_reflink
-+
-+run_test()
-+{
-+	local sync_after_add_reflinks=$1
-+	local sync_after_remove_reflinks=$2
-+	local first_swap_file="$SCRATCH_MNT/swap"
-+	local swap_size=$(($(_get_page_size) * 32))
-+	local num_clones=50
-+	local swap_file="$SCRATCH_MNT/clone_${num_clones}"
-+
-+	_scratch_mkfs >> $seqres.full 2>&1 || _fail "failed to mkfs"
-+	_scratch_mount
-+
-+	echo "Creating swap file..."
-+	_format_swapfile $first_swap_file $swap_size >> $seqres.full
-+
-+	echo "Cloning swap file..."
-+	# Create a large number of clones so that on btrfs we get external ref
-+	# items in the extent tree and not just inline refs (33 is currently the
-+	# treshold after which external refs are created).
-+	for ((i = 1; i <= $num_clones; i++)); do
-+		# Create the destination file and set +C (NOCOW) on it before
-+		# copying into it with reflink. This is because when cp needs to
-+		# create the destination file, it first copies/clones the data
-+		# and then sets the +C attribute, and on btrfs we can't clone a
-+		# NOCOW file into a COW file, both must be NOCOW or both COW.
-+		touch $SCRATCH_MNT/clone_$i
-+		# 0600 is required for swap files, do the same as _format_swapfile.
-+		chmod 0600 $SCRATCH_MNT/clone_$i
-+		$CHATTR_PROG +C $SCRATCH_MNT/clone_$i > /dev/null 2>&1
-+		_cp_reflink $first_swap_file $SCRATCH_MNT/clone_$i
-+	done
-+
-+	if [ $sync_after_add_reflinks -ne 0 ]; then
-+		# Force a transaction commit on btrfs to flush all delayed
-+		# references and commit the current transaction.
-+		_scratch_sync
-+	fi
-+
-+	echo "Deleting original file and all clones except the last..."
-+	rm -f $first_swap_file
-+	for ((i = 1; i < $num_clones; i++)); do
-+		rm -f $SCRATCH_MNT/clone_$i
-+	done
-+
-+	if [ $sync_after_remove_reflinks -ne 0 ]; then
-+		# Force a transaction commit on btrfs to flush all delayed
-+		# references and commit the current transaction.
-+		_scratch_sync
-+	fi
-+
-+	# Now use the last clone as a swap file.
-+	echo "Activating swap file..."
-+	_swapon_file $swap_file
-+	swapoff $swap_file
-+
-+	_scratch_unmount
-+}
-+
-+echo -e "\nTest without sync after creating and removing clones"
-+run_test 0 0
-+
-+echo -e "\nTest with sync after creating clones"
-+run_test 1 0
-+
-+echo -e "\nTest with sync after removing clones"
-+run_test 0 1
-+
-+echo -e "\nTest with sync after creating and removing clones"
-+run_test 1 1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/368.out b/tests/generic/368.out
-new file mode 100644
-index 00000000..14a561e1
---- /dev/null
-+++ b/tests/generic/368.out
-@@ -0,0 +1,25 @@
-+QA output created by 368
-+
-+Test without sync after creating and removing clones
-+Creating swap file...
-+Cloning swap file...
-+Deleting original file and all clones except the last...
-+Activating swap file...
-+
-+Test with sync after creating clones
-+Creating swap file...
-+Cloning swap file...
-+Deleting original file and all clones except the last...
-+Activating swap file...
-+
-+Test with sync after removing clones
-+Creating swap file...
-+Cloning swap file...
-+Deleting original file and all clones except the last...
-+Activating swap file...
-+
-+Test with sync after creating and removing clones
-+Creating swap file...
-+Cloning swap file...
-+Deleting original file and all clones except the last...
-+Activating swap file...
--- 
-2.45.2
-
+> ---
+>  common/rc | 17 ++++++++++-------
+>  1 file changed, 10 insertions(+), 7 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 1b2e4508d767..906905daa92d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1152,7 +1152,6 @@ _try_scratch_mkfs_sized()
+>  	shift
+>  	local def_blksz
+>  	local blocksize_opt
+> -	local rt_ops
+>  
+>  	case $FSTYP in
+>  	xfs)
+> @@ -1202,14 +1201,18 @@ _try_scratch_mkfs_sized()
+>  		[ "$fssize" -gt "$devsize" ] && _notrun "Scratch device too small"
+>  	fi
+>  
+> -	if [ "$FSTYP" = "xfs" ] && [ -b "$SCRATCH_RTDEV" ]; then
+> -		local rtdevsize=`blockdev --getsize64 $SCRATCH_RTDEV`
+> -		[ "$fssize" -gt "$rtdevsize" ] && _notrun "Scratch rt device too small"
+> -		rt_ops="-r size=$fssize"
+> -	fi
+> -
+>  	case $FSTYP in
+>  	xfs)
+> +		local rt_ops
+> +
+> +		if [ -b "$SCRATCH_RTDEV" ]; then
+> +			local rtdevsize=`blockdev --getsize64 $SCRATCH_RTDEV`
+> +			if [ "$fssize" -gt "$rtdevsize" ]; then
+> +				_notrun "Scratch rt device too small"
+> +			fi
+> +			rt_ops="-r size=$fssize"
+> +		fi
+> +
+>  		# don't override MKFS_OPTIONS that set a block size.
+>  		echo $MKFS_OPTIONS |grep -E -q "b\s*size="
+>  		if [ $? -eq 0 ]; then
+> -- 
+> 2.45.2
+> 
