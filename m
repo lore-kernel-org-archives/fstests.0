@@ -1,38 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56E92239BCF;
-	Wed, 11 Dec 2024 10:55:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B2CD7139CFF;
+	Wed, 11 Dec 2024 15:09:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733914549; cv=none; b=eZIzqgG9B/2SHhN7oBmhGTfbUFFfC1uj9mq8eumNbTLKWpKFVctmDPzFrddvlGkfeU9WPdFpUBzfn00jKX4n4UIWvKFAJAMWILVzVo5HbPp84gMCQ6KVG7ocUKS4QpiOSj0i2Tew7wuZnyRVTuOxVmKiJYYHmw3dNAnKLZtieDU=
+	t=1733929786; cv=none; b=phP6Yx7EjfKv3R2KVBih3vL7ZKgtwhmYy8tw0wn2be3QhWizN55TeP/kJrJ7dJXXaUKPGNQE02bwtKCENUMFO72ob7qiFIOUiqkJOI0LLkds/Qnz3BnxjVYgqrjVmeWnjyAufdRk40mj6YBISFviB9+TgaPzE3hY2VRbrg3tx+4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733914549; c=relaxed/simple;
-	bh=0FweEDu2QS27ef/Aj7WO6oyLB9eY4NDcApayvfvOKsc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PBgqSLrQLeBjE37V35+uey1rEGcSIwsb+f5xoDj7L6bCVo8KEtoNT79HpR/otjG82KG6XhP0nVNZfdcZvW9NBTl8O8cXDzUmE7s5nzJfCy3D7U01GyZTdw61pzY3q+d9juHzM7dUiQ0ALEgoC0fmL+YzQwhPtITUQZSrmUW3lHQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GZpkTyB6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1733929786; c=relaxed/simple;
+	bh=kjA2mG+uXwOrZUDMpDD9AqWD7pS5Z2Fe8+gMPd5t6nM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kR0tCFHIh1vbT67IfMQz8njWifqW58AFMlecWZX3kFnw1zlnLuXMg22UCTB9G9yCpzYtSl1GDjWlbw7jVnsVVCyOi2YueO2/cIEA+EUX/1lQzTFjHE77fQyYMxO4XTsQJRrSai0rQnKuMalj/YxOqjHKzlgt00PK93sKp1+O7KE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lNLLy4ta; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GZpkTyB6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B093EC4CED2;
-	Wed, 11 Dec 2024 10:55:47 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lNLLy4ta"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F16EC4CED2;
+	Wed, 11 Dec 2024 15:09:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1733914548;
-	bh=0FweEDu2QS27ef/Aj7WO6oyLB9eY4NDcApayvfvOKsc=;
+	s=k20201202; t=1733929786;
+	bh=kjA2mG+uXwOrZUDMpDD9AqWD7pS5Z2Fe8+gMPd5t6nM=;
 	h=From:To:Cc:Subject:Date:From;
-	b=GZpkTyB60kBkM7gTKQM/U+suvBworQ6uVbrIH9+8ee+qDbUFEnbEJ9hiSL8HIkA8L
-	 gn4lZVQawPFJzoBJGHjvAaR5IQJ7CSjKb8+vrCWx7MaN58vh2SSu7iSo+ZgBdjWVpI
-	 p/4TxgmJG9uiY7mO6arUzOGoPdn1NmW5wUZFHc6M6S44hw3Yf4N9vXq2iyX7ec00xX
-	 EdsimJmeP4ME20yo9sB3JlFV8tS7kT/jRh1Rjfx99yzieZQDBqiglybM0WMnml/yyS
-	 WsU484aauztD31gQTz4tJxUawDFju17GySZeKclwEzRbdOZ/yjo5G7dPRyplTsQPWk
-	 L5vHn5pudh6xg==
+	b=lNLLy4ta1PpkibHZp0v7+9OoEV3bjsRhyl8PFBqQWl3yo8svb0xNx+lKiRBErlJMU
+	 krxixTpswC9BeC19u+RC9e7O6qiHV1yeQF/i+f6tuIazTD83EX51KWhQ53zCh17FFZ
+	 PCTRWneTQwQqsr+NEF8IaEChAAqEgDNIrBzhWLoHWVugaUV77ThEWJRbpv2y7yiIDh
+	 xeU+RXCwmT5JT99JIckT+4MNyw0b8XYYSZ884ILZqO6ylAcnvowuH6qaaxXKfagTBp
+	 HElBSrHn2bx+CJr06JiKXrcVnPwikAXLu69ipAkCiPycuUHqB9zBIQ+EnJmrVYjgFx
+	 mp28q/JPNKogA==
 From: fdmanana@kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org,
-	dchinner@redhat.com,
 	Filipe Manana <fdmanana@suse.com>
-Subject: [PATCH] generic/590: fix test failure when running against fs other than xfs
-Date: Wed, 11 Dec 2024 10:55:25 +0000
-Message-ID: <bcb3d3adeb36c732e807d876b82219c3c1350e2e.1733914512.git.fdmanana@suse.com>
+Subject: [PATCH] generic: test swap activation on file that used to have clones
+Date: Wed, 11 Dec 2024 15:09:40 +0000
+Message-ID: <dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com>
 X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -44,60 +43,165 @@ Content-Transfer-Encoding: 8bit
 
 From: Filipe Manana <fdmanana@suse.com>
 
-With commit ce79de11337e ("fstests: clean up loop device instantiation")
-we started to always call _destroy_loop_device at the very end of the
-test, but we only create a loop device if we are running against xfs,
-so the call to _destroy_loop_device results in an error since no loop
-device was setup.
+Test that we are able to activate a swap file on a file that used to have
+its extents shared multiple times.
 
-For example running this test against btrfs or ext4 results in this
-failure:
+This exercises a bug on btrfs' extent sharedness detection during swap
+file activation, which is fixed by the following patch:
 
-   $ ./check generic/590
-   FSTYP         -- btrfs
-   PLATFORM      -- Linux/x86_64 debian0 6.13.0-rc1-btrfs-next-181+ #1 SMP PREEMPT_DYNAMIC Tue Dec  3 13:03:23 WET 2024
-   MKFS_OPTIONS  -- /dev/sdc
-   MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+  "btrfs: fix swap file activation failure due to extents that used to be shared"
 
-   generic/590 29s ... [failed, exit status 1]- output mismatch (see /home/fdmanana/git/hub/xfstests/results//generic/590.out.bad)
-      --- tests/generic/590.out	2020-06-10 19:29:03.858520038 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//generic/590.out.bad	2024-12-11 10:48:43.946205346 +0000
-       @@ -1,2 +1,5 @@
-       QA output created by 590
-      -Silence is golden
-      +losetup: option requires an argument -- 'd'
-      +Try 'losetup --help' for more information.
-      +Cannot destroy loop device
-      +(see /home/fdmanana/git/hub/xfstests/results//generic/590.full for details)
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/generic/590.out /home/fdmanana/git/hub/xfstests/results//generic/590.out.bad'  to see the entire diff)
-   Ran: generic/590
-   Failures: generic/590
-   Failed 1 of 1 tests
+The test also fails sporadically on xfs and the bug was already reported
+to the xfs mailing list:
 
-Fix this by removing the call to _destroy_loop_device at the end of the
-test, as it's unnecessary because we call it in the _cleanup function if
-we have setup a loop device.
+   https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
 
-Fixes: ce79de11337e ("fstests: clean up loop device instantiation")
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/590 | 2 --
- 1 file changed, 2 deletions(-)
+ tests/generic/368     | 101 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/368.out |  25 +++++++++++
+ 2 files changed, 126 insertions(+)
+ create mode 100755 tests/generic/368
+ create mode 100644 tests/generic/368.out
 
-diff --git a/tests/generic/590 b/tests/generic/590
-index 04d86e78..1adeef4c 100755
---- a/tests/generic/590
-+++ b/tests/generic/590
-@@ -115,8 +115,6 @@ $XFS_IO_PROG -c "truncate 0" -c fsync "$SCRATCH_MNT/file"
- # We need to do this before the loop device gets torn down.
- _scratch_unmount
- _check_scratch_fs
--_destroy_loop_device $loop_dev
--unset loop_dev
- 
- echo "Silence is golden"
- status=0
+diff --git a/tests/generic/368 b/tests/generic/368
+new file mode 100755
+index 00000000..b2bf2d2c
+--- /dev/null
++++ b/tests/generic/368
+@@ -0,0 +1,101 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2024 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 368
++#
++# Test that we are able to create and activate a swap file on a file that used
++# to have its extents shared multiple times.
++#
++. ./common/preamble
++_begin_fstest auto quick clone swap
++
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	test -n "$swap_file" && swapoff $swap_file &> /dev/null
++}
++
++. ./common/reflink
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
++    "btrfs: fix swap file activation failure due to extents that used to be shared"
++
++_require_scratch_swapfile
++_require_scratch_reflink
++_require_cp_reflink
++
++run_test()
++{
++	local sync_after_add_reflinks=$1
++	local sync_after_remove_reflinks=$2
++	local first_swap_file="$SCRATCH_MNT/swap"
++	local swap_size=$(($(_get_page_size) * 32))
++	local num_clones=50
++	local swap_file="$SCRATCH_MNT/clone_${num_clones}"
++
++	_scratch_mkfs >> $seqres.full 2>&1 || _fail "failed to mkfs"
++	_scratch_mount
++
++	echo "Creating swap file..."
++	_format_swapfile $first_swap_file $swap_size >> $seqres.full
++
++	echo "Cloning swap file..."
++	# Create a large number of clones so that on btrfs we get external ref
++	# items in the extent tree and not just inline refs (33 is currently the
++	# treshold after which external refs are created).
++	for ((i = 1; i <= $num_clones; i++)); do
++		# Create the destination file and set +C (NOCOW) on it before
++		# copying into it with reflink. This is because when cp needs to
++		# create the destination file, it first copies/clones the data
++		# and then sets the +C attribute, and on btrfs we can't clone a
++		# NOCOW file into a COW file, both must be NOCOW or both COW.
++		touch $SCRATCH_MNT/clone_$i
++		# 0600 is required for swap files, do the same as _format_swapfile.
++		chmod 0600 $SCRATCH_MNT/clone_$i
++		$CHATTR_PROG +C $SCRATCH_MNT/clone_$i > /dev/null 2>&1
++		_cp_reflink $first_swap_file $SCRATCH_MNT/clone_$i
++	done
++
++	if [ $sync_after_add_reflinks -ne 0 ]; then
++		# Force a transaction commit on btrfs to flush all delayed
++		# references and commit the current transaction.
++		_scratch_sync
++	fi
++
++	echo "Deleting original file and all clones except the last..."
++	rm -f $first_swap_file
++	for ((i = 1; i < $num_clones; i++)); do
++		rm -f $SCRATCH_MNT/clone_$i
++	done
++
++	if [ $sync_after_remove_reflinks -ne 0 ]; then
++		# Force a transaction commit on btrfs to flush all delayed
++		# references and commit the current transaction.
++		_scratch_sync
++	fi
++
++	# Now use the last clone as a swap file.
++	echo "Activating swap file..."
++	_swapon_file $swap_file
++	swapoff $swap_file
++
++	_scratch_unmount
++}
++
++echo -e "\nTest without sync after creating and removing clones"
++run_test 0 0
++
++echo -e "\nTest with sync after creating clones"
++run_test 1 0
++
++echo -e "\nTest with sync after removing clones"
++run_test 0 1
++
++echo -e "\nTest with sync after creating and removing clones"
++run_test 1 1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/368.out b/tests/generic/368.out
+new file mode 100644
+index 00000000..14a561e1
+--- /dev/null
++++ b/tests/generic/368.out
+@@ -0,0 +1,25 @@
++QA output created by 368
++
++Test without sync after creating and removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after creating clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after creating and removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
 -- 
 2.45.2
 
