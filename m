@@ -1,90 +1,86 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F8C91DE4FF
-	for <fstests@vger.kernel.org>; Fri, 13 Dec 2024 11:43:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 677239450
+	for <fstests@vger.kernel.org>; Sun, 15 Dec 2024 05:12:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734090204; cv=none; b=KxQFBHcpT9Kz46YEEL/mz0qbV+W55590ZNBo1LhP7kreK4as0P4MfWA4FkIwLebd9FuG0oIio7yFFgPYYKa5utLL7xxaU4OS3aumxVRCk+9fXls4ImrLeN2DuRayXGMZZ28zRyHPWL1sHrOfnEbeaqA/0KYjx7ao9rVqGmFKGKE=
+	t=1734239573; cv=none; b=dVk3ImMCh71d9IyQayg/EOqmGIjcR18aFAThDVCw4bVxNsg11X4PMtTUibp9RsxNNeuJDtl4LjKhjbjjNZD7FLHvFKGyT8dT5wygnwJ9O1rq/Rd+wDeCegcNEKWVZlR3zGX5LnGUup01WCZ8eQtebUREuP7VbR18CoHEpIPo1e4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734090204; c=relaxed/simple;
-	bh=eW9nwW7lK1ifSKW/eKk9RryFq4CF13eTC66o1Cw75RQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uJ0USP6j7GK5jUYJx1ficzYuTJdsPjSBcYuFjmvNGCUM5UzVRlOZybfz+kGV2GhHW6X1DPyCsg/B4vNG/Fu5/gw99vDeLoC/0wl0fpPhTJtvkwQOXH3+EVrh1VUiiLj7A5HEAN4z8fVzEb/45gcGtosm9RHR8c2DjTd6L3jX6pc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=t2d2SdLc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1734239573; c=relaxed/simple;
+	bh=UV7DP3/rkim2gIJG5rzeZ27iqYxV/z/+FDZmynz3IBA=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=IL0Oq7g4/LuEll6cMlk/SNT+3s4meZKeam/BT1kSQmMcBQNqQmTnmV6n2QJhFhiqgCYpFB4WhbgeLkJWzBJTJ+tDTRSYbITDetL2QQtrqEJGWPpriRrgZ7RBbyHXqpoi3wVNj7MXMhifFfos0XIN6laGBEMs+a22TLuz6W1eYRU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=i5vTt4M7; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="t2d2SdLc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 226BBC4CED4;
-	Fri, 13 Dec 2024 11:43:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734090204;
-	bh=eW9nwW7lK1ifSKW/eKk9RryFq4CF13eTC66o1Cw75RQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=t2d2SdLc/I3z1Hn5mw7jYhrKOmGSuMwQD4W/WHer4G8hRBU0IZJlyVCBZOk+BNkf/
-	 SnZfWdxPLhgs/KhEkLI3OPv8QCbKjk5EZ/hY1Ns/Gl8hr6mkT6g2vtBQ1FXkYWZCWu
-	 ztKzdKnDDEcgBAxTOyJ2QO4DD9gZpNTXyY/EJ3wKRpXJ8ebX+9DSnmHTX0HONxofLR
-	 f+dcwGvTuH+r1YG4/gRagonoPUAIyn/M9TMdInMPcbTc3irFSOoPQP7oDT7Bnzgqlf
-	 sbnroCzUJf5ENRyXR3RRB9ZUf9kMT0LHQZ/XbkjMkgHS7I8rkw7iUjIWrivwx6WrYR
-	 g1MsAwRfQUrlA==
-Date: Fri, 13 Dec 2024 19:43:20 +0800
-From: Zorro Lang <zlang@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, cel@kernel.org
-Subject: Re: [PATCH] common: call _require_scratch_dedupe from
- _require_scratch_duperemove
-Message-ID: <20241213114320.hm74x7v5yhxe7hem@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241210065346.1234550-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="i5vTt4M7"
+Received: from cwcc.thunk.org (pool-173-48-82-226.bstnma.fios.verizon.net [173.48.82.226])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 4BF5Ckwk016317
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 15 Dec 2024 00:12:47 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1734239567; bh=3j2Z8iw2rO+eZLaywIqn8SZcjLivo0CXS/EClIwCa4s=;
+	h=From:Subject:Date:Message-ID:MIME-Version;
+	b=i5vTt4M7apFbh/MjLSw7Bjl5nU8Z1+e7m0Mtz86Jiv5ilKrLqsmMle8Rvj8yYn0u2
+	 lZYECE6oQ1vFF+hf0s1imhEnLDoRZNBIacHqUv8Fjy3ibN15edTiDtqPQJPfWbjZWe
+	 FAi7IEtTdSc0Czl3tz0HXHehlK7t5KB4Tmg7qIv/CEgRZ7gp4nQi7BgNMMZcIHe46g
+	 mkYKqSn/AaDrKxiqYsRMZiKMqOTpjpZrpiuPA1JVvWnyqaCbJ1ItIntMSmGslqqGhd
+	 IwzTCt41RDhL7f2mXwwq8D9vXmhKIJHZw2GX5Ytt2ga1r7lkuCIhdDixm0tkg3rRhq
+	 q17N7gzU8d0mw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id D7ADF15C465A; Sun, 15 Dec 2024 00:12:45 -0500 (EST)
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: fstests@vger.kernel.org
+Cc: Dave Chinner <david@fromorbit.com>, "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH 1/2] generic/135: don't try to rm $SCRATCH_MNT/*
+Date: Sun, 15 Dec 2024 00:12:41 -0500
+Message-ID: <20241215051242.3340572-2-tytso@mit.edu>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20241215051242.3340572-1-tytso@mit.edu>
+References: <20241215051242.3340572-1-tytso@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241210065346.1234550-1-hch@lst.de>
+Content-Transfer-Encoding: 8bit
 
-On Tue, Dec 10, 2024 at 07:53:15AM +0100, Christoph Hellwig wrote:
-> _require_scratch_duperemove doesn't check if the scratch file system
-> actually supports dedup, so add the proper call for that.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
-> 
-> Btw, I wonder if we should simply stop using dupremove in favor of the
-> xfs_io dedup command which seems lot less cumbersome?  For now this is
-> a quick fix, though.
-> 
->  common/reflink | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/common/reflink b/common/reflink
-> index 22adc4449bc6..9177c45e70bb 100644
-> --- a/common/reflink
-> +++ b/common/reflink
-> @@ -83,6 +83,8 @@ _require_scratch_duperemove()
->  
->  	_scratch_mkfs > /dev/null
->  	_scratch_mount
-> +	_require_scratch_dedupe
+This fixes a regression for ext4 introduced by commit 32e14cb90b88
+("fstests: don't use directory stacks"), which replaced a number of
+files at the top-level of the scratch file system:
 
-Thanks, it makes sense to me.
+    async_file sync_file direct_file trunc_file
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+with "rm $SCRATCH_MNT/*".  This causes a test failure on ext4 file
+systems caused by a failed attempt to unlink the lost+found directory.
+The thing, is these files are all super small (4k or 16k) and the
+scratch file system is going to get reformatted before it gets used
+again.  So just dropping the delete is the simplest way to solve the
+problem.
 
-I brought in "duperemove" just for giving dedupe feature a random stress test.
-I never thought the duperemove project can't be stable long time. If anyone
-knows any other tools can replace duperemove, I can change duperemove to
-others.
+Fixes: 32e14cb90b88 ("fstests: don't use directory stacks")
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/135 | 2 --
+ 1 file changed, 2 deletions(-)
 
-Thanks,
-Zorro
+diff --git a/tests/generic/135 b/tests/generic/135
+index 392fee6fc..f74e144f3 100755
+--- a/tests/generic/135
++++ b/tests/generic/135
+@@ -40,7 +40,5 @@ od -Ad -x $SCRATCH_MNT/sync_file
+ od -Ad -x $SCRATCH_MNT/direct_file
+ od -Ad -x $SCRATCH_MNT/trunc_file
+ 
+-rm -f $SCRATCH_MNT/*
+-
+ status=0
+ exit 
+-- 
+2.45.2
 
-> +
->  	dd if=/dev/zero of="$SCRATCH_MNT/file1" bs=128k count=1 >& /dev/null
->  	dd if=/dev/zero of="$SCRATCH_MNT/file2" bs=128k count=1 >& /dev/null
->  	if ! "$DUPEREMOVE_PROG" -d "$SCRATCH_MNT/file1" \
-> -- 
-> 2.45.2
-> 
-> 
