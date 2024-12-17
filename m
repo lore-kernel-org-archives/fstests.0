@@ -1,65 +1,65 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E5261D416A
-	for <fstests@vger.kernel.org>; Tue, 17 Dec 2024 07:53:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D3AF132132
+	for <fstests@vger.kernel.org>; Tue, 17 Dec 2024 07:54:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734422040; cv=none; b=Tp4ePa+lLx9KJJusQ8GMJ3TdyI5WNwitS8Lv7Gd+gmGv8It3dM/kjiIkRPufclnICdWrOfAgwEBE8lS6TqQ02oHLQ8hyg63ro//ZF95gElvcou2V7ddAO1q2TWOQtfF5LcJNHqG9VsF+jyHqWbYcvssT3LkV5VaAUY/HVnapJBg=
+	t=1734422087; cv=none; b=P0J8BFsobhFxUZhPM9XSCbx+iNk2So7AyK9RjUCNof9XCY+vZiZGRG4X1zqdSLnsIC+QVrTv29MM6EijEKi5JW4zu3jJjWrHNdv7PMTDgF1MLn4okgTVlb/LW3Hef8LgYkNLxSGXKkJKtEBW/l2D09w5ytFNXvb08o8xcnlrZ3s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734422040; c=relaxed/simple;
-	bh=Bpu/O8gr/P186Ez+jiI9p9KSMiybkDvgAlyxwn1PupI=;
+	s=arc-20240116; t=1734422087; c=relaxed/simple;
+	bh=9pkKONfZPK/zCFwyWDjSWheCpP5U08dPtjoJEwFW4GU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ftLe2zbCF48WPCG8EELPzjfh6DJkbHVkmo8ymopJfbSsAGVD03Z4AV7y8Y7u3n9x+gIs+D8yUEJzcByriEqZVRO0xAXBn5jC+W90GOLJmv23dB90GmQaafumjrH3mMlym6x3JEbPnBfCWRwABtxZVpnz35QhKFfPp1FdnDk2LXw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Gw+ANYSc; arc=none smtp.client-ip=209.85.221.44
+	 In-Reply-To:Content-Type; b=KI8rztm+h1RQ89VVu0jQ9w/C1bHdWMTR9k/Gj0y5FyBX7f3OOdp1pXqb7ja0S0YWxPxdBd4gSlU53Ovr/Nh48OIuAupi1vUFRThPLgl3BPhWALh+6ugpCM9K4qUUZouT/wmSwVST6WZfbJKuEAfnSed8r/YWxeBv5qL63UBZu6Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=UCnObrBE; arc=none smtp.client-ip=209.85.128.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Gw+ANYSc"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-385e0e224cbso2569885f8f.2
-        for <fstests@vger.kernel.org>; Mon, 16 Dec 2024 23:53:57 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="UCnObrBE"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-432d86a3085so32739815e9.2
+        for <fstests@vger.kernel.org>; Mon, 16 Dec 2024 23:54:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1734422036; x=1735026836; darn=vger.kernel.org;
+        d=suse.com; s=google; t=1734422083; x=1735026883; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=wgPs939+JTOtFHfLHRar72zvOYaxxVBHfsyOFECZ2dY=;
-        b=Gw+ANYSco3BJr4LtZRnt+0ZbTxYKo8DBN8nwQHpz92GuMlfFdQVT34bWGEcC4p7Nfn
-         MV8o8nSTzQTp1G1jdnRetTyR8TG4ENBeUY+QRMuMINCHP8bn9Nr5jX4h2BXYTO/k48KY
-         2kqWe8ditkEtsFaDfBx63/EQQW5XbRM2ytOKzYh5s9o4t+Wm9twck9h9JCkxdz6cL4pJ
-         8nxSfOqbhHA7hwH+InuaWLPcEJibs4OHhECm+YIFtayi36UE4aVf9d2IWiCVrEHYM1ej
-         RdOCcNJqhm4P7h3dd/ABnOJkY4O8E/s0/VVI5Mudp3fEvv54O5t/HuqmaeB982ZvvAOs
-         9hjA==
+        bh=wIexqEXLx24aTDZtw3vT/5R0XqKEKqj3/7Bevxa9akc=;
+        b=UCnObrBEQjY81CDl7zWUmCve/cDPaQc3ofgMryNsxpteXKIjzsLNhv9GlAt65bCeb6
+         rYtRpoSjntbxDWtIFNJcouyvPXksh18lR5KdQ7mq6p6FBJCegPjzxadGr4iFkpiFj0/w
+         FDmO/2CM23bGy2YslyMROr4XCZcqaH7dYy9JheZUlrniNMRNs62ei+nstavXckHgXWPM
+         ZAoAhUf0R65jht8j86lXpFo+dMMxzNfu2x3kqklJPQ6222AG5Eod/niDBGs2R45lOvoT
+         k+NON2IgseOhTMxBwxmU/IBH1h3iVOC3FaiutM8+vlVWJVB05yUxO5uWCLma9XJpHAXX
+         v6GQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1734422036; x=1735026836;
+        d=1e100.net; s=20230601; t=1734422083; x=1735026883;
         h=content-transfer-encoding:in-reply-to:autocrypt:from
          :content-language:references:cc:to:subject:user-agent:mime-version
          :date:message-id:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wgPs939+JTOtFHfLHRar72zvOYaxxVBHfsyOFECZ2dY=;
-        b=tjn5RQ7xSJpJVN8T9ciPifQNu/fju28c620V6aSuEUBwdSkt4nIgWlz82ks5eNy+fP
-         GtpZTGvQhb0sRSOTrQiL8zj7IwTIoxVJroiA+n8TbM9VhO5xnRrSbKo++R5Xu6L4JsWq
-         miPHns+gl8tGvCuSjIfckw1caAJxaq/BlgrhA6TkE8AMWRfMYxRFcg1v45s9bCf9YQJT
-         XaKSSdLgdxL8weo9Hs7CnBR9Ub5P/mWz4BHdOR6yIjicSLCAkg8F6A66SQnjd7YxxKWf
-         9cfvOKqAKIvcELxoHjr3gcpFfQCl7WcNdLs9lnHbECCnQmuRHMy5Pxp9fYek+WA+tp7J
-         ZqsQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVRYlvRKfV8Ia+gSMxlAwIuoRoIe9WlAFeaA3PAUXDphoIF8/8xoh/TmZrMkcKt8I7TmIUbrfRc@vger.kernel.org
-X-Gm-Message-State: AOJu0YxTqSB5eEywNpagu65yJ67QTNk5W9D8lTn44ZiT6U+5kvcxDwzA
-	5dOTKbn0H0kCwMDms3TH1LHdYucQt1m2lbKRU3krqUEsYiJmogbSwXHgfxv5sqk=
-X-Gm-Gg: ASbGnctorP0T05AwuWMw3qs5PRfpPMnoy5+I6TSx25UuaLkb6+m7U/mS/AmFYQwyrqi
-	oyjIVKUxigqdFlZpi/yWxiftiuHWWbL+NAoqmPt6zWxN+OUflBwbQnowOcu9Qulo7CeGIm5ho0v
-	4VunlhDjcc7czDgEXSslA+9E0/Dux96ZQy2JZi7NffNleXLCfLODKnaGRPc85e91uZNMZBGZ7nT
-	bTr7u2klck9DV+8qrN/lt3t2h734WQt/YnPZJLn90X2GTXq9FjJxIZPrH/yHcH7RDU+uBWA2J84
-	xcGbwOEh
-X-Google-Smtp-Source: AGHT+IHl7dpftuyHXi5id3CCfsuRjsqcclMHhkC8ECicieZ4eslNd1yDq6PW4i60d2oyveqJ8hLwkg==
-X-Received: by 2002:a05:6000:1848:b0:385:e968:f189 with SMTP id ffacd0b85a97d-3888e0c0826mr13609065f8f.51.1734422035350;
-        Mon, 16 Dec 2024 23:53:55 -0800 (PST)
+        bh=wIexqEXLx24aTDZtw3vT/5R0XqKEKqj3/7Bevxa9akc=;
+        b=ClS/O70YD0neJCj11GmaFTF1qDG9p6sC+T3RKgbvNq9isih1wTg6sWAPd3qKJ0lO90
+         1UQ09eSK+U2bZmMKPMXclgNAHDSr3Fi+YM5TBQ6BXCXtyvoxhMzY5HIM3qkxjlpUp5ve
+         OKsyWFg4YoZbIw2vVEAczlm0/qrhaKgzgkXogTCS7gosUgnlWGYMOWVfmwafQV/GHS5y
+         O9jqmXK22nZVFgZqx1QrmLf3xZQ3ukPN1XGNTZruf4+ttvv9Wqw3CvRjPiVubBw6kf8G
+         1MCjstNQCdw+lHjg49XGTb7Ayk6BbcKrd79/82pL9jNQxW4/ILrCRbleXrXOp5exiXb0
+         gDVg==
+X-Forwarded-Encrypted: i=1; AJvYcCXZKRfmLLCFiLwbPk5KcBMfCRV3T9HV+OTK05vIBng9pA7rxN4mR3nFFGVFr57grkjBJrz73hxB@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy2giJNETCGtkLyMiF+gYQcmzo+JEZdsjb5ybBm77T/o4nbJkZH
+	Zj3Nc9zkwN61eb1i3XeB1kOByLnBDOhVQxj70lLZmwJamJYNet1iCkF4d0Ft0Cs=
+X-Gm-Gg: ASbGncsgHe3qNusfXegqrWtnoEapcIVFvn8Y0v6qGs1bLs4wh05IQiLitM6sScTBuXd
+	o5ghLyw0ieG4f5dMyME0F491IskRJCg+L1pauvP3fXvZJbtAAxTfL0Aj+uIMsDKBp5swV9lj38C
+	fAfz+kA09J/qV6Wpqa4StJRzAhrG5Emqs2RdmP1fPCr0m8pHRT9u4z9f0pPdLTFCKN5foZvECih
+	FxXtQYVe3JnJ8+6kd1EJ/uWQg/J2ahUumhs7AGVMgVyuenSZg/WSEeqv5wldY58npeay0BUgxZk
+	FCl2jrib
+X-Google-Smtp-Source: AGHT+IERNNUXKI4qhDyzg0XI5iH6RTIa+5izaO5xIW039tDeLfuArFYVT9GqftBtcuIqWhBDdtdIPA==
+X-Received: by 2002:a5d:5988:0:b0:382:450c:2607 with SMTP id ffacd0b85a97d-38880abfca5mr10290909f8f.4.1734422083265;
+        Mon, 16 Dec 2024 23:54:43 -0800 (PST)
 Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-218a1dd69d9sm53736995ad.111.2024.12.16.23.53.52
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72918ad5ac5sm6237789b3a.67.2024.12.16.23.54.40
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 16 Dec 2024 23:53:54 -0800 (PST)
-Message-ID: <5e21e7f6-6c91-4395-836e-728ffbcdca04@suse.com>
-Date: Tue, 17 Dec 2024 18:23:49 +1030
+        Mon, 16 Dec 2024 23:54:42 -0800 (PST)
+Message-ID: <3926d40d-6d1b-4c57-96b8-eda2053e0e6d@suse.com>
+Date: Tue, 17 Dec 2024 18:24:38 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -67,12 +67,11 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] btrfs/100, btrfs/101: fix device name in their golden
- output
+Subject: Re: [PATCH] btrfs/142, btrfs/143: fix dmdust device names
 To: fdmanana@kernel.org, fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, dchinner@redhat.com,
  Filipe Manana <fdmanana@suse.com>
-References: <84afb2bfe9615a98a1ae4de7dfd5fca98771937d.1733851994.git.fdmanana@suse.com>
+References: <e890661f90bde3b8119bd9a533760b2c8e162cfd.1733852020.git.fdmanana@suse.com>
 Content-Language: en-US
 From: Qu Wenruo <wqu@suse.com>
 Autocrypt: addr=wqu@suse.com; keydata=
@@ -99,7 +98,7 @@ Autocrypt: addr=wqu@suse.com; keydata=
  /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
  o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
  JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <84afb2bfe9615a98a1ae4de7dfd5fca98771937d.1733851994.git.fdmanana@suse.com>
+In-Reply-To: <e890661f90bde3b8119bd9a533760b2c8e162cfd.1733852020.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 
@@ -108,14 +107,14 @@ Content-Transfer-Encoding: 8bit
 在 2024/12/11 04:03, fdmanana@kernel.org 写道:
 > From: Filipe Manana <fdmanana@suse.com>
 > 
-> After commit 88c0291d297c ("fstests: per-test dmerror instances"), the dm
-> error device name changed so that it's no longer a plain 'error-test' but
-> instead it's that plus a prefix matching the test number, such as
-> 'error-test.100' for example. The tests btrfs/100 and btrfs/101 are still
-> using the plain old name 'error-test' in their golden output, which makes
-> them fail. So update them to use 'error-test.100' and 'error-test.101'.
+> After commit aaa132777476 ("fstests: per-test dmdust instances") the
+> dmdust device names are no longer a plain 'dust-test', they now have
+> a suffix matching '.N', where N is the test's sequence number.
+> The test cases btrf/142 and btrfs/143 are still using the old device
+> names, so they fail. Fix this my making them refer to 'dust-test.$seq'
+> instead of 'dust-test'.
 > 
-> Fixes: 88c0291d297c ("fstests: per-test dmerror instances")
+> Fixes: aaa132777476 ("fstests: per-test dmdust instances")
 > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
 Reviewed-by: Qu Wenruo <wqu@suse.com>
@@ -124,34 +123,38 @@ Thanks,
 Qu
 
 > ---
->   tests/btrfs/100.out | 2 +-
->   tests/btrfs/101.out | 2 +-
->   2 files changed, 2 insertions(+), 2 deletions(-)
+>   tests/btrfs/142 | 4 ++--
+>   tests/btrfs/143 | 4 ++--
+>   2 files changed, 4 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/btrfs/100.out b/tests/btrfs/100.out
-> index 1fe3c0de..e0e6cec2 100644
-> --- a/tests/btrfs/100.out
-> +++ b/tests/btrfs/100.out
-> @@ -2,7 +2,7 @@ QA output created by 100
->   Label: none  uuid: <UUID>
->   	Total devices <NUM> FS bytes used <SIZE>
->   	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-> -	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
-> +	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test.100
->   Label: none  uuid: <UUID>
->   	Total devices <NUM> FS bytes used <SIZE>
->   	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-> diff --git a/tests/btrfs/101.out b/tests/btrfs/101.out
-> index c2359c7c..fbb5faa1 100644
-> --- a/tests/btrfs/101.out
-> +++ b/tests/btrfs/101.out
-> @@ -2,7 +2,7 @@ QA output created by 101
->   Label: none  uuid: <UUID>
->   	Total devices <NUM> FS bytes used <SIZE>
->   	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
-> -	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test
-> +	devid <DEVID> size <SIZE> used <SIZE> path /dev/mapper/error-test.101
->   Label: none  uuid: <UUID>
->   	Total devices <NUM> FS bytes used <SIZE>
->   	devid <DEVID> size <SIZE> used <SIZE> path SCRATCH_DEV
+> diff --git a/tests/btrfs/142 b/tests/btrfs/142
+> index cf7e8daa..0ab0f801 100755
+> --- a/tests/btrfs/142
+> +++ b/tests/btrfs/142
+> @@ -58,8 +58,8 @@ _mount_dust
+>   # step 3, 128k dio read (this read can repair bad copy)
+>   echo "step 3......repair the bad copy" >>$seqres.full
+>   
+> -$DMSETUP_PROG message dust-test 0 addbadblock $((physical / 512))
+> -$DMSETUP_PROG message dust-test 0 enable
+> +$DMSETUP_PROG message dust-test.$seq 0 addbadblock $((physical / 512))
+> +$DMSETUP_PROG message dust-test.$seq 0 enable
+>   
+>   _btrfs_direct_read_on_mirror $stripe 2 "$SCRATCH_MNT/foobar" 0 128K
+>   
+> diff --git a/tests/btrfs/143 b/tests/btrfs/143
+> index 5da9a578..490f27b5 100755
+> --- a/tests/btrfs/143
+> +++ b/tests/btrfs/143
+> @@ -65,8 +65,8 @@ _mount_dust
+>   # step 3, 128k buffered read (this read can repair bad copy)
+>   echo "step 3......repair the bad copy" >>$seqres.full
+>   
+> -$DMSETUP_PROG message dust-test 0 addbadblock $((physical / 512))
+> -$DMSETUP_PROG message dust-test 0 enable
+> +$DMSETUP_PROG message dust-test.$seq 0 addbadblock $((physical / 512))
+> +$DMSETUP_PROG message dust-test.$seq 0 enable
+>   
+>   _btrfs_buffered_read_on_mirror $stripe 2 "$SCRATCH_MNT/foobar" 0 128K
+>   
 
