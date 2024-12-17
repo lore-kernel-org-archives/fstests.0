@@ -1,166 +1,62 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFF271D5AD1
-	for <fstests@vger.kernel.org>; Tue, 17 Dec 2024 07:58:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7408126BF7
+	for <fstests@vger.kernel.org>; Tue, 17 Dec 2024 08:11:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734422289; cv=none; b=HDSVACOdv96NmsVaj2ZTKQ9NfcgcSBwvA0pQ8t7IxI8p79QIlwwliAHZhSkpgbrIroy2Qr3CXAGLJY+2mFO38i71FHEbimX3xqCkHYjWZmWD6hGQc2ASbPbCSAjINtVmVp1+kfgjiEfixXSDiSzQ1CsDf0ucBPr88jVNndpbbSQ=
+	t=1734423072; cv=none; b=pgLwRh4il8XtAJ02ONTQWBYpKBpc5oouLlQW/Dc6n05CE4/tA6IC9L/PYmdkA0AZSVhfuLAH0voJJmCzZIDr8HtfKP5PKvSpOkWyOAAjv3NBcHBq1Z4ucldzK4HiZgbiZvPYACSdGjW522y4Y81JryjXqx6WveHaYW/Pc10TI4c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734422289; c=relaxed/simple;
-	bh=zjYFBeGI81TvwSczSswEx2d4FS7UT7vkjnjWbwM8MU8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=M92hZIFs2yU3HXUg9PX8I1O3cYVCitClpZhdJMCcsExHunrPOIn6RH1aEzFxccgGuh804TcWHeRDFBIcrUR+5aggAwPhy80P44+F2GQzp1FWqE7Z76HKmjpX+o4UiAKtMDDj6gCLRDAeFvF04f2qZKRv1ksAMKLS7ZFKpJHvBOY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=JekDdSIl; arc=none smtp.client-ip=209.85.128.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1734423072; c=relaxed/simple;
+	bh=H7/mqawJhk60FJhSU6Kv0un8/JONH133ydgLOlOR/ts=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RPTWHUTsGvJrNYByIjVE7j7dxl3jbyOCETLhUi8lubrklX+dIEO3i5y2cMHUCE7cxp0r7sRFbT7sFmnYpooo8N9wPDCq8hkeA9frUvEPjYz5jGmXavgUfTge5EURs3jsirzlbBSUfyRxNGmU9VoJw/RiwJXdZNl0VYrXcVXd0UQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=hPVOhKlH; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="JekDdSIl"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-436345cc17bso24015015e9.0
-        for <fstests@vger.kernel.org>; Mon, 16 Dec 2024 23:58:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1734422285; x=1735027085; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=WrjFjP+rzv/6lfs/A3ErR2BE8L5FI8AZ1uVimKRsvHU=;
-        b=JekDdSIlxV0JoH8G3OZ+MGHqJTw55PXSj7FUJuFDGGDXZ95E/I73aPxH+p8JZ/HGNo
-         bEs9N1wbsofS5ammz1+VIFFzv+mRKfg/Xm36nCigfVTWk74kKJC+QaS/SquKPmfPeMMD
-         Zdg80pnwfAKkn8pnoU6rxC0SJaG9KrfS7CFoaLqVzZk+5Us2emlYis++fcv9Dfv1u9ED
-         F3QtSOX0l2G0eg5DFeu2h80DGm2H19KoXYgz8oUhfN4LR66Q6GJKLtKtOnlaxu/IjNk1
-         aZZ+iHJiqbzjwEXfpxi5zzQVd/g7oxxcj+Qd7hQMatHMIVap7m08fU5TgL8fSTnkHhwH
-         sFRA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1734422285; x=1735027085;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WrjFjP+rzv/6lfs/A3ErR2BE8L5FI8AZ1uVimKRsvHU=;
-        b=CFWaTuw2lDbYnhl/izGvvGW/MR+pMH7pbJZaDh2XL7xIpiPuU8t2vRIr00iZTaApu/
-         Vvl1ucg5JV058jlBH7IdEdJHSl1Rl9opx+8LdtuDbPR++PyjUjh4XmdyxBQ8wLEHJjIc
-         TA7qcUncaEmLfab1zLrAbP+WhSmCpmfvs80AwiRUmF+2ysoFNgffv1LsEYuPlEW0y4a/
-         Qa4XITbEWJi9zGVv/tljIFkr9mWZi1W5jVS1YBCqfuXy0NYW3+kS+dPgsbyuTt17qKsD
-         y/xqAUaknH5+qPbQqHje4acK8uckGKPRKS0iHkyiUn0Xkorq42qE0NVcfBUEEXQcH1sU
-         XMQQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXSOEDZPtvwr6DZqZg7lsJ/E2YGKRtAxfGDm8KzxCt+APNmf1odvs14dyHVmxTE/qc+n61wHwd+@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw/7E8YEXh8tVlh5tPCKqvmnt70mQgVxuTAnrDD3eRiB7fBcwDA
-	klddQIyJ2s+eulDX4sx6Qli+XCEL20y5oTuMdG0Ty1gxZuCOB/gCmDHCZTdWsH8=
-X-Gm-Gg: ASbGncuWmOno2viH0xBa87Uvy64Fm2QpOLFOnHZqizIEQ594H9FJunpZpDDBl24+OAE
-	SZ7VnvccO7KDlANm/QDYyhEzA8jdWJjA487gSixyiXRB9JYYatNytLTuRzgRJIaW5mitcJWc1Bp
-	BDps4o779bsg8ugjNKxAPFA9Ky7OdtsPyjh6ILJM/kI1GUWGYg69b2Cw0mXLXat8RJdbcNLn3u8
-	t5pK2yIyHCdIrHR85MKaSJHcFGjLbshp7A0WxBsWzJ7q5AFwldaO1ngqmrz2ON4XplJARRHfwNe
-	e4Fr4Kdh
-X-Google-Smtp-Source: AGHT+IFqIyYn7Rdka62RpyLZvJ8mxvgAbCLpcmlatdkxdyBjhlq7GFwKME8kk/gse/nmNraNloN0zg==
-X-Received: by 2002:a05:6000:186e:b0:385:e429:e59e with SMTP id ffacd0b85a97d-388da5b5c32mr2035964f8f.52.1734422285042;
-        Mon, 16 Dec 2024 23:58:05 -0800 (PST)
-Received: from ?IPV6:2403:580d:fda1::299? (2403-580d-fda1--299.ip6.aussiebb.net. [2403:580d:fda1::299])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72918bc05a1sm6051809b3a.173.2024.12.16.23.58.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 16 Dec 2024 23:58:04 -0800 (PST)
-Message-ID: <788dc543-9394-4e8b-9780-b1d08c86afec@suse.com>
-Date: Tue, 17 Dec 2024 18:28:00 +1030
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="hPVOhKlH"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=zINYm0P8+Rdm1SwqKnExVZj1GlL+8XkzlaofHQs8ApA=; b=hPVOhKlHL8PIrrRUcB2bgDj3iy
+	HOu67/uINeuVu70P8oPwf43Pk5KTM6iMABpZ+Lf88Wpcoiyl4ptpWHcLCpIEJF8Hqd+Jlq0Cdu/6T
+	1QaiScbgf0GyDzmo2EA+eu+LtDGdcEBx1bEUyon26oxRPsGn3zCi9HV1TetzuC0tp8XaA09uJziht
+	5mBCjncBc6dxu6ZOluHSOSHfkboYN7P+gdKRQA50uaRF4YyId/+Nq51baSQe+TU3xWBdWs9L/vpVE
+	f+jq6n3W/hN9chYrCjLGZLCKxDzUSVY++IE5wqICNTtuJJR1MVaMsm9s6Rl/5peFcsE2WqFsmrVgL
+	sD0N8y6A==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1tNSfb-0000000CfYT-0Ufw;
+	Tue, 17 Dec 2024 08:11:07 +0000
+Date: Tue, 17 Dec 2024 00:11:07 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
+ testing on xfs
+Message-ID: <Z2EyG0vqtyTSyM5a@infradead.org>
+References: <20241215051242.3340572-1-tytso@mit.edu>
+ <20241215051242.3340572-3-tytso@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic/442: fix failure due to missing test number
- argument for fsync-err
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, dchinner@redhat.com,
- Filipe Manana <fdmanana@suse.com>
-References: <407b633354417bbadeb3e665246f5c5f8000e1e6.1733852293.git.fdmanana@suse.com>
-Content-Language: en-US
-From: Qu Wenruo <wqu@suse.com>
-Autocrypt: addr=wqu@suse.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNGFF1IFdlbnJ1byA8d3F1QHN1c2UuY29tPsLAlAQTAQgAPgIbAwULCQgHAgYVCAkKCwIE
- FgIDAQIeAQIXgBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXVgBQkQ/lqxAAoJEMI9kfOh
- Jf6o+jIH/2KhFmyOw4XWAYbnnijuYqb/obGae8HhcJO2KIGcxbsinK+KQFTSZnkFxnbsQ+VY
- fvtWBHGt8WfHcNmfjdejmy9si2jyy8smQV2jiB60a8iqQXGmsrkuR+AM2V360oEbMF3gVvim
- 2VSX2IiW9KERuhifjseNV1HLk0SHw5NnXiWh1THTqtvFFY+CwnLN2GqiMaSLF6gATW05/sEd
- V17MdI1z4+WSk7D57FlLjp50F3ow2WJtXwG8yG8d6S40dytZpH9iFuk12Sbg7lrtQxPPOIEU
- rpmZLfCNJJoZj603613w/M8EiZw6MohzikTWcFc55RLYJPBWQ+9puZtx1DopW2jOwE0EWdWB
- rwEIAKpT62HgSzL9zwGe+WIUCMB+nOEjXAfvoUPUwk+YCEDcOdfkkM5FyBoJs8TCEuPXGXBO
- Cl5P5B8OYYnkHkGWutAVlUTV8KESOIm/KJIA7jJA+Ss9VhMjtePfgWexw+P8itFRSRrrwyUf
- E+0WcAevblUi45LjWWZgpg3A80tHP0iToOZ5MbdYk7YFBE29cDSleskfV80ZKxFv6koQocq0
- vXzTfHvXNDELAuH7Ms/WJcdUzmPyBf3Oq6mKBBH8J6XZc9LjjNZwNbyvsHSrV5bgmu/THX2n
- g/3be+iqf6OggCiy3I1NSMJ5KtR0q2H2Nx2Vqb1fYPOID8McMV9Ll6rh8S8AEQEAAcLAfAQY
- AQgAJgIbDBYhBC3fcuWlpVuonapC4cI9kfOhJf6oBQJnEXWBBQkQ/lrSAAoJEMI9kfOhJf6o
- cakH+QHwDszsoYvmrNq36MFGgvAHRjdlrHRBa4A1V1kzd4kOUokongcrOOgHY9yfglcvZqlJ
- qfa4l+1oxs1BvCi29psteQTtw+memmcGruKi+YHD7793zNCMtAtYidDmQ2pWaLfqSaryjlzR
- /3tBWMyvIeWZKURnZbBzWRREB7iWxEbZ014B3gICqZPDRwwitHpH8Om3eZr7ygZck6bBa4MU
- o1XgbZcspyCGqu1xF/bMAY2iCDcq6ULKQceuKkbeQ8qxvt9hVxJC2W3lHq8dlK1pkHPDg9wO
- JoAXek8MF37R8gpLoGWl41FIUb3hFiu3zhDDvslYM4BmzI18QgQTQnotJH8=
-In-Reply-To: <407b633354417bbadeb3e665246f5c5f8000e1e6.1733852293.git.fdmanana@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241215051242.3340572-3-tytso@mit.edu>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
+On Sun, Dec 15, 2024 at 12:12:42AM -0500, Theodore Ts'o wrote:
+> +if [ $FSTYP = "xfs" ]; then
+> +    _scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
+> +else
+> +    _scratch_mkfs >> $seqres.full 2>&1
+> +fi
 
-
-在 2024/12/11 04:08, fdmanana@kernel.org 写道:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> After commit 88c0291d297c ("fstests: per-test dmerror instances") the
-> script src/dmerror now has an extra argument, corresponding to a test's
-> sequence number, but generic/442 isn't passing that argument so the test
-> fails like this:
-> 
->    $ ./check generic/442
->    FSTYP         -- btrfs
->    PLATFORM      -- Linux/x86_64 debian0 6.13.0-rc1-btrfs-next-181+ #1 SMP PREEMPT_DYNAMIC Tue Dec  3 13:03:23 WET 2024
->    MKFS_OPTIONS  -- /dev/sdc
->    MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
->    generic/442 4s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//generic/442.out.bad)
->        --- tests/generic/442.out	2020-06-10 19:29:03.850519863 +0100
->        +++ /home/fdmanana/git/hub/xfstests/results//generic/442.out.bad	2024-12-10 17:35:59.746597468 +0000
->        @@ -1,2 +1,3 @@
->         QA output created by 442
->        -Test passed!
->        +Usage: /home/fdmanana/git/hub/xfstests/src/dmerror {load_error_table|load_working_table}
->        +system: program exited: 1
->        ...
->        (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/generic/442.out /home/fdmanana/git/hub/xfstests/results//generic/442.out.bad'  to see the entire diff)
->    Ran: generic/442
->    Failures: generic/442
->    Failed 1 of 1 tests
-> 
-> Fix this by passing the test's sequence number as an argument.
-> 
-> Fixes: 88c0291d297c ("fstests: per-test dmerror instances")
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-BTW, generic/441 has one debug seqres.full output containing the old 
-command, which is desynced from the real command.
-
-Thanks,
-Qu
-
-> ---
->   tests/generic/442 | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/442 b/tests/generic/442
-> index c1182b5a..ac1b094a 100755
-> --- a/tests/generic/442
-> +++ b/tests/generic/442
-> @@ -29,7 +29,7 @@ _require_test_program dmerror
->   
->   _dmerror_init
->   
-> -$here/src/fsync-err -d $here/src/dmerror $DMERROR_DEV
-> +$here/src/fsync-err -d "$here/src/dmerror $seq" $DMERROR_DEV
->   
->   # success, all done
->   _dmerror_load_working_table
+We really need to document why generic tests have file system specific
+hacks.  And yes, that's a request for Dave who originally added it
+without any explanation and not Ted.
 
