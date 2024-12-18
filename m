@@ -1,241 +1,103 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A870154BE2;
-	Wed, 18 Dec 2024 21:01:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07D2C17A586
+	for <fstests@vger.kernel.org>; Wed, 18 Dec 2024 22:26:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734555709; cv=none; b=cZZUuWtSFj+JXKqb/kjp6390kG+mZxgbSGE4GyDMUwi2QhlPCbJyMG+SSXQE713DWO9hVTSPAOlHR/od9JHk2DmmAKp1LnMsVORbItRQFzHm0KdkW5Zj5m+tJ9vSUnkUWHpAMY7hSpTb3Gp0PgNKYiE57aaZU3qLSwynRO6NWsg=
+	t=1734560774; cv=none; b=reZ3elKQWPkJMUVO1zgwYAkxmZ7x1IA/89G786dECLARJEXBz4rPuK5c6zblstqEC/lBXoWNagV5zmc7w0DmW0p8LZmjquVfvZdYJHxiFBHeoV0ZyfcWdY7+LSm5x7IYHnDIGmzoH83yDqVtyncv77nGjA2xBUjGvLQmhNLbkDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734555709; c=relaxed/simple;
-	bh=cDO7UWdIQWbWH/F4yo3vlmDVwdRm8KqFQLlnMgpIVdg=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ZAZbHfDCAhLeyc3nghtFiV9TDIlLmNGxa3S7NJP6uuW+Mp+o9LTKy1DGXxOe4XskLvOg1SjYGTbGqIyhFAouGJ3Kr5wurly61AF6xM6Pr63psnpGZIUuEV+x8ewuRZcLF+But61F1f/mukMex2somuHcA2Qeko8D7x02Utq4fUE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Z8Ur6Gk7; arc=none smtp.client-ip=209.85.128.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1734560774; c=relaxed/simple;
+	bh=8vwhHmQLEpkZmpzcrcDMP0ub+kyd8l6nrOijMTDS6Lc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=UxN9HTfHeIScO6GOe3vOwQsl52mB4fdveVtNwh4F3YeL2jzMQtv3Qt7dopvJbuLUJvIg16zoYePmPC8K6cH1rQJaUTX0i3Un4UN30sqwt+ozB7TRHp6YibIHRvszMKlTWmlZojHKkeq+M1q6oJVd9dMFr+i5nTx5evy8WOJ8a/4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=HjleHKxJ; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Z8Ur6Gk7"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-6efe4324f96so955277b3.1;
-        Wed, 18 Dec 2024 13:01:46 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="HjleHKxJ"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2164b662090so1449345ad.1
+        for <fstests@vger.kernel.org>; Wed, 18 Dec 2024 14:26:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1734555705; x=1735160505; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QncxWc0ArffuexDoQAkc0V3NOWqi960DY4WYKPMB8Xc=;
-        b=Z8Ur6Gk7r9u/oQ38eIrNS8wulihpr8njfBFeKb1UffM5Qw6y2WtfEnDUyh9ZT/w0h8
-         WZwdmvDaYnplndn9yUi7hFSHl72nxxCmoAgZ9b+9oarMWgbE6fE8TTznGLKGRBpKEe6H
-         vuJjpdys+J/RmRW1WEViIULc7GnU0jKAGLQhcEsMGxWoXntXAp2IJDjE2zfmIDt412zO
-         ttEV6i2MVlEfAxYgs5Ml/hdb9Zw71aqt5tqElUcFzn7CIqxr57M5SF/YC+gi6I4+N7RY
-         7I9wWIwR7T/g6CLM0n92WJvAeckYK4SPH4g6gxOgZI3YVd6TPlEQHS/HC+DmCRKfZij6
-         giGQ==
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1734560770; x=1735165570; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=vOeB6zA5skaMzp4ZAiz3xHlYIdAmnlauE5YvU+UAmpc=;
+        b=HjleHKxJVyJ1O/1eXCED5sfIKEQsp5hjPKTHX0lVzRDbeQP5+upUjmfB90vA+F25Z4
+         HJqZUs9wFIF+oViEf6YDFEPmGu6Kfd79kd1LsD8q7hEJV6W9mCQNIPLaqInGGtYUVudD
+         Wes2kzBXHQhA76psXMFG/NrmzMwrCWZEYjMqRfaGIuTIoz++rJYwSHoFJxKzlh3+mp9E
+         MsxnN2BS3GwRgvatX2S5ljDuInzYxvA2Lku8Hs1nmKj23uYP04iiuAUCTSc98RjNW2W/
+         UjWrXQC99jf3RVn6WYJ8XcxyUk5Dzi+4wHHjH0AmtkdZM4Cih5esmaHXhicyA0IxQ2Li
+         KXng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1734555705; x=1735160505;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=QncxWc0ArffuexDoQAkc0V3NOWqi960DY4WYKPMB8Xc=;
-        b=tShT5lQpmxoKjwwKUBdlYYhHkKkWDO5P/4PhQVokLEcJpnY3KCWGW1nTH52o5glRE5
-         GOLv64zdsn7QQdc917TkE/IJMCuIyreg8A/wbhosU7I/MDBBQ31RzfsJHTi6i31r6HzM
-         Ql2BDCUMlk6pHIqupMywg0RadwkL5IdWCyCwa+vOGDBjFBBJ760N7c5oTtvcA5yxelTl
-         IUjS4dJIoHKrcyiyYuHQliipnBbezPf6+tJcOEAFARBrUIdy8tlKBZl5DCwHZAjIaTyl
-         2pSIeeI15ZUk/mVgseVfTpfo8XT+7Im+VNSM/3d9pE6ixYazaWt6S7R4xnI4aGUDm6h9
-         cmyw==
-X-Gm-Message-State: AOJu0Yzza9HMc6Uvj3mJMmmlL4PKXhheqnwERQwUNVJLFnwKGfcOXPX/
-	iYW7qQJ0NEBFuhvLXnXU+v2gKjgvHX2IMAcdYskaYfcUJYvv8j9xbCx0lw==
-X-Gm-Gg: ASbGncvbsGdftCF+ajpJQe89KVUAOgz4a7jEJZIJd7Jhr4BGWCX5NVY7nHA/KpCfnur
-	bcpeU0Zyg8LRnlLUgtjUpKVg2HjHhg3x4tWerMhJKvSCf3UEEWRq/Cq3c3DsMhBDjfMQaPaCpfq
-	L9qr0NaZHwwyDlaJc0Qe/1jTV/O+qN2i/9Of+cLbuah8dNYDou9sIEk+kfmYnIB11Uz0wmrWKGO
-	XS/aPkG70KIVTA8cWzb0uxGcc1nF3rgFxZ3FbRzK0HkVWgtwnrWFeGjzuMYjQOxgsuL4Sz3oF21
-	wJU7QuG5fspe3ww=
-X-Google-Smtp-Source: AGHT+IGxWQIlECdd3SGIqn0jlH44IHvkjLyi7S8vfSq5akURyLZVBTNd182RVoG0lNaLJFB0NaNxsA==
-X-Received: by 2002:a05:690c:d88:b0:6ef:a5bf:510b with SMTP id 00721157ae682-6f3ccc246b3mr34248537b3.1.1734555703582;
-        Wed, 18 Dec 2024 13:01:43 -0800 (PST)
-Received: from localhost (fwdproxy-nha-013.fbsv.net. [2a03:2880:25ff:d::face:b00c])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f288fc4f11sm26135667b3.24.2024.12.18.13.01.43
+        d=1e100.net; s=20230601; t=1734560770; x=1735165570;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vOeB6zA5skaMzp4ZAiz3xHlYIdAmnlauE5YvU+UAmpc=;
+        b=wZ9U08BR0Diolo2tyq43doVRb4PLKsFvmsW2UYyQmj0JIGT9uB+38deQMm8fkqhnBz
+         EVKkENf6786CFM7tYF9C4wODN4ZRkd5iVSrr0mV8AVr7xIPaRtvgjLCWpjFqWw5NXKQ3
+         ttYnbl4nAqdaM6k/Z0r5nwX0NFzDKRvMEZIL6cAfkp1AaC5ElE6I0nxeocN2UyjLnKR7
+         rh7VoGneL/KZLeI1bQj/1wp2kUektHi5y6ew+nvazk26L5iQ00Q877JYOJOSco2SB5tf
+         NpcsBJtnQprbppFTsm70lODCTsariOO9ukUE+Ejduy0Gn8sLaHRLPFNTSdZl8/+imWuD
+         Y3Hw==
+X-Forwarded-Encrypted: i=1; AJvYcCXmeThhK1kYYMobzPtaVnVxvIHHfG2j2mSvgdSfgy8jqOPivhKLltoqjr2CGgkVv9o+EOOxATLl@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQMOTg2SrXx3XwGOsmq70HgH3VxCHe+4NbKAwZBe2d2TmpZpqB
+	EtIzIXCpp7VSVHHlDz2iwAiSBFw2PHa3g+NKeuo1JUASvirl9RSwUvZUsJQ0YKlyOrYVLlZ74PT
+	b
+X-Gm-Gg: ASbGncuTp6VCNvNGxsZqUQfyoJ1co65js3sRCYZ02rwc0b6FRkUklOrzjwZ7i4EFQD6
+	wOf5/sI5Y2pFcBa8Y59hWLeUqlD4woEvYgpYepr3wwxNHz7AtP6mSuB1j1mqETEt/dpqwxmj6lU
+	VCgYrvA3J6GiTD91w6VrnouSDLY8auRWFds5OU5tf3VSFg6DGVTP9HtePyi9UDXOhu0RCFCY7Dq
+	w1s2KnGObW3mrwgiyZUw3yPRYTj07BdAVOAGpQYZHxYztiWSnQEQzBbe4f2g7a+w7fOO4aP/1Z8
+	8TcpXG1WpJn43l7GXuORUkit+cS9Ew==
+X-Google-Smtp-Source: AGHT+IHKshBMFKmtZzz13kC8NcY7XsU1uwfx/6DQrlyP2WPK4iC6sHjMnT72lTIGzitP+crFYSoOJw==
+X-Received: by 2002:a17:902:cccd:b0:215:6cb2:7877 with SMTP id d9443c01a7336-218d6fcc257mr67215565ad.4.1734560770430;
+        Wed, 18 Dec 2024 14:26:10 -0800 (PST)
+Received: from dread.disaster.area (pa49-195-9-235.pa.nsw.optusnet.com.au. [49.195.9.235])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-219dca025d1sm255805ad.254.2024.12.18.14.26.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Dec 2024 13:01:43 -0800 (PST)
-From: Joanne Koong <joannelkoong@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org,
-	kernel-team@meta.com
-Subject: [PATCH 1/2] fsx: support reads/writes from buffers backed by hugepages
-Date: Wed, 18 Dec 2024 13:01:21 -0800
-Message-ID: <20241218210122.3809198-2-joannelkoong@gmail.com>
-X-Mailer: git-send-email 2.43.5
-In-Reply-To: <20241218210122.3809198-1-joannelkoong@gmail.com>
-References: <20241218210122.3809198-1-joannelkoong@gmail.com>
+        Wed, 18 Dec 2024 14:26:10 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tO2UY-0000000CQl8-47bI;
+	Thu, 19 Dec 2024 09:26:06 +1100
+Date: Thu, 19 Dec 2024 09:26:06 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
+ testing on xfs
+Message-ID: <Z2NL_oc5QSscZdZ_@dread.disaster.area>
+References: <20241215051242.3340572-1-tytso@mit.edu>
+ <20241215051242.3340572-3-tytso@mit.edu>
+ <Z2EyG0vqtyTSyM5a@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Z2EyG0vqtyTSyM5a@infradead.org>
 
-Add support for reads/writes from buffers backed by hugepages.
-This can be enabled through the '-h' flag. This flag should only be used
-on systems where THP capabilities are enabled.
+On Tue, Dec 17, 2024 at 12:11:07AM -0800, Christoph Hellwig wrote:
+> On Sun, Dec 15, 2024 at 12:12:42AM -0500, Theodore Ts'o wrote:
+> > +if [ $FSTYP = "xfs" ]; then
+> > +    _scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
+> > +else
+> > +    _scratch_mkfs >> $seqres.full 2>&1
+> > +fi
+> 
+> We really need to document why generic tests have file system specific
+> hacks.  And yes, that's a request for Dave who originally added it
+> without any explanation and not Ted.
 
-Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
----
- ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 92 insertions(+), 8 deletions(-)
+Creating and then unlinking 50000 files is journal space bound
+when using default 64MB logs on small test filesystems. Increasing
+the journal size to 256MB halved the runtime of this test.
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 41933354..3656fd9f 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -190,6 +190,7 @@ int	o_direct;			/* -Z */
- int	aio = 0;
- int	uring = 0;
- int	mark_nr = 0;
-+int	hugepages = 0;                  /* -h flag */
- 
- int page_size;
- int page_mask;
-@@ -2471,7 +2472,7 @@ void
- usage(void)
- {
- 	fprintf(stdout, "usage: %s",
--		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
-+		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
- 	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
- 	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
- 	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-@@ -2484,6 +2485,7 @@ usage(void)
- 	-e: pollute post-eof on size changes (default 0)\n\
- 	-f: flush and invalidate cache after I/O\n\
- 	-g X: write character X instead of random generated data\n\
-+	-h hugepages: use buffers backed by hugepages for reads/writes\n\
- 	-i logdev: do integrity testing, logdev is the dm log writes device\n\
- 	-j logid: prefix debug log messsages with this id\n\
- 	-k: do not truncate existing file and use its size as upper bound on file size\n\
-@@ -2856,6 +2858,56 @@ keep_running(void)
- 	return numops-- != 0;
- }
- 
-+static long
-+get_hugepage_size(void)
-+{
-+	const char *str = "Hugepagesize:";
-+	long hugepage_size = -1;
-+	char buffer[64];
-+	FILE *file;
-+
-+	file = fopen("/proc/meminfo", "r");
-+	if (!file) {
-+		prterr("get_hugepage_size: fopen /proc/meminfo");
-+		return -1;
-+	}
-+	while (fgets(buffer, sizeof(buffer), file)) {
-+		if (strncmp(buffer, str, strlen(str)) == 0) {
-+			sscanf(buffer + strlen(str), "%ld", &hugepage_size);
-+			break;
-+		}
-+	}
-+	fclose(file);
-+	if (hugepage_size == -1) {
-+		prterr("get_hugepage_size: failed to find "
-+			"hugepage size in /proc/meminfo\n");
-+		return -1;
-+	}
-+
-+	/* convert from KiB to bytes  */
-+	return hugepage_size * 1024;
-+}
-+
-+static void *
-+init_hugepages_buf(unsigned len, long hugepage_size)
-+{
-+	void *buf;
-+	long buf_size = roundup(len, hugepage_size);
-+
-+	if (posix_memalign(&buf, hugepage_size, buf_size)) {
-+		prterr("posix_memalign for buf");
-+		return NULL;
-+	}
-+	memset(buf, '\0', len);
-+	if (madvise(buf, buf_size, MADV_COLLAPSE)) {
-+		prterr("madvise collapse for buf");
-+		free(buf);
-+		return NULL;
-+	}
-+
-+	return buf;
-+}
-+
- static struct option longopts[] = {
- 	{"replay-ops", required_argument, 0, 256},
- 	{"record-ops", optional_argument, 0, 255},
-@@ -2883,7 +2935,7 @@ main(int argc, char **argv)
- 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
- 
- 	while ((ch = getopt_long(argc, argv,
--				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-+				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
- 				 longopts, NULL)) != EOF)
- 		switch (ch) {
- 		case 'b':
-@@ -2916,6 +2968,9 @@ main(int argc, char **argv)
- 		case 'g':
- 			filldata = *optarg;
- 			break;
-+		case 'h':
-+			hugepages = 1;
-+			break;
- 		case 'i':
- 			integrity = 1;
- 			logdev = strdup(optarg);
-@@ -3232,12 +3287,41 @@ main(int argc, char **argv)
- 	original_buf = (char *) malloc(maxfilelen);
- 	for (i = 0; i < maxfilelen; i++)
- 		original_buf[i] = random() % 256;
--	good_buf = (char *) malloc(maxfilelen + writebdy);
--	good_buf = round_ptr_up(good_buf, writebdy, 0);
--	memset(good_buf, '\0', maxfilelen);
--	temp_buf = (char *) malloc(maxoplen + readbdy);
--	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
--	memset(temp_buf, '\0', maxoplen);
-+	if (hugepages) {
-+		long hugepage_size;
-+
-+		hugepage_size = get_hugepage_size();
-+		if (hugepage_size == -1) {
-+			prterr("get_hugepage_size()");
-+			exit(99);
-+		}
-+
-+		if (writebdy != 1 && writebdy != hugepage_size)
-+			prt("ignoring write alignment (since -h is enabled)");
-+
-+		if (readbdy != 1 && readbdy != hugepage_size)
-+			prt("ignoring read alignment (since -h is enabled)");
-+
-+		good_buf = init_hugepages_buf(maxfilelen, hugepage_size);
-+		if (!good_buf) {
-+			prterr("init_hugepages_buf failed for good_buf");
-+			exit(100);
-+		}
-+
-+		temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
-+		if (!temp_buf) {
-+			prterr("init_hugepages_buf failed for temp_buf");
-+			exit(101);
-+		}
-+	} else {
-+		good_buf = (char *) malloc(maxfilelen + writebdy);
-+		good_buf = round_ptr_up(good_buf, writebdy, 0);
-+		memset(good_buf, '\0', maxfilelen);
-+
-+		temp_buf = (char *) malloc(maxoplen + readbdy);
-+		temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-+		memset(temp_buf, '\0', maxoplen);
-+	}
- 	if (lite) {	/* zero entire existing file */
- 		ssize_t written;
- 
+-Dave.
 -- 
-2.47.1
-
+Dave Chinner
+david@fromorbit.com
