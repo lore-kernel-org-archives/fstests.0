@@ -1,186 +1,99 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AAB0157E82;
-	Wed, 18 Dec 2024 20:19:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF471154BE2;
+	Wed, 18 Dec 2024 21:01:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734553160; cv=none; b=tH/bDpOpTFuPpFaXDImqu78+cmGjOrTkeLJ8W6L5rYeIET/z/4AaIgFSVfWbGJLt3V5DqPspW5VCXhlYaxcdIZrjDg919Yfs/jCwWjHi5k45fWmlAl4c/zLMgBERIxg7Ms+t105NynjIBae496lCPk09T5xY55e4dF97f7a1ep4=
+	t=1734555704; cv=none; b=Du/MPQ9bchmm3BBx14m1i8yBOBfTYqBoEaTsa3rlOgFE5OCOE8qTzj6+RF/J6BKOtYwK1b6t7ANamzFufKBB+wuRHE9jmEvZGvVRxl5riNDZeUJIUdSg9OF29tEC6buD+l+Shfx3T1H3KEaC+kwrsZgUtAxi1xE3UW4a3V7bqKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734553160; c=relaxed/simple;
-	bh=6jwd0ipT3oGGRW7xVGzjO+Hg4MOfpzOO2Z2fOkqER9c=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=qFFJlwDyX65YiVT/WC1O6vCoCYp6G5cJpZL4cb+Ik23zdbCgVlzgR49fUCwTsewIfk41byEMcCjkT5NZ7jxbLFnhMT5TfyCg/mX6TSJKS7c0YhUcFyaZSGGQlJhKo0wIUDX8UdJ2pbnPa7j44k0d4p0T4TG5WBb8ZwSOZxo9YLA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=h48Du321; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1734555704; c=relaxed/simple;
+	bh=1xjpSBxi3kNZg7RwapyHF30o2RKo5JZlGFsvyV8EVys=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=QjkOBBsd8lEChdP9EmedVAvJk6YM/jN/qrIoIqXgcrzF8ASJmVnJorKg99w1p+GUKOmtUMqXZTulXvdz5iyWQ+xOVcIXHV5BoJZVX2K6YBudxZURfQjvCgoYjouGe+LTcu5EH/4P1+3TgHOFB5EFsUYQOvfrbVsXnHKE36i8lck=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lNvycLmP; arc=none smtp.client-ip=209.85.128.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="h48Du321"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1734553146; x=1735157946; i=quwenruo.btrfs@gmx.com;
-	bh=od5URkdEfhynodlyffApnC2vsLZ2WCQHzDkven0hFU8=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=h48Du321aNj7ai/kg3B21JzOLkOmcJmqgSpH2Mf5dombg8TOOJ49S9BL17Rjk1yD
-	 4C14XN+C9FPVKprK7jbM8hW9ECyTZHG4X9C28Mtej1nb7jH68k9Z/D/PZQF8BSu+i
-	 3Lp3LaczdGraKbglueyTIZp/y/ypamlTPMgmc7Kb4l/0ZakIfgYljNu4m8O+lUGZ7
-	 2KLmDtmQ7EXmqPRXtmZFcGaZ3uMV/4+6iaZZpUDywPOGHyMKChLDPHEuYmtata8CH
-	 puCp3sfB8RqIhnEbQOzk312XStINkUAN3aPaKM1z8P8QtVdvJpd7xDLVccV7870Rd
-	 qRS3/YhVjnHIo7ySdA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MZktj-1t2KVy1thv-00X2fu; Wed, 18
- Dec 2024 21:19:06 +0100
-Message-ID: <d4c1334e-0275-453c-bdea-7878dc8c56f1@gmx.com>
-Date: Thu, 19 Dec 2024 06:49:01 +1030
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lNvycLmP"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6f2896ecdafso919587b3.1;
+        Wed, 18 Dec 2024 13:01:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1734555701; x=1735160501; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=DWw5wVPT+yj2lMwqK7Emk7iKazto2lPJM/4qc1aAqwA=;
+        b=lNvycLmP54oZpy0rGVO1bgHgRDTOP3tlhZKm+0+r9BVB+W4OAFmfAccIu8e/Ctl4M8
+         OMeLJ+ktFbMDnxlBXZekb/aVJVHhLXN8Gl2UEn82gL/2sLJSSg+FCfTeiPZF7Q2YwMEm
+         K+WfybF+1pRKg5xeTQgDtB/PREvS/p9UZcSc5s/JNZWJgSVB9s7diGkdNmvHQVygvjhr
+         MCYyuNCpg6Zf3bkh8FvCkqNVbWOHyxYpdJhH5buC9RIhFjPSQjmGQ8T8+PXPRlX1GPlU
+         UOA82PfS8PeifC08mllgfmnux0F0FUW9npoJPr0aoVjqKjW8SJns5N+9CFNNMa/kT2T/
+         K09A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1734555701; x=1735160501;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=DWw5wVPT+yj2lMwqK7Emk7iKazto2lPJM/4qc1aAqwA=;
+        b=a/IuholBnKhJPE7E6XEBwVRlQt3ZK1Yn2BRDFLCxKHdRDU4NeY/stlELnkqXEZhPZq
+         fm8c97OJZZeyiU6LReM8Id2/fNXpHH8WB0UTApDYb20H6BdWXX1o2Nd4sZtRZjRtS8W+
+         XlOoIo5afKvR389DIrVhpkKyYb9PdPxR/w7C5xSSu18gupxjyrIA4P0jTow9i5ozjF4m
+         LxePqWONOkfivN5LdiWdgduyLpQvYW/QGFsEEJOosIywzzIuoWl339M4iGXJywmq+92i
+         kj7bimcDpkKawaGkVE+EkwXkT2jlFbe5pBYKIRt/BZimycDSzIp5IsmlfTTmiZ3IMewm
+         o9ZA==
+X-Gm-Message-State: AOJu0Yxz5vyYtJHgajWSadEM1ZMygHcJn/rT4vuwI8oIXIzKo5FeCWGK
+	80zg+N4zPn59iPB0v2OayEJcvAbfb2PmAFqZvxwQ4kJ9hC7hwql+ckoC3Q==
+X-Gm-Gg: ASbGncspjrdI1sYykx/OWUR4lQJob0nmlsNMdY3MPN0MHT6sjcZL+9ANONu5oYSZFjV
+	LcUZMVaV86xD3nZu8evq+TqQPowKU4M+O1t2x/REh51KlC/fmTQQqJDzWCNimCbvvXWNefOpy0p
+	YuYkTkOGjep52yHEfy8NY7YEWJ4Wu1zcaz9gMn2IK9b9Aou5hHhnd/HU1gvDpjha5BDyBkox4Tx
+	8etwx4cbTDhfPT+QN/T81QUnT2VNHUWhcyRRkhri5jGO0SYs4n7UiNl91AGY0SxkHx1p0XUZI+1
+	p6qEdM+JTT/vjI8=
+X-Google-Smtp-Source: AGHT+IHRqBK9Pl12C5lQNeZYUplq9CR+4j6ZM04lvN1cJQh4U2z72iEuoMFuatnoX+O5gkRAQer20Q==
+X-Received: by 2002:a05:690c:3:b0:6ef:63cb:61d0 with SMTP id 00721157ae682-6f3d0e0fec9mr36800207b3.10.1734555701274;
+        Wed, 18 Dec 2024 13:01:41 -0800 (PST)
+Received: from localhost (fwdproxy-nha-002.fbsv.net. [2a03:2880:25ff:2::face:b00c])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f288fc50fasm26124227b3.25.2024.12.18.13.01.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Dec 2024 13:01:41 -0800 (PST)
+From: Joanne Koong <joannelkoong@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org,
+	kernel-team@meta.com
+Subject: [PATCH 0/2] fstests: test reads/writes from hugepages-backed buffers
+Date: Wed, 18 Dec 2024 13:01:20 -0800
+Message-ID: <20241218210122.3809198-1-joannelkoong@gmail.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: test swap activation on file that used to have
- clones
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Filipe Manana <fdmanana@kernel.org>, Christoph Hellwig
- <hch@infradead.org>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
- Filipe Manana <fdmanana@suse.com>
-References: <dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com>
- <Z2Ey4yQywOEYqEOI@infradead.org>
- <CAL3q7H4Age-k0ifGh+n4QwExC1vTgWGd3NROcX40vQXKRipBqw@mail.gmail.com>
- <20241217172223.GA6160@frogsfrogsfrogs>
- <db59d0b2-6542-41e1-abf7-0c38b91cdf4d@gmx.com>
- <20241218200927.GC6160@frogsfrogsfrogs>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <20241218200927.GC6160@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:SHfukfyfSpb+WrjRfNzj6CUgLb+ybRxVY6UkIo8jHztQM3wx8IL
- p/4Ci7j+s+gcROmhMtd9UgU3uFIAPp/OtaCQd0hmZi973HqJubbNC089yd63D4y5ncR9vkr
- snAHHmsxntIAlZ9HoT0dP/F5ndEFE0cU3pKv9HDCbdCUgAXp9jNh2Ht4YFPWKWvpg6DpGIV
- JKlIkjQNCnqfAgwVuOhqg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:UsgGzmInNGw=;mVkLnMbN/0r73SZyr4qFZQZ1XUh
- 1GgRzerrxxVdcMab0IvCcT9a46FoIjKI+Kcj1gX3CgyJdK4AmQcwbwK21MKVVgucJlrZZzI5Y
- SY8NeAnyL3yxFDO/bWpsetW4FsbeX+cbLw5H7gu+yQBZBmxUeDJS/jorb6DM6PIG5NBGk+CJh
- KMZlwU8yCuZYGIdBOUP2dODaQ/k7DwqGtzAAKhVrY7jale7yDDlNBDPLHGzBDA1cOf0vi8Ha0
- ThTqc/eVnXgRN+va+FJE53gEAKUTmIWj8LbqM1R7MeOVvtNMSo00NoRja/ddj592bSUAPmW0L
- 2f3o4d9J8QaTC8z958rU2KYVZeXklAHYPm2NQYXwrqekGlxscAoXwyvUFgcEuskRC0e6wXEoz
- oZuUpb4w2ayU3ELXEBxhqq6Tb70IHl9txlP1dja8moChE1cjFrPWZHfHIszlP3NQ0tY35JbKY
- zl5fm+Crsg5wsa2gLLP+/YPF10FaMa7TIyiOuYn9JvQtZksRAnplPG9JwGn3ia8EpxxR8QScP
- 0oZRHKTtdORhsw+YWEJaJIWJIGkNAHC3hlh10pmy2BQystohYSaXS08BaGtHQPsXfwfuRsGWZ
- oHob0ce10xR19G3w6KmFESBH9PlAsuQmjbxfsiDj1sq27aoVaWl6meZrf5SRStOlNBcZ3nIYS
- Xjc2hoZMPrPo/ZTVfADqc1c5aBpkShmhh6ICEt9D89GBsbMuy6Jrm1dO0B0VRPXYo+CWU6fQN
- tNsjdcvIVY4P4v0z7Z4Yf/bDT1Yt3lr4TMKaLAEJub27AMTWN7R6wv4R6s7YnurVIIzaBh8vr
- bu7RomYh8PRP+Z8zQprjxFIJcOdjFwLrASPnc7i36dokmyesXSg/D7qzpe9vVFXu0B3UvwtSe
- FgkKVpTcd5RTXXXyZ6/q5XfZ3qm0KrIFRSfpQBw0oHNEvH/Bef6HU6aztYNGrbYN96wF9AV+k
- 8o/zjYTfqVl2CbUXye//wgUioqS8Lp1kKvtHZF7DhaQmR1bqnOiRbbCwQ+MQUDwM7DHMBeEq+
- O8A+94Nr8AhLGXVLLrmqWr8J1tZqTaS+Q+2wu3e1NJ5Mw1zoKqjchWQwzo15LTGn+F8IggwgF
- Afv+4WnG7CaVPIRfGLF3ZPfAfvq5GR
+Content-Transfer-Encoding: 8bit
 
+There was a recent bug in rc1 [1] that was due to faulty handling for
+userspace buffers backed by hugepages.
 
+This patchset adds generic tests for reads/writes from buffers backed by
+hugepages.
 
-=E5=9C=A8 2024/12/19 06:39, Darrick J. Wong =E5=86=99=E9=81=93:
-> On Wed, Dec 18, 2024 at 09:07:26AM +1030, Qu Wenruo wrote:
->>
->>
->> =E5=9C=A8 2024/12/18 03:52, Darrick J. Wong =E5=86=99=E9=81=93:
->>> On Tue, Dec 17, 2024 at 08:26:33AM +0000, Filipe Manana wrote:
->>>> On Tue, Dec 17, 2024 at 8:14=E2=80=AFAM Christoph Hellwig <hch@infrad=
-ead.org> wrote:
->>>>>
->>>>> On Wed, Dec 11, 2024 at 03:09:40PM +0000, fdmanana@kernel.org wrote:
->>>>>> The test also fails sporadically on xfs and the bug was already rep=
-orted
->>>>>> to the xfs mailing list:
->>>>>>
->>>>>>      https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=3D=
-xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
->>>>>>
->>>>>
->>>>> This version still doesn't seem to have the fs freeze/unfreeze that =
-Darrick
->>>>> asked for in that thread.
->>>>
->>>> I don't get it, what's the freeze/unfreeze for? Where should they be =
-placed?
->>>> Is it some way to get around the bug on xfs?
->>>
->>> freeze kicks the background inode gc thread so that the unlinked clone=
-s
->>> actually get freed before the swapon call.  A less bighammer idea migh=
-t
->>> be to call XFS_IOC_FREE_EOFBLOCKS which also kicks the garbage
->>> collectors.
->>
->> I'm wondering why this GC things can not be done inside XFS' swapon cal=
-l?
->>
->> So that we don't need some per-fs workaround in a generic test case.
->
-> I suppose one could call xfs_inodegc_flush from within swapon with the
-> swap file's i_rwsem held, but now we're blocking swapon while we wait
-> for some unbounded number of probably unrelated unlinked inodes to be
-> freed on the off chance that one of them shared blocks.
->
-> A better answer might be to run FALLOC_FL_UNSHARE on the file, but now
-> we're making swapon more complex and potentially issuing a lot of IO to
-> make that happen.  If you can convince the fsdevel/mm folks that swapon
-> is supposed to try to correct things it doesn't like in the file mapping
-> (instead of returning EINVAL or whatever it does now) then we could add
-> that to the syscall definition.
+[1] https://lore.kernel.org/linux-fsdevel/p3iss6hssbvtdutnwmuddvdadubrhfkdoosgmbewvo674f7f3y@cwnwffjqltzw/
 
-Sorry that I'm no familiar with XFS to provide any help, but the swapon
-call on btrfs is already very complex.
+Joanne Koong (2):
+  fsx: support reads/writes from buffers backed by hugepages
+  generic: add tests for read/writes from hugepages-backed buffers
 
-It needs to verify every extent of that file is not shared, and block
-the subvolume from being snapshotted.
-(The extent shareness check iteslf may already cause quite some IO)
+ common/rc             |  10 +++++
+ ltp/fsx.c             | 100 ++++++++++++++++++++++++++++++++++++++----
+ tests/generic/758     |  23 ++++++++++
+ tests/generic/758.out |   4 ++
+ tests/generic/759     |  24 ++++++++++
+ tests/generic/759.out |   4 ++
+ 6 files changed, 157 insertions(+), 8 deletions(-)
+ create mode 100755 tests/generic/758
+ create mode 100644 tests/generic/758.out
+ create mode 100755 tests/generic/759
+ create mode 100644 tests/generic/759.out
 
-So at least to me, a little more extra logic and IO shouldn't be a huge
-blockage, since we're already doing exactly that since the btrfs
-swapfile support.
-
-Thanks,
-Qu
->
-> --D
->
->> Thanks,
->> Qu
->>>
->>> --D
->>>
->>
->>
->
+-- 
+2.47.1
 
