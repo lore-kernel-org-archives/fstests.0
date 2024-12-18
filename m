@@ -1,166 +1,103 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E283F1591EA;
-	Wed, 18 Dec 2024 15:59:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E1B21FC7C9;
+	Wed, 18 Dec 2024 20:09:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734537592; cv=none; b=nY+MT07yjxgDhKasXiwzAkp3pYVYwrBvPuT2E8PszpPb9JKzzV+L2iWhnIsb8xYKhe3kA1CFGs1WDEFweh91F5GvrnD6K0qoahH/h11tkjA/c6EdzIJ/8eprOQJ5QTpULgOmuLEMgKqnazhAV69jyDx26RCXj0iHpIBWSzC+lDI=
+	t=1734552568; cv=none; b=loawFhc7OfJMsgtqX2Mnw3VppfcvAdIg7L9UwW8ERXHPZo+FIHHA8wgu5SA8pfuaFuQxh4A6bEzMuP9Y0hIIbRstrdoCOn6pCXHc0UPDK+cHsYM/M8sHDpwGs78ZnLS/zXGP3B3dzkVKAank7S8dHfD2v75EpBp6EAzaECdUBS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734537592; c=relaxed/simple;
-	bh=xqRCZi47ssybpFZmQ9iD4OT8RCvrCkNnYwDuOCAbG/o=;
+	s=arc-20240116; t=1734552568; c=relaxed/simple;
+	bh=B/cOJhbra6lL7SgWOSgbpY/TIMkm2vRhiQG/WFbweJk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g9XF8im3MCIGVIr0RVCA7wPrXNlVm4nVVvrGXKoYEaR/J+AqoYrzWr9u4lVbKWHTzFnRh4DL31LgzoI5hNbJOjf2mTS08ylSK0J1VzFtQdt8PwGUnjSJ1oMwmV/sUY30VENVHB9Zcf6Qzgti1o+AQ2vBrIY6M+NHkrmAQDvjqZw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=YIiyuT+B; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=JNBpqo5H; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=FyerPoDP; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=7Zz/hbAW; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	 Content-Type:Content-Disposition:In-Reply-To; b=qTdCg7MuT2Q1Z2X+Epi/my1L945DrcPzhPh9i60mqJdEsw9l/ic+3F6qMkkXorKvfYCW+UW2YbUqCDAvy5/Qnhgh58hOEOIKLhKVxXIubdJVqQnJQfnuMdekBWCJCIJpLPRBuMTXqHr3fQkX1KCa9IMAGNRg51UTRPoAvhSRdeM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Yc+EikQj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="YIiyuT+B";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="JNBpqo5H";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="FyerPoDP";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="7Zz/hbAW"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id DD1FA21153;
-	Wed, 18 Dec 2024 15:59:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1734537588; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=736W051uo2m2PQ7K3wbgdieBkT9c+WicYFLODup6hqc=;
-	b=YIiyuT+BhTqzkJFTEg+SlyRZ7Id2/MEIK6MjlhT9/zFJqV54DL+kogUXW0Qh0BPP70aqZ3
-	Zuk0BdJJ+1hDsNSwZbhorSjc3KzuU6j18olt5DJIUkJJ+BWBlFEGFG0Yvfa+jiWFrR4vcH
-	rdlG+5jMQoRir1FvxqArG00U374iqSQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1734537588;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=736W051uo2m2PQ7K3wbgdieBkT9c+WicYFLODup6hqc=;
-	b=JNBpqo5HCmp8zvrobhiDZTsm840xyacIVp9odDxVXiqDCAxjP1xFoCl3MJykzvwlt/BhBo
-	LnOmDGowrBa1RTBA==
-Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=FyerPoDP;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b="7Zz/hbAW"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1734537587; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=736W051uo2m2PQ7K3wbgdieBkT9c+WicYFLODup6hqc=;
-	b=FyerPoDPwaLY0i9qG9FM5AGH5aqTakFZowQp+cdC5MVRS7ZDeSaug8yqzNm4lYcmRXbdzN
-	5LEc/ze83D6/yMskW8x7/G18h83PTqTr9s3IEIZ3MwxatrZX4J9TLrWNzlt766aRJTzgLk
-	TOEQZtThz2hWZEbSDiETHY3BowCrXLs=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1734537587;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=736W051uo2m2PQ7K3wbgdieBkT9c+WicYFLODup6hqc=;
-	b=7Zz/hbAW/4Sok4prx9FCx5QzFWePX+UIOchUpo+yqpKHZDut8ET8kyTFPragOQRwpkDT3F
-	c+bZLOgudF6s+xCw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D2E70137CF;
-	Wed, 18 Dec 2024 15:59:47 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id EXt1M3PxYmdYQQAAD6G6ig
-	(envelope-from <jack@suse.cz>); Wed, 18 Dec 2024 15:59:47 +0000
-Received: by quack3.suse.cz (Postfix, from userid 1000)
-	id 7A3C4A0435; Wed, 18 Dec 2024 16:59:47 +0100 (CET)
-Date: Wed, 18 Dec 2024 16:59:47 +0100
-From: Jan Kara <jack@suse.cz>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Zorro Lang <zlang@kernel.org>, Brian Foster <bfoster@redhat.com>,
-	fstests@vger.kernel.org, linux-ext4@vger.kernel.org
-Subject: Re: [PATCH 3/4] ext-common: create a new test directory for ext*
- common tests
-Message-ID: <20241218155947.ocbq6hjdzaud6ioj@quack3>
-References: <20241210065900.1235379-1-hch@lst.de>
- <20241210065900.1235379-4-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Yc+EikQj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC77CC4CED7;
+	Wed, 18 Dec 2024 20:09:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1734552567;
+	bh=B/cOJhbra6lL7SgWOSgbpY/TIMkm2vRhiQG/WFbweJk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Yc+EikQj0knYCTZA71OpUm7q8NPsHipDxELLHlbAD1tEbnTYmcLnXrFS7wqKAjR9/
+	 g2RrTZab++RBubfMCariHS20hejO0p3v16Bn7HdJXCi+wezBWynbinOmOmprNYWRuh
+	 q1bfsVVcTGlZnDOXPevon6/QKCwZ4UlUdy2Uch9LwKZYYyJbNTSYxzsJFIzVpa42Qu
+	 gxwMjbKUVMyvMvQy3ZhLlUdPGdoGQmBYzYglChFzPSvYd9ntLfl4XafLh+/GQSxjuL
+	 OG9s8ndhkb9TPL+lmd/9AfiYYJr9NPJ+/QCyMdkK8Y0jbDkTpA5QuX8T+nhE0kG+HH
+	 mYehrcg3qFbkw==
+Date: Wed, 18 Dec 2024 12:09:27 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Filipe Manana <fdmanana@kernel.org>,
+	Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: test swap activation on file that used to have
+ clones
+Message-ID: <20241218200927.GC6160@frogsfrogsfrogs>
+References: <dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com>
+ <Z2Ey4yQywOEYqEOI@infradead.org>
+ <CAL3q7H4Age-k0ifGh+n4QwExC1vTgWGd3NROcX40vQXKRipBqw@mail.gmail.com>
+ <20241217172223.GA6160@frogsfrogsfrogs>
+ <db59d0b2-6542-41e1-abf7-0c38b91cdf4d@gmx.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20241210065900.1235379-4-hch@lst.de>
-X-Rspamd-Queue-Id: DD1FA21153
-X-Spam-Level: 
-X-Spamd-Result: default: False [-4.01 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_RHS_NOT_FQDN(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_COUNT_THREE(0.00)[3];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_SOME(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	RCVD_TLS_LAST(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	FROM_EQ_ENVFROM(0.00)[];
-	RCPT_COUNT_FIVE(0.00)[5];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	ASN(0.00)[asn:25478, ipnet:::/0, country:RU];
-	DKIM_TRACE(0.00)[suse.cz:+];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.cz:dkim,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns]
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Score: -4.01
-X-Spam-Flag: NO
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <db59d0b2-6542-41e1-abf7-0c38b91cdf4d@gmx.com>
 
-On Tue 10-12-24 07:58:27, Christoph Hellwig wrote:
-> Split the tests shared with ext2 and ext3 from the ext4 directory.
-> This makes ext4 a normal file system specific directory and cuts down
-> the number of _supported_fs calls to a little more than a handful
-> for tests that can't run on ext2.
+On Wed, Dec 18, 2024 at 09:07:26AM +1030, Qu Wenruo wrote:
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> 
+> 在 2024/12/18 03:52, Darrick J. Wong 写道:
+> > On Tue, Dec 17, 2024 at 08:26:33AM +0000, Filipe Manana wrote:
+> > > On Tue, Dec 17, 2024 at 8:14 AM Christoph Hellwig <hch@infradead.org> wrote:
+> > > > 
+> > > > On Wed, Dec 11, 2024 at 03:09:40PM +0000, fdmanana@kernel.org wrote:
+> > > > > The test also fails sporadically on xfs and the bug was already reported
+> > > > > to the xfs mailing list:
+> > > > > 
+> > > > >     https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
+> > > > > 
+> > > > 
+> > > > This version still doesn't seem to have the fs freeze/unfreeze that Darrick
+> > > > asked for in that thread.
+> > > 
+> > > I don't get it, what's the freeze/unfreeze for? Where should they be placed?
+> > > Is it some way to get around the bug on xfs?
+> > 
+> > freeze kicks the background inode gc thread so that the unlinked clones
+> > actually get freed before the swapon call.  A less bighammer idea might
+> > be to call XFS_IOC_FREE_EOFBLOCKS which also kicks the garbage
+> > collectors.
+> 
+> I'm wondering why this GC things can not be done inside XFS' swapon call?
+> 
+> So that we don't need some per-fs workaround in a generic test case.
 
-So I went through all ext4 tests and I think:
-  ext4/004 should work for all ext? types -> move to ext_common
+I suppose one could call xfs_inodegc_flush from within swapon with the
+swap file's i_rwsem held, but now we're blocking swapon while we wait
+for some unbounded number of probably unrelated unlinked inodes to be
+freed on the off chance that one of them shared blocks.
 
-  ext4/006 should work for all ext? types -> move to ext_common
-  ext4/007 should work for all ext? types -> move to ext_common
-  ext4/008 should work for all ext? types -> move to ext_common
-  ext4/009 should work for all ext? types -> move to ext_common
-  ext4/010 should work for all ext? types -> move to ext_common
-  ext4/011 should work for all ext? types -> move to ext_common
-  ext4/012 should work for all ext? types -> move to ext_common
-  ext4/013 should work for all ext? types -> move to ext_common
-  ext4/014 should work for all ext? types -> move to ext_common
-  ext4/016 should work for all ext? types -> move to ext_common
-    - but I've now noticed that the last ten call _scratch_mkfs_ext4
-      instead of _scratch_mkfs so that would need fixing up. So maybe leave
-      it as is for now
-  ext4/017 should work for all ext3 & ext4 types -> move to ext_common
-    - similar caveat with _scratch_mkfs_ext4
-  ext4/018 should work for all ext? types -> move to ext_common
-  ext4/019 should work for all ext? types -> move to ext_common
-    - similar caveat with _scratch_mkfs_ext4
+A better answer might be to run FALLOC_FL_UNSHARE on the file, but now
+we're making swapon more complex and potentially issuing a lot of IO to
+make that happen.  If you can convince the fsdevel/mm folks that swapon
+is supposed to try to correct things it doesn't like in the file mapping
+(instead of returning EINVAL or whatever it does now) then we could add
+that to the syscall definition.
 
-  ext4/022 should work for ext3 & ext4 -> move to ext_common
-  ext4/023 should work for all ext? types -> move to ext_common
+--D
 
-  ext4/044 should work for all ext? types -> move to ext_common
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> Thanks,
+> Qu
+> > 
+> > --D
+> > 
+> 
+> 
