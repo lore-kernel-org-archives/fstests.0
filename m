@@ -1,261 +1,364 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from mx0a-00082601.pphosted.com (mx0a-00082601.pphosted.com [67.231.145.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 748F6225780
-	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 14:27:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C335378F54
+	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 14:56:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.145.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734618458; cv=none; b=B+dLFz6u++o8cmdI3hwHCTiC3WUX18dGna2fTRrD+W9cLkohc9uISZu8Fx0rlhGK351mJF2Vyk+dVdbQAiqfPLHk44RXxDABJucehCbCiZ2Dv8p2z0ZbV3rF78ob0JuMcVk+UJrIeYcqyBH6gC1OKBnUaU1Iedy9NGC77pfKPSM=
+	t=1734620216; cv=none; b=rtvXptfePMKlux8THVWQM8rhjlgQOzq9+L46SNCnneTNQ9Vxvv2pEi8IY70Xmj3EjuxHbIMhqdvYDGVidmQ60nwgxWi/J93p2OxM57mqJSd6zEpAKc2/pGKNBaW8UP70/fxZTfOLhrxfNV45f0wlQP9oTm8m5AFCmKsgfkvQC0Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734618458; c=relaxed/simple;
-	bh=8QE5KfVjxpoTfZKjYIwLH3s2nPdfEW1XRGQHv3pqJYo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fIsrxavbE3ECN3rZNws77uvrP0NmokyRJkW1PYnSUrPpyKCndC/V9QUOEKGlezHKZKF/cUqan5zhXG3tcZZM7TPB2215YqhF4vUDYwXjcybE5rpCgi9lUkUqCr516jV49OV5uLepALO0qnlFnLddlbm74jeqBlxhgj7lWTJr2F8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OAcsWhBp; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1734620216; c=relaxed/simple;
+	bh=nyPLepdPiFn6D+OGD+MjSqXBJcNJ9+UCod+pDt9/UQ0=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=JH3ovurZOWmg4GqO9mz06CJmBuwsUt+1lJp3rJjkI00UQhqetcpXkdDp/TO60fMeElrmYC4EUKa2Le9MO7+9XB+jsi8+wsWn5aZmTPpeycoRt/0O/7pjuhw1p76hVpx09NeNTG6d824/W4Cv6TN0XiOgGS2J0f/iNvZ/nUTvHk8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fb.com; spf=pass smtp.mailfrom=meta.com; dkim=pass (1024-bit key) header.d=fb.com header.i=@fb.com header.b=QAQW9e6k; arc=none smtp.client-ip=67.231.145.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fb.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=meta.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OAcsWhBp"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1734618455;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=SM5pjnhH0iRbog20VIIxtk0rFApLrF8qnA9nKzvigrs=;
-	b=OAcsWhBpcnTh/CZ0eojY6h3kOnBmkmUnJhXBYA2eP+INB1fF6PfA4z2h9JXyLe2MzGmuDb
-	dd0srtbY2JsMMeBXetWsi6UKrCnjCG1Hd/hnmlfBzIE2dsIHHTpGlzeQaS0x8YdaPlghmv
-	Y+bGBWR9n6xfKT4NudmXLDY/2upwsXw=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-264-WN6aVnAVM8WPBETMsFnNcQ-1; Thu,
- 19 Dec 2024 09:27:31 -0500
-X-MC-Unique: WN6aVnAVM8WPBETMsFnNcQ-1
-X-Mimecast-MFC-AGG-ID: WN6aVnAVM8WPBETMsFnNcQ
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 91F1F1955F43;
-	Thu, 19 Dec 2024 14:27:30 +0000 (UTC)
-Received: from bfoster (unknown [10.22.88.128])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id A37BE30044C1;
-	Thu, 19 Dec 2024 14:27:29 +0000 (UTC)
-Date: Thu, 19 Dec 2024 09:29:29 -0500
-From: Brian Foster <bfoster@redhat.com>
-To: Joanne Koong <joannelkoong@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	kernel-team@meta.com
-Subject: Re: [PATCH 1/2] fsx: support reads/writes from buffers backed by
- hugepages
-Message-ID: <Z2QtyaryQtBZZw7q@bfoster>
-References: <20241218210122.3809198-1-joannelkoong@gmail.com>
- <20241218210122.3809198-2-joannelkoong@gmail.com>
+	dkim=pass (1024-bit key) header.d=fb.com header.i=@fb.com header.b="QAQW9e6k"
+Received: from pps.filterd (m0044012.ppops.net [127.0.0.1])
+	by mx0a-00082601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BJ7PCQF025747
+	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 06:56:54 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=facebook; bh=bKv5BuYbPe0RVZ5KawS7S2S
+	fYc8+BUTb6VmUSA7oGGU=; b=QAQW9e6kauHtnyq0JbjyUzWcB1vmSQbEBekXG5D
+	bli2BDbGfplXRxJ15/qiUXmoDJVsE2zCARSs+bIH/2WRjM7Jw8Debw+0g5ets/Mj
+	jJKfGZuBibq3rflxfJQ9iY2LUYx5REX+5eGmnY/f3QvWKe+2393gAS+0fNMzbL2S
+	5buc=
+Received: from mail.thefacebook.com ([163.114.134.16])
+	by mx0a-00082601.pphosted.com (PPS) with ESMTPS id 43md1uawgj-4
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 06:56:53 -0800 (PST)
+Received: from twshared60378.16.frc2.facebook.com (2620:10d:c085:108::4) by
+ mail.thefacebook.com (2620:10d:c08b:78::c78f) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.2.1544.14; Thu, 19 Dec 2024 14:56:51 +0000
+Received: by devbig276.nha1.facebook.com (Postfix, from userid 660015)
+	id DDBFE9B34819; Thu, 19 Dec 2024 14:56:48 +0000 (GMT)
+From: Mark Harmstone <maharmstone@fb.com>
+To: <fstests@vger.kernel.org>, <linux-btrfs@vger.kernel.org>
+CC: <neelx@suse.com>, <Johannes.Thumschirn@wdc.com>, <anand.jain@oracle.com>,
+        Mark Harmstone <maharmstone@fb.com>
+Subject: [PATCH v3 1/2] configure: use pkg-config to find liburing
+Date: Thu, 19 Dec 2024 14:55:55 +0000
+Message-ID: <20241219145608.3925261-1-maharmstone@fb.com>
+X-Mailer: git-send-email 2.43.5
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241218210122.3809198-2-joannelkoong@gmail.com>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+Content-Transfer-Encoding: quoted-printable
+X-FB-Internal: Safe
+Content-Type: text/plain
+X-Proofpoint-ORIG-GUID: eCxzxXuu09ZGFxC8CqmNjKLyOPFsrAkP
+X-Proofpoint-GUID: eCxzxXuu09ZGFxC8CqmNjKLyOPFsrAkP
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
+ definitions=2024-10-05_02,2024-10-04_01,2024-09-30_01
 
-On Wed, Dec 18, 2024 at 01:01:21PM -0800, Joanne Koong wrote:
-> Add support for reads/writes from buffers backed by hugepages.
-> This can be enabled through the '-h' flag. This flag should only be used
-> on systems where THP capabilities are enabled.
-> 
-> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-> ---
+Change our autoconf macros so that instead of checking for the presence
+of liburing.h, we use pkg-config.
 
-Firstly, thanks for taking the time to add this. This seems like a nice
-idea. It might be nice to have an extra sentence or two in the commit
-log on the purpose/motivation. For example, has this been used to detect
-a certain class of problem?
+The benefit of this is that we can then check the version of liburing,
+and do conditional compilation based on this. There's a macro
+IO_URING_CHECK_VERSION already, but it's only in relatively recent
+versions of liburing.h.
 
-A few other quick comments below...
+This replaces HAVE_URING_H, defined by AC_CHECK_HEADERS, with
+HAVE_URING. I also had to rename PKG_{MAJOR,MINOR,REVISION,BUILD} to
+start with PACKAGE_, to avoid "possibly undefined macro" errors; it
+looks like pkg-config assumes that anything called PKG_* is for its own
+use.
 
->  ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 92 insertions(+), 8 deletions(-)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 41933354..3656fd9f 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -190,6 +190,7 @@ int	o_direct;			/* -Z */
->  int	aio = 0;
->  int	uring = 0;
->  int	mark_nr = 0;
-> +int	hugepages = 0;                  /* -h flag */
->  
->  int page_size;
->  int page_mask;
-> @@ -2471,7 +2472,7 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
-> +		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
->  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
->  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
->  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-> @@ -2484,6 +2485,7 @@ usage(void)
->  	-e: pollute post-eof on size changes (default 0)\n\
->  	-f: flush and invalidate cache after I/O\n\
->  	-g X: write character X instead of random generated data\n\
-> +	-h hugepages: use buffers backed by hugepages for reads/writes\n\
->  	-i logdev: do integrity testing, logdev is the dm log writes device\n\
->  	-j logid: prefix debug log messsages with this id\n\
->  	-k: do not truncate existing file and use its size as upper bound on file size\n\
-> @@ -2856,6 +2858,56 @@ keep_running(void)
->  	return numops-- != 0;
->  }
->  
-> +static long
-> +get_hugepage_size(void)
-> +{
-> +	const char *str = "Hugepagesize:";
-> +	long hugepage_size = -1;
-> +	char buffer[64];
-> +	FILE *file;
-> +
-> +	file = fopen("/proc/meminfo", "r");
-> +	if (!file) {
-> +		prterr("get_hugepage_size: fopen /proc/meminfo");
-> +		return -1;
-> +	}
-> +	while (fgets(buffer, sizeof(buffer), file)) {
-> +		if (strncmp(buffer, str, strlen(str)) == 0) {
-> +			sscanf(buffer + strlen(str), "%ld", &hugepage_size);
-> +			break;
-> +		}
-> +	}
-> +	fclose(file);
-> +	if (hugepage_size == -1) {
-> +		prterr("get_hugepage_size: failed to find "
-> +			"hugepage size in /proc/meminfo\n");
-> +		return -1;
-> +	}
-> +
-> +	/* convert from KiB to bytes  */
-> +	return hugepage_size * 1024;
-> +}
-> +
-> +static void *
-> +init_hugepages_buf(unsigned len, long hugepage_size)
-> +{
-> +	void *buf;
-> +	long buf_size = roundup(len, hugepage_size);
-> +
-> +	if (posix_memalign(&buf, hugepage_size, buf_size)) {
-> +		prterr("posix_memalign for buf");
-> +		return NULL;
-> +	}
-> +	memset(buf, '\0', len);
+Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+---
+ VERSION                         | 8 ++++----
+ m4/package_globals.m4           | 4 ++--
+ m4/package_liburing.m4          | 6 +++++-
+ release.sh                      | 2 +-
+ src/feature.c                   | 4 ++--
+ src/vfs/idmapped-mounts.c       | 6 +++---
+ src/vfs/idmapped-mounts.h       | 2 +-
+ src/vfs/tmpfs-idmapped-mounts.c | 6 +++---
+ src/vfs/utils.c                 | 4 ++--
+ src/vfs/utils.h                 | 6 +++---
+ src/vfs/vfstest.c               | 6 +++---
+ 11 files changed, 29 insertions(+), 25 deletions(-)
 
-I'm assuming it doesn't matter, but did you want to use buf_size here to
-clear the whole buffer?
-
-> +	if (madvise(buf, buf_size, MADV_COLLAPSE)) {
-> +		prterr("madvise collapse for buf");
-> +		free(buf);
-> +		return NULL;
-> +	}
-> +
-> +	return buf;
-> +}
-> +
->  static struct option longopts[] = {
->  	{"replay-ops", required_argument, 0, 256},
->  	{"record-ops", optional_argument, 0, 255},
-> @@ -2883,7 +2935,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2916,6 +2968,9 @@ main(int argc, char **argv)
->  		case 'g':
->  			filldata = *optarg;
->  			break;
-> +		case 'h':
-> +			hugepages = 1;
-> +			break;
->  		case 'i':
->  			integrity = 1;
->  			logdev = strdup(optarg);
-> @@ -3232,12 +3287,41 @@ main(int argc, char **argv)
->  	original_buf = (char *) malloc(maxfilelen);
->  	for (i = 0; i < maxfilelen; i++)
->  		original_buf[i] = random() % 256;
-> -	good_buf = (char *) malloc(maxfilelen + writebdy);
-> -	good_buf = round_ptr_up(good_buf, writebdy, 0);
-> -	memset(good_buf, '\0', maxfilelen);
-> -	temp_buf = (char *) malloc(maxoplen + readbdy);
-> -	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> -	memset(temp_buf, '\0', maxoplen);
-> +	if (hugepages) {
-> +		long hugepage_size;
-> +
-> +		hugepage_size = get_hugepage_size();
-> +		if (hugepage_size == -1) {
-> +			prterr("get_hugepage_size()");
-> +			exit(99);
-> +		}
-> +
-> +		if (writebdy != 1 && writebdy != hugepage_size)
-> +			prt("ignoring write alignment (since -h is enabled)");
-> +
-> +		if (readbdy != 1 && readbdy != hugepage_size)
-> +			prt("ignoring read alignment (since -h is enabled)");
-
-I'm a little unclear on what these warnings mean. The alignments are
-still used in the read/write paths afaics. The non-huge mode seems to
-only really care about the max size of the buffers in this code.
-
-If your test doesn't actually use read/write alignments and the goal is
-just to keep things simple, perhaps it would be cleaner to add something
-like an if (hugepages && (writebdy != 1 || readbdy != 1)) check after
-option processing and exit out as an unsupported combination..?
-
-BTW, it might also be nice to factor out this whole section of buffer
-initialization code (including original_buf) into an init_buffers() or
-some such. That could be done as a prep patch, but just a suggestion
-either way.
-
-Brian
-
-> +
-> +		good_buf = init_hugepages_buf(maxfilelen, hugepage_size);
-> +		if (!good_buf) {
-> +			prterr("init_hugepages_buf failed for good_buf");
-> +			exit(100);
-> +		}
-> +
-> +		temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
-> +		if (!temp_buf) {
-> +			prterr("init_hugepages_buf failed for temp_buf");
-> +			exit(101);
-> +		}
-> +	} else {
-> +		good_buf = (char *) malloc(maxfilelen + writebdy);
-> +		good_buf = round_ptr_up(good_buf, writebdy, 0);
-> +		memset(good_buf, '\0', maxfilelen);
-> +
-> +		temp_buf = (char *) malloc(maxoplen + readbdy);
-> +		temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> +		memset(temp_buf, '\0', maxoplen);
-> +	}
->  	if (lite) {	/* zero entire existing file */
->  		ssize_t written;
->  
-> -- 
-> 2.47.1
-> 
-> 
+diff --git a/VERSION b/VERSION
+index 7294a002..afcab53e 100644
+--- a/VERSION
++++ b/VERSION
+@@ -1,7 +1,7 @@
+ #
+ # This file is used by configure to get version information
+ #
+-PKG_MAJOR=3D1
+-PKG_MINOR=3D1
+-PKG_REVISION=3D1
+-PKG_BUILD=3D1
++PACKAGE_MAJOR=3D1
++PACKAGE_MINOR=3D1
++PACKAGE_REVISION=3D1
++PACKAGE_BUILD=3D1
+diff --git a/m4/package_globals.m4 b/m4/package_globals.m4
+index ce7a8c51..c8d5d124 100644
+--- a/m4/package_globals.m4
++++ b/m4/package_globals.m4
+@@ -9,9 +9,9 @@ AC_DEFUN([AC_PACKAGE_GLOBALS],
+     AC_SUBST(pkg_name)
+=20
+     . ./VERSION
+-    pkg_version=3D${PKG_MAJOR}.${PKG_MINOR}.${PKG_REVISION}
++    pkg_version=3D${PACKAGE_MAJOR}.${PACKAGE_MINOR}.${PACKAGE_REVISION}
+     AC_SUBST(pkg_version)
+-    pkg_release=3D$PKG_BUILD
++    pkg_release=3D$PACKAGE_BUILD
+     test -z "$BUILD_VERSION" || pkg_release=3D"$BUILD_VERSION"
+     AC_SUBST(pkg_release)
+=20
+diff --git a/m4/package_liburing.m4 b/m4/package_liburing.m4
+index c92cc02a..0553966d 100644
+--- a/m4/package_liburing.m4
++++ b/m4/package_liburing.m4
+@@ -1,4 +1,8 @@
+ AC_DEFUN([AC_PACKAGE_WANT_URING],
+-  [ AC_CHECK_HEADERS(liburing.h, [ have_uring=3Dtrue ], [ have_uring=3Df=
+alse ])
++  [ PKG_CHECK_MODULES([LIBURING], [liburing],
++    [ AC_DEFINE([HAVE_LIBURING], [1], [Use liburing])
++      have_uring=3Dtrue
++    ],
++    [ have_uring=3Dfalse ])
+     AC_SUBST(have_uring)
+   ])
+diff --git a/release.sh b/release.sh
+index 5b78ec79..70fbf47e 100644
+--- a/release.sh
++++ b/release.sh
+@@ -5,7 +5,7 @@
+=20
+ . ./VERSION
+=20
+-version=3D${PKG_MAJOR}.${PKG_MINOR}.${PKG_REVISION}
++version=3D${PACKAGE_MAJOR}.${PACKAGE_MINOR}.${PACKAGE_REVISION}
+ date=3D`date +"%-d %B %Y"`
+=20
+ echo "Cleaning up"
+diff --git a/src/feature.c b/src/feature.c
+index 7e474ce5..7df36acf 100644
+--- a/src/feature.c
++++ b/src/feature.c
+@@ -42,7 +42,7 @@
+ #include <libaio.h>
+ #endif
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ #include <liburing.h>
+ #endif
+=20
+@@ -227,7 +227,7 @@ check_aio_support(void)
+ static int
+ check_uring_support(void)
+ {
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ 	struct io_uring ring;
+ 	int err;
+=20
+diff --git a/src/vfs/idmapped-mounts.c b/src/vfs/idmapped-mounts.c
+index f4dfc3f3..ed9992f9 100644
+--- a/src/vfs/idmapped-mounts.c
++++ b/src/vfs/idmapped-mounts.c
+@@ -2206,7 +2206,7 @@ out:
+ }
+=20
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ int tcore_io_uring_idmapped(const struct vfstest_info *info)
+ {
+ 	int fret =3D -1;
+@@ -2743,7 +2743,7 @@ out_unmap:
+=20
+ 	return fret;
+ }
+-#endif /* HAVE_LIBURING_H */
++#endif /* HAVE_LIBURING */
+=20
+ /* Validate that protected symlinks work correctly on idmapped mounts. *=
+/
+ int tcore_protected_symlinks_idmapped_mounts(const struct vfstest_info *=
+info)
+@@ -8859,7 +8859,7 @@ static const struct test_struct t_idmapped_mounts[]=
+ =3D {
+ 	{ tcore_hardlink_crossing_idmapped_mounts,				true,	"cross idmapped mou=
+nt hardlink",								},
+ 	{ tcore_hardlink_from_idmapped_mount,					true,	"hardlinks from idmappe=
+d mounts",								},
+ 	{ tcore_hardlink_from_idmapped_mount_in_userns,			true,	"hardlinks from=
+ idmapped mounts in user namespace",						},
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ 	{ tcore_io_uring_idmapped,						true,	"io_uring from idmapped mounts",	=
+							},
+ 	{ tcore_io_uring_idmapped_userns,					true,	"io_uring from idmapped mou=
+nts in user namespace",						},
+ 	{ tcore_io_uring_idmapped_unmapped,					true,	"io_uring from idmapped m=
+ounts with unmapped ids",						},
+diff --git a/src/vfs/idmapped-mounts.h b/src/vfs/idmapped-mounts.h
+index 4a2c7b39..688394c8 100644
+--- a/src/vfs/idmapped-mounts.h
++++ b/src/vfs/idmapped-mounts.h
+@@ -30,7 +30,7 @@ int tcore_fscaps_idmapped_mounts_in_userns_separate_use=
+rns(const struct vfstest_
+ int tcore_hardlink_crossing_idmapped_mounts(const struct vfstest_info *i=
+nfo);
+ int tcore_hardlink_from_idmapped_mount(const struct vfstest_info *info);
+ int tcore_hardlink_from_idmapped_mount_in_userns(const struct vfstest_in=
+fo *info);
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ int tcore_io_uring_idmapped(const struct vfstest_info *info);
+ int tcore_io_uring_idmapped_userns(const struct vfstest_info *info);
+ int tcore_io_uring_idmapped_unmapped(const struct vfstest_info *info);
+diff --git a/src/vfs/tmpfs-idmapped-mounts.c b/src/vfs/tmpfs-idmapped-mou=
+nts.c
+index 0899aed9..d8212bce 100644
+--- a/src/vfs/tmpfs-idmapped-mounts.c
++++ b/src/vfs/tmpfs-idmapped-mounts.c
+@@ -167,7 +167,7 @@ static int tmpfs_hardlink_from_idmapped_mount_in_user=
+ns(const struct vfstest_inf
+ 	return tmpfs_nested_mount_setup(info, tcore_hardlink_from_idmapped_moun=
+t_in_userns);
+ }
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ static int tmpfs_io_uring_idmapped(const struct vfstest_info *info)
+ {
+ 	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped);
+@@ -184,7 +184,7 @@ static int tmpfs_io_uring_idmapped_unmapped_userns(co=
+nst struct vfstest_info *in
+ {
+ 	return tmpfs_nested_mount_setup(info, tcore_io_uring_idmapped_unmapped_=
+userns);
+ }
+-#endif /* HAVE_LIBURING_H */
++#endif /* HAVE_LIBURING */
+=20
+ static int tmpfs_protected_symlinks_idmapped_mounts(const struct vfstest=
+_info *info)
+ {
+@@ -272,7 +272,7 @@ static const struct test_struct t_tmpfs[] =3D {
+ 	{ tmpfs_hardlink_crossing_idmapped_mounts,				T_REQUIRE_USERNS | T_REQU=
+IRE_IDMAPPED_MOUNTS,	"tmpfs cross idmapped mount hardlink",								},
+ 	{ tmpfs_hardlink_from_idmapped_mount,					T_REQUIRE_USERNS | T_REQUIRE_=
+IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts",								},
+ 	{ tmpfs_hardlink_from_idmapped_mount_in_userns,				T_REQUIRE_USERNS | T=
+_REQUIRE_IDMAPPED_MOUNTS,	"tmpfs hardlinks from idmapped mounts in user n=
+amespace",						},
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ 	{ tmpfs_io_uring_idmapped,						T_REQUIRE_USERNS | T_REQUIRE_IDMAPPED_M=
+OUNTS,	"tmpfs io_uring from idmapped mounts",								      },
+ 	{ tmpfs_io_uring_idmapped_userns,					T_REQUIRE_USERNS | T_REQUIRE_IDMA=
+PPED_MOUNTS,	"tmpfs io_uring from idmapped mounts in user namespace",				=
+	      },
+ 	{ tmpfs_io_uring_idmapped_unmapped,					T_REQUIRE_USERNS | T_REQUIRE_ID=
+MAPPED_MOUNTS,	"tmpfs io_uring from idmapped mounts with unmapped ids",		=
+			      },
+diff --git a/src/vfs/utils.c b/src/vfs/utils.c
+index 0ab5de15..c1c7951c 100644
+--- a/src/vfs/utils.c
++++ b/src/vfs/utils.c
+@@ -502,7 +502,7 @@ out:
+ 	return fret;
+ }
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ int io_uring_openat_with_creds(struct io_uring *ring, int dfd, const cha=
+r *path,
+ 			       int cred_id, bool with_link, int *ret_cqe)
+ {
+@@ -555,7 +555,7 @@ int io_uring_openat_with_creds(struct io_uring *ring,=
+ int dfd, const char *path,
+ out:
+ 	return ret;
+ }
+-#endif /* HAVE_LIBURING_H */
++#endif /* HAVE_LIBURING */
+=20
+ /* caps_up - raise all permitted caps */
+ int caps_up(void)
+diff --git a/src/vfs/utils.h b/src/vfs/utils.h
+index 872fd96f..c086885a 100644
+--- a/src/vfs/utils.h
++++ b/src/vfs/utils.h
+@@ -25,7 +25,7 @@
+ #include <sys/capability.h>
+ #endif
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ #include <liburing.h>
+ #endif
+=20
+@@ -349,11 +349,11 @@ static inline bool switch_fsids(uid_t fsuid, gid_t =
+fsgid)
+ 	return true;
+ }
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ extern int io_uring_openat_with_creds(struct io_uring *ring, int dfd,
+ 				      const char *path, int cred_id,
+ 				      bool with_link, int *ret_cqe);
+-#endif /* HAVE_LIBURING_H */
++#endif /* HAVE_LIBURING */
+=20
+ extern int chown_r(int fd, const char *path, uid_t uid, gid_t gid);
+ extern int rm_r(int fd, const char *path);
+diff --git a/src/vfs/vfstest.c b/src/vfs/vfstest.c
+index f842117d..e0c897bb 100644
+--- a/src/vfs/vfstest.c
++++ b/src/vfs/vfstest.c
+@@ -1222,7 +1222,7 @@ out:
+ 	return fret;
+ }
+=20
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ static int io_uring(const struct vfstest_info *info)
+ {
+ 	int fret =3D -1;
+@@ -1495,7 +1495,7 @@ out_unmap:
+=20
+ 	return fret;
+ }
+-#endif /* HAVE_LIBURING_H */
++#endif /* HAVE_LIBURING */
+=20
+ /* The following tests are concerned with setgid inheritance. These can =
+be
+  * filesystem type specific. For xfs, if a new file or directory or node=
+ is
+@@ -2349,7 +2349,7 @@ static const struct option longopts[] =3D {
+ static const struct test_struct t_basic[] =3D {
+ 	{ fscaps,							T_REQUIRE_USERNS,	"fscaps on regular mounts",									}=
+,
+ 	{ hardlink_crossing_mounts,					0,			"cross mount hardlink",										}=
+,
+-#ifdef HAVE_LIBURING_H
++#ifdef HAVE_LIBURING
+ 	{ io_uring,							0,			"io_uring",											},
+ 	{ io_uring_userns,						T_REQUIRE_USERNS,	"io_uring in user namespace",=
+									},
+ #endif
+--=20
+2.45.2
 
