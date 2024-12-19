@@ -1,241 +1,261 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6558B11CBA
-	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 13:56:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 748F6225780
+	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 14:27:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734616590; cv=none; b=ld66ZlGAur8D1LVmDFAQI0UDW90nOpYGw9K99tJLV5e/Y5oZUpGrTFKwJYL0UtR6QwNSmF0dkCBCbmilQ4+vEgT6bV9FV1zQK1/3WcL6brSvczZHFde3e0XH9CdPTYEelHI7vxHHk1xYn5CMRilKaMvyiM/d0IAVzWeWNVwkTxE=
+	t=1734618458; cv=none; b=B+dLFz6u++o8cmdI3hwHCTiC3WUX18dGna2fTRrD+W9cLkohc9uISZu8Fx0rlhGK351mJF2Vyk+dVdbQAiqfPLHk44RXxDABJucehCbCiZ2Dv8p2z0ZbV3rF78ob0JuMcVk+UJrIeYcqyBH6gC1OKBnUaU1Iedy9NGC77pfKPSM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734616590; c=relaxed/simple;
-	bh=9Lb96h++/0LycNx83Skfbq84Su//al+7vAl4RFKa648=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=NEbMdvdS2uyzFk5v3WUCWsbpZNwJdpY1L4fQIpo5qnKZi7ki5BHMt/W2f4JhLjr+pkNvFUAKT5fWq3lVEJ8Y/qjCiVRcWd/7NtWxCPIHKL5wQ9nDXdOsF81+IwadyBO4O0Hz+P8Wrs0KTaT1MvP5iN6d2nUxnKVKsDcVNSmUDTk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PToTB57E; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1734618458; c=relaxed/simple;
+	bh=8QE5KfVjxpoTfZKjYIwLH3s2nPdfEW1XRGQHv3pqJYo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=fIsrxavbE3ECN3rZNws77uvrP0NmokyRJkW1PYnSUrPpyKCndC/V9QUOEKGlezHKZKF/cUqan5zhXG3tcZZM7TPB2215YqhF4vUDYwXjcybE5rpCgi9lUkUqCr516jV49OV5uLepALO0qnlFnLddlbm74jeqBlxhgj7lWTJr2F8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OAcsWhBp; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PToTB57E"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD675C4CECE;
-	Thu, 19 Dec 2024 13:56:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734616589;
-	bh=9Lb96h++/0LycNx83Skfbq84Su//al+7vAl4RFKa648=;
-	h=Date:Cc:Subject:To:References:From:In-Reply-To:From;
-	b=PToTB57ExbYoQUcLEcAIaKDiJy03p2qrWp0j6hs4cqBa/0LPy/OiANtX9IJfuMznT
-	 NYuMJtJ6x/8um3g5cq/BsCYANvINc5cHHmmHTXb55tXeFNBGINpFoFz2qlGl1w3mOZ
-	 kfh7c3dfmfIKeRdI4WxUYpgcSQUgardqkHaS0aIr2ZtpswKsMLCyJ425Z7WDOkiL06
-	 iT7ziANzL28ksRtDLCakb+WpWAGdRq/FH3VX0WDUh5se+sbN72z2W20EJE8zFGYFvs
-	 TdeXe788KRTto2wTaE+vdZ6cB+PJhoc15bMj/foV6tx2sKqEvCcQCE2EUXucOGL8NR
-	 5B2B83FqgKBrg==
-Message-ID: <bd8687df-8dea-4c33-821b-87b87b5554ef@kernel.org>
-Date: Thu, 19 Dec 2024 21:56:32 +0800
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OAcsWhBp"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1734618455;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SM5pjnhH0iRbog20VIIxtk0rFApLrF8qnA9nKzvigrs=;
+	b=OAcsWhBpcnTh/CZ0eojY6h3kOnBmkmUnJhXBYA2eP+INB1fF6PfA4z2h9JXyLe2MzGmuDb
+	dd0srtbY2JsMMeBXetWsi6UKrCnjCG1Hd/hnmlfBzIE2dsIHHTpGlzeQaS0x8YdaPlghmv
+	Y+bGBWR9n6xfKT4NudmXLDY/2upwsXw=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-264-WN6aVnAVM8WPBETMsFnNcQ-1; Thu,
+ 19 Dec 2024 09:27:31 -0500
+X-MC-Unique: WN6aVnAVM8WPBETMsFnNcQ-1
+X-Mimecast-MFC-AGG-ID: WN6aVnAVM8WPBETMsFnNcQ
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 91F1F1955F43;
+	Thu, 19 Dec 2024 14:27:30 +0000 (UTC)
+Received: from bfoster (unknown [10.22.88.128])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id A37BE30044C1;
+	Thu, 19 Dec 2024 14:27:29 +0000 (UTC)
+Date: Thu, 19 Dec 2024 09:29:29 -0500
+From: Brian Foster <bfoster@redhat.com>
+To: Joanne Koong <joannelkoong@gmail.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	kernel-team@meta.com
+Subject: Re: [PATCH 1/2] fsx: support reads/writes from buffers backed by
+ hugepages
+Message-ID: <Z2QtyaryQtBZZw7q@bfoster>
+References: <20241218210122.3809198-1-joannelkoong@gmail.com>
+ <20241218210122.3809198-2-joannelkoong@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: Chao Yu <chao@kernel.org>, Zorro Lang <zlang@kernel.org>,
- fstests@vger.kernel.org, jaegeuk@kernel.org,
- linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH] f2fs/008: test snapshot creation/deletion on lvm device
-To: Zorro Lang <zlang@redhat.com>
-References: <20241202114307.2747-1-chao@kernel.org>
- <20241219131631.6imqcwg7zxcm6hj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Language: en-US
-From: Chao Yu <chao@kernel.org>
-Autocrypt: addr=chao@kernel.org; keydata=
- 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
-In-Reply-To: <20241219131631.6imqcwg7zxcm6hj5@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241218210122.3809198-2-joannelkoong@gmail.com>
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-On 2024/12/19 21:16, Zorro Lang wrote:
-> On Mon, Dec 02, 2024 at 07:43:07PM +0800, Chao Yu wrote:
->> This patch introduce a regression testcase to check whether
->> f2fs can handle discard correctly once underlying lvm device
->> changes to not support discard after user creates snapshot
->> on it.
->>
->> Related bug was fixed by commit bc8aeb04fd80 ("f2fs: fix to
->> drop all discards after creating snapshot on lvm device")
->>
->> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
->> Signed-off-by: Chao Yu <chao@kernel.org>
->> ---
->>   tests/f2fs/008     | 53 ++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/f2fs/008.out |  2 ++
->>   2 files changed, 55 insertions(+)
->>   create mode 100755 tests/f2fs/008
->>   create mode 100644 tests/f2fs/008.out
->>
->> diff --git a/tests/f2fs/008 b/tests/f2fs/008
->> new file mode 100755
->> index 00000000..a9a3f263
->> --- /dev/null
->> +++ b/tests/f2fs/008
->> @@ -0,0 +1,53 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
->> +#
->> +# FS QA Test No. f2fs/008
->> +#
->> +# This is a regression test to check whether f2fs can handle
->> +# discard correctly once underlying lvm device changes to not
->> +# support discard after user creates snapshot on it.
->> +#
->> +
->> +. ./common/preamble
->> +_begin_fstest auto quick rw
->> +
->> +_fixed_by_kernel_commit bc8aeb04fd80 \
->> +        "f2fs: fix to drop all discards after creating snapshot on lvm device"
->> +
->> +_require_scratch_nolvm
->> +_require_block_device $SCRATCH_DEV
->> +_require_command "$LVM_PROG" lvm
->> +
->> +lvname=lv_$sed
->> +vgname=vg_$Sseg
+On Wed, Dec 18, 2024 at 01:01:21PM -0800, Joanne Koong wrote:
+> Add support for reads/writes from buffers backed by hugepages.
+> This can be enabled through the '-h' flag. This flag should only be used
+> on systems where THP capabilities are enabled.
 > 
-> What's "$sed" and "$Sseg", I didn't find the definition of them.
+> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> ---
 
-Zorro,
+Firstly, thanks for taking the time to add this. This seems like a nice
+idea. It might be nice to have an extra sentence or two in the commit
+log on the purpose/motivation. For example, has this been used to detect
+a certain class of problem?
 
-Sorry, these are typos caused by copying codes, I have noticed this and
-fixed it in v2.
+A few other quick comments below...
 
-https://lore.kernel.org/fstests/20241203124657.4997-1-chao@kernel.org
+>  ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 92 insertions(+), 8 deletions(-)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 41933354..3656fd9f 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -190,6 +190,7 @@ int	o_direct;			/* -Z */
+>  int	aio = 0;
+>  int	uring = 0;
+>  int	mark_nr = 0;
+> +int	hugepages = 0;                  /* -h flag */
+>  
+>  int page_size;
+>  int page_mask;
+> @@ -2471,7 +2472,7 @@ void
+>  usage(void)
+>  {
+>  	fprintf(stdout, "usage: %s",
+> -		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
+> +		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
+>  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
+>  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
+>  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+> @@ -2484,6 +2485,7 @@ usage(void)
+>  	-e: pollute post-eof on size changes (default 0)\n\
+>  	-f: flush and invalidate cache after I/O\n\
+>  	-g X: write character X instead of random generated data\n\
+> +	-h hugepages: use buffers backed by hugepages for reads/writes\n\
+>  	-i logdev: do integrity testing, logdev is the dm log writes device\n\
+>  	-j logid: prefix debug log messsages with this id\n\
+>  	-k: do not truncate existing file and use its size as upper bound on file size\n\
+> @@ -2856,6 +2858,56 @@ keep_running(void)
+>  	return numops-- != 0;
+>  }
+>  
+> +static long
+> +get_hugepage_size(void)
+> +{
+> +	const char *str = "Hugepagesize:";
+> +	long hugepage_size = -1;
+> +	char buffer[64];
+> +	FILE *file;
+> +
+> +	file = fopen("/proc/meminfo", "r");
+> +	if (!file) {
+> +		prterr("get_hugepage_size: fopen /proc/meminfo");
+> +		return -1;
+> +	}
+> +	while (fgets(buffer, sizeof(buffer), file)) {
+> +		if (strncmp(buffer, str, strlen(str)) == 0) {
+> +			sscanf(buffer + strlen(str), "%ld", &hugepage_size);
+> +			break;
+> +		}
+> +	}
+> +	fclose(file);
+> +	if (hugepage_size == -1) {
+> +		prterr("get_hugepage_size: failed to find "
+> +			"hugepage size in /proc/meminfo\n");
+> +		return -1;
+> +	}
+> +
+> +	/* convert from KiB to bytes  */
+> +	return hugepage_size * 1024;
+> +}
+> +
+> +static void *
+> +init_hugepages_buf(unsigned len, long hugepage_size)
+> +{
+> +	void *buf;
+> +	long buf_size = roundup(len, hugepage_size);
+> +
+> +	if (posix_memalign(&buf, hugepage_size, buf_size)) {
+> +		prterr("posix_memalign for buf");
+> +		return NULL;
+> +	}
+> +	memset(buf, '\0', len);
 
-> 
->> +testfile=$SCRATCH_MNT/testfile
->> +
->> +_cleanup()
->> +{
-> 
->    _unmount $SCRATCH_MNT >>$seqres.full 2>&1
-> 
-> for this test might be interrupted.
-> 
->> +	$LVM_PROG lvremove -f /dev/mapper/$lvname-snapshot $vgname >>$seqres.full 2>&1
->> +	$LVM_PROG lvremove -f /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
->> +	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
->> +	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-> 
-> "-ff" might be better for cleanup.
-> 
-> According to 5f7a66b6dc4c ("fstests: use udevadm wait in preference to settle"), Dave
-> recommend doing below command after above lines:
+I'm assuming it doesn't matter, but did you want to use buf_size here to
+clear the whole buffer?
 
-Thank you for this information. :)
+> +	if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+> +		prterr("madvise collapse for buf");
+> +		free(buf);
+> +		return NULL;
+> +	}
+> +
+> +	return buf;
+> +}
+> +
+>  static struct option longopts[] = {
+>  	{"replay-ops", required_argument, 0, 256},
+>  	{"record-ops", optional_argument, 0, 255},
+> @@ -2883,7 +2935,7 @@ main(int argc, char **argv)
+>  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+>  
+>  	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>  				 longopts, NULL)) != EOF)
+>  		switch (ch) {
+>  		case 'b':
+> @@ -2916,6 +2968,9 @@ main(int argc, char **argv)
+>  		case 'g':
+>  			filldata = *optarg;
+>  			break;
+> +		case 'h':
+> +			hugepages = 1;
+> +			break;
+>  		case 'i':
+>  			integrity = 1;
+>  			logdev = strdup(optarg);
+> @@ -3232,12 +3287,41 @@ main(int argc, char **argv)
+>  	original_buf = (char *) malloc(maxfilelen);
+>  	for (i = 0; i < maxfilelen; i++)
+>  		original_buf[i] = random() % 256;
+> -	good_buf = (char *) malloc(maxfilelen + writebdy);
+> -	good_buf = round_ptr_up(good_buf, writebdy, 0);
+> -	memset(good_buf, '\0', maxfilelen);
+> -	temp_buf = (char *) malloc(maxoplen + readbdy);
+> -	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> -	memset(temp_buf, '\0', maxoplen);
+> +	if (hugepages) {
+> +		long hugepage_size;
+> +
+> +		hugepage_size = get_hugepage_size();
+> +		if (hugepage_size == -1) {
+> +			prterr("get_hugepage_size()");
+> +			exit(99);
+> +		}
+> +
+> +		if (writebdy != 1 && writebdy != hugepage_size)
+> +			prt("ignoring write alignment (since -h is enabled)");
+> +
+> +		if (readbdy != 1 && readbdy != hugepage_size)
+> +			prt("ignoring read alignment (since -h is enabled)");
 
-> 
->    _udev_wait --removed /dev/mapper/$vgname-$lvname
-> 
-> Then, don't forget the default cleanup steps:
-> 
->    cd /
->    rm -f $tmp.*
-> 
->> +}
->> +
->> +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
->> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
->> +$LVM_PROG lvcreate -L 1024m -n $lvname $vgname >>$seqres.full 2>&1
-> 
-> Also according to 5f7a66b6dc4c ("fstests: use udevadm wait in preference to settle"),
-> Dave recommend using a:
->    _udev_wait /dev/mapper/$vgname-$lvname
-> 
->> +
->> +$MKFS_F2FS_PROG /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> 
-> "-f" to force overwrite ? Or use _mkfs_dev? But _mkfs_dev doesn't has a f2f2
-> specific line, maybe you'd like to write one.
+I'm a little unclear on what these warnings mean. The alignments are
+still used in the read/write paths afaics. The non-huge mode seems to
+only really care about the max size of the buffers in this code.
 
-Sure, maybe adapting f2fs in a separated patch, anyway, let me check this.
+If your test doesn't actually use read/write alignments and the goal is
+just to keep things simple, perhaps it would be cleaner to add something
+like an if (hugepages && (writebdy != 1 || readbdy != 1)) check after
+option processing and exit out as an unsupported combination..?
 
-> 
->> +mount -o discard /dev/mapper/$vgname-$lvname $SCRATCH_MNT >>$seqres.full 2>&1
-> 
-> _mount
-> 
->> +
->> +dd if=/dev/zero of=$testfile bs=1M count=20 >>$seqres.full 2>&1
->> +sync
->> +rm $testfile
-> 
-> "-f" ?
-> 
->> +sync
->> +
->> +# create a snapshot on lvm device
->> +$LVM_PROG lvcreate -L 1024m -s -n $lvname-snapshot /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
->> +umount $SCRATCH_MNT
-> 
-> Move this line to _cleanup, to always try to do it before removing lvm.
+BTW, it might also be nice to factor out this whole section of buffer
+initialization code (including original_buf) into an init_buffers() or
+some such. That could be done as a prep patch, but just a suggestion
+either way.
 
-Will update in v3 according to all your comments.
+Brian
 
-Thanks,
-
+> +
+> +		good_buf = init_hugepages_buf(maxfilelen, hugepage_size);
+> +		if (!good_buf) {
+> +			prterr("init_hugepages_buf failed for good_buf");
+> +			exit(100);
+> +		}
+> +
+> +		temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
+> +		if (!temp_buf) {
+> +			prterr("init_hugepages_buf failed for temp_buf");
+> +			exit(101);
+> +		}
+> +	} else {
+> +		good_buf = (char *) malloc(maxfilelen + writebdy);
+> +		good_buf = round_ptr_up(good_buf, writebdy, 0);
+> +		memset(good_buf, '\0', maxfilelen);
+> +
+> +		temp_buf = (char *) malloc(maxoplen + readbdy);
+> +		temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> +		memset(temp_buf, '\0', maxoplen);
+> +	}
+>  	if (lite) {	/* zero entire existing file */
+>  		ssize_t written;
+>  
+> -- 
+> 2.47.1
 > 
->> +
->> +echo "Silence is golden"
->> +
->> +status=0
->> +exit
->> diff --git a/tests/f2fs/008.out b/tests/f2fs/008.out
->> new file mode 100644
->> index 00000000..dd68d5a4
->> --- /dev/null
->> +++ b/tests/f2fs/008.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 008
->> +Silence is golden
->> -- 
->> 2.40.1
->>
 > 
 
