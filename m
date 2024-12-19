@@ -1,156 +1,225 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+Received: from mail-qt1-f170.google.com (mail-qt1-f170.google.com [209.85.160.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D94321805E
-	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 20:49:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5932C1BD01D;
+	Thu, 19 Dec 2024 21:36:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734641374; cv=none; b=iW7MOdTPTdVODTzybwVqW7ei7Y/qSvZA4xdTr7RTSBrcBArW+IH98V1EpRFLJRA76j8yTKbNsHR39UUY2BaFJEHHqPp3TL5BD+cdZEcMIbJnN7BKdA9g4AhBGut8QO2vriSo+LNhqoCyiR2O0Xy7mysRMNyNLMMt6zj2GDtGX3w=
+	t=1734644174; cv=none; b=aareMW5RqcFPmI5bKxbeETqBn7UFbBm4Zdo7pJcSHXyEyJafePYmNy/eHl8bIUy1lPzR2zPyuBEaxAmd0BG/wbjGV7cWL3FAr/45JewP9kRr1y1qS3YwjHxS3u7GfDYhNlHtcgNUk6AvY/n/pFyCs6m6CwpJI5IuRL9cdyJAbDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734641374; c=relaxed/simple;
-	bh=Y9ti6rE9vqkWle3Jgl2BRrPt5+QGGg4w1cRQsv1G6g8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WaXUbgc8jrZaQtkK0HqOjogJfvwf8wD+bTrg3+fWyujiCR/ZGqzIfaJzVAYbmgTZevPNff7n/LnUYXA3d5h0nuEReg6TPRdlQvrDlGNXkNNlvQSoxvPZukhlfCt7+2U8W21/UiX4HhHHO2ZI77CKYxO9Dh9thfV+pda7EwnPbWE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=MnrH9ABt; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1734644174; c=relaxed/simple;
+	bh=sTfDykp5xshdR0+wdkJ7lcY3IDCzznF6avmv598s5Es=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=FGIMCBld7E0cTt8rEqG+iLPD/FQzu7WZBMxe+P7i/4ReWNTlSGPyNr6x1HoM8mNRbG6JoKBS1kufc77CcL2ovij6KHfF3PPxs6uT9D7IVqqbDnYfwwPZOh+3iwvzcaMD4BtrNnnKewhYjtuKhK31NYlYecNamBt8jrF1y6IsWsY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=H4eyt0AO; arc=none smtp.client-ip=209.85.160.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="MnrH9ABt"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-215770613dbso8594215ad.2
-        for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 12:49:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H4eyt0AO"
+Received: by mail-qt1-f170.google.com with SMTP id d75a77b69052e-467a8d2d7f1so9499561cf.1;
+        Thu, 19 Dec 2024 13:36:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1734641372; x=1735246172; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=7bIiYB80VxQ7ZUsSp1nMFrFeVOGrRcj3/Y/P4Z+ht9k=;
-        b=MnrH9ABtvKiYxJL76hx4DVIZuEB9apxDKUiKNBIwsa0XflIyIRuR8DuiYi8YOIRUKc
-         KAnmGJIeHlwAuz0Er3E5BZPFPoeypq3Kfxs4cdESNFcvnHV5ToBaPSWsesJnjKGP/ESU
-         gHS9I9N2wptu3D2Q0nbEFcEgoDU05ZSAZspOVbhmU1HgvQ0jdMiBG3+4/+6VrFcnArJa
-         LjtizP0UouM0f4XYX+StOkUxC+0QlWlZbhFO2t62FbEKeYJHbw5fxOJKFxEnQ1qg/Z/g
-         zVsOtXwK0z3Y2ABilB7KM3s+Rvcm4PLLnOIIQpiCYIh+rqNQMDm7SMKw9hNYZfF420ad
-         VaUQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1734641372; x=1735246172;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1734644171; x=1735248971; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=7bIiYB80VxQ7ZUsSp1nMFrFeVOGrRcj3/Y/P4Z+ht9k=;
-        b=VBDbTQsmLqWh/oh6dd+N7YkSylP6uhdvfi/Nd23A72MVBWqsliJvIadONSQ9C40uDl
-         tGVgV5rCMNp84Z39TKOO3iDjSkOzPlN3rP2gGEnys59Uq8YOlr7OOo9DF8v+KM5e+xOl
-         wbbhc9Hg0/HGfjNwS9N1OnmMuCzMHf4MI9ZYefZydOHvciqPfOtgPbNXXfThBWAj3qUS
-         C5xgDabYbtLFNWUe67AazN7p9xieqpC42qJR8PgR4ZZbzr7Hqybf3p5+MEPt1Nz4fkS8
-         oU5062O5G6mWB+hOleuQZjmUIE/ZakSlVOApYJz+bYlRCsG8ajnHQdht6nUGvF/7mV26
-         CUgw==
-X-Forwarded-Encrypted: i=1; AJvYcCWrMP9eEW0i74vv14UTX2Vfh9BWUI+vBpHp0vMWg3jOt6YlF+3rgT+gjc2ovENWNQpfBv1Mq3vc@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyl7uf6ORWglMMKS0vKiNhK/u411skBIf/ryP2Ve2PHZHmM3ssB
-	tskBDfHKXmTVw/GYD+0CydchTcXD8aWyrC+1C0nC1nPwavXghQvl1xvR7wOvELE=
-X-Gm-Gg: ASbGncsRkuwdqIxbUq8wHl2gO5yyjy2d3Hmf8bBiLi6SzbQLvL0q6ROgdzWRhP/Z2d2
-	EU93N/G6KRcl0KvQv4vFQIDJ37pEARlSyeqo0kTIs0EEYJBSxtkrweMXyuFeMq5RVtXOlSPQuoL
-	ss5zhdOKjpuLwhhUHoVIVs7lwpXNH1FIxzoI1o0OHNFfBXYTi8kGyQQU0ke6OGORJ5SS14M1M3Y
-	VuXjkq6WmEmb8NDG9fz+8ufNKXnAj2kNnHSpXWfnuNqTJHwfY/nf6ELA87tOkG+34BXoNiwTV4g
-	MkWHORq683ZjASFQjGs+1yq9Dwp8XA==
-X-Google-Smtp-Source: AGHT+IERECpk8p3y3r6hCY9P9NXZgy88FmQ6ZrqpSxT+Hs1Rv4yI/FPjLrAF1RRdZdXmxrJMGv9XCA==
-X-Received: by 2002:a17:902:dac6:b0:216:59d4:40e7 with SMTP id d9443c01a7336-219e6f25e08mr1442245ad.55.1734641372133;
-        Thu, 19 Dec 2024 12:49:32 -0800 (PST)
-Received: from dread.disaster.area (pa49-195-9-235.pa.nsw.optusnet.com.au. [49.195.9.235])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-219dc9cdeecsm16245375ad.123.2024.12.19.12.49.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Dec 2024 12:49:31 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tONSa-0000000CoV4-3Z95;
-	Fri, 20 Dec 2024 07:49:28 +1100
-Date: Fri, 20 Dec 2024 07:49:28 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@redhat.com>, Christoph Hellwig <hch@infradead.org>,
-	Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
- testing on xfs
-Message-ID: <Z2SG2HsqgA46kuAz@dread.disaster.area>
-References: <20241215051242.3340572-1-tytso@mit.edu>
- <20241215051242.3340572-3-tytso@mit.edu>
- <Z2EyG0vqtyTSyM5a@infradead.org>
- <Z2NL_oc5QSscZdZ_@dread.disaster.area>
- <Z2OxMQACnMgmBR1a@infradead.org>
- <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20241219163206.GD6160@frogsfrogsfrogs>
+        bh=EkpsDXCBqdSlrvvzseNsW4LqmbzJse7fVIj7xYcto+A=;
+        b=H4eyt0AOIPrPmme9nIphK7iwkXPTOf+hYvorVOu+bWjRKCNh8cMnWi27pYRYfewj5K
+         Ebpl3mtm7L2rxlTzq4zlhbv2xW0bgexDC9/93RVWNV01s7GHt8IyUF1YqGXdcULDVnPX
+         +LEYzaxUgRduu1QOB3tAHUO9fglNQeAi3ITTpYW+mAvBaP5+26GfbTj1KjVxshLbpskh
+         Pws+uZbqKeuMZO8YkCnmeAYAnYBynd7A+fQt71rz7UoZts3aQ0K+7L0OoYUcyOGZNCTY
+         R0XotLPm/UaaOHL+6HTSNalRsc/0COZQ9VdfciZAceBlIjJAiz/NBUHcq1Fs0ACDV7NP
+         RcZw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1734644171; x=1735248971;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=EkpsDXCBqdSlrvvzseNsW4LqmbzJse7fVIj7xYcto+A=;
+        b=Sfg6VvHCeTK9IjopKp9oZ2IQFrKJ4GtenYHz395vRN6dqASUrTu1GZidgqpaw8ZPlj
+         dMfiaqaq47JjLwzEigOGD+x3dtRQ0D/FdW8aeB/MKWzeMz/qGv4MH1JJ3pZ1JpP/spTy
+         jKu+8g53QExuFB2PSSFIflBlhj7zcVCqy+NNbvaTvaUiZxTRh1MvGpu2w1YiaKNa5Ys1
+         k3G/gtBfILAoxRLTL1/OOg+n9Pr+Rty4BucyEUVeEMI2fQHgec5bboKJgG/nGtqUm16q
+         fXpLWdJ3KvmacqsaJCL6EnT867MfFlPVIRAfYKM64H/Y9w9Wj+WESn8BSxL5vA9biee9
+         mqRw==
+X-Forwarded-Encrypted: i=1; AJvYcCWhPWzpOuKV9VwkSc7KBFLlPIgYzZySAdcfDD0OPe9ThLIaJFK054Xc+Ki7RNhs+eXrIbJYZ3lzBqSd7ynJ@vger.kernel.org
+X-Gm-Message-State: AOJu0YyFTlzHBtFHyktE0X0L0u5vHyKE6nBLNERQoCrUj1jrH2D3OTvz
+	1mHkK+ZGMmrlMkPUw2E1ha7HTfXdeSHHqPZSdDN7skglXDl1MsSij3CptCWNWF8mKXWNfxtVt2M
+	kB70UxaHZy6/NdrXqdVD5wGDaYCk=
+X-Gm-Gg: ASbGncuSvN/MrfqsxhLzB5o1AAGedX7eTDmzLU+mCIFjpU/BkwKOGeXWs8ueHO+ubPz
+	nELlncdWK+jiMp4aaNAIuKShGpX2sAwUonh/3OUc=
+X-Google-Smtp-Source: AGHT+IHMgZ8wxhUS67VT2UCJB9GRN9ICr/KTvDgmcJQpldUMHlpFyXw4edi1P0xG5/lesHhHRpQZzPDQVBN3bsBYN94=
+X-Received: by 2002:ac8:58c4:0:b0:466:85eb:6123 with SMTP id
+ d75a77b69052e-46a4a8cb215mr8468441cf.22.1734644171209; Thu, 19 Dec 2024
+ 13:36:11 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241219163206.GD6160@frogsfrogsfrogs>
+References: <20241218210122.3809198-1-joannelkoong@gmail.com>
+ <20241218210122.3809198-3-joannelkoong@gmail.com> <20241219175251.GH6160@frogsfrogsfrogs>
+In-Reply-To: <20241219175251.GH6160@frogsfrogsfrogs>
+From: Joanne Koong <joannelkoong@gmail.com>
+Date: Thu, 19 Dec 2024 13:36:00 -0800
+Message-ID: <CAJnrk1Y0BrFRt2mAujAzmoWRzYnoWoAJt4X6jtLh6O0CkgR4CA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] generic: add tests for read/writes from
+ hugepages-backed buffers
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	kernel-team@meta.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Dec 19, 2024 at 08:32:06AM -0800, Darrick J. Wong wrote:
-> On Thu, Dec 19, 2024 at 06:16:26PM +0800, Zorro Lang wrote:
-> > On Wed, Dec 18, 2024 at 09:37:53PM -0800, Christoph Hellwig wrote:
-> > > On Thu, Dec 19, 2024 at 09:26:06AM +1100, Dave Chinner wrote:
-> > > > On Tue, Dec 17, 2024 at 12:11:07AM -0800, Christoph Hellwig wrote:
-> > > > > On Sun, Dec 15, 2024 at 12:12:42AM -0500, Theodore Ts'o wrote:
-> > > > > > +if [ $FSTYP = "xfs" ]; then
-> > > > > > +    _scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
-> > > > > > +else
-> > > > > > +    _scratch_mkfs >> $seqres.full 2>&1
-> > > > > > +fi
-> > > > > 
-> > > > > We really need to document why generic tests have file system specific
-> > > > > hacks.  And yes, that's a request for Dave who originally added it
-> > > > > without any explanation and not Ted.
-> > > > 
-> > > > Creating and then unlinking 50000 files is journal space bound
-> > > > when using default 64MB logs on small test filesystems. Increasing
-> > > > the journal size to 256MB halved the runtime of this test.
-> > > 
-> > > Please explain this in thet test.  And you probably also want to
-> > > ensure that you don't force the log smaller than 256 either, otherwise
-> > > people in 10 or 20 years will wonder why this test forces logs to
-> > > be so small.
-> > 
-> > I'll help to add this comment when I merge this patch, if Dave hope to
-> > keep "-l size=256m" for xfs.
-> 
-> What happens if someone runs fstests with a 128M external log device?
+On Thu, Dec 19, 2024 at 9:52=E2=80=AFAM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
+>
+> On Wed, Dec 18, 2024 at 01:01:22PM -0800, Joanne Koong wrote:
+> > Add generic tests 758 and 759 for testing reads/writes from buffers
+> > backed by hugepages.
+> >
+> > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> > ---
+> >  common/rc             | 10 ++++++++++
+> >  tests/generic/758     | 23 +++++++++++++++++++++++
+> >  tests/generic/758.out |  4 ++++
+> >  tests/generic/759     | 24 ++++++++++++++++++++++++
+> >  tests/generic/759.out |  4 ++++
+> >  5 files changed, 65 insertions(+)
+> >  create mode 100755 tests/generic/758
+> >  create mode 100644 tests/generic/758.out
+> >  create mode 100755 tests/generic/759
+> >  create mode 100644 tests/generic/759.out
+> >
+> > diff --git a/common/rc b/common/rc
+> > index 1b2e4508..33af7fa7 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -3016,6 +3016,16 @@ _require_xfs_io_command()
+> >       fi
+> >  }
+> >
+> > +# check that the kernel and system supports huge pages
+> > +_require_thp()
+> > +{
+> > +    thp_status=3D$(cat /sys/kernel/mm/transparent_hugepage/enabled)
+> > +    if [[ $thp_status =3D=3D *"[never]"* ]]; then
+> > +         _notrun "system doesn't support transparent hugepages"
+> > +    fi
+> > +    _require_kernel_config CONFIG_TRANSPARENT_HUGEPAGE
+>
+> Will /sys/kernel/mm/transparent_hugepage/ exist if
+> CONFIG_TRANSPARENT_HUGEPAGE=3Dn ?
+>
+> Or put another way, if /sys/kernel/mm/transparent_hugepage/ doesn't
+> exist, is that a sign that hugepages aren't enabled?
 
-It fails, then drops MKFS_OPTIONS.  The simple solution for this is
-to simply to use a larger external log device....
+I just checked the logic in hugepage_init() and it looks like the
+sysfs initialization is gated by a has_transparent_hugepage() check
+against that config, so no, ' /sys/kernel/mm/transparent_hugepage/'
+won't be there if that config is set to n. Thanks for noting, I'll
+revise this check.
 
-> Is this one of those cases where _scratch_mkfs notices the mkfs failure
-> and formats without MKFS_OPTIONS? 
+>
+> > +}
+> > +
+> >  # check that kernel and filesystem support direct I/O, and check if "$=
+1" size
+> >  # aligned (optional) is supported
+> >  _require_odirect()
+> > diff --git a/tests/generic/758 b/tests/generic/758
+> > new file mode 100755
+> > index 00000000..b3bd6e5b
+> > --- /dev/null
+> > +++ b/tests/generic/758
+> > @@ -0,0 +1,23 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +#
+> > +# FS QA Test No. 758
+> > +#
+> > +# fsx exercising reads/writes from userspace buffers
+> > +# backed by hugepages
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest rw auto quick
+> > +
+> > +# Import common functions.
+>
+> No need for ^^ this comment.  Same with 759.
+>
+> --D
 
-More than likely.
+Will remove these comments in v2.
 
-> And if that's true, what about my
-> test configs that set MKFS_OPTIONS to test new non-default features?
 
-Changing existing infrastructure behaviour to better suit *your*
-test environments is *your* responsibility to address, not mine.
-I don't care if MKFS_OPTIONS get dropped in occasional tests, it's
-more important to me that the tests run fast so I can iterate
-my modify-build-test development cycle faster.
+Thanks,
+Joanne
 
-It should be trivial for you to address, though. Add a function
-like:
-
-_scratch_mkfs_try_option "-l size=256M" 
-
-which has the opposite fallback behaviour of dropping the test
-supplied option and using MKFS_OPTIONS instead, and I'll use it for
-all these "test go faster" modifications that we badly need to
-address...
-
-FWIW, this would also get rid of the need for the FSTYP checks in
-the test, too, because passing "-l size=256M" will fail on btrfs,
-ext4, etc and then they fall back to the specific test config...
-
-So, provide me with the infrastructure that makes stuff like this
-work properly in *your test environment*, and I'll use it
-appropriately.
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+>
+> > +. ./common/filter
+> > +
+> > +_require_test
+> > +_require_thp
+> > +
+> > +run_fsx -N 10000         -l 500000 -h
+> > +run_fsx -N 10000  -o 8192   -l 500000 -h
+> > +run_fsx -N 10000  -o 128000 -l 500000 -h
+> > +
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/generic/758.out b/tests/generic/758.out
+> > new file mode 100644
+> > index 00000000..af04bb14
+> > --- /dev/null
+> > +++ b/tests/generic/758.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 758
+> > +fsx -N 10000 -l 500000 -h
+> > +fsx -N 10000 -o 8192 -l 500000 -h
+> > +fsx -N 10000 -o 128000 -l 500000 -h
+> > diff --git a/tests/generic/759 b/tests/generic/759
+> > new file mode 100755
+> > index 00000000..6dfe2b86
+> > --- /dev/null
+> > +++ b/tests/generic/759
+> > @@ -0,0 +1,24 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +#
+> > +# FS QA Test No. 759
+> > +#
+> > +# fsx exercising direct IO reads/writes from userspace buffers
+> > +# backed by hugepages
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest rw auto quick
+> > +
+> > +# Import common functions.
+> > +. ./common/filter
+> > +
+> > +_require_test
+> > +_require_odirect
+> > +_require_thp
+> > +
+> > +run_fsx -N 10000            -l 500000 -Z -R -W -h
+> > +run_fsx -N 10000  -o 8192   -l 500000 -Z -R -W -h
+> > +run_fsx -N 10000  -o 128000 -l 500000 -Z -R -W -h
+> > +
+> > +status=3D0
+> > +exit
+> > diff --git a/tests/generic/759.out b/tests/generic/759.out
+> > new file mode 100644
+> > index 00000000..18d21229
+> > --- /dev/null
+> > +++ b/tests/generic/759.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 759
+> > +fsx -N 10000 -l 500000 -Z -R -W -h
+> > +fsx -N 10000 -o 8192 -l 500000 -Z -R -W -h
+> > +fsx -N 10000 -o 128000 -l 500000 -Z -R -W -h
+> > --
+> > 2.47.1
+> >
+> >
