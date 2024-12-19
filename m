@@ -1,46 +1,48 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A52386345
-	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 16:32:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F06516CD1D
+	for <fstests@vger.kernel.org>; Thu, 19 Dec 2024 17:02:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734625927; cv=none; b=B5FWSuyUtAXRXHV6Wka/iq7nCkKZPrF3NiDIcnTLjRu+C3klWQ/PtW288MFHKI5YPIxX7oAYOWj12Dwi97A+Q7mNdpafvoAVDLCXWGI4FCePbVMj89ykBGjvC+rcMWn3Wk1mfLZk1zsDrnmlqZP1LzbeZ7zwHATpo8nZYfodNUI=
+	t=1734627759; cv=none; b=lJTjFcw2X6oTP6P/BMP2iEp7C3N6wL4Bn2PfcfktfWlLc7YWgXleXr6xV7wPC0TbmLQwtVabtDvOfh4Qy+U2920eoZ05stRhRNqYBGa9m0TjAXIgMy0ZPO10h4TScHG4PZtMbB+m5eam2T+7RG3FglaToXJKZp/7pczwH2t/c+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734625927; c=relaxed/simple;
-	bh=eAOjxw9yQAZM4SFJ0+wn/J7V/NdtSZ2pr1uNJMx1wlI=;
+	s=arc-20240116; t=1734627759; c=relaxed/simple;
+	bh=upuM+R3MtuDSg3Iia279gR+wsGQwfW9USxs1V02Xpr4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gfSpRN4bheNYW9g/3eB8fv/CrmU2Q93uo7lFxJIq/RHsEi0bDmCfhb5gP4Zrg4Uz6HF8/jrTjR/IjqMmVs6To2vLPXk1ysoSoBP1kCMugwkDPBI0ha26u1lNkVaRoABioxcqtR20v7SewkDUCA96x+E1n7R+Xuqei9k0icXb4BQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fkfu1Y1y; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=tFCYZFbz1acIr8R5FM1P9ZGCQk72D9Ccmd2DnBlC1W78iPSRfih6tqkk/FKOGo+uFF2NFF7MSIrjY45/CXsHy3nm/LkW4G+a9BJIgT7ZeW9gphF0U40rDhQK22dDeTXygfQt15MSjuS88cc1E4D9jiZOEI+T7Z3l2ZwDnywswb0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=ZZWXPB5A; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fkfu1Y1y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 269D8C4CECE;
-	Thu, 19 Dec 2024 16:32:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734625927;
-	bh=eAOjxw9yQAZM4SFJ0+wn/J7V/NdtSZ2pr1uNJMx1wlI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fkfu1Y1yLZG89juYigbuHETTYXTaU78qX2NiVp2JxvnnmBbKcaRIf8I55goyIN8NJ
-	 QfM1S2tZUzm7Jkz3oqIwpMKtYAFAMvvhN8TqnTdjoOcrHGXxuqtbCQzuDGAI921AdL
-	 zhvsNTJ5Z8wMlkvjMxPr2fLk0CBW4fsee86OTqMEnuuGpIlteL0ai+Zf096mQGOSYA
-	 HzzVLO/VaG6z3xvk7z9NgBY/sSMG5vSL8zTK7CrXMVVEI+lMe09xS8zIwoMpUXTG+I
-	 E/1kkDnvW+z5n+mb7uc91K2RWJjFt+5DPCi8yllyAULALe0qIupJOHS395pwS+Jc5W
-	 YLdeNFUIkxsEA==
-Date: Thu, 19 Dec 2024 08:32:06 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Christoph Hellwig <hch@infradead.org>,
-	Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
- testing on xfs
-Message-ID: <20241219163206.GD6160@frogsfrogsfrogs>
-References: <20241215051242.3340572-1-tytso@mit.edu>
- <20241215051242.3340572-3-tytso@mit.edu>
- <Z2EyG0vqtyTSyM5a@infradead.org>
- <Z2NL_oc5QSscZdZ_@dread.disaster.area>
- <Z2OxMQACnMgmBR1a@infradead.org>
- <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="ZZWXPB5A"
+Received: from cwcc.thunk.org (pool-173-48-82-226.bstnma.fios.verizon.net [173.48.82.226])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 4BJH2CZ6015642
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 19 Dec 2024 12:02:13 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1734627734; bh=uN9lPunIguV3iGtN3rpjNbh29BetKE/Dfb90QEgIy2M=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=ZZWXPB5A8fHrzFQ6iUnYvMENNq2vKaoXVzvHYmvBN6x3KQWkoYkjlOYB6QHc4c605
+	 81gs6tMcb1fJwDUypGyE/ZFD2aADOPBEeLR5L4v3CM1OKcRpjWshyNZfTQe7UdTDjY
+	 Ym82AMelEyU3jsxSop3NHpzYOp6Kjq6W+CxUsw4qfyUkjBBE9EREd2Gbj1eEA7Rd3Q
+	 XDziz7nXDpdRenWdQ9MgqdpQeITOg1HEd3Vj4jUbh9MrmvOXs29cfQUtnwefuplY9V
+	 BCE9aeedqBQY0X6mzkmCDgfYt4kcAIAo1z8AqDsrHfjaM82ynkhuy7Fr1Rvvlpy0Y0
+	 ebfBD33JjuxGQ==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id 6F2E315C5BC3; Thu, 19 Dec 2024 12:02:12 -0500 (EST)
+Date: Thu, 19 Dec 2024 12:02:12 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Zorro Lang <zlang@kernel.org>, Brian Foster <bfoster@redhat.com>,
+        fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+Subject: Re: remove _supported_fs
+Message-ID: <20241219170212.GA1585694@mit.edu>
+References: <20241210065900.1235379-1-hch@lst.de>
+ <20241210130033.GA1839653@mit.edu>
+ <20241210160827.GA26559@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -49,45 +51,37 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20241210160827.GA26559@lst.de>
 
-On Thu, Dec 19, 2024 at 06:16:26PM +0800, Zorro Lang wrote:
-> On Wed, Dec 18, 2024 at 09:37:53PM -0800, Christoph Hellwig wrote:
-> > On Thu, Dec 19, 2024 at 09:26:06AM +1100, Dave Chinner wrote:
-> > > On Tue, Dec 17, 2024 at 12:11:07AM -0800, Christoph Hellwig wrote:
-> > > > On Sun, Dec 15, 2024 at 12:12:42AM -0500, Theodore Ts'o wrote:
-> > > > > +if [ $FSTYP = "xfs" ]; then
-> > > > > +    _scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
-> > > > > +else
-> > > > > +    _scratch_mkfs >> $seqres.full 2>&1
-> > > > > +fi
-> > > > 
-> > > > We really need to document why generic tests have file system specific
-> > > > hacks.  And yes, that's a request for Dave who originally added it
-> > > > without any explanation and not Ted.
-> > > 
-> > > Creating and then unlinking 50000 files is journal space bound
-> > > when using default 64MB logs on small test filesystems. Increasing
-> > > the journal size to 256MB halved the runtime of this test.
-> > 
-> > Please explain this in thet test.  And you probably also want to
-> > ensure that you don't force the log smaller than 256 either, otherwise
-> > people in 10 or 20 years will wonder why this test forces logs to
-> > be so small.
-> 
-> I'll help to add this comment when I merge this patch, if Dave hope to
-> keep "-l size=256m" for xfs.
+On Tue, Dec 10, 2024 at 05:08:27PM +0100, Christoph Hellwig wrote:
+> I think the diffstat alone makes it pretty clear that moving away
+> form that is a benefit, and it's also a lot easier to understand than
+> that ext2 and ext3 magically run ext4 tests.
 
-What happens if someone runs fstests with a 128M external log device?
-Is this one of those cases where _scratch_mkfs notices the mkfs failure
-and formats without MKFS_OPTIONS?  And if that's true, what about my
-test configs that set MKFS_OPTIONS to test new non-default features?
+We talked about this on the weekly ext4 video chat, and I think what
+we'd think is actually cleaner is to have a single directory for all
+ext2/ext3/ext4 tests, and then eventually, have feature-specific
+guards which skip a test if a particular feature isn't supported by a
+particular file system.
 
---D
+It's always been my position that ext2, ext3, and ext4 are effectively
+the same file system from a conceptual perspective, with multiple
+implementations that support different subsets of file system
+features.  This includes /usr/src/linux/fs/ext2,
+/usr/src/linux/fs/ext3 (before we removed it from more recent
+rernels), /usr/src/linux/fs/ext4, HURD's implementation of ext2,
+NetBSD/FreeBSD's implementation of ext2, etc.
 
-> Thanks,
-> Zorro
-> 
-> > 
-> 
-> 
+So effectively, what I'm proposing is that we use xfstests/tests/ext4
+effectively as "extN", which would be used when testing with
+FSTYP=ext[234].
+
+Yes, we'll need to do some cleanup to add feature guards (e.g.,
+_require_metadata_journaling, and "_require_scratch_ext4_feature mmp")
+instead of _exclude_fs ext2, but in the end, I think this will be
+cleaner and easier to understand since we'll know exactly what the
+test is testing.
+
+Cheers,
+
+						- Ted
