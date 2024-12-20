@@ -1,248 +1,133 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from fhigh-a8-smtp.messagingengine.com (fhigh-a8-smtp.messagingengine.com [103.168.172.159])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F2581C32FE
-	for <fstests@vger.kernel.org>; Fri, 20 Dec 2024 11:51:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35200216399
+	for <fstests@vger.kernel.org>; Fri, 20 Dec 2024 15:12:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.159
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734695465; cv=none; b=hLKcpG/ppRCNMM192WO4mx18A16rclOWx589xFRfJMrsaiUZb/K4V/KyTUtDnA0lPCj4RqgnRpkZCW/6UITJWZoOdxkPuXSet+DjgbkV8W4qN6Jyw+HOalNZjGe8DnRuHwFR7TgS1S/uasEijSVVm44lg1DK465rRRNhKcU27nI=
+	t=1734707523; cv=none; b=eLiFRE2fWTOCEzooSPKY/az3KCR45ObVUyRCqpxps5ay50iBeP5zydJ+64s+Ei6eaIgvHCqb1522b7ehvZvdfp4p2eF5CY/rNaA6uSzshotHMu2kFYtNz7Rrr2hXFDcKFqe7zTDxpnujx1V48L0Y9cfl8vHhBBPRZkzwiDmHrH4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734695465; c=relaxed/simple;
-	bh=aBqOW8VcDW3vZzaxBudlXklI0UZO+JYoD6Hsv4ZASNg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eKu1PLdiOs0u0OkF3RQiCk/PMDoMERDZlTghPAIVN+DQWmFcFWcbDl3+DP9k4gjwrQGw88mtY4cO2HTq4Ne3IIQs2uRlpazSiM3Mq9+5BXjiPUNblR9yRKqynWOopGIfqfpGa4yHR+3W2O2w7/yiEgMQaYt1BWCILaBvF1hNQzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Cgo47Jkf; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1734707523; c=relaxed/simple;
+	bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UvmNLmrqz03oSECOGYuX5qoNziW2a+mM79wH/wgqQ5IQaV5yuThZnXyDcPUyGHPQTILEeouu39TMDT2KOyYOuyfd/qitkEkbpSQHoK3nbCu/R+ylwlsJjqzCWlSFtzho3oacDjFr5UdbOku61x89/TkM8bfy9unBqvaE6zP0lsc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=EEBraCam; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=SFenpr3S; arc=none smtp.client-ip=103.168.172.159
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Cgo47Jkf"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1734695461;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=WOV3QE8gcBZ5MVKrGesNSPW5GTb8ph5wnuAYk1P1CZs=;
-	b=Cgo47JkfUsb7sDnjQcDcFtTaEYFlEOj8u/2/OFQSQ44EI1nVPPFi8upb0W4Pi6tbdMO42x
-	u01tFqCRkfCGmornFh7NuCM7mpizJZovXbCiG8Dj30rjVjkWMsTPsSptyGJwdQsVUIez+B
-	te0rW420xSn815jCAttlo0zhWxNbLlg=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-609-viGedOvTPiCGNiM-alIHHw-1; Fri,
- 20 Dec 2024 06:50:58 -0500
-X-MC-Unique: viGedOvTPiCGNiM-alIHHw-1
-X-Mimecast-MFC-AGG-ID: viGedOvTPiCGNiM-alIHHw
-Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 50D321956048;
-	Fri, 20 Dec 2024 11:50:57 +0000 (UTC)
-Received: from bfoster (unknown [10.22.88.128])
-	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 63B30195608A;
-	Fri, 20 Dec 2024 11:50:56 +0000 (UTC)
-Date: Fri, 20 Dec 2024 06:52:55 -0500
-From: Brian Foster <bfoster@redhat.com>
-To: Joanne Koong <joannelkoong@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	kernel-team@meta.com
-Subject: Re: [PATCH 1/2] fsx: support reads/writes from buffers backed by
- hugepages
-Message-ID: <Z2Val8PjhcfBdBFK@bfoster>
-References: <20241218210122.3809198-1-joannelkoong@gmail.com>
- <20241218210122.3809198-2-joannelkoong@gmail.com>
- <Z2QtyaryQtBZZw7q@bfoster>
- <CAJnrk1ZfvyrP=8qKyHFzVte_G1q85bVtmKb4KRwJCe_cYHBmxg@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="EEBraCam";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="SFenpr3S"
+Received: from phl-compute-12.internal (phl-compute-12.phl.internal [10.202.2.52])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id 367F91140146;
+	Fri, 20 Dec 2024 10:12:00 -0500 (EST)
+Received: from phl-mailfrontend-02 ([10.202.2.163])
+  by phl-compute-12.internal (MEProxy); Fri, 20 Dec 2024 10:12:00 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm2; t=1734707520;
+	 x=1734793920; bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=; b=
+	EEBraCami6fAks9fFCSvyO/rvhJymMopCUxvr1+KKLfOo9jchjZ0I21A4oUtQpTB
+	XbX30xrK7ICZH6PFEPE5BAR1sU9d3HpSuRoUTP5jhZ2ToWPu+Dd/ga+3rh+K3UVN
+	Xab8F7Aag56T5VzSzJT5Mv3yPQr4B4D2b+PZ/1DGfrggkKPMht9b+vGI/RRHos65
+	/NH309j5CNcLnqVTF9Wl8+5Vb9PUDf8RMjuwhvpLF2bJ0XHuZ4xXnt0gGI5Uac8J
+	hWGtRCMh1y/5s/VE7AL9xS81+pSK5AaiDMjoPxvKD6cgyj7cDLYhM7Mmrep4xRO/
+	XqU3pDpI8HE/mo2t4jLMug==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1734707520; x=
+	1734793920; bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=; b=S
+	Fenpr3SGrfohQ1+b++fstGXdzSE0jZzNfAdcBFYPdga/Puj4+P80aplSGz186hmP
+	NyGwgzOxkvIppo/2YjD4XPASYfQERW+QWSOF43ug56eQiOfjNNdV4du+rH+Mw3ut
+	st8us5KIJGV7ZNAymzNI0vN9872Q7MeEviU8SsDua0hWcUVUorg5q667u61a2XD8
+	ZDFziKiQ2jMmczeRX47PJbZnoM0NtY85q/vutrZWGyHv5IhfL/eSvxThFrvAsGPt
+	6dfpf6h8Yr49x5BAGCrFSzBUITnm1cs9UsasIz3LoyRHS8TmKtdpogPZ7lhTz9jz
+	0fQXYbLRYdoA0hy7XVx0w==
+X-ME-Sender: <xms:P4llZ-s10reFwfX_R68byErORjP_AbllqIskYSVJrEWcdl5QqlD0eQ>
+    <xme:P4llZzczjOcSdeJb_DwWemYa_w6GyyrNIcWulz9m7vMBl1LHeoPJLS9Dg6Trnj4sC
+    HzCO_K9eNTrd4L30M8>
+X-ME-Received: <xmr:P4llZ5yQyWwEL6EwXUOEfPzvxZYjskSDnUvFJM1ZUC4dB067D84pgPniLEhgv0TJlXztvTKYD_6iI_0UpyNynWNKTzM>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefuddruddtvddgjedtucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
+    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnh
+    htshculddquddttddmnecujfgurhepkfffgggfuffvvehfhfgjtgfgsehtjeertddtvdej
+    necuhfhrohhmpefgrhhitgcuufgrnhguvggvnhcuoehsrghnuggvvghnsehsrghnuggvvg
+    hnrdhnvghtqeenucggtffrrghtthgvrhhnpeevieekueetfeeujedtheeffedvgeffiedv
+    jeejleffhfeggeejuedtjeeulefhvdenucevlhhushhtvghrufhiiigvpedtnecurfgrrh
+    grmhepmhgrihhlfhhrohhmpehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtpdhnsggp
+    rhgtphhtthhopeekpdhmohguvgepshhmthhpohhuthdprhgtphhtthhopegujhifohhngh
+    eskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepuggrvhhiugesfhhrohhmohhrsghithdr
+    tghomhdprhgtphhtthhopeiilhgrnhhgsehrvgguhhgrthdrtghomhdprhgtphhtthhope
+    hhtghhsehinhhfrhgruggvrggurdhorhhgpdhrtghpthhtohepthihthhsohesmhhithdr
+    vgguuhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpd
+    hrtghpthhtohepshhhihhrlhgvhidrmhgrsehorhgrtghlvgdrtghomhdprhgtphhtthho
+    pehkohhnrhgrugdrfihilhhksehorhgrtghlvgdrtghomh
+X-ME-Proxy: <xmx:P4llZ5MmckYYSUmYSEe6P04X46I8flm3FY_icmF-RSRoPvlrBsb9xQ>
+    <xmx:P4llZ-9CCtNDY5gVR906uGlgk0F1LoKRzhBu1LpEyuhuan_odlRLHQ>
+    <xmx:P4llZxXWu4pKaX2iWZzInReLTlU5K90PF5o98DRoAO-XHKyWfIXT1A>
+    <xmx:P4llZ3eWStjOSxXn7EO-4dIwyfkeDDBPFXRdoftTFtY1Tc3LfbBD9g>
+    <xmx:QIllZyTYrXC7sscxQQxJB67T55NDSW-9dEQd8OvL3W-xhguC7WN5t-Vq>
+Feedback-ID: i2b59495a:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 20 Dec 2024 10:11:59 -0500 (EST)
+Message-ID: <0b37904f-7ab6-4b92-a9a0-30318fcadc4a@sandeen.net>
+Date: Fri, 20 Dec 2024 09:11:58 -0600
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAJnrk1ZfvyrP=8qKyHFzVte_G1q85bVtmKb4KRwJCe_cYHBmxg@mail.gmail.com>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
+ testing on xfs
+To: "Darrick J. Wong" <djwong@kernel.org>, Dave Chinner <david@fromorbit.com>
+Cc: Zorro Lang <zlang@redhat.com>, Christoph Hellwig <hch@infradead.org>,
+ Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
+ Shirley Ma <shirley.ma@oracle.com>,
+ Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+References: <20241215051242.3340572-1-tytso@mit.edu>
+ <20241215051242.3340572-3-tytso@mit.edu> <Z2EyG0vqtyTSyM5a@infradead.org>
+ <Z2NL_oc5QSscZdZ_@dread.disaster.area> <Z2OxMQACnMgmBR1a@infradead.org>
+ <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241219163206.GD6160@frogsfrogsfrogs>
+ <Z2SG2HsqgA46kuAz@dread.disaster.area>
+ <20241219225331.GG6197@frogsfrogsfrogs>
+Content-Language: en-US
+From: Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <20241219225331.GG6197@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, Dec 19, 2024 at 02:34:01PM -0800, Joanne Koong wrote:
-> On Thu, Dec 19, 2024 at 6:27 AM Brian Foster <bfoster@redhat.com> wrote:
-> >
-> > On Wed, Dec 18, 2024 at 01:01:21PM -0800, Joanne Koong wrote:
-> > > Add support for reads/writes from buffers backed by hugepages.
-> > > This can be enabled through the '-h' flag. This flag should only be used
-> > > on systems where THP capabilities are enabled.
-> > >
-> > > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-> > > ---
-> >
-> > Firstly, thanks for taking the time to add this. This seems like a nice
-> > idea. It might be nice to have an extra sentence or two in the commit
-> > log on the purpose/motivation. For example, has this been used to detect
-> > a certain class of problem?
-> 
-> Hi Brian,
-> 
-> Thanks for reviewing this. That's a good idea - I'll include the
-> sentence from the cover letter to this commit message as well: "This
-> is motivated by a recent bug that was due to faulty handling for
-> userspace buffers backed by hugepages."
-> 
+<snip the latest grousing back and forth>
 
-Thanks. Got a link or anything, for my own curiosity?
+Gentlemen, It would go a really long way if everyone could keep a
+few things in mind as we work together in this public space.
 
-Also, I presume the followup fstest is a reproducer?
+1) Act in good faith
+2) Assume good intent
+3) Don't escalate conflict
+4) Own your mistakes
 
-> >
-> > A few other quick comments below...
-> >
-> > >  ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++-----
-> > >  1 file changed, 92 insertions(+), 8 deletions(-)
-> > >
-> > > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > > index 41933354..3656fd9f 100644
-> > > --- a/ltp/fsx.c
-> > > +++ b/ltp/fsx.c
-> > > @@ -190,6 +190,7 @@ int       o_direct;                       /* -Z */
-> > >  int  aio = 0;
-> > > +}
-> > > +
-> > > +static void *
-> > > +init_hugepages_buf(unsigned len, long hugepage_size)
-> > > +{
-> > > +     void *buf;
-> > > +     long buf_size = roundup(len, hugepage_size);
-> > > +
-> > > +     if (posix_memalign(&buf, hugepage_size, buf_size)) {
-> > > +             prterr("posix_memalign for buf");
-> > > +             return NULL;
-> > > +     }
-> > > +     memset(buf, '\0', len);
-> >
-> > I'm assuming it doesn't matter, but did you want to use buf_size here to
-> > clear the whole buffer?
-> 
-> I only saw buf being used up to len in the rest of the code so I
-> didn't think it was necessary, but I also don't feel strongly about
-> this and am happy to change this to clear the entire buffer if
-> preferred.
-> 
+That's basic stuff. Could we maybe give that a shot for a while,
+and see if we can reduce this misery a bit?
 
-Yeah.. at first it looked like a bug to me, then I realized the same
-thing later. I suspect it might be wise to just clear it entirely to
-avoid any future landmines, but that could just be my internal bias
-talking too. No big deal either way.
+(If you took any of the above personally, please don't. I'm just
+reflecting on what I think are some longstanding patterns, here.)
 
-> >
-> > > +     if (madvise(buf, buf_size, MADV_COLLAPSE)) {
-> > > +             prterr("madvise collapse for buf");
-> > > +             free(buf);
-> > > +             return NULL;
-> > > +     }
-> > > +
-> > > +     return buf;
-> > > +}
-> > > @@ -3232,12 +3287,41 @@ main(int argc, char **argv)
-> > >       original_buf = (char *) malloc(maxfilelen);
-> > >       for (i = 0; i < maxfilelen; i++)
-> > >               original_buf[i] = random() % 256;
-> > > -     good_buf = (char *) malloc(maxfilelen + writebdy);
-> > > -     good_buf = round_ptr_up(good_buf, writebdy, 0);
-> > > -     memset(good_buf, '\0', maxfilelen);
-> > > -     temp_buf = (char *) malloc(maxoplen + readbdy);
-> > > -     temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> > > -     memset(temp_buf, '\0', maxoplen);
-> > > +     if (hugepages) {
-> > > +             long hugepage_size;
-> > > +
-> > > +             hugepage_size = get_hugepage_size();
-> > > +             if (hugepage_size == -1) {
-> > > +                     prterr("get_hugepage_size()");
-> > > +                     exit(99);
-> > > +             }
-> > > +
-> > > +             if (writebdy != 1 && writebdy != hugepage_size)
-> > > +                     prt("ignoring write alignment (since -h is enabled)");
-> > > +
-> > > +             if (readbdy != 1 && readbdy != hugepage_size)
-> > > +                     prt("ignoring read alignment (since -h is enabled)");
-> >
-> > I'm a little unclear on what these warnings mean. The alignments are
-> > still used in the read/write paths afaics. The non-huge mode seems to
-> > only really care about the max size of the buffers in this code.
-> >
-> > If your test doesn't actually use read/write alignments and the goal is
-> > just to keep things simple, perhaps it would be cleaner to add something
-> > like an if (hugepages && (writebdy != 1 || readbdy != 1)) check after
-> > option processing and exit out as an unsupported combination..?
-> 
-> My understanding of the 'writebdy' and 'readbdy' options are that
-> they're for making reads/writes aligned to the passed-in value, which
-> depends on the starting address of the buffer being aligned to that
-> value as well. However for hugepages buffers, they must be aligned to
-> the system hugepage size (eg 2 MiB) or the madvise(... MADV_COLLAPSE)
-> call will fail. As such, it is not guaranteed that the requested
-> alignment will actually be abided by. For that reason, I thought it'd
-> be useful to print this out to the user so they know requested
-> alignments will be ignored, but it didn't seem severe enough of an
-> issue to error out and exit altogether. But maybe it'd be less
-> confusing for the user if this instead does just error out if the
-> alignment isn't a multiple of the hugepage size.
-> 
+Everybody's working hard, everybody's stressed, everybody makes
+mistakes. I have no desire to go point by point through some
+of the many recent blow-ups, but in nearly every one of them I
+think things would have gone better if at any time during the back
+and forth, people had stopped to reflect on the points above
+before firing off a reply.
 
-Ahh, I see. I missed the round_ptr_up() adjustments. That makes more
-sense now.
+Above isn't perfect and perhaps others have thoughts on basic
+guidelines for communicating without conflict, but maybe it's a
+start?
 
-IMO it would be a little cleaner to just bail out earlier as such. But
-either way, I suppose if you could add a small comment with this
-alignment context you've explained above with the error checks then that
-is good enough for me. Thanks!
-
-Brian
-
-> >
-> > BTW, it might also be nice to factor out this whole section of buffer
-> > initialization code (including original_buf) into an init_buffers() or
-> > some such. That could be done as a prep patch, but just a suggestion
-> > either way.
-> 
-> Good idea - i'll do this refactoring for v2.
-> 
-> 
-> Thanks,
-> Joanne
-> >
-> > Brian
-> >
-> > > +
-> > > +             good_buf = init_hugepages_buf(maxfilelen, hugepage_size);
-> > > +             if (!good_buf) {
-> > > +                     prterr("init_hugepages_buf failed for good_buf");
-> > > +                     exit(100);
-> > > +             }
-> > > +
-> > > +             temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
-> > > +             if (!temp_buf) {
-> > > +                     prterr("init_hugepages_buf failed for temp_buf");
-> > > +                     exit(101);
-> > > +             }
-> > > +     } else {
-> > > +             good_buf = (char *) malloc(maxfilelen + writebdy);
-> > > +             good_buf = round_ptr_up(good_buf, writebdy, 0);
-> > > +             memset(good_buf, '\0', maxfilelen);
-> > > +
-> > > +             temp_buf = (char *) malloc(maxoplen + readbdy);
-> > > +             temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> > > +             memset(temp_buf, '\0', maxoplen);
-> > > +     }
-> > >       if (lite) {     /* zero entire existing file */
-> > >               ssize_t written;
-> > >
-> > > --
-> > > 2.47.1
-> > >
-> > >
-> >
-> 
+-Eric
 
