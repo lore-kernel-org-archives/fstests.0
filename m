@@ -1,276 +1,248 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4F57041C6A;
-	Fri, 20 Dec 2024 07:47:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9F2581C32FE
+	for <fstests@vger.kernel.org>; Fri, 20 Dec 2024 11:51:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734680854; cv=none; b=kFqkZLnuPIeMbnLvyTmu0pdaXbLXEM8yHVqOlEHFl2xut0DKt+u8Y/UuTFQe8ZYaFmlfEVbBMja/ynzlql2rO8wGEKPEv/sWWnzxJ3ETglOaGBoRUmuD0bdXxR2iSVov6g5TTnhDBFYdeipYuNx6MITclHnVkDRmjrQiRHd3s6s=
+	t=1734695465; cv=none; b=hLKcpG/ppRCNMM192WO4mx18A16rclOWx589xFRfJMrsaiUZb/K4V/KyTUtDnA0lPCj4RqgnRpkZCW/6UITJWZoOdxkPuXSet+DjgbkV8W4qN6Jyw+HOalNZjGe8DnRuHwFR7TgS1S/uasEijSVVm44lg1DK465rRRNhKcU27nI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734680854; c=relaxed/simple;
-	bh=LgvdwZAe0lySK4iAk5x6MGr4z7w1M3ScPRGlv7hxgvM=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=ufIXcpkgDbJApz/Q1wZGmr3fB3AZW+39B/guX0/JPY3q7KyVTM9oCOWzFQ8d6UASTdGQWtOxcrSJIwxuIR0R9AJqRSmZx1DUpEohTeQJ/D6pOxrIn1PJMJxxCp6+cl2nhjasze4CrN5xcb1AllFI9eXV5Yj+Ahz+73JNNl8xJhc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=cix61rSi; arc=none smtp.client-ip=148.163.156.1
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1734695465; c=relaxed/simple;
+	bh=aBqOW8VcDW3vZzaxBudlXklI0UZO+JYoD6Hsv4ZASNg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eKu1PLdiOs0u0OkF3RQiCk/PMDoMERDZlTghPAIVN+DQWmFcFWcbDl3+DP9k4gjwrQGw88mtY4cO2HTq4Ne3IIQs2uRlpazSiM3Mq9+5BXjiPUNblR9yRKqynWOopGIfqfpGa4yHR+3W2O2w7/yiEgMQaYt1BWCILaBvF1hNQzU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Cgo47Jkf; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="cix61rSi"
-Received: from pps.filterd (m0353729.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BJNw9U3002323;
-	Fri, 20 Dec 2024 07:47:30 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=9Gcegu
-	D2QY3TThEpaHY+FUoOyKw1xz9hRVveW7CASHw=; b=cix61rSiFyCTOCv9/xalWu
-	P3rr/4Yg9Vo0ifD3xQZdi92lXWQbsgobYsIz+RSOlynDm1K8eTT/y4hU5BQLa+v5
-	7ePdx31sMiouJiNAyEaA4j28I5aHW+FyYVOVOGPFbFhIUQrUytyMOvSPe8x7JXiS
-	JNL0l6WgaaFd/gzffqIVIPcd/10/s9k1+9rCbrCpdt332NJhKq5hFH7yMwFHlzfz
-	dIzUUjt0mtFvODKnZiF/PhzepJyQzYAbT8oa6+jyXU5ZD1gxkg+x+/5m9C7UFArF
-	e2q+OzofgndF1Q4OiAnSB4Y77TpvXhuR0Z+BLdb+TvGsPMv2tpG+mhyFuX3PWMsA
-	==
-Received: from pps.reinject (localhost [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43mwmhhh0b-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Dec 2024 07:47:30 +0000 (GMT)
-Received: from m0353729.ppops.net (m0353729.ppops.net [127.0.0.1])
-	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 4BK7MiXr018289;
-	Fri, 20 Dec 2024 07:47:29 GMT
-Received: from ppma11.dal12v.mail.ibm.com (db.9e.1632.ip4.static.sl-reverse.com [50.22.158.219])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43mwmhhh06-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Dec 2024 07:47:29 +0000 (GMT)
-Received: from pps.filterd (ppma11.dal12v.mail.ibm.com [127.0.0.1])
-	by ppma11.dal12v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 4BK6repV014383;
-	Fri, 20 Dec 2024 07:47:28 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma11.dal12v.mail.ibm.com (PPS) with ESMTPS id 43hq220s9t-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Dec 2024 07:47:28 +0000
-Received: from smtpav06.fra02v.mail.ibm.com (smtpav06.fra02v.mail.ibm.com [10.20.54.105])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 4BK7lRDZ31458016
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 20 Dec 2024 07:47:27 GMT
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 222852005A;
-	Fri, 20 Dec 2024 07:47:27 +0000 (GMT)
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 22BC82004D;
-	Fri, 20 Dec 2024 07:47:26 +0000 (GMT)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com (unknown [9.39.22.206])
-	by smtpav06.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Fri, 20 Dec 2024 07:47:25 +0000 (GMT)
-Message-ID: <c74087b50970bf953c78c8756e41d25df28637b1.camel@linux.ibm.com>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Cgo47Jkf"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1734695461;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WOV3QE8gcBZ5MVKrGesNSPW5GTb8ph5wnuAYk1P1CZs=;
+	b=Cgo47JkfUsb7sDnjQcDcFtTaEYFlEOj8u/2/OFQSQ44EI1nVPPFi8upb0W4Pi6tbdMO42x
+	u01tFqCRkfCGmornFh7NuCM7mpizJZovXbCiG8Dj30rjVjkWMsTPsSptyGJwdQsVUIez+B
+	te0rW420xSn815jCAttlo0zhWxNbLlg=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-609-viGedOvTPiCGNiM-alIHHw-1; Fri,
+ 20 Dec 2024 06:50:58 -0500
+X-MC-Unique: viGedOvTPiCGNiM-alIHHw-1
+X-Mimecast-MFC-AGG-ID: viGedOvTPiCGNiM-alIHHw
+Received: from mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.15])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 50D321956048;
+	Fri, 20 Dec 2024 11:50:57 +0000 (UTC)
+Received: from bfoster (unknown [10.22.88.128])
+	by mx-prod-int-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 63B30195608A;
+	Fri, 20 Dec 2024 11:50:56 +0000 (UTC)
+Date: Fri, 20 Dec 2024 06:52:55 -0500
+From: Brian Foster <bfoster@redhat.com>
+To: Joanne Koong <joannelkoong@gmail.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	kernel-team@meta.com
 Subject: Re: [PATCH 1/2] fsx: support reads/writes from buffers backed by
  hugepages
-From: Nirjhar Roy <nirjhar@linux.ibm.com>
-To: Joanne Koong <joannelkoong@gmail.com>, fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, kernel-team@meta.com
-Date: Fri, 20 Dec 2024 13:17:25 +0530
-In-Reply-To: <20241218210122.3809198-2-joannelkoong@gmail.com>
+Message-ID: <Z2Val8PjhcfBdBFK@bfoster>
 References: <20241218210122.3809198-1-joannelkoong@gmail.com>
-	 <20241218210122.3809198-2-joannelkoong@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-26.el8_10) 
+ <20241218210122.3809198-2-joannelkoong@gmail.com>
+ <Z2QtyaryQtBZZw7q@bfoster>
+ <CAJnrk1ZfvyrP=8qKyHFzVte_G1q85bVtmKb4KRwJCe_cYHBmxg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: NL01KBuMqStCMfT0YuN7U4nDjyma30Mp
-X-Proofpoint-GUID: K2aFTBkewM2UHbZ9qH6QdAdfwRxEUrIp
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 impostorscore=0
- priorityscore=1501 mlxscore=0 phishscore=0 lowpriorityscore=0
- suspectscore=0 clxscore=1011 malwarescore=0 adultscore=0 mlxlogscore=999
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2411120000 definitions=main-2412200062
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAJnrk1ZfvyrP=8qKyHFzVte_G1q85bVtmKb4KRwJCe_cYHBmxg@mail.gmail.com>
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.15
 
-On Wed, 2024-12-18 at 13:01 -0800, Joanne Koong wrote:
-> Add support for reads/writes from buffers backed by hugepages.
-> This can be enabled through the '-h' flag. This flag should only be
-> used
-> on systems where THP capabilities are enabled.
+On Thu, Dec 19, 2024 at 02:34:01PM -0800, Joanne Koong wrote:
+> On Thu, Dec 19, 2024 at 6:27 AM Brian Foster <bfoster@redhat.com> wrote:
+> >
+> > On Wed, Dec 18, 2024 at 01:01:21PM -0800, Joanne Koong wrote:
+> > > Add support for reads/writes from buffers backed by hugepages.
+> > > This can be enabled through the '-h' flag. This flag should only be used
+> > > on systems where THP capabilities are enabled.
+> > >
+> > > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> > > ---
+> >
+> > Firstly, thanks for taking the time to add this. This seems like a nice
+> > idea. It might be nice to have an extra sentence or two in the commit
+> > log on the purpose/motivation. For example, has this been used to detect
+> > a certain class of problem?
 > 
-> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-> ---
->  ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++---
-> --
->  1 file changed, 92 insertions(+), 8 deletions(-)
+> Hi Brian,
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 41933354..3656fd9f 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -190,6 +190,7 @@ int	o_direct;			/* -Z */
->  int	aio = 0;
->  int	uring = 0;
->  int	mark_nr = 0;
-> +int	hugepages = 0;                  /* -h flag */
->  
->  int page_size;
->  int page_mask;
-> @@ -2471,7 +2472,7 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
-> +		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
->  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
->  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
->  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-> @@ -2484,6 +2485,7 @@ usage(void)
->  	-e: pollute post-eof on size changes (default 0)\n\
->  	-f: flush and invalidate cache after I/O\n\
->  	-g X: write character X instead of random generated data\n\
-> +	-h hugepages: use buffers backed by hugepages for
-> reads/writes\n\
->  	-i logdev: do integrity testing, logdev is the dm log writes
-> device\n\
->  	-j logid: prefix debug log messsages with this id\n\
->  	-k: do not truncate existing file and use its size as upper
-> bound on file size\n\
-> @@ -2856,6 +2858,56 @@ keep_running(void)
->  	return numops-- != 0;
->  }
->  
-> +static long
-> +get_hugepage_size(void)
-> +{
-> +	const char *str = "Hugepagesize:";
-> +	long hugepage_size = -1;
-> +	char buffer[64];
-> +	FILE *file;
-> +
-> +	file = fopen("/proc/meminfo", "r");
-> +	if (!file) {
-> +		prterr("get_hugepage_size: fopen /proc/meminfo");
-> +		return -1;
-> +	}
-> +	while (fgets(buffer, sizeof(buffer), file)) {
-> +		if (strncmp(buffer, str, strlen(str)) == 0) {
-Extremely minor: Since str is a fixed string, why not calculate the
-length outside the loop and not re-use strlen(str) multiple times?
-> +			sscanf(buffer + strlen(str), "%ld",
-> &hugepage_size);
-> +			break;
-> +		}
-> +	}
-> +	fclose(file);
-> +	if (hugepage_size == -1) {
-> +		prterr("get_hugepage_size: failed to find "
-> +			"hugepage size in /proc/meminfo\n");
-> +		return -1;
-> +	}
-> +
-> +	/* convert from KiB to bytes  */
-> +	return hugepage_size * 1024;
-Minor: << 10 might be faster instead of '*' ?
-> +}
-> +
-> +static void *
-> +init_hugepages_buf(unsigned len, long hugepage_size)
-> +{
-> +	void *buf;
-> +	long buf_size = roundup(len, hugepage_size);
-> +
-> +	if (posix_memalign(&buf, hugepage_size, buf_size)) {
-> +		prterr("posix_memalign for buf");
-> +		return NULL;
-> +	}
-> +	memset(buf, '\0', len);
-> +	if (madvise(buf, buf_size, MADV_COLLAPSE)) {
-> +		prterr("madvise collapse for buf");
-> +		free(buf);
-> +		return NULL;
-> +	}
-> +
-> +	return buf;
-> +}
-> +
->  static struct option longopts[] = {
->  	{"replay-ops", required_argument, 0, 256},
->  	{"record-ops", optional_argument, 0, 255},
-> @@ -2883,7 +2935,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout
-> */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xy
-> ABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:x
-> yABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2916,6 +2968,9 @@ main(int argc, char **argv)
->  		case 'g':
->  			filldata = *optarg;
->  			break;
-> +		case 'h':
-> +			hugepages = 1;
-> +			break;
->  		case 'i':
->  			integrity = 1;
->  			logdev = strdup(optarg);
-> @@ -3232,12 +3287,41 @@ main(int argc, char **argv)
->  	original_buf = (char *) malloc(maxfilelen);
->  	for (i = 0; i < maxfilelen; i++)
->  		original_buf[i] = random() % 256;
-> -	good_buf = (char *) malloc(maxfilelen + writebdy);
-> -	good_buf = round_ptr_up(good_buf, writebdy, 0);
-> -	memset(good_buf, '\0', maxfilelen);
-> -	temp_buf = (char *) malloc(maxoplen + readbdy);
-> -	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> -	memset(temp_buf, '\0', maxoplen);
-> +	if (hugepages) {
-> +		long hugepage_size;
-> +
-> +		hugepage_size = get_hugepage_size();
-> +		if (hugepage_size == -1) {
-> +			prterr("get_hugepage_size()");
-> +			exit(99);
-> +		}
-> +
-> +		if (writebdy != 1 && writebdy != hugepage_size)
-> +			prt("ignoring write alignment (since -h is
-> enabled)");
-> +
-> +		if (readbdy != 1 && readbdy != hugepage_size)
-> +			prt("ignoring read alignment (since -h is
-> enabled)");
-> +
-> +		good_buf = init_hugepages_buf(maxfilelen,
-> hugepage_size);
-> +		if (!good_buf) {
-> +			prterr("init_hugepages_buf failed for
-> good_buf");
-> +			exit(100);
-> +		}
-> +
-> +		temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
-> +		if (!temp_buf) {
-> +			prterr("init_hugepages_buf failed for
-> temp_buf");
-> +			exit(101);
-> +		}
-> +	} else {
-> +		good_buf = (char *) malloc(maxfilelen + writebdy);
-> +		good_buf = round_ptr_up(good_buf, writebdy, 0);
-Not sure if it would matter but aren't we seeing a small memory leak
-here since good_buf's original will be lost after rounding up?
-> +		memset(good_buf, '\0', maxfilelen);
-> +
-> +		temp_buf = (char *) malloc(maxoplen + readbdy);
-> +		temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> +		memset(temp_buf, '\0', maxoplen);
-> +	}
->  	if (lite) {	/* zero entire existing file */
->  		ssize_t written;
->  
+> Thanks for reviewing this. That's a good idea - I'll include the
+> sentence from the cover letter to this commit message as well: "This
+> is motivated by a recent bug that was due to faulty handling for
+> userspace buffers backed by hugepages."
+> 
+
+Thanks. Got a link or anything, for my own curiosity?
+
+Also, I presume the followup fstest is a reproducer?
+
+> >
+> > A few other quick comments below...
+> >
+> > >  ltp/fsx.c | 100 +++++++++++++++++++++++++++++++++++++++++++++++++-----
+> > >  1 file changed, 92 insertions(+), 8 deletions(-)
+> > >
+> > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > index 41933354..3656fd9f 100644
+> > > --- a/ltp/fsx.c
+> > > +++ b/ltp/fsx.c
+> > > @@ -190,6 +190,7 @@ int       o_direct;                       /* -Z */
+> > >  int  aio = 0;
+> > > +}
+> > > +
+> > > +static void *
+> > > +init_hugepages_buf(unsigned len, long hugepage_size)
+> > > +{
+> > > +     void *buf;
+> > > +     long buf_size = roundup(len, hugepage_size);
+> > > +
+> > > +     if (posix_memalign(&buf, hugepage_size, buf_size)) {
+> > > +             prterr("posix_memalign for buf");
+> > > +             return NULL;
+> > > +     }
+> > > +     memset(buf, '\0', len);
+> >
+> > I'm assuming it doesn't matter, but did you want to use buf_size here to
+> > clear the whole buffer?
+> 
+> I only saw buf being used up to len in the rest of the code so I
+> didn't think it was necessary, but I also don't feel strongly about
+> this and am happy to change this to clear the entire buffer if
+> preferred.
+> 
+
+Yeah.. at first it looked like a bug to me, then I realized the same
+thing later. I suspect it might be wise to just clear it entirely to
+avoid any future landmines, but that could just be my internal bias
+talking too. No big deal either way.
+
+> >
+> > > +     if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+> > > +             prterr("madvise collapse for buf");
+> > > +             free(buf);
+> > > +             return NULL;
+> > > +     }
+> > > +
+> > > +     return buf;
+> > > +}
+> > > @@ -3232,12 +3287,41 @@ main(int argc, char **argv)
+> > >       original_buf = (char *) malloc(maxfilelen);
+> > >       for (i = 0; i < maxfilelen; i++)
+> > >               original_buf[i] = random() % 256;
+> > > -     good_buf = (char *) malloc(maxfilelen + writebdy);
+> > > -     good_buf = round_ptr_up(good_buf, writebdy, 0);
+> > > -     memset(good_buf, '\0', maxfilelen);
+> > > -     temp_buf = (char *) malloc(maxoplen + readbdy);
+> > > -     temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> > > -     memset(temp_buf, '\0', maxoplen);
+> > > +     if (hugepages) {
+> > > +             long hugepage_size;
+> > > +
+> > > +             hugepage_size = get_hugepage_size();
+> > > +             if (hugepage_size == -1) {
+> > > +                     prterr("get_hugepage_size()");
+> > > +                     exit(99);
+> > > +             }
+> > > +
+> > > +             if (writebdy != 1 && writebdy != hugepage_size)
+> > > +                     prt("ignoring write alignment (since -h is enabled)");
+> > > +
+> > > +             if (readbdy != 1 && readbdy != hugepage_size)
+> > > +                     prt("ignoring read alignment (since -h is enabled)");
+> >
+> > I'm a little unclear on what these warnings mean. The alignments are
+> > still used in the read/write paths afaics. The non-huge mode seems to
+> > only really care about the max size of the buffers in this code.
+> >
+> > If your test doesn't actually use read/write alignments and the goal is
+> > just to keep things simple, perhaps it would be cleaner to add something
+> > like an if (hugepages && (writebdy != 1 || readbdy != 1)) check after
+> > option processing and exit out as an unsupported combination..?
+> 
+> My understanding of the 'writebdy' and 'readbdy' options are that
+> they're for making reads/writes aligned to the passed-in value, which
+> depends on the starting address of the buffer being aligned to that
+> value as well. However for hugepages buffers, they must be aligned to
+> the system hugepage size (eg 2 MiB) or the madvise(... MADV_COLLAPSE)
+> call will fail. As such, it is not guaranteed that the requested
+> alignment will actually be abided by. For that reason, I thought it'd
+> be useful to print this out to the user so they know requested
+> alignments will be ignored, but it didn't seem severe enough of an
+> issue to error out and exit altogether. But maybe it'd be less
+> confusing for the user if this instead does just error out if the
+> alignment isn't a multiple of the hugepage size.
+> 
+
+Ahh, I see. I missed the round_ptr_up() adjustments. That makes more
+sense now.
+
+IMO it would be a little cleaner to just bail out earlier as such. But
+either way, I suppose if you could add a small comment with this
+alignment context you've explained above with the error checks then that
+is good enough for me. Thanks!
+
+Brian
+
+> >
+> > BTW, it might also be nice to factor out this whole section of buffer
+> > initialization code (including original_buf) into an init_buffers() or
+> > some such. That could be done as a prep patch, but just a suggestion
+> > either way.
+> 
+> Good idea - i'll do this refactoring for v2.
+> 
+> 
+> Thanks,
+> Joanne
+> >
+> > Brian
+> >
+> > > +
+> > > +             good_buf = init_hugepages_buf(maxfilelen, hugepage_size);
+> > > +             if (!good_buf) {
+> > > +                     prterr("init_hugepages_buf failed for good_buf");
+> > > +                     exit(100);
+> > > +             }
+> > > +
+> > > +             temp_buf = init_hugepages_buf(maxoplen, hugepage_size);
+> > > +             if (!temp_buf) {
+> > > +                     prterr("init_hugepages_buf failed for temp_buf");
+> > > +                     exit(101);
+> > > +             }
+> > > +     } else {
+> > > +             good_buf = (char *) malloc(maxfilelen + writebdy);
+> > > +             good_buf = round_ptr_up(good_buf, writebdy, 0);
+> > > +             memset(good_buf, '\0', maxfilelen);
+> > > +
+> > > +             temp_buf = (char *) malloc(maxoplen + readbdy);
+> > > +             temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> > > +             memset(temp_buf, '\0', maxoplen);
+> > > +     }
+> > >       if (lite) {     /* zero entire existing file */
+> > >               ssize_t written;
+> > >
+> > > --
+> > > 2.47.1
+> > >
+> > >
+> >
+> 
 
