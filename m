@@ -1,133 +1,233 @@
-Received: from fhigh-a8-smtp.messagingengine.com (fhigh-a8-smtp.messagingengine.com [103.168.172.159])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35200216399
-	for <fstests@vger.kernel.org>; Fri, 20 Dec 2024 15:12:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.159
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C60EB17C68
+	for <fstests@vger.kernel.org>; Sun, 22 Dec 2024 12:22:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734707523; cv=none; b=eLiFRE2fWTOCEzooSPKY/az3KCR45ObVUyRCqpxps5ay50iBeP5zydJ+64s+Ei6eaIgvHCqb1522b7ehvZvdfp4p2eF5CY/rNaA6uSzshotHMu2kFYtNz7Rrr2hXFDcKFqe7zTDxpnujx1V48L0Y9cfl8vHhBBPRZkzwiDmHrH4=
+	t=1734870179; cv=none; b=NMIYbBTu25R5p6SUCeLvvdzK31X5ipbD+PiaRZwr7y7Q+eoZ6XgVbcPgqb7JoieOH1a15DEAqRBSDCtH//kb6oebZz8RrAuaZE3hBcAy+p04EqleTZBRPHi5dxgkPA/EZUkqNXDxk+YyMElD3K4hmzmW2juTxBvRVljLQgxm410=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734707523; c=relaxed/simple;
-	bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UvmNLmrqz03oSECOGYuX5qoNziW2a+mM79wH/wgqQ5IQaV5yuThZnXyDcPUyGHPQTILEeouu39TMDT2KOyYOuyfd/qitkEkbpSQHoK3nbCu/R+ylwlsJjqzCWlSFtzho3oacDjFr5UdbOku61x89/TkM8bfy9unBqvaE6zP0lsc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=EEBraCam; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=SFenpr3S; arc=none smtp.client-ip=103.168.172.159
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1734870179; c=relaxed/simple;
+	bh=bgS205GHYMGY/kHAuyHRy5O//7Kxfi9TEz+STRGfy30=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=sEGDYWJiaADvUyoOZpNiwndTMBZ/Cgg+W+P+TkKnRJ0Wk0qPJwxuL3pndpJyD38t15szUf6WzL15mQ1aJC9fdBNl8Wjyn91GzB/zyrO5OA1ot0G4KbWwuPXJJpFRu2v2XTWPINlTs5rxG2VDEDg/8Gc8WGwsdyjr2XPrD5raDaI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AwQWx+Iz; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="EEBraCam";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="SFenpr3S"
-Received: from phl-compute-12.internal (phl-compute-12.phl.internal [10.202.2.52])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 367F91140146;
-	Fri, 20 Dec 2024 10:12:00 -0500 (EST)
-Received: from phl-mailfrontend-02 ([10.202.2.163])
-  by phl-compute-12.internal (MEProxy); Fri, 20 Dec 2024 10:12:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm2; t=1734707520;
-	 x=1734793920; bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=; b=
-	EEBraCami6fAks9fFCSvyO/rvhJymMopCUxvr1+KKLfOo9jchjZ0I21A4oUtQpTB
-	XbX30xrK7ICZH6PFEPE5BAR1sU9d3HpSuRoUTP5jhZ2ToWPu+Dd/ga+3rh+K3UVN
-	Xab8F7Aag56T5VzSzJT5Mv3yPQr4B4D2b+PZ/1DGfrggkKPMht9b+vGI/RRHos65
-	/NH309j5CNcLnqVTF9Wl8+5Vb9PUDf8RMjuwhvpLF2bJ0XHuZ4xXnt0gGI5Uac8J
-	hWGtRCMh1y/5s/VE7AL9xS81+pSK5AaiDMjoPxvKD6cgyj7cDLYhM7Mmrep4xRO/
-	XqU3pDpI8HE/mo2t4jLMug==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1734707520; x=
-	1734793920; bh=WIBQVwkqWOPywQPO2x+mbHP4jvJY/EvvYwMGNjIGIgg=; b=S
-	Fenpr3SGrfohQ1+b++fstGXdzSE0jZzNfAdcBFYPdga/Puj4+P80aplSGz186hmP
-	NyGwgzOxkvIppo/2YjD4XPASYfQERW+QWSOF43ug56eQiOfjNNdV4du+rH+Mw3ut
-	st8us5KIJGV7ZNAymzNI0vN9872Q7MeEviU8SsDua0hWcUVUorg5q667u61a2XD8
-	ZDFziKiQ2jMmczeRX47PJbZnoM0NtY85q/vutrZWGyHv5IhfL/eSvxThFrvAsGPt
-	6dfpf6h8Yr49x5BAGCrFSzBUITnm1cs9UsasIz3LoyRHS8TmKtdpogPZ7lhTz9jz
-	0fQXYbLRYdoA0hy7XVx0w==
-X-ME-Sender: <xms:P4llZ-s10reFwfX_R68byErORjP_AbllqIskYSVJrEWcdl5QqlD0eQ>
-    <xme:P4llZzczjOcSdeJb_DwWemYa_w6GyyrNIcWulz9m7vMBl1LHeoPJLS9Dg6Trnj4sC
-    HzCO_K9eNTrd4L30M8>
-X-ME-Received: <xmr:P4llZ5yQyWwEL6EwXUOEfPzvxZYjskSDnUvFJM1ZUC4dB067D84pgPniLEhgv0TJlXztvTKYD_6iI_0UpyNynWNKTzM>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefuddruddtvddgjedtucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
-    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnh
-    htshculddquddttddmnecujfgurhepkfffgggfuffvvehfhfgjtgfgsehtjeertddtvdej
-    necuhfhrohhmpefgrhhitgcuufgrnhguvggvnhcuoehsrghnuggvvghnsehsrghnuggvvg
-    hnrdhnvghtqeenucggtffrrghtthgvrhhnpeevieekueetfeeujedtheeffedvgeffiedv
-    jeejleffhfeggeejuedtjeeulefhvdenucevlhhushhtvghrufhiiigvpedtnecurfgrrh
-    grmhepmhgrihhlfhhrohhmpehsrghnuggvvghnsehsrghnuggvvghnrdhnvghtpdhnsggp
-    rhgtphhtthhopeekpdhmohguvgepshhmthhpohhuthdprhgtphhtthhopegujhifohhngh
-    eskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepuggrvhhiugesfhhrohhmohhrsghithdr
-    tghomhdprhgtphhtthhopeiilhgrnhhgsehrvgguhhgrthdrtghomhdprhgtphhtthhope
-    hhtghhsehinhhfrhgruggvrggurdhorhhgpdhrtghpthhtohepthihthhsohesmhhithdr
-    vgguuhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpd
-    hrtghpthhtohepshhhihhrlhgvhidrmhgrsehorhgrtghlvgdrtghomhdprhgtphhtthho
-    pehkohhnrhgrugdrfihilhhksehorhgrtghlvgdrtghomh
-X-ME-Proxy: <xmx:P4llZ5MmckYYSUmYSEe6P04X46I8flm3FY_icmF-RSRoPvlrBsb9xQ>
-    <xmx:P4llZ-9CCtNDY5gVR906uGlgk0F1LoKRzhBu1LpEyuhuan_odlRLHQ>
-    <xmx:P4llZxXWu4pKaX2iWZzInReLTlU5K90PF5o98DRoAO-XHKyWfIXT1A>
-    <xmx:P4llZ3eWStjOSxXn7EO-4dIwyfkeDDBPFXRdoftTFtY1Tc3LfbBD9g>
-    <xmx:QIllZyTYrXC7sscxQQxJB67T55NDSW-9dEQd8OvL3W-xhguC7WN5t-Vq>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 20 Dec 2024 10:11:59 -0500 (EST)
-Message-ID: <0b37904f-7ab6-4b92-a9a0-30318fcadc4a@sandeen.net>
-Date: Fri, 20 Dec 2024 09:11:58 -0600
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AwQWx+Iz"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1734870175;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=0RHGaVKj9gYJsvMW07V++emouSd6CN2otZGKrle3FcQ=;
+	b=AwQWx+Iz/IZ2vNRbMbXHCugDQVqQySFaUF/TaNng8owauuaUCj1fCy2dTRPGVDQAC7G1iU
+	cSyFnLGn6ll97cvOBkTWVnWf9Pr/K1OfY0djwe4MiQ1FPCUTEkIJeF9adUle9cogstcuEs
+	/EXMNVfRrf2lgQABHc8Bmwgb/A0H4Eg=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-180-ju8x-ckjM5-MIw28Zuk9jw-1; Sun, 22 Dec 2024 07:22:53 -0500
+X-MC-Unique: ju8x-ckjM5-MIw28Zuk9jw-1
+X-Mimecast-MFC-AGG-ID: ju8x-ckjM5-MIw28Zuk9jw
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2ef9204f898so2988568a91.2
+        for <fstests@vger.kernel.org>; Sun, 22 Dec 2024 04:22:53 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1734870173; x=1735474973;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0RHGaVKj9gYJsvMW07V++emouSd6CN2otZGKrle3FcQ=;
+        b=iGbcsNzVuH4zXaom9K89XGDhVa2bF0FYdpKTz8fDMyYILo2toRwPEorzNzXVbsO4Pf
+         Zb2RNXDFJRBgXikhwYEdSub8QGd9VCOvooAwIaToZ/legtLffhX19FmcRlM9NWchgCKH
+         YglGFB6mXb49ah6um4EfxG0Et5P2l+FOYjnYs5u9R9w0btC62jVAFwf9cBam2aVQAYkd
+         R306qee4IeRsKLPx3jS8znFPk/vBB/9hcfOH4QKMnPaJDbE1dzFH8oHLia5+CMvdc2VJ
+         DjkELlQt5fqXeaRwsRNd4EtyOtPnG2iub/efbb5w67TixZAWBi27/X9LUoPtsn7QdNhe
+         PXpg==
+X-Forwarded-Encrypted: i=1; AJvYcCVb1EF7IFqdDuYCXthlhrhZcM+dE6d2+d69OXR5oFthjCUosX3fDyoeDdghQPB/2PuHnhsZrwJ3@vger.kernel.org
+X-Gm-Message-State: AOJu0YzVkbRSJqWYCWtHLyGLH8s8Qb9C+u0W6BBtj8uscuZIXMzmQNxK
+	XJmt2pNOdTXJ/HPoCuRwoyJxRx74GS5lVbnA4ZUCvLt2ay9YhtPpFicCn+Gu4JM37p4vv8kAFo4
+	vbxP5jUT8RSv86E772SyX9yc8Tb0ncMmkrDFqToMGJqAh9LMbQT6qG0Q=
+X-Gm-Gg: ASbGnctRcZO0rDc9D+20bbtkGms0oe8myxEzMOTLtYmImiYKN606iVwo1nXXl99lYnB
+	sInp2AvOV0E3xEthP9gr4i5tfzaGwuPrGmBsIJRzJnxu6C91eSNM0eE+NqxTP+uFtM1ohPnVRHh
+	AwxaGmBTgbe4/72w4uMioOKAVPgVkCAUypij2jpLgmeZFmiirQoYKDZLU7VABCxBvtGqrSitOIe
+	wZiCF3AUgKMy0NARjHq0mPTqS7w+i4KyR3J+xhXmUH2t/ubing6K9ILzLgU/jkbNYs6Zji7I3Jp
+	+8rrT8NQYPnUQ7TjrL5knA==
+X-Received: by 2002:a17:90a:da8e:b0:2ee:f80c:688d with SMTP id 98e67ed59e1d1-2f452ec37a0mr12683788a91.25.1734870172568;
+        Sun, 22 Dec 2024 04:22:52 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEXA5xKGWfMpsd16kbf6D19kJN+Hhc5+ys5+dUYEd4/4jRrqQfdtc6HDuRu6RzfmPoz2suWrQ==
+X-Received: by 2002:a17:90a:da8e:b0:2ee:f80c:688d with SMTP id 98e67ed59e1d1-2f452ec37a0mr12683765a91.25.1734870172195;
+        Sun, 22 Dec 2024 04:22:52 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2f2ed644846sm9235511a91.28.2024.12.22.04.22.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 22 Dec 2024 04:22:51 -0800 (PST)
+Date: Sun, 22 Dec 2024 20:22:46 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>,
+	Christoph Hellwig <hch@infradead.org>,
+	Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
+	Shirley Ma <shirley.ma@oracle.com>,
+	Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
+ testing on xfs
+Message-ID: <20241222122246.3uvlvudchf2azmo3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20241215051242.3340572-1-tytso@mit.edu>
+ <20241215051242.3340572-3-tytso@mit.edu>
+ <Z2EyG0vqtyTSyM5a@infradead.org>
+ <Z2NL_oc5QSscZdZ_@dread.disaster.area>
+ <Z2OxMQACnMgmBR1a@infradead.org>
+ <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20241219163206.GD6160@frogsfrogsfrogs>
+ <Z2SG2HsqgA46kuAz@dread.disaster.area>
+ <20241219225331.GG6197@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] generic/530: only use xfs-specific mkfs options when
- testing on xfs
-To: "Darrick J. Wong" <djwong@kernel.org>, Dave Chinner <david@fromorbit.com>
-Cc: Zorro Lang <zlang@redhat.com>, Christoph Hellwig <hch@infradead.org>,
- Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org,
- Shirley Ma <shirley.ma@oracle.com>,
- Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
-References: <20241215051242.3340572-1-tytso@mit.edu>
- <20241215051242.3340572-3-tytso@mit.edu> <Z2EyG0vqtyTSyM5a@infradead.org>
- <Z2NL_oc5QSscZdZ_@dread.disaster.area> <Z2OxMQACnMgmBR1a@infradead.org>
- <20241219101626.ze5pqs3ub7izpoqr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20241219163206.GD6160@frogsfrogsfrogs>
- <Z2SG2HsqgA46kuAz@dread.disaster.area>
- <20241219225331.GG6197@frogsfrogsfrogs>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20241219225331.GG6197@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
-<snip the latest grousing back and forth>
+On Thu, Dec 19, 2024 at 02:53:31PM -0800, Darrick J. Wong wrote:
+> On Fri, Dec 20, 2024 at 07:49:28AM +1100, Dave Chinner wrote:
+> > On Thu, Dec 19, 2024 at 08:32:06AM -0800, Darrick J. Wong wrote:
+> > > On Thu, Dec 19, 2024 at 06:16:26PM +0800, Zorro Lang wrote:
+> > > > On Wed, Dec 18, 2024 at 09:37:53PM -0800, Christoph Hellwig wrote:
+> > > > > On Thu, Dec 19, 2024 at 09:26:06AM +1100, Dave Chinner wrote:
+> > > > > > On Tue, Dec 17, 2024 at 12:11:07AM -0800, Christoph Hellwig wrote:
+> > > > > > > On Sun, Dec 15, 2024 at 12:12:42AM -0500, Theodore Ts'o wrote:
+> > > > > > > > +if [ $FSTYP = "xfs" ]; then
+> > > > > > > > +    _scratch_mkfs "-l size=256m" >> $seqres.full 2>&1
+> > > > > > > > +else
+> > > > > > > > +    _scratch_mkfs >> $seqres.full 2>&1
+> > > > > > > > +fi
+> > > > > > > 
+> > > > > > > We really need to document why generic tests have file system specific
+> > > > > > > hacks.  And yes, that's a request for Dave who originally added it
+> > > > > > > without any explanation and not Ted.
+> > > > > > 
+> > > > > > Creating and then unlinking 50000 files is journal space bound
+> > > > > > when using default 64MB logs on small test filesystems. Increasing
+> > > > > > the journal size to 256MB halved the runtime of this test.
+> > > > > 
+> > > > > Please explain this in thet test.  And you probably also want to
+> > > > > ensure that you don't force the log smaller than 256 either, otherwise
+> > > > > people in 10 or 20 years will wonder why this test forces logs to
+> > > > > be so small.
+> > > > 
+> > > > I'll help to add this comment when I merge this patch, if Dave hope to
+> > > > keep "-l size=256m" for xfs.
+> > > 
+> > > What happens if someone runs fstests with a 128M external log device?
+> > 
+> > It fails, then drops MKFS_OPTIONS.  The simple solution for this is
+> > to simply to use a larger external log device....
+> > 
+> > > Is this one of those cases where _scratch_mkfs notices the mkfs failure
+> > > and formats without MKFS_OPTIONS? 
+> > 
+> > More than likely.
+> > 
+> > > And if that's true, what about my
+> > > test configs that set MKFS_OPTIONS to test new non-default features?
+> > 
+> > Changing existing infrastructure behaviour to better suit *your*
+> > test environments is *your* responsibility to address, not mine.
+> > I don't care if MKFS_OPTIONS get dropped in occasional tests, it's
+> > more important to me that the tests run fast so I can iterate
+> > my modify-build-test development cycle faster.
+> 
+> I don't agree that your personal development velocity is more important
+> than silent loss of code coverage of everyone who happens to be testing
+> external log devices.  That at least covers myself, our QA department,
+> and everyone who uses the prepackaged configurations in kdevops and
+> xfstests-bld.
+> 
+> > It should be trivial for you to address, though. Add a function
+> > like:
+> > 
+> > _scratch_mkfs_try_option "-l size=256M" 
+> 
+> Or instead:
+> 
+> # Pushing 50000 unlinked inode inactivations through a small xfs log can
+> # result in bottlenecks on the log grant heads, so try to make the log
+> # larger to reduce runtime.
+> if [ $FSTYP = xfs ] && [ -z "$SCRATCH_LOGDEV ]; then
+> 	_scratch_mkfs -l size=256M
 
-Gentlemen, It would go a really long way if everyone could keep a
-few things in mind as we work together in this public space.
+Maybe better to use "_has_logdev", due to there's "$USE_EXTERNAL".
+I can change this patch as:
 
-1) Act in good faith
-2) Assume good intent
-3) Don't escalate conflict
-4) Own your mistakes
+  # Pushing 50000 unlinked inode inactivations through a small xfs log can
+  # result in bottlenecks on the log grant heads, so try to make the log
+  # larger to reduce runtime.
+  if [ "$FSTYP" = "xfs" ] && _has_logdev; then
+  	_scratch_mkfs -l size=256M
+  else
+  	_scratch_mkfs
+  fi
 
-That's basic stuff. Could we maybe give that a shot for a while,
-and see if we can reduce this misery a bit?
+when I merge it, if you all agree :)
 
-(If you took any of the above personally, please don't. I'm just
-reflecting on what I think are some longstanding patterns, here.)
+Thanks,
+Zorro
 
-Everybody's working hard, everybody's stressed, everybody makes
-mistakes. I have no desire to go point by point through some
-of the many recent blow-ups, but in nearly every one of them I
-think things would have gone better if at any time during the back
-and forth, people had stopped to reflect on the points above
-before firing off a reply.
-
-Above isn't perfect and perhaps others have thoughts on basic
-guidelines for communicating without conflict, but maybe it's a
-start?
-
--Eric
+> else
+> 	_scratch_mkfs
+> fi
+> 
+> > which has the opposite fallback behaviour of dropping the test
+> > supplied option and using MKFS_OPTIONS instead, and I'll use it for
+> > all these "test go faster" modifications that we badly need to
+> > address...
+> > 
+> > FWIW, this would also get rid of the need for the FSTYP checks in
+> > the test, too, because passing "-l size=256M" will fail on btrfs,
+> > ext4, etc and then they fall back to the specific test config...
+> 
+> Huh?  And what happens when btrfs want their own try option?
+> 
+> > So, provide me with the infrastructure that makes stuff like this
+> > work properly in *your test environment*, and I'll use it
+> > appropriately.
+> 
+> Dave.
+> 
+> You're the one who made the changes to generic/53*.  It worked before.
+> 
+> Like any other code change, it's /your/ responsibility to try not to
+> cause regressions for everyone else using the same code.  If other
+> people have problems with a change, it's longstanding community
+> expectation that the author should help resolve the problem.
+> 
+> It is /not/ standard practice to lecture the affected people about how
+> they should embark on a treewide change to fix a problem that didn't
+> exist previously.  The maintainer reverts the offending commit and the
+> author redrafts the patch.  You're well aware of this, because you've
+> said as much about other patches (e.g. iomap zeroing cleanups).
+> 
+> It is not everyone else's (Ted, Christoph, Zorro) role to clean up after
+> you.
+> 
+> I do not appreciate the condescending behavior you have shown towards me
+> this year and last.  Next year I will take more steps to insulate my
+> team from you and other community members as needed because I don't want
+> them to continue to deal with such conduct[1][2].
+> 
+> --D
+> 
+> [1] https://lore.kernel.org/fstests/Z0pBKWBlXLBxwK3D@dread.disaster.area/
+> [2] https://lore.kernel.org/linux-xfs/Z1FQdYEXLR5BoOE-@redhat.com/
+> 
+> > -Dave.
+> > -- 
+> > Dave Chinner
+> > david@fromorbit.com
+> 
 
