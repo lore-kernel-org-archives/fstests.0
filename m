@@ -1,134 +1,188 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BA3A2913
-	for <fstests@vger.kernel.org>; Sun, 22 Dec 2024 14:33:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 495714C70;
+	Mon, 23 Dec 2024 02:43:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734878027; cv=none; b=t36WOxEYVU069n+j2TwXnI4+dTvT/v32aKADSsQ7yMu3yaRfm/s6c6MtEXNA2YfEFgBr7ubsVLkjh0ScNzZWMAoJ6haru+dPlRM5BMxBvRfw8LUM3ipoG+vq7AvJZlU+TGLIJrPcAuX2Ppj6QNzqhVXsZhUCiFqeBXdYx31nz6w=
+	t=1734921795; cv=none; b=BF6jEwOa8u0pyBekL9lFvnQzxqidyPdanow4Ux6R/DaUwbY06QXFegW5QOCCN2M2uBzyhV0RBW+ZJJlLw0CFhzon5uLtg+CCHhWAHaiaR0XV1OfpFuKUcXNmBPTTEyT/ZL0qXAj1elvvEs0Da8+oErnoJF3pLGbYynWIW/J9JXI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734878027; c=relaxed/simple;
-	bh=09sg357ez1Oa1bn3vGEh9Ooa/K1Dau6/6VHwLcMCj4M=;
-	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
-	 Content-Disposition; b=On5X9OdjqXD2raSsNAsurs736riU7ZYoHYueAfZ5dCk5dI7V95rnABSB5bprDgtFrNwz7UxQKL+MFmZUXNRr+fmmNkI5l3cKoZSc+0ez/Z6odlPBx0rdqgGHbYt9LouLptG1rI2lUuwOaUZJ6Qt+4hYKJy3kHAKJ8Zjto7qV0EE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I5jiDdDL; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I5jiDdDL"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98144C4CECD;
-	Sun, 22 Dec 2024 14:33:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734878027;
-	bh=09sg357ez1Oa1bn3vGEh9Ooa/K1Dau6/6VHwLcMCj4M=;
-	h=Date:From:To:Subject:From;
-	b=I5jiDdDLL5iBtY4hhBF3GJlx1pF2SRLF/5YjbC0c8MyNb2ir68Hg3i8FCDXwhrHzK
-	 tuph/HMHXZGexdUBY+Yp6FWF/rGGvXFVb5MiQecVlW9+wn1QpAuHGp7pJ6+mEhlwQB
-	 1gVow+1uSQy5T6T3X/Qb/OF1JGuScFREbam9d85IgTSAg3cxWWhSca435v0BtQoxR6
-	 hgzZPQVQk1VIjx16KPUM9eiodNZ+3+3R5dwxC2GrVd9EUhH82GR19nqpHzxeToycKz
-	 CngmSZ3AA2b68lAgq7QoDQI97ZJriqVmrhlB7D5+WDccbEH63EwUC+8uW6aBhHVZtq
-	 82vQbIsFYrgHQ==
-Date: Sun, 22 Dec 2024 22:33:44 +0800
-Message-ID: <f181e6f3383c1e9db12c16abcb2a268c@kernel.org>>
-From: Zorro Lang <zlang@kernel.org>
-To: fstests@vger.kernel.org
-Subject: [ANNOUNCE] fstests: for-next branch updated to v2024.12.22
+	s=arc-20240116; t=1734921795; c=relaxed/simple;
+	bh=epH6mfC9cH98Qgtiyo4xjZbPdxf+AuONA7UNbMDxLMU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mW+rzKykplIlZvuVk9ZQSkGmmEqErmyedMSK8T7MZLqxrtg0/PAr8gN3WYhZdHND/WpJvch+nDYXoaWTNi/pHAQ/OAh7xwygLRLE07B3vhjPTtFn8C+dbZzgt2lrVo05IHPbKp/rCYvIDrhdwOvyL1U1BGPM3hUzDtZmGw9QTfo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
+Received: from mail.maildlp.com (unknown [172.19.163.216])
+	by dggsgout11.his.huawei.com (SkyGuard) with ESMTP id 4YGj473R3Hz4f3lWG;
+	Mon, 23 Dec 2024 10:42:47 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.128])
+	by mail.maildlp.com (Postfix) with ESMTP id 328C11A018C;
+	Mon, 23 Dec 2024 10:43:08 +0800 (CST)
+Received: from huaweicloud.com (unknown [10.175.112.188])
+	by APP4 (Coremail) with SMTP id gCh0CgA3XoIxzmhnKTuBFQ--.5176S4;
+	Mon, 23 Dec 2024 10:43:05 +0800 (CST)
+From: Zhang Yi <yi.zhang@huaweicloud.com>
+To: fstests@vger.kernel.org,
+	zlang@kernel.org
+Cc: linux-fsdevel@vger.kernel.org,
+	tytso@mit.edu,
+	adilger.kernel@dilger.ca,
+	jack@suse.cz,
+	willy@infradead.org,
+	ojaswin@linux.ibm.com,
+	yi.zhang@huawei.com,
+	yi.zhang@huaweicloud.com,
+	chengzhihao1@huawei.com,
+	yukuai3@huawei.com,
+	yangerkun@huawei.com
+Subject: [xfstests PATCH] generic/567: add partial pages zeroing out case
+Date: Mon, 23 Dec 2024 10:39:30 +0800
+Message-ID: <20241223023930.2328634-1-yi.zhang@huaweicloud.com>
+X-Mailer: git-send-email 2.46.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="tw67LmalBufo"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:gCh0CgA3XoIxzmhnKTuBFQ--.5176S4
+X-Coremail-Antispam: 1UD129KBjvJXoWxAF4kCw18tF1rAryfJF18Xwb_yoW5KFyDpF
+	yfG34Syr48Z3W3AFZFk34UXryrJwn3ZF15Jry3Xr98Zr10y3W7GFsFgw10yr1UGr10vrs0
+	vr4Dtryjgw48ZaDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUU9Y14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26F1j6w1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
+	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
+	CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
+	2Ix0cI8IcVAFwI0_Jr0_Jr4lYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJV
+	W8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2
+	Y2ka0xkIwI1lc7CjxVAaw2AFwI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x
+	0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2
+	zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF
+	4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWU
+	CwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCT
+	nIWIevJa73UjIFyTuYvjfUonmRUUUUU
+X-CM-SenderInfo: d1lo6xhdqjqx5xdzvxpfor3voofrz/
 
+From: Zhang Yi <yi.zhang@huawei.com>
 
---tw67LmalBufo
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This addresses a data corruption issue encountered during partial page
+zeroing in ext4 which the block size is smaller than the page size [1].
+Expand this test to include a zeroing range test that spans two partial
+pages to cover this case.
 
-Hi all,
+Link: https://lore.kernel.org/linux-ext4/20241220011637.1157197-2-yi.zhang@huaweicloud.com/ [1]
+Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
+---
+ tests/generic/567     | 50 +++++++++++++++++++++++++------------------
+ tests/generic/567.out | 18 ++++++++++++++++
+ 2 files changed, 47 insertions(+), 21 deletions(-)
 
-The for-next branch of the xfstests repository at:
+diff --git a/tests/generic/567 b/tests/generic/567
+index fc109d0d..756280e8 100755
+--- a/tests/generic/567
++++ b/tests/generic/567
+@@ -4,43 +4,51 @@
+ #
+ # FS QA Test No. generic/567
+ #
+-# Test mapped writes against punch-hole to ensure we get the data
+-# correctly written. This can expose data corruption bugs on filesystems
+-# where the block size is smaller than the page size.
++# Test mapped writes against punch-hole and zero-range to ensure we get
++# the data correctly written. This can expose data corruption bugs on
++# filesystems where the block size is smaller than the page size.
+ #
+ # (generic/029 is a similar test but for truncate.)
+ #
+ . ./common/preamble
+-_begin_fstest auto quick rw punch
++_begin_fstest auto quick rw punch zero
+ 
+ # Import common functions.
+ . ./common/filter
+ 
+ _require_scratch
+ _require_xfs_io_command "fpunch"
++_require_xfs_io_command "fzero"
+ 
+ testfile=$SCRATCH_MNT/testfile
+ 
+ _scratch_mkfs > /dev/null 2>&1
+ _scratch_mount
+ 
+-# Punch a hole straddling two pages to check that the mapped write after the
+-# hole-punching is correctly handled.
+-
+-$XFS_IO_PROG -t -f \
+--c "pwrite -S 0x58 0 12288" \
+--c "mmap -rw 0 12288" \
+--c "mwrite -S 0x5a 2048 8192" \
+--c "fpunch 2048 8192" \
+--c "mwrite -S 0x59 2048 8192" \
+--c "close"      \
+-$testfile | _filter_xfs_io
+-
+-echo "==== Pre-Remount ==="
+-_hexdump $testfile
+-_scratch_cycle_mount
+-echo "==== Post-Remount =="
+-_hexdump $testfile
++# Punch a hole and zero out straddling two pages to check that the mapped
++# write after the hole-punching and range-zeroing are correctly handled.
++_straddling_test()
++{
++	local test_cmd=$1
++
++	$XFS_IO_PROG -t -f \
++		-c "pwrite -S 0x58 0 12288" \
++		-c "mmap -rw 0 12288" \
++		-c "mwrite -S 0x5a 2048 8192" \
++		-c "$test_cmd 2048 8192" \
++		-c "mwrite -S 0x59 2048 8192" \
++		-c "close"      \
++	$testfile | _filter_xfs_io
++
++	echo "==== Pre-Remount ==="
++	_hexdump $testfile
++	_scratch_cycle_mount
++	echo "==== Post-Remount =="
++	_hexdump $testfile
++}
++
++_straddling_test "fpunch"
++_straddling_test "fzero"
+ 
+ status=0
+ exit
+diff --git a/tests/generic/567.out b/tests/generic/567.out
+index 0e826ed3..df89b8f3 100644
+--- a/tests/generic/567.out
++++ b/tests/generic/567.out
+@@ -17,3 +17,21 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ 002800 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >XXXXXXXXXXXXXXXX<
+ *
+ 003000
++wrote 12288/12288 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++==== Pre-Remount ===
++000000 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >XXXXXXXXXXXXXXXX<
++*
++000800 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59  >YYYYYYYYYYYYYYYY<
++*
++002800 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >XXXXXXXXXXXXXXXX<
++*
++003000
++==== Post-Remount ==
++000000 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >XXXXXXXXXXXXXXXX<
++*
++000800 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59 59  >YYYYYYYYYYYYYYYY<
++*
++002800 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58 58  >XXXXXXXXXXXXXXXX<
++*
++003000
+-- 
+2.46.1
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-has just been updated and tagged as v2024.12.22 release.
-
-Release Note:
-Since a big feature updated on last version, we get some updates and fixes for
-stable this time. There's not new test case in this release. More details
-refer to below.
-
-Thanks,
-Zorro
-
-The new head of the for-next branch is commit:
-
-023070744cef generic/530: only use xfs-specific mkfs options when testing on xfs
-
-New commits:
-
-Chao Yu (1):
-      [4a33c5b1dd0c] f2fs: add commit id to _fixed_by_kernel_commit
-
-Christoph Hellwig (3):
-      [2b66be5f5cfc] common: loop device work on zoned file systems
-      [825950c8cab7] common: cleanup scratch_mkfs_sized
-      [3b9f5fc7d7d8] common: call _require_scratch_dedupe from _require_scratch_duperemove
-
-Filipe Manana (6):
-      [1f32af6a4ce9] fstests: fix argument passing to _run_fsstress and _run_fsstress_bg
-      [06626fb70ae7] btrfs/100, btrfs/101: fix device name in their golden output
-      [9b12a1a8a35b] btrfs/142, btrfs/143: fix dmdust device names
-      [8212e1ada5e0] btrfs/146: fix failure due to missing test number argument for fsync-err
-      [7c5604ec86b8] generic/442: fix failure due to missing test number argument for fsync-err
-      [a1d583fa0062] generic/590: fix test failure when running against fs other than xfs
-
-Theodore Ts'o (2):
-      [f7262fd49cf8] generic/135: don't try to rm $SCRATCH_MNT/*
-      [023070744cef] generic/530: only use xfs-specific mkfs options when testing on xfs
-
-
-Code Diffstat:
-
- common/rc           | 24 ++++++++++++------------
- common/reflink      |  2 ++
- tests/btrfs/100.out |  2 +-
- tests/btrfs/101.out |  2 +-
- tests/btrfs/142     |  4 ++--
- tests/btrfs/143     |  4 ++--
- tests/btrfs/146     |  2 +-
- tests/f2fs/005      |  2 +-
- tests/f2fs/006      |  2 +-
- tests/f2fs/007      |  2 +-
- tests/generic/135   |  2 --
- tests/generic/442   |  2 +-
- tests/generic/530   |  9 ++++++++-
- tests/generic/563   |  4 ++++
- tests/generic/590   |  2 --
- 15 files changed, 37 insertions(+), 28 deletions(-)
---
-Zorro Lang
-zlang@kernel.org
-
---tw67LmalBufo
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmdoIy4ACgkQlNbPkfr2
-tMyxJQ/6AxtIrrDpWDLB22KqRWlZBrbydxf8/r3w4IDcffFjKh73ZbsfN52TDfR+
-sAsyeu4poblzlT/JoH1v8qFJdU6KP4wHiNDKORDYOxgKi91WpXC89KHghN6XDFzP
-imqQEMYKjDDEeghicBzJcujF+IQGrd9znKGKqHLga0HKhkVc9VKWRTlfkCLr1eaB
-50xSG8Tm/QQipd4VjKUzfY+fTBWTEr2mC+Q9GrDaLoD+IEvkmFziFpmpGStLnxfa
-IbOsslA4rLUqk44fLec0pPrQekvK4YMxFb3/CzSPvvJ1KlTccDmY42TCKC/Qn7ab
-MgOjLtraUheeJJz/Rz4brBlYCrgp20FY5dsWnU1rUbxoOPzxMKlMlVrWsEW47GW/
-iZ3LIxjfteLacDyHz9yL+wpQ9uwW2k5H+xhKtCnIbGBi6d+yJ6sCczQKwE1vjx3z
-jZceuOkPGuFhJgK6lAUCOMC8K8gxi9X7cM4Crh3kVBfpTXEs2CYezaR1xDPgxZAc
-T6QRQuTbV/+VyTGqL6pjvhiZ335yYbl2EoXfOjn5k2c+bcUCQn6I1IrhYK8kzc+H
-s5iKKxy0m2XKgnFIH0xUxY92aupXkln90rNppJAa83KO5a3s6Kqj35+yADw0+bCI
-X0UyVYy7r+Hr23ZbRMM7/hab4KSXGIjpw+5QzFBujVo8j7DI+Lk=
-=ckJ9
------END PGP SIGNATURE-----
-
---tw67LmalBufo--
