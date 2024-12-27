@@ -1,219 +1,209 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from dggsgout12.his.huawei.com (dggsgout12.his.huawei.com [45.249.212.56])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CC301428F3
-	for <fstests@vger.kernel.org>; Fri, 27 Dec 2024 07:21:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C229E2BAF7;
+	Fri, 27 Dec 2024 08:29:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.56
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735284101; cv=none; b=KsUUdu2nG0+Z2KguLduIhdyB1+N7dlTgE+lp/XdUk9dbxTNxcTFbfd683MKRsEIsmH2F3+yLwiTj7oMYBCSqzhoTof4S2zyyqI0mv2KgzG2nVViti/YO663YBkFVXF/UOwIYgHZ7J8YiqBPupbdGQPx3oNXbuKf/6I4KMyG57LE=
+	t=1735288182; cv=none; b=tB7LH+cZjfGGS//4CY7D3h7a2NSBTWVoLf5MEF/DX9bIsfzzLPIOhBU9seFICSJ9kA4WEcuUy4iyIJoSHh3yXrEl9AZVJ8M+mM5ZobAIoQ210uQqvfppMWOlTXb4+xVIZxqsrc7aHRVDNIqUShXvMdNvmdK6fUPwHjEtpxopwrY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735284101; c=relaxed/simple;
-	bh=0PQvQUthfVcmALz1wJRVd8k8k8ZQ0rT5yKCfUqG+HIw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sMTZ8USckqnzbKr8G5WzpHDWDNyTdWqIhjPXmOzjmdOQ1JLssnRO8jrpCD60P58gx0af4OdDsmPf/k9QBEgLiykwvexsQWyPDgrjqtecEMC/MEV+QPvIJBEEzZ64ot75FSTH90tc9voGTMMAmqhyO9flHKocJJ4n29gspzS8JFQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YFTQpBz/; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YFTQpBz/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1735284098;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=jTdDZUtw2Ka0vLXbecitBmQbRYS1xtRV2yfPiransTE=;
-	b=YFTQpBz/PClXmawjOxDNuGBHM7beTMfG2q3VPysnFjqb39AJBMqT3EQq2l0qXeMkvS5CxY
-	7VEiMdIz/5y3TxISIxn3Jxmf7bAYZ5v7Xs1lwsG8XKXrpOyzSJP4aUQNlYM7vr1GrK9chn
-	p6NdzGvpRqFdGLVHRnMuAk2ZgzFI5Tg=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-306-FnxcGEYUM3qbxwEAbjnfVw-1; Fri, 27 Dec 2024 02:21:36 -0500
-X-MC-Unique: FnxcGEYUM3qbxwEAbjnfVw-1
-X-Mimecast-MFC-AGG-ID: FnxcGEYUM3qbxwEAbjnfVw
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-21648ddd461so114598585ad.0
-        for <fstests@vger.kernel.org>; Thu, 26 Dec 2024 23:21:36 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735284095; x=1735888895;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=jTdDZUtw2Ka0vLXbecitBmQbRYS1xtRV2yfPiransTE=;
-        b=vEgJgLa7/uQdBvlTHoqO4U7nfXjO8db9mZAA+HxJjv7yd37VvpCJKiBtu0IYsSEfSM
-         bM3d0f1eT4mT4AUeEAnJcIc1tOiROgWDhdxcl3+v2ZlEf2emvR4dlG1QmQDYoaNnIL/e
-         kuxjnS7A9zLxF9u1faZX5aTChKZaofzw/P/gFQVX/m78jsNQuBb7Gm2LgKLCc0HfKm4M
-         THz/BRpxw69XPcoGbMHJTLNZiXdd+2QpLSTdW+ECsazKG86yCkvll8fpF0vga561nx9o
-         m5O3p886vlwd73g5a6maVrQ4C6b+L/vuan1sGfPp8X+P9rsEYH9LqmhNHyrm5XnHL9Tw
-         mwGw==
-X-Forwarded-Encrypted: i=1; AJvYcCXzA5wwyhkRpQ2QSv8NUcGzy79fMs7eD8l1hgp61zGDlLhTIX9huFj5ExoPM/Qvtuxv6NYEMM8Y@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzuw8rR7FO5so5eQAul9wy2Sj2u5mfu0nL1P0W37EQNoT1VHtjk
-	I/gWiSIeXyGPbKF9UzMVnf3DtVECJWkD6z/S4ReFfcQXejGxbdb3rBxAAyS3tlQisXn2uRmLVvL
-	H4GUYEs9wsiyBKPVztSP2kZGeorD22j0AYRVEqPUZZmQO69AfgA/zHVI89MWOjaU=
-X-Gm-Gg: ASbGncvJXhsyx3ikHVCXkXaD8nYlppEih2nhM9vRvhNcEbPnisCWHwGiAwsVafjXJoP
-	pwf9IdcbudqilcqrZUve9OYEhn0RCxzAiz5mt7MiBIaER81BQoHRkpmGbXP0Ta7o609SWOtdqFP
-	RJ4JkJcKHVB94AmP8fexEJdMTVeUalZO2AaoJjb32B4QbIkFmJASaiaBtSX1uOh09+Ng2Bj2701
-	QYT456ZJBTpr5EG5Vk02XBGCyN+aWCSzHt8KWYL2WnrP+0+ndaRiXiq3CRxDmxnaWVqy+kozDdw
-	GVxDvu/S23F/CohVKMvDxg==
-X-Received: by 2002:a05:6a20:258e:b0:1db:e40d:5f89 with SMTP id adf61e73a8af0-1e5e07eed86mr37314810637.28.1735284095202;
-        Thu, 26 Dec 2024 23:21:35 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFGqtd9+hI2bhQ8GbhtjQjnJ+9D00ZELi7HpVEX5suJMoPY0wJRKzQlCNcs+NS7JZHQ4NGgqg==
-X-Received: by 2002:a05:6a20:258e:b0:1db:e40d:5f89 with SMTP id adf61e73a8af0-1e5e07eed86mr37314788637.28.1735284094854;
-        Thu, 26 Dec 2024 23:21:34 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72aad8fe5fbsm14432988b3a.142.2024.12.26.23.21.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Dec 2024 23:21:34 -0800 (PST)
-Date: Fri, 27 Dec 2024 15:21:30 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Chao Yu <chao@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v3 2/2] f2fs/008: test snapshot creation/deletion on lvm
- device
-Message-ID: <20241227072130.3spzr4hlkaqakt2x@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20241221082345.196029-1-chao@kernel.org>
- <20241221082345.196029-2-chao@kernel.org>
- <20241224095821.ylfv622fifsk3tsv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <38a448c9-5cd4-482e-8411-a801995199c3@kernel.org>
+	s=arc-20240116; t=1735288182; c=relaxed/simple;
+	bh=aUJgAbO5iskOk/k258sYNnwjVkxh2pFnqJLESNLyWsc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=dqBuUr8N+gevgWRRs2Gn0t8nCb5ANRaRYUW+a8ecdeXDh36xBRzcTuOix3yydz3P22SCGEUAPdFOr3SfspK1dTzycra/7fGzSQsRv3ihFitpNAWC8MZ0St25IO3eLaZP0pzo6U8b2mpsTJMcbEPKbI2r1u4bRASV6ttFHQyLmZo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.56
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
+Received: from mail.maildlp.com (unknown [172.19.163.235])
+	by dggsgout12.his.huawei.com (SkyGuard) with ESMTP id 4YKJZ41cHRz4f3jXX;
+	Fri, 27 Dec 2024 16:29:16 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.128])
+	by mail.maildlp.com (Postfix) with ESMTP id 035DC1A06DA;
+	Fri, 27 Dec 2024 16:29:36 +0800 (CST)
+Received: from [10.174.179.80] (unknown [10.174.179.80])
+	by APP4 (Coremail) with SMTP id gCh0CgA3XoJsZW5nzMkSFw--.2142S3;
+	Fri, 27 Dec 2024 16:29:34 +0800 (CST)
+Message-ID: <67ae32aa-11e1-4e7f-b911-2546856564c2@huaweicloud.com>
+Date: Fri, 27 Dec 2024 16:29:32 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <38a448c9-5cd4-482e-8411-a801995199c3@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [xfstests PATCH] generic/567: add partial pages zeroing out case
+To: Nirjhar Roy <nirjhar@linux.ibm.com>, fstests@vger.kernel.org,
+ zlang@kernel.org
+Cc: linux-fsdevel@vger.kernel.org, tytso@mit.edu, adilger.kernel@dilger.ca,
+ jack@suse.cz, willy@infradead.org, ojaswin@linux.ibm.com,
+ yi.zhang@huawei.com, chengzhihao1@huawei.com, yukuai3@huawei.com,
+ yangerkun@huawei.com
+References: <20241223023930.2328634-1-yi.zhang@huaweicloud.com>
+ <7e77d8d1bf4521a727247badd6b6231256abb791.camel@linux.ibm.com>
+Content-Language: en-US
+From: Zhang Yi <yi.zhang@huaweicloud.com>
+In-Reply-To: <7e77d8d1bf4521a727247badd6b6231256abb791.camel@linux.ibm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-CM-TRANSID:gCh0CgA3XoJsZW5nzMkSFw--.2142S3
+X-Coremail-Antispam: 1UD129KBjvJXoWxWFWUuF4fWF45ZrW7Ary8uFg_yoWrZFy5pa
+	43Ga4ayr4Iqa4xW3y2vF13XFyrtrsavFsrAry3X345ZF1j9r1xKFsIg340q3WkKr4kuw4F
+	vw4ktFyrW3WDZrDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvjb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
+	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
+	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xIIjxv20xvEc7Cj
+	xVAFwI0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I
+	0E14v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40E
+	x7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x
+	0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1lc7CjxVAaw2AF
+	wI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4
+	xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43
+	MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I
+	0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWU
+	JVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjxUF1
+	v3UUUUU
+X-CM-SenderInfo: d1lo6xhdqjqx5xdzvxpfor3voofrz/
 
-On Thu, Dec 26, 2024 at 09:18:36PM +0800, Chao Yu wrote:
-> On 2024/12/24 17:58, Zorro Lang wrote:
-> > On Sat, Dec 21, 2024 at 04:23:45PM +0800, Chao Yu wrote:
-> > > This patch introduce a regression testcase to check whether
-> > > f2fs can handle discard correctly once underlying lvm device
-> > > changes to not support discard after user creates snapshot
-> > > on it.
-> > > 
-> > > Related bug was fixed by commit bc8aeb04fd80 ("f2fs: fix to
-> > > drop all discards after creating snapshot on lvm device")
-> > > 
-> > > Cc: Jaegeuk Kim <jaegeuk@kernel.org>
-> > > Signed-off-by: Chao Yu <chao@kernel.org>
-> > > ---
-> > > v3:
-> > > - rebase to last for-next branch
-> > > - update according to Zorro's comments.
-> > >   tests/f2fs/008     | 57 ++++++++++++++++++++++++++++++++++++++++++++++
-> > >   tests/f2fs/008.out |  2 ++
-> > >   2 files changed, 59 insertions(+)
-> > >   create mode 100755 tests/f2fs/008
-> > >   create mode 100644 tests/f2fs/008.out
-> > > 
-> > > diff --git a/tests/f2fs/008 b/tests/f2fs/008
-> > > new file mode 100755
-> > > index 00000000..b85e321c
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/008
-> > > @@ -0,0 +1,57 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2024 Oppo.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. f2fs/008
-> > > +#
-> > > +# This is a regression test to check whether f2fs can handle
-> > > +# discard correctly once underlying lvm device changes to not
-> > > +# support discard after user creates snapshot on it.
-> > > +#
-> > > +
-> > > +. ./common/preamble
-> > > +_begin_fstest auto quick rw
-> > > +
-> > > +_fixed_by_kernel_commit bc8aeb04fd80 \
-> > > +        "f2fs: fix to drop all discards after creating snapshot on lvm device"
-> > > +
-> > > +_require_scratch_nolvm
-> > > +_require_block_device $SCRATCH_DEV
-> > > +_require_command "$LVM_PROG" lvm
-> > > +
-> > > +lvname=lv_$seq
-> > > +vgname=vg_$seq
-> > > +testfile=$SCRATCH_MNT/testfile
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	_unmount $SCRATCH_MNT >>$seqres.full 2>&1
-> > > +	$LVM_PROG lvremove -ff /dev/mapper/$lvname-snapshot $vgname >>$seqres.full 2>&1
-> > > +	$LVM_PROG lvremove -ff /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> > > +	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
-> > > +	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
-> > > +	_udev_wait --removed /dev/mapper/$vgname-$lvname
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
-> > > +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> > > +$LVM_PROG lvcreate -L 1024m -n $lvname $vgname >>$seqres.full 2>&1
-> > 
-> > The lvcreate might be blocked by:
-> >    "WARNING: f2fs signature detected on /dev/vg_008/lv_008 at offset 1024. Wipe it? [y/n]:"
+On 2024/12/27 13:28, Nirjhar Roy wrote:
+> On Mon, 2024-12-23 at 10:39 +0800, Zhang Yi wrote:
+>> From: Zhang Yi <yi.zhang@huawei.com>
+>>
+>> This addresses a data corruption issue encountered during partial
+>> page
+>> zeroing in ext4 which the block size is smaller than the page size
+>> [1].
+>> Expand this test to include a zeroing range test that spans two
+>> partial
+>> pages to cover this case.
+>>
+>> Link: 
+>> https://lore.kernel.org/linux-ext4/20241220011637.1157197-2-yi.zhang@huaweicloud.com/
+>>  [1]
+>> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
+>> ---
+>>  tests/generic/567     | 50 +++++++++++++++++++++++++--------------
+>> ----
+>>  tests/generic/567.out | 18 ++++++++++++++++
+>>  2 files changed, 47 insertions(+), 21 deletions(-)
+>>
+>> diff --git a/tests/generic/567 b/tests/generic/567
+>> index fc109d0d..756280e8 100755
+>> --- a/tests/generic/567
+>> +++ b/tests/generic/567
+>> @@ -4,43 +4,51 @@
+>>  #
+>>  # FS QA Test No. generic/567
+>>  #
+>> -# Test mapped writes against punch-hole to ensure we get the data
+>> -# correctly written. This can expose data corruption bugs on
+>> filesystems
+>> -# where the block size is smaller than the page size.
+>> +# Test mapped writes against punch-hole and zero-range to ensure we
+>> get
+>> +# the data correctly written. This can expose data corruption bugs
+>> on
+>> +# filesystems where the block size is smaller than the page size.
+>>  #
+>>  # (generic/029 is a similar test but for truncate.)
+>>  #
+>>  . ./common/preamble
+>> -_begin_fstest auto quick rw punch
+>> +_begin_fstest auto quick rw punch zero
+>>  
+>>  # Import common functions.
+>>  . ./common/filter
+>>  
+>>  _require_scratch
+>>  _require_xfs_io_command "fpunch"
+>> +_require_xfs_io_command "fzero"
+>>  
+>>  testfile=$SCRATCH_MNT/testfile
+>>  
+>>  _scratch_mkfs > /dev/null 2>&1
+> Since this test requires block size < page size, do you think it is a
+> good idea to hard code the _scratch_mkfs parameters to explicitly pass
+> the block size to < less than zero? This will require less manipulation
+> with the local.config file. Or maybe have a _notrun to _notrun the test
+> if the block size is not less than the page size?
+
+Hi, Nirjhar. Thank you for the review!
+
+Although the issue we encountered is on the configuration that block
+size is less than page size, I believe it is also harmless to run this
+test in an environment where the block size is equal to the page size.
+This is a quick and basic test.
+
+>>  _scratch_mount
+>>  
+>> -# Punch a hole straddling two pages to check that the mapped write
+>> after the
+>> -# hole-punching is correctly handled.
+>> -
+>> -$XFS_IO_PROG -t -f \
+>> --c "pwrite -S 0x58 0 12288" \
+>> --c "mmap -rw 0 12288" \
+>> --c "mwrite -S 0x5a 2048 8192" \
+>> --c "fpunch 2048 8192" \
+>> --c "mwrite -S 0x59 2048 8192" \
+>> --c "close" 
+> Minor: isn't the close command redundant? xfs_io will in any case close
+> the file right?
+
+Yes, but this explicit close is from the original text and appears
+harmless, so I'd suggest keeping it.
+
+>>      \
+>> -$testfile | _filter_xfs_io
+>> -
+>> -echo "==== Pre-Remount ==="
+>> -_hexdump $testfile
+>> -_scratch_cycle_mount
+>> -echo "==== Post-Remount =="
+>> -_hexdump $testfile
+>> +# Punch a hole and zero out straddling two pages to check that the
+>> mapped
+>> +# write after the hole-punching and range-zeroing are correctly
+>> handled.
+>> +_straddling_test()
+>> +{
+>> +	local test_cmd=$1
+>> +
+>> +	$XFS_IO_PROG -t -f \
+>> +		-c "pwrite -S 0x58 0 12288" \
+>> +		-c "mmap -rw 0 12288" \
+>> +		-c "mwrite -S 0x5a 2048 8192" \
+>> +		-c "$test_cmd 2048 8192" \
+>> +		-c "mwrite -S 0x59 2048 8192" \
+>> +		-c "close"      \
+>> +	$testfile | _filter_xfs_io
+>> +
+>> +	echo "==== Pre-Remount ==="
+>> +	_hexdump $testfile
+>> +	_scratch_cycle_mount
+>> +	echo "==== Post-Remount =="
+>> +	_hexdump $testfile
+> Just guessing here: Do you think it is makes sense to test with both
+> delayed and non-delayed allocation? I mean with and without "msync"?
+
+Sorry, I don't understand why we need msync. The umount should flush
+the dirty pages to the disk even without msync, I mean this this test
+does not focus on the functionality of msync now.
+
+>> +}
+>> +
+>> +_straddling_test "fpunch"
+>> +_straddling_test "fzero"
+> Minor: Since we are running 2 independant sub-tests, isn't it better to
+> use 2 different files?
 > 
-> Oh, I didn't encounter this... is it due to I use low version lvm tool?
 
-I tried to run this test twice, the second test hang there, then I found it.
+Yes, Darrick had the same suggestion, and I have separated this into
+generic/758 in my v2.
 
-> 
-> lvm version
->   LVM version:     2.03.11(2) (2021-01-08)
->   Library version: 1.02.175 (2021-01-08)
->   Driver version:  4.48.0
-> 
-> > 
-> > So better to use "lvcreate -y" or "yes | ...".
-
-`lvcreate -y` is good, but I'm not sure which lvm version starts to support
-this option. So the "yes | ..." might have better compatibility.
+  https://lore.kernel.org/fstests/20241225125120.1952219-1-yi.zhang@huaweicloud.com/
 
 Thanks,
-Zorro
+Yi.
 
-> 
-> Sure.
-> 
-> Thanks,
-> 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > +_udev_wait /dev/mapper/$vgname-$lvname
-> > > +
-> > > +_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> > > +_mount -o discard /dev/mapper/$vgname-$lvname $SCRATCH_MNT >>$seqres.full 2>&1
-> > > +
-> > > +dd if=/dev/zero of=$testfile bs=1M count=20 >>$seqres.full 2>&1
-> > > +sync
-> > > +rm -f $testfile
-> > > +sync
-> > > +
-> > > +# create a snapshot on lvm device
-> > > +$LVM_PROG lvcreate -L 1024m -s -n $lvname-snapshot /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> > > +
-> > > +echo "Silence is golden"
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/f2fs/008.out b/tests/f2fs/008.out
-> > > new file mode 100644
-> > > index 00000000..dd68d5a4
-> > > --- /dev/null
-> > > +++ b/tests/f2fs/008.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 008
-> > > +Silence is golden
-> > > -- 
-> > > 2.40.1
-> > > 
-> > 
-> 
 
