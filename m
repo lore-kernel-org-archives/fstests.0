@@ -1,78 +1,76 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94F47382
-	for <fstests@vger.kernel.org>; Sat, 28 Dec 2024 04:27:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 648D8382
+	for <fstests@vger.kernel.org>; Sat, 28 Dec 2024 04:29:41 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735360070; cv=none; b=fGr0SkbDFzM5vW8A6/cjSs0TXLAfzeb7v5I1hLttmkH6rDzg7Dqvwl44qyOkM1mD11N0pZDtZs7gNDKhXawDFOlIS9XnQOLioCY/Lo0iS1SAstlZW+9Km+sV2ORmQlDHMs4Uv9UhUcygqsq3mT4m4LGttdLP0R/nkUUeGIKGZLs=
+	t=1735360183; cv=none; b=MgQq9szy5N9fJ50uq2hPGUTLA/M6+SMsRkYreTPEitoygzwogXXSBCkBbsC+4w38Oenk5V89r3GEig0GLSWk9BRRFV3c05vH2Z+P4KjpFyY2RnUJBA8W+fdFDVC4Np/U1XnMMCI2dBgpRXChMCvl/XuB0nsiqtxLx+W5f17NQcs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735360070; c=relaxed/simple;
-	bh=mnOofn6URV9UNfFzszdWSBRA0oZMWIzJMhtz+hWaDKU=;
+	s=arc-20240116; t=1735360183; c=relaxed/simple;
+	bh=gro4dNNWPQ5gYJECg7R07YgLJPSbRf6YQLgKpGRTQVE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZllXtU3M2nmrKY7jRlDYFLFsbvRVHQNkTnKr5ImH+WKPuk/xcLiV6tY5PcXB++gHUkOZiWQhzFM28nBeGBiK6JuYjD/6kgfOFqdMEy4wmEeDUX6amz5DMqekSbydtaQBqPPQk/yqj9L7B21pcrM5hYUv35pbj3/PPHuwXW4Uac8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=OyGckHdO; arc=none smtp.client-ip=170.10.133.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=hkLMycJ1shD/ys/sDu3wIpirJoJCI5N5YREnECE+3ESBUuupOvHHuSBSiVC3dpgeD8ePdchhRgGiP3L3TUdbfsCLtpGNh1rrR96o7xmdE22LgubPeU2eIW5hisY+TdNjNUxOhPn2um/vy/RFtw1sZBkTr2ZH9k7Y9wDM6UF703M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ecO6lEnm; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="OyGckHdO"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ecO6lEnm"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1735360067;
+	s=mimecast20190719; t=1735360180;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=PxKP1JYtpYze2lidt7JggvzgICQVYYUkZoaw6OgMCWM=;
-	b=OyGckHdOn3x/Je0sZEDABjsHpMn3MRkeoIdat+dIPpvxZaemuwkcoooG94fZMDiw6suZgI
-	/Dd82CUvxCIgnEnX9cNKo0IpBjTXO6kP5Gn/enyLFM8ymF3El1OiJJbBfdapvqdF1P1c/L
-	OJVMSXBslj+h77gwwd+cbjFgJgXBMCs=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=7EfW69f1VbR875uQRLJFk3Xl8wJJasMX4yD9gMIjf4E=;
+	b=ecO6lEnmj2T6cRObbK5Ev1Hiqgb/cAlfwHjGOtM5bmiQHodxbLFCE1QgKO4+SjqFx1Pxs4
+	mhs2rZvBZVMe6AHJH9SomQ2Jn4GMpdGWRHpQzgL4w3ixKNakjU8YD7U1jj+sP2kLRYbEX+
+	iNIWr2oTURrUojRXHX0E9iDrZO3NsyY=
+Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
+ [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-310-ANauCbLsM3aF8ASfCpxNUQ-1; Fri, 27 Dec 2024 23:27:45 -0500
-X-MC-Unique: ANauCbLsM3aF8ASfCpxNUQ-1
-X-Mimecast-MFC-AGG-ID: ANauCbLsM3aF8ASfCpxNUQ
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-216430a88b0so102463145ad.0
-        for <fstests@vger.kernel.org>; Fri, 27 Dec 2024 20:27:45 -0800 (PST)
+ us-mta-582-fjJ9ahTGNmyTutVHcHNULA-1; Fri, 27 Dec 2024 23:29:37 -0500
+X-MC-Unique: fjJ9ahTGNmyTutVHcHNULA-1
+X-Mimecast-MFC-AGG-ID: fjJ9ahTGNmyTutVHcHNULA
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2ef8c7ef51dso9728769a91.1
+        for <fstests@vger.kernel.org>; Fri, 27 Dec 2024 20:29:37 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735360064; x=1735964864;
+        d=1e100.net; s=20230601; t=1735360177; x=1735964977;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=PxKP1JYtpYze2lidt7JggvzgICQVYYUkZoaw6OgMCWM=;
-        b=v+9CpvUj6BMN5MGZZPbJRW7bf7e13Vn2k7D84sU5kn09eGWxJtCUYxcZbb+r3qu8LG
-         1IBPx/OVb6xp5whN3SyGF51AGfs91DDZaiRajjyc1/773fCnIOywg001uIHS3V+/HDYQ
-         5lGlb2tVTj60ikTT3PeGHrXwlR5AW5ix+vCeCojl3JWqNhD9czi7PrU1awKQ+7oB0WSR
-         YHEDlpB9JFTYxylwzUMlq0yjojEU7rXIHFShRqArcf7t5kcXMwujta3AXABqvP5iMC8O
-         UItq5m6RSUMXPolrbjPdRYkenJOFK9ThaJTafdE1vBkfHdJov4G/nflwBBw3ddV9UGNI
-         rTaQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWbPkld6HhQehrgPq8d0X0y6UJIfdrXSwN+DYCILU5y/KjGiN3pXqtrNpKbTcRiYyModXj0xINg@vger.kernel.org
-X-Gm-Message-State: AOJu0YwleO/tW30PKtAc5mRNdi4xBC/IrOAEZot7tTQJSiFrnbM2BjWw
-	vjTWcFCqQUhuz2mC+a3MNdcE5jCX0haVImQmiS10nPEVqYpOMWBXXzBtRIr8XLpfp9/6sOnSxuG
-	Zff/AFOn1/nUWhDMDHu3OJgF+VZbFdACd7Ih9E6KuAja/EOKkLKjpkCvUPXHD1pCIAA==
-X-Gm-Gg: ASbGncuMFBiEH277lhtrghWVbtfMUNhfuZ2gAfAsgU9hWgDT8I/6T8ITyQJGlsZMR5d
-	lcTDcuUpIGMe8JN+6+eiGBCON/d9saHHlvz9ZC7dEmdsL+By5dxojyvBRX7i7HLRXZFSA23rSqe
-	JwW/iVyLXFCQ4V5fYq3lsiJLZ9aucDhpy1ws2GgycMNvlFAWTEU7scujAkogYP0PcAZs+D3jWii
-	23gYnA7ajbYOrXTsxYabzlQdd7mvcH2CVvO8tIPdp7Z5jtKdMVLfrqhhvJ9/Y5vjpqLUrTQxfwZ
-	z7k8gyB71DraoiDX8RUhHw==
-X-Received: by 2002:a17:903:1248:b0:215:a96d:ec17 with SMTP id d9443c01a7336-219e6e9f972mr388774545ad.14.1735360064115;
-        Fri, 27 Dec 2024 20:27:44 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFMN3qkkbg7IkE7tokaFOyB9J+Jlk/b/GquRVWEbzCvww8Aslq47g6LUtZs6GhTqkO4yMpgsQ==
-X-Received: by 2002:a17:903:1248:b0:215:a96d:ec17 with SMTP id d9443c01a7336-219e6e9f972mr388774435ad.14.1735360063819;
-        Fri, 27 Dec 2024 20:27:43 -0800 (PST)
+        bh=7EfW69f1VbR875uQRLJFk3Xl8wJJasMX4yD9gMIjf4E=;
+        b=i71eegk9e2hVtt4HgeuVuPgUtWgqBAuIy4ddql9dfzJmbmlKQ/P3GOM7IEEdJFOS3i
+         xAkr14eW9Ah4PN8isnpb4sTG18ercDpg1g2ZYqqJoRSBLUUzQGXp7W/XmvkmLrwmPuWT
+         dfnyMG7FfddcmIAI24hs6LZsLAZ34RAr8mFgUbXO38FlRJR5T2b11Wan3RxmoCJAnQ/J
+         O5gpI56aPX5FL+R8t7Q/cx4Gs3dGRcM/x/Af0BTn8vCwevipnqJIkQ28dA/GvF5JsZg+
+         F7u16LNc1iJciH1K0X5H91IC3pCHC9RsRIcdUw0mWFVhIoacVvPf1U53Qy3D9tGkUGYS
+         zX4w==
+X-Forwarded-Encrypted: i=1; AJvYcCV5pQT7LcwliuucMBxqLl+vIZSTb2pVlQWR+amyBl6mJFPwb64SIhFkvo2/ieVKTjeolSYTrWy3@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxex8MhhX3u97v4ga4m/GtwiQdPEoU5nkGLMIFoqKBMo1T8L6b5
+	96KXyfQXQjOxzh4tb74xVA4kTeX493c5BG+6XLdLFxeraQjTVzbrTgJT9ckmKHAK1ca6WsJyRJm
+	opvQvvXOjLCDfSNCqGeyFaJO0sfX5o8neAXc6Pr7Hg28nHU5EOYo3RfU=
+X-Gm-Gg: ASbGncuFi2LiGNF3VIuZ/qcnXoiAppHVXTPDx/WJL6wxZ2hnXzdYhoh6QRbwcN98dwU
+	LONmOx4X3n48THWVzZ+WqxQpkqUw76ultyi2zsphicMvpbs5VjdAlDJkCTW2T3lgamEYIIVW/dJ
+	n0njRjIFJiCFbkFm6hCh7eWNLKn5QDuwJbNvJHEEXaOnKdP4OmJjQ03EmvTyLRC6CK+pTJoc9+H
+	K6YXUYE7TeNpUNRGNyREEtEpgZ+1oPq9K/smmvSwTzfi65N+4uaqkOJM0y639enuURZCv4UnY+e
+	trOVy8tR5k5R/hn67b0tKQ==
+X-Received: by 2002:a17:90b:2b83:b0:2ef:9dbc:38d1 with SMTP id 98e67ed59e1d1-2f4435ad5e6mr45177911a91.5.1735360176841;
+        Fri, 27 Dec 2024 20:29:36 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IF1MdxnWOsnF/Nx/tbnW5WGIG+UHcQ1Kyol/UUxYMSG87cGahqG+KdcewPaFgaSIsQRZPlBig==
+X-Received: by 2002:a17:90b:2b83:b0:2ef:9dbc:38d1 with SMTP id 98e67ed59e1d1-2f4435ad5e6mr45177896a91.5.1735360176557;
+        Fri, 27 Dec 2024 20:29:36 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-219dc96e85csm142860585ad.61.2024.12.27.20.27.41
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-219dc9f7356sm143127715ad.193.2024.12.27.20.29.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Dec 2024 20:27:43 -0800 (PST)
-Date: Sat, 28 Dec 2024 12:27:38 +0800
+        Fri, 27 Dec 2024 20:29:36 -0800 (PST)
+Date: Sat, 28 Dec 2024 12:29:32 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Chao Yu <chao@kernel.org>
 Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
 	jaegeuk@kernel.org, linux-f2fs-devel@lists.sourceforge.net
-Subject: Re: [PATCH v4 2/2] f2fs/008: test snapshot creation/deletion on lvm
- device
-Message-ID: <20241228042738.hk5k4impnvstjmj4@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+Subject: Re: [PATCH v4 1/2] common/rc: support f2fs in _mkfs_dev()
+Message-ID: <20241228042932.jvevyhdxmp6sasjx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <20241226133631.9486-1-chao@kernel.org>
- <20241226133631.9486-2-chao@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,115 +79,39 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241226133631.9486-2-chao@kernel.org>
+In-Reply-To: <20241226133631.9486-1-chao@kernel.org>
 
-On Thu, Dec 26, 2024 at 09:36:31PM +0800, Chao Yu wrote:
-> This patch introduce a regression testcase to check whether
-> f2fs can handle discard correctly once underlying lvm device
-> changes to not support discard after user creates snapshot
-> on it.
+On Thu, Dec 26, 2024 at 09:36:30PM +0800, Chao Yu wrote:
+> Then, f2fs/* testcases can use this wrapped common helper instead of
+> raw codes.
 > 
-> Related bug was fixed by commit bc8aeb04fd80 ("f2fs: fix to
-> drop all discards after creating snapshot on lvm device")
-> 
-> Cc: Jaegeuk Kim <jaegeuk@kernel.org>
+> Suggested-by: Zorro Lang <zlang@kernel.org>
 > Signed-off-by: Chao Yu <chao@kernel.org>
 > ---
 > v4:
-> - use "lvcreate -y" to force wiping stale data in device.
->  tests/f2fs/008     | 57 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/f2fs/008.out |  2 ++
->  2 files changed, 59 insertions(+)
->  create mode 100755 tests/f2fs/008
->  create mode 100644 tests/f2fs/008.out
+> - no updates
+>  common/rc | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> diff --git a/tests/f2fs/008 b/tests/f2fs/008
-> new file mode 100755
-> index 00000000..47696f2b
-> --- /dev/null
-> +++ b/tests/f2fs/008
-> @@ -0,0 +1,57 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024 Oppo.  All Rights Reserved.
-> +#
-> +# FS QA Test No. f2fs/008
-> +#
-> +# This is a regression test to check whether f2fs can handle
-> +# discard correctly once underlying lvm device changes to not
-> +# support discard after user creates snapshot on it.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick rw
-> +
-> +_fixed_by_kernel_commit bc8aeb04fd80 \
-> +        "f2fs: fix to drop all discards after creating snapshot on lvm device"
-> +
-> +_require_scratch_nolvm
-> +_require_block_device $SCRATCH_DEV
-> +_require_command "$LVM_PROG" lvm
-> +
-> +lvname=lv_$seq
-> +vgname=vg_$seq
-> +testfile=$SCRATCH_MNT/testfile
-> +
-> +_cleanup()
-> +{
-> +	_unmount $SCRATCH_MNT >>$seqres.full 2>&1
-> +	$LVM_PROG lvremove -ff /dev/mapper/$lvname-snapshot $vgname >>$seqres.full 2>&1
-> +	$LVM_PROG lvremove -ff /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> +	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
-> +	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
-> +	_udev_wait --removed /dev/mapper/$vgname-$lvname
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
-> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
-> +$LVM_PROG lvcreate -y -L 1024m -n $lvname $vgname >>$seqres.full 2>&1
+> diff --git a/common/rc b/common/rc
+> index 7b5bc0b4..ecac2de8 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -833,6 +833,9 @@ _try_mkfs_dev()
+>      ext2|ext3|ext4)
+>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $*
+>  	;;
+> +    f2fs)
+> +	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $*
+> +	;;
 
-OK, so you choose "-y" option. I think it's fine, due to this option was
-brought in by below commit [1] 11 years ago. It's nearly same old with f2fs :)
-So,
+Oh, that's fine to me if you don't want to use mkfs.f2fs directly.
 
 Reviewed-by: Zorro Lang <zlang@redhat.com>
 
-[1]
-  commit b6dab4e0598df7b6a44a32749fdb846c03aa692d
-  Author: Peter Rajnoha <prajnoha@redhat.com>
-  Date:   Wed Nov 6 16:16:34 2013 +0100
-
-    lv_manip: rename set_lv -> wipe_lv and include signature wiping capability
-
-
-
-> +_udev_wait /dev/mapper/$vgname-$lvname
-> +
-> +_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> +_mount -o discard /dev/mapper/$vgname-$lvname $SCRATCH_MNT >>$seqres.full 2>&1
-> +
-> +dd if=/dev/zero of=$testfile bs=1M count=20 >>$seqres.full 2>&1
-> +sync
-> +rm -f $testfile
-> +sync
-> +
-> +# create a snapshot on lvm device
-> +$LVM_PROG lvcreate -L 1024m -s -n $lvname-snapshot /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> +
-> +echo "Silence is golden"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/f2fs/008.out b/tests/f2fs/008.out
-> new file mode 100644
-> index 00000000..dd68d5a4
-> --- /dev/null
-> +++ b/tests/f2fs/008.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 008
-> +Silence is golden
+>      xfs)
+>  	$MKFS_PROG -t $FSTYP -- -f $MKFS_OPTIONS $*
+>  	;;
 > -- 
 > 2.40.1
 > 
