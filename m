@@ -1,60 +1,67 @@
-Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD62F171C9;
-	Mon, 30 Dec 2024 04:17:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44475A59;
+	Mon, 30 Dec 2024 05:00:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735532245; cv=none; b=qyRnAJWWi43OeAO7As0pBQP+xoLSyXpHzxNQIAFeO78AtWHnp0AW37zhnfTMi5DAAWd2aOY4UtYvMySoGkpP9qRgs94YMux0Uk+V5B5u5VYDxKeW/FGfk/Xb57aJlvWnzXD2MOZnWFDE1XuF2djtURxtCL618W545jz/IE34EFk=
+	t=1735534855; cv=none; b=rADKaXLg3ItW75iRA/y17xg/gGEShaRVG3DvtC8e4fbAwoWejDpDGs34aqRdxHaVM0xXWEAI7GrGmmByJLtN/JSPIExSKhPJwDgEJkgmz1x4Xh3+jE736RCc16eWiYGSH78cjqCBTg9ye/GyDgRpLFc12q8DlnosFIjXmk/yQLE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735532245; c=relaxed/simple;
-	bh=NLE1O3H4FHga76WxJH0DsaWvVlCO/f3ZOmSdLNGA4zw=;
+	s=arc-20240116; t=1735534855; c=relaxed/simple;
+	bh=F9gq7YxOB8hDOzC+TdcEnQuj3qICCS1stpJ9fZne0XU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=l2G+CVE7cYQxjdu7WY3AqE6UlY6+N9/ii898FtBmqBewQidYbYrQIs9N4FtoIQ6AQlyGV9z+lfeZ+T4mBHz5pfeb/j21Q+PZj7eOXAqFRncA6bfs5/dHPLpP2cuaee+beT0CKK761k0A2qiq2xTcDFbSu7sc5jIbIVyP5REmDRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=PTEwsNRa; arc=none smtp.client-ip=148.163.156.1
+	 In-Reply-To:Content-Type; b=ptljhBQl/XeRLEnJay2AqC16ryKlS5cGDS4OpCSq472gs3Tp3ni4rxNnRhsdoIQiE1KsFI0mHVoEux0hmwqmjuO+hdQt54vZ8y3TVOSdJf1v6zD/BYoUJoIV28o8cQEMmUOZcQyWmaR626YZflAlC5atL/Jkde5u0AQ7Ldj1jtI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=Mw++6R0E; arc=none smtp.client-ip=148.163.158.5
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="PTEwsNRa"
-Received: from pps.filterd (m0360083.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BU3qYUc015272;
-	Mon, 30 Dec 2024 04:16:29 GMT
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="Mw++6R0E"
+Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BTNk4Xl007452;
+	Mon, 30 Dec 2024 05:00:40 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=i+rAYS
-	DBFjxdkkJAJF5Sw8fzN0VH7kbJrQHbj5OmlKw=; b=PTEwsNRaHNQYXCIXGz4Xxv
-	fY8CApNX2V8mcmRQTa0sf51CE/tNqVViPDwtYFPn+MdXo/rHieHuJQBjW+TiP3Eg
-	Q/E9jNT6hMvzYwp3RjItwtBceZNRMtJRd4iW7HjivW1mnereuMdbNjEHeCSHKBLm
-	Nrc6utjBfopeVgtZXv0GvrDbzd0DLCd1Q2jAFKhsP678Uv5hFMdSDEaySdtFdy+Y
-	VNpHxfS9H80vrL8Z+OQ53mcKBmrt+Q6IDYxv9bDs9lxbddg8FQqi4mSIkJSByVys
-	ZCct0p5RobpYyTe/rfzh4L/erKe6mXEd2KVcVTElyP1i9O0821rMl4T/HrUf0cow
+	:message-id:mime-version:references:subject:to; s=pp1; bh=XrHxNo
+	fox0/Y5rlSKIX5NNHY/bYV8xm9fTSy6bzxZLM=; b=Mw++6R0E0lLgevIk2/vYvA
+	PpNub3KtvVbI7QDsFWSNhSwBDGbYIKGTi1QLloqojoKTDkdh2AgUGqFTVZG2+b8o
+	y5w9nLROWqs9LdFdM/WtfwqhlV+OrlbLClhzv5LZOZkMLSLzhE6+K5Wrqo+Y6JPT
+	lGKhgIuH7bojSSlTT3gaQHUuuRK64SIwb1T2WLy02Vc2fOZLtOp4KRkczDrQG1n7
+	4N0liwlbNkeSCUXBvhtfVyVgAyOpwUfUYsj9XPe8mbGMj5LSIjNR8jfqb1aVMoXD
+	ZddCk4xuRhny7b7D3Sp1z5QiC/Th5O52nJAO+vRUpDskqbR36GiEmbkJxJ97JAMw
 	==
+Received: from pps.reinject (localhost [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43ug8a0nj6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 30 Dec 2024 05:00:39 +0000 (GMT)
+Received: from m0356516.ppops.net (m0356516.ppops.net [127.0.0.1])
+	by pps.reinject (8.18.0.8/8.18.0.8) with ESMTP id 4BU50d12028631;
+	Mon, 30 Dec 2024 05:00:39 GMT
 Received: from ppma21.wdc07v.mail.ibm.com (5b.69.3da9.ip4.static.sl-reverse.com [169.61.105.91])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43um0b8272-1
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 43ug8a0nj3-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 30 Dec 2024 04:16:28 +0000 (GMT)
+	Mon, 30 Dec 2024 05:00:39 +0000 (GMT)
 Received: from pps.filterd (ppma21.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 4BU0U5nZ010184;
-	Mon, 30 Dec 2024 04:16:27 GMT
-Received: from smtprelay06.fra02v.mail.ibm.com ([9.218.2.230])
-	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 43tvnn43ph-1
+	by ppma21.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 4BU0SjSe010067;
+	Mon, 30 Dec 2024 05:00:38 GMT
+Received: from smtprelay04.fra02v.mail.ibm.com ([9.218.2.228])
+	by ppma21.wdc07v.mail.ibm.com (PPS) with ESMTPS id 43tvnn46wk-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 30 Dec 2024 04:16:27 +0000
+	Mon, 30 Dec 2024 05:00:38 +0000
 Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
-	by smtprelay06.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 4BU4GP7q35521240
+	by smtprelay04.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 4BU50akh27525658
 	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 30 Dec 2024 04:16:25 GMT
+	Mon, 30 Dec 2024 05:00:36 GMT
 Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 7CD4C2004E;
-	Mon, 30 Dec 2024 04:16:25 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 82FA020040;
+	Mon, 30 Dec 2024 05:00:36 +0000 (GMT)
 Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 6778A20043;
-	Mon, 30 Dec 2024 04:16:23 +0000 (GMT)
+	by IMSVA (Postfix) with ESMTP id 648A720043;
+	Mon, 30 Dec 2024 05:00:35 +0000 (GMT)
 Received: from [9.109.247.80] (unknown [9.109.247.80])
 	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Mon, 30 Dec 2024 04:16:23 +0000 (GMT)
-Message-ID: <a1749e83-9c29-45b7-be4c-bca1a32ee85a@linux.ibm.com>
-Date: Mon, 30 Dec 2024 09:46:22 +0530
+	Mon, 30 Dec 2024 05:00:35 +0000 (GMT)
+Message-ID: <0763b0c7-8570-4b85-80f6-77ae0b09dde9@linux.ibm.com>
+Date: Mon, 30 Dec 2024 10:30:34 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -62,179 +69,210 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [xfstests PATCH] generic/567: add partial pages zeroing out case
-To: Zhang Yi <yi.zhang@huaweicloud.com>, fstests@vger.kernel.org,
-        zlang@kernel.org
-Cc: linux-fsdevel@vger.kernel.org, tytso@mit.edu, adilger.kernel@dilger.ca,
-        jack@suse.cz, willy@infradead.org, ojaswin@linux.ibm.com,
-        yi.zhang@huawei.com, chengzhihao1@huawei.com, yukuai3@huawei.com,
-        yangerkun@huawei.com
-References: <20241223023930.2328634-1-yi.zhang@huaweicloud.com>
- <7e77d8d1bf4521a727247badd6b6231256abb791.camel@linux.ibm.com>
- <67ae32aa-11e1-4e7f-b911-2546856564c2@huaweicloud.com>
+Subject: Re: [PATCH v2 1/2] fsx: support reads/writes from buffers backed by
+ hugepages
 Content-Language: en-US
+To: Joanne Koong <joannelkoong@gmail.com>, fstests@vger.kernel.org
+Cc: linux-fsdevel@vger.kernel.org, bfoster@redhat.com, djwong@kernel.org,
+        kernel-team@meta.com
+References: <20241227193311.1799626-1-joannelkoong@gmail.com>
+ <20241227193311.1799626-2-joannelkoong@gmail.com>
 From: Nirjhar Roy <nirjhar@linux.ibm.com>
-In-Reply-To: <67ae32aa-11e1-4e7f-b911-2546856564c2@huaweicloud.com>
+In-Reply-To: <20241227193311.1799626-2-joannelkoong@gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: GyrIubHtt1G-wn5Bn-sKRht7PZbUEm8i
-X-Proofpoint-ORIG-GUID: GyrIubHtt1G-wn5Bn-sKRht7PZbUEm8i
+X-Proofpoint-GUID: syAne63DwaWyOuMqMARRBVhL3WNn8CRZ
+X-Proofpoint-ORIG-GUID: Vyt8rzGIuFRNi-xRqBM4_3dZOdO7M_Pk
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
  definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 clxscore=1015
- mlxlogscore=999 impostorscore=0 suspectscore=0 phishscore=0
- priorityscore=1501 adultscore=0 mlxscore=0 malwarescore=0
- lowpriorityscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.19.0-2411120000 definitions=main-2412300030
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
+ mlxlogscore=999 bulkscore=0 mlxscore=0 adultscore=0 priorityscore=1501
+ clxscore=1011 spamscore=0 lowpriorityscore=0 malwarescore=0 phishscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2411120000 definitions=main-2412300039
 
 
-On 12/27/24 13:59, Zhang Yi wrote:
-> On 2024/12/27 13:28, Nirjhar Roy wrote:
->> On Mon, 2024-12-23 at 10:39 +0800, Zhang Yi wrote:
->>> From: Zhang Yi <yi.zhang@huawei.com>
->>>
->>> This addresses a data corruption issue encountered during partial
->>> page
->>> zeroing in ext4 which the block size is smaller than the page size
->>> [1].
->>> Expand this test to include a zeroing range test that spans two
->>> partial
->>> pages to cover this case.
->>>
->>> Link:
->>> https://lore.kernel.org/linux-ext4/20241220011637.1157197-2-yi.zhang@huaweicloud.com/
->>>   [1]
->>> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
->>> ---
->>>   tests/generic/567     | 50 +++++++++++++++++++++++++--------------
->>> ----
->>>   tests/generic/567.out | 18 ++++++++++++++++
->>>   2 files changed, 47 insertions(+), 21 deletions(-)
->>>
->>> diff --git a/tests/generic/567 b/tests/generic/567
->>> index fc109d0d..756280e8 100755
->>> --- a/tests/generic/567
->>> +++ b/tests/generic/567
->>> @@ -4,43 +4,51 @@
->>>   #
->>>   # FS QA Test No. generic/567
->>>   #
->>> -# Test mapped writes against punch-hole to ensure we get the data
->>> -# correctly written. This can expose data corruption bugs on
->>> filesystems
->>> -# where the block size is smaller than the page size.
->>> +# Test mapped writes against punch-hole and zero-range to ensure we
->>> get
->>> +# the data correctly written. This can expose data corruption bugs
->>> on
->>> +# filesystems where the block size is smaller than the page size.
->>>   #
->>>   # (generic/029 is a similar test but for truncate.)
->>>   #
->>>   . ./common/preamble
->>> -_begin_fstest auto quick rw punch
->>> +_begin_fstest auto quick rw punch zero
->>>   
->>>   # Import common functions.
->>>   . ./common/filter
->>>   
->>>   _require_scratch
->>>   _require_xfs_io_command "fpunch"
->>> +_require_xfs_io_command "fzero"
->>>   
->>>   testfile=$SCRATCH_MNT/testfile
->>>   
->>>   _scratch_mkfs > /dev/null 2>&1
->> Since this test requires block size < page size, do you think it is a
->> good idea to hard code the _scratch_mkfs parameters to explicitly pass
->> the block size to < less than zero? This will require less manipulation
->> with the local.config file. Or maybe have a _notrun to _notrun the test
->> if the block size is not less than the page size?
-> Hi, Nirjhar. Thank you for the review!
+On 12/28/24 01:03, Joanne Koong wrote:
+> Add support for reads/writes from buffers backed by hugepages.
+> This can be enabled through the '-h' flag. This flag should only be used
+> on systems where THP capabilities are enabled.
 >
-> Although the issue we encountered is on the configuration that block
-> size is less than page size, I believe it is also harmless to run this
-> test in an environment where the block size is equal to the page size.
-> This is a quick and basic test.
-Okay makes sense. So with block size equal to page size, the actual 
-functionality that we want to test won't be tested(but the test will 
-pass), is that what you mean?
+> This is motivated by a recent bug that was due to faulty handling of
+> userspace buffers backed by hugepages. This patch is a mitigation
+> against problems like this in the future.
 >
->>>   _scratch_mount
->>>   
->>> -# Punch a hole straddling two pages to check that the mapped write
->>> after the
->>> -# hole-punching is correctly handled.
->>> -
->>> -$XFS_IO_PROG -t -f \
->>> --c "pwrite -S 0x58 0 12288" \
->>> --c "mmap -rw 0 12288" \
->>> --c "mwrite -S 0x5a 2048 8192" \
->>> --c "fpunch 2048 8192" \
->>> --c "mwrite -S 0x59 2048 8192" \
->>> --c "close"
->> Minor: isn't the close command redundant? xfs_io will in any case close
->> the file right?
-> Yes, but this explicit close is from the original text and appears
-> harmless, so I'd suggest keeping it.
-Okay.
+> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> ---
+>   ltp/fsx.c | 108 ++++++++++++++++++++++++++++++++++++++++++++++++------
+>   1 file changed, 97 insertions(+), 11 deletions(-)
 >
->>>       \
->>> -$testfile | _filter_xfs_io
->>> -
->>> -echo "==== Pre-Remount ==="
->>> -_hexdump $testfile
->>> -_scratch_cycle_mount
->>> -echo "==== Post-Remount =="
->>> -_hexdump $testfile
->>> +# Punch a hole and zero out straddling two pages to check that the
->>> mapped
->>> +# write after the hole-punching and range-zeroing are correctly
->>> handled.
->>> +_straddling_test()
->>> +{
->>> +	local test_cmd=$1
->>> +
->>> +	$XFS_IO_PROG -t -f \
->>> +		-c "pwrite -S 0x58 0 12288" \
->>> +		-c "mmap -rw 0 12288" \
->>> +		-c "mwrite -S 0x5a 2048 8192" \
->>> +		-c "$test_cmd 2048 8192" \
->>> +		-c "mwrite -S 0x59 2048 8192" \
->>> +		-c "close"      \
->>> +	$testfile | _filter_xfs_io
->>> +
->>> +	echo "==== Pre-Remount ==="
->>> +	_hexdump $testfile
->>> +	_scratch_cycle_mount
->>> +	echo "==== Post-Remount =="
->>> +	_hexdump $testfile
->> Just guessing here: Do you think it is makes sense to test with both
->> delayed and non-delayed allocation? I mean with and without "msync"?
-> Sorry, I don't understand why we need msync. The umount should flush
-> the dirty pages to the disk even without msync, I mean this this test
-> does not focus on the functionality of msync now.
-Okay makes sense.
->
->>> +}
->>> +
->>> +_straddling_test "fpunch"
->>> +_straddling_test "fzero"
->> Minor: Since we are running 2 independant sub-tests, isn't it better to
->> use 2 different files?
->>
-> Yes, Darrick had the same suggestion, and I have separated this into
-> generic/758 in my v2.
-Okay.
->
->    https://lore.kernel.org/fstests/20241225125120.1952219-1-yi.zhang@huaweicloud.com/
->
-> Thanks,
-> Yi.
->
->
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 41933354..fb6a9b31 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -190,6 +190,7 @@ int	o_direct;			/* -Z */
+>   int	aio = 0;
+>   int	uring = 0;
+>   int	mark_nr = 0;
+> +int	hugepages = 0;                  /* -h flag */
+>   
+>   int page_size;
+>   int page_mask;
+> @@ -2471,7 +2472,7 @@ void
+>   usage(void)
+>   {
+>   	fprintf(stdout, "usage: %s",
+> -		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
+> +		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
+>   	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
+>   	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
+>   	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+> @@ -2484,6 +2485,7 @@ usage(void)
+>   	-e: pollute post-eof on size changes (default 0)\n\
+>   	-f: flush and invalidate cache after I/O\n\
+>   	-g X: write character X instead of random generated data\n\
+> +	-h hugepages: use buffers backed by hugepages for reads/writes\n\
+>   	-i logdev: do integrity testing, logdev is the dm log writes device\n\
+>   	-j logid: prefix debug log messsages with this id\n\
+>   	-k: do not truncate existing file and use its size as upper bound on file size\n\
+> @@ -2856,6 +2858,95 @@ keep_running(void)
+>   	return numops-- != 0;
+>   }
+>   
+> +static long
+> +get_hugepage_size(void)
+> +{
+> +	const char str[] = "Hugepagesize:";
+> +	size_t str_len =  sizeof(str) - 1;
+> +	unsigned int hugepage_size = 0;
+> +	char buffer[64];
+> +	FILE *file;
+> +
+> +	file = fopen("/proc/meminfo", "r");
+> +	if (!file) {
+> +		prterr("get_hugepage_size: fopen /proc/meminfo");
+> +		return -1;
+> +	}
+> +	while (fgets(buffer, sizeof(buffer), file)) {
+> +		if (strncmp(buffer, str, str_len) == 0) {
+> +			sscanf(buffer + str_len, "%u", &hugepage_size);
+> +			break;
+> +		}
+> +	}
+> +	fclose(file);
+> +	if (!hugepage_size) {
+> +		prterr("get_hugepage_size: failed to find "
+> +			"hugepage size in /proc/meminfo\n");
+> +		return -1;
+> +	}
+> +
+> +	/* convert from KiB to bytes */
+> +	return hugepage_size << 10;
+Thanks for the change.
+> +}
+> +
+> +static void *
+> +init_hugepages_buf(unsigned len, int hugepage_size, int alignment)
+> +{
+> +	void *buf;
+> +	long buf_size = roundup(len, hugepage_size) + alignment;
+> +
+> +	if (posix_memalign(&buf, hugepage_size, buf_size)) {
+> +		prterr("posix_memalign for buf");
+> +		return NULL;
+> +	}
+> +	memset(buf, '\0', buf_size);
+> +	if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+> +		prterr("madvise collapse for buf");
+> +		free(buf);
+> +		return NULL;
+> +	}
+> +
+> +	return buf;
+> +}
+> +
+> +static void
+> +init_buffers(void)
+> +{
+> +	int i;
+> +
+> +	original_buf = (char *) malloc(maxfilelen);
+> +	for (i = 0; i < maxfilelen; i++)
+> +		original_buf[i] = random() % 256;
+> +	if (hugepages) {
+> +		long hugepage_size = get_hugepage_size();
+> +		if (hugepage_size == -1) {
+> +			prterr("get_hugepage_size()");
+> +			exit(100);
+> +		}
+> +		good_buf = init_hugepages_buf(maxfilelen, hugepage_size, writebdy);
+> +		if (!good_buf) {
+> +			prterr("init_hugepages_buf failed for good_buf");
+> +			exit(101);
+> +		}
+> +
+> +		temp_buf = init_hugepages_buf(maxoplen, hugepage_size, readbdy);
+> +		if (!temp_buf) {
+> +			prterr("init_hugepages_buf failed for temp_buf");
+> +			exit(101);
+> +		}
+> +	} else {
+> +		unsigned long good_buf_len = maxfilelen + writebdy;
+> +		unsigned long temp_buf_len = maxoplen + readbdy;
+> +
+> +		good_buf = (char *) malloc(good_buf_len);
+> +		memset(good_buf, '\0', good_buf_len);
+minor:  maybe good_buf = (char *)calloc(1, good_buf_len); So we don't 
+need to use memset.
+> +		temp_buf = (char *) malloc(temp_buf_len);
+> +		memset(temp_buf, '\0', temp_buf_len);
+> +	}
+> +	good_buf = round_ptr_up(good_buf, writebdy, 0);
+> +	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> +}
+> +
+>   static struct option longopts[] = {
+>   	{"replay-ops", required_argument, 0, 256},
+>   	{"record-ops", optional_argument, 0, 255},
+> @@ -2883,7 +2974,7 @@ main(int argc, char **argv)
+>   	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+>   
+>   	while ((ch = getopt_long(argc, argv,
+> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> +				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+>   				 longopts, NULL)) != EOF)
+>   		switch (ch) {
+>   		case 'b':
+> @@ -2916,6 +3007,9 @@ main(int argc, char **argv)
+>   		case 'g':
+>   			filldata = *optarg;
+>   			break;
+> +		case 'h':
+> +			hugepages = 1;
+> +			break;
+>   		case 'i':
+>   			integrity = 1;
+>   			logdev = strdup(optarg);
+> @@ -3229,15 +3323,7 @@ main(int argc, char **argv)
+>   			exit(95);
+>   		}
+>   	}
+> -	original_buf = (char *) malloc(maxfilelen);
+> -	for (i = 0; i < maxfilelen; i++)
+> -		original_buf[i] = random() % 256;
+> -	good_buf = (char *) malloc(maxfilelen + writebdy);
+> -	good_buf = round_ptr_up(good_buf, writebdy, 0);
+> -	memset(good_buf, '\0', maxfilelen);
+> -	temp_buf = (char *) malloc(maxoplen + readbdy);
+> -	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
+> -	memset(temp_buf, '\0', maxoplen);
+> +	init_buffers();
+>   	if (lite) {	/* zero entire existing file */
+>   		ssize_t written;
+>   
+
 -- 
 Nirjhar Roy
 Linux Kernel Developer
