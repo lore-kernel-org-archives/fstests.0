@@ -1,82 +1,79 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B36241AF0D0;
-	Tue, 31 Dec 2024 23:25:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F44B13FD72;
+	Tue, 31 Dec 2024 23:34:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735687504; cv=none; b=k1JUXZS/zHLXUIV8s45sfnSSnE9ANoJfEeBU547RDV8GyfJkFPZHNWzuFjJsbwTORpOc7d6BHLa4KMgRuG6LNSC61o9K2OD/gQ5f1jFZr9oz9Iew9ZTpTXS85PpA2XXBTT+dUzdeuek1IjOqHOWXyzHqr+dfxxmSdbKWXGUgSVA=
+	t=1735688097; cv=none; b=QF/wvNPN9fJKWDz8h5qfG2oppGC38XeJqzLimFKw8u4YBfF7poYPkyQ8S5A6wvQSjuW5/WTJ0XSqG0PBYCc6lFAVklMfiMmwqbgPDexj8kHZlGmXyhWRGcaz8lmnQAyUEGxvJPiQO2QMxBsQ+exBHN/WCF+G4bWrn2HRuwcSEYs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735687504; c=relaxed/simple;
-	bh=xTdGOP/4tlJnYHWAhXgrFmS2k0XV0zsX5gx61KJyxQo=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=KKuu19FKzf2LnK4lbRU8QNOvSkw9KPxlv+7yO+iBTGKW1OLSXyTtQk0l4vNhE0YphpQ11+pTqJ/EIDx6jxJ33/CCVbd8W4RX+kkODKwTAO9xjAaQy3fR+yG0TaC3usT71G27STSaW53PSKFe678Ul03ykuVl1fU2LM3jB9EpjVs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=eyVcZLt5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1735688097; c=relaxed/simple;
+	bh=WbIyTS2JlFS5hyHvvUSda567BswWPeE26o/lewb4h0E=;
+	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=XWAHRQg+IprqZWdGFLY1sMkw72fELOqrYY5yr8ua6zCcDW3kdqLtJZzDiYhtQ/fOYWc+Z5ZGLsKarDEW+vsmeh0UukNqXMJcqn827PzF2EW79Yx6RoMgHcJeJnEGpdQwpmF1qt8dvZU1c7i3u2kd8cqRNhDUeMJPI1bJnAui1I0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Cq00stn4; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="eyVcZLt5"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2E608C4CED2;
-	Tue, 31 Dec 2024 23:25:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Cq00stn4"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E19D7C4CED2;
+	Tue, 31 Dec 2024 23:34:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1735687504;
-	bh=xTdGOP/4tlJnYHWAhXgrFmS2k0XV0zsX5gx61KJyxQo=;
-	h=Date:From:To:Cc:Subject:From;
-	b=eyVcZLt5vUWJZB3yAA0vAueAISCuizy2DlTn86AE9e4/G/gv9IDZWAU61HUyjySPo
-	 AXFexjZXd9mSb/Qk+jKv4mWt6M64y/nVzdxWIaKFOUORGse8NKr3HXEJWAqqik7LRV
-	 ROpZWivxbrgVZJmw5jfFXt0LbCsWOFdRUqpZ1hMOcx0lL8VxZMNZhIESSCR3MCdqe3
-	 zREdi8Ngj9x05lOaUJjb0BwVmvKkE9DKKDJjHqo28UET9gRYEa/hS0f/TxuvaxohXb
-	 FmZ/hi0Gtyad9x1I1VHVzl+AYo/H6dTGxzEB03qP56TVrmtKKTe8paBGiLEoQe4Imx
-	 axgnnbo77KcSw==
-Date: Tue, 31 Dec 2024 15:25:03 -0800
+	s=k20201202; t=1735688097;
+	bh=WbIyTS2JlFS5hyHvvUSda567BswWPeE26o/lewb4h0E=;
+	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
+	b=Cq00stn4n4F44MGUAVnJ4VtV2wvKA2R36GwUgOMTX560erThG/zs8AnhbaHuDbAIa
+	 Zq1nPNSQRyE2RaGwEs3tezYl+USe0QXO8F5iDIY57sj7Y9rOEODNjszSUmX9mlR2oK
+	 RTt08ClSeenAUmF/crlJnwP/e0pCHmAar1Kx830AXxE2AJ6zrATQyQH2lTKjvkDYXG
+	 yuPkO27ZoWEWuBrTwldKWYthpFZn53pYuOEV7HNv9mmpPykBNIp0MsnTq1dFMnrcLV
+	 slLzYjCeqFZcEFqFPO7y3cBt9faG0hdSBRxpOcgxECQwp1MBdMOdiZAFB1XBELZ5KM
+	 2v0TNVrwhVWVw==
+Date: Tue, 31 Dec 2024 15:34:56 -0800
+Subject: [PATCHSET 1/5] fstests: functional test for refcount reporting
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Carlos Maiolino <cmaiolino@redhat.com>, Zorro Lang <zlang@redhat.com>,
-	Andrey Albershteyn <aalbersh@redhat.com>,
-	Christoph Hellwig <hch@infradead.org>
-Cc: xfs <linux-xfs@vger.kernel.org>, greg.marsden@oracle.com,
-	shirley.ma@oracle.com, konrad.wilk@oracle.com,
-	fstests <fstests@vger.kernel.org>
-Subject: [NYE PATCHCYCLONE] xfs: free space defrag and autonomous self healing
-Message-ID: <20241231232503.GU6174@frogsfrogsfrogs>
+To: zlang@redhat.com, djwong@kernel.org
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Message-ID: <173568781929.2711934.8784820316232821491.stgit@frogsfrogsfrogs>
+In-Reply-To: <20241231232503.GU6174@frogsfrogsfrogs>
+References: <20241231232503.GU6174@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-Hi everyone,
+Hi all,
 
-Thank you all for helping get online repair, parent pointers, and
-metadata directory trees, and realtime allocation groups merged this
-year!  We got a lot done in 2024.
+Add a short functional test for the new GETFSREFCOUNTS ioctl that allows
+userspace to query reference count information for a given range of
+physical blocks.
 
-Having sent pull requests to Carlos for the last pieces of the realtime
-modernization project, I have exactly two worthwhile projects left in my
-development trees!  The stuff here isn't necessarily in mergeable state
-yet, but I still believe everyone ought to know what I'm up to.
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-The first project implements (somewhat buggily; I never quite got back
-to dealing with moving eof blocks) free space defragmentation so that we
-can meaningfully shrink filesystems; garbage collect regions of the
-filesystem; or prepare for large allocations.  There's not much new
-kernel code other than exporting refcounts and gaining the ability to
-map free space.
-
-The second project initiates filesystem self healing routines whenever
-problems start to crop up, which means that it can run fully
-autonomously in the background.  The monitoring system uses some
-pseudo-file and seqbuf tricks that I lifted from kmo last winter.
-
-Both of these projects are largely userspace code.
-
-Also I threw in some xfs_repair code to do dangerous fs upgrades.
-Nobody should use these, ever.
-
-Maintainers: please do not merge, this is a dog-and-pony show to attract
-developer attention.
+This has been running on the djcloud for months with no problems.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
 
-PS: I'll be back after the holidays to look at the zoned/atomic/fsverity
-patches.  And finally rebase fstests to 2024-12-08.
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=report-refcounts
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=report-refcounts
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=report-refcounts
+---
+Commits in this patchset:
+ * xfs: test output of new FSREFCOUNTS ioctl
+---
+ common/rc           |    4 +
+ doc/group-names.txt |    1 
+ tests/xfs/1921      |  164 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1921.out  |    4 +
+ 4 files changed, 171 insertions(+), 2 deletions(-)
+ create mode 100755 tests/xfs/1921
+ create mode 100644 tests/xfs/1921.out
+
