@@ -1,159 +1,845 @@
-Received: from mail-qt1-f173.google.com (mail-qt1-f173.google.com [209.85.160.173])
+Received: from mail-qv1-f54.google.com (mail-qv1-f54.google.com [209.85.219.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 126AA4A00;
-	Thu,  2 Jan 2025 01:38:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A4A51FA8E9
+	for <fstests@vger.kernel.org>; Fri,  3 Jan 2025 16:13:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735781906; cv=none; b=BZ1ae3FipEnNrPFpibhu1qIRk4k3DXD8GR0i1lO+FUTPV3g56Sd8xzGoC9ii+DyFBjSRP6WZ9PY3kaYKfCH3ILpOviZ9428+dK99eKpuIdUOh4OS29+BIxetsYsqz6n6kE7e6eFwCtPMF3V7DAseF95r5zNXPCsFp5qeONi+r/I=
+	t=1735920800; cv=none; b=WIguGphfaQ81w8/6mV0QNGqKQoKYg6nDIBs8+tQxH4KLCeBPjoF+wTZ2Uu84nTOHm2yp3MbX7f/W9jSJVR8XBSgWqzxtqCquJe6UWvW1VDwGPuqxkaYW/X93RA0fWXEw05j2ZtM4ZNUwriC+q07RbKaAkOLLaJsZVW+dO2EDMNk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735781906; c=relaxed/simple;
-	bh=3LcJE0rHh/n/Gl7uQ1VMXImFk0aSBDDZDCLgAAjOS34=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=MHwCiyZ6dvdNQghrMFTlsA3BBhwNwZn8RXg+dT2V1Ilcm8EHF88R9Xwy6tfJGl0AB8kjJ3rLeGbrI+5GS5ZXcFGJVa6iLFMUgL0es5BkT+MiHC7TPvt/APlnlVbW3isv2YpBmzVnIeyjnZkbMAx2gRlsCCXShGACpEXpcyNiIKU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QcNS4Bex; arc=none smtp.client-ip=209.85.160.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1735920800; c=relaxed/simple;
+	bh=v677yCb+SsNAE2iBgdo2bsKmHT5B9ywfUM8/wWkxdKw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jSBP0pRmOqPi9z8iJp3PFneaJerINNPfrkBt4uK0QoVDTl75PADH0lxLelupxYh2rER0XDL2FL91razSdUJ5m9MLNtfhPwvbE+fSig8Lmzvpr057STY+ERVL3n7qtZiLcNn81No8EV84ikbjBrv/do62XsaTe3WjmEO+okFcsxI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=vl2VFTj/; arc=none smtp.client-ip=209.85.219.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QcNS4Bex"
-Received: by mail-qt1-f173.google.com with SMTP id d75a77b69052e-467a17055e6so123592541cf.3;
-        Wed, 01 Jan 2025 17:38:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="vl2VFTj/"
+Received: by mail-qv1-f54.google.com with SMTP id 6a1803df08f44-6d8e773ad77so96451186d6.2
+        for <fstests@vger.kernel.org>; Fri, 03 Jan 2025 08:13:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1735781904; x=1736386704; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=7uVXZGA4N7myt30g5K5hU8rvzE1rH6GD1ou+jGmGGeM=;
-        b=QcNS4BexVX8Hc6vLSWfk2UqYSQ/MyK0mc+n6XLpHEcFHUeaZBNJ3mKmnk8VhK+KvKV
-         dTuNzC1Tae4tfRGuC/ZPIcgnv2fFpz/eRrPXyBt7v9nWI8O4uzH1i8q3/+zOYQjYGHxB
-         9xS50hEq4zLgpBFIBEeRmMNIC3Qa/aXUDJIdF8nE/nb2VEpeAizemxjI6B8OCZ2VseNe
-         opNBOpS1vl918rj0UNdMd3msbRTnnhoBOxCyX4pPT6N3Nree1RGIg8yKbsv6TQA0W8bi
-         lv/ZhQJtG60nJ1H5g4L/TSepQhB+yntpdbEeCzX6/DmU2bIH/Jo9UwspM/wTkfwHwnaq
-         zo2g==
+        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1735920797; x=1736525597; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=mVLPkKaREXXl1/ZDEYlstXn/XrSPom1WN2ycVv7auhg=;
+        b=vl2VFTj/Zp87FhqVkUiVM+JLkN9EDHfyEoI7Hz7WOHUT8KZ6XgY3CAqjpcMaudKlfh
+         N6TIU9EFGwL3q4+E8ExTdocA/RM6qsAk5SthjCGecUP8jkYNkQbB9mp4L2wGfxUIc/U6
+         5XmYN7SYJOwQO2HubHDEIncHI19vQwhRez9w5NiuOJWpmDmnNXTtrbx5PbxfSX4svIPH
+         mWUSUY7xe8odCvXaYER99vdNi1Rj+k5FkfXQq9WHZubw3dIPN0H2MLOlMy1zVVLGqRyq
+         SNaxpUdz2DUpQD0bdRyZUYb9PKBGgrxwgYeB4vtwY6kKpi52kFmw8uLtMlou5+f19zNy
+         1YAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735781904; x=1736386704;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=7uVXZGA4N7myt30g5K5hU8rvzE1rH6GD1ou+jGmGGeM=;
-        b=E4wRSEzlmCQnjg6bVhE+IKrtxcdgMMgFhRf57Fw8ibQ/7FAqQHuG+/P9H7CkfMrM3r
-         79RURAY5+ALc5PfAuQ7x6ikpwZGMhQnrkEfld2cqrLMPgXve1iLmg4alf4nxFrjykNWS
-         Xgq+91pZ+ygN6bJQulnOV+fXLFC02wafXdAkV6ohbWG0TOcIpD/Ji4zhZhU0MgxpXLHx
-         vbQniotrDYFEkIfJWHsWDb+IdqHvHNitgKdckt1jiptYZSARno6KXLzpouiQHMyjZ9cT
-         k/vYVqmrg9h0xJTizq8pDd3SGfEUBC1/CqwWfVDEjcZdD/XeX+ivLCtPak9XeixxbKHh
-         zbjg==
-X-Forwarded-Encrypted: i=1; AJvYcCUJtuCMA6qDHB/YZL/VvnXAoTd/GkyQcoB8URUp+RgOABIHJElGGjhkXTrXpHq2JQ9jqu3qfmeB@vger.kernel.org, AJvYcCUTZxPgDrESoPwyTnK0iATuZQ03HtHT+0TvDslzf4gSJgSrmLQ1xlnxrzMUc/q8vtfrNkU7ZrdOSgb1@vger.kernel.org
-X-Gm-Message-State: AOJu0YxKwtBcI5GX1TM/+yyELhtxxaPvbNFiPdbFTV9ECzfXrEOyZMfJ
-	khqkQ3qoZGdfqQc+u/jEEb6zv4NQ2NHmMY8uvFpYfUxYSEOu558KxwvAJjj+RtQDBZ9cgalO6pN
-	rBLpD7vLz8UIV+CyW144bphQ6vWM=
-X-Gm-Gg: ASbGncuxBeiys14PylYQfNC9AYcnyAPxj+QbmdH8KD9vFUz6cFG4udy8QeidKNZCp90
-	yy38sxncBCdfkZl4VXBtkCEDa3w+K7SMZ/Z2SUiz/eJEzJpDWz3zrpIHupASDGi2xFw==
-X-Google-Smtp-Source: AGHT+IESdMTKKwaxrbP//GlVIfjn6S6CHc/DsTA4u1MEhIgLfQZhWOL0cN8LbKnh2DYX1lSCFRhw6ac+dEgDLSqLjbk=
-X-Received: by 2002:ac8:5a16:0:b0:466:ab8f:8972 with SMTP id
- d75a77b69052e-46a4a8b868cmr714354731cf.3.1735781903839; Wed, 01 Jan 2025
- 17:38:23 -0800 (PST)
+        d=1e100.net; s=20230601; t=1735920797; x=1736525597;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mVLPkKaREXXl1/ZDEYlstXn/XrSPom1WN2ycVv7auhg=;
+        b=eHm7wmYoHAX3pDIF0FYczVqMMHBe720UiLmlELbp/XPjlK7Zlt5cYkhN8AWqeSxzOK
+         cySbluJd25atGQiPuNFtNvmqgtrNXytXrVt9/DVjEyJ16Zbzu4ZHW7w2LjIoHv7bWxsC
+         sbqhTJKG79w7Qvp7/jtfjN655caPURDmSwAKzg7GP6vwpCQF+5eU3fMlBTDeSOFJxJZo
+         c9JJVu8K75rl6J20MpCeRw61AOiak9w06vDOEsUo7RERNGJssqfe3Y1/r6EQW9dgObRh
+         vAeWbQa42LIzvgTFKsZzGfrjOVeD8HQVGfCBukfAP02+17Q9U/TPp00+ioaCRv5sxPOD
+         freQ==
+X-Gm-Message-State: AOJu0YzcoM7arwoeaZqk0nPx9kIeIJbaTgIMcXdTxOBbOpwD9cZZGmiB
+	/Wbk44ARL4ZbICK0BA5ZzZyEorbAubX2JLcCbRUgI4XY/Xsh72PDhkSkLizO10Q=
+X-Gm-Gg: ASbGncs52lkRjT9qh3GNwyMdxYr7nQHgYAOrXuNA/om+9yHUkKVeKcjxehcZuknf9m1
+	6Ap/M/MsVhT/Yot/ieNJvxkK457h1sftbhARmWy/kgrdSbcJ71ZJoQ5obvkO2EbomWYw2uUBlfo
+	5pi8PxkrwjmSSuUh307JDn1p1YFzA2ansGTv7Nt8+b3Qthkhi1LI944lOW4g6QhjDGV5i2HWhUx
+	4n6LyPTUT3si7YesXnEutYZgOdia+XGCJWUQbmWzA95W/8AGdqMOOmqb41tEdQJ06kDIQDt+f5c
+	3yoR1yJmd22FyzKbjw==
+X-Google-Smtp-Source: AGHT+IF8QYOGUmg9GNJSX5QhzyyWCV63lJISOfpHNKqqfLY8kMPUaPBhH4GJBe7wqYsHr+N6UXGVNQ==
+X-Received: by 2002:ad4:5967:0:b0:6d8:b371:6a0f with SMTP id 6a1803df08f44-6dd233970e4mr765868786d6.31.1735920796752;
+        Fri, 03 Jan 2025 08:13:16 -0800 (PST)
+Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-6dd58598d98sm90189816d6.35.2025.01.03.08.13.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jan 2025 08:13:15 -0800 (PST)
+Date: Fri, 3 Jan 2025 11:13:14 -0500
+From: Josef Bacik <josef@toxicpanda.com>
+To: Mark Harmstone <maharmstone@fb.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, neelx@suse.com,
+	Johannes.Thumschirn@wdc.com, anand.jain@oracle.com
+Subject: Re: [PATCH v3 2/2] btrfs: add test for encoded reads
+Message-ID: <20250103161314.GA4067957@perftesting>
+References: <20241219145608.3925261-1-maharmstone@fb.com>
+ <20241219145608.3925261-2-maharmstone@fb.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241231232503.GU6174@frogsfrogsfrogs>
-In-Reply-To: <20241231232503.GU6174@frogsfrogsfrogs>
-From: Stephen Zhang <starzhangzsd@gmail.com>
-Date: Thu, 2 Jan 2025 09:37:47 +0800
-Message-ID: <CANubcdXWHOtTW4PjJE1qjAJHEg48LS7MFc065gcQwoH7s0Ybqw@mail.gmail.com>
-Subject: Re: [NYE PATCHCYCLONE] xfs: free space defrag and autonomous self healing
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Carlos Maiolino <cmaiolino@redhat.com>, Zorro Lang <zlang@redhat.com>, 
-	Andrey Albershteyn <aalbersh@redhat.com>, Christoph Hellwig <hch@infradead.org>, 
-	Dave Chinner <david@fromorbit.com>, xfs <linux-xfs@vger.kernel.org>, greg.marsden@oracle.com, 
-	shirley.ma@oracle.com, konrad.wilk@oracle.com, 
-	fstests <fstests@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241219145608.3925261-2-maharmstone@fb.com>
 
-Darrick J. Wong <djwong@kernel.org> =E4=BA=8E2025=E5=B9=B41=E6=9C=881=E6=97=
-=A5=E5=91=A8=E4=B8=89 07:25=E5=86=99=E9=81=93=EF=BC=9A
->
-> Hi everyone,
->
-> Thank you all for helping get online repair, parent pointers, and
-> metadata directory trees, and realtime allocation groups merged this
-> year!  We got a lot done in 2024.
->
-> Having sent pull requests to Carlos for the last pieces of the realtime
-> modernization project, I have exactly two worthwhile projects left in my
-> development trees!  The stuff here isn't necessarily in mergeable state
-> yet, but I still believe everyone ought to know what I'm up to.
->
-> The first project implements (somewhat buggily; I never quite got back
-> to dealing with moving eof blocks) free space defragmentation so that we
-> can meaningfully shrink filesystems; garbage collect regions of the
-> filesystem; or prepare for large allocations.  There's not much new
-> kernel code other than exporting refcounts and gaining the ability to
-> map free space.
->
-> The second project initiates filesystem self healing routines whenever
-> problems start to crop up, which means that it can run fully
-> autonomously in the background.  The monitoring system uses some
-> pseudo-file and seqbuf tricks that I lifted from kmo last winter.
->
-> Both of these projects are largely userspace code.
->
-> Also I threw in some xfs_repair code to do dangerous fs upgrades.
-> Nobody should use these, ever.
->
-> Maintainers: please do not merge, this is a dog-and-pony show to attract
-> developer attention.
->
+On Thu, Dec 19, 2024 at 02:55:56PM +0000, Mark Harmstone wrote:
+> Add btrfs/333 and its helper programs btrfs_encoded_read and
+> btrfs_encoded_write, in order to test encoded reads.
+> 
+> We use the BTRFS_IOC_ENCODED_WRITE ioctl to write random data into a
+> compressed extent, then use the BTRFS_IOC_ENCODED_READ ioctl to check
+> that it matches what we've written. If the new io_uring interface for
+> encoded reads is supported, we also check that that matches the ioctl.
+> 
+> Note that what we write isn't valid compressed data, so any non-encoded
+> reads on these files will fail.
+> 
+> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+> ---
+> This should now work on systems with old versions of liburing, and
+> systems with old versions of the btrfs.h header.
+> 
+> I've also included Daniel Vacek's suggestions for reducing the amount of
+> time spent doing dd.
+> 
+>  .gitignore                |   2 +
+>  m4/package_liburing.m4    |   2 +
+>  src/Makefile              |   3 +-
+>  src/btrfs_encoded_read.c  | 203 +++++++++++++++++++++++++++++++++
+>  src/btrfs_encoded_write.c | 234 ++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/333           | 220 +++++++++++++++++++++++++++++++++++
+>  tests/btrfs/333.out       |   2 +
+>  7 files changed, 665 insertions(+), 1 deletion(-)
+>  create mode 100644 src/btrfs_encoded_read.c
+>  create mode 100644 src/btrfs_encoded_write.c
+>  create mode 100755 tests/btrfs/333
+>  create mode 100644 tests/btrfs/333.out
+> 
+> diff --git a/.gitignore b/.gitignore
+> index f16173d9..efd47773 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -62,6 +62,8 @@ tags
+>  /src/attr_replace_test
+>  /src/attr-list-by-handle-cursor-test
+>  /src/bstat
+> +/src/btrfs_encoded_read
+> +/src/btrfs_encoded_write
+>  /src/bulkstat_null_ocount
+>  /src/bulkstat_unlink_test
+>  /src/bulkstat_unlink_test_modified
+> diff --git a/m4/package_liburing.m4 b/m4/package_liburing.m4
+> index 0553966d..7fbf4a5f 100644
+> --- a/m4/package_liburing.m4
+> +++ b/m4/package_liburing.m4
+> @@ -1,6 +1,8 @@
+>  AC_DEFUN([AC_PACKAGE_WANT_URING],
+>    [ PKG_CHECK_MODULES([LIBURING], [liburing],
+>      [ AC_DEFINE([HAVE_LIBURING], [1], [Use liburing])
+> +      AC_DEFINE_UNQUOTED([LIBURING_MAJOR_VERSION], [`$PKG_CONFIG --modversion liburing | cut -d. -f1`], [liburing major version])
+> +      AC_DEFINE_UNQUOTED([LIBURING_MINOR_VERSION], [`$PKG_CONFIG --modversion liburing | cut -d. -f2`], [liburing minor version])
+>        have_uring=true
+>      ],
+>      [ have_uring=false ])
+> diff --git a/src/Makefile b/src/Makefile
+> index a0396332..b42b8147 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -34,7 +34,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+>  	fscrypt-crypt-util bulkstat_null_ocount splice-test chprojid_fail \
+>  	detached_mounts_propagation ext4_resize t_readdir_3 splice2pipe \
+> -	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment
+> +	uuid_ioctl t_snapshot_deleted_subvolume fiemap-fault min_dio_alignment \
+> +	btrfs_encoded_read btrfs_encoded_write
+>  
+>  EXTRA_EXECS = dmerror fill2attr fill2fs fill2fs_check scaleread.sh \
+>  	      btrfs_crc32c_forged_name.py popdir.pl popattr.py \
+> diff --git a/src/btrfs_encoded_read.c b/src/btrfs_encoded_read.c
+> new file mode 100644
+> index 00000000..2e4079b0
+> --- /dev/null
+> +++ b/src/btrfs_encoded_read.c
+> @@ -0,0 +1,203 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +// Copyright (c) Meta Platforms, Inc. and affiliates.
+> +
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <unistd.h>
+> +#include <sys/uio.h>
+> +#include <sys/ioctl.h>
+> +#include <linux/btrfs.h>
+> +#include "config.h"
+> +
+> +#ifdef HAVE_LIBURING
+> +#include <liburing.h>
+> +#endif
+> +
+> +/* IORING_OP_URING_CMD defined from liburing 2.2 onwards */
+> +#if defined(HAVE_LIBURING) && (LIBURING_MAJOR_VERSION < 2 || (LIBURING_MAJOR_VERSION == 2 && LIBURING_MINOR_VERSION < 2))
+> +#define IORING_OP_URING_CMD 46
+> +#endif
+> +
+> +#ifndef BTRFS_IOC_ENCODED_READ
+> +struct btrfs_ioctl_encoded_io_args {
+> +	const struct iovec *iov;
+> +	unsigned long iovcnt;
+> +	__s64 offset;
+> +	__u64 flags;
+> +	__u64 len;
+> +	__u64 unencoded_len;
+> +	__u64 unencoded_offset;
+> +	__u32 compression;
+> +	__u32 encryption;
+> +	__u8 reserved[64];
+> +};
+> +
+> +#define BTRFS_IOC_ENCODED_READ _IOR(BTRFS_IOCTL_MAGIC, 64, struct btrfs_ioctl_encoded_io_args)
+> +#endif
+> +
+> +#define BTRFS_MAX_COMPRESSED 131072
+> +#define QUEUE_DEPTH 1
+> +
+> +static int encoded_read_ioctl(const char *filename, long long offset)
+> +{
+> +	int ret, fd;
+> +	char buf[BTRFS_MAX_COMPRESSED];
+> +	struct iovec iov;
+> +	struct btrfs_ioctl_encoded_io_args enc;
+> +
+> +	fd = open(filename, O_RDONLY);
+> +	if (fd < 0) {
+> +		fprintf(stderr, "open failed for %s\n", filename);
+> +		return 1;
+> +	}
+> +
+> +	iov.iov_base = buf;
+> +	iov.iov_len = sizeof(buf);
+> +
+> +	enc.iov = &iov;
+> +	enc.iovcnt = 1;
+> +	enc.offset = offset;
+> +	enc.flags = 0;
+> +
+> +	ret = ioctl(fd, BTRFS_IOC_ENCODED_READ, &enc);
+> +
+> +	if (ret < 0) {
+> +		printf("%i\n", -errno);
+> +		close(fd);
+> +		return 0;
+> +	}
+> +
+> +	close(fd);
+> +
+> +	printf("%i\n", ret);
+> +	printf("%llu\n", enc.len);
+> +	printf("%llu\n", enc.unencoded_len);
+> +	printf("%llu\n", enc.unencoded_offset);
+> +	printf("%u\n", enc.compression);
+> +	printf("%u\n", enc.encryption);
+> +
+> +	fwrite(buf, ret, 1, stdout);
+> +
+> +	return 0;
+> +}
+> +
+> +static int encoded_read_io_uring(const char *filename, long long offset)
+> +{
+> +#ifdef HAVE_LIBURING
 
-[Add Dave to the list]
+Instead of doing this, add
 
-Hi, Darrick and all,
+ifeq ($(HAVE_LIBURING),true)
+LINUX_TARGETS += btrfs_encoded_read btrfs_encoded_write
+endif
 
-Recently, I have been considering implementing the XFS shrink feature based
-on the AF concept, which was mentioned in this link:
+and then in your test you add 
 
-https://lore.kernel.org/linux-xfs/20241104014439.3786609-1-zhangshida@kylin=
-os.cn/
+_require_command src/btrfs_encoded_read
+_require_command src/btrfs_encoded_write
 
-In the lore link, it stated:
-The rules used by AG are more about extending outwards.
-whilst
-The rules used by AF are more about restricting inwards.
+And then you can remove all this extra code to check for liburing.
 
-where the AF concept implicitly and naturally involves the semantics of
-compressing/shrinking(restricting).
+> +	int ret, fd;
+> +	char buf[BTRFS_MAX_COMPRESSED];
+> +	struct iovec iov;
+> +	struct btrfs_ioctl_encoded_io_args enc;
+> +	struct io_uring ring;
+> +	struct io_uring_sqe *sqe;
+> +	struct io_uring_cqe *cqe;
+> +
+> +	io_uring_queue_init(QUEUE_DEPTH, &ring, 0);
+> +
+> +	fd = open(filename, O_RDONLY);
+> +	if (fd < 0) {
+> +		fprintf(stderr, "open failed for %s\n", filename);
+> +		ret = 1;
+> +		goto out_uring;
+> +	}
+> +
+> +	iov.iov_base = buf;
+> +	iov.iov_len = sizeof(buf);
+> +
+> +	enc.iov = &iov;
+> +	enc.iovcnt = 1;
+> +	enc.offset = offset;
+> +	enc.flags = 0;
+> +
+> +	sqe = io_uring_get_sqe(&ring);
+> +	if (!sqe) {
+> +		fprintf(stderr, "io_uring_get_sqe failed\n");
+> +		ret = 1;
+> +		goto out_close;
+> +	}
+> +
+> +	io_uring_prep_rw(IORING_OP_URING_CMD, sqe, fd, &enc, sizeof(enc), 0);
+> +
+> +	/* sqe->cmd_op union'd to sqe->off from liburing 2.3 onwards */
+> +#if (LIBURING_MAJOR_VERSION < 2 || (LIBURING_MAJOR_VERSION == 2 && LIBURING_MINOR_VERSION < 3))
+> +	sqe->off = BTRFS_IOC_ENCODED_READ;
+> +#else
+> +	sqe->cmd_op = BTRFS_IOC_ENCODED_READ;
+> +#endif
+> +
+> +	io_uring_submit(&ring);
+> +
+> +	ret = io_uring_wait_cqe(&ring, &cqe);
+> +	if (ret < 0) {
+> +		fprintf(stderr, "io_uring_wait_cqe returned %i\n", ret);
+> +		ret = 1;
+> +		goto out_close;
+> +	}
+> +
+> +	io_uring_cqe_seen(&ring, cqe);
+> +
+> +	if (cqe->res < 0) {
+> +		printf("%i\n", cqe->res);
+> +		ret = 0;
+> +		goto out_close;
+> +	}
+> +
+> +	printf("%i\n", cqe->res);
+> +	printf("%llu\n", enc.len);
+> +	printf("%llu\n", enc.unencoded_len);
+> +	printf("%llu\n", enc.unencoded_offset);
+> +	printf("%u\n", enc.compression);
+> +	printf("%u\n", enc.encryption);
+> +
+> +	fwrite(buf, cqe->res, 1, stdout);
+> +
+> +	ret = 0;
+> +
+> +out_close:
+> +	close(fd);
+> +
+> +out_uring:
+> +	io_uring_queue_exit(&ring);
+> +
+> +	return ret;
+> +#else
+> +	fprintf(stderr, "liburing not linked in\n");
+> +	return 1;
+> +#endif
+> +}
+> +
+> +static void usage()
+> +{
+> +	fprintf(stderr, "Usage: btrfs_encoded_read ioctl|io_uring filename offset\n");
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	const char *filename;
+> +	long long offset;
+> +
+> +	if (argc != 4) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	filename = argv[2];
+> +
+> +	offset = atoll(argv[3]);
+> +	if (offset == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	if (!strcmp(argv[1], "ioctl")) {
+> +		return encoded_read_ioctl(filename, offset);
+> +	} else if (!strcmp(argv[1], "io_uring")) {
+> +		return encoded_read_io_uring(filename, offset);
+> +	} else {
+> +		usage();
+> +		return 1;
+> +	}
+> +}
+> diff --git a/src/btrfs_encoded_write.c b/src/btrfs_encoded_write.c
+> new file mode 100644
+> index 00000000..1b063fa1
+> --- /dev/null
+> +++ b/src/btrfs_encoded_write.c
+> @@ -0,0 +1,234 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +// Copyright (c) Meta Platforms, Inc. and affiliates.
+> +
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <unistd.h>
+> +#include <sys/uio.h>
+> +#include <sys/ioctl.h>
+> +#include <linux/btrfs.h>
+> +#include "config.h"
+> +
+> +#ifdef HAVE_LIBURING
+> +#include <liburing.h>
+> +#endif
+> +
+> +/* IORING_OP_URING_CMD defined from liburing 2.2 onwards */
+> +#if defined(HAVE_LIBURING) && (LIBURING_MAJOR_VERSION < 2 || (LIBURING_MAJOR_VERSION == 2 && LIBURING_MINOR_VERSION < 2))
+> +#define IORING_OP_URING_CMD 46
+> +#endif
+> +
+> +#ifndef BTRFS_IOC_ENCODED_WRITE
+> +struct btrfs_ioctl_encoded_io_args {
+> +	const struct iovec *iov;
+> +	unsigned long iovcnt;
+> +	__s64 offset;
+> +	__u64 flags;
+> +	__u64 len;
+> +	__u64 unencoded_len;
+> +	__u64 unencoded_offset;
+> +	__u32 compression;
+> +	__u32 encryption;
+> +	__u8 reserved[64];
+> +};
+> +
+> +#define BTRFS_IOC_ENCODED_WRITE _IOW(BTRFS_IOCTL_MAGIC, 64, struct btrfs_ioctl_encoded_io_args)
+> +#endif
+> +
+> +#define BTRFS_MAX_COMPRESSED 131072
+> +#define QUEUE_DEPTH 1
+> +
+> +static int encoded_write_ioctl(const char *filename, long long offset,
+> +			       long long len, long long unencoded_len,
+> +			       long long unencoded_offset, int compression,
+> +			       char *buf, size_t size)
+> +{
+> +	int ret, fd;
+> +	struct iovec iov;
+> +	struct btrfs_ioctl_encoded_io_args enc;
+> +
+> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+> +	if (fd < 0) {
+> +		fprintf(stderr, "open failed for %s\n", filename);
+> +		return 1;
+> +	}
+> +
+> +	iov.iov_base = buf;
+> +	iov.iov_len = size;
+> +
+> +	memset(&enc, 0, sizeof(enc));
+> +	enc.iov = &iov;
+> +	enc.iovcnt = 1;
+> +	enc.offset = offset;
+> +	enc.len = len;
+> +	enc.unencoded_len = unencoded_len;
+> +	enc.unencoded_offset = unencoded_offset;
+> +	enc.compression = compression;
+> +
+> +	ret = ioctl(fd, BTRFS_IOC_ENCODED_WRITE, &enc);
+> +
+> +	if (ret < 0) {
+> +		printf("%i\n", -errno);
+> +		close(fd);
+> +		return 0;
+> +	}
+> +
+> +	printf("%i\n", ret);
+> +
+> +	close(fd);
+> +
+> +	return 0;
+> +}
+> +
+> +static int encoded_write_io_uring(const char *filename, long long offset,
+> +				  long long len, long long unencoded_len,
+> +				  long long unencoded_offset, int compression,
+> +				  char *buf, size_t size)
+> +{
+> +#ifdef HAVE_LIBURING
+> +	int ret, fd;
+> +	struct iovec iov;
+> +	struct btrfs_ioctl_encoded_io_args enc;
+> +	struct io_uring ring;
+> +	struct io_uring_sqe *sqe;
+> +	struct io_uring_cqe *cqe;
+> +
+> +	io_uring_queue_init(QUEUE_DEPTH, &ring, 0);
+> +
+> +	fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+> +	if (fd < 0) {
+> +		fprintf(stderr, "open failed for %s\n", filename);
+> +		ret = 1;
+> +		goto out_uring;
+> +	}
+> +
+> +	iov.iov_base = buf;
+> +	iov.iov_len = size;
+> +
+> +	memset(&enc, 0, sizeof(enc));
+> +	enc.iov = &iov;
+> +	enc.iovcnt = 1;
+> +	enc.offset = offset;
+> +	enc.len = len;
+> +	enc.unencoded_len = unencoded_len;
+> +	enc.unencoded_offset = unencoded_offset;
+> +	enc.compression = compression;
+> +
+> +	sqe = io_uring_get_sqe(&ring);
+> +	if (!sqe) {
+> +		fprintf(stderr, "io_uring_get_sqe failed\n");
+> +		ret = 1;
+> +		goto out_close;
+> +	}
+> +
+> +	io_uring_prep_rw(IORING_OP_URING_CMD, sqe, fd, &enc, sizeof(enc), 0);
+> +
+> +	/* sqe->cmd_op union'd to sqe->off from liburing 2.3 onwards */
+> +#if (LIBURING_MAJOR_VERSION < 2 || (LIBURING_MAJOR_VERSION == 2 && LIBURING_MINOR_VERSION < 3))
+> +	sqe->off = BTRFS_IOC_ENCODED_WRITE;
+> +#else
+> +	sqe->cmd_op = BTRFS_IOC_ENCODED_WRITE;
+> +#endif
+> +
+> +	io_uring_submit(&ring);
+> +
+> +	ret = io_uring_wait_cqe(&ring, &cqe);
+> +	if (ret < 0) {
+> +		fprintf(stderr, "io_uring_wait_cqe returned %i\n", ret);
+> +		ret = 1;
+> +		goto out_close;
+> +	}
+> +
+> +	io_uring_cqe_seen(&ring, cqe);
+> +
+> +	if (cqe->res < 0) {
+> +		printf("%i\n", cqe->res);
+> +		ret = 0;
+> +		goto out_close;
+> +	}
+> +
+> +	printf("%i\n", cqe->res);
+> +
+> +	ret = 0;
+> +
+> +out_close:
+> +	close(fd);
+> +
+> +out_uring:
+> +	io_uring_queue_exit(&ring);
+> +
+> +	return ret;
+> +#else
+> +	fprintf(stderr, "liburing not linked in\n");
+> +	return 1;
+> +#endif
+> +}
+> +
+> +static void usage()
+> +{
+> +	fprintf(stderr, "Usage: btrfs_encoded_write ioctl|io_uring filename offset len unencoded_len unencoded_offset compression\n");
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	const char *filename;
+> +	long long offset, len, unencoded_len, unencoded_offset;
+> +	int compression;
+> +	char buf[BTRFS_MAX_COMPRESSED];
+> +	size_t size;
+> +
+> +	if (argc != 8) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	filename = argv[2];
+> +
+> +	offset = atoll(argv[3]);
+> +	if (offset == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	len = atoll(argv[4]);
+> +	if (len == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	unencoded_len = atoll(argv[5]);
+> +	if (unencoded_len == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	unencoded_offset = atoll(argv[6]);
+> +	if (unencoded_offset == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	compression = atoi(argv[7]);
+> +	if (compression == 0 && errno != 0) {
+> +		usage();
+> +		return 1;
+> +	}
+> +
+> +	size = fread(buf, 1, BTRFS_MAX_COMPRESSED, stdin);
+> +
+> +	if (!strcmp(argv[1], "ioctl")) {
+> +		return encoded_write_ioctl(filename, offset, len, unencoded_len,
+> +					   unencoded_offset, compression, buf,
+> +					   size);
+> +	} else if (!strcmp(argv[1], "io_uring")) {
+> +		return encoded_write_io_uring(filename, offset, len,
+> +					      unencoded_len, unencoded_offset,
+> +					      compression, buf, size);
+> +	} else {
+> +		usage();
+> +		return 1;
+> +	}
+> +}
+> diff --git a/tests/btrfs/333 b/tests/btrfs/333
+> new file mode 100755
+> index 00000000..d7fbb7c7
+> --- /dev/null
+> +++ b/tests/btrfs/333
+> @@ -0,0 +1,220 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024 Meta Platforms, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. btrfs/333
+> +#
+> +# Test btrfs encoded reads
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick compress rw
+> +
+> +. ./common/filter
+> +. ./common/btrfs
+> +
+> +_supported_fs btrfs
+> +
+> +do_encoded_read() {
+> +    local fn=$1
+> +    local type=$2
+> +    local exp_ret=$3
+> +    local exp_len=$4
+> +    local exp_unencoded_len=$5
+> +    local exp_unencoded_offset=$6
+> +    local exp_compression=$7
+> +    local exp_md5=$8
+> +
+> +    local tmpfile=`mktemp`
+> +
+> +    echo "running btrfs_encoded_read $type $fn 0 > $tmpfile" >>$seqres.full
+> +    src/btrfs_encoded_read $type $fn 0 > $tmpfile
+> +
+> +    if [[ $? -ne 0 ]]; then
+> +        echo "btrfs_encoded_read failed" >>$seqres.full
+> +        rm $tmpfile
+> +        return 1
+> +    fi
+> +
+> +    exec {FD}< $tmpfile
+> +
+> +    read -u ${FD} ret
+> +
+> +    if [[ $ret == -95 && $type -eq "io_uring" ]]; then
+> +        echo "btrfs io_uring encoded read failed with -EOPNOTSUPP, skipping" >>$seqres.full
+> +        exec {FD}<&-
+> +        return 1
+> +    fi
+> +
+> +    if [[ $ret -lt 0 ]]; then
+> +        if [[ $ret == -1 ]]; then
+> +            echo "btrfs encoded read failed with -EPERM; are you running as root?" >>$seqres.full
+> +        else
+> +            echo "btrfs encoded read failed (errno $ret)" >>$seqres.full
+> +        fi
+> +        exec {FD}<&-
+> +        return 1
+> +    fi
 
-AG(for xfs extend) and AF(for xfs shrink) are constructed in a symmetrical =
-way,
-in which it is more elegant and easier to build more complex features on it=
-.
+This should probably be moved to common/btrfs with a 
 
-To elaborate further, for example, AG should not be seen as
-independent entities in
-the shrink context. That means each AG requires separate
-managements(flags or something to indicate the state of that
-AG/region), which would increase the system complexity compared to the
-idea behind AF. AF views several AGs as a whole.
+_require_btrfs_iouring_encoded_ops
 
-And when it comes to growfs, things start to get a little more
-complicated, and AF
-can handle it easily and naturally.
+or something like that.
 
-However talk is too cheap, to validate our point, we truly hope to have the
-opportunity to participate in developing these features by integrating
-the existing
-infrastructure you have already established with the AF concept.
+> +
+> +    local status=0
+> +
+> +    if [[ $ret -ne $exp_ret ]]; then
+> +        echo "$fn: btrfs encoded read returned $ret, expected $exp_ret" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    read -u ${FD} len
+> +    read -u ${FD} unencoded_len
+> +    read -u ${FD} unencoded_offset
+> +    read -u ${FD} compression
+> +    read -u ${FD} encryption
+> +
+> +    local filesize=`stat -c%s $tmpfile`
+> +    local datafile=`mktemp`
+> +
+> +    tail -c +$((1+$filesize-$ret)) $tmpfile > $datafile
+> +
+> +    exec {FD}<&-
+> +    rm $tmpfile
+> +
+> +    local md5=`md5sum $datafile | cut -d ' ' -f 1`
+> +    rm $datafile
+> +
+> +    if [[ $len -ne $exp_len ]]; then
+> +        echo "$fn: btrfs encoded read had len of $len, expected $exp_len" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    if [[ $unencoded_len -ne $exp_unencoded_len ]]; then
+> +        echo "$fn: btrfs encoded read had unencoded_len of $unencoded_len, expected $exp_unencoded_len" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    if [[ $unencoded_offset -ne $exp_unencoded_offset ]]; then
+> +        echo "$fn: btrfs encoded read had unencoded_offset of $unencoded_offset, expected $exp_unencoded_offset" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    if [[ $compression -ne $exp_compression ]]; then
+> +        echo "$fn: btrfs encoded read had compression of $compression, expected $exp_compression" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    if [[ $encryption -ne 0 ]]; then
+> +        echo "$fn: btrfs encoded read had encryption of $encryption, expected 0" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    if [[ $md5 != $exp_md5 ]]; then
+> +        echo "$fn: data returned had hash of $md5, expected $exp_md5" >>$seqres.full
+> +        status=1
+> +    fi
+> +
+> +    return $status
+> +}
+> +
+> +do_encoded_write() {
+> +    local fn=$1
+> +    local exp_ret=$2
+> +    local len=$3
+> +    local unencoded_len=$4
+> +    local unencoded_offset=$5
+> +    local compression=$6
+> +    local data_file=$7
+> +
+> +    local tmpfile=`mktemp`
+> +
+> +    echo "running btrfs_encoded_write ioctl $fn 0 $len $unencoded_len $unencoded_offset $compression < $data_file > $tmpfile" >>$seqres.full
+> +    src/btrfs_encoded_write ioctl $fn 0 $len $unencoded_len $unencoded_offset $compression < $data_file > $tmpfile
+> +
+> +    if [[ $? -ne 0 ]]; then
+> +        echo "btrfs_encoded_write failed" >>$seqres.full
+> +        rm $tmpfile
+> +        return 1
+> +    fi
+> +
+> +    exec {FD}< $tmpfile
+> +
+> +    read -u ${FD} ret
+> +
+> +    if [[ $ret -lt 0 ]]; then
+> +        if [[ $ret == -1 ]]; then
+> +            echo "btrfs encoded write failed with -EPERM; are you running as root?" >>$seqres.full
+> +        else
+> +            echo "btrfs encoded write failed (errno $ret)" >>$seqres.full
+> +        fi
+> +        exec {FD}<&-
+> +        return 1
+> +    fi
+> +
+> +    exec {FD}<&-
+> +    rm $tmpfile
+> +
+> +    return 0
+> +}
+> +
+> +test_file() {
+> +    local size=$1
+> +    local len=$2
+> +    local unencoded_len=$3
+> +    local unencoded_offset=$4
+> +    local compression=$5
+> +
+> +    local tmpfile=`mktemp -p $SCRATCH_MNT`
+> +    local randfile=`mktemp`
+> +
+> +    dd if=/dev/urandom of=$randfile bs=$size count=1 status=none
+> +    local md5=`md5sum $randfile | cut -d ' ' -f 1`
+> +
+> +    do_encoded_write $tmpfile $size $len $unencoded_len $unencoded_offset \
+> +        $compression $randfile || _fail "encoded write ioctl failed"
+> +
+> +    rm $randfile
+> +
+> +    do_encoded_read $tmpfile ioctl $size $len $unencoded_len \
+> +        $unencoded_offset $compression $md5 || _fail "encoded read ioctl failed"
+> +    do_encoded_read $tmpfile io_uring $size $len $unencoded_len \
+> +        $unencoded_offset $compression $md5 || _fail "encoded read io_uring failed"
+> +
+> +    rm $tmpfile
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> +sector_size=$(_scratch_btrfs_sectorsize)
+> +
+> +if [[ $sector_size -ne 4096 && $sector_size -ne 65536 ]]; then
+> +    _notrun "sector size $sector_size not supported by this test"
+> +fi
+> +
+> +_scratch_mount "-o max_inline=2048"
+> +
+> +if [[ $sector_size -eq 4096 ]]; then
+> +    test_file 40960 97966 98304 0 1 # zlib
+> +    test_file 40960 97966 98304 0 2 # zstd
+> +    test_file 40960 97966 98304 0 3 # lzo 4k
+> +    test_file 40960 97966 110592 4096 1 # bookended zlib
+> +    test_file 40960 97966 110592 4096 2 # bookended zstd
+> +    test_file 40960 97966 110592 4096 3 # bookended lzo 4k
+> +elif [[ $sector_size -eq 65536 ]]; then
+> +    test_file 65536 97966 131072 0 1 # zlib
+> +    test_file 65536 97966 131072 0 2 # zstd
+> +    test_file 65536 97966 131072 0 7 # lzo 64k
+> +    # can't test bookended extents on 64k, as max is only 2 sectors long
+> +fi
+> +
+> +# btrfs won't create inline files unless PAGE_SIZE == sector size
+> +if [[ "$(_get_page_size)" -eq $sector_size ]]; then
+> +    test_file 892 1931 1931 0 1 # inline zlib
+> +    test_file 892 1931 1931 0 2 # inline zstd
+> +
+> +    if [[ $sector_size -eq 4096 ]]; then
+> +        test_file 892 1931 1931 0 3 # inline lzo 4k
+> +    elif [[ $sector_size -eq 65536 ]]; then
+> +        test_file 892 1931 1931 0 7 # inline lzo 64k
+> +    fi
+> +fi
+> +
+> +_scratch_unmount
 
-Best regards,
-Shida
+You don't have to do this, the common stuff will do it for you.  Thanks,
 
-
-
-> --D
->
-> PS: I'll be back after the holidays to look at the zoned/atomic/fsverity
-> patches.  And finally rebase fstests to 2024-12-08.
->
+Josef
