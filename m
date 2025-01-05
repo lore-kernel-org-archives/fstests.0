@@ -1,98 +1,123 @@
-Received: from mail-qv1-f51.google.com (mail-qv1-f51.google.com [209.85.219.51])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2864B1FAC5A
-	for <fstests@vger.kernel.org>; Fri,  3 Jan 2025 16:13:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A16E3200CB;
+	Sun,  5 Jan 2025 02:01:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735920819; cv=none; b=P6eWPV6hSscfEiNJrGX8TfDh2IJk+XnEGSfMMK3FPWNhjEcjcN0EmffnIkVcP68rYlOMFkduiQ43Ra5kjA8XJ6OKiaiqddf8fMm+Ovl14g3ytk9n8ghtyCLXpmYcvI6J26l8LbFGIGpHckeBl3flsP7Tkzgk2uvBsNQQ0Z545Xs=
+	t=1736042490; cv=none; b=Sd/dxZ9iw3ttwMA423O3uJq8nkzzPa0rN5ZqCZB9zENDZuMxjrNTps9DUyfoFyeam+VFXpfYZtt79RfWaUrCqnJ2/AT9rrB9Mq7AB2KISjjLuVBd2goC925YWyMuuZR6QzxJDqEXUfZFK9sTdNsVRs+g2KVj8rwnZ5FRN+RNpYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735920819; c=relaxed/simple;
-	bh=g15eqjCApM3awBaszdvsM4zrjdSGgXJfvezTQdJ2M0M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qov7lZ6rlDyO/ryUCK4HJwbVv3px8BBI5gPrAqNS8DW1OiOcQzuVKwzUGp+BV/LXJjOK/s/+LpNFT6oIAWNCRHhAtvBXailB2S9EAcOeluGVXdSW8sUiLQbughe50+CumtT1VPKLdMiTTiq9WTuWuX4TCGnH6KOy6+jL6fL3e0I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com; spf=none smtp.mailfrom=toxicpanda.com; dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b=QvWqEfCB; arc=none smtp.client-ip=209.85.219.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toxicpanda.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toxicpanda.com
+	s=arc-20240116; t=1736042490; c=relaxed/simple;
+	bh=mYNFHpQduswhlF8L2G5avj9ZUG7TUwfwL7OO2gWBp8o=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=R8M0GLQyRqOFpBhhFG+n1pZ7JEuvzdU+YwhXKh9earGKHCP048lKZn6RD5MuiEZ1muejFOK0NwTKuvNsEmHw/5Q/PBv7tbrRsnurbPU6otaZlc6wwXsFo7zi53F4hsrNJRZ2XcCkJ7w94ThIUzeIQWa+Pp5Yh4XcxU9/JxJ+Uiw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=LWbrlMwP; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=LWbrlMwP; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toxicpanda-com.20230601.gappssmtp.com header.i=@toxicpanda-com.20230601.gappssmtp.com header.b="QvWqEfCB"
-Received: by mail-qv1-f51.google.com with SMTP id 6a1803df08f44-6d900c27af7so97558106d6.2
-        for <fstests@vger.kernel.org>; Fri, 03 Jan 2025 08:13:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toxicpanda-com.20230601.gappssmtp.com; s=20230601; t=1735920816; x=1736525616; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=LdOTZG7Tw8d/29U3QRa4o5UMi9zXTiDsrTfdQrcCUBE=;
-        b=QvWqEfCBp9Kx3Fz6MWFMSoapyz50KY2w0ksG56/v4NFQhi1bVf/txOkZ9jsvkyQub1
-         T6m+/BLKENqfmlMOypwd2nGZn4MTsjGZL0RCd3uxf6IIS2ATZshiiHQTzM1WfwWCtLTY
-         srVvjVeJ+UlzxeyNRm1CeenYmFYLWks4qyzautYuAV2cXn5BMB4SeF2jw/drupsYYS65
-         tKB2HFenoKQmAMhTObG8xGrYFMNzYZ12zKWIsOYaeNrGBGqHrjFJpYGoZIre2VbShy20
-         fJuGbKOlSNEso93o7FfLCMe9xuBpWxxa2+4I49pa5gBkgXo3qJNXabicQHgcdjNsHygc
-         XojA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735920816; x=1736525616;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LdOTZG7Tw8d/29U3QRa4o5UMi9zXTiDsrTfdQrcCUBE=;
-        b=MvnzY7UBYdLXMDQ05BWDcXBvK340PF8fBStWoDUnGTJP8+Tg8yNnrerzROA7Vnh0bs
-         dKeOccVlk0M95nBVXjeSNzr5m7A9pQUay2w+m64Z3r+SCydD+90FWPrrJlXpKQe6MHky
-         0X3uKa1+AfyFZ3gAWWzKQkfMcOQ8eat3EPkfYZdivzJZEPVOTwVN7CXpew4OND9qzca7
-         PdYHe4bfFTE80UsO4QJaHWPczTyvNQpNnAgXFq5QHwxIUpCDCiP4lq2TKV99eVTACYCg
-         VKeZS8xHSmNo/QOTPoR6Vf3klME4tlOmYfGJOkkkfxC1Ne6miNleU944NoPdHvlxrfq7
-         rwjg==
-X-Gm-Message-State: AOJu0YwTAyFbz7W5G9oLRVaiZCMOnQzzDc/T4paNRR8tmcYIDJ0a7Qms
-	mDL0bkV6qCRRddoqL8w4zPHXML80uY1a0CZ9i1gcz514hQDF7UUJ3t0agpf7wsCsKL2PBKF6jiJ
-	TVCE=
-X-Gm-Gg: ASbGncsx3368vijpOT7c80oOQJ8tjupYCNFke/JbvcoTcVZvJao1cYM3SIpHjFr61nh
-	sV1U82vPjNLKeM7knLTKkDYRG0OiOwOdTtMTR+SdFnVMrGVfLfwMDD4IcnXbEwuZloxm12nDCl9
-	0u0STCfo3iZyz+PqklzQnmDnutb2KwSbkjOmYZXPlELic3vfk6FwMbGcOtfdGFlSN0cLDeLwWJ4
-	ahN68VVLb9sP2UIqzStvN+zXlWi+0p3QmzJG58tE2CdaIOsPMk3eZytHg1So9IcFAnpY6gQdRsE
-	u1jHWocF9gJqg29vOQ==
-X-Google-Smtp-Source: AGHT+IH8uelw7Uc0//kY5DxUKJxwFOuf13tv7ESB0TelCE45T8Ktv5yUfaiUQQh5pOxu8nWWpb+QiQ==
-X-Received: by 2002:a05:6214:8103:b0:6dd:be2b:c684 with SMTP id 6a1803df08f44-6ddbe2bc6c2mr77257976d6.41.1735920815610;
-        Fri, 03 Jan 2025 08:13:35 -0800 (PST)
-Received: from localhost (syn-076-182-020-124.res.spectrum.com. [76.182.20.124])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-6dd181d5aabsm142763666d6.108.2025.01.03.08.13.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 03 Jan 2025 08:13:34 -0800 (PST)
-Date: Fri, 3 Jan 2025 11:13:33 -0500
-From: Josef Bacik <josef@toxicpanda.com>
-To: Mark Harmstone <maharmstone@fb.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, neelx@suse.com,
-	Johannes.Thumschirn@wdc.com, anand.jain@oracle.com
-Subject: Re: [PATCH v3 1/2] configure: use pkg-config to find liburing
-Message-ID: <20250103161333.GB4067957@perftesting>
-References: <20241219145608.3925261-1-maharmstone@fb.com>
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="LWbrlMwP";
+	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="LWbrlMwP"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 7AEB11F365;
+	Sun,  5 Jan 2025 02:01:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1736042484; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=0QmsxuVknufvUBnqqY/3eApyHc9wcBzqX1Xo0b3QPaA=;
+	b=LWbrlMwPWhHNFEzsweyxQJg4uwUSu2KvwDrrCVUwpYMzGQFi0T88ZTUbPKgiCd7uBBckmW
+	ZsJBAPsDd5M1VU5vxQ5VoJkRzTcQspzbBmSuZsYS3u+aqG3JWl5auEtEDfR0FB/Jz1TWhx
+	lE+LqPQ6hN7siaSYscTO58qhdWTTWyE=
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+	t=1736042484; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+	bh=0QmsxuVknufvUBnqqY/3eApyHc9wcBzqX1Xo0b3QPaA=;
+	b=LWbrlMwPWhHNFEzsweyxQJg4uwUSu2KvwDrrCVUwpYMzGQFi0T88ZTUbPKgiCd7uBBckmW
+	ZsJBAPsDd5M1VU5vxQ5VoJkRzTcQspzbBmSuZsYS3u+aqG3JWl5auEtEDfR0FB/Jz1TWhx
+	lE+LqPQ6hN7siaSYscTO58qhdWTTWyE=
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 2D33613A30;
+	Sun,  5 Jan 2025 02:01:22 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id ZJT5NvLneWeuVQAAD6G6ig
+	(envelope-from <wqu@suse.com>); Sun, 05 Jan 2025 02:01:22 +0000
+From: Qu Wenruo <wqu@suse.com>
+To: linux-btrfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Cc: Christian Brauner <brauner@kernel.org>
+Subject: [PATCH] btrfs/326: update _fixed_by_kernel_commit
+Date: Sun,  5 Jan 2025 12:31:01 +1030
+Message-ID: <74d9b2816beb6ef245718331ebcbc1a7cdab5919.1736042456.git.wqu@suse.com>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241219145608.3925261-1-maharmstone@fb.com>
+Content-Transfer-Encoding: 8bit
+X-Spam-Score: -2.80
+X-Spamd-Result: default: False [-2.80 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	MID_CONTAINS_FROM(1.00)[];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_MISSING_CHARSET(0.50)[];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	TO_DN_SOME(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	RCPT_COUNT_THREE(0.00)[3];
+	FROM_HAS_DN(0.00)[];
+	DKIM_SIGNED(0.00)[suse.com:s=susede1];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_TLS_ALL(0.00)[]
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-On Thu, Dec 19, 2024 at 02:55:55PM +0000, Mark Harmstone wrote:
-> Change our autoconf macros so that instead of checking for the presence
-> of liburing.h, we use pkg-config.
-> 
-> The benefit of this is that we can then check the version of liburing,
-> and do conditional compilation based on this. There's a macro
-> IO_URING_CHECK_VERSION already, but it's only in relatively recent
-> versions of liburing.h.
-> 
-> This replaces HAVE_URING_H, defined by AC_CHECK_HEADERS, with
-> HAVE_URING. I also had to rename PKG_{MAJOR,MINOR,REVISION,BUILD} to
-> start with PACKAGE_, to avoid "possibly undefined macro" errors; it
-> looks like pkg-config assumes that anything called PKG_* is for its own
-> use.
-> 
-> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
+The original fix is already in the upstream, meanwhile a new but much
+harder to hit bug is also exposed by this test case.
 
-Reviewed-by: Josef Bacik <josef@toxicpanda.com>
+Add a new _fixed_by_kernel_commit for that bug, and special thanks to
+Christian for pointing out the fix.
 
-Thanks,
+Cc: Christian Brauner <brauner@kernel.org>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/326 | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-Josef
+diff --git a/tests/btrfs/326 b/tests/btrfs/326
+index 528fee5e5685..1fc4db06b811 100755
+--- a/tests/btrfs/326
++++ b/tests/btrfs/326
+@@ -10,9 +10,14 @@
+ . ./common/preamble
+ _begin_fstest auto quick mount remount
+ 
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 951a3f59d268 \
+ 	"btrfs: fix mount failure due to remount races"
+ 
++# Another rare bug exposed by this test case where mnt_list list corruption or
++# extra kernel warning on MNT_ONRB flag is triggered.
++_fixed_by_kernel_commit xxxxxxxxxxxx \
++	"fs: kill MNT_ONRB"
++
+ _cleanup()
+ {
+ 	cd /
+-- 
+2.47.1
+
