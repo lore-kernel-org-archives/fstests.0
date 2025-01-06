@@ -1,112 +1,279 @@
-Received: from esa7.hc1455-7.c3s2.iphmx.com (esa7.hc1455-7.c3s2.iphmx.com [139.138.61.252])
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A235F1D90AD
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 10:00:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=139.138.61.252
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A7AF73451;
+	Mon,  6 Jan 2025 11:18:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736157626; cv=none; b=OOF4OcBvAns4yuehc2lVFOOECm6pP2Njm+9IhTTIFsD1ZPCsY8fJY7sDccOeKn+w8wWQy+to6jSbqxlOEhOgEXExLy884Ok4b6D5wIFBUCDu6fTbMGMQf7NCk3Fnkh0kWiyFYURIXjHs3TiXACWEC8g0yGQmHYNzW/blFYAA/xA=
+	t=1736162327; cv=none; b=EPVgZJZJg596aBBS5QGdSmUCHdYf4PMCTMO4b7X471L5dx2rJ4yx7FKOooR3Dy1aLTt2Sg0L4ExZ734u8vAUtbpG2POWzKSZEs2yTgrgtxrEy0ZPtO5eAmW7xu/aOiYdHVv0OXHp4H6KHcLm0qgkPua12pz31ktA9ZndPmjgcA8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736157626; c=relaxed/simple;
-	bh=mfbRB5EDhI2yJQ9O6Sdiiqq3YpwDHba8FGNZkmNDpkQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tPiSwIZetIIJG/wIXRH8RT6IV22RZneyJDOnqtCgylqh5dATvrEht56z1kYMgNdSNNV8N81KdfsGV+bE4yWvjqdEekcCLr0gxO6L24jbpxQmVXCqQinKTaISHNcS3aTGqRZRVbgMmd1uBV7kMx/iftjcblSNgTGmrylCiijz/8M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com; spf=pass smtp.mailfrom=fujitsu.com; dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b=dAZ8r56T; arc=none smtp.client-ip=139.138.61.252
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=fujitsu.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fujitsu.com
+	s=arc-20240116; t=1736162327; c=relaxed/simple;
+	bh=kMaBTXJmX8kUhkDovqFKec7qKLzQli32ehmYpT9HhmA=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:Mime-Version; b=MGILUDynuSPx1JOhakjR2UyY/wKIm2/3Xya4ZD9J0OPprOJkyD88ake3gEyRGeVRep7Ohbt0ziIf2ObAt1uPYANio2yv45TPT//XPT7d1Tj0Za+OaiCThX4ooDPcJxfiWRbOsqvlVQQX4vYv9cDJ2TAAp0bBKMS4eK79XQRwxSg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=sfUMt1RQ; arc=none smtp.client-ip=148.163.158.5
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fujitsu.com header.i=@fujitsu.com header.b="dAZ8r56T"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=fujitsu.com; i=@fujitsu.com; q=dns/txt; s=fj2;
-  t=1736157622; x=1767693622;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=mfbRB5EDhI2yJQ9O6Sdiiqq3YpwDHba8FGNZkmNDpkQ=;
-  b=dAZ8r56TxpfaYCyZHaP6ckATSoNMDziu7p6YmIn4w8YCzSGg3QhcEZVT
-   J/GDzdNlV85MjynbkzPVokFSOAtvW7+Poc5SFTFC9A2OI6ya8mkI3v4rH
-   6ojGkee9eh65AHXCqIMOKwxXWCEfTmydvwAEQ+zs3+VgmmhEgWg+iywQC
-   6erAUBI8ewXdWl8KpgHTcGsPTj35qnt0EYK/mIAl6NYWtSZXkTHFDW7JK
-   WJWpb5ud0eNCp4CgZUpInhgJSJrfVT6wnprIIKPkWj/H7a5CfsQiu5gWs
-   hzWm4D8NyYNeLtyve6a436wP3AmsmLUGTHtBIBB2rFM8gxS7qTk0AH4qp
-   g==;
-X-CSE-ConnectionGUID: Th8I/u51SG6LKtOB0wNXEA==
-X-CSE-MsgGUID: 2NmwOoPkRQ6N6qqG1wU4Lg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11306"; a="164576187"
-X-IronPort-AV: E=Sophos;i="6.12,292,1728918000"; 
-   d="scan'208";a="164576187"
-Received: from unknown (HELO yto-r1.gw.nic.fujitsu.com) ([218.44.52.217])
-  by esa7.hc1455-7.c3s2.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jan 2025 18:59:09 +0900
-Received: from yto-m4.gw.nic.fujitsu.com (yto-nat-yto-m4.gw.nic.fujitsu.com [192.168.83.67])
-	by yto-r1.gw.nic.fujitsu.com (Postfix) with ESMTP id 1483FD6EA9
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 18:59:08 +0900 (JST)
-Received: from kws-ab3.gw.nic.fujitsu.com (kws-ab3.gw.nic.fujitsu.com [192.51.206.21])
-	by yto-m4.gw.nic.fujitsu.com (Postfix) with ESMTP id D4755D504A
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 18:59:07 +0900 (JST)
-Received: from edo.cn.fujitsu.com (edo.cn.fujitsu.com [10.167.33.5])
-	by kws-ab3.gw.nic.fujitsu.com (Postfix) with ESMTP id 6702020079545
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 18:59:07 +0900 (JST)
-Received: from localhost.localdomain (unknown [10.167.135.81])
-	by edo.cn.fujitsu.com (Postfix) with ESMTP id D522E1A000B;
-	Mon,  6 Jan 2025 17:59:06 +0800 (CST)
-From: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-To: fstests@vger.kernel.org
-Cc: ruansy.fnst@fujitsu.com
-Subject: [PATCH] include/builddefs.in: ignore unused-result warning
-Date: Mon,  6 Jan 2025 17:59:06 +0800
-Message-ID: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="sfUMt1RQ"
+Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 505Naqpa007188;
+	Mon, 6 Jan 2025 11:18:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=pp1; bh=2rnlkW
+	z/9QtlowmwNqqmorV/XMGe7ekY30NgNNUcbnQ=; b=sfUMt1RQVmng4pAzahd+dC
+	Q7temqtlmgude8G7s6DT0jLPeVpONwCvljq7Wa5Ls1/wn0v6ggIkCi3ApN/eRPcO
+	MpPAAGRbQBB9EonUHUeN1g5xlCZ3GYxiFBo71AsgeIoBzOlL6gjKb8zIGEXNjjRR
+	WIjpTb/dRuyIDNQNjSSeycJjGZV2VI2S22SZGLy6jiWE4DT6L/pcd1agpWgYVhpX
+	7Ny2zfsXzCnYPLq2qDoEeQf/c9J6zL9Ohrbq99SWjGMzgHkD+IAibUv6OrzWrFG4
+	UsjYLFSd+vyhAeCYPhyI/NFkYRao3uzhWbl7Duk0iAw0QbU9m8WmP0e6lwZpu26w
+	==
+Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4403waj6ga-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 06 Jan 2025 11:18:40 +0000 (GMT)
+Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 506AhcvH016669;
+	Mon, 6 Jan 2025 11:18:39 GMT
+Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
+	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 43ygtknbe6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 06 Jan 2025 11:18:39 +0000
+Received: from smtpav06.fra02v.mail.ibm.com (smtpav06.fra02v.mail.ibm.com [10.20.54.105])
+	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 506BIbE247120698
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 6 Jan 2025 11:18:37 GMT
+Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 747D420049;
+	Mon,  6 Jan 2025 11:18:37 +0000 (GMT)
+Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 4EC5520040;
+	Mon,  6 Jan 2025 11:18:36 +0000 (GMT)
+Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com (unknown [9.124.209.51])
+	by smtpav06.fra02v.mail.ibm.com (Postfix) with ESMTP;
+	Mon,  6 Jan 2025 11:18:36 +0000 (GMT)
+Message-ID: <58cb2b57d782f48652ed86a7d7726b851e723b48.camel@linux.ibm.com>
+Subject: Re: [PATCH 2/2] check: capture dmesg of mount failures if test fails
+From: Nirjhar Roy <nirjhar@linux.ibm.com>
+To: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Date: Mon, 06 Jan 2025 16:48:34 +0530
+In-Reply-To: <173568782758.2712126.12517347004514444060.stgit@frogsfrogsfrogs>
+References: <173568782724.2712126.2021149328064840091.stgit@frogsfrogsfrogs>
+	 <173568782758.2712126.12517347004514444060.stgit@frogsfrogsfrogs>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5 (3.28.5-26.el8_10) 
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 X-TM-AS-GCONF: 00
-X-TM-AS-Product-Ver: IMSS-9.1.0.1417-9.0.0.1002-28904.006
-X-TM-AS-User-Approved-Sender: Yes
-X-TMASE-Version: IMSS-9.1.0.1417-9.0.1002-28904.006
-X-TMASE-Result: 10--3.049000-10.000000
-X-TMASE-MatchedRID: TWQD+6s80gNXY5ze6zUPKU2xVQmDwU6mn5nfR7I2dFMyiHqxwIX2MaqX
-	NKklxta3rYBGlEzRvBCH2FGgJptidkSaaFy3o7RNTuctSpiuWyU2ZWOmuJUS2cZltfe/nRavRi7
-	TGiHA9x6C/cGE7/ouQAbBgWAUWNZnlwV2iaAfSWcURSScn+QSXmVV1G+Ck2l7+gtHj7OwNO2eVW
-	/ZdL52j0HwGluOMzyRCQJEtxAzKAQRerRMWxF8QmkyZ83xJPcyCSqmvohHUY5yJdY5ZIKfhD1/F
-	Vh34Goct2hj5WEghFuqC3j/ikadtIaT7FRqp0wPAcQrAfBh69vBRLFeH6OJSCTDD+DBjuEw
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-Proofpoint-GUID: PppKuvS4qtrYSCEg1TUTdFyUh2dF0ISI
+X-Proofpoint-ORIG-GUID: PppKuvS4qtrYSCEg1TUTdFyUh2dF0ISI
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
+ definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxlogscore=999
+ lowpriorityscore=0 spamscore=0 suspectscore=0 bulkscore=0 mlxscore=0
+ clxscore=1015 adultscore=0 impostorscore=0 priorityscore=1501
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2411120000 definitions=main-2501060097
 
-When build xfstests, a lot of "unused result" warning are reported:
+On Tue, 2024-12-31 at 15:56 -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Capture the kernel output after a mount failure occurs.  If the test
+> itself fails, then keep the logging output for further diagnosis.
+> 
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  check                  |   22 +++++++++++++++++++++-
+>  common/rc              |   26 +++++++++++++++++++++++++-
+>  common/report          |    8 ++++++++
+>  tests/selftest/008     |   20 ++++++++++++++++++++
+>  tests/selftest/008.out |    1 +
+>  5 files changed, 75 insertions(+), 2 deletions(-)
+>  create mode 100755 tests/selftest/008
+>  create mode 100644 tests/selftest/008.out
+> 
+> 
+> diff --git a/check b/check
+> index 9222cd7e4f8197..a46ea1a54d78bb 100755
+> --- a/check
+> +++ b/check
+> @@ -614,7 +614,7 @@ _stash_fail_loop_files() {
+>  	local seq_prefix="${REPORT_DIR}/${1}"
+>  	local cp_suffix="$2"
+>  
+> -	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core"
+> ".hints"; do
+> +	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"
+> ".mountfail"; do
+>  		rm -f "${seq_prefix}${i}${cp_suffix}"
+>  		if [ -f "${seq_prefix}${i}" ]; then
+>  			cp "${seq_prefix}${i}"
+> "${seq_prefix}${i}${cp_suffix}"
+> @@ -994,6 +994,7 @@ function run_section()
+>  				      echo -n "	$seqnum -- "
+>  			cat $seqres.notrun
+>  			tc_status="notrun"
+> +			rm -f "$seqres.mountfail?"
+>  			_stash_test_status "$seqnum" "$tc_status"
+>  
+>  			# Unmount the scratch fs so that we can wipe
+> the scratch
+> @@ -1053,6 +1054,7 @@ function run_section()
+>  		if [ ! -f $seq.out ]; then
+>  			_dump_err "no qualified output"
+>  			tc_status="fail"
+> +			rm -f "$seqres.mountfail?"
+>  			_stash_test_status "$seqnum" "$tc_status"
+>  			continue;
+>  		fi
+> @@ -1089,6 +1091,24 @@ function run_section()
+>  				rm -f $seqres.hints
+>  			fi
+>  		fi
+> +
+> +		if [ -f "$seqres.mountfail?" ]; then
+> +			if [ "$tc_status" = "fail" ]; then
+> +				# Let the user know if there were mount
+> +				# failures on a test that failed
+> because that
+> +				# could be interesting.
+> +				mv "$seqres.mountfail?"
+> "$seqres.mountfail"
+> +				_dump_err "check: possible mount
+> failures (see $seqres.mountfail)"
+> +				test -f $seqres.mountfail && \
+> +					maybe_compress_logfile
+> $seqres.mountfail $MAX_MOUNTFAIL_SIZE
+> +			else
+> +				# Don't retain mount failure logs for
+> tests
+> +				# that pass or were skipped because
+> some tests
+> +				# intentionally drive mount failures.
+> +				rm -f "$seqres.mountfail?"
+> +			fi
+> +		fi
+> +
+>  		_stash_test_status "$seqnum" "$tc_status"
+>  	done
+>  
+> diff --git a/common/rc b/common/rc
+> index d7dfb55bbbd7e1..0ede68eb912440 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -204,9 +204,33 @@ _get_hugepagesize()
+>  	awk '/Hugepagesize/ {print $2 * 1024}' /proc/meminfo
+>  }
+>  
+> +# Does dmesg have a --since flag?
+> +_dmesg_detect_since()
+> +{
+> +	if [ -z "$DMESG_HAS_SINCE" ]; then
+> +		test "$DMESG_HAS_SINCE" = "yes"
+> +		return
+> +	elif dmesg --help | grep -q -- --since; then
+> +		DMESG_HAS_SINCE=yes
+> +	else
+> +		DMESG_HAS_SINCE=no
+> +	fi
+> +}
+> +
+>  _mount()
+>  {
+> -    $MOUNT_PROG $*
+> +	$MOUNT_PROG $*
+> +	ret=$?
+> +	if [ "$ret" -ne 0 ]; then
+> +		echo "\"$MOUNT_PROG $*\" failed at $(date)" >>
+> "$seqres.mountfail?"
+> +		if _dmesg_detect_since; then
+> +			dmesg --since '30s ago' >> "$seqres.mountfail?"
+> +		else
+> +			dmesg | tail -n 100 >> "$seqres.mountfail?"
+Is it possible to grep for a mount failure message in dmesg and then
+capture the last n lines? Do you think that will be more accurate?
 
-    [CC] write_log.lo
-write_log.c: In function 'wlog_record_write':
-write_log.c:205:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
-  205 |             write(wfile->w_afd, wbuf, reclen);
-      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-write_log.c:209:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
-  209 |             write(wfile->w_rfd, wbuf, reclen);
-      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    [CC] random.lo
-
-Mostly are calused by not using the return value of read()/write()/...
-Ignore this warning by adding `-Wno-unused-result` to CCFLAGS.  This
-won't cause other problem but make the log clean.
-
-Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
----
- include/builddefs.in | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/include/builddefs.in b/include/builddefs.in
-index 7274cde8d..edf87ff00 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -75,7 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
- NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
- HAVE_FICLONE = @have_ficlone@
- 
--GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
-+GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall -Wno-unused-result
- 
- ifeq ($(PKG_PLATFORM),linux)
- PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
--- 
-2.43.0
+Also, do you think it is useful to make this 100 configurable instead
+of hardcoding? 
+> +		fi
+> +	fi
+> +
+> +	return $ret
+>  }
+>  
+>  # Call _mount to do mount operation but also save mountpoint to
+> diff --git a/common/report b/common/report
+> index 0e91e481f9725a..b57697f76dafb2 100644
+> --- a/common/report
+> +++ b/common/report
+> @@ -199,6 +199,7 @@ _xunit_make_testcase_report()
+>  		local out_src="${SRC_DIR}/${test_name}.out"
+>  		local full_file="${REPORT_DIR}/${test_name}.full"
+>  		local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
+> +		local
+> mountfail_file="${REPORT_DIR}/${test_name}.mountfail"
+>  		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
+>  		if [ -z "$_err_msg" ]; then
+>  			_err_msg="Test $test_name failed, reason
+> unknown"
+> @@ -225,6 +226,13 @@ _xunit_make_testcase_report()
+>  			printf ']]>\n'	>>$report
+>  			echo -e "\t\t</system-err>" >> $report
+>  		fi
+> +		if [ -z "$quiet" -a -f "$mountfail_file" ]; then
+> +			echo -e "\t\t<mount-failure>" >> $report
+> +			printf	'<![CDATA[\n' >>$report
+> +			cat "$mountfail_file" | tr -dc
+> '[:print:][:space:]' | encode_cdata >>$report
+> +			printf ']]>\n'	>>$report
+> +			echo -e "\t\t</mount-failure>" >> $report
+> +		fi
+>  		;;
+>  	*)
+>  		echo -e "\t\t<failure message=\"Unknown
+> test_status=$test_status\" type=\"TestFail\"/>" >> $report
+> diff --git a/tests/selftest/008 b/tests/selftest/008
+> new file mode 100755
+> index 00000000000000..db80ffe6f77339
+> --- /dev/null
+> +++ b/tests/selftest/008
+> @@ -0,0 +1,20 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024-2025 Oracle.  All Rights Reserved.
+> +#
+> +# FS QA Test 008
+> +#
+> +# Test mount failure capture.
+> +#
+> +. ./common/preamble
+> +_begin_fstest selftest
+> +
+> +_require_command "$WIPEFS_PROG" wipefs
+> +_require_scratch
+> +
+> +$WIPEFS_PROG -a $SCRATCH_DEV
+> +_scratch_mount &>> $seqres.full
+Minor: Do you think adding some filtered messages from the captured
+dmesg logs in the output will be helpful?  
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/selftest/008.out b/tests/selftest/008.out
+> new file mode 100644
+> index 00000000000000..aaff95f3f48372
+> --- /dev/null
+> +++ b/tests/selftest/008.out
+> @@ -0,0 +1 @@
+> +QA output created by 008
+> 
 
