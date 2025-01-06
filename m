@@ -1,70 +1,70 @@
-Received: from mail-io1-f52.google.com (mail-io1-f52.google.com [209.85.166.52])
+Received: from mail-il1-f169.google.com (mail-il1-f169.google.com [209.85.166.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8733313AD11
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 17:49:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36E27196C7C
+	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 17:49:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736185766; cv=none; b=Xiy4ZrE+itlY9rzijrhggQZ96p00WuhZqYj/zVwcciInjLszyyfbaT4YD9fWofZkV4JRUhGw/y7j/vChWJfD6/n+vI4aw+ifvJyjR8i0GOXsq3xcWAcUixUAFplOQfXKB1gtIaSQDiI0KPPoOp5SQmOyvQdd6niAvF90f6A4z+A=
+	t=1736185768; cv=none; b=tylnMpEoWVurc2Eey0NkBqQ+BZ+2mLZH87HM4YhGa2bb0Oi0mZEHOh+5Drd4PyxFbsUiCLmoFzvuVmwyzWxF/nmPI8Vpr9mMyV2XYrC+AZ2UFQkDZ9foHSkr9g9kE1H73mLt/OG+XckZCwdtEIu3AirglKUBY3GhMd9QucLenp8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736185766; c=relaxed/simple;
-	bh=tvqES3UOwZ9RKao+t3rmRllqr7DqDrZubWtdq9sgZHQ=;
+	s=arc-20240116; t=1736185768; c=relaxed/simple;
+	bh=iQCCxJHksaILhWEwzfEtFZiow5lUTF65CZ6Go0CEEYY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=FTfFOpLQfQ7op95sdW3KMP9EJ95/ubGmgn8VOUTc9TJD9en1SdVAaNAU4JfvEycob1jIiv+Wz3wkMQdFVkMWgG6ns05DUjGszVCeit4fdjgxPn8FZNtFmJYqOHJhKWDnbB1rGR4I/DDV9jvDPavl5X7WyRC+tz+7VXYmQK47iqI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=RKBllJIE; arc=none smtp.client-ip=209.85.166.52
+	 MIME-Version; b=bbBXO5PorZxA3W3Qlx1+RZ1O+E2QNcwinaKeAQLArbAwktwwyc2qgc7OXT/46fIDAS7MeStv77FfEwlhPqxkzfmw+NWX0QoOtJAb6RAviGtBFcwBmrORbt8VK04RNAdgcx8I5M5TJzBeoq4tW3TYVZiMuxVJUa1+6rbeKe6WW6M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=rpGLEpDJ; arc=none smtp.client-ip=209.85.166.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="RKBllJIE"
-Received: by mail-io1-f52.google.com with SMTP id ca18e2360f4ac-844e55a981dso583504439f.3
-        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 09:49:24 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="rpGLEpDJ"
+Received: by mail-il1-f169.google.com with SMTP id e9e14a558f8ab-3cdce23f3e7so19147595ab.0
+        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 09:49:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736185764; x=1736790564; darn=vger.kernel.org;
+        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736185765; x=1736790565; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3UsatFm0Ukbq7RUqKO9Rc0W/a/IUpPePTOsrGCkqtTg=;
-        b=RKBllJIExiD7fU6qa2ZLRPXDZQcd1SU0Q61s/C2gVGDo+aBSLAHQZi5GUix39onn7W
-         WAj5zLo+ue2SqZvH6VyvNFCOs5VjLc8GGRhHTeYx/J1SlzGvCXLN5dZBkP5Fup0h+xqS
-         evNjyL007N2wYMM1SuGeote0/l8TGxKc8HRPC58ehk636TnGTxl5hbgBE+dLVCYuRx3R
-         vaUtOw6ZaGQccHpyjCSGGjg1vkjMizORpX49FAc1aoUp4zCuWyxR0qXEy4ulEqqggbd9
-         eHN7vQBOj+MKuaT4uGWgA/vQoUN/N0Kur2bra3M/adnkShK4hVTb66NjTPoh2nWr2Ln9
-         8QMg==
+        bh=0NNJFPm/al3hJ3SDGiALnD5MEFzeKRwOR3tZnzCt//s=;
+        b=rpGLEpDJffXLiNeho5QSOqLGpSSNiw6X8xdsSZYShTHQsxSJ2CtSbRU51Vzt/yv6ig
+         EsgIsNsco+hcmz3wSD9qShJ1KuYmVxOEfhSgS/3rZRh5eA3yhGx3Uvrz1M3jHFT1r/iX
+         kF6H6x2WkzWy2UNccajByYKXzI/4lCmlDeovfWoz1Wegzkge+LMCsLMzMyqZzb5ujbAt
+         GRIetML9hGHMsfhwwzVHQliluVRsO86q0qgUvwyIkoyeAkUfPgoKD/QeEgefp84AUCEh
+         xau4hiA+LJnE3OMxgbQxV1xouZZu+rHsCdZiCDSfD3xnwZBOODYA8Wv6bLXj2Lxsn3/d
+         hzcQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736185764; x=1736790564;
+        d=1e100.net; s=20230601; t=1736185765; x=1736790565;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=3UsatFm0Ukbq7RUqKO9Rc0W/a/IUpPePTOsrGCkqtTg=;
-        b=R5NtuN2KrJZZlc9xtemlMb93zM0gC2A7c3KrsjFBlv4DogGBXNm0F7szcbFSBq2ouR
-         8qZwuO8MwvNmKK7Nl3bOyTFhitPGRmpk++cTol87Lw1dBpXkrvx4P8f1GN6mt1FSyKbb
-         zv8Uqpm3zYvMk3uv1tOkOT0Q3C6gC8vboLPtXhjtdGcediyOJgtFbeonCvfEEIOCFelr
-         1VSFSfFPwBN/j+nNHYPbor6H2leapxs5sM6s29vLyEyKjm4un3XQkGm45Ho2Mc/Z2/H/
-         ceCviYR11ffsovTl6CbHIo8bSWnEf7ez4YMjSl3dL0Z3O+NxZEG/L6gPayzZ3SH5cqri
-         eA4A==
-X-Forwarded-Encrypted: i=1; AJvYcCWFlgPqfImSWBxyKQv/x05oMTcDF2C3b/kyR29gw1RmWPnR+oGEvyENiRM9wPlTmr4z+C6LmVv8@vger.kernel.org
-X-Gm-Message-State: AOJu0YwzAa1G6Z36t8Tk1boXMKZKJs1n74zMZswU844WsP4gAG5gtbaV
-	w8YTLwpYNugCANxDhRPZiM9qIVq84rFH9T6zCtzUFvWsv+ofToXEq5IlY24ooKcC2V59nRah6bD
-	o
-X-Gm-Gg: ASbGncvZ0Gwp1i+wZq2+yGyZsAfymyZN+spQbmIHtTuy5JWjVxhojaIc9wdRF9kGjks
-	mmdsa4dANRtr6KEsZilJ/K/oVLImhi4wqegvoXq4VZ8sPydsoL9sG9+r+lDw2/2BqOXtVUjwj/x
-	htnYbZhrfkq+kPE04Fbu5G+YMGuq+bKJT2L1kA8avVDSsfRaRgwwTno9ZNRrhQqRSkI0XLkkmXH
-	+26EUJuA1xa16kendBjD1aTTDi9B2yJro7T5LfxXaNmTEnu7GLkGOHt5f9k
-X-Google-Smtp-Source: AGHT+IHobrRuVrdvHTZtu083DaaP8tt1dNj3khhYo3ndKBMhO9kzJ0LVApBitOeqcWPaCw23eZFuMQ==
-X-Received: by 2002:a05:6602:3c6:b0:847:51e2:eac with SMTP id ca18e2360f4ac-8499e625be2mr4766623239f.7.1736185763665;
-        Mon, 06 Jan 2025 09:49:23 -0800 (PST)
+        bh=0NNJFPm/al3hJ3SDGiALnD5MEFzeKRwOR3tZnzCt//s=;
+        b=v8BGQZPhUlO4CKppQOu04DlT+CzvQ+TKxCz4J/X9MaZbCv5R3UITCb3uUrCgwdzW/z
+         Ex4uIUYo5zhqB4nvlr95rarg9QhAoHQlKtSvVSRjRWRZ0YLrsFKdgXSk5iVaMFBxKz91
+         to0/LEdbddhmfUsHxMyDahzFn3ch4Cpva1lq5cs83gJmLLszTPZnEC2MXgj583JkNprP
+         ADYVfB7TcF7bXQ2fJBg8F8qoj3K87ZZa10nB1KKI9+DXlwAxhYCeBP1w2zN+8zV41EZ4
+         +wSJaf9gP8DmF2M198ZuNxOETxWye4oWueDjtQu8MIFc6nR/iywz81R1oLmI/u8QtWBG
+         7w3Q==
+X-Forwarded-Encrypted: i=1; AJvYcCXYhidtf4WNR0e/dysb9h3OdQLLcW3yYKM+4EkOeLXbF+e9qMQIlCrZa9h2SGNOCDzGGoDjstMj@vger.kernel.org
+X-Gm-Message-State: AOJu0YwdBlN2Xi1ZAM9+fAnQ3C812ZLfVqRbqRKmGMLh+UfXUzAqtM4h
+	nVQmFKMRHzyRxbgT5hMOduik5Y5ROthEZdz3y4HJzCbYsbaZQWyY6qJ692Zr1bis2PknJcTOG6b
+	+
+X-Gm-Gg: ASbGncvaS48LGa5c3ASJ1SNXl+5z6+en+u+SfFhQXY3/PiyDHNf/qjwZEcACOCKzTlw
+	eki7OjHmnTaUjN9kX2VwWUzEJDTtVMHnbkTNqfAhLIre96DZreTHsgzXIp10g5QfeS8/mSaLCl6
+	CtITvNdY7yC5SNFn54DQopCLz+gtlhpzDPjGtC2zGLYq6QLibL2PhP8BLKvZoAUnps7Ox+aFgqe
+	6qy2RDUeOdaQI7Jmi2nvXYpdEOsYkCn4etG7xErZQRtvIiAnAEq0ghp9xks
+X-Google-Smtp-Source: AGHT+IGlVsH41pjRv8Nlk7p2SXNn/Nqsin00R/ILIu/QjITwKVUkwVVJqf2OIxj0SpWo5ByuY6tcWQ==
+X-Received: by 2002:a05:6e02:2185:b0:3a7:c072:c69a with SMTP id e9e14a558f8ab-3c2d1c919b7mr509354715ab.3.1736185765196;
+        Mon, 06 Jan 2025 09:49:25 -0800 (PST)
 Received: from localhost.localdomain ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4e68bf4f355sm9210867173.9.2025.01.06.09.49.22
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4e68bf4f355sm9210867173.9.2025.01.06.09.49.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jan 2025 09:49:22 -0800 (PST)
+        Mon, 06 Jan 2025 09:49:24 -0800 (PST)
 From: Jens Axboe <axboe@kernel.dk>
 To: zlang@kernel.org
 Cc: djwong@kernel.org,
 	fstests@vger.kernel.org,
 	Jens Axboe <axboe@kernel.dk>
-Subject: [PATCH 1/2] fsstress: add support for RWF_DONTCACHE
-Date: Mon,  6 Jan 2025 10:48:46 -0700
-Message-ID: <20250106174919.103199-2-axboe@kernel.dk>
+Subject: [PATCH 2/2] fsx: add support for RWF_DONTCACHE
+Date: Mon,  6 Jan 2025 10:48:47 -0700
+Message-ID: <20250106174919.103199-3-axboe@kernel.dk>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <20250106174919.103199-1-axboe@kernel.dk>
 References: <20250106174919.103199-1-axboe@kernel.dk>
@@ -80,9 +80,11 @@ Using RWF_DONTCACHE tells the kernel that any page cache instantiated
 by this operation should get pruned once the operation completes. If
 data is in cache prior to the operation it will remain there.
 
-Add ops for testing both the read and write side of this. If the kernel
-being tested doesn't support RWF_DONTCACHE, then operations are performed
-with regular read/write buffered IO.
+Add ops for testing both the read and write side of this. At startup,
+kernel support for this feature is probed. If support isn't available,
+uncached/dontcache IO is performed as regular buffered IO. If -Z is
+used to turn on O_DIRECT, then uncached/dontcache IO isn't performed.
+Defaults to on if available, and adds a -T parameter to turn it off.
 
 See the kernel posting adding support:
 
@@ -90,212 +92,311 @@ https://lore.kernel.org/linux-fsdevel/20241220154831.1086649-1-axboe@kernel.dk/
 
 Signed-off-by: Jens Axboe <axboe@kernel.dk>
 ---
- ltp/fsstress.c | 136 +++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 136 insertions(+)
+ ltp/fsx.c | 115 ++++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 77 insertions(+), 38 deletions(-)
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 3d248ee25791..df9f6ffb86fc 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -82,6 +82,12 @@ static int renameat2(int dfd1, const char *path1,
- #define RENAME_WHITEOUT		(1 << 2)	/* Whiteout source */
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 41933354328a..7c996026157d 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -43,6 +43,10 @@
+ # define MAP_FILE 0
  #endif
  
 +#ifndef RWF_DONTCACHE
-+#define RWF_DONTCACHE		0x80
++#define RWF_DONTCACHE	0x80
 +#endif
 +
-+static int have_rwf_dontcache = 1;
-+
- #define FILELEN_MAX		(32*4096)
+ #define NUMPRINTCOLUMNS 32	/* # columns of data to print on each line */
  
- typedef enum {
-@@ -117,6 +123,7 @@ typedef enum {
- 	OP_COLLAPSE,
- 	OP_INSERT,
- 	OP_READ,
+ /* Operation flags (bitmask) */
+@@ -101,7 +105,9 @@ int			logcount = 0;	/* total ops */
+ enum {
+ 	/* common operations */
+ 	OP_READ = 0,
 +	OP_READ_DONTCACHE,
- 	OP_READLINK,
- 	OP_READV,
- 	OP_REMOVEFATTR,
-@@ -143,6 +150,7 @@ typedef enum {
- 	OP_URING_READ,
- 	OP_URING_WRITE,
  	OP_WRITE,
 +	OP_WRITE_DONTCACHE,
- 	OP_WRITEV,
- 	OP_EXCHANGE_RANGE,
- 	OP_LAST
-@@ -248,6 +256,7 @@ void	zero_f(opnum_t, long);
- void	collapse_f(opnum_t, long);
- void	insert_f(opnum_t, long);
- void	unshare_f(opnum_t, long);
-+void	read_dontcache_f(opnum_t, long);
- void	read_f(opnum_t, long);
- void	readlink_f(opnum_t, long);
- void	readv_f(opnum_t, long);
-@@ -273,6 +282,7 @@ void	unlink_f(opnum_t, long);
- void	unresvsp_f(opnum_t, long);
- void	uring_read_f(opnum_t, long);
- void	uring_write_f(opnum_t, long);
-+void	write_dontcache_f(opnum_t, long);
- void	write_f(opnum_t, long);
- void	writev_f(opnum_t, long);
- void	exchangerange_f(opnum_t, long);
-@@ -315,6 +325,7 @@ struct opdesc	ops[OP_LAST]	= {
- 	[OP_COLLAPSE]	   = {"collapse",      collapse_f,	1, 1 },
- 	[OP_INSERT]	   = {"insert",	       insert_f,	1, 1 },
- 	[OP_READ]	   = {"read",	       read_f,		1, 0 },
-+	[OP_READ_DONTCACHE] = {"read_dontcache", read_dontcache_f,	1, 0 },
- 	[OP_READLINK]	   = {"readlink",      readlink_f,	1, 0 },
- 	[OP_READV]	   = {"readv",	       readv_f,		1, 0 },
- 	/* remove (delete) extended attribute */
-@@ -346,6 +357,7 @@ struct opdesc	ops[OP_LAST]	= {
- 	[OP_URING_WRITE]   = {"uring_write",   uring_write_f,	1, 1 },
- 	[OP_WRITE]	   = {"write",	       write_f,		4, 1 },
- 	[OP_WRITEV]	   = {"writev",	       writev_f,	4, 1 },
-+	[OP_WRITE_DONTCACHE]= {"write_dontcache", write_dontcache_f,4, 1 },
- 	[OP_EXCHANGE_RANGE]= {"exchangerange", exchangerange_f,	2, 1 },
- }, *ops_end;
+ 	OP_MAPREAD,
+ 	OP_MAPWRITE,
+ 	OP_MAX_LITE,
+@@ -190,15 +196,16 @@ int	o_direct;			/* -Z */
+ int	aio = 0;
+ int	uring = 0;
+ int	mark_nr = 0;
++int	dontcache_io = 1;
  
-@@ -4635,6 +4647,71 @@ readv_f(opnum_t opno, long r)
- 	close(fd);
+ int page_size;
+ int page_mask;
+ int mmap_mask;
+-int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset);
++int fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset, int flags);
+ #define READ 0
+ #define WRITE 1
+-#define fsxread(a,b,c,d)	fsx_rw(READ, a,b,c,d)
+-#define fsxwrite(a,b,c,d)	fsx_rw(WRITE, a,b,c,d)
++#define fsxread(a,b,c,d,f)	fsx_rw(READ, a,b,c,d,f)
++#define fsxwrite(a,b,c,d,f)	fsx_rw(WRITE, a,b,c,d,f)
+ 
+ struct timespec deadline;
+ 
+@@ -266,7 +273,9 @@ prterr(const char *prefix)
+ 
+ static const char *op_names[] = {
+ 	[OP_READ] = "read",
++	[OP_READ_DONTCACHE] = "read_dontcache",
+ 	[OP_WRITE] = "write",
++	[OP_WRITE_DONTCACHE] = "write_dontcache",
+ 	[OP_MAPREAD] = "mapread",
+ 	[OP_MAPWRITE] = "mapwrite",
+ 	[OP_TRUNCATE] = "truncate",
+@@ -393,12 +402,14 @@ logdump(void)
+ 				prt("\t******WWWW");
+ 			break;
+ 		case OP_READ:
++		case OP_READ_DONTCACHE:
+ 			prt("READ     0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+ 			    lp->args[1]);
+ 			if (overlap)
+ 				prt("\t***RRRR***");
+ 			break;
++		case OP_WRITE_DONTCACHE:
+ 		case OP_WRITE:
+ 			prt("WRITE    0x%x thru 0x%x\t(0x%x bytes)",
+ 			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+@@ -784,9 +795,8 @@ doflush(unsigned offset, unsigned size)
  }
  
-+void
-+read_dontcache_f(opnum_t opno, long r)
+ void
+-doread(unsigned offset, unsigned size)
++doread(unsigned offset, unsigned size, int flags)
+ {
+-	off_t ret;
+ 	unsigned iret;
+ 
+ 	offset -= offset % readbdy;
+@@ -818,12 +828,7 @@ doread(unsigned offset, unsigned size)
+ 			(monitorend == -1 || offset <= monitorend))))))
+ 		prt("%lld read\t0x%x thru\t0x%x\t(0x%x bytes)\n", testcalls,
+ 		    offset, offset + size - 1, size);
+-	ret = lseek(fd, (off_t)offset, SEEK_SET);
+-	if (ret == (off_t)-1) {
+-		prterr("doread: lseek");
+-		report_failure(140);
+-	}
+-	iret = fsxread(fd, temp_buf, size, offset);
++	iret = fsxread(fd, temp_buf, size, offset, flags);
+ 	if (iret != size) {
+ 		if (iret == -1)
+ 			prterr("doread: read");
+@@ -870,7 +875,6 @@ check_contents(void)
+ 	unsigned map_offset;
+ 	unsigned map_size;
+ 	char *p;
+-	off_t ret;
+ 	unsigned iret;
+ 
+ 	if (!check_buf) {
+@@ -885,13 +889,7 @@ check_contents(void)
+ 	if (size == 0)
+ 		return;
+ 
+-	ret = lseek(fd, (off_t)offset, SEEK_SET);
+-	if (ret == (off_t)-1) {
+-		prterr("doread: lseek");
+-		report_failure(140);
+-	}
+-
+-	iret = fsxread(fd, check_buf, size, offset);
++	iret = fsxread(fd, check_buf, size, offset, 0);
+ 	if (iret != size) {
+ 		if (iret == -1)
+ 			prterr("check_contents: read");
+@@ -1064,9 +1062,8 @@ update_file_size(unsigned offset, unsigned size)
+ }
+ 
+ void
+-dowrite(unsigned offset, unsigned size)
++dowrite(unsigned offset, unsigned size, int flags)
+ {
+-	off_t ret;
+ 	unsigned iret;
+ 
+ 	offset -= offset % writebdy;
+@@ -1099,14 +1096,9 @@ dowrite(unsigned offset, unsigned size)
+ 		       (monitorstart == -1 ||
+ 			(offset + size > monitorstart &&
+ 			(monitorend == -1 || offset <= monitorend))))))
+-		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\n", testcalls,
+-		    offset, offset + size - 1, size);
+-	ret = lseek(fd, (off_t)offset, SEEK_SET);
+-	if (ret == (off_t)-1) {
+-		prterr("dowrite: lseek");
+-		report_failure(150);
+-	}
+-	iret = fsxwrite(fd, good_buf + offset, size, offset);
++		prt("%lld write\t0x%x thru\t0x%x\t(0x%x bytes)\tdontcache=%d\n", testcalls,
++		    offset, offset + size - 1, size, (flags & RWF_DONTCACHE) != 0);
++	iret = fsxwrite(fd, good_buf + offset, size, offset, flags);
+ 	if (iret != size) {
+ 		if (iret == -1)
+ 			prterr("dowrite: write");
+@@ -1954,6 +1946,26 @@ do_preallocate(unsigned offset, unsigned length, int keep_size, int unshare)
+ }
+ #endif
+ 
++int
++test_dontcache_io(void)
 +{
-+	int		e;
-+	pathname_t	f;
-+	int		fd;
-+	int64_t		lr;
-+	off64_t		off;
-+	struct stat64	stb;
-+	int		v;
-+	char		st[1024];
-+	struct iovec	iov;
-+	int flags;
++	char buf[4096];
++	struct iovec iov = { .iov_base = buf, .iov_len = sizeof(buf) };
++	int ret, e;
 +
-+	init_pathname(&f);
-+	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-+		if (v)
-+			printf("%d/%lld: read - no filename\n", procid, opno);
-+		free_pathname(&f);
-+		return;
++	ret = preadv2(fd, &iov, 1, 0, RWF_DONTCACHE);
++	e = ret < 0 ? errno : 0;
++	if (e == EOPNOTSUPP) {
++		if (!quiet)
++			fprintf(stderr,
++				"main: filesystem does not support "
++				"dontcache IO, disabling!\n");
++		return 0;
 +	}
-+	fd = open_path(&f, O_RDONLY);
-+	e = fd < 0 ? errno : 0;
-+	check_cwd();
-+	if (fd < 0) {
-+		if (v)
-+			printf("%d/%lld: read - open %s failed %d\n",
-+				procid, opno, f.path, e);
-+		free_pathname(&f);
-+		return;
-+	}
-+	if (fstat64(fd, &stb) < 0) {
-+		if (v)
-+			printf("%d/%lld: read - fstat64 %s failed %d\n",
-+				procid, opno, f.path, errno);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+	inode_info(st, sizeof(st), &stb, v);
-+	if (stb.st_size == 0) {
-+		if (v)
-+			printf("%d/%lld: read - %s%s zero size\n", procid, opno,
-+			       f.path, st);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+	lr = ((int64_t)random() << 32) + random();
-+	off = (off64_t)(lr % stb.st_size);
-+	iov.iov_len = (random() % FILELEN_MAX) + 1;
-+	iov.iov_base = malloc(iov.iov_len);
-+	flags = have_rwf_dontcache ? RWF_DONTCACHE : 0;
-+	e = preadv2(fd, &iov, 1, off, flags) < 0 ? errno : 0;
-+	if (have_rwf_dontcache && e == EOPNOTSUPP)
-+		e = preadv2(fd, &iov, 1, off, 0) < 0 ? errno : 0;
-+	free(iov.iov_base);
-+	if (v)
-+		printf("%d/%lld: read dontcache %s%s [%lld,%d] %d\n",
-+		       procid, opno, f.path, st, (long long)off,
-+		       (int)iov.iov_len, e);
-+	free_pathname(&f);
-+	close(fd);
++
++	return 1;
 +}
 +
  void
- removefattr_f(opnum_t opno, long r)
+ writefileimage()
  {
-@@ -5509,6 +5586,65 @@ writev_f(opnum_t opno, long r)
- 	close(fd);
+@@ -2337,12 +2349,28 @@ have_op:
+ 	switch (op) {
+ 	case OP_READ:
+ 		TRIM_OFF_LEN(offset, size, file_size);
+-		doread(offset, size);
++		doread(offset, size, 0);
++		break;
++
++	case OP_READ_DONTCACHE:
++		TRIM_OFF_LEN(offset, size, file_size);
++		if (dontcache_io)
++			doread(offset, size, RWF_DONTCACHE);
++		else
++			doread(offset, size, 0);
+ 		break;
+ 
+ 	case OP_WRITE:
+ 		TRIM_OFF_LEN(offset, size, maxfilelen);
+-		dowrite(offset, size);
++		dowrite(offset, size, 0);
++		break;
++
++	case OP_WRITE_DONTCACHE:
++		TRIM_OFF_LEN(offset, size, maxfilelen);
++		if (dontcache_io)
++			dowrite(offset, size, RWF_DONTCACHE);
++		else
++			dowrite(offset, size, 0);
+ 		break;
+ 
+ 	case OP_MAPREAD:
+@@ -2538,6 +2566,7 @@ usage(void)
+ "	-0: Do not use exchange range calls\n"
+ #endif
+ "	-K: Do not use keep size\n\
++	-T: Do not use dontcache IO\n\
+ 	-L: fsxLite - no file creations & no file size changes\n\
+ 	-N numops: total # operations to do (default infinity)\n\
+ 	-O: use oplen (see -o flag) for every op (default random)\n\
+@@ -2546,7 +2575,7 @@ usage(void)
+ 	-S seed: for random # generator (default 1) 0 gets timestamp\n\
+ 	-W: mapped write operations DISabled\n\
+ 	-X: Read file and compare to good buffer after every operation\n\
+-	-Z: O_DIRECT (use -R, -W, -r and -w too)\n\
++	-Z: O_DIRECT (use -R, -W, -r and -w too, excludes dontcache IO)\n\
+ 	--replay-ops=opsfile: replay ops from recorded .fsxops file\n\
+ 	--record-ops[=opsfile]: dump ops file also on success. optionally specify ops file name\n\
+ 	--duration=seconds: ignore any -N setting and run for this many seconds\n\
+@@ -2702,7 +2731,7 @@ uring_setup()
  }
  
-+void
-+write_dontcache_f(opnum_t opno, long r)
-+{
-+	int		e;
-+	pathname_t	f;
-+	int		fd;
-+	int64_t		lr;
-+	off64_t		off;
-+	struct stat64	stb;
-+	int		v;
-+	char		st[1024];
-+	struct iovec	iov;
-+	int flags;
-+
-+	init_pathname(&f);
-+	if (!get_fname(FT_REGm, r, &f, NULL, NULL, &v)) {
-+		if (v)
-+			printf("%d/%lld: write - no filename\n", procid, opno);
-+		free_pathname(&f);
-+		return;
-+	}
-+	fd = open_path(&f, O_WRONLY);
-+	e = fd < 0 ? errno : 0;
-+	check_cwd();
-+	if (fd < 0) {
-+		if (v)
-+			printf("%d/%lld: write - open %s failed %d\n",
-+				procid, opno, f.path, e);
-+		free_pathname(&f);
-+		return;
-+	}
-+	if (fstat64(fd, &stb) < 0) {
-+		if (v)
-+			printf("%d/%lld: write - fstat64 %s failed %d\n",
-+				procid, opno, f.path, errno);
-+		free_pathname(&f);
-+		close(fd);
-+		return;
-+	}
-+	inode_info(st, sizeof(st), &stb, v);
-+	lr = ((int64_t)random() << 32) + random();
-+	off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-+	off %= maxfsize;
-+	iov.iov_len = (random() % FILELEN_MAX) + 1;
-+	iov.iov_base = malloc(iov.iov_len);
-+	memset(iov.iov_base, nameseq & 0xff, iov.iov_len);
-+	flags = have_rwf_dontcache ? RWF_DONTCACHE : 0;
-+	e = pwritev2(fd, &iov, 1, off, flags) < 0 ? errno : 0;
-+	if (have_rwf_dontcache && e == EOPNOTSUPP)
-+		e = pwritev2(fd, &iov, 1, off, 0) < 0 ? errno : 0;
-+	free(iov.iov_base);
-+	if (v)
-+		printf("%d/%lld: write dontcache %s%s [%lld,%d] %d\n",
-+		       procid, opno, f.path, st, (long long)off,
-+		       (int)iov.iov_len, e);
-+	free_pathname(&f);
-+	close(fd);
-+}
-+
- char *
- xattr_flag_to_string(int flag)
+ int
+-uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
++uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset, int flags)
  {
+ 	struct io_uring_sqe     *sqe;
+ 	struct io_uring_cqe     *cqe;
+@@ -2733,6 +2762,7 @@ uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+ 		} else {
+ 			io_uring_prep_writev(sqe, fd, &iovec, 1, o);
+ 		}
++		sqe->rw_flags = flags;
+ 
+ 		ret = io_uring_submit_and_wait(&ring, 1);
+ 		if (ret != 1) {
+@@ -2781,7 +2811,7 @@ uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+ }
+ #else
+ int
+-uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
++uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset, int flags)
+ {
+ 	fprintf(stderr, "io_rw: need IO_URING support!\n");
+ 	exit(111);
+@@ -2789,19 +2819,21 @@ uring_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
+ #endif
+ 
+ int
+-fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset)
++fsx_rw(int rw, int fd, char *buf, unsigned len, unsigned offset, int flags)
+ {
+ 	int ret;
+ 
+ 	if (aio) {
+ 		ret = aio_rw(rw, fd, buf, len, offset);
+ 	} else if (uring) {
+-		ret = uring_rw(rw, fd, buf, len, offset);
++		ret = uring_rw(rw, fd, buf, len, offset, flags);
+ 	} else {
++		struct iovec iov = { .iov_base = buf, .iov_len = len };
++
+ 		if (rw == READ)
+-			ret = read(fd, buf, len);
++			ret = preadv2(fd, &iov, 1, offset, flags);
+ 		else
+-			ret = write(fd, buf, len);
++			ret = pwritev2(fd, &iov, 1, offset, flags);
+ 	}
+ 	return ret;
+ }
+@@ -3065,6 +3097,9 @@ main(int argc, char **argv)
+ 			if (seed < 0)
+ 				usage();
+ 			break;
++		case 'T':
++			dontcache_io = 0;
++			break;
+ 		case 'W':
+ 		        mapped_writes = 0;
+ 			if (!quiet)
+@@ -3076,6 +3111,7 @@ main(int argc, char **argv)
+ 		case 'Z':
+ 			o_direct = O_DIRECT;
+ 			o_flags |= O_DIRECT;
++			dontcache_io = 0;
+ 			break;
+ 		case 254:  /* --duration */
+ 			if (!optarg) {
+@@ -3293,6 +3329,9 @@ main(int argc, char **argv)
+ 		copy_range_calls = test_copy_range();
+ 	if (exchange_range_calls)
+ 		exchange_range_calls = test_exchange_range();
++	if (dontcache_io)
++		dontcache_io = test_dontcache_io();
++	printf("Dontcache_io=%d\n", dontcache_io);
+ 
+ 	while (keep_running())
+ 		if (!test())
 -- 
 2.47.1
 
