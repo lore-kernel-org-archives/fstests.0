@@ -1,279 +1,128 @@
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A7AF73451;
-	Mon,  6 Jan 2025 11:18:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.158.5
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51091F9D6;
+	Mon,  6 Jan 2025 11:54:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736162327; cv=none; b=EPVgZJZJg596aBBS5QGdSmUCHdYf4PMCTMO4b7X471L5dx2rJ4yx7FKOooR3Dy1aLTt2Sg0L4ExZ734u8vAUtbpG2POWzKSZEs2yTgrgtxrEy0ZPtO5eAmW7xu/aOiYdHVv0OXHp4H6KHcLm0qgkPua12pz31ktA9ZndPmjgcA8=
+	t=1736164485; cv=none; b=sCRs4TB99vUKVEVemCuFvJjUFGbsjaIMKkllk5CXh/KeW939uqf+gWTbJO1mSGkHG3UisraZs7pP0FMkWes5DoVMVjrHoiSGoHEUMQNg69M/4fbfY4GTV6YgPC3f1IEJ7QuNj2xtg27CWtO1/JByZwdtJyK8O0gKTaavhqK9Wgc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736162327; c=relaxed/simple;
-	bh=kMaBTXJmX8kUhkDovqFKec7qKLzQli32ehmYpT9HhmA=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:Mime-Version; b=MGILUDynuSPx1JOhakjR2UyY/wKIm2/3Xya4ZD9J0OPprOJkyD88ake3gEyRGeVRep7Ohbt0ziIf2ObAt1uPYANio2yv45TPT//XPT7d1Tj0Za+OaiCThX4ooDPcJxfiWRbOsqvlVQQX4vYv9cDJ2TAAp0bBKMS4eK79XQRwxSg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=sfUMt1RQ; arc=none smtp.client-ip=148.163.158.5
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
+	s=arc-20240116; t=1736164485; c=relaxed/simple;
+	bh=SQwjDTWlSK662prJcJDZp9PPRL/9qgWUMQ4clsiprPs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=oY4HcgHlDmyV6jDEG5Quiv6b5RS0TI3PErBLIDW9iEV3yic/Ylk8f45qINv7uCGnyfU3IQy0yAe+OMeTsXQ3+vkUW1hnGKQw8pSKNg/z+Nkb24AcuuuMVB2EX7L6oO13WL/KXk2ecpLgNMzSY2WxW74n62o8TnA5wrmjkAmCtHM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=Z2I0tbx+; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=VBQkhZs3; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=oOXxwyxN; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=FQ8bLAc5; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="sfUMt1RQ"
-Received: from pps.filterd (m0356516.ppops.net [127.0.0.1])
-	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 505Naqpa007188;
-	Mon, 6 Jan 2025 11:18:40 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=pp1; bh=2rnlkW
-	z/9QtlowmwNqqmorV/XMGe7ekY30NgNNUcbnQ=; b=sfUMt1RQVmng4pAzahd+dC
-	Q7temqtlmgude8G7s6DT0jLPeVpONwCvljq7Wa5Ls1/wn0v6ggIkCi3ApN/eRPcO
-	MpPAAGRbQBB9EonUHUeN1g5xlCZ3GYxiFBo71AsgeIoBzOlL6gjKb8zIGEXNjjRR
-	WIjpTb/dRuyIDNQNjSSeycJjGZV2VI2S22SZGLy6jiWE4DT6L/pcd1agpWgYVhpX
-	7Ny2zfsXzCnYPLq2qDoEeQf/c9J6zL9Ohrbq99SWjGMzgHkD+IAibUv6OrzWrFG4
-	UsjYLFSd+vyhAeCYPhyI/NFkYRao3uzhWbl7Duk0iAw0QbU9m8WmP0e6lwZpu26w
-	==
-Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
-	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4403waj6ga-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 06 Jan 2025 11:18:40 +0000 (GMT)
-Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
-	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 506AhcvH016669;
-	Mon, 6 Jan 2025 11:18:39 GMT
-Received: from smtprelay05.fra02v.mail.ibm.com ([9.218.2.225])
-	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 43ygtknbe6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 06 Jan 2025 11:18:39 +0000
-Received: from smtpav06.fra02v.mail.ibm.com (smtpav06.fra02v.mail.ibm.com [10.20.54.105])
-	by smtprelay05.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 506BIbE247120698
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 6 Jan 2025 11:18:37 GMT
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 747D420049;
-	Mon,  6 Jan 2025 11:18:37 +0000 (GMT)
-Received: from smtpav06.fra02v.mail.ibm.com (unknown [127.0.0.1])
-	by IMSVA (Postfix) with ESMTP id 4EC5520040;
-	Mon,  6 Jan 2025 11:18:36 +0000 (GMT)
-Received: from li-5d80d4cc-2782-11b2-a85c-bed59fe4c9e5.ibm.com (unknown [9.124.209.51])
-	by smtpav06.fra02v.mail.ibm.com (Postfix) with ESMTP;
-	Mon,  6 Jan 2025 11:18:36 +0000 (GMT)
-Message-ID: <58cb2b57d782f48652ed86a7d7726b851e723b48.camel@linux.ibm.com>
-Subject: Re: [PATCH 2/2] check: capture dmesg of mount failures if test fails
-From: Nirjhar Roy <nirjhar@linux.ibm.com>
-To: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Date: Mon, 06 Jan 2025 16:48:34 +0530
-In-Reply-To: <173568782758.2712126.12517347004514444060.stgit@frogsfrogsfrogs>
-References: <173568782724.2712126.2021149328064840091.stgit@frogsfrogsfrogs>
-	 <173568782758.2712126.12517347004514444060.stgit@frogsfrogsfrogs>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-26.el8_10) 
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="Z2I0tbx+";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="VBQkhZs3";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="oOXxwyxN";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="FQ8bLAc5"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 73FE91F441;
+	Mon,  6 Jan 2025 11:54:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1736164480;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=drarDzD7kms09VWCCsDAPG3R2WgniJs1kpoq9zXFHKk=;
+	b=Z2I0tbx+j5hZH5TJ9OP5h9N5WxgQD8Nhgbkt7dx1KJf8JENuVUBFBxvG4zZLDRbMhWSIfD
+	ZPXXOnFEc1RR9XWBl/4jLTJEZG4KTO2RuarMAVXmjtSe5WJCd4HalUjpMqTxfULSYdVIJ1
+	KC4xszQLwikW8NRtodB7kb+G1XYQJws=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1736164480;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=drarDzD7kms09VWCCsDAPG3R2WgniJs1kpoq9zXFHKk=;
+	b=VBQkhZs3WdwYg3vqrfLUrOCIcpSjBSGnnrmmdl1ZGppE+nnEyatqwCv5xWLzJ4nHDLU13W
+	61+s6icC5D5XDvCg==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1736164479;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=drarDzD7kms09VWCCsDAPG3R2WgniJs1kpoq9zXFHKk=;
+	b=oOXxwyxNwuuvCjoV/B0nTssTNHkjkf1a8wMmIudy/YsreCht3FfOLM8KWahWyE7NkaTjZB
+	FY5WgHSmbUP/fj/IhOSTmYx0wDcL3p0CU/vo8B1gGlXSciWkY8IcfgLH3zGvxSrls29K32
+	Axfiw51rfpaZQjISJXtSFqa7XeyLkKY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1736164479;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=drarDzD7kms09VWCCsDAPG3R2WgniJs1kpoq9zXFHKk=;
+	b=FQ8bLAc5y7+mjF5SUVzq6n84StCJ4tZx6JCoBjXcIAaqxEgboq4bt9vU19XMymN/3lrzyK
+	oi2kfyGXReZ8W/Dg==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 6442F137DA;
+	Mon,  6 Jan 2025 11:54:39 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id UFlCGH/Ee2fGFAAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Mon, 06 Jan 2025 11:54:39 +0000
+Date: Mon, 6 Jan 2025 12:54:34 +0100
+From: David Sterba <dsterba@suse.cz>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+	Christian Brauner <brauner@kernel.org>
+Subject: Re: [PATCH] btrfs/326: update _fixed_by_kernel_commit
+Message-ID: <20250106115434.GT31418@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <74d9b2816beb6ef245718331ebcbc1a7cdab5919.1736042456.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: PppKuvS4qtrYSCEg1TUTdFyUh2dF0ISI
-X-Proofpoint-ORIG-GUID: PppKuvS4qtrYSCEg1TUTdFyUh2dF0ISI
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
- definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxlogscore=999
- lowpriorityscore=0 spamscore=0 suspectscore=0 bulkscore=0 mlxscore=0
- clxscore=1015 adultscore=0 impostorscore=0 priorityscore=1501
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2411120000 definitions=main-2501060097
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <74d9b2816beb6ef245718331ebcbc1a7cdab5919.1736042456.git.wqu@suse.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	RCVD_TLS_ALL(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	ARC_NA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_THREE(0.00)[4];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.com:email,suse.cz:replyto];
+	RCVD_COUNT_TWO(0.00)[2];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[]
+X-Spam-Score: -4.00
+X-Spam-Flag: NO
 
-On Tue, 2024-12-31 at 15:56 -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <djwong@kernel.org>
+On Sun, Jan 05, 2025 at 12:31:01PM +1030, Qu Wenruo wrote:
+> The original fix is already in the upstream, meanwhile a new but much
+> harder to hit bug is also exposed by this test case.
 > 
-> Capture the kernel output after a mount failure occurs.  If the test
-> itself fails, then keep the logging output for further diagnosis.
+> Add a new _fixed_by_kernel_commit for that bug, and special thanks to
+> Christian for pointing out the fix.
 > 
-> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  check                  |   22 +++++++++++++++++++++-
->  common/rc              |   26 +++++++++++++++++++++++++-
->  common/report          |    8 ++++++++
->  tests/selftest/008     |   20 ++++++++++++++++++++
->  tests/selftest/008.out |    1 +
->  5 files changed, 75 insertions(+), 2 deletions(-)
->  create mode 100755 tests/selftest/008
->  create mode 100644 tests/selftest/008.out
-> 
-> 
-> diff --git a/check b/check
-> index 9222cd7e4f8197..a46ea1a54d78bb 100755
-> --- a/check
-> +++ b/check
-> @@ -614,7 +614,7 @@ _stash_fail_loop_files() {
->  	local seq_prefix="${REPORT_DIR}/${1}"
->  	local cp_suffix="$2"
->  
-> -	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core"
-> ".hints"; do
-> +	for i in ".full" ".dmesg" ".out.bad" ".notrun" ".core" ".hints"
-> ".mountfail"; do
->  		rm -f "${seq_prefix}${i}${cp_suffix}"
->  		if [ -f "${seq_prefix}${i}" ]; then
->  			cp "${seq_prefix}${i}"
-> "${seq_prefix}${i}${cp_suffix}"
-> @@ -994,6 +994,7 @@ function run_section()
->  				      echo -n "	$seqnum -- "
->  			cat $seqres.notrun
->  			tc_status="notrun"
-> +			rm -f "$seqres.mountfail?"
->  			_stash_test_status "$seqnum" "$tc_status"
->  
->  			# Unmount the scratch fs so that we can wipe
-> the scratch
-> @@ -1053,6 +1054,7 @@ function run_section()
->  		if [ ! -f $seq.out ]; then
->  			_dump_err "no qualified output"
->  			tc_status="fail"
-> +			rm -f "$seqres.mountfail?"
->  			_stash_test_status "$seqnum" "$tc_status"
->  			continue;
->  		fi
-> @@ -1089,6 +1091,24 @@ function run_section()
->  				rm -f $seqres.hints
->  			fi
->  		fi
-> +
-> +		if [ -f "$seqres.mountfail?" ]; then
-> +			if [ "$tc_status" = "fail" ]; then
-> +				# Let the user know if there were mount
-> +				# failures on a test that failed
-> because that
-> +				# could be interesting.
-> +				mv "$seqres.mountfail?"
-> "$seqres.mountfail"
-> +				_dump_err "check: possible mount
-> failures (see $seqres.mountfail)"
-> +				test -f $seqres.mountfail && \
-> +					maybe_compress_logfile
-> $seqres.mountfail $MAX_MOUNTFAIL_SIZE
-> +			else
-> +				# Don't retain mount failure logs for
-> tests
-> +				# that pass or were skipped because
-> some tests
-> +				# intentionally drive mount failures.
-> +				rm -f "$seqres.mountfail?"
-> +			fi
-> +		fi
-> +
->  		_stash_test_status "$seqnum" "$tc_status"
->  	done
->  
-> diff --git a/common/rc b/common/rc
-> index d7dfb55bbbd7e1..0ede68eb912440 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -204,9 +204,33 @@ _get_hugepagesize()
->  	awk '/Hugepagesize/ {print $2 * 1024}' /proc/meminfo
->  }
->  
-> +# Does dmesg have a --since flag?
-> +_dmesg_detect_since()
-> +{
-> +	if [ -z "$DMESG_HAS_SINCE" ]; then
-> +		test "$DMESG_HAS_SINCE" = "yes"
-> +		return
-> +	elif dmesg --help | grep -q -- --since; then
-> +		DMESG_HAS_SINCE=yes
-> +	else
-> +		DMESG_HAS_SINCE=no
-> +	fi
-> +}
-> +
->  _mount()
->  {
-> -    $MOUNT_PROG $*
-> +	$MOUNT_PROG $*
-> +	ret=$?
-> +	if [ "$ret" -ne 0 ]; then
-> +		echo "\"$MOUNT_PROG $*\" failed at $(date)" >>
-> "$seqres.mountfail?"
-> +		if _dmesg_detect_since; then
-> +			dmesg --since '30s ago' >> "$seqres.mountfail?"
-> +		else
-> +			dmesg | tail -n 100 >> "$seqres.mountfail?"
-Is it possible to grep for a mount failure message in dmesg and then
-capture the last n lines? Do you think that will be more accurate?
+> Cc: Christian Brauner <brauner@kernel.org>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-Also, do you think it is useful to make this 100 configurable instead
-of hardcoding? 
-> +		fi
-> +	fi
-> +
-> +	return $ret
->  }
->  
->  # Call _mount to do mount operation but also save mountpoint to
-> diff --git a/common/report b/common/report
-> index 0e91e481f9725a..b57697f76dafb2 100644
-> --- a/common/report
-> +++ b/common/report
-> @@ -199,6 +199,7 @@ _xunit_make_testcase_report()
->  		local out_src="${SRC_DIR}/${test_name}.out"
->  		local full_file="${REPORT_DIR}/${test_name}.full"
->  		local dmesg_file="${REPORT_DIR}/${test_name}.dmesg"
-> +		local
-> mountfail_file="${REPORT_DIR}/${test_name}.mountfail"
->  		local outbad_file="${REPORT_DIR}/${test_name}.out.bad"
->  		if [ -z "$_err_msg" ]; then
->  			_err_msg="Test $test_name failed, reason
-> unknown"
-> @@ -225,6 +226,13 @@ _xunit_make_testcase_report()
->  			printf ']]>\n'	>>$report
->  			echo -e "\t\t</system-err>" >> $report
->  		fi
-> +		if [ -z "$quiet" -a -f "$mountfail_file" ]; then
-> +			echo -e "\t\t<mount-failure>" >> $report
-> +			printf	'<![CDATA[\n' >>$report
-> +			cat "$mountfail_file" | tr -dc
-> '[:print:][:space:]' | encode_cdata >>$report
-> +			printf ']]>\n'	>>$report
-> +			echo -e "\t\t</mount-failure>" >> $report
-> +		fi
->  		;;
->  	*)
->  		echo -e "\t\t<failure message=\"Unknown
-> test_status=$test_status\" type=\"TestFail\"/>" >> $report
-> diff --git a/tests/selftest/008 b/tests/selftest/008
-> new file mode 100755
-> index 00000000000000..db80ffe6f77339
-> --- /dev/null
-> +++ b/tests/selftest/008
-> @@ -0,0 +1,20 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2024-2025 Oracle.  All Rights Reserved.
-> +#
-> +# FS QA Test 008
-> +#
-> +# Test mount failure capture.
-> +#
-> +. ./common/preamble
-> +_begin_fstest selftest
-> +
-> +_require_command "$WIPEFS_PROG" wipefs
-> +_require_scratch
-> +
-> +$WIPEFS_PROG -a $SCRATCH_DEV
-> +_scratch_mount &>> $seqres.full
-Minor: Do you think adding some filtered messages from the captured
-dmesg logs in the output will be helpful?  
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/selftest/008.out b/tests/selftest/008.out
-> new file mode 100644
-> index 00000000000000..aaff95f3f48372
-> --- /dev/null
-> +++ b/tests/selftest/008.out
-> @@ -0,0 +1 @@
-> +QA output created by 008
-> 
-
+Reviewed-by: David Sterba <dsterba@suse.com>
