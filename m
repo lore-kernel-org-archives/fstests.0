@@ -1,142 +1,81 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+Received: from mail-io1-f44.google.com (mail-io1-f44.google.com [209.85.166.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6399D19CC2A
-	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 17:47:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 353FA15C158
+	for <fstests@vger.kernel.org>; Mon,  6 Jan 2025 17:49:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736185629; cv=none; b=tBXrAst8WhQp4GNGLwpAe7lb0ekMsRaEYSpoVLkAi5it63xVVNDM0uKIsPHcA05cD2gjUHQIh7Z0aZkN4aTr3rijxMGFxsLa94QIEf3ADRfb2NHIc3hPy524LPT4M+xo/pTVD1Sn3tVgMD62vbNVGKUAs3qDbCx/XVoZSf9YtTQ=
+	t=1736185764; cv=none; b=Ghy2DzN4nabHdsOQHItroBK8B14/BuZfcXwsOwI1Oim/dAfnhH/i5hQTHOP4Pi7mIUuVmR9mknu1S4aAMpJEIh7qGxn8tnNAV82Pnuv8iEDk33T1P6LokWoPqjf9vYOybSxfV1406lwH1Dmx9xymm+nl2DlHwCP3bEZXrUuulpI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736185629; c=relaxed/simple;
-	bh=a6kz5Tt/09AWtMtktdHp+XvDl7QFCYGVFrnsfJtJjdo=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=A1Wj4X2pdTDoiqRKnDxQlRVTWzVNlLLeCSNsc4gyNCcsgjgwi8NW3Yqhu9VwVE34zqVf8W96hhZMtLOrGMO0ukcfFm/tgcMxuWJyg7eTJHQKU2IoElw8IbttUoRzAjnyQ9EvirDSG9P9tzITT2B4LpNLwIUyoUF7bs+7NZuXREs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=N23hUi5z; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=OWnwgOt2; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=VG1M/1gK; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=0cbCyHFk; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1736185764; c=relaxed/simple;
+	bh=pe3mJ7xBSrzaeAQ3c/zs4oI0+PoA1+aFvFGAWa4TSDY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=M7xj2iAxxK65P4Yn1/MR4KVcgFHlriLoNBfPHwiNcVxzJ+xTGh5vxQFTvaTnJ2lU1dpoIQxG6zlENyqz6FvbXB8xqd1OJfTst/vWcq5wYzloc0JCeYmtudQX5RaRurZSV+lUIvhShYSG85Ed7j2TPniR8K8n4iaFg+zcpBHauyM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=QAMM2EoD; arc=none smtp.client-ip=209.85.166.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="N23hUi5z";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="OWnwgOt2";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="VG1M/1gK";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="0cbCyHFk"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 741A01F44E;
-	Mon,  6 Jan 2025 17:47:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1736185625; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wCyexgqF3uhrsEN9aoYoz8ANXjITaW8yZ35u5rQfGTo=;
-	b=N23hUi5zcH9kyUb9P9LbQrsmDtUGPSJfRbCL8H65C2etenyUhMLJSlbkLERG5qVxPHSTN0
-	iNc56Li4+233AImA1w9qRKGmQsw8CqK59niNYfINqXZLjkBeMUOz4WwnUGsfxJCYHie3Pj
-	zEZZAiqK785lhx+p0bn9kvknc9L3u7I=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1736185625;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wCyexgqF3uhrsEN9aoYoz8ANXjITaW8yZ35u5rQfGTo=;
-	b=OWnwgOt2GDd/1hmwZHAKn5+fCecucGxfkX2Z+eBg2aItARB1hsudbeH9ZWY/Hr6xfKi06/
-	CeIGKNxgfIVkl0DA==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b="VG1M/1gK";
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=0cbCyHFk
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1736185623; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wCyexgqF3uhrsEN9aoYoz8ANXjITaW8yZ35u5rQfGTo=;
-	b=VG1M/1gKQTMWqWG7m5h1HWTOuHvlxiAd/QuQzNXv2rI9rJZaDeFcXPVNChkm2j6vBr4UWh
-	CIFVqmfAoaFHvsZRsGcq2yU7SVwXOsRpULk2uVxUxe7dP9brm/ucSgYuAwic0qijreRu7O
-	z+r5gz6fcQlFYtBqYfppTdhnxIjB1j4=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1736185623;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=wCyexgqF3uhrsEN9aoYoz8ANXjITaW8yZ35u5rQfGTo=;
-	b=0cbCyHFkWQkWUs5Oc0kD9SBkgIqUiCDYdGWnxCQGvP5OeUA9q7GG9z2m6tv7oRT9asCDHV
-	TieFja2TOOM8+fAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 43423139AB;
-	Mon,  6 Jan 2025 17:47:03 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id ZfGbDhcXfGcXbQAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Mon, 06 Jan 2025 17:47:03 +0000
-Date: Tue, 7 Jan 2025 04:47:02 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Su Yue <glass.su@suse.com>
-Cc: fstests@vger.kernel.org, ocfs2-devel@lists.linux.dev
-Subject: Re: [PATCH] common/quota: filter out option projquota in
- _qmount_option for ocfs2
-Message-ID: <20250107044702.7fb7edaa.ddiss@suse.de>
-In-Reply-To: <20250106140124.91928-1-glass.su@suse.com>
-References: <20250106140124.91928-1-glass.su@suse.com>
+	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="QAMM2EoD"
+Received: by mail-io1-f44.google.com with SMTP id ca18e2360f4ac-844e06e5d11so490842439f.0
+        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 09:49:23 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736185762; x=1736790562; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=5fhNs/QnKkRfk/4dcrWeTLLXbEcnBgJuGsiOUG56S/A=;
+        b=QAMM2EoDd0WLWoa2UckXVfl6NkbBfgl7oAw56NlzEChQ+fHuKq/jJsb1ZI9APLkgmO
+         4NL1ysqGvSqRs7IQa2iH5iRW/1h0YNJHlYBlvB5Ijf5SwK4xHu0mJK14rMieC8BMa+mK
+         IwWHnOrMf11xnklZWIgaO8dl21HqyoJqgqHuE6ltTPFNIbopbpFpeLdljm0G+vVC4vGU
+         +9ZMXgn644o+g3ohvbivuB1Pt6VPlt2oo/kmmCjH+yxATXSeCbuljzdp/tfrTj08Bxvw
+         z1/nqUVEGyn+TDaqT3d7B1z8eEm/81IaKsrPrph3RCABYLtoEaNl08y19GszPa49Hflz
+         bUuw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736185762; x=1736790562;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=5fhNs/QnKkRfk/4dcrWeTLLXbEcnBgJuGsiOUG56S/A=;
+        b=t9KvoEIh9S99nZ6DFjiY9F/P4McqAaJRHmISUUL93EsALsvmzWaZVMsUl8uUJXBO3l
+         6wStw/BBiqTc2K1G8eRpYdHxV2w2uIJhO2+/pL0xOIb55Gu0vOs/HMsDRLOTmgNOP4RQ
+         2CkphT7W/DwWN1ham3DTg7/8ABkEw/+SuHfrqXfmOSqzSVW+PXv55FQv6+c6z+bdGdtm
+         hJpZMGf1atLKqG7BOjjzVHoT6DQm8pSM1ZCikEV5QOob+ktk10IFxVGTr5pGCHw+fB3H
+         fetjJX73+a7c3GcCFYZspxkE1G5ALz10nZ7ZwpYsxyOFRgpDu8fNbp/uNUpagctbLV6t
+         m0Xw==
+X-Forwarded-Encrypted: i=1; AJvYcCVVlqgecASmpVMV2j73xGWB0lkDNCwQlZnJX/7uMoOfeSY7ZF9O2Wd9nnpii/v8yM1UeUfa89/W@vger.kernel.org
+X-Gm-Message-State: AOJu0YyyHwFCvDN0oS/bPRiLIllMsfNBd9XR9PA3AagAKwqwuVHYl58V
+	Ga165wmkBLDu8xJvaNamwpWJMATGzymJXd32RPwGdQBOW+RAF2dRJdLPH5Q0ov0H8RFbD6p4ndn
+	P
+X-Gm-Gg: ASbGnct0oP/6VvPFDHugWZvMzE68X7y/q585QrqcxRzFIoDLwekJLRXrZwQ5b5JDnKj
+	itCqTUYUw5LSDHkrBzeKGqedb8IMTL44HiB406bbelT61QfEMGhb/8oGplHgpJocuTGjkhhbk29
+	CBUOcfpCpt4iIyAxFuGcM80GLsp9B1Iqse6qNYh6627zBUscFHUBo0jX3arA7O7D1LfhnjhYph4
+	PpF5QqKeXFw0lVA9hoJK3eQDPDKoubH0dIXt7/6Q6tXLmCz3BUkjYYXAMIf
+X-Google-Smtp-Source: AGHT+IHV9Yr0hb6tTZELuRv6SzdW3yA+ucz3tL0NTu9QXae2yC9zSdflbbq4fjYgR3t9rns23/2pIw==
+X-Received: by 2002:a05:6e02:b24:b0:3a7:85ee:fa78 with SMTP id e9e14a558f8ab-3c2d51516acmr468643685ab.18.1736185762438;
+        Mon, 06 Jan 2025 09:49:22 -0800 (PST)
+Received: from localhost.localdomain ([96.43.243.2])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4e68bf4f355sm9210867173.9.2025.01.06.09.49.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Jan 2025 09:49:21 -0800 (PST)
+From: Jens Axboe <axboe@kernel.dk>
+To: zlang@kernel.org
+Cc: djwong@kernel.org,
+	fstests@vger.kernel.org
+Subject: [PATCHSET 0/2] Add RWF_DONTCACHE support
+Date: Mon,  6 Jan 2025 10:48:45 -0700
+Message-ID: <20250106174919.103199-1-axboe@kernel.dk>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Queue-Id: 741A01F44E
-X-Spam-Score: -3.51
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-3.51 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	MISSING_XM_UA(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RCVD_TLS_ALL(0.00)[];
-	RCPT_COUNT_THREE(0.00)[3];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:rdns,imap1.dmz-prg2.suse.org:helo,suse.de:dkim,suse.de:mid,suse.de:email];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	DKIM_TRACE(0.00)[suse.de:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
-X-Spam-Level: 
+Content-Transfer-Encoding: 8bit
 
-On Mon,  6 Jan 2025 22:01:24 +0800, Su Yue wrote:
+Hi,
 
-> ocfs2 doesn't support projquota but does support usrquota an grpquota.
-> For now, two tests generic/594 and generic/603 are for testing
-> usrquota,grpquota and projquota. The mount option 'projquota' causes
-> failure of ocfs2 mount.
-> 
-> To make things simple, just skip the tests for ocfs2.
-> However, we can't just put '_require_prjquota $SCRATCH_DEV' before
-> _qmount because f2fs and xfs need runtime after mount of SCRATCH_DEV.
+This adds support for RWF_DONTCACHE for fsx and fsstress, which was
+used for testing the kernel patchset referenced in the two patches.
 
-All _require_prjquota callers provide a $SCRATCH_DEV parameter, so
-changing the order and mkfsing / mounting to check support for f2fs and
-xfs should be an option. Still, this approach looks reasonable too:
+-- 
+Jens Axboe
 
-Reviewed-by: David Disseldorp <ddiss@suse.de>
