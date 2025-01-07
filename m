@@ -1,97 +1,77 @@
-Received: from mail-io1-f47.google.com (mail-io1-f47.google.com [209.85.166.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 513962594A3
-	for <fstests@vger.kernel.org>; Tue,  7 Jan 2025 02:12:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 132D928691;
+	Tue,  7 Jan 2025 02:12:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736215932; cv=none; b=o9Pdm1cOh/I63ITqvwho+9ea6XLi1tsyCuKoxObQKD2OdaY4RHxstWwNZlrluyw3yrRgenM2x2byLlLeS9PXYQ4Zh6hFOz8dmx8rbW03YUapB7GAOjvhLQiQxXpWMfCiZByoQ3s9GiVLdlFmKKEhZrE4K4wjvAB1oFn6mKVSIIA=
+	t=1736215975; cv=none; b=N8qewfPt2B0zeGYVFjwExzVyEwYXIaHi2kPAACCGKFitz4NZgqrzGORCa+Ip99BdC6UbzEMNgDwzpRmLWxWJ7cZgBt5U2P86HB2SURhFYxfADSPQkLDdPwc7ePvcKFAYVik1MUnE/J6iFG/yjNO1+WNnfy2NXmecfjmU2oUoVgk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736215932; c=relaxed/simple;
-	bh=Wrm2cFi4OxWJxOSgLJ4CL14Xf8jxwebw7MCFyrq5eXM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=n6ea+8n9HQXJo7eLYY9aXLu0GEwlfX6ZiQ7ww6AkT6qvoxo0gggApZp504wVKBkwQhnhfgIZTLbloyVi9W0lOhWDxAxIk2G08E3KdbfYpnBh7SyEv6FZNKJLe1kcdahkAjCNDz/I3HtGivVfFutbexjVaGX3H7QEqxnV4yOeTlU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=VIRg7VmT; arc=none smtp.client-ip=209.85.166.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1736215975; c=relaxed/simple;
+	bh=oenYNeG+gnXZ4H5JoJghjClCQ0G0h7QENPx8F3zC6oA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nk7KLapTyd4w8EI+fUDFENzotfW384F7/+FgBT9jREXHDgat/A24kXqZuM2YQrfxc0yRPrLrNFUfbdPsWvFRmf7Q//6ao+D2GRDU7UkgANMHANhr9e0RkHpm28mHo8hzTxk+7IBl3z5P50+Fmj4BtdOjteULRYKCvLbZs16vqPw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O58M++VH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="VIRg7VmT"
-Received: by mail-io1-f47.google.com with SMTP id ca18e2360f4ac-844cd85f5ebso1246208139f.3
-        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 18:12:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736215928; x=1736820728; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=TNQe/WR71FZygdC+W4FLGA0pV45U0zkbVZTzWNEj+R4=;
-        b=VIRg7VmTVaO5HMaqFgBZjCgsEl5+gDM1H1cFaiobLhxteEJO324IiEfEeiESqqOdHJ
-         jkGg9Q7ejFGl5weO+/IyLnM7P/N4/d/iyCdZtOn7jIaWefCeR3g04UCT+bzrUegaPy3l
-         4VIrceuDoHv9F78W2d+E4qbOYckBQo9jfqS8SEJ8KFsO9qLcQWiXDOGxcx//8XYXaCCi
-         X9HdsY7IFfsgnmr0CefzvX3mJX9YvOqrvGMPXnhbsAzMNQMR1v01JUamlELZz/LJxZEf
-         Pbm1wttQjcB0mgZshyshrImuCwoTrNocIbm2MeoK2MvYZYP0Dk8nuYLBf8HswflJbcj9
-         O1BQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736215928; x=1736820728;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=TNQe/WR71FZygdC+W4FLGA0pV45U0zkbVZTzWNEj+R4=;
-        b=krHTkG6blDNbDkwbGqOjNmhICYspockJ1j3wV2dPvoGZLW+XrJ43cW6AjH468Rb6dE
-         eHoMbbWxgRCJ4GTcItTunYTHeTH1BDCRXXic8wQgOMJNBssTdXr5PlNhQTsxjs/IfNTR
-         C9GiKyJtdYAh9hLDRRubb7rXZaK22Sfw5a7zoQfpN900cGoHY+0Ts+dpKySkgiifKXJn
-         Ur1ar2ce4a7B4LWh2ktD1mcf70Z8/mCF4siL0/O7z6rmabey9Ir+3O5mqB3XvL/GWuAZ
-         0MlS2qafcxDJwKEB5AXrPTyO7F5iFq/UChakguvwoLy6PHkhSBr0ubS3bP4UnnpHmTes
-         KeiQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVCrhXYECRB/B2B2Y1mUoNzjEg6NLlmo69aUBjpeXtONDMCfwGhBUs+7RaTyP3ULLXNe1ZtbE29@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx2AVfzWH7BjN00oiMoy9peVDOIwET7wlJkilvsoVt9EjxTAROO
-	wJAOwoB46Y7pQFS1NKLHeEZLHbVbYmRWjWkFJ8S7BVXg5jDK2uwn0ZAFEJkKmfjQlJETyBX/47j
-	I
-X-Gm-Gg: ASbGncuTM6AdtMRQiHTicBee++92t7lZv7HJifPAP2VpcUujvl8UjkT2cbWlYL/ltQj
-	PPAmDCCqkEEuq8OuBdryuVSLX/6G82VJPHO2guPysE4GwRCnx/68S7zLEBxp7IdHXM99HGORpwQ
-	VVj4IKzP0TClADocqM0Dmgk4KoBg1ty52lALHcv629sZslkf774ZMsyi2CAiU8yR4diJDEPblnr
-	hDj0J6sBK7jr7zFhwqoTGHinwJEo282JDmv0BzKxJgLQyDeczQfPg==
-X-Google-Smtp-Source: AGHT+IFkyvS+3iluW+QRAppD3uM0QnCXFu9YwmLkLuRE8c4K6DWCAdPp4KmR9Gv6Wzf5swujyl+aag==
-X-Received: by 2002:a05:6602:13d4:b0:844:dfcd:8de0 with SMTP id ca18e2360f4ac-8499e6a11c0mr5950239039f.15.1736215928413;
-        Mon, 06 Jan 2025 18:12:08 -0800 (PST)
-Received: from [192.168.1.150] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4e68c199a09sm9596883173.87.2025.01.06.18.12.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Jan 2025 18:12:07 -0800 (PST)
-Message-ID: <0564fe96-203e-48d1-b853-5ad55fd7dd68@kernel.dk>
-Date: Mon, 6 Jan 2025 19:12:06 -0700
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O58M++VH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CE644C4CED2;
+	Tue,  7 Jan 2025 02:12:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1736215974;
+	bh=oenYNeG+gnXZ4H5JoJghjClCQ0G0h7QENPx8F3zC6oA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=O58M++VHHsjec9HmfX80PLUbkeogEBmxU3IXcwXUP8HwB7kgRB311AeL7wAdziY4B
+	 ks1/1faN/+9ynybDxBxX7WoK680NeqVg0fKEXpVIQf1oD/XWcxAm1TT7oKDdd+nkDT
+	 oFgA8yj8cF3tg2ZpxWTrYf5wLW7UgFrwv9KII+mk/BVru3H2zxrOgqYjXI5azdIs8J
+	 gCVsL9e2nlB+XNP48llBfM696gEd7MwHVXs4DxUzemiSujny4dPwaDQivGKw7W9UpV
+	 vMLlRTagyQxbY+Ktl3B2rFD4ErrKefd+ErWrtt3AG5Xyi1up83klxDgXozXnKZyl91
+	 5/VUDpCR9kYlA==
+Date: Mon, 6 Jan 2025 18:12:54 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Su Yue <glass.su@suse.com>
+Cc: fstests@vger.kernel.org, ocfs2-devel@lists.linux.dev
+Subject: Re: [PATCH] generic/620: add '-J block64' mkfs option for ocfs2
+Message-ID: <20250107021254.GP6160@frogsfrogsfrogs>
+References: <20250106140104.91880-1-glass.su@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] fsx: add support for RWF_DONTCACHE
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-References: <20250106174919.103199-1-axboe@kernel.dk>
- <20250106174919.103199-3-axboe@kernel.dk>
- <20250107020938.GN6160@frogsfrogsfrogs>
-From: Jens Axboe <axboe@kernel.dk>
-Content-Language: en-US
-In-Reply-To: <20250107020938.GN6160@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250106140104.91880-1-glass.su@suse.com>
 
-On 1/6/25 7:09 PM, Darrick J. Wong wrote:
->> @@ -3293,6 +3329,9 @@ main(int argc, char **argv)
->>  		copy_range_calls = test_copy_range();
->>  	if (exchange_range_calls)
->>  		exchange_range_calls = test_exchange_range();
->> +	if (dontcache_io)
->> +		dontcache_io = test_dontcache_io();
->> +	printf("Dontcache_io=%d\n", dontcache_io);
+On Mon, Jan 06, 2025 at 10:01:04PM +0800, Su Yue wrote:
+> mkfs.ocfs2 is using 32bit journal as default.
+> For 16T size device support, '-J block64' should be used.
 > 
-> Is this a debug printf that got left in by mistake?
+> Signed-off-by: Su Yue <glass.su@suse.com>
+> ---
+>  tests/generic/620 | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> (Everything else in here looks fine to me...)
+> diff --git a/tests/generic/620 b/tests/generic/620
+> index 3f1ce45a55fd..60e5a2cacdda 100755
+> --- a/tests/generic/620
+> +++ b/tests/generic/620
+> @@ -41,6 +41,9 @@ sectors=$((2*1024*1024*1024*17))
+>  chunk_size=128
+>  
+>  _dmhugedisk_init $sectors $chunk_size
+> +
+> +[ "$FSTYP" = "ocfs2"  ] && MKFS_OPTIONS="$MKFS_OPTIONS -J block64"
 
-Oops indeed yes, good catch!
+Won't mkfs.ocfs2 turn on block64 on a > 16T volume without prompting?
 
--- 
-Jens Axboe
+--D
+
+> +
+>  _mkfs_dev $DMHUGEDISK_DEV
+>  _mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for $DMHUGEDISK_DEV $SCRATCH_MNT"
+>  testfile=$SCRATCH_MNT/testfile-$seq
+> -- 
+> 2.47.1
+> 
+> 
