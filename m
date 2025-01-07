@@ -1,160 +1,135 @@
-Received: from mail-il1-f170.google.com (mail-il1-f170.google.com [209.85.166.170])
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BF80132111
-	for <fstests@vger.kernel.org>; Tue,  7 Jan 2025 02:16:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0546D16DED2
+	for <fstests@vger.kernel.org>; Tue,  7 Jan 2025 02:43:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736216181; cv=none; b=etYEOPyNScixD6YqijPML8pU6YbFwtACSiGwYBdpGOXnEUblmse6jtjAWZoQzlQp+N9g6347F2keTRc0ITGjWMC33j+kW+CvUL/7pvf1baLys6cRYpR5Di8HPB7iiCoRVNLHssf5IpfItKcEvEbN1cubOyUsl6HkBf/A7+IyXvQ=
+	t=1736217803; cv=none; b=QvT/nXdQbrZ38QhfmLwR8CdmlMLT6zU42wDqolYnP6/ZqsKNKleJhfTwcaUm/jM85oP4IJJwyrnz6Ax3lRZV2eAUV6ilJ30hMwZZX3OZkxQZblQr6I/Y5pJAgnZudRQcWnfp+yukBQSaFLAhV8k/Pgr96X1utjrFF3rMWAvnAiU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736216181; c=relaxed/simple;
-	bh=tKQ9Nf2z8BAQF2pf2Qx0qe5NTfvVs1h2eYRYo9jV8QY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kiGiQRjdLZDQEsADz13NcfZ8NbCZxQJuIczwYjPoQoMDMSLYAw8gXNaTvTZFH5tKiNLqzTlbCvIUVx8DGj5dQGB6CrNUOl+aVFhrJLPzRXVh9kyI7gVHoc9XNljweHCY+MYaKx2LglHNyt2Rn3cn0MXc1gu42yKq8wJEOF6ReEo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=TKBSwLWF; arc=none smtp.client-ip=209.85.166.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1736217803; c=relaxed/simple;
+	bh=atmxslussPqEoNewRStGfOlgpH0gRaohZK+PVuWNTbw=;
+	h=Content-Type:Mime-Version:Subject:From:In-Reply-To:Date:Cc:
+	 Message-Id:References:To; b=SAp6CIXMf7UILJIUS4PduPMv8Rekh3yv23FMnjt2jsXOCHNTE9sdeGncD/6K/jPBGwC5BjOIamSzSbJlvzMih02UUOF5+RURjb9WaPEpSFFiFu1cvHBJZiuSNjsyNTynUEMyXcd3qglj0Rhm2RTFHxf/Cx0FDsbGfAvg/Px/Bik=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=JXIESpB4; arc=none smtp.client-ip=209.85.218.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="TKBSwLWF"
-Received: by mail-il1-f170.google.com with SMTP id e9e14a558f8ab-3a8aed87a0dso49683035ab.3
-        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 18:16:19 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="JXIESpB4"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-aaeef97ff02so1865093666b.1
+        for <fstests@vger.kernel.org>; Mon, 06 Jan 2025 18:43:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736216178; x=1736820978; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=VKcN8G6vwXEiRUg1ibvtKdPImnTg9Ja4S5AkhQL04Bw=;
-        b=TKBSwLWFtgCKNAvuq5jVk7ZE5H0TK6yNLVHnWkdflgjW65PGYe5BkRC5WEqzmOGN6x
-         ebWqbDgWnxb9kxX6srNVpo63ITgFcDTJ0rj/HPTYdyfGAOo5rFUMgXClm6c3FNhWrCdz
-         qbEuCNS9ZTvXBT+zTrzNWZJDLQvYG04J0JXF+xp02cVFlkp6WuPKKjE5B4UcLUyRwFTq
-         HvxqlwWEitOyRLbtBN/whIPScOe+xMKrosCd4zeDIeF5P5WnzRuzioOmcLy7wezgga4G
-         aBmVSKUGIZDJEbGsH6cDT0M880H4YXG+PJaBUJ9WHDIABWUVenjoq4B0hned8Eji3jKq
-         xkWQ==
+        d=suse.com; s=google; t=1736217798; x=1736822598; darn=vger.kernel.org;
+        h=to:references:message-id:content-transfer-encoding:cc:date
+         :in-reply-to:from:subject:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pXUcL3nStPzDQg53+DjpcZtNPpb29NiMyPlb3M2zrrg=;
+        b=JXIESpB40Oho/g1tVGNwi9ktgaQXTjadnia/B8JTobrfjSUH7ycSlsdpGFN9ZpldYS
+         IicNj6MVUzl2SabQ8FwVMbUg6qtClFMSn0ZHJYZALyNog3UtgjJ6akTOGyNKnwQqF3vs
+         h3GB8l++IqbTtaK6WAsAk1xrz/XJKNDQLi6cSHe/5BakAvhWIOKXt2sdTv9oTqcVDTMU
+         6NGudwelRVKI//cymPzdUO5fMJzZGZ9l4ll1NK0x/QcmF31/1pRGMGHKnPaOZxLr+l91
+         frCMQAUDyYkmeluxISedQT0PeOIv7b+On8VqirF08Hia22wJV9GEsY08/Cgm/CLWEF27
+         I24Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736216178; x=1736820978;
-        h=content-transfer-encoding:in-reply-to:content-language:from
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VKcN8G6vwXEiRUg1ibvtKdPImnTg9Ja4S5AkhQL04Bw=;
-        b=OXtk34HtdBXuqmas3Kp8ILPgPMc0zxmNv5p2VI6O5deQoEYn91n4F7f8r//nLb3UNr
-         6X1s38H9oqlxMPJWWcUlyHBdSBknGrBjZfC6lgV2FjpghCADRiCfdq+GrDeGoTq/Ww2V
-         UrtQ08hRmesEIkASEBxhGdBUnPEv3MI0yA2Sa/1T7f5XJqHbG6Spf+gV70sCV3HAjZGC
-         GoXcoY2T4Km7BUFUUn8HO+0ILTmwdn7Wup3GgCzxGQ+TLi1Vml0WjVBtIR+/PmsCv91r
-         CahvCH76mci0fZept88aObW/fvD5Y6UKE5uNLmmljYBigcB8KfK7QsWu+DBMUqH8A/ua
-         j0iA==
-X-Forwarded-Encrypted: i=1; AJvYcCVoYKr40Dmo04CbVlejlkLdJ3d2zvXQF3xJZBjrosbPtAZmG4lSuCJaGgzfYm93IPqwmmIdM0bs@vger.kernel.org
-X-Gm-Message-State: AOJu0YzH+R5wBtYVSvff2Zz4/BuHvGgI3aIo9oUebSlAz0vyEv0bkC/b
-	Z0nzFeTes0hvBdiakx4er8+bbkK1Y0GwwO+Sws0Jpec5kdoJJB6I79BdBXQoIsI=
-X-Gm-Gg: ASbGncvHNskAKFXTA65Jbd5NZH6h76SHeWX3EPNIlU0V8RUmhNCN3STJYC2UEgWU89u
-	mFt/Tx8EsTC02Lr7AuGIMEdycYeotXH59BDy8OoJgYmgsFNIQxIFKNpNsdzBHJQtaSSxa4A2w/p
-	aZWtVuwayqbz3vgkeZEQ8thVeKEJ1qS7eHDRGz1zqe2rL1HJaE4/RI5NdQC8uxPeXE6uivFtJh+
-	hjafz4KdNrTLU3+yE1/2G4zHk8BCpjt6su06pIuCDFAYdKzvHqNmA==
-X-Google-Smtp-Source: AGHT+IFbW/fTG4Uf60rZOZizoK5/6Bust3Hqljf7yzCqC1XkoD2j1atIzeyCpr6aq2q3jZp3xhp24A==
-X-Received: by 2002:a05:6e02:b42:b0:3a7:e67f:3c58 with SMTP id e9e14a558f8ab-3c2d1aa2b80mr512308855ab.3.1736216178608;
-        Mon, 06 Jan 2025 18:16:18 -0800 (PST)
-Received: from [192.168.1.150] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4e68c199c0esm9565050173.89.2025.01.06.18.16.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Jan 2025 18:16:17 -0800 (PST)
-Message-ID: <32edc8e2-f338-44d3-9070-4be4b5fc99a2@kernel.dk>
-Date: Mon, 6 Jan 2025 19:16:17 -0700
+        d=1e100.net; s=20230601; t=1736217798; x=1736822598;
+        h=to:references:message-id:content-transfer-encoding:cc:date
+         :in-reply-to:from:subject:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=pXUcL3nStPzDQg53+DjpcZtNPpb29NiMyPlb3M2zrrg=;
+        b=YkOLkvCkLsyDJfIHqrqlXHcngnwlsmMFTPdBWJb7ywfnzmpNFwttmnK+/6WSSr6aKN
+         iPG98Rbs0WdOD2be7yy+qFOlzhSI0JWnlNjBBCgpsfLDKjuUnOU5Zf+U+slk3ZkGAMLK
+         B3KRZFI6+WDUu/dMYiV3Ww+C65cOmTvrfqBd1BDJXxYljQTXGwMCrXYhPEqiE2wO1wgB
+         J6cazbAptb32euaubnafuLrYRS6EVE8khTvvG0ONlAYZuOxtqhH671PPOhuniem3MDwa
+         h4qBrFkioTo/K/NjteSxwXbRqP/ttPqkHm8KRezwVl02YBZ6pljZEFWF50eR2e6SiVY/
+         Btig==
+X-Gm-Message-State: AOJu0YyZDnMd9h+lVgOKLrnqNxUCkAs0LRUboxmjCQnW1RSTs2gJqabw
+	aKPoAJOwD25D67BoayGpjuj5zqMMh52AO7XN+rd985Fq1X0eIUpygWkRp08e+oKjIZ5QFBs5hFO
+	8nCQ=
+X-Gm-Gg: ASbGncvVvwpR70VYXK4RfL5RMo5+ZiByJ8n4ZSfaqM1RkpS6QOSIi3NUh+Ll9jznN8F
+	2eZQ52gkYHjTjR7ByFiVxeW8hB4EoRBCx/nRApm2KFk79Oq3IODcnxQiAH9eOhoC72sJhqIGGdK
+	7RrHsOrepZE5V0PzuyddI6yImKinsLfop7UD7uoAG3+lPlakOVwaEXaGXi90A6RbYRsJBSNAszY
+	RULtPmkWmyuOWqe6SWRXE48P1gkWh5zPxkifDt97/6bXY0TE/vuWPunTnA=
+X-Google-Smtp-Source: AGHT+IEsoJUsEaVLjDHC0PLwVOEL4shT4+vkrMouh+CENrtPO+h1kPxYzrZf4uW53TI3pchKVLPBZA==
+X-Received: by 2002:a17:907:6d19:b0:aa6:8a1b:8b7c with SMTP id a640c23a62f3a-aac2d44727fmr5685406266b.2.1736217798266;
+        Mon, 06 Jan 2025 18:43:18 -0800 (PST)
+Received: from smtpclient.apple ([23.247.139.15])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-219dc9cde0dsm299334125ad.140.2025.01.06.18.43.16
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 06 Jan 2025 18:43:17 -0800 (PST)
+Content-Type: text/plain;
+	charset=utf-8
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] fsstress: add support for RWF_DONTCACHE
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@kernel.org, fstests@vger.kernel.org
-References: <20250106174919.103199-1-axboe@kernel.dk>
- <20250106174919.103199-2-axboe@kernel.dk>
- <20250107021102.GO6160@frogsfrogsfrogs>
-From: Jens Axboe <axboe@kernel.dk>
-Content-Language: en-US
-In-Reply-To: <20250107021102.GO6160@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3826.200.121\))
+Subject: Re: [PATCH] generic/620: add '-J block64' mkfs option for ocfs2
+From: Glass Su <glass.su@suse.com>
+In-Reply-To: <20250107021254.GP6160@frogsfrogsfrogs>
+Date: Tue, 7 Jan 2025 10:42:58 +0800
+Cc: fstests@vger.kernel.org,
+ ocfs2-devel@lists.linux.dev
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <6B45499F-7306-478A-A860-73E02D47FCF3@suse.com>
+References: <20250106140104.91880-1-glass.su@suse.com>
+ <20250107021254.GP6160@frogsfrogsfrogs>
+To: "Darrick J. Wong" <djwong@kernel.org>,
+ Joseph Qi <joseph.qi@linux.alibaba.com>,
+ Mark Fasheh <mark@fasheh.com>
+X-Mailer: Apple Mail (2.3826.200.121)
 
-On 1/6/25 7:11 PM, Darrick J. Wong wrote:
->> +void
->> +read_dontcache_f(opnum_t opno, long r)
->> +{
->> +	int		e;
->> +	pathname_t	f;
->> +	int		fd;
->> +	int64_t		lr;
->> +	off64_t		off;
->> +	struct stat64	stb;
->> +	int		v;
->> +	char		st[1024];
->> +	struct iovec	iov;
->> +	int flags;
+
+
+> On Jan 7, 2025, at 10:12, Darrick J. Wong <djwong@kernel.org> wrote:
+>=20
+> On Mon, Jan 06, 2025 at 10:01:04PM +0800, Su Yue wrote:
+>> mkfs.ocfs2 is using 32bit journal as default.
+>> For 16T size device support, '-J block64' should be used.
+>>=20
+>> Signed-off-by: Su Yue <glass.su@suse.com>
+>> ---
+>> tests/generic/620 | 3 +++
+>> 1 file changed, 3 insertions(+)
+>>=20
+>> diff --git a/tests/generic/620 b/tests/generic/620
+>> index 3f1ce45a55fd..60e5a2cacdda 100755
+>> --- a/tests/generic/620
+>> +++ b/tests/generic/620
+>> @@ -41,6 +41,9 @@ sectors=3D$((2*1024*1024*1024*17))
+>> chunk_size=3D128
+>>=20
+>> _dmhugedisk_init $sectors $chunk_size
 >> +
->> +	init_pathname(&f);
->> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
->> +		if (v)
->> +			printf("%d/%lld: read - no filename\n", procid, opno);
->> +		free_pathname(&f);
->> +		return;
->> +	}
->> +	fd = open_path(&f, O_RDONLY);
->> +	e = fd < 0 ? errno : 0;
->> +	check_cwd();
->> +	if (fd < 0) {
->> +		if (v)
->> +			printf("%d/%lld: read - open %s failed %d\n",
->> +				procid, opno, f.path, e);
->> +		free_pathname(&f);
->> +		return;
->> +	}
->> +	if (fstat64(fd, &stb) < 0) {
->> +		if (v)
->> +			printf("%d/%lld: read - fstat64 %s failed %d\n",
->> +				procid, opno, f.path, errno);
->> +		free_pathname(&f);
->> +		close(fd);
->> +		return;
->> +	}
->> +	inode_info(st, sizeof(st), &stb, v);
->> +	if (stb.st_size == 0) {
->> +		if (v)
->> +			printf("%d/%lld: read - %s%s zero size\n", procid, opno,
->> +			       f.path, st);
->> +		free_pathname(&f);
->> +		close(fd);
->> +		return;
->> +	}
->> +	lr = ((int64_t)random() << 32) + random();
->> +	off = (off64_t)(lr % stb.st_size);
->> +	iov.iov_len = (random() % FILELEN_MAX) + 1;
->> +	iov.iov_base = malloc(iov.iov_len);
-> 
-> Should there be a check for null iov_base after the allocation?
+>> +[ "$FSTYP" =3D "ocfs2"  ] && MKFS_OPTIONS=3D"$MKFS_OPTIONS -J =
+block64"
+>=20
+> Won't mkfs.ocfs2 turn on block64 on a > 16T volume without prompting?
+>=20
+It won=E2=80=99t. Only error will be printed:
 
-Nothing else in fsstress seems to bother with malloc() failures, which
-at least on Linux, is probably fair game.
+ERROR: jbd can only store block numbers in 32 bits. =
+/dev/mapper/huge-test.620 can hold 4563402752 blocks
+which overflows this limit. If you have a new enough Ocfs2 with JBD2 =
+support, you can try formatting with the "-Jblock64" option to turn on =
+support for this size block device.
 
->> +	flags = have_rwf_dontcache ? RWF_DONTCACHE : 0;
->> +	e = preadv2(fd, &iov, 1, off, flags) < 0 ? errno : 0;
->> +	if (have_rwf_dontcache && e == EOPNOTSUPP)
-> 
-> ...and should this set have_rwf_dontcache = 0?
+It=E2=80=99s 2025 now. Maybe it=E2=80=99s time to make mkfs.ocfs2  turn =
+on block64 if device size > 16T.
 
-I don't think so? If we get EOPNOTSUPP and we don't have dontcache, then
-it's a fatal condition. fsstress defaults to it being available, so we
-may very well run into EOPNOTSUPP and then just do a regular read or
-write for that case. We could probably do:
+Maintainers may know some stories.  Joseph?
 
-if (have_rwf_dontcache && e == EOPNOTSUPP) {
-	have_rwf_dontcache = 0;
-	e = preadv2(fd, &iov, 1, off, 0) < 0 ? errno : 0;
-}
+=E2=80=94=20
+Su
 
-here and on the write side, at least then we won't repeatedly try
-RWF_DONTCACHE if we hit EOPNOTSUPP. But in terms of logic, it should be
-correct as-is.
+> --D
+>=20
+>> +
+>> _mkfs_dev $DMHUGEDISK_DEV
+>> _mount $DMHUGEDISK_DEV $SCRATCH_MNT || _fail "mount failed for =
+$DMHUGEDISK_DEV $SCRATCH_MNT"
+>> testfile=3D$SCRATCH_MNT/testfile-$seq
+>> --=20
+>> 2.47.1
 
--- 
-Jens Axboe
+
