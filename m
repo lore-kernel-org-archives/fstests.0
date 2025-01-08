@@ -1,216 +1,205 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
+Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A74AD3FBB3;
-	Wed,  8 Jan 2025 06:34:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736318049; cv=fail; b=D5/xuW5w5ZVYh3fHXHrpv9lN61nOePWgqGbBw/Ssbq1yHPdtOEu0lkR+Bis37iqyBUpNeqgwOtHvONSLqoOxQiqqijGI1XeU55pwYU36vXhnEH9YV5WBCbA5dr3JkCPo7kw9RZYQBJH17plKao0Nn4fWrZwSd11cuvVzWsH45i4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736318049; c=relaxed/simple;
-	bh=stkvEKuiAYYE3QjY3l5CIDBUX5gN7ldVV/Pn6+UbCsk=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=OTiJu0tzOLP+9prA5OCD1l2KBCd4CVsoP9Yg1shoqjilPr8NBqT3EPB0g1CXH7gMs+UaxdhuiDGJa65+UWLilFjNMo7zYeQUwqX1dYfD/mOf7EOsIaAX8fIvHGPpzbnZaLb7wHoOatLcXogz/Qi6v0WC8UiEywBgVOYxcJ7/Bp4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=YUj5kRvK; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=vzlQ8aR8; arc=fail smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="YUj5kRvK";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="vzlQ8aR8"
-Received: from pps.filterd (m0333521.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5081tqOT015729;
-	Wed, 8 Jan 2025 06:34:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=wna43YLUpqXQOi1RPrlANaMVk5JP6BsoqcxAjVU1Eqs=; b=
-	YUj5kRvK9XSf7YaenfCydMleGb1xNOGovMgetWsNa6rdklyOcOsQgz+aqAnc9vfD
-	o1nBNdOqNzhgZxPWDEd5NbH9+MA4uvGxLV4gDbRq/34vX6l03VEI9mEDjhGOB5Aw
-	aYpFj5zsq/SZOHIf6qLVrnKI7nSSVy33OsZU6hgufovsKjnpA3cn6EJTmFkvTG8o
-	9j1X+H3ixUWn9jSEMRCNp5DUc6q7DHu+vByOf3O8PjLmGYY/Pf5HfMDrNBAU4akW
-	8ye2DYxxeQxEqKspls+UtaCQ89lQAoHreF4N7YL1VIHYv1EGJKTRUVoQv2c8mgNF
-	MlCsXUBQWKgcPOb+rY0/iQ==
-Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 43xuwb68tv-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 08 Jan 2025 06:34:03 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5083rpKx011977;
-	Wed, 8 Jan 2025 06:34:02 GMT
-Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2169.outbound.protection.outlook.com [104.47.57.169])
-	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 43xue96vq0-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 08 Jan 2025 06:34:02 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=deILW8Wg2+lJraQnz2VUmfUp9pROQtKjVWPCuORCHlBlxX/wqmMqN4CBilat8LmaCRxu5QVDxi5JlUDFCnMF9hYw/JFtg3S2t1J7fhEngW/dcBfkH8b9lgf7mBdH6k+i5ZKE3WZbzPAYFA9nolvqX9t2F6MRXDiWSdOCWBeG+bCwTTcJPSl6HKovHWWsoR87HrcOYUmWU8dDIKT2b58YiFG+0GCskeGhzWlfomOAWGCsSGoUVj4TRIDPZjOePEfPDxWMg9Zh0sfWaeucZNCZb6PO1sVHpCIVVQiSMfIV9LcQDJADmZgNlqM8neFTPwvce+JUmNFCeqZeApbJ9rZ65A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wna43YLUpqXQOi1RPrlANaMVk5JP6BsoqcxAjVU1Eqs=;
- b=YPxH9p88EsydxFn1KE1cPhHg4YboOaqX7oq5QXL11OKGYmUcUfzS4vpeeED83DZY1h+MtobFeHe2trrQtjGNxyTGIAzumY4KiAGp4Mh1dAvr0fsRyIOBusE8kWp9zEzJ4AbiG5tAWEFJCWt8STo0ZBNShp7R17mC4/0eu/Ys8QOOtTgcWTGRrAegLHsLUqx/g1pOktI0QI+hu2IH5fYJ3D6ziba6fI1ronakuT85C9JsTIjRGXI8LEKdeAbfUpUy0MSq+7CwyMvlLTxvo8i75DE61QPdAiVhRrUK/IbkCOKXFEaFeyDsloNup+9aKAG3dzU4FZlr4QhaSp674UtMtQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=wna43YLUpqXQOi1RPrlANaMVk5JP6BsoqcxAjVU1Eqs=;
- b=vzlQ8aR8DbNlspPB+QiLo4IhlGSP9lb+/5DJ9nHFeVEE+lIm0aq36/vbE/ZlzkdFz3060ZM+Y8LKiLFz+jPb3pW1YSeEVNS8qKBeNrqdRr6/Trp4N5f+EQ+4FtGoWY+WvTOQiaSb1vfwFl/fGR55XWjFOma2oHJPe6HejaJiYdw=
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by BLAPR10MB5042.namprd10.prod.outlook.com (2603:10b6:208:30c::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8335.11; Wed, 8 Jan
- 2025 06:34:00 +0000
-Received: from PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
- ([fe80::fea:df00:2d94:cb65%2]) with mapi id 15.20.8335.010; Wed, 8 Jan 2025
- 06:34:00 +0000
-Message-ID: <b085669a-3684-4031-9e0d-3275289e86b6@oracle.com>
-Date: Wed, 8 Jan 2025 12:03:54 +0530
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 2/2] btrfs: add test for encoded reads
-To: Mark Harmstone <maharmstone@fb.com>, fstests@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Cc: neelx@suse.com, Johannes.Thumschirn@wdc.com
-References: <20250106140142.3140103-1-maharmstone@fb.com>
- <20250106140142.3140103-2-maharmstone@fb.com>
-Content-Language: en-US
-From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <20250106140142.3140103-2-maharmstone@fb.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: MA0PR01CA0069.INDPRD01.PROD.OUTLOOK.COM
- (2603:1096:a01:ad::10) To PH0PR10MB5706.namprd10.prod.outlook.com
- (2603:10b6:510:148::10)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DB9986324;
+	Wed,  8 Jan 2025 08:00:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.51
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1736323233; cv=none; b=E50q8ZEauHnfz6Ne9ipSIHgtDxqBmj5ceYYKHN1m/OUz0U1IAO4mBXY3Hc4pwDkg8kG36PlzK0uEKq9FROh1cAW817YWlq7LMVpMvXNgEYf/kP/lAZA8Sv2JcLblmVNI4vLk2Aets1OzJSQa6GkkA3FqtZM3Mp3qZgYKe+Cls+4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1736323233; c=relaxed/simple;
+	bh=PRn6O56hP1PW9dQPfJtdu8tCul4YM2r1wgdCeklt/Ac=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=TmQF8ei8nyHQ3+ylKROZvKgRV1rUpJU9Gx8Nl7N75sluC75EFwtq1Zw9sfiX5RUH7Qwme0hK8yQN1X0ipRagIdCFaZR+wose32JZinvzxtumbw3Jcu6Sz1sHQ86fExBStAxIxgdU7IORUtgfEpgJ0xMqa8+K5ptdUpSmyE5NYvI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com; spf=pass smtp.mailfrom=huaweicloud.com; arc=none smtp.client-ip=45.249.212.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=huaweicloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huaweicloud.com
+Received: from mail.maildlp.com (unknown [172.19.163.216])
+	by dggsgout11.his.huawei.com (SkyGuard) with ESMTP id 4YSgLy5Qztz4f3jss;
+	Wed,  8 Jan 2025 16:00:10 +0800 (CST)
+Received: from mail02.huawei.com (unknown [10.116.40.128])
+	by mail.maildlp.com (Postfix) with ESMTP id B76211A1620;
+	Wed,  8 Jan 2025 16:00:25 +0800 (CST)
+Received: from [10.174.179.80] (unknown [10.174.179.80])
+	by APP4 (Coremail) with SMTP id gCh0CgDnSl+VMH5n9XV5AQ--.56329S3;
+	Wed, 08 Jan 2025 16:00:23 +0800 (CST)
+Message-ID: <9586a142-ab96-4f3d-961d-8edb8a87e616@huaweicloud.com>
+Date: Wed, 8 Jan 2025 16:00:21 +0800
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|BLAPR10MB5042:EE_
-X-MS-Office365-Filtering-Correlation-Id: fdaa12f8-5e61-4d55-f0e1-08dd2fae6fb5
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|10070799003|366016|376014|1800799024|7053199007;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?YWJSWE1uZUtLc2ZJQnJuN21IanJEdkZQaXlXeFhuaFZ1T0hkUG8zUjI3Z2ZC?=
- =?utf-8?B?SkVSVUhOejFGSHg2YzBPSXp1dSt4czB5NllFdnVKTDdHeTZUMjRwMjV0bjdh?=
- =?utf-8?B?RTJzUUdpNjMwbFlwMWh1ckttbVBFV2VCNTRhazUyVEVQYm1XOWxSbWUvNXRv?=
- =?utf-8?B?Y2dFeUtaMndqNFNHUEYxMGY5aUJ1VXVJVGwxZ0ZYVkRuYWtXMHhXS2ovQ0RM?=
- =?utf-8?B?Q09hNllDUnQvRlBxSjlvRC9kTWhRRnVyU0pwYVFFTUluNDdoZHNjVEY0bU1x?=
- =?utf-8?B?dGxMNXlNT1hsVHk0UmsxUXlNTER5bXRhVjJMbmdrQ1ovRm9ITmxGclBqWmJl?=
- =?utf-8?B?UWtZSE8zVzY1MnFyTE1yQU1kWHdiT29yMU5ZMkFlcnpoNnFXR3hFMmVOdllL?=
- =?utf-8?B?TzhTdW5WeGR4ckRIOVNVck43dWRiYWVxdVVSODJEZ280YjZveWJ0Z1Z2eVJG?=
- =?utf-8?B?azhmRHltREdTc3p0QnlOZW55L1NIM0ZpdW1aRHJPZ21qTlhnNUJRMDhBdDFs?=
- =?utf-8?B?aCtxdm9aTUVTQ2I2TUNZTlgxa1pBbStLdFZveGVNSlpVb3RZTDluY0xndE1M?=
- =?utf-8?B?OTdmaFNEVGJxMUZsVkp6SXRWQUZ2SFo0Y0NUK0Rab1VKNlhHYWx4bjQxeXB6?=
- =?utf-8?B?QktiYSt1UmlkMG5JNXVmZ0FIaU1yY0NscHpsMVZZVGk4TlBqODBQZUFyY2du?=
- =?utf-8?B?M3dINzFtK1pOdzdENTRGTFNoZ2poRURSRzBqU0lxSjFwQXBNeHVUQUNSVmhO?=
- =?utf-8?B?TktxTk5scDNuY1MzeithdUo5RDMyby9OVURsdVpISk1xRUNFUjQvQm1sYmpo?=
- =?utf-8?B?a1pUNmNkM20vVzBxN2x1eXJIUHlVeE9jaVJtaXRjd3BjWUVaVHAwc2c2bVhZ?=
- =?utf-8?B?T1lQQXZab3Vub0dsdFAyZmV1c3VPQjBKQmUvRTJCcGdGOENwekNPQmZ1MWpG?=
- =?utf-8?B?NnB6bkJIWHBrb01sbmFZWXFqQ0YzQmM5Ykx1ZS9NU2FVU1A5a0daS2NUMUlC?=
- =?utf-8?B?Q29rOStzRFkvLzJadW16YVBZcit5L1RNUmkzei9WOWJkaU9aT2JINFB1bU5x?=
- =?utf-8?B?Q1ZpRUZ6Vm5TbmFObCtwVW9SMmo5RzRsdUdSZlZ6VisxWTF6bzZlaS9XSDEw?=
- =?utf-8?B?bUU1VTlER29EcXNZckZmOWJyZStDVDBHWDQrVVphS1gwQXhHMDgvUmVob0JY?=
- =?utf-8?B?UzFGVys3REt5bnM0RVpyYkYyNGIwYW1DbnRXbml0K1Z2MmE3aXB5aW9mcGZC?=
- =?utf-8?B?Yy9Cc0pVbm13ZHdLNTg2b1kxbW56UFR3dXRZb0pXdFpMOHBsczYxb21yR0ha?=
- =?utf-8?B?UXN4K2JTajNYc0t4QjlLeHI4VVhocEJwV0hhbDlESFVWckVPR3hWcEtpSUpB?=
- =?utf-8?B?MFdZbWh1WVBERzRHVi85cmI0NkJ4RDlkRW0wczRuakt0VXF1ektmM21aR09o?=
- =?utf-8?B?ck0vdUhGaTQ3N1pHcDFlMXJrcEFiWGRGRUNCdzBUY05RWm5ORjdodCtuSjRa?=
- =?utf-8?B?Y21vWFdSeXB0YkZMQ2xNbkx1Y09JdmlKam9vMHlxSHFJcjU1bCtQMzR0ZFZm?=
- =?utf-8?B?RkszN2JtYWxZRnZkSkpteTU3RC96U0wyMS92cnVxTVVLTXZONGtLQklPMDhy?=
- =?utf-8?B?a3F1bWIvU1hHMmV1aU5oMzdCVU05WSt5dm5PQ0ViRko0K2plajJkYkpPR0hO?=
- =?utf-8?B?V3l2MVFFZ1JqV2V4N3BMcm5ZTVpMbGtlYUxaOTF3Y2pJNUlEWkFIeE1nbEZi?=
- =?utf-8?B?T1YwNm4rc0pNc2FhZDVibE81OEpCOG1pTmpKbmhqMmVsVWxpakJsU0J3QStH?=
- =?utf-8?B?YUN2QU1zUDRoTGp1RUtXUVd3U0RGWGpoZ3dyZnFmMGc1RFZ0VWtMVGY2Szhi?=
- =?utf-8?Q?zZxmVoX9C7wgt?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(10070799003)(366016)(376014)(1800799024)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?U211V0FCMWJ0Qmt3cFFlNndUenRnSk81VEZtQk1zaHBncmlxS2RWQnE1c2Yx?=
- =?utf-8?B?VGNjWnBPR1dqc2JCWXZIaW80N3V3WjZPRmxEMUFmOFRxZE00RFdVQnowMmlo?=
- =?utf-8?B?S2lvSW16OC9mN24wUm5Vc2dUUzI0U1FhNVVtZUh1SUk1OExOSXI1dUdqTDIv?=
- =?utf-8?B?TTQvYXFZSzM3Ykcxbis0SHJ3Wk8zMFd2Vy82MXYrVlhGNHRKSnFnb2hnM21l?=
- =?utf-8?B?UTNEOWg0cG5XMkNPOFhkcEFOTkhoK0FJaEJaY1lVSWp1NDgxd3BHeU1leDF4?=
- =?utf-8?B?UjRCL2djZHZHSFpVRnNwVDJ4ZXBOT0lrSVErLzYyQStZckRMbElPRzJDZEJZ?=
- =?utf-8?B?bVRoNlQvU0dFR3B3UXV4NmY4Q1hwMm1CbnVCTDFsdVpoaEJ2TjVxMUhBc0Rp?=
- =?utf-8?B?Z2dqNitnRmZJRC93bmlHbjZudGhTSUN5WWljN0RNOHVUUWZkdU8wajVndkw5?=
- =?utf-8?B?MWthaDRaTGlWQUdYSENyUjF6R3J4RFR1bWl6N1pPVXZDazVUUW8xU09hTzNG?=
- =?utf-8?B?bnZLdHp3VHVjUXhqNVpjZ2sxdXhLZHpVSjg2WVM5eXIvUGJhZ1BOWmFoMWEr?=
- =?utf-8?B?NGp6K0VORVZvOXk3WW5OK2dPdFE2eGJVUGU3MlR3dXIzREdxSHRPTmxJa053?=
- =?utf-8?B?WjBhK0dHWVBQMzN3SWVYRlpDN0dkOTZOK1VmRmg4UU9QRlRpSnBDUk4wWUZx?=
- =?utf-8?B?MVBOdndaOTVzTzkybGZ1S0o3ZGZoK21pdmNHVDVhOGtkU1RHOUdWRzJmTm5N?=
- =?utf-8?B?TlZVMWxlMVZjaXpua09QYXprblJyQUM4cHlKeGJTN2hCaXBYNjdvblZHT2FJ?=
- =?utf-8?B?cURROVZVWThvUk8zcTNWSUxyWVBDb3UzVjl2M1BXNERnc1dUYzJEL3V0ZFF2?=
- =?utf-8?B?cTJmakcxZGRacTUvT0V2R3FYeS9ScHhuRGZTQ01SY2lUWTl1YUhMS1RXZG9Q?=
- =?utf-8?B?UGdQSmtSOWRya0NDeTJyK29OeXlaNHJIb28wZVFJUnREeXZidXc4bmxFZ3gz?=
- =?utf-8?B?a0RqN3NrZlFPckRpdXVmTU5qaWRXV3hZQ1Fzak96Rk1lamNEdWRLWFdTM2o0?=
- =?utf-8?B?NmlsdjdNTDFTRFFDMnNNaUcyOHphM25MZEhnTXYyaUJKK2VRdjBrbXFvQmEz?=
- =?utf-8?B?aHNyb1pTTWFZTEZMMDFvSFRTVE9rNThUNzlhSUl2dmdZZDkwRENweUo4b3Y2?=
- =?utf-8?B?bTQ5a0tsY0FmM2VuTWJldlpUOWtObWU2MkhJT093czNzVXUydXJmMWNIM0Ir?=
- =?utf-8?B?aUozcmoyNitwM0hJcXAyME9uTkFkZWdtQkV4MXV3VWlGZ0FXNHpZUGVwaHRG?=
- =?utf-8?B?V0YxTlE0dHFVUUNCVC9SaWpQaUQvcjZLV2JRRkE5MmoxWFI3Y3dYaXZTd25T?=
- =?utf-8?B?VnA5WlQ1NFZweVBXZkYzeVV2dVFiMUtNaDl0R2tmSUNUaUxBSjNoTVFQN1pV?=
- =?utf-8?B?cGZDU2NyY2FWRHhDSGx4OStOWFhuODhEVysrTUV4b29oZC81NGNjM0RDQXlO?=
- =?utf-8?B?c0s0Ni9aWGlYMlUyeU5uUkpSM3lwQ3ZNQlNzK2hYamcxZDZIc2FyNHNVajZ1?=
- =?utf-8?B?WXRZZEFuVURoa1V3MzYzYWJGU1oyTVNaRGpRZ0hwRjh4VHN1VEFkMnI4cGg4?=
- =?utf-8?B?NzhKa2g1amx0UW5GSEZ6aGxtQlJxUHJHM0hvS0UzUTkzMXdsT1E4NUNEcnlu?=
- =?utf-8?B?MDdLM1IzcElvUVBBM0FzUHl1eWFrVzhyeGhieTBRR0UrTHFlNTdQdkYzWEdz?=
- =?utf-8?B?S3ducHV6dHArUGJxUHhmczQycmYvNVE3QXE0b3hDUW1BL1NEa0JyU2lvLyt2?=
- =?utf-8?B?YWNjNXJHK2FoRTRuRlJUa25yQ2p1bUxOZWJZRFFhcUNtZHRxSEpGWjVwWlBT?=
- =?utf-8?B?cmhJcVEwYkk1R296eWZJTlZvcGFHSSt5YUZPOHBsYUc5R0g0cWJmeklBRWJu?=
- =?utf-8?B?WndoalJINlNoaUtWNTZiR3RJbHVOZEdzUHhjTUFic1p5dTZ0SjMzckduZWR3?=
- =?utf-8?B?R0F5NmlwdU9ucXU5RkI0alJRbHlTMGhaT0hZK0pEOTJYMzA4Sjd5UU5manR3?=
- =?utf-8?B?QlNDK29QK2ZUZzZMVmNFNE9zL0V4T2RiRWtsUXArNUJRMlY3MjZyeWV6Sjl6?=
- =?utf-8?B?VDc4YUx1NnpNL1Q2NElxL1lHVnlvUmkwcytJVzRodzF5Ry9KL1YrOHNqQmZr?=
- =?utf-8?Q?V/VeRxDn0WOPDyS6HvRNuv7yUxnS7n0HD/811K4IyqxJ?=
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	KbryrqjQUX7FsY3c3wowatR2Uz1SHrwQWyGy+lc5RaryW6oI8XX0kGdrD88qLIgGJk0ddEp329sc5c3rH+l9sBdwT/KD9MyPGGKpmyPm8uadicVUt4X8426oGdmrQZJD/OQmbgVNwVmt/zrGSNu4G6qbDKMondNjTbz8+X8ATZp3Rk2k4zIpeDWp/5cK8PDmo2iwdn7oAotOpPjxttTG2iLBd+iWhHgD0xt86X74TU7zUTBtTU8VYf0itiZaHIQECc9L4wTIr6y6owseJ0TOHr/SdaEuF3t68XHXqbOOUaVE5J33bcp+Vq1mCWy2zvcwSPb0zvXP7tHOzTHikYj+c5jMJYco103+g0BTclid82LbdTZduNfLDZrl6OgIo72HFhsIXLY+R4+tlD8Mo/Ehr4e9t3ZacscUaKVR+jWlY7JJW0AAgRL7AI7k0CqfGZCFPrrR31eAOjjIZRsOYuQTRL9zCpL/DeENI5E/5IvcnhgBQuPgqwwMoWWmgYQmhGUbrfsfD/BRIX/t+0hAgHcwsGbTt35YeaUIKcj4v8FxlbK6wM1MpCLQbur8agF41OHjPnP3HgNRE2uT9SJtn8zcU3aNqyJ9gApetgOHZ5/rXmo=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: fdaa12f8-5e61-4d55-f0e1-08dd2fae6fb5
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jan 2025 06:34:00.5105
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: /1KmOD3VMqvEFERwmUPR3a4p1SRwwLP6wmt8ft5Bl0y7ilsTB1s5+P067TY9fvoDgBLlNP5lMCVW0S6KP+kOHQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BLAPR10MB5042
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-01-07_06,2025-01-06_02,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 malwarescore=0
- adultscore=0 mlxlogscore=999 suspectscore=0 mlxscore=0 spamscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2411120000 definitions=main-2501080051
-X-Proofpoint-GUID: AbchIeUM3lUu4e11AMf1ng4cmameh8HO
-X-Proofpoint-ORIG-GUID: AbchIeUM3lUu4e11AMf1ng4cmameh8HO
+User-Agent: Mozilla Thunderbird
+Subject: Re: [xfstests PATCH v2] generic: add a partial pages zeroing out test
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-fsdevel@vger.kernel.org,
+ tytso@mit.edu, adilger.kernel@dilger.ca, jack@suse.cz, willy@infradead.org,
+ ojaswin@linux.ibm.com, yi.zhang@huawei.com, chengzhihao1@huawei.com,
+ yukuai3@huawei.com, yangerkun@huawei.com
+References: <20241225125120.1952219-1-yi.zhang@huaweicloud.com>
+ <20250108015042.GC1251194@frogsfrogsfrogs>
+Content-Language: en-US
+From: Zhang Yi <yi.zhang@huaweicloud.com>
+In-Reply-To: <20250108015042.GC1251194@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-CM-TRANSID:gCh0CgDnSl+VMH5n9XV5AQ--.56329S3
+X-Coremail-Antispam: 1UD129KBjvJXoWxWFW8AF18GFyDZr1UGw4fGrg_yoWrAryfpF
+	Z5W3ZIyr4xJa47J3s3uFn8Xry3Jws3ZF47ury7Wr90yFWvvrn7Ga9Igr48WFZ3Gw4j9r4F
+	vw4kX34a9r4vvrDanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUvjb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k2
+	6cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4
+	vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xIIjxv20xvEc7Cj
+	xVAFwI0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I
+	0E14v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40E
+	x7xfMcIj6xIIjxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x
+	0Yz7v_Jr0_Gr1lF7xvr2IY64vIr41lFIxGxcIEc7CjxVA2Y2ka0xkIwI1lc7CjxVAaw2AF
+	wI0_Jw0_GFyl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4
+	xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43
+	MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I
+	0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWU
+	JVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjxUF1
+	v3UUUUU
+X-CM-SenderInfo: d1lo6xhdqjqx5xdzvxpfor3voofrz/
 
-On 6/1/25 19:31, Mark Harmstone wrote:
-> Add btrfs/333 and its helper programs btrfs_encoded_read and
-> btrfs_encoded_write, in order to test encoded reads.
+On 2025/1/8 9:50, Darrick J. Wong wrote:
+> On Wed, Dec 25, 2024 at 08:51:20PM +0800, Zhang Yi wrote:
+>> From: Zhang Yi <yi.zhang@huawei.com>
+>>
+>> This addresses a data corruption issue encountered during partial page
+>> zeroing in ext4 which the block size is smaller than the page size [1].
+>> Add a new test which is expanded upon generic/567, this test performs a
+>> zeroing range test that spans two partial pages to cover this case, and
+>> also generalize it to work for non-4k page sizes.
+>>
+>> Link: https://lore.kernel.org/linux-ext4/20241220011637.1157197-2-yi.zhang@huaweicloud.com/ [1]
+>> Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
+>> ---
+>> v1->v2:
+>>  - Add a new test instead of modifying generic/567.
+>>  - Generalize the test to work for non-4k page sizes.
+>> v1: https://lore.kernel.org/fstests/20241223023930.2328634-1-yi.zhang@huaweicloud.com/
+>>
+>>  tests/generic/758     | 76 +++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/758.out |  3 ++
+>>  2 files changed, 79 insertions(+)
+>>  create mode 100755 tests/generic/758
+>>  create mode 100644 tests/generic/758.out
+>>
+>> diff --git a/tests/generic/758 b/tests/generic/758
+>> new file mode 100755
+>> index 00000000..e03b5e80
+>> --- /dev/null
+>> +++ b/tests/generic/758
+>> @@ -0,0 +1,76 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2024 Huawei.  All Rights Reserved.
+>> +#
+>> +# FS QA Test No. generic/758
 > 
-> We use the BTRFS_IOC_ENCODED_WRITE ioctl to write random data into a
-> compressed extent, then use the BTRFS_IOC_ENCODED_READ ioctl to check
-> that it matches what we've written. If the new io_uring interface for
-> encoded reads is supported, we also check that that matches the ioctl.
+> "FS QA Test No. 758" is ok here, or whatever ./new spat out.
 > 
-> Note that what we write isn't valid compressed data, so any non-encoded
-> reads on these files will fail.
+>> +#
+>> +# Test mapped writes against zero-range to ensure we get the data
+>> +# correctly written. This can expose data corruption bugs on filesystems
+>> +# where the block size is smaller than the page size.
+>> +#
+>> +# (generic/567 is a similar test but for punch hole.)
+>> +#
+>> +. ./common/preamble
+>> +_begin_fstest auto quick rw zero
+>> +
+>> +# Override the default cleanup function.
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -r -f $verifyfile $testfile
 > 
-> Signed-off-by: Mark Harmstone <maharmstone@fb.com>
-> ---
+> Don't bother deleting anything on $SCRATCH_MNT, it'll get mkfs'd out of
+> existence soon enough.
+> 
+>> +}
+>> +
+>> +# Import common functions.
+>> +. ./common/filter
+>> +
+>> +_require_test
+>> +_require_scratch
+>> +_require_xfs_io_command "fzero"
+>> +
+>> +verifyfile=$TEST_DIR/verifyfile
+> 
+> Also is there any harm in putting verifyfile on $SCRATCH_MNT and thereby
+> not having to override _cleanup?
+> 
 
+Ha, it seems fine to me. Putting verifyfile on $SCRATCH_MNT should have no
+side effects, I will do this in next iteration.
 
-Looks good. Add to the group io_uring and ioctl.
+Thanks,
+Yi.
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
+> 
+>> +testfile=$SCRATCH_MNT/testfile
+>> +
+>> +pagesz=$(getconf PAGE_SIZE)
+>> +
+>> +_scratch_mkfs > /dev/null 2>&1
+>> +_scratch_mount
+>> +
+>> +_dump_files()
+>> +{
+>> +	echo "---- testfile ----"
+>> +	_hexdump $testfile
+>> +	echo "---- verifyfile --"
+>> +	_hexdump $verifyfile
+>> +}
+>> +
+>> +# Build verify file, the data in this file should be consistent with
+>> +# that in the test file.
+>> +$XFS_IO_PROG -f -c "pwrite -S 0x58 0 $((pagesz * 3))" \
+>> +		-c "pwrite -S 0x59 $((pagesz / 2)) $((pagesz * 2))" \
+>> +		$verifyfile | _filter_xfs_io >> /dev/null
+>> +
+>> +# Zero out straddling two pages to check that the mapped write after the
+>> +# range-zeroing are correctly handled.
+>> +$XFS_IO_PROG -t -f \
+>> +	-c "pwrite -S 0x58 0 $((pagesz * 3))" \
+>> +	-c "mmap -rw 0 $((pagesz * 3))" \
+>> +	-c "mwrite -S 0x5a $((pagesz / 2)) $((pagesz * 2))" \
+>> +	-c "fzero $((pagesz / 2)) $((pagesz * 2))" \
+>> +	-c "mwrite -S 0x59 $((pagesz / 2)) $((pagesz * 2))" \
+>> +	-c "close"      \
+>> +$testfile | _filter_xfs_io > $seqres.full
+>> +
+>> +echo "==== Pre-Remount ==="
+>> +if ! cmp -s $testfile $verifyfile; then
+>> +	echo "Data does not match pre-remount."
+>> +	_dump_files
+>> +fi
+>> +_scratch_cycle_mount
+>> +echo "==== Post-Remount =="
+>> +if ! cmp -s $testfile $verifyfile; then
+>> +	echo "Data does not match post-remount."
+>> +	_dump_files
+>> +fi
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/generic/758.out b/tests/generic/758.out
+>> new file mode 100644
+>> index 00000000..d01c1959
+>> --- /dev/null
+>> +++ b/tests/generic/758.out
+>> @@ -0,0 +1,3 @@
+>> +QA output created by 758
+>> +==== Pre-Remount ===
+>> +==== Post-Remount ==
+>> -- 
+>> 2.39.2
+>>
+>>
 
-Thx.
