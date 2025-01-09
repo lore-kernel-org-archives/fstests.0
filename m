@@ -1,41 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 531B31FF61B;
-	Wed,  8 Jan 2025 16:56:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F7E12010FD;
+	Thu,  9 Jan 2025 13:07:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.156.1
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736355379; cv=none; b=g4dz0gIu325OlD3yjusAlDQp7Pm7Jlxb7RFr4N9iwMebXq3Vm31Ks3ckZZjlSXwOYIqrLpemRsYQdSLJmIEgqVVcRuGdAXcxvtfYe6dlLJbHUqevTzKJvZeqd1KmQAJQEvueIvHSFGZfeWXtLrR2PMs+iafU5HPzDYFIlI+hTQA=
+	t=1736428038; cv=none; b=iDQiNffDyLJp2GewQsxsf0Jp0i/VwvAMlv5nAUK0mg7DVDHNuxTPqLigt5bbD0KCbpq+vmwJ6OMc6eXLhTZAziNZ/wDNwnMwmmar4yGqITxetI8b1m70LfPMHZVIsccmvUBYiQP1r4i835uYdy8VIfcecs1M/81xjYLEobMLadQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736355379; c=relaxed/simple;
-	bh=26oTvqxCuPsCjfFB/yaN73dcKA/l+qJt8dtwka37Ryk=;
+	s=arc-20240116; t=1736428038; c=relaxed/simple;
+	bh=jxO0uETgdPlzzyXaDUrzPxUM75Hp+GjXHTRASlrNaRc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZjUXWMsb6NlloDjXGVOzvCXLaFNz4d1wf+jdKrkDMTfEbRZeGJh8hyJKw72M/tTLSOZKnPw1TDaL7WAUfIFB5J7dXeZMR65DhazGWAp9/wwu6DK5K5WOFf2rsxKlHJRWVXC2RqdNcbuAO+CLoeqmi3bZBKf0XYFWC7+fTIBlw/Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UrMV3bYs; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=oKLLCP1a287VbWc8mqPiZ+f+T3LOEz/9LeQTbDuMmpn9OegIAkxe7aEs4p/K4+OKoSPQE/xBkw+S9UNA+PwvZwXJAqv3d9Dv+L5FkTjieX3nATId6nBzzfM+E45CvpbR3urf/j16IiyN8xlYF4kP0ZUEPyHVfd2KBN6MZeRGfR8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com; spf=pass smtp.mailfrom=linux.ibm.com; dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b=WkDIfdqd; arc=none smtp.client-ip=148.163.156.1
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.ibm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linux.ibm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UrMV3bYs"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE046C4CED3;
-	Wed,  8 Jan 2025 16:56:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1736355378;
-	bh=26oTvqxCuPsCjfFB/yaN73dcKA/l+qJt8dtwka37Ryk=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=UrMV3bYsMEEgZyn8+BwQymgp8rg7Ez+wTQ+cJuEITvjpEORKx3F8LqWejRGtmfvH7
-	 sSr+If1L5+geNu57lOV8qZdeIzrxFGrXoyMIyCcvDLJPsEx9Qoi4nNxyBLkuAvmFv7
-	 I8SIP4soFcTSe1w4Evy+pqLoPSrG99DN7kzdn3YySYWSsyvLHL8nBLbRk+zlmSzDYc
-	 TdWNgV2nPV9zr29GubHyNhW4di4n8c6UNQiTeElfXyGxZX2RRxQaO9/gCGBxTf7Lvk
-	 gd18ZwFKUUa2lfui9x8ZQprhqC2QwzaVHC6SdPK6CbDVw0979sH1db4cCjNhuOD6BU
-	 f/kX1KJIdsRjQ==
-Date: Wed, 8 Jan 2025 08:56:18 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="WkDIfdqd"
+Received: from pps.filterd (m0356517.ppops.net [127.0.0.1])
+	by mx0a-001b2d01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5093r58J020172;
+	Thu, 9 Jan 2025 13:06:46 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=cc
+	:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=pp1; bh=7SuEC6uAszwAq24gll7+Wo9qhtTze/
+	HCGjBgA1GCGO0=; b=WkDIfdqd2ZpXBC/pAgyc3LrrYkcoHB0hzHEohBswCgXb1R
+	VvQ2N8AEItDDgERyIWlfrHhxASwxGPw7EKKRHuB6tUO75GOVSBqKAPVRH5femuCb
+	O2HruHEVHEra25dNYxRVwRnaU1g0K2XNCE/vIBE3g3F47jMce8EnbEHdKPTuW5im
+	Lh6DfrsT9lkqUpLQMMI0p3HmFpLvZSKgZaatSMkPbeq0xMl1o5GOKODFL3PszR5B
+	3crt+5bKShhsWzahSNT2vk9/BIHJiNJXg5kRtFxb+UjR5hzSalFzNuZkuQvhxTI8
+	rxnqrAK0KkPxeci9xAjNHpDiL8lepnkQSi2B13Hg==
+Received: from ppma23.wdc07v.mail.ibm.com (5d.69.3da9.ip4.static.sl-reverse.com [169.61.105.93])
+	by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 4426xqt7p5-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 09 Jan 2025 13:06:46 +0000 (GMT)
+Received: from pps.filterd (ppma23.wdc07v.mail.ibm.com [127.0.0.1])
+	by ppma23.wdc07v.mail.ibm.com (8.18.1.2/8.18.1.2) with ESMTP id 50996lkw015809;
+	Thu, 9 Jan 2025 13:06:45 GMT
+Received: from smtprelay01.fra02v.mail.ibm.com ([9.218.2.227])
+	by ppma23.wdc07v.mail.ibm.com (PPS) with ESMTPS id 43ygtm5408-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 09 Jan 2025 13:06:45 +0000
+Received: from smtpav05.fra02v.mail.ibm.com (smtpav05.fra02v.mail.ibm.com [10.20.54.104])
+	by smtprelay01.fra02v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 509D6h6456361352
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 9 Jan 2025 13:06:43 GMT
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id 1219A2004D;
+	Thu,  9 Jan 2025 13:06:43 +0000 (GMT)
+Received: from smtpav05.fra02v.mail.ibm.com (unknown [127.0.0.1])
+	by IMSVA (Postfix) with ESMTP id D2A8020040;
+	Thu,  9 Jan 2025 13:06:39 +0000 (GMT)
+Received: from li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com (unknown [9.109.219.249])
+	by smtpav05.fra02v.mail.ibm.com (Postfix) with ESMTPS;
+	Thu,  9 Jan 2025 13:06:39 +0000 (GMT)
+Date: Thu, 9 Jan 2025 18:36:36 +0530
+From: Ojaswin Mujoo <ojaswin@linux.ibm.com>
 To: Zhang Yi <yi.zhang@huaweicloud.com>
-Cc: fstests@vger.kernel.org, zlang@kernel.org,
-	linux-fsdevel@vger.kernel.org, tytso@mit.edu,
-	adilger.kernel@dilger.ca, jack@suse.cz, willy@infradead.org,
-	ojaswin@linux.ibm.com, yi.zhang@huawei.com, chengzhihao1@huawei.com,
-	yukuai3@huawei.com, yangerkun@huawei.com
+Cc: fstests@vger.kernel.org, zlang@kernel.org, linux-fsdevel@vger.kernel.org,
+        tytso@mit.edu, adilger.kernel@dilger.ca, jack@suse.cz,
+        willy@infradead.org, djwong@kernel.org, yi.zhang@huawei.com,
+        chengzhihao1@huawei.com, yukuai3@huawei.com, yangerkun@huawei.com
 Subject: Re: [xfstests PATCH v3] generic: add a partial pages zeroing out test
-Message-ID: <20250108165618.GD1251194@frogsfrogsfrogs>
+Message-ID: <Z3_J3OLnQkW8LVl6@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com>
 References: <20250108084407.1575909-1-yi.zhang@huaweicloud.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -46,6 +71,17 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <20250108084407.1575909-1-yi.zhang@huaweicloud.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: y5gO_WNs7AGQCqzlTDfZEshW2otXLB4f
+X-Proofpoint-ORIG-GUID: y5gO_WNs7AGQCqzlTDfZEshW2otXLB4f
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1051,Hydra:6.0.680,FMLib:17.12.62.30
+ definitions=2024-10-15_01,2024-10-11_01,2024-09-30_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501 mlxscore=0
+ suspectscore=0 phishscore=0 spamscore=0 bulkscore=0 mlxlogscore=999
+ lowpriorityscore=0 clxscore=1015 malwarescore=0 adultscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2411120000 definitions=main-2501090104
 
 On Wed, Jan 08, 2025 at 04:44:07PM +0800, Zhang Yi wrote:
 > From: Zhang Yi <yi.zhang@huawei.com>
@@ -58,12 +94,6 @@ On Wed, Jan 08, 2025 at 04:44:07PM +0800, Zhang Yi wrote:
 > 
 > Link: https://lore.kernel.org/linux-ext4/20241220011637.1157197-2-yi.zhang@huaweicloud.com/ [1]
 > Signed-off-by: Zhang Yi <yi.zhang@huawei.com>
-
-LGTM now, thanks for setting this up!
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-
---D
-
 > ---
 > v2->v3:
 >  - Put the verifyfile in $SCRATCH_MNT and remove the overriding
@@ -74,6 +104,13 @@ Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 >  - Generalize the test to work for non-4k page sizes.
 > v2: https://lore.kernel.org/fstests/20241225125120.1952219-1-yi.zhang@huaweicloud.com/
 > v1: https://lore.kernel.org/fstests/20241223023930.2328634-1-yi.zhang@huaweicloud.com/
+
+Feel free to add:
+
+Reviewed-by: Ojaswin Mujoo <ojaswin@linux.ibm.com>
+
+Regards,
+ojaswin
 > 
 >  tests/generic/758     | 68 +++++++++++++++++++++++++++++++++++++++++++
 >  tests/generic/758.out |  3 ++
@@ -166,5 +203,4 @@ Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 > +==== Post-Remount ==
 > -- 
 > 2.39.2
-> 
 > 
