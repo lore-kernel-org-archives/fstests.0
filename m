@@ -1,188 +1,225 @@
-Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B19D25760;
-	Mon, 13 Jan 2025 15:52:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53BFD1420DD;
+	Mon, 13 Jan 2025 15:56:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736783556; cv=none; b=cZRC6FpA+712235IEc7qiaFc7WTGWrQ/7ELql3Kg63JMj8tlwYhfX4LriRp5Zsd9kZMBwaWBow8NJvf2W9JMJOFqYFuGGbep1IBjMNJIWIK7WzahPb+93/6WFjwKk2rREpiPHYThm+b9f95N8gKDgQrWjB/sRgaYuuj24YG9Pk8=
+	t=1736783772; cv=none; b=eD4s0r3DKGon61qGKlIehdtA6eFUiO18QxNK5WEeaohqdSKIt/fHTRxfFhll37/W5eVZM0hOVl3actKjwFoe2Si9WrM7mxEmVKHmlvxV2R/t7YEDxpv72UtxdlSEiXIOLSxe2q6sc7XoY+toP8yk0K27d8XzPWwjkXkTo9tqwIA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736783556; c=relaxed/simple;
-	bh=KQGBGhXeAKerB/ZmQg6V+0zu677PPyFeiNo7a0yTUyo=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References:
-	 MIME-version:Content-type; b=qoLxjKEu+qH4TEpqn3OfUK8kd9wbB+LW6iNt8mKeAeIFMiZk3989iH9XYF422F5/TJK8Up88/KLIYcPROVA3v3dN1mevqxFpqtmxJhLoisxmZ+adym5jYyrPETL8pF2Nlv19h2Uqy2sTG7LExsfrA0caUTZ6wxvQ+0AOA+7nSwE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ELPKPY6c; arc=none smtp.client-ip=209.85.216.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1736783772; c=relaxed/simple;
+	bh=2DyQJQtg2jTz+shuWvjjwZuE4kOwj/cguYbgJDjyRWk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=efa4TXsGdX3GQQhRUuvMLaks4GTRrf3NjQxAvQ8gG3TX3b+fomNwYTdaWvffDmUl3h1D/9lQ6+hTv1ePrvTuWwNVJnSqmgA4sGvvB5gLGYiFmMWaZ6yelQ4qN49PgKJ4PcH8nGBzudm4ewbI00erPZ2mntgf/8rGOgB1QDN6xr4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=g+1b0QmJ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ELPKPY6c"
-Received: by mail-pj1-f45.google.com with SMTP id 98e67ed59e1d1-2ef714374c0so6693238a91.0;
-        Mon, 13 Jan 2025 07:52:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736783554; x=1737388354; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:message-id:date
-         :in-reply-to:subject:cc:to:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=q1y/odhV1Y5lkits40FYXBT8gxSpQl7u3UnS0bDayd4=;
-        b=ELPKPY6cPh4hwRcRP620Sl3pFaKXhh97lRUjxzjs+CxUvdiAtSei7SaqTH9DCqYMGa
-         h08pkWpnyZF7BVxTYtc38U7zRdBMOsPDoEYCIlAof2Vd1F9DUSuecmhVIdU2MeXkQTtc
-         j1+jeXFwqK0VHLXO+706YDZ7Bq+hWmKIzPEf1a/RsAy/A+eEzWkQs6r4KNxubqWZtmeA
-         4fDDD9N9ypsnEQUtoZZgJ4fhbmjvMON5zRRSmC9qOch3/TQq/Y8/WmthyllYMC1l2WDB
-         Ag9hzCzMiGeZ21/jXN3HUOWMBrnF5pbImSA28DA5MRsDJNIwAuC0hJavXXHA1Piy8Vtf
-         5ixQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736783554; x=1737388354;
-        h=content-transfer-encoding:mime-version:references:message-id:date
-         :in-reply-to:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=q1y/odhV1Y5lkits40FYXBT8gxSpQl7u3UnS0bDayd4=;
-        b=naZBrmn1uTIplA5a3cKyCGKRLXgKCpqDJvWrrg/So7h6rwHSju75AKx0xAlojZsKNN
-         2nobr5GXu4a3PiR8a0wcjwRwU0Z3FGIiYvLzix+KkoWIQ6sA4ZG077zSe+/drKuPLdNS
-         0xDCBhGJvok9Gue/FXkoMvn8tY5Fkdw7W/IqiJB2bqXiiftvW+uHMUfxL3T1dpJV0LHH
-         l7TOjIZ3aT3n3Favdb8OlGBbAz2B9CPGqMXl0nIGgMFbcxVbaiUu4SfdrWOgRmUImIxm
-         /heuCgSbvuFHZ3BzvDhFj8DcppAN9rHYoclyoS69mHFBAzjDoWEbbHpEgX4Z3t3dQJ30
-         a2Aw==
-X-Forwarded-Encrypted: i=1; AJvYcCUEOPnsoFrX1Ol6ITEkvaoV9uaG+hvjXzv3w9Pfb4wNUgGWsRzuLCYRnrerChVPomozoi3tSbYi@vger.kernel.org, AJvYcCULPtjFuYBOedpdiPwEKeaHGZr37H7HkrZdM6+PWHPsdxIb5UyQrcKFIA61sPFZ0YU1cSqxCEuDISYW@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw3SuyMrkWluJWPAElce8VhOdqF+TO+XPk7FZRc2kJOhJUi94JQ
-	Jw+NVugqJ6ZIDoc+dwTqBeeOBcAB/DqcebRLAcCC78Jueh0ynHaw
-X-Gm-Gg: ASbGncvqi6P8orVz4vn6DeA4q5sqNISx6LZQGYNRDzm0o5nd5ttWZqaB+alt2gdP5qp
-	uqDx4VUSbADbRN7iUIawY2zsEvCaXicPmK/80meWvMiCsFIBsi5UusEey3TyLz8XU3qjBLbLdaS
-	jGb18PH5iDXQTs5pok6gN1UxEfTV1+ERt5vYLF0TgkEXXvC592OaMjiO5CC7sqj+kvMLa4u4rU/
-	axp9IJHri5PxHApvgfCuJL+52haw17ydktOkXaKcN7n5mEM
-X-Google-Smtp-Source: AGHT+IGW8l3L8k3osuE/8UXobQu34qaX1xn0uWWszgfA0WkU3z5kQmcC4M1bch7vpBmQqHIbM1nkYA==
-X-Received: by 2002:a17:90b:3b4f:b0:2f2:a974:fc11 with SMTP id 98e67ed59e1d1-2f554603e39mr25755060a91.17.1736783552681;
-        Mon, 13 Jan 2025 07:52:32 -0800 (PST)
-Received: from dw-tp ([171.76.81.42])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2f54a2ad2basm10214702a91.24.2025.01.13.07.52.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jan 2025 07:52:31 -0800 (PST)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [PATCH] check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
-In-Reply-To: <1efecce4-f051-40fc-8851-e9f9c057e844@gmail.com>
-Date: Mon, 13 Jan 2025 21:09:37 +0530
-Message-ID: <87frlmvi2u.fsf@gmail.com>
-References: <f49a72d9ee4cfb621c7f3516dc388b4c80457115.1736695253.git.nirjhar.roy.lists@gmail.com> <87jzazvmzh.fsf@gmail.com> <1efecce4-f051-40fc-8851-e9f9c057e844@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g+1b0QmJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95CF8C4CEE3;
+	Mon, 13 Jan 2025 15:56:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1736783771;
+	bh=2DyQJQtg2jTz+shuWvjjwZuE4kOwj/cguYbgJDjyRWk=;
+	h=From:To:Cc:Subject:Date:From;
+	b=g+1b0QmJXM6WW2jKwcy67te5aCHRMIbiegQMInjqHmkDioOnqxv2h9Z50NUZW1AIV
+	 t2n0CMbHDqeefJU9QgTAXcuvFhTc1AtLiUA6+Eq/3e+2/yPRD0l6psqPipwQg/iWxi
+	 01VpOz5RdFuAd7+hsTnfGHUSZnCG7q9ncvzklVz7lfhwD6BDeVUaJCzDMdRc4T5Cxe
+	 +eSkLusdQgDs9CJuD3qx6vEsIs4IU4Q8TRKz5Z9lWyfGbnK4Tbkp3vV7qj4XlWaLs5
+	 EKFJ+FNqn076VSv2Yc3fi/8eSO+xDFTilM/TE6dv07xxYHLj0LkNg02/crIZPg0rcv
+	 pdmUfApoJ2FpQ==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	zlang@redhat.com,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH v2] generic: test swap activation on file that used to have clones
+Date: Mon, 13 Jan 2025 15:55:57 +0000
+Message-ID: <2c9ff99c2bcaec4412b0903e03949d5a3ad0d817.1736783467.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-version: 1.0
-Content-type: text/plain; charset=utf-8
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+From: Filipe Manana <fdmanana@suse.com>
 
-> On 1/13/25 01:11, Ritesh Harjani (IBM) wrote:
->> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
->>
->>> Bug Description:
->>>
->>> _test_mount function is failing with the following error:
->>> ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
+Test that we are able to activate a swap file on a file that used to have
+its extents shared multiple times.
 
-Please notice the error that you are seeing here ^^^ 
+This exercises a bug on btrfs' extent sharedness detection during swap
+file activation, which is fixed by the following kernel commit:
 
->>> check: failed to mount /dev/loop0 on /mnt1/test
->>>
->>> when the second section in local.config file is xfs and the first section
->>> is non-xfs.
->>>
->>> It can be easily reproduced with the following local.config file
->>>
->>> [s2]
->>> export FSTYP=ext4
->>> export TEST_DEV=/dev/loop0
->>> export TEST_DIR=/mnt1/test
->>> export SCRATCH_DEV=/dev/loop1
->>> export SCRATCH_MNT=/mnt1/scratch
->>>
->>> [s1]
->>> export FSTYP=xfs
->>> export TEST_DEV=/dev/loop0
->>> export TEST_DIR=/mnt1/test
->>> export SCRATCH_DEV=/dev/loop1
->>> export SCRATCH_MNT=/mnt1/scratch
->>>
->>> ./check selftest/001
->>>
->>> Root cause:
->>> When _test_mount() is executed for the second section, the FSTYPE has
->>> already changed but the new fs specific common/$FSTYP has not yet
->>> been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
->>> the test run fails.
->>>
->>> Fix:
->>> call _source_specific_fs $FSTYP at the correct call site of  _test_mount()
->> You should add the Fixes: tag too. Based on your description I guess
->> this should be the tag?
->>
->> Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
+  03018e5d8508 ("btrfs: fix swap file activation failure due to extents that used to be shared")
 
-Please look into the above commit. The above patch introduced function
-"_prepare_for_eio_shutdown()" in _test_mount(), which is what we are
-getting the error for (for XFS i.e. _xfs_prepare_for_eio_shutdown()
-command not found). Right? 
+The fails sporadically on XFS and the bug was already reported to the XFS
+mailing list:
 
-Ok, why don't revert the above commit and see if the revert fixes the
-issue for you. 
+   https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
 
-https://www.kernel.org/doc/html/v4.10/process/submitting-patches.html#using-reported-by-tested-by-reviewed-by-suggested-by-and-fixes
+   https://lore.kernel.org/fstests/dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com/
 
--ritesh
+So for now skip the test on XFS and add comments with references to these
+threads.
 
->
-> Shouldn't this be the following?
->
-> commit f8e4f532f18d7517430d9849bfc042305d7f7f4d (HEAD)
-> Author: Lukas Czerner <lczerner@redhat.com>
-> Date:   Fri Apr 4 17:18:15 2014 +1100
->
->      check: Allow to recreate TEST_DEV
->
->      Add config option RECREATE_TEST_DEV to allow to recreate file system on
->      the TEST_DEV device. Permitted values are true and false.
->
->      If RECREATE_TEST_DEV is set to true the TEST_DEV device will be
->      unmounted and FSTYP file system will be created on it. Afterwards it
->      will be mounted to TEST_DIR again with the default, or specified mount
->      options.
->
->      Also recreate the file system if FSTYP differs from the previous
->      section.
->
->>
->> I agree with today the problem was in _test_mount(), tomorrow it could
->> be _test_mkfs, hence we could source the new FSTYP config file before
->> calling _test_mkfs().
->>
->> With the fixes tag added, please feel free to add:
->>
->> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
->>
->>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->>> ---
->>>   check | 1 +
->>>   1 file changed, 1 insertion(+)
->>>
->>> diff --git a/check b/check
->>> index 607d2456..8cdbb68f 100755
->>> --- a/check
->>> +++ b/check
->>> @@ -776,6 +776,7 @@ function run_section()
->>>   	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
->>>   		echo "RECREATING    -- $FSTYP on $TEST_DEV"
->>>   		_test_unmount 2> /dev/null
->>> +		[[ "$OLD_FSTYP" != "$FSTYP" ]] && _source_specific_fs $FSTYP
->>>   		if ! _test_mkfs >$tmp.err 2>&1
->>>   		then
->>>   			echo "our local _test_mkfs routine ..."
->>> -- 
->>> 2.34.1
->
-> -- 
-> Nirjhar Roy
-> Linux Kernel Developer
-> IBM, Bangalore
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+
+V2: Add git commit ID now that the btrfs fix landed in Linus' tree.
+    Skip the test on XFS and add a comment about it.
+
+ tests/generic/370     | 109 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/370.out |  25 ++++++++++
+ 2 files changed, 134 insertions(+)
+ create mode 100755 tests/generic/370
+ create mode 100644 tests/generic/370.out
+
+diff --git a/tests/generic/370 b/tests/generic/370
+new file mode 100755
+index 00000000..67af7b6e
+--- /dev/null
++++ b/tests/generic/370
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2025 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 370
++#
++# Test that we are able to create and activate a swap file on a file that used
++# to have its extents shared multiple times.
++#
++. ./common/preamble
++_begin_fstest auto quick clone swap
++
++_cleanup()
++{
++	cd /
++	rm -r -f $tmp.*
++	test -n "$swap_file" && swapoff $swap_file &> /dev/null
++}
++
++. ./common/reflink
++
++[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 03018e5d8508 \
++    "btrfs: fix swap file activation failure due to extents that used to be shared"
++
++# Skip XFS for now because this exposes an issue that is hard to fix.
++# See the following threads for details about it:
++#
++# https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
++# https://lore.kernel.org/fstests/dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com/
++#
++_supported_fs ^xfs
++
++_require_scratch_swapfile
++_require_scratch_reflink
++_require_cp_reflink
++
++run_test()
++{
++	local sync_after_add_reflinks=$1
++	local sync_after_remove_reflinks=$2
++	local first_swap_file="$SCRATCH_MNT/swap"
++	local swap_size=$(($(_get_page_size) * 32))
++	local num_clones=50
++	local swap_file="$SCRATCH_MNT/clone_${num_clones}"
++
++	_scratch_mkfs >> $seqres.full 2>&1 || _fail "failed to mkfs"
++	_scratch_mount
++
++	echo "Creating swap file..."
++	_format_swapfile $first_swap_file $swap_size >> $seqres.full
++
++	echo "Cloning swap file..."
++	# Create a large number of clones so that on btrfs we get external ref
++	# items in the extent tree and not just inline refs (33 is currently the
++	# treshold after which external refs are created).
++	for ((i = 1; i <= $num_clones; i++)); do
++		# Create the destination file and set +C (NOCOW) on it before
++		# copying into it with reflink. This is because when cp needs to
++		# create the destination file, it first copies/clones the data
++		# and then sets the +C attribute, and on btrfs we can't clone a
++		# NOCOW file into a COW file, both must be NOCOW or both COW.
++		touch $SCRATCH_MNT/clone_$i
++		# 0600 is required for swap files, do the same as _format_swapfile.
++		chmod 0600 $SCRATCH_MNT/clone_$i
++		$CHATTR_PROG +C $SCRATCH_MNT/clone_$i > /dev/null 2>&1
++		_cp_reflink $first_swap_file $SCRATCH_MNT/clone_$i
++	done
++
++	if [ $sync_after_add_reflinks -ne 0 ]; then
++		# Force a transaction commit on btrfs to flush all delayed
++		# references and commit the current transaction.
++		_scratch_sync
++	fi
++
++	echo "Deleting original file and all clones except the last..."
++	rm -f $first_swap_file
++	for ((i = 1; i < $num_clones; i++)); do
++		rm -f $SCRATCH_MNT/clone_$i
++	done
++
++	if [ $sync_after_remove_reflinks -ne 0 ]; then
++		# Force a transaction commit on btrfs to flush all delayed
++		# references and commit the current transaction.
++		_scratch_sync
++	fi
++
++	# Now use the last clone as a swap file.
++	echo "Activating swap file..."
++	_swapon_file $swap_file
++	swapoff $swap_file
++
++	_scratch_unmount
++}
++
++echo -e "\nTest without sync after creating and removing clones"
++run_test 0 0
++
++echo -e "\nTest with sync after creating clones"
++run_test 1 0
++
++echo -e "\nTest with sync after removing clones"
++run_test 0 1
++
++echo -e "\nTest with sync after creating and removing clones"
++run_test 1 1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/370.out b/tests/generic/370.out
+new file mode 100644
+index 00000000..36b2dc27
+--- /dev/null
++++ b/tests/generic/370.out
+@@ -0,0 +1,25 @@
++QA output created by 370
++
++Test without sync after creating and removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after creating clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
++
++Test with sync after creating and removing clones
++Creating swap file...
++Cloning swap file...
++Deleting original file and all clones except the last...
++Activating swap file...
+-- 
+2.45.2
+
