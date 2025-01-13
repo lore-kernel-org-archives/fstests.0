@@ -1,156 +1,223 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9535B22CF2A;
-	Mon, 13 Jan 2025 12:01:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C18F322A4FD
+	for <fstests@vger.kernel.org>; Mon, 13 Jan 2025 13:11:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736769663; cv=none; b=AC+mGZBhyZXC1LZRWQZf2KqSwBJeI+358WiqCjhLx+hQxjgouJxuTi2m7XcxRLL6RSwgNbQcRbEwTTGoeBTskDdgW5qYtRXiTa5WTmYQMpIAKNRYzfSmPEP15A1K/FOmpy/OsCXn79XncVfyn/cHnqQrDvMEIM47EtPGvxyyczM=
+	t=1736773873; cv=none; b=G50pj6OXGDjRaidLzU4UZ5HIPCCCovQmIxO/m6/KY4cnF4oTH5gkpUKVM8Pd12nwHct+P6agrElh8niSszSFOq777c0OgmaXPaT61+v6ZL6VCUwjBqIBouSTaZKlwu+/+/YoFzBHx9KCaoIKhgHH3Ib41lDRiB1RtXIhXgtLQ2c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736769663; c=relaxed/simple;
-	bh=NSNpqsYesPWJFBbE5jTpjUv6TnMCPBw1pB+AFaj9ARA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QBuYgoKIxUUxdGNNDI4brNIepTrl1cMqtaXR4LRntW+NJgClMySK34OcR1Rm+8CuG1ViG+M1Q/kjCQ2w3IvdMgRtgmTo+kNspNnxPYOh6NeYzht1IBnE5AOvAm/GY3na/eH9ePn0arbGXGQ4+9tByC30q63vBi9n+wGas6dJQfQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=EUDosj7O; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1736773873; c=relaxed/simple;
+	bh=ohJF4MOn0aRK7flWN/MCpqehYbVM3qklDIp9OG7mMc0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=og05bQsqUvi//MQBjVbWydBEPDknmgDIPN4TlW+S9XlaFavzILRVKLcw9JlkWewt6mG+P39VQgNrc1PKah73W2BEzQR9ZrEJmY90cWkG/+F2vq6UGgk6SGF+8sgvAdy8yUJQMaKABOybnzwyt916+VGAk4IwKJbU+3NaJ6dq4YI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=cjBiqMY/; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="EUDosj7O"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2337EC4CED6;
-	Mon, 13 Jan 2025 12:01:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1736769663;
-	bh=NSNpqsYesPWJFBbE5jTpjUv6TnMCPBw1pB+AFaj9ARA=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=EUDosj7ONvNv564n+JWqFCUDhvtbCLZIuq8P9oqE6Xh3D/vhghK92yGKaFpSyygsd
-	 uyZDhZPJxRL7HAEgARL+qx9gQybzLV9MTNIcIS0qfmuj1lXmXDvhwje1f3y4bljcp2
-	 j5hyzLnK1QjFA2CuXauhd5EjeleWGE77Q0Q+RsTJ9oiSP/Ygnf8bBrkGqF2COR1kjq
-	 8Zk2Z1I0qIVP0eBLybiV34n6IaRwqQc0JnQIbiw8Zkaj41rGU0/+alQIoQlOlcdtMR
-	 CAePVHIyRBzWxHy2PgRv7M3pgi/kS9F7eGjV55WUUB+c/VY8FP2Zv9awGMmhX1/Zhi
-	 u2Hv3D+sdvryg==
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-aaeec07b705so682476066b.2;
-        Mon, 13 Jan 2025 04:01:03 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUqfMKixho0AjcgfLrPatMdtTbb+GX47l2Ji6/4vceMZxUvjXcs7JdIWSYJJGQP7QY92R+8o4Qv@vger.kernel.org, AJvYcCXVxvm939sssZu2WIVsNT2QRWWsBO+54jAcnbxU5N7nutn39r6eOVVj44zazoEb0tTUlu0FfWY55csUe1E=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyIBpVX92g9QEiqq0WSOKME6PyvJOtYEiZ+71m4vsQrqyuCQBNJ
-	rumwmR+5CJcEB8mWbrFze4AnB9qKlPGXsZVC6LWwK7nHVtjhC0rJKcJ8JtpstzkCLUx5y5B7mmQ
-	uQ1C2RooAEo3MiBerRfFWpqqWI6M=
-X-Google-Smtp-Source: AGHT+IGCj/R0sXVc4sN+D6aV26Ivffl7rLF38xa6pYAZZp3TJSH0gS7jyQqaZ9IBz/neGBBM9tb9I1w6qPTZo7+VkQQ=
-X-Received: by 2002:a17:906:f58e:b0:aa5:225f:47d9 with SMTP id
- a640c23a62f3a-ab2ab749f27mr1556422966b.29.1736769661696; Mon, 13 Jan 2025
- 04:01:01 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cjBiqMY/"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1736773870;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=FadNKLb2hmiuT2xe3JqSrPIXf7EYR5ffKD3vg2tvAY0=;
+	b=cjBiqMY/OqAbL7j6MlAzNPVhd60acNocHHNEBo9291WELjprfZ1D3SZp6mBTBUzjMoFn1n
+	VPzuFRONqCYylNHlZdieu/XGS8ns+lQACQOhh8ZVjc4jfs04xi5ODibxXwdrNzWYpJXygV
+	q3NNLkkcxNAZrIX2x4/IwjAVe+XNWyg=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-92-CvyMv5MGNXCkj3qMlh9wcw-1; Mon, 13 Jan 2025 08:11:09 -0500
+X-MC-Unique: CvyMv5MGNXCkj3qMlh9wcw-1
+X-Mimecast-MFC-AGG-ID: CvyMv5MGNXCkj3qMlh9wcw
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2f2a9743093so7523760a91.3
+        for <fstests@vger.kernel.org>; Mon, 13 Jan 2025 05:11:09 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736773868; x=1737378668;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=FadNKLb2hmiuT2xe3JqSrPIXf7EYR5ffKD3vg2tvAY0=;
+        b=RER8qoS7Q23kVKtvwDbQFRvB3bnS+Q3uVhyxlNVFF+Tv7NSNxDhjNQJccxPoWRbIRT
+         gpzmUonAzW51zG5mrtIn5m76jtvxBT5khW9h3dHhldN5ZusZEui/Mz9UaAU3LSp9CJD5
+         DeQx6q9IForfZG3946wDAIJmwqB0G09XuCHW4EyEmHUwrS7sXe/GiW9suKQnYQPHx9hS
+         DOdFJ4Pk3W3DEGLApG93wD/RdPeGtNLTAhcGdu7U2lVakWzQxfBMWFKxr0jAgz7ubCx7
+         W9MWnzZiyj+T5T4ZtJFcdzt99kyLJvNFSITrp/UhBqymV5d/loT+pt2abRx+v6ckfJYZ
+         eNDg==
+X-Gm-Message-State: AOJu0Yw6R4TtxuEUBpPY3Ysc6EoYE8RoH3t1+cfrL+Fg7juG0/SdMmlP
+	uGeQwYBbg4KlSHU0GYC4whhSNGQwPAdtlGAaV0yK+Fpgd/TrpvqXcGt28exuSM7evYueB5gQabm
+	N/Yw4vU9ZVRxw3UMdI5zdklzbwPqDYwTeUQwJoCetnMnzv9vCkUdk++s=
+X-Gm-Gg: ASbGncvUkOnm+QGGg5NB3EdM4YIYNDlXmo5TQdwlF+QR9rDREIBZuWgZPecpmBmsnlI
+	9r5LINkLYHQTOyAHIEEoYfWOcF7dE6XGrc8/FeTy7OZGGU+x9rP5z8BzkLZ8DhEvYeVqTDcYFPJ
+	WAC/8Ke5jE8xJj7FrcHPRdxosvwSAOh/g7mojq/aJ2/gMVWId3VUYEZXwheg6JzlnRQbgvykg5k
+	MGJQVrqgz1KHxyY03MwXIR17RuqGYcBfJji1ywfyj46vWSxccLo0gslr9bAVusCadEoJYiP3WR1
+	r8RwcZTNF3j2mQMm3pk/6w==
+X-Received: by 2002:a05:6a00:4ac6:b0:727:3cd0:1167 with SMTP id d2e1a72fcca58-72d21fea50emr29848203b3a.21.1736773868494;
+        Mon, 13 Jan 2025 05:11:08 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEj0/2mbkwh5VkIBnE0+6ZYp96/BRcW6F6brwGkZMp1FqGOz+ypA2ZQPuOcXrqxY7jE6rIXig==
+X-Received: by 2002:a05:6a00:4ac6:b0:727:3cd0:1167 with SMTP id d2e1a72fcca58-72d21fea50emr29848171b3a.21.1736773868036;
+        Mon, 13 Jan 2025 05:11:08 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72d40549322sm5777910b3a.8.2025.01.13.05.11.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 13 Jan 2025 05:11:07 -0800 (PST)
+Date: Mon, 13 Jan 2025 21:11:03 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH] check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
+Message-ID: <20250113131103.tb25jtgkepw4xreo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <f49a72d9ee4cfb621c7f3516dc388b4c80457115.1736695253.git.nirjhar.roy.lists@gmail.com>
+ <20250113055901.u5e5ghzi3t45hdha@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <4afe80a4-ac6b-4796-b466-c42a95f7225a@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com>
- <Z2Ey4yQywOEYqEOI@infradead.org> <CAL3q7H4Age-k0ifGh+n4QwExC1vTgWGd3NROcX40vQXKRipBqw@mail.gmail.com>
- <20241217172223.GA6160@frogsfrogsfrogs> <db59d0b2-6542-41e1-abf7-0c38b91cdf4d@gmx.com>
- <20241218200927.GC6160@frogsfrogsfrogs> <d4c1334e-0275-453c-bdea-7878dc8c56f1@gmx.com>
-In-Reply-To: <d4c1334e-0275-453c-bdea-7878dc8c56f1@gmx.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 13 Jan 2025 12:00:24 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H7gkd8w3mN4WV8OYMYDY_Be1SsCLcA0YezBA18U1cwkCA@mail.gmail.com>
-X-Gm-Features: AbW1kvZqNsZ1VybzIUslAPxRw9oW1IHRlgLcIDxg11-sDP0gPLX0z5mf8WJgOIU
-Message-ID: <CAL3q7H7gkd8w3mN4WV8OYMYDY_Be1SsCLcA0YezBA18U1cwkCA@mail.gmail.com>
-Subject: Re: [PATCH] generic: test swap activation on file that used to have clones
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, 
-	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, 
-	Zorro Lang <zlang@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <4afe80a4-ac6b-4796-b466-c42a95f7225a@gmail.com>
 
-On Wed, Dec 18, 2024 at 8:19=E2=80=AFPM Qu Wenruo <quwenruo.btrfs@gmx.com> =
-wrote:
->
->
->
-> =E5=9C=A8 2024/12/19 06:39, Darrick J. Wong =E5=86=99=E9=81=93:
-> > On Wed, Dec 18, 2024 at 09:07:26AM +1030, Qu Wenruo wrote:
-> >>
-> >>
-> >> =E5=9C=A8 2024/12/18 03:52, Darrick J. Wong =E5=86=99=E9=81=93:
-> >>> On Tue, Dec 17, 2024 at 08:26:33AM +0000, Filipe Manana wrote:
-> >>>> On Tue, Dec 17, 2024 at 8:14=E2=80=AFAM Christoph Hellwig <hch@infra=
-dead.org> wrote:
-> >>>>>
-> >>>>> On Wed, Dec 11, 2024 at 03:09:40PM +0000, fdmanana@kernel.org wrote=
-:
-> >>>>>> The test also fails sporadically on xfs and the bug was already re=
-ported
-> >>>>>> to the xfs mailing list:
-> >>>>>>
-> >>>>>>      https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=
-=3DxKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
-> >>>>>>
-> >>>>>
-> >>>>> This version still doesn't seem to have the fs freeze/unfreeze that=
- Darrick
-> >>>>> asked for in that thread.
-> >>>>
-> >>>> I don't get it, what's the freeze/unfreeze for? Where should they be=
- placed?
-> >>>> Is it some way to get around the bug on xfs?
-> >>>
-> >>> freeze kicks the background inode gc thread so that the unlinked clon=
-es
-> >>> actually get freed before the swapon call.  A less bighammer idea mig=
-ht
-> >>> be to call XFS_IOC_FREE_EOFBLOCKS which also kicks the garbage
-> >>> collectors.
-> >>
-> >> I'm wondering why this GC things can not be done inside XFS' swapon ca=
-ll?
-> >>
-> >> So that we don't need some per-fs workaround in a generic test case.
-> >
-> > I suppose one could call xfs_inodegc_flush from within swapon with the
-> > swap file's i_rwsem held, but now we're blocking swapon while we wait
-> > for some unbounded number of probably unrelated unlinked inodes to be
-> > freed on the off chance that one of them shared blocks.
-> >
-> > A better answer might be to run FALLOC_FL_UNSHARE on the file, but now
-> > we're making swapon more complex and potentially issuing a lot of IO to
-> > make that happen.  If you can convince the fsdevel/mm folks that swapon
-> > is supposed to try to correct things it doesn't like in the file mappin=
-g
-> > (instead of returning EINVAL or whatever it does now) then we could add
-> > that to the syscall definition.
+On Mon, Jan 13, 2025 at 02:22:20PM +0530, Nirjhar Roy (IBM) wrote:
+> 
+> On 1/13/25 11:29, Zorro Lang wrote:
+> > On Sun, Jan 12, 2025 at 03:21:51PM +0000, Nirjhar Roy (IBM) wrote:
+> > > Bug Description:
+> > > 
+> > > _test_mount function is failing with the following error:
+> > > ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
+> > > check: failed to mount /dev/loop0 on /mnt1/test
+> > > 
+> > > when the second section in local.config file is xfs and the first section
+> > > is non-xfs.
+> > > 
+> > > It can be easily reproduced with the following local.config file
+> > > 
+> > > [s2]
+> > > export FSTYP=ext4
+> > > export TEST_DEV=/dev/loop0
+> > > export TEST_DIR=/mnt1/test
+> > > export SCRATCH_DEV=/dev/loop1
+> > > export SCRATCH_MNT=/mnt1/scratch
+> > > 
+> > > [s1]
+> > > export FSTYP=xfs
+> > > export TEST_DEV=/dev/loop0
+> > > export TEST_DIR=/mnt1/test
+> > > export SCRATCH_DEV=/dev/loop1
+> > > export SCRATCH_MNT=/mnt1/scratch
+> > > 
+> > > ./check selftest/001
+> > > 
+> > > Root cause:
+> > > When _test_mount() is executed for the second section, the FSTYPE has
+> > > already changed but the new fs specific common/$FSTYP has not yet
+> > > been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
+> > > the test run fails.
+> > > 
+> > > Fix:
+> > > call _source_specific_fs $FSTYP at the correct call site of  _test_mount()
+> > > 
+> > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > ---
+> > >   check | 1 +
+> > >   1 file changed, 1 insertion(+)
+> > > 
+> > > diff --git a/check b/check
+> > > index 607d2456..8cdbb68f 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -776,6 +776,7 @@ function run_section()
+> > >   	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+> > >   		echo "RECREATING    -- $FSTYP on $TEST_DEV"
+> > >   		_test_unmount 2> /dev/null
+> > > +		[[ "$OLD_FSTYP" != "$FSTYP" ]] && _source_specific_fs $FSTYP
+> > The _source_specific_fs is called when importing common/rc file:
+> > 
+> >    # check for correct setup and source the $FSTYP specific functions now
+> >    _source_specific_fs $FSTYP
+> > 
+> >  From the code logic of check script:
+> > 
+> >          if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+> >                  echo "RECREATING    -- $FSTYP on $TEST_DEV"
+> >                  _test_unmount 2> /dev/null
+> >                  if ! _test_mkfs >$tmp.err 2>&1
+> >                  then
+> >                          echo "our local _test_mkfs routine ..."
+> >                          cat $tmp.err
+> >                          echo "check: failed to mkfs \$TEST_DEV using specified options"
+> >                          status=1
+> >                          exit
+> >                  fi
+> >                  if ! _test_mount
+> >                  then
+> >                          echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+> >                          status=1
+> >                          exit
+> >                  fi
+> >                  # TEST_DEV has been recreated, previous FSTYP derived from
+> >                  # TEST_DEV could be changed, source common/rc again with
+> >                  # correct FSTYP to get FSTYP specific configs, e.g. common/xfs
+> >                  . common/rc
+> >                  ^^^^^^^^^^^
+> > we import common/rc at here.
+> > 
+> > So I'm wondering if we can move this line upward, to fix the problem you
+> > hit (and don't bring in regression :) Does that help?
+> > 
+> > Thanks,
+> > Zorro
+> 
+> Okay so we can move ". common/rc" upward and then remove the following from
+> "check" file:
+> 
+>         if ! _test_mount
+>         then
+>             echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+>             status=1
+>             exit
+>         fi
+> 
+> since . common/rc will call init_rc() in the end, which does a
+> _test_mount(). Do you agree with this (Zorro and Ritesh)?
+> 
+> I can make the changes and send a v2?
 
-So how do we proceed from here?
+Hmm... the _init_rc doesn't do _test_mkfs, so you might need to do
+". common/rc" after "_test_mkfs", rather than "_test_unmount".
 
-The btrfs fix was merged into Linus' tree sometime ago (v6.13-rc5),
-and I would hate to lose test coverage in fstests.
+By checking the _init_rc, I think it can replace the _test_mount you metioned
+above. Some details might need more testing, to make sure we didn't miss
+anything wrong:)
 
-Since the bug seems to be hard to fix on XFS, shall I make the test
-_notun on xfs, or move it tests/btrfs?
-Zorro?
+Any review points from others?
 
-Thanks.
+Thanks,
+Zorro
 
->
-> Sorry that I'm no familiar with XFS to provide any help, but the swapon
-> call on btrfs is already very complex.
->
-> It needs to verify every extent of that file is not shared, and block
-> the subvolume from being snapshotted.
-> (The extent shareness check iteslf may already cause quite some IO)
->
-> So at least to me, a little more extra logic and IO shouldn't be a huge
-> blockage, since we're already doing exactly that since the btrfs
-> swapfile support.
->
-> Thanks,
-> Qu
-> >
-> > --D
-> >
-> >> Thanks,
-> >> Qu
-> >>>
-> >>> --D
-> >>>
-> >>
-> >>
-> >
->
+> 
+> --NR
+> 
+> > 
+> > 
+> > >   		if ! _test_mkfs >$tmp.err 2>&1
+> > >   		then
+> > >   			echo "our local _test_mkfs routine ..."
+> > > -- 
+> > > 2.34.1
+> > > 
+> > > 
+> -- 
+> Nirjhar Roy
+> Linux Kernel Developer
+> IBM, Bangalore
+> 
+
