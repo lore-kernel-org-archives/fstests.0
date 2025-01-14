@@ -1,82 +1,85 @@
-Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85DFE7E105
-	for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 14:31:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB8EB14A609
+	for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 17:16:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736865075; cv=none; b=qXdH1zAQb+IEg7PC9o6X885jeDF+eaZIMpaU7hZIpbIAzcSx62NN+dlKIWrdZ+MzTPOnsE8yvcStetEW63oP7aSv0KnUXr9MyQOPq6TLM6ZmeN7VCr24+esB6SafqhUODdS2I+1mWh+mJ0UTubojO8L7umcdIbQIbKD52tQl6E8=
+	t=1736874985; cv=none; b=alvFBfUfe4Jl8h9oAdA4VtWI7sF5AFVa2IwNR7iwnsoY/hfwziJEZouzarektVo2R/Ka5CxH3hGivATwp11ax5j/jxJl3AICdyTXX4r77uSwjiQsvvDz1WpsXmHYF3eH3noGoG9xOcqetqzuX6KYbWelDqss45QnAb2PdIk/ZgI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736865075; c=relaxed/simple;
-	bh=i7SGow3s9JPSYAe3fYZRgBzSgXOWGiCUh27CmFkmVIw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=uuNSazGPoyijzFa1lnvC/1+HysnzClSV8rrp93cfdYFQnlC0ybIzCVyWlMZfqVfshvIqoPKnkJL/kogo16cHO1dwqhha5v1z7KOT7nQlAeiJCD3yOj8mgNnlc76ddLgRd8rzVuR4DAdxq9sFzgT0Hw/uPgmvFa/SrcjYpvuBni8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=n/40SvVV; arc=none smtp.client-ip=209.85.166.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1736874985; c=relaxed/simple;
+	bh=mi5E/ZHz2q/fl8pvKX4+YEmAcf6/XLeXJ8iCf9MPjFU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pu7KAJZrRB3tWWWvBY/6VEQ4d+K9SeZLZap5q0jqWjf04bb/VbXeYnb0Acwgun2CW6OkuMzCd3P6w59CBrCoK2yws9ICpMROojRBHYXbyEWBLSBulrNo2b96P9/omjU1H0Ky72tqe5dAtwysmq1KWHmH55tU9MaYdwjwyH4Xur8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZzNSc2fo; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="n/40SvVV"
-Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-844e9b8b0b9so424177639f.0
-        for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 06:31:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1736865072; x=1737469872; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:to:subject:user-agent:mime-version:date:message-id:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=GeXhWjiR6gP9oY+0EZL92w+YXvQWxT8KBvHfhq/VdJU=;
-        b=n/40SvVVtlUQF1VdV/XyZeg0jNZz+5sX0FgTzq4aJL6WL3ZT/rLUP+1SuTkFridf5X
-         WSjDgGj7T6kq4IdUvUJ3bu1zXp3u7R88D30+rk9sf+0Hqu4ne7Vyi7OmEdTTfP/LqrUs
-         vFbUGgq8iXmjX3A9yip4W8YyrGM6XOGrdnr7R6Gzt4Kw8E2MG8IwvagpVlZGIzaM0EG6
-         C5HnEjwwkyRPYCIyyHS/iLpOXYz7WJy4Vt0aWEJyrXOiL0OXgUP0k04PvkqqaliZ0uI6
-         sSSiAGpcYreiDYVVhpdTnb+ojQQLmvS8Nw3WPj3I/5QQAHC93lq6/WHgPkSnwjQ8IP0Y
-         ZDzw==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZzNSc2fo"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1736874982;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=rPTTZuNsCe89G7u8xA4zsRu6Fcavb1xricJk8a6YESE=;
+	b=ZzNSc2foLaNYw9nyW3xNRaHxMDqGvQbvQc6BiO+otfDcxfTMaugv4iSc6Q2ym6DIPtwHfW
+	jPCP/Yj+ElC2oA6Y7zr24EG46sJH3mokM0XgeK/RJ6EK7aIfn3rsnzIoz8h59JgBEzPP3B
+	dnF+2a2v2hJzfBtyZOy4YNnJumUS4UU=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-459-ojwIE2ptPqe3jlD1hNgyIg-1; Tue, 14 Jan 2025 12:16:21 -0500
+X-MC-Unique: ojwIE2ptPqe3jlD1hNgyIg-1
+X-Mimecast-MFC-AGG-ID: ojwIE2ptPqe3jlD1hNgyIg
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2efa0eb9dacso10485831a91.1
+        for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 09:16:21 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736865072; x=1737469872;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=GeXhWjiR6gP9oY+0EZL92w+YXvQWxT8KBvHfhq/VdJU=;
-        b=NqFrG1oSpQvvfvwuV3tptM6/Uuwn54ihKR/xSZLPr4W5vCb/kWjPkIvHpMQ+KsbMoq
-         8N1yHm5yUXyTsv4+ROmOaJVA4ppMW+8dG2s2egOGq/5DM//r7YhMCSVAIB3urtDSaloc
-         HO7T0kpI1F6ymZ/aEYeYKMTm0hK1qh8k7ye/vQOxoZK2rXPeYRzleRQdLKz2sd3E6kHX
-         0KFx0pmXHgzwBKFLpjRsyTSJiLvW7Ti3onpGp7lu+IGeg03oWTzU5n5msSMJJGZovnU4
-         CmpV+hgEW6FbPoALbe0DXsJiceYQ4p4ZfsO4qIb32I8kYgGDnbgFOIN+Tffa3i4Emjuv
-         yXLw==
-X-Forwarded-Encrypted: i=1; AJvYcCVttJRwgxw+SRDLJQDx9Hlrh+0hqDtn10+fst9letaP10oJ6OO8NOODP8KhVhYOOC2Mc4wIOwY7@vger.kernel.org
-X-Gm-Message-State: AOJu0YxrfkIcd/Db2yaZhTn0F0/lm5mH1RJpj2QiHk448x3vcFxtSRXE
-	YT6wx0bU/Zbfpq7VNSIJFTkPlcUoK1pmOAGZYS/G2D8sBw59b6d3ivfM2QC/3s1n+DZsEPK3e8J
-	P
-X-Gm-Gg: ASbGncvx0eCcridS21Hj+GnNrm+1EQcLxdVakc36FQMviegf3/dzvmgpzFSoUzASTLr
-	r4ZhHV5ptD2hBYbQaWK4u4AkFfveda/l/oBWAT2KIb8zE0q5S+Wc3Sq3YFpcSx4APlH9RsZ5rsZ
-	Uhdnkk3JjhnmLxrp3EvFuPFMaHOYfzYBumh0aW3nkMC/FvRX0tW+C8k861uljfowNOKkc5nvtI1
-	q3iYH2PEFpAQ+yIYUI6BATDc6U/0p662zXT6Xd/5kdJUkmyOkir
-X-Google-Smtp-Source: AGHT+IGi/LaNmGBTuxQrUFeVCdExztKplentmzqAt/Kjseiv8OeVolF0wZQKl1xWaoAWxZzv2g+cTg==
-X-Received: by 2002:a6b:7c47:0:b0:849:c82e:c039 with SMTP id ca18e2360f4ac-84f3c295d6cmr908579339f.6.1736865072505;
-        Tue, 14 Jan 2025 06:31:12 -0800 (PST)
-Received: from [192.168.1.116] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4ea1b62921esm3480242173.69.2025.01.14.06.31.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 14 Jan 2025 06:31:11 -0800 (PST)
-Message-ID: <ccbb5800-edc8-4aac-af57-80447b0a1ee6@kernel.dk>
-Date: Tue, 14 Jan 2025 07:31:11 -0700
+        d=1e100.net; s=20230601; t=1736874980; x=1737479780;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rPTTZuNsCe89G7u8xA4zsRu6Fcavb1xricJk8a6YESE=;
+        b=s0uCuTztNCKtdNTgnI4Fj4yDlwzQpWJ14eu3+3WND0FjhG3L5Cyy2AneK3SBzf3SS3
+         Hgl8jENI5W2JTIlBUqXq06toXqPI3tIJxQ16ZYzUwmkWuv5X8wwxWggTrpZBFwTZO6HA
+         WbaJZsVbBLDtRtGosHzW8j+gzg+m9slvcO1aw1ykSIwtaK+UguGu3+jB/+5pDwPUWJbb
+         /JkZcu/or7cBIkEEFyHAYRT6cyJrcI483OrEZkU7nFbNiEVsj+d032CoFtzmblb04Cpz
+         uMKwdwL6FpZBuKnYte0lMArkxNwO0isQeKrdH/O7sNRQGEDoypOtr43Tv/3PY9B6ECae
+         sa+Q==
+X-Gm-Message-State: AOJu0YzVD2DgGbiKKmXkCsUiBC1ZcvO0IqVTrmHdOCptgnZuxw0ZE0+z
+	/tBzu6tst699/sH5s/w8q9prfuFbNoVgz2axnHui1QFflnCeZir0r6+xSv29jglSz88r2sC0/Hz
+	fRVTrl5g4EhkMISApAHgBE9FqrrLVb107rz7SC0vmU5KVu9iskMmTwuZKYp1LqJwxrw==
+X-Gm-Gg: ASbGncsVKnZn00mNIzkpCJl/++ptIOun5cvXFx+PA3CLNd2gi0NDJuoiXmEL6HBxfw0
+	3Glf5uA5ETQy+JnY7Hd2mm7xWmRtClT5Gt5BaWbvaFEjkHkQg3oN9f+lR2fEQ8fQKV82h8oVogY
+	bbmXziV6+Eps9kXjlaDl9Jw4PUJD8LVO6Gx3WfWbIcnwHgLBtwTZBPgwZUzxADSPITP1fMjkxwU
+	aWIrrTMXixrUTrp9ZAkRNwZQ2tuA0J40R0j9jBSNH5g6riPsyyBh7CHqB1J78P5BkEQVjmfHjJ4
+	CTOAVGxfA+LI/5bKDN4Q+w==
+X-Received: by 2002:a05:6a00:1414:b0:728:e40d:c5fc with SMTP id d2e1a72fcca58-72d21ff814fmr36933356b3a.22.1736874980286;
+        Tue, 14 Jan 2025 09:16:20 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEHyQdEwjsmVTkvRlLdgvZUZJbjx5mfOFnBYhBLATl6STd9zGKtsZQRAmKNavepCHDYgBJlRA==
+X-Received: by 2002:a05:6a00:1414:b0:728:e40d:c5fc with SMTP id d2e1a72fcca58-72d21ff814fmr36933316b3a.22.1736874979943;
+        Tue, 14 Jan 2025 09:16:19 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72d4067edf0sm7885464b3a.133.2025.01.14.09.16.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 14 Jan 2025 09:16:19 -0800 (PST)
+Date: Wed, 15 Jan 2025 01:16:14 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+Cc: fstests@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Subject: Re: [PATCH] fsx: fix compile error for preadv2()
+Message-ID: <20250114171614.y2ub632vcckq3qxy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250114034831.1128945-1-shinichiro.kawasaki@wdc.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fsx: fix compile error for preadv2()
-To: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
- fstests@vger.kernel.org
-References: <20250114034831.1128945-1-shinichiro.kawasaki@wdc.com>
-Content-Language: en-US
-From: Jens Axboe <axboe@kernel.dk>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20250114034831.1128945-1-shinichiro.kawasaki@wdc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
-On 1/13/25 8:48 PM, Shin'ichiro Kawasaki wrote:
+On Tue, Jan 14, 2025 at 12:48:31PM +0900, Shin'ichiro Kawasaki wrote:
 > Commit d6b9d8eff076 ("fsx: add support for RWF_DONTCACHE") introduced
 > preadv2() calls in ltp/fsx.c. However, sys/uio.h is not included to the
 > source file, which causes compile errors with the gcc option
@@ -95,10 +98,31 @@ On 1/13/25 8:48 PM, Shin'ichiro Kawasaki wrote:
 > 
 > To fix it, add the include directive.
 
-Looks good, thanks for catching that.
+I didn't hit this issue when I test it. Thanks for catching it.
 
-Reviewed-by: Jens Axboe <axboe@kernel.dk>
+Reviewed-by: Zorro Lang <zlang@redhat.com>
 
--- 
-Jens Axboe
+> 
+> Fixes: d6b9d8eff076 ("fsx: add support for RWF_DONTCACHE")
+> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
+> ---
+>  ltp/fsx.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index 9efd2f5c..3e89d570 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -20,6 +20,7 @@
+>  #include <strings.h>
+>  #include <sys/file.h>
+>  #include <sys/mman.h>
+> +#include <sys/uio.h>
+>  #include <stdbool.h>
+>  #ifdef HAVE_ERR_H
+>  #include <err.h>
+> -- 
+> 2.47.0
+> 
+> 
 
