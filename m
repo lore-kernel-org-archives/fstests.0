@@ -1,128 +1,205 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f52.google.com (mail-pj1-f52.google.com [209.85.216.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB8EB14A609
-	for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 17:16:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5EAE4C6C;
+	Wed, 15 Jan 2025 05:06:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736874985; cv=none; b=alvFBfUfe4Jl8h9oAdA4VtWI7sF5AFVa2IwNR7iwnsoY/hfwziJEZouzarektVo2R/Ka5CxH3hGivATwp11ax5j/jxJl3AICdyTXX4r77uSwjiQsvvDz1WpsXmHYF3eH3noGoG9xOcqetqzuX6KYbWelDqss45QnAb2PdIk/ZgI=
+	t=1736917591; cv=none; b=kKrQlBBNAA0SRPL4houyNW5VWlvqvT5oKWy0flMrB5NLmQKAFwCf8Y9m9lq8ll6yR/4YHoYK2tZCpVYUVYVQARqq+AsHb/fTR++pcjhu6ID5Yoxyp5NfzeilNLkL+bJbJ+RRYjNvrfvzr3WFhjOFAT0WepPr6DvySB2uKxlTeSo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736874985; c=relaxed/simple;
-	bh=mi5E/ZHz2q/fl8pvKX4+YEmAcf6/XLeXJ8iCf9MPjFU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pu7KAJZrRB3tWWWvBY/6VEQ4d+K9SeZLZap5q0jqWjf04bb/VbXeYnb0Acwgun2CW6OkuMzCd3P6w59CBrCoK2yws9ICpMROojRBHYXbyEWBLSBulrNo2b96P9/omjU1H0Ky72tqe5dAtwysmq1KWHmH55tU9MaYdwjwyH4Xur8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZzNSc2fo; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1736917591; c=relaxed/simple;
+	bh=KjgoSbXszLXoXHoi9/i8h5dy1czUZuku0z3G/aDzZk4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Odith99tXnZPCMtoMnh00i3B9NZGIiTHx5/+aF/8ZqgpRUBF7RPXWd6YHkBh4g+0l7M58XOzeSjrZNId2I55ZsuyfTPVznTx1owcuLSOJZzFlu1XoaE8stwl3ufWTwuPmsCGgD5XdavLlC4Uo/HNahVAGo9jfWpSBSh41utSslY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jSW/iI92; arc=none smtp.client-ip=209.85.216.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZzNSc2fo"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1736874982;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=rPTTZuNsCe89G7u8xA4zsRu6Fcavb1xricJk8a6YESE=;
-	b=ZzNSc2foLaNYw9nyW3xNRaHxMDqGvQbvQc6BiO+otfDcxfTMaugv4iSc6Q2ym6DIPtwHfW
-	jPCP/Yj+ElC2oA6Y7zr24EG46sJH3mokM0XgeK/RJ6EK7aIfn3rsnzIoz8h59JgBEzPP3B
-	dnF+2a2v2hJzfBtyZOy4YNnJumUS4UU=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-459-ojwIE2ptPqe3jlD1hNgyIg-1; Tue, 14 Jan 2025 12:16:21 -0500
-X-MC-Unique: ojwIE2ptPqe3jlD1hNgyIg-1
-X-Mimecast-MFC-AGG-ID: ojwIE2ptPqe3jlD1hNgyIg
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2efa0eb9dacso10485831a91.1
-        for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 09:16:21 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jSW/iI92"
+Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-2ee9a780de4so7938793a91.3;
+        Tue, 14 Jan 2025 21:06:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1736917589; x=1737522389; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=mAOTT5u9dBdg3GPbM9mMYLriXpbeNHlQ021icnWLTLk=;
+        b=jSW/iI92jbyWzxyvtH7rpIwffyxGm3pPIgZ6TnH8JifVduXNqYbl4nnZZO+37uKx3H
+         4SV4ttZun4Ni7FYM7eC503iDXLuMJ5aQMKlI3NeQEEy32MLQCxXBI29xE1hN+JZz41f5
+         oTCEK8IyUyj5Zx4Ygo8OzT6cMibmTjvV8iclr59BVv2Zi04xya9ZK2M8boM72OSrRcDc
+         0mYecgJw3Rp5x4uPFo0upkpc0C+b0vQLqIIEl5OU4OQGnBNyRMl+RZBkZA+Hw+R85l+I
+         piG8wx08ZoOKcANyjpndCfu6wwlCtjSzPhlNdlW/brl6bQuaX64PxzNTuUC6cEcEvKXx
+         MyDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736874980; x=1737479780;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=rPTTZuNsCe89G7u8xA4zsRu6Fcavb1xricJk8a6YESE=;
-        b=s0uCuTztNCKtdNTgnI4Fj4yDlwzQpWJ14eu3+3WND0FjhG3L5Cyy2AneK3SBzf3SS3
-         Hgl8jENI5W2JTIlBUqXq06toXqPI3tIJxQ16ZYzUwmkWuv5X8wwxWggTrpZBFwTZO6HA
-         WbaJZsVbBLDtRtGosHzW8j+gzg+m9slvcO1aw1ykSIwtaK+UguGu3+jB/+5pDwPUWJbb
-         /JkZcu/or7cBIkEEFyHAYRT6cyJrcI483OrEZkU7nFbNiEVsj+d032CoFtzmblb04Cpz
-         uMKwdwL6FpZBuKnYte0lMArkxNwO0isQeKrdH/O7sNRQGEDoypOtr43Tv/3PY9B6ECae
-         sa+Q==
-X-Gm-Message-State: AOJu0YzVD2DgGbiKKmXkCsUiBC1ZcvO0IqVTrmHdOCptgnZuxw0ZE0+z
-	/tBzu6tst699/sH5s/w8q9prfuFbNoVgz2axnHui1QFflnCeZir0r6+xSv29jglSz88r2sC0/Hz
-	fRVTrl5g4EhkMISApAHgBE9FqrrLVb107rz7SC0vmU5KVu9iskMmTwuZKYp1LqJwxrw==
-X-Gm-Gg: ASbGncsVKnZn00mNIzkpCJl/++ptIOun5cvXFx+PA3CLNd2gi0NDJuoiXmEL6HBxfw0
-	3Glf5uA5ETQy+JnY7Hd2mm7xWmRtClT5Gt5BaWbvaFEjkHkQg3oN9f+lR2fEQ8fQKV82h8oVogY
-	bbmXziV6+Eps9kXjlaDl9Jw4PUJD8LVO6Gx3WfWbIcnwHgLBtwTZBPgwZUzxADSPITP1fMjkxwU
-	aWIrrTMXixrUTrp9ZAkRNwZQ2tuA0J40R0j9jBSNH5g6riPsyyBh7CHqB1J78P5BkEQVjmfHjJ4
-	CTOAVGxfA+LI/5bKDN4Q+w==
-X-Received: by 2002:a05:6a00:1414:b0:728:e40d:c5fc with SMTP id d2e1a72fcca58-72d21ff814fmr36933356b3a.22.1736874980286;
-        Tue, 14 Jan 2025 09:16:20 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEHyQdEwjsmVTkvRlLdgvZUZJbjx5mfOFnBYhBLATl6STd9zGKtsZQRAmKNavepCHDYgBJlRA==
-X-Received: by 2002:a05:6a00:1414:b0:728:e40d:c5fc with SMTP id d2e1a72fcca58-72d21ff814fmr36933316b3a.22.1736874979943;
-        Tue, 14 Jan 2025 09:16:19 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72d4067edf0sm7885464b3a.133.2025.01.14.09.16.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jan 2025 09:16:19 -0800 (PST)
-Date: Wed, 15 Jan 2025 01:16:14 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Cc: fstests@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH] fsx: fix compile error for preadv2()
-Message-ID: <20250114171614.y2ub632vcckq3qxy@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250114034831.1128945-1-shinichiro.kawasaki@wdc.com>
+        d=1e100.net; s=20230601; t=1736917589; x=1737522389;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=mAOTT5u9dBdg3GPbM9mMYLriXpbeNHlQ021icnWLTLk=;
+        b=wPm6qx+1f3tx8TOfqgZbMtR/48AKGRrcLav4vhivppCuQGRvQ90dj086Pwrb32r+QF
+         CKse3KIXjul+1gaaNmqnc/+c9nL5fdrvilt7b6x3/anCb/+sVsQM3iMhFUzPvs6StA7C
+         ekxcA74Oh4+sqLQqE0qE+SzV6pTDRuYKTuogGY+5Baf00JbmXLYY7UjkpFj88aUK10HO
+         sDHQz57KESmdZqAB6dO0UtRIRix0pLlCtrN1TXMYDooubtNCL2hkul8QQEJIwDLsesdO
+         uVV0LiVFSmEM4KV1gWLj7q3mJfk3kw510yxWm/6m16ice8KpXxVXn5g1VuyFoiCCcLAw
+         8W1A==
+X-Forwarded-Encrypted: i=1; AJvYcCUT+5OhayKTcc9+Dv1o+mwms1/Eou5+/P/OjfFO2uQOGWwOexgSkXq5Hjfz1eA34w+Ki/Bur2pH0T8P@vger.kernel.org, AJvYcCXQNPSM4KAKRxM2ElNUZ0Lma+Ihob5ku5GvgEmTrG1B2HTaTBJEW/eMy9r1OZmgDK1jk0Jj4ovZ@vger.kernel.org
+X-Gm-Message-State: AOJu0YzsUvn/J0tjd1oqT31YOu39tPEGPVRxYRDJFQ/Idi8ilqx01rIJ
+	hu3krM3CBanC8ae/YjfOePTn0VMKmNJvXxyIzdZ4hbD39AMAwn67
+X-Gm-Gg: ASbGnctVKlElAr91BxEE47Z5Uh5AfIUn8SHWEy7dEpAUi1McwCes9d9FKtAN1RumGBg
+	XX29sGor5exqIIFo8BAxqW21yrOjQatT1T/OuAHkNCXlXFi6ncUIviDd5XlBkboo1NkD5IFKLDm
+	p7avHdIF0uTXhWgK9SI9pKYZ9bvHjwv5pdnqdiVxtkcoYPpN2ZAMNfsBsQ9OUpyfitOyoQyI8C1
+	8U4Q66RoBLU4Ypq3B0dvfRy3ojROJSSrCV/XPEBGTCNdmadLr8uQW6gDdrZf/nBzpw=
+X-Google-Smtp-Source: AGHT+IFBO7bEIoVnz0xv09HqB5Oh2UyxG6XEz0Z4PImafkbM3lSX1dudvpHQgcxkT4x1BN+HQ5ej2g==
+X-Received: by 2002:a17:90a:c2ce:b0:2ee:741c:e9f4 with SMTP id 98e67ed59e1d1-2f548ebba5bmr41082025a91.11.1736917588826;
+        Tue, 14 Jan 2025 21:06:28 -0800 (PST)
+Received: from [192.168.0.120] ([49.205.33.247])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2f72c1cd597sm424841a91.24.2025.01.14.21.06.25
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Jan 2025 21:06:28 -0800 (PST)
+Message-ID: <4f489dbf-b47f-4b1a-9299-e6d0b6ef2369@gmail.com>
+Date: Wed, 15 Jan 2025 10:36:22 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250114034831.1128945-1-shinichiro.kawasaki@wdc.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
+Content-Language: en-US
+To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+ ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+References: <f49a72d9ee4cfb621c7f3516dc388b4c80457115.1736695253.git.nirjhar.roy.lists@gmail.com>
+ <87jzazvmzh.fsf@gmail.com> <1efecce4-f051-40fc-8851-e9f9c057e844@gmail.com>
+ <87frlmvi2u.fsf@gmail.com>
+From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+In-Reply-To: <87frlmvi2u.fsf@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Tue, Jan 14, 2025 at 12:48:31PM +0900, Shin'ichiro Kawasaki wrote:
-> Commit d6b9d8eff076 ("fsx: add support for RWF_DONTCACHE") introduced
-> preadv2() calls in ltp/fsx.c. However, sys/uio.h is not included to the
-> source file, which causes compile errors with the gcc option
-> -Werror-implicit-function-declaration:
-> 
-> fsx.c: In function 'test_dontcache_io':
-> fsx.c:1956:15: error: implicit declaration of function 'preadv2'; did you mean 'pread64'? [-Wimplicit-function-declaration]
->  1956 |         ret = preadv2(fd, &iov, 1, 0, RWF_DONTCACHE);
->       |               ^~~~~~~
->       |               pread64
-> fsx.c: In function 'fsx_rw':
-> fsx.c:2836:31: error: implicit declaration of function 'pwritev2'; did you mean 'pwrite64'? [-Wimplicit-function-declaration]
->  2836 |                         ret = pwritev2(fd, &iov, 1, offset, flags);
->       |                               ^~~~~~~~
->       |                               pwrite64
-> 
-> To fix it, add the include directive.
 
-I didn't hit this issue when I test it. Thanks for catching it.
+On 1/13/25 21:09, Ritesh Harjani (IBM) wrote:
+> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+>
+>> On 1/13/25 01:11, Ritesh Harjani (IBM) wrote:
+>>> "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com> writes:
+>>>
+>>>> Bug Description:
+>>>>
+>>>> _test_mount function is failing with the following error:
+>>>> ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
+> Please notice the error that you are seeing here ^^^
+>
+>>>> check: failed to mount /dev/loop0 on /mnt1/test
+>>>>
+>>>> when the second section in local.config file is xfs and the first section
+>>>> is non-xfs.
+>>>>
+>>>> It can be easily reproduced with the following local.config file
+>>>>
+>>>> [s2]
+>>>> export FSTYP=ext4
+>>>> export TEST_DEV=/dev/loop0
+>>>> export TEST_DIR=/mnt1/test
+>>>> export SCRATCH_DEV=/dev/loop1
+>>>> export SCRATCH_MNT=/mnt1/scratch
+>>>>
+>>>> [s1]
+>>>> export FSTYP=xfs
+>>>> export TEST_DEV=/dev/loop0
+>>>> export TEST_DIR=/mnt1/test
+>>>> export SCRATCH_DEV=/dev/loop1
+>>>> export SCRATCH_MNT=/mnt1/scratch
+>>>>
+>>>> ./check selftest/001
+>>>>
+>>>> Root cause:
+>>>> When _test_mount() is executed for the second section, the FSTYPE has
+>>>> already changed but the new fs specific common/$FSTYP has not yet
+>>>> been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
+>>>> the test run fails.
+>>>>
+>>>> Fix:
+>>>> call _source_specific_fs $FSTYP at the correct call site of  _test_mount()
+>>> You should add the Fixes: tag too. Based on your description I guess
+>>> this should be the tag?
+>>>
+>>> Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
+> Please look into the above commit. The above patch introduced function
+> "_prepare_for_eio_shutdown()" in _test_mount(), which is what we are
+> getting the error for (for XFS i.e. _xfs_prepare_for_eio_shutdown()
+> command not found). Right?
+Okay, now I got the logic. I was thinking of the commit that added the 
+entire "if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ];" block 
+(where the sourcing should have been there)
+>
+> Ok, why don't revert the above commit and see if the revert fixes the
+> issue for you.
+Yes, I can check that.
+>
+> https://www.kernel.org/doc/html/v4.10/process/submitting-patches.html#using-reported-by-tested-by-reviewed-by-suggested-by-and-fixes
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+Thanks, I will read this.
 
-> 
-> Fixes: d6b9d8eff076 ("fsx: add support for RWF_DONTCACHE")
-> Signed-off-by: Shin'ichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-> ---
->  ltp/fsx.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 9efd2f5c..3e89d570 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -20,6 +20,7 @@
->  #include <strings.h>
->  #include <sys/file.h>
->  #include <sys/mman.h>
-> +#include <sys/uio.h>
->  #include <stdbool.h>
->  #ifdef HAVE_ERR_H
->  #include <err.h>
-> -- 
-> 2.47.0
-> 
-> 
+--NR
+
+>
+> -ritesh
+>
+>> Shouldn't this be the following?
+>>
+>> commit f8e4f532f18d7517430d9849bfc042305d7f7f4d (HEAD)
+>> Author: Lukas Czerner <lczerner@redhat.com>
+>> Date:   Fri Apr 4 17:18:15 2014 +1100
+>>
+>>       check: Allow to recreate TEST_DEV
+>>
+>>       Add config option RECREATE_TEST_DEV to allow to recreate file system on
+>>       the TEST_DEV device. Permitted values are true and false.
+>>
+>>       If RECREATE_TEST_DEV is set to true the TEST_DEV device will be
+>>       unmounted and FSTYP file system will be created on it. Afterwards it
+>>       will be mounted to TEST_DIR again with the default, or specified mount
+>>       options.
+>>
+>>       Also recreate the file system if FSTYP differs from the previous
+>>       section.
+>>
+>>> I agree with today the problem was in _test_mount(), tomorrow it could
+>>> be _test_mkfs, hence we could source the new FSTYP config file before
+>>> calling _test_mkfs().
+>>>
+>>> With the fixes tag added, please feel free to add:
+>>>
+>>> Reviewed-by: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+>>>
+>>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+>>>> ---
+>>>>    check | 1 +
+>>>>    1 file changed, 1 insertion(+)
+>>>>
+>>>> diff --git a/check b/check
+>>>> index 607d2456..8cdbb68f 100755
+>>>> --- a/check
+>>>> +++ b/check
+>>>> @@ -776,6 +776,7 @@ function run_section()
+>>>>    	if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+>>>>    		echo "RECREATING    -- $FSTYP on $TEST_DEV"
+>>>>    		_test_unmount 2> /dev/null
+>>>> +		[[ "$OLD_FSTYP" != "$FSTYP" ]] && _source_specific_fs $FSTYP
+>>>>    		if ! _test_mkfs >$tmp.err 2>&1
+>>>>    		then
+>>>>    			echo "our local _test_mkfs routine ..."
+>>>> -- 
+>>>> 2.34.1
+>> -- 
+>> Nirjhar Roy
+>> Linux Kernel Developer
+>> IBM, Bangalore
+
+-- 
+Nirjhar Roy
+Linux Kernel Developer
+IBM, Bangalore
 
