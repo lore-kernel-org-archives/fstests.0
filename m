@@ -1,72 +1,74 @@
-Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B5FB51E7C31
-	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 09:54:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8B3315D5C5
+	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 15:33:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736934857; cv=none; b=VJGlPw4xTCB6srEXnOunsH1O3BVvgN0k7Jl8S/kQQEd8QChDMGW66U5KCZnWlWursZYYJEeypZ/B1+MAoxN4KQsQ+Y0sPA6BEqhgnLkFE6qcFSvu+2FCC0L+uWMWeGDXyBl44TZgKyMQHkhYOOIuLNCqWOwlnn5iEcSa8cd0rSg=
+	t=1736955217; cv=none; b=GJ4eE75nd8IDWGLShj+I3YFHEPY6RHIU7RYx3fDpGDIPloe27bCdU09cE85X5AD/TfqCHTdWR3ECYsfOL7sZBobhmxNdScfSnvkDsScwZeSwTQ/04ZqEm+hjyOTBlDgK7dvwlqW4/1CxSbwjN7oWEgTXVs44lhab5EThBR922uA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736934857; c=relaxed/simple;
-	bh=/GxHNeK9zA8F+RRVMi7l8qpA8e05b5ElDgKJh6Ve8hA=;
+	s=arc-20240116; t=1736955217; c=relaxed/simple;
+	bh=8Koq0cDmgjknDctgrBiiSvW1wuDmiLFRINcH+m+RgAY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Gqjuo/FG3cD+6gnWBM85ffWu45hZrPDnalPFO8pRaT0KUJigzy0h2rTMEzy05JSoB3fNCcPdZZxuON7CzFjA+/EDuRJCW77ubnRL/bKFMWB7dr1wwza5dOQvoVhkE5hCwfb0cX/juH1VlFdRuSe7LOGLGHGT9qfPmI26eF9AIbk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=RYR386iS; arc=none smtp.client-ip=209.85.214.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=I+nJk6Ao/1vFnJy9Rcpzge44N/K4DiTZvqADQEZr2T/Aa90NFWuoE9FkzhptCMP4ITi2U8nq3TxOWrUeqft6w8xVJ8tJzS23gXWOWmq/9OZq3VlVVzMmAfCpbtqP6f3lY8Sdif408trEImgYFQtMXqUi5aASReTFrUU4wkLTRDo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZNJJZmoP; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="RYR386iS"
-Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-21654fdd5daso110567865ad.1
-        for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 01:54:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1736934854; x=1737539654; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=VdbKs+zjGkXLz5QD2m3fZGKorkscW0QHmFziqMcHpsY=;
-        b=RYR386iS5m3Z8S31Jdi32zAphNmCew8OyZudEHIBkIJojHhBU4IiF/+fz7dgSVIsSM
-         3eK2ZODJO6Pj7e5iY+zb5kEBJD/0lr/pPPmbbE+9e4bS/Jk6dw6Eknm5usUwSXLx9ljC
-         7tsmjaLwIB3peP7cLjr9H6ELYTyILoQCEhtBhDIGBpni5NeDELkUTO6vhQaztFC91Ug0
-         ajrofLW70TBAYydyY9Vy4DeuQjKaNoRFY3UFFE6kvsotAD1BdwTZwk1TtHAmvSwXTlsi
-         KlSo/q4pqFU25kqyBG1XBrhMNTx+kUVZlkbJEKEuCUIEP9sWgyAo/dBQOQTd6WWT1n+Q
-         YYaQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZNJJZmoP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1736955214;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=FV7OZYrCTuMqaDKhF7SFkKjXTg1pxi1RaFuxGcXJosI=;
+	b=ZNJJZmoPwz3GeUUsYqJlhExMtCpKJVIUq0GkdoWSxn/dM6Cy0URsgLOMv4sjYpnayFEKuv
+	xBwlUPReWLYjL+grBn6kuJ+XE0GS+we+a7Wts2zEZb4toKw9fbKYV72nXv3DhgTMdhuffG
+	f+ZensCGmk8mdlIQAL9QyUY18yVyxw8=
+Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
+ [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-5-3Sgg5rGCP3-p-JbnmwOYOg-1; Wed, 15 Jan 2025 10:33:32 -0500
+X-MC-Unique: 3Sgg5rGCP3-p-JbnmwOYOg-1
+X-Mimecast-MFC-AGG-ID: 3Sgg5rGCP3-p-JbnmwOYOg
+Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2f129f7717fso12513990a91.0
+        for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 07:33:32 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736934854; x=1737539654;
+        d=1e100.net; s=20230601; t=1736955211; x=1737560011;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=VdbKs+zjGkXLz5QD2m3fZGKorkscW0QHmFziqMcHpsY=;
-        b=A/OsbPObkKOnCGdxrB6jDOsMUJAJnEeN9eAFlEoG8HYliABxVjumPIRhoB8vXiAmaf
-         qfq8PNo0xRqNiaqTMs5swDIJQ1O577o1lnDTZjWHASmV+KNwVEcHJ1d29D7MVSF/MHuk
-         UR3/5DFcFKdSP22Nt3VX9DhQj5YzH2fGCshlbkN83+j+h+o8h0FYPyfkJAMLsJQZm13W
-         lsttpxgF9QcL4HcrPB8vNB/mvzS6wyffmXa+cLqyyFPXSriDsSnCFzPThOGeAR9XY6h+
-         yOqSxNoOMA3KEnaudOC2UBPBrUMZMimDuyJCxU1abjt5WhQoTmn2s3zZU7KYVWc4EZyF
-         rLgA==
-X-Gm-Message-State: AOJu0Yx+PJZtXePoWrer1+Iwo1Z0yb+hMLQVfRbCgQm8hepH8RhTSNZb
-	PqMjXuK0vzxSJzu/cfyBRFnVBE62BHX2pUYOweDII3WeVgA3FwWuSGoL6hQHWcw=
-X-Gm-Gg: ASbGnctX4epmHlX/MVXg17m6SyKTTR9P77C1t+9TWoi9mcRj4Y0oJ2VY1l+cX9Fz3+m
-	3ClBfq0JxJ0XXD3NRnQyCFgM98myeZTdg2g+QS9qAw5pMWE1APINYxjhQQ8gOav2ZT8a5QjjMJH
-	1TkrsxOw6hIV3oe73+MNFki8o+eGQ41naFIsN1C/ePz3YYMG1Ogw6b0AucrBU1sD3MlU1KFdkFv
-	IdjIPzYMUVZnowKlw4hHcWM2O4UnbRGsMMlJ/660KTFnZnMwSSNmTLt5yl0RzfVt5HiYR5KpZOM
-	fZf8Ixu6eoxQtXPIXkc3VDJo7jrdgiJJ
-X-Google-Smtp-Source: AGHT+IFgsUHgtuYGP6nqCq6jAFVlW7N+0/gC9qRooPLppLMgVr4s4+u758uuFYx1XjcTnQJxBB0QDw==
-X-Received: by 2002:a17:903:11d0:b0:215:65f3:27f2 with SMTP id d9443c01a7336-21a83f43abamr355322905ad.8.1736934854059;
-        Wed, 15 Jan 2025 01:54:14 -0800 (PST)
-Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21a9f10dd84sm79462255ad.14.2025.01.15.01.54.13
+        bh=FV7OZYrCTuMqaDKhF7SFkKjXTg1pxi1RaFuxGcXJosI=;
+        b=GvG0oA79ckq1+68fnEAfNGpwolkH04uC+FzBV8gY4OcsGePyYcZoTbDC0+jRP/fNbx
+         3hZ6I36Yrj2noCrfgJUNy9XvKS2252TJ3sXPaaOhmUiAhnLpeVkSPSgC4ehNvdrQEPDO
+         k66/wwoSjfhnOi/giEI55hhPvfVsqtpCv6gyFLZbf4s7921n+sSipXB95OP5T4yMftzh
+         wX2DDAqs8c5oOQ0uHWn1L1IQzWzEckHPkpCIFPZC8ztHP00oc0KYBpOlwrVFs14jyR0S
+         FA5MU/P/xFFt8sRQZ4tdyuFhSaSWDzuvBohFE1iKz9vtwo/Qlj41YBZNVz6MqB+amGL/
+         j6XA==
+X-Gm-Message-State: AOJu0YyZNfwhUq+fOsrj/Y50AJxlkjN2vRDzzOit6W3M1tz/d/1gkErz
+	kPEGBA9/bdjzt6Q0PFJNCSgwllZEoy5NDRqWO5ZzWdbkVckasgE0aw8RRBXJfajWwXTdgrZM5g7
+	CTg4ypoIKzonR94mCtxPBfuQarVvWdOa+wHisv2ZGJW9EJoLPs0R9/fhVUyf1Knq+Dg==
+X-Gm-Gg: ASbGncuK7GlzQNpU3c93QAryPAL18fJjAOf2L4jcv0tLX8JcG6bh2lHqi+7rQfezPG/
+	BJMo79/ISrrvkhSrp5Pi1L0yYQz2Vh8U9FfE2yoLw85YCkQu9kI5NJdEsYHAv8CzoN6ntuIt8Yh
+	ynlfbn1tnPUe/qGCJ7h0V0U4XS6Ww+zIevknV/XroOfJtzb8tLODQELRcJiwKImCE8pMglzl0bE
+	KLoUXkCBNGALJiFoOpVJ8t0z7x0LroTQzd8png/Bnsj1/t+SeNaavjl1ce22lPt8gjQXXMFciPy
+	adPZhyZBCrsQByd5GYoGtw==
+X-Received: by 2002:a05:6a00:35c6:b0:728:e1f9:b680 with SMTP id d2e1a72fcca58-72d21f30e46mr39790246b3a.6.1736955211029;
+        Wed, 15 Jan 2025 07:33:31 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFxp4LOBX0nC3Rvz7L8fLORwgzvAzVkO6+Ojv4LDON967yJxXPvEI99r1p/QVx53WAQsG7GBg==
+X-Received: by 2002:a05:6a00:35c6:b0:728:e1f9:b680 with SMTP id d2e1a72fcca58-72d21f30e46mr39790215b3a.6.1736955210591;
+        Wed, 15 Jan 2025 07:33:30 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72d406a935csm9593454b3a.179.2025.01.15.07.33.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Jan 2025 01:54:13 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tY06E-0000000680R-3doZ;
-	Wed, 15 Jan 2025 20:54:10 +1100
-Date: Wed, 15 Jan 2025 20:54:10 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
+        Wed, 15 Jan 2025 07:33:30 -0800 (PST)
+Date: Wed, 15 Jan 2025 23:33:27 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Shiyang Ruan <ruansy.fnst@fujitsu.com>
 Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 0/5]: CLI and feature improvements for check-parallel
-Message-ID: <Z4eFwhJvCo-oh7UT@dread.disaster.area>
-References: <20250115060258.3951185-1-david@fromorbit.com>
- <20250115062916.GC3557695@frogsfrogsfrogs>
+Subject: Re: [PATCH] include/builddefs.in: ignore unused-result warning
+Message-ID: <20250115153327.izjczrhtpd2yjfjc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,84 +77,80 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250115062916.GC3557695@frogsfrogsfrogs>
+In-Reply-To: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
 
-On Tue, Jan 14, 2025 at 10:29:16PM -0800, Darrick J. Wong wrote:
-> On Wed, Jan 15, 2025 at 04:51:11PM +1100, Dave Chinner wrote:
-> > Hi folks,
-> > 
-> > This patchset brings some new functionality to check-parallel to
-> > make it easier to run across different machines and filesystems.
-> > The patch seti adds these features:
-> > 
-> > - auto-adjusts concurrency for the machine it is running on.
-> > - adds CLI support of selection of tests. These CLI parameters are
-> >   identical to the check CLI parameters and the test lists are built
-> >   using the same code.
-> > - adds support for logwrites devices so that all the test that use
-> >   dm-logwrites are now enabled
-> > - adds support for specifying the initial filesystem type to test
-> >   on the CLI. This makes it easy to select xfs, btrfs, ext4, etc as
-> >   the target filesystem type that is to be tested.
-> > - Only block device based filesystems can be used with
-> >   check-parallel, and this is now enforced at FSTYP selection time.
+On Mon, Jan 06, 2025 at 05:59:06PM +0800, Shiyang Ruan wrote:
+> When build xfstests, a lot of "unused result" warning are reported:
 > 
-> Can you please add a --help so that curious users don't have to go find
-> the calling conventions by reading the bash? :)
+>     [CC] write_log.lo
+> write_log.c: In function 'wlog_record_write':
+> write_log.c:205:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
+>   205 |             write(wfile->w_afd, wbuf, reclen);
+>       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> write_log.c:209:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
+>   209 |             write(wfile->w_rfd, wbuf, reclen);
+>       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>     [CC] random.lo
 
-Already implemented:
+Hi,
 
-$ ./check-parallel --help
-Usage: ./check-parallel [options] [testlist]
+I never hit this build warning:
 
-check options
-    -D <dir>            Directory to run in
-    -n                  Output test list, do not run tests
-    -r                  randomize test order
-    --exact-order       run tests in the exact order specified
-    -s section          run only specified section from config file
-    -f <FSTYPE>         specify the filesystem type to test
+# make
+...
+Building lib
+    [LTDEP]
+    [CC] write_log.lo
+    [LD]
+Building ltp
+    [CC]    doio
+    [CC]    fsstress
+...
 
-testlist options
-    -g group[,group...] include tests from these groups
-    -x group[,group...] exclude tests from these groups
-    -X exclude_file     exclude individual tests
-    -e testlist         exclude a specific list of tests
-    -E external_file    exclude individual tests
-    [testlist]          include tests matching names in testlist
+Besides that ...
 
-testlist argument is a list of tests in the form of <test dir>/<test name>.
+> 
+> Mostly are calused by not using the return value of read()/write()/...
+> Ignore this warning by adding `-Wno-unused-result` to CCFLAGS.  This
+> won't cause other problem but make the log clean.
+> 
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> ---
+>  include/builddefs.in | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/include/builddefs.in b/include/builddefs.in
+> index 7274cde8d..edf87ff00 100644
+> --- a/include/builddefs.in
+> +++ b/include/builddefs.in
+> @@ -75,7 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+>  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
+>  HAVE_FICLONE = @have_ficlone@
+>  
+> -GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+> +GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall -Wno-unused-result
 
-<test dir> is a directory under tests that contains a group file,
-with a list of the names of the tests in that directory.
+I'm not an expert of gcc. From the manual of gcc, it says:
 
-<test name> may be either a specific test file name (e.g. xfs/001) or
-a test file name match pattern (e.g. xfs/*).
+       -Wno-unused-result
+           Do not warn if a caller of a function marked with attribute "warn_unused_result" does not use its return value. The default is -Wunused-result.
 
-group argument is either a name of a tests group to collect from all
-the test dirs (e.g. quick) or a name of a tests group to collect from
-a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
-If you want to run all the tests in the test suite, use "-g all" to specify all
-groups.
+Looks like the "-Wno-unused-result" works for "a function marked with
+attribute warn_unused_result", e.g.
 
-exclude_file argument refers to a name of a file inside each test directory.
-for every test dir where this file is found, the listed test names are
-excluded from the list of tests to run from that test dir.
+    int __attribute__((warn_unused_result)) foo(void)
 
-external_file argument is a path to a single file containing a list of tests
-to exclude in the form of <test dir>/<test name>.
+I think fstests doesn't use that attribute.
 
-examples:
- check-parallel -f xfs -D /mnt xfs/001
- check-parallel -f ext4 -D /mnt -g quick
- check-parallel -D /mnt -g xfs/quick
- check-parallel -D /mnt -x stress xfs/*
- check-parallel -f btrfs -D /mnt -X .exclude -g auto
- check-parallel -f udf -D /mnt -E ~/.xfstests.exclude
-$
+Thanks,
+Zorro
 
--Dave.
 
--- 
-Dave Chinner
-david@fromorbit.com
+>  
+>  ifeq ($(PKG_PLATFORM),linux)
+>  PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
+> -- 
+> 2.43.0
+> 
+> 
+
