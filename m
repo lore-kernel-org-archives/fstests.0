@@ -1,156 +1,242 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8B3315D5C5
-	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 15:33:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAEB9155C96;
+	Wed, 15 Jan 2025 17:53:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736955217; cv=none; b=GJ4eE75nd8IDWGLShj+I3YFHEPY6RHIU7RYx3fDpGDIPloe27bCdU09cE85X5AD/TfqCHTdWR3ECYsfOL7sZBobhmxNdScfSnvkDsScwZeSwTQ/04ZqEm+hjyOTBlDgK7dvwlqW4/1CxSbwjN7oWEgTXVs44lhab5EThBR922uA=
+	t=1736963601; cv=none; b=O4qQT85lXcQIw/yX4lh4YNMVNHtbDzMPCqExtUpYc9mgJnCXMVfPIdeiHNWtE8IGgtPWCswq9G3xNcp0GK+z6QC5yAf5J5Md7Ld5lojRfv79nYt07iLSty8KtC4LZ79vcDdUJPPiOkGusvlL1zxAqLrB0E4lNybiTOWGRn654+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736955217; c=relaxed/simple;
-	bh=8Koq0cDmgjknDctgrBiiSvW1wuDmiLFRINcH+m+RgAY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=I+nJk6Ao/1vFnJy9Rcpzge44N/K4DiTZvqADQEZr2T/Aa90NFWuoE9FkzhptCMP4ITi2U8nq3TxOWrUeqft6w8xVJ8tJzS23gXWOWmq/9OZq3VlVVzMmAfCpbtqP6f3lY8Sdif408trEImgYFQtMXqUi5aASReTFrUU4wkLTRDo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ZNJJZmoP; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1736963601; c=relaxed/simple;
+	bh=rsWMNhPDIpEE2bEC3a3KZ3VHisVYyvYotvkljz+C0/A=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=sQKhCucG58rSbrlYHEdX5eug+NDhAeGItYMsuNfUjrwWYMOw5ckEXavnnRtnnS13U36hVy2Zj5jrSdodKPs68X3BYn/CJordg2NRpfTveGdKwBqzST9vv49E0kCtf0LGHWrSuLAqwUUoDXPvo0v9hWWE1I3AJwQSgHBaqmmJMoc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=k3CIxzaM; arc=none smtp.client-ip=209.85.160.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ZNJJZmoP"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1736955214;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=FV7OZYrCTuMqaDKhF7SFkKjXTg1pxi1RaFuxGcXJosI=;
-	b=ZNJJZmoPwz3GeUUsYqJlhExMtCpKJVIUq0GkdoWSxn/dM6Cy0URsgLOMv4sjYpnayFEKuv
-	xBwlUPReWLYjL+grBn6kuJ+XE0GS+we+a7Wts2zEZb4toKw9fbKYV72nXv3DhgTMdhuffG
-	f+ZensCGmk8mdlIQAL9QyUY18yVyxw8=
-Received: from mail-pj1-f70.google.com (mail-pj1-f70.google.com
- [209.85.216.70]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-5-3Sgg5rGCP3-p-JbnmwOYOg-1; Wed, 15 Jan 2025 10:33:32 -0500
-X-MC-Unique: 3Sgg5rGCP3-p-JbnmwOYOg-1
-X-Mimecast-MFC-AGG-ID: 3Sgg5rGCP3-p-JbnmwOYOg
-Received: by mail-pj1-f70.google.com with SMTP id 98e67ed59e1d1-2f129f7717fso12513990a91.0
-        for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 07:33:32 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736955211; x=1737560011;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="k3CIxzaM"
+Received: by mail-qt1-f176.google.com with SMTP id d75a77b69052e-467a6ecaa54so693731cf.0;
+        Wed, 15 Jan 2025 09:53:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1736963598; x=1737568398; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=FV7OZYrCTuMqaDKhF7SFkKjXTg1pxi1RaFuxGcXJosI=;
-        b=GvG0oA79ckq1+68fnEAfNGpwolkH04uC+FzBV8gY4OcsGePyYcZoTbDC0+jRP/fNbx
-         3hZ6I36Yrj2noCrfgJUNy9XvKS2252TJ3sXPaaOhmUiAhnLpeVkSPSgC4ehNvdrQEPDO
-         k66/wwoSjfhnOi/giEI55hhPvfVsqtpCv6gyFLZbf4s7921n+sSipXB95OP5T4yMftzh
-         wX2DDAqs8c5oOQ0uHWn1L1IQzWzEckHPkpCIFPZC8ztHP00oc0KYBpOlwrVFs14jyR0S
-         FA5MU/P/xFFt8sRQZ4tdyuFhSaSWDzuvBohFE1iKz9vtwo/Qlj41YBZNVz6MqB+amGL/
-         j6XA==
-X-Gm-Message-State: AOJu0YyZNfwhUq+fOsrj/Y50AJxlkjN2vRDzzOit6W3M1tz/d/1gkErz
-	kPEGBA9/bdjzt6Q0PFJNCSgwllZEoy5NDRqWO5ZzWdbkVckasgE0aw8RRBXJfajWwXTdgrZM5g7
-	CTg4ypoIKzonR94mCtxPBfuQarVvWdOa+wHisv2ZGJW9EJoLPs0R9/fhVUyf1Knq+Dg==
-X-Gm-Gg: ASbGncuK7GlzQNpU3c93QAryPAL18fJjAOf2L4jcv0tLX8JcG6bh2lHqi+7rQfezPG/
-	BJMo79/ISrrvkhSrp5Pi1L0yYQz2Vh8U9FfE2yoLw85YCkQu9kI5NJdEsYHAv8CzoN6ntuIt8Yh
-	ynlfbn1tnPUe/qGCJ7h0V0U4XS6Ww+zIevknV/XroOfJtzb8tLODQELRcJiwKImCE8pMglzl0bE
-	KLoUXkCBNGALJiFoOpVJ8t0z7x0LroTQzd8png/Bnsj1/t+SeNaavjl1ce22lPt8gjQXXMFciPy
-	adPZhyZBCrsQByd5GYoGtw==
-X-Received: by 2002:a05:6a00:35c6:b0:728:e1f9:b680 with SMTP id d2e1a72fcca58-72d21f30e46mr39790246b3a.6.1736955211029;
-        Wed, 15 Jan 2025 07:33:31 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFxp4LOBX0nC3Rvz7L8fLORwgzvAzVkO6+Ojv4LDON967yJxXPvEI99r1p/QVx53WAQsG7GBg==
-X-Received: by 2002:a05:6a00:35c6:b0:728:e1f9:b680 with SMTP id d2e1a72fcca58-72d21f30e46mr39790215b3a.6.1736955210591;
-        Wed, 15 Jan 2025 07:33:30 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72d406a935csm9593454b3a.179.2025.01.15.07.33.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Jan 2025 07:33:30 -0800 (PST)
-Date: Wed, 15 Jan 2025 23:33:27 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH] include/builddefs.in: ignore unused-result warning
-Message-ID: <20250115153327.izjczrhtpd2yjfjc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
+        bh=QxBhmlbb3NqmfO5hIp21TMTAyT6RZ8qBzW1rgk3/8d0=;
+        b=k3CIxzaMaDJXye2YQjCKvrLK463okYab/p7/4NP2oiCk8zhfYgwrl9E6dU6xdJHJjS
+         0GHEUuWNCloosbpghc2d3QaMqwdLC08jErx6+t3ba4G505XHjx9x3iR52GVy/cguMgrd
+         iypRlw3+DdDvKoQEca7WsktJLeD7wfVrZl5GZPGsEFOduZbopJZIMsekhMUl6vRH1eua
+         6UeoQ6dLChKRWVomtzJNIYgnaSwbAtiTT06foOstbSajxW3q9w72u0ckm9KKya4AyB7w
+         PtdCvvW2FcjEId7fbKgcsAWRiSw0giiErTvB0LNJmGbKayslfsS8oj5JYnivRQt6h2wC
+         eD9g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736963598; x=1737568398;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QxBhmlbb3NqmfO5hIp21TMTAyT6RZ8qBzW1rgk3/8d0=;
+        b=KeWXc2Osna7/MOeJlki3ZlTAD+EGdH0zvi2fbzJ2zLe6ziMu6maPw+oO3C5vkOMfup
+         xSUjsjNEF3NHRe1PVyjx2am/Hiewk2k2uQT9VG2OimNRgtp/TUZPvrYpJD7cf4PR5v6M
+         sJLWK9L2WKEa3h0Metxw3USLNsPjfgcY2nV8CLmhcDugLpRXCfTsVakTuPtnkJuEJ6jr
+         wk8dNAnaUWWGGO0eKFbr4yBbFOe8nX1/+H8n+whtjVzCdqtr8yhXeP1SLUKFlwRCe7AJ
+         eLVB3eCMYSTP+ajD5xyZj+658miBoxPP7DtaEzvJcJXgfE7Nxh+0zLWNOTY7XvEj0wGy
+         +Ayg==
+X-Forwarded-Encrypted: i=1; AJvYcCUGmuzzIeIxVdgohbdeUzAaBDqOuXscjDLbcTD2FOfwAVD8l/Tc+rNFyf7GkS05jfSLTd9ghOYKzJBMrHw7@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy/zAR8AswSdupaYwi1XZygg554Djk+mOMWYidC9uaAuMaC55I7
+	5YmRbw69q9G6ogUkvbDV5djGZZEUE212hJHhjL46vSO8AO3BVNB6/AG9tYRo8ZPSduNPRuL7NwK
+	DRTTcKjDygcsFFukYA2br2nGm1Y4=
+X-Gm-Gg: ASbGncvfX8r7+AmPNe0i4dyWamyd/kasFBnxrcqw+wZCN3/s7uqPMJZQF7CLvC4fzlz
+	xjhx/KX0RKnhsk6uK7wlBSk62t21SSx2gAfiWpCnKOE6Nch6TPfrw5A==
+X-Google-Smtp-Source: AGHT+IGmoOgg1Rtx5ws4QiZadgUm6YuT50WGAezRWLf8zAKVGuogy4bSm29FNdjzxCaiLnXyXWofNNTYJfSomSZ/zuU=
+X-Received: by 2002:ac8:7fd6:0:b0:466:9ab3:c2d0 with SMTP id
+ d75a77b69052e-46c7108c35amr423317891cf.44.1736963597617; Wed, 15 Jan 2025
+ 09:53:17 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
+References: <20241227193311.1799626-1-joannelkoong@gmail.com>
+ <20241227193311.1799626-2-joannelkoong@gmail.com> <20250112041624.xzenih232klygwvw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250112041624.xzenih232klygwvw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Joanne Koong <joannelkoong@gmail.com>
+Date: Wed, 15 Jan 2025 09:53:06 -0800
+X-Gm-Features: AbW1kvbLSf0VzrmecAd8o8rfZyvxZUoKFQSwjrv--pKNhrTop2ksjwHrTOvImuI
+Message-ID: <CAJnrk1YABnxcHqcZ8G9S834N1VJJcxfgQim7SGhH=ajpXBeUug@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] fsx: support reads/writes from buffers backed by hugepages
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, bfoster@redhat.com, 
+	djwong@kernel.org, nirjhar@linux.ibm.com, kernel-team@meta.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jan 06, 2025 at 05:59:06PM +0800, Shiyang Ruan wrote:
-> When build xfstests, a lot of "unused result" warning are reported:
-> 
->     [CC] write_log.lo
-> write_log.c: In function 'wlog_record_write':
-> write_log.c:205:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
->   205 |             write(wfile->w_afd, wbuf, reclen);
->       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> write_log.c:209:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
->   209 |             write(wfile->w_rfd, wbuf, reclen);
->       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->     [CC] random.lo
+On Sat, Jan 11, 2025 at 8:16=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote=
+:
+>
+> On Fri, Dec 27, 2024 at 11:33:10AM -0800, Joanne Koong wrote:
+> > Add support for reads/writes from buffers backed by hugepages.
+> > This can be enabled through the '-h' flag. This flag should only be use=
+d
+> > on systems where THP capabilities are enabled.
+> >
+> > This is motivated by a recent bug that was due to faulty handling of
+> > userspace buffers backed by hugepages. This patch is a mitigation
+> > against problems like this in the future.
+> >
+> > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> > ---
+> >  ltp/fsx.c | 108 ++++++++++++++++++++++++++++++++++++++++++++++++------
+> >  1 file changed, 97 insertions(+), 11 deletions(-)
+> >
+>
+> [snip]
+>
+> > +static void *
+> > +init_hugepages_buf(unsigned len, int hugepage_size, int alignment)
+> > +{
+> > +     void *buf;
+> > +     long buf_size =3D roundup(len, hugepage_size) + alignment;
+> > +
+> > +     if (posix_memalign(&buf, hugepage_size, buf_size)) {
+> > +             prterr("posix_memalign for buf");
+> > +             return NULL;
+> > +     }
+> > +     memset(buf, '\0', buf_size);
+> > +     if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+>
+> Hi Joanne,
+>
+> Sorry I have to drop this patchset from the "upcoming" release v2025.01.1=
+2. Due to
+> it cause a regression build error on older system, e.g. RHEL-9:
+>
+>     [CC]    fsx
+>  fsx.c: In function 'init_hugepages_buf':
+>  fsx.c:2935:36: error: 'MADV_COLLAPSE' undeclared (first use in this func=
+tion); did you mean 'MADV_COLD'?
+>   2935 |         if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+>        |                                    ^~~~~~~~~~~~~
+>        |                                    MADV_COLD
+>  fsx.c:2935:36: note: each undeclared identifier is reported only once fo=
+r each function it appears in
+>  gmake[4]: *** [Makefile:51: fsx] Error 1
+>  gmake[4]: *** Waiting for unfinished jobs....
+>  gmake[3]: *** [include/buildrules:30: ltp] Error 2
+>
+> It might cause xfstests totally can't be used on downstream systems, so i=
+t can't
+> catch up the release of this weekend. Sorry about that, let's try to have=
+ it
+> in next release :)
 
-Hi,
+Hi Zorro,
 
-I never hit this build warning:
+Thanks for the update. I'll submit a v3 of this patch that gates this
+function behind #ifdef MADV_COLLAPSE, and hopefully that should fix
+this issue.
 
-# make
-...
-Building lib
-    [LTDEP]
-    [CC] write_log.lo
-    [LD]
-Building ltp
-    [CC]    doio
-    [CC]    fsstress
-...
-
-Besides that ...
-
-> 
-> Mostly are calused by not using the return value of read()/write()/...
-> Ignore this warning by adding `-Wno-unused-result` to CCFLAGS.  This
-> won't cause other problem but make the log clean.
-> 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
-> ---
->  include/builddefs.in | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/include/builddefs.in b/include/builddefs.in
-> index 7274cde8d..edf87ff00 100644
-> --- a/include/builddefs.in
-> +++ b/include/builddefs.in
-> @@ -75,7 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
->  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
->  HAVE_FICLONE = @have_ficlone@
->  
-> -GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
-> +GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall -Wno-unused-result
-
-I'm not an expert of gcc. From the manual of gcc, it says:
-
-       -Wno-unused-result
-           Do not warn if a caller of a function marked with attribute "warn_unused_result" does not use its return value. The default is -Wunused-result.
-
-Looks like the "-Wno-unused-result" works for "a function marked with
-attribute warn_unused_result", e.g.
-
-    int __attribute__((warn_unused_result)) foo(void)
-
-I think fstests doesn't use that attribute.
 
 Thanks,
-Zorro
+Joanne
 
-
->  
->  ifeq ($(PKG_PLATFORM),linux)
->  PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
-> -- 
-> 2.43.0
-> 
-> 
-
+>
+> Thanks,
+> Zorro
+>
+>
+> > +             prterr("madvise collapse for buf");
+> > +             free(buf);
+> > +             return NULL;
+> > +     }
+> > +
+> > +     return buf;
+> > +}
+> > +
+> > +static void
+> > +init_buffers(void)
+> > +{
+> > +     int i;
+> > +
+> > +     original_buf =3D (char *) malloc(maxfilelen);
+> > +     for (i =3D 0; i < maxfilelen; i++)
+> > +             original_buf[i] =3D random() % 256;
+> > +     if (hugepages) {
+> > +             long hugepage_size =3D get_hugepage_size();
+> > +             if (hugepage_size =3D=3D -1) {
+> > +                     prterr("get_hugepage_size()");
+> > +                     exit(100);
+> > +             }
+> > +             good_buf =3D init_hugepages_buf(maxfilelen, hugepage_size=
+, writebdy);
+> > +             if (!good_buf) {
+> > +                     prterr("init_hugepages_buf failed for good_buf");
+> > +                     exit(101);
+> > +             }
+> > +
+> > +             temp_buf =3D init_hugepages_buf(maxoplen, hugepage_size, =
+readbdy);
+> > +             if (!temp_buf) {
+> > +                     prterr("init_hugepages_buf failed for temp_buf");
+> > +                     exit(101);
+> > +             }
+> > +     } else {
+> > +             unsigned long good_buf_len =3D maxfilelen + writebdy;
+> > +             unsigned long temp_buf_len =3D maxoplen + readbdy;
+> > +
+> > +             good_buf =3D (char *) malloc(good_buf_len);
+> > +             memset(good_buf, '\0', good_buf_len);
+> > +             temp_buf =3D (char *) malloc(temp_buf_len);
+> > +             memset(temp_buf, '\0', temp_buf_len);
+> > +     }
+> > +     good_buf =3D round_ptr_up(good_buf, writebdy, 0);
+> > +     temp_buf =3D round_ptr_up(temp_buf, readbdy, 0);
+> > +}
+> > +
+> >  static struct option longopts[] =3D {
+> >       {"replay-ops", required_argument, 0, 256},
+> >       {"record-ops", optional_argument, 0, 255},
+> > @@ -2883,7 +2974,7 @@ main(int argc, char **argv)
+> >       setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+> >
+> >       while ((ch =3D getopt_long(argc, argv,
+> > -                              "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyAB=
+D:EFJKHzCILN:OP:RS:UWXZ",
+> > +                              "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyA=
+BD:EFJKHzCILN:OP:RS:UWXZ",
+> >                                longopts, NULL)) !=3D EOF)
+> >               switch (ch) {
+> >               case 'b':
+> > @@ -2916,6 +3007,9 @@ main(int argc, char **argv)
+> >               case 'g':
+> >                       filldata =3D *optarg;
+> >                       break;
+> > +             case 'h':
+> > +                     hugepages =3D 1;
+> > +                     break;
+> >               case 'i':
+> >                       integrity =3D 1;
+> >                       logdev =3D strdup(optarg);
+> > @@ -3229,15 +3323,7 @@ main(int argc, char **argv)
+> >                       exit(95);
+> >               }
+> >       }
+> > -     original_buf =3D (char *) malloc(maxfilelen);
+> > -     for (i =3D 0; i < maxfilelen; i++)
+> > -             original_buf[i] =3D random() % 256;
+> > -     good_buf =3D (char *) malloc(maxfilelen + writebdy);
+> > -     good_buf =3D round_ptr_up(good_buf, writebdy, 0);
+> > -     memset(good_buf, '\0', maxfilelen);
+> > -     temp_buf =3D (char *) malloc(maxoplen + readbdy);
+> > -     temp_buf =3D round_ptr_up(temp_buf, readbdy, 0);
+> > -     memset(temp_buf, '\0', maxoplen);
+> > +     init_buffers();
+> >       if (lite) {     /* zero entire existing file */
+> >               ssize_t written;
+> >
+> > --
+> > 2.47.1
+> >
+> >
+>
