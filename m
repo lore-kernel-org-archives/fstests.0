@@ -1,42 +1,39 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAEFC1D61B7;
-	Wed, 15 Jan 2025 21:40:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CF9019CC2A
+	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 21:45:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736977219; cv=none; b=fZH3vsB2PPEy4CLHti3G1HtCJK6Qs+T0Hta6sG1J8kIzlIrT8cAb88VgnJbFX0EyBijiWb/ytw0eRxHqlKSy4YNfRKOXJC+B1+KHl28F2+XMXUJp8baV0K2yekEpEByZ5YD5Ba2+xDoI8c+mj+uqPGIntk0bMklLcrE7F+tgLk4=
+	t=1736977548; cv=none; b=mua5FyOKaLpLJ9pTAuUjQZkKL29Rr9H6Q2msA7L89j+7LB4P7iNkiy3wI+ZJSFZZJfjrdBZoVi332UTL0AxIJQLsnSOlsn9i5ORcpdkBaw5WUMlVX0VMR/t+be2hqW5VHC8wdfjGcJwVqEKQFd1PI91YEJmj65lXgDO/N5BJGXg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736977219; c=relaxed/simple;
-	bh=6vboC0nCKtNL4IrreyugR1iZPp21Qld3yhPTbyqLIyk=;
+	s=arc-20240116; t=1736977548; c=relaxed/simple;
+	bh=4HOMjYPP2WmM0zp/bZGGKbunyitaqkj32HsKnCAbhGk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=P85Oy3ZzvlEEpQVbxCCyLvxcxkgmsjPJWNUr8JhvHXrblJ9jUagThdkBit/2A5R9fL9GK+H4UTaPVJQ647pb0P5ryi49kW1MogYAtxzH/wECGTqZeG0yqK7Kk4HClv/ZZDbVd7iEqns6dyVnDGVP4UeczlKCae2FB1xKjyDDwmk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D01Lt0ca; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=qUzHll2LK9+BGMgrE0i3l39ttypPIUyzlJ+BDnffkoik/9XUJkVzdv8mCqCNKFXOkeHYIaKkEAui7Ro/k+pzdcMpIGNWDvBnpIzuyRYIxhLKM/9joRTRIXTezq5n/0+h0ZgpdacRyNIC+OjOUOeD8NM8/FCWa6Yfu0SjmHQQIc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qc+81Jny; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D01Lt0ca"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B79DC4CED1;
-	Wed, 15 Jan 2025 21:40:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qc+81Jny"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A0279C4CED1;
+	Wed, 15 Jan 2025 21:45:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1736977219;
-	bh=6vboC0nCKtNL4IrreyugR1iZPp21Qld3yhPTbyqLIyk=;
+	s=k20201202; t=1736977547;
+	bh=4HOMjYPP2WmM0zp/bZGGKbunyitaqkj32HsKnCAbhGk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=D01Lt0caXMYuBRr7ugke1x2tbToe6mSq8c4XqofjgqsFGugmxaoYt9IHvMXKPh5M/
-	 skWl7x6nM7t3qn4l15anJssTzj61ISkOzzaoOdeBGPoSYHLnDfpDzSAF6VTpLcJuJe
-	 nL90NGxAWjVpzeNITfK49GGMbjHx/AgElVEME3Rwobl5Hsj2ZH7Yz6AltFPJsyGAQZ
-	 5cRikue6tQgWECKNQ+G/ZCQKUKEmT3KlYErDhiFP/CaD5EJywbmgRTDdpg8+FbCHiC
-	 0nOZYrP8lC3zQiwxB1e3Hb34thnhqGeUOEEY0ctgEAt8GvICvO4a8iVfr59fSIGB8n
-	 gnTp5EPh3an/A==
-Date: Wed, 15 Jan 2025 13:40:18 -0800
+	b=qc+81JnyBzngtS0QD8ew3RQrBNytPybqSyx3OiG7eKWn4o747z4NXqz9WoF84vsqS
+	 O1fm3gfwEHz31SXVltEb01cKsbWFIZt1W4QVqi0yk713dQYgXZod2zLg8yksBZxuGX
+	 VBbw4w3w4wqAz5mCV7ygYMexAPhvrYbFPtm07DLM1yODUNayqg9o6BWMsVCulIKps1
+	 Yr+8XbyE4ONfQJWEM0ko4J2SeXRAYaVmDf2QnUWbWGjP/tUhwZ00VAxR7jJxfFsAEh
+	 oeTu5GoujWdi75um80ccmwaIYBbTT4FhMaLCqhclwpkmue0dGji7f5A4720/5BFxqi
+	 roS8pD86k+LCg==
+Date: Wed, 15 Jan 2025 13:45:47 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Joanne Koong <joannelkoong@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	bfoster@redhat.com, nirjhar@linux.ibm.com, zlang@redhat.com,
-	kernel-team@meta.com
-Subject: Re: [PATCH v3 2/2] generic: add tests for read/writes from
- hugepages-backed buffers
-Message-ID: <20250115214018.GF3557695@frogsfrogsfrogs>
-References: <20250115183107.3124743-1-joannelkoong@gmail.com>
- <20250115183107.3124743-3-joannelkoong@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Shiyang Ruan <ruansy.fnst@fujitsu.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH] include/builddefs.in: ignore unused-result warning
+Message-ID: <20250115214547.GG3557695@frogsfrogsfrogs>
+References: <20250106095906.330877-1-ruansy.fnst@fujitsu.com>
+ <20250115153327.izjczrhtpd2yjfjc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,139 +42,96 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250115183107.3124743-3-joannelkoong@gmail.com>
+In-Reply-To: <20250115153327.izjczrhtpd2yjfjc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Wed, Jan 15, 2025 at 10:31:07AM -0800, Joanne Koong wrote:
-> Add generic tests 758 and 759 for testing reads/writes from buffers
-> backed by hugepages.
+On Wed, Jan 15, 2025 at 11:33:27PM +0800, Zorro Lang wrote:
+> On Mon, Jan 06, 2025 at 05:59:06PM +0800, Shiyang Ruan wrote:
+> > When build xfstests, a lot of "unused result" warning are reported:
+> > 
+> >     [CC] write_log.lo
+> > write_log.c: In function 'wlog_record_write':
+> > write_log.c:205:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
+> >   205 |             write(wfile->w_afd, wbuf, reclen);
+> >       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> > write_log.c:209:13: warning: ignoring return value of 'write' declared with attribute 'warn_unused_result' [-Wunused-result]
+> >   209 |             write(wfile->w_rfd, wbuf, reclen);
+> >       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >     [CC] random.lo
 > 
-> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-> Reviewed-by: Brian Foster <bfoster@redhat.com>
-> ---
->  common/rc             | 13 +++++++++++++
->  tests/generic/758     | 22 ++++++++++++++++++++++
->  tests/generic/758.out |  4 ++++
->  tests/generic/759     | 26 ++++++++++++++++++++++++++
->  tests/generic/759.out |  4 ++++
->  5 files changed, 69 insertions(+)
->  create mode 100755 tests/generic/758
->  create mode 100644 tests/generic/758.out
->  create mode 100755 tests/generic/759
->  create mode 100644 tests/generic/759.out
+> Hi,
 > 
-> diff --git a/common/rc b/common/rc
-> index 1b2e4508..825e350e 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3016,6 +3016,19 @@ _require_xfs_io_command()
->  	fi
->  }
->  
-> +# check that the system supports transparent hugepages
-> +_require_thp()
-> +{
-> +    if [ ! -e /sys/kernel/mm/transparent_hugepage/enabled ]; then
-> +	    _notrun "system doesn't support transparent hugepages"
-> +    fi
-> +
-> +    thp_status=$(cat /sys/kernel/mm/transparent_hugepage/enabled)
-> +    if [[ $thp_status == *"[never]"* ]]; then
-> +	    _notrun "system doesn't have transparent hugepages enabled"
-> +    fi
+> I never hit this build warning:
+> 
+> # make
+> ...
+> Building lib
+>     [LTDEP]
+>     [CC] write_log.lo
+>     [LD]
+> Building ltp
+>     [CC]    doio
+>     [CC]    fsstress
+> ...
+> 
+> Besides that ...
+> 
+> > 
+> > Mostly are calused by not using the return value of read()/write()/...
+> > Ignore this warning by adding `-Wno-unused-result` to CCFLAGS.  This
+> > won't cause other problem but make the log clean.
+> > 
+> > Signed-off-by: Shiyang Ruan <ruansy.fnst@fujitsu.com>
+> > ---
+> >  include/builddefs.in | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/include/builddefs.in b/include/builddefs.in
+> > index 7274cde8d..edf87ff00 100644
+> > --- a/include/builddefs.in
+> > +++ b/include/builddefs.in
+> > @@ -75,7 +75,7 @@ HAVE_RLIMIT_NOFILE = @have_rlimit_nofile@
+> >  NEED_INTERNAL_XFS_IOC_EXCHANGE_RANGE = @need_internal_xfs_ioc_exchange_range@
+> >  HAVE_FICLONE = @have_ficlone@
+> >  
+> > -GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+> > +GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall -Wno-unused-result
+> 
+> I'm not an expert of gcc. From the manual of gcc, it says:
+> 
+>        -Wno-unused-result
+>            Do not warn if a caller of a function marked with attribute "warn_unused_result" does not use its return value. The default is -Wunused-result.
+> 
+> Looks like the "-Wno-unused-result" works for "a function marked with
+> attribute warn_unused_result", e.g.
+> 
+>     int __attribute__((warn_unused_result)) foo(void)
+> 
+> I think fstests doesn't use that attribute.
 
-Tabs, not spaces.
+No, but unistd.h does for write():
 
-With that fixed,
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+extern ssize_t write (int __fd, const void *__buf, size_t __n) __wur
+    __attr_access ((__read_only__, 2, 3));
+
+where "__wur" is a macro wrapping __attribute__
+((__warn_unused_result__)) if available and FORTIFY_SOURCE is nonzero.
+
+But, uh, shouldn't we fix these programs either to fail the test because
+some part of its execution failed, or declare that the return value is
+irrelevant if that's the case?
 
 --D
 
-> +}
-> +
->  # check that kernel and filesystem support direct I/O, and check if "$1" size
->  # aligned (optional) is supported
->  _require_odirect()
-> diff --git a/tests/generic/758 b/tests/generic/758
-> new file mode 100755
-> index 00000000..e7cd8cdc
-> --- /dev/null
-> +++ b/tests/generic/758
-> @@ -0,0 +1,22 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 758
-> +#
-> +# fsx exercising reads/writes from userspace buffers
-> +# backed by hugepages
-> +#
-> +. ./common/preamble
-> +_begin_fstest rw auto quick
-> +
-> +. ./common/filter
-> +
-> +_require_test
-> +_require_thp
-> +
-> +run_fsx -N 10000            -l 500000 -h
-> +run_fsx -N 10000  -o 8192   -l 500000 -h
-> +run_fsx -N 10000  -o 128000 -l 500000 -h
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/758.out b/tests/generic/758.out
-> new file mode 100644
-> index 00000000..af04bb14
-> --- /dev/null
-> +++ b/tests/generic/758.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 758
-> +fsx -N 10000 -l 500000 -h
-> +fsx -N 10000 -o 8192 -l 500000 -h
-> +fsx -N 10000 -o 128000 -l 500000 -h
-> diff --git a/tests/generic/759 b/tests/generic/759
-> new file mode 100755
-> index 00000000..514e7603
-> --- /dev/null
-> +++ b/tests/generic/759
-> @@ -0,0 +1,26 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +#
-> +# FS QA Test No. 759
-> +#
-> +# fsx exercising direct IO reads/writes from userspace buffers
-> +# backed by hugepages
-> +#
-> +. ./common/preamble
-> +_begin_fstest rw auto quick
-> +
-> +. ./common/filter
-> +
-> +_require_test
-> +_require_odirect
-> +_require_thp
-> +
-> +psize=`$here/src/feature -s`
-> +bsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
-> +
-> +run_fsx -N 10000            -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> +run_fsx -N 10000  -o 8192   -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> +run_fsx -N 10000  -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/759.out b/tests/generic/759.out
-> new file mode 100644
-> index 00000000..86bb66ef
-> --- /dev/null
-> +++ b/tests/generic/759.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 759
-> +fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> +fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> +fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-> -- 
-> 2.47.1
+> Thanks,
+> Zorro
+> 
+> 
+> >  
+> >  ifeq ($(PKG_PLATFORM),linux)
+> >  PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
+> > -- 
+> > 2.43.0
+> > 
+> > 
 > 
 > 
