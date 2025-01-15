@@ -1,79 +1,79 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pj1-f44.google.com (mail-pj1-f44.google.com [209.85.216.44])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA9D01F9F5C
-	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 06:03:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 585542054E9
+	for <fstests@vger.kernel.org>; Wed, 15 Jan 2025 06:03:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736920986; cv=none; b=WvMNEiTRqUdz+1OaZA+p2VPAi7zzoSEXm/+IuwB4tphS8JEff3dTLuTocYI1Hf7HQ8GuA4RW326NE01E601asil43wFD9JlK6tm52BB5N23xCtW2/0ZM4I9bPa36QMMjfmvtlpyIgZLrKnMKSDTU1xLsMvhuevegkQQet1t8ly4=
+	t=1736920987; cv=none; b=V/dGcVJdfuCLIs8vfr9CbK3xFLrmdlIGNdB8NJunZWqDEMA+MsXGxXFbQ4sQezc0SNPUHpN2Lm+80kXfR+iM5jCK2cDnhATfvcNZTqI/gCqELMlBJCtt0b9vMyC5z0kvUWSnEVfEesl2kPD0Rn/rwX083SK2TyR+4/l3NoRSYkE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736920986; c=relaxed/simple;
-	bh=NQ1NVX7mDRpk3eFImqWLbKttBReOmTgfmygnEDXVKcU=;
+	s=arc-20240116; t=1736920987; c=relaxed/simple;
+	bh=Rs2CL2oGTEJ4im+8mN6kltlq5ox4e5BdJiatg9nxtn8=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HJhE3+jCoWl4TjLtbE3m1PKnBgN91UA0rUr8BlQuua3BlOvlFn1SNxgXp8tblZdy6C/7W6p/jSHRKgn59dIVd5frAhTQxkkj9mhMZ2rWOW/H4LIYBOyyYUp/yVc/yRl3nRvT1UHpPjzA4ctSDJ+ppt26TlBcaGEBzKrgOTfAxA8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=Z4CKFn4a; arc=none smtp.client-ip=209.85.214.181
+	 MIME-Version; b=A2T0EpQ5kwRJtAqEjUSb5dhM4dd01gOpUVBA0m2Gpd3Mb9AiIf+VLMLJQ+naKHM9wF/HMdlpO333KKFToOfXi3qftSosiRTOYHW9te7XagfqcTcOkJPiVWJlh4TCUe3I4itlzqrPBd5njsetEAlEhCbl1d5EEejfbuVp+n/GhFM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=Vm8gE2XO; arc=none smtp.client-ip=209.85.216.44
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Z4CKFn4a"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-21670dce0a7so137226475ad.1
-        for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 22:03:04 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="Vm8gE2XO"
+Received: by mail-pj1-f44.google.com with SMTP id 98e67ed59e1d1-2ef70c7efa5so8651999a91.2
+        for <fstests@vger.kernel.org>; Tue, 14 Jan 2025 22:03:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1736920984; x=1737525784; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=DDyM9C+bh4pg44LGWqVZr4fOonPK+G5ritIIjqyIkgo=;
-        b=Z4CKFn4aq7qacoSwSbx7DhUKO5/cx7w35Q12NhzkPzSH/u6FbrOcs+B5x8EVCIgFbW
-         WpIzf1P6VGlT6ywachZFYbzNiEiansJnEhvbMDR5L5fcbPVct0RnzjRsg2kEOrrQKXDR
-         +JxOUb+ZYMYYnfB5UfaqphjbCtUVx3qrVfLEQ3FyaMgrGxkEGUtZtxlfb24bJTH7c2d/
-         BddRnp7Z9LWMZLJbH1J3v75pCrl4OckaRwe44Dh/+A+BefyITWpKBsikogqp8nOwe/N1
-         1FaMjZKHFM0HQG5AwyMVFa/xAUpukrN+/jkNOLeHJNGjl5FV23qGy6uZIXGemxsMrPac
-         nB6Q==
+        bh=s/VIejK/47Hv2yqRjB4Op7RT5n+QkZx2ByFzp9lIxHg=;
+        b=Vm8gE2XO/9dROFyefj02LqH63bTVPZAUoZ2x0hxq3osjgLOIMmyZB1Da0pPhebiwWE
+         pxrlsS38kLqCrYjfdaYqjx2LTLsMQuDROSYZd31dE+dSEmMoI4lJfqrxg4olQo8/Jo9I
+         uslwctUoET3cepHazt51XZYkfRbzVRTb1rH1WOKPWssOAMWT/G/fWxWXl3Ow/SxkjWWf
+         xYlyPF+yPoJj0Gzkf0kePjuuChdIrebajTlG3qNFkWerRu4EHinUuRClEb+mLk4p9a8F
+         7jY2TLJuzYoIz/mvoe8b3xr2l9vPZJWzZi6No6VuXyBYL7mMgD9oaRfn3HYzg0I34RR0
+         quaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1736920984; x=1737525784;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=DDyM9C+bh4pg44LGWqVZr4fOonPK+G5ritIIjqyIkgo=;
-        b=WzVNgrXH9S2fYg0W6piOcoPw26f7z0yPPVnbhx8n2FMQbjGAq+Yt+/HHpkcQQ7MgmC
-         D+M+rfe8YEwKagGAnzOviUjB7U2evnsjn0d+9at5ItSWhC1zYDnJ+BC3oYc2fL9s47Gz
-         zw071YAZqnLudOzp6VQYSMag58jQNtJviSh/fvC7AG9VZa4HdUHbw03BBzK3fKM3EUCZ
-         qgaA2OE/eaNU6hk1yMtEZ8RbooWnrI0g0vMuKYXZL9dlodv1YpJiT58KFhx2PITbmWki
-         CU7ibTnmU0pGQApTdNEzmxX70kOKS1+N5xvyKI6SLlBogz9PJ2f9i1sIoOSKPfP18k05
-         qiwA==
-X-Gm-Message-State: AOJu0YzWtEDxTdkd1WPj04MPNIJ/cuuDYwR80fqHaTNXSqQk35q/mLRO
-	e8ZQxFDQXZDQy1sl7ma2gdCFbMnczeqPHlrAo0XMo1E9/INEm5EhF3/h9JGuU7lRlnd1CUCoDpm
-	+
-X-Gm-Gg: ASbGncvLZpkDJYHKAJnn8YbkO44N7WpS35bAx2swnahbuUkxoG2sfP1KPikTchQs1r0
-	Ef6xvzMM5Oo8k5EAg2j+IA99KYsLIlcP0ZgeFTEGGKtNN0/NpY6cgbnpB77b9CGSK2nIksQy1F8
-	Dm/oQCPKpO8/HL3szdBKS/26GeoVFl89XDTO+ZsRsqOKSsCXYJQLlHVayyDYjgIb4fK+1Jxp4fM
-	ZtM26HLSLFqohd+yLqTbDU3iBSRQsLqojk+gNYf7m1EeuGlWwhVl1vNaTXIqUauQeMqp1EbDgHa
-	Te2lHY5u3cMdB8d4W3zUrGP7LHXxZ74=
-X-Google-Smtp-Source: AGHT+IEQzF6KjrbH9bb7HxEdgA+Kg03emAnemZVSnpBNFX+gk6mEpz8MEUTmGXbqgcmv02n/wn33ew==
-X-Received: by 2002:a17:902:d481:b0:215:b01a:627f with SMTP id d9443c01a7336-21a83f48e86mr442042485ad.4.1736920983986;
-        Tue, 14 Jan 2025 22:03:03 -0800 (PST)
+        bh=s/VIejK/47Hv2yqRjB4Op7RT5n+QkZx2ByFzp9lIxHg=;
+        b=jx24PVHPP9IfJY525VTsXZHd/lP9/Mv9jPh9Ql/2G25NYtXm6YnkTAU26WNEelVdPi
+         XKGCbvcRh1aCOcSWpMMLhr5SVRbMBwhbB6Uw7e647jVA1LXvVIwg3xqp9PNMvSU1ZGXi
+         ZZAPNOtZnN33IH4vNmmvkrbMPz5xL1FbmI1Ss56PWX2NjEHwfGg/uWMsdCdSujWfHjth
+         lhQY1CBxkr3jtOdNZx7SiWhebgJpcbDFCYMsa5S04v8ODP/J7qxXWJATEb6c0nmqDpsn
+         DZr/Q8Ib+P6JCv5nJAL1lZ9Y1JaZSaG958dGesVdAenfnLOScEs3MJZAlMvs2vEYsR3V
+         IyGg==
+X-Gm-Message-State: AOJu0YzPfCaPuqP6tk4xa2cBS3ayddd8Q/4bYLEvC9HDEHOuRq+HUndG
+	ZKxsmgAZUsTr7wCX+NRMpP0HRePR9EnFN2UeJDLxaUcq42wGROEAv9FTeQ1MC2pV/TPaly2/TWa
+	5
+X-Gm-Gg: ASbGncvZ4LZ+NlpIsEJNfsYVtzhD8jRYZuCiDAOgX0z5q/9S1s09MKhd4SXJhWkcAp7
+	Jz1910YjwnvRWruioYvSM02q6r/MxQUtVPONQqtPkPOWMWdqu1UIMbpbc27K3HXH3Yikhb+LwtN
+	Ys3I2uSXtydYtqbZqO8uJBHR5X9IfUzr0OssShkqQCLOGlIJcaxnVTjoW5YFZNC+8H+u2y/HyXT
+	EnBovEqqBqFaO3Ebqiq3JU9yz3k+wQGwXVXqjweuL34Q8qDnITGuaWXCvL+sqnBLbap2m4RslSK
+	wnu3v2f0sUNsIhm+vH7/4JF6HbKmbH4=
+X-Google-Smtp-Source: AGHT+IHZwUvntRo747RCyUhvPsBXBw/LP5MdUBSCWGR8S6qE7jjia0ro7h1J3qNFhCKoHlP4BvbCjg==
+X-Received: by 2002:a17:90b:4d05:b0:2ee:f80c:6884 with SMTP id 98e67ed59e1d1-2f548f426ccmr42464663a91.33.1736920984434;
+        Tue, 14 Jan 2025 22:03:04 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21a9f10e2basm75162815ad.19.2025.01.14.22.03.03
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21a9f152c6asm74777825ad.104.2025.01.14.22.03.03
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Tue, 14 Jan 2025 22:03:03 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tXwUW-0000000641i-29Ga
+	id 1tXwUW-0000000641c-1oVF
 	for fstests@vger.kernel.org;
 	Wed, 15 Jan 2025 17:03:00 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tXwUW-0000000Gabd-31Ig
+	id 1tXwUW-0000000GabS-2iah
 	for fstests@vger.kernel.org;
 	Wed, 15 Jan 2025 17:03:00 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 5/5] check-parallel: allow FSTYP selection from the CLI
-Date: Wed, 15 Jan 2025 16:51:16 +1100
-Message-ID: <20250115060258.3951185-6-david@fromorbit.com>
+Subject: [PATCH 3/5] check-parallel: use common group list parsing code
+Date: Wed, 15 Jan 2025 16:51:14 +1100
+Message-ID: <20250115060258.3951185-4-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250115060258.3951185-1-david@fromorbit.com>
 References: <20250115060258.3951185-1-david@fromorbit.com>
@@ -87,126 +87,292 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Add a CLI option to specify the initial FSTYP to test. If this is
-not specified the the default of "xfs" will be used. This option is
-different to the way check has FSTYP specified as check-parallel
-has no infrastructure to support non block device based filesystems
-and hence we have to reject virtual or network based filesysetms
-are this point in time.
+Build the test list directly from command line prompts, rather
+than hard coding the tests and using the check infrastructure to
+filter that list.
 
-This patch only implements default mkfs parameter support for the
-test device. Config sections can be used to override this as check
-will then format the test device when the section that defines
-non-default test device mkfs options is selected.
+We still pass exact test lists to check to execute the tests that
+each runner needs to execute, but all other test list commands
+are no longer passed to check.
+
+As a result of this change, check-parallel no longer passes unknown
+CLI parameters through to the internal check invocations. At this
+point, the only non test-list related option is config file section
+selection; more of the check options will be brought across as
+needed in future patches.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- check-parallel | 44 +++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 37 insertions(+), 7 deletions(-)
+ check-parallel   | 153 ++++++++++++++++++++++++++++++++++++++++-------
+ common/test_list |   7 +++
+ 2 files changed, 139 insertions(+), 21 deletions(-)
 
 diff --git a/check-parallel b/check-parallel
-index 498b53c5a..38fa4f7f9 100755
+index d34c73f66..a341c9c2e 100755
 --- a/check-parallel
 +++ b/check-parallel
-@@ -18,7 +18,7 @@ run_section=""
+@@ -9,18 +9,115 @@
+ # for them and runs the test in the background. When it completes, it tears down
+ # the loop devices.
  
- tmp=/tmp/check-parallel.$$
+-export SRC_DIR="tests"
+-basedir=$1
+-shift
+-check_args="$*"
++basedir=""
+ runners=$(getconf _NPROCESSORS_CONF)
+ runner_list=()
+ runtimes=()
++show_test_list=
++run_section=""
  
--export FSTYP=xfs
-+FSTYP=
++tmp=/tmp/check-parallel.$$
  
- # We need to include the test list processing first as argument parsing
- # requires test list parsing and setup.
-@@ -35,6 +35,7 @@ check options
-     -r			randomize test order
-     --exact-order	run tests in the exact order specified
-     -s section		run only specified section from config file
-+    -f <FSTYPE>		specify the filesystem type to test
- 
- testlist options
-     -g group[,group...]	include tests from these groups
-@@ -66,16 +67,39 @@ external_file argument is a path to a single file containing a list of tests
- to exclude in the form of <test dir>/<test name>.
- 
- examples:
-- check-parallel -D /mnt xfs/001
-- check-parallel -D /mnt -g quick
-+ check-parallel -f xfs -D /mnt xfs/001
-+ check-parallel -f ext4 -D /mnt -g quick
-  check-parallel -D /mnt -g xfs/quick
-  check-parallel -D /mnt -x stress xfs/*
-- check-parallel -D /mnt -X .exclude -g auto
-- check-parallel -D /mnt -E ~/.xfstests.exclude
-+ check-parallel -f btrfs -D /mnt -X .exclude -g auto
-+ check-parallel -f udf -D /mnt -E ~/.xfstests.exclude
- '
- 	    exit 1
- }
- 
-+# Only support block device based filesystems with generic mkfs support
-+# at the moment.
-+is_supported_fstype()
-+{
-+	local fstype=$1
+-# tests in auto group
+-test_list=$(awk '/^[0-9].*auto/ { print "generic/" $1 }' tests/generic/group.list)
+-test_list+=$(awk '/^[0-9].*auto/ { print "xfs/" $1 }' tests/xfs/group.list)
++export FSTYP=xfs
 +
-+	case $fstype in
-+	xfs)		;;
-+	ext2|ext3|ext4)	;;
-+	udf)		;;
-+	jfs)		;;
-+	f2fs)		;;
-+	btrfs)		;;
-+	bcachefs)	;;
-+	gfs2)		;;
-+	ocfs2)		;;
-+	*)
-+		echo "unsupported FSTYPE: $fstype"
-+		usage
-+		;;
-+	esac
++# We need to include the test list processing first as argument parsing
++# requires test list parsing and setup.
++. ./common/test_names
++. ./common/test_list
++
++usage()
++{
++    echo "Usage: $0 [options] [testlist]"'
++
++check options
++    -D <dir>		Directory to run in
++    -n			Output test list, do not run tests
++    -r			randomize test order
++    --exact-order	run tests in the exact order specified
++    -s section		run only specified section from config file
++
++testlist options
++    -g group[,group...]	include tests from these groups
++    -x group[,group...]	exclude tests from these groups
++    -X exclude_file	exclude individual tests
++    -e testlist         exclude a specific list of tests
++    -E external_file	exclude individual tests
++    [testlist]		include tests matching names in testlist
++
++testlist argument is a list of tests in the form of <test dir>/<test name>.
++
++<test dir> is a directory under tests that contains a group file,
++with a list of the names of the tests in that directory.
++
++<test name> may be either a specific test file name (e.g. xfs/001) or
++a test file name match pattern (e.g. xfs/*).
++
++group argument is either a name of a tests group to collect from all
++the test dirs (e.g. quick) or a name of a tests group to collect from
++a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
++If you want to run all the tests in the test suite, use "-g all" to specify all
++groups.
++
++exclude_file argument refers to a name of a file inside each test directory.
++for every test dir where this file is found, the listed test names are
++excluded from the list of tests to run from that test dir.
++
++external_file argument is a path to a single file containing a list of tests
++to exclude in the form of <test dir>/<test name>.
++
++examples:
++ check-parallel -D /mnt xfs/001
++ check-parallel -D /mnt -g quick
++ check-parallel -D /mnt -g xfs/quick
++ check-parallel -D /mnt -x stress xfs/*
++ check-parallel -D /mnt -X .exclude -g auto
++ check-parallel -D /mnt -E ~/.xfstests.exclude
++'
++	    exit 1
 +}
 +
- # Process command arguments first.
- while [ $# -gt 0 ]; do
- 	case "$1" in
-@@ -91,6 +115,8 @@ while [ $# -gt 0 ]; do
- 	--exact-order) _tl_setup_ordered ;;
- 	-n)	show_test_list="yes" ;;
- 
-+	-f)	is_supported_fstype $2 ; FSTYP=$2; shift ;;
++# Process command arguments first.
++while [ $# -gt 0 ]; do
++	case "$1" in
++	-\? | -h | --help) usage ;;
 +
- 	-s)	run_section="$run_section -s $2"; shift ;;
- 
- 	-*)	usage ;;
-@@ -108,6 +134,8 @@ while [ $# -gt 0 ]; do
- 	shift
- done
- 
-+export FSTYP=${FSTYP:=xfs}
++	-D)	basedir=$2; shift ;;
++	-g)	_tl_setup_group $2 ; shift ;;
++	-e)	_tl_setup_exclude_tests $2 ; shift ;;
++	-E)	_tl_setup_exclude_file $2 ; shift ;;
++	-x)	_tl_setup_exclude_group $2; shift ;;
++	-X)	_tl_setup_exclude_subdir $2; shift ;;
++	-r)	_tl_setup_randomise ;;
++	--exact-order) _tl_setup_ordered ;;
++	-n)	show_test_list="yes" ;;
 +
- if [ ! -d "$basedir" ]; then
- 	echo "Invalid basedir specification"
- 	usage
-@@ -217,8 +245,6 @@ runner_go()
- 	xfs_io -f -c 'truncate 8g' $_scratch
- 	xfs_io -f -c 'truncate 1g' $_logwrites
++	-s)	run_section="$run_section -s $2"; shift ;;
++
++	-*)	usage ;;
++	*)	# not an argument, we've got tests now.
++		_tl_setup_cli $*
++	esac
++
++	# if we've found a test specification, the break out of the processing
++	# loop before we shift the arguments so that this is the first argument
++	# that we process in the test arg loop below.
++	if $_tl_have_test_args; then
++		break;
++	fi
++
++	shift
++done
++
++if [ ! -d "$basedir" ]; then
++	echo "Invalid basedir specification"
++	usage
++fi
++if [ -d "$basedir/runner-0/" ]; then
++	prev_results=`ls -tr $basedir/runner-0/ | grep results | tail -1`
++fi
++
++_tl_prepare_test_list
++_tl_strip_test_list
  
--	mkfs.xfs -f $_test > /dev/null 2>&1
+ # grab all previously run tests and order them from highest runtime to lowest
+ # We are going to try to run the longer tests first, hopefully so we can avoid
+@@ -30,25 +127,23 @@ test_list+=$(awk '/^[0-9].*auto/ { print "xfs/" $1 }' tests/xfs/group.list)
+ #
+ # If we have tests in the test list that don't have runtimes recorded, then
+ # append them to be run last.
 -
- 	export TEST_DEV=$(_create_loop_device $_test)
- 	export TEST_DIR=$me/test
- 	export SCRATCH_DEV=$(_create_loop_device $_scratch)
-@@ -232,6 +258,10 @@ runner_go()
- 	mkdir -p $RESULT_BASE
- 	rm -f $RESULT_BASE/check.*
+-build_runner_list()
++time_order_test_list()
+ {
+ 	local runtimes
+ 	local run_list=()
+-	local prev_results=`ls -tr $basedir/runner-0/ | grep results | tail -1`
  
-+	# Only supports default mkfs parameters right now
-+	wipefs $TEST_DEV > /dev/null 2>&1
-+	yes | mkfs -t $FSTYP $TEST_DEV > /dev/null 2>&1
-+
- #	export DUMP_CORRUPT_FS=1
+ 	runtimes=$(cat $basedir/*/$prev_results/check.time | sort -k 2 -nr | cut -d " " -f 1)
+ 
+ 	# Iterate the timed list first. For every timed list entry that
+ 	# is found in the test_list, add it to the local runner list.
+ 	local -a _list=( $runtimes )
+-	local -a _tlist=( $test_list )
++	local -a _tlist=( $_tl_tests )
+ 	local rx=0
+ 	local ix
+ 	local jx
+ 	#set -x
+ 	for ((ix = 0; ix < ${#_list[*]}; ix++)); do
+-		echo $test_list | grep -q ${_list[$ix]}
++		echo $_tl_tests | grep -q ${_list[$ix]}
+ 		if [ $? == 0 ]; then
+ 			# add the test to the new run list and remove
+ 			# it from the remaining test list.
+@@ -60,20 +155,21 @@ build_runner_list()
+ 
+ 	# The final test list is all the time ordered tests followed by
+ 	# all the tests we didn't find time records for.
+-	test_list="${run_list[*]} ${_tlist[*]}"
++	_tl_tests="${run_list[*]} ${_tlist[*]}"
+ }
+ 
+-if [ -f $basedir/runner-0/results/check.time ]; then
+-	build_runner_list
++if ! $_tl_randomise -a ! $_tl_exact_order; then
++	if [ -f $basedir/runner-0/$prev_results/check.time ]; then
++		time_order_test_list
++	fi
+ fi
+ 
+ # split the list amongst N runners
+-
+ split_runner_list()
+ {
+ 	local ix
+ 	local rx
+-	local -a _list=( $test_list )
++	local -a _list=( $_tl_tests )
+ 	for ((ix = 0; ix < ${#_list[*]}; ix++)); do
+ 		seq="${_list[$ix]}"
+ 		rx=$((ix % $runners))
+@@ -137,7 +233,7 @@ runner_go()
  
  	# Run the tests in it's own mount namespace, as per the comment below
+ 	# that precedes making the basedir a private mount.
+-	./src/nsexec -m ./check $check_args -x unreliable_in_parallel --exact-order ${runner_list[$id]} > $me/log 2>&1
++	./src/nsexec -m ./check $run_section -x unreliable_in_parallel --exact-order ${runner_list[$id]} > $me/log 2>&1
+ 
+ 	wait
+ 	sleep 1
+@@ -165,6 +261,13 @@ cleanup()
+ 
+ trap "cleanup; exit" HUP INT QUIT TERM
+ 
++split_runner_list
++if [ -n "$show_test_list" ]; then
++	echo Time ordered test list:
++	echo $_tl_tests
++	echo
++fi
++
+ 
+ # Each parallel test runner needs to only see it's own mount points. If we
+ # leave the basedir as shared, then all tests see all mounts and then we get
+@@ -178,15 +281,23 @@ trap "cleanup; exit" HUP INT QUIT TERM
+ # in it's own mount namespace so that they cannot see mounts that other tests
+ # are performing.
+ mount --make-private $basedir
+-split_runner_list
++
+ now=`date +%Y-%m-%d-%H:%M:%S`
+ for ((i = 0; i < $runners; i++)); do
+ 
+-	runner_go $i $now &
++	if [ -n "$show_test_list" ]; then
++		echo "Runner $i: ${runner_list[$i]}"
++	else
++		runner_go $i $now &
++	fi
+ 
+ done;
+ wait
+ 
++if [ -n "$show_test_list" ]; then
++	exit 0
++fi
++
+ echo -n "Tests run: "
+ grep Ran /mnt/xfs/*/log | sed -e 's,^.*:,,' -e 's, ,\n,g' | sort | uniq | wc -l
+ 
+@@ -195,7 +306,7 @@ grep Failures: $basedir/*/log | uniq | sed -e "s/^.*Failures://" -e "s,\([0-9]\)
+ echo
+ 
+ echo Ten slowest tests - runtime in seconds:
+-cat $basedir/*/results/check.time | sort -k 2 -nr | head -10
++cat $basedir/*/results-$now/check.time | sort -k 2 -nr | head -10
+ 
+ echo
+ echo Cleanup on Aisle 5?
+diff --git a/common/test_list b/common/test_list
+index 2432be6f7..2b3ae9fbf 100644
+--- a/common/test_list
++++ b/common/test_list
+@@ -24,6 +24,7 @@ _tl_file="$tmp.test_list"
+ _tl_exclude_tests=()
+ _tl_tests=
+ 
++# strip 'tests\' prefix from the provided test name
+ _tl_strip_src_dir()
+ {
+ 	local test="$1"
+@@ -31,6 +32,12 @@ _tl_strip_src_dir()
+ 	echo ${test#$_tl_src_dir/}
+ }
+ 
++# strip 'tests\' prefix from all the tests in the test list
++_tl_strip_test_list()
++{
++	_tl_tests=$(echo $_tl_tests | sed -e "s/$_tl_src_dir\///g")
++}
++
+ get_sub_group_list()
+ {
+ 	local d=$1
 -- 
 2.45.2
 
