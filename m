@@ -1,293 +1,300 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f179.google.com (mail-qt1-f179.google.com [209.85.160.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF0FB22CF2C;
-	Thu, 16 Jan 2025 23:40:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1DBB25A64F;
+	Fri, 17 Jan 2025 01:03:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737070833; cv=none; b=nov2AU5WzZC1pUsxlrddfjyoSSOtuCAU9NL6WgTbzp2njQ43da1n+23G/rY9FbCn5vnq8K5/Yx0iRKnfkuN1qfHodEK8MDk7xXikA4Nh8+31cjwU3kMlamuYxdbr287AmB897py+fJvZVKb+AZkNCZz6lEVG8r6vMNrYUUBK6Lw=
+	t=1737075835; cv=none; b=drigIy3+LqIfiJRoExzOUloS8bq77d/EfSTFXmx2Dr2iEgFkm41GvZlaOdmQZ8BzEg8EvxmQArinDV7qsKEAK8d0a3tx9Nz18u3m1I37I94szixSsxqA86GENCUW8U1d/UGZzCdV0JJQRBepWGjmu2MktI4Df+7i30y9l7O358c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737070833; c=relaxed/simple;
-	bh=uErrAG9YIoMvsGeHi2UWF27s4exnGBV0NWDkvNEcxGE=;
-	h=Date:Subject:From:To:Cc:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=M23CjaBTh7MivO3a9VWgydZKmh3u8uL9FQ1v6YO7IbKe+LnNDO8fHPHuJix7cTlNqsz8/mZ3k1BZ8J5JVYpZHUJ9ahmvE4qgcFs4SYM/wA0dxSDJ09PuETGdMsabnMelXaOsIsfHpkW8CTpvmSAb+ZlTMj0o6XvWq0lC7e52cKY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ab6TR752; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1737075835; c=relaxed/simple;
+	bh=rYwPBwWIXVqUelSauZCKCAgUp+AHNmn2az6E8KRUC+0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=oz5eako5NAq8jMaoJGTxZ1ocHaN7ZKIVpB0r9aqgK/iSb0wIc/RO5JCokRqrjUEJ77vZ1JCjkBhyXf8FwYsVnjV6kIZabNeAbaCsaYiRWqm557ODQn/jZzyuchGc6VQreePcps5K5dDHp44BV1LioV1OsZX3a+t3zc2mnxWgo68=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=V7GiTQax; arc=none smtp.client-ip=209.85.160.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ab6TR752"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4AC28C4CED6;
-	Thu, 16 Jan 2025 23:40:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737070833;
-	bh=uErrAG9YIoMvsGeHi2UWF27s4exnGBV0NWDkvNEcxGE=;
-	h=Date:Subject:From:To:Cc:In-Reply-To:References:From;
-	b=Ab6TR752bf8ZPR3vqkn5ZrjLs6rrwC6hKuOSxCFR/i5VDSboSNRmpn24bU+ju/ApS
-	 LgjHeVdSiT1dhuyQG5oAVFga4qKPFetDlYPTzOw0C/MfD+B0ko1t84N9c9nilyKQ4u
-	 YF0fLxSsFYJkRV/EB1SvgHpq6Tr8WJOhd1lIaNSD5Exi7XnTyzUuI5v5+8qKzphu2D
-	 typaVDLe8tCDviIL4ktoKRuo34pk3xKgkRwoB+WPb7TzyKAfPgbxNUOd7/4ssz56F+
-	 WWhyP33h8NFLK4peDWlxz4EymMh9WvL3tkbQj2EVeZSZW6rK8ND69YRHBLLRgjGAyL
-	 5glnYQKaUl+1Q==
-Date: Thu, 16 Jan 2025 15:40:32 -0800
-Subject: [PATCH 3/3] xfs: regression testing of quota on the realtime device
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: zlang@redhat.com, djwong@kernel.org
-Cc: hch@lst.de, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Message-ID: <173706977106.1931302.6039966897834501224.stgit@frogsfrogsfrogs>
-In-Reply-To: <173706977056.1931302.2974286403286751639.stgit@frogsfrogsfrogs>
-References: <173706977056.1931302.2974286403286751639.stgit@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="V7GiTQax"
+Received: by mail-qt1-f179.google.com with SMTP id d75a77b69052e-46defafbdafso18489191cf.0;
+        Thu, 16 Jan 2025 17:03:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1737075832; x=1737680632; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BWTn2hIqOedJTkStLOdCs7NFe2va4E3NluJ3a3sdVf8=;
+        b=V7GiTQaxegjr8b//68cm0JgY+VWB+1Xc3lm7hCwH8flYhNABkTO6fIS+dOUjfzuPNc
+         FIcXJDgW5YmGcmd+DWrZpiac2zL10Xyb1Ik/71IEIfAFKDz2JBd17Yu1Urao7HiK7+P0
+         fx0akfYowGouY2LXa7BWrF38JxX38bfE+pPHBg1UbuP2ruEre7LYs2x3MIRmwLH/SvsJ
+         2TureAICnNLN7RrwCE1MlQ6+r7xUD/eOv/GsNR4wActXCF/WV6wgJlc4Tr0BtvLpTSkr
+         Vn0mI2VtT7NW2pfuE0oVNmNptgO7G7gx03bcYH51nfCvT9noJoxhNddUtGc0liDiV1zD
+         llhQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1737075832; x=1737680632;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=BWTn2hIqOedJTkStLOdCs7NFe2va4E3NluJ3a3sdVf8=;
+        b=Fnqxu/j+bA82gvh1/NYHS8X1CiWGKdP6naGeIPkd8byKP68MFzHAuP3UA/mmrqO5KF
+         SsFDIw3xn4Ca2HTppuzIs3cTlIoaho+Yr18ZDu9Me8RZT0CKZ4m1L6PK+tkrrVxIfnah
+         NAcok/suJh15iscZXAA1pV/e8spGaPJ2nvy0BZ28nHSJfGYdZR27jDWs2rC3WKSlu6m+
+         11r6Z6BTsZHo0dhprC2p+/1EoEughdSteBpZ6O7HpYEJgwSff8gI4Xzmx74apUJthyO9
+         6Jt5pz6ueXocF8mGwJ6Ieb8Jb5Bm4qyC6yZbiakx7i21A+FbJ7D28CRu7azh1qHM2iiK
+         0A2g==
+X-Forwarded-Encrypted: i=1; AJvYcCV12bJD4KBpVVIjE2lDS9ZepX2PE8fnBj1W69+G1R4DS7XDdckRh7Lv4NYhJK8AbiZJ7xi9YdNJldjPtmFo@vger.kernel.org
+X-Gm-Message-State: AOJu0YxtRB8jzeWS9O/Jb8NvPO8y3s2J8je/tOiIJydIq3jgV1IV6tRo
+	e4l4PlC72AO6NAlsojEEaErs6Vu+ZQhYNh+vtGiJnfdnZvO0P2uLmVbA+rRu7jKQHRrTxpnsNXs
+	YY/ipljI8tq1sx7b4Dgh3W9QWOCg=
+X-Gm-Gg: ASbGnct7TPSwoG1PoQzku3zZ03XE5D2IXt+6jRSjzXSMKrCNJsqvAuvTL5bDyUxQyLw
+	8If37Wno1xQEwKKTn1U4exPAc6+Gr6HX+F20xmfM=
+X-Google-Smtp-Source: AGHT+IEbqeIv2jG7FV9kyk09fzj6AzxO9SgggQixsUsvWEIp17Mi4ed2RUJtjtKAkKfdkh2kzpbl/Jox5R1dUEXK9dw=
+X-Received: by 2002:a05:622a:593:b0:46c:716f:d76 with SMTP id
+ d75a77b69052e-46e12a54b3cmr12219361cf.12.1737075832502; Thu, 16 Jan 2025
+ 17:03:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <20250115183107.3124743-1-joannelkoong@gmail.com>
+ <20250115183107.3124743-2-joannelkoong@gmail.com> <20250115213713.GE3557695@frogsfrogsfrogs>
+ <CAJnrk1YXa++SrifrCfXf7WPQF34V20cet3+x+7wVuDf9CPoR7w@mail.gmail.com> <20250116005919.GK3557553@frogsfrogsfrogs>
+In-Reply-To: <20250116005919.GK3557553@frogsfrogsfrogs>
+From: Joanne Koong <joannelkoong@gmail.com>
+Date: Thu, 16 Jan 2025 17:03:41 -0800
+X-Gm-Features: AbW1kvYHGRLoGZlz8qZfoZWjbEX0ksm_vHOD16Mh18NCTHv4a1Q3a6ODLir8k2E
+Message-ID: <CAJnrk1ZpjnAL26x7KdX_33bgX7YdJN1hnPmn6zAgM38p4uBopw@mail.gmail.com>
+Subject: Re: [PATCH v3 1/2] fsx: support reads/writes from buffers backed by hugepages
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, bfoster@redhat.com, 
+	nirjhar@linux.ibm.com, zlang@redhat.com, kernel-team@meta.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Darrick J. Wong <djwong@kernel.org>
+On Wed, Jan 15, 2025 at 4:59=E2=80=AFPM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
+>
+> On Wed, Jan 15, 2025 at 04:47:30PM -0800, Joanne Koong wrote:
+> > On Wed, Jan 15, 2025 at 1:37=E2=80=AFPM Darrick J. Wong <djwong@kernel.=
+org> wrote:
+> > >
+> > > On Wed, Jan 15, 2025 at 10:31:06AM -0800, Joanne Koong wrote:
+> > > > Add support for reads/writes from buffers backed by hugepages.
+> > > > This can be enabled through the '-h' flag. This flag should only be=
+ used
+> > > > on systems where THP capabilities are enabled.
+> > > >
+> > > > This is motivated by a recent bug that was due to faulty handling o=
+f
+> > > > userspace buffers backed by hugepages. This patch is a mitigation
+> > > > against problems like this in the future.
+> > > >
+> > > > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> > > > Reviewed-by: Brian Foster <bfoster@redhat.com>
+> > > > ---
+> > > >  ltp/fsx.c | 119 +++++++++++++++++++++++++++++++++++++++++++++++++-=
+----
+> > > >  1 file changed, 108 insertions(+), 11 deletions(-)
+> > > >
+> > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > > index 41933354..8d3a2e2c 100644
+> > > > --- a/ltp/fsx.c
+> > > > +++ b/ltp/fsx.c
+> > > > @@ -190,6 +190,7 @@ int       o_direct;                       /* -Z=
+ */
+> > > >  int  aio =3D 0;
+> > > >  int  uring =3D 0;
+> > > >  int  mark_nr =3D 0;
+> > > > +int  hugepages =3D 0;                  /* -h flag */
+> > > >
+> > > >  int page_size;
+> > > >  int page_mask;
+> > > > @@ -2471,7 +2472,7 @@ void
+> > > >  usage(void)
+> > > >  {
+> > > >       fprintf(stdout, "usage: %s",
+> > > > -             "fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
+> > > > +             "fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
+> > > >          [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\=
+n\
+> > > >          [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\=
+n\
+> > > >          [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
+> > > > @@ -2484,6 +2485,7 @@ usage(void)
+> > > >       -e: pollute post-eof on size changes (default 0)\n\
+> > > >       -f: flush and invalidate cache after I/O\n\
+> > > >       -g X: write character X instead of random generated data\n\
+> > > > +     -h hugepages: use buffers backed by hugepages for reads/write=
+s\n\
+> > >
+> > > If this requires MADV_COLLAPSE, then perhaps the help text shouldn't
+> > > describe the switch if the support wasn't compiled in?
+> > >
+> > > e.g.
+> > >
+> > >         -g X: write character X instead of random generated data\n"
+> > > #ifdef MADV_COLLAPSE
+> > > "       -h hugepages: use buffers backed by hugepages for reads/write=
+s\n"
+> > > #endif
+> > > "       -i logdev: do integrity testing, logdev is the dm log writes =
+device\n\
+> > >
+> > > (assuming I got the preprocessor and string construction goo right; I
+> > > might be a few cards short of a deck due to zombie attack earlier)
+> >
+> > Sounds great, I'll #ifdef out the help text -h line. Hope you feel bett=
+er.
+> > >
+> > > >       -i logdev: do integrity testing, logdev is the dm log writes =
+device\n\
+> > > >       -j logid: prefix debug log messsages with this id\n\
+> > > >       -k: do not truncate existing file and use its size as upper b=
+ound on file size\n\
+> > [...]
+> > > > +}
+> > > > +
+> > > > +#ifdef MADV_COLLAPSE
+> > > > +static void *
+> > > > +init_hugepages_buf(unsigned len, int hugepage_size, int alignment)
+> > > > +{
+> > > > +     void *buf;
+> > > > +     long buf_size =3D roundup(len, hugepage_size) + alignment;
+> > > > +
+> > > > +     if (posix_memalign(&buf, hugepage_size, buf_size)) {
+> > > > +             prterr("posix_memalign for buf");
+> > > > +             return NULL;
+> > > > +     }
+> > > > +     memset(buf, '\0', buf_size);
+> > > > +     if (madvise(buf, buf_size, MADV_COLLAPSE)) {
+> > >
+> > > If the fsx runs for a long period of time, will it be necessary to ca=
+ll
+> > > MADV_COLLAPSE periodically to ensure that reclaim doesn't break up th=
+e
+> > > hugepage?
+> > >
+> >
+> > imo, I don't think so. My understanding is that this would be a rare
+> > edge case that happens when the system is constrained on memory, in
+> > which case subsequent calls to MADV_COLLAPSE would most likely fail
+> > anyways.
+>
+> Hrmmm... well I /do/ like to run memory constrained VMs to prod reclaim
+> into stressing the filesystem more.  But I guess there's no good way for
+> fsx to know that something happened to it.  Unless there's some even
+> goofier way to force a hugepage, like shmem/hugetlbfs (ugh!) :)
 
-Make sure that quota accounting and enforcement work correctly for
-realtime volumes on XFS.
+I can't think of a better way to force a hugepage either. I believe
+shmem and hugetlbfs would both require root privileges to do so, and
+if i'm not mistaken, shmem hugepages are still subject to being broken
+up by reclaim.
 
-Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
----
- tests/xfs/1858     |  174 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1858.out |   47 ++++++++++++++
- 2 files changed, 221 insertions(+)
- create mode 100755 tests/xfs/1858
- create mode 100644 tests/xfs/1858.out
+>
+> Will have to ponder hugepage renewasl -- maybe we should madvise every
+> few thousand fsxops just to be careful?
 
+I can add this in, but on memory constrained VMs, would this be
+effective? To me, it seems like in the majority of cases, subsequent
+attempts at collapsing the broken pages back into a hugepage would
+fail due to memory still being constrained. In which case, I guess
+we'd exit the test altogether? It kind of seems to me like if the user
+wants to test out hugepages functionality of their filesystem, then
+the onus is on them to run the test in an environment that can
+adequately and consistently support hugepages.
 
-diff --git a/tests/xfs/1858 b/tests/xfs/1858
-new file mode 100755
-index 00000000000000..64c536024f6ec0
---- /dev/null
-+++ b/tests/xfs/1858
-@@ -0,0 +1,174 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+# Copyright (c) 2022-2025 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test No. 1858
-+#
-+# Functional testing for realtime quotas.
-+
-+. ./common/preamble
-+_begin_fstest auto quick quota realtime
-+
-+. ./common/quota
-+. ./common/filter
-+
-+_require_test_program "punch-alternating"
-+_require_scratch
-+_require_user
-+
-+echo "Format filesystem" | tee -a $seqres.full
-+_scratch_mkfs > $seqres.full
-+_try_scratch_mount -o usrquota || \
-+	_notrun "Can't mount with realtime quota enabled"
-+
-+_require_xfs_has_feature "$SCRATCH_MNT" realtime
-+_scratch_supports_rtquota || _notrun "Requires realtime quota"
-+
-+# Make sure all our files are on the rt device
-+_xfs_force_bdev realtime $SCRATCH_MNT
-+chmod a+rwx $SCRATCH_MNT
-+
-+# Record rt geometry
-+bmbt_blksz=$(_get_block_size $SCRATCH_MNT)
-+file_blksz=$(_get_file_block_size $SCRATCH_MNT)
-+rextsize=$((file_blksz / bmbt_blksz))
-+echo "bmbt_blksz $bmbt_blksz" >> $seqres.full
-+echo "file_blksz $file_blksz" >> $seqres.full
-+echo "rextsize $rextsize" >> $seqres.full
-+
-+note() {
-+	echo -e "\n$*" | tee -a $seqres.full
-+}
-+
-+# Report on the user's block and rt block usage, soft limit, hard limit, and
-+# warning count for rt volumes
-+report_rtusage() {
-+	local user="$1"
-+	local timeout_arg="$2"
-+	local print_timeout=0
-+
-+	test -z "$user" && user=$qa_user
-+	test -n "$timeout_arg" && print_timeout=1
-+
-+	$XFS_QUOTA_PROG -c "quota -u -r -n -N $user" $SCRATCH_MNT | \
-+		sed -e 's/ days/_days/g' >> $seqres.full
-+
-+	$XFS_QUOTA_PROG -c "quota -u -r -n -N $user" $SCRATCH_MNT | \
-+		sed -e 's/ days/_days/g' | \
-+		awk -v user=$user -v print_timeout=$print_timeout -v file_blksz=$file_blksz \
-+			'{printf("%s[real] %d %d %d %d %s\n", user, $2 * 1024 / file_blksz, $3 * 1024 / file_blksz, $4 * 1024 / file_blksz, $5, print_timeout ? $6 : "---");}'
-+}
-+
-+note "Write 128rx to root"
-+$XFS_IO_PROG -f -c "pwrite 0 $((128 * file_blksz))" $SCRATCH_MNT/file1 > /dev/null
-+chmod a+r $SCRATCH_MNT/file1
-+_scratch_sync
-+report_rtusage 0
-+
-+note "Write 64rx to root, 4444, and 5555."
-+$XFS_IO_PROG -f -c "pwrite 0 $((64 * file_blksz))" $SCRATCH_MNT/file3.5555 > /dev/null
-+chown 5555 $SCRATCH_MNT/file3.5555
-+$XFS_IO_PROG -f -c "pwrite 0 $((64 * file_blksz))" $SCRATCH_MNT/file3.4444 > /dev/null
-+chown 4444 $SCRATCH_MNT/file3.4444
-+$XFS_IO_PROG -f -c "pwrite 0 $((64 * file_blksz))" $SCRATCH_MNT/file3 > /dev/null
-+_scratch_sync
-+report_rtusage 0
-+report_rtusage 4444
-+report_rtusage 5555
-+
-+note "Move 64rx from root to 5555"
-+chown 5555 $SCRATCH_MNT/file3
-+report_rtusage 0
-+report_rtusage 4444
-+report_rtusage 5555
-+
-+note "Move 64rx from 5555 to 4444"
-+chown 4444 $SCRATCH_MNT/file3
-+report_rtusage 0
-+report_rtusage 4444
-+report_rtusage 5555
-+
-+note "Set hard limit of 1024rx and check enforcement"
-+$XFS_QUOTA_PROG -x -c "limit -u rtbhard=$((1024 * file_blksz)) $qa_user" $SCRATCH_MNT
-+# fsync (-w) after pwrite because enforcement only begins when space usage is
-+# committed.  If delalloc is enabled, this doesn't happen until writeback.
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w 0 $((2048 * file_blksz))' $SCRATCH_MNT/file2"
-+report_rtusage
-+
-+note "Set soft limit of 512rx and check timelimit enforcement"
-+rm -f $SCRATCH_MNT/file2 $SCRATCH_MNT/file2.1
-+period=6	# seconds
-+$XFS_QUOTA_PROG -x \
-+	-c "limit -u rtbsoft=$((512 * file_blksz)) rtbhard=0 $qa_user" \
-+	-c "timer -u -r -d $period" \
-+	-c 'state -u' $SCRATCH_MNT >> $seqres.full
-+
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w 0 $((512 * file_blksz))' $SCRATCH_MNT/file2" > /dev/null
-+report_rtusage
-+
-+overflow=$(date +%s)
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w -b $file_blksz 0 $file_blksz' $SCRATCH_MNT/file2.1" > /dev/null
-+report_rtusage
-+sleep $((period / 2))
-+note "Try again after $((period / 2))s"
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w -b $file_blksz $file_blksz $file_blksz' $SCRATCH_MNT/file2.1" > /dev/null
-+report_rtusage
-+sleep $period
-+note "Try again after another ${period}s"
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w -b $file_blksz $((2 * file_blksz)) $file_blksz' $SCRATCH_MNT/file2.1" > /dev/null
-+report_rtusage
-+
-+note "Extend time limits and warnings"
-+rm -f $SCRATCH_MNT/file2 $SCRATCH_MNT/file2.1
-+$XFS_QUOTA_PROG -x \
-+	-c "limit -u rtbsoft=$((512 * file_blksz)) rtbhard=0 $qa_user" \
-+	-c "timer -u -r -d 49h" $SCRATCH_MNT \
-+	-c 'state -u' $SCRATCH_MNT >> $seqres.full
-+
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w 0 $((512 * file_blksz))' $SCRATCH_MNT/file2" > /dev/null
-+report_rtusage $qa_user want_timeout
-+
-+note "Try to trip a 2 day grace period"
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w -b $file_blksz 0 $file_blksz' $SCRATCH_MNT/file2.1" > /dev/null
-+report_rtusage $qa_user want_timeout
-+
-+$XFS_QUOTA_PROG -x -c "timer -u -r 73h $qa_user" $SCRATCH_MNT
-+
-+note "Try to trip a 3 day grace period"
-+_su $qa_user -c "$XFS_IO_PROG -f -c 'pwrite -w -b $file_blksz $file_blksz $file_blksz' $SCRATCH_MNT/file2.1" > /dev/null
-+report_rtusage $qa_user want_timeout
-+
-+note "Test quota applied to bmbt"
-+
-+# Testing quota enforcement for bmbt shape changes is tricky.  The block
-+# reservation will be for enough blocks to handle the maximal btree split.
-+# This is (approximately) 9 blocks no matter the size of the existing extent
-+# map structure, so we set the hard limit to one more than this quantity.
-+#
-+# However, that means that we need to make a file of at least twice that size
-+# to ensure that we create enough extent records even in the rextsize==1 case
-+# where punching doesn't just create unwritten records.
-+#
-+# Unfortunately, it's very difficult to predict when exactly the EDQUOT will
-+# come down, so we just look for the error message.
-+extent_records=$(( (25 * bmbt_blksz) / 16))
-+echo "extent_records $extent_records" >> $seqres.full
-+
-+rm -f $SCRATCH_MNT/file2
-+$XFS_QUOTA_PROG -x \
-+	-c "limit -u rtbsoft=0 rtbhard=0 $qa_user" \
-+	-c "limit -u bhard=$((bmbt_blksz * 10)) bsoft=0 $qa_user" \
-+	-c 'state -u' $SCRATCH_MNT >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x58 -b 64m 0 $((extent_records * file_blksz))" $SCRATCH_MNT/file2 > /dev/null
-+_scratch_sync
-+chown $qa_user $SCRATCH_MNT/file2
-+$here/src/punch-alternating $SCRATCH_MNT/file2 2>&1 | _filter_scratch
-+
-+$XFS_QUOTA_PROG -c "quota -u -r -n -N $qa_user" -c "quota -u -b -n -N $qa_user" $SCRATCH_MNT >> $seqres.full
-+$XFS_IO_PROG -c "bmap -e -l -p -v" $SCRATCH_MNT/file2 >> $seqres.full
-+
-+# success, all done
-+$XFS_QUOTA_PROG -x -c 'report -a -u' -c 'report -a -u -r' $SCRATCH_MNT >> $seqres.full
-+ls -latr $SCRATCH_MNT >> $seqres.full
-+status=0
-+exit
-diff --git a/tests/xfs/1858.out b/tests/xfs/1858.out
-new file mode 100644
-index 00000000000000..85298618d26e0f
---- /dev/null
-+++ b/tests/xfs/1858.out
-@@ -0,0 +1,47 @@
-+QA output created by 1858
-+Format filesystem
-+
-+Write 128rx to root
-+0[real] 128 0 0 0 ---
-+
-+Write 64rx to root, 4444, and 5555.
-+0[real] 192 0 0 0 ---
-+4444[real] 64 0 0 0 ---
-+5555[real] 64 0 0 0 ---
-+
-+Move 64rx from root to 5555
-+0[real] 128 0 0 0 ---
-+4444[real] 64 0 0 0 ---
-+5555[real] 128 0 0 0 ---
-+
-+Move 64rx from 5555 to 4444
-+0[real] 128 0 0 0 ---
-+4444[real] 128 0 0 0 ---
-+5555[real] 64 0 0 0 ---
-+
-+Set hard limit of 1024rx and check enforcement
-+pwrite: Disk quota exceeded
-+fsgqa[real] 1024 0 1024 0 ---
-+
-+Set soft limit of 512rx and check timelimit enforcement
-+fsgqa[real] 512 512 0 0 ---
-+fsgqa[real] 513 512 0 0 ---
-+
-+Try again after 3s
-+fsgqa[real] 514 512 0 0 ---
-+
-+Try again after another 6s
-+pwrite: Disk quota exceeded
-+fsgqa[real] 514 512 0 0 ---
-+
-+Extend time limits and warnings
-+fsgqa[real] 512 512 0 0 [--------]
-+
-+Try to trip a 2 day grace period
-+fsgqa[real] 513 512 0 0 [2_days]
-+
-+Try to trip a 3 day grace period
-+fsgqa[real] 514 512 0 0 [3_days]
-+
-+Test quota applied to bmbt
-+SCRATCH_MNT/file2: Disk quota exceeded
+Thanks,
+Joanne
 
+>
+> --D
+>
+> >
+> > Thanks,
+> > Joanne
+> >
+> > > > +             prterr("madvise collapse for buf");
+> > > > +             free(buf);
+> > > > +             return NULL;
+> > > > +     }
+> > > > +
+> > > > +     return buf;
+> > > > +}
+> > > > +#else
+> > > > +static void *
+> > > > +init_hugepages_buf(unsigned len, int hugepage_size, int alignment)
+> > > > +{
+> > > > +     return NULL;
+> > > > +}
+> > > > +#endif
+> > > > +
+> > > > +static void
+> > > > +init_buffers(void)
+> > > > +{
+> > > > +     int i;
+> > > > +
+> > > > +     original_buf =3D (char *) malloc(maxfilelen);
+> > > > +     for (i =3D 0; i < maxfilelen; i++)
+> > > > +             original_buf[i] =3D random() % 256;
+> > > > +     if (hugepages) {
+> > > > +             long hugepage_size =3D get_hugepage_size();
+> > > > +             if (hugepage_size =3D=3D -1) {
+> > > > +                     prterr("get_hugepage_size()");
+> > > > +                     exit(102);
+> > > > +             }
+> > > > +             good_buf =3D init_hugepages_buf(maxfilelen, hugepage_=
+size, writebdy);
+> > > > +             if (!good_buf) {
+> > > > +                     prterr("init_hugepages_buf failed for good_bu=
+f");
+> > > > +                     exit(103);
+> > > > +             }
+> > > > +
+> > > > +             temp_buf =3D init_hugepages_buf(maxoplen, hugepage_si=
+ze, readbdy);
+> > > > +             if (!temp_buf) {
+> > > > +                     prterr("init_hugepages_buf failed for temp_bu=
+f");
+> > > > +                     exit(103);
+> > > > +             }
+> > > > +     } else {
+> > > > +             unsigned long good_buf_len =3D maxfilelen + writebdy;
+> > > > +             unsigned long temp_buf_len =3D maxoplen + readbdy;
+> > > > +
+> > > > +             good_buf =3D calloc(1, good_buf_len);
+> > > > +             temp_buf =3D calloc(1, temp_buf_len);
+> > > > +     }
+> > > > +     good_buf =3D round_ptr_up(good_buf, writebdy, 0);
+> > > > +     temp_buf =3D round_ptr_up(temp_buf, readbdy, 0);
+> > > > +}
+> > > > +
+> > > >  static struct option longopts[] =3D {
+> > > >       {"replay-ops", required_argument, 0, 256},
+> > > >       {"record-ops", optional_argument, 0, 255},
+> > > > @@ -2883,7 +2980,7 @@ main(int argc, char **argv)
+> > > >       setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdou=
+t */
+> > > >
+> > > >       while ((ch =3D getopt_long(argc, argv,
+> > > > -                              "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:=
+xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> > > > +                              "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw=
+:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> > > >                                longopts, NULL)) !=3D EOF)
+> > > >               switch (ch) {
+> > > >               case 'b':
+> > > > @@ -2916,6 +3013,14 @@ main(int argc, char **argv)
+> > > >               case 'g':
+> > > >                       filldata =3D *optarg;
+> > > >                       break;
+> > > > +             case 'h':
+> > > > +                     #ifndef MADV_COLLAPSE
+> > >
+> > > Preprocessor directives should start at column 0, like most of the re=
+st
+> > > of fstests.
+> > >
+> > > --D
+> > >
