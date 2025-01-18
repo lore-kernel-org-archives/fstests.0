@@ -1,74 +1,39 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4E8A2913;
-	Sat, 18 Jan 2025 00:48:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D050A32;
+	Sat, 18 Jan 2025 07:24:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737161295; cv=none; b=F24ZMAG/2AAQXOFLUg68vZflq3QPeQVIXBYkMrw3j/A0vhDeu6Iallnwq6LeSj02RAp0yZTNoN4dHJnPrmiEscu4+YcwdjCSAYocwHPArm2VjGUR8fRF2j08iHszE7hokqlwk7KRKShVwgIZzlsOFdgQLahVI66YBYMUFq2qSFU=
+	t=1737185059; cv=none; b=WMOiEGvFitRqvMWrLCiuRPJsYyRJfYh1dQnfPaw2qImNTQWSYqDsp0U1iDKJI6oFkUh8Ms+U87KzbXkEqYJ/e9Gs37cwKSthBi/nmRU3GRgv+gKS1udPtsEdOthcmM/zT+9YFtOBsEq0+Q6pZcbb0JZne6fkblhLqa/WorxYae8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737161295; c=relaxed/simple;
-	bh=daBzD//cBkg5rogE6pEcC4+gYYpGqWl0biKOXvthShQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qXZCD7RUplPLWWemgU9w55PnGy8wCHt1KYNl4b3ASDZWqC3vqC1y9mK8my95YpeCFtfAj6Yiw/2vVa9tpWx4hWbY/SxevvIgGbk4bVq4ERUi1PcWePZmrTWXAINWMQNl9obcIP5+TdF257Csy8kKmgSg5jnGeHmZL1o+SzmeA9I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KL0/4wWo; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1737185059; c=relaxed/simple;
+	bh=1C8W/Q5ujXglYgPyJOK/n1BDEy6mDnLv36PS0bVeOSg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ehBfb4/Q5lau4ZhDU/lcaevKwTyT68sFW0SOkoOwVsOX6NVjLuLv5QVLRAKzEfQMmbn/DXDr/eyt1m+IjSrhcDlECUtHhve+VrYy+flQApIUQ8DZm7kjKXQMOtGOyA48mLd84O/3IdKYM809WDocisc508VkcoYInUIcDC7QuSw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S0W4nNkT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KL0/4wWo"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e461015fbd4so4180989276.2;
-        Fri, 17 Jan 2025 16:48:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1737161292; x=1737766092; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=p90TONDalliPlYjPPsOYvMlU+K4gQUMKH3aG4J/s8yc=;
-        b=KL0/4wWodpGw34GgBHwccR88euAznJ7++rHNGYX3vIe4gv22pu02KMFs2M0BfFCC8p
-         JD8yvXZOGtEUUn5ogvvDhtM9Y1w8v9wdOrxXJFFPPT93JQ1rB0bEy7FRuX/+DKk5zkaG
-         XM4eIj+mM4LOtQKgsop8tby3fw4A+TOtHhM95wkFZnTnXuuZ3e1mW6k2yY9O7wrc2bv9
-         cA5+KIqywciOpV/8+ZyFghU7tol3RGnb4yvUSVDd9zfBfC4kAGjfjLPcgffrn+2H8Jjt
-         LxbtAG6IE6HWhljeJMwvZhw+WdBS6NwJcoNcCEnsy5ZH8UwKyTC9TW2vToMoKWhos9p1
-         6bkg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737161292; x=1737766092;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=p90TONDalliPlYjPPsOYvMlU+K4gQUMKH3aG4J/s8yc=;
-        b=fRFJQyD9ffsgPr3ltRbm4ovx5aUVmCXESjaFGFlq7R0aaJhI54wqbOJ/7rdP/kEBwH
-         vmM9LM8xYvDKDbvfsrPHAJ2pzNMEg1NQu2LULg2YY0X/qYt5/p49b3zTHpLWZujRqmGa
-         OmLsa1iseRa5ni3nOilBwg3aAVxSuMMit5sxdRA89KXP8ZgYFGm/BkquUgrIJLslXy8W
-         Yuig5jLWjv1EwdScU+PI3XQflteNmXK49wQE6nfM2JxRwlkUsu1Mzo8+pCVgSG6NGx0D
-         qS8kNKaTS4tCC/pSndZLyc9s5Ss1rMhhxSThpfPXXvIxW4k/wfJLhTbaG/sTbpYG1hLk
-         TBpA==
-X-Gm-Message-State: AOJu0YynXot5YaxMPzimVbQ+sYOhjTcFfwcHOMFS414HUWOSUsgmDI1p
-	jRaX3BllC+38oKlVa/IIQXyH8Kso+xpbm0PErii3L+JdU+NVJ334vmjeoA==
-X-Gm-Gg: ASbGnctx2q2m8r4tADiEcSebdERoJBVGCyg+Os20QMweu9p107rtppAwXiW0bDp24Io
-	t5KKCgO7sd006nU7IdhkC7y3Z0LwmKvcvRwI4tyi+AhRZ8/8OpLHCu31YcNZ7Y1hRWPoCLYFWi+
-	HJIF/CWc7eP6DXBMe4BjbIa+Pr4E63DUjHRQ2QBFtTFj13KhpZfnRKZkji6hC5Okn9bb4C0T+w0
-	23yU/C96Wi0K8Ea+WFY8NLp5um7iwWT8HAExGxB2miVLxnjvDPzjkA2A1Y7WShOV2U=
-X-Google-Smtp-Source: AGHT+IE2Vqy5z/eDdSfmsk6Si7xp1zWOne1XWU3hbGXwnMHdtMGCHHoLif4tCYLULGL/ELAFrpGllw==
-X-Received: by 2002:a05:690c:31a:b0:6ef:6f24:d080 with SMTP id 00721157ae682-6f6eb6490edmr41809017b3.7.1737161292712;
-        Fri, 17 Jan 2025 16:48:12 -0800 (PST)
-Received: from localhost ([2a03:2880:25ff:b::])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f6e640bdd0sm6336707b3.45.2025.01.17.16.48.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Jan 2025 16:48:12 -0800 (PST)
-From: Joanne Koong <joannelkoong@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S0W4nNkT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7050EC4CED1;
+	Sat, 18 Jan 2025 07:24:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1737185058;
+	bh=1C8W/Q5ujXglYgPyJOK/n1BDEy6mDnLv36PS0bVeOSg=;
+	h=From:To:Cc:Subject:Date:From;
+	b=S0W4nNkTKQunFBY+GiJ5mqX5wj1A6ggyFnrPy7sC2mWfpRc2GLImyqJ8DNnQ87UEu
+	 R22/LphbGqh/psOfzGcVTyP3xZ3mFkPpg8OOlJc274PGaiLMgtVuk7/sYETCtKdq3I
+	 hX1I3stVSADog7OBusHq84HrjfjNc71fc2DDRT6BJQ2q/FdrZ1W8ayBXw9i+Ik8zq3
+	 lUo/IeQU5x+avxaR9Wy7nUOs5n+/wWHFUOXoZ/L6slY3kEvc8qvHrF+zrcBfWEJL4+
+	 KNkrgodcQwBlmCQFGzVFiBUZvaeTCEgIYc6FpTqwoK5AS4hBzMSQQBxSLCcdXpUIki
+	 FipN3a4FwHv7w==
+From: Eric Biggers <ebiggers@kernel.org>
 To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org,
-	bfoster@redhat.com,
-	djwong@kernel.org,
-	nirjhar@linux.ibm.com,
-	zlang@redhat.com,
-	kernel-team@meta.com
-Subject: [PATCH v4 2/2] generic: add tests for read/writes from hugepages-backed buffers
-Date: Fri, 17 Jan 2025 16:47:59 -0800
-Message-ID: <20250118004759.2772065-3-joannelkoong@gmail.com>
-X-Mailer: git-send-email 2.43.5
-In-Reply-To: <20250118004759.2772065-1-joannelkoong@gmail.com>
-References: <20250118004759.2772065-1-joannelkoong@gmail.com>
+Cc: linux-fscrypt@vger.kernel.org,
+	Bartosz Golaszewski <brgl@bgdev.pl>,
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Subject: [xfstests PATCH] fscrypt-crypt-util: fix KDF contexts for SM8650
+Date: Fri, 17 Jan 2025 23:23:36 -0800
+Message-ID: <20250118072336.605023-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.48.1
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -77,128 +42,49 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add generic tests 758 and 759 for testing reads/writes from buffers
-backed by hugepages.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+Update the KDF contexts to match those actually used on SM8650.  This
+turns out to be needed for the hardware-wrapped key tests generic/368
+and generic/369 to pass on the SM8650 HDK (now that I have one to
+actually test it).  Apparently the contexts changed between the
+prototype version I tested a couple years ago and the final version.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/rc             | 13 +++++++++++++
- tests/generic/758     | 22 ++++++++++++++++++++++
- tests/generic/758.out |  4 ++++
- tests/generic/759     | 26 ++++++++++++++++++++++++++
- tests/generic/759.out |  4 ++++
- 5 files changed, 69 insertions(+)
- create mode 100755 tests/generic/758
- create mode 100644 tests/generic/758.out
- create mode 100755 tests/generic/759
- create mode 100644 tests/generic/759.out
+ src/fscrypt-crypt-util.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 1b2e4508..0c44d096 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3016,6 +3016,19 @@ _require_xfs_io_command()
- 	fi
+diff --git a/src/fscrypt-crypt-util.c b/src/fscrypt-crypt-util.c
+index 4dde1d4a..f51b3669 100644
+--- a/src/fscrypt-crypt-util.c
++++ b/src/fscrypt-crypt-util.c
+@@ -2278,21 +2278,21 @@ static void hw_kdf(const u8 *master_key, size_t master_key_size,
+ static void derive_inline_encryption_key(const u8 *master_key,
+ 					 size_t master_key_size,
+ 					 u8 inlinecrypt_key[INLINECRYPT_KEY_SIZE])
+ {
+ 	static const u8 ctx[36] =
+-		"inline encryption key\0\0\0\0\0\0\x03\x43\0\x82\x50\0\0\0\0";
++		"inline encryption key\0\0\0\0\0\0\x02\x43\0\x82\x50\0\0\0\0";
+ 
+ 	hw_kdf(master_key, master_key_size, ctx, sizeof(ctx),
+ 	       inlinecrypt_key, INLINECRYPT_KEY_SIZE);
  }
  
-+# check that the system supports transparent hugepages
-+_require_thp()
-+{
-+	if [ ! -e /sys/kernel/mm/transparent_hugepage/enabled ]; then
-+		_notrun "system doesn't support transparent hugepages"
-+	fi
-+
-+	thp_status=$(cat /sys/kernel/mm/transparent_hugepage/enabled)
-+	if [[ $thp_status == *"[never]"* ]]; then
-+		_notrun "system doesn't have transparent hugepages enabled"
-+	fi
-+}
-+
- # check that kernel and filesystem support direct I/O, and check if "$1" size
- # aligned (optional) is supported
- _require_odirect()
-diff --git a/tests/generic/758 b/tests/generic/758
-new file mode 100755
-index 00000000..e7cd8cdc
---- /dev/null
-+++ b/tests/generic/758
-@@ -0,0 +1,22 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. 758
-+#
-+# fsx exercising reads/writes from userspace buffers
-+# backed by hugepages
-+#
-+. ./common/preamble
-+_begin_fstest rw auto quick
-+
-+. ./common/filter
-+
-+_require_test
-+_require_thp
-+
-+run_fsx -N 10000            -l 500000 -h
-+run_fsx -N 10000  -o 8192   -l 500000 -h
-+run_fsx -N 10000  -o 128000 -l 500000 -h
-+
-+status=0
-+exit
-diff --git a/tests/generic/758.out b/tests/generic/758.out
-new file mode 100644
-index 00000000..af04bb14
---- /dev/null
-+++ b/tests/generic/758.out
-@@ -0,0 +1,4 @@
-+QA output created by 758
-+fsx -N 10000 -l 500000 -h
-+fsx -N 10000 -o 8192 -l 500000 -h
-+fsx -N 10000 -o 128000 -l 500000 -h
-diff --git a/tests/generic/759 b/tests/generic/759
-new file mode 100755
-index 00000000..514e7603
---- /dev/null
-+++ b/tests/generic/759
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. 759
-+#
-+# fsx exercising direct IO reads/writes from userspace buffers
-+# backed by hugepages
-+#
-+. ./common/preamble
-+_begin_fstest rw auto quick
-+
-+. ./common/filter
-+
-+_require_test
-+_require_odirect
-+_require_thp
-+
-+psize=`$here/src/feature -s`
-+bsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
-+
-+run_fsx -N 10000            -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+run_fsx -N 10000  -o 8192   -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+run_fsx -N 10000  -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+
-+status=0
-+exit
-diff --git a/tests/generic/759.out b/tests/generic/759.out
-new file mode 100644
-index 00000000..86bb66ef
---- /dev/null
-+++ b/tests/generic/759.out
-@@ -0,0 +1,4 @@
-+QA output created by 759
-+fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
+ static void derive_sw_secret(const u8 *master_key, size_t master_key_size,
+ 			     u8 sw_secret[SW_SECRET_SIZE])
+ {
+ 	static const u8 ctx[28] =
+-		"raw secret\0\0\0\0\0\0\0\0\0\x03\x17\0\x80\x50\0\0\0\0";
++		"raw secret\0\0\0\0\0\0\0\0\0\x02\x17\0\x80\x50\0\0\0\0";
+ 
+ 	hw_kdf(master_key, master_key_size, ctx, sizeof(ctx),
+ 	       sw_secret, SW_SECRET_SIZE);
+ }
+ 
+
+base-commit: dec8cfb46ba0f19d29d13412841f68ebf119a452
 -- 
-2.47.1
+2.48.1
 
