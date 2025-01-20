@@ -1,78 +1,88 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 805951E9B18
-	for <fstests@vger.kernel.org>; Mon, 20 Jan 2025 17:41:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C7791EE7C0;
+	Mon, 20 Jan 2025 17:46:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737394910; cv=none; b=k9vkYAyy4wgxcmrJn9MJIV8O8BcRIL4VeYEiqxZ0DIT7t48Jl6th4BqoSxS1NrF4AVdUR7M62xoMT+mOZOkANbzRzFELnmAEwKqjdjbUvCcpSwOZg6Xd+UpJBCuj0cLUV33tdpQ34V4gN1yf1Vdlm5nkNKd+ndqUR3IqmXLyAsY=
+	t=1737395190; cv=none; b=BLbsyWRkRbgmys/7KKidEZwRmh/czGXcN7wXQGWqaQPvH23AzwJ+M+XV/UoR/NLKL6tYQW7VWe6vPT8lOWoXpVrbkZac30fAcDzelwUMseCh/svhBtq9stkZtf2HRHG5q+AyyYSNy3i11uZACFlGDF/Bz0rMwj57jiZ2lJc6jkI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737394910; c=relaxed/simple;
-	bh=RfwqfJ6WQFvFiurvX7OLUSqD6sAC/uLfdBok+sVje58=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=Jxq2BTWdLpiMEIgaMEM2nZV99QlKTM7mGk/ViuF63+TWz3miBJERthTiJTvW3X+LJEtx16AqMpeQpXZ2TNawsiRl2nwyYtQoqaMHvocdMFLqyaBtUqJRm9K34uzexUHkYW69tS5PKFxdY/hy9z3hkynv68/T60cbxpCnhXWEjb0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=V9LdAlZO; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1737395190; c=relaxed/simple;
+	bh=oDwoLUxTBAZCGcLc4HCgDK8vQ0LLZP86wNXamvbjVXY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ThQW8dU7uJtsaPWbI8m4bFcohl1m1oG2PSA6Phgie7/XA77w8ZU44cIdew8Top26QNHNIIOtSrWLwgU0Qaw3qxHuy6cBvgWVn0jZyeph7tK5Eqhi/AXWm6FNEUSFCr+VXrMCvAaUDgYti2yfBDpcqgRbreRPa+wdocnKXDlqdtE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TZUYbIJO; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="V9LdAlZO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1737394907;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=SpxnSlISiNchvWWX6LnEHPhu33sba9G29IFfuhf9BNM=;
-	b=V9LdAlZO8ZggT4q9fNpSX52Eg+LQfpc2YTbQfjJYof3APaSg9Y/ytJyGPiTsSUfvfvSv3a
-	nTAMPdVM55yHlVukwVUGZg8WtOW6M5MTqMtSND1cdYToQGzK4h8IOvUAjry2N9cmRFKE9v
-	6znQIBRG7q2h9vHY912G0ayseFHmYA4=
-Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-114-E_Bkld3aMdefOaFDLZKDhQ-1; Mon,
- 20 Jan 2025 12:41:44 -0500
-X-MC-Unique: E_Bkld3aMdefOaFDLZKDhQ-1
-X-Mimecast-MFC-AGG-ID: E_Bkld3aMdefOaFDLZKDhQ
-Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 289B1195604F;
-	Mon, 20 Jan 2025 17:41:43 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.42.28.5])
-	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C268B19560AD;
-	Mon, 20 Jan 2025 17:41:41 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <20250120172542.GC1159@sol.localdomain>
-References: <20250120172542.GC1159@sol.localdomain> <1201003.1737382806@warthog.procyon.org.uk> <1113699.1737376348@warthog.procyon.org.uk> <1207325.1737387826@warthog.procyon.org.uk>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: dhowells@redhat.com, Alex Markuze <amarkuze@redhat.com>,
-    fstests@vger.kernel.org, ceph-devel@vger.kernel.org,
-    linux-fsdevel@vger.kernel.org
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TZUYbIJO"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 42E53C4CEDD;
+	Mon, 20 Jan 2025 17:46:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1737395189;
+	bh=oDwoLUxTBAZCGcLc4HCgDK8vQ0LLZP86wNXamvbjVXY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=TZUYbIJODYGR/tSZJxTmPkHml7FsA5FwS8p+wofLYAugpyWp4wqWYrfSm4HmZr0R8
+	 rnmEp4SqUZ3Gvpf3LgTOzNJuW5tacQ4JARMC/7mEK4NUysh4llJaDftMR3Ps+6CDAZ
+	 ELFF9LJ/LvuYM/zBWSRCyNddhYkAgkmPUlOLrc67O1+SPdLKd6T8Ff2dpOU0AjZaFH
+	 m5n4MeQVYi0gX/ffs3kZ0Xth1DuFDC1t84mOfRwvhyA9Ke1ZAF4sCGuuKJNagbjdRM
+	 Zd2EIGwlk6Xr54JVpqcwjLiaoEWYUtFjqPfXjAqvJTlxk67Ulqch37uRPB8onMHCi+
+	 swypEp9PqzS/w==
+Date: Mon, 20 Jan 2025 09:46:27 -0800
+From: Eric Biggers <ebiggers@kernel.org>
+To: David Howells <dhowells@redhat.com>
+Cc: Alex Markuze <amarkuze@redhat.com>, fstests@vger.kernel.org,
+	ceph-devel@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>
 Subject: Re: Error in generic/397 test script?
+Message-ID: <20250120174627.GB2268@sol.localdomain>
+References: <20250120172542.GC1159@sol.localdomain>
+ <1201003.1737382806@warthog.procyon.org.uk>
+ <1113699.1737376348@warthog.procyon.org.uk>
+ <1207325.1737387826@warthog.procyon.org.uk>
+ <1211247.1737394900@warthog.procyon.org.uk>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <1211246.1737394900.1@warthog.procyon.org.uk>
-Date: Mon, 20 Jan 2025 17:41:40 +0000
-Message-ID: <1211247.1737394900@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1211247.1737394900@warthog.procyon.org.uk>
 
-Eric Biggers <ebiggers@kernel.org> wrote:
+On Mon, Jan 20, 2025 at 05:41:40PM +0000, David Howells wrote:
+> Eric Biggers <ebiggers@kernel.org> wrote:
+> 
+> > It would be enlightening to understand what the issue was here.  Did you
+> > explicitly disable these options, overriding the imply, without providing a
+> > replacement?  Or was this another issue specific to unmerged kernel patches?
+> 
+> I enabled CONFIG_FS_ENCRYPTION in addition to the options I normally use, but
+> didn't realise I needed to enable CONFIG_CRYPTO_XTS as well.
+> 
+> David
+> 
 
-> It would be enlightening to understand what the issue was here.  Did you
-> explicitly disable these options, overriding the imply, without providing a
-> replacement?  Or was this another issue specific to unmerged kernel patches?
+So you had an explicit '# CONFIG_CRYPTO_XTS is not set' somewhere in your
+kconfig that overrode the imply, right?
 
-I enabled CONFIG_FS_ENCRYPTION in addition to the options I normally use, but
-didn't realise I needed to enable CONFIG_CRYPTO_XTS as well.
+Wondering if the following commit should maybe be reconsidered:
 
-David
+    commit a0fc20333ee4bac1147c4cf75dea098c26671a2f
+    Author: Ard Biesheuvel <ardb@kernel.org>
+    Date:   Wed Apr 21 09:55:10 2021 +0200
 
+        fscrypt: relax Kconfig dependencies for crypto API algorithms
+        
+        Even if FS encryption has strict functional dependencies on various
+        crypto algorithms and chaining modes. those dependencies could potentially
+        be satisified by other implementations than the generic ones, and no link
+        time dependency exists on the 'depends on' claused defined by
+        CONFIG_FS_ENCRYPTION_ALGS.
+        
+        So let's relax these clauses to 'imply', so that the default behavior
+        is still to pull in those generic algorithms, but in a way that permits
+        them to be disabled again in Kconfig.
+        
+        Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+        Acked-by: Eric Biggers <ebiggers@google.com>
+        Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
