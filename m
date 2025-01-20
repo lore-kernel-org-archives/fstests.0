@@ -1,83 +1,82 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D181E1E32DB
-	for <fstests@vger.kernel.org>; Mon, 20 Jan 2025 15:43:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 295C11494CC
+	for <fstests@vger.kernel.org>; Mon, 20 Jan 2025 17:01:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737387834; cv=none; b=c+oScPid4xqWwO68nfG3L7XGwuKDVOVc0Rmiy5uKcIVaMzHc79RM7my7QpqkSrTHr2pnBzn8hnkBbmV3ZOvmMdNqIscYQUj9pb9RoJwxl7H8dYRCB+RDba+l/G70X76+m7YDMLNJwhoMprApBi29RoQsnsCDGeynf9woJUMZh/Y=
+	t=1737392503; cv=none; b=Ho3aSivZSQnQXwoAjDUgBAgGahrZU5f9tgbh3dmEFP6Vz5aC+6BLYgoTqKrlEFylQhYMdyoKZRvjIA8pGn/B/+iJeyn2po8msOcSwUalkoAgZSS1rfd04xX2Rz0Wl5CTPCUV63DNJe8BYaQv7LK5dLFF1vcw8WvXtXHE6gu3XN0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737387834; c=relaxed/simple;
-	bh=7GSgh24e7Lrx6jF7Y+WvZ/VFxDmY/RDDmKTerlQyylE=;
-	h=From:In-Reply-To:References:To:Cc:Subject:MIME-Version:
-	 Content-Type:Date:Message-ID; b=O8FZSsVQmd9hwCuZQPam5jSZc7/84HJVzInfTQeNVMadR7NPRw94DbJyz9/On1iXlldA6iZSh06czfmR/s45jhtvPdbtOr018gr8KY/FEuREYk53drbdSluNf86V02AWlJi9D+IxBRytflAC19VHGf3k6INkfNGLkQDImKWVMxc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=HIn/r90D; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1737392503; c=relaxed/simple;
+	bh=3ow7rn802RxE1ryIKYxzgc3Ic8faIfyahg4SvzR9vxc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=bO4ZltERCUvheR5/EylE7D6xgl2soVy3VyJ505OC8S1ahT9O4Vd9je9H6pozk2kamiCjHuG3+gdqUbUNwwIGh3RwvlSCmi6Hu/KlQhhlFB3Ss5GSSJOboVG+blWPrwlEHCYL3JzKPLkx8T76mejzCJT+d4HLQ7lqhPhzscS7Cyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=pMyItjb2; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HIn/r90D"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1737387831;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=7GSgh24e7Lrx6jF7Y+WvZ/VFxDmY/RDDmKTerlQyylE=;
-	b=HIn/r90D1wCo8UPH/9GfgWxUk9ayLKbniRlCdxVc5+s1u0PZfvlQkfAyEUAdsLjBUN0ysW
-	NAqE5sj85zNAgVV/atDc58XMxOU31PgLrsaHcAh3o6S5cHyA7JFRlq3SEx7UPU6Fwx8kgV
-	RICD5kMTeoK6MAww+kyZUoRnaPvPyRs=
-Received: from mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-689-vONu1RTdPVW21o9O61ZlCg-1; Mon,
- 20 Jan 2025 10:43:50 -0500
-X-MC-Unique: vONu1RTdPVW21o9O61ZlCg-1
-X-Mimecast-MFC-AGG-ID: vONu1RTdPVW21o9O61ZlCg
-Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 6DE5C1955BD9;
-	Mon, 20 Jan 2025 15:43:49 +0000 (UTC)
-Received: from warthog.procyon.org.uk (unknown [10.42.28.5])
-	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C30AC3003FD2;
-	Mon, 20 Jan 2025 15:43:47 +0000 (UTC)
-Organization: Red Hat UK Ltd. Registered Address: Red Hat UK Ltd, Amberley
-	Place, 107-111 Peascod Street, Windsor, Berkshire, SI4 1TE, United
-	Kingdom.
-	Registered in England and Wales under Company Registration No. 3798903
-From: David Howells <dhowells@redhat.com>
-In-Reply-To: <1201003.1737382806@warthog.procyon.org.uk>
-References: <1201003.1737382806@warthog.procyon.org.uk> <1113699.1737376348@warthog.procyon.org.uk>
-To: Eric Biggers <ebiggers@google.com>
-Cc: dhowells@redhat.com, Alex Markuze <amarkuze@redhat.com>,
-    fstests@vger.kernel.org, ceph-devel@vger.kernel.org,
-    linux-fsdevel@vger.kernel.org
-Subject: Re: Error in generic/397 test script?
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="pMyItjb2"
+Received: from cwcc.thunk.org (pool-173-48-114-200.bstnma.fios.verizon.net [173.48.114.200])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 50KH1KIZ018111
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 20 Jan 2025 12:01:24 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1737392485; bh=0zUUQd7sH0SvlXuvHU361VEnWRMbwvAqwYSuiNgwjUE=;
+	h=From:Subject:Date:Message-ID:MIME-Version;
+	b=pMyItjb2dAz6WsWJX+dTfrRKPf333wOsfVDC3tbBMyTseaTZNohgkg7jjMxHYHnHV
+	 NJQrQX098qIPhNPkKje0jWS00Bi8ueB/XfZ481kfUsRj1xE5Uu1RniUzn+pCuzIaAi
+	 z1J6hjzC4oItx+EMxJ/BfXq6+nkZIc2G5DzLXUeQ3exd8NtPOUQLgA0C/nMmuYOzuv
+	 JNK5sKK04Nfm5CVm+/xZWshYm9FlhmNr/TlCVnx+n9OzKFAxiqmz6BoMQOSYy9111R
+	 ki3Epf0wNQsTfgBNoTqOq78ru+I6dEAmSlaNq/OU4+D2sLW7w77/MAteyMBeQp616g
+	 S9c4oWeJvbW4Q==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id 3C9FC15C0176; Mon, 20 Jan 2025 12:01:20 -0500 (EST)
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: fstests@vger.kernel.org
+Cc: "Darrick J. Wong" <djwong@kernel.org>, "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH -v2] xfs/32: fix test failure on kernels which don't support bs > ps
+Date: Mon, 20 Jan 2025 12:01:09 -0500
+Message-ID: <20250120170109.3770633-1-tytso@mit.edu>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20250117210202.GJ3557695@frogsfrogsfrogs>
+References: <20250117210202.GJ3557695@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <1207324.1737387826.1@warthog.procyon.org.uk>
-Content-Transfer-Encoding: quoted-printable
-Date: Mon, 20 Jan 2025 15:43:46 +0000
-Message-ID: <1207325.1737387826@warthog.procyon.org.uk>
-X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
+Content-Transfer-Encoding: 8bit
 
-David Howells <dhowells@redhat.com> wrote:
+When trying to mount a file system with a block size > page size on
+kernel which doesn't support this, suppress the error messages from
+showing up in the output file lest it cause test failures.
 
-> However, in this case (in which I'm running these against ceph), I don't=
- think
-> that the find should return nothing, so it's not a bug in the test scrip=
-t per
-> se.
+Fixes: 0b66f6efd669 ("xfs/032: try running on blocksize > pagesize filesystems")
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+v2:
+    As Darrick suggested redirect the output of mount(8) to $seqres.full
+    instead of /dev/null
 
-Turned out that I hadn't enabled XTS and so the tests for xts(aes) failed =
-and
-produced no files.
+ tests/xfs/032 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-David
+diff --git a/tests/xfs/032 b/tests/xfs/032
+index 41a9134d8..675881d5b 100755
+--- a/tests/xfs/032
++++ b/tests/xfs/032
+@@ -44,7 +44,7 @@ for ((; SECTORSIZE <= 65536; SECTORSIZE *= 2)); do
+ 		if [ $? -ne 0 ]; then
+ 			continue
+ 		fi
+-		if ! _try_scratch_mount; then
++		if ! _try_scratch_mount >> $seqres.full 2>&1 ; then
+ 			if [ $BLOCKSIZE -le $PAGESIZE ]; then
+ 				_fail "mount $(_scratch_mount_options $*) failed"
+ 			fi
+-- 
+2.45.2
 
