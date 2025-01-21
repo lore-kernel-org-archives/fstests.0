@@ -1,78 +1,48 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D3AC19F101
-	for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 05:12:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D3491E9B38
+	for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 12:44:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737436380; cv=none; b=dBVqJ+3c3ITpUTSDKLLP+AUjZzNRAqnHB7zWzmMjIgDdjMiKryRHgyzsonT3QhrKB6KLHQ1Fnt4WD0THdP6VWthhT5CPwVHOlmkypypvQquWZpwqfiO9j80BD4F+reGykMqRMDw9FZkIht51FiA7nFaArsKcGsvc2gzM2/gEw4M=
+	t=1737463488; cv=none; b=W0vkanNh9YxGWuM0Sa3C2URtJPR09Y2umQk9ojMY7PeurHplCpgdlk8ay0B4vLjkGbLnNGT/hFB9/EFnsxoSBHhDoPy8XRSYmMFhCkPqx09pM+P3HT/gkOGU5kG6NvEAAynMU39DgJjczM6PDwu0PumZv3RLMN27P83XF5Wz3zA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737436380; c=relaxed/simple;
-	bh=R0dA0srL09CrO9+h7zLMCbftthXyhqaZa5oPNdUustI=;
+	s=arc-20240116; t=1737463488; c=relaxed/simple;
+	bh=ANp3OH3mx5KasX0OyT5VGzZf+KaJsSvE7iOIWHbvwyc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=E4zXuDDjPPjlObT52jIIqVLNQjFG6mYMM6R9v8NZQD8N/3yFlQp6/63eDjnT0xfbMYJrYD3K64qefrVu2ZQ/EZJ8Zii+/OvcZCuQ6tv3i3XST1voZph3LoJ9ibzT5g+jBi1/knsCPd2OT2UP3+/XawowVM1B5gQDtqvuTGBMBRs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=SU0AeJqB; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=PrIjNzH9fo3TVZ4KDLDoVGcIEtjAE8c2dVHZsGWeFFbfvVFwH6JG5cV4NqG4ObHx+JOhTQV2roiHJ+OJWiTNtwTRNjguzsRFQ6jqYm0QbwCIUV9MuXWkxfe3B26s9z6MQZTYxjzqlh2DRH5ZjWJpZT8yXkYwIISFNmwYg2xo4d0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=CW1iKlNd; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SU0AeJqB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1737436378;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=64PEcDr7tKSMbboC7W53OKVzaqIM/sWA6jUpK9q1TrM=;
-	b=SU0AeJqBfTDf2eNIBaJNN8bigUPt0YTK5VPueSGasvEYMaPV7m7d9G9aY+dn6vatGHDEg+
-	xXj0XQQDHIXX3klA/NUPxLlU+g3/wCYRdG5bsQTTijHLuIdNr4aYaesnZU4ceNgkarDMj+
-	PqmkQ+x6KAkJHo7D8sU9rbvq7kXX/EU=
-Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
- [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-74-uO3t2ZnKNyyg9B3iu_JqwQ-1; Tue, 21 Jan 2025 00:12:56 -0500
-X-MC-Unique: uO3t2ZnKNyyg9B3iu_JqwQ-1
-X-Mimecast-MFC-AGG-ID: uO3t2ZnKNyyg9B3iu_JqwQ
-Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-216430a88b0so102596065ad.0
-        for <fstests@vger.kernel.org>; Mon, 20 Jan 2025 21:12:55 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737436375; x=1738041175;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=64PEcDr7tKSMbboC7W53OKVzaqIM/sWA6jUpK9q1TrM=;
-        b=J8gO/nPyHZUcer201qk8UYrcu2KCrzvCtNflhVxlyvi4H882KifCMBZvP+/wabhhPY
-         97aE8s0/oA2FkHWI1TevFi/rQgISbjwA3wUI9s1cpKtnZYTqogUADvjquAtWio0V7kAb
-         t6o5UAy9dLjt23ovhazGkv1gVR3eronJ644oPuq1LGtNUNiwm2X7Xjx8k3ZfeqT0rFnb
-         aW+MFjfoFRmwbz4M5V1uR272T4no2RfiC5wAY2of80OF2ysoGqJlKTqIN5V2zd2tL2UE
-         roi12gnDyzMHXMVaNKVl/Uf7AoaMxLTIkrk66bfrJ9Ti1kn//NlaQfnZrEE0rb+18RKd
-         fBgA==
-X-Gm-Message-State: AOJu0Yx/Z5gtdP2xcX87EuXXM2lZZXItWNX5tvzJjzn5bFGpitw6XpO4
-	HfpeGtT6EF3zDP6Sh/q7034Q6Sr91Xlb6vaydxJNtUh2HF/IewpKfgsnE3qCvxRs1U+9xWPJlXK
-	0g7CLwbAQ2uGplJcWYzTHHJOS/JQCQbXQEBdPAUoA4VtalU6rTEKo9JWMEEosyQC5PA==
-X-Gm-Gg: ASbGnctznm+ctxlp7KKAxDH7at3CXYZ3OVlcFCHWGkwAkaGA2kAL04ITMZE2fkiz3H6
-	XA3iiiU/ZF1LDywAIy/xUoPjE0/rwjlVwKJwg7ackTHVkLgUUwFD+79o6qqt9gsigCQKxKhw7E4
-	DrHZZS793No81PCBh9YiHnLiM9UG0/ONznORYHOU1aopGgeOd0v7zM8dzEJRxC8kBz/amUCGZ4T
-	7wdo8IUzdmPzZxPU5Ao9e3byAYezok2ix8i2oRao+RK3HFYwzDTBbnnpA9F/eJkWBmb7OagZzT7
-	PimhIdpeWzv/O3Z/prES4VFVod9BHg0wpxg=
-X-Received: by 2002:a17:902:cece:b0:215:a3e4:d251 with SMTP id d9443c01a7336-21c351bd44bmr221086955ad.6.1737436374845;
-        Mon, 20 Jan 2025 21:12:54 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEAGG25MP4JrvQPA/qjeCokfCjfq8kjkVk8934TSNMmQMtS/VD7Fw+eEWQb3dYZUMV+4qqhDw==
-X-Received: by 2002:a17:902:cece:b0:215:a3e4:d251 with SMTP id d9443c01a7336-21c351bd44bmr221086705ad.6.1737436374499;
-        Mon, 20 Jan 2025 21:12:54 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21c2d3acf50sm68981945ad.143.2025.01.20.21.12.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Jan 2025 21:12:54 -0800 (PST)
-Date: Tue, 21 Jan 2025 13:12:51 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>
-Subject: Re: [PATCH -v2] xfs/32: fix test failure on kernels which don't
- support bs > ps
-Message-ID: <20250121051251.ab4bl5xeet4bxa5s@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250117210202.GJ3557695@frogsfrogsfrogs>
- <20250120170109.3770633-1-tytso@mit.edu>
- <20250121023536.dz45c3ustuk3fddu@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20250121033356.GB3761769@mit.edu>
+	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="CW1iKlNd"
+Received: from cwcc.thunk.org (pool-173-48-114-200.bstnma.fios.verizon.net [173.48.114.200])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 50LCiVGc032151
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 21 Jan 2025 07:44:32 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
+	t=1737463473; bh=wUoxwg++YKNF6nKKpNyDiSSgpiw6M5OVkgoc2CdjZds=;
+	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
+	b=CW1iKlNdh/s9iA7lhbDbuqf/85v1gF2k1GbQDsuqt3KFwXy1iwr7w1dNUgqFKJXJ2
+	 fdk6SD77tx6O2I7tT3LIAc1q/uzQnowVdlKK6vI4w9BFrcfrHO02QvWLm8bDvrgd59
+	 28HUmUGJQZY+bE4Npd8hsEPBD0ZnRyOtjldYfPlLeJ2DM8jY6NhaJKH/zeYHEBW/x7
+	 S3gMYpinJU2uirakJeooOZCYuwI/VBe7QAGaMc6fK4mTOGM/J5ISs8b+W7Rg6d+o+Y
+	 Bvz/3bnVLXDyHzMpkDtVx/eR/Z/5LYjO2HgG4FFwHGA1f4EgTofAAEfk/n6LW/57f+
+	 CSDSdhEjmfQlw==
+Received: by cwcc.thunk.org (Postfix, from userid 15806)
+	id F1A6F15C01A1; Tue, 21 Jan 2025 07:44:30 -0500 (EST)
+Date: Tue, 21 Jan 2025 07:44:30 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, hch@lst.de,
+        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 10/23] mkfs: don't hardcode log size
+Message-ID: <20250121124430.GA3809348@mit.edu>
+References: <173706974044.1927324.7824600141282028094.stgit@frogsfrogsfrogs>
+ <173706974228.1927324.17714311358227511791.stgit@frogsfrogsfrogs>
+ <Z48bYVRvWt-wPmUz@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -81,39 +51,36 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250121033356.GB3761769@mit.edu>
+In-Reply-To: <Z48bYVRvWt-wPmUz@dread.disaster.area>
 
-On Mon, Jan 20, 2025 at 10:33:56PM -0500, Theodore Ts'o wrote:
-> On Tue, Jan 21, 2025 at 10:35:36AM +0800, Zorro Lang wrote:
-> > On Mon, Jan 20, 2025 at 12:01:09PM -0500, Theodore Ts'o wrote:
-> > > When trying to mount a file system with a block size > page size on
-> > > kernel which doesn't support this, suppress the error messages from
-> > > showing up in the output file lest it cause test failures.
-> > > 
-> > > Fixes: 0b66f6efd669 ("xfs/032: try running on blocksize > pagesize filesystems")
-> > > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > > ---
-> > > v2:
-> > >     As Darrick suggested redirect the output of mount(8) to $seqres.full
-> > >     instead of /dev/null
-> > 
-> > Thanks for fixing it.
-> > 
-> > Reviewed-by: Zorro Lang <zlang@redhat.com>
+On Tue, Jan 21, 2025 at 02:58:25PM +1100, Dave Chinner wrote:
+> > +# Are there mkfs options to try to improve concurrency?
+> > +_scratch_mkfs_concurrency_options()
+> > +{
+> > +	local nr_cpus="$(( $1 * LOAD_FACTOR ))"
 > 
-> I just noticed just now that I screwed up the subject line / commit description.
+> caller does not need to pass a number of CPUs. This function can
+> simply do:
 > 
-> xfs/32: ...
+> 	local nr_cpus=$(getconf _NPROCESSORS_CONF)
 > 
-> should be:
-> 
-> xfs/032: ...
-> 
-> Sorry for not noticing this earlier!
+> And that will set concurrency to be "optimal" for the number of CPUs
+> in the machine the test is going to run on. That way tests don't
+> need to hard code some number that is going to be too large for
+> small systems and to small for large systems...
 
-Never mind, I've changed that when I merge it :)
+Hmm, but is this the right thing if you are using check-parallel?  If
+you are running multiple tests that are all running some kind of load
+or stress-testing antagonist at the same time, then having 3x to 5x
+the number of necessary antagonist threads is going to unnecessarily
+slow down the test run, which goes against the original goal of what
+we were hoping to achieve with check-parallel.
 
-> 
-> 					- Ted
-> 
+How many tests are you currently able to run in parallel today, and
+what's the ultimate goal?  We could have some kind of antagonist load
+which is shared across multiple tests, but it's not clear to me that
+it's worth the complexity.  (And note that it's not just fs and cpu
+load antagonistsw; there could also be memory stress antagonists, where
+having multiple antagonists could lead to OOM kills...)
 
+							- Ted
