@@ -1,204 +1,200 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-pj1-f52.google.com (mail-pj1-f52.google.com [209.85.216.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9F081F8913;
-	Tue, 21 Jan 2025 21:57:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 050741B041B
+	for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 22:05:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737496681; cv=none; b=enF4Bx24ZrfF4gnFcB7/8ZRN8KcTYlAgvIeBHufxoyADy1GpcxU0nWdAKI2+LMcVBFJmixk65ZBFiV2ImRuA78xe4N0xxKJ3JxoJOojVJUSkRFOvIaqo1OXmP1g14H/o7NhcNKO5bcIbjRxC6zZIvX2HaOF8mniqhxuX5aKo7w8=
+	t=1737497124; cv=none; b=DAmaGy8nJ0eOT/i7DysD/xhmfprlFwphPFid9LAZuOUMCheYb4rdr5tLiBTGe747RJ2juDiCNaXZJOd2GtOFkJKYOaljUWOFrh3sJIsGVct6CB8iI4LPsIbVNd/ebmL5rCStujMdseFLSvpIkTWYumzl0aK6VPxLpABRhpnNKtE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737496681; c=relaxed/simple;
-	bh=daBzD//cBkg5rogE6pEcC4+gYYpGqWl0biKOXvthShQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=UsLSjLcwtnMsFbuCARmtN4m9PvUaw4y4OnQChVVskkaf/11dvgs8ItuOK6FeEtF77q0GYC2HznO5ByYbTCbVIBixFRk3HOeHtr+Ph2NR7rtmCUuxTRoFFMUVh0aNqDrmetY+KixoX2AFxlk0hY1rntmz3ijUTgXT+ufOASvzTnc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=D5GdrBI4; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1737497124; c=relaxed/simple;
+	bh=JxkSA1+o9o9ouuhpNx9UTa7SOc8NvrSPsLX/KynJQdY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IGzXymjFX2fUjCJ01a0M9jtCOUawY1aLeG2HmAgLrZx0xM5/3Pak54atldm1qljkpBvNJuj5DMkEiwDxVOBwNfDw274TQDsI8gGxCub6qjnlU9BqbKBwwaXg/leJK4/1+mUxxTT4Pkxf0gK7nLmv5yo0nDrRVRT7wfale8sYU/0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=RFCzPo8+; arc=none smtp.client-ip=209.85.216.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="D5GdrBI4"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e46c6547266so8954263276.3;
-        Tue, 21 Jan 2025 13:57:59 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="RFCzPo8+"
+Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-2f78a4ca5deso5831042a91.0
+        for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 14:05:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1737496678; x=1738101478; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=p90TONDalliPlYjPPsOYvMlU+K4gQUMKH3aG4J/s8yc=;
-        b=D5GdrBI47vsUAWgRQBY9UatEjAM2/SZdRnQHAI1RvwwJsDg++ZVkrnUQNV6g/RjZj/
-         pM4sGJgnaCDLDvlhIuDwhGHg1Sdlyhl7T6m+f3Kr6YXiC9ob+Z1L/MymYA/ydjnpO2CO
-         BY4f0WsERBdbBgcgTkVGMC/gndmzqBwxoX+XVHGsQm74YQxH6NkLXlj/u4EgiAjcqO21
-         3SquKmuUYS3tdAKkBZwcSKszIu1QD+jUUjjZSgcrxRcpcaq5U2YUB8xbILwmt7PD3+wQ
-         kfl+NUTvBhN5QTOULpzPLAUmQtcQbC1ZrMAYx4fFRJETUbPdTvy3aQezwpS36I4aeNVy
-         MsHw==
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1737497122; x=1738101922; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=4e8+Mj3cRgobogPNAclKWWgs48AdKLwKCVXRuVShalY=;
+        b=RFCzPo8+BFs4rCpDEPOR7ZJlmknbkuoM3HIqdyGfL5lnMhhpqI2VtwUk8R66YdcJCc
+         dicOq9TWV19NNO9Eq/JWfs79OImjbyDmr95wIZu6DWKDd2lOI/eLe69pq36B5xtTFKac
+         LY9hdocdWePwLQpcRqAsrkmn91tyk4byQnYypHrx7Z7AH4IwBDkvC9WVK18huS5Hx36K
+         7tZOusUc7WKU2AHUXUq1B7wJb7e0qf+M7d37zYHgxaOQFSaoC2uKYyQXRW3nFCxIpwao
+         RCNBgqsatEud7ChK/ZA8+EnA8sHQ2ItLU7wCJ68/rGwx27igb5e/30jRRbRU21Gs39Lc
+         gv7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737496678; x=1738101478;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=p90TONDalliPlYjPPsOYvMlU+K4gQUMKH3aG4J/s8yc=;
-        b=KbuDQZcm23Za8zzYgLQT+oEp669PQR4hHdYPu62nDFzE9o6NqxEnviKV93ekvVDD9c
-         7HqaqSYYsvqY4kFVH5PUKM/n11cWQmXRB3sdfAzMQuQoCNE70CjPAy198Msw+u2SgWao
-         JgYJHVCHnPXzy0qi3xNgJOXR7eckJClHnfu3peqGnQ6U2nQRAqTtkjOaSVjeAB7t56Xk
-         ElBt0rnt9crWi7/rPLA1cFDZZLC4IaGSqGyRAOo5QM/w5Cl4e6IPJPs6SkMUkwJiZJq+
-         NeSBzVFfslJQBr49YNnDimq2YvJWt25CIZOvmvoAzZfykQVIvlmOy/bsE9VX38xmer3m
-         d5cg==
-X-Gm-Message-State: AOJu0YwnmG1Fc4tRdhsaK0BE7hr/8aYu5hyo+RtcZrD3iZykjNPN4EwA
-	RkpIyYHnBy31v5XaeAWO9uUc9nhr8WsxU7KBwWUHDHz1j+9VECKGxMal4Q==
-X-Gm-Gg: ASbGnctfMQ7H1tYXNTWF9qpUJ0/64GWEv7XnFk0k1WAWCc+3bOwpf6RZXHm5N+2SgQW
-	8Zs1pvXtbv6EpNLtC2hgXryEpCfO1EwzQyXwVkAFZMVpdvbe6iXBwisInq969ENXgAefaKBrsNt
-	oWGuy7GSkg0MjMETsu1RWOwERYmONaYRsofVUK3pijJRjpyVFIZnBH+LL0DPctJY1xtrp3LIMqn
-	ArzPo1cWd+dcE3cuKphEuobu763jVUqD/CfdYT4VQA4kBR491uPFDZZN4D8jXVjJcI=
-X-Google-Smtp-Source: AGHT+IFmvaCmmiQ82v5xYu6S4f5vefDSLrJUTgNzpkacFGYkawWwEP3UxMXw+8/a/x37kHBGoekXgA==
-X-Received: by 2002:a05:690c:c83:b0:6db:c847:c8c5 with SMTP id 00721157ae682-6f6eb67bca1mr172803707b3.16.1737496678480;
-        Tue, 21 Jan 2025 13:57:58 -0800 (PST)
-Received: from localhost ([2a03:2880:25ff:3::])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f6e66f8dc7sm18206407b3.116.2025.01.21.13.57.58
+        d=1e100.net; s=20230601; t=1737497122; x=1738101922;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4e8+Mj3cRgobogPNAclKWWgs48AdKLwKCVXRuVShalY=;
+        b=eo0TEYsHC5LN8NCHtyPDddaQIjxMbPgrwrK3AotO3QwbC5IXrCBvw+xuNuA9yrc56l
+         QtpwYMAYv11t06bLxcdPixeQDdB233qSKhNvIx5BiLxcU+W45leQBEfQyYzoVIf3V+Qk
+         wl1c9T5zp9LLp0luzrhNTGmeD3Lq2Pva0UVabPW2E7h3wNFrYnSUHasApieB4daO+RBO
+         YkX+iCI+m99fINhWiLsYgBznsKwdIf2b4gZ9Ld/CFRLFmn2lC7FVrsPTKWAjc2O8jSj5
+         a6cWIQMzhb8l+DsD0/05dVW8SdMCWWDu5ZHzX0Bdiv2PHJHHZBs6LbIi2RoRCXwQ+pFs
+         p/uw==
+X-Forwarded-Encrypted: i=1; AJvYcCXpUiFqMDHlf0I2xvFfENAvaKcBM3EAj2jAsqn1/dFUycPlJrEOL6OcV8kMmtC1s0aXNP8a1maV@vger.kernel.org
+X-Gm-Message-State: AOJu0YwuFFLSY3xPJNouZQFbWk1MKI0pYCJpwL0FNTc0iuFo4or7Gc4p
+	Z3+HdG6Xe/l4OWvRkt31/hDQEkLzzW5+RLxOD1f4qLaXksBy+o8a6bcGodn3m2k=
+X-Gm-Gg: ASbGncvMYTZyPQ+xgE66l7SpnrtvCxH+sWpYGBlKrNNL/dNEhCJ0sez2XsopJGCcsFI
+	uuMv8b566wouGtw7+mUaUvk+bmIhsDbIDoSawH7S88vBQYPIdMgPce4Ra9bFILRbUCJcUbZapG3
+	Z8RQ4JRZgTA8QCBXyNouA19cWPbfHtZUTqeS0bgm7G9puu3mljsr8//uAk41DSQOrETFCwWiVlR
+	pJQCqxLBvM55EEKO4E85Khwuupz7hMoagbMy0+HreB4WBcCvW7fXSeOmuUU5KbWvJG4pBJqfjTW
+	Ws2iQ1Y066VnIREOGqhwsJLXX0X7hjkO9uXwwEbB5oIBGw==
+X-Google-Smtp-Source: AGHT+IGdmW5oc8V4toK1cTqRN4u+7FrMe8moGwAsy1AeGmD6BVgcsyMf6IFWMbfklN0hSdOv9CDeRg==
+X-Received: by 2002:a05:6a00:2444:b0:727:d55e:4bee with SMTP id d2e1a72fcca58-72daf92b010mr26192289b3a.1.1737497121988;
+        Tue, 21 Jan 2025 14:05:21 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72daba48cd0sm9724753b3a.131.2025.01.21.14.05.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jan 2025 13:57:58 -0800 (PST)
-From: Joanne Koong <joannelkoong@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org,
-	bfoster@redhat.com,
-	djwong@kernel.org,
-	nirjhar@linux.ibm.com,
-	zlang@redhat.com,
-	kernel-team@meta.com
-Subject: [PATCH v5 2/2] generic: add tests for read/writes from hugepages-backed buffers
-Date: Tue, 21 Jan 2025 13:56:41 -0800
-Message-ID: <20250121215641.1764359-3-joannelkoong@gmail.com>
-X-Mailer: git-send-email 2.43.5
-In-Reply-To: <20250121215641.1764359-1-joannelkoong@gmail.com>
-References: <20250121215641.1764359-1-joannelkoong@gmail.com>
+        Tue, 21 Jan 2025 14:05:21 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1taMN4-00000008pb2-2u1Q;
+	Wed, 22 Jan 2025 09:05:18 +1100
+Date: Wed, 22 Jan 2025 09:05:18 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, hch@lst.de,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 10/23] mkfs: don't hardcode log size
+Message-ID: <Z5AaHkvdwqHKpPyO@dread.disaster.area>
+References: <173706974044.1927324.7824600141282028094.stgit@frogsfrogsfrogs>
+ <173706974228.1927324.17714311358227511791.stgit@frogsfrogsfrogs>
+ <Z48bYVRvWt-wPmUz@dread.disaster.area>
+ <20250121124430.GA3809348@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250121124430.GA3809348@mit.edu>
 
-Add generic tests 758 and 759 for testing reads/writes from buffers
-backed by hugepages.
+On Tue, Jan 21, 2025 at 07:44:30AM -0500, Theodore Ts'o wrote:
+> On Tue, Jan 21, 2025 at 02:58:25PM +1100, Dave Chinner wrote:
+> > > +# Are there mkfs options to try to improve concurrency?
+> > > +_scratch_mkfs_concurrency_options()
+> > > +{
+> > > +	local nr_cpus="$(( $1 * LOAD_FACTOR ))"
+> > 
+> > caller does not need to pass a number of CPUs. This function can
+> > simply do:
+> > 
+> > 	local nr_cpus=$(getconf _NPROCESSORS_CONF)
+> > 
+> > And that will set concurrency to be "optimal" for the number of CPUs
+> > in the machine the test is going to run on. That way tests don't
+> > need to hard code some number that is going to be too large for
+> > small systems and to small for large systems...
+> 
+> Hmm, but is this the right thing if you are using check-parallel?
 
-Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-Reviewed-by: Brian Foster <bfoster@redhat.com>
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
----
- common/rc             | 13 +++++++++++++
- tests/generic/758     | 22 ++++++++++++++++++++++
- tests/generic/758.out |  4 ++++
- tests/generic/759     | 26 ++++++++++++++++++++++++++
- tests/generic/759.out |  4 ++++
- 5 files changed, 69 insertions(+)
- create mode 100755 tests/generic/758
- create mode 100644 tests/generic/758.out
- create mode 100755 tests/generic/759
- create mode 100644 tests/generic/759.out
+Yes. The whole point of check-parallel is to run the tests in such a
+way as to max out the resources of the test machine for the entire
+test run. Everything that can be run concurrently should be run
+concurrently, and we should not be cutting down on the concurrency
+just because we are running check-parallel.
 
-diff --git a/common/rc b/common/rc
-index 1b2e4508..0c44d096 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3016,6 +3016,19 @@ _require_xfs_io_command()
- 	fi
- }
- 
-+# check that the system supports transparent hugepages
-+_require_thp()
-+{
-+	if [ ! -e /sys/kernel/mm/transparent_hugepage/enabled ]; then
-+		_notrun "system doesn't support transparent hugepages"
-+	fi
-+
-+	thp_status=$(cat /sys/kernel/mm/transparent_hugepage/enabled)
-+	if [[ $thp_status == *"[never]"* ]]; then
-+		_notrun "system doesn't have transparent hugepages enabled"
-+	fi
-+}
-+
- # check that kernel and filesystem support direct I/O, and check if "$1" size
- # aligned (optional) is supported
- _require_odirect()
-diff --git a/tests/generic/758 b/tests/generic/758
-new file mode 100755
-index 00000000..e7cd8cdc
---- /dev/null
-+++ b/tests/generic/758
-@@ -0,0 +1,22 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. 758
-+#
-+# fsx exercising reads/writes from userspace buffers
-+# backed by hugepages
-+#
-+. ./common/preamble
-+_begin_fstest rw auto quick
-+
-+. ./common/filter
-+
-+_require_test
-+_require_thp
-+
-+run_fsx -N 10000            -l 500000 -h
-+run_fsx -N 10000  -o 8192   -l 500000 -h
-+run_fsx -N 10000  -o 128000 -l 500000 -h
-+
-+status=0
-+exit
-diff --git a/tests/generic/758.out b/tests/generic/758.out
-new file mode 100644
-index 00000000..af04bb14
---- /dev/null
-+++ b/tests/generic/758.out
-@@ -0,0 +1,4 @@
-+QA output created by 758
-+fsx -N 10000 -l 500000 -h
-+fsx -N 10000 -o 8192 -l 500000 -h
-+fsx -N 10000 -o 128000 -l 500000 -h
-diff --git a/tests/generic/759 b/tests/generic/759
-new file mode 100755
-index 00000000..514e7603
---- /dev/null
-+++ b/tests/generic/759
-@@ -0,0 +1,26 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+#
-+# FS QA Test No. 759
-+#
-+# fsx exercising direct IO reads/writes from userspace buffers
-+# backed by hugepages
-+#
-+. ./common/preamble
-+_begin_fstest rw auto quick
-+
-+. ./common/filter
-+
-+_require_test
-+_require_odirect
-+_require_thp
-+
-+psize=`$here/src/feature -s`
-+bsize=`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
-+
-+run_fsx -N 10000            -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+run_fsx -N 10000  -o 8192   -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+run_fsx -N 10000  -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+
-+status=0
-+exit
-diff --git a/tests/generic/759.out b/tests/generic/759.out
-new file mode 100644
-index 00000000..86bb66ef
---- /dev/null
-+++ b/tests/generic/759.out
-@@ -0,0 +1,4 @@
-+QA output created by 759
-+fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-+fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
+> If
+> you are running multiple tests that are all running some kind of load
+> or stress-testing antagonist at the same time, then having 3x to 5x
+> the number of necessary antagonist threads is going to unnecessarily
+> slow down the test run, which goes against the original goal of what
+> we were hoping to achieve with check-parallel.
+
+There are tests that run a thousand concurrent fsstress processes -
+check-parallel still runs all those thousand fsstress processes.
+
+> How many tests are you currently able to run in parallel today,
+
+All of them if I wanted. Default is to run one test per CPU at a
+time, but also to allow tests that use concurrency to maximise it.
+
+> and
+> what's the ultimate goal?
+
+My initial goal was to maximise the utilisation of the machine when
+testing XFS. If I can't max out a 64p server with 1.5 million
+IOPS/7GB/s IO and 64GB RAM with check-parallel, then check-parallel
+is not running enough tests in parallel.
+
+Right now with 64 runner threads (one per CPU), I'm seeing an
+average utilisation across the whole auto group XFS test run of:
+
+-50 CPUs
+- 2.5GB/s IO @ 30k IOPS
+- 40GB RAM
+
+The utilisation on ext4 is much lower and runtimes are much longer
+for (as yet) unknown reasons. Concurrent fsstress loads, in
+particular, appear to run much slower on ext4 than XFS...
+
+> We could have some kind of antagonist load
+> which is shared across multiple tests, but it's not clear to me that
+> it's worth the complexity.
+
+Yes, that's the plan further down the track - stuff like background
+CPU hotplug (instead of a test that specifically runs hotplug with
+fsstress that takes about 5 minutes to run), cache dropping to add
+memory reclaim during tests, etc
+
+> (And note that it's not just fs and cpu
+> load antagonistsw; there could also be memory stress antagonists, where
+> having multiple antagonists could lead to OOM kills...)
+
+Yes, I eventually plan to use the src/usemem.c memory locker to
+create changing levels of background memory stress to the test
+runs...
+
+Right now "perturbations" are exercised as a side effect of random
+tests performing these actions. I want to make them controllable by
+check-parallel so we can exercise the system functionality across
+the entire range of correctness tests we have, not just an isolated
+test case.
+
+IOWs, the whole point of check-parallel is to make use of large
+machines to stress the whole OS at the same time as we are testing
+for filesystem behavioural correctness.
+
+I also want to do it in as short a time period as possible - outside
+of dedicated QE environments, I don't beleive that long running
+stress tests actually provide value for the machine time they
+consume. i.e. returns rapidly diminish because stress tests
+cover 99.99% of the code paths they are going to exercise in the
+first few minutes of running.
+
+Yes, letting them run for longer will -eventually- cover rarely
+travelled code paths, but for developers, CI systems and
+first/second level QE verification of bug fixes we don't need
+extended stress tests.
+
+Further, when we run fstests in the normal way, we never cover
+things like memory reclaim racing against unmount, freeze, sync,
+etc. And we never cover them when the system is under extremely
+heavy load running multiple GB/s of IO whilst CPU hotplug is running
+whilst the scheduler is running at nearly a million context
+switches/s, etc.
+
+That's exactly the sort of loads that check-parallel is generating
+on a machine just running the correctness tests in parallel. It
+combines correctness testing with a dynamic, stressful environment,
+and it runs the tests -fast-. The coverage I get in a single 10
+minute auto-group run of check-parallel is -much higher- than I get
+in a single auto-group run of check that takes 4 hours on the same
+hardware to complete....
+
+-Dave.
 -- 
-2.47.1
-
+Dave Chinner
+david@fromorbit.com
