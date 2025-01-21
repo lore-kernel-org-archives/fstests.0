@@ -1,48 +1,40 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0C061854
-	for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 13:00:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 035381F1505
+	for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 15:59:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737464443; cv=none; b=iUvQKe4GufHndsfEFjfESf3mfRM1K7QPpTqDKo4Ywv/O37KkctYFs0tKM5PNyO3NrH714Uj188qCjq+9vTH/U4p+3EFiYgQAmq3WcobJ1RjYqWj7/SfJ92NK0FHoGkavjmYFQtbYzL+S4FEUdLPBOFzosfXaMbigsbYU0Z85FI0=
+	t=1737475171; cv=none; b=stZLJ+ilTjYMa4d3GsbOj/z6vbY+CeNe6mcb+6zCz7CXMvT6k5EnluSodOjMHCguMPSLsW+PvIa2wmXSa4uAgHRLuzreKsLKn882V30ZsLz8A0YE2qR82WYozbu9xMjYH+MjimJMKaJ56iONzt0Lf7h3oqtFXMpWF6qmjBeKiKU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737464443; c=relaxed/simple;
-	bh=Bczp+Mk1GULGGoNXDpdESk+6tq3PfX6KbtuRNXYozB8=;
+	s=arc-20240116; t=1737475171; c=relaxed/simple;
+	bh=E9GNuaKEvtZXNPBgPvlq89mvF60p8ikZoa1jVNehL34=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=D87XokBpXh2y5o90I3rWc4vF1UNDGcc8L+klNt0+6GRTz28SrrMpqtYvhSZr1GAr+a435X2hFM6PmB4zL6Wvmm6A6g76DAFoXgWQAkskJ5sAhfwlzJZTiqhXzu1Kl+zL2j7oTiLKR7fOsf0RBSWMNExXOxzyOOaROh1xqkFVwKU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b=cD6dmr53; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+	 Content-Type:Content-Disposition:In-Reply-To; b=jPLvlHt+2Nf78WU0qmGkTaTM0JdQG/GvZV+0qZ2znyAu+MGA/eHspLX+2ZoKimjaE9jJBWZS7DQaTq+mUQ7cNF9kmbGJFqPhJuLu7SXLxbDNaEGP6yD6AHLMyb2bDVl7mB12RTMy3SOI98+6V96BPMWXX8CjlFveSg2rfnFcWAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sbZqgyoU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mit.edu header.i=@mit.edu header.b="cD6dmr53"
-Received: from cwcc.thunk.org (pool-173-48-114-200.bstnma.fios.verizon.net [173.48.114.200])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 50LD0Rih006960
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 21 Jan 2025 08:00:28 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mit.edu; s=outgoing;
-	t=1737464429; bh=nQPo5+23vUPdLpPn03EHsNJ0Nm3bsBYZfxGnIAZrVj0=;
-	h=Date:From:Subject:Message-ID:MIME-Version:Content-Type;
-	b=cD6dmr53wcuWuy66G5GsnAFoQeJKT8+7Fq4Vc3935dOjP2fyI/1a7ashnCRnZMzwr
-	 IOX5fHtgfQ4sDA0Cj6Fm72AOec7PeB1GB9P83nIkGwub6rZ7CZ+CQzcV6E5daAeU7O
-	 7vTBm9TiCKmGQ7r37LwcEU3HpkHLwBNFtIZdctxfx+ZBAz18tQ/3B0FFvVGQXNum8m
-	 5rH2jqUhNeUZMjUDYvI86fpaPM65ZqAsWxypMh1B8KhqwH76kIv7P4VdRAIpFnA47H
-	 Uz82buwKHQPKQIgq1LCcCvNZMz+w7kJTKzvE4qzpREEDGjwQwiQeKdP0HzzD8f/R5T
-	 zNrT+CH8bd/6g==
-Received: by cwcc.thunk.org (Postfix, from userid 15806)
-	id 77B6115C01A1; Tue, 21 Jan 2025 08:00:27 -0500 (EST)
-Date: Tue, 21 Jan 2025 08:00:27 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Dave Chinner <david@fromorbit.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, hch@lst.de,
-        fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 13/23] generic/650: revert SOAK DURATION changes
-Message-ID: <20250121130027.GB3809348@mit.edu>
-References: <173706974044.1927324.7824600141282028094.stgit@frogsfrogsfrogs>
- <173706974273.1927324.11899201065662863518.stgit@frogsfrogsfrogs>
- <Z48pM9GEhp9P_VLX@dread.disaster.area>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sbZqgyoU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 645EAC4CEE0;
+	Tue, 21 Jan 2025 15:59:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1737475170;
+	bh=E9GNuaKEvtZXNPBgPvlq89mvF60p8ikZoa1jVNehL34=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=sbZqgyoUt3zsu2onkYNJf2BvBb6qKoDHbI1GOIjVyq41mc+vCNNjDvyYTOIJP2qaw
+	 ut/6jrtxnMcvTdO3k6aiYluygnQl7WukLBoJ3dt4+ZHN0KafVIu2P7B+sgWEguhSiY
+	 xI1vAMNEzDIOHTeDZRzkMRSNxtjS95ZTBeraOR5XF6IBgp7zk6uWnCj3ZBtf0tXrm+
+	 Up0mHDBR5PuJpUBDg4TN3Sbi6x4GYA724uVVlCZNOEiT41N1SxT17pT+LUIlcsxSYK
+	 eGVk88GsBNuv4mhc3bCZIH9c9deb6Rnwx+sYuCOjEN5AWNRXLP2J2uZXJfoqS/92qf
+	 d4zrsHH75wUJg==
+Date: Tue, 21 Jan 2025 07:59:29 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH -v2] xfs/32: fix test failure on kernels which don't
+ support bs > ps
+Message-ID: <20250121155929.GM3557695@frogsfrogsfrogs>
+References: <20250117210202.GJ3557695@frogsfrogsfrogs>
+ <20250120170109.3770633-1-tytso@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -51,36 +43,43 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Z48pM9GEhp9P_VLX@dread.disaster.area>
+In-Reply-To: <20250120170109.3770633-1-tytso@mit.edu>
 
-On Tue, Jan 21, 2025 at 03:57:23PM +1100, Dave Chinner wrote:
-> I probably misunderstood how -n nr_ops vs --duration=30 interact;
-> I expected it to run until either were exhausted, not for duration
-> to override nr_ops as implied by this:
+On Mon, Jan 20, 2025 at 12:01:09PM -0500, Theodore Ts'o wrote:
+> When trying to mount a file system with a block size > page size on
+> kernel which doesn't support this, suppress the error messages from
+> showing up in the output file lest it cause test failures.
+> 
+> Fixes: 0b66f6efd669 ("xfs/032: try running on blocksize > pagesize filesystems")
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 
-There are (at least) two ways that a soak duration is being used
-today; one is where someone wants to run a very long soak for hours
-and where if you go long by an hour or two it's no big deals.  The
-other is where you are specifying a soak duration as part of a smoke
-test (using the smoketest group), where you might be hoping to keep
-the overall run time to 15-20 minutes and so you set SOAK_DURATION to
-3m.
+Looks ok,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-(This was based on some research that Darrick did which showed that
-running the original 5 tests in the smoketest group gave you most of
-the code coverage of running all of the quick group, which had
-ballooned from 15 minutes many years ago to an hour or more.  I just
-noticed that we've since added two more tests to the smoketest group;
-it might be worth checking whether those two new tests addded to thhe
-smoketest groups significantly improves code coverage or not.  It
-would be unfortunate if the runtime bloat that happened to the quick
-group also happens to the smoketest group...)
+--D
 
-The bottom line is in addition to trying to design semantics for users
-who might be at either end of the CPU count spectrum, we should also
-consider that SOAK_DURATION could be set for values ranging from
-minutes to hours.
-
-Thanks,
-
-						- Ted
+> ---
+> v2:
+>     As Darrick suggested redirect the output of mount(8) to $seqres.full
+>     instead of /dev/null
+> 
+>  tests/xfs/032 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/xfs/032 b/tests/xfs/032
+> index 41a9134d8..675881d5b 100755
+> --- a/tests/xfs/032
+> +++ b/tests/xfs/032
+> @@ -44,7 +44,7 @@ for ((; SECTORSIZE <= 65536; SECTORSIZE *= 2)); do
+>  		if [ $? -ne 0 ]; then
+>  			continue
+>  		fi
+> -		if ! _try_scratch_mount; then
+> +		if ! _try_scratch_mount >> $seqres.full 2>&1 ; then
+>  			if [ $BLOCKSIZE -le $PAGESIZE ]; then
+>  				_fail "mount $(_scratch_mount_options $*) failed"
+>  			fi
+> -- 
+> 2.45.2
+> 
+> 
