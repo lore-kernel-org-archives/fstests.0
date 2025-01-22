@@ -1,77 +1,76 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-pj1-f50.google.com (mail-pj1-f50.google.com [209.85.216.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 947568467
-	for <fstests@vger.kernel.org>; Wed, 22 Jan 2025 04:12:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A34BC136A
+	for <fstests@vger.kernel.org>; Wed, 22 Jan 2025 04:19:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737519137; cv=none; b=RjLsjIak4/KA9dwZ0/jFPA1dDugKSCVKjjvvRVseTzTBRE0jopmJFiu03UfYmGuULJQ4CNEjSOj4NpWic8BrsDWySCjCFtSkGplFIBRM9HL1hHNeMYLxlK1Thhm+SHVyzRKQ/n3OVHysQFCjy0mZGSWNVqQhtiR9TieEtezzn0M=
+	t=1737519550; cv=none; b=dyals1TsjX71zGWFnQ7Jllt6G3idAVoP6QRu5RFHjhEAln1Pz92zL8yhgc8uvXoI8WRBSm36eVoYZj78cmc1e+JlQaMb/J+mlrqEJD28NGmRfx0HC3S1gAMgT5CH8vXaz0YX6gz7pCPQ3HTX5l360nWYbe4gdPw2zpI5px7DkqU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737519137; c=relaxed/simple;
-	bh=P9Ov4Px9oBRh9XzWojXq/K6uJD+gCDAt93LjuA4QWwY=;
+	s=arc-20240116; t=1737519550; c=relaxed/simple;
+	bh=JG0CQBkzu4EfxKaPxKR1zi9VKeZFzsdXf08p/gbxXuU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=C3WnjWe+ZgpB1NSDpCSPsF7MfZVQeY7Qw5tA3nICgdx5UqZ6+7LEfl1uR7/bE1kuOxtqEv067yJikABJSzSSvsucvA447s9FSdIwBbcGsw1KxbugMKHJuXWA7RoZ0CZJosvjWO4h7euiB6k0rFaYvCTasoH1nAYNn3fmfjhCuWg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=1+mbwipv; arc=none smtp.client-ip=209.85.214.170
+	 Content-Type:Content-Disposition:In-Reply-To; b=RzTlVJooOBm/P/rhne5s4c5Od7t++KTMt1KPEoGLjGvadJTiMqb/Yi9NNXkaZiB7woXALTOCKTATZHLEDmRWhO8V+hxfCDn8cvvk0e3hokLoKEincEmiMzHjvXcZh5qkaTyJonguQYyq+dlIZbXI0GZqT8RjNIQ3rUu1aYAkmyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=r/o3ygpv; arc=none smtp.client-ip=209.85.216.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="1+mbwipv"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-2167141dfa1so8204595ad.1
-        for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 20:12:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="r/o3ygpv"
+Received: by mail-pj1-f50.google.com with SMTP id 98e67ed59e1d1-2ef714374c0so699940a91.0
+        for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 20:19:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1737519135; x=1738123935; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1737519548; x=1738124348; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=PFVZB5FaMISWLHki7WyPInxNBUdbkD5mHv69/3iDKn4=;
-        b=1+mbwipv4eczwKvGdzls/CLJMAgh/kdAhu53ZcrohBhUD1DRSV3iHKdo6ZFHRSf+Mn
-         JvYw96vACvcqVYssoSpk7Z+eG49oyEAKcaoVV7mgvAd3fRZBPU/WYl45bbUgGz0JIu/f
-         yPUjdwK2O5TyVK5q/8GdLL4D7xrqyRfdIO+I+155FjLhx84eQ+jM+n9EZIMB2gqjqKd5
-         Sex3slfpCFvsf/lmaCWIgLSiMyffjaY+tGFP5XX4fdEjN5Nb8j7SJgWJ/de5EN9ECsHs
-         r3JND2pCWq5Vf/9ZnE/u/DnPoLiw6xAgrQT+1RaCca01H64eRg6ImqvTq3400N86gGeg
-         fa7g==
+        bh=bdlLkCODvsE17qSC5n73WWnIq7rNqHzzruEgL85deP0=;
+        b=r/o3ygpv8r9XD+fqRs6u4wFsgtYS2kbu23wfHVxnIXckKL6GoJv6CfvhDdVtGla5aG
+         BIKIq+Ov7Ty43wBwpSz2nxhi/xnOz+FEMLYDs9zSQCVj5aA/9PayemUBgb700ztvwZMp
+         2650hHCeC4rheZjdDXIIcU/S76l0jywyVFyO5rHnPkmweOz1sP26WseFCp0MiFbEVnLG
+         fJ7iA7lWUjHb8DqBZyoGFCsDeEsq1ruzo/XGk82cqFYxCdCtoIkqvRBWpVeMG0jkQt0f
+         LK1YSFY2euVPBjfeqsqx6snpTqJEiQmSidOGN9tibm0RidI/cpbt1TkbGiPaipf7DQLk
+         bXJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737519135; x=1738123935;
+        d=1e100.net; s=20230601; t=1737519548; x=1738124348;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=PFVZB5FaMISWLHki7WyPInxNBUdbkD5mHv69/3iDKn4=;
-        b=HZYKaZ3GeYomH4ylJL7ROC35ahnI9/lLcf0QsYMijUMp3pjzDkvsH3qa+ZqrJkZIMO
-         m96yJAY7S21qIVNTg2SGYGX1V8SIuz7Vu9k3MmaXa8llWGkwKTOGMNj/KAfLksYkBJqw
-         dr3fyMMvr0+u3xhDovepSP+pqbACCgWsHqpDsHa0akGmuL0fTgBswzVGyhv725RQwbzL
-         qhYKnk6wuQ5YOU6vv5HEI5PmV9DcrYJX9LKQETlEQfEHOaPed1uFDEuD+Xj1pV9+ak9h
-         eGmcz9LzG2NvQRqbeVSAQzrJDE9X/sBRR9G8RyvP6eBeNlxqCVcKSK30waAHLKk/7yc4
-         VH7Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUXvIfVp/5jTfnE2OkA/32jke8HjG0wZ7ICmel3eFxOMB70rQnDuyPGi+G+Tjjn3W3VX3G6kf1c@vger.kernel.org
-X-Gm-Message-State: AOJu0YxmjCr50A/7zLjECYoWu4EeuGC13xYN5yLN7JKbeGmbROCzPC26
-	eetrO80gNvmOgtJzt5H9tbrWfmjtL17Ig96M/4opN0fVxGzlCKnGV5ZerX2pG6lCfPKBxaI3E8s
-	T
-X-Gm-Gg: ASbGnctu+BgymtKOPmb8TFVmh+RU8JT3Pt8i1UnthSMFr+5u3cP0lEzM35BKAWJtegt
-	3XkbrQBo0PQ1ZNivObJhhiL+V+m8x2Fae9HNMGgrYXDTUdid80CK2X6OPkvSMG6zvAANGw9tIkY
-	WBR73+DhG1FFLBg7kmdVIYXd+ABAhRNRK3kWm6PoURa2aU75/nQ8NwitYJ9GhZlKnXWMDy1DT86
-	CudWnNejuQcKdOZ9MnzMh9oylAYLuqETLZyL+KrE1MIzXq2yCsS7/BfTfhAnSM4BqKNkUSw2wrI
-	noekVb+HrtdaVEbDmVdkEg+Z1tPZ/1+DmnFRU9z+Y3ihGw==
-X-Google-Smtp-Source: AGHT+IGSx2HrbJNxcB3zckZw7AwAGwNRu9wF7Dy+Al4+oPC8JWG59ZhasBfDOoI5PNWsRso2L2allA==
-X-Received: by 2002:a17:902:db08:b0:215:7287:67bb with SMTP id d9443c01a7336-21c35b16c8cmr326689165ad.0.1737519134736;
-        Tue, 21 Jan 2025 20:12:14 -0800 (PST)
+        bh=bdlLkCODvsE17qSC5n73WWnIq7rNqHzzruEgL85deP0=;
+        b=ce0nEQ4RmF8o6h/fnEGT5YEseBYsWXJO6PuxP63BEVGpqSOrHgreG9WKUSqhPsOUNa
+         hBddrvWT1tqwkwwFfReVXz3MzxVMGcGKyT7uppYMVLgO35xX99NCQy2a7GuwWJC0UFYc
+         QqrmoKJ/U+brEvTYGgYXVl3lcqVTzoilE2huW3yvPXVDrSybGThnKwFP2sZ+DrZp0BbX
+         98VE7/Sie1sl7fQfLOwk4XN9EPvSYLUNaXWPF1jmaNnn0oM9YPYSt6twkz3MOr/4kZJr
+         WbypvEdEYk0CS780sMos5QBLvVwi0+un58VFr0ZUApA9R+VxyksR7AlLIHv2E4RGpZXI
+         cJWQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWVK2V6jfEe+ggeLudq2oM4yxGvkhK5+YF85AjW+0fmy9jbLU2wQfgjOdjA+6tPXovgQsMWxuXM@vger.kernel.org
+X-Gm-Message-State: AOJu0YyX8AeISi7OLtQkNk+gLkZgz2j0RQ5SK/3fa5jrFV+ox546g2cG
+	nHYmjGof2br1FkA6YixMajjDYHkNHE5GbmPxBxqSfnosiLcLlC9HDH+mUE1tHCk=
+X-Gm-Gg: ASbGncuXM35QxI26PGltpq5/7chyjaFsK9eCshH8TEQO48/gSQwjT9RhXMsNC3HZ6pV
+	JQxaLUT0Ed/cwIUTXYXJ9L8Aw6uxlTEQjhyuno3C3VGhl4h3FaWXICbTm5yte2pApuZ79rD5agj
+	J6cyqp+s0F3TxNPIcMyvTz8N7ZnSwfdovQlc/tSGNZdRjETqs7bLtrb1r+9FknJUPXeGwT+T0Q6
+	+npUj5TKFHE/JOfHoVjaMMUbrbXLW+Wu1jPdp6jTBTMo8yZBHJ3GbzcSrpOZ4DfhNSfR+Vm9PRN
+	OrpSduk12V4gdbGXIkPNocqNm/6+lUx2syE=
+X-Google-Smtp-Source: AGHT+IHUR7n4PGomaS045lySnWmnDu2iRph+5H3AhNVt3r5dS1ktgCWBx7MOwKAmaSRxspCM//EHTQ==
+X-Received: by 2002:a17:90b:38c6:b0:2ef:949c:6f6b with SMTP id 98e67ed59e1d1-2f728e472dcmr43289443a91.13.1737519547882;
+        Tue, 21 Jan 2025 20:19:07 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21c2d42b8e1sm86277325ad.250.2025.01.21.20.12.14
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2f7e6a78914sm408689a91.11.2025.01.21.20.19.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jan 2025 20:12:14 -0800 (PST)
+        Tue, 21 Jan 2025 20:19:07 -0800 (PST)
 Received: from dave by dread.disaster.area with local (Exim 4.98)
 	(envelope-from <david@fromorbit.com>)
-	id 1taS67-00000008wGg-1C57;
-	Wed, 22 Jan 2025 15:12:11 +1100
-Date: Wed, 22 Jan 2025 15:12:11 +1100
+	id 1taSCm-00000008wLB-2pU9;
+	Wed, 22 Jan 2025 15:19:04 +1100
+Date: Wed, 22 Jan 2025 15:19:04 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
 	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 13/23] generic/650: revert SOAK DURATION changes
-Message-ID: <Z5BwGzOfPaSzXyQ3@dread.disaster.area>
+Subject: Re: [PATCH 14/23] generic/032: fix pinned mount failure
+Message-ID: <Z5BxuB8SuqgjOJA3@dread.disaster.area>
 References: <173706974044.1927324.7824600141282028094.stgit@frogsfrogsfrogs>
- <173706974273.1927324.11899201065662863518.stgit@frogsfrogsfrogs>
- <Z48pM9GEhp9P_VLX@dread.disaster.area>
- <20250122034944.GS1611770@frogsfrogsfrogs>
+ <173706974288.1927324.17585931341351454094.stgit@frogsfrogsfrogs>
+ <Z48qm4BG6tlp5nCa@dread.disaster.area>
+ <20250122040834.GW1611770@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,92 +79,60 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250122034944.GS1611770@frogsfrogsfrogs>
+In-Reply-To: <20250122040834.GW1611770@frogsfrogsfrogs>
 
-On Tue, Jan 21, 2025 at 07:49:44PM -0800, Darrick J. Wong wrote:
-> On Tue, Jan 21, 2025 at 03:57:23PM +1100, Dave Chinner wrote:
-> > On Thu, Jan 16, 2025 at 03:28:33PM -0800, Darrick J. Wong wrote:
+On Tue, Jan 21, 2025 at 08:08:34PM -0800, Darrick J. Wong wrote:
+> On Tue, Jan 21, 2025 at 04:03:23PM +1100, Dave Chinner wrote:
+> > On Thu, Jan 16, 2025 at 03:28:49PM -0800, Darrick J. Wong wrote:
 > > > From: Darrick J. Wong <djwong@kernel.org>
 > > > 
-> > > Prior to commit 8973af00ec21, in the absence of an explicit
-> > > SOAK_DURATION, this test would run 2500 fsstress operations each of ten
-> > > times through the loop body.  On the author's machines, this kept the
-> > > runtime to about 30s total.  Oddly, this was changed to 30s per loop
-> > > body with no specific justification in the middle of an fsstress process
-> > > management change.
+> > > generic/032 now periodically fails with:
+> > > 
+> > >  --- /tmp/fstests/tests/generic/032.out	2025-01-05 11:42:14.427388698 -0800
+> > >  +++ /var/tmp/fstests/generic/032.out.bad	2025-01-06 18:20:17.122818195 -0800
+> > >  @@ -1,5 +1,7 @@
+> > >   QA output created by 032
+> > >   100 iterations
+> > >  -000000 cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  >................<
+> > >  -*
+> > >  -100000
+> > >  +umount: /opt: target is busy.
+> > >  +mount: /opt: /dev/sda4 already mounted on /opt.
+> > >  +       dmesg(1) may have more information after failed mount system call.
+> > >  +cycle mount failed
+> > >  +(see /var/tmp/fstests/generic/032.full for details)
+> > > 
+> > > The root cause of this regression is the _syncloop subshell.  This
+> > > background process runs _scratch_sync, which is actually an xfs_io
+> > > process that calls syncfs on the scratch mount.
+> > > 
+> > > Unfortunately, while the test kills the _syncloop subshell, it doesn't
+> > > actually kill the xfs_io process.  If the xfs_io process is in D state
+> > > running the syncfs, it won't react to the signal, but it will pin the
+> > > mount.  Then the _scratch_cycle_mount fails because the mount is pinned.
+> > > 
+> > > Prior to commit 8973af00ec212f the _syncloop ran sync(1) which avoided
+> > > pinning the scratch filesystem.
 > > 
-> > I'm pretty sure that was because when you run g/650 on a machine
-> > with 64p, the number of ops performed on the filesystem is
-> > nr_cpus * 2500 * nr_loops.
+> > How does running sync(1) prevent this? they run the same kernel
+> > code, so I'm a little confused as to why this is a problem caused
+> > by using the syncfs() syscall rather than the sync() syscall...
 > 
-> Where does that happen?
+> Instead of:
+> _scratch_sync -> _sync_fs $SCRATCH_MNT -> $XFS_IO_PROG -rxc "syncfs" $SCRATCH_MNT
 > 
-> Oh, heh.  -n is the number of ops *per process*.
+> sync(1) just calls sync(2) with no open files other than
+> std{in,out,err}.
 
-Yeah, I just noticed another case of this:
+Sure, but while sync(2) is writing back a superblock it pins the
+superblock by holding the s_umount lock. So even if the sync process
+is killable, it still pins the dirty superblock for the same
+amount of time as syncfs.
 
-Ten slowest tests - runtime in seconds:
-generic/750 559
-generic/311 486
-.....
-
-generic/750 does:
-
-nr_cpus=$((LOAD_FACTOR * 4))
-nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
-fsstress_args=(-w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus)
-
-So the actual load factor increase is exponential:
-
-Load factor	nr_cpus		nr_ops		total ops
-1		4		100k		400k
-2		8		200k		1.6M
-3		12		300k		3.6M
-4		16		400k		6.4M
-
-and so on.
-
-I suspect that there are other similar cpu scaling issues
-lurking across the many fsstress tests...
-
-> > > On the author's machine, this explodes the runtime from ~30s to 420s.
-> > > Put things back the way they were.
-> > 
-> > Yeah, OK, that's exactly waht keep_running() does - duration
-> > overrides nr_ops.
-> > 
-> > Ok, so keeping or reverting the change will simply make different
-> > people unhappy because of the excessive runtime the test has at
-> > either ends of the CPU count spectrum - what's the best way to go
-> > about providing the desired min(nr_ops, max loop time) behaviour?
-> > Do we simply cap the maximum process count to keep the number of ops
-> > down to something reasonable (e.g. 16), or something else?
-> 
-> How about running fsstress with --duration=3 if SOAK_DURATION isn't set?
-> That should keep the runtime to 30 seconds or so even on larger
-> machines:
-> 
-> if [ -n "$SOAK_DURATION" ]; then
-> 	test "$SOAK_DURATION" -lt 10 && SOAK_DURATION=10
-> 	fsstress_args+=(--duration="$((SOAK_DURATION / 10))")
-> else
-> 	# run for 3s per iteration max for a default runtime of ~30s.
-> 	fsstress_args+=(--duration=3)
-> fi
-
-Yeah, that works for me.
-
-As a rainy day project, perhaps we should look to convert all the
-fsstress invocations to be time bound rather than running a specific
-number of ops. i.e. hard code nr_ops=<some huge number> in
-_run_fstress_bg() and the tests only need to define parallelism and
-runtime.
-
-This would make the test runtimes more deterministic across machines
-with vastly different capabilities and and largely make "test xyz is
-slow on my test machine" reports largely go away.
-
-Thoughts?
+Oh, in the sync case unmount blocks on the s_umount lock rather than
+returns -EBUSY because of the elevated open file count with syncfs.
+Ok, gotcha, we've been using different definitions for the phrase
+"mount is pinned". :/
 
 -Dave.
 -- 
