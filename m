@@ -1,77 +1,78 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCF3E158535
-	for <fstests@vger.kernel.org>; Wed, 22 Jan 2025 05:21:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B4C749659
+	for <fstests@vger.kernel.org>; Wed, 22 Jan 2025 06:01:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737523312; cv=none; b=dR16w/P6/R2giBkt68iBRg1FptQb9ZDnZafb9phtg50V7NPopolXN/uuoNdkKBAeHdpF45QlW9p54oEZ4tawwz3vmxhafSnOSI+adBkvghnJuuwsCLl9QAJKtiUb+2aFpoMKHmTcKYTnlc/U0dOHzK7jnTjeOkvHUt3HhDohVv8=
+	t=1737525713; cv=none; b=JtkHuK04sWIYwbGMJGDVBo6mIFLv0hQdbKSVt9u5nunySG3UmQixhppHWPV7KOwqK7JBsxZ468qgOzGKAlTJQG18Kj7DmpFBxv/9GWSz3nCI6ki0dcMegWwdNubSIFNpMyjkZBRkf7w5eDtaAiuuwwFvl2I28nX0X7SmPsIQ144=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737523312; c=relaxed/simple;
-	bh=UTWz/bmCZZYU1LZ5ZRhUUvhP/HBZNLGpxFRpB0lxiEU=;
+	s=arc-20240116; t=1737525713; c=relaxed/simple;
+	bh=0RjHZ4t/PHYR0tptcFGYcpDfn88fYToZPWru5bDIDew=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=fvsvWBV4IAuk1JeAsd8AhkKlD8lO42LS+Zp6lGj7/qB2XP+ZPaBx1JmjbNqBq8byvayMnCluAf8y6day6Kytntvn7V27TeMWflNgkZZep8sjit8Jhuu2FJIud0LRWoKaV9XOIm1Z+J8+tBtWtG9pHrqumTcisuiy8YHTJDywB/A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=VeXyLt5j; arc=none smtp.client-ip=209.85.214.176
+	 Content-Type:Content-Disposition:In-Reply-To; b=Y2D3YEz0fhqqRZidPLP82St7XdYQfOtNIn6FJgoJvndGt3EfCZefLRr8EPoIsnyyNGrKY6nXK2eB6KarRi63bYY2umbaFImgenHcZRYP4f6PKFysolVEosYms7xtyTOrjc2yz/pAPH/gTUWI9riiXkC1MNmaAzBGGgCq7CgfQpY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=FOGwZLZz; arc=none smtp.client-ip=209.85.214.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="VeXyLt5j"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2163b0c09afso116999765ad.0
-        for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 21:21:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="FOGwZLZz"
+Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-2163dc5155fso123883205ad.0
+        for <fstests@vger.kernel.org>; Tue, 21 Jan 2025 22:01:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1737523310; x=1738128110; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1737525711; x=1738130511; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=HWK2P/XHD1Mf2BaG5j25AIwyCS/6y2CV9rzh02z6IvQ=;
-        b=VeXyLt5jT92mv/tUBFEjnvmNHID3DExtEVYNMwdv5j5jdHnk1z3XSsjMf8FIZ+6hcp
-         SMdHQaK9SX1W1fQ3ur4aNhq76xnxG+l/LjOXjPrVCTuKWLWv+pg+LXOEsnhthRhIYUSI
-         adZQpcETP8b8OxG5Sj8d8/ViW3IQw+1VYse2OwhEQtyTwMJvDVyGsbjEMrR3aMFg4/xI
-         wo7/8h6ZtG1SlmwGXTWmEvoC88zaJL2X8xzPuKRUdyMfb/ovIaP6yVdop6g8EXIcfyZn
-         0H72DliHgheZqpCR8xPPJf5hWj4m/qDi7HuBZ15sgbvc/RjC32oX8bLbB/nwiO+zX9zc
-         41Sw==
+        bh=OqQC5hj+jnYRV6YRnsTRti7ufZmru3OTilR9kB8mbaI=;
+        b=FOGwZLZzxjtPJHv/3m5SNVjLso/F2vrYP4aowC9QnWLgJtpWpN7dT7Wt4CmXCtzctw
+         zTwmY+KfPUf9nk2mMHGb0frCbPC0/nZr0bKsvLYOm/IQqLOvoExC60wL735a/36W/7ZQ
+         EqceT1+/MVN1kzL6/c4AjiqCFzK3W9XLV12fITxy3gCjZtAGM0wZroajkh92HDBmEg+Z
+         +49UlUEj3EYQMCepQ8rkwbmBu1t6kycM7Vrs72bHiGIj5xWKKVxwNq/4G5K/m0A5bkGI
+         8CV0V09JzLCjwFXfkOEG6iVHri1asw9halo+PJX9/n1djE/n1AGsSWCj/BI15TRzcdRF
+         cjDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737523310; x=1738128110;
+        d=1e100.net; s=20230601; t=1737525711; x=1738130511;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HWK2P/XHD1Mf2BaG5j25AIwyCS/6y2CV9rzh02z6IvQ=;
-        b=L3vg273N6YEsaF1n1LRjm3giVy3KO6Am0f1ylAE34iK1/mtyR5RAJzGCkmdgZTpbyO
-         anlJpxGwdE4m5sUS+MbJWBNJU2vs61KDk4YtLR5wNUpLb9bAlcja7dsJrw2Lg78bxIkH
-         6aGbO5KCWKLf3mlJSh8loEqnuvT7OYpWO8y1TmOQuWuz8Qorq4N1LmYRNcQEFc0c+rm1
-         wnB/zpHo92FsHT6Kx56nM9N+pnAe+yIqRr8tYcd/nnk6Jgvj+MPG1AaBF9UoGI+a50Z+
-         SkLuzO74joCVWdIKuJUgGk50PMziG9cJWP0iuUPLnsjdRmAHIbLylj9SgFc86sAG1pKW
-         GrqQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVAtSuRb1t/0ZS7aFY0RD0BV85BcJzR/A1SOQbLoH7fTzX5M0qfxQVKmbIqu8LroiT/V1d3fSy1@vger.kernel.org
-X-Gm-Message-State: AOJu0YymixhQCo2PTO1DbbhJVRLyEa4aOEI/qVZVAyiOfIOXkS8C9Veu
-	18jUA0QNqIk1vSKGeEU+xkmpv7IN8KeFy5Vmdt66Bc2dd3WN8WCWmWhlhgJYXGU=
-X-Gm-Gg: ASbGnctlUq5P3kgfSlud2NqrJjMSQB++VB9fhJY0Q+uJlYzPhdEzx657VsvVt86jkYE
-	ycAlz2MLAfUF1Uu92czgCSmxPXZ7mQWANOsB3Y1L+aOMUfJ9LHQ0SysNEFwcMT4ZwNt2WWpWb7p
-	dhoujyiNZF5qeKd1Q3TKeKJvQS8+kWvYYBoOtgsMuSMeSexxOlwnrBmPOs+Zca8sLHgEkqm3wrC
-	X6a2HBH5g4z1cpgGsPqrhC3LjKMUkSMUzduWvuwhh3XIUaUoW5pkdzUPk9yRoNQIZQ7EeVucf1z
-	feFJN70WjlWk6NoNCmxGbcGonUrj+aYX0qjr/9JQdDI+aQ==
-X-Google-Smtp-Source: AGHT+IH5R7pj8qLDenAoga+QJkWuqr4FgKHgan+NZCtM4+EprtmjwkKltMGWrn6lPQVE8Nw/9oijbg==
-X-Received: by 2002:a17:902:d501:b0:20c:9821:6998 with SMTP id d9443c01a7336-21c352c798emr356015375ad.10.1737523309911;
-        Tue, 21 Jan 2025 21:21:49 -0800 (PST)
+        bh=OqQC5hj+jnYRV6YRnsTRti7ufZmru3OTilR9kB8mbaI=;
+        b=XIasacKf00iXJa9Yda98V0w7+Kd/mW7fgmLMhh+UIN5A3kebpL51SxAlPsOE2fpGSi
+         XJVkdZUDSDqWZTn+Fr2LSBq71jSX6MJcdcI8Jya4/bXgoA7Zy+Lo8zaMk+LUeutJNDoi
+         nU3zD6xjzWplmQli2qef91YXhnSzef75yGtuaNAMY1VJ0ZPBH5LDht5kL6GEaaKdug0M
+         DwE3LrUh8iiAGoMKfPPdVons9ZPauNUU8XNMBWBDHbrFGyGLErMin8zLiHwgl/zYSnV0
+         5gyFk+xDbjITaGVyihCYeJcrBOWzXA0oGFKPdgR9hzXYHfSw2obQFhYKdInXlS5ZUNUx
+         Aaig==
+X-Forwarded-Encrypted: i=1; AJvYcCWp/DyUiRIR8rnAC2HwK0sqiHLioMZJdrfbzjBMWNh01ZK+9cj7jlpqD+7cddho8qxW5uFP1dNf@vger.kernel.org
+X-Gm-Message-State: AOJu0YzfsP7Rcn7hUK/6duDvaSEBpWNp3WKU/xFV8O56gPK7omUnB16K
+	diL0QycfSIxLv4WpwQ7RqkMnxwC/XmdUKZfdXn3UvtbYfrIe+2tWIPPXppgHwh0=
+X-Gm-Gg: ASbGncv10QguIQ/YABJMWhNT0UIar7jtdSDSh5NaKM/n6/1lwDMocY+44NRSOVHPK4x
+	dO/VJTMELVA+cpjOeBxqfmN0iLQT1DZ/9hJPk6ifYUEmYKimK9aITP4bKa5zyEr+tu6AKWgYK9Y
+	HwxOTM1TcZvHQtakFDGYfuTS+mdNUv1+XZ5DoRcgTZI+QJM485gfMJpCWqtLN8teqqgo5qX8LQ+
+	ehvuIlryYXlldPMp08zYft0v8N+eY/KEMdTUUDBbWnlqDkFdf3JIKWC2/6BTaGuL9qh3BmPtuqK
+	LXf55xvg5Vl7ef2pk9yRpXLEcaRBq9XTG5E=
+X-Google-Smtp-Source: AGHT+IGrHNJZ0d3oMfymu7odQjyBCijM88SSYfORRP1XboGnp4b2s7Wyw3twPdrNlrftEiws9QTnFA==
+X-Received: by 2002:a05:6a21:6d87:b0:1e6:5323:58cb with SMTP id adf61e73a8af0-1eb214afd38mr30571125637.23.1737525710873;
+        Tue, 21 Jan 2025 22:01:50 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21c2cea0531sm88261955ad.24.2025.01.21.21.21.49
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72dababebacsm10428217b3a.179.2025.01.21.22.01.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Jan 2025 21:21:49 -0800 (PST)
+        Tue, 21 Jan 2025 22:01:50 -0800 (PST)
 Received: from dave by dread.disaster.area with local (Exim 4.98)
 	(envelope-from <david@fromorbit.com>)
-	id 1taTBS-00000008xQR-3036;
-	Wed, 22 Jan 2025 16:21:46 +1100
-Date: Wed, 22 Jan 2025 16:21:46 +1100
+	id 1taToB-00000008yI0-39Ji;
+	Wed, 22 Jan 2025 17:01:47 +1100
+Date: Wed, 22 Jan 2025 17:01:47 +1100
 From: Dave Chinner <david@fromorbit.com>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 11/23] common/xfs: find loop devices for non-blockdevs
- passed to _prepare_for_eio_shutdown
-Message-ID: <Z5CAaq-SN96RSvfZ@dread.disaster.area>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, zlang@redhat.com, hch@lst.de,
+	fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 13/23] generic/650: revert SOAK DURATION changes
+Message-ID: <Z5CJy195Fh36NNHN@dread.disaster.area>
 References: <173706974044.1927324.7824600141282028094.stgit@frogsfrogsfrogs>
- <173706974243.1927324.9105721327110864014.stgit@frogsfrogsfrogs>
- <Z48kffpLwUr1xMmT@dread.disaster.area>
- <20250122040542.GV1611770@frogsfrogsfrogs>
+ <173706974273.1927324.11899201065662863518.stgit@frogsfrogsfrogs>
+ <Z48pM9GEhp9P_VLX@dread.disaster.area>
+ <20250121130027.GB3809348@mit.edu>
+ <Z5AclEe71PIikAnH@dread.disaster.area>
+ <20250122040839.GD3761769@mit.edu>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -80,180 +81,103 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250122040542.GV1611770@frogsfrogsfrogs>
+In-Reply-To: <20250122040839.GD3761769@mit.edu>
 
-On Tue, Jan 21, 2025 at 08:05:42PM -0800, Darrick J. Wong wrote:
-> On Tue, Jan 21, 2025 at 03:37:17PM +1100, Dave Chinner wrote:
-> > On Thu, Jan 16, 2025 at 03:28:02PM -0800, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <djwong@kernel.org>
-> > > 
-> > > xfs/336 does this somewhat sketchy thing where it mdrestores into a
-> > > regular file, and then does this to validate the restored metadata:
-> > > 
-> > > SCRATCH_DEV=$TEST_DIR/image _scratch_mount
+On Tue, Jan 21, 2025 at 11:08:39PM -0500, Theodore Ts'o wrote:
+> On Wed, Jan 22, 2025 at 09:15:48AM +1100, Dave Chinner wrote:
+> > check-parallel on my 64p machine runs the full auto group test in
+> > under 10 minutes.
 > > 
-> > That's a canonical example of what is called "stepping on a
-> > landmine".
+> > i.e. if you have a typical modern server (64-128p, 256GB RAM and a
+> > couple of NVMe SSDs), then check-parallel allows a full test run in
+> > the same time that './check -g smoketest' will run....
 > 
-> 60% of fstests is written in bash, all of it is a friggin land mine
-> because bash totally lets us do variable substitution at any time, and
-> any time you make a change you have to exhaustively test the whole mess
-> to make sure nothing broke...
+> Interesting.  I would have thought that even with NVMe SSD's, you'd be
+> I/O speed constrained, especially given that some of the tests
+> (especially the ENOSPC hitters) can take quite a lot of time to fill
+> the storage device, even if they are using fallocate.
 
-Yes, I know, which is why the moment I saw xfs/336 I called it out -
-it has never run on my machines, ever...
+You haven't looked at how check-parallel works, have you? :/
 
-> (Yeah, I hate bash)
+> How do you have your test and scratch devices configured?
 
-Not a great fan of it myself. But it's no worse than other scripting
-languages that use JIT based syntax checking from the "if it wasn't
-run it ain't tested" perspective.
+Please go and read the check-parallel script. It does all the
+per-runner process test and scratch device configuration itself
+using loop devices.
 
-> > We validate that the SCRATCH_DEV is a block device at the start of
-> > check and each section it reads and runs (via common/config), and
-> > then make the assumption in all the infrastructure that SCRATCH_DEV
-> > always points to a valid block device.
+> > Yes, and I've previously made the point about how check-parallel
+> > changes the way we should be looking at dev-test cycles. We no
+> > longer have to care that auto group testing takes 4 hours to run and
+> > have to work around that with things like smoketest groups. If you
+> > can run the whole auto test group in 10-15 minutes, then we don't
+> > need "quick", "smoketest", etc to reduce dev-test cycle time
+> > anymore...
 > 
-> We do?
-
-fstests configurations for block based filesystems have always been
-based on block devices and mount points, not image files. 
-
-Yes, you can pass an image file to XFS utilities and they will do
-the right thing, but not all filesystems or all the infrastructure
-in fstests can handle an image file masquerading as a device.
-
-I certainly didn't expect it.....
-
-> Can you point me to the sentence in doc/ that says this
-> explicitly? 
-
-fstests is woefully under-documented - especially when it comes to
-configuration constraints and behaviours - so I doubt it is actually
-specified anywhere. AFAIA it has never been raised in discussion
-for a long time (not since we added network filesystem support a
-long time ago, IIRC)
-
-However, the code is pretty explicit - common/config is responsible
-for setting up and validating the runtime config before any test can
-run. All test and scratch devices are passed through this
-validation:
-
-_check_device()
-{
-        local name=$1
-        local dev_needed=$2
-        local dev=$3
-
-        if [ -z "$dev" ]; then
-                if [ "$dev_needed" == "required" ]; then
-                        _fatal "common/config: $name is required but not defined!"
-                fi
-                return 0
-        fi
-
-        if [ -b "$dev" ] || ( echo $dev | grep -qE ":|//" ); then
-                # block device or a network url
-                return 0
-	fi
-
-	case "$FSTYP" in
-        9p|fuse|tmpfs|virtiofs|afs)
-	.....
-	*)
-                _fatal "common/config: $name ($dev) is not a block device or a network filesystem"
-        esac
-}
-....
-
-Basically, it says that all the test and scratch devices (including
-the external ones) must be either a block device, a network URL, or
-a string that the specific filesystem under test must recognise and
-accept (e.g. a directory for overlay filesystems). Otherwise fstests
-will fail to run with an explicit error message that says:
-
-	<device> is not a block device or network filesystem
-
-Nowhere in this config validation process does fstests consider
-image files as a valid device configuration for a block based
-filesystem.
-
-If we need to do stuff with a image files, we have the
-infrastructure to create loop devices and then operate directly on
-that dynamic loop device(s) (e.g. _mkfs_dev, _mount, _unmount,
-_check_xfs_filesystem, etc) that are created.
-
-> There's nothing I can find in the any docs and
-> _try_scratch_mount does not check SCRATCH_DEV is a bdev for XFS.
-
-That's because it's validated before we start running tests and the
-assumption is that nobody is screwing with SCRATCH_DEV in a way
-that makes it behave vastly differently.
-
-Consider what it means to have to do runtime checking of the
-device validity in common code before we do anything with the
-device. We'd have to sprinkle _check_device calls -everywhere-.
-
-We'd also have to check logdev and rtdev variables if USE_EXTERNAL
-is set, too.
-
-That's not a viable development strategy, nor is it a maintainable
-solution to the issue at hand. It's far simpler to fix one test not
-to use this trick than it is to declare "nobody can trust TEST_DEV
-or SCRATCH_DEV to be a valid block device" and have to handle that
-everywhere those variables are used...
-
-> That needs to be documented.
+> Well, yes, if the only consideration is test run time latency.
 
 Sure.
 
-> > > Fix this by detecting non-bdevs and finding (we hope) the loop device
-> > > that was created to handle the mount. 
-> > 
-> > What loop device? xfs/336 doesn't use loop devices at all.
-> > 
-> > Oh, this is assuming that mount will silently do a loopback mount
-> > when passed a file rather than a block device. IOWs, it's relying on
-> > some third party to do the loop device creation and hence allow it
-> > to be mounted.
-> > 
-> > IOWs, this change is addressing a landmine by adding another
-> > landmine.
-> 
-> Some would say that mount adding the ability to set up a loop dev was
-> itself *avoiding* a landmine from 90s era util-linux.
+> I can think of two off-setting considerations.  The first is if you
+> care about cost.
 
-True.
+Which I really don't care about.
 
-But in the case of fstests we explicitly create loop
-devices so that we don't have to play whacky games to find the
-random loop device that mount magically creates when you pass it a
-file.
+That's something for a QE organisation to worry about, and it's up
+to them to make the best use of the tools they have within the
+budget they have.
 
-Making all the image file and loop device usage consistent across
-all of fstests was part of the infrastructure changes in my initial
-check-parallel patchset. This was necessary because killing tests
-with ctrl-c would randomly leave dangling mounts and loop devices
-because many tests did not have _cleanup routines to tear down
-mounts that auto-created loop devices or clean up loop
-devices they created themselves properly.
+> The second concern is that for certain class of failures (UBSAN,
+> KCSAN, Lockdep, RCU soft lockups, WARN_ON, BUG_ON, and other
+> panics/OOPS), if you are runnig 64 tests in parllel it might not be
+> obvious which test caused the failure.
 
-Part of those changes was fixing up the mess in some XFS tests
-where that mixed loop device and image file based operations
-interchangably. I didn't notice x/336 because it wasn't
-running on my test system and so didn't attempt to fix it at the
-same time...
+Then multiple tests will fail with the same dmesg error, but it's
+generally pretty clear which of the tests caused it. Yes, it's a bit
+more work to isolate the specific test, but it's not hard or any
+different to how a test failure is debugged now.
 
-> > I really think that xfs/336 needs to be fixed - one off test hacks
-> > like this, while they may work, only make modifying and maintaining
-> > the fstests infrastructure that much harder....
-> 
-> Yeah, it'll get cleaned up for the rtrmap fstests merge.
+If you want to automate such failures, then my process is to grep
+the log files for all the tests that failed with a dmesg error then
+run them again using check instead of check-parallel.  Then I get
+exactly which test generated the dmesg output without having to put
+time into trying to work out which test triggered the failure.
 
-Thanks!
+> Today, even if the test VM
+> crashes or hangs, I can have test manager (which runs on a e2-small VM
+> costing $0.021913 USD/hour and can manage dozens of test VM's all at the
+> same time), can restart the test VM, and we know which test is at at
+> fault, and we mark that a particular test with the Junit XML status of
+> "error" (as distinct from "success" or "failure").  If there are 64
+> test runs in parallel, if I wanted to have automated recovery if the
+> test appliance hangs or crashes, life gets a lot more complicated.....
+
+Not really. Both dmesg and the results files will have tracked all
+the tests inflight when the system crashes, so it's just an extra
+step to extract all those tests and run them again using check
+and/or check-parallel to further isolate which test caused the
+failure....
+
+I'm sure this could be automated eventually, but that's way down my
+priority list right now.
+
+> I suppose we could have the human (or test automation) try run each
+> individual test that had been running at the time of the crash but
+> that's a lot more complicated, and what if the tests pass when run
+> once at a time?  I guess we should happen that check-parallel found a
+> bug that plain check didn't find, but the human being still has to
+> root cause the failure.
+
+Yes. This is no different to a test that is flakey or compeltely
+fails when run serially by check multiple times. You still need a
+human to find the root cause of the failure.
+
+Nobody is being forced to change their tooling or processes to use
+check-parallel if they don't want or need to. It is an alternative
+method for running the tests within the fstests suite - if using
+check meets your needs, there is no reason to use check-parallel or
+even care that it exists...
 
 -Dave.
-
 -- 
 Dave Chinner
 david@fromorbit.com
