@@ -1,73 +1,43 @@
-Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A30841DE3C0;
-	Tue, 28 Jan 2025 05:00:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C863192D84;
+	Tue, 28 Jan 2025 07:13:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738040450; cv=none; b=RGhhgr+OB09BW9UhHQy5D63X5h59PTGNsB+cvGw0UpahCt2T6x340M1ydTnGzO6OfegiFkkHeseztZe4kfUK/s4Zz4kyKjBbN0iWauFkmKbUE/j2fsYcHa9c4h+RUSVJa/i1MwnGq8cjwAc8NhE1wqh44VuR7cltM1M9NkMaAS4=
+	t=1738048401; cv=none; b=YvorePq5jI0qbhZG8ALkeJiV7TRiuDXONLGey9P/NnSfAsl/1h3oZmeqooTg54fROl0dbiEpOQ5rpEX+XpiWp7VuW33oh7iawfg7ibV/DgUINiO0cWOdu0xm/eF7mYnnWuTQvkHMUQfw37xTz+sFpzOeCiJPYxdZaHfTMtMbyLA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738040450; c=relaxed/simple;
-	bh=YnMrgM0kAbn7HbwId81HWNeX/UNge8flowFNY+L5siw=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=sA2GIjVr8bReK+jpV4S3HJE3UyzCbVWHuLMzF5Oz32KU1cX1iNCWIdtAgwM/2VNDoLjZ9zta+JUBB5FuGquvBRokPPLfZ6ROmdzOyAItV6xp6WI1vE8Y6dP7HCzjxGa5Z7d3lPd0yLUQdlTeevXl7C13Unh8Jsc4VGUXuOIqDUI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=F6qLkr9V; arc=none smtp.client-ip=209.85.216.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1738048401; c=relaxed/simple;
+	bh=UOzXf/+YJeSToG9xigCeps8xuPBG2sg1sFZm2kB0nVQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=djA1RtDxsoxGmI42qtXfYjFyt2X8SJ/n1Et6jFwVUJfktjBbEwbQ7zZ0oDddP8faZOnobXvdHAZfszO5gexdpm+7K5ZzmMstqWKFOIcfUxybFfFVG4fKypdf9mL9fV6Px40qpkG+1TnhdkmKQ8tsySJxnuM4rmiQADGVMCgkNoQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Ps2XJS01; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F6qLkr9V"
-Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-2efe25558ddso6901100a91.2;
-        Mon, 27 Jan 2025 21:00:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1738040447; x=1738645247; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=lI6ZsKdm3CPgRxaFaoLcGi7VSzV9xwpMY9SMD0KXp50=;
-        b=F6qLkr9VKn00MtT3eVo385veO7IYOyF7Y/oCZi1z2mkzrwK1Toj7EA3DxJWh5ZNh22
-         1QcKNruuHW3HkcZe0hBlNeQMFbwwcQF5WX9PsiuUwfnqPmQZLZBGm6Eq5rv2gTB1U8Y/
-         1jASecpEHok2QDVnO+KqxwSDXqNrXyRWnH5If+CuNEOqb36W0Dwcnz5+MbKFEjKvGm+7
-         UswFLtiYQNbd/A3uVJ/CkMcDCR7WCR51F2EsaUKsmGZhXDqoCKbuXg/4NQKLHA3IeFYl
-         f32IpYstFPD5ZjOYgUzxZfTZ3Sr4hjceVlRJxKw4yyFdrQR3t8Z+BvZ0qqpBN94LWdZO
-         HP4g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738040447; x=1738645247;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=lI6ZsKdm3CPgRxaFaoLcGi7VSzV9xwpMY9SMD0KXp50=;
-        b=Eg3/eL6rutPM4GGtX69xq+fmm1QCzfPKWM03TNA6SybJwyAg2X1LiCUOZLAR1LU1Gf
-         PISpTt5wEiYVuuvx81tR/5Kri5S8VRyhXVcMtKOdQl3Bo4F2GbtAO7rfsKsdLttqMLi7
-         qVTWGChr0RXX3scJlBAvMetGHC8vAhNKtqv11afQTcRRZk9IKbW/pcPNyyG2ipdagdY5
-         No1Jms4TqLo47TLus8Y3q5jhghZAdVNeUyb2LDkAgajvcn4M99jYMKJPAr/wSmvcMAeM
-         43gE+WC22mUy3Xr7/wiidlEoiQ6wkNRMj2aKVGRhYd1jpU1OX7aZ1iKaPhRvSq0xGzYI
-         9otg==
-X-Forwarded-Encrypted: i=1; AJvYcCWFlKH6GIYQhMOdnOhAA3NQGPgzH0TvYY5XGxU2PRpYM1BZbtj0Cj83FWnFWzHBVsjYekKajLXNED0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzeCuP+Jx+dEL9jlefEPdZ0UqH65iYm6/oBjkLi7XJzAixnkqGX
-	TeuaPyuVgn2nTgO/0sgOmUfSF2UlZJhwvs0/PFTLpevZwozsma1PUT/C7A==
-X-Gm-Gg: ASbGncuuBBfWB0KkRuxkW30cCh0/YUfO/TGsATr6AamIr/Qx1+sa7xUVieQfflri418
-	5qCibvkdKOquD4RCqFJuIEvqYzN/Y4Zujyw97rgcPgkoSuzfc+8/fkvm1ITB3aC8fN/ruY3uD/3
-	Ey19UjeDt+/2d3887/vvGQU/hlVhQOEJui/W8a7eyf1t0Nvtw2FfYNuBX+eeOuV+0GVGIUmo0Oz
-	RWiGqDlehq3d5teu5U6rDOBSYg8tZ7QHjRxiGgebCAVxVSpNazPXUutfaMpZ/wunJISAqk9iTQ4
-	jYuWcq86n+wwcrT71Ys=
-X-Google-Smtp-Source: AGHT+IEKdrFVDQQHdjT3PhB0R5ZBzQ9rTVUXpRMk7c414rupxSwuOFMs6r7axppA7LTYRZZ0T6t5Gw==
-X-Received: by 2002:a17:90b:5483:b0:2ee:f076:20f1 with SMTP id 98e67ed59e1d1-2f782afebcamr72962321a91.0.1738040446860;
-        Mon, 27 Jan 2025 21:00:46 -0800 (PST)
-Received: from citest-1.. ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2f7ffb18b90sm9120915a91.41.2025.01.27.21.00.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Jan 2025 21:00:46 -0800 (PST)
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com,
-	djwong@kernel.org,
-	zlang@kernel.org,
-	nirjhar.roy.lists@gmail.com
-Subject: [PATCH v2] check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
-Date: Tue, 28 Jan 2025 05:00:22 +0000
-Message-Id: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Ps2XJS01"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=0fAPBxXriOrlocXY+PgcyMz1JSAr+2M6gpNGaPvcviQ=; b=Ps2XJS01JAW29/Z9sfgdIhfoOu
+	XeJc5vP0eTAstEFTD8yZh0xi3ZInLoBpumYYNcv3OOG85d9YxXFXYgwu5gQASqzDjEqooeYxsGdNp
+	v1DuqMCMOlr8oWgDlmTTYthG3EBbzrm52BG83G1YGEKuEEDEi0ftrrrdvlRmWPLWS5LXu3JROt99M
+	fo/gmPNF1d+1z2Ilo52//e4k1veEwyWX+fC+Gz9AjJSFe4xP/pZuMpw2A5EqONd4e+uLcBqbQzvHA
+	aWZ4RqSCv/aZOts2e52H3HhVTpuoboSZt7eTxfQLG0m4YVTIUbaBLBGh7CLhBYFvvquSeZDUwn8AX
+	Ay2iG8dQ==;
+Received: from 2a02-8389-2341-5b80-d7c6-3fcb-a44b-90d7.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:d7c6:3fcb:a44b:90d7] helo=localhost)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
+	id 1tcfmh-00000004GOQ-0BwF;
+	Tue, 28 Jan 2025 07:13:19 +0000
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@kernel.org>
+Cc: Brian Foster <bfoster@redhat.com>,
+	fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org
+Subject: remove _supported_fs v2
+Date: Tue, 28 Jan 2025 08:12:57 +0100
+Message-ID: <20250128071315.676272-1-hch@lst.de>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,74 +45,22 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-Bug Description:
+Hi all,
 
-_test_mount function is failing with the following error:
-./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
-check: failed to mount /dev/loop0 on /mnt1/test
+this series removes the remaining _supported_fs calls and replaces them
+with a new _exclude_fs call.
 
-when the second section in local.config file is xfs and the first section
-is non-xfs.
+The first patch removes a _supported_fs for a relatively new test from
+Brian that fails on other file systems.  We should still run it so that
+people have a chance to fix the corruption, so I think this make sense.
 
-It can be easily reproduced with the following local.config file
+Unlike the previous version this does not add a new ext-common directory,
+but instead uses _exclude_fs for those tests as well, which doesn't
+look quite as nice.  Some of the ext4 maintainers said they might want
+to switch this to feature checks, which sounds great but also something
+better done by people familiar with extN.
 
-[s2]
-export FSTYP=ext4
-export TEST_DEV=/dev/loop0
-export TEST_DIR=/mnt1/test
-export SCRATCH_DEV=/dev/loop1
-export SCRATCH_MNT=/mnt1/scratch
-
-[s1]
-export FSTYP=xfs
-export TEST_DEV=/dev/loop0
-export TEST_DIR=/mnt1/test
-export SCRATCH_DEV=/dev/loop1
-export SCRATCH_MNT=/mnt1/scratch
-
-./check selftest/001
-
-Root cause:
-When _test_mount() is executed for the second section, the FSTYPE has
-already changed but the new fs specific common/$FSTYP has not yet
-been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
-the test run fails.
-
-Fix:
-Remove the additional _test_mount in check file just before ". commom/rc"
-since ". commom/rc" is already sourcing fs specific imports and doing a
-_test_mount.
-
-Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
----
- check | 12 +++---------
- 1 file changed, 3 insertions(+), 9 deletions(-)
-
-diff --git a/check b/check
-index 607d2456..5cb4e7eb 100755
---- a/check
-+++ b/check
-@@ -784,15 +784,9 @@ function run_section()
- 			status=1
- 			exit
- 		fi
--		if ! _test_mount
--		then
--			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
--			status=1
--			exit
--		fi
--		# TEST_DEV has been recreated, previous FSTYP derived from
--		# TEST_DEV could be changed, source common/rc again with
--		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
-+		# Previous FSTYP derived from TEST_DEV could be changed, source
-+		# common/rc again with correct FSTYP to get FSTYP specific configs,
-+		# e.g. common/xfs
- 		. common/rc
- 		_prepare_test_list
- 	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
--- 
-2.34.1
-
+Changes since v1:
+ - remove the separated ext-common directory previously added
