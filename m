@@ -1,203 +1,188 @@
-Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32E3F19DF60;
-	Wed, 29 Jan 2025 11:18:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738149497; cv=none; b=K8OkXfWL9xAkxr2MUK34bhJ2K8QhlczvQYqwZW7ccf3ZOtGAwsjY5PRYezycalnilktfc9Ec6TzHlbrkyOrt7fek0jluwrRc6SY9ZT8SfNiBg+iyCkXeSWrycobCBlyUUEQR3mFk1DBIgkQzAyAUX00eEPshlDkinVtfk0lvK/Y=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738149497; c=relaxed/simple;
-	bh=3p3h1pv8J2c1FvL/X/lc339oqDdxtJN9pJ0h+9Y1QoE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=fi4w3j7nV6880X1ZPqyVgnsUoWdkyy/ywUbJPYOuasoQdsfNxNa8X44q8mpEHRjU4oW0oCTriZaUABRdeUU5bKEKIESBIisx3mkjGv7KAj5qiOKcEBRjNsksWI1nTTARvhM+B4DhhErOcrPvs5WlK/2oksoMFnSb4Gyj8MSyJDg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=H2bJC//X; arc=none smtp.client-ip=209.85.214.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E52D615B102;
+	Wed, 29 Jan 2025 15:20:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1738164024; cv=fail; b=UDNcfBGL/zLmE0cSgULaz+90gOm0oNV1jYI0exLZB0EdxFjkk6iVP5b8X0NT0013fFP+2Ao6uPkPyLRS+S8S05ArVjfziVuRTs1Yw3ODSSHpEvURflRqaC3pQtOPJupqMAvK3TEBhZ//OsZMo8eMjQAVFWSE4N3kzY0/Vw9fZDA=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1738164024; c=relaxed/simple;
+	bh=bILavgwF83MohtVPJImtzPW2FVf2F+9lk7nVBQlAXB8=;
+	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=QQUmcgIkmbNb/M6eyNoPdlOd0iR2kvlDrJmOuX/6w5dymHAykJ2QwwwjCE83KisMzjO5CVcMznXpYOXQuuxmKImagLSXBYpGpL694gbJ6v4kyQJFNbqmgQ4Y44bLUk9m5j2su5xQKs+y5CT+NLXjgNAwqPgYTnSPxcm987o0iQQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=AO8H3MaV; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=vYaCrkW0; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H2bJC//X"
-Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2165cb60719so118851415ad.0;
-        Wed, 29 Jan 2025 03:18:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="AO8H3MaV";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="vYaCrkW0"
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 50TFHTJe001004;
+	Wed, 29 Jan 2025 15:20:21 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=corp-2023-11-20; bh=CxqNr2LcFVQcg25r
+	oa5+CgG2SMFtmttTtVNaWIK7T7U=; b=AO8H3MaV/uxGlgfg15ZfylwZ0Qetjlgg
+	EyXhA97s7asVdw2XkrnMLrhcUq/8IMZhzCWkOZ/xpPU7AMW8yZEzzJyOHHkUJ5DT
+	Sdzp2gb+qrHMvPC00tX8hm7t+wLhpLjH4e9GMF2mFN1j51STz/wZhtqfYOurUywi
+	kiMVUaDfUzbt0Ldr047UGgxyigr07RzK/ya7ZfhcYV4zV0h0yLy69Ql3LP0uYpaX
+	72+2wRVpo1vU9MCVr/jaoFxyyb8DiZTRAbMbW1Nsi67/J2M/LWA4wqalLuSe7VIK
+	NAocYzLVP7rygzML12bCsnsm04kA8Qal8JjEEYf/JYK54OFbz4XfBw==
+Received: from iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta03.appoci.oracle.com [130.35.103.27])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 44fn2ug8qn-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 29 Jan 2025 15:20:21 +0000 (GMT)
+Received: from pps.filterd (iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 50TEk70I035875;
+	Wed, 29 Jan 2025 15:20:21 GMT
+Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2042.outbound.protection.outlook.com [104.47.55.42])
+	by iadpaimrmta03.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 44cpdfw2nr-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 29 Jan 2025 15:20:20 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=xGLj2Munc7tsI0jI4aEMQlaohdjxpSogVnxQDyUkDmIIKWPkEBbipyWdOrgqbJ5IJCL3B4JZzKk8cYqCcb0T33yHMSxCsvOoPsnmbHs+mnH5Jv3GoNRulCxhzml//eseZkmVIch6tn+c+BJtVRhQT0lUeJY4jEK1n2a6YTHB0xgp42Fc0dzVNdZbaCCKVm0pYj6FjkaSt1ULUdCGwYT6CYKLo9D70D5fWP3i/kHbQGGXuhpDbQkl4kXf1OTTQgXxwt3RQBmI05o0sudoxvwCJwysXU1llWkhyotC7pGJMJkIEDQGnhz6X3ct+cU2avqewEy3CS1CjW31tuIrDhr1Ag==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=CxqNr2LcFVQcg25roa5+CgG2SMFtmttTtVNaWIK7T7U=;
+ b=tVnnPPbv/EHvLDq+IpR4nE2xyVJ81/ba/Xv21eHyCHrTrcYRcAI4Ht3yPZ8sCg7s2hChn0uUn68GYSAbgU/xLEluR+2wNUumHzNhWClmCVZqQdbOwhOoqTeG0U/O5U2PSKKGzI2rCRTZ9fnm/J9SIZ4IlXgOoMbFyVTteyule9SuEMsUjueG0Lx5UMrKYe2uT30qbNppiVvNLG6R7yobw07NCEH4Tf9k7/1ZgCWJA62nuvByF7CCf9oCydbjkn1nFVVDdRsunmDXsGK36WCPkPaZq4QdUe5hIkxDYBf4gvQx8HCMQHyB+Xv5dvBofC3YhKkPlm9/OTOtNqde8cfDPw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1738149495; x=1738754295; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Un8YIu7U0rtJz4Eo1iyAOAUXT9TJl6lo48bWaNY04aM=;
-        b=H2bJC//XtcJVsLS+KFcY+uyjtkjzNjEzJCS1ql7gNjQ51XTIR1qN80fiI/PWZNR5nE
-         8tsX3z2OCVpViX3Z0pIpVgolTQF+Xve1B0q4Lm9MVHy84bc9MYBAPhxDxdlpNM4EnvMW
-         HY4W3Mz0+XCWvlL/3tSeOSP1ux7toOSHC6p6e6MPXMS4qWLIwwOpdY+dQWh5G2CO70Tb
-         X+q+1m3X7mw6SPgP78tgHPYrNHqsHul48DYuv5sLmXz5gPhd7TUyUPTkTTaNYanNIFhw
-         e8K2tTvloPShynBTMoeXDNuIZrg1Ukae2vGOwy11YprpxHsxebBL2pGO2dO1OEHFuvw5
-         3HRQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738149495; x=1738754295;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Un8YIu7U0rtJz4Eo1iyAOAUXT9TJl6lo48bWaNY04aM=;
-        b=wVk50iBPG7RNgaPD1YFtq5YwlVuAA2svwuweMpmho5/7sNyqVNWTwrN/+9hfnoBmqI
-         d/MYS5hMLBfVdkTsKRX/aOaX20cKBjTFqi49jhev4saT5GG8HK5NQbDFKBEjPg/Y4kx5
-         2+Cg0MTM43sQQt7EKb0Gnin0B9mm/muFAhvEjM7iJLgWWwwdRJz/AGz9PQ2yrJLnOog1
-         Dbwfj18Wa8EvegHexavB6JEIgqDP4ru/Y+Wy9+XNiwrDijOFOkd2HO1F5l4O2kGz4wyD
-         p7IyxeHog58y9NJDFRWqi+jZ7ble0MBnohn7OrZbkc+OU5QR0dgDfsmMDA9eodpn4kAa
-         U68Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWQwa/zgCfHy+Fv3hZiRO+2wVUN9zvNo/s2XmZAM+xz8ozUbwuexKRB4+MbdPvHNK7f2dDr84CLoOkv@vger.kernel.org, AJvYcCWURY5QHx1GGDl/FGv1IzTeYlT9MbjWgpc+ZfCJVedLdGpEPY/xFnEQ2njl9o6cdc4KhBvJ6IY6eTqg@vger.kernel.org
-X-Gm-Message-State: AOJu0YzWmXy5QAlvwZsBA6WA4MkZXuP6bl5OZ3yeRe91RSB1TeLINjyH
-	H9DMVCjhBZPEuvDyiO7i+iMBMCyh0DdEj3A+uwBBOPevX7HAi6c1
-X-Gm-Gg: ASbGncv1/lVesGw1fzGZV9NkBrfFggl59n1uwBxl1T8I74LKx720Yd+PUjPf+88VRRY
-	z/pKAI39LOnn53PcgFzmTic6O7DDh2OvRHPvge/Dls6oplN4+q/OV1k6qXuEnYQD8HAwcnHOJHP
-	Dt0FM0e37QuuMB4wXuL3DG5tA9kxBDVbp6UFF0gSYd/0zdkT9/hu6TyRVSQOq81lvp2kXtylRjz
-	8xtJuZGstODPoBE3x8XygKCdJhPVdHLWRXwbQsyp0c7qJ14J81Jgef+FSh5ioVQpSma1mL0+zS7
-	39I0hWwd1Ejo7JQjLa/Aj9I/QQ==
-X-Google-Smtp-Source: AGHT+IE6klJTaPcpMVmemdGT4vOgBrAoJYfuYSn5suFG18ptZMLljZUmln7aZrcWmztBr0zyNCkJng==
-X-Received: by 2002:a05:6a21:8dca:b0:1e1:96d9:a7db with SMTP id adf61e73a8af0-1ed7a49a283mr5323402637.4.1738149495306;
-        Wed, 29 Jan 2025 03:18:15 -0800 (PST)
-Received: from [192.168.0.120] ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72f8a6b324bsm11243492b3a.62.2025.01.29.03.18.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 29 Jan 2025 03:18:14 -0800 (PST)
-Message-ID: <f89b6b40-8dce-4378-ba56-cf7f29695bdb@gmail.com>
-Date: Wed, 29 Jan 2025 16:48:10 +0530
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=CxqNr2LcFVQcg25roa5+CgG2SMFtmttTtVNaWIK7T7U=;
+ b=vYaCrkW0IA1Xbz18cpac1jaBI2OSBwceb72thxUaxNgJs7Me+wCKNiZvndv1dor07P3KsEDjZNM+Ixoo0gB2yB60nKAQ68Oy0f6hwqUHx+7ZIwBCx/9pGonVAPCXVHIphvSdZ2ECFn5DjkulQlwQhH491JolxH8uZ/1r3/AAnKI=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by DS7PR10MB4959.namprd10.prod.outlook.com (2603:10b6:5:3a0::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8398.20; Wed, 29 Jan
+ 2025 15:20:16 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65%3]) with mapi id 15.20.8377.021; Wed, 29 Jan 2025
+ 15:20:16 +0000
+From: Anand Jain <anand.jain@oracle.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
+Subject: [PATCH 0/3] fstests: btrfs: add test case to validate sysfs input arguments
+Date: Wed, 29 Jan 2025 23:19:51 +0800
+Message-ID: <cover.1738161075.git.anand.jain@oracle.com>
+X-Mailer: git-send-email 2.47.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SI2P153CA0013.APCP153.PROD.OUTLOOK.COM
+ (2603:1096:4:140::12) To PH0PR10MB5706.namprd10.prod.outlook.com
+ (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] check: Fix fs specfic imports when
- $FSTYPE!=$OLD_FSTYPE
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
- linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- zlang@kernel.org
-References: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
- <20250128180917.GA3561257@frogsfrogsfrogs>
-Content-Language: en-US
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <20250128180917.GA3561257@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DS7PR10MB4959:EE_
+X-MS-Office365-Filtering-Correlation-Id: 095323e6-bf54-477a-830d-08dd40786ede
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?TkW3PmMBUbfECrnrgaR0nrF+nRayc9+FdPD5/1Yl+IVjqC7tQLIcJPR2VGeh?=
+ =?us-ascii?Q?HatavwAVhgx3dAZJTS4dVyW5nsSbtdKZr48FYWDohK1cjV4Z5N2ZErWU8rpc?=
+ =?us-ascii?Q?oPxQHNhHXTwWFKPPsNlD1OHdozQcBW+s/DS5MqNA+xF/4Td0yiUCxQj2jVSn?=
+ =?us-ascii?Q?EmjZayfxVR07HHgITR3Q4Ntk9E9ov4gGsVgz2mpZ67ZTwFJduob3M5bkuS/+?=
+ =?us-ascii?Q?cs8cJE6FEy+u6vCnb0MZstBTuY55ipvi99/Y/lJE/mPoClj2tXzmrJg+lifT?=
+ =?us-ascii?Q?DDuO9frOMNiYfMj1T+oageaJKL7dFU7bORwtXhTTxLa8ylWeIhnJJ3YEx/vr?=
+ =?us-ascii?Q?N9rI8SoohgDk8vkoZIlDRMzudC5zz2mavkXZL1RA+/Ufv+LidQYmN784sQt+?=
+ =?us-ascii?Q?crUpdT4wPBx/huPCMcto7NkqXUMoIyK6TbdRBVHQdiB/mIoGTxm9YmbkS4lw?=
+ =?us-ascii?Q?Lbt/ShINHoLWuDMZ8X1gwveOo0jGTEA5aTEd3JdrpqXsUxyS/kLhIsv39DYs?=
+ =?us-ascii?Q?HByrmpSNJ4oaLJkI1fZ7KrUsuxOxrAedx2wjLPzF8au5HGPNf2n6inpIjUiB?=
+ =?us-ascii?Q?eujfRQ/URt2cAMfcof2sqMK7iq9H89SUajBKdkiqCO6506DrJroT5H/tWVHr?=
+ =?us-ascii?Q?G2ieEvwHisa4xWKwkSwfOTJC2uAO8AywcASpAf81nwkjYcxxZmEQHHPSeZaH?=
+ =?us-ascii?Q?Cxs6X3jxdggIzypdU1FDKV4tjY4RIucakmczmpUtdTdJan6tJuj4ZHPhEi6X?=
+ =?us-ascii?Q?O48JU4r3oMtmFQSdY31J3gGEBI49vBCtvkqGKi/pvV0r2p5L6I7WCT0vD4BU?=
+ =?us-ascii?Q?drWgKkcU/gUy2TEtkO8KJ53iZelLQ8WDE6scU/hKOqe3MUy9glPni3KvzF+Y?=
+ =?us-ascii?Q?cHti5H1n+1sk4XVQkC3rnWiT9/CuAFgEzqwddiv5sylVOH0B552DQ1tQu1lF?=
+ =?us-ascii?Q?wp4vtFpJK+ZZMODtNA8t/N1z9mviKBgeR6AFJ9FQ3mpWCK+WVEUOfmdJI6pB?=
+ =?us-ascii?Q?PNRCpWWNDKQJOrlDJ7ZNP7jlWt2Ph3sZmxLn6kRNDYujw5BwBAyMiidkkvYl?=
+ =?us-ascii?Q?PdiFZef58SA2QMqLjtjchhHsSeNnWgJ/mJUc9Z1+B8Ao1i11dc2YvmdTYBzj?=
+ =?us-ascii?Q?YEN4W20Ykr8Rd/iOkf5cDFrOVMHzRMb0MMCL90I2olRjONrHNpVjYy1ZCUx+?=
+ =?us-ascii?Q?yjtFDBPWUIGZYLwUhClKhOkciCKb4iQmGrkOConCSsefhuhBm+1v5rNsLOZw?=
+ =?us-ascii?Q?5H17yOIILY4p7JLLch2uYIJKQ9iPmP4DnjhWL5gTxXnAVLxrpC51x2lfkFGv?=
+ =?us-ascii?Q?e6ndhuGjeDJUI0txn7uY5OZ+fCwMlhTxGGNvLO8Da0rsK5y0FyBrsh6zs6Ke?=
+ =?us-ascii?Q?NgU7IUCk9nq2yvZTUPd3OS7TQNQT?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?zKPxqMM43XBB9teL01QS0OG3+esFZIQuM5RaP4AbIdxkVVq2pX44O3gV4MiY?=
+ =?us-ascii?Q?0HBij4X48uXw/DgfSN6Pu8VOYoCG0u48u61nL+fhkNlxndWZDOzFrNDZOsmd?=
+ =?us-ascii?Q?vTLDB5lJOxxbX68eALKzX6TJeCPWlcA/C+w/QNwKKcJrxd3AwohkJ/+Rz3cC?=
+ =?us-ascii?Q?UUEL5tqwzOpJmT/qHdDTGtuAgHSQf+iSSCYnMmt+iqtiokdxcdn2F89i2ETE?=
+ =?us-ascii?Q?MiYDlSmc/zeInMfxa4pCIYEu5QX9zxn32jocoG6mlN8Z/0vGZ6dA+MtIoJcM?=
+ =?us-ascii?Q?CTDimNPcRbkDuW1XjZOgSAVv6Ndyytyb9yT6JzOm8lH64mWghMXkstBlCc3G?=
+ =?us-ascii?Q?kBZWrs92BwUVALKuoBQtCGDUq2dWwVzVbrn4m3Qp8erQjFkLQsKptu9reaE/?=
+ =?us-ascii?Q?abDN8mGrEKN8esNVggN7j0Qs84w0LSZI8F3t0oXfc8JDAs2mDc2snKQVOSfy?=
+ =?us-ascii?Q?C8rNW1jBxFjiyPOneO8Y01eqyZrs40VXG8FHjMVZE7lf2Ampukp8q7HMikCz?=
+ =?us-ascii?Q?0vXuhQOrjwzJXfaEEuQur1MmLlM2DGyXd0PNlIJDpOFBr/DeswuHvq0sHFCt?=
+ =?us-ascii?Q?XptFLTz7ihM+s8jX6QSHX5gnr+PoZ++I7+MgqteDTrSo8ozasn4MSdkXhYjv?=
+ =?us-ascii?Q?F2i6vAYpLLWk+pLXCXwzRjEQLeahGIl1bAcxfssZlTuEZ5ByTsIacGKqV8hM?=
+ =?us-ascii?Q?1+N8QK1eLm0y/42MySyNAj8be4pa4+Wgb8vPdkvSjv0afaWq2jYYGO8yrfe8?=
+ =?us-ascii?Q?F4q9kfAn+pgY9A0+5J+mgv8tY3olBJVFr/reEKhsuXxBPgk+ptRsNdy0j6Zo?=
+ =?us-ascii?Q?fFFIHVOWYvJkF5d3fy9GS7CmTjNR9v++DTPjLsgGvbbUpIJqN1i9h7fkiMMO?=
+ =?us-ascii?Q?6OXEmv8Ugk3LJn0WeSdkZZl0vKph5UzxA5l8d84F8Y4EpiOULiMJqpnB5xAv?=
+ =?us-ascii?Q?Gki2RWTblTkEFDAFoNvbzjfqONRelH4rk5hFLjmdhAfYSCmhYiCuUufNR6SN?=
+ =?us-ascii?Q?LIxV4YhbwtKFCptpFLwZyZ/U0mA+ZhyaBJZdGe0tljkVPcdcF4unTzpsAcer?=
+ =?us-ascii?Q?j/gife7yyGTlBjMS/wQtGBP/OCJEKnUHP0ieWDsyUjhLxE3TkJwuqpMECDjI?=
+ =?us-ascii?Q?GiHsVD0RbzDMcgGk7SXWgj1maRAIKRQEXkoF8QK/0jDjSf9v57ZDsS+Kff4u?=
+ =?us-ascii?Q?jyJB3qKCBVT1fWyZ4aG4BklpKPYNKCduAZNEaf5jzkzKv/GBDsJfqeQ7olMO?=
+ =?us-ascii?Q?4iZylA3olb/X9fk2BvZJRAtr32tizSFZbqjD8WWW2+FpnqQX+5EYGIR28Kvj?=
+ =?us-ascii?Q?XF/3QVKDUW7mtAob+XZh3EstS4Ua8Ja/IRgyzhqQikoseAzij66Vz8lypjso?=
+ =?us-ascii?Q?tucFXbwC9CgciXqiMsGgBrtc35JQWIX/X0yRSry+PI1QHt9yv4ZvckqBd/2/?=
+ =?us-ascii?Q?FZhRX+TTraKIE5CgT2TMu0JjElm5seBW4S79aQn/Qp1rxUJJCqh0inWc2a/S?=
+ =?us-ascii?Q?OYQemYtZV3b4/CwO8yfubhciONM5aRlmsfN5oFKdFkkvq1F7Kzp+RNEsQoTK?=
+ =?us-ascii?Q?rl7Uagq72yNJU5JiLwjAAttwHZd42juHWeH8TLTm?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	iAtJs8+z5UVbwwVljAO9zmboFACI5qF5v/zVqiFoUh+4pye1PJN8Z4OE8pwoCEF3WMFwt38WmKD2b6lESMbuOeHVMP2KuR6eyddxTiPbzToPp0VdIirwq+FVZX2lFnyTUyWc9nmYlm74456hgMzDVcHCiajTnWtXBjQI6Z1YIovrJohT5OOm8QcX/Vx8RLgVj95n971ektVom65nALMxydjkmYQsaYmUfsytd7bkxi3fIwOK4K29zRJ18y+OcsW6OBi0dET4hgC63bqmv8tvvQOeMMFq5qUIJ8K97bz5odma1iMnJhjJHaeOD7PzYMsRJdvYejhuzQb0RbhAy2wPqp06wR9/60qa4HGA/L/eHLcQzSDalqmzq+Ojrawv4Nh8t6zy+9IuoTILW7ACoL+2uMPogtyQoelMcMD+HYidmiAkGiGSsPUG1nTUaMlG867t5+ab4kFm+CjvMFbX/WsOfzwlPMrte9DktFJn0m0RQbABF7K6OjnIUbFXPMf4X9lz9KneDvaQE6qETxwDM4yGXpYum3Fh7ULKhtkWPqgNjJodsGKrNR2Rh2e+dF9EzoNYC2rROypbWcjEuhBYQA94CEQIkKwo7v6Lh0xjbdVwov4=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 095323e6-bf54-477a-830d-08dd40786ede
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Jan 2025 15:20:15.9209
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: SquMHNtUCkzJ/rDIvIVkyFZSmcRSTC5KT8sHJkD8VG394BprQgqx109U/UOVM+jtcywMaUNG06E1gOTARoLMmQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR10MB4959
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-01-29_02,2025-01-29_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxscore=0 bulkscore=0
+ phishscore=0 suspectscore=0 adultscore=0 spamscore=0 mlxlogscore=768
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2411120000
+ definitions=main-2501290123
+X-Proofpoint-ORIG-GUID: Fhuwd7X6CgwOvfGM4USNgG-HKjpVH8lx
+X-Proofpoint-GUID: Fhuwd7X6CgwOvfGM4USNgG-HKjpVH8lx
 
+Patches 1/3 and 2/3 lay the groundwork for testing sysfs input validation.
+Patch 3/3 introduces the actual test case.
 
-On 1/28/25 23:39, Darrick J. Wong wrote:
-> On Tue, Jan 28, 2025 at 05:00:22AM +0000, Nirjhar Roy (IBM) wrote:
->> Bug Description:
->>
->> _test_mount function is failing with the following error:
->> ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
->> check: failed to mount /dev/loop0 on /mnt1/test
->>
->> when the second section in local.config file is xfs and the first section
->> is non-xfs.
->>
->> It can be easily reproduced with the following local.config file
->>
->> [s2]
->> export FSTYP=ext4
->> export TEST_DEV=/dev/loop0
->> export TEST_DIR=/mnt1/test
->> export SCRATCH_DEV=/dev/loop1
->> export SCRATCH_MNT=/mnt1/scratch
->>
->> [s1]
->> export FSTYP=xfs
->> export TEST_DEV=/dev/loop0
->> export TEST_DIR=/mnt1/test
->> export SCRATCH_DEV=/dev/loop1
->> export SCRATCH_MNT=/mnt1/scratch
->>
->> ./check selftest/001
->>
->> Root cause:
->> When _test_mount() is executed for the second section, the FSTYPE has
->> already changed but the new fs specific common/$FSTYP has not yet
->> been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
->> the test run fails.
->>
->> Fix:
->> Remove the additional _test_mount in check file just before ". commom/rc"
->> since ". commom/rc" is already sourcing fs specific imports and doing a
->> _test_mount.
->>
->> Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->> ---
->>   check | 12 +++---------
->>   1 file changed, 3 insertions(+), 9 deletions(-)
->>
->> diff --git a/check b/check
->> index 607d2456..5cb4e7eb 100755
->> --- a/check
->> +++ b/check
->> @@ -784,15 +784,9 @@ function run_section()
->>   			status=1
->>   			exit
->>   		fi
->> -		if ! _test_mount
-> Don't we want to _test_mount the newly created filesystem still?  But
-> perhaps after sourcing common/rc ?
->
-> --D
+Anand Jain (3):
+  fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
+  fstests: filter: helpers for sysfs error filtering
+  fstests: btrfs: testcase for sysfs policy syntax verification
 
-common/rc calls init_rc() in the end and init_rc() already does a 
-_test_mount. _test_mount after sourcing common/rc will fail, won't it? 
-Does that make sense?
+ common/filter       | 24 ++++++++++++
+ common/rc           |  3 +-
+ tests/btrfs/329     | 92 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/329.out |  2 +
+ 4 files changed, 120 insertions(+), 1 deletion(-)
+ create mode 100755 tests/btrfs/329
+ create mode 100644 tests/btrfs/329.out
 
-init_rc()
-{
-     # make some further configuration checks here
-     if [ "$TEST_DEV" = ""  ]
-     then
-         echo "common/rc: Error: \$TEST_DEV is not set"
-         exit 1
-     fi
-
-     # if $TEST_DEV is not mounted, mount it now as XFS
-     if [ -z "`_fs_type $TEST_DEV`" ]
-     then
-         # $TEST_DEV is not mounted
-         if ! _test_mount
-         then
-             echo "common/rc: retrying test device mount with external set"
-             [ "$USE_EXTERNAL" != "yes" ] && export USE_EXTERNAL=yes
-             if ! _test_mount
-             then
-                 echo "common/rc: could not mount $TEST_DEV on $TEST_DIR"
-                 exit 1
-             fi
-         fi
-     fi
-...
-
-...
-
---NR
-
-
-
->
->> -		then
->> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
->> -			status=1
->> -			exit
->> -		fi
->> -		# TEST_DEV has been recreated, previous FSTYP derived from
->> -		# TEST_DEV could be changed, source common/rc again with
->> -		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
->> +		# Previous FSTYP derived from TEST_DEV could be changed, source
->> +		# common/rc again with correct FSTYP to get FSTYP specific configs,
->> +		# e.g. common/xfs
->>   		. common/rc
->>   		_prepare_test_list
->>   	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->> -- 
->> 2.34.1
->>
->>
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+2.47.0
 
