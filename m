@@ -1,29 +1,83 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A5A705672
-	for <fstests@vger.kernel.org>; Wed, 29 Jan 2025 05:49:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66A5D1EEE6
+	for <fstests@vger.kernel.org>; Wed, 29 Jan 2025 06:06:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738129763; cv=none; b=N3E7KHYysGwQxcYCGMVhdSo5oQgIHMmnu08sIjKOqwqSiegE7O+qe7bG7aOb1yokLVAyq8cjfcN3EZQ+lfO7lSCAP2xWUTcudHrINPgdkqcyNBdM0s7LXHLsc10jksQ+HIiU9Gdb9/5fkrRaggvqAzJWkCPQFKM2EPp/CqLsMao=
+	t=1738130819; cv=none; b=VQecCYLcWGhE9ze7dAImNwicUYQjVqm0E/2f9BJN8Ms9bNHS1l7thW5gb+kU8WWmTk9n6f4Ml9TUm4rylka8FEllHB3rJj9GuJpWxuUX+6D4EjvZwrxfzrjwWqPu3ffQjXmLVZ2J3Z22eG+eYNcubqfG5WT/Onnmyv+ZN2CIvOA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738129763; c=relaxed/simple;
-	bh=J6wW7nGzZsYFwFlbeSPvhUWCYtjdDubyC2TDsjiNfYQ=;
+	s=arc-20240116; t=1738130819; c=relaxed/simple;
+	bh=Taa73zJhSXOuB2KmDli7srsvGbZ70bw+kofesNjGJR0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cvJKptMtZSTiKWtUrqWMyiRu126DmJDRJZun7vm0fPurdkrmz1wqbQhSklXZGSpQ6ezsiYEfAVEJeHu7vWI0OIUKaLm/mSzx3YZfuAp+TW50spIg2uYcs098uXJII0bWWt/tp91G4d3PuhJozljupY5lX6U3KbEfJfbPHSNOm9o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id D9F6968D13; Wed, 29 Jan 2025 06:49:18 +0100 (CET)
-Date: Wed, 29 Jan 2025 06:49:18 +0100
-From: Christoph Hellwig <hch@lst.de>
+	 Content-Type:Content-Disposition:In-Reply-To; b=pH5SsPMqvMUw3nt8u3xuCIHLoonmg2nWhUN5jNQy54sVTKt+gBYkmVfES/czaiOVPaFScAStrlExEdtgla3q8ZZ/XPVAicULar5SHpfBXpdx7E8hZHo08YhdHVbNK4ADJgNQAeeXDZIz/2pl7Q+diggMMiKvKS5qa/dquiwQGFo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=RD3gJcgr; arc=none smtp.client-ip=209.85.214.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="RD3gJcgr"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-215770613dbso82300035ad.2
+        for <fstests@vger.kernel.org>; Tue, 28 Jan 2025 22:06:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1738130816; x=1738735616; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=05h+/zAx3Q++Rgdg0SMjBS/g37mGzexiku0BsuXqWMM=;
+        b=RD3gJcgrFCTGCS73LZeUc7tuVRa6EFNRrJCanIunuA+KnPiw8VqRmTDInAS76lgtal
+         mde3yTnRzIp/caerIj/Q/IlakG4U1ksYbQDq5/jTg1bSfwnh/rpzCjCehZEdb1VhIZ7C
+         ar2DCPF6Vzl+4tVi96+Bo0khWhFVtj+MMkoEndHu0X9WpsTcaYXR/Lppa88Tuej3Swue
+         9yQPYo6j9hMXgXIKrgjIagTecvpeCVtllsPn5fuwdxkjq+gsjgaFGdT/76tYXpAlA607
+         2Ag3G6+d+Rxwoh9VDSL2Kh5s16/AUEQFjmlhpHzW6hPrSi2YMSNYy2+295rIRb+s63Yv
+         ecEQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738130816; x=1738735616;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=05h+/zAx3Q++Rgdg0SMjBS/g37mGzexiku0BsuXqWMM=;
+        b=L/fY5No+Nzjj68lsqJrdVFkRhn1Qg9NJnCcV+w6eNUR0rzcrdlMzjfg4nlHsWwu7b6
+         qEhZYFYxikSPXzbW3e1vHPA+BXcs0yxIIG8RWxLALctk76x4MI08Cb7X3iiCx/6q8yCn
+         zxEY9jg9OBk3tFHGB/LhaRR+U9eHxKDObV9Ogv6IrhJBHlCNwl1cN2vDXSJqstT5/yTl
+         XILrkYJVFPUo+QAa6+Bi9c2LrsuvCMTZ9UinCAJ9/zgM0JSHC6PgdrE63/KoT1AcS9QX
+         2rlo1AFZ+NQPx1l2xmlH9m5+9ni8E6DeWsNHX1LjI8MTywzldVIHuqslN880nDFNBre7
+         qI5w==
+X-Forwarded-Encrypted: i=1; AJvYcCVOOZNmgKZhFLJfHmaJOXsBykZRISzmDYBlU9EtxfBfrwtRh4kbSsRUdrepA/2n5eZdLWrAYPBu@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywhke3H4WoAlzjhM+IJkkuyTqTnceQat3NFQV0R6VTCZx4+PLGN
+	dQoFtvtU9SoPU9v9qegDN3K4xBMsRjxh9XxQhlfSxQgTN627LfmyI0la2rfAVi4=
+X-Gm-Gg: ASbGncsqlVoFK9y8YXDc7X4KXlVEbrlllTfqwLywcat5pJFQ5xIr/FTBbR23hCADXE/
+	E2TXJ29wVWU3p/0hZbRxBZxGzi6eEGG1XlKWFA8nSygmq6fGObB/C8qH495t4zPdzylU4A3PDet
+	Qe4JDTj+Ga8lqsNVPC/zgmV+6m2cgZfqgIAZZDgsV2VFdyV7mM+k4sBYcul/Oc2nOx+g3f9twVx
+	9cXCARaVVOyIw/QECy9tmdtcE9f6Ph5GDW3XQufyw/NmTrs7bmGJWSYYalbLxn5crECFplr1EFm
+	L60at3Pk7ASEECrQkp0fVeQX5P4qn14U7if0KXsSroFprsNp802LxrjVuHCk3Ai5Kq0=
+X-Google-Smtp-Source: AGHT+IHo44f8AuO3eN0dp/9kstSL1hVKmS3/23zY92XcOH3JBc0ajEZU6Kd37qLBxjnslfuTEnRnrg==
+X-Received: by 2002:a17:902:da86:b0:215:6b4c:89fa with SMTP id d9443c01a7336-21dd7c4e3aamr21414375ad.8.1738130816607;
+        Tue, 28 Jan 2025 22:06:56 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21da4141e2dsm92284865ad.124.2025.01.28.22.06.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Jan 2025 22:06:56 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1td1Dw-0000000BtEr-381K;
+	Wed, 29 Jan 2025 17:06:52 +1100
+Date: Wed, 29 Jan 2025 17:06:52 +1100
+From: Dave Chinner <david@fromorbit.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, zlang@kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/541: _notrun if the file system can't mount
-Message-ID: <20250129054918.GA29053@lst.de>
-References: <20250128071449.676462-1-hch@lst.de> <20250128192506.GT3557695@frogsfrogsfrogs>
+Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 08/23] common: fix pkill by running test program in a
+ separate session
+Message-ID: <Z5nFfCD8Km_A3AnA@dread.disaster.area>
+References: <20250122042400.GX1611770@frogsfrogsfrogs>
+ <Z5CLUbj4qbXCBGAD@dread.disaster.area>
+ <20250122070520.GD1611770@frogsfrogsfrogs>
+ <Z5C9mf2yCgmZhAXi@dread.disaster.area>
+ <20250122214609.GE1611770@frogsfrogsfrogs>
+ <Z5GYgjYL_9LecSb9@dread.disaster.area>
+ <Z5heaj-ZsL_rBF--@dread.disaster.area>
+ <20250128072352.GP3557553@frogsfrogsfrogs>
+ <Z5lAek54UK8mdFs-@dread.disaster.area>
+ <20250129031313.GV3557695@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -32,25 +86,93 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250128192506.GT3557695@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20250129031313.GV3557695@frogsfrogsfrogs>
 
-On Tue, Jan 28, 2025 at 11:25:06AM -0800, Darrick J. Wong wrote:
-> On Tue, Jan 28, 2025 at 08:14:48AM +0100, Christoph Hellwig wrote:
-> > A file system created without an RT section might not be able to mount
-> > with an rtdev specified if the RT device has a larger LBA size.
+On Tue, Jan 28, 2025 at 07:13:13PM -0800, Darrick J. Wong wrote:
+> On Wed, Jan 29, 2025 at 07:39:22AM +1100, Dave Chinner wrote:
+> > On Mon, Jan 27, 2025 at 11:23:52PM -0800, Darrick J. Wong wrote:
+> > > On Tue, Jan 28, 2025 at 03:34:50PM +1100, Dave Chinner wrote:
+> > > > On Thu, Jan 23, 2025 at 12:16:50PM +1100, Dave Chinner wrote:
+> > > > 4. /tmp is still shared across all runner instances so all the
+> > > > 
+> > > >    concurrent runners dump all their tmp files in /tmp. However, the
+> > > >    runners no longer have unique PIDs (i.e. check runs as PID 3 in
+> > > >    all runner instaces). This means using /tmp/tmp.$$ as the
+> > > >    check/test temp file definition results is instant tmp file name
+> > > >    collisions and random things in check and tests fail.  check and
+> > > >    common/preamble have to be converted to use `mktemp` to provide
+> > > >    unique tempfile name prefixes again.
+> > > > 
+> > > > 5. Don't forget to revert the parent /proc mount back to shared
+> > > >    after check has finished running (or was aborted).
+> > > > 
+> > > > I think with this (current prototype patch below), we can use PID
+> > > > namespaces rather than process session IDs for check-parallel safe
+> > > > process management.
+> > > > 
+> > > > Thoughts?
+> > > 
+> > > Was about to go to bed, but can we also start a new mount namespace,
+> > > create a private (or at least non-global) /tmp to put files into, and
+> > > then each test instance is isolated from clobbering the /tmpfiles of
+> > > other ./check instances *and* the rest of the system?
+> > 
+> > We probably can. I didn't want to go down that rat hole straight
+> > away, because then I'd have to make a decision about what to mount
+> > there. One thing at a time....
+> > 
+> > I suspect that I can just use a tmpfs filesystem for it - there's
+> > heaps of memory available on my test machines and we don't use /tmp
+> > to hold large files, so that should work fine for me.  However, I'm
+> > a little concerned about what will happen when testing under memory
+> > pressure situations if /tmp needs memory to operate correctly.
+> > 
+> > I'll have a look at what is needed for private tmpfs /tmp instances
+> > to work - it should work just fine.
+> > 
+> > However, if check-parallel has taught me anything, it is that trying
+> > to use "should work" features on a modern system tends to mean "this
+> > is a poorly documented rat-hole that with many dead-ends that will
+> > be explored before a working solution is found"...
 > 
-> Where does the mount failure occur?  The initial mount (where we specify
-> -o rtdev but sb_rblocks is still zero) should succeed because
-> xfs_rtmount_init ignores m_rtdev_targp if !rblocks, right?  So it's only
-> when you get to growfs and we try to read the device that things fail?
+> <nod> I'm running an experiment overnight with the following patch to
+> get rid of the session id grossness.  AFAICT it can also be used by
+> check-parallel to start its subprocesses in separate pid namespaces,
+> though I didn't investigate thoroughly.
 
-There only is a single mount in the test.
+I don't think check-parallel needs to start each check instance in
+it's own PID namespace - it's the tests themselves that need the
+isolation from each other.
 
-The test only clears the rtdev for the mkfs call, not the mount call.
-As XFS doesn't allow adding a new rtdev at runtime, just expanding the
-file system to the already passed but not actually used rt device in
-growfs that's actually needed, even if it sounds counterintuitive.
+However, the check instances require a private mount namespace, as
+they mount and unmount test/scratch devices themselves and we do not
+want other check instances seeing those mounts.
 
-(that being said I sent the patch directly from my zoned branch,
-so it won't apply as-is due to context issues)
+Hence I think the current check-parallel code doing mount namespace
+isolation as it already does should work with this patch enabling
+per-test process isolation inside check itself.
+
+> I'm also not sure it's required for check-helper to unmount the /proc
+> that it creates; merely exiting seems to clean everything up? <shrug>
+
+Yeah, I think tearing down the mount namespace (i.e. exiting the
+process that nsexec created) drops the last active reference to the
+mounts inside the private namespace and so it gets torn down that
+way.
+
+So from my perspective, I think your check-helper namespace patch is
+a good improvement and I'll build/fix anything I come across on top
+of it. Once your series of fixes goes in, I'll rebase all the stuff
+I've got on top it and go from there...
+
+> I also tried using systemd-nspawn to run fstests inside a "container"
+> but very quickly discovered that you can't pass block devices to the
+> container which makes fstests pretty useless for testing real scsi
+> devices. :/
+
+Yet another dead-end in the poorly sign-posted rat-hole, eh?
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
