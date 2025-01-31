@@ -1,105 +1,243 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48D5414B092
-	for <fstests@vger.kernel.org>; Fri, 31 Jan 2025 15:36:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30A881E3DD6;
+	Fri, 31 Jan 2025 16:24:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738337803; cv=none; b=q6X9fk+iYaizyF0HYcw7OAzNBeXSJZ3iwVDbbQTYKyNi0uhxjOrefF2yppNW4QvZyJvFHv0lhPRnzqI7pmSc54XR39URKmp3W60sxyBdl5B4mhgkgWT3Cf2phIME2+2FULLGOSlHw0FZSOg0d5cVlUfXXG34UFEeuiAXQERwcrk=
+	t=1738340698; cv=none; b=i+R/l1fVlNz4vd4+QaibUwXNE7Sl2l6JCbEZTC4aFORnK12+gkEGqB9dbVS5fUuwrfXELI90DTKXbwbUFU1qsMkTuQbOuRsKTKc9IENt1ML9HtUZK/atvWZO0fvCHaYEFG0SebL/z1Hjzu9PjI5V09Bzk39eTDnBjZ7LPJqe72c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738337803; c=relaxed/simple;
-	bh=+nK1MVrsQ+Mj1wKhIWqPrBHJEXEPId05G8ixPHv+6HY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=i9/tDpAFJSCGrJlLea8MQ69V1saqdhOEJggjl89SjKzYxwGMuRtw0QJTFmL7PJoo/FAnDLe5TCdivSUHgaYO9d+m4xtho4u5BQO+RPHcrL9qV7XE5DEgHNSLmIqZEsuOp3BspMht8kD9Cka51xTO4JCe+nRuOqYn5QA4MvyZbxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GhseJ0nm; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1738340698; c=relaxed/simple;
+	bh=rxv/0PwD9wBAo2UfeAdPGZR8B0ZNGqibx3vkhB6mlTA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=K0da6Eb5Qadkx+cO6SqJWmXQMrWDNtK/6XG0RAy7ipSxD6+s8EeI3lE9pEZMvCKbn8vQe1WEZY322P3RMKVSCD92myn435x84k2FlwlyigKy+ZHXHKCT9gOxd1oOHIZotQrLS1GIRCYkwZjHub2bWWtpWsO6JoK/7e7wgquDM18=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nxgjED/Y; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GhseJ0nm"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1738337800;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=kCHYGcqGImx66xYuS+Osxxrt0G9Xqdmj7rsHk+CBX4g=;
-	b=GhseJ0nmJGWcVpbHzvLGBYt7t7bs2BtVhSNRVl5OKlCNfglbCuT+fNd7Yv1U/Lm8ANX/qS
-	OUo9/qiyHkTWfbLjqA8F/mfE/pYUcfCnlKiB2s8+SfAfddjKro3/hBIq+iW++Id6G7E9bB
-	LFF4+6x+SeJM1pINd8yQsnJVTn2NfgY=
-Received: from mail-il1-f200.google.com (mail-il1-f200.google.com
- [209.85.166.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-92-tXXsC-dVM9yLAva4LAOa0w-1; Fri, 31 Jan 2025 10:36:38 -0500
-X-MC-Unique: tXXsC-dVM9yLAva4LAOa0w-1
-X-Mimecast-MFC-AGG-ID: tXXsC-dVM9yLAva4LAOa0w
-Received: by mail-il1-f200.google.com with SMTP id e9e14a558f8ab-3cfc08132adso29702395ab.3
-        for <fstests@vger.kernel.org>; Fri, 31 Jan 2025 07:36:38 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738337798; x=1738942598;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=kCHYGcqGImx66xYuS+Osxxrt0G9Xqdmj7rsHk+CBX4g=;
-        b=Qo47VEomplGxGJtEfUjvSm02orscZNiOh47mEm0keclTZfoZsT1tsQsMJ/lFos78k2
-         +sqv1Jb4TuE7gjAKz/DFzQnuiYldRrLHQkfVBE/l99l2hQwxGMkI7PMFLK0UIwyWI4LK
-         1Gxum4IiRvxs26sCjQ7P7A2B69nkrJw4HxZSOpRuflhVy9yIcULjkTAtTmQ2O4qKEbP9
-         BrMAdZzYJABfDKc1j6TuSZ2VKHAgBh8LVky3QZieXBsNP57pGl/h+mG7OBQFhupe2wUA
-         tWfbNIH3TgJ4FLSwFyznUK9K2MmrlnQzeuBedOXXAWmDrITsr4jIOBsf5Xz2qk79W+s/
-         KfUQ==
-X-Gm-Message-State: AOJu0YwEk9hfLQDmxoG+A6xIKFunwugcmm1+RiD2ZVjODhB/a6tJv779
-	ab1kO4vX0MXfNoigmRZpW/e/yOnvry7aiit4EGE6oXcB1vO81PvynkI9WF4l4IIbVooi3MTFVgt
-	ga0qUAGNIR16A+dXdn9N5BGmx3NlAlRMJPdTH2haDwpMmbqPZZiWfrVk=
-X-Gm-Gg: ASbGncsnNdRqHHjVkOwA+w17sDhu8oGpHZAR5t7CK+BCpm5FzgdS7Lf2qzX6Yys2iiY
-	xO9CfuI1qVWvwm87AYGAbW4UFSSMFUyIGQBXVEKubkmL4mWi6fa0WW64OtQl77rjQSetDxjAhY9
-	baUptJM5SWpP0ZaMUDjbfXjxANeXWYbihVDivTFaWYeXUZxdGdoKKpuJnwqs7xs7/pRc2ESv2aw
-	SitpIu+JpR6JQSo+KINojEfW8TXutwmNdC14hom5BaDrI9OvnMpr3txpd2ftO+dYTwGggrTXICh
-	viOxE5if0yPVM553+eNlkH+8CCEKeGOgT+vQzN7DCPbA
-X-Received: by 2002:a92:ca45:0:b0:3d0:10a6:99aa with SMTP id e9e14a558f8ab-3d010a69cfcmr43902145ab.4.1738337797184;
-        Fri, 31 Jan 2025 07:36:37 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IH8mzTET5L9cmSAn4MkAf4+OtT/FA318fOWY2K2XU3aDe2n97vdi3JIxKt/AOUbY+aHWvJnvA==
-X-Received: by 2002:a92:ca45:0:b0:3d0:10a6:99aa with SMTP id e9e14a558f8ab-3d010a69cfcmr43901985ab.4.1738337796855;
-        Fri, 31 Jan 2025 07:36:36 -0800 (PST)
-Received: from [10.0.0.48] (97-116-166-216.mpls.qwest.net. [97.116.166.216])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4ec8b535b3bsm126975173.104.2025.01.31.07.36.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 31 Jan 2025 07:36:36 -0800 (PST)
-Message-ID: <d31161ef-ab18-4963-adee-3a2608282630@redhat.com>
-Date: Fri, 31 Jan 2025 09:36:35 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nxgjED/Y"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A9CFC4CED1;
+	Fri, 31 Jan 2025 16:24:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738340697;
+	bh=rxv/0PwD9wBAo2UfeAdPGZR8B0ZNGqibx3vkhB6mlTA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=nxgjED/Y/v/r66vaLxmVe2MLuJRyce+uE0MjBjcOuIGlhUMXVwaBLOehPnADffG0U
+	 C1NmeRtQ5rTdCNzk6wg5wgkvCGo8QgbdyrNt5stt0vc1K/e8DDRW0ACrXLQIvHQWyj
+	 t0CYyQ52Q+VrZTuRefg1nW5eBouhxzT1qcW0IE0GrfE0/ynwrcWywLgdzUxUwS/SVo
+	 PIun99uikxWJDZEj72EBxS2GfR+vxNGuPI2bOmtFBY+YQDFB+64Mi4Xcnyy8rwx0EO
+	 SgpVaAq5i68Rq0j/8p/TzNS6/WzeOLsf/Kw7cfT24fEy4JAl1POpiA8Ajh7JSkKje+
+	 OZACgax84w5fA==
+Date: Fri, 31 Jan 2025 08:24:57 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, zlang@kernel.org
+Subject: Re: [PATCH v2] check: Fix fs specfic imports when
+ $FSTYPE!=$OLD_FSTYPE
+Message-ID: <20250131162457.GV1611770@frogsfrogsfrogs>
+References: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
+ <20250128180917.GA3561257@frogsfrogsfrogs>
+ <f89b6b40-8dce-4378-ba56-cf7f29695bdb@gmail.com>
+ <20250129160259.GT3557553@frogsfrogsfrogs>
+ <dfbd2895-e29a-4e25-bbc6-a83826d14878@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fix vfs/utils.c for big-endian systems
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- Christian Brauner <brauner@kernel.org>
-References: <fb7ad928-bbe9-4488-a6b7-a2786782bccd@redhat.com>
- <Z5yFi6Ofr5_I75jL@infradead.org>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@redhat.com>
-In-Reply-To: <Z5yFi6Ofr5_I75jL@infradead.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <dfbd2895-e29a-4e25-bbc6-a83826d14878@gmail.com>
 
-On 1/31/25 2:10 AM, Christoph Hellwig wrote:
-> On Mon, Jan 27, 2025 at 03:43:24PM -0600, Eric Sandeen wrote:
->> generic/633 was failing with EINVAL on the fsxgetattr call on s390.
->> Looks like this is due to a failure to properly endian swap the
->> arguments to the syscall, so fix that, and the magic_etc compare
->> in expected_dummy_vfs_caps_uid() as well while we're at it.
+On Fri, Jan 31, 2025 at 06:49:50PM +0530, Nirjhar Roy (IBM) wrote:
 > 
-> Looks good:
+> On 1/29/25 21:32, Darrick J. Wong wrote:
+> > On Wed, Jan 29, 2025 at 04:48:10PM +0530, Nirjhar Roy (IBM) wrote:
+> > > On 1/28/25 23:39, Darrick J. Wong wrote:
+> > > > On Tue, Jan 28, 2025 at 05:00:22AM +0000, Nirjhar Roy (IBM) wrote:
+> > > > > Bug Description:
+> > > > > 
+> > > > > _test_mount function is failing with the following error:
+> > > > > ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
+> > > > > check: failed to mount /dev/loop0 on /mnt1/test
+> > > > > 
+> > > > > when the second section in local.config file is xfs and the first section
+> > > > > is non-xfs.
+> > > > > 
+> > > > > It can be easily reproduced with the following local.config file
+> > > > > 
+> > > > > [s2]
+> > > > > export FSTYP=ext4
+> > > > > export TEST_DEV=/dev/loop0
+> > > > > export TEST_DIR=/mnt1/test
+> > > > > export SCRATCH_DEV=/dev/loop1
+> > > > > export SCRATCH_MNT=/mnt1/scratch
+> > > > > 
+> > > > > [s1]
+> > > > > export FSTYP=xfs
+> > > > > export TEST_DEV=/dev/loop0
+> > > > > export TEST_DIR=/mnt1/test
+> > > > > export SCRATCH_DEV=/dev/loop1
+> > > > > export SCRATCH_MNT=/mnt1/scratch
+> > > > > 
+> > > > > ./check selftest/001
+> > > > > 
+> > > > > Root cause:
+> > > > > When _test_mount() is executed for the second section, the FSTYPE has
+> > > > > already changed but the new fs specific common/$FSTYP has not yet
+> > > > > been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
+> > > > > the test run fails.
+> > > > > 
+> > > > > Fix:
+> > > > > Remove the additional _test_mount in check file just before ". commom/rc"
+> > > > > since ". commom/rc" is already sourcing fs specific imports and doing a
+> > > > > _test_mount.
+> > > > > 
+> > > > > Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
+> > > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > > > ---
+> > > > >    check | 12 +++---------
+> > > > >    1 file changed, 3 insertions(+), 9 deletions(-)
+> > > > > 
+> > > > > diff --git a/check b/check
+> > > > > index 607d2456..5cb4e7eb 100755
+> > > > > --- a/check
+> > > > > +++ b/check
+> > > > > @@ -784,15 +784,9 @@ function run_section()
+> > > > >    			status=1
+> > > > >    			exit
+> > > > >    		fi
+> > > > > -		if ! _test_mount
+> > > > Don't we want to _test_mount the newly created filesystem still?  But
+> > > > perhaps after sourcing common/rc ?
+> > > > 
+> > > > --D
+> > > common/rc calls init_rc() in the end and init_rc() already does a
+> > > _test_mount. _test_mount after sourcing common/rc will fail, won't it? Does
+> > > that make sense?
+> > > 
+> > > init_rc()
+> > > {
+> > >      # make some further configuration checks here
+> > >      if [ "$TEST_DEV" = ""  ]
+> > >      then
+> > >          echo "common/rc: Error: \$TEST_DEV is not set"
+> > >          exit 1
+> > >      fi
+> > > 
+> > >      # if $TEST_DEV is not mounted, mount it now as XFS
+> > >      if [ -z "`_fs_type $TEST_DEV`" ]
+> > >      then
+> > >          # $TEST_DEV is not mounted
+> > >          if ! _test_mount
+> > >          then
+> > >              echo "common/rc: retrying test device mount with external set"
+> > >              [ "$USE_EXTERNAL" != "yes" ] && export USE_EXTERNAL=yes
+> > >              if ! _test_mount
+> > >              then
+> > >                  echo "common/rc: could not mount $TEST_DEV on $TEST_DIR"
+> > >                  exit 1
+> > >              fi
+> > >          fi
+> > >      fi
+> > > ...
+> > ahahahaha yes it does.
+> > 
+> > /commit message reading comprehension fail, sorry about that.
+> > 
+> > Though now that you point it out, should check elide the init_rc call
+> > about 12 lines down if it re-sourced common/rc ?
 > 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Yes, it should. init_rc() is getting called twice when common/rc is getting
+> re-sourced. Maybe I can do like
 > 
-> Do we need to enable sparse builds for xfstests?  Or is this
-> goign to create too much churn?
+> 
+> if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+> 
+>     <...>
+> 
+>     . common/rc # changes in this patch
+> 
+>     <...>
+> 
+> elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+> 
+>     ...
+> 
+>     init_rc() # explicitly adding an init_rc() for this condition
+> 
+> else
+> 
+>     init_rc() # # explicitly adding an init_rc() for all other conditions.
+> This will prevent init_rc() from getting called twice during re-sourcing
+> common/rc
+> 
+> fi
+> 
+> What do you think?
 
-Yeah I wondered about that. I bet adding the infrastructure would be trivial
-but the fallout might be a whole other thing. ;)
+Sounds fine as a mechanical change, but I wonder, should calling init_rc
+be explicit?  There are not so many places that source common/rc:
 
--Eric
+$ git grep 'common/rc'
+check:362:if ! . ./common/rc; then
+check:836:              . common/rc
+common/preamble:52:     . ./common/rc
+soak:7:. ./common/rc
+tests/generic/749:18:. ./common/rc
 
+(I filtered out the non-executable matches)
+
+I think the call in generic/749 is unnecessary and I don't know what
+soak does.  But that means that one could insert an explicit call to
+init_rc at line 366 and 837 in check and at line 53 in common/preamble,
+and we can clean up one more of those places where sourcing a common/
+file actually /does/ something quietly under the covers.
+
+(Unless the maintainer is ok with the status quo...?)
+
+--D
+
+> 
+> > 
+> > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> > 
+> > --D
+> > 
+> > > ...
+> > > 
+> > > --NR
+> > > 
+> > > 
+> > > 
+> > > > > -		then
+> > > > > -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+> > > > > -			status=1
+> > > > > -			exit
+> > > > > -		fi
+> > > > > -		# TEST_DEV has been recreated, previous FSTYP derived from
+> > > > > -		# TEST_DEV could be changed, source common/rc again with
+> > > > > -		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
+> > > > > +		# Previous FSTYP derived from TEST_DEV could be changed, source
+> > > > > +		# common/rc again with correct FSTYP to get FSTYP specific configs,
+> > > > > +		# e.g. common/xfs
+> > > > >    		. common/rc
+> > > > >    		_prepare_test_list
+> > > > >    	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+> > > > > -- 
+> > > > > 2.34.1
+> > > > > 
+> > > > > 
+> > > -- 
+> > > Nirjhar Roy
+> > > Linux Kernel Developer
+> > > IBM, Bangalore
+> > > 
+> -- 
+> Nirjhar Roy
+> Linux Kernel Developer
+> IBM, Bangalore
+> 
+> 
