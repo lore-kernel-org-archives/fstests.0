@@ -1,175 +1,154 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 884052C9A
-	for <fstests@vger.kernel.org>; Sat,  1 Feb 2025 07:05:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C905154BFF;
+	Sat,  1 Feb 2025 10:55:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738393548; cv=none; b=sCRJNT5iEKibIEhobz307pQhVL52oGwyLf2sYM80zI1CnYzYZnpUyiTq4hjzuUazhLX6j/szti3IcNvrlIB6WFSlDgpbupfr03Y9hW+v+jOHd1eH/Bd7IDjPK5ZiScMwnPk/ZTsicnyh0jG/5hi8fdJMWKn1BxDrcHMYOeJfWXo=
+	t=1738407336; cv=none; b=LANBOqkbh9SVVC4FA0247yxE+hmGYEg/J6am00lO4XD0by6pSHIkr9nummdfdfYA2/BCVnVTktsjmmrAMrBG+neDNXquuoe2n/xN2bmcugHZSJpxgiPsgnRDj7iNYcm9w5292T3Qfh5A08SozUUxC4CWYEcztBGf+vI/Cs8Qf4w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738393548; c=relaxed/simple;
-	bh=V8oRhT2/qocvP7c7/6x9lh4o/5vuxcRma/3A7IjW3QQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cmeunePOOHKj/Yoa6xdWCdUUPiMR7nwSN9HN8dfUGZ/wk8TSebClo9EW8aaB0sFs5xM6TJKSLbnbyHNuLi9AhpF4rP1hj3OJGUQp7eJ1O8hjRb44lKaYQmdkzYJYcOrcrX6B95Klo6ZpeNG/QpnN/i0qgxr6VTywrcs7hug+R98=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=C0/23swq; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1738407336; c=relaxed/simple;
+	bh=DcVsBXMMkCLxd1sCPkpDPTWXiB9k4THUSMnTMLSxbvM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=erCpEveheGjnDDDww7Z/8XvzJfvvXCmjHz4ohSB5fvh65o5gxLFHD7+eWe0IAr/noVaTkK0YkoD4rJJ7bj+z6kelluWXJdjbI4rw1t/AWzEAotfW+BoHE3nvitI5qfMiFJgx8emR3dE6FchTUIwDPTecLBWwDUmvl7OIrGnC5Hc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nl5p14rh; arc=none smtp.client-ip=209.85.208.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="C0/23swq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1738393545;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LOil50X7To4Izr3XMF3C3ToTpCATFupGxfJXHGENw+4=;
-	b=C0/23swq283kRlpImGdaeOH2TPnXWG3z2nPe1k8rt7xlcckcp/8tGDO9E41w3KnqcXqU0D
-	dLphoGTwjRSIKx7I1JpezGAFGAhRD82oI/CWttnLjSmRig9ja7JOSYPRLeFRvzlHRn1W18
-	lvWs+deD8RHHZwHElOuTPTnZLanJBRo=
-Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
- [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-433-eip5_3U8PlKO7Rtmb8zuLw-1; Sat, 01 Feb 2025 02:05:43 -0500
-X-MC-Unique: eip5_3U8PlKO7Rtmb8zuLw-1
-X-Mimecast-MFC-AGG-ID: eip5_3U8PlKO7Rtmb8zuLw
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2ef9e4c5343so7741794a91.0
-        for <fstests@vger.kernel.org>; Fri, 31 Jan 2025 23:05:43 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738393543; x=1738998343;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nl5p14rh"
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-5d7e3f1fc01so5773322a12.2;
+        Sat, 01 Feb 2025 02:55:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1738407333; x=1739012133; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=LOil50X7To4Izr3XMF3C3ToTpCATFupGxfJXHGENw+4=;
-        b=Mz/m4G3DM7DV8dfFHmAMZckpCjk14WTmzsOwnyrz1uWv+8MNK4H+Oki6pP8qHQFTgE
-         9K3VpzWgziG9EM0fT6VaEQXi/ZnkpTwur+ZUx5EEmo80zR+yE7LUtSaDa5fSMPOlogjj
-         6rJUndUaemLe8fYUUujpiKkNaoamVhC0Wj74ih2CgKQ+RJb7dKpK3hLB1i4Uqf01jJwJ
-         h0wUDuxY99ZUyjZGXpwbNxxU8SkyfIgNb/jLbltirDXchZXrXA5TiPI4S8+YJHR+QVEQ
-         lQZ5tkdaQe6NTe4qRCyZJ4hmHOyBEbE9wnyeJdlP1m2Kslht8uOGqJ4oA0bxM2gtPd2M
-         Y50A==
-X-Gm-Message-State: AOJu0YyDIx/ww9bhFzjyBoToFqqq9BJr/j7LNIPOYbKMmLcq7bNgnhN9
-	jrzNx4TTOAEWeM25d5V1l50qpx53SpvfHTM/W2rN7uH9VfgGPD2neAPpbLPRcwk0tp09QfnLwHw
-	68yoOazlIZEtP0kyhdtMFEqsqFbMq5VEYS9nDUvnzraloN9oH4J20+Kw=
-X-Gm-Gg: ASbGnctlxVkEP6zcwpzo1+aSaiEgauSypHibJdq1Jb/eBeY6HZJMO6e1z9Li7E3ScVy
-	tvOHLhhKdwsgE1Pa8RjIeNwk+Ld/TKUfmCx2sQUkVmyFHE5odclSXFth5S940xA/cM9LVtSetAt
-	wYx2kNqKwKWjLQOkm9Q8w4K/oMxEJOBISqiAU4igmoWx0OgllgeJCzwTjyqAemQ+uTXP0w+VUf0
-	/D6/HqIVEjo8KmwpKbA7cnj3ioWjzzuE/JyrxtaQxAcasiXTUiZ0e66YMLRn4Jdl2J4wFIJJU51
-	lX31Sw1l5QtDAQDVwi7SiouYxWNEPJPzilizBa1eoOpBmQ==
-X-Received: by 2002:a05:6a00:278e:b0:71e:6b8:2f4a with SMTP id d2e1a72fcca58-72fd0c1487fmr19169747b3a.12.1738393542911;
-        Fri, 31 Jan 2025 23:05:42 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEovbZRZDUPyRjBsMSwhtkSDtYrYfFiTSCzeACcsV4AytoO+dqNEf4OG9wges0H9ELPqkxUqQ==
-X-Received: by 2002:a05:6a00:278e:b0:71e:6b8:2f4a with SMTP id d2e1a72fcca58-72fd0c1487fmr19169723b3a.12.1738393542581;
-        Fri, 31 Jan 2025 23:05:42 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72fe631be61sm4528747b3a.19.2025.01.31.23.05.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Jan 2025 23:05:42 -0800 (PST)
-Date: Sat, 1 Feb 2025 15:05:38 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [PATCH v2] check: Fix fs specfic imports when
- $FSTYPE!=$OLD_FSTYPE
-Message-ID: <20250201070538.u2o2n6znswbvhsdf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
+        bh=DcVsBXMMkCLxd1sCPkpDPTWXiB9k4THUSMnTMLSxbvM=;
+        b=nl5p14rhSWNMmHVQRQ/tWrng1klUOtrYDlCWHvnwVB8tbD4AaX4Wd/+8gwPW5ySDe5
+         URVMr+arDCGyFm2o20iXaYGQnQzRz430knH4KqEq+jzUH/9VdMk5iY+wzz6C9Nfn9Y58
+         IfLMetslBJHVY91/RL4tYDHGbMnYEx+AaZm/kWYw1FeBZ2TYS9pf8iYoijxspKFaAMIw
+         SzXIF4vcG9otZOYTS0QHi1qK7fH7XqER4AbVsApZMA2SJcSEyuk5Au6o1Zg1G2yYNOdA
+         l7VwwzwvoCjCMsdxUUvaGv11KwR3LHSL5/K+sKsNGV3zukwoYn0b7wrvAV+8WLcJbFQn
+         XSWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738407333; x=1739012133;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=DcVsBXMMkCLxd1sCPkpDPTWXiB9k4THUSMnTMLSxbvM=;
+        b=El1hX4oJcKYYBAT5edGWKJTM1u22dmZAyTUncibVN+ShwR37TmYB0KyGz+PiMP3Wsb
+         8ASDFqyBxCeNZ+tgUwdVDhemGq6/EMAztQ25K9uZyI6xQ5cJelICaMxeW6h4OF6Eyf2X
+         LLTFxG2yH/ice7h8xv8BJiz2ZLw8IWNdBiI7BxD0pQYL+6Tn/oRXpm04kCMC1UvQmGoC
+         kmbF4fkKHY1YWO3fStG0NjX6wyl4SowUW9SF+lHUYDLsdEfO69YXN6b9EpY7uW7tcq8a
+         B5QSJrRyalDeTwpVJs7SXRl8lXoOKykernJLYS6+5AiQS0sbgX3+LUQsaef326ayo600
+         URDA==
+X-Forwarded-Encrypted: i=1; AJvYcCWhZ9ZqoVGeHQdGWviQe4mQlGqS7QLSD1Mkc56gNsQpS7qcs6B7KppTXssuo+fGRQaBi/awnxaqmNdxQxh/IA==@vger.kernel.org, AJvYcCXUMDLNybVyvgsOLWebfPmDtFFO+JV4tId2P8j+A4oCWIy39m4IKsCvj6x063Nm+NvpszJcCNsi@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw9TMz4YlUyQ9RjiaZlqP/NE+dCt+93y3H4CN0Q7j7DUmlPih1n
+	XkoSQ0tqdjdIbTDbLcEWI8TcbYnsYadJNQWcHOdfwDylxtOVy2i99tlhcdcJnJE3sXI2OU109mN
+	rHlsvbFzzOccrpu9/EmBVGWfIuXXemOPLAyc=
+X-Gm-Gg: ASbGncuQT3W86oNTvWaNaev7ccxpJoe4OIaWsmKGyqUMHvWxvX1QocqtpWjJjZxJydM
+	SR1NDY+oLDOT5nFqKgNoXnv6BujwQ71/r7QRgjzoyn81dsBuLMfmCg2S/FclbFlVsPPCHu9pn
+X-Google-Smtp-Source: AGHT+IGPMMYzWlXIpuBTIvXI4BoB4DqKuV7FHMN+zeTg2Yl4SYkun220FnVnFqIopzt8DbxEpYaIjWb+4WmGRB06MLE=
+X-Received: by 2002:a05:6402:5106:b0:5d3:ce7f:ac05 with SMTP id
+ 4fb4d7f45d1cf-5dc5effb167mr14090363a12.31.1738407332386; Sat, 01 Feb 2025
+ 02:55:32 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
+References: <5A3D5719-1705-466D-9A86-96DAFD7EAABD@amazon.com>
+ <Z5h1wmTawx6P8lfK@infradead.org> <DD162239-D4B3-433C-A7C1-2DBEBFA881EC@amazon.com>
+ <20250130142820.GA401886@mit.edu> <4044F3FF-D0CE-4823-B104-0544A986DF7B@ddn.com>
+ <CAOQ4uxgpDy-WFJgpha38SQxSYZDVSaACexJ5ZMr2hN7XkzsBqQ@mail.gmail.com> <1A60CCB2-5412-4223-849C-F6824F82B1B2@amazon.com>
+In-Reply-To: <1A60CCB2-5412-4223-849C-F6824F82B1B2@amazon.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sat, 1 Feb 2025 11:55:21 +0100
+X-Gm-Features: AWEUYZnddcI9ZXUP-_OND4xrMEgOvXFasxQFqaCCsp13gOFyK-vdpFw4VYO5geA
+Message-ID: <CAOQ4uxjR2fD1gUY6NnJa75+ACm_nANNPajmH5aaVSN7FoD8ukQ@mail.gmail.com>
+Subject: Re: [Lsf-pc] [LSF/MM/BPF TOPIC] Lustre filesystem upstreaming
+To: "Day, Timothy" <timday@amazon.com>
+Cc: Andreas Dilger <adilger@ddn.com>, "Theodore Ts'o" <tytso@mit.edu>, 
+	Christoph Hellwig <hch@infradead.org>, 
+	"lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>, 
+	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, 
+	"jsimmons@infradead.org" <jsimmons@infradead.org>, "neilb@suse.de" <neilb@suse.de>, 
+	fstests <fstests@vger.kernel.org>, Zorro Lang <zlang@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Jan 28, 2025 at 05:00:22AM +0000, Nirjhar Roy (IBM) wrote:
-> Bug Description:
-> 
-> _test_mount function is failing with the following error:
-> ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
-> check: failed to mount /dev/loop0 on /mnt1/test
-> 
-> when the second section in local.config file is xfs and the first section
-> is non-xfs.
-> 
-> It can be easily reproduced with the following local.config file
-> 
-> [s2]
-> export FSTYP=ext4
-> export TEST_DEV=/dev/loop0
-> export TEST_DIR=/mnt1/test
-> export SCRATCH_DEV=/dev/loop1
-> export SCRATCH_MNT=/mnt1/scratch
-> 
-> [s1]
-> export FSTYP=xfs
-> export TEST_DEV=/dev/loop0
-> export TEST_DIR=/mnt1/test
-> export SCRATCH_DEV=/dev/loop1
-> export SCRATCH_MNT=/mnt1/scratch
-> 
-> ./check selftest/001
-> 
-> Root cause:
-> When _test_mount() is executed for the second section, the FSTYPE has
-> already changed but the new fs specific common/$FSTYP has not yet
-> been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
-> the test run fails.
-> 
-> Fix:
-> Remove the additional _test_mount in check file just before ". commom/rc"
-                                                                 common
+On Sat, Feb 1, 2025 at 12:01=E2=80=AFAM Day, Timothy <timday@amazon.com> wr=
+ote:
+>
+> On 1/31/25, 5:11 PM, "Amir Goldstein" <amir73il@gmail.com <mailto:amir73i=
+l@gmail.com>> wrote:
+> > On Fri, Jan 31, 2025 at 3:35 AM Andreas Dilger via Lsf-pc
+> > <lsf-pc@lists.linux-foundation.org <mailto:lsf-pc@lists.linux-foundatio=
+n.org>> wrote:
+> > >
+> > >
+> > > As Tim mentioned, it is possible to mount a Lustre client (or two) pl=
+us one or
+> > > more MDT/OST on a single ~3GB VM with loopback files in /tmp and run =
+testing.
+> > > There is a simple script we use to format and mount 4 MDTs and 4 OSTs=
+ on
+> > > temporary loop files and mount a client from the Lustre build tree.
+> > >
+> > > There haven't been any VFS patches needed for years for Lustre to be =
+run,
+> > > though there are a number patches needed against a copied ext4 tree t=
+o
+> > > export some of the functions and add some filesystem features. Until =
+the
+> > > ext4 patches are merged, it would also be possible to run light testi=
+ng with
+> > > Tim's RAM-based OSD without any loopback devices at all (though with =
+a
+> > > hard limitation on the size of the filesystem).
+> >
+> >
+> > Recommendation: if it is easy to setup loopback lustre server, then the=
+ best
+> > practice would be to add lustre fstests support, same as nfs/afs/cifs c=
+an be
+> > tested with fstests.
+> >
+> >
+> > Adding fstests support will not guarantee that vfs developers will run =
+fstest
+> > with your filesystem, but if you make is super easy for vfs developers =
+to
+> > test your filesystem with a the de-facto standard for fs testing, then =
+at least
+> > they have an option to verify that their vfs changes are not breaking y=
+our
+> > filesystem, which is what upstreaming is supposed to provide.
+>
+> I was hoping to do exactly that. I've been able run to fstests on Lustre
+> (in an adhoc manner), but I wanted to put together a patch series to
+> add proper support. Would fstests accept Lustre support before Lustre
+> gets accepted upstream? Or should it be maintained as a separate
+> branch?
+>
 
+Up to the maintainer (CC) but in any case, you will need to maintain
+a development branch until the fstests patches are reviewed, so I do
+not see much difference for the process.
 
-> since ". commom/rc" is already sourcing fs specific imports and doing a
-           common
+My own vote would be to merge lustre support to fstest *before*
+merging lustre to linux-next tree (to fs-next branch), so that lustre
+could potentially be tested by 3rd party when it hits linux-next.
 
-> _test_mount.
+IMO, if lustre is on track for upstreaming with all the open questions
+addressed, I see no reason not to merge fstests support earlier.
 
-This version looks good to me, I'll merge it with above changes.
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
-I'll push this patch (if it's passed the regression test) to fix current
-problem at first.
-
-About the common/rc:init_rc we're talking about, I think we can keep
-talking, and change that in another patch if need. Thanks for fixing this.
+I was going to recommend that you consider adding lustre support to
+one or more of the available "fstest runners" to provide a turnkey solution
+for the standalone test setup, but I see that you already contributed to kt=
+est,
+So that's great! and one more reason to merge fstests support sooner.
 
 Thanks,
-Zorro
-
-> 
-> Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> ---
->  check | 12 +++---------
->  1 file changed, 3 insertions(+), 9 deletions(-)
-> 
-> diff --git a/check b/check
-> index 607d2456..5cb4e7eb 100755
-> --- a/check
-> +++ b/check
-> @@ -784,15 +784,9 @@ function run_section()
->  			status=1
->  			exit
->  		fi
-> -		if ! _test_mount
-> -		then
-> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
-> -			status=1
-> -			exit
-> -		fi
-> -		# TEST_DEV has been recreated, previous FSTYP derived from
-> -		# TEST_DEV could be changed, source common/rc again with
-> -		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
-> +		# Previous FSTYP derived from TEST_DEV could be changed, source
-> +		# common/rc again with correct FSTYP to get FSTYP specific configs,
-> +		# e.g. common/xfs
->  		. common/rc
->  		_prepare_test_list
->  	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
-> -- 
-> 2.34.1
-> 
-
+Amir.
