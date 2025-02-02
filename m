@@ -1,371 +1,227 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB4FD1F9A80
-	for <fstests@vger.kernel.org>; Sun,  2 Feb 2025 14:25:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FF1A1CAA7B
+	for <fstests@vger.kernel.org>; Sun,  2 Feb 2025 14:46:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738506329; cv=none; b=iTlefwZMVmePHJC9Vnf+1L//XAyC1DCd5Yny0TXTchj4a/TwkVnSEclVnpZtvE9DZgTtvCSBHLApjTbONyFQk2lcJ9vnUuXnKyGGK6OWAwX9twc7u50+BqzfXWPoUvF2pomHGnjnrxa4lHiuj0o0Dnm8nQCDQJdO2mwoN74XQlA=
+	t=1738507611; cv=none; b=FTVS911UAohrYViZlJNyWy6pKHHXsYIc47gUk+XnG0yGIi5uBxR69ZYrGXfyFEizqEexEWOKTX3S3T8m0OcoR6Txb3uvHwr6EG9tAH74gC4c05tOWcHC1yrBWcXwuzJmYxZc3cGoCfZhD752fmKOgm1er0cLg6xqqUtLyt/b0cg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738506329; c=relaxed/simple;
-	bh=V/4c0udt/+v+Xh/8RmMnbxYwqjB2kktBZlKt+27k2vo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ef7/Npi+7UjhVBJlL3hfmXHzmZFBLOWcLTzF6HDefRk8alPv4y8LIDvObcvDQ0bVz0ZyzIXSzL0rGyM2Yl5rhM31xvtr3dU0v6aRGsgeOxHlpWctGf7jkT3Fjcql55iOLttwpDexZOPoD/7IQyOhCa6iEM5otu9aQnlwI9Olo8U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=aiFPoOvA; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1738507611; c=relaxed/simple;
+	bh=5o8tQIBErNVwbWZ/RUwka93tW4tOF8h6ZhyVTZK9/X8=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=legyxBKcgYhMAlAAETCkTWNQ8gIWh+RUnVrUoEUkUWsrUnAoPucwpLpaL/dxdalrtdFXha+C5tMjOlB8fgUjZT211DffI5Kq8K3dgtJBux3cTuQgLRpx+4WbVcxclMy3QEuzEm4Y51CP5XY07QTyprgN+ZInmkVe0II5GrGKZWA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mN1tSprD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="aiFPoOvA"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1738506326;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=7iSzttlOUodK75C/VSs7RT8LdulGLjbAyncahFiE6d0=;
-	b=aiFPoOvAnPhpZ5M6R/VVENDNfS62wtL43nNeUa28GWI5BTMV9pNzb7o/ZuTCMnxYtA58gu
-	TkZMUAldMKOjGA6MIc3+/y0hdNLNV/DkoLxp+Lbi92nDKF33VY8Y9K29gYZjlVZx9c0fbP
-	sEGBGPzCpL5pfBAe1PrWzd8ab13wp1c=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-466-AyrLJNybNkCNI8tB94j1rQ-1; Sun, 02 Feb 2025 09:25:25 -0500
-X-MC-Unique: AyrLJNybNkCNI8tB94j1rQ-1
-X-Mimecast-MFC-AGG-ID: AyrLJNybNkCNI8tB94j1rQ
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-21661949f23so111515445ad.3
-        for <fstests@vger.kernel.org>; Sun, 02 Feb 2025 06:25:25 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738506324; x=1739111124;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=7iSzttlOUodK75C/VSs7RT8LdulGLjbAyncahFiE6d0=;
-        b=HxDwz7cnXmq586rROJtQuwKWfFMyJT+W5tacc9aIJISC4kQxEX9Za67A1cs64wAvMV
-         bJXObdC42Mi93t1xYORr2ZhCa9oIty95Ru3SmjAoHivAZM7TZnY+KJ/5l4NTuTy45Pw7
-         Wm1yb3Q+vLMiU5jr6xvq+uMjC/gq6j1V1VumW9AKrhHNk+zbwXeerHgzbZ8uJLxf/E/t
-         HR9EkoSHN7b/mmi1oa6yrTFjmRGEbYCeSnktzfS6gF8kJpCqQh2UHPvcEUGCxqmC5kPC
-         5uL+dEOhps6cRjebAn9Ade90muDdXi3Sz6W2GXJVwEUAVdDGlX4+r0WwyXpSYvwTedgK
-         p6Jg==
-X-Gm-Message-State: AOJu0YzjOE1Qd/Jloo+KFkCvghPD0Q3zeTxZD7SsqU2b/bMJxqpadbN4
-	IRNDssAb+LZUMbPn1WNom2HPNYHyxfEpIa14HkCPvDCLq7fVebua/oUJZcqH++DIaxO0jY3DSpY
-	wIMqa3/iU7QWkfr4v0vna/YcAuF1lzfi1kyvvMQgqJdfAGNapO37s2ZI=
-X-Gm-Gg: ASbGncvlhqMislycn929TsoGhwFwv8NM0F6iYja6jWHQYRirxztlHiqj+dn9n+7RVOt
-	y2a9hJzKNlBMYs3qhdQ31LJTzEs6Vxqp0Lctt7owo26vvr2kie2jeVSjeMgMU3z6Bo+mVDHJH/U
-	tgsniOTPTBndf+coVyCDk9UP3vOXrTeHbLTye/Ltmo0UiSu5Lpg0BhORTLO/zcGv3kjoW/IN5Po
-	SQrkr9mH27ydqSxHYQhFK6lHfAs2ABE1v4NnikPjQiH9Nnd6Y/ePVMMRbn752d8t4eqUE0h3/mp
-	EUNLErR9rdtkrHOCvDSFsGG8j0GuXGOnVSp+Z8xe8TjV0g==
-X-Received: by 2002:a17:903:11cd:b0:215:7719:24f6 with SMTP id d9443c01a7336-21dd7d788ffmr262712195ad.23.1738506324011;
-        Sun, 02 Feb 2025 06:25:24 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IE2hI+8JEG1vqkXTigzNYfB9dSkTo88eWJNupF1d/cMAf5KQtZR94IJwoxJvgFxw4xXyLb/Sg==
-X-Received: by 2002:a17:903:11cd:b0:215:7719:24f6 with SMTP id d9443c01a7336-21dd7d788ffmr262711815ad.23.1738506323560;
-        Sun, 02 Feb 2025 06:25:23 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21de31edd95sm59489305ad.40.2025.02.02.06.25.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 02 Feb 2025 06:25:22 -0800 (PST)
-Date: Sun, 2 Feb 2025 22:25:18 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Joanne Koong <joannelkoong@gmail.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-	bfoster@redhat.com, djwong@kernel.org, nirjhar@linux.ibm.com,
-	kernel-team@meta.com
-Subject: Re: [PATCH v5 1/2] fsx: support reads/writes from buffers backed by
- hugepages
-Message-ID: <20250202142518.r3xvf7mvfo2nhb7t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250121215641.1764359-1-joannelkoong@gmail.com>
- <20250121215641.1764359-2-joannelkoong@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mN1tSprD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 887FDC4CED1;
+	Sun,  2 Feb 2025 14:46:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738507611;
+	bh=5o8tQIBErNVwbWZ/RUwka93tW4tOF8h6ZhyVTZK9/X8=;
+	h=Date:From:To:Subject:From;
+	b=mN1tSprDCFM/+j2ORzKznvYh0TYb40To7vco0UnSWzePkkwnxL3ROinlJ/8bp4vdY
+	 PoxqLAmmZInYIXSotfmE2SXFPanppTpnXWLOUcUnutsPjNhPC0B6M71sOcwRvdV2xj
+	 /4JdgPsF5iCtj8Q+a+d3Jlw1V6lj4FUwaco12kLr6iSgQPcRk3FcTpCovEic5vxfIn
+	 2+3AoE2o+9ktALVyrFuJBhRJRk4s74maf+CCAmU85sQjzKXOfcleSZmQtj2Xh4237U
+	 v2BGFCPvYAesx/FIpMUnED9dnhvVUNovr32DFuzFvq2g0RMrXW88FXa6AARPG6KDWM
+	 qpA8XF2dK+CXQ==
+Date: Sun, 02 Feb 2025 22:46:47 +0800
+Message-ID: <c052fc0100e3f0cb157f31ecbeb89ce0@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.02.02
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="2vdJqhqsSB3v"
+Content-Disposition: inline
+
+
+--2vdJqhqsSB3v
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250121215641.1764359-2-joannelkoong@gmail.com>
 
-On Tue, Jan 21, 2025 at 01:56:40PM -0800, Joanne Koong wrote:
-> Add support for reads/writes from buffers backed by hugepages.
-> This can be enabled through the '-h' flag. This flag should only be used
-> on systems where THP capabilities are enabled.
-> 
-> This is motivated by a recent bug that was due to faulty handling of
-> userspace buffers backed by hugepages. This patch is a mitigation
-> against problems like this in the future.
-> 
-> Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
-> Reviewed-by: Brian Foster <bfoster@redhat.com>
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> ---
+Hi all,
 
-Those two test cases fail on old system which doesn't support
-MADV_COLLAPSE:
+The for-next branch of the xfstests repository at:
 
-   fsx -N 10000 -l 500000 -h
-  -fsx -N 10000 -o 8192 -l 500000 -h
-  -fsx -N 10000 -o 128000 -l 500000 -h
-  +MADV_COLLAPSE not supported. Can't support -h
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-and
+has just been updated and tagged as v2025.02.02 release.
 
-   fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-  -fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-  -fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -h
-  +mapped writes DISABLED
-  +MADV_COLLAPSE not supported. Can't support -h
+Release Notes:
+1) There're 3 new test cases -- generic/370, generic/759 and generic/760. The
+   g/759 and g/760 fail on old system which doesn't support MADV_COLLAPSE. It
+   might be fixed later.
+2) The _supported_fs is removed totally, please use _exclude_fs if you need
+   to skip a test for a fs.
 
-I'm wondering ...
-
->  ltp/fsx.c | 166 +++++++++++++++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 153 insertions(+), 13 deletions(-)
-> 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 41933354..3be383c6 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -190,6 +190,16 @@ int	o_direct;			/* -Z */
->  int	aio = 0;
->  int	uring = 0;
->  int	mark_nr = 0;
-> +int	hugepages = 0;                  /* -h flag */
-> +
-> +/* Stores info needed to periodically collapse hugepages */
-> +struct hugepages_collapse_info {
-> +	void *orig_good_buf;
-> +	long good_buf_size;
-> +	void *orig_temp_buf;
-> +	long temp_buf_size;
-> +};
-> +struct hugepages_collapse_info hugepages_info;
->  
->  int page_size;
->  int page_mask;
-> @@ -2471,7 +2481,7 @@ void
->  usage(void)
->  {
->  	fprintf(stdout, "usage: %s",
-> -		"fsx [-dfknqxyzBEFHIJKLORWXZ0]\n\
-> +		"fsx [-dfhknqxyzBEFHIJKLORWXZ0]\n\
->  	   [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid]\n\
->  	   [-l flen] [-m start:end] [-o oplen] [-p progressinterval]\n\
->  	   [-r readbdy] [-s style] [-t truncbdy] [-w writebdy]\n\
-> @@ -2483,8 +2493,11 @@ usage(void)
->  	-d: debug output for all operations\n\
->  	-e: pollute post-eof on size changes (default 0)\n\
->  	-f: flush and invalidate cache after I/O\n\
-> -	-g X: write character X instead of random generated data\n\
-> -	-i logdev: do integrity testing, logdev is the dm log writes device\n\
-> +	-g X: write character X instead of random generated data\n"
-> +#ifdef MADV_COLLAPSE
-> +"	-h hugepages: use buffers backed by hugepages for reads/writes\n"
-> +#endif
-> +"	-i logdev: do integrity testing, logdev is the dm log writes device\n\
->  	-j logid: prefix debug log messsages with this id\n\
->  	-k: do not truncate existing file and use its size as upper bound on file size\n\
->  	-l flen: the upper bound on file size (default 262144)\n\
-> @@ -2833,11 +2846,41 @@ __test_fallocate(int mode, const char *mode_str)
->  #endif
->  }
->  
-> +/*
-> + * Reclaim may break up hugepages, so do a best-effort collapse every once in
-> + * a while.
-> + */
-> +static void
-> +collapse_hugepages(void)
-> +{
-> +#ifdef MADV_COLLAPSE
-> +	int ret;
-> +
-> +	/* re-collapse every 16k fsxops after we start */
-> +	if (!numops || (numops & ((1U << 14) - 1)))
-> +		return;
-> +
-> +	ret = madvise(hugepages_info.orig_good_buf,
-> +		      hugepages_info.good_buf_size, MADV_COLLAPSE);
-> +	if (ret)
-> +		prt("collapsing hugepages for good_buf failed (numops=%llu): %s\n",
-> +		     numops, strerror(errno));
-> +	ret = madvise(hugepages_info.orig_temp_buf,
-> +		      hugepages_info.temp_buf_size, MADV_COLLAPSE);
-> +	if (ret)
-> +		prt("collapsing hugepages for temp_buf failed (numops=%llu): %s\n",
-> +		     numops, strerror(errno));
-> +#endif
-> +}
-> +
->  bool
->  keep_running(void)
->  {
->  	int ret;
->  
-> +	if (hugepages)
-> +	        collapse_hugepages();
-> +
->  	if (deadline.tv_nsec) {
->  		struct timespec now;
->  
-> @@ -2856,6 +2899,103 @@ keep_running(void)
->  	return numops-- != 0;
->  }
->  
-> +static long
-> +get_hugepage_size(void)
-> +{
-> +	const char str[] = "Hugepagesize:";
-> +	size_t str_len =  sizeof(str) - 1;
-> +	unsigned int hugepage_size = 0;
-> +	char buffer[64];
-> +	FILE *file;
-> +
-> +	file = fopen("/proc/meminfo", "r");
-> +	if (!file) {
-> +		prterr("get_hugepage_size: fopen /proc/meminfo");
-> +		return -1;
-> +	}
-> +	while (fgets(buffer, sizeof(buffer), file)) {
-> +		if (strncmp(buffer, str, str_len) == 0) {
-> +			sscanf(buffer + str_len, "%u", &hugepage_size);
-> +			break;
-> +		}
-> +	}
-> +	fclose(file);
-> +	if (!hugepage_size) {
-> +		prterr("get_hugepage_size: failed to find "
-> +			"hugepage size in /proc/meminfo\n");
-> +		return -1;
-> +	}
-> +
-> +	/* convert from KiB to bytes */
-> +	return hugepage_size << 10;
-> +}
-> +
-> +static void *
-> +init_hugepages_buf(unsigned len, int hugepage_size, int alignment, long *buf_size)
-> +{
-> +	void *buf = NULL;
-> +#ifdef MADV_COLLAPSE
-> +	int ret;
-> +	long size = roundup(len, hugepage_size) + alignment;
-> +
-> +	ret = posix_memalign(&buf, hugepage_size, size);
-> +	if (ret) {
-> +		prterr("posix_memalign for buf");
-> +		return NULL;
-> +	}
-> +	memset(buf, '\0', size);
-> +	ret = madvise(buf, size, MADV_COLLAPSE);
-> +	if (ret) {
-> +		prterr("madvise collapse for buf");
-> +		free(buf);
-> +		return NULL;
-> +	}
-> +
-> +	*buf_size = size;
-> +#endif
-> +	return buf;
-> +}
-> +
-> +static void
-> +init_buffers(void)
-> +{
-> +	int i;
-> +
-> +	original_buf = (char *) malloc(maxfilelen);
-> +	for (i = 0; i < maxfilelen; i++)
-> +		original_buf[i] = random() % 256;
-> +	if (hugepages) {
-> +		long hugepage_size = get_hugepage_size();
-> +		if (hugepage_size == -1) {
-> +			prterr("get_hugepage_size()");
-> +			exit(102);
-> +		}
-> +		good_buf = init_hugepages_buf(maxfilelen, hugepage_size, writebdy,
-> +					      &hugepages_info.good_buf_size);
-> +		if (!good_buf) {
-> +			prterr("init_hugepages_buf failed for good_buf");
-> +			exit(103);
-> +		}
-> +		hugepages_info.orig_good_buf = good_buf;
-> +
-> +		temp_buf = init_hugepages_buf(maxoplen, hugepage_size, readbdy,
-> +					      &hugepages_info.temp_buf_size);
-> +		if (!temp_buf) {
-> +			prterr("init_hugepages_buf failed for temp_buf");
-> +			exit(103);
-> +		}
-> +		hugepages_info.orig_temp_buf = temp_buf;
-> +	} else {
-> +		unsigned long good_buf_len = maxfilelen + writebdy;
-> +		unsigned long temp_buf_len = maxoplen + readbdy;
-> +
-> +		good_buf = calloc(1, good_buf_len);
-> +		temp_buf = calloc(1, temp_buf_len);
-> +	}
-> +	good_buf = round_ptr_up(good_buf, writebdy, 0);
-> +	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> +}
-> +
->  static struct option longopts[] = {
->  	{"replay-ops", required_argument, 0, 256},
->  	{"record-ops", optional_argument, 0, 255},
-> @@ -2883,7 +3023,7 @@ main(int argc, char **argv)
->  	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
->  
->  	while ((ch = getopt_long(argc, argv,
-> -				 "0b:c:de:fg:i:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
-> +				 "0b:c:de:fg:hi:j:kl:m:no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
->  				 longopts, NULL)) != EOF)
->  		switch (ch) {
->  		case 'b':
-> @@ -2916,6 +3056,14 @@ main(int argc, char **argv)
->  		case 'g':
->  			filldata = *optarg;
->  			break;
-> +		case 'h':
-> +#ifndef MADV_COLLAPSE
-> +			fprintf(stderr, "MADV_COLLAPSE not supported. "
-> +				"Can't support -h\n");
-> +			exit(86);
-> +#endif
-> +			hugepages = 1;
-> +			break;
-
-...
-if we could change this part to:
-
-#ifdef MADV_COLLAPSE
-	hugepages = 1;
-#endif
-	break;
-
-to avoid the test failures on old systems.
-
-Or any better ideas from you :)
+More bug fixes or updates refer to below, thanks for all these contributions.
 
 Thanks,
 Zorro
 
->  		case 'i':
->  			integrity = 1;
->  			logdev = strdup(optarg);
-> @@ -3229,15 +3377,7 @@ main(int argc, char **argv)
->  			exit(95);
->  		}
->  	}
-> -	original_buf = (char *) malloc(maxfilelen);
-> -	for (i = 0; i < maxfilelen; i++)
-> -		original_buf[i] = random() % 256;
-> -	good_buf = (char *) malloc(maxfilelen + writebdy);
-> -	good_buf = round_ptr_up(good_buf, writebdy, 0);
-> -	memset(good_buf, '\0', maxfilelen);
-> -	temp_buf = (char *) malloc(maxoplen + readbdy);
-> -	temp_buf = round_ptr_up(temp_buf, readbdy, 0);
-> -	memset(temp_buf, '\0', maxoplen);
-> +	init_buffers();
->  	if (lite) {	/* zero entire existing file */
->  		ssize_t written;
->  
-> -- 
-> 2.47.1
-> 
+The new head of the for-next branch is commit:
 
+d1adf462e4b2 check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
+
+New commits:
+
+Christoph Hellwig (6):
+      [329e47e375fb] xfs/541: _notrun if the file system can't mount
+      [d2f055fd91a2] generic/363: remove _supported_fs xfs
+      [1f193e75d3f1] common: remove the $FSYP check in _cleanup_dump
+      [9d6ea111e5b9] replace _supported_fs with _exclude_fs
+      [1246241aa954] generic/418: use min_dio_alignment
+      [a4163647375c] common: skip tests using LVM when the device is no known
+
+Eric Sandeen (1):
+      [3fa459d162c9] fix vfs/utils.c for big-endian systems
+
+Filipe Manana (1):
+      [fa47c4d8affa] generic: test swap activation on file that used to have clones
+
+Joanne Koong (2):
+      [40150a936449] fsx: support reads/writes from buffers backed by hugepages
+      [627289232371] generic: add tests for read/writes from hugepages-backed buffers
+
+Nirjhar Roy (IBM) (1):
+      [d1adf462e4b2] check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE
+
+Shin'ichiro Kawasaki (1):
+      [a7d82369dcae] fsx: fix compile error for preadv2()
+
+Theodore Ts'o (1):
+      [6bf32d1a46d4] xfs/032: fix test failure on kernels which don't support bs > ps
+
+
+Code Diffstat:
+
+ check                 |  12 +---
+ common/dump           |   6 --
+ common/rc             |  43 +++++++------
+ ltp/fsx.c             | 167 ++++++++++++++++++++++++++++++++++++++++++++++----
+ src/vfs/utils.c       |   6 +-
+ tests/ext4/001        |   4 +-
+ tests/ext4/002        |   2 +-
+ tests/ext4/003        |   3 +-
+ tests/ext4/004        |   3 +-
+ tests/ext4/005        |   4 +-
+ tests/ext4/006        |   3 +-
+ tests/ext4/007        |   3 +-
+ tests/ext4/008        |   3 +-
+ tests/ext4/009        |   3 +-
+ tests/ext4/010        |   3 +-
+ tests/ext4/011        |   3 +-
+ tests/ext4/012        |   3 +-
+ tests/ext4/013        |   3 +-
+ tests/ext4/014        |   3 +-
+ tests/ext4/015        |   3 +-
+ tests/ext4/016        |   3 +-
+ tests/ext4/017        |   3 +-
+ tests/ext4/018        |   3 +-
+ tests/ext4/019        |   3 +-
+ tests/ext4/020        |   4 +-
+ tests/ext4/021        |   4 +-
+ tests/ext4/022        |   4 +-
+ tests/ext4/023        |   4 +-
+ tests/ext4/024        |   4 +-
+ tests/ext4/025        |   4 +-
+ tests/ext4/026        |   4 +-
+ tests/ext4/027        |   4 +-
+ tests/ext4/028        |   4 +-
+ tests/ext4/029        |   4 +-
+ tests/ext4/030        |   4 +-
+ tests/ext4/031        |   4 +-
+ tests/ext4/032        |   3 +-
+ tests/ext4/033        |   4 +-
+ tests/ext4/034        |   3 +-
+ tests/ext4/035        |   3 +-
+ tests/ext4/036        |   3 +-
+ tests/ext4/037        |   2 +-
+ tests/ext4/038        |   3 +-
+ tests/ext4/039        |   3 +-
+ tests/ext4/040        |   1 -
+ tests/ext4/041        |   1 -
+ tests/ext4/042        |   3 -
+ tests/ext4/043        |   2 +-
+ tests/ext4/044        |   4 +-
+ tests/ext4/045        |   3 +-
+ tests/ext4/046        |   3 +-
+ tests/ext4/047        |   4 +-
+ tests/ext4/048        |   3 +-
+ tests/ext4/049        |   3 +-
+ tests/ext4/050        |   3 +-
+ tests/ext4/051        |   3 +-
+ tests/ext4/052        |   3 +-
+ tests/ext4/053        |   1 -
+ tests/ext4/054        |   4 +-
+ tests/ext4/055        |   4 +-
+ tests/ext4/056        |   4 +-
+ tests/ext4/057        |   4 +-
+ tests/ext4/058        |   4 +-
+ tests/ext4/059        |   4 +-
+ tests/ext4/060        |   4 +-
+ tests/ext4/271        |   4 +-
+ tests/ext4/301        |   4 +-
+ tests/ext4/302        |   4 +-
+ tests/ext4/303        |   4 +-
+ tests/ext4/304        |   4 +-
+ tests/ext4/305        |   3 +-
+ tests/ext4/306        |   3 +-
+ tests/ext4/307        |   4 +-
+ tests/generic/081     |   6 +-
+ tests/generic/108     |   6 +-
+ tests/generic/187     |   8 ++-
+ tests/generic/294     |   2 +-
+ tests/generic/357     |   2 +-
+ tests/generic/362     |   3 +-
+ tests/generic/363     |   3 -
+ tests/generic/370     | 109 ++++++++++++++++++++++++++++++++
+ tests/generic/370.out |  25 ++++++++
+ tests/generic/418     |   2 +-
+ tests/generic/459     |   6 +-
+ tests/generic/465     |   2 +-
+ tests/generic/500     |   2 +-
+ tests/generic/631     |   4 +-
+ tests/generic/679     |   2 +-
+ tests/generic/699     |   3 +-
+ tests/generic/732     |   4 +-
+ tests/generic/740     |   7 ++-
+ tests/generic/759     |  22 +++++++
+ tests/generic/759.out |   4 ++
+ tests/generic/760     |  26 ++++++++
+ tests/generic/760.out |   4 ++
+ tests/xfs/032         |   2 +-
+ tests/xfs/541         |   2 +-
+ 97 files changed, 570 insertions(+), 145 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--2vdJqhqsSB3v
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAmefhTQACgkQlNbPkfr2
+tMw3+A/9GTGJV8YvJM2y9Yv9mFOOoJm8Hy8p4A/K4AY0sGfvr49jkEUjV+aPhWpT
+G/RrEYL0GgEifM9n95NnQGGF2PNYhjgyABAMmHc/jofzOevpILks7Tz93SkfKMT0
+0i9AlLcan2oit6+oVhJt+nKb0keTUBcb4eLSF8oUVaaAe9VWY4zFwi2/fp0a9bIP
+Tc1afBymHlC+t0/U4kftXfrly/kZ2wzGsdMgS1vDMuiJEcMf1PwDVo2tKTg6s8nC
+pHkKODDiR20KEF9bQEFayNtEnzfQuKaGM2/LU63CORbUGAc+tr+NoxhCBNNkfQoH
+fz4vqeio6x6RWxTJp1j0d0NGIiZUhotugwPlPJKan26Pg3fzE4Di31MnsJEPf12r
+5cO5WoNTW2v31vRwZuCcYlTEs9X8Etbnd8XFehwVe8Vm0aHT+0PC8Gz2eawMlKdu
+2snGqkYOzcf1lrGoY4hx04R9PUlHuZHq87SQaBHBUhHsdpWXrTAE22b2JaglqY9Y
+hPYfgQAWBh+RFC5GNnVNMhIE6tr09lgAxYidLg+tTSARi5XNSK9nKlZBj5BuSVKF
+/halO/jYiyyPQQsZtRamLp/WOqKQJZsxVE5gRVktkx+Mm7ZO7Pss2CknoUY29kSh
+1ZAszYdC1RyWTvfK3dsx6Gb7IqPIZu/TlzqU3CY9rH5JuEPr3sk=
+=Syyj
+-----END PGP SIGNATURE-----
+
+--2vdJqhqsSB3v--
