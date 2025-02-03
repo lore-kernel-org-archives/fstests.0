@@ -1,49 +1,30 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42BA74502F;
-	Mon,  3 Feb 2025 06:44:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A021A31;
+	Mon,  3 Feb 2025 06:48:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738565068; cv=none; b=sCfEvUNcwOpLTAMkiJeIfVmXcvtsahYIht/A4NZq7IORFtjYnE5fN3OpJnOZNmzDfuzcSa1aOUGXQjoD2qiGRKbykhXDfF2/7sksZSCjXAUyWGiQTayD8qesPnt85Wu1psCoEihwHb2zcPO6RlmzN8SDK3ctoUU5t0naCDncf0s=
+	t=1738565303; cv=none; b=NqU0BnLf4pkY7vL3BH1wx7wJt9a2gnOx44+rCrnYXf3sBTLFFWpRr3bfomUtVQUBip4bFb3gNVYRIW3ivgMYzrrLcBOMdv/HTP7DHs0t+2yQTrnIs2eecmWxa5FQYemozOMP+04uAraQ1bHBy7AsvpUK+ENJsZOH762+6bqlgWo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738565068; c=relaxed/simple;
-	bh=HQKDYOCdHKaakHGV0eqzsWVJdOSGEfM5T8DAjKSLviE=;
+	s=arc-20240116; t=1738565303; c=relaxed/simple;
+	bh=U9PIZyhcRSkv6gA7iBY9dX8xB49xi1s77L3qQi3hulI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WsTSKvRTEO19L2BVHRQ+IDBTzXnzvCvTXYxegCIdwWj55BNadFAefd2DdbsEh78pDThoyMZrlqDkioKV7S0dKesvC+/NszAc0hkz3vzAom8UAmhRPGVXtu+TWeUx7naR7glk8k5yuWlghUCLv9Gi8q6fWRssVgIcDMKf/B7vkGE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=Aqa5/RnF; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="Aqa5/RnF"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=s8X/jA+kTlWlpDDzux2Wj/CLtctKj+eXpCkO2gIJEKI=; b=Aqa5/RnFXfV5vtOdf4273dOiCn
-	CRbMZfqUSS8aBWNoGks2hdqyxZNxtCr4SLVs+/gmyZgg7ZnIE3uLeXBDKMy65s86pMXnKlN5MmzR9
-	/xudR9kFE7GvxPb6+PuiC/XXGvwu8N6ARkgD6NPw1mKCdRgjsF8mpjNdTrMtXKwsnKv+aiP1bq2n6
-	xRv1Ard42TE3bfcPiNthogUpbr+6S/1bwqPPyEqieuZyagmRXPRgG/XtKcyD7+9M7LBvm8ALtuuvm
-	Cb5B/+ahPzpYs623D+oNsUFwquc+1yTjGpJ6RKdn/yjSEk6Miu38RdvZhpAX7o5w7eUwE8dDCNxC9
-	AfNlh2iw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1teqBw-0000000EfQ2-2ueZ;
-	Mon, 03 Feb 2025 06:44:20 +0000
-Date: Sun, 2 Feb 2025 22:44:20 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Zorro Lang <zlang@redhat.com>, Amir Goldstein <amir73il@gmail.com>,
-	"Day, Timothy" <timday@amazon.com>,
-	Andreas Dilger <adilger@ddn.com>,
-	Christoph Hellwig <hch@infradead.org>,
-	"lsf-pc@lists.linux-foundation.org" <lsf-pc@lists.linux-foundation.org>,
-	"linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-	"jsimmons@infradead.org" <jsimmons@infradead.org>,
-	"neilb@suse.de" <neilb@suse.de>, fstests <fstests@vger.kernel.org>
-Subject: Re: [Lsf-pc] [LSF/MM/BPF TOPIC] Lustre filesystem upstreaming
-Message-ID: <Z6BlxO4YjsjPQyuY@infradead.org>
-References: <20250201135911.tglbjox4dx7htrco@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <20250202152045.GA12129@macsyma-2.local>
+	 Content-Type:Content-Disposition:In-Reply-To; b=NiHc1JxOLgp0Gd8qNdqUIJKokzV/GRzHA13Uv0u5xHWyyMhXDv8RCOBHYJDItTbXnM4uyRy4uV9/nJQQ6I6xlH/OiqCizzjpJNPxL+JP55IoYVxqC2fhmsxsttGXEvqEkmQjpD0qsY9G4xSuqoxbs/u7aUuECXWUaiCDCaBXGHM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
+Received: by verein.lst.de (Postfix, from userid 2407)
+	id 8DAED68D05; Mon,  3 Feb 2025 07:40:29 +0100 (CET)
+Date: Mon, 3 Feb 2025 07:40:29 +0100
+From: Christoph Hellwig <hch@lst.de>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, Zorro Lang <zlang@kernel.org>,
+	Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org
+Subject: Re: [PATCH 3/3] replace _supported_fs with _exclude_fs
+Message-ID: <20250203064029.GA16864@lst.de>
+References: <20250128071315.676272-1-hch@lst.de> <20250128071315.676272-4-hch@lst.de> <20250202133101.bpst6rzhjn7g4zvw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -52,21 +33,23 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250202152045.GA12129@macsyma-2.local>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20250202133101.bpst6rzhjn7g4zvw@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Sun, Feb 02, 2025 at 10:26:28AM -0500, Theodore Ts'o wrote:
-> Well, in the past I attempted to land a "local" file system type that
-> could be used for file systems that were available via docker (and so
-> there was no block device to mount and unmount).  This was useful for
-> testing gVisor[1] and could also be used for testing Windows Subsystem
-> for Linux v1.  As I recall, either Dave or Cristoph objected, even
-> though the diffstat was +73, -4 lines in common/rc.
+On Sun, Feb 02, 2025 at 09:31:01PM +0800, Zorro Lang wrote:
+> generic/730 is missed:
+> 
+>   /var/lib/xfstests/tests/generic/370: line 31: _supported_fs: command not found
+> 
+> Anyway, I'll help to change g/370 when I merge this patch.
 
-Yes, xfstests should just support upstream code.  Even for things where
-we through it would get upstream ASAP like the XFS
-rtrmap/reflink/metadir work (which finally did get upstream now) having
-the half-finished support in xfstests without actually landing the rest
-caused more than enough problems.  Something like lustre that has
-historically been a complete trainwreck and where I have strong doubts
-that the maintainers get their act together is even worse.
+generic/730 didn't exist when I submitted this series, you applied
+it in the same batch of patches.
+
+But it really should not skip xfs to start with.  Either the test
+is correct and XFS should fail it (and get fixed) or the test is
+incorrect and it should not be added.  I suspect it is the former
+and I'll look into fixing it.
+
+As added in the comments in this series we should never add a
+_exclude_fs without a very good reason and comment explaining it.
