@@ -1,75 +1,74 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8987021518A;
-	Tue,  4 Feb 2025 13:47:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDEEF175A5
+	for <fstests@vger.kernel.org>; Tue,  4 Feb 2025 17:04:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738676836; cv=none; b=U1tpXt53WBCzH7gNkeAbnRgXNfOwbxxlN1+sFLyaN1CF/UKDG1cQ29OmSQ20D9cfkrTHsfgyIlz1/rEc3LGMwNReK/coYz3RdctotQP/Htyy5hT8XwqhWQ2AfJ/AqMcFsiDKe8DofkfhJtIiykgw766KKV/09yv/d+AlNcK44o4=
+	t=1738688670; cv=none; b=rLm+fZK9KtkzNLemYSvdPwaBaFbDkdUwVu5mT6z3ebyAByTpkypspRpahAMQ0pWDfjx9iWRsFyjFmB7bff9DqcGl13W8onAtA1SAMkLmu8aa9xtwXEDIcAmhlz0ykc0uJr0GVeANB9oy5dFrMP3XoBedZu4w+aWoMXrhsOd/sxQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738676836; c=relaxed/simple;
-	bh=EkMyI5nvOIEDttjQKfPJXwj//9RRz3E7JaDMaNSFNUo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HefpDAGAGZGfXF0kBDDJ0yKLLyPf7wF2piJsuaVEEeXiUw9y97V8TTCpErd/R/ybK9R3UfvmBOoLfsQDDDSBM+5FeXVgMKDKjQHJHPiktaxTGlMnQSpN5Zt47ETX/FQO6vdBH75AEc1XfKeJq//fpEemd+qvA15fFJLUyPQCFvE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=IBiYewqi; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1738688670; c=relaxed/simple;
+	bh=fp2YvRgD0uFv5VWWPsiww4oOfsA5XkzKQKfvhXVawQc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cuNvhFmZ16AvBhHZsZJOTUPfcXtVcanuztJw+LTfqlVsRKv2bZcW3HRSXm5Q0HKWJ5BRRlhfBEC4I/gPJ6tD1i1ZzOHeg0jiDc9MCopBFN3U9YwnGqQOGtJV8xrXbbn9sN24b3/wYR1I4EbC/yDYa0PoJdEN7Da5Davbo0PQx1o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iAV/jfry; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="IBiYewqi"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender
-	:Reply-To:Content-Type:Content-ID:Content-Description;
-	bh=5EobIW9T8WZQJr0tt0p9YlY+MRDsQTrn0Jc+dXrME0E=; b=IBiYewqiW10vQyC1IFgIVENWx6
-	2hJkjaN09kQwy51S93y61kBnCG2cxWkJEM/5b6a5KnXcz1xLvUmXiWC169fkKSylPUw60LnGbATiu
-	5uTRj22Tc5LQ5HR5iJ85tJfiMqpvQ3RJRbreExXvBlr2Lmi3udZ+7mDq1vLftmGC13f7nPzvQ5iVJ
-	pRATqYDB0FhqJ8EoD2R+Sgg+9bqa1w7SXVlD7b5FZa7eUCpWDyImNefWaMIsbwGpm/21dbewB2SPT
-	Uns31CRrgl8son5fRKmYWNi9DcSoqFsbCHCqEDu0Nr/gyHnDq50ENb45pzL31k1dpcJJU6/pXCJ8l
-	/CMkYYlA==;
-Received: from 2a02-8389-2341-5b80-c653-ac45-db09-df54.cable.dynamic.v6.surfer.at ([2a02:8389:2341:5b80:c653:ac45:db09:df54] helo=localhost)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
-	id 1tfJGj-00000000Zcv-1Nf8;
-	Tue, 04 Feb 2025 13:47:13 +0000
-From: Christoph Hellwig <hch@lst.de>
-To: zlang@kernel.org,
-	djwong@kernel.org
-Cc: fstests@vger.kernel.org,
-	linux-xfs@vger.kernel.org
-Subject: [PATCH 2/2] xfs/614: remove the _require_loop call
-Date: Tue,  4 Feb 2025 14:46:55 +0100
-Message-ID: <20250204134707.2018526-2-hch@lst.de>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20250204134707.2018526-1-hch@lst.de>
-References: <20250204134707.2018526-1-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iAV/jfry"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 577B4C4CEDF;
+	Tue,  4 Feb 2025 17:04:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738688669;
+	bh=fp2YvRgD0uFv5VWWPsiww4oOfsA5XkzKQKfvhXVawQc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=iAV/jfry7Yp3hAKObhfYRDB720mSKa4Myw12IIRmVi81D+Ft54imFvB/3lleJr6MK
+	 +ME5uX1w0TVF5GMm6HkmSiQmQ9bDVA7Y6aXFiFHmdxXYgHH4vpW8o6MsU5TVg9eUeI
+	 jjGT1l6AZOLVKTka8pI5O3aF7WCKwTeN8Xc9grYTAwOhWKzJiijtP/7t9KIlNABP58
+	 /rTRAHg/gPsu68gF3lAQIwtbxXV6kernnxLWohl90l+GqK8Rkw3Ov4zS6j+TkkUDdo
+	 s6YYMfFOwKIRMU8fnFMRf1xeCycFUUgkRKBiFNAT3XSvK1wToWlOrwSbRzGuWWnSd/
+	 Kt2gH70voS6oA==
+Date: Tue, 4 Feb 2025 09:04:28 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] common: fix a spelling error in _require_zoned_device
+Message-ID: <20250204170428.GB21799@frogsfrogsfrogs>
+References: <20250204134612.2017269-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250204134612.2017269-1-hch@lst.de>
 
-This test only creates file system images as regular files, but never
-actually uses the kernel loop driver.  Remove the extra requirement.
+On Tue, Feb 04, 2025 at 02:46:12PM +0100, Christoph Hellwig wrote:
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/xfs/614 | 1 -
- 1 file changed, 1 deletion(-)
+Looks ok,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-diff --git a/tests/xfs/614 b/tests/xfs/614
-index 06cc2384f38c..f2ea99edb342 100755
---- a/tests/xfs/614
-+++ b/tests/xfs/614
-@@ -22,7 +22,6 @@ _cleanup()
- 
- 
- _require_test
--_require_loop
- $MKFS_XFS_PROG 2>&1 | grep -q concurrency || \
- 	_notrun "mkfs does not support concurrency options"
- 
--- 
-2.45.2
+--D
 
+> ---
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 4658e3b8be74..6840bb1dfa10 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2473,7 +2473,7 @@ _require_zoned_device()
+>  
+>  	local type=`_zone_type ${target}`
+>  	if [ "${type}" = "none" ]; then
+> -		_notrun "this test require zoned block device"
+> +		_notrun "this test requires a zoned block device"
+>  	fi
+>  }
+>  
+> -- 
+> 2.45.2
+> 
+> 
