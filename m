@@ -1,217 +1,214 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F4B721767C
-	for <fstests@vger.kernel.org>; Tue,  4 Feb 2025 21:14:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3EC225A62C;
+	Tue,  4 Feb 2025 21:22:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738703655; cv=none; b=GAxXTQneCoGA0hZAG0R5dhdxI5le3hQWqYkLRnNpafdT9BHz269nkewceo/tEMyw2v2W1SXLEj/IeDSgjTE5rFSkKf1DVVVrjQZ65EHNQqzlGZIkEQkdkzannY5Awg2GPGhM0y7aedVTjum7vr2oRM8pjMHibqVd+SrsuW8BTbo=
+	t=1738704148; cv=none; b=Vqc1mrLIzyAYw6ChxsnLV7GRwcYAmmareS231VZNz2lB1RkzKY5i1QvZHLaVLaVzaMrUzO6gVUQjR7VFZ4bgskPQ9jw7OQUMfR1sJ0QgFqQtHhXaCjsCZ7KWakav5ODqyp2cAPR4c1utp+6Xj5Pi6aILGx3IC4ZgSzaa5lPiVlU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738703655; c=relaxed/simple;
-	bh=4Ylt8Ia7CQKA49AbgNdndRrwDPWJoIPKiRBrhvirnls=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UFhLEf9G5HWU1+fo+6XpcZyzJ2CeyPfQF8IBMH4s+1p61I+/DtgdBr6BXY6VLHOmW0/DmG+nsFeVjIBn9tznRTJbzYJiambMg9lQFFzJ7qDlOGCpdxja3f5F/MdffeD8Ee99hyCfWIk1mTQIlDW0YjVKsdMXaQ6FvLX6ZoiqIEU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=SkCQBDvr; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	s=arc-20240116; t=1738704148; c=relaxed/simple;
+	bh=yHGSzj1eCEAAlea1U8aWvMTeQXKnlBJYnyaW0djzLKo=;
+	h=Date:Subject:From:To:Cc:Message-ID:MIME-Version:Content-Type; b=VuA6MKgF971fcG9XbDnwaDjvLWVVXQYhoehEGhsqixERkhVroGjyJnMsNAejjnAgUgW8d4SceR50Iak0mJVyFN2CoyVc+AqD1Qa3phWNelOQCeuD5CjQhVw8FYqMM5wf+dEu+cNlFDlCWwf96tnCrGKTVYBjrYystSSS3qxUuhI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Jz48GZWW; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="SkCQBDvr"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-21f05693a27so15408025ad.2
-        for <fstests@vger.kernel.org>; Tue, 04 Feb 2025 13:14:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1738703652; x=1739308452; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=dTURmX0OMFrWDWZM1e7A94oGdcNwV3azk+DcaUDav5s=;
-        b=SkCQBDvrHmpse+WZwaL1V+XZaxQIA5C4kJwlbTowY2sBDXB9QF1DjVlE9W3zhjRwBh
-         rQ5febU23wSNSUG7IVctSUhDpd8j7SVILky708qBScKXHqbrFsntGZROZTsn0Tdp446I
-         yqaxZOoBrMGvwAkYZ1OINRQwHiAri9MR/lQ8+PLShGKGiPhgd2Ta8iDQNcUJWdV6Jhlb
-         HETKWez9z42jdzbLoAhWCa3KTVBQzkgvduS6ZCae0iwKiwlLMsm3TiT4u+TQWa80yt0w
-         I+XBF1shdD6T0IGNVx6wqbW6ZcksjiGXRV0AyvlMXc5hfduoSWQPkGqe2LryoJfos3XB
-         hlsQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738703652; x=1739308452;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dTURmX0OMFrWDWZM1e7A94oGdcNwV3azk+DcaUDav5s=;
-        b=PV7TaA/mVxLRbWLFcHWKHxafyEBkAAHDRsjKmMs8tM2+kxFdSa8OVmBRQzZidL2Ac1
-         yqqZWv5uxL9lZlD92wV2L/MrC2S9OOk3Oq0jRMIeSH6TcZctDuMaZtjfEg7VHLrI4zQY
-         /xo7qMlNYXmXnvGnTp/zfDWpDEVaJfBWPc9Yi+ZGeWVGceYGSbYSeWWg5gzk/GpaK+UH
-         HMBvXxcvKpKrbAY+YVVYM2E1vNRz3crKUwluijUydu4aD5QThnl5bQTExHEw0eBuB26r
-         QyEgomt2Gmg9vekyVtPtNgOSqnd27uvFZ13EZq93lUxDZjtHKLYuzDmj2lZJ6Cn3oPN2
-         M35w==
-X-Forwarded-Encrypted: i=1; AJvYcCVA9NcLa4SN04BSI35Tq+BKFFCYbK9QEBKBnfWBRGlhId5BOqHLxmY0JVEIoRrWloPlmx37twpw@vger.kernel.org
-X-Gm-Message-State: AOJu0YwG9u39QoRtLvvcoVrUQmjeqykeeqphpJ+qsnqAIpxJkE19WVPO
-	hDvivwomuaLGm+7J6NGDYSx1fjFeqvGNu3P2fa5sJwZcrFQD/fCUCfCHQeEiRjM=
-X-Gm-Gg: ASbGncvH3Ze/aTeJxs5eAblq1KdczcAxfYCSHXWIXNCzHWKIEFl385byaYh5Qd+Q0/b
-	+RAiXIGLcEhNRFRXdFna0fjmRXnEZPdOd+jmtnWZ3vCVjbCsCQLn4ppW0HwIZ/+N3Sb2T9ANmS1
-	8JkKWVga3kUJDPoLMGrdynVqj5EUE7xwlqYNKnWas5CYblNrSB0PT1PX3WuAyOXJPifgu2poIDo
-	Y0wCRLBH7jKGRbYTJUjX6efmhQgCZqxtrCoQIqCy+/GShMlYTqDXMZnRoUnrUbfqPvkrJzuzenr
-	FRBlDLs0o31hVqfMn/0Z20k4A9sT6KtSNCEdpWwyHylQJFBfLbI/JJFF
-X-Google-Smtp-Source: AGHT+IEeR++U0VebrZO3gKxUGf8OR+3CkpknBHWLWvvPOg70iSSUyhxQnEM//n5EmVFVV6MHIxL4qg==
-X-Received: by 2002:a17:902:ccca:b0:216:431b:e577 with SMTP id d9443c01a7336-21f17ed2f4fmr5463175ad.51.1738703652539;
-        Tue, 04 Feb 2025 13:14:12 -0800 (PST)
-Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21de32ea893sm102752915ad.127.2025.02.04.13.14.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Feb 2025 13:14:11 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tfQFF-0000000EfRd-1LO2;
-	Wed, 05 Feb 2025 08:14:09 +1100
-Date: Wed, 5 Feb 2025 08:14:09 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Boris Burkov <boris@bur.io>
-Cc: Amir Goldstein <amir73il@gmail.com>, lsf-pc@lists.linux-foundation.org,
-	linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>
-Subject: Re: [LSF/MM/BPF TOPIC] Long Duration Stress Testing Filesystems
-Message-ID: <Z6KDIZ1theZm9rox@dread.disaster.area>
-References: <20250203185519.GA2888598@zen.localdomain>
- <CAOQ4uxjiYQHUVkYnv5owPHHvs6BP128Zvuf_LGciENjyJkLa6w@mail.gmail.com>
- <Z6Fl5d34STRzC3K2@dread.disaster.area>
- <20250204195846.GB3657803@zen.localdomain>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Jz48GZWW"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2263DC4CEDF;
+	Tue,  4 Feb 2025 21:22:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738704148;
+	bh=yHGSzj1eCEAAlea1U8aWvMTeQXKnlBJYnyaW0djzLKo=;
+	h=Date:Subject:From:To:Cc:From;
+	b=Jz48GZWWh46JXtUcLTF0ot8nd7Mp5MQ2uxgrv7aJSxIa8+2R7S1fOnb0mqz3z0p7n
+	 SN+oXH/T+LmUG2++y7WhV2TrCbQh5CDYL9LRwMhSbgnGf13mCTRfokguvF4W5F+vQC
+	 GnLI0U21CQeXAgwgNU2JaVHtxFLyAVnq83BOelpLRvOI64wjVDqgB4q9cGmyAFuxnY
+	 mwXbEX4TiTO1emTisCVWLPTXz3TfEYkLqQjLdQXG+rICROLKv26oxtZtiWLy3pEEAO
+	 nhJysxn6oKH14ZQCXUiAIn1Mflgcx9QqqQK3gaGl09Tt+PRz/gCve/MJpJypCrOwVA
+	 Wro4oaMVcMnvA==
+Date: Tue, 04 Feb 2025 13:22:27 -0800
+Subject: [PATCHSET v2] fstests: random fixes for v2025.02.02
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: zlang@redhat.com, djwong@kernel.org
+Cc: dchinner@redhat.com, joannelkoong@gmail.com, fstests@vger.kernel.org,
+ linux-xfs@vger.kernel.org
+Message-ID: <173870406063.546134.14070590745847431026.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250204195846.GB3657803@zen.localdomain>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-On Tue, Feb 04, 2025 at 11:58:46AM -0800, Boris Burkov wrote:
-> On Tue, Feb 04, 2025 at 11:57:09AM +1100, Dave Chinner wrote:
-> > > > - were able to reproduce the bugs with a predictable concoction of "run
-> > > >   a workload and some known nasty btrfs operations in parallel". The most
-> > > >   common form of this was running 'fsstress' and 'btrfs balance', but it
-> > > >   wasn't quite universal. Sometimes we needed reflink threads, or
-> > > >   drop_caches, or memory pressure, etc. to trigger a bug.
-> > 
-> > That's pretty much what check-parallel does to a system. Loads of
-> > tests run things like drop_caches, memory compaction, CPU hotplug,
-> > etc. check-parallel essentially exposes every test to these sorts
-> > of background perturbations rather than just the one test that is
-> > running that perturbation. IOWs, even the most basic correctness
-> > test now gets exercised while cpu hotplug and memory compaction are
-> > going on in the background....
-> > 
-> > Eventually, I plan to implement these background perturbations as
-> > separate control tasks for check-parallel so we don't need specific
-> > tests that run a background perturbation whilst the rest of the
-> > system is under test.
-> 
-> I think that a framework for introducing background perturbations while
-> running tests is definitely what I'm getting at. If check-parallel is a
-> good version of that, then that sounds great to me. I am particularly
-> excited about your point that it will smash together *every* stimulus
-> with *every* test. I do have some questions in my head about how that
-> would work in practice.
-> 
-> My main questions/concerns are:
-> 
-> How much do you randomize the interleaving of tests? Does
-> check-parallel run them in a random order?
+Hi all,
 
-Same as check - the "-r" option will randomise the test run order.
+This is an unusually large set of bug fixes for fstests.  The first 20
+patches in this patchset are corrections for that RFC series.
 
-The test run order is also somewhat randomised by default in that
-it sorts the test run order based on the runtime of each test in
-the previous test run. Hence test run order is not static - it
-generally runs long running tests before slow running tests, but the
-exact order is not fixed.
+The most significant change is that I made ./check run each test with
+its own Unix process session id.  This means that a test can use pkill
+to kill all of its own subprocesses, without killing anyone else's
+subprocesses.  I wasn't completely sold on that approach, but it works
+for me.  A better approach is to run each test in a separate pid and
+mount namespace, but then kernel support for that becomes a hard
+requirement.  Both approaches seems to work for check and
+check-parallel, though I've not tested that all that much.
 
-> Similarly, their durations are not at all tuned to maximize
-> interesting interactions. If test X and test Y would collide on some
-> faulty interaction, but test X runs once in 1 second, then you would
-> likely never see test X interfere with some interesting moment during
-> test Y. Are you considering feeding the tests back into the run-queue
-> as they finish for these stress style runs?
+Note: I am /not/ happy about Dave's RFC going straight to for-next
+without even a complete review right before everyone went on PTO for
+several weeks for xmas/solar new year.  But in the interests of getting
+QA back on line for myself and everyone else who's having problems, here
+it is.
 
-Not yet - the infrastructure to directly manage and run tests from
-check-parallel is not yet in place. It currently generates a test
-list for each runner thread then executes that via a check instance
-per runner thread.
+At this point this series has accumulated even more bug fixes: an
+unexplained insertion of -R in a umount command; fixes for the new
+generic/759 hugepages IO test, fixes to the pptr size calculations in
+common/fuzzy, memory consumption reductions in scrub fsstress tests,
+fixes for excessive fsstress ops scaling, and some cleanups to how we
+locate the fsstress and fsx binaries.
 
-I plan to have check-parallel execute tests individually itself by
-factoring the run loop out of check (similar to how I'm doing the
-test list parsing). Once there is direct control of the test
-execution, stuff like dynamic test queues where runners just pull
-the next test to run off the queue and they keep going until the
-queue is empty will be possible.
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-> It seems that the two objectives of the test harness are sort of in
-> tension with using check-parallel to stress things. On one hand you
-> want tests to independently succeed or fail and on the other hand you
-> want noise from one test to disturb the other.
+With a bit of luck, this should all go splendidly.
+Comments and questions are, as always, welcome.
 
-Yes. Tests are largely written such that they don't interfere with
-each other.
+--D
 
-> I fear more of the
-> failures will turn out to be "Oh, well, when THAT happens, we would
-> expect this condition to be violated". Especially for the more "unit
-> test" style fstests that carefully use sync to check specific conditions
-> during a run.
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
 
-That's why I currently have a "unreliable_in_parallel" test group
-definition and check-parallel excludes that test group. There's
-about 20 tests I've classified this way, most of them xfs specific
-tests that are reliant on exact fragmentation patterns being
-created. This tests are perturbed by things like sync(1) calls from
-other tests which results in a different fragmentation pattern than
-the test expects to see.
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
 
-In each case, there is a comment in the test explaining the
-condition that makes the test unreliable in parallel, and so we
-have some idea of what needs fixing to be able to remove it from the
-unreliable_in_parallel group.
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
+---
+Commits in this patchset:
+ * generic/476: fix fsstress process management
+ * metadump: make non-local function variables more obvious
+ * metadump: fix cleanup for v1 metadump testing
+ * generic/019: don't fail if fio crashes while shutting down
+ * fuzzy: do not set _FSSTRESS_PID when exercising fsx
+ * common/rc: revert recursive unmount in _clear_mount_stack
+ * common/dump: don't replace pids arbitrarily
+ * common/populate: correct the parent pointer name creation formulae
+ * generic/759,760: fix MADV_COLLAPSE detection and inclusion
+ * generic/759,760: skip test if we can't set up a hugepage for IO
+ * common/rc: create a wrapper for the su command
+ * fuzzy: kill subprocesses with SIGPIPE, not SIGINT
+ * common/rc: hoist pkill to a helper function
+ * common: fix pkill by running test program in a separate session
+ * check: run tests in a private pid/mount namespace
+ * check: deprecate using process sessions to isolate test instances
+ * common/rc: don't copy fsstress to $TEST_DIR
+ * unmount: resume logging of stdout and stderr for filtering
+ * mkfs: don't hardcode log size
+ * common/rc: return mount_ret in _try_scratch_mount
+ * preamble: fix missing _kill_fsstress
+ * generic/650: revert SOAK DURATION changes
+ * generic/032: fix pinned mount failure
+ * fuzzy: stop __stress_scrub_fsx_loop if fsx fails
+ * fuzzy: don't use readarray for xfsfind output
+ * fuzzy: always stop the scrub fsstress loop on error
+ * fuzzy: port fsx and fsstress loop to use --duration
+ * fix _require_scratch_duperemove ordering
+ * fsstress: fix a memory leak
+ * fsx: fix leaked log file pointer
+ * misc: don't put nr_cpus into the fsstress -n argument
+ * common/config: add $here to FSSTRESS_PROG
+ * config: add FSX_PROG variable
+ * build: initialize stack variables to zero by default
+---
+ check                 |   89 +++++++++++++++++++++++++------
+ common/config         |    5 +-
+ common/dump           |    1 
+ common/fuzzy          |  100 ++++++++++++++++++++++-------------
+ common/metadump       |   42 +++++++--------
+ common/populate       |   13 +++--
+ common/preamble       |    2 -
+ common/quota          |    2 -
+ common/rc             |  141 ++++++++++++++++++++++++++++++++++++++++++-------
+ common/reflink        |    6 +-
+ configure.ac          |    1 
+ include/builddefs.in  |    3 +
+ ltp/fsstress.c        |    1 
+ ltp/fsx.c             |    8 ++-
+ m4/package_libcdev.m4 |   14 +++++
+ src/nsexec.c          |   18 +++++-
+ src/xfsfind.c         |   14 ++++-
+ tests/generic/019     |    2 -
+ tests/generic/032     |    9 +++
+ tests/generic/050     |    2 -
+ tests/generic/075     |    2 -
+ tests/generic/085     |    2 -
+ tests/generic/093     |    2 -
+ tests/generic/112     |    2 -
+ tests/generic/125     |    2 -
+ tests/generic/127     |   16 +++---
+ tests/generic/128     |    2 -
+ tests/generic/193     |   36 ++++++-------
+ tests/generic/230     |   14 ++---
+ tests/generic/231     |    4 +
+ tests/generic/233     |    2 -
+ tests/generic/270     |   12 ++--
+ tests/generic/310     |    6 +-
+ tests/generic/314     |    2 -
+ tests/generic/327     |    2 -
+ tests/generic/328     |    4 +
+ tests/generic/355     |    2 -
+ tests/generic/361     |    4 +
+ tests/generic/453     |    6 +-
+ tests/generic/455     |    2 -
+ tests/generic/456     |    2 -
+ tests/generic/457     |    2 -
+ tests/generic/469     |    2 -
+ tests/generic/476     |    4 +
+ tests/generic/499     |    2 -
+ tests/generic/504     |   15 +++++
+ tests/generic/511     |    2 -
+ tests/generic/514     |    2 -
+ tests/generic/530     |    6 --
+ tests/generic/531     |    6 --
+ tests/generic/561     |    2 -
+ tests/generic/573     |    2 -
+ tests/generic/590     |    2 -
+ tests/generic/600     |    2 -
+ tests/generic/601     |    2 -
+ tests/generic/603     |   10 ++-
+ tests/generic/642     |    2 -
+ tests/generic/650     |    6 +-
+ tests/generic/673     |    2 -
+ tests/generic/674     |    2 -
+ tests/generic/675     |    2 -
+ tests/generic/680     |    2 -
+ tests/generic/681     |    2 -
+ tests/generic/682     |    2 -
+ tests/generic/683     |    2 -
+ tests/generic/684     |    2 -
+ tests/generic/685     |    2 -
+ tests/generic/686     |    2 -
+ tests/generic/687     |    2 -
+ tests/generic/688     |    2 -
+ tests/generic/691     |    8 +--
+ tests/generic/721     |   10 ++-
+ tests/generic/726     |    2 -
+ tests/generic/727     |    2 -
+ tests/generic/746     |    2 -
+ tests/generic/750     |    2 -
+ tests/generic/759     |    7 +-
+ tests/generic/760     |    7 +-
+ tests/xfs/149         |    2 -
+ tests/xfs/501         |    2 -
+ tests/xfs/502         |    2 -
+ tests/xfs/530         |    2 -
+ tests/xfs/720         |    2 -
+ tests/xfs/795         |    2 -
+ tests/xfs/803         |    2 -
+ tools/run_seq_pidns   |   28 ++++++++++
+ tools/run_seq_setsid  |   22 ++++++++
+ 87 files changed, 546 insertions(+), 250 deletions(-)
+ create mode 100755 tools/run_seq_pidns
+ create mode 100755 tools/run_seq_setsid
 
-Essentially, I'm using this as a marker and note for future
-improvements once all the (more important) infrastructure work is
-done and solid.
-
-> This variant also feels like it would be at the extreme of difficulty
-> for attempting to distill a failure into a reproducer.
-
-It's pretty obvious when a test is doing something that is
-influenced by an outside event. The biggest problem for debugging
-them comes when the test failures appear to be real bugs (e.g. all
-the weird and whacky off-by-one quota failures that check-parallel
-triggers on XFS) but they cannot be reproduced when the tests are
-run serially.
-
-.....
-
-> > > > And of course, I would love to discuss anything else of interest to
-> > > > people who like stress testing filesystems!
-> > 
-> > Filesystem stress testing by itself isn't really interesting to me.
-> > Using filesystem correctness tests to create massively stressful
-> > workloads, OTOH, attacks the problem from multiple angles and
-> > exercises the system well outside the bounds of just filesystem
-> > code.
-> 
-> From what I see, today we have a handful of tests which race fsx or
-> fsstress with 0-2 operations under test, and you are proposing using
-> check-parallel to hammer the computer with the entirety of all 1000
-> tests in parallel (awesome).
-
-It's currently running one test per CPU in parallel, not all at
-once. Many tests run lots of stuff in parallel themselves, too, and
-some of them hammer large CPU count machines really hard just by
-themselves, let alone when there's another 63 tests running
-concurrently....
-
-> I think I am proposing something in between
-> where we run fsx AND fsstress AND ~10 known scary operations.
-
-Write a set of tests that do this for btrfs and put them in the
-auto/stress/soak groups. Then run 'check-parallel -g soak,stress
-....'
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
