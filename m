@@ -1,306 +1,455 @@
-Received: from fhigh-a4-smtp.messagingengine.com (fhigh-a4-smtp.messagingengine.com [103.168.172.155])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f169.google.com (mail-qt1-f169.google.com [209.85.160.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84517158558;
-	Tue,  4 Feb 2025 19:58:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.155
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 856EC206F16;
+	Tue,  4 Feb 2025 20:50:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738699097; cv=none; b=er06V3KsGEzbG//0EKuhs6UdztckNXB7xidxs0BI9eK9N95wyutdxb9FUur3v+a7pNaVdC6/hpB7BBw6trDpgcEjzQSB0RT9P99Smyi/8uBxzNpwBUpVlwFE9W1e5opUbtKcMaV+TF8/GITIv0bNhIEU6uUSRsDYXFwnzA2jUjw=
+	t=1738702218; cv=none; b=UlCAlmyfOn7wrX4zdcdzcC4VtK6lW/V/Hm4FQ9l0aw+eG+Cp2g9rseAav5/WB7u65OQSfUUmLJmK2IIGA40DiFFJMB3ZAwKivUvxsyTrpp09ACgRM10UDcg+4b1/j7YrtE5I/tArGMI/R6n7V9M9C/dUfAK1qF1A49Yq9DZ9Z7I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738699097; c=relaxed/simple;
-	bh=02FT8D66wI55dclyaSjT58HkAwVzlKF9AGLNKYVuIXA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pfIuO24iT8tz2O4hFKa3Y6zVShuve7+tDjxxwMWexH0dupmS/t0Shgiw/Kjuf8h0fsZHrOpWBRFrjgoysSqd3FYn7dhaEevvNZVJfo+Y6zyo8IiLoL8uh8ZTI5qWc+e0M79BHhum5EHwC3GdgHFHm7iFBMMwtjadh82OGgOGWQw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io; spf=pass smtp.mailfrom=bur.io; dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b=znSuin8k; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=Er2rDR0a; arc=none smtp.client-ip=103.168.172.155
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bur.io
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bur.io
+	s=arc-20240116; t=1738702218; c=relaxed/simple;
+	bh=EfqotukzcpDCV3ZSYISIXnSxcW8AW7Syyg0OUHOrIpI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gl7PPVY+s+x8rr41KTHNGXc/NIpnwsC2R+aj1F+QeonJzOfqibDI73742sH8Y7p1rXrlhjeqkYZQa03vBdTxKRF/5D9cjzqkrNLC7g97GCWkq61mZe/5yPo93U1+gmor/h89WXf56cchKcoowU5X/8l5SAydviFsjqxUQr9MxJg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OINE8KwX; arc=none smtp.client-ip=209.85.160.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bur.io header.i=@bur.io header.b="znSuin8k";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="Er2rDR0a"
-Received: from phl-compute-10.internal (phl-compute-10.phl.internal [10.202.2.50])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 8B1AF1140161;
-	Tue,  4 Feb 2025 14:58:13 -0500 (EST)
-Received: from phl-mailfrontend-01 ([10.202.2.162])
-  by phl-compute-10.internal (MEProxy); Tue, 04 Feb 2025 14:58:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bur.io; h=cc:cc
-	:content-transfer-encoding:content-type:content-type:date:date
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1738699093;
-	 x=1738785493; bh=QkQWo5dv37k9vHqtVSa+5oI/vxYIdzDHygSyMSt/E2Y=; b=
-	znSuin8kS2hIgdSPRBbpAhtrXTIEQ7fnICz99XBjrDXFvGS7nbN2fB9hij89W8Mr
-	7GNhdYxWenIftKPUNX5rhdyHg7BPA+LY3px9p1cNbL6iNkzO9gRkxa85FjhxRbDI
-	rPvfhifePBTRmmAvcnWjQ6G3QhUgbkt+FWEzUJEkzzLlIpIRP3ixfSC9dGbIz+g5
-	3UdaCGJY1u9epVf539613+iAC+WY/1FsRByY3k9iXtzgeft+9Dhu6NmYyxWKyBJy
-	tDMKPYdudPTF5LBFuKdDwyzKH0Aj44y1j5/g5ZhJ26v1safR071VZJiSnL9Tvdj0
-	HsbQc++J27cFIIH3OOTn0g==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1738699093; x=
-	1738785493; bh=QkQWo5dv37k9vHqtVSa+5oI/vxYIdzDHygSyMSt/E2Y=; b=E
-	r2rDR0aNcylS0KCDfMJ8AgTF3o/2MheLZszqw9v/V5F2vRVWlz01exp9YEPyrGEX
-	igOBsLNua9hY9ZssIm+tPvPylFbY9KemM6zevdDYMQeL9KnLAVFtnJb0vT2mn9Sf
-	duLtIqJES7OKZjgNJe0oXRh4Oe1I/4nUAxqtbaHjNRaUYSHXRXr2dzQa5LQhzujq
-	0GMV2wahD453KkVBBtr/iqJvDa37Qz44P37VxKNHgUHLgx16VqsssIz2rHkm3SAo
-	H2GfaNVIXK0d4xfOkfwJ7VSRfTp0R2dtHgXYYfpt9COPnFUB47l/t5AOmVMTCphr
-	ChxITARofEKEi4levMk0A==
-X-ME-Sender: <xms:VXGiZ_PQpBtIH8MzDQnrO9MTQ5KerWLqYI3RRRj6Ib2q7CM3wT8rJA>
-    <xme:VXGiZ59l4XpxAX-Z-NG8va0uh2xvMDt67MdrtVyG9zxZzJbYMOOgkWrfCkB0eBEe3
-    TDQzvmJzfEkIaUDdMM>
-X-ME-Received: <xmr:VXGiZ-R2OVvklP-9uDpwpBluWg-uSZjkegNpxupPVGfkowfAvs73AVYpVWK02L020ViTnfn9icTljF1Bckpr5XMnPU4>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgddvudegfecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdp
-    uffrtefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecunecujfgurhepfffhvf
-    evuffkfhggtggugfgjsehtkeertddttdejnecuhfhrohhmpeeuohhrihhsuceuuhhrkhho
-    vhcuoegsohhrihhssegsuhhrrdhioheqnecuggftrfgrthhtvghrnhephefhudehgfekhe
-    dufedvtefgteelueeigfefhfefgeejkeefhefhgfekjefhvdehnecuffhomhgrihhnpehk
-    vghrnhgvlhdrohhrghenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrih
-    hlfhhrohhmpegsohhrihhssegsuhhrrdhiohdpnhgspghrtghpthhtohephedpmhhouggv
-    pehsmhhtphhouhhtpdhrtghpthhtohepuggrvhhiugesfhhrohhmohhrsghithdrtghomh
-    dprhgtphhtthhopegrmhhirhejfehilhesghhmrghilhdrtghomhdprhgtphhtthhopehl
-    shhfqdhptgeslhhishhtshdrlhhinhhugidqfhhouhhnuggrthhiohhnrdhorhhgpdhrtg
-    hpthhtoheplhhinhhugidqfhhsuggvvhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdp
-    rhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:VXGiZzvjWw_DZs2cD9tx_mY38fPeNX5u3QVUA8SRCP0ra5NgQQyabQ>
-    <xmx:VXGiZ3eG7vgKVmQIsBGveqf8y0rwgkUI-HJl2pHPAeXixKleI13V6g>
-    <xmx:VXGiZ_3G-PLWPr6IlfnywV7IV819jVETUkp3MJOfaBN9YwFd-06Qeg>
-    <xmx:VXGiZz-ZjUC533UIYt66QGz9tBfcs6HkI4JDejMZCrrQR9Vy7BmH6A>
-    <xmx:VXGiZ4HftS9pY5v5vm3ch0n8No_m-3xPbHIYbNugdXfxkWlpNL2a4tWf>
-Feedback-ID: i083147f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Tue,
- 4 Feb 2025 14:58:12 -0500 (EST)
-Date: Tue, 4 Feb 2025 11:58:46 -0800
-From: Boris Burkov <boris@bur.io>
-To: Dave Chinner <david@fromorbit.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, lsf-pc@lists.linux-foundation.org,
-	linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>
-Subject: Re: [LSF/MM/BPF TOPIC] Long Duration Stress Testing Filesystems
-Message-ID: <20250204195846.GB3657803@zen.localdomain>
-References: <20250203185519.GA2888598@zen.localdomain>
- <CAOQ4uxjiYQHUVkYnv5owPHHvs6BP128Zvuf_LGciENjyJkLa6w@mail.gmail.com>
- <Z6Fl5d34STRzC3K2@dread.disaster.area>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OINE8KwX"
+Received: by mail-qt1-f169.google.com with SMTP id d75a77b69052e-46c8474d8daso43088761cf.3;
+        Tue, 04 Feb 2025 12:50:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1738702215; x=1739307015; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=J3q/9LTOK1m2RNFGy8txqtDxvIMl4dVGU30eFdIrCIo=;
+        b=OINE8KwXCAXVqNOF3aD9lYj0ITyN7kSpjQmWeGfXJcL+pCWzeZdQLA7G5UzGGI3dSI
+         C/ApeIBl1XmcTxXdvzi2PFpCO9SDaX5Nzqqqii2NaEPWpwua9b8ZiUld60ZxIJ9I+VkS
+         8+gdkGlhJ78SOQ0p7tGAkCOP6T+n0sIUd6u4cqlMZcZmRRFulk8hDCUZvOQ8xSidDNc3
+         QFoJB8njEcO4vUMlmxDE9fgQAGrA4tC3wmgpB04kCOw2dOFfa4Up4KCS1G7XjlyyyFpH
+         kisqkINwre/qHN5w26byLAFCE3N7qkRx7bXD5yEMipPcNxSUuvHh1Ix/Bkf25p9GcJaz
+         459g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738702215; x=1739307015;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=J3q/9LTOK1m2RNFGy8txqtDxvIMl4dVGU30eFdIrCIo=;
+        b=SYTgNOtRqCjBKC1V0czhgNP6wRbMfsue9SgS1bMIU7myZM58axB5mTZyNy2S9nM6Xr
+         Guq5AP3CpeuDgnbSBkp/tRuFwpegCcahUy6ZnGkMuKW3FL91heNITLwq1tc2NwNhi5pL
+         lwvymWwCzWvIsmpGoLIoUCvEu7vPbUftk+QBF0gZHAc+6O0a/RF0IIzN5MLKQ02h7Gos
+         x2Syj3oUTrVtmtke9K1p2vtyzFzF3seTcRFlCMoROgzErw5tJQNNT+Et4VzaXjO8REQ3
+         BIRAaOoZMoCIUg4Mbrv/klEJI0fV0cPHjmbT0DMpm8EOsOICCJ19zyF5JcdU7o9KzJx9
+         96ZQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWRDRSWw3USlCQepY0wXPoX9RT/Mfal5EnGXOJCldLoq8/qnsIV6wbcMDZfCkh4dK4mCqD+YRN2@vger.kernel.org, AJvYcCX5hvm7hBkMq72BJrJQ53VUHFcYGuqBAYa5dImsQ8jSzFWIfiN+nFtD/XgbdQ+pdFYx2Uti/hPMYKyTnjDT/w==@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxmd97Ihl5NI2w5eFqLVy05q7QiywIwk50zDkvuAOgqFzQSK6Nn
+	qzuczGD5Utlq3F2/pIv2p6MXKRgzgVVOLS0nLl84zV7GRz7OfF16G9RgBJ/tov7ZjwLIUOneiqo
+	4oC25n3XUv811x6DfwnFJxSWTTlo=
+X-Gm-Gg: ASbGncudIcWXbZqpfHcYLWTYTGpWWleNAxQ+b0ZDnOs04DjA83uxGM6UmPRnm93Avhy
+	wLn/iCUW9vXOIAR4aulVMJJG368225HpbRV/3t/uxOFiKLRYG4EteAqv59HwXSwOjZ+DdrGMwDg
+	==
+X-Google-Smtp-Source: AGHT+IHTTlTAo8kEiZjjPF6urEJAekmCPdZzPK5XWZGbtPyNP4jLgbbbRpKGXvYX9ftdXGHLaejfT74EsC3Ize1dgUo=
+X-Received: by 2002:a05:622a:6099:b0:467:613d:9a1 with SMTP id
+ d75a77b69052e-4702831f49cmr1129861cf.48.1738702214969; Tue, 04 Feb 2025
+ 12:50:14 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <Z6Fl5d34STRzC3K2@dread.disaster.area>
+References: <20250121215641.1764359-2-joannelkoong@gmail.com>
+ <20250202142518.r3xvf7mvfo2nhb7t@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAJnrk1YwBJQnFwYBcO50Xy2dA6df_SqQsHdpLux4wa-Yw5rXdg@mail.gmail.com>
+ <20250203185948.GB134532@frogsfrogsfrogs> <CAJnrk1bX27KAOxChMs5pRNmrjjuxjYu11GG==vTN0sa8Qf2Uqw@mail.gmail.com>
+ <20250203194147.GA134498@frogsfrogsfrogs> <CAJnrk1Y_eDFOnob3N78O3jcRoHy6Y0jaxnXbgVT0okBjwJue3g@mail.gmail.com>
+ <20250203200149.GC134490@frogsfrogsfrogs> <CAJnrk1apX266i33s8CA4JwCv0z9sNmGm=+EXt0kSESvzicEhJQ@mail.gmail.com>
+ <20250203215432.GC134532@frogsfrogsfrogs> <20250204042136.GA21799@frogsfrogsfrogs>
+In-Reply-To: <20250204042136.GA21799@frogsfrogsfrogs>
+From: Joanne Koong <joannelkoong@gmail.com>
+Date: Tue, 4 Feb 2025 12:50:04 -0800
+X-Gm-Features: AWEUYZlr6Dfog9k_k-e0VnMxSCkNginETTtcDTi82kIPLIR-rrLoPjnIRneXzrU
+Message-ID: <CAJnrk1bTpOvZG=PHW1LeoQ8xCb276X6At8gm8=M9UdinaVY1+Q@mail.gmail.com>
+Subject: Re: [PATCH v5 1/2] fsx: support reads/writes from buffers backed by hugepages
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, 
+	linux-fsdevel@vger.kernel.org, bfoster@redhat.com, nirjhar@linux.ibm.com, 
+	kernel-team@meta.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, Feb 04, 2025 at 11:57:09AM +1100, Dave Chinner wrote:
-> On Mon, Feb 03, 2025 at 08:12:59PM +0100, Amir Goldstein wrote:
-> > CC fstests
-> > 
-> > On Mon, Feb 3, 2025 at 7:54 PM Boris Burkov <boris@bur.io> wrote:
+On Mon, Feb 3, 2025 at 8:21=E2=80=AFPM Darrick J. Wong <djwong@kernel.org> =
+wrote:
+>
+> On Mon, Feb 03, 2025 at 01:54:32PM -0800, Darrick J. Wong wrote:
+> > On Mon, Feb 03, 2025 at 01:40:39PM -0800, Joanne Koong wrote:
+> > > On Mon, Feb 3, 2025 at 12:01=E2=80=AFPM Darrick J. Wong <djwong@kerne=
+l.org> wrote:
+> > > >
+> > > > On Mon, Feb 03, 2025 at 11:57:23AM -0800, Joanne Koong wrote:
+> > > > > On Mon, Feb 3, 2025 at 11:41=E2=80=AFAM Darrick J. Wong <djwong@k=
+ernel.org> wrote:
+> > > > > >
+> > > > > > On Mon, Feb 03, 2025 at 11:23:20AM -0800, Joanne Koong wrote:
+> > > > > > > On Mon, Feb 3, 2025 at 10:59=E2=80=AFAM Darrick J. Wong <djwo=
+ng@kernel.org> wrote:
+> > > > > > > >
+> > > > > > > > On Mon, Feb 03, 2025 at 10:04:04AM -0800, Joanne Koong wrot=
+e:
+> > > > > > > > > On Sun, Feb 2, 2025 at 6:25=E2=80=AFAM Zorro Lang <zlang@=
+redhat.com> wrote:
+> > > > > > > > > >
+> > > > > > > > > > On Tue, Jan 21, 2025 at 01:56:40PM -0800, Joanne Koong =
+wrote:
+> > > > > > > > > > > Add support for reads/writes from buffers backed by h=
+ugepages.
+> > > > > > > > > > > This can be enabled through the '-h' flag. This flag =
+should only be used
+> > > > > > > > > > > on systems where THP capabilities are enabled.
+> > > > > > > > > > >
+> > > > > > > > > > > This is motivated by a recent bug that was due to fau=
+lty handling of
+> > > > > > > > > > > userspace buffers backed by hugepages. This patch is =
+a mitigation
+> > > > > > > > > > > against problems like this in the future.
+> > > > > > > > > > >
+> > > > > > > > > > > Signed-off-by: Joanne Koong <joannelkoong@gmail.com>
+> > > > > > > > > > > Reviewed-by: Brian Foster <bfoster@redhat.com>
+> > > > > > > > > > > Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+> > > > > > > > > > > ---
+> > > > > > > > > >
+> > > > > > > > > > Those two test cases fail on old system which doesn't s=
+upport
+> > > > > > > > > > MADV_COLLAPSE:
+> > > > > > > > > >
+> > > > > > > > > >    fsx -N 10000 -l 500000 -h
+> > > > > > > > > >   -fsx -N 10000 -o 8192 -l 500000 -h
+> > > > > > > > > >   -fsx -N 10000 -o 128000 -l 500000 -h
+> > > > > > > > > >   +MADV_COLLAPSE not supported. Can't support -h
+> > > > > > > > > >
+> > > > > > > > > > and
+> > > > > > > > > >
+> > > > > > > > > >    fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z=
+ -R -W -h
+> > > > > > > > > >   -fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w =
+BSIZE -Z -R -W -h
+> > > > > > > > > >   -fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -=
+w BSIZE -Z -R -W -h
+> > > > > > > > > >   +mapped writes DISABLED
+> > > > > > > > > >   +MADV_COLLAPSE not supported. Can't support -h
+> > > > > > > > > >
+> > > > > > > > > > I'm wondering ...
+> > > > > > > > > >
+> > > > > > > > > > >  ltp/fsx.c | 166 ++++++++++++++++++++++++++++++++++++=
++++++++++++++-----
+> > > > > > > > > > >  1 file changed, 153 insertions(+), 13 deletions(-)
+> > > > > > > > > > >
+> > > > > > > > > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > > > > > > > > > index 41933354..3be383c6 100644
+> > > > > > > > > > > --- a/ltp/fsx.c
+> > > > > > > > > > > +++ b/ltp/fsx.c
+> > > > > > > > > > >  static struct option longopts[] =3D {
+> > > > > > > > > > >       {"replay-ops", required_argument, 0, 256},
+> > > > > > > > > > >       {"record-ops", optional_argument, 0, 255},
+> > > > > > > > > > > @@ -2883,7 +3023,7 @@ main(int argc, char **argv)
+> > > > > > > > > > >       setvbuf(stdout, (char *)0, _IOLBF, 0); /* line =
+buffered stdout */
+> > > > > > > > > > >
+> > > > > > > > > > >       while ((ch =3D getopt_long(argc, argv,
+> > > > > > > > > > > -                              "0b:c:de:fg:i:j:kl:m:n=
+o:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> > > > > > > > > > > +                              "0b:c:de:fg:hi:j:kl:m:=
+no:p:qr:s:t:uw:xyABD:EFJKHzCILN:OP:RS:UWXZ",
+> > > > > > > > > > >                                longopts, NULL)) !=3D =
+EOF)
+> > > > > > > > > > >               switch (ch) {
+> > > > > > > > > > >               case 'b':
+> > > > > > > > > > > @@ -2916,6 +3056,14 @@ main(int argc, char **argv)
+> > > > > > > > > > >               case 'g':
+> > > > > > > > > > >                       filldata =3D *optarg;
+> > > > > > > > > > >                       break;
+> > > > > > > > > > > +             case 'h':
+> > > > > > > > > > > +#ifndef MADV_COLLAPSE
+> > > > > > > > > > > +                     fprintf(stderr, "MADV_COLLAPSE =
+not supported. "
+> > > > > > > > > > > +                             "Can't support -h\n");
+> > > > > > > > > > > +                     exit(86);
+> > > > > > > > > > > +#endif
+> > > > > > > > > > > +                     hugepages =3D 1;
+> > > > > > > > > > > +                     break;
+> > > > > > > > > >
+> > > > > > > > > > ...
+> > > > > > > > > > if we could change this part to:
+> > > > > > > > > >
+> > > > > > > > > > #ifdef MADV_COLLAPSE
+> > > > > > > > > >         hugepages =3D 1;
+> > > > > > > > > > #endif
+> > > > > > > > > >         break;
+> > > > > > > > > >
+> > > > > > > > > > to avoid the test failures on old systems.
+> > > > > > > > > >
+> > > > > > > > > > Or any better ideas from you :)
+> > > > > > > > >
+> > > > > > > > > Hi Zorro,
+> > > > > > > > >
+> > > > > > > > > It looks like MADV_COLLAPSE was introduced in kernel vers=
+ion 6.1. What
+> > > > > > > > > do you think about skipping generic/758 and generic/759 i=
+f the kernel
+> > > > > > > > > version is older than 6.1? That to me seems more preferab=
+le than the
+> > > > > > > > > paste above, as the paste above would execute the test as=
+ if it did
+> > > > > > > > > test hugepages when in reality it didn't, which would be =
+misleading.
+> > > > > > > >
+> > > > > > > > Now that I've gotten to try this out --
+> > > > > > > >
+> > > > > > > > There's a couple of things going on here.  The first is tha=
+t generic/759
+> > > > > > > > and 760 need to check if invoking fsx -h causes it to spit =
+out the
+> > > > > > > > "MADV_COLLAPSE not supported" error and _notrun the test.
+> > > > > > > >
+> > > > > > > > The second thing is that userspace programs can ensure the =
+existence of
+> > > > > > > > MADV_COLLAPSE in multiple ways.  The first way is through s=
+ys/mman.h,
+> > > > > > > > which requires that the underlying C library headers are ne=
+w enough to
+> > > > > > > > include a definition.  glibc 2.37 is new enough, but even t=
+hings like
+> > > > > > > > Debian 12 and RHEL 9 aren't new enough to have that.  Other=
+ C libraries
+> > > > > > > > might not follow glibc's practice of wrapping and/or redefi=
+ning symbols
+> > > > > > > > in a way that you hope is the same as...
+> > > > > > > >
+> > > > > > > > The second way is through linux/mman.h, which comes from th=
+e kernel
+> > > > > > > > headers package; and the third way is for the program to de=
+fine it
+> > > > > > > > itself if nobody else does.
+> > > > > > > >
+> > > > > > > > So I think the easiest way to fix the fsx.c build is to inc=
+lude
+> > > > > > > > linux/mman.h in addition to sys/mman.h.  Sorry I didn't not=
+ice these
+> > > > > > >
+> > > > > > > Thanks for your input. Do we still need sys/mman.h if linux/m=
+man.h is added?
+> > > > > >
+> > > > > > Yes, because glibc provides the mmap() function that wraps
+> > > > > > syscall(__NR_mmap, ...);
+> > > > > >
+> > > > > > > For generic/758 and 759, does it suffice to gate this on whet=
+her the
+> > > > > > > kernel version if 6.1+ and _notrun if not? My understanding i=
+s that
+> > > > > > > any kernel version 6.1 or newer will have MADV_COLLAPSE in it=
+s kernel
+> > > > > > > headers package and support the feature.
+> > > > > >
+> > > > > > No, because some (most?) vendors backport new features into exi=
+sting
+> > > > > > kernels without revving the version number of that kernel.
+> > > > >
+> > > > > Oh okay, I see. That makes sense, thanks for the explanation.
+> > > > >
+> > > > > >
+> > > > > > Maybe the following fixes things?
+> > > > > >
+> > > > > > --D
+> > > > > >
+> > > > > > generic/759,760: fix MADV_COLLAPSE detection and inclusion
+> > > > > >
+> > > > > > On systems with "old" C libraries such as glibc 2.36 in Debian =
+12, the
+> > > > > > MADV_COLLAPSE flag might not be defined in any of the header fi=
+les
+> > > > > > pulled in by sys/mman.h, which means that the fsx binary might =
+not get
+> > > > > > built with any of the MADV_COLLAPSE code.  If the kernel suppor=
+ts THP,
+> > > > > > the test will fail with:
+> > > > > >
+> > > > > > >  QA output created by 760
+> > > > > > >  fsx -N 10000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W -=
+h
+> > > > > > > -fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z=
+ -R -W -h
+> > > > > > > -fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE =
+-Z -R -W -h
+> > > > > > > +mapped writes DISABLED
+> > > > > > > +MADV_COLLAPSE not supported. Can't support -h
+> > > > > >
+> > > > > > Fix both tests to detect fsx binaries that don't support MADV_C=
+OLLAPSE,
+> > > > > > then fix fsx.c to include the mman.h from the kernel headers (a=
+ka
+> > > > > > linux/mman.h) so that we can actually test IOs to and from THPs=
+ if the
+> > > > > > kernel is newer than the rest of userspace.
+> > > > > >
+> > > > > > Cc: <fstests@vger.kernel.org> # v2025.02.02
+> > > > > > Fixes: 627289232371e3 ("generic: add tests for read/writes from=
+ hugepages-backed buffers")
+> > > > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > > > ---
+> > > > > >  ltp/fsx.c         |    1 +
+> > > > > >  tests/generic/759 |    3 +++
+> > > > > >  tests/generic/760 |    3 +++
+> > > > > >  3 files changed, 7 insertions(+)
+> > > > > >
+> > > > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > > > > > index 634c496ffe9317..cf9502a74c17a7 100644
+> > > > > > --- a/ltp/fsx.c
+> > > > > > +++ b/ltp/fsx.c
+> > > > > > @@ -20,6 +20,7 @@
+> > > > > >  #include <strings.h>
+> > > > > >  #include <sys/file.h>
+> > > > > >  #include <sys/mman.h>
+> > > > > > +#include <linux/mman.h>
+> > > > > >  #include <sys/uio.h>
+> > > > > >  #include <stdbool.h>
+> > > > > >  #ifdef HAVE_ERR_H
+> > > > > > diff --git a/tests/generic/759 b/tests/generic/759
+> > > > > > index 6c74478aa8a0e0..3549c5ed6a9299 100755
+> > > > > > --- a/tests/generic/759
+> > > > > > +++ b/tests/generic/759
+> > > > > > @@ -14,6 +14,9 @@ _begin_fstest rw auto quick
+> > > > > >  _require_test
+> > > > > >  _require_thp
+> > > > > >
+> > > > > > +$here/ltp/fsx -N 0 -h $TEST_DIR 2>&1 | grep -q 'MADV_COLLAPSE =
+not supported' && \
+> > > > > > +       _notrun "fsx binary does not support MADV_COLLAPSE"
+> > > > > > +
+> > > > > >  run_fsx -N 10000            -l 500000 -h
+> > > > > >  run_fsx -N 10000  -o 8192   -l 500000 -h
+> > > > > >  run_fsx -N 10000  -o 128000 -l 500000 -h
+> > > > > > diff --git a/tests/generic/760 b/tests/generic/760
+> > > > > > index c71a196222ad3b..2fbd28502ae678 100755
+> > > > > > --- a/tests/generic/760
+> > > > > > +++ b/tests/generic/760
+> > > > > > @@ -15,6 +15,9 @@ _require_test
+> > > > > >  _require_odirect
+> > > > > >  _require_thp
+> > > > > >
+> > > > > > +$here/ltp/fsx -N 0 -h $TEST_DIR 2>&1 | grep -q 'MADV_COLLAPSE =
+not supported' && \
+> > > > > > +       _notrun "fsx binary does not support MADV_COLLAPSE"
+> > > > > > +
+> > > > >
+> > > > > I tried this out locally and it works for me:
+> > > > >
+> > > > > generic/759 8s ... [not run] fsx binary does not support MADV_COL=
+LAPSE
+> > > > > Ran: generic/759
+> > > > > Not run: generic/759
+> > > > > Passed all 1 tests
+> > > > >
+> > > > > SECTION       -- fuse
+> > > > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D
+> > > > > Ran: generic/759
+> > > > > Not run: generic/759
+> > > > > Passed all 1 tests
+> > > >
+> > > > Does the test actually run if you /do/ have kernel/libc headers tha=
+t
+> > > > define MADV_COLLAPSE?  And if so, does that count as a Tested-by?
+> > > >
 > > >
-> > > At Meta, we currently primarily rely on fstests 'auto' runs for
-> > > validating Btrfs as a general purpose filesystem for all of our root
-> > > drives. While this has obviously proven to be a very useful test suite
-> > > with rich collaboration across teams and filesystems, we have observed a
-> > > recent trend in our production filesystem issues that makes us question
-> > > if it is sufficient.
+> > > I'm not sure if I fully understand the subtext of your question but
+> > > yes, the test runs on my system when MADV_COLLAPSE is defined in the
+> > > kernel/libc headers.
+> >
+> > Yep, you understood me correctly. :)
+> >
+> > > For sanity checking the inverse case, (eg MADV_COLLAPSE not defined),
+> > > I tried this out by modifying the ifdef/ifndef checks in fsx to
+> > > MADV_COLLAPSE_ to see if the '$here/ltp/fsx -N 0 -h $TEST_DIR 2>&1 |
+> > > grep -q 'MADV_COLLAPSE not supported'' line catches that.
+> >
+> > <nod> Sounds good then; I'll add this to my test clod and run it
+> > overnight.
+>
+> The arm64 vms with 64k base pages spat out this:
+>
+> --- /run/fstests/bin/tests/generic/759.out      2025-02-02 08:36:28.00724=
+8055 -0800
+> +++ /var/tmp/fstests/generic/759.out.bad        2025-02-03 16:51:34.86296=
+4640 -0800
+> @@ -1,4 +1,5 @@
+>  QA output created by 759
+>  fsx -N 10000 -l 500000 -h
+> -fsx -N 10000 -o 8192 -l 500000 -h
+> -fsx -N 10000 -o 128000 -l 500000 -h
+> +Seed set to 1
+> +madvise collapse for buf: Cannot allocate memory
+> +init_hugepages_buf failed for good_buf: Cannot allocate memory
+>
+> Note that it was trying to create a 512M page(!) on a VM with 8G of
+> memory.  Normally one doesn't use large base page size in low memory
+> environments, but this /is/ fstestsland. 8-)
+>
+> From commit 7d8faaf155454f ("mm/madvise: introduce MADV_COLLAPSE sync
+> hugepage collapse") :
+>
+>         ENOMEM  Memory allocation failed or VMA not found
+>         EBUSY   Memcg charging failed
+>         EAGAIN  Required resource temporarily unavailable.  Try again
+>                 might succeed.
+>         EINVAL  Other error: No PMD found, subpage doesn't have Present
+>                 bit set, "Special" page no backed by struct page, VMA
+>                 incorrectly sized, address not page-aligned, ...
+>
+> It sounds like ENOMEM/EBUSY/EINVAL should result in
+> _notrun "Could not generate hugepage" ?  What are your thoughts?
+>
+
+Thanks for running it overnight. This sounds good to me, but will this
+be robust against false negatives? For example, if it succeeds when
+we're doing the
+
+$here/ltp/fsx -N 0 -h $TEST_DIR 2>&1 | grep -q 'MADV_COLLAPSE not
+supported' &&  _notrun "fsx binary does not support MADV_COLLAPSE"
+
+check, does that guarantee that the actual run won't error out with
+ENOMEM/EBUSY/EINVAL? It seems like there could be the case where it
+passes the check but then when it actually runs, the system state
+memory state may have changed and now memcg charging or the memory
+allocation fails? EAGAIN seems a bit iffy to me - hopefully this
+doesn't happen often but if it does, it would likely be a false
+negative fail for the generic test?
+
+Maybe instead of "$here/ltp/fsx -N 0 -h $TEST_DIR 2>&1 | grep -q
+'MADV_COLLAPSE not supported' &&  _notrun "fsx binary does not support
+MADV_COLLAPSE"", we should run the test and then if the output to the
+.out file is "MADV_COLLAPSE not supported", then we deem that a
+pass/success? Not sure if this is possible in the fstest
+infrastructure though for checking against two possible outputs in the
+.out file. What are your thoughts?
+
+
+Thanks,
+Joanne
+
+> --D
+>
+> > --D
+> >
 > > >
-> > > Over the last few years, we have had a number of issues (primarily in
-> > > Btrfs, but at least one notable one in Xfs) that have been detected in
-> > > production, then reproduced with an unreliable non-specific stressor
-> > > that takes hours or even days to trigger the issue.
-> > > Examples:
-> > > - Btrfs relocation bugs
-> > > https://lore.kernel.org/linux-btrfs/68766e66ed15ca2e7550585ed09434249db912a2.1727212293.git.josef@toxicpanda.com/
-> > > https://lore.kernel.org/linux-btrfs/fc61fb63e534111f5837c204ec341c876637af69.1731513908.git.josef@toxicpanda.com/
-> > > - Btrfs extent map merging corruption
-> > > https://lore.kernel.org/linux-btrfs/9b98ba80e2cf32f6fb3b15dae9ee92507a9d59c7.1729537596.git.boris@bur.io/
-> > > - Btrfs dio data corruptions from bio splitting
-> > > (mostly our internal errors trying to make minimal backports of
-> > > https://lore.kernel.org/linux-btrfs/cover.1679512207.git.boris@bur.io/
-> > > and Christoph's related series)
-> > > - Xfs large folios
-> > > https://lore.kernel.org/linux-fsdevel/effc0ec7-cf9d-44dc-aee5-563942242522@meta.com/
-> > >
-> > > In my view, the common threads between these are that:
-> > > - we used fstests to validate these systems, in some cases even with
-> > >   specific regression tests for highly related bugs, but still missed
-> > >   the bugs until they hit us during our production release process. In
-> > >   all cases, we had passing 'fstests -g auto' runs.
-> 
-> Have you considered the 'soak' test group with a long SOAK_DURATION
-> and then increasing the load using LOAD_FACTOR? Also there is a
-> 'stress' group that TIME_FACTOR acts on.
-> 
-> For XFS, there's also bunch of fuzzing tests (in the
-> dangerous_fuzzers group) that use the same SOAK_DURATION
-> infrastructure via common/fuzzy.
-
-I hadn't realized people were running these for multi-day durations.
-Thanks for pointing them out and for your other inline answers to my
-questions.
-
-> 
-> 
-> > > - were able to reproduce the bugs with a predictable concoction of "run
-> > >   a workload and some known nasty btrfs operations in parallel". The most
-> > >   common form of this was running 'fsstress' and 'btrfs balance', but it
-> > >   wasn't quite universal. Sometimes we needed reflink threads, or
-> > >   drop_caches, or memory pressure, etc. to trigger a bug.
-> 
-> That's pretty much what check-parallel does to a system. Loads of
-> tests run things like drop_caches, memory compaction, CPU hotplug,
-> etc. check-parallel essentially exposes every test to these sorts
-> of background perturbations rather than just the one test that is
-> running that perturbation. IOWs, even the most basic correctness
-> test now gets exercised while cpu hotplug and memory compaction are
-> going on in the background....
-> 
-> Eventually, I plan to implement these background perturbations as
-> separate control tasks for check-parallel so we don't need specific
-> tests that run a background perturbation whilst the rest of the
-> system is under test.
-
-I think that a framework for introducing background perturbations while
-running tests is definitely what I'm getting at. If check-parallel is a
-good version of that, then that sounds great to me. I am particularly
-excited about your point that it will smash together *every* stimulus
-with *every* test. I do have some questions in my head about how that
-would work in practice.
-
-My main questions/concerns are:
-
-How much do you randomize the interleaving of tests? Does
-check-parallel run them in a random order?
-
-Similarly, their durations are not at all tuned to maximize
-interesting interactions. If test X and test Y would collide on some
-faulty interaction, but test X runs once in 1 second, then you would
-likely never see test X interfere with some interesting moment during
-test Y. Are you considering feeding the tests back into the run-queue
-as they finish for these stress style runs?
-
-It seems that the two objectives of the test harness are sort of in
-tension with using check-parallel to stress things. On one hand you
-want tests to independently succeed or fail and on the other hand you
-want noise from one test to disturb the other. I fear more of the
-failures will turn out to be "Oh, well, when THAT happens, we would
-expect this condition to be violated". Especially for the more "unit
-test" style fstests that carefully use sync to check specific conditions
-during a run.
-
-This variant also feels like it would be at the extreme of difficulty
-for attempting to distill a failure into a reproducer.
-
-> 
-> > > - The relatively generic stressing reproducers took hours or days to
-> > >   produce an issue then the investigating engineer could try to tweak and
-> > >   tune it by trial and error to bring that time down for a particular bug.
-> > >
-> > > This leads me to the conclusion that there is some room for improvement in
-> > > stress testing filesystems (at least Btrfs).
-> > >
-> > > I attempted to study the prior art on this and so far have found:
-> > > - fsstress/fsx and the attendant tests in fstests/. There are ~150-200
-> > >   tests using fsstress and fsx in fstests/. Most of them are xfs and
-> > >   btrfs tests following the aforementioned pattern of racing fsstress
-> > >   with some scary operations. Most of them tend to run for 30s, though
-> > >   some are longer (and of course subject to TIME_FACTOR configuration)
-> 
-> As per above, SOAK_DURATION.
-> 
-> > > - Similar duration error injection tests in fstests (e.g. generic/475)
-> > > - The NFSv4 Test Project
-> > >   https://www.kernel.org/doc/ols/2006/ols2006v2-pages-275-294.pdf
-> > >   A choice quote regarding stress testing:
-> > >   "One year after we started using FSSTRESS (in April 2005) Linux NFSv4
-> > >   was able to sustain the concurrent load of 10 processes during 24
-> > >   hours, without any problem. Three months later, NFSv4 reached 72 hours
-> > >   of stress under FSSTRESS, without any bugs. From this date, NFSv4
-> > >   filesystem tree manipulation is considered to be stable."
-> > >
-> > >
-> > > I would like to discuss:
-> > > - Am I missing other strategies people are employing? Apologies if there
-> > >   are obvious ones, but I tried to hunt around for a few days :)
-> 
-> check-parallel.
-> 
-> > > - What is the universe of interesting stressors (e.g., reflink, scrub,
-> > >   online repair, balance, etc.)
-> 
-> memory compaction, cpu hotplug, random reflinks of the underlying
-> loop device image files to simulate dynamic VM image file snapshots,
-> etc.
-> 
-> > > - What is the universe of interesting validation conditions (e.g.,
-> > >   kernel panic, read only fs, fsck failure, data integrity error, etc.)
-> 
-> All of them. That's the point of check-parallel - it uses simple,
-> existing filesystem correctness tests to generate a massively
-> stressful load on the system...
-> 
-> > > - Is there any interest in automating longer running fsstress runs? Are
-> > >   people already doing this with varying TIME_FACTOR configurations in
-> > >   fstests?
-> 
-> At least for XFS, Darrick is already doing that, and I think Carlos
-> may be as well.
-> 
-> > > - There is relatively less testing with fsx than fsstress in fstests.
-> > >   I believe this creates gaps for data corruption bugs rather than
-> > >   "feature logic" issues that the fsstress feature set tends to hit.
-> > > - Can we standardize on some modular "stressors" and stress durations
-> > >   to run to validate file systems?
-> 
-> I think we already have that with the "soak" and "stress" groups...
-> 
-> > > In the short term, I have been working on these ideas in a separate
-> > > barebones stress testing framework which I am happy to share, but isn't
-> > > particularly interesting in and of itself. It is basically just a
-> > > skeleton for concurrently running some concurrent "stressors" and then
-> > > validating the fs with some generic "validators". I plan to run it
-> > > internally just to see if I can get some useful results on our next few
-> > > major kernel releases.
-> 
-> check-parallel is effectively a massive concurrent stress workload
-> for the system. It does this by running many individual correctness
-> tests concurrently.
-> 
-> Run it on a 64p system or larger, and it will hammer both the test
-> filesystems and base filesystem that all the loop device image files
-> are laid out on.  I'm seeing it generate 5-6GB/s of IO load, 40-50GB
-> of memory usage, and consistently use >90% of the CPU in the system
-> stress the scheduler at over half a million context switches/s.
-
-I will definitely invest some time into getting check-parallel to run
-with btrfs, and hopefully it turns up some interesting stuff.
-
-> 
-> > > And of course, I would love to discuss anything else of interest to
-> > > people who like stress testing filesystems!
-> 
-> Filesystem stress testing by itself isn't really interesting to me.
-> Using filesystem correctness tests to create massively stressful
-> workloads, OTOH, attacks the problem from multiple angles and
-> exercises the system well outside the bounds of just filesystem
-> code.
-
-From what I see, today we have a handful of tests which race fsx or
-fsstress with 0-2 operations under test, and you are proposing using
-check-parallel to hammer the computer with the entirety of all 1000
-tests in parallel (awesome). I think I am proposing something in between
-where we run fsx AND fsstress AND ~10 known scary operations. That
-has proven to dredge up bugs in btrfs (where the simpler fsstress plus
-one thing doesn't). I think check-parallel will be more stressful, but
-that this "mega fsstress run" will be more predictable and easier to
-tune/get reproducers out of.
-
-Thanks again for your thoughts,
-Boris
-
-> 
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
+> > > > --D
+> > > >
+> > > > >
+> > > > > Thanks,
+> > > > > Joanne
+> > > > >
+> > > > > >  psize=3D`$here/src/feature -s`
+> > > > > >  bsize=3D`$here/src/min_dio_alignment $TEST_DIR $TEST_DEV`
+> > > > > >
+> > > > >
+> >
