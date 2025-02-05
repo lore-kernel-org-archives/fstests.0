@@ -1,73 +1,73 @@
 Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E956173
-	for <fstests@vger.kernel.org>; Wed,  5 Feb 2025 00:09:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BF3853BE
+	for <fstests@vger.kernel.org>; Wed,  5 Feb 2025 00:15:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738714146; cv=none; b=HUcQU5S2ai7DR7GhFqSvHrMMvb1H9rmEG0n3v8BYZR3Z1HbntpAUD7yghDc7G74G0TWxc7P5Vl1Ui5qP7yIA5dG6cxxVABQHA3XpMLqddFd7tWXnx2TRAuWCoJif7B+4K64OwlTPC0oVwBc1uUIloJSTlGW0y49XA7LfSI/zbvg=
+	t=1738714506; cv=none; b=m6KBPM8IgXd2aPdtI8xxMyZdKSp1FfSq11WnmSiJB0tL34L97TumPday51VjfquFAWvwyb4lmQ4jhPQGglkL3Lgz1oiCITViGjh0yB88RCsRANcI6V1ak59QZfVXDLGo0BU1tJZQH8yW3NVXRcIXbGfta295ttlCg/t7imkpyhc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738714146; c=relaxed/simple;
-	bh=DlxSGXZU0DWaOR8mpKXyWlkBQrLiAdDhmztPP7zY+KY=;
+	s=arc-20240116; t=1738714506; c=relaxed/simple;
+	bh=uLQquXgmTssOR68eJsMIs4FDbJ6qba0cuODYGCF5aSg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kYvh5zP/1BIcjhWTJfblVd7wSxOcnnwGwW/hSm1XVqIKQLcqUfpKdyBoiUJwVMj1WZ5BYAeTUvfSQjnNqB4sp3Fu0QWDr+y7W7pIZruotXWAzv46iMY4UsJZpQhp8+DFLwkETLN7DrAzoZff/dom3xDl9ltwHbRyBzLY3imsrNk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=07drgkKR; arc=none smtp.client-ip=209.85.214.181
+	 Content-Type:Content-Disposition:In-Reply-To; b=VVwSeBrkg3Hq8Z0zQqrLDXE4V7gfkmVnI6434RuNHPNEPXejICZfXyDlg4WiU4/rDH3Pm0kzRsyD3Dj+hGUZfh9pHRsTPgprx9h2I5jyry50IR6NuZOLSdCpPT5OIRSAXPf/h6BrfIBBx3k7GzGq38Z+EbmV/aZIruD5MLHE3Bk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=olIQVgtP; arc=none smtp.client-ip=209.85.214.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="07drgkKR"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-21f0c4275a1so15761295ad.2
-        for <fstests@vger.kernel.org>; Tue, 04 Feb 2025 16:09:04 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="olIQVgtP"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-21661be2c2dso105763555ad.1
+        for <fstests@vger.kernel.org>; Tue, 04 Feb 2025 16:15:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1738714144; x=1739318944; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1738714502; x=1739319302; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=uYQa5iksrp/AjhZ2SgU2sWhfZ2J+sJFerGxdTl91K2I=;
-        b=07drgkKRqRC0YwUrGkh+DJz6rC3qB6Y9xoPBvXvO70sMgvwuaC7+hNWeJOoSn5m99g
-         3nR0g6kYyTmdtqgihj/ri7Di5v2D2BnEFR4YPnxCRR1dfNS6iOnWJ8I1NrzPAKPcmNEF
-         8ffmKFO1xn5hQzAmr8zwuTCDP4L6HHP+3os6q9oK8bEwSYgOMBevWPrdLrlEU3q0IN3p
-         79BwTAfxXJGKm+3qV5C1YyzTIBexElcmVWQfRkZDbAp+hMlpuPPoz/xK3NlFNgu7O3Xr
-         PwIZFD/HoU+hROgAuEPzcUm+hEivel4CR7ez8BwnrDJiu2mWhnpG5ooc3ToHmlfpSKv6
-         +o4w==
+        bh=Xla1eyZLhS5EmFBfiSNE0Sv70/LRGJRczxpfK7Flbr8=;
+        b=olIQVgtPlGxl+YruE5kdMEvqrkEGWaL/9lKArVrxjFcBuynEOCy8f1AgL5nHCDFYR+
+         MDREpcno65bvhDado+OabQ9h2G7aA2XI2mPQ9LX/ofydmy/00xCuWNi8smDx2XI8EVYF
+         VW2I/2hKhdGV3D3Y1hoMpDowt8BCDKIIiDSRhJvNvUYUd4jZCmUVCxsjN3ts2v8kwO0v
+         HJ50JKPB9ZJhJII/0CZk5gSSBtnCG+BdQJjMJV/Blyn+Ri80+pAdmU4r+nwtRfGho49/
+         uPpzqOoXTCVGonEdGgL4DkUG4iKLxeBdbLuUzbnmIm4T5UaVJKLAk9StcX3bzpkE2eOJ
+         YoUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738714144; x=1739318944;
+        d=1e100.net; s=20230601; t=1738714502; x=1739319302;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=uYQa5iksrp/AjhZ2SgU2sWhfZ2J+sJFerGxdTl91K2I=;
-        b=nyaIoJl0eRFxc8bpafz8u8cr1nAvsXjdM7sM2gI7+/KFIjfrdyWQQlph379oHB6pkw
-         uCyNOfL1rlRJpPz0EYSlcp3vtQ264SYr5tgLfiWtN5rOEdF8cWPpCQWFiHryXYeCvphP
-         Ke5lXI/SfNr2o45Fqw7L29634hXyDg4Aacxh7TgVEmBcP1h4nY4s/i7ZGnoSanWbsiQf
-         lvFUM0dYO48h/ZMe3YnUfQCEk+5D0sDUsfPoeC2feLkvecv0vrTYLfvKhAcvIu9AGkSt
-         84MpH8/uI6QQuIsAjA85adZY7F2HAGCyDWZH4OLG6kvWjQrFqHN5qem/f+G0d18mLJXF
-         Prsw==
-X-Forwarded-Encrypted: i=1; AJvYcCV3WpH784fqwBcqcu6d8UNJpzmTvrJleVvE1qOYeuHZFXhSSf7E2u0DUazhbX9ZTuicDrpEOCwm@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy2v9L6gpOdfdx1G9iXPKyXgX5VdIM4Zc9yH/kv8QzA7E7C4JyL
-	YKnj7zEqLlvtaST/q3LohL+LNjCSqfd+xgwq6NNC7An3WBvPbnq+ZZg9QYY0ztQ=
-X-Gm-Gg: ASbGnctiBSERuIwYlt/bC2zObfZhVElnvjKMP6W1LrLwpxP6eJDUiIrKWM5DQ/NlFbT
-	kbxDa+EG4FUzvXtThfXjfLn3ir3+cHAtn3ZB2v+gvE8U807ddeiGczZI6GXwBC93HUrkn8nYg61
-	LwbQYAx/62PqGm6YVWVXqFMfRWvLEHnZ61IMPH+NNtL0rMSeZnX8iVDnAm8u36VOJQVDGFxGLMm
-	Ran9s0pOvE9Ftif/fyLzojhYRNXn7E8V1zRMQaoCCxrIouHRH8h0rfXMzCeut0YyJ6aBewkDWPx
-	Rlp2IFCBQvV+hjm7tRFTdTTfvEBt4+i54xGOeFwqj6CRtQ1uidJnxZ0c
-X-Google-Smtp-Source: AGHT+IF1nTgQm/3zR702eOCluilvUQRBDi7woD+dIuPFWUp5+iYLkJaePkAZZsHIqqwx/+84D+IQPg==
-X-Received: by 2002:a05:6a00:114a:b0:725:e057:c3de with SMTP id d2e1a72fcca58-7303521441cmr1328278b3a.23.1738714144338;
-        Tue, 04 Feb 2025 16:09:04 -0800 (PST)
+        bh=Xla1eyZLhS5EmFBfiSNE0Sv70/LRGJRczxpfK7Flbr8=;
+        b=r9hy5GVNgoo6rpKY0TtjFrzJZNazgbESMwiEynzaVf+urpeUSp7Iw17OKn5Qw2x5+T
+         003EqwaEk/Xbo+H5zL3AsjATcGkaLSTdzNxPfJFWKl/A7Wy0ZhlMG0vQDbld/N5Nwj73
+         +M1Ta/toIxZ8SRdU6yPGtATiz9iU/Uk5NVeUNmRhMf+6VKyizh5ZkvkIglgz+GCvgr1O
+         RWTSB8MSJ8Cw8qXemFB3d/MXdh4At8DV4pvwJMkP7gPmFpZOMvy+rx+/RAr7F8+412bn
+         5q3cWL5cuYGnuhACVH/4viQsa2AAnLdg9ISW19os/rHCEYXQqlGvsFi30a833oMj9y7z
+         OBuQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXumymHYCjsZ7b0Zz01zdrI+dps+kw2ZyxsguDfkpL66ByFx1k2DzvyD9xmdtXvwdWrVbeS26qE@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy8YPThy9atoQ6i7rcdnI0bX6k62XECB85WG2Li++/F5QST46Cx
+	7gjhsmFkoi7/1BbSBkV4kGIKZSjeB1VWB5eN424fV7jUM0UnMl7TdSYhwbNKaLs=
+X-Gm-Gg: ASbGncvICB0usfLleYW6TRUMjcyuCX+gCHyKAYFJd1mEgpO1v+b6XzBsD8BZG8J0JmW
+	oNVgrscRNbNyjrmFEGaK6XQcql7NFINH2RTc0ch+sdFYlM90rnjx0Z/iy0jLptJqEu5vsp+Wznl
+	MuPdI1WceTHHq/nlpk3Zle9f/X2ZxBSoS5Y0ikKnb7bUa9HvMGisOLdJJES8kCrb6dVJ2O1soNZ
+	5CfBJKczwdg2s2TF6+xM0yXMIo9tI1mJ5M4m3+6gEA7u1BwQQS6gtKrDw6Yfy4E32qShrC+Kvsg
+	sD1EkttLbk9WCTpSP44lGhpXFwUZQ+CVO6GR5+1lPPHjvwdE5niAxydY
+X-Google-Smtp-Source: AGHT+IG0ZMWlZfOgtD5/49DBQQ8c4viEqaE/OcUlkg2Uk2pkVUFdphB5Zr5X2zfwoyulKwav1rtDHA==
+X-Received: by 2002:a05:6a20:43ab:b0:1ed:a80e:932 with SMTP id adf61e73a8af0-1ede88ad49dmr1573766637.34.1738714502409;
+        Tue, 04 Feb 2025 16:15:02 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72fe653fa85sm10975781b3a.77.2025.02.04.16.09.03
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72fe6427abdsm11619259b3a.59.2025.02.04.16.15.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Feb 2025 16:09:03 -0800 (PST)
+        Tue, 04 Feb 2025 16:15:01 -0800 (PST)
 Received: from dave by dread.disaster.area with local (Exim 4.98)
 	(envelope-from <david@fromorbit.com>)
-	id 1tfSyT-0000000Eilg-38Kc;
-	Wed, 05 Feb 2025 11:09:01 +1100
-Date: Wed, 5 Feb 2025 11:09:01 +1100
+	id 1tfT4F-0000000Eip8-27QZ;
+	Wed, 05 Feb 2025 11:14:59 +1100
+Date: Wed, 5 Feb 2025 11:14:59 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: "Darrick J. Wong" <djwong@kernel.org>
 Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Subject: Re: [PATCH 07/34] common/dump: don't replace pids arbitrarily
-Message-ID: <Z6KsHTzj1meFDVAF@dread.disaster.area>
+Subject: Re: [PATCH 11/34] common/rc: create a wrapper for the su command
+Message-ID: <Z6Ktg3-oudF2wxJw@dread.disaster.area>
 References: <173870406063.546134.14070590745847431026.stgit@frogsfrogsfrogs>
- <173870406214.546134.16846124942782280576.stgit@frogsfrogsfrogs>
+ <173870406275.546134.6082485989827844416.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -76,43 +76,18 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <173870406214.546134.16846124942782280576.stgit@frogsfrogsfrogs>
+In-Reply-To: <173870406275.546134.6082485989827844416.stgit@frogsfrogsfrogs>
 
-On Tue, Feb 04, 2025 at 01:24:07PM -0800, Darrick J. Wong wrote:
+On Tue, Feb 04, 2025 at 01:25:09PM -0800, Darrick J. Wong wrote:
 > From: Darrick J. Wong <djwong@kernel.org>
 > 
-> In the next patch we'll run tests in a pid namespace, which means that
-> the test process will have a very low pid.  This low pid situation
-> causes problems with the dump tests because they unconditionally replace
-> it with the word "PID", which causes unnecessary test failures.
+> Create a _su wrapper around the su command so that the next patch can
+> fix all the pkill isolation code so that this test can only kill
+> processes started for this test.
 > 
-> Initially I was going to fix it by bracketing the regexp with a
-> whitespace/punctuation/eol/sol detector, but then I decided to remove it
-> see how many sheep came barreling through.  None did, so I removed it
-> entirely.  The commit adding it (linked below) was not insightful at
-> all.
-> 
-> Fixes: 19beb54c96e363 ("Extra filtering as part of IRIX/Linux xfstests reconciliation for dump.")
 > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> ---
->  common/dump |    1 -
->  1 file changed, 1 deletion(-)
-> 
-> 
-> diff --git a/common/dump b/common/dump
-> index 3761c16100d808..6dcd6250c33147 100644
-> --- a/common/dump
-> +++ b/common/dump
-> @@ -907,7 +907,6 @@ _dir_filter()
->      -e "s#$SCRATCH_MNT#SCRATCH_MNT#g"       \
->      -e "s#$dump_sdir#DUMP_SUBDIR#g"   \
->      -e "s#$restore_sdir#RESTORE_SUBDIR#g" \
-> -    -e "s#$$#PID#g" \
->      -e "/Only in SCRATCH_MNT: .use_space/d" \
->      -e "s#$RESULT_DIR/##g" \
 
-Looks fine, if it causes problems further down the line then we can
-implement a better filter.
+Looks fine.
 
 Reviewed-by: Dave Chinner <dchinner@redhat.com>
 -- 
