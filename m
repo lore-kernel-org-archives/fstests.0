@@ -1,72 +1,43 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67E082147E3
-	for <fstests@vger.kernel.org>; Wed,  5 Feb 2025 21:21:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A884214A73;
+	Wed,  5 Feb 2025 21:25:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738790517; cv=none; b=ZvfpNyk24bUZUykUSrsZvjXmo2in19TupStr9jaim/JHw/mwcHQEdSYAboQxF+cDYSHWEJrnXtS/BMnscGA/AJKgxgcSTQ15VZZgkNFhikUh6FKFv5DZ9fW2WwlKl0uwB1Bajt7f08mgn58F9yZqYtc16hyCuPyr9VggWLgAIsY=
+	t=1738790726; cv=none; b=Ko1BWMQPy02S1bMBbnpTNqNjn1wBfjMibq9LsiVSirqpdr6+9gxo9xl0qtQo/KrYM0+omeUUa7hiqKD76Pxr3yVrVDTI6AGMTZ9mkAs/hwe1+eq/xwWcHEiBCAnKY/38bPewofp+mCdQ8ALIcD4Gyj5vw8SjGQ/z7sjNiJru4hw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738790517; c=relaxed/simple;
-	bh=4c1CQdFfn/dW+knDe17drwtkrgxvFmnEZBzBNcc3VvM=;
+	s=arc-20240116; t=1738790726; c=relaxed/simple;
+	bh=qOciB2zAmW+iGaWGu4e8oadw0Z9OC7vLuQRbgu6E/r8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=WcuDEQ/hv3vrjT03rNc/5wO4dqYk1kQzQ5x37uEGzaddgabEfbGbkb+xnLR7YByL+4U9zf7nVTtJWcjIV/c0WSngmvB8/VHt5jyIv3Lzt3Crw/c3Q0kIxS75wXr1ewuxDKUzUFSqoMtBFND+Ph7DxrAYbsqjPCDTJP0XC4fkaZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=aKedFP/5; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=twTLoE/8MSBsOSxBJiMkxdYOrli8AwVoWICqjunXfRxddIrfoksyP5YGun87YYKWcn47qDlrj39as35j2IlgqpAVMQPw5CiRsDY4Rgfh1kfyOadYGrU2aP16UEwfmKgcRUINb4v7JX6QADpDUFlZMyoR5pyazumfoRIwHCxncg8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vQ7v3wyG; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="aKedFP/5"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-2161eb95317so5641035ad.1
-        for <fstests@vger.kernel.org>; Wed, 05 Feb 2025 13:21:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1738790516; x=1739395316; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=JWwkIxRKtSqIjASsHl/lHHEUmpKkeTHbd6vOaclqp1c=;
-        b=aKedFP/5tCvdX+bkfe+N5kHZcv2OhJO6pxQ98LvwPNa1Pj/eoRXRFoZjwX31ZgcLge
-         eiY52lRgQDh0e66h8cErhFJ2o3MzbDQhZWIgSjdlchhYta5/tAQzI/DIREFk4fL9QSC+
-         euX/EdxygyGyRdtCZ0TFLcOE/hxuk/6zCQTEtDDSeHU+5+cSB6B9lxNiMsPw5poUsku6
-         84PnR9Rl7+90P3l9Ow6Pk69VMa8f+P0pKEoS9wlvdKpCmc9Fa5y0Wda07+jQ30Hp7CVc
-         CVzxAtiiSmoYGI+hKwLBcP2537dUlMmCuzhToXfZHPNcvrarWrJRwTI3SXDdDeBhUBNm
-         dqWw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738790516; x=1739395316;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JWwkIxRKtSqIjASsHl/lHHEUmpKkeTHbd6vOaclqp1c=;
-        b=VzsLCmNBDXjxqDOKVg27cvRM4IMd4ArDJzkHro1zMS35+G9TCB3I6wvQWwkxlduXHg
-         /F72Nsx4po9M/dVpceJ41pSN6ZHxksTENIRhj1gSJlsavos0+Q52gI3K+VUrWkwOZ2rc
-         cr8Ogltb+iF28klWIlrxwegjLFG12a8Q44oiMXTspM/RpWVnhWkiD6H1GHH3NgzCqSjC
-         hfrDsjPuurGrXvEqiPN9EY+u7pb39aabDOYe2TpTOEJgkAxj+kCbrGrgJAZ6gXIi5WjP
-         N4gu1UepwSP6XECykJGCfBHwKiTRfPtS65f7mpV/mMBHitdrEAIgKxRbeOKRXAovFLsK
-         KUuw==
-X-Gm-Message-State: AOJu0Yz0su1BrYlCj5+mqaxOqvfnVayhHBh0ACoQtlKJmUq6JpDwfgE1
-	OyfIMrEiCeePS3/tIDPsp6NdeYGoXlX1zLOmiBOByDVGBQRhQ5qz0/ezeAu6RDs=
-X-Gm-Gg: ASbGncueEsPwh7bTwCvPsrOLDwtcmrcI73QB+dFhZwPxIy44CCHXRhLXcJhBbrgWVJs
-	FPiO4+FNccsNslWFih3Jvl//a4Qw2HASVE926VV5wEngrP6HcIHkRLHBTsdUDMkvTcmoBihvpR6
-	GOuBi9+zO0ww7CGHySTeFSR3iWQ/iPuDvkV9GvJYS1+nFz7VRnVhflr/tf+m3fmJpAPWfRh0Rhz
-	MDfXksLS0+EMesj7b/GCiAL0I9Rf8TPUHBeTCTNkvF5PTMPN6LeYk4ppUA75xjNJvaJQTDduqK1
-	fnTBsjp+tkz/mzY2PzbnTisx8t4crqc0MBxOGhPU5cNdfP4HULz/buk/
-X-Google-Smtp-Source: AGHT+IER3Sku2BPF4yvBzW7mHhEAqWYyzMVrFsk9Eou4rK/LfNULE8nqSV1UdyQnlMwkJKqVk9KKEw==
-X-Received: by 2002:aa7:930d:0:b0:725:b347:c3cc with SMTP id d2e1a72fcca58-7303521f9camr7629504b3a.23.1738790514124;
-        Wed, 05 Feb 2025 13:21:54 -0800 (PST)
-Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72fe6429a98sm13598669b3a.67.2025.02.05.13.21.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Feb 2025 13:21:53 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tfmqF-0000000F5wq-21Ou;
-	Thu, 06 Feb 2025 08:21:51 +1100
-Date: Thu, 6 Feb 2025 08:21:51 +1100
-From: Dave Chinner <david@fromorbit.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH v2 0/5] fstests: btrfs: add test case to validate sysfs
- input arguments
-Message-ID: <Z6PWb__u9h25RCX4@dread.disaster.area>
-References: <cover.1738752716.git.anand.jain@oracle.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vQ7v3wyG"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AAEC8C4CED1;
+	Wed,  5 Feb 2025 21:25:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738790725;
+	bh=qOciB2zAmW+iGaWGu4e8oadw0Z9OC7vLuQRbgu6E/r8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=vQ7v3wyGcx/Rqv+Z2YEC16jTz+zW+rdbCCU5k6vju8cTGdap6ImY/On//jQGqg3n+
+	 tpOVgkRneAyCT+OUerruzsPv6yj/J1VQJ63VEDATRHaMuJKv9ZeGtflRNJx01UX8+L
+	 tjQctOHCYOZvUefvPWQ5X2Kk2VMfoSZomgERROmvXYiYCCkyS/XXy3zmkveIDNvBWe
+	 oNK9ts6wp/7TqkTXdLgI+AeP6ThMnfra3UMpgHRkBFrehVv2tH/wd9wIl5zjztvJzY
+	 cGej21R5Eir7TFMM8wkZ1aP+c8SY4bLGpNFoLaTEFZkwp3pcW8A3zi+5MDW4aSCekR
+	 M98qLU1lo6qIg==
+Date: Wed, 5 Feb 2025 13:25:25 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: zlang@redhat.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 15/34] check: run tests in a private pid/mount namespace
+Message-ID: <20250205212525.GD21808@frogsfrogsfrogs>
+References: <173870406063.546134.14070590745847431026.stgit@frogsfrogsfrogs>
+ <173870406337.546134.5825194290554919668.stgit@frogsfrogsfrogs>
+ <Z6KyrG6jatCgmUiD@dread.disaster.area>
+ <20250205180048.GH21799@frogsfrogsfrogs>
+ <20250205181959.GL21799@frogsfrogsfrogs>
+ <Z6PU11K25tADRy4i@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -75,28 +46,84 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <cover.1738752716.git.anand.jain@oracle.com>
+In-Reply-To: <Z6PU11K25tADRy4i@dread.disaster.area>
 
-On Wed, Feb 05, 2025 at 07:06:35PM +0800, Anand Jain wrote:
-> v2:
-> Mainly adds a generic function to check if a sysfs attribute reports
-> invalid input.
+On Thu, Feb 06, 2025 at 08:15:03AM +1100, Dave Chinner wrote:
+> On Wed, Feb 05, 2025 at 10:19:59AM -0800, Darrick J. Wong wrote:
+> > On Wed, Feb 05, 2025 at 10:00:48AM -0800, Darrick J. Wong wrote:
+> > > On Wed, Feb 05, 2025 at 11:37:00AM +1100, Dave Chinner wrote:
+> > > > On Tue, Feb 04, 2025 at 01:26:13PM -0800, Darrick J. Wong wrote:
+> > > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > > 
+> > > > > As mentioned in the previous patch, trying to isolate processes from
+> > > > > separate test instances through the use of distinct Unix process
+> > > > > sessions is annoying due to the many complications with signal handling.
+> > > > > 
+> > > > > Instead, we could just use nsexec to run the test program with a private
+> > > > > pid namespace so that each test instance can only see its own processes;
+> > > > > and private mount namespace so that tests writing to /tmp cannot clobber
+> > > > > other tests or the stuff running on the main system.
+> > > > > 
+> > > > > However, it's not guaranteed that a particular kernel has pid and mount
+> > > > > namespaces enabled.  Mount (2.4.19) and pid (2.6.24) namespaces have
+> > > > > been around for a long time, but there's no hard requirement for the
+> > > > > latter to be enabled in the kernel.  Therefore, this bugfix slips
+> > > > > namespace support in alongside the session id thing.
+> > > > > 
+> > > > > Declaring CONFIG_PID_NS=n a deprecated configuration and removing
+> > > > > support should be a separate conversation, not something that I have to
+> > > > > do in a bug fix to get mainline QA back up.
+> > > > > 
+> > > > > Cc: <fstests@vger.kernel.org> # v2024.12.08
+> > > > > Fixes: 8973af00ec212f ("fstests: cleanup fsstress process management")
+> > > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > > ---
+> > > > >  check               |   34 +++++++++++++++++++++++-----------
+> > > > >  common/rc           |   12 ++++++++++--
+> > > > >  src/nsexec.c        |   18 +++++++++++++++---
+> > > > >  tests/generic/504   |   15 +++++++++++++--
+> > > > >  tools/run_seq_pidns |   28 ++++++++++++++++++++++++++++
+> > > > >  5 files changed, 89 insertions(+), 18 deletions(-)
+> > > > >  create mode 100755 tools/run_seq_pidns
+> > > > 
+> > > > Same question as for session ids - is this all really necessary (or
+> > > > desired) if check-parallel executes check in it's own private PID
+> > > > namespace?
+> > 
+> > Forgot to respond to this question --
+> > 
+> > Because check-parallel runs (will run?) each child ./check instance in a
+> > private namepsace, each of those instances will be isolated from the
+> > others.  So no, it's probably not absolutely necessary.
+> > 
+> > However, there are a couple of reasons to let it happen: (a) the private
+> > ns that ./check creates in _run_seq() isolates the actual test code from
+> > its parent ./check process; and (b) the process started by nsexec is
+> > considered to be the "init" process for that namespace, so when it dies,
+> > the kernel will kill -9 all other processes in that namespace, so we
+> > won't have any stray fsstress processes that bleed into the next test.
 > 
-> v1:
-> https://lwn.net/ml/all/cover.1738161075.git.anand.jain@oracle.com/
+> Ok - that might be worth adding to the commit message so that anyone
+> looking at it in a few months time doesn't need to remember this
+> detail.
+
+It /does/ say that in _run_seq() but yeah I'll add it to the commit
+message too:
+
+"Instead, we could just use nsexec to run the test program with a
+private pid namespace so that each test instance can only see its own
+processes; and private mount namespace so that tests writing to /tmp
+cannot clobber other tests or the stuff running on the main system.
+Further, the process created by the clone(CLONE_NEWPID) call is
+considered the init process of that pid namespace, so all processes will
+be SIGKILL'd when the init process terminates, so we no longer need
+systemd scopes for externally enforced cleanup."
+
+--D
+
 > 
-> Anand Jain (5):
->   fstests: common/rc: set_fs_sysfs_attr: redirect errors to stdout
->   fstests: filter: helper for sysfs error filtering
->   fstests: common/rc: add sysfs argument verification helpers
->   fstests: btrfs: testcase for sysfs policy syntax verification
->   fstests: btrfs: testcase for sysfs chunk_size attribute validation
-
-All looks ok, except for my comment about creating common/sysfs for
-all the sysfs stuff. The individual tests look much simpler and
-nicer, too.
-
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
