@@ -1,134 +1,165 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25EDD194094;
-	Thu,  6 Feb 2025 21:12:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ED031CEAC8
+	for <fstests@vger.kernel.org>; Thu,  6 Feb 2025 21:21:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738876363; cv=none; b=TENLxSZg9zN/dLE37DVBjwPeX6t/1Y2IMItuK0xmYP/YVAUSvKnlzyumgyw8JJ88nUYdSOYrudqEtflCOA9VSF0B4l5T4fmR7o3ViPfulbzTu74SC+97gDKbAv015sJZ7nMFGsobm7ErJsCaAP9CjQ3JPG6SROzgTJ9uRqBLZdk=
+	t=1738876914; cv=none; b=Qt4s0m3ExonrbQdv6YsBx3FVmwWdwDlKCtJkOX2OGKLzhhFGl/CeEtBV+S5pLXTEiZE4/h+C0U6KpwD/06B5kBQycwQuhxsW6LMv/sE6uBDPW1f51LcI3O83e934ZGenXynlOt0+B76ndM9gt8XPQxR7VpEPKT32rtFj9xq2M80=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738876363; c=relaxed/simple;
-	bh=WdP8nVpvbt1HNkewmz1oeeXsJe3/p4G8wzJ+5Ly9pVU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=pSDMdfZ3CtP+MKuyL6jTO9O/vAUkHHOUGU2Pplb/91FsHdAy9R3JdPYbhjNYXiNweV13PJeNuI+z6Z9I/lOv2CNjngJlceB4+dklDd93pYl1Rt2uuiC81uS8jHWnmJFbc5JpSqlWfurcWVICineCva2a29DcuBRyP4YJXtsyH7U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=Uw3LWHYl; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1738876914; c=relaxed/simple;
+	bh=JUV36Ey7mkf9flasEnSj/dEVwniRaxehflYNZPYCaek=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=qOvNoFIEq9fyBt1ZjqEIq/6eIeFpauZihb2EOHdne8oxh2eSs8yT+Xz1W5IBif8gN3vIwOoo2ZHCpbkXd0x3N9Ex1gUAwvGawgcu631sA1HztO5irJw92z0kaqjlf//H+j6MWcuF2XnEvi2CQ36QPxvlD2nb6OJ8PAVN0muu1k4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=NXvRxfb4; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="Uw3LWHYl"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1738876353; x=1739481153; i=quwenruo.btrfs@gmx.com;
-	bh=cz0uJpJErd7icSNsdJt716upD4yz+fi2Ia5Orxq/Ht8=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=Uw3LWHYlxPUPNfdELivQnjpzxausHtR2KWJA2lzfM8yqK7Jf7tgikbJHyZX61Flm
-	 wUiR3lKB+LNhVbUNIJp9Kd3ztVbNEDIuO0l+ovLwwAomWqnvauZKeAGKSIJruvvpF
-	 Jwfw2s4/JkCams+ag7MByP9KbrgwK+CeM4fU8DlE0sHEbyJX4aE927Rsz5ff/TYrP
-	 HAJ4Kg1NV/tsHkfH4l2Yb7FxHlm8Erg/I00GiucNZb+k0OFmQrfFBNEGQ7wzpwIMP
-	 ZEE9H+OwiDX0FW3HmRgaPB7DPknOB4aM2Ja9aRAyrqPsqBB/cpE4QTw5N1tHySNa6
-	 t1hUbuzms9TwXFLLVA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx104
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MNbox-1u4iRW0p2J-00YfSR; Thu, 06
- Feb 2025 22:12:33 +0100
-Message-ID: <8ea6c977-7cb2-4d64-8efd-c3587e096c25@gmx.com>
-Date: Fri, 7 Feb 2025 07:42:29 +1030
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="NXvRxfb4"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1738876911;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=lKwjKVNejs6w3Hw0cmKUpZYv+RNLmLTojt4wHh6J1t0=;
+	b=NXvRxfb4aO11BXdBKCAZOB3+qynskHpGAMsrOImReFEoFYOPhadftQbFZ7Wz1lc6nFjLk9
+	jy2qg3J8JVW44eCsbsI0NilxybkS0yfiKPAsnJYahBEue64dQsRkmJ7KstW7v6tKY+raYL
+	pKgkmTdexwFBqOf7wM6N7+kvnMoJ/Lw=
+Received: from mail-il1-f200.google.com (mail-il1-f200.google.com
+ [209.85.166.200]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-61-PHsI0m7EO5aQXTBVLyCqPQ-1; Thu, 06 Feb 2025 16:21:50 -0500
+X-MC-Unique: PHsI0m7EO5aQXTBVLyCqPQ-1
+X-Mimecast-MFC-AGG-ID: PHsI0m7EO5aQXTBVLyCqPQ
+Received: by mail-il1-f200.google.com with SMTP id e9e14a558f8ab-3ce7a0ec1easo9975815ab.0
+        for <fstests@vger.kernel.org>; Thu, 06 Feb 2025 13:21:49 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738876909; x=1739481709;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=lKwjKVNejs6w3Hw0cmKUpZYv+RNLmLTojt4wHh6J1t0=;
+        b=wD10CYzTQEm8AgE0uoE5wxSyj+yVzuvHszsquVOW0F4RyKHHm1Z9NgBpaNP0fS0HJK
+         Qwn2MfyQqOdl47xfClLmbDFBtxgkxolnMXciVnn9drfojBW0WC0EWYes4DkriRH8i5yt
+         R7jM4579gxIMXp5BIbyy7L9W2/OB1hfpV+o4TEY4iyqvb8VUBvrnyPI7hHEnOsVgWrV2
+         zeOSi+97EW2tJJ/HF9ebax+uus+m1ySd0AjuM01EU+u4FlGGHflGOu+u4y+ALI9deDY8
+         zMM4Q8VORndPOWVUR3aTXvKpnJpvbFx3jOxP1H954R0FHYRKc0o7boN/fw0qY7VsQSVJ
+         T9aw==
+X-Gm-Message-State: AOJu0YwZeunOxe+pqatd5iEjBdLi7SGFFpvNX1FGtyG1ltjvAotIWoIs
+	nzemTsKaNvATvk8A6MWCNOB8tGbo6SfrdijAAt2mGvpMEKFECaLEH8bLS6C/1FaHKRV+nnccn1I
+	YT82HsCKrBP9fdcJPAhRsNO/ltgax4BOE88oL7DrD2QbQC+3ZgK2wblUEBDe8giZiRNc1Vqv7W3
+	ghrOG6vSD0+zAlfBO+OpjHeDVQKVRqcFVh3D5/YAmQ
+X-Gm-Gg: ASbGncsH0WWWMm/LkvpjXTE17XVUiWRO6gcDfLydrTcFAv2mafDneD40kbHx6cTPhZx
+	RGgo9zlBLvm6vwwGdo83Bt2fOQYxsN5b4nPX1tDSEhCnoWP7EOE8TO0RH5dPCaEbiF2X9litxn2
+	itYBeVswSGf7XP96t4uBBnVXu2cssWZ4UaBVVR7DNWZE/Ot/3SbTuTkrXZyv9Lefyv+y/3nxrP5
+	U81Cpv0fv92jCSYYkTjqU4nlukiXu/cue0YmVawOQFAii/Uir5kTj3wHyxhhXBX8ew3iHEQiO3V
+	AkgU0O/sHBrKQMFOlnxfOdI9afVzRDXXGCFBTC9iqPbafKYAoP/41Q==
+X-Received: by 2002:a05:6e02:1a0d:b0:3d0:137a:8c9d with SMTP id e9e14a558f8ab-3d13dd13f7emr5950165ab.8.1738876909067;
+        Thu, 06 Feb 2025 13:21:49 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IF9Jfa1UGfrBA9GWTTl0dB7FwgXfnuG59VU6axbFSkIH9qBPyIoOtJtMkft8DxWjcvSXBC3Dg==
+X-Received: by 2002:a05:6e02:1a0d:b0:3d0:137a:8c9d with SMTP id e9e14a558f8ab-3d13dd13f7emr5949955ab.8.1738876908688;
+        Thu, 06 Feb 2025 13:21:48 -0800 (PST)
+Received: from fedora-rawhide.sandeen.net (97-116-166-216.mpls.qwest.net. [97.116.166.216])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4eccf9afe8bsm435133173.6.2025.02.06.13.21.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 06 Feb 2025 13:21:48 -0800 (PST)
+From: Eric Sandeen <sandeen@redhat.com>
+To: fstests@vger.kernel.org
+Cc: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH 1/7] fstests: enable sparse checking with make C=[12]
+Date: Thu,  6 Feb 2025 15:19:56 -0600
+Message-ID: <20250206212145.7732-2-sandeen@redhat.com>
+X-Mailer: git-send-email 2.48.0
+In-Reply-To: <20250206212145.7732-1-sandeen@redhat.com>
+References: <20250206212145.7732-1-sandeen@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: suggest fs specific fix only if the tested
- filesystem matches
-To: Christoph Hellwig <hch@infradead.org>, fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
- Filipe Manana <fdmanana@suse.com>
-References: <8c64ba21953b44b682c72b448bebe273dba64013.1738847088.git.fdmanana@suse.com>
- <Z6TC_yP7pTlzDOH4@infradead.org>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <Z6TC_yP7pTlzDOH4@infradead.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:UE9EQlPzkfu2sWwz0fWelhmKaDj3QvnJWsId3JcDk7zG29ein2h
- z2bQJAa6eHxsLp6TzQzNFLumypgEMQ/vNe7GMNAUu0PPW9XtXh2CscfQkcCEdCm0JKtmT1k
- h1qVHJutJhCCJDvFt56PZipT8qu9LXdNUMvxXdfaOkjk5H9rW82OuX6HaNlK0C9CYES7gGN
- SyuksyMtx67o0qrncmEtA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:ytsoDkE+77Y=;a0hHGwC4lpUIaXgZOV3c4/h74cN
- EI/bKjaGbx42HQ9xTwdlBtcmuIfl+xjbfIL6yWDO2eTEKdd6ohKPxEeRSQGsclLLvPxcFOyDH
- 4lMw4YlgJzjy8kualisI4FG+gwP0WoaAFQBdpRfDwjNPWXsxDjSzfGOXzTmM/hlOZntvgiTf5
- 2FKkT++qxHi7qKtr3NGhkfKY1SfGXs3Isj6FxHvoRevCCpCEapdD3VaBKgHLwY2wAgYwxtfaR
- IiCHXC8wltjNHtEip5cmXc0niLsDxrgDg8aAjVorBiJ3Qh0pMr2HJeBzwfsa1CipP4/kTmR1/
- MPJI3G+j3/2vWFWZecuO95+5v7ZVZPDnt8I3ggpzkM0oslnr1xta640KH1tqHE3jd/BZovatm
- r5Ti7bb+SCYWwJe+MLYMd2UIfnqzd4D7X1UujjC6p+9Gt+D3ss6YCdmsss7to1zHQwrlQ1fqF
- VxJBPwBD+1ZpmGvX+3Hx2IUB/ZBBZuxCWmjbiaTIImNWGdH3A+dUjCob0DbB+VW6wVUCc6u6U
- F5bvYKoEpOkc2gv8+FHD3HR9mhoS4m+hQhGovJHlIfLiCfiP2/g+ciBZj9O676p3BPDWXZ9St
- CXuStLVTVKydkA2gmXpHYbbjbJi6BPd5+w7YmrZR36kW0mZDnKHf6Nd7NcxN8iyWd9d611kyP
- TY8h3PK0ZXXwbt9Z72sNrQCTI2TGXh/Q7Ork0KgnwcuNhbnsnexdsnJ72gDDeuFKbN73IJhkj
- 5fe2uDC/ICc9/Lzzh6oTLaTG8n51I0SuDpWKzlNv0+4OQ8IcoVz9DbLts4SJIAKu7+c7bABs0
- pJoG4tMyOl7T1ye6n7k1ixZB/uL76jy8Hdrgrns9rIO5qdyl61eeIExaY+9GU/bdVt+ze1c0P
- vJN/Qdfa9hjPIN5rM4pEBHf0OKgqRCykiC8a8n7oOog8/LygHPZxJhVXxqBPgTCdd6Cbhy7q5
- 92zu2VsyQUR1inp95uY6993WBowEQUpCwkW0WdbVN4Di/w6uRBYS0fq9xZSEjP02MJ5pQLazy
- 5dw9fqsQ5cWubrHZVSlI829uzTOApYQ7hJt7qjrkTeC2159K52Bp3DDiN6QXfxHC4RSOXO561
- vLevgRaleW7LO80GjT0YsChAmM72Y8yKNRsYRwzAcyuEoZQYANjcOdpNpGQiqZeMO6neIVVey
- M3zh2G8TmKVu2vEH4bzbeS/T3wAeeaVsOpj79N7t87BDyiV+IITH0ez0WfeJcIOts6VPwZBZ4
- lUvSCZ0uxTCdcb2CBPYEjozT9s23CfkHAPxtBuTAdPzQWtEz2qLKGakgCZkMwYFWodmXrUof4
- 8XAtEBAi0qlC1kU2RlOwVmDwuhm75N4OFJfpVRyIfmaJ/Llz1aoaTPvznLlgJXCyhuyYjgwqS
- Em40UPhWf2kS4DGmDo0xXXOj6WBoZ3Vzam1zMSNHEI9eYxtouOXPg9PWse
+Content-Transfer-Encoding: 8bit
 
+Enable "make C=1" sparse checking when files get rebuilt. To check
+all files, run "make clean" first.
 
+Enable "make C=2" sparse checking of all files without rebuilding them.
 
-=E5=9C=A8 2025/2/7 00:41, Christoph Hellwig =E5=86=99=E9=81=93:
-> On Thu, Feb 06, 2025 at 01:05:06PM +0000, fdmanana@kernel.org wrote:
->> +if [ "$FSTYP" =3D "xfs" ]; then
->> +	_fixed_by_kernel_commit 68415b349f3f \
->> +		"xfs: Fix the owner setting issue for rmap query in xfs fsmap"
->> +	_fixed_by_kernel_commit ca6448aed4f1 \
->> +		"xfs: Fix missing interval for missing_owner in xfs fsmap"
->> +fi
->
-> How about you add a new helper instead of the boilerplate, something
-> like
->
-> _fixed_by_fs_kernel_commit xfs 68415b349f3f \
-> 	"xfs: Fix the owner setting issue for rmap query in xfs fsmap"
->
-> ?
->
-But what if the fix is generic? E.g. in mm/VFS layer?
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+ Makefile           | 14 ++++++++++++++
+ include/buildrules | 19 +++++++++++++++++++
+ 2 files changed, 33 insertions(+)
 
-Should we choose some placeholder name like "generic" as a fs type instead=
-?
+diff --git a/Makefile b/Makefile
+index f6f91a4d..79779d5e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -14,6 +14,20 @@ else
+   Q = @
+ endif
+ 
++CHECK=sparse
++CHECK_OPTS=-Wsparse-all -Wbitwise -Wno-transparent-union -Wno-return-void -Wno-undef \
++	-Wno-non-pointer-null -D__CHECK_ENDIAN__ -D__linux__
++
++ifeq ("$(origin C)", "command line")
++  CHECK_CMD=$(CHECK) $(CHECK_OPTS)
++  CHECKSRC=$(C)
++else
++  CHECK_CMD=@true
++  CHECKSRC=0
++endif
++
++export CHECK_CMD CHECKSRC
++
+ MAKEOPTS = --no-print-directory Q=$(Q)
+ 
+ TOPDIR = .
+diff --git a/include/buildrules b/include/buildrules
+index bf187662..6c2b7e18 100644
+--- a/include/buildrules
++++ b/include/buildrules
+@@ -35,6 +35,21 @@ endif
+ # Standard targets
+ #
+ 
++ifeq ($(CHECKSRC),2)
++
++# Check every .c file with sparse CHECK_CMD, do not call compiler
++$(LTCOMMAND) $(LTLIBRARY) : $(SUBDIRS) $(OBJECTS)
++.PHONY: $(LTCOMMAND) $(LTLIBRARY)
++
++%.lo %.o : %.c FORCE
++	@echo "    [CHECK]  $<"
++	$(Q)$(CHECK_CMD) $(CFLAGS) $<
++
++FORCE:
++
++else
++# Regular build, possibly calling sparse CHECK_CMD as well
++
+ ifdef LTCOMMAND
+ $(LTCOMMAND) : $(SUBDIRS) $(OBJECTS) $(LTDEPENDENCIES)
+ 	@echo "    [LD] $*"
+@@ -49,12 +64,16 @@ $(LTLIBRARY) : $(SUBDIRS) $(LTOBJECTS)
+ %.lo: %.c
+ 	@echo "    [CC] $@"
+ 	$(Q)$(LTCOMPILE) -c $<
++	$(Q)$(CHECK_CMD) $(CFLAGS) $<
+ else
++
+ %.o: %.c
+ 	@echo "    [CC] $@"
+ 	$(Q)$(CC) $(CFLAGS) -c $<
++	$(Q)$(CHECK_CMD) $(CFLAGS) $<
+ 
+ endif
++endif
+ 
+ ifdef POTHEAD
+ %.pot: $(XGETTEXTFILES)
+-- 
+2.48.0
 
-Thanks,
-Qu
