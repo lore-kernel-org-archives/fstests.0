@@ -1,152 +1,132 @@
-Received: from fhigh-a4-smtp.messagingengine.com (fhigh-a4-smtp.messagingengine.com [103.168.172.155])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A8D227735
-	for <fstests@vger.kernel.org>; Fri,  7 Feb 2025 01:09:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.155
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A726222619
+	for <fstests@vger.kernel.org>; Fri,  7 Feb 2025 02:01:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738890566; cv=none; b=O+ll3K/l3QQifxCE66FjdccCdsYRef9kvZ5oLrG+qIFiEhLmBeFWKbffRNwJ5yCIoERABaSjl7Flud/ac0S733/S8lyMIefC/pkVfI6p915CRYIV22LJWNGI6R+FMx/xHt+QgoNN1sYDhHFB1jmBYVk89uXznXbRCQbhj493kgs=
+	t=1738893697; cv=none; b=YiFvtFnvGDpyMpfmWLKSAxJ6SK+s5T2zOVguYbdUQU4oi/Sk9cJwo07MmGCa5d1aIdg/mF85BsgqR2MbOTnGL94S9ptla/xIGFC1s69UY6LBuhJPlCInKHZsEi+zgHJSbN3JufUMvQmuH3T9ZAWt1e1VBbkHbpy42jKteTu1as8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738890566; c=relaxed/simple;
-	bh=IGikku87lxhIm419Y2N+ct61Cf3lH4de10lKz1rKVXA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ISw9a5ePhi2Q7GE/4MpBcdO/agItpAS8k8xcLBaOesbNuIVcuLUDEgHKf1G0mwYRIf4VNGpYQ99QUgDLTH/WGrNyV6lTT7HKpv1Py18pkQ8vPjX2ZC0lfi1KFeAdjL/i67muy94pInOUHlotjW4VxBmcYR/vC+4rEm83WovQ3NQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=JCZoxTvw; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=OgYFbCoh; arc=none smtp.client-ip=103.168.172.155
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1738893697; c=relaxed/simple;
+	bh=EcGdSzL/FTOvHi2+hX9Q5GfRCSV+8zHr+UzG4BGjRvY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gWCMi4TIV0vXmeijYyGb8RH4J+37esfT5Pu0E0igUp/HklTEfs12yvS7xmwmPVH0p02xH1uHoD+VtaTEQRpIbWBNi2sHb8DI/VIojCYdGvMhJGV/hyDlIqHvSGkXkfZlz1PVOInmghsJH1XmbTZOWr5oNG+GMOddUTJrIlGso2g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rjhiLPrg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="JCZoxTvw";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OgYFbCoh"
-Received: from phl-compute-08.internal (phl-compute-08.phl.internal [10.202.2.48])
-	by mailfhigh.phl.internal (Postfix) with ESMTP id 7F70C1140222;
-	Thu,  6 Feb 2025 20:09:22 -0500 (EST)
-Received: from phl-mailfrontend-01 ([10.202.2.162])
-  by phl-compute-08.internal (MEProxy); Thu, 06 Feb 2025 20:09:22 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm3; t=1738890562;
-	 x=1738976962; bh=xZm9RV/TXL6rfoSRd0RjGxOntu8AhGTU140/9qoksAs=; b=
-	JCZoxTvwZWDYyywdzkZKX6bMY7JOX9U6W23GnFflA4bXcbYmJ24Q2s3Kmvdoq5zw
-	9xD5SZQyBJiXIBPKKe749loCjDgjOitEM8MTKuHai++VxDsd4tUMRQ+Ih+ScCASX
-	pO8ggdp5zs9xdX6Z4hKzC8fdEjPv4JWK3Q9dr+i/dAg1VGiNm6MWaMlnijDIebn8
-	J1KSJuQ4BY+8yvVOAg2pebUgvcym7RqvZuWW7gVJJ9eI3siytw6L6wo5+gqpr1nw
-	qEgul1DEv6Hv0uz7/Pmv0r4TbAJAI/BEjnVFkrvWGMJhLtDCnchmaXJLqEEhFeD8
-	KRj3fG62GoON8TZmhajblw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1738890562; x=
-	1738976962; bh=xZm9RV/TXL6rfoSRd0RjGxOntu8AhGTU140/9qoksAs=; b=O
-	gYFbCoh4dmU4V0rpc2mkmy0hDozxs6dQBncaDl2U4hac00Ef3xUO1lhziKHBijY1
-	CYBkRvsf2LORU78uiSAtDd0gmT0b/2NlpulcJrEWORL2rga8V3uH8hc80/K+XOi1
-	UuiCFnctrOvyUR5WIBW1BydP57Nq7wsg/lXdZuQmpXjNhBYWd3jGzAA/v3s6boQE
-	W/XVYL5a5ONdsHRmtShjJdGV0EG+lTSYqR9jZ6Y0W6wlULN+6V3kG/ubnjkK/4rL
-	BW3PjdVo9u4t4zdpeXiFtDErgv6jmsDjAQxvkVfG/Q4YXkdZb+Ey9touyhGcLFDH
-	0Qll83jVEW7s/tFCOSV/w==
-X-ME-Sender: <xms:Ql2lZwSHI3rqKjwkLXE1S3XkQXJwAFA4zby6DeQyA9HpHV-0p7O3HQ>
-    <xme:Ql2lZ9wwFCRpJBS9MQVVydwPJA5atspcDwodYy4tPk8h3BAYGfWrmzg5lnADiHzBs
-    7wWdP6rg4VwUwxDCIQ>
-X-ME-Received: <xmr:Ql2lZ93NrkpV6eWmDlFZ_p3kVEUEXUuYgDjpBWpil8DQN5Y-z0IFrQGmfU7HG8UrSZy0zaS7paZXTt6DeKkYM3DUUxtv>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgddvjeeltdcutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdp
-    uffrtefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivg
-    hnthhsucdlqddutddtmdenucfjughrpefkffggfgfuvfevfhfhjggtgfesthejredttddv
-    jeenucfhrhhomhepgfhrihgtucfurghnuggvvghnuceoshgrnhguvggvnhesshgrnhguvg
-    gvnhdrnhgvtheqnecuggftrfgrthhtvghrnhepveeikeeuteefueejtdehfeefvdegffei
-    vdejjeelfffhgeegjeeutdejueelhfdvnecuvehluhhsthgvrhfuihiivgeptdenucfrrg
-    hrrghmpehmrghilhhfrhhomhepshgrnhguvggvnhesshgrnhguvggvnhdrnhgvthdpnhgs
-    pghrtghpthhtohepfedpmhhouggvpehsmhhtphhouhhtpdhrtghpthhtohepughjfihonh
-    hgsehkvghrnhgvlhdrohhrghdprhgtphhtthhopehsrghnuggvvghnsehrvgguhhgrthdr
-    tghomhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-ME-Proxy: <xmx:Ql2lZ0ChAYyNMGUhYrQjcbm79bsQKfadv5A2Uw5m-v-Syw6xgjRkgQ>
-    <xmx:Ql2lZ5js1HZZ9GG1625NZOueEc_JW9GiSWKNZj9t5L2XkirsFHB6kA>
-    <xmx:Ql2lZwrpP1JGjMf7faiBKW9bOwZYCOHDpfEVef_kkIqRF44NaDHezg>
-    <xmx:Ql2lZ8jGamQu5PQBcpJaTNIiFuALZ-7285V0w3m5u0gJnFWv4kux4A>
-    <xmx:Ql2lZ-ulFBa1-KBWLFdMOGkuFznfGmyqW0H0SHBsIPrsBNWy1z7E2i1z>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
- 6 Feb 2025 20:09:21 -0500 (EST)
-Message-ID: <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
-Date: Thu, 6 Feb 2025 19:09:21 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rjhiLPrg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C188C4CEDD;
+	Fri,  7 Feb 2025 02:01:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738893697;
+	bh=EcGdSzL/FTOvHi2+hX9Q5GfRCSV+8zHr+UzG4BGjRvY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=rjhiLPrgGyJUK7xa2eZm1MxQ6HNznBUJp5hOMpYoKQ6xHFBESsN7mTnc1STjztwwp
+	 xcvcXWVRQDkIo8/wCpVV1ioiWbKDKzjo34ZMfEIbRvUTup3OHRtkxAK4nRMfOwIHK2
+	 rT+nhh8qDT4LsoALvg7Io1nYAYO1sqkByKr8MpjMIkQwHSBMrB+boa2ztZTs2nBrLp
+	 qvoRSp7O765oQmy3VtPLvrphyQmEjv83Rgm++3eqxyyL16ubEkKw2Hti36VkMnI0GZ
+	 /EWE9SJfPQzYDBPTdNFP1LTLHdRuNDN1bKE5Q4Nn/8lL7o3iHfh52/Rs0RNPXnCcga
+	 emrn9/xIQhWxw==
+Date: Thu, 6 Feb 2025 18:01:36 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org
+Subject: Re: [PATCH 2/7] builddefs: define linux
+Message-ID: <20250207020136.GK21828@frogsfrogsfrogs>
+References: <20250206212145.7732-1-sandeen@redhat.com>
+ <20250206212145.7732-3-sandeen@redhat.com>
+ <20250206223905.GO21799@frogsfrogsfrogs>
+ <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/7] builddefs: define linux
-To: "Darrick J. Wong" <djwong@kernel.org>, Eric Sandeen <sandeen@redhat.com>
-Cc: fstests@vger.kernel.org
-References: <20250206212145.7732-1-sandeen@redhat.com>
- <20250206212145.7732-3-sandeen@redhat.com>
- <20250206223905.GO21799@frogsfrogsfrogs>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <20250206223905.GO21799@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
 
-On 2/6/25 4:39 PM, Darrick J. Wong wrote:
-> On Thu, Feb 06, 2025 at 03:19:57PM -0600, Eric Sandeen wrote:
->> There are several #ifdef linux guards in the code, but nothing
->> defined it. This caused several sparse warnings, so define it
->> when building on linux.
+On Thu, Feb 06, 2025 at 07:09:21PM -0600, Eric Sandeen wrote:
+> On 2/6/25 4:39 PM, Darrick J. Wong wrote:
+> > On Thu, Feb 06, 2025 at 03:19:57PM -0600, Eric Sandeen wrote:
+> >> There are several #ifdef linux guards in the code, but nothing
+> >> defined it. This caused several sparse warnings, so define it
+> >> when building on linux.
+> > 
+> > cpp in gcc 12.2 defines this:
+> > 
+> > $ touch /tmp/moo.h ; cpp -dM /tmp/moo.h | grep define.linux
+> > #define linux 1
 > 
-> cpp in gcc 12.2 defines this:
+> Huh, on my test box too.
+> And yet without this sparse coughs up lots of things for me:
 > 
-> $ touch /tmp/moo.h ; cpp -dM /tmp/moo.h | grep define.linux
-> #define linux 1
+> tlibio.c:90:20: error: undefined identifier 'LIO_IO_TYPES'
+> tlibio.c:90:33: error: undefined identifier 'LIO_WAIT_TYPES'
+> tlibio.c:92:20: error: undefined identifier 'LIO_IO_TYPES'
+> tlibio.c:92:33: error: undefined identifier 'LIO_WAIT_TYPES'
+> tlibio.c:118:20: error: undefined identifier 'LIO_IO_TYPES'
+> tlibio.c:118:33: error: undefined identifier 'LIO_WAIT_TYPES'
+> 
+> because i.e.:
+> 
+> #ifdef linux
+> #define LIO_IO_TYPES            00021   /* all io types */
+> #endif /* linux */
+> 
+> make V=1 shows:
+> 
+> /bin/sh ../libtool --quiet --tag=CC --mode=compile gcc -g -O2 -g -O2 -DDEBUG  -I../include -DVERSION=\"1.1.1\" -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -funsigned-char -fno-strict-aliasing -Wall   -c tlibio.c
+> 
+> so not sure what's going on here ?
 
-Huh, on my test box too.
-And yet without this sparse coughs up lots of things for me:
+sparse doesn't define linux by default:
 
-tlibio.c:90:20: error: undefined identifier 'LIO_IO_TYPES'
-tlibio.c:90:33: error: undefined identifier 'LIO_WAIT_TYPES'
-tlibio.c:92:20: error: undefined identifier 'LIO_IO_TYPES'
-tlibio.c:92:33: error: undefined identifier 'LIO_WAIT_TYPES'
-tlibio.c:118:20: error: undefined identifier 'LIO_IO_TYPES'
-tlibio.c:118:33: error: undefined identifier 'LIO_WAIT_TYPES'
-
-because i.e.:
-
+$ cat > /tmp/a.c << ENDL
 #ifdef linux
-#define LIO_IO_TYPES            00021   /* all io types */
-#endif /* linux */
+# warning not
+#else
+# warning me
+#endif
+ENDL
+$ gcc -o /tmp/a.o /tmp/a.c
+/tmp/a.c:2:3: warning: #warning not [-Wcpp]
+    2 | # warning not
+      |   ^~~~~~~
+/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
+(.text+0x17): undefined reference to `main'
+collect2: error: ld returned 1 exit status
+$ sparse /tmp/a.c
+/tmp/a.c:4:3: warning: me
+$ sparse /tmp/a.c -Dlinux
+/tmp/a.c:2:3: warning: not
 
-make V=1 shows:
+--D
 
-/bin/sh ../libtool --quiet --tag=CC --mode=compile gcc -g -O2 -g -O2 -DDEBUG  -I../include -DVERSION=\"1.1.1\" -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -funsigned-char -fno-strict-aliasing -Wall   -c tlibio.c
-
-so not sure what's going on here ?
-
-
-> --D
 > 
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>  include/builddefs.in | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/include/builddefs.in b/include/builddefs.in
->> index 7274cde8..00dec0ea 100644
->> --- a/include/builddefs.in
->> +++ b/include/builddefs.in
->> @@ -78,7 +78,7 @@ HAVE_FICLONE = @have_ficlone@
->>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
->>  
->>  ifeq ($(PKG_PLATFORM),linux)
->> -PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
->> +PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Dlinux $(GCCFLAGS)
->>  endif
->>  ifeq ($(PKG_PLATFORM),darwin)
->>  PCFLAGS = -traditional-cpp $(GCCFLAGS)
->> -- 
->> 2.48.0
->>
->>
+> > --D
+> > 
+> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> >> ---
+> >>  include/builddefs.in | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/include/builddefs.in b/include/builddefs.in
+> >> index 7274cde8..00dec0ea 100644
+> >> --- a/include/builddefs.in
+> >> +++ b/include/builddefs.in
+> >> @@ -78,7 +78,7 @@ HAVE_FICLONE = @have_ficlone@
+> >>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+> >>  
+> >>  ifeq ($(PKG_PLATFORM),linux)
+> >> -PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
+> >> +PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Dlinux $(GCCFLAGS)
+> >>  endif
+> >>  ifeq ($(PKG_PLATFORM),darwin)
+> >>  PCFLAGS = -traditional-cpp $(GCCFLAGS)
+> >> -- 
+> >> 2.48.0
+> >>
+> >>
+> > 
 > 
-
