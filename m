@@ -1,320 +1,152 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fhigh-a4-smtp.messagingengine.com (fhigh-a4-smtp.messagingengine.com [103.168.172.155])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 961F923908E
-	for <fstests@vger.kernel.org>; Thu,  6 Feb 2025 22:47:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A8D227735
+	for <fstests@vger.kernel.org>; Fri,  7 Feb 2025 01:09:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.155
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738882046; cv=none; b=u2uK1HEIthybZvphYt9q3rG4M18YhxT3VbLYejMbNdPODuXrkYW/gDctCluuL4VsQ75J7Nj1zzDDp1zOUJhGNVr9HpdGFedcLl5A4SG2WcDP2NPYkYpvfEp1ts9IYRrI5m+M95PjA47wlNT2OTBVwTU1jrybVBwrQY/658q3moE=
+	t=1738890566; cv=none; b=O+ll3K/l3QQifxCE66FjdccCdsYRef9kvZ5oLrG+qIFiEhLmBeFWKbffRNwJ5yCIoERABaSjl7Flud/ac0S733/S8lyMIefC/pkVfI6p915CRYIV22LJWNGI6R+FMx/xHt+QgoNN1sYDhHFB1jmBYVk89uXznXbRCQbhj493kgs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738882046; c=relaxed/simple;
-	bh=sUHcvKjnZPuNrIq0G5P9mPan57QAF5jV5liM2CZfz98=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=psR+DUwXrKENXpZ5t6DcfYZ264He+IqRMwevLIg+ACaOTqieC8O26crTvSOBmft998nAM7nyNQQCFYbWYPYUxjF8pAUPPxnjSR2F/tjlolRUeRmPxFYL7PhAancudChldOHsV7OEfL8GvCZ32M2fO8BMH8HPrwbV5Fvu97OtLBU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F5xnwzBV; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1738890566; c=relaxed/simple;
+	bh=IGikku87lxhIm419Y2N+ct61Cf3lH4de10lKz1rKVXA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ISw9a5ePhi2Q7GE/4MpBcdO/agItpAS8k8xcLBaOesbNuIVcuLUDEgHKf1G0mwYRIf4VNGpYQ99QUgDLTH/WGrNyV6lTT7HKpv1Py18pkQ8vPjX2ZC0lfi1KFeAdjL/i67muy94pInOUHlotjW4VxBmcYR/vC+4rEm83WovQ3NQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=JCZoxTvw; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=OgYFbCoh; arc=none smtp.client-ip=103.168.172.155
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F5xnwzBV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0974DC4CEE2;
-	Thu,  6 Feb 2025 22:47:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1738882046;
-	bh=sUHcvKjnZPuNrIq0G5P9mPan57QAF5jV5liM2CZfz98=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=F5xnwzBVJ4d9+rg1fbHpamqjaV45lFb62g8WTVeH8nmyRzl8EPEedRuOQJCuW9snB
-	 6xWUSv0zHe5TQ0/e7dKfuv/hQJ0ualgbtsVU34t4KWFcRuptMLRvOssu8428j/DM9D
-	 6SYcr7lsqqDewJIdLw+B+jOcR2+B4vLWQG4GiaTlAR2jcrfjtpSaJxdnpttWXs1l+3
-	 XCdoA5UQttAbi7iSMDpUTFdFVmEsKJRxxNlYf1A2FdxLirI6KjxtGiMaNBMzUOSmUd
-	 3LnMkURfMgQZeUuFVEjExgbqfTxuQZ+BthqiDa2z3AuXzANr8PkLyrvwnyMqHLIAib
-	 oQtZ4+ne3Gmjw==
-Date: Thu, 6 Feb 2025 14:47:25 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 7/7] lib: remove random.c
-Message-ID: <20250206224725.GT21799@frogsfrogsfrogs>
-References: <20250206212145.7732-1-sandeen@redhat.com>
- <20250206212145.7732-8-sandeen@redhat.com>
+	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="JCZoxTvw";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="OgYFbCoh"
+Received: from phl-compute-08.internal (phl-compute-08.phl.internal [10.202.2.48])
+	by mailfhigh.phl.internal (Postfix) with ESMTP id 7F70C1140222;
+	Thu,  6 Feb 2025 20:09:22 -0500 (EST)
+Received: from phl-mailfrontend-01 ([10.202.2.162])
+  by phl-compute-08.internal (MEProxy); Thu, 06 Feb 2025 20:09:22 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
+	cc:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1738890562;
+	 x=1738976962; bh=xZm9RV/TXL6rfoSRd0RjGxOntu8AhGTU140/9qoksAs=; b=
+	JCZoxTvwZWDYyywdzkZKX6bMY7JOX9U6W23GnFflA4bXcbYmJ24Q2s3Kmvdoq5zw
+	9xD5SZQyBJiXIBPKKe749loCjDgjOitEM8MTKuHai++VxDsd4tUMRQ+Ih+ScCASX
+	pO8ggdp5zs9xdX6Z4hKzC8fdEjPv4JWK3Q9dr+i/dAg1VGiNm6MWaMlnijDIebn8
+	J1KSJuQ4BY+8yvVOAg2pebUgvcym7RqvZuWW7gVJJ9eI3siytw6L6wo5+gqpr1nw
+	qEgul1DEv6Hv0uz7/Pmv0r4TbAJAI/BEjnVFkrvWGMJhLtDCnchmaXJLqEEhFeD8
+	KRj3fG62GoON8TZmhajblw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1738890562; x=
+	1738976962; bh=xZm9RV/TXL6rfoSRd0RjGxOntu8AhGTU140/9qoksAs=; b=O
+	gYFbCoh4dmU4V0rpc2mkmy0hDozxs6dQBncaDl2U4hac00Ef3xUO1lhziKHBijY1
+	CYBkRvsf2LORU78uiSAtDd0gmT0b/2NlpulcJrEWORL2rga8V3uH8hc80/K+XOi1
+	UuiCFnctrOvyUR5WIBW1BydP57Nq7wsg/lXdZuQmpXjNhBYWd3jGzAA/v3s6boQE
+	W/XVYL5a5ONdsHRmtShjJdGV0EG+lTSYqR9jZ6Y0W6wlULN+6V3kG/ubnjkK/4rL
+	BW3PjdVo9u4t4zdpeXiFtDErgv6jmsDjAQxvkVfG/Q4YXkdZb+Ey9touyhGcLFDH
+	0Qll83jVEW7s/tFCOSV/w==
+X-ME-Sender: <xms:Ql2lZwSHI3rqKjwkLXE1S3XkQXJwAFA4zby6DeQyA9HpHV-0p7O3HQ>
+    <xme:Ql2lZ9wwFCRpJBS9MQVVydwPJA5atspcDwodYy4tPk8h3BAYGfWrmzg5lnADiHzBs
+    7wWdP6rg4VwUwxDCIQ>
+X-ME-Received: <xmr:Ql2lZ93NrkpV6eWmDlFZ_p3kVEUEXUuYgDjpBWpil8DQN5Y-z0IFrQGmfU7HG8UrSZy0zaS7paZXTt6DeKkYM3DUUxtv>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgddvjeeltdcutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdp
+    uffrtefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivg
+    hnthhsucdlqddutddtmdenucfjughrpefkffggfgfuvfevfhfhjggtgfesthejredttddv
+    jeenucfhrhhomhepgfhrihgtucfurghnuggvvghnuceoshgrnhguvggvnhesshgrnhguvg
+    gvnhdrnhgvtheqnecuggftrfgrthhtvghrnhepveeikeeuteefueejtdehfeefvdegffei
+    vdejjeelfffhgeegjeeutdejueelhfdvnecuvehluhhsthgvrhfuihiivgeptdenucfrrg
+    hrrghmpehmrghilhhfrhhomhepshgrnhguvggvnhesshgrnhguvggvnhdrnhgvthdpnhgs
+    pghrtghpthhtohepfedpmhhouggvpehsmhhtphhouhhtpdhrtghpthhtohepughjfihonh
+    hgsehkvghrnhgvlhdrohhrghdprhgtphhtthhopehsrghnuggvvghnsehrvgguhhgrthdr
+    tghomhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhg
+X-ME-Proxy: <xmx:Ql2lZ0ChAYyNMGUhYrQjcbm79bsQKfadv5A2Uw5m-v-Syw6xgjRkgQ>
+    <xmx:Ql2lZ5js1HZZ9GG1625NZOueEc_JW9GiSWKNZj9t5L2XkirsFHB6kA>
+    <xmx:Ql2lZwrpP1JGjMf7faiBKW9bOwZYCOHDpfEVef_kkIqRF44NaDHezg>
+    <xmx:Ql2lZ8jGamQu5PQBcpJaTNIiFuALZ-7285V0w3m5u0gJnFWv4kux4A>
+    <xmx:Ql2lZ-ulFBa1-KBWLFdMOGkuFznfGmyqW0H0SHBsIPrsBNWy1z7E2i1z>
+Feedback-ID: i2b59495a:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
+ 6 Feb 2025 20:09:21 -0500 (EST)
+Message-ID: <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
+Date: Thu, 6 Feb 2025 19:09:21 -0600
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250206212145.7732-8-sandeen@redhat.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/7] builddefs: define linux
+To: "Darrick J. Wong" <djwong@kernel.org>, Eric Sandeen <sandeen@redhat.com>
+Cc: fstests@vger.kernel.org
+References: <20250206212145.7732-1-sandeen@redhat.com>
+ <20250206212145.7732-3-sandeen@redhat.com>
+ <20250206223905.GO21799@frogsfrogsfrogs>
+Content-Language: en-US
+From: Eric Sandeen <sandeen@sandeen.net>
+In-Reply-To: <20250206223905.GO21799@frogsfrogsfrogs>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, Feb 06, 2025 at 03:20:02PM -0600, Eric Sandeen wrote:
-> sparse points out that lots of things in random.c could be static,
-> and upon doing so we realize that nothing in this file is used.
-> Which is unsurprising since these are all part of the standard
-> C library ... so just remove the file.
+On 2/6/25 4:39 PM, Darrick J. Wong wrote:
+> On Thu, Feb 06, 2025 at 03:19:57PM -0600, Eric Sandeen wrote:
+>> There are several #ifdef linux guards in the code, but nothing
+>> defined it. This caused several sparse warnings, so define it
+>> when building on linux.
 > 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
->  lib/Makefile |   5 +-
->  lib/random.c | 224 ---------------------------------------------------
->  2 files changed, 2 insertions(+), 227 deletions(-)
-
-Thus marks the return of Sandeen, Remover of Code!!
-
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
-
---D
-
->  delete mode 100644 lib/random.c
+> cpp in gcc 12.2 defines this:
 > 
-> diff --git a/lib/Makefile b/lib/Makefile
-> index 53540ca7..ce4381a2 100644
-> --- a/lib/Makefile
-> +++ b/lib/Makefile
-> @@ -11,13 +11,12 @@ LT_REVISION = 0
->  LT_AGE = 0
->  
->  #
-> -# Everything (except for random.c) copied directly from LTP.
-> +# Everything copied directly from LTP.
->  # Refer to http://ltp.sourceforge.net/ for complete source.
->  #
->  CFILES = dataascii.c databin.c datapid.c file_lock.c forker.c \
->  	pattern.c open_flags.c random_range.c string_to_tokens.c \
-> -	str_to_bytes.c tlibio.c write_log.c \
-> -	random.c
-> +	str_to_bytes.c tlibio.c write_log.c
->  
->  default: depend $(LTLIBRARY)
->  
-> diff --git a/lib/random.c b/lib/random.c
-> deleted file mode 100644
-> index d5c81be8..00000000
-> --- a/lib/random.c
-> +++ /dev/null
-> @@ -1,224 +0,0 @@
-> -// SPDX-License-Identifier: GPL-2.0+
-> -/*
-> - * random.c -- pseudo random number generator
-> - * Copyright (C) 1994  Chris Wallace (csw@bruce.cs.monash.edu.au)
-> - */
-> -
-> -#include <sys/types.h>
-> -
-> -/*
-> - * modified by dxm@sgi.com so that this file acts as a drop in replacement
-> - * for srandom and random.
-> - */
-> -
-> -/*
-> - *	A random number generator called as a function by
-> - *	random (iseed)	or	irandm (iseed)
-> - *	The parameter should be a pointer to a 2-element int32_t vector.
-> - *	The first function returns a double uniform in 0 .. 1.
-> - *	The second returns a int32_t integer uniform in 0 .. 2**31-1
-> - *	Both update iseed[] in exactly the same way.
-> - *	iseed[] must be a 2-element integer vector.
-> - *	The initial value of the second element may be anything.
-> - *
-> - *	The period of the random sequence is 2**32 * (2**32-1)
-> - *	The table mt[0:127] is defined by mt[i] = 69069 ** (128-i)
-> - */
-> -
-> -#define MASK ((int32_t) 593970775)
-> -/*	or in hex, 23674657	*/
-> -
-> -#define SCALE ((double) 1.0 / (1024.0 * 1024.0 * 1024.0 * 2.0))
-> -/*	i.e. 2 to power -31	*/
-> -
-> -static int32_t mt [128] =   {
-> -      902906369,
-> -     2030498053,
-> -     -473499623,
-> -     1640834941,
-> -      723406961,
-> -     1993558325,
-> -     -257162999,
-> -    -1627724755,
-> -      913952737,
-> -      278845029,
-> -     1327502073,
-> -    -1261253155,
-> -      981676113,
-> -    -1785280363,
-> -     1700077033,
-> -      366908557,
-> -    -1514479167,
-> -     -682799163,
-> -      141955545,
-> -     -830150595,
-> -      317871153,
-> -     1542036469,
-> -     -946413879,
-> -    -1950779155,
-> -      985397153,
-> -      626515237,
-> -      530871481,
-> -      783087261,
-> -    -1512358895,
-> -     1031357269,
-> -    -2007710807,
-> -    -1652747955,
-> -    -1867214463,
-> -      928251525,
-> -     1243003801,
-> -    -2132510467,
-> -     1874683889,
-> -     -717013323,
-> -      218254473,
-> -    -1628774995,
-> -    -2064896159,
-> -       69678053,
-> -      281568889,
-> -    -2104168611,
-> -     -165128239,
-> -     1536495125,
-> -      -39650967,
-> -      546594317,
-> -     -725987007,
-> -     1392966981,
-> -     1044706649,
-> -      687331773,
-> -    -2051306575,
-> -     1544302965,
-> -     -758494647,
-> -    -1243934099,
-> -      -75073759,
-> -      293132965,
-> -    -1935153095,
-> -      118929437,
-> -      807830417,
-> -    -1416222507,
-> -    -1550074071,
-> -      -84903219,
-> -     1355292929,
-> -     -380482555,
-> -    -1818444007,
-> -     -204797315,
-> -      170442609,
-> -    -1636797387,
-> -      868931593,
-> -     -623503571,
-> -     1711722209,
-> -      381210981,
-> -     -161547783,
-> -     -272740131,
-> -    -1450066095,
-> -     2116588437,
-> -     1100682473,
-> -      358442893,
-> -    -1529216831,
-> -     2116152005,
-> -     -776333095,
-> -     1265240893,
-> -     -482278607,
-> -     1067190005,
-> -      333444553,
-> -       86502381,
-> -      753481377,
-> -       39000101,
-> -     1779014585,
-> -      219658653,
-> -     -920253679,
-> -     2029538901,
-> -     1207761577,
-> -    -1515772851,
-> -     -236195711,
-> -      442620293,
-> -      423166617,
-> -    -1763648515,
-> -     -398436623,
-> -    -1749358155,
-> -     -538598519,
-> -     -652439379,
-> -      430550625,
-> -    -1481396507,
-> -     2093206905,
-> -    -1934691747,
-> -     -962631983,
-> -     1454463253,
-> -    -1877118871,
-> -     -291917555,
-> -    -1711673279,
-> -      201201733,
-> -     -474645415,
-> -      -96764739,
-> -    -1587365199,
-> -     1945705589,
-> -     1303896393,
-> -     1744831853,
-> -      381957665,
-> -     2135332261,
-> -      -55996615,
-> -    -1190135011,
-> -     1790562961,
-> -    -1493191723,
-> -      475559465,
-> -          69069
-> -		};
-> -
-> -double 
-> -_random (int32_t is [2])
-> -{
-> -	int32_t it, leh, nit;
-> -
-> -	it = is [0];
-> -	leh = is [1];
-> -	if (it <= 0)	
-> -		it = (it + it) ^ MASK;
-> -	else
-> -		it = it + it;
-> -	nit = it - 1;
-> -/*	to ensure all-ones pattern omitted    */
-> -	leh = leh * mt[nit & 127] + nit;
-> -	is [0] = it;    is [1] = leh;
-> -	if (leh < 0) leh = ~leh;
-> -	return (SCALE * ((int32_t) (leh | 1)));
-> -}
-> -
-> -
-> -
-> -int32_t 
-> -_irandm (int32_t is [2])
-> -{
-> -	int32_t it, leh, nit;
-> -
-> -	it = is [0];
-> -	leh = is [1];
-> -	if (it <= 0)	
-> -		it = (it + it) ^ MASK;
-> -	else
-> -		it = it + it;
-> -	nit = it - 1;
-> -/*	to ensure all-ones pattern omitted    */
-> -	leh = leh * mt[nit & 127] + nit;
-> -	is [0] = it;    is [1] = leh;
-> -	if (leh < 0) leh = ~leh;
-> -	return (leh);
-> -}
-> -
-> -/*
-> - * make this a drop in replacement for random and srandom
-> - *
-> - * XXX not thread safe I guess.
-> - */
-> -
-> -static int32_t saved_seed[2];
-> -
-> -long random(void)
-> -{
-> -    return _irandm(saved_seed);
-> -}
-> -
-> -void srandom(unsigned seed)
-> -{
-> -    saved_seed[0]=seed;
-> -    saved_seed[1]=0;
-> -    _irandm(saved_seed);
-> -}
-> -
-> -- 
-> 2.48.0
+> $ touch /tmp/moo.h ; cpp -dM /tmp/moo.h | grep define.linux
+> #define linux 1
+
+Huh, on my test box too.
+And yet without this sparse coughs up lots of things for me:
+
+tlibio.c:90:20: error: undefined identifier 'LIO_IO_TYPES'
+tlibio.c:90:33: error: undefined identifier 'LIO_WAIT_TYPES'
+tlibio.c:92:20: error: undefined identifier 'LIO_IO_TYPES'
+tlibio.c:92:33: error: undefined identifier 'LIO_WAIT_TYPES'
+tlibio.c:118:20: error: undefined identifier 'LIO_IO_TYPES'
+tlibio.c:118:33: error: undefined identifier 'LIO_WAIT_TYPES'
+
+because i.e.:
+
+#ifdef linux
+#define LIO_IO_TYPES            00021   /* all io types */
+#endif /* linux */
+
+make V=1 shows:
+
+/bin/sh ../libtool --quiet --tag=CC --mode=compile gcc -g -O2 -g -O2 -DDEBUG  -I../include -DVERSION=\"1.1.1\" -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -funsigned-char -fno-strict-aliasing -Wall   -c tlibio.c
+
+so not sure what's going on here ?
+
+
+> --D
 > 
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
+>>  include/builddefs.in | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/include/builddefs.in b/include/builddefs.in
+>> index 7274cde8..00dec0ea 100644
+>> --- a/include/builddefs.in
+>> +++ b/include/builddefs.in
+>> @@ -78,7 +78,7 @@ HAVE_FICLONE = @have_ficlone@
+>>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+>>  
+>>  ifeq ($(PKG_PLATFORM),linux)
+>> -PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
+>> +PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Dlinux $(GCCFLAGS)
+>>  endif
+>>  ifeq ($(PKG_PLATFORM),darwin)
+>>  PCFLAGS = -traditional-cpp $(GCCFLAGS)
+>> -- 
+>> 2.48.0
+>>
+>>
 > 
+
