@@ -1,41 +1,42 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A726222619
-	for <fstests@vger.kernel.org>; Fri,  7 Feb 2025 02:01:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7998B231CA4
+	for <fstests@vger.kernel.org>; Fri,  7 Feb 2025 04:56:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738893697; cv=none; b=YiFvtFnvGDpyMpfmWLKSAxJ6SK+s5T2zOVguYbdUQU4oi/Sk9cJwo07MmGCa5d1aIdg/mF85BsgqR2MbOTnGL94S9ptla/xIGFC1s69UY6LBuhJPlCInKHZsEi+zgHJSbN3JufUMvQmuH3T9ZAWt1e1VBbkHbpy42jKteTu1as8=
+	t=1738904199; cv=none; b=PYhRUrhgY1nQ/119u9rIJ9K7359Xqp0IOitSO/mbK/wssbMpHIzyafKB/xTqA/dLOkwh46xkkVO74z/NUGppsbL79bFzaM2Fcd38y9mvq6MN26ruwde1kuB02VOMzUM9tKpxY3QZR3Et/PDUKphvRUuk+HBNeMVBJ2/yOoeVzJg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738893697; c=relaxed/simple;
-	bh=EcGdSzL/FTOvHi2+hX9Q5GfRCSV+8zHr+UzG4BGjRvY=;
+	s=arc-20240116; t=1738904199; c=relaxed/simple;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gWCMi4TIV0vXmeijYyGb8RH4J+37esfT5Pu0E0igUp/HklTEfs12yvS7xmwmPVH0p02xH1uHoD+VtaTEQRpIbWBNi2sHb8DI/VIojCYdGvMhJGV/hyDlIqHvSGkXkfZlz1PVOInmghsJH1XmbTZOWr5oNG+GMOddUTJrIlGso2g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rjhiLPrg; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=jKgCnG1mAgf03LqznB7/bTL4rqbgg35G8viFz6b5xkdZ3M2I2xO7aJqOChDcshpOpUE+jWCIQKSja0DaaE2JaiYSEQyCZqnUEGnUth+L6N8QV6i/V34QgmT7DOXlx1VhP1n8XuDATPqflUDln/Fv/IfsfGQzzWIzUqUlDu4N+po=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=JFCtCSJ+; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rjhiLPrg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C188C4CEDD;
-	Fri,  7 Feb 2025 02:01:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1738893697;
-	bh=EcGdSzL/FTOvHi2+hX9Q5GfRCSV+8zHr+UzG4BGjRvY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=rjhiLPrgGyJUK7xa2eZm1MxQ6HNznBUJp5hOMpYoKQ6xHFBESsN7mTnc1STjztwwp
-	 xcvcXWVRQDkIo8/wCpVV1ioiWbKDKzjo34ZMfEIbRvUTup3OHRtkxAK4nRMfOwIHK2
-	 rT+nhh8qDT4LsoALvg7Io1nYAYO1sqkByKr8MpjMIkQwHSBMrB+boa2ztZTs2nBrLp
-	 qvoRSp7O765oQmy3VtPLvrphyQmEjv83Rgm++3eqxyyL16ubEkKw2Hti36VkMnI0GZ
-	 /EWE9SJfPQzYDBPTdNFP1LTLHdRuNDN1bKE5Q4Nn/8lL7o3iHfh52/Rs0RNPXnCcga
-	 emrn9/xIQhWxw==
-Date: Thu, 6 Feb 2025 18:01:36 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests@vger.kernel.org
-Subject: Re: [PATCH 2/7] builddefs: define linux
-Message-ID: <20250207020136.GK21828@frogsfrogsfrogs>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="JFCtCSJ+"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=JFCtCSJ+tEiE+6FnbM5Otyau+V
+	FaM9UhQh+/0u44/t/VVZNXiWaG36Q8rNxLpdsgJHFCsqJaWIR2jFZwU+nI9uGRH0Zy9BR9CuuPHcG
+	G4B5J8ngwCFnituS7N07ZiC+7YcKKHtm1L25qmlqHeSSx7sOfPFt134yOtRfi+dirSkDFNx286LgC
+	HPvVA6CS7aXBJRHCJ2SRe9ImbiCy+29vljl3vyCNgYzphWgnBow0BccQg4ZRvN9fFczZlfcM4J/Wj
+	5i4KGpzUgmesXhvPo1vdioJHhWKdThVWefw5B8H2NoXkKxSWca0zAb+veSsXAJgEUmcLVwToUc9Vp
+	sf0bxH9Q==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1tgGPt-00000008KYm-2YPj;
+	Fri, 07 Feb 2025 04:56:37 +0000
+Date: Thu, 6 Feb 2025 20:56:37 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH 1/7] fstests: enable sparse checking with make C=[12]
+Message-ID: <Z6WShahlU_FZPn0Y@infradead.org>
 References: <20250206212145.7732-1-sandeen@redhat.com>
- <20250206212145.7732-3-sandeen@redhat.com>
- <20250206223905.GO21799@frogsfrogsfrogs>
- <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
+ <20250206212145.7732-2-sandeen@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,89 +45,10 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <006e3012-c4e9-4672-a9bb-ccb726017b21@sandeen.net>
+In-Reply-To: <20250206212145.7732-2-sandeen@redhat.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Thu, Feb 06, 2025 at 07:09:21PM -0600, Eric Sandeen wrote:
-> On 2/6/25 4:39 PM, Darrick J. Wong wrote:
-> > On Thu, Feb 06, 2025 at 03:19:57PM -0600, Eric Sandeen wrote:
-> >> There are several #ifdef linux guards in the code, but nothing
-> >> defined it. This caused several sparse warnings, so define it
-> >> when building on linux.
-> > 
-> > cpp in gcc 12.2 defines this:
-> > 
-> > $ touch /tmp/moo.h ; cpp -dM /tmp/moo.h | grep define.linux
-> > #define linux 1
-> 
-> Huh, on my test box too.
-> And yet without this sparse coughs up lots of things for me:
-> 
-> tlibio.c:90:20: error: undefined identifier 'LIO_IO_TYPES'
-> tlibio.c:90:33: error: undefined identifier 'LIO_WAIT_TYPES'
-> tlibio.c:92:20: error: undefined identifier 'LIO_IO_TYPES'
-> tlibio.c:92:33: error: undefined identifier 'LIO_WAIT_TYPES'
-> tlibio.c:118:20: error: undefined identifier 'LIO_IO_TYPES'
-> tlibio.c:118:33: error: undefined identifier 'LIO_WAIT_TYPES'
-> 
-> because i.e.:
-> 
-> #ifdef linux
-> #define LIO_IO_TYPES            00021   /* all io types */
-> #endif /* linux */
-> 
-> make V=1 shows:
-> 
-> /bin/sh ../libtool --quiet --tag=CC --mode=compile gcc -g -O2 -g -O2 -DDEBUG  -I../include -DVERSION=\"1.1.1\" -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -funsigned-char -fno-strict-aliasing -Wall   -c tlibio.c
-> 
-> so not sure what's going on here ?
+Looks good:
 
-sparse doesn't define linux by default:
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
-$ cat > /tmp/a.c << ENDL
-#ifdef linux
-# warning not
-#else
-# warning me
-#endif
-ENDL
-$ gcc -o /tmp/a.o /tmp/a.c
-/tmp/a.c:2:3: warning: #warning not [-Wcpp]
-    2 | # warning not
-      |   ^~~~~~~
-/usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/12/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
-(.text+0x17): undefined reference to `main'
-collect2: error: ld returned 1 exit status
-$ sparse /tmp/a.c
-/tmp/a.c:4:3: warning: me
-$ sparse /tmp/a.c -Dlinux
-/tmp/a.c:2:3: warning: not
-
---D
-
-> 
-> > --D
-> > 
-> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >> ---
-> >>  include/builddefs.in | 2 +-
-> >>  1 file changed, 1 insertion(+), 1 deletion(-)
-> >>
-> >> diff --git a/include/builddefs.in b/include/builddefs.in
-> >> index 7274cde8..00dec0ea 100644
-> >> --- a/include/builddefs.in
-> >> +++ b/include/builddefs.in
-> >> @@ -78,7 +78,7 @@ HAVE_FICLONE = @have_ficlone@
-> >>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
-> >>  
-> >>  ifeq ($(PKG_PLATFORM),linux)
-> >> -PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 $(GCCFLAGS)
-> >> +PCFLAGS = -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -Dlinux $(GCCFLAGS)
-> >>  endif
-> >>  ifeq ($(PKG_PLATFORM),darwin)
-> >>  PCFLAGS = -traditional-cpp $(GCCFLAGS)
-> >> -- 
-> >> 2.48.0
-> >>
-> >>
-> > 
-> 
