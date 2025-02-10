@@ -1,467 +1,326 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1C5F156861;
-	Mon, 10 Feb 2025 04:36:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32B9D2528E1
+	for <fstests@vger.kernel.org>; Mon, 10 Feb 2025 14:23:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739162212; cv=none; b=geGESnaF1uMfemJfp62r5EYN9cfcpU8vLd0VJP05rl3PHDHTCWRfY/9BgPXbAkBUQKAx/K3Jl5A6eHDJu/EskUHp9wGEv8rdL3i0JQxEGaNJUy6VkotshCrgI9dv6LPMEvsueP5ZfV5XVddC252NSsoCN38llu9ueSkpfxVv/Bw=
+	t=1739197413; cv=none; b=jfMMqximBQnJeBIInVBvZxr74HeMvMe7hCwTeGOdTeD2Gn9kpxkwMMMbgnrUUjj4khq+ChH65Wc4BIc+rdzWjfG9u5VBhaFzcRMHWPg2yxw5k3W9yn9oDbIgUDIHc2yLAhcAZsyx/1fAg/sA8n2HObt0Ng8NLe+tD6NefSl0VEY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739162212; c=relaxed/simple;
-	bh=eZaxg6FmK61Eo4cYfP/1J1QoK/9q4A5kA1djBOH5xDE=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=dn6qXkQS0y+cfO6wan7cxVxikb/bsmR61tW8Ttim7fDxaguIwpYG/zUovrr549gKflAI5WaTfn6t0pTJieEomhnB0IdaghHTa8euqxZLKSUgFpI3iJkwEAGIlXwUMsUG+np9vJr6csz187qN3RzlLZ45YS/gd/AQvlNmF2kCKxM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=WwHUkcKD; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Xr5Lh1bM; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=OQjd/7eW; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=zxBKpPTc; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1739197413; c=relaxed/simple;
+	bh=1Z2zsOiXE6O6GTVKoPdKuaAm5SnVWXvJtZUpZHd1K+c=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=XbbKD3P2Ckhmujba82+hNDHLtMfkskxzPbM9nSQG+oCuwbe5iF6FjhyAnj4kh1MXrobiK8EjHrlCMfRYY63sm55d7EaOCYiBTlLWIHUxAEPd4XkJhIJQmLSfqupl6DuoM0WNAK7mRptYIuGTBPH3epVaAllqfAkgjGCRftfL8ew=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=ESTCh4p7; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="WwHUkcKD";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Xr5Lh1bM";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="OQjd/7eW";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="zxBKpPTc"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id E029B2111F;
-	Mon, 10 Feb 2025 04:36:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1739162209; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="ESTCh4p7"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1739197410;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=w3fXi7lTuxRppmuw3JN77LwY7ZsSMPHPoOTCJ5RQH14=;
-	b=WwHUkcKDN7sNxVTCUQy+hNpjQyIjs1rvxOWoGWs/tcPcrT8DRfdbqr2EyZx3yx6HTSB4xJ
-	BC7NdtoHaifd0uUuA7tdxow/0rmePhdxdwTsOw4RMAG7+dyFaG9QTpDuX5vHnLIaMK/tLl
-	8CSOYWllrwN6XLbf5evecZeYi3lVG+A=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1739162209;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=w3fXi7lTuxRppmuw3JN77LwY7ZsSMPHPoOTCJ5RQH14=;
-	b=Xr5Lh1bMRrO05fZv0UxB8K8pKEgA6m4VQLjPO2pqin/SmGbdylEgb39kwh+s6SOnL1IPbq
-	8VJxwp49kUupXaCg==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1739162208; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=w3fXi7lTuxRppmuw3JN77LwY7ZsSMPHPoOTCJ5RQH14=;
-	b=OQjd/7eWmdhJwgR27JGyOqgZxP+5FagpWThy66tx9YsNJq+kObBhN+mdWr/VCii9H5RxZY
-	PDnk0yr4A6INOuLD0r3OdZG89MzSXCSYYORtrs+VW5bgmYI0YccwhTc5DHyx1mTNKfomqx
-	NU3MEzD4bLg2AZMOywzPD4mHee4JLws=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1739162208;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=w3fXi7lTuxRppmuw3JN77LwY7ZsSMPHPoOTCJ5RQH14=;
-	b=zxBKpPTcSVaXCFx0lyLpAycj/uBEjX7aZnTMYHxFtYjMWp6QxlziGeYgLbh5s2CKxer+R3
-	BNa9RxalrUQYibAg==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 1E37313707;
-	Mon, 10 Feb 2025 04:36:46 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id n6RhMV6CqWfZYwAAD6G6ig
-	(envelope-from <ddiss@suse.de>); Mon, 10 Feb 2025 04:36:46 +0000
-Date: Mon, 10 Feb 2025 15:36:33 +1100
-From: David Disseldorp <ddiss@suse.de>
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Christoph Hellwig
- <hch@infradead.org>
-Subject: Re: [PATCH] fstests: add a generic test to verify direct IO writes
- with buffer contents change
-Message-ID: <20250210153633.608af52e.ddiss@suse.de>
-In-Reply-To: <20250208054110.226709-1-wqu@suse.com>
-References: <20250208054110.226709-1-wqu@suse.com>
+	bh=xGzuxbEMQPiuowHPxJeA1JII8eG7zdJNZMUo+iSTSnA=;
+	b=ESTCh4p7uVccIhiBRnQ5/CWTdP/zeMaIS6iUDLN3nrBJOxrpio7N4oI9N7ebEHfIc7NMfS
+	i1v/BTzQJUtCePk5o+pTLHOLWMj2I6rwtnv0xfX7o9vSSRLqQ3NeGl0qggqtngDOpcLcZS
+	6285viRRtBTPybjoRWwbyTNaXId5VUE=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-436-0Edfhl57PN6bzEYINKvCYA-1; Mon, 10 Feb 2025 09:23:28 -0500
+X-MC-Unique: 0Edfhl57PN6bzEYINKvCYA-1
+X-Mimecast-MFC-AGG-ID: 0Edfhl57PN6bzEYINKvCYA
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2fa668c0d35so2595715a91.1
+        for <fstests@vger.kernel.org>; Mon, 10 Feb 2025 06:23:28 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1739197407; x=1739802207;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=xGzuxbEMQPiuowHPxJeA1JII8eG7zdJNZMUo+iSTSnA=;
+        b=h+qzepbqi6iNjU/uvkmuQWx1YEROHP5FkJ33afJgk+Jy1Ps6WK9GkXNFMuWEyKb82x
+         /C+1/6dwk3qn/MIM5ADy/lNolw5lRgu/4v4bx2WNSMuKNU3fMpLDjNhx0r0AbqN42MRS
+         n4OVEHo2umK6zWicsris34WT0DJkE/OEt5TYmC2ZuKvvIU8BL0Yon3/KLJ4Gmxd/xfG5
+         qFSTOb+8H2G8Yrz823Av/xFQdvoOdp2n1hLU3qvtTQugYiHbmQB9PLOgcC/ylb/thW8L
+         mu6EaUru6QhRJxJqIN2rli5pqG+o+4FJdUYJwMlMk6vfcW5b0bl98Hg/CS1lxlfYBXMf
+         XKkg==
+X-Forwarded-Encrypted: i=1; AJvYcCXcnsAJlx2N/Q8YfDeNpA5sb5F0q/U5kKlrdC330RlxvV9OUPImWMWYC7YvvCTatNDCdjLSCSC0@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwiNfC7ofnsVC5ftKUrVK48qpPLiwOh8ENK6vTDPPoMnPyr+oF
+	5zA9iiK24d2Rt4Svsn6veFMI0jRteaqaBIVILXUjHZK7axO0P0kX2WUwWrPFrXC8Wh8f0+kBx22
+	KgIsTnhwBkfXojtGQM1TELm9+odfJPDo3FJeIqGG4slxfWO/ADp2DtLM=
+X-Gm-Gg: ASbGncuJih/TBFEzpTqCQniLe0HgRUYcgKfWtgkoKUWW5fK4lg0/LC7z5qe6xmpwHNP
+	InFfzfCkZndHr+PF7MkrWQewu1PUC36/9gLRtIZTnvTWFWB4yz3rAfchUPQ+FUghrNLwfvfwEDF
+	vLdwyV8A8qiCp15Z9w6EaoCNYLHGwzRhcC/200B76kTD5sYUSmBnOppZp7ostGV7+/7Jx32zlz9
+	6o6vyuOAwRs7WJ+IMd4IM0tDIf6fmbGlXYJGRijkI77CMp1NWosawuy/bsCUEELA5upya2b1cDl
+	gIHynXrAaXMhJcESqPpo1uOw8lUQrivVmhp9YW8IsGaqgg==
+X-Received: by 2002:a17:90b:3588:b0:2ee:c04a:4281 with SMTP id 98e67ed59e1d1-2fa23f55e36mr17607442a91.6.1739197407425;
+        Mon, 10 Feb 2025 06:23:27 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHyP6CawqOeKaUVxUnUyswTZh9FvFL8k4DQt790I6J6UB1hJTPatRSE4FGebHj2ux/PXkRhxA==
+X-Received: by 2002:a17:90b:3588:b0:2ee:c04a:4281 with SMTP id 98e67ed59e1d1-2fa23f55e36mr17607401a91.6.1739197406969;
+        Mon, 10 Feb 2025 06:23:26 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fa09b5c71csm8662517a91.47.2025.02.10.06.23.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Feb 2025 06:23:26 -0800 (PST)
+Date: Mon, 10 Feb 2025 22:23:22 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
+	linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
+	ritesh.list@gmail.com, ojaswin@linux.ibm.com, zlang@kernel.org
+Subject: Re: [PATCH v2] check: Fix fs specfic imports when
+ $FSTYPE!=$OLD_FSTYPE
+Message-ID: <20250210142322.tptpphdntglsz4eq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
+ <20250128180917.GA3561257@frogsfrogsfrogs>
+ <f89b6b40-8dce-4378-ba56-cf7f29695bdb@gmail.com>
+ <20250129160259.GT3557553@frogsfrogsfrogs>
+ <dfbd2895-e29a-4e25-bbc6-a83826d14878@gmail.com>
+ <20250131162457.GV1611770@frogsfrogsfrogs>
+ <20250201063516.gndb7lngpd5afatv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <ff6b4e2f-dbd3-479b-a522-a1ae4837b3df@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.30 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-0.999];
-	MIME_GOOD(-0.10)[text/plain];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	MIME_TRACE(0.00)[0:+];
-	ARC_NA(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	RCPT_COUNT_THREE(0.00)[4];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	MISSING_XM_UA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:mid,suse.com:email,imap1.dmz-prg2.suse.org:helo]
-X-Spam-Score: -3.30
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <ff6b4e2f-dbd3-479b-a522-a1ae4837b3df@gmail.com>
 
-Hi Qu,
-
-Thanks for adding this test. A few comments inline...
-
-On Sat,  8 Feb 2025 16:11:10 +1030, Qu Wenruo wrote:
-
-> There is a long existing btrfs problem that if some one is modifying the
-> buffer of an on-going direct IO write, it has a very high chance causing
-> permanent data checksum mismatch.
+On Thu, Feb 06, 2025 at 11:32:43PM +0530, Nirjhar Roy (IBM) wrote:
 > 
-> This is caused by the following factors:
+> On 2/1/25 12:05, Zorro Lang wrote:
+> > On Fri, Jan 31, 2025 at 08:24:57AM -0800, Darrick J. Wong wrote:
+> > > On Fri, Jan 31, 2025 at 06:49:50PM +0530, Nirjhar Roy (IBM) wrote:
+> > > > On 1/29/25 21:32, Darrick J. Wong wrote:
+> > > > > On Wed, Jan 29, 2025 at 04:48:10PM +0530, Nirjhar Roy (IBM) wrote:
+> > > > > > On 1/28/25 23:39, Darrick J. Wong wrote:
+> > > > > > > On Tue, Jan 28, 2025 at 05:00:22AM +0000, Nirjhar Roy (IBM) wrote:
+> > > > > > > > Bug Description:
+> > > > > > > > 
+> > > > > > > > _test_mount function is failing with the following error:
+> > > > > > > > ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
+> > > > > > > > check: failed to mount /dev/loop0 on /mnt1/test
+> > > > > > > > 
+> > > > > > > > when the second section in local.config file is xfs and the first section
+> > > > > > > > is non-xfs.
+> > > > > > > > 
+> > > > > > > > It can be easily reproduced with the following local.config file
+> > > > > > > > 
+> > > > > > > > [s2]
+> > > > > > > > export FSTYP=ext4
+> > > > > > > > export TEST_DEV=/dev/loop0
+> > > > > > > > export TEST_DIR=/mnt1/test
+> > > > > > > > export SCRATCH_DEV=/dev/loop1
+> > > > > > > > export SCRATCH_MNT=/mnt1/scratch
+> > > > > > > > 
+> > > > > > > > [s1]
+> > > > > > > > export FSTYP=xfs
+> > > > > > > > export TEST_DEV=/dev/loop0
+> > > > > > > > export TEST_DIR=/mnt1/test
+> > > > > > > > export SCRATCH_DEV=/dev/loop1
+> > > > > > > > export SCRATCH_MNT=/mnt1/scratch
+> > > > > > > > 
+> > > > > > > > ./check selftest/001
+> > > > > > > > 
+> > > > > > > > Root cause:
+> > > > > > > > When _test_mount() is executed for the second section, the FSTYPE has
+> > > > > > > > already changed but the new fs specific common/$FSTYP has not yet
+> > > > > > > > been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
+> > > > > > > > the test run fails.
+> > > > > > > > 
+> > > > > > > > Fix:
+> > > > > > > > Remove the additional _test_mount in check file just before ". commom/rc"
+> > > > > > > > since ". commom/rc" is already sourcing fs specific imports and doing a
+> > > > > > > > _test_mount.
+> > > > > > > > 
+> > > > > > > > Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
+> > > > > > > > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > > > > > > > ---
+> > > > > > > >     check | 12 +++---------
+> > > > > > > >     1 file changed, 3 insertions(+), 9 deletions(-)
+> > > > > > > > 
+> > > > > > > > diff --git a/check b/check
+> > > > > > > > index 607d2456..5cb4e7eb 100755
+> > > > > > > > --- a/check
+> > > > > > > > +++ b/check
+> > > > > > > > @@ -784,15 +784,9 @@ function run_section()
+> > > > > > > >     			status=1
+> > > > > > > >     			exit
+> > > > > > > >     		fi
+> > > > > > > > -		if ! _test_mount
+> > > > > > > Don't we want to _test_mount the newly created filesystem still?  But
+> > > > > > > perhaps after sourcing common/rc ?
+> > > > > > > 
+> > > > > > > --D
+> > > > > > common/rc calls init_rc() in the end and init_rc() already does a
+> > > > > > _test_mount. _test_mount after sourcing common/rc will fail, won't it? Does
+> > > > > > that make sense?
+> > > > > > 
+> > > > > > init_rc()
+> > > > > > {
+> > > > > >       # make some further configuration checks here
+> > > > > >       if [ "$TEST_DEV" = ""  ]
+> > > > > >       then
+> > > > > >           echo "common/rc: Error: \$TEST_DEV is not set"
+> > > > > >           exit 1
+> > > > > >       fi
+> > > > > > 
+> > > > > >       # if $TEST_DEV is not mounted, mount it now as XFS
+> > > > > >       if [ -z "`_fs_type $TEST_DEV`" ]
+> > > > > >       then
+> > > > > >           # $TEST_DEV is not mounted
+> > > > > >           if ! _test_mount
+> > > > > >           then
+> > > > > >               echo "common/rc: retrying test device mount with external set"
+> > > > > >               [ "$USE_EXTERNAL" != "yes" ] && export USE_EXTERNAL=yes
+> > > > > >               if ! _test_mount
+> > > > > >               then
+> > > > > >                   echo "common/rc: could not mount $TEST_DEV on $TEST_DIR"
+> > > > > >                   exit 1
+> > > > > >               fi
+> > > > > >           fi
+> > > > > >       fi
+> > > > > > ...
+> > > > > ahahahaha yes it does.
+> > > > > 
+> > > > > /commit message reading comprehension fail, sorry about that.
+> > > > > 
+> > > > > Though now that you point it out, should check elide the init_rc call
+> > > > > about 12 lines down if it re-sourced common/rc ?
+> > > > Yes, it should. init_rc() is getting called twice when common/rc is getting
+> > > > re-sourced. Maybe I can do like
+> > > > 
+> > > > 
+> > > > if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
+> > > > 
+> > > >      <...>
+> > > > 
+> > > >      . common/rc # changes in this patch
+> > > > 
+> > > >      <...>
+> > > > 
+> > > > elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+> > > > 
+> > > >      ...
+> > > > 
+> > > >      init_rc() # explicitly adding an init_rc() for this condition
+> > > > 
+> > > > else
+> > > > 
+> > > >      init_rc() # # explicitly adding an init_rc() for all other conditions.
+> > > > This will prevent init_rc() from getting called twice during re-sourcing
+> > > > common/rc
+> > > > 
+> > > > fi
+> > > > 
+> > > > What do you think?
+> > > Sounds fine as a mechanical change, but I wonder, should calling init_rc
+> > > be explicit?  There are not so many places that source common/rc:
+> > > 
+> > > $ git grep 'common/rc'
+> > > check:362:if ! . ./common/rc; then
+> > > check:836:              . common/rc
+> > > common/preamble:52:     . ./common/rc
+> > > soak:7:. ./common/rc
+> > > tests/generic/749:18:. ./common/rc
+> > > 
+> > > (I filtered out the non-executable matches)
+> > > 
+> > > I think the call in generic/749 is unnecessary and I don't know what
+> > > soak does.  But that means that one could insert an explicit call to
+> > > init_rc at line 366 and 837 in check and at line 53 in common/preamble,
+> > > and we can clean up one more of those places where sourcing a common/
+> > > file actually /does/ something quietly under the covers.
+> > > 
+> > > (Unless the maintainer is ok with the status quo...?)
+> > I think people just hope to import the helpers in common/rc mostly, don't
+> > want to run init_rc again. Maybe we can make sure the init_rc is only run
+> > once each time?
+> > 
+> > E.g.
+> > 
+> >    if [ _INIT_RC != "done" ];then
+> > 	init_rc
+> > 	_INIT_RC="done"
+> >    fi
+> > 
+> > Or any better idea.
 > 
-> - Direct IO buffer is out of the control of filesystem
->   Thus user space can modify the contents during writeback.
+> Yes, this idea looks good too. However, after thinking a bit more, I like
+> Darrick's idea to remove the call to init_rc from common/rc and explicitly
+> calling them explicitly whenever necessary makes more sense. This also makes
+> the interface/reason to source common/rc more meaningful, and also not
+> making common/rc do something via init_rc silently. What do you think?
+
+Sorry I'm on a travel, reply you late. I don't like to run codes in include
+files either :) If we remove the init_rc calling from common/rc we might
+need to do 2 things:
+1) xfstests/check needs to run init_rc, calls it in check properly.
+2) Now each sub-cases run init_rc when they import common/rc, I think
+we can call init_rc in common/preamble:_begin_fstest().
+
+If I miss other things, please feel free to remind me:)
+
+Thanks,
+Zorro
+
 > 
-> - Btrfs generate its data checksum just before submitting the bio
->   This means if the contents happens after the checksum is generated,
->   the data written to disk will no longer match the checksum.
+> --NR
 > 
-> Btrfs later fixes the problem by forcing the direct IO to fallback to
-> buffered IO (if the inode requires data checksum), so that btrfs can
-> have a consistent view of the buffer.
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > > --D
+> > > 
+> > > > > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > > 
+> > > > > --D
+> > > > > 
+> > > > > > ...
+> > > > > > 
+> > > > > > --NR
+> > > > > > 
+> > > > > > 
+> > > > > > 
+> > > > > > > > -		then
+> > > > > > > > -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
+> > > > > > > > -			status=1
+> > > > > > > > -			exit
+> > > > > > > > -		fi
+> > > > > > > > -		# TEST_DEV has been recreated, previous FSTYP derived from
+> > > > > > > > -		# TEST_DEV could be changed, source common/rc again with
+> > > > > > > > -		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
+> > > > > > > > +		# Previous FSTYP derived from TEST_DEV could be changed, source
+> > > > > > > > +		# common/rc again with correct FSTYP to get FSTYP specific configs,
+> > > > > > > > +		# e.g. common/xfs
+> > > > > > > >     		. common/rc
+> > > > > > > >     		_prepare_test_list
+> > > > > > > >     	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+> > > > > > > > -- 
+> > > > > > > > 2.34.1
+> > > > > > > > 
+> > > > > > > > 
+> > > > > > -- 
+> > > > > > Nirjhar Roy
+> > > > > > Linux Kernel Developer
+> > > > > > IBM, Bangalore
+> > > > > > 
+> > > > -- 
+> > > > Nirjhar Roy
+> > > > Linux Kernel Developer
+> > > > IBM, Bangalore
+> > > > 
+> > > > 
+> -- 
+> Nirjhar Roy
+> Linux Kernel Developer
+> IBM, Bangalore
 > 
-> This test case will verify the behavior by:
-> 
-> - Create a helper program 'dio-writeback-race'
->   Which does direct IO writes block-by-block, and the buffer is always
->   initialized to all 0xff before write,
->   Then starting two threads:
->   - One to submit the direct IO
->   - One to modify the buffer to 0x00
-> 
->   The program uses 4K as default block size, and 64MiB as the default
->   file size.
->   Which is more than enough to trigger tons of btrfs checksum errors
->   on unpatched kernels.
-> 
-> - New test case generic/761
->   Which will:
-> 
->   * Use above program to create a 64MiB file
-> 
->   * Do buffered read on that file
->     Since above program is doing direct IO, there is no page cache
->     populated.
->     And the buffered read will need to read out all data from the disk,
->     and if the filesystem supports data checksum, then the data checksum
->     will also be verified against the data.
-> 
-> The test case passes on the following fses:
-> - ext4
-> - xfs
-> - btrfs with "nodatasum" mount option
->   No data checksum to bother.
-> 
-> - btrfs with default "datasum" mount option and the fix "btrfs: always
->   fallback to buffered write if the inode requires checksum"
->   This makes btrfs to fallback on buffered IO so the contents won't
->   change during writeback of page cache.
-> 
-> And fails on the following fses:
-> 
-> - btrfs with default "datasum" mount option and without the fix
->   Expected.
-> 
-> Suggested-by: Christoph Hellwig <hch@infradead.org>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  .gitignore               |   1 +
->  src/Makefile             |   3 +-
->  src/dio-writeback-race.c | 143 +++++++++++++++++++++++++++++++++++++++
->  tests/generic/761        |  50 ++++++++++++++
->  tests/generic/761.out    |   2 +
->  5 files changed, 198 insertions(+), 1 deletion(-)
->  create mode 100644 src/dio-writeback-race.c
->  create mode 100755 tests/generic/761
->  create mode 100644 tests/generic/761.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index efd47773..7060f52c 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -210,6 +210,7 @@ tags
->  /src/perf/*.pyc
->  /src/fiemap-fault
->  /src/min_dio_alignment
-> +/src/dio-writeback-race
->  
->  # Symlinked files
->  /tests/generic/035.out
-> diff --git a/src/Makefile b/src/Makefile
-> index 1417c383..6ac72b36 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -20,7 +20,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
->  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
->  	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
-> -	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd
-> +	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
-> +	dio-writeback-race
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/dio-writeback-race.c b/src/dio-writeback-race.c
-> new file mode 100644
-> index 00000000..01cce50b
-> --- /dev/null
-> +++ b/src/dio-writeback-race.c
-> @@ -0,0 +1,143 @@
-> +// SPDX-License-Identifier: GPL-2.0+
-> +/*
-> + * dio_writeback_race -- test direct IO writes with the contents of
-> + * the buffer changed during writeback.
-> + *
-> + * Copyright (C) 2025 SUSE Linux Products GmbH.
-> + */
-> +
-> +/*
-> + * dio_writeback_race
-> + *
-> + * Compile:
-> + *
-> + *   gcc -Wall -pthread -o dio_writeback_race dio_writeback_race.c
-> + *
-> + * Make sure filesystems with explicit data checksum to handle direct IO
-> + * writes correctly, so that even the contents of the direct IO buffer changes
-> + * during writeback, the fs should still work fine without data checksum mismatch.
-> + * (Normally by falling back to buffer IO to keep the checksum and contents
-> + *  consistent)
-> + *
-> + * Usage:
-> + *
-> + *   dio_writeback_race [-b <buffersize>] [-s <filesize>] <filename>
-> + *
-> + * Where:
-> + *
-> + *   <filename> is the name of the test file to create, if the file exists
-> + *   it will be overwritten.
-> + *
-> + *   <buffersize> is the buffer size for direct IO. Users are responsible to
-> + *   probe the correct direct IO size and alignment requirement.
-> + *   If not specified, the default value will be PAGE_SIZE.
-
-PAGE_SIZE -> 4096 bytes
-
-> + *
-> + *   <filesize> is the total size of the test file. If not aligned to <blocksize>
-> + *   the result file size will be rounded up to <blocksize>.
-> + *   If not specified, the default value will be 64MiB.
-> + */
-> +
-> +#include <fcntl.h>
-> +#include <stdlib.h>
-> +#include <stdio.h>
-> +#include <pthread.h>
-> +#include <unistd.h>
-> +#include <getopt.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <sys/stat.h>
-> +
-> +static int fd = -1;
-> +static void *buf = NULL;
-> +static unsigned long long filesize = 64 * 1024 * 1024;
-> +static int blocksize = 4096;
-> +
-> +const int orig_pattern = 0xff;
-> +const int modify_pattern = 0x00;
-> +
-> +static void *do_io(void *arg)
-> +{
-> +	int ret;
-> +
-> +	ret = write(fd, buf, blocksize);
-> +	pthread_exit((void *)(unsigned long long)ret);
-
-ret should be a ssize_t. (unsigned long long) can be dropped, right?
-
-> +}
-> +
-> +static void *do_modify(void *arg)
-> +{
-> +	memset(buf, modify_pattern, blocksize);
-> +	pthread_exit(NULL);
-> +}
-> +
-> +int main (int argc, char *argv[])
-> +{
-> +	pthread_t io_thread;
-> +	pthread_t modify_thread;
-> +	unsigned long long filepos;
-> +	int opt;
-> +	int ret;
-> +
-> +	while ((opt = getopt(argc, argv, "b:s:")) > 0) {
-> +		switch (opt) {
-> +		case 'b':
-> +			blocksize = atoi(optarg);
-> +			if (blocksize == 0) {
-> +				fprintf(stderr, "invalid blocksize '%s'\n", optarg);
-> +				goto error;
-> +			}
-> +			break;
-> +		case 's':
-> +			filesize = atoll(optarg);
-> +			if (filesize == 0) {
-> +				fprintf(stderr, "invalid blocksize '%s'\n", optarg);
-"invalid filesize"
-> +				goto error;
-> +			}
-> +			break;
-> +		default:
-> +			fprintf(stderr, "unknown option '%c'\n", opt);
-> +			goto error;
-> +		}
-> +	}
-> +	if (optind >= argc) {
-> +		fprintf(stderr, "missing argument\n");
-> +		goto error;
-> +	}
-> +	ret = posix_memalign(&buf, blocksize, blocksize);
-> +	if (!buf) {
-> +		fprintf(stderr, "failed to allocate aligned memory\n");
-> +		exit(EXIT_FAILURE);
-> +	}
-> +	fd = open(argv[optind], O_DIRECT | O_WRONLY | O_CREAT);
-> +	if (fd < 0) {
-> +		fprintf(stderr, "failed to open file '%s': %m\n", argv[2]);
-
-argv[2] -> argv[optind]
-
-> +		goto error;
-> +	}
-> +
-> +	for (filepos = 0; filepos < filesize; filepos += blocksize) {
-> +		void *retval = NULL;
-> +
-> +		memset(buf, orig_pattern, blocksize);
-> +		pthread_create(&io_thread, NULL, do_io, NULL);
-> +		pthread_create(&modify_thread, NULL, do_modify, NULL);
-> +		ret = pthread_join(io_thread, retval);
-
-I think this should be &retval?
-
-> +		if (ret < 0) {
-> +			errno = -ret;
-
-man indicates that pthread_join errors are positive errno.
-
-> +			fprintf(stderr, "failed to join io thread: %m\n");
-> +			goto error;
-> +		}
-> +		if (retval) {
-
-if ((ssize_t)retval < 0), or we could confirm that it matches blocksize.
-
-> +			fprintf(stderr, "io thread failed\n");
-> +			goto error;
-> +		}
-> +		ret = pthread_join(modify_thread, NULL);
-> +		if (ret < 0) {
-> +			errno = -ret;
-
-As before, should this be a positive check?
-
-> +			fprintf(stderr, "failed to join modify thread: %m\n");
-> +			goto error;
-> +		}
-> +	}
-> +error:
-> +	close(fd);
-> +	free(buf);
-> +	return EXIT_FAILURE;
-
-Should probably EXIT_SUCCESS based on ret / retval?
-
-> +}
-> diff --git a/tests/generic/761 b/tests/generic/761
-> new file mode 100755
-> index 00000000..24f45cb0
-> --- /dev/null
-> +++ b/tests/generic/761
-> @@ -0,0 +1,50 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2025 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 761
-> +#
-> +# Making sure direct IO (O_DIRECT) writes won't cause any data checksum mismatch,
-> +# even if the contents of the buffer changes during writeback.
-> +#
-> +# This is mostly for filesystems with data checksum support, which should fallback
-> +# to buffer IO to avoid inconsistency.
-> +# For filesystems without data checksum support, nothing needs to be bothered.
-> +#
-> +
-> +. ./common/preamble
-> +_begin_fstest auto quick
-> +
-> +# Override the default cleanup function.
-> +# _cleanup()
-> +# {
-> +# 	cd /
-> +# 	rm -r -f $tmp.*
-> +# }
-
-nit: drop the commented override function.
-
-> +
-> +# Import common functions.
-> +# . ./common/filter
-> +
-> +# Modify as appropriate.
-> +_require_scratch
-> +_require_odirect
-> +_require_test_program dio-writeback-race
-
-_fixed_by_kernel_commit XXXXXXXX \
-	"btrfs: always fallback to buffered write if the inode requires checksum"
-
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +blocksize=$(_get_block_size $SCRATCH_MNT)
-> +filesize=$(( 64 * 1024 * 1024))
-> +
-> +echo "blocksize=$blocksize filesize=$filesize" >> $seqres.full
-> +
-> +$here/src/dio-writeback-race -b $blocksize -s $filesize $SCRATCH_MNT/foobar
-> +
-> +# Read out the file, which should trigger checksum verification
-> +cat $SCRATCH_MNT/foobar > /dev/null
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/761.out b/tests/generic/761.out
-> new file mode 100644
-> index 00000000..72ebba4c
-> --- /dev/null
-> +++ b/tests/generic/761.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 761
-> +Silence is golden
 
