@@ -1,152 +1,326 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D5E4F4FA;
-	Wed, 12 Feb 2025 12:42:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E6DC20F067
+	for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 14:12:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739364144; cv=none; b=KXzNTUafju/3dz97R+6D8kZ7mGNiFtyQOTSxZAb4g7JHFEr/8WfC6iv3dcH6b5UfXqS4Eupg1/EyG9Y67zB7CsYTZBgCo6kjy0Rwj6WdKHkmu4QrJ8/3TWE++a0NCqfQ6zeAmNQTlYSDY9F0jAP6xaoIuEghEXXug0ZLhm3v6jw=
+	t=1739369540; cv=none; b=fDmF+or0fRjpk+Yt65+fI0tQ06sLk5FQzX0q7CfI3DeLlagkU/8kCrsmRDfIVEoA4EEfYboDqJEzXIAjDlzuMIJwuuQUX1y7R9iuaLan9aT5CxZ+PmjgIyIa+qEfE6wwNya+o9w2Dnb0F9HWCXI8djZY9KcgZI0KUFcgEq3zh0M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739364144; c=relaxed/simple;
-	bh=c4LVZDb8JVr8gzjdz7Z5FYQBjgYEm1csVXr4bPtjWAI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=EUQXJHpmoYdZRHHAtd0rkVFusj1iGizZotQ/cJmllwmvaC38CZigTH7c22qMtLViMLOWl8IWl49n5C2iJGxC0/hvJVtTJpEhL6iMjH6CvAYr+lpq4VmK7awB8SEiVxZEJCZDxyFgv2T7SpP+1K1y1Ar0696Z9OhOKR+ZBcUrTO4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Qd++t8Uu; arc=none smtp.client-ip=209.85.214.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1739369540; c=relaxed/simple;
+	bh=DfMo3fpU+ZaCcD01USQ9QlAjcp97KNKu0cTkDOSvC5k=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Tl3P12pnggG2muH9wiZuZYElfJxLGz5GkWnc4Lt9WGFcP0KpvkCjSRaQsQs+zhoGzOMwuRccs6dRO9J3H/v4nlAold11Y7kjYoMAfvZNbMjrcSaXc9gQhMhqD1xDL/e4q6MIILFt+LbtVugrDYHKp05cY9Xlb6n89fVdShJ+hKQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Ng82MDeP; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Qd++t8Uu"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-21fa56e1583so51136085ad.3;
-        Wed, 12 Feb 2025 04:42:23 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1739364142; x=1739968942; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ILSZ2TlqgYiobcvK/I9xuSSgxNUMr42iC2d9uSuSt7I=;
-        b=Qd++t8UuYk1DT9SlqbY8qOYmtSTrvJ1Uloz7WKEuGqBoixX2ETIDahwAjIir76Woaf
-         TRk2z7dribKBeo0dGEaJJSDJewhuVbpitJrQi7+oPkASDarvjbKsS2/eBvMQFie3CdoF
-         64aOMlRk0O3qRqBG/IQLMhtLKLJNS1bwQ1/WoNJgUf6hmeQxqPjI4pJ/adyy7T+xkNnU
-         Sq20Bfesu7Ej0TGDe2+9rrx4gfEevD4Q0G7tlhcz7w4MdeSsBxqdBi7zukd0Q6gfjRY/
-         UY4XBIs2Zim0M1YV3HJaRDcpyrLQHvFWok0C7FLkienPaDQkn1AnuwJdnxMdFlrYBIjF
-         wp6Q==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Ng82MDeP"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1739369537;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=QqklkF2wM7Dvc2tnyKwBTZhu7zUVqNPBwlh/B6VLTnI=;
+	b=Ng82MDePPI8uGXg6gs6QcHQf56KrpkHo+WU2/kZR7yskOk3yyFRtGgoVSTmAjE8SiI3E5l
+	02+fMvEFlLFBaU/ckdQWikLBx9vZiJsP8f8sffdVjYM/7l59a3eltXw9XOIrtud6M+NjZ+
+	yJWrRTfLXdmxuSJwWtmAbW88sS2zmR0=
+Received: from mail-pl1-f199.google.com (mail-pl1-f199.google.com
+ [209.85.214.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-59-ZSxw8JywOX6haUpPwuWwdg-1; Wed, 12 Feb 2025 09:12:15 -0500
+X-MC-Unique: ZSxw8JywOX6haUpPwuWwdg-1
+X-Mimecast-MFC-AGG-ID: ZSxw8JywOX6haUpPwuWwdg_1739369535
+Received: by mail-pl1-f199.google.com with SMTP id d9443c01a7336-21f3aad4e0bso102354235ad.3
+        for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 06:12:15 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739364142; x=1739968942;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ILSZ2TlqgYiobcvK/I9xuSSgxNUMr42iC2d9uSuSt7I=;
-        b=wQZ6qUElP0rnKG9f6qAEdudNff7g8lJZHT6vF/YGVp7o123Ux45fnT8qSLGnwwim71
-         J6O5v7F7QS8+v/QX568ZBsoqtBGJ02FeIYAXaR3XxaZS+AYngnRM0TMFNN6hXUSaNXyb
-         U1Joy67k/ImOvdmMGkjLADqwAsdDA4PenqW+c1kZ9B37rVA9AJTc1REWCnRNtZz4C1HS
-         xiEnhdPRoKVu9IAYDx+zgMm9q0oB1/J80ULHVINEpRbO6yRpCFfYLUXrdncsVt31umj4
-         qo+CeZP4RVOzjv4+7qbUMXUKC+XivoITxC9RqcUaIgbhJdrRd3pD3PBw3At5cUjUGPf7
-         p32Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWQXKjKxuLntvufFNfA+3VvvG4PYCJIXN3cyIOXy6j2u5uU0AooBNXs8CwMQUxQhYPp5Pq0UEUdYQs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwaktHbq1T+Xtnf/4BwLMGZP5PQYbzQNGn7dbce+ix6TBBHoCie
-	cvmg9IYq6n4vemNLZmPtSn71t3HJmqRbXRsan0E+Mkm41Tjgctet7oGEOg==
-X-Gm-Gg: ASbGncupQ++u37E4zfICiOjVg8k/8jsnKFkwIVcH6f8udOsnrTPrM7jguDgvhnwIhyc
-	FgyjRcXPumtXnkYTvFaznvTZIAObKa13Lr8BCeBnQ9K1rP15aBK4OFKWVL5XrXMqGIqQI20ik8/
-	0Mdb0iotznBYLXJzu/39B9aDB859pa9vLAmdXNCDXYwuDOn1BrHK7BDnjdi2Y2e+UIjHfNec0zK
-	HWqyD+qolPqjZw9GmW8Vg2hsilojaWRNZ4gDGYx5iyRdRK9HszW8t+cuOiQSfVD0cn2HPi6prgK
-	5hENC8CoZUsD3XNt2SU=
-X-Google-Smtp-Source: AGHT+IGM+SqfUDe3ENV6cVog26MQlu4xZNnjizXEHulc8DtoyP5PpHxCk/S5BgUAPlSSD+TthibbSg==
-X-Received: by 2002:a05:6a21:6d97:b0:1ed:a4e2:89cf with SMTP id adf61e73a8af0-1ee5c7dbec0mr5369352637.27.1739364142385;
-        Wed, 12 Feb 2025 04:42:22 -0800 (PST)
-Received: from citest-1.. ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-ad53d0c0c19sm6468484a12.57.2025.02.12.04.42.19
+        d=1e100.net; s=20230601; t=1739369535; x=1739974335;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=QqklkF2wM7Dvc2tnyKwBTZhu7zUVqNPBwlh/B6VLTnI=;
+        b=LeTsUCAgTHoeDQSZSof+/aUZsbBk3yQNqMfU3G4tVHySz/s+SvVpKrZpR01aMBMps7
+         Tay82aNdVPUowFIaqDA8+kEBheCyg2xDGn9NZK1uDeKPllRii6lPVzkn0LmzXPClnPpY
+         9UdLKbfPS1nHK4HnqbPayh8OlpObqt4EfKIR6wORNn0PmqZQr17muytVFIJLaVHhK2K7
+         ZqKEyD/ici5blsmPCK6kb181xl/sppwSB5G1lE+PAkWjpqwEjxM+6L0z0qq0jrU4Fu3T
+         qbB+FWlgNXwzQy9sbB9F7AAbC9vIUonA7UTOhn3mbEYgZnw7BpnXgWG7zR/lH31bAmgn
+         FAng==
+X-Gm-Message-State: AOJu0Ywru2+AefW9rXm4krsm/Zg4l6CUn4mrMka2hnbSKl1jyyCw1aXI
+	CouAyW0qkWH3tPZEMn8NPPDXBcBBxnV2Hsv82HrftPp9MikdcDwIsRHaMovjkATxwcjsG174UJK
+	X7/7kegVVQSjbVe/P+mtF16xKZN+wGz+ObRLdIuGKAbyjCntqp2YnRzg=
+X-Gm-Gg: ASbGncvHuwGky4hBEdXnn47hAglLAxAAxuyxESU/5WTAhFDOhWItfkIFX9GjQCIFpLj
+	9PaZVivyCtdK1mtrROMcn7hxUHYPw3kjIH2RKS2KmDZEIrC67/kbFHysAOVBtANeyUIWyPRr9EH
+	9IV//GetMxk+YBGKK+K+llb4dieHFZU2FTm1a0PTS7+/0VGXn3tGtPIkxSpcApdt0fNfV3tIRt8
+	dCevMAciuRMgRnoASpKYYgjo6XlqZFalqSwNjtIp/GGxdV2rwplSwgtpctaaVlnCJgWJ15uDsqH
+	7rl4xDIY4z9mHAUsNp+61w6iMjInkAN6njGcwOIfpmEnyA==
+X-Received: by 2002:a17:903:2b05:b0:21f:4b01:b985 with SMTP id d9443c01a7336-220be007160mr46027845ad.45.1739369533302;
+        Wed, 12 Feb 2025 06:12:13 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFespjGa3ie8YbhdXg9QxEeNJEn/Sfmx/F+qj84dd93CY9usjelxTh7awlJ75UvzRu3ay/VpQ==
+X-Received: by 2002:a17:903:2b05:b0:21f:4b01:b985 with SMTP id d9443c01a7336-220be007160mr46025975ad.45.1739369531219;
+        Wed, 12 Feb 2025 06:12:11 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21f3655164bsm113822365ad.85.2025.02.12.06.12.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Feb 2025 04:42:22 -0800 (PST)
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org,
-	ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com,
-	djwong@kernel.org,
-	zlang@kernel.org,
-	nirjhar.roy.lists@gmail.com
-Subject: [PATCH v1 3/3] xfs: Add a testcase to check remount with noattr2 on a v5 xfs
-Date: Wed, 12 Feb 2025 12:39:58 +0000
-Message-Id: <de61a54dcf5f7240d971150cb51faf0038d3d835.1739363803.git.nirjhar.roy.lists@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
-References: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
+        Wed, 12 Feb 2025 06:12:10 -0800 (PST)
+Date: Wed, 12 Feb 2025 22:12:06 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH] generic: suggest fs specific fix only if the tested
+ filesystem matches
+Message-ID: <20250212141206.y65onr7xfyy5qdll@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <8c64ba21953b44b682c72b448bebe273dba64013.1738847088.git.fdmanana@suse.com>
+ <20250212015310.ifnjdxj53jbsy2qx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <CAL3q7H6wzKJCBR0qbGsTEiCH1PV977+XLC+Atr4kMfhd5nXAVQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAL3q7H6wzKJCBR0qbGsTEiCH1PV977+XLC+Atr4kMfhd5nXAVQ@mail.gmail.com>
 
-This testcase reproduces the following bug:
-Bug:
-mount -o remount,noattr2 <device> <mount_point> succeeds
-unexpectedly on a v5 xfs when CONFIG_XFS_SUPPORT_V4 is set.
+On Wed, Feb 12, 2025 at 12:38:27PM +0000, Filipe Manana wrote:
+> On Wed, Feb 12, 2025 at 1:53 AM Zorro Lang <zlang@redhat.com> wrote:
+> >
+> > On Thu, Feb 06, 2025 at 01:05:06PM +0000, fdmanana@kernel.org wrote:
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > It's odd when a test fails on a filesystem and a specific fix is suggested
+> > > for another filesystem. Some generic tests are suggesting filesystem
+> > > specific fixes without checking if the running filesystem matches, so
+> > > update them.
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > ---
+> > >  tests/generic/365 | 10 ++++++----
+> > >  tests/generic/366 |  2 +-
+> > >  tests/generic/367 |  2 +-
+> > >  tests/generic/623 |  2 +-
+> > >  tests/generic/631 |  2 +-
+> > >  tests/generic/646 |  2 +-
+> > >  tests/generic/649 |  2 +-
+> > >  tests/generic/695 |  2 +-
+> > >  tests/generic/700 |  4 ++--
+> > >  tests/generic/701 |  2 +-
+> > >  tests/generic/702 |  2 +-
+> > >  tests/generic/704 |  4 +++-
+> > >  tests/generic/707 |  4 ++--
+> > >  13 files changed, 22 insertions(+), 18 deletions(-)
+> > >
+> > > diff --git a/tests/generic/365 b/tests/generic/365
+> > > index 1f6a618a..1bca848a 100755
+> > > --- a/tests/generic/365
+> > > +++ b/tests/generic/365
+> > > @@ -9,10 +9,12 @@
+> > >  . ./common/preamble
+> > >  _begin_fstest auto rmap fsmap
+> > >
+> > > -_fixed_by_kernel_commit 68415b349f3f \
+> > > -     "xfs: Fix the owner setting issue for rmap query in xfs fsmap"
+> > > -_fixed_by_kernel_commit ca6448aed4f1 \
+> > > -     "xfs: Fix missing interval for missing_owner in xfs fsmap"
+> > > +if [ "$FSTYP" = "xfs" ]; then
+> > > +     _fixed_by_kernel_commit 68415b349f3f \
+> > > +             "xfs: Fix the owner setting issue for rmap query in xfs fsmap"
+> > > +     _fixed_by_kernel_commit ca6448aed4f1 \
+> > > +             "xfs: Fix missing interval for missing_owner in xfs fsmap"
+> > > +fi
+> > >
+> > >  . ./common/filter
+> > >
+> > > diff --git a/tests/generic/366 b/tests/generic/366
+> > > index b322bcca..b2c2e607 100755
+> > > --- a/tests/generic/366
+> > > +++ b/tests/generic/366
+> > > @@ -23,7 +23,7 @@ _require_scratch
+> > >  _require_odirect 512 # see fio job1 config below
+> > >  _require_aio
+> > >
+> > > -_fixed_by_kernel_commit xxxxxxxxxxxx \
+> > > +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
+> > >       "btrfs: avoid deadlock when reading a partial uptodate folio"
+> > >
+> > >  iterations=$((32 * LOAD_FACTOR))
+> > > diff --git a/tests/generic/367 b/tests/generic/367
+> > > index 7cf90695..ed371a02 100755
+> > > --- a/tests/generic/367
+> > > +++ b/tests/generic/367
+> > > @@ -17,7 +17,7 @@
+> > >
+> > >  _begin_fstest ioctl quick
+> > >
+> > > -_fixed_by_kernel_commit 2a492ff66673 \
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 2a492ff66673 \
+> > >       "xfs: Check for delayed allocations before setting extsize"
+> > >
+> > >  _require_scratch_extsize
+> > > diff --git a/tests/generic/623 b/tests/generic/623
+> > > index 6487ccb8..9f41b5cc 100755
+> > > --- a/tests/generic/623
+> > > +++ b/tests/generic/623
+> > > @@ -11,7 +11,7 @@ _begin_fstest auto quick shutdown
+> > >
+> > >  . ./common/filter
+> > >
+> > > -_fixed_by_kernel_commit e4826691cc7e \
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit e4826691cc7e \
+> > >       "xfs: restore shutdown check in mapped write fault path"
+> > >
+> > >  _require_scratch_nocheck
+> > > diff --git a/tests/generic/631 b/tests/generic/631
+> > > index 8e2cf9c6..c38ab771 100755
+> > > --- a/tests/generic/631
+> > > +++ b/tests/generic/631
+> > > @@ -41,7 +41,7 @@ _require_attrs trusted
+> > >  _exclude_fs overlay
+> > >  _require_extra_fs overlay
+> > >
+> > > -_fixed_by_kernel_commit 6da1b4b1ab36 \
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 6da1b4b1ab36 \
+> > >       "xfs: fix an ABBA deadlock in xfs_rename"
+> > >
+> > >  _scratch_mkfs >> $seqres.full
+> > > diff --git a/tests/generic/646 b/tests/generic/646
+> > > index dc73aeb3..b3b0ab0a 100755
+> > > --- a/tests/generic/646
+> > > +++ b/tests/generic/646
+> > > @@ -14,7 +14,7 @@
+> > >  . ./common/preamble
+> > >  _begin_fstest auto quick recoveryloop shutdown
+> > >
+> > > -_fixed_by_kernel_commit 50d25484bebe \
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 50d25484bebe \
+> > >       "xfs: sync lazy sb accounting on quiesce of read-only mounts"
+> > >
+> > >  _require_scratch
+> > > diff --git a/tests/generic/649 b/tests/generic/649
+> > > index a33b13ea..58ef96a8 100755
+> > > --- a/tests/generic/649
+> > > +++ b/tests/generic/649
+> > > @@ -31,7 +31,7 @@ _cleanup()
+> > >
+> > >
+> > >  # Modify as appropriate.
+> > > -_fixed_by_kernel_commit 72a048c1056a \
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 72a048c1056a \
+> > >       "xfs: only set IOMAP_F_SHARED when providing a srcmap to a write"
+> > >
+> > >  _require_cp_reflink
+> > > diff --git a/tests/generic/695 b/tests/generic/695
+> > > index df81fdb7..694f4245 100755
+> > > --- a/tests/generic/695
+> > > +++ b/tests/generic/695
+> > > @@ -25,7 +25,7 @@ _cleanup()
+> > >  . ./common/dmflakey
+> > >  . ./common/punch
+> > >
+> > > -_fixed_by_kernel_commit e6e3dec6c3c288 \
+> > > +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit e6e3dec6c3c288 \
+> > >          "btrfs: update generation of hole file extent item when merging holes"
+> > >  _require_scratch
+> > >  _require_dm_target flakey
+> > > diff --git a/tests/generic/700 b/tests/generic/700
+> > > index 052cfbd6..7f84df9d 100755
+> > > --- a/tests/generic/700
+> > > +++ b/tests/generic/700
+> > > @@ -19,8 +19,8 @@ _require_scratch
+> > >  _require_attrs
+> > >  _require_renameat2 whiteout
+> > >
+> > > -_fixed_by_kernel_commit 70b589a37e1a \
+> > > -     xfs: add selinux labels to whiteout inodes
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 70b589a37e1a \
+> > > +     "xfs: add selinux labels to whiteout inodes"
+> > >
+> > >  get_selinux_label()
+> > >  {
+> > > diff --git a/tests/generic/701 b/tests/generic/701
+> > > index 527bba34..806cc65d 100755
+> > > --- a/tests/generic/701
+> > > +++ b/tests/generic/701
+> > > @@ -22,7 +22,7 @@ _cleanup()
+> > >       rm -r -f $tmp.* $junk_dir
+> > >  }
+> > >
+> > > -_fixed_by_kernel_commit 92fba084b79e \
+> > > +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit 92fba084b79e \
+> > >       "exfat: fix i_blocks for files truncated over 4 GiB"
+> > >
+> > >  _require_test
+> > > diff --git a/tests/generic/702 b/tests/generic/702
+> > > index a506e07d..ae47eb27 100755
+> > > --- a/tests/generic/702
+> > > +++ b/tests/generic/702
+> > > @@ -14,7 +14,7 @@ _begin_fstest auto quick clone fiemap
+> > >  . ./common/filter
+> > >  . ./common/reflink
+> > >
+> > > -_fixed_by_kernel_commit ac3c0d36a2a2f7 \
+> > > +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit ac3c0d36a2a2f7 \
+> > >       "btrfs: make fiemap more efficient and accurate reporting extent sharedness"
+> > >
+> > >  _require_scratch_reflink
+> > > diff --git a/tests/generic/704 b/tests/generic/704
+> > > index f452f9e9..f2360c42 100755
+> > > --- a/tests/generic/704
+> > > +++ b/tests/generic/704
+> > > @@ -21,7 +21,9 @@ _cleanup()
+> > >  # Import common functions.
+> > >  . ./common/scsi_debug
+> > >
+> > > -_fixed_by_kernel_commit 7c71ee78031c "xfs: allow logical-sector sized O_DIRECT"
+> > > +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 7c71ee78031c \
+> > > +     "xfs: allow logical-sector sized O_DIRECT"
+> > > +
+> > >  _require_scsi_debug
+> > >  # If TEST_DEV is block device, make sure current fs is a localfs which can be
+> > >  # written on scsi_debug device
+> > > diff --git a/tests/generic/707 b/tests/generic/707
+> > > index 3d8fac4b..23864038 100755
+> > > --- a/tests/generic/707
+> > > +++ b/tests/generic/707
+> > > @@ -13,9 +13,9 @@ _begin_fstest auto
+> > >
+> > >  _require_scratch
+> > >
+> > > -_fixed_by_kernel_commit f950fd052913 \
+> > > +[ "$FSTYP" = "udf" ] && _fixed_by_kernel_commit f950fd052913 \
+> > >       "udf: Protect rename against modification of moved directory"
+> > > -_fixed_by_kernel_commit 0813299c586b \
+> > > +[ "$FSTYP" = "ext4" ] && _fixed_by_kernel_commit 0813299c586b \
+> >
+> > I'm wondering if it's a "ext4 only" bug, or it might can be [[ "$FSTYP" =~ ext[0-9]+ ]] ?
+> 
+> Not sure either, but other generic test cases do that, so it's
+> probably best to do it like that.
+> Do you want a new patch version with that change or can you change it yourself?
 
-Ideally the above mount command should always fail with a v5 xfs
-filesystem irrespective of whether CONFIG_XFS_SUPPORT_V4 is set
-or not.
+I'll change that when I merge it, just double check with you :)
 
-Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
----
- tests/xfs/634     | 35 +++++++++++++++++++++++++++++++++++
- tests/xfs/634.out |  3 +++
- 2 files changed, 38 insertions(+)
- create mode 100755 tests/xfs/634
- create mode 100644 tests/xfs/634.out
+Thanks,
+Zorro
 
-diff --git a/tests/xfs/634 b/tests/xfs/634
-new file mode 100755
-index 00000000..dc153047
---- /dev/null
-+++ b/tests/xfs/634
-@@ -0,0 +1,35 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>.  All Rights Reserved.
-+#
-+# FS QA Test 634
-+#
-+# This test checks that mounting and remounting a v5 xfs filesystem with
-+# noattr2 fails. Currently, this test will pass with CONFIG_XFS_SUPPORT_V4=n but
-+# with CONFIG_XFS_SUPPORT_V4=y, this will fail i.e, mount -o remount,noattr2
-+# command succeeds incorrectly.
-+#
-+. ./common/preamble
-+. ./common/filter
-+
-+_begin_fstest auto quick mount
-+_require_scratch
-+# Import common functions.
-+
-+_fixed_by_kernel_commit xxxx \
-+	""
-+_require_scratch_xfs_v5
-+_scratch_mkfs -m crc=1 > $seqres.full 2>&1 ||
-+	_notrun "need an xfs v5 filesystem"
-+_scratch_mount "-o noattr2" |& grep -iq "fail" && \
-+	echo "mount failed successfully"
-+_scratch_mount
-+! _scratch_remount noattr2 >> $seqres.full 2>&1 && \
-+	echo "remount failed successfully"
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-+status=0
-+exit
-diff --git a/tests/xfs/634.out b/tests/xfs/634.out
-new file mode 100644
-index 00000000..8a98c05c
---- /dev/null
-+++ b/tests/xfs/634.out
-@@ -0,0 +1,3 @@
-+QA output created by 634
-+mount failed successfully
-+remount failed successfully
--- 
-2.34.1
+> 
+> Thanks.
+> 
+> > Others looks good to me.
+> >
+> > Thanks,
+> > Zorro
+> >
+> > >       "ext4: Fix possible corruption when moving a directory"
+> > >
+> > >  _scratch_mkfs >>$seqres.full 2>&1
+> > > --
+> > > 2.45.2
+> > >
+> > >
+> >
+> 
 
