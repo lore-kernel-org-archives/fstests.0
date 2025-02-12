@@ -1,76 +1,77 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A6031CA9C
-	for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 01:53:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 884591D618C
+	for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 02:55:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739325201; cv=none; b=AKNSx7pLg0yBBwxHdXxP/OliczPQH939rXjfg7/2p6KoiWwYxEuHls5VAauhxUY4XR7/lGUvcp4cu7kobV67txeuDyemzg9JMvpASVgMaKB/GvE31Me7YTzPglRePAAy9Gc9HBBOFuChPS91n6fZWjsP9WK7McjRFv0jeVOSLrE=
+	t=1739328914; cv=none; b=WWOz3rWVc7OcHbilcaR65O+JFZdKLzeml/xN/nCEdIOMbulfQXILV/E/2IG50svIkUHcTziLN8lAd1DJJUHpWfqTsRGuGpMvq337WT6NpemKqBchYYHn2oEw6VKiqEkVvWVeGUTX4Phxk5FinULNo4Okm62k1efj+kLq30WTk/M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739325201; c=relaxed/simple;
-	bh=161lUi+Z6GsZnNfxahI4UKNYb2OjZYVAsEn6pc/1rY0=;
+	s=arc-20240116; t=1739328914; c=relaxed/simple;
+	bh=enIXLBp4cCRgVbtO3hJBQcKzs/tR3EhrJZUtKK2GCCE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZD8o8qS60kHgGqxCpd/1HX97HlUc3b9/puY2ovTmOEX3B3+io6YRoRW24Gw06vuYOZPJkNJ8KYnQ/Bf58AGpz6XIHxI+MGj45tZgSqHzzDga72FNdquBAhZv5WSOWqrfUaV3eQjqKuW+q/0dRQXvAtLgZnXIj8eJnNNjWHsnDaA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=bh82aKYc; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZYalJng5UmTP24LHd9YCxSBzGNBSZEYQO2fB3+/kF0MW/Xp9FoN1LcuUmvtX5KIGFIGOgzXkQR+udjSHsTEWaTHm+NZ7ok8sCyFWucT2w1lBe4CcMaFBjV6aAepBvUPZdWz37Tq4iLnX9gshSrZJiGXBNlcQRjS79OaaQge4Q7U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=K15J2MV4; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="bh82aKYc"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="K15J2MV4"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1739325198;
+	s=mimecast20190719; t=1739328911;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=ShwW8uP4vppu9NWjtPcCG12JjQteJ1armH7JB/XdAQs=;
-	b=bh82aKYclyh9EKVvKNtQ52hkaqAxy5u0zgHYTGXosPVACl1mYkOH9l4CKQK7x5vi9KLzop
-	hZ+mLpdqdaSXru2amLqpzS+afWxT7aXaddH3nm6qyuWhS5ulSwg6XVJZ2hZQ/uAwQAP8sk
-	zFrtL7IlBGYNa4U459pqUMnDxmJrgj0=
-Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
- [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=KXwbsMtaizItuMstGuWew4slA9DtSNq2HN/1otMrPIo=;
+	b=K15J2MV4hUBxJ9qGYUlECE8PUgHPff57EuyTx5IHtiutIn8egJ+9qTz/D/35F+8vcTiti5
+	jTrS8OrXXmCYvo0e62gPzHZY+NKI2ZT/xooOXnkTusf8nVHwf1Hp0yLGSnNlz6duqZgz9G
+	rq2GWWaTez/dZDxkEWrrBLbXFO1Ky90=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-191-s2rYzovmPl-dNw_DPTr2fA-1; Tue, 11 Feb 2025 20:53:16 -0500
-X-MC-Unique: s2rYzovmPl-dNw_DPTr2fA-1
-X-Mimecast-MFC-AGG-ID: s2rYzovmPl-dNw_DPTr2fA
-Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2fa34e65bc1so14072872a91.2
-        for <fstests@vger.kernel.org>; Tue, 11 Feb 2025 17:53:16 -0800 (PST)
+ us-mta-562-A5_-pGwxMT2Fr_fHIjepTQ-1; Tue, 11 Feb 2025 21:55:09 -0500
+X-MC-Unique: A5_-pGwxMT2Fr_fHIjepTQ-1
+X-Mimecast-MFC-AGG-ID: A5_-pGwxMT2Fr_fHIjepTQ
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-21f02d17cd0so107923685ad.0
+        for <fstests@vger.kernel.org>; Tue, 11 Feb 2025 18:55:09 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739325195; x=1739929995;
+        d=1e100.net; s=20230601; t=1739328908; x=1739933708;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=ShwW8uP4vppu9NWjtPcCG12JjQteJ1armH7JB/XdAQs=;
-        b=avXkpGKXAl/JJYyM22qkk/ygpvxWyIGEKjW6/lwKv36gvLYdd1Nz/eO5namxGB4ald
-         D5qrGD7N6P0Ezbdv4/jk6Q1W2RIFM1veMrLoqWOEcFaYhA+XW7XdkpZ1DAEmBeonosZr
-         +UOdM7yp7NK8HSPRZUsA2CupH09MQAB9ZxUb8jpwF+aLllKi0Iuo5mYEJX0BMdSZ7+Po
-         iTC4duy9HuIRLqyCIxM97UIYI/XwMARNJxrEtaHtai4kuHED7l8ryAcgOXsB9RPFnsk2
-         r2BSB7IIvpyt0amKAkIBBVAh57UNIQK7XWpBAdSdTfIKQLcGrtiAxlV2gKJKUje/lbL1
-         ZPWw==
-X-Gm-Message-State: AOJu0Yz75tCXm388wTH/4m5FnwNRIh9gltcvTSg1V1riMs2N7xB6ebGZ
-	jD9v0DdS6EIYxrRbbqeDYuJoQfHI7GCHOR8SYd0Vh8SZ3IQ81/bocPXRScKzFGz8HEPSaQ+d9k6
-	4coIPBQmD2v9j9k730bK9QUCmu3HefL0IbPSqoS5h7ZT/eM5J/fYXRHI=
-X-Gm-Gg: ASbGnctUr+5x4Ih28AY4waC/TC07OqF4NDTXguZ47ulMUdy/7iB03MVFAtMDm1dx7ZD
-	eYOfk0zv1TktPaw/uXiLYPkNjoHO2sIqiXEbBQCI5VrqE4VDM9D6a0gSxQ6+tIAEoS8ruhyt7h5
-	1qHonaNXEowbU8a8zHW7bx0TDQ07pTR+PrchB8jpz+sKf6p98jNSWHqoZcX9n1pkR0g+dWq8mnz
-	r2ni2hXCNS2DsDFFxWbGg6OHN8k1yDYTb/l2oMDbS71aSEe2XMOf46t9FZ9Ht1TC9LEQiUqGFGB
-	hOrR237EKAauDj5IsR6vWcW6qey9bv3LJWtoUdvplLsE7Q==
-X-Received: by 2002:a17:90b:4a10:b0:2ee:df70:1ff3 with SMTP id 98e67ed59e1d1-2fbf5ae2d80mr2468517a91.0.1739325195048;
-        Tue, 11 Feb 2025 17:53:15 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFy2dSxl087ZCLJp5iAGw45IvvYKiWgq/W94gbXGG3ddPQJw0i7qqXvXwQxCUdLE2K1LOVNUg==
-X-Received: by 2002:a17:90b:4a10:b0:2ee:df70:1ff3 with SMTP id 98e67ed59e1d1-2fbf5ae2d80mr2468497a91.0.1739325194673;
-        Tue, 11 Feb 2025 17:53:14 -0800 (PST)
+        bh=KXwbsMtaizItuMstGuWew4slA9DtSNq2HN/1otMrPIo=;
+        b=Un42uw6UCbsV/JsP5Lfs+S65DXeSm21e1zo2PzR3aXHp3Wn/E6n1gYkLk/e13KNod+
+         E/y5o2hPmq1SCS9S9uFfHnA4N6XaSOIKZRtY23mBgvIJkDYee+Su3dZKdMJ1J2mUNnne
+         l8THhLyoAhH6v7oPVEwQfKsqdhhb0V/yIyE5YcvBlCrYk8e1blEfIHCiHBF+FWI58JtX
+         9Apse0zYAxY+JbAFLsNA1hhIthspXjyHicl2aURDAWRwTkhyFK8xYXRZhhuUgUXMXmhw
+         irS5Bq/sQKUE/mpyNk/J1BBXiQY/p/Q0oS9iSWSdWpwiVm0DrJiM6W8PvxcRXtjN5yU9
+         16uQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUbWy4VHS3ykj3sWKkkgyV5K040wNswooL842rZ+U0MwqEw8dCv9aRg/ff/x91N5mi3/elJHz4k@vger.kernel.org
+X-Gm-Message-State: AOJu0YxY62rXlp9dHwxL4Mwf36FztxqlH7q/rdGXsELsqlzUWhidUpEY
+	RnMzRQH+A5LdH1VZNXEqlwZy64ErDDjXlex9eDgxgdBBDwFkM/qRPcXNtZEx0sQvh2yNmmvZ9QK
+	I2Ohyta5N/I0MpmZ9qW/O078lLc6BvVnOlwgQjSpJvGSNKyTbi98j4GU=
+X-Gm-Gg: ASbGnctGEUZL3G9nOumFduhUoij42MIZUuuAMLoVeMymZtUpIHFNrY8vCV6wMaZ0h3E
+	Veqz0bD0GopfiRCLRgEMRf5U35SpeXrd8NIJ8FG6fz5DlAk55tL3IYbZO0OKMbuX+WgjNfgm9Ll
+	gxqaC8yE4o8mYOhzIB/KhnWQfImHhscqfViy0HltYPtb0AK5K90h+gwWjkY1TuSsDx3M2no8ioR
+	k83ph1JzSk0a8wY2qMYErev0iqHvkrcyrgmNfQJl4UkuYcRMTGV2+NNpGecfexLhkKi1YEpb5Ie
+	KUDAVxfsyYwPGLF8BrHSyQtIvg1nqiF25QxSHnzF5CSv0w==
+X-Received: by 2002:a17:902:d481:b0:21f:1549:a563 with SMTP id d9443c01a7336-220bbab334emr29100505ad.2.1739328908215;
+        Tue, 11 Feb 2025 18:55:08 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHlbzlqsCBAvxByESEN2EA97Iy7wyzGHQcchMJ1gI79FvN7mUwictlTIeBpoymftWw90+a8qw==
+X-Received: by 2002:a17:902:d481:b0:21f:1549:a563 with SMTP id d9443c01a7336-220bbab334emr29100145ad.2.1739328907767;
+        Tue, 11 Feb 2025 18:55:07 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fbf9ab0233sm227160a91.44.2025.02.11.17.53.12
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21f3650cddcsm103635315ad.20.2025.02.11.18.55.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Feb 2025 17:53:13 -0800 (PST)
-Date: Wed, 12 Feb 2025 09:53:10 +0800
+        Tue, 11 Feb 2025 18:55:07 -0800 (PST)
+Date: Wed, 12 Feb 2025 10:55:03 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>
-Subject: Re: [PATCH] generic: suggest fs specific fix only if the tested
- filesystem matches
-Message-ID: <20250212015310.ifnjdxj53jbsy2qx@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <8c64ba21953b44b682c72b448bebe273dba64013.1738847088.git.fdmanana@suse.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2] fstests: add a generic test to verify direct IO
+ writes with buffer contents change
+Message-ID: <20250212025503.cg5452r6swki6m3a@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <d9c50aa0df6cde2cb39cb7c9f978dbc27dadb770.1739241217.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,226 +80,342 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8c64ba21953b44b682c72b448bebe273dba64013.1738847088.git.fdmanana@suse.com>
+In-Reply-To: <d9c50aa0df6cde2cb39cb7c9f978dbc27dadb770.1739241217.git.wqu@suse.com>
 
-On Thu, Feb 06, 2025 at 01:05:06PM +0000, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Tue, Feb 11, 2025 at 04:22:57PM +1030, Qu Wenruo wrote:
+> There is a long existing btrfs problem that if some one is modifying the
+> buffer of an on-going direct IO write, it has a very high chance causing
+> permanent data checksum mismatch.
 > 
-> It's odd when a test fails on a filesystem and a specific fix is suggested
-> for another filesystem. Some generic tests are suggesting filesystem
-> specific fixes without checking if the running filesystem matches, so
-> update them.
+> This is caused by the following factors:
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> - Direct IO buffer is out of the control of filesystem
+>   Thus user space can modify the contents during writeback.
+> 
+> - Btrfs generate its data checksum just before submitting the bio
+>   This means if the contents happens after the checksum is generated,
+>   the data written to disk will no longer match the checksum.
+> 
+> Btrfs later fixes the problem by forcing the direct IO to fallback to
+> buffered IO (if the inode requires data checksum), so that btrfs can
+> have a consistent view of the buffer.
+> 
+> This test case will verify the behavior by:
+> 
+> - Create a helper program 'dio-writeback-race'
+>   Which does direct IO writes block-by-block, and the buffer is always
+>   initialized to all 0xff before write,
+>   Then starting two threads:
+>   - One to submit the direct IO
+>   - One to modify the buffer to 0x00
+> 
+>   The program uses 4K as default block size, and 64MiB as the default
+>   file size.
+>   Which is more than enough to trigger tons of btrfs checksum errors
+>   on unpatched kernels.
+> 
+> - New test case generic/761
+>   Which will:
+> 
+>   * Use above program to create a 64MiB file
+> 
+>   * Do buffered read on that file
+>     Since above program is doing direct IO, there is no page cache
+>     populated.
+>     And the buffered read will need to read out all data from the disk,
+>     and if the filesystem supports data checksum, then the data checksum
+>     will also be verified against the data.
+> 
+> The test case passes on the following fses:
+> - ext4
+> - xfs
+> - btrfs with "nodatasum" mount option
+>   No data checksum to bother.
+> 
+> - btrfs with default "datasum" mount option and the fix "btrfs: always
+>   fallback to buffered write if the inode requires checksum"
+>   This makes btrfs to fallback on buffered IO so the contents won't
+>   change during writeback of page cache.
+> 
+> And fails on the following fses:
+> 
+> - btrfs with default "datasum" mount option and without the fix
+>   Expected.
+> 
+> Suggested-by: Christoph Hellwig <hch@infradead.org>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 > ---
->  tests/generic/365 | 10 ++++++----
->  tests/generic/366 |  2 +-
->  tests/generic/367 |  2 +-
->  tests/generic/623 |  2 +-
->  tests/generic/631 |  2 +-
->  tests/generic/646 |  2 +-
->  tests/generic/649 |  2 +-
->  tests/generic/695 |  2 +-
->  tests/generic/700 |  4 ++--
->  tests/generic/701 |  2 +-
->  tests/generic/702 |  2 +-
->  tests/generic/704 |  4 +++-
->  tests/generic/707 |  4 ++--
->  13 files changed, 22 insertions(+), 18 deletions(-)
+> Changelog:
+> v2:
+> - Fix the comment on the default block size of dio-writeback-race
+> - Use proper type for pthread_exit() of do_io() function
+> - Fix the error message when filesize is invalid
+> - Fix the error message when unknown option is parsed
+> - Catch the thread return value correctly for pthread_join() on IO thread
+> - Always update @ret
+> - Return EXIT_SUCCESS/FAILURE based on @ret at error: tag
+> - Check the return value of pthread_join() correctly
+> - Remove unused cleanup override/include comments from the test case
+> - Add the missing fixed-by tag
+> ---
+>  .gitignore               |   1 +
+>  src/Makefile             |   3 +-
+>  src/dio-writeback-race.c | 148 +++++++++++++++++++++++++++++++++++++++
+>  tests/generic/761        |  41 +++++++++++
+>  tests/generic/761.out    |   2 +
+>  5 files changed, 194 insertions(+), 1 deletion(-)
+>  create mode 100644 src/dio-writeback-race.c
+>  create mode 100755 tests/generic/761
+>  create mode 100644 tests/generic/761.out
 > 
-> diff --git a/tests/generic/365 b/tests/generic/365
-> index 1f6a618a..1bca848a 100755
-> --- a/tests/generic/365
-> +++ b/tests/generic/365
-> @@ -9,10 +9,12 @@
->  . ./common/preamble
->  _begin_fstest auto rmap fsmap
+> diff --git a/.gitignore b/.gitignore
+> index efd477738e1e..7060f52cf6b8 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -210,6 +210,7 @@ tags
+>  /src/perf/*.pyc
+>  /src/fiemap-fault
+>  /src/min_dio_alignment
+> +/src/dio-writeback-race
 >  
-> -_fixed_by_kernel_commit 68415b349f3f \
-> -	"xfs: Fix the owner setting issue for rmap query in xfs fsmap"
-> -_fixed_by_kernel_commit ca6448aed4f1 \
-> -	"xfs: Fix missing interval for missing_owner in xfs fsmap"
-> +if [ "$FSTYP" = "xfs" ]; then
-> +	_fixed_by_kernel_commit 68415b349f3f \
-> +		"xfs: Fix the owner setting issue for rmap query in xfs fsmap"
-> +	_fixed_by_kernel_commit ca6448aed4f1 \
-> +		"xfs: Fix missing interval for missing_owner in xfs fsmap"
-> +fi
+>  # Symlinked files
+>  /tests/generic/035.out
+> diff --git a/src/Makefile b/src/Makefile
+> index 1417c383863e..6ac72b366257 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -20,7 +20,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
+>  	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
+>  	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
+> -	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd
+> +	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
+> +	dio-writeback-race
 >  
->  . ./common/filter
->  
-> diff --git a/tests/generic/366 b/tests/generic/366
-> index b322bcca..b2c2e607 100755
-> --- a/tests/generic/366
-> +++ b/tests/generic/366
-> @@ -23,7 +23,7 @@ _require_scratch
->  _require_odirect 512	# see fio job1 config below
->  _require_aio
->  
-> -_fixed_by_kernel_commit xxxxxxxxxxxx \
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit xxxxxxxxxxxx \
->  	"btrfs: avoid deadlock when reading a partial uptodate folio"
->  
->  iterations=$((32 * LOAD_FACTOR))
-> diff --git a/tests/generic/367 b/tests/generic/367
-> index 7cf90695..ed371a02 100755
-> --- a/tests/generic/367
-> +++ b/tests/generic/367
-> @@ -17,7 +17,7 @@
->  
->  _begin_fstest ioctl quick
->  
-> -_fixed_by_kernel_commit 2a492ff66673 \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 2a492ff66673 \
->  	"xfs: Check for delayed allocations before setting extsize"
->  
->  _require_scratch_extsize
-> diff --git a/tests/generic/623 b/tests/generic/623
-> index 6487ccb8..9f41b5cc 100755
-> --- a/tests/generic/623
-> +++ b/tests/generic/623
-> @@ -11,7 +11,7 @@ _begin_fstest auto quick shutdown
->  
->  . ./common/filter
->  
-> -_fixed_by_kernel_commit e4826691cc7e \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit e4826691cc7e \
->  	"xfs: restore shutdown check in mapped write fault path"
->  
->  _require_scratch_nocheck
-> diff --git a/tests/generic/631 b/tests/generic/631
-> index 8e2cf9c6..c38ab771 100755
-> --- a/tests/generic/631
-> +++ b/tests/generic/631
-> @@ -41,7 +41,7 @@ _require_attrs trusted
->  _exclude_fs overlay
->  _require_extra_fs overlay
->  
-> -_fixed_by_kernel_commit 6da1b4b1ab36 \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 6da1b4b1ab36 \
->  	"xfs: fix an ABBA deadlock in xfs_rename"
->  
->  _scratch_mkfs >> $seqres.full
-> diff --git a/tests/generic/646 b/tests/generic/646
-> index dc73aeb3..b3b0ab0a 100755
-> --- a/tests/generic/646
-> +++ b/tests/generic/646
-> @@ -14,7 +14,7 @@
->  . ./common/preamble
->  _begin_fstest auto quick recoveryloop shutdown
->  
-> -_fixed_by_kernel_commit 50d25484bebe \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 50d25484bebe \
->  	"xfs: sync lazy sb accounting on quiesce of read-only mounts"
->  
->  _require_scratch
-> diff --git a/tests/generic/649 b/tests/generic/649
-> index a33b13ea..58ef96a8 100755
-> --- a/tests/generic/649
-> +++ b/tests/generic/649
-> @@ -31,7 +31,7 @@ _cleanup()
->  
->  
->  # Modify as appropriate.
-> -_fixed_by_kernel_commit 72a048c1056a \
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 72a048c1056a \
->  	"xfs: only set IOMAP_F_SHARED when providing a srcmap to a write"
->  
->  _require_cp_reflink
-> diff --git a/tests/generic/695 b/tests/generic/695
-> index df81fdb7..694f4245 100755
-> --- a/tests/generic/695
-> +++ b/tests/generic/695
-> @@ -25,7 +25,7 @@ _cleanup()
->  . ./common/dmflakey
->  . ./common/punch
->  
-> -_fixed_by_kernel_commit e6e3dec6c3c288 \
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit e6e3dec6c3c288 \
->          "btrfs: update generation of hole file extent item when merging holes"
->  _require_scratch
->  _require_dm_target flakey
-> diff --git a/tests/generic/700 b/tests/generic/700
-> index 052cfbd6..7f84df9d 100755
-> --- a/tests/generic/700
-> +++ b/tests/generic/700
-> @@ -19,8 +19,8 @@ _require_scratch
->  _require_attrs
->  _require_renameat2 whiteout
->  
-> -_fixed_by_kernel_commit 70b589a37e1a \
-> -	xfs: add selinux labels to whiteout inodes
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 70b589a37e1a \
-> +	"xfs: add selinux labels to whiteout inodes"
->  
->  get_selinux_label()
->  {
-> diff --git a/tests/generic/701 b/tests/generic/701
-> index 527bba34..806cc65d 100755
-> --- a/tests/generic/701
-> +++ b/tests/generic/701
-> @@ -22,7 +22,7 @@ _cleanup()
->  	rm -r -f $tmp.* $junk_dir
->  }
->  
-> -_fixed_by_kernel_commit 92fba084b79e \
-> +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit 92fba084b79e \
->  	"exfat: fix i_blocks for files truncated over 4 GiB"
->  
->  _require_test
-> diff --git a/tests/generic/702 b/tests/generic/702
-> index a506e07d..ae47eb27 100755
-> --- a/tests/generic/702
-> +++ b/tests/generic/702
-> @@ -14,7 +14,7 @@ _begin_fstest auto quick clone fiemap
->  . ./common/filter
->  . ./common/reflink
->  
-> -_fixed_by_kernel_commit ac3c0d36a2a2f7 \
-> +[ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit ac3c0d36a2a2f7 \
->  	"btrfs: make fiemap more efficient and accurate reporting extent sharedness"
->  
->  _require_scratch_reflink
-> diff --git a/tests/generic/704 b/tests/generic/704
-> index f452f9e9..f2360c42 100755
-> --- a/tests/generic/704
-> +++ b/tests/generic/704
-> @@ -21,7 +21,9 @@ _cleanup()
->  # Import common functions.
->  . ./common/scsi_debug
->  
-> -_fixed_by_kernel_commit 7c71ee78031c "xfs: allow logical-sector sized O_DIRECT"
-> +[ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 7c71ee78031c \
-> +	"xfs: allow logical-sector sized O_DIRECT"
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/dio-writeback-race.c b/src/dio-writeback-race.c
+> new file mode 100644
+> index 000000000000..f0a2f6de531b
+> --- /dev/null
+> +++ b/src/dio-writeback-race.c
+> @@ -0,0 +1,148 @@
+> +// SPDX-License-Identifier: GPL-2.0+
+> +/*
+> + * dio_writeback_race -- test direct IO writes with the contents of
+> + * the buffer changed during writeback.
+> + *
+> + * Copyright (C) 2025 SUSE Linux Products GmbH.
+> + */
 > +
->  _require_scsi_debug
->  # If TEST_DEV is block device, make sure current fs is a localfs which can be
->  # written on scsi_debug device
-> diff --git a/tests/generic/707 b/tests/generic/707
-> index 3d8fac4b..23864038 100755
-> --- a/tests/generic/707
-> +++ b/tests/generic/707
-> @@ -13,9 +13,9 @@ _begin_fstest auto
->  
->  _require_scratch
->  
-> -_fixed_by_kernel_commit f950fd052913 \
-> +[ "$FSTYP" = "udf" ] && _fixed_by_kernel_commit f950fd052913 \
->  	"udf: Protect rename against modification of moved directory"
-> -_fixed_by_kernel_commit 0813299c586b \
-> +[ "$FSTYP" = "ext4" ] && _fixed_by_kernel_commit 0813299c586b \
+> +/*
+> + * dio_writeback_race
+> + *
+> + * Compile:
+> + *
+> + *   gcc -Wall -pthread -o dio_writeback_race dio_writeback_race.c
+> + *
+> + * Make sure filesystems with explicit data checksum can handle direct IO
+> + * writes correctly, so that even the contents of the direct IO buffer changes
+> + * during writeback, the fs should still work fine without data checksum mismatch.
+> + * (Normally by falling back to buffer IO to keep the checksum and contents
+> + *  consistent)
+> + *
+> + * Usage:
+> + *
+> + *   dio_writeback_race [-b <buffersize>] [-s <filesize>] <filename>
+> + *
+> + * Where:
+> + *
+> + *   <filename> is the name of the test file to create, if the file exists
+> + *   it will be overwritten.
+> + *
+> + *   <buffersize> is the buffer size for direct IO. Users are responsible to
+> + *   probe the correct direct IO size and alignment requirement.
+> + *   If not specified, the default value will be 4096.
+> + *
+> + *   <filesize> is the total size of the test file. If not aligned to <blocksize>
+> + *   the result file size will be rounded up to <blocksize>.
+> + *   If not specified, the default value will be 64MiB.
+> + */
+> +
+> +#include <fcntl.h>
+> +#include <stdlib.h>
+> +#include <stdio.h>
+> +#include <pthread.h>
+> +#include <unistd.h>
+> +#include <getopt.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <sys/stat.h>
+> +
+> +static int fd = -1;
+> +static void *buf = NULL;
+> +static unsigned long long filesize = 64 * 1024 * 1024;
+> +static int blocksize = 4096;
+> +
+> +const int orig_pattern = 0xff;
+> +const int modify_pattern = 0x00;
+> +
+> +static void *do_io(void *arg)
+> +{
+> +	ssize_t ret;
+> +
+> +	ret = write(fd, buf, blocksize);
+> +	pthread_exit((void *)ret);
+> +}
+> +
+> +static void *do_modify(void *arg)
+> +{
+> +	memset(buf, modify_pattern, blocksize);
+> +	pthread_exit(NULL);
+> +}
+> +
+> +int main (int argc, char *argv[])
+> +{
+> +	pthread_t io_thread;
+> +	pthread_t modify_thread;
+> +	unsigned long long filepos;
+> +	int opt;
+> +	int ret = -EINVAL;
+> +
+> +	while ((opt = getopt(argc, argv, "b:s:")) > 0) {
+> +		switch (opt) {
+> +		case 'b':
+> +			blocksize = atoi(optarg);
+> +			if (blocksize == 0) {
+> +				fprintf(stderr, "invalid blocksize '%s'\n", optarg);
+> +				goto error;
+> +			}
+> +			break;
+> +		case 's':
+> +			filesize = atoll(optarg);
+> +			if (filesize == 0) {
+> +				fprintf(stderr, "invalid filesize '%s'\n", optarg);
+> +				goto error;
+> +			}
+> +			break;
+> +		default:
+> +			fprintf(stderr, "unknown option '%c'\n", opt);
+> +			goto error;
+> +		}
+> +	}
+> +	if (optind >= argc) {
+> +		fprintf(stderr, "missing argument\n");
+> +		goto error;
+> +	}
+> +	ret = posix_memalign(&buf, blocksize, blocksize);
+> +	if (!buf) {
+> +		fprintf(stderr, "failed to allocate aligned memory\n");
+> +		exit(EXIT_FAILURE);
+> +	}
+> +	fd = open(argv[optind], O_DIRECT | O_WRONLY | O_CREAT);
+> +	if (fd < 0) {
+> +		fprintf(stderr, "failed to open file '%s': %m\n", argv[2]);
+> +		goto error;
+> +	}
+> +
+> +	for (filepos = 0; filepos < filesize; filepos += blocksize) {
+> +		void *retval = NULL;
+> +
+> +		memset(buf, orig_pattern, blocksize);
+> +		pthread_create(&io_thread, NULL, do_io, NULL);
+> +		pthread_create(&modify_thread, NULL, do_modify, NULL);
+> +		ret = pthread_join(io_thread, &retval);
+> +		if (ret) {
+> +			errno = ret;
+> +			ret = -ret;
+> +			fprintf(stderr, "failed to join io thread: %m\n");
+> +			goto error;
+> +		}
+> +		if ((ssize_t )retval < blocksize) {
+> +			ret = -EIO;
+> +			fprintf(stderr, "io thread failed\n");
+> +			goto error;
+> +		}
+> +		ret = pthread_join(modify_thread, NULL);
+> +		if (ret) {
+> +			errno = ret;
+> +			ret = -ret;
+> +			fprintf(stderr, "failed to join modify thread: %m\n");
+> +			goto error;
+> +		}
+> +	}
+> +error:
+> +	close(fd);
+> +	free(buf);
+> +	if (ret < 0)
+> +		return EXIT_FAILURE;
+> +	return EXIT_SUCCESS;
+> +}
+> diff --git a/tests/generic/761 b/tests/generic/761
+> new file mode 100755
+> index 000000000000..422b716d31b6
+> --- /dev/null
+> +++ b/tests/generic/761
+> @@ -0,0 +1,41 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 761
+> +#
+> +# Making sure direct IO (O_DIRECT) writes won't cause any data checksum mismatch,
+> +# even if the contents of the buffer changes during writeback.
+> +#
+> +# This is mostly for filesystems with data checksum support, which should fallback
+> +# to buffer IO to avoid inconsistency.
+> +# For filesystems without data checksum support, nothing needs to be bothered.
+> +#
+> +
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +_require_scratch
+> +_require_odirect
+> +_require_test_program dio-writeback-race
+> +_fixed_by_kernel_commit XXXXXXXX \
+> +	"btrfs: always fallback to buffered write if the inode requires checksum"
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +blocksize=$(_get_block_size $SCRATCH_MNT)
 
-I'm wondering if it's a "ext4 only" bug, or it might can be [[ "$FSTYP" =~ ext[0-9]+ ]] ?
-Others looks good to me.
+_get_file_block_size ? Others looks good to me.
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
+I'll help to do these changes from all review points when I merge it, if you
+don't want to change it more.
 
 Thanks,
 Zorro
 
->  	"ext4: Fix possible corruption when moving a directory"
->  
->  _scratch_mkfs >>$seqres.full 2>&1
+> +filesize=$(( 64 * 1024 * 1024))
+> +
+> +echo "blocksize=$blocksize filesize=$filesize" >> $seqres.full
+> +
+> +$here/src/dio-writeback-race -b $blocksize -s $filesize $SCRATCH_MNT/foobar
+> +
+> +# Read out the file, which should trigger checksum verification
+> +cat $SCRATCH_MNT/foobar > /dev/null
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/761.out b/tests/generic/761.out
+> new file mode 100644
+> index 000000000000..72ebba4cb426
+> --- /dev/null
+> +++ b/tests/generic/761.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 761
+> +Silence is golden
 > -- 
-> 2.45.2
+> 2.48.1
 > 
 > 
 
