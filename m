@@ -1,421 +1,217 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47F0627182B;
-	Wed, 12 Feb 2025 03:04:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E58F271839;
+	Wed, 12 Feb 2025 03:30:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739329470; cv=none; b=Weyaw8L9z3JzohTwPa4T3zu6IU3bJHP4tDulzQlu/sWqHqHzGrrpxq9DYgQB5ZMrxsp8Co6lQGhgdL7JnYbz533SNUftJAZIF4REM/dqogdfCxpun65J5bVaPKnq93Im5Q1LToQyKFFFNJivHxXGG4e7w7E7sYrnemJgLOHwLuY=
+	t=1739331051; cv=none; b=Tpn+axWFleQyzoaEbzAcmSrqZPHCm3fXWUzY2NyUpT9ple+ZFsIBpJsyfzUNtebnOUU0bva1aoOvUQ95Oru79066NoZhKLfFrHxR/3oPj+tdPaSPkWy61TwPiBN5miDl2BJcKWrEahoa0wvdOXL9qtRZ7JNvQwb7RuGG0Ctunqs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739329470; c=relaxed/simple;
-	bh=g351z5digKIFq8speWIMXf/GwtVrRE6hjPJ3gssJ6vk=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ipeu8Da8aCOQuZPGbhjxLAYzgtWejB9gioiwrzUenZ2wy2S3ZhLaqGXwy+LHCwqXeGT1nKKpQbm8ynNgk4F363YqDGlhaDhJmH+XAvOTF+W1jPKC3LLNbh+7164Dawf6iF6G1v8m8EINfBTpPIIJaznReO954JsjL0I+rvJGo5g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ihr0Q1GE; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=ihr0Q1GE; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1739331051; c=relaxed/simple;
+	bh=RS/wCtp7ztBDOL+5Vk87tNkzzRrmhsDZRp/GFT61Guw=;
+	h=Date:Subject:From:To:Cc:Message-ID:MIME-Version:Content-Type; b=CSw03rrQv8OUIW27k05qdsDS0u6A9zJuJ8ASRu0Hml6gHJt0hBtr3BSAoC3arXPWQEYcwpYDvyqzEgkXKKM4a7Fk4A5mI/9Za3TJb38PdMuniwqID9apvp8Yfz+LUS7BrfR2+B1/IIMgMyxUcfOu16+wPU08rfddPJvZULGh7vs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QJ70dvu5; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ihr0Q1GE";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="ihr0Q1GE"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 53A0E1F847;
-	Wed, 12 Feb 2025 03:04:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1739329466; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=CXoTAP3HX7KYtMDmi/g9a7IofqzUq412bfkLDMG3jro=;
-	b=ihr0Q1GEqJD9t1+wt9XvmSnCXDsXVjdMhBFdS2bedXXwXnO1LwJ84jm2MPRUwRJGdPzWNj
-	57lX+/7LMIwGnUzrXDMWCkiGGr+eR9B0MfIKbadr98i6zTxq69Vdmc1T8tn3OAwRksNZIu
-	u299zfxthLFJC9CWBLxWZA/etTCZ2so=
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1739329466; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=CXoTAP3HX7KYtMDmi/g9a7IofqzUq412bfkLDMG3jro=;
-	b=ihr0Q1GEqJD9t1+wt9XvmSnCXDsXVjdMhBFdS2bedXXwXnO1LwJ84jm2MPRUwRJGdPzWNj
-	57lX+/7LMIwGnUzrXDMWCkiGGr+eR9B0MfIKbadr98i6zTxq69Vdmc1T8tn3OAwRksNZIu
-	u299zfxthLFJC9CWBLxWZA/etTCZ2so=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 8F77013707;
-	Wed, 12 Feb 2025 03:04:24 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 7MzdE7gPrGdbUwAAD6G6ig
-	(envelope-from <wqu@suse.com>); Wed, 12 Feb 2025 03:04:24 +0000
-From: Qu Wenruo <wqu@suse.com>
-To: linux-btrfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Cc: Christoph Hellwig <hch@infradead.org>,
-	David Disseldorp <ddiss@suse.de>,
-	Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] fstests: add a generic test to verify direct IO writes with buffer contents change
-Date: Wed, 12 Feb 2025 13:34:06 +1030
-Message-ID: <93410edfde1cb0405c133cca49a8291dcdb90e2e.1739329404.git.wqu@suse.com>
-X-Mailer: git-send-email 2.48.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QJ70dvu5"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8256C4CEDF;
+	Wed, 12 Feb 2025 03:30:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1739331050;
+	bh=RS/wCtp7ztBDOL+5Vk87tNkzzRrmhsDZRp/GFT61Guw=;
+	h=Date:Subject:From:To:Cc:From;
+	b=QJ70dvu5m4HdaTupW+X8dsM1W0m4fldY3V6v+uURQPaPgf5l3mpz49IU6eidAdTfs
+	 bLI89yI0ToLis7l6rt78uavZjanEBm8YdIGZGHSKVXKBbolqhjuZWh+KtdwAJDHw/r
+	 Nyp3Wkt8OUCNMU3S8DLn7MrVejiMzBzmuh27Kr8ljJDz3KY91mc8I3sfyXS7jVLZ0d
+	 z/cL/+2E/I4PjtuH7lRJdOeB/d9bK8HYC5tUVM/05FndNkIRipTgmWgfEgEzDJPuwQ
+	 rwac62m9kwa7HWROHaoLPHtPxAegtXUD7HaV+A1HXpqHOJev6MAuopDJL+Fmg4Wnq2
+	 X8KiNB+gOPwSw==
+Date: Tue, 11 Feb 2025 19:30:50 -0800
+Subject: [PATCHSET v3] fstests: random fixes for v2025.02.02
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: djwong@kernel.org, zlang@redhat.com
+Cc: dchinner@redhat.com, joannelkoong@gmail.com, fstests@vger.kernel.org,
+ linux-xfs@vger.kernel.org
+Message-ID: <173933094308.1758477.194807226568567866.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Spam-Score: -2.80
-X-Spamd-Result: default: False [-2.80 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	MID_CONTAINS_FROM(1.00)[];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	R_MISSING_CHARSET(0.50)[];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MIME_TRACE(0.00)[0:+];
-	TO_DN_SOME(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	RCPT_COUNT_FIVE(0.00)[5];
-	RCVD_COUNT_TWO(0.00)[2];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:mid,suse.com:email,suse.de:email];
-	RCVD_TLS_ALL(0.00)[]
-X-Spam-Flag: NO
-X-Spam-Level: 
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 
-There is a long existing btrfs problem that if some one is modifying the
-buffer of an on-going direct IO write, it has a very high chance causing
-permanent data checksum mismatch.
+Hi all,
 
-This is caused by the following factors:
+This is an unusually large set of bug fixes for fstests.  The first 20
+patches in this patchset are corrections for that RFC series.
 
-- Direct IO buffer is out of the control of filesystem
-  Thus user space can modify the contents during writeback.
+The most significant change is that I made ./check run each test with
+its own Unix process session id.  This means that a test can use pkill
+to kill all of its own subprocesses, without killing anyone else's
+subprocesses.  I wasn't completely sold on that approach, but it works
+for me.  A better approach is to run each test in a separate pid and
+mount namespace, but then kernel support for that becomes a hard
+requirement.  Both approaches seems to work for check and
+check-parallel, though I've not tested that all that much.
 
-- Btrfs generate its data checksum just before submitting the bio
-  This means if the contents happens after the checksum is generated,
-  the data written to disk will no longer match the checksum.
+Note: I am /not/ happy about Dave's RFC going straight to for-next
+without even a complete review right before everyone went on PTO for
+several weeks for xmas/solar new year.  But in the interests of getting
+QA back on line for myself and everyone else who's having problems, here
+it is.
 
-Btrfs later fixes the problem by forcing the direct IO to fallback to
-buffered IO (if the inode requires data checksum), so that btrfs can
-have a consistent view of the buffer.
+At this point this series has accumulated even more bug fixes: an
+unexplained insertion of -R in a umount command; fixes for the new
+generic/759 hugepages IO test, fixes to the pptr size calculations in
+common/fuzzy, memory consumption reductions in scrub fsstress tests,
+fixes for excessive fsstress ops scaling, and some cleanups to how we
+locate the fsstress and fsx binaries.
 
-This test case will verify the behavior by:
+v2: update to 2025.02.02
+v3: update with feedback from dchinner
 
-- Create a helper program 'dio-writeback-race'
-  Which does direct IO writes block-by-block, and the buffer is always
-  initialized to all 0xff before write,
-  Then starting two threads:
-  - One to submit the direct IO
-  - One to modify the buffer to 0x00
+If you're going to start using this code, I strongly recommend pulling
+from my git trees, which are linked below.
 
-  The program uses 4K as default block size, and 64MiB as the default
-  file size.
-  Which is more than enough to trigger tons of btrfs checksum errors
-  on unpatched kernels.
+With a bit of luck, this should all go splendidly.
+Comments and questions are, as always, welcome.
 
-- New test case generic/761
-  Which will:
+--D
 
-  * Use above program to create a 64MiB file
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=random-fixes
 
-  * Do buffered read on that file
-    Since above program is doing direct IO, there is no page cache
-    populated.
-    And the buffered read will need to read out all data from the disk,
-    and if the filesystem supports data checksum, then the data checksum
-    will also be verified against the data.
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=random-fixes
 
-The test case passes on the following fses:
-- ext4
-- xfs
-- btrfs with "nodatasum" mount option
-  No data checksum to bother.
-
-- btrfs with default "datasum" mount option and the fix "btrfs: always
-  fallback to buffered write if the inode requires checksum"
-  This makes btrfs to fallback on buffered IO so the contents won't
-  change during writeback of page cache.
-
-And fails on the following fses:
-
-- btrfs with default "datasum" mount option and without the fix
-  Expected.
-
-Suggested-by: Christoph Hellwig <hch@infradead.org>
-Reviewed-by: David Disseldorp <ddiss@suse.de>
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
 ---
-Changelog:
-v2:
-- Fix the comment on the default block size of dio-writeback-race
-- Use proper type for pthread_exit() of do_io() function
-- Fix the error message when filesize is invalid
-- Fix the error message when unknown option is parsed
-- Catch the thread return value correctly for pthread_join() on IO thread
-- Always update @ret
-- Return EXIT_SUCCESS/FAILURE based on @ret at error: tag
-- Check the return value of pthread_join() correctly
-- Remove unused cleanup override/include comments from the test case
-- Add the missing fixed-by tag
-
-v3:
-- Use hyphens for the program's name in the comments of dio-writeback-race.c
-- Fix a missing argv[2] usage
-- Use _get_file_block_size() to benefit from ocfs2/xfs special handling
+Commits in this patchset:
+ * generic/476: fix fsstress process management
+ * metadump: make non-local function variables more obvious
+ * metadump: fix cleanup for v1 metadump testing
+ * generic/019: don't fail if fio crashes while shutting down
+ * fuzzy: do not set _FSSTRESS_PID when exercising fsx
+ * common/rc: revert recursive unmount in _clear_mount_stack
+ * common/dump: don't replace pids arbitrarily
+ * common/populate: correct the parent pointer name creation formulae
+ * generic/759,760: fix MADV_COLLAPSE detection and inclusion
+ * generic/759,760: skip test if we can't set up a hugepage for IO
+ * common/rc: create a wrapper for the su command
+ * fuzzy: kill subprocesses with SIGPIPE, not SIGINT
+ * common/rc: hoist pkill to a helper function
+ * common: fix pkill by running test program in a separate session
+ * check: run tests in a private pid/mount namespace
+ * check: deprecate using process sessions to isolate test instances
+ * common/rc: don't copy fsstress to $TEST_DIR
+ * unmount: resume logging of stdout and stderr for filtering
+ * mkfs: don't hardcode log size
+ * common/rc: return mount_ret in _try_scratch_mount
+ * preamble: fix missing _kill_fsstress
+ * generic/650: revert SOAK DURATION changes
+ * generic/032: fix pinned mount failure
+ * fuzzy: stop __stress_scrub_fsx_loop if fsx fails
+ * fuzzy: don't use readarray for xfsfind output
+ * fuzzy: always stop the scrub fsstress loop on error
+ * fuzzy: port fsx and fsstress loop to use --duration
+ * fix _require_scratch_duperemove ordering
+ * fsstress: fix a memory leak
+ * fsx: fix leaked log file pointer
+ * misc: don't put nr_cpus into the fsstress -n argument
+ * common/config: add $here to FSSTRESS_PROG
+ * config: add FSX_PROG variable
+ * build: initialize stack variables to zero by default
 ---
- .gitignore               |   1 +
- src/Makefile             |   3 +-
- src/dio-writeback-race.c | 148 +++++++++++++++++++++++++++++++++++++++
- tests/generic/761        |  41 +++++++++++
- tests/generic/761.out    |   2 +
- 5 files changed, 194 insertions(+), 1 deletion(-)
- create mode 100644 src/dio-writeback-race.c
- create mode 100755 tests/generic/761
- create mode 100644 tests/generic/761.out
-
-diff --git a/.gitignore b/.gitignore
-index efd477738e1e..7060f52cf6b8 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -210,6 +210,7 @@ tags
- /src/perf/*.pyc
- /src/fiemap-fault
- /src/min_dio_alignment
-+/src/dio-writeback-race
- 
- # Symlinked files
- /tests/generic/035.out
-diff --git a/src/Makefile b/src/Makefile
-index 1417c383863e..6ac72b366257 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -20,7 +20,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	t_get_file_time t_create_short_dirs t_create_long_dirs t_enospc \
- 	t_mmap_writev_overlap checkpoint_journal mmap-rw-fault allocstale \
- 	t_mmap_cow_memory_failure fake-dump-rootino dio-buf-fault rewinddir-test \
--	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd
-+	readdir-while-renames dio-append-buf-fault dio-write-fsync-same-fd \
-+	dio-writeback-race
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/dio-writeback-race.c b/src/dio-writeback-race.c
-new file mode 100644
-index 000000000000..963ed207fc1b
---- /dev/null
-+++ b/src/dio-writeback-race.c
-@@ -0,0 +1,148 @@
-+// SPDX-License-Identifier: GPL-2.0+
-+/*
-+ * dio-writeback-race -- test direct IO writes with the contents of
-+ * the buffer changed during writeback.
-+ *
-+ * Copyright (C) 2025 SUSE Linux Products GmbH.
-+ */
-+
-+/*
-+ * dio-writeback-race
-+ *
-+ * Compile:
-+ *
-+ *   gcc -Wall -pthread -o dio-writeback-race dio-writeback-race.c
-+ *
-+ * Make sure filesystems with explicit data checksum can handle direct IO
-+ * writes correctly, so that even the contents of the direct IO buffer changes
-+ * during writeback, the fs should still work fine without data checksum mismatch.
-+ * (Normally by falling back to buffer IO to keep the checksum and contents
-+ *  consistent)
-+ *
-+ * Usage:
-+ *
-+ *   dio-writeback-race [-b <buffersize>] [-s <filesize>] <filename>
-+ *
-+ * Where:
-+ *
-+ *   <filename> is the name of the test file to create, if the file exists
-+ *   it will be overwritten.
-+ *
-+ *   <buffersize> is the buffer size for direct IO. Users are responsible to
-+ *   probe the correct direct IO size and alignment requirement.
-+ *   If not specified, the default value will be 4096.
-+ *
-+ *   <filesize> is the total size of the test file. If not aligned to <blocksize>
-+ *   the result file size will be rounded up to <blocksize>.
-+ *   If not specified, the default value will be 64MiB.
-+ */
-+
-+#include <fcntl.h>
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <pthread.h>
-+#include <unistd.h>
-+#include <getopt.h>
-+#include <string.h>
-+#include <errno.h>
-+#include <sys/stat.h>
-+
-+static int fd = -1;
-+static void *buf = NULL;
-+static unsigned long long filesize = 64 * 1024 * 1024;
-+static int blocksize = 4096;
-+
-+const int orig_pattern = 0xff;
-+const int modify_pattern = 0x00;
-+
-+static void *do_io(void *arg)
-+{
-+	ssize_t ret;
-+
-+	ret = write(fd, buf, blocksize);
-+	pthread_exit((void *)ret);
-+}
-+
-+static void *do_modify(void *arg)
-+{
-+	memset(buf, modify_pattern, blocksize);
-+	pthread_exit(NULL);
-+}
-+
-+int main (int argc, char *argv[])
-+{
-+	pthread_t io_thread;
-+	pthread_t modify_thread;
-+	unsigned long long filepos;
-+	int opt;
-+	int ret = -EINVAL;
-+
-+	while ((opt = getopt(argc, argv, "b:s:")) > 0) {
-+		switch (opt) {
-+		case 'b':
-+			blocksize = atoi(optarg);
-+			if (blocksize == 0) {
-+				fprintf(stderr, "invalid blocksize '%s'\n", optarg);
-+				goto error;
-+			}
-+			break;
-+		case 's':
-+			filesize = atoll(optarg);
-+			if (filesize == 0) {
-+				fprintf(stderr, "invalid filesize '%s'\n", optarg);
-+				goto error;
-+			}
-+			break;
-+		default:
-+			fprintf(stderr, "unknown option '%c'\n", opt);
-+			goto error;
-+		}
-+	}
-+	if (optind >= argc) {
-+		fprintf(stderr, "missing argument\n");
-+		goto error;
-+	}
-+	ret = posix_memalign(&buf, blocksize, blocksize);
-+	if (!buf) {
-+		fprintf(stderr, "failed to allocate aligned memory\n");
-+		exit(EXIT_FAILURE);
-+	}
-+	fd = open(argv[optind], O_DIRECT | O_WRONLY | O_CREAT);
-+	if (fd < 0) {
-+		fprintf(stderr, "failed to open file '%s': %m\n", argv[optind]);
-+		goto error;
-+	}
-+
-+	for (filepos = 0; filepos < filesize; filepos += blocksize) {
-+		void *retval = NULL;
-+
-+		memset(buf, orig_pattern, blocksize);
-+		pthread_create(&io_thread, NULL, do_io, NULL);
-+		pthread_create(&modify_thread, NULL, do_modify, NULL);
-+		ret = pthread_join(io_thread, &retval);
-+		if (ret) {
-+			errno = ret;
-+			ret = -ret;
-+			fprintf(stderr, "failed to join io thread: %m\n");
-+			goto error;
-+		}
-+		if ((ssize_t )retval < blocksize) {
-+			ret = -EIO;
-+			fprintf(stderr, "io thread failed\n");
-+			goto error;
-+		}
-+		ret = pthread_join(modify_thread, NULL);
-+		if (ret) {
-+			errno = ret;
-+			ret = -ret;
-+			fprintf(stderr, "failed to join modify thread: %m\n");
-+			goto error;
-+		}
-+	}
-+error:
-+	close(fd);
-+	free(buf);
-+	if (ret < 0)
-+		return EXIT_FAILURE;
-+	return EXIT_SUCCESS;
-+}
-diff --git a/tests/generic/761 b/tests/generic/761
-new file mode 100755
-index 000000000000..9406a4b86f2e
---- /dev/null
-+++ b/tests/generic/761
-@@ -0,0 +1,41 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 761
-+#
-+# Making sure direct IO (O_DIRECT) writes won't cause any data checksum mismatch,
-+# even if the contents of the buffer changes during writeback.
-+#
-+# This is mostly for filesystems with data checksum support, which should fallback
-+# to buffer IO to avoid inconsistency.
-+# For filesystems without data checksum support, nothing needs to be bothered.
-+#
-+
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+_require_scratch
-+_require_odirect
-+_require_test_program dio-writeback-race
-+_fixed_by_kernel_commit XXXXXXXX \
-+	"btrfs: always fallback to buffered write if the inode requires checksum"
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+blocksize=$(_get_file_block_size $SCRATCH_MNT)
-+filesize=$(( 64 * 1024 * 1024))
-+
-+echo "blocksize=$blocksize filesize=$filesize" >> $seqres.full
-+
-+$here/src/dio-writeback-race -b $blocksize -s $filesize $SCRATCH_MNT/foobar
-+
-+# Read out the file, which should trigger checksum verification
-+cat $SCRATCH_MNT/foobar > /dev/null
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/761.out b/tests/generic/761.out
-new file mode 100644
-index 000000000000..72ebba4cb426
---- /dev/null
-+++ b/tests/generic/761.out
-@@ -0,0 +1,2 @@
-+QA output created by 761
-+Silence is golden
--- 
-2.48.1
+ check                 |   89 +++++++++++++++++++++++++------
+ common/config         |    5 +-
+ common/dump           |    1 
+ common/fuzzy          |  102 ++++++++++++++++++++++-------------
+ common/metadump       |   42 +++++++--------
+ common/populate       |   13 +++--
+ common/preamble       |    2 -
+ common/quota          |    2 -
+ common/rc             |  141 ++++++++++++++++++++++++++++++++++++++++++-------
+ common/reflink        |    6 +-
+ configure.ac          |    1 
+ include/builddefs.in  |    3 +
+ ltp/fsstress.c        |    1 
+ ltp/fsx.c             |    8 ++-
+ m4/package_libcdev.m4 |   14 +++++
+ src/nsexec.c          |   18 +++++-
+ src/xfsfind.c         |   14 ++++-
+ tests/generic/019     |    2 -
+ tests/generic/032     |    9 +++
+ tests/generic/050     |    2 -
+ tests/generic/075     |    2 -
+ tests/generic/085     |    2 -
+ tests/generic/093     |    2 -
+ tests/generic/112     |    2 -
+ tests/generic/125     |    2 -
+ tests/generic/127     |   16 +++---
+ tests/generic/128     |    2 -
+ tests/generic/193     |   36 ++++++-------
+ tests/generic/230     |   14 ++---
+ tests/generic/231     |    4 +
+ tests/generic/233     |    2 -
+ tests/generic/270     |   12 ++--
+ tests/generic/310     |    6 +-
+ tests/generic/314     |    2 -
+ tests/generic/327     |    2 -
+ tests/generic/328     |    4 +
+ tests/generic/355     |    2 -
+ tests/generic/361     |    4 +
+ tests/generic/453     |    6 +-
+ tests/generic/455     |    2 -
+ tests/generic/456     |    2 -
+ tests/generic/457     |    2 -
+ tests/generic/469     |    2 -
+ tests/generic/476     |    4 +
+ tests/generic/499     |    2 -
+ tests/generic/504     |   15 +++++
+ tests/generic/511     |    2 -
+ tests/generic/514     |    2 -
+ tests/generic/530     |    6 --
+ tests/generic/531     |    6 --
+ tests/generic/561     |    2 -
+ tests/generic/573     |    2 -
+ tests/generic/590     |    2 -
+ tests/generic/600     |    2 -
+ tests/generic/601     |    2 -
+ tests/generic/603     |   10 ++-
+ tests/generic/642     |    2 -
+ tests/generic/650     |    6 +-
+ tests/generic/673     |    2 -
+ tests/generic/674     |    2 -
+ tests/generic/675     |    2 -
+ tests/generic/680     |    2 -
+ tests/generic/681     |    2 -
+ tests/generic/682     |    2 -
+ tests/generic/683     |    2 -
+ tests/generic/684     |    2 -
+ tests/generic/685     |    2 -
+ tests/generic/686     |    2 -
+ tests/generic/687     |    2 -
+ tests/generic/688     |    2 -
+ tests/generic/691     |    8 +--
+ tests/generic/721     |   10 ++-
+ tests/generic/726     |    2 -
+ tests/generic/727     |    2 -
+ tests/generic/746     |    2 -
+ tests/generic/750     |    2 -
+ tests/generic/759     |    7 +-
+ tests/generic/760     |    7 +-
+ tests/xfs/149         |    2 -
+ tests/xfs/501         |    2 -
+ tests/xfs/502         |    2 -
+ tests/xfs/530         |    2 -
+ tests/xfs/720         |    2 -
+ tests/xfs/795         |    2 -
+ tests/xfs/803         |    2 -
+ tools/run_privatens   |   28 ++++++++++
+ tools/run_setsid      |   22 ++++++++
+ 87 files changed, 546 insertions(+), 252 deletions(-)
+ create mode 100755 tools/run_privatens
+ create mode 100755 tools/run_setsid
 
