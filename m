@@ -1,42 +1,76 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D618C201018;
-	Wed, 12 Feb 2025 21:06:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8927B1FBC8D
+	for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 21:23:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739394372; cv=none; b=Ax9Kr52CXVM+Ki8xU3E8iEFY3YoD6bmHqBN7g+4p8YF2yutTA8ZkJXX7QaSW0xDgDyz8oqG8gHXsPUNi6V/Xb/Vw1DFqQmxbeZHC6V/S6XV9C79pZtu9Q3RqwYkClVqeO1zg3Hmui59Lc+026NcCE5EoVPokImvlmJBNsf+A3m4=
+	t=1739395419; cv=none; b=NKUo3UX0mOhAhJpUwMDNq3t8/UhihslcP8su6kCmhXlr5HY8WRx/xWxnpWE+EAj0pzKDVwbqk70XP/BnuWCGpKR7eIaqAI8imyKYg9Ar3qLqikspE+HbM+12e2PJq9AP8jMuvAH/4L9avvcDK6teV59ML9jJNkKrcaY7BOo5DW8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739394372; c=relaxed/simple;
-	bh=kjvRLO5npKcpJ3A3vEjixEOPis2d3acjOFa6cM0pDA4=;
+	s=arc-20240116; t=1739395419; c=relaxed/simple;
+	bh=Hy2r0elVz1dNaH6kTrp/cVsXskL5R2B2kHanuTCM4kQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=aGwwC4S5jgL0GpH5crleH6tIxgXqhJYU8hVzHkABk0XtdgrlJUxGAoX28C+Sv0j045JMOwVoZKcD7ZN8cIUVG1QBgbUeJXQeMRpJ2qQ2C7eAThnxwSi3qQBw5K5IqQtW2WGTrVCCpZfJhIWn6QTua/nZoICr3aHRkPJT3t+NU48=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Gy+zsUsE; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=HJfE5SC+GBpYa59g9YxtggpxZt50u9heKrx7tD8nFqQWKJah3uDX05b9zlqhKhnX0jESYEW5SbstSbeLodg+qOmYzfvC5O4/06icn53CJnjvKEs7eS46FsDZUwqzXJOhkFdDD4FqxEXoqhhD4T5G7pJAA3A2JdV8vjPQCairktg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=T5vgbcPP; arc=none smtp.client-ip=209.85.214.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Gy+zsUsE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 48A4FC4CEDF;
-	Wed, 12 Feb 2025 21:06:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1739394371;
-	bh=kjvRLO5npKcpJ3A3vEjixEOPis2d3acjOFa6cM0pDA4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Gy+zsUsEBW398zqE8HB0pVujP3WkYZqrrbe862qL6eFsd4hBedbNacFdd/p4FM9Cq
-	 WjuyIqZdixT7h3s08punal2d/snY5H6BwlQgBMALwXkg40hNCWBqQ5KHNT5BSJFKXY
-	 WxlTWKKvlZvhqOrS2AD0iJtaUAKvRV7a051WXPHgx2zLJz4Dc3RkA0g6f19diGFHLF
-	 cxVz3+W9i8iLy1IVvY+2fTiiCubXqPnri7QJfF6ytOXMhm7EyTJ6lBgTGdtz3igH/w
-	 3nkzCTBDHzIXEP+UrzimquhxgqCXOLEG29iKn/etyEaiGdG26DdTTXsZ3xjstqDwzX
-	 Z4fpFucmCneRA==
-Date: Wed, 12 Feb 2025 13:06:10 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="T5vgbcPP"
+Received: by mail-pl1-f169.google.com with SMTP id d9443c01a7336-21f4af4f9ddso1898215ad.1
+        for <fstests@vger.kernel.org>; Wed, 12 Feb 2025 13:23:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1739395417; x=1740000217; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=DnWJ9ncHwe6ht8H8YTq86uwEtd3hGCr8wLzk0vFKje4=;
+        b=T5vgbcPPmcNEygj7xxbAWZJ+tYuxFaYlP68nzftNISpR4yunrRg88SQq+m1iSy/nC0
+         5DiLtsVehx7wf7e7NSdzUjVBRKq9vABcaib41ctk9SNs+fN6fIOGeGLs5GxqSmoqEFnb
+         uEy71h1vGgOFlJoo3dh/ZVi6Tr7EgUEt+Hp/ga+494935OWDnxbRzm/g+reeSIZVQBox
+         df2mmJrs9KX9Pb6im7LBYKbxw5CDxxAHLKOJCfk8L1P4683Om000dUkQtpeDNxLsgCJT
+         mNUvfj237aGbgMV2jsAZHxQCW1mzigTWFxsKb8hjRKz3+PIMXHWtaIhf6XkxMtzs6Gn+
+         xXtA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1739395417; x=1740000217;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DnWJ9ncHwe6ht8H8YTq86uwEtd3hGCr8wLzk0vFKje4=;
+        b=THUbO6SKQs6bDzRuOqkYIgr8U8AwPDacYOUdDJBeP5xCcFq5nERZb/zr4lPgwqGMHg
+         njTazuziwV5CyQVPkVW1JtH3QNixMxe2w1jnsdAxBLm1xX+XAEtuEF+pdalKXxxJ2w3y
+         P9Ya+Zk/tqLdJmQHSm5TCCe3zsdOKJbnNdwCRR4BtmyCUyhVVhFcdk0tIYKLzEhU7aUp
+         bYVV3AgktyTAgoTXmMfQKFlDePGB/Zx3JH73rr7VPRUnuuVZe7cyLQbfIhbMsQT8Uy6l
+         jllQw+xI62+eAwQT6eY/EDExx55vb+lCw3wXngs9TKXzDr+wuW3bYwT+Ni/6PMBYV8Hm
+         HPkA==
+X-Gm-Message-State: AOJu0Yy/u65/QRB8pEOM1Q0mKmU8ZI6Y7q7TKpSUGSXx4w74PpJl2hkG
+	ENGwNoB7cKxsffAVPqbmfe1HksRmv9ghseEc/yOYNi8I/Sm+2IGVd1ykPIkfSkLsDcGpkTK2PjX
+	g
+X-Gm-Gg: ASbGncurIsWXm+uU8vjVPsba/M5jsaPpnBaSBJB/kiK/GfDhrBd5VutPDr8G6SXKUUL
+	Xao3dI2BmsNvRQAZlRtqruhJU+rHiJVkmUQYPXC1ngp1r2vuzjo4H+N3jyxwv16GmFg4g923vad
+	yPkH9kq/ARI/8IiuQ0zlYtXKETZbrQbIk2apk9o1UGXdyuwKJZQ0pCgIuHQqP73IHkuR8e3HaC4
+	nerzKfmk3VNSBmX6hCtMr8UrFKomdAcrhE3DTRpfexwmQ36+tj9O46Zw6y8dxnPk6P/0KMc+ztk
+	nC8QqF9B4D14W+ye1VvJAm+qX0nsGA/f5zP+IaJDx3hlF6KC6DKfFV/pqdODGBWtVaQ=
+X-Google-Smtp-Source: AGHT+IEYqdmFI/8uZqwemYkPrJk0UIjGmcrIHb9Mpfb2ciK6bkr9nytSyUNC0C4qGkZnmqnJZ6k5rw==
+X-Received: by 2002:a17:902:ef11:b0:21f:5cd8:c52 with SMTP id d9443c01a7336-220d213e655mr13788095ad.53.1739395416777;
+        Wed, 12 Feb 2025 13:23:36 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d5363848sm118065ad.55.2025.02.12.13.23.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Feb 2025 13:23:36 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tiKCi-00000000RUB-3uBx;
+	Thu, 13 Feb 2025 08:23:32 +1100
+Date: Thu, 13 Feb 2025 08:23:32 +1100
+From: Dave Chinner <david@fromorbit.com>
 To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
 Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
 	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, zlang@kernel.org
-Subject: Re: [PATCH v1 1/3] xfs/539: Skip noattr2 remount option on v5
- filesystems
-Message-ID: <20250212210610.GY21799@frogsfrogsfrogs>
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH v1 2/3] common/xfs: Add a new helper function to check v5
+ XFS
+Message-ID: <Z60RVLPGwpucOgRx@dread.disaster.area>
 References: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
- <8704e5bd46d9f8dc37cec2781104704fa7213aa3.1739363803.git.nirjhar.roy.lists@gmail.com>
+ <61a7e3f25621548ec3ef795a3cd0724e32afb647.1739363803.git.nirjhar.roy.lists@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,76 +79,54 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8704e5bd46d9f8dc37cec2781104704fa7213aa3.1739363803.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <61a7e3f25621548ec3ef795a3cd0724e32afb647.1739363803.git.nirjhar.roy.lists@gmail.com>
 
-On Wed, Feb 12, 2025 at 12:39:56PM +0000, Nirjhar Roy (IBM) wrote:
-> This test is to verify that repeated warnings are not printed
-> for default options (attr2, noikeep) and warnings are
-> printed for non default options (noattr2, ikeep). Remount
-> with noattr2 fails on a v5 filesystem, so skip the mount option.
+On Wed, Feb 12, 2025 at 12:39:57PM +0000, Nirjhar Roy (IBM) wrote:
+> This commit adds a new helper to function to check that we can
+> create a V5 XFS filesystem in the scratch device
 > 
 > Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
 > ---
->  tests/xfs/539 | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
+>  common/xfs | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
 > 
-> diff --git a/tests/xfs/539 b/tests/xfs/539
-> index b9bb7cc1..58eead67 100755
-> --- a/tests/xfs/539
-> +++ b/tests/xfs/539
-> @@ -42,7 +42,8 @@ echo "Silence is golden."
+> diff --git a/common/xfs b/common/xfs
+> index 0417a40a..cc0a62e4 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -468,6 +468,19 @@ _require_scratch_xfs_crc()
+>  	_scratch_unmount
+>  }
 >  
->  # Skip old kernels that did not print the warning yet
->  log_tag
-> -_scratch_mkfs > $seqres.full 2>&1
-> +is_v5=true
-> +_scratch_mkfs |& grep -q "crc=0" && is_v5=false >> $seqres.full 2>&1
+> +# this test requires the xfs kernel support crc feature on scratch device
+> +#
+> +_require_scratch_xfs_v5()
+> +{
+> +	_require_scratch_xfs_crc
+> +	_scratch_mkfs_xfs -m crc=1 > $seqres.full 2>&1 ||
+> +		_notrun "v5 filesystem isn't supported by the kernel"
 
-Usually we do this with something more like:
+This is testing mkfs.xfs, not the kernel.
 
-_scratch_mkfs | _filter_mkfs >>$seqres.full 2>$tmp.mkfs
-. $tmp.mkfs
+We already have a helper for that: _scratch_mkfs_xfs_supported()
 
-if [ $_fs_has_crcs -eq 1 ]; then
-	# v5 stuff
-else
-	# v4 stuff
-endif
+> +	_try_scratch_mount >/dev/null 2>&1
+> +	ret="$?"
+> +	_scratch_unmount
+> +	[[ "$ret" != "0" ]] && _notrun "couldn't mount a V5 xfs filesystem"
+> +}
 
->  _scratch_mount -o attr2
->  _scratch_unmount
->  check_dmesg_for_since_tag "XFS: attr2 mount option is deprecated" || \
-> @@ -60,8 +61,13 @@ for VAR in {attr2,noikeep}; do
->  		echo "Should not be able to find deprecation warning for $VAR"
->  done
->  for VAR in {noattr2,ikeep}; do
-> +	if [[ "$VAR" == "noattr2" ]] && $is_v5; then
-> +		echo "remount with noattr2 will fail in v5 filesystem. Skip" \
-> +			>> $seqres.full
-> +		continue
+This doesn't actually check that the mounted filesystem is a v5
+format filesystem. That's what _require_scratch_xfs_crc() does.
 
-/me wonders if it'd be cleaner to do:
+Hence I don't see what this adds over _require_scratch_xfs_crc(),
+which does the right thing on any mkfs.xfs released in the past
+decade (i.e. when we changed mkfs.xfs to create v5 filesystems by
+default). 
 
-VARS=(ikeep)
-test $_fs_has_crcs -eq 0 && VARS+=(noattr2)
+What test environment doesn't _require_scratch_xfs_crc() work for?
 
-for VAR in "${VARS[@]}"; do
-	...
-done
-
-> +	fi
->  	log_tag
-> -	_scratch_remount $VAR
-> +    _scratch_remount $VAR >> $seqres.full 2>&1
-
-Nit: Indentation.
-
---D
-
->  	check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated" || \
->  		echo "Could not find deprecation warning for $VAR"
->  done
-> -- 
-> 2.34.1
-> 
-> 
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
