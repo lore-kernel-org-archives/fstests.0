@@ -1,155 +1,213 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80F2F1FFC59
-	for <fstests@vger.kernel.org>; Thu, 13 Feb 2025 20:50:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF9EB269825
+	for <fstests@vger.kernel.org>; Thu, 13 Feb 2025 21:49:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739479847; cv=none; b=grPqq9yTHIdnmNIgsXQiczQPbcASh3xmxKUya5MZje2Wggdb5yrnTb8lhenBEStixFWR9PiItNnF/Veytr/nWab1MOWYYS84Pqra98R38ueb/g9Z8/wR9dmDAxPuo/ylHOPynCZL85PSKeVSyH8qwrpwjDiqxB0dlGi2fcjmqZA=
+	t=1739483377; cv=none; b=as1VNAUtLXTaMd1iB1+QiYsBBxcnwr+wM79zYLVqvNW98XNykgkso6zTXGUezDMsRIg6ENc1N8ZPFl/ZmJJKNKEdA9nVotavyeKFb/JoX1ihvVJo/jpeiqLRq7J6xPp/JU/fszkp8NT3749hl0YzdSqCe6OJOHsE4dBNN5Mgczg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739479847; c=relaxed/simple;
-	bh=9EaGDRxDgdHkB68AiPqOZg8AaLE07Pw8+S9B+CHtr3g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=tKx2ZQPixNOt3OmCHy1Ihb55aoU6WIPIb5MrJ9xzLw85IXuRiDZXYDkxHQvch2SUcQUddgVHaHleMN/bendjlxj4s6B1U/T5o06XJfi8UEZbR2NXJzqq+vfALrihAfaVL9z7CXtnWddtYz7t5mlvErcizpHjsEcaphrR/C1sHps=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=DNmVs/Az; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1739483377; c=relaxed/simple;
+	bh=KszPgrrhK+wd0rXnmnM0yKY4WgHtDszkBghHxkvkPic=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=cipNOA/4Nf9Iw0/kC0CGeXuZzIoGaNpdQrozWPXmEzSCsXSbY8/s6OU4tcqMKgdYBEoMnT/tIHr842Vup2ZyCWPtv77dlM0o2/C4xEbrRPw6VXo0i6WANvZXuae1Kki9M0gbRmQLkn1utVIvLHFd0+AOr3psGktA7qP0KMdMlpQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=r5oLR4Pc; arc=none smtp.client-ip=209.85.216.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DNmVs/Az"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1739479844;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=X03XE6KPkUO14E6f/81I6hW5Szx+mA6rao9rMbGMQuk=;
-	b=DNmVs/AzkF2I4ens/EPIGEKzWqPh/ZnqbEviZWGdTsJJqPkL3OW75hOPdHeP02aJCY6BvY
-	GiEnnfssE/7pgXt7g/0XlKyvrqgqXL1CyqwC+1WGNAMNJbO5E6znpYmX+lZxLz/8s2of0T
-	yLT67yulILmx0Xad5BXAY++WeX3B7uI=
-Received: from mail-io1-f72.google.com (mail-io1-f72.google.com
- [209.85.166.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-385-uO3C0HWPMCqLSYcFGMV_Cg-1; Thu, 13 Feb 2025 15:50:43 -0500
-X-MC-Unique: uO3C0HWPMCqLSYcFGMV_Cg-1
-X-Mimecast-MFC-AGG-ID: uO3C0HWPMCqLSYcFGMV_Cg
-Received: by mail-io1-f72.google.com with SMTP id ca18e2360f4ac-855635c9d0eso94517939f.0
-        for <fstests@vger.kernel.org>; Thu, 13 Feb 2025 12:50:43 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="r5oLR4Pc"
+Received: by mail-pj1-f47.google.com with SMTP id 98e67ed59e1d1-2fc1843495eso1507238a91.1
+        for <fstests@vger.kernel.org>; Thu, 13 Feb 2025 13:49:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1739483375; x=1740088175; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=VEDH/5BvKu8Lhm+jqz8ZDB2l0Ph7VFkq/UwmsmrA3c4=;
+        b=r5oLR4PczweTkeGzIMsJpPcW83WIBZr1UTUWRSYJCQQ9PXqRvNM0IUwty2hMcKL8JK
+         OurQ+Ing+xvXqizy3rLxCNciFee8D5bYb7MG6WjxccnutFNYvorcRFOQBWqihMnbs/xz
+         vqKz77GrvNpOhu0Aq/i6AFo7evyqfbGKQ7ItZncn2aJzJscaGu0fV13uF2YIC/nYvkZ5
+         fz9V+5W5Z6EuUTJQ0fm6TWv3s+F/D51W6boPEwdOu3/PtvpDbHpWQHX4UcuGtTqvtnuQ
+         63VSfpd0OgOoh9hunixURS1pGWJEdKKnG7COKMw8pHEdKN0EAFNXBW8YrdVbGIyaXrpU
+         Ji6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739479842; x=1740084642;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=X03XE6KPkUO14E6f/81I6hW5Szx+mA6rao9rMbGMQuk=;
-        b=bWphtMZzJsiWBNW60+wzJOHDVzTwuG+PQapNyuFhC5rKXdL3StI6guuIRk1zy/jwxb
-         50oTcnOh7uepnErAgfSUJZ1yxiEeG84MZ3eCSmRzk+0k3nW9dSr2qJVmvHk/M14IMgLO
-         /OCORUNwCsWHk3JUEFffLL9FBKHDulbnD41mjXtxo8Ckk3vl5t68svoS0ahhZ9RXuTQE
-         vIKVO1NoMzEOisxCGTAVzICGYUvZsqWfyTK+LgRppKYBiQX9JmZkoBNk0hFAzo73mnL0
-         3aQluBYwjATKHOZY3pR/JMaXVLlBLdHZWW+uMxLdvaCufKlKwii4sOYIkR4Nji81f6NJ
-         qM1g==
-X-Gm-Message-State: AOJu0Yxo/SUR0LVv5J8U7vZk9xEYq0T5H9pQ1aTRRXoVV5GI711JjxDn
-	GFl/vARQBVw7ouzAEl7zBXrkLvRlNEJpLYxK0/sVm5p/u6aXUpWKlJAU/GCEqE3y+KPoOGfmNQ6
-	nyjeVSNMpahQFXOrS72I6VGCPNZDLMlxYgnVTMDe46gvjO4gELGLIYTfXOA93bTNy6A==
-X-Gm-Gg: ASbGnctR/tPfRhzQJR48VFhDNOnjfoomU7uTa4/hVmNkc+foF6nDiP+EaRhi9arPSyw
-	C7usH25qbxsdXMOX+fXpiHq/7kzAWcknCzqLPi8SRV79GVXQEr6NdkooneiMJJd8XgVz8oVkQ01
-	HOYpmWTyogq+6/reWrBEmJDZCLzoawq2hdhC8CtyQr1odIXiwJgXpDi7IISwbAvdLp9kkYUAMQX
-	7sJjD0BVRbdG9ULEvcWghU1pwXiGNgZF/l2D219kKJs9BPWstNKsCBKvWpAGp9UInDhA7Oj3BOl
-	nq40YJCAZsZ10OFGVzI+Gmq7vdqLmGrb3wvi6BAxPn0M
-X-Received: by 2002:a05:6e02:20cc:b0:3cf:f844:68eb with SMTP id e9e14a558f8ab-3d17bdff4afmr78549435ab.4.1739479842203;
-        Thu, 13 Feb 2025 12:50:42 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGDMe7E1JVdXDBUr6XZRz5GyntXhpvAi3zXJ6MAgZ2nvCsKmDeV88O+2d3l8BxyDsAiQ9639g==
-X-Received: by 2002:a05:6e02:20cc:b0:3cf:f844:68eb with SMTP id e9e14a558f8ab-3d17bdff4afmr78549375ab.4.1739479841888;
-        Thu, 13 Feb 2025 12:50:41 -0800 (PST)
-Received: from [10.0.0.22] (97-116-166-216.mpls.qwest.net. [97.116.166.216])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4ed28149500sm494082173.2.2025.02.13.12.50.41
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Feb 2025 12:50:41 -0800 (PST)
-Message-ID: <e2240afa-2335-4462-81db-410d0b10737f@redhat.com>
-Date: Thu, 13 Feb 2025 14:50:40 -0600
+        d=1e100.net; s=20230601; t=1739483375; x=1740088175;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VEDH/5BvKu8Lhm+jqz8ZDB2l0Ph7VFkq/UwmsmrA3c4=;
+        b=bAd4Zkjbjogw65lv1bKz3nPHE9vYXPyT0B8yorHjyO+zgn5gx1PzPeaWR5EqfeM9w0
+         oZP4MPYPp3cGCtZM1RWFgJtpiSW7s/YoKxYgKnurjEu7VWrShiy86I7GTIOyAB0RNwxY
+         fW8gh1pnCkG9KpwNdjNLh1f5x2uZUTkI5/wRFQfcLrkBR1zv0Owi1/2NgnCkCzO5o9jc
+         5xazGLs29zGeOH5rFKOufbGuI4SNY8xjy6BYU8eaw+suR/QRRDlNno4sQ4CesnJVN7bj
+         w4JqjmnUeayLPm0npIwAoH9EKU8qpzLBWmKlVG9t8V1jKI2y1fbVxCSR/pHZtuBVeIHB
+         sPqA==
+X-Gm-Message-State: AOJu0YxgeefS5+24QQurLAcsPKymARrjmMAgHcbN0zYgjXu6tVQDiHdw
+	Sv2tgV1O1PsVce8U1SKaoLB9rd5kSjgGOP4KmbwoHyRbpklRCs4fqeV5Jg2mlW1B1Te6lEmot5v
+	a
+X-Gm-Gg: ASbGncsLCZn0r6bQUr5lsdv208aDu7RscTbumRT5xN+aQldz4o3ASDp5JxA7WzgNBVQ
+	lXmoeirT5zYOJ3OeTWxUwUltKDqPeszJepxije+oDiElLHQOWvVKceYnxsJJNnamV0Y1F4wOgYa
+	NSK6FEc7sImZlxYCENqTXnCrediGz/EmZ/67crF8k0231WOicm+A1wvojFIep7RD3UbRiG1c/pY
+	/zWUj8CuMufxbzpr3+NQDENiCWlO6C7Rgu4+sSej0n7a+POAO1KQYWJaWAOd1R+74/ThyBMqfE2
+	vtAhnKQzo14QUn7O1VZobuXnAg7yrH5YiVA07msNquYTXtET1rVk5Js2MjVh1ZUpWLk=
+X-Google-Smtp-Source: AGHT+IGu3LA2+kviLvU8k4d19E79vb/f8ZCZw06nOlk4KtTHwgy+U6i2eoIBD3cIaYDOp5otljisbQ==
+X-Received: by 2002:a17:90b:258e:b0:2f8:34df:5652 with SMTP id 98e67ed59e1d1-2fbf9072b46mr11048591a91.21.1739483375252;
+        Thu, 13 Feb 2025 13:49:35 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fbf999b60dsm3791784a91.39.2025.02.13.13.49.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Feb 2025 13:49:34 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tih5O-00000000s8S-1WC3;
+	Fri, 14 Feb 2025 08:49:30 +1100
+Date: Fri, 14 Feb 2025 08:49:30 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
+	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [PATCH v1 3/3] xfs: Add a testcase to check remount with noattr2
+ on a v5 xfs
+Message-ID: <Z65o6nWxT00MaUrW@dread.disaster.area>
+References: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
+ <de61a54dcf5f7240d971150cb51faf0038d3d835.1739363803.git.nirjhar.roy.lists@gmail.com>
+ <Z60W2U8raqzRKYdy@dread.disaster.area>
+ <b43e4cd9-d8aa-4cc0-a5ff-35f2e0553682@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: test zero-byte writes to new file
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- Namjae Jeon <linkinjeon@kernel.org>
-References: <b4d76883-e58b-4db3-b7e4-7ddeb5ec7f42@redhat.com>
- <20250213195129.GZ21799@frogsfrogsfrogs>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@redhat.com>
-In-Reply-To: <20250213195129.GZ21799@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b43e4cd9-d8aa-4cc0-a5ff-35f2e0553682@gmail.com>
 
-On 2/13/25 1:51 PM, Darrick J. Wong wrote:
-> On Thu, Feb 13, 2025 at 12:06:24PM -0600, Eric Sandeen wrote:
->> A bug was recently fixed in exfat where attempting to do a zero-byte
->> write would yield -EFAULT; test for that here.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>
->> diff --git a/tests/generic/761 b/tests/generic/761
->> new file mode 100755
->> index 00000000..e933eb83
->> --- /dev/null
->> +++ b/tests/generic/761
->> @@ -0,0 +1,28 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
->> +#
->> +# FS QA Test 761
->> +#
->> +# test zero-byte writes
->> +#
->> +# exfat had a regression where a zero-byte write to a file would
->> +# yield -EfAULT. Should work on all filesystems - write should
->> +# succeed and the zero-byte file should be created.
->> +#
->> +. ./common/preamble
->> +_begin_fstest auto quick
->> +
->> +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
->> +	"exfat: short-circuit zero-byte writes in exfat_file_write_iter"
->> +
->> +# Modify as appropriate.
->> +_require_test
->> +
->> +rm -f $TEST_DIR/testfile.$seq
->> +$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq
->> +test -f $TEST_DIR/testfile.$seq || _fail "file not created"
+On Thu, Feb 13, 2025 at 03:30:50PM +0530, Nirjhar Roy (IBM) wrote:
 > 
-> When does the file not get created?
-
-In some unknown error case? ;)
-There's probably no reason for that test, though of course
-it's still expected to pass.
-
-In the various discussions of the exfat bug scattered around
-the internet people kept pointing out that "well, the file does
-get created" so I probably had that on my mind.
-
--Eric
-
-> --D
+> On 2/13/25 03:17, Dave Chinner wrote:
+> > On Wed, Feb 12, 2025 at 12:39:58PM +0000, Nirjhar Roy (IBM) wrote:
+> > > This testcase reproduces the following bug:
+> > > Bug:
+> > > mount -o remount,noattr2 <device> <mount_point> succeeds
+> > > unexpectedly on a v5 xfs when CONFIG_XFS_SUPPORT_V4 is set.
+> > AFAICT, this is expected behaviour. Remount intentionally ignores
+> > options that cannot be changed.
+> > 
+> > > Ideally the above mount command should always fail with a v5 xfs
+> > > filesystem irrespective of whether CONFIG_XFS_SUPPORT_V4 is set
+> > > or not.
+> > No, we cannot fail remount when invalid options are passed to the
+> > kernel by the mount command for historical reasons. i.e. the mount
+> > command has historically passed invalid options to the kernel on
+> > remount, but expects the kernel to apply just the new options that
+> > they understand and ignore the rest without error.
+> > 
+> > i.e. to keep compatibility with older userspace, we cannot fail a
+> > remount because userspace passed an option the kernel does not
+> > understand or cannot change.
+> > 
+> > Hence, in this case, XFS emits a deprecation warning for the noattr2
+> > mount option on remount (because it is understood), then ignores
+> > because it it isn't a valid option that remount can change.
 > 
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/761.out b/tests/generic/761.out
->> new file mode 100644
->> index 00000000..72ebba4c
->> --- /dev/null
->> +++ b/tests/generic/761.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 761
->> +Silence is golden
->>
->>
-> 
+> Thank you, Dave, for the background. This was really helpful. So just to
+> confirm the behavior of mount - remount with noattr2 (or any other invalid
+> option) should always pass irrespective of whether CONFIG_XFS_SUPPORT_V4 is
+> set or not, correct?
 
+Not necessarily.
+
+It depends on whether the filesystem considers it a known option or
+not. noattr2 is a known option, so if it is invalid to use it as a
+remount option, the remount should always fail.
+
+If the option is -unknown-, then the behaviour of remount is largely
+dependent on filesystem implementation -and- what mount syscall
+interface is being used by userspace.
+
+e.g. a modern mount binary using
+fsconfig(2) allows the kernel to reject unknown options before the
+filesystem is remounted. However, we cannot do that with the
+mount(2) interface because of the historic behaviour of the mount
+binary (see the comment above xfs_fs_reconfigure() about this).
+
+Hence with a modern mount binary using the fsconfig(2) interface,
+the kernel can actually reject bad/unknown mount options without
+breaking anything. i.e. kernel behaviour is dependent on userspace
+implementation...
+
+> This is the behavior that I have observed with CONFIG_XFS_SUPPORT_V4=n on v5
+> xfs:
+> 
+> $ mount -o "remount,noattr2" /dev/loop0 /mnt1/test
+> mount: /mnt1/test: mount point not mounted or bad option.
+> $ echo "$?"
+> 32
+
+This is not useful in itself because of all the above possibilities.
+i.e. What generated that error?
+
+Was if from the mount binary, or the kernel?  What syscall is mount
+using - strace output will tell us if it is fsconfig(2) or mount(2)
+and what is being passed to the kernel.  What does dmesg say - did
+the kernel parse the option and then fail, or something else?
+
+i.e. this is actually really hard to write a kernel and userspace
+version agnostic regression test for.
+
+> With this test, I am also parallelly working on a kernel fix to make the
+> behavior of remount with noattr2 same irrespective of the
+> CONFIG_XFS_SUPPORT_V4's value, and I was under the impression that it should
+> always fail. But, it seems like it should always pass (silently ignoring the
+> invalid mount options) and the failure when CONFIG_XFS_SUPPORT_V4=n is a
+> bug. Is my understanding correct?
+
+As per above, the behaviour we expose to userspace is actually
+dependent on the syscall interface the mount is using.
+
+That said, I still don't see why CONFIG_XFS_SUPPORT_V4 would change
+how we parse and process noattr2.....
+
+.... Ohhh.
+
+The new xfs_mount being used for reconfiguring the
+superblock on remount doesn't have the superblock feature
+flags initialised. attr2 is defined as:
+
+__XFS_ADD_V4_FEAT(attr2, ATTR2)
+
+Which means if CONFIG_XFS_SUPPORT_V4=n it will always return true.
+
+However, if CONFIG_XFS_SUPPORT_V4=y, then it checks for the ATTR2
+feature flag in the xfs_mount.
+
+Hence when we are validating the noattr2 flag in
+xfs_fs_validate_params(), this check:
+
+	/*                                                                       
+         * We have not read the superblock at this point, so only the attr2      
+         * mount option can set the attr2 feature by this stage.                 
+         */                                                                      
+        if (xfs_has_attr2(mp) && xfs_has_noattr2(mp)) {                          
+                xfs_warn(mp, "attr2 and noattr2 cannot both be specified.");     
+                return -EINVAL;                                                  
+        }
+
+Never triggers on remount when CONFIG_XFS_SUPPORT_V4=y because
+xfs_has_attr2(mp) is always false.  OTOH, when
+CONFIG_XFS_SUPPORT_V4=n, xfs_has_attr2(mp) is always true because of
+the __XFS_ADD_V4_FEAT() macro implementation, and so now it rejects
+the noattr2 mount option because it isn't valid on a v5 filesystem.
+
+Ok, so CONFIG_XFS_SUPPORT_V4=n is the correct behaviour (known mount
+option, invalid configuration being asked for), and it is the
+CONFIG_XFS_SUPPORT_V4=y behaviour that is broken.
+
+This likely has been broken since the mount option parsing was
+first changed to use the fscontext interfaces....
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
