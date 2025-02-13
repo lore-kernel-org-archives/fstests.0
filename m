@@ -1,91 +1,75 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C5F325D548;
-	Wed, 12 Feb 2025 23:35:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B6954206F05;
+	Thu, 13 Feb 2025 05:49:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739403326; cv=none; b=R/omQTuL9PT3dYEW856op3S8DgNnl2FAdWock9/Qz1kAcxjkeCLUHgaNbd37Anplgd6jY3HOt/wrX06Cb7NO7Wtourv/rN39Dj6EF5/ojzNtPrmT450p1kue87ry3cV9vkVc66f7nwBZXGFGO8P5iwtAJU10XuEEdyby/X8JgaM=
+	t=1739425799; cv=none; b=AtQUevp1aHs2mc6He4v4F87VuKGiw3dqGZmEcQuaQE4aO9rsNSf1OrNsH0R8Y1EAFtfJAkUZOSGEi7DyxzOt4jAiQa72vdUfmCpYrUN/58lyLmt8EqfwTcEi0rORjItvqqKfYf15hr/5HnjytL66Kn9ejGWxjy8YaQZ2+wi0xKE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739403326; c=relaxed/simple;
-	bh=g2U64/jen+A/FU39yqHRTgfvxFrRvv9Tg0mJK9PBfV8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=DJrIEL9qbjEkGhwXc8kxRlIpQc5+Td+TxLERv/1qqpVSBYwZ0KheQIAezhHxwbbCVOnbng2YR1bFpMKpcHs7UkhXTiHoMfmhalXD+f5aQh8IZl20fiy1slFdVmbHEpvWcq/t3veM/Yayt0eJ6JbzBCHL58/X4psmbcjOqr0aybk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Wo1Qsf5M; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1739425799; c=relaxed/simple;
+	bh=aTK5VATF++OZ78F6LSTaDZsOYjkDpWS/+3qWodgJS3w=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mgvvgEc8pIVtX2xNywpRJVPUaax1JLM6TJf+KlHLO2+P9OWgdMgs20iGfeu2EV8wPYbweYKT4Mj6ZZ401hTCfLbcV6oY6I+UkvcAhOUzil+FCb6kAHt1jrJvyok33yF1fuTifct75tCazwi6Q6WWscJGmZHd67nebeM/+jaicfQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=OBKJMKJe; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Wo1Qsf5M"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E613FC4CEE5;
-	Wed, 12 Feb 2025 23:35:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1739403326;
-	bh=g2U64/jen+A/FU39yqHRTgfvxFrRvv9Tg0mJK9PBfV8=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=Wo1Qsf5MkTqAT689eA2yGZ+BP7tD647XWNF3g9VpZwIGexMp2p9RPcIkHZMcNzgh0
-	 9GQLOEZ5M3npeqb6SLn/08GQZw+befQX3tXRY9u6XP2lGQVz4UZLbQcNlnsrLzG3tS
-	 kqYR3xkdWctsvkBCBgj1aY5dyVCxsc1PZAm98qYAGtnUxBnnKWzyXA8zZfd2pMdcem
-	 t7ZrolEIBhZ61yKVRSB7ZpySTXEKRqfYoWvhHhuEH/FrZf8ybAdebjzPf7xeB9GxJq
-	 kStmZhiscVGu8wUsrnPpxr/6Tuf8gY8PRTZEdglwX6b0tctp47+RN3Ad8pqbpG9bK0
-	 MCYHDcNkfydSA==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>,
-	David Sterba <dsterba@suse.com>
-Subject: [PATCH v2 8/8] btrfs: skip tests that exercise compression property when using nodatasum
-Date: Wed, 12 Feb 2025 23:35:06 +0000
-Message-ID: <bba353ff8e99673a70f79ede58951f77d004bb22.1739403114.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <cover.1739403114.git.fdmanana@suse.com>
-References: <cover.1739403114.git.fdmanana@suse.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="OBKJMKJe"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=lk7TBzZqvAfCNrl4R7OE8KOuo++lHMcoT34T0q90xw8=; b=OBKJMKJezrY6LhNV4vomv4cSer
+	GcuCOmky3ZsMPddPz4m7ma+MpVCyoGr7crA6o62OhqaqQb2fjSzIgtRbHmYVKduvny3VAm8Ch5OFt
+	+gRdldtDSPVjycDYZmgWn+CM/gy8PrFvUzIoGYsyfqcsgVkmkp2ENjMik3rW8f6yJuNvT2gEDiDDx
+	emyDklA0cd9cxluO74yMXnkgkuZ0kMN9dB2CcSylOleAS+pbZ/qugDCNhoAtB6dGjz92NcRa7/mo/
+	9eGQxx6kdJ/F92EedRbtYz1h4jbKLC2UbeQ7fu6k7oynaZmq03OJxGpa25QI2K4lQ6kLTkXMDGUtT
+	kBsMA8vA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1tiS6m-00000009qCu-423N;
+	Thu, 13 Feb 2025 05:49:56 +0000
+Date: Wed, 12 Feb 2025 21:49:56 -0800
+From: Christoph Hellwig <hch@infradead.org>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org,
+	Christoph Hellwig <hch@infradead.org>,
+	David Disseldorp <ddiss@suse.de>, Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v3] fstests: add a generic test to verify direct IO
+ writes with buffer contents change
+Message-ID: <Z62IBLnGOb8C2A1K@infradead.org>
+References: <93410edfde1cb0405c133cca49a8291dcdb90e2e.1739329404.git.wqu@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <93410edfde1cb0405c133cca49a8291dcdb90e2e.1739329404.git.wqu@suse.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Feb 12, 2025 at 01:34:06PM +1030, Qu Wenruo wrote:
+> The test case passes on the following fses:
+> - ext4
+> - xfs
+> - btrfs with "nodatasum" mount option
+>   No data checksum to bother.
+> 
+> - btrfs with default "datasum" mount option and the fix "btrfs: always
+>   fallback to buffered write if the inode requires checksum"
+>   This makes btrfs to fallback on buffered IO so the contents won't
+>   change during writeback of page cache.
+> 
+> And fails on the following fses:
+> 
+> - btrfs with default "datasum" mount option and without the fix
+>   Expected.
 
-A couple tests exercise the compression property and that fails when an
-inode has the nodatasum flag set. So skip the tests when running under the
-nodatasum mount option.
+It also fails (as expected) for XFS on a T10-DIF capable device.
 
-Reviewed-by: David Sterba <dsterba@suse.com>
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/048 | 3 +++
- tests/btrfs/059 | 3 +++
- 2 files changed, 6 insertions(+)
+The test looks good to me:
 
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index a38c3951..3676debe 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -28,6 +28,9 @@ _require_scratch
- _require_btrfs_command "property"
- _require_btrfs_command inspect-internal dump-super
- _require_btrfs_no_nodatacow
-+# We exercise setting compression through properties, and that fails on inodes
-+# with nodatasum, so skip when mounting with nodatasum.
-+_require_btrfs_no_nodatasum
- 
- send_files_dir=$TEST_DIR/btrfs-test-$seq
- 
-diff --git a/tests/btrfs/059 b/tests/btrfs/059
-index 227ebb14..3da6a5a9 100755
---- a/tests/btrfs/059
-+++ b/tests/btrfs/059
-@@ -26,6 +26,9 @@ _require_test
- _require_scratch
- _require_btrfs_command "property"
- _require_btrfs_no_nodatacow
-+# We exercise setting compression through properties, and that fails on inodes
-+# with nodatasum, so skip when mounting with nodatasum.
-+_require_btrfs_no_nodatasum
- 
- _scratch_mkfs >> $seqres.full 2>&1
- _scratch_mount
--- 
-2.45.2
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
