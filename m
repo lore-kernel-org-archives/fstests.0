@@ -1,233 +1,129 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26AE9101DE
-	for <fstests@vger.kernel.org>; Tue, 18 Feb 2025 03:51:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88EAB157E6B
+	for <fstests@vger.kernel.org>; Tue, 18 Feb 2025 04:21:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739850682; cv=none; b=dHEfITRHmlmO1HIM7YnuWWkakIygOqQZGVDkSMhdRHDdzHU4qSl0zuJj1XzRXwnaqZIaJBek3OKodQ8h2/PK2+magiShM/prqmdrql38n7k77owQpzEwkmo8rVMRotYdUD5Q/DK2dXnUWNDs8PGEqzZKHE9cWoW65lv+zfrz83U=
+	t=1739852499; cv=none; b=KUasc2dqouSffG+Xxsn3JvPZgqnWpq5sqwYkffH2QMMC6xP2ookar00pslMvRHd44UjpcAgKNVZe4jPqpTjuFY55I9Ss+F5Z3aum/vgHbBRs5x+GuhEtYstTuuuiD2nRJIEGrVGNUjW1M/WsKchhpTgW080odbo/2gXivX4nL1A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739850682; c=relaxed/simple;
-	bh=FvgKXlSU1t/pJyHHnTn4rTAIkocrayihITMD7T9bGUs=;
+	s=arc-20240116; t=1739852499; c=relaxed/simple;
+	bh=7jRmcG+bZAHaZHPDN/sTKl4F764EBuHOAfRb/wsyEhg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=csGwGZEtsHkz8aC/mbEykOKEZrevD7aNpG7AeZhtYODYs88P74lAiQ23DWALFpNSrK/1FG2PLQU4hR7Qfk7kY6X2wAl2s8Q3PSaeQsr64tPRQSwLKi+VHREXc9XkdZaZDEMMnbpZEZmN+QjMHVEp5hPeRWq3tLNtEiY9P2ABuYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=JwCo3PpE; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=uiyD15JAqwj9dHWlQ8iIMYBLgz0JDCNoen9g4ukq6aHA6AxfmH8k+KpQUq0cdwZL+hbe8jyD4y0Z/P0YuOKe8VQOwq4X3Ev+k1pJON9nmkzuPGmzDMXENeIUdvSYEToskBVgcLcJbS1itrkUQAj/zfZXnM9CGwAqlcPR6s1iihg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LCvUVeWW; arc=none smtp.client-ip=170.10.133.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="JwCo3PpE"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LCvUVeWW"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1739850679;
+	s=mimecast20190719; t=1739852496;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=C1B0qnhCCL2r66FtfTHMj6MIYs0gWEo3WbaXK6R5xxQ=;
-	b=JwCo3PpECW337CPml0ou7dAQTTOk5PoD9wbr09+6Ag4P9dY03c/NOABP2pK55WRotC/gW8
-	B/r2sbP4IsopbXwqjXUBCVCRjJ+LWI6qNZxps5Z1J4HlsTQPBQlobXkiHz4UxG1xNUszzC
-	dt1l0Z2tfslHu8MUQGUJMfUD+X0kfes=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+	bh=f6DldgkL1Bf7Mcv6AIKnpvYFmz+jRz5HRWLP0ogmnaU=;
+	b=LCvUVeWWOOMH6cfm2SecZHF/NzhvwN4zMVp7rN4sfwf0Be7OImh2Hp3chyP2kA1qSY7ld+
+	Qe+fVcq/gkrBgrt0IBnbWOKk6v6BU25Rt139mBuqgp23pez+EY/fN0zy/2h8qv+AfQ9Spp
+	VnPApN5uNbXNtaypRET8VW3ONUwRGuk=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-81-rQgv3-Y7NTa9uKFiohE9vA-1; Mon, 17 Feb 2025 22:51:17 -0500
-X-MC-Unique: rQgv3-Y7NTa9uKFiohE9vA-1
-X-Mimecast-MFC-AGG-ID: rQgv3-Y7NTa9uKFiohE9vA_1739850676
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2f83e54432dso16511511a91.2
-        for <fstests@vger.kernel.org>; Mon, 17 Feb 2025 19:51:17 -0800 (PST)
+ us-mta-466-Cz4F1lTFO-Gs8ERXher3Lw-1; Mon, 17 Feb 2025 23:21:33 -0500
+X-MC-Unique: Cz4F1lTFO-Gs8ERXher3Lw-1
+X-Mimecast-MFC-AGG-ID: Cz4F1lTFO-Gs8ERXher3Lw_1739852492
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-21f6cb3097bso137152055ad.3
+        for <fstests@vger.kernel.org>; Mon, 17 Feb 2025 20:21:32 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739850676; x=1740455476;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=C1B0qnhCCL2r66FtfTHMj6MIYs0gWEo3WbaXK6R5xxQ=;
-        b=ESiWBmstR6+EZgWORzlK13g49/4W2BHF9fgTfiZeBJzaqVqlo0ZgHFnrNxlwlMRt6/
-         Ak08Dhh0phR9qj6hzW5lt7fGfIcCP+dDoBH4AUjt3RWW8zrCe6x4VFAetA1Oud/+67Ky
-         U2eihAoV3MCaSOgFOAtRSmQakRE9QonUH2Vg7xnVOjvqbmBqQvvaX2ULBZGLsVyYTvHH
-         mUoo6td/nqc4Zj0HgtAUdV+vq3XbH8zbTZv2khB8syacJS0ITAZNe54sxHTSPYeNOosF
-         bep2AvsrndiwEzq3GgP0lqaXxQhuifDUmMYyC+M1jlCSvuvdiQ1arMO9CsRApcvoOqNh
-         +2nQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVK7vFeydZL11L1ef3CJDfqjVciYN08Z/u/TDbTfMr+gvysgJOvb5QQMSMNbYieP4uniXd+gMFn@vger.kernel.org
-X-Gm-Message-State: AOJu0YzXLoeJ8C6nZdepImkEYf12LQohJFV5d2c9vq/bzJ/rks0RDgkZ
-	xURPq9QVT0yL3YOrqCBwXpX+A+iaoa6J0sCg6rc6hZfTLOjhyLuSq+KXF7YLiymTfjvcbYxjLc0
-	hhQtEPVEp/tNynDqoUeWJdffFUUAoO+GjapaxkNFAjLFZaUb3KIBOxUg=
-X-Gm-Gg: ASbGncsb5PtcSHH/0KPyhk2YMj8oZzE8cRDhvbfn58u0dY8LB6m5d2BgQfAlwR8iksV
-	6LpSifd6oP9d/y0Rs0Ia6jQHOi3K66/Lvc1bKjBkDxEnzJqnWPAMrPYGKuSmZLBful4cfn5YZhe
-	ps2qx7AvVxw3rISSpblxEZAKzaERN/Wih+VWeUBh8zNgjyXLYSKajZl+tJk5RftNcF80/ikmOld
-	+PNZw454p8sjq/wLLwi1Egqy3cPe0MJLbTIoJAwyeEPTdaYgNhqpJrVo3CVtyafzXGPjJy6O/bJ
-	ff6fR0NavadoFtQ8f3t5sVmDoGTG92ZZ/ZpVcLQziAa3ig==
-X-Received: by 2002:a17:90b:3812:b0:2fa:1e3e:9be0 with SMTP id 98e67ed59e1d1-2fc40f234bemr17952769a91.19.1739850676266;
-        Mon, 17 Feb 2025 19:51:16 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFe+w2oPmg28Eu9GUkVxZOKp/RdRyEsiEvIXBVOCAAvqW2XxT60wREOtQdIcYfwIkQd9fQNDA==
-X-Received: by 2002:a17:90b:3812:b0:2fa:1e3e:9be0 with SMTP id 98e67ed59e1d1-2fc40f234bemr17952747a91.19.1739850675919;
-        Mon, 17 Feb 2025 19:51:15 -0800 (PST)
+        d=1e100.net; s=20230601; t=1739852492; x=1740457292;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=f6DldgkL1Bf7Mcv6AIKnpvYFmz+jRz5HRWLP0ogmnaU=;
+        b=FNrm1tzA+CamzlCckuIR+f+5kubOPFkDLV4665nthcjDTwJX5lUq0TRRRr59ZePftT
+         KMcgQ5SYuVjTck+T9qNBtAhJjew9bDWPPC6hre3VLq5Wl+2Bb7pLjrIHccgclxl5UTQ7
+         5Gk6kX/tC0CebWL4vN3vBBfWF4A3Z1MIrR+b9VpAHdHrqf4Bws0fx4JKJKXdWVPc/c2x
+         EFSOT2hd+k1H1jMZe29qtYvIasz+FRPNjVOCSRdywl2urtFEGYK2Zie6ugYbg00Er4eh
+         hzHO/jOQHZ/wGoSDn9C2yfPNKTJCOeG+bgeq3qIcMuXvWQHa0hDAe7qhWSO3La420Q/R
+         FczQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXK/SnziUnxouQzDd2YLZlLr0RLe7rsyYkQDxbvwZ1CrYiuWEOwvbaFzQw/XBCYlHACWD/TsXtz@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy1ZjrQ3Cx9VTs7wTArESpKwagZ1K6S+I0Wwp/s3Lr73KMxbl+F
+	s1yNW8BqqfdkH8usmDiNpvzhCMHWNBz3ITe7lQeRte764bqOL+EhfvvToXs0UzpRcYB6QPDOvyz
+	ogDddfoXLhCwTSj5tCLu/cPEqsOTGQYBgxt6NHuAIYWX2XCP3flXTTPcRr3tl2lEyKQ==
+X-Gm-Gg: ASbGnctVau0BsS4eb0iAjqMqHXD72P7+W3dqVRkesinJcACpon+ukgMH6XihcSWhcHw
+	h555MSr8PGZzZ4K/OCm1DLlLr3QYMzQDF4r/KEWwMicjB50vwLCSCoQkrX75PbraC3C5vuPKLro
+	EQzoNjkki78aVb0u9sTvgUpEplNr22dvNnV7l2fHkiaKXaNdZwx9Zrgw210pVDX087hTfSKPbxa
+	/K32vlLz/+uRVl2lyYuw/6lw+zw/zpexnUnLUxPBnrkuJyYtAIG9XvOOZqYHbG7gcFbWI6cIMnc
+	Pb9nd/c3RqsgrcpboFObZMoCrli4wBhk6iD6NxO00vYVoQ==
+X-Received: by 2002:a17:903:8c5:b0:215:9642:4d7a with SMTP id d9443c01a7336-22103c5ceaemr214462145ad.0.1739852491712;
+        Mon, 17 Feb 2025 20:21:31 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IE4kQCEI6NTrjTG3w0XR7+7/nsPO/1ATZNfO8fYUORFL28xdz+yszMyILPxvtHAQC6SRMnU0g==
+X-Received: by 2002:a17:903:8c5:b0:215:9642:4d7a with SMTP id d9443c01a7336-22103c5ceaemr214461955ad.0.1739852491442;
+        Mon, 17 Feb 2025 20:21:31 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fc13b91227sm8938088a91.32.2025.02.17.19.51.14
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d5349306sm79513815ad.48.2025.02.17.20.21.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Feb 2025 19:51:15 -0800 (PST)
-Date: Tue, 18 Feb 2025 11:51:11 +0800
+        Mon, 17 Feb 2025 20:21:31 -0800 (PST)
+Date: Tue, 18 Feb 2025 12:21:27 +0800
 From: Zorro Lang <zlang@redhat.com>
-To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Subject: Re: [GIT PULL] fstests: btrfs changes for master and/or for-next
- v2025.02.14
-Message-ID: <20250218035111.vkdtzkjskutvpvqa@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250214110521.40103-1-anand.jain@oracle.com>
- <3b2a541f-da83-4658-a47b-8b8a1ea75b83@oracle.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: zlang@kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH] generic/370: don't exclude XFS
+Message-ID: <20250218042127.u5o2nchtayodwi7m@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250217063135.3728305-1-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <3b2a541f-da83-4658-a47b-8b8a1ea75b83@oracle.com>
+In-Reply-To: <20250217063135.3728305-1-hch@lst.de>
 
-On Tue, Feb 18, 2025 at 08:26:20AM +0800, Anand Jain wrote:
-> 
-> Zorro,
-> 
-> I wonder if you've already pulled this?
-> 
-> The branches in the PR below also include nitpick suggestions
-> and fixes that didn’t go through the reroll.
-> 
-> For example, commit ("fstests: btrfs/226: use nodatasum mount
-> option to prevent false alerts") updates a comment that’s missing
-> from your for-next branch.
+On Mon, Feb 17, 2025 at 07:31:35AM +0100, Christoph Hellwig wrote:
+> Skipping tests just because a file system is broken is always a bad idea
+> as it hides bugs.
 
-Oh, I've merged this patch from your for-next branch when I saw
-you said: "Fixed. Applied to for-next at https://github.com/asj/fstests.git":
-
-  https://lore.kernel.org/fstests/68aa436b-4ddd-4ee7-ad5a-8eca55aae176@oracle.com/
-
-Sorry, I saw you used "past tense", I didn't notice you changed it after that.
-Please feel free to send another patch to do this change, there'll be a release
-this week too :)
-
-Thanks,
-Zorro
+Skipping this test due to I'm not sure if xfs treats it as a bug or a boring
+test failure which isn't suit for xfs. So I have to choose to skip it
+temporarily with enough explanation, as btrfs was hurry to have this merge
+and there was not objection from xfs either at that time.
 
 > 
-> --------------
-> diff --git a/tests/btrfs/226 b/tests/btrfs/226
-> index 359813c4f394..ce53b7d48c49 100755
-> --- a/tests/btrfs/226
-> +++ b/tests/btrfs/226
-> @@ -22,10 +22,8 @@ _require_xfs_io_command fpunch
+> (Fortunately despite hiding the bug this is now getting fixed in XFS as
+>  well).
+
+Great to hear that:)
+
+Reviewed-by: Zorro Lang <zlang@redhat.com>
+
 > 
->  _scratch_mkfs >>$seqres.full 2>&1
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/370 | 8 --------
+>  1 file changed, 8 deletions(-)
 > 
-> -# This test involves RWF_NOWAIT direct IOs, but for inodes with data
-> checksum,
-> -# btrfs will fall back to buffered IO unconditionally to prevent data
-> checksum
-> -# mimsatch, and that will break RWF_NOWAIT with -EAGAIN.
-> -# So here we have to go with nodatasum mount option.
-> +# RWF_NOWAIT works only with direct I/O and requires an inode with
-> nodatasum
-> +# to avoid checksum mismatches. Otherwise, it falls back to buffered I/O.
->  _scratch_mount -o nodatasum
-> 
->  # Test a write against COW file/extent - should fail with -EAGAIN. Disable
-> the
-> --------------
-> 
-> 
-> Thanks, Anand
-> 
-> 
-> On 14/2/25 19:05, Anand Jain wrote:
-> > Zorro,
-> > 
-> > Please pull these branches with the Btrfs test case changes.
-> > 
-> > 
-> >   [1]  https://github.com/asj/fstests.git staged-20250214-master_or_for-next
-> > 
-> > The branch [1] is good to merge directly into master. It’s been tested,
-> > doesn’t affect other file systems, and has RB from key Btrfs contributors.
-> > But if you feel we need to discuss it more before doing it, no problem—
-> > kindly help merge it into for-next. (It is based on the master).
-> > 
-> > After that, could you pull this branch [2] into your for-next only? as it
-> > depends on the btrfs/333 test case, which is not yet in the master.
-> > 
-> >    [2] https://github.com/asj/fstests.git staged-20250214-for-next
-> > 
-> > Thank you.
-> > 
-> > PR 1:
-> > ====
-> > 
-> > The following changes since commit 8467552f09e1672a02712653b532a84bd46ea10e:
-> > 
-> >    btrfs/327: add a test case to verify inline extent data read (2024-11-29 11:20:18 +0800)
-> > 
-> > are available in the Git repository at:
-> > 
-> >    https://github.com/asj/fstests.git staged-20250214-master_or_for-next
-> > 
-> > for you to fetch changes up to 429ed656f99c06f8036eff1088d93059d782add4:
-> > 
-> >    btrfs: skip tests that exercise compression property when using nodatasum (2025-02-14 18:35:16 +0800)
-> > 
-> > ----------------------------------------------------------------
-> > Filipe Manana (7):
-> >        btrfs: skip tests incompatible with compression when compression is enabled
-> >        btrfs/290: skip test if we are running with nodatacow mount option
-> >        common/btrfs: add a _require_btrfs_no_nodatasum helper
-> >        btrfs/205: skip test when running with nodatasum mount option
-> >        btrfs: skip tests exercising data corruption and repair when using nodatasum
-> >        btrfs/281: skip test when running with nodatasum mount option
-> >        btrfs: skip tests that exercise compression property when using nodatasum
-> > 
-> > Qu Wenruo (1):
-> >        fstests: btrfs/226: use nodatasum mount option to prevent false alerts
-> > 
-> >   common/btrfs    |  7 +++++++
-> >   tests/btrfs/048 |  3 +++
-> >   tests/btrfs/059 |  3 +++
-> >   tests/btrfs/140 |  4 +++-
-> >   tests/btrfs/141 |  4 +++-
-> >   tests/btrfs/157 |  4 +++-
-> >   tests/btrfs/158 |  4 +++-
-> >   tests/btrfs/205 |  5 +++++
-> >   tests/btrfs/215 |  8 +++++++-
-> >   tests/btrfs/226 |  5 ++++-
-> >   tests/btrfs/265 |  7 ++++++-
-> >   tests/btrfs/266 |  7 ++++++-
-> >   tests/btrfs/267 |  7 ++++++-
-> >   tests/btrfs/268 |  7 ++++++-
-> >   tests/btrfs/269 |  7 ++++++-
-> >   tests/btrfs/281 |  2 ++
-> >   tests/btrfs/289 |  8 ++++++--
-> >   tests/btrfs/290 | 12 ++++++++++++
-> >   tests/btrfs/297 |  4 ++++
-> >   19 files changed, 95 insertions(+), 13 deletions(-)
-> > 
-> > PR 2:
-> > =====
-> > 
-> > The following changes since commit d1adf462e4b291547014212f0d602e3d2a7c7cef:
-> > 
-> >    check: Fix fs specfic imports when $FSTYPE!=$OLD_FSTYPE (2025-02-02 21:28:37 +0800)
-> > 
-> > are available in the Git repository at:
-> > 
-> >    https://github.com/asj/fstests.git staged-20250214-for-next
-> > 
-> > for you to fetch changes up to dd2c1d2fa744aa305c88bd5910cce0e19dfb6f41:
-> > 
-> >    btrfs/333: skip the test when running with nodatacow or nodatasum (2025-02-14 18:37:09 +0800)
-> > 
-> > ----------------------------------------------------------------
-> > Filipe Manana (1):
-> >        btrfs/333: skip the test when running with nodatacow or nodatasum
-> > 
-> >   tests/btrfs/333 | 5 +++++
-> >   1 file changed, 5 insertions(+)
+> diff --git a/tests/generic/370 b/tests/generic/370
+> index 8adffd2e9650..8101ef42724e 100755
+> --- a/tests/generic/370
+> +++ b/tests/generic/370
+> @@ -22,14 +22,6 @@ _cleanup()
+>  [ "$FSTYP" = "btrfs" ] && _fixed_by_kernel_commit 03018e5d8508 \
+>      "btrfs: fix swap file activation failure due to extents that used to be shared"
+>  
+> -# Skip XFS for now because this exposes an issue that is hard to fix.
+> -# See the following threads for details about it:
+> -#
+> -# https://lore.kernel.org/linux-xfs/CAL3q7H7cURmnkJfUUx44HM3q=xKmqHb80eRdisErD_x8rU4+0Q@mail.gmail.com/
+> -# https://lore.kernel.org/fstests/dca49a16a7aacdab831b8895bdecbbb52c0e609c.1733928765.git.fdmanana@suse.com/
+> -#
+> -_exclude_fs xfs
+> -
+>  _require_scratch_swapfile
+>  _require_scratch_reflink
+>  _require_cp_reflink
+> -- 
+> 2.45.2
 > 
 > 
 
