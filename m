@@ -1,41 +1,41 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4FBD416F858;
-	Wed, 19 Feb 2025 16:57:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54AC6214233;
+	Wed, 19 Feb 2025 17:13:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739984242; cv=none; b=ct5V+x3uJV1hn0+0OVInOCeLxXnUUJ38MfiSp60oiRdX/o0Bb7muugoVJj8fB1b5X2LxxzKxxU6OomcvKeS/fOF6XEuwVapb8l7NalTgcB89PqhrOGFTYV4har0V0gvvSihQMpYTvXyqcWQrBXamaqpzGCtuiVlvTryn66Ro9gg=
+	t=1739985219; cv=none; b=Or+AuZuR7/rFSsxhyJh488gkH0CgOamRkXOX5Zz3DAnEmVBOAtp3TR8P6JspeXf/IJvorggqb+QD8q59dO2UAG/N2MMOIK4yLdPMm9f7uBm7B95kmZFnQ6D2NR9LVFnvWzgsxWtYKyYc6IVRwMll+NUbpNpLRVNNolRCs6iVtuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739984242; c=relaxed/simple;
-	bh=RhvFmV+tBIfrFDsVZlCrlgBZN8j9ZhOdeBYPDXDiVG8=;
+	s=arc-20240116; t=1739985219; c=relaxed/simple;
+	bh=HjJP64nsT996BlEqWT55/byzilVFaLXvQZ5ljLJStXI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rgcm9InJ4d6joaCYxTOoMloxj0E48v+5Mle/EO+Mm4ZE3Yf5rU/poe9qdJv2aQRpg3D5n/8xSyNBvibAaiRXsP4eHgArdzh0X+9verGqGxHTJTkdRrzjtymnyETOGafMA1yrdNFkYgTZSd3jk8gt77rmjD5irVluAt4lhoyacqI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aSvxQzrK; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=DmmXoQiseUcObyxMhHHL3IeQe8XP/60IyqYxI8EpFIZSpl/glPKWg8XdBg8hcDiiP2DbbM9vuKZjx8NT9ti/VuP1d5sdQZXgi6moj+RRKtkFqYIKTXyynsieI+3GyFpLO39NFi21X8r+hfdo/uGCUsHlYsl4P48hOlw+fEGFdfs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=h75G5D0U; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aSvxQzrK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF1F6C4CED1;
-	Wed, 19 Feb 2025 16:57:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="h75G5D0U"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6298C4CED1;
+	Wed, 19 Feb 2025 17:13:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1739984241;
-	bh=RhvFmV+tBIfrFDsVZlCrlgBZN8j9ZhOdeBYPDXDiVG8=;
+	s=k20201202; t=1739985218;
+	bh=HjJP64nsT996BlEqWT55/byzilVFaLXvQZ5ljLJStXI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=aSvxQzrKljGxpT74CodvT8pUgY89IuZjo4Qtpdg40le+WH+QyBXk9uA+QsrCHxZKT
-	 QEJ7IkbNAGOdl8SfaJxhvqOMYICwCsP7QuBSivqv1RUYURA30EVp8Fgo9KjOaSKRQW
-	 US3jADnaaj/7nBFdqY06vxie3ZUgfGXhDOmuPVY5pklxvfI2jHIHYNkkusv/zn5mxo
-	 73u25zTsZAQsvOz4ez0F+JQ+hB4Ewq4yAGsCJNjN/Vq72Q6SQ63xYqBKP2QaemvDXM
-	 UcqGdjmKBrj5dcgCruwlSgrcAF/n14+RPcdBqLzZWULOOU6yZke9w8Yqzw3i+KN4IV
-	 GKNNJzdNYMxuw==
-Date: Wed, 19 Feb 2025 08:57:21 -0800
+	b=h75G5D0UymxoHO0d+8Ht49GpaRKMZ7QmnE1VOw5ouMSMe/eEW7kHiV0ELzvjJZDhT
+	 hBloLKoN720IMwkk28wzkU6w4QidRkq2nCfBcQGwq0xw4tj0V4KgvF3yXJJegl58pt
+	 TkpU/f7TEJkvuOybS5R5MsY5VJU+q4PG0wQ3NappsvxF7UXoSKjySuRFd7lriXTNiN
+	 XTGLcsIsXhhIC9CaKzk5WTWqFWSmEMliu1DQNn+P7xRFoJZa3Jr8u2qTpXPBBNW4K3
+	 zGjecUha4/X9Sh5t9knz7Z0502lWf67sr7+6d+5QER1PbOmtkNTRIM++YwBzlXPA44
+	 sLMyndXnt1+tA==
+Date: Wed, 19 Feb 2025 09:13:38 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
 To: Christoph Hellwig <hch@infradead.org>
-Cc: zlang@redhat.com, hch@lst.de, linux-xfs@vger.kernel.org,
-	fstests@vger.kernel.org
-Subject: Re: [PATCHSET v6.4 07/12] fstests: store quota files in the metadir
-Message-ID: <20250219165721.GP21808@frogsfrogsfrogs>
-References: <20250219004353.GM21799@frogsfrogsfrogs>
- <173992589825.4080063.11871287620731205179.stgit@frogsfrogsfrogs>
- <Z7WF70dbtoNGfOIY@infradead.org>
+Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Subject: Re: [PATCH 09/13] xfs: skip tests if formatting small filesystem
+ fails
+Message-ID: <20250219171338.GQ21808@frogsfrogsfrogs>
+References: <173992591052.4080556.14368674525636291029.stgit@frogsfrogsfrogs>
+ <173992591276.4080556.2717402179307349211.stgit@frogsfrogsfrogs>
+ <Z7WIsZec_ZHIKKHQ@infradead.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,24 +44,30 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Z7WF70dbtoNGfOIY@infradead.org>
+In-Reply-To: <Z7WIsZec_ZHIKKHQ@infradead.org>
 
-On Tue, Feb 18, 2025 at 11:19:11PM -0800, Christoph Hellwig wrote:
-> On Tue, Feb 18, 2025 at 04:47:40PM -0800, Darrick J. Wong wrote:
-> > Hi all,
+On Tue, Feb 18, 2025 at 11:30:57PM -0800, Christoph Hellwig wrote:
+> On Tue, Feb 18, 2025 at 05:05:59PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
 > > 
-> > Store the quota files in the metadata directory tree instead of the superblock.
-> > Since we're introducing a new incompat feature flag, let's also make the mount
-> > process bring up quotas in whatever state they were when the filesystem was
-> > last unmounted, instead of requiring sysadmins to remember that themselves.
+> > There are a few tests that try to exercise XFS functionality with an
+> > unusually small (< 500MB) filesystem.  Formatting can fail if the test
+> > configuration also specifies a very large realtime device because mkfs
+> > hits ENOSPC when allocating the realtime metadata.  The test proceeds
+> > anyway (which causes an immediate mount failure) so we might as well
+> > skip these.
 > 
-> This sentence looks like it was erroneously copied from the kernel
-> series.
+> In this patch only a single test case is touched and not a few.  But
+> I remember hitting a few more with the zoned testing.
 
-Oops, yeah.  Will change it to:
+Originally there were a few more, but most of the others I fixed by
+making _scratch_mkfs_sized constrict the size of both the data and rt
+volumes.  The 2022 version of this patch changed both xfs/104 and
+xfs/291.
 
-"These are the fstests adjustments to quota handling in metadir
-filesystems, which means finding the quota inodes through paths, and
-adjusting to quota options being persistent."
+Oh, wait, the xfs/291 change became its own patch.
+
+Right.  _scratch_mkfs_sized takes arguments now.  So this patch should
+make create_scratch() use that instead of plain _scratch_mkfs_xfs.
 
 --D
