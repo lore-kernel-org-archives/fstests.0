@@ -1,132 +1,118 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCC391F3BB2;
-	Wed, 19 Feb 2025 15:04:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1438F2862B2
+	for <fstests@vger.kernel.org>; Wed, 19 Feb 2025 16:50:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739977492; cv=none; b=dbDhxBxWedY4IoBVnvkSaxaWtt8RZtwpQTM7DqOUKsjRb/XN79Oss4S4UNde7hm6VOvF54KpE6na3O5ojSPjceHy9+prtDIppgWy8IM8iGc/CpPZIR6psnOATS+tg7UKFB1djGS/c6YUTyp3w2AOTJcXmvOt78uhDiVgRZizu+Q=
+	t=1739983806; cv=none; b=bzLWGRsvwAs1Y6GXY/rwJmvd37za+C60pmKvNqjav1AkL0THwrpg50pUSGwZs7pV+EVVSwzdr5qO3pSkNvqENIn0Ga8w0Mjcq1+J3mv1tZy5HTeW/K0F0XZi25KHYV1jKFtgiEenMD36JC5dWM2rWdARZ3sJ6mrhp+rP/yDPWts=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739977492; c=relaxed/simple;
-	bh=ljNhr3gioO5BrDd9zykPmvUpWyLxX/ZGib1/O/4tlBg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=WD6Waf4xuLbPDNpjs7Ia29zoNDQU2Fcqz/bfUfRooILGyzfCN9hkCqHREcjAlkl0SGuuNTZKadZtg4Ridse1oNgIbqstJq8l6LGtGWwt9SuuZ5fV0ehKfl9v80fPrwBKJd5kuAZuE8+Fg3HwUoWuaE+xrZc5xJM8J2nk68OXLQc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=E1J5y1H5; arc=none smtp.client-ip=209.85.214.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1739983806; c=relaxed/simple;
+	bh=Xm/doimVczAwR/kkRicPqTJwW4WBjiQuzy9+4ku1lAc=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=oODafWfxLYhWrfTtoKvdojPsVWQlpb9zs9r48Yo5yvG0c0vPKajr676v1ShG/Cvs7YgQHo5mM7UessLx7TXPzSWrig94OnsUkVB3QVLv2g/JzmfK0rCJm/XO9lxDqLuLcKobW8NqCEVFzlptTmeE/mXlTcjPKLr9N5xoolxi1xk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PJ3fEEIm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E1J5y1H5"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-2212a930001so8006645ad.0;
-        Wed, 19 Feb 2025 07:04:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1739977490; x=1740582290; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=NTdD+bQIdz3RWZ4KMHlskhNWncYorBHEeG1RebeT8zs=;
-        b=E1J5y1H5D4TXvgFNaO47qrO+b8QsQ4GL30IcigUFudaCE1FV1hmS8+BF23mAR1RSLs
-         PhwJ5bVR4FhsReNfWVyiBbRuwgYH3pwSIRvZX12Oq2hwyLzL3m0SynOqlcgkVgtt/5IP
-         /RAjfL6+r8zO3Z1WWfj80aW51KWTR+QzK21pZMbJYT71qk56PFNuHUdFJ/AO8vmutcTg
-         stnlSTptLkS5hoIQyGg2IVZ1xr6lOoHZiNJGAaCNIZ18ZYVqloi+qSaDN+N87HcsIYzS
-         oIlmveg1nUFXJY1ZNe6wQAQ9QFh4olg+hNTq9EEvOmiz9BA0IXcv5/uKgpZZDp8X8la6
-         fG5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739977490; x=1740582290;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=NTdD+bQIdz3RWZ4KMHlskhNWncYorBHEeG1RebeT8zs=;
-        b=UJKiGxlhlxmehIWRzzbx6rgUPNr7K4gIEJEEJjQj+oc9hfAgjpypANjFEur+zz5RCu
-         ezzQ2ZVzh1a5WQuQ8FFCLyymvlfobZdOVopGtEBE2Ek9nO6Mo458rjxxUm1vx3I+HSsU
-         AG24dXYHML/DqMjY7BTcSmSFoS1RDIlAJ62k/n+dP9s//QUjnagDkjcN+3vJQDubPbS0
-         ysu1LBt7b81KugRQ1ciBLZwQJog+lH/kAUHVQKg+/1zU8nSc/cZjoR9fXGme/gsUS41d
-         iABy+x7KMAmU+OzLguP9tE5kdEYz0ZFO/9w2jkwVj3TGvh8A8NhVBuncAlkDC0tLWwF+
-         6vnw==
-X-Forwarded-Encrypted: i=1; AJvYcCUc102IZIPrKFb9Qbd/AgrnSAYq1Wa+CQVsR2hPwOBSIKHZhhvWY4DtDqxOfTwbMsqe8fUzBvyZA0nc@vger.kernel.org, AJvYcCUzqHU7hd1yek++PPbHqrKwM2VHrtSfYvrTqIHlZiW/3bFGXd+acR/2QXhiYknxAsCCUdiNriFgJrhd@vger.kernel.org
-X-Gm-Message-State: AOJu0YxgZcLfXynHeHFdscCPqhrAwOmv7KoeLGc4PemCWnDXUPIcf7Ry
-	1rU3qpbsMwcLwVaXcTp0p1/iifYBMOGDIrAXmU4qpUEQQ51W5MI7
-X-Gm-Gg: ASbGncukyXsL8k923RrDWRKJ5WECzQXCNokr9OnSw7hAAN8lPcFx2XVdAL8pRj7SNWd
-	3yPVIBmd4qGdXRFz5eFr0LHnxvF/8UxoWfYzrRgkm/6lNFTbpkES5smpmwbm30bI8Lo5TeSJBwo
-	U9MFesHkpOdAKqDSKsmHS1c14Q4wteN/TXaNGDIWcflT0ZB8MlBKbCUKI9DRSvoVhCjwPFYuN4z
-	xts3+Ezz20TIKUKQVuMfaKAE2/LN0VhU0i0ez2yDK2DbeIdoBmU8FF11e1gWcU7c2xGendp7VFL
-	2ThbMRAVcNpdCzgomF63/a99tw==
-X-Google-Smtp-Source: AGHT+IHgGwjUZhfDYX8Qm0YJ2oNs1GP4Gis0CwmFBq5y3bH9gBxqoItHzmVLiLnLPcxaunc4g7TZdw==
-X-Received: by 2002:a17:902:d58b:b0:220:ea90:1925 with SMTP id d9443c01a7336-221040ab9b3mr348915455ad.35.1739977490038;
-        Wed, 19 Feb 2025 07:04:50 -0800 (PST)
-Received: from [192.168.0.120] ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d5348f7asm106922385ad.23.2025.02.19.07.04.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 19 Feb 2025 07:04:49 -0800 (PST)
-Message-ID: <90be3350-67e5-4dec-bc65-442762f5f856@gmail.com>
-Date: Wed, 19 Feb 2025 20:34:44 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PJ3fEEIm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5926BC4CED6;
+	Wed, 19 Feb 2025 16:50:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1739983805;
+	bh=Xm/doimVczAwR/kkRicPqTJwW4WBjiQuzy9+4ku1lAc=;
+	h=From:Date:Subject:To:Cc:From;
+	b=PJ3fEEImbUoOh4pO7NYyLrJxIzzEpS8ulhIx4//Nf4qyqT0MO1F17r32Mkdr0m7dw
+	 p2MHTxF6XdzZfSyxPl78NzPFGAr8j8dBh5NhFcQWkYh4aRk0psRYkDOoFJ0ShOORIW
+	 7BVAKJvN0Sa1HjBO3HZozUtAn5AdWfJEFUpizMfpNqDfF89BMJwTVPbuvPPa7uZgQe
+	 EBPt56z52RoSZX6DX4NU7g5lc7Fn4QCnLoVuics7WQSyVkplMlmPf50eARKnpFok+9
+	 tjGOcHXCUPKbCPWHZlG79EXYwRQQ13QYn79WPWGCmlI3tgNbS7y4wc0KUINSWZXgkV
+	 X/7NihEwY/z4w==
+From: Jeff Layton <jlayton@kernel.org>
+Date: Wed, 19 Feb 2025 11:50:03 -0500
+Subject: [PATCH fstests] generic/126: run it inside its own subdirectory
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 3/3] xfs: Add a testcase to check remount with noattr2
- on a v5 xfs
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
- linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org
-References: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
- <de61a54dcf5f7240d971150cb51faf0038d3d835.1739363803.git.nirjhar.roy.lists@gmail.com>
- <Z60W2U8raqzRKYdy@dread.disaster.area>
- <b43e4cd9-d8aa-4cc0-a5ff-35f2e0553682@gmail.com>
- <Z65o6nWxT00MaUrW@dread.disaster.area>
- <1b8a4074-ae78-4ba2-9d8a-9e5e85437df5@gmail.com>
- <Z7O4MZ0xOpO_GTKE@dread.disaster.area>
-Content-Language: en-US
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <Z7O4MZ0xOpO_GTKE@dread.disaster.area>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Message-Id: <20250219-generic126-v1-1-018e4e60c811@kernel.org>
+X-B4-Tracking: v=1; b=H4sIALoLtmcC/x3MPQqAMAxA4auUzBba+O9VxEFrqlmqNCKC9O4Wx
+ zd87wWhyCQwqBci3Sx8hBy2UOD2OWykec0NaLA2aHu9UcjCWWy07+xSGkRXLS1kcEby/PyzEbx
+ cJJfAlNIHXdZCymUAAAA=
+X-Change-ID: 20250219-generic126-f81b3022c4b7
+To: fstests@vger.kernel.org
+Cc: Jeff Layton <jlayton@kernel.org>
+X-Mailer: b4 0.14.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1513; i=jlayton@kernel.org;
+ h=from:subject:message-id; bh=Xm/doimVczAwR/kkRicPqTJwW4WBjiQuzy9+4ku1lAc=;
+ b=owEBbQKS/ZANAwAIAQAOaEEZVoIVAcsmYgBntgu9BddNYb76WkMdntUKOyv8/W3137CWROlTa
+ 63tNPJiGYWJAjMEAAEIAB0WIQRLwNeyRHGyoYTq9dMADmhBGVaCFQUCZ7YLvQAKCRAADmhBGVaC
+ FZY/D/99GpUKsEOq+t4g6ZmZCHpyfBlC4y9N9ZpvQjmUUPAkq+lLtPWP+bGyhTeRhFxL7kJUSdn
+ qRfOGT53PDrVsbxdmyYCB+yrGx7UrUohwSxqf+5Azz/iG1YPklhYiZVGm7PVw2yEiile3ne1mgb
+ c+RIOOTeXaN/G6AcPzWp3D80iGs5mDM/oSYrQ1j4pL7gzydufhfMKYuGb2zdtB1N+jK6XB27+Uq
+ uiJpdjQL7q3UVzF7QAu1ctKiT1yDKc5ElAU9M2gs3YuTPj6NyUHUYbwFwVfFEtzLHmxUKlfU6v9
+ RRmYKku/x+j5nDtmpzq4CCqiGj61Sp5Jvx/fl0Oc9LDMtRhmaLROz9Yrnje3kESxiOXHaWpeCwE
+ rLRf4MthWpqGmQ93Y7PsIYKM52iEdPI0h7OX/AUdUi+MF54iGVdaIXTuoOifq9D2f+JfiYxs9I+
+ 1QHrQjflNwwEJFN/o5xf6BRrZ8ug+STLOphH9aibynUskb2ELkSczaJgUEow+dTelmM2ZfA+r8j
+ fZatoGTgDXyiswOBLWevneABwX1ZnG2MdbWbAGcgyI/adxJFcVqkddP8zArygMP2QLn8fnIMRLZ
+ 8M71t0OiF6W11FIkNMa67d5LvwqCzL1YzgCq9Ur2jkN+5QHePkL2lpTuk117zTFrJqvaJcdJSfs
+ K3FSLLVu9IavF7A==
+X-Developer-Key: i=jlayton@kernel.org; a=openpgp;
+ fpr=4BC0D7B24471B2A184EAF5D3000E684119568215
 
+I had been seeing some failures in generic/126 when running on NFS under
+kdevops.
 
-On 2/18/25 03:59, Dave Chinner wrote:
-> On Mon, Feb 17, 2025 at 10:18:48AM +0530, Nirjhar Roy (IBM) wrote:
->> On 2/14/25 03:19, Dave Chinner wrote:
->>> On Thu, Feb 13, 2025 at 03:30:50PM +0530, Nirjhar Roy (IBM) wrote:
->>>> On 2/13/25 03:17, Dave Chinner wrote:
->>>>> On Wed, Feb 12, 2025 at 12:39:58PM +0000, Nirjhar Roy (IBM) wrote:
->>> Ok, so CONFIG_XFS_SUPPORT_V4=n is the correct behaviour (known mount
->>> option, invalid configuration being asked for), and it is the
->>> CONFIG_XFS_SUPPORT_V4=y behaviour that is broken.
->> Okay, so do you find this testcase (patch 3/3 xfs: Add a testcase to check
->> remount with noattr2 on a v5 xfs) useful,
-> Not at this point in time, because xfs/189 is supposed to exercise
-> attr2/noattr2 mount/remount behaviour and take into account all the
-> weirdness of the historic mount behaviour.
->
-> Obviously, it is not detecting that this noattr2 remount behaviour
-> was broken, so that test needs fixing/additions.  Indeed, it's
-> probably important to understand why xfs/189 isn't detecting this
-> failure before going any further, right?
-Yes. Let me look into what xfs/189 does and why it isn't detecting the 
-noattr2 remount broken behavior. Thank you for the pointer.
+The problem turned out to be that kdevops makes the root of the NFS
+export mode 01777 by default (i.e. with the sticky bit set). This causes
+some of these permission tests to fail because the open() is called with
+the O_CREAT bit set.
 
-About "Patch 1/3: xfs/539: Skip noattr2 remount option on v5 file 
-systems" --> I wrote the patch because xfs/539 has started failing in 
-one of fstests CI runs because RHEL 10 has started disabling xfs v4 
-support i.e, CONFIG_XFS_SUPPORT_V4=n. Do you think modifying patch 
-1/3(xfs/539) in such a way that the test ignores the remount failures 
-with noattr2 and continues the test is an appropriate idea (since the 
-test xfs/539 only intends to check the dmesg warnings)?
+Make the outcome of this test not depend on the permissions on
+$TEST_DIR. Create a new directory to do these tests in, and clean it up
+when done.
 
---NR
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ tests/generic/126 | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
->
-> IMO, it is better to fix existing tests that exercise the behaviour
-> in question than it is to add a new test that covers just what the
-> old test missed.
->
-> -Dave.
+diff --git a/tests/generic/126 b/tests/generic/126
+index 142d2bb97db706bafd2152856ef0993c5c273441..fe0d6db1b6bd85d4942333fdf04d23a63c4052ec 100755
+--- a/tests/generic/126
++++ b/tests/generic/126
+@@ -23,7 +23,13 @@ _require_chown
+ 
+ QA_FS_PERMS=$here/src/fs_perms
+ 
+-cd $TEST_DIR
++testdir="$TEST_DIR/generic-126.$$"
++
++mkdir $testdir
++chown 0:0 $testdir
++chmod 0755 $testdir
++cd $testdir
++
+ cp $here/src/testx ./testx.file
+ 
+ # file_perm owner_uid owner_gid tester_uid tester_gid perm_to_test expected_result pass=1
+@@ -46,7 +52,8 @@ $QA_FS_PERMS 200 99 99 200 99 w 1
+ $QA_FS_PERMS 040 99 99 99 500 r 1
+ $QA_FS_PERMS 400 99 99 200 99 r 1
+ 
+-rm -f ./testx.file
++cd /
++rm -rf $testdir
+ 
+ status=0
+ exit
 
+---
+base-commit: 8467552f09e1672a02712653b532a84bd46ea10e
+change-id: 20250219-generic126-f81b3022c4b7
+
+Best regards,
 -- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+Jeff Layton <jlayton@kernel.org>
 
