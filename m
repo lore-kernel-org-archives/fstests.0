@@ -1,81 +1,124 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 032781FDA7B
-	for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 18:22:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 48B9A213E6E;
+	Thu, 20 Feb 2025 18:23:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740075744; cv=none; b=YCX4IiSgaxo7dw5E4gNfcw3aaqejBYRcCFnuM4QFIxkgoBgney1loVZoXYE7C6GNTadzhLfOiPtSFIrDtmZa3tGyGCR6N6idavCCCHK4xPXMTPpZDY5zSoyLGLCtv+gceESTz1iLo6PAQYmjDtGLkFeTJQVjYFLXEotvAOe3EzI=
+	t=1740075816; cv=none; b=vEH7dyd600aiJOoBIxoYVh1liWWBCmu9QReqzGjmFfBfeReEfovn7q9RlVKvejg+ITjiMCqEXG+heHKX94qFJdpM+T46NvBVwaxvV0GON99Xck/jk6cfDkfZnKWvfU0EZb1PA619gijQNrxxg3o8TBLCIVXJMkGKGvhRyH5xm94=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740075744; c=relaxed/simple;
-	bh=h2V2nYKf/+TSic+kt418c8VX513RmVCyVTA4ZzINrM4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=AvzQFOB3LtNNGu7ES0szuKomQVvsNBNwCUwzCANN45/MPWWfSQxjUieN+eTKsEMETjt30EEcUVluzZmq8myfBly35OwVXgOZY5iBYk+trr2tHE1ZDacKTV1gvDHajaiMR/Lshpl1aQmndqHLt5uIbfdywodLBtQ/sSk4xCNcI/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
-Received: from trampoline.thunk.org (pool-173-48-114-12.bstnma.fios.verizon.net [173.48.114.12])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 51KIMBYL005431
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 20 Feb 2025 13:22:11 -0500
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id 34CFC2E011A; Thu, 20 Feb 2025 13:22:11 -0500 (EST)
-Date: Thu, 20 Feb 2025 13:22:11 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Boyang Xue <bxue@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH v1] ext4: add test case 061 for ext3 to ext4 conversion
-Message-ID: <20250220182211.GD2150479@mit.edu>
-References: <20250220072226.175071-1-bxue@redhat.com>
- <20250220151528.GC2150479@mit.edu>
- <CAHLe9YYjX-78hHCb9ftBc3=OsBJBpPmV+5_C=72BRbhOVH8qTg@mail.gmail.com>
+	s=arc-20240116; t=1740075816; c=relaxed/simple;
+	bh=bGRsuGCjBaxlke4IY42bXBVPlj0MwrjZiMm/l5TxlHU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=sn5xN+VGckHYsZ6+i+8kccWyFRRUedNo1rqzJRX+liH8yowPQbyE8ReD7kEG8pk7INKPp34PKXu08RndoitCzNIoCCwvXuWocsPMUuTplusX3Vufov+anmjunAMy7ZD8jf4fWeOezFbFd8DXbK4d5w/KiHK8a/89SxvRZTC1xLA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LUJHyxPm; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LUJHyxPm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBC56C4CEE2;
+	Thu, 20 Feb 2025 18:23:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740075815;
+	bh=bGRsuGCjBaxlke4IY42bXBVPlj0MwrjZiMm/l5TxlHU=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=LUJHyxPmMwBeFlE2MW6Aa4IcUZAVJcmhBuL4nP9xupp0MCB0JLa0NRzY/FkAeCD6q
+	 ioZGeNd4pXZxe2+H4Ha2pS9nXqyIROAs+4QzPFGOwLW9+x3k61wY3VHINv2PumU6mO
+	 ojpTveZxyiJZ5zt3t60IU8L/VrqiWiL+qy71PuNEGh0Gnf9k1nFL64QSTJAf9+NzWB
+	 XOw86mrQaIfoR61ZVvtEW8GqP/3ELLC30gYQrQWWFlQKhKctmYgZ4qxYPgypreWhar
+	 +X9nxqdMB8PGUoOsIHK58iVNgBkhexkMtFhtZdvcviS/DG/xnyjjF5slFsTGPiyP5Q
+	 b2DN0PORYt+qg==
+Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-abb7f539c35so260044366b.1;
+        Thu, 20 Feb 2025 10:23:35 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCUgkFSESP8qEyJO/xsTUIffweebIay0Bl3Lds6RlnFi1xDQtdzpcTsCRYgGAX8O22R9jcLuD9VY@vger.kernel.org, AJvYcCXT3HgoJpTGSc/5lxeyMt3BBbmFjVaznH2ETM2kk3A81wallLTkykEpPsAHgQkTAgXXipMzCnAQNDfRq2E=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzFE4dTHEnqvKnxWIMQCOUTK1/N0o89C2apnpoWwee2d4/sg7+l
+	VHSlv/QjNRvvoGPB7dfPrA2buYPSk2Vx0/aCycwcDeIbF6i3zOr1vlraiG9ZAZDIAZNSA/U7Q1F
+	0TjLHqBLnkD8Fy53PJ82ts9NjB6U=
+X-Google-Smtp-Source: AGHT+IHBEMCjuYLgwwSiZhMz1RYFkLx2xXuRM9jCSE4/Z1LuyLW3SrVGXm7UG33uEJp2hEczhkXZb+x6bievDGOwP00=
+X-Received: by 2002:a17:907:7214:b0:ab7:d801:86a7 with SMTP id
+ a640c23a62f3a-abc099b847amr38506766b.3.1740075814280; Thu, 20 Feb 2025
+ 10:23:34 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHLe9YYjX-78hHCb9ftBc3=OsBJBpPmV+5_C=72BRbhOVH8qTg@mail.gmail.com>
+References: <cover.1739989076.git.fdmanana@suse.com> <9aa6c8318d11b2fd1c2e208d85b2f83ea81ff88d.1739989076.git.fdmanana@suse.com>
+ <d2d72753-5bf2-48cf-b2f0-cfe184ec75a7@oracle.com> <20250220170333.GV21799@frogsfrogsfrogs>
+In-Reply-To: <20250220170333.GV21799@frogsfrogsfrogs>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Thu, 20 Feb 2025 18:22:57 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H6cH26jarU+YEogd5O5FuHi+YNtaWgmsV72NuXacPQU6w@mail.gmail.com>
+X-Gm-Features: AWEUYZmkkQ6iKDCeLBhCsgmegiWibgSWGodk-YAj_vDV-_cbqHDvJajqHWVKwtQ
+Message-ID: <CAL3q7H6cH26jarU+YEogd5O5FuHi+YNtaWgmsV72NuXacPQU6w@mail.gmail.com>
+Subject: Re: [PATCH 1/2] btrfs/254: don't leave mount on test fs in case of failure/interruption
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org, 
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Feb 21, 2025 at 01:06:04AM +0800, Boyang Xue wrote:
-> > This isn't actually a very exhaustive test of doing a "conversion".
-> > If you really want to do a "coversion" test, what I'd recommend is to
-> > fill the TEST_DEV to be about 50% full, and then make the changes to
-> > the file system features, and then running the xfstests using the ext4
-> > file system type without SCRATCH_DEV being set up.  This would do a
-> > much better job of testing this case, without needing to add a new
-> > test to xfstest that to be honest, isn't really all that effective at
-> > testing this case.
-> 
-> I'm curious why the TEST_DEV is about 50% full is more effective at
-> testing this case?
+On Thu, Feb 20, 2025 at 5:03=E2=80=AFPM Darrick J. Wong <djwong@kernel.org>=
+ wrote:
+>
+> On Thu, Feb 20, 2025 at 01:27:32PM +0800, Anand Jain wrote:
+> > On 20/2/25 02:19, fdmanana@kernel.org wrote:
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > If the test fails or is interrupted after mounting $scratch_dev3 insi=
+de
+> > > the test filesystem and before unmounting at test_add_device(), we le=
+ave
+> > > without being unable to unmount the test filesystem since it has a mo=
+unt
+> > > inside it. This results in the need to manually unmount $scratch_dev3=
+,
+> > > otherwise a subsequent run of fstests fails since the unmount of the
+> > > test device fails with -EBUSY.
+> > >
+> > > Fix this by unmounting $scratch_dev3 ($seq_mnt) in the _cleanup()
+> > > function.
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > ---
+> > >   tests/btrfs/254 | 1 +
+> > >   1 file changed, 1 insertion(+)
+> > >
+> > > diff --git a/tests/btrfs/254 b/tests/btrfs/254
+> > > index d9c9eea9..6523389b 100755
+> > > --- a/tests/btrfs/254
+> > > +++ b/tests/btrfs/254
+> > > @@ -21,6 +21,7 @@ _cleanup()
+> > >   {
+> > >     cd /
+> > >     rm -f $tmp.*
+> > > +   $UMOUNT_PROG $seq_mnt > /dev/null 2>&1
+>
+> This should use the _unmount helper that's in for-next.
 
-The reason why this is useful is because we are starting with a file
-system that 50% of the space filled with files using indirect files,
-and when you run the tests, you are created and deleting files using
-extents.  That's actualy not perfect.  What we would want to do is to
-create ext2/ext3-style files using indirect block maps, that would
-then be mutated using fstress and fsx in parallel with files being
-created, mutated, and deleted using extent-mapped files.
+Sure, it does the same, except that it redirects stdout and stderr to
+$seqres.full.
 
-The basic idea is that you want to actually exercise *using* the file
-system after it is converted -- reading and writing files, allocating
-and dealocating blocks and inodes, after converting the file sytem --
-and then making sure that the kernel doesn't crash or result in a
-corrupted file system.
+Some tests are still calling  $UMOUNT_PROG directly. And that's often
+what we want, so that if umount fails we get a mismatch with the
+golden output instead of ignoring the failure.
+But in this case it's fine.
 
-Your proposed test just fills the file system, unmounts it, uses
-tune2fs to add the extents feature flag, and then runs e2fsck on the
-file system, and then tries mounting the file system.  That's pretty
-much guaranteed to work, since running fsck.ext4 on a file system that
-was originally created as ext3, with lots of indirect mapped files,
-and then adding the extent flag, essentially exercises *zero*
-new or different code paths.
+Anand, since you've already merged this patch into your repo, can you
+please replace that line with the following?
 
-Cheers,
+_unmount $seq_mnt
 
-					- Ted
+Thanks.
+
+>
+> --D
+>
+> > >     rm -rf $seq_mnt > /dev/null 2>&1
+> > >     cleanup_dmdev
+> > >   }
+> >
+> >
+> > Reviewed-by: Anand Jain <anand.jain@oracle.com>
+> >
+> >
+> >
