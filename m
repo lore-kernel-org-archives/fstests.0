@@ -1,158 +1,89 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F14721D61A3
-	for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 14:57:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81A031F9F62
+	for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 15:15:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740063450; cv=none; b=olQ1xrAoC5rbc/JdsHgqgKUcevQCJILZZ6IoCvCtrzqUuzzsJkQqY/BBga88OPLEuze5JLyIjAi/bm41eT+NwKHXesH9wBRtfGgY5TwXQauSjeGu6OBRPBJmSaytCro/4T/SrL8/omPCuL6GVJDeVGSwYBWVjly3RLQNGYGcoqQ=
+	t=1740064536; cv=none; b=Nw/AKg7t5ZMUxaFQS8fTNEc601NORrNoOJv9P5F0VAbqvvCfryLaGc3cAD1M6jVqAHQoZ8b3jiJJosq7eSJ+hfADgb/lLQvGkMyLmwAZxDFcLyskbjTT26ruWvTsYmGSc+SGGZ6VKkOCn3wdql1N5eBWY+1oA9mL0yUdUc9CGtw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740063450; c=relaxed/simple;
-	bh=AIaovNgiaq8lOnvtpM7U66/mO+cGQ/qjshhhc4+CWCg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=MIpqpigUQwQOqvL1hVbVOJ4pEhs9RlBjddTf/p2mn8KsOnW0SEtX/tbV3jv+4fc/kQO5SZTvjNIQP6gF16Vda6/sobW2V65dcwPthPeger/MExZli39nQCiatx87ERZxoq3ECvmCCIqnuOo2n1xJA0qz6sbWcY3amU49Qd/My9Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=WWqCvBpl; dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b=cUUhu+my; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="WWqCvBpl";
-	dkim=pass (1024-bit key) header.d=suse.com header.i=@suse.com header.b="cUUhu+my"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id F295A1F388;
-	Thu, 20 Feb 2025 14:57:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1740063446; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=oSaY3vDCvLYSA/Kh8OgXvQHSePeoZAn1q7aFrNXRwjE=;
-	b=WWqCvBplN2jXvaq5FqXeRYcQK/Sm9X5+ejnsp9hQ8Hg8KkNxNngdaZ6KBtWtXV1us0qHVF
-	2h8aioc1DC53w7PcLsvP17ybcWGV6JPOSsHVEzk3cpa2tLO7KRFa1BeIJamSTEJpbHAg9i
-	4N7r9phyiqhUO8EWhfBzKBhzqBuUDI8=
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.com header.s=susede1 header.b=cUUhu+my
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-	t=1740063445; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=oSaY3vDCvLYSA/Kh8OgXvQHSePeoZAn1q7aFrNXRwjE=;
-	b=cUUhu+myIE+XwbD6yIM7iCEtrMi0+cq577je4xY4V/34e8ujW0rqrJ6+ZwrmEP3dNwjHn7
-	NQk8IoWzuR6daSOyhV18zx1armR2eFjFB+yf6pqJt59zZfXbQ/8+yLjJQQ/O1MliSx9A4e
-	mWCrZR1PYfIb6HGseKw+3sqOYbIg6LM=
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id DDC1213A42;
-	Thu, 20 Feb 2025 14:57:24 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id g0+KNdRCt2cdYgAAD6G6ig
-	(envelope-from <neelx@suse.com>); Thu, 20 Feb 2025 14:57:24 +0000
-From: Daniel Vacek <neelx@suse.com>
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Anand Jain <anand.jain@oracle.com>,
-	Daniel Vacek <neelx@suse.com>
-Subject: [PATCH] fstests: btrfs/314: fix the failure when SELinux is enabled
-Date: Thu, 20 Feb 2025 15:57:23 +0100
-Message-ID: <20250220145723.1526907-1-neelx@suse.com>
-X-Mailer: git-send-email 2.47.2
+	s=arc-20240116; t=1740064536; c=relaxed/simple;
+	bh=MnfC3MpJaNTEsfbCZChlF8QLt/RNAgHn/WMwYjetiAs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MnJWGJvC1BmrgrAhmIHdPQonVPl+322+neM6WSQYKhWr6Dg+qe41yHRoTeJy2jdpsFsvOOOfXvBov75QBK1YJBIxi/ugNgruxUB94R72En9r7pmPxwgR8p3S8JLeHwadaFYi+YmdnSxQd2RTRcN6cc5o1JGxSGwT5/+SDCY97E0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; arc=none smtp.client-ip=18.9.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
+Received: from trampoline.thunk.org (pool-173-48-114-12.bstnma.fios.verizon.net [173.48.114.12])
+	(authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 51KFFSJw011446
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 20 Feb 2025 10:15:29 -0500
+Received: by trampoline.thunk.org (Postfix, from userid 15806)
+	id AF41D2E011A; Thu, 20 Feb 2025 10:15:28 -0500 (EST)
+Date: Thu, 20 Feb 2025 10:15:28 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+To: Boyang Xue <bxue@redhat.com>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v1] ext4: add test case 061 for ext3 to ext4 conversion
+Message-ID: <20250220151528.GC2150479@mit.edu>
+References: <20250220072226.175071-1-bxue@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Rspamd-Queue-Id: F295A1F388
-X-Spam-Level: 
-X-Spamd-Result: default: False [-3.01 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	MID_CONTAINS_FROM(1.00)[];
-	R_MISSING_CHARSET(0.50)[];
-	R_DKIM_ALLOW(-0.20)[suse.com:s=susede1];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.com:email,suse.com:dkim,suse.com:mid];
-	ARC_NA(0.00)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	RCVD_TLS_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FROM_EQ_ENVFROM(0.00)[];
-	DKIM_SIGNED(0.00)[suse.com:s=susede1];
-	RCPT_COUNT_THREE(0.00)[4];
-	DKIM_TRACE(0.00)[suse.com:+]
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Rspamd-Action: no action
-X-Spam-Score: -3.01
-X-Spam-Flag: NO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250220072226.175071-1-bxue@redhat.com>
 
-When SELinux is enabled this test fails unable to receive a file with
-security label attribute:
+I'm curious why this is something that you care about this particular
+case?  Historically, Red Hat (nor any other enterprise distribution)
+has supported changing or adding ext4 feature flags.  What users were
+told to do was to create a new ext4 file system, and then copy the
+files (or do a backup/restore) to the new file system.
 
-    --- tests/btrfs/314.out
-    +++ results//btrfs/314.out.bad
-    @@ -17,5 +17,6 @@
-     At subvol TEST_DIR/314/tempfsid_mnt/snap1
-     Receive SCRATCH_MNT
-     At subvol snap1
-    +ERROR: lsetxattr foo security.selinux=unconfined_u:object_r:unlabeled_t:s0 failed: Operation not supported
-     Send:	42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/tempfsid_mnt/foo
-    -Recv:	42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/foo
-    +Recv:	d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/foo
-    ...
+Over a decade ago, when I was at Google, we did do a transition of
+file sytems from ext2 to ext4 (in no-journal mode) for all files
+stored in our cluster file systems.  Our experience for our partcular
+workload is that the performance delta between an existing file system
+that was formatted w/o extents, and uninit_bg, and then converted to
+"ext4" using tune2fs, was roughly half the performance improvement of
+a file system that was freshly formatted to use ext4 once the file
+system was filled to roughly the same level, so that file system aging
+wastaken into account.
 
-Setting the security label file attribute fails due to the default mount
-option implied by fstests:
+So users who do the conversion won't get the full benefits of ext4.
+Also, the exact set of file system features that we changed was
+different from from what you are testing.  I'd also note that this
+test is just filling a 1G file system, then changing the file system
+features, and then running fsck on the file system, and then trying to
+mount the file system.
 
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdb /mnt/scratch
+This isn't actually a very exhaustive test of doing a "conversion".
+If you really want to do a "coversion" test, what I'd recommend is to
+fill the TEST_DEV to be about 50% full, and then make the changes to
+the file system features, and then running the xfstests using the ext4
+file system type without SCRATCH_DEV being set up.  This would do a
+much better job of testing this case, without needing to add a new
+test to xfstest that to be honest, isn't really all that effective at
+testing this case.
 
-See commit 3839d299 ("xfstests: mount xfs with a context when selinux is on")
+What did we do, 10+ year ago?  Well, we ran xfstests using the a file
+system config[1] that didn't have flex_bg set, since that's one of the
+primary differences when using a "converted" file system.  We then
+using tune2fs to convert 1% of the file systems in a single failure
+domain of the cluster file system, and watched looking for potential
+problems, and measuring for any performances gains (or losses).  We
+then gradually increased the percentage of file systems converted to
+2%, 5%, etc which is considered best practice[2] when doing this kind
+of feature rollout.
 
-fstests by default mount test and scratch devices with forced SELinux
-context to get rid of the additional file attributes when SELinux is
-enabled. When a test mounts additional devices from the pool, it may need
-to honor this option to keep on par. Otherwise failures may be expected.
+[1] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/ext4/cfg/ext3conv
+[2] https://books.google.com/books?id=81UrjwEACAAJ
 
-Moreover this test is perfectly fine labeling the files so let's just
-disable the forced context for this one.
+Cheers,
 
-Signed-off-by: Daniel Vacek <neelx@suse.com>
----
- tests/btrfs/314 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/tests/btrfs/314 b/tests/btrfs/314
-index 76dccc41..cc1a2264 100755
---- a/tests/btrfs/314
-+++ b/tests/btrfs/314
-@@ -21,6 +21,10 @@ _cleanup()
- 
- . ./common/filter.btrfs
- 
-+# Disable the forced SELinux context. We are fine testing the
-+# security labels with this test when SELinux is enabled.
-+SELINUX_MOUNT_OPTIONS=
-+
- _require_scratch_dev_pool 2
- _require_btrfs_fs_feature temp_fsid
- 
-@@ -38,7 +42,7 @@ send_receive_tempfsid()
- 	# Use first 2 devices from the SCRATCH_DEV_POOL
- 	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
- 	_scratch_mount
--	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-+	_mount ${SELINUX_MOUNT_OPTIONS} ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
- 
- 	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' ${src}/foo | _filter_xfs_io
- 	_btrfs subvolume snapshot -r ${src} ${src}/snap1
--- 
-2.48.1
-
+						- Ted
