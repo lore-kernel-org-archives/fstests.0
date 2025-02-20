@@ -1,34 +1,42 @@
-Received: from outgoing.mit.edu (outgoing-auth-1.mit.edu [18.9.28.11])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81A031F9F62
-	for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 15:15:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=18.9.28.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9411420D4E2;
+	Thu, 20 Feb 2025 17:03:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740064536; cv=none; b=Nw/AKg7t5ZMUxaFQS8fTNEc601NORrNoOJv9P5F0VAbqvvCfryLaGc3cAD1M6jVqAHQoZ8b3jiJJosq7eSJ+hfADgb/lLQvGkMyLmwAZxDFcLyskbjTT26ruWvTsYmGSc+SGGZ6VKkOCn3wdql1N5eBWY+1oA9mL0yUdUc9CGtw=
+	t=1740071014; cv=none; b=GldgD6VGzMjSRXy3J7e7obhQtFxIO1EwzxXFYTQj1oOYbij3dBc0OlRe0myc4GFUJgwxOf9NxnpQxWX3GjmUlLzssTg1MaxLfEcqVkTbuqJIGcSO6uSxY06lgBl0x9IaiFiabaNZXIV+6p9VgthlvxgoBlJmOp1XZl4t8F9mYiU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740064536; c=relaxed/simple;
-	bh=MnfC3MpJaNTEsfbCZChlF8QLt/RNAgHn/WMwYjetiAs=;
+	s=arc-20240116; t=1740071014; c=relaxed/simple;
+	bh=OX3zVgBITRhakhwrq7UZ2lxr3CK8y45OpVp4ss++YI8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MnJWGJvC1BmrgrAhmIHdPQonVPl+322+neM6WSQYKhWr6Dg+qe41yHRoTeJy2jdpsFsvOOOfXvBov75QBK1YJBIxi/ugNgruxUB94R72En9r7pmPxwgR8p3S8JLeHwadaFYi+YmdnSxQd2RTRcN6cc5o1JGxSGwT5/+SDCY97E0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu; spf=pass smtp.mailfrom=mit.edu; arc=none smtp.client-ip=18.9.28.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=mit.edu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mit.edu
-Received: from trampoline.thunk.org (pool-173-48-114-12.bstnma.fios.verizon.net [173.48.114.12])
-	(authenticated bits=0)
-        (User authenticated as tytso@ATHENA.MIT.EDU)
-	by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 51KFFSJw011446
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 20 Feb 2025 10:15:29 -0500
-Received: by trampoline.thunk.org (Postfix, from userid 15806)
-	id AF41D2E011A; Thu, 20 Feb 2025 10:15:28 -0500 (EST)
-Date: Thu, 20 Feb 2025 10:15:28 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-To: Boyang Xue <bxue@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH v1] ext4: add test case 061 for ext3 to ext4 conversion
-Message-ID: <20250220151528.GC2150479@mit.edu>
-References: <20250220072226.175071-1-bxue@redhat.com>
+	 Content-Type:Content-Disposition:In-Reply-To; b=i0mL7gXfMxDpCsrWLHs1yvyo9xhqkZ0XJ1namdRop9cFWIbEgfWoBFyOe2AiuQlUe8QnrfsDMsnAtzs+nK8ozJ8p60o8gWnz8zGRSAqBvW23zXf3Wf/d9ISg2VmIZSjSgTQcFebI3iQUCxNU4YMCRYHUAnNVH7ME1oNQVeosp2A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U5J+IazE; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U5J+IazE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 61A3FC4CEDD;
+	Thu, 20 Feb 2025 17:03:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740071014;
+	bh=OX3zVgBITRhakhwrq7UZ2lxr3CK8y45OpVp4ss++YI8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=U5J+IazELyOoENwuoUk+haL58wFsSjQ/0KCbjqzcpKwsN9rYUtzErD6bvjAMoUBtl
+	 h0Phm/IxXRy8VIebUWVSlYhXYhdFaoZ1yCho/JitnIXzRIKQ0eGgcO7XfZ4xvYD54V
+	 6PnlO4RmBCB+I+9BT6MLVcYHIvhtcsT0n26JUg1r50hb+cs7Hn02XIwi9LzcIMJ2Gm
+	 U1mpAcEJFxs5HvacI89W+03VETlibKp9GPq1vQzvmoTZPQr/O7Ka1beZCLtCd1ZOfF
+	 hm3v/4zOHizxLcbZk61VGKM196UZ391mCwgrLZ0r+KUVSe/2PCLoPkWfCJvpONhQyu
+	 Q5cswIKyfYjcA==
+Date: Thu, 20 Feb 2025 09:03:33 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fdmanana@kernel.org, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/2] btrfs/254: don't leave mount on test fs in case of
+ failure/interruption
+Message-ID: <20250220170333.GV21799@frogsfrogsfrogs>
+References: <cover.1739989076.git.fdmanana@suse.com>
+ <9aa6c8318d11b2fd1c2e208d85b2f83ea81ff88d.1739989076.git.fdmanana@suse.com>
+ <d2d72753-5bf2-48cf-b2f0-cfe184ec75a7@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -37,53 +45,47 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250220072226.175071-1-bxue@redhat.com>
+In-Reply-To: <d2d72753-5bf2-48cf-b2f0-cfe184ec75a7@oracle.com>
 
-I'm curious why this is something that you care about this particular
-case?  Historically, Red Hat (nor any other enterprise distribution)
-has supported changing or adding ext4 feature flags.  What users were
-told to do was to create a new ext4 file system, and then copy the
-files (or do a backup/restore) to the new file system.
+On Thu, Feb 20, 2025 at 01:27:32PM +0800, Anand Jain wrote:
+> On 20/2/25 02:19, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> > 
+> > If the test fails or is interrupted after mounting $scratch_dev3 inside
+> > the test filesystem and before unmounting at test_add_device(), we leave
+> > without being unable to unmount the test filesystem since it has a mount
+> > inside it. This results in the need to manually unmount $scratch_dev3,
+> > otherwise a subsequent run of fstests fails since the unmount of the
+> > test device fails with -EBUSY.
+> > 
+> > Fix this by unmounting $scratch_dev3 ($seq_mnt) in the _cleanup()
+> > function.
+> > 
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >   tests/btrfs/254 | 1 +
+> >   1 file changed, 1 insertion(+)
+> > 
+> > diff --git a/tests/btrfs/254 b/tests/btrfs/254
+> > index d9c9eea9..6523389b 100755
+> > --- a/tests/btrfs/254
+> > +++ b/tests/btrfs/254
+> > @@ -21,6 +21,7 @@ _cleanup()
+> >   {
+> >   	cd /
+> >   	rm -f $tmp.*
+> > +	$UMOUNT_PROG $seq_mnt > /dev/null 2>&1
 
-Over a decade ago, when I was at Google, we did do a transition of
-file sytems from ext2 to ext4 (in no-journal mode) for all files
-stored in our cluster file systems.  Our experience for our partcular
-workload is that the performance delta between an existing file system
-that was formatted w/o extents, and uninit_bg, and then converted to
-"ext4" using tune2fs, was roughly half the performance improvement of
-a file system that was freshly formatted to use ext4 once the file
-system was filled to roughly the same level, so that file system aging
-wastaken into account.
+This should use the _unmount helper that's in for-next.
 
-So users who do the conversion won't get the full benefits of ext4.
-Also, the exact set of file system features that we changed was
-different from from what you are testing.  I'd also note that this
-test is just filling a 1G file system, then changing the file system
-features, and then running fsck on the file system, and then trying to
-mount the file system.
+--D
 
-This isn't actually a very exhaustive test of doing a "conversion".
-If you really want to do a "coversion" test, what I'd recommend is to
-fill the TEST_DEV to be about 50% full, and then make the changes to
-the file system features, and then running the xfstests using the ext4
-file system type without SCRATCH_DEV being set up.  This would do a
-much better job of testing this case, without needing to add a new
-test to xfstest that to be honest, isn't really all that effective at
-testing this case.
-
-What did we do, 10+ year ago?  Well, we ran xfstests using the a file
-system config[1] that didn't have flex_bg set, since that's one of the
-primary differences when using a "converted" file system.  We then
-using tune2fs to convert 1% of the file systems in a single failure
-domain of the cluster file system, and watched looking for potential
-problems, and measuring for any performances gains (or losses).  We
-then gradually increased the percentage of file systems converted to
-2%, 5%, etc which is considered best practice[2] when doing this kind
-of feature rollout.
-
-[1] https://github.com/tytso/xfstests-bld/blob/master/test-appliance/files/root/fs/ext4/cfg/ext3conv
-[2] https://books.google.com/books?id=81UrjwEACAAJ
-
-Cheers,
-
-						- Ted
+> >   	rm -rf $seq_mnt > /dev/null 2>&1
+> >   	cleanup_dmdev
+> >   }
+> 
+> 
+> Reviewed-by: Anand Jain <anand.jain@oracle.com>
+> 
+> 
+> 
