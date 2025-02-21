@@ -1,114 +1,149 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E2401E9905
-	for <fstests@vger.kernel.org>; Fri, 21 Feb 2025 16:47:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E9F91FBC86;
+	Fri, 21 Feb 2025 20:22:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740156472; cv=none; b=SIstqD0lxPexTiViu6fSKVUm0ouchhPR85yvRTPEv1kX2LV0FxUrB/Oeg3JGzwPK56zruHHtwyutUiIVouZhS/p4rB3NjmaFw2QvX2X5Ga0V+dPZIHcziDxhUPZn8AVkA5+fi3y0ix8YhcJJql1MGAfI7XQPIV4H0fzkK9ol15k=
+	t=1740169366; cv=none; b=cF+7WNLkXH6BfuAdZfhwLvEAnLCfok7WxGH6fJcgOHUn7FYD/kJb5GjEW6jxSzamnK61YuEsB/+4Dy/zD1Sw85Dhltkg63/EF2n34lIICWAafHQnA8GsJFjwfZYHEaZ5yol8WHBApKZba68rXKv3yPVZlTLyBAZg360ZM0SSotw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740156472; c=relaxed/simple;
-	bh=UEhBBl4R2UtHUakkote54lSON4a70yR6Rdc63v0ovF0=;
+	s=arc-20240116; t=1740169366; c=relaxed/simple;
+	bh=OyfFSNFOZhz2ZZXwktr473MPDHGeSiTuMaLR3HxJdUk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IRS+WpmQltdnKOuJgTVGBWwbEFfLXxSs9EVYJXxGll1VQ5nOPE6p9eOrHlxe9Q//+B1JykMRBLLool3ElFPo0tAKeTGQK9HkupzVfO2jg+Tp+Dn3rsyxRLaDa70B8IdM30OHFFQ2YUwcuaVYzyli+6gXhFV7/439yM1ZmjOVNno=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FyJ34jUb; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=tMzNB/3Sg6BlQ78xpuwkT36Ku2/tsTXxjmW9CStlcrvMW+GBc9yBv3QMZcaPY6PazHMu9R/HuHWFqSKwQopWlWNhcqQubO6ZnIWBmtKnQa3QsT6w/AXFVYXwVh5RpvZwAmZ8EGuhojfWh1K2puuRgJP+H+wHRLr/IMXdKsqvBKA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Al0gD3Ku; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FyJ34jUb"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0671EC4CED6;
-	Fri, 21 Feb 2025 16:47:52 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Al0gD3Ku"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7CDC8C4CED6;
+	Fri, 21 Feb 2025 20:22:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740156472;
-	bh=UEhBBl4R2UtHUakkote54lSON4a70yR6Rdc63v0ovF0=;
+	s=k20201202; t=1740169365;
+	bh=OyfFSNFOZhz2ZZXwktr473MPDHGeSiTuMaLR3HxJdUk=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=FyJ34jUbdBIASd8zX6IZ+qYP6bv4/uGmvpAD2X8C26YV6apGeGxZihyV4cyzdf+mX
-	 Iqz14NzcKXI351GNuy4A+guCUJLtOzbjLPAi5/++tJjagIis3+p09N10t8Xat3wsK6
-	 i213jD3oPJsKZ1U8/JGU8W2bup++RiVegDjxCC6BJZjVwj1Jx70meFUkTLW6Rn6YfM
-	 1uX46MFD+c/CVq43D1T6wDpC56NdPIKuwvUbL6AYjMF5XQPi5H9VeyCElVOR5yLSzh
-	 FNJS2IDqvuiB+c21JKgwGDMLCHGLi/KCk0cOmCxD0/3Rw+SYYnijkbe8//7IsG9WLo
-	 ol1HtulAwP5aw==
-Date: Fri, 21 Feb 2025 08:47:51 -0800
+	b=Al0gD3Ku/WETML+UeraPDLo91a1LS4jYIr+bBwQ7lJa7UVskuufKPyzI+fKGvWbEW
+	 6K7A5WmVrM6sLPZXWMELEFBX1GewVSyJDAy+zQmfjylO4sNg8bDHub7KIL9ne473JW
+	 MuLEs18iUNWlqNIske/J2xJ3Rk9HAxq5e/X0OYnkmg3wpt9u1k7J7DuE+3K2+zUvbk
+	 54tt7jbmb+SsPVR5vkPkZw1H7pw/gOAbJPlaEQaWYJbLGk39tBJNz40RxfgaXmiZOn
+	 RiUDNbpHLG5YRx4DFWnHBXSMywWWWvddv0mWJcOTwetJsGAuYnQgoaCnKdAoOr3vIo
+	 FfxiEe7DhxT9g==
+Date: Fri, 21 Feb 2025 12:22:44 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: Eric Sandeen <sandeen@redhat.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Namjae Jeon <linkinjeon@kernel.org>
-Subject: Re: [PATCH] generic: test zero-byte writes to new file
-Message-ID: <20250221164751.GY21799@frogsfrogsfrogs>
-References: <b4d76883-e58b-4db3-b7e4-7ddeb5ec7f42@redhat.com>
- <30dfe4a2d18ec2ca29d303c1f8fc943688221d59.camel@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Filipe Manana <fdmanana@kernel.org>, Anand Jain <anand.jain@oracle.com>,
+	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/2] btrfs/254: don't leave mount on test fs in case of
+ failure/interruption
+Message-ID: <20250221202244.GZ21799@frogsfrogsfrogs>
+References: <cover.1739989076.git.fdmanana@suse.com>
+ <9aa6c8318d11b2fd1c2e208d85b2f83ea81ff88d.1739989076.git.fdmanana@suse.com>
+ <d2d72753-5bf2-48cf-b2f0-cfe184ec75a7@oracle.com>
+ <20250220170333.GV21799@frogsfrogsfrogs>
+ <CAL3q7H6cH26jarU+YEogd5O5FuHi+YNtaWgmsV72NuXacPQU6w@mail.gmail.com>
+ <20250221041819.GX21799@frogsfrogsfrogs>
+ <20250221060243.4wgr4s64mz7qaxlf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <30dfe4a2d18ec2ca29d303c1f8fc943688221d59.camel@gmail.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20250221060243.4wgr4s64mz7qaxlf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Fri, Feb 21, 2025 at 10:44:09AM +0530, Nirjhar Roy (IBM) wrote:
-> On Thu, 2025-02-13 at 12:06 -0600, Eric Sandeen wrote:
-> > A bug was recently fixed in exfat where attempting to do a zero-byte
-> > write would yield -EFAULT; test for that here.
+On Fri, Feb 21, 2025 at 02:02:43PM +0800, Zorro Lang wrote:
+> On Thu, Feb 20, 2025 at 08:18:19PM -0800, Darrick J. Wong wrote:
+> > On Thu, Feb 20, 2025 at 06:22:57PM +0000, Filipe Manana wrote:
+> > > On Thu, Feb 20, 2025 at 5:03 PM Darrick J. Wong <djwong@kernel.org> wrote:
+> > > >
+> > > > On Thu, Feb 20, 2025 at 01:27:32PM +0800, Anand Jain wrote:
+> > > > > On 20/2/25 02:19, fdmanana@kernel.org wrote:
+> > > > > > From: Filipe Manana <fdmanana@suse.com>
+> > > > > >
+> > > > > > If the test fails or is interrupted after mounting $scratch_dev3 inside
+> > > > > > the test filesystem and before unmounting at test_add_device(), we leave
+> > > > > > without being unable to unmount the test filesystem since it has a mount
+> > > > > > inside it. This results in the need to manually unmount $scratch_dev3,
+> > > > > > otherwise a subsequent run of fstests fails since the unmount of the
+> > > > > > test device fails with -EBUSY.
+> > > > > >
+> > > > > > Fix this by unmounting $scratch_dev3 ($seq_mnt) in the _cleanup()
+> > > > > > function.
+> > > > > >
+> > > > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > > > > ---
+> > > > > >   tests/btrfs/254 | 1 +
+> > > > > >   1 file changed, 1 insertion(+)
+> > > > > >
+> > > > > > diff --git a/tests/btrfs/254 b/tests/btrfs/254
+> > > > > > index d9c9eea9..6523389b 100755
+> > > > > > --- a/tests/btrfs/254
+> > > > > > +++ b/tests/btrfs/254
+> > > > > > @@ -21,6 +21,7 @@ _cleanup()
+> > > > > >   {
+> > > > > >     cd /
+> > > > > >     rm -f $tmp.*
+> > > > > > +   $UMOUNT_PROG $seq_mnt > /dev/null 2>&1
+> > > >
+> > > > This should use the _unmount helper that's in for-next.
+> > > 
+> > > Sure, it does the same, except that it redirects stdout and stderr to
+> > > $seqres.full.
+> > > 
+> > > Some tests are still calling  $UMOUNT_PROG directly. And that's often
+> > > what we want, so that if umount fails we get a mismatch with the
+> > > golden output instead of ignoring the failure.
+> > > But in this case it's fine.
 > > 
-> > Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> > ---
+> > <groan> You're right, I'd repressed that Chinner decided to introduce
+> > _unmount so that he could improve logging of unmount failures but then
+> > he only bothered converting tests/{generic,xfs} because he didn't give
+> > a damn about anyone else.
 > > 
-> > diff --git a/tests/generic/761 b/tests/generic/761
-> > new file mode 100755
-> > index 00000000..e933eb83
-> > --- /dev/null
-> > +++ b/tests/generic/761
-> > @@ -0,0 +1,28 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 761
-> > +#
-> > +# test zero-byte writes
-> > +#
-> > +# exfat had a regression where a zero-byte write to a file would
-> > +# yield -EfAULT. Should work on all filesystems - write should
-> > +# succeed and the zero-byte file should be created.
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest auto quick
-> > +
-> > +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
-> > +	"exfat: short-circuit zero-byte writes in
-> > exfat_file_write_iter"
-> > +
-> > +# Modify as appropriate.
-> > +_require_test
-> > +
-> > +rm -f $TEST_DIR/testfile.$seq
-> > +$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq
-> > +test -f $TEST_DIR/testfile.$seq || _fail "file not created"
-> Minor: Maybe just remove the test file that is created above (since we
-> are using the TEST_DIR)and not leave any test artifacts? Or, maybe use
-> the scratch device? 
+> > Now fstests is stuck with a half finished conversion and no clarity
+> > about whether the rest of the $UMOUNT_PROG invocations should be
+> > converted to _umount or if those are somehow intentional.
+> > 
+> > Hey Zorro, do you have any opinion on this?  Should someone just finish
+> > the $UMOUNT_PROG -> _unmount conversion next week?
+> 
+> The release of this week will have your big randome-fixes. Next release will
+> deal with your 10 PRs mainly :) So I'll deal with the "$UMOUNT_PROG ->
+> _unmount conversion" after that. Anyway, we still can review the "conversion"
+> patch at first.
 
-Agreed, the _cleanup should remove the testfile.
-
-Using the scratch device (== additional runtime for mkfs) is overkill
-since this test creates a single file but writes nothing to it.
+Ok.  Let's do that next week.
 
 --D
 
-> --NR
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/761.out b/tests/generic/761.out
-> > new file mode 100644
-> > index 00000000..72ebba4c
-> > --- /dev/null
-> > +++ b/tests/generic/761.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 761
-> > +Silence is golden
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > Anand, since you've already merged this patch into your repo, can you
+> > > please replace that line with the following?
+> > > 
+> > > _unmount $seq_mnt
+> > > 
+> > > Thanks.
+> > > 
+> > > >
+> > > > --D
+> > > >
+> > > > > >     rm -rf $seq_mnt > /dev/null 2>&1
+> > > > > >     cleanup_dmdev
+> > > > > >   }
+> > > > >
+> > > > >
+> > > > > Reviewed-by: Anand Jain <anand.jain@oracle.com>
+> > > > >
+> > > > >
+> > > > >
+> > > 
 > > 
 > 
 > 
