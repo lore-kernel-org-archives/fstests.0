@@ -1,130 +1,125 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43B631E5701;
-	Fri, 21 Feb 2025 12:05:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 603B61EE00E;
+	Fri, 21 Feb 2025 12:54:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740139511; cv=none; b=ibp91FcCjhbZrbkKcifssX6BrkVnVAFLT9jEeokSccB9B0KaSnunM/62ZL5Gn3WaiE/g+W29gEjrQmvZeSg3wfQzmENuY5cdLdyR7Ri6oGON453T5EAqJiOvL1V7Es/XnWlTj4tJCUCjY16wL8hQyqbyg1c8JC2bpHm3g2DymGo=
+	t=1740142490; cv=none; b=KLMrHS0j4QQm1QxJUAolZ0RlCdQGfud2ffXS5tUPKBxAAU5PEW3Dh393r6jqzSEIsQu/lG69yxw2UjwGY89NLuX4PVr/0z8ziUVYkLWSBtw/m7bmbJipKkVjaH6PP+PCJAjcWu2cKD2Jjy5/2CSffgMH9CiSCkrGcrkmBGao3oU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740139511; c=relaxed/simple;
-	bh=cUqxcl8SfiwYmxIgkjeyFdso3n4dOeioO3i3nLIym6M=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EMpgp6oMddGIY/m/eJucdmP3ZvF8yMoeuj5JFCf2Kj66B53xmhW+0yUN19VVeGH5n7YPyi2x9g4HU39c0Ozv2ttqiORccsbPqJS9ackq2Mjb0OSPWDAl6G+sR5HRD5PQsh6XaiuSrfA0jxXmNNDwGzx8hAUaJsCf7SmRNu9pyqU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kawpoAPB; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740142490; c=relaxed/simple;
+	bh=PcUS/83HjBOY6GsNbTD/RmobTvvq1zbmZ3d6BroLlO4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=oYp0/VKe0K8FxF2ti9aQw7S0bZVJ9u3qiHbVDPZsbq6gFWmzszWizcCo2HCLk2LDzA9zT4kOgdVqHDV19n0tjdWDDBaVZHgKeZ7qNL9KWQgGFHgI9CUsf+1AW9VQnKMBOJHDqE4IzYLLILAaUQZb9vGSbYvGrLvCTYTmWIJ/6Ec=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=o8ClqXCR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kawpoAPB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B53E0C4CEE6;
-	Fri, 21 Feb 2025 12:05:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="o8ClqXCR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EABF9C4CED6;
+	Fri, 21 Feb 2025 12:54:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740139510;
-	bh=cUqxcl8SfiwYmxIgkjeyFdso3n4dOeioO3i3nLIym6M=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=kawpoAPB7i0UkTPEsVOZHMfYWgdDxK2gzq1x8JIE82vXtmW/jGG8e0GIqe/ekXOFR
-	 mTLsypsPSY1KV3uDsGPtncU/RUKn1/IVTWRaztkT/89eqIniFLZZAadnxJ+THYe0RO
-	 +MHsOAMHkXa0xjeyj9LGEL5g+/3I5SZKelYUrGnAKLfHjwf4ne0VJ1+HocYtD5pus5
-	 yYNFZg8eD1r6vt4DvamcWyMA3GyZUXrDrhvqmtYXYZb1jFTo0i0bdvPdhCVxwuYXZh
-	 2PVUqu74AitHN+qvmnn/jJ5TZYW+D+6Aih+cgudbF/oCFpszqk5YrTmvElUDAWEaEz
-	 CxGWjcu3eMjzg==
-Received: by mail-ed1-f51.google.com with SMTP id 4fb4d7f45d1cf-5e0939c6456so3481089a12.3;
-        Fri, 21 Feb 2025 04:05:10 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCU+5D2al1iW/6RywoL3zx8Q7z6ZtkPFB16pilFvkyIdGemNS33aZy2p10fIs7T7gJ5KfdM2unLW@vger.kernel.org, AJvYcCUEaBRv5wOMnwSRnQz7X6MfWBkj1KqrC+SYy2eE9qdF1sgHgqTXDSZNXYpJxVmMH1A8XwQYqqMiGLdifds=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzu4hrgzUQzhzZJXg7tjWlu6rD822R+y5AgncD8CzPRMhR/eR2U
-	UTVbNCYLyFXRYuvKXe8mchLaJQXvlmoP03fcOtYr/dLRP8SMAwxreC81K9MER8MD5+GSVglO2gZ
-	0VQPqnSO31jw1OA3ysIVT0CyQ43M=
-X-Google-Smtp-Source: AGHT+IHahBn3zFBA39KXAA0RKXggsyvmOqfc7fJJxlvZu8gABRYiw7UAiIFLcs0do5jlDu980URsbEHn822AugTUw/s=
-X-Received: by 2002:a17:907:7216:b0:ab7:86b6:beeb with SMTP id
- a640c23a62f3a-abc0de519d3mr285091066b.57.1740139509190; Fri, 21 Feb 2025
- 04:05:09 -0800 (PST)
+	s=k20201202; t=1740142489;
+	bh=PcUS/83HjBOY6GsNbTD/RmobTvvq1zbmZ3d6BroLlO4=;
+	h=From:To:Cc:Subject:Date:From;
+	b=o8ClqXCRizWDwkk5dSs7fH3VSYae0/vYTKg5sls0ZOeYNTBfq0m12z2Hw7CU28cCj
+	 HIG+AYNISbOfUUEc89Pd4PWzYasOze33GBnzwwZ+0E+r4U3Etts9h/ONT+X4plIfRp
+	 iQaTO3qgEfMewU4r6cAJY5CUAgFnNVyYpNn05i7i+AcPuLy/t3/X9s4GjuurEHtouC
+	 ZYZoFCk0sQuHPr10HqihBpyqwvhEJIMRmedza8Uh1jOcXfGxQ07sCvzIozGtxi4+rl
+	 mUwijXk44Q5AiKfntBgG0LT/dakflbjE60I+0LYDHS85l4lMyhVzsil/S/1dFHIcg2
+	 rhcY3Iq/6uXkw==
+From: fdmanana@kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: [PATCH] fstests: add commit IDs for kernel patches that are already in Linus' tree
+Date: Fri, 21 Feb 2025 12:54:43 +0000
+Message-ID: <4ba5443a5789880423ce3b90406a12314626e349.1740142425.git.fdmanana@suse.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <e73cfe5310a8cee5f6c709d54b8c18ff52e39a0a.1739918100.git.anand.jain@oracle.com>
-In-Reply-To: <e73cfe5310a8cee5f6c709d54b8c18ff52e39a0a.1739918100.git.anand.jain@oracle.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 21 Feb 2025 12:04:32 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H4GgaQKTLzXzza4xKsoa22pG6MbOFYOuNhK-5J-ieZdRg@mail.gmail.com>
-X-Gm-Features: AWEUYZkKswD_20hf8wffgO0RfYeCUGxPBBvtkTtUtRKBr7oXMpPmCF24wSk_Exk
-Message-ID: <CAL3q7H4GgaQKTLzXzza4xKsoa22pG6MbOFYOuNhK-5J-ieZdRg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/226: fill in missing comments changes
-To: Anand Jain <anand.jain@oracle.com>
-Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Tue, Feb 18, 2025 at 10:36=E2=80=AFPM Anand Jain <anand.jain@oracle.com>=
- wrote:
->
-> From: Qu Wenruo <wqu@suse.com>
->
-> Update comments that were previously missed.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/btrfs/226 | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/tests/btrfs/226 b/tests/btrfs/226
-> index 359813c4f394..ce53b7d48c49 100755
-> --- a/tests/btrfs/226
-> +++ b/tests/btrfs/226
-> @@ -22,10 +22,8 @@ _require_xfs_io_command fpunch
->
->  _scratch_mkfs >>$seqres.full 2>&1
->
-> -# This test involves RWF_NOWAIT direct IOs, but for inodes with data che=
-cksum,
-> -# btrfs will fall back to buffered IO unconditionally to prevent data ch=
-ecksum
-> -# mimsatch, and that will break RWF_NOWAIT with -EAGAIN.
-> -# So here we have to go with nodatasum mount option.
-> +# RWF_NOWAIT works only with direct I/O and requires an inode with nodat=
-asum
-> +# to avoid checksum mismatches. Otherwise, it falls back to buffered I/O=
-.
+From: Filipe Manana <fdmanana@suse.com>
 
-Btw, this is different from what I suggested before here:
+Update a few tests to refer to the commit IDs of patches that were already
+merged into Linus' tree.
 
-https://lore.kernel.org/fstests/68aa436b-4ddd-4ee7-ad5a-8eca55aae176@oracle=
-.com/T/#mb2369802d2e33c9778c62fcb3c0ee47de28b773b
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/323   | 2 +-
+ tests/btrfs/326   | 2 +-
+ tests/btrfs/330   | 2 +-
+ tests/generic/562 | 2 +-
+ tests/xfs/273     | 2 +-
+ 5 files changed, 5 insertions(+), 5 deletions(-)
 
-Which is:
+diff --git a/tests/btrfs/323 b/tests/btrfs/323
+index b7421f6e..08ebf194 100755
+--- a/tests/btrfs/323
++++ b/tests/btrfs/323
+@@ -13,7 +13,7 @@ _begin_fstest auto quick seed remount volume
+ _require_command "$BTRFS_TUNE_PROG" btrfstune
+ _require_scratch_dev_pool 2
+ 
+-_fixed_by_kernel_commit XXXXXXXX \
++_fixed_by_kernel_commit 70958a949d85 \
+ 	"btrfs: do not clear read-only when adding sprout device"
+ 
+ _scratch_dev_pool_get 1
+diff --git a/tests/btrfs/326 b/tests/btrfs/326
+index 1fc4db06..7e6e7b77 100755
+--- a/tests/btrfs/326
++++ b/tests/btrfs/326
+@@ -15,7 +15,7 @@ _fixed_by_kernel_commit 951a3f59d268 \
+ 
+ # Another rare bug exposed by this test case where mnt_list list corruption or
+ # extra kernel warning on MNT_ONRB flag is triggered.
+-_fixed_by_kernel_commit xxxxxxxxxxxx \
++_fixed_by_kernel_commit 344bac8f0d73 \
+ 	"fs: kill MNT_ONRB"
+ 
+ _cleanup()
+diff --git a/tests/btrfs/330 b/tests/btrfs/330
+index 92cc498f..3a311a5a 100755
+--- a/tests/btrfs/330
++++ b/tests/btrfs/330
+@@ -19,7 +19,7 @@ _cleanup()
+ 
+ $MOUNT_PROG -V | grep -q 'fd-based-mount'
+ if [ "$?" -eq 0 ]; then
+-	_fixed_by_kernel_commit xxxxxxxxxxxx \
++	_fixed_by_kernel_commit cda7163d4e3d \
+ 		"btrfs: fix per-subvolume RO/RW flags with new mount API"
+ fi
+ 
+diff --git a/tests/generic/562 b/tests/generic/562
+index 36bd0291..03a66ff2 100755
+--- a/tests/generic/562
++++ b/tests/generic/562
+@@ -16,7 +16,7 @@ _begin_fstest auto clone punch
+ . ./common/reflink
+ 
+ test "$FSTYP" = "xfs" && \
+-	_fixed_by_kernel_commit XXXXXXXXXX "xfs: don't drop errno values when we fail to ficlone the entire range"
++	_fixed_by_kernel_commit 7ce31f20a077 "xfs: don't drop errno values when we fail to ficlone the entire range"
+ 
+ _require_scratch_reflink
+ _require_test_program "punch-alternating"
+diff --git a/tests/xfs/273 b/tests/xfs/273
+index 9f11540a..7e743179 100755
+--- a/tests/xfs/273
++++ b/tests/xfs/273
+@@ -24,7 +24,7 @@ _require_scratch
+ _require_populate_commands
+ _require_xfs_io_command "fsmap"
+ 
+-_fixed_by_kernel_commit XXXXXXXXXXXXXX "xfs: fix off-by-one error in fsmap"
++_fixed_by_kernel_commit a440a28ddbdc "xfs: fix off-by-one error in fsmap"
+ 
+ rm -f "$seqres.full"
+ 
+-- 
+2.45.2
 
-# RWF_NOWAIT only works with direct IO, which requires an inode with
-nodatasum (otherwise it falls back to buffered IO).
-
-What is being added in this patch:
-
-+# RWF_NOWAIT works only with direct I/O and requires an inode with nodatas=
-um
-+# to avoid checksum mismatches. Otherwise, it falls back to buffered I/O.
-
-Is confusing because:
-
-1) It gives the suggestion RWF_NOWAIT requires nodatasum.
-
-2) The part that says "to avoid checksum mismatches", that's not
-related to RWF_NOWAIT at all.
-    That's the reason why direct IO writes against inodes without
-nodatasum fallback to buffered IO.
-    We don't have to explain that - this is not a test to exercise the
-fallback after all, all we have to say
-    is that RWF_NOWAIT needs direct IO and direct IO can only be done
-against inodes with nodatasum.
-
-So you didn't pick my suggestion after all, you just added your own
-rephrasing which IMO is confusing.
-
-
-
->  _scratch_mount -o nodatasum
->
->  # Test a write against COW file/extent - should fail with -EAGAIN. Disab=
-le the
-> --
-> 2.47.0
->
->
