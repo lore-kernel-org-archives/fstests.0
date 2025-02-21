@@ -1,346 +1,180 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FB9B1FBC87;
-	Fri, 21 Feb 2025 05:49:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D6751F755B
+	for <fstests@vger.kernel.org>; Fri, 21 Feb 2025 06:02:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740116988; cv=none; b=GPEMMu3n6iUQJylsiBSNq5zWR1270uhspvS8NQo83349Ims/Ov6rVQcqYo6eI0RufNIkfWR8+Buj9Z0KuCkqJXXnJqYsCt9Jg5CM3Ply+ogeXWUV2IBZ0dWpcpKHQHqqpCUmOl6TBl+TQPkVcrm3+WjUD+IKJ0bSu5xfY2myvNI=
+	t=1740117773; cv=none; b=EjoFzFUF9Yej4GCH07Y7KrwVjmELfz/DmTFfd1xETwISYo7IAITgIKCV+JGfYl8GsbN0r+2K6sVrLw4XMtAxkJdqr3cJJc/wh4v13Eugh0cHjFInG4pT9T3tC2U8JbmLz5n1tmoBtnPvA6mdupzqSYpZNIKgrmdJU9n3nmWfJSw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740116988; c=relaxed/simple;
-	bh=cvmiWKew6bIhrYPHLGmG7TpPGmgPt9q+TqAyBCJNGBg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Yme7b3+HDWH5Ynj4bD725qNkkDWokMu0ICZf0P4w9OSPZDA8fu86oth9h1a+iFPEPaYKJTUEXCY94dCeNqHmbBXXQVOvTa4tX7df1p63LuKUn2TefKSh7kJRjVD71WS3NSyKTVEy2srs8GcIiuZ8GGonEbZfql4fc3ceq4SGo3E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Lt+8ACfI; arc=none smtp.client-ip=209.85.214.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1740117773; c=relaxed/simple;
+	bh=naxkgafUE/uoKz1c65LlObiDAc87O5jI+9ZZKZQPH4w=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eR6IpwY/YBslUJ2D8PE8yWe4K/Ohr7GA8aEQEHyS4/+WUDFyFBJfdXj/LrSdqN+Y9Uao38obR+yvJXWZREMTv7E4sdhPl38gyrYNGCL+ETICTu0iXQwzNALTtukD1z6IrpJhO2BPAhSMVSBQOE1gesmIKtr4+sUnNPQZZD46No0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LUAp+NKD; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Lt+8ACfI"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-220bfdfb3f4so37778475ad.2;
-        Thu, 20 Feb 2025 21:49:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1740116986; x=1740721786; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=YxH9KuWJX9rm9WyAdNNgaHpu9/9ip+kAMwhprP7JICU=;
-        b=Lt+8ACfIb2YLXKc1dhR3h9wjwbJIinbqNvR5N5FM5ua4Vu2Cse0x9F3MsaWzxJmU4I
-         ZTjeOoxDDjQq7adiBl44VqfbW/UkSR4v+4prTtem7zOE3ART/fy8v7aoEsYhM4R9hGue
-         Tz4DKXndA2RzdA2XA25naruzld2s3B9uHtwkagGpf5NshyoUHp8BInBL8FTJdZIZnOhD
-         Biz+GIeLNXe7CUu+6ozC9qbUvevlWrUnBo/k/PDc9ONShJqDQDGfWP4RywLV0WPtOwbU
-         sHV6g/9PQoeq68gmlEaTVvpCj0pbtQisOtaNPPWLITbsZpFnq+UtR8NoJ4Nb9dSpJLI9
-         C7GQ==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LUAp+NKD"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1740117771;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=obxFJfu8iolYPLgoAFCeQGWsCqsjY31pMoZ5UMKcarQ=;
+	b=LUAp+NKDkf/vY7o7Ae2tjLMJc5V6nw1aVYK1/iwwBxB0t/iomymwnhklkOY0BR0Zr8fkW0
+	IB4/xkSAfzRKXNIhnq9JHNpvjvsDeUFV7TwdSDD7HoBAuZ+pJjZKKzmq3RcSDjOd1/Hyok
+	GH4P/qovdpQ+GWfUCmtd57bz4io08hE=
+Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
+ [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-527-ctZBMKZRNfOOkxloMIXVvQ-1; Fri, 21 Feb 2025 01:02:49 -0500
+X-MC-Unique: ctZBMKZRNfOOkxloMIXVvQ-1
+X-Mimecast-MFC-AGG-ID: ctZBMKZRNfOOkxloMIXVvQ_1740117768
+Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-22109f29c99so36281445ad.1
+        for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 22:02:49 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740116986; x=1740721786;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
+        d=1e100.net; s=20230601; t=1740117768; x=1740722568;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=YxH9KuWJX9rm9WyAdNNgaHpu9/9ip+kAMwhprP7JICU=;
-        b=ZKto6mqI5qrMx4Q5BuDzyrf8ov7vlldUvPwY54GEZz5YKZew/A5hDqLAgnDaw6AxRt
-         Eieb/nw774kHfrCW7vodC0NXjVPMrL7pBEBsIsQk+x2iOFOag6kAPPiozmYu3cqrZ3UH
-         bkKdWweNUZxWEHA9TuMCCxZIbiV9MGgruVILhPUCPHzNSYn5EeYPFCt45pWCyVVRVcca
-         HkAkjy+YxS/EjfhbF4OQG1erxBM6ivSnU+MLGbLXuBOZ+VtONQ3hsrC6QxbGWMEQD9fO
-         t6JEIpkKtJl6ClxRkaO0rYxKa1Z2uS5dfIXkdADob/DO5L4ggV6nv03PKwzm1zA7HUQ6
-         MH2Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWg7ICWsirX++daTZiHCRecvPPQh4fGfdkfBq0IDsM6cbWKBg9CWo4io0w1E0bK13gTkgA5gXED@vger.kernel.org, AJvYcCWj9eaYT9KOzOooKQxNUHrCMq2sDEqVzvx3qWtdZCyVet7IHd8nyrFRVX6wcKATne+1VAwT/6WANdkp@vger.kernel.org, AJvYcCXqfmIRkzmF6RIxquByl0lH+6XHqCKy9vr2VFG0hpKTL8VJ34JwPd8DqN6CCpgyNFB06rMGXTiQjA8sBA==@vger.kernel.org
-X-Gm-Message-State: AOJu0YyCgyXrPVKfAB6iTbEBDcwqCzC80MdjVo7YU4EBCV4xDfIPHOMl
-	Clxd7IpJOlg3GaFD180Cjz0nJQOEaF+iyOUuwSAuIOl2Mz8GBesC
-X-Gm-Gg: ASbGncsBJ9s6uaa4e4dAx7Tn7v497lo2fZ2y6d2kcqfkawgLju7/QrwaFNBiQT3372h
-	FuuPfPMLjyFp/dZu4OID9eBwLE97yojEDU4qKL+hij+4aCM5XBeMwFHwcpfRFbkM6MfkyADqffO
-	AUkJeNzAhSw4EQytciLMccS29oerMuFjbtC//+w6XpFEvu9ExLojMXvhIvsea4Xab3jlcBFjFrx
-	D98/GHBOW7M0eH2JmbrE3QLDsHGJXyBmFAUZf9XmIDV6/WKyAgZxEHAMmKr4HwKW9E1wWPqXN9b
-	6E31/uoATWNXwTbtGLxGNO+RAzI1Q9kXHMcz
-X-Google-Smtp-Source: AGHT+IEiidR4fTSv8C0AJDrbT+K+y1GcOQ2r1xj4NzKnkKaamPGXo0BUpCJHMFOCn1ftjslEXhVOIg==
-X-Received: by 2002:a17:902:f68e:b0:21f:6bda:e492 with SMTP id d9443c01a7336-2219ffc3d85mr33712205ad.35.1740116986228;
-        Thu, 20 Feb 2025 21:49:46 -0800 (PST)
-Received: from [192.168.0.120] ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d55858d6sm129371975ad.223.2025.02.20.21.49.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 20 Feb 2025 21:49:45 -0800 (PST)
-Message-ID: <b8dcd75a-ba05-40c7-adb4-862e594f9b70@gmail.com>
-Date: Fri, 21 Feb 2025 11:19:41 +0530
+        bh=obxFJfu8iolYPLgoAFCeQGWsCqsjY31pMoZ5UMKcarQ=;
+        b=C+eWIOcjiXqgRBxKM5e+L9+ebOfcFeF1wH9syecojXulj/itWK1K0UDWAdifKVl/x3
+         3Ek2UaGA4TjFXuJBSqnCuMssruvpY25jfiU4ZidxAlHItviGHQwkR0CP2XtUDhz4uKo1
+         fByWjbTc0kEALyJ4Cx2d2tDlS6ndaFUFluP/q+ATSCpvZ7PkxQKp9/Rg54vKRHuqF+xa
+         cIwHYELplIIYvhS/hQAWvqGvNFPVQaiOdoJXuntFBS5qTcoR+m9rThn7XCa2rUB7m37C
+         aBP2FF2MUcE4wgbyA1cnh/j2hZUAiaNoIUAcODv1zfsAtu1LsoWdAr3VqduvCvhZ6/LO
+         qEyw==
+X-Forwarded-Encrypted: i=1; AJvYcCW6pVW2Cql04KDnIyZX6FhG7RvZt0OKyPsmWHWyXnN2vbkc6jUwOX+dq1XuKG5y3L0x9DFMQNPb@vger.kernel.org
+X-Gm-Message-State: AOJu0YyRr1noWO0q9q2u7w+wWtUzf6bI7hLJuPqCI8BK7jQHhdDn/WH6
+	B7l+Roal0EcwZwGMlB4nL8m6MDJ5lIlHRWIob2z/6f9oUI+R4cmbkuc1t0KjyJGqAix4sc+m5qW
+	UkcsJwz93QfVcn0sZcp/u3bUWGr17GaVRI2Csx1jXHFZzsVe3+kx13TA=
+X-Gm-Gg: ASbGnctMin2cxJd/l42nyhMkLA8Jss0JwfONI3AwRQu3XK0jr3BwQPoHPRcYxEzWThm
+	FksM04N5VQvNfuhJewrGYQqOzXegXo74FkXUjcupzXjK3IjEShjpHCp3QJ72P54+/dahItM/hHU
+	DNJGdm17NYvqV0ruMEosZoMlK4ggaxsx/ha1xPsMZcGCiFPHue3eI9cb3MoOKxTA1KTO49DpEZn
+	aYBoLRsISKnR0Jp568Z8gZNDm8xb6Kjk8bRmvbcTyODnYIimjL2cl/gLe6z30ukI46u7Ok4p66Z
+	zLHDzC2Frp+ZbPobR3q05BjiM+yOkcrjIxZLTrh7waQUbNgnKOeQfpbU
+X-Received: by 2002:a17:903:2286:b0:220:cd9f:a186 with SMTP id d9443c01a7336-2219fdc2dfcmr36260715ad.0.1740117768477;
+        Thu, 20 Feb 2025 22:02:48 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IEYlbRZFFuOUDgIJ24tagzyso/dkqWf2mfOc8u3dr9nscIjeUfbiBUC8oyWfSN9pNrRVlMTbg==
+X-Received: by 2002:a17:903:2286:b0:220:cd9f:a186 with SMTP id d9443c01a7336-2219fdc2dfcmr36260425ad.0.1740117768109;
+        Thu, 20 Feb 2025 22:02:48 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-221822094adsm31120035ad.195.2025.02.20.22.02.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Feb 2025 22:02:47 -0800 (PST)
+Date: Fri, 21 Feb 2025 14:02:43 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Filipe Manana <fdmanana@kernel.org>, Anand Jain <anand.jain@oracle.com>,
+	fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	Filipe Manana <fdmanana@suse.com>
+Subject: Re: [PATCH 1/2] btrfs/254: don't leave mount on test fs in case of
+ failure/interruption
+Message-ID: <20250221060243.4wgr4s64mz7qaxlf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <cover.1739989076.git.fdmanana@suse.com>
+ <9aa6c8318d11b2fd1c2e208d85b2f83ea81ff88d.1739989076.git.fdmanana@suse.com>
+ <d2d72753-5bf2-48cf-b2f0-cfe184ec75a7@oracle.com>
+ <20250220170333.GV21799@frogsfrogsfrogs>
+ <CAL3q7H6cH26jarU+YEogd5O5FuHi+YNtaWgmsV72NuXacPQU6w@mail.gmail.com>
+ <20250221041819.GX21799@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] check: Fix fs specfic imports when
- $FSTYPE!=$OLD_FSTYPE
-Content-Language: en-US
-To: Zorro Lang <zlang@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, fstests@vger.kernel.org,
- linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
- ritesh.list@gmail.com, ojaswin@linux.ibm.com, zlang@kernel.org
-References: <3b980d028a8ae1496c13ebe3a6685fbc472c5bc0.1738040386.git.nirjhar.roy.lists@gmail.com>
- <20250128180917.GA3561257@frogsfrogsfrogs>
- <f89b6b40-8dce-4378-ba56-cf7f29695bdb@gmail.com>
- <20250129160259.GT3557553@frogsfrogsfrogs>
- <dfbd2895-e29a-4e25-bbc6-a83826d14878@gmail.com>
- <20250131162457.GV1611770@frogsfrogsfrogs>
- <20250201063516.gndb7lngpd5afatv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ff6b4e2f-dbd3-479b-a522-a1ae4837b3df@gmail.com>
- <20250210142322.tptpphdntglsz4eq@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <b066257d-e32b-4c2e-a213-826ce8923a93@gmail.com>
- <20250221054737.owarnxetb34gdicf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <20250221054737.owarnxetb34gdicf@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20250221041819.GX21799@frogsfrogsfrogs>
 
+On Thu, Feb 20, 2025 at 08:18:19PM -0800, Darrick J. Wong wrote:
+> On Thu, Feb 20, 2025 at 06:22:57PM +0000, Filipe Manana wrote:
+> > On Thu, Feb 20, 2025 at 5:03 PM Darrick J. Wong <djwong@kernel.org> wrote:
+> > >
+> > > On Thu, Feb 20, 2025 at 01:27:32PM +0800, Anand Jain wrote:
+> > > > On 20/2/25 02:19, fdmanana@kernel.org wrote:
+> > > > > From: Filipe Manana <fdmanana@suse.com>
+> > > > >
+> > > > > If the test fails or is interrupted after mounting $scratch_dev3 inside
+> > > > > the test filesystem and before unmounting at test_add_device(), we leave
+> > > > > without being unable to unmount the test filesystem since it has a mount
+> > > > > inside it. This results in the need to manually unmount $scratch_dev3,
+> > > > > otherwise a subsequent run of fstests fails since the unmount of the
+> > > > > test device fails with -EBUSY.
+> > > > >
+> > > > > Fix this by unmounting $scratch_dev3 ($seq_mnt) in the _cleanup()
+> > > > > function.
+> > > > >
+> > > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > > > ---
+> > > > >   tests/btrfs/254 | 1 +
+> > > > >   1 file changed, 1 insertion(+)
+> > > > >
+> > > > > diff --git a/tests/btrfs/254 b/tests/btrfs/254
+> > > > > index d9c9eea9..6523389b 100755
+> > > > > --- a/tests/btrfs/254
+> > > > > +++ b/tests/btrfs/254
+> > > > > @@ -21,6 +21,7 @@ _cleanup()
+> > > > >   {
+> > > > >     cd /
+> > > > >     rm -f $tmp.*
+> > > > > +   $UMOUNT_PROG $seq_mnt > /dev/null 2>&1
+> > >
+> > > This should use the _unmount helper that's in for-next.
+> > 
+> > Sure, it does the same, except that it redirects stdout and stderr to
+> > $seqres.full.
+> > 
+> > Some tests are still calling  $UMOUNT_PROG directly. And that's often
+> > what we want, so that if umount fails we get a mismatch with the
+> > golden output instead of ignoring the failure.
+> > But in this case it's fine.
+> 
+> <groan> You're right, I'd repressed that Chinner decided to introduce
+> _unmount so that he could improve logging of unmount failures but then
+> he only bothered converting tests/{generic,xfs} because he didn't give
+> a damn about anyone else.
+> 
+> Now fstests is stuck with a half finished conversion and no clarity
+> about whether the rest of the $UMOUNT_PROG invocations should be
+> converted to _umount or if those are somehow intentional.
+> 
+> Hey Zorro, do you have any opinion on this?  Should someone just finish
+> the $UMOUNT_PROG -> _unmount conversion next week?
 
-On 2/21/25 11:17, Zorro Lang wrote:
-> On Fri, Feb 21, 2025 at 09:44:19AM +0530, Nirjhar Roy (IBM) wrote:
->> On 2/10/25 19:53, Zorro Lang wrote:
->>> On Thu, Feb 06, 2025 at 11:32:43PM +0530, Nirjhar Roy (IBM) wrote:
->>>> On 2/1/25 12:05, Zorro Lang wrote:
->>>>> On Fri, Jan 31, 2025 at 08:24:57AM -0800, Darrick J. Wong wrote:
->>>>>> On Fri, Jan 31, 2025 at 06:49:50PM +0530, Nirjhar Roy (IBM) wrote:
->>>>>>> On 1/29/25 21:32, Darrick J. Wong wrote:
->>>>>>>> On Wed, Jan 29, 2025 at 04:48:10PM +0530, Nirjhar Roy (IBM) wrote:
->>>>>>>>> On 1/28/25 23:39, Darrick J. Wong wrote:
->>>>>>>>>> On Tue, Jan 28, 2025 at 05:00:22AM +0000, Nirjhar Roy (IBM) wrote:
->>>>>>>>>>> Bug Description:
->>>>>>>>>>>
->>>>>>>>>>> _test_mount function is failing with the following error:
->>>>>>>>>>> ./common/rc: line 4716: _xfs_prepare_for_eio_shutdown: command not found
->>>>>>>>>>> check: failed to mount /dev/loop0 on /mnt1/test
->>>>>>>>>>>
->>>>>>>>>>> when the second section in local.config file is xfs and the first section
->>>>>>>>>>> is non-xfs.
->>>>>>>>>>>
->>>>>>>>>>> It can be easily reproduced with the following local.config file
->>>>>>>>>>>
->>>>>>>>>>> [s2]
->>>>>>>>>>> export FSTYP=ext4
->>>>>>>>>>> export TEST_DEV=/dev/loop0
->>>>>>>>>>> export TEST_DIR=/mnt1/test
->>>>>>>>>>> export SCRATCH_DEV=/dev/loop1
->>>>>>>>>>> export SCRATCH_MNT=/mnt1/scratch
->>>>>>>>>>>
->>>>>>>>>>> [s1]
->>>>>>>>>>> export FSTYP=xfs
->>>>>>>>>>> export TEST_DEV=/dev/loop0
->>>>>>>>>>> export TEST_DIR=/mnt1/test
->>>>>>>>>>> export SCRATCH_DEV=/dev/loop1
->>>>>>>>>>> export SCRATCH_MNT=/mnt1/scratch
->>>>>>>>>>>
->>>>>>>>>>> ./check selftest/001
->>>>>>>>>>>
->>>>>>>>>>> Root cause:
->>>>>>>>>>> When _test_mount() is executed for the second section, the FSTYPE has
->>>>>>>>>>> already changed but the new fs specific common/$FSTYP has not yet
->>>>>>>>>>> been done. Hence _xfs_prepare_for_eio_shutdown() is not found and
->>>>>>>>>>> the test run fails.
->>>>>>>>>>>
->>>>>>>>>>> Fix:
->>>>>>>>>>> Remove the additional _test_mount in check file just before ". commom/rc"
->>>>>>>>>>> since ". commom/rc" is already sourcing fs specific imports and doing a
->>>>>>>>>>> _test_mount.
->>>>>>>>>>>
->>>>>>>>>>> Fixes: 1a49022fab9b4 ("fstests: always use fail-at-unmount semantics for XFS")
->>>>>>>>>>> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
->>>>>>>>>>> ---
->>>>>>>>>>>       check | 12 +++---------
->>>>>>>>>>>       1 file changed, 3 insertions(+), 9 deletions(-)
->>>>>>>>>>>
->>>>>>>>>>> diff --git a/check b/check
->>>>>>>>>>> index 607d2456..5cb4e7eb 100755
->>>>>>>>>>> --- a/check
->>>>>>>>>>> +++ b/check
->>>>>>>>>>> @@ -784,15 +784,9 @@ function run_section()
->>>>>>>>>>>       			status=1
->>>>>>>>>>>       			exit
->>>>>>>>>>>       		fi
->>>>>>>>>>> -		if ! _test_mount
->>>>>>>>>> Don't we want to _test_mount the newly created filesystem still?  But
->>>>>>>>>> perhaps after sourcing common/rc ?
->>>>>>>>>>
->>>>>>>>>> --D
->>>>>>>>> common/rc calls init_rc() in the end and init_rc() already does a
->>>>>>>>> _test_mount. _test_mount after sourcing common/rc will fail, won't it? Does
->>>>>>>>> that make sense?
->>>>>>>>>
->>>>>>>>> init_rc()
->>>>>>>>> {
->>>>>>>>>         # make some further configuration checks here
->>>>>>>>>         if [ "$TEST_DEV" = ""  ]
->>>>>>>>>         then
->>>>>>>>>             echo "common/rc: Error: \$TEST_DEV is not set"
->>>>>>>>>             exit 1
->>>>>>>>>         fi
->>>>>>>>>
->>>>>>>>>         # if $TEST_DEV is not mounted, mount it now as XFS
->>>>>>>>>         if [ -z "`_fs_type $TEST_DEV`" ]
->>>>>>>>>         then
->>>>>>>>>             # $TEST_DEV is not mounted
->>>>>>>>>             if ! _test_mount
->>>>>>>>>             then
->>>>>>>>>                 echo "common/rc: retrying test device mount with external set"
->>>>>>>>>                 [ "$USE_EXTERNAL" != "yes" ] && export USE_EXTERNAL=yes
->>>>>>>>>                 if ! _test_mount
->>>>>>>>>                 then
->>>>>>>>>                     echo "common/rc: could not mount $TEST_DEV on $TEST_DIR"
->>>>>>>>>                     exit 1
->>>>>>>>>                 fi
->>>>>>>>>             fi
->>>>>>>>>         fi
->>>>>>>>> ...
->>>>>>>> ahahahaha yes it does.
->>>>>>>>
->>>>>>>> /commit message reading comprehension fail, sorry about that.
->>>>>>>>
->>>>>>>> Though now that you point it out, should check elide the init_rc call
->>>>>>>> about 12 lines down if it re-sourced common/rc ?
->>>>>>> Yes, it should. init_rc() is getting called twice when common/rc is getting
->>>>>>> re-sourced. Maybe I can do like
->>>>>>>
->>>>>>>
->>>>>>> if $RECREATE_TEST_DEV || [ "$OLD_FSTYP" != "$FSTYP" ]; then
->>>>>>>
->>>>>>>        <...>
->>>>>>>
->>>>>>>        . common/rc # changes in this patch
->>>>>>>
->>>>>>>        <...>
->>>>>>>
->>>>>>> elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->>>>>>>
->>>>>>>        ...
->>>>>>>
->>>>>>>        init_rc() # explicitly adding an init_rc() for this condition
->>>>>>>
->>>>>>> else
->>>>>>>
->>>>>>>        init_rc() # # explicitly adding an init_rc() for all other conditions.
->>>>>>> This will prevent init_rc() from getting called twice during re-sourcing
->>>>>>> common/rc
->>>>>>>
->>>>>>> fi
->>>>>>>
->>>>>>> What do you think?
->>>>>> Sounds fine as a mechanical change, but I wonder, should calling init_rc
->>>>>> be explicit?  There are not so many places that source common/rc:
->>>>>>
->>>>>> $ git grep 'common/rc'
->>>>>> check:362:if ! . ./common/rc; then
->>>>>> check:836:              . common/rc
->>>>>> common/preamble:52:     . ./common/rc
->>>>>> soak:7:. ./common/rc
->>>>>> tests/generic/749:18:. ./common/rc
->>>>>>
->>>>>> (I filtered out the non-executable matches)
->>>>>>
->>>>>> I think the call in generic/749 is unnecessary and I don't know what
->>>>>> soak does.  But that means that one could insert an explicit call to
->>>>>> init_rc at line 366 and 837 in check and at line 53 in common/preamble,
->>>>>> and we can clean up one more of those places where sourcing a common/
->>>>>> file actually /does/ something quietly under the covers.
->>>>>>
->>>>>> (Unless the maintainer is ok with the status quo...?)
->>>>> I think people just hope to import the helpers in common/rc mostly, don't
->>>>> want to run init_rc again. Maybe we can make sure the init_rc is only run
->>>>> once each time?
->>>>>
->>>>> E.g.
->>>>>
->>>>>      if [ _INIT_RC != "done" ];then
->>>>> 	init_rc
->>>>> 	_INIT_RC="done"
->>>>>      fi
->>>>>
->>>>> Or any better idea.
->>>> Yes, this idea looks good too. However, after thinking a bit more, I like
->>>> Darrick's idea to remove the call to init_rc from common/rc and explicitly
->>>> calling them explicitly whenever necessary makes more sense. This also makes
->>>> the interface/reason to source common/rc more meaningful, and also not
->>>> making common/rc do something via init_rc silently. What do you think?
->>> Sorry I'm on a travel, reply you late. I don't like to run codes in include
->>> files either :) If we remove the init_rc calling from common/rc we might
->>> need to do 2 things:
->>> 1) xfstests/check needs to run init_rc, calls it in check properly.
->>> 2) Now each sub-cases run init_rc when they import common/rc, I think
->>> we can call init_rc in common/preamble:_begin_fstest().
->> Sorry for my delayed reply, I got caught up with some other work items.
->> Thank you for your above suggestions. Let me go through them, look for some
->> edge cases and I can come up with a patch after some proper testing.
-> No problem :) I just suggested, but the thing is we must figure out which
-> ". common/rc" hopes to run init_rc, and which not :) Thanks for looking
-> into it and test it.
+The release of this week will have your big randome-fixes. Next release will
+deal with your 10 PRs mainly :) So I'll deal with the "$UMOUNT_PROG ->
+_unmount conversion" after that. Anyway, we still can review the "conversion"
+patch at first.
 
-Yes, I will look into this. Thank you.
+Thanks,
+Zorro
 
---NR
-
->
->> Regards,
->>
->> --NR
->>
->>> If I miss other things, please feel free to remind me:)
->>>
->>> Thanks,
->>> Zorro
->>>
->>>> --NR
->>>>
->>>>> Thanks,
->>>>> Zorro
->>>>>
->>>>>> --D
->>>>>>
->>>>>>>> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
->>>>>>>>
->>>>>>>> --D
->>>>>>>>
->>>>>>>>> ...
->>>>>>>>>
->>>>>>>>> --NR
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>
->>>>>>>>>>> -		then
->>>>>>>>>>> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
->>>>>>>>>>> -			status=1
->>>>>>>>>>> -			exit
->>>>>>>>>>> -		fi
->>>>>>>>>>> -		# TEST_DEV has been recreated, previous FSTYP derived from
->>>>>>>>>>> -		# TEST_DEV could be changed, source common/rc again with
->>>>>>>>>>> -		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
->>>>>>>>>>> +		# Previous FSTYP derived from TEST_DEV could be changed, source
->>>>>>>>>>> +		# common/rc again with correct FSTYP to get FSTYP specific configs,
->>>>>>>>>>> +		# e.g. common/xfs
->>>>>>>>>>>       		. common/rc
->>>>>>>>>>>       		_prepare_test_list
->>>>>>>>>>>       	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->>>>>>>>>>> -- 
->>>>>>>>>>> 2.34.1
->>>>>>>>>>>
->>>>>>>>>>>
->>>>>>>>> -- 
->>>>>>>>> Nirjhar Roy
->>>>>>>>> Linux Kernel Developer
->>>>>>>>> IBM, Bangalore
->>>>>>>>>
->>>>>>> -- 
->>>>>>> Nirjhar Roy
->>>>>>> Linux Kernel Developer
->>>>>>> IBM, Bangalore
->>>>>>>
->>>>>>>
->>>> -- 
->>>> Nirjhar Roy
->>>> Linux Kernel Developer
->>>> IBM, Bangalore
->>>>
->> -- 
->> Nirjhar Roy
->> Linux Kernel Developer
->> IBM, Bangalore
->>
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+> 
+> --D
+> 
+> > Anand, since you've already merged this patch into your repo, can you
+> > please replace that line with the following?
+> > 
+> > _unmount $seq_mnt
+> > 
+> > Thanks.
+> > 
+> > >
+> > > --D
+> > >
+> > > > >     rm -rf $seq_mnt > /dev/null 2>&1
+> > > > >     cleanup_dmdev
+> > > > >   }
+> > > >
+> > > >
+> > > > Reviewed-by: Anand Jain <anand.jain@oracle.com>
+> > > >
+> > > >
+> > > >
+> > 
+> 
 
