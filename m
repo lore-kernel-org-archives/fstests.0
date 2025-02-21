@@ -1,171 +1,190 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B6BC70807
-	for <fstests@vger.kernel.org>; Fri, 21 Feb 2025 06:46:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83C871FF7CC
+	for <fstests@vger.kernel.org>; Fri, 21 Feb 2025 07:40:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740120391; cv=none; b=ior/0JN33qOXk/Um9gkgrnsr9zs+9K7/qNTbGogu2ZzW2pRGyJyG3Tt+nQ9V5vOhFze1yeN0cfLtqqsW6+03JHnLJEXx+40tqKBZMmciHDDx/xFdKnezmItvgaANESCfWuYN0LbOSLFadZ3RPj+pouoXg/F6Y3kIkLtK0zpvDuY=
+	t=1740123635; cv=none; b=kmzk9ZKK5mfCssAOCc2FOrevOZS3wJXk05sU3FufTxOnOU+Ew3bv9R6Q26831LRVvn+lfQCXdSfWGVo6ToJlc82g9mT9IxkVb5scdo+O1qfitX17tIkJ9kSL3CUUZBvslQ7zIENrkWZg5rxzKtC50Ah+0jXxc7eDPR7/Bp9WqY4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740120391; c=relaxed/simple;
-	bh=2KJcc7fWLK7+m0j8ACI1u4txHBtC3FaKyqAEy8s7WE8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GWrqYqJFx/pdenBwzXghsT4GttfpGUDQ06DbbYeyX/s2Z0nQdJTjQ26JVZ/SC1uMOoIDFshwWRyRCxGRJOHBpOPwUiaM/RAJB+ilYmbz3h0rDNIq1kK2WfIk4rIdZyEyAUrtxZpfgx4/6wRKQ0bfIXjeFFphodAdLj71D9v1XWo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=AIsVqiRX; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1740123635; c=relaxed/simple;
+	bh=F9em5c/IsvL/ssxaXMrUXlNqF9SlOYHQdrzjKHJTKs0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=J3KLySAvx1Q2r3b7N3pGgycozzNG775VhYYjnL3pLjSl5BEqc+7taIF5gapAY9dApIWMatrx4HSKfL9KF4qYH+sIRjmKECc9Xes72zXM4rO2qY7kc7j2kCtZkAHKgsgRCm6X+C2CwwNvcAU9TGlUoeSlIa3f5YeIZXZwAg3gh4E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=VAbuqSgI; arc=none smtp.client-ip=209.85.208.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="AIsVqiRX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740120388;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Z2CF9/nae4kxQG5WaCbwczqkTclTO8vuOg6rTmkGyfo=;
-	b=AIsVqiRXqAfFdZLxIP8oIyGZ1HjrYDOfVOA1wkOWmozKXb0ZQ+2gZN0fWWXK7uvtCz41yL
-	62NPSpHvIxqLONjyDGD3kVHQ20f/EVYesLBpIiDzCwEI1A2Ah8rlhF0QBMjMNSyvKcn1VK
-	cDQ81aRMJxW6HJk8qRPlr5DDqMtb/FM=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-336-SayDFpeNMF-QLytYac1pVw-1; Fri, 21 Feb 2025 01:46:27 -0500
-X-MC-Unique: SayDFpeNMF-QLytYac1pVw-1
-X-Mimecast-MFC-AGG-ID: SayDFpeNMF-QLytYac1pVw_1740120387
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-22114b800f0so55449985ad.1
-        for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 22:46:27 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740120386; x=1740725186;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="VAbuqSgI"
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-5e04f87584dso2749398a12.3
+        for <fstests@vger.kernel.org>; Thu, 20 Feb 2025 23:40:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1740123631; x=1740728431; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Z2CF9/nae4kxQG5WaCbwczqkTclTO8vuOg6rTmkGyfo=;
-        b=QWYpplNcUUpiKXOUOKdACcci7QVE/swrrQHqraQC/XUjvZ/A4r5CoG/swO5MaXHcL4
-         gv0sUlrmW7LmQZ7JnoyWYUSbCH3p4UMD8MGa3mlheHULIzBIYuDqT8tUBAtHnc/ySbHf
-         FEFy1UPuiRDQg34Q7jplYv2brVkUn5m+C+GvICwkDJEvzeje2Y4/qqR27MrmIYiWstef
-         xd0C/20OXx2OoFmIne+09tUpdqdlFIev7vnYhN/SzadI5oXy8q17rmWh7mOBDUIodxnr
-         NzWWCQyZDtEcl63OCTvivgXyzoaXdNaQZsNCOT8r4NdaE5OQcZ3sBfi9cbve8nVmJlRn
-         IKWg==
-X-Gm-Message-State: AOJu0Yzj3H3Cg1KGlft9woMFQQ0Y8ZIz9jwZaOWaLoPACLYbq6McKvR9
-	R7sEppARSoDZl/KiMWV31CLqUlaFoSr6lGU/U5MWlHm3u4BtOOz95uIOr7dcAkDatXpdHF7eCZ+
-	k8fyv/ibbruSTvTDssSNmYw96tC1/67ZMhIb43/cdNrYiz1U+pZnF4OOcMh10zm/ZLg==
-X-Gm-Gg: ASbGncso/yeqfcjBLCOQ/iZvWBze13pB04atPRV/cLtgpNGSMyPkJPXAa69dWsiUaSP
-	e3kO6srEA/2VZrAg8/hSIPj3x3c5on8xgFDFMikQQESLsr7yvqlmO4Vp5fLGwh+riEhRzjaWd1L
-	TwrNaB0sNv41KygZtNvhbuRsSKRUpbFu+OmnFvBNkvObflcJfYPFVyobov0ADtYJVhx5i44oJwb
-	Ayt+1aTVA+V9+zRHyk4wlHLqJggFRBaA2HsoFRmIyOIrKVdczvF4kZKPE9B9cqQ5a21pz9f1yWc
-	yGjYzM0BNWch7Szgo/FfhxtAj1nQiMeUHBwgPtXisR85y8eTkyhwj5WZ
-X-Received: by 2002:a17:902:e84e:b0:215:853d:38 with SMTP id d9443c01a7336-2219ff60911mr33837255ad.25.1740120386331;
-        Thu, 20 Feb 2025 22:46:26 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFfmFektLYwJBrHOep/GUqEpXM8omWPowGl73omfLWq80HPBb7xayCFTzDOIgBQL8Jc64IFBQ==
-X-Received: by 2002:a17:902:e84e:b0:215:853d:38 with SMTP id d9443c01a7336-2219ff60911mr33837055ad.25.1740120385972;
-        Thu, 20 Feb 2025 22:46:25 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d556f967sm129969795ad.162.2025.02.20.22.46.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Feb 2025 22:46:25 -0800 (PST)
-Date: Fri, 21 Feb 2025 14:46:22 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <djwong@kernel.org>,
-	Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH fstests v3] generic/126: run it inside its own
- subdirectory
-Message-ID: <20250221064622.to3vscytxrix6ytt@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250220-generic126-v3-1-03a061b6ed50@kernel.org>
+        bh=i7QIoMV8b3NHnIzXgAtJmy7Iy9kOWxAtm72suSqSJEQ=;
+        b=VAbuqSgIkSAWAriMNg7l70LmuAKTVzf6OhOmmkIGHdXO9zuAvDYP7yDuPZ+895x3X6
+         OfmOXLsyTIwh5g08IAB8fCt562RhBlTE8Bv5TchiGcem+Bc0MOFR5iF2g8VBTFgZCdYp
+         E/bUAOuu49HdTg3lyCLi1VU5FFjZEkKCROQEwwZyiCZ97hS/QR3HLJ5qHakR/ZBFCIQL
+         FAPpOhmKwU0FcTmsQyi8ACPAbnzjrCsZPVb9Gt9pMPmfrFWBF3Dv7kX7jPP8eoWUSxsC
+         /85qYhCHJoQirnCgVezduJEnKKEnqPSeEVXuL/dniFtzeSg2TcuSCUnOES7f/ijS+lnr
+         bLog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1740123631; x=1740728431;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=i7QIoMV8b3NHnIzXgAtJmy7Iy9kOWxAtm72suSqSJEQ=;
+        b=Mzyk7W20NaiX9QN6vEgLbHNAlKGJGBA83RvUYuJzSty0+f7k9slbABGGIXjXmBYMGz
+         X00OiIvClfCo+Go1mBzrGMQmBqJksa5hX464gz9jfttNkITH9xgQEj8pcmLou18bgZO4
+         rk6SFNmSryBBh/n5vA59JtXurJwy9mSwkTzpibMOcCildESedTiUXkv5fVxVslzk2QwI
+         UnPSacTOGvo0/dQyQdbgRFHJDPBgdLv/ixK9aZcke2Po1Z7ZRDUfrQdFzYgejRfwIzkW
+         OqP4PJcAzQQq4pperiF3JoUruRmCB9+5SwmP5QidJR63H5sjJQDlUWXe9SKFldFBJS3o
+         XVmg==
+X-Gm-Message-State: AOJu0Yx6PpuEcqumMIBl1EX57U0Lx++JM+YKmQInqj4BQtKBqmOhEYvb
+	gO0BWPZ7QAizMJpvoH5+wwmwjOWM6oO/RRsllPBWKi/LoOr1JGSlXHE7t2O/pkewyk1XKp9I/sN
+	jrIJBcfzdQ6AfYswfJ2sEq+xDUrdV/PQDtQwBrbPUubsQGD3A
+X-Gm-Gg: ASbGncvM9H8/7e234GbhWBRRZWjwsgw/usHg6koX1yRzLksPDsYZB0yXj6H4GpJ7cLH
+	dCw9H7zCOFxAVdpHgaecXILnBIRCSX4AVptFYpZgB0nen3m7R1Fb+0jdVqmKUynANzSsLzB/MJh
+	qp5kbZIg==
+X-Google-Smtp-Source: AGHT+IGm9DcsqUF63IzY6q9Hn7t6gmR/2o5qjG59Ne37mELgsvSM8qBY0qfDqk+Oa/+5w0XWUbgG9qsw9PwqF+vGyis=
+X-Received: by 2002:a17:906:30d4:b0:ab7:f2da:8122 with SMTP id
+ a640c23a62f3a-abc099f0b31mr202230166b.3.1740123630809; Thu, 20 Feb 2025
+ 23:40:30 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250220-generic126-v3-1-03a061b6ed50@kernel.org>
+References: <20250220145723.1526907-1-neelx@suse.com> <d84d2d83-03ac-4741-9677-52c71e1fb36d@suse.com>
+ <c0a4b4a0-268c-42f3-b117-b87b2fb12a03@suse.com>
+In-Reply-To: <c0a4b4a0-268c-42f3-b117-b87b2fb12a03@suse.com>
+From: Daniel Vacek <neelx@suse.com>
+Date: Fri, 21 Feb 2025 08:40:20 +0100
+X-Gm-Features: AWEUYZl3NrlB6A71sAyFDuafK3zhb4lMN28XT0STNlQ6BlH5f-25mLE-domIWTs
+Message-ID: <CAPjX3Fem-=D8dxyR1MGTQVskkzdijmc7k82+f5_S_YyBJ_Orsg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs/314: fix the failure when SELinux is enabled
+To: Qu Wenruo <wqu@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Anand Jain <anand.jain@oracle.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Feb 20, 2025 at 06:26:38AM -0500, Jeff Layton wrote:
-> I had been seeing some failures in generic/126 when running on NFS under
-> kdevops. The problem turned out to be that kdevops makes the root of the
-> NFS export mode 01777 by default (i.e. with the sticky bit set). This
-> causes some of these permission tests to fail because the open() is
-> called with the O_CREAT bit set.
-> 
-> Make the outcome of this test not depend on the permissions on
-> $TEST_DIR. Create a new directory to do these tests in, and clean it up
-> when done.
-> 
-> Reviewed-by: Darrick J. Wong <djwong@kernel.org>
-> Signed-off-by: Jeff Layton <jlayton@kernel.org>
-> ---
-> Changes in v3:
-> - Add comment explaining the weird setup
-> - Move all of the cleanup into _cleanup()
-> - rm -rf $testdir before doing mkdir
-> - add call to _require_chmod helper
-> - Link to v2: https://lore.kernel.org/r/20250219-generic126-v2-1-e7537f6c9607@kernel.org
-> 
-> Changes in v2:
-> - add commands to _cleanup() to clean up test directory (Thanks Darrick!)
-> - Link to v1: https://lore.kernel.org/r/20250219-generic126-v1-1-018e4e60c811@kernel.org
-> ---
->  tests/generic/126 | 17 ++++++++++++++---
->  1 file changed, 14 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/generic/126 b/tests/generic/126
-> index 142d2bb97db706bafd2152856ef0993c5c273441..97b4a07344bd5d3d5e06b36831978c9ad314b9d7 100755
-> --- a/tests/generic/126
-> +++ b/tests/generic/126
-> @@ -13,6 +13,7 @@ _begin_fstest perms auto quick
->  _cleanup()
->  {
->      cd /
-> +    test -n "$testdir" && rm -rf "$testdir"
->  }
->  
->  # Import common functions.
-> @@ -20,10 +21,22 @@ _cleanup()
->  
->  _require_test
->  _require_chown
-> +_require_chmod
->  
->  QA_FS_PERMS=$here/src/fs_perms
->  
-> -cd $TEST_DIR
-> +#
-> +# This test is testing filesystem permissions. If the sticky bit is set on
-> +# the directory, that can affect the outcome. Create a new directory with
-> +# known permissions in which to run this test.
-> +#
-> +testdir="$TEST_DIR/generic-126.$$"
+On Thu, 20 Feb 2025 at 22:54, Qu Wenruo <wqu@suse.com> wrote:
+>
+>
+>
+> =E5=9C=A8 2025/2/21 08:06, Qu Wenruo =E5=86=99=E9=81=93:
+> >
+> >
+> > =E5=9C=A8 2025/2/21 01:27, Daniel Vacek =E5=86=99=E9=81=93:
+> >> When SELinux is enabled this test fails unable to receive a file with
+> >> security label attribute:
+> >>
+> >>      --- tests/btrfs/314.out
+> >>      +++ results//btrfs/314.out.bad
+> >>      @@ -17,5 +17,6 @@
+> >>       At subvol TEST_DIR/314/tempfsid_mnt/snap1
+> >>       Receive SCRATCH_MNT
+> >>       At subvol snap1
+> >>      +ERROR: lsetxattr foo
+> >> security.selinux=3Dunconfined_u:object_r:unlabeled_t:s0 failed:
+> >> Operation not supported
+> >>       Send:    42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/
+> >> tempfsid_mnt/foo
+> >>      -Recv:    42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/foo
+> >>      +Recv:    d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/foo
+> >>      ...
+> >>
+> >> Setting the security label file attribute fails due to the default mou=
+nt
+> >> option implied by fstests:
+> >>
+> >> MOUNT_OPTIONS -- -o context=3Dsystem_u:object_r:root_t:s0 /dev/sdb /mn=
+t/
+> >> scratch
+> >>
+> >> See commit 3839d299 ("xfstests: mount xfs with a context when selinux
+> >> is on")
+> >>
+> >> fstests by default mount test and scratch devices with forced SELinux
+> >> context to get rid of the additional file attributes when SELinux is
+> >> enabled. When a test mounts additional devices from the pool, it may n=
+eed
+> >> to honor this option to keep on par. Otherwise failures may be expecte=
+d.
+> >>
+> >> Moreover this test is perfectly fine labeling the files so let's just
+> >> disable the forced context for this one.
+> >>
+> >> Signed-off-by: Daniel Vacek <neelx@suse.com>
+> >
+> > Reviewed-by: Qu Wenruo <wqu@suse.com>
+> >
+> > Thanks,
+> > Qu
+> >
+> >> ---
+> >>   tests/btrfs/314 | 6 +++++-
+> >>   1 file changed, 5 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git a/tests/btrfs/314 b/tests/btrfs/314
+> >> index 76dccc41..cc1a2264 100755
+> >> --- a/tests/btrfs/314
+> >> +++ b/tests/btrfs/314
+> >> @@ -21,6 +21,10 @@ _cleanup()
+> >>   . ./common/filter.btrfs
+> >> +# Disable the forced SELinux context. We are fine testing the
+> >> +# security labels with this test when SELinux is enabled.
+> >> +SELINUX_MOUNT_OPTIONS=3D
+>
+> Wait for a minute, this means you're disabling SELINUX mount options
+> completely.
+>
+> I'm not sure if this is really needed.
+> >> +
+> >>   _require_scratch_dev_pool 2
+> >>   _require_btrfs_fs_feature temp_fsid
+> >> @@ -38,7 +42,7 @@ send_receive_tempfsid()
+> >>       # Use first 2 devices from the SCRATCH_DEV_POOL
+> >>       mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+> >>       _scratch_mount
+> >> -    _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+> >> +    _mount ${SELINUX_MOUNT_OPTIONS} ${SCRATCH_DEV_NAME[1]}
+> >> ${tempfsid_mnt}
+>
+> The problem of the old code is it doesn't have any SELinux related mount
+> option, thus later receive will fail to set SELinux context.
+>
+> But since you have already added SELINUX_MOUNT_OPTIONS, I think you do
+> not need to disable the SELINUX_MOUNT_OPTIONS.
+>
+> Have you tested with only this change, without resetting
+> SELINUX_MOUNT_OPTIONS?
 
-I'll change the 126 to ${seq}, others good to me. Thanks!
+Yes, I tested both. Actually resetting this option was the first fix I
+came up with, that's why I kept it. This option breaks the test case
+when SELinux is enabled.
+But then I figured the other way around (using the option consistently
+with all the mounts) also works. So I added it for consistency.
+At that point, resetting the option is not really strictly needed
+anymore (as you correctly suspect).
 
-Reviewed-by: Zorro Lang <zlang@redhat.com>
+So there are two possible solutions. Each one makes the testcase 314
+pass. But they can as well be combined.
 
+Anyways, this test is fine without forcing the default mount context,
+which is more a bandaid for other fstests, IIUC. There's no need for
+this option in this case, at least with my testing. Hence I disabled
+it. Does it fail for you?
 
-> +rm -rf $testdir
-> +mkdir $testdir
-> +chown 0:0 $testdir
-> +chmod 0755 $testdir
-> +cd $testdir
-> +
->  cp $here/src/testx ./testx.file
->  
->  # file_perm owner_uid owner_gid tester_uid tester_gid perm_to_test expected_result pass=1
-> @@ -46,7 +59,5 @@ $QA_FS_PERMS 200 99 99 200 99 w 1
->  $QA_FS_PERMS 040 99 99 99 500 r 1
->  $QA_FS_PERMS 400 99 99 200 99 r 1
->  
-> -rm -f ./testx.file
-> -
->  status=0
->  exit
-> 
-> ---
-> base-commit: 8467552f09e1672a02712653b532a84bd46ea10e
-> change-id: 20250219-generic126-f81b3022c4b7
-> 
-> Best regards,
-> -- 
-> Jeff Layton <jlayton@kernel.org>
-> 
-
+> Thanks,
+> Qu
+> >>       $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' ${src}/foo |
+> >> _filter_xfs_io
+> >>       _btrfs subvolume snapshot -r ${src} ${src}/snap1
+> >
+> >
+>
