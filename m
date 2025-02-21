@@ -1,119 +1,83 @@
-Received: from flow-b5-smtp.messagingengine.com (flow-b5-smtp.messagingengine.com [202.12.124.140])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75C991DA612
-	for <fstests@vger.kernel.org>; Fri, 21 Feb 2025 16:07:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.140
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A06901E9905;
+	Fri, 21 Feb 2025 16:38:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740154048; cv=none; b=UZJ7uZuGv6Yv1HjXh/PtIkhQ+r+dCOJQGq4rGXhuTQ9ddgHbw5GDkpI6uPfjiISq4m8GhFCo+tiiiiac2apNuLLqyJYKog4ygEDFm2sTp0si+aCg4ktkDInwMq/SMbEzEco09qhILdq2sN1dknCLUk7FYi2LXyM46/3Wqtw5bKg=
+	t=1740155913; cv=none; b=EK6CnYth/Dua9Lpf6G86XbHqLGb0FIp0YUMwRyAZIIGQZzheoWfPRKLEoYtsAOYFvFin77De3miLtH+oGglcSq5dxNHOTwWDafB4laoiKyfDVSeDXC4YwgEidvBJo5VJBE6MCwdVSkuT6Kk45GxW8rfHPB55fXrMC2o1/VV82M4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740154048; c=relaxed/simple;
-	bh=zfZxcEgLTZg425ATARSP1iuVZP3LL5C43vGbuIMf42g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=pctltQdg6gC9xjpBMLf3kQG2eXVoePNfXH4KuRAE6OUbXCW0/J3/FfPJ9Y3WefFV5vmdfJnatVESBqbWnuhAV5Vac9DH9bwZwRjWURINexqoyF1kiauLZNsYzbh8bP0ee/A14854PvngtfjkaKgZX2ik211ScN/Db0p9FBP0lrc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net; spf=pass smtp.mailfrom=sandeen.net; dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b=iIiuhipq; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=nFwAipYF; arc=none smtp.client-ip=202.12.124.140
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sandeen.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandeen.net
+	s=arc-20240116; t=1740155913; c=relaxed/simple;
+	bh=QmyIH+mIMMQ1X41pdeHl5nhnKAxLMnO9/8puOu5y24Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=bagvXV1BbUR6ZeeXgGWR0LKGH+CjYJ7Bzdr59Hmli8tICx4XElVK+jUBfkgGVQKOIyWHFMDxiaj6VOCQED2QuS6axCOwffgZeTvIkZ7bOKpJ1E7RTOyo3fiKBfgdxXRrgLqt9EPw8J+vTeoqS0aNdcX+RHvnToDDmhRDAVmFMuU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rsNN1efL; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandeen.net header.i=@sandeen.net header.b="iIiuhipq";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="nFwAipYF"
-Received: from phl-compute-11.internal (phl-compute-11.phl.internal [10.202.2.51])
-	by mailflow.stl.internal (Postfix) with ESMTP id 7358B1D40D8D;
-	Fri, 21 Feb 2025 11:07:25 -0500 (EST)
-Received: from phl-mailfrontend-01 ([10.202.2.162])
-  by phl-compute-11.internal (MEProxy); Fri, 21 Feb 2025 11:07:25 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sandeen.net; h=
-	cc:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1740154045;
-	 x=1740161245; bh=vmZJDadksA7HpG1aHfiwdTLUFfG7D/BxjWAbWUPZ0ys=; b=
-	iIiuhipqJzBtwEzW/qHxb2wECs2QD5ofpMt0hS0gzZyHNs8IFGDSN3JcHsUKaXOb
-	5ynNz9qROyQBnH3ONKXfeuDWXWboeyHcPaYVeM1vbQ38/tCOj+fzxnOPBWnxQaaE
-	3fv8ePvjt+CiVJusnd9eu0ha+1LVa8fUv8TXjfTaFRwlhw/IrxMzDcGSCY21TbRa
-	UX7WI+Dquttrk36YrbT8c1Sdf1R8yLgYikvGdc7Qz86nybtBmIqKyrQRbFWeXjuT
-	qZUH1Qqgx8aD4wTIGIrn6irJRBd+cGunPZJeOP/DPmR4znszI1XKvUHgq3PGU6ZM
-	YzxbbQsEtEi/qRk9DzsEoQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1740154045; x=
-	1740161245; bh=vmZJDadksA7HpG1aHfiwdTLUFfG7D/BxjWAbWUPZ0ys=; b=n
-	FwAipYFQRc4ZS/vaDm9mJtCySNFIL0tJ11MiEdHvSCFbkyaoSLGqkH77sfPPtBod
-	qW0uT91uPwSNb3NTe6JAsZFi/Q/QgFf29QUFz+5N3fvTAx4+cPdY61mGIPGyvlDU
-	3ncNgqHFttIfa7kfN1ZPlQX74OBIPG3bZjl+flsju1OazBLlvdALMUfQIjisjLIt
-	IXo8JL6YyLIEGUN6nbdU9nrmaOmKChy/7j3Cd8Rk5YLAxnLn5rtRbG9K415E91aq
-	c4XyUApvlyNEHmcbRg4FgYwBaPgIHgP1V65j10daEPAh6SvcJ/0kiUO3EYZHQKPJ
-	BZlFSg1q4Rg1wEre7d2Eg==
-X-ME-Sender: <xms:vaS4Z1Jz731bMChs3A-tW6YpEAuNZuVycaY9op6YWgX-d-lsNUWbRg>
-    <xme:vaS4ZxLiHXTCVMEnpewS6zbkpyRiJpS2BtGyP8cdvJVWwIFC4tEFRYk-Napxk3Dd2
-    bNfTiwVAX-Qzy8660A>
-X-ME-Received: <xmr:vaS4Z9vFzUWcq-EbrKc7CA7pK_SkwE9FqlTz-kk8fO4vExVdLioKNU14kheOxxHY429Olrb9iJG_r8FN5uR5As-8rGbSWg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgdejtdeghecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdp
-    uffrtefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivg
-    hnthhsucdlqddutddtmdenucfjughrpefkffggfgfuvfevfhfhjggtgfesthejredttddv
-    jeenucfhrhhomhepgfhrihgtucfurghnuggvvghnuceoshgrnhguvggvnhesshgrnhguvg
-    gvnhdrnhgvtheqnecuggftrfgrthhtvghrnhepveeikeeuteefueejtdehfeefvdegffei
-    vdejjeelfffhgeegjeeutdejueelhfdvnecuvehluhhsthgvrhfuihiivgeptdenucfrrg
-    hrrghmpehmrghilhhfrhhomhepshgrnhguvggvnhesshgrnhguvggvnhdrnhgvthdpnhgs
-    pghrtghpthhtohepgedpmhhouggvpehsmhhtphhouhhtpdhrtghpthhtohepughjfihonh
-    hgsehkvghrnhgvlhdrohhrghdprhgtphhtthhopehsrghnuggvvghnsehrvgguhhgrthdr
-    tghomhdprhgtphhtthhopehfshhtvghsthhssehvghgvrhdrkhgvrhhnvghlrdhorhhgpd
-    hrtghpthhtoheplhhinhhkihhnjhgvohhnsehkvghrnhgvlhdrohhrgh
-X-ME-Proxy: <xmx:vaS4Z2ZsJy16l-wPq_NbX86V_SbwNdlyH_K-Ujot1bwmY-MtuQY4lg>
-    <xmx:vaS4Z8aPeENqZ5YlLmsAm0UnbhMm_qrixWUvhlTr8fbcKkLpIoU1mg>
-    <xmx:vaS4Z6C378rh15jH1h4JzMo3Ng5mzX6QQ5lWYllDOuSMKpYiEKpFWg>
-    <xmx:vaS4Z6aAKEEYf5LpbPkqgbCXH1z38dHeXJ9Ia4SXMtfPv_4NkIlTZA>
-    <xmx:vaS4Z3xefW4ShYgdcOt087q86fIy_DMLkIEuDvZBZ5dNqr-1osmEkOeO>
-Feedback-ID: i2b59495a:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
- 21 Feb 2025 11:07:24 -0500 (EST)
-Message-ID: <6b3d50a5-d08e-4cbc-8835-333e1674396e@sandeen.net>
-Date: Fri, 21 Feb 2025 10:07:23 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rsNN1efL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FDC5C4CED6;
+	Fri, 21 Feb 2025 16:38:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740155913;
+	bh=QmyIH+mIMMQ1X41pdeHl5nhnKAxLMnO9/8puOu5y24Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=rsNN1efLb4uEy0RveVrr2XWB8fClxiZahUrCiOvLxm+C3v9ThufDNPywNTarJ9pyp
+	 FmbCp5JVzJFxlvCXGTG1OKfSKWRAFPufbcPBUVopspVM288JNvQQjUHCpjglyM0Bev
+	 enfwqfs8BmNfuryFQ2Ftdvf7aEDy2+65311gqxSLzwvFwqZRJPJsltgVztubJYIlMD
+	 LYzmxTLe6zfa8/om+xW4JeUqS9erU+wVymaqHtWf4g2bRu+cvr2e5/8U7IaUHGsiix
+	 ue9ABNyUVb3m1fF6/X8RkzF5VNL5lKfqgqNMxlD7UFrgg21RnbUhFyz7FmuJTV7J4a
+	 xT5VrirvfqSCw==
+Date: Fri, 21 Feb 2025 08:38:32 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+Subject: Re: [GIT PULLBOMB] fstests: catch us up to 6.12-6.14
+Message-ID: <20250221163832.GB3028674@frogsfrogsfrogs>
+References: <20250220220245.GW21799@frogsfrogsfrogs>
+ <20250221054126.x5dc5wiidsnhen5g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: test zero-byte writes to new file
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Eric Sandeen <sandeen@redhat.com>,
- "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- Namjae Jeon <linkinjeon@kernel.org>
-References: <b4d76883-e58b-4db3-b7e4-7ddeb5ec7f42@redhat.com>
- <20250213195129.GZ21799@frogsfrogsfrogs>
- <e2240afa-2335-4462-81db-410d0b10737f@redhat.com>
- <f05f9875-1552-4d77-8403-7b191da24141@redhat.com>
- <20250214040220.GA21799@frogsfrogsfrogs>
- <65457d9b-c435-40eb-9531-6fd23c48ae75@sandeen.net>
- <20250218173950.GL21799@frogsfrogsfrogs>
-Content-Language: en-US
-From: Eric Sandeen <sandeen@sandeen.net>
-In-Reply-To: <20250218173950.GL21799@frogsfrogsfrogs>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250221054126.x5dc5wiidsnhen5g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On 2/18/25 9:39 AM, Darrick J. Wong wrote:
-> On Fri, Feb 14, 2025 at 08:36:25AM -0600, Eric Sandeen wrote:
-
-...
-
->> Ah, I see. No, the observable problem was an -EFAULT on the write,
->> and the file /does/ get created as expected. The test probably is
->> extraneous to the original bug, because of course open(O_CREAT) and
->> write(0) are two separate operations. I was just a bit over-eager
->> when writing the test.
+On Fri, Feb 21, 2025 at 01:41:26PM +0800, Zorro Lang wrote:
+> On Thu, Feb 20, 2025 at 02:02:45PM -0800, Darrick J. Wong wrote:
+> > Hi Zorro,
+> > 
+> > Please accept these pull requests with all the changes needed to bring
+> > fstests for-next uptodate with kernel 6.12-6.14.  These PRs are
+> > generated against your patches-in-queue branch, with the hope that not
+> > too much of that will get changed.
 > 
-> <nod> Would you mind resending, but with the rm removed?
+> Hi Darrick,
+> 
+> Are you much hurry to have this large "PR BOMB"? It's Friday for me, I'm
+> going to test and release fstests of this week. I planned to have a stable
+> fstests release this week, which contains your large random-fixes and some
+> other fixes/updates. Then we can move forward after that big feature change
+> last time.
 
-I can. I'm OOTO for a bit so it may be a while, but this isn't urgent.
-I'll get to it.
+No big hurry, just getting PRs lined up for after patches-in-queue goes
+to for-next.
 
-Thanks,
--Eric
+--D
 
-> --D
+> I'll try to make a release next week too, for your big PR bomb. Good news
+> is they "nearly" don't affect other filesystems. So if they can through
+> my basic regression test, I'll merge them soon. Or merge part of them at
+> first.
+> 
+> I'll merge them to the patches-in-queue branch at first (after the release
+> of this week). Then test it and talk with you about more details.
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> 
