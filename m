@@ -1,232 +1,185 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF5432512DB;
-	Fri, 21 Feb 2025 22:54:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BF342063F9
+	for <fstests@vger.kernel.org>; Sat, 22 Feb 2025 08:38:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740178480; cv=none; b=l5+mQxvtBxA3UGl/hpQDX3sZrKhKEYB0OfhnlTI/XnHpGQ0yvSZd4OYiOSQGwqqjWRv85LNXgwxQ39KsaLh0bjynvEqhsMStBtaiqLH+P6Q5l4fRBBYfx87vLalivLEybR4dfq0y/ZFq5PRE+uJfeqJX1V38XrcF7B26cVro4lc=
+	t=1740213484; cv=none; b=FlVHB0BnPZSTJKfDWelSxmSC/8GWScDdwDAjzNeOeOm8s6Kh9wxFNA4QxbHv2Rcgx9VAUHcredPfutExTN9ebf7cDyUgCtkVkJ6HaD4h8yiArlVRmjld4Q88R2hIpjRkE3ZSk+QKlhGRaL8kSMdRoMkB0ymMXwOKR39TmpktpOE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740178480; c=relaxed/simple;
-	bh=V67ND5ofm+34Y/67/YRqBVsDctXFvPGg+++fjqs1jQU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ILn2owDOtl/25BaUm5yXKyKRDq9yO8hH5nO6nTiLWqWQf/Zonz64SIJS2FF/XDh69C6Xj5+w5vcqL4qahuPTxl4SuIQdz2/VU15guA48b8ZmEq9uuDvJwSL/GMnmMSZix09D9AnrwRGxpBPch1Yyo4vJgWcFeOcWMJxIs4UfvpE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=sRm1YLbX; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
+	s=arc-20240116; t=1740213484; c=relaxed/simple;
+	bh=gKIikp1nkeutP68ypumD/wQtsQN6cnIA2YiRX2ZrJqU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=nbLwYM/SS9ErghvAlh/jQUDyUvfcIbLA3nHOxMpyFTmUBdAv3kYPq7Y8T1kBe008CMoJAT5yyKEloQG5nKRAPwQ8DIujrsu9IqKQQ4Snyy/J46hPkJ0O8Rz1iw9/TCdgPYSylxymROuDR0ige+c+RE+52J/KRF2kGfo9i9oPlZ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=GUTHk7YR; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="sRm1YLbX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
-	s=s31663417; t=1740178472; x=1740783272; i=quwenruo.btrfs@gmx.com;
-	bh=p+xKtbzm0BmoCB/4il6vYlQKZI+f4L11NLxsJbS43tI=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=sRm1YLbXyJI57DlvPGxCWUkNA0T2OtiflX+dPLbXJknd3kH9j++7zstTJfUUNHYV
-	 OvhD+iCzziCxUavhOppBT/W8OPzhOj+qphLMdfLKlVOC3v4TdoZTRB817No3b7ba5
-	 KfT4QWlwnK95owv5aSYu+GRUfohrBFElLqC7EMkCldDeTjz/7G7RzByLUbr3960jL
-	 BVRxOK4tf0jB4Uxs5aLnSr9qhTVA1+++adbtkD09EWSR+dxJ06/4v/uauj7x5znm5
-	 hAhsuaIgmzVfi15iTH7TuLDUy//68LHhkqB1skcdwz5Jvhl+rt3gOsiyIMLPAR2Py
-	 4WXojXUQW/QAWNCFqA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1N2mFY-1tKMFX3xbY-00yanl; Fri, 21
- Feb 2025 23:54:32 +0100
-Message-ID: <20d7a8c5-8f61-4870-84ae-87a6ca4a052e@gmx.com>
-Date: Sat, 22 Feb 2025 09:24:27 +1030
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GUTHk7YR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1740213481;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ywvo3iVMwT805pw8Dw72ePN9++qcn0USaUPpo0W9c9I=;
+	b=GUTHk7YRrxJK1rv5Pr/ggDJcg+QTQHNPJ7MQsBChVm5NlOsQyuKuun1F+QZ4vdeO806x5s
+	uikOEys6Md+ati9JXpdrccMxMq7TpQKkkqH/iUDcnofRrCxyCIohTC1HYPd8IUqdt7LWWy
+	qOK4Or7a3NzDtnEHOmBV+r+aIwdZyvU=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-124-d46qoZzmPSmhr12QpQguqw-1; Sat, 22 Feb 2025 03:37:58 -0500
+X-MC-Unique: d46qoZzmPSmhr12QpQguqw-1
+X-Mimecast-MFC-AGG-ID: d46qoZzmPSmhr12QpQguqw_1740213478
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2fc0bc05b36so9466695a91.3
+        for <fstests@vger.kernel.org>; Sat, 22 Feb 2025 00:37:58 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1740213478; x=1740818278;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ywvo3iVMwT805pw8Dw72ePN9++qcn0USaUPpo0W9c9I=;
+        b=WFWwUTJf2R+Xdn7gdHhgzcWkfmgff3dgwp94RA3lbNVO/yXKKj7nr1rb3HWk2pUmeH
+         p/+XxHA1+JGJ/kbSXhFJGxxhD90drdsduaFdhsWfBByWtrRUfHnLN7nw7ph1FtaikD6i
+         liHycIavDeB8bwED1lqyAPZPJLoCYpu5Q2pyx3oOn9oCs8dW6sBfxn+q1sbmhUv5LOM2
+         YluyFlRZmoCfxNKfKDZPob8KqyXyfA5wJEck5uMnx9avzLqVn6etCdp0NotzpRf4m8oW
+         0rxaJgnY3A7HSVRYD3Bfsn42rgXqegwMEKSTFeg6wdlGP1dC7p4Sb3G5DIN4SZvGgPBm
+         KgBw==
+X-Gm-Message-State: AOJu0YxQJQ5A4Fya8oj9rSejva1ZKlhtDXgomyOBmnpjoWI3upyylm0/
+	OPdkCe4OopjTcl3nLjK8P9gzMZZdGQx3TVQs8fmlZNF3RPh6Z+11wVWLJGOiFbifLcNl9NdsuEU
+	o9o8/kK25qWZm3+vww07fq1XTNtk+S8NBsSIgJEYzWacoguXEfry+tb59Jbi0tSjRMQ==
+X-Gm-Gg: ASbGncs/9IyMOaljZ2OanRUkXGtf9EhKAawrwtujBF4rP/QtH/gjpo6k75FoavcsXAX
+	P9ke/QZkBX9Qm3+eQxZsFagbHtZrZ61RVf4AXbvjo7awDRC3OM3ZDeYZMdVMc1ItErmRzg+oN5M
+	BYJsiI3rtpUZU0DK7stpOv2yx6OjGaWQmI4DMFm8jJroN31uKxBfN9s9g3ClqFKqyqdYSLMu1hc
+	6FqcDqEA5INSv/cX+ly9UaWZwsXBt4q3TTCu2C3Y8m4L1izrCtnUAmaBY7LQCFUni+RxGQNomLU
+	UHNNGrJlmPFhrOBixRwsY32trWJyQh6qXIZNCkoIZrzji10+DQvkzCtA
+X-Received: by 2002:a05:6a00:13a4:b0:730:8768:76d1 with SMTP id d2e1a72fcca58-73426d815ccmr10663209b3a.19.1740213477692;
+        Sat, 22 Feb 2025 00:37:57 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHIHnCmIVk5lXxDmvm0NE0c2IZpd4cv0ovJ3p6kbDJr3zaOF9kjL7wlqzpzzQLJkJwekp9+ZA==
+X-Received: by 2002:a05:6a00:13a4:b0:730:8768:76d1 with SMTP id d2e1a72fcca58-73426d815ccmr10663193b3a.19.1740213477400;
+        Sat, 22 Feb 2025 00:37:57 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73269fa358dsm13396189b3a.91.2025.02.22.00.37.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 22 Feb 2025 00:37:57 -0800 (PST)
+Date: Sat, 22 Feb 2025 16:37:53 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Daniel Vacek <neelx@suse.com>, Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Subject: Re: [PATCH] fstests: btrfs/314: fix the failure when SELinux is
+ enabled
+Message-ID: <20250222083753.wvdw2quokicxdqoz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250220145723.1526907-1-neelx@suse.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] fstests: btrfs/314: fix the failure when SELinux is
- enabled
-To: Daniel Vacek <neelx@suse.com>
-Cc: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org,
- linux-btrfs@vger.kernel.org, Anand Jain <anand.jain@oracle.com>
-References: <20250220145723.1526907-1-neelx@suse.com>
- <d84d2d83-03ac-4741-9677-52c71e1fb36d@suse.com>
- <c0a4b4a0-268c-42f3-b117-b87b2fb12a03@suse.com>
- <CAPjX3Fem-=D8dxyR1MGTQVskkzdijmc7k82+f5_S_YyBJ_Orsg@mail.gmail.com>
- <6bbfddea-f0ea-4825-a987-01be3ff18a23@suse.com>
- <CAPjX3Fc=E28A6zD4tJOT2bRZ-pnErVKzkYuzALt6soGLu=MRJQ@mail.gmail.com>
- <a2ae2321-4934-4a10-8a44-2f7dc3bf48c3@suse.com>
- <CAPjX3Fes+PDEyi4_tFJyRHePVVuv_K+nUfShEeuagOANd6VqfQ@mail.gmail.com>
- <61afcaa2-01ff-4d18-a8fa-804fe36464cb@gmx.com>
- <CAPjX3FcnofHyQzHvP_R0CWWML2EVC-PmPY9k90X+ddWWPFxhBw@mail.gmail.com>
-Content-Language: en-US
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
- xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
- 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
- 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
- 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
- gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
- AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
- BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
- sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
- xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
- naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
- tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
- 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
- VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
- CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
- /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
- GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
- q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
- ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
- CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
- B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
- Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
- +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
- HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
-In-Reply-To: <CAPjX3FcnofHyQzHvP_R0CWWML2EVC-PmPY9k90X+ddWWPFxhBw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:WzlCAoNvEUTlNDy7FMhQ5h4/Ddq29DEu7IdhieJoBKQXGzxCuNJ
- aEzjhVcNcRhF2uyDLF84DU11bVknt+PHkeWfazuUffL3IinExNa089jGnyktwN+xblbFmpC
- kNXg1WYW8KeJPU7QLA6f/xi1KANVraBLsiey6Isk8qq3j1Kcft+pUZUHfmMPYkaOy4DBghM
- 7cN+dx0nac0QsceLW6xfg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:YtaVgEcFDCs=;khDpvGmFfCxqBW8TX8RtcOcM7zw
- r8D06HKCwYFXZPZd8+OWnUkCUCrBfEf2Sr1N3WxWsaAg1iouJvh11mCfBvxBb6MahYbeS1AvY
- nSLgPeulk7275FcGg3EJLX+QFr8x6Wk7wTeNVhcGY0grOj7fIClC5sQwH91LAWU19WLyijopO
- U/Hitt/DVl53ZrqHYsHetSO4lyniGUndnprPkaycLVbjlO5B+iZqxrAPbUIwpY8VWEocdblPk
- aYR9Jd/OK05kLFQ9d5Vy5BM8VSm6uug1ayR65L9JH+iemmDqEITYqicr133t1zUTUz0Uq9J8F
- iLzpvtK0pOvyMldYLcPJiVP4T6RVKmgJbeBDQXtZlBLCH1DI2TZdko6QNoVufmAfLkKuRiefJ
- dt4Km7z5IxavgLtIp5q2rU5iYp39HiGNEJlESGR5+QrsZ2/2vB340JA1C/qyElQhrTcNkFYVL
- FeHcrWpsmM3pZY7Olev0OddFQs2xtyWRXzqejgdsKk6qrtdkH4pInFoaGFoYKzQjMgikL0KOp
- QFMlWYQJOT7GQPpBBuktNALBwZu7Qs3HL0frUUpCiRvpiq0bbQFvPpR0X/OkZt0wPGRkcu85Q
- V32M1kO2pCzrStm98auocbE+vdtQfcaQ6//gqSx4xocDv2/ozHTW58dy9NJzISH3TtslWRDDO
- IC9j2zlByM2mhCYyg/LCmUKW9v9L9qCq01uKUFY/z6pbPGflaFLsoiXM2LiHKdpGBaPn8ksiT
- n2joud/2lV+LGGEtbCMJ+eDS+2HQ+1QyFwl75DUUSc8yCuF5XGQQjPJuvhftOsT4E7MbjYzKt
- 6kBIxu1IY/+rU9srdFK066SLDNRSjiJBlfIv3D+PXPP5F9/mO0YOIrqKm6DBMKJqK01vBDesi
- Rzi4Gys8e+Uz66vWUqY8uzzo35tO8qBiUH1Gp8bcsWqlDBmc/Yz9/GtFkumehYFo0N+sTr1DG
- oS/xVHSv4RalWMvGOHtina0LOdbOCDuXwcPGSzS5682SD8XLR9CCSgGkpQ29Sro6Pqr+AS6p1
- wOTD9f09B+Yab4HEw4J0Mr9HO0h8z98iUDb0loV7mtpKXDBMe0AwhFjjHcbBBzhT4day5EnnR
- 9Qva5d3LKELzbiQaXSZEJhSVf2cggeOa/BWfWHgnNTK8djiFexoEzAnWeUergdpzKzErdlXEQ
- D56j7EHOkFvLVbSrurUZM9VmHSfI3Q6ja1e55rPcV5BR7ZkazL5WJ/9S8UAAVEcj84EhZZM+t
- wK3DkyGqBFQoPXnJg9qK3TC/XHFy8l8UxPg1PtGPTNvbZgZbdRItBwHl5x9G4pgllT6eiImPa
- S9/R52TOKc0o4O+iunCYIiDLhNoke7Ns7SaoPIopZm+TxsVT/i8IQ5i28vnWtjVuRSTLGntqT
- J2427UxeXTbmK3VISGZZd4m9JjkfkxP6lrHE7BAGUhDpI2jdUe6gB7fcbQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250220145723.1526907-1-neelx@suse.com>
 
+On Thu, Feb 20, 2025 at 03:57:23PM +0100, Daniel Vacek wrote:
+> When SELinux is enabled this test fails unable to receive a file with
+> security label attribute:
+> 
+>     --- tests/btrfs/314.out
+>     +++ results//btrfs/314.out.bad
+>     @@ -17,5 +17,6 @@
+>      At subvol TEST_DIR/314/tempfsid_mnt/snap1
+>      Receive SCRATCH_MNT
+>      At subvol snap1
+>     +ERROR: lsetxattr foo security.selinux=unconfined_u:object_r:unlabeled_t:s0 failed: Operation not supported
+>      Send:	42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/tempfsid_mnt/foo
+>     -Recv:	42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/foo
+>     +Recv:	d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/foo
+>     ...
+> 
+> Setting the security label file attribute fails due to the default mount
+> option implied by fstests:
+> 
+> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdb /mnt/scratch
+> 
+> See commit 3839d299 ("xfstests: mount xfs with a context when selinux is on")
+> 
+> fstests by default mount test and scratch devices with forced SELinux
+> context to get rid of the additional file attributes when SELinux is
+> enabled. When a test mounts additional devices from the pool, it may need
+> to honor this option to keep on par. Otherwise failures may be expected.
+> 
+> Moreover this test is perfectly fine labeling the files so let's just
+> disable the forced context for this one.
+> 
+> Signed-off-by: Daniel Vacek <neelx@suse.com>
+> ---
 
+Take it easy, Thanks for both of you would like to help fstests to get
+better :)
 
-=E5=9C=A8 2025/2/21 22:23, Daniel Vacek =E5=86=99=E9=81=93:
-> On Fri, 21 Feb 2025 at 10:48, Qu Wenruo <quwenruo.btrfs@gmx.com> wrote:
->>
->>
->>
->> =E5=9C=A8 2025/2/21 19:43, Daniel Vacek =E5=86=99=E9=81=93:
->>> On Fri, 21 Feb 2025 at 09:20, Qu Wenruo <wqu@suse.com> wrote:
->> [...]
->>>> Remember, user can provide their own mount options (including the
->>>> SELinux ones) through MOUNT_OPTIONS environmental variables.
->>>>
->>>> So you at least need a full reason why SElinux context must be disabl=
-e
->>>> for this case.
->>>> And I see none.
->>>
->>> It does not need to be disabled. But it also does not have to be
->>> enabled for this test.
->>
->> Then good lucky if one day some QA guy finds out the send/receive
->> behavior has a SELINUX specific bug, and you need to explain to them wh=
-y
->> it's a good idea to not test SELinux for this particular workload.
->>
->> Your mindset of "XX feature doesn't have to be tested" makes nosense fo=
-r
->> a test suite.
->
-> Huh, this is a huge misunderstanding.You still got it the other way
-> around. I'm sorry if I was confusing you.
-> I never said I'm against testing SELinux. Quite the opposite, to be
-> honest. I did argue that testing the default system policy without
-> overriding the context also works for this test, at least with my
-> testing on the latest TW.
-> SELinux is always tested. Just either with the default system policy
-> or with the given forced context.
->
->>> At least not with the default policy on the latest Tumbleweed I was te=
-sting on.
->>>
->>> But your mileage may vary, I guess.
->>>
->>>>>
->>>>> Or do you use such an option with any of your mounts? I doubt so.
->>>>>
->>>>> Check the mentioned commit 3839d299. fstests cripple SELinux by
->>>>> default. Which doesn't look good by itself.
->>>>
->>>> Do you really believe that commit is going crippling SELINUX?
->>>
->>> Well, in a way, yes.
->>>
->>> What it does is that it overrides the system's default policy. Which
->>> may make sense, as for example your system policy may deny some
->>> operations the tests do, eventually resulting in failed tests.
->>> Though as a side-effect it also prevents writing the security label
->>> file attribute by design with the mount option override. In such a
->>> case SELinux just returns with -EOPNOTSUPP.
->>>
->>> 3213         sbsec =3D selinux_superblock(inode->i_sb);
->>> 3214         if (!(sbsec->flags & SBLABEL_MNT))
->>> 3215                 return -EOPNOTSUPP;
->>> ...                  ^^^^^^^^^^^^^^^^^^^
->>
->> This only explains why your mount option fix is correct.
->
-> Nope. This triggers precisely when the context is forced with the
-> mount option. In that case setting the file attribute is not
-> supported.
+Firstly, SELINUX_MOUNT_OPTIONS isn't a parameter to enable or disable
+SELinux test. We just use it to avoid tons of ondisk selinux lables to
+mess up the testing. So mount with a specified SELINUX_MOUNT_OPTIONS
+to avoid new ondisk selinux labels always be created in each file's
+extended attributes field.
 
-BS, overriding the SELINUX context just means disabling SELINUX.
+Secondly, I don't want to attend the argument :) Just for this patch review,
+I prefer just doing:
 
-Your "fix" from the very beginning is doing two conflicting things:
+          _scratch_mount
+  -       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+  +       _mount $SELINUX_MOUNT_OPTIONS ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
 
-- Disable SELINUX context by overriding it
+or if you concern MOUNT_OPTIONS and SELINUX_MOUNT_OPTIONS both, maybe:
 
-- Add back the empty SELinux context for mount
+          _scratch_mount
+  -       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+  +       _mount $(_common_dev_mount_options) ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
 
-Explain why it makes any sense?
+That's enough to help "_scratch_mount" and later "_mount" use same
+SELINUX_MOUNT_OPTIONS, and fix the test failure you hit.
 
->
->> The send stream has SELinux attrs, that's because the original fs is
->> mounted with SELinux context (the regular _scratch_mount() helper added
->> SELinux context).
->
-> Nope. Again, the other way around. The send stream has the
-> `security.selinux` attribute precisely because the mount was missing
-> the option and hence the file labels were used (and not refused).
+About resetting "SELINUX_MOUNT_OPTIONS", I think btrfs/314 isn't a test case
+cares about SELinux labels on-disk or not. So how about don't touch it.
 
-There is no SELinux xattrs because you damn disabled SELinux for this
-test case!!
+If you'd like to talk about if xfstests cases should test with a specified
+SELINUX_MOUNT_OPTIONS mount option or not, you can send another patch to talk
+about 3839d299 ("xfstests: mount xfs with a context when selinux is on").
 
-  But
-> the receive side fails as that mount actually did use the context
-> mount option and so it was refusing setting the file label returning
-> this -EOPNOTSUPP error.
->
->> But later we manually mounted a btrfs, not using _scratch_mount(), thus
->> the new mounted btrfs doesn't have SELinux context, thus unable to set
->> the SELinux attrs at receive side.
->
-> This is just wrong.
+Now let's fix this failure at first :)
 
-Whatever you believe, I think I have wasted too much time on this non-sens=
-e.
+Thanks,
+Zorro
 
->
->> It doesn't show why you need both the mount fix and overriding SELINUX
->> context at all.
->
-> I'm saying you don't need both from the very beginning. Where did I say =
-you do?
+>  tests/btrfs/314 | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/btrfs/314 b/tests/btrfs/314
+> index 76dccc41..cc1a2264 100755
+> --- a/tests/btrfs/314
+> +++ b/tests/btrfs/314
+> @@ -21,6 +21,10 @@ _cleanup()
+>  
+>  . ./common/filter.btrfs
+>  
+> +# Disable the forced SELinux context. We are fine testing the
+> +# security labels with this test when SELinux is enabled.
+> +SELINUX_MOUNT_OPTIONS=
+> +
+>  _require_scratch_dev_pool 2
+>  _require_btrfs_fs_feature temp_fsid
+>  
+> @@ -38,7 +42,7 @@ send_receive_tempfsid()
+>  	# Use first 2 devices from the SCRATCH_DEV_POOL
+>  	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+>  	_scratch_mount
+> -	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+> +	_mount ${SELINUX_MOUNT_OPTIONS} ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+>  
+>  	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' ${src}/foo | _filter_xfs_io
+>  	_btrfs subvolume snapshot -r ${src} ${src}/snap1
+> -- 
+> 2.48.1
+> 
+> 
 
-Then why damn putting the override and mount fix in the same damn patch?
