@@ -1,233 +1,311 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3ABD82111
-	for <fstests@vger.kernel.org>; Sun, 23 Feb 2025 19:30:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740339042; cv=none; b=aaVcl89D5KKKQF1pw5iGXRYorgoRhm6UINlHcqYA0y+RW4JSyewidb/SVwBwm943Fz/KKBs5va4dw1zcoirsRdvzOQ4/F+HwXBjGph6RxVBMC+eR1Zp1uq5Ou1RoRxMrq7Fi86PhoWaLTjqlrGDS94TxEQH7k9CZqYrxU+BNir8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740339042; c=relaxed/simple;
-	bh=X4MdPycUhwtbQ9mueZwnj+ERZHOl5484NQTqaMuT9TY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qh+rPbNO30lvdbuQMgC5V1Gs5tQzudcGXNeijJ9nIZFcJiDUNpKI1Y8srQNtK/m2H2Hf7jc/TCUxexC09Ocln9PbSuyyatjDWt7s9ifT2Ymhhr5tvxDwAd377TfiidKZzjI98IVbQySL639/wgEKFE1EjzI0KpMqcvPqYHfPv08=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U8nR/47O; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14B2D1DDE9;
+	Sun, 23 Feb 2025 22:30:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.177.32
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1740349835; cv=fail; b=EZELvWVn214ro2wslk6hF46oL9doAQ6lrt68ti+jDZrqHfC5vTdeLi2etmK4C840nz2jsTRW2lDUcTLD593TJVk2buZm5uP24pckwBIPUKnXcMwZxF5uZQhl/H8dotmxTxekOtNrA2R3tDlA+5qJpY2rtB0QG35zoBtqiw9IKfE=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1740349835; c=relaxed/simple;
+	bh=a7h8FolOnYqJq08itKiyJxr2lwbCzAZXi1v1gIglq1A=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=Jdt6szzj84uRt0yW2CjJvtkUVDp1yGbby1+XvKoZU360telZCpbkThqSPZ5KflpO2mK2oxwEz63fth26M7T8E6hmDLlMWSkSEWy5lQ0OEgjWx6/GIpqI9U66GUZYfNMBlcIaTGFnLCKk4iiz1s1fIJ69mGqf5SyBeW+43hGTstM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=JbPCxiXw; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=hW4QWlSm; arc=fail smtp.client-ip=205.220.177.32
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U8nR/47O"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8CDDDC4CEDD;
-	Sun, 23 Feb 2025 19:30:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740339041;
-	bh=X4MdPycUhwtbQ9mueZwnj+ERZHOl5484NQTqaMuT9TY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=U8nR/47OXDhFR17oPKce4UdsyvWjl54wCRgFQK8ChkrTEL/uaa+iIGpBNX8X7IkxS
-	 B5kSwsr+9mGIMCUgdWcs8FUJnhZUsuaqf9yjlxDcqFjKV2D7HdE8YCS6VhqRWfJN+5
-	 xekM5CYesTP8uFtHCKvgghw7wpePwAcM2EKo7DgUNjcoVh8QAmHzHjBvwRDYl56OR6
-	 4jZhv5PzskkgRwBWZX8yIidksRgRXbi0zsp3kc6st/5ZWlXH5Pr776wmW0xJ+3r4qn
-	 Dokehk6aOohetNvSh41Qxl0vn4bylyKSHVDVo9WuQuCwfx0tqrYSyORh8j/xPXdcl9
-	 38LKI6+ibqsTw==
-Date: Sun, 23 Feb 2025 11:30:40 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
-Message-ID: <20250223193040.GA21799@frogsfrogsfrogs>
-References: <c238e76631b086db592f214beaa6fd94@kernel.org>
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="JbPCxiXw";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="hW4QWlSm"
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 51NLoSiR004441;
+	Sun, 23 Feb 2025 22:30:17 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=
+	corp-2023-11-20; bh=uP8NvgQYlD69IbG4vmaanmJ0zQ5cMF95VauqhmgE9sg=; b=
+	JbPCxiXwqhKGN9zvu6N4HQx5jDUxVhsQZdFkLC8jUQ0fQR8ohtkpvzbIKk+BJXY9
+	7q+Sweo/M9XCIhRhGfbvypkAZBsvYfdYNsHa14wkKjcxgUjQpov1sgulcL0smXr3
+	naYSiLk9aT8pj3o86npd6fMSFGKDbzgOSfiBO6R4sv7obYDfXW12Y+k+WrQgZ/sb
+	H4SX5v3lR7oUvvAs5LPlJ1eawnn/5GdbCNGDdEb6a5rsd9Yqr6vQCEOgUlA5D25X
+	2ZipcQi+Lg8YNJGuS8X8VBtBap1pK+MqruutmzOjkRLjYRGxOKlXMPJHZdJjYOwG
+	x7o1+aC3QK5R7egdUaO4OQ==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 44y5c29htf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Sun, 23 Feb 2025 22:30:16 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 51NJsaTh012590;
+	Sun, 23 Feb 2025 22:30:16 GMT
+Received: from nam02-bn1-obe.outbound.protection.outlook.com (mail-bn1nam02lp2046.outbound.protection.outlook.com [104.47.51.46])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 44y5188dhq-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Sun, 23 Feb 2025 22:30:15 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=V2gVoqOMj3zVIDN32e5FhMbSmUHP94iHqzIsvkG85pa5odcFgP06Dy54nxMmQ2DTrLwi4kkRshLbb73HixgktOY3nND9VcYQX1InbWzNmALnco1elCZZOoJ4pq6/X+wevk3ztgQVxYAUBb/o6TWUhCrG20QoUMkyXhC5fvX0LwRV5N9AXh2d41Y0eEySiVFnLWfE7VT7SdwxsKTk63la6lfyOl9zw53JOpwUUu+G3yDmADdoKaKvN+b6AD3VQiRsk0azXsuqrQzeVz6O2anepul9o7JSteEqhAjS849UKw/Had0BcJLWg9KFTn4GUVHpn/coXJz8dcRF8wNuNw6OYQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=uP8NvgQYlD69IbG4vmaanmJ0zQ5cMF95VauqhmgE9sg=;
+ b=cMxLivEO+lGVhnZp7imC7VI/EcWoncDPfA3qd6mpStgA79D0fv+4SXq8nx0n79GWYInZLOf7ihZQQVW4ODPbneY9QqXvEl+rkM7lIorA4/eLQbrQbu2lw+alGyBiUidg/ggesUUJgv7udSi2Gr2E8btJXoAiI9LQrnVivx2uEigAFndewKoYpt5Fyvj/Ih7mGYON07DhMA5GZEs7IdWKy11krlTTmVydM2lxDibXHKpfpAJM+D2Qtj8Sdn3nptaEfPe6KJhfLZwJZR+X7qCXW4wfC0ZwuIDNWM17KypThz5Qw8r6ZN59NsovAClzDKI1GK8E/z5JzNTF5jSNF8+0AA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=uP8NvgQYlD69IbG4vmaanmJ0zQ5cMF95VauqhmgE9sg=;
+ b=hW4QWlSmItpAMPlLhaBQ8A5/mel/WKM8TTWgb9bRUR57fBuhQsfpeT1hWEmbtyiLa+97F5b1rtAkKzvnqiPV/k5zEkbNqY4f12LA+78aF12kmaesiZywxvT5c9r4uCJmx+YVxnB6NTsUXDTmwHJEeD46ppmoCo/upOzVk67qgo4=
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
+ by DM6PR10MB4348.namprd10.prod.outlook.com (2603:10b6:5:21e::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8466.16; Sun, 23 Feb
+ 2025 22:30:10 +0000
+Received: from PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
+ ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8466.016; Sun, 23 Feb 2025
+ 22:30:10 +0000
+Message-ID: <86a1ea5e-b0cc-4f6f-b578-9fa0512ff7fb@oracle.com>
+Date: Mon, 24 Feb 2025 06:30:04 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] fstests: btrfs/226: fill in missing comments changes
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: zlang@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        Zorro Lang <zlang@redhat.com>
+References: <e73cfe5310a8cee5f6c709d54b8c18ff52e39a0a.1739918100.git.anand.jain@oracle.com>
+ <CAL3q7H4GgaQKTLzXzza4xKsoa22pG6MbOFYOuNhK-5J-ieZdRg@mail.gmail.com>
+ <20250221150311.eabczmxfxnvndkqk@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <4e013629-c1ff-4e84-99f0-6916058ca6ab@oracle.com>
+ <CAL3q7H6cAGE4C5vRw60P1iu1zoA=JnK3+rNMbiN8CXiMT3C02g@mail.gmail.com>
+Content-Language: en-US
+From: Anand Jain <anand.jain@oracle.com>
+In-Reply-To: <CAL3q7H6cAGE4C5vRw60P1iu1zoA=JnK3+rNMbiN8CXiMT3C02g@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: SGXP274CA0010.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::22)
+ To PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c238e76631b086db592f214beaa6fd94@kernel.org>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|DM6PR10MB4348:EE_
+X-MS-Office365-Filtering-Correlation-Id: 6ff66d46-5503-478f-916c-08dd5459a1a4
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|376014|366016|1800799024;
+X-Microsoft-Antispam-Message-Info:
+	=?utf-8?B?VmtYRldPa0RpZTVQTHhzNlZNWVZBcktPbDB6L3dsK29UZG1HbDBxRVAvYjRp?=
+ =?utf-8?B?WXZqckNDT2ZKQllsQUpyU0ZGU0J2a0lUSjlranA2cStGRTVQMzE3blE1YU5o?=
+ =?utf-8?B?d2h2NDFZZnd5WXVvcGt3ZzVidE51NG5heituRlZ4NS9HQ1U0dEZONlQ1a2dE?=
+ =?utf-8?B?SmJkYjBVVUY4RDVvbnU3N3BlUm1NYnZlbjJ2WnErTWpKQkx2VC9PWEtwekFE?=
+ =?utf-8?B?TXVRQnQ4WlY5TG1tcDd6eFVTNWwvTXhEdGFZM0ZUY3JVUWpwUUR1K3ZGWDRx?=
+ =?utf-8?B?a0g0SFRMVHRLL2xGeFovTUlUa0JqWHhrYXdSNHBEWW1zaVNYbGN0V25hZmtN?=
+ =?utf-8?B?SEEzWGZ2RlRzWWE3eUZoNHB4c21wVGtvb0FISjBrbmxsMU40bUFReTl3bFJK?=
+ =?utf-8?B?SklLeGhoYWo3ZDM0cmFwUFNRLzZEZ1U5VnJGQmJqS0M4TlcvTWtyZ01NSnpN?=
+ =?utf-8?B?dnczcFNUU0g1QlBQQUJOcTZ2QkN3Y2ErUXpmOFZUeGJaY21veWNJYmNDRUtL?=
+ =?utf-8?B?RTlJRFFOMmZUR0lXRVlDWDNrenBzbm9RTkNQSm1TcllJT2IrWDEvdWg0RU4w?=
+ =?utf-8?B?LzRzTEkwQzRzZWIvbHVFYXg1aVMyNS9tTXlodHlLOEdINEhLVUZvaEtZTnRp?=
+ =?utf-8?B?cEtkTjFKQkw1bXdLc0IrM1h4MlZKMnYwV1ZFem9udVIvRDBTcWRFM1RLOGxL?=
+ =?utf-8?B?VEhDVnNTYm1XSGVTSEF0YUVpR09SNmRSazc0UG9STUd2cXBtTHJXWG1Jc0pV?=
+ =?utf-8?B?UkIrQTl4cmRGQ3ZTOERORGhTZ0NFY3JNNTMwMkljVnVJUndLc21HNXAwUlJO?=
+ =?utf-8?B?OXhscXMzZm9mZ1pKR25kd3lQMXM1UmxLR3pjMTNxd1pTaGl4dTcwSmhKR0x3?=
+ =?utf-8?B?cXIvbVBLRWVNb3h1VGw1ZEFuWGpBTU83RmVLZElHNDh0dVd0SDFXWjNmUXNJ?=
+ =?utf-8?B?aU1xSEp4a0pOa1dNaVh1RTZvbFZDUElvenA2aHFHK0hZU0d0aGllSWQyeHZH?=
+ =?utf-8?B?ODJFdldPT0wzdHVJZVVjV3VYRWllVHN5SlR3Tnk1WjRoVFkyRUZLQm1kbUNV?=
+ =?utf-8?B?L0toUnNFNXlQQ3JxVGpXek5GZS9aVXV0VDlIckJIMjB5UGpCM1hXM0dxa1Ft?=
+ =?utf-8?B?Uk5iRXJjdGNBSndPWDAvc0xxUzZ1U3lkOUU3KzN6Y3F4Ky9neGo5aTFRUTdO?=
+ =?utf-8?B?YXM2NjNwdGovYW1BRnlQdHFaR1pnSldBeHNzYWFyNGxuY3lKV3J5Q1N0WDY5?=
+ =?utf-8?B?Z2t6bGxuWkZ1cnZFVDFVWUVQVnlHb1hpMTEzaFp2U2pCR1o5Z0lhNHdkWlRj?=
+ =?utf-8?B?V0gzWnh6YWtGVEhvWmczK2RTR1M0WTZGNHdDQk52a1FwWVRnT1BmaDdsOUhT?=
+ =?utf-8?B?S2ZEbG1SOUlYeFd3blE1ZVM1c2pDZkVJeHd5N2RsSSsxbnVMb0EyNm5lR1RW?=
+ =?utf-8?B?RER0WDUxZ1V2TGc5Zk00cHBJYjRCaWVzdUFCMW5DQllucnA2aUw3OU52ejhh?=
+ =?utf-8?B?ZCs4RVJQQzAyWHNYRk16YjF3eXB0VkhTL2d6NCt6M3hkdGk3WUU3VitXVnBs?=
+ =?utf-8?B?ak8zSC9tNEFWcmphbzlVbzlPcllBOHA4dUMrb0oxME44OW03ck5uTVhOMzRJ?=
+ =?utf-8?B?MjBwYU5BcXNkYS8rZ2Y2YVFDZUx0M09uUnhHajRIS3puTTZBWTV2aUI1cnMz?=
+ =?utf-8?B?MGxjVDNFem5pZ29VSDRLTi94Qm4wMmk2cCtpSTA5a3ZpZ2VwUjA1amVjWllr?=
+ =?utf-8?B?QzJ3NStiTjRYMjBnZEEyN1Vsb3JTdzROZE5VQmpIV3pLNjNxRGNtZUZqZUgy?=
+ =?utf-8?B?UVMycUJkRmJjR0ZyQjRHZz09?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?VE9TMzNmVHZHeUlMVXlLUUJJdGFudnFkRXZPY213SW9zU09iNFdsdlE3TnZl?=
+ =?utf-8?B?R2l3eEFJSU9keVFwN3hnMmFtaDVsQldmcm9jVmluREM4SExKTTJNbjA5V2Nl?=
+ =?utf-8?B?WHl3ZWJ5NWV3VnFWOGVKK2huZlBKdWZPUXJJQURxcUJxQ1ZXQml3S20ydDNU?=
+ =?utf-8?B?SlUyRlNwN3VkUGhJcU9nYUNkVFhYejIzZnFjcldLUFNlUXVDZ09vOGJvZGZT?=
+ =?utf-8?B?L1hxYWFTUGpEVVd3eENWTUZwdk1BLy9pRHpDTUc5dDJKZVprMXVXY2g5bUg2?=
+ =?utf-8?B?dGNOaDJINmNjM0IxYUgxRmZRTG9FMHhrMlhTRjNpeTFwbndjY1lVZjJ4STRL?=
+ =?utf-8?B?S2QrTUJKOEozRUh3OHNiZEU3ZkwyY0RwdmhIeGJLYzljam5NeU5PQ1ZmY0li?=
+ =?utf-8?B?cDczakc0QmYrODJwWXF3WmxVNytxTUYwVG9lUmVwS0c1UVVPZ2tUMzBEbko1?=
+ =?utf-8?B?ZEFNamw1dUxJWVdqbTJ6M0k0NUYzeVR6T3U0Ny9vd2ZaTkc3WjFQaTJXZGVa?=
+ =?utf-8?B?NWdrbzRURVNSYk5ZZkhZZWYvTkdFWldqQkM5UlJPVFk2VGJrbGVWZlllcStq?=
+ =?utf-8?B?R3pZYk8wQXo5STZGbnk0SUJxbmljMWdYWk40aFR4ajJsbXp0cmpmdStCbzda?=
+ =?utf-8?B?UjlXcE02SFV5S3Q5QWdUc0ZPUHk4R1E2MXU4MGRZcVMzb3JTd2Q0TkNFd1ZR?=
+ =?utf-8?B?RUlDcTZVVE5UUFlnaFJGRTkxWitDZVlPU2xiUW9jd0lLbmhwRmxIZm4yQys4?=
+ =?utf-8?B?RFBKNnVhWENCblZxeEdYc2poQXRmOHhWZG9zckhxZUJYMWFCRTNrNko0enE3?=
+ =?utf-8?B?WDU1bFJnZzdub3c1TldFMHpyUzh0K3p6eHhnVks3QU9yMWFTSUdjdWs1UkdK?=
+ =?utf-8?B?aWxvNHF4Qlh6bjFhemd3cXErTkVKdjFaYUNQWWtRNHZMNU1QaFBHUW4wOXk4?=
+ =?utf-8?B?b3N6S21DM2dkK2o3a2xGNkZoNmR3djJYOGN1c0VkbTdRK0RRL1FBbzVhRzlP?=
+ =?utf-8?B?RlFkSG5VN0thdS82SFVzbHlNY3JwNFMrOTRMUEJZM21rSWVBZ0svakxCVTE4?=
+ =?utf-8?B?bzZJNnZtRU1OMWt6dWVQVytFR2EraWxFaFZwQ1pMazd6c3JWMkRSUm5VY1Jw?=
+ =?utf-8?B?WHVVSXdyNFRHaVFQR3BnUFJLSG1pRFpKbGNnWWlkM0tvZThINHVEOWZYRjVr?=
+ =?utf-8?B?UVc0T3hNSVdTd05hUEpZQUVQaHFGRnBGQ1RnWHdac0tTcUQvUkRYT1dHTFph?=
+ =?utf-8?B?MmMyNlA4dFJ5Q1hyVU1UL3lNSkUrL0FCR2pkSmpINDF4U3hxN0tLazVGVWRm?=
+ =?utf-8?B?dWIwbUQzcW4rMHlpMzFtaUkxMERmVEJQZ0dHK1FJRVFMTGJBajNmUEc2WlE5?=
+ =?utf-8?B?b3NnVlBXazhOQ0xSNnRLd29jbUozTXNHL1R1VDNScUFzMDNDZkFDSGo1aHAw?=
+ =?utf-8?B?M0dmelp5NlVpMkV4MFhGRlpKelNDY2VmT05ycXM1MmZUbVFDN2RDUTl6N1Vy?=
+ =?utf-8?B?VFd6Rm10cVlQVkozWWR6a3NRS0Q2Njc4ZUpYVk9HbmZ5Nmxtd1NMT3VSMm9X?=
+ =?utf-8?B?bXZuK0p6S09lVGFFai9MS2F2dlNWcXNDUVVKamJEc1JnZ2pYenRkeXFkdlFM?=
+ =?utf-8?B?TGxsakJXczJTWmxMTStGVWNDbmErWnlJRWVSN0hoYTFhRmZ4bW1kcUNha2lD?=
+ =?utf-8?B?M2p4MmY3aFh1TzdScjh3TmRMc2Jja25YSllQdzJLckprZS9wUFhVNGJvVFhr?=
+ =?utf-8?B?dXJQZjFJaTlFZFlEL2tNbWtoem03WjYrSFJ5d3VlcWhEVjRNVldVWnUvS3lC?=
+ =?utf-8?B?b0FlTmIrQW5FNmV0RjhCSU01VWkvS2RvaG5LWjF6OEhnQnJ3WU5iVXlEeWZ2?=
+ =?utf-8?B?dE02SSs2QkpEbjRBZ2JTS1JmU2JoRHVXdEtkRzl0MFExaURjN2VWR3pqdG80?=
+ =?utf-8?B?Uk0zbzVRTERaUkZacU4zd0pJWkowOXZ6NjJLZCtvR2thTGc1Q0FoeTJBS0xH?=
+ =?utf-8?B?Ri9sWDVBdFBFME10RXZUY2FZNXdTVGdXWXhtSStXYy96QzRhbHA1bXBsUUFX?=
+ =?utf-8?B?NHFudHljbTMwNk5EUm5MTFFucWc4bE9lMSszNnA1VFJxK3BGSW8zNHp4eURL?=
+ =?utf-8?Q?a/PDFodESqg3UzJVTeBbquIDk?=
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	pcYwJl9+gvoFPYpQyQyV48N1sULXIfte5+ZhRDx2A13VQnpqVBU8pNjWyk4IzwHRvOIs+juWH9y2mv5Gimro7bKOBarr9VVRNfB48/RzzPGUq7lrjcIH85Of/cdu1BMVOcyOoUrKjSxiAniiHf2pprzzljgosCmtrTvdYRc0ZmVcVTbbQAJqXazgrGhviUfE5CGNywbbTjAOXbYA1dsYesf3+BYwbZtX19GeqHGr4kz9+yshMjyPWqOza7u2mxsB/9RLxfB2DjFMYH23Wn0//7CgMnMf1wxURzXsX9cS64M721TPqrv7f11CtvT9mbFlov70BrsQNVxAy1xAOBQMpLOAZtuUF7rFsUjKBmgL8Sbxf6bF1cZjs6lRn7a4LEWpnN3lxK97fCBhixNDPugWfuaw/f03zVXx0u+q5ydScn/OdFGsZwz96jZzamO7Tei0aX1jmloTaaZ6JqACMny0qpcVqGndojTmm4sDtPs/lf6gvZtbBNvFtXN8caJQIZM2zCm4S10lamM5RccN8kNkAwNQ4Wfx+YlTgPiG5RVCY8IyAeD4L0wSUUJtc6aKF5yhHVGC9saSyf68IiOUqyEiK8QdvySPsn1LAro3gQyBxBI=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6ff66d46-5503-478f-916c-08dd5459a1a4
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Feb 2025 22:30:09.9512
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: BJscGqzojcUr+mpiBPACAke2nXbPDpkeksBpTG/7y/76R0lqVpIWexhlPe8KRa7fuWRXN8gRQ3W+EuntAyrM6w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR10MB4348
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-02-23_10,2025-02-20_02,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 spamscore=0 mlxscore=0
+ adultscore=0 bulkscore=0 mlxlogscore=999 malwarescore=0 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2502100000
+ definitions=main-2502230178
+X-Proofpoint-ORIG-GUID: rzPL5Zs1n5aVVG_osmseEI2XGtGa3dN_
+X-Proofpoint-GUID: rzPL5Zs1n5aVVG_osmseEI2XGtGa3dN_
 
-On Sun, Feb 23, 2025 at 08:27:43PM +0800, Zorro Lang wrote:
-> Hi all,
-> 
-> The for-next branch of the xfstests repository at:
-> 
-> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> 
-> has just been updated and tagged as v2025.02.23 release.
-> 
-> Release Notes:
-> 1) There's not new test cases in this release, this's a release for bug fixes
->    particularly.
-> 2) Reiserfs part is removed from fstests.
-> 3) ltp/growfiles is removed too, I think no one needs it.
-> 
-> I can't list all updates at here, more details please refer to below.
-> Thanks for all these contributions!
 
-Thanks, Zorro.  I know the last few months have been rough. :/
 
---D
+On 22/2/25 19:29, Filipe Manana wrote:
+> On Sat, Feb 22, 2025 at 11:17 AM Anand Jain <anand.jain@oracle.com> wrote:
+>>
+>>
+>>
+>> On 21/2/25 23:03, Zorro Lang wrote:
+>>> On Fri, Feb 21, 2025 at 12:04:32PM +0000, Filipe Manana wrote:
+>>>> On Tue, Feb 18, 2025 at 10:36 PM Anand Jain <anand.jain@oracle.com> wrote:
+>>>>>
+>>>>> From: Qu Wenruo <wqu@suse.com>
+>>>>>
+>>>>> Update comments that were previously missed.
+>>>>>
+>>>>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+>>>>> ---
+>>>>>    tests/btrfs/226 | 6 ++----
+>>>>>    1 file changed, 2 insertions(+), 4 deletions(-)
+>>>>>
+>>>>> diff --git a/tests/btrfs/226 b/tests/btrfs/226
+>>>>> index 359813c4f394..ce53b7d48c49 100755
+>>>>> --- a/tests/btrfs/226
+>>>>> +++ b/tests/btrfs/226
+>>>>> @@ -22,10 +22,8 @@ _require_xfs_io_command fpunch
+>>>>>
+>>>>>    _scratch_mkfs >>$seqres.full 2>&1
+>>>>>
+>>>>> -# This test involves RWF_NOWAIT direct IOs, but for inodes with data checksum,
+>>>>> -# btrfs will fall back to buffered IO unconditionally to prevent data checksum
+>>>>> -# mimsatch, and that will break RWF_NOWAIT with -EAGAIN.
+>>>>> -# So here we have to go with nodatasum mount option.
+>>>>> +# RWF_NOWAIT works only with direct I/O and requires an inode with nodatasum
+>>>>> +# to avoid checksum mismatches. Otherwise, it falls back to buffered I/O.
+>>>>
+>>>> Btw, this is different from what I suggested before here:
+>>>>
+>>>> https://lore.kernel.org/fstests/68aa436b-4ddd-4ee7-ad5a-8eca55aae176@oracle.com/T/#mb2369802d2e33c9778c62fcb3c0ee47de28b773b
+>>>>
+>>>> Which is:
+>>>>
+>>>> # RWF_NOWAIT only works with direct IO, which requires an inode with
+>>>> nodatasum (otherwise it falls back to buffered IO).
+>>>>
+>>>> What is being added in this patch:
+>>>>
+>>>> +# RWF_NOWAIT works only with direct I/O and requires an inode with nodatasum
+>>>> +# to avoid checksum mismatches. Otherwise, it falls back to buffered I/O.
+>>>>
+>>>> Is confusing because:
+>>>>
+>>>> 1) It gives the suggestion RWF_NOWAIT requires nodatasum.
+>>>>
+>>>> 2) The part that says "to avoid checksum mismatches", that's not
+>>>> related to RWF_NOWAIT at all.
+>>>>       That's the reason why direct IO writes against inodes without
+>>>> nodatasum fallback to buffered IO.
+>>>>       We don't have to explain that - this is not a test to exercise the
+>>>> fallback after all, all we have to say
+>>>>       is that RWF_NOWAIT needs direct IO and direct IO can only be done
+>>>> against inodes with nodatasum.
+>>>>
+>>>> So you didn't pick my suggestion after all, you just added your own
+>>>> rephrasing which IMO is confusing.
+>>>
+>>
+>> Your sentence missed the consequence part (checksum mismatches) that
+>> Qu's sentence included.
+> 
+> And that's totally irrelevant to this test case.
+> 
+> Preventing checksum mismatches is why direct IO writes fallback to
+> buffered IO if the inode doesn't have the nodatasum flag - it has
+> nothing to do with RWF_NOWAIT writes.
+> Besides that, such mismatches only happen for cases where an app
+> writes to the write buffer while the direct IO write is in progress -
+> which is not the case of this test case.
+> 
+>>
+>> How about,
+>>
+>> # RWF_NOWAIT only works with direct IO, which requires an inode with
+>> nodatasum to avoid checksum-mismatches (otherwise it falls back to
+>> buffered IO).
+> 
+> Just stick it to the original - simple and to the point.
+> 
+> Thanks.
 
-> Thanks,
-> Zorro
-> 
-> The new head of the for-next branch is commit:
-> 
-> 5b56a2d88819 fstests: remove reiserfs support
-> 
-> New commits:
-> 
-> Christoph Hellwig (1):
->       [04d0cf3f8909] generic/370: don't exclude XFS
-> 
-> Darrick J. Wong (35):
->       [cc379f50f3bd] generic/476: fix fsstress process management
->       [ab459c67c5e0] metadump: make non-local function variables more obvious
->       [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
->       [e68a92376165] generic/019: don't fail if fio crashes while shutting down
->       [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising fsx
->       [543795bf67f2] common/rc: revert recursive unmount in _clear_mount_stack
->       [777732b27e62] common/dump: don't replace pids arbitrarily
->       [81f28acda2f2] common/populate: correct the parent pointer name creation formulae
->       [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and inclusion
->       [241c1c787e5b] generic/759,760: skip test if we can't set up a hugepage for IO
->       [77548e6066fd] common/rc: create a wrapper for the su command
->       [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGINT
->       [c71349150d34] common/rc: hoist pkill to a helper function
->       [91d2880aa029] tools: add a Makefile
->       [88d60f434bd9] common: fix pkill by running test program in a separate session
->       [247ab01fa227] check: run tests in a private pid/mount namespace
->       [949bdf8eae31] check: deprecate using process sessions to isolate test instances
->       [af0f1090e240] common/rc: don't copy fsstress to $TEST_DIR
->       [f43da58ef936] unmount: resume logging of stdout and stderr for filtering
->       [5dc27fd20f80] mkfs: don't hardcode log size
->       [dba402b7e3ae] common/rc: return mount_ret in _try_scratch_mount
->       [9505d04b8073] preamble: fix missing _kill_fsstress
->       [4d9aeeb79f9c] generic/650: revert SOAK DURATION changes
->       [1bb15a27573e] generic/032: fix pinned mount failure
->       [b816737426bf] fuzzy: stop __stress_scrub_fsx_loop if fsx fails
->       [040e74c89192] fuzzy: don't use readarray for xfsfind output
->       [0dfe1fac98d2] fuzzy: always stop the scrub fsstress loop on error
->       [336d73c96a96] fuzzy: port fsx and fsstress loop to use --duration
->       [96d29207c126] fix _require_scratch_duperemove ordering
->       [a8268531ca8b] fsstress: fix a memory leak
->       [e8e29e028faa] fsx: fix leaked log file pointer
->       [4a9e82863917] misc: don't put nr_cpus into the fsstress -n argument
->       [c475ff6ff6d7] common/config: add $here to FSSTRESS_PROG
->       [1c67e8b191fe] config: add FSX_PROG variable
->       [a553e7eba1cf] build: initialize stack variables to zero by default
-> 
-> David Sterba (2):
->       [9049250b4042] fstests: remove ltp/growfiles
->       [5b56a2d88819] fstests: remove reiserfs support
-> 
-> Filipe Manana (2):
->       [7122c0315a08] btrfs/254: don't leave mount on test fs in case of failure/interruption
->       [535b72a63a28] btrfs/254: fix test failure in case scratch devices are larger than 50G
-> 
-> Jeff Layton (1):
->       [bd6e01c81e21] generic/126: run it inside its own subdirectory
-> 
-> 
-> Code Diffstat:
-> 
->  .gitignore            |    1 -
->  Makefile              |    2 +-
->  check                 |   91 +-
->  common/config         |   12 +-
->  common/dump           |    1 -
->  common/fuzzy          |  104 +-
->  common/metadump       |   42 +-
->  common/populate       |   13 +-
->  common/preamble       |    2 +-
->  common/quota          |    6 +-
->  common/rc             |  146 ++-
->  common/reflink        |    2 +-
->  configure.ac          |    1 +
->  include/builddefs.in  |    3 +-
->  lib/tlibio.c          |    2 +-
->  ltp/Makefile          |    2 +-
->  ltp/fsstress.c        |    1 +
->  ltp/fsx.c             |    8 +-
->  ltp/growfiles.c       | 2607 -------------------------------------------------
->  m4/package_libcdev.m4 |   14 +
->  src/nsexec.c          |   18 +-
->  src/xfsfind.c         |   14 +-
->  tests/btrfs/254       |    8 +-
->  tests/generic/019     |    2 +-
->  tests/generic/032     |    9 +
->  tests/generic/050     |    2 +-
->  tests/generic/075     |    2 +-
->  tests/generic/085     |    2 +-
->  tests/generic/093     |    2 +-
->  tests/generic/112     |    2 +-
->  tests/generic/125     |    2 +-
->  tests/generic/126     |   17 +-
->  tests/generic/127     |   16 +-
->  tests/generic/128     |    2 +-
->  tests/generic/193     |   36 +-
->  tests/generic/230     |   14 +-
->  tests/generic/231     |    4 +-
->  tests/generic/233     |    2 +-
->  tests/generic/270     |   12 +-
->  tests/generic/310     |    6 +-
->  tests/generic/314     |    2 +-
->  tests/generic/327     |    2 +-
->  tests/generic/328     |    4 +-
->  tests/generic/355     |    2 +-
->  tests/generic/361     |    4 +-
->  tests/generic/370     |   10 +-
->  tests/generic/453     |    6 +-
->  tests/generic/455     |    2 +-
->  tests/generic/456     |    2 +-
->  tests/generic/457     |    2 +-
->  tests/generic/469     |    2 +-
->  tests/generic/476     |    4 +-
->  tests/generic/499     |    2 +-
->  tests/generic/504     |   15 +-
->  tests/generic/511     |    2 +-
->  tests/generic/514     |    2 +-
->  tests/generic/530     |    6 +-
->  tests/generic/531     |    6 +-
->  tests/generic/561     |    2 +-
->  tests/generic/573     |    2 +-
->  tests/generic/590     |    2 +-
->  tests/generic/600     |    2 +-
->  tests/generic/601     |    2 +-
->  tests/generic/603     |   10 +-
->  tests/generic/642     |    2 +-
->  tests/generic/650     |    6 +-
->  tests/generic/673     |    2 +-
->  tests/generic/674     |    2 +-
->  tests/generic/675     |    2 +-
->  tests/generic/680     |    2 +-
->  tests/generic/681     |    2 +-
->  tests/generic/682     |    2 +-
->  tests/generic/683     |    2 +-
->  tests/generic/684     |    2 +-
->  tests/generic/685     |    2 +-
->  tests/generic/686     |    2 +-
->  tests/generic/687     |    2 +-
->  tests/generic/688     |    2 +-
->  tests/generic/691     |    8 +-
->  tests/generic/721     |   10 +-
->  tests/generic/726     |    2 +-
->  tests/generic/727     |    2 +-
->  tests/generic/740     |    2 +-
->  tests/generic/746     |    2 +-
->  tests/generic/750     |    2 +-
->  tests/generic/759     |    7 +-
->  tests/generic/760     |    7 +-
->  tests/xfs/149         |    2 +-
->  tests/xfs/501         |    2 +-
->  tests/xfs/502         |    2 +-
->  tests/xfs/530         |    2 +-
->  tests/xfs/720         |    2 +-
->  tests/xfs/795         |    2 +-
->  tests/xfs/803         |    2 +-
->  tools/Makefile        |   21 +
->  tools/run_privatens   |   28 +
->  tools/run_setsid      |   22 +
->  97 files changed, 596 insertions(+), 2890 deletions(-)
-> --
-> Zorro Lang
-> zlang@kernel.org
+Done. Thx.
+Anand
 
+> 
+>>
+>> Thx, Anand
+>>
+>>> Hi Anand, please talk with Filipe (or more btrfs folks) and make a final
+>>> decision about how to write this comment. I'll drop this patch from
+>>> patches-in-queue branch temporarily, until you reach a consensus :)
+>>>
+>>> Thanks,
+>>> Zorro
+>>>
+>>>>
+>>>>
+>>>>
+>>>>>    _scratch_mount -o nodatasum
+>>>>>
+>>>>>    # Test a write against COW file/extent - should fail with -EAGAIN. Disable the
+>>>>> --
+>>>>> 2.47.0
+>>>>>
+>>>>>
+>>>>
+>>>
+>>
 
