@@ -1,215 +1,251 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3ECD32111
-	for <fstests@vger.kernel.org>; Sun, 23 Feb 2025 07:07:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CA2D200121
+	for <fstests@vger.kernel.org>; Sun, 23 Feb 2025 12:27:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740294480; cv=none; b=gRPooOZ8YionbY3gq4JV9YRSuJIdrNMd1ZWmrSWMrCh6zZJv126jC7TD5wYCpQrg7oJB5v6D0EkLyxhprefZzE2s6A/2vFZRDN0pEV2MCtqBHN3I35RwzS6JQdLINgkrh7gPmuwhosC1Aiaov28wRHWIjIlkIXNfpczd5A1sdC0=
+	t=1740313667; cv=none; b=TNoVSpyWe1fJnqdW9N8vUEUN3VB9bp+Vlm8rYtCk3qa+K3GVF2cIzgWSMiQDabZKAQrX2/AhVSX7qWrE+AMn5wA3FMJvSWst/euMqGov6y3v+OrTHOidhcCsW/Jf7X6u0YSPPu/0yyJZSVSRbxEBJDTGhHoLfJmSpD++LWzT+10=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740294480; c=relaxed/simple;
-	bh=2VRPymG1U1AkeC2EOlESAMwaS1rYMcnthSiWH7Yx9Io=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=SnWVUTC++omThwPlDS4MwUGlMFuzoyhYX0wfssCpqiV7BxyRQswFpVPSTcI23MTCXZCuYmkVYSJ95+1hEhWAco4U12TgqBa515TkCOkXltCNTgARodTY/ADSY9L+zjxlwJxpIBNfPpO5+GvHubN178CvqbmESbbcKAqYVaJX4/k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Y7xANRXc; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1740313667; c=relaxed/simple;
+	bh=e08K/Kggd5iHuUZU/x6izf8gBQJ/Rj442R+1CMGulBw=;
+	h=Date:Message-ID:From:To:Subject:MIME-Version:Content-Type:
+	 Content-Disposition; b=e8gbYV1zuoceGhkz0xL9hNaDboH3viliM2PoTM8C3HgIdwglvVf17Jogt2dneVBQpKzLIak9QgadWgJIdXt2QHqQINviHiT1ZqquoaZJgnZHLCzaKXRq0XzRpzy26eHnoxdy5F2SFaoL/lRM0fT6NbmH6cLE2ZIrOU0LM6FHqO4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SEaby0Eu; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Y7xANRXc"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740294477;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=zkWjc5e4+Oq+FwwYWxLPxh4bK4kAlysso9UshsQ7yRQ=;
-	b=Y7xANRXcLacJiLr0Gp+tWcUXJ5o76PtoDoEQQTh6UyhG8EIZTTCqXO9I7z9U1BVaf0XZzJ
-	6qo1+UY59Na/1/7PeizmtpO6Ga87VMmsKTy0fBgG45jADaF5kiXlyi2KHPDrWF2u4Y7Wbf
-	uKTVeD70ptEVWadJg2maj7WTyM6QAc4=
-Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
- [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-472-5_OQZtvVNE29MPbtk4Sstw-1; Sun, 23 Feb 2025 02:07:55 -0500
-X-MC-Unique: 5_OQZtvVNE29MPbtk4Sstw-1
-X-Mimecast-MFC-AGG-ID: 5_OQZtvVNE29MPbtk4Sstw_1740294474
-Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-22112e86501so66931175ad.0
-        for <fstests@vger.kernel.org>; Sat, 22 Feb 2025 23:07:55 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740294474; x=1740899274;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=zkWjc5e4+Oq+FwwYWxLPxh4bK4kAlysso9UshsQ7yRQ=;
-        b=SjBqWmt7cgXQDw/0TFGb26yMxHjQmg89tqVtOyaxQvrCo2Dl/vCFGSqsocVkd6zdkJ
-         cHHENK4HK6YWKWCoahs+n1MU/P4nYir7KYvdckD4UPKbINq2Uxrq0nCuo5ZCM8GP/Asv
-         8zKtjh+gqJtQF1LTGh+91idT1YG2GThMGTAoEGRJUatEIq5191BXzmPBnqZweItVlGlV
-         MgEIHEV2X8Wh1+ZTvI/OJnO+WOm/e+OLZt98sdRKEbu5rbnAPtjgrc4723RYrZvvVekG
-         6OtKGJfvq78QxdxQpG1xiUsdRpo12FbJJKNxWWFn/IMttgQfiiN7U+aG2/N7lS3mlQmO
-         u9ig==
-X-Forwarded-Encrypted: i=1; AJvYcCXhV9XgzsMKhucPnrfvn2oDyxl+zluwyuZ2kS4ayAe2NCp8Iq1SZqzGBW2y7Y61IUPb93ZlW7Dq@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxd8UicMkltEzXhbxnRPPKZtI412riqPZOWKtR3GN1YzPLbDSyq
-	mXUDkbLp8F+81rOhQDfUb2NkWnKzpSXvk8dtqtgcrucGdxcpA614h50xDo/l+9/I66iPAR8G/jL
-	W1trJag/9T3G6kPPSn+AqSeZAhXygKzYSM+ftEHMGn9++RWPyg+RgVLe7YhzpQPvbzw==
-X-Gm-Gg: ASbGncv24xfulrG2+oi850JcdguZGANxhGFhtMZ7kEParUEaE/NQISJhjWNRU+LDSV/
-	s79V2iKCk4h4tinokBrRmQ/MJTnGjfH8QxN0SVWSIJu2wCQ1SllWdPks9eINwjis03+ptOkD5Od
-	9s2cBOJwHNNmCDll/+jXtB8ROe3jhsYQjrq+e64TTLFDxryjgEgY0IxGYn9th9nda97lAr1L/4Z
-	AQ3nJSqbHgBlwbRZshjNKEP1NY7Go+Ank2NNI0bbXXZaYonyCWpCG6KA7vpCAPZVGQG0Lh6PNNG
-	YUo8h/MF86iR7nTJL1eSEVJ0yYqHyNl2x2XF7BjdervYJK9LIzUgYmV7
-X-Received: by 2002:a05:6a00:807:b0:730:8e2c:e557 with SMTP id d2e1a72fcca58-73426ce7da9mr14938801b3a.11.1740294474035;
-        Sat, 22 Feb 2025 23:07:54 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGsXe5d81toRnfFwXrAbMbc+KTNccS5HQIYciF5hAFuZUj8NbDbhiSDvqq4YjfmwcxBnutHgw==
-X-Received: by 2002:a05:6a00:807:b0:730:8e2c:e557 with SMTP id d2e1a72fcca58-73426ce7da9mr14938779b3a.11.1740294473683;
-        Sat, 22 Feb 2025 23:07:53 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73265098570sm14711730b3a.22.2025.02.22.23.07.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 22 Feb 2025 23:07:53 -0800 (PST)
-Date: Sun, 23 Feb 2025 15:07:49 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Daniel Vacek <neelx@suse.com>, fstests@vger.kernel.org,
-	linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH] fstests: btrfs/314: fix the failure when SELinux is
- enabled
-Message-ID: <20250223070749.dmym2egqad4drwkc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250220145723.1526907-1-neelx@suse.com>
- <20250222083753.wvdw2quokicxdqoz@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <ddc27f3b-291f-43db-abfb-0f82d8c584fb@gmx.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SEaby0Eu"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19B74C4CEDD;
+	Sun, 23 Feb 2025 12:27:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740313666;
+	bh=e08K/Kggd5iHuUZU/x6izf8gBQJ/Rj442R+1CMGulBw=;
+	h=Date:From:To:Subject:From;
+	b=SEaby0EuPQPgRAZhxxkYFmCfJNdHJf0oX/0Oqtu0o0UC5c7mLnDd4mGuniWGx1fHA
+	 m3vZqs+9lPgvHCum9Af0T5Z+dUyTxXD5ZUDgmc5JKqKSsz4fLITAggX6Z9gkbm8017
+	 P3NTJTJyr8IpzlM/o9ZzLzf3v3T4cgbwbKVkZGc44vbSyE5FwUkRMfduZJqfnqKTmW
+	 dLbsiOKJim4GQu6hTiQSbmpvmKZIqutHz3f8Jgf2f2nPq21Al2QScKqWrDdKbTSAT/
+	 yeQkq8Fb0k8wg/xrzKJLNvpnOs6RBH3x96r0wm0bHwCo2t0BFBs3Xs0d7HCGWqR2VG
+	 VwFf3KYCfdjwA==
+Date: Sun, 23 Feb 2025 20:27:43 +0800
+Message-ID: <c238e76631b086db592f214beaa6fd94@kernel.org>>
+From: Zorro Lang <zlang@kernel.org>
+To: fstests@vger.kernel.org
+Subject: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pxojJDxkiNbC"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <ddc27f3b-291f-43db-abfb-0f82d8c584fb@gmx.com>
 
-On Sun, Feb 23, 2025 at 07:56:02AM +1030, Qu Wenruo wrote:
-> 
-> 
-> 在 2025/2/22 19:07, Zorro Lang 写道:
-> > On Thu, Feb 20, 2025 at 03:57:23PM +0100, Daniel Vacek wrote:
-> > > When SELinux is enabled this test fails unable to receive a file with
-> > > security label attribute:
-> > > 
-> > >      --- tests/btrfs/314.out
-> > >      +++ results//btrfs/314.out.bad
-> > >      @@ -17,5 +17,6 @@
-> > >       At subvol TEST_DIR/314/tempfsid_mnt/snap1
-> > >       Receive SCRATCH_MNT
-> > >       At subvol snap1
-> > >      +ERROR: lsetxattr foo security.selinux=unconfined_u:object_r:unlabeled_t:s0 failed: Operation not supported
-> > >       Send:	42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/tempfsid_mnt/foo
-> > >      -Recv:	42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/foo
-> > >      +Recv:	d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/foo
-> > >      ...
-> > > 
-> > > Setting the security label file attribute fails due to the default mount
-> > > option implied by fstests:
-> > > 
-> > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdb /mnt/scratch
-> > > 
-> > > See commit 3839d299 ("xfstests: mount xfs with a context when selinux is on")
-> > > 
-> > > fstests by default mount test and scratch devices with forced SELinux
-> > > context to get rid of the additional file attributes when SELinux is
-> > > enabled. When a test mounts additional devices from the pool, it may need
-> > > to honor this option to keep on par. Otherwise failures may be expected.
-> > > 
-> > > Moreover this test is perfectly fine labeling the files so let's just
-> > > disable the forced context for this one.
-> > > 
-> > > Signed-off-by: Daniel Vacek <neelx@suse.com>
-> > > ---
-> > 
-> > Take it easy, Thanks for both of you would like to help fstests to get
-> > better :)
-> > 
-> > Firstly, SELINUX_MOUNT_OPTIONS isn't a parameter to enable or disable
-> > SELinux test. We just use it to avoid tons of ondisk selinux lables to
-> > mess up the testing. So mount with a specified SELINUX_MOUNT_OPTIONS
-> > to avoid new ondisk selinux labels always be created in each file's
-> > extended attributes field.
-> > 
-> > Secondly, I don't want to attend the argument :) Just for this patch review,
-> > I prefer just doing:
-> > 
-> >            _scratch_mount
-> >    -       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> >    +       _mount $SELINUX_MOUNT_OPTIONS ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> > 
-> > or if you concern MOUNT_OPTIONS and SELINUX_MOUNT_OPTIONS both, maybe:
-> > 
-> >            _scratch_mount
-> >    -       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> >    +       _mount $(_common_dev_mount_options) ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> > 
-> > That's enough to help "_scratch_mount" and later "_mount" use same
-> > SELINUX_MOUNT_OPTIONS, and fix the test failure you hit.
-> > 
-> > About resetting "SELINUX_MOUNT_OPTIONS", I think btrfs/314 isn't a test case
-> > cares about SELinux labels on-disk or not. So how about don't touch it.
-> 
-> Thanks for the sane final call.
-> 
-> Exactly what I want in the first place.
 
-Your suggestion is good to me, but I think you confused Daniel a bit with "overriding
-the SELINUX context just means disabling SELINUX" :) Anyway, I believe both of you
-know how to fix this issue and how SELinux works, maybe you're just not talking in the
-same channel, so take it easy, let's over it and move on :-D
+--pxojJDxkiNbC
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The for-next branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+has just been updated and tagged as v2025.02.23 release.
+
+Release Notes:
+1) There's not new test cases in this release, this's a release for bug fixes
+   particularly.
+2) Reiserfs part is removed from fstests.
+3) ltp/growfiles is removed too, I think no one needs it.
+
+I can't list all updates at here, more details please refer to below.
+Thanks for all these contributions!
 
 Thanks,
 Zorro
 
-> 
-> Thanks,
-> Qu
-> 
-> > 
-> > If you'd like to talk about if xfstests cases should test with a specified
-> > SELINUX_MOUNT_OPTIONS mount option or not, you can send another patch to talk
-> > about 3839d299 ("xfstests: mount xfs with a context when selinux is on").
-> > 
-> > Now let's fix this failure at first :)
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > >   tests/btrfs/314 | 6 +++++-
-> > >   1 file changed, 5 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/btrfs/314 b/tests/btrfs/314
-> > > index 76dccc41..cc1a2264 100755
-> > > --- a/tests/btrfs/314
-> > > +++ b/tests/btrfs/314
-> > > @@ -21,6 +21,10 @@ _cleanup()
-> > > 
-> > >   . ./common/filter.btrfs
-> > > 
-> > > +# Disable the forced SELinux context. We are fine testing the
-> > > +# security labels with this test when SELinux is enabled.
-> > > +SELINUX_MOUNT_OPTIONS=
-> > > +
-> > >   _require_scratch_dev_pool 2
-> > >   _require_btrfs_fs_feature temp_fsid
-> > > 
-> > > @@ -38,7 +42,7 @@ send_receive_tempfsid()
-> > >   	# Use first 2 devices from the SCRATCH_DEV_POOL
-> > >   	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
-> > >   	_scratch_mount
-> > > -	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> > > +	_mount ${SELINUX_MOUNT_OPTIONS} ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
-> > > 
-> > >   	$XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' ${src}/foo | _filter_xfs_io
-> > >   	_btrfs subvolume snapshot -r ${src} ${src}/snap1
-> > > --
-> > > 2.48.1
-> > > 
-> > > 
-> > 
-> > 
-> 
+The new head of the for-next branch is commit:
 
+5b56a2d88819 fstests: remove reiserfs support
+
+New commits:
+
+Christoph Hellwig (1):
+      [04d0cf3f8909] generic/370: don't exclude XFS
+
+Darrick J. Wong (35):
+      [cc379f50f3bd] generic/476: fix fsstress process management
+      [ab459c67c5e0] metadump: make non-local function variables more obvious
+      [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
+      [e68a92376165] generic/019: don't fail if fio crashes while shutting down
+      [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising fsx
+      [543795bf67f2] common/rc: revert recursive unmount in _clear_mount_stack
+      [777732b27e62] common/dump: don't replace pids arbitrarily
+      [81f28acda2f2] common/populate: correct the parent pointer name creation formulae
+      [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and inclusion
+      [241c1c787e5b] generic/759,760: skip test if we can't set up a hugepage for IO
+      [77548e6066fd] common/rc: create a wrapper for the su command
+      [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGINT
+      [c71349150d34] common/rc: hoist pkill to a helper function
+      [91d2880aa029] tools: add a Makefile
+      [88d60f434bd9] common: fix pkill by running test program in a separate session
+      [247ab01fa227] check: run tests in a private pid/mount namespace
+      [949bdf8eae31] check: deprecate using process sessions to isolate test instances
+      [af0f1090e240] common/rc: don't copy fsstress to $TEST_DIR
+      [f43da58ef936] unmount: resume logging of stdout and stderr for filtering
+      [5dc27fd20f80] mkfs: don't hardcode log size
+      [dba402b7e3ae] common/rc: return mount_ret in _try_scratch_mount
+      [9505d04b8073] preamble: fix missing _kill_fsstress
+      [4d9aeeb79f9c] generic/650: revert SOAK DURATION changes
+      [1bb15a27573e] generic/032: fix pinned mount failure
+      [b816737426bf] fuzzy: stop __stress_scrub_fsx_loop if fsx fails
+      [040e74c89192] fuzzy: don't use readarray for xfsfind output
+      [0dfe1fac98d2] fuzzy: always stop the scrub fsstress loop on error
+      [336d73c96a96] fuzzy: port fsx and fsstress loop to use --duration
+      [96d29207c126] fix _require_scratch_duperemove ordering
+      [a8268531ca8b] fsstress: fix a memory leak
+      [e8e29e028faa] fsx: fix leaked log file pointer
+      [4a9e82863917] misc: don't put nr_cpus into the fsstress -n argument
+      [c475ff6ff6d7] common/config: add $here to FSSTRESS_PROG
+      [1c67e8b191fe] config: add FSX_PROG variable
+      [a553e7eba1cf] build: initialize stack variables to zero by default
+
+David Sterba (2):
+      [9049250b4042] fstests: remove ltp/growfiles
+      [5b56a2d88819] fstests: remove reiserfs support
+
+Filipe Manana (2):
+      [7122c0315a08] btrfs/254: don't leave mount on test fs in case of failure/interruption
+      [535b72a63a28] btrfs/254: fix test failure in case scratch devices are larger than 50G
+
+Jeff Layton (1):
+      [bd6e01c81e21] generic/126: run it inside its own subdirectory
+
+
+Code Diffstat:
+
+ .gitignore            |    1 -
+ Makefile              |    2 +-
+ check                 |   91 +-
+ common/config         |   12 +-
+ common/dump           |    1 -
+ common/fuzzy          |  104 +-
+ common/metadump       |   42 +-
+ common/populate       |   13 +-
+ common/preamble       |    2 +-
+ common/quota          |    6 +-
+ common/rc             |  146 ++-
+ common/reflink        |    2 +-
+ configure.ac          |    1 +
+ include/builddefs.in  |    3 +-
+ lib/tlibio.c          |    2 +-
+ ltp/Makefile          |    2 +-
+ ltp/fsstress.c        |    1 +
+ ltp/fsx.c             |    8 +-
+ ltp/growfiles.c       | 2607 -------------------------------------------------
+ m4/package_libcdev.m4 |   14 +
+ src/nsexec.c          |   18 +-
+ src/xfsfind.c         |   14 +-
+ tests/btrfs/254       |    8 +-
+ tests/generic/019     |    2 +-
+ tests/generic/032     |    9 +
+ tests/generic/050     |    2 +-
+ tests/generic/075     |    2 +-
+ tests/generic/085     |    2 +-
+ tests/generic/093     |    2 +-
+ tests/generic/112     |    2 +-
+ tests/generic/125     |    2 +-
+ tests/generic/126     |   17 +-
+ tests/generic/127     |   16 +-
+ tests/generic/128     |    2 +-
+ tests/generic/193     |   36 +-
+ tests/generic/230     |   14 +-
+ tests/generic/231     |    4 +-
+ tests/generic/233     |    2 +-
+ tests/generic/270     |   12 +-
+ tests/generic/310     |    6 +-
+ tests/generic/314     |    2 +-
+ tests/generic/327     |    2 +-
+ tests/generic/328     |    4 +-
+ tests/generic/355     |    2 +-
+ tests/generic/361     |    4 +-
+ tests/generic/370     |   10 +-
+ tests/generic/453     |    6 +-
+ tests/generic/455     |    2 +-
+ tests/generic/456     |    2 +-
+ tests/generic/457     |    2 +-
+ tests/generic/469     |    2 +-
+ tests/generic/476     |    4 +-
+ tests/generic/499     |    2 +-
+ tests/generic/504     |   15 +-
+ tests/generic/511     |    2 +-
+ tests/generic/514     |    2 +-
+ tests/generic/530     |    6 +-
+ tests/generic/531     |    6 +-
+ tests/generic/561     |    2 +-
+ tests/generic/573     |    2 +-
+ tests/generic/590     |    2 +-
+ tests/generic/600     |    2 +-
+ tests/generic/601     |    2 +-
+ tests/generic/603     |   10 +-
+ tests/generic/642     |    2 +-
+ tests/generic/650     |    6 +-
+ tests/generic/673     |    2 +-
+ tests/generic/674     |    2 +-
+ tests/generic/675     |    2 +-
+ tests/generic/680     |    2 +-
+ tests/generic/681     |    2 +-
+ tests/generic/682     |    2 +-
+ tests/generic/683     |    2 +-
+ tests/generic/684     |    2 +-
+ tests/generic/685     |    2 +-
+ tests/generic/686     |    2 +-
+ tests/generic/687     |    2 +-
+ tests/generic/688     |    2 +-
+ tests/generic/691     |    8 +-
+ tests/generic/721     |   10 +-
+ tests/generic/726     |    2 +-
+ tests/generic/727     |    2 +-
+ tests/generic/740     |    2 +-
+ tests/generic/746     |    2 +-
+ tests/generic/750     |    2 +-
+ tests/generic/759     |    7 +-
+ tests/generic/760     |    7 +-
+ tests/xfs/149         |    2 +-
+ tests/xfs/501         |    2 +-
+ tests/xfs/502         |    2 +-
+ tests/xfs/530         |    2 +-
+ tests/xfs/720         |    2 +-
+ tests/xfs/795         |    2 +-
+ tests/xfs/803         |    2 +-
+ tools/Makefile        |   21 +
+ tools/run_privatens   |   28 +
+ tools/run_setsid      |   22 +
+ 97 files changed, 596 insertions(+), 2890 deletions(-)
+--
+Zorro Lang
+zlang@kernel.org
+
+--pxojJDxkiNbC
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEI6yX1/+Fhk84DbzBlNbPkfr2tMwFAme7FBoACgkQlNbPkfr2
+tMwDEA//WgIkrWBtCDGmICkoG1vdkGYFqxSfAyOjxfBxgpmDMLuQdBBxSrfGdZNR
+LntpZX3Ki/FCglaLCGNalrwGIMMI6Lu13omEGkSxbDBR4lmfNN7Zz9CFQQCjXURu
+l01DUFGjre48YsKZSr7RRRrwHhhQqavCJDrne596BObq/atADxBcRuYi4DfIZxpg
+/4D1QzRpIP8GNcfVV0KzhkTsGcOVE2MkDdd8rAvFsANcW/9p/j09zABliH5SZ8ix
+Jd/1i0xb8YhPtI4iIqj6afIQieDqBZdzIuU/GGOR9zeiTtfAc+mSEwvtqOzxax0C
+5u97qpgsOVAXAT9LDNyeTBL3tSuRsZ9gqpr5FQyun48oaQ3WrquuXXm/8fTKQlIx
+5uUoV5Oz34s7zNhOFsd+mCAQGllXPo0dbls/GsUzGDOu3qGMO9I2GwcwWTnnNdt0
+g4DbujgDWiDdOnlLS/sHKKN3uGOZOcLQx34OFfzbyviKM1uI0svvs9Ufdly1TgCS
+AYBl7hglS/LWjN55+LBj6q29AJ/ni/elfExDwXrSEzJO2jvZCiJmhI3eKIPPDwOP
+8bhduqfi9lvYduqaYVmVe9+S5xwYs+gptVQinqsvBxidfjnUPLWvOfieQ1YoaLdf
+QibZKjSSaA2z8Exw7TKZGU7uMmBLIB2kWo0xrQF95ieTp+f1oFo=
+=Lf2R
+-----END PGP SIGNATURE-----
+
+--pxojJDxkiNbC--
