@@ -1,64 +1,64 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
+Received: from mail-pj1-f43.google.com (mail-pj1-f43.google.com [209.85.216.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2123F1EB3E
-	for <fstests@vger.kernel.org>; Mon, 24 Feb 2025 04:39:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 049182F3B;
+	Mon, 24 Feb 2025 04:50:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740371958; cv=none; b=syfaainVpWCh8eifL2M2IZgLbaEQ+WQrddHcIR3qJcjGaenzrThtTfxeugmvNRynft5fEY+rnYQRXFMh8qcdpMka2TveUQVdPBADjVSgMjYcWiOp9BllR6dypeUQrIb9ZKi3a/grb7dUVyeasxMzrVEuU21sicGvGz7nfH6Naf8=
+	t=1740372657; cv=none; b=V4yju/df6j2f4+s98QGnFMcziBL05QodNhBXTGROlGwwHA6zbpg/7SklsG5DzHXZtyJDFhBFpO9YSyjtNClmIsmDfhYr6ARfBLo2DbrEUFO4voYqQkMpgHzqOfm0I/+gAR6hPQGHA73R8CG5REIg4K5Sv8lu7ntfr+5xG9+W7KE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740371958; c=relaxed/simple;
-	bh=k79ofe1PZPOJR0OrJo0bFr+RefGY7KPHPVv9TF6RcDs=;
+	s=arc-20240116; t=1740372657; c=relaxed/simple;
+	bh=BmOgzG0JI+d7aJv0Oa244avhqt4WXeAIWcDX/NTYfCM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cgrbHI1OzHE3DYctlmzwo6W3XOM9SmyRcAzfIyUkjb8YnkrM2j750SCauIX1YzVcBGuujweYI2Jvx2mNsBHh0KaSSocHY80ECznlRn6TRaDSi7rc1YJfRSCo5x4tXr3XE5xiEeuZgEuxlAx3BjQuRaeEyCSUIwz+s7ZJoDitSfE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Yw6W9rpO; arc=none smtp.client-ip=209.85.214.171
+	 In-Reply-To:Content-Type; b=ZsxwomnCAmuSITu0dHWWC+Bc9AKpVTRlKXsk73UTY9VoVrBkUwXgRxZdgxtTtPS/oZ86ARG0oLpM/+4b97G66zJt0fkET66cq0bVlaZv9LiaD9mfmi2IaBXnE3fanE3KdJbd6MsSuqc+2CoxRvyvwDFsR9q2ccamFa/Xxl+JRo8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WFTQkzqT; arc=none smtp.client-ip=209.85.216.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Yw6W9rpO"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-2212a930001so107624575ad.0
-        for <fstests@vger.kernel.org>; Sun, 23 Feb 2025 20:39:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WFTQkzqT"
+Received: by mail-pj1-f43.google.com with SMTP id 98e67ed59e1d1-2fc1f410186so8436681a91.0;
+        Sun, 23 Feb 2025 20:50:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1740371955; x=1740976755; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        d=gmail.com; s=20230601; t=1740372655; x=1740977455; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=EfF0Ck3a+hsNAsaRGDTNxAMveckS+XT+lQbkjNPTwEM=;
-        b=Yw6W9rpOKA+1Yarf6H+eiSxHC0YGbNaUww+g8xHerRSvwC1BFmK2dPTS3UStvcxHmM
-         ZLsR5FJ+5nCa6RvVmXXYAsX6ySc0pS3x9Ad+ExipEEbre29E4SSEOLr4mQ+iD0xi5Dau
-         qXZ+mRxBFYsU3aExgl6CsT+kG8zNF2HbWfHFvbC26YDtfQOz6Ibv3m7FJKk34Dy3lNuo
-         rQh9vabNG17cS7ubY9XcRmHXQhL5Rjd/lybc0UshtXHpe+RoobcsFK0z8hJrC9UqKhkh
-         P5iH2CkAjL/HzBNd61bFxWrp8yjOPYraJGeLQAXQQpShiLqIronNSSnM37gHDzZ/nNJI
-         QNYA==
+        bh=cq5X6v/15Wba9AJ1b3Nzk+v3oL4H02L4uR5JtNkrOQU=;
+        b=WFTQkzqTayEJ2gx3ILT3+/Wl0BI0c8fROB0wjkKgeb1BB9aE+l1bdM4XSwfmlvEzm/
+         dw5XdmNkWkj1oXf/vDjXBQbFGuX/mLpRKtWInMeLz8jvKrSPxZ7+2MbAXxrr6M06apJQ
+         k8FbzCImOJ1t1JPqmf3iRYOjy5a/MFJV9jsaEZnQEEflH9hs/wZIeEIM4VGTsZOTysrf
+         tKQuAL8YJCfjMLvxiBei2zNO2Vp3xhZYHXVSXCxI8wP59tl2M4ZGrIXpkBkGKL97i8wD
+         ZJaeO8/kLphALl//jHggik8JyHWWDbh2787ox/rGVA1Reb9pdJVEtOiHeqTQwCpqvxGr
+         V5hg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740371955; x=1740976755;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        d=1e100.net; s=20230601; t=1740372655; x=1740977455;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EfF0Ck3a+hsNAsaRGDTNxAMveckS+XT+lQbkjNPTwEM=;
-        b=fxwJFa6DypDQZhRxfQ1PxcZPXg+tq8rK39GXeFEEhqPQ5C7u9DJNZSX7XPY/CrOO9X
-         BRwn4KZbk+Twrg5uDTzKVPyqbPleYT2c/pmPyxHlVtAa0uQ2Bkhn/lwLNc4gFiqPGnfa
-         oCfaQveCN0T1NSN/st1FaMWtMXs1GKbiriPH0N5Og8HXeoDWHIlaJo6/3/WVwXX54UOM
-         mOecqoePyrdG+pKyvdTMrqu0b/mPZ/bUdiJk8YKnO/Zi1wSkWfIAW9t+w6DVCdYexRzi
-         9M1wBznwZoAbxNDkwOyUYBgQ90vGnZvkosUDzlhgQkoZ9BkTpzVKj7Ee3M59FMFP+xGt
-         9cQw==
-X-Forwarded-Encrypted: i=1; AJvYcCXPHMYuKp0RuiLKj6k0hlVfb+YopG1eil5Z+pfdLxibED2Px73+h0mgZPqXACI6dcCDiNrEQIBX@vger.kernel.org
-X-Gm-Message-State: AOJu0YxAw/sr0dUBUKhBCEHo+MX+vD7LLbsWSzd3HIITjEJ4LFG/2z17
-	ypY/orSTbuzSbI4ZwguRTlz+zzsKTN44eaj0CkY4kw3DoXCosy4r
-X-Gm-Gg: ASbGncsoHn/jJ69mdAsmT43sEqe20QFOaCDFXylhROpUh+shjhFmE8FK/7Pe+f+ab6T
-	HUDziYph/3tZ50M8wMgkIL6hsgEgYw13kY87MzSnd4f/M/EeeclxtwO97npJXHoqmooHeiSQ13c
-	SK8Sc7XKr/aVRDdmWlkbGo0J+LHrTMx73RTC/lpICsdv7zgg0ViNTIAvA7aHMql5D5wIHqVAhHr
-	Q1EXG0jqFM2BHzruCKKsFs05DudC+tdVb4vgHVGcyxxJIgkDoti+kUU7PPuRe+etrX5tR1+j6uh
-	RNBzP+wu9rzwudVRQBSqCyagphLA2RNXej4a
-X-Google-Smtp-Source: AGHT+IE0ltQEqKAICQD+hY1oZgEDZhXLP2yW7TK0mJ8CoUaAoUF5XCTqllX8JdtztIe26WWdQanGIA==
-X-Received: by 2002:a17:903:2f92:b0:215:a964:e680 with SMTP id d9443c01a7336-221a10de4a8mr169392575ad.25.1740371955000;
-        Sun, 23 Feb 2025 20:39:15 -0800 (PST)
+        bh=cq5X6v/15Wba9AJ1b3Nzk+v3oL4H02L4uR5JtNkrOQU=;
+        b=uhIESvZ8Msgr7T9r8UpTuCSvxdPpBXtfdnh6F0nPMnol/u5njkv3LNwq4Gz3SQwBIc
+         JxC32d0UGsSQhjkF7GapiyZm6QUDarKlpEEpXJbaxOgHLxbcAkkOdIXJEigVxhLCjFB9
+         334l0Bs35kZJr853/UmpbpEEuy/Tu0ExSVWcZw+tkiekely+FAvqnrFOb8CvwJWi6eZj
+         1VzmW+rQM0mdhYmdf53XXFibP4VyFQwuKvMggZmCAMU1+2LqS3yD2wtE/Jlcp86dsvZ0
+         rBlO2ke9xUiORJEbdp407Lgk/oaMGlFWWtTjhhh2RnhD5PRWbD/9N/pXfroML5uHBcIt
+         FKiQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVRXHIG6gKVYH07DHIaHTcEPjjsdYOO4aW8CmhlRYp3ggNy2NDZv+u+s+JrVc2fSymk3P2JvWEYRTvN@vger.kernel.org, AJvYcCWBXvcD0Bm7m+c5/g5F/oEX9yF4hH2fNK5oN2JpV729J1cspYffU4g/zpRUoRCTfa18zPkI1L+sL366@vger.kernel.org
+X-Gm-Message-State: AOJu0YzeGSVZK6jSLreLSsqwXKsLXQA3EuawLbBrt1SHBtcWWdN/FTnE
+	3rgG+lyDORGefqxtSefBOjJlCq4PSVE+UqYl/aMnHS5a4Lka/YJP
+X-Gm-Gg: ASbGncvykH0lfqqqBVc7SsCFqLvPXJTIeTkZv50kH/alllv/2OioEmX07AylYqC7m5K
+	ul9QGvCjoqlasCGkWhtM+dqxcCrXp7YFKAiYXo45Qpvu/SUKSJgjoHoJKqeQzpRZVt/nn21FMVo
+	CTpmDHwv7U8ptwyQatWhkQfb3QuRP4ljHzrsrGo5jXty1m7NECCSVxXlmIcDHgJcbVe5LKNZxDz
+	cOF38x37rTA7PP1WzNOgQlI66u0ZnOGHzFTp5OV5YDnOxCcUGE0rz78R40WhzltKfOxU+RoW0iI
+	huv3Qhxz0lxuNVLg0LNmzvrEhvIikD5Rz02z
+X-Google-Smtp-Source: AGHT+IHyQCx/YO7KUUOXHjJV86KY038uKsEg/mHGAAw3dLoR/ht8tUPU69YggQrkSdqTTb52aJPp6w==
+X-Received: by 2002:a17:90b:2b90:b0:2ee:8cbb:de28 with SMTP id 98e67ed59e1d1-2fce7ae96bemr22171227a91.8.1740372655134;
+        Sun, 23 Feb 2025 20:50:55 -0800 (PST)
 Received: from [192.168.0.120] ([49.205.33.247])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-220d556d3b1sm171284025ad.163.2025.02.23.20.39.13
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fceae32c24sm5430199a91.0.2025.02.23.20.50.52
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 23 Feb 2025 20:39:14 -0800 (PST)
-Message-ID: <278823de-0b30-4ddc-ae00-8e3fc9757463@gmail.com>
-Date: Mon, 24 Feb 2025 10:09:11 +0530
+        Sun, 23 Feb 2025 20:50:54 -0800 (PST)
+Message-ID: <8b927d46-f34f-4ae5-96df-835c40a6f574@gmail.com>
+Date: Mon, 24 Feb 2025 10:20:49 +0530
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -66,91 +66,75 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] generic: test zero-byte writes to new file
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: Eric Sandeen <sandeen@redhat.com>,
- "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
- Namjae Jeon <linkinjeon@kernel.org>
-References: <b4d76883-e58b-4db3-b7e4-7ddeb5ec7f42@redhat.com>
- <30dfe4a2d18ec2ca29d303c1f8fc943688221d59.camel@gmail.com>
- <20250221164751.GY21799@frogsfrogsfrogs>
+Subject: Re: [PATCH v1 1/3] xfs/539: Skip noattr2 remount option on v5
+ filesystems
 Content-Language: en-US
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
+ linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
+ djwong@kernel.org, zlang@kernel.org
+References: <cover.1739363803.git.nirjhar.roy.lists@gmail.com>
+ <8704e5bd46d9f8dc37cec2781104704fa7213aa3.1739363803.git.nirjhar.roy.lists@gmail.com>
+ <Z60MMI3mbC9ou6rC@dread.disaster.area>
 From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <20250221164751.GY21799@frogsfrogsfrogs>
+In-Reply-To: <Z60MMI3mbC9ou6rC@dread.disaster.area>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
 
-On 2/21/25 22:17, Darrick J. Wong wrote:
-> On Fri, Feb 21, 2025 at 10:44:09AM +0530, Nirjhar Roy (IBM) wrote:
->> On Thu, 2025-02-13 at 12:06 -0600, Eric Sandeen wrote:
->>> A bug was recently fixed in exfat where attempting to do a zero-byte
->>> write would yield -EFAULT; test for that here.
->>>
->>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->>> ---
->>>
->>> diff --git a/tests/generic/761 b/tests/generic/761
->>> new file mode 100755
->>> index 00000000..e933eb83
->>> --- /dev/null
->>> +++ b/tests/generic/761
->>> @@ -0,0 +1,28 @@
->>> +#! /bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0
->>> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
->>> +#
->>> +# FS QA Test 761
->>> +#
->>> +# test zero-byte writes
->>> +#
->>> +# exfat had a regression where a zero-byte write to a file would
->>> +# yield -EfAULT. Should work on all filesystems - write should
->>> +# succeed and the zero-byte file should be created.
->>> +#
->>> +. ./common/preamble
->>> +_begin_fstest auto quick
->>> +
->>> +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
->>> +	"exfat: short-circuit zero-byte writes in
->>> exfat_file_write_iter"
->>> +
->>> +# Modify as appropriate.
->>> +_require_test
->>> +
->>> +rm -f $TEST_DIR/testfile.$seq
->>> +$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq
->>> +test -f $TEST_DIR/testfile.$seq || _fail "file not created"
->> Minor: Maybe just remove the test file that is created above (since we
->> are using the TEST_DIR)and not leave any test artifacts? Or, maybe use
->> the scratch device?
-> Agreed, the _cleanup should remove the testfile.
+On 2/13/25 02:31, Dave Chinner wrote:
+> On Wed, Feb 12, 2025 at 12:39:56PM +0000, Nirjhar Roy (IBM) wrote:
+>> This test is to verify that repeated warnings are not printed
+>> for default options (attr2, noikeep) and warnings are
+>> printed for non default options (noattr2, ikeep). Remount
+>> with noattr2 fails on a v5 filesystem, so skip the mount option.
+> Why do we care if remount succeeds or fails? That's not what the
+> test is exercising.
 >
-> Using the scratch device (== additional runtime for mkfs) is overkill
-> since this test creates a single file but writes nothing to it.
+> i.e. We are testing to see if the appropriate deprecation warning
+> for a deprecated mount option has been issued or not, and that
+> should happen regardless of whether the mount option is valid or not
+> for the given filesysetm format....
+>
+> Hence I don't see any reason for changing the test to exclude
+> noattr2 testing on v5 filesystems...
 
-Yes, makes sense.
+Yes, this makes sense. The test indeed just checks for the dmesg 
+warnings, and they appear even if the remount fails. I wrote the patch 
+because xfs/539 has started failing in one of our fstests CI runs 
+because RHEL 10 has started disabling xfs v4 support i.e, 
+CONFIG_XFS_SUPPORT_V4=n. Do you think modifying this patch in such a way 
+that the test ignores the remount failures with noattr2 and continues 
+the test is an appropriate idea (since the test xfs/539 only intends to 
+check the dmesg warnings)? So something like:,
+
+--- a/tests/xfs/539
++++ b/tests/xfs/539
+@@ -61,7 +61,11 @@ for VAR in {attr2,noikeep}; do
+  done
+  for VAR in {noattr2,ikeep}; do
+      log_tag
+-    _scratch_remount $VAR
++    _scratch_remount $VAR >> $seqres.full 2>&1
++    if [[ "$VAR" == "noattr2" && "$?" != "0" ]]; then
++        echo "remount will fail in v5 filesystem but the warning should 
+be printed" \
++            >> $seqres.full
++    fi
+      check_dmesg_for_since_tag "XFS: $VAR mount option is deprecated" || \
+          echo "Could not find deprecation warning for $VAR"
+
+I also suggested something similar in one of my previous replies[1] in 
+this patch series. Can you please let me know your thoughts on this?
+
+[1] 
+https://lore.kernel.org/all/90be3350-67e5-4dec-bc65-442762f5f856@gmail.com/
 
 --NR
 
 >
-> --D
->
->> --NR
->>> +
->>> +# success, all done
->>> +status=0
->>> +exit
->>> diff --git a/tests/generic/761.out b/tests/generic/761.out
->>> new file mode 100644
->>> index 00000000..72ebba4c
->>> --- /dev/null
->>> +++ b/tests/generic/761.out
->>> @@ -0,0 +1,2 @@
->>> +QA output created by 761
->>> +Silence is golden
->>>
->>
+> -Dave.
+
 -- 
 Nirjhar Roy
 Linux Kernel Developer
