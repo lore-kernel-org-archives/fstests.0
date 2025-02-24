@@ -1,29 +1,41 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 794DD18EA2;
-	Mon, 24 Feb 2025 16:40:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74D1D265CBF;
+	Mon, 24 Feb 2025 18:18:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740415204; cv=none; b=EIJeLFpfRoDp35IxC4AHYaO95Omk6EaigKDKqxaS3PtBa8rPTxAkcIET2GHLiUOaUS/187F3r4gC1BejSMmufKyvkUK9UkS9u1100zwsqtw+lvLV41NRg7/Wmx5pcITIDqcn0lIDHc+2tVLDDBVCwBLEfH68+rlNgKgSVByVFNU=
+	t=1740421135; cv=none; b=C0aUeQc5lkg3/oTMFv7RfnyBZMOYsB+uNE0+pQdgVHjBlTYWC0ZoDYCRj6zX1wubrqfzAULhSYivejL/XN1Qe4WKNPkxkZmsb8pLd5weaRFpQMYKG42kc/5PezbDJPCPniS0MH4SswyzlGx/u0c1Ggu09kCyIMCWGF6vOsbZZM0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740415204; c=relaxed/simple;
-	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
+	s=arc-20240116; t=1740421135; c=relaxed/simple;
+	bh=2mg1avw/PiNF4XVt7bVe0O569/2GhiFh7nOGBRqUuKU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nw0TOlEIGeCnDfo+v1SLFyT8xJDJZeieDotb+moU5RUWoXBvfaxbfZhcsEfca4wwIr8a8brLcXlRhhBSnzOJObKr+WycItTqCulOMoL0YtSZ6w+dniJfKxR6EZg9H0zpw8bWtPPzMhvyHuCnzXxYJtSuaVErGZYxYcRh6QMct90=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 19CAD68C4E; Mon, 24 Feb 2025 17:39:58 +0100 (CET)
-Date: Mon, 24 Feb 2025 17:39:57 +0100
-From: Christoph Hellwig <hch@lst.de>
-To: "Darrick J. Wong" <djwong@kernel.org>
-Cc: zlang@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
-Subject: Re: [PATCH] xfs/614: determine the sector size of the fs image by
- doing a test format
-Message-ID: <20250224163957.GA5936@lst.de>
-References: <20250219223830.GS21799@frogsfrogsfrogs>
+	 Content-Type:Content-Disposition:In-Reply-To; b=cm4WLTkkSoE2D1mVS5ThOJJFn9GcJzeVHHRp8P3p7eu4idpO+Vpjg0V3XT39dXH3wXcaYnw7nyFt+HadSRogUaDoLC0tBull4F1sl9t+zFmN3HrKT/TS0hvQrAQsbH4LhPUXKb3rZVA+3T+66fCOFI21OTQCxUOSpxYDrAZOG8E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=S5j51DpS; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="S5j51DpS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA286C4CEEA;
+	Mon, 24 Feb 2025 18:18:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740421135;
+	bh=2mg1avw/PiNF4XVt7bVe0O569/2GhiFh7nOGBRqUuKU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=S5j51DpScS0YY9wvq9uBEh8jNvAbwHmE85ul06TrsxA9im2z53VivcfcWkIEyeCc/
+	 WM0Nao0XbErgE15Zv+xbBemOwm9m1MQkC/DJy+5fSUpUomBoKMu9MTyGUHKQfHGnX7
+	 tCY59tpOGoT17wTTIChfKBzXeR3cL77JjVTzdHW2ssj01+tRej1sc1hJDSqOeKVuyr
+	 nToyeloOwpQKd9TXK2rx/aZMt7+UPE9IVEhMgRgE+BuKHbStLx38/JPALhNHPXXG7d
+	 5xfmleg6DvB/iVJN4zYbRwfvucWIIotH3BCi2ZXIDW7z5klFVAeJXU1ohvqynXkF/v
+	 r/HM6g5bu5bIw==
+Date: Mon, 24 Feb 2025 10:18:54 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org,
+	david@fromorbit.com
+Subject: Re: [PATCH v3 1/5] fstests: common/rc: set_fs_sysfs_attr: redirect
+ errors to stdout
+Message-ID: <20250224181854.GB21799@frogsfrogsfrogs>
+References: <cover.1740395948.git.anand.jain@oracle.com>
+ <e18babf503e66ce798c3df4353174afd4f771303.1740395948.git.anand.jain@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -32,10 +44,40 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250219223830.GS21799@frogsfrogsfrogs>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <e18babf503e66ce798c3df4353174afd4f771303.1740395948.git.anand.jain@oracle.com>
 
-Looks good:
+On Mon, Feb 24, 2025 at 08:15:04PM +0800, Anand Jain wrote:
+> Redirect sysfs write errors to stdout as a preparatory patch to enable
+> testing of expected sysfs write failures. Also, log the executed
+> sysfs write command and its failure if any to seqres.full for better
+> debugging and traceability.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>  common/rc | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index cf6316a224ff..942e201649dd 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -5081,7 +5081,8 @@ _set_fs_sysfs_attr()
+>  
+>  	local dname=$(_fs_sysfs_dname $dev)
+>  
+> -	echo "$content" > /sys/fs/${FSTYP}/${dname}/${attr}
+> +	echo "echo "$content" 2>&1 > /sys/fs/${FSTYP}/${dname}/${attr}" >> $seqres.full
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Did you mean to    ^ escape ^ these double-quotes?  Without it,
+whitespace in $content might not be logged correctly.
 
+--D
+
+> +	echo "$content" 2>&1 > /sys/fs/${FSTYP}/${dname}/${attr} | tee -a $seqres.full
+>  }
+>  
+>  # Print the content of /sys/fs/$FSTYP/$DEV/$ATTR
+> -- 
+> 2.43.5
+> 
+> 
