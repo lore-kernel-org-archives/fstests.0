@@ -1,79 +1,79 @@
 Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB33D261599
-	for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 09:00:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A037024EF96
+	for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 09:25:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740474014; cv=none; b=vFsH63rS2wRsVoBKiIs0XvTIbq+A6F7ZmeONWK6bnUbfWATYfqK3ZuH7MM4O9QFxl8tDiuf2zczKRdt5BTxntjdWz0HQ1DwIyaWoHcfWsvEv1jy8/AHNbGSX/X+dQ8IJVVSCs7ZISRmjDQ6Hp9xC9/4qGveFvLcOUsG3yy4O96s=
+	t=1740475509; cv=none; b=hov/ANoSyaW7YgYijBfuksa6mHqb4H4x/FG3+5oK/1J0jCsApmhJnPAzedHan7JHcHTaAKG+6nIhsX+rZg5oF/fv4LSwTedBEqVwF3UC8u7ZcyyoLZAXJRU0ojYttV0Afnq6VNuZdee8ow5ydJpTV4HdEcnimtnByf5ICnX7MPo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740474014; c=relaxed/simple;
-	bh=CJYl2KnOR5n0jq+kQWsIfKv+tF5qcOPga7xBI+hX74I=;
+	s=arc-20240116; t=1740475509; c=relaxed/simple;
+	bh=erj9N9Vit1eVAGakU5HYsZ3c2ok6hACcCdpNmAG1RuQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=T2MglN+pRFZdPrn6tRTDZ8ECfUDRqyoUUNSmUa3VE98B4l/M5q0hfcnYxa13K5DoNmRhrP/hJaYxEkQVmAt+FHxmfCdCQ5NCR7Op4fp+IqyfMf1mvEUgrEEsrBa3UZgzoEug07R1D3Pg3pLGnqSKJXESc3YH+7lmMwXHZN2BI8g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VfAcuA7B; arc=none smtp.client-ip=170.10.129.124
+	 Content-Type:Content-Disposition:In-Reply-To; b=ab1RSkzzCc1BQzPS+Tv798pwHPMUIWEc9O/S5HVjboKUkEx1wMb4NZoPSHIj0HASbPKMth/1J7O3R7NPWhDV3V3APf5BgHIu9wsOlBm2yz25ZZjHoBcHqUO3wSMU2yvPQfqlXDohcuun95Szsq5+sVceb1Qe6ph9HMJUeWt3gBY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XqO/IvxO; arc=none smtp.client-ip=170.10.129.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VfAcuA7B"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XqO/IvxO"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740474010;
+	s=mimecast20190719; t=1740475506;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=1VhJdzhRrmVwlrqL9UCjL020/1lx3rVwO5RnRNhbc1U=;
-	b=VfAcuA7Bzb/jhRlzhJqld6gDWAMuPOpDEhlIynUROXmhbGYclnGQjnJNRkooRExk+gA1hn
-	GtOvZfjMYcQbTpkz5Xg8Zk95bZmdIFSrHvfI40D0jqO7ncRhMqjmf+BduF/D+L5ZH+tERI
-	iXKPFEdbPLttaTLeVfjaLms4wjsroB0=
+	bh=mankb6imwSp1UxMwbuGVJaLzZcCAIHqDBny0Cs+EpmU=;
+	b=XqO/IvxOiIssYi+NhzZ2KOwdIfyNuBzeNXYmKjcCvCG5CoOXp+YBOFmCW9vMz1p5xW09dm
+	dW5yAYPaqGb41sT76F5QdOGDjPuN6Z/oohkooYCyIo6ozVBu+lRsf937cNcZyxUZp6mfVL
+	8CdZd23WQzYhOAxtMk87UJ5RRxfln3w=
 Received: from mail-pj1-f72.google.com (mail-pj1-f72.google.com
  [209.85.216.72]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-445-aA8UsjVjONuwJzl2wZXcYg-1; Tue, 25 Feb 2025 04:00:08 -0500
-X-MC-Unique: aA8UsjVjONuwJzl2wZXcYg-1
-X-Mimecast-MFC-AGG-ID: aA8UsjVjONuwJzl2wZXcYg_1740474008
-Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2fc43be27f8so18114442a91.1
-        for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 01:00:08 -0800 (PST)
+ us-mta-347-FiMzDFNTOfuunL91X2UxbA-1; Tue, 25 Feb 2025 04:25:04 -0500
+X-MC-Unique: FiMzDFNTOfuunL91X2UxbA-1
+X-Mimecast-MFC-AGG-ID: FiMzDFNTOfuunL91X2UxbA_1740475504
+Received: by mail-pj1-f72.google.com with SMTP id 98e67ed59e1d1-2fc2e648da3so10586722a91.3
+        for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 01:25:04 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740474007; x=1741078807;
+        d=1e100.net; s=20230601; t=1740475503; x=1741080303;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1VhJdzhRrmVwlrqL9UCjL020/1lx3rVwO5RnRNhbc1U=;
-        b=q2AKBYMh2f/UrivBFBnvZ/FCqGTA+NXS6um1Sla+hhktBT+f4nvX8K8GKOGROV6I6l
-         Bv3FBxkBcmPT1nI8RIFQgGYxEVUna1XYfcE3FRQ/mjNfEmczhZPAjU4b6kQgU7xuHpzv
-         gYOYqJymTfrzQAjQ3UFRXm2ClbfK2Xix1ECJs8uUyxTL34rtIym8T9BLTPx6UGWji2LS
-         xTTXCUNV+iseM1tR0J9XLX+Ym4MTHUlSnXJvcfhS5iIKvzculEeK9O4rDmuEbeKYmC8T
-         SJ072O9Os4NOpestakl35qGbH/ra9V2daNza/pU9Yl2PT473h88cl022mNuodQf2/0XG
-         6yLA==
-X-Forwarded-Encrypted: i=1; AJvYcCWcv2foapKhA46nLs1J7yHH4ss2HkZvjF8E6yuQMO0IVlbFENWtIperhMn/rm9sqCDfFNly0PDB@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy+/GYimjSMKlImBOAP3xVYBJD4km8LmelD5UVMBfK55atwZZoF
-	LPSK6rlEAWdOC+XnU1B8YJHr1oRrg1sDUY3e0sDjPTq+CuBxPBTay6UCXzJDhWiA3UuyJDtS9SS
-	OynO5eD25UmaD77iOx3WvCIZl3YdmYVSaP8nioxIogSUSSoOjXcvFchk2s5VLNBhARg==
-X-Gm-Gg: ASbGncs2brSNEDR3RymD1F6Pk19dMx49QRjtjRyDQoSMEVjEUAaHIEYCQnjXkJ7wwz+
-	kCyNOa2HVN7UjYcEC7VSi/FN3vfD7mUvSuQ3kLIwFi5ODNWrWLqaMH5CtGjZVlIfddzauKVSXjb
-	NKmlxupxkPUjhmFuYaSmxeAfX2vokcTezN8Ja5epQsniUSmUozB1ghwGdt55xJsoDJQvpFt2EzD
-	hjiDZHZAEkuUzAgwCE4qObBnpYV4q1jk0DAvpsIJVjvOfdgBQnVc8d0YBto+SobdMM1xzt+NRCD
-	UstZaKcVHlR0F31KLJz1LAlNdp+yyahXd7AU5UPrlEdQsAgGa5qBhW7U
-X-Received: by 2002:a17:90a:9203:b0:2fe:6942:3710 with SMTP id 98e67ed59e1d1-2fe694238e2mr3433724a91.3.1740474007614;
-        Tue, 25 Feb 2025 01:00:07 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGzKnmtzVjiqh0co9rne3AM6Z6i63RawHUkwKWaMWfvmVcpFZSTQQZ6SrEs9lfheMmd4PjViA==
-X-Received: by 2002:a17:90a:9203:b0:2fe:6942:3710 with SMTP id 98e67ed59e1d1-2fe694238e2mr3433700a91.3.1740474007296;
-        Tue, 25 Feb 2025 01:00:07 -0800 (PST)
+        bh=mankb6imwSp1UxMwbuGVJaLzZcCAIHqDBny0Cs+EpmU=;
+        b=ck91kmtZQb4m65Afdff6IHasfNCjbhkXL5CKX2HUEJlfDAKBWxMvJunpCxJAvbNueL
+         QIAURW1GnAr+XeAZYaQyq8KCAbOxn/Y9ezig+Z+f06W55o9h+FyjhjAHujW/bVVUBmpl
+         sPCK6DelRZgbMqduVNgj1xyfUUGpHDurFyxD4LT7FzvQf9jpxO09Y9zYSmrLeB3U3DUI
+         4Vx1UsE2KvgbnViBLTkymALKLpy9PHA6fAuOI0RqJo/grPai9bzx01vkxFmemV1apLCr
+         9HPgTTu+JFt+GGGN+Mf2fyCD1fZjOmnAM0vZhLx6w0vCEkWHjZDPsXUUMCfgB+/JJngS
+         7tBw==
+X-Forwarded-Encrypted: i=1; AJvYcCVeNsG3asIt4eJ9mYdOYIEwsLvfxE8JYoj0Dx0tA3dz8nITxCD2qpRjy6MhIvouvpynaafgpNp3@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywi3xohxTOBjFngKAq/m5uU+EDDdSPSVQRQKbxTk8YyAVz1xS0/
+	LEpTrYEQdccQkoNU2lGnGpnq8QQRoWqdxdtGwsWTWLgprzwpla3bI7Pdbw4OC5HylXx8qqPG6AS
+	yzB+AC+qV656MvPoQjrsaDxhoj6Wrs6dPmIn8JzFRYm2Rw/WwkWcWvPY=
+X-Gm-Gg: ASbGncuylsGISupSGcoSkVEcfY+W/yhE09t5zgqLhtgN7xq0/cCdWuP91aBSccwNXA4
+	lkv/Z4hvSbfm2Ca2BRE+bmXArW4U6ZSFnoo7ab2Kg0sjgSyAQVKq1keEngmyyLQ1pDnOG9VvCT0
+	C7TJr/421mNcor/BU1xqGgJYB8JQn3uzQ+z0RwCest41NMRZOofkJd2kBNPVHnLTINBuqvGDewS
+	3/ex6gg7UImlmLEwCs+V+FHJYWz1tSRw+N5NcdaK99ADi+AeKgWUQeOaq2gJhybiYdA8ynK/yTr
+	efG1a/zCNMcHhT2fAVS+6lzJx3JlSxFWJhypJV5U7GSXJ4idSCd/jcDp
+X-Received: by 2002:a05:6a21:700a:b0:1ee:7054:178b with SMTP id adf61e73a8af0-1eef3d90dcdmr28130650637.33.1740475503598;
+        Tue, 25 Feb 2025 01:25:03 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFivElT9x3XxWObNvSoozQXJ8cmM0QVsoO3KYdNSyWXLZ76kROuJUG7XXuhU5Ywo0JE4oXD4A==
+X-Received: by 2002:a05:6a21:700a:b0:1ee:7054:178b with SMTP id adf61e73a8af0-1eef3d90dcdmr28130622637.33.1740475503254;
+        Tue, 25 Feb 2025 01:25:03 -0800 (PST)
 Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2fe6a3da764sm1035323a91.16.2025.02.25.01.00.05
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7347a6f9eb5sm1059933b3a.69.2025.02.25.01.25.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Feb 2025 01:00:06 -0800 (PST)
-Date: Tue, 25 Feb 2025 17:00:02 +0800
+        Tue, 25 Feb 2025 01:25:02 -0800 (PST)
+Date: Tue, 25 Feb 2025 17:24:58 +0800
 From: Zorro Lang <zlang@redhat.com>
 To: Dave Chinner <david@fromorbit.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>, Zorro Lang <zlang@kernel.org>,
-	fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
-Message-ID: <20250225090002.4y5o2op7cliikx6n@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <c238e76631b086db592f214beaa6fd94@kernel.org>
- <20250223193040.GA21799@frogsfrogsfrogs>
- <20250224054839.zne2pykkrm2nll5d@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <Z7zs6bqldp38_5Sn@dread.disaster.area>
+Cc: Daniel Vacek <neelx@suse.com>, fstests@vger.kernel.org,
+	linux-btrfs@vger.kernel.org, Anand Jain <anand.jain@oracle.com>
+Subject: Re: [PATCH v2] fstests: btrfs/314: fix the failure when SELinux is
+ enabled
+Message-ID: <20250225092458.n4lstidr3mifdrdp@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250220145723.1526907-1-neelx@suse.com>
+ <20250224111014.2276072-1-neelx@suse.com>
+ <Z7zsIkC4SR103m0D@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -82,51 +82,79 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Z7zs6bqldp38_5Sn@dread.disaster.area>
+In-Reply-To: <Z7zsIkC4SR103m0D@dread.disaster.area>
 
-On Tue, Feb 25, 2025 at 09:04:25AM +1100, Dave Chinner wrote:
-> On Mon, Feb 24, 2025 at 01:48:39PM +0800, Zorro Lang wrote:
-> > On Sun, Feb 23, 2025 at 11:30:40AM -0800, Darrick J. Wong wrote:
-> > > On Sun, Feb 23, 2025 at 08:27:43PM +0800, Zorro Lang wrote:
-> > > > Hi all,
-> > > > 
-> > > > The for-next branch of the xfstests repository at:
-> > > > 
-> > > > 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > > > 
-> > > > has just been updated and tagged as v2025.02.23 release.
-> > > > 
-> > > > Release Notes:
-> > > > 1) There's not new test cases in this release, this's a release for bug fixes
-> > > >    particularly.
-> > > > 2) Reiserfs part is removed from fstests.
-> > > > 3) ltp/growfiles is removed too, I think no one needs it.
-> > > > 
-> > > > I can't list all updates at here, more details please refer to below.
-> > > > Thanks for all these contributions!
-> > > 
-> > > Thanks, Zorro.  I know the last few months have been rough. :/
+On Tue, Feb 25, 2025 at 09:01:06AM +1100, Dave Chinner wrote:
+> On Mon, Feb 24, 2025 at 12:10:14PM +0100, Daniel Vacek wrote:
+> > When SELinux is enabled this test fails unable to receive a file with
+> > security label attribute:
 > > 
-> > Thank *you* help a lot, and always be patiented to take review points to
-> > your patchset, finally we got these patches in :)
+> >     --- tests/btrfs/314.out
+> >     +++ results//btrfs/314.out.bad
+> >     @@ -17,5 +17,6 @@
+> >      At subvol TEST_DIR/314/tempfsid_mnt/snap1
+> >      Receive SCRATCH_MNT
+> >      At subvol snap1
+> >     +ERROR: lsetxattr foo security.selinux=unconfined_u:object_r:unlabeled_t:s0 failed: Operation not supported
+> >      Send:	42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/tempfsid_mnt/foo
+> >     -Recv:	42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/foo
+> >     +Recv:	d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/foo
+> >     ...
 > > 
-> > Next, I'm going to deal with your 10 PRs (73 patches), and another patchset
-> > about the check-parallel ([PATCH 0/5]: CLI and feature improvements for
-> > check-parallel). Will talk details with you after my testing.
+> > Setting the security label file attribute fails due to the default mount
+> > option implied by fstests:
+> > 
+> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sdb /mnt/scratch
+> > 
+> > See commit 3839d299 ("xfstests: mount xfs with a context when selinux is on")
+> > 
+> > fstests by default mount test and scratch devices with forced SELinux
+> > context to get rid of the additional file attributes when SELinux is
+> > enabled. When a test mounts additional devices from the pool, it may need
+> > to honor this option to keep on par. Otherwise failures may be expected.
+> > 
+> > Moreover this test is perfectly fine labeling the files so let's just
+> > disable the forced context for this one.
+> > 
+> > Signed-off-by: Daniel Vacek <neelx@suse.com>
+> > ---
+> >  tests/btrfs/314 | 6 +++++-
+> >  1 file changed, 5 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/tests/btrfs/314 b/tests/btrfs/314
+> > index 76dccc41..29111ece 100755
+> > --- a/tests/btrfs/314
+> > +++ b/tests/btrfs/314
+> > @@ -38,7 +38,7 @@ send_receive_tempfsid()
+> >  	# Use first 2 devices from the SCRATCH_DEV_POOL
+> >  	mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+> >  	_scratch_mount
+> > -	_mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+> > +	_mount $(_common_dev_mount_options) ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
 > 
-> No, please do not pull those check-parallel patches or waste time
-> trying to apply/review them right now. I have rebased and updated
-> versions locally that I'm getting ready to send out - this has been
-> waiting on Darrick's namespace helper fixes to land so I can test
-> things with those patches in place...
+> I note that there are several similar instances of this in common/,
+> either as '_mount $(_common_dev_mount_options)' or as '$MOUNT_PROG
+> -t $FSTYP `_common_dev_mount_options $*`'
+> 
+> That kinda says to me there should be a _mount_dev() wrapper,
+> similar to the _mkfs_dev() wrapper like this:
+> 
+> _mount_dev()
+> {
+> 	_mount $(_common_dev_mount_options) $*
+> }
+> 
+> And all these open coded device mounts be converted to use the
+> wrapper. That way we don't have this problem of omitting
+> _common_dev_mount_options when future tests open code specific device
+> mounts.
 
-Thanks Dave, I knew Darrick is working on namespace helpers, I was on a travel
-at that time, so we haven't gotten time to talk about the details, good to know
-your plan :)
-
-So now I'll try to check and merge the 10 PRs from Darrick at first, then the
-namespace helpers maybe next. Feel free to let us know your review points and
-plans.
+OK, so we have two requirements about mount/umount now:
+1) Use _mount_dev to replace _mount or even $MOUNT_PROG. But overlayfs
+   tests might be special, he has to deal with underlying devices which
+   is not suitable for $(_common_dev_mount_options).
+2) Use _umount to replace $UMOUNT_PROG:
+   https://lore.kernel.org/fstests/20250221041819.GX21799@frogsfrogsfrogs/
 
 Thanks,
 Zorro
