@@ -1,35 +1,70 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF8774430;
-	Tue, 25 Feb 2025 15:49:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F68320F08F
+	for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 21:29:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740498551; cv=none; b=jLBv/KX5m1W24TpdbC3guvtk1Ann8eM2IIcq71EaDeCh7pzsg1hMH/PKAAq88wG7c5dZT73cuZRuLKW3hl/+p4Zy2yLY5c3GaY2vdMrqXGw8JU0mxogRiYV9P3xInMBdm8AHX4U4jNI4jEPCKspdnvuWGBMdB79W1JbFmTYtVDw=
+	t=1740518988; cv=none; b=BbeVbx+ZRZyqMBpX4ly+LgYCN5oYB4V0n47fzkSNI3sggVImGsJlW4RpBNngigV0n+h6+xgjFmao24aMekqO5Ks/zIgfBVXmIviKvlEhDeFUSI59mChZMh/ymarnvc1kL26c+PuvLKV2FgM1Wgk+LR9XiFELWw59KyHDvsMG8kA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740498551; c=relaxed/simple;
-	bh=5Cfm58+X84U5hcJGQyY+f+r+SS1LkqFV9Ih6DQznbKw=;
+	s=arc-20240116; t=1740518988; c=relaxed/simple;
+	bh=RJ8nxryWmRATg+xZ+c4o3lqDz9k+9vc0aHo0iecmLPM=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=P+KEK652Z7i7kMPFGtQfvratwE2pqryoZHPDcjOIWPLfjXpgT3Lg5QE4iHG7F7XYr4oj3jO2rmPLVy9vh2/5YJapKUrsEAtPP/j+3E0nqwi+02D5bcMZXSeQnb3gLCxF7TyWEdlmDkuMUq1mjjrRnYIFBdszdMQjs69CzsGtYMg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OPqcENSP; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=iA9wXrZQvgIfBzqMMtZ5lSY4kWOmW91cz6KfU7b2aRE8DaquXZtEESBXn1zWdzy4WamyeuqsM6m+ph4ypd0A69UTJR8lfxO9+bic3Z2QIwHddRKJ2KFIUkhJIvH/aOPHDqgbhhxgsJZCtzNcpeT14cpqLhEJ8drYotP7+yvRNfM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=s0WXWW1l; arc=none smtp.client-ip=209.85.214.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OPqcENSP"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25CFCC4CEDD;
-	Tue, 25 Feb 2025 15:49:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740498551;
-	bh=5Cfm58+X84U5hcJGQyY+f+r+SS1LkqFV9Ih6DQznbKw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=OPqcENSPKroUQelPaqiTg3xpks1uOJ8WBkEssCxz1U9LbKPae290iCYAlqLnMKkzo
-	 TWGMHWZyjtspc///QWaqOewt9sGoJrTsFThu2dU7O9iabvCulGhl4cD59fLpu6ubXh
-	 9uQukRQB6ubTQrZmmngjH3yXj5Ufmv5gsRKafJXWPiklmvnFPNUkeAfRHEzbvUiLlw
-	 j/CjDXOd6ti1eDfu6Kcaob0hejywxDyCHuIRVxDH0gqhLff/3p4uXlZzrHMtsipEoY
-	 3nX+bIPJ5eyw8wpmzXkPoq7QTnmYfb2xTkPbI+/rekRwM8CGfb26kcSxNqCexPHyNj
-	 UUnmRgxI0Vt6g==
-Date: Tue, 25 Feb 2025 07:49:10 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>
-Cc: "zlang@redhat.com" <zlang@redhat.com>,
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="s0WXWW1l"
+Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-221050f3f00so139214065ad.2
+        for <fstests@vger.kernel.org>; Tue, 25 Feb 2025 13:29:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1740518985; x=1741123785; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=9hUhTeanJZvN3uegtxUy2CeWK0FuL5VvS0GK9DS5Gi4=;
+        b=s0WXWW1lkDutdvpSyFRQWWrVsUJKcW6+c+XU4hBnZmMioIfaGXbAho7fyEZHPFAm5n
+         ui/FVwehv2bD7SPMSHr/v1oo+8W9COp596ITV/p4sdAFOAcp7tmCz27bQQ1CiHtyBLzW
+         2YOat1ab2WTpDoM5VZEanJ2SO7ytW1Wd3rB07wwpQ+Bv6g3lrzw3ljBKfuShFN6Ssn1M
+         tv3QVCrkpTRgKObjczM1c2Fro48WKa++iITQcvoyCLQFAKZq/4MpxMgnECQNNknT6QcK
+         rlM7vu8BNSPdQ8DdG8zkbBwP+IddfV+tbooIxrAMmp86hwQ5R4P96IEN4o/z4ESyOm72
+         21ng==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1740518985; x=1741123785;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9hUhTeanJZvN3uegtxUy2CeWK0FuL5VvS0GK9DS5Gi4=;
+        b=kP8a21qso8V2DqRTHjuz1+XCToj+gIgVZjxiFXVo4/jehCvrVRWoG+PnWdnPlTl0Ku
+         4csQXgHXbrxKWfz2sUjH/oryynYdZ11DsGKmqJlwegDV5hOdRCurwQtQ01C4MdfpLYmH
+         /WJUs0kd1Qs/ZzrF+BLA77kVB4ZqGcbJeLtFUACM26929o2Yor0G/5LgvTUTyTECcnWg
+         or5eGGWAuBEVkrdWGUzJwV8IhKQ9BEFWrNDSZqkucTMDA7+4HZFiCT/SL0ADNov5a5Is
+         twiBcx4Z+frSv7FQCAAs/uYIl3lX3Sd+/GCsIDDc0RgteDAFGc6J6A4NNUBnE+aZiTrx
+         CyRg==
+X-Forwarded-Encrypted: i=1; AJvYcCX26Y+9ihOqHp1mWYfN/brUI4/ZDaJ/OzY2TG8jZxdW/BYiwOn4rDYg4qU+aszcETTS/Uqh8TJu@vger.kernel.org
+X-Gm-Message-State: AOJu0YxZzsuzqI8MBVeXkTZ+4knamFMtf4Hkzjiki9VhwAgFUNZGKslS
+	OELREEYFkKGaoOUUEPPycj3qvoD1Up5wwZ8lvk3xhk+IPmnzjOQceGNZEvL3PoI=
+X-Gm-Gg: ASbGncv8cqo2vr/6s8gpzwugaFdihczLwTlnn5bpVQ/uJDkQxM+gm22f71HZzSImN0R
+	oPpOxRievbdsdnWMjjClxptf0SrJencQImx6APEr/nbeTQskSwuQVwx1MMu0p7rNEBMXsBIiAt1
+	l9WDMVXFERiNcp+Ft9Ni7Xh5rr85PJZrmLxFvF8aT7K/q3G6yMZMkIY4/pti9cre0L2egzJ43By
+	uPdGOtfBcS02bE8RR828rq0TZBOoYqmBR2f2iop6dCaLq9xbDOFqxQbBOuLZq+xIoQij5WBdeWw
+	t9+2aOwonkTgmjK8FCmfRrJAlc97J3M+ki2vFzwZTjIKfzslC9WSsRPSkGNEkJlxVgU=
+X-Google-Smtp-Source: AGHT+IEjBdT7FNIXo8o1Js6XdokQgzHHkUXcoV+AxlIX1Slmd+eqWVyefVbK7pAY2Jb3elkwOEKM4A==
+X-Received: by 2002:a05:6a00:3d48:b0:730:75b1:7218 with SMTP id d2e1a72fcca58-7347918de02mr8472227b3a.16.1740518985571;
+        Tue, 25 Feb 2025 13:29:45 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7347a81b91csm2003941b3a.123.2025.02.25.13.29.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Feb 2025 13:29:44 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tn2Uo-00000005vsl-0TBI;
+	Wed, 26 Feb 2025 08:29:42 +1100
+Date: Wed, 26 Feb 2025 08:29:42 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Shinichiro Kawasaki <shinichiro.kawasaki@wdc.com>,
+	"zlang@redhat.com" <zlang@redhat.com>,
 	"dchinner@redhat.com" <dchinner@redhat.com>,
 	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
 	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
@@ -37,11 +72,12 @@ Cc: "zlang@redhat.com" <zlang@redhat.com>,
 	Naohiro Aota <Naohiro.Aota@wdc.com>
 Subject: Re: [PATCH v3.1 15/34] check: run tests in a private pid/mount
  namespace
-Message-ID: <20250225154910.GB6265@frogsfrogsfrogs>
+Message-ID: <Z742RnudifADoj01@dread.disaster.area>
 References: <173933094308.1758477.194807226568567866.stgit@frogsfrogsfrogs>
  <173933094584.1758477.17381421804809266222.stgit@frogsfrogsfrogs>
  <20250214211341.GG21799@frogsfrogsfrogs>
  <6azplgcrw6czwucfm5cr7kh4xorkpwt7zmxoks5m5ptegnyme3@ldg2d6hmmdty>
+ <20250225154910.GB6265@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -50,96 +86,122 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <6azplgcrw6czwucfm5cr7kh4xorkpwt7zmxoks5m5ptegnyme3@ldg2d6hmmdty>
+In-Reply-To: <20250225154910.GB6265@frogsfrogsfrogs>
 
-On Tue, Feb 25, 2025 at 11:27:19AM +0000, Shinichiro Kawasaki wrote:
-> On Feb 14, 2025 / 13:13, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Feb 25, 2025 at 07:49:10AM -0800, Darrick J. Wong wrote:
+> On Tue, Feb 25, 2025 at 11:27:19AM +0000, Shinichiro Kawasaki wrote:
+> > On Feb 14, 2025 / 13:13, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > As mentioned in the previous patch, trying to isolate processes from
+> > > separate test instances through the use of distinct Unix process
+> > > sessions is annoying due to the many complications with signal handling.
+> > > 
+> > > Instead, we could just use nsexec to run the test program with a private
+> > > pid namespace so that each test instance can only see its own processes;
+> > > and private mount namespace so that tests writing to /tmp cannot clobber
+> > > other tests or the stuff running on the main system.  Further, the
+> > > process created by the clone(CLONE_NEWPID) call is considered the init
+> > > process of that pid namespace, so all processes will be SIGKILL'd when
+> > > the init process terminates, so we no longer need systemd scopes for
+> > > externally enforced cleanup.
+> > > 
+> > > However, it's not guaranteed that a particular kernel has pid and mount
+> > > namespaces enabled.  Mount (2.4.19) and pid (2.6.24) namespaces have
+> > > been around for a long time, but there's no hard requirement for the
+> > > latter to be enabled in the kernel.  Therefore, this bugfix slips
+> > > namespace support in alongside the session id thing.
+> > > 
+> > > Declaring CONFIG_PID_NS=n a deprecated configuration and removing
+> > > support should be a separate conversation, not something that I have to
+> > > do in a bug fix to get mainline QA back up.
+> > > 
+> > > Note that the new helper cannot unmount the /proc it inherits before
+> > > mounting a pidns-specific /proc because generic/504 relies on being able
+> > > to read the init_pid_ns (aka systemwide) version of /proc/locks to find
+> > > a file lock that was taken and leaked by a process.
 > > 
-> > As mentioned in the previous patch, trying to isolate processes from
-> > separate test instances through the use of distinct Unix process
-> > sessions is annoying due to the many complications with signal handling.
+> > Hello Darrick,
 > > 
-> > Instead, we could just use nsexec to run the test program with a private
-> > pid namespace so that each test instance can only see its own processes;
-> > and private mount namespace so that tests writing to /tmp cannot clobber
-> > other tests or the stuff running on the main system.  Further, the
-> > process created by the clone(CLONE_NEWPID) call is considered the init
-> > process of that pid namespace, so all processes will be SIGKILL'd when
-> > the init process terminates, so we no longer need systemd scopes for
-> > externally enforced cleanup.
+> > I ran fstests for zoned btrfs using the latest fstests tag v2025.02.23, and
+> > observed all test cases failed with my set up. I bisected and found that this
+> > commit is the trigger. Let me share my observations.
 > > 
-> > However, it's not guaranteed that a particular kernel has pid and mount
-> > namespaces enabled.  Mount (2.4.19) and pid (2.6.24) namespaces have
-> > been around for a long time, but there's no hard requirement for the
-> > latter to be enabled in the kernel.  Therefore, this bugfix slips
-> > namespace support in alongside the session id thing.
+> > For example, btrfs/001.out.bad contents are as follows:
 > > 
-> > Declaring CONFIG_PID_NS=n a deprecated configuration and removing
-> > support should be a separate conversation, not something that I have to
-> > do in a bug fix to get mainline QA back up.
+> >   QA output created by 001
+> >   mount: bad usage
+> >   Try 'mount --help' for more information.
+> >   common/rc: retrying test device mount with external set
+> >   mount: bad usage
+> >   Try 'mount --help' for more information.
+> >   common/rc: could not mount /dev/sda on common/config: TEST_DIR (/tmp/test) is not a directory
 > > 
-> > Note that the new helper cannot unmount the /proc it inherits before
-> > mounting a pidns-specific /proc because generic/504 relies on being able
-> > to read the init_pid_ns (aka systemwide) version of /proc/locks to find
-> > a file lock that was taken and leaked by a process.
+> > As the last line above shows, fstests failed to find out TEST_DIR, /tmp/test.
+> > 
+> > My set up uses mount point directories in tmpfs, /tmp/*:
+> > 
+> >   export TEST_DIR=/tmp/test
+> >   export SCRATCH_MNT=/tmp/scratch
+> > 
+> > I guessed that tmpfs might be a cause. As a trial, I modified these to,
+> > 
+> >   export TEST_DIR=/var/test
+> >   export SCRATCH_MNT=/var/scratch
+> > 
+> > then I observed the failures disappeared. I guess this implies that the commit
+> > for the private pid/mount namespace makes tmpfs unique to each namespace. Then,
+> > the the mount points in tmpfs were not found in the private namespaces context,
+> > probably.
 > 
-> Hello Darrick,
+> Yes, /tmp is now private to the test program (e.g. tests/btrfs/001) so
+> that tests run in parallel cannot interfere with each other.
 > 
-> I ran fstests for zoned btrfs using the latest fstests tag v2025.02.23, and
-> observed all test cases failed with my set up. I bisected and found that this
-> commit is the trigger. Let me share my observations.
+> > If this guess is correct, in indicates that tmpfs can no longer be used for
+> > fstests mount points. Is this expected?
 > 
-> For example, btrfs/001.out.bad contents are as follows:
+> Expected, yes.  But still broken for you. :(
 > 
->   QA output created by 001
->   mount: bad usage
->   Try 'mount --help' for more information.
->   common/rc: retrying test device mount with external set
->   mount: bad usage
->   Try 'mount --help' for more information.
->   common/rc: could not mount /dev/sda on common/config: TEST_DIR (/tmp/test) is not a directory
+> I can think of a few solutions:
 > 
-> As the last line above shows, fstests failed to find out TEST_DIR, /tmp/test.
-> 
-> My set up uses mount point directories in tmpfs, /tmp/*:
-> 
->   export TEST_DIR=/tmp/test
->   export SCRATCH_MNT=/tmp/scratch
-> 
-> I guessed that tmpfs might be a cause. As a trial, I modified these to,
-> 
->   export TEST_DIR=/var/test
->   export SCRATCH_MNT=/var/scratch
-> 
-> then I observed the failures disappeared. I guess this implies that the commit
-> for the private pid/mount namespace makes tmpfs unique to each namespace. Then,
-> the the mount points in tmpfs were not found in the private namespaces context,
-> probably.
+> 1. Perhaps run_privatens could detect that TEST_DIR/SCRATCH_MNT start
+> with "/tmp" and bind mount them into the private /tmp before it starts
+> the test.
 
-Yes, /tmp is now private to the test program (e.g. tests/btrfs/001) so
-that tests run in parallel cannot interfere with each other.
+Which then makes it specific to test running, and that makes it
+less suited to use from check-parallel (or any other generic test
+context).
 
-> If this guess is correct, in indicates that tmpfs can no longer be used for
-> fstests mount points. Is this expected?
+> 2. fstests could take care of defining and mkdir'ing the
+> TEST_DIR/SCRATCH_MNT directories and users no longer have to create
+> them.  It might, however, be useful to have them accessible to someone
+> who has ssh'd in to look around after a failure.
 
-Expected, yes.  But still broken for you. :(
+check-parallel already does this, and it leaves them around after
+the test, so....
 
-I can think of a few solutions:
+4. use check-parallel.
 
-1. Perhaps run_privatens could detect that TEST_DIR/SCRATCH_MNT start
-with "/tmp" and bind mount them into the private /tmp before it starts
-the test.
+> 3. Everyone rewrites their fstests configs to choose something outside
+> of /tmp (e.g. /var/tmp/{test,scratch})?
 
-2. fstests could take care of defining and mkdir'ing the
-TEST_DIR/SCRATCH_MNT directories and users no longer have to create
-them.  It might, however, be useful to have them accessible to someone
-who has ssh'd in to look around after a failure.
+How many people actually use /tmp for fstests mount points?
 
-3. Everyone rewrites their fstests configs to choose something outside
-of /tmp (e.g. /var/tmp/{test,scratch})?
+IMO, it's better for ongoing maintenance to drop support for /tmp
+based mount points (less complexity in infrastructure setup). If
+there are relatively few ppl who do this, perhaps it would be best
+to treat this setup the same as the setsid encapsulation. i.e. works
+for now, but is deprecated and is going to be removed in a years
+time....
 
-Any thoughts?  #3 is the least thinking for me, but #1 is the least
-thinking for everyone /else/ :)
+Then we can simply add a /tmp test to the HAVE_PRIVATENS setting and
+avoid using a private ns for these setups for now. This gives
+everyone who does use these setups time to migrate to a different
+setup that will work with private namespaces correctly, whilst
+keeping the long term maintenance burden of running tests in private
+namespaces down to a minimum.
 
---D
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
