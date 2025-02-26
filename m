@@ -1,81 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02C2926A095
-	for <fstests@vger.kernel.org>; Wed, 26 Feb 2025 10:58:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 419F9218AB4
+	for <fstests@vger.kernel.org>; Wed, 26 Feb 2025 14:41:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740567487; cv=none; b=hl75A2HPch2XeNkEvf9XFE6sDRJ5/4vqtEyOSpN8tElaGoloKSvAv+fwlFLg9K8XW8o8m3Z5NZS9HM9pS0FuX70n5EBCWijnOGt7xj6oMIx2aQZhS/RrJWNXYrUugEZarf7EqCvtNGj9MqoUGKIsZUxL7FRcA32dNAFFJXpto1s=
+	t=1740580876; cv=none; b=HouaOG2JZ+dhd+BBgSxLXt9Xec5k72XBLaBf9mvqTLxOSxuHry0JnOsYOSxA1ZKk7nLH7qT/TzUDqTF6G1Nc1y+uU8AxjBbI7NBMgwC3eky8P7/zOoRkR97otefHTLixd9BJvv0gCLqpKGBA0QFCehcTuXo0WF1AQVoSDF7v4BA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740567487; c=relaxed/simple;
-	bh=G2biezqhv1eZZsdXJv8Xm5Af2wF2UZ+UoXc93NcOoSo=;
+	s=arc-20240116; t=1740580876; c=relaxed/simple;
+	bh=ay0u/XXcDCvLRQei7dNjtfMDxY+UcImMbvJUVIiDBCU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lNJZ5CLiEDoGps5Yzqhq4PIwCLjARIDt5hV2YZX5Bk7jBD31I9jTWu4/eOGFxoUe5z0rNVJQPNdOtMVrqUJKO4uG/MGD6ws+eN/6pDLLY53z8BWJIPdENNzJr4UeoJmgQYT20LhhzT6cQq5n0PvQIbLxRD5CJRyj0EoRlH9MgL8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=WE3PedTJ; arc=none smtp.client-ip=170.10.133.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=mNVa91l0T3h6ZrIxLcGsXBp28f3BiBYT4K+qF/T5Ph5gZKa9F1TrM0FFE+D+NjHO38cgrC7XBd3owy5nANQY2TmKVM7iXX08CWLeI+JIaU5TAm2cUty9l9fFsoOWjDkgfrWk3a4zN44BRHINW3viYCHY/bdoDKa/KeehphqlwYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=X6kizwMk; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=w4YEm8dH; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=X6kizwMk; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=w4YEm8dH; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="WE3PedTJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740567484;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="X6kizwMk";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="w4YEm8dH";
+	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="X6kizwMk";
+	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="w4YEm8dH"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 3B2DA1F387;
+	Wed, 26 Feb 2025 14:41:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1740580873;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
 	 in-reply-to:in-reply-to:references:references;
-	bh=pY87gcAdkmuZHjWFXkgzhswKq8QhMcQw3yqhQuIFtCw=;
-	b=WE3PedTJdSmNu7AMI/a93IsIHX1hY2N4JWsRpOnz0rZbA9bx1lXCJgMRiAvojUntzZ+1Gz
-	gSA0+KxXUWxchgx4winkt9uy3Ro6UIKuFuu6ZtjSl31+ZsJ3f3iNsU7D1KOl/XJ9gLkhtY
-	unqB/PpJUNXLOJGNkIxOFxV9QMZqGuI=
-Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
- [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-466-xgBi-LxhN5-qlyX361-6hQ-1; Wed, 26 Feb 2025 05:58:03 -0500
-X-MC-Unique: xgBi-LxhN5-qlyX361-6hQ-1
-X-Mimecast-MFC-AGG-ID: xgBi-LxhN5-qlyX361-6hQ_1740567482
-Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2fe8c697ec3so534862a91.1
-        for <fstests@vger.kernel.org>; Wed, 26 Feb 2025 02:58:03 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740567482; x=1741172282;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pY87gcAdkmuZHjWFXkgzhswKq8QhMcQw3yqhQuIFtCw=;
-        b=DEsRPZL+/jl+5Xth4XgA+xjN+cB83C1YR1o2LF9gjAbSygWN5NMs59wRYsqvot7IvX
-         bXlZ2aMGt2i8KqnPVz99deqvzYpvzpahAqJ0rpJEHUPgqz+SatHpq7g3VB8nY+jUOWAo
-         /VKSRhMj6YejMk/NiXKHb46VTG/ttQz9itzZEcTJCdfYQiuACao5xm+NiZvQq1Jrl+Ca
-         9dE567xAKtb+ItguwipFJi0MRrs58sdTFu39+jk0xVn0+tvA8VorbKkSP0jA0zis15Oh
-         sQHJsC/nUsL8RKbr9hwKe1BjYB01UJHb8Dj30QeezIh0YsN2rTqcDWCeOj+0Sdgef2vr
-         7lPw==
-X-Forwarded-Encrypted: i=1; AJvYcCVFcIDYspFMaUyxZ/QZp5JbzyS5+Z58KlcJ7LDy+/WyE6EMvuxSglnwZraEc9O9l2H87w6/F0Ku@vger.kernel.org
-X-Gm-Message-State: AOJu0YxONKehwNILDbTkHI5UDiBF0NKq2DOjCG3P8rwrBZeYhCg0Wvai
-	tobyv9gNsbXSwLJm2A3YTKnH20gwZdotBTpndB54rYIP5qfl6PAafdgRQYoDo6lZPueefwKKzT6
-	hlz9MnYVZA4hSnUkGd4Fo3CCPkDUJsbkM+h+P7wasPNVOCnlWT+XRJpc=
-X-Gm-Gg: ASbGnct9qweeEINTHqf1QH1zw2lZvuilksPOQVvqeOQUZT9dEHHYaHInKmoe9A79N/M
-	9O/kfbdbeJ7fGs/PwoeNw8v6UgQ8OQIFleVMuQrHBPz+yuGwbYoLni7ATKghwV0wwpnW16EMZeR
-	ADEFIkbCEz9awMpombGEjiE3+kgYqghtSyq2req9qwWVmM/TqGdwziHymRiJ52Sj/TpP4zP2ML+
-	O4/H8QhlLXshtbZkKzMqHqMwifO7dlCTg3vLNOsz8WzObMUNJ+OFOSnvqV1VPl4zyGWMyz2NzBI
-	T7HW0vDhMjbU4y6/d3+M/5eovP0N29A264aQyTCdB68sx0FjliQCaAfj
-X-Received: by 2002:a05:6a00:991:b0:732:6276:b46c with SMTP id d2e1a72fcca58-73425a1fab8mr35209066b3a.0.1740567482160;
-        Wed, 26 Feb 2025 02:58:02 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IG8VRVWTQwXKNKiLHB4lWvRBpLVdNibQPuotxtwn11M5p+HJhPcfBc67In/gPw9ufZXIcBLQA==
-X-Received: by 2002:a05:6a00:991:b0:732:6276:b46c with SMTP id d2e1a72fcca58-73425a1fab8mr35209034b3a.0.1740567481786;
-        Wed, 26 Feb 2025 02:58:01 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7347a839ed8sm3231334b3a.175.2025.02.26.02.58.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Feb 2025 02:58:01 -0800 (PST)
-Date: Wed, 26 Feb 2025 18:57:57 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: "Darrick J. Wong" <djwong@kernel.org>,
-	"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>,
-	Namjae Jeon <linkinjeon@kernel.org>
-Subject: Re: [PATCH] generic: test zero-byte writes to new file
-Message-ID: <20250226105757.i2ltr4aq5lh3jllv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <b4d76883-e58b-4db3-b7e4-7ddeb5ec7f42@redhat.com>
- <30dfe4a2d18ec2ca29d303c1f8fc943688221d59.camel@gmail.com>
- <20250221164751.GY21799@frogsfrogsfrogs>
- <58b204a2-4cf8-4110-8ac0-4543e1c4798d@redhat.com>
+	bh=SPzzTMd0g67/GZBaBmX/Lo8nG+z6Mp1KTlQ7wqbqLjs=;
+	b=X6kizwMk0MenUewSuNSuHK7xgMUA9YLHWGTd+n72Ydcnv8bVzUq5BSTaGk1CAYGR3bZkn9
+	207PM6FJVMnypHHNyayv85Gig2LthPDbW8rYGF8iaGoLtX/xVk0UBBw24iZHF0Xf6XU+Gs
+	RLSEvVsfAINVnpn9nNUIFoktBYEXV9g=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1740580873;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SPzzTMd0g67/GZBaBmX/Lo8nG+z6Mp1KTlQ7wqbqLjs=;
+	b=w4YEm8dHhKNJgp2AYVT4X283RD6H5WxQtsKuLDLVI5hC4MMSRt7WmZ6cNGKF7qiQ1+PL8F
+	jBW2CdLZfoW598CQ==
+Authentication-Results: smtp-out2.suse.de;
+	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=X6kizwMk;
+	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=w4YEm8dH
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+	t=1740580873;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SPzzTMd0g67/GZBaBmX/Lo8nG+z6Mp1KTlQ7wqbqLjs=;
+	b=X6kizwMk0MenUewSuNSuHK7xgMUA9YLHWGTd+n72Ydcnv8bVzUq5BSTaGk1CAYGR3bZkn9
+	207PM6FJVMnypHHNyayv85Gig2LthPDbW8rYGF8iaGoLtX/xVk0UBBw24iZHF0Xf6XU+Gs
+	RLSEvVsfAINVnpn9nNUIFoktBYEXV9g=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+	s=susede2_ed25519; t=1740580873;
+	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+	 cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=SPzzTMd0g67/GZBaBmX/Lo8nG+z6Mp1KTlQ7wqbqLjs=;
+	b=w4YEm8dHhKNJgp2AYVT4X283RD6H5WxQtsKuLDLVI5hC4MMSRt7WmZ6cNGKF7qiQ1+PL8F
+	jBW2CdLZfoW598CQ==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 1C12A1377F;
+	Wed, 26 Feb 2025 14:41:13 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id PcmiBgkov2cuSQAAD6G6ig
+	(envelope-from <dsterba@suse.cz>); Wed, 26 Feb 2025 14:41:13 +0000
+Date: Wed, 26 Feb 2025 15:41:07 +0100
+From: David Sterba <dsterba@suse.cz>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, David Sterba <dsterba@suse.com>,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH] fstests: remove reiserfs support
+Message-ID: <20250226144107.GU5777@suse.cz>
+Reply-To: dsterba@suse.cz
+References: <20250219221743.20161-1-dsterba@suse.com>
+ <20250220202238.6axqgejzk47aay3j@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250220203751.GH5777@suse.cz>
+ <20250221051902.e7ft6iuvahfvvyza@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250221105918.GJ5777@twin.jikos.cz>
+ <20250221154531.ttch34qic7zsxyzv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -84,67 +94,76 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <58b204a2-4cf8-4110-8ac0-4543e1c4798d@redhat.com>
+In-Reply-To: <20250221154531.ttch34qic7zsxyzv@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
+X-Rspamd-Queue-Id: 3B2DA1F387
+X-Spam-Score: -4.21
+X-Rspamd-Action: no action
+X-Spamd-Result: default: False [-4.21 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	HAS_REPLYTO(0.30)[dsterba@suse.cz];
+	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
+	FROM_HAS_DN(0.00)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	ARC_NA(0.00)[];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	TO_DN_SOME(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	DKIM_TRACE(0.00)[suse.cz:+];
+	RCVD_COUNT_TWO(0.00)[2];
+	REPLYTO_ADDR_EQ_FROM(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
+	MID_RHS_MATCH_FROM(0.00)[];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	RCPT_COUNT_THREE(0.00)[4];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.cz:replyto,suse.cz:mid,suse.cz:dkim]
+X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-On Tue, Feb 25, 2025 at 04:29:29PM -0600, Eric Sandeen wrote:
-> On 2/21/25 8:47 AM, Darrick J. Wong wrote:
-> > On Fri, Feb 21, 2025 at 10:44:09AM +0530, Nirjhar Roy (IBM) wrote:
-> >> On Thu, 2025-02-13 at 12:06 -0600, Eric Sandeen wrote:
-> >>> A bug was recently fixed in exfat where attempting to do a zero-byte
-> >>> write would yield -EFAULT; test for that here.
-> >>>
-> >>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >>> ---
-> >>>
-> >>> diff --git a/tests/generic/761 b/tests/generic/761
-> >>> new file mode 100755
-> >>> index 00000000..e933eb83
-> >>> --- /dev/null
-> >>> +++ b/tests/generic/761
-> >>> @@ -0,0 +1,28 @@
-> >>> +#! /bin/bash
-> >>> +# SPDX-License-Identifier: GPL-2.0
-> >>> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-> >>> +#
-> >>> +# FS QA Test 761
-> >>> +#
-> >>> +# test zero-byte writes
-> >>> +#
-> >>> +# exfat had a regression where a zero-byte write to a file would
-> >>> +# yield -EfAULT. Should work on all filesystems - write should
-> >>> +# succeed and the zero-byte file should be created.
-> >>> +#
-> >>> +. ./common/preamble
-> >>> +_begin_fstest auto quick
-> >>> +
-> >>> +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
-> >>> +	"exfat: short-circuit zero-byte writes in
-> >>> exfat_file_write_iter"
-> >>> +
-> >>> +# Modify as appropriate.
-> >>> +_require_test
-> >>> +
-> >>> +rm -f $TEST_DIR/testfile.$seq
-> >>> +$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq
-> >>> +test -f $TEST_DIR/testfile.$seq || _fail "file not created"
-> >> Minor: Maybe just remove the test file that is created above (since we
-> >> are using the TEST_DIR)and not leave any test artifacts? Or, maybe use
-> >> the scratch device? 
-> > 
-> > Agreed, the _cleanup should remove the testfile.
+On Fri, Feb 21, 2025 at 11:45:31PM +0800, Zorro Lang wrote:
+> > This may bring the question what is the policy for filesystem support.
+> > I've seen "case $FSTYP" with widely inconsistent cases of filesystems,
+> > probably the longest list is in common/rc:_require_scratch_nocheck with
+> > 9p, virtiofs, afs, pvfs2 or ubifs.  It would be good to document that in
+> > README, I haven't found anything in that regard.
 > 
-> ok. I thought we left stuff lying around to age test, but I'll do whatever
-> folks like to get this one-liner test merged :) 
-
-Actually there's not a rule about "must remove the file your create in TEST_DIR".
-And I remember the TEST_DIR was designed to keep some random files. So from my
-side, if the file size isn't too large, I'm good to keep it in TEST_DIR :)
-
-Thanks,
-Zorro
-
+> Good idea, maybe we should have a list about that.
 > 
-> -Eric
+> There's not a limitation about what filesystems are supported or not.
+> Especially the generic test cases, some "not in list" filesystems might
+> run generic tests too. So we don't exclude any filesystem which wants
+> to try fstests.
 > 
+> Generally when someone wants to help fstests to support a new filesystem,
+> there're 3 phases:
+> 1) Check if fstests can mkfs, mount, unmount and fsck on this fs natively.
+>    If it can't, add the fs to the "case...esac" list, to do special treatment.
+> 2) Run generic test case on the new fs, fix some test failures which are
+>    not suitable for this fs.
+> 3) Add more test cases for this fs, might need a new tests/$FSTYP directory
+>    and more common helpers.
 > 
+> Actually some of filesystems which are "supported" by xfstests, just satisfy
+> the phase#1, or a few phase#2. That depends on how deeply that fs list
+> would like to use xfstests.
+> 
+> But everything is still changing. For example, we don't support nfs much,
+> just in phase#1. But as more and more nfs folks start to use xfstests,
+> it's good to run on nfs now, even reach to part of phase#3. In contrast,
+> although cifs is in the list, and xfstests can be run on it, but too
+> many test failures, no one from cifs would like to care about that.
+> 
+> So about the "support list", what's the standard to count in a fs :)
 
+Thanks, this is useful, can you please add this text to the README?
