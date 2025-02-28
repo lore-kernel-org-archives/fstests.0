@@ -1,199 +1,315 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 400B51F4CB3
-	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 17:33:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1A3F23F365;
+	Fri, 28 Feb 2025 21:16:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740764000; cv=none; b=c/LT1annbDfjthj4vn2fue0ByMHnG0cYDi1TaM2kEal4P/7tSzwAE0453r75l2FCWh3kI7LMzyKZpQzlLesieB3XDF7GJcTpsZy7w5tkNjCWK0WWeXkQb26Ynpz59fAUzKWvc9pTUy2X2UEOEqy1uZDM5/j9clKv9gc2fc4SN1k=
+	t=1740777367; cv=none; b=YXRZjFkgTKj8Fh/kftXeayziY8VHffGf4j6YaewCWgTOrhJKrheaTxPMgi7eD7yWJE2oPFrCG5MGoWDFUhaEcWqfyxVsLz/5UMROZBhOf9qH4a+c7rEbZoJcLB7SlC8aw14GpGfxAfuWme4T4p83H270cKTgxzUqfU8VoP61vOY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740764000; c=relaxed/simple;
-	bh=Ifqibn7pZrJPPuP2xClLmontY0zB0t7kPaMPadwvYkE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=PV5NzrUzEzy3B9eTgsCc/vAAxOxBKPtb5DQs9PvICPeehvsc4CNhrQQypAok1KhswwLdKIBLVBFrJcTDaflYoeQkeLmaoeuMvnQOR+Pe7Z6g5PHBkZFv9yv6iBHsxXG2jz4ypW/6l1PExAQ7a0cwdJ4foTG6gZRJ/FFIcb1Ds0Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rz7gE8DN; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740777367; c=relaxed/simple;
+	bh=a0xsMwnhp4d524e7S6gVV3AdSGHmRPMbIDcgks6Mgrk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=OC9g9jkwyu1FD82wXSjP0yDm4w1BIT8BYfrY5/DtvuXKG61ID08efO0KNCBsV9SwUylE743dx3/M/VtgRhGYz9bNvoAFKlHnr3mXom9B2Iz9h5peXVjGJkpB9MBUm9C9DIHByIsRRAYZNbk2ItlkmavZ+FxAGYLvFXm3H9u3ahc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com; spf=pass smtp.mailfrom=gmx.com; dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b=NiMqrzkr; arc=none smtp.client-ip=212.227.17.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rz7gE8DN"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF261C4CED6;
-	Fri, 28 Feb 2025 17:33:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740763999;
-	bh=Ifqibn7pZrJPPuP2xClLmontY0zB0t7kPaMPadwvYkE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=rz7gE8DNJCeuhUOOO3YKpTTV/zCbI+mtK1P21ioMlpkUc+K8HXtIAIWu4Dd+5XCv+
-	 //VttuJE20hxKTbxmUpwo2SH/3eR6/2YIYvFMfe6SZ9dPMmLH4PidYso2zLcGbj+u7
-	 uscUjXEijqCCxL6yqvP7K28BZaq1KrHL0o4mdxVgOhY32OS3TzUmUwu57XDTzavrzu
-	 YEal4SumvHv19dM/4EtiRNQuvAa257NCk8a08ddLKW9ktoQCgvxASClrYKoehllPhI
-	 y43YeRubUN2fNtYJy02nSLjKS5tY9r7wo0pLm30E9K2GaDGxMRT6o+QWJhNSMwQzpq
-	 xkzwW3UEI7ztA==
-Date: Fri, 28 Feb 2025 09:33:19 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: David Sterba <dsterba@suse.cz>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
-Message-ID: <20250228173319.GG1124788@frogsfrogsfrogs>
-References: <c238e76631b086db592f214beaa6fd94@kernel.org>
- <20250228123354.GE5777@twin.jikos.cz>
+	dkim=pass (2048-bit key) header.d=gmx.com header.i=quwenruo.btrfs@gmx.com header.b="NiMqrzkr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.com;
+	s=s31663417; t=1740777362; x=1741382162; i=quwenruo.btrfs@gmx.com;
+	bh=W/I7tl/jnGVSXWhVPIDLDjjWwH/80honMUZgn7yLpFo=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
+	 References:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=NiMqrzkr07DxtDmdoWJ2XVwyOHR9E2qS11WmFhryvdn+fxElKarXJC3KNea1rkcn
+	 59NPY+9FaAe0mj3NydWBG1akA6IIv4FjR1ALEh5oe28DDIZLeAQmGjoJ7ute5Xf2Y
+	 rtoVjJz7SeZtaM2hA2ByPPp5vYXdR7I2mEzTOX40XktydgCEDJIS9X7AmgYpMcHFz
+	 NvWWWiBZ9+6EYqFvFwWYSHrIzVDFZ+YvHD3OPe5a0e00s/05XV6UUhTLFmN+/pyIA
+	 c6s3fzzyPSh7NqlR9i3c191JFEGBeQnXf9skuRGGk1dU7ejquSpjw/YWJ8Ze6qEsf
+	 6NiJB7XypurGuNhuzw==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [172.16.0.191] ([159.196.52.54]) by mail.gmx.net (mrgmx105
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MLQxX-1tWJc11Hvv-00VtZK; Fri, 28
+ Feb 2025 22:16:02 +0100
+Message-ID: <8cdc4be8-f1ad-4baa-beab-c22b0ca0832c@gmx.com>
+Date: Sat, 1 Mar 2025 07:45:59 +1030
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250228123354.GE5777@twin.jikos.cz>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] btrfs/080: fix sporadic failures starting with kernel
+ 6.13
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
+ Glass Su <glass.su@suse.com>
+References: <d48dd538e99048e73973c6b32a75a6ff340e8c47.1740759907.git.fdmanana@suse.com>
+Content-Language: en-US
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Autocrypt: addr=quwenruo.btrfs@gmx.com; keydata=
+ xsBNBFnVga8BCACyhFP3ExcTIuB73jDIBA/vSoYcTyysFQzPvez64TUSCv1SgXEByR7fju3o
+ 8RfaWuHCnkkea5luuTZMqfgTXrun2dqNVYDNOV6RIVrc4YuG20yhC1epnV55fJCThqij0MRL
+ 1NxPKXIlEdHvN0Kov3CtWA+R1iNN0RCeVun7rmOrrjBK573aWC5sgP7YsBOLK79H3tmUtz6b
+ 9Imuj0ZyEsa76Xg9PX9Hn2myKj1hfWGS+5og9Va4hrwQC8ipjXik6NKR5GDV+hOZkktU81G5
+ gkQtGB9jOAYRs86QG/b7PtIlbd3+pppT0gaS+wvwMs8cuNG+Pu6KO1oC4jgdseFLu7NpABEB
+ AAHNIlF1IFdlbnJ1byA8cXV3ZW5ydW8uYnRyZnNAZ214LmNvbT7CwJQEEwEIAD4CGwMFCwkI
+ BwIGFQgJCgsCBBYCAwECHgECF4AWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1YAUJEP5a
+ sQAKCRDCPZHzoSX+qF+mB/9gXu9C3BV0omDZBDWevJHxpWpOwQ8DxZEbk9b9LcrQlWdhFhyn
+ xi+l5lRziV9ZGyYXp7N35a9t7GQJndMCFUWYoEa+1NCuxDs6bslfrCaGEGG/+wd6oIPb85xo
+ naxnQ+SQtYLUFbU77WkUPaaIU8hH2BAfn9ZSDX9lIxheQE8ZYGGmo4wYpnN7/hSXALD7+oun
+ tZljjGNT1o+/B8WVZtw/YZuCuHgZeaFdhcV2jsz7+iGb+LsqzHuznrXqbyUQgQT9kn8ZYFNW
+ 7tf+LNxXuwedzRag4fxtR+5GVvJ41Oh/eygp8VqiMAtnFYaSlb9sjia1Mh+m+OBFeuXjgGlG
+ VvQFzsBNBFnVga8BCACqU+th4Esy/c8BnvliFAjAfpzhI1wH76FD1MJPmAhA3DnX5JDORcga
+ CbPEwhLj1xlwTgpeT+QfDmGJ5B5BlrrQFZVE1fChEjiJvyiSAO4yQPkrPVYTI7Xj34FnscPj
+ /IrRUUka68MlHxPtFnAHr25VIuOS41lmYKYNwPNLRz9Ik6DmeTG3WJO2BQRNvXA0pXrJH1fN
+ GSsRb+pKEKHKtL1803x71zQxCwLh+zLP1iXHVM5j8gX9zqupigQR/Cel2XPS44zWcDW8r7B0
+ q1eW4Jrv0x19p4P923voqn+joIAostyNTUjCeSrUdKth9jcdlam9X2DziA/DHDFfS5eq4fEv
+ ABEBAAHCwHwEGAEIACYCGwwWIQQt33LlpaVbqJ2qQuHCPZHzoSX+qAUCZxF1gQUJEP5a0gAK
+ CRDCPZHzoSX+qHGpB/kB8A7M7KGL5qzat+jBRoLwB0Y3Zax0QWuANVdZM3eJDlKJKJ4HKzjo
+ B2Pcn4JXL2apSan2uJftaMbNQbwotvabLXkE7cPpnppnBq7iovmBw++/d8zQjLQLWInQ5kNq
+ Vmi36kmq8o5c0f97QVjMryHlmSlEZ2Wwc1kURAe4lsRG2dNeAd4CAqmTw0cMIrR6R/Dpt3ma
+ +8oGXJOmwWuDFKNV4G2XLKcghqrtcRf2zAGNogg3KulCykHHripG3kPKsb7fYVcSQtlt5R6v
+ HZStaZBzw4PcDiaAF3pPDBd+0fIKS6BlpeNRSFG94RYrt84Qw77JWDOAZsyNfEIEE0J6LSR/
+In-Reply-To: <d48dd538e99048e73973c6b32a75a6ff340e8c47.1740759907.git.fdmanana@suse.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:xpdrY1Temwo9gMnjKBvp0FqOtyKWFqz27009RKb4lyB8HE5Nfb6
+ 6//Aw4otH9zn1Ag8CQAM9V/d46wB0Qb8DccLhPgHbYqxn+1nl8TGYBJK5cBQgjPQQKPcKRv
+ BetWh5WRXkP1Nnu3bOgvDaD3CSz1mTbQ3Yeupuu6De8hem6V2GEJ5BpR25nkFaURWugowul
+ rDcB+z61/E8Tl3d3eM2AA==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:YmN6e7K23BQ=;rcESaB4k/N324STnMi4pBvMWNqg
+ eICkh+kOZl2L4t+JhnERCKQMrswLjTQmZzGVQfpZTfRvvT6CGo5z2OFxU20SfPfyf6/BUWZzt
+ 57hc9QnpHsSZttylDopry0RQ7ffWRQ0FVW/Z582WlJFzmZxi3AWSj7hv8ykPBobOpAoedy1q+
+ 1CQ7+TyionfklNzKfzoAXnv8/7izJUzsARl7CqbNN1dR1vQHj8PGL0M3TqaqLiDroX0HZ20DD
+ tJM1I6Wex++BLJuVKZ9p0m/ptiidDRgcYDwWfr69cakRg0yfvAU0IlpjI8WhhKd+Ntbt57kco
+ ZUTyzdTrt/Hnw3BATBrUxGQ8XB/0A4Atf2eiXOe/F2iyy1/80BeBXxXZn6emnyesoo/P4PBOL
+ aLyJqY7U51846SAAdbil1uzrOsG1dtUmjEy5uE5ji3Dh9xX7lAnZ0/mbDAuLvcaSvE6h4p/tH
+ Wp6AsZDf41390JTJ/3pwTAUj+QT+vSuo8Hm5b2prD5dymxhY3O3DvRTLuOMDpMbWBL03zhMDC
+ +6Hvai0RPuvs3i0bh2NDoHwQ4hDhNzYTZgMMxYS6Q7anT6cU7lJnl8bP1gltAw8W6ag4k9zNw
+ O7t+pFNHwvBrjbzZUzhuzigItH0L56NvBEpD+CXr/Zo9PpbnLzf+VRAa1SlSI4DOC+f3zIlcy
+ g7EdgxhuZknTuFHkagGkuUu9XEVF/W54iaFFWZZuc2xW/F9l+n7Oemn1oGXC7J4tVsSw+NfQv
+ gzoKTwiEF7LMWy6gSMrXlYmZ3ABgrpcAQIQjzTlP6793UfMhrJAS2JHU8rIE0QD7doYOVtA80
+ 5OMe2mRCC69hczSoFKUHgiwkl9lkKnqW4kLHSEsdTqU9VZ86pkn3VEqCki9c6Z4d4T4r1An5H
+ +sNfh8vzKTeYb3ZMzhjlZFlVtwWjj68Rg+UVQKrCCwvNb41pb5CSjLAQjDy259H1OBpcxyHig
+ 7gB5Q/sPBdAeYdFMSAdkqx/GsOdG52TErYc5LVikd3xjuNm02uKli97KF1gTZK2G2cZUsbsG+
+ IXrPoiqVMvBk3ZgiYaihSqJnXdZtN4AO1bDFG3cpKxFyiCbYX4rybutJ9m2FZIU+jVcSJXBAq
+ NQyh6m3clSpApamnvWkPMPCSyWRcfn30v+ZO6TrT6AYLS4tHNWh8+gZDiQCgSr1nPhDNi9Noy
+ XwTCmuxTc8tyQdJ6vILNTr7IrMuGwxItdne4NqDi3kInojtrx4+VBucSsDPWfN6u7CYeyai1C
+ cFrfzDJ6jn9zohZbYJIgDIhfnCpDbAIBAc386urMKAKHELRGu2u/HPuwiwtkifqcUW9YERxeP
+ 8dEXddA01f1YUiZNZlFraN/3JMtdb5ibqv+naG1eBCTTrNK0w2VzWTC7XzQuuNwPKW0TgDlu8
+ x6oI/DaO899I5gANLK+lcYU+9/KfgAmTnfybF97D2Jns614DtxCsiEzB1I
 
-On Fri, Feb 28, 2025 at 01:33:54PM +0100, David Sterba wrote:
-> On Sun, Feb 23, 2025 at 08:27:43PM +0800, Zorro Lang wrote:
-> > Hi all,
-> > 
-> > The for-next branch of the xfstests repository at:
-> > 
-> > 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > 
-> > has just been updated and tagged as v2025.02.23 release.
-> > 
-> > Release Notes:
-> > 1) There's not new test cases in this release, this's a release for bug fixes
-> >    particularly.
-> > 2) Reiserfs part is removed from fstests.
-> > 3) ltp/growfiles is removed too, I think no one needs it.
-> > 
-> > I can't list all updates at here, more details please refer to below.
-> > Thanks for all these contributions!
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > The new head of the for-next branch is commit:
-> > 
-> > 5b56a2d88819 fstests: remove reiserfs support
-> > 
-> > New commits:
-> > 
-> > Christoph Hellwig (1):
-> >       [04d0cf3f8909] generic/370: don't exclude XFS
-> > 
-> > Darrick J. Wong (35):
-> >       [cc379f50f3bd] generic/476: fix fsstress process management
-> >       [ab459c67c5e0] metadump: make non-local function variables more obvious
-> >       [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
-> >       [e68a92376165] generic/019: don't fail if fio crashes while shutting down
-> >       [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising fsx
-> >       [543795bf67f2] common/rc: revert recursive unmount in _clear_mount_stack
-> >       [777732b27e62] common/dump: don't replace pids arbitrarily
-> >       [81f28acda2f2] common/populate: correct the parent pointer name creation formulae
-> >       [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and inclusion
-> >       [241c1c787e5b] generic/759,760: skip test if we can't set up a hugepage for IO
-> >       [77548e6066fd] common/rc: create a wrapper for the su command
-> >       [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGINT
-> >       [c71349150d34] common/rc: hoist pkill to a helper function
-> >       [91d2880aa029] tools: add a Makefile
-> >       [88d60f434bd9] common: fix pkill by running test program in a separate session
-> >       [247ab01fa227] check: run tests in a private pid/mount namespace
-> >       [949bdf8eae31] check: deprecate using process sessions to isolate test instances
-> 
-> I'm using a setup with a minimal VM system without systemd and such and
-> dedicate the whole machine to one instance. I'm not interested in the
-> check-parallel updates and test case separation. All fine if it is
-> supported and lets me continue using single instance.
 
-Hi Dave (Sterba),
 
-Agreed.  I would very much have liked to continue single-instance
-testing in peace the same way I always have.  There are things that
-excite me that I would like to move onto; refactoring a large pile of
-bash is NOT one of them.
+=E5=9C=A8 2025/3/1 02:57, fdmanana@kernel.org =E5=86=99=E9=81=93:
+> From: Filipe Manana <fdmanana@suse.com>
+>
+> Since kernel 6.13, namely since commit c87c299776e4 ("btrfs: make buffer=
+ed
+> write to copy one page a time"), the test can sporadically fail with an
+> unexpected digests for files in snapshots. This is because after that
+> commit the pages for a buffered write are prepared and dirtied one by on=
+e,
+> and no longer in batches up to 512 pages (on x86_64)
 
-Before anyone gets any ideas -- there is no grand plan or collaboration
-here.  Chinner posted an RFC[1] and wrote:
+Minor nitpicks, the original limit of pages is 8:
 
-"This will probably take a bit of time, so I'd like to get the bug
-fixes, improvements and infrastructure changes underway so I'm not
-left carrying a huge patchset for months...."
+	nrptrs =3D max(nrptrs, 8);
+	pages =3D kmalloc_array(nrptrs, sizeof(struct page *),
+                               GFP_KERNEL);
 
-[1] https://lore.kernel.org/fstests/20241127045403.3665299-1-david@fromorbit.com/
+I'm not sure if it's a coincident or not, but the first 32K writes
+matches the pages limit perfectly (for x86_64).
 
-and later roared[2] at me that he isn't some n00b as a response to my
-question about whether he'd had problems with xfs_scrub:
+Meanwhile the second 32770 write is possible to be split even with the
+older code, but it should be super rare to hit.
 
-"Thank you for finding this, Darrick, but there is absolutely no need to
-treat me like a n00b who doesn't know how kernel development works."
+>, so a snapshot that
+> is created in the middle of a buffered write can result in a version of
+> the file where only a part of a buffered write got caught, for example i=
+f
+> a snapshot is created while doing the 32K write for file range [0, 32K),
+> we can end up a file in the snapshot where only the first 8K (2 pages) o=
+f
+> the write are visible, since the remaining 24K were not yet processed by
+> the write task. Before that kernel commit, this didn't happen since we
+> processed all the pages in a single batch and while holding the whole
+> range locked in the inode's io tree.
 
-[2] https://lore.kernel.org/fstests/Z0pBKWBlXLBxwK3D@dread.disaster.area/
+This means no matter the buffered io buffer size, it's the filesystems'
+behavior determining if such a buffered write will be split.
 
-Yeah, I know he's a senior developer.
+Maybe it's not that a huge deal, as the original behavior will also
+break the buffered io block size, just with a larger value (8 pages
+other than 1).
 
-Apparently Zorro felt pressured into merging it to for-next over my
-misgivings and the obviously inadequate testing by the author.  I don't
-know why he made the decision to merge it.  If Zorro wants to discuss
-that publicly, he can do so.
+>
+> This is easy to observe by adding an "od -A d -t x1" call to the test
+> before the _fail statement when we get an unexpected file digest:
+>
+>    $ ./check btrfs/080
+>    FSTYP         -- btrfs
+>    PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1 S=
+MP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
+>    MKFS_OPTIONS  -- /dev/sdc
+>    MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+>
+>    btrfs/080 32s ... [failed, exit status 1]- output mismatch (see /home=
+/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad)
+>        --- tests/btrfs/080.out	2020-06-10 19:29:03.814519074 +0100
+>        +++ /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad	20=
+25-02-27 17:12:08.410696958 +0000
+>        @@ -1,2 +1,6 @@
+>         QA output created by 080
+>        -Silence is golden
+>        +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>        +*
+>        +0008192
+>        +Unexpected digest for file /home/fdmanana/btrfs-tests/scratch_1/=
+17_11_56_146646257_snap/foobar_50
+>        +(see /home/fdmanana/git/hub/xfstests/results//btrfs/080.full for=
+ details)
+>        ...
+>        (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/080.out=
+ /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad'  to see the e=
+ntire diff)
+>    Ran: btrfs/080
+>    Failures: btrfs/080
+>    Failed 1 of 1 tests
+>
+> The files are created like this while snapshots are created in parallel:
+>
+>      run_check $XFS_IO_PROG -f \
+>          -c "pwrite -S 0xaa -b 32K 0 32K" \
+>          -c "fsync" \
+>          -c "pwrite -S 0xbb -b 32770 16K 32770" \
+>          -c "truncate 90123" \
+>          $SCRATCH_MNT/$name
+>
+> So with the kernel behaviour before 6.13 we expected the snapshot to
+> contain any of the following versions of the file:
+>
+> 1) Empty file;
+>
+> 2) 32K file reflecting only the first buffered write;
+>
+> 3) A file with a size of 49154 bytes reflecting both buffered writes;
+>
+> 4) A file with a size of 90123 bytes, reflecting the truncate operation
+>     and both buffered writes.
+>
+> So now the test can fail since kernel 6.13 due to snapshots catching
+> partial writes.
+>
+> However the goal of the test when I wrote it was to verify that if the
+> snapshot version of a file gets the truncated size, then the buffered
+> writes are visible in the file, since they happened before the truncate
+> operation - that is, we can't get a file with a size of 90123 bytes that
+> doesn't have the range [0, 16K) full of bytes with a value of 0xaa and
+> the range [16K, 49154) full of bytes with the 0xbb value.
+>
+> So update the test to the new kernel behaviour by verifying only that if
+> the file has the size we truncated to, then it has all the data we wrote
+> previously with the buffered writes.
+>
+> Reported-by: Glass Su <glass.su@suse.com>
+> Link: https://lore.kernel.org/linux-btrfs/30FD234D-58FC-4F3C-A947-47A5B6=
+972C01@suse.com/
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-So it went in, and everything broke.  Ted and Amir and I (and probably
-more people) noticed and started comparing notes and complaining, but
-Chinner didn't respond by trying to fix anything.  Instead, he told me
-to go fix the stuff his changes broke:
+Reviewed-by: Qu Wenruo <wqu@suse.com>
 
-"Changing existing infrastructure behaviour to better suit *your* test
-environments is *your* responsibility to address, not mine.  I don't
-care if MKFS_OPTIONS get dropped in occasional tests, it's more
-important to me that the tests run fast so I can iterate my
-modify-build-test development cycle faster."
+Thanks for the detailed analyze and the fix.
 
-[3] https://lore.kernel.org/fstests/Z2SG2HsqgA46kuAz@dread.disaster.area/
+Thanks,
+Qu
 
-I've been told that Chinner was on vacation from mid December to mid
-January.  If that's true then I feel sad that someone would come back
-from vacation just to talk condescendingly to me.  If it's not true then
-wow.
+> ---
+>   tests/btrfs/080 | 42 +++++++++++++++++++++++-------------------
+>   1 file changed, 23 insertions(+), 19 deletions(-)
+>
+> diff --git a/tests/btrfs/080 b/tests/btrfs/080
+> index ea9d09b0..aa97d3f6 100755
+> --- a/tests/btrfs/080
+> +++ b/tests/btrfs/080
+> @@ -32,6 +32,8 @@ _cleanup()
+>
+>   _require_scratch_nocheck
+>
+> +truncate_offset=3D90123
+> +
+>   create_snapshot()
+>   {
+>   	local ts=3D`date +'%H_%M_%S_%N'`
+> @@ -48,7 +50,7 @@ create_file()
+>   		-c "pwrite -S 0xaa -b 32K 0 32K" \
+>   		-c "fsync" \
+>   		-c "pwrite -S 0xbb -b 32770 16K 32770" \
+> -		-c "truncate 90123" \
+> +		-c "truncate $truncate_offset" \
+>   		$SCRATCH_MNT/$name
+>   }
+>
+> @@ -81,6 +83,12 @@ _scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
+>
+>   _scratch_mount
+>
+> +# Create a file while no snapshotting is in progress so that we get the=
+ expected
+> +# digest for every file in a snapshot that caught the truncate operatio=
+n (which
+> +# sets the file's size to $truncate_offset).
+> +create_file "gold_file"
+> +expected_digest=3D`_md5_checksum "$SCRATCH_MNT/gold_file"`
+> +
+>   # Run some background load in order to make the issue easier to trigge=
+r.
+>   # Specially needed when testing with non-debug kernels and there isn't
+>   # any other significant load on the test machine other than this test.
+> @@ -103,24 +111,20 @@ for ((i =3D 0; i < $num_procs; i++)); do
+>   done
+>
+>   for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
+> -	digest=3D`md5sum $f | cut -d ' ' -f 1`
+> -	case $digest in
+> -	"d41d8cd98f00b204e9800998ecf8427e")
+> -		# ok, empty file
+> -		;;
+> -	"c28418534a020122aca59fd3ff9581b5")
+> -		# ok, only first write captured
+> -		;;
+> -	"cd0032da89254cdc498fda396e6a9b54")
+> -		# ok, only 2 first writes captured
+> -		;;
+> -	"a1963f914baf4d2579d643425f4e54bc")
+> -		# ok, the 2 writes and the truncate were captured
+> -		;;
+> -	*)
+> -		# not ok, truncate captured but not one or both writes
+> -		_fail "Unexpected digest for file $f"
+> -	esac
+> +	file_size=3D$(stat -c%s "$f")
+> +	# We want to verify that if the file has the size set by the truncate
+> +	# operation, then both delalloc writes were flushed, and every version
+> +	# of the file in each snapshot has its range [0, 16K) full of bytes wi=
+th
+> +	# a value of 0xaa and the range [16K, 49154) is full of bytes with a
+> +	# value of 0xbb.
+> +	if [ "$file_size" -eq "$truncate_offset" ]; then
+> +		digest=3D`_md5_checksum "$f"`
+> +		if [ "$digest" !=3D "$expected_digest" ]; then
+> +			echo -e "Unexpected content for file $f:\n"
+> +			_hexdump "$f"
+> +			_fail "Bad file content"
+> +		fi
+> +	fi
+>   done
+>
+>   # Check the filesystem for inconsistencies.
 
-Anyway, I only took on fixing fstests so that I could push *tested* XFS
-code towards cem and linus for 6.14-rc1.  That was my only motivation in
-adjusting the recent killall->pkill code changes.  But this is bash, so
-there are a lot of subtleties and (as we have all seen) a high risk of
-breakage.
-
-I'm doing this under duress.  I don't want to be wrangling what used to
-be well-worn bash.  I don't know what Chinner's future plans are.  I
-don't know if he and Zorro have discussed this further.  I'm only doing
-this because I feel obligated to enable testing in the community.
-
-I'm sorry that things have gotten really messed up for you and Felipe.
-This whole situation is messed up.  I don't want to be here.
-
-</defensive blathering>
-
-> But as I read it and the deprecation it's not going to be the supported
-> use case. After last week update of fstests 100% of cases failed in the
-> test setup (_seq_run). My workaround is to simply disable it by
-> 
-> check:
-> HAVE_PRIVATENS=
-> HAVE_SYSTEMD_SCOPES=
-
-If you don't have systemd, then HAVE_SYSTEMD_SCOPES should never be set
-to "yes", correct?  I'm wondering if there's a detection bug somewhere,
-or are you simply overriding the upstream logic with a large hammer?
-
-> so I don't have to debug changes to the detection of the scope and
-> namespaces and after each for-next update. I understand that with a
-> custom system setup I'm on my own but until recently things have been
-> fine but now after each update either test cases fail or the whole test
-> infrastructure does not work.
-
-I'm willing to *undeprecate* tools/run_setsid.  Clearly you have a use
-case for that.
-
-Thinking slightly further, if check-parallel is going to require
-tools/run_privatens to work, then we could just revert all the pkill
-changes in the test suite.  That would have been a useful design
-discussion to have had before merging.
-
-> It's not just me who observes that. It seems that BTRFS is not tested
-> before release as thoroughly as other filesystems (probably just XFS).
-
-Admittedly, I only run ext4/btrfs in the default configurations.  I only
-learned yesterday about SCRATCH_DEV_POOL because Felipe called that out.
-
---D
