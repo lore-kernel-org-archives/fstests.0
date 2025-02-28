@@ -1,138 +1,364 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7E8C1EF36F
-	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 15:13:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8D3926E63C;
+	Fri, 28 Feb 2025 15:43:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740755606; cv=none; b=XBh5PZE2fAJUHaTgEkO82Pm513IgWHFCOEVd1B2Lp2yni55qCh3ifcO4K6JwDcyF9a7U19Mt2YjlAsyStwqC4iuamx2mbfa9KJhnOtRgnLL8lW1wKYBoamsBLtOhvMBPE3sPD0vrKEkFgp07UTpQD+rIvczPRYsSAzUM2q5n7m0=
+	t=1740757416; cv=none; b=nLYPxTTiO4Vcu0I9GiL5fX5vmXpGi2KH0DQQ9wfUUGM76CzTTxYBbLQc1fxcPXJ4xanUoqcpPkNnP/IdDU/+jOt1sXO/sS6+3uXiGmEtgFeE90aoxwfLjNR3ef5yfRvW4ZCwP2gwBZcvYJXyHKnYjox7VbRFKTgbzkhHrjozmcI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740755606; c=relaxed/simple;
-	bh=iKrcG10aCiZJEeKCd1FVCGbW+zIoFgHqe0lysXaY3f8=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=QnAxxIS4yGGH/iQ4HTQI051Uu5AVQ3ZW5zZqxF2HIuj1TiObQ+BotXSsD6NC448IO+SSIU1Qq4ekbEdig0yLEngP4TnMmp4GuAIdKqSgH74XDWI0MM2Z5tOom/76bh2w5N+NMBjne28iYwGCgPYqtkgbPtoaPkwKP1XLNxjUwAY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Nax2K1EM; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1740757416; c=relaxed/simple;
+	bh=O8VQdjgqxxnKQ7Fm7LzoFdu/DwulGF5u+C7S5xtQujk=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=GhmgdNvl159sbhaDmQg7dAwW+jViUieugyNLbZXUW9W9NuC0FH7ukcBsBp3rrEzScXCJ/JE1KNysC6aYC/nULDylkahUZDirWic6Mp9fVCfno/HVWevP2PVN9snB6QFnaD/+D5mJLyVY7FPMPs8FlbOCVBoa+t+rA4xFE+ro4jQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=o+qQTWGc; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Nax2K1EM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740755603;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=mD9Sf+66M986BAk7h4L1zWsXc36Y60fmqYc9pvEmo04=;
-	b=Nax2K1EMmzYG7xZjxZMdr1BWjN63U4qe+Lt0+xFiidGOiLOPbi+y4cRfy4cHGwhYsuQfVQ
-	okPNs+ote8sw+D72pfUCFSO3soKbzTEYp/FJk5vMlGggHPMhGGOgqUotxrJDDpTfUj9urw
-	nTTfiSge4Et9UEDsqXz8pKkQKXcNpWU=
-Received: from mail-il1-f197.google.com (mail-il1-f197.google.com
- [209.85.166.197]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-689-94-1jSjjMtG7Ec5UL1zEEg-1; Fri, 28 Feb 2025 10:13:21 -0500
-X-MC-Unique: 94-1jSjjMtG7Ec5UL1zEEg-1
-X-Mimecast-MFC-AGG-ID: 94-1jSjjMtG7Ec5UL1zEEg_1740755601
-Received: by mail-il1-f197.google.com with SMTP id e9e14a558f8ab-3d2a60faa44so46108135ab.0
-        for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 07:13:21 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740755601; x=1741360401;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=mD9Sf+66M986BAk7h4L1zWsXc36Y60fmqYc9pvEmo04=;
-        b=Tc5iDTgFEExwe1JXXOmU0h9fj4FLPqnUiMjyM5AFbfjRcR5j4bH37u0bQGYTL3Qbe+
-         Qx99MG0kOLnv0ahAXRHMLyGO3p1GvOjuElm9VPtVJ0cRYyPULv7N7NmLhY5l+saL4n8d
-         fRr0ESfzpBDh3Hv0oAN50/fbLrDQ6XngxezpiAr2wsK6i8oU39RghNsNp+8xzXLL8L0o
-         fFVk9shO9Ac6wgMEh0QyEAR4fBCVGwLmeB8tBuEe4a1UUAeq97wsD3MjfSC8e8CZeFF3
-         VQ1cSEnKkeiM83m8Lt3BG93PKOqPF2RdxWESmBLAHlhuVkHuRGlIMF+0AkcYJCjgzG4z
-         AJ6A==
-X-Gm-Message-State: AOJu0YyzFBk5nm781df8QsOrqF8CN90t6Ph+cmDL3enk98bCSL/Hcb8d
-	ezGhogEUw6wgAQSx3dl0SNCpKKmugizeAVLxf8BGCqOKXkWqAzfbhPw/UHVBq0erlF9ax4QrAMa
-	wUM97wjkX6uwlJa22f4EuHlpys6DCUApEkClfxbVhQaUFHgiuunfJvTDsqE3Ie3/yyvKXdNlIA8
-	e2u1O8oMOpmWRCbjAH1FOsycy0Kvhg+KcpmBWa9ogz
-X-Gm-Gg: ASbGncuLHmIkxH2jObm8D8ucw+Wz6o28d692UNVMPrjQdSG5Z76adeC8Q/dwsgf1iik
-	ufpL/12/yNpqWtg+RmE/N47AxvhIbQTf/9i5/0tQyp6k7Y23jYJFPZzDxoVyMq/ZYMKZ1dBILEr
-	cpCbPMGGVKTksIWXj/lc49BRBzLvtUfiknjiVPaXaqbMBbUOPkz6qEUas+0T3usR39uvPjsjxO1
-	IKo00Vy0a0EcX7Dzey4VxHB5/u54hDiakWo8AR+LKpxKxSzOVe8UeU6lzVA0Sts/t4x9mEyH7zN
-	+tkW4GIQTXIQx8hoZ4vJ1NgwyMYApf1GlsD1Y9dXfxG2+ZHm+cE0Lg==
-X-Received: by 2002:a05:6e02:19ca:b0:3d3:e3fc:d5e1 with SMTP id e9e14a558f8ab-3d3e6e42248mr38283415ab.1.1740755600875;
-        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IHRCmlAihX9QKBSkKyhKbYoWfIuhaacBij8HOii8MxZ5nZ/adohZjLxVg/WxHWBAFF5TaA4bg==
-X-Received: by 2002:a05:6e02:19ca:b0:3d3:e3fc:d5e1 with SMTP id e9e14a558f8ab-3d3e6e42248mr38283015ab.1.1740755600533;
-        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
-Received: from [10.0.1.24] (nwtn-09-2828.dsl.iowatelecom.net. [67.224.43.12])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4f061f790bcsm932878173.126.2025.02.28.07.13.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
-Message-ID: <3bd585ba-fe21-4f93-802a-f32f9e0f1c61@redhat.com>
-Date: Fri, 28 Feb 2025 09:13:19 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="o+qQTWGc"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3B6E8C4CEE2;
+	Fri, 28 Feb 2025 15:43:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740757416;
+	bh=O8VQdjgqxxnKQ7Fm7LzoFdu/DwulGF5u+C7S5xtQujk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=o+qQTWGcr4hmZTDHfmgeYjyz8i/pw1VN1wkev7U3SNGgGQ8MYWA1wdrMue7VuR7jE
+	 f42vG2k470+uViKdHRAecLZFhOoHy9JaOx/3j+Aqq+En3GqmizhYC1CLrV0agi4kt9
+	 hqObCppr23v5VHpSg3cQiwxHevFeuByweFiw5ukUx7q3cNQBev9BJb49VEmbjNjAYI
+	 KU2/dazfGFgjj97ZFHV+jeUWrdX1uS+0Ijkl+/Cxv26KjYHQtKt8Ufb6TATukRlTjV
+	 +U+o145qFOhjDkQRXAICOE9zG6BdJ7RX7k8U8jg8YJ/KJB2K8QF3OMVPgizfO/lCw9
+	 m+LqIGkJmwYFQ==
+Date: Fri, 28 Feb 2025 07:43:35 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
+Cc: Catherine Hoang <catherine.hoang@oracle.com>, linux-xfs@vger.kernel.org,
+	fstests@vger.kernel.org
+Subject: Re: [PATCH v3] xfs: add a test for atomic writes
+Message-ID: <20250228154335.GZ6242@frogsfrogsfrogs>
+References: <20250228002059.16750-1-catherine.hoang@oracle.com>
+ <20250228021156.GX6242@frogsfrogsfrogs>
+ <c95b0a815dc9ccfe6172b589c5d4810147dcc207.camel@gmail.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Cc: Namjae Jeon <linkinjeon@kernel.org>
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH V2] generic: test zero-byte writes to file
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c95b0a815dc9ccfe6172b589c5d4810147dcc207.camel@gmail.com>
 
-A bug was recently fixed in exfat where attempting to do a zero-byte
-write would yield -EFAULT; test for that here.
+On Fri, Feb 28, 2025 at 07:01:50PM +0530, Nirjhar Roy (IBM) wrote:
+> On Thu, 2025-02-27 at 18:11 -0800, Darrick J. Wong wrote:
+> > On Thu, Feb 27, 2025 at 04:20:59PM -0800, Catherine Hoang wrote:
+> > > Add a test to validate the new atomic writes feature.
+> > > 
+> > > Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+> > > Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> > 
+> > Er.... what git tree is this based upon?  generic/762 is a project
+> > quota
+> > test.
+> On which branch do you have tests/generic/762? I checked the latest
+> master(commit - 8467552f09e1672a02712653b532a84bd46ea10e) and the for-
+> next(commit - 5b56a2d888191bfc7131b096e611eab1881d8422) and it doesn't
+> seem to exist there. However, tests/xfs/762 does exist. 
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+Zorro's patches-in-queue, aka whatever gets pushed to for-next on
+Sunday.  My confusion stems from this patch modifying what looks like an
+existing atomic writes test, but generic/762 isn't that test so now I
+can't see everything that this test is examining.
 
-V2: remove the test that file exists, fix .out file and filter xfs_io
+(I suggest everyone please post urls to public git repos so reviewers
+can get around these sorts of issues in the future.)
 
-Zorro - If there is more debate over whether or not the file should be
-removed at the end of the test, please feel free to fix it up to
-whatever makes the most people happy. ;)
+--D
 
-diff --git a/tests/generic/762 b/tests/generic/762
-new file mode 100755
-index 00000000..25eb88b9
---- /dev/null
-+++ b/tests/generic/762
-@@ -0,0 +1,29 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test 762
-+#
-+# test zero-byte writes
-+#
-+# exfat had a regression where a zero-byte write to a file would
-+# yield -EfAULT. Should work on all filesystems - write should
-+# succeed.
-+#
-+. ./common/preamble
-+_begin_fstest auto quick
-+
-+# Import common functions.
-+. ./common/filter
-+
-+[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
-+	"exfat: short-circuit zero-byte writes in exfat_file_write_iter"
-+
-+# Modify as appropriate.
-+_require_test
-+
-+$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq 2>&1 | _filter_xfs_io
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/762.out b/tests/generic/762.out
-new file mode 100644
-index 00000000..918f5455
---- /dev/null
-+++ b/tests/generic/762.out
-@@ -0,0 +1,3 @@
-+QA output created by 762
-+wrote 0/0 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-
+> --NR
+> > 
+> > --D
+> > 
+> > > ---
+> > >  common/rc             |  51 ++++++++++++++
+> > >  tests/generic/762     | 160
+> > > ++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/762.out |   2 +
+> > >  3 files changed, 213 insertions(+)
+> > >  create mode 100755 tests/generic/762
+> > >  create mode 100644 tests/generic/762.out
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 6592c835..08a9d9b8 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -2837,6 +2837,10 @@ _require_xfs_io_command()
+> > >  			opts+=" -d"
+> > >  			pwrite_opts+="-V 1 -b 4k"
+> > >  		fi
+> > > +		if [ "$param" == "-A" ]; then
+> > > +			opts+=" -d"
+> > > +			pwrite_opts+="-D -V 1 -b 4k"
+> > > +		fi
+> > >  		testio=`$XFS_IO_PROG -f $opts -c \
+> > >  		        "pwrite $pwrite_opts $param 0 4k" $testfile
+> > > 2>&1`
+> > >  		param_checked="$pwrite_opts $param"
+> > > @@ -5175,6 +5179,53 @@ _require_scratch_btime()
+> > >  	_scratch_unmount
+> > >  }
+> > >  
+> > > +_get_atomic_write_unit_min()
+> > > +{
+> > > +	$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> > > +        grep atomic_write_unit_min | grep -o '[0-9]\+'
+> > > +}
+> > > +
+> > > +_get_atomic_write_unit_max()
+> > > +{
+> > > +	$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> > > +        grep atomic_write_unit_max | grep -o '[0-9]\+'
+> > > +}
+> > > +
+> > > +_get_atomic_write_segments_max()
+> > > +{
+> > > +	$XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> > > +        grep atomic_write_segments_max | grep -o '[0-9]\+'
+> > > +}
+> > > +
+> > > +_require_scratch_write_atomic()
+> > > +{
+> > > +	_require_scratch
+> > > +
+> > > +	export STATX_WRITE_ATOMIC=0x10000
+> > > +
+> > > +	awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
+> > > +	awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+> > > +
+> > > +	if [ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]; then
+> > > +		_notrun "write atomic not supported by this block
+> > > device"
+> > > +	fi
+> > > +
+> > > +	_scratch_mkfs > /dev/null 2>&1
+> > > +	_scratch_mount
+> > > +
+> > > +	testfile=$SCRATCH_MNT/testfile
+> > > +	touch $testfile
+> > > +
+> > > +	awu_min_fs=$(_get_atomic_write_unit_min $testfile)
+> > > +	awu_max_fs=$(_get_atomic_write_unit_max $testfile)
+> > > +
+> > > +	_scratch_unmount
+> > > +
+> > > +	if [ $awu_min_fs -eq 0 ] && [ $awu_max_fs -eq 0 ]; then
+> > > +		_notrun "write atomic not supported by this filesystem"
+> > > +	fi
+> > > +}
+> > > +
+> > >  _require_inode_limits()
+> > >  {
+> > >  	if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
+> > > diff --git a/tests/generic/762 b/tests/generic/762
+> > > new file mode 100755
+> > > index 00000000..d0a80219
+> > > --- /dev/null
+> > > +++ b/tests/generic/762
+> > > @@ -0,0 +1,160 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0
+> > > +# Copyright (c) 2025 Oracle.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test 762
+> > > +#
+> > > +# Validate atomic write support
+> > > +#
+> > > +. ./common/preamble
+> > > +_begin_fstest auto quick rw
+> > > +
+> > > +_require_scratch_write_atomic
+> > > +_require_xfs_io_command pwrite -A
+> > > +
+> > > +test_atomic_writes()
+> > > +{
+> > > +    local bsize=$1
+> > > +
+> > > +    case "$FSTYP" in
+> > > +    "xfs")
+> > > +        mkfs_opts="-b size=$bsize"
+> > > +        ;;
+> > > +    "ext4")
+> > > +        mkfs_opts="-b $bsize"
+> > > +        ;;
+> > > +    *)
+> > > +        ;;
+> > > +    esac
+> > > +
+> > > +    # If block size is not supported, skip this test
+> > > +    _scratch_mkfs $mkfs_opts >>$seqres.full 2>&1 || return
+> > > +    _try_scratch_mount >>$seqres.full 2>&1 || return
+> > > +
+> > > +    test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
+> > > +
+> > > +    testfile=$SCRATCH_MNT/testfile
+> > > +    touch $testfile
+> > > +
+> > > +    file_min_write=$(_get_atomic_write_unit_min $testfile)
+> > > +    file_max_write=$(_get_atomic_write_unit_max $testfile)
+> > > +    file_max_segments=$(_get_atomic_write_segments_max $testfile)
+> > > +
+> > > +    # Check that atomic min/max = FS block size
+> > > +    test $file_min_write -eq $bsize || \
+> > > +        echo "atomic write min $file_min_write, should be fs block
+> > > size $bsize"
+> > > +    test $file_min_write -eq $bsize || \
+> > > +        echo "atomic write max $file_max_write, should be fs block
+> > > size $bsize"
+> > > +    test $file_max_segments -eq 1 || \
+> > > +        echo "atomic write max segments $file_max_segments, should
+> > > be 1"
+> > > +
+> > > +    # Check that we can perform an atomic write of len = FS block
+> > > size
+> > > +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> > > $bsize" $testfile | \
+> > > +        grep wrote | awk -F'[/ ]' '{print $2}')
+> > > +    test $bytes_written -eq $bsize || echo "atomic write
+> > > len=$bsize failed"
+> > > +
+> > > +    # Check that we can perform an atomic single-block cow write
+> > > +    if [ "$FSTYP" == "xfs" ]; then
+> > > +        testfile_cp=$SCRATCH_MNT/testfile_copy
+> > > +        if _xfs_has_feature $SCRATCH_MNT reflink; then
+> > > +            cp --reflink $testfile $testfile_cp
+> > > +        fi
+> > > +        bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b
+> > > $bsize 0 $bsize" $testfile_cp | \
+> > > +            grep wrote | awk -F'[/ ]' '{print $2}')
+> > > +        test $bytes_written -eq $bsize || echo "atomic write on
+> > > reflinked file failed"
+> > > +    fi
+> > > +
+> > > +    # Check that we can perform an atomic write on an unwritten
+> > > block
+> > > +    $XFS_IO_PROG -c "falloc $bsize $bsize" $testfile
+> > > +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize
+> > > $bsize $bsize" $testfile | \
+> > > +        grep wrote | awk -F'[/ ]' '{print $2}')
+> > > +    test $bytes_written -eq $bsize || echo "atomic write to
+> > > unwritten block failed"
+> > > +
+> > > +    # Check that we can perform an atomic write on a sparse hole
+> > > +    $XFS_IO_PROG -c "fpunch 0 $bsize" $testfile
+> > > +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> > > $bsize" $testfile | \
+> > > +        grep wrote | awk -F'[/ ]' '{print $2}')
+> > > +    test $bytes_written -eq $bsize || echo "atomic write to sparse
+> > > hole failed"
+> > > +
+> > > +    # Check that we can perform an atomic write on a fully mapped
+> > > block
+> > > +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> > > $bsize" $testfile | \
+> > > +        grep wrote | awk -F'[/ ]' '{print $2}')
+> > > +    test $bytes_written -eq $bsize || echo "atomic write to mapped
+> > > block failed"
+> > > +
+> > > +    # Reject atomic write if len is out of bounds
+> > > +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $((bsize - 1))"
+> > > $testfile 2>> $seqres.full && \
+> > > +        echo "atomic write len=$((bsize - 1)) should fail"
+> > > +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $((bsize + 1))"
+> > > $testfile 2>> $seqres.full && \
+> > > +        echo "atomic write len=$((bsize + 1)) should fail"
+> > > +
+> > > +    # Reject atomic write when iovecs > 1
+> > > +    $XFS_IO_PROG -dc "pwrite -A -D -V2 -b $bsize 0 $bsize"
+> > > $testfile 2>> $seqres.full && \
+> > > +        echo "atomic write only supports iovec count of 1"
+> > > +
+> > > +    # Reject atomic write when not using direct I/O
+> > > +    $XFS_IO_PROG -c "pwrite -A -V1 -b $bsize 0 $bsize" $testfile
+> > > 2>> $seqres.full && \
+> > > +        echo "atomic write requires direct I/O"
+> > > +
+> > > +    # Reject atomic write when offset % bsize != 0
+> > > +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 1 $bsize"
+> > > $testfile 2>> $seqres.full && \
+> > > +        echo "atomic write requires offset to be aligned to bsize"
+> > > +
+> > > +    _scratch_unmount
+> > > +}
+> > > +
+> > > +test_atomic_write_bounds()
+> > > +{
+> > > +    local bsize=$1
+> > > +
+> > > +    case "$FSTYP" in
+> > > +    "xfs")
+> > > +        mkfs_opts="-b size=$bsize"
+> > > +        ;;
+> > > +    "ext4")
+> > > +        mkfs_opts="-b $bsize"
+> > > +        ;;
+> > > +    *)
+> > > +        ;;
+> > > +    esac
+> > > +
+> > > +    # If block size is not supported, skip this test
+> > > +    _scratch_mkfs $mkfs_opts >>$seqres.full 2>&1 || return
+> > > +    _try_scratch_mount >>$seqres.full 2>&1 || return
+> > > +
+> > > +    test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
+> > > +
+> > > +    testfile=$SCRATCH_MNT/testfile
+> > > +    touch $testfile
+> > > +
+> > > +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $bsize"
+> > > $testfile 2>> $seqres.full && \
+> > > +        echo "atomic write should fail when bsize is out of
+> > > bounds"
+> > > +
+> > > +    _scratch_unmount
+> > > +}
+> > > +
+> > > +sys_min_write=$(cat "/sys/block/$(_short_dev
+> > > $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
+> > > +sys_max_write=$(cat "/sys/block/$(_short_dev
+> > > $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
+> > > +
+> > > +bdev_min_write=$(_get_atomic_write_unit_min $SCRATCH_DEV)
+> > > +bdev_max_write=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+> > > +
+> > > +if [ "$sys_min_write" -ne "$bdev_min_write" ]; then
+> > > +    echo "bdev min write != sys min write"
+> > > +fi
+> > > +if [ "$sys_max_write" -ne "$bdev_max_write" ]; then
+> > > +    echo "bdev max write != sys max write"
+> > > +fi
+> > > +
+> > > +# Test all supported block sizes between bdev min and max
+> > > +for ((bsize=$bdev_min_write; bsize<=bdev_max_write; bsize*=2)); do
+> > > +        test_atomic_writes $bsize
+> > > +done;
+> > > +
+> > > +# Check that atomic write fails if bsize < bdev min or bsize >
+> > > bdev max
+> > > +test_atomic_write_bounds $((bdev_min_write / 2))
+> > > +test_atomic_write_bounds $((bdev_max_write * 2))
+> > > +
+> > > +# success, all done
+> > > +echo Silence is golden
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/762.out b/tests/generic/762.out
+> > > new file mode 100644
+> > > index 00000000..fbaeb297
+> > > --- /dev/null
+> > > +++ b/tests/generic/762.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 762
+> > > +Silence is golden
+> > > -- 
+> > > 2.34.1
+> > > 
+> > > 
+> 
+> 
