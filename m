@@ -1,205 +1,113 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0759D26A0DB;
-	Fri, 28 Feb 2025 16:28:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 464AD1F4C8D
+	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 17:18:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740760084; cv=none; b=mAYXT381M6GKyGdtJucmvHcAytW+I23GRdg0RVYKjsLZBjW9aZIwVPidkTYKxZsu/4g18tO/ytwwzCZLuFQpgBKNK9Mzn9LQB1SfjASFBngFWsC3OGcZ3Uhq/HxGu3ZTcwwqoP2H5l9rvtj/R2c4RRqKoZ21O+alT8v6d61e5RY=
+	t=1740763125; cv=none; b=STc4Z7FampQIK72SmtOl4nmCVSTFdAAY/7Mj7leha0AIe7I76XmSeHxR1u2yKnGeXJ3Y2bkPaouub67JofD3dkVsmKfqTLWD1BzTN5FNoRrVFIt0UqIY6G9+yV5L8Xf8y9e8j7E1XLkNX4G7ep2RQ35482fzhSPcE+Z5eVI/R/U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740760084; c=relaxed/simple;
-	bh=vb+8B1B33mARj/OQc1AFoSwj4mPJXOHuGLQvA5qeByA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kjQ7oAZ0ZqdBPMjXY2XSLoY7MJMA8V+4bE/mozzeKYng7wDCRZI86GTmsE64CF87nxh6/dNDQWO1R5IMLWFLWeYDOUg+RHRmazW5ULd5syGRyDtQHHsSFeKCnG56gNUueAday0dPtRT/V7YhXrykvHMkesCJevZ68UYcB9ecqm8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sR2205aj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740763125; c=relaxed/simple;
+	bh=nUqCWGjT+crPwqyHua6dxz2s4z3Ov/EcUzTVJXRpyug=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=kbSl9rBDsWk2QqBCZJCieN20+bc47UuqYzCl+2HPay3Xv4Nv1sh0LApzWJCZ+bKYK982fmmAv4hx7sPFIvyCP+MxmMXZCqom0MmLU2kfiTRf4kjwEM/ifjx8ZPlFuuppTj7QmrN2TqW3ZSWoLmIfa/gb+1RLvcz/KCWRVvfk2oY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FjxMzqHe; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sR2205aj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5BC9EC4CED6;
-	Fri, 28 Feb 2025 16:28:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FjxMzqHe"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1ECCCC4CEE2;
+	Fri, 28 Feb 2025 17:18:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740760083;
-	bh=vb+8B1B33mARj/OQc1AFoSwj4mPJXOHuGLQvA5qeByA=;
-	h=From:To:Cc:Subject:Date:From;
-	b=sR2205ajhr2GvHTMH4LVmejs6OzvKxTRsnbtc+FWyH8W2edAm+E8H+0vV1LgQZgBg
-	 +43anvf22MO9AqOLXdGmsDQLOQOr8+pjGHy5WQ6jVtEHQ66FefaasdE6ssSAdJOUFE
-	 409U/X6xpxzsbkKHHQ7OVBjnJW/A/diQyGjFIDe+IE227poRrS1CwaPvjQaAjNXbpo
-	 5K5q1kAQKXj5DX3IPdD82eAzyFDZWrPafzDMoGdJz7O7b5Oul6lSHmp9o/eFixKoNg
-	 ry1bVqbLOkrK9ipsALXvfFZA94un6c9tM8ZpnTS+ACxRX1vYnijELcuEL0tdKTOuP0
-	 erbIk8UheFJDQ==
-From: fdmanana@kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org,
-	Filipe Manana <fdmanana@suse.com>,
-	Glass Su <glass.su@suse.com>
-Subject: [PATCH] btrfs/080: fix sporadic failures starting with kernel 6.13
-Date: Fri, 28 Feb 2025 16:27:55 +0000
-Message-ID: <d48dd538e99048e73973c6b32a75a6ff340e8c47.1740759907.git.fdmanana@suse.com>
-X-Mailer: git-send-email 2.45.2
+	s=k20201202; t=1740763125;
+	bh=nUqCWGjT+crPwqyHua6dxz2s4z3Ov/EcUzTVJXRpyug=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=FjxMzqHeu0aUszjprqh0DuReoGGBDr4JzXk5yXxveeuDDHNRAnzGm4+lCCcIqMafT
+	 i3KMNwZPFfeO5TXbeu615Hu+3PPm3JS/rNmiLU3BwYay5wQC6oyahmhf1bnBRHh//2
+	 WvRle0g/0CjKwFrVpLXEmk7fWJLONsR9GFpbeWJsqUJrYTt6xIX/czK9oELq7fyokY
+	 947zFyrMcwvZ4jzMuzLokl5YzgInB+TwJpLMKVKlCV3DNmxHZU9FQ+Re4Qp0egz2Y1
+	 Q+AZS6FcduTg6LkRoeDSm7Los2Z+pb65ioN6m9c2IVLVgAPdnv1+QI1a0B2h/ZwJmJ
+	 ZFvbC1zrXriVQ==
+Date: Fri, 28 Feb 2025 09:18:44 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>,
+	Namjae Jeon <linkinjeon@kernel.org>
+Subject: Re: [PATCH V2] generic: test zero-byte writes to file
+Message-ID: <20250228171844.GB6229@frogsfrogsfrogs>
+References: <3bd585ba-fe21-4f93-802a-f32f9e0f1c61@redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <3bd585ba-fe21-4f93-802a-f32f9e0f1c61@redhat.com>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, Feb 28, 2025 at 09:13:19AM -0600, Eric Sandeen wrote:
+> A bug was recently fixed in exfat where attempting to do a zero-byte
+> write would yield -EFAULT; test for that here.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> V2: remove the test that file exists, fix .out file and filter xfs_io
+> 
+> Zorro - If there is more debate over whether or not the file should be
+> removed at the end of the test, please feel free to fix it up to
+> whatever makes the most people happy. ;)
+> 
+> diff --git a/tests/generic/762 b/tests/generic/762
+> new file mode 100755
+> index 00000000..25eb88b9
+> --- /dev/null
+> +++ b/tests/generic/762
 
-Since kernel 6.13, namely since commit c87c299776e4 ("btrfs: make buffered
-write to copy one page a time"), the test can sporadically fail with an
-unexpected digests for files in snapshots. This is because after that
-commit the pages for a buffered write are prepared and dirtied one by one,
-and no longer in batches up to 512 pages (on x86_64), so a snapshot that
-is created in the middle of a buffered write can result in a version of
-the file where only a part of a buffered write got caught, for example if
-a snapshot is created while doing the 32K write for file range [0, 32K),
-we can end up a file in the snapshot where only the first 8K (2 pages) of
-the write are visible, since the remaining 24K were not yet processed by
-the write task. Before that kernel commit, this didn't happen since we
-processed all the pages in a single batch and while holding the whole
-range locked in the inode's io tree.
+Hee hee, another generic/762 :)
 
-This is easy to observe by adding an "od -A d -t x1" call to the test
-before the _fail statement when we get an unexpected file digest:
+Looks good to me,
+Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
 
-  $ ./check btrfs/080
-  FSTYP         -- btrfs
-  PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1 SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-  MKFS_OPTIONS  -- /dev/sdc
-  MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
+--D
 
-  btrfs/080 32s ... [failed, exit status 1]- output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad)
-      --- tests/btrfs/080.out	2020-06-10 19:29:03.814519074 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad	2025-02-27 17:12:08.410696958 +0000
-      @@ -1,2 +1,6 @@
-       QA output created by 080
-      -Silence is golden
-      +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-      +*
-      +0008192
-      +Unexpected digest for file /home/fdmanana/btrfs-tests/scratch_1/17_11_56_146646257_snap/foobar_50
-      +(see /home/fdmanana/git/hub/xfstests/results//btrfs/080.full for details)
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/080.out /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad'  to see the entire diff)
-  Ran: btrfs/080
-  Failures: btrfs/080
-  Failed 1 of 1 tests
-
-The files are created like this while snapshots are created in parallel:
-
-    run_check $XFS_IO_PROG -f \
-        -c "pwrite -S 0xaa -b 32K 0 32K" \
-        -c "fsync" \
-        -c "pwrite -S 0xbb -b 32770 16K 32770" \
-        -c "truncate 90123" \
-        $SCRATCH_MNT/$name
-
-So with the kernel behaviour before 6.13 we expected the snapshot to
-contain any of the following versions of the file:
-
-1) Empty file;
-
-2) 32K file reflecting only the first buffered write;
-
-3) A file with a size of 49154 bytes reflecting both buffered writes;
-
-4) A file with a size of 90123 bytes, reflecting the truncate operation
-   and both buffered writes.
-
-So now the test can fail since kernel 6.13 due to snapshots catching
-partial writes.
-
-However the goal of the test when I wrote it was to verify that if the
-snapshot version of a file gets the truncated size, then the buffered
-writes are visible in the file, since they happened before the truncate
-operation - that is, we can't get a file with a size of 90123 bytes that
-doesn't have the range [0, 16K) full of bytes with a value of 0xaa and
-the range [16K, 49154) full of bytes with the 0xbb value.
-
-So update the test to the new kernel behaviour by verifying only that if
-the file has the size we truncated to, then it has all the data we wrote
-previously with the buffered writes.
-
-Reported-by: Glass Su <glass.su@suse.com>
-Link: https://lore.kernel.org/linux-btrfs/30FD234D-58FC-4F3C-A947-47A5B6972C01@suse.com/
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/080 | 42 +++++++++++++++++++++++-------------------
- 1 file changed, 23 insertions(+), 19 deletions(-)
-
-diff --git a/tests/btrfs/080 b/tests/btrfs/080
-index ea9d09b0..aa97d3f6 100755
---- a/tests/btrfs/080
-+++ b/tests/btrfs/080
-@@ -32,6 +32,8 @@ _cleanup()
- 
- _require_scratch_nocheck
- 
-+truncate_offset=90123
-+
- create_snapshot()
- {
- 	local ts=`date +'%H_%M_%S_%N'`
-@@ -48,7 +50,7 @@ create_file()
- 		-c "pwrite -S 0xaa -b 32K 0 32K" \
- 		-c "fsync" \
- 		-c "pwrite -S 0xbb -b 32770 16K 32770" \
--		-c "truncate 90123" \
-+		-c "truncate $truncate_offset" \
- 		$SCRATCH_MNT/$name
- }
- 
-@@ -81,6 +83,12 @@ _scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
- 
- _scratch_mount
- 
-+# Create a file while no snapshotting is in progress so that we get the expected
-+# digest for every file in a snapshot that caught the truncate operation (which
-+# sets the file's size to $truncate_offset).
-+create_file "gold_file"
-+expected_digest=`_md5_checksum "$SCRATCH_MNT/gold_file"`
-+
- # Run some background load in order to make the issue easier to trigger.
- # Specially needed when testing with non-debug kernels and there isn't
- # any other significant load on the test machine other than this test.
-@@ -103,24 +111,20 @@ for ((i = 0; i < $num_procs; i++)); do
- done
- 
- for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
--	digest=`md5sum $f | cut -d ' ' -f 1`
--	case $digest in
--	"d41d8cd98f00b204e9800998ecf8427e")
--		# ok, empty file
--		;;
--	"c28418534a020122aca59fd3ff9581b5")
--		# ok, only first write captured
--		;;
--	"cd0032da89254cdc498fda396e6a9b54")
--		# ok, only 2 first writes captured
--		;;
--	"a1963f914baf4d2579d643425f4e54bc")
--		# ok, the 2 writes and the truncate were captured
--		;;
--	*)
--		# not ok, truncate captured but not one or both writes
--		_fail "Unexpected digest for file $f"
--	esac
-+	file_size=$(stat -c%s "$f")
-+	# We want to verify that if the file has the size set by the truncate
-+	# operation, then both delalloc writes were flushed, and every version
-+	# of the file in each snapshot has its range [0, 16K) full of bytes with
-+	# a value of 0xaa and the range [16K, 49154) is full of bytes with a
-+	# value of 0xbb.
-+	if [ "$file_size" -eq "$truncate_offset" ]; then
-+		digest=`_md5_checksum "$f"`
-+		if [ "$digest" != "$expected_digest" ]; then
-+			echo -e "Unexpected content for file $f:\n"
-+			_hexdump "$f"
-+			_fail "Bad file content"
-+		fi
-+	fi
- done
- 
- # Check the filesystem for inconsistencies.
--- 
-2.45.2
-
+> @@ -0,0 +1,29 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 762
+> +#
+> +# test zero-byte writes
+> +#
+> +# exfat had a regression where a zero-byte write to a file would
+> +# yield -EfAULT. Should work on all filesystems - write should
+> +# succeed.
+> +#
+> +. ./common/preamble
+> +_begin_fstest auto quick
+> +
+> +# Import common functions.
+> +. ./common/filter
+> +
+> +[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
+> +	"exfat: short-circuit zero-byte writes in exfat_file_write_iter"
+> +
+> +# Modify as appropriate.
+> +_require_test
+> +
+> +$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq 2>&1 | _filter_xfs_io
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/762.out b/tests/generic/762.out
+> new file mode 100644
+> index 00000000..918f5455
+> --- /dev/null
+> +++ b/tests/generic/762.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 762
+> +wrote 0/0 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> 
+> 
