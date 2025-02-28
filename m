@@ -1,269 +1,138 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09B421B960
-	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 13:55:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7E8C1EF36F
+	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 15:13:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740750955; cv=none; b=QC8lF69nCW4JYvch0wbtgS6hmJLL/23c7+sM27SdksOh75vbIobSiwvGPpul3T5fvnSAVTAO0ILQuflZq7qM9+eB4RVBxxH6Oyy0+sWQWl0Tkm1SB+8+PPca13E79Ykmcz2bcispzisaMantHX4mpuJTJ8MGvzixjgpstaQV8/Y=
+	t=1740755606; cv=none; b=XBh5PZE2fAJUHaTgEkO82Pm513IgWHFCOEVd1B2Lp2yni55qCh3ifcO4K6JwDcyF9a7U19Mt2YjlAsyStwqC4iuamx2mbfa9KJhnOtRgnLL8lW1wKYBoamsBLtOhvMBPE3sPD0vrKEkFgp07UTpQD+rIvczPRYsSAzUM2q5n7m0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740750955; c=relaxed/simple;
-	bh=+WqeiIJb4j75GPAXrEevIo+zv8XKGSOUbD+/cXz7EqU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=LDubNFA9oEPfFZ4q/hzcDmuPVXd3zGnxjuUZA3pAq3zUQ9S5FP/3+qxs2twsOJsGSRhum9bqwPL/+Zi1t1TPDOWLGL5T5pH63mR4e6ME+EGxe6BDpjfqR98NlEscPpenYdxs35Lp7/4VraP4GWnAOyiMXeIlbAxg/a3qMVWNDZM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz; spf=pass smtp.mailfrom=suse.cz; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=HZja0rt1; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=EKbEXUzQ; dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b=v6hT9j83; dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b=4OCbwd70; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=suse.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.cz
+	s=arc-20240116; t=1740755606; c=relaxed/simple;
+	bh=iKrcG10aCiZJEeKCd1FVCGbW+zIoFgHqe0lysXaY3f8=;
+	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=QnAxxIS4yGGH/iQ4HTQI051Uu5AVQ3ZW5zZqxF2HIuj1TiObQ+BotXSsD6NC448IO+SSIU1Qq4ekbEdig0yLEngP4TnMmp4GuAIdKqSgH74XDWI0MM2Z5tOom/76bh2w5N+NMBjne28iYwGCgPYqtkgbPtoaPkwKP1XLNxjUwAY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=Nax2K1EM; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="HZja0rt1";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="EKbEXUzQ";
-	dkim=pass (1024-bit key) header.d=suse.cz header.i=@suse.cz header.b="v6hT9j83";
-	dkim=permerror (0-bit key) header.d=suse.cz header.i=@suse.cz header.b="4OCbwd70"
-Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id E31A01F38F;
-	Fri, 28 Feb 2025 13:55:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1740750952;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LPt5sHGWmn/KstzopdmY0CQ8/tw2Eh65XhRod/YG23A=;
-	b=HZja0rt1TfCPVgLYCtj8ee1OjbBCVykoWxJnfRZ1jTQT1RAzEKErmlD8ECNJ+OQvbeV+HU
-	BdjIRzwP5QkTfMFT8T/R/tuRIo6rXyONPlrZ7jO5/qWrxKSJy9LxzMYirsY70a4z+zpYlZ
-	LVLD9fTibMox/FP6eAB9mqqiIwpv+gg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1740750952;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LPt5sHGWmn/KstzopdmY0CQ8/tw2Eh65XhRod/YG23A=;
-	b=EKbEXUzQYhi6oNCSEnv24vxTUVo20BFGzKjeNfO7uS47m3S5zNUxjgJ9ZOklpQHBsVZT6J
-	zcdBVbuPZh/Gl/AQ==
-Authentication-Results: smtp-out2.suse.de;
-	dkim=pass header.d=suse.cz header.s=susede2_rsa header.b=v6hT9j83;
-	dkim=pass header.d=suse.cz header.s=susede2_ed25519 header.b=4OCbwd70
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-	t=1740750951;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LPt5sHGWmn/KstzopdmY0CQ8/tw2Eh65XhRod/YG23A=;
-	b=v6hT9j83xDzKSN8+gXif6WdMp7s2ZHmf9zRiWdfkI6nxyxCiyOjeBaVbmcNlaVbmQwN5Ir
-	5Quc1MC0DoJVbOySxQqdoqewBF0H8P1ryJzBeT/iZVY7yy0OsgRHPoE68Bf9CyHafcB3oW
-	G/JHTwnzu/9R1lLJBbRQ8gh9vRCeTyg=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-	s=susede2_ed25519; t=1740750951;
-	h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-	 cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LPt5sHGWmn/KstzopdmY0CQ8/tw2Eh65XhRod/YG23A=;
-	b=4OCbwd70ekNH4FF6YUfl2NAlPDq/k3tW3BFXMpDuFuiZAqyPYLmjXn1C9kRihIgWnIRbbl
-	S7cDpKREdphzt7CA==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id B662C1344A;
-	Fri, 28 Feb 2025 13:55:51 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id V0lWLGfAwWdQKgAAD6G6ig
-	(envelope-from <dsterba@suse.cz>); Fri, 28 Feb 2025 13:55:51 +0000
-Date: Fri, 28 Feb 2025 14:55:50 +0100
-From: David Sterba <dsterba@suse.cz>
-To: Zorro Lang <zlang@kernel.org>
-Cc: fstests@vger.kernel.org, David Sterba <dsterba@suse.com>,
-	linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH] README: add supported fs list
-Message-ID: <20250228135550.GH5777@suse.cz>
-Reply-To: dsterba@suse.cz
-References: <20250227200514.4085734-1-zlang@kernel.org>
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Nax2K1EM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1740755603;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=mD9Sf+66M986BAk7h4L1zWsXc36Y60fmqYc9pvEmo04=;
+	b=Nax2K1EMmzYG7xZjxZMdr1BWjN63U4qe+Lt0+xFiidGOiLOPbi+y4cRfy4cHGwhYsuQfVQ
+	okPNs+ote8sw+D72pfUCFSO3soKbzTEYp/FJk5vMlGggHPMhGGOgqUotxrJDDpTfUj9urw
+	nTTfiSge4Et9UEDsqXz8pKkQKXcNpWU=
+Received: from mail-il1-f197.google.com (mail-il1-f197.google.com
+ [209.85.166.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-689-94-1jSjjMtG7Ec5UL1zEEg-1; Fri, 28 Feb 2025 10:13:21 -0500
+X-MC-Unique: 94-1jSjjMtG7Ec5UL1zEEg-1
+X-Mimecast-MFC-AGG-ID: 94-1jSjjMtG7Ec5UL1zEEg_1740755601
+Received: by mail-il1-f197.google.com with SMTP id e9e14a558f8ab-3d2a60faa44so46108135ab.0
+        for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 07:13:21 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1740755601; x=1741360401;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=mD9Sf+66M986BAk7h4L1zWsXc36Y60fmqYc9pvEmo04=;
+        b=Tc5iDTgFEExwe1JXXOmU0h9fj4FLPqnUiMjyM5AFbfjRcR5j4bH37u0bQGYTL3Qbe+
+         Qx99MG0kOLnv0ahAXRHMLyGO3p1GvOjuElm9VPtVJ0cRYyPULv7N7NmLhY5l+saL4n8d
+         fRr0ESfzpBDh3Hv0oAN50/fbLrDQ6XngxezpiAr2wsK6i8oU39RghNsNp+8xzXLL8L0o
+         fFVk9shO9Ac6wgMEh0QyEAR4fBCVGwLmeB8tBuEe4a1UUAeq97wsD3MjfSC8e8CZeFF3
+         VQ1cSEnKkeiM83m8Lt3BG93PKOqPF2RdxWESmBLAHlhuVkHuRGlIMF+0AkcYJCjgzG4z
+         AJ6A==
+X-Gm-Message-State: AOJu0YyzFBk5nm781df8QsOrqF8CN90t6Ph+cmDL3enk98bCSL/Hcb8d
+	ezGhogEUw6wgAQSx3dl0SNCpKKmugizeAVLxf8BGCqOKXkWqAzfbhPw/UHVBq0erlF9ax4QrAMa
+	wUM97wjkX6uwlJa22f4EuHlpys6DCUApEkClfxbVhQaUFHgiuunfJvTDsqE3Ie3/yyvKXdNlIA8
+	e2u1O8oMOpmWRCbjAH1FOsycy0Kvhg+KcpmBWa9ogz
+X-Gm-Gg: ASbGncuLHmIkxH2jObm8D8ucw+Wz6o28d692UNVMPrjQdSG5Z76adeC8Q/dwsgf1iik
+	ufpL/12/yNpqWtg+RmE/N47AxvhIbQTf/9i5/0tQyp6k7Y23jYJFPZzDxoVyMq/ZYMKZ1dBILEr
+	cpCbPMGGVKTksIWXj/lc49BRBzLvtUfiknjiVPaXaqbMBbUOPkz6qEUas+0T3usR39uvPjsjxO1
+	IKo00Vy0a0EcX7Dzey4VxHB5/u54hDiakWo8AR+LKpxKxSzOVe8UeU6lzVA0Sts/t4x9mEyH7zN
+	+tkW4GIQTXIQx8hoZ4vJ1NgwyMYApf1GlsD1Y9dXfxG2+ZHm+cE0Lg==
+X-Received: by 2002:a05:6e02:19ca:b0:3d3:e3fc:d5e1 with SMTP id e9e14a558f8ab-3d3e6e42248mr38283415ab.1.1740755600875;
+        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IHRCmlAihX9QKBSkKyhKbYoWfIuhaacBij8HOii8MxZ5nZ/adohZjLxVg/WxHWBAFF5TaA4bg==
+X-Received: by 2002:a05:6e02:19ca:b0:3d3:e3fc:d5e1 with SMTP id e9e14a558f8ab-3d3e6e42248mr38283015ab.1.1740755600533;
+        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
+Received: from [10.0.1.24] (nwtn-09-2828.dsl.iowatelecom.net. [67.224.43.12])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4f061f790bcsm932878173.126.2025.02.28.07.13.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 28 Feb 2025 07:13:20 -0800 (PST)
+Message-ID: <3bd585ba-fe21-4f93-802a-f32f9e0f1c61@redhat.com>
+Date: Fri, 28 Feb 2025 09:13:19 -0600
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250227200514.4085734-1-zlang@kernel.org>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
-X-Rspamd-Queue-Id: E31A01F38F
-X-Spam-Score: -4.21
-X-Rspamd-Action: no action
-X-Spamd-Result: default: False [-4.21 / 50.00];
-	BAYES_HAM(-3.00)[100.00%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	HAS_REPLYTO(0.30)[dsterba@suse.cz];
-	R_DKIM_ALLOW(-0.20)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MX_GOOD(-0.01)[];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	ARC_NA(0.00)[];
-	ASN(0.00)[asn:25478, ipnet:::/0, country:RU];
-	RCVD_TLS_ALL(0.00)[];
-	TO_DN_SOME(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	MID_RHS_MATCH_FROM(0.00)[];
-	REPLYTO_DOM_NEQ_TO_DOM(0.00)[];
-	DKIM_SIGNED(0.00)[suse.cz:s=susede2_rsa,suse.cz:s=susede2_ed25519];
-	FROM_EQ_ENVFROM(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	REPLYTO_ADDR_EQ_FROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCPT_COUNT_THREE(0.00)[4];
-	DKIM_TRACE(0.00)[suse.cz:+]
-X-Rspamd-Server: rspamd1.dmz-prg2.suse.org
-X-Spam-Flag: NO
-X-Spam-Level: 
+User-Agent: Mozilla Thunderbird
+Content-Language: en-US
+To: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Cc: Namjae Jeon <linkinjeon@kernel.org>
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH V2] generic: test zero-byte writes to file
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Feb 28, 2025 at 04:05:14AM +0800, Zorro Lang wrote:
-> To clarify the supported filesystems by fstests, add a fs list to
-> README file.
-> 
-> Signed-off-by: Zorro Lang <zlang@kernel.org>
-> ---
-> 
-> Hi,
-> 
-> David Sterba suggests to have a supported fs list in fstests:
-> 
-> https://lore.kernel.org/fstests/20250227073535.7gt7mj5gunp67axr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#m742e4f1f6668d39c1a48450e7176a366e0a2f6f9
-> 
-> I think that's a good suggestion, so I send this patch now. But tell the truth,
-> it's hard to find all filesystems which are supported by fstests. Especially
-> some filesystems might use fstests, but never be metioned in fstests code.
-> So please review this patch or send another patch to tell fstests@ list, if
-> you know any other filesystem is suppported.
+A bug was recently fixed in exfat where attempting to do a zero-byte
+write would yield -EFAULT; test for that here.
 
-The idea is to make the list best-effort, we don't know which of the L1
-and L2 are tested. It would be interesting to try them to see the actual
-level of support. I kind of doubt that anybody has run e.g. pvfs2 recently.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
+V2: remove the test that file exists, fix .out file and filter xfs_io
 
-> And if anyone has review point about the support "level" and "comment" part,
-> please feel free to tell me :)
-> 
-> Thanks,
-> Zorro
-> 
->  README | 82 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 82 insertions(+)
-> 
-> diff --git a/README b/README
-> index 024d39531..055935917 100644
-> --- a/README
-> +++ b/README
-> @@ -1,3 +1,85 @@
-> +_______________________
-> +SUPPORTED FS LIST
-> +_______________________
-> +
-> +History
-> +-------
-> +
-> +Firstly, xfstests is the old name of this project, due to it was originally
-> +developed for testing the XFS file system on the SGI's Irix operating system.
-> +With xfs was ported to Linux, so was xfstests, now it only supports Linux.
-> +
-> +As xfstests has some test cases are good to run on some other filesystems,
-> +we call them "generic" (and "shared", but it has been removed) cases, you
-> +can find them in tests/generic/ directory. Then more and more filesystems
-> +started to use xfstests, and contribute patches. Today xfstests is used
-> +as a file system regression test suite for lots of Linux's major file systems.
-> +So it's not "xfs"tests only, we tend to call it "fstests" now.
-> +
-> +Supported fs
-> +------------
-> +
-> +Firstly, there's not hard restriction about which filesystem can use fstests.
-> +Any filesystem can give fstests a try.
+Zorro - If there is more debate over whether or not the file should be
+removed at the end of the test, please feel free to fix it up to
+whatever makes the most people happy. ;)
 
-This could list what are the assumptions of a generic filesystem. For
-example the mkfs.$FSTYP and fsck.$FSTYP should exist as the generic
-fallback applies (other filesystems have the exceptions that skip eg.
-fsck if it's known not to exist).
+diff --git a/tests/generic/762 b/tests/generic/762
+new file mode 100755
+index 00000000..25eb88b9
+--- /dev/null
++++ b/tests/generic/762
+@@ -0,0 +1,29 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2025 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 762
++#
++# test zero-byte writes
++#
++# exfat had a regression where a zero-byte write to a file would
++# yield -EfAULT. Should work on all filesystems - write should
++# succeed.
++#
++. ./common/preamble
++_begin_fstest auto quick
++
++# Import common functions.
++. ./common/filter
++
++[ "$FSTYP" = "exfat" ] && _fixed_by_kernel_commit dda0407a2026 \
++	"exfat: short-circuit zero-byte writes in exfat_file_write_iter"
++
++# Modify as appropriate.
++_require_test
++
++$XFS_IO_PROG -f -c "pwrite 0 0" $TEST_DIR/testfile.$seq 2>&1 | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/762.out b/tests/generic/762.out
+new file mode 100644
+index 00000000..918f5455
+--- /dev/null
++++ b/tests/generic/762.out
+@@ -0,0 +1,3 @@
++QA output created by 762
++wrote 0/0 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 
-> +Although fstests supports many filesystems, they have different support level
-> +by fstests. So mark it with 4 levels as below:
-> +
-> +L1: Fstests can be run on the specified fs basically.
-> +L2: Rare support from the specified fs list to fix some generic test failures.
-> +L3: Normal support from the specified fs list, has some own cases.
-> +L4: Active support from the fs list, has lots of own cases.
-> +
-> ++------------+-------+---------------------------------------------------------+
-> +| Filesystem | Level |                       Comment                           |
-> ++------------+-------+---------------------------------------------------------+
-> +| AFS        |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Bcachefs   |  L1+  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Btrfs      |  L4   | N/A                                                     |
-
-https://btrfs.readthedocs.io/en/latest/dev/Development-notes.html#fstests-setup
-
-some additional information about required packages, kernel configs and
-devices. This could be in fstests/README too.
-
-> ++------------+-------+---------------------------------------------------------+
-> +| Ceph       |  L2   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| CIFS       |  L2-  | https://wiki.samba.org/index.php/Xfstesting-cifs        |
-> ++------------+-------+---------------------------------------------------------+
-> +| Ext2/3/4   |  L3+  | N/A                                                     |
-
-I'd suggest to split ext4 from that and give it L4, not sure if ext2 is
-still being tested maybe it's worth L3. The standalone Ext3 module does
-not exist and is covered by ext4, so it probably works with fstests but
-is interesting maybe only for historical reasons.
-
-> ++------------+-------+---------------------------------------------------------+
-> +| Exfat      |  L1+  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| f2fs       |  L3-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| FUSE       |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| GFS2       |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Glusterfs  |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| JFS        |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| NFS        |  L2+  | https://linux-nfs.org/wiki/index.php/Xfstests           |
-> ++------------+-------+---------------------------------------------------------+
-> +| ocfs2      |  L2-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| overlay    |  L3   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| pvfs2      |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Reiser4    |  L1   | Reiserfs has been removed, only left reiser4            |
-> ++------------+-------+---------------------------------------------------------+
-> +| tmpfs      |  L3-  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| ubifs      |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| udf        |  L1+  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| Virtiofs   |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| XFS        |  L4+  | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-> +| 9p         |  L1   | N/A                                                     |
-> ++------------+-------+---------------------------------------------------------+
-
-The table works as the way to present it but with so few links/comments
-writing it as a simple list could give a better idea what filesystems
-are in each category. Sorted alphabetically, like:
-
-L4: Btrfs, Ext4, XFS
-L3: ...
-etc
