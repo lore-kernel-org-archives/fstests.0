@@ -1,222 +1,166 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6171023DE;
-	Fri, 28 Feb 2025 06:31:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35346276D12
+	for <fstests@vger.kernel.org>; Fri, 28 Feb 2025 07:27:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740724286; cv=none; b=BB1+WjfoP53Sb6LAftX8osLTlBQSPu+Ox1mTFyfxbyjGPafZcaaGpo3Z7BxohgI8Cd/CEb1nJWg0hCNKcuVhzCvesMrCrQaglhWw3qA60ApGhmxeaqWgHneoqTpXAtz5eSX8IVtugHJ2F7jt0p+SeiTT5+OeTELcTFGKbHlvetk=
+	t=1740727637; cv=none; b=PNxUiG+toj9NDERjJt90XTVOWWJM+ZYF9+7nQVCT1alLHyrfBUkpmrjMYKS2CrCsZeG6futOgig4Eb3zEv6wRjAtSmeiI8jipC0BPFVv6T7Ii+Gm4TrZ0TxZDxaaaYAr5c1tfwNc0mnsp+lGHl6AnizrMvTXhORaZfc9w2soFvM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740724286; c=relaxed/simple;
-	bh=JPRSZ8i+a3rWyFTiARKx3DmJ8eTqChd52fJZMuS27wg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CQBn/py6sqFojCN0HmE5TnYz2UTc5QO+ZvgtWrfAb9BrhUcDhvMYeCUYh/a+/N2Fqr/JLCEh4ttTJumXffvcr9dnng0lKMF7B+teu+NgX08uEbj4BD00Y2hECE9yRCEU8pSk4AKAyYQ5sKSsMkd045KgCX7yNb7A9HjjT+FC+Yc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s17ML4n4; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740727637; c=relaxed/simple;
+	bh=OXaRp4idgcRdJx0qDoj8i90oCscA5SqQ9u7Mn4MPzwY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Wa95jXKYuIcwJFn7avjVI8o9Doc8MtEVdZhYtCZ01KDoA+qFC2ehDympBuhLzvcpNzC7m4fjulm+BCdwLgRaTqI7L2bhGeZeyN+86cq3tkZ8RHIrwGEtiZk68U6lTJKD4QFTSdnBPXiL6Hzcwxc6vzUk8+TP5P3925U+1R/fK7M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=UWrvOQqE; arc=none smtp.client-ip=209.85.218.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s17ML4n4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC7CEC4CED6;
-	Fri, 28 Feb 2025 06:31:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740724285;
-	bh=JPRSZ8i+a3rWyFTiARKx3DmJ8eTqChd52fJZMuS27wg=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=s17ML4n4PJT3QCtwRIJuZpdSvEQMMQeC1hsJ9F5B7AHhnhUkRzK2n0wQRgBncMm+M
-	 dZ+JZBpW9KNYdocXZczxN2ScsTdSKPhDwHMbh7t+jNhqh2Yg8cAMX1Bw93U+lge4WY
-	 S1H8VbRUwa8YYvNjqQiwwscnv8asfGyVj1LSc4/ye6I8dXLN123Y23Wcd4ZGdEqBzz
-	 1nyKa830m3whcqiSqX4o+MkoM1leyj6klkL8XiZUvC5trPTm2+hF0q8YPyjxSJT0Rt
-	 p4kW3ICEHHa8dmuoPL4Qingv0MTFJlR/1svJ65NHXkmFz0+JPM/t0YovBB4SfXTTdG
-	 ykE+OqdGgHyiA==
-Date: Thu, 27 Feb 2025 22:31:25 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@redhat.com>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	David Sterba <dsterba@suse.com>, linux-fsdevel@vger.kernel.org
-Subject: Re: [PATCH] README: add supported fs list
-Message-ID: <20250228063125.GC6225@frogsfrogsfrogs>
-References: <20250227200514.4085734-1-zlang@kernel.org>
- <20250228022045.GA6229@frogsfrogsfrogs>
- <20250228051600.b44dmfimqqbrom22@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="UWrvOQqE"
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-abb7f539c35so332257566b.1
+        for <fstests@vger.kernel.org>; Thu, 27 Feb 2025 23:27:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1740727633; x=1741332433; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XfdNaB0E7fgmIJmDaEv9xRcyfj8vJkDTlr4miGhmJ1s=;
+        b=UWrvOQqEJQOAboP8Df7TAyKhcxXrW4PFVYWt5k7HutjJFwm0kxyME1MUzLbSQnkDd3
+         XhOgjwkNV0qjw8oywFPL88Ikj+zCVW5yEiO6sUQcvvNFr8116D2E/jFP0DLysHfnec/q
+         AVCx90EHRYU3jGUVZ8CBeE8oUlqhvdWA/ruRI2MAbHVPglSTB646owrtrVcgqrHCrhB3
+         17743nHfhPs7uoyWR1G2w9rEA3uoPVaFMpiub/ZaQu/oX0NqnjmJ0CBA8tz/MXU2hFZx
+         b8kz6W1ICqicIkqycDW/V4jqUjeNi3l8CFiZanIpak9GeHYBfidm5hhVozrq0CDxgGjB
+         8TPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1740727633; x=1741332433;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=XfdNaB0E7fgmIJmDaEv9xRcyfj8vJkDTlr4miGhmJ1s=;
+        b=LGknNn/RFW4VlpIKL3PtDLH7dAcRDq50RVkBxQ/QhxZDsr1lQS0Josyrggt5lRKZ7s
+         LwTQLUUZid5e/dEEhfaOPuIIBnI44/ZD5y8s11xsom2wC4gkwqIth53faV7XMf0ojgF1
+         JF381eoZDWBdGEbRi+f3Z5jKH4txExhjUtL8NZ0pCWBC7911XmvBOBw3r9tI+Ie9ARjJ
+         92yubs8Kfu0fX0IAgPePngGFJARS5zNc+d77gc4qrdJz2A6t85tmxEb5zrLT37SCOGPd
+         5VBU3yIINrppbI9zPULnljrFq6LLRfPb3XckjmKKfdxyR6bnqQqbmZOzDGqENjH0Esj8
+         ZFaQ==
+X-Gm-Message-State: AOJu0YyTibFtMavfRADd7+7bvru9NSC/Z9mho4J7Vgl0Vh1XqTycm8vB
+	eOHZPwIRJSYrKOLg2aQpo3KmkpW3gVkNDYK3dALPS84fsobth5pIoXsdofWs23DsbEbQ3euqimY
+	Gx9wvXVxJVwmpBfut8K7F5zyE7Y4zRG+8M95o2A==
+X-Gm-Gg: ASbGncsdlBKs+XYMDlppjhJNfpfNRtPJBb/b0egPlOZpvjEdKGn+3S5oiRmuUpJqSSU
+	qgGxqMMFfPxq2KmmGpRQIg6XAuFVeVxb3Ctp+7m1e9GZzZg4mjRw8FxN9SSc6V8y9piLAvMWwsD
+	/hB2uQag==
+X-Google-Smtp-Source: AGHT+IEHZLuLqzLU6YdSbwrSc2pWAVvyIXo9LRUSqmihktMu9s8+x868QHVGvuWQwKCXqHeHI81dd93VpPypCBDhMZI=
+X-Received: by 2002:a17:906:f59d:b0:ab7:a5f2:ed22 with SMTP id
+ a640c23a62f3a-abf25fa0374mr268651566b.1.1740727633443; Thu, 27 Feb 2025
+ 23:27:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250228051600.b44dmfimqqbrom22@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250220145723.1526907-1-neelx@suse.com> <20250224111014.2276072-1-neelx@suse.com>
+ <CAPjX3FeKPR78zfUYGW+8Ytn-Yz+7i7k+1vmxjO6wjDcobqtocg@mail.gmail.com> <d618b303-4753-40cd-b02b-026437abdfa6@oracle.com>
+In-Reply-To: <d618b303-4753-40cd-b02b-026437abdfa6@oracle.com>
+From: Daniel Vacek <neelx@suse.com>
+Date: Fri, 28 Feb 2025 08:27:02 +0100
+X-Gm-Features: AQ5f1JptISSwH9o8Im_GI3JkMuHyJ2I1tTf4FzdUl7ZNwowAMjXGr77skWSlxfo
+Message-ID: <CAPjX3FcY7uc5mP8z5VMDS0tfrVP87O0q6jQkXY3OAq9stWvfCg@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs/314: fix the failure when SELinux is enabled
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, 
+	Zorro Lang <zlang@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Feb 28, 2025 at 01:16:00PM +0800, Zorro Lang wrote:
-> On Thu, Feb 27, 2025 at 06:20:45PM -0800, Darrick J. Wong wrote:
-> > On Fri, Feb 28, 2025 at 04:05:14AM +0800, Zorro Lang wrote:
-> > > To clarify the supported filesystems by fstests, add a fs list to
-> > > README file.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > David Sterba suggests to have a supported fs list in fstests:
-> > > 
-> > > https://lore.kernel.org/fstests/20250227073535.7gt7mj5gunp67axr@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com/T/#m742e4f1f6668d39c1a48450e7176a366e0a2f6f9
-> > > 
-> > > I think that's a good suggestion, so I send this patch now. But tell the truth,
-> > > it's hard to find all filesystems which are supported by fstests. Especially
-> > > some filesystems might use fstests, but never be metioned in fstests code.
-> > > So please review this patch or send another patch to tell fstests@ list, if
-> > > you know any other filesystem is suppported.
-> > > 
-> > > And if anyone has review point about the support "level" and "comment" part,
-> > > please feel free to tell me :)
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  README | 82 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  1 file changed, 82 insertions(+)
-> > > 
-> > > diff --git a/README b/README
-> > > index 024d39531..055935917 100644
-> > > --- a/README
-> > > +++ b/README
-> > > @@ -1,3 +1,85 @@
-> > > +_______________________
-> > > +SUPPORTED FS LIST
-> > > +_______________________
-> > > +
-> > > +History
-> > > +-------
-> > > +
-> > > +Firstly, xfstests is the old name of this project, due to it was originally
-> > > +developed for testing the XFS file system on the SGI's Irix operating system.
-> > > +With xfs was ported to Linux, so was xfstests, now it only supports Linux.
-> > 
-> >    When
-> > 
-> > > +
-> > > +As xfstests has some test cases are good to run on some other filesystems,
-> > 
-> >                    many test cases that can be run
-> 
-> Sure, will change these.
-> 
-> > 
-> > > +we call them "generic" (and "shared", but it has been removed) cases, you
-> > > +can find them in tests/generic/ directory. Then more and more filesystems
-> > > +started to use xfstests, and contribute patches. Today xfstests is used
-> > > +as a file system regression test suite for lots of Linux's major file systems.
-> > > +So it's not "xfs"tests only, we tend to call it "fstests" now.
-> > > +
-> > > +Supported fs
-> > > +------------
-> > > +
-> > > +Firstly, there's not hard restriction about which filesystem can use fstests.
-> > > +Any filesystem can give fstests a try.
-> > > +
-> > > +Although fstests supports many filesystems, they have different support level
-> > > +by fstests. So mark it with 4 levels as below:
-> > > +
-> > > +L1: Fstests can be run on the specified fs basically.
-> > > +L2: Rare support from the specified fs list to fix some generic test failures.
-> > > +L3: Normal support from the specified fs list, has some own cases.
-> > > +L4: Active support from the fs list, has lots of own cases.
-> > > +
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Filesystem | Level |                       Comment                           |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| AFS        |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Bcachefs   |  L1+  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Btrfs      |  L4   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Ceph       |  L2   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| CIFS       |  L2-  | https://wiki.samba.org/index.php/Xfstesting-cifs        |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Ext2/3/4   |  L3+  | N/A                                                     |
-> > 
-> > What do the plus and minus mean?
-> 
-> Oh, I didn't explain them.
-> 
-> ("+" means a slightly higher than the current level, but not reach to the next.
->  "-" is opposite, means a little bit lower than the current level.)
-> 
-> Is that good to you?
+On Fri, 28 Feb 2025 at 07:10, Anand Jain <anand.jain@oracle.com> wrote:
+>
+> On 24/2/25 19:35, Daniel Vacek wrote:
+> > On Mon, 24 Feb 2025 at 12:10, Daniel Vacek <neelx@suse.com> wrote:
+> >>
+> >> When SELinux is enabled this test fails unable to receive a file with
+> >> security label attribute:
+> >>
+> >>      --- tests/btrfs/314.out
+> >>      +++ results//btrfs/314.out.bad
+> >>      @@ -17,5 +17,6 @@
+> >>       At subvol TEST_DIR/314/tempfsid_mnt/snap1
+> >>       Receive SCRATCH_MNT
+> >>       At subvol snap1
+> >>      +ERROR: lsetxattr foo security.selinux=3Dunconfined_u:object_r:un=
+labeled_t:s0 failed: Operation not supported
+> >>       Send:      42d69d1a6d333a7ebdf64792a555e392  TEST_DIR/314/tempfs=
+id_mnt/foo
+> >>      -Recv:      42d69d1a6d333a7ebdf64792a555e392  SCRATCH_MNT/snap1/f=
+oo
+> >>      +Recv:      d41d8cd98f00b204e9800998ecf8427e  SCRATCH_MNT/snap1/f=
+oo
+> >>      ...
+> >>
+>
+> It=E2=80=99s actually good that the Btrfs receive failed because the send=
+ had
+> an unlabeled security context=E2=80=94kind of a validation, even though i=
+t
+> wasn=E2=80=99t intentional. The fix here fits the objective of the test c=
+ase.
 
-<shrug> Insofar as those ratings are ongoing and fluid anyway, ok. :)
+It's the other way around. Send (missing the mount option) had the
+label (as expected) which was refused by the receive side due to the
+explicit context mount option. That's how SELinux is designed.
 
-> > 
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Exfat      |  L1+  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| f2fs       |  L3-  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| FUSE       |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| GFS2       |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Glusterfs  |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| JFS        |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| NFS        |  L2+  | https://linux-nfs.org/wiki/index.php/Xfstests           |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| ocfs2      |  L2-  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| overlay    |  L3   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| pvfs2      |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Reiser4    |  L1   | Reiserfs has been removed, only left reiser4            |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| tmpfs      |  L3-  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| ubifs      |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| udf        |  L1+  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| Virtiofs   |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| XFS        |  L4+  | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > > +| 9p         |  L1   | N/A                                                     |
-> > > ++------------+-------+---------------------------------------------------------+
-> > 
-> > This roughly tracks with my observations over the years.
-> 
-> Some filesystems I never tried, likes "9p" and "ubifs" etc, I just found these names
-> from common/rc.
-
-Wasn't sandeen trying to make fstests work with fat at some point?
-Well, it's not hard to add more to the table.
-
-Looks good to me,
-Acked-by: "Darrick J. Wong" <djwong@kernel.org>
-
---D
-
-> If any fs list has any supplement to the fs name or the "comment", or would like to
-> modify the "level", please feel free to tell me.
-> 
-> Thanks,
-> Zorro
-> 
-> 
-> 
-> > 
-> > --D
-> > 
-> > > +
-> > >  _______________________
-> > >  BUILDING THE FSQA SUITE
-> > >  _______________________
-> > > -- 
-> > > 2.47.1
-> > > 
-> > > 
-> > 
-> 
-> 
+> Reviewed-by: Anand Jain <anand.jain@oracle.com>
+>
+> >> Setting the security label file attribute fails due to the default mou=
+nt
+> >> option implied by fstests:
+> >>
+> >> MOUNT_OPTIONS -- -o context=3Dsystem_u:object_r:root_t:s0 /dev/sdb /mn=
+t/scratch
+> >>
+> >> See commit 3839d299 ("xfstests: mount xfs with a context when selinux =
+is on")
+> >>
+> >> fstests by default mount test and scratch devices with forced SELinux
+> >> context to get rid of the additional file attributes when SELinux is
+> >> enabled. When a test mounts additional devices from the pool, it may n=
+eed
+> >> to honor this option to keep on par. Otherwise failures may be expecte=
+d.
+> >>
+> >> Moreover this test is perfectly fine labeling the files so let's just
+> >> disable the forced context for this one.
+> >
+> > And of course I forgot to remove this sentence. Please, remove it if
+> > you decide to merge this fix.
+>
+> Fixed the changelog and pushed it (for-next).
+>
+> Thanks, Anand
+>
+>
+>
+> >
+> >> Signed-off-by: Daniel Vacek <neelx@suse.com>
+> >> ---
+> >>   tests/btrfs/314 | 6 +++++-
+> >>   1 file changed, 5 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git a/tests/btrfs/314 b/tests/btrfs/314
+> >> index 76dccc41..29111ece 100755
+> >> --- a/tests/btrfs/314
+> >> +++ b/tests/btrfs/314
+> >> @@ -38,7 +38,7 @@ send_receive_tempfsid()
+> >>          # Use first 2 devices from the SCRATCH_DEV_POOL
+> >>          mkfs_clone ${SCRATCH_DEV} ${SCRATCH_DEV_NAME[1]}
+> >>          _scratch_mount
+> >> -       _mount ${SCRATCH_DEV_NAME[1]} ${tempfsid_mnt}
+> >> +       _mount $(_common_dev_mount_options) ${SCRATCH_DEV_NAME[1]} ${t=
+empfsid_mnt}
+> >>
+> >>          $XFS_IO_PROG -fc 'pwrite -S 0x61 0 9000' ${src}/foo | _filter=
+_xfs_io
+> >>          _btrfs subvolume snapshot -r ${src} ${src}/snap1
+> >> --
+> >> 2.48.1
+> >>
+>
