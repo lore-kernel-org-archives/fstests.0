@@ -1,566 +1,154 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A21C1E5732
-	for <fstests@vger.kernel.org>; Sat,  1 Mar 2025 17:23:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79EF71A841F;
+	Sat,  1 Mar 2025 17:46:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740849801; cv=none; b=unqMR33NporNWWQkXjkV1fi56yKF8zQnz/UAZgB7Ejdg24f9ZLfoBAwQY0XQhZvg1Alu+5FYlCm2DMwZrnvDjJCV9thmzoUTS4JwBo8B5SKtJ+Dm2hPn7S5Q/+m7iHZeZEDVKQufnB6uEXNKQW+y6jbFueX5WH4uERs/CkG5OBk=
+	t=1740851178; cv=none; b=NbErHgYWiCGmIZrxwZ4gNLXNchCbF/zrew1bJ+ZILOAXub1MjFe85iWnHLG/JgcbbBSuULJoIUcJ+mpBYwbUq4PoFhx3QFJxVzvGARuZfxZctF+TIhV0PiEgqFZ4s36P1y6zS9zdJ9Id0iLlNfJX4dAROJop3e0Woaam9R+YXBo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740849801; c=relaxed/simple;
-	bh=oSRsZCJkk9tnsSM9Ov3lDkqio1So2jmzKacf6+Whl4A=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OSbW9SzADIoCRmUSd4XqobN0CD4QAb9ZQTT1JPenXFePvKe4h0X+Xo0EA65kF8hMWxtT4TQ2M1dD6c96xsD13l4GWbC8OgbX65Di4M8j5RcbSLXDYjwrlZcVYU3JOuLu4/aSEZDfEno1fInxeoc3Osr/ejUz5ZcXTakyelI8Y5s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=XSw3R9ef; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	s=arc-20240116; t=1740851178; c=relaxed/simple;
+	bh=Gtgm+HfkQpBAKcEGPTOlQARCrxJQv1VFX2vnqly2Bm8=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References:
+	 MIME-version:Content-type; b=hk/BsK48srPuMbg73jRMx2ezjB1Zb+JVU1qxKACz78j7Lt7rkPaS6rCpHWmgoqhUr/hv2ruBVYTzb1iFvUDoZGN1nZXRdC77GDaXo7nL0lpOlN0RHb+Ke96GbVbmhK1eP3FWpktxD8LGo9k0rd1Zo5HSe7dnRZuNdl9NDG2PhOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IcKGZAvh; arc=none smtp.client-ip=209.85.214.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="XSw3R9ef"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1740849798;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=k0BxxevkSqyBUVcMSjv7ETzJBeC8P5NDCFTvW7S7R6o=;
-	b=XSw3R9efdZ8BP3AbaTv2SBMd8FGXnONFMSAPEhlR7eUONQ1uFMhsJRtzPR5kio6GCORZuJ
-	0XylwzFwRIwJUmEdiymu8YRdeFJPuLLFoZ4uCaEXEmRbAigdF/7lAV49oLnlC22aO0dSiV
-	Yc2gP7R0m0YQx5N5j/JtGeO1UynXZPo=
-Received: from mail-pl1-f200.google.com (mail-pl1-f200.google.com
- [209.85.214.200]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-597-Wr6I9XptMKCYWq89zD3BmQ-1; Sat, 01 Mar 2025 12:22:56 -0500
-X-MC-Unique: Wr6I9XptMKCYWq89zD3BmQ-1
-X-Mimecast-MFC-AGG-ID: Wr6I9XptMKCYWq89zD3BmQ_1740849775
-Received: by mail-pl1-f200.google.com with SMTP id d9443c01a7336-22350e4b7baso56258805ad.3
-        for <fstests@vger.kernel.org>; Sat, 01 Mar 2025 09:22:56 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IcKGZAvh"
+Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2238e884f72so5605805ad.3;
+        Sat, 01 Mar 2025 09:46:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1740851176; x=1741455976; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:message-id:date
+         :in-reply-to:subject:cc:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=S5EMC4QTPsTfx7rf08ONLES150yxmA4ww7kM1gnGqK0=;
+        b=IcKGZAvhn6LXqO3NJcSxthOfGSjpK6QdKEeb/QpX1iw3nIQ5T+RGXYExvfdLFmYuqE
+         K8+09fk8P1Qvya+KeGIN1rkPjm0pSou/yT6LNvysXqeg35OHywppTNLE3DSIey85tLV5
+         4U2LcyoeVXTwydm2XXo17mZNyTQVqbmVaRITLy7cOx/exijnKkOvfCThV8PJXsOKzkrk
+         Mtr989ACDtgGdWlrO8onat/ziX8+znECzlVIk6SSqIq+BRqRRcaCK0QPw20LoA660Dwi
+         5ZYj/MANc9dEQXnkYk4cnmdZq6vho7NDu8PN545QC/HM4JaibuxzVw7+bcUzbJh+bPWG
+         uYtw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740849775; x=1741454575;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=k0BxxevkSqyBUVcMSjv7ETzJBeC8P5NDCFTvW7S7R6o=;
-        b=cvBNzcp/+UH0v/qlmfyL+6S+F4WcrSeaJi8wrShfu/PjjcRYEBgJmR4RntRCV2VwFc
-         ibZlzcmhD48taNpqKTsIr4QWsKFC+nMvFMx+Oqy70dXiSKAB/8dPGWDO0Rz0ZW3JDEmy
-         kr2bivL4iaqRj+/jT46+5lczMIqSUXi+nSFGzJqkep/gwujjayTg7lQ3NVEg4X1paiR8
-         5sE4D9eAhCp/befXC7eGMj7ylfVPXAaRlVmy46swilqg+MQzQnUjfdGtQ9L7rFZ5+g67
-         kjVNtuz3TSABZqCP2bbzQNgnC3uiELmdi3Lp2JDurHRJvGXLS9LS5glC/TiwZmM0PEm1
-         u9iA==
-X-Forwarded-Encrypted: i=1; AJvYcCV6Vs+mDsUOEsgSd4/bxwBwIndqPvcu0PD4GYk/JAL9MqNKcTaGR57LbnHwqqlYqmOyy/VTLngi@vger.kernel.org
-X-Gm-Message-State: AOJu0YygVEmjCGBNZMzI2F8oQDXV+p40iFBUcv/RQVT+SIV/6QZ3k4kf
-	V5pho/j4AATQbz4wNlRClwXrlDhUwRq/NuZS//ObJkFzSh87q873CjoVsJ0JeI4Oez+oTqnveT3
-	G9kJEvt/4SBPckEtcYIqjrRcFaowJbCULlhakn83HhuYpDDwTwuXykyk=
-X-Gm-Gg: ASbGnctqNQ2CyStxRGs6Bih4CkX2p+tx/QaApoLzyMVGr3sDZ6a6YKS2UBLMENuhtF5
-	HAxMp6coOAsmL9XbiY9PYop8lkNFsiN3t5WhB48XVOtFL469fT+wAptSqi9H+BTm9m2NVH1MpbX
-	ginp0kh8gxvjpda7/UrKRJRz7fYd0pufYX3L2M89IPCElVrt26rVCOZgWwhP+5PpqQMn4CYWScc
-	1zh0Ikxvwtdn/32w+rpASbpz0jFNdYCLjEWzuNV5J0HiJCL7kTO0K+f6A03uDi3LgOHAKluCGSr
-	i6mNYx2ohgec8FNgLJW+1MKW6XRClRdvZAejue1XnvyzDIGQceLWAWF2
-X-Received: by 2002:a17:902:ecd0:b0:21f:b6f:3f4b with SMTP id d9443c01a7336-22368f6d598mr111016955ad.7.1740849775209;
-        Sat, 01 Mar 2025 09:22:55 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IEpPi0Hh5XT5+FyTdUZ7yShilRqZfe2C4aueSyo8UBUbOPQmI3cVgdd8f/BJL4K2gEOvClDXw==
-X-Received: by 2002:a17:902:ecd0:b0:21f:b6f:3f4b with SMTP id d9443c01a7336-22368f6d598mr111016695ad.7.1740849774649;
-        Sat, 01 Mar 2025 09:22:54 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2235020c2c9sm50881575ad.105.2025.03.01.09.22.52
+        d=1e100.net; s=20230601; t=1740851176; x=1741455976;
+        h=content-transfer-encoding:mime-version:references:message-id:date
+         :in-reply-to:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=S5EMC4QTPsTfx7rf08ONLES150yxmA4ww7kM1gnGqK0=;
+        b=HcaM+NSHX2SmDdqz398UhXCNVztEQAo+FTFYR4YqLDwzQXeX2tEYHWPKqve52b8ysL
+         ncINdcapJJ5mfmavqdbVcTBQPLWaORkkHWvW+W4NSPN0bNZHv6tH4UOzMcay15Ha5Q2M
+         qCvfiJP/27TGdr0EG3exmTKv1EkqAs26TzHe9pJR0bj4YUjr0B9ttZknzL2qgWuEDAkZ
+         kYiQG5D502m5V4tkQsKUdPWxbUtMMRoIaqGRw/KWJe+aTl659jswDiO9ElhmJjYpkPpF
+         ov/j5FcFUiFxUO/+Zm2Pzlu+tzu3Qq8Tg8efnzFqzqt1MsXp5+dEtlsx6S8+p/FBRZr7
+         KJ0Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUyjm/DlEL3R6AhR7eVS0nCCU+LXc+Qbz9rE/8ZnIXCo25AWveBxHgicNQkwn+Sf1c5/tijOz8jZDgP@vger.kernel.org, AJvYcCXWrlkOE1pOMWE6ycWwlSaMLC4u2SrqJwNFfv8pRWm0CsPpo9YhRFw6CiLofkPPobWyfuwr0ZLl@vger.kernel.org
+X-Gm-Message-State: AOJu0YwfOoD7//y7D8VMMMjzfV3oO3Ewv8xzrzddGp1kHzDO/TMP8pfF
+	SkClx9PI+MZRGFEh6wBlcrfG3BBRWcVTG23KJncZ57QytWkQDSV7
+X-Gm-Gg: ASbGncvcMlT38S9YrFK9/Ue1ipYxC+GQAz4TeWKIrGWnxFFfprr5Ji7l7tyDPDBuBwo
+	k4l1/8gtWohe0PTXrEc9ZmLbCz1gt5b7KETNWbdIqV/h2ALONsuzoV/XtBGNfQ/Z6fYEmCu4RYw
+	+t1L9AifLpiy5QSHS/ioAz2i9Ngnl2/qg+68jM1K/YSqX8pqo99GXfTNmrDFw3d16430H/bi6JU
+	VExcGwUIFSqP/C4x+zDMLfjszNRDDGot8Yzutyu5c2O9gGFR6bOqNWlEf7++Vc0EX/pGrb/qod5
+	9Tg/tycP0E0K/buh8X+nICFmKGp8Qdn01q0n8Q==
+X-Google-Smtp-Source: AGHT+IGLYa1RZ5t0cuEAVsiCUoSiG35w5JXi8zPh4yvcaqsvxMkzNHS2n7S/luxzuvx7NMCDstghxw==
+X-Received: by 2002:a17:902:fc8d:b0:223:44dc:3f36 with SMTP id d9443c01a7336-2236925eef4mr125123875ad.43.1740851176520;
+        Sat, 01 Mar 2025 09:46:16 -0800 (PST)
+Received: from dw-tp ([49.205.218.89])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22355773b58sm47985605ad.234.2025.03.01.09.46.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 01 Mar 2025 09:22:54 -0800 (PST)
-Date: Sun, 2 Mar 2025 01:22:50 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Filipe Manana <fdmanana@kernel.org>,
-	"Darrick J. Wong" <djwong@kernel.org>
-Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org,
-	linux-btrfs <linux-btrfs@vger.kernel.org>
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
-Message-ID: <20250301172250.g3whd6rsr5pantdc@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <67bb1448.500a0220.af3ac.9928SMTPIN_ADDED_BROKEN@mx.google.com>
- <CAL3q7H7ODnoeo3ac1pahD9NdujiGA=zoG79arAgrJVDUu9j7hg@mail.gmail.com>
+        Sat, 01 Mar 2025 09:46:15 -0800 (PST)
+From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
+To: Anand Jain <anand.jain@oracle.com>, "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
+Subject: Re: [RFC 4/5] check,common/config: Add support for central fsconfig
+In-Reply-To: <4c951390-400a-48ce-824c-f075a37496a9@oracle.com>
+Date: Sat, 01 Mar 2025 23:00:17 +0530
+Message-ID: <87mse4hd5i.fsf@gmail.com>
+References: <cover.1736496620.git.nirjhar.roy.lists@gmail.com> <9a6764237b900f40e563d8dee2853f1430245b74.1736496620.git.nirjhar.roy.lists@gmail.com> <4c951390-400a-48ce-824c-f075a37496a9@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+MIME-version: 1.0
+Content-type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAL3q7H7ODnoeo3ac1pahD9NdujiGA=zoG79arAgrJVDUu9j7hg@mail.gmail.com>
 
-On Thu, Feb 27, 2025 at 01:32:42PM +0000, Filipe Manana wrote:
-> On Sun, Feb 23, 2025 at 12:27 PM Zorro Lang <zlang@kernel.org> wrote:
-> >
-> > Hi all,
-> >
-> > The for-next branch of the xfstests repository at:
-> >
-> >         git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> >
-> > has just been updated and tagged as v2025.02.23 release.
-> >
-> > Release Notes:
-> > 1) There's not new test cases in this release, this's a release for bug fixes
-> >    particularly.
-> > 2) Reiserfs part is removed from fstests.
-> > 3) ltp/growfiles is removed too, I think no one needs it.
-> >
-> > I can't list all updates at here, more details please refer to below.
-> > Thanks for all these contributions!
-> >
-> > Thanks,
-> > Zorro
-> >
-> > The new head of the for-next branch is commit:
-> >
-> > 5b56a2d88819 fstests: remove reiserfs support
-> >
-> > New commits:
-> >
-> > Christoph Hellwig (1):
-> >       [04d0cf3f8909] generic/370: don't exclude XFS
-> >
-> > Darrick J. Wong (35):
-> >       [cc379f50f3bd] generic/476: fix fsstress process management
-> >       [ab459c67c5e0] metadump: make non-local function variables more obvious
-> >       [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
-> >       [e68a92376165] generic/019: don't fail if fio crashes while shutting down
-> >       [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising fsx
-> >       [543795bf67f2] common/rc: revert recursive unmount in _clear_mount_stack
-> >       [777732b27e62] common/dump: don't replace pids arbitrarily
-> >       [81f28acda2f2] common/populate: correct the parent pointer name creation formulae
-> >       [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and inclusion
-> >       [241c1c787e5b] generic/759,760: skip test if we can't set up a hugepage for IO
-> >       [77548e6066fd] common/rc: create a wrapper for the su command
-> >       [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGINT
-> >       [c71349150d34] common/rc: hoist pkill to a helper function
-> >       [91d2880aa029] tools: add a Makefile
-> >       [88d60f434bd9] common: fix pkill by running test program in a separate session
-> >       [247ab01fa227] check: run tests in a private pid/mount namespace
-> 
-> By the way, this commits breaks several btrfs test cases in the
-> read_repair group:
-> 
-> $ ./check -g read_repair
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1
-> SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/140 1s ... [failed, exit status 1]- output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad)
->     --- tests/btrfs/140.out 2024-06-04 12:18:50.080308741 +0100
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad
-> 2025-02-27 13:27:56.050933812 +0000
->     @@ -1,3 +1,5 @@
->      QA output created by 140
->      wrote 131072/131072 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     +repair failed, csums don't match
->     +(see /home/fdmanana/git/hub/xfstests/results//btrfs/140.full for details)
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/140.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/140.out.bad'  to see
-> the entire diff)
-> btrfs/141 1s ... [failed, exit status 1]- output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad)
->     --- tests/btrfs/141.out 2024-06-04 12:18:50.084308982 +0100
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad
-> 2025-02-27 13:27:57.233352695 +0000
->     @@ -1,3 +1,5 @@
->      QA output created by 141
->      wrote 131072/131072 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     +repair failed, csums don't match
->     +(see /home/fdmanana/git/hub/xfstests/results//btrfs/141.full for details)
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/141.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/141.out.bad'  to see
-> the entire diff)
+Anand Jain <anand.jain@oracle.com> writes:
 
-Sorry I didn't hit this failure on my last release test:
-  ...
-  btrfs/140 1s ...  1s
-  btrfs/141 1s ...  1s
-  ...
+> On 10/1/25 17:10, Nirjhar Roy (IBM) wrote:
+>> This adds support to pick and use any existing FS config from
+>> configs/<fstype>/<config>. e.g.
+>> 
+>> configs/xfs/1k
+>> configs/xfs/4k
+>> configs/ext4/4k
+>> configs/ext4/64k
+>> 
+>> This should help us maintain and test different fs test
+>> configurations from a central place. We also hope that
+>> this will be useful for both developers and testers to
+>> look into what is being actively maintained and tested
+>> by FS Maintainers.
+>> 
+>> When we will have fsconfigs set, then will be another subdirectory created
+>> in results/<section>. For example let's look at the following:
+>> 
+>> The directory tree structure on running
+>> sudo ./check -q 2 -R xunit-quiet -c xfs/4k,configs/xfs/1k selftest/001 selftest/007
+>> 
+>
+>
+> The -c option check makes sense to me. Is it possible to get this
+> feature implemented first while the -q option is still under discussion?
 
-But by running them more times, I reproduce it manually now. And I noticed
-that it won't be failed if disable HAVE_PRIVATENS. So your and David's bugs
-are all from the `./tools/run_privatens "./$seq"` part.
+Hi Anand, 
 
-I think below failures are same. You can disable HAVE_PRIVATENS and test
-again. If everything goes well, or still something wrong, please tell me.
+Thanks for trying the patches. The design of -c option is still under
+discussion [1]. But it will be helpful if you could help us understand
+your reasons for finding -c option useful :) 
 
-Hi Darrick, I think we're a bit hurry to promote the PRIVATENS way. I don't
-want to give you too much pressure to face the issue from "run_privatens".
-So how about just don't let it to be the "first-choice" to run ./$seq for now,
-as it's not stable :-D
+[1]: https://lore.kernel.org/linux-fsdevel/Z55RXUKB5O5l8QjM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com/
 
-(1)     if [ -n "${HAVE_PRIVATENS}" ]; then
-		./tools/run_privatens "./$seq"
-		...
-(2)     elif [ -n "${HAVE_SYSTEMD_SCOPES}" ]; then
-		...
-                systemd-run --quiet --unit "${unit}" --scope \
-                        ./tools/run_setsid "./$seq" &
-		...
-(3)     else
-		./tools/run_setsid "./$seq" &
-		...
-        fi
+>
+> That said, I have a suggestion for the -c option—
+>   Global config variables should be overridden by file system-specific 
+> config files.
+>
+> For example, if configs/localhost.config contains:
+>
+> MKFS_OPTIONS="--sectorsize 64K"
+>
+> but configs/<fstype>/some_config sets:
+>
+> MKFS_OPTIONS=""
+>
+> then the value from configs/<fstype>/some_config should take priority.
+>
+> I ran some tests with btrfs, and I don’t see this behavior happening yet.
 
-We have (2) and (3) for years (although they're changed a bit, but still works
-well). Let's keep old ways at first, give the new way (1) some time to test and
-improve. When other filesystems think it's good to use (1), then turn to it at
-that time. What do you think?
+I think that was intentional. I guess the reasoning was, we don't want to
+break use cases for folks who still wanted to use local.config file
+option.
 
-Thanks,
-Zorro
+However, in the new proposed design [2] we are thinking of having 1
+large config per filesystem. e.g. configs/btrfs/config.btrfs which will
+define all of the relevant sections e.g. btrfs_4k, btrfs_64k, ...  Then
+on invokking "make", it will generate a single large fs config file i.e.
+configs/.all-sections-configs which will club all filesystems section
+configs together.
 
-> btrfs/142 1s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/142.out.bad)
->     --- tests/btrfs/142.out 2020-06-10 19:29:03.818519162 +0100
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/142.out.bad
-> 2025-02-27 13:27:59.133249259 +0000
->     @@ -1,37 +1,37 @@
->      QA output created by 142
->      wrote 131072/131072 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/142.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/142.out.bad'  to see
-> the entire diff)
-> btrfs/143 1s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/143.out.bad)
->     --- tests/btrfs/143.out 2020-06-10 19:29:03.818519162 +0100
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/143.out.bad
-> 2025-02-27 13:28:00.989680223 +0000
->     @@ -1,37 +1,37 @@
->      QA output created by 143
->      wrote 131072/131072 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/143.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/143.out.bad'  to see
-> the entire diff)
-> btrfs/150 1s ...  1s
-> btrfs/157 2s ...  1s
-> btrfs/215 1s ...  1s
-> btrfs/265 2s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad)
->     --- tests/btrfs/265.out 2023-03-02 21:47:53.876609426 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad
-> 2025-02-27 13:28:05.589305927 +0000
->     @@ -5,71 +5,71 @@
->      step 2......corrupt file extent
->      step 3......repair the bad copy
->      step 4......check if the repair worked
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/265.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad'  to see
-> the entire diff)
-> btrfs/266 3s ...  2s
-> btrfs/267 2s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/267.out.bad)
->     --- tests/btrfs/267.out 2023-03-02 21:47:53.876609426 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/267.out.bad
-> 2025-02-27 13:28:09.161394788 +0000
->     @@ -73,37 +73,37 @@
->      XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->      read 512/512 bytes
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/267.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/267.out.bad'  to see
-> the entire diff)
-> btrfs/268 3s ...  2s
-> btrfs/269 2s ...  1s
-> btrfs/270 1s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/270.out.bad)
->     --- tests/btrfs/270.out 2023-03-02 21:47:53.876609426 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/270.out.bad
-> 2025-02-27 13:28:14.090153054 +0000
->     @@ -5,3 +5,4099 @@
->      step 2......corrupt file extent
->      step 3......repair the bad copy
->      step 4......check if the repair worked
->     +   1 170 x    273 M-;
->     +   2 136 ^    273 M-;
->     +   3 354 M-l  273 M-;
->     +   4 320 M-P  273 M-;
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/270.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/270.out.bad'  to see
-> the entire diff)
-> Ran: btrfs/140 btrfs/141 btrfs/142 btrfs/143 btrfs/150 btrfs/157
-> btrfs/215 btrfs/265 btrfs/266 btrfs/267 btrfs/268 btrfs/269 btrfs/270
-> Failures: btrfs/140 btrfs/141 btrfs/142 btrfs/143 btrfs/265 btrfs/267 btrfs/270
-> Failed 7 of 13 tests
-> 
-> The failures seems to be timing sensitive, as running a test
-> individually doesn't always fails, for example:
-> 
-> $ root 13:30:43 /home/fdmanana/git/hub/xfstests > ./check btrfs/265
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1
-> SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/265 1s ...  2s
-> Ran: btrfs/265
-> Passed all 1 tests
-> 
-> root 13:30:46 /home/fdmanana/git/hub/xfstests > ./check btrfs/265
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1
-> SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/265 2s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad)
->     --- tests/btrfs/265.out 2023-03-02 21:47:53.876609426 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad
-> 2025-02-27 13:30:49.386584060 +0000
->     @@ -5,71 +5,71 @@
->      step 2......corrupt file extent
->      step 3......repair the bad copy
->      step 4......check if the repair worked
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/265.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad'  to see
-> the entire diff)
-> Ran: btrfs/265
-> Failures: btrfs/265
-> Failed 1 of 1 tests
-> 
-> root 13:30:49 /home/fdmanana/git/hub/xfstests > ./check btrfs/265
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1
-> SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/265 2s ...  1s
-> Ran: btrfs/265
-> Passed all 1 tests
-> 
-> root 13:31:02 /home/fdmanana/git/hub/xfstests > ./check btrfs/265
-> FSTYP         -- btrfs
-> PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1
-> SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
-> MKFS_OPTIONS  -- /dev/sdc
-> MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-> 
-> btrfs/265 1s ... - output mismatch (see
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad)
->     --- tests/btrfs/265.out 2023-03-02 21:47:53.876609426 +0000
->     +++ /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad
-> 2025-02-27 13:31:05.522911416 +0000
->     @@ -5,38 +5,38 @@
->      step 2......corrupt file extent
->      step 3......repair the bad copy
->      step 4......check if the repair worked
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     -XXXXXXXX:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-> ................
->     ...
->     (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/265.out
-> /home/fdmanana/git/hub/xfstests/results//btrfs/265.out.bad'  to see
-> the entire diff)
-> Ran: btrfs/265
-> Failures: btrfs/265
-> Failed 1 of 1 tests
-> 
-> root 13:31:05 /home/fdmanana/git/hub/xfstests >
-> 
-> Bisection using 100 iterations reliably points to that commit.
-> 
-> Any ideas Darrick?
-> 
-> Thanks.
-> 
-> 
-> 
-> >       [949bdf8eae31] check: deprecate using process sessions to isolate test instances
-> >       [af0f1090e240] common/rc: don't copy fsstress to $TEST_DIR
-> >       [f43da58ef936] unmount: resume logging of stdout and stderr for filtering
-> >       [5dc27fd20f80] mkfs: don't hardcode log size
-> >       [dba402b7e3ae] common/rc: return mount_ret in _try_scratch_mount
-> >       [9505d04b8073] preamble: fix missing _kill_fsstress
-> >       [4d9aeeb79f9c] generic/650: revert SOAK DURATION changes
-> >       [1bb15a27573e] generic/032: fix pinned mount failure
-> >       [b816737426bf] fuzzy: stop __stress_scrub_fsx_loop if fsx fails
-> >       [040e74c89192] fuzzy: don't use readarray for xfsfind output
-> >       [0dfe1fac98d2] fuzzy: always stop the scrub fsstress loop on error
-> >       [336d73c96a96] fuzzy: port fsx and fsstress loop to use --duration
-> >       [96d29207c126] fix _require_scratch_duperemove ordering
-> >       [a8268531ca8b] fsstress: fix a memory leak
-> >       [e8e29e028faa] fsx: fix leaked log file pointer
-> >       [4a9e82863917] misc: don't put nr_cpus into the fsstress -n argument
-> >       [c475ff6ff6d7] common/config: add $here to FSSTRESS_PROG
-> >       [1c67e8b191fe] config: add FSX_PROG variable
-> >       [a553e7eba1cf] build: initialize stack variables to zero by default
-> >
-> > David Sterba (2):
-> >       [9049250b4042] fstests: remove ltp/growfiles
-> >       [5b56a2d88819] fstests: remove reiserfs support
-> >
-> > Filipe Manana (2):
-> >       [7122c0315a08] btrfs/254: don't leave mount on test fs in case of failure/interruption
-> >       [535b72a63a28] btrfs/254: fix test failure in case scratch devices are larger than 50G
-> >
-> > Jeff Layton (1):
-> >       [bd6e01c81e21] generic/126: run it inside its own subdirectory
-> >
-> >
-> > Code Diffstat:
-> >
-> >  .gitignore            |    1 -
-> >  Makefile              |    2 +-
-> >  check                 |   91 +-
-> >  common/config         |   12 +-
-> >  common/dump           |    1 -
-> >  common/fuzzy          |  104 +-
-> >  common/metadump       |   42 +-
-> >  common/populate       |   13 +-
-> >  common/preamble       |    2 +-
-> >  common/quota          |    6 +-
-> >  common/rc             |  146 ++-
-> >  common/reflink        |    2 +-
-> >  configure.ac          |    1 +
-> >  include/builddefs.in  |    3 +-
-> >  lib/tlibio.c          |    2 +-
-> >  ltp/Makefile          |    2 +-
-> >  ltp/fsstress.c        |    1 +
-> >  ltp/fsx.c             |    8 +-
-> >  ltp/growfiles.c       | 2607 -------------------------------------------------
-> >  m4/package_libcdev.m4 |   14 +
-> >  src/nsexec.c          |   18 +-
-> >  src/xfsfind.c         |   14 +-
-> >  tests/btrfs/254       |    8 +-
-> >  tests/generic/019     |    2 +-
-> >  tests/generic/032     |    9 +
-> >  tests/generic/050     |    2 +-
-> >  tests/generic/075     |    2 +-
-> >  tests/generic/085     |    2 +-
-> >  tests/generic/093     |    2 +-
-> >  tests/generic/112     |    2 +-
-> >  tests/generic/125     |    2 +-
-> >  tests/generic/126     |   17 +-
-> >  tests/generic/127     |   16 +-
-> >  tests/generic/128     |    2 +-
-> >  tests/generic/193     |   36 +-
-> >  tests/generic/230     |   14 +-
-> >  tests/generic/231     |    4 +-
-> >  tests/generic/233     |    2 +-
-> >  tests/generic/270     |   12 +-
-> >  tests/generic/310     |    6 +-
-> >  tests/generic/314     |    2 +-
-> >  tests/generic/327     |    2 +-
-> >  tests/generic/328     |    4 +-
-> >  tests/generic/355     |    2 +-
-> >  tests/generic/361     |    4 +-
-> >  tests/generic/370     |   10 +-
-> >  tests/generic/453     |    6 +-
-> >  tests/generic/455     |    2 +-
-> >  tests/generic/456     |    2 +-
-> >  tests/generic/457     |    2 +-
-> >  tests/generic/469     |    2 +-
-> >  tests/generic/476     |    4 +-
-> >  tests/generic/499     |    2 +-
-> >  tests/generic/504     |   15 +-
-> >  tests/generic/511     |    2 +-
-> >  tests/generic/514     |    2 +-
-> >  tests/generic/530     |    6 +-
-> >  tests/generic/531     |    6 +-
-> >  tests/generic/561     |    2 +-
-> >  tests/generic/573     |    2 +-
-> >  tests/generic/590     |    2 +-
-> >  tests/generic/600     |    2 +-
-> >  tests/generic/601     |    2 +-
-> >  tests/generic/603     |   10 +-
-> >  tests/generic/642     |    2 +-
-> >  tests/generic/650     |    6 +-
-> >  tests/generic/673     |    2 +-
-> >  tests/generic/674     |    2 +-
-> >  tests/generic/675     |    2 +-
-> >  tests/generic/680     |    2 +-
-> >  tests/generic/681     |    2 +-
-> >  tests/generic/682     |    2 +-
-> >  tests/generic/683     |    2 +-
-> >  tests/generic/684     |    2 +-
-> >  tests/generic/685     |    2 +-
-> >  tests/generic/686     |    2 +-
-> >  tests/generic/687     |    2 +-
-> >  tests/generic/688     |    2 +-
-> >  tests/generic/691     |    8 +-
-> >  tests/generic/721     |   10 +-
-> >  tests/generic/726     |    2 +-
-> >  tests/generic/727     |    2 +-
-> >  tests/generic/740     |    2 +-
-> >  tests/generic/746     |    2 +-
-> >  tests/generic/750     |    2 +-
-> >  tests/generic/759     |    7 +-
-> >  tests/generic/760     |    7 +-
-> >  tests/xfs/149         |    2 +-
-> >  tests/xfs/501         |    2 +-
-> >  tests/xfs/502         |    2 +-
-> >  tests/xfs/530         |    2 +-
-> >  tests/xfs/720         |    2 +-
-> >  tests/xfs/795         |    2 +-
-> >  tests/xfs/803         |    2 +-
-> >  tools/Makefile        |   21 +
-> >  tools/run_privatens   |   28 +
-> >  tools/run_setsid      |   22 +
-> >  97 files changed, 596 insertions(+), 2890 deletions(-)
-> > --
-> > Zorro Lang
-> > zlang@kernel.org
-> 
+Now when someone invokes check script with different -s options, it will
+first look into local.config file, if local.config not found, then it
+will look into configs/.all-sections-configs to get the relevant section
+defines.
 
+This hopefully should address all the other concerns which were raised
+on the current central fs config design.
+
+[2]: https://lore.kernel.org/linux-fsdevel/87plj0hp7e.fsf@gmail.com/
+
+-ritesh
+
+>
+> Thanks, Anand
