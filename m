@@ -1,247 +1,339 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A27261DEFF5
-	for <fstests@vger.kernel.org>; Sun,  2 Mar 2025 13:14:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E3B01EB3D;
+	Sun,  2 Mar 2025 13:15:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740921262; cv=none; b=l0o4e1CZA6tlATk8DeG8y+gUGFNerwLWdh6JySrkK9q1F05kSslMWy8syC8h6MTzvkmgB4Yx9Q9i1+4/B3acEyM89Uh0B5gzTJ4ym4RXnN7F4Z7veZU0hVjuvIeZJ7dK6bX7ggIzDnwZ64ustUAiIZB8UtzBJ1cZXDk2MSL1x+w=
+	t=1740921349; cv=none; b=G/9aITFdF4WX+c+btmNkJX+HVPT1d4w5NjKcJOvgvvkJJcnYu7rtcumCoOdjJnyRc/TdzriO8mbsjWdYiCyrOOqdOKp6SeReXBsDtS12GAQUSo4z/fC8/gjp+NJ0gme1HeV3zugq4VGz678LN4q2i23RdUk4KIFNX76h1jNClMA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740921262; c=relaxed/simple;
-	bh=VQ4k1Jnn0W6S4PFg6Nj/azuBWSKbB78oJ4laImV3VXw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=iBPTz0gy6pkea8qDS5DXAtl2RjzbjW6WG37kGzmt5edtlttQQ/pCQU8IU2dOdcdrp/GgzViXnKT5iH2anpVUWzbMYzrmymE6w75lfjw+AUogIbtKNrQvwwbgugzIe2Bzt1Rpt6c6o6pKHJpYLgY6MZQmKs/L0JxaaLRyeVdcZ0o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Je5bvIrY; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1740921349; c=relaxed/simple;
+	bh=cIx/7ecz9ni1mTYA20B5p8ZtiDd9kpfnldf8pVCPZG4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OP02lmJVshAy+vJlgUDwdqUGdAaLCt4oE27Z23td48ORCXmKnoJ9XXBFDwNx+deoHn7EZ/oMM3PZYlCgWoWOpQDeDrO8MJ/eATgg0fZ22pe3aXK0qniQGq9F4jBPZKTyi13rlT3YdBDNshbApge2Rkiu0o6DeIRMVxpP681orhM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UlrxogiK; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Je5bvIrY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D8FDC4CEE7
-	for <fstests@vger.kernel.org>; Sun,  2 Mar 2025 13:14:22 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UlrxogiK"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4DCE7C4CED6;
+	Sun,  2 Mar 2025 13:15:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740921262;
-	bh=VQ4k1Jnn0W6S4PFg6Nj/azuBWSKbB78oJ4laImV3VXw=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=Je5bvIrYyAL4P9w7cfLzzI/06A8erTguBJTWKRIvmDlFIObjFVJ5wBlff0ZggdUK2
-	 nPGq3G6OtFcYYcDGPzGYCzShQzTkn8S61hgNAR4dU3MTneCgPWhqsDPf+8BsCkuoiH
-	 8Y+VSf9Ioo5sVzdofBlnKJdyHQEDodoAQkqiaaZfAviZdWWgwf3CzqzbLrX0FzBMs/
-	 7HpQ5cpY/aLfLGjU/9n9hOBR0j+3y1bz+RAw5IVMis271SLI9qXqEM097IxhDF0bI9
-	 D+6nl3tbuWfGucAnUjsHmEQiVnrminljvkTxsSdRmiSRGPw9P0GrGNHzCKl3E/d/2p
-	 OkSSFnYq4FY2w==
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-aaec111762bso659846566b.2
-        for <fstests@vger.kernel.org>; Sun, 02 Mar 2025 05:14:22 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCWuDNMFpfCMm3+wM1QMOi59ofVifLgbg/vIFWLkqSONd5epHk4syRH8QapjU/PJfhnq4KGR9/nP@vger.kernel.org
-X-Gm-Message-State: AOJu0YycrupMKjT3b94O6ICI0bjuD/khOERuxxWGq5A9Mb6FLkaujN+E
-	0ylt4hs7ubNQ/WHZj1pbu6xw+94Ze6UKCZS5Zj0vvGugcdyZPfhT5a7fDXV+IQ8Tc30dstnWj2v
-	pl7X3KQ60kPniLCS+/q+WbSD6YSY=
-X-Google-Smtp-Source: AGHT+IHQuy5lU8GWzgGA8EfXQjio5LtBaQfZUkU6sclui/GCjyCVPfN4/WwSj5Fe1GB+8nBBnk9nKKFoRxv1Qnbt1Ow=
-X-Received: by 2002:a17:907:c50a:b0:abe:ea93:2ca3 with SMTP id
- a640c23a62f3a-abf261d3cd5mr1269284566b.29.1740921260611; Sun, 02 Mar 2025
- 05:14:20 -0800 (PST)
+	s=k20201202; t=1740921348;
+	bh=cIx/7ecz9ni1mTYA20B5p8ZtiDd9kpfnldf8pVCPZG4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=UlrxogiKoGhdWybXgNp+cVP3L8l5wVF+yNw9Ar3xioyVuuvrsQuzKQZZ0maYZz85t
+	 gmn8LD3Td1hYBDXp1/E3d4aZ63Eqn8obSz5LDxHS9kzNkZopG41bec5ntY1mLAhyFr
+	 fiSeiNmYl3/FddN+wRUt7M2hlNKAQb7sJgfyHuBNvBnGqfVWgmp77wqTLw1NtwtcEi
+	 stHJeRsIIYnL+76IURoL5/bBobdVAj4WYL6c3WGRvDHVmCyRXOMg69+Z7cW9AFe82u
+	 R6lVxbTSef7+74TBNXXQXt8rvNKN7tO+ak6Sge3PV/IhGmYm5xe8ZlW4+i89rfWFWE
+	 mspGQ+l2epdmQ==
+Date: Sun, 2 Mar 2025 21:15:44 +0800
+From: Zorro Lang <zlang@kernel.org>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/1] fstests: test mkfs.xfs protofiles with xattr support
+Message-ID: <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <173706975660.1928701.8344148155038133836.stgit@frogsfrogsfrogs>
+ <173706975673.1928701.14882814105946770615.stgit@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <c238e76631b086db592f214beaa6fd94@kernel.org> <20250228123354.GE5777@twin.jikos.cz>
- <20250301140854.dplxboc3ml52e3ll@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-In-Reply-To: <20250301140854.dplxboc3ml52e3ll@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sun, 2 Mar 2025 13:13:43 +0000
-X-Gmail-Original-Message-ID: <CAL3q7H6Bb+pFjo11X3LAvtrVJLit1RTSg63k+weFDKsHOuYnOw@mail.gmail.com>
-X-Gm-Features: AQ5f1Joe0ZJT_0T8ZxE08ZbcF6cAwX6NRZtmwYFHosfyjVsm23FuGqdqH_vfuD8
-Message-ID: <CAL3q7H6Bb+pFjo11X3LAvtrVJLit1RTSg63k+weFDKsHOuYnOw@mail.gmail.com>
-Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
-To: Zorro Lang <zlang@redhat.com>
-Cc: David Sterba <dsterba@suse.cz>, "Theodore Ts'o" <tytso@mit.edu>, 
-	"Darrick J. Wong" <djwong@kernel.org>, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <173706975673.1928701.14882814105946770615.stgit@frogsfrogsfrogs>
 
-On Sat, Mar 1, 2025 at 2:09=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
->
-> On Fri, Feb 28, 2025 at 01:33:54PM +0100, David Sterba wrote:
-> > On Sun, Feb 23, 2025 at 08:27:43PM +0800, Zorro Lang wrote:
-> > > Hi all,
-> > >
-> > > The for-next branch of the xfstests repository at:
-> > >
-> > >     git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> > >
-> > > has just been updated and tagged as v2025.02.23 release.
-> > >
-> > > Release Notes:
-> > > 1) There's not new test cases in this release, this's a release for b=
-ug fixes
-> > >    particularly.
-> > > 2) Reiserfs part is removed from fstests.
-> > > 3) ltp/growfiles is removed too, I think no one needs it.
-> > >
-> > > I can't list all updates at here, more details please refer to below.
-> > > Thanks for all these contributions!
-> > >
-> > > Thanks,
-> > > Zorro
-> > >
-> > > The new head of the for-next branch is commit:
-> > >
-> > > 5b56a2d88819 fstests: remove reiserfs support
-> > >
-> > > New commits:
-> > >
-> > > Christoph Hellwig (1):
-> > >       [04d0cf3f8909] generic/370: don't exclude XFS
-> > >
-> > > Darrick J. Wong (35):
-> > >       [cc379f50f3bd] generic/476: fix fsstress process management
-> > >       [ab459c67c5e0] metadump: make non-local function variables more=
- obvious
-> > >       [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
-> > >       [e68a92376165] generic/019: don't fail if fio crashes while shu=
-tting down
-> > >       [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising =
-fsx
-> > >       [543795bf67f2] common/rc: revert recursive unmount in _clear_mo=
-unt_stack
-> > >       [777732b27e62] common/dump: don't replace pids arbitrarily
-> > >       [81f28acda2f2] common/populate: correct the parent pointer name=
- creation formulae
-> > >       [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and=
- inclusion
-> > >       [241c1c787e5b] generic/759,760: skip test if we can't set up a =
-hugepage for IO
-> > >       [77548e6066fd] common/rc: create a wrapper for the su command
-> > >       [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGIN=
-T
-> > >       [c71349150d34] common/rc: hoist pkill to a helper function
-> > >       [91d2880aa029] tools: add a Makefile
-> > >       [88d60f434bd9] common: fix pkill by running test program in a s=
-eparate session
-> > >       [247ab01fa227] check: run tests in a private pid/mount namespac=
-e
-> > >       [949bdf8eae31] check: deprecate using process sessions to isola=
-te test instances
-> >
-> > I'm using a setup with a minimal VM system without systemd and such and
-> > dedicate the whole machine to one instance. I'm not interested in the
-> > check-parallel updates and test case separation. All fine if it is
-> > supported and lets me continue using single instance.
-> >
-> > But as I read it and the deprecation it's not going to be the supported
-> > use case. After last week update of fstests 100% of cases failed in the
-> > test setup (_seq_run). My workaround is to simply disable it by
-> >
-> > check:
-> > HAVE_PRIVATENS=3D
-> > HAVE_SYSTEMD_SCOPES=3D
-> >
-> > so I don't have to debug changes to the detection of the scope and
-> > namespaces and after each for-next update. I understand that with a
-> > custom system setup I'm on my own but until recently things have been
-> > fine but now after each update either test cases fail or the whole test
-> > infrastructure does not work.
-> >
-> > It's not just me who observes that. It seems that BTRFS is not tested
-> > before release as thoroughly as other filesystems (probably just XFS).
->
-> I test btrfs (only default), ext4 (+-fsverity, +-dax), ext3, exfat, xfs(1=
-k, 4k,
-> 64k blocksize, +-dax), tmpfs, nfs(base on xfs), cifs(on xfs), exfat, over=
-lay
-> (on xfs) on aarch64, x86_64, s390x and ppc64le. But I'm not an expert of =
-all
-> filesystems, so I just can check there's not big issue from my side for m=
-ost of
-> fs. But different persons have different test ways, I can't try all diffe=
-rent
-> test configs/ways on all filesystems by myself, I already take each weeke=
-nd
-> to do these things, even I'm fever or on holiday. Even though I'm still a=
-sked
-> to release more fast...
->
-> Darrick's patchset has been in the list more than one month (since 2025-0=
-1-16)
-> to get reviewing. And I've tested Darrick's patchset several weeks, and t=
-alked
-> with Darrick several times about some issues I found. Darrick has done hi=
-s best
-> to do that, please don't give him more pressure. But still sorry about I =
-didn't
-> find the "100% fail" big issue in my test env. Feel free to share the con=
-fig
-> you use, I'll refer to it to change my test.
+On Thu, Jan 16, 2025 at 03:35:04PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <djwong@kernel.org>
+> 
+> Make sure we can do protofiles with xattr support.
+> 
+> Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
 
-A lot of the regressions that broke btrfs tests, or generic tests when
-testing btrfs or ext4 for example, were not dependent on any specific
-config.
-I.e. no required MOUNT_OPTIONS or MKFS_OPTIONS, and failed with any
-kind of devices used as scratch and test devices.
+This test always fails on my side, as below (diff output):
 
-For example:
+   ...
+   Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+   Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+   Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+  +Attribute "selinux" has a 28 byte value for SCRATCH_MNT/directory/test
+   *** unmount FS
+   *** done
+   *** unmount
 
-https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
-next&id=3Da1d583fa0062f097b54dfb2b9b7ff1d9260c855c
+Looks like the $SELINUX_MOUNT_OPTIONS doesn't help the mkfs protofile
+with xattrs.
 
-This generic test started to fail on any fs other than xfs.
-For me it failed with btrfs and ext4 (all the time).
-
-Another example for another generic test case:
-
-https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
-next&id=3D7c5604ec86b82d118a3b84d7e5286740e652720d
-
-Or this one:
-
-https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
-next&id=3D9b12a1a8a35bb491076332e21a113c43851ceb69
-
-The dmdust device names changed but the btrfs tests were not updated,
-so the tests always failed no matter what your setup config is.
-
-So anyone running btrfs or ext4 with default settings (no mount or
-mkfs options) should have run into the same failures.
-I can't see how they wouldn't run into those failures in fact.
-
-Or another example, a fix from Ted, for a generic test case that
-always failed on ext4:
-
-https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
-next&id=3D023070744cef1fde8a5b4fbd8fa134cd5098843e
-
-And there are plenty of other examples.
-
-More recently, from last week's update:
-
-https://lore.kernel.org/fstests/b470cdee538aab91177f8295fb8886ae79f680db.17=
-40662683.git.fdmanana@suse.com/
-
-While it's too time consuming to test all major filesystems for all
-possible configs, at least some basic testing can be done.
-By basic testing I mean run the quick group without any mount and mkfs
-options, which is reasonably fast and helps to catch a lot of
-problems.
+Thanks,
+Zorro
 
 
-Thanks.
-
->
-> I've gotten lots of pressure recently, I thought this release would be th=
-e end,
-> but looks like it's not. If you all (xfs, btrfs, ext4 and others) agree, =
-I can
-> think about reverting the whole check-parallel and its related things, or=
- there's
-> a switch to isolate the effect of check-parallel things. I thought there'=
-ll be a
-> painful period, but won't be too much if you don't use check-parallel dir=
-ectly.
-> I thought we will fix some bugs, then return to stable status. But I neve=
-r thought
-> it's such painful. That's my fault...
->
-> Thanks,
-> Zorro
->
-> >
->
->
+>  tests/xfs/1937     |  144 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/1937.out |  102 +++++++++++++++++++++++++++++++++++++
+>  2 files changed, 246 insertions(+)
+>  create mode 100755 tests/xfs/1937
+>  create mode 100644 tests/xfs/1937.out
+> 
+> 
+> diff --git a/tests/xfs/1937 b/tests/xfs/1937
+> new file mode 100755
+> index 00000000000000..aa4143a75ef643
+> --- /dev/null
+> +++ b/tests/xfs/1937
+> @@ -0,0 +1,144 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2024-2025 Oracle.  All Rights Reserved.
+> +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 1937
+> +#
+> +# mkfs protofile with xattrs test
+> +#
+> +. ./common/preamble
+> +_begin_fstest mkfs auto quick
+> +
+> +seqfull="$seqres.full"
+> +rm -f $seqfull
+> +
+> +. ./common/filter
+> +
+> +_cleanup()
+> +{
+> +	echo "*** unmount"
+> +	_scratch_unmount 2>/dev/null
+> +	rm -f $tmp.*
+> +	rm -f $TEST_DIR/$seq.file
+> +}
+> +
+> +_full()
+> +{
+> +	echo ""            >>$seqfull
+> +	echo "*** $* ***"  >>$seqfull
+> +	echo ""            >>$seqfull
+> +}
+> +
+> +_filter_stat()
+> +{
+> +	sed '
+> +		/^Access:/d;
+> +		/^Modify:/d;
+> +		/^Change:/d;
+> +		s/Device: *[0-9][0-9]*,[0-9][0-9]*/Device: <DEVICE>/;
+> +		s/Inode: *[0-9][0-9]*/Inode: <INODE>/;
+> +		s/Size: *[0-9][0-9]* *Filetype: Dir/Size: <DSIZE> Filetype: Dir/;
+> +	' | tr -s ' '
+> +}
+> +
+> +_require_command $ATTR_PROG "attr"
+> +_require_scratch
+> +
+> +# mkfs cannot create a filesystem with protofiles if realtime is enabled, so
+> +# don't run this test if the rtinherit is anywhere in the mkfs options.
+> +echo "$MKFS_OPTIONS" | grep -q "rtinherit" && \
+> +	_notrun "Cannot mkfs with a protofile and -d rtinherit."
+> +
+> +protofile=$tmp.proto
+> +tempfile=$TEST_DIR/$seq.file
+> +
+> +$XFS_IO_PROG -f -c 'pwrite 64k 28k' -c 'pwrite 1280k 37960' $tempfile >> $seqres.full
+> +$here/src/devzero -b 2048 -n 2 -c -v 44 $tempfile.2 
+> +
+> +$ATTR_PROG -R -s rootdata -V 0test $tempfile &>> $seqres.full
+> +$ATTR_PROG -S -s acldata -V 1test $tempfile &>> $seqres.full
+> +$ATTR_PROG -s userdata -V 2test $tempfile &>> $seqres.full
+> +perl -e 'print "x" x 37960;' | $ATTR_PROG -s bigdata $tempfile &>> $seqres.full
+> +
+> +cat >$protofile <<EOF
+> +DUMMY1
+> +0 0
+> +: root directory
+> +d--777 3 1
+> +: a directory
+> +directory d--755 3 1 
+> +test ---755 3 1 $tempfile
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0 ---755 3 1 $tempfile
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1 ---755 3 1 $tempfile
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2 ---755 3 1 $tempfile
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3 ---755 3 1 $tempfile
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4 ---755 3 1 $tempfile
+> +$
+> +: back in the root
+> +setuid -u-666 0 0 $tempfile
+> +setgid --g666 0 0 $tempfile
+> +setugid -ug666 0 0 $tempfile
+> +directory_setgid d-g755 3 2
+> +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5 ---755 3 1 $tempfile
+> +$
+> +: back in the root
+> +block_device b--012 3 1 161 162 
+> +char_device c--345 3 1 177 178
+> +pipe p--670 0 0
+> +symlink l--123 0 0 bigfile
+> +: a file we actually read
+> +bigfile ---666 3 0 $tempfile.2
+> +: done
+> +$
+> +EOF
+> +
+> +if [ $? -ne 0 ]
+> +then
+> +	_fail "failed to create test protofile"
+> +fi
+> +
+> +_verify_fs()
+> +{
+> +	echo "*** create FS version $1"
+> +	VERSION="-n version=$1"
+> +
+> +	_scratch_unmount >/dev/null 2>&1
+> +
+> +	_full "mkfs"
+> +	_scratch_mkfs_xfs $VERSION -p $protofile >>$seqfull 2>&1
+> +
+> +	echo "*** check FS"
+> +	_check_scratch_fs
+> +
+> +	echo "*** mount FS"
+> +	_full " mount"
+> +	_try_scratch_mount >>$seqfull 2>&1 \
+> +		|| _fail "mount failed"
+> +
+> +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | \
+> +		grep -q 'Attribute.*has a ' || \
+> +		_notrun "mkfs.xfs protofile does not support xattrs"
+> +
+> +	echo "*** verify FS"
+> +	(cd $SCRATCH_MNT ; find . | LC_COLLATE=POSIX sort \
+> +		| grep -v ".use_space" \
+> +		| xargs $here/src/lstat64 | _filter_stat)
+> +	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
+> +		|| _fail "bigfile corrupted"
+> +	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
+> +		|| _fail "symlink broken"
+> +
+> +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | _filter_scratch
+> +
+> +	echo "*** unmount FS"
+> +	_full "umount"
+> +	_scratch_unmount >>$seqfull 2>&1 \
+> +		|| _fail "umount failed"
+> +}
+> +
+> +_verify_fs 2
+> +
+> +echo "*** done"
+> +status=0
+> +exit
+> diff --git a/tests/xfs/1937.out b/tests/xfs/1937.out
+> new file mode 100644
+> index 00000000000000..050c8318b1abca
+> --- /dev/null
+> +++ b/tests/xfs/1937.out
+> @@ -0,0 +1,102 @@
+> +QA output created by 1937
+> +Wrote 2048.00Kb (value 0x2c)
+> +*** create FS version 2
+> +*** check FS
+> +*** mount FS
+> +*** verify FS
+> + File: "."
+> + Size: <DSIZE> Filetype: Directory
+> + Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 4 
+> +
+> + File: "./bigfile"
+> + Size: 2097152 Filetype: Regular File
+> + Mode: (0666/-rw-rw-rw-) Uid: (3) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./block_device"
+> + Size: 0 Filetype: Block Device
+> + Mode: (0012/b-----x-w-) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 161,162
+> +
+> + File: "./char_device"
+> + Size: 0 Filetype: Character Device
+> + Mode: (0345/c-wxr--r-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 177,178
+> +
+> + File: "./directory"
+> + Size: <DSIZE> Filetype: Directory
+> + Mode: (0755/drwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 2 
+> +
+> + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory/test"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./directory_setgid"
+> + Size: <DSIZE> Filetype: Directory
+> + Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
+> +Device: <DEVICE> Inode: <INODE> Links: 2 
+> +
+> + File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./pipe"
+> + Size: 0 Filetype: Fifo File
+> + Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./setgid"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (2666/-rw-rwsrw-) Uid: (0) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./setugid"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (6666/-rwsrwsrw-) Uid: (0) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./setuid"
+> + Size: 1348680 Filetype: Regular File
+> + Mode: (4666/-rwsrw-rw-) Uid: (0) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +
+> + File: "./symlink"
+> + Size: 7 Filetype: Symbolic Link
+> + Mode: (0123/l--x-w--wx) Uid: (0) Gid: (0)
+> +Device: <DEVICE> Inode: <INODE> Links: 1 
+> +Attribute "userdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> +Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> +Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> +Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> +*** unmount FS
+> +*** done
+> +*** unmount
+> 
