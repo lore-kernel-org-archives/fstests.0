@@ -1,154 +1,247 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79EF71A841F;
-	Sat,  1 Mar 2025 17:46:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A27261DEFF5
+	for <fstests@vger.kernel.org>; Sun,  2 Mar 2025 13:14:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740851178; cv=none; b=NbErHgYWiCGmIZrxwZ4gNLXNchCbF/zrew1bJ+ZILOAXub1MjFe85iWnHLG/JgcbbBSuULJoIUcJ+mpBYwbUq4PoFhx3QFJxVzvGARuZfxZctF+TIhV0PiEgqFZ4s36P1y6zS9zdJ9Id0iLlNfJX4dAROJop3e0Woaam9R+YXBo=
+	t=1740921262; cv=none; b=l0o4e1CZA6tlATk8DeG8y+gUGFNerwLWdh6JySrkK9q1F05kSslMWy8syC8h6MTzvkmgB4Yx9Q9i1+4/B3acEyM89Uh0B5gzTJ4ym4RXnN7F4Z7veZU0hVjuvIeZJ7dK6bX7ggIzDnwZ64ustUAiIZB8UtzBJ1cZXDk2MSL1x+w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740851178; c=relaxed/simple;
-	bh=Gtgm+HfkQpBAKcEGPTOlQARCrxJQv1VFX2vnqly2Bm8=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References:
-	 MIME-version:Content-type; b=hk/BsK48srPuMbg73jRMx2ezjB1Zb+JVU1qxKACz78j7Lt7rkPaS6rCpHWmgoqhUr/hv2ruBVYTzb1iFvUDoZGN1nZXRdC77GDaXo7nL0lpOlN0RHb+Ke96GbVbmhK1eP3FWpktxD8LGo9k0rd1Zo5HSe7dnRZuNdl9NDG2PhOY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=IcKGZAvh; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1740921262; c=relaxed/simple;
+	bh=VQ4k1Jnn0W6S4PFg6Nj/azuBWSKbB78oJ4laImV3VXw=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iBPTz0gy6pkea8qDS5DXAtl2RjzbjW6WG37kGzmt5edtlttQQ/pCQU8IU2dOdcdrp/GgzViXnKT5iH2anpVUWzbMYzrmymE6w75lfjw+AUogIbtKNrQvwwbgugzIe2Bzt1Rpt6c6o6pKHJpYLgY6MZQmKs/L0JxaaLRyeVdcZ0o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Je5bvIrY; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IcKGZAvh"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-2238e884f72so5605805ad.3;
-        Sat, 01 Mar 2025 09:46:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1740851176; x=1741455976; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:message-id:date
-         :in-reply-to:subject:cc:to:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=S5EMC4QTPsTfx7rf08ONLES150yxmA4ww7kM1gnGqK0=;
-        b=IcKGZAvhn6LXqO3NJcSxthOfGSjpK6QdKEeb/QpX1iw3nIQ5T+RGXYExvfdLFmYuqE
-         K8+09fk8P1Qvya+KeGIN1rkPjm0pSou/yT6LNvysXqeg35OHywppTNLE3DSIey85tLV5
-         4U2LcyoeVXTwydm2XXo17mZNyTQVqbmVaRITLy7cOx/exijnKkOvfCThV8PJXsOKzkrk
-         Mtr989ACDtgGdWlrO8onat/ziX8+znECzlVIk6SSqIq+BRqRRcaCK0QPw20LoA660Dwi
-         5ZYj/MANc9dEQXnkYk4cnmdZq6vho7NDu8PN545QC/HM4JaibuxzVw7+bcUzbJh+bPWG
-         uYtw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740851176; x=1741455976;
-        h=content-transfer-encoding:mime-version:references:message-id:date
-         :in-reply-to:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=S5EMC4QTPsTfx7rf08ONLES150yxmA4ww7kM1gnGqK0=;
-        b=HcaM+NSHX2SmDdqz398UhXCNVztEQAo+FTFYR4YqLDwzQXeX2tEYHWPKqve52b8ysL
-         ncINdcapJJ5mfmavqdbVcTBQPLWaORkkHWvW+W4NSPN0bNZHv6tH4UOzMcay15Ha5Q2M
-         qCvfiJP/27TGdr0EG3exmTKv1EkqAs26TzHe9pJR0bj4YUjr0B9ttZknzL2qgWuEDAkZ
-         kYiQG5D502m5V4tkQsKUdPWxbUtMMRoIaqGRw/KWJe+aTl659jswDiO9ElhmJjYpkPpF
-         ov/j5FcFUiFxUO/+Zm2Pzlu+tzu3Qq8Tg8efnzFqzqt1MsXp5+dEtlsx6S8+p/FBRZr7
-         KJ0Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUyjm/DlEL3R6AhR7eVS0nCCU+LXc+Qbz9rE/8ZnIXCo25AWveBxHgicNQkwn+Sf1c5/tijOz8jZDgP@vger.kernel.org, AJvYcCXWrlkOE1pOMWE6ycWwlSaMLC4u2SrqJwNFfv8pRWm0CsPpo9YhRFw6CiLofkPPobWyfuwr0ZLl@vger.kernel.org
-X-Gm-Message-State: AOJu0YwfOoD7//y7D8VMMMjzfV3oO3Ewv8xzrzddGp1kHzDO/TMP8pfF
-	SkClx9PI+MZRGFEh6wBlcrfG3BBRWcVTG23KJncZ57QytWkQDSV7
-X-Gm-Gg: ASbGncvcMlT38S9YrFK9/Ue1ipYxC+GQAz4TeWKIrGWnxFFfprr5Ji7l7tyDPDBuBwo
-	k4l1/8gtWohe0PTXrEc9ZmLbCz1gt5b7KETNWbdIqV/h2ALONsuzoV/XtBGNfQ/Z6fYEmCu4RYw
-	+t1L9AifLpiy5QSHS/ioAz2i9Ngnl2/qg+68jM1K/YSqX8pqo99GXfTNmrDFw3d16430H/bi6JU
-	VExcGwUIFSqP/C4x+zDMLfjszNRDDGot8Yzutyu5c2O9gGFR6bOqNWlEf7++Vc0EX/pGrb/qod5
-	9Tg/tycP0E0K/buh8X+nICFmKGp8Qdn01q0n8Q==
-X-Google-Smtp-Source: AGHT+IGLYa1RZ5t0cuEAVsiCUoSiG35w5JXi8zPh4yvcaqsvxMkzNHS2n7S/luxzuvx7NMCDstghxw==
-X-Received: by 2002:a17:902:fc8d:b0:223:44dc:3f36 with SMTP id d9443c01a7336-2236925eef4mr125123875ad.43.1740851176520;
-        Sat, 01 Mar 2025 09:46:16 -0800 (PST)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22355773b58sm47985605ad.234.2025.03.01.09.46.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 01 Mar 2025 09:46:15 -0800 (PST)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: Anand Jain <anand.jain@oracle.com>, "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>, fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [RFC 4/5] check,common/config: Add support for central fsconfig
-In-Reply-To: <4c951390-400a-48ce-824c-f075a37496a9@oracle.com>
-Date: Sat, 01 Mar 2025 23:00:17 +0530
-Message-ID: <87mse4hd5i.fsf@gmail.com>
-References: <cover.1736496620.git.nirjhar.roy.lists@gmail.com> <9a6764237b900f40e563d8dee2853f1430245b74.1736496620.git.nirjhar.roy.lists@gmail.com> <4c951390-400a-48ce-824c-f075a37496a9@oracle.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Je5bvIrY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1D8FDC4CEE7
+	for <fstests@vger.kernel.org>; Sun,  2 Mar 2025 13:14:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740921262;
+	bh=VQ4k1Jnn0W6S4PFg6Nj/azuBWSKbB78oJ4laImV3VXw=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=Je5bvIrYyAL4P9w7cfLzzI/06A8erTguBJTWKRIvmDlFIObjFVJ5wBlff0ZggdUK2
+	 nPGq3G6OtFcYYcDGPzGYCzShQzTkn8S61hgNAR4dU3MTneCgPWhqsDPf+8BsCkuoiH
+	 8Y+VSf9Ioo5sVzdofBlnKJdyHQEDodoAQkqiaaZfAviZdWWgwf3CzqzbLrX0FzBMs/
+	 7HpQ5cpY/aLfLGjU/9n9hOBR0j+3y1bz+RAw5IVMis271SLI9qXqEM097IxhDF0bI9
+	 D+6nl3tbuWfGucAnUjsHmEQiVnrminljvkTxsSdRmiSRGPw9P0GrGNHzCKl3E/d/2p
+	 OkSSFnYq4FY2w==
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-aaec111762bso659846566b.2
+        for <fstests@vger.kernel.org>; Sun, 02 Mar 2025 05:14:22 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCWuDNMFpfCMm3+wM1QMOi59ofVifLgbg/vIFWLkqSONd5epHk4syRH8QapjU/PJfhnq4KGR9/nP@vger.kernel.org
+X-Gm-Message-State: AOJu0YycrupMKjT3b94O6ICI0bjuD/khOERuxxWGq5A9Mb6FLkaujN+E
+	0ylt4hs7ubNQ/WHZj1pbu6xw+94Ze6UKCZS5Zj0vvGugcdyZPfhT5a7fDXV+IQ8Tc30dstnWj2v
+	pl7X3KQ60kPniLCS+/q+WbSD6YSY=
+X-Google-Smtp-Source: AGHT+IHQuy5lU8GWzgGA8EfXQjio5LtBaQfZUkU6sclui/GCjyCVPfN4/WwSj5Fe1GB+8nBBnk9nKKFoRxv1Qnbt1Ow=
+X-Received: by 2002:a17:907:c50a:b0:abe:ea93:2ca3 with SMTP id
+ a640c23a62f3a-abf261d3cd5mr1269284566b.29.1740921260611; Sun, 02 Mar 2025
+ 05:14:20 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
-MIME-version: 1.0
-Content-type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+MIME-Version: 1.0
+References: <c238e76631b086db592f214beaa6fd94@kernel.org> <20250228123354.GE5777@twin.jikos.cz>
+ <20250301140854.dplxboc3ml52e3ll@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250301140854.dplxboc3ml52e3ll@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Sun, 2 Mar 2025 13:13:43 +0000
+X-Gmail-Original-Message-ID: <CAL3q7H6Bb+pFjo11X3LAvtrVJLit1RTSg63k+weFDKsHOuYnOw@mail.gmail.com>
+X-Gm-Features: AQ5f1Joe0ZJT_0T8ZxE08ZbcF6cAwX6NRZtmwYFHosfyjVsm23FuGqdqH_vfuD8
+Message-ID: <CAL3q7H6Bb+pFjo11X3LAvtrVJLit1RTSg63k+weFDKsHOuYnOw@mail.gmail.com>
+Subject: Re: [ANNOUNCE] fstests: for-next branch updated to v2025.02.23
+To: Zorro Lang <zlang@redhat.com>
+Cc: David Sterba <dsterba@suse.cz>, "Theodore Ts'o" <tytso@mit.edu>, 
+	"Darrick J. Wong" <djwong@kernel.org>, Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Anand Jain <anand.jain@oracle.com> writes:
+On Sat, Mar 1, 2025 at 2:09=E2=80=AFPM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Fri, Feb 28, 2025 at 01:33:54PM +0100, David Sterba wrote:
+> > On Sun, Feb 23, 2025 at 08:27:43PM +0800, Zorro Lang wrote:
+> > > Hi all,
+> > >
+> > > The for-next branch of the xfstests repository at:
+> > >
+> > >     git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> > >
+> > > has just been updated and tagged as v2025.02.23 release.
+> > >
+> > > Release Notes:
+> > > 1) There's not new test cases in this release, this's a release for b=
+ug fixes
+> > >    particularly.
+> > > 2) Reiserfs part is removed from fstests.
+> > > 3) ltp/growfiles is removed too, I think no one needs it.
+> > >
+> > > I can't list all updates at here, more details please refer to below.
+> > > Thanks for all these contributions!
+> > >
+> > > Thanks,
+> > > Zorro
+> > >
+> > > The new head of the for-next branch is commit:
+> > >
+> > > 5b56a2d88819 fstests: remove reiserfs support
+> > >
+> > > New commits:
+> > >
+> > > Christoph Hellwig (1):
+> > >       [04d0cf3f8909] generic/370: don't exclude XFS
+> > >
+> > > Darrick J. Wong (35):
+> > >       [cc379f50f3bd] generic/476: fix fsstress process management
+> > >       [ab459c67c5e0] metadump: make non-local function variables more=
+ obvious
+> > >       [f428edcec2a2] metadump: fix cleanup for v1 metadump testing
+> > >       [e68a92376165] generic/019: don't fail if fio crashes while shu=
+tting down
+> > >       [48a3731b50ba] fuzzy: do not set _FSSTRESS_PID when exercising =
+fsx
+> > >       [543795bf67f2] common/rc: revert recursive unmount in _clear_mo=
+unt_stack
+> > >       [777732b27e62] common/dump: don't replace pids arbitrarily
+> > >       [81f28acda2f2] common/populate: correct the parent pointer name=
+ creation formulae
+> > >       [9b177d92dc65] generic/759,760: fix MADV_COLLAPSE detection and=
+ inclusion
+> > >       [241c1c787e5b] generic/759,760: skip test if we can't set up a =
+hugepage for IO
+> > >       [77548e6066fd] common/rc: create a wrapper for the su command
+> > >       [ac2d48f81094] fuzzy: kill subprocesses with SIGPIPE, not SIGIN=
+T
+> > >       [c71349150d34] common/rc: hoist pkill to a helper function
+> > >       [91d2880aa029] tools: add a Makefile
+> > >       [88d60f434bd9] common: fix pkill by running test program in a s=
+eparate session
+> > >       [247ab01fa227] check: run tests in a private pid/mount namespac=
+e
+> > >       [949bdf8eae31] check: deprecate using process sessions to isola=
+te test instances
+> >
+> > I'm using a setup with a minimal VM system without systemd and such and
+> > dedicate the whole machine to one instance. I'm not interested in the
+> > check-parallel updates and test case separation. All fine if it is
+> > supported and lets me continue using single instance.
+> >
+> > But as I read it and the deprecation it's not going to be the supported
+> > use case. After last week update of fstests 100% of cases failed in the
+> > test setup (_seq_run). My workaround is to simply disable it by
+> >
+> > check:
+> > HAVE_PRIVATENS=3D
+> > HAVE_SYSTEMD_SCOPES=3D
+> >
+> > so I don't have to debug changes to the detection of the scope and
+> > namespaces and after each for-next update. I understand that with a
+> > custom system setup I'm on my own but until recently things have been
+> > fine but now after each update either test cases fail or the whole test
+> > infrastructure does not work.
+> >
+> > It's not just me who observes that. It seems that BTRFS is not tested
+> > before release as thoroughly as other filesystems (probably just XFS).
+>
+> I test btrfs (only default), ext4 (+-fsverity, +-dax), ext3, exfat, xfs(1=
+k, 4k,
+> 64k blocksize, +-dax), tmpfs, nfs(base on xfs), cifs(on xfs), exfat, over=
+lay
+> (on xfs) on aarch64, x86_64, s390x and ppc64le. But I'm not an expert of =
+all
+> filesystems, so I just can check there's not big issue from my side for m=
+ost of
+> fs. But different persons have different test ways, I can't try all diffe=
+rent
+> test configs/ways on all filesystems by myself, I already take each weeke=
+nd
+> to do these things, even I'm fever or on holiday. Even though I'm still a=
+sked
+> to release more fast...
+>
+> Darrick's patchset has been in the list more than one month (since 2025-0=
+1-16)
+> to get reviewing. And I've tested Darrick's patchset several weeks, and t=
+alked
+> with Darrick several times about some issues I found. Darrick has done hi=
+s best
+> to do that, please don't give him more pressure. But still sorry about I =
+didn't
+> find the "100% fail" big issue in my test env. Feel free to share the con=
+fig
+> you use, I'll refer to it to change my test.
 
-> On 10/1/25 17:10, Nirjhar Roy (IBM) wrote:
->> This adds support to pick and use any existing FS config from
->> configs/<fstype>/<config>. e.g.
->> 
->> configs/xfs/1k
->> configs/xfs/4k
->> configs/ext4/4k
->> configs/ext4/64k
->> 
->> This should help us maintain and test different fs test
->> configurations from a central place. We also hope that
->> this will be useful for both developers and testers to
->> look into what is being actively maintained and tested
->> by FS Maintainers.
->> 
->> When we will have fsconfigs set, then will be another subdirectory created
->> in results/<section>. For example let's look at the following:
->> 
->> The directory tree structure on running
->> sudo ./check -q 2 -R xunit-quiet -c xfs/4k,configs/xfs/1k selftest/001 selftest/007
->> 
+A lot of the regressions that broke btrfs tests, or generic tests when
+testing btrfs or ext4 for example, were not dependent on any specific
+config.
+I.e. no required MOUNT_OPTIONS or MKFS_OPTIONS, and failed with any
+kind of devices used as scratch and test devices.
+
+For example:
+
+https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
+next&id=3Da1d583fa0062f097b54dfb2b9b7ff1d9260c855c
+
+This generic test started to fail on any fs other than xfs.
+For me it failed with btrfs and ext4 (all the time).
+
+Another example for another generic test case:
+
+https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
+next&id=3D7c5604ec86b82d118a3b84d7e5286740e652720d
+
+Or this one:
+
+https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
+next&id=3D9b12a1a8a35bb491076332e21a113c43851ceb69
+
+The dmdust device names changed but the btrfs tests were not updated,
+so the tests always failed no matter what your setup config is.
+
+So anyone running btrfs or ext4 with default settings (no mount or
+mkfs options) should have run into the same failures.
+I can't see how they wouldn't run into those failures in fact.
+
+Or another example, a fix from Ted, for a generic test case that
+always failed on ext4:
+
+https://web.git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?h=3Dfor-=
+next&id=3D023070744cef1fde8a5b4fbd8fa134cd5098843e
+
+And there are plenty of other examples.
+
+More recently, from last week's update:
+
+https://lore.kernel.org/fstests/b470cdee538aab91177f8295fb8886ae79f680db.17=
+40662683.git.fdmanana@suse.com/
+
+While it's too time consuming to test all major filesystems for all
+possible configs, at least some basic testing can be done.
+By basic testing I mean run the quick group without any mount and mkfs
+options, which is reasonably fast and helps to catch a lot of
+problems.
+
+
+Thanks.
+
+>
+> I've gotten lots of pressure recently, I thought this release would be th=
+e end,
+> but looks like it's not. If you all (xfs, btrfs, ext4 and others) agree, =
+I can
+> think about reverting the whole check-parallel and its related things, or=
+ there's
+> a switch to isolate the effect of check-parallel things. I thought there'=
+ll be a
+> painful period, but won't be too much if you don't use check-parallel dir=
+ectly.
+> I thought we will fix some bugs, then return to stable status. But I neve=
+r thought
+> it's such painful. That's my fault...
+>
+> Thanks,
+> Zorro
+>
+> >
 >
 >
-> The -c option check makes sense to me. Is it possible to get this
-> feature implemented first while the -q option is still under discussion?
-
-Hi Anand, 
-
-Thanks for trying the patches. The design of -c option is still under
-discussion [1]. But it will be helpful if you could help us understand
-your reasons for finding -c option useful :) 
-
-[1]: https://lore.kernel.org/linux-fsdevel/Z55RXUKB5O5l8QjM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com/
-
->
-> That said, I have a suggestion for the -c option—
->   Global config variables should be overridden by file system-specific 
-> config files.
->
-> For example, if configs/localhost.config contains:
->
-> MKFS_OPTIONS="--sectorsize 64K"
->
-> but configs/<fstype>/some_config sets:
->
-> MKFS_OPTIONS=""
->
-> then the value from configs/<fstype>/some_config should take priority.
->
-> I ran some tests with btrfs, and I don’t see this behavior happening yet.
-
-I think that was intentional. I guess the reasoning was, we don't want to
-break use cases for folks who still wanted to use local.config file
-option.
-
-However, in the new proposed design [2] we are thinking of having 1
-large config per filesystem. e.g. configs/btrfs/config.btrfs which will
-define all of the relevant sections e.g. btrfs_4k, btrfs_64k, ...  Then
-on invokking "make", it will generate a single large fs config file i.e.
-configs/.all-sections-configs which will club all filesystems section
-configs together.
-
-Now when someone invokes check script with different -s options, it will
-first look into local.config file, if local.config not found, then it
-will look into configs/.all-sections-configs to get the relevant section
-defines.
-
-This hopefully should address all the other concerns which were raised
-on the current central fs config design.
-
-[2]: https://lore.kernel.org/linux-fsdevel/87plj0hp7e.fsf@gmail.com/
-
--ritesh
-
->
-> Thanks, Anand
