@@ -1,89 +1,86 @@
 Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 042391D63C0;
-	Mon,  3 Mar 2025 09:31:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 178911E9B12;
+	Mon,  3 Mar 2025 09:49:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=205.220.165.32
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740994269; cv=fail; b=fMIDJGxzD2TRy9FJMGYeXFkdMWmS2Z2gRZ/TszjqMJbFs6wiGKUnndZ+EHsNfDVUkm7EXA4EtMDaIHYa0f4zrKtEwoYCoEAxi0k1NVQ3sADy8FnQBRgm9X+calVkr3x9wDR+56YW2n4rbz/EeZNnsUIWeXNA1Fw0NrvpSXCkT7I=
+	t=1740995352; cv=fail; b=q1P18EPZdRCsflsf4kGr6wauxnqmad0eCrhKXy0+b1QqrwXYqkjeL/67gRDq5zdqAphznYneEuNUfpeOiHDiBSh6ZN5lyk6ZwCxMDV5KhPXXlWVuXqODIrWoJxociNdu8zOG+6OXvjUmImEfiS8n0bN/8CXeajG2wsg2dsANiew=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740994269; c=relaxed/simple;
-	bh=WRGECXftuqXppEr0/87LlhFZn9Oyz4C0dSXrGeMYyzw=;
+	s=arc-20240116; t=1740995352; c=relaxed/simple;
+	bh=bt49g6MXiGk3UBURLvf9zviwwHhTMqEwXNchZW81l1E=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=rtC9dsoyNTZWsHkpT9C/5Fa+TNcdvUUTuFPxgzrFJ8ZP13YL1kARsD26+bX1+Fj5L+3rUYUV16itJ5kudxu5uMGoCR4bXs38s41fThdKPPiKC0558NZYwkzFYdJX3fiQiwsVa5F8a2EC8rMjIE0/nUvIFFUy2uialIvTl10AUDE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=KnGzRbNt; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=ruGOmBax; arc=fail smtp.client-ip=205.220.165.32
+	 Content-Type:MIME-Version; b=eBfhy1HtNZRZH55DAV3MsfcbkU75kEaqCINrNCqt/mEu1ZeTUBZ5ibHl6XptWFAZfkQvuzMPhf2gbfIbeCghAO1P20xpm8IxK3kQljs2g9rCiBoBNXmzzin9c8IiDbhQqzOsqk3IQ4XMn0gxnJMJqSzpuTaqTACMJvYUs/paXFE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=dU6Hg+Bm; dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b=VzoO/tSp; arc=fail smtp.client-ip=205.220.165.32
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="KnGzRbNt";
-	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="ruGOmBax"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="dU6Hg+Bm";
+	dkim=pass (1024-bit key) header.d=oracle.onmicrosoft.com header.i=@oracle.onmicrosoft.com header.b="VzoO/tSp"
 Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5237tj1s031366;
-	Mon, 3 Mar 2025 09:30:50 GMT
+	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5237u174031538;
+	Mon, 3 Mar 2025 09:49:07 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
 	:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=sQJ5yRTejVdpe8NDd5z6chCgHAk63FRhxazz4Lb4lh4=; b=
-	KnGzRbNtzpu2QddyKU1As0MnPyiFRevdJjMtGRmBsW8X4AoG4/SMaG0VkH1ujKMD
-	jpdIFxTCowuImZK4hIa39C9ow+1PKNJXlIP1J5T1Miq4F1wRGRc3Um2xu8y3rlKM
-	H/iz0VWNZ6awZYTgnHnDc/MsGWDX4vBWadK9Lp0UZpznScS7K+4+t7tvo1jc+DsX
-	6N40Jmu1mR/HG0j28TeIJyVtMgJDqgjGi8cI8ekNxvsQzYpkWjjkK1558A3YHzKv
-	lZqYcfr+5UyvXGmY7ehvyDoS6t1ffrQ+NaTKJPiFJom16vR5KUng2DikrmsN7UlF
-	PCvo8vv0lovEB3Z9QVnslg==
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 453u81t7ww-1
+	corp-2023-11-20; bh=hs07Gpe5mbG0GlqaqqG8nxkWEsdCFJrZi07ffcJX/CA=; b=
+	dU6Hg+Bmq6aTMY0YPTPphJBWyTqgPjr2MO+c7jAhPkwnZiaWLCpKgdHY+b6pk+tW
+	SejiYFM0Lz660HA10sG2t6V31Ctvrj232kdfhy0sgbGTuldw+f3P65IB37D3MEnx
+	ewcWIShwyi/PbNUgaOpuHLZljMu68fhTUVQsAwTvU7vVVVARFpsHvLafmCeLNlGe
+	Rd9DuDnussJNNuJT6hYXs90bTx2cUpffOe1YeoyVRxRW5+L871diKhiChhWSI+tk
+	Z0YF+7Jn6g8gp7eA4mtdZIq6cHw+czHic200f3AR72IuiKt8EmHViTGfCIRZX48x
+	yUBFQzQMOj4AJtT8sU+edg==
+Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
+	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 453u81t933-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 03 Mar 2025 09:30:50 +0000 (GMT)
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5239ITdi003202;
-	Mon, 3 Mar 2025 09:30:48 GMT
-Received: from nam11-bn8-obe.outbound.protection.outlook.com (mail-bn8nam11lp2177.outbound.protection.outlook.com [104.47.58.177])
-	by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 453rp7873u-1
+	Mon, 03 Mar 2025 09:49:06 +0000 (GMT)
+Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 5238JTvE039727;
+	Mon, 3 Mar 2025 09:49:06 GMT
+Received: from nam02-dm3-obe.outbound.protection.outlook.com (mail-dm3nam02lp2041.outbound.protection.outlook.com [104.47.56.41])
+	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 453rp7yx4r-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 03 Mar 2025 09:30:48 +0000
+	Mon, 03 Mar 2025 09:49:06 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=F4mia61jJ4axwNSxKHfJfdmy8T+/ZoTsQBKyBeF/6nGPdnbGd9WdeZXoD43OIIjvxC6nymP+cZ46R3+UE12LXU4zrZZwNPtzne/7lX1oHcRfij2YqYn5Yp79Amo2rlPihEj/bQAbG40nrl3izAA4MDswndUQKbrPyindIB++3m4+gRH6GY8Zp1m6sgznD+SXKBFkzKOjFCGX0M1Zs3BRbVrbwOap+YYjUxMQ1/hCHLrXNf00+opUAYVXYzLxZ0ciyUFf6MLmpVuSfSIxtRHlqoVAqOjw8O5HoqqfXw1G/Ib/znk48Mfw3Lkg7F8pemYlkRmwpOOEPuOhabDC8iJv+w==
+ b=jQQT22CyEzvqcAD+YH6Qtx5cX4zoiBa+7dBNJvTcDk3/QK639yIVvjeTofch35La6as73eGT9uVNhwsD9UIAFRPSTDd8CibWDJdrpiVaTdzHPma4TiB82D1zSi2fWsR1q/0JbBfGxOL4HytdYQvrMt28KKa5ZkU9aTMHxL7cY8XHHfNASQ8FZNRH/IwzMWfCkkyR1yBLSY599Kr29aMjf9F7WzaKQW4mkBUS4YA9DVwYQDU9NiCJroywZHfAZW5M4l8hchRW3KWF1jWTHpFe519WV8UYAjWfuhziQtWZ6QOIwiAGqCgr61+wwIpaOJElWfjedYxCHwwn6cGKLPuOXg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=sQJ5yRTejVdpe8NDd5z6chCgHAk63FRhxazz4Lb4lh4=;
- b=Yw6Jvkx34/AfmTUsN6H4ZDu0VH9jGsUEMj/8UdYvh47bTN7uQkNhEN0jNz9izY7YeiSOkvJl44ln9vXYewH1DJxodUevm8q8sThsxeMgULgbPxGtb24MR3x8mHwQeuH/TirAF4yeUoSm7NVL52Vh/3GtznT+KPN//SVW5AhMFXjjXEBBPlT9mGg8EMyqQW+PuZDl6lHqWz7csULQBxlrQgP+T6LbMWu+ymJnDb5NbLeuC3ppmLqrXCb3vgdnsjwt9A15KEuB/jEcKfO3vkH/flTtidlEmvrk0nqTRU5XPf2RP+c3a6gujnq07K8VzCGPt5yU8LD+h6GY3UKtcYRGGw==
+ bh=hs07Gpe5mbG0GlqaqqG8nxkWEsdCFJrZi07ffcJX/CA=;
+ b=aBSM6nnVZDTmVqhdXhoKaAv3hgA1TPY9GTEzv67KiWdcMBPSzlNJY/hywxhr7pTrzk6hB3dgRv6qHtVQq/iILcftm8o7vWOkoJ3w/TH54eTStyKvJfWZECvrrTzCRc04SDWYpqWt14hANrupN1xiWv67BU1blGD161lqYscOVT7wwUe90p0pUs+qzlM3jM0DqLYS3AjZUIq0eoj9sl9JWVC/xTAhHM0Lrn5W5K5vpvIV/VdUsxo4r3Awyy9kt7sOZP9m5KxD+pa5jTGf2SbWOwghb1RGv2tdq0dm96xiUPM39ppExH52ruA15FRMnVzJXVw0kiggKqQMgJT1AjJA5w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sQJ5yRTejVdpe8NDd5z6chCgHAk63FRhxazz4Lb4lh4=;
- b=ruGOmBaxmqwBLs0DXHKAh+weQqPhBxbp7sdiQLKgRFt9dBeXNpSSpXIVyQETX0H8xKZ8wdKgPzPnjeYw1DmPidhnsioVqf9jYL5hIbpc667cYnY3j24svVGqTdA6hMDKxWSVXIFnLzgJiQwpE1IiD2lJhdvOkXcdeqdBL6PYlqM=
+ bh=hs07Gpe5mbG0GlqaqqG8nxkWEsdCFJrZi07ffcJX/CA=;
+ b=VzoO/tSpv6M+ztPppnRUrTGCfy6bpP4RinPH+tj7pUXAm6TkHSzMFCypcSgEu0s4+Qy9ZwIUMLAAUES6YThX2Rhb+uNpfkyR3WSCNLiNiedaAJ1WCsuhDUzI0InzR9Hc+wwRU5tOaZ5sWeHAXNfN0iZnUZlNFWka4Wcp/UD8CXo=
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com (2603:10b6:510:148::10)
- by CH0PR10MB5147.namprd10.prod.outlook.com (2603:10b6:610:c2::18) with
+ by CH0PR10MB5033.namprd10.prod.outlook.com (2603:10b6:610:c0::21) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8489.26; Mon, 3 Mar
- 2025 09:30:45 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8489.28; Mon, 3 Mar
+ 2025 09:48:59 +0000
 Received: from PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::fea:df00:2d94:cb65]) by PH0PR10MB5706.namprd10.prod.outlook.com
  ([fe80::fea:df00:2d94:cb65%5]) with mapi id 15.20.8489.025; Mon, 3 Mar 2025
- 09:30:45 +0000
-Message-ID: <859a6401-b06a-4b8c-aaa9-ea977f9c2674@oracle.com>
-Date: Mon, 3 Mar 2025 17:30:40 +0800
+ 09:48:59 +0000
+Message-ID: <9a47b242-2013-4d39-ab95-ce8777dde995@oracle.com>
+Date: Mon, 3 Mar 2025 17:48:55 +0800
 User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC 4/5] check,common/config: Add support for central fsconfig
-To: "Ritesh Harjani (IBM)" <ritesh.list@gmail.com>,
-        "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
-        fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org,
-        ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-References: <cover.1736496620.git.nirjhar.roy.lists@gmail.com>
- <9a6764237b900f40e563d8dee2853f1430245b74.1736496620.git.nirjhar.roy.lists@gmail.com>
- <4c951390-400a-48ce-824c-f075a37496a9@oracle.com> <87mse4hd5i.fsf@gmail.com>
+Subject: Re: [PATCH] btrfs/080: fix sporadic failures starting with kernel
+ 6.13
+To: fdmanana@kernel.org, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>,
+        Glass Su <glass.su@suse.com>
+References: <d48dd538e99048e73973c6b32a75a6ff340e8c47.1740759907.git.fdmanana@suse.com>
 Content-Language: en-US
 From: Anand Jain <anand.jain@oracle.com>
-In-Reply-To: <87mse4hd5i.fsf@gmail.com>
+In-Reply-To: <d48dd538e99048e73973c6b32a75a6ff340e8c47.1740759907.git.fdmanana@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: SI2PR01CA0006.apcprd01.prod.exchangelabs.com
- (2603:1096:4:191::14) To PH0PR10MB5706.namprd10.prod.outlook.com
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: SG2PR04CA0200.apcprd04.prod.outlook.com
+ (2603:1096:4:187::15) To PH0PR10MB5706.namprd10.prod.outlook.com
  (2603:10b6:510:148::10)
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
@@ -92,225 +89,274 @@ List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CH0PR10MB5147:EE_
-X-MS-Office365-Filtering-Correlation-Id: a55d1869-b0ec-49c1-f524-08dd5a361312
+X-MS-TrafficTypeDiagnostic: PH0PR10MB5706:EE_|CH0PR10MB5033:EE_
+X-MS-Office365-Filtering-Correlation-Id: 34a6ba66-a027-4f7e-57d5-08dd5a389f51
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|376014;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|1800799024|376014|7053199007;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?WFE5d3QwTENTajVLcU9tbEZleEh1QTI1ODFwSWRZcTZFeCs4bjBiZjNNdHFv?=
- =?utf-8?B?OEFFekxuZHhQQW51cnU1cHRVcmRUeVZzY2lDTEZndXdnYkd0L0tKNURRNHJp?=
- =?utf-8?B?NEEzNTkrWWlJRlY4bFBmUlA1YWRFQUF6bVI4cm1hWnhUdEcrT1A4ZGpubE5G?=
- =?utf-8?B?WFBtWFJXT041MlhaUitzWHBOUUdmVjVKWU0rcTRqb3Z1aDlBYUtiSFZmWlVC?=
- =?utf-8?B?N3B3d2cxRW4ycW1hZ1ZSRmcrOTNtVUl0QVhUaVpWYXB2dFdUcTFwbXJnUkVl?=
- =?utf-8?B?TVN5bDFEYmFwM1JGakxlcnhNRHdvQTM1MnRqVzBtNHVlbmQyWmtJRDVsQ2Vh?=
- =?utf-8?B?OVQxNE91VHlDbHRWU0xtNHRrcC9QUUxKQ2FVbHdaK2JmcXQxWGtUeGE5M0lm?=
- =?utf-8?B?dFVZUmRFWFJsODB6V0l5RllBeDN3MkRMY0UzNUNXUTZ6WE40NGQzeHNkMEpU?=
- =?utf-8?B?SThsamRjWjNKem1jd1FrZ2QwTDZrSFIwRzR6VmNCRU1CQkFPT2dGNUZGaEsv?=
- =?utf-8?B?WnV3RDV6M2QrL0V1b0ZzV24rNFVnSWJUM3YyRTlwWDMrZ0xjMVVFMWlncURZ?=
- =?utf-8?B?ZUdra0g2dUg1MGtuSXJmaGpzcXBVMkdmL01BYXlHK0ZmODdmYlhtUDhJL0Mw?=
- =?utf-8?B?NTh0a1RRblhLS2VpNzFQVHZ1RUN0b0Vudjl4VXpJMFk4UFQ2N1BNN3dVNkY3?=
- =?utf-8?B?NWhaZmZQbGptN0t4NHpZcHhkWURvWGhibmJ0OUhDTHVPMVJnMVRXY090SjhQ?=
- =?utf-8?B?TzgzNmpUOXUzZzR2Mmc5MHBVMGFDUTFXZzFDZUZwUGhqMHdBejlmWFFlNng0?=
- =?utf-8?B?K3NHNUM0N2VoRG9JeWZlaXlobDl6UTB4U1h5Y1J3N1ZXdHpEYytvQ3h2eWdO?=
- =?utf-8?B?blk3UjZUMzZabTAvUExwWGR0cHpWSndXNDNoOGNEY2lrL0pxK1ZubkZsWlpN?=
- =?utf-8?B?NXdIdzVWbHhXd3NIYlRxOHVHeTFKdFBpcG9qRDc5aFhGSnJzbU15MldPcGth?=
- =?utf-8?B?cndQZHRMZzRuNFFSVzNiYXVKY0FNSGZlZklDdFlVaTBmZUZ3UGd5Uis1dWRq?=
- =?utf-8?B?SWVZQ1gydCtrai9ZdzJ3YWlyU2NJOU5CQXdXS3ZTN3lLNTNGaDVSTHliVUxn?=
- =?utf-8?B?L2FrQkoxYlExcG54eFlUeGhTdktaMStzd1UwZjhnRi9EZE92c1VQY0Y5R1Jj?=
- =?utf-8?B?NVRhL3NydHpKbm1aYUpFVCtlUmRmUytqb0E2NXlKY1dLZzNqaHhheDZxSUNa?=
- =?utf-8?B?YzRwczZQY2R6V2JBdHQrYlZYTldRZVFiNUJUWjJOekVsdzhXWVpWZ0tRaTAy?=
- =?utf-8?B?SlFmemdRYUVyR2JzRHZ3eCs2VVg3REdOUFBVYlk4cS8rUjl6cnorTG5ydjVR?=
- =?utf-8?B?L3ZRZ0lETEJMNVd0eURrUlNOMU5lTUFqN29IL2doT01mS2pqRW8xRW10STFu?=
- =?utf-8?B?MnRxdGM4SkVrakpkTThjbTU3SDZzbnQ0M1I3WjZ0eG1OYTlnUEVUTDlxZFYy?=
- =?utf-8?B?dHdpUmZSUVBKWElMeHJkV0tzSmt3aEp1T0VGUDNCV0ZrazR6QXgyZEtyMnYy?=
- =?utf-8?B?Q2JSdUJiSVRlSHlHSk5WVXkvdlN3SUwvdms4S3dTSkZhdmhudmVQa3U1M2VH?=
- =?utf-8?B?ZXdMTzlNbFJVK1FPSWxCNDFPd1FDam9MTzhJSk1rRHUyNDNVTXFqK1JCMlV6?=
- =?utf-8?B?ayt0YVZzSVR6dlFnZHNUSW4vV0ZnbTZOL28yQUkzRFdDTDhrREJyUTJyajE1?=
- =?utf-8?B?d1grd0s4elkzQXp0TEx6SVZKZEVINkFSOHl3YzZ0UEZxS0FjMFp4bklZSTlj?=
- =?utf-8?B?SU9yWUg1UUxhc0FEd0MwU1ZjbXR2U0RMRnFqYWE0ekg5MExwZW0wNWFPYytz?=
- =?utf-8?B?VFhtanB0cGxaSnQvRmphdWZIZzhrRGxveTlyci9CYll2aXc9PQ==?=
+	=?utf-8?B?S01aV0RHWFlRSEVEV3NoMmNHQVBTMU5ZZVYxbzNPRDRkbmlWd1FlcmVOdG5x?=
+ =?utf-8?B?Zk5IREk4RTU0WnVEbHNxeUNQUmRyNWpQQzdSQVFqdDlXQms1MjBiaVZKQWpp?=
+ =?utf-8?B?T0xFSVZNbVpNdXVhanNmMXV4Wmd6RkZIcFJpWTFBdmlwa0k0WStNNjNBZTlu?=
+ =?utf-8?B?R29KcUlRbjJQL2xUL1BvbG1qVzJXNm1XcTdzcENHVGRZMCtsQlgra3ZpbWFX?=
+ =?utf-8?B?dkxndEdvZ3dTT0wrT1RIbmU0dUVFODM5SnBRb2FtVzFJcnpwR2ZNU0UyWkNa?=
+ =?utf-8?B?NmJLbGZPTC9icDdSdG9BUVNGdXpLdEF5end2UEhTVXBERzVhY3JFODZWeFNi?=
+ =?utf-8?B?YlB0RlpGcUl6djNIUG9QZ2hyYU53Y1dqNGNJcFo5NWVZYnU0VWFZZU13ZTJZ?=
+ =?utf-8?B?Zkt1cFlVaEFGeVN3cWlnQm1tOGljZlQ0b2oxTFJFMW5DQ3ovd2RoZkNSdWNK?=
+ =?utf-8?B?NWdhd1BlU0hhT1V6RFhZY29zV3NIdGR3Wk5DbVNBY1VhR0l0L0kwOGZrTktp?=
+ =?utf-8?B?VGZjZU9YN2cwazYyaEFQRVluSlBxMWJiR1lxUGljam9UQ28xNVlndGtLdkNL?=
+ =?utf-8?B?OXFjZWdsT294bmc2cXlUYVVIZGVpTHVuNzZWSm1LSFgvSkNHb2ZHUlVaMEo5?=
+ =?utf-8?B?U2MxZjlxV2JYOGt4Nk1UZzIybkVmOGhKRlUwWnphc1plSGoyUWc1cmdaTklK?=
+ =?utf-8?B?Rm5GZkJQRHdKa01NVE11Z2ZFZm5oM1lCdkpiaGZqVHdWRnYrbHZyNFNpN2Rq?=
+ =?utf-8?B?b0tKTzhDR1U4SEp6bDZjNGNycHhjeWpWZUZxTVozOUF5UTdrYnhHVjFRT2RU?=
+ =?utf-8?B?dDBLZ20xK2M4aUVSWFo5aTNQLzhXQklMSUZhM08zWm5RQTVrcVhrSUxJdmg1?=
+ =?utf-8?B?aVp5SUxrMlVqNkZTRG0yVzlaZFZEaWI0SlpoSU45aXNDYkVIU2hQajJOV3lK?=
+ =?utf-8?B?VTlmck5CVjFnSlJqV1JwNWxXOTVGWGlVdHJibjJqN3ZIY256Vnd6TlFYYlRN?=
+ =?utf-8?B?UW5NU3RnSTB4ajM5SGgyQlpvYnQ1REZMSkVXalprS3RmSHdpQlVDSThBbWVr?=
+ =?utf-8?B?aG1wYk5uRENEZWY5QzVTWUZ4b2dzOWcrNURNWFltNldWeFhSa0FjRHRvL0JY?=
+ =?utf-8?B?b1BKR2ZBU3VHWUljdHFoYi9DZGFWUlYxWVorMkdERzhidkRFN2pROXppTVY3?=
+ =?utf-8?B?YlFPc0h4Tm4wQnVQdEpKUXA4VWR2bk5QSmswNC94cWozSU9jd0s1dU1WUUV2?=
+ =?utf-8?B?RWIvVVBoeUl3QWNnT1NQakhuZVRsKzk0SzE5bGx6VXg1RlhJMEhadmJnK2xy?=
+ =?utf-8?B?ZXV4eUdNVmlxUUxsSENEQlJ3YmY0Y1kwbGh0b1NhYzBSVXpKeGpHTjhHZE1E?=
+ =?utf-8?B?S1lCU0g3Nk1EQXZubzdGVnNlRlljcS9yUXpQeERZT21oczRqaFdwelUvd3FV?=
+ =?utf-8?B?TWZ1c01VUVhGWWJMRGZPamZVUXVCTHRBK3NpRGQ5RDFKS2dFTytybS91RGRq?=
+ =?utf-8?B?WUVQV1k4a3JLcWFleEpkUHgyZEVUcGU4S2hCVFF5SEJqTmQ2YkNyZUthTnBt?=
+ =?utf-8?B?U1lLV3NXNERHZlArTDBwcjN4Mmprb2JFM3doTGxIRnZJaWVPaTUzN0JPSDhl?=
+ =?utf-8?B?TFZXNExTMTJ1VVJhUTlMUmVYcFZzQjlMWldhSmhIeDFlN3NBOHcwSzhSN2ds?=
+ =?utf-8?B?ZE8ycG9qZ3Y0Yjg0cmljdnh2TkZCMkZzYkZQUENRNFNRbDBKand1bGNBWDJN?=
+ =?utf-8?B?YUJQTHV0bE8xUXdLWFNVNVU2VEJHY1gwT0pOQ3YrYWxyU1VYdExFQmZqcjdN?=
+ =?utf-8?B?RjZ0UmJ0N0NvbVZYNVlZQmFwY00rRkxUbUttRXIwcDNsckF0dXkyUEVJYUkw?=
+ =?utf-8?Q?susxamkR2fLS4?=
 X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014);DIR:OUT;SFP:1101;
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR10MB5706.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(7053199007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?ekFDV0hIWXRCeE1XNTdYdDVPTGp1RmNaNzJKeDNFaFBSYkphR0pLT0duWlVO?=
- =?utf-8?B?MkhKRkgxTWw2KzVSWlNqQzg0cGZDSXQycW14V2VEa05MYkNxL1JVMXgzYnpW?=
- =?utf-8?B?R09obVBJeE4yT1dZbXJuaFJsV0JuZXdrUFJvUStaYjRWTlJveXFUelhsUkNJ?=
- =?utf-8?B?MFFhSkFsd093Zk5zNUlyWDc2OGFCTzhIOGZ0N2s0a002RHNRb2llS0k5SXNn?=
- =?utf-8?B?emVlYysyU3hwYk9IZUZCZEh1MWtSNEtXdWlkcGlPMExkUDZydXFXbDVUS3BM?=
- =?utf-8?B?TytabjVUZ2VtR1I3NXhqd0doc3V1SmxWd1lDWFpjaHd6eTRELzVEdGdmNEl0?=
- =?utf-8?B?ai9YWG1kZ3l3UWhGR2RQVktYTVVXb1RhMjlhdC9nT1d2SktRWktrcUlQSGNK?=
- =?utf-8?B?SlpReEQzSGdwc1NmeVdyL1Vhc0hsRUZHSC9TVmxXMS91ZnJDNWsrZERMR2lX?=
- =?utf-8?B?QXI2d2RlR2pJSHAzYUtPLy9pZHB2ZlVkTWlrNE5ta2V0WjVYeGhKeUNmdGlt?=
- =?utf-8?B?WEFmTWFqTHBodFc2WnlIdkJkWXNtejlwNXM5Q1VWRUlRV0tURXVocmJBc044?=
- =?utf-8?B?aEZtRXRlYzN5YWxPWHEwWVhrdUQzeGlqUkNFb3o3eDZaMk1DdzdHOTFpWU16?=
- =?utf-8?B?c0NBOGlMT3p3TTdUNzlQZ2FzaGlUaXhMTGh4bUdvUjJMcUlsME9OcXFOYkM5?=
- =?utf-8?B?cDE5MW1qVWx5YzlxdkpTNmdkZnpwQStDc0pPWGxLSVNoa2o2a0U4TEExWlRk?=
- =?utf-8?B?dVVOZFIyUFVJZ0ZEQVlWcTZSRUpDY1YzWWsxV1craG1oWU9ZZHRVN1FtZDVB?=
- =?utf-8?B?c3laM0w0ZFlza0xrYXBFLzgyZ2NiMjR2c1ZpYXRCN1lVbVhIRVJXdGgvREoz?=
- =?utf-8?B?RHR3KzhZU2JNQlpCbFBvTUR5NjBVWGE5UkxkTlVhMEt2cUY0VmRScnVXSEw5?=
- =?utf-8?B?NkRZTUI1MGljem5LalVTU1pkQUJZVEp3UTVkVXdJekxPSnRVVHhEUENGaGE1?=
- =?utf-8?B?alEvVEJKaVFwRURFZlk2VVVOcHpRbS9KOVpzSDJ0RVc4UjVDNGdkdWwxS1NO?=
- =?utf-8?B?ZkluMnU0Nys3Z3ZnWXhqT1VCV2J6TEVDTXFKU1lpYm94M2lIbGxtMVRqNUdJ?=
- =?utf-8?B?a0E4ZDQ5MXlYUVREUjY2Q0VVdUlTamIvTkRMQnFTQWZZb092Tk1keDQxcGhx?=
- =?utf-8?B?VTcrQ1JCdk40Ym43UW1tYnV6SGVGN3psZDdKdTJFK29KNlNwZVdXdFBzbmNl?=
- =?utf-8?B?WVYrd0ZMS2NLWENyY01EQ3lMbnY1bVNDV3lSOHcrZkwwZm5lOGVweVJValRT?=
- =?utf-8?B?byt0UTlVQTdtUC9pZmN3WmtPRkg1SVBJR3ZyUXErSlVDbklYbTByRkZyUkp6?=
- =?utf-8?B?UXpha28weDlqbnRkK0VPOUdBczgxRHRHY1pQV2dqYlVEejRYNXVibE1GdDFt?=
- =?utf-8?B?VVZSU2djTVN1QTBOc1JsUHoyTHNsRDdTUGtod0ZvUm1DbjBhQWp1MDNmcmtq?=
- =?utf-8?B?Q2Q5djNIZVVveVdiZXZwNkpXRTdqQ0hJQ1NmeFJzUGdXczNjakxsM2ZGa283?=
- =?utf-8?B?RjZaTGhnV2JVOEYrbGJZVWI4M0R3cVNEOGJzY1NLWllXYUcrZlhDbzA3SldY?=
- =?utf-8?B?U21lMGQxZ0hweHFIRE9jTndXM2RWQWh3blo2Z3ZLaFZoRk1sbWZ1ZU12RmxO?=
- =?utf-8?B?VGJ3Z3ZETzJoMjNtV0tEbWhZNk5ZaUVkOHpYVG52cVVZU2k3RnBJNk1tckp1?=
- =?utf-8?B?MUNqbnZjby81cWc2VkRqZEwrYXZyNGFlVTFZUEhnQy9kVU4reGNvZStLMkRW?=
- =?utf-8?B?VC9hT0tJbFArMnhldnZKd3p6eGhuanBmdUN2VnYwVUxLMVpBYlg5cDh1aks5?=
- =?utf-8?B?UC9lSmMvK3AyTy9SYlg2Q0dBMUZObXR2b2lIS3YxdXFJb1Q4Q2ZDWnBXb2JQ?=
- =?utf-8?B?UGxQSDFWblRGTCtLRUk0QkNNUSt5QXpaUUtoNjZKUmJiSC94VjEwTEVaR3Nj?=
- =?utf-8?B?QWNmWEMvOW01dmRmUVhDamlDOUpIUGNaWlI4SE9hUWJLcUtTRGdkVEhEVytU?=
- =?utf-8?B?Ry9ULzVtQ29mRFRJRW5IbGFLNG5JZWdjUWU5aVg5ZkpuK2lHcGcvUUN0TlZn?=
- =?utf-8?Q?gf9WpE57cl7+t/ssc8DEjx3Rf?=
+	=?utf-8?B?TUxpejltcVlPa1RaNEx1ZkN2aGQxRG1DUkM5Zk00SVlneTZHRmlNRjZxNG1S?=
+ =?utf-8?B?TXI3dmxlRXdaYWw5TlNLZ3F2UDZVWmlnMkdoZ3JSQzljUkpIVTFBUDZBQWxm?=
+ =?utf-8?B?VVJFWTdUNzF3TGE1Qmx2RTJBU0N4UTV4bWZ3VXJaTDdhSGV0RU9DUUJEN28w?=
+ =?utf-8?B?SW80NWkrRUw1RnFNRFZLOFdxVmVjWVJad1cwRTVFWU5PSHg2eVFOUi9uRkEz?=
+ =?utf-8?B?WGFSM21qdHhyQ1cwZHF6cnlEN3k4SkZEQng3RlBmS1hmSlRWcnRFS2hzd1RQ?=
+ =?utf-8?B?NFYrRnFTdENqcWdMakJmWVArNzlRZEFBU3dpQ2gzN0szbTVGa29Uak9UWnpL?=
+ =?utf-8?B?S2VkbWlFY1FvTGlQU2F2UXRXNUc5dDhLNDBMeGE2SHhHMEtlbzJ4cHF4ak5D?=
+ =?utf-8?B?V0xIRXFIbWpkT2RVOWhoRTkyS2F0S2hIRFFLZjlrTGJtTzZGNXhSZGRhbVly?=
+ =?utf-8?B?RXhEUVl0Ui9ZWkFBZklrVytCdktHTjhSdTNFYXRSTVoyUXVwYmdEZDQxcGls?=
+ =?utf-8?B?K1dHQUFydVcyVDNkYUdqZFRiNVdwQmdlcXhBbkFGNXlmV3JueHhoYWM0U05Y?=
+ =?utf-8?B?TWJNc0FPN2N3SVQ1RlJHWlZ4Mit1TjlVWHZ5Z2ljS1hicXVRUlNIMVJqMCtI?=
+ =?utf-8?B?Q1dYZ1Q5TUJSZU9pSytrU2dvVC93Q0dpQzVEYVJvY3ZJZCtja1JOMzYvakRj?=
+ =?utf-8?B?VHN3dWpUQnJ5ZU45NWd5Vy9qNkNJMlRsdktvN3l3ck9BSmVYc1ZPMEZ4Z1dN?=
+ =?utf-8?B?UTU2bDJtMEd4TjEzMHNoVng2WjFkdjNsdGRad29MQXhXaUdoTHNNQXBWdkJO?=
+ =?utf-8?B?amoyejRTTlIwcnpkZXNYbkhPUDdHZGwwMlowNkgyWDYzdlVxSmR5SUJsTlhG?=
+ =?utf-8?B?SERORnNlTmM1ZVg1N3krTS96Q25IdGFVSDB3aXFWMC9KcHI4ZFk5SFFCd3g3?=
+ =?utf-8?B?ekRVV0lWeWROSGRMeFZkVkl5ZFhTOURiZ0Nwc2E5dmc4b3ozb3MzSHkrRENZ?=
+ =?utf-8?B?bnNhMFJiVXdtRmNtNXlDa2RPbnFpNWdVQnd3Vitxa2FJMU5XcHM3MkRjSVdH?=
+ =?utf-8?B?a2xQWFdvcHJTM0NRUnNERGlxQTFham5oU0VTSGlubmd3U29iMnhBUUhyNmN1?=
+ =?utf-8?B?Q0hWaUNOZVZBRkxzZ1FNNDVWSzVNZVFMS092OGExK01MMEk4KzRxQjVmM0k1?=
+ =?utf-8?B?bkErVlR3UklqVEhxK3czR1RZeEZCZGwzTElrZ3NPQXIzMlhlM2k5VFBzVS80?=
+ =?utf-8?B?T1BFNnZIalZIRitPMVVxVjZ1VURZTzVzNUxPa1J0ZXlMV3FFamVDUVFSdWJD?=
+ =?utf-8?B?aEVFWnN2OE5BeStOLzdlR1hIRk1tRTVMbjJTejk4Q0VPUk51clh1RU4xbmM5?=
+ =?utf-8?B?YjJrZGhla3Q2OFdXZW54T2pMYkx5cmJ1UjhvanIrOHd1MjNNc0dTNUlpOU9h?=
+ =?utf-8?B?MWFmeEVVLzh6QVlsblpheWF5YlV0R3UwdFpFM3FqNVI2dnhHSTdhNlR3dzJQ?=
+ =?utf-8?B?THc1cEFVNmM5Sm8wUlFXTThMTlZ3TFN2L3RVbnpMb2tpWWZRUEZ4elJ0a2w3?=
+ =?utf-8?B?bkRGaVUyWUMvOG9JS201YlhJbkZvNjRrSFlISnAvNlJId1lhU3EyYmxxVlZh?=
+ =?utf-8?B?MDJURU16bFJuZDE1NUUwbklHdzF0ZkZMblRUeGs2MW5GRWttbVZ2VDAxQm10?=
+ =?utf-8?B?eHFGaUtGMUMxaHRENXFvTjdvWGFLZElCVjB2Nk1rQWh4d1A1SzdsYy9aSW9E?=
+ =?utf-8?B?VTVLQzliYnVGZUt0WGJUdDBQMTBFVWh3VXBwQVJqMXhnMkxnUFYxUEtnU3R6?=
+ =?utf-8?B?aU9Sc0M4N1N4cDF6TnBPeU9QS042aEJwSWsrYjI5bllQbVpZcFB2WkdqeVdH?=
+ =?utf-8?B?RHRJZGN0STFIdXUzUDZ0aG8rVFFYL0pvZlNnYzRlRVZtM2F1eVhjK1NEZ2h0?=
+ =?utf-8?B?UmVtYmZwZTlpa3h6cDE5TlJCYkVzLzVKRUZ0UzdKL3ZITzVSTEJhdGRUSUZH?=
+ =?utf-8?B?MytrYUdDT09GeUlOdkhKbmpMNjFmTU5neU1Zb0NPQWNNakNYWXRhZ3MvZGJI?=
+ =?utf-8?B?OWlVWVI4aEpvRXB5dmo0bTB5Z2xnKzdrYW9mcWFxUWV1aG9GQmRZK0lURkRj?=
+ =?utf-8?Q?TVUukh7KpyyL4q7u0mIJgpr5z?=
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	zWLMWK1BqQHBM0fmScQ0nEWVXzd/ag3Slh6XKEQMV95VqdSmp45orWlmVlTMOyPZ+IBFoR/DUaEZqdM+nR5meLbp4dpqr3ym12pP7F6JDUtp0+XlSWwucyjNxuteV61OiOx4yhnM+DguyOIwjIA+c4un2zMSfWDSzsPVfPHLjeDSC7GdPhm7VbcLz4hs1phV4Io0FEkp+0u12flpmBkgR7oqCH8gKF/C4LJH8dCTBrhgz+iBGXWmTVP+3P/BHuU7/eB+YHK1+Yw82WynnLR0UcYUi5CafBwPsgt2ub9N3M38QnkM6MgpUgAbdXexLhVIlPLN0q44jcP7JWrKbSpg4KHzP/ribNfEXsqquJTPQTb4ni6usK9nrIj1dOmPMnWvd5k6ebhJZsSGvlMMP3ewj99uWbvCCQzYB8b73ENuDofNwC+dOJS9lkj6vT54Qcb81f4o7zKWnfOFaC50axREVku13Uu+OxGqvWWW8YFFqH/pVbWugyhIkN+U1f/nqpZvjWpmn6QsgWnWXLVNosuSoOa8duAwmyW2FeAzHWkHLewq4Kx6xxmKHUnUHaGzoX/klWT53arok5wf0gCO8PUWAEM81Cny1aHBVg6Ah27jwfw=
+	ROe7/ym67RUvI3jDsiwGu7ZvdBbUTNw5NjqUnZ9wxrTLadyLTHu4yfJ1BXmeKBMOKqgQr2T0bpzirUOjw3UFO510lNCIOb0pEmIPSr2Ytff4ZN8qLNo/EZw/r72GgcPp5EuVzrBSBdAP4+P3fz+9+B86V+S9yBtf2jp5baZAz1ZIozHWlru7H6qWWeBBufYoMbBfzCCFzFHkyBlqlOBqv9qOM0vVmGmeKJxZi6P9k+VoRPEUeZhgS2tLzVaCYMvZHPa+AXeq+m06CZslQ/5qoSa2aRpK8h0SE1sqNCmSaTiMVo7VTJtA8P572EPfGoeMyyA7gP/VPY/wVCTzuzJIK4lSnmTROQeKInmP2m714I4+4PJufrcmFRvKL47o2ZXmg5zGdiPuZAxY+Ndtpg3kcQLgJ9KUpEvT0dXoo1o4M5HwTWwxvdUUlY0qK0o/mwUNIepI3TSorsjQABbUmbmUGCuY09VQFBpGF+R08SclNiJu7szT2O3uv9iO3eU3b/EXbl6sWdPqBT8m3WWkMQy94syAQIwq924Y9cljjoKhZBqAZ3g/BydJpiktlg5K6PPEZs8zWDzr2BhaLRYtwYxDlKeAtXgc6AbLjU9DPZaMb7U=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a55d1869-b0ec-49c1-f524-08dd5a361312
+X-MS-Exchange-CrossTenant-Network-Message-Id: 34a6ba66-a027-4f7e-57d5-08dd5a389f51
 X-MS-Exchange-CrossTenant-AuthSource: PH0PR10MB5706.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Mar 2025 09:30:45.4450
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Mar 2025 09:48:59.8850
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: qcM+2n2BGaf/zo6cTdoVYFX7TmESyyWioAkgaDfS56vwGBdgPVfRcKnXLpIj9L/peFMO4TNKQzsA/5RjDOiycg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR10MB5147
+X-MS-Exchange-CrossTenant-UserPrincipalName: e6ji2Jz0Whry61+7NRr9qeudOxhDZT+knpV3CINRSG1LSDHNEFjwMSRssE7EqNS7bOwd2ToUaIoDFLAujNHvCw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR10MB5033
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
  definitions=2025-03-03_03,2025-03-03_01,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 adultscore=0 bulkscore=0
- mlxlogscore=999 malwarescore=0 spamscore=0 phishscore=0 suspectscore=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 suspectscore=0 spamscore=0
+ mlxscore=0 mlxlogscore=999 adultscore=0 malwarescore=0 bulkscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2502100000
- definitions=main-2503030072
-X-Proofpoint-GUID: IIJxbUaR4lZ_vIS7YDOSTavCY3PZmfsF
-X-Proofpoint-ORIG-GUID: IIJxbUaR4lZ_vIS7YDOSTavCY3PZmfsF
+ definitions=main-2503030075
+X-Proofpoint-GUID: n1lvwsNs2KY-JYZtEqIO2Ov2HPt4vEfx
+X-Proofpoint-ORIG-GUID: n1lvwsNs2KY-JYZtEqIO2Ov2HPt4vEfx
 
-
-
-On 2/3/25 01:30, Ritesh Harjani (IBM) wrote:
-> Anand Jain <anand.jain@oracle.com> writes:
+On 1/3/25 00:27, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
->> On 10/1/25 17:10, Nirjhar Roy (IBM) wrote:
->>> This adds support to pick and use any existing FS config from
->>> configs/<fstype>/<config>. e.g.
->>>
->>> configs/xfs/1k
->>> configs/xfs/4k
->>> configs/ext4/4k
->>> configs/ext4/64k
->>>
->>> This should help us maintain and test different fs test
->>> configurations from a central place. We also hope that
->>> this will be useful for both developers and testers to
->>> look into what is being actively maintained and tested
->>> by FS Maintainers.
->>>
->>> When we will have fsconfigs set, then will be another subdirectory created
->>> in results/<section>. For example let's look at the following:
->>>
->>> The directory tree structure on running
->>> sudo ./check -q 2 -R xunit-quiet -c xfs/4k,configs/xfs/1k selftest/001 selftest/007
->>>
->>
->>
->> The -c option check makes sense to me. Is it possible to get this
->> feature implemented first while the -q option is still under discussion?
+> Since kernel 6.13, namely since commit c87c299776e4 ("btrfs: make buffered
+> write to copy one page a time"), the test can sporadically fail with an
+> unexpected digests for files in snapshots. This is because after that
+> commit the pages for a buffered write are prepared and dirtied one by one,
+> and no longer in batches up to 512 pages (on x86_64), so a snapshot that
+> is created in the middle of a buffered write can result in a version of
+> the file where only a part of a buffered write got caught, for example if
+> a snapshot is created while doing the 32K write for file range [0, 32K),
+> we can end up a file in the snapshot where only the first 8K (2 pages) of
+> the write are visible, since the remaining 24K were not yet processed by
+> the write task. Before that kernel commit, this didn't happen since we
+> processed all the pages in a single batch and while holding the whole
+> range locked in the inode's io tree.
 > 
-> Hi Anand,
+> This is easy to observe by adding an "od -A d -t x1" call to the test
+> before the _fail statement when we get an unexpected file digest:
 > 
-> Thanks for trying the patches. The design of -c option is still under
-> discussion [1]. But it will be helpful if you could help us understand
-> your reasons for finding -c option useful :)
+>    $ ./check btrfs/080
+>    FSTYP         -- btrfs
+>    PLATFORM      -- Linux/x86_64 debian0 6.14.0-rc4-btrfs-next-188+ #1 SMP PREEMPT_DYNAMIC Wed Feb 26 17:38:41 WET 2025
+>    MKFS_OPTIONS  -- /dev/sdc
+>    MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
 > 
-
-Reason is exactly same as you mentioned and I copied it here:
-
----
-1. Testers and other FS developers can know what is being actively
-tested and maintained by FS Maintainers.
----
-
-> [1]: https://lore.kernel.org/linux-fsdevel/Z55RXUKB5O5l8QjM@li-dc0c254c-257c-11b2-a85c-98b6c1322444.ibm.com/
+>    btrfs/080 32s ... [failed, exit status 1]- output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad)
+>        --- tests/btrfs/080.out	2020-06-10 19:29:03.814519074 +0100
+>        +++ /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad	2025-02-27 17:12:08.410696958 +0000
+>        @@ -1,2 +1,6 @@
+>         QA output created by 080
+>        -Silence is golden
+>        +0000000 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+>        +*
+>        +0008192
+>        +Unexpected digest for file /home/fdmanana/btrfs-tests/scratch_1/17_11_56_146646257_snap/foobar_50
+>        +(see /home/fdmanana/git/hub/xfstests/results//btrfs/080.full for details)
+>        ...
+>        (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/080.out /home/fdmanana/git/hub/xfstests/results//btrfs/080.out.bad'  to see the entire diff)
+>    Ran: btrfs/080
+>    Failures: btrfs/080
+>    Failed 1 of 1 tests
 > 
->>
->> That said, I have a suggestion for the -c option—
->>    Global config variables should be overridden by file system-specific
->> config files.
->>
->> For example, if configs/localhost.config contains:
->>
->> MKFS_OPTIONS="--sectorsize 64K"
->>
->> but configs/<fstype>/some_config sets:
->>
->> MKFS_OPTIONS=""
->>
->> then the value from configs/<fstype>/some_config should take priority.
->>
->> I ran some tests with btrfs, and I don’t see this behavior happening yet.
+> The files are created like this while snapshots are created in parallel:
 > 
-> I think that was intentional. I guess the reasoning was, we don't want to
-> break use cases for folks who still wanted to use local.config file
-> option.
->
-
-Ok.
-
-> However, in the new proposed design [2] we are thinking of having 1
-> large config per filesystem. e.g. configs/btrfs/config.btrfs which will
-> define all of the relevant sections e.g. btrfs_4k, btrfs_64k, ...  Then
-> on invokking "make", it will generate a single large fs config file i.e.
-> configs/.all-sections-configs which will club all filesystems section
-> configs together.
->
-> Now when someone invokes check script with different -s options, it will
-> first look into local.config file, if local.config not found, then it
-> will look into configs/.all-sections-configs to get the relevant section
-> defines.
+>      run_check $XFS_IO_PROG -f \
+>          -c "pwrite -S 0xaa -b 32K 0 32K" \
+>          -c "fsync" \
+>          -c "pwrite -S 0xbb -b 32770 16K 32770" \
+>          -c "truncate 90123" \
+>          $SCRATCH_MNT/$name
 > 
-> This hopefully should address all the other concerns which were raised
-> on the current central fs config design.
+> So with the kernel behaviour before 6.13 we expected the snapshot to
+> contain any of the following versions of the file:
 > 
-> [2]: https://lore.kernel.org/linux-fsdevel/87plj0hp7e.fsf@gmail.com/
+> 1) Empty file;
 > 
-
-
-I think it’s making things a bit more complicated than needed.
-
-True. We’d probably be better off with one big config file.
-No need for <fstype> directories under configs.
-configs/<fstype>.config should work just fine.
-I’m not fond of the need to run make; it seems excessive.
-
-The way to run it is simple and works well:
-
-  $ ./check -c configs/btrfs.config
-  $ ./check -c configs/btrfs.config -s <section1> ...
-  $ ./check -c configs/btrfs.config -S <exclude-section1> ...
-
-These steps already work fine:
-
-  $ cp configs/btrfs.config configs/$(hostname).config
-  $ ./check -s <section> ..
-
-(Patch containing configs/btrfs.config is already in the ML).
-
-Also, a --dry-run option to check the config before running would
-be super helpful.
-
-Thanks, Anand
-
-> -ritesh
+> 2) 32K file reflecting only the first buffered write;
 > 
->>
->> Thanks, Anand
+> 3) A file with a size of 49154 bytes reflecting both buffered writes;
+> 
+> 4) A file with a size of 90123 bytes, reflecting the truncate operation
+>     and both buffered writes.
+> 
+> So now the test can fail since kernel 6.13 due to snapshots catching
+> partial writes.
+> 
+> However the goal of the test when I wrote it was to verify that if the
+> snapshot version of a file gets the truncated size, then the buffered
+> writes are visible in the file, since they happened before the truncate
+> operation - that is, we can't get a file with a size of 90123 bytes that
+> doesn't have the range [0, 16K) full of bytes with a value of 0xaa and
+> the range [16K, 49154) full of bytes with the 0xbb value.
+> 
+> So update the test to the new kernel behaviour by verifying only that if
+> the file has the size we truncated to, then it has all the data we wrote
+> previously with the buffered writes.
+> 
+> Reported-by: Glass Su <glass.su@suse.com>
+> Link: https://lore.kernel.org/linux-btrfs/30FD234D-58FC-4F3C-A947-47A5B6972C01@suse.com/
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> ---
+>   tests/btrfs/080 | 42 +++++++++++++++++++++++-------------------
+>   1 file changed, 23 insertions(+), 19 deletions(-)
+> 
+> diff --git a/tests/btrfs/080 b/tests/btrfs/080
+> index ea9d09b0..aa97d3f6 100755
+> --- a/tests/btrfs/080
+> +++ b/tests/btrfs/080
+> @@ -32,6 +32,8 @@ _cleanup()
+>   
+>   _require_scratch_nocheck
+>   
+> +truncate_offset=90123
+> +
+>   create_snapshot()
+>   {
+>   	local ts=`date +'%H_%M_%S_%N'`
+> @@ -48,7 +50,7 @@ create_file()
+>   		-c "pwrite -S 0xaa -b 32K 0 32K" \
+>   		-c "fsync" \
+>   		-c "pwrite -S 0xbb -b 32770 16K 32770" \
+> -		-c "truncate 90123" \
+> +		-c "truncate $truncate_offset" \
+>   		$SCRATCH_MNT/$name
+>   }
+>   
+> @@ -81,6 +83,12 @@ _scratch_mkfs "$mkfs_options" >>$seqres.full 2>&1
+>   
+>   _scratch_mount
+>   
+> +# Create a file while no snapshotting is in progress so that we get the expected
+> +# digest for every file in a snapshot that caught the truncate operation (which
+> +# sets the file's size to $truncate_offset).
+> +create_file "gold_file"
+> +expected_digest=`_md5_checksum "$SCRATCH_MNT/gold_file"`
+> +
+>   # Run some background load in order to make the issue easier to trigger.
+>   # Specially needed when testing with non-debug kernels and there isn't
+>   # any other significant load on the test machine other than this test.
+> @@ -103,24 +111,20 @@ for ((i = 0; i < $num_procs; i++)); do
+>   done
+>   
+>   for f in $(find $SCRATCH_MNT -type f -name 'foobar_*'); do
+> -	digest=`md5sum $f | cut -d ' ' -f 1`
+> -	case $digest in
+> -	"d41d8cd98f00b204e9800998ecf8427e")
+> -		# ok, empty file
+> -		;;
+> -	"c28418534a020122aca59fd3ff9581b5")
+> -		# ok, only first write captured
+> -		;;
+> -	"cd0032da89254cdc498fda396e6a9b54")
+> -		# ok, only 2 first writes captured
+> -		;;
+> -	"a1963f914baf4d2579d643425f4e54bc")
+> -		# ok, the 2 writes and the truncate were captured
+> -		;;
+> -	*)
+> -		# not ok, truncate captured but not one or both writes
+> -		_fail "Unexpected digest for file $f"
+> -	esac
+> +	file_size=$(stat -c%s "$f")
+> +	# We want to verify that if the file has the size set by the truncate
+> +	# operation, then both delalloc writes were flushed, and every version
+> +	# of the file in each snapshot has its range [0, 16K) full of bytes with
+> +	# a value of 0xaa and the range [16K, 49154) is full of bytes with a
+> +	# value of 0xbb.
+> +	if [ "$file_size" -eq "$truncate_offset" ]; then
+> +		digest=`_md5_checksum "$f"`
+> +		if [ "$digest" != "$expected_digest" ]; then
+> +			echo -e "Unexpected content for file $f:\n"
+> +			_hexdump "$f"
+> +			_fail "Bad file content"
+> +		fi
+> +	fi
+
+Looks good.
+Reviewed-by: Anand Jain <anand.jain@oracle.com>
+
+Applied to for-next.
+
+Thx.
+
+
+>   done
+>   
+>   # Check the filesystem for inconsistencies.
 
