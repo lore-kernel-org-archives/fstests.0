@@ -1,41 +1,79 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D6171EB9FA;
-	Tue,  4 Mar 2025 17:42:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2AD827814E
+	for <fstests@vger.kernel.org>; Tue,  4 Mar 2025 18:00:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741110164; cv=none; b=hF1I+KQ0PZBESF1ctmK8mJOnpN/gtyazZGmOeswt4TZwQAKJo9u9UXt+T5FLAwW6Q/Y5aaAQRZU+1yQB79ZKI+J5m9jZh3JV6F2dAvOEER1CldQR6AUUHKEWt61j7aqMDIlNX9f19aalCv+KwN/Til4bpmgTfBplHnzRuYJr9j4=
+	t=1741111256; cv=none; b=KZOmoLWteGrprQOaZqaa72gRmiBtmp1zsYNqzEP+dItZ28SYwcDyUXO68kLPg/Z+V7MCxaPwRIzWswPONEjgeZcaAJlZlALMIev96YKEUfbHMUl2hNatbb498mzDFUlaVS7vF1QdIFKXgSJR0ooZQwHi55MLWzbHKFqP+tCrnPE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741110164; c=relaxed/simple;
-	bh=f+8HzBvpw7250BUiv1OwiIExtF93RpSe2DV0+9NSt2Y=;
+	s=arc-20240116; t=1741111256; c=relaxed/simple;
+	bh=3WSqMz/LoOIwHMuqPvHCPZ39xMGhc+Vblgx8Y3zTzBk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=C7nkC6BaK5BHNoX9tKMWne4xDZGqNoPgLsikJTsc9RIwNz0qd+tfqGEf+ydDj/KUpbVJ+wpa2L/Q64x6X+bTy2OyYT7p5QIv8H++TsXyQMxvsw8ydtX0fGH4cztP8CPjXxerN4eEJmARmYcRffDi9D2wDxgzXeNnHwpm8US4TVA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fay+lofj; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=iLneUUMVuQEQCmzAktH9c8Au6143KV5Q1ume47HygmZH7WKBKTYHNN9A7oH3ip9Ye88INteXtxhdXNST0BxpKEtZbs11gh5PIco9HxXzd8b+SQxvl/5MPiD+gA4ZHj/Ghebfs8AI0DCgzlx/zhz20y8rizeuOssU/jzJDyD5zFg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=YhLABN/b; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fay+lofj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91FE3C4CEE5;
-	Tue,  4 Mar 2025 17:42:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741110163;
-	bh=f+8HzBvpw7250BUiv1OwiIExtF93RpSe2DV0+9NSt2Y=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=fay+lofjMlzDM0+hRFifBMrZG5uktxs6YUypqubYGKGusdqSxpO80Zma0d/pCa6X3
-	 yQFHwGJo2ksdtxV91pJw9H7B9q4iYUc4wNKcNhf/A3JR2c1O+kY4+7V/aXnzOS43h5
-	 pvg/LoolzHLHAqXLWEIQylggz6ozZNgQtX9mIkB1aZeeB8uf89lvQ05q2HABRH5Rbr
-	 /RMYa5e+cubwlaK/ArPwhuDuXt47QWdA6rRaTXo/3yJpdTd9KmSQDq9O+MDUa5aOlm
-	 cBiqUm4XqAv/U8wdfvQ2ZSy6knC24WBxZD6ZFld71ZYzMk/edlutpf/WbH9ZDBUuF9
-	 zI5ZtWOG7sHzw==
-Date: Tue, 4 Mar 2025 09:42:42 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: Zorro Lang <zlang@kernel.org>
-Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="YhLABN/b"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1741111252;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=WBecTwctML88vqPy/on9x469GjzYB+S5ZmJ1F5KyEkA=;
+	b=YhLABN/bz41xtKzWVWbbtbegzUm/w06OfETVQFq+iu3ai6iZTmyOUU3dxGu9/1Y2sIPJTg
+	yqaa8beMi8EIRPLcQdhTFSj21ECqRoisz1W35qQmvVQK67tbFRbvhXPX0tBFPSs19u2FBW
+	fA4UHKpWaN1crRN3WufeCBVFO/9mUww=
+Received: from mail-pj1-f71.google.com (mail-pj1-f71.google.com
+ [209.85.216.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-317-FGSqhJHwO06CdWI2533q3Q-1; Tue, 04 Mar 2025 13:00:46 -0500
+X-MC-Unique: FGSqhJHwO06CdWI2533q3Q-1
+X-Mimecast-MFC-AGG-ID: FGSqhJHwO06CdWI2533q3Q_1741111245
+Received: by mail-pj1-f71.google.com with SMTP id 98e67ed59e1d1-2feda472a6eso6136415a91.0
+        for <fstests@vger.kernel.org>; Tue, 04 Mar 2025 10:00:46 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1741111245; x=1741716045;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WBecTwctML88vqPy/on9x469GjzYB+S5ZmJ1F5KyEkA=;
+        b=EqDboUcaO+ToNZJS8cPndL7yhq0VyhznOM8HxRZ0djzO9bkjnPDgbOTkTvRPel09C6
+         ntWY4i5DZK/+bDK3Q9BxBcZB5s5DFbjPSH1UV0mDG0V1bIXHL9dL7+eyqNL0ODlnYpnF
+         h9iHEgbanY7IKIG2BhZP7MFFdr1pN9rc4xj4R3coN5W594GX/1wkb0M1TVpO6LfqHrN/
+         BNf4Oo5BPzjwHGmGU9Qc844KSO14nqS0LQcEeGTg8zMlRdy2PVs99XmnTpMHrw1MedDl
+         7WRAqDm92dCyVHj5bJn03oPzNY/idBmwL4eeLy0f8B0uFT4ux5f7820KL3SoFp4XjEip
+         rbDQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUVK0lmoEvP72CElQaWwg/t/sP7dUWVxjukCHYxugyi8GT+HV2CCMMSuYmLAR9q8MMmXWDgPqwO@vger.kernel.org
+X-Gm-Message-State: AOJu0YxE7XS5eiiYR18c+UwhXqWwtp9Cu6Yc0tSdKK367kV6L6Biz6EO
+	Bn5MGd2Icbe/kbK3TSVyNh/DOpk4dR5LxbTKI7jGo+OuZ8SUq/W2Wl2jjBv0o6G4nrncxS2ykyE
+	RyTt0payf3FE8VKZpgdTkKk2tSvL9Ynvvck2P93Kk84ihiOb96a9/xG4=
+X-Gm-Gg: ASbGncuCxIbHB/IthZJ4pcHbtdIrjdILiggV/zIOnewekUveOQXc2TPP56lTUjvnvAy
+	+GPd8m6mmJlzMuw18Plc102GZnIjyki3QEStbaPXoi6YlONFA9kPN0uKQSYF0Lg3bQkhGkPsl/e
+	zvWkH0h+hrqEGqUWd8+w5TNS+gA6D3KuzfX7sYL3k3UqDEC5UIXocDymRftU/8luPr4ifrqZuG1
+	oXFYUb71SOIUNKvvaR+w7Rfw6lT/KT2FsjkZJZiaR1lx9xLFuJYpGcMNnolpfLDCRrlqwWv8AhN
+	xAKhmvswVbgzQyeaKgAtFbCsa15imHUhMP6jz+hD9hREzBxxRl9lmVmx
+X-Received: by 2002:a05:6a21:4613:b0:1ee:dd60:194f with SMTP id adf61e73a8af0-1f2f4e45147mr28203969637.26.1741111245024;
+        Tue, 04 Mar 2025 10:00:45 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGrEVpMt1TC86DAQEPPAlMYdw+D+XtbQA6Vq0wy6kj5q/vKdTteC5BmkNy4Tg+w1dtlyrVhuw==
+X-Received: by 2002:a05:6a21:4613:b0:1ee:dd60:194f with SMTP id adf61e73a8af0-1f2f4e45147mr28203921637.26.1741111244603;
+        Tue, 04 Mar 2025 10:00:44 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-af14cd45d19sm7644214a12.35.2025.03.04.10.00.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Mar 2025 10:00:44 -0800 (PST)
+Date: Wed, 5 Mar 2025 02:00:40 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: "Darrick J. Wong" <djwong@kernel.org>
+Cc: Zorro Lang <zlang@kernel.org>, hch@lst.de, fstests@vger.kernel.org,
 	linux-xfs@vger.kernel.org
 Subject: Re: [PATCH 1/1] fstests: test mkfs.xfs protofiles with xattr support
-Message-ID: <20250304174242.GA2803749@frogsfrogsfrogs>
+Message-ID: <20250304180040.7yoddqyciqajw47d@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 References: <173706975660.1928701.8344148155038133836.stgit@frogsfrogsfrogs>
  <173706975673.1928701.14882814105946770615.stgit@frogsfrogsfrogs>
  <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250304174242.GA2803749@frogsfrogsfrogs>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -44,307 +82,192 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20250304174242.GA2803749@frogsfrogsfrogs>
 
-On Sun, Mar 02, 2025 at 09:15:44PM +0800, Zorro Lang wrote:
-> On Thu, Jan 16, 2025 at 03:35:04PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <djwong@kernel.org>
+On Tue, Mar 04, 2025 at 09:42:42AM -0800, Darrick J. Wong wrote:
+> On Sun, Mar 02, 2025 at 09:15:44PM +0800, Zorro Lang wrote:
+> > On Thu, Jan 16, 2025 at 03:35:04PM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <djwong@kernel.org>
+> > > 
+> > > Make sure we can do protofiles with xattr support.
+> > > 
+> > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > ---
 > > 
-> > Make sure we can do protofiles with xattr support.
+> > This test always fails on my side, as below (diff output):
 > > 
-> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
-> > ---
+> >    ...
+> >    Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> >    Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> >    Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> >   +Attribute "selinux" has a 28 byte value for SCRATCH_MNT/directory/test
+> >    *** unmount FS
+> >    *** done
+> >    *** unmount
+> > 
+> > Looks like the $SELINUX_MOUNT_OPTIONS doesn't help the mkfs protofile
+> > with xattrs.
 > 
-> This test always fails on my side, as below (diff output):
+> Oops.  Ok then, I'll filter them out below...
 > 
->    ...
->    Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
->    Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
->    Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
->   +Attribute "selinux" has a 28 byte value for SCRATCH_MNT/directory/test
->    *** unmount FS
->    *** done
->    *** unmount
-> 
-> Looks like the $SELINUX_MOUNT_OPTIONS doesn't help the mkfs protofile
-> with xattrs.
-
-Oops.  Ok then, I'll filter them out below...
-
-> Thanks,
-> Zorro
-> 
-> 
-> >  tests/xfs/1937     |  144 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/1937.out |  102 +++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 246 insertions(+)
-> >  create mode 100755 tests/xfs/1937
-> >  create mode 100644 tests/xfs/1937.out
+> > Thanks,
+> > Zorro
 > > 
 > > 
-> > diff --git a/tests/xfs/1937 b/tests/xfs/1937
-> > new file mode 100755
-> > index 00000000000000..aa4143a75ef643
-> > --- /dev/null
-> > +++ b/tests/xfs/1937
-> > @@ -0,0 +1,144 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2024-2025 Oracle.  All Rights Reserved.
-> > +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 1937
-> > +#
-> > +# mkfs protofile with xattrs test
-> > +#
-> > +. ./common/preamble
-> > +_begin_fstest mkfs auto quick
-> > +
-> > +seqfull="$seqres.full"
-> > +rm -f $seqfull
-> > +
-> > +. ./common/filter
-> > +
-> > +_cleanup()
-> > +{
-> > +	echo "*** unmount"
-> > +	_scratch_unmount 2>/dev/null
-> > +	rm -f $tmp.*
-> > +	rm -f $TEST_DIR/$seq.file
-> > +}
-> > +
-> > +_full()
-> > +{
-> > +	echo ""            >>$seqfull
-> > +	echo "*** $* ***"  >>$seqfull
-> > +	echo ""            >>$seqfull
-> > +}
-> > +
-> > +_filter_stat()
-> > +{
-> > +	sed '
-> > +		/^Access:/d;
-> > +		/^Modify:/d;
-> > +		/^Change:/d;
-> > +		s/Device: *[0-9][0-9]*,[0-9][0-9]*/Device: <DEVICE>/;
-> > +		s/Inode: *[0-9][0-9]*/Inode: <INODE>/;
-> > +		s/Size: *[0-9][0-9]* *Filetype: Dir/Size: <DSIZE> Filetype: Dir/;
-> > +	' | tr -s ' '
-> > +}
-> > +
-> > +_require_command $ATTR_PROG "attr"
-> > +_require_scratch
-> > +
-> > +# mkfs cannot create a filesystem with protofiles if realtime is enabled, so
-> > +# don't run this test if the rtinherit is anywhere in the mkfs options.
-> > +echo "$MKFS_OPTIONS" | grep -q "rtinherit" && \
-> > +	_notrun "Cannot mkfs with a protofile and -d rtinherit."
-> > +
-> > +protofile=$tmp.proto
-> > +tempfile=$TEST_DIR/$seq.file
-> > +
-> > +$XFS_IO_PROG -f -c 'pwrite 64k 28k' -c 'pwrite 1280k 37960' $tempfile >> $seqres.full
-> > +$here/src/devzero -b 2048 -n 2 -c -v 44 $tempfile.2 
-> > +
-> > +$ATTR_PROG -R -s rootdata -V 0test $tempfile &>> $seqres.full
-> > +$ATTR_PROG -S -s acldata -V 1test $tempfile &>> $seqres.full
-> > +$ATTR_PROG -s userdata -V 2test $tempfile &>> $seqres.full
-> > +perl -e 'print "x" x 37960;' | $ATTR_PROG -s bigdata $tempfile &>> $seqres.full
-> > +
-> > +cat >$protofile <<EOF
-> > +DUMMY1
-> > +0 0
-> > +: root directory
-> > +d--777 3 1
-> > +: a directory
-> > +directory d--755 3 1 
-> > +test ---755 3 1 $tempfile
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0 ---755 3 1 $tempfile
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1 ---755 3 1 $tempfile
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2 ---755 3 1 $tempfile
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3 ---755 3 1 $tempfile
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4 ---755 3 1 $tempfile
-> > +$
-> > +: back in the root
-> > +setuid -u-666 0 0 $tempfile
-> > +setgid --g666 0 0 $tempfile
-> > +setugid -ug666 0 0 $tempfile
-> > +directory_setgid d-g755 3 2
-> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5 ---755 3 1 $tempfile
-> > +$
-> > +: back in the root
-> > +block_device b--012 3 1 161 162 
-> > +char_device c--345 3 1 177 178
-> > +pipe p--670 0 0
-> > +symlink l--123 0 0 bigfile
-> > +: a file we actually read
-> > +bigfile ---666 3 0 $tempfile.2
-> > +: done
-> > +$
-> > +EOF
-> > +
-> > +if [ $? -ne 0 ]
-> > +then
-> > +	_fail "failed to create test protofile"
-> > +fi
-> > +
-> > +_verify_fs()
-> > +{
-> > +	echo "*** create FS version $1"
-> > +	VERSION="-n version=$1"
-> > +
-> > +	_scratch_unmount >/dev/null 2>&1
-> > +
-> > +	_full "mkfs"
-> > +	_scratch_mkfs_xfs $VERSION -p $protofile >>$seqfull 2>&1
-> > +
-> > +	echo "*** check FS"
-> > +	_check_scratch_fs
-> > +
-> > +	echo "*** mount FS"
-> > +	_full " mount"
-> > +	_try_scratch_mount >>$seqfull 2>&1 \
-> > +		|| _fail "mount failed"
-> > +
-> > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | \
-> > +		grep -q 'Attribute.*has a ' || \
-> > +		_notrun "mkfs.xfs protofile does not support xattrs"
-> > +
-> > +	echo "*** verify FS"
-> > +	(cd $SCRATCH_MNT ; find . | LC_COLLATE=POSIX sort \
-> > +		| grep -v ".use_space" \
-> > +		| xargs $here/src/lstat64 | _filter_stat)
-> > +	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
-> > +		|| _fail "bigfile corrupted"
-> > +	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
-> > +		|| _fail "symlink broken"
-> > +
-> > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | _filter_scratch
+> > >  tests/xfs/1937     |  144 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/1937.out |  102 +++++++++++++++++++++++++++++++++++++
+> > >  2 files changed, 246 insertions(+)
+> > >  create mode 100755 tests/xfs/1937
+> > >  create mode 100644 tests/xfs/1937.out
+> > >
+ 
+[snip]
 
-...so they don't spill into the golden output.  As this is already in
-patches-in-queue, do you want me to send a fixpatch on top of that?
+> > > +	echo "*** verify FS"
+> > > +	(cd $SCRATCH_MNT ; find . | LC_COLLATE=POSIX sort \
+> > > +		| grep -v ".use_space" \
+> > > +		| xargs $here/src/lstat64 | _filter_stat)
+> > > +	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
+> > > +		|| _fail "bigfile corrupted"
+> > > +	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
+> > > +		|| _fail "symlink broken"
+> > > +
+> > > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | _filter_scratch
+> 
+> ...so they don't spill into the golden output.  As this is already in
+> patches-in-queue, do you want me to send a fixpatch on top of that?
 
---D
+If you just need a simple filter, I think you can tell me what do you
+want to change, I can amend the commit simply. Or if you need to change
+more, only re-send this patch is good to me :)
 
-> > +
-> > +	echo "*** unmount FS"
-> > +	_full "umount"
-> > +	_scratch_unmount >>$seqfull 2>&1 \
-> > +		|| _fail "umount failed"
-> > +}
-> > +
-> > +_verify_fs 2
-> > +
-> > +echo "*** done"
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/1937.out b/tests/xfs/1937.out
-> > new file mode 100644
-> > index 00000000000000..050c8318b1abca
-> > --- /dev/null
-> > +++ b/tests/xfs/1937.out
-> > @@ -0,0 +1,102 @@
-> > +QA output created by 1937
-> > +Wrote 2048.00Kb (value 0x2c)
-> > +*** create FS version 2
-> > +*** check FS
-> > +*** mount FS
-> > +*** verify FS
-> > + File: "."
-> > + Size: <DSIZE> Filetype: Directory
-> > + Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 4 
-> > +
-> > + File: "./bigfile"
-> > + Size: 2097152 Filetype: Regular File
-> > + Mode: (0666/-rw-rw-rw-) Uid: (3) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./block_device"
-> > + Size: 0 Filetype: Block Device
-> > + Mode: (0012/b-----x-w-) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 161,162
-> > +
-> > + File: "./char_device"
-> > + Size: 0 Filetype: Character Device
-> > + Mode: (0345/c-wxr--r-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 177,178
-> > +
-> > + File: "./directory"
-> > + Size: <DSIZE> Filetype: Directory
-> > + Mode: (0755/drwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 2 
-> > +
-> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory/test"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./directory_setgid"
-> > + Size: <DSIZE> Filetype: Directory
-> > + Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
-> > +Device: <DEVICE> Inode: <INODE> Links: 2 
-> > +
-> > + File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./pipe"
-> > + Size: 0 Filetype: Fifo File
-> > + Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./setgid"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (2666/-rw-rwsrw-) Uid: (0) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./setugid"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (6666/-rwsrwsrw-) Uid: (0) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./setuid"
-> > + Size: 1348680 Filetype: Regular File
-> > + Mode: (4666/-rwsrw-rw-) Uid: (0) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +
-> > + File: "./symlink"
-> > + Size: 7 Filetype: Symbolic Link
-> > + Mode: (0123/l--x-w--wx) Uid: (0) Gid: (0)
-> > +Device: <DEVICE> Inode: <INODE> Links: 1 
-> > +Attribute "userdata" has a 5 byte value for SCRATCH_MNT/directory/test
-> > +Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
-> > +Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
-> > +Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
-> > +*** unmount FS
-> > +*** done
-> > +*** unmount
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > > +
+> > > +	echo "*** unmount FS"
+> > > +	_full "umount"
+> > > +	_scratch_unmount >>$seqfull 2>&1 \
+> > > +		|| _fail "umount failed"
+> > > +}
+> > > +
+> > > +_verify_fs 2
+> > > +
+> > > +echo "*** done"
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/xfs/1937.out b/tests/xfs/1937.out
+> > > new file mode 100644
+> > > index 00000000000000..050c8318b1abca
+> > > --- /dev/null
+> > > +++ b/tests/xfs/1937.out
+> > > @@ -0,0 +1,102 @@
+> > > +QA output created by 1937
+> > > +Wrote 2048.00Kb (value 0x2c)
+> > > +*** create FS version 2
+> > > +*** check FS
+> > > +*** mount FS
+> > > +*** verify FS
+> > > + File: "."
+> > > + Size: <DSIZE> Filetype: Directory
+> > > + Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 4 
+> > > +
+> > > + File: "./bigfile"
+> > > + Size: 2097152 Filetype: Regular File
+> > > + Mode: (0666/-rw-rw-rw-) Uid: (3) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./block_device"
+> > > + Size: 0 Filetype: Block Device
+> > > + Mode: (0012/b-----x-w-) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 161,162
+> > > +
+> > > + File: "./char_device"
+> > > + Size: 0 Filetype: Character Device
+> > > + Mode: (0345/c-wxr--r-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 177,178
+> > > +
+> > > + File: "./directory"
+> > > + Size: <DSIZE> Filetype: Directory
+> > > + Mode: (0755/drwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > > +
+> > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory/test"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./directory_setgid"
+> > > + Size: <DSIZE> Filetype: Directory
+> > > + Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > > +
+> > > + File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./pipe"
+> > > + Size: 0 Filetype: Fifo File
+> > > + Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./setgid"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (2666/-rw-rwsrw-) Uid: (0) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./setugid"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (6666/-rwsrwsrw-) Uid: (0) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./setuid"
+> > > + Size: 1348680 Filetype: Regular File
+> > > + Mode: (4666/-rwsrw-rw-) Uid: (0) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +
+> > > + File: "./symlink"
+> > > + Size: 7 Filetype: Symbolic Link
+> > > + Mode: (0123/l--x-w--wx) Uid: (0) Gid: (0)
+> > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > +Attribute "userdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > +Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > +Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> > > +Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > +*** unmount FS
+> > > +*** done
+> > > +*** unmount
+> > > 
 > > 
 > 
+
