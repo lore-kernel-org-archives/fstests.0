@@ -1,43 +1,43 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 403412376E4
-	for <fstests@vger.kernel.org>; Tue,  4 Mar 2025 18:03:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B5432E3375;
+	Tue,  4 Mar 2025 18:21:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741111440; cv=none; b=ONHYZd4dtBnNfUP1/Cn2sjtC0G6R1fmI0qofakXbfXdTPEIvFeYPbOnhyD6AakjGmCjtG+NgLKwLQsEFYdEGoeYr/MBQksp/fgqwjwvvpQHkO9SEZ/UrfgiKcq2nbwa2FwGB0ucaGZFLnQJHIdwG2DxxcfaZZSSqcsnkTLNMmpM=
+	t=1741112473; cv=none; b=MreK34GXC4o68zAgCZvqzXQyox5P45bkZ0rK27eh6hqIiv/5lIrUTNFRPXLC6vhnqus9hdXaC2P/IXJv3QZnWJFMQv5hMMf7RZdNEPyhMKW+JZohZoAeiwoVXJw1myI+Me+UZ+yS+mileAvWaXk0Q3VpRs5EyMHpq2VoSQM9mBQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741111440; c=relaxed/simple;
-	bh=qqsIRsI/bVTYUYajJ3oPrCmdnl17xOE4EEFIT2+v4tw=;
+	s=arc-20240116; t=1741112473; c=relaxed/simple;
+	bh=VTQFXOYllTlcr9vYSd2P7Rl0RRizMkZACCi/GABP9Uo=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DSzQuVjm8hG8CqTsQY/4eYeQ/ki+FisOEoDyBsqjPuMPbLfTGcrInyyQhz1oelhFjZh0LZYg9WCwspamNmnhx6gZreR6xGlFN1le4+S4Lhx2klU+rAjqChTtTNM6AxbohqOXNtnDdPUHOTTuc0drUpbtPsmrf3aJI25IplM1Jak=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gSuVA+b8; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=YrIJao1rvcyhD0eshUC3bS+DwnqHSiqvDd6/PzZ+OY0IxFTmH0P2Q92HdXCQeNDt0wiL4y3w1qyj+hEz8oaDJS2TMNSxlI8O5AaeHBx+5PEfDkYGb1RtULrAzFPPUOjoDeZ1vS7NL1ZV988S4hj0p1+8JCyakmsiiMvXtR7fP+E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cJg1OTFl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gSuVA+b8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A40F9C4CEE5;
-	Tue,  4 Mar 2025 18:03:59 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cJg1OTFl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A24E6C4CEE5;
+	Tue,  4 Mar 2025 18:21:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741111439;
-	bh=qqsIRsI/bVTYUYajJ3oPrCmdnl17xOE4EEFIT2+v4tw=;
+	s=k20201202; t=1741112472;
+	bh=VTQFXOYllTlcr9vYSd2P7Rl0RRizMkZACCi/GABP9Uo=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gSuVA+b8Wq9GTqWLgjLYwbe0d1IAGrfBMyIK9qqh1JqyNRfDfpdG0Sj3m1AEyTudx
-	 w7aotU+lS+Dr7X+hn8k9V7OyEGDpU/fG+QBIvMf6K/m1Rd8Fb0Nack0dLJmevIkSwM
-	 +aMqIooR0r8+0ycZU37OBnGse1sjqk4MBc+Mqk/gHxefy/bR2a7gCKHKTiUwLNPPks
-	 FGkDYp8SFmId9I4EfH2d5T+aFBttaEwwuvpIbp8Dn2h3MgNhdWq2DI8hrw/Ad1x8o4
-	 IuIJTGZvlbotV/iReC+mK1S13hkL30rMlInevR6r0BsxdryGJW8Xy9lUj9hQiWcZNM
-	 MQzU0zLcPft0Q==
-Date: Tue, 4 Mar 2025 10:03:59 -0800
+	b=cJg1OTFl0CBCYyFUzo/omTa3VgDUAhaHJ6H9xTSA10LF1vgqP7yax9V5m9DvFalbG
+	 L75z40uZGOsJuWI1kqxfnK7kDLNyJLyCqyU8trOMd7xbfW9+CbEVXqzYmKlvhmTIky
+	 Ywn++G4DYiFgHUikdCRWqmDFVybWDb/YiCb/Xul+KcD+Q/eMqgyV1UzHpdptg2gdO3
+	 phmukZIm9Xgbcoynqeja/V2BNzIv6qb+WcM5DDeG/YfxDc1ZoXiKvmCYGwqr6pLHtM
+	 jxn425ztKbEhNJugz0EZhwVKwv4FxxlOF8JJOmK1y4y8GHgKhmGhlicPr2QcsdefjB
+	 p5/iFrtK3LlLQ==
+Date: Tue, 4 Mar 2025 10:21:12 -0800
 From: "Darrick J. Wong" <djwong@kernel.org>
-To: Naohiro Aota <Naohiro.Aota@wdc.com>
-Cc: Zorro Lang <zlang@redhat.com>,
-	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Subject: Re: [PATCH] tools/run_privatens: check if it is mount point for
- --make-private
-Message-ID: <20250304180359.GA2803740@frogsfrogsfrogs>
-References: <20250303064209.602577-1-naohiro.aota@wdc.com>
- <20250303101047.qjugaez6c7ythpd6@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
- <D86O11SKYP75.1NJE84UIKCEYD@wdc.com>
- <D873JHORR7IB.2VEFHOF3HQMMY@wdc.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, hch@lst.de, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/1] fstests: test mkfs.xfs protofiles with xattr support
+Message-ID: <20250304182112.GB2803740@frogsfrogsfrogs>
+References: <173706975660.1928701.8344148155038133836.stgit@frogsfrogsfrogs>
+ <173706975673.1928701.14882814105946770615.stgit@frogsfrogsfrogs>
+ <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <20250304174242.GA2803749@frogsfrogsfrogs>
+ <20250304180040.7yoddqyciqajw47d@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -46,113 +46,202 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <D873JHORR7IB.2VEFHOF3HQMMY@wdc.com>
+In-Reply-To: <20250304180040.7yoddqyciqajw47d@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Tue, Mar 04, 2025 at 01:38:48AM +0000, Naohiro Aota wrote:
-> On Mon Mar 3, 2025 at 10:29 PM JST, Naohiro Aota wrote:
-> > On Mon Mar 3, 2025 at 7:10 PM JST, Zorro Lang wrote:
-> >> On Mon, Mar 03, 2025 at 03:42:09PM +0900, Naohiro Aota wrote:
-> >>> While /tmp is mounted with tmpfs in the most setup, it still can be a non-mount
-> >>> point. For example, I'm running the fstests in a container, which does not
-> >>> mount /tmp inside the container.
-> >>> 
-> >>> Running any test case on such system results in having the following error
-> >>> printed, which leads to all the test cases fail due to the output difference.
-> >>> 
-> >>>   mount: /tmp: not mount point or bad option.
-> >>>          dmesg(1) may have more information after failed mount system call.
-> >>> 
-> >>> These lines are printed by the "mount --make-private" command. So, fix that by
-> >>> using mountpoint command to check if the directory is a mount point or not.
-> >>> 
-> >>> Fixes: 247ab01fa227 ("check: run tests in a private pid/mount namespace")
-> >>> Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
-> >>> ---
-> >>>  tools/run_privatens | 2 +-
-> >>>  1 file changed, 1 insertion(+), 1 deletion(-)
-> >>> 
-> >>> diff --git a/tools/run_privatens b/tools/run_privatens
-> >>> index df94974ab30c..c52e0128b8f9 100755
-> >>> --- a/tools/run_privatens
-> >>> +++ b/tools/run_privatens
-> >>> @@ -8,7 +8,7 @@
-> >>>  
-> >>>  if [ -n "${FSTESTS_ISOL}" ]; then
-> >>>  	for path in /proc /tmp; do
-> >>> -		mount --make-private "$path"
-> >>> +		mountpoint "$path" >/dev/null && mount --make-private "$path"
-> >>
-> >> Oh, if /tmp isn't a mountpoint on your system, don't you need to think about ...
-> >>
-> >>>  	done
-> >>>  	mount -t proc proc /proc
-> >>>  	mount -t tmpfs tmpfs /tmp
-> >>         ^^^^^^^^^^^^^^^^^^^^^^^^^
-> >>
-> >> ... this step? I think the first run_privatens process will remain a "mounted"
-> >> /tmp on your system.
-> >>
-> >> And then later tests will use this tmpfs. That's nearly equal to "We always
-> >> make sure there's a tmpfs mount on /tmp at the beginning of fstests running".
-> >
-> > That does not happen because we are already in a mount namespace created
-> > by nsexec. The mounted "/tmp" is local to each test, and each test
-> > showed the error above.
-> >
-> >>
-> >> But if we don't run that "mount tmpfs" step, I think it's not what this script
-> >> wants (to isolate the data in /tmp). Right?
-> >
-> > I guess we can do these instead?
-> >
-> > mount --make-private -t proc proc /proc
-> > mount --make-private -t tmpfs tmpfs /tmp
-> >
-> > Actually, I'm not quite confindent that we really need "--make-private"
-> > here. As we mount new instance of proc and tmpfs and we don't bind them,
-> > I don't see much point making them private.
+On Wed, Mar 05, 2025 at 02:00:40AM +0800, Zorro Lang wrote:
+> On Tue, Mar 04, 2025 at 09:42:42AM -0800, Darrick J. Wong wrote:
+> > On Sun, Mar 02, 2025 at 09:15:44PM +0800, Zorro Lang wrote:
+> > > On Thu, Jan 16, 2025 at 03:35:04PM -0800, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <djwong@kernel.org>
+> > > > 
+> > > > Make sure we can do protofiles with xattr support.
+> > > > 
+> > > > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > ---
+> > > 
+> > > This test always fails on my side, as below (diff output):
+> > > 
+> > >    ...
+> > >    Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > >    Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> > >    Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > >   +Attribute "selinux" has a 28 byte value for SCRATCH_MNT/directory/test
+> > >    *** unmount FS
+> > >    *** done
+> > >    *** unmount
+> > > 
+> > > Looks like the $SELINUX_MOUNT_OPTIONS doesn't help the mkfs protofile
+> > > with xattrs.
+> > 
+> > Oops.  Ok then, I'll filter them out below...
+> > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > 
+> > > >  tests/xfs/1937     |  144 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/xfs/1937.out |  102 +++++++++++++++++++++++++++++++++++++
+> > > >  2 files changed, 246 insertions(+)
+> > > >  create mode 100755 tests/xfs/1937
+> > > >  create mode 100644 tests/xfs/1937.out
+> > > >
+>  
+> [snip]
 > 
-> No, I was wrong. We still need to make them private, not to propagate
-> "mount tmpfs" or "mount proc" to the outside. If not, we will see new
-> instance of tmpfs mounted on /tmp in the PID 1 environment, which
-> breaks several applications :(.
+> > > > +	echo "*** verify FS"
+> > > > +	(cd $SCRATCH_MNT ; find . | LC_COLLATE=POSIX sort \
+> > > > +		| grep -v ".use_space" \
+> > > > +		| xargs $here/src/lstat64 | _filter_stat)
+> > > > +	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
+> > > > +		|| _fail "bigfile corrupted"
+> > > > +	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
+> > > > +		|| _fail "symlink broken"
+> > > > +
+> > > > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | _filter_scratch
+> > 
+> > ...so they don't spill into the golden output.  As this is already in
+> > patches-in-queue, do you want me to send a fixpatch on top of that?
 > 
-> So, in the end, I think my patch did it correctly, no?
+> If you just need a simple filter, I think you can tell me what do you
+> want to change, I can amend the commit simply. Or if you need to change
+> more, only re-send this patch is good to me :)
 
-Yes.  The "mount --make-private" prohibits propagation of changes to
-this mount outside of the mount namespace.  The "mount -t tmpfs tmpfs
-/tmp" creates a new tmpfs that is not exposed to the outside world.
+I /think/ changing the above line to this will fix it:
 
-This should've been documented better, Zorro could you please add a few
-comments on commit:
-
-	if [ -n "${FSTESTS_ISOL}" ]; then
-		# Don't allow changes to these mountpoints to propagate
-		# outside of our mount namespace...
-		for path in /proc /tmp; do
-			mountpoint "$path" >/dev/null && \
-				mount --make-private "$path"
-
-		done
-
-		# ...because here we create new mounts that are private
-		# to this mount namespace that we don't want to escape.
-		mount -t proc proc /proc
-		mount -t tmpfs tmpfs /tmp
-	fi
-
-Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+	$ATTR_PROG -l $SCRATCH_MNT/directory/test | \
+		sed -e '/Attribute..selinux..has/d' | \
+		_filter_scratch
 
 --D
 
-> >
-> >>
-> >> Thanks,
-> >> Zorro
-> >>
-> >>
-> >>
-> >>> -- 
-> >>> 2.48.1
-> >>> 
-> >>> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > --D
+> > 
+> > > > +
+> > > > +	echo "*** unmount FS"
+> > > > +	_full "umount"
+> > > > +	_scratch_unmount >>$seqfull 2>&1 \
+> > > > +		|| _fail "umount failed"
+> > > > +}
+> > > > +
+> > > > +_verify_fs 2
+> > > > +
+> > > > +echo "*** done"
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/xfs/1937.out b/tests/xfs/1937.out
+> > > > new file mode 100644
+> > > > index 00000000000000..050c8318b1abca
+> > > > --- /dev/null
+> > > > +++ b/tests/xfs/1937.out
+> > > > @@ -0,0 +1,102 @@
+> > > > +QA output created by 1937
+> > > > +Wrote 2048.00Kb (value 0x2c)
+> > > > +*** create FS version 2
+> > > > +*** check FS
+> > > > +*** mount FS
+> > > > +*** verify FS
+> > > > + File: "."
+> > > > + Size: <DSIZE> Filetype: Directory
+> > > > + Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 4 
+> > > > +
+> > > > + File: "./bigfile"
+> > > > + Size: 2097152 Filetype: Regular File
+> > > > + Mode: (0666/-rw-rw-rw-) Uid: (3) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./block_device"
+> > > > + Size: 0 Filetype: Block Device
+> > > > + Mode: (0012/b-----x-w-) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 161,162
+> > > > +
+> > > > + File: "./char_device"
+> > > > + Size: 0 Filetype: Character Device
+> > > > + Mode: (0345/c-wxr--r-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 177,178
+> > > > +
+> > > > + File: "./directory"
+> > > > + Size: <DSIZE> Filetype: Directory
+> > > > + Mode: (0755/drwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > > > +
+> > > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory/test"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./directory_setgid"
+> > > > + Size: <DSIZE> Filetype: Directory
+> > > > + Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > > > +
+> > > > + File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./pipe"
+> > > > + Size: 0 Filetype: Fifo File
+> > > > + Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./setgid"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (2666/-rw-rwsrw-) Uid: (0) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./setugid"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (6666/-rwsrwsrw-) Uid: (0) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./setuid"
+> > > > + Size: 1348680 Filetype: Regular File
+> > > > + Mode: (4666/-rwsrw-rw-) Uid: (0) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +
+> > > > + File: "./symlink"
+> > > > + Size: 7 Filetype: Symbolic Link
+> > > > + Mode: (0123/l--x-w--wx) Uid: (0) Gid: (0)
+> > > > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > > > +Attribute "userdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > > +Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > > +Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> > > > +Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > > > +*** unmount FS
+> > > > +*** done
+> > > > +*** unmount
+> > > > 
+> > > 
+> > 
+> 
+> 
