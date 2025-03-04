@@ -1,197 +1,350 @@
-Received: from fanzine2.igalia.com (fanzine.igalia.com [178.60.130.6])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42AA424337E
-	for <fstests@vger.kernel.org>; Tue,  4 Mar 2025 14:31:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.60.130.6
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D6171EB9FA;
+	Tue,  4 Mar 2025 17:42:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741098692; cv=none; b=aXaAGDDDE77UwUCiSWC73bQ1bp/YYAAet1sH/B+ACeKlqJZY7vOJaSMzTMkU7Zj+MrQvWhg2lOjzNW5WBsgaY7aazhRVzasPVejUn2jcAs6P2+jBK3mRjIsO7ExYqzpJTfCESS+/3ErfmfTasxu2T9pCiyc4zMvp5+I3Ycop5NE=
+	t=1741110164; cv=none; b=hF1I+KQ0PZBESF1ctmK8mJOnpN/gtyazZGmOeswt4TZwQAKJo9u9UXt+T5FLAwW6Q/Y5aaAQRZU+1yQB79ZKI+J5m9jZh3JV6F2dAvOEER1CldQR6AUUHKEWt61j7aqMDIlNX9f19aalCv+KwN/Til4bpmgTfBplHnzRuYJr9j4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741098692; c=relaxed/simple;
-	bh=X6QlfqRl8Awr5uycq4cp7o2PqY5qfGNJfJCAPICDhcI=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=tMOP2J14adQIbHnBFetENyEWcvcd+t1KBH8ebm8KBxDcfPDXr9LXHxnMUNbjSIE3OqZP3BgXLLvoR9MxZSw90752BA8tXjhfsOuR9GoX68/LjSGjLfTOaQEeDxlYF+o9ZCEiVuOOB6+gCL0d9sdatoGOqIYv0mIYWXykkakWKCE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com; spf=pass smtp.mailfrom=igalia.com; dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b=LCNvi3N6; arc=none smtp.client-ip=178.60.130.6
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=igalia.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=igalia.com
+	s=arc-20240116; t=1741110164; c=relaxed/simple;
+	bh=f+8HzBvpw7250BUiv1OwiIExtF93RpSe2DV0+9NSt2Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=C7nkC6BaK5BHNoX9tKMWne4xDZGqNoPgLsikJTsc9RIwNz0qd+tfqGEf+ydDj/KUpbVJ+wpa2L/Q64x6X+bTy2OyYT7p5QIv8H++TsXyQMxvsw8ydtX0fGH4cztP8CPjXxerN4eEJmARmYcRffDi9D2wDxgzXeNnHwpm8US4TVA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fay+lofj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=igalia.com header.i=@igalia.com header.b="LCNvi3N6"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=igalia.com;
-	s=20170329; h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:
-	Date:References:In-Reply-To:Subject:Cc:To:From:Sender:Reply-To:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=+xqa3d8JJGi8j4gFA9YIFKyGNp4R8g4iNu6PFrYLjOA=; b=LCNvi3N6+KchyrY/RgLFSdYYo9
-	gppvoVio3Fha43nesvtMchRv0UTE9AWLjXkIHqotT+CNzNeiMpWvNL1hv4VugZp8SSUR2vg6cqFvm
-	EL1Gvxsrxyk+EYmQfmeIcPfn4KhZTCrQwjpwdwQG8pmYnwf0V03iRFmpIwPSMTcnvm6QPiw4FTIp+
-	i+LxYtqIVoRJ4MqbrWLhds5UMP+iPdG8UkfnI8LFL5AUP97omjjOOwhL7XVaLDLMlRx+tsB3vhPqs
-	uIm3rfe1LPBrNzcKN5UI5xmQq5yEwLtbkiBl/TwAlZyakVi8dif+kR/YqE4fWK9e5cPOnHo+NTZOG
-	hlRd008Q==;
-Received: from bl23-10-177.dsl.telepac.pt ([144.64.10.177] helo=localhost)
-	by fanzine2.igalia.com with utf8esmtpsa 
-	(Cipher TLS1.3:ECDHE_X25519__RSA_PSS_RSAE_SHA256__AES_256_GCM:256) (Exim)
-	id 1tpTIm-003kpa-Ov; Tue, 04 Mar 2025 15:31:26 +0100
-From: Luis Henriques <luis@igalia.com>
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
-Subject: Re: [PATCH 1/2] src: include libgen.h for function basename() if
- not using GNU libc
-In-Reply-To: <20250304140530.o46rs3tad6eqqprh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-	(Zorro Lang's message of "Tue, 4 Mar 2025 22:05:30 +0800")
-References: <20250304122119.21412-1-luis@igalia.com>
-	<20250304122119.21412-2-luis@igalia.com>
-	<20250304140530.o46rs3tad6eqqprh@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-Date: Tue, 04 Mar 2025 14:31:26 +0000
-Message-ID: <875xkox3y9.fsf@igalia.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fay+lofj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91FE3C4CEE5;
+	Tue,  4 Mar 2025 17:42:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741110163;
+	bh=f+8HzBvpw7250BUiv1OwiIExtF93RpSe2DV0+9NSt2Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fay+lofjMlzDM0+hRFifBMrZG5uktxs6YUypqubYGKGusdqSxpO80Zma0d/pCa6X3
+	 yQFHwGJo2ksdtxV91pJw9H7B9q4iYUc4wNKcNhf/A3JR2c1O+kY4+7V/aXnzOS43h5
+	 pvg/LoolzHLHAqXLWEIQylggz6ozZNgQtX9mIkB1aZeeB8uf89lvQ05q2HABRH5Rbr
+	 /RMYa5e+cubwlaK/ArPwhuDuXt47QWdA6rRaTXo/3yJpdTd9KmSQDq9O+MDUa5aOlm
+	 cBiqUm4XqAv/U8wdfvQ2ZSy6knC24WBxZD6ZFld71ZYzMk/edlutpf/WbH9ZDBUuF9
+	 zI5ZtWOG7sHzw==
+Date: Tue, 4 Mar 2025 09:42:42 -0800
+From: "Darrick J. Wong" <djwong@kernel.org>
+To: Zorro Lang <zlang@kernel.org>
+Cc: zlang@redhat.com, hch@lst.de, fstests@vger.kernel.org,
+	linux-xfs@vger.kernel.org
+Subject: Re: [PATCH 1/1] fstests: test mkfs.xfs protofiles with xattr support
+Message-ID: <20250304174242.GA2803749@frogsfrogsfrogs>
+References: <173706975660.1928701.8344148155038133836.stgit@frogsfrogsfrogs>
+ <173706975673.1928701.14882814105946770615.stgit@frogsfrogsfrogs>
+ <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250302131544.5om3lil64kw5nnyo@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Tue, Mar 04 2025, Zorro Lang wrote:
+On Sun, Mar 02, 2025 at 09:15:44PM +0800, Zorro Lang wrote:
+> On Thu, Jan 16, 2025 at 03:35:04PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <djwong@kernel.org>
+> > 
+> > Make sure we can do protofiles with xattr support.
+> > 
+> > Signed-off-by: "Darrick J. Wong" <djwong@kernel.org>
+> > ---
+> 
+> This test always fails on my side, as below (diff output):
+> 
+>    ...
+>    Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+>    Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+>    Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+>   +Attribute "selinux" has a 28 byte value for SCRATCH_MNT/directory/test
+>    *** unmount FS
+>    *** done
+>    *** unmount
+> 
+> Looks like the $SELINUX_MOUNT_OPTIONS doesn't help the mkfs protofile
+> with xattrs.
 
-> On Tue, Mar 04, 2025 at 12:21:18PM +0000, Luis Henriques wrote:
->> Compiling fstests on a system without the GNU libc fails because the
->> basename() is defined in libgen.h by POSIX and not in string.h.
->>=20
->> Fix that by including the libgen.h header if __USE_GNU isn't defined.
->>=20
->> Signed-off-by: Luis Henriques <luis@igalia.com>
->> ---
->>  src/aio-dio-regress/aio-dio-append-write-read-race.c | 3 +++
->>  src/splice-test.c                                    | 3 +++
->>  src/t_ext4_dax_inline_corruption.c                   | 3 +++
->>  src/t_ext4_dax_journal_corruption.c                  | 3 +++
->>  src/t_mmap_collision.c                               | 3 +++
->>  src/t_mmap_dio.c                                     | 3 +++
->>  6 files changed, 18 insertions(+)
->>=20
->> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/=
-aio-dio-regress/aio-dio-append-write-read-race.c
->> index d9f8982f007c..1a0c8e99c61f 100644
->> --- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
->> @@ -19,6 +19,9 @@
->>  #include <sys/stat.h>
->>  #include <fcntl.h>
->>  #include <errno.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->
-> Do you use clang and musl to build fstests? I'm even not sure if fstests
-> can be built with them :)=20
+Oops.  Ok then, I'll filter them out below...
 
-Yes, I'm able to compile and run fstests using gcc (not clang) and musl.
-Though there's a hack I still need to use to compile, which is to define
-CFLAGS=3D"-D_LARGEFILE64_SOURCE".  Since that doesn't require changing
-anything, I haven't yet investigated how that could be fixed.
-
-> I don't have experience on this part, but I don't mind letting fstests
-> to be supported by other libc. The patch looks safe for current users.
->
-> If anyone has this experience, please feel free to review. I'll think
-> about merging this patch if no objection from others.
-
-The only links I can provide you with some extra info are [1] (section
-about basename) and the basename(3) man page.  Looking at it again makes
-me think that including libgen.h unconditionally should also be OK,
-forcing the POSIX implementation to be used instead.  But using this
-#ifndef seems to be used in other projects.
-
-And thanks, Zorro, for your review!
-
-[1] https://www.gnu.org/software/libc/manual/html_node/Finding-Tokens-in-a-=
-String.html
-
-Cheers,
---=20
-Lu=C3=ADs
-
->
 > Thanks,
 > Zorro
->
->>=20=20
->>  #include <libaio.h>
->>  #include <pthread.h>
->> diff --git a/src/splice-test.c b/src/splice-test.c
->> index eb8636738064..e6753a15dc47 100644
->> --- a/src/splice-test.c
->> +++ b/src/splice-test.c
->> @@ -18,6 +18,9 @@
->>  #include <string.h>
->>  #include <errno.h>
->>  #include <malloc.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->>=20=20
->>  unsigned int sector_size;
->>  unsigned int buffer_size;
->> diff --git a/src/t_ext4_dax_inline_corruption.c b/src/t_ext4_dax_inline_=
-corruption.c
->> index e1a39a6c1e46..a6cb768512fc 100644
->> --- a/src/t_ext4_dax_inline_corruption.c
->> +++ b/src/t_ext4_dax_inline_corruption.c
->> @@ -10,6 +10,9 @@
->>  #include <sys/types.h>
->>  #include <time.h>
->>  #include <unistd.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->>=20=20
->>  #define PAGE(a) ((a)*0x1000)
->>  #define STRLEN 256
->> diff --git a/src/t_ext4_dax_journal_corruption.c b/src/t_ext4_dax_journa=
-l_corruption.c
->> index ba7a96e43559..4e5762d77058 100644
->> --- a/src/t_ext4_dax_journal_corruption.c
->> +++ b/src/t_ext4_dax_journal_corruption.c
->> @@ -10,6 +10,9 @@
->>  #include <sys/types.h>
->>  #include <time.h>
->>  #include <unistd.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->>=20=20
->>  #define PAGE(a) ((a)*0x1000)
->>  #define STRLEN 256
->> diff --git a/src/t_mmap_collision.c b/src/t_mmap_collision.c
->> index c872f4e26940..638424d2e619 100644
->> --- a/src/t_mmap_collision.c
->> +++ b/src/t_mmap_collision.c
->> @@ -24,6 +24,9 @@
->>  #include <sys/stat.h>
->>  #include <sys/types.h>
->>  #include <unistd.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->>=20=20
->>  void *dax_data;
->>  int nodax_fd;
->> diff --git a/src/t_mmap_dio.c b/src/t_mmap_dio.c
->> index 6c8ca1a39181..342e2c6deb4b 100644
->> --- a/src/t_mmap_dio.c
->> +++ b/src/t_mmap_dio.c
->> @@ -14,6 +14,9 @@
->>  #include <libaio.h>
->>  #include <errno.h>
->>  #include <sys/time.h>
->> +#ifndef __USE_GNU
->> +#include <libgen.h>
->> +#endif
->>=20=20
->>  void usage(char *prog)
->>  {
->>=20
->
+> 
+> 
+> >  tests/xfs/1937     |  144 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/1937.out |  102 +++++++++++++++++++++++++++++++++++++
+> >  2 files changed, 246 insertions(+)
+> >  create mode 100755 tests/xfs/1937
+> >  create mode 100644 tests/xfs/1937.out
+> > 
+> > 
+> > diff --git a/tests/xfs/1937 b/tests/xfs/1937
+> > new file mode 100755
+> > index 00000000000000..aa4143a75ef643
+> > --- /dev/null
+> > +++ b/tests/xfs/1937
+> > @@ -0,0 +1,144 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2024-2025 Oracle.  All Rights Reserved.
+> > +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 1937
+> > +#
+> > +# mkfs protofile with xattrs test
+> > +#
+> > +. ./common/preamble
+> > +_begin_fstest mkfs auto quick
+> > +
+> > +seqfull="$seqres.full"
+> > +rm -f $seqfull
+> > +
+> > +. ./common/filter
+> > +
+> > +_cleanup()
+> > +{
+> > +	echo "*** unmount"
+> > +	_scratch_unmount 2>/dev/null
+> > +	rm -f $tmp.*
+> > +	rm -f $TEST_DIR/$seq.file
+> > +}
+> > +
+> > +_full()
+> > +{
+> > +	echo ""            >>$seqfull
+> > +	echo "*** $* ***"  >>$seqfull
+> > +	echo ""            >>$seqfull
+> > +}
+> > +
+> > +_filter_stat()
+> > +{
+> > +	sed '
+> > +		/^Access:/d;
+> > +		/^Modify:/d;
+> > +		/^Change:/d;
+> > +		s/Device: *[0-9][0-9]*,[0-9][0-9]*/Device: <DEVICE>/;
+> > +		s/Inode: *[0-9][0-9]*/Inode: <INODE>/;
+> > +		s/Size: *[0-9][0-9]* *Filetype: Dir/Size: <DSIZE> Filetype: Dir/;
+> > +	' | tr -s ' '
+> > +}
+> > +
+> > +_require_command $ATTR_PROG "attr"
+> > +_require_scratch
+> > +
+> > +# mkfs cannot create a filesystem with protofiles if realtime is enabled, so
+> > +# don't run this test if the rtinherit is anywhere in the mkfs options.
+> > +echo "$MKFS_OPTIONS" | grep -q "rtinherit" && \
+> > +	_notrun "Cannot mkfs with a protofile and -d rtinherit."
+> > +
+> > +protofile=$tmp.proto
+> > +tempfile=$TEST_DIR/$seq.file
+> > +
+> > +$XFS_IO_PROG -f -c 'pwrite 64k 28k' -c 'pwrite 1280k 37960' $tempfile >> $seqres.full
+> > +$here/src/devzero -b 2048 -n 2 -c -v 44 $tempfile.2 
+> > +
+> > +$ATTR_PROG -R -s rootdata -V 0test $tempfile &>> $seqres.full
+> > +$ATTR_PROG -S -s acldata -V 1test $tempfile &>> $seqres.full
+> > +$ATTR_PROG -s userdata -V 2test $tempfile &>> $seqres.full
+> > +perl -e 'print "x" x 37960;' | $ATTR_PROG -s bigdata $tempfile &>> $seqres.full
+> > +
+> > +cat >$protofile <<EOF
+> > +DUMMY1
+> > +0 0
+> > +: root directory
+> > +d--777 3 1
+> > +: a directory
+> > +directory d--755 3 1 
+> > +test ---755 3 1 $tempfile
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0 ---755 3 1 $tempfile
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1 ---755 3 1 $tempfile
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2 ---755 3 1 $tempfile
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3 ---755 3 1 $tempfile
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4 ---755 3 1 $tempfile
+> > +$
+> > +: back in the root
+> > +setuid -u-666 0 0 $tempfile
+> > +setgid --g666 0 0 $tempfile
+> > +setugid -ug666 0 0 $tempfile
+> > +directory_setgid d-g755 3 2
+> > +file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5 ---755 3 1 $tempfile
+> > +$
+> > +: back in the root
+> > +block_device b--012 3 1 161 162 
+> > +char_device c--345 3 1 177 178
+> > +pipe p--670 0 0
+> > +symlink l--123 0 0 bigfile
+> > +: a file we actually read
+> > +bigfile ---666 3 0 $tempfile.2
+> > +: done
+> > +$
+> > +EOF
+> > +
+> > +if [ $? -ne 0 ]
+> > +then
+> > +	_fail "failed to create test protofile"
+> > +fi
+> > +
+> > +_verify_fs()
+> > +{
+> > +	echo "*** create FS version $1"
+> > +	VERSION="-n version=$1"
+> > +
+> > +	_scratch_unmount >/dev/null 2>&1
+> > +
+> > +	_full "mkfs"
+> > +	_scratch_mkfs_xfs $VERSION -p $protofile >>$seqfull 2>&1
+> > +
+> > +	echo "*** check FS"
+> > +	_check_scratch_fs
+> > +
+> > +	echo "*** mount FS"
+> > +	_full " mount"
+> > +	_try_scratch_mount >>$seqfull 2>&1 \
+> > +		|| _fail "mount failed"
+> > +
+> > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | \
+> > +		grep -q 'Attribute.*has a ' || \
+> > +		_notrun "mkfs.xfs protofile does not support xattrs"
+> > +
+> > +	echo "*** verify FS"
+> > +	(cd $SCRATCH_MNT ; find . | LC_COLLATE=POSIX sort \
+> > +		| grep -v ".use_space" \
+> > +		| xargs $here/src/lstat64 | _filter_stat)
+> > +	diff -q $SCRATCH_MNT/bigfile $tempfile.2 \
+> > +		|| _fail "bigfile corrupted"
+> > +	diff -q $SCRATCH_MNT/symlink $tempfile.2 \
+> > +		|| _fail "symlink broken"
+> > +
+> > +	$ATTR_PROG -l $SCRATCH_MNT/directory/test | _filter_scratch
 
+...so they don't spill into the golden output.  As this is already in
+patches-in-queue, do you want me to send a fixpatch on top of that?
+
+--D
+
+> > +
+> > +	echo "*** unmount FS"
+> > +	_full "umount"
+> > +	_scratch_unmount >>$seqfull 2>&1 \
+> > +		|| _fail "umount failed"
+> > +}
+> > +
+> > +_verify_fs 2
+> > +
+> > +echo "*** done"
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/1937.out b/tests/xfs/1937.out
+> > new file mode 100644
+> > index 00000000000000..050c8318b1abca
+> > --- /dev/null
+> > +++ b/tests/xfs/1937.out
+> > @@ -0,0 +1,102 @@
+> > +QA output created by 1937
+> > +Wrote 2048.00Kb (value 0x2c)
+> > +*** create FS version 2
+> > +*** check FS
+> > +*** mount FS
+> > +*** verify FS
+> > + File: "."
+> > + Size: <DSIZE> Filetype: Directory
+> > + Mode: (0777/drwxrwxrwx) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 4 
+> > +
+> > + File: "./bigfile"
+> > + Size: 2097152 Filetype: Regular File
+> > + Mode: (0666/-rw-rw-rw-) Uid: (3) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./block_device"
+> > + Size: 0 Filetype: Block Device
+> > + Mode: (0012/b-----x-w-) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 161,162
+> > +
+> > + File: "./char_device"
+> > + Size: 0 Filetype: Character Device
+> > + Mode: (0345/c-wxr--r-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 Device type: 177,178
+> > +
+> > + File: "./directory"
+> > + Size: <DSIZE> Filetype: Directory
+> > + Mode: (0755/drwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > +
+> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_0"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_1"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_2"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_3"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_4"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory/test"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./directory_setgid"
+> > + Size: <DSIZE> Filetype: Directory
+> > + Mode: (2755/drwxr-sr-x) Uid: (3) Gid: (2)
+> > +Device: <DEVICE> Inode: <INODE> Links: 2 
+> > +
+> > + File: "./directory_setgid/file_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_5"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (0755/-rwxr-xr-x) Uid: (3) Gid: (1)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./pipe"
+> > + Size: 0 Filetype: Fifo File
+> > + Mode: (0670/frw-rwx---) Uid: (0) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./setgid"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (2666/-rw-rwsrw-) Uid: (0) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./setugid"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (6666/-rwsrwsrw-) Uid: (0) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./setuid"
+> > + Size: 1348680 Filetype: Regular File
+> > + Mode: (4666/-rwsrw-rw-) Uid: (0) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +
+> > + File: "./symlink"
+> > + Size: 7 Filetype: Symbolic Link
+> > + Mode: (0123/l--x-w--wx) Uid: (0) Gid: (0)
+> > +Device: <DEVICE> Inode: <INODE> Links: 1 
+> > +Attribute "userdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > +Attribute "rootdata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > +Attribute "bigdata" has a 37960 byte value for SCRATCH_MNT/directory/test
+> > +Attribute "acldata" has a 5 byte value for SCRATCH_MNT/directory/test
+> > +*** unmount FS
+> > +*** done
+> > +*** unmount
+> > 
+> 
