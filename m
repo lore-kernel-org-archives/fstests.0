@@ -1,243 +1,428 @@
-Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4015D37160;
-	Tue,  4 Mar 2025 04:19:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 139BB1F63F0
+	for <fstests@vger.kernel.org>; Tue,  4 Mar 2025 08:47:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741061966; cv=none; b=B9yvERCwTC+4hepIC1CHHDUIq+ksPaHsFVL6GZMB+wxUwWaDBZWRmXfIkRoPjayqX7ROlbuccG1EwpKlRjVmduSQx+0hkEwj/ocEGQrFM5irKG8I6s+DzG+VSh9wfCkH/lp0/bu0+X90FJ+oHQ4Ke6kyxT9b0XFx82zCuQ4jmPQ=
+	t=1741078042; cv=none; b=m7Uy4L/A3chr+7OCOUPasiIVEIAM/48Cn2QPwbxx6AMcDxSSTeViwzG0XPJeJsqsPNshmVMA45d+BDpCZD1JSbNdEsyOGNNYN2doOw8kuKPGflrQ64Yuz82PHc/MU6b2MvEZuApqIOQthlpJTQoGz6iUXtxH9VbjoPeXz/Gp1J0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741061966; c=relaxed/simple;
-	bh=E4zSxkRdxpBHJnCFEpoSKhm8+YIJc8a1vUeGcruwJNU=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=pQWnF2G5IhdDNEW+LfPoXlLK0VaD+yzXdoHUY341LZF4MIZ6FzPV5J0p7cttWZ6VelvuKZsPBjTKWrCeou+7XQY9bh0/QPOc/NGRWjxMJ5GMRHyYrUJxh778sAfJu5Gd22agHWKPVwEdJOGbqfb3DEK0o8mRsMZhwShgo2yjz1w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MtzweX1e; arc=none smtp.client-ip=209.85.214.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1741078042; c=relaxed/simple;
+	bh=SNFi+wvuVKJd52l/MVR/oYr6VRZ9ud1FPbZkiy0EO8I=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=k915LI5lU2vg4kMha7q/cFfIoeBo/uuVtGJ7QBWtDclHazHiORqsbk2J2wYOuOB/Gs+gIJOz/0W3bVAxgVdserCjqBul/zThCrrsdcLKkhdYuxSd0CNuhZTagbMObGybgKvIKb52KMa6/tWwn0S02GndBS5n1Wxeax8UoQ2HNUo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=etMVh7e/; arc=none smtp.client-ip=170.10.129.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MtzweX1e"
-Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-22349dc31bcso90098935ad.3;
-        Mon, 03 Mar 2025 20:19:24 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1741061964; x=1741666764; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=b5BZZqzU3LyDmpLf80WHlDyl/IunQEMvOhtkkYrHchw=;
-        b=MtzweX1eJywMDPzeIpmKlpF9TLv8vN/9QGJA5J2L+gc62USLfQ5y/gTvhUum+Za7XQ
-         9bBByyYx6I4l2jiHFsp/n/WEyifUdY7OB4nrS6hHnZCJKmt7E3sr4WHLiRuDv1dxJVxu
-         Nq1uvCg3n8hcskliI2FK1prOeMRRiya7vQWxcROoLGisRo11WqFtCjRjYgPgJ3435qHC
-         UljEm4ugNX6F5o5oqBrGU5R8zaiXFwa4f2xqjmHL6W1b24UitYGboDo6ZTiyqeN5fP77
-         CPw+j581+Wq0rlODfxWfBE2YEsYzUbIOOikgENr1eIeqOrkdNCsql46cONSbkBgJS8bm
-         v05Q==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="etMVh7e/"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1741078038;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=vxqqwkbC7AqnCAi5XVUY+yK6tRGhVKo/og0MttuAbI4=;
+	b=etMVh7e/qNHAYXL1tU49aTwXcEtg+2urUQfeyJ0WI8WQxy707CWUTv3bfp1BPteH2SXtn6
+	SJ2etRMov0Kn35oy7GIKxIXVesY/J1p7+qKVC4SkInlT7BbiSGgbf70Knm9DNi0fk0c45+
+	Jxgq+wfqzXM8iUsp0UfS/uW431gLp4c=
+Received: from mail-pl1-f197.google.com (mail-pl1-f197.google.com
+ [209.85.214.197]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-277-OteywGq4OCymQeRGwZd0wA-1; Tue, 04 Mar 2025 03:47:17 -0500
+X-MC-Unique: OteywGq4OCymQeRGwZd0wA-1
+X-Mimecast-MFC-AGG-ID: OteywGq4OCymQeRGwZd0wA_1741078037
+Received: by mail-pl1-f197.google.com with SMTP id d9443c01a7336-2235a1f8aadso83280545ad.2
+        for <fstests@vger.kernel.org>; Tue, 04 Mar 2025 00:47:17 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741061964; x=1741666764;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
+        d=1e100.net; s=20230601; t=1741078036; x=1741682836;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=b5BZZqzU3LyDmpLf80WHlDyl/IunQEMvOhtkkYrHchw=;
-        b=AXik0JImHmdKwi33oCR60SA5UAakl8mgNnxeAms4VqBFPl03i1tu7mZqTdT9G9/Dp/
-         L+1WH3F37Ta3inKef4jlQyKrh0+2iNOq2yyR7T0CsCfdzzAUHFjWgxqI0NDT081DP48f
-         cw2FxCIItyZBSzQx6CTMkXChD6m/lkPK3QPdC8EYwZwuWUVyjvxmYvufSbmHsxpg8dzh
-         CZYa/9OtViaS37bDhmbRmrYSj+3obmTqSTZ4v/HH18D6E+Km1kLlf0ey4JDI38q+shPf
-         7n+4fnCvLA4hD3HBmSmUR+qz5o0TP0Y0S603foEWEnjnDu9qUZ15di80KKJkkUl9mizD
-         V0UA==
-X-Forwarded-Encrypted: i=1; AJvYcCUC9JWueMwLD2JXEM4QlVeaQ+Fc05IzPJDmdbl0gHiSHqKgJ1YqUGMSDMQU3kxyF9O/NvIprtUdDpRk@vger.kernel.org, AJvYcCUUls1FmysHLLUlxqgg4o5ORTXaK12Il9aNvKD+d7EcfIu5+iZ8KPPRAkSf3ttSXerFogE9MPB8W69q1qsSJA==@vger.kernel.org, AJvYcCVj5hmGQLoPC+EyJgZcasEijg6D5U7Tjm2OrbWb4QgAalJubgzamvRRMXFvDeXEKwbvrHlYJcVi6C0LzU2O@vger.kernel.org, AJvYcCXnP2dmNENzhrSyZWLpIo5MltkfXcaBH5MMEz2B/gWFQn3mhSG5eJ4ZS1gWIIRW1ZB+Hgcsr3zX@vger.kernel.org
-X-Gm-Message-State: AOJu0YzRPYI568pZH5pfYDZq1cIfHXmAGPZlPgZ4kUHHxte9A7AKKYNt
-	g3E84HGv1hqQTf/8h041eBQ2ajbPqqId4VoIdZ/dfwUpKAqolf77
-X-Gm-Gg: ASbGncuL/E6SxowJA1cqnJNCLwdhcQg41BLSWHLHH1NEbMysw+F+TwpQX1eVr3UZm1e
-	IMJbL3IGsn3m+FVjDrGK7aOVSiD5l8kLoyVJ8AKbz1Y7bxPYe9ERXq53pfQCvwuLOWY+pv/irR2
-	lcDiStpzqtj0SW2Y/pu0moUsLIgKYW4tAjlLr1KUUsZoUcxkOnoc78N6oArO5v3XQvIyq4XuM5i
-	UkzszOxuYJrGoPj5z8LxF9gS/s5Du4pqJS5MDB59slu0IzmnafYlWbtQdzWrx0w7TXJfhvQlyfH
-	NRTcvOyTB69bi2yZujhE/Kb5iOacWeoTmg1qQg==
-X-Google-Smtp-Source: AGHT+IGyLnXU48VROf4eIEM9JE/bEc0s12E1atZPU8MYK+Bgk6HdBsy65wH7qxGpf1uQ/d9Bst6Wxg==
-X-Received: by 2002:a05:6a00:3e1e:b0:736:46b4:beef with SMTP id d2e1a72fcca58-73646b57724mr11858996b3a.3.1741061964126;
-        Mon, 03 Mar 2025 20:19:24 -0800 (PST)
-Received: from dw-tp ([171.76.80.250])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7362dbde43bsm6526845b3a.25.2025.03.03.20.19.20
+        bh=vxqqwkbC7AqnCAi5XVUY+yK6tRGhVKo/og0MttuAbI4=;
+        b=XQYAaLnscGR51DfmcAtEdy173nufKbtN+GN/+RgpQdeyu+au5p8WrFJw+rKdv560uh
+         4HNXGCzgntj3/MnjBDEuJ/7kxNoBFkJN4SNAMXOHX7yMb4nsM5ir7lc7O9m1W0qR/D0D
+         PT7/saTFcbw2WiF6Ue9aFlW8omuOvnmUe32X9lu97bdZHUmOV67WbbBeSBASpGhHRFrB
+         z91al9jsxz8Z5+qbB46GzH03feAiSNDXXvwW+8PV1iqYGTYZjrfgADdv6uzrPeKkyNNv
+         e8btZoxEUrROzouwYniIj+PvtTG8PWpVECpZuAqL935JVA1iM/bK9IpI6vyeC7QU4pWQ
+         SCLg==
+X-Forwarded-Encrypted: i=1; AJvYcCVW+cFfjP6QOXHxpYMmIy3Tejl9bNZQHhwW6rQIPjzQD3W9tkUzguAC3IZLU3mXcv4pTyB7Rhdj@vger.kernel.org
+X-Gm-Message-State: AOJu0YwNDsmf66RgJSrK3lBbUQQ7uqc2K9f9eGmQNJ7zpH0OxCQh4eVi
+	MM1fB5+grTky34YRMeg+TlgbnK5G80k7W0tOdImWjNQhHyIXyiYFDurZeluWxNEgrBBMk/F3F8y
+	hRJyZo5YarO97pu+VaGV9qa4m00SDJk/9fnydhhC0gT0tZoJzGfgzUXQ=
+X-Gm-Gg: ASbGncvD7+lrzCz7N7wKFLJOlwZP2zvNjfYl/kcKEY8t4XVFX0xqG+YC/Zo2aehjhRn
+	MhRqfYB0aNSctmC3esyoD61/7dEKOp2erC0nRTPHF7sVpEjRcbBTjZ40Q6weanbqaSm3QXbjxvG
+	AblZuc4XTi8ZucIWH0ubGLun18BV4mSqU2rnJf3cm5Abe+6H51YhjT6CBThXKsfG5ep4v6QuPuq
+	fE7qIISU3a+9saX4GIVvtzZfZXj76aCHq0p+1Lud4vOvXa7hyWuEkPLAOuzTAuiX8yaugKhQdFT
+	o+tHnSMJ4zgIiMWAGnFABd22xThCggfL1nZCH2dXiG7GNLMOiY/M+rs7
+X-Received: by 2002:a17:903:2ca:b0:223:53fb:e1dd with SMTP id d9443c01a7336-22368f6dca8mr247611805ad.9.1741078036498;
+        Tue, 04 Mar 2025 00:47:16 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGKn6xzqyZL6B8w2VAtr1dSsuI8yvSG8WQiO/gJxf37+Y7h9LHByYn/7PlCpMdYj2YqBOEOQQ==
+X-Received: by 2002:a17:903:2ca:b0:223:53fb:e1dd with SMTP id d9443c01a7336-22368f6dca8mr247611505ad.9.1741078036085;
+        Tue, 04 Mar 2025 00:47:16 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-223d4b94c25sm13503975ad.49.2025.03.04.00.47.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 03 Mar 2025 20:19:23 -0800 (PST)
-From: Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-To: Jens Axboe <axboe@kernel.dk>, "Darrick J . Wong" <djwong@kernel.org>, 
-Cc: hannes@cmpxchg.org, clm@meta.com, linux-kernel@vger.kernel.org, willy@infradead.org, kirill@shutemov.name, bfoster@redhat.com, Jens Axboe <axboe@kernel.dk>, linux-mm@kvack.org, linux-fsdevel@vger.kernel.org, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, Ritesh Harjani (IBM) <ritesh.list@gmail.com>
-Subject: Re: [PATCH 09/12] mm/filemap: drop streaming/uncached pages when writeback completes
-In-Reply-To: <20241220154831.1086649-10-axboe@kernel.dk>
-Date: Tue, 04 Mar 2025 08:42:32 +0530
-Message-ID: <87h649trof.fsf@gmail.com>
-References: <20241220154831.1086649-1-axboe@kernel.dk> <20241220154831.1086649-10-axboe@kernel.dk>
+        Tue, 04 Mar 2025 00:47:15 -0800 (PST)
+Date: Tue, 4 Mar 2025 16:47:12 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Catherine Hoang <catherine.hoang@oracle.com>
+Cc: "Darrick J. Wong" <djwong@kernel.org>,
+	"Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>,
+	"linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>,
+	"fstests@vger.kernel.org" <fstests@vger.kernel.org>
+Subject: Re: [PATCH v3] xfs: add a test for atomic writes
+Message-ID: <20250304084712.xmodkmfbtyf4rf73@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250228002059.16750-1-catherine.hoang@oracle.com>
+ <20250228021156.GX6242@frogsfrogsfrogs>
+ <c95b0a815dc9ccfe6172b589c5d4810147dcc207.camel@gmail.com>
+ <20250228154335.GZ6242@frogsfrogsfrogs>
+ <DABD5AF4-1711-495C-8387-CB628A2B728D@oracle.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <DABD5AF4-1711-495C-8387-CB628A2B728D@oracle.com>
 
-Jens Axboe <axboe@kernel.dk> writes:
+On Mon, Mar 03, 2025 at 10:42:44PM +0000, Catherine Hoang wrote:
+> 
+> 
+> > On Feb 28, 2025, at 7:43 AM, Darrick J. Wong <djwong@kernel.org> wrote:
+> > 
+> > On Fri, Feb 28, 2025 at 07:01:50PM +0530, Nirjhar Roy (IBM) wrote:
+> >> On Thu, 2025-02-27 at 18:11 -0800, Darrick J. Wong wrote:
+> >>> On Thu, Feb 27, 2025 at 04:20:59PM -0800, Catherine Hoang wrote:
+> >>>> Add a test to validate the new atomic writes feature.
+> >>>> 
+> >>>> Signed-off-by: Catherine Hoang <catherine.hoang@oracle.com>
+> >>>> Reviewed-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
+> >>> 
+> >>> Er.... what git tree is this based upon?  generic/762 is a project
+> >>> quota
+> >>> test.
+> >> On which branch do you have tests/generic/762? I checked the latest
+> >> master(commit - 8467552f09e1672a02712653b532a84bd46ea10e) and the for-
+> >> next(commit - 5b56a2d888191bfc7131b096e611eab1881d8422) and it doesn't
+> >> seem to exist there. However, tests/xfs/762 does exist.
+> > 
+> > Zorro's patches-in-queue, aka whatever gets pushed to for-next on
+> > Sunday.  
+> 
+> This test was based on for-next, I wasn’t aware there was another
+> branch. I will rebase this onto patches-in-queue.
 
-> If the folio is marked as streaming, drop pages when writeback completes.
-> Intended to be used with RWF_DONTCACHE, to avoid needing sync writes for
-> uncached IO.
->
-> Signed-off-by: Jens Axboe <axboe@kernel.dk>
-> ---
->  mm/filemap.c | 28 ++++++++++++++++++++++++++++
->  1 file changed, 28 insertions(+)
->
-> diff --git a/mm/filemap.c b/mm/filemap.c
-> index dd563208d09d..aa0b3af6533d 100644
-> --- a/mm/filemap.c
-> +++ b/mm/filemap.c
-> @@ -1599,6 +1599,27 @@ int folio_wait_private_2_killable(struct folio *folio)
->  }
->  EXPORT_SYMBOL(folio_wait_private_2_killable);
->  
-> +/*
-> + * If folio was marked as dropbehind, then pages should be dropped when writeback
-> + * completes. Do that now. If we fail, it's likely because of a big folio -
-> + * just reset dropbehind for that case and latter completions should invalidate.
-> + */
-> +static void folio_end_dropbehind_write(struct folio *folio)
-> +{
-> +	/*
-> +	 * Hitting !in_task() should not happen off RWF_DONTCACHE writeback,
-> +	 * but can happen if normal writeback just happens to find dirty folios
-> +	 * that were created as part of uncached writeback, and that writeback
-> +	 * would otherwise not need non-IRQ handling. Just skip the
-> +	 * invalidation in that case.
-> +	 */
-> +	if (in_task() && folio_trylock(folio)) {
-> +		if (folio->mapping)
-> +			folio_unmap_invalidate(folio->mapping, folio, 0);
-> +		folio_unlock(folio);
-> +	}
-> +}
-> +
+I can help to deal with the case number conflict too. It's good to me if
+your patch is base on for-next, if you don't need to deal with some
+conflicts with other "in-queue" patches, or pre-test un-pushed patches :)
 
-Hi Jens, 
+Thanks,
+Zorro
 
-Want to ensure that my understanding is correct here w.r.t the above
-function where we call folio_unmap_invalidate() only when in_task() is
-true. 
+> > My confusion stems from this patch modifying what looks like an
+> > existing atomic writes test, but generic/762 isn't that test so now I
+> > can't see everything that this test is examining.
+> 
+> I don’t think the atomic writes test was ever merged, unless I missed it?
+> > 
+> > (I suggest everyone please post urls to public git repos so reviewers
+> > can get around these sorts of issues in the future.)
+> > 
+> > --D
+> > 
+> >> --NR
+> >>> 
+> >>> --D
+> >>> 
+> >>>> ---
+> >>>> common/rc             |  51 ++++++++++++++
+> >>>> tests/generic/762     | 160
+> >>>> ++++++++++++++++++++++++++++++++++++++++++
+> >>>> tests/generic/762.out |   2 +
+> >>>> 3 files changed, 213 insertions(+)
+> >>>> create mode 100755 tests/generic/762
+> >>>> create mode 100644 tests/generic/762.out
+> >>>> 
+> >>>> diff --git a/common/rc b/common/rc
+> >>>> index 6592c835..08a9d9b8 100644
+> >>>> --- a/common/rc
+> >>>> +++ b/common/rc
+> >>>> @@ -2837,6 +2837,10 @@ _require_xfs_io_command()
+> >>>> opts+=" -d"
+> >>>> pwrite_opts+="-V 1 -b 4k"
+> >>>> fi
+> >>>> + if [ "$param" == "-A" ]; then
+> >>>> + opts+=" -d"
+> >>>> + pwrite_opts+="-D -V 1 -b 4k"
+> >>>> + fi
+> >>>> testio=`$XFS_IO_PROG -f $opts -c \
+> >>>>        "pwrite $pwrite_opts $param 0 4k" $testfile
+> >>>> 2>&1`
+> >>>> param_checked="$pwrite_opts $param"
+> >>>> @@ -5175,6 +5179,53 @@ _require_scratch_btime()
+> >>>> _scratch_unmount
+> >>>> }
+> >>>> 
+> >>>> +_get_atomic_write_unit_min()
+> >>>> +{
+> >>>> + $XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> >>>> +        grep atomic_write_unit_min | grep -o '[0-9]\+'
+> >>>> +}
+> >>>> +
+> >>>> +_get_atomic_write_unit_max()
+> >>>> +{
+> >>>> + $XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> >>>> +        grep atomic_write_unit_max | grep -o '[0-9]\+'
+> >>>> +}
+> >>>> +
+> >>>> +_get_atomic_write_segments_max()
+> >>>> +{
+> >>>> + $XFS_IO_PROG -c "statx -r -m $STATX_WRITE_ATOMIC" $1 | \
+> >>>> +        grep atomic_write_segments_max | grep -o '[0-9]\+'
+> >>>> +}
+> >>>> +
+> >>>> +_require_scratch_write_atomic()
+> >>>> +{
+> >>>> + _require_scratch
+> >>>> +
+> >>>> + export STATX_WRITE_ATOMIC=0x10000
+> >>>> +
+> >>>> + awu_min_bdev=$(_get_atomic_write_unit_min $SCRATCH_DEV)
+> >>>> + awu_max_bdev=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+> >>>> +
+> >>>> + if [ $awu_min_bdev -eq 0 ] && [ $awu_max_bdev -eq 0 ]; then
+> >>>> + _notrun "write atomic not supported by this block
+> >>>> device"
+> >>>> + fi
+> >>>> +
+> >>>> + _scratch_mkfs > /dev/null 2>&1
+> >>>> + _scratch_mount
+> >>>> +
+> >>>> + testfile=$SCRATCH_MNT/testfile
+> >>>> + touch $testfile
+> >>>> +
+> >>>> + awu_min_fs=$(_get_atomic_write_unit_min $testfile)
+> >>>> + awu_max_fs=$(_get_atomic_write_unit_max $testfile)
+> >>>> +
+> >>>> + _scratch_unmount
+> >>>> +
+> >>>> + if [ $awu_min_fs -eq 0 ] && [ $awu_max_fs -eq 0 ]; then
+> >>>> + _notrun "write atomic not supported by this filesystem"
+> >>>> + fi
+> >>>> +}
+> >>>> +
+> >>>> _require_inode_limits()
+> >>>> {
+> >>>> if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
+> >>>> diff --git a/tests/generic/762 b/tests/generic/762
+> >>>> new file mode 100755
+> >>>> index 00000000..d0a80219
+> >>>> --- /dev/null
+> >>>> +++ b/tests/generic/762
+> >>>> @@ -0,0 +1,160 @@
+> >>>> +#! /bin/bash
+> >>>> +# SPDX-License-Identifier: GPL-2.0
+> >>>> +# Copyright (c) 2025 Oracle.  All Rights Reserved.
+> >>>> +#
+> >>>> +# FS QA Test 762
+> >>>> +#
+> >>>> +# Validate atomic write support
+> >>>> +#
+> >>>> +. ./common/preamble
+> >>>> +_begin_fstest auto quick rw
+> >>>> +
+> >>>> +_require_scratch_write_atomic
+> >>>> +_require_xfs_io_command pwrite -A
+> >>>> +
+> >>>> +test_atomic_writes()
+> >>>> +{
+> >>>> +    local bsize=$1
+> >>>> +
+> >>>> +    case "$FSTYP" in
+> >>>> +    "xfs")
+> >>>> +        mkfs_opts="-b size=$bsize"
+> >>>> +        ;;
+> >>>> +    "ext4")
+> >>>> +        mkfs_opts="-b $bsize"
+> >>>> +        ;;
+> >>>> +    *)
+> >>>> +        ;;
+> >>>> +    esac
+> >>>> +
+> >>>> +    # If block size is not supported, skip this test
+> >>>> +    _scratch_mkfs $mkfs_opts >>$seqres.full 2>&1 || return
+> >>>> +    _try_scratch_mount >>$seqres.full 2>&1 || return
+> >>>> +
+> >>>> +    test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
+> >>>> +
+> >>>> +    testfile=$SCRATCH_MNT/testfile
+> >>>> +    touch $testfile
+> >>>> +
+> >>>> +    file_min_write=$(_get_atomic_write_unit_min $testfile)
+> >>>> +    file_max_write=$(_get_atomic_write_unit_max $testfile)
+> >>>> +    file_max_segments=$(_get_atomic_write_segments_max $testfile)
+> >>>> +
+> >>>> +    # Check that atomic min/max = FS block size
+> >>>> +    test $file_min_write -eq $bsize || \
+> >>>> +        echo "atomic write min $file_min_write, should be fs block
+> >>>> size $bsize"
+> >>>> +    test $file_min_write -eq $bsize || \
+> >>>> +        echo "atomic write max $file_max_write, should be fs block
+> >>>> size $bsize"
+> >>>> +    test $file_max_segments -eq 1 || \
+> >>>> +        echo "atomic write max segments $file_max_segments, should
+> >>>> be 1"
+> >>>> +
+> >>>> +    # Check that we can perform an atomic write of len = FS block
+> >>>> size
+> >>>> +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> >>>> $bsize" $testfile | \
+> >>>> +        grep wrote | awk -F'[/ ]' '{print $2}')
+> >>>> +    test $bytes_written -eq $bsize || echo "atomic write
+> >>>> len=$bsize failed"
+> >>>> +
+> >>>> +    # Check that we can perform an atomic single-block cow write
+> >>>> +    if [ "$FSTYP" == "xfs" ]; then
+> >>>> +        testfile_cp=$SCRATCH_MNT/testfile_copy
+> >>>> +        if _xfs_has_feature $SCRATCH_MNT reflink; then
+> >>>> +            cp --reflink $testfile $testfile_cp
+> >>>> +        fi
+> >>>> +        bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b
+> >>>> $bsize 0 $bsize" $testfile_cp | \
+> >>>> +            grep wrote | awk -F'[/ ]' '{print $2}')
+> >>>> +        test $bytes_written -eq $bsize || echo "atomic write on
+> >>>> reflinked file failed"
+> >>>> +    fi
+> >>>> +
+> >>>> +    # Check that we can perform an atomic write on an unwritten
+> >>>> block
+> >>>> +    $XFS_IO_PROG -c "falloc $bsize $bsize" $testfile
+> >>>> +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize
+> >>>> $bsize $bsize" $testfile | \
+> >>>> +        grep wrote | awk -F'[/ ]' '{print $2}')
+> >>>> +    test $bytes_written -eq $bsize || echo "atomic write to
+> >>>> unwritten block failed"
+> >>>> +
+> >>>> +    # Check that we can perform an atomic write on a sparse hole
+> >>>> +    $XFS_IO_PROG -c "fpunch 0 $bsize" $testfile
+> >>>> +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> >>>> $bsize" $testfile | \
+> >>>> +        grep wrote | awk -F'[/ ]' '{print $2}')
+> >>>> +    test $bytes_written -eq $bsize || echo "atomic write to sparse
+> >>>> hole failed"
+> >>>> +
+> >>>> +    # Check that we can perform an atomic write on a fully mapped
+> >>>> block
+> >>>> +    bytes_written=$($XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0
+> >>>> $bsize" $testfile | \
+> >>>> +        grep wrote | awk -F'[/ ]' '{print $2}')
+> >>>> +    test $bytes_written -eq $bsize || echo "atomic write to mapped
+> >>>> block failed"
+> >>>> +
+> >>>> +    # Reject atomic write if len is out of bounds
+> >>>> +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $((bsize - 1))"
+> >>>> $testfile 2>> $seqres.full && \
+> >>>> +        echo "atomic write len=$((bsize - 1)) should fail"
+> >>>> +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $((bsize + 1))"
+> >>>> $testfile 2>> $seqres.full && \
+> >>>> +        echo "atomic write len=$((bsize + 1)) should fail"
+> >>>> +
+> >>>> +    # Reject atomic write when iovecs > 1
+> >>>> +    $XFS_IO_PROG -dc "pwrite -A -D -V2 -b $bsize 0 $bsize"
+> >>>> $testfile 2>> $seqres.full && \
+> >>>> +        echo "atomic write only supports iovec count of 1"
+> >>>> +
+> >>>> +    # Reject atomic write when not using direct I/O
+> >>>> +    $XFS_IO_PROG -c "pwrite -A -V1 -b $bsize 0 $bsize" $testfile
+> >>>> 2>> $seqres.full && \
+> >>>> +        echo "atomic write requires direct I/O"
+> >>>> +
+> >>>> +    # Reject atomic write when offset % bsize != 0
+> >>>> +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 1 $bsize"
+> >>>> $testfile 2>> $seqres.full && \
+> >>>> +        echo "atomic write requires offset to be aligned to bsize"
+> >>>> +
+> >>>> +    _scratch_unmount
+> >>>> +}
+> >>>> +
+> >>>> +test_atomic_write_bounds()
+> >>>> +{
+> >>>> +    local bsize=$1
+> >>>> +
+> >>>> +    case "$FSTYP" in
+> >>>> +    "xfs")
+> >>>> +        mkfs_opts="-b size=$bsize"
+> >>>> +        ;;
+> >>>> +    "ext4")
+> >>>> +        mkfs_opts="-b $bsize"
+> >>>> +        ;;
+> >>>> +    *)
+> >>>> +        ;;
+> >>>> +    esac
+> >>>> +
+> >>>> +    # If block size is not supported, skip this test
+> >>>> +    _scratch_mkfs $mkfs_opts >>$seqres.full 2>&1 || return
+> >>>> +    _try_scratch_mount >>$seqres.full 2>&1 || return
+> >>>> +
+> >>>> +    test "$FSTYP" = "xfs" && _xfs_force_bdev data $SCRATCH_MNT
+> >>>> +
+> >>>> +    testfile=$SCRATCH_MNT/testfile
+> >>>> +    touch $testfile
+> >>>> +
+> >>>> +    $XFS_IO_PROG -dc "pwrite -A -D -V1 -b $bsize 0 $bsize"
+> >>>> $testfile 2>> $seqres.full && \
+> >>>> +        echo "atomic write should fail when bsize is out of
+> >>>> bounds"
+> >>>> +
+> >>>> +    _scratch_unmount
+> >>>> +}
+> >>>> +
+> >>>> +sys_min_write=$(cat "/sys/block/$(_short_dev
+> >>>> $SCRATCH_DEV)/queue/atomic_write_unit_min_bytes")
+> >>>> +sys_max_write=$(cat "/sys/block/$(_short_dev
+> >>>> $SCRATCH_DEV)/queue/atomic_write_unit_max_bytes")
+> >>>> +
+> >>>> +bdev_min_write=$(_get_atomic_write_unit_min $SCRATCH_DEV)
+> >>>> +bdev_max_write=$(_get_atomic_write_unit_max $SCRATCH_DEV)
+> >>>> +
+> >>>> +if [ "$sys_min_write" -ne "$bdev_min_write" ]; then
+> >>>> +    echo "bdev min write != sys min write"
+> >>>> +fi
+> >>>> +if [ "$sys_max_write" -ne "$bdev_max_write" ]; then
+> >>>> +    echo "bdev max write != sys max write"
+> >>>> +fi
+> >>>> +
+> >>>> +# Test all supported block sizes between bdev min and max
+> >>>> +for ((bsize=$bdev_min_write; bsize<=bdev_max_write; bsize*=2)); do
+> >>>> +        test_atomic_writes $bsize
+> >>>> +done;
+> >>>> +
+> >>>> +# Check that atomic write fails if bsize < bdev min or bsize >
+> >>>> bdev max
+> >>>> +test_atomic_write_bounds $((bdev_min_write / 2))
+> >>>> +test_atomic_write_bounds $((bdev_max_write * 2))
+> >>>> +
+> >>>> +# success, all done
+> >>>> +echo Silence is golden
+> >>>> +status=0
+> >>>> +exit
+> >>>> diff --git a/tests/generic/762.out b/tests/generic/762.out
+> >>>> new file mode 100644
+> >>>> index 00000000..fbaeb297
+> >>>> --- /dev/null
+> >>>> +++ b/tests/generic/762.out
+> >>>> @@ -0,0 +1,2 @@
+> >>>> +QA output created by 762
+> >>>> +Silence is golden
+> >>>> -- 
+> >>>> 2.34.1
+> >>>> 
+> >>>> 
+> >> 
+> >> 
+> 
 
-Almost always the writeback completion will run in the softirq
-completion context right?  Do you know of cases where the writeback
-completion runs in the process context (in_task())?  Few cases from the
-filesystem side, where the completion can run in a process context are,
-when the bio->bi_end_io is hijacked by the filesystem, e.g.
-
-	/* send ioends that might require a transaction to the completion wq */
-	if (xfs_ioend_is_append(ioend) ||
-	    (ioend->io_flags & (IOMAP_IOEND_UNWRITTEN | IOMAP_IOEND_SHARED)))
-		ioend->io_bio.bi_end_io = xfs_end_bio;
-
-	if (status)
-		return status;
-	submit_bio(&ioend->io_bio);
-
-In this case xfs_end_bio() will be called for completing the ioends and
-will queue the completion to a workqueue (since this requires txn
-processing). (Which means in_task() will be true)
-
-
-That means the user visible effect of having an in_task() check for
-calling folio_unmap_invalidate() are - 
-
-1. If an append write or write to a unwritten extent or when cow is done
-using RWF_DONTCACHE on a file, it will free up the page cache folios
-after the I/O completes (as expected).
-
-2. However if RWF_DONTCACHE writes are done to any existing written extents
-(i.e. overwrites), then it will not free up the page cache folios after
-the I/O completes (because the completions run in the softirq context)
-
-Is this understanding correct? Is this an expected behavior too and is
-this documented someplace like in a man page or kernel Documentation?
-
-The other thing which I wanted to check was, we can then have folios
-still in the page cache which were written using RWF_DONTCACHE. So do
-we drop these page cache folios later from somewhere else? Or is there
-any other mm subsystem utilizing the fact that those pages remaining in
-the pagecache which were written using RWF_DONTCACHE can be the
-candidates for removal first?
-
-I am just trying to better understand on whether we are treating these
-page cache folios marked with PG_dropbehind as special or just as a
-regular page cache folios after the I/O is complete but these didn't get
-free. I understand the other reason where these won't get freed is when
-someone else might be using these folios.
-
-
-<Below experiment to show page cache pages cached after doing an
-overwrite using RWF_DONTCACHE>
-
-I was trying to add -U flag to xfs_io for uncached preadv2/pwritev2
-calls. (I will post those patches soon).
-
-Using -U flag in xfs_io, we can see the above mentioned behavior.
-
-e.g. 
-# mount /dev/loop6 /mnt1/test
-
-// Do uncached writes using (-U) to a new file
-# ./io/xfs_io -fc "pwrite -U -V 1 0 16K" /mnt1/test/f1;
-wrote 16384/16384 bytes at offset 0
-16 KiB, 4 ops; 0.0036 sec (4.277 MiB/sec and 1094.9904 ops/sec)
-
-//no page cache pages found as expected
-# ./io/xfs_io -c "mmap 0 16K" -c "mincore" -c "munmap" /mnt1/test/f1    
-
-// overwrite to the same area using uncached writes (-U)
-# ./io/xfs_io -c "pwrite -U -V 1 0 16K" /mnt1/test/f1;
-wrote 16384/16384 bytes at offset 0
-16 KiB, 4 ops; 0.0016 sec (9.340 MiB/sec and 2390.9145 ops/sec)
-
-// Overwrite causes the page cache pages to be found even with -U
-# ./io/xfs_io -c "mmap 0 16K" -c "mincore" -c "munmap" /mnt1/test/f1
-0x7ffff7fb5000 - 0x7ffff7fb9000  4 pages (0 : 16384)
-
-// Try the same after a mount cycle
-# umount /dev/loop6
-# mount /dev/loop6 /mnt1/test
-
-// Overwrite causes the page cache pages to be found even with -U
-# ./io/xfs_io -c "pwrite -U -V 1 0 16K" /mnt1/test/f1;
-wrote 16384/16384 bytes at offset 0
-16 KiB, 4 ops; 0.0009 sec (16.361 MiB/sec and 4188.4817 ops/sec)
-# ./io/xfs_io -c "mmap 0 16K" -c "mincore" -c "munmap" /mnt1/test/f1
-0x7ffff7fb5000 - 0x7ffff7fb9000  4 pages (0 : 16384)
-#
-
-
-Should we add few unit tests in xfstests for above behavior (for
-preadv2() and pwritev2()). I was planning to add a few, but since we are
-already discussing other things here - it's better to get an opinion
-from others too for this.
-
--ritesh
-
-
->  /**
->   * folio_end_writeback - End writeback against a folio.
->   * @folio: The folio.
-> @@ -1609,6 +1630,8 @@ EXPORT_SYMBOL(folio_wait_private_2_killable);
->   */
->  void folio_end_writeback(struct folio *folio)
->  {
-> +	bool folio_dropbehind = false;
-> +
->  	VM_BUG_ON_FOLIO(!folio_test_writeback(folio), folio);
->  
->  	/*
-> @@ -1630,9 +1653,14 @@ void folio_end_writeback(struct folio *folio)
->  	 * reused before the folio_wake_bit().
->  	 */
->  	folio_get(folio);
-> +	if (!folio_test_dirty(folio))
-> +		folio_dropbehind = folio_test_clear_dropbehind(folio);
->  	if (__folio_end_writeback(folio))
->  		folio_wake_bit(folio, PG_writeback);
->  	acct_reclaim_writeback(folio);
-> +
-> +	if (folio_dropbehind)
-> +		folio_end_dropbehind_write(folio);
->  	folio_put(folio);
->  }
->  EXPORT_SYMBOL(folio_end_writeback);
-> -- 
-> 2.45.2
