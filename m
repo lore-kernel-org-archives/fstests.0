@@ -1,80 +1,80 @@
-Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D3EE151990
-	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:39:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81DFC2135A3
+	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:39:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741297170; cv=none; b=fz96+WtLaudnZM2o3mLaYeiPV7qAyv5AqaTwn1OvUDjUwnN9sBpdJdoH7llPC70jFyYQ7bl5OGhVyQ36PjaXER78kvMW5lcd+HjhIx7tAIAYNuFi4NZreZ1l96qKRcjeYpib7KXODY9Lc9zn0XpE21D+EN2pjtk1paXzrEsGcDk=
+	t=1741297170; cv=none; b=iUK9pobMgR/yUgfJgL45/QsScwFZe/SfKtYRPkMPPTXUdxveaTvC/AWth6dmOyNXu4a93QlQQpogmb8oAfit7SGHCvvgQRg/SKMR1ft5M81mwkt0Axbns24Kha8HarDqSZaWSXYH/gNsQY8nlhmtaVkg5HVvUEtLzrmzTAil06E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1741297170; c=relaxed/simple;
-	bh=gRnYCy3DvomvqWbtKnCfD6lpOqN/3Vy6waQ7ojnGeTk=;
+	bh=eCntKfcnKcAoTACNRtfbYRoUkJYxKPLidqc8ENdI7vs=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=R2/ihzO+ilt87jiIubWhtkUgexzIZVLO6LuDmGiGR77XwxrhuCjUyjEKVH8SubOxGI4MGYq15w5yt4kYQB6sdStHYu7dR2XaZYTimayHTO20NU9VsJkfIo1AJNV7yRNHPPoh83FrOpUB2xujxl7t0XRT/qlhvxNNfvZhD2PcDU0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=3a3E4A9j; arc=none smtp.client-ip=209.85.216.54
+	 MIME-Version; b=IOQzq6mp9AyReIePH7RXtRU36v969cODME2RV0jDTi36qDlYelSaYfP4nGXIA93TQWYfBr3VMoecVpzj5Ci6T03qxaKOswmIiFT2rFm2EIrOfwT0qmgyHq+tY/HuvG7cYbDpjeJZvEN9qQ0lg/ppX1YAbom84wbYNDcwJT0vLlA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=UW5A4r1A; arc=none smtp.client-ip=209.85.214.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="3a3E4A9j"
-Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-2fea47bcb51so2530333a91.2
-        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:39:28 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="UW5A4r1A"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-2234e4b079cso21307365ad.1
+        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:39:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741297167; x=1741901967; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=l3wE2ibZn5SufygRU4N/xIesL05h8ucm7NvbROm039k=;
-        b=3a3E4A9jLbpQoXXAtX0FvC05M3eAEIXEExLV7FsiCSMKIrypZTvY7XIsU6OVqaTbm7
-         CKTrzFHN5vUSzrdAfU0nqLgow41DH2QE+gWva5TP0cR8PhhhVkz7/IzPdTz6VDnNbz7U
-         lP7cYfij4Za3NQbX8rVzEMxiUOYiwmI29URLObvF0KykWnmX5UNyoX9gcfujdNG3H1ho
-         aysU98pZ+ggATlEQ73VOWZ5zUQ2xVZ5CwBLARD8lECQmBLzBEahF/8a/SRmmHyFPwdJE
-         /A7RSCaCNalOYkW5hhV6k2jr8iMzONle+Y2BlIR7D54VUxWm04GHMtrsTXmcxdKIHWMW
-         L25g==
+        bh=NTPSLjVBQ+MFaQOuOxS6Bl/h8Mkm+ykxeSkcWemwpLs=;
+        b=UW5A4r1AqIbbicwsAa6d3CKpL1gH2ytj9CfhXb92C5N2+CfkDW5007k5onCh1kYH0V
+         YKeSAMlFRoumYQNrTtDdTU3sWxV9E786V2I42wvbnrmGo7l4miB7kilYUXnX0985Unw7
+         8KFGm3bTXvZus2bRIZ9TVvaKFd8GuahSkIfXnYMtTn4n9j6v/3jpRCtAewjoODbydtqL
+         lli0QKznDkYrKlzYtReuzUPzGtxREAiuitpDW23mJB2HzrCc3/7iBKe8JRt+ZpK5bWGA
+         rRoRrUZVTo+DAEKcxOVF8M6fvJHFKasC+TdMzTqksLtZzoG74imIKdVyFG8jS24mijJM
+         I4CQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1741297167; x=1741901967;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=l3wE2ibZn5SufygRU4N/xIesL05h8ucm7NvbROm039k=;
-        b=xQfoPG2eI0LpJLHBh7TlPCddxjvLkYsGtCleZTh5JTnnzr+JKFFWldO0ZaCBKZEsL7
-         MrmfLiU6WWZr5Yh4w/6dpeI/BT6omoKgUytRD/lWb+YsGfrjUv+n9EAoJV4ERtRgs7gC
-         Il7JM3rge94MH2a7ecXCdx+3P46j7R4jFiSIbsE91QShnzQIXzP77fNmuSdXOVtCsMNT
-         RLBccR0nW2SPfHMenaiqUng9Gk0ouzNuiCoPHlrSNinUvzY4aNj3w+TE1G5QqLJ89d9k
-         OnePdtZo1pMEBknqG1vijBywwz2lCfxH9TJX/cUg9ch03+wUpcc2WYUh7oqwMOmlfsE7
-         NhEw==
-X-Gm-Message-State: AOJu0YwbeDU8DCY4h3a/5wWhMZGJDLbkvdOrME3XfMPZWi6K11yp5nfD
-	sizKdnAiNy/Sb9jSosFGyZkuxtVPxoLzuOk2xjfR3kN/LGeSK31XMl9lZDhiOxAqbVay11d4deW
-	N
-X-Gm-Gg: ASbGncvnDzuq3FHCWOaEUuHb46suZDINqcWy5ncI+LmJAm7hvJhfwaoCwZEpvz9ZY/q
-	aQDNsiz4apD5o8jW9ZVJTjJmN/btvHQPWntbbZLSc87QtiYxABz/l+rxq2Q/FXNFUZulcKslCWr
-	9id3BNvDnWvY2z0ocdRhYkL7ZLn//t/lCFBUM77xQXTSokvklQDV2wuUxyCXjaJqiLKZKJ4Fgdd
-	PEpyyU/E6b+W/HcqSdY0T6M/u20PZ95hHrZzKKeSCUMrYbQyqP1GFxjo9NJLEyijjbKvKKbD1DZ
-	wHtdpAhThjCkCTv21VoTdUcAemoJJs9OawFOnKLDWWSgwn1QviFUgRGvpszVrGdAj1nGFL6ZXDp
-	d1xWWLdlVSHCve/YC/rI=
-X-Google-Smtp-Source: AGHT+IEUjcxwI6mG0oWTYzVwb51HUiLOUegszjHpEdbR5hciEfJuNmVvJvl9vK/fU5UVdfa5Nj7QAQ==
-X-Received: by 2002:a17:90b:1b0b:b0:2fc:c262:ef4b with SMTP id 98e67ed59e1d1-2ff7cea9a99mr1489556a91.18.1741297167421;
-        Thu, 06 Mar 2025 13:39:27 -0800 (PST)
+        bh=NTPSLjVBQ+MFaQOuOxS6Bl/h8Mkm+ykxeSkcWemwpLs=;
+        b=DWkP4kwKaXkmcxAq/ZV8MDOZ53AKs6XR9A+1C8Tx7IQy6G/UfVxbJMyU36OYRoX7MY
+         QdpUDzT/Wmr5e3H7sgMcrBW2TwP4RtE4Dsj4BazEp4Bvf1Mam5jT3uHrw//X/KXqDOHE
+         SDliKCKoyg+mQacDLwcqNbkOEfV936hlpFK83HE4vbi2UUoI1A9jxVwZSKNcg1u/wWY4
+         AdDXPU/5pPeJs8M1IRz7hn5v9VKdafFVSWn9lK/o+T1xlgPIzt+TudeQ5MwcH2DcGL4h
+         D4YqLO+RkvMfSe+NVwTQqIp1MudumHWRKu8JjQumLbbSGkK9zJvX9ybMxO+EbFml4WC5
+         E7pQ==
+X-Gm-Message-State: AOJu0YyqTBk5Wmi6L0ifYANWVURH8m+XmJrh+5rh/TGs+aQwyJmPvnBm
+	cEt27qM9mmLC7dunBsDtgWrukTwB2NIQwVmtzy25qXdcsybXSuiH1JvFRmN+3HGGoDdV9B+va6j
+	6
+X-Gm-Gg: ASbGnctYFTKUvnZfUMhem7Rd43quJ11CxMGUMfOEX1CCXEB2BVC6MiyGeIY76m7qJOc
+	7T6+MEa+W8NP8PJottXoevUnG01CnBNYwrWbccwt/wn93mNdz/9IaQm9hsKF558PBAMnUVA7ymd
+	LpMcIWvwH4pZKiEjvNd3P3EY1P7t1KHqKcHtIRG64WEeSZ/h55jNj2Zy54qHX20xAE+GjZ2PRKR
+	12b9OcZC4V/perTHV9ca6BZLctzHX9TBFqLlTaFKMqArOEc2qoCOA0E3dGly91jlZ2OCS6NAdne
+	VHERDTuen7RGwdpcqbzNw5kVqq34tqVILNe5+10CXgWVzputqBOSON3jM3pRsWBaJE7mwxe0zoU
+	NMneTtNA5H09vTXM3V9U=
+X-Google-Smtp-Source: AGHT+IEt+E+y2Pi6CQ317tY2I70l062g5qieFWw0vfA4SVn5Z6YgSAuZScuIoQxj/VoXmobd69smhw==
+X-Received: by 2002:a05:6a00:1812:b0:736:8c0f:7758 with SMTP id d2e1a72fcca58-736aa9e954amr1160889b3a.10.1741297166615;
+        Thu, 06 Mar 2025 13:39:26 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ff693e75ccsm1738812a91.32.2025.03.06.13.39.25
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73698243fcbsm1916459b3a.57.2025.03.06.13.39.25
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Mar 2025 13:39:27 -0800 (PST)
+        Thu, 06 Mar 2025 13:39:25 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tqIw6-00000009lRh-2hKy
+	id 1tqIw6-00000009lRd-2ZYf
 	for fstests@vger.kernel.org;
 	Fri, 07 Mar 2025 08:39:22 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tqIw6-0000000Fvrc-3anL
+	id 1tqIw6-0000000FvrX-3SEF
 	for fstests@vger.kernel.org;
 	Fri, 07 Mar 2025 08:39:22 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 5/5] fstests: remove old tools from tools directory
-Date: Fri,  7 Mar 2025 08:34:50 +1100
-Message-ID: <20250306213921.3769440-6-david@fromorbit.com>
+Subject: [PATCH 4/5] fstests: remove tools/auto-qa
+Date: Fri,  7 Mar 2025 08:34:49 +1100
+Message-ID: <20250306213921.3769440-5-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250306213921.3769440-1-david@fromorbit.com>
 References: <20250306213921.3769440-1-david@fromorbit.com>
@@ -88,597 +88,591 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-ag-wipe, db-walk, fs-walk and interop are all old 2000s era SGI QA
-scripts that are either not usable anymore of have been superceded
-by much more recent functionality.
-
-interop only runs on machines with the host named "bruce" or
-"whack", requires NFS mounts from a machine named "snort" and access
-to a specific user's home dir. I know what all these were; they were
-test and build machines in SGI's engineering office in Melbourne,
-Australia. That went away in ~2009....
-
-ag-wipe is unused and has been superceded by multiple different sets of
-functionality (e.g. ./check --large-fs).
-
-db-walk is unused by fstests and now is native xfs_db functionality.
-
-fs-walk is dumping the md5sum and stat info of every file in a
-directory heirachy and only used by the interop script....
-
-Remove them all.
+This is a 2000s era SGI test script that no-one uses anymore. It
+likely doesn't even work because it is dependent on CVS and/or
+the SGI proprietary ptools revision control system for source
+control. Hence it clearly hasn't been used for years, so remove it.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tools/ag-wipe | 171 ------------------------------------------------
- tools/db-walk | 178 --------------------------------------------------
- tools/fs-walk |  85 ------------------------
- tools/interop | 101 ----------------------------
- 4 files changed, 535 deletions(-)
- delete mode 100755 tools/ag-wipe
- delete mode 100755 tools/db-walk
- delete mode 100755 tools/fs-walk
- delete mode 100755 tools/interop
+ tools/auto-qa | 568 --------------------------------------------------
+ 1 file changed, 568 deletions(-)
+ delete mode 100755 tools/auto-qa
 
-diff --git a/tools/ag-wipe b/tools/ag-wipe
+diff --git a/tools/auto-qa b/tools/auto-qa
 deleted file mode 100755
-index 52acf0f80..000000000
---- a/tools/ag-wipe
+index 1beb28359..000000000
+--- a/tools/auto-qa
 +++ /dev/null
-@@ -1,171 +0,0 @@
--#!/usr/bin/perl -w
+@@ -1,568 +0,0 @@
+-#!/bin/sh
 -# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2003-2004 Silicon Graphics, Inc.  All Rights Reserved.
+-# Copyright (c) 2000-2003 Silicon Graphics, Inc.  All Rights Reserved.
 -#
--use strict;
--use IO::File;
--use Getopt::Std;
+-# automatic qa system. 31/08/00 dxm@sgi.com
 -#
--#
--# Modify a filesystem's superblock and AGF metadata structures
--# so that only a subset of the allocation groups will be used.
--# Intended use is in testing large virtual devices (eg. loop)
--# with extremely large filesystems, where we want to ensure
--# high allocation groups are used as much as possible (where
--# the block addresses are large).
+-# Usage: auto_qa start-state [stop-state]
+-# Do auto_qa from start-state up to stop-state inclusive
+-# or if no stop-state given then do it until reach "done" state.
 -#
 -
--my %opt;
--getopts('cf:l:qr:v', \%opt);
--
--die "Usage: $0 [-f AG] [-l AG] [-r bytes] [-cqv] device\n" unless (@ARGV == 1);
--my $device = shift @ARGV;
--die "$device: no such file\n" unless (-e $device);
--
--my $clearall = defined($opt{'c'}) ? 1 : 0;
--my $retain = defined($opt{'r'}) ? $opt{'r'} : -1;
--my $quiet = defined($opt{'q'}) ? 1 : 0;
--my $verbose = defined($opt{'v'}) ? 1 : 0;
--my $nagfirst = defined($opt{'f'}) ? $opt{'f'} : 0;
--my $naglast = defined($opt{'l'}) ? $opt{'l'} : 0;
--
--# 
--# "clearall" means clear everything barring the final AG.
--# "retain" means clearall and retain a specified amount in the
--# second-from-last AG as well (value is the number of bytes).
--# [NB: retain with a value of zero is now the same as clearall].
--# 
--if ($retain >= 0) {
--	$clearall = 1;
+-_log()
+-{
+-    echo "$*" >&2
+-    echo "$*" >> $LOG
+-    sync
 -}
 -
--sub xfs_db {
--	my $xfsdb = 'xfs_db -x';
--	my %hash;
+-_fail()
+-{
+-    if [ "$started" = "1" ] 
+-    then
+-	echo "auto-qa stopped" | wall
+-	started=0
+-    fi
 -
--	foreach (@_) {
--		$xfsdb .= ' -c ' . $_;
+-    _log "$*"
+-    
+-    # send special email if a cron'd qa run fails
+-    case $state
+-    in
+-	cron*)
+-	    mail -s "XFS QA status report" $EMAIL < $LOG 2>&1
+-	;;
+-    esac
+-
+-    status=1
+-    exit 1
+-}
+-
+-_get_kernel_version()
+-{
+-    [ -x "$KWORKAREA" ] || return
+-    [ -r "$KWORKAREA/Makefile" ] \
+-	|| _fail "can't read kernel makefile $KWORKAREA/Makefile"
+-
+-    eval `awk '
+-	BEGIN { FS = "[ \t=]+" }
+-	/^VERSION =/ { a=$2 }
+-	/^PATCHLEVEL =/ { b=$2 }
+-	/^SUBLEVEL =/ { c=$2 }
+-	/^EXTRAVERSION =/ { d=$2 }
+-	END { 
+-	    print "VERSION=" a "." b "." c d " ; SVERSION=" a "." b "." c
 -	}
--	print $xfsdb, ' ', $device, "\n" if ($verbose);
--
--	die unless open(DB, "$xfsdb $device 2>/dev/null |");
--	while (<DB>) {
--		if (/^(\S+) = (.*)$/) {
--			print if ($verbose);
--			$hash{$1} = $2;
--		}
--	}
--	return %hash;
+-   ' < $KWORKAREA/Makefile`
 -}
 -
+-# this should be constant
 -
--# 
--# Stage 1: Get control information from the superblock
--# 
--
--my @sbprint = ( '"print fdblocks"', '"print agcount"', '"print blocksize"' );
--my @agffree = ( '"print freeblks"' );
--
--my %sb = xfs_db 'sb', @sbprint;
--print "=== Initially ", $sb{'fdblocks'}, " blocks free across ",
--	$sb{'agcount'}, " AGs\n" unless $quiet;
--if ($clearall && ($nagfirst || $naglast)) {
--	print STDERR "  o Clearall/retain specified with first/last AG\n";
--	exit(1);
--}
--if ($nagfirst >= $sb{'agcount'}) {
--	print STDERR "  o First AG number is too large\n";
--	exit(1);
--}
--if ($naglast >= $sb{'agcount'}) {
--	print STDERR "  o Last AG number is too large\n";
--	exit(1);
--}
--if ($naglast - $nagfirst < 0) {
--	print STDERR "  o No AGs to clear\n";
--	exit(1);
--}
--if ($clearall) {
--	$naglast = $sb{'agcount'} - 2;
--	if ($retain > 0) {
--		my %check;
--
--		$naglast--;
--		$retain /= $sb{'blocksize'};	# convert to fsblocks
--		%check = xfs_db "'agf $naglast'", @agffree;
--		if ($check{'freeblks'} < $retain) {
--			print STDERR "  o Insufficient space to retain\n";
--			exit(1);
--		}
--	}
--}
+-ROOT="$HOME/qa"
+-HOST=`hostname -s`
+-if [ ! -z "$CVSROOT" ]; then
+-    export WORKAREA="$ROOT/xfs-cmds"
+-else
+-    [ -z "$WORKAREA" ] && export WORKAREA="$ROOT/xfs-cmds"
+-fi
 -
 -
--# 
--# Stage 2: Wipe out all completely masked allocation groups.
--# 
+-export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin/ptools:/usr/local/bin"
+-STATE=$ROOT/qa.state
+-QADIR="$WORKAREA/xfstests"
+-SUDO="su -c"
+-CONFIG="$ROOT/$HOST.config"
+-COMMON_CONFIG="$QADIR/common/config"
+-SH="/bin/sh"
+-LOG="$ROOT/qa.log"
 -
--my @agfprint = ( '"print freeblks"', '"print flcount"' );
--my @agfcommands = ( '"write freeblks 0"',
--			'"write longest 0"', '"write flcount 0"',
--			'"write bnolevel 1"', '"write cntlevel 1"',
--			'"write flfirst 0"', '"write fllast 0"' );
--my @bnoprint = ( '"addr bnoroot"', '"print numrecs"' );
--my @bnocommands = ( '"addr bnoroot"', '"write numrecs 0"',
--			'"write leftsib -1"', '"write rightsib -1"' );
--my @cntprint = ( '"addr cntroot"', '"print numrecs"' );
--my @cntcommands = ( '"addr cntroot"', '"write numrecs 0"',
--			'"write leftsib -1"', '"write rightsib -1"' );
+-# do some cleanup on exit
 -
--print "=== Wiping ", $naglast - $nagfirst + 1,
--	" AGs starting from AG #", $nagfirst, "\n" unless $quiet;
--
--my $ag = $nagfirst;
--while ($ag <= $naglast) {
--	print "  o AG#", $ag, " AGF fields\n" unless $quiet;
--
--	my %agf = xfs_db "'agf $ag'", @agfprint;
--	xfs_db "'agf $ag'", @agfcommands;
--
--	my $blockcnt = $agf{'freeblks'} + $agf{'flcount'};
--	$sb{'fdblocks'} -= $blockcnt;
--	print "     cleared ", $blockcnt, " blocks from AG#", $ag, "\n"
--		unless $quiet;
--
--	my %btree = xfs_db "'agf $ag'", @bnoprint;
--	xfs_db "'agf $ag'", @bnocommands, "'agf $ag'", @cntcommands;
--	print "     cleared ", $btree{'numrecs'}, " BNO/CNT btree recs in AG#",
--		$ag, "\n" unless $quiet;
--
--	$ag++;
--}
--
--
--# 
--# Stage 3: Wipe out any partially masked allocation group.
--# 
--
--if ($retain > 0) {
--	print "  o AG#", $ag, " AGF fields (partial)\n" unless $quiet;
--
--	my %ragf = xfs_db "'agf $ag'", '"print freeblks"',
--		'"addr bnoroot"', '"print recs[1].startblock"';
--	my $maskblks = $ragf{'freeblks'} - $retain;
--	my $newstart = $ragf{'recs[1].startblock'} + $maskblks;
--	xfs_db "'agf $ag'",
--		"'write freeblks $retain'", "'write longest $retain'",
--		"'agf $ag'", '"addr bnoroot"',
--		"'write recs[1].startblock $newstart'",
--		"'write recs[1].blockcount $retain'",
--		"'agf $ag'", '"addr cntroot"',
--		"'write recs[1].startblock $newstart'",
--		"'write recs[1].blockcount $retain'";
--
--	$sb{'fdblocks'} -= $maskblks;
--	print "     cleared ", $maskblks, " blocks from AG#", $ag, "\n"
--		unless $quiet;
--}
--
--print "=== Updating final freespace count, ", $sb{'fdblocks'}, " blocks\n"
--	unless $quiet;
--xfs_db "'sb 0'", "'write fdblocks $sb{'fdblocks'}'"
-diff --git a/tools/db-walk b/tools/db-walk
-deleted file mode 100755
-index e09920559..000000000
---- a/tools/db-walk
-+++ /dev/null
-@@ -1,178 +0,0 @@
--#!/usr/bin/perl -w
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
--#
--# use db to try to traverse the entire filesystem starting at the root
--#
--my $device;
--my $rootino;
--my $agcount;
--my $versionnum;
--my $dir_version;
--my @dir_inodes;
--my @bmap_blocks;
--my @block_inodes;
--my $mode;
--
--sub db($)
+-_cleanup()
 -{
--    my ($args)=@_;
--    my ($ret);
--    
--    $ret=`xfs_db -r $args $device 2> /dev/null`;
--    die "ERROR executing xfs_db -r $args $device" if ($?);
--    
--    return $ret;
+-    umount $SCRATCH_DEV &> /dev/null
+-    umount $TEST_DEV &> /dev/null
+-    if [ "$started" = 1 ]
+-    then
+-	echo "auto-qa stopped" | wall
+-	started=0
+-    fi
 -}
+-status=1
+-trap "_cleanup; exit \$status" 0 1 2 3 15
 -
--sub fmt($)
+-# clean exit
+-
+-_success()
 -{
--    my ($text)=@_;
--    my $c=0;
--    print "        ";
--    foreach (split("\n",$text)) {
--        s/^core\.//;
--        
--        if ($c+length($_) >= 70) {
--            $c=0;
--            print ",\n        ";
--        }
--        if ($c) {
--            print ", ";
--            $c+=2;
--        }
--        print "$_";
--        $c+=length($_)+2;
--    }
--    print "\n";
+-    status=0
+-    exit 0
 -}
 -
--sub inode($)
+-_get_state()
 -{
--    my ($num)=@_;
--    my ($t);
--    
--    @dir_inodes=();
--    
--    $t=db("-c \"inode $num\" -c \"print\"");
--    print "    *** Inode $num\n";
--    fmt($t);
--    
--    ($mode)= $t=~ /^core.mode = (\d+)$/m;
--    
--    if ($t=~ /a\.bmx/m) {
--        bmap("inode $num","attr");
--        foreach (@bmap_blocks) {
--            attr_block($_);
--        }
--    }
--    if (eval "$mode & 040000") {
--        if ( $t=~ /sfdir/m) {
--            while ($t=~ /inumber(?:\.i[48])? = (\d+)$/mg) {
--                push(@dir_inodes,$1);
--            }
--        }
--        if ( $t=~ /u\.bmx/m) {
--            bmap("inode $num","dir");
--            foreach (@bmap_blocks) {
--                dir_block($_);
--                push(@dir_inodes,@block_inodes);
--            }
--        }
--    } else {
--        bmap("inode $num","file") if ( $t=~ /u\.bmx/m);
--    }
+-    state=`cat $STATE`
 -}
 -
--sub bmap($$)
+-_set_state()
 -{
--    my ($cmd,$type)=@_;
--    my ($t);
--    
--    @bmap_blocks=();
--    
--    $flag=($type eq "attr")?"-a":"";
--    
--    $t=db("-c \"$cmd\" -c \"bmap $flag\"");
--    print "    *** bmap $type $cmd\n";
--    fmt($t);
--    
--    if ($type eq "dir" || $type eq "attr") {
--        while ($t=~ /startblock (\d+) \(.+\) count (\d+)/mg) {
--            for ($b=$1;$b<$1+$2;$b++) {
--                push(@bmap_blocks,$b);
--            }
--        }
--    }
+-    echo $1 > $STATE
+-    _get_state
 -}
 -
--sub dir_block($)
+-_change_state()
 -{
--    my ($num)=@_;
--    my ($t);
+-    new=$1
+-
+-    # if have state XXXX-state then preserve XXXX-newstate
 -    
--    @block_inodes=();
--    
--    $type=($dir_version==2)?"dir2":"dir";
--    
--    $t=db("-c \"fsblock $num\" -c \"type $type\" -c \"print\"");
--    print "    *** $type block $num\n";
--    # need to drop . and ..
--    ($self)= $t=~ /\[(\d+)\].name = \"\.\"/m;
--    ($parent)= $t=~ /\[(\d+)\].name = \"\.\.\"/m;
--    fmt($t);
--    
--    
--    while ($t=~ /\[(\d+)\].inumber = (\d+)/mg) {
--        next if (defined $self && $1 == $self);
--        next if (defined $parent && $1 == $parent);
--        push(@block_inodes, $2);
--    }
+-    case $state
+-    in
+-	*-*)
+-	    case $new
+-	    in
+-		*-*)
+-		    _set_state $new
+-		    ;;
+-		*)
+-		    _set_state `echo $state | sed "s/-.*$/-$new/"`
+-		    ;;
+-	    esac
+-	    ;;
+-	*)
+-	    _set_state $new
+-	    ;;
+-    esac
 -}
 -
--sub attr_block($)
+-_sudo()
 -{
--    my ($num)=@_;
--    my ($t);
--    
--    $t=db("-c \"fsblock $num\" -c \"type attr\" -c \"print\"");
--    print "    *** attr block $num\n";
--
--    fmt($t);
+-    $ROOT/su -c "$*" < /dev/null ;# HACK - we need a hacked su at the mo
 -}
 -
--sub sb($)
+-_restart()
 -{
--    my ($num)=@_;
--    my ($t);
--    
--    $t=db("-c \"sb $num\" -c \"print\"");
--    print "    *** SB $num\n";
--    fmt($t);
--    
--    ($rootino)= $t=~ /^rootino = (\d+)$/m;
--    ($agcount)= $t=~ /^agcount = (\d+)$/m;
--    ($versionnum)= $t=~ /^versionnum = (0x[\da-f]+)$/m;
--    $dir_version = (eval "$versionnum & 0x2000")?2:1;
+-    exec $ROOT/su -c "(shutdown -r now \"auto-qa rebooting\" )&" < /dev/null
 -}
 -
--die "Usage: $0 <XFS device>\n" unless (@ARGV == 1);
--
--$device=shift @ARGV;
--die "can't read $device\n" unless (-r $device);
--die "$device is not a block device\n" unless (-b _);
--
--chomp($HOST = `hostname -s`);
--
--print "*** db-walk host $HOST device $device\n";
--
--sb(0);
--for ($ag=1;$ag<$agcount;$ag++) {
--    sb($ag);
--}
--
--@inodes=($rootino);
--while ($_ = shift @inodes) {
--    inode($_);
--    push(@inodes,@dir_inodes);
--}
-diff --git a/tools/fs-walk b/tools/fs-walk
-deleted file mode 100755
-index 918e1ad67..000000000
---- a/tools/fs-walk
-+++ /dev/null
-@@ -1,85 +0,0 @@
--#!/usr/bin/perl -w
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
--#
--# traverse the entire filesystem dumping info.
--#
--use MD5;
--use Getopt::Std;
--
--my %opt;
--
--sub scan($)
+-_update_workarea()
 -{
--    my ($file)=@_;
--    my ($md5)=new MD5;
--    my (@stat);
+-    if [ -z "$CVSROOT" ]; then
+-	_log "	*** p_tupdate"
+-	cd "$1"
+-	WORKAREA="$1" p_tupdate 2>&1 \
+-			|| _fail "	    !!! p_tupdate failed"
 -
--    unless (@stat=lstat("$file")) {
--        printf("%-" . ($opt{v}?65:32) . "s $file\n", "!!! could not lstat");
--        return;
--    }
--
--    $stat[0]=$stat[8]=""; # wipe the device and access time
--    $md5->reset;
--    $md5->add(join(" ",@stat));
--    
--    print join(" ",@stat), "\n";
--    
--    if ($opt{v}) {
--        print $md5->hexdigest . " ";
--        $md5->reset;
--    }
--
--    if (-l "$file") {
--        if (!defined($link = readlink $file)) {
--            printf("%-32s $file\n", "!!! could not readlink");
--            return;
--        }
--        $md5->add($link);
--    } elsif (-f "$file") {
--        if (!open(FILE, "$file")) {
--            printf("%-32s $file\n", "!!! could not read");
--            return;
--        }
--        $md5->addfile(FILE);
--        close (FILE);
--    }
--    print $md5->hexdigest . " $file\n";
+-	_log "	*** non-trunk files"
+-	cd "$1"
+-	WORKAREA="$1" p_list -c 2>&1 \
+-			|| _fail "	    !!! p_list failed"
+-    else
+-	_log "	*** cvs update"
+-	cd "$1"
+-	cvs -z3 update -d
+-    fi
 -}
 -
--getopts('vs', \%opt);
--
--die "Usage: $0 <dir>\n" unless (@ARGV == 1);
--
--$dir=shift @ARGV;
--die "can't read $dir\n" unless (-r $dir);
--die "$dir is not a directory\n" unless (-d _);
--
--chomp($HOST = `hostname -s`);
--
--print "*** fs-walk host $HOST dir $dir\n";
--
--@todo=$dir;
--while ($dir = shift @todo) {
--    scan($dir);
--    unless (opendir(DIR,$dir)) {
--        printf("%-" . ($opt{v}?65:32) . "s $dir\n", "!!! could not opendir");
--        next;
--    }
--    unless (@all=readdir(DIR)) {
--        printf("%-" . ($opt{v}?65:32) . "s $dir\n", "!!! could not readdir");
--        next;
--    }
--    closedir(DIR);
--    @dirs=grep(-d "$dir/$_" && !-l "$dir/$_", @all);
--    foreach (@all) {
--        next if /^\.\.?$/;
--        scan("$dir/$_");
--    }
--    
--    foreach (grep(!/^\.\.?$/, @dirs)) {
--        push (@todo,"$dir/$_");
--    }
--}
--
-diff --git a/tools/interop b/tools/interop
-deleted file mode 100755
-index dc1652c2b..000000000
---- a/tools/interop
-+++ /dev/null
-@@ -1,101 +0,0 @@
--#!/usr/sbin/perl
--# SPDX-License-Identifier: GPL-2.0
--# Copyright (c) 2001 Silicon Graphics, Inc.  All Rights Reserved.
--#
--sub setup()
+-_test_mkfs_xfs()
 -{
--    $PATH="$PATH:/usr/local/bin/ptools:/sbin:/usr/sbin";
--    $DISPLAY="clouds:0";
+-    TEST_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
+-        TEST_OPTIONS="$TEST_OPTIONS -rrtdev=$TEST_RTDEV"
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
+-        TEST_OPTIONS="$TEST_OPTIONS -llogdev=$TEST_LOGDEV"
+-    _sudo /sbin/mkfs.xfs -f $TEST_OPTIONS $MKFS_OPTIONS $* $TEST_DEV
+-    mkfs_status=$?
+-    if [ "$USE_BIG_LOOPFS" = yes ]; then
+-        [ -z "$RETAIN_AG_BYTES" ] && RETAIN_AG_BYTES=0
+-        _sudo $QADIR/tools/ag-wipe -q -r $RETAIN_AG_BYTES $TEST_DEV
+-    fi
+-    return $mkfs_status
+-}
+-
+-_test_mount()
+-{
+-    TEST_OPTIONS=""
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
+-        TEST_OPTIONS="$TEST_OPTIONS -ortdev=$TEST_RTDEV"
+-    [ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
+-        TEST_OPTIONS="$TEST_OPTIONS -ologdev=$TEST_LOGDEV"
+-    _sudo mount -t xfs $TEST_OPTIONS $MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+-}
+-
+-_i386_install()
+-{
+-    _sudo cp -f "$KWORKAREA/arch/i386/boot/bzImage" "$IMAGE" 2>&1 \
+-		|| _fail "	    !!! install kernel failed"
+-    _sudo cp -f "$KWORKAREA/System.map" "$SYSTEMMAP" 2>&1 \
+-		|| _fail "	    !!! install kernel failed"
+-    if [ -z "$KMODULES" -o "$KMODULES" = yes ]; then
+-	_sudo make EXTRAVERSION=-$EXTRA modules_install 2>&1 \
+-		|| _fail "	    !!! install modules failed"
+-    fi
+-
+-
+-    if [ -z "$KINSTALL" -o "$KINSTALL" = lilo ]; then
+-	_log "	*** reinit lilo"
+-	_sudo /sbin/lilo 2>&1 \
+-		|| _fail "	    !!! reinit lilo failed"
+-    fi
+-}
+-
+-_i386_restart()
+-{
+-    if [ -z "$KINSTALL" -o "$KINSTALL" = lilo ]; then
+-	_sudo /sbin/lilo -R $EXTRA $KERNEL_OPTIONS 2>&1 \
+-		|| _fail "	    !!! lilo failed"
+-    fi
+-}
+-
+-_ia64_install()
+-{
+-    echo not yet implemented
+-}
+-
+-_ia64_restart()
+-{
+-    echo not yet implemented
+-}
+-
+-_check_kernel()
+-{
+-    [ -d "$KWORKAREA" ]	|| _fail "    !!! QA kernel workarea \"$KWORKAREA\" not found"
+-    [ -r "$CONFIG" ]	|| _fail "    !!! Can't read config file $CONFIG"
+-}
+-
+-
+-_log "*** XFS QA (`date`)"
+-
+-_get_state
+-
+-# check preconditions for starting state
+-case $1
+-in
+-    cron-init)
+-	case $state
+-	in
+-	    *done)
+-		;;
+-	    *)
+-		_fail "    !!! cron-init while not in \"*done\" state"
+-		;;
+-	esac
+-	;;
+-    cron-restarted)
+-	# we don't auto restart after reboot, but cron the restart
+-	# to happen a bit later - it's much easier and safer that way
+-	if [ "$state" != "cron-restarted" ]
+-	then
+-	    _fail "    !!! cron-restarted while not in \"cron-restarted\" state"
+-	fi
+-	;;
+-esac
+-
+-[ -n "$1" ] && _set_state $1
+-[ -n "$2" ] && stop_state=$2
+-
+-[ "$UID" -eq 0 ]	&& _fail "    !!! QA most be run as a normal user"
+-[ -d "$ROOT" ]		|| _fail "    !!! QA root \"$ROOT\" not found"
+-[ -d "$WORKAREA" ]	|| _fail "    !!! QA workarea \"$WORKAREA\" not found"
+-cd $QADIR
+-. "$COMMON_CONFIG" 	|| _fail "    !!! Couldn't source $COMMON_CONFIG"
+-
+-_get_kernel_version
+-IMAGE="$BOOT/vmlinuz-$EXTRA"
+-SYSTEMMAP="$BOOT/System.map-$VERSION-$EXTRA"
+-MODULES="/lib/modules/$SVERSION"
+-
+-cd $ROOT
+-
+-started=1
+-echo "auto-qa started" | wall
+-
+-while true
+-do
+-    _get_state
+-
+-    _log "    *** state $state start (`date`)"
+-    _log "	(user=$USER, host=$HOST)"
+-    new_state=""
+-
+-    start_state=$state
+-
+-    case $state
+-    in
+-	*init)
+-	    echo "" > $ROOT/qa.log
+-	    echo "" > $ROOT/qa.full
+-	    _log "******************************************************"
+-	    _log "QA init $VERSION (`date`)"
+-	    _log "******************************************************"
+-	    new_state="updatetools"
+-	    ;;
+-	
+-	*updatetools)
+-	    _update_workarea "$WORKAREA"
+-	    new_state="cleantools"
+-	    ;;
+-
+-	*cleantools)
+-	    # we need to configure or else we might fail to clean
+-	    for pkg in attr acl xfsprogs xfsdump xfstests
+-	    do
+-		[ -d $WORKAREA/$pkg ] || continue
+-		cd $WORKAREA/$pkg
+-		_log "	*** clean $pkg tools"
+-		make realclean 2>&1 \
+-			|| _fail "	    !!! clean $pkg failed"
+-	    done
+-	    new_state="buildtools"
+-	    ;;
+-
+-	*buildtools)
+-	    _log "	*** build and install tools"
+-	    for pkg in attr acl xfsprogs xfsdump xfstests 
+-	    do
+-		[ -d $WORKAREA/$pkg ] || continue
+-		cd $WORKAREA/$pkg
+-
+-		make configure 2>&1 \
+-			|| _fail "	    !!! configure $pkg failed"
+-		make default 2>&1 \
+-			|| _fail "	    !!! build $pkg failed"
+-
+-		_sudo make install install-dev 2>&1 \
+-			|| _fail "	    !!! install $pkg failed"
+-
+-		# attr and acl now have install-lib targets as well
+-		[ "$pkg" = "attr" -o "$pkg" = "acl" ] || continue
+-		_sudo make install-lib 2>&1 \
+-			|| _fail "	    !!! install $pkg failed"
+-	    done
+-
+-	    new_state="updatekernel"
+-	    ;;
+-
+-	*updatekernel)
+-	    _check_kernel
+-	    _update_workarea "$KWORKAREA"
+-	    new_state="cleankernel"
+-	    ;;
+-
+-	*cleankernel)
+-	    _check_kernel
+-	    _log "	*** clean kernel"
+-	    cd "$KWORKAREA"
+-	    make mrproper 2>&1 \
+-			|| _fail "	    !!! clean kernel failed"
+-
+-	    _log "	*** install configuration file"
+-	    cp -f $CONFIG "$KWORKAREA/.config" 2>&1 \
+-			|| _fail "	    !!! failed to install config"
+-	    
+-	    _log "	*** remove version file"
+-	    rm -f include/linux/version.h 2>&1 \
+-			|| _fail "	    !!! failed to clean version"
+-
+-	    new_state="reconfig"
+-	    ;;
+-	    
+-	*reconfig)
+-	    _check_kernel
+-	    _log "	*** reconfig kernel"
+-	    
+-	    # we better start from scratch if this fails
+-	    _change_state "cleankernel"
+-	    
+-	    cd "$KWORKAREA"
+-	    # we want to use default options for any new config options.
+-	    echo -e "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | \
+-		make EXTRAVERSION=-$EXTRA oldconfig 2>&1 \
+-			|| _fail "	    !!! reconfig oldconfig failed"
+-	    make EXTRAVERSION=-$EXTRA dep 2>&1 \
+-			|| _fail "	    !!! reconfig dep failed"
+-
+-	    new_state="buildkernel"
+-	    ;;
+-	    
+-	*buildkernel)
+-	    _check_kernel
+-	    _log "	*** build kernel"
+-	    _log "          --- kernel ($IMAGE)"
+-	    [ -z "$KMODULES" -o "$KMODULES" = yes ] && \
+-            _log "          --- modules ($MODULES)"
+-	    
+-	    _change_state "cleankernel" ; # we better start from scratch if this fails
+-	    
+-	    cd "$KWORKAREA"
+-	    [ -z "$KTARGET" ] && KTARGET=bzImage
+-	    [ -z "$KMODULES" -o "$KMODULES" = yes ] && \
+-		KTARGET="$KTARGET modules"
+-	    make -j4 EXTRAVERSION=-$EXTRA $KTARGET 2>&1 \
+-			|| _fail "	    !!! build $KTARGET failed"
+-	    new_state="install"
+-	    ;;
+-
+-	*install)
+-	    _check_kernel
+-	    _log "	*** blat old modules"
+-	    _sudo rm -rf $MODULES
+-	    
+-	    _log "	*** install kernel"
+-	    cd "$KWORKAREA"
+-	    case `uname -m`
+-	    in
+-		i386|i686)	_i386_install ;;
+-		ia64)		_ia64_install ;;
+-	    esac
+-
+-	    new_state="restart"
+-	    ;;
+-	    
+-	*restart)
+-	    _log "	    *** select qa kernel"
+-	    case `uname -m`
+-	    in
+-		i386|i686)	_i386_restart ;;
+-		ia64)		_ia64_restart ;;
+-	    esac
+-
+-	    _log "	    *** prepare to restart"
+-	    _change_state "restarted"
+-	    
+-	    _log "	    *** restarting"
+-
+-	    _restart # doesn't return
+-	    ;;
+-	    
+-	*restarted)
+-	    _log "	    *** QA reentered after restart"
+-	    
+-	    new_state="check"
+-	    ;;
+-	  
+-	*check)
+-	    uname=`uname -a`
+-	    _log "	    *** uname $uname"
+-
+-	    if [ "$MODULAR" -eq 0 ]; then
+-		new_state="reset"
+-	    else
+-		new_state="probe"
+-	    fi
+-	    ;;
+-	    
+-	*probe)
+-	    _log "	    *** modules dependencies"
+-	    _sudo depmod -a  2>&1 \
+-			|| _fail "	    !!! failed to depmod -a" 
+-	    
+-	    _log "	    *** unmounting XFS mounts"
+-	    _sudo umount -a -t xfs 2>&1
+-	    
+-	    _log "	    *** removing modules"
+-	    for m in xfsidbg xfs kdbm_pg kdbm_vm
+-	    do
+-		_sudo rmmod $m 2> /dev/null
+-	    done
+-	    
+-	    _log "	    *** installing modules"
+-	    _sudo modprobe xfs 2>&1 \
+-			|| _fail "	    !!! failed to modprobe xfs"
+-
+-	    new_state="reset"
+-	    ;;
+-	    
+-	*reset)
+-	    
+-	    _log "	    *** unmounting TEST_DEV"
+-	    _sudo umount $TEST_DEV 2>&1
+-	    
+-	    _log "	    *** unmounting SCRATCH_DEV"
+-	    _sudo umount $SCRATCH_DEV 2>&1
+-	    
+-	    _log "	    *** clean TEST_DEV"
+-	    _test_mkfs_xfs 2>&1 \
+-			|| _fail "	    !!! failed to mkfs TEST_DEV"
+-	    
+-	    _log "	    *** mounting TEST_DEV"
+-	    _test_mount 2>&1 \
+-			|| _fail "	    !!! failed to mount"
+-				    
+-	    new_state="run"
+-	    ;;
+-	    
+-	soak-run)
+-	    cd $QADIR
+-	    
+-	    _log "	    *** run soak test"
+-	    _sudo ./soak $SOAK_PASSES $SOAK_STRESS $SOAK_PROC \
+-			|| _fail "	    !!! failed to run soak test"
+-
+-	    new_state="done"
+-	    ;;
+-	    
+-	bench-run)
+-	    cd $QADIR
+-	    
+-	    # $BENCHMARK is typically unset, which equates to "all"
+-	    #
+-	    _log "	    *** run benchmarks"
+-	    _sudo ./bench $BENCH_PASSES `id -nu && id -ng` $BENCHMARK \
+-			|| _fail "	    !!! failed to run benchmarks"
+-
+-	    _log ""
+-	    _log "	    *** send results mail"
+-	    mail -s "XFS QA benchmark results" $EMAIL < $QADIR/bench.out 2>&1
+-	
+-	    new_state="done"
+-	    ;;
+-	    
+-	*run)
+-	    cd $QADIR
+-	    
+-	    _log "	    *** run tests ($CHECK_OPTIONS)"
+-	    _sudo ./check -l $CHECK_OPTIONS 2>&1 | tee $ROOT/qa.out
+-	    
+-	    _log ""
+-	    _log "	    *** send status mail"
+-	    mail -s "XFS QA status report" $EMAIL < $ROOT/qa.out 2>&1
+-	
+-	    new_state="done"
+-	    ;;
+-	    
+-	*done)
+-	    _log "*** requested QA state transitions complete"
+-
+-	    _success
+-	    ;;
+-	    
+-	*nothing)
+-	    new_state="done"
+-	    _log "    *** do nothing"
+-	    ;;
+-	    
+-	*)
+-	    _fail "	   !!! unknown state $state"
+-	    ;;
+-    esac
+-
+-    _log "    *** state $state done (`date`)"
+-    [ "$new_state" = "" ] && _fail "    !!! no new state set"
+-
+-    if [ -n "$stop_state" ]
+-    then
+-        # remove hyphen prefixes
+-	s1=`echo $start_state | sed 's/.*-//'`
+-	s2=`echo $stop_state | sed 's/.*-//'`
+-
+-	if [ $s1 = $s2 ]
+-	then
+-	    # we have been requested to stop here and not go on
+-	    new_state="done"
+-	fi
+-    fi
+-
+-    _change_state $new_state
 -    
--    if ("$HOST" eq "bruce") {
--        $TOOLS="/home/dxm/isms/slinx-xfs/cmd/xfs/tools";
--        $SCRATCH_DEV="/dev/sdf1";
--        $SCRATCH_MNT="/mnt/xfs3";
--        $MKFS="/sbin/mkfs -t xfs -f";
--        $SUDO="/home/dxm/su -c";
--        $MOUNT="/bin/mount -t xfs";
--        $UMOUNT="/bin/umount";
--        $MKFS_EXTRA="-f";
--    } elsif ("$HOST" eq "whack") {
--        $TOOLS="/hosts/snort/build1/people/dxm/isms/slinx-xfs/cmd/xfs/tools";
--        $SCRATCH_DEV="/dev/dsk/20000080e5114459/lun2s0/c2p1";
--        $SCRATCH_MNT="/lun2";
--        $MKFS="/sbin/mkfs";
--        $SUDO="su root -c";
--        $MOUNT="/sbin/mount -t xfs";
--        $UMOUNT="/sbin/umount";
--        $MKFS_EXTRA="";
--    } else {
--        die "unconfigured host \"$HOST\"\n"
--    }
--}
--
--sub run_no_check(@)
--{
--    system(@_);
--}
--
--sub run(@)
--{
--    system(@_)  == 0
--        || die "ERROR \"" . join(" ",@_) . "\" returned error\n";
--}
--
--sub run_expect_fail(@)
--{
--    system(@_)  == 0
--        && die "ERROR \"" . join(" ",@_) . "\" returned non-error\n";
--}
--
--sub umount_no_check()
--{
--    run_no_check("umount $SCRATCH_DEV");
--}
--
--sub umount()
--{
--    run("umount $SCRATCH_DEV");
--}
--
--sub mount($)
--{
--    my ($ops)=@_;
--    run("mount -t xfs $ops $SCRATCH_DEV $SCRATCH_MNT");
--}
--
--chomp($HOST=`hostname -s`);
--
--die "usage: $ARGV0 <operation> [parameters]\n" unless (scalar(@ARGV));
--print "*** $HOST: Interop started\n";
--print "    *** ", join(" ", @ARGV), "\n";
--
--setup();
--
--$op=shift(@ARGV);
--
--umount_no_check();
--
--if ($op eq "init") {
--
--    run("mkfs -t xfs $MKFS_EXTRA $SCRATCH_DEV");
--    
--} elsif ($op eq "test") {
--
--    run("xfs_repair -n $SCRATCH_DEV");
--    
--} elsif ($op eq "easy") {
--
--    mount("");
--    system("mount");
--    mkdir("$SCRATCH_MNT/fish",0777);
--    
--} elsif ($op eq "check") {
--
--    mount("-o ro");
--    system("cd $SCRATCH_MNT ; $TOOLS/fs-walk .");
--
--} else {
--    die "unknown operation \"$op\"\n";
--}
--
--umount_no_check();
+-done
 -- 
 2.45.2
 
