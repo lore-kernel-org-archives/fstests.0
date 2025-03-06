@@ -1,779 +1,191 @@
-Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC97A27701B
-	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:30:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69244151990
+	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:39:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741296644; cv=none; b=T4ZI1lj7RLScrYNeikCBWbhUBmF/joDMES7gENtsPAOraE8tyxLv37TPXuWQN5nNEDugBLqrJOCDSfZtQjIgcchFONrvQCR/Kc80G8BuVSMjvbLA+13kAQHeDk6mL6bM6aMRupEEVB3i1CHEQqzIRU9Z2UIMpeBODPCa1S1C+Tg=
+	t=1741297167; cv=none; b=FyoQB2hQf3Wxg05V0kJdguve+kNHCN3YwKDREk0ak2LANJSAi35lYHA3KzQ4NI6ijEkJnwYC8iCyqeMOt8bGb4ACg8nTvLqEmrLWKUrtfeFtPrs1dZFLb4XdxyJgy0k7+OhuR7N8QHrJtBffcL+ulfdzqshNBMni6lzuabQmNdY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741296644; c=relaxed/simple;
-	bh=AiR0DU52eslFdBh7e+pgyRnLfYWJ1U0nl0q1vcshKbE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iSkYi309a2DzklG+4Uboptsm94sq8d9BNhu5tLk7yz0ul/9JtYVwf6ca3R/8fMb+6SP4ZOrhs02A/z+ISqHeTc+kyS9R9SZ7OTtIMpVwCSRFty01s/EXUSEimd7Z76c1gPQ8kYMG7eiW8KORfbWlj8mnV2R4SGKTXnMunryLG68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=t70dbjDR; arc=none smtp.client-ip=209.85.214.181
+	s=arc-20240116; t=1741297167; c=relaxed/simple;
+	bh=N7pfLHtnj8VS+Z8BEQ8qt7JrTABrQLbQ2NnNRIgQNfo=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=OyTNeo8z3tfFKZQCRWNKjXj7xLu3dajZKc1VWDnD9hQYFxDPalP1Cl2IrtSOI07ZtRmFaV/2iOxD5iZVG2Quhq+xX1W+LSx2G1XCfSCOqgNRuMfB+aVAeje8MOcxadXlKdiDd6CkZV5D3gWJ6ornTdPhuRph4yjui5KuUDQFJnQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=RRr7UrJM; arc=none smtp.client-ip=209.85.214.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="t70dbjDR"
-Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-2234bec7192so28762425ad.2
-        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:30:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="RRr7UrJM"
+Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22409077c06so25386215ad.1
+        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:39:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741296642; x=1741901442; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=hBweP0B09ntGSuAWsrY3fZWd3abEiIQrw7MYskEwZpA=;
-        b=t70dbjDR/Jai1KZRV9T8iPL/TUv+4yZcKXpsnRlP3D2AuiPOAAjYPrDVygVUmqXKgE
-         ZZSYprCyb8hYZ6p2E9iFRCaUmHf3iZDuBuiEZopzTNE3shH4VcGhhoJwr0WPhmPXAnck
-         vTt4HlHSGfjvc8gupwEbQq9xxwqYPDfC+E/ABHzKFa456+2sdnyoVrGIToNQ9TeiU0mw
-         5F8nW7I9T+UeY9G5JtNHPyj4rJGjmYgtPmCQj3CZrwHRDfTSsgcfEN5CS3KI+IpO7dH2
-         oMYZaLKKCyQXs4Ie0IPNXmJum5F+6t4ldgj4bXagXc0svin3yVajJPdN6P2dX3+4JQyS
-         1q+Q==
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741297165; x=1741901965; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=s2KJUvO1UZidGcYTguXEMcrYZBS90tfoZ3c0LWkq5wI=;
+        b=RRr7UrJMp98nXKw1EGwn2yxLC5OsGfqPU+lH2DqQPmaKljal/Nny+agJ25pc1RcrEF
+         gYVF2xBVSIzYLTcpwT9bVnA3vqZIXy78E6ci8iHI3Hyom6zc2+30U1zPWzqkNIazQTSd
+         SyreE2r/EH0YZGRJsCX8Um3+fyOoUe5vrolwekbyvrnSFnGAM/9oGVUiW37vgeJ0Rylp
+         N4p+OGPoaUsMgYf5FJeB/vQMp3pxMhuzW+Bpcn4NFhlrM6YHdZum92GWVwaIxWneBugf
+         drmP5HH9P7xSmoZviWFYwToqHfJP5u5p19px18oScOcnj3mtXoyKxHkUiw+FNMX1ye+g
+         4LHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741296642; x=1741901442;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=hBweP0B09ntGSuAWsrY3fZWd3abEiIQrw7MYskEwZpA=;
-        b=ZE8YEan/flSbEdLPnjUsWJbmS0LalK9tAcjSVl83BG+zz4OxFQyH5eZIt+cTnBXb0L
-         SljJxeR4/pjjHlzh/1vw0/4mA9gvI9dfDbZk6LxDAGDQFYU7IaWQzIe5BNj+0g0RFxPE
-         PSt9zvgUwVPjphMZhp+8M2jSyFunjxxSWVjWCE8sIM1mV7mV2WMVhw1OKJnfWMto8ZtO
-         wGFLXU1ELnkWg/6OZEmPovawB7k83FQ/jF/a5QnhkPej34KtZNJr+DF5PurbTTRLnzwS
-         U4hElLrho7xgEyQ7VKFEwP8FpbLATE6jQ/bxjFRstmjKu+BDGOgABGHKm4RHAndu0Kgp
-         g9+A==
-X-Gm-Message-State: AOJu0YxoUSXCyaNuvMySm8yKiYzjKF++o8sxXysAT0YHxVwMdt0U0dg2
-	I5NW/B51D3lsImmBPEaLQc2cN8B9+H3eUOxcUij9PBUsTOiRGDKg1PjgVFxiPMxkw8gO5xdCAcd
-	x
-X-Gm-Gg: ASbGncs7nwozxzO77p1vNHCs26li3PeazCWmMwKspITCBWxaQvI+fXg/VDmgoWjAuo0
-	3dmI+7DipH4LCPwg4gAv+izQ9hUMJnonsDUGfaXQfg3Nh96iAqqLIgsUKurJ/dBin5hQS6BQuUf
-	fgVnjDuUVhBJkvIDgm+Tam5yvxSN3/nNFmT2N7xZmlmYLE9MsPfSLcz8k1jL/K9deZlfsoVF+qr
-	G9fsMcp0Zjw8SBEnQqEoCJZItW5ozPSwfVd9hdrijMhimtOW9xUDwNkrJePTxFdiJ6uh0KTKusB
-	0/RDntXvL/bJYYznLmTIezAnYsHGgUP+MzwxsbQqYYpuTXToCJhWpHJmKV3v2+fB0zy5CzAFZ80
-	gnCHrOlL3Mg==
-X-Google-Smtp-Source: AGHT+IHcX8bT6TXAq8vebw/1MmP/Ome/JNiO0yP6veJ7tbm3F3pBWDNWQO3mRZ+2g3hVVwtKBWdfEQ==
-X-Received: by 2002:a17:902:f681:b0:224:179a:3b8f with SMTP id d9443c01a7336-22428a8cd24mr10809675ad.23.1741296641943;
-        Thu, 06 Mar 2025 13:30:41 -0800 (PST)
+        d=1e100.net; s=20230601; t=1741297165; x=1741901965;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=s2KJUvO1UZidGcYTguXEMcrYZBS90tfoZ3c0LWkq5wI=;
+        b=kZrNAofV7+TKypANfL/3g2fKVuscz+gxFigd1nvEN1jJQloCDVTjzghBbTEo2wTjAe
+         zw1t+rsrgbh9MeL5tuKDcNKxoeiH3t5Rd9NFZuCdg4El/utLaykZX2QcCXcZ/bhpAeq5
+         E6I0dt5Gdho1eZepMzB71SXU0dHw/zlguo1/QA0qlV9KtVVILdy5i+anFIpBq4/ttPrU
+         7foZy724KHkli95dRD8JPq5vOuKwVP1O0B0ls+mueJzSoZW9TKqapYZbMIJnI9SPfPFx
+         qwdDDSLZrfs8cJF06pAUg4V2ou+nVxCyRyuUQw/iIIxr/rruY/U8NHhGhQREw6h85HOn
+         8oWQ==
+X-Gm-Message-State: AOJu0YwunK2N8M4hZkythdCzKcEFcRSt97rXfQ6umWAAfM6/FNtZJX7a
+	4Wiz92GIfwVMJMwZGMi1pGEAJyS8cBr9UpovHy+bdDRYS7rfzgfPLLN9CbTU8FBn++wX7gzmWms
+	7
+X-Gm-Gg: ASbGncsxHdjFB822mXJn09ZGSf8gtsbfH6SW2wFyFvsiTuBtQlqAJJ9g9wCAgQSVmM6
+	92Ue/FcvTnoNChjH3XMjPjuB2sVIN4LtZNRykFMiEQB2NryvDf4IfRAA2uYan0Ec1KWR909zHf4
+	VW3G5FCCjjR/hzThsABTfQ9rT5bed7r00WoB6NR1qHUv+8xFp8LD/ll/1gGZvMYpTaCza5RyHoo
+	mbfAwPshFPQI4rEOOuFiKKE2tHDZwXp/z2A44LKD4A744Cbuxt2cOC5cmwQltCFhGK3+BBCWp8b
+	nCWPcFDwfhkPOhR2ivo2yMFf/VMge4SjaJf22/+ztTCY5SO2TjPSdZ2XQqhk7hKPG+oh2fOiPcO
+	sA8Aehz0ZMytCTlBNqPw=
+X-Google-Smtp-Source: AGHT+IEUdQfpbuND3N71Q+VrXfe+yInGIWQZTsp8ILqNf1gsBYdQzr2JB8+VSRgolICS13yPrkb4EQ==
+X-Received: by 2002:a05:6a20:9185:b0:1f3:20aa:4224 with SMTP id adf61e73a8af0-1f544aef367mr1714834637.15.1741297165642;
+        Thu, 06 Mar 2025 13:39:25 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a80f31sm17140035ad.118.2025.03.06.13.30.40
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-af2810c1cbcsm1478651a12.35.2025.03.06.13.39.25
+        for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Mar 2025 13:30:41 -0800 (PST)
-Received: from dave by dread.disaster.area with local (Exim 4.98)
-	(envelope-from <david@fromorbit.com>)
-	id 1tqIne-00000009lLu-0Mz7;
-	Fri, 07 Mar 2025 08:30:38 +1100
-Date: Fri, 7 Mar 2025 08:30:38 +1100
+        Thu, 06 Mar 2025 13:39:25 -0800 (PST)
+Received: from [192.168.253.23] (helo=devoid.disaster.area)
+	by dread.disaster.area with esmtp (Exim 4.98)
+	(envelope-from <dave@fromorbit.com>)
+	id 1tqIw6-00000009lRW-27DF
+	for fstests@vger.kernel.org;
+	Fri, 07 Mar 2025 08:39:22 +1100
+Received: from dave by devoid.disaster.area with local (Exim 4.98)
+	(envelope-from <dave@devoid.disaster.area>)
+	id 1tqIw6-0000000FvrJ-2xit
+	for fstests@vger.kernel.org;
+	Fri, 07 Mar 2025 08:39:22 +1100
 From: Dave Chinner <david@fromorbit.com>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, djwong@kernel.org, zlang@kernel.org
-Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
- init_rc() call from sourcing common/rc
-Message-ID: <Z8oT_tBYG-a79CjA@dread.disaster.area>
-References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
- <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+To: fstests@vger.kernel.org
+Subject: [PATCH 1/5] fstests: remove setup script
+Date: Fri,  7 Mar 2025 08:34:46 +1100
+Message-ID: <20250306213921.3769440-2-david@fromorbit.com>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20250306213921.3769440-1-david@fromorbit.com>
+References: <20250306213921.3769440-1-david@fromorbit.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
-
-On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
-> Silently executing scripts during sourcing common/rc doesn't look good
-> and also causes unnecessary script execution. Decouple init_rc() call
-> and call init_rc() explicitly where required.
-> 
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-
-FWIW, I've just done somethign similar for check-parallel. I need to
-decouple common/config from common/rc and not run any code from
-either common/config or common/rc.
-
-I've included the patch below (it won't apply because there's all
-sorts of refactoring for test list and config-section parsing in the
-series before it), but it should give you an idea of how I think we
-should be separating one-off initialisation environment varaibles,
-common code inclusion and the repeated initialisation of section
-specific parameters....
-
-.....
-> diff --git a/soak b/soak
-> index d5c4229a..5734d854 100755
-> --- a/soak
-> +++ b/soak
-> @@ -5,6 +5,7 @@
->  
->  # get standard environment, filters and checks
->  . ./common/rc
-> +# ToDo: Do we need an init_rc() here? How is soak used?
->  . ./common/filter
-
-I've also go a patch series that removes all these old 2000-era SGI
-QE scripts that have not been used by anyone for the last 15
-years. I did that to get rid of the technical debt that these
-scripts have gathered over years of neglect. They aren't used, we
-shouldn't even attempt to maintain them anymore.
-
--Dave.
-
--- 
-Dave Chinner
-david@fromorbit.com
-
-
-fstests: separate sourcing common/rc and common/config from initialisation
+Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-The sourcing of common/rc causes code to be run. init_rc
-is executed from common/rc, and it includes common/config which
-also runs a couple of initialisation functions.
-
-This is messy, because re-sourcing those files also does an awful
-lot more setup work than running those a couple of init functions.
-
-common/config only needs to be included once - everything that
-scripts then depend on should be exported by it, and hence it should
-only be included once from check/check-parallel to set up all the
-environmental parameters for the entire run.
-
-common/rc also only needs to be included once per context, but it
-does not need to directly include common config nor does it need to
-run init_rc in each individual test context.
-
-Seperate out this mess. Include common/config directly where needed
-and only use it to set up the environment. Move all the code that is
-in common/config to common/rc so that common/config is not needed
-for any purpose other than setting up the initial environment.
-Move the initialisation functions to the scripts that include
-common/config.
-
-Config file and config section parsing can be run directly from check
-and/or check-parallel; this is not needed for every context that
-needs to know how what XFS_MKFS_PROG is set to...
-
-Similarly, include common/rc only once, and only call init_rc or
-_source_specific_fs() from the contexts that actually need that code
-to be run.
+THere is a script that will echo the current setup of the fstests
+directory. This is largely the same output as running 'check -n' to
+do a dry-run outputs. Hence this script is redundant, not likely to
+be widely used and is easily replaced with check itself. Remove it.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- check             |  24 +++---
- common/config     | 218 --------------------------------------------------
- common/preamble   |   1 +
- common/rc         | 234 ++++++++++++++++++++++++++++++++++++++++++++++++++----
- tests/generic/367 |   7 +-
- tests/generic/749 |   3 +-
- 6 files changed, 235 insertions(+), 252 deletions(-)
+ setup | 81 -----------------------------------------------------------
+ 1 file changed, 81 deletions(-)
+ delete mode 100755 setup
 
-diff --git a/check b/check
-index b4d31d138..b968a134a 100755
---- a/check
-+++ b/check
-@@ -43,10 +43,12 @@ timestamp=${TIMESTAMP:=false}
- 
- rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.report.* $tmp.arglist
- 
--# We need to include the test list processing first as argument parsing
--# requires test list parsing and setup.
-+. ./common/config
-+. ./common/config-sections
-+. ./common/rc
- . ./common/test_list
- 
-+
- usage()
- {
-     echo "Usage: $0 [options] [testlist]"'
-@@ -183,11 +185,15 @@ while [ $# -gt 0 ]; do
- 	shift
- done
- 
--# we need common/rc, that also sources common/config. We need to source it
--# after processing args, overlay needs FSTYP set before sourcing common/config
--if ! . ./common/rc; then
--	echo "check: failed to source common/rc"
--	exit 1
-+# now we have done argument parsing, overlay has FSTYP set and we can now
-+# start processing the config files and setting up devices.
-+_config_section_setup
-+_canonicalize_devices
-+init_rc
-+
-+if [ ! -z "$REPORT_LIST" ]; then
-+	. ./common/report
-+	_assert_report_list
- fi
- 
- # If the test config specified a soak test duration, see if there are any
-@@ -601,10 +607,6 @@ function run_section()
- 			status=1
- 			exit
- 		fi
--		# Previous FSTYP derived from TEST_DEV could be changed, source
--		# common/rc again with correct FSTYP to get FSTYP specific configs,
--		# e.g. common/xfs
--		. common/rc
- 		_tl_prepare_test_list
- 	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
- 		_test_unmount 2> /dev/null
-diff --git a/common/config b/common/config
-index 571e52a58..03970bf54 100644
---- a/common/config
-+++ b/common/config
-@@ -40,7 +40,6 @@
- #
- 
- . common/test_names
--. common/config-sections
- 
- # all tests should use a common language setting to prevent golden
- # output mismatches.
-@@ -348,220 +347,3 @@ if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
- 	export SELINUX_MOUNT_OPTIONS
- fi
- 
--_common_mount_opts()
+diff --git a/setup b/setup
+deleted file mode 100755
+index 375a54c98..000000000
+--- a/setup
++++ /dev/null
+@@ -1,81 +0,0 @@
+-#!/bin/bash
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (c) 2003-2004 Silicon Graphics, Inc.  All Rights Reserved.
+-#
+-usage()
 -{
--	case $FSTYP in
--	9p)
--		echo $PLAN9_MOUNT_OPTIONS
--		;;
--	fuse)
--		echo $FUSE_MOUNT_OPTIONS
--		;;
--	xfs)
--		echo $XFS_MOUNT_OPTIONS
--		;;
--	udf)
--		echo $UDF_MOUNT_OPTIONS
--		;;
--	nfs)
--		echo $NFS_MOUNT_OPTIONS
--		;;
--	afs)
--		echo $AFS_MOUNT_OPTIONS
--		;;
--	cifs)
--		echo $CIFS_MOUNT_OPTIONS
--		;;
--	ceph)
--		echo $CEPHFS_MOUNT_OPTIONS
--		;;
--	glusterfs)
--		echo $GLUSTERFS_MOUNT_OPTIONS
--		;;
--	overlay)
--		echo $OVERLAY_MOUNT_OPTIONS
--		;;
--	ext2|ext3|ext4)
--		# acls & xattrs aren't turned on by default on ext$FOO
--		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
--		;;
--	f2fs)
--		echo "-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
--		;;
--	reiserfs)
--		# acls & xattrs aren't turned on by default on reiserfs
--		echo "-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
--		;;
--       reiser4)
--		# acls & xattrs aren't supported by reiser4
--		echo $REISER4_MOUNT_OPTIONS
--		;;
--	gfs2)
--		# acls aren't turned on by default on gfs2
--		echo "-o acl $GFS2_MOUNT_OPTIONS"
--		;;
--	tmpfs)
--		# We need to specify the size at mount, use 1G by default
--		echo "-o size=1G $TMPFS_MOUNT_OPTIONS"
--		;;
--	ubifs)
--		echo $UBIFS_MOUNT_OPTIONS
--		;;
--	*)
--		;;
+-
+-	echo "Usage: $0 [options]"'
+-
+-	-s section	run only specified section(s) from config file
+-	-S section	exclude the specified section from the config file
+-'
+-	exit 0
+-}
+-
+-while [ $# -gt 0 ]; do
+-	case "$1" in
+-	-\? | -h | --help) usage ;;
+-	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+-	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
+-	*)	usage ;;
 -	esac
--}
+-	shift
+-done
 -
--_mount_opts()
--{
--	export MOUNT_OPTIONS=$(_common_mount_opts)
--}
--
--_test_mount_opts()
--{
--	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
--}
--
--_mkfs_opts()
--{
--	case $FSTYP in
--	xfs)
--		export MKFS_OPTIONS=$XFS_MKFS_OPTIONS
--		;;
--	udf)
--		[ ! -z "$udf_fsize" ] && \
--			UDF_MKFS_OPTIONS="$UDF_MKFS_OPTIONS -s $udf_fsize"
--		export MKFS_OPTIONS=$UDF_MKFS_OPTIONS
--		;;
--	nfs)
--		export MKFS_OPTIONS=$NFS_MKFS_OPTIONS
--		;;
--	afs)
--		export MKFS_OPTIONS=$AFS_MKFS_OPTIONS
--		;;
--	cifs)
--		export MKFS_OPTIONS=$CIFS_MKFS_OPTIONS
--		;;
--	ceph)
--		export MKFS_OPTIONS=$CEPHFS_MKFS_OPTIONS
--		;;
--	reiserfs)
--		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
--		;;
--       reiser4)
--		export MKFS_OPTIONS=$REISER4_MKFS_OPTIONS
--		;;
--	gfs2)
--		export MKFS_OPTIONS="$GFS2_MKFS_OPTIONS -O -p lock_nolock"
--		;;
--	jfs)
--		export MKFS_OPTIONS="$JFS_MKFS_OPTIONS -q"
--		;;
--	f2fs)
--		export MKFS_OPTIONS="$F2FS_MKFS_OPTIONS"
--		;;
--	btrfs)
--		export MKFS_OPTIONS="$BTRFS_MKFS_OPTIONS"
--		;;
--	bcachefs)
--		export MKFS_OPTIONS=$BCACHEFS_MKFS_OPTIONS
--		;;
--	*)
--		;;
--	esac
--}
--
--_fsck_opts()
--{
--	case $FSTYP in
--	ext2|ext3|ext4)
--		export FSCK_OPTIONS="-nf"
--		;;
--	reiser*)
--		export FSCK_OPTIONS="--yes"
--		;;
--	f2fs)
--		export FSCK_OPTIONS=""
--		;;
--	*)
--		export FSCK_OPTIONS="-n"
--		;;
--	esac
--}
--
--# check necessary running dependences then source sepcific fs helpers
--_source_specific_fs()
--{
--	local fs=$1
--
--	if [ -z "$fs" ];then
--		fs=$FSTYP
--	fi
--
--	case "$fs" in
--	xfs)
--		[ "$XFS_LOGPRINT_PROG" = "" ] && _fatal "xfs_logprint not found"
--		[ "$XFS_REPAIR_PROG" = "" ] && _fatal "xfs_repair not found"
--		[ "$XFS_DB_PROG" = "" ] && _fatal "xfs_db not found"
--		[ "$MKFS_XFS_PROG" = "" ] && _fatal "mkfs_xfs not found"
--		[ "$XFS_INFO_PROG" = "" ] && _fatal "xfs_info not found"
--
--		. ./common/xfs
--		;;
--	udf)
--		[ "$MKFS_UDF_PROG" = "" ] && _fatal "mkfs_udf/mkudffs not found"
--		;;
--	btrfs)
--		[ "$MKFS_BTRFS_PROG" = "" ] && _fatal "mkfs.btrfs not found"
--
--		. ./common/btrfs
--		;;
--	ext4)
--		[ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
--		. ./common/ext4
--		;;
--	ext2|ext3)
--		. ./common/ext4
--		;;
--	f2fs)
--		[ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
--		;;
--	nfs)
--		. ./common/nfs
--		;;
--	afs)
--		;;
--	cifs)
--		;;
--	9p)
--		;;
--	fuse)
--		;;
--	ceph)
--		. ./common/ceph
--		;;
--	glusterfs)
--		;;
--	overlay)
--		. ./common/overlay
--		;;
--	reiser4)
--		[ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
--		;;
--	pvfs2)
--		;;
--	ubifs)
--		[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
--		. ./common/ubifs
--		;;
--	esac
--}
--
--_config_section_setup
--_canonicalize_devices
--# mkfs.xfs checks for TEST_DEV before permitting < 300M filesystems. TEST_DIR
--# and QA_CHECK_FS are also checked by mkfs.xfs, but already exported elsewhere.
--export TEST_DEV
--
--# make sure this script returns success
--/bin/true
-diff --git a/common/preamble b/common/preamble
-index 0c9ee2e03..1f40dd5d1 100644
---- a/common/preamble
-+++ b/common/preamble
-@@ -50,6 +50,7 @@ _begin_fstest()
- 	_register_cleanup _cleanup
- 
- 	. ./common/rc
-+	_source_specific_fs $FSTYP
- 
- 	# remove previous $seqres.full before test
- 	rm -f $seqres.full $seqres.hints
-diff --git a/common/rc b/common/rc
-index 056112714..01f8cba2e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2,10 +2,11 @@
- # SPDX-License-Identifier: GPL-2.0+
- # Copyright (c) 2000-2006 Silicon Graphics, Inc.  All Rights Reserved.
- 
--. common/config
--
- BC="$(type -P bc)" || BC=
- 
-+# make sure we have a standard umask
-+umask 022
-+
- # Don't use sync(1) directly if at all possible. In most cases we only need to
- # sync the fs under test, so we use syncfs if it is supported to prevent
- # disturbance of other tests that may be running concurrently.
-@@ -250,17 +251,6 @@ _log_err()
-     echo "(see $seqres.full for details)"
- }
- 
--# make sure we have a standard umask
--umask 022
--
--# check for correct setup and source the $FSTYP specific functions now
--_source_specific_fs $FSTYP
--
--if [ ! -z "$REPORT_LIST" ]; then
--	. ./common/report
--	_assert_report_list
+-if ! . ./common/config
+-then
+-    echo "check: failed to source common/config"
+-    exit 1
 -fi
 -
- _get_filesize()
- {
-     stat -c %s "$1"
-@@ -4895,6 +4885,8 @@ init_rc()
- 		exit 1
- 	fi
- 
-+	_source_specific_fs $FSTYP
-+
- 	# if $TEST_DEV is not mounted, mount it now as XFS
- 	if [ -z "`_fs_type $TEST_DEV`" ]
- 	then
-@@ -4934,6 +4926,11 @@ init_rc()
- 	# it is supported.
- 	$XFS_IO_PROG -i -c quit 2>/dev/null && \
- 		export XFS_IO_PROG="$XFS_IO_PROG -i"
-+
-+	# mkfs.xfs checks for TEST_DEV before permitting < 300M filesystems.
-+	# TEST_DIR and QA_CHECK_FS are also checked by mkfs.xfs, but already
-+	# exported elsewhere.
-+	export TEST_DEV
- }
- 
- # get real device path name by following link
-@@ -5757,8 +5754,211 @@ _require_program() {
- 	_have_program "$1" || _notrun "$tag required"
- }
- 
--init_rc
-+_common_mount_opts()
-+{
-+	case $FSTYP in
-+	9p)
-+		echo $PLAN9_MOUNT_OPTIONS
-+		;;
-+	fuse)
-+		echo $FUSE_MOUNT_OPTIONS
-+		;;
-+	xfs)
-+		echo $XFS_MOUNT_OPTIONS
-+		;;
-+	udf)
-+		echo $UDF_MOUNT_OPTIONS
-+		;;
-+	nfs)
-+		echo $NFS_MOUNT_OPTIONS
-+		;;
-+	afs)
-+		echo $AFS_MOUNT_OPTIONS
-+		;;
-+	cifs)
-+		echo $CIFS_MOUNT_OPTIONS
-+		;;
-+	ceph)
-+		echo $CEPHFS_MOUNT_OPTIONS
-+		;;
-+	glusterfs)
-+		echo $GLUSTERFS_MOUNT_OPTIONS
-+		;;
-+	overlay)
-+		echo $OVERLAY_MOUNT_OPTIONS
-+		;;
-+	ext2|ext3|ext4)
-+		# acls & xattrs aren't turned on by default on ext$FOO
-+		echo "-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-+		;;
-+	f2fs)
-+		echo "-o acl,user_xattr $F2FS_MOUNT_OPTIONS"
-+		;;
-+	reiserfs)
-+		# acls & xattrs aren't turned on by default on reiserfs
-+		echo "-o acl,user_xattr $REISERFS_MOUNT_OPTIONS"
-+		;;
-+       reiser4)
-+		# acls & xattrs aren't supported by reiser4
-+		echo $REISER4_MOUNT_OPTIONS
-+		;;
-+	gfs2)
-+		# acls aren't turned on by default on gfs2
-+		echo "-o acl $GFS2_MOUNT_OPTIONS"
-+		;;
-+	tmpfs)
-+		# We need to specify the size at mount, use 1G by default
-+		echo "-o size=1G $TMPFS_MOUNT_OPTIONS"
-+		;;
-+	ubifs)
-+		echo $UBIFS_MOUNT_OPTIONS
-+		;;
-+	*)
-+		;;
-+	esac
-+}
- 
--################################################################################
--# make sure this script returns success
--/bin/true
-+_mount_opts()
-+{
-+	export MOUNT_OPTIONS=$(_common_mount_opts)
-+}
-+
-+_test_mount_opts()
-+{
-+	export TEST_FS_MOUNT_OPTS=$(_common_mount_opts)
-+}
-+
-+_mkfs_opts()
-+{
-+	case $FSTYP in
-+	xfs)
-+		export MKFS_OPTIONS=$XFS_MKFS_OPTIONS
-+		;;
-+	udf)
-+		[ ! -z "$udf_fsize" ] && \
-+			UDF_MKFS_OPTIONS="$UDF_MKFS_OPTIONS -s $udf_fsize"
-+		export MKFS_OPTIONS=$UDF_MKFS_OPTIONS
-+		;;
-+	nfs)
-+		export MKFS_OPTIONS=$NFS_MKFS_OPTIONS
-+		;;
-+	afs)
-+		export MKFS_OPTIONS=$AFS_MKFS_OPTIONS
-+		;;
-+	cifs)
-+		export MKFS_OPTIONS=$CIFS_MKFS_OPTIONS
-+		;;
-+	ceph)
-+		export MKFS_OPTIONS=$CEPHFS_MKFS_OPTIONS
-+		;;
-+	reiserfs)
-+		export MKFS_OPTIONS="$REISERFS_MKFS_OPTIONS -q"
-+		;;
-+       reiser4)
-+		export MKFS_OPTIONS=$REISER4_MKFS_OPTIONS
-+		;;
-+	gfs2)
-+		export MKFS_OPTIONS="$GFS2_MKFS_OPTIONS -O -p lock_nolock"
-+		;;
-+	jfs)
-+		export MKFS_OPTIONS="$JFS_MKFS_OPTIONS -q"
-+		;;
-+	f2fs)
-+		export MKFS_OPTIONS="$F2FS_MKFS_OPTIONS"
-+		;;
-+	btrfs)
-+		export MKFS_OPTIONS="$BTRFS_MKFS_OPTIONS"
-+		;;
-+	bcachefs)
-+		export MKFS_OPTIONS=$BCACHEFS_MKFS_OPTIONS
-+		;;
-+	*)
-+		;;
-+	esac
-+}
-+
-+_fsck_opts()
-+{
-+	case $FSTYP in
-+	ext2|ext3|ext4)
-+		export FSCK_OPTIONS="-nf"
-+		;;
-+	reiser*)
-+		export FSCK_OPTIONS="--yes"
-+		;;
-+	f2fs)
-+		export FSCK_OPTIONS=""
-+		;;
-+	*)
-+		export FSCK_OPTIONS="-n"
-+		;;
-+	esac
-+}
-+
-+# check necessary running dependences then source sepcific fs helpers
-+_source_specific_fs()
-+{
-+	local fs=$1
-+
-+	if [ -z "$fs" ];then
-+		fs=$FSTYP
-+	fi
-+
-+	case "$fs" in
-+	xfs)
-+		[ "$XFS_LOGPRINT_PROG" = "" ] && _fatal "xfs_logprint not found"
-+		[ "$XFS_REPAIR_PROG" = "" ] && _fatal "xfs_repair not found"
-+		[ "$XFS_DB_PROG" = "" ] && _fatal "xfs_db not found"
-+		[ "$MKFS_XFS_PROG" = "" ] && _fatal "mkfs_xfs not found"
-+		[ "$XFS_INFO_PROG" = "" ] && _fatal "xfs_info not found"
-+
-+		. ./common/xfs
-+		;;
-+	udf)
-+		[ "$MKFS_UDF_PROG" = "" ] && _fatal "mkfs_udf/mkudffs not found"
-+		;;
-+	btrfs)
-+		[ "$MKFS_BTRFS_PROG" = "" ] && _fatal "mkfs.btrfs not found"
-+
-+		. ./common/btrfs
-+		;;
-+	ext4)
-+		[ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
-+		. ./common/ext4
-+		;;
-+	ext2|ext3)
-+		. ./common/ext4
-+		;;
-+	f2fs)
-+		[ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
-+		;;
-+	nfs)
-+		. ./common/nfs
-+		;;
-+	afs)
-+		;;
-+	cifs)
-+		;;
-+	9p)
-+		;;
-+	fuse)
-+		;;
-+	ceph)
-+		. ./common/ceph
-+		;;
-+	glusterfs)
-+		;;
-+	overlay)
-+		. ./common/overlay
-+		;;
-+	reiser4)
-+		[ "$MKFS_REISER4_PROG" = "" ] && _fatal "mkfs.reiser4 not found"
-+		;;
-+	pvfs2)
-+		;;
-+	ubifs)
-+		[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
-+		. ./common/ubifs
-+		;;
-+	esac
-+}
-diff --git a/tests/generic/367 b/tests/generic/367
-index ed371a02b..1c9c66730 100755
---- a/tests/generic/367
-+++ b/tests/generic/367
-@@ -10,13 +10,12 @@
- # i.e, with any file with allocated extents or delayed allocation. We also
- # check if the extsize value and the xflag bit actually got reflected after
- # setting/re-setting the extsize value.
+-for section in $HOST_OPTIONS_SECTIONS; do
+-	OLD_FSTYP=$FSTYP
+-	OLD_MOUNT_OPTIONS=$MOUNT_OPTIONS
+-	get_next_config $section
 -
--. ./common/config
--. ./common/filter
-+#
- . ./common/preamble
+-	# Do we need to run only some sections ?
+-	if [ ! -z "$RUN_SECTION" ]; then
+-		skip=true
+-		for s in $RUN_SECTION; do
+-			if [ $section == $s ]; then
+-				skip=false
+-				break;
+-			fi
+-		done
+-		if $skip; then
+-			continue
+-		fi
+-	fi
 -
- _begin_fstest ioctl quick
- 
-+. ./common/filter
-+
- [ "$FSTYP" = "xfs" ] && _fixed_by_kernel_commit 2a492ff66673 \
- 	"xfs: Check for delayed allocations before setting extsize"
- 
-diff --git a/tests/generic/749 b/tests/generic/749
-index fc7477380..aac8da20d 100755
---- a/tests/generic/749
-+++ b/tests/generic/749
-@@ -14,11 +14,10 @@
- # page, you should get a SIGBUS. This test verifies we zero-fill to page
- # boundary and ensures we get a SIGBUS if we write to data beyond the system
- # page size even if the block size is greater than the system page size.
-+#
- . ./common/preamble
--. ./common/rc
- _begin_fstest auto quick prealloc
- 
--# Import common functions.
- . ./common/filter
- 
- _require_scratch_nocheck
+-	# Did this section get excluded?
+-	if [ ! -z "$EXCLUDE_SECTION" ]; then
+-		skip=false
+-		for s in $EXCLUDE_SECTION; do
+-			if [ $section == $s ]; then
+-				skip=true
+-				break;
+-			fi
+-		done
+-		if $skip; then
+-			continue
+-		fi
+-	fi
+-
+-	[ "$USE_EXTERNAL"    = yes ] || USE_EXTERNAL=no
+-	[ "$USE_LBD_PATCH"   = yes ] || USE_LBD_PATCH=no
+-	[ "$LARGE_SCRATCH_DEV"  = yes ] || LARGE_SCRATCH_DEV=no
+-	[ "$USE_ATTR_SECURE" = yes ] || USE_ATTR_SECURE=no
+-	[ -z "$FSTYP" ] && FSTYP="xfs"
+-
+-	cat <<EOF
+-SECTION       -- $section
+-
+-TEST: DIR=$TEST_DIR DEV=$TEST_DEV rt=[$TEST_RTDEV] log=[$TEST_LOGDEV]
+-TAPE: dev=[$TAPE_DEV] rmt=[$RMT_TAPE_DEV] rmtirix=[$RMT_TAPE_USER@$RMT_IRIXTAPE_DEV]
+-SCRATCH: MNT=$SCRATCH_MNT DEV=$SCRATCH_DEV rt=[$SCRATCH_RTDEV] log=[$SCRATCH_LOGDEV]
+-VARIABLES: external=$USE_EXTERNAL largeblk=$USE_LBD_PATCH fstyp=$FSTYP
+-	   large_scratch_dev=$LARGE_SCRATCH_DEV attrsecure=$USE_ATTR_SECURE
+---------
+-EOF
+-done
+-- 
+2.45.2
+
