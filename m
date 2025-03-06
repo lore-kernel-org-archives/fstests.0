@@ -1,42 +1,75 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f181.google.com (mail-pl1-f181.google.com [209.85.214.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D36002147FD;
-	Thu,  6 Mar 2025 17:46:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D20511DDC18
+	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 20:56:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741283215; cv=none; b=VLFZoFjnHq/UwAnH4H50A+4GE6uIoA3gIMntFAoKoYByFP0ACSOCt/JMdUC9fMME7yflp0b9TjsqNJYPml2KNYHGBDDxumWK2oMO4l4qUEvqDHPXz6FO5Q02/cUqcLFLRFJeTyGSok4yL/iCsWW7H8hZ2Zrgi2j8fU3KcbpdXFw=
+	t=1741294596; cv=none; b=uLINMaORefp2sMATVhAAFo1XAPqWaUOb3pLGCOipYbSefAqxQub37iqLbtPT5DKBsmYI4lIIu4MnG6Zf3AvcQgWX8dBpao6t7U7R4p/oixi81HU66F8PEAMmcKEqvkaTc69Shq23kwuEDgbhriORt/Ui6LwIbF/GB7PJOOSiN+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741283215; c=relaxed/simple;
-	bh=gRNy8gstzU6rMi1Md3Q70+e1jh4EDZE65Mvqj0Rex0g=;
+	s=arc-20240116; t=1741294596; c=relaxed/simple;
+	bh=ptYdHyXO3N9/ihNHLuoELVhKoWDcOiZzxs1ii/lBkkg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ou9Ayq/qP36gk3YSTrFPFgilEw8i66pslRom6BRhlpnRUYTyWALaRGQaCIp+9LlkBtHSIxdNZhbze49nF2I7c1AqEpSdiz+W6Fu1juSk6WP2czsJ8UPx38zenHkuRbAerCCjZmVsY0gC0hMr2hxwa/TASy91GPXZygU0oLTMrfQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gaO/GcFp; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=HsMCmsWOHjv8SLy7QNvdPD1AUSbW+qDXm00wJSSQ1ySiRTAFQJBkVp0FRtD2QpN3eQsQRLmWZ3u9mCFGUQSgrQR/aG7itT3MpGsbSYqF+Tq/Uyo9Q4RisQw17ki4C5cnvaVIvvYFOlWeYepCTgpUmA9useH07C9vU6HA72JRFb0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=EulTkPe+; arc=none smtp.client-ip=209.85.214.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gaO/GcFp"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 25581C4CEE0;
-	Thu,  6 Mar 2025 17:46:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741283214;
-	bh=gRNy8gstzU6rMi1Md3Q70+e1jh4EDZE65Mvqj0Rex0g=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gaO/GcFpJYdZknDMNDSBwbqDfJewWF5EqrRuleeNzWo5avdtnBTlrZ46JUAHeMCB+
-	 QAod3IUeAnndwjQnNTmZOHbkOHxupPNMV9hEKcQFTx+FBvxsOovHmarQKjc+QLc00P
-	 y+AlV324f7sLCLOfu+JAiL5xKquhjP12nM1vRMUYE8cy6wjeAtB9NfSnI30+wbQUfw
-	 mccf3FjvEbWTWJI776XP2Qy9gzSkGnnvKaETlgiBYYx4wUtKSw9JGvz7AaatIEo85I
-	 bqDdvscWfIovBgWRECO4zd+kFsFn3wX7vkzl2Iuhv38p1xL5y2rPanscEELwtaQxI7
-	 O8Wid5tyvij6Q==
-Date: Thu, 6 Mar 2025 09:46:53 -0800
-From: "Darrick J. Wong" <djwong@kernel.org>
-To: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
-	linux-xfs@vger.kernel.org, ritesh.list@gmail.com,
-	ojaswin@linux.ibm.com, zlang@kernel.org, david@fromorbit.com
-Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
- init_rc() call from sourcing common/rc
-Message-ID: <20250306174653.GP2803749@frogsfrogsfrogs>
-References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
- <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="EulTkPe+"
+Received: by mail-pl1-f181.google.com with SMTP id d9443c01a7336-219f8263ae0so22542405ad.0
+        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 12:56:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741294594; x=1741899394; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=jWkuK59BmG6tUseO2dcBFkVYSyEAR5JFieinStVjkqo=;
+        b=EulTkPe+FsRO9lZYRKfx4GFo9V0s3VX1+lDj7pq/cmyaydrDzUxYS8JxJ+Dlw4K9pv
+         L/nEBbkfg8mVuV8AtxBrh1bLMKozdPMeM3Mo7RaIdHakfTi5Zc/pFphdBVnqXZ9qqACV
+         y/52o6gLvxqVwbDdOJ8NF42GA3Bi91JiDhaSCPEone07p7j0gHZjAjm7yE6Ow8fNt1H5
+         RocSxMUP2ZsVpElY8syrk+F8gROvCP043IrMt6TPSvjbR1UkHWIageHbyVQtP0ozFlMp
+         6V3qtemyGeT+e7Ey+Kv9mrGslqYF3DEG0ACA7TzpkWzRS4kUh3axLwmDC3xkgi/tVPjA
+         +zxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1741294594; x=1741899394;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jWkuK59BmG6tUseO2dcBFkVYSyEAR5JFieinStVjkqo=;
+        b=KFg5DodG4LXvfxoOPWAhFB41p1va7+385vSVoqp/850l5AWug/c1MZoTa2SWwRJUZV
+         E/mGsPYAAbAWC0ToH2a6cKpXc02OyvuJkO9nVygZ3SK/DbXGdsDSqzP2k9b5X/Xucncr
+         8V580/DLWgyahYjTPt0C43BEhF4BfcrYJShwENVT2dKEt/PJNeQ9q5TfKm3rugReWtln
+         JtK9pwbYfSjXT5L0moMB0sxFiPEqDIS+tST7lEDkENzwKp/u5jG2Ld8omvqM5UgxP0BU
+         ZKQoblKG9rwEKw+gnrE9dc0NDaUDbaPNng3lILxs/xp80WTGn39PJAMyYFt6ghDeCLg6
+         gfGA==
+X-Forwarded-Encrypted: i=1; AJvYcCXLpKzt4ja0JSedd1Z0TczJcquOaZ6/7mwTp3qeDAZpdMpqx0x2/RJP3v3l2XNHlmWCtUpZ6rAk@vger.kernel.org
+X-Gm-Message-State: AOJu0YwR0U42O+Err9Wt/DBlGHXaCxbmvCevZCRg1Cz4yDH2trNzOJnO
+	8LN1M7ILKzMgjAw1zUwxnhPhSYYiMn7CgYJg5UrZYbGJJtCaK7pzcctzUbRLSko=
+X-Gm-Gg: ASbGncs67oBEoXapxktnrYA0eHvUTnrrVO0OuheskdrtPUGy+0aySRvSUXgNFnHwMgN
+	c20aTTT1FqJDiyCbRCeV5lYy2HZnNaDXdVq/4C+LMw4H1IRo54DD3Bbj7PgbVgIkgj7hhvwu/Ep
+	+fqya5p+Q4vfE06/mJVQE1A+Hb2o/CBY74dc093vBmRp/fnHthoj06iRxahQkgfvPEv7gVWgiiZ
+	LcNP06PWVOAcle7n8DHGGWc8jwZF6tpwAaMuMZ6EEt2sG+gH9UHX1a1rwX3LkV9CwKzGLAbThOK
+	A7Ngu/miZQfHZ3WCZY8+ZbYDU78Gt2KdrRJcWASVHjJxEIhWJ1reUg==
+X-Google-Smtp-Source: AGHT+IFGPaHwyTHDYtih2rmrwO3xU0589/pntjcgAvCfvYwuTrGIeV8fb8J5anrk6rC9M/rC+fbAfQ==
+X-Received: by 2002:a17:902:e750:b0:220:c4e8:3b9f with SMTP id d9443c01a7336-224283ffb11mr14529315ad.0.1741294594051;
+        Thu, 06 Mar 2025 12:56:34 -0800 (PST)
+Received: from dread.disaster.area ([49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-224109eab91sm16999515ad.95.2025.03.06.12.56.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 06 Mar 2025 12:56:33 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tqIGa-00000009ki3-45pz;
+	Fri, 07 Mar 2025 07:56:28 +1100
+Date: Fri, 7 Mar 2025 07:56:28 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] check: disable HAVE_PRIVATENS by default
+Message-ID: <Z8oL_LAc9XQsKwd-@dread.disaster.area>
+References: <20250306094924.1353269-1-zlang@kernel.org>
+ <20250306094924.1353269-2-zlang@kernel.org>
+ <Z8mBacJNAj6gVd7N@dread.disaster.area>
+ <20250306134723.x5fovpzmzemleyi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -45,102 +78,131 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
+In-Reply-To: <20250306134723.x5fovpzmzemleyi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
 
-On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
-> Silently executing scripts during sourcing common/rc doesn't look good
-> and also causes unnecessary script execution. Decouple init_rc() call
-> and call init_rc() explicitly where required.
+On Thu, Mar 06, 2025 at 09:47:23PM +0800, Zorro Lang wrote:
+> On Thu, Mar 06, 2025 at 10:05:13PM +1100, Dave Chinner wrote:
+> > On Thu, Mar 06, 2025 at 05:49:23PM +0800, Zorro Lang wrote:
+> > > Currently we have 3 ways to run a test case in _run_seq():
+> > > 
+> > >   if [ -n "${HAVE_PRIVATENS}" ]; then
+> > >       ./tools/run_privatens "./$seq"
+> > >       ...
+> > >   elif [ -n "${HAVE_SYSTEMD_SCOPES}" ]; then
+> > >       systemd-run --quiet --unit "${unit}" --scope \
+> > >              ./tools/run_setsid "./$seq" &
+> > >       ...
+> > >   else
+> > >       ./tools/run_setsid "./$seq" &
+> > >       ...
+> > >   fi
+> > > 
+> > > The "privatens" way brings in some regressions. We need more time
+> > > to develop and test this way, it's not time let it to be the
+> > > first default choice, so isolate the HAVE_PRIVATENS initialization
+> > > by a TRY_PRIVATENS parameter, and disable it by default.
+> > > 
+> > > Set TRY_PRIVATENS=yes to give "privatens" a try, otherwise run in
+> > > old ways. This patch can be removed after "privatens" way is stable.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > ---
+> > >  check | 11 +++++++----
+> > >  1 file changed, 7 insertions(+), 4 deletions(-)
+> > > 
+> > > diff --git a/check b/check
+> > > index ea92b0d62..cb2f19d08 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -674,10 +674,13 @@ _stash_test_status() {
+> > >  	esac
+> > >  }
+> > >  
+> > > -# Can we run in a private pid/mount namespace?
+> > > -HAVE_PRIVATENS=
+> > > -./tools/run_privatens bash -c "exit 77"
+> > > -test $? -eq 77 && HAVE_PRIVATENS=yes
+> > > +# Don't try "privatens" by default, it's experimental for now.
+> > > +if [ "$TRY_PRIVATENS" = "yes" ];then
+> > > +	# Can we run in a private pid/mount namespace?
+> > > +	HAVE_PRIVATENS=
+> > > +	./tools/run_privatens bash -c "exit 77"
+> > > +	test $? -eq 77 && HAVE_PRIVATENS=yes
+> > > +fi
+> > 
+> > Works for me - I have basically the same patch in my check-parallel
+> > stack because this breaks check-parallel mount namespacing for
+> > reasons I don't yet understand.
+> > 
+> > Creating a new mount namespace for each test that is run appears
+> > to turn the private mount namespace that each check instance is
+> > executed in back into a globally shared mount namespace inside
+> > each individual test mount namespace.
+> > 
+> > i.e. when check uses private namespaces I can see all the mounts
+> > from inside each test namespace from the init namespace and every
+> > test can see every mount that every other test runs again.
+> > 
+> > That is the problem I originally used mount namespaces in
+> > check-parallel to avoid.
+> > 
+> > I have no idea if this is how mount namespace nesting is actually
+> > supposed to work (seems completely broken to me!), but the only
+> > solution I've found that works so far is to turn off HAVE_PRIVATENS
+> > in check as it is redundant when it is run from check-parallel.
+> > 
+> > FWIW, given that check-parallel now runs in it's own private PID
+> > namespace with it's own /proc and /tmp, the original problem of
+> > needing to "confine pkill to only the child processes of this test
+> > instance" has gone away entirely. i.e. check-parallel does not need check to
+> > to restrict pkill to children of the current test being run anymore.
+> > 
+> > Hence I think we can probably remove the new process isolation
+> > shenanigans and revert the _pkill wrappers to plain pkill calls
+> > again as the private PID namespacing the check-parallel does means
+> > pkill does the right thing for both check and check-parallel now.
 > 
-> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> ---
->  check           | 10 ++--------
->  common/preamble |  1 +
->  common/rc       |  2 --
->  soak            |  1 +
->  4 files changed, 4 insertions(+), 10 deletions(-)
+> Hi Dave,
 > 
-> diff --git a/check b/check
-> index ea92b0d6..d30af1ba 100755
-> --- a/check
-> +++ b/check
-> @@ -840,16 +840,8 @@ function run_section()
->  		_prepare_test_list
->  	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->  		_test_unmount 2> /dev/null
-> -		if ! _test_mount
-> -		then
-> -			echo "check: failed to mount $TEST_DEV on $TEST_DIR"
-> -			status=1
-> -			exit
-> -		fi
-
-Unrelated change?  I was expecting a mechanical ". ./common/rc" =>
-". ./common/rc ; init_rc" change in this patch.
-
->  	fi
->  
-> -	init_rc
-
-Why remove init_rc here?
-
-> -
->  	seq="check.$$"
->  	check="$RESULT_BASE/check"
->  
-> @@ -870,6 +862,8 @@ function run_section()
->  	needwrap=true
->  
->  	if [ ! -z "$SCRATCH_DEV" ]; then
-> +		_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
-> +		[ $? -le 1 ] || exit 1
->  	  _scratch_unmount 2> /dev/null
->  	  # call the overridden mkfs - make sure the FS is built
->  	  # the same as we'll create it later.
-> diff --git a/common/preamble b/common/preamble
-> index 0c9ee2e0..c92e55bb 100644
-> --- a/common/preamble
-> +++ b/common/preamble
-> @@ -50,6 +50,7 @@ _begin_fstest()
->  	_register_cleanup _cleanup
->  
->  	. ./common/rc
-> +	init_rc
->  
->  	# remove previous $seqres.full before test
->  	rm -f $seqres.full $seqres.hints
-> diff --git a/common/rc b/common/rc
-> index d2de8588..f153ad81 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -5754,8 +5754,6 @@ _require_program() {
->  	_have_program "$1" || _notrun "$tag required"
->  }
->  
-> -init_rc
-> -
->  ################################################################################
->  # make sure this script returns success
->  /bin/true
-> diff --git a/soak b/soak
-> index d5c4229a..5734d854 100755
-> --- a/soak
-> +++ b/soak
-> @@ -5,6 +5,7 @@
->  
->  # get standard environment, filters and checks
->  . ./common/rc
-> +# ToDo: Do we need an init_rc() here? How is soak used?
-
-I have no idea what soak does and have never used it, but I think for
-continuity's sake you should call init_rc here.
-
---D
-
->  . ./common/filter
->  
->  tmp=/tmp/$$
-> -- 
-> 2.34.1
+> Thanks for your reviewing. Do you mean revert below commit directly?
 > 
+>   commit 247ab01fa227647c290cf82696f1b0bbf87a0177
+>   Author: Darrick J. Wong <djwong@kernel.org>
+>   Date:   Mon Feb 3 14:00:28 2025 -0800
 > 
+>       check: run tests in a private pid/mount namespace
+> 
+> I isolate the HAVE_PRIVATENS rather than reverting it, due to I'm not
+> sure if you or Darrick still would like to improve that test way.
+
+I'm talking about removing all the setsid and namspace bits that we
+added to try to solve the need for pkill --parent. i.e. this series
+of patches:
+
+949bdf8ea check: deprecate using process sessions to isolate test instances
+247ab01fa check: run tests in a private pid/mount namespace
+88d60f434 common: fix pkill by running test program in a separate session
+c71349150 common/rc: hoist pkill to a helper function
+77548e606 common/rc: create a wrapper for the su command
+
+Using private PID namespaces in check-parallel has solved the
+original problem that required the pkill --parent usage and the
+fsstress binary rename/copy workaround by wrapping process isolation
+outside of each check instance. Hence check and the internal
+check infrastructure doesn't need to ever care about process
+isolation to solve this check-parallel problem anymore.
+
+i.e. the isolation fix should have been made to check-parallel,
+not to check.
+
+It is not ideal to have to walk all this stuff back, but this is
+what happens when an RFC-scope feature prototype is merged without
+allowing adequate time for review or give the author a chance to
+address at least one round of review comments and bug fixes before
+it gets merged....
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
