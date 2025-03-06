@@ -1,80 +1,80 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
+Received: from mail-pj1-f54.google.com (mail-pj1-f54.google.com [209.85.216.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55D9B207A34
-	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:39:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D3EE151990
+	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 21:39:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741297169; cv=none; b=Wm6FXs5hZuh8OUsv+GFrVM6+za8DwQYGB4t+dbnwALtxhogp+CHPLRzH/p865wPfzQwf5eYu/9aOyVtQI1sLAEDrZURJU8QZe7Oyf0CBVVFj5DgSi0ZEym1PbbEXqJDWyFh8E5Bk5irdB+R4FuOJj8zrrM17tnYl3HjRKtsNL58=
+	t=1741297170; cv=none; b=fz96+WtLaudnZM2o3mLaYeiPV7qAyv5AqaTwn1OvUDjUwnN9sBpdJdoH7llPC70jFyYQ7bl5OGhVyQ36PjaXER78kvMW5lcd+HjhIx7tAIAYNuFi4NZreZ1l96qKRcjeYpib7KXODY9Lc9zn0XpE21D+EN2pjtk1paXzrEsGcDk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741297169; c=relaxed/simple;
-	bh=iTAkiLhTD7dez0IwrMWxK/DH6Vu6yQhssj3zV0uSpAY=;
+	s=arc-20240116; t=1741297170; c=relaxed/simple;
+	bh=gRnYCy3DvomvqWbtKnCfD6lpOqN/3Vy6waQ7ojnGeTk=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=GIktZdfkf2O0+rb0AZBtGBqkONOvGAuMnh0uWPMS8nFeNfBK9E+NCBDy2Xv292PGkouP9DXPlz2xWn9aGgkV7hKafHZTVMFBjMhlShU5yYJhKUzL4Y4kyqU/n9BQHkLylpiJj6RCf20wQhKvVa60SNqguw2FOZ8U5+ab+PjJQEI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=1OtHxjsj; arc=none smtp.client-ip=209.85.214.179
+	 MIME-Version; b=R2/ihzO+ilt87jiIubWhtkUgexzIZVLO6LuDmGiGR77XwxrhuCjUyjEKVH8SubOxGI4MGYq15w5yt4kYQB6sdStHYu7dR2XaZYTimayHTO20NU9VsJkfIo1AJNV7yRNHPPoh83FrOpUB2xujxl7t0XRT/qlhvxNNfvZhD2PcDU0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=3a3E4A9j; arc=none smtp.client-ip=209.85.216.54
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="1OtHxjsj"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-224100e9a5cso21837435ad.2
-        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:39:27 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="3a3E4A9j"
+Received: by mail-pj1-f54.google.com with SMTP id 98e67ed59e1d1-2fea47bcb51so2530333a91.2
+        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 13:39:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741297166; x=1741901966; darn=vger.kernel.org;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741297167; x=1741901967; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=dHQAScpZJLW0kW4Qb3/VRaYbP43fdtprpyU3J1+tFKs=;
-        b=1OtHxjsjgDjrTEDAHlJoOYAESFF5Y24pnNyQx2DQd+kaXrSLnjVAmQaPwva8NL0ICD
-         T8jCh1Oq9O5H1ErW+4s1yXm4VaT1gLMHO02wHNMR1zEEFe+/fVQz3IGB9dWP7M9ndMKG
-         S2ROOWyCFi+HRURLzPPw28eamDPwEW0pZX/iWPHZUNiSQprTSXTfW/2Rn7lzlPqyjaOH
-         JF6xOw/sqBI6ZP8/FKBCAN4tt5YqyKBbqzTdonFaRtB47NhHp2aopxH6YQmwS1lRHzpb
-         yoDxm5rzuegYX8odgcgyuRvIX829j5cxUaQWgFJTJnxHNwdPdOqoBoT4qF1BP1bomNeF
-         dwTw==
+        bh=l3wE2ibZn5SufygRU4N/xIesL05h8ucm7NvbROm039k=;
+        b=3a3E4A9jLbpQoXXAtX0FvC05M3eAEIXEExLV7FsiCSMKIrypZTvY7XIsU6OVqaTbm7
+         CKTrzFHN5vUSzrdAfU0nqLgow41DH2QE+gWva5TP0cR8PhhhVkz7/IzPdTz6VDnNbz7U
+         lP7cYfij4Za3NQbX8rVzEMxiUOYiwmI29URLObvF0KykWnmX5UNyoX9gcfujdNG3H1ho
+         aysU98pZ+ggATlEQ73VOWZ5zUQ2xVZ5CwBLARD8lECQmBLzBEahF/8a/SRmmHyFPwdJE
+         /A7RSCaCNalOYkW5hhV6k2jr8iMzONle+Y2BlIR7D54VUxWm04GHMtrsTXmcxdKIHWMW
+         L25g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741297166; x=1741901966;
+        d=1e100.net; s=20230601; t=1741297167; x=1741901967;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=dHQAScpZJLW0kW4Qb3/VRaYbP43fdtprpyU3J1+tFKs=;
-        b=dB1r3cmTVh62v7zDc9PbTizO3EaouIULslkaJgk6nQMhhUryxqzMiNBNRiriFlm99j
-         2lXknwQnQEVtxT9SB01UEahF4N65QwqhG3byGZyvOUwdJQ0/60SsjqEkL1HZGsmo16m7
-         CqB/i2SoQWZED+FJu00Ezcr40RK/ICpqfkSRob381rlCAp8W/ydjVjJ+R6jvE+bszJ73
-         KyvxOjG8ZQ3G325ZkS41vb76q+EnuHx0uRtcedxebeT/Edg19ps7RhSf8AdKe0CoR+tk
-         NvECiqYPMnunGW4y9Qhx45JD8ldNn7qMCB2rR8c0AdfM5LeRmGgoW6QcDbFOyEkjumTp
-         /Hqg==
-X-Gm-Message-State: AOJu0Yyajr5EgpPM481k7dSw2sZLtzAwU8s6X0me+q5hkvHtOTcN7E5B
-	raYd1VIrbxi3ETrRYcfmsUHJkMAPK1qyVVfW3cBOGL5vsH4ZmcbppwGe0SZNrnogVIA7Z8tN/AI
-	o
-X-Gm-Gg: ASbGncuMuWYU8RLd9d5WwPkSCb4Go3fq081Mc4qVXetvvvtg1lkepuRBsGbgfGjyQek
-	vBxmrpOltU9cCysOUbWJ97BJFo/luNVbTvyBhzsvGu6ItevGWL4qf/pzp48bs+ATPqxh0AhNuUV
-	GbKu0Os4LzirvLSqU2Fk0AGGVZ0K/9vc4MpUUaUILNKEORDt1jjMOsSd/DCGXtGIyGERN9vFcx6
-	owxh7hRJts5YsyP9vfjmNI+UoxasxK2NRjmjQeCl7CYORTCy/xwSPeXm/RBf4B06oH4WLzMBhuP
-	UYJNP5CQgP0i1bmXAq0wRLYVTD1S1+z8jm50GMWbl4fYXAdb/A0po2bvbK4WU5Vd1d1BcmrQCvZ
-	WG1AsBZesrMS2pMbEt4Y=
-X-Google-Smtp-Source: AGHT+IF4RtH7bdrWXrAvFPHazT2iNjkpQ5u2/zh5zTnVC8JfcsyNBfoiOmZp2rMsecZP1tXSnBAdzw==
-X-Received: by 2002:a05:6a00:4b4a:b0:736:6ac4:d1ff with SMTP id d2e1a72fcca58-736aa9e7154mr1673484b3a.3.1741297166262;
-        Thu, 06 Mar 2025 13:39:26 -0800 (PST)
+        bh=l3wE2ibZn5SufygRU4N/xIesL05h8ucm7NvbROm039k=;
+        b=xQfoPG2eI0LpJLHBh7TlPCddxjvLkYsGtCleZTh5JTnnzr+JKFFWldO0ZaCBKZEsL7
+         MrmfLiU6WWZr5Yh4w/6dpeI/BT6omoKgUytRD/lWb+YsGfrjUv+n9EAoJV4ERtRgs7gC
+         Il7JM3rge94MH2a7ecXCdx+3P46j7R4jFiSIbsE91QShnzQIXzP77fNmuSdXOVtCsMNT
+         RLBccR0nW2SPfHMenaiqUng9Gk0ouzNuiCoPHlrSNinUvzY4aNj3w+TE1G5QqLJ89d9k
+         OnePdtZo1pMEBknqG1vijBywwz2lCfxH9TJX/cUg9ch03+wUpcc2WYUh7oqwMOmlfsE7
+         NhEw==
+X-Gm-Message-State: AOJu0YwbeDU8DCY4h3a/5wWhMZGJDLbkvdOrME3XfMPZWi6K11yp5nfD
+	sizKdnAiNy/Sb9jSosFGyZkuxtVPxoLzuOk2xjfR3kN/LGeSK31XMl9lZDhiOxAqbVay11d4deW
+	N
+X-Gm-Gg: ASbGncvnDzuq3FHCWOaEUuHb46suZDINqcWy5ncI+LmJAm7hvJhfwaoCwZEpvz9ZY/q
+	aQDNsiz4apD5o8jW9ZVJTjJmN/btvHQPWntbbZLSc87QtiYxABz/l+rxq2Q/FXNFUZulcKslCWr
+	9id3BNvDnWvY2z0ocdRhYkL7ZLn//t/lCFBUM77xQXTSokvklQDV2wuUxyCXjaJqiLKZKJ4Fgdd
+	PEpyyU/E6b+W/HcqSdY0T6M/u20PZ95hHrZzKKeSCUMrYbQyqP1GFxjo9NJLEyijjbKvKKbD1DZ
+	wHtdpAhThjCkCTv21VoTdUcAemoJJs9OawFOnKLDWWSgwn1QviFUgRGvpszVrGdAj1nGFL6ZXDp
+	d1xWWLdlVSHCve/YC/rI=
+X-Google-Smtp-Source: AGHT+IEUjcxwI6mG0oWTYzVwb51HUiLOUegszjHpEdbR5hciEfJuNmVvJvl9vK/fU5UVdfa5Nj7QAQ==
+X-Received: by 2002:a17:90b:1b0b:b0:2fc:c262:ef4b with SMTP id 98e67ed59e1d1-2ff7cea9a99mr1489556a91.18.1741297167421;
+        Thu, 06 Mar 2025 13:39:27 -0800 (PST)
 Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736984f7115sm1904388b3a.105.2025.03.06.13.39.25
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2ff693e75ccsm1738812a91.32.2025.03.06.13.39.25
         for <fstests@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Mar 2025 13:39:25 -0800 (PST)
+        Thu, 06 Mar 2025 13:39:27 -0800 (PST)
 Received: from [192.168.253.23] (helo=devoid.disaster.area)
 	by dread.disaster.area with esmtp (Exim 4.98)
 	(envelope-from <dave@fromorbit.com>)
-	id 1tqIw6-00000009lRc-2T6O
+	id 1tqIw6-00000009lRh-2hKy
 	for fstests@vger.kernel.org;
 	Fri, 07 Mar 2025 08:39:22 +1100
 Received: from dave by devoid.disaster.area with local (Exim 4.98)
 	(envelope-from <dave@devoid.disaster.area>)
-	id 1tqIw6-0000000FvrR-3Fvh
+	id 1tqIw6-0000000Fvrc-3anL
 	for fstests@vger.kernel.org;
 	Fri, 07 Mar 2025 08:39:22 +1100
 From: Dave Chinner <david@fromorbit.com>
 To: fstests@vger.kernel.org
-Subject: [PATCH 3/5] fstests: remove crash script
-Date: Fri,  7 Mar 2025 08:34:48 +1100
-Message-ID: <20250306213921.3769440-4-david@fromorbit.com>
+Subject: [PATCH 5/5] fstests: remove old tools from tools directory
+Date: Fri,  7 Mar 2025 08:34:50 +1100
+Message-ID: <20250306213921.3769440-6-david@fromorbit.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250306213921.3769440-1-david@fromorbit.com>
 References: <20250306213921.3769440-1-david@fromorbit.com>
@@ -88,742 +88,597 @@ Content-Transfer-Encoding: 8bit
 
 From: Dave Chinner <dchinner@redhat.com>
 
-This is an old, early 2000s SGI era script for crash and recovery
-testing XFS filesystems. We have much better ways of doing this
-today with tools like dm-error, dm-flakey, etc. Nobody has been
-using this script for years, so remove it.
+ag-wipe, db-walk, fs-walk and interop are all old 2000s era SGI QA
+scripts that are either not usable anymore of have been superceded
+by much more recent functionality.
+
+interop only runs on machines with the host named "bruce" or
+"whack", requires NFS mounts from a machine named "snort" and access
+to a specific user's home dir. I know what all these were; they were
+test and build machines in SGI's engineering office in Melbourne,
+Australia. That went away in ~2009....
+
+ag-wipe is unused and has been superceded by multiple different sets of
+functionality (e.g. ./check --large-fs).
+
+db-walk is unused by fstests and now is native xfs_db functionality.
+
+fs-walk is dumping the md5sum and stat info of every file in a
+directory heirachy and only used by the interop script....
+
+Remove them all.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- crash/README     | 151 --------------
- crash/rc.sysinit |  46 -----
- crash/xfscrash   | 506 -----------------------------------------------
- 3 files changed, 703 deletions(-)
- delete mode 100644 crash/README
- delete mode 100644 crash/rc.sysinit
- delete mode 100755 crash/xfscrash
+ tools/ag-wipe | 171 ------------------------------------------------
+ tools/db-walk | 178 --------------------------------------------------
+ tools/fs-walk |  85 ------------------------
+ tools/interop | 101 ----------------------------
+ 4 files changed, 535 deletions(-)
+ delete mode 100755 tools/ag-wipe
+ delete mode 100755 tools/db-walk
+ delete mode 100755 tools/fs-walk
+ delete mode 100755 tools/interop
 
-diff --git a/crash/README b/crash/README
-deleted file mode 100644
-index 36f2ec65e..000000000
---- a/crash/README
-+++ /dev/null
-@@ -1,151 +0,0 @@
--############
--# xfscrash #  crash testing setup for XFS
--############
--
--*** disclaimers ***
--
--    work-in-progress, buyer-beware, your-mileage-may-vary, this-is-a-hack
--
--*** what xfscrash does ***
--
--    xfscrash allows realistic testing of XFS log recovery and XFS check/repair
--    by generating log activity on an XFS partition, then rebooting the machine
--    at a random point. When the machine comes back up, xfscrash is restarted
--    and then tests either the log recovery or xfs_repair on the dirtied
--    filesystem. All going well the process continues.
--
--*** getting ready for crash testing ***
--
--    Most filesystems (ext2 included) can't withstand having the machine
--    they're running on rebooted while they're active. So the crash test
--    machine needs to have all filesystems other than the test FS mounted
--    read-only so they won't get trashed when the machine reboots.
--
--*** mouting FSes read-only ***
--
--    Following is a recipe for making a redhat linux (6.2) machine with a single
--    ext2 FS mounted on root able to be booted read-only. Your Mileage May
--    Vary - don't try this on an important machine.
--
--    The idea is to move anything that needs to be r/w into the /initrd_init
--    directory, replacing the moved directories with links to the moved ones.
--    That way the /initrd_init directory may be copied to a ramdisk, and
--    mounted over /initrd on the root FS which never gets remounted r/w.
--
--        # go to single user
--        init 1
--
--        # make a mount point for the ramdisk
--        mkdir /initrd
--
--        # link across to the /initrd_init directory for when 
--        # the ramdisk isn't mounted
--        ln -s /initrd_init/dev .
--        ln -s /initrd_init/etc .
--        ln -s /initrd_init/proc .
--        ln -s /initrd_init/sbin .
--        ln -s /initrd_init/tmp .
--        ln -s /initrd_init/var .
--
--        # make the /initrd_init directory
--        mkdir /initrd_init
--        cd /initrd_init
--
--
--        # move /dev
--        mv /dev .
--        ln -s /dev /initrd/dev
--
--        # move /etc
--        mv /etc .
--        ln -s /etc /initrd/etc
--
--        # make proc mount
--        mkdir proc 
--
--        # move /tmp
--        mkdir tmp
--        rm -rf /tmp
--        ln -s /tmp /initrd/tmp
--
--        # link /sbin 
--        ln -s /sbin .
--
--        # setup a tree for parts of /var
--        mkdir var var/cache var/lock var/lock/console var/lock/subsys
--        mkdir var/log var/preserve var/run 
--
--        touch /var/run/utmp /var/log/utmp /var/log/wtmp 
--
--        # move parts of /var
--        rm -rf /var/cache /var/lock /var/log /var/preserve /var/run
--        ln -s /initrd/var/cache /var/cache
--        ln -s /initrd/var/lock /var/lock
--        ln -s /initrd/var/log /var/log
--        ln -s /initrd/var/preserve /var/preserve
--        ln -s /initrd/var/run /var/run
--
--        # make a mount for /var/shm
--        mkdir var/shm 
--        ln -s /var/shm /initrd/var/shm
--
--        # move /var/spool
--        mkdir var/spool
--        mkdir var/spool/mail var/spool/anacron var/spool/at var/spool/lpd
--        mkdir var/spool/rwho var/spool/mqueue var/spool/cron
--        rm -rf /var/spool
--        ln -s /var/spool /initrd/var/spool
--
--        # move /var/tmp
--        mkdir var/tmp
--        rm -rf /var/tmp
--        ln -s /var/tmp /initrd/var/tmp
--
--        # trim /dev - too many inodes here - remove anything you don't need
--        # (small ramdisk has a small number of inodes)
--        rm -rf /initrd/dev/<....>   
--
--    All going well, all the directories you've made should link through
--    /initrd and into /initrd_init, and the machine should come back up
--    if you restart it.
--
--    You want to keep the contents of /initrd_init to a minimum because
--    this stuff has to fit into the ramdisk.
--
--*** getting the ramdisk going ***
--
--    See the rc.sysinit file for some details of what to do to get the
--    ro-root/ramdisk up and running.
--
--    Once everything is going, the root FS should never be remounted to
--    r/w on boot and should be in r/o mode when the machine comes up.
--    
--    All going well, any open files have been redirected through the
--    symlinks onto the ramdisk, so you should be able to remount the
--    root FS to r/w and then remount it back to r/o.
--    
--    Since there's no r/w filesystems mounted, it should be ok to 
--    reboot the machine with 'reboot -fn' and everything should come
--    back without dirty filesystems and without having to fsck.
--    
--*** starting xfscrash ***
--
--    The simplest way to restart xfscrash on reboot is to start it
--    in the background from rc.local. The script logs to /dev/tty1,
--    /dev/console & a logfile by default, so the output should be
--    easy to find.
--    
--    Link the xfscrash directory off an NFS mounted FS so you can make
--    changes while the machine is rebooting and so you can touch the
--    'stop' and 'start' control files.
--
--    To configure the system, change the parameters in the configuration
--    section of the 'xfscrash' script.
--    
--    To start the system, touch the 'start' control file and then either
--    reboot or manually run the 'xfscrash' script.
--    
--    To stop the system, touch the 'stop' control file and wait for the
--    next cycle to start when the control file will be checked and
--    the test terminated.
--
-diff --git a/crash/rc.sysinit b/crash/rc.sysinit
-deleted file mode 100644
-index 0f0781a79..000000000
---- a/crash/rc.sysinit
-+++ /dev/null
-@@ -1,46 +0,0 @@
--#
--# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
--#
--# xfscrash - control the XFS crash tests
--#
--
--# this is an example of what to add to rc.sysinit on a redhat linux
--# system to get the ro-root/ramdisk system up and running
--
--if [ -f /initrd.active ]
--then
--	echo "*** MAKE RAMDISK ***"
--	dd if=/dev/zero of=/dev/ram0 bs=1024k count=4
--	mkfs -i 1024 /dev/ram0 4096
--	echo "*** MOUNT RAMDISK ***"
--	mount -n -w /dev/ram0 /mnt
--	echo "*** INIT RAMDISK ***"
--	cp -a /initrd_init/* /mnt
--	rm -f /mnt/00_INITRD_REAL
--	touch /mnt/00_INITRD_RAMDISK
--	umount -n /mnt
--	echo "*** REMOUNT RAMDISK ***"
--	mount -n /dev/ram0 /initrd
--
--	echo "*** FIX MTAB ***"
--	>/etc/mtab
--	rm -f /etc/mtab~ /etc/mtab~~
--	mount -f -o ro /
--	mount -f -o rw /dev/ram0 /initrd
--else
--        # old code
--        
--	# Remount the root filesystem read-write.
--	action "Remounting root filesystem in read-write mode" mount -n -o remount,rw /
--
--	# Clear mtab
--	>/etc/mtab
--
--	# Remove stale backups
--	rm -f /etc/mtab~ /etc/mtab~~
--
--	# Enter root and /proc into mtab.
--	mount -f /
--	mount -f /proc
--
--fi
-diff --git a/crash/xfscrash b/crash/xfscrash
+diff --git a/tools/ag-wipe b/tools/ag-wipe
 deleted file mode 100755
-index 037b3df1e..000000000
---- a/crash/xfscrash
+index 52acf0f80..000000000
+--- a/tools/ag-wipe
 +++ /dev/null
-@@ -1,506 +0,0 @@
--#!/bin/sh
+@@ -1,171 +0,0 @@
+-#!/usr/bin/perl -w
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (c) 2003-2004 Silicon Graphics, Inc.  All Rights Reserved.
 -#
+-use strict;
+-use IO::File;
+-use Getopt::Std;
+-#
+-#
+-# Modify a filesystem's superblock and AGF metadata structures
+-# so that only a subset of the allocation groups will be used.
+-# Intended use is in testing large virtual devices (eg. loop)
+-# with extremely large filesystems, where we want to ensure
+-# high allocation groups are used as much as possible (where
+-# the block addresses are large).
+-#
+-
+-my %opt;
+-getopts('cf:l:qr:v', \%opt);
+-
+-die "Usage: $0 [-f AG] [-l AG] [-r bytes] [-cqv] device\n" unless (@ARGV == 1);
+-my $device = shift @ARGV;
+-die "$device: no such file\n" unless (-e $device);
+-
+-my $clearall = defined($opt{'c'}) ? 1 : 0;
+-my $retain = defined($opt{'r'}) ? $opt{'r'} : -1;
+-my $quiet = defined($opt{'q'}) ? 1 : 0;
+-my $verbose = defined($opt{'v'}) ? 1 : 0;
+-my $nagfirst = defined($opt{'f'}) ? $opt{'f'} : 0;
+-my $naglast = defined($opt{'l'}) ? $opt{'l'} : 0;
+-
+-# 
+-# "clearall" means clear everything barring the final AG.
+-# "retain" means clearall and retain a specified amount in the
+-# second-from-last AG as well (value is the number of bytes).
+-# [NB: retain with a value of zero is now the same as clearall].
+-# 
+-if ($retain >= 0) {
+-	$clearall = 1;
+-}
+-
+-sub xfs_db {
+-	my $xfsdb = 'xfs_db -x';
+-	my %hash;
+-
+-	foreach (@_) {
+-		$xfsdb .= ' -c ' . $_;
+-	}
+-	print $xfsdb, ' ', $device, "\n" if ($verbose);
+-
+-	die unless open(DB, "$xfsdb $device 2>/dev/null |");
+-	while (<DB>) {
+-		if (/^(\S+) = (.*)$/) {
+-			print if ($verbose);
+-			$hash{$1} = $2;
+-		}
+-	}
+-	return %hash;
+-}
+-
+-
+-# 
+-# Stage 1: Get control information from the superblock
+-# 
+-
+-my @sbprint = ( '"print fdblocks"', '"print agcount"', '"print blocksize"' );
+-my @agffree = ( '"print freeblks"' );
+-
+-my %sb = xfs_db 'sb', @sbprint;
+-print "=== Initially ", $sb{'fdblocks'}, " blocks free across ",
+-	$sb{'agcount'}, " AGs\n" unless $quiet;
+-if ($clearall && ($nagfirst || $naglast)) {
+-	print STDERR "  o Clearall/retain specified with first/last AG\n";
+-	exit(1);
+-}
+-if ($nagfirst >= $sb{'agcount'}) {
+-	print STDERR "  o First AG number is too large\n";
+-	exit(1);
+-}
+-if ($naglast >= $sb{'agcount'}) {
+-	print STDERR "  o Last AG number is too large\n";
+-	exit(1);
+-}
+-if ($naglast - $nagfirst < 0) {
+-	print STDERR "  o No AGs to clear\n";
+-	exit(1);
+-}
+-if ($clearall) {
+-	$naglast = $sb{'agcount'} - 2;
+-	if ($retain > 0) {
+-		my %check;
+-
+-		$naglast--;
+-		$retain /= $sb{'blocksize'};	# convert to fsblocks
+-		%check = xfs_db "'agf $naglast'", @agffree;
+-		if ($check{'freeblks'} < $retain) {
+-			print STDERR "  o Insufficient space to retain\n";
+-			exit(1);
+-		}
+-	}
+-}
+-
+-
+-# 
+-# Stage 2: Wipe out all completely masked allocation groups.
+-# 
+-
+-my @agfprint = ( '"print freeblks"', '"print flcount"' );
+-my @agfcommands = ( '"write freeblks 0"',
+-			'"write longest 0"', '"write flcount 0"',
+-			'"write bnolevel 1"', '"write cntlevel 1"',
+-			'"write flfirst 0"', '"write fllast 0"' );
+-my @bnoprint = ( '"addr bnoroot"', '"print numrecs"' );
+-my @bnocommands = ( '"addr bnoroot"', '"write numrecs 0"',
+-			'"write leftsib -1"', '"write rightsib -1"' );
+-my @cntprint = ( '"addr cntroot"', '"print numrecs"' );
+-my @cntcommands = ( '"addr cntroot"', '"write numrecs 0"',
+-			'"write leftsib -1"', '"write rightsib -1"' );
+-
+-print "=== Wiping ", $naglast - $nagfirst + 1,
+-	" AGs starting from AG #", $nagfirst, "\n" unless $quiet;
+-
+-my $ag = $nagfirst;
+-while ($ag <= $naglast) {
+-	print "  o AG#", $ag, " AGF fields\n" unless $quiet;
+-
+-	my %agf = xfs_db "'agf $ag'", @agfprint;
+-	xfs_db "'agf $ag'", @agfcommands;
+-
+-	my $blockcnt = $agf{'freeblks'} + $agf{'flcount'};
+-	$sb{'fdblocks'} -= $blockcnt;
+-	print "     cleared ", $blockcnt, " blocks from AG#", $ag, "\n"
+-		unless $quiet;
+-
+-	my %btree = xfs_db "'agf $ag'", @bnoprint;
+-	xfs_db "'agf $ag'", @bnocommands, "'agf $ag'", @cntcommands;
+-	print "     cleared ", $btree{'numrecs'}, " BNO/CNT btree recs in AG#",
+-		$ag, "\n" unless $quiet;
+-
+-	$ag++;
+-}
+-
+-
+-# 
+-# Stage 3: Wipe out any partially masked allocation group.
+-# 
+-
+-if ($retain > 0) {
+-	print "  o AG#", $ag, " AGF fields (partial)\n" unless $quiet;
+-
+-	my %ragf = xfs_db "'agf $ag'", '"print freeblks"',
+-		'"addr bnoroot"', '"print recs[1].startblock"';
+-	my $maskblks = $ragf{'freeblks'} - $retain;
+-	my $newstart = $ragf{'recs[1].startblock'} + $maskblks;
+-	xfs_db "'agf $ag'",
+-		"'write freeblks $retain'", "'write longest $retain'",
+-		"'agf $ag'", '"addr bnoroot"',
+-		"'write recs[1].startblock $newstart'",
+-		"'write recs[1].blockcount $retain'",
+-		"'agf $ag'", '"addr cntroot"',
+-		"'write recs[1].startblock $newstart'",
+-		"'write recs[1].blockcount $retain'";
+-
+-	$sb{'fdblocks'} -= $maskblks;
+-	print "     cleared ", $maskblks, " blocks from AG#", $ag, "\n"
+-		unless $quiet;
+-}
+-
+-print "=== Updating final freespace count, ", $sb{'fdblocks'}, " blocks\n"
+-	unless $quiet;
+-xfs_db "'sb 0'", "'write fdblocks $sb{'fdblocks'}'"
+diff --git a/tools/db-walk b/tools/db-walk
+deleted file mode 100755
+index e09920559..000000000
+--- a/tools/db-walk
++++ /dev/null
+@@ -1,178 +0,0 @@
+-#!/usr/bin/perl -w
+-# SPDX-License-Identifier: GPL-2.0
 -# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
 -#
--# xfscrash - control the XFS crash tests
+-# use db to try to traverse the entire filesystem starting at the root
 -#
+-my $device;
+-my $rootino;
+-my $agcount;
+-my $versionnum;
+-my $dir_version;
+-my @dir_inodes;
+-my @bmap_blocks;
+-my @block_inodes;
+-my $mode;
 -
--  #######################
--### configuration stuff ########################################################
--  #######################
--
--# remount, repair or corrupt
--MODE=remount
--# where to find xfscrash
--XFSCRASH=/xfscrash
--# put log files here
--LOG=$XFSCRASH
--# put output to these places
--OUTPUT="$LOG/xfscrash.log /dev/tty1 /dev/console"
--# awk...
--AWK_PROG=gawk
--# clear FS if >= this percent full at start of run. 100 is a good
--# number - only used on corrupt test so far
--FULL_LIMIT=80
--  
--case `hostname -s`
--in
--    leesa)
--        # mount test partition here
--        TEST_MNT=/mnt/arch0
--        # build test partition here
--        TEST_DEV=/dev/hda6
--        # backup test partition to here (or empty)
--        BACKUP_DEV=/dev/hda8
--        # backup block size for dd
--        BACKUP_BS=1024k
--        # base stress time
--        STRESS_TIME=60
--        # stress random time
--        STRESS_RANDOM=60
--	;;
--    lumpy)
--        # mount test partition here
--        TEST_MNT=/mnt/scratch_0
--        # build test partition here
--        TEST_DEV=/dev/sdc5
--        # backup test partition to here (or empty)
--        BACKUP_DEV=  ;#/dev/sdc6
--        # backup block size for dd
--        BACKUP_BS=10240k
--        # base stress time
--        STRESS_TIME=360
--        # stress random time
--        STRESS_RANDOM=360
--	;;
--    *)
--        echo "!!! no configuration data for host `hostname -s`"
--        exit 1
--        ;;
--esac
--
--# avoid stress
--
--AVOID="-f resvsp=0 -f unresvsp=0"
--
--# DIY stress command
--STRESS="/usr/local/bin/fsstress -d $TEST_MNT/stress -n 10000000 -p 1 $AVOID"
--#STRESS="/usr/local/bin/randholes -l 10000000 -c 100000 -b 512 $TEST_MNT/stress/holes"
--
--# stress command for the corrupt test
--CORRUPT_STRESS="/usr/local/bin/fsstress -d $TEST_MNT/stress -n 10000 -p 1 $AVOID"
--
--###########################################################################
--
--reboot=-1
--
--_log()
+-sub db($)
 -{
--    tee -a $OUTPUT > /dev/null
--}
--
--_echo()
--{
--    echo "$*" | _log
--}
--
--_mount()
--{
--    _echo "   *** Mounting $TEST_DEV on $TEST_MNT"
--    if ! mount -t xfs $TEST_DEV $TEST_MNT
--    then
--        _echo "   !!! unable to mount"
--        exit 1
--    fi
--}
--
--_unmount()
--{
--    _echo "   *** Unmounting $TEST_DEV"
--    if ! umount $TEST_DEV &> /dev/null
--    then
--        _echo "   !!! unable to unmount"
--        exit 1
--    fi
--}
--
--_check()
--{
--    expect=$1
--    fail=0
+-    my ($args)=@_;
+-    my ($ret);
 -    
--    if [ $expect -eq 0 ]
--    then
--        _echo "      *** xfs_repair -n ($LOG/repair_clean.out)"   
--        xfs_repair -n $TEST_DEV &> $LOG/repair_clean.out || fail=1
--    fi
+-    $ret=`xfs_db -r $args $device 2> /dev/null`;
+-    die "ERROR executing xfs_db -r $args $device" if ($?);
 -    
--    if [ $fail -eq 0 ]
--    then
--        _echo "         *** FS checks ok"
--    else
--        if [ $expect -eq 0 ]
--        then
--            _echo "         !!! FS check failed - inconsistent FS"
--            _echo "         !!! (see $LOG/*.out for details)"
--            exit 1
--        else
--            _echo "         *** inconsistent fs (as expected)"
--        fi
--    fi
+-    return $ret;
 -}
 -
--_check_core()
--{        
--    if [ -e core ]
--    then
--        _echo "   !!! core file found!"
--        exit 1
--    fi
--}
--
--_repair()
+-sub fmt($)
 -{
--    rm -f core
--    _echo "   *** repair"
--    _echo "      *** repair pass 1 (RO)"
--    xfs_repair -n $TEST_DEV &> $LOG/repair_1.out \
--        && _echo "         !!! no errors found (eh?)" \
--        || _echo "         *** errors found (expected)"
+-    my ($text)=@_;
+-    my $c=0;
+-    print "        ";
+-    foreach (split("\n",$text)) {
+-        s/^core\.//;
 -        
--    _check_core
--        
--    _echo "      *** repair pass 2 (RW)"
--    
--    if xfs_repair $TEST_DEV &> $LOG/repair_2.out
--    then
--        _echo "         *** FS checks ok (now)"
--    else
--        _echo "         !!! xfs_repair returned error code"
--        _echo "         !!! (see $LOG/repair_*.out for details)"
--        exit 1
--    fi
--        
--    _check_core
--        
--    _echo "      *** repair pass 3 (RO)"
--    if xfs_repair -n $TEST_DEV &> $LOG/repair_3.out
--    then
--        _echo "         *** FS checks ok"
--    else
--        _echo "         !!! errors found after repair (unexpected)"
--        _echo "         !!! (see $LOG/repair_*.out for details)"
--        exit 1
--    fi
--
--    _check_core
--}
--
--_cleanup()
--{
--    rm -f $XFSCRASH/counter $XFSCRASH/start $XFSCRASH/stop $XFSCRASH/active 
--    
--    if [ $reboot != -1 ]
--    then
--        kill $reboot
--    fi
--    
--}
--
--_random()
--{
--    od -tu -N 4 /dev/random | gawk -v v=$1 'NR==1 { print $2 % v }'
--}
--
--_backup()
--{
--    if [ $count -ne 1 -a "$BACKUP_DEV" != "" ]
--    then
--        _echo "   *** Backing up $TEST_DEV to $BACKUP_DEV"
--        if ! dd if=$TEST_DEV of=$BACKUP_DEV bs=$BACKUP_BS &> $LOG/dd.out
--        then
--            _echo "   !!! unable to backup fs"
--            _echo "   !!! (see $LOG/dd.out)"
--            exit 1
--        fi
--    else
--        _echo "   *** skipping back up step"
--    fi
--}
--
--_logprint()
--{
--    _echo "   *** dumping log to $LOG/logprint.out"
--    rm -f core
--    xfs_logprint $TEST_DEV &> $LOG/logprint.out
--    if [ -e core ]
--    then
--        _echo "      !!! xfs_logprint dumped core"
--        echo "" >> $LOG/logprint.out
--        echo "*** CORE DUMPED ***" >> $LOG/logprint.out
--        echo "" >> $LOG/logprint.out
--    fi
--    
--    _echo "   *** dumping log (-t -i) to $LOG/logprint_inode.out"
--    
--    rm -f core
--    xfs_logprint -t -i $TEST_DEV &> $LOG/logprint_inode.out
--    if [ -e core ]
--    then
--        _echo "      !!! xfs_logprint dumped core"
--        echo "" >> $LOG/logprint_inode.out
--        echo "*** CORE DUMPED ***" >> $LOG/logprint_inode.out
--        echo "" >> $LOG/logprint_inode.out
--    fi
--    
--    _echo "   *** dumping log (-t -b) to $LOG/logprint_buf.out"
--    
--    rm -f core
--    xfs_logprint -t -b $TEST_DEV &> $LOG/logprint_buf.out
--    if [ -e core ]
--    then
--        _echo "      !!! xfs_logprint dumped core"
--        echo "" >> $LOG/logprint_buf.out
--        echo "*** CORE DUMPED ***" >> $LOG/logprint_buf.out
--        echo "" >> $LOG/logprint_buf.out
--    fi
--}
--#
--# _df_device : get an IRIX style df line for a given device 
--#
--#       - returns "" if not mounted
--#       - returns fs type in field two (ala IRIX)
--#       - joins line together if split by fancy df formatting
--#       - strips header etc
--#
--
--_df_device()
--{
--    if [ $# -ne 1 ]
--    then
--	echo "Usage: _df_device device" >&2
--	exit 1
--    fi
--    
--    df -T 2> /dev/null | $AWK_PROG -v what=$1 '
--        match($1,what) && NF==1 { 
--            v=$1
--            getline
--            print v, $0
--            exit
+-        if ($c+length($_) >= 70) {
+-            $c=0;
+-            print ",\n        ";
 -        }
--        match($1,what) {
--            print
--            exit
+-        if ($c) {
+-            print ", ";
+-            $c+=2;
 -        }
--    '
+-        print "$_";
+-        $c+=length($_)+2;
+-    }
+-    print "\n";
 -}
 -
--#
--# _df_dir : get an IRIX style df line for device where a directory resides
--#
--#       - returns fs type in field two (ala IRIX)
--#       - joins line together if split by fancy df formatting
--#       - strips header etc
--#
--
--_df_dir()
+-sub inode($)
 -{
--    if [ $# -ne 1 ]
--    then
--	echo "Usage: _df_dir device" >&2
--	exit 1
--    fi
+-    my ($num)=@_;
+-    my ($t);
 -    
--    df -T $1 2> /dev/null | $AWK_PROG -v what=$1 '
--        NR == 2 && NF==1 { 
--            v=$1
--            getline 
--            print v, $0;
--            exit 0
+-    @dir_inodes=();
+-    
+-    $t=db("-c \"inode $num\" -c \"print\"");
+-    print "    *** Inode $num\n";
+-    fmt($t);
+-    
+-    ($mode)= $t=~ /^core.mode = (\d+)$/m;
+-    
+-    if ($t=~ /a\.bmx/m) {
+-        bmap("inode $num","attr");
+-        foreach (@bmap_blocks) {
+-            attr_block($_);
 -        }
--        NR == 2 {
--            print;
--            exit 0
+-    }
+-    if (eval "$mode & 040000") {
+-        if ( $t=~ /sfdir/m) {
+-            while ($t=~ /inumber(?:\.i[48])? = (\d+)$/mg) {
+-                push(@dir_inodes,$1);
+-            }
 -        }
--        {}
--    '
--    # otherwise, nada
+-        if ( $t=~ /u\.bmx/m) {
+-            bmap("inode $num","dir");
+-            foreach (@bmap_blocks) {
+-                dir_block($_);
+-                push(@dir_inodes,@block_inodes);
+-            }
+-        }
+-    } else {
+-        bmap("inode $num","file") if ( $t=~ /u\.bmx/m);
+-    }
 -}
 -
--# return percentage used disk space for mounted device
--
--_used()
+-sub bmap($$)
 -{
--    if [ $# -ne 1 ]
--    then
--	echo "Usage: _used device" >&2
--	exit 1
--    fi
+-    my ($cmd,$type)=@_;
+-    my ($t);
 -    
--    _df_device $1 | $AWK_PROG '{ sub("%", "") ; print $6 }'
+-    @bmap_blocks=();
+-    
+-    $flag=($type eq "attr")?"-a":"";
+-    
+-    $t=db("-c \"$cmd\" -c \"bmap $flag\"");
+-    print "    *** bmap $type $cmd\n";
+-    fmt($t);
+-    
+-    if ($type eq "dir" || $type eq "attr") {
+-        while ($t=~ /startblock (\d+) \(.+\) count (\d+)/mg) {
+-            for ($b=$1;$b<$1+$2;$b++) {
+-                push(@bmap_blocks,$b);
+-            }
+-        }
+-    }
 -}
 -
--_check_free()
+-sub dir_block($)
 -{
--     used=`_used $TEST_DEV`
--
--     if [ $used -ge $FULL_LIMIT ]    
--     then
--         _echo "      *** $used % used on $TEST_DEV - deleting files"
--         rm -rf $TEST_MNT/stress
--     fi
--}       
--
--# loop, stressing, unounting and checking
--# no (expected) rebooting...
--_corrupt()
--{
--    count=0
+-    my ($num)=@_;
+-    my ($t);
 -    
--    # don't want to restart if we reboot...
--    _cleanup
+-    @block_inodes=();
 -    
--    while true
--    do
--
--        if [ -e $XFSCRASH/stop ]
--        then
--            _echo "### XFS Crash stopped "
--            exit 0
--        fi
--
--        _echo "*** run $count"
--        let "count = count + 1"
--        
--        _check 0
--        _mount
--        
--        _check_free
--        
--        $CORRUPT_STRESS | _log
--        
--        _unmount        
--    done
+-    $type=($dir_version==2)?"dir2":"dir";
+-    
+-    $t=db("-c \"fsblock $num\" -c \"type $type\" -c \"print\"");
+-    print "    *** $type block $num\n";
+-    # need to drop . and ..
+-    ($self)= $t=~ /\[(\d+)\].name = \"\.\"/m;
+-    ($parent)= $t=~ /\[(\d+)\].name = \"\.\.\"/m;
+-    fmt($t);
+-    
+-    
+-    while ($t=~ /\[(\d+)\].inumber = (\d+)/mg) {
+-        next if (defined $self && $1 == $self);
+-        next if (defined $parent && $1 == $parent);
+-        push(@block_inodes, $2);
+-    }
 -}
 -
--###########################################################################
+-sub attr_block($)
+-{
+-    my ($num)=@_;
+-    my ($t);
 -    
--_echo ""
--_echo ""
--echo "XFSCRASH [output to $OUTPUT]"
--_echo ""
+-    $t=db("-c \"fsblock $num\" -c \"type attr\" -c \"print\"");
+-    print "    *** attr block $num\n";
 -
--if [ "$1" = "start" ]
--then
--    touch $XFSCRASH/start
--fi
+-    fmt($t);
+-}
 -
--if [ "$1" = "stop" ]
--then
--    touch $XFSCRASH/stop
--fi
--
--
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--
--if [ -e $XFSCRASH/stop ]
--then
--    _echo "### XFS Crash stopped "
--    exit 0
--fi
--
--if [ -e $XFSCRASH/start ]
--then
--    _echo "### XFS Crash started "
--    _cleanup
--    rm -f $LOG/*.out $LOG/*.log core
+-sub sb($)
+-{
+-    my ($num)=@_;
+-    my ($t);
 -    
--    touch $XFSCRASH/active
+-    $t=db("-c \"sb $num\" -c \"print\"");
+-    print "    *** SB $num\n";
+-    fmt($t);
+-    
+-    ($rootino)= $t=~ /^rootino = (\d+)$/m;
+-    ($agcount)= $t=~ /^agcount = (\d+)$/m;
+-    ($versionnum)= $t=~ /^versionnum = (0x[\da-f]+)$/m;
+-    $dir_version = (eval "$versionnum & 0x2000")?2:1;
+-}
 -
--    _echo "   *** Building fresh XFS FS"
--    umount $TEST_DEV &> /dev/null
--    if ! mkfs -t xfs -f $TEST_DEV &> $LOG/mkfs.out
--    then
--        _echo "   !!! unable to mkfs"
--        _echo "   !!! (see $LOG/mkfs.out)"
--        exit 1
--    fi
--fi
+-die "Usage: $0 <XFS device>\n" unless (@ARGV == 1);
 -
--if [ ! -e $XFSCRASH/active ]
--then
--    _echo "### XFS Crash inactive "
--    exit 0
--fi
+-$device=shift @ARGV;
+-die "can't read $device\n" unless (-r $device);
+-die "$device is not a block device\n" unless (-b _);
 -
+-chomp($HOST = `hostname -s`);
 -
--if [ -r $XFSCRASH/counter ]
--then
--    count=`cat $XFSCRASH/counter`
--else
--    count=0
--fi
--_echo "### Crash test run $count (mode=$MODE, log=$LOG/{*.out,*.log})"
+-print "*** db-walk host $HOST device $device\n";
 -
--let "count = count +1"
--echo $count > $XFSCRASH/counter
+-sb(0);
+-for ($ag=1;$ag<$agcount;$ag++) {
+-    sb($ag);
+-}
 -
--# real test starts here
+-@inodes=($rootino);
+-while ($_ = shift @inodes) {
+-    inode($_);
+-    push(@inodes,@dir_inodes);
+-}
+diff --git a/tools/fs-walk b/tools/fs-walk
+deleted file mode 100755
+index 918e1ad67..000000000
+--- a/tools/fs-walk
++++ /dev/null
+@@ -1,85 +0,0 @@
+-#!/usr/bin/perl -w
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
+-#
+-# traverse the entire filesystem dumping info.
+-#
+-use MD5;
+-use Getopt::Std;
 -
--_echo "   *** Checking for R/O root"
--if ! mount | grep "on / type" | grep -q "(ro)"
--then
--    _echo "   !!! root not mounted readonly"
--    exit 1
--fi
+-my %opt;
 -
--_echo "   *** Loading XFS modules"
--if ! modprobe xfs
--then
--    _echo "   !!! unable to modprobe xfs"
--    exit 1
--fi
+-sub scan($)
+-{
+-    my ($file)=@_;
+-    my ($md5)=new MD5;
+-    my (@stat);
 -
--_echo "   *** Unmounting $TEST_DEV"
--umount $TEST_DEV &> /dev/null
+-    unless (@stat=lstat("$file")) {
+-        printf("%-" . ($opt{v}?65:32) . "s $file\n", "!!! could not lstat");
+-        return;
+-    }
 -
--_logprint
--if [ $MODE != "corrupt" ]
--then
--    _backup
--fi
+-    $stat[0]=$stat[8]=""; # wipe the device and access time
+-    $md5->reset;
+-    $md5->add(join(" ",@stat));
+-    
+-    print join(" ",@stat), "\n";
+-    
+-    if ($opt{v}) {
+-        print $md5->hexdigest . " ";
+-        $md5->reset;
+-    }
 -
--case $MODE
--in
--    remount)
--        _check 1 # expect errors
--        _mount
--        _unmount
--	;;
--    repair)
--        _repair
--	;;
--    corrupt)
--        _corrupt
--        exit 0
--        ;;
--    *)
--	_echo "xfscrash: MODE must be remount or repair"
--	exit 1
--	;;
--esac
+-    if (-l "$file") {
+-        if (!defined($link = readlink $file)) {
+-            printf("%-32s $file\n", "!!! could not readlink");
+-            return;
+-        }
+-        $md5->add($link);
+-    } elsif (-f "$file") {
+-        if (!open(FILE, "$file")) {
+-            printf("%-32s $file\n", "!!! could not read");
+-            return;
+-        }
+-        $md5->addfile(FILE);
+-        close (FILE);
+-    }
+-    print $md5->hexdigest . " $file\n";
+-}
 -
--_check 0 # don't expect errors
--_mount
+-getopts('vs', \%opt);
 -
--_echo "   *** Cleaning XFS FS"
--if ! rm -rf $TEST_MNT/stress $TEST_MNT/lost+found &> $LOG/clean.out
--then
--    _echo "   !!! unable to clean XFS FS"
--    _echo "   !!! (see $LOG/clean.out)"
--    exit 1
--fi
+-die "Usage: $0 <dir>\n" unless (@ARGV == 1);
 -
--_echo "   *** Making stress directory"
--if ! mkdir $TEST_MNT/stress
--then
--    _echo "   !!! unable to mkdir stress"
--    exit 1
--fi
+-$dir=shift @ARGV;
+-die "can't read $dir\n" unless (-r $dir);
+-die "$dir is not a directory\n" unless (-d _);
 -
--let "bang = STRESS_TIME + `_random $STRESS_RANDOM`"
+-chomp($HOST = `hostname -s`);
 -
--_echo "   *** Preparing random reboot (in $bang seconds)"
--(
--    sleep $bang
--    _echo "      *** BANG ****"
--    reboot -fn
--) &
--reboot=$!
+-print "*** fs-walk host $HOST dir $dir\n";
 -
--_echo "   *** Causing stress & waiting for the inevitable"
--$STRESS | _log
+-@todo=$dir;
+-while ($dir = shift @todo) {
+-    scan($dir);
+-    unless (opendir(DIR,$dir)) {
+-        printf("%-" . ($opt{v}?65:32) . "s $dir\n", "!!! could not opendir");
+-        next;
+-    }
+-    unless (@all=readdir(DIR)) {
+-        printf("%-" . ($opt{v}?65:32) . "s $dir\n", "!!! could not readdir");
+-        next;
+-    }
+-    closedir(DIR);
+-    @dirs=grep(-d "$dir/$_" && !-l "$dir/$_", @all);
+-    foreach (@all) {
+-        next if /^\.\.?$/;
+-        scan("$dir/$_");
+-    }
+-    
+-    foreach (grep(!/^\.\.?$/, @dirs)) {
+-        push (@todo,"$dir/$_");
+-    }
+-}
 -
--exit 0
+diff --git a/tools/interop b/tools/interop
+deleted file mode 100755
+index dc1652c2b..000000000
+--- a/tools/interop
++++ /dev/null
+@@ -1,101 +0,0 @@
+-#!/usr/sbin/perl
+-# SPDX-License-Identifier: GPL-2.0
+-# Copyright (c) 2001 Silicon Graphics, Inc.  All Rights Reserved.
+-#
+-sub setup()
+-{
+-    $PATH="$PATH:/usr/local/bin/ptools:/sbin:/usr/sbin";
+-    $DISPLAY="clouds:0";
+-    
+-    if ("$HOST" eq "bruce") {
+-        $TOOLS="/home/dxm/isms/slinx-xfs/cmd/xfs/tools";
+-        $SCRATCH_DEV="/dev/sdf1";
+-        $SCRATCH_MNT="/mnt/xfs3";
+-        $MKFS="/sbin/mkfs -t xfs -f";
+-        $SUDO="/home/dxm/su -c";
+-        $MOUNT="/bin/mount -t xfs";
+-        $UMOUNT="/bin/umount";
+-        $MKFS_EXTRA="-f";
+-    } elsif ("$HOST" eq "whack") {
+-        $TOOLS="/hosts/snort/build1/people/dxm/isms/slinx-xfs/cmd/xfs/tools";
+-        $SCRATCH_DEV="/dev/dsk/20000080e5114459/lun2s0/c2p1";
+-        $SCRATCH_MNT="/lun2";
+-        $MKFS="/sbin/mkfs";
+-        $SUDO="su root -c";
+-        $MOUNT="/sbin/mount -t xfs";
+-        $UMOUNT="/sbin/umount";
+-        $MKFS_EXTRA="";
+-    } else {
+-        die "unconfigured host \"$HOST\"\n"
+-    }
+-}
+-
+-sub run_no_check(@)
+-{
+-    system(@_);
+-}
+-
+-sub run(@)
+-{
+-    system(@_)  == 0
+-        || die "ERROR \"" . join(" ",@_) . "\" returned error\n";
+-}
+-
+-sub run_expect_fail(@)
+-{
+-    system(@_)  == 0
+-        && die "ERROR \"" . join(" ",@_) . "\" returned non-error\n";
+-}
+-
+-sub umount_no_check()
+-{
+-    run_no_check("umount $SCRATCH_DEV");
+-}
+-
+-sub umount()
+-{
+-    run("umount $SCRATCH_DEV");
+-}
+-
+-sub mount($)
+-{
+-    my ($ops)=@_;
+-    run("mount -t xfs $ops $SCRATCH_DEV $SCRATCH_MNT");
+-}
+-
+-chomp($HOST=`hostname -s`);
+-
+-die "usage: $ARGV0 <operation> [parameters]\n" unless (scalar(@ARGV));
+-print "*** $HOST: Interop started\n";
+-print "    *** ", join(" ", @ARGV), "\n";
+-
+-setup();
+-
+-$op=shift(@ARGV);
+-
+-umount_no_check();
+-
+-if ($op eq "init") {
+-
+-    run("mkfs -t xfs $MKFS_EXTRA $SCRATCH_DEV");
+-    
+-} elsif ($op eq "test") {
+-
+-    run("xfs_repair -n $SCRATCH_DEV");
+-    
+-} elsif ($op eq "easy") {
+-
+-    mount("");
+-    system("mount");
+-    mkdir("$SCRATCH_MNT/fish",0777);
+-    
+-} elsif ($op eq "check") {
+-
+-    mount("-o ro");
+-    system("cd $SCRATCH_MNT ; $TOOLS/fs-walk .");
+-
+-} else {
+-    die "unknown operation \"$op\"\n";
+-}
+-
+-umount_no_check();
 -- 
 2.45.2
 
