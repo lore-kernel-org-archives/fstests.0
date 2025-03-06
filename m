@@ -1,76 +1,74 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f52.google.com (mail-pj1-f52.google.com [209.85.216.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BD131FF7CC
-	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 09:58:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31FB01FC0FB
+	for <fstests@vger.kernel.org>; Thu,  6 Mar 2025 11:05:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741255140; cv=none; b=NiQxwkOG/Y6veGqhKmFl3yw+/mpZpwjHiHIqHoKLvcCylMl4sPSlFDmkY/SuyJcdAzQgccBtx6mNs00cobGLvMIgPdP03MulDCKEa+fU3h2GUQ2zRXcNzaXuvUfAtFE6/ZTVhStrHzDgswL2/rH5QfTKhXpAEMd09nf8EZTr/uY=
+	t=1741259119; cv=none; b=b3ZkwiW0gGOoCw3j+GbkGCvNB6XldsirQpB499wAVVwMCfodsQD6j227X8YQS7EffATogvi9rlPia4tVw6TtpI3CwfJk5bq5YImmDsfXSFl7bHeFCSfgN4a6cjF2BUsfm1Vli6xOaX3u8hOjVEmcGw/7DLBOtEopDjLlAAfv+aY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741255140; c=relaxed/simple;
-	bh=5QVFF8d4iy27c7SlyHwxg15vDDZ2BEBqPBqasZsGhBU=;
+	s=arc-20240116; t=1741259119; c=relaxed/simple;
+	bh=/cC1lJMApoxWxOO8D3Ns81ZSoC0WPT8kJ7nL/eKLAjQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ni00GNiPxIvHWiVzmSCBR/xfYIDnc7GcfFFr1WWCHj1z1Q6clUA96F/VyAomVcWw94jWpyVcqBn6z1wLRaHONX5sm77T3HS4mOeZikCrmIXfXN1cmT0KQEi1Zcp+DusdVgwXKhSB7DvzfhbnIcwJrx1xH7Ryj2S7QKqrJGp2cNo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=UIbaR+yJ; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=Qkj06rLb3pCOmhMcgiRsVSM3gVogNxo6J8qqdu/SJATucm6Q2aOEy3PyeYFtZDuszHqeVz2l/yl5ajBNHq9XWkLov6NuL6vqXWpBtS9lpXS1UBFxPK/S16lj9ZHcbshdf8KsY8HOo1Tj4qvAH3HvzOkctBCipS37PaP/ZV/kQB8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com; spf=pass smtp.mailfrom=fromorbit.com; dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b=FKoUsUJX; arc=none smtp.client-ip=209.85.216.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=fromorbit.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fromorbit.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UIbaR+yJ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1741255137;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=dbteuj65FfUi6QAnLeaiqumk91jolQkbE1/iJYqntz8=;
-	b=UIbaR+yJz4SFpjgo0dFZB2yH2w4QEObvkRcKZpRL8sTz3maXkFpu2tGRALjusVpn6MAHCg
-	BYF55KGijPa4sdKM1xZiQdPEXm58HCMndePEbjXWs1uy7/8RgnWCMVAX33YKIhCZLagp88
-	AoVCKG5VTmV02ZccNXPVE/DVwKam+ME=
-Received: from mail-pl1-f198.google.com (mail-pl1-f198.google.com
- [209.85.214.198]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-553-wfVqA0iiMFKH5BoClFoPhQ-1; Thu, 06 Mar 2025 04:58:50 -0500
-X-MC-Unique: wfVqA0iiMFKH5BoClFoPhQ-1
-X-Mimecast-MFC-AGG-ID: wfVqA0iiMFKH5BoClFoPhQ_1741255130
-Received: by mail-pl1-f198.google.com with SMTP id d9443c01a7336-22379c2e96aso16524875ad.1
-        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 01:58:50 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=fromorbit-com.20230601.gappssmtp.com header.i=@fromorbit-com.20230601.gappssmtp.com header.b="FKoUsUJX"
+Received: by mail-pj1-f52.google.com with SMTP id 98e67ed59e1d1-2ff04f36fd2so891348a91.1
+        for <fstests@vger.kernel.org>; Thu, 06 Mar 2025 03:05:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fromorbit-com.20230601.gappssmtp.com; s=20230601; t=1741259117; x=1741863917; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=r77KB5e0ggp3XHtWYDI70Cvwmi5isFHBBlKG4vQODgM=;
+        b=FKoUsUJX4BCe1qNZffaqf1zdQT3n23DtCQUJI2/++MGt3FgxnGSAWlgthGcWsbHy7D
+         xjcf1Q7AxwR/6g969wZAoJwcBr9MtfB6ymgK15oXSUtiWkMAEJr8YYeP1JSMFpozrDKZ
+         rmPkIcKiAzITaOzYxCFTExHidWHHHX0W8pmvgYsvSkdAwg3rWgkJC2cZNJskt+uV4pJR
+         54GRt+lWWtOc5NdjsY6yPSzujMgh5ohIzuPankkah4i1FZQ2i+XNUJDWgTfkxTOurjsN
+         SpdJyzX1mX2nSCp2AZdDybnUNTViCGSTrXtVPTi5nJ99sWUBdzZwnhdKH99BoPqEjHS0
+         IPrg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741255130; x=1741859930;
+        d=1e100.net; s=20230601; t=1741259117; x=1741863917;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=dbteuj65FfUi6QAnLeaiqumk91jolQkbE1/iJYqntz8=;
-        b=lpp5+iTyWOhoCgAILfbixD+cH/JOQKKlTcJ7Ng5TT/u+ZJiwDxGcw1dFPgZGCX4cW8
-         VxKwf2YdUA7nXxIQqdK+pvxT62G1Co+hg3Pm6TUbri0LixbrYEDPo1u1MbbB58QTI9+g
-         sjzV8rJ22rX7mmAi67ydPP0Q82kSJV5XtRtbXVDjvdT+68oLvv6O79kkOM6ydBZXOEno
-         Yr5tAFyjYCqhfb7jq1wXhyAjvxMKzI3vOFUhaitii6d15KkAu1m3JeUOv/hYaWxzi3Y2
-         V5BqnXkY+Z5JnGGfXZUdKOeNmY42Iy3XDm1hNjtY7VIB6AsI/IpJXzI4VolISTmSPm52
-         uiog==
-X-Forwarded-Encrypted: i=1; AJvYcCWpIhLyio0EG1K7bXVqjHRF9lRCyAjtdbbnkkhSm1c6fz1B9vNSWFV1X46qfau6hKaHQQ8mcJVK@vger.kernel.org
-X-Gm-Message-State: AOJu0YzVdHncQ9f+1sPsjQgWh551bWLMQsYFowciefZVnCgnZgPReH05
-	R//RkFyi1DDFESX6K+PaWRx4HfZnfe3eDB48ZFewpGYxY+Kz0q0qyHjyxE6EjGCgMAKnZ3Zc+mq
-	rYYDtIwmHAFUQj9D82uC11YRTv2CUcyP5EnHs7lhlmONBO2Y1BScbxqs=
-X-Gm-Gg: ASbGncubbOn2QwD6WrO6ZC8H4tJNzWYUCFG4zO6TzNlfotvDh4eCzsq5BEnX+T17qo2
-	E7cIt0GrE302s5DYWdN4TRaxWGHkhrzc/mGCpuswH6z0CqJ/8VpBlnl04RPInZRF+tsX4kqJIQE
-	WvXLvjGYx34+OIuaLdnsmDpfzUM02oEHb5ZW1ykf/i+CRupbha+/CQ1SEeuZ9WwnsryaAHD4n7T
-	nsR/GK8Er/HPhNPTSJhiOMbB7+TaS5+x7zNM1aq5wZMtMGG0o/c4qR6S/gE/gzv0jweO+/2AYHG
-	AMYtrHg0/i/BriSMIx5dD10IiGCsvzjZPenVkt561bWC1/6id6yxRXIC
-X-Received: by 2002:a17:902:f541:b0:21f:52e:939e with SMTP id d9443c01a7336-223f1caf82amr114154035ad.28.1741255129755;
-        Thu, 06 Mar 2025 01:58:49 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IH7XeL6oQ4E8kk4R8wG+MWRiyYduuR0qcZMKqCcFPQrg4RJLpYaXRYVfZ3x+jjaAUVaxR6g+A==
-X-Received: by 2002:a17:902:f541:b0:21f:52e:939e with SMTP id d9443c01a7336-223f1caf82amr114153825ad.28.1741255129446;
-        Thu, 06 Mar 2025 01:58:49 -0800 (PST)
-Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73698518e21sm949957b3a.148.2025.03.06.01.58.47
+        bh=r77KB5e0ggp3XHtWYDI70Cvwmi5isFHBBlKG4vQODgM=;
+        b=ptX9eGjzy/75i1nzJCRtBDtbHiI+rubhttuB7TYMKecVH55K0+8PG/7J0107CraRQY
+         FoOFfsqAHyHxSab74wBnwdP9uZTZkCiODHu7Z7tI7GkKIqe070ld9JLmxBgnJU/GSjF6
+         ZFQjS9DlLCiy2KZpM+0yTDsyQftq1+2Z0mm3PzpUCj+OPo2LEcTaoFIThDh1LlgnvcbT
+         EM5RDlUZRvdDJWWzCEPf0HVL5axOONY/+KvNFHM+TPqhvwj/N6qEdAr4pdoFb59b/3AA
+         XNNqIS7rkzEJl+oeSc0tAwRc3jhesTK2TNRoDFa3eOSS8axqivMrGzC89L1r9LX8ALeM
+         km5A==
+X-Gm-Message-State: AOJu0YyU3vCbJBuOrFLemShpIAKe3Sabx2WaH5/kdPz6FD7b+V6AyvEY
+	YjY/ztlBw3M+1ZvmsJuhF1JI7y0dOhaE28pz89W3BsQyvnlSdg0nc6gXP2knaZPg+b43jBt7lgl
+	m
+X-Gm-Gg: ASbGnctfk3piA4yartjSnCaEzT3IGAxDGDuV0bPFQKrYQNmIYwLQyx+UnS6KCqPaupX
+	wTt935DyXfB9lUwrCM2PPuvfrtCHPb8GXVMNNaWq/XNUntfieGaINjSyzSchJIzkUDA+o8umNF+
+	UgZJLZ3Vg2plS+F0NSwqPCf0fdto8nhq/xjxL6Y2hC7eYPTXGswUmwmfiM/6z9DQDUrZdeFxci/
+	iiFbKYvo0QqcNr1aZYVJW2LoEfhcmUVL+chN4M0ooTh754LaVm9RvgmAOZIw1c/Cq/f1a/J+3tL
+	I+spU9l2hKNYdOgCoy1zdr7UN5qYzO1bU9hX5nW5R1XfGGrTvt5PFNx6qIGro5gioSJUNsh/1ym
+	eKHKXuxp/ACI3YiZ5Lv0B
+X-Google-Smtp-Source: AGHT+IHLl2sUdwWfRhvjJPLdL1l9KWFuzRi4uxxrs/x5vjEmGEiSeyQVmsrd74ysA7cjk/Dfllqt2A==
+X-Received: by 2002:a17:90a:d64e:b0:2ee:8e75:4aeb with SMTP id 98e67ed59e1d1-2ff497534c7mr12703892a91.17.1741259117378;
+        Thu, 06 Mar 2025 03:05:17 -0800 (PST)
+Received: from dread.disaster.area (pa49-186-89-135.pa.vic.optusnet.com.au. [49.186.89.135])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22410a7f976sm9479735ad.156.2025.03.06.03.05.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Mar 2025 01:58:48 -0800 (PST)
-Date: Thu, 6 Mar 2025 17:58:45 +0800
-From: Zorro Lang <zlang@redhat.com>
-To: Anthony Iliopoulos <ailiop@suse.com>
-Cc: David Disseldorp <ddiss@suse.de>, fstests@vger.kernel.org
-Subject: Re: [PATCH] generic/633: add _require_idmapped_mounts check
-Message-ID: <20250306095845.4x2bt4gb7zwqt43g@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
-References: <20250304234819.783-1-ailiop@suse.com>
- <20250305141043.31c3eb95.ddiss@suse.de>
+        Thu, 06 Mar 2025 03:05:16 -0800 (PST)
+Received: from dave by dread.disaster.area with local (Exim 4.98)
+	(envelope-from <david@fromorbit.com>)
+	id 1tq92P-00000009Zkd-19eC;
+	Thu, 06 Mar 2025 22:05:13 +1100
+Date: Thu, 6 Mar 2025 22:05:13 +1100
+From: Dave Chinner <david@fromorbit.com>
+To: Zorro Lang <zlang@kernel.org>
+Cc: fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] check: disable HAVE_PRIVATENS by default
+Message-ID: <Z8mBacJNAj6gVd7N@dread.disaster.area>
+References: <20250306094924.1353269-1-zlang@kernel.org>
+ <20250306094924.1353269-2-zlang@kernel.org>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
@@ -79,44 +77,90 @@ List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250305141043.31c3eb95.ddiss@suse.de>
+In-Reply-To: <20250306094924.1353269-2-zlang@kernel.org>
 
-On Wed, Mar 05, 2025 at 02:10:43PM +1100, David Disseldorp wrote:
-> On Wed,  5 Mar 2025 00:48:19 +0100, Anthony Iliopoulos wrote:
+On Thu, Mar 06, 2025 at 05:49:23PM +0800, Zorro Lang wrote:
+> Currently we have 3 ways to run a test case in _run_seq():
 > 
-> > Skip the test on older kernels that don't implement mount_setattr and
-> > open_tree syscalls, instead of failing.
-> > 
-> > Signed-off-by: Anthony Iliopoulos <ailiop@suse.com>
-> > ---
-> >  tests/generic/633 | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/generic/633 b/tests/generic/633
-> > index 3bd18df68ba5..f58dbbf5f222 100755
-> > --- a/tests/generic/633
-> > +++ b/tests/generic/633
-> > @@ -12,7 +12,7 @@ _begin_fstest auto quick atime attr cap idmapped io_uring mount perms rw unlink
-> >  # Import common functions.
-> >  . ./common/filter
-> >  
-> > -
-> > +_require_idmapped_mounts
-> >  _require_test
-> >  
-> >  echo "Silence is golden"
+>   if [ -n "${HAVE_PRIVATENS}" ]; then
+>       ./tools/run_privatens "./$seq"
+>       ...
+>   elif [ -n "${HAVE_SYSTEMD_SCOPES}" ]; then
+>       systemd-run --quiet --unit "${unit}" --scope \
+>              ./tools/run_setsid "./$seq" &
+>       ...
+>   else
+>       ./tools/run_setsid "./$seq" &
+>       ...
+>   fi
 > 
-> Looks good, although generic/696 and generic/697 probably should be
-> covered too.
+> The "privatens" way brings in some regressions. We need more time
+> to develop and test this way, it's not time let it to be the
+> first default choice, so isolate the HAVE_PRIVATENS initialization
+> by a TRY_PRIVATENS parameter, and disable it by default.
 > 
-> Reviewed-by: David Disseldorp <ddiss@suse.de>
-
-Thanks David points out that:)
-
-Hi Anthony, if you'd like to fix missed "_require_idmapped_mounts", could you
-help to fix above two cases together. With that change:
-
-Reviewed-by: Zorro Lang <zlang@redhat.com>
-
+> Set TRY_PRIVATENS=yes to give "privatens" a try, otherwise run in
+> old ways. This patch can be removed after "privatens" way is stable.
 > 
+> Signed-off-by: Zorro Lang <zlang@kernel.org>
+> Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> ---
+>  check | 11 +++++++----
+>  1 file changed, 7 insertions(+), 4 deletions(-)
+> 
+> diff --git a/check b/check
+> index ea92b0d62..cb2f19d08 100755
+> --- a/check
+> +++ b/check
+> @@ -674,10 +674,13 @@ _stash_test_status() {
+>  	esac
+>  }
+>  
+> -# Can we run in a private pid/mount namespace?
+> -HAVE_PRIVATENS=
+> -./tools/run_privatens bash -c "exit 77"
+> -test $? -eq 77 && HAVE_PRIVATENS=yes
+> +# Don't try "privatens" by default, it's experimental for now.
+> +if [ "$TRY_PRIVATENS" = "yes" ];then
+> +	# Can we run in a private pid/mount namespace?
+> +	HAVE_PRIVATENS=
+> +	./tools/run_privatens bash -c "exit 77"
+> +	test $? -eq 77 && HAVE_PRIVATENS=yes
+> +fi
 
+Works for me - I have basically the same patch in my check-parallel
+stack because this breaks check-parallel mount namespacing for
+reasons I don't yet understand.
+
+Creating a new mount namespace for each test that is run appears
+to turn the private mount namespace that each check instance is
+executed in back into a globally shared mount namespace inside
+each individual test mount namespace.
+
+i.e. when check uses private namespaces I can see all the mounts
+from inside each test namespace from the init namespace and every
+test can see every mount that every other test runs again.
+
+That is the problem I originally used mount namespaces in
+check-parallel to avoid.
+
+I have no idea if this is how mount namespace nesting is actually
+supposed to work (seems completely broken to me!), but the only
+solution I've found that works so far is to turn off HAVE_PRIVATENS
+in check as it is redundant when it is run from check-parallel.
+
+FWIW, given that check-parallel now runs in it's own private PID
+namespace with it's own /proc and /tmp, the original problem of
+needing to "confine pkill to only the child processes of this test
+instance" has gone away entirely. i.e. check-parallel does not need check to
+to restrict pkill to children of the current test being run anymore.
+
+Hence I think we can probably remove the new process isolation
+shenanigans and revert the _pkill wrappers to plain pkill calls
+again as the private PID namespacing the check-parallel does means
+pkill does the right thing for both check and check-parallel now.
+
+-Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
