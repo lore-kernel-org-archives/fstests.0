@@ -1,133 +1,239 @@
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 779EC28E8;
-	Fri,  7 Mar 2025 08:05:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BB40DF71
+	for <fstests@vger.kernel.org>; Fri,  7 Mar 2025 15:47:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741334709; cv=none; b=q4fnhyOkK4sGGP5MvSj5Ein2AiGJnKHaeRedThkZ7bvV6yL5zMRMSn3/csTXpClurtG/INr2tuS0Prira5vTgi4L8SmdWv2NTNV8gvX5gii1bY/F/HYq+7QJkiDuxbszY3AaYZWG3B4YDSs2eqeUGeQhOmXIE6Mgq2psRD+hOng=
+	t=1741362457; cv=none; b=fJJUH1ghfO6jDjZUMWbANfsDVZLvsIOW65pSPSzZXGdzQ85wTFrjAS5sTo0QhTyUBlyrYDoetXG5uv0YW9TEXJRGWlQaTWgz8k9ONihUmAoTR3sGCOqx3PrXQLQF2UtECPWsawrduN8N8SElgqTA6PcHeILhkOLLQtn5Bb6RoXM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741334709; c=relaxed/simple;
-	bh=cewBzhj/Uh7V6W/nPAL4b9bf4vo+Ggi4E/ZzoSluG+I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=d0eZULC62Vixt7IzCVDs2GyhW9KNFJyfOf1mzWzDq4QWu+nR69Q5ZLkK55zMPcU2NDfXXVlIRttonV2QIN0+74JkPFRPcl/9Obf0BrMsIbjlPK++5ejiKYPP+SLk1NkeqdplL2DJlxxpHqxAy/9GWdmSsShcP201t3t1fXVoOjE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Ldv6xr7q; arc=none smtp.client-ip=209.85.214.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1741362457; c=relaxed/simple;
+	bh=Mk2UaEka+WdAhxKWWqVAfpSVCa8racwnlijTLE0H9w4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PJ40XdKLkk/i7zwlxaDJY8wBjPxJvjQ4mRF+PFfEPLo6VhjVhcRrroH1EAkhAMiQKX0hvt1je3uyiHqrbi7LMCxfFjFVHjhbtctDISQIW8q9OOnMJpfG+zy09zntXqygNlpZQmiJ+fiosdc1jJ9fqCkbzcFv/yE4iUMrk5MLmYc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=MyPTbV1C; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ldv6xr7q"
-Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-22185cddbffso51261535ad.1;
-        Fri, 07 Mar 2025 00:05:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1741334708; x=1741939508; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=mQd7MCLMb5m6gKXonhGoh77RnzkJR75ioCNoJkyZULo=;
-        b=Ldv6xr7qDPHt4svFmJmw9vqJmPThS2NfU4prvMSsciX1iz9NK+fYv873+SMsoB25Sn
-         YzMgDhIu7cCQwGtaLnWJEHE4JNMHlV9E7BdA1ur//oLHZNQ94MDR2XqAdDQ4HSiRO02U
-         6dXn3h58ealQITdV3l2UkuYkIA+pTBz8vFljndbaFvFEWFnplzJKCOKqJ1mP/7i7PekB
-         KWNI3IQ2CHhwK6bk+d1g08lnlaW/QDCf5BMO0jz0OldjH9q5Prurfc2CtI1EpzLZKvlH
-         k+6w6PifK4vjjagfIxrT118++QRnATUo1wnIKN6iw0Zp51GikCnod0QCMMtE4f0n3dYn
-         qi7w==
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="MyPTbV1C"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1741362453;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=PUOHyNehYUC0/Y/aqolCS7r50W1zQSZBmzY0RfQ11Mc=;
+	b=MyPTbV1CrQf2GsIfHI+6pNWBRD6ku35qOrm9iHv2ampbkYHCvPAf7LfVoTj/KZFeTlXY8r
+	QL7UIJs+bPB1xibA7F+Q9MIjAjo+UmeCxRniAh45oazweyMO+qIeoQoOrOMYf+1wnuhwa2
+	YoiQl3Ltg8Xw0kJbL+sV3Z+E2t0HCJE=
+Received: from mail-pj1-f69.google.com (mail-pj1-f69.google.com
+ [209.85.216.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-96-VHJyYLMxN4C7iZhO64xzHg-1; Fri, 07 Mar 2025 10:47:29 -0500
+X-MC-Unique: VHJyYLMxN4C7iZhO64xzHg-1
+X-Mimecast-MFC-AGG-ID: VHJyYLMxN4C7iZhO64xzHg_1741362448
+Received: by mail-pj1-f69.google.com with SMTP id 98e67ed59e1d1-2ff798e8c3bso2280118a91.2
+        for <fstests@vger.kernel.org>; Fri, 07 Mar 2025 07:47:29 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741334708; x=1741939508;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=mQd7MCLMb5m6gKXonhGoh77RnzkJR75ioCNoJkyZULo=;
-        b=gg5Yu81SJEDUokKCzBLAZCAD+HPKKpZ4QbM0vExE3OqyWks+Dxst+PmZrEwVQLXjhU
-         BLyC2QCvNK9ZZ05uHH2BWOY9q5bFaEyeBnObuRKu43DbL+f8IKH/sYFJJZg2oh0jBpeH
-         kIYOV+ASBXZkAMr9g+m3prifCofEkiRPnbhiFrNcrkuRRJQqisnM9hAdOsYKDsibiD5N
-         +C93BS2+dyz7t1ZBNho435x3j+u8DaJCYlr+TV7qA93U+N9RR3dDKU5jTWlMm2LCa8xX
-         DBhTSk67kKkvl+MLY5Tm79OCDJ1KaRYhcjn42PTtosx0ZURwpjldpWV1z4PpI1b/Hi44
-         xjtQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU0kFJNClYMWiIYn1EQs5UkOxUQTX6u9dUR1cZCqCtb7O0wbPU+JHTFQQTAKOBsnkF1BRAWb2TfAI8p@vger.kernel.org, AJvYcCUofAvjn1CpY7bJ9eEjrB5WgznJgrp6e1rzULkS0or4Ao5TmL+HZk4YmhBBUIZDAKrK40RWrf1aurZo@vger.kernel.org
-X-Gm-Message-State: AOJu0YxIjEoJREmcbitqIi/Bom0v9ZfWCnxhwNf38yR2xHJE0DPvNrR6
-	81wE4LWcwa7eqyP1Sm6AaRj+PMSssH/4F7j85BfKbXD2J/RwGMCbd2RQYQ==
-X-Gm-Gg: ASbGncuqRYH2JPvUq6dGMfgT5ZEil80Qb0yeZZf3W05nOsNNnQ/N7/4VhFf9H+9qiH7
-	p/gFEGh9Gx04soRw5cQ46ykh2TnYJoekQLvL7uGXt0Hdv/bdGVKSiMa79JzanmdjJtu74Sj2I1K
-	JvqF2T7bHXPVdb/ZvkhNefuB/Qoq/T+fn9kCN/rj78t6AeZJgazTMKIVNgGDS5wzbea/nqX3L/T
-	2wK9cFgpk06CpCuV2REXuWGFf4xP/P67SFJD9gI+RUyDpMvEVbt5Pz0YUQTHNn4HK5Jp4nTJ21U
-	WSGuaX1Awaql0hTATJ/5QoL0jLKy1GSv/paRe3a33BaRn6S/IKKBzcQ=
-X-Google-Smtp-Source: AGHT+IEeX9zHsHYMraDYVg5YvJ/5yBas/htzAmlGee+kx193lJTrTuqODs/is/rwpnkP7FynH8tGVA==
-X-Received: by 2002:a05:6a00:2e17:b0:730:9637:b2ff with SMTP id d2e1a72fcca58-736a97bbbddmr4662660b3a.7.1741334707160;
-        Fri, 07 Mar 2025 00:05:07 -0800 (PST)
-Received: from [192.168.0.120] ([49.205.39.113])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-736b2da32c6sm421059b3a.149.2025.03.07.00.05.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Mar 2025 00:05:06 -0800 (PST)
-Message-ID: <5c38f84d-cc60-49e7-951e-6a7ef488f9df@gmail.com>
-Date: Fri, 7 Mar 2025 13:35:02 +0530
+        d=1e100.net; s=20230601; t=1741362448; x=1741967248;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PUOHyNehYUC0/Y/aqolCS7r50W1zQSZBmzY0RfQ11Mc=;
+        b=UeVXYHzrYG3CRUm09M7XYgXR8n4iDjLWwWLIV96jodu0YE74P81hW31svuOsh6z5RA
+         l8bm14WTkDD5liBoCSawpSUSTgYLB32dABwY6ERMwQ0b27B5BxGAZyqZIv2S8BQvYkMX
+         8djJ3Sasjv06iB6yeEQHKh6NmX68zZcDoFd8ghPHcbtbkiL69dSFm+x8tqUG+VaC5Px+
+         Z3sVDyFlU+1Vs6Pqt6BuRbpT1tGPmVX2PXP62aSv8ox+xAeJjzSgGEHdREvDDLY5Rd8G
+         NLV7vXFwo4V6ncUmkK2T41DnuWThUY3EzGqClmHlkO6XDi4cJDr0lw+0BHpK1jrk5nLn
+         wrZg==
+X-Forwarded-Encrypted: i=1; AJvYcCUuAilTagLE7v4BqozQl8Z/iuDdGPkOkXIqmUXqIzvgKd56gDILtkWYs3gxFtx+ReaQWJZUNI2R@vger.kernel.org
+X-Gm-Message-State: AOJu0YxAC7GeXYOfJ3b6gRvHYqMs1J9jSdEQqJ/83bXJhaBkPDsmHtSY
+	owEF1W0UZUXh9q4JiV687Ylk355zlMvtTb9PiL6oJzL633sQeDFw5bpMoxKI61OmuFHkoEnkE9v
+	fcOBtTLl2h1O488uIeMK5n5mF7XGdhQ/og9PL3Si1J3cP3w3vU4wZBVg=
+X-Gm-Gg: ASbGncuCb0swwcHOrDJ82gAcAJeX2W9Ykyq0jk/wMysesAMVI4QxzMuZNnZzyokxUA+
+	9hqN7u8R2kmecLAwBX06UV/NPnJ083D7ZQ/ZY+TYQCP0V75OoN32r8oTretJ7mcsDVf8Wa2k3Ut
+	ZCb95kt+et7d3ZKCpR9vDzfZmUPRjyomEq1trnrKxypSTZRbASeOJnhhsuAIuJmKVo+hkzPRRdb
+	MK5DYuGj56zEjUNVj9WhI3RsU6PmUoEv61AOD1cpLTWDyCieMr8ZRsQBPskOIUFY02kPs1CWHI0
+	OBhMqud3Nd5VMRF/5TmVCBoyrF7k8DjS6WitLcg8iXxATtELMYukl2YG
+X-Received: by 2002:a05:6a21:32a7:b0:1f3:4667:7288 with SMTP id adf61e73a8af0-1f544c8bdd4mr6802780637.10.1741362448067;
+        Fri, 07 Mar 2025 07:47:28 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IGodKvguIVTazqbr/K52LVu1yCZWLSnednc6fs3fmFDXnOYyKIbLMmzvzqifO4wlN458cPNsw==
+X-Received: by 2002:a05:6a21:32a7:b0:1f3:4667:7288 with SMTP id adf61e73a8af0-1f544c8bdd4mr6802619637.10.1741362446164;
+        Fri, 07 Mar 2025 07:47:26 -0800 (PST)
+Received: from dell-per750-06-vm-08.rhts.eng.pek2.redhat.com ([43.228.180.230])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-7369d4b978asm3038413b3a.28.2025.03.07.07.47.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Mar 2025 07:47:25 -0800 (PST)
+Date: Fri, 7 Mar 2025 23:47:22 +0800
+From: Zorro Lang <zlang@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Zorro Lang <zlang@kernel.org>, fstests@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] check: disable HAVE_PRIVATENS by default
+Message-ID: <20250307154722.iafm7hm7qo6x54c3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+References: <20250306094924.1353269-1-zlang@kernel.org>
+ <20250306094924.1353269-2-zlang@kernel.org>
+ <Z8mBacJNAj6gVd7N@dread.disaster.area>
+ <20250306134723.x5fovpzmzemleyi3@dell-per750-06-vm-08.rhts.eng.pek2.redhat.com>
+ <Z8oL_LAc9XQsKwd-@dread.disaster.area>
 Precedence: bulk
 X-Mailing-List: fstests@vger.kernel.org
 List-Id: <fstests.vger.kernel.org>
 List-Subscribe: <mailto:fstests+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:fstests+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 2/2] check,common/{preamble,rc},soak: Decoupling
- init_rc() call from sourcing common/rc
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org,
- linux-xfs@vger.kernel.org, ritesh.list@gmail.com, ojaswin@linux.ibm.com,
- djwong@kernel.org, zlang@kernel.org
-References: <cover.1741248214.git.nirjhar.roy.lists@gmail.com>
- <1d07e5657c2817c74e939894bb554424199fd290.1741248214.git.nirjhar.roy.lists@gmail.com>
- <Z8oT_tBYG-a79CjA@dread.disaster.area>
-Content-Language: en-US
-From: "Nirjhar Roy (IBM)" <nirjhar.roy.lists@gmail.com>
-In-Reply-To: <Z8oT_tBYG-a79CjA@dread.disaster.area>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Z8oL_LAc9XQsKwd-@dread.disaster.area>
 
+On Fri, Mar 07, 2025 at 07:56:28AM +1100, Dave Chinner wrote:
+> On Thu, Mar 06, 2025 at 09:47:23PM +0800, Zorro Lang wrote:
+> > On Thu, Mar 06, 2025 at 10:05:13PM +1100, Dave Chinner wrote:
+> > > On Thu, Mar 06, 2025 at 05:49:23PM +0800, Zorro Lang wrote:
+> > > > Currently we have 3 ways to run a test case in _run_seq():
+> > > > 
+> > > >   if [ -n "${HAVE_PRIVATENS}" ]; then
+> > > >       ./tools/run_privatens "./$seq"
+> > > >       ...
+> > > >   elif [ -n "${HAVE_SYSTEMD_SCOPES}" ]; then
+> > > >       systemd-run --quiet --unit "${unit}" --scope \
+> > > >              ./tools/run_setsid "./$seq" &
+> > > >       ...
+> > > >   else
+> > > >       ./tools/run_setsid "./$seq" &
+> > > >       ...
+> > > >   fi
+> > > > 
+> > > > The "privatens" way brings in some regressions. We need more time
+> > > > to develop and test this way, it's not time let it to be the
+> > > > first default choice, so isolate the HAVE_PRIVATENS initialization
+> > > > by a TRY_PRIVATENS parameter, and disable it by default.
+> > > > 
+> > > > Set TRY_PRIVATENS=yes to give "privatens" a try, otherwise run in
+> > > > old ways. This patch can be removed after "privatens" way is stable.
+> > > > 
+> > > > Signed-off-by: Zorro Lang <zlang@kernel.org>
+> > > > Reviewed-by: "Darrick J. Wong" <djwong@kernel.org>
+> > > > ---
+> > > >  check | 11 +++++++----
+> > > >  1 file changed, 7 insertions(+), 4 deletions(-)
+> > > > 
+> > > > diff --git a/check b/check
+> > > > index ea92b0d62..cb2f19d08 100755
+> > > > --- a/check
+> > > > +++ b/check
+> > > > @@ -674,10 +674,13 @@ _stash_test_status() {
+> > > >  	esac
+> > > >  }
+> > > >  
+> > > > -# Can we run in a private pid/mount namespace?
+> > > > -HAVE_PRIVATENS=
+> > > > -./tools/run_privatens bash -c "exit 77"
+> > > > -test $? -eq 77 && HAVE_PRIVATENS=yes
+> > > > +# Don't try "privatens" by default, it's experimental for now.
+> > > > +if [ "$TRY_PRIVATENS" = "yes" ];then
+> > > > +	# Can we run in a private pid/mount namespace?
+> > > > +	HAVE_PRIVATENS=
+> > > > +	./tools/run_privatens bash -c "exit 77"
+> > > > +	test $? -eq 77 && HAVE_PRIVATENS=yes
+> > > > +fi
+> > > 
+> > > Works for me - I have basically the same patch in my check-parallel
+> > > stack because this breaks check-parallel mount namespacing for
+> > > reasons I don't yet understand.
+> > > 
+> > > Creating a new mount namespace for each test that is run appears
+> > > to turn the private mount namespace that each check instance is
+> > > executed in back into a globally shared mount namespace inside
+> > > each individual test mount namespace.
+> > > 
+> > > i.e. when check uses private namespaces I can see all the mounts
+> > > from inside each test namespace from the init namespace and every
+> > > test can see every mount that every other test runs again.
+> > > 
+> > > That is the problem I originally used mount namespaces in
+> > > check-parallel to avoid.
+> > > 
+> > > I have no idea if this is how mount namespace nesting is actually
+> > > supposed to work (seems completely broken to me!), but the only
+> > > solution I've found that works so far is to turn off HAVE_PRIVATENS
+> > > in check as it is redundant when it is run from check-parallel.
+> > > 
+> > > FWIW, given that check-parallel now runs in it's own private PID
+> > > namespace with it's own /proc and /tmp, the original problem of
+> > > needing to "confine pkill to only the child processes of this test
+> > > instance" has gone away entirely. i.e. check-parallel does not need check to
+> > > to restrict pkill to children of the current test being run anymore.
+> > > 
+> > > Hence I think we can probably remove the new process isolation
+> > > shenanigans and revert the _pkill wrappers to plain pkill calls
+> > > again as the private PID namespacing the check-parallel does means
+> > > pkill does the right thing for both check and check-parallel now.
+> > 
+> > Hi Dave,
+> > 
+> > Thanks for your reviewing. Do you mean revert below commit directly?
+> > 
+> >   commit 247ab01fa227647c290cf82696f1b0bbf87a0177
+> >   Author: Darrick J. Wong <djwong@kernel.org>
+> >   Date:   Mon Feb 3 14:00:28 2025 -0800
+> > 
+> >       check: run tests in a private pid/mount namespace
+> > 
+> > I isolate the HAVE_PRIVATENS rather than reverting it, due to I'm not
+> > sure if you or Darrick still would like to improve that test way.
+> 
+> I'm talking about removing all the setsid and namspace bits that we
+> added to try to solve the need for pkill --parent. i.e. this series
+> of patches:
+> 
+> 949bdf8ea check: deprecate using process sessions to isolate test instances
+> 247ab01fa check: run tests in a private pid/mount namespace
+> 88d60f434 common: fix pkill by running test program in a separate session
+> c71349150 common/rc: hoist pkill to a helper function
+> 77548e606 common/rc: create a wrapper for the su command
+> 
+> Using private PID namespaces in check-parallel has solved the
+> original problem that required the pkill --parent usage and the
+> fsstress binary rename/copy workaround by wrapping process isolation
+> outside of each check instance. Hence check and the internal
+> check infrastructure doesn't need to ever care about process
+> isolation to solve this check-parallel problem anymore.
 
-On 3/7/25 03:00, Dave Chinner wrote:
-> On Thu, Mar 06, 2025 at 08:17:41AM +0000, Nirjhar Roy (IBM) wrote:
->> Silently executing scripts during sourcing common/rc doesn't look good
->> and also causes unnecessary script execution. Decouple init_rc() call
->> and call init_rc() explicitly where required.
->>
->> Signed-off-by: Nirjhar Roy (IBM) <nirjhar.roy.lists@gmail.com>
-> FWIW, I've just done somethign similar for check-parallel. I need to
-> decouple common/config from common/rc and not run any code from
-> either common/config or common/rc.
->
-> I've included the patch below (it won't apply because there's all
-> sorts of refactoring for test list and config-section parsing in the
-> series before it), but it should give you an idea of how I think we
-> should be separating one-off initialisation environment varaibles,
-> common code inclusion and the repeated initialisation of section
-> specific parameters....
-Thank you so much. I can a look at this.
->
-> .....
->> diff --git a/soak b/soak
->> index d5c4229a..5734d854 100755
->> --- a/soak
->> +++ b/soak
->> @@ -5,6 +5,7 @@
->>   
->>   # get standard environment, filters and checks
->>   . ./common/rc
->> +# ToDo: Do we need an init_rc() here? How is soak used?
->>   . ./common/filter
-> I've also go a patch series that removes all these old 2000-era SGI
-> QE scripts that have not been used by anyone for the last 15
-> years. I did that to get rid of the technical debt that these
-> scripts have gathered over years of neglect. They aren't used, we
-> shouldn't even attempt to maintain them anymore.
+If "check" doesn't need these namespace isolation things, that will be good
+to me. That'll help to isolate the issues on check or on check-parallel.
+And we won't bring in regressions to check when try to fix check-parallel.
 
-Okay. What do you mean by SGI QE script (sorry, not familiar with this)? 
-Do you mean some kind of CI/automation-test script?
+Now let me merge this patch at first, to avoid the regressions on btrfs.
+Then please feel free to send patches to remove/reduce the coupling of
+two testing ways (check and check-parallel:)
 
---NR
+> 
+> i.e. the isolation fix should have been made to check-parallel,
+> not to check.
+> 
+> It is not ideal to have to walk all this stuff back, but this is
+> what happens when an RFC-scope feature prototype is merged without
+> allowing adequate time for review or give the author a chance to
+> address at least one round of review comments and bug fixes before
+> it gets merged....
 
->
+Sorry, I've learned from this. I thought I've given it lots of test,
+and fixed all bug reports at that time. And I asked several times
+if there's any objection about merging it in next release. As there's
+not objection from anyone in 2 weeks, so I decided to give it a chance,
+to save the super complicated rebasing workload... Anyway, next time,
+for each complex patchset on infrastructure, I'll always give it 3+
+release cycles time. And never merge it if without 3 acks from xfs,
+ext4 and btrfs, as there're too many different test ways I can't test
+cover. Sorry again for the mess this time, hope we can back to track
+soon.
+
+Thanks,
+Zorro
+
+> 
 > -Dave.
->
--- 
-Nirjhar Roy
-Linux Kernel Developer
-IBM, Bangalore
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> 
 
